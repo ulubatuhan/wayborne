@@ -221,7 +221,25 @@ To enable GitHub Pages deployment:
 Web export is configured in `export_presets.cfg`:
 - Platform: HTML5/Web
 - Output: `build/web/index.html`
-- Features: WASM, streaming enabled, threading **disabled** (GitHub Pages statik hosting olduğu için SharedArrayBuffer'ın gerektirdiği Cross-Origin-Opener-Policy/Cross-Origin-Embedder-Policy header'larını gönderemiyor)
+- Features: WASM, streaming enabled, threading disabled
+
+### Cross-Origin Isolation (GitHub Pages)
+
+Godot's Web export requires `crossOriginIsolated`/`SharedArrayBuffer`
+unconditionally (this check is baked into the export template itself,
+regardless of the `web/enable_threading` setting). GitHub Pages cannot
+send the `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy`
+headers this needs, since it's static hosting with no custom header
+support.
+
+The deploy workflow (`.github/workflows/deploy.yml`) works around this by
+copying `web/coi-serviceworker.js` into the export output and injecting a
+`<script>` tag into `index.html`'s `<head>` after export. This service
+worker intercepts same-origin fetches and injects the required headers
+client-side, then triggers one page reload so the isolated context takes
+effect. Do not remove this step unless GitHub Pages gains custom header
+support or the game is hosted somewhere that can send these headers
+directly.
 
 ### Local Testing
 

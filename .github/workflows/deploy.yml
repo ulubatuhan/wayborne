@@ -39,6 +39,12 @@ jobs:
           godot --headless --export-release Web build/web/index.html
         continue-on-error: false
 
+      - name: Add Cross-Origin Isolation service worker
+        run: |
+          cp web/coi-serviceworker.js build/web/coi-serviceworker.js
+          sed -i 's#</head>#<script src="coi-serviceworker.js"></script>\n</head>#' build/web/index.html
+          grep -q 'coi-serviceworker.js' build/web/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
