@@ -6,6 +6,7 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 # ilgili sahnenin yolunu yazmak yeterli.
 const TEST_SCENES: Dictionary = {
 	"economy": "res://scenes/tests/economy_test.tscn",
+	"haggling": "res://scenes/tests/haggling_test.tscn",
 	"events": "",
 	"combat": "",
 	"city": "",
@@ -14,6 +15,7 @@ const TEST_SCENES: Dictionary = {
 
 @onready var _buttons: Dictionary = {
 	"economy": $VBoxContainer/EconomyButton,
+	"haggling": $VBoxContainer/HagglingButton,
 	"events": $VBoxContainer/EventsButton,
 	"combat": $VBoxContainer/CombatButton,
 	"city": $VBoxContainer/CityButton,
