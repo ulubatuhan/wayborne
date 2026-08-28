@@ -13,11 +13,12 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,7 +30,7 @@ jobs:
           use-dotnet: false
 
       - name: Import project
-        run: godot --headless --import-project .
+        run: godot --headless --import
 
       - name: Export to HTML5
         run: godot --headless --export-release Web build/web/index.html
