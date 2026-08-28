@@ -7,6 +7,7 @@ const GRID_ROWS: int = 4
 const SLOT_SIZE: Vector2 = Vector2(80, 80)
 const EMPTY_SLOT_COLOR: Color = Color(0.2, 0.2, 0.2)
 const FILLED_SLOT_COLOR: Color = Color(0.3, 0.5, 0.3)
+const SELL_PRICE_MULTIPLIER: float = 0.5
 
 var _wallet: Wallet
 var _inventory: Inventory
@@ -62,10 +63,15 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	name_label.custom_minimum_size = Vector2(140, 0)
 	row.add_child(name_label)
 
-	var price_label := Label.new()
-	price_label.text = "%d GG" % item.base_price
-	price_label.custom_minimum_size = Vector2(70, 0)
-	row.add_child(price_label)
+	var buy_price_label := Label.new()
+	buy_price_label.text = "Al: %d GG" % item.base_price
+	buy_price_label.custom_minimum_size = Vector2(90, 0)
+	row.add_child(buy_price_label)
+
+	var sell_price_label := Label.new()
+	sell_price_label.text = "Sat: %d GG" % _get_sell_price(item)
+	sell_price_label.custom_minimum_size = Vector2(90, 0)
+	row.add_child(sell_price_label)
 
 	var buy_button := Button.new()
 	buy_button.text = "Al"
@@ -89,9 +95,11 @@ func _on_buy_pressed(item: Item) -> void:
 func _on_sell_pressed(item: Item) -> void:
 	if not _inventory.has_item(item.item_id, 1):
 		return
-	var sell_price := int(item.base_price * 0.5)
 	_inventory.remove_item(item.item_id, 1)
-	_wallet.earn(sell_price)
+	_wallet.earn(_get_sell_price(item))
+
+func _get_sell_price(item: Item) -> int:
+	return int(item.base_price * SELL_PRICE_MULTIPLIER)
 
 func _on_wallet_balance_changed(_new_balance: int) -> void:
 	_refresh_balance_label()
