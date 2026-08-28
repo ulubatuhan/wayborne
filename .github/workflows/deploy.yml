@@ -41,12 +41,12 @@ jobs:
 
       - name: Debug - check for threading requirement in export
         run: |
-          echo "--- index.html requiredFeatures/threads references ---"
-          grep -o "requiredFeatures[^;]*" build/web/index.html || echo "no requiredFeatures match"
-          grep -c "crossOriginIsolated" build/web/index.html || echo "0 crossOriginIsolated matches in index.html"
-          for f in build/web/*.js; do
-            echo "$f: $(grep -c 'crossOriginIsolated' "$f" || true) crossOriginIsolated matches"
-          done
+          echo "--- context around 'crossOriginIsolated' in index.js ---"
+          grep -oP '.{150}crossOriginIsolated.{150}' build/web/index.js || echo "no match"
+          echo "--- context around 'Cross Origin Isolation' text (any file) ---"
+          grep -orP '.{100}Cross Origin Isolation.{200}' build/web/ || echo "no match"
+          echo "--- context around 'SharedArrayBuffer' text (any file) ---"
+          grep -orP '.{100}SharedArrayBuffer.{200}' build/web/ || echo "no match"
           ls -la build/web
 
       - name: Upload artifact
