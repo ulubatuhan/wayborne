@@ -221,7 +221,7 @@ To enable GitHub Pages deployment:
 Web export is configured in `export_presets.cfg`:
 - Platform: HTML5/Web
 - Output: `build/web/index.html`
-- Features: WASM, threading enabled, streaming enabled
+- Features: WASM, streaming enabled, threading **disabled** (GitHub Pages statik hosting olduğu için SharedArrayBuffer'ın gerektirdiği Cross-Origin-Opener-Policy/Cross-Origin-Embedder-Policy header'larını gönderemiyor)
 
 ### Local Testing
 
