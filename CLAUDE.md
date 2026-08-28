@@ -194,15 +194,59 @@ func load_enemy_data(enemy_id: int) -> Dictionary:
 - Test game logic separately from scene logic
 - Avoid testing engine internals
 
+## CI/CD & Deployment
+
+### GitHub Actions Workflow
+
+The project uses GitHub Actions to automatically export and deploy the game:
+
+- **Trigger**: Push to `main` branch
+- **Actions**:
+  1. Checkout code
+  2. Setup Godot 4.2.2
+  3. Import Godot project
+  4. Export to HTML5 (Web)
+  5. Deploy to GitHub Pages
+
+### GitHub Pages Setup
+
+To enable GitHub Pages deployment:
+
+1. Go to **Settings** → **Pages**
+2. Set **Source** to `GitHub Actions`
+3. Workflow will automatically deploy on each `main` push
+
+### Export Presets
+
+Web export is configured in `export_presets.cfg`:
+- Platform: HTML5/Web
+- Output: `build/web/index.html`
+- Features: WASM, threading enabled, streaming enabled
+
+### Local Testing
+
+To export locally:
+```bash
+godot --headless --export-release Web build/web/index.html
+```
+
+Then serve with:
+```bash
+python -m http.server 8000 -d build/web
+```
+
+Visit `http://localhost:8000` in browser.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
 2. Create your first scene in `scenes/main.tscn`
 3. Create scripts in appropriate `scripts/` subfolders
 4. Reference scenes/scripts using `res://` paths
+5. Push to `main` branch to trigger automatic Web export & deployment
 
 ## Useful Links
 
 - [Godot 4 Documentation](https://docs.godotengine.org/en/stable/)
 - [GDScript Reference](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/index.html)
-- [Best Practices](https://docs.godotengine.org/en/stable/tutorials/3d/using_3d_characters/index.html)
+- [HTML5 Export Guide](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html)
