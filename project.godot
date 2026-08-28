@@ -14,7 +14,7 @@ config/name="Wayborne"
 config/description="A Godot 4 game project"
 config/version="0.1.0"
 config/windows_native_title=true
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.2", "forward_plus")
 config/icon="res://assets/icon.svg"
 
