@@ -1,0 +1,36 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to keys
+
+config_version=5
+
+[application]
+
+config/name="Wayborne"
+config/description="A Godot 4 game project"
+config/version="0.1.0"
+config/windows_native_title=true
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.2", "forward_plus")
+config/icon="res://assets/icon.svg"
+
+[debug]
+
+gdscript/warnings/unused_variable=1
+gdscript/warnings/unused_argument=1
+gdscript/warnings/unused_signal=1
+gdscript/warnings/return_value_discarded=1
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_layers"
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
