@@ -39,16 +39,6 @@ jobs:
           godot --headless --export-release Web build/web/index.html
         continue-on-error: false
 
-      - name: Debug - check for threading requirement in export
-        run: |
-          echo "--- context around 'crossOriginIsolated' in index.js ---"
-          grep -oP '.{150}crossOriginIsolated.{150}' build/web/index.js || echo "no match"
-          echo "--- context around 'Cross Origin Isolation' text (any file) ---"
-          grep -orP '.{100}Cross Origin Isolation.{200}' build/web/ || echo "no match"
-          echo "--- context around 'SharedArrayBuffer' text (any file) ---"
-          grep -orP '.{100}SharedArrayBuffer.{200}' build/web/ || echo "no match"
-          ls -la build/web
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
