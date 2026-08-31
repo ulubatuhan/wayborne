@@ -81,12 +81,18 @@ wayborne/
   - `EventBus` (registered autoload): cross-system signals only
   - AudioManager, SaveManager (planned)
 
-**Autoload rule:** never reference a `class_name` by name inside an autoload
-script. Autoloads are parsed before the global script class cache is ready, so
-`var x: GameSession` or `GameSession.new()` fails with *"Could not find type"*
-and the autoload silently never instantiates. Use `preload("res://…")` into a
-`const` instead, and leave signal parameters untyped (their types are
-documentation only in GDScript).
+**Autoload rule:** never reference a `class_name` inside an autoload script —
+not in a type annotation, not in a body. Autoloads are parsed before the global
+script class cache is ready, so `var x: GameSession` or `GameSession.new()`
+fails with *"Could not find type"* and the autoload silently never instantiates
+(the build still reports success — check the CI import log for
+`Failed to create an autoload`).
+
+`preload()` does **not** fix this: it resolves at compile time, so the failure
+just moves down into the preloaded script's own `class_name` references. Use
+runtime `load("res://…")` inside a function and construct lazily on first
+access. Leave signal parameters untyped (their types are documentation only in
+GDScript) and note the intended type in a comment.
 
 - **data/config/**: Game configuration files
   - `game_config.json`: Game-wide settings

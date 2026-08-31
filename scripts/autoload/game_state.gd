@@ -4,20 +4,29 @@ extends Node
 ## GameSession içinde (RefCounted) durduğu için test sahneleri
 ## autoload'a dokunmadan kendi oturumlarını kurabilir.
 ##
-## Tipler class_name yerine preload ile çözülüyor: autoload'lar global
-## script class cache hazır olmadan ayrıştırılıyor, bu yüzden bir
-## class_name'e ada göre başvurmak "Could not find type" hatası veriyor.
-## preload yol üzerinden çözdüğü için bu sıralamadan etkilenmiyor.
+## Bu dosyada bilerek hiçbir class_name'e başvurulmuyor - ne tip
+## açıklamasında ne de gövdede. Autoload'lar global script class cache
+## hazır olmadan ayrıştırılıyor; preload bile derleme anında çözdüğü
+## için GameSession'ın kendi bağımlılıkları (Wallet, Inventory,
+## CaravanState) üzerinden aynı hataya düşüyordu. load() çalışma anında
+## çözdüğü ve oturum ilk erişimde kurulduğu için o noktada cache hazır.
 
-const GameSessionScript := preload("res://scripts/autoload/game_session.gd")
+const GAME_SESSION_PATH: String = "res://scripts/autoload/game_session.gd"
 
 signal session_reset()
 
-var session: GameSessionScript
+var _session = null
 
-func _ready() -> void:
-	start_new_game()
+## Oturumu ilk erişimde oluşturur.
+func get_session():
+	if _session == null:
+		start_new_game()
+	return _session
+
+func has_session() -> bool:
+	return _session != null
 
 func start_new_game(starting_gold: int = 250, starting_provisions: int = 20) -> void:
-	session = GameSessionScript.new(starting_gold, starting_provisions)
+	var session_script := load(GAME_SESSION_PATH)
+	_session = session_script.new(starting_gold, starting_provisions)
 	session_reset.emit()
