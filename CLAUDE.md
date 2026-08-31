@@ -22,6 +22,7 @@ wayborne/
 │   └── autoload/          # Global singleton scripts
 ├── data/
 │   ├── config/            # JSON/YAML configuration files
+│   ├── locale/            # Translation CSV (keys, tr, en)
 │   └── assets/            # Game assets (sprites, sounds, fonts)
 └── tests/                 # Unit tests (gdscript-testing-tool format)
 ```
@@ -43,9 +44,25 @@ wayborne/
   - Travel context shared between map and planner screens
 
 - **scripts/events/**: Event & narrative systems
-  - Quest management
-  - Dialogue trees
-  - Event triggers
+  - EU4-style road event cards: `GameEvent` → `EventChoice` → `EventOutcome`
+  - `EventCondition` (triggers) and `EventWeightModifier` (MTTH-style weighting)
+  - `EventEffect` is the *only* vocabulary an event may use to touch the world;
+    `EventEffectApplier` applies it and enforces the never-total-loss clamps
+  - `EventEngine`: eligibility filter, weighted draw, once/cooldown tracking,
+    seedable RNG for reproducible runs
+
+### Event Engine Rules
+
+- Road events only. City interaction is deliberately **not** card-based.
+- A caravan can be ruined but never wiped out: the player's own wagon is never
+  lost, gold never goes negative, provisions never go below zero. These clamps
+  live in `EventEffectApplier`/`CaravanState`, never in individual events.
+- Locked choices are shown disabled *with their reason*, not hidden, so the
+  player learns what to prepare for next time.
+- All player-facing event text lives in `data/locale/wayborne_text.csv` as
+  translation keys; scripts call `tr(key)`. Never hardcode event prose.
+- New effects must be added to the `EventEffect.Type` enum **and** handled in
+  `EventEffectApplier`, otherwise they silently do nothing.
 
 - **scripts/combat/**: Combat mechanics & AI
   - Character stats
@@ -58,10 +75,11 @@ wayborne/
   - Popup dialogs
 
 - **scripts/autoload/**: Global singleton scripts (configured in project settings)
-  - GameManager
-  - EventBus
-  - AudioManager
-  - SaveManager
+  - `GameState` (registered autoload): holds the persistent `GameSession`
+  - `GameSession` (plain RefCounted): wallet, inventory, caravan, flags,
+    reputation, journey — instantiable in tests without touching the autoload
+  - `EventBus` (registered autoload): cross-system signals only
+  - AudioManager, SaveManager (planned)
 
 - **data/config/**: Game configuration files
   - `game_config.json`: Game-wide settings

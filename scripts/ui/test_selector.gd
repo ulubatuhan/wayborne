@@ -7,7 +7,7 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const TEST_SCENES: Dictionary = {
 	"economy": "res://scenes/tests/economy_test.tscn",
 	"haggling": "res://scenes/tests/haggling_test.tscn",
-	"events": "",
+	"events": "res://scenes/tests/event_test.tscn",
 	"combat": "",
 	"city": "",
 	"travel": "res://scenes/tests/travel_test.tscn",

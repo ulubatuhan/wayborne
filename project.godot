@@ -17,6 +17,11 @@ config/windows_native_title=true
 run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.2", "forward_plus")
 
+[autoload]
+
+GameState="*res://scripts/autoload/game_state.gd"
+EventBus="*res://scripts/autoload/event_bus.gd"
+
 [debug]
 
 gdscript/warnings/unused_variable=1
@@ -29,6 +34,10 @@ gdscript/warnings/return_value_discarded=1
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_layers"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://data/locale/wayborne_text.tr.translation", "res://data/locale/wayborne_text.en.translation")
 
 [rendering]
 
