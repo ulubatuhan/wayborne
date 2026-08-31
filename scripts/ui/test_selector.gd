@@ -10,7 +10,7 @@ const TEST_SCENES: Dictionary = {
 	"events": "",
 	"combat": "",
 	"city": "",
-	"travel": "",
+	"travel": "res://scenes/tests/travel_test.tscn",
 }
 
 @onready var _buttons: Dictionary = {

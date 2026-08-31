@@ -15,6 +15,7 @@ wayborne/
 ├── scenes/                # Game scenes (*.tscn files)
 ├── scripts/
 │   ├── economy/           # Economy & trade system scripts
+│   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
 │   ├── combat/            # Combat & AI scripts
 │   ├── ui/                # UI components & screens
@@ -35,6 +36,11 @@ wayborne/
   - Trading systems
   - Currency management
   - Resource calculations
+
+- **scripts/travel/**: Map & caravan logistics
+  - Locations, routes and world map data
+  - Caravan composition (wagon limits, documents, provisions)
+  - Travel context shared between map and planner screens
 
 - **scripts/events/**: Event & narrative systems
   - Quest management
