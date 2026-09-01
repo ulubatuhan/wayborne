@@ -328,32 +328,39 @@ python -m http.server 8000 -d build/web
 
 Visit `http://localhost:8000` in browser.
 
-## Development Status / Faz 3 Hazırlık
+## Development Status
 
-Faz 0-2 tamamlandı: oyun bir tur dönüyor (kazanç ödeniyor, harita tam
+Faz 0-3 tamamlandı. Oyun bir tur dönüyor (kazanç ödeniyor, harita tam
 bağlı, fiyat şehre göre değişiyor, kargo kapasitesi var), test iskelesi
 oyuna çevrildi (`scenes/game/`, F1 dev paneli), ilerleme kalıcı
-(`SaveManager`). Faz 3 (şehir gerçekten şehir olsun) bu oturumda
-**yapılmadı** - şu an dört lokasyon da (`scripts/world/city_map.gd`)
-mevcut ekranlara açılan birer kısayol. Faz 3'ün ihtiyaç duyacağı
-altyapının bir kısmı zaten hazır:
+(`SaveManager`), şehrin dört lokasyonu artık gerçek ekranlar - kart
+tabanlı değil, her biri kendi kararını taşıyor:
 
-**Hazır:**
-- `Location.produces` / `Location.demands` (bkz. `MarketPricing`) -
-  Pazar Meydanı'nın arz/talep göstergesi bunun üzerine kurulabilir.
-- `MerchantOffer.origin_location_id` - teklifler artık şehre bağlı;
-  Tüccar Loncası'nın kontrat panosu aynı veriyi kullanabilir.
-- `SaveManager` - yeni bir ekran state eklerse `GameSession.to_save_dict()`
-  / `load_from_dict()`'e bir alan eklemek yeterli.
+- **Pazar Meydanı** (`market.gd`): şehir başına stok sınırı
+  (`Location.stock_per_item` / `GameSession.market_stock`, her varışta
+  dolar), miktar seçili toptan alım, `HagglingPanel` üzerinden bulk
+  pazarlık.
+- **Tüccar Loncası** (`guild.gd`): kontrat panosu. Teklifler artık
+  statik veri değil, `GameSession.accepted_contracts`'ta tutulan
+  oturum durumu - kabul edilince panodan kalkar, sefere çıkılmadan
+  süresi geçerse (`MerchantOffer.contract_deadline_days`, `advance_day()`)
+  ya da yolda teslim edilemezse (`CaravanState.original_merchant_names`,
+  `finish_journey()`) itibar cezası uygulanır. Büyük kontratlar itibar
+  ister (`required_reputation`).
+- **Taverna** (`tavern.gd`): rota dedikodusu. `GameSession.known_routes`
+  öğrenilmedikçe dünya haritası tehlikeyi yalnızca kaba bir bant
+  (düşük/orta/yüksek) gösterir, tam yüzde parayla öğrenilir.
+- **Kervan Avlusu** (`caravan_yard.gd`): vagon onarımı ve alımı.
+  Oyuncu artık kalıcı olarak vagon sahibi (`GameSession.owned_wagon_count`
+  / `owned_wagon_damaged`, ana menüde parti büyüklüğünden hesaplanır);
+  sefer sırasındaki kayıp/hasar escort vagonlarına öncelikli uygulanıp
+  varışta sahipliğe taşınır (bkz. `_apply_wagon_losses_to_ownership`).
 
-**Eksik (Faz 3'te yapılacak):**
-- Pazar Meydanı: stok sınırı, toptan alım, pazarlığın market'e bağlanması.
-- Tüccar Loncası: kontrat panosu - haritadaki teklifler süreli ve
-  itibara bağlı kontratlara dönüşmeli, teslim edilmeyen kontrat itibar
-  yaksın.
-- Taverna: rota dedikodusu - tehlike seviyesi ancak burada öğrenilsin,
-  bilgiye para ödemek ilk stratejik karar olsun.
-- Kervansaray: hasarlı vagon onarımı, yeni vagon alımı.
+**Sırada (Faz 4-5):** yolda gerçek combat (haydut pususu şu an zar
+atıyor), olay havuzunun genişlemesi (10 → 30+), yolda karar noktaları,
+placeholder isimlerin (`test_loc_a`, `Tüccar 12`) gerçek lore'a
+dönüşmesi, dünya/UI metinlerinin de `data/locale/`'e taşınması (şu an
+yalnızca olay metinleri orada), `tests/` altında GUT testleri.
 
 ## Quick Start
 
