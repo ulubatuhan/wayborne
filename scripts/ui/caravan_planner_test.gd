@@ -87,7 +87,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	merchants_title.text = "Kervana Kabul Edilecek Tüccarlar"
 	_content.add_child(merchants_title)
 
-	for offer in WorldMapData.get_offers_for_destination(destination.location_id):
+	for offer in WorldMapData.get_offers_for_destination(destination.location_id, origin.location_id):
 		_content.add_child(_build_offer_row(offer))
 
 	_content.add_child(HSeparator.new())

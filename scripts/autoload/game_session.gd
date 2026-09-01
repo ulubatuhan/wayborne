@@ -25,6 +25,16 @@ var journey_days_remaining: int = 0
 var danger_level: float = 0.0
 var reputation: int = 0
 
+## Vagon başına taşınabilecek yük. Yalnızca pazardan alınan mallara
+## uygulanır; erzak kendi sefer formülüyle sınırlı, kapasiteye dahil değil.
+const CARGO_PER_WAGON: float = 50.0
+
+## Sefer sonu ödemesi: moral ve hasar ne kadar düşükse ücret o kadar
+## kısılır ama asla sıfırlanmaz - kervan ağır kayıp yaşayabilir, aç kalmaz.
+const MIN_MORALE_PAYOUT_FACTOR: float = 0.5
+const DAMAGE_PENALTY_PER_WAGON: float = 0.08
+const MIN_DAMAGE_PAYOUT_FACTOR: float = 0.4
+
 var _flags: Dictionary = {}
 var _provisions_item: Item
 
@@ -78,8 +88,13 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	danger_level = danger
 	caravan = CaravanState.from_plan(plan)
 
-## Hedefe varıldığında çağrılır: konum güncellenir, sefer temizlenir.
-func finish_journey() -> void:
+## Hedefe varıldığında çağrılır: escort ücretini öder, konumu günceller,
+## kervanı oyuncunun tek vagonuna indirger (escort ettiği tüccarlar
+## hedefe ulaşıp ayrılmıştır) ve seferi temizler. Ödeme dökümünü döner.
+func finish_journey() -> Dictionary:
+	var payout := _calculate_arrival_payout()
+	wallet.earn(payout.net)
+
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	journey_origin_id = ""
@@ -87,6 +102,45 @@ func finish_journey() -> void:
 	journey_total_days = 0
 	journey_days_remaining = 0
 	danger_level = 0.0
+	caravan = CaravanState.new()
+
+	return payout
+
+func _calculate_arrival_payout() -> Dictionary:
+	var gross := 0
+	for merchant_name in caravan.merchant_names:
+		gross += caravan.merchant_profit_by_name.get(merchant_name, 0)
+
+	var morale_factor := lerpf(
+		MIN_MORALE_PAYOUT_FACTOR, 1.0, caravan.morale / float(CaravanState.MAX_MORALE)
+	)
+	var damage_factor := maxf(
+		MIN_DAMAGE_PAYOUT_FACTOR, 1.0 - caravan.damaged_wagons * DAMAGE_PENALTY_PER_WAGON
+	)
+	var net := int(round(gross * morale_factor * damage_factor))
+
+	return {
+		"gross": gross,
+		"morale_factor": morale_factor,
+		"damage_factor": damage_factor,
+		"net": net,
+	}
+
+## Yalnızca pazardan alınan mallara uygulanır (bkz. CARGO_PER_WAGON).
+func get_cargo_capacity() -> float:
+	return caravan.wagon_count * CARGO_PER_WAGON
+
+func get_cargo_weight() -> float:
+	var total := 0.0
+	for entry in inventory.get_all_entries():
+		var item: Item = entry.item
+		if item.item_id == PROVISIONS_ITEM_ID:
+			continue
+		total += item.unit_weight * entry.quantity
+	return total
+
+func get_cargo_space_remaining() -> float:
+	return maxf(0.0, get_cargo_capacity() - get_cargo_weight())
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.

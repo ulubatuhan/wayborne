@@ -13,12 +13,17 @@ var merchant_names: Array[String] = []
 var morale: int = MAX_MORALE
 var documents: int = 0
 
+## Sefer sonunda ödenecek escort ücreti burada tutulur; bir tüccar
+## kervandan ayrılırsa merchant_names'ten düşer ve ücreti ödenmez.
+var merchant_profit_by_name: Dictionary = {}
+
 static func from_plan(plan: CaravanPlan) -> CaravanState:
 	var state := CaravanState.new()
 	state.wagon_count = plan.get_total_wagon_count()
 	state.documents = plan.get_required_documents()
 	for offer in plan.get_selected_offers():
 		state.merchant_names.append(offer.merchant_name)
+		state.merchant_profit_by_name[offer.merchant_name] = offer.potential_profit
 	return state
 
 func get_healthy_wagon_count() -> int:

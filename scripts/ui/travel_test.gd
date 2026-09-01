@@ -90,7 +90,9 @@ func _refresh_info_panel() -> void:
 	_add_info_label("Hedef: %s" % _focused_location.location_name)
 	_add_info_label("Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)])
 
-	var offers := WorldMapData.get_offers_for_destination(_focused_location.location_id)
+	var offers := WorldMapData.get_offers_for_destination(
+		_focused_location.location_id, _current_location_id
+	)
 	_add_info_label("Buraya gitmek isteyen tüccarlar (%d):" % offers.size())
 
 	var total_profit := 0

@@ -33,6 +33,8 @@ var _advance_button: Button
 var _draw_button: Button
 var _reset_button: Button
 var _arrive_button: Button
+var _arrival_panel: VBoxContainer
+var _enter_city_button: Button
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
@@ -101,6 +103,16 @@ func _build_ui() -> void:
 	_arrive_button.pressed.connect(_on_arrive_pressed)
 	_content.add_child(_arrive_button)
 
+	_arrival_panel = VBoxContainer.new()
+	_arrival_panel.add_theme_constant_override("separation", 4)
+	_content.add_child(_arrival_panel)
+
+	_enter_city_button = Button.new()
+	_enter_city_button.text = "Şehre Gir"
+	_enter_city_button.visible = false
+	_enter_city_button.pressed.connect(_on_enter_city_pressed)
+	_content.add_child(_enter_city_button)
+
 	_content.add_child(HSeparator.new())
 
 	var log_title := Label.new()
@@ -132,6 +144,9 @@ func _init_journey() -> void:
 	_current_event = null
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
+	_clear_children(_arrival_panel)
+	_arrive_button.visible = false
+	_enter_city_button.visible = false
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 
@@ -337,9 +352,41 @@ func _finish_journey() -> void:
 		_arrive_button.visible = true
 
 func _on_arrive_pressed() -> void:
-	_session.finish_journey()
+	var payout: Dictionary = _session.finish_journey()
+	_arrive_button.visible = false
+	_render_arrival_summary(payout)
 	EventBus.caravan_changed.emit()
-	# Sefer bitince kervan hedef şehrin içindedir.
+	_enter_city_button.visible = true
+
+func _render_arrival_summary(payout: Dictionary) -> void:
+	_clear_children(_arrival_panel)
+
+	var title := Label.new()
+	title.text = "Varış: Sefer Kazancı"
+	_arrival_panel.add_child(title)
+
+	_arrival_panel.add_child(_make_summary_label(
+		"Escort ücreti (brüt): %d GG" % payout.gross
+	))
+	_arrival_panel.add_child(_make_summary_label(
+		"Moral çarpanı: %d%%" % int(round(payout.morale_factor * 100.0))
+	))
+	_arrival_panel.add_child(_make_summary_label(
+		"Hasar çarpanı: %d%%" % int(round(payout.damage_factor * 100.0))
+	))
+
+	var net_label := _make_summary_label("Net kazanç: %d GG" % payout.net)
+	net_label.modulate = OUTCOME_COLOR
+	_arrival_panel.add_child(net_label)
+
+	_add_log("Şehre varıldı. Net kazanç: %d GG." % payout.net, OUTCOME_COLOR)
+
+func _make_summary_label(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	return label
+
+func _on_enter_city_pressed() -> void:
 	Nav.return_scene = Nav.CITY_MAP
 	get_tree().change_scene_to_file(Nav.CITY_MAP)
 

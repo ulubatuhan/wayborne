@@ -32,6 +32,10 @@ layout_mode = 2
 text = "Ekonomi / Envanter Testi"
 horizontal_alignment = 1
 
+[node name="LocationNoteLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = ""
+
 [node name="BalanceRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
@@ -43,6 +47,14 @@ text = "Gümüş Groat:"
 [node name="BalanceValueLabel" type="Label" parent="MarginContainer/VBoxContainer/BalanceRow"]
 layout_mode = 2
 text = "0 GG"
+
+[node name="CargoValueLabel" type="Label" parent="MarginContainer/VBoxContainer/BalanceRow"]
+layout_mode = 2
+text = ""
+
+[node name="MessageLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = ""
 
 [node name="ContentRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

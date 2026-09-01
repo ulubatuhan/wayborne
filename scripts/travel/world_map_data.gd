@@ -6,13 +6,26 @@ extends RefCounted
 
 const START_LOCATION_ID: String = "test_loc_a"
 
+## Şehirler arası ticaret zinciri: her şehir bir malı ucuza üretir ve
+## başka birinin ürettiği malı pahalıya arar. A→D→B→A ve C↔E iki kapalı
+## döngü oluşturur, ikisi de gerçek rotalarla (bkz. _get_edges) bağlı.
 static func get_locations() -> Array[Location]:
 	var locations: Array[Location] = []
-	locations.append(_make_location("test_loc_a", "Test Şehir A", Vector2(110, 210)))
-	locations.append(_make_location("test_loc_b", "Test Şehir B", Vector2(330, 90)))
-	locations.append(_make_location("test_loc_c", "Test Şehir C", Vector2(360, 330)))
-	locations.append(_make_location("test_loc_d", "Test Şehir D", Vector2(560, 180)))
-	locations.append(_make_location("test_loc_e", "Test Şehir E", Vector2(590, 370)))
+	locations.append(_make_location(
+		"test_loc_a", "Test Şehir A", Vector2(110, 210), ["test_grain"], ["test_furs"]
+	))
+	locations.append(_make_location(
+		"test_loc_b", "Test Şehir B", Vector2(330, 90), ["test_furs"], ["test_weapon"]
+	))
+	locations.append(_make_location(
+		"test_loc_c", "Test Şehir C", Vector2(360, 330), ["test_cloth"], ["test_potion"]
+	))
+	locations.append(_make_location(
+		"test_loc_d", "Test Şehir D", Vector2(560, 180), ["test_weapon"], ["test_grain"]
+	))
+	locations.append(_make_location(
+		"test_loc_e", "Test Şehir E", Vector2(590, 370), ["test_potion"], ["test_cloth"]
+	))
 	return locations
 
 static func get_location_by_id(location_id: String) -> Location:
@@ -34,45 +47,93 @@ static func get_route(from_location_id: String, to_location_id: String) -> Trave
 			return route
 	return null
 
-static func get_offers_for_destination(destination_location_id: String) -> Array[MerchantOffer]:
+## origin_location_id: teklifi veren tüccarın şu an bulunduğu şehir.
+## Oyuncu oradaysa teklif görünür - başka bir şehirdeki tüccar burada
+## çıkmaz.
+static func get_offers_for_destination(
+	destination_location_id: String, origin_location_id: String
+) -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
 	for offer in _get_all_offers():
-		if offer.destination_location_id == destination_location_id:
-			offers.append(offer)
+		if offer.destination_location_id != destination_location_id:
+			continue
+		if offer.origin_location_id != origin_location_id:
+			continue
+		offers.append(offer)
 	return offers
+
+## Kenarlar iki yönlü rota ve teklif üretimi için tek kaynak: her kenar
+## [şehir_a, şehir_b, gün, tehlike] olarak tanımlanır, iki yöne de aynı
+## değerlerle uygulanır. Her şehrin en az iki komşusu olacak şekilde
+## kurulmuş (A merkez, B-D-E arasında ayrıca kısayollar var).
+static func _get_edges() -> Array:
+	return [
+		["test_loc_a", "test_loc_b", 3, 0.20],
+		["test_loc_a", "test_loc_c", 4, 0.35],
+		["test_loc_a", "test_loc_d", 6, 0.50],
+		["test_loc_a", "test_loc_e", 8, 0.65],
+		["test_loc_b", "test_loc_d", 4, 0.30],
+		["test_loc_c", "test_loc_e", 5, 0.40],
+		["test_loc_d", "test_loc_e", 3, 0.25],
+	]
 
 static func _get_all_routes() -> Array[TravelRoute]:
 	var routes: Array[TravelRoute] = []
-	routes.append(_make_route("test_loc_a", "test_loc_b", 3, 0.20))
-	routes.append(_make_route("test_loc_a", "test_loc_c", 4, 0.35))
-	routes.append(_make_route("test_loc_a", "test_loc_d", 6, 0.50))
-	routes.append(_make_route("test_loc_a", "test_loc_e", 8, 0.65))
+	for edge in _get_edges():
+		routes.append(_make_route(edge[0], edge[1], edge[2], edge[3]))
+		routes.append(_make_route(edge[1], edge[0], edge[2], edge[3]))
 	return routes
 
 static func _get_all_offers() -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
-	offers.append(_make_offer("m_b1", "Test Tüccar 1", "test_loc_b", 45, 1))
-	offers.append(_make_offer("m_b2", "Test Tüccar 2", "test_loc_b", 110, 2))
-	offers.append(_make_offer("m_b3", "Test Tüccar 3", "test_loc_b", 35, 1))
-
-	offers.append(_make_offer("m_c1", "Test Tüccar 4", "test_loc_c", 60, 1))
-	offers.append(_make_offer("m_c2", "Test Tüccar 5", "test_loc_c", 150, 3))
-	offers.append(_make_offer("m_c3", "Test Tüccar 6", "test_loc_c", 40, 1))
-
-	offers.append(_make_offer("m_d1", "Test Tüccar 7", "test_loc_d", 130, 2))
-	offers.append(_make_offer("m_d2", "Test Tüccar 8", "test_loc_d", 70, 1))
-	offers.append(_make_offer("m_d3", "Test Tüccar 9", "test_loc_d", 55, 1))
-	offers.append(_make_offer("m_d4", "Test Tüccar 10", "test_loc_d", 120, 2))
-
-	offers.append(_make_offer("m_e1", "Test Tüccar 11", "test_loc_e", 90, 1))
-	offers.append(_make_offer("m_e2", "Test Tüccar 12", "test_loc_e", 180, 2))
+	var id_counter := 1
+	for edge in _get_edges():
+		offers.append_array(_offers_for_direction(edge[0], edge[1], edge[2], id_counter))
+		id_counter += 10
+		offers.append_array(_offers_for_direction(edge[1], edge[0], edge[2], id_counter))
+		id_counter += 10
 	return offers
 
-static func _make_location(location_id: String, location_name: String, map_position: Vector2) -> Location:
+## Her yön için iki teklif: küçük/ucuz bir vagon ve büyük/kârlı bir vagon.
+## Kâr, yolun uzunluğuna göre ölçekleniyor - uzun ve tehlikeli rotalar
+## daha çok ödüyor, riski anlamlı kılan da bu.
+static func _offers_for_direction(
+	origin_id: String, destination_id: String, travel_days: int, id_base: int
+) -> Array[MerchantOffer]:
+	var offers: Array[MerchantOffer] = []
+	var profiles := [
+		{"wagons": 1, "profit": 30 + travel_days * 8},
+		{"wagons": 2, "profit": 70 + travel_days * 14},
+	]
+	for i in range(profiles.size()):
+		var profile: Dictionary = profiles[i]
+		var merchant_number: int = id_base + i
+		offers.append(_make_offer(
+			"m_%d" % merchant_number,
+			"Tüccar %d" % merchant_number,
+			origin_id,
+			destination_id,
+			profile.profit,
+			profile.wagons
+		))
+	return offers
+
+static func _make_location(
+	location_id: String, location_name: String, map_position: Vector2,
+	produces: Array, demands: Array
+) -> Location:
 	var location := Location.new()
 	location.location_id = location_id
 	location.location_name = location_name
 	location.map_position = map_position
+	var produces_typed: Array[String] = []
+	for item_id in produces:
+		produces_typed.append(item_id)
+	var demands_typed: Array[String] = []
+	for item_id in demands:
+		demands_typed.append(item_id)
+	location.produces = produces_typed
+	location.demands = demands_typed
 	return location
 
 static func _make_route(from_location_id: String, to_location_id: String, travel_days: int, danger_level: float) -> TravelRoute:
@@ -83,10 +144,14 @@ static func _make_route(from_location_id: String, to_location_id: String, travel
 	route.danger_level = danger_level
 	return route
 
-static func _make_offer(merchant_id: String, merchant_name: String, destination_location_id: String, potential_profit: int, wagon_count: int) -> MerchantOffer:
+static func _make_offer(
+	merchant_id: String, merchant_name: String, origin_location_id: String,
+	destination_location_id: String, potential_profit: int, wagon_count: int
+) -> MerchantOffer:
 	var offer := MerchantOffer.new()
 	offer.merchant_id = merchant_id
 	offer.merchant_name = merchant_name
+	offer.origin_location_id = origin_location_id
 	offer.destination_location_id = destination_location_id
 	offer.potential_profit = potential_profit
 	offer.wagon_count = wagon_count
