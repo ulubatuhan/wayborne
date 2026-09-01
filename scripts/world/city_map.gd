@@ -10,7 +10,7 @@ const SPOT_SIZE: Vector2 = Vector2(190, 76)
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
 @onready var _gate_button: Button = $MarginContainer/VBoxContainer/GateButton
 
-var _session
+var _session: GameSession
 
 func _ready() -> void:
 	_session = GameState.get_session()
