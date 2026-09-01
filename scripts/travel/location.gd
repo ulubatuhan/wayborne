@@ -10,3 +10,8 @@ extends Resource
 ## Aradaki fark ticaretin kâr kaynağı (bkz. MarketPricing).
 @export var produces: Array[String] = []
 @export var demands: Array[String] = []
+
+## Şehrin ürettiği malın stok kapasitesi (item_id -> miktar). Yalnızca
+## burada listelenen mallar stok sınırına tabi (bkz. GameSession.
+## market_stock); listede olmayanlar sınırsız kabul edilir.
+@export var stock_per_item: Dictionary = {}

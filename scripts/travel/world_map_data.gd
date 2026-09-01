@@ -12,6 +12,9 @@ extends RefCounted
 
 const START_LOCATION_ID: String = "test_loc_a"
 
+## Bir şehrin ürettiği malın pazardaki başlangıç/varış stoğu.
+const PRODUCED_GOOD_STOCK: int = 30
+
 static var _built: bool = false
 static var _locations: Array[Location] = []
 static var _location_by_id: Dictionary = {}
@@ -78,6 +81,8 @@ static func _build_locations() -> void:
 	))
 	for location in _locations:
 		_location_by_id[location.location_id] = location
+		for item_id in location.produces:
+			location.stock_per_item[item_id] = PRODUCED_GOOD_STOCK
 
 ## Kenarlar iki yönlü rota ve teklif üretimi için tek kaynak: her kenar
 ## [şehir_a, şehir_b, gün, tehlike] olarak tanımlanır, iki yöne de aynı

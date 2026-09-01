@@ -75,6 +75,31 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	if starting_provisions > 0:
 		inventory.add_item(_provisions_item, starting_provisions)
 
+	_restock_current_location()
+
+## Şehrin mevcut pazar stoğu (item_id -> kalan miktar). Yalnızca
+## current_location_id şehri için geçerli; her varışta (finish_journey()
+## ve ilk kuruluş) o şehrin Location.stock_per_item'ından tam dolu
+## başlar - günlük bir ekonomi simülasyonu yok, placeholder için bu
+## yeterli. Listede olmayan mallar sınırsız kabul edilir.
+var market_stock: Dictionary = {}
+
+## -1 = sınırsız.
+func get_market_stock(item_id: String) -> int:
+	return market_stock.get(item_id, -1)
+
+func consume_stock(item_id: String, quantity: int) -> void:
+	if market_stock.has(item_id):
+		market_stock[item_id] = maxi(0, market_stock[item_id] - quantity)
+
+func _restock_current_location() -> void:
+	market_stock.clear()
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	if location == null:
+		return
+	for item_id in location.stock_per_item:
+		market_stock[item_id] = location.stock_per_item[item_id]
+
 func get_provisions() -> int:
 	return inventory.get_quantity(PROVISIONS_ITEM_ID)
 
@@ -129,6 +154,7 @@ func finish_journey() -> Dictionary:
 	journey_days_remaining = 0
 	danger_level = 0.0
 	caravan = CaravanState.new()
+	_restock_current_location()
 
 	return payout
 
@@ -232,6 +258,7 @@ func load_from_dict(data: Dictionary) -> void:
 	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
+	_restock_current_location()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.
