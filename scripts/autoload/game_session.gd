@@ -25,6 +25,22 @@ var journey_days_remaining: int = 0
 var danger_level: float = 0.0
 var reputation: int = 0
 
+## Taverna'da ödeyip öğrenilmedikçe bir rotanın tam tehlike yüzdesi
+## bilinmez (bkz. tavern.gd, world_map.gd - kaba bir bant gösterirler).
+## "from|to" anahtarlanır; rota simetrik olduğu için öğrenince iki yön
+## de kaydedilir.
+var known_routes: Dictionary = {}
+
+func is_route_known(from_location_id: String, to_location_id: String) -> bool:
+	return known_routes.has(_route_key(from_location_id, to_location_id))
+
+func learn_route(from_location_id: String, to_location_id: String) -> void:
+	known_routes[_route_key(from_location_id, to_location_id)] = true
+	known_routes[_route_key(to_location_id, from_location_id)] = true
+
+func _route_key(from_location_id: String, to_location_id: String) -> String:
+	return "%s|%s" % [from_location_id, to_location_id]
+
 ## Oyuncunun kalıcı olarak sahip olduğu vagon sayısı ve bunların kaç
 ## tanesinin hasarlı olduğu. Şehirdeyken geçerli olan bu; sefer sırasında
 ## CaravanState.wagon_count (escort dahil havuz) geçerli - sefer bitince
@@ -194,6 +210,7 @@ func to_save_dict() -> Dictionary:
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
 		"owned_wagon_damaged": owned_wagon_damaged,
+		"known_routes": known_routes.duplicate(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -214,6 +231,7 @@ func load_from_dict(data: Dictionary) -> void:
 		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
 	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
+	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.

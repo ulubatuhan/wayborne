@@ -88,7 +88,7 @@ func _refresh_info_panel() -> void:
 		return
 
 	_add_info_label("Hedef: %s" % _focused_location.location_name)
-	_add_info_label("Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)])
+	_add_info_label(_route_summary(route))
 
 	var offers := WorldMapData.get_offers_for_destination(
 		_focused_location.location_id, _current_location_id
@@ -106,6 +106,20 @@ func _refresh_info_panel() -> void:
 	plan_button.text = "Planla: %s" % _focused_location.location_name
 	plan_button.pressed.connect(_on_plan_pressed)
 	_info_panel.add_child(plan_button)
+
+## Tehlike yüzdesi yalnızca Taverna'da öğrenilmişse tam gösterilir;
+## bilinmiyorsa kaba bir bant gösterir (bkz. GameSession.known_routes).
+func _route_summary(route: TravelRoute) -> String:
+	if _session.is_route_known(_current_location_id, route.to_location_id):
+		return "Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)]
+	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)" % [route.travel_days, _danger_band(route.danger_level)]
+
+func _danger_band(danger: float) -> String:
+	if danger < 0.3:
+		return "düşük"
+	if danger < 0.55:
+		return "orta"
+	return "yüksek"
 
 func _on_plan_pressed() -> void:
 	if _focused_location == null:

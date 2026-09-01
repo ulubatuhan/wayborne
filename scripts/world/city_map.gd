@@ -46,9 +46,9 @@ func _build_spots() -> void:
 	)
 	_add_spot(
 		"Taverna",
-		"Yol haberleri ve harita.",
+		"Yol dedikodusu ve harita.",
 		Vector2(80, 260),
-		Nav.TRAVEL
+		Nav.TAVERN
 	)
 	_add_spot(
 		"Kervan Avlusu",

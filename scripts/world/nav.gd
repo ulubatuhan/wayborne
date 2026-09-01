@@ -14,6 +14,7 @@ const HAGGLING: String = "res://scenes/game/haggling.tscn"
 const TRAVEL: String = "res://scenes/game/world_map.tscn"
 const CARAVAN_PLANNER: String = "res://scenes/game/caravan_planner.tscn"
 const JOURNEY: String = "res://scenes/game/road_journey.tscn"
+const TAVERN: String = "res://scenes/game/tavern.tscn"
 
 ## Alt ekranların "geri" tuşu buraya döner.
 static var return_scene: String = WORLD_HUB
