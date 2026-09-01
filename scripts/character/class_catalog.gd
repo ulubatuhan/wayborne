@@ -16,13 +16,15 @@ static func get_classes() -> Array[CharacterClass]:
 	_ensure_built()
 	return _classes
 
-static func get_class(class_id: String) -> CharacterClass:
+## Adı bilerek get_class() değil: get_class() Object'in kendi metodu,
+## üzerine yazmak tüm betiği ayrıştırılamaz hale getiriyor.
+static func get_character_class(class_id: String) -> CharacterClass:
 	_ensure_built()
 	return _class_by_id.get(class_id)
 
 ## Sınıf bulunamazsa oyunun çökmemesi için ilk sınıfa düşer.
-static func get_class_or_default(class_id: String) -> CharacterClass:
-	var found := get_class(class_id)
+static func get_character_class_or_default(class_id: String) -> CharacterClass:
+	var found := get_character_class(class_id)
 	if found != null:
 		return found
 	return get_classes()[0]
