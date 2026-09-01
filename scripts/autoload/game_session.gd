@@ -142,6 +142,43 @@ func get_cargo_weight() -> float:
 func get_cargo_space_remaining() -> float:
 	return maxf(0.0, get_cargo_capacity() - get_cargo_weight())
 
+## Kalıcı kayıt yalnızca şehir varışında alınır (bkz. SaveManager,
+## scripts/ui/road_journey.gd), o noktada sefer hiç aktif değildir ve
+## kervan finish_journey() tarafından zaten tek vagonluk varsayılana
+## döndürülmüştür. Bu yüzden sefer/kervan alanları hiç serileştirilmiyor -
+## saklayacak anlamlı bir durumları yok.
+const SAVE_VERSION: int = 1
+
+func to_save_dict() -> Dictionary:
+	var inventory_data: Array = []
+	for entry in inventory.get_all_entries():
+		var item: Item = entry.item
+		inventory_data.append({"item_id": item.item_id, "quantity": entry.quantity})
+
+	return {
+		"version": SAVE_VERSION,
+		"gold": wallet.balance,
+		"inventory": inventory_data,
+		"current_location_id": current_location_id,
+		"reputation": reputation,
+		"flags": _flags.duplicate(),
+	}
+
+## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
+## sıfır başlangıç erzağıyla, aksi halde erzak iki kere eklenir.
+func load_from_dict(data: Dictionary) -> void:
+	wallet.earn(int(data.get("gold", 0)))
+
+	for entry in data.get("inventory", []):
+		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
+		var quantity := int(entry.get("quantity", 0))
+		if item != null and quantity > 0:
+			inventory.add_item(item, quantity)
+
+	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
+	reputation = int(data.get("reputation", 0))
+	_flags = (data.get("flags", {}) as Dictionary).duplicate()
+
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.
 func build_event_context() -> Dictionary:

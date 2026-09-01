@@ -30,3 +30,8 @@ func start_new_game(starting_gold: int = 250, starting_provisions: int = 20) -> 
 	var session_script := load(GAME_SESSION_PATH)
 	_session = session_script.new(starting_gold, starting_provisions)
 	session_reset.emit()
+
+## SaveManager'ın yüklediği bir oturumu kalıcı hale getirir.
+func set_session(session) -> void:
+	_session = session
+	session_reset.emit()

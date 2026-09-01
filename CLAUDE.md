@@ -109,7 +109,13 @@ wayborne/
     çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
     kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
     ekranın geri tuşu paneli açtığın yere döner, panele değil.
-  - AudioManager, SaveManager (planned)
+  - `SaveManager` (registered autoload): `GameSession.to_save_dict()` /
+    `load_from_dict()` içeriği bilir, burada yalnızca `user://save.json`
+    G/Ç'si var. Yalnızca şehir varışında (`finish_journey()` sonrası)
+    çağrılır - sefer/kervan alanları o an her zaman sıfırlanmış olduğu
+    için hiç serileştirilmez. `GameSession`'ı `load()` ile kurup normal
+    örnek metodu çağırır, hiçbir yerde `class_name` ile anmaz.
+  - AudioManager (planned)
 
 **Autoload rule:** never reference a `class_name` inside an autoload script —
 not in a type annotation, not in a body. Autoloads are parsed before the global
@@ -321,6 +327,33 @@ python -m http.server 8000 -d build/web
 ```
 
 Visit `http://localhost:8000` in browser.
+
+## Development Status / Faz 3 Hazırlık
+
+Faz 0-2 tamamlandı: oyun bir tur dönüyor (kazanç ödeniyor, harita tam
+bağlı, fiyat şehre göre değişiyor, kargo kapasitesi var), test iskelesi
+oyuna çevrildi (`scenes/game/`, F1 dev paneli), ilerleme kalıcı
+(`SaveManager`). Faz 3 (şehir gerçekten şehir olsun) bu oturumda
+**yapılmadı** - şu an dört lokasyon da (`scripts/world/city_map.gd`)
+mevcut ekranlara açılan birer kısayol. Faz 3'ün ihtiyaç duyacağı
+altyapının bir kısmı zaten hazır:
+
+**Hazır:**
+- `Location.produces` / `Location.demands` (bkz. `MarketPricing`) -
+  Pazar Meydanı'nın arz/talep göstergesi bunun üzerine kurulabilir.
+- `MerchantOffer.origin_location_id` - teklifler artık şehre bağlı;
+  Tüccar Loncası'nın kontrat panosu aynı veriyi kullanabilir.
+- `SaveManager` - yeni bir ekran state eklerse `GameSession.to_save_dict()`
+  / `load_from_dict()`'e bir alan eklemek yeterli.
+
+**Eksik (Faz 3'te yapılacak):**
+- Pazar Meydanı: stok sınırı, toptan alım, pazarlığın market'e bağlanması.
+- Tüccar Loncası: kontrat panosu - haritadaki teklifler süreli ve
+  itibara bağlı kontratlara dönüşmeli, teslim edilmeyen kontrat itibar
+  yaksın.
+- Taverna: rota dedikodusu - tehlike seviyesi ancak burada öğrenilsin,
+  bilgiye para ödemek ilk stratejik karar olsun.
+- Kervansaray: hasarlı vagon onarımı, yeni vagon alımı.
 
 ## Quick Start
 

@@ -32,9 +32,14 @@ theme_override_font_sizes/font_size = 48
 text = "WAYBORNE"
 horizontal_alignment = 1
 
+[node name="ContinueButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+visible = false
+text = "Devam Et"
+
 [node name="PlayButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Oyna"
+text = "Yeni Oyun"
 
 [node name="LanguageRow" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2

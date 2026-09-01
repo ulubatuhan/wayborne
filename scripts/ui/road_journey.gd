@@ -358,6 +358,12 @@ func _on_arrive_pressed() -> void:
 	_arrive_button.visible = false
 	_render_arrival_summary(payout)
 	EventBus.caravan_changed.emit()
+
+	# Sefer içinde kayıt yok: yolda alınan riskin geri alınamaması
+	# olayları anlamlı kılıyor. Sentetik dev seferi gerçek kaydı kirletmez.
+	if _is_live_journey:
+		SaveManager.save_session(_session)
+
 	_enter_city_button.visible = true
 
 func _render_arrival_summary(payout: Dictionary) -> void:
