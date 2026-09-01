@@ -17,6 +17,11 @@ var documents: int = 0
 ## kervandan ayrılırsa merchant_names'ten düşer ve ücreti ödenmez.
 var merchant_profit_by_name: Dictionary = {}
 
+## Sefer başındaki tüccar listesinin değişmez kopyası: finish_journey()
+## bunu merchant_names ile karşılaştırıp yolda kimin kaybedildiğini
+## (kontratın teslim edilemediğini) bulur ve itibar cezası uygular.
+var original_merchant_names: Array[String] = []
+
 ## Sefer başındaki anlık görüntü: kayıp/hasarı GameSession.finish_journey()
 ## oyuncunun kalıcı sahipliğine adil paylaştırabilsin diye tutulur -
 ## escort vagonları önce gider, oyuncunun kendi vagonu en son.
@@ -32,6 +37,7 @@ static func from_plan(plan: CaravanPlan) -> CaravanState:
 	for offer in plan.get_selected_offers():
 		state.merchant_names.append(offer.merchant_name)
 		state.merchant_profit_by_name[offer.merchant_name] = offer.potential_profit
+	state.original_merchant_names = state.merchant_names.duplicate()
 	return state
 
 func get_healthy_wagon_count() -> int:

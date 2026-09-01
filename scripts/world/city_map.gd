@@ -40,9 +40,9 @@ func _build_spots() -> void:
 	)
 	_add_spot(
 		"Tüccar Loncası",
-		"Fiyat üzerine pazarlık.",
+		"Kontrat panosu.",
 		Vector2(340, 150),
-		Nav.HAGGLING
+		Nav.GUILD
 	)
 	_add_spot(
 		"Taverna",

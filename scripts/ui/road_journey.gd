@@ -195,6 +195,10 @@ func _on_advance_day() -> void:
 	_current_day += 1
 	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
 
+	var expired_contracts := _session.advance_day()
+	for _merchant_id in expired_contracts:
+		_add_log("Loncadaki bir kontratın süresi doldu, itibarın düştü.")
+
 	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
 	var daily_consumption := 1 + _session.caravan.merchant_names.size()
 	_session.change_provisions(-daily_consumption)
@@ -386,6 +390,16 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 	var net_label := _make_summary_label("Net kazanç: %d GG" % payout.net)
 	net_label.modulate = OUTCOME_COLOR
 	_arrival_panel.add_child(net_label)
+
+	var lost_contracts: int = payout.get("lost_contracts", 0)
+	if lost_contracts > 0:
+		var penalty_label := _make_summary_label(
+			"Teslim edilemeyen kontrat: %d (itibar -%d)" % [
+				lost_contracts, lost_contracts * GameSession.REPUTATION_PENALTY_PER_LOST_CONTRACT
+			]
+		)
+		penalty_label.modulate = LOCKED_COLOR
+		_arrival_panel.add_child(penalty_label)
 
 	_add_log("Şehre varıldı. Net kazanç: %d GG." % payout.net, OUTCOME_COLOR)
 

@@ -90,7 +90,13 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	merchants_title.text = "Kervana Kabul Edilecek Tüccarlar"
 	_content.add_child(merchants_title)
 
-	for offer in WorldMapData.get_offers_for_destination(destination.location_id, origin.location_id):
+	var accepted_offers := _session.get_accepted_offers_for_destination(destination.location_id)
+	if accepted_offers.is_empty():
+		var hint_label := Label.new()
+		hint_label.text = "Bu hedefe kabul ettiğin bir kontrat yok. Tüccar Loncası'ndan kontrat kabul et."
+		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		_content.add_child(hint_label)
+	for offer in accepted_offers:
 		_content.add_child(_build_offer_row(offer))
 
 	_content.add_child(HSeparator.new())
@@ -233,6 +239,7 @@ func _on_confirm_pressed() -> void:
 	if _plan.get_provisions_shortfall(_session.get_provisions()) > 0:
 		return
 
+	_session.depart_with_contracts(_plan.get_selected_offers())
 	_session.start_journey(
 		_destination.location_id,
 		_plan.travel_days,

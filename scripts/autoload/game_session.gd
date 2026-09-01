@@ -41,6 +41,67 @@ func learn_route(from_location_id: String, to_location_id: String) -> void:
 func _route_key(from_location_id: String, to_location_id: String) -> String:
 	return "%s|%s" % [from_location_id, to_location_id]
 
+## Tüm seferler boyunca ilerleyen gün sayacı (bkz. road_journey.gd
+## _on_advance_day). journey_days_remaining bir seferin kalan gününü
+## sayar, bu ise hiç sıfırlanmaz - kontrat panosunun süre takibi için.
+var total_days_elapsed: int = 0
+
+## Tüccar Loncası'nda kabul edilen ama henüz sefere çıkılmamış kontratlar
+## (merchant_id -> kabul edildiği gün). Sefere çıkılınca depart_with_
+## contracts() ile kaldırılır - artık kervanın kendi mekanikleri
+## (yolda ayrılma, varışta ödeme) geçerlidir. Süresi geçerse advance_day()
+## itibar cezasıyla kaldırır.
+var accepted_contracts: Dictionary = {}
+const REPUTATION_PENALTY_PER_LOST_CONTRACT: int = 5
+
+func accept_contract(offer: MerchantOffer) -> void:
+	accepted_contracts[offer.merchant_id] = total_days_elapsed
+
+func is_contract_accepted(merchant_id: String) -> bool:
+	return accepted_contracts.has(merchant_id)
+
+## Yalnızca oyuncunun şu an bulunduğu şehirde kabul edilmiş ve o şehirden
+## çıkan kontratları döner - kontrat başka bir şehirde kabul edilmişse
+## oyuncu oraya dönmeden onu yola çıkaramaz.
+func get_accepted_offers_for_destination(destination_location_id: String) -> Array[MerchantOffer]:
+	var offers: Array[MerchantOffer] = []
+	for merchant_id in accepted_contracts:
+		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
+		if offer == null:
+			continue
+		if offer.destination_location_id != destination_location_id:
+			continue
+		if offer.origin_location_id != current_location_id:
+			continue
+		offers.append(offer)
+	return offers
+
+## Yola çıkılan kontratlar panodan düşer - artık kervanın kendi
+## mekanikleri geçerlidir (bkz. CaravanState.original_merchant_names).
+func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
+	for offer in offers:
+		accepted_contracts.erase(offer.merchant_id)
+
+## Sefer gününü ilerletir, süresi geçen kontratları panodan düşürüp
+## itibar cezası uygular. Süresi geçenlerin merchant_id listesini döner
+## (bkz. road_journey.gd - günlüğe not düşer).
+func advance_day() -> Array[String]:
+	total_days_elapsed += 1
+	var expired: Array[String] = []
+	for merchant_id in accepted_contracts.keys():
+		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
+		if offer == null:
+			continue
+		var accepted_at: int = accepted_contracts[merchant_id]
+		if total_days_elapsed > accepted_at + offer.contract_deadline_days:
+			expired.append(merchant_id)
+
+	for merchant_id in expired:
+		accepted_contracts.erase(merchant_id)
+		reputation -= REPUTATION_PENALTY_PER_LOST_CONTRACT
+
+	return expired
+
 ## Oyuncunun kalıcı olarak sahip olduğu vagon sayısı ve bunların kaç
 ## tanesinin hasarlı olduğu. Şehirdeyken geçerli olan bu; sefer sırasında
 ## CaravanState.wagon_count (escort dahil havuz) geçerli - sefer bitince
@@ -184,6 +245,7 @@ func finish_journey() -> Dictionary:
 	var payout := _calculate_arrival_payout()
 	wallet.earn(payout.net)
 	_apply_wagon_losses_to_ownership()
+	payout["lost_contracts"] = _apply_undelivered_contract_penalty()
 
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
@@ -196,6 +258,16 @@ func finish_journey() -> Dictionary:
 	_restock_current_location()
 
 	return payout
+
+## Yolda kervandan ayrılan (teslim edilemeyen) her kontrat için itibar
+## cezası uygular. Kaç kontratın kaybedildiğini döner.
+func _apply_undelivered_contract_penalty() -> int:
+	var lost := 0
+	for merchant_name in caravan.original_merchant_names:
+		if not caravan.merchant_names.has(merchant_name):
+			lost += 1
+	reputation -= lost * REPUTATION_PENALTY_PER_LOST_CONTRACT
+	return lost
 
 ## Sefer sırasındaki kayıp/hasar kervanın havuzundan (oyuncu + escort
 ## tüccarların vagonları birlikte) uygulanıyor. Buradan oyuncunun payına
@@ -276,6 +348,8 @@ func to_save_dict() -> Dictionary:
 		"owned_wagon_count": owned_wagon_count,
 		"owned_wagon_damaged": owned_wagon_damaged,
 		"known_routes": known_routes.duplicate(),
+		"total_days_elapsed": total_days_elapsed,
+		"accepted_contracts": accepted_contracts.duplicate(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -297,6 +371,10 @@ func load_from_dict(data: Dictionary) -> void:
 	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
+	total_days_elapsed = int(data.get("total_days_elapsed", 0))
+	accepted_contracts = {}
+	for merchant_id in (data.get("accepted_contracts", {}) as Dictionary):
+		accepted_contracts[merchant_id] = int(data["accepted_contracts"][merchant_id])
 	_restock_current_location()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez

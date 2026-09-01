@@ -15,12 +15,20 @@ const START_LOCATION_ID: String = "test_loc_a"
 ## Bir şehrin ürettiği malın pazardaki başlangıç/varış stoğu.
 const PRODUCED_GOOD_STOCK: int = 30
 
+## Kontrat panosu (bkz. GameSession.accepted_contracts): kabul edilen bir
+## kontrat, yolun süresinden bu kadar fazla gün içinde sefere çıkılmazsa
+## süresi dolar. Büyük (2 vagonluk) kontratlar bir miktar itibar ister.
+const CONTRACT_DEADLINE_BUFFER_DAYS: int = 10
+const CONTRACT_REPUTATION_FOR_LARGE: int = 5
+
 static var _built: bool = false
 static var _locations: Array[Location] = []
 static var _location_by_id: Dictionary = {}
 static var _routes_by_from: Dictionary = {}
 static var _route_by_pair: Dictionary = {}
 static var _offers_by_origin_destination: Dictionary = {}
+static var _offers_by_origin: Dictionary = {}
+static var _offer_by_merchant_id: Dictionary = {}
 
 static func get_locations() -> Array[Location]:
 	_ensure_built()
@@ -52,6 +60,19 @@ static func get_offers_for_destination(
 	for offer in _offers_by_origin_destination.get(_pair_key(origin_location_id, destination_location_id), []):
 		offers.append(offer)
 	return offers
+
+## Bir şehirden (hedef fark etmeksizin) çıkan tüm teklifler - Tüccar
+## Loncası'nın kontrat panosu için.
+static func get_offers_from_origin(origin_location_id: String) -> Array[MerchantOffer]:
+	_ensure_built()
+	var offers: Array[MerchantOffer] = []
+	for offer in _offers_by_origin.get(origin_location_id, []):
+		offers.append(offer)
+	return offers
+
+static func get_offer_by_merchant_id(merchant_id: String) -> MerchantOffer:
+	_ensure_built()
+	return _offer_by_merchant_id.get(merchant_id)
 
 static func _ensure_built() -> void:
 	if _built:
@@ -116,9 +137,13 @@ static func _add_direction(
 	_routes_by_from[from_id].append(route)
 	_route_by_pair[_pair_key(from_id, to_id)] = route
 
-	_offers_by_origin_destination[_pair_key(from_id, to_id)] = _offers_for_direction(
-		from_id, to_id, travel_days, id_base
-	)
+	var offers := _offers_for_direction(from_id, to_id, travel_days, id_base)
+	_offers_by_origin_destination[_pair_key(from_id, to_id)] = offers
+	if not _offers_by_origin.has(from_id):
+		_offers_by_origin[from_id] = []
+	for offer in offers:
+		_offers_by_origin[from_id].append(offer)
+		_offer_by_merchant_id[offer.merchant_id] = offer
 
 ## Her yön için iki teklif: küçük/ucuz bir vagon ve büyük/kârlı bir vagon.
 ## Kâr, yolun uzunluğuna göre ölçekleniyor - uzun ve tehlikeli rotalar
@@ -127,9 +152,10 @@ static func _offers_for_direction(
 	origin_id: String, destination_id: String, travel_days: int, id_base: int
 ) -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
+	var deadline := travel_days + CONTRACT_DEADLINE_BUFFER_DAYS
 	var profiles := [
-		{"wagons": 1, "profit": 30 + travel_days * 8},
-		{"wagons": 2, "profit": 70 + travel_days * 14},
+		{"wagons": 1, "profit": 30 + travel_days * 8, "reputation": 0},
+		{"wagons": 2, "profit": 70 + travel_days * 14, "reputation": CONTRACT_REPUTATION_FOR_LARGE},
 	]
 	for i in range(profiles.size()):
 		var profile: Dictionary = profiles[i]
@@ -140,7 +166,9 @@ static func _offers_for_direction(
 			origin_id,
 			destination_id,
 			profile.profit,
-			profile.wagons
+			profile.wagons,
+			deadline,
+			profile.reputation
 		))
 	return offers
 
@@ -175,7 +203,8 @@ static func _make_route(from_location_id: String, to_location_id: String, travel
 
 static func _make_offer(
 	merchant_id: String, merchant_name: String, origin_location_id: String,
-	destination_location_id: String, potential_profit: int, wagon_count: int
+	destination_location_id: String, potential_profit: int, wagon_count: int,
+	contract_deadline_days: int, required_reputation: int
 ) -> MerchantOffer:
 	var offer := MerchantOffer.new()
 	offer.merchant_id = merchant_id
@@ -184,4 +213,6 @@ static func _make_offer(
 	offer.destination_location_id = destination_location_id
 	offer.potential_profit = potential_profit
 	offer.wagon_count = wagon_count
+	offer.contract_deadline_days = contract_deadline_days
+	offer.required_reputation = required_reputation
 	return offer

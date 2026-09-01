@@ -16,6 +16,7 @@ const CARAVAN_PLANNER: String = "res://scenes/game/caravan_planner.tscn"
 const JOURNEY: String = "res://scenes/game/road_journey.tscn"
 const TAVERN: String = "res://scenes/game/tavern.tscn"
 const CARAVAN_YARD: String = "res://scenes/game/caravan_yard.tscn"
+const GUILD: String = "res://scenes/game/guild.tscn"
 
 ## Alt ekranların "geri" tuşu buraya döner.
 static var return_scene: String = WORLD_HUB

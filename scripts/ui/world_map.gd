@@ -90,17 +90,16 @@ func _refresh_info_panel() -> void:
 	_add_info_label("Hedef: %s" % _focused_location.location_name)
 	_add_info_label(_route_summary(route))
 
-	var offers := WorldMapData.get_offers_for_destination(
-		_focused_location.location_id, _current_location_id
-	)
-	_add_info_label("Buraya gitmek isteyen tüccarlar (%d):" % offers.size())
-
-	var total_profit := 0
-	for offer in offers:
-		total_profit += offer.potential_profit
-		_add_info_label("  • %s — %d vagon — +%d GG" % [offer.merchant_name, offer.wagon_count, offer.potential_profit])
-
-	_add_info_label("Toplam potansiyel getiri: %d GG" % total_profit)
+	var offers := _session.get_accepted_offers_for_destination(_focused_location.location_id)
+	if offers.is_empty():
+		_add_info_label("Bu hedefe kabul ettiğin bir kontrat yok. Tüccar Loncası'ndan kontrat kabul et.")
+	else:
+		_add_info_label("Kabul ettiğin kontratlar (%d):" % offers.size())
+		var total_profit := 0
+		for offer in offers:
+			total_profit += offer.potential_profit
+			_add_info_label("  • %s — %d vagon — +%d GG" % [offer.merchant_name, offer.wagon_count, offer.potential_profit])
+		_add_info_label("Toplam potansiyel getiri: %d GG" % total_profit)
 
 	var plan_button := Button.new()
 	plan_button.text = "Planla: %s" % _focused_location.location_name
