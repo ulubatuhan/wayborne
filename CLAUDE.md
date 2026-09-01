@@ -17,6 +17,7 @@ wayborne/
 │   ├── economy/           # Economy & trade system scripts
 │   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
+│   ├── character/         # Cultures, stats, classes & recruits
 │   ├── combat/            # Combat & AI scripts
 │   ├── world/             # Explorable 2D spaces & scene navigation
 │   ├── ui/                # UI components & screens
@@ -65,10 +66,64 @@ wayborne/
 - New effects must be added to the `EventEffect.Type` enum **and** handled in
   `EventEffectApplier`, otherwise they silently do nothing.
 
-- **scripts/combat/**: Combat mechanics & AI
-  - Character stats
-  - Attack calculations
-  - Enemy AI behavior
+- **scripts/character/**: Who the people in the caravan are
+  - `CharacterStats`: the six base stats (Güç/Çeviklik/Dayanıklılık/Zeka/
+    Sezgi/Karizma) plus every derived value (max HP, initiative, accuracy,
+    dodge, crit, damage bonus). Derived formulas live **only** here - the
+    character screen and the combat engine both read them from this class.
+  - `Culture` / `CultureCatalog`: the five cultures (göçebe, vadi loncaları,
+    dağ kabilesi, liman şehri, balıkçı kasabası). Each carries a stat lean, a
+    name pool and exactly **one** mechanical perk, and every perk plugs into
+    a system that already exists (daily provisions, provision price, market
+    buy price, combat damage, rumor price). No perk may invent a new system.
+  - `CharacterClass` / `ClassCatalog`: combat role. `class_name` is a
+    reserved word, so the visible name lives in `display_name`. One class for
+    now (Kervan Muhafızı); the catalog exists so a second one costs no UI work.
+  - `CharacterData`: identity + appearance (boy/ten rengi) + stats + class +
+    current HP, with `to_dict()`/`from_dict()`. Height is not flavour: tall
+    means more HP and less dodge, short the reverse.
+  - `RecruitCatalog`: per-venue candidate pools (meydan cheap/green, taverna
+    balanced, lonca expensive and reputation-gated). Candidates are rolled
+    **once per city arrival** from a `location + day` seed, so reopening the
+    screen cannot reroll them.
+
+### Character & Party Rules
+
+- **Crew size ≠ combat party.** Crew (chosen in character creation) drives the
+  wagons and sets cargo capacity, up to 12 people / 6 wagons. The combat party
+  is the named characters, max `GameSession.MAX_PARTY_SIZE` (4), and only they
+  fight. Never conflate the two.
+- `party[0]` is always the player: they can be reordered but never dismissed.
+- Party order **is** combat rank order (1 = front).
+- Characters heal to full on city arrival (`finish_journey()`); the road is
+  where damage accumulates.
+
+- **scripts/combat/**: Darkest Dungeon style turn-based combat
+  - `CombatSkill` / `SkillCatalog`: position-gated skills. Every skill carries
+    both `usable_positions` (where the user must stand) and `target_positions`
+    (what it can reach). Numbers live in the catalog, never in the UI.
+  - `EnemyTemplate` / `EnemyCatalog`: enemy stats plus `build_bandit_squad()`,
+    which scales the squad with the road's danger **and** with party size, so
+    a lone traveller never faces four bandits.
+  - `CombatUnit`: one fighter on the field. Wraps a `CharacterData` on the
+    player side and writes HP back when the fight ends.
+  - `CombatEncounter`: the engine itself - initiative order, accuracy vs
+    dodge, crits, cooldowns, enemy AI (weakest reachable target), rank
+    repacking when someone falls. UI-independent and directly testable.
+  - `CombatPanel` (in `scripts/ui/`): builds itself in code and is embedded
+    into the journey screen, so a mid-journey fight never changes scenes
+    (bkz. `HagglingPanel` deseni).
+
+### Combat Rules
+
+- Four ranks per side, 1 = front. A skill the current position cannot use is
+  shown **disabled with its reason**, never hidden - same rule as event choices.
+- Losing a fight is not death: `write_back_party()` stands downed characters
+  back up at 1 HP. The caravan can be ruined, never wiped out.
+- Combat is entered only through `EventEffect.Type.TRIGGER_COMBAT`, bridged by
+  `EventEffectApplier.Result.combat_requests` and applied in `road_journey.gd`
+  `_on_combat_finished()`. The bandit ambush's "fight" choice no longer rolls
+  dice - it opens the real panel.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right,
@@ -352,15 +407,33 @@ tabanlı değil, her biri kendi kararını taşıyor:
   (düşük/orta/yüksek) gösterir, tam yüzde parayla öğrenilir.
 - **Kervan Avlusu** (`caravan_yard.gd`): vagon onarımı ve alımı.
   Oyuncu artık kalıcı olarak vagon sahibi (`GameSession.owned_wagon_count`
-  / `owned_wagon_damaged`, ana menüde parti büyüklüğünden hesaplanır);
+  / `owned_wagon_damaged`, karakter oluşturmada tayfa sayısından
+  hesaplanır);
   sefer sırasındaki kayıp/hasar escort vagonlarına öncelikli uygulanıp
   varışta sahipliğe taşınır (bkz. `_apply_wagon_losses_to_ownership`).
 
-**Sırada (Faz 4-5):** yolda gerçek combat (haydut pususu şu an zar
-atıyor), olay havuzunun genişlemesi (10 → 30+), yolda karar noktaları,
-placeholder isimlerin (`test_loc_a`, `Tüccar 12`) gerçek lore'a
-dönüşmesi, dünya/UI metinlerinin de `data/locale/`'e taşınması (şu an
-yalnızca olay metinleri orada), `tests/` altında GUT testleri.
+Faz 4 (karakter + combat) tamamlandı. Oyuna artık bir "sen" girdi:
+
+- **Karakter oluşturma** (`character_creation.gd`, `Nav.CHARACTER_CREATION`):
+  kültür, isim (kültür havuzundan rastgele ya da elle), boy, ten rengi,
+  6 stata dağıtılan puan ve tayfa büyüklüğü. Ana menüdeki "Yeni Oyun"
+  artık doğrudan oyunu başlatmıyor, buraya getiriyor; kayıt yalnızca
+  bu ekran tamamlanınca siliniyor.
+- **Combat** (`scripts/combat/`, `CombatPanel`): Darkest Dungeon tarzı,
+  4 mevkilik iki saf, inisiyatif sırası, mevki kilitli yetenekler.
+  Haydut pususunun "Direnç göster" seçeneği artık zar atmıyor, gerçek
+  savaşı açıyor (`TRIGGER_COMBAT`). F1 panelindeki "combat" girişi de
+  bağlandı (`scenes/game/combat.tscn`).
+- **Tayfa toplama** (`RecruitCatalog`, `RecruitPanel`, `recruit.gd`):
+  meydan/taverna/lonca aynı ekranı farklı havuz ve fiyatla açar
+  (`Nav.recruit_venue`), lonca itibar ister. Yolda da bir aday çıkabilir
+  (`evt_road_wanderer` → `TRIGGER_RECRUIT`).
+
+**Sırada (Faz 5):** ikinci sınıf ve sınıfa özel yetenek ağacı, savaşta
+stres/moral bağı, olay havuzunun genişlemesi (11 → 30+), placeholder
+isimlerin (`test_loc_a`, `Tüccar 12`) gerçek lore'a dönüşmesi,
+dünya/UI metinlerinin de `data/locale/`'e taşınması (şu an yalnızca
+olay metinleri orada), `tests/` altında GUT testleri.
 
 ## Quick Start
 

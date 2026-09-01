@@ -10,6 +10,9 @@ const SYNTHETIC_JOURNEY_DAYS: int = 8
 const SYNTHETIC_DANGER: float = 0.4
 const SYNTHETIC_WAGONS: int = 4
 const SYNTHETIC_MERCHANTS: Array = ["Deneme Tüccarı 1", "Deneme Tüccarı 2", "Deneme Tüccarı 3"]
+const SYNTHETIC_PARTY_CULTURES: Array[String] = [
+	CultureCatalog.HIGHLAND, CultureCatalog.NOMAD, CultureCatalog.VALLEY,
+]
 
 const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
 const IMMEDIATE_COLOR: Color = Color(0.95, 0.8, 0.45)
@@ -18,6 +21,22 @@ const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 ## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
 const HAGGLE_FAIL_MORALE: int = -8
 const HAGGLE_DRAIN_RATE: float = 25.0
+
+## Savaş sonuçları. Zafer yolu bir süre güvenli kılar ve yağma getirir;
+## yenilgi ağır ama kervanı bitirmez (bkz. EventEffectApplier clamp'leri).
+const COMBAT_LOOT_BASE: int = 25
+const COMBAT_LOOT_DANGER_BONUS: int = 60
+const COMBAT_VICTORY_MORALE: int = 12
+const COMBAT_VICTORY_REPUTATION: int = 4
+const COMBAT_VICTORY_DANGER: int = -10
+const COMBAT_DEFEAT_WAGON_DAMAGE: int = 2
+const COMBAT_DEFEAT_MERCHANTS: int = 1
+const COMBAT_DEFEAT_MORALE: int = -20
+const COMBAT_DEFEAT_GOLD: int = -40
+
+## Yolda karşılaşılan biri şehirdeki kadar seçici değil ama pazarlık payı
+## da bırakmıyor.
+const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 
 var _session: GameSession
 var _engine: EventEngine
@@ -30,6 +49,8 @@ var _seed_spin: SpinBox
 var _state_label: Label
 var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
+var _combat_holder: VBoxContainer
+var _recruit_holder: VBoxContainer
 var _log_list: VBoxContainer
 var _advance_button: Button
 var _draw_button: Button
@@ -99,6 +120,12 @@ func _build_ui() -> void:
 	_haggle_holder = VBoxContainer.new()
 	_content.add_child(_haggle_holder)
 
+	_combat_holder = VBoxContainer.new()
+	_content.add_child(_combat_holder)
+
+	_recruit_holder = VBoxContainer.new()
+	_content.add_child(_recruit_holder)
+
 	_arrive_button = Button.new()
 	_arrive_button.text = "Şehre Var"
 	_arrive_button.visible = false
@@ -146,6 +173,8 @@ func _init_journey() -> void:
 	_current_event = null
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
+	_clear_children(_combat_holder)
+	_clear_children(_recruit_holder)
 	_clear_children(_arrival_panel)
 	_arrive_button.visible = false
 	_enter_city_button.visible = false
@@ -180,6 +209,18 @@ func _start_synthetic_journey() -> void:
 		merchants.append(merchant_name)
 	_session.caravan.merchant_names = merchants
 
+	# Dev seferinde savaşı denemek için dolu bir kadro kurulur; gerçek
+	# oyunda parti karakter oluşturma ve tayfa toplamayla büyür.
+	var test_party: Array[CharacterData] = []
+	for index in SYNTHETIC_PARTY_CULTURES.size():
+		var culture := CultureCatalog.get_culture_or_default(SYNTHETIC_PARTY_CULTURES[index])
+		test_party.append(CharacterData.create(
+			culture.name_pool[index % culture.name_pool.size()],
+			culture.culture_id,
+			CharacterStats.new()
+		))
+	_session.party = test_party
+
 	_current_day = 0
 
 func _on_reset_pressed() -> void:
@@ -200,7 +241,9 @@ func _on_advance_day() -> void:
 		_add_log("Loncadaki bir kontratın süresi doldu, itibarın düştü.")
 
 	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
+	# Göçebe kültürü az yer (bkz. Culture.daily_provision_multiplier).
 	var daily_consumption := 1 + _session.caravan.merchant_names.size()
+	daily_consumption = maxi(1, int(round(daily_consumption * _session.get_daily_provision_multiplier())))
 	_session.change_provisions(-daily_consumption)
 	if _session.get_provisions() <= 0:
 		_session.caravan.change_morale(-10)
@@ -303,8 +346,110 @@ func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 		_engine.unlock_event(event_id)
 		_add_log("      (yeni olay açıldı)")
 
+	if not result.combat_requests.is_empty():
+		_open_combat(int(result.combat_requests[0]))
+		return
+
+	if not result.recruit_requests.is_empty():
+		_open_recruit_offer()
+		return
+
 	if not result.haggling_requests.is_empty():
 		_open_haggling(int(result.haggling_requests[0]))
+
+## Yolda karşılaşılan biri partiye katılmayı teklif ediyor. Şehirdeki
+## tayfa ekranıyla aynı havuzdan (RecruitCatalog) üretiliyor, yalnızca
+## teklif tek kişilik ve anlık.
+func _open_recruit_offer() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%d|%d" % [int(_seed_spin.value), _current_day])
+	var candidates := RecruitCatalog.build_candidates(RecruitCatalog.VENUE_TAVERN, rng)
+	if candidates.is_empty() or not _session.can_recruit():
+		_add_log("      Yolcu fikrini değiştirdi ve yoluna gitti.")
+		return
+
+	var candidate := candidates[0]
+	# Yolda pazarlık gücü yok: ücret şehirdekinden biraz yüksek.
+	candidate.hire_cost = int(round(candidate.hire_cost * ROAD_RECRUIT_COST_MULTIPLIER))
+
+	_set_journey_controls_enabled(false)
+	_clear_children(_recruit_holder)
+
+	var info := Label.new()
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD
+	info.text = "%s — can %d · isabet %d · kaçınma %d — %d GG istiyor." % [
+		candidate.get_summary_line(),
+		candidate.get_max_hp(),
+		candidate.stats.get_accuracy(),
+		candidate.get_dodge(),
+		candidate.hire_cost,
+	]
+	_recruit_holder.add_child(info)
+
+	var hire_button := Button.new()
+	if _session.wallet.can_afford(candidate.hire_cost):
+		hire_button.text = "Partiye Kat (%d GG)" % candidate.hire_cost
+		hire_button.pressed.connect(_on_road_recruit_accepted.bind(candidate))
+	else:
+		hire_button.text = "Kese yetmiyor"
+		hire_button.disabled = true
+		hire_button.modulate = LOCKED_COLOR
+	_recruit_holder.add_child(hire_button)
+
+	var decline_button := Button.new()
+	decline_button.text = "Vazgeç"
+	decline_button.pressed.connect(_on_road_recruit_declined)
+	_recruit_holder.add_child(decline_button)
+
+func _on_road_recruit_accepted(candidate: CharacterData) -> void:
+	if _session.recruit(candidate):
+		_add_log("      %s partine katıldı." % candidate.character_name, OUTCOME_COLOR)
+	_close_recruit_offer()
+
+func _on_road_recruit_declined() -> void:
+	_add_log("      Yolcuyla yollarınız ayrıldı.")
+	_close_recruit_offer()
+
+func _close_recruit_offer() -> void:
+	_clear_children(_recruit_holder)
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+	_check_journey_end()
+
+## Bir olay savaş istediğinde Darkest Dungeon tarzı panel açılır; sonuç
+## kervana etkilerle yansır. Panel açıkken gün ilerletilemez.
+func _open_combat(danger_percent: int) -> void:
+	var danger := _session.danger_level if danger_percent <= 0 else danger_percent / 100.0
+	_set_journey_controls_enabled(false)
+	_clear_children(_combat_holder)
+
+	var panel := CombatPanel.new()
+	_combat_holder.add_child(panel)
+	panel.combat_finished.connect(_on_combat_finished)
+	panel.start_combat(_session.get_party(), danger)
+
+func _on_combat_finished(victory: bool) -> void:
+	var effects: Array[EventEffect] = []
+	if victory:
+		var loot := COMBAT_LOOT_BASE + int(round(_session.danger_level * COMBAT_LOOT_DANGER_BONUS))
+		effects.append(EventEffect.make(EventEffect.Type.GOLD, loot))
+		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_VICTORY_MORALE))
+		effects.append(EventEffect.make(EventEffect.Type.REPUTATION, COMBAT_VICTORY_REPUTATION))
+		effects.append(EventEffect.make(EventEffect.Type.DANGER, COMBAT_VICTORY_DANGER))
+	else:
+		effects.append(EventEffect.make(EventEffect.Type.GOLD, COMBAT_DEFEAT_GOLD))
+		effects.append(EventEffect.make(EventEffect.Type.WAGON_DAMAGE, COMBAT_DEFEAT_WAGON_DAMAGE))
+		effects.append(EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, COMBAT_DEFEAT_MERCHANTS))
+		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_DEFEAT_MORALE))
+
+	var result := EventEffectApplier.apply(effects, _session)
+	for line in result.lines:
+		_add_log("      %s" % line, OUTCOME_COLOR if victory else LOCKED_COLOR)
+
+	_clear_children(_combat_holder)
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+	_check_journey_end()
 
 ## Bir olay pazarlık istediğinde gerçek pazarlık paneli açılır:
 ## anlaşırsan anlaştığın fiyatı, anlaşamazsan tam bedeli ödersin.

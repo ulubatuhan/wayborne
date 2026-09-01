@@ -22,6 +22,7 @@ func _ready() -> void:
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_back_button.text = Nav.return_label()
 	_back_button.pressed.connect(_on_back_pressed)
+	_add_recruit_button(RecruitCatalog.VENUE_GUILD, Nav.GUILD)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = "Tüccar Loncası" if location == null else "%s Tüccar Loncası" % location.location_name
@@ -120,3 +121,18 @@ func _clear_children(container: Node) -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.return_scene)
+
+## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
+## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
+func _add_recruit_button(venue: String, own_scene: String) -> void:
+	var button := Button.new()
+	button.text = "Tayfa Ara"
+	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
+	var container := _back_button.get_parent()
+	container.add_child(button)
+	container.move_child(button, _back_button.get_index())
+
+func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
+	Nav.recruit_venue = venue
+	Nav.return_scene = own_scene
+	get_tree().change_scene_to_file(Nav.RECRUIT)

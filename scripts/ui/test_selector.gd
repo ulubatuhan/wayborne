@@ -12,7 +12,7 @@ extends Control
 	"economy": Nav.ECONOMY,
 	"haggling": Nav.HAGGLING,
 	"events": Nav.JOURNEY,
-	"combat": "",
+	"combat": Nav.COMBAT,
 	"city": Nav.CITY_MAP,
 	"travel": Nav.TRAVEL,
 }

@@ -41,6 +41,93 @@ func learn_route(from_location_id: String, to_location_id: String) -> void:
 func _route_key(from_location_id: String, to_location_id: String) -> String:
 	return "%s|%s" % [from_location_id, to_location_id]
 
+## Savaş partisi. party[0] her zaman oyuncunun kendi karakteridir ve
+## partiden çıkarılamaz; sıralama aynı zamanda savaştaki mevki sırasıdır.
+## Bu, vagonları süren tayfa sayısından (CaravanPlan) ayrı bir kavramdır:
+## tayfa vagon kapasitesini belirler, parti ise savaşa giren adı olan
+## kişilerdir.
+const MAX_PARTY_SIZE: int = 4
+
+var party: Array[CharacterData] = []
+
+func get_party() -> Array[CharacterData]:
+	_ensure_party()
+	return party
+
+func get_player_character() -> CharacterData:
+	_ensure_party()
+	return party[0]
+
+## Karakter oluşturma ekranı çağırır; mevcut parti sıfırlanır.
+func set_player_character(character: CharacterData) -> void:
+	party = [character]
+
+func can_recruit() -> bool:
+	_ensure_party()
+	return party.size() < MAX_PARTY_SIZE
+
+## Ücreti keseden düşüp partiye katar. Kese yetmezse ya da parti doluysa
+## false döner, hiçbir şey değişmez.
+func recruit(character: CharacterData) -> bool:
+	if not can_recruit():
+		return false
+	if not wallet.can_afford(character.hire_cost):
+		return false
+	wallet.spend(character.hire_cost)
+	character.heal_full()
+	party.append(character)
+	return true
+
+## Oyuncunun kendisi (party[0]) çıkarılamaz.
+func dismiss(character: CharacterData) -> bool:
+	var index := party.find(character)
+	if index <= 0:
+		return false
+	party.remove_at(index)
+	return true
+
+## Parti mevkilerini değiştirir; oyuncu da yer değiştirebilir (party[0]
+## olması yalnızca "çıkarılamaz" demek, "hep önde" demek değil).
+func swap_party_positions(first_index: int, second_index: int) -> bool:
+	if first_index == second_index:
+		return false
+	if first_index < 0 or second_index < 0:
+		return false
+	if first_index >= party.size() or second_index >= party.size():
+		return false
+	var temp := party[first_index]
+	party[first_index] = party[second_index]
+	party[second_index] = temp
+	return true
+
+func heal_party() -> void:
+	for character in party:
+		character.heal_full()
+
+## Kayıtsız/eski bir oturumda bile savaşa sokacak birinin bulunması için
+## varsayılan bir karakter kurar.
+func _ensure_party() -> void:
+	if party.is_empty():
+		var culture := CultureCatalog.get_cultures()[0]
+		party = [CharacterData.create(culture.name_pool[0], culture.culture_id, CharacterStats.new())]
+
+# --- Kültür perkleri: tek yerden okunur, ekranlar formülü kopyalamaz ---
+
+func get_player_culture() -> Culture:
+	return get_player_character().get_culture()
+
+func get_daily_provision_multiplier() -> float:
+	return get_player_culture().daily_provision_multiplier
+
+func get_provision_cost_multiplier() -> float:
+	return get_player_culture().provision_cost_multiplier
+
+func get_buy_price_multiplier() -> float:
+	return get_player_culture().buy_price_multiplier
+
+func get_rumor_cost_multiplier() -> float:
+	return get_player_culture().rumor_cost_multiplier
+
 ## Tüm seferler boyunca ilerleyen gün sayacı (bkz. road_journey.gd
 ## _on_advance_day). journey_days_remaining bir seferin kalan gününü
 ## sayar, bu ise hiç sıfırlanmaz - kontrat panosunun süre takibi için.
@@ -195,10 +282,43 @@ func consume_stock(item_id: String, quantity: int) -> void:
 func _restock_current_location() -> void:
 	market_stock.clear()
 	var location := WorldMapData.get_location_by_id(current_location_id)
-	if location == null:
-		return
-	for item_id in location.stock_per_item:
-		market_stock[item_id] = location.stock_per_item[item_id]
+	if location != null:
+		for item_id in location.stock_per_item:
+			market_stock[item_id] = location.stock_per_item[item_id]
+	_restock_recruits()
+
+## Şehirdeki partiye katılabilecek adaylar (mekân -> aday listesi).
+## Pazar stoğuyla aynı ritimde, her varışta bir kez tazelenir; tohum
+## şehir + gün olduğu için aynı varışta ekran kapatıp açmak listeyi
+## değiştirmez.
+var recruit_candidates: Dictionary = {}
+
+func _restock_recruits() -> void:
+	recruit_candidates.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|%d" % [current_location_id, total_days_elapsed])
+	for venue in [
+		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
+	]:
+		recruit_candidates[venue] = RecruitCatalog.build_candidates(venue, rng)
+
+func get_recruit_candidates(venue: String) -> Array[CharacterData]:
+	var candidates: Array[CharacterData] = []
+	for candidate in recruit_candidates.get(venue, []):
+		candidates.append(candidate)
+	return candidates
+
+## Adayı partiye katar ve mekânın listesinden düşürür. İtibar, kese ya da
+## parti sınırı yetmezse false döner, hiçbir şey değişmez.
+func hire_recruit(venue: String, candidate: CharacterData) -> bool:
+	if reputation < RecruitCatalog.get_venue_required_reputation(venue):
+		return false
+	if not recruit_candidates.get(venue, []).has(candidate):
+		return false
+	if not recruit(candidate):
+		return false
+	recruit_candidates[venue].erase(candidate)
+	return true
 
 func get_provisions() -> int:
 	return inventory.get_quantity(PROVISIONS_ITEM_ID)
@@ -256,6 +376,7 @@ func finish_journey() -> Dictionary:
 	danger_level = 0.0
 	caravan = CaravanState.new()
 	_restock_current_location()
+	heal_party()
 
 	return payout
 
@@ -338,6 +459,10 @@ func to_save_dict() -> Dictionary:
 		var item: Item = entry.item
 		inventory_data.append({"item_id": item.item_id, "quantity": entry.quantity})
 
+	var party_data: Array = []
+	for character in party:
+		party_data.append(character.to_dict())
+
 	return {
 		"version": SAVE_VERSION,
 		"gold": wallet.balance,
@@ -350,6 +475,7 @@ func to_save_dict() -> Dictionary:
 		"known_routes": known_routes.duplicate(),
 		"total_days_elapsed": total_days_elapsed,
 		"accepted_contracts": accepted_contracts.duplicate(),
+		"party": party_data,
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -375,6 +501,12 @@ func load_from_dict(data: Dictionary) -> void:
 	accepted_contracts = {}
 	for merchant_id in (data.get("accepted_contracts", {}) as Dictionary):
 		accepted_contracts[merchant_id] = int(data["accepted_contracts"][merchant_id])
+
+	party.clear()
+	for entry in data.get("party", []):
+		party.append(CharacterData.from_dict(entry))
+	_ensure_party()
+
 	_restock_current_location()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
@@ -392,5 +524,6 @@ func build_event_context() -> Dictionary:
 		"danger": danger_level,
 		"days_remaining": journey_days_remaining,
 		"reputation": reputation,
+		"party_size": party.size(),
 		"flags": _flags,
 	}
