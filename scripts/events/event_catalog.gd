@@ -6,20 +6,31 @@ extends RefCounted
 ## gizlenmez; oyuncu neye hazırlıksız yakalandığını görür.
 ##
 ## Şema oturduğunda bu tablo .tres kaynak dosyalarına taşınacak.
+##
+## Olaylar bir kez kurulup statik önbelleğe alınıyor: EventEngine bunları
+## yalnızca okuyor (event_id/koşul/ağırlık), hiçbir yerde mutate etmiyor -
+## bir-kez/bekleme takibi EventEngine örneğinin kendi sözlüklerinde,
+## event_id string'iyle tutuluyor. Bu yüzden aynı GameEvent nesnelerini
+## her sefer ekranı girişinde paylaşmak güvenli ve gereksiz yeniden
+## inşayı önlüyor.
+
+static var _road_events: Array[GameEvent] = []
 
 static func get_road_events() -> Array[GameEvent]:
-	var events: Array[GameEvent] = []
-	events.append(_bandit_ambush())
-	events.append(_customs_checkpoint())
-	events.append(_broken_axle())
-	events.append(_storm())
-	events.append(_spoiled_provisions())
-	events.append(_stowaway())
-	events.append(_stowaway_repay())
-	events.append(_sick_merchant())
-	events.append(_mutiny())
-	events.append(_abandoned_wagon())
-	return events
+	if not _road_events.is_empty():
+		return _road_events
+
+	_road_events.append(_bandit_ambush())
+	_road_events.append(_customs_checkpoint())
+	_road_events.append(_broken_axle())
+	_road_events.append(_storm())
+	_road_events.append(_spoiled_provisions())
+	_road_events.append(_stowaway())
+	_road_events.append(_stowaway_repay())
+	_road_events.append(_sick_merchant())
+	_road_events.append(_mutiny())
+	_road_events.append(_abandoned_wagon())
+	return _road_events
 
 static func _bandit_ambush() -> GameEvent:
 	var event := _event("evt_bandit_ambush", "EVT_AMBUSH", 1.4)
