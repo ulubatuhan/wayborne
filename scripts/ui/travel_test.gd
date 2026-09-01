@@ -10,6 +10,7 @@ const CURRENT_LOCATION_COLOR: Color = Color(1.0, 0.85, 0.4)
 const REACHABLE_COLOR: Color = Color(0.75, 0.85, 1.0)
 const UNREACHABLE_COLOR: Color = Color(0.5, 0.5, 0.5)
 
+var _session: GameSession
 var _current_location_id: String = WorldMapData.START_LOCATION_ID
 var _focused_location: Location
 
@@ -18,6 +19,8 @@ var _focused_location: Location
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	_session = GameState.get_session()
+	_current_location_id = _session.current_location_id
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
 	_show_hint()
@@ -110,7 +113,6 @@ func _on_plan_pressed() -> void:
 	_go_to_planner(_focused_location)
 
 func _go_to_planner(location: Location) -> void:
-	TravelContext.current_location_id = _current_location_id
 	TravelContext.selected_destination_id = location.location_id
 	get_tree().change_scene_to_file(CARAVAN_PLANNER_SCENE)
 

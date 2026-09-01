@@ -11,6 +11,23 @@ static func get_item(item_id: String) -> Item:
 		_build_cache()
 	return _cache.get(item_id)
 
+## Şehir pazarında alınıp satılabilen mallar, sabit sırayla.
+static func get_trade_goods() -> Array[Item]:
+	var ids := [
+		GameSession.PROVISIONS_ITEM_ID,
+		"test_grain",
+		"test_cloth",
+		"test_weapon",
+		"test_potion",
+		"test_furs",
+	]
+	var items: Array[Item] = []
+	for item_id in ids:
+		var item := get_item(item_id)
+		if item != null:
+			items.append(item)
+	return items
+
 static func get_all_items() -> Array[Item]:
 	if _cache.is_empty():
 		_build_cache()

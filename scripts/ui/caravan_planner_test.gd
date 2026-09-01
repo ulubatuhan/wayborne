@@ -1,52 +1,58 @@
 extends Control
 
+## Kervan planlayıcı. Erzağı gerçek envanterden okur, eksiği cüzdandan
+## satın aldırır ve onaylandığında kervanı gerçekten yola çıkarır.
+
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const TRAVEL_SCENE: String = "res://scenes/tests/travel_test.tscn"
-
-const PROVISIONS_ITEM_ID: String = "test_provisions"
-const PROVISIONS_ITEM_NAME: String = "Test Erzak"
-const PROVISIONS_UNIT_PRICE: int = 4
-const STARTING_PROVISIONS: int = 6
+const JOURNEY_SCENE: String = "res://scenes/tests/event_test.tscn"
 
 const SHORTFALL_COLOR: Color = Color(0.9, 0.45, 0.35)
 const SATISFIED_COLOR: Color = Color(0.45, 0.8, 0.45)
 
+var _session: GameSession
 var _plan: CaravanPlan
-var _inventory: Inventory
-var _provisions_item: Item
+var _destination: Location
+var _route_danger: float = 0.0
 var _offer_rows: Array[Dictionary] = []
 
 var _wagon_counter_label: Label
+var _gold_label: Label
 var _party_label: Label
 var _documents_label: Label
 var _required_provisions_label: Label
 var _current_provisions_label: Label
 var _shortfall_label: Label
 var _profit_label: Label
-var _result_label: Label
+var _buy_provisions_button: Button
 var _confirm_button: Button
+var _result_label: Label
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
-	var destination := WorldMapData.get_location_by_id(TravelContext.selected_destination_id)
-	var origin := WorldMapData.get_location_by_id(TravelContext.current_location_id)
+	_session = GameState.get_session()
 
-	if destination == null or origin == null:
+	_destination = WorldMapData.get_location_by_id(TravelContext.selected_destination_id)
+	var origin := WorldMapData.get_location_by_id(_session.current_location_id)
+
+	if _destination == null or origin == null:
 		_build_missing_context_ui()
 		return
 
-	var route := WorldMapData.get_route(origin.location_id, destination.location_id)
+	var route := WorldMapData.get_route(origin.location_id, _destination.location_id)
 	var travel_days: int = 1
 	if route != null:
 		travel_days = route.travel_days
+		_route_danger = route.danger_level
 
-	_plan = CaravanPlan.new(destination, travel_days)
-	_inventory = Inventory.new()
-	_provisions_item = _build_provisions_item()
-	_set_inventory_provisions(STARTING_PROVISIONS)
+	_plan = CaravanPlan.new(_destination, travel_days)
 
-	_build_ui(origin, destination, travel_days)
+	_session.wallet.balance_changed.connect(_on_wallet_changed)
+	_session.inventory.item_added.connect(_on_inventory_changed)
+	_session.inventory.item_removed.connect(_on_inventory_changed)
+
+	_build_ui(origin, _destination, travel_days)
 	_refresh()
 
 func _build_missing_context_ui() -> void:
@@ -66,8 +72,15 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(title)
 
 	var route_label := Label.new()
-	route_label.text = "Yol: %d gün · Vagon limiti: %d (1'i senin)" % [travel_days, _plan.max_wagons]
+	route_label.text = "Yol: %d gün · Tehlike: %d%% · Vagon limiti: %d (1'i senin)" % [
+		travel_days,
+		int(_route_danger * 100.0),
+		_plan.max_wagons,
+	]
 	_content.add_child(route_label)
+
+	_gold_label = Label.new()
+	_content.add_child(_gold_label)
 
 	_wagon_counter_label = Label.new()
 	_content.add_child(_wagon_counter_label)
@@ -80,26 +93,6 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 
 	for offer in WorldMapData.get_offers_for_destination(destination.location_id):
 		_content.add_child(_build_offer_row(offer))
-
-	_content.add_child(HSeparator.new())
-
-	var provisions_title := Label.new()
-	provisions_title.text = "Erzak (envanterden)"
-	_content.add_child(provisions_title)
-
-	var provisions_row := HBoxContainer.new()
-	var provisions_spin_label := Label.new()
-	provisions_spin_label.text = "Envanterdeki erzak:"
-	provisions_spin_label.custom_minimum_size = Vector2(180, 0)
-	var provisions_spin := SpinBox.new()
-	provisions_spin.min_value = 0
-	provisions_spin.max_value = 200
-	provisions_spin.step = 1
-	provisions_spin.value = STARTING_PROVISIONS
-	provisions_spin.value_changed.connect(_on_provisions_changed)
-	provisions_row.add_child(provisions_spin_label)
-	provisions_row.add_child(provisions_spin)
-	_content.add_child(provisions_row)
 
 	_content.add_child(HSeparator.new())
 
@@ -120,8 +113,12 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(_shortfall_label)
 	_content.add_child(_profit_label)
 
+	_buy_provisions_button = Button.new()
+	_buy_provisions_button.pressed.connect(_on_buy_provisions_pressed)
+	_content.add_child(_buy_provisions_button)
+
 	_confirm_button = Button.new()
-	_confirm_button.text = "Kervanı Onayla"
+	_confirm_button.text = "Kervanı Onayla ve Yola Çık"
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_content.add_child(_confirm_button)
 
@@ -173,11 +170,26 @@ func _on_offer_toggled(_toggled_on: bool, offer: MerchantOffer, checkbox: CheckB
 		checkbox.set_pressed_no_signal(false)
 	_refresh()
 
-func _on_provisions_changed(value: float) -> void:
-	_set_inventory_provisions(int(value))
+func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh()
 
+func _on_inventory_changed(_item: Item, _quantity: int) -> void:
+	_refresh()
+
+func _on_buy_provisions_pressed() -> void:
+	var shortfall := _plan.get_provisions_shortfall(_session.get_provisions())
+	if shortfall <= 0:
+		return
+
+	var cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
+	if not _session.wallet.can_afford(cost):
+		return
+
+	_session.wallet.spend(cost)
+	_session.change_provisions(shortfall)
+
 func _refresh() -> void:
+	_gold_label.text = "Kese: %d GG" % _session.wallet.balance
 	_wagon_counter_label.text = "Vagon: %d / %d (tüccarlara açık slot)" % [
 		_plan.get_used_wagon_count(),
 		_plan.get_available_wagon_slots(),
@@ -188,7 +200,7 @@ func _refresh() -> void:
 		var checkbox: CheckBox = row.checkbox
 		checkbox.disabled = not _plan.is_selected(offer) and not _plan.can_add_offer(offer)
 
-	var current_provisions := _inventory.get_quantity(PROVISIONS_ITEM_ID)
+	var current_provisions := _session.get_provisions()
 	var required_provisions := _plan.get_required_provisions()
 	var shortfall := _plan.get_provisions_shortfall(current_provisions)
 
@@ -198,45 +210,38 @@ func _refresh() -> void:
 	]
 	_documents_label.text = "Gerekli evrak: %d adet (vagon başına 1)" % _plan.get_required_documents()
 	_required_provisions_label.text = "Gerekli erzak: %d birim" % required_provisions
-	_current_provisions_label.text = "Elindeki erzak: %d birim" % current_provisions
+	_current_provisions_label.text = "Envanterdeki erzak: %d birim" % current_provisions
 
+	var shortfall_cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
 	if shortfall > 0:
-		_shortfall_label.text = "Satın alınacak erzak: %d birim (≈ %d GG)" % [
-			shortfall,
-			shortfall * PROVISIONS_UNIT_PRICE,
-		]
+		_shortfall_label.text = "Eksik erzak: %d birim (%d GG)" % [shortfall, shortfall_cost]
 		_shortfall_label.modulate = SHORTFALL_COLOR
+		_buy_provisions_button.visible = true
+		_buy_provisions_button.text = "Eksik erzağı satın al (%d GG)" % shortfall_cost
+		_buy_provisions_button.disabled = not _session.wallet.can_afford(shortfall_cost)
+		_confirm_button.disabled = true
+		_confirm_button.text = "Erzak yetersiz — yola çıkılamaz"
 	else:
-		_shortfall_label.text = "Erzak yeterli, satın alma gerekmiyor."
+		_shortfall_label.text = "Erzak yeterli, sefere hazırsın."
 		_shortfall_label.modulate = SATISFIED_COLOR
+		_buy_provisions_button.visible = false
+		_confirm_button.disabled = false
+		_confirm_button.text = "Kervanı Onayla ve Yola Çık"
 
 	_profit_label.text = "Toplam potansiyel getiri: %d GG" % _plan.get_total_profit()
 
 func _on_confirm_pressed() -> void:
-	var current_provisions := _inventory.get_quantity(PROVISIONS_ITEM_ID)
-	var shortfall := _plan.get_provisions_shortfall(current_provisions)
+	if _plan.get_provisions_shortfall(_session.get_provisions()) > 0:
+		return
 
-	_result_label.text = "Kervan onaylandı: %d tüccar, %d vagon, %d evrak, %d birim erzak eksiği. Beklenen getiri: %d GG." % [
-		_plan.get_selected_offers().size(),
-		_plan.get_total_wagon_count(),
-		_plan.get_required_documents(),
-		shortfall,
-		_plan.get_total_profit(),
-	]
-
-func _build_provisions_item() -> Item:
-	var item := Item.new()
-	item.item_id = PROVISIONS_ITEM_ID
-	item.item_name = PROVISIONS_ITEM_NAME
-	item.base_price = PROVISIONS_UNIT_PRICE
-	return item
-
-func _set_inventory_provisions(amount: int) -> void:
-	var current := _inventory.get_quantity(PROVISIONS_ITEM_ID)
-	if current > 0:
-		_inventory.remove_item(PROVISIONS_ITEM_ID, current)
-	if amount > 0:
-		_inventory.add_item(_provisions_item, amount)
+	_session.start_journey(
+		_destination.location_id,
+		_plan.travel_days,
+		_route_danger,
+		_plan
+	)
+	EventBus.caravan_changed.emit()
+	get_tree().change_scene_to_file(JOURNEY_SCENE)
 
 func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file(TRAVEL_SCENE)

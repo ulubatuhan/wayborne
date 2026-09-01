@@ -1,7 +1,9 @@
 extends Control
 
+## Şehir pazarı. Kalıcı oturumun cüzdanı ve envanteri üzerinde çalışır:
+## burada aldığın erzak, sefere çıkarken kervan planlayıcıda görünür.
+
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-const STARTING_BALANCE: int = 100
 const GRID_COLUMNS: int = 5
 const GRID_ROWS: int = 4
 const SLOT_SIZE: Vector2 = Vector2(80, 80)
@@ -9,8 +11,7 @@ const EMPTY_SLOT_COLOR: Color = Color(0.2, 0.2, 0.2)
 const FILLED_SLOT_COLOR: Color = Color(0.3, 0.5, 0.3)
 const SELL_PRICE_MULTIPLIER: float = 0.5
 
-var _wallet: Wallet
-var _inventory: Inventory
+var _session: GameSession
 var _shop_items: Array[Item] = []
 
 @onready var _balance_value_label: Label = $MarginContainer/VBoxContainer/BalanceRow/BalanceValueLabel
@@ -19,36 +20,18 @@ var _shop_items: Array[Item] = []
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
-	_wallet = Wallet.new(STARTING_BALANCE)
-	_inventory = Inventory.new(GRID_COLUMNS * GRID_ROWS)
+	_session = GameState.get_session()
 	_inventory_grid.columns = GRID_COLUMNS
+	_shop_items = ItemCatalog.get_trade_goods()
 
-	_shop_items = _build_shop_items()
-	_inventory.add_item(_shop_items[0], 3)
-
-	_wallet.balance_changed.connect(_on_wallet_balance_changed)
-	_inventory.item_added.connect(_on_inventory_changed)
-	_inventory.item_removed.connect(_on_inventory_changed)
+	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
+	_session.inventory.item_added.connect(_on_inventory_changed)
+	_session.inventory.item_removed.connect(_on_inventory_changed)
 	_back_button.pressed.connect(_on_back_pressed)
 
 	_build_shop_rows()
 	_refresh_balance_label()
 	_refresh_inventory_grid()
-
-func _build_shop_items() -> Array[Item]:
-	return [
-		_make_item("test_grain", "Test Tahıl", 5),
-		_make_item("test_cloth", "Test Kumaş", 12),
-		_make_item("test_weapon", "Test Silah", 40),
-		_make_item("test_potion", "Test İksir", 20),
-	]
-
-func _make_item(item_id: String, item_name: String, price: int) -> Item:
-	var item := Item.new()
-	item.item_id = item_id
-	item.item_name = item_name
-	item.base_price = price
-	return item
 
 func _build_shop_rows() -> void:
 	for item in _shop_items:
@@ -86,17 +69,17 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	return row
 
 func _on_buy_pressed(item: Item) -> void:
-	if not _wallet.can_afford(item.base_price):
+	if not _session.wallet.can_afford(item.base_price):
 		return
-	if not _inventory.add_item(item, 1):
+	if not _session.inventory.add_item(item, 1):
 		return
-	_wallet.spend(item.base_price)
+	_session.wallet.spend(item.base_price)
 
 func _on_sell_pressed(item: Item) -> void:
-	if not _inventory.has_item(item.item_id, 1):
+	if not _session.inventory.has_item(item.item_id, 1):
 		return
-	_inventory.remove_item(item.item_id, 1)
-	_wallet.earn(_get_sell_price(item))
+	_session.inventory.remove_item(item.item_id, 1)
+	_session.wallet.earn(_get_sell_price(item))
 
 func _get_sell_price(item: Item) -> int:
 	return int(item.base_price * SELL_PRICE_MULTIPLIER)
@@ -108,13 +91,14 @@ func _on_inventory_changed(_item: Item, _quantity: int) -> void:
 	_refresh_inventory_grid()
 
 func _refresh_balance_label() -> void:
-	_balance_value_label.text = "%d GG" % _wallet.balance
+	_balance_value_label.text = "%d GG" % _session.wallet.balance
 
 func _refresh_inventory_grid() -> void:
 	for child in _inventory_grid.get_children():
+		_inventory_grid.remove_child(child)
 		child.queue_free()
 
-	var entries := _inventory.get_all_entries()
+	var entries := _session.inventory.get_all_entries()
 	var total_slots := GRID_COLUMNS * GRID_ROWS
 
 	for i in range(total_slots):

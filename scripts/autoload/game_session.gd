@@ -13,7 +13,15 @@ var wallet: Wallet
 var inventory: Inventory
 var caravan: CaravanState
 
+## Kervanın şu an bulunduğu şehir.
+var current_location_id: String = WorldMapData.START_LOCATION_ID
+
+## Aktif sefer. journey_destination_id boşsa yolda değiliz.
+var journey_origin_id: String = ""
+var journey_destination_id: String = ""
+var journey_total_days: int = 0
 var journey_days_remaining: int = 0
+
 var danger_level: float = 0.0
 var reputation: int = 0
 
@@ -55,6 +63,30 @@ func set_flag(flag: String) -> void:
 
 func clear_flag(flag: String) -> void:
 	_flags.erase(flag)
+
+# --- Sefer ---
+
+func is_journey_active() -> bool:
+	return not journey_destination_id.is_empty()
+
+## Planlayıcıda onaylanan kervanı yola çıkarır.
+func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan) -> void:
+	journey_origin_id = current_location_id
+	journey_destination_id = destination_id
+	journey_total_days = maxi(1, days)
+	journey_days_remaining = journey_total_days
+	danger_level = danger
+	caravan = CaravanState.from_plan(plan)
+
+## Hedefe varıldığında çağrılır: konum güncellenir, sefer temizlenir.
+func finish_journey() -> void:
+	if not journey_destination_id.is_empty():
+		current_location_id = journey_destination_id
+	journey_origin_id = ""
+	journey_destination_id = ""
+	journey_total_days = 0
+	journey_days_remaining = 0
+	danger_level = 0.0
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.

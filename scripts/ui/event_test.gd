@@ -1,33 +1,47 @@
 extends Control
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+## Sefer ekranı. Kervan planlayıcıdan gerçek bir seferle gelindiğinde
+## kalıcı oturumu yürütür; test menüsünden doğrudan açıldığında kendi
+## geçici seferini kurar, böylece gerçek kaydı kirletmez.
 
-const STARTING_JOURNEY_DAYS: int = 8
-const STARTING_DANGER: float = 0.4
-const STARTING_WAGONS: int = 4
-const STARTING_MERCHANTS: Array = ["Test Tüccar 1", "Test Tüccar 2", "Test Tüccar 3"]
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const TRAVEL_SCENE: String = "res://scenes/tests/travel_test.tscn"
+
+const SYNTHETIC_JOURNEY_DAYS: int = 8
+const SYNTHETIC_DANGER: float = 0.4
+const SYNTHETIC_WAGONS: int = 4
+const SYNTHETIC_MERCHANTS: Array = ["Test Tüccar 1", "Test Tüccar 2", "Test Tüccar 3"]
 
 const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
 const IMMEDIATE_COLOR: Color = Color(0.95, 0.8, 0.45)
 const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 
+## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
+const HAGGLE_FAIL_MORALE: int = -8
+const HAGGLE_DRAIN_RATE: float = 25.0
+
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
 var _current_day: int = 0
+var _is_live_journey: bool = false
+var _pending_haggle_max: int = 0
 
 var _seed_spin: SpinBox
 var _state_label: Label
 var _card_panel: VBoxContainer
+var _haggle_holder: VBoxContainer
 var _log_list: VBoxContainer
 var _advance_button: Button
 var _draw_button: Button
+var _reset_button: Button
+var _arrive_button: Button
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
 	_build_ui()
-	_start_new_journey()
+	_init_journey()
 
 func _build_ui() -> void:
 	var title := Label.new()
@@ -49,10 +63,10 @@ func _build_ui() -> void:
 	_seed_spin.value = 1234
 	controls_row.add_child(_seed_spin)
 
-	var reset_button := Button.new()
-	reset_button.text = tr("EVT_TEST_RESET")
-	reset_button.pressed.connect(_start_new_journey)
-	controls_row.add_child(reset_button)
+	_reset_button = Button.new()
+	_reset_button.text = tr("EVT_TEST_RESET")
+	_reset_button.pressed.connect(_on_reset_pressed)
+	controls_row.add_child(_reset_button)
 
 	_advance_button = Button.new()
 	_advance_button.text = tr("EVT_TEST_ADVANCE")
@@ -81,6 +95,15 @@ func _build_ui() -> void:
 	_card_panel.add_theme_constant_override("separation", 6)
 	_content.add_child(_card_panel)
 
+	_haggle_holder = VBoxContainer.new()
+	_content.add_child(_haggle_holder)
+
+	_arrive_button = Button.new()
+	_arrive_button.text = "Şehre Var"
+	_arrive_button.visible = false
+	_arrive_button.pressed.connect(_on_arrive_pressed)
+	_content.add_child(_arrive_button)
+
 	_content.add_child(HSeparator.new())
 
 	var log_title := Label.new()
@@ -95,29 +118,61 @@ func _build_ui() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	_content.add_child(back_button)
 
-func _start_new_journey() -> void:
+func _init_journey() -> void:
+	var live_session: GameSession = GameState.get_session()
+
+	if live_session.is_journey_active():
+		_is_live_journey = true
+		_session = live_session
+		_current_day = maxi(0, _session.journey_total_days - _session.journey_days_remaining)
+		_reset_button.visible = false
+		_seed_spin.editable = false
+	else:
+		_is_live_journey = false
+		_start_synthetic_journey()
+
+	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
+	_current_event = null
+	_clear_children(_card_panel)
+	_clear_children(_haggle_holder)
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+
+	if _is_live_journey:
+		var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+		var destination_name := "?" if destination == null else destination.location_name
+		_add_log("%s yolundasın: %d gün, tehlike %d%%." % [
+			destination_name,
+			_session.journey_days_remaining,
+			int(_session.danger_level * 100.0),
+		])
+	else:
+		_add_log("Deneme seferi: %d gün yol, tehlike %d%%." % [
+			_session.journey_days_remaining,
+			int(_session.danger_level * 100.0),
+		])
+
+func _start_synthetic_journey() -> void:
 	_session = GameSession.new()
-	_session.journey_days_remaining = STARTING_JOURNEY_DAYS
-	_session.danger_level = STARTING_DANGER
-	_session.caravan.wagon_count = STARTING_WAGONS
-	_session.caravan.documents = STARTING_WAGONS
+	_session.journey_destination_id = WorldMapData.START_LOCATION_ID
+	_session.journey_total_days = SYNTHETIC_JOURNEY_DAYS
+	_session.journey_days_remaining = SYNTHETIC_JOURNEY_DAYS
+	_session.danger_level = SYNTHETIC_DANGER
+	_session.caravan.wagon_count = SYNTHETIC_WAGONS
+	_session.caravan.documents = SYNTHETIC_WAGONS
+
 	var merchants: Array[String] = []
-	for merchant_name in STARTING_MERCHANTS:
+	for merchant_name in SYNTHETIC_MERCHANTS:
 		merchants.append(merchant_name)
 	_session.caravan.merchant_names = merchants
 
-	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
 	_current_day = 0
-	_current_event = null
 
+func _on_reset_pressed() -> void:
+	if _is_live_journey:
+		return
 	_clear_children(_log_list)
-	_clear_children(_card_panel)
-	_set_journey_controls_enabled(true)
-	_refresh_state()
-	_add_log("Sefer başladı: %d gün yol, tehlike %d%%." % [
-		_session.journey_days_remaining,
-		int(_session.danger_level * 100.0),
-	])
+	_init_journey()
 
 func _on_advance_day() -> void:
 	if _current_event != null:
@@ -125,6 +180,7 @@ func _on_advance_day() -> void:
 
 	_current_day += 1
 	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
+
 	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
 	var daily_consumption := 1 + _session.caravan.merchant_names.size()
 	_session.change_provisions(-daily_consumption)
@@ -222,22 +278,71 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 
 	EventBus.road_event_resolved.emit(resolved_event, choice)
 	_refresh_state()
-
-	if _session.journey_days_remaining <= 0:
-		_finish_journey()
+	_check_journey_end()
 
 func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 	for event_id in result.unlocked_event_ids:
 		_engine.unlock_event(event_id)
 		_add_log("      (yeni olay açıldı)")
-	for max_price in result.haggling_requests:
-		# Pazarlık köprüsü henüz bağlı değil; şimdilik günlüğe düşülüyor.
-		_add_log("      (pazarlık isteği: tavan %d GG)" % max_price)
+
+	if not result.haggling_requests.is_empty():
+		_open_haggling(int(result.haggling_requests[0]))
+
+## Bir olay pazarlık istediğinde gerçek pazarlık paneli açılır:
+## anlaşırsan anlaştığın fiyatı, anlaşamazsan tam bedeli ödersin.
+func _open_haggling(max_price: int) -> void:
+	_pending_haggle_max = max_price
+	_set_journey_controls_enabled(false)
+	_clear_children(_haggle_holder)
+
+	var intro := Label.new()
+	intro.text = "Pazarlık: karşı taraf %d GG istiyor." % max_price
+	_haggle_holder.add_child(intro)
+
+	var panel := HagglingPanel.new()
+	_haggle_holder.add_child(panel)
+	panel.deal_made.connect(_on_haggle_deal)
+	panel.haggling_failed.connect(_on_haggle_failed)
+	panel.start_haggling(float(max_price), 0.5, 0.3, 0, 0, HAGGLE_DRAIN_RATE, false)
+
+func _on_haggle_deal(price: int) -> void:
+	var paid := mini(price, _session.wallet.balance)
+	if paid > 0:
+		_session.wallet.spend(paid)
+	_add_log("      Pazarlık tuttu: %d GG ödendi." % paid, OUTCOME_COLOR)
+	_close_haggling()
+
+func _on_haggle_failed() -> void:
+	var paid := mini(_pending_haggle_max, _session.wallet.balance)
+	if paid > 0:
+		_session.wallet.spend(paid)
+	_session.caravan.change_morale(HAGGLE_FAIL_MORALE)
+	_add_log("      Pazarlık koptu: tam bedel %d GG ödendi." % paid)
+	_close_haggling()
+
+func _close_haggling() -> void:
+	_clear_children(_haggle_holder)
+	_pending_haggle_max = 0
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+	_check_journey_end()
+
+func _check_journey_end() -> void:
+	if _session.journey_days_remaining <= 0 and _current_event == null:
+		_finish_journey()
 
 func _finish_journey() -> void:
 	_set_journey_controls_enabled(false)
 	_add_log("Sefer tamamlandı. %d gün sürdü." % _current_day)
 	EventBus.journey_finished.emit(_current_day)
+
+	if _is_live_journey:
+		_arrive_button.visible = true
+
+func _on_arrive_pressed() -> void:
+	_session.finish_journey()
+	EventBus.caravan_changed.emit()
+	get_tree().change_scene_to_file(TRAVEL_SCENE)
 
 func _set_journey_controls_enabled(enabled: bool) -> void:
 	_advance_button.disabled = not enabled
