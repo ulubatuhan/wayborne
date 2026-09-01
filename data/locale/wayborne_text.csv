@@ -2,7 +2,7 @@ keys,tr,en
 UI_LANGUAGE,"Dil","Language"
 UI_PLAY,"Oyna","Play"
 UI_BACK_TO_MENU,"Ana Menüye Dön","Back to Main Menu"
-EVT_TEST_TITLE,"Event Engine Testi","Event Engine Test"
+EVT_TEST_TITLE,"Kervan Seferi","Caravan Journey"
 EVT_TEST_DRAW,"Olay Çek","Draw Event"
 EVT_TEST_ADVANCE,"Bir Gün İlerle","Advance One Day"
 EVT_TEST_RESET,"Seferi Sıfırla","Reset Journey"

@@ -1,13 +1,15 @@
 extends Control
 
 ## Sefer ekranı. Kervan planlayıcıdan gerçek bir seferle gelindiğinde
-## kalıcı oturumu yürütür; test menüsünden doğrudan açıldığında kendi
-## geçici seferini kurar, böylece gerçek kaydı kirletmez.
-
+## kalıcı oturumu yürütür. Sentetik (sahte) sefer yalnızca F1 geliştirici
+## panelinden doğrudan açıldığında kurulur - normal oyun akışında bu
+## ekrana her zaman start_journey() çağırmış bir oturumla girilir, bu
+## yüzden ek bir "dev girişi" bayrağına gerek yok: is_journey_active()
+## zaten aynı ayrımı yapıyor.
 const SYNTHETIC_JOURNEY_DAYS: int = 8
 const SYNTHETIC_DANGER: float = 0.4
 const SYNTHETIC_WAGONS: int = 4
-const SYNTHETIC_MERCHANTS: Array = ["Test Tüccar 1", "Test Tüccar 2", "Test Tüccar 3"]
+const SYNTHETIC_MERCHANTS: Array = ["Deneme Tüccarı 1", "Deneme Tüccarı 2", "Deneme Tüccarı 3"]
 
 const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
 const IMMEDIATE_COLOR: Color = Color(0.95, 0.8, 0.45)

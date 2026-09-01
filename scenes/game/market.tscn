@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://bqecontest003"]
 
-[ext_resource type="Script" path="res://scripts/ui/economy_test.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/market.gd" id="1"]
 
-[node name="EconomyTest" type="Control"]
+[node name="Market" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,7 +29,7 @@ theme_override_constants/separation = 16
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Ekonomi / Envanter Testi"
+text = "Pazar"
 horizontal_alignment = 1
 
 [node name="LocationNoteLabel" type="Label" parent="MarginContainer/VBoxContainer"]

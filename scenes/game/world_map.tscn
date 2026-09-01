@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://bqtraveltest005"]
 
-[ext_resource type="Script" path="res://scripts/ui/travel_test.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/world_map.gd" id="1"]
 
-[node name="TravelTest" type="Control"]
+[node name="WorldMap" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,7 +29,7 @@ theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Harita / Seyahat Testi"
+text = "Harita"
 horizontal_alignment = 1
 
 [node name="ContentRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]

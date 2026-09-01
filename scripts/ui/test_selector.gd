@@ -1,5 +1,11 @@
 extends Control
 
+## Geliştirici menüsü. DevPanel autoload'u tarafından oyun başında bir kez
+## kurulup gizlenir, F1 ile açılıp kapanır - normal oyun akışının bir
+## parçası değildir, bu yüzden Nav.return_scene'e hiç dokunmaz: bir
+## ekrana geçersen o ekranın geri tuşu seni buraya değil, paneli açtığın
+## yere döndürür.
+
 # Bir sistemi test edilebilir hale getirmek için burada boş string yerine
 # ilgili sahnenin yolunu yazmak yeterli.
 @onready var _test_scenes: Dictionary = {
@@ -20,13 +26,9 @@ extends Control
 	"travel": $VBoxContainer/TravelButton,
 }
 
-@onready var _back_button: Button = $VBoxContainer/BackButton
+@onready var _close_button: Button = $VBoxContainer/BackButton
 
 func _ready() -> void:
-	# Seçiciye hangi ekrandan gelindiyse geri tuşu oraya dönmeli.
-	Nav.selector_return_scene = Nav.return_scene
-	Nav.return_scene = Nav.TEST_SELECTOR
-
 	for key in _buttons:
 		var scene_path: String = _test_scenes[key]
 		var button: Button = _buttons[key]
@@ -34,12 +36,11 @@ func _ready() -> void:
 		if not scene_path.is_empty():
 			button.pressed.connect(_on_test_button_pressed.bind(scene_path))
 
-	_back_button.text = Nav.label_for(Nav.selector_return_scene)
-	_back_button.pressed.connect(_on_back_pressed)
+	_close_button.pressed.connect(_on_close_pressed)
 
 func _on_test_button_pressed(scene_path: String) -> void:
+	DevPanel.hide_panel()
 	get_tree().change_scene_to_file(scene_path)
 
-func _on_back_pressed() -> void:
-	Nav.return_scene = Nav.selector_return_scene
-	get_tree().change_scene_to_file(Nav.selector_return_scene)
+func _on_close_pressed() -> void:
+	DevPanel.hide_panel()

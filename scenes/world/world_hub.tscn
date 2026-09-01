@@ -48,5 +48,5 @@ theme_override_constants/margin_bottom = 12
 
 [node name="HintLabel" type="Label" parent="HUD/HintBar"]
 layout_mode = 2
-text = "A / D ya da ok tuşları ile yürü · tabelaya tıkla veya E"
+text = "A / D ya da ok tuşları ile yürü · vagona veya şehir kapısına yaklaşıp tıkla ya da E · F1: geliştirici menüsü"
 horizontal_alignment = 1

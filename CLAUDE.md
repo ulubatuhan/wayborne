@@ -105,6 +105,10 @@ wayborne/
   - `GameSession` (plain RefCounted): wallet, inventory, caravan, flags,
     reputation, journey — instantiable in tests without touching the autoload
   - `EventBus` (registered autoload): cross-system signals only
+  - `DevPanel` (registered autoload): F1 geliştirici menüsü. `test_selector.tscn`'i
+    çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
+    kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
+    ekranın geri tuşu paneli açtığın yere döner, panele değil.
   - AudioManager, SaveManager (planned)
 
 **Autoload rule:** never reference a `class_name` inside an autoload script —

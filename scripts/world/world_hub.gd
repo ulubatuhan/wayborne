@@ -1,8 +1,10 @@
 extends Node2D
 
 ## Yan görünüşlü 2D alan: kervan liderini sağa sola yürütür, vagon peşinden
-## gelir. Yol üstündeki tabelalara ve vagona yaklaşıp tıklayarak ilgili
-## ekranlara geçilir. Fizik yok - düz bir şerit üzerinde konum aritmetiği.
+## gelir. Vagona ve şehir kapısına yaklaşıp tıklayarak ilgili ekranlara
+## geçilir. Fizik yok - düz bir şerit üzerinde konum aritmetiği.
+## Geliştirici test menüsü artık yolun içinde değil, F1 ile her yerden
+## açılan bir overlay (bkz. scripts/autoload/dev_panel.gd).
 
 const GROUND_Y: float = 430.0
 const WORLD_MIN_X: float = -160.0
@@ -19,7 +21,6 @@ const SKY_COLOR: Color = Color(0.42, 0.52, 0.62)
 const GROUND_COLOR: Color = Color(0.35, 0.31, 0.24)
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const WAGON_COLOR: Color = Color(0.55, 0.38, 0.22)
-const SIGN_COLOR: Color = Color(0.72, 0.60, 0.30)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
 const PROMPT_COLOR: Color = Color(1.0, 0.9, 0.5)
 
@@ -95,14 +96,6 @@ func _build_scenery() -> void:
 		add_child(marker)
 
 func _build_spots() -> void:
-	_add_spot(
-		"Test Alanı Tabelası",
-		Vector2(760.0, GROUND_Y - 150.0),
-		Vector2(120.0, 150.0),
-		SIGN_COLOR,
-		Nav.TEST_SELECTOR,
-		Nav.WORLD_HUB
-	)
 	_add_spot(
 		"Şehir Kapısı",
 		Vector2(1720.0, GROUND_Y - 230.0),
