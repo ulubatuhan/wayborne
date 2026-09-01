@@ -42,7 +42,9 @@ func _ready() -> void:
 		travel_days = route.travel_days
 		_route_danger = route.danger_level
 
-	_plan = CaravanPlan.new(_destination, travel_days)
+	_plan = CaravanPlan.new(
+		_destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_count
+	)
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_session.inventory.item_added.connect(_on_inventory_changed)
@@ -68,10 +70,11 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(title)
 
 	var route_label := Label.new()
-	route_label.text = "Yol: %d gün · Tehlike: %d%% · Vagon limiti: %d (1'i senin)" % [
+	route_label.text = "Yol: %d gün · Tehlike: %d%% · Vagon limiti: %d (%d'si senin)" % [
 		travel_days,
 		int(_route_danger * 100.0),
 		_plan.max_wagons,
+		_plan.player_wagon_count,
 	]
 	_content.add_child(route_label)
 

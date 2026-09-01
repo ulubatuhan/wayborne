@@ -21,10 +21,14 @@ func _ready() -> void:
 func _refresh_title() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	var city_name := "Şehir" if location == null else location.location_name
-	_title_label.text = "%s · Kese: %d GG · Erzak: %d" % [
+	var wagon_note := "%d vagon" % _session.owned_wagon_count
+	if _session.owned_wagon_damaged > 0:
+		wagon_note += " (%d hasarlı)" % _session.owned_wagon_damaged
+	_title_label.text = "%s · Kese: %d GG · Erzak: %d · %s" % [
 		city_name,
 		_session.wallet.balance,
 		_session.get_provisions(),
+		wagon_note,
 	]
 
 func _build_spots() -> void:

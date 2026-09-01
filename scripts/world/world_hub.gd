@@ -246,7 +246,7 @@ func _refresh_status() -> void:
 		location_name,
 		session.wallet.balance,
 		session.get_provisions(),
-		session.caravan.wagon_count,
+		session.owned_wagon_count,
 	]
 
 func _on_menu_pressed() -> void:

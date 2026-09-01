@@ -41,6 +41,25 @@ text = "Devam Et"
 layout_mode = 2
 text = "Yeni Oyun"
 
+[node name="PartyRow" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="PartyLabel" type="Label" parent="VBoxContainer/PartyRow"]
+layout_mode = 2
+text = "Parti Büyüklüğü"
+
+[node name="PartySizeSpin" type="SpinBox" parent="VBoxContainer/PartyRow"]
+layout_mode = 2
+min_value = 1
+max_value = 12
+value = 4
+
+[node name="PartyWagonLabel" type="Label" parent="VBoxContainer/PartyRow"]
+layout_mode = 2
+text = "→ 2 vagon"
+
 [node name="LanguageRow" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 alignment = 1

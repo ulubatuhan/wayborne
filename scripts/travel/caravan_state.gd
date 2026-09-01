@@ -17,9 +17,17 @@ var documents: int = 0
 ## kervandan ayrılırsa merchant_names'ten düşer ve ücreti ödenmez.
 var merchant_profit_by_name: Dictionary = {}
 
+## Sefer başındaki anlık görüntü: kayıp/hasarı GameSession.finish_journey()
+## oyuncunun kalıcı sahipliğine adil paylaştırabilsin diye tutulur -
+## escort vagonları önce gider, oyuncunun kendi vagonu en son.
+var wagons_at_start: int = MIN_WAGONS
+var player_wagon_count_at_start: int = MIN_WAGONS
+
 static func from_plan(plan: CaravanPlan) -> CaravanState:
 	var state := CaravanState.new()
 	state.wagon_count = plan.get_total_wagon_count()
+	state.wagons_at_start = state.wagon_count
+	state.player_wagon_count_at_start = plan.player_wagon_count
 	state.documents = plan.get_required_documents()
 	for offer in plan.get_selected_offers():
 		state.merchant_names.append(offer.merchant_name)

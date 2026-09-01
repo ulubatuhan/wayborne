@@ -25,6 +25,13 @@ var journey_days_remaining: int = 0
 var danger_level: float = 0.0
 var reputation: int = 0
 
+## Oyuncunun kalıcı olarak sahip olduğu vagon sayısı ve bunların kaç
+## tanesinin hasarlı olduğu. Şehirdeyken geçerli olan bu; sefer sırasında
+## CaravanState.wagon_count (escort dahil havuz) geçerli - sefer bitince
+## kayıp/hasar buraya taşınır (bkz. _apply_wagon_losses_to_ownership).
+var owned_wagon_count: int = 1
+var owned_wagon_damaged: int = 0
+
 ## Vagon başına taşınabilecek yük. Yalnızca pazardan alınan mallara
 ## uygulanır; erzak kendi sefer formülüyle sınırlı, kapasiteye dahil değil.
 const CARGO_PER_WAGON: float = 50.0
@@ -38,10 +45,11 @@ const MIN_DAMAGE_PAYOUT_FACTOR: float = 0.4
 var _flags: Dictionary = {}
 var _provisions_item: Item
 
-func _init(starting_gold: int = 250, starting_provisions: int = 20) -> void:
+func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wagon_count: int = 1) -> void:
 	wallet = Wallet.new(starting_gold)
 	inventory = Inventory.new()
 	caravan = CaravanState.new()
+	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
@@ -88,12 +96,14 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	danger_level = danger
 	caravan = CaravanState.from_plan(plan)
 
-## Hedefe varıldığında çağrılır: escort ücretini öder, konumu günceller,
-## kervanı oyuncunun tek vagonuna indirger (escort ettiği tüccarlar
-## hedefe ulaşıp ayrılmıştır) ve seferi temizler. Ödeme dökümünü döner.
+## Hedefe varıldığında çağrılır: escort ücretini öder, sefer sırasındaki
+## kayıp/hasarı oyuncunun kalıcı vagon sahipliğine taşır, konumu günceller
+## ve seferi temizler (escort ettiği tüccarlar hedefe ulaşıp ayrılmıştır).
+## Ödeme dökümünü döner.
 func finish_journey() -> Dictionary:
 	var payout := _calculate_arrival_payout()
 	wallet.earn(payout.net)
+	_apply_wagon_losses_to_ownership()
 
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
@@ -105,6 +115,23 @@ func finish_journey() -> Dictionary:
 	caravan = CaravanState.new()
 
 	return payout
+
+## Sefer sırasındaki kayıp/hasar kervanın havuzundan (oyuncu + escort
+## tüccarların vagonları birlikte) uygulanıyor. Buradan oyuncunun payına
+## düşeni çıkarır: escort vagonları önce kaybedilir/hasar alır, oyuncunun
+## kendi vagonu yalnızca escort tükendikten sonra etkilenir.
+func _apply_wagon_losses_to_ownership() -> void:
+	var escort_at_start := maxi(0, caravan.wagons_at_start - caravan.player_wagon_count_at_start)
+	var total_lost := maxi(0, caravan.wagons_at_start - caravan.wagon_count)
+	var escort_lost := mini(total_lost, escort_at_start)
+	var player_lost := total_lost - escort_lost
+
+	var escort_remaining := escort_at_start - escort_lost
+	var escort_damaged := mini(caravan.damaged_wagons, escort_remaining)
+	var player_damaged := caravan.damaged_wagons - escort_damaged
+
+	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
+	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
 
 func _calculate_arrival_payout() -> Dictionary:
 	var gross := 0
@@ -127,8 +154,10 @@ func _calculate_arrival_payout() -> Dictionary:
 	}
 
 ## Yalnızca pazardan alınan mallara uygulanır (bkz. CARGO_PER_WAGON).
+## Şehirdeyken geçerli olan sahiplik sayısını kullanır - sefer sırasında
+## kargo alışverişi zaten mümkün değil (market yalnızca şehirde açılır).
 func get_cargo_capacity() -> float:
-	return caravan.wagon_count * CARGO_PER_WAGON
+	return owned_wagon_count * CARGO_PER_WAGON
 
 func get_cargo_weight() -> float:
 	var total := 0.0
@@ -144,9 +173,10 @@ func get_cargo_space_remaining() -> float:
 
 ## Kalıcı kayıt yalnızca şehir varışında alınır (bkz. SaveManager,
 ## scripts/ui/road_journey.gd), o noktada sefer hiç aktif değildir ve
-## kervan finish_journey() tarafından zaten tek vagonluk varsayılana
-## döndürülmüştür. Bu yüzden sefer/kervan alanları hiç serileştirilmiyor -
-## saklayacak anlamlı bir durumları yok.
+## finish_journey() zaten kervanı temizleyip kayıp/hasarı sahiplik
+## alanlarına taşımıştır. Bu yüzden journey_*/caravan hiç serileştirilmiyor
+## - saklayacak anlamlı bir durumları yok; owned_wagon_* kalıcı olduğu
+## için serileştiriliyor.
 const SAVE_VERSION: int = 1
 
 func to_save_dict() -> Dictionary:
@@ -162,6 +192,8 @@ func to_save_dict() -> Dictionary:
 		"current_location_id": current_location_id,
 		"reputation": reputation,
 		"flags": _flags.duplicate(),
+		"owned_wagon_count": owned_wagon_count,
+		"owned_wagon_damaged": owned_wagon_damaged,
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -178,6 +210,10 @@ func load_from_dict(data: Dictionary) -> void:
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
 	reputation = int(data.get("reputation", 0))
 	_flags = (data.get("flags", {}) as Dictionary).duplicate()
+	owned_wagon_count = clampi(
+		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
+	)
+	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.
