@@ -70,7 +70,7 @@ func get_culture() -> Culture:
 	return CultureCatalog.get_culture_or_default(culture_id)
 
 func get_character_class() -> CharacterClass:
-	return ClassCatalog.get_class_or_default(class_id)
+	return ClassCatalog.get_character_class_or_default(class_id)
 
 func get_skills() -> Array[CombatSkill]:
 	return SkillCatalog.get_skills(get_character_class().skill_ids)
