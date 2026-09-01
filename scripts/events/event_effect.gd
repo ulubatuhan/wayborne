@@ -27,6 +27,8 @@ enum Type {
 	UNLOCK_EVENT,
 	# Sistem köprüsü
 	TRIGGER_HAGGLING,
+	TRIGGER_COMBAT,
+	TRIGGER_RECRUIT,
 }
 
 @export var type: Type = Type.GOLD

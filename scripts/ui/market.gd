@@ -51,6 +51,7 @@ func _ready() -> void:
 	_session.inventory.item_removed.connect(_on_inventory_changed)
 	_back_button.text = Nav.return_label()
 	_back_button.pressed.connect(_on_back_pressed)
+	_add_recruit_button(RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
 
 	_location_note_label.text = _build_trade_note()
 	_location_note_label.modulate = TRADE_NOTE_COLOR
@@ -259,8 +260,15 @@ func _has_enough_cargo_space(item: Item, quantity: int) -> bool:
 		return true
 	return item.unit_weight * quantity <= _session.get_cargo_space_remaining()
 
+## Kültür perkleri alış fiyatına burada giriyor: vadi loncaları her malı,
+## balıkçı kasabası yalnızca erzağı ucuza alır. Satış fiyatı etkilenmez -
+## perk pazarlık gücü, tüccarlık değil.
 func _get_buy_price(item: Item) -> int:
-	return MarketPricing.get_buy_price(item, _current_location)
+	var price := float(MarketPricing.get_buy_price(item, _current_location))
+	price *= _session.get_buy_price_multiplier()
+	if item.item_id == GameSession.PROVISIONS_ITEM_ID:
+		price *= _session.get_provision_cost_multiplier()
+	return maxi(1, int(round(price)))
 
 func _get_sell_price(item: Item) -> int:
 	return MarketPricing.get_sell_price(item, _current_location)
@@ -310,3 +318,18 @@ func _clear_children(container: Node) -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.return_scene)
+
+## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
+## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
+func _add_recruit_button(venue: String, own_scene: String) -> void:
+	var button := Button.new()
+	button.text = "Tayfa Ara"
+	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
+	var container := _back_button.get_parent()
+	container.add_child(button)
+	container.move_child(button, _back_button.get_index())
+
+func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
+	Nav.recruit_venue = venue
+	Nav.return_scene = own_scene
+	get_tree().change_scene_to_file(Nav.RECRUIT)

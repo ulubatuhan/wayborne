@@ -23,6 +23,7 @@ func _ready() -> void:
 	_back_button.text = Nav.return_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_map_button.pressed.connect(_on_map_pressed)
+	_add_recruit_button(RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = "Taverna" if location == null else "%s Tavernası" % location.location_name
@@ -60,8 +61,11 @@ func _build_row(route: TravelRoute) -> HBoxContainer:
 	})
 	return row
 
+## Liman şehrinden gelen bir kervancı her dedikoduyu daha ucuza duyar
+## (bkz. Culture.rumor_cost_multiplier).
 func _rumor_cost(route: TravelRoute) -> int:
-	return BASE_RUMOR_COST + route.travel_days * PER_DAY_RUMOR_COST
+	var cost := BASE_RUMOR_COST + route.travel_days * PER_DAY_RUMOR_COST
+	return maxi(1, int(round(cost * _session.get_rumor_cost_multiplier())))
 
 func _refresh_rows() -> void:
 	for row in _rows:
@@ -97,3 +101,18 @@ func _on_map_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.return_scene)
+
+## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
+## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
+func _add_recruit_button(venue: String, own_scene: String) -> void:
+	var button := Button.new()
+	button.text = "Tayfa Ara"
+	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
+	var container := _back_button.get_parent()
+	container.add_child(button)
+	container.move_child(button, _back_button.get_index())
+
+func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
+	Nav.recruit_venue = venue
+	Nav.return_scene = own_scene
+	get_tree().change_scene_to_file(Nav.RECRUIT)

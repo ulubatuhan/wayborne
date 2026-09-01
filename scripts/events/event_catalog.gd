@@ -30,7 +30,31 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_sick_merchant())
 	_road_events.append(_mutiny())
 	_road_events.append(_abandoned_wagon())
+	_road_events.append(_road_wanderer())
 	return _road_events
+
+## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
+## karşılığı: kadro yalnızca şehirde değil, yolda da büyüyebilsin diye.
+static func _road_wanderer() -> GameEvent:
+	var event := _event("evt_road_wanderer", "EVT_WANDERER", 0.9)
+	event.cooldown_days = 6
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_WANDERER_OPT_HIRE", "EVT_WANDERER_OPT_HIRE_LOCKED",
+			_conditions([
+				EventCondition.make("party_size", EventCondition.Op.LESS_EQUAL, GameSession.MAX_PARTY_SIZE - 1),
+			]),
+			_effects([EventEffect.make(EventEffect.Type.TRIGGER_RECRUIT, 0)])
+		),
+		_choice("EVT_WANDERER_OPT_FEED", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+			EventEffect.make(EventEffect.Type.MORALE, 5),
+		])),
+		_choice("EVT_WANDERER_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -2),
+		])),
+	])
+	return event
 
 static func _bandit_ambush() -> GameEvent:
 	var event := _event("evt_bandit_ambush", "EVT_AMBUSH", 1.4)
@@ -50,17 +74,10 @@ static func _bandit_ambush() -> GameEvent:
 				EventEffect.make(EventEffect.Type.MORALE, -5),
 			])
 		),
-		_choice_with_outcomes("EVT_AMBUSH_OPT_FIGHT", _outcomes([
-			EventOutcome.make("EVT_AMBUSH_FIGHT_WIN", _effects([
-				EventEffect.make(EventEffect.Type.MORALE, 12),
-				EventEffect.make(EventEffect.Type.REPUTATION, 4),
-				EventEffect.make(EventEffect.Type.DANGER, -10),
-			]), 1.0),
-			EventOutcome.make("EVT_AMBUSH_FIGHT_LOSE", _effects([
-				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 2),
-				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1),
-				EventEffect.make(EventEffect.Type.MORALE, -20),
-			]), 1.6),
+		# Zar atılmıyor: gerçek savaş paneli açılıyor, sonucun etkilerini
+		# road_journey.gd uyguluyor (bkz. _on_combat_finished).
+		_choice("EVT_AMBUSH_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
 		])),
 		_choice("EVT_AMBUSH_OPT_HAGGLE", _effects([
 			EventEffect.make(EventEffect.Type.TRIGGER_HAGGLING, 200),
