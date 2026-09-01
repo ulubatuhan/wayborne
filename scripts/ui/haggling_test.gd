@@ -4,8 +4,6 @@ extends Control
 ## besler. Pazarlık mantığının kendisi panelde, burada yalnızca ayar
 ## kutuları var.
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-
 var _base_price_spin: SpinBox
 var _greed_spin: SpinBox
 var _reputation_spin: SpinBox
@@ -107,4 +105,4 @@ func _on_start_pressed() -> void:
 	)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	get_tree().change_scene_to_file(Nav.return_scene)

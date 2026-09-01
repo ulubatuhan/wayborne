@@ -1,7 +1,5 @@
 extends Control
 
-const TEST_SELECTOR_SCENE: String = "res://scenes/ui/test_selector.tscn"
-
 ## Girişte seçilen dil tüm oyun için geçerli olur.
 const LOCALES: Array[String] = ["tr", "en"]
 const LOCALE_NAMES: Array[String] = ["Türkçe", "English"]
@@ -36,4 +34,5 @@ func _refresh_texts() -> void:
 	_play_button.text = tr("UI_PLAY")
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_file(TEST_SELECTOR_SCENE)
+	Nav.return_scene = Nav.WORLD_HUB
+	get_tree().change_scene_to_file(Nav.WORLD_HUB)

@@ -1,0 +1,73 @@
+extends Control
+
+## Placeholder şehir haritası. Şehir kart tabanlı değil: her lokasyon kendi
+## ekranını açar, oyuncu neyle etkileşime gireceğini kendisi seçer.
+
+const SPOT_SIZE: Vector2 = Vector2(190, 76)
+
+@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MapPanel
+@onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
+@onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
+@onready var _gate_button: Button = $MarginContainer/VBoxContainer/GateButton
+
+var _session
+
+func _ready() -> void:
+	_session = GameState.get_session()
+	_gate_button.pressed.connect(_on_gate_pressed)
+	_refresh_title()
+	_build_spots()
+
+func _refresh_title() -> void:
+	var location := WorldMapData.get_location_by_id(_session.current_location_id)
+	var city_name := "Şehir" if location == null else location.location_name
+	_title_label.text = "%s · Kese: %d GG · Erzak: %d" % [
+		city_name,
+		_session.wallet.balance,
+		_session.get_provisions(),
+	]
+
+func _build_spots() -> void:
+	_add_spot(
+		"Pazar Meydanı",
+		"Genel mal alım satımı.",
+		Vector2(60, 40),
+		Nav.ECONOMY
+	)
+	_add_spot(
+		"Tüccar Loncası",
+		"Fiyat üzerine pazarlık.",
+		Vector2(340, 150),
+		Nav.HAGGLING
+	)
+	_add_spot(
+		"Taverna",
+		"Yol haberleri ve harita.",
+		Vector2(80, 260),
+		Nav.TRAVEL
+	)
+	_add_spot(
+		"Kervan Avlusu",
+		"Henüz kapalı.",
+		Vector2(400, 330),
+		""
+	)
+
+func _add_spot(spot_name: String, description: String, position: Vector2, scene_path: String) -> void:
+	var button := Button.new()
+	button.text = "%s\n%s" % [spot_name, description]
+	button.custom_minimum_size = SPOT_SIZE
+	button.size = SPOT_SIZE
+	button.position = position
+	button.disabled = scene_path.is_empty()
+	if not button.disabled:
+		button.pressed.connect(_on_spot_pressed.bind(scene_path))
+	_map_panel.add_child(button)
+
+func _on_spot_pressed(scene_path: String) -> void:
+	Nav.return_scene = Nav.CITY_MAP
+	get_tree().change_scene_to_file(scene_path)
+
+func _on_gate_pressed() -> void:
+	Nav.return_scene = Nav.WORLD_HUB
+	get_tree().change_scene_to_file(Nav.WORLD_HUB)

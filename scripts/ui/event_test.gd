@@ -4,9 +4,6 @@ extends Control
 ## kalıcı oturumu yürütür; test menüsünden doğrudan açıldığında kendi
 ## geçici seferini kurar, böylece gerçek kaydı kirletmez.
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-const TRAVEL_SCENE: String = "res://scenes/tests/travel_test.tscn"
-
 const SYNTHETIC_JOURNEY_DAYS: int = 8
 const SYNTHETIC_DANGER: float = 0.4
 const SYNTHETIC_WAGONS: int = 4
@@ -342,7 +339,9 @@ func _finish_journey() -> void:
 func _on_arrive_pressed() -> void:
 	_session.finish_journey()
 	EventBus.caravan_changed.emit()
-	get_tree().change_scene_to_file(TRAVEL_SCENE)
+	# Sefer bitince kervan hedef şehrin içindedir.
+	Nav.return_scene = Nav.CITY_MAP
+	get_tree().change_scene_to_file(Nav.CITY_MAP)
 
 func _set_journey_controls_enabled(enabled: bool) -> void:
 	_advance_button.disabled = not enabled
@@ -378,4 +377,4 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	get_tree().change_scene_to_file(Nav.return_scene)

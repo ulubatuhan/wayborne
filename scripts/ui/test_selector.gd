@@ -1,16 +1,14 @@
 extends Control
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-
 # Bir sistemi test edilebilir hale getirmek için burada boş string yerine
 # ilgili sahnenin yolunu yazmak yeterli.
-const TEST_SCENES: Dictionary = {
-	"economy": "res://scenes/tests/economy_test.tscn",
-	"haggling": "res://scenes/tests/haggling_test.tscn",
-	"events": "res://scenes/tests/event_test.tscn",
+@onready var _test_scenes: Dictionary = {
+	"economy": Nav.ECONOMY,
+	"haggling": Nav.HAGGLING,
+	"events": Nav.JOURNEY,
 	"combat": "",
-	"city": "",
-	"travel": "res://scenes/tests/travel_test.tscn",
+	"city": Nav.CITY_MAP,
+	"travel": Nav.TRAVEL,
 }
 
 @onready var _buttons: Dictionary = {
@@ -25,8 +23,12 @@ const TEST_SCENES: Dictionary = {
 @onready var _back_button: Button = $VBoxContainer/BackButton
 
 func _ready() -> void:
+	# Seçiciye hangi ekrandan gelindiyse geri tuşu oraya dönmeli.
+	Nav.selector_return_scene = Nav.return_scene
+	Nav.return_scene = Nav.TEST_SELECTOR
+
 	for key in _buttons:
-		var scene_path: String = TEST_SCENES[key]
+		var scene_path: String = _test_scenes[key]
 		var button: Button = _buttons[key]
 		button.disabled = scene_path.is_empty()
 		if not scene_path.is_empty():
@@ -38,4 +40,5 @@ func _on_test_button_pressed(scene_path: String) -> void:
 	get_tree().change_scene_to_file(scene_path)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	Nav.return_scene = Nav.selector_return_scene
+	get_tree().change_scene_to_file(Nav.selector_return_scene)

@@ -18,6 +18,7 @@ wayborne/
 │   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
 │   ├── combat/            # Combat & AI scripts
+│   ├── world/             # Explorable 2D spaces & scene navigation
 │   ├── ui/                # UI components & screens
 │   └── autoload/          # Global singleton scripts
 ├── data/
@@ -68,6 +69,31 @@ wayborne/
   - Character stats
   - Attack calculations
   - Enemy AI behavior
+
+- **scripts/world/**: Explorable 2D spaces the player physically moves through
+  - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right,
+    the wagon lerp-follows behind. Landmarks (test-area sign, city gate) and
+    the wagon itself are interaction spots: walk within `INTERACT_RANGE`, then
+    click them or press E. No physics bodies — plain position arithmetic on a
+    single ground line, so it stays cheap on Web export.
+  - `city_map.gd`: placeholder city map. City interaction is deliberately
+    **not** card-based (see Event Engine Rules): each location button opens its
+    own screen (market → economy, guild → haggling, tavern → travel map).
+  - `nav.gd`: every scene path lives here, plus `Nav.return_scene` — the screen
+    a sub-screen's back button returns to. A spot sets it before changing
+    scenes, so the same economy screen returns to the road or to the city
+    depending on where it was entered from. `selector_return_scene` is the
+    test selector's own back target, kept separate because sub-tests overwrite
+    `return_scene` to point back at the selector.
+  - There is no SceneManager autoload: navigation is `change_scene_to_file()`
+    plus these static vars.
+
+### World Navigation Rules
+
+- Never hardcode a `res://scenes/...` path in a screen script; use `Nav`.
+- A screen's back button goes to `Nav.return_scene`, never to a fixed scene.
+- Whoever sends the player somewhere is responsible for setting
+  `Nav.return_scene` first.
 
 - **scripts/ui/**: User interface scripts
   - Menu controllers

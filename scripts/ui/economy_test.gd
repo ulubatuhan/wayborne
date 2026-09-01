@@ -3,7 +3,6 @@ extends Control
 ## Şehir pazarı. Kalıcı oturumun cüzdanı ve envanteri üzerinde çalışır:
 ## burada aldığın erzak, sefere çıkarken kervan planlayıcıda görünür.
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const GRID_COLUMNS: int = 5
 const GRID_ROWS: int = 4
 const SLOT_SIZE: Vector2 = Vector2(80, 80)
@@ -111,4 +110,4 @@ func _refresh_inventory_grid() -> void:
 			_inventory_grid.add_child(PlaceholderHelper.create_box(SLOT_SIZE, EMPTY_SLOT_COLOR, ""))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	get_tree().change_scene_to_file(Nav.return_scene)

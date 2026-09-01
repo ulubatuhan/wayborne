@@ -1,8 +1,5 @@
 extends Control
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-const CARAVAN_PLANNER_SCENE: String = "res://scenes/tests/caravan_planner_test.tscn"
-
 const POINT_SIZE: Vector2 = Vector2(130, 44)
 const ROUTE_COLOR: Color = Color(0.45, 0.4, 0.32)
 const ROUTE_WIDTH: float = 3.0
@@ -114,7 +111,7 @@ func _on_plan_pressed() -> void:
 
 func _go_to_planner(location: Location) -> void:
 	TravelContext.selected_destination_id = location.location_id
-	get_tree().change_scene_to_file(CARAVAN_PLANNER_SCENE)
+	get_tree().change_scene_to_file(Nav.CARAVAN_PLANNER)
 
 func _add_info_label(text: String) -> void:
 	var label := Label.new()
@@ -128,4 +125,4 @@ func _clear_info_panel() -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	get_tree().change_scene_to_file(Nav.return_scene)

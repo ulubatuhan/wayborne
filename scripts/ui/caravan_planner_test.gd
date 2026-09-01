@@ -3,10 +3,6 @@ extends Control
 ## Kervan planlayıcı. Erzağı gerçek envanterden okur, eksiği cüzdandan
 ## satın aldırır ve onaylandığında kervanı gerçekten yola çıkarır.
 
-const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
-const TRAVEL_SCENE: String = "res://scenes/tests/travel_test.tscn"
-const JOURNEY_SCENE: String = "res://scenes/tests/event_test.tscn"
-
 const SHORTFALL_COLOR: Color = Color(0.9, 0.45, 0.35)
 const SATISFIED_COLOR: Color = Color(0.45, 0.8, 0.45)
 
@@ -241,10 +237,10 @@ func _on_confirm_pressed() -> void:
 		_plan
 	)
 	EventBus.caravan_changed.emit()
-	get_tree().change_scene_to_file(JOURNEY_SCENE)
+	get_tree().change_scene_to_file(Nav.JOURNEY)
 
 func _on_map_pressed() -> void:
-	get_tree().change_scene_to_file(TRAVEL_SCENE)
+	get_tree().change_scene_to_file(Nav.TRAVEL)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	get_tree().change_scene_to_file(Nav.return_scene)
