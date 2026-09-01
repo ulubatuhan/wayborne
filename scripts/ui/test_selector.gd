@@ -34,6 +34,7 @@ func _ready() -> void:
 		if not scene_path.is_empty():
 			button.pressed.connect(_on_test_button_pressed.bind(scene_path))
 
+	_back_button.text = Nav.label_for(Nav.selector_return_scene)
 	_back_button.pressed.connect(_on_back_pressed)
 
 func _on_test_button_pressed(scene_path: String) -> void:

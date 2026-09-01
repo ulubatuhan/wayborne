@@ -26,6 +26,7 @@ func _ready() -> void:
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_session.inventory.item_added.connect(_on_inventory_changed)
 	_session.inventory.item_removed.connect(_on_inventory_changed)
+	_back_button.text = Nav.return_label()
 	_back_button.pressed.connect(_on_back_pressed)
 
 	_build_shop_rows()

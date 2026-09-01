@@ -130,7 +130,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(map_button)
 
 	var back_button := Button.new()
-	back_button.text = "Ana Menüye Dön"
+	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
 	_content.add_child(back_button)
 

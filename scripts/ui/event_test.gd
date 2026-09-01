@@ -111,7 +111,7 @@ func _build_ui() -> void:
 	_content.add_child(_log_list)
 
 	var back_button := Button.new()
-	back_button.text = tr("UI_BACK_TO_MENU")
+	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
 	_content.add_child(back_button)
 

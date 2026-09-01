@@ -18,6 +18,7 @@ var _focused_location: Location
 func _ready() -> void:
 	_session = GameState.get_session()
 	_current_location_id = _session.current_location_id
+	_back_button.text = Nav.return_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
 	_show_hint()

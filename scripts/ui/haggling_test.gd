@@ -39,7 +39,7 @@ func _build_ui() -> void:
 	_content.add_child(HSeparator.new())
 
 	var back_button := Button.new()
-	back_button.text = "Ana Menüye Dön"
+	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
 	_content.add_child(back_button)
 
