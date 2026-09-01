@@ -52,9 +52,9 @@ func _build_spots() -> void:
 	)
 	_add_spot(
 		"Kervan Avlusu",
-		"Henüz kapalı.",
+		"Vagon onarımı ve alımı.",
 		Vector2(400, 330),
-		""
+		Nav.CARAVAN_YARD
 	)
 
 func _add_spot(spot_name: String, description: String, position: Vector2, scene_path: String) -> void:

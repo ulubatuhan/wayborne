@@ -48,6 +48,45 @@ func _route_key(from_location_id: String, to_location_id: String) -> String:
 var owned_wagon_count: int = 1
 var owned_wagon_damaged: int = 0
 
+## Kervansaray fiyatları: yeni vagon sahip olunan vagon sayısı arttıkça
+## kademeli pahalanır, onarım hasarlı vagon başına sabit ücrettir.
+const WAGON_PURCHASE_BASE_COST: int = 150
+const WAGON_PURCHASE_COST_STEP: int = 60
+const WAGON_REPAIR_COST_PER_WAGON: int = 30
+
+func get_next_wagon_cost() -> int:
+	return WAGON_PURCHASE_BASE_COST + (owned_wagon_count - CaravanState.MIN_WAGONS) * WAGON_PURCHASE_COST_STEP
+
+func can_buy_wagon() -> bool:
+	return owned_wagon_count < CaravanPlan.DEFAULT_MAX_WAGONS
+
+## Başarısızsa (kese yetmez ya da limit dolu) false döner, hiçbir şey
+## değişmez.
+func buy_wagon() -> bool:
+	if not can_buy_wagon():
+		return false
+	var cost := get_next_wagon_cost()
+	if not wallet.can_afford(cost):
+		return false
+	wallet.spend(cost)
+	owned_wagon_count += 1
+	return true
+
+func get_repair_cost() -> int:
+	return owned_wagon_damaged * WAGON_REPAIR_COST_PER_WAGON
+
+## Tüm hasarlı vagonları tek seferde onarır. Başarısızsa (hasar yok ya
+## da kese yetmez) false döner.
+func repair_wagons() -> bool:
+	if owned_wagon_damaged <= 0:
+		return false
+	var cost := get_repair_cost()
+	if not wallet.can_afford(cost):
+		return false
+	wallet.spend(cost)
+	owned_wagon_damaged = 0
+	return true
+
 ## Vagon başına taşınabilecek yük. Yalnızca pazardan alınan mallara
 ## uygulanır; erzak kendi sefer formülüyle sınırlı, kapasiteye dahil değil.
 const CARGO_PER_WAGON: float = 50.0
