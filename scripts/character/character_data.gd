@@ -44,6 +44,11 @@ var current_hp: int = 0
 ## Tayfayı işe alma ücreti; oyuncunun kendisi için 0.
 var hire_cost: int = 0
 
+## Oyuncunun kendisi mi? Parti sırası aynı zamanda savaş mevki sırası
+## olduğu için oyuncu arkaya geçebiliyor; kim olduğu bu yüzden sıradan
+## değil bu bayraktan okunur (bkz. GameSession.dismiss).
+var is_player: bool = false
+
 static func get_skin_tone_color(index: int) -> Color:
 	return _skin_tone_colors[clampi(index, 0, _skin_tone_colors.size() - 1)]
 
@@ -130,6 +135,7 @@ func to_dict() -> Dictionary:
 		"stats": stats.to_dict(),
 		"current_hp": current_hp,
 		"hire_cost": hire_cost,
+		"is_player": is_player,
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -141,5 +147,6 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.skin_tone = int(data.get("skin_tone", 1))
 	character.stats = CharacterStats.from_dict(data.get("stats", {}))
 	character.hire_cost = int(data.get("hire_cost", 0))
+	character.is_player = bool(data.get("is_player", false))
 	character.current_hp = int(data.get("current_hp", character.get_max_hp()))
 	return character

@@ -97,13 +97,14 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 	label.custom_minimum_size = Vector2(520, 0)
 	row.add_child(label)
 
-	# Oyuncunun kendisi (party[0]) çıkarılamaz; sırası değiştirilebilir.
 	if slot > 1:
 		var up_button := Button.new()
 		up_button.text = "↑"
 		up_button.pressed.connect(_on_move_up_pressed.bind(slot - 1))
 		row.add_child(up_button)
 
+	# Oyuncunun kendisi çıkarılamaz; kontrol sıraya değil bayrağa bakıyor.
+	if not character.is_player:
 		var dismiss_button := Button.new()
 		dismiss_button.text = "Yol Ver"
 		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))

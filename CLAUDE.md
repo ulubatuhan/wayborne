@@ -26,7 +26,7 @@ wayborne/
 │   ├── config/            # JSON/YAML configuration files
 │   ├── locale/            # Translation CSV (keys, tr, en)
 │   └── assets/            # Game assets (sprites, sounds, fonts)
-└── tests/                 # Unit tests (gdscript-testing-tool format)
+└── tests/                 # Headless GDScript tests + balance simulator
 ```
 
 ### Folder Descriptions
@@ -102,7 +102,11 @@ wayborne/
   or on the road (`evt_road_wanderer`), and every one of them is drawn walking
   behind the leader in `world_hub.gd` — height and skin tone included, so what
   character creation chose is visible in the world.
-- `party[0]` is always the player: they can be reordered but never dismissed.
+- **The player is identified by `CharacterData.is_player`, never by index.**
+  Party order is combat rank order, so the player can move to the back; a guard
+  that tested `index == 0` let them dismiss themselves, kept a companion
+  undismissable, and handed the companion's culture perk to the whole caravan.
+  `get_player_character()` and `dismiss()` read the flag.
 - Party order **is** combat rank order (1 = front). `party.tscn` is where the
   player reads and reorders it (reachable from the road HUD and the city map).
 - Characters heal to full on city arrival (`finish_journey()`); the road is
@@ -332,9 +336,34 @@ func load_enemy_data(enemy_id: int) -> Dictionary:
 
 ### Testing
 
-- Create unit tests in `tests/` folder using GDUnit4 or similar
-- Test game logic separately from scene logic
-- Avoid testing engine internals
+Tests run headless with no addon - a plain GDScript `SceneTree` runner:
+
+```bash
+godot --headless --script res://tests/run_tests.gd      # exit 1 on failure
+godot --headless --script res://tests/simulate_journeys.gd   # balance report
+```
+
+- **No `class_name` in `tests/`.** Test scripts would otherwise land in the
+  global class cache and ship with the game. `run_tests.gd` reaches suites with
+  runtime `load()` for the same reason it avoids `class_name` itself: the
+  autoload parse-order trap.
+- A suite is a `RefCounted` script with `suite_name() -> String` and
+  `run(t) -> void`; `t` is `tests/test_reporter.gd`. Register it in
+  `run_tests.gd`'s `SUITE_PATHS`.
+- Test the UI-free cores, which is why they were written UI-free:
+  `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
+  `GameSession`. Never test engine internals or scene wiring.
+- Seed every RNG. A test that can flake is worse than no test.
+- `simulate_journeys.gd` is **not** a test - it never fails, it prints a
+  distribution (net payout, morale, starvation rate, combat win rate by party
+  size). It is the only honest way to tune balance without playing.
+
+**CI is the real gate.** Godot prints parse errors and still exits `0`, so a
+broken script hid under a green build twice (`city_map.gd`,
+`ClassCatalog.get_class`). `.github/workflows/deploy.yml` now tees every Godot
+invocation to a log and fails the job on `SCRIPT ERROR`, `Parse Error`,
+`Compile Error`, `Failed to load script` or `Failed to create an autoload`.
+Never remove that step to make a build pass.
 
 ## CI/CD & Deployment
 

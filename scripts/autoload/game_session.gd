@@ -41,8 +41,9 @@ func learn_route(from_location_id: String, to_location_id: String) -> void:
 func _route_key(from_location_id: String, to_location_id: String) -> String:
 	return "%s|%s" % [from_location_id, to_location_id]
 
-## Savaş partisi. party[0] her zaman oyuncunun kendi karakteridir ve
-## partiden çıkarılamaz; sıralama aynı zamanda savaştaki mevki sırasıdır.
+## Savaş partisi. Oyuncunun kendi karakteri partiden çıkarılamaz -
+## kim olduğu CharacterData.is_player'dan okunur, sırasından değil;
+## sıralama savaştaki mevki sırasıdır ve oyuncu arkaya geçebilir.
 ## Bu, vagonların taşıdığı isimsiz tayfadan ayrı bir kavramdır: tayfa
 ## kargo kapasitesini belirler, parti ise savaşa giren adı olan kişilerdir.
 ##
@@ -62,12 +63,17 @@ func get_party() -> Array[CharacterData]:
 	_ensure_party()
 	return party
 
+## Oyuncu partide arkaya geçebildiği için sıraya değil bayrağa bakılır.
 func get_player_character() -> CharacterData:
 	_ensure_party()
+	for character in party:
+		if character.is_player:
+			return character
 	return party[0]
 
 ## Karakter oluşturma ekranı çağırır; mevcut parti sıfırlanır.
 func set_player_character(character: CharacterData) -> void:
+	character.is_player = true
 	party = [character]
 
 func can_recruit() -> bool:
@@ -82,20 +88,24 @@ func recruit(character: CharacterData) -> bool:
 	if not wallet.can_afford(character.hire_cost):
 		return false
 	wallet.spend(character.hire_cost)
+	character.is_player = false
 	character.heal_full()
 	party.append(character)
 	return true
 
-## Oyuncunun kendisi (party[0]) çıkarılamaz.
+## Oyuncunun kendisi çıkarılamaz. Kontrol sıraya göre değil bayrağa göre:
+## oyuncu arkaya geçtiğinde kendini atabilmesi bir hataydı.
 func dismiss(character: CharacterData) -> bool:
+	if character == null or character.is_player:
+		return false
 	var index := party.find(character)
-	if index <= 0:
+	if index < 0:
 		return false
 	party.remove_at(index)
 	return true
 
-## Parti mevkilerini değiştirir; oyuncu da yer değiştirebilir (party[0]
-## olması yalnızca "çıkarılamaz" demek, "hep önde" demek değil).
+## Parti mevkilerini değiştirir; oyuncu da yer değiştirebilir - sırası
+## savaştaki mevkisidir, kim olduğunu belirlemez.
 func swap_party_positions(first_index: int, second_index: int) -> bool:
 	if first_index == second_index:
 		return false
@@ -117,7 +127,11 @@ func heal_party() -> void:
 func _ensure_party() -> void:
 	if party.is_empty():
 		var culture := CultureCatalog.get_cultures()[0]
-		party = [CharacterData.create(culture.name_pool[0], culture.culture_id, CharacterStats.new())]
+		var fallback := CharacterData.create(
+			culture.name_pool[0], culture.culture_id, CharacterStats.new()
+		)
+		fallback.is_player = true
+		party = [fallback]
 
 # --- Kültür perkleri: tek yerden okunur, ekranlar formülü kopyalamaz ---
 
@@ -532,9 +546,12 @@ func build_event_context() -> Dictionary:
 		"danger": danger_level,
 		"days_remaining": journey_days_remaining,
 		"reputation": reputation,
-		"party_size": party.size(),
+		# get_party(), partiyi henüz kimse okumadıysa kurar. Doğrudan
+		# party.size() okumak taze bir oturumda 0 döndürüyordu, yani
+		# koşullar olmayan bir boş yer görüyordu.
+		"party_size": get_party().size(),
 		# Koşullar başka bir anahtarla karşılaştırma yapamadığı için boş
 		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
-		"party_slots_free": maxi(0, get_party_capacity() - party.size()),
+		"party_slots_free": maxi(0, get_party_capacity() - get_party().size()),
 		"flags": _flags,
 	}

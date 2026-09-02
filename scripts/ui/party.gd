@@ -55,21 +55,23 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	name_label.custom_minimum_size = Vector2(460, 0)
 	header.add_child(name_label)
 
-	# Oyuncunun kendisi (party[0]) çıkarılamaz ama yerini değiştirebilir.
+	# Oyuncunun kendisi çıkarılamaz ama her mevkiye geçebilir; bu yüzden
+	# kontrol sıraya değil is_player bayrağına bakıyor.
 	if index > 0:
 		header.add_child(_build_move_button("↑", index, index - 1))
 	if index < party_size - 1:
 		header.add_child(_build_move_button("↓", index, index + 1))
-	if index > 0:
-		var dismiss_button := Button.new()
-		dismiss_button.text = "Yol Ver"
-		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))
-		header.add_child(dismiss_button)
-	else:
+
+	if character.is_player:
 		var you_label := Label.new()
 		you_label.text = "(sen)"
 		you_label.modulate = LOCKED_COLOR
 		header.add_child(you_label)
+	else:
+		var dismiss_button := Button.new()
+		dismiss_button.text = "Yol Ver"
+		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))
+		header.add_child(dismiss_button)
 
 	card.add_child(header)
 
