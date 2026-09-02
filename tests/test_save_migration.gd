@@ -37,6 +37,7 @@ func _test_old_character_dict_loads_with_defaults(t) -> void:
 	t.eq(character.second_class_id, "", "ikinci sınıf yok")
 	t.eq(character.duty_id, "", "görev atanmamış")
 	t.ok(character.auto_allocate, "otomatik dağıtım varsayılan açık")
+	t.ok(character.equipped.is_empty(), "ekipman sözlüğü boş başlar (Faz 7'den önceki kayıt)")
 
 	# Yeni sistemler eski kaydı çökertmeden çalışmalı.
 	t.ok(character.get_skills().size() > 0, "yetenekler hâlâ okunabilir")

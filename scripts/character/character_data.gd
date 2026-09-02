@@ -77,6 +77,10 @@ var trait_ids: Array[String] = []
 ## penceresi bunun üstünden hesaplanır.
 var trait_granted_day: Dictionary = {}
 
+## EquipmentCatalog.SLOT_* -> equipment_id. En fazla dört giriş (slot
+## başına bir parça); boş slot sözlükte hiç yer almaz.
+var equipped: Dictionary = {}
+
 ## Açıkken seviye atlayınca puanlar otomatik dağıtılır (yoldaşlar için
 ## varsayılan). Oyuncu kendi karakterinde bunu kapatıp elle dağıtabilir.
 var auto_allocate: bool = true
@@ -253,22 +257,26 @@ func get_max_hp() -> int:
 	return maxi(
 		1,
 		stats.get_max_hp() + get_character_class().bonus_max_hp
-		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus")
+		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
 	)
 
 func get_dodge() -> int:
-	return maxi(0, stats.get_dodge() + get_height_dodge_bonus() + _trait_bonus_sum("dodge_bonus"))
+	return maxi(
+		0,
+		stats.get_dodge() + get_height_dodge_bonus()
+		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus")
+	)
 
-## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy
-## bonusları burada eklenir (bkz. CombatUnit.from_character).
+## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy ve
+## ekipman bonusları burada eklenir (bkz. CombatUnit.from_character).
 func get_accuracy() -> int:
-	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus")
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus")
 
 func get_crit_chance() -> int:
-	return stats.get_crit_chance() + _trait_bonus_sum("crit_bonus")
+	return stats.get_crit_chance() + _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus")
 
 func get_damage_bonus() -> int:
-	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus")
+	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
 
 # --- Huylar (Trait) ---
 
@@ -326,6 +334,40 @@ func _trait_bonus_sum(field: String) -> int:
 			total += int(trait_resource.get(field))
 	return total
 
+# --- Ekipman ---
+
+func get_equipped_id(slot: String) -> String:
+	return str(equipped.get(slot, ""))
+
+func get_equipped(slot: String) -> Equipment:
+	var equipment_id := get_equipped_id(slot)
+	if equipment_id.is_empty():
+		return null
+	return EquipmentCatalog.get_equipment(equipment_id)
+
+## Parça, verilen slota gerçekten aitse takar (o slottaki eskisinin yerine
+## geçer - envantere geri koymak çağıranın işi, bkz. character.gd Faz 7 PR-B).
+func equip(slot: String, equipment_id: String) -> bool:
+	var equipment_resource := EquipmentCatalog.get_equipment(equipment_id)
+	if equipment_resource == null or equipment_resource.slot != slot:
+		return false
+	equipped[slot] = equipment_id
+	return true
+
+func unequip(slot: String) -> bool:
+	if not equipped.has(slot):
+		return false
+	equipped.erase(slot)
+	return true
+
+func _equipment_bonus_sum(field: String) -> int:
+	var total := 0
+	for slot in equipped:
+		var equipment_resource := EquipmentCatalog.get_equipment(str(equipped[slot]))
+		if equipment_resource != null:
+			total += int(equipment_resource.get(field))
+	return total
+
 func is_alive() -> bool:
 	return current_hp > 0
 
@@ -370,6 +412,7 @@ func to_dict() -> Dictionary:
 		"auto_allocate": auto_allocate,
 		"trait_ids": trait_ids.duplicate(),
 		"trait_granted_day": trait_granted_day.duplicate(),
+		"equipped": equipped.duplicate(),
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -395,6 +438,11 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	for trait_id in (data.get("trait_ids", []) as Array):
 		character.trait_ids.append(str(trait_id))
 	character.trait_granted_day = (data.get("trait_granted_day", {}) as Dictionary).duplicate()
+
+	var equipped_data: Dictionary = data.get("equipped", {})
+	character.equipped.clear()
+	for slot in equipped_data:
+		character.equipped[str(slot)] = str(equipped_data[slot])
 
 	character.current_hp = int(data.get("current_hp", character.get_max_hp()))
 	return character
