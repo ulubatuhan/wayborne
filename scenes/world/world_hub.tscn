@@ -29,6 +29,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Kervan"
 
+[node name="PartyButton" type="Button" parent="HUD/TopBar/Row"]
+layout_mode = 2
+text = "Parti"
+
 [node name="MenuButton" type="Button" parent="HUD/TopBar/Row"]
 layout_mode = 2
 text = "Ana Menü"

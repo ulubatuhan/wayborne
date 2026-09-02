@@ -42,7 +42,7 @@ static func _road_wanderer() -> GameEvent:
 		_gated_choice(
 			"EVT_WANDERER_OPT_HIRE", "EVT_WANDERER_OPT_HIRE_LOCKED",
 			_conditions([
-				EventCondition.make("party_size", EventCondition.Op.LESS_EQUAL, GameSession.MAX_PARTY_SIZE - 1),
+				EventCondition.make("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1),
 			]),
 			_effects([EventEffect.make(EventEffect.Type.TRIGGER_RECRUIT, 0)])
 		),

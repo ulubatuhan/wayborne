@@ -1,7 +1,8 @@
 extends Node2D
 
-## Yan görünüşlü 2D alan: kervan liderini sağa sola yürütür, vagon peşinden
-## gelir. Vagona ve şehir kapısına yaklaşıp tıklayarak ilgili ekranlara
+## Yan görünüşlü 2D alan: kervan liderini sağa sola yürütür, parti ve
+## vagonlar peşinden gelir - kaç vagonun ve kaç yoldaşın varsa o kadarı
+## çizilir. Vagona ve şehir kapısına yaklaşıp tıklayarak ilgili ekranlara
 ## geçilir. Fizik yok - düz bir şerit üzerinde konum aritmetiği.
 ## Geliştirici test menüsü artık yolun içinde değil, F1 ile her yerden
 ## açılan bir overlay (bkz. scripts/autoload/dev_panel.gd).
@@ -12,10 +13,19 @@ const WORLD_MAX_X: float = 2100.0
 const WALK_SPEED: float = 280.0
 const INTERACT_RANGE: float = 150.0
 
-const LEADER_SIZE: Vector2 = Vector2(34, 62)
 const WAGON_SIZE: Vector2 = Vector2(76, 50)
-const WAGON_GAP: float = 100.0
 const WAGON_FOLLOW_SPEED: float = 7.0
+
+## Kervanın dizilişi: lider önde, parti arkasında, vagonlar en arkada.
+const FOLLOWER_GAP: float = 46.0
+const WAGON_GAP: float = 100.0
+const WAGON_SPACING: float = 92.0
+
+## Karakterin boyu görünürde de fark etsin diye gövde yüksekliği bu
+## aralıkta ölçeklenir (bkz. CharacterData.MIN/MAX_HEIGHT_CM).
+const BODY_MIN_HEIGHT: float = 52.0
+const BODY_MAX_HEIGHT: float = 72.0
+const BODY_WIDTH: float = 30.0
 
 const SKY_COLOR: Color = Color(0.42, 0.52, 0.62)
 const GROUND_COLOR: Color = Color(0.35, 0.31, 0.24)
@@ -25,16 +35,21 @@ const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
 const PROMPT_COLOR: Color = Color(1.0, 0.9, 0.5)
 
 var _player: ColorRect
-var _wagon: ColorRect
+## Vagonlar sahip olunan sayıya göre kuruluyor, parti üyeleri de
+## isimleriyle yürüyor - kervanın büyüdüğü ekranda görülsün diye.
+var _wagons: Array[ColorRect] = []
+var _followers: Array[ColorRect] = []
 var _spots: Array[Dictionary] = []
 
 @onready var _camera: Camera2D = $Camera2D
 @onready var _status_label: Label = $HUD/TopBar/Row/StatusLabel
+@onready var _party_button: Button = $HUD/TopBar/Row/PartyButton
 @onready var _menu_button: Button = $HUD/TopBar/Row/MenuButton
 @onready var _hint_label: Label = $HUD/HintBar/HintLabel
 
 func _ready() -> void:
 	Nav.return_scene = Nav.WORLD_HUB
+	_party_button.pressed.connect(_on_party_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 
 	_build_scenery()
@@ -67,9 +82,18 @@ func _move_player(delta: float) -> void:
 	)
 
 func _follow_with_wagon(delta: float) -> void:
-	var target_x := _player.position.x - WAGON_GAP
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
-	_wagon.position.x = lerpf(_wagon.position.x, target_x, weight)
+
+	for index in _followers.size():
+		var follower := _followers[index]
+		var follower_target := _player.position.x - FOLLOWER_GAP * (index + 1)
+		follower.position.x = lerpf(follower.position.x, follower_target, weight)
+
+	var train_start := _player.position.x - FOLLOWER_GAP * _followers.size() - WAGON_GAP
+	for index in _wagons.size():
+		var wagon := _wagons[index]
+		var wagon_target := train_start - WAGON_SPACING * index
+		wagon.position.x = lerpf(wagon.position.x, wagon_target, weight)
 
 func _build_scenery() -> void:
 	var sky := ColorRect.new()
@@ -143,19 +167,39 @@ func _add_spot(
 		"prompt": prompt,
 	})
 
+## Kervanı sahiplik durumuna göre kurar: sahip olunan her vagon için bir
+## vagon, partideki her kişi için bir gövde. Oyuncu partisi tek kişiyle
+## başlar, tayfa topladıkça arkasında yürüyenler çoğalır.
 func _build_caravan() -> void:
-	_wagon = ColorRect.new()
-	_wagon.color = WAGON_COLOR
-	_wagon.position = Vector2(-WAGON_GAP, GROUND_Y - WAGON_SIZE.y)
-	_wagon.size = WAGON_SIZE
-	add_child(_wagon)
+	var session: GameSession = GameState.get_session()
+	var party := session.get_party()
+
+	for index in maxi(1, session.owned_wagon_count):
+		_wagons.append(_build_wagon(index))
+
+	_player = _build_person(party[0], true)
+	for index in range(1, party.size()):
+		_followers.append(_build_person(party[index], false))
+
+## Sadece ilk vagon etkileşim noktası - kervanın yükü tek envanterde.
+func _build_wagon(index: int) -> ColorRect:
+	var wagon := ColorRect.new()
+	wagon.color = WAGON_COLOR
+	wagon.position = Vector2(
+		-WAGON_GAP - WAGON_SPACING * index, GROUND_Y - WAGON_SIZE.y
+	)
+	wagon.size = WAGON_SIZE
+	add_child(wagon)
 
 	var wagon_label := Label.new()
-	wagon_label.text = "Vagon"
+	wagon_label.text = "Vagon %d" % (index + 1)
 	wagon_label.position = Vector2(0.0, -26.0)
 	wagon_label.size = Vector2(WAGON_SIZE.x, 24.0)
 	wagon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_wagon.add_child(wagon_label)
+	wagon.add_child(wagon_label)
+
+	if index > 0:
+		return wagon
 
 	var wagon_prompt := Label.new()
 	wagon_prompt.text = "▼ tıkla ya da E"
@@ -164,7 +208,7 @@ func _build_caravan() -> void:
 	wagon_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	wagon_prompt.modulate = PROMPT_COLOR
 	wagon_prompt.visible = false
-	_wagon.add_child(wagon_prompt)
+	wagon.add_child(wagon_prompt)
 
 	# Vagon hareket ettiği için kendi kaydı ayrı tutulur.
 	_spots.append({
@@ -175,23 +219,39 @@ func _build_caravan() -> void:
 		"prompt": wagon_prompt,
 		"follows_wagon": true,
 	})
+	return wagon
 
-	_player = ColorRect.new()
-	_player.color = LEADER_COLOR
-	_player.position = Vector2(0.0, GROUND_Y - LEADER_SIZE.y)
-	_player.size = LEADER_SIZE
-	add_child(_player)
+## Gövde yüksekliği karakterin boyundan, rengi ten renginden geliyor -
+## oluşturma ekranında seçilenler yolda da görünsün diye.
+func _build_person(character: CharacterData, is_leader: bool) -> ColorRect:
+	var height_ratio := inverse_lerp(
+		float(CharacterData.MIN_HEIGHT_CM),
+		float(CharacterData.MAX_HEIGHT_CM),
+		float(character.height_cm)
+	)
+	var body_height := lerpf(BODY_MIN_HEIGHT, BODY_MAX_HEIGHT, clampf(height_ratio, 0.0, 1.0))
 
-	var leader_label := Label.new()
-	leader_label.text = "Kervan Lideri"
-	leader_label.position = Vector2(-45.0, -28.0)
-	leader_label.size = Vector2(LEADER_SIZE.x + 90.0, 24.0)
-	leader_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_player.add_child(leader_label)
+	var body := ColorRect.new()
+	body.color = CharacterData.get_skin_tone_color(character.skin_tone)
+	body.size = Vector2(BODY_WIDTH, body_height)
+	body.position = Vector2(0.0, GROUND_Y - body_height)
+	if not is_leader:
+		body.position.x = -FOLLOWER_GAP
+	add_child(body)
+
+	var label := Label.new()
+	label.text = character.character_name if is_leader else character.character_name.split(" ")[0]
+	label.position = Vector2(-45.0, -28.0)
+	label.size = Vector2(BODY_WIDTH + 90.0, 24.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if is_leader:
+		label.modulate = LEADER_COLOR
+	body.add_child(label)
+	return body
 
 func _get_spot_rect(spot: Dictionary) -> Rect2:
 	if spot.get("follows_wagon", false):
-		return Rect2(_wagon.position, WAGON_SIZE)
+		return Rect2(_wagons[0].position, WAGON_SIZE)
 	return spot.rect
 
 func _update_prompts() -> void:
@@ -200,7 +260,7 @@ func _update_prompts() -> void:
 
 func _is_in_range(spot: Dictionary) -> bool:
 	var rect := _get_spot_rect(spot)
-	var player_center := _player.position.x + LEADER_SIZE.x * 0.5
+	var player_center := _player.position.x + _player.size.x * 0.5
 	return absf(rect.get_center().x - player_center) <= INTERACT_RANGE
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -242,12 +302,18 @@ func _refresh_status() -> void:
 	var session: GameSession = GameState.get_session()
 	var location := WorldMapData.get_location_by_id(session.current_location_id)
 	var location_name := "Yolda" if location == null else location.location_name
-	_status_label.text = "%s · Kese: %d GG · Erzak: %d · Vagon: %d" % [
+	_status_label.text = "%s · Kese: %d GG · Erzak: %d · Vagon: %d · Parti: %d/%d" % [
 		location_name,
 		session.wallet.balance,
 		session.get_provisions(),
 		session.owned_wagon_count,
+		session.get_party().size(),
+		session.get_party_capacity(),
 	]
+
+func _on_party_pressed() -> void:
+	Nav.return_scene = Nav.WORLD_HUB
+	get_tree().change_scene_to_file(Nav.PARTY)
 
 func _on_menu_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.MAIN_MENU)

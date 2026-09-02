@@ -221,7 +221,7 @@ func _build_crew_section() -> void:
 	_content.add_child(crew_row)
 
 	var note := _make_hint_label()
-	note.text = "Tayfa vagonları sürer ve kargo kapasiteni belirler. Savaşa ise en fazla %d kişilik adı olan bir parti girer - onları yolda ve şehirde toplarsın." % GameSession.MAX_PARTY_SIZE
+	note.text = "Tayfa vagonları sürer ve kargo kapasiteni belirler. Yola tek başına çıkarsın; adı olan yoldaşları şehirde ve yolda toplarsın. Her vagonda iki kişi yattığı için partin vagon sayınla büyür, savaş alanı dört mevkiden ibaret olduğu için tavanı %d kişidir." % GameSession.MAX_PARTY_SIZE
 	_content.add_child(note)
 
 func _make_section_title(text: String) -> Label:

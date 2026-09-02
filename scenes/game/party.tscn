@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqworld002city"]
+[gd_scene load_steps=2 format=3 uid="uid://bqparty001"]
 
-[ext_resource type="Script" path="res://scripts/world/city_map.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/party.gd" id="1"]
 
-[node name="CityMap" type="Control"]
+[node name="Party" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,21 +30,21 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Şehir"
+text = "Parti"
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Bir lokasyona tıkla. Kapıdan çıkınca yola dönersin."
+text = ""
 
-[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(640, 440)
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PartyButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
-text = "Partiyi Görüntüle"
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
 
-[node name="GateButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehir Kapısından Çık"
+text = "Geri"

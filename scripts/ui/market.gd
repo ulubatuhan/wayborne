@@ -31,13 +31,17 @@ var _shop_rows: Array[Dictionary] = []
 var _pending_purchase_item: Item
 var _pending_purchase_quantity: int = 0
 
-@onready var _location_note_label: Label = $MarginContainer/VBoxContainer/LocationNoteLabel
-@onready var _balance_value_label: Label = $MarginContainer/VBoxContainer/BalanceRow/BalanceValueLabel
-@onready var _cargo_value_label: Label = $MarginContainer/VBoxContainer/BalanceRow/CargoValueLabel
-@onready var _message_label: Label = $MarginContainer/VBoxContainer/MessageLabel
-@onready var _shop_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/ShopPanel/ShopList
-@onready var _inventory_grid: GridContainer = $MarginContainer/VBoxContainer/ContentRow/InventoryPanel/InventoryGrid
-@onready var _haggle_holder: VBoxContainer = $MarginContainer/VBoxContainer/HaggleHolder
+# İçerik kaydırılabilir bir kutunun içinde: mağaza satırları ve envanter
+# ızgarası ekranı aşınca geri tuşu ekrandan taşıp tıklanamaz hale
+# geliyordu. Başlık ve geri tuşu bilerek kaydırma alanının dışında.
+@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _location_note_label: Label = _content.get_node("LocationNoteLabel")
+@onready var _balance_value_label: Label = _content.get_node("BalanceRow/BalanceValueLabel")
+@onready var _cargo_value_label: Label = _content.get_node("BalanceRow/CargoValueLabel")
+@onready var _message_label: Label = _content.get_node("MessageLabel")
+@onready var _shop_list: VBoxContainer = _content.get_node("ContentRow/ShopPanel/ShopList")
+@onready var _inventory_grid: GridContainer = _content.get_node("ContentRow/InventoryPanel/InventoryGrid")
+@onready var _haggle_holder: VBoxContainer = _content.get_node("HaggleHolder")
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
