@@ -28,9 +28,13 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
    çarpışma açar (Darkest Dungeon tarzı, mevki kilitli yetenekler, 4
    mevkilik iki saf). Olaylar ve seferler XP verir; karakterler seviye
    atlayınca stat ve yetkinlik puanı kazanır (otomatik ya da elle
-   dağıtılır — parti ekranındaki karakter sayfası).
+   dağıtılır — parti ekranındaki karakter sayfası). Savaş, kayıp ve açlık
+   parti stresini biriktirir; "Kamp Kur" bir günü feda edip stresi azaltır,
+   biriken stres yüksek şehre varışta bazı yoldaşları kırabilir (huy
+   kazanır, nadiren tam tersi güçlenir, ağır kırılan biri ayrılabilir).
 5. **Şehre var** — escort ücreti moral ve hasara göre kırpılarak ödenir,
-   karakterler tam cana döner, ilerleme kaydedilir.
+   karakterler tam cana döner, stres bir miktar dinlenir, ilerleme
+   kaydedilir.
 
 Tasarımın değişmez kuralı: **kervan ağır kayıp yaşayabilir ama asla yok
 olmaz.** Altın negatife düşmez, erzak sıfırın altına inmez, oyuncunun son

@@ -32,6 +32,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_abandoned_wagon())
 	_road_events.append(_road_wanderer())
 	_road_events.append(_troubled_night())
+	_road_events.append(_stress_brawl())
 	return _road_events
 
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
@@ -300,15 +301,45 @@ static func _troubled_night() -> GameEvent:
 		_choice("EVT_TROUBLED_NIGHT_OPT_WATCH", _effects([
 			EventEffect.make(EventEffect.Type.PROVISIONS, -2),
 			EventEffect.make(EventEffect.Type.MORALE, -3),
+			EventEffect.make(EventEffect.Type.STRESS, 5),
 		])),
 		_choice_with_outcomes("EVT_TROUBLED_NIGHT_OPT_SLEEP", _outcomes([
 			EventOutcome.make("EVT_TROUBLED_NIGHT_SLEEP_GOOD", _effects([
 				EventEffect.make(EventEffect.Type.MORALE, 6),
+				EventEffect.make(EventEffect.Type.STRESS, -8),
 			]), 1.4),
 			EventOutcome.make("EVT_TROUBLED_NIGHT_SLEEP_BAD", _effects([
 				EventEffect.make(EventEffect.Type.MORALE, -10),
+				EventEffect.make(EventEffect.Type.STRESS, 12),
 				EventEffect.make(EventEffect.Type.GRANT_TRAIT, 0, TraitCatalog.CLUMSY_FOOT),
 			]), 1.0),
+		])),
+	])
+	return event
+
+## Yüksek parti stresi kendi agresif olayını açıyor - DD'deki gibi,
+## tükenmiş bir kadro birbirine düşebilir. `stress` bağlamı
+## GameSession.build_event_context()'ten geliyor.
+static func _stress_brawl() -> GameEvent:
+	var event := _event("evt_stress_brawl", "EVT_BRAWL", 1.3)
+	event.conditions = _conditions([
+		EventCondition.make("stress", EventCondition.Op.GREATER_EQUAL, 70),
+	])
+	event.cooldown_days = 4
+	event.choices = _choices([
+		_choice("EVT_BRAWL_OPT_INTERVENE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -5),
+			EventEffect.make(EventEffect.Type.STRESS, -15),
+		])),
+		_choice_with_outcomes("EVT_BRAWL_OPT_IGNORE", _outcomes([
+			EventOutcome.make("EVT_BRAWL_IGNORE_FIZZLE", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, -5),
+			]), 1.0),
+			EventOutcome.make("EVT_BRAWL_IGNORE_ESCALATE", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -12),
+				EventEffect.make(EventEffect.Type.STRESS, 10),
+				EventEffect.make(EventEffect.Type.GOLD, -30),
+			]), 1.3),
 		])),
 	])
 	return event

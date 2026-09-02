@@ -309,6 +309,15 @@ func get_traits() -> Array[Trait]:
 			result.append(trait_resource)
 	return result
 
+## Direnç ne kadar yüksekse parti stresi bu karakteri o kadar geç kırar -
+## dayanıklılığa bağlı (bkz. GameSession.resolve_stress_breaks). Herkes
+## er ya da geç kırılabilir, yalnızca eşiği farklı.
+func get_stress_resistance() -> int:
+	return 50 + int(round(3.0 * stats.get_effective_value(CharacterStats.Kind.ENDURANCE)))
+
+func is_stressed(current_party_stress: int) -> bool:
+	return current_party_stress >= get_stress_resistance()
+
 func _trait_bonus_sum(field: String) -> int:
 	var total := 0
 	for trait_id in trait_ids:

@@ -33,6 +33,13 @@ const COMBAT_DEFEAT_WAGON_DAMAGE: int = 2
 const COMBAT_DEFEAT_MERCHANTS: int = 1
 const COMBAT_DEFEAT_MORALE: int = -20
 const COMBAT_DEFEAT_GOLD: int = -40
+const COMBAT_STRESS_BASE: int = 8
+const COMBAT_STRESS_PER_DOWN: int = 6
+const COMBAT_VICTORY_STRESS_RELIEF: int = 4
+const COMBAT_DEFEAT_STRESS: int = 15
+
+## Erzak tükenince moralin yanı sıra gerginlik de yükselir.
+const FAMINE_STRESS: int = 6
 
 ## Yolda karşılaşılan biri şehirdeki kadar seçici değil ama pazarlık payı
 ## da bırakmıyor.
@@ -55,6 +62,7 @@ var _log_list: VBoxContainer
 var _advance_button: Button
 var _draw_button: Button
 var _reset_button: Button
+var _camp_button: Button
 var _arrive_button: Button
 var _arrival_panel: VBoxContainer
 var _enter_city_button: Button
@@ -94,6 +102,12 @@ func _build_ui() -> void:
 	_advance_button.text = tr("EVT_TEST_ADVANCE")
 	_advance_button.pressed.connect(_on_advance_day)
 	controls_row.add_child(_advance_button)
+
+	_camp_button = Button.new()
+	_camp_button.text = "Kamp Kur"
+	_camp_button.tooltip_text = "Bir gün kaybedip stresi azaltır."
+	_camp_button.pressed.connect(_on_camp_pressed)
+	controls_row.add_child(_camp_button)
 
 	_draw_button = Button.new()
 	_draw_button.text = tr("EVT_TEST_DRAW")
@@ -235,7 +249,42 @@ func _on_advance_day() -> void:
 
 	_current_day += 1
 	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
+	_advance_contracts_and_provisions()
 
+	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
+	if event == null:
+		_add_log("Gün %d: %s" % [_current_day, tr("EVT_TEST_QUIET_DAY")])
+	else:
+		_present_event(event)
+
+	_refresh_state()
+	_check_journey_end()
+
+## Kamp: günü ilerletir, erzak yer, ama olay çekmez - o günü dinlenerek
+## geçirdiğin garanti, karşılığında stres belirgin azalır (bkz.
+## GameSession.make_camp). "21. nasıl daha az maliyetli olacaksa" kararı:
+## yeni bir gün döngüsü kurmak yerine mevcut gün ilerletme akışını
+## paylaşıyor, yalnızca olay çekimini atlayıp kampın kendi payını ekliyor.
+func _on_camp_pressed() -> void:
+	if _current_event != null:
+		return
+
+	_current_day += 1
+	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
+	_advance_contracts_and_provisions()
+
+	var camp_result := _session.make_camp()
+	_add_log(
+		"Gün %d: Kamp kuruldu (erzak -%d), kadro biraz soluklandı (stres -%d)." % [
+			_current_day, camp_result.provisions_spent, camp_result.stress_relief
+		],
+		OUTCOME_COLOR
+	)
+
+	_refresh_state()
+	_check_journey_end()
+
+func _advance_contracts_and_provisions() -> void:
 	var expired_contracts := _session.advance_day()
 	for _merchant_id in expired_contracts:
 		_add_log("Loncadaki bir kontratın süresi doldu, itibarın düştü.")
@@ -249,17 +298,8 @@ func _on_advance_day() -> void:
 	_session.change_provisions(-daily_consumption)
 	if _session.get_provisions() <= 0:
 		_session.caravan.change_morale(-10)
+		_session.change_stress(FAMINE_STRESS)
 		_add_log("Gün %d: Erzak tükendi, moral düşüyor." % _current_day)
-
-	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
-	if event == null:
-		_add_log("Gün %d: %s" % [_current_day, tr("EVT_TEST_QUIET_DAY")])
-	else:
-		_present_event(event)
-
-	_refresh_state()
-	if _session.journey_days_remaining <= 0 and _current_event == null:
-		_finish_journey()
 
 func _on_force_draw() -> void:
 	if _current_event != null:
@@ -433,14 +473,21 @@ func _open_combat(danger_percent: int) -> void:
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
-	panel.start_combat(_session.get_party(), danger)
+	panel.start_combat(_session.get_party(), danger, null, _session.party_stress)
 
-func _on_combat_finished(victory: bool, xp_awarded: int) -> void:
+func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> void:
 	if xp_awarded > 0:
 		_session.grant_party_xp(xp_awarded)
 		_add_log("      Kadro %d tecrübe kazandı." % xp_awarded, OUTCOME_COLOR)
 
-	var effects: Array[EventEffect] = []
+	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
+	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
+	var stress_delta := COMBAT_STRESS_BASE + downed_count * COMBAT_STRESS_PER_DOWN
+	stress_delta += -COMBAT_VICTORY_STRESS_RELIEF if victory else COMBAT_DEFEAT_STRESS
+
+	var effects: Array[EventEffect] = [
+		EventEffect.make(EventEffect.Type.STRESS, stress_delta),
+	]
 	if victory:
 		var loot := COMBAT_LOOT_BASE + int(round(_session.danger_level * COMBAT_LOOT_DANGER_BONUS))
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, loot))
@@ -563,7 +610,30 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		penalty_label.modulate = LOCKED_COLOR
 		_arrival_panel.add_child(penalty_label)
 
+	for entry in (payout.get("stress_breaks", []) as Array):
+		var break_data: Dictionary = entry
+		var break_label := _make_summary_label(_stress_break_line(break_data))
+		break_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		break_label.modulate = LOCKED_COLOR if break_data.affliction else OUTCOME_COLOR
+		_arrival_panel.add_child(break_label)
+
 	_add_log("Şehre varıldı. Net kazanç: %d GG." % payout.net, OUTCOME_COLOR)
+
+## Kırılan bir yoldaşın varış özetindeki tek satırlık dökümü - huy
+## kazandıysa adı, ayrıldıysa bunun da belirtilmesi lazım, oyuncu neden
+## bir yoldaşını kaybettiğini anlasın.
+func _stress_break_line(break_data: Dictionary) -> String:
+	var character_name: String = break_data.character_name
+	var trait_id: String = break_data.trait_id
+	var trait_resource := TraitCatalog.get_trait(trait_id) if not trait_id.is_empty() else null
+	var trait_note := " (%s)" % trait_resource.display_name if trait_resource != null else ""
+
+	if break_data.departed:
+		return "%s stresten kırıldı ve kervandan ayrıldı%s." % [character_name, trait_note]
+	if trait_resource != null:
+		var kind := "olumlu bir" if trait_resource.is_positive else "yeni bir"
+		return "%s stresten kırıldı, %s huy edindi%s." % [character_name, kind, trait_note]
+	return "%s stresten kırıldı." % character_name
 
 func _make_summary_label(text: String) -> Label:
 	var label := Label.new()
@@ -577,10 +647,11 @@ func _on_enter_city_pressed() -> void:
 func _set_journey_controls_enabled(enabled: bool) -> void:
 	_advance_button.disabled = not enabled
 	_draw_button.disabled = not enabled
+	_camp_button.disabled = not enabled
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan
-	_state_label.text = "Gün %d · Kalan yol: %d gün · Tehlike: %d%%\nAltın: %d GG · Erzak: %d · İtibar: %d\nVagon: %d (%d hasarlı) · Tüccar: %d · Evrak: %d · Moral: %d" % [
+	_state_label.text = "Gün %d · Kalan yol: %d gün · Tehlike: %d%%\nAltın: %d GG · Erzak: %d · İtibar: %d\nVagon: %d (%d hasarlı) · Tüccar: %d · Evrak: %d · Moral: %d · Stres: %d" % [
 		_current_day,
 		_session.journey_days_remaining,
 		int(_session.danger_level * 100.0),
@@ -592,6 +663,7 @@ func _refresh_state() -> void:
 		caravan.merchant_names.size(),
 		caravan.documents,
 		caravan.morale,
+		_session.party_stress,
 	]
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:

@@ -24,6 +24,11 @@ const CRIT_MULTIPLIER: float = 1.5
 const MIN_HIT_CHANCE: int = 5
 const MAX_HIT_CHANCE: int = 95
 
+## Kırılma noktasını aşmış (CombatUnit.is_stressed) bir savaşçının, sırası
+## geldiğinde emirlere kulak asmama ihtimali - DD'deki "irrasyonel"
+## davranışın en sade hâli: hamle yapamaz, sırası boşa gider.
+const STRESS_REFUSAL_CHANCE: int = 20
+
 var state: State = State.ONGOING
 var round_number: int = 1
 var player_units: Array[CombatUnit] = []
@@ -138,16 +143,35 @@ func _after_action() -> void:
 	_run_until_player_turn()
 
 func _run_until_player_turn() -> void:
-	while not is_over() and not is_player_turn():
+	while not is_over():
 		var unit := get_active_unit()
 		if unit == null:
 			return
+
+		if is_player_turn():
+			if not _try_refuse_order(unit):
+				break
+			_advance_turn()
+			continue
+
 		_run_enemy_turn(unit)
 		if _check_end():
 			return
 		_advance_turn()
+
 	if not is_over():
 		turn_started.emit(get_active_unit())
+
+## Stresten kırılmış bir savaşçı sırası geldiğinde emre kulak asmayabilir -
+## sırası tamamen boşa gider, oyuncuya hiçbir seçenek sunulmaz. true
+## dönerse tur zaten tüketildi, çağıran _advance_turn()'e geçmeli.
+func _try_refuse_order(unit: CombatUnit) -> bool:
+	if not unit.is_stressed:
+		return false
+	if _rng.randi_range(1, 100) > STRESS_REFUSAL_CHANCE:
+		return false
+	_emit_log("%s emirlere kulak asmıyor." % unit.display_name)
+	return true
 
 func _run_enemy_turn(unit: CombatUnit) -> void:
 	var choice := _pick_enemy_action(unit)

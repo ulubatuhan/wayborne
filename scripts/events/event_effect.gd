@@ -16,6 +16,7 @@ enum Type {
 	WAGON_LOSE,
 	MERCHANT_LEAVE,
 	MORALE,
+	STRESS,
 	# Yolculuk
 	TRAVEL_DAYS,
 	DANGER,

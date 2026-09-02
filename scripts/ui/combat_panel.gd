@@ -9,7 +9,7 @@ extends VBoxContainer
 ## gömülür. Böylece sefer sırasında sahne değiştirip durum taşımak
 ## gerekmez.
 
-signal combat_finished(victory, xp_awarded)  # bool, int
+signal combat_finished(victory, xp_awarded, downed_count)  # bool, int, int
 
 const ENEMY_COLOR: Color = Color(0.85, 0.45, 0.4)
 const PLAYER_COLOR: Color = Color(0.55, 0.8, 0.55)
@@ -35,8 +35,13 @@ func _ready() -> void:
 	_ensure_built()
 
 ## Verilen parti ve tehlike seviyesiyle yeni bir savaş açar. Parti
-## CharacterData listesidir; sıralaması mevki sırasıdır.
-func start_combat(party: Array[CharacterData], danger_level: float, rng: RandomNumberGenerator = null) -> void:
+## CharacterData listesidir; sıralaması mevki sırasıdır. party_stress
+## GameSession'dan geçirilir - kırılma noktasını aşmış (bkz.
+## CharacterData.is_stressed) her karakter emirlere kulak asmayabilir.
+func start_combat(
+	party: Array[CharacterData], danger_level: float,
+	rng: RandomNumberGenerator = null, party_stress: int = 0
+) -> void:
 	_ensure_built()
 
 	var combat_rng := rng
@@ -50,7 +55,7 @@ func start_combat(party: Array[CharacterData], danger_level: float, rng: RandomN
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
-		units.append(CombatUnit.from_character(character, position))
+		units.append(CombatUnit.from_character(character, position, character.is_stressed(party_stress)))
 		level_total += character.level
 		position += 1
 
@@ -266,9 +271,12 @@ func _on_continue_pressed() -> void:
 	for unit in _encounter.enemy_units:
 		if not unit.is_alive():
 			xp_awarded += unit.xp_value
+	# downed_count write_back_party()'den önce okunmalı - o çağrı düşenleri
+	# 1 canla ayağa kaldırıyor, sonrasında kimse "düşmüş" sayılmıyor.
+	var downed_count := _encounter.get_downed_count()
 	_encounter.write_back_party()
 	_continue_button.visible = false
-	combat_finished.emit(victory, xp_awarded)
+	combat_finished.emit(victory, xp_awarded, downed_count)
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

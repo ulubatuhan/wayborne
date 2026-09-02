@@ -26,6 +26,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_save_migration.gd",
 	"res://tests/test_recruit_catalog.gd",
 	"res://tests/test_traits.gd",
+	"res://tests/test_stress.gd",
 ]
 
 func _initialize() -> void:

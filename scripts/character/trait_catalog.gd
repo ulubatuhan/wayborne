@@ -38,12 +38,26 @@ static func get_trait(trait_id: String) -> Trait:
 ## seviye" burada kendini gösteriyor, aşırı statlar aşırı huy demek değil.
 static func roll_seed_trait(stats: CharacterStats, rng: RandomNumberGenerator) -> String:
 	_ensure_built()
-	if _traits.is_empty():
+	return _weighted_pick(_traits, stats, rng)
+
+## Stres kırılması: kutup (olumlu/olumsuz) zaten zar atılarak belirlenmiş
+## oluyor (bkz. GameSession.resolve_stress_breaks) - burada yalnızca o
+## kutuptaki huylar arasında, yine statlarla orantılı seçim yapılır.
+static func roll_break_trait(stats: CharacterStats, rng: RandomNumberGenerator, want_positive: bool) -> String:
+	_ensure_built()
+	var pool: Array[Trait] = []
+	for candidate in _traits:
+		if candidate.is_positive == want_positive:
+			pool.append(candidate)
+	return _weighted_pick(pool, stats, rng)
+
+static func _weighted_pick(pool: Array[Trait], stats: CharacterStats, rng: RandomNumberGenerator) -> String:
+	if pool.is_empty():
 		return ""
 
 	var weights: Array[float] = []
 	var total := 0.0
-	for candidate in _traits:
+	for candidate in pool:
 		var effective := stats.get_effective_value(candidate.affinity_stat)
 		var lean := effective if candidate.is_positive else -effective
 		var weight := maxf(0.5, 1.0 + lean)
@@ -52,11 +66,11 @@ static func roll_seed_trait(stats: CharacterStats, rng: RandomNumberGenerator) -
 
 	var roll := rng.randf() * total
 	var cursor := 0.0
-	for i in _traits.size():
+	for i in pool.size():
 		cursor += weights[i]
 		if roll <= cursor:
-			return _traits[i].trait_id
-	return _traits[_traits.size() - 1].trait_id
+			return pool[i].trait_id
+	return pool[pool.size() - 1].trait_id
 
 static func _ensure_built() -> void:
 	if not _traits.is_empty():

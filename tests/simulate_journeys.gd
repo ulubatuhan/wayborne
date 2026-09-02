@@ -49,6 +49,9 @@ func _run_batch(danger: float) -> Dictionary:
 	var contracts_lost := 0
 	var worst_net := 1 << 30
 	var best_net := -(1 << 30)
+	var stress_total := 0
+	var breaks_total := 0
+	var departures_total := 0
 
 	for run_index in RUN_COUNT:
 		var outcome := _run_single(danger, 1000 + run_index)
@@ -60,6 +63,9 @@ func _run_batch(danger: float) -> Dictionary:
 			provisions_out += 1
 		worst_net = mini(worst_net, int(outcome.net))
 		best_net = maxi(best_net, int(outcome.net))
+		stress_total += int(outcome.stress_before_rest)
+		breaks_total += int(outcome.breaks)
+		departures_total += int(outcome.departures)
 
 	return {
 		"net_avg": float(net_total) / float(RUN_COUNT),
@@ -69,6 +75,9 @@ func _run_batch(danger: float) -> Dictionary:
 		"contracts_lost_avg": float(contracts_lost) / float(RUN_COUNT),
 		"worst_net": worst_net,
 		"best_net": best_net,
+		"stress_avg": float(stress_total) / float(RUN_COUNT),
+		"breaks_avg": float(breaks_total) / float(RUN_COUNT),
+		"departures_total": departures_total,
 	}
 
 ## Bir seferi baştan sona koşturur. Olay seçenekleri "ilk uygun seçenek"
@@ -108,6 +117,7 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		if session.get_provisions() <= 0:
 			starved = true
 			session.caravan.change_morale(-10)
+			session.change_stress(6)  # bkz. road_journey.gd FAMINE_STRESS
 
 		var event := engine.roll_for_day(day, session.build_event_context())
 		if event == null:
@@ -119,7 +129,16 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		_resolve_first_available_choice(event, engine, session, danger, rng)
 
 	var wagons_before := session.caravan.wagon_count
+	var stress_before_rest := session.party_stress
 	var payout := session.finish_journey()
+	# finish_journey() zaten resolve_stress_breaks() çağırıyor - burada
+	# tekrar çağırmak aynı karakteri iki kez kırardı.
+	var stress_breaks: Array = payout.get("stress_breaks", [])
+
+	var departures := 0
+	for entry in stress_breaks:
+		if bool((entry as Dictionary).get("departed", false)):
+			departures += 1
 
 	return {
 		"net": int(payout.net),
@@ -127,6 +146,9 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		"wagons_lost": maxi(0, 4 - wagons_before),
 		"contracts_lost": int(payout.get("lost_contracts", 0)),
 		"ran_out_of_provisions": starved,
+		"stress_before_rest": stress_before_rest,
+		"breaks": stress_breaks.size(),
+		"departures": departures,
 	}
 
 func _resolve_first_available_choice(
@@ -144,7 +166,12 @@ func _resolve_first_available_choice(
 		return
 
 ## Etkiler uygulanır; savaş isteği çıkarsa gerçek motor koşturulur ve
-## sonucu road_journey ile aynı etkilere çevrilir.
+## sonucu road_journey ile aynı etkilere (stres dahil) çevrilir.
+const SIM_COMBAT_STRESS_BASE: int = 8
+const SIM_COMBAT_STRESS_PER_DOWN: int = 6
+const SIM_COMBAT_VICTORY_STRESS_RELIEF: int = 4
+const SIM_COMBAT_DEFEAT_STRESS: int = 15
+
 func _apply(
 	effects: Array[EventEffect], session: GameSession,
 	danger: float, rng: RandomNumberGenerator
@@ -153,7 +180,14 @@ func _apply(
 	if result.combat_requests.is_empty():
 		return
 
-	var victory := _simulate_combat(session.get_party(), danger, rng)
+	var combat_result := _simulate_combat(session.get_party(), danger, rng, 1, session.party_stress)
+	var victory: bool = combat_result.victory
+	var downed_count: int = combat_result.downed_count
+
+	var stress_delta := SIM_COMBAT_STRESS_BASE + downed_count * SIM_COMBAT_STRESS_PER_DOWN
+	stress_delta += -SIM_COMBAT_VICTORY_STRESS_RELIEF if victory else SIM_COMBAT_DEFEAT_STRESS
+	session.change_stress(stress_delta)
+
 	var aftermath: Array[EventEffect] = []
 	if victory:
 		aftermath.append(EventEffect.make(EventEffect.Type.GOLD, 25 + int(round(danger * 60.0))))
@@ -167,14 +201,15 @@ func _apply(
 	var _aftermath_result := EventEffectApplier.apply(aftermath, session)
 
 func _simulate_combat(
-	party: Array[CharacterData], danger: float, rng: RandomNumberGenerator, average_level: int = 1
-) -> bool:
+	party: Array[CharacterData], danger: float, rng: RandomNumberGenerator,
+	average_level: int = 1, party_stress: int = 0
+) -> Dictionary:
 	var units: Array[CombatUnit] = []
 	var position := 1
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
-		units.append(CombatUnit.from_character(character, position))
+		units.append(CombatUnit.from_character(character, position, character.is_stressed(party_stress)))
 		position += 1
 
 	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng, average_level)
@@ -187,8 +222,9 @@ func _simulate_combat(
 			break
 		guard += 1
 
+	var downed_count := encounter.get_downed_count()
 	encounter.write_back_party()
-	return encounter.state == CombatEncounter.State.VICTORY
+	return {"victory": encounter.state == CombatEncounter.State.VICTORY, "downed_count": downed_count}
 
 ## En zayıf ulaşılabilir hedefe en sert vuran yeteneği seçer.
 func _take_greedy_action(encounter: CombatEncounter) -> bool:
@@ -232,6 +268,9 @@ func _report(danger: float, stats: Dictionary) -> void:
 	print("    erzak tükendi   %%%.1f koşuda" % stats.starved_pct)
 	print("    vagon kaybı     ortalama %7.2f" % stats.wagons_lost_avg)
 	print("    teslim edilemeyen kontrat  %.2f" % stats.contracts_lost_avg)
+	print("    varışta stres   ortalama %7.1f · kırılma %.2f/sefer · toplam ayrılık %d" % [
+		stats.stress_avg, stats.breaks_avg, stats.departures_total
+	])
 	print("")
 
 func _report_combat(party_size: int) -> void:
@@ -250,7 +289,7 @@ func _report_combat(party_size: int) -> void:
 				CharacterStats.new()
 			))
 
-		if _simulate_combat(party, 0.5, rng):
+		if bool(_simulate_combat(party, 0.5, rng).victory):
 			wins += 1
 
 	print("    %d kişilik parti: %%%d kazanıyor (%d/%d)" % [
@@ -285,7 +324,7 @@ func _report_combat_at_level(level: int) -> void:
 			_level_up(character, level)
 			party.append(character)
 
-		if _simulate_combat(party, 0.5, rng, level):
+		if bool(_simulate_combat(party, 0.5, rng, level).victory):
 			wins += 1
 
 	print("    seviye %2d: %%%d kazanıyor (%d/%d)" % [

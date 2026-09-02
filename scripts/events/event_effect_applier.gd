@@ -56,6 +56,9 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 		EventEffect.Type.MORALE:
 			session.caravan.change_morale(effect.amount)
 			result.lines.append("Moral %+d (şimdi %d)" % [effect.amount, session.caravan.morale])
+		EventEffect.Type.STRESS:
+			session.change_stress(effect.amount)
+			result.lines.append("Stres %+d (şimdi %d)" % [effect.amount, session.party_stress])
 		EventEffect.Type.TRAVEL_DAYS:
 			session.journey_days_remaining = maxi(0, session.journey_days_remaining + effect.amount)
 			result.lines.append("Yol %+d gün" % effect.amount)
