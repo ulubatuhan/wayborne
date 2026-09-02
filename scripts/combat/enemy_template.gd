@@ -16,6 +16,9 @@ extends Resource
 
 @export var skill_ids: Array[String] = []
 
+## Yenilince partiye kazandırdığı tecrübe (bkz. CombatPanel.combat_finished).
+@export var xp_value: int = 10
+
 ## Düşmanın tercih ettiği mevkiler; sıra kurulurken öne mi arkaya mı
 ## yerleşeceğini belirler (küçük sayı = önde).
 @export var preferred_position: int = 1

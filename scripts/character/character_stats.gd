@@ -9,7 +9,14 @@ extends RefCounted
 
 const BASE_VALUE: int = 5
 const MIN_VALUE: int = 1
-const MAX_VALUE: int = 10
+const MAX_VALUE: int = 15
+
+## 10'a kadar statın her puanı tam değer katar; 10'un üstü yarı değerde -
+## seviye atlayınca statı hep aynı yere yığmanın getirisi azalır. stat=5
+## (başlangıç değeri) her zaman 0 döner, böylece türetilmiş formüller
+## baseline'da değişmeden kalır.
+static func effective_value(raw: int) -> float:
+	return float(mini(raw, 10) - BASE_VALUE) + 0.5 * float(maxi(0, raw - 10))
 
 enum Kind {
 	STRENGTH,
@@ -110,28 +117,33 @@ func copy() -> CharacterStats:
 		copied.set_value(kind, get_value(kind))
 	return copied
 
+func get_effective_value(kind: Kind) -> float:
+	return effective_value(get_value(kind))
+
 # --- Türetilmiş değerler ---
+# Her formül baseline (stat=5, effective=0) sonucu + katsayı * effective(stat)
+# biçiminde: 10'a kadar eski davranışla birebir aynı, 10 üstü yavaşlar.
 
 func get_max_hp() -> int:
-	return 20 + endurance * 4
+	return 40 + int(round(4.0 * get_effective_value(Kind.ENDURANCE)))
 
 func get_initiative() -> int:
-	return 5 + agility
+	return 10 + int(round(get_effective_value(Kind.AGILITY)))
 
 func get_accuracy() -> int:
-	return 70 + perception * 2
+	return 80 + int(round(2.0 * get_effective_value(Kind.PERCEPTION)))
 
 func get_dodge() -> int:
-	return agility * 2
+	return 10 + int(round(2.0 * get_effective_value(Kind.AGILITY)))
 
 func get_crit_chance() -> int:
-	return 2 + perception
+	return 7 + int(round(get_effective_value(Kind.PERCEPTION)))
 
 func get_damage_bonus() -> int:
-	return strength
+	return 5 + int(round(get_effective_value(Kind.STRENGTH)))
 
 func get_support_power() -> int:
-	return intellect
+	return 5 + int(round(get_effective_value(Kind.INTELLECT)))
 
 func to_dict() -> Dictionary:
 	return {

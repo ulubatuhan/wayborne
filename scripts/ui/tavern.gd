@@ -64,8 +64,10 @@ func _build_row(route: TravelRoute) -> HBoxContainer:
 ## Liman şehrinden gelen bir kervancı her dedikoduyu daha ucuza duyar
 ## (bkz. Culture.rumor_cost_multiplier).
 func _rumor_cost(route: TravelRoute) -> int:
-	var cost := BASE_RUMOR_COST + route.travel_days * PER_DAY_RUMOR_COST
-	return maxi(1, int(round(cost * _session.get_rumor_cost_multiplier())))
+	var base_cost := BASE_RUMOR_COST + route.travel_days * PER_DAY_RUMOR_COST
+	var cost := float(base_cost) * _session.get_rumor_cost_multiplier()
+	cost *= 1.0 - _session.get_duty_discount(DutyCatalog.TELLAL)
+	return maxi(1, int(round(cost)))
 
 func _refresh_rows() -> void:
 	for row in _rows:

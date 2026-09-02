@@ -9,7 +9,7 @@ extends VBoxContainer
 ## gömülür. Böylece sefer sırasında sahne değiştirip durum taşımak
 ## gerekmez.
 
-signal combat_finished(victory)  # bool
+signal combat_finished(victory, xp_awarded)  # bool, int
 
 const ENEMY_COLOR: Color = Color(0.85, 0.45, 0.4)
 const PLAYER_COLOR: Color = Color(0.55, 0.8, 0.55)
@@ -46,13 +46,18 @@ func start_combat(party: Array[CharacterData], danger_level: float, rng: RandomN
 
 	var units: Array[CombatUnit] = []
 	var position := 1
+	var level_total := 0
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
 		units.append(CombatUnit.from_character(character, position))
+		level_total += character.level
 		position += 1
 
-	var enemies := EnemyCatalog.build_bandit_squad(danger_level, units.size(), combat_rng)
+	var average_level := int(round(float(level_total) / float(maxi(1, units.size()))))
+	var enemies := EnemyCatalog.build_bandit_squad(danger_level, units.size(), combat_rng, average_level)
+
+	_apply_muhafiz_opening_bonus(party, units)
 
 	_encounter = CombatEncounter.new(units, enemies, combat_rng)
 	_encounter.log_added.connect(_on_log_added)
@@ -65,6 +70,26 @@ func start_combat(party: Array[CharacterData], danger_level: float, rng: RandomN
 
 	_encounter.start()
 	_refresh()
+
+## Muhafız görevini tutan biri varsa kadro ilk tura iyi konumlanmış girer:
+## herkese tek turluk bir isabet bonusu. DutyCatalog.get_duty_power()
+## zaten sınıf eşleşmesini ve statı hesaba katıyor, burada yalnızca sayıya
+## çeviriyoruz.
+func _apply_muhafiz_opening_bonus(party: Array[CharacterData], units: Array[CombatUnit]) -> void:
+	var holder: CharacterData = null
+	for character in party:
+		if character.duty_id == DutyCatalog.MUHAFIZ:
+			holder = character
+			break
+	if holder == null:
+		return
+
+	var power := DutyCatalog.get_duty_power(holder, DutyCatalog.MUHAFIZ)
+	var bonus := int(round(10.0 * (power - 1.0)))
+	if bonus <= 0:
+		return
+	for unit in units:
+		unit.apply_modifier("accuracy", bonus, 1)
 
 func _ensure_built() -> void:
 	if _built:
@@ -237,9 +262,13 @@ func _on_state_changed(new_state: CombatEncounter.State) -> void:
 
 func _on_continue_pressed() -> void:
 	var victory := _encounter.state == CombatEncounter.State.VICTORY
+	var xp_awarded := 0
+	for unit in _encounter.enemy_units:
+		if not unit.is_alive():
+			xp_awarded += unit.xp_value
 	_encounter.write_back_party()
 	_continue_button.visible = false
-	combat_finished.emit(victory)
+	combat_finished.emit(victory, xp_awarded)
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

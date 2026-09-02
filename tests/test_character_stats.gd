@@ -36,8 +36,8 @@ func _test_clamping(t) -> void:
 	stats.set_value(CharacterStats.Kind.STRENGTH, -5)
 	t.eq(stats.strength, CharacterStats.MIN_VALUE, "tabanın altı kırpılır")
 
-	stats.set_value(CharacterStats.Kind.AGILITY, 9)
-	stats.add_value(CharacterStats.Kind.AGILITY, 5)
+	stats.set_value(CharacterStats.Kind.AGILITY, 12)
+	stats.add_value(CharacterStats.Kind.AGILITY, 10)
 	t.eq(stats.agility, CharacterStats.MAX_VALUE, "add_value da kırpar")
 
 	t.eq(CharacterStats.KIND_ORDER.size(), 6, "altı temel stat var")

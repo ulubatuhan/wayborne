@@ -189,13 +189,21 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	if skill.is_heal():
 		var healed := _roll_heal(unit, skill)
 		target.apply_heal(healed)
+		_apply_skill_modifier(skill, target)
 		_emit_log("%s, %s yeteneğiyle %s'in %d canını sardı." % [
 			unit.display_name, skill.display_name, target.display_name, healed
 		])
 		return
 
+	## Saf değiştirici (hasarsız, iyileştirmesiz buff/debuff) isabet
+	## atmadan doğrudan uygulanır - kendine/yoldaşa şans devreye girmez.
+	if skill.target_kind != CombatSkill.Target.ENEMY and skill.base_damage == 0:
+		_apply_skill_modifier(skill, target)
+		_emit_log("%s, %s yeteneğini kullandı." % [unit.display_name, skill.display_name])
+		return
+
 	var hit_chance := clampi(
-		unit.accuracy + skill.accuracy_bonus - target.dodge,
+		unit.get_effective_accuracy() + skill.accuracy_bonus - target.get_effective_dodge(),
 		MIN_HIT_CHANCE,
 		MAX_HIT_CHANCE
 	)
@@ -206,6 +214,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	var is_crit := _rng.randi_range(1, 100) <= unit.crit_chance + skill.crit_bonus
 	var damage := _roll_damage(unit, skill, is_crit)
 	target.apply_damage(damage)
+	_apply_skill_modifier(skill, target)
 
 	if is_crit:
 		_emit_log("KRİTİK! %s, %s ile %s'e %d hasar verdi." % [
@@ -223,17 +232,26 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 			_emit_log("%s devrildi." % target.display_name)
 		_repack(_side_of(target))
 
+func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:
+	if skill.has_modifier():
+		target.apply_modifier(skill.modifier_stat, skill.modifier_amount, skill.modifier_rounds)
+
 func _roll_damage(unit: CombatUnit, skill: CombatSkill, is_crit: bool) -> int:
 	var variance := _rng.randi_range(-skill.damage_variance, skill.damage_variance)
-	var scaling := unit.support_power if skill.scales_with_support else unit.damage_bonus
-	var raw := float(skill.base_damage + variance + scaling) * unit.damage_multiplier
+	var scaling := unit.support_power if skill.scales_with_support else unit.get_effective_damage_bonus()
+	var raw := (
+		float(skill.base_damage + variance + scaling)
+		* unit.damage_multiplier
+		* unit.get_proficiency_multiplier(skill.skill_id)
+	)
 	if is_crit:
 		raw *= CRIT_MULTIPLIER
 	return maxi(1, int(round(raw)))
 
 func _roll_heal(unit: CombatUnit, skill: CombatSkill) -> int:
 	var variance := _rng.randi_range(-skill.damage_variance, skill.damage_variance)
-	return maxi(1, skill.heal_amount + variance + int(unit.support_power / 2.0))
+	var base := skill.heal_amount + variance + int(unit.support_power / 2.0)
+	return maxi(1, int(round(float(base) * unit.get_proficiency_multiplier(skill.skill_id))))
 
 func _build_order() -> void:
 	_order.clear()
@@ -254,6 +272,7 @@ func _advance_turn() -> void:
 			round_number += 1
 			for unit in _order:
 				unit.tick_cooldowns()
+				unit.tick_modifiers()
 		if _order[_order_index].is_alive():
 			return
 

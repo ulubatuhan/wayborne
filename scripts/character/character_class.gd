@@ -15,3 +15,11 @@ extends Resource
 ## SkillCatalog'daki yetenek kimlikleri. Sıra, savaş panelindeki buton
 ## sırasıdır.
 @export var skill_ids: Array[String] = []
+
+## Seviye atlarken otomatik dağıtımın önceliklendirdiği statlar (bkz.
+## CharacterData._auto_allocate_level_up).
+@export var stat_affinity: Array[CharacterStats.Kind] = []
+
+## Bu sınıfın "ana" kervan görevi - DutyCatalog.get_duty_power() eşleşince
+## görev gücünü katlar. Boş bırakılırsa sınıfın hiçbir görevde bonusu olmaz.
+@export var duty_id: String = ""

@@ -118,6 +118,52 @@ func swap_party_positions(first_index: int, second_index: int) -> bool:
 	party[second_index] = temp
 	return true
 
+# --- Görevler (Duty): kimin ne iş yaptığı, DutyCatalog.get_duty_power() ---
+
+## Bir görevi bir karaktere verir; aynı görevi tutan başkası varsa
+## boşa çıkar - bir görevin tek sahibi olabilir.
+func assign_duty(character: CharacterData, duty_id: String) -> void:
+	if character == null or not get_party().has(character):
+		return
+	for other in get_party():
+		if other != character and other.duty_id == duty_id:
+			other.duty_id = ""
+	character.duty_id = duty_id
+
+func get_duty_holder(duty_id: String) -> CharacterData:
+	for character in get_party():
+		if character.duty_id == duty_id:
+			return character
+	return null
+
+## Görevin ham gücü: sahibi yoksa 1.0 (nötr - ne bonus ne ceza).
+func get_duty_multiplier(duty_id: String) -> float:
+	var holder := get_duty_holder(duty_id)
+	if holder == null:
+		return 1.0
+	return DutyCatalog.get_duty_power(holder, duty_id)
+
+## Yüzdesel indirimler için (pazar fiyatı, onarım bedeli gibi):
+## 0.0 = indirim yok, tavan %20.
+func get_duty_discount(duty_id: String) -> float:
+	return clampf((get_duty_multiplier(duty_id) - 1.0) * 0.3, 0.0, 0.2)
+
+## Tam sayı azaltmalar için (günlük erzak tüketimi, vagon hasarı gibi).
+func get_duty_flat_reduction(duty_id: String) -> int:
+	return int(floor((get_duty_multiplier(duty_id) - 1.0) / 0.2))
+
+## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
+## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
+func grant_party_xp(amount: int) -> Dictionary:
+	var levels_gained: Dictionary = {}
+	if amount <= 0:
+		return levels_gained
+	for character in get_party():
+		var gained := character.gain_xp(amount)
+		if gained > 0:
+			levels_gained[character.character_name] = gained
+	return levels_gained
+
 func heal_party() -> void:
 	for character in party:
 		character.heal_full()
@@ -243,7 +289,8 @@ func buy_wagon() -> bool:
 	return true
 
 func get_repair_cost() -> int:
-	return owned_wagon_damaged * WAGON_REPAIR_COST_PER_WAGON
+	var base := owned_wagon_damaged * WAGON_REPAIR_COST_PER_WAGON
+	return int(round(base * (1.0 - get_duty_discount(DutyCatalog.ARABACI))))
 
 ## Tüm hasarlı vagonları tek seferde onarır. Başarısızsa (hasar yok ya
 ## da kese yetmez) false döner.
@@ -389,6 +436,16 @@ func finish_journey() -> Dictionary:
 	_apply_wagon_losses_to_ownership()
 	payout["lost_contracts"] = _apply_undelivered_contract_penalty()
 
+	# XP hesabı sıfırlanmadan önce yapılmalı: moral ve kontrat kaybı seferin
+	# "başarılı" mı "başarısız" mı sayıldığını belirliyor (bkz. _calculate_journey_xp).
+	var journey_xp := _calculate_journey_xp(
+		journey_total_days, danger_level,
+		caravan.morale / float(CaravanState.MAX_MORALE),
+		payout["lost_contracts"]
+	)
+	payout["xp_awarded"] = journey_xp
+	payout["levels_gained"] = grant_party_xp(journey_xp)
+
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	journey_origin_id = ""
@@ -428,6 +485,21 @@ func _apply_wagon_losses_to_ownership() -> void:
 
 	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
+
+const JOURNEY_XP_BASE: int = 15
+const JOURNEY_XP_PER_DAY: float = 4.0
+const JOURNEY_XP_DANGER_BONUS: float = 40.0
+const JOURNEY_XP_FAILURE_FACTOR: float = 0.25
+const JOURNEY_SUCCESS_MORALE_RATIO: float = 0.5
+
+## Başarı ölçütü kervanın hiç yok olmaması değil (o zaten garanti) - moral
+## yarının altına düşmeden ve hiç kontrat kaybetmeden varmak. Tutmazsa
+## sefer yine tamamlanmış sayılır ama XP'nin yalnızca çeyreği kazanılır.
+func _calculate_journey_xp(days: int, danger: float, morale_ratio: float, lost_contracts: int) -> int:
+	var base := float(JOURNEY_XP_BASE) + float(days) * JOURNEY_XP_PER_DAY + danger * JOURNEY_XP_DANGER_BONUS
+	var succeeded := morale_ratio >= JOURNEY_SUCCESS_MORALE_RATIO and lost_contracts == 0
+	var factor := 1.0 if succeeded else JOURNEY_XP_FAILURE_FACTOR
+	return maxi(0, int(round(base * factor)))
 
 func _calculate_arrival_payout() -> Dictionary:
 	var gross := 0
