@@ -366,10 +366,11 @@ func _restock_recruits() -> void:
 	recruit_candidates.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%s|%d" % [current_location_id, total_days_elapsed])
+	var player_level := get_player_character().level
 	for venue in [
 		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
 	]:
-		recruit_candidates[venue] = RecruitCatalog.build_candidates(venue, rng)
+		recruit_candidates[venue] = RecruitCatalog.build_candidates(venue, rng, player_level)
 
 func get_recruit_candidates(venue: String) -> Array[CharacterData]:
 	var candidates: Array[CharacterData] = []

@@ -30,6 +30,8 @@ var _culture_button: OptionButton
 var _culture_description: Label
 var _culture_bonus: Label
 var _culture_perk: Label
+var _class_button: OptionButton
+var _class_description: Label
 var _name_edit: LineEdit
 var _height_slider: HSlider
 var _height_label: Label
@@ -51,6 +53,8 @@ func _ready() -> void:
 
 func _build_ui() -> void:
 	_build_culture_section()
+	_content.add_child(HSeparator.new())
+	_build_class_section()
 	_content.add_child(HSeparator.new())
 	_build_identity_section()
 	_content.add_child(HSeparator.new())
@@ -92,6 +96,18 @@ func _build_culture_section() -> void:
 	_culture_perk.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_culture_perk.modulate = PERK_COLOR
 	_content.add_child(_culture_perk)
+
+func _build_class_section() -> void:
+	_content.add_child(_make_section_title("Sınıf"))
+
+	_class_button = OptionButton.new()
+	for character_class in ClassCatalog.get_classes():
+		_class_button.add_item(character_class.display_name)
+	_class_button.item_selected.connect(_on_class_selected)
+	_content.add_child(_class_button)
+
+	_class_description = _make_hint_label()
+	_content.add_child(_class_description)
 
 func _build_identity_section() -> void:
 	_content.add_child(_make_section_title("Kimlik"))
@@ -250,6 +266,9 @@ func _on_culture_selected(_index: int) -> void:
 func _on_name_changed(_new_text: String) -> void:
 	_refresh()
 
+func _on_class_selected(_index: int) -> void:
+	_refresh()
+
 func _roll_random_name() -> void:
 	var pool := _selected_culture().name_pool
 	if pool.is_empty():
@@ -282,7 +301,12 @@ func _on_crew_size_changed(_value: float) -> void:
 
 func _refresh() -> void:
 	var culture := _selected_culture()
+	var character_class := _selected_class()
 	var preview := _build_character()
+
+	_class_description.text = "%s Uygun görev: %s." % [
+		character_class.description, DutyCatalog.get_duty(character_class.duty_id).display_name
+	]
 
 	_points_label.text = "Dağıtılacak puan: %d / %d" % [STAT_POINTS - _spent_points, STAT_POINTS]
 	for row in _stat_rows:
@@ -324,13 +348,17 @@ func _height_effect_text(preview: CharacterData) -> String:
 func _selected_culture() -> Culture:
 	return CultureCatalog.get_cultures()[maxi(_culture_button.selected, 0)]
 
+func _selected_class() -> CharacterClass:
+	return ClassCatalog.get_classes()[maxi(_class_button.selected, 0)]
+
 func _build_character() -> CharacterData:
 	return CharacterData.create(
 		_name_edit.text.strip_edges(),
 		_selected_culture().culture_id,
 		_base_stats,
 		int(_height_slider.value),
-		_skin_button.selected
+		_skin_button.selected,
+		_selected_class().class_id
 	)
 
 func _wagons_for_crew_size(crew_size: int) -> int:
