@@ -52,8 +52,10 @@ func refresh() -> void:
 		_info_label.text = "Şu an burada yola çıkmak isteyen kimse yok."
 		return
 
-	_info_label.text = "Parti %d/%d dolu. Savaşta yalnızca bu kişiler dövüşür." % [
-		_session.get_party().size(), GameSession.MAX_PARTY_SIZE
+	_info_label.text = "Parti %d/%d · %d vagon. Her vagonda iki kişi yatar; savaş alanı da dört mevkiden ibaret." % [
+		_session.get_party().size(),
+		_session.get_party_capacity(),
+		_session.owned_wagon_count,
 	]
 	for candidate in candidates:
 		_candidate_list.add_child(_build_candidate_row(candidate))
@@ -127,7 +129,10 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	var hire_button := Button.new()
 	# Kilitli seçenek gizlenmez, sebebiyle gösterilir.
 	if not _session.can_recruit():
-		hire_button.text = "Parti dolu"
+		if _session.get_party_capacity() < GameSession.MAX_PARTY_SIZE:
+			hire_button.text = "Vagonlarında yer yok"
+		else:
+			hire_button.text = "Parti dolu"
 		hire_button.disabled = true
 		hire_button.modulate = LOCKED_COLOR
 	elif not _session.wallet.can_afford(candidate.hire_cost):

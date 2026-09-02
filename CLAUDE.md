@@ -91,10 +91,20 @@ wayborne/
 
 - **Crew size ≠ combat party.** Crew (chosen in character creation) drives the
   wagons and sets cargo capacity, up to 12 people / 6 wagons. The combat party
-  is the named characters, max `GameSession.MAX_PARTY_SIZE` (4), and only they
-  fight. Never conflate the two.
+  is the named characters and only they fight. Never conflate the two.
+- **Party capacity comes from wagons.** `GameSession.get_party_capacity()` is
+  `owned_wagon_count * PEOPLE_PER_WAGON`, capped at `MAX_PARTY_SIZE` (4)
+  because the battlefield has four ranks. So buying a wagon at the caravan
+  yard also buys a party slot; never gate recruiting on `MAX_PARTY_SIZE`
+  directly. Events read `party_slots_free` from the context dict, since
+  `EventCondition` can only compare a key against a constant.
+- The player starts alone. Companions are recruited in the city (`RecruitPanel`)
+  or on the road (`evt_road_wanderer`), and every one of them is drawn walking
+  behind the leader in `world_hub.gd` — height and skin tone included, so what
+  character creation chose is visible in the world.
 - `party[0]` is always the player: they can be reordered but never dismissed.
-- Party order **is** combat rank order (1 = front).
+- Party order **is** combat rank order (1 = front). `party.tscn` is where the
+  player reads and reorders it (reachable from the road HUD and the city map).
 - Characters heal to full on city arrival (`finish_journey()`); the road is
   where damage accumulates.
 
@@ -126,10 +136,10 @@ wayborne/
   dice - it opens the real panel.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
-  - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right,
-    the wagon lerp-follows behind. Landmarks (test-area sign, city gate) and
-    the wagon itself are interaction spots: walk within `INTERACT_RANGE`, then
-    click them or press E. No physics bodies — plain position arithmetic on a
+  - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
+    the party then the wagons lerp-follow behind, one body per party member and
+    one wagon per `owned_wagon_count`. The city gate and the first wagon are
+    interaction spots: walk within `INTERACT_RANGE`, then click them or press E. No physics bodies — plain position arithmetic on a
     single ground line, so it stays cheap on Web export.
   - `city_map.gd`: placeholder city map. City interaction is deliberately
     **not** card-based (see Event Engine Rules): each location button opens its
@@ -149,6 +159,10 @@ wayborne/
 - A screen's back button goes to `Nav.return_scene`, never to a fixed scene.
 - Whoever sends the player somewhere is responsible for setting
   `Nav.return_scene` first.
+- A screen whose content can grow past the viewport (market rows, the contract
+  board, the party list) puts that content in a `ScrollContainer` and keeps the
+  back button **outside** it. Otherwise the back button is pushed off-screen and
+  the player is stranded - this actually happened on the market screen.
 
 - **scripts/ui/**: User interface scripts
   - Menu controllers

@@ -43,12 +43,20 @@ func _route_key(from_location_id: String, to_location_id: String) -> String:
 
 ## Savaş partisi. party[0] her zaman oyuncunun kendi karakteridir ve
 ## partiden çıkarılamaz; sıralama aynı zamanda savaştaki mevki sırasıdır.
-## Bu, vagonları süren tayfa sayısından (CaravanPlan) ayrı bir kavramdır:
-## tayfa vagon kapasitesini belirler, parti ise savaşa giren adı olan
-## kişilerdir.
+## Bu, vagonların taşıdığı isimsiz tayfadan ayrı bir kavramdır: tayfa
+## kargo kapasitesini belirler, parti ise savaşa giren adı olan kişilerdir.
+##
+## Kaç kişi taşıyabildiğin vagon sayısına bağlı (her vagonda iki kişi
+## yatar), ama savaş alanı dört mevkiden ibaret olduğu için tavan
+## MAX_PARTY_SIZE. Yani vagon almak partiye yer açar - kervansaraydaki
+## vagon alımı böylece savaşa da dokunuyor.
 const MAX_PARTY_SIZE: int = 4
+const PEOPLE_PER_WAGON: int = 2
 
 var party: Array[CharacterData] = []
+
+func get_party_capacity() -> int:
+	return clampi(owned_wagon_count * PEOPLE_PER_WAGON, 1, MAX_PARTY_SIZE)
 
 func get_party() -> Array[CharacterData]:
 	_ensure_party()
@@ -64,7 +72,7 @@ func set_player_character(character: CharacterData) -> void:
 
 func can_recruit() -> bool:
 	_ensure_party()
-	return party.size() < MAX_PARTY_SIZE
+	return party.size() < get_party_capacity()
 
 ## Ücreti keseden düşüp partiye katar. Kese yetmezse ya da parti doluysa
 ## false döner, hiçbir şey değişmez.
@@ -525,5 +533,8 @@ func build_event_context() -> Dictionary:
 		"days_remaining": journey_days_remaining,
 		"reputation": reputation,
 		"party_size": party.size(),
+		# Koşullar başka bir anahtarla karşılaştırma yapamadığı için boş
+		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
+		"party_slots_free": maxi(0, get_party_capacity() - party.size()),
 		"flags": _flags,
 	}

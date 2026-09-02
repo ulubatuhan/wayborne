@@ -25,8 +25,14 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	_status_label.text = "Sahip olduğun vagon: %d / %d · Hasarlı: %d" % [
-		_session.owned_wagon_count, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_damaged
+	# Vagon almak yalnızca kargo değil, parti kapasitesi de açıyor
+	# (bkz. GameSession.get_party_capacity) - oyuncu bunu burada görsün.
+	_status_label.text = "Sahip olduğun vagon: %d / %d · Hasarlı: %d · Parti kapasiten: %d/%d" % [
+		_session.owned_wagon_count,
+		CaravanPlan.DEFAULT_MAX_WAGONS,
+		_session.owned_wagon_damaged,
+		_session.get_party().size(),
+		_session.get_party_capacity(),
 	]
 
 	if _session.owned_wagon_damaged > 0:

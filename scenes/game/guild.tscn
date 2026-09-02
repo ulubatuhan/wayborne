@@ -36,18 +36,27 @@ text = "Tüccar Loncası"
 layout_mode = 2
 text = "Kabul ettiğin kontrat panodan kalkar; sefere çıkmadan süresi geçerse ya da yolda teslim edilmezse itibarın düşer."
 
-[node name="ContractList" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="ContractList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AcceptedTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="AcceptedTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
 text = "Kabul Ettiğin Kontratlar"
 
-[node name="AcceptedList" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="AcceptedList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehre Dön"
+text = "Geri"

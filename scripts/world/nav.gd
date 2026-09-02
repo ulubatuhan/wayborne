@@ -20,6 +20,7 @@ const CARAVAN_YARD: String = "res://scenes/game/caravan_yard.tscn"
 const GUILD: String = "res://scenes/game/guild.tscn"
 const RECRUIT: String = "res://scenes/game/recruit.tscn"
 const COMBAT: String = "res://scenes/game/combat.tscn"
+const PARTY: String = "res://scenes/game/party.tscn"
 
 ## Alt ekranların "geri" tuşu buraya döner.
 static var return_scene: String = WORLD_HUB

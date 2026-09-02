@@ -10,11 +10,14 @@ extends Control
 var _session: GameSession
 var _rows: Array[Dictionary] = []
 
+# Kontrat listesi büyüdükçe geri tuşunun ekrandan taşmaması için pano
+# kaydırılabilir bir kutuda; başlık ve geri tuşu dışarıda kalır.
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _contract_list: VBoxContainer = $MarginContainer/VBoxContainer/ContractList
-@onready var _accepted_title: Label = $MarginContainer/VBoxContainer/AcceptedTitle
-@onready var _accepted_list: VBoxContainer = $MarginContainer/VBoxContainer/AcceptedList
+@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _contract_list: VBoxContainer = _content.get_node("ContractList")
+@onready var _accepted_title: Label = _content.get_node("AcceptedTitle")
+@onready var _accepted_list: VBoxContainer = _content.get_node("AcceptedList")
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:

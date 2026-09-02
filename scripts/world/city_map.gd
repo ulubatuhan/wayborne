@@ -8,12 +8,14 @@ const SPOT_SIZE: Vector2 = Vector2(190, 76)
 @onready var _map_panel: Control = $MarginContainer/VBoxContainer/MapPanel
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
+@onready var _party_button: Button = $MarginContainer/VBoxContainer/PartyButton
 @onready var _gate_button: Button = $MarginContainer/VBoxContainer/GateButton
 
 var _session: GameSession
 
 func _ready() -> void:
 	_session = GameState.get_session()
+	_party_button.pressed.connect(_on_party_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_refresh_title()
 	_build_spots()
@@ -24,11 +26,13 @@ func _refresh_title() -> void:
 	var wagon_note := "%d vagon" % _session.owned_wagon_count
 	if _session.owned_wagon_damaged > 0:
 		wagon_note += " (%d hasarlı)" % _session.owned_wagon_damaged
-	_title_label.text = "%s · Kese: %d GG · Erzak: %d · %s" % [
+	_title_label.text = "%s · Kese: %d GG · Erzak: %d · %s · Parti: %d/%d" % [
 		city_name,
 		_session.wallet.balance,
 		_session.get_provisions(),
 		wagon_note,
+		_session.get_party().size(),
+		_session.get_party_capacity(),
 	]
 
 func _build_spots() -> void:
@@ -71,6 +75,10 @@ func _add_spot(spot_name: String, description: String, position: Vector2, scene_
 func _on_spot_pressed(scene_path: String) -> void:
 	Nav.return_scene = Nav.CITY_MAP
 	get_tree().change_scene_to_file(scene_path)
+
+func _on_party_pressed() -> void:
+	Nav.return_scene = Nav.CITY_MAP
+	get_tree().change_scene_to_file(Nav.PARTY)
 
 func _on_gate_pressed() -> void:
 	Nav.return_scene = Nav.WORLD_HUB
