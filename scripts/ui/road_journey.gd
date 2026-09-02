@@ -244,6 +244,8 @@ func _on_advance_day() -> void:
 	# Göçebe kültürü az yer (bkz. Culture.daily_provision_multiplier).
 	var daily_consumption := 1 + _session.caravan.merchant_names.size()
 	daily_consumption = maxi(1, int(round(daily_consumption * _session.get_daily_provision_multiplier())))
+	# Levazımcı ölçülü dağıtır: gücüne göre günlük tüketimden düşer.
+	daily_consumption = maxi(1, daily_consumption - _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI))
 	_session.change_provisions(-daily_consumption)
 	if _session.get_provisions() <= 0:
 		_session.caravan.change_morale(-10)
@@ -337,6 +339,9 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 		for line in outcome_result.lines:
 			_add_log("      %s" % line)
 
+	if resolved_event.xp_value > 0:
+		_session.grant_party_xp(resolved_event.xp_value)
+
 	EventBus.road_event_resolved.emit(resolved_event, choice)
 	_refresh_state()
 	_check_journey_end()
@@ -428,7 +433,11 @@ func _open_combat(danger_percent: int) -> void:
 	panel.combat_finished.connect(_on_combat_finished)
 	panel.start_combat(_session.get_party(), danger)
 
-func _on_combat_finished(victory: bool) -> void:
+func _on_combat_finished(victory: bool, xp_awarded: int) -> void:
+	if xp_awarded > 0:
+		_session.grant_party_xp(xp_awarded)
+		_add_log("      Kadro %d tecrübe kazandı." % xp_awarded, OUTCOME_COLOR)
+
 	var effects: Array[EventEffect] = []
 	if victory:
 		var loot := COMBAT_LOOT_BASE + int(round(_session.danger_level * COMBAT_LOOT_DANGER_BONUS))
@@ -535,6 +544,12 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 	var net_label := _make_summary_label("Net kazanç: %d GG" % payout.net)
 	net_label.modulate = OUTCOME_COLOR
 	_arrival_panel.add_child(net_label)
+
+	var xp_awarded: int = payout.get("xp_awarded", 0)
+	if xp_awarded > 0:
+		var xp_label := _make_summary_label("Sefer tecrübesi: %d XP" % xp_awarded)
+		xp_label.modulate = OUTCOME_COLOR
+		_arrival_panel.add_child(xp_label)
 
 	var lost_contracts: int = payout.get("lost_contracts", 0)
 	if lost_contracts > 0:

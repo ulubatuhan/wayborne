@@ -33,6 +33,10 @@ enum Category {
 
 @export var choices: Array[EventChoice] = []
 
+## Kart çıkınca partiye (oyuncu karakterine) verilen XP. Katalogdaki
+## olayların çoğu bu varsayılanı kullanır, tek tek ayarlanmamış.
+@export var xp_value: int = 10
+
 func is_eligible(context: Dictionary) -> bool:
 	return EventCondition.are_all_met(conditions, context)
 

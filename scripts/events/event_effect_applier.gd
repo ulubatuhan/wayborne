@@ -40,7 +40,9 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			if removed:
 				result.lines.append("%s -%d" % [effect.text_value, effect.amount])
 		EventEffect.Type.WAGON_DAMAGE:
-			var damaged := session.caravan.damage_wagons(effect.amount)
+			# Arabacı elinden geldiğince hasarı azaltır ama tamamen sıfırlamaz.
+			var reduced := maxi(0, effect.amount - session.get_duty_flat_reduction(DutyCatalog.ARABACI))
+			var damaged := session.caravan.damage_wagons(reduced)
 			if damaged > 0:
 				result.lines.append("%d vagon hasar aldı" % damaged)
 		EventEffect.Type.WAGON_LOSE:

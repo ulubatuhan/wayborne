@@ -272,6 +272,8 @@ func _get_buy_price(item: Item) -> int:
 	price *= _session.get_buy_price_multiplier()
 	if item.item_id == GameSession.PROVISIONS_ITEM_ID:
 		price *= _session.get_provision_cost_multiplier()
+	# Tellal pazarlığı ucuzlatır - tıpkı kültür perki gibi bir çarpan daha.
+	price *= 1.0 - _session.get_duty_discount(DutyCatalog.TELLAL)
 	return maxi(1, int(round(price)))
 
 func _get_sell_price(item: Item) -> int:

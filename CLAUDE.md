@@ -71,17 +71,40 @@ wayborne/
     Sezgi/Karizma) plus every derived value (max HP, initiative, accuracy,
     dodge, crit, damage bonus). Derived formulas live **only** here - the
     character screen and the combat engine both read them from this class.
+    Stats run 1-15 but only the first 10 points count at full value -
+    `get_effective_value()` returns `min(stat,10)-5 + 0.5*max(0,stat-10)`,
+    zero at the starting value of 5. Every derived formula is written as
+    `baseline + coefficient * effective_value(stat)`, so a fresh character
+    (all stats at 5) behaves exactly as before this system existed; only
+    pushing a stat past 10 (via level-ups) triggers the slowdown, on purpose
+    - a maxed stat should never dominate the game.
   - `Culture` / `CultureCatalog`: the five cultures (göçebe, vadi loncaları,
     dağ kabilesi, liman şehri, balıkçı kasabası). Each carries a stat lean, a
     name pool and exactly **one** mechanical perk, and every perk plugs into
     a system that already exists (daily provisions, provision price, market
     buy price, combat damage, rumor price). No perk may invent a new system.
   - `CharacterClass` / `ClassCatalog`: combat role. `class_name` is a
-    reserved word, so the visible name lives in `display_name`. One class for
-    now (Kervan Muhafızı); the catalog exists so a second one costs no UI work.
+    reserved word, so the visible name lives in `display_name`. Four classes
+    (Sıra Neferi/Sekban/Kırıkçı/Kalem Efendisi), each with a `stat_affinity`
+    (used by auto-allocate) and a `duty_id` - its "ana" kervan görevi, which
+    `DutyCatalog.get_duty_power()` rewards when a character actually holds
+    that duty.
+  - `Duty` / `DutyCatalog`: the six road/city jobs (Muhafız/İzci/Levazımcı/
+    Arabacı/Tellal/Otacı), separate from combat class. `GameSession.assign_duty()`
+    gives a duty to one party member at a time; `get_duty_multiplier()` /
+    `get_duty_discount()` / `get_duty_flat_reduction()` turn that into the
+    concrete number a system reads (buy price, repair cost, daily
+    consumption, wagon damage, combat opening accuracy). A duty with no
+    holder is neutral (multiplier 1.0), never a penalty.
   - `CharacterData`: identity + appearance (boy/ten rengi) + stats + class +
-    current HP, with `to_dict()`/`from_dict()`. Height is not flavour: tall
-    means more HP and less dodge, short the reverse.
+    current HP + level/XP/yetkinlik/second_class_id/duty_id, with
+    `to_dict()`/`from_dict()`. Height is not flavour: tall means more HP and
+    less dodge, short the reverse. `gain_xp()` levels up (curve: see
+    `xp_required_for_level`), granting 1 stat point + 2 yetkinlik points per
+    level; `auto_allocate` (default on, companions keep it on, the player can
+    turn it off) spends those immediately toward the class's `stat_affinity`
+    and its own skills. Multiclass (`set_second_class`) unlocks at
+    `MULTICLASS_UNLOCK_LEVEL` (7) and merges both classes' skill lists.
   - `RecruitCatalog`: per-venue candidate pools (meydan cheap/green, taverna
     balanced, lonca expensive and reputation-gated). Candidates are rolled
     **once per city arrival** from a `location + day` seed, so reopening the
@@ -136,8 +159,26 @@ wayborne/
   back up at 1 HP. The caravan can be ruined, never wiped out.
 - Combat is entered only through `EventEffect.Type.TRIGGER_COMBAT`, bridged by
   `EventEffectApplier.Result.combat_requests` and applied in `road_journey.gd`
-  `_on_combat_finished()`. The bandit ambush's "fight" choice no longer rolls
-  dice - it opens the real panel.
+  `_on_combat_finished(victory, xp_awarded)`. The bandit ambush's "fight"
+  choice no longer rolls dice - it opens the real panel.
+- **Timed stat modifiers are the one sanctioned way a skill reaches beyond
+  its own hit.** A `CombatSkill` can carry `modifier_stat` ("accuracy",
+  "dodge" or "damage"), `modifier_amount` and `modifier_rounds`; landing the
+  skill calls `CombatUnit.apply_modifier()` on the target, and
+  `CombatEncounter` ticks every unit's modifiers down by one each time the
+  round number advances. `get_effective_accuracy()/_dodge()/_damage_bonus()`
+  are what combat resolution actually reads - never the raw fields directly
+  once a skill might have buffed/debuffed them. A skill with no damage, no
+  heal and a non-enemy target (SELF/ALLY) applies its modifier without an
+  accuracy roll - see `CombatSkill.make_buff()`.
+- **Yetkinlik (skill proficiency) lives on the character, never on the
+  shared `CombatSkill` resource.** `CombatUnit.skill_proficiency` (0-100 per
+  skill, invested via `CharacterData.invest_skill_point()`) scales that
+  unit's damage/heal by up to +50% and shortens its cooldown - mutating the
+  cached `CombatSkill`/`EnemyTemplate` singletons directly would leak across
+  every other user of that skill/template, which is why enemy level scaling
+  is a `power_scale` multiplier applied only to the freshly-built
+  `CombatUnit`, not the `EnemyTemplate` itself.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
@@ -353,6 +394,14 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
 - Test the UI-free cores, which is why they were written UI-free:
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
   `GameSession`. Never test engine internals or scene wiring.
+- `test_progression.gd` locks the XP curve, diminishing-returns stat math,
+  auto-allocate and the multiclass unlock; `test_duties.gd` locks
+  `DutyCatalog.get_duty_power()`'s class-match multipliers and the discount/
+  flat-reduction formulas `GameSession` derives from it; `test_save_migration.gd`
+  loads a save dict shaped like it predates a given field and asserts sane
+  defaults - a reminder that every new `CharacterData`/`GameSession` field
+  needs a `.get(key, default)` in `from_dict()`/`load_from_dict()`, never a
+  bare index.
 - Seed every RNG. A test that can flake is worse than no test.
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
@@ -472,11 +521,23 @@ Faz 4 (karakter + combat) tamamlandı. Oyuna artık bir "sen" girdi:
   (`Nav.recruit_venue`), lonca itibar ister. Yolda da bir aday çıkabilir
   (`evt_road_wanderer` → `TRIGGER_RECRUIT`).
 
-**Sırada (Faz 5):** ikinci sınıf ve sınıfa özel yetenek ağacı, savaşta
-stres/moral bağı, olay havuzunun genişlemesi (11 → 30+), placeholder
-isimlerin (`test_loc_a`, `Tüccar 12`) gerçek lore'a dönüşmesi,
-dünya/UI metinlerinin de `data/locale/`'e taşınması (şu an yalnızca
-olay metinleri orada), `tests/` altında GUT testleri.
+Faz 5 (güvenlik ağı) tamamlandı: CI artık her push/PR'da testleri koşturup
+Godot'un sessizce geçtiği ayrıştırma hatalarını yakalıyor (`tests.yml`),
+314 doğrulamalık yedi paket ve `simulate_journeys.gd` denge simülatörü var.
+
+Faz 6 ("Karakterin Yolculuğu") sürüyor - dört PR'lık bir hat: **PR-A
+(veri katmanı, tamamlandı)** stat tavanını 15'e çıkardı ve 10 üstünü
+yavaşlattı (`CharacterStats.get_effective_value`), XP/seviye eğrisini,
+dört sınıfı (Sıra Neferi/Sekban/Kırıkçı/Kalem Efendisi) ve on iki yeni
+yeteneği, süreli stat değiştiricileri (`CombatSkill.modifier_*`), yetkinlik
+(per-skill continuous investment) ve altı kervan görevini (`Duty`/
+`DutyCatalog`) getirdi - dördü (Muhafız/Levazımcı/Arabacı/Tellal) canlı
+sistemlere bağlandı, ikisi (İzci/Otacı) henüz katalogda hazır ama bağlanmadı
+(İzci `caravan_planner.gd`/`world_map.gd`'yi, Otacı PR-D'nin kamp sistemini
+bekliyor). Sırada: **PR-B** karakter ekranı (stat/yetkinlik dağıtımı,
+görev seçimi, ekipman yer tutucuları), **PR-C** huylar + Kilise, **PR-D**
+stres/moral döngüsü ve kamp - hepsi harekât emrinin (oturum geçmişinde)
+kapsamı içinde.
 
 ## Quick Start
 

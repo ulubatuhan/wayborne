@@ -31,6 +31,14 @@ func _initialize() -> void:
 	for party_size in party_sizes:
 		_report_combat(party_size)
 
+	print("")
+	print("── Seviye dengesi (4 kişilik parti, tehlike %50, düşman da seviyeye göre büyür)")
+	print("   Hedef: seviye 1 ~%%40-55, seviye 15 ~%%75-88 kazanmalı - Sekban/Kırıkçı/Kalem")
+	print("   Efendisi katılımıyla dört sınıf da dönüşümlü test ediliyor.")
+	var levels_to_check: Array[int] = [1, 5, 10, 15]
+	for level in levels_to_check:
+		_report_combat_at_level(level)
+
 	quit(0)
 
 func _run_batch(danger: float) -> Dictionary:
@@ -158,7 +166,9 @@ func _apply(
 		aftermath.append(EventEffect.make(EventEffect.Type.MORALE, -20))
 	var _aftermath_result := EventEffectApplier.apply(aftermath, session)
 
-func _simulate_combat(party: Array[CharacterData], danger: float, rng: RandomNumberGenerator) -> bool:
+func _simulate_combat(
+	party: Array[CharacterData], danger: float, rng: RandomNumberGenerator, average_level: int = 1
+) -> bool:
 	var units: Array[CombatUnit] = []
 	var position := 1
 	for character in party:
@@ -167,7 +177,7 @@ func _simulate_combat(party: Array[CharacterData], danger: float, rng: RandomNum
 		units.append(CombatUnit.from_character(character, position))
 		position += 1
 
-	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng)
+	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng, average_level)
 	var encounter := CombatEncounter.new(units, enemies, rng)
 	encounter.start()
 
@@ -245,4 +255,39 @@ func _report_combat(party_size: int) -> void:
 
 	print("    %d kişilik parti: %%%d kazanıyor (%d/%d)" % [
 		party_size, int(round(100.0 * float(wins) / float(battles))), wins, battles
+	])
+
+## Dört seviyeye kadar zorunlu XP toplayarak gerçekçi bir dağıtım kurar -
+## auto_allocate açık olduğu için sınıfın yatkın olduğu statlara gider.
+func _level_up(character: CharacterData, target_level: int) -> void:
+	var total_xp := 0
+	for level in range(1, target_level):
+		total_xp += CharacterData.xp_required_for_level(level)
+	if total_xp > 0:
+		character.gain_xp(total_xp)
+
+func _report_combat_at_level(level: int) -> void:
+	var wins := 0
+	var battles := 60
+	var class_ids: Array[String] = [ClassCatalog.GUARD, ClassCatalog.HUNTER, ClassCatalog.BREAKER, ClassCatalog.CLERK]
+
+	for index in battles:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 700 + index
+
+		var party: Array[CharacterData] = []
+		for slot in 4:
+			var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+			var character := CharacterData.create(
+				"Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new(),
+				CharacterData.DEFAULT_HEIGHT_CM, 1, class_ids[slot]
+			)
+			_level_up(character, level)
+			party.append(character)
+
+		if _simulate_combat(party, 0.5, rng, level):
+			wins += 1
+
+	print("    seviye %2d: %%%d kazanıyor (%d/%d)" % [
+		level, int(round(100.0 * float(wins) / float(battles))), wins, battles
 	])

@@ -36,6 +36,16 @@ enum Target {
 ## Açık ise hasar/iyileştirme Güç yerine Zeka'dan ölçeklenir.
 @export var scales_with_support: bool = false
 
+## Süreli stat değiştirici: hedefe (ya da SELF/ALLY için kullanıcıya)
+## modifier_rounds tur boyunca modifier_amount kadar "accuracy", "dodge"
+## ya da "damage" ekler/çıkarır. modifier_rounds = 0 -> değiştirici yok.
+@export var modifier_stat: String = ""
+@export var modifier_amount: int = 0
+@export var modifier_rounds: int = 0
+
+func has_modifier() -> bool:
+	return modifier_rounds > 0 and not modifier_stat.is_empty()
+
 func can_use_from(position: int) -> bool:
 	return position in usable_positions
 
@@ -70,7 +80,8 @@ static func make_attack(
 	skill_id: String, display_name: String, description: String,
 	usable_positions: Array, target_positions: Array,
 	base_damage: int, damage_variance: int,
-	accuracy_bonus: int = 0, crit_bonus: int = 0, cooldown_rounds: int = 0
+	accuracy_bonus: int = 0, crit_bonus: int = 0, cooldown_rounds: int = 0,
+	modifier_stat: String = "", modifier_amount: int = 0, modifier_rounds: int = 0
 ) -> CombatSkill:
 	var skill := CombatSkill.new()
 	skill.skill_id = skill_id
@@ -83,5 +94,29 @@ static func make_attack(
 	skill.damage_variance = damage_variance
 	skill.accuracy_bonus = accuracy_bonus
 	skill.crit_bonus = crit_bonus
+	skill.cooldown_rounds = cooldown_rounds
+	skill.modifier_stat = modifier_stat
+	skill.modifier_amount = modifier_amount
+	skill.modifier_rounds = modifier_rounds
+	return skill
+
+## Hasarsız/iyileştirmesiz bir süreli değiştirici: kendine ya da bir
+## yoldaşa şans atmadan uygulanır (bkz. CombatEncounter._resolve_skill).
+static func make_buff(
+	skill_id: String, display_name: String, description: String,
+	target_kind: Target, usable_positions: Array, target_positions: Array,
+	modifier_stat: String, modifier_amount: int, modifier_rounds: int,
+	cooldown_rounds: int = 0
+) -> CombatSkill:
+	var skill := CombatSkill.new()
+	skill.skill_id = skill_id
+	skill.display_name = display_name
+	skill.description = description
+	skill.target_kind = target_kind
+	skill.usable_positions = to_position_array(usable_positions)
+	skill.target_positions = to_position_array(target_positions)
+	skill.modifier_stat = modifier_stat
+	skill.modifier_amount = modifier_amount
+	skill.modifier_rounds = modifier_rounds
 	skill.cooldown_rounds = cooldown_rounds
 	return skill

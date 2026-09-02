@@ -25,8 +25,13 @@ static func get_enemy(enemy_id: String) -> EnemyTemplate:
 ##
 ## Kadro ayrıca partiden en fazla bir kişi fazla olabilir: tek başına yola
 ## çıkan bir oyuncu dört haydutla karşılaşmaz, ama hep de rahat etmez.
+##
+## average_level partinin ortalama seviyesidir; seviye arttıkça haydutların
+## canı/hasarı da hafifçe büyür ki üst seviye bir parti hep ezici galip
+## gelmesin - EnemyTemplate'in kendisi sabit kalır, ölçek yalnızca
+## CombatUnit.from_enemy()'e power_scale olarak geçer.
 static func build_bandit_squad(
-	danger_level: float, party_size: int, rng: RandomNumberGenerator
+	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1
 ) -> Array[CombatUnit]:
 	_ensure_built()
 
@@ -48,20 +53,26 @@ static func build_bandit_squad(
 	var squad_size := mini(templates.size(), MAX_SQUAD_SIZE)
 	squad_size = mini(squad_size, maxi(2, party_size + 1))
 
+	var power_scale := get_power_scale(average_level)
 	var units: Array[CombatUnit] = []
 	for index in squad_size:
-		units.append(CombatUnit.from_enemy(templates[index], index + 1))
+		units.append(CombatUnit.from_enemy(templates[index], index + 1, power_scale))
 	return units
+
+## Seviye 1'de 1.0; her seviye canı/hasarı %8 büyütür, üst sınır seviye
+## 15'te ~%12'lik zafer oranına denk düşecek şekilde yumuşak tutulur.
+static func get_power_scale(average_level: int) -> float:
+	return 1.0 + 0.08 * float(maxi(0, average_level - 1))
 
 static func _ensure_built() -> void:
 	if not _enemies.is_empty():
 		return
 
-	_enemies.append(_make(CUTTER, "Haydut Kesicisi", 24, 76, 5, 4, 3, 8, [SkillCatalog.CLEAVER], 1))
-	_enemies.append(_make(ARCHER, "Haydut Okçusu", 18, 80, 8, 6, 2, 11, [SkillCatalog.BANDIT_ARROW], 3))
+	_enemies.append(_make(CUTTER, "Haydut Kesicisi", 24, 76, 5, 4, 3, 8, [SkillCatalog.CLEAVER], 1, 10))
+	_enemies.append(_make(ARCHER, "Haydut Okçusu", 18, 80, 8, 6, 2, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
 	_enemies.append(_make(
 		LEADER, "Haydut Reisi", 34, 82, 6, 8, 5, 10,
-		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2
+		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2, 25
 	))
 
 	for enemy in _enemies:
@@ -70,7 +81,7 @@ static func _ensure_built() -> void:
 static func _make(
 	enemy_id: String, display_name: String, max_hp: int, accuracy: int,
 	dodge: int, crit_chance: int, damage_bonus: int, initiative: int,
-	skill_ids: Array, preferred_position: int
+	skill_ids: Array, preferred_position: int, xp_value: int = 10
 ) -> EnemyTemplate:
 	var enemy := EnemyTemplate.new()
 	enemy.enemy_id = enemy_id
@@ -86,4 +97,5 @@ static func _make(
 		typed_skill_ids.append(skill_id)
 	enemy.skill_ids = typed_skill_ids
 	enemy.preferred_position = preferred_position
+	enemy.xp_value = xp_value
 	return enemy
