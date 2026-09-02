@@ -133,11 +133,14 @@ func _test_stressed_unit_sometimes_refuses(t) -> void:
 		var rng := _seeded_rng(9500 + seed_value)
 		var encounter := CombatEncounter.new([unit], [enemy], rng)
 
-		var refused := false
-		encounter.log_added.connect(func(line): refused = refused or ("kulak asmıyor" in line))
+		# Lambda'lar dış yerel değişkeni değere göre yakalar, referansa göre
+		# değil - içeride atama dıştaki değişkeni değiştirmez. Tek elemanlı
+		# bir Array paylaşılan bir kutu gibi davranır, bu yüzden çalışır.
+		var refused := [false]
+		encounter.log_added.connect(func(line): refused[0] = refused[0] or ("kulak asmıyor" in line))
 		encounter.start()
 
-		if refused:
+		if refused[0]:
 			refusal_seen = true
 			break
 	t.ok(refusal_seen, "kırk denemede stresli birim en az bir kez emir dinlemiyor")
@@ -149,8 +152,8 @@ func _test_calm_unit_never_refuses(t) -> void:
 		var rng := _seeded_rng(9700 + seed_value)
 		var encounter := CombatEncounter.new([unit], [enemy], rng)
 
-		var refused := false
-		encounter.log_added.connect(func(line): refused = refused or ("kulak asmıyor" in line))
+		var refused := [false]
+		encounter.log_added.connect(func(line): refused[0] = refused[0] or ("kulak asmıyor" in line))
 		encounter.start()
 
-		t.not_ok(refused, "stressiz birim hiç emir reddetmez (tohum %d)" % seed_value)
+		t.not_ok(refused[0], "stressiz birim hiç emir reddetmez (tohum %d)" % seed_value)

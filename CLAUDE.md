@@ -325,6 +325,15 @@ catches it. Fix by giving the *source* value an explicit type before the
 loop/assignment (`var typed: Array[CharacterData] = untyped_result`), not by
 chasing every downstream `:=` that happens to fail.
 
+**Lambdas capture outer locals by value, not by reference.** A lambda
+connected to a signal (`signal.connect(func(x): outer_flag = true)`)
+reassigns its own private copy of `outer_flag`, not the enclosing
+function's variable - reading `outer_flag` afterwards still sees the old
+value. This silently made an early draft of `test_stress.gd`'s refusal test
+pass/fail on a value that never actually changed. Capture a reference type
+instead - a one-element `Array` used as a shared box (`var flag := [false]`,
+mutate `flag[0]` inside the lambda) is the standard GDScript workaround.
+
 - **data/config/**: Game configuration files
   - `game_config.json`: Game-wide settings
   - `enemy_data.json`: Enemy definitions
