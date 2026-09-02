@@ -30,14 +30,45 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      # Godot ayrıştırma hatalarını basıp yine de 0 ile çıkıyor: bozuk bir
+      # betik yeşil bir yapının altında gizlenebiliyordu ve iki kez öyle
+      # oldu (city_map.gd, class_catalog.gd). Bu yüzden çıktı dosyaya
+      # alınıyor ve aşağıdaki kapı adımı taranıyor.
       - name: Import project
-        run: godot --headless --import
+        run: |
+          set -o pipefail
+          godot --headless --import 2>&1 | tee import.log
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          godot --headless --script res://tests/run_tests.gd 2>&1 | tee tests.log
 
       - name: Export to HTML5
         run: |
+          set -o pipefail
           mkdir -p build/web
-          godot --headless --export-release Web build/web/index.html
+          godot --headless --export-release Web build/web/index.html 2>&1 | tee export.log
         continue-on-error: false
+
+      # Testler geçse bile ayrıştırma hatası kalmış olabilir (hatalı betik
+      # yalnızca bir ekranda kullanılıyorsa testler onu hiç görmez).
+      - name: Fail on script errors
+        if: always()
+        run: |
+          found=0
+          for log in import.log tests.log export.log; do
+            [ -f "$log" ] || continue
+            if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' "$log"; then
+              echo "::error file=$log::$log içinde betik hatası var"
+              found=1
+            fi
+          done
+          if [ "$found" -ne 0 ]; then
+            echo "Godot bu hataları basıp yine de sıfırla çıkıyor; yapı bilerek düşürüldü."
+            exit 1
+          fi
+          echo "Betik hatası yok."
 
       - name: Add Cross-Origin Isolation service worker
         run: |
