@@ -60,6 +60,12 @@ func _build_spots() -> void:
 		Vector2(400, 330),
 		Nav.CARAVAN_YARD
 	)
+	_add_spot(
+		"Kilise",
+		"Taze huyları arındırır.",
+		Vector2(400, 40),
+		Nav.CHURCH
+	)
 
 func _add_spot(spot_name: String, description: String, position: Vector2, scene_path: String) -> void:
 	var button := Button.new()

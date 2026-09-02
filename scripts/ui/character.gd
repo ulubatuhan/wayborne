@@ -8,6 +8,8 @@ extends Control
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
 const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
+const POSITIVE_COLOR: Color = Color(0.6, 0.85, 0.6)
+const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
 const EQUIPMENT_SLOTS: Array[String] = ["Silah", "Zırh", "Yüzük", "Kolye"]
 
 var _session: GameSession
@@ -33,6 +35,8 @@ func _ready() -> void:
 func _refresh() -> void:
 	_clear_children(_content)
 	_build_identity_section()
+	_content.add_child(HSeparator.new())
+	_build_traits_section()
 	_content.add_child(HSeparator.new())
 	_build_progress_section()
 	_content.add_child(HSeparator.new())
@@ -62,10 +66,10 @@ func _build_identity_section() -> void:
 	var derived := Label.new()
 	derived.text = "İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d · Hasar +%d" % [
 		_character.stats.get_initiative(),
-		_character.stats.get_accuracy(),
+		_character.get_accuracy(),
 		_character.get_dodge(),
-		_character.stats.get_crit_chance(),
-		_character.stats.get_damage_bonus(),
+		_character.get_crit_chance(),
+		_character.get_damage_bonus(),
 	]
 	derived.modulate = HINT_COLOR
 	_content.add_child(derived)
@@ -75,6 +79,31 @@ func _build_identity_section() -> void:
 	perk.autowrap_mode = TextServer.AUTOWRAP_WORD
 	perk.modulate = PERK_COLOR
 	_content.add_child(perk)
+
+func _build_traits_section() -> void:
+	_content.add_child(_make_section_title("Huylar"))
+
+	var traits := _character.get_traits()
+	if traits.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "Henüz bir huyu yok."
+		empty_label.modulate = HINT_COLOR
+		_content.add_child(empty_label)
+		return
+
+	for trait_resource in traits:
+		var row := Label.new()
+		var fresh := _character.is_trait_fresh(
+			trait_resource.trait_id, _session.total_days_elapsed
+		)
+		row.text = "%s — %s%s" % [
+			trait_resource.display_name,
+			trait_resource.description,
+			" (taze, tavernada/kilisede arındırılabilir)" if fresh else "",
+		]
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD
+		row.modulate = POSITIVE_COLOR if trait_resource.is_positive else NEGATIVE_COLOR
+		_content.add_child(row)
 
 func _build_progress_section() -> void:
 	_content.add_child(_make_section_title("İlerleme"))

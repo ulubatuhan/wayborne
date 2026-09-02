@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqtavern001"]
+[gd_scene load_steps=2 format=3 uid="uid://bqchurch001"]
 
-[ext_resource type="Script" path="res://scripts/ui/tavern.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/church.gd" id="1"]
 
-[node name="Tavern" type="Control"]
+[node name="Church" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,7 +30,7 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Taverna"
+text = "Kilise"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -43,15 +43,7 @@ theme_override_constants/separation = 14
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
-text = "Yolcular burada rota dedikodusu satar. Ödersen tehlikeyi tam bilirsin; ödemezsen kaba bir tahminle yola çıkarsın."
-
-[node name="RumorList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="MapButton" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-text = "Dünya Haritasına Git"
+text = "Rahip yeni edinilmiş bir huyu sabırla dinler ve arındırır - eski, kökleşmiş bir huya elini süremez."
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

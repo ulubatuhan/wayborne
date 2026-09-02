@@ -65,6 +65,18 @@ var second_class_id: String = ""
 ## tarafından yönetilir.
 var duty_id: String = ""
 
+const MAX_TRAITS: int = 3
+## Yalnızca "taze" (bkz. is_trait_fresh) bir huy tavernada/kilisede
+## silinebilir - eski huylar kalıcılaşır.
+const TRAIT_FRESH_WINDOW_DAYS: int = 5
+
+## En fazla MAX_TRAITS kimlik. TraitCatalog.roll_seed_trait() karakter
+## kurulurken bir tane verir; GRANT_TRAIT olay etkisi yolda ekleyebilir.
+var trait_ids: Array[String] = []
+## trait_id -> verildiği gün (GameSession.total_days_elapsed) - saflık
+## penceresi bunun üstünden hesaplanır.
+var trait_granted_day: Dictionary = {}
+
 ## Açıkken seviye atlayınca puanlar otomatik dağıtılır (yoldaşlar için
 ## varsayılan). Oyuncu kendi karakterinde bunu kapatıp elle dağıtabilir.
 var auto_allocate: bool = true
@@ -238,10 +250,72 @@ func get_height_dodge_bonus() -> int:
 	return 0
 
 func get_max_hp() -> int:
-	return maxi(1, stats.get_max_hp() + get_character_class().bonus_max_hp + get_height_hp_bonus())
+	return maxi(
+		1,
+		stats.get_max_hp() + get_character_class().bonus_max_hp
+		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus")
+	)
 
 func get_dodge() -> int:
-	return maxi(0, stats.get_dodge() + get_height_dodge_bonus())
+	return maxi(0, stats.get_dodge() + get_height_dodge_bonus() + _trait_bonus_sum("dodge_bonus"))
+
+## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy
+## bonusları burada eklenir (bkz. CombatUnit.from_character).
+func get_accuracy() -> int:
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus")
+
+func get_crit_chance() -> int:
+	return stats.get_crit_chance() + _trait_bonus_sum("crit_bonus")
+
+func get_damage_bonus() -> int:
+	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus")
+
+# --- Huylar (Trait) ---
+
+func has_trait(trait_id: String) -> bool:
+	return trait_ids.has(trait_id)
+
+## Huy sayısı MAX_TRAITS'i aşamaz, aynı huy iki kez verilmez. granted_day
+## GameSession.total_days_elapsed'ten geçirilir - saflık penceresi bunu
+## kullanır.
+func grant_trait(trait_id: String, granted_day: int) -> bool:
+	if trait_ids.size() >= MAX_TRAITS or has_trait(trait_id):
+		return false
+	if TraitCatalog.get_trait(trait_id) == null:
+		return false
+	trait_ids.append(trait_id)
+	trait_granted_day[trait_id] = granted_day
+	return true
+
+func remove_trait(trait_id: String) -> bool:
+	if not trait_ids.has(trait_id):
+		return false
+	trait_ids.erase(trait_id)
+	trait_granted_day.erase(trait_id)
+	return true
+
+## Yalnızca TRAIT_FRESH_WINDOW_DAYS içinde kazanılmış huylar silinebilir -
+## eski bir huy artık kimliğin parçası, tavernada da kilisede de kalıcı.
+func is_trait_fresh(trait_id: String, current_day: int) -> bool:
+	if not trait_granted_day.has(trait_id):
+		return false
+	return current_day - int(trait_granted_day[trait_id]) <= TRAIT_FRESH_WINDOW_DAYS
+
+func get_traits() -> Array[Trait]:
+	var result: Array[Trait] = []
+	for trait_id in trait_ids:
+		var trait_resource := TraitCatalog.get_trait(trait_id)
+		if trait_resource != null:
+			result.append(trait_resource)
+	return result
+
+func _trait_bonus_sum(field: String) -> int:
+	var total := 0
+	for trait_id in trait_ids:
+		var trait_resource := TraitCatalog.get_trait(trait_id)
+		if trait_resource != null:
+			total += int(trait_resource.get(field))
+	return total
 
 func is_alive() -> bool:
 	return current_hp > 0
@@ -285,6 +359,8 @@ func to_dict() -> Dictionary:
 		"second_class_id": second_class_id,
 		"duty_id": duty_id,
 		"auto_allocate": auto_allocate,
+		"trait_ids": trait_ids.duplicate(),
+		"trait_granted_day": trait_granted_day.duplicate(),
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -305,5 +381,11 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.second_class_id = str(data.get("second_class_id", ""))
 	character.duty_id = str(data.get("duty_id", ""))
 	character.auto_allocate = bool(data.get("auto_allocate", true))
+
+	character.trait_ids.clear()
+	for trait_id in (data.get("trait_ids", []) as Array):
+		character.trait_ids.append(str(trait_id))
+	character.trait_granted_day = (data.get("trait_granted_day", {}) as Dictionary).duplicate()
+
 	character.current_hp = int(data.get("current_hp", character.get_max_hp()))
 	return character

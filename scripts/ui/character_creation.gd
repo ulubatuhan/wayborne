@@ -332,9 +332,9 @@ func _refresh() -> void:
 		preview.get_summary_line(),
 		preview.get_max_hp(),
 		preview.stats.get_initiative(),
-		preview.stats.get_accuracy(),
+		preview.get_accuracy(),
 		preview.get_dodge(),
-		preview.stats.get_crit_chance(),
+		preview.get_crit_chance(),
 	]
 	_start_button.disabled = _name_edit.text.strip_edges().is_empty()
 
@@ -371,6 +371,11 @@ func _on_start_pressed() -> void:
 	var character := _build_character()
 	if character.character_name.is_empty():
 		return
+
+	# Seed huy: hangi statın öne çıktığına göre ağırlıklı seçilir, "basic
+	# seviyede" kalması için tek huyla başlanır (bkz. TraitCatalog).
+	character.grant_trait(TraitCatalog.roll_seed_trait(character.stats, _rng), 0)
+	character.heal_full()
 
 	SaveManager.delete_save()
 	GameState.start_new_game(

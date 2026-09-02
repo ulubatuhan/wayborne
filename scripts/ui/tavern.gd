@@ -8,13 +8,19 @@ extends Control
 const BASE_RUMOR_COST: int = 10
 const PER_DAY_RUMOR_COST: int = 5
 
+## Tavernadaki huy arındırma, Kilise'den daha pahalı - içmekle unutmak
+## Kilise'nin uzmanlaştığı işten daha kolay değil (bkz. church.gd).
+const PURIFICATION_COST: int = 60
+
 var _session: GameSession
 var _rows: Array[Dictionary] = []
+var _purification_panel: PurificationPanel
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
-@onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _rumor_list: VBoxContainer = $MarginContainer/VBoxContainer/RumorList
-@onready var _map_button: Button = $MarginContainer/VBoxContainer/MapButton
+@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _info_label: Label = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/InfoLabel
+@onready var _rumor_list: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/RumorList
+@onready var _map_button: Button = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/MapButton
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
@@ -27,6 +33,12 @@ func _ready() -> void:
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = "Taverna" if location == null else "%s Tavernası" % location.location_name
+
+	_content.add_child(HSeparator.new())
+	_purification_panel = PurificationPanel.new()
+	_content.add_child(_purification_panel)
+	_purification_panel.setup(_session, "Huy Arındır", PURIFICATION_COST)
+	_purification_panel.trait_removed.connect(_refresh_rows)
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_build_rows()
@@ -96,6 +108,7 @@ func _on_buy_pressed(route: TravelRoute) -> void:
 
 func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh_rows()
+	_purification_panel.refresh()
 
 func _on_map_pressed() -> void:
 	Nav.return_scene = Nav.CITY_MAP

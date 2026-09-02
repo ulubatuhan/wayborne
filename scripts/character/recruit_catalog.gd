@@ -95,6 +95,8 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 		class_id
 	)
 	_grant_levels(candidate, level)
+	candidate.grant_trait(TraitCatalog.roll_seed_trait(candidate.stats, rng), 0)
+	candidate.heal_full()
 	candidate.hire_cost = (
 		profile[2] + _stat_surplus(candidate) * profile[3] + (level - 1) * HIRE_COST_PER_LEVEL
 	)

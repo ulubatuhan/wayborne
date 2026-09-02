@@ -112,6 +112,26 @@ wayborne/
     level scaled off the player's own (`get_venue_level_spread` - meydan
     always below the player, lonca always at or above), granted as real XP
     so `auto_allocate` spends it the same way a levelling companion would.
+  - `Trait` / `TraitCatalog`: twelve Darkest-Dungeon-style huy, one virtue
+    and one affliction per stat, each a small permanent modifier
+    (`hp_bonus`/`dodge_bonus`/`accuracy_bonus`/`crit_bonus`/`damage_bonus`)
+    read by `CharacterData.get_max_hp()/get_dodge()/get_accuracy()/
+    get_crit_chance()/get_damage_bonus()` alongside the class/height bonus -
+    **combat must read these `CharacterData` wrappers, never
+    `character.stats.get_X()` directly**, or trait bonuses silently don't
+    apply (bkz. `CombatUnit.from_character`). A character carries at most
+    `CharacterData.MAX_TRAITS` (3). Seed traits are rolled by
+    `TraitCatalog.roll_seed_trait(stats, rng)` - weighted by how far each
+    stat sits from baseline, so a lopsided character leans toward matching
+    huy without a hard guarantee - and granted explicitly by the two real
+    creation flows (`character_creation.gd`, `RecruitCatalog`) with their
+    own seeded RNG; `CharacterData.create()` itself never rolls one, so
+    every existing test that calls `create()` stays deterministic. Later
+    huys come from `EventEffect.Type.GRANT_TRAIT` (always targets the
+    player character - bkz. `evt_troubled_night`). Only a "taze" huy -
+    granted within `CharacterData.TRAIT_FRESH_WINDOW_DAYS` (5) days of
+    `GameSession.total_days_elapsed` - can be removed, at the Tavern or the
+    Church (`PurificationPanel`, shared by both, priced differently).
 
 ### Character & Party Rules
 
@@ -409,7 +429,12 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   loads a save dict shaped like it predates a given field and asserts sane
   defaults - a reminder that every new `CharacterData`/`GameSession` field
   needs a `.get(key, default)` in `from_dict()`/`load_from_dict()`, never a
-  bare index.
+  bare index; `test_recruit_catalog.gd` locks the per-venue level spread and
+  that granted levels actually get auto-spent; `test_traits.gd` locks the
+  catalog shape, the fresh-window boundary and that `CharacterData`'s
+  derived getters actually include trait bonuses - a statistically
+  overwhelming-margin check (not an exact roll) on `roll_seed_trait`'s lean,
+  same reasoning as `test_event_engine.gd`'s seed-reproducibility test.
 - Seed every RNG. A test that can flake is worse than no test.
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
@@ -542,10 +567,18 @@ yeteneği, süreli stat değiştiricileri (`CombatSkill.modifier_*`), yetkinlik
 `DutyCatalog`) getirdi - dördü (Muhafız/Levazımcı/Arabacı/Tellal) canlı
 sistemlere bağlandı, ikisi (İzci/Otacı) henüz katalogda hazır ama bağlanmadı
 (İzci `caravan_planner.gd`/`world_map.gd`'yi, Otacı PR-D'nin kamp sistemini
-bekliyor). Sırada: **PR-B** karakter ekranı (stat/yetkinlik dağıtımı,
-görev seçimi, ekipman yer tutucuları), **PR-C** huylar + Kilise, **PR-D**
-stres/moral döngüsü ve kamp - hepsi harekât emrinin (oturum geçmişinde)
-kapsamı içinde.
+bekliyor). **PR-B (karakter ekranı, tamamlandı)** bu veri katmanını ilk kez
+oynanabilir kıldı: yeni `Nav.CHARACTER` ekranı (stat/yetkinlik yatırımı,
+görev ataması, multiclass, Faz 7'ye kilitli ekipman yer tutucuları),
+karakter oluşturmada sınıf seçimi, seviyeli/sınıflı tayfa adayları.
+**PR-C (huylar + Kilise, tamamlandı)** on iki huy (`Trait`/`TraitCatalog`,
+her stat için bir olumlu bir olumsuz), karakter kurulurken statlarla
+orantılı ağırlıklı seed huy (`roll_seed_trait`), `EventEffect.Type.
+GRANT_TRAIT` (ilk kullanımı `evt_troubled_night`) ve yalnızca beş gün
+içinde kazanılmış ("taze") huyları silen `PurificationPanel`'i getirdi -
+Taverna'da pahalı, yeni Kilise'de (`Nav.CHURCH`) ucuz. Sırada: **PR-D**
+stres/moral döngüsü ve kamp - harekât emrinin (oturum geçmişinde) kapsamı
+içinde.
 
 ## Quick Start
 

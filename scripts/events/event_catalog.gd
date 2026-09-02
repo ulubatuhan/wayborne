@@ -31,6 +31,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_mutiny())
 	_road_events.append(_abandoned_wagon())
 	_road_events.append(_road_wanderer())
+	_road_events.append(_troubled_night())
 	return _road_events
 
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
@@ -285,6 +286,29 @@ static func _abandoned_wagon() -> GameEvent:
 		])),
 		_choice("EVT_ABANDONED_OPT_LEAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 3),
+		])),
+	])
+	return event
+
+## GRANT_TRAIT'in ilk canlı kullanımı: kötü bir gece kervanın liderine
+## kalıcı (ama taze - bkz. CharacterData.TRAIT_FRESH_WINDOW_DAYS) bir huy
+## bırakabilir.
+static func _troubled_night() -> GameEvent:
+	var event := _event("evt_troubled_night", "EVT_TROUBLED_NIGHT", 0.8)
+	event.cooldown_days = 5
+	event.choices = _choices([
+		_choice("EVT_TROUBLED_NIGHT_OPT_WATCH", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -2),
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+		])),
+		_choice_with_outcomes("EVT_TROUBLED_NIGHT_OPT_SLEEP", _outcomes([
+			EventOutcome.make("EVT_TROUBLED_NIGHT_SLEEP_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 6),
+			]), 1.4),
+			EventOutcome.make("EVT_TROUBLED_NIGHT_SLEEP_BAD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -10),
+				EventEffect.make(EventEffect.Type.GRANT_TRAIT, 0, TraitCatalog.CLUMSY_FOOT),
+			]), 1.0),
 		])),
 	])
 	return event

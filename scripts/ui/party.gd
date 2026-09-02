@@ -96,10 +96,10 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	var derived_label := Label.new()
 	derived_label.text = "İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d · Hasar +%d" % [
 		character.stats.get_initiative(),
-		character.stats.get_accuracy(),
+		character.get_accuracy(),
 		character.get_dodge(),
-		character.stats.get_crit_chance(),
-		character.stats.get_damage_bonus(),
+		character.get_crit_chance(),
+		character.get_damage_bonus(),
 	]
 	derived_label.modulate = HINT_COLOR
 	card.add_child(derived_label)
