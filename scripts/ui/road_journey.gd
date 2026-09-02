@@ -387,7 +387,7 @@ func _open_recruit_offer() -> void:
 	info.text = "%s — can %d · isabet %d · kaçınma %d — %d GG istiyor." % [
 		candidate.get_summary_line(),
 		candidate.get_max_hp(),
-		candidate.stats.get_accuracy(),
+		candidate.get_accuracy(),
 		candidate.get_dodge(),
 		candidate.hire_cost,
 	]

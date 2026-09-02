@@ -10,20 +10,25 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
 
 ## Oyun döngüsü
 
-1. **Karakter oluştur** — kültür, isim, boy, ten rengi, 6 temel stata
-   dağıtılan puan ve tayfa büyüklüğü seçilir. Tayfa vagonları sürer ve
-   kargo kapasitesini belirler (her vagonda 2 kişi, en fazla 6 vagon);
-   savaşa giren **parti** ise ayrı bir kavramdır ve en fazla 4 kişidir.
+1. **Karakter oluştur** — kültür, sınıf (dördü var: Sıra Neferi/Sekban/
+   Kırıkçı/Kalem Efendisi), isim, boy, ten rengi, 6 temel stata dağıtılan
+   puan ve tayfa büyüklüğü seçilir. Tayfa vagonları sürer ve kargo
+   kapasitesini belirler (her vagonda 2 kişi, en fazla 6 vagon); savaşa
+   giren **parti** ise ayrı bir kavramdır ve en fazla 4 kişidir.
 2. **Şehirde hazırlan** — Pazar Meydanı'ndan mal al/sat, Tüccar
    Loncası'ndan kontrat kabul et, Taverna'dan rota dedikodusu satın al,
-   Kervan Avlusu'ndan vagon onart/satın al. Meydan, taverna ve lonca
-   partine yeni kişiler de katabilir.
+   Kervan Avlusu'ndan vagon onart/satın al, Kilise'de taze huyları
+   arındır. Meydan, taverna ve lonca partine yeni kişiler de katabilir -
+   adaylar oyuncunun seviyesine göre ölçeklenir (meydan hep acemi, lonca
+   hep en az oyuncu kadar tecrübeli).
 3. **Kervan planla** — kaç vagonla, hangi tüccarların refakatinde, hangi
    rotadan gideceğine karar ver.
 4. **Yola çık** — her gün olay çıkma ihtimali var; EU4 tarzı kartlar
    kilitli seçenekleri sebepleriyle gösterir. Bazı seçenekler gerçek bir
    çarpışma açar (Darkest Dungeon tarzı, mevki kilitli yetenekler, 4
-   mevkilik iki saf).
+   mevkilik iki saf). Olaylar ve seferler XP verir; karakterler seviye
+   atlayınca stat ve yetkinlik puanı kazanır (otomatik ya da elle
+   dağıtılır — parti ekranındaki karakter sayfası).
 5. **Şehre var** — escort ücreti moral ve hasara göre kırpılarak ödenir,
    karakterler tam cana döner, ilerleme kaydedilir.
 

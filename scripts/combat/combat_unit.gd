@@ -47,10 +47,10 @@ static func from_character(character: CharacterData, position: int) -> CombatUni
 	unit.position = position
 	unit.max_hp = character.get_max_hp()
 	unit.current_hp = clampi(character.current_hp, 0, unit.max_hp)
-	unit.accuracy = character.stats.get_accuracy()
+	unit.accuracy = character.get_accuracy()
 	unit.dodge = character.get_dodge()
-	unit.crit_chance = character.stats.get_crit_chance()
-	unit.damage_bonus = character.stats.get_damage_bonus()
+	unit.crit_chance = character.get_crit_chance()
+	unit.damage_bonus = character.get_damage_bonus()
 	unit.support_power = character.stats.get_support_power()
 	unit.initiative = character.stats.get_initiative()
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier

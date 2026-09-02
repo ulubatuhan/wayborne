@@ -83,6 +83,20 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.lines.append("Silahlara davranılıyor…")
 		EventEffect.Type.TRIGGER_RECRUIT:
 			result.recruit_requests.append(effect.amount)
+		EventEffect.Type.GRANT_TRAIT:
+			_apply_grant_trait(effect, session, result)
+
+## Huy her zaman oyuncunun kendi karakterine verilir - olayın kervanın
+## lideri başına geldiği kabulüyle (bkz. GameEvent/RoadJourney tasarımı).
+## text_value bir TraitCatalog kimliği taşımalı.
+static func _apply_grant_trait(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var character := session.get_player_character()
+	if character == null:
+		return
+	if character.grant_trait(effect.text_value, session.total_days_elapsed):
+		var trait_resource := TraitCatalog.get_trait(effect.text_value)
+		if trait_resource != null:
+			result.lines.append("Yeni huy: %s" % trait_resource.display_name)
 
 static func _apply_gold(effect: EventEffect, session: GameSession, result: Result) -> void:
 	if effect.amount >= 0:

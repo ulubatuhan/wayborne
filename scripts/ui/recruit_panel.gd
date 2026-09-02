@@ -121,7 +121,7 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 		candidate.get_summary_line(),
 		candidate.level,
 		candidate.get_max_hp(),
-		candidate.stats.get_accuracy(),
+		candidate.get_accuracy(),
 		candidate.get_dodge(),
 		candidate.hire_cost,
 	]
