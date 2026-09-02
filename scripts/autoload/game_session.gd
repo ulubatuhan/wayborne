@@ -546,9 +546,12 @@ func build_event_context() -> Dictionary:
 		"danger": danger_level,
 		"days_remaining": journey_days_remaining,
 		"reputation": reputation,
-		"party_size": party.size(),
+		# get_party(), partiyi henüz kimse okumadıysa kurar. Doğrudan
+		# party.size() okumak taze bir oturumda 0 döndürüyordu, yani
+		# koşullar olmayan bir boş yer görüyordu.
+		"party_size": get_party().size(),
 		# Koşullar başka bir anahtarla karşılaştırma yapamadığı için boş
 		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
-		"party_slots_free": maxi(0, get_party_capacity() - party.size()),
+		"party_slots_free": maxi(0, get_party_capacity() - get_party().size()),
 		"flags": _flags,
 	}
