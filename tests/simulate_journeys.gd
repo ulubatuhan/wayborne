@@ -79,7 +79,7 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 
 	var merchants: Array[String] = []
 	for index in ESCORT_MERCHANTS:
-		var merchant_name := "Tüccar %d" % (index + 1)
+		var merchant_name: String = "Tüccar %d" % (index + 1)
 		merchants.append(merchant_name)
 		session.caravan.merchant_profit_by_name[merchant_name] = ESCORT_PROFIT_EACH
 	session.caravan.merchant_names = merchants

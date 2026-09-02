@@ -51,7 +51,9 @@ func _initialize() -> void:
 	print("")
 	print("── %d geçti, %d kaldı" % [reporter.passed, reporter.failed])
 
-	var has_error := reporter.failed > 0 or not missing.is_empty()
+	# reporter çalışma anında load() ile geldiği için Variant; ondan
+	# türeyen ifadede `:=` çıkarım yapamaz (bkz. city_map.gd hatası).
+	var has_error: bool = reporter.failed > 0 or not missing.is_empty()
 	quit(1 if has_error else 0)
 
 ## quit() ana döngüyü bir sonraki karede kapatır; işi _initialize'da
