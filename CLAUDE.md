@@ -227,9 +227,13 @@ wayborne/
   virtue instead - both go through `TraitCatalog.roll_break_trait()`, which
   is `roll_seed_trait()`'s weighting with the polarity pre-decided. An
   afflicted companion (never the player) may also leave the caravan outright
-  - **iterate a copy of the party** (`get_party().duplicate()`) when a loop
-  might call `dismiss()`, or removal mid-iteration silently skips the next
-  character.
+  - **iterate a copy of the party** when a loop might call `dismiss()`, or
+  removal mid-iteration silently skips the next character. `Array.duplicate()`
+  doesn't carry its element type statically, so assign it to an explicitly
+  typed `Array[CharacterData]` variable first (`resolve_stress_breaks()`
+  does this) - otherwise the loop variable degrades to `Variant` and any
+  `:=` call on it (`character.grant_trait(...)` here) fails to parse; see
+  the `:=` / Variant trap under Autoload rule.
 - **A broken character can refuse orders in combat.**
   `CombatUnit.is_stressed` (set from `CharacterData.is_stressed()` when the
   encounter is built) gives `CombatEncounter` a flat chance each time that
@@ -309,6 +313,17 @@ just moves down into the preloaded script's own `class_name` references. Use
 runtime `load("res://…")` inside a function and construct lazily on first
 access. Leave signal parameters untyped (their types are documentation only in
 GDScript) and note the intended type in a comment.
+
+**The `:=` / Variant trap.** Not just `load()` - any expression the static
+checker can't type (a `for` loop over a plain `Array` returned by
+`Array.duplicate()`, a value from `Dictionary.get()`, anything untyped)
+makes `:=` fail to parse with `Cannot infer the type of "x" variable`. This
+has broken a shipped-green build repeatedly (`city_map.gd`, `run_tests.gd`,
+`simulate_journeys.gd`, `resolve_stress_breaks()`) because Godot's own
+parser still prints `SCRIPT ERROR` and exits 0 - only the CI log grep
+catches it. Fix by giving the *source* value an explicit type before the
+loop/assignment (`var typed: Array[CharacterData] = untyped_result`), not by
+chasing every downstream `:=` that happens to fail.
 
 - **data/config/**: Game configuration files
   - `game_config.json`: Game-wide settings

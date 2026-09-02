@@ -186,8 +186,12 @@ const BREAK_DEPARTURE_CHANCE: float = 0.2
 func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	# Kopya üzerinde geziniyoruz: dismiss() partiden çıkarabiliyor, canlı
-	# diziyi gezerken elemanı silmek sıradaki karakteri atlatırdı.
-	for character in get_party().duplicate():
+	# diziyi gezerken elemanı silmek sıradaki karakteri atlatırdı. Array.
+	# duplicate() eleman tipini statik olarak taşımıyor - açık tip
+	# yazılmazsa character Variant'a düşüp altındaki grant_trait() çağrısının
+	# dönüş tipini çıkaramıyor (bkz. CLAUDE.md'deki := / Variant tuzağı).
+	var stressed_party: Array[CharacterData] = get_party().duplicate()
+	for character in stressed_party:
 		if not character.is_stressed(party_stress):
 			continue
 
