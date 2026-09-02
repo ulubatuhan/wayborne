@@ -47,10 +47,14 @@ var _spots: Array[Dictionary] = []
 @onready var _menu_button: Button = $HUD/TopBar/Row/MenuButton
 @onready var _hint_label: Label = $HUD/HintBar/HintLabel
 
+var _morale_bar: PulseBar
+var _stress_bar: PulseBar
+
 func _ready() -> void:
 	Nav.return_scene = Nav.WORLD_HUB
 	_party_button.pressed.connect(_on_party_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
+	_build_status_bars()
 
 	_build_scenery()
 	_build_spots()
@@ -58,6 +62,22 @@ func _ready() -> void:
 
 	_camera.make_current()
 	_refresh_status()
+
+## Moral seferin kendi ruh hali, stres seferler arası kalıcı - ikisi de
+## burada, kervanın "ana ekranında", ayrı birer soluk/parlak çubukla
+## gösteriliyor (bkz. PulseBar).
+func _build_status_bars() -> void:
+	var row := _status_label.get_parent()
+
+	_morale_bar = PulseBar.new()
+	row.add_child(_morale_bar)
+	row.move_child(_morale_bar, _status_label.get_index() + 1)
+	_morale_bar.setup("Moral", Color(0.6, 0.75, 0.5))
+
+	_stress_bar = PulseBar.new()
+	row.add_child(_stress_bar)
+	row.move_child(_stress_bar, _morale_bar.get_index() + 1)
+	_stress_bar.setup("Stres", Color(0.8, 0.45, 0.4))
 
 func _process(delta: float) -> void:
 	_move_player(delta)
@@ -310,6 +330,8 @@ func _refresh_status() -> void:
 		session.get_party().size(),
 		session.get_party_capacity(),
 	]
+	_morale_bar.set_value(session.caravan.morale, CaravanState.MAX_MORALE)
+	_stress_bar.set_value(session.party_stress, GameSession.MAX_STRESS)
 
 func _on_party_pressed() -> void:
 	Nav.return_scene = Nav.WORLD_HUB

@@ -94,8 +94,10 @@ wayborne/
     gives a duty to one party member at a time; `get_duty_multiplier()` /
     `get_duty_discount()` / `get_duty_flat_reduction()` turn that into the
     concrete number a system reads (buy price, repair cost, daily
-    consumption, wagon damage, combat opening accuracy). A duty with no
-    holder is neutral (multiplier 1.0), never a penalty.
+    consumption, wagon damage, combat opening accuracy, camp stress relief).
+    Five of six are wired to a live system - only İzci (travel-day/danger
+    reveal, lives in `caravan_planner.gd`/`world_map.gd`) isn't yet. A duty
+    with no holder is neutral (multiplier 1.0), never a penalty.
   - `CharacterData`: identity + appearance (boy/ten rengi) + stats + class +
     current HP + level/XP/yetkinlik/second_class_id/duty_id, with
     `to_dict()`/`from_dict()`. Height is not flavour: tall means more HP and
@@ -202,6 +204,42 @@ wayborne/
   every other user of that skill/template, which is why enemy level scaling
   is a `power_scale` multiplier applied only to the freshly-built
   `CombatUnit`, not the `EnemyTemplate` itself.
+
+### Stress Rules
+
+- **Stress (`GameSession.party_stress`) and morale (`CaravanState.morale`)
+  are deliberately separate stats.** Morale resets to full at the start of
+  every journey (`CaravanState.from_plan`) - it's that journey's mood.
+  Stress is party-wide and persistent across journeys; only a city arrival
+  (`finish_journey()`, `-CITY_REST_STRESS_RELIEF`) or a road camp
+  (`GameSession.make_camp()`, `-CAMP_STRESS_RELIEF`) brings it down. Both are
+  shown on `world_hub.gd`'s HUD as `PulseBar`s - a bar that flashes to full
+  opacity on change and fades back to idle, so the "ana ekran" reflects both
+  without permanently cluttering it.
+- **Resistance, not a global threshold, decides who breaks.**
+  `CharacterData.get_stress_resistance()` scales with the character's own
+  Dayanıklılık; `is_stressed(party_stress)` compares the party's current
+  stress against that personal line. A high-resistance character can stay
+  composed while a low-resistance one has already broken.
+- **Breaking (`GameSession.resolve_stress_breaks`) happens once per city
+  arrival**, for every currently-stressed character: mostly (85%) an
+  affliction, rarely (15%) the DD-style inverse where hardship forges a
+  virtue instead - both go through `TraitCatalog.roll_break_trait()`, which
+  is `roll_seed_trait()`'s weighting with the polarity pre-decided. An
+  afflicted companion (never the player) may also leave the caravan outright
+  - **iterate a copy of the party** (`get_party().duplicate()`) when a loop
+  might call `dismiss()`, or removal mid-iteration silently skips the next
+  character.
+- **A broken character can refuse orders in combat.**
+  `CombatUnit.is_stressed` (set from `CharacterData.is_stressed()` when the
+  encounter is built) gives `CombatEncounter` a flat chance each time that
+  unit's turn comes up to skip it entirely, logged and nothing else - never
+  exposed as a choice to the player, unlike a locked skill.
+- **`EventEffect.Type.STRESS` is the vocabulary events use to touch it**,
+  same rule as every other effect: unhandled means silently inert. The
+  `stress` key is available in `GameSession.build_event_context()`, so an
+  event's own eligibility can key off it directly (`evt_stress_brawl`)
+  instead of needing a bespoke weight modifier.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
@@ -434,7 +472,12 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   catalog shape, the fresh-window boundary and that `CharacterData`'s
   derived getters actually include trait bonuses - a statistically
   overwhelming-margin check (not an exact roll) on `roll_seed_trait`'s lean,
-  same reasoning as `test_event_engine.gd`'s seed-reproducibility test.
+  same reasoning as `test_event_engine.gd`'s seed-reproducibility test;
+  `test_stress.gd` locks stress clamping, resistance-scales-with-Dayanıklılık,
+  `resolve_stress_breaks()` (polarity, the player never departing, calm
+  parties never breaking), `make_camp()`, the `STRESS` effect, and - same
+  overwhelming-margin pattern again - that a stressed `CombatUnit` sometimes
+  refuses orders while a calm one deterministically never does.
 - Seed every RNG. A test that can flake is worse than no test.
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
@@ -558,27 +601,40 @@ Faz 5 (güvenlik ağı) tamamlandı: CI artık her push/PR'da testleri koşturup
 Godot'un sessizce geçtiği ayrıştırma hatalarını yakalıyor (`tests.yml`),
 314 doğrulamalık yedi paket ve `simulate_journeys.gd` denge simülatörü var.
 
-Faz 6 ("Karakterin Yolculuğu") sürüyor - dört PR'lık bir hat: **PR-A
-(veri katmanı, tamamlandı)** stat tavanını 15'e çıkardı ve 10 üstünü
-yavaşlattı (`CharacterStats.get_effective_value`), XP/seviye eğrisini,
-dört sınıfı (Sıra Neferi/Sekban/Kırıkçı/Kalem Efendisi) ve on iki yeni
-yeteneği, süreli stat değiştiricileri (`CombatSkill.modifier_*`), yetkinlik
-(per-skill continuous investment) ve altı kervan görevini (`Duty`/
-`DutyCatalog`) getirdi - dördü (Muhafız/Levazımcı/Arabacı/Tellal) canlı
-sistemlere bağlandı, ikisi (İzci/Otacı) henüz katalogda hazır ama bağlanmadı
-(İzci `caravan_planner.gd`/`world_map.gd`'yi, Otacı PR-D'nin kamp sistemini
-bekliyor). **PR-B (karakter ekranı, tamamlandı)** bu veri katmanını ilk kez
-oynanabilir kıldı: yeni `Nav.CHARACTER` ekranı (stat/yetkinlik yatırımı,
-görev ataması, multiclass, Faz 7'ye kilitli ekipman yer tutucuları),
-karakter oluşturmada sınıf seçimi, seviyeli/sınıflı tayfa adayları.
-**PR-C (huylar + Kilise, tamamlandı)** on iki huy (`Trait`/`TraitCatalog`,
-her stat için bir olumlu bir olumsuz), karakter kurulurken statlarla
-orantılı ağırlıklı seed huy (`roll_seed_trait`), `EventEffect.Type.
-GRANT_TRAIT` (ilk kullanımı `evt_troubled_night`) ve yalnızca beş gün
-içinde kazanılmış ("taze") huyları silen `PurificationPanel`'i getirdi -
-Taverna'da pahalı, yeni Kilise'de (`Nav.CHURCH`) ucuz. Sırada: **PR-D**
-stres/moral döngüsü ve kamp - harekât emrinin (oturum geçmişinde) kapsamı
-içinde.
+Faz 6 ("Karakterin Yolculuğu") tamamlandı - dört PR'lık bir hat:
+
+- **PR-A (veri katmanı)** stat tavanını 15'e çıkardı ve 10 üstünü
+  yavaşlattı (`CharacterStats.get_effective_value`), XP/seviye eğrisini,
+  dört sınıfı (Sıra Neferi/Sekban/Kırıkçı/Kalem Efendisi) ve on iki yeni
+  yeteneği, süreli stat değiştiricileri (`CombatSkill.modifier_*`),
+  yetkinlik (per-skill continuous investment) ve altı kervan görevini
+  (`Duty`/`DutyCatalog`) getirdi - dördü (Muhafız/Levazımcı/Arabacı/Tellal)
+  canlı sistemlere bağlandı, Otacı PR-D'nin kamp/stres sistemine bağlandı;
+  İzci hâlâ katalogda hazır ama bağlanmadı (ev sistemi
+  `caravan_planner.gd`/`world_map.gd`, henüz okunmadı).
+- **PR-B (karakter ekranı)** bu veri katmanını ilk kez oynanabilir kıldı:
+  yeni `Nav.CHARACTER` ekranı (stat/yetkinlik yatırımı, görev ataması,
+  multiclass, Faz 7'ye kilitli ekipman yer tutucuları), karakter
+  oluşturmada sınıf seçimi, seviyeli/sınıflı tayfa adayları.
+- **PR-C (huylar + Kilise)** on iki huy (`Trait`/`TraitCatalog`, her stat
+  için bir olumlu bir olumsuz), karakter kurulurken statlarla orantılı
+  ağırlıklı seed huy (`roll_seed_trait`), `EventEffect.Type.GRANT_TRAIT`
+  (ilk kullanımı `evt_troubled_night`) ve yalnızca beş gün içinde
+  kazanılmış ("taze") huyları silen `PurificationPanel`'i getirdi -
+  Taverna'da pahalı, yeni Kilise'de (`Nav.CHURCH`) ucuz.
+- **PR-D (stres/moral döngüsü + kamp)** `GameSession.party_stress`'i
+  (bkz. Stress Rules) getirdi: dayanıklılığa göre kişisel kırılma direnci,
+  şehir varışında toplu kırılma zarı (`resolve_stress_breaks` - çoğunlukla
+  huy, nadiren tam tersi, ağır kırılan bir yoldaş kervandan ayrılabilir),
+  savaşta emir reddi (`CombatUnit.is_stressed`), yolda yeni bir "Kamp Kur"
+  eylemi (`GameSession.make_camp`) ve yüksek stresin kendi olayını
+  (`evt_stress_brawl`) açması. `world_hub.gd`'nin HUD'una moral ve stresi
+  gösteren iki `PulseBar` eklendi.
+
+Sırada Faz 7: ekipman (karakter ekranındaki dört yer tutucu slotun
+gerçek eşyalarla dolması), İzci'nin gerçek sisteme bağlanması, olay
+havuzunun genişlemesi (şu an 13 olay), placeholder isimlerin gerçek
+lore'a dönüşmesi.
 
 ## Quick Start
 

@@ -74,7 +74,7 @@ func _start_combat() -> void:
 func _on_danger_changed(value: float) -> void:
 	_danger_label.text = "%d%%" % int(value)
 
-func _on_combat_finished(victory: bool, xp_awarded: int) -> void:
+func _on_combat_finished(victory: bool, xp_awarded: int, _downed_count: int) -> void:
 	_result_label.text = "Sonuç: %s (%d XP)" % ["zafer" if victory else "yenilgi", xp_awarded]
 
 func _on_back_pressed() -> void:

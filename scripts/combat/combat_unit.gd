@@ -37,14 +37,20 @@ var _timed_modifiers: Array = []
 ## Yalnızca düşman tarafında anlamlı: yenilince oyuncuya verilen XP.
 var xp_value: int = 0
 
+## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
+## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
+## _try_refuse_order). Yalnızca oyuncu tarafında anlamlı.
+var is_stressed: bool = false
+
 ## Yalnızca oyuncu tarafında dolu; savaş sonunda canı buraya yazarız.
 var source_character: CharacterData = null
 
-static func from_character(character: CharacterData, position: int) -> CombatUnit:
+static func from_character(character: CharacterData, position: int, is_stressed: bool = false) -> CombatUnit:
 	var unit := CombatUnit.new()
 	unit.display_name = character.character_name
 	unit.is_player_side = true
 	unit.position = position
+	unit.is_stressed = is_stressed
 	unit.max_hp = character.get_max_hp()
 	unit.current_hp = clampi(character.current_hp, 0, unit.max_hp)
 	unit.accuracy = character.get_accuracy()

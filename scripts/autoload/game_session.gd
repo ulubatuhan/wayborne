@@ -25,6 +25,16 @@ var journey_days_remaining: int = 0
 var danger_level: float = 0.0
 var reputation: int = 0
 
+## Kervan morali (CaravanState.morale) her seferde sıfırdan başlar - o
+## anki seferin ruh hali. Stres bunun tam tersi: seferler arası kalıcı,
+## yalnızca şehirde dinlenmek ya da kampta mola vermek azaltır. İkisi de
+## ana ekranda ayrı birer çubukla gösterilir (bkz. world_hub.gd).
+const MAX_STRESS: int = 100
+var party_stress: int = 0
+
+func change_stress(delta: int) -> void:
+	party_stress = clampi(party_stress + delta, 0, MAX_STRESS)
+
 ## Taverna'da ödeyip öğrenilmedikçe bir rotanın tam tehlike yüzdesi
 ## bilinmez (bkz. tavern.gd, world_map.gd - kaba bir bant gösterirler).
 ## "from|to" anahtarlanır; rota simetrik olduğu için öğrenince iki yön
@@ -163,6 +173,55 @@ func grant_party_xp(amount: int) -> Dictionary:
 		if gained > 0:
 			levels_gained[character.character_name] = gained
 	return levels_gained
+
+## DD tarzı kırılma zarı: her kırılabilir (bkz. CharacterData.is_stressed)
+## karakter için bir kez atılır, çoğunlukla olumsuz bir huy bırakır,
+## nadiren tam tersine olumlu bir huy verir. Ağır kırılan bir yoldaş
+## (oyuncu hariç) kervandan ayrılabilir - kırılma huy vermeyi başaramasa
+## bile (tavan dolu) ayrılık ihtimali işler, çünkü sorun huyun kendisi
+## değil, karakterin dayanma noktasının aşılmış olması.
+const BREAK_AFFLICTION_CHANCE: float = 0.85
+const BREAK_DEPARTURE_CHANCE: float = 0.2
+
+func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	# Kopya üzerinde geziniyoruz: dismiss() partiden çıkarabiliyor, canlı
+	# diziyi gezerken elemanı silmek sıradaki karakteri atlatırdı.
+	for character in get_party().duplicate():
+		if not character.is_stressed(party_stress):
+			continue
+
+		var affliction := rng.randf() < BREAK_AFFLICTION_CHANCE
+		var trait_id := TraitCatalog.roll_break_trait(character.stats, rng, not affliction)
+		var granted := character.grant_trait(trait_id, total_days_elapsed)
+
+		var departed := false
+		if affliction and not character.is_player and rng.randf() < BREAK_DEPARTURE_CHANCE:
+			departed = dismiss(character)
+
+		results.append({
+			"character_name": character.character_name,
+			"affliction": affliction,
+			"trait_id": trait_id if granted else "",
+			"departed": departed,
+		})
+	return results
+
+## Yolda mola: bir günü kaybederek stresi belirgin azaltır - şehre
+## varmadan nefes almanın tek yolu (bkz. road_journey.gd _on_camp_pressed).
+## Gün ilerletme/erzak tüketimi çağıran tarafın işi, burada yalnızca
+## kampın kendi payı var.
+const CAMP_PROVISIONS_COST: int = 3
+const CAMP_STRESS_RELIEF: int = 20
+
+## Otacı'nın görevi tam bu - "kampta yaraları ve gerginliği sarar" (bkz.
+## DutyCatalog) - tutan biri varsa kampın rahatlatma payını büyütür.
+func make_camp() -> Dictionary:
+	var paid := mini(CAMP_PROVISIONS_COST, get_provisions())
+	change_provisions(-paid)
+	var relief := CAMP_STRESS_RELIEF + get_duty_flat_reduction(DutyCatalog.OTACI) * 2
+	change_stress(-relief)
+	return {"provisions_spent": paid, "stress_relief": relief}
 
 func heal_party() -> void:
 	for character in party:
@@ -447,6 +506,14 @@ func finish_journey() -> Dictionary:
 	payout["xp_awarded"] = journey_xp
 	payout["levels_gained"] = grant_party_xp(journey_xp)
 
+	# Kırılma zarı stres hâlâ sefer boyunca biriktiği haliyle atılır, şehir
+	# dinlenmesi bundan sonra gelir - aksi halde rahatlama kırılmayı hiç
+	# yaşanmamış gösterirdi.
+	var stress_rng := RandomNumberGenerator.new()
+	stress_rng.seed = hash("%s|%d|stress" % [current_location_id, total_days_elapsed])
+	payout["stress_breaks"] = resolve_stress_breaks(stress_rng)
+	change_stress(-CITY_REST_STRESS_RELIEF)
+
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	journey_origin_id = ""
@@ -486,6 +553,10 @@ func _apply_wagon_losses_to_ownership() -> void:
 
 	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
+
+## Şehre varış her zaman rahatlatır - kırılma riski sıfırlanmaz ama stres
+## seviyesi geri çekilir.
+const CITY_REST_STRESS_RELIEF: int = 35
 
 const JOURNEY_XP_BASE: int = 15
 const JOURNEY_XP_PER_DAY: float = 4.0
@@ -571,6 +642,7 @@ func to_save_dict() -> Dictionary:
 		"total_days_elapsed": total_days_elapsed,
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
+		"party_stress": party_stress,
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -602,6 +674,8 @@ func load_from_dict(data: Dictionary) -> void:
 		party.append(CharacterData.from_dict(entry))
 	_ensure_party()
 
+	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
+
 	_restock_current_location()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
@@ -615,6 +689,7 @@ func build_event_context() -> Dictionary:
 		"damaged_wagons": caravan.damaged_wagons,
 		"merchants": caravan.merchant_names.size(),
 		"morale": caravan.morale,
+		"stress": party_stress,
 		"documents": caravan.documents,
 		"danger": danger_level,
 		"days_remaining": journey_days_remaining,
