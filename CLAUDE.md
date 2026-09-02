@@ -108,7 +108,10 @@ wayborne/
   - `RecruitCatalog`: per-venue candidate pools (meydan cheap/green, taverna
     balanced, lonca expensive and reputation-gated). Candidates are rolled
     **once per city arrival** from a `location + day` seed, so reopening the
-    screen cannot reroll them.
+    screen cannot reroll them. Each candidate also gets a random class and a
+    level scaled off the player's own (`get_venue_level_spread` - meydan
+    always below the player, lonca always at or above), granted as real XP
+    so `auto_allocate` spends it the same way a levelling companion would.
 
 ### Character & Party Rules
 
@@ -194,7 +197,12 @@ wayborne/
     scenes, so the same economy screen returns to the road or to the city
     depending on where it was entered from. `selector_return_scene` is the
     test selector's own back target, kept separate because sub-tests overwrite
-    `return_scene` to point back at the selector.
+    `return_scene` to point back at the selector; `character.gd` (opened only
+    from `party.gd`) follows the same pattern by hardcoding its own back
+    target to `Nav.PARTY` instead of touching `return_scene` at all, so the
+    party screen's own return target (world hub or city map, whoever sent the
+    player there) survives the detour. `character_target_index` carries which
+    party member the character screen shows.
   - There is no SceneManager autoload: navigation is `change_scene_to_file()`
     plus these static vars.
 

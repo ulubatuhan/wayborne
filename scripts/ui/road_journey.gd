@@ -368,7 +368,9 @@ func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 func _open_recruit_offer() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%d|%d" % [int(_seed_spin.value), _current_day])
-	var candidates := RecruitCatalog.build_candidates(RecruitCatalog.VENUE_TAVERN, rng)
+	var candidates := RecruitCatalog.build_candidates(
+		RecruitCatalog.VENUE_TAVERN, rng, _session.get_player_character().level
+	)
 	if candidates.is_empty() or not _session.can_recruit():
 		_add_log("      Yolcu fikrini değiştirdi ve yoluna gitti.")
 		return

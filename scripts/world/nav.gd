@@ -21,6 +21,7 @@ const GUILD: String = "res://scenes/game/guild.tscn"
 const RECRUIT: String = "res://scenes/game/recruit.tscn"
 const COMBAT: String = "res://scenes/game/combat.tscn"
 const PARTY: String = "res://scenes/game/party.tscn"
+const CHARACTER: String = "res://scenes/game/character.tscn"
 
 ## Alt ekranların "geri" tuşu buraya döner.
 static var return_scene: String = WORLD_HUB
@@ -28,6 +29,11 @@ static var return_scene: String = WORLD_HUB
 ## Tayfa ekranını açan mekân (RecruitCatalog.VENUE_*). Aday havuzu ve
 ## ücretler buna göre değişir; gönderen ekran değiştirmekle yükümlü.
 static var recruit_venue: String = "tavern"
+
+## Karakter ekranını açan parti index'i - character.gd bunu okuyup hangi
+## üyeyi göstereceğine karar verir. Parti değişmişse (biri yol verildi)
+## ekran kendi tarafında sınırlara kırpar.
+static var character_target_index: int = 0
 
 ## Geri tuşunun yazısı hedefe göre değişir, yoksa oyuncu nereye
 ## döneceğini tuşa basmadan bilemiyor.

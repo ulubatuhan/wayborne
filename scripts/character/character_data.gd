@@ -175,6 +175,14 @@ func set_second_class(new_class_id: String) -> bool:
 	second_class_id = new_class_id
 	return true
 
+func clear_second_class() -> void:
+	second_class_id = ""
+
+## Tik açılırken birikmiş puan varsa hemen harcar - oyuncu "otomatik"
+## dediğinde beklemeden devreye girsin diye (bkz. auto_allocate).
+func flush_pending_points() -> void:
+	_auto_allocate_level_up()
+
 ## Yoldaşlar için varsayılan yol: statı sınıfının yatkın olduğu alana,
 ## yetkinliği sınıfın kendi yeteneklerine sırayla yatırır. Yatkınlık
 ## dolmuşsa herhangi bir dolmamış stata geçer - puan asla boşa gitmez.
@@ -247,7 +255,7 @@ func apply_damage(amount: int) -> void:
 func apply_heal(amount: int) -> void:
 	current_hp = clampi(current_hp + amount, 0, get_max_hp())
 
-## "Torgan · Dağ Kabilesi · Kervan Muhafızı" gibi tek satırlık kimlik.
+## "Torgan · Dağ Kabilesi · Sıra Neferi" gibi tek satırlık kimlik.
 func get_summary_line() -> String:
 	return "%s · %s · %s" % [
 		character_name,

@@ -62,6 +62,11 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	if index < party_size - 1:
 		header.add_child(_build_move_button("↓", index, index + 1))
 
+	var character_button := Button.new()
+	character_button.text = "Karakter"
+	character_button.pressed.connect(_on_character_pressed.bind(index))
+	header.add_child(character_button)
+
 	if character.is_player:
 		var you_label := Label.new()
 		you_label.text = "(sen)"
@@ -76,8 +81,8 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	card.add_child(header)
 
 	var hp_label := Label.new()
-	hp_label.text = "Can %d/%d · %s" % [
-		character.current_hp, character.get_max_hp(), character.get_appearance_line()
+	hp_label.text = "Seviye %d · Can %d/%d · %s" % [
+		character.level, character.current_hp, character.get_max_hp(), character.get_appearance_line()
 	]
 	if character.current_hp < character.get_max_hp():
 		hp_label.modulate = HURT_COLOR
@@ -143,6 +148,13 @@ func _on_move_pressed(from_index: int, to_index: int) -> void:
 func _on_dismiss_pressed(character: CharacterData) -> void:
 	if _session.dismiss(character):
 		_refresh()
+
+## Karakter ekranı yalnızca buradan açılıyor ve buraya dönüyor - dönüş
+## hedefini sabit tutuyoruz ki bu ekranın kendi Nav.return_scene'i (world
+## hub ya da şehir haritası, kimin gönderdiğine göre) burada kaybolmasın.
+func _on_character_pressed(index: int) -> void:
+	Nav.character_target_index = index
+	get_tree().change_scene_to_file(Nav.CHARACTER)
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

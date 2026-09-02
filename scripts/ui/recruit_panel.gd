@@ -91,8 +91,8 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var label := Label.new()
-	label.text = "%d. %s — can %d · %s" % [
-		slot, character.get_summary_line(), character.get_max_hp(), character.get_appearance_line()
+	label.text = "%d. %s (sv. %d) — can %d · %s" % [
+		slot, character.get_summary_line(), character.level, character.get_max_hp(), character.get_appearance_line()
 	]
 	label.custom_minimum_size = Vector2(520, 0)
 	row.add_child(label)
@@ -117,8 +117,9 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var label := Label.new()
-	label.text = "%s — can %d · isabet %d · kaçınma %d — %d GG" % [
+	label.text = "%s (sv. %d) — can %d · isabet %d · kaçınma %d — %d GG" % [
 		candidate.get_summary_line(),
+		candidate.level,
 		candidate.get_max_hp(),
 		candidate.stats.get_accuracy(),
 		candidate.get_dodge(),
