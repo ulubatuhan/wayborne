@@ -13,6 +13,56 @@ var wallet: Wallet
 var inventory: Inventory
 var caravan: CaravanState
 
+## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
+## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
+## GRANT_EQUIPMENT ile bulunan Yüzük/Kolye buraya düşer; karakter ekranı
+## (equip_to_character) burdan alıp takar, çıkarınca (unequip_from_character)
+## geri buraya koyar - Inventory'nin item_id->miktar deseninin ekipman
+## karşılığı.
+var equipment_inventory: Dictionary = {}
+
+func add_equipment(equipment_id: String, quantity: int = 1) -> void:
+	if quantity <= 0:
+		return
+	equipment_inventory[equipment_id] = get_equipment_count(equipment_id) + quantity
+
+func get_equipment_count(equipment_id: String) -> int:
+	return int(equipment_inventory.get(equipment_id, 0))
+
+func remove_equipment(equipment_id: String, quantity: int = 1) -> bool:
+	var current := get_equipment_count(equipment_id)
+	if quantity <= 0 or current < quantity:
+		return false
+	var remaining := current - quantity
+	if remaining > 0:
+		equipment_inventory[equipment_id] = remaining
+	else:
+		equipment_inventory.erase(equipment_id)
+	return true
+
+## Karaktere bir parça takar: yeni parça depodan düşer, o slotta zaten
+## takılı olan (varsa) depoya geri döner. Depoda yoksa hiçbir şey değişmez.
+func equip_to_character(character: CharacterData, slot: String, equipment_id: String) -> bool:
+	if character == null or not remove_equipment(equipment_id, 1):
+		return false
+	var previous_id := character.get_equipped_id(slot)
+	if not character.equip(slot, equipment_id):
+		add_equipment(equipment_id, 1)
+		return false
+	if not previous_id.is_empty():
+		add_equipment(previous_id, 1)
+	return true
+
+## Karakterden bir parçayı çıkarıp depoya geri koyar.
+func unequip_from_character(character: CharacterData, slot: String) -> bool:
+	if character == null:
+		return false
+	var previous_id := character.get_equipped_id(slot)
+	if previous_id.is_empty() or not character.unequip(slot):
+		return false
+	add_equipment(previous_id, 1)
+	return true
+
 ## Kervanın şu an bulunduğu şehir.
 var current_location_id: String = WorldMapData.START_LOCATION_ID
 
@@ -647,6 +697,7 @@ func to_save_dict() -> Dictionary:
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
 		"party_stress": party_stress,
+		"equipment_inventory": equipment_inventory.duplicate(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -679,6 +730,11 @@ func load_from_dict(data: Dictionary) -> void:
 	_ensure_party()
 
 	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
+
+	equipment_inventory = {}
+	var equipment_data: Dictionary = data.get("equipment_inventory", {})
+	for equipment_id in equipment_data:
+		equipment_inventory[str(equipment_id)] = int(equipment_data[equipment_id])
 
 	_restock_current_location()
 

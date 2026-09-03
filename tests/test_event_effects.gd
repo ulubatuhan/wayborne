@@ -15,6 +15,7 @@ func run(t) -> void:
 	_test_morale_stays_in_range(t)
 	_test_documents_and_merchants(t)
 	_test_bridges_are_reported(t)
+	_test_grant_equipment_fills_locker(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -126,3 +127,22 @@ func _test_bridges_are_reported(t) -> void:
 
 	session.clear_flag("deneme_bayragi")
 	t.not_ok(session.has_flag("deneme_bayragi"), "bayrak temizlenebilir")
+
+## Bulunan tılsım doğrudan bir karaktere takılmaz - kervanın ortak
+## depostuna düşer (bkz. GameSession.equipment_inventory), oyuncu kimin
+## takacağını karakter ekranında seçer.
+func _test_grant_equipment_fills_locker(t) -> void:
+	var session := _session()
+	t.eq(session.get_equipment_count(EquipmentCatalog.RING_MARKSMAN), 0, "başlangıçta depo boş")
+
+	var result := EventEffectApplier.apply(_effects([
+		EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.RING_MARKSMAN),
+	]), session)
+
+	t.eq(session.get_equipment_count(EquipmentCatalog.RING_MARKSMAN), 1, "bulunan parça depoya düşer")
+	t.eq(result.lines.size(), 1, "sonuçta bir satır var")
+
+	var invalid_result := EventEffectApplier.apply(_effects([
+		EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, "yok_boyle_bir_ekipman"),
+	]), session)
+	t.eq(invalid_result.lines.size(), 0, "katalogda olmayan ekipman sessizce yok sayılır")

@@ -1,16 +1,15 @@
 extends Control
 
 ## Tek bir karakterin ayrıntı ekranı: stat/yetkinlik yatırımı, görev
-## ataması, multiclass seçimi ve (Faz 7'ye kadar) ekipman yer tutucuları.
-## Parti ekranından "Karakter" düğmesiyle açılır; hangi üyeyi gösterdiği
-## Nav.character_target_index'ten okunur.
+## ataması, multiclass seçimi ve ekipman (bkz. GameSession.equip_to_character -
+## takılan/çıkarılan parça kervanın ortak equipment_inventory deposuyla
+## alışveriş eder). Parti ekranından "Karakter" düğmesiyle açılır; hangi
+## üyeyi gösterdiği Nav.character_target_index'ten okunur.
 
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
-const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 const POSITIVE_COLOR: Color = Color(0.6, 0.85, 0.6)
 const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
-const EQUIPMENT_SLOTS: Array[String] = ["Silah", "Zırh", "Yüzük", "Kolye"]
 
 var _session: GameSession
 var _character: CharacterData
@@ -263,21 +262,78 @@ func _build_multiclass_section() -> void:
 func _build_equipment_section() -> void:
 	_content.add_child(_make_section_title("Ekipman"))
 
-	var note := Label.new()
-	note.text = "Faz 7'de gelecek."
-	note.modulate = HINT_COLOR
-	_content.add_child(note)
+	for slot in EquipmentCatalog.ALL_SLOTS:
+		_content.add_child(_build_equipment_slot_row(slot))
 
+func _build_equipment_slot_row(slot: String) -> VBoxContainer:
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+
+	var equipped := _character.get_equipped(slot)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 8)
+
+	var slot_label := Label.new()
+	slot_label.text = "%s:" % EquipmentCatalog.get_slot_display_name(slot)
+	slot_label.custom_minimum_size = Vector2(70, 0)
+	header.add_child(slot_label)
+
+	var equipped_label := Label.new()
+	equipped_label.text = _equipment_summary(equipped) if equipped != null else "Boş"
+	equipped_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	equipped_label.modulate = HINT_COLOR if equipped == null else POSITIVE_COLOR
+	equipped_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(equipped_label)
+
+	var unequip_button := Button.new()
+	unequip_button.text = "Çıkar"
+	unequip_button.disabled = equipped == null
+	unequip_button.pressed.connect(_on_unequip_pressed.bind(slot))
+	header.add_child(unequip_button)
+
+	column.add_child(header)
+
+	for candidate in EquipmentCatalog.get_equipment_for_slot(slot):
+		var available := _session.get_equipment_count(candidate.equipment_id)
+		if available <= 0 or candidate.equipment_id == _character.get_equipped_id(slot):
+			continue
+		column.add_child(_build_equip_option_row(slot, candidate, available))
+
+	return column
+
+func _build_equip_option_row(slot: String, candidate: Equipment, available: int) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	for slot_name in EQUIPMENT_SLOTS:
-		var slot_button := Button.new()
-		slot_button.text = slot_name
-		slot_button.disabled = true
-		slot_button.modulate = LOCKED_COLOR
-		slot_button.tooltip_text = "Faz 7'de gelecek"
-		row.add_child(slot_button)
-	_content.add_child(row)
+
+	var equip_button := Button.new()
+	equip_button.text = "Tak: %s (depoda %d)" % [candidate.display_name, available]
+	equip_button.tooltip_text = candidate.description
+	equip_button.pressed.connect(_on_equip_pressed.bind(slot, candidate.equipment_id))
+	row.add_child(equip_button)
+
+	var bonus_label := Label.new()
+	bonus_label.text = _equipment_bonus_text(candidate)
+	bonus_label.modulate = HINT_COLOR
+	row.add_child(bonus_label)
+
+	return row
+
+func _equipment_summary(equipment_resource: Equipment) -> String:
+	return "%s — %s" % [equipment_resource.display_name, _equipment_bonus_text(equipment_resource)]
+
+func _equipment_bonus_text(equipment_resource: Equipment) -> String:
+	var parts: Array[String] = []
+	if equipment_resource.hp_bonus != 0:
+		parts.append("Can %+d" % equipment_resource.hp_bonus)
+	if equipment_resource.dodge_bonus != 0:
+		parts.append("Kaçınma %+d" % equipment_resource.dodge_bonus)
+	if equipment_resource.accuracy_bonus != 0:
+		parts.append("İsabet %+d" % equipment_resource.accuracy_bonus)
+	if equipment_resource.crit_bonus != 0:
+		parts.append("Kritik %+d" % equipment_resource.crit_bonus)
+	if equipment_resource.damage_bonus != 0:
+		parts.append("Hasar %+d" % equipment_resource.damage_bonus)
+	return ", ".join(parts)
 
 func _make_section_title(text: String) -> Label:
 	var label := Label.new()
@@ -315,6 +371,14 @@ func _on_second_class_selected(index: int, options: Array) -> void:
 	else:
 		var character_class: CharacterClass = options[index - 1]
 		_character.set_second_class(character_class.class_id)
+	_refresh()
+
+func _on_equip_pressed(slot: String, equipment_id: String) -> void:
+	_session.equip_to_character(_character, slot, equipment_id)
+	_refresh()
+
+func _on_unequip_pressed(slot: String) -> void:
+	_session.unequip_from_character(_character, slot)
 	_refresh()
 
 func _clear_children(container: Node) -> void:
