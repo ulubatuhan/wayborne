@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_cargo_capacity(t)
 	_test_save_round_trip(t)
 	_test_event_context(t)
+	_test_equipment_locker_and_equip(t)
 
 func _make_recruit(recruit_name: String, cost: int) -> CharacterData:
 	var candidate := CharacterData.create(recruit_name, CultureCatalog.NOMAD, CharacterStats.new())
@@ -97,6 +98,7 @@ func _test_save_round_trip(t) -> void:
 	original.learn_route("test_loc_a", "test_loc_b")
 	original.set_flag("deneme_bayragi")
 	original.owned_wagon_damaged = 1
+	original.add_equipment(EquipmentCatalog.RING_MARKSMAN, 2)
 	original.set_player_character(
 		CharacterData.create("Kayıtlı", CultureCatalog.FISHER, CharacterStats.new(), 188, 3)
 	)
@@ -116,6 +118,7 @@ func _test_save_round_trip(t) -> void:
 	t.ok(restored.is_route_known("test_loc_a", "test_loc_b"), "öğrenilen rota korunur")
 	t.ok(restored.is_route_known("test_loc_b", "test_loc_a"), "rota iki yönlü kaydedilir")
 	t.ok(restored.has_flag("deneme_bayragi"), "bayraklar korunur")
+	t.eq(restored.get_equipment_count(EquipmentCatalog.RING_MARKSMAN), 2, "ekipman deposu korunur")
 
 	t.eq(restored.get_party().size(), 2, "parti korunur")
 	t.eq(restored.get_player_character().character_name, "Kayıtlı", "oyuncu ilk sırada kalır")
@@ -143,3 +146,39 @@ func _test_event_context(t) -> void:
 		"party_slots_free", EventCondition.Op.GREATER_EQUAL, 1
 	)
 	t.ok(condition.is_met(context), "yer varken yolcu olayı açılabilir")
+
+## Kervanın ortak equipment_inventory deposu ile CharacterData.equipped
+## arasındaki alışveriş - bkz. GameSession.equip_to_character/
+## unequip_from_character (character.gd'nin equip paneli bunu çağırır).
+func _test_equipment_locker_and_equip(t) -> void:
+	var session := GameSession.new(100, 0, 1)
+	var character := session.get_player_character()
+
+	t.not_ok(
+		session.equip_to_character(character, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_1),
+		"depoda yokken takılamaz"
+	)
+
+	session.add_equipment(EquipmentCatalog.WEAPON_TIER_1, 1)
+	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 1, "satın alınan parça depoya düşer")
+
+	t.ok(
+		session.equip_to_character(character, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_1),
+		"depodaki parça takılabilir"
+	)
+	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 0, "takılan parça depodan düşer")
+	t.eq(character.get_equipped_id(EquipmentCatalog.SLOT_WEAPON), EquipmentCatalog.WEAPON_TIER_1, "karakter parçayı taşır")
+
+	# Yükseltme: yeni parça depoda, eskisi takılıyken.
+	session.add_equipment(EquipmentCatalog.WEAPON_TIER_2, 1)
+	t.ok(
+		session.equip_to_character(character, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_2),
+		"yükseltme takılabilir"
+	)
+	t.eq(character.get_equipped_id(EquipmentCatalog.SLOT_WEAPON), EquipmentCatalog.WEAPON_TIER_2, "yeni parça takılı")
+	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 1, "eski parça depoya geri döner")
+
+	t.ok(session.unequip_from_character(character, EquipmentCatalog.SLOT_WEAPON), "çıkarma başarılı")
+	t.eq(character.get_equipped(EquipmentCatalog.SLOT_WEAPON), null, "slot boşaldı")
+	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_2), 1, "çıkarılan parça depoya döner")
+	t.not_ok(session.unequip_from_character(character, EquipmentCatalog.SLOT_WEAPON), "boş slot tekrar çıkarılamaz")

@@ -32,6 +32,7 @@ enum Type {
 	TRIGGER_RECRUIT,
 	# Karakter
 	GRANT_TRAIT,
+	GRANT_EQUIPMENT,
 }
 
 @export var type: Type = Type.GOLD

@@ -66,3 +66,4 @@ func _test_old_session_save_loads(t) -> void:
 	t.eq(session.get_party().size(), 1, "eski partili kayıt yüklenir")
 	t.eq(session.get_player_character().level, 1, "yüklenen karakter seviye 1'den başlar")
 	t.eq(session.get_duty_holder(DutyCatalog.MUHAFIZ), null, "eski kayıtta kimse görevli değildir")
+	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 0, "ekipman deposu olmayan kayıt boş depoyla yüklenir")

@@ -48,6 +48,20 @@ text = "Onar"
 layout_mode = 2
 text = "Yeni Vagon Al"
 
+[node name="EquipmentTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Demirci: Silah ve Zırh Yükseltmeleri"
+
+[node name="EquipmentScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EquipmentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/EquipmentScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Şehre Dön"
