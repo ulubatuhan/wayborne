@@ -742,10 +742,45 @@ Faz 7 ("Kervanın Donanımı") tamamlandı - dört PR'lık bir hat:
   numaralar yerine kültürlerin kendi isim havuzlarından deterministik
   seçiliyor.
 
-Sırada Faz 8: karakter portreleri/görsel varlıklar, ikinci bir şehir
-etkileşim katmanı (loncalar arası itibar rekabeti gibi derinlik), ya da
-equipment'in Faz 7'de bilerek dışarıda bırakılan kısımları (görsel
-ikonlar, envanterde ağırlık/slot sınırı) - kesin kapsam henüz seçilmedi.
+Faz 8 ("Vizyon ve Denge") sürüyor - rakip oyunların (Darkest Dungeon,
+Oregon Trail tarzı kervan yönetimi) vizyonu doğrultusunda içerik/denge
+boşluklarını dolduran bir hat:
+
+- **PR-A (denge simülatörü)** `simulate_journeys.gd`'yi Faz 6-7 içeriğini
+  gerçekten alıştıran bir araca çevirdi (bkz. Testing bölümü) - bulduğu
+  `get_duty_flat_reduction()` asimetrisini düzeltti.
+- **PR-B (düşman çeşitliliği)** yolda yalnızca haydut çıkma tekdüzeliğini
+  kırdı: vahşi hayvan (Kurt/Ayı/Domuz), bölgeye göre haydut reskin'i
+  (Kurtboğazı → Dağ Haydutu, Demirkapı → Silahlı Eşkıya), şehir muhafızı/
+  çavuşu (zafer itibar *kaybettirir* - bkz. Combat Rules). Tek giriş
+  noktası `EnemyCatalog.build_squad(enemy_kind, region_id, ...)`,
+  `enemy_kind` `EventEffect.Type.TRIGGER_COMBAT`'in `text_value`'sundan
+  `EventEffectApplier.Result.combat_kinds` üzerinden akıyor.
+- **PR-C (tayfanın görünürlüğü)** `world_hub.gd`'de vagonları süren
+  isimsiz tayfayı (`GameSession.PEOPLE_PER_WAGON`) ilk kez görünür kıldı.
+- **PR-C2 (kervan formasyonu)** diziliş mantığını ikiye ayırdı: isimli
+  parti üyeleri artık simetrik bir muhafız düzeninde - levazımcı görevini
+  taşıyan kişi (yoksa en kıdemli) her zaman liderin hemen arkasında
+  (bkz. `world_hub.gd`'nin `_order_escorts()`) - tayfaysa artık düzenli
+  sıra tutmuyor, vagon başına asimetrik/dağınık bir konumda yürüyor
+  (`_crew_offset()`).
+- **PR-D (hedef ve zorluk eğrisi)** üç parça: `GameSession.
+  get_effective_danger(base_danger)` rotanın ham `danger_level`'ını
+  `total_days_elapsed`'e göre büyütüyor (`DANGER_GROWTH_PER_DAY`,
+  `DANGER_GROWTH_CAP` tavanlı) - erken oyunun kolaylığı geç oyunda
+  sürmesin diye; caravan_planner.gd/world_map.gd/tavern.gd artık rotanın
+  ham değeri yerine bunu okuyor. Oyunun DD tarzı felsefesinde yenilgi
+  yok, bu yüzden "hedef ekranı" bir game-over değil: kese `GameSession.
+  GOAL_GOLD`'a ulaşınca (`has_reached_goal()`, bir kereye mahsus -
+  `GOAL_FLAG`) şehre varışta `goal_reached.tscn` açılıyor, "Devam Et" ile
+  oyun kaldığı yerden sürüyor. Ana menüye "Ayarlar" (dil seçici artık
+  burada, `settings.tscn`) ve "Çıkış" eklendi.
+
+Sırada: karakter portreleri/görsel varlıklar (bu fazın ColorRect yer
+tutucuları hâlâ duruyor), ikinci bir şehir etkileşim katmanı (loncalar
+arası itibar rekabeti gibi derinlik), ya da equipment'in Faz 7'de
+bilerek dışarıda bırakılan kısımları (görsel ikonlar, envanterde
+ağırlık/slot sınırı) - kesin kapsam henüz seçilmedi.
 
 ## Quick Start
 

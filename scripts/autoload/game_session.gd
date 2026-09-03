@@ -75,6 +75,29 @@ var journey_days_remaining: int = 0
 var danger_level: float = 0.0
 var reputation: int = 0
 
+## Rotanın kendi tehlike tablosu (bkz. WorldMapData) sabit kalır ama
+## kervan ne kadar deneyimli olursa olsun yollar günler geçtikçe daha
+## tehlikeli hale gelir - erken oyunun kolaylığı geç oyunda sürmesin
+## diye. caravan_planner.gd ve world_map.gd rotanın ham danger_level'ını
+## göstermek yerine bunu okur, start_journey() de bununla çağrılır -
+## ekranda görülen ile yaşanan tutarlı kalsın diye.
+const DANGER_GROWTH_PER_DAY: float = 0.004
+const DANGER_GROWTH_CAP: float = 1.6
+
+func get_effective_danger(base_danger: float) -> float:
+	var growth := minf(1.0 + DANGER_GROWTH_PER_DAY * float(total_days_elapsed), DANGER_GROWTH_CAP)
+	return clampf(base_danger * growth, 0.0, 1.0)
+
+## Zenginlik hedefi: kervanın bir "kervan baronu" sayılacağı eşik.
+## Oyunun DD tarzı felsefesinde yenilgi yok (bkz. CLAUDE.md) - bu yüzden
+## bir "game over" değil, bir kereye mahsus kutlama ekranı (bkz.
+## road_journey.gd _on_enter_city_pressed, scripts/ui/goal_reached.gd).
+const GOAL_GOLD: int = 5000
+const GOAL_FLAG: String = "goal_wealth_reached"
+
+func has_reached_goal() -> bool:
+	return wallet.balance >= GOAL_GOLD and not has_flag(GOAL_FLAG)
+
 ## Kervan morali (CaravanState.morale) her seferde sıfırdan başlar - o
 ## anki seferin ruh hali. Stres bunun tam tersi: seferler arası kalıcı,
 ## yalnızca şehirde dinlenmek ya da kampta mola vermek azaltır. İkisi de

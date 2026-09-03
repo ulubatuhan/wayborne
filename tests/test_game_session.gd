@@ -15,6 +15,7 @@ func run(t) -> void:
 	_test_save_round_trip(t)
 	_test_event_context(t)
 	_test_equipment_locker_and_equip(t)
+	_test_effective_danger_and_goal(t)
 
 func _make_recruit(recruit_name: String, cost: int) -> CharacterData:
 	var candidate := CharacterData.create(recruit_name, CultureCatalog.NOMAD, CharacterStats.new())
@@ -193,3 +194,28 @@ func _test_equipment_locker_and_equip(t) -> void:
 	t.eq(character.get_equipped(EquipmentCatalog.SLOT_WEAPON), null, "slot boşaldı")
 	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_2), 1, "çıkarılan parça depoya döner")
 	t.not_ok(session.unequip_from_character(character, EquipmentCatalog.SLOT_WEAPON), "boş slot tekrar çıkarılamaz")
+
+## Faz 8 PR-D: yollar günler geçtikçe tehlikelenir (get_effective_danger),
+## zenginlik hedefi bir kereye mahsus tetiklenir (has_reached_goal).
+func _test_effective_danger_and_goal(t) -> void:
+	var fresh := GameSession.new(100, 0, 1)
+	t.almost(fresh.get_effective_danger(0.5), 0.5, "sıfırıncı günde ham tehlike değişmez")
+
+	var seasoned := GameSession.new(100, 0, 1)
+	seasoned.total_days_elapsed = 100
+	t.ok(
+		seasoned.get_effective_danger(0.5) > fresh.get_effective_danger(0.5),
+		"gün ilerledikçe aynı rota daha tehlikeli olur"
+	)
+	t.le(seasoned.get_effective_danger(0.5), 1.0, "etkin tehlike 1.0'ı aşmaz")
+
+	var maxed_out := GameSession.new(100, 0, 1)
+	maxed_out.total_days_elapsed = 100000
+	t.le(maxed_out.get_effective_danger(0.9), 1.0, "aşırı uzun oyunlarda bile tavan aşılmaz")
+
+	var goal_session := GameSession.new(0, 0, 1)
+	t.not_ok(goal_session.has_reached_goal(), "kese hedefin altındayken hedefe ulaşılmaz")
+	goal_session.wallet.earn(GameSession.GOAL_GOLD)
+	t.ok(goal_session.has_reached_goal(), "kese hedefe ulaşınca hedef tetiklenir")
+	goal_session.set_flag(GameSession.GOAL_FLAG)
+	t.not_ok(goal_session.has_reached_goal(), "bayrak kurulunca bir daha tetiklenmez")

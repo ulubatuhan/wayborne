@@ -43,7 +43,7 @@ func _ready() -> void:
 		# kısalır (asla bir günün altına inmez), bkz. DutyCatalog.IZCI.
 		var izci_reduction := _session.get_duty_flat_reduction(DutyCatalog.IZCI)
 		travel_days = maxi(1, route.travel_days - izci_reduction)
-		_route_danger = route.danger_level
+		_route_danger = _session.get_effective_danger(route.danger_level)
 
 	_plan = CaravanPlan.new(
 		_destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_count
