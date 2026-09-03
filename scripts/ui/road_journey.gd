@@ -659,6 +659,14 @@ func _make_summary_label(text: String) -> Label:
 
 func _on_enter_city_pressed() -> void:
 	Nav.return_scene = Nav.CITY_MAP
+
+	if _session.has_reached_goal():
+		_session.set_flag(GameSession.GOAL_FLAG)
+		if _is_live_journey:
+			SaveManager.save_session(_session)
+		get_tree().change_scene_to_file(Nav.GOAL_REACHED)
+		return
+
 	get_tree().change_scene_to_file(Nav.CITY_MAP)
 
 func _set_journey_controls_enabled(enabled: bool) -> void:

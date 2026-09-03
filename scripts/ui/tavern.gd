@@ -89,7 +89,8 @@ func _refresh_rows() -> void:
 		var known := _session.is_route_known(_session.current_location_id, route.to_location_id)
 
 		if known:
-			status_label.text = "%d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)]
+			var effective_danger := _session.get_effective_danger(route.danger_level)
+			status_label.text = "%d gün · Tehlike: %d%%" % [route.travel_days, int(effective_danger * 100.0)]
 			buy_button.text = "Öğrenildi"
 			buy_button.disabled = true
 		else:

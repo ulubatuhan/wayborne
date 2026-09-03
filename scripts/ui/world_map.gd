@@ -111,11 +111,12 @@ func _refresh_info_panel() -> void:
 ## tam gösterilir; ikisi de yoksa kaba bir bant gösterir (bkz.
 ## GameSession.known_routes).
 func _route_summary(route: TravelRoute) -> String:
+	var effective_danger := _session.get_effective_danger(route.danger_level)
 	if _session.is_route_known(_current_location_id, route.to_location_id):
-		return "Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)]
+		return "Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(effective_danger * 100.0)]
 	if _session.get_duty_holder(DutyCatalog.IZCI) != null:
-		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)" % [route.travel_days, int(route.danger_level * 100.0)]
-	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)" % [route.travel_days, _danger_band(route.danger_level)]
+		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)" % [route.travel_days, int(effective_danger * 100.0)]
+	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)" % [route.travel_days, _danger_band(effective_danger)]
 
 func _danger_band(danger: float) -> String:
 	if danger < 0.3:

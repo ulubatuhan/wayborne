@@ -9,6 +9,8 @@ const WORLD_HUB: String = "res://scenes/world/world_hub.tscn"
 const CITY_MAP: String = "res://scenes/world/city_map.tscn"
 const MAIN_MENU: String = "res://scenes/ui/main_menu.tscn"
 const CHARACTER_CREATION: String = "res://scenes/ui/character_creation.tscn"
+const SETTINGS: String = "res://scenes/ui/settings.tscn"
+const GOAL_REACHED: String = "res://scenes/ui/goal_reached.tscn"
 
 const ECONOMY: String = "res://scenes/game/market.tscn"
 const HAGGLING: String = "res://scenes/game/haggling.tscn"
