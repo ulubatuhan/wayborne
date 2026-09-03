@@ -23,8 +23,19 @@ func _initialize() -> void:
 	])
 	print("")
 
+	# Faz 6-7'nin kültür/görev/ekipman koşullu içeriğini hiçbir zaman
+	# çalıştırmayan bir simülatör yanlış bir güven verir - olay ateşlenme
+	# sıklığını burada topluca görmek için üç tehlike koşusunun sayaçları
+	# birleştiriliyor (bkz. _report_event_frequency).
+	var merged_event_counts: Dictionary = {}
 	for danger in DANGER_LEVELS:
-		_report(danger, _run_batch(danger))
+		var stats := _run_batch(danger)
+		_report(danger, stats)
+		var batch_counts: Dictionary = stats.event_counts
+		for event_id in batch_counts:
+			merged_event_counts[event_id] = int(merged_event_counts.get(event_id, 0)) + int(batch_counts[event_id])
+
+	_report_event_frequency(merged_event_counts)
 
 	print("── Savaş dengesi (parti büyüklüğüne göre kazanma oranı)")
 	var party_sizes: Array[int] = [1, 2, 3, 4]
@@ -39,6 +50,14 @@ func _initialize() -> void:
 	for level in levels_to_check:
 		_report_combat_at_level(level)
 
+	print("")
+	print("── Ekipman etkisi (tehlike %50)")
+	_report_equipment_impact()
+
+	print("")
+	print("── Görev sağlık kontrolü (Sıra Neferi, seviye 1 ve 10)")
+	_report_duty_impact()
+
 	quit(0)
 
 func _run_batch(danger: float) -> Dictionary:
@@ -52,6 +71,7 @@ func _run_batch(danger: float) -> Dictionary:
 	var stress_total := 0
 	var breaks_total := 0
 	var departures_total := 0
+	var event_counts: Dictionary = {}
 
 	for run_index in RUN_COUNT:
 		var outcome := _run_single(danger, 1000 + run_index)
@@ -66,6 +86,8 @@ func _run_batch(danger: float) -> Dictionary:
 		stress_total += int(outcome.stress_before_rest)
 		breaks_total += int(outcome.breaks)
 		departures_total += int(outcome.departures)
+		for event_id in (outcome.fired_events as Array):
+			event_counts[event_id] = int(event_counts.get(event_id, 0)) + 1
 
 	return {
 		"net_avg": float(net_total) / float(RUN_COUNT),
@@ -78,6 +100,7 @@ func _run_batch(danger: float) -> Dictionary:
 		"stress_avg": float(stress_total) / float(RUN_COUNT),
 		"breaks_avg": float(breaks_total) / float(RUN_COUNT),
 		"departures_total": departures_total,
+		"event_counts": event_counts,
 	}
 
 ## Bir seferi baştan sona koşturur. Olay seçenekleri "ilk uygun seçenek"
@@ -88,6 +111,32 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 	session.journey_destination_id = WorldMapData.START_LOCATION_ID
 	session.journey_total_days = JOURNEY_DAYS
 	session.journey_days_remaining = JOURNEY_DAYS
+
+	# Kültürü ve görevi her koşuda döndürmek beş evt_culture_* olayının ve
+	# İzci/Levazımcı/Otacı/Arabacı/Tellal/Muhafız'ın hepsini simülasyona
+	# sokuyor - sabit varsayılan oyuncu bunların çoğunu hiç görmüyordu.
+	var cultures := CultureCatalog.get_cultures()
+	var player := CharacterData.create(
+		"Simülasyon", cultures[seed_value % cultures.size()].culture_id, CharacterStats.new()
+	)
+	player.heal_full()
+	session.set_player_character(player)
+
+	var duties: Array[String] = [
+		DutyCatalog.MUHAFIZ, DutyCatalog.IZCI, DutyCatalog.LEVAZIMCI,
+		DutyCatalog.ARABACI, DutyCatalog.TELLAL, DutyCatalog.OTACI,
+	]
+	session.assign_duty(player, duties[seed_value % duties.size()])
+
+	# Üçte bir oranında ekipmanlı - GRANT_EQUIPMENT'in doldurduğu depodan
+	# takılmış gibi, equipment'in combat sonuçlarına gerçekten karıştığı
+	# koşular da örneklemde olsun diye (bkz. _report_equipment_impact
+	# ayrıca izole bir A/B karşılaştırması yapıyor).
+	if seed_value % 3 == 0:
+		session.add_equipment(EquipmentCatalog.WEAPON_TIER_2, 1)
+		session.add_equipment(EquipmentCatalog.ARMOR_TIER_2, 1)
+		session.equip_to_character(player, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_2)
+		session.equip_to_character(player, EquipmentCatalog.SLOT_ARMOR, EquipmentCatalog.ARMOR_TIER_2)
 
 	session.caravan.wagon_count = 4
 	session.caravan.wagons_at_start = 4
@@ -107,6 +156,7 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 	rng.seed = seed_value
 
 	var starved := false
+	var fired_events: Array[String] = []
 
 	for day in range(1, JOURNEY_DAYS + 1):
 		session.journey_days_remaining = maxi(0, session.journey_days_remaining - 1)
@@ -124,8 +174,9 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 			continue
 
 		engine.mark_fired(event, day)
+		fired_events.append(event.event_id)
 		if not event.immediate_effects.is_empty():
-			_apply(event.immediate_effects, session, danger, rng)
+			_apply(event.immediate_effects, session, danger, rng, engine)
 		_resolve_first_available_choice(event, engine, session, danger, rng)
 
 	var wagons_before := session.caravan.wagon_count
@@ -149,6 +200,7 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		"stress_before_rest": stress_before_rest,
 		"breaks": stress_breaks.size(),
 		"departures": departures,
+		"fired_events": fired_events,
 	}
 
 func _resolve_first_available_choice(
@@ -159,10 +211,10 @@ func _resolve_first_available_choice(
 	for choice in event.choices:
 		if not choice.is_available(context):
 			continue
-		_apply(choice.effects, session, danger, rng)
+		_apply(choice.effects, session, danger, rng, engine)
 		var outcome := engine.resolve_outcome(choice, session.build_event_context())
 		if outcome != null:
-			_apply(outcome.effects, session, danger, rng)
+			_apply(outcome.effects, session, danger, rng, engine)
 		return
 
 ## Etkiler uygulanır; savaş isteği çıkarsa gerçek motor koşturulur ve
@@ -174,9 +226,19 @@ const SIM_COMBAT_DEFEAT_STRESS: int = 15
 
 func _apply(
 	effects: Array[EventEffect], session: GameSession,
-	danger: float, rng: RandomNumberGenerator
+	danger: float, rng: RandomNumberGenerator, engine: EventEngine = null
 ) -> void:
 	var result := EventEffectApplier.apply(effects, session)
+
+	# road_journey.gd zincir olaylarını böyle açıyor (bkz.
+	# EventEffect.Type.UNLOCK_EVENT) - burada da yapılmazsa triggered_only
+	# zincir olayları (evt_stowaway_repay gibi) simülasyonda hiçbir zaman
+	# ateşlenemez, kaynağı bulunan gerçek bir eksiklik değil sahte bir
+	# "hiç çekilmiyor" alarmı verir (bkz. _report_event_frequency).
+	if engine != null:
+		for event_id in result.unlocked_event_ids:
+			engine.unlock_event(event_id)
+
 	if result.combat_requests.is_empty():
 		return
 
@@ -330,3 +392,90 @@ func _report_combat_at_level(level: int) -> void:
 	print("    seviye %2d: %%%d kazanıyor (%d/%d)" % [
 		level, int(round(100.0 * float(wins) / float(battles))), wins, battles
 	])
+
+## 22 olayın hepsi gerçekten çekiliyor mu, biri (kültür/İzci koşulu hiç
+## sağlanmadığı için) asılı mı kalmış - tek tek elle kontrol etmek yerine
+## topluca burada görülüyor. En az çekilenler üstte.
+func _report_event_frequency(counts: Dictionary) -> void:
+	print("── Olay ateşlenme sıklığı (%d koşu toplamı)" % (RUN_COUNT * DANGER_LEVELS.size()))
+
+	var rows: Array[Dictionary] = []
+	for event in EventCatalog.get_road_events():
+		rows.append({"id": event.event_id, "count": int(counts.get(event.event_id, 0))})
+	rows.sort_custom(func(a, b): return a.count < b.count)
+
+	for row in rows:
+		var marker := "  ⚠ hiç ateşlenmedi" if row.count == 0 else ""
+		print("    %-28s %4d%s" % [row.id, row.count, marker])
+	print("")
+
+## Equipment'in savaşa gerçekten katkısı ne kadar - donanımsız/tam donanımlı
+## aynı parti arasındaki kazanma oranı farkı (bkz. Faz 7 PR-A/B). 4 kişilik
+## parti tehlike %50'de zaten %100 kazanıyor (bkz. Savaş dengesi raporu) -
+## tavanda ölçüm yapmak hiçbir farkı göstermez, o yüzden burada tavana
+## çarpmayan tek kişilik parti kullanılıyor (bare taban zaten %63).
+const EQUIPMENT_TEST_PARTY_SIZE: int = 1
+
+func _report_equipment_impact() -> void:
+	var battles := 60
+	var bare_wins := _battle_batch(battles, false)
+	var geared_wins := _battle_batch(battles, true)
+	print("    donanımsız %d kişi                      %%%d kazanıyor (%d/%d)" % [
+		EQUIPMENT_TEST_PARTY_SIZE, int(round(100.0 * float(bare_wins) / float(battles))), bare_wins, battles
+	])
+	print("    tam donanımlı (T3+yüzük+kolye) %d kişi  %%%d kazanıyor (%d/%d)" % [
+		EQUIPMENT_TEST_PARTY_SIZE, int(round(100.0 * float(geared_wins) / float(battles))), geared_wins, battles
+	])
+
+func _battle_batch(battles: int, geared: bool) -> int:
+	var wins := 0
+	for index in battles:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 900 + index
+
+		var party: Array[CharacterData] = []
+		for slot in EQUIPMENT_TEST_PARTY_SIZE:
+			var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+			var character := CharacterData.create(
+				"Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new()
+			)
+			if geared:
+				_equip_best_gear(character)
+			party.append(character)
+
+		if bool(_simulate_combat(party, 0.5, rng).victory):
+			wins += 1
+	return wins
+
+func _equip_best_gear(character: CharacterData) -> void:
+	var pieces: Array[String] = [
+		EquipmentCatalog.WEAPON_TIER_3, EquipmentCatalog.ARMOR_TIER_3,
+		EquipmentCatalog.RING_MARKSMAN, EquipmentCatalog.AMULET_WOLF_FANG,
+	]
+	for equipment_id in pieces:
+		var equipment_resource := EquipmentCatalog.get_equipment(equipment_id)
+		character.equip(equipment_resource.slot, equipment_id)
+
+## Görev sayılarının kaba bir sağlık kontrolü - seviye ilerledikçe
+## get_duty_flat_reduction/get_duty_discount anlamlı büyüyor mu, yoksa
+## sürekli 0'da mı kalıyor (bkz. GameSession.get_duty_flat_reduction).
+func _report_duty_impact() -> void:
+	var duties: Array[String] = [
+		DutyCatalog.MUHAFIZ, DutyCatalog.IZCI, DutyCatalog.LEVAZIMCI,
+		DutyCatalog.ARABACI, DutyCatalog.TELLAL, DutyCatalog.OTACI,
+	]
+	for level in [1, 10]:
+		var session := GameSession.new(100, 0, 1)
+		var holder := session.get_player_character()
+		holder.class_id = ClassCatalog.GUARD
+		_level_up(holder, level)
+		print("    seviye %d Sıra Neferi:" % level)
+		for duty_id in duties:
+			session.assign_duty(holder, duty_id)
+			var duty := DutyCatalog.get_duty(duty_id)
+			print("      %-12s çarpan %.2f · indirim %%%.0f · azaltma %d" % [
+				duty.display_name,
+				session.get_duty_multiplier(duty_id),
+				session.get_duty_discount(duty_id) * 100.0,
+				session.get_duty_flat_reduction(duty_id),
+			])
