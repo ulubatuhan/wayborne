@@ -775,6 +775,11 @@ boşluklarını dolduran bir hat:
   `GOAL_FLAG`) şehre varışta `goal_reached.tscn` açılıyor, "Devam Et" ile
   oyun kaldığı yerden sürüyor. Ana menüye "Ayarlar" (dil seçici artık
   burada, `settings.tscn`) ve "Çıkış" eklendi.
+- **PR-E (onboarding)** karakter oluşturmadan sonraki ilk şehir varışında
+  bir kereye mahsus, atlanabilir bir ipucu katmanı (`OnboardingPanel`,
+  `GameSession.ONBOARDING_FLAG`) stres/görev/huy/ekipman sistemlerini
+  tanıtıyor - `PulseBar` gibi sahnesiz, `.new()` ile kurulan bir bileşen,
+  `city_map.gd`'nin ilk `_ready()`'sinden tetikleniyor.
 
 Sırada: karakter portreleri/görsel varlıklar (bu fazın ColorRect yer
 tutucuları hâlâ duruyor), ikinci bir şehir etkileşim katmanı (loncalar

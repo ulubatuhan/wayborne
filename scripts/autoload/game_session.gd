@@ -98,6 +98,10 @@ const GOAL_FLAG: String = "goal_wealth_reached"
 func has_reached_goal() -> bool:
 	return wallet.balance >= GOAL_GOLD and not has_flag(GOAL_FLAG)
 
+## İlk şehir varışında bir kereye mahsus gösterilen atlanabilir ipucu
+## katmanının bayrağı (bkz. city_map.gd, scripts/ui/onboarding_panel.gd).
+const ONBOARDING_FLAG: String = "onboarding_seen"
+
 ## Kervan morali (CaravanState.morale) her seferde sıfırdan başlar - o
 ## anki seferin ruh hali. Stres bunun tam tersi: seferler arası kalıcı,
 ## yalnızca şehirde dinlenmek ya da kampta mola vermek azaltır. İkisi de

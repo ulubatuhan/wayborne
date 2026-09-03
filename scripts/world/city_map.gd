@@ -19,6 +19,16 @@ func _ready() -> void:
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_refresh_title()
 	_build_spots()
+	_maybe_show_onboarding()
+
+## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
+## mahsus, atlanabilir bir ipucu katmanı gösterir (bkz. OnboardingPanel,
+## GameSession.ONBOARDING_FLAG).
+func _maybe_show_onboarding() -> void:
+	if _session.has_flag(GameSession.ONBOARDING_FLAG):
+		return
+	_session.set_flag(GameSession.ONBOARDING_FLAG)
+	add_child(OnboardingPanel.new())
 
 func _refresh_title() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)

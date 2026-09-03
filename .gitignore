@@ -19,3 +19,6 @@ mono_crash.*.json
 # Build exports
 build/
 *.zip
+
+# Personal Claude Code overrides - not shared with the repo/CI
+.claude/settings.local.json
