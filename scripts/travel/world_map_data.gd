@@ -1,8 +1,11 @@
 class_name WorldMapData
 extends RefCounted
 
-## Placeholder dünya verisi. Gerçek lore/harita gelince buradaki tablolar
-## veri dosyalarından (data/config/) okunacak şekilde değiştirilecek.
+## Beş şehirlik dünya verisi. Şema oturduğunda buradaki tablolar veri
+## dosyalarından (data/config/) okunacak şekilde değiştirilecek -
+## location_id'ler ("test_loc_a" vb.) o yüzden kalıcı kayıtlarla uyumlu
+## kalmak için bilerek değiştirilmedi, yalnızca location_name'ler ve
+## tüccar isimleri Faz 7 PR-D'de gerçek lore'a döndü.
 ##
 ## Tüm tablolar bir kez kurulup statik önbelleğe alınıyor (bkz. ItemCatalog
 ## ile aynı desen): içerik büyüdükçe her çağrıda sıfırdan yeniden inşa
@@ -82,23 +85,24 @@ static func _ensure_built() -> void:
 	_build_routes_and_offers()
 
 ## Şehirler arası ticaret zinciri: her şehir bir malı ucuza üretir ve
-## başka birinin ürettiği malı pahalıya arar. A→D→B→A ve C↔E iki kapalı
+## başka birinin ürettiği malı pahalıya arar. Karakonak (merkez) →
+## Demirkapı → Kurtboğazı → Karakonak ve İpekevi ↔ Yeşilova iki kapalı
 ## döngü oluşturur, ikisi de gerçek rotalarla (bkz. _get_edges) bağlı.
 static func _build_locations() -> void:
 	_locations.append(_make_location(
-		"test_loc_a", "Test Şehir A", Vector2(110, 210), ["test_grain"], ["test_furs"]
+		"test_loc_a", "Karakonak", Vector2(110, 210), ["test_grain"], ["test_furs"]
 	))
 	_locations.append(_make_location(
-		"test_loc_b", "Test Şehir B", Vector2(330, 90), ["test_furs"], ["test_weapon"]
+		"test_loc_b", "Kurtboğazı", Vector2(330, 90), ["test_furs"], ["test_weapon"]
 	))
 	_locations.append(_make_location(
-		"test_loc_c", "Test Şehir C", Vector2(360, 330), ["test_cloth"], ["test_potion"]
+		"test_loc_c", "İpekevi", Vector2(360, 330), ["test_cloth"], ["test_potion"]
 	))
 	_locations.append(_make_location(
-		"test_loc_d", "Test Şehir D", Vector2(560, 180), ["test_weapon"], ["test_grain"]
+		"test_loc_d", "Demirkapı", Vector2(560, 180), ["test_weapon"], ["test_grain"]
 	))
 	_locations.append(_make_location(
-		"test_loc_e", "Test Şehir E", Vector2(590, 370), ["test_potion"], ["test_cloth"]
+		"test_loc_e", "Yeşilova", Vector2(590, 370), ["test_potion"], ["test_cloth"]
 	))
 	for location in _locations:
 		_location_by_id[location.location_id] = location
@@ -108,7 +112,8 @@ static func _build_locations() -> void:
 ## Kenarlar iki yönlü rota ve teklif üretimi için tek kaynak: her kenar
 ## [şehir_a, şehir_b, gün, tehlike] olarak tanımlanır, iki yöne de aynı
 ## değerlerle uygulanır. Her şehrin en az iki komşusu olacak şekilde
-## kurulmuş (A merkez, B-D-E arasında ayrıca kısayollar var).
+## kurulmuş (Karakonak merkez, Kurtboğazı-Demirkapı-Yeşilova arasında
+## ayrıca kısayollar var).
 static func _build_routes_and_offers() -> void:
 	var id_counter := 1
 	for edge in _get_edges():
@@ -162,7 +167,7 @@ static func _offers_for_direction(
 		var merchant_number: int = id_base + i
 		offers.append(_make_offer(
 			"m_%d" % merchant_number,
-			"Tüccar %d" % merchant_number,
+			_merchant_name(merchant_number),
 			origin_id,
 			destination_id,
 			profile.profit,
@@ -171,6 +176,17 @@ static func _offers_for_direction(
 			profile.reputation
 		))
 	return offers
+
+## merchant_id kalıcıdır (bkz. GameSession.accepted_contracts), isim
+## yalnızca gösterim - kültürlerin kendi isim havuzlarından (bkz.
+## CultureCatalog) deterministik seçiliyor, hem "Tüccar 12" gibi çıplak
+## bir numara kalmıyor hem de dünyanın beş kültürü tüccar tarafında da
+## görünür oluyor.
+static func _merchant_name(merchant_number: int) -> String:
+	var cultures := CultureCatalog.get_cultures()
+	var culture: Culture = cultures[merchant_number % cultures.size()]
+	var pool := culture.name_pool
+	return pool[(merchant_number / cultures.size()) % pool.size()]
 
 static func _pair_key(a: String, b: String) -> String:
 	return "%s|%s" % [a, b]
