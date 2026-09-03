@@ -27,10 +27,17 @@ const BODY_MIN_HEIGHT: float = 52.0
 const BODY_MAX_HEIGHT: float = 72.0
 const BODY_WIDTH: float = 30.0
 
+## Vagonu süren isimsiz tayfa (bkz. GameSession.PEOPLE_PER_WAGON) - adı
+## olan parti üyelerinden görsel olarak ayrışsın diye soluk/nötr renkte,
+## etiketsiz, sabit boyda.
+const CREW_BODY_HEIGHT: float = 56.0
+const CREW_GAP: float = 22.0
+
 const SKY_COLOR: Color = Color(0.42, 0.52, 0.62)
 const GROUND_COLOR: Color = Color(0.35, 0.31, 0.24)
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const WAGON_COLOR: Color = Color(0.55, 0.38, 0.22)
+const CREW_COLOR: Color = Color(0.42, 0.4, 0.36)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
 const PROMPT_COLOR: Color = Color(1.0, 0.9, 0.5)
 
@@ -39,6 +46,9 @@ var _player: ColorRect
 ## isimleriyle yürüyor - kervanın büyüdüğü ekranda görülsün diye.
 var _wagons: Array[ColorRect] = []
 var _followers: Array[ColorRect] = []
+## Her vagonun kendi tayfası: crew_index -> wagon_index ilişkisi
+## GameSession.PEOPLE_PER_WAGON üzerinden hesaplanır (bkz. _follow_with_wagon).
+var _crew: Array[ColorRect] = []
 var _spots: Array[Dictionary] = []
 
 @onready var _camera: Camera2D = $Camera2D
@@ -114,6 +124,18 @@ func _follow_with_wagon(delta: float) -> void:
 		var wagon := _wagons[index]
 		var wagon_target := train_start - WAGON_SPACING * index
 		wagon.position.x = lerpf(wagon.position.x, wagon_target, weight)
+		_follow_wagon_crew(index, wagon_target, weight)
+
+## Bir vagonun tayfası (bkz. GameSession.PEOPLE_PER_WAGON) o vagonun önünde,
+## yan yana yürür - vagon kendi kendine gitmiyormuş gibi görünmesin diye.
+func _follow_wagon_crew(wagon_index: int, wagon_target_x: float, weight: float) -> void:
+	for crew_slot in GameSession.PEOPLE_PER_WAGON:
+		var crew_index := wagon_index * GameSession.PEOPLE_PER_WAGON + crew_slot
+		if crew_index >= _crew.size():
+			continue
+		var crew_member := _crew[crew_index]
+		var crew_target := wagon_target_x + WAGON_SIZE.x * 0.5 - CREW_GAP * (crew_slot + 1)
+		crew_member.position.x = lerpf(crew_member.position.x, crew_target, weight)
 
 func _build_scenery() -> void:
 	var sky := ColorRect.new()
@@ -188,14 +210,18 @@ func _add_spot(
 	})
 
 ## Kervanı sahiplik durumuna göre kurar: sahip olunan her vagon için bir
-## vagon, partideki her kişi için bir gövde. Oyuncu partisi tek kişiyle
-## başlar, tayfa topladıkça arkasında yürüyenler çoğalır.
+## vagon ve GameSession.PEOPLE_PER_WAGON kadar tayfa, partideki her kişi
+## için bir gövde. Oyuncu partisi tek kişiyle başlar, tayfa topladıkça
+## arkasında yürüyenler çoğalır.
 func _build_caravan() -> void:
 	var session: GameSession = GameState.get_session()
 	var party := session.get_party()
 
 	for index in maxi(1, session.owned_wagon_count):
-		_wagons.append(_build_wagon(index))
+		var wagon := _build_wagon(index)
+		_wagons.append(wagon)
+		for crew_slot in GameSession.PEOPLE_PER_WAGON:
+			_crew.append(_build_crew_member(wagon.position.x, crew_slot))
 
 	_player = _build_person(party[0], true)
 	for index in range(1, party.size()):
@@ -240,6 +266,19 @@ func _build_wagon(index: int) -> ColorRect:
 		"follows_wagon": true,
 	})
 	return wagon
+
+## wagon_x, o vagonun o anki x'i - _follow_wagon_crew'daki hedef formülüyle
+## aynısı kullanılır ki ilk karede kervan konumundan içeri kaymasın.
+func _build_crew_member(wagon_x: float, crew_slot: int) -> ColorRect:
+	var body := ColorRect.new()
+	body.color = CREW_COLOR
+	body.size = Vector2(BODY_WIDTH, CREW_BODY_HEIGHT)
+	body.position = Vector2(
+		wagon_x + WAGON_SIZE.x * 0.5 - CREW_GAP * (crew_slot + 1),
+		GROUND_Y - CREW_BODY_HEIGHT
+	)
+	add_child(body)
+	return body
 
 ## Gövde yüksekliği karakterin boyundan, rengi ten renginden geliyor -
 ## oluşturma ekranında seçilenler yolda da görünsün diye.
