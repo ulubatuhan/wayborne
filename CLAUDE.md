@@ -525,7 +525,21 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
 - Seed every RNG. A test that can flake is worse than no test.
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
-  size). It is the only honest way to tune balance without playing.
+  size). It is the only honest way to tune balance without playing. Faz 8
+  PR-A widened it past what it originally measured: the simulated player now
+  rotates culture and a duty assignment across runs and occasionally equips
+  gear, instead of always being the same unmodified default character - a
+  fixed default silently never exercised any of Faz 6-7's culture-gated
+  events, duty math, or equipment bonuses. Added reports: event-fire
+  frequency across the full catalog (flags any event that never fires),
+  and an equipped-vs-bare win-rate A/B (run at a party size below the
+  existing win-rate ceiling, or the comparison shows no signal). This is
+  how `GameSession.get_duty_flat_reduction()`'s missing floor was
+  found - `get_duty_discount()` already clamped at 0.0 but its sibling
+  didn't, so a duty holder whose culture leans negative on the relevant
+  stat (e.g. Göçebe's INTELLECT -1 for Levazımcı) produced a worse result
+  than leaving the duty unassigned, breaking the "a duty with no holder is
+  never a penalty" rule for the *held*-but-mismatched case too.
 
 **CI is the real gate.** Godot prints parse errors and still exits `0`, so a
 broken script hid under a green build twice (`city_map.gd`,

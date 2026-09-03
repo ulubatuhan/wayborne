@@ -68,3 +68,16 @@ func _test_discount_and_flat_reduction_formulas(t) -> void:
 	t.eq(session.get_duty_flat_reduction(DutyCatalog.ARABACI), 5, "güçlü Arabacı hasarı belirgin azaltır")
 	t.le(session.get_duty_discount(DutyCatalog.TELLAL), 0.001, "sahipsiz görevde indirim yoktur")
 	t.eq(session.get_duty_flat_reduction(DutyCatalog.TELLAL), 0, "sahipsiz görevde azaltma yoktur")
+
+	# Göçebe'nin INTELLECT -1 kültür bonusu, Levazımcı/Otacı gibi INTELLECT
+	# gerektiren bir görevde get_duty_power'ı 1.0'ın altına düşürebiliyor
+	# (bkz. DutyCatalog.get_duty_power) - ama bir görevi kimsesiz bırakmak
+	# hiçbir zaman ceza olmamalı, o yüzden atanmış-ama-uygunsuz biri de en
+	# kötü ihtimalle nötr kalmalı, sahipsizden daha kötü değil (bkz.
+	# GameSession.get_duty_flat_reduction'daki taban).
+	var mismatched := CharacterData.create("Uygunsuz", CultureCatalog.NOMAD, CharacterStats.new())
+	session.party.append(mismatched)
+	session.assign_duty(mismatched, DutyCatalog.LEVAZIMCI)
+	t.le(DutyCatalog.get_duty_power(mismatched, DutyCatalog.LEVAZIMCI), 1.0, "eksi kültür bonusu gücü 1.0 altına düşürür")
+	t.eq(session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI), 0, "azaltma yine de negatife düşmez")
+	t.le(session.get_duty_discount(DutyCatalog.LEVAZIMCI), 0.001, "indirim de negatife düşmez")

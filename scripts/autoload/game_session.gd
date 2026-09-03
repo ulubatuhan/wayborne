@@ -209,8 +209,16 @@ func get_duty_discount(duty_id: String) -> float:
 	return clampf((get_duty_multiplier(duty_id) - 1.0) * 0.3, 0.0, 0.2)
 
 ## Tam sayı azaltmalar için (günlük erzak tüketimi, vagon hasarı gibi).
+## get_duty_discount ile aynı taban: bir görevin kimsesiz kalması hiçbir
+## zaman ceza değildir (bkz. DutyCatalog) - ama get_duty_power, kültür
+## statı ilgili stat'ta eksiyse (ör. Göçebe'nin INTELLECT -1'i) 1.0'ın
+## altına düşebiliyor. Taban olmadan bu, Levazımcı/Otacı gibi görevlere
+## atanan kültürel açıdan uygunsuz biri için sonucu kimseye atamamaktan
+## daha kötüye çeviriyordu (bkz. simulate_journeys.gd _report_duty_impact -
+## bu tabanı olmayan hâliyle "azaltma -1" basıyordu). Sınama yatağı denge
+## simülatöründe genişletilirken bu asimetri fark edildi.
 func get_duty_flat_reduction(duty_id: String) -> int:
-	return int(floor((get_duty_multiplier(duty_id) - 1.0) / 0.2))
+	return maxi(0, int(floor((get_duty_multiplier(duty_id) - 1.0) / 0.2)))
 
 ## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
 ## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
