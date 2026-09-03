@@ -3,6 +3,11 @@ extends RefCounted
 
 ## id -> Item çözümlemesi. Olaylar envantere eşya eklerken yalnızca id
 ## bildirir; nesnenin kendisi buradan gelir.
+##
+## item_id'ler ("test_grain" vb.) kalıcı kayıtlarda ve olay tanımlarında
+## (bkz. event_catalog.gd) saklandığı için değiştirilmez - yalnızca
+## item_name/description'ı gerçek lore'a çevirmek güvenlidir (bkz. Faz 7
+## PR-D).
 
 static var _cache: Dictionary = {}
 
@@ -38,11 +43,11 @@ static func get_all_items() -> Array[Item]:
 
 static func _build_cache() -> void:
 	_add(GameSession.PROVISIONS_ITEM_ID, GameSession.PROVISIONS_ITEM_NAME, GameSession.PROVISIONS_UNIT_PRICE, 0.5)
-	_add("test_grain", "Test Tahıl", 5, 1.0)
-	_add("test_cloth", "Test Kumaş", 12, 1.5)
-	_add("test_weapon", "Test Silah", 40, 2.5)
-	_add("test_potion", "Test İksir", 20, 0.5)
-	_add("test_furs", "Test Kürk", 30, 2.0)
+	_add("test_grain", "Buğday", 5, 1.0)
+	_add("test_cloth", "Top Kumaş", 12, 1.5)
+	_add("test_weapon", "Demirci Malı Silah", 40, 2.5)
+	_add("test_potion", "Otacı İksiri", 20, 0.5)
+	_add("test_furs", "İşlenmiş Kürk", 30, 2.0)
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()

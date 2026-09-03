@@ -95,8 +95,10 @@ wayborne/
     `get_duty_discount()` / `get_duty_flat_reduction()` turn that into the
     concrete number a system reads (buy price, repair cost, daily
     consumption, wagon damage, combat opening accuracy, camp stress relief).
-    Five of six are wired to a live system - only İzci (travel-day/danger
-    reveal, lives in `caravan_planner.gd`/`world_map.gd`) isn't yet. A duty
+    All six are wired to a live system - İzci (travel-day reduction in
+    `caravan_planner.gd`, free danger reveal in `world_map.gd`, both via
+    `get_duty_flat_reduction`/`get_duty_holder`) was the last, added in
+    Faz 7 PR-C. A duty
     with no holder is neutral (multiplier 1.0), never a penalty.
   - `CharacterData`: identity + appearance (boy/ten rengi) + stats + class +
     current HP + level/XP/yetkinlik/second_class_id/duty_id, with
@@ -134,6 +136,24 @@ wayborne/
     granted within `CharacterData.TRAIT_FRESH_WINDOW_DAYS` (5) days of
     `GameSession.total_days_elapsed` - can be removed, at the Tavern or the
     Church (`PurificationPanel`, shared by both, priced differently).
+  - `Equipment` / `EquipmentCatalog`: four slots (`SLOT_WEAPON`/`SLOT_ARMOR`/
+    `SLOT_RING`/`SLOT_AMULET`), twelve pieces total - Weapon/Armor are three
+    permanent tiers each (positive bonus only, bought with gold at the
+    Caravan Yard's "Demirci" section), Ring/Amulet are DD-trinket-style
+    finds (one stat up, another down, `price` 0 - never sold, only granted
+    by `EventEffect.Type.GRANT_EQUIPMENT`). Bonus fields
+    (`hp_bonus`/`dodge_bonus`/`accuracy_bonus`/`crit_bonus`/`damage_bonus`)
+    are named identically to `Trait`'s and read by the exact same
+    `CharacterData` derived getters (`_equipment_bonus_sum` sits alongside
+    `_trait_bonus_sum`), so combat sees equipped gear automatically through
+    `CombatUnit.from_character` - same wrapper rule as traits. A piece is
+    never handed straight to a character: it always lands in
+    `GameSession.equipment_inventory` (id -> count, the equipment
+    counterpart of `Inventory`'s item_id -> quantity) first, and
+    `GameSession.equip_to_character()`/`unequip_from_character()` is the
+    only path that moves a piece between that shared locker and a
+    character's `equipped` dict - upgrading a slot automatically returns
+    the old piece to the locker.
 
 ### Character & Party Rules
 
@@ -655,10 +675,49 @@ Faz 6 ("Karakterin Yolculuğu") tamamlandı - dört PR'lık bir hat:
   (`evt_stress_brawl`) açması. `world_hub.gd`'nin HUD'una moral ve stresi
   gösteren iki `PulseBar` eklendi.
 
-Sırada Faz 7: ekipman (karakter ekranındaki dört yer tutucu slotun
-gerçek eşyalarla dolması), İzci'nin gerçek sisteme bağlanması, olay
-havuzunun genişlemesi (şu an 13 olay), placeholder isimlerin gerçek
-lore'a dönüşmesi.
+Faz 7 ("Kervanın Donanımı") tamamlandı - dört PR'lık bir hat:
+
+- **PR-A (equipment veri katmanı)** dört slotu (Silah/Zırh/Yüzük/Kolye,
+  `EquipmentCatalog.SLOT_*`) ve on iki parçayı getirdi: Silah/Zırh üçer
+  tier'lik kalıcı yükseltme (yalnızca pozitif bonus), Yüzük/Kolye üçer
+  DD trinket'i tarzı ödünlü tılsım (bir stat artar, biri düşer). Bonus
+  alanları `Trait`'inkiyle birebir aynı isimlerde - `CharacterData.
+  get_max_hp()/get_dodge()/get_accuracy()/get_crit_chance()/
+  get_damage_bonus()` huy bonusunun yanına `_equipment_bonus_sum`'ı da
+  topluyor, `CombatUnit.from_character` hiç değişmeden bunu otomatik görür.
+- **PR-B (equipment UI + edinim)** `character.gd`'nin dört kilitli
+  placeholder slotunu gerçek bir equip paneline çevirdi. `GameSession.
+  equipment_inventory` kimseye takılmamış parçaların ortak deposu
+  (`Inventory`'nin item_id->miktar deseninin karşılığı);
+  `equip_to_character()`/`unequip_from_character()` karakterle depo
+  arasındaki transferi tek yerde topluyor. Kervan Avlusu'na "Demirci"
+  bölümü eklendi (Silah/Zırh parayla satılıyor); `EventEffect.Type.
+  GRANT_EQUIPMENT` bulunan parçayı - `GRANT_TRAIT`'in aksine - doğrudan
+  bir karaktere değil depoya yazıyor, çünkü ekipman hangi karaktere
+  takılacağı seçilene kadar nötr kalmalı.
+- **PR-C (İzci + olay havuzu)** altı görevin son bağlanmayanını
+  (`DutyCatalog.IZCI`) canlı sistemlere bağladı: `world_map.gd` İzci
+  varsa rota tehlikesini ücretsiz tam gösteriyor, `caravan_planner.gd`
+  sefer süresini İzci'nin `get_duty_flat_reduction`'ı kadar kısaltıyor.
+  Olay havuzu 13'ten 22'ye çıktı - ekipman bulma/edinme (`evt_forgotten_
+  cache`, `evt_traveling_tinker`), İzci (`evt_scouted_pass`), beş
+  kültürün her birine bir sahne (`evt_culture_*` - kültürlerin mekanik
+  perki dışında ilk kez olay tarafında da göründüğü yer) ve bir DD
+  curio'su (`evt_roadside_shrine`). `GameSession.build_event_context()`'e
+  `has_izci` ve beş `is_*_culture` bayrağı eklendi.
+- **PR-D (placeholder → lore)** `item_catalog.gd`'deki `test_` önekli
+  id'ler (kayıt uyumluluğu için sabit) artık gerçek isimler taşıyor
+  (Buğday, Top Kumaş, Demirci Malı Silah, Otacı İksiri, İşlenmiş Kürk).
+  `world_map_data.gd`'nin beş şehri de aynı şekilde gerçek isimlere
+  kavuştu (Karakonak/Kurtboğazı/İpekevi/Demirkapı/Yeşilova -
+  `location_id`'ler yine sabit), tüccar isimleri "Tüccar 12" gibi çıplak
+  numaralar yerine kültürlerin kendi isim havuzlarından deterministik
+  seçiliyor.
+
+Sırada Faz 8: karakter portreleri/görsel varlıklar, ikinci bir şehir
+etkileşim katmanı (loncalar arası itibar rekabeti gibi derinlik), ya da
+equipment'in Faz 7'de bilerek dışarıda bırakılan kısımları (görsel
+ikonlar, envanterde ağırlık/slot sınırı) - kesin kapsam henüz seçilmedi.
 
 ## Quick Start
 

@@ -113,7 +113,8 @@ tarafında bu başlıkları enjekte ediyor.
 
 Geliştirme fazlar hâlinde ilerliyor; her fazın kapsamı ve gerekçesi
 oturumun konuşma geçmişinde ve proje CLAUDE.md'sinin
-"Development Status" bölümünde. Faz 0-5 tamam: temel oyun döngüsü,
-karakter/savaş sistemi ve CI güvenlik ağı kuruldu. Sıradaki fazlar
-karakterin ilerlemesi (seviye, ikinci sınıf, stres), savaşın derinliği
-ve yaşayan bir dünya etrafında şekilleniyor.
+"Development Status" bölümünde. Faz 0-7 tamam: temel oyun döngüsü,
+karakter/savaş sistemi, ilerleme (seviye/huy/stres), CI güvenlik ağı ve
+ekipman (Silah/Zırh/Yüzük/Kolye) kuruldu; İzci son göreve bağlandı, yol
+olayı havuzu 22'ye çıktı, placeholder isimler gerçek lore'a döndü.
+Sıradaki faz kapsamı CLAUDE.md'de.
