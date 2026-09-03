@@ -140,6 +140,17 @@ func _test_event_context(t) -> void:
 	)
 	t.ok(context.has("flags"), "bağlamda bayrak sözlüğü var")
 
+	# İzci ve kültür de aynı gerekçeyle (yalnızca sabitle karşılaştırma)
+	# 0/1'e çevrilip hazır geliyor - bkz. evt_scouted_pass, evt_culture_*.
+	t.eq(context.get("has_izci"), 0.0, "kimse İzci değilken bağlam 0 döner")
+	session.assign_duty(session.get_player_character(), DutyCatalog.IZCI)
+	t.eq(session.build_event_context().get("has_izci"), 1.0, "İzci atanınca bağlam 1 döner")
+
+	session.get_player_character().culture_id = CultureCatalog.HIGHLAND
+	var culture_context := session.build_event_context()
+	t.eq(culture_context.get("is_highland_culture"), 1.0, "oyuncunun kültürü doğru bayrağı işaretler")
+	t.eq(culture_context.get("is_nomad_culture"), 0.0, "eşleşmeyen kültür bayrağı sıfır kalır")
+
 	# Koşullar bir anahtarı yalnızca sabitle karşılaştırabildiği için
 	# boş yer sayısının hazır gelmesi şart (bkz. evt_road_wanderer).
 	var condition := EventCondition.make(

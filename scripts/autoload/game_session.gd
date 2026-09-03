@@ -762,4 +762,18 @@ func build_event_context() -> Dictionary:
 		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
 		"party_slots_free": maxi(0, get_party_capacity() - get_party().size()),
 		"flags": _flags,
+		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.
+		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
+		# önceden 0/1'e çevrilip hazır veriliyor - bkz. evt_scouted_pass,
+		# evt_culture_*.
+		"has_izci": 1.0 if get_duty_holder(DutyCatalog.IZCI) != null else 0.0,
+		"is_nomad_culture": 1.0 if _player_culture_id() == CultureCatalog.NOMAD else 0.0,
+		"is_valley_culture": 1.0 if _player_culture_id() == CultureCatalog.VALLEY else 0.0,
+		"is_highland_culture": 1.0 if _player_culture_id() == CultureCatalog.HIGHLAND else 0.0,
+		"is_port_culture": 1.0 if _player_culture_id() == CultureCatalog.PORT else 0.0,
+		"is_fisher_culture": 1.0 if _player_culture_id() == CultureCatalog.FISHER else 0.0,
 	}
+
+func _player_culture_id() -> String:
+	var player := get_player_character()
+	return player.culture_id if player != null else ""
