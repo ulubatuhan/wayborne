@@ -33,6 +33,15 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_road_wanderer())
 	_road_events.append(_troubled_night())
 	_road_events.append(_stress_brawl())
+	_road_events.append(_forgotten_cache())
+	_road_events.append(_traveling_tinker())
+	_road_events.append(_scouted_pass())
+	_road_events.append(_culture_nomad_kin())
+	_road_events.append(_culture_valley_dispute())
+	_road_events.append(_culture_highland_challenge())
+	_road_events.append(_culture_port_gossip())
+	_road_events.append(_culture_fisher_catch())
+	_road_events.append(_roadside_shrine())
 	return _road_events
 
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
@@ -339,6 +348,193 @@ static func _stress_brawl() -> GameEvent:
 				EventEffect.make(EventEffect.Type.MORALE, -12),
 				EventEffect.make(EventEffect.Type.STRESS, 10),
 				EventEffect.make(EventEffect.Type.GOLD, -30),
+			]), 1.3),
+		])),
+	])
+	return event
+
+## Yol kenarında gömülü bir stok - kazmak vakit ve erzak yer ama bazen
+## bir tılsımla ödüllenir; sonuç tablosu Terkedilmiş Vagon'un aksine
+## kazanç garantili değil (bkz. EventOutcome ağırlıklı seçim).
+static func _forgotten_cache() -> GameEvent:
+	var event := _event("evt_forgotten_cache", "EVT_CACHE", 0.7)
+	event.cooldown_days = 5
+	event.choices = _choices([
+		_choice_with_outcomes("EVT_CACHE_OPT_DIG", _outcomes([
+			EventOutcome.make("EVT_CACHE_DIG_RING", _effects([
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.RING_MARKSMAN),
+			]), 1.0),
+			EventOutcome.make("EVT_CACHE_DIG_AMULET", _effects([
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_WARD),
+			]), 1.0),
+			EventOutcome.make("EVT_CACHE_DIG_NOTHING", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
+				EventEffect.make(EventEffect.Type.MORALE, -3),
+			]), 1.2),
+		])),
+		_choice("EVT_CACHE_OPT_LEAVE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+	])
+	return event
+
+## Silah/Zırh'ı yalnızca Kervan Avlusu satmaz - yolda geçen bir gezgin
+## demirci de bir tanesini elden çıkarabilir, biraz daha pahalıya.
+static func _traveling_tinker() -> GameEvent:
+	var event := _event("evt_traveling_tinker", "EVT_TINKER", 0.7)
+	event.cooldown_days = 6
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_TINKER_OPT_BUY", "EVT_TINKER_OPT_BUY_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 120)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -120),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_1),
+			])
+		),
+		_choice("EVT_TINKER_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## İzci varsa (bkz. DutyCatalog.IZCI, caravan_planner.gd) kervan zaten
+## öndeki kestirmeyi biliyor - burada da işe yarıyor, ücretsiz bir gün
+## kazandırıyor ama tehlikeyi biraz artırıyor. İzci yoksa seçenek kilitli.
+static func _scouted_pass() -> GameEvent:
+	var event := _event("evt_scouted_pass", "EVT_SCOUT_PASS", 0.9)
+	event.conditions = _conditions([
+		EventCondition.make("days_remaining", EventCondition.Op.GREATER_EQUAL, 2),
+	])
+	event.cooldown_days = 4
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_SCOUT_OPT_SHORTCUT", "EVT_SCOUT_OPT_SHORTCUT_LOCKED",
+			_conditions([EventCondition.make("has_izci", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, -1),
+				EventEffect.make(EventEffect.Type.DANGER, 5),
+			])
+		),
+		_choice("EVT_SCOUT_OPT_MAIN_ROAD", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+	])
+	return event
+
+## Göçebe kültüründen bir oyuncu bozkırda akraba bir boyla karşılaşır -
+## kültürün kendi perki (erzak tüketimi) dışında ilk kez olay tarafında
+## da bir sahnesi oluyor (bkz. CultureCatalog).
+static func _culture_nomad_kin() -> GameEvent:
+	var event := _event("evt_culture_nomad_kin", "EVT_NOMAD_KIN", 0.8)
+	event.conditions = _conditions([
+		EventCondition.make("is_nomad_culture", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice("EVT_NOMAD_KIN_OPT_TRADE", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, -20),
+			EventEffect.make(EventEffect.Type.PROVISIONS, 4),
+		])),
+		_choice("EVT_NOMAD_KIN_OPT_GREET", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 4),
+			EventEffect.make(EventEffect.Type.REPUTATION, 1),
+		])),
+	])
+	return event
+
+static func _culture_valley_dispute() -> GameEvent:
+	var event := _event("evt_culture_valley_dispute", "EVT_VALLEY_DISPUTE", 0.8)
+	event.conditions = _conditions([
+		EventCondition.make("is_valley_culture", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("merchants", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice("EVT_VALLEY_DISPUTE_OPT_MEDIATE", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, 5),
+			EventEffect.make(EventEffect.Type.GOLD, 30),
+		])),
+		_choice("EVT_VALLEY_DISPUTE_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+static func _culture_highland_challenge() -> GameEvent:
+	var event := _event("evt_culture_highland_challenge", "EVT_HIGHLAND_CHALLENGE", 0.8)
+	event.conditions = _conditions([
+		EventCondition.make("is_highland_culture", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice_with_outcomes("EVT_HIGHLAND_CHALLENGE_OPT_ACCEPT", _outcomes([
+			EventOutcome.make("EVT_HIGHLAND_CHALLENGE_WIN", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 8),
+				EventEffect.make(EventEffect.Type.REPUTATION, 3),
+			]), 1.4),
+			EventOutcome.make("EVT_HIGHLAND_CHALLENGE_LOSE", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, 5),
+				EventEffect.make(EventEffect.Type.MORALE, -3),
+			]), 1.0),
+		])),
+		_choice("EVT_HIGHLAND_CHALLENGE_OPT_DECLINE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -2),
+		])),
+	])
+	return event
+
+static func _culture_port_gossip() -> GameEvent:
+	var event := _event("evt_culture_port_gossip", "EVT_PORT_GOSSIP", 0.8)
+	event.conditions = _conditions([
+		EventCondition.make("is_port_culture", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice("EVT_PORT_GOSSIP_OPT_LISTEN", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, 20),
+			EventEffect.make(EventEffect.Type.REPUTATION, 3),
+		])),
+		_choice("EVT_PORT_GOSSIP_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+static func _culture_fisher_catch() -> GameEvent:
+	var event := _event("evt_culture_fisher_catch", "EVT_FISHER_CATCH", 0.8)
+	event.conditions = _conditions([
+		EventCondition.make("is_fisher_culture", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice("EVT_FISHER_CATCH_OPT_GATHER", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, 5),
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+		_choice("EVT_FISHER_CATCH_OPT_SKIP", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -1),
+		])),
+	])
+	return event
+
+## DD tarzı bir "curio": kültürden bağımsız, dua etmek güvenli bir stres
+## azaltıcı, adakları almaksa kumarlı bir kazanç.
+static func _roadside_shrine() -> GameEvent:
+	var event := _event("evt_roadside_shrine", "EVT_SHRINE", 0.8)
+	event.cooldown_days = 6
+	event.choices = _choices([
+		_choice("EVT_SHRINE_OPT_PRAY", _effects([
+			EventEffect.make(EventEffect.Type.STRESS, -10),
+			EventEffect.make(EventEffect.Type.MORALE, 3),
+		])),
+		_choice_with_outcomes("EVT_SHRINE_OPT_TAKE", _outcomes([
+			EventOutcome.make("EVT_SHRINE_TAKE_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 50),
+			]), 1.0),
+			EventOutcome.make("EVT_SHRINE_TAKE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, 15),
+				EventEffect.make(EventEffect.Type.REPUTATION, -4),
 			]), 1.3),
 		])),
 	])

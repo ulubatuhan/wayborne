@@ -106,11 +106,15 @@ func _refresh_info_panel() -> void:
 	plan_button.pressed.connect(_on_plan_pressed)
 	_info_panel.add_child(plan_button)
 
-## Tehlike yüzdesi yalnızca Taverna'da öğrenilmişse tam gösterilir;
-## bilinmiyorsa kaba bir bant gösterir (bkz. GameSession.known_routes).
+## Tehlike yüzdesi Taverna'da öğrenilmişse ya da kervanda bir İzci
+## varsa (bkz. DutyCatalog.IZCI - ücretsiz, ödeme gerektirmeyen keşif)
+## tam gösterilir; ikisi de yoksa kaba bir bant gösterir (bkz.
+## GameSession.known_routes).
 func _route_summary(route: TravelRoute) -> String:
 	if _session.is_route_known(_current_location_id, route.to_location_id):
 		return "Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(route.danger_level * 100.0)]
+	if _session.get_duty_holder(DutyCatalog.IZCI) != null:
+		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)" % [route.travel_days, int(route.danger_level * 100.0)]
 	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)" % [route.travel_days, _danger_band(route.danger_level)]
 
 func _danger_band(danger: float) -> String:

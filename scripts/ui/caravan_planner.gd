@@ -39,7 +39,10 @@ func _ready() -> void:
 	var route := WorldMapData.get_route(origin.location_id, _destination.location_id)
 	var travel_days: int = 1
 	if route != null:
-		travel_days = route.travel_days
+		# İzci öndeki tehlikeyi ve en kısa yolu bilir - kervandaysa yol
+		# kısalır (asla bir günün altına inmez), bkz. DutyCatalog.IZCI.
+		var izci_reduction := _session.get_duty_flat_reduction(DutyCatalog.IZCI)
+		travel_days = maxi(1, route.travel_days - izci_reduction)
 		_route_danger = route.danger_level
 
 	_plan = CaravanPlan.new(
