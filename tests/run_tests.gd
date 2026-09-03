@@ -29,6 +29,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_stress.gd",
 	"res://tests/test_equipment.gd",
 	"res://tests/test_world_map_data.gd",
+	"res://tests/test_enemy_variety.gd",
 ]
 
 func _initialize() -> void:

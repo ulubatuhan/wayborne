@@ -184,9 +184,23 @@ wayborne/
   - `CombatSkill` / `SkillCatalog`: position-gated skills. Every skill carries
     both `usable_positions` (where the user must stand) and `target_positions`
     (what it can reach). Numbers live in the catalog, never in the UI.
-  - `EnemyTemplate` / `EnemyCatalog`: enemy stats plus `build_bandit_squad()`,
-    which scales the squad with the road's danger **and** with party size, so
-    a lone traveller never faces four bandits.
+  - `EnemyTemplate` / `EnemyCatalog`: enemy stats plus three squad builders -
+    `build_bandit_squad()`, `build_wildlife_squad()` (kurt/ayı/domuz, bkz.
+    `evt_wild_animal`), `build_guard_squad()` (şehir muhafızı/çavuşu, bkz.
+    `evt_guard_patrol`) - each scales with the road's danger **and** with
+    party size, so a lone traveller never faces four bandits. `build_squad(
+    enemy_kind, region_id, ...)` is the single dispatcher `combat_panel.gd`
+    calls; `enemy_kind` ("bandit"/"wildlife"/"guard") comes from
+    `EventEffect.Type.TRIGGER_COMBAT`'s `text_value` (empty = "bandit", so
+    every pre-Faz-8 event definition keeps working unchanged) via
+    `EventEffectApplier.Result.combat_kinds`. `build_bandit_squad()` also
+    takes `region_id` (the journey's destination `location_id`) and reskins
+    the melee/ranged bandit for two regions - Kurtboğazı gets heavier Dağ
+    Haydutu, Demirkapı gets sharper Silahlı Eşkıya - same squad shape,
+    different yöre teçhizatı. Winning against guards costs reputation
+    instead of granting it (bkz. `road_journey.gd`'s
+    `GUARD_VICTORY_REPUTATION`) - beating up the law isn't the same as
+    beating bandits, even in victory.
   - `CombatUnit`: one fighter on the field. Wraps a `CharacterData` on the
     player side and writes HP back when the fight ends.
   - `CombatEncounter`: the engine itself - initiative order, accuracy vs

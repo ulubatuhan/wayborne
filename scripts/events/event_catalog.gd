@@ -42,6 +42,8 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_culture_port_gossip())
 	_road_events.append(_culture_fisher_catch())
 	_road_events.append(_roadside_shrine())
+	_road_events.append(_wild_animal())
+	_road_events.append(_guard_patrol())
 	return _road_events
 
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
@@ -536,6 +538,63 @@ static func _roadside_shrine() -> GameEvent:
 				EventEffect.make(EventEffect.Type.STRESS, 15),
 				EventEffect.make(EventEffect.Type.REPUTATION, -4),
 			]), 1.3),
+		])),
+	])
+	return event
+
+## Doğada karşılaşılan bir tehdit - haydut pususundan ayrı bir tetikleyici,
+## kadrosu EnemyCatalog.build_wildlife_squad'tan gelir (bkz. Faz 8 PR-B).
+## Kaçmak/beslemek savaşsız atlatır ama bedelsiz değil - besleme erzak
+## yer, kaçış tehlikeyi artırır (ürkütülen hayvanlar iz bırakır).
+static func _wild_animal() -> GameEvent:
+	var event := _event("evt_wild_animal", "EVT_WILD", 1.0)
+	event.cooldown_days = 3
+	event.choices = _choices([
+		_choice("EVT_WILD_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "wildlife"),
+		])),
+		_choice("EVT_WILD_OPT_FEED", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+		_choice("EVT_WILD_OPT_FLEE", _effects([
+			EventEffect.make(EventEffect.Type.DANGER, 8),
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+		])),
+	])
+	return event
+
+## Düşük itibarlı bir kervan şehir muhafızlarının dikkatini çekiyor - kadrosu
+## EnemyCatalog.build_guard_squad'tan gelir. Direnişte zafer bile itibarı
+## yükseltmez, kırar (bkz. road_journey.gd GUARD_VICTORY_REPUTATION) -
+## kanunla çatışmanın haydutla çatışmaktan farkı burada.
+static func _guard_patrol() -> GameEvent:
+	var event := _event("evt_guard_patrol", "EVT_GUARD_PATROL", 0.9)
+	event.conditions = _conditions([
+		EventCondition.make("reputation", EventCondition.Op.LESS_EQUAL, 10),
+	])
+	event.cooldown_days = 5
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_GUARD_PATROL_OPT_BRIBE", "EVT_GUARD_PATROL_OPT_BRIBE_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 100)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -100),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+			])
+		),
+		_choice_with_outcomes("EVT_GUARD_PATROL_OPT_RUN", _outcomes([
+			EventOutcome.make("EVT_GUARD_PATROL_RUN_ESCAPE", _effects([
+				EventEffect.make(EventEffect.Type.DANGER, 10),
+			]), 1.0),
+			EventOutcome.make("EVT_GUARD_PATROL_RUN_CAUGHT", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -120),
+				EventEffect.make(EventEffect.Type.REPUTATION, -10),
+				EventEffect.make(EventEffect.Type.DOCUMENT_LOSE, 1),
+			]), 1.3),
+		])),
+		_choice("EVT_GUARD_PATROL_OPT_RESIST", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
 		])),
 	])
 	return event

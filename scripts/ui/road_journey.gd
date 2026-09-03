@@ -29,6 +29,10 @@ const COMBAT_LOOT_DANGER_BONUS: int = 60
 const COMBAT_VICTORY_MORALE: int = 12
 const COMBAT_VICTORY_REPUTATION: int = 4
 const COMBAT_VICTORY_DANGER: int = -10
+## Muhafızlara karşı kazanmak haydutlara karşı kazanmak gibi değil - kervan
+## kanunla çatışmış olur, zafer bile itibarı yükseltmez, kırar (bkz.
+## evt_guard_patrol, _on_combat_finished).
+const GUARD_VICTORY_REPUTATION: int = -6
 const COMBAT_DEFEAT_WAGON_DAMAGE: int = 2
 const COMBAT_DEFEAT_MERCHANTS: int = 1
 const COMBAT_DEFEAT_MORALE: int = -20
@@ -48,6 +52,7 @@ const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
+var _current_combat_kind: String = "bandit"
 var _current_day: int = 0
 var _is_live_journey: bool = false
 var _pending_haggle_max: int = 0
@@ -392,7 +397,10 @@ func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 		_add_log("      (yeni olay açıldı)")
 
 	if not result.combat_requests.is_empty():
-		_open_combat(int(result.combat_requests[0]))
+		var enemy_kind := "bandit"
+		if not result.combat_kinds.is_empty():
+			enemy_kind = result.combat_kinds[0]
+		_open_combat(int(result.combat_requests[0]), enemy_kind)
 		return
 
 	if not result.recruit_requests.is_empty():
@@ -465,15 +473,23 @@ func _close_recruit_offer() -> void:
 
 ## Bir olay savaş istediğinde Darkest Dungeon tarzı panel açılır; sonuç
 ## kervana etkilerle yansır. Panel açıkken gün ilerletilemez.
-func _open_combat(danger_percent: int) -> void:
+## enemy_kind EnemyCatalog.build_squad'ın kadro türü (bkz. EventEffect.Type.
+## TRIGGER_COMBAT'in text_value'su); bölge (bkz. EnemyCatalog.build_bandit_squad'ın
+## region_id'si) sefer hedefinden okunuyor - haydut kadrosu gidilen yöreye
+## göre reskin oluyor.
+func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	var danger := _session.danger_level if danger_percent <= 0 else danger_percent / 100.0
+	_current_combat_kind = enemy_kind
 	_set_journey_controls_enabled(false)
 	_clear_children(_combat_holder)
 
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
-	panel.start_combat(_session.get_party(), danger, null, _session.party_stress)
+	panel.start_combat(
+		_session.get_party(), danger, null, _session.party_stress,
+		enemy_kind, _session.journey_destination_id
+	)
 
 func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> void:
 	if xp_awarded > 0:
@@ -492,7 +508,8 @@ func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> v
 		var loot := COMBAT_LOOT_BASE + int(round(_session.danger_level * COMBAT_LOOT_DANGER_BONUS))
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, loot))
 		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_VICTORY_MORALE))
-		effects.append(EventEffect.make(EventEffect.Type.REPUTATION, COMBAT_VICTORY_REPUTATION))
+		var reputation_delta := GUARD_VICTORY_REPUTATION if _current_combat_kind == "guard" else COMBAT_VICTORY_REPUTATION
+		effects.append(EventEffect.make(EventEffect.Type.REPUTATION, reputation_delta))
 		effects.append(EventEffect.make(EventEffect.Type.DANGER, COMBAT_VICTORY_DANGER))
 	else:
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, COMBAT_DEFEAT_GOLD))

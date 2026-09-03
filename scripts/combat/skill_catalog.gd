@@ -31,10 +31,19 @@ const TALLY_RECKON: String = "tally_reckon"
 const CUTTING_WORD: String = "cutting_word"
 const KEEP_LEDGER: String = "keep_ledger"
 
-# Düşman yetenekleri
+# Düşman yetenekleri - haydutlar
 const CLEAVER: String = "bandit_cleave"
 const BANDIT_ARROW: String = "bandit_arrow"
 const BANDIT_ORDER: String = "bandit_order"
+
+# Düşman yetenekleri - vahşi hayvanlar (bkz. Faz 8 PR-B)
+const WOLF_BITE: String = "wolf_bite"
+const BEAR_CLAW: String = "bear_claw"
+const BOAR_CHARGE: String = "boar_charge"
+
+# Düşman yetenekleri - şehir muhafızları
+const GUARD_STRIKE: String = "guard_strike"
+const GUARD_ORDER: String = "guard_order"
 
 static var _skills: Array[CombatSkill] = []
 static var _skill_by_id: Dictionary = {}
@@ -217,6 +226,46 @@ static func _ensure_built() -> void:
 		"Reis sopasını sallayarak öne saldırır.",
 		[1, 2, 3], [1, 2],
 		11, 4, 5, 5
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		WOLF_BITE,
+		"Kurt Isırığı",
+		"Çevik bir kurt, en yakın hedefi ısırmak için atılır.",
+		[1, 2], [1, 2],
+		7, 3, 5, 5
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		BEAR_CLAW,
+		"Pençe Darbesi",
+		"Ayının koca pençesi iner - isabeti düşük ama ezici.",
+		[1], [1, 2],
+		16, 6, -5, 0, 1
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		BOAR_CHARGE,
+		"Domuz Hücumu",
+		"Yaban domuzu başını eğip doğrudan öne saldırır.",
+		[1], [1],
+		10, 4, 0, 8
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		GUARD_STRIKE,
+		"Muhafız Vuruşu",
+		"Talimli bir kılıç darbesi - isabeti yüksek, hasarı ölçülü.",
+		[1, 2], [1, 2],
+		8, 2, 8, 0
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		GUARD_ORDER,
+		"Çavuş Emri",
+		"Çavuş devriyeyi öne sürer.",
+		[1, 2, 3], [1, 2],
+		10, 3, 5, 0
 	))
 
 	for skill in _skills:
