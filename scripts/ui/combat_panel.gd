@@ -40,7 +40,8 @@ func _ready() -> void:
 ## CharacterData.is_stressed) her karakter emirlere kulak asmayabilir.
 func start_combat(
 	party: Array[CharacterData], danger_level: float,
-	rng: RandomNumberGenerator = null, party_stress: int = 0
+	rng: RandomNumberGenerator = null, party_stress: int = 0,
+	enemy_kind: String = "bandit", region_id: String = ""
 ) -> void:
 	_ensure_built()
 
@@ -60,7 +61,9 @@ func start_combat(
 		position += 1
 
 	var average_level := int(round(float(level_total) / float(maxi(1, units.size()))))
-	var enemies := EnemyCatalog.build_bandit_squad(danger_level, units.size(), combat_rng, average_level)
+	var enemies := EnemyCatalog.build_squad(
+		enemy_kind, region_id, danger_level, units.size(), combat_rng, average_level
+	)
 
 	_apply_muhafiz_opening_bonus(party, units)
 

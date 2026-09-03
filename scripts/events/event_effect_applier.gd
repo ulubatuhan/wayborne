@@ -13,6 +13,11 @@ class Result extends RefCounted:
 	## Savaşın tehlike seviyesi yüzde olarak; 0 ise yolun kendi tehlikesi
 	## kullanılır (bkz. road_journey.gd _open_combat).
 	var combat_requests: Array[int] = []
+	## combat_requests ile aynı sırada: EnemyCatalog.build_squad'ın kind
+	## parametresi ("bandit"/"wildlife"/"guard"). Boş text_value "bandit"
+	## sayılır - evt_bandit_ambush gibi eski tanımlar hiçbir şey değiştirmeden
+	## çalışmaya devam eder.
+	var combat_kinds: Array[String] = []
 	## Yolda partiye katılma teklifi; değer istenen ücrettir.
 	var recruit_requests: Array[int] = []
 	var unlocked_event_ids: Array[String] = []
@@ -83,6 +88,7 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.lines.append("Pazarlık başlıyor…")
 		EventEffect.Type.TRIGGER_COMBAT:
 			result.combat_requests.append(effect.amount)
+			result.combat_kinds.append(effect.text_value if not effect.text_value.is_empty() else "bandit")
 			result.lines.append("Silahlara davranılıyor…")
 		EventEffect.Type.TRIGGER_RECRUIT:
 			result.recruit_requests.append(effect.amount)
