@@ -207,8 +207,18 @@ func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
+	# Pazarlık artık kör bir mini oyun değil: kervanın en iyi zekâsı ve
+	# karizması tüccarın taban fiyatını gerçekten aşağı çeker (bkz.
+	# HagglingSession.get_floor). Dilini iyi kullanan birini yanına almak
+	# burada somut para kazandırır.
 	panel.start_haggling(
-		float(base_price), MARKET_HAGGLE_GREED, MARKET_HAGGLE_REPUTATION, 0, 0, MARKET_HAGGLE_DRAIN_RATE, false
+		float(base_price),
+		MARKET_HAGGLE_GREED,
+		MARKET_HAGGLE_REPUTATION,
+		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
+		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
+		MARKET_HAGGLE_DRAIN_RATE,
+		false
 	)
 
 func _on_haggle_deal(price: int) -> void:
@@ -226,8 +236,19 @@ func _on_haggle_deal(price: int) -> void:
 	_show_message("Pazarlık tuttu: %d GG ödendi." % price)
 	_close_haggling()
 
-func _on_haggle_failed() -> void:
-	_show_message("Pazarlık koptu, alım gerçekleşmedi.")
+## Masadan kalkmak bedava değil: alım iptal olur *ve* itibar yersin. Bu ceza
+## olmadan "kopana kadar dip teklif ver, koparsa yeniden başla" bedava bir
+## deneme döngüsü olurdu - pazarlığın para basma noktasına dönüştüğü yer
+## tam olarak orasıydı (bkz. HagglingSession başlığı).
+func _on_haggle_failed(reputation_penalty: int) -> void:
+	if reputation_penalty > 0:
+		_session.reputation -= reputation_penalty
+		_show_message(
+			"Pazarlık koptu, alım gerçekleşmedi. Tüccarın öfkesi kasabada duyuldu: itibar -%d."
+			% reputation_penalty
+		)
+	else:
+		_show_message("Pazarlık koptu, alım gerçekleşmedi.")
 	_close_haggling()
 
 func _close_haggling() -> void:

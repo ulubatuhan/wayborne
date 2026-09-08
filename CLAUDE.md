@@ -365,6 +365,42 @@ can be lost.
   eat cargo space), and the ceiling tracks `owned_wagon_count`.
 - Every number in these tables is a placeholder to be tuned.
 
+### Haggling Rules
+
+`HagglingSession` is the closest thing the game has to a money printer, so
+its invariants matter more than its numbers. The old design inverted its own
+incentive: the acceptance threshold slid toward the absolute minimum as
+patience fell, and the fastest way to burn patience was an insulting
+lowball - so enraging the merchant was *rewarded*, and spamming the bottom
+of the slider (then cashing the "final offer" perk) was strictly optimal.
+
+- **Two prices, not one.** `get_floor()` is what the merchant could ever
+  accept; `get_acceptable_threshold()` is what they will accept *right now*.
+  The threshold slides from `p_start` down toward the floor as patience
+  drains, and **never below it**. That "never below" is the whole fix.
+- **The floor hardens, it never softens.** Every rejected offer adds
+  `FLOOR_HARDEN_PER_ROUND`; an insulting one adds `INSULT_EXTRA_ROUNDS` more.
+  So pushing for one more round costs you the room you are pushing for, and
+  the falling threshold meets the rising floor somewhere in the middle. That
+  meeting point is what a well-played haggle earns.
+- **Rage-quitting is a rescue, never a strategy.** The offer that empties
+  patience is itself a rejected offer, so it hardens the floor *before* the
+  final-chance price is computed, and that price is then marked up by
+  `FINAL_CHANCE_PENALTY`. Without the perk there is simply no deal.
+  `tests/test_haggling.gd` locks this as a direct comparison: the rage price
+  is worse than the best price an exhaustive patient search can reach.
+- **Walking out costs reputation** (`get_walkout_reputation_penalty`).
+  Without it, "lowball until it breaks, then reopen" was a free retry loop -
+  the actual farming exploit. The panel hands the penalty to whoever opened
+  it (`HagglingPanel.haggling_failed`) and each screen decides: a city
+  merchant's anger is heard around town (`market.gd`), a roadside bandit's
+  is not (`road_journey.gd`, which charges the full toll instead - through
+  `spend_or_owe`, so being broke is not an escape).
+- **Skill is read from the party, not hardcoded.** Callers pass
+  `get_best_effective_stat()` for Zeka and Karizma; those widen the floor.
+  Passing literal zeros (as both screens once did) made the whole mini-game
+  character-blind.
+
 ### Event Character Rules
 
 Who you are travelling with, and who you meet, changes what an event does.
@@ -679,7 +715,14 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   `run_tests.gd`'s `SUITE_PATHS`.
 - Test the UI-free cores, which is why they were written UI-free:
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
-  `GameSession`. Never test engine internals or scene wiring.
+  `GameSession`, `HagglingSession`. Never test engine internals or scene
+  wiring.
+- **Where a system can be exploited, assert the exploit is closed rather
+  than asserting the formula.** `test_haggling.gd` does not check that a
+  particular offer yields a particular price - it exhaustively searches the
+  offer range for the best price patient play can reach, and asserts that
+  enraging the merchant lands strictly worse. A formula assertion would have
+  passed happily on the old, broken design.
 - `test_progression.gd` locks the XP curve, diminishing-returns stat math,
   auto-allocate and the multiclass unlock; `test_duties.gd` locks
   `DutyCatalog.get_duty_power()`'s class-match multipliers and the discount/

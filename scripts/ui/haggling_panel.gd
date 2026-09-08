@@ -6,7 +6,10 @@ extends VBoxContainer
 ## böylece pazarlık mantığı tek bir yerde durur.
 
 signal deal_made(price: int)
-signal haggling_failed()
+## Masadan kalkmanın itibar bedeli birlikte taşınır: paneli açan ekran
+## cezayı kendi bağlamına göre uygular (şehir tüccarını kızdırmak kasabada
+## duyulur, yoldaki haydudu kızdırmak duyulmaz - bkz. market.gd/road_journey.gd).
+signal haggling_failed(reputation_penalty: int)
 
 const PATIENCE_HIGH_COLOR: Color = Color(0.3, 0.75, 0.3)
 const PATIENCE_LOW_COLOR: Color = Color(0.75, 0.2, 0.2)
@@ -32,8 +35,8 @@ func start_haggling(
 	base_price: float,
 	merchant_greed: float,
 	reputation: float,
-	player_speech: int,
-	player_charisma: int,
+	player_speech: float,
+	player_charisma: float,
 	patience_drain_rate: float,
 	has_final_offer_perk: bool
 ) -> void:
@@ -153,7 +156,17 @@ func _on_submit_offer_pressed() -> void:
 		return
 	var offer := _offer_slider.value
 	_add_log_entry("Sen: %d GG teklif ettin." % offer)
+
+	# Sertleşme oyuncuya görünmezse "bir tur daha zorlayayım mı" kararı
+	# kör bir zar olur - pazarlığın tüm gerilimi bu geri bildirimde.
+	var insulting := _session.is_insulting(offer)
+	var rounds_before := _session.rounds_used
 	_session.submit_offer(offer)
+
+	if insulting:
+		_add_log_entry("Tüccar teklifi hakaret saydı - sabrı ve payı hızla kapanıyor.")
+	if _session.state == HagglingSession.State.IN_PROGRESS and _session.rounds_used > rounds_before:
+		_add_log_entry("Tüccar diretiyor: pazarlık payı biraz daha daraldı.")
 
 func _on_patience_changed(new_patience: float) -> void:
 	_patience_bar.value = new_patience
@@ -183,7 +196,7 @@ func _on_state_changed(new_state: HagglingSession.State) -> void:
 			_result_label.text = "Tüccar öfkeyle masayı terk etti!"
 			_submit_button.disabled = true
 			_final_offer_panel.visible = false
-			haggling_failed.emit()
+			haggling_failed.emit(_session.get_walkout_reputation_penalty())
 
 func _add_log_entry(text: String) -> void:
 	var label := Label.new()

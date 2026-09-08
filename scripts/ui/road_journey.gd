@@ -684,19 +684,30 @@ func _open_haggling(max_price: int) -> void:
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
-	panel.start_haggling(float(max_price), 0.5, 0.3, 0, 0, HAGGLE_DRAIN_RATE, false)
+	panel.start_haggling(
+		float(max_price),
+		0.5,
+		0.3,
+		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
+		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
+		HAGGLE_DRAIN_RATE,
+		false
+	)
 
+## Anlaşılan bedel kesende yoksa da ödenir: fark açık hesaba yazılır
+## (bkz. GameSession.spend_or_owe). Eskiden "kasada ne varsa o kadarı"
+## alınıyordu - parası olmayan kervan haraçtan bedavaya kurtuluyordu.
 func _on_haggle_deal(price: int) -> void:
-	var paid := mini(price, _session.wallet.balance)
-	if paid > 0:
-		_session.wallet.spend(paid)
-	_add_log("      Pazarlık tuttu: %d GG ödendi." % paid, OUTCOME_COLOR)
+	_session.spend_or_owe(price)
+	_add_log("      Pazarlık tuttu: %d GG ödendi." % price, OUTCOME_COLOR)
 	_close_haggling()
 
-func _on_haggle_failed() -> void:
-	var paid := mini(_pending_haggle_max, _session.wallet.balance)
-	if paid > 0:
-		_session.wallet.spend(paid)
+## Yolda pazarlık koparsa itibar cezası yok: karşındaki haydut, kasabada
+## kimseye şikâyet etmeyecek (bkz. HagglingPanel.haggling_failed). Bedel
+## burada tam haracı ödemek - ve ödeyecek paran yoksa borçlanmak.
+func _on_haggle_failed(_reputation_penalty: int) -> void:
+	var paid := _pending_haggle_max
+	_session.spend_or_owe(paid)
 	_session.caravan.change_morale(HAGGLE_FAIL_MORALE)
 	_add_log("      Pazarlık koptu: tam bedel %d GG ödendi." % paid)
 	_close_haggling()

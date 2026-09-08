@@ -28,6 +28,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_journey_clock.gd",
 	"res://tests/test_debt.gd",
 	"res://tests/test_market_conditions.gd",
+	"res://tests/test_haggling.gd",
 	"res://tests/test_recruit_catalog.gd",
 	"res://tests/test_traits.gd",
 	"res://tests/test_stress.gd",
