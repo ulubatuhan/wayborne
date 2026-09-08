@@ -541,11 +541,18 @@ func hire_recruit(venue: String, candidate: CharacterData) -> bool:
 func get_provisions() -> int:
 	return inventory.get_quantity(PROVISIONS_ITEM_ID)
 
-## Negatif miktarlarda sıfırın altına inmez; gerçekten düşen miktarı döner.
+## Negatif miktarlarda sıfırın altına inmez; her iki yönde de gerçekten
+## değişen miktarı döner.
+##
+## Ekleme tarafı add_item'ın dönüşünü yok sayıyordu: envanterde boş slot
+## kalmamışsa (Inventory.max_slots) ve erzak girişi tükendiği için silinmişse
+## ekleme sessizce başarısız oluyor, buna rağmen delta "eklendi" diye
+## dönüyordu - olay günlüğü "Erzak +5" yazarken kervan aç kalırdı. Bugün
+## katalogda max_slots'tan az mal olduğu için tetiklenmiyor, mal eklendikçe
+## gerçek olur.
 func change_provisions(delta: int) -> int:
 	if delta > 0:
-		inventory.add_item(_provisions_item, delta)
-		return delta
+		return delta if inventory.add_item(_provisions_item, delta) else 0
 
 	var removable := mini(-delta, get_provisions())
 	if removable > 0:

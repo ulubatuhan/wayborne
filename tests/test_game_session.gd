@@ -16,6 +16,31 @@ func run(t) -> void:
 	_test_event_context(t)
 	_test_equipment_locker_and_equip(t)
 	_test_effective_danger_and_goal(t)
+	_test_change_provisions_reports_truth(t)
+
+## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
+## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
+## doluyken erzak eklenmiyor ama "eklendi" deniyordu, yani olay günlüğü
+## "Erzak +N" yazarken kervan aç kalıyordu.
+func _test_change_provisions_reports_truth(t) -> void:
+	var session := GameSession.new(0, 10)
+	t.eq(session.change_provisions(5), 5, "yer varken eklenen miktar aynen döner")
+	t.eq(session.get_provisions(), 15, "erzak gerçekten arttı")
+
+	t.eq(session.change_provisions(-4), -4, "düşülen miktar döner")
+	t.eq(session.get_provisions(), 11, "erzak gerçekten azaldı")
+
+	t.eq(session.change_provisions(-999), -11, "sıfırın altına inmez, düşen kadarını döner")
+	t.eq(session.get_provisions(), 0, "erzak sıfırda durur")
+
+	# Envanteri tam doldur: erzak girişi tükendiği için silinmiş durumda,
+	# yeni bir slot açılamıyorsa ekleme başarısız olmalı ve bunu söylemeli.
+	var packed := GameSession.new(0, 0)
+	packed.inventory = Inventory.new(1)
+	var filler := ItemCatalog.get_item("test_grain")
+	t.ok(packed.inventory.add_item(filler, 1), "tek slot dolduruldu")
+	t.eq(packed.change_provisions(5), 0, "envanterde yer yoksa 0 döner, yalan söylemez")
+	t.eq(packed.get_provisions(), 0, "gerçekten de erzak eklenmedi")
 
 func _make_recruit(recruit_name: String, cost: int) -> CharacterData:
 	var candidate := CharacterData.create(recruit_name, CultureCatalog.NOMAD, CharacterStats.new())

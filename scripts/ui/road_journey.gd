@@ -56,6 +56,8 @@ var _current_combat_kind: String = "bandit"
 var _current_day: int = 0
 var _is_live_journey: bool = false
 var _pending_haggle_max: int = 0
+## Varış bir kez işlenir - bkz. _check_journey_end.
+var _journey_finished: bool = false
 
 var _seed_spin: SpinBox
 var _state_label: Label
@@ -190,6 +192,7 @@ func _init_journey() -> void:
 
 	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
 	_current_event = null
+	_journey_finished = false
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
 	_clear_children(_combat_holder)
@@ -565,11 +568,33 @@ func _close_haggling() -> void:
 	_refresh_state()
 	_check_journey_end()
 
+## Sefer yalnızca ortada çözülmemiş bir olay ve açık bir yan kanal paneli
+## (savaş/pazarlık/tayfa) yokken bitebilir.
+##
+## Yan kanal kontrolü olmadan şu zincir işliyordu: son gün bir olay çıkıp
+## oyuncu "Direnç göster" derse _on_choice_pressed savaşı açıyor, sonra
+## aynı çağrının sonunda buraya geliyor - _current_event çoktan null
+## olduğu için sefer bitmiş sayılıyor ve savaş paneli ekrandayken "Şehre
+## Var" beliriyordu. Oyuncu varınca finish_journey() kervanı sıfırlayıp
+## ödemeyi yapıp kaydediyor; ardından savaş bitince ödülleri (altın,
+## moral, itibar) kapanmış bir sefere uygulanıyor ve buradan ikinci kez
+## _finish_journey() çağrılıp varış bir daha işlenebiliyordu - ikinci bir
+## kırılma zarı ve ikinci bir kayıt dahil.
 func _check_journey_end() -> void:
-	if _session.journey_days_remaining <= 0 and _current_event == null:
+	if _journey_finished or _current_event != null or _has_open_panel():
+		return
+	if _session.journey_days_remaining <= 0:
 		_finish_journey()
 
+func _has_open_panel() -> bool:
+	return (
+		_combat_holder.get_child_count() > 0
+		or _haggle_holder.get_child_count() > 0
+		or _recruit_holder.get_child_count() > 0
+	)
+
 func _finish_journey() -> void:
+	_journey_finished = true
 	_set_journey_controls_enabled(false)
 	_add_log("Sefer tamamlandı. %d gün sürdü." % _current_day)
 	EventBus.journey_finished.emit(_current_day)

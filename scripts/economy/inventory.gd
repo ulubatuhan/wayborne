@@ -52,6 +52,3 @@ func has_item(item_id: String, quantity: int = 1) -> bool:
 
 func get_all_entries() -> Array:
 	return _entries.values()
-
-func is_full() -> bool:
-	return _entries.size() >= max_slots

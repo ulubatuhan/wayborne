@@ -33,14 +33,6 @@ static func get_trade_goods() -> Array[Item]:
 			items.append(item)
 	return items
 
-static func get_all_items() -> Array[Item]:
-	if _cache.is_empty():
-		_build_cache()
-	var items: Array[Item] = []
-	for item in _cache.values():
-		items.append(item)
-	return items
-
 static func _build_cache() -> void:
 	_add(GameSession.PROVISIONS_ITEM_ID, GameSession.PROVISIONS_ITEM_NAME, GameSession.PROVISIONS_UNIT_PRICE, 0.5)
 	_add("test_grain", "Buğday", 5, 1.0)

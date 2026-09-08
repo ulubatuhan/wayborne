@@ -29,7 +29,6 @@ static var _locations: Array[Location] = []
 static var _location_by_id: Dictionary = {}
 static var _routes_by_from: Dictionary = {}
 static var _route_by_pair: Dictionary = {}
-static var _offers_by_origin_destination: Dictionary = {}
 static var _offers_by_origin: Dictionary = {}
 static var _offer_by_merchant_id: Dictionary = {}
 
@@ -51,18 +50,6 @@ static func get_routes_from(from_location_id: String) -> Array[TravelRoute]:
 static func get_route(from_location_id: String, to_location_id: String) -> TravelRoute:
 	_ensure_built()
 	return _route_by_pair.get(_pair_key(from_location_id, to_location_id))
-
-## origin_location_id: teklifi veren tüccarın şu an bulunduğu şehir.
-## Oyuncu oradaysa teklif görünür - başka bir şehirdeki tüccar burada
-## çıkmaz.
-static func get_offers_for_destination(
-	destination_location_id: String, origin_location_id: String
-) -> Array[MerchantOffer]:
-	_ensure_built()
-	var offers: Array[MerchantOffer] = []
-	for offer in _offers_by_origin_destination.get(_pair_key(origin_location_id, destination_location_id), []):
-		offers.append(offer)
-	return offers
 
 ## Bir şehirden (hedef fark etmeksizin) çıkan tüm teklifler - Tüccar
 ## Loncası'nın kontrat panosu için.
@@ -143,7 +130,6 @@ static func _add_direction(
 	_route_by_pair[_pair_key(from_id, to_id)] = route
 
 	var offers := _offers_for_direction(from_id, to_id, travel_days, id_base)
-	_offers_by_origin_destination[_pair_key(from_id, to_id)] = offers
 	if not _offers_by_origin.has(from_id):
 		_offers_by_origin[from_id] = []
 	for offer in offers:
