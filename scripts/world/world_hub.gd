@@ -120,33 +120,46 @@ func _move_player(delta: float) -> void:
 
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
+	var leader_x := _player.position.x
+	var escort_count := _followers.size()
 
-	var front_count := mini(_followers.size(), FRONT_ESCORT_LIMIT)
-	for index in front_count:
+	for index in escort_count:
 		var follower := _followers[index]
-		var follower_target := _player.position.x - _front_escort_gap(index)
+		var follower_target := _follower_target_x(index, leader_x, escort_count, _wagons.size())
 		follower.position.x = lerpf(follower.position.x, follower_target, weight)
 
-	var front_span := _front_escort_gap(front_count - 1) if front_count > 0 else 0.0
-	var train_start := _player.position.x - front_span - WAGON_GAP
 	for index in _wagons.size():
 		var wagon := _wagons[index]
-		var wagon_target := train_start - WAGON_SPACING * index
+		var wagon_target := _wagon_target_x(index, leader_x, escort_count)
 		wagon.position.x = lerpf(wagon.position.x, wagon_target, weight)
 		_follow_wagon_crew(index, wagon_target, weight)
-
-	# Üçüncü isimli parti üyesi varsa (bkz. _build_caravan sırası) vagonların
-	# gerisinde arka nöbetçi olarak yürür - öndeki muhafızları etkilemez.
-	if _followers.size() > front_count and not _wagons.is_empty():
-		var rear_guard := _followers[front_count]
-		var last_wagon_target := train_start - WAGON_SPACING * (_wagons.size() - 1)
-		var rear_target := last_wagon_target - REAR_GUARD_TRAIL
-		rear_guard.position.x = lerpf(rear_guard.position.x, rear_target, weight)
 
 ## Öndeki muhafızlar arasında liderden uzaklaştıkça açılan mesafe -
 ## 0. muhafız (levazımcı/kıdemli) tam arkasında, 1.'si biraz daha geride.
 func _front_escort_gap(index: int) -> float:
 	return FOLLOWER_GAP if index <= 0 else MID_GUARD_GAP
+
+## Aşağıdaki üç hedef formülü saf aritmetik: düğüm durumuna değil verilen
+## sayılara bakıyorlar. Böylece hem her karede lerp hedefi hem de kervan
+## kurulurken ilk konum olarak kullanılabiliyorlar - takipçiler eskiden
+## hepsi aynı noktada kurulup ilk karelerde yerlerine kayıyordu (bkz.
+## _build_crew_member'ın zaten kaçındığı aynı tuzak).
+func _train_start_x(leader_x: float, escort_count: int) -> float:
+	var front_count := mini(escort_count, FRONT_ESCORT_LIMIT)
+	var front_span := _front_escort_gap(front_count - 1) if front_count > 0 else 0.0
+	return leader_x - front_span - WAGON_GAP
+
+func _wagon_target_x(wagon_index: int, leader_x: float, escort_count: int) -> float:
+	return _train_start_x(leader_x, escort_count) - WAGON_SPACING * wagon_index
+
+## FRONT_ESCORT_LIMIT'e kadar olan muhafızlar liderin arkasında yürür;
+## üstündeki (üçüncü parti üyesi) vagonların gerisinde arka nöbetçidir.
+func _follower_target_x(
+	index: int, leader_x: float, escort_count: int, wagon_count: int
+) -> float:
+	if index < FRONT_ESCORT_LIMIT or wagon_count <= 0:
+		return leader_x - _front_escort_gap(index)
+	return _wagon_target_x(wagon_count - 1, leader_x, escort_count) - REAR_GUARD_TRAIL
 
 ## Bir vagonun tayfası (bkz. GameSession.PEOPLE_PER_WAGON) vagonun etrafında
 ## dağınık yürür - isimli muhafızların aksine düzenli bir sıra tutmazlar,
@@ -256,16 +269,25 @@ func _add_spot(
 func _build_caravan() -> void:
 	var session: GameSession = GameState.get_session()
 	var party := session.get_party()
+	var escorts := _order_escorts(session, party)
+	var wagon_count := maxi(1, session.owned_wagon_count)
+	# Lider her zaman x=0'da kuruluyor (bkz. _build_person); kervanın geri
+	# kalanı ilk karede yerine kaymasın diye ilk konumunu her karede
+	# kullanılan hedef formülünden alıyor. Ekleme sırası çizim sırasıdır -
+	# vagonlar ve tayfa önce, insanlar üstlerine.
+	var leader_x := 0.0
 
-	for index in maxi(1, session.owned_wagon_count):
-		var wagon := _build_wagon(index)
-		_wagons.append(wagon)
+	for index in wagon_count:
+		var wagon_x := _wagon_target_x(index, leader_x, escorts.size())
+		_wagons.append(_build_wagon(index, wagon_x))
 		for crew_slot in GameSession.PEOPLE_PER_WAGON:
-			_crew.append(_build_crew_member(wagon.position.x, index, crew_slot))
+			_crew.append(_build_crew_member(wagon_x, index, crew_slot))
 
 	_player = _build_person(party[0], true)
-	for character in _order_escorts(session, party):
-		_followers.append(_build_person(character, false))
+	for index in escorts.size():
+		var follower := _build_person(escorts[index], false)
+		follower.position.x = _follower_target_x(index, leader_x, escorts.size(), wagon_count)
+		_followers.append(follower)
 
 ## Lideri saymadan geri kalan parti üyelerini muhafız sırasına dizer: en
 ## önde levazımcı görevini taşıyan (yoksa en kıdemli - en yüksek seviyeli)
@@ -292,12 +314,10 @@ func _order_escorts(session: GameSession, party: Array[CharacterData]) -> Array[
 	return ordered
 
 ## Sadece ilk vagon etkileşim noktası - kervanın yükü tek envanterde.
-func _build_wagon(index: int) -> ColorRect:
+func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 	var wagon := ColorRect.new()
 	wagon.color = WAGON_COLOR
-	wagon.position = Vector2(
-		-WAGON_GAP - WAGON_SPACING * index, GROUND_Y - WAGON_SIZE.y
-	)
+	wagon.position = Vector2(wagon_x, GROUND_Y - WAGON_SIZE.y)
 	wagon.size = WAGON_SIZE
 	add_child(wagon)
 
@@ -359,9 +379,9 @@ func _build_person(character: CharacterData, is_leader: bool) -> ColorRect:
 	var body := ColorRect.new()
 	body.color = CharacterData.get_skin_tone_color(character.skin_tone)
 	body.size = Vector2(BODY_WIDTH, body_height)
+	# x'i çağıran belirliyor (bkz. _build_caravan): lider 0'da kalır,
+	# takipçiler kendi hedef konumlarında kurulur.
 	body.position = Vector2(0.0, GROUND_Y - body_height)
-	if not is_leader:
-		body.position.x = -FOLLOWER_GAP
 	add_child(body)
 
 	var label := Label.new()

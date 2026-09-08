@@ -10,6 +10,7 @@ func suite_name() -> String:
 func run(t) -> void:
 	_test_old_character_dict_loads_with_defaults(t)
 	_test_old_session_save_loads(t)
+	_test_current_hp_is_clamped_to_max(t)
 
 ## Faz 5'te yazılmış olabilecek, yeni alanları hiç bilmeyen bir kayıt.
 func _old_character_dict() -> Dictionary:
@@ -67,3 +68,21 @@ func _test_old_session_save_loads(t) -> void:
 	t.eq(session.get_player_character().level, 1, "yüklenen karakter seviye 1'den başlar")
 	t.eq(session.get_duty_holder(DutyCatalog.MUHAFIZ), null, "eski kayıtta kimse görevli değildir")
 	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 0, "ekipman deposu olmayan kayıt boş depoyla yüklenir")
+
+## Kayıt dosyası dış sınır: saklanan can, kayıt alındıktan sonra ekipman
+## çıkarılmış ya da huy silinmişse artık ulaşılamayacak kadar yüksek
+## olabilir; elle düzenlenmiş bir kayıt negatif de gelebilir.
+func _test_current_hp_is_clamped_to_max(t) -> void:
+	var inflated := _old_character_dict()
+	inflated["current_hp"] = 9999
+	var healed := CharacterData.from_dict(inflated)
+	t.eq(healed.current_hp, healed.get_max_hp(), "maksimumu aşan can tavana kenetlenir")
+
+	var negative := _old_character_dict()
+	negative["current_hp"] = -50
+	var downed := CharacterData.from_dict(negative)
+	t.eq(downed.current_hp, 0, "negatif can sıfıra kenetlenir")
+
+	var intact := _old_character_dict()
+	intact["current_hp"] = 12
+	t.eq(CharacterData.from_dict(intact).current_hp, 12, "aralıktaki can olduğu gibi korunur")

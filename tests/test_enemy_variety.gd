@@ -15,11 +15,53 @@ func run(t) -> void:
 	_test_build_squad_dispatches_by_kind(t)
 	_test_grant_equipment_effect_still_works_alongside_combat_kind(t)
 	_test_trigger_combat_carries_kind(t)
+	_test_kind_labels(t)
+	_test_encounter_log_uses_enemy_label(t)
 
 func _seeded_rng(seed_value: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	return rng
+
+## Kadro türü çeşitlendiği hâlde savaş kayıtları/panel başlığı sabit
+## "Haydutlar" diyordu - bir ayı sürüsü de muhafız devriyesi de haydut
+## diye anılıyordu. Etiket artık kadro türünden geliyor.
+func _test_kind_labels(t) -> void:
+	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_BANDIT), "Haydutlar", "haydut kadrosunun adı")
+	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_WILDLIFE), "Vahşi hayvanlar", "vahşi hayvan kadrosunun adı")
+	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_GUARD), "Şehir muhafızları", "muhafız kadrosunun adı")
+
+	# Boş text_value "bandit" sayılıyor (bkz. event_effect_applier.gd), bu
+	# yüzden bilinmeyen bir tür de haydut etiketine düşmeli.
+	t.eq(EnemyCatalog.get_kind_label(""), "Haydutlar", "boş tür haydut etiketine düşer")
+	t.eq(EnemyCatalog.get_kind_label("bilinmeyen"), "Haydutlar", "bilinmeyen tür haydut etiketine düşer")
+
+func _test_encounter_log_uses_enemy_label(t) -> void:
+	var default_encounter := CombatEncounter.new(_label_party(), _label_enemies(), _seeded_rng(7))
+	t.eq(default_encounter.enemy_label, "Haydutlar", "etiket verilmezse haydut varsayılanı kalır")
+
+	var label := EnemyCatalog.get_kind_label(EnemyCatalog.KIND_WILDLIFE)
+	var encounter := CombatEncounter.new(_label_party(), _label_enemies(), _seeded_rng(7), label)
+	t.eq(encounter.enemy_label, label, "verilen etiket motora taşınır")
+
+	# Lambda dış yereli değere göre yakaladığı için paylaşılan kutu deseni
+	# (bkz. CLAUDE.md, test_stress.gd'deki aynı kullanım).
+	var opening := [""]
+	encounter.log_added.connect(func(line): opening[0] = opening[0] if not opening[0].is_empty() else line)
+	encounter.start()
+	t.ok(label in opening[0], "açılış kaydı kadro türünün adını kullanır")
+	t.not_ok("Haydutlar" in opening[0], "vahşi hayvan savaşı artık haydut demiyor")
+
+func _label_party() -> Array[CombatUnit]:
+	var hero := CharacterData.create("Etiket", CultureCatalog.VALLEY, CharacterStats.new(), 174, 1)
+	var units: Array[CombatUnit] = [CombatUnit.from_character(hero, 1)]
+	return units
+
+func _label_enemies() -> Array[CombatUnit]:
+	var units: Array[CombatUnit] = [
+		CombatUnit.from_enemy(EnemyCatalog.get_enemy(EnemyCatalog.WOLF), 1)
+	]
+	return units
 
 func _test_wildlife_squad_composition(t) -> void:
 	var calm := EnemyCatalog.build_wildlife_squad(0.1, 4, _seeded_rng(1))
