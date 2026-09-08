@@ -23,9 +23,6 @@ func get_session():
 		start_new_game()
 	return _session
 
-func has_session() -> bool:
-	return _session != null
-
 func start_new_game(starting_gold: int = 250, starting_provisions: int = 20, starting_wagon_count: int = 1) -> void:
 	var session_script := load(GAME_SESSION_PATH)
 	_session = session_script.new(starting_gold, starting_provisions, starting_wagon_count)

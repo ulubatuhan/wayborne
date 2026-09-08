@@ -67,32 +67,32 @@ static func _ensure_built() -> void:
 
 	_skills.append(CombatSkill.make_attack(
 		SHIELD_BASH,
-		"Kalkan Darbesi",
-		"Öndeki düşmanı kalkanla iter; isabetli ama vuruşu hafiftir.",
+		"SKILL_SHIELD_BASH_NAME",
+		"SKILL_SHIELD_BASH_DESC",
 		[1, 2], [1, 2],
 		6, 2, 10, 0
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		SPEAR_THRUST,
-		"Mızrak Saplaması",
-		"Uzun mızrakla ikinci sıraya kadar uzanır.",
+		"SKILL_SPEAR_THRUST_NAME",
+		"SKILL_SPEAR_THRUST_DESC",
 		[1, 2, 3], [1, 2, 3],
 		9, 3, 0, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		SLING_SHOT,
-		"Sapan Atışı",
-		"Arkadan atılan taş, düşmanın arka saflarını bulur.",
+		"SKILL_SLING_SHOT_NAME",
+		"SKILL_SLING_SHOT_DESC",
 		[3, 4], [2, 3, 4],
 		7, 4, -5, 5
 	))
 
 	var rally := CombatSkill.new()
 	rally.skill_id = RALLY
-	rally.display_name = "Toparlan"
-	rally.description = "Bir yoldaşının yarasını sarar. İki turda bir kullanılabilir."
+	rally.display_name_key = "SKILL_RALLY_NAME"
+	rally.description_key = "SKILL_RALLY_DESC"
 	rally.target_kind = CombatSkill.Target.ALLY
 	rally.usable_positions = CombatSkill.to_position_array([2, 3, 4])
 	rally.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
@@ -103,23 +103,23 @@ static func _ensure_built() -> void:
 	_skills.append(rally)
 
 	_skills.append(CombatSkill.make_buff(
-		TAKE_COVER, "Siper Al", "İki tur boyunca kaçınmasını artırır.",
+		TAKE_COVER, "SKILL_TAKE_COVER_NAME", "SKILL_TAKE_COVER_DESC",
 		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
 		"dodge", 10, 2, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		ARROW_SHOT,
-		"Ok Atışı",
-		"Arkadan atılan güvenilir bir ok.",
+		"SKILL_ARROW_SHOT_NAME",
+		"SKILL_ARROW_SHOT_DESC",
 		[3, 4], [1, 2, 3, 4],
 		8, 3, 8, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		LEG_TIE,
-		"Ayak Bağı",
-		"Hafif bir ok, hedefin bacağına dolanıp iki tur kaçınmasını düşürür.",
+		"SKILL_LEG_TIE_NAME",
+		"SKILL_LEG_TIE_DESC",
 		[2, 3, 4], [1, 2, 3],
 		4, 1, 0, 0, 2,
 		"dodge", -8, 2
@@ -127,53 +127,53 @@ static func _ensure_built() -> void:
 
 	_skills.append(CombatSkill.make_attack(
 		AIMED_SHOT,
-		"Nişan Al",
-		"Uzun süre nişan alır, isabet ederse ağır vurur.",
+		"SKILL_AIMED_SHOT_NAME",
+		"SKILL_AIMED_SHOT_DESC",
 		[3, 4], [2, 3, 4],
 		10, 2, -5, 15, 3
 	))
 
 	_skills.append(CombatSkill.make_buff(
-		STEP_BACK, "Sırtını Dön", "Bir tur boyunca kaçınmasını artırır.",
+		STEP_BACK, "SKILL_STEP_BACK_NAME", "SKILL_STEP_BACK_DESC",
 		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
 		"dodge", 6, 1, 2
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		SLEDGE_STRIKE,
-		"Balyoz Darbesi",
-		"Ağır bir savurma; isabeti düşük ama vurunca çok acıtır.",
+		"SKILL_SLEDGE_STRIKE_NAME",
+		"SKILL_SLEDGE_STRIKE_DESC",
 		[1, 2], [1, 2],
 		14, 5, -5, 0, 1
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		SHIELD_BREAK,
-		"Kalkan Kırma",
-		"Hedefin kalkanını zorlar, iki tur kaçınmasını düşürür.",
+		"SKILL_SHIELD_BREAK_NAME",
+		"SKILL_SHIELD_BREAK_DESC",
 		[1, 2], [1, 2],
 		6, 2, 0, 0, 2,
 		"dodge", -6, 2
 	))
 
 	_skills.append(CombatSkill.make_buff(
-		RAGE, "Öfke Nöbeti", "İki tur boyunca hasar bonusunu artırır.",
+		RAGE, "SKILL_RAGE_NAME", "SKILL_RAGE_DESC",
 		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
 		"damage", 6, 2, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		SWEEPING_BLOW,
-		"Çevirme Darbesi",
-		"Geniş bir savurma, öndeki iki mevkiyi de bulur.",
+		"SKILL_SWEEPING_BLOW_NAME",
+		"SKILL_SWEEPING_BLOW_DESC",
 		[1], [1, 2],
 		9, 3, 0, 0, 2
 	))
 
 	var rousing_speech := CombatSkill.new()
 	rousing_speech.skill_id = ROUSING_SPEECH
-	rousing_speech.display_name = "Moral Nutku"
-	rousing_speech.description = "Bir yoldaşının yarasını sarar."
+	rousing_speech.display_name_key = "SKILL_ROUSING_SPEECH_NAME"
+	rousing_speech.description_key = "SKILL_ROUSING_SPEECH_DESC"
 	rousing_speech.target_kind = CombatSkill.Target.ALLY
 	rousing_speech.usable_positions = CombatSkill.to_position_array([3, 4])
 	rousing_speech.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
@@ -184,86 +184,86 @@ static func _ensure_built() -> void:
 	_skills.append(rousing_speech)
 
 	_skills.append(CombatSkill.make_buff(
-		TALLY_RECKON, "Hesap Kitap", "İki tur boyunca isabetini artırır.",
+		TALLY_RECKON, "SKILL_TALLY_RECKON_NAME", "SKILL_TALLY_RECKON_DESC",
 		CombatSkill.Target.SELF, [2, 3, 4], [],
 		"accuracy", 10, 2, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		CUTTING_WORD,
-		"Keskin Söz",
-		"İğneleyici bir laf, hedefin iki tur isabetini düşürür.",
+		"SKILL_CUTTING_WORD_NAME",
+		"SKILL_CUTTING_WORD_DESC",
 		[3, 4], [1, 2, 3, 4],
 		3, 1, 0, 0, 2,
 		"accuracy", -8, 2
 	))
 
 	_skills.append(CombatSkill.make_buff(
-		KEEP_LEDGER, "Kayıt Tut", "Bir yoldaşın iki tur kaçınmasını artırır.",
+		KEEP_LEDGER, "SKILL_KEEP_LEDGER_NAME", "SKILL_KEEP_LEDGER_DESC",
 		CombatSkill.Target.ALLY, [3, 4], [1, 2, 3, 4],
 		"dodge", 8, 2, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		CLEAVER,
-		"Satır Savurması",
-		"Haydut satırını öndeki hedefe indirir.",
+		"SKILL_CLEAVER_NAME",
+		"SKILL_CLEAVER_DESC",
 		[1, 2], [1, 2],
 		8, 3, 0, 3
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		BANDIT_ARROW,
-		"Kısa Yay",
-		"Arkadan atılan ok, en zayıf halkayı arar.",
+		"SKILL_BANDIT_ARROW_NAME",
+		"SKILL_BANDIT_ARROW_DESC",
 		[2, 3, 4], [1, 2, 3, 4],
 		6, 3, 5, 5
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		BANDIT_ORDER,
-		"Reisin Emri",
-		"Reis sopasını sallayarak öne saldırır.",
+		"SKILL_BANDIT_ORDER_NAME",
+		"SKILL_BANDIT_ORDER_DESC",
 		[1, 2, 3], [1, 2],
 		11, 4, 5, 5
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		WOLF_BITE,
-		"Kurt Isırığı",
-		"Çevik bir kurt, en yakın hedefi ısırmak için atılır.",
+		"SKILL_WOLF_BITE_NAME",
+		"SKILL_WOLF_BITE_DESC",
 		[1, 2], [1, 2],
 		7, 3, 5, 5
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		BEAR_CLAW,
-		"Pençe Darbesi",
-		"Ayının koca pençesi iner - isabeti düşük ama ezici.",
+		"SKILL_BEAR_CLAW_NAME",
+		"SKILL_BEAR_CLAW_DESC",
 		[1], [1, 2],
 		16, 6, -5, 0, 1
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		BOAR_CHARGE,
-		"Domuz Hücumu",
-		"Yaban domuzu başını eğip doğrudan öne saldırır.",
+		"SKILL_BOAR_CHARGE_NAME",
+		"SKILL_BOAR_CHARGE_DESC",
 		[1], [1],
 		10, 4, 0, 8
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		GUARD_STRIKE,
-		"Muhafız Vuruşu",
-		"Talimli bir kılıç darbesi - isabeti yüksek, hasarı ölçülü.",
+		"SKILL_GUARD_STRIKE_NAME",
+		"SKILL_GUARD_STRIKE_DESC",
 		[1, 2], [1, 2],
 		8, 2, 8, 0
 	))
 
 	_skills.append(CombatSkill.make_attack(
 		GUARD_ORDER,
-		"Çavuş Emri",
-		"Çavuş devriyeyi öne sürer.",
+		"SKILL_GUARD_ORDER_NAME",
+		"SKILL_GUARD_ORDER_DESC",
 		[1, 2, 3], [1, 2],
 		10, 3, 5, 0
 	))

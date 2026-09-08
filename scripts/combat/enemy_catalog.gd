@@ -44,9 +44,9 @@ const KIND_GUARD: String = "guard"
 ## anılıyordu. Etiket her zaman cümle başında/yalın halde kullanılır, o
 ## yüzden tek biçim yetiyor.
 const _KIND_LABELS: Dictionary = {
-	KIND_BANDIT: "Haydutlar",
-	KIND_WILDLIFE: "Vahşi hayvanlar",
-	KIND_GUARD: "Şehir muhafızları",
+	KIND_BANDIT: "ENEMY_KIND_BANDIT",
+	KIND_WILDLIFE: "ENEMY_KIND_WILDLIFE",
+	KIND_GUARD: "ENEMY_KIND_GUARD",
 }
 
 static var _enemies: Array[EnemyTemplate] = []
@@ -56,8 +56,11 @@ static func get_enemy(enemy_id: String) -> EnemyTemplate:
 	_ensure_built()
 	return _enemy_by_id.get(enemy_id)
 
+## tr() bir Object örnek metodu, static bağlamdan çağrılamıyor - static
+## katalogların çeviri yolu TranslationServer.translate().
 static func get_kind_label(enemy_kind: String) -> String:
-	return _KIND_LABELS.get(enemy_kind, _KIND_LABELS[KIND_BANDIT])
+	var key: String = str(_KIND_LABELS.get(enemy_kind, _KIND_LABELS[KIND_BANDIT]))
+	return String(TranslationServer.translate(key))
 
 ## Tek giriş noktası: road_journey.gd/combat_panel.gd bu üçünden hangisini
 ## çağıracağını bilmek zorunda kalmaz. enemy_kind EventEffect.Type.
@@ -175,29 +178,29 @@ static func _ensure_built() -> void:
 	if not _enemies.is_empty():
 		return
 
-	_enemies.append(_make(CUTTER, "Haydut Kesicisi", 24, 76, 5, 4, 3, 8, [SkillCatalog.CLEAVER], 1, 10))
-	_enemies.append(_make(ARCHER, "Haydut Okçusu", 18, 80, 8, 6, 2, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
+	_enemies.append(_make(CUTTER, "ENEMY_BANDIT_CUTTER_NAME", 24, 76, 5, 4, 3, 8, [SkillCatalog.CLEAVER], 1, 10))
+	_enemies.append(_make(ARCHER, "ENEMY_BANDIT_ARCHER_NAME", 18, 80, 8, 6, 2, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
 	_enemies.append(_make(
-		LEADER, "Haydut Reisi", 34, 82, 6, 8, 5, 10,
+		LEADER, "ENEMY_BANDIT_LEADER_NAME", 34, 82, 6, 8, 5, 10,
 		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2, 25
 	))
 
 	# Bölgesel reskin'ler: Kesici/Okçu'nun aynı mevki tercihiyle ama farklı
 	# yöre teçhizatıyla çıkan versiyonları (bkz. build_bandit_squad).
-	_enemies.append(_make(MOUNTAIN_BANDIT, "Dağ Haydutu", 28, 74, 4, 4, 6, 7, [SkillCatalog.CLEAVER], 1, 12))
-	_enemies.append(_make(ARMED_BRIGAND, "Silahlı Eşkıya", 20, 86, 7, 9, 3, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
+	_enemies.append(_make(MOUNTAIN_BANDIT, "ENEMY_MOUNTAIN_BANDIT_NAME", 28, 74, 4, 4, 6, 7, [SkillCatalog.CLEAVER], 1, 12))
+	_enemies.append(_make(ARMED_BRIGAND, "ENEMY_ARMED_BRIGAND_NAME", 20, 86, 7, 9, 3, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
 
 	# Vahşi hayvanlar - kurt sürü halinde hızlı/hafif, ayı nadir/tekil ve
 	# ezici, domuz ortada saldırgan bir tekil tehdit (bkz. build_wildlife_squad).
-	_enemies.append(_make(WOLF, "Kurt", 16, 78, 12, 5, 2, 14, [SkillCatalog.WOLF_BITE], 1, 8))
-	_enemies.append(_make(BEAR, "Ayı", 55, 70, 2, 2, 8, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
-	_enemies.append(_make(BOAR, "Yaban Domuzu", 28, 74, 5, 3, 5, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 16, 78, 12, 5, 2, 14, [SkillCatalog.WOLF_BITE], 1, 8))
+	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 55, 70, 2, 2, 8, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
+	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 28, 74, 5, 3, 5, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
 
 	# Şehir muhafızları - talimli ve isabetli ama haydutlar kadar sert
 	# vurmuyor, çavuş komuta eder (bkz. build_guard_squad, evt_guard_patrol).
-	_enemies.append(_make(CITY_GUARD, "Şehir Muhafızı", 26, 80, 6, 3, 4, 9, [SkillCatalog.GUARD_STRIKE], 1, 12))
+	_enemies.append(_make(CITY_GUARD, "ENEMY_CITY_GUARD_NAME", 26, 80, 6, 3, 4, 9, [SkillCatalog.GUARD_STRIKE], 1, 12))
 	_enemies.append(_make(
-		GUARD_SERGEANT, "Muhafız Çavuşu", 36, 82, 7, 5, 6, 10,
+		GUARD_SERGEANT, "ENEMY_GUARD_SERGEANT_NAME", 36, 82, 7, 5, 6, 10,
 		[SkillCatalog.GUARD_ORDER, SkillCatalog.GUARD_STRIKE], 2, 26
 	))
 
@@ -211,7 +214,7 @@ static func _make(
 ) -> EnemyTemplate:
 	var enemy := EnemyTemplate.new()
 	enemy.enemy_id = enemy_id
-	enemy.display_name = display_name
+	enemy.display_name_key = display_name
 	enemy.max_hp = max_hp
 	enemy.accuracy = accuracy
 	enemy.dodge = dodge

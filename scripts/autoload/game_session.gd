@@ -6,7 +6,7 @@ extends RefCounted
 ## yalnızca kalıcı bir örneği tutar.
 
 const PROVISIONS_ITEM_ID: String = "provisions"
-const PROVISIONS_ITEM_NAME: String = "Erzak"
+const PROVISIONS_ITEM_NAME: String = "ITEM_PROVISIONS_NAME"
 const PROVISIONS_UNIT_PRICE: int = 4
 
 var wallet: Wallet
@@ -162,6 +162,35 @@ func get_player_character() -> CharacterData:
 func set_player_character(character: CharacterData) -> void:
 	character.is_player = true
 	party = [character]
+
+## Oyunun sabit açılışı: parti her zaman iki kişi (oyuncu + rastgele bir
+## yoldaş), bir vagon, rastgele bir şehir. Oyuncu bunların hiçbirini
+## seçmiyor - açılış dengesi her yeni oyunda aynı kalsın, çeşitlilik
+## yoldaşın kim çıktığından ve nerede uyandığından gelsin diye.
+##
+## Bir vagon tam iki kişilik yer açar (get_party_capacity), yani kadro
+## baştan dolu: üçüncü kişi ancak kervansaraydan vagon alınca gelebilir.
+const STARTING_WAGONS: int = 1
+const STARTING_PARTY_SIZE: int = 2
+
+func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerator) -> void:
+	owned_wagon_count = STARTING_WAGONS
+	owned_wagon_damaged = 0
+
+	set_player_character(player_character)
+	party.append(RecruitCatalog.build_starting_companion(rng))
+
+	current_location_id = roll_starting_location(rng)
+	_restock_current_location()
+
+## Başlangıç şehri rastgele - her playthrough haritanın başka bir
+## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
+## yönden çözülsün diye.
+static func roll_starting_location(rng: RandomNumberGenerator) -> String:
+	var locations := WorldMapData.get_locations()
+	if locations.is_empty():
+		return WorldMapData.START_LOCATION_ID
+	return locations[rng.randi_range(0, locations.size() - 1)].location_id
 
 func can_recruit() -> bool:
 	_ensure_party()
@@ -473,7 +502,9 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
-	_provisions_item.item_name = PROVISIONS_ITEM_NAME
+	# item_name artık hesaplanan (salt-okunur) bir özellik; saklanan şey
+	# anahtar (bkz. CLAUDE.md Localization Rules).
+	_provisions_item.item_name_key = PROVISIONS_ITEM_NAME
 	_provisions_item.base_price = PROVISIONS_UNIT_PRICE
 
 	if starting_provisions > 0:
@@ -541,11 +572,18 @@ func hire_recruit(venue: String, candidate: CharacterData) -> bool:
 func get_provisions() -> int:
 	return inventory.get_quantity(PROVISIONS_ITEM_ID)
 
-## Negatif miktarlarda sıfırın altına inmez; gerçekten düşen miktarı döner.
+## Negatif miktarlarda sıfırın altına inmez; her iki yönde de gerçekten
+## değişen miktarı döner.
+##
+## Ekleme tarafı add_item'ın dönüşünü yok sayıyordu: envanterde boş slot
+## kalmamışsa (Inventory.max_slots) ve erzak girişi tükendiği için silinmişse
+## ekleme sessizce başarısız oluyor, buna rağmen delta "eklendi" diye
+## dönüyordu - olay günlüğü "Erzak +5" yazarken kervan aç kalırdı. Bugün
+## katalogda max_slots'tan az mal olduğu için tetiklenmiyor, mal eklendikçe
+## gerçek olur.
 func change_provisions(delta: int) -> int:
 	if delta > 0:
-		inventory.add_item(_provisions_item, delta)
-		return delta
+		return delta if inventory.add_item(_provisions_item, delta) else 0
 
 	var removable := mini(-delta, get_provisions())
 	if removable > 0:

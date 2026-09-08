@@ -58,20 +58,20 @@ static func _ensure_built() -> void:
 	if not _duties.is_empty():
 		return
 
-	_duties.append(_make(MUHAFIZ, "Muhafız", "Kervanı pusuya karşı önde tutar.", CharacterStats.Kind.ENDURANCE))
-	_duties.append(_make(IZCI, "İzci", "Rotayı önden keşfeder, tehlikeyi sezer.", CharacterStats.Kind.PERCEPTION))
-	_duties.append(_make(LEVAZIMCI, "Levazımcı", "Erzağı ölçülü dağıtır, israfı önler.", CharacterStats.Kind.INTELLECT))
-	_duties.append(_make(ARABACI, "Arabacı", "Vagonları sürer, hasarı elinden geldiğince azaltır.", CharacterStats.Kind.STRENGTH))
-	_duties.append(_make(TELLAL, "Tellal", "Şehirde pazarlığı ve dedikoduyu ucuza getirir.", CharacterStats.Kind.CHARISMA))
-	_duties.append(_make(OTACI, "Otacı", "Kampta yaraları ve gerginliği sarar.", CharacterStats.Kind.INTELLECT))
+	_duties.append(_make(MUHAFIZ, "DUTY_MUHAFIZ_NAME", "DUTY_MUHAFIZ_DESC", CharacterStats.Kind.ENDURANCE))
+	_duties.append(_make(IZCI, "DUTY_IZCI_NAME", "DUTY_IZCI_DESC", CharacterStats.Kind.PERCEPTION))
+	_duties.append(_make(LEVAZIMCI, "DUTY_LEVAZIMCI_NAME", "DUTY_LEVAZIMCI_DESC", CharacterStats.Kind.INTELLECT))
+	_duties.append(_make(ARABACI, "DUTY_ARABACI_NAME", "DUTY_ARABACI_DESC", CharacterStats.Kind.STRENGTH))
+	_duties.append(_make(TELLAL, "DUTY_TELLAL_NAME", "DUTY_TELLAL_DESC", CharacterStats.Kind.CHARISMA))
+	_duties.append(_make(OTACI, "DUTY_OTACI_NAME", "DUTY_OTACI_DESC", CharacterStats.Kind.INTELLECT))
 
 	for duty in _duties:
 		_duty_by_id[duty.duty_id] = duty
 
-static func _make(duty_id: String, display_name: String, description: String, primary_stat: CharacterStats.Kind) -> Duty:
+static func _make(duty_id: String, name_key: String, description_key: String, primary_stat: CharacterStats.Kind) -> Duty:
 	var duty := Duty.new()
 	duty.duty_id = duty_id
-	duty.display_name = display_name
-	duty.description = description
+	duty.display_name_key = name_key
+	duty.description_key = description_key
 	duty.primary_stat = primary_stat
 	return duty

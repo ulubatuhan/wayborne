@@ -69,6 +69,17 @@ static func build_candidates(
 		candidates.append(_make_candidate(profile, rng, level))
 	return candidates
 
+## Oyunun sabit açılışındaki yoldaş (bkz. GameSession.start_playthrough):
+## oyuncu bunu seçmiyor, her yeni oyunda rastgele bir sınıf/kültür/huy ile
+## karşısına çıkıyor. Meydan profilinde ve oyuncuyla aynı seviyede - açılış
+## dengesi her seferinde aynı kalsın, çeşitlilik kimin çıktığından gelsin.
+## Ücreti sıfır: işe alınmıyor, zaten kervanın bir parçası.
+static func build_starting_companion(rng: RandomNumberGenerator) -> CharacterData:
+	var companion := _make_candidate(VENUE_MARKET_PROFILE, rng, 1)
+	companion.hire_cost = 0
+	companion.is_player = false
+	return companion
+
 static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, level: int) -> CharacterData:
 	var cultures := CultureCatalog.get_cultures()
 	var culture := cultures[rng.randi_range(0, cultures.size() - 1)]

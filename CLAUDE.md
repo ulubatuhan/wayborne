@@ -320,6 +320,92 @@ wayborne/
   back button **outside** it. Otherwise the back button is pushed off-screen and
   the player is stranded - this actually happened on the market screen.
 
+### Journey Time Rules
+
+The road used to advance one day per button press. It now runs on a
+continuously flowing clock (`JourneyClock`, `scripts/travel/`), while the
+day *mechanics* are unchanged.
+
+- **The clock counts days; it does not replace them.** Provisions, contract
+  deadlines and the event roll still happen once per day. `take_elapsed_days()`
+  answers "how many whole days completed since I last asked" and the road
+  screen runs the existing per-day logic that many times. It returns a count,
+  not a bool: at 3x speed, or after a long event, more than one day can
+  complete in a single frame. A day must never be processed twice and never
+  skipped - both are locked by `tests/test_journey_clock.gd`.
+- **The day rolls over at dawn (`START_HOUR`), not midnight.** With a
+  midnight boundary every daily event fired at 00:00, so the player never
+  saw one in daylight. Events now land around 07:30.
+- **Events consume time.** Resolving a card, a fight, a haggle or a road
+  recruit each spend hours (`consume_hours`), so the background moves while
+  the caravan is stopped - that is the "events eat time" rule.
+- **Time stops for decisions.** `_can_time_flow()` is false while an event
+  card is open or a side-channel panel (combat/haggle/recruit) is up.
+- **Camping is a state, not an instant.** Pressing camp lights the fire and
+  lets time keep flowing until `CAMP_HOURS` pass; the benefit (provisions
+  cost, stress relief) is applied when it ends. It is only offered when
+  `is_camp_time()` - evening or night.
+- `TravelBand` (`scripts/ui/`) owns the visuals: sky/ground colors
+  interpolate toward the *next* phase using `get_phase_progress()` so the
+  scene never snaps, the world scrolls under a stationary caravan (moving
+  the caravan would just hit the edge of the band), and the campfire adds a
+  flickering warm light. Still ColorRect placeholders.
+
+### Playthrough Start Rules
+
+- **The opening is fixed and not offered as a choice**: two party members
+  (the player plus one randomly rolled companion), one wagon, a random
+  starting city - see `GameSession.start_playthrough()`. One wagon is
+  exactly two party slots, so the roster starts full; a third member is
+  only possible after buying a wagon.
+- The companion comes from `RecruitCatalog.build_starting_companion()`,
+  which reuses the normal candidate generator rather than duplicating the
+  randomization.
+- `tests/playthrough_demo.gd` runs the whole loop headless (market,
+  contracts, travel with the real clock, events, arrival) and prints a
+  readable log. Like `simulate_journeys.gd` it is **not** a test - it never
+  fails, it shows whether the game actually loops. It mirrors the road
+  screen's `_process` order deliberately, so what it verifies is what the
+  screen does.
+
+### Localization Rules
+
+The game targets **11 languages** (tr, en, de, fr, es, it, pt_BR, ru, pl,
+zh_CN, ja). Turkish is the source language; English is the fallback.
+
+- **`UserSettings.SUPPORTED` (`scripts/autoload/user_settings.gd`) is the
+  single source of truth for the language list.** It also persists the
+  player's choice to `user://settings.cfg` (separate from the save file, so
+  "New Game" never resets it) and picks the system language on first run.
+  No screen may hardcode a locale list - `settings.gd` reads it.
+- **Adding a language is three coordinated edits**: a row in
+  `UserSettings.SUPPORTED`, a column in *each* `data/locale/*.csv`, and the
+  three `.translation` paths in `project.godot`'s `locale/translations`.
+  `tests/test_localization.gd` fails loudly if these drift apart - it also
+  checks that `tr`/`en` are filled on every row and that no key is defined
+  in two files.
+- **An empty cell falls back to English, it does not render blank** (verified
+  against Godot 4.2.2 with `locale/fallback="en"`). So a language can ship
+  partially translated, and English must stay complete.
+- Translation CSVs are split by domain so translators can work in parallel
+  and prioritize: `ui.csv` (screens, buttons), `events.csv` (road event
+  prose), `game.csv` (catalog content - duties, enemies, cities, items,
+  traits, equipment, skills, classes, cultures).
+- **Catalog resources store keys, not prose.** `Duty`, `Trait`, `Equipment`,
+  `CombatSkill`, `Culture`, `CharacterClass`, `EnemyTemplate`, `Item` and
+  `Location` each keep a `*_key` export and expose the visible text as a
+  **computed property** (`var display_name: String: get: return
+  tr(display_name_key)`). This is why the ~67 places that read
+  `.display_name`/`.description` needed no change at all when the game
+  became translatable - never reintroduce a plain stored `display_name`.
+- **`tr()` is an `Object` instance method and cannot be called from a
+  `static func`.** Static catalogs must use
+  `TranslationServer.translate(key)` instead (see
+  `EnemyCatalog.get_kind_label`).
+- **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
+  resolves through the translation server, so without pinning, assertions on
+  display names would pass or fail depending on the machine's language.
+
 - **scripts/ui/**: User interface scripts
   - Menu controllers
   - HUD management

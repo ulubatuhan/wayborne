@@ -11,8 +11,19 @@ extends Resource
 ## CharacterData._equipment_bonus_sum).
 
 @export var equipment_id: String = ""
-@export var display_name: String = ""
-@export var description: String = ""
+## Saklanan sey ceviri anahtari (bkz. data/locale/game.csv); gosterilen
+## metin asagidaki hesaplanan ozelliklerden okunur. Bu ayrim sayesinde
+## bu alanlari okuyan ekranlarin hicbiri degismeden cevrilebilir oldu
+## - bkz. CLAUDE.md Localization Rules.
+@export var display_name_key: String = ""
+@export var description_key: String = ""
+
+var display_name: String:
+	get: return tr(display_name_key)
+
+var description: String:
+	get: return tr(description_key)
+
 ## EquipmentCatalog.SLOT_* değerlerinden biri.
 @export var slot: String = ""
 ## Silah/Zırh için yükseltme kademesi; Yüzük/Kolye'de anlamsız (1 kalır).

@@ -6,8 +6,19 @@ extends Resource
 ## dedikodu) bağlanır, yeni bir sistem icat etmez.
 
 @export var culture_id: String = ""
-@export var culture_name: String = ""
-@export var description: String = ""
+## Saklanan sey ceviri anahtari (bkz. data/locale/game.csv); gosterilen
+## metin asagidaki hesaplanan ozelliklerden okunur. Bu ayrim sayesinde
+## bu alanlari okuyan ekranlarin hicbiri degismeden cevrilebilir oldu
+## - bkz. CLAUDE.md Localization Rules.
+@export var culture_name_key: String = ""
+@export var description_key: String = ""
+
+var culture_name: String:
+	get: return tr(culture_name_key)
+
+var description: String:
+	get: return tr(description_key)
+
 
 ## CharacterStats.Kind -> bonus. Eksi değerler de olabilir.
 @export var stat_bonuses: Dictionary = {}

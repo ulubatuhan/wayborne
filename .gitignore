@@ -11,6 +11,11 @@ export_credentials.cfg
 # Imported translations (automatically generated from CSV files)
 *.translation
 
+# Godot import metadata - CI regenerates it with `godot --headless --import`,
+# and the repo has never tracked it; without this it shows up as untracked
+# noise after every local import.
+*.import
+
 # Mono-specific ignores
 .mono/
 data_*/
