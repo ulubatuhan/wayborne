@@ -51,6 +51,14 @@ func lose_wagons(count: int) -> int:
 	damaged_wagons = mini(damaged_wagons, wagon_count)
 	return actually_lost
 
+## Yolda onarım (bkz. evt_traveling_tinker): şehirdeki kervansaray
+## onarımının yol karşılığı. Gerçekten onarılan vagon sayısını döner -
+## hasarlıdan fazlası onarılamaz.
+func repair_wagons(count: int) -> int:
+	var repaired := mini(maxi(0, count), damaged_wagons)
+	damaged_wagons -= repaired
+	return repaired
+
 func damage_wagons(count: int) -> int:
 	var damageable := maxi(0, wagon_count - damaged_wagons)
 	var actually_damaged := mini(count, damageable)

@@ -56,9 +56,9 @@ wayborne/
 ### Event Engine Rules
 
 - Road events only. City interaction is deliberately **not** card-based.
-- A caravan can be ruined but never wiped out: the player's own wagon is never
-  lost, gold never goes negative, provisions never go below zero. These clamps
-  live in `EventEffectApplier`/`CaravanState`, never in individual events.
+- A caravan can be ruined but never wiped out - see **Caravan Ruin Rules**
+  below for exactly how far "ruined" goes. The clamps live in
+  `EventEffectApplier`/`CaravanState`, never in individual events.
 - Locked choices are shown disabled *with their reason*, not hidden, so the
   player learns what to prepare for next time.
 - All player-facing event text lives in `data/locale/wayborne_text.csv` as
@@ -319,6 +319,75 @@ wayborne/
   board, the party list) puts that content in a `ScrollContainer` and keeps the
   back button **outside** it. Otherwise the back button is pushed off-screen and
   the player is stranded - this actually happened on the market screen.
+
+### Caravan Ruin Rules
+
+"The caravan is never wiped out" does **not** mean it is untouchable. It can
+crawl: everything down to the leader, their own wagon and whoever stays loyal
+can be lost.
+
+- **Gold can go negative - the caravan can fall into debt.** Two spending
+  paths enforce the difference: `Wallet.spend()` is optional purchase (a
+  wagon, a hire, goods) and simply fails when you cannot afford it - the
+  player never sinks himself. `Wallet.force_spend()` /
+  `GameSession.spend_or_owe()` is money you *must* pay - tribute, a fine,
+  customs, interest - and it pushes the purse below zero.
+- **`DebtLedger` is the one place debt lives.** A debt carries a creditor, a
+  principal and a due day (a month). Past due, every 10 days adds 15%
+  interest and costs reputation; restructuring pushes the deadline out but
+  adds a fee to the principal, and the fee rate grows each time - endlessly
+  deferring must not be the cheap way out.
+- **The negative balance and the ledger's overdraft entry are the same
+  money.** `GameSession` syncs them on every `balance_changed`. Kept
+  separately they drift: earn gold and the purse recovers while the ledger
+  still shows the old debt, so the player is billed twice for it.
+- Provisions still never go below zero, but zero means you cannot feed the
+  caravan: hunger and morale losses follow.
+
+### Economy Rules
+
+- **Profit is not only the price gap between cities.** `MarketPricing` holds
+  the base table (a city sells what it produces cheap, pays well for what it
+  demands); `MarketConditions` layers inflation, season, supply-and-demand
+  pressure and economic/political shocks on top and multiplies the base.
+  Passing no conditions yields the old, purely positional behaviour.
+- **Supply and demand is what stops a single route being farmed forever.**
+  Buying pushes that good's price up in that city; selling pushes it down;
+  the pressure decays back toward baseline over the following days. Any new
+  trade path must go through `consume_stock`/`record_sale` or it silently
+  bypasses this.
+- `EventEffect.Type.MARKET_SHOCK` is how a strike, famine, embargo or good
+  harvest moves prices for a while.
+- **Weight binds, not just slots.** The limit lives in `Inventory.add_item`
+  itself, so an event reward obeys it exactly like a market purchase - when
+  only the market screen checked it, everything else leaked through.
+  Provisions are exempt (they have their own journey formula and must not
+  eat cargo space), and the ceiling tracks `owned_wagon_count`.
+- Every number in these tables is a placeholder to be tuned.
+
+### Event Character Rules
+
+Who you are travelling with, and who you meet, changes what an event does.
+
+- **People met on the road carry a hidden disposition** (`NpcDisposition`:
+  loyal / desperate / thief / vengeful). `EventEffect.Type.ROLL_ENCOUNTER`
+  rolls it into a flag and outcomes branch on that flag with
+  `EventCondition.HAS_FLAG`. The player is not told which - a party member
+  with strong Sezgi only gets a *hint*.
+- **The bill need not come due immediately.** Turning away a vengeful
+  traveller sets a flag and unlocks a `triggered_only` chain event that
+  fires days later (`evt_wanderer_revenge`). This is the pattern for any
+  "that decision comes back to you" design.
+- **Culture kinship is not one culture's privilege.** `ROLL_ENCOUNTER` also
+  rolls the met group's culture and sets a `<prefix>_kin` flag when it
+  matches the *leader's* culture, so meeting your own people works whichever
+  culture you chose (`evt_kin_encounter`, which replaced the Nomad-only
+  version).
+- **Party capability gates choices.** All six duty holders plus
+  `best_perception` / `best_charisma` are in the event context, so an
+  outcome can ask "is there a quartermaster who would have caught this
+  early?" or "is there anyone here who could talk them down?" - see
+  `evt_spoiled_provisions` and `evt_mutiny`'s manipulate option.
 
 ### Journey Time Rules
 

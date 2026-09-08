@@ -31,12 +31,13 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_mutiny())
 	_road_events.append(_abandoned_wagon())
 	_road_events.append(_road_wanderer())
+	_road_events.append(_wanderer_revenge())
 	_road_events.append(_troubled_night())
 	_road_events.append(_stress_brawl())
 	_road_events.append(_forgotten_cache())
 	_road_events.append(_traveling_tinker())
 	_road_events.append(_scouted_pass())
-	_road_events.append(_culture_nomad_kin())
+	_road_events.append(_kin_encounter())
 	_road_events.append(_culture_valley_dispute())
 	_road_events.append(_culture_highland_challenge())
 	_road_events.append(_culture_port_gossip())
@@ -51,7 +52,14 @@ static func get_road_events() -> Array[GameEvent]:
 static func _road_wanderer() -> GameEvent:
 	var event := _event("evt_road_wanderer", "EVT_WANDERER", 0.9)
 	event.cooldown_days = 6
+	# Yolcunun kim olduğu peşinen bilinmiyor: mizacı burada yuvarlanıyor,
+	# seçeneklerin sonuçları o mizaca dallanıyor. Sezgisi kuvvetli bir parti
+	# üyesi varsa ROLL_ENCOUNTER bir ipucu da bırakır.
+	event.immediate_effects = _effects([
+		EventEffect.make(EventEffect.Type.ROLL_ENCOUNTER, 0, "wanderer"),
+	])
 	event.choices = _choices([
+		# Kervana almak: sadık biri kazanç, hırsız ileride soyar.
 		_gated_choice(
 			"EVT_WANDERER_OPT_HIRE", "EVT_WANDERER_OPT_HIRE_LOCKED",
 			_conditions([
@@ -59,12 +67,68 @@ static func _road_wanderer() -> GameEvent:
 			]),
 			_effects([EventEffect.make(EventEffect.Type.TRIGGER_RECRUIT, 0)])
 		),
-		_choice("EVT_WANDERER_OPT_FEED", _effects([
-			EventEffect.make(EventEffect.Type.PROVISIONS, -3),
-			EventEffect.make(EventEffect.Type.MORALE, 5),
+		# Doyurup yollamak: kimseyi almadan da mizaç önemli - kinci biri
+		# doyurulduğunda küs gitmez.
+		_choice_with_outcomes("EVT_WANDERER_OPT_FEED", _outcomes([
+			_outcome_if("EVT_WANDERER_FEED_KIN", _conditions([
+				EventCondition.make("wanderer_kin", EventCondition.Op.HAS_FLAG),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+				EventEffect.make(EventEffect.Type.MORALE, 10),
+				EventEffect.make(EventEffect.Type.REPUTATION, 3),
+			]), 4.0),
+			_outcome_if("EVT_WANDERER_FEED_THIEF", _conditions([
+				EventCondition.make(
+					NpcDisposition.get_flag("wanderer", NpcDisposition.THIEF),
+					EventCondition.Op.HAS_FLAG
+				),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -5),
+				EventEffect.make(EventEffect.Type.MORALE, 2),
+			]), 4.0),
+			EventOutcome.make("EVT_WANDERER_FEED_PLAIN", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+				EventEffect.make(EventEffect.Type.MORALE, 5),
+			]), 1.0),
 		])),
-		_choice("EVT_WANDERER_OPT_IGNORE", _effects([
-			EventEffect.make(EventEffect.Type.MORALE, -2),
+		# Görmezden gelmek: kinci biri bunu unutmaz, günler sonra döner.
+		_choice_with_outcomes("EVT_WANDERER_OPT_IGNORE", _outcomes([
+			_outcome_if("EVT_WANDERER_IGNORE_GRUDGE", _conditions([
+				EventCondition.make(
+					NpcDisposition.get_flag("wanderer", NpcDisposition.VENGEFUL),
+					EventCondition.Op.HAS_FLAG
+				),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -2),
+				EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wanderer_scorned"),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wanderer_revenge"),
+			]), 4.0),
+			EventOutcome.make("EVT_WANDERER_IGNORE_PLAIN", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -2),
+			]), 1.0),
+		])),
+	])
+	return event
+
+## Görmezden gelinen kinci yolcu geri döner - kararın faturası hemen
+## kesilmiyor, günler sonra kesiliyor (bkz. NpcDisposition).
+static func _wanderer_revenge() -> GameEvent:
+	var event := _event("evt_wanderer_revenge", "EVT_WANDERER_REVENGE", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("wanderer_scorned", EventCondition.Op.HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice("EVT_WANDERER_REVENGE_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "wanderer_scorned"),
+		])),
+		_choice("EVT_WANDERER_REVENGE_OPT_PAY", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, -120),
+			EventEffect.make(EventEffect.Type.MORALE, -6),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "wanderer_scorned"),
 		])),
 	])
 	return event
@@ -182,14 +246,38 @@ static func _spoiled_provisions() -> GameEvent:
 	event.conditions = _conditions([
 		EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 5),
 	])
-	event.immediate_effects = _effects([
-		EventEffect.make(EventEffect.Type.PROVISIONS, -4),
-	])
+	# Levazımcı erzağı ölçülü dağıtır - bozulmayı erken fark eder, kayıp az.
+	# Bu yüzden anlık kayıp artık sabit değil, seçeneklerin içinde.
 	event.choices = _choices([
+		# Levazımcı varsa bozulma daha o gün fark edilir.
+		_gated_choice(
+			"EVT_SPOILED_OPT_CATCH_EARLY", "EVT_SPOILED_OPT_CATCH_EARLY_LOCKED",
+			_conditions([
+				EventCondition.make("has_levazimci", EventCondition.Op.GREATER_EQUAL, 1),
+			]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -1),
+				EventEffect.make(EventEffect.Type.MORALE, 2),
+			])
+		),
+		# Otacı bozulmuşu yahniye çevirir: daha az besleyici, biraz moral
+		# bozucu ama tamamen çöp değil.
+		_gated_choice(
+			"EVT_SPOILED_OPT_RECOOK", "EVT_SPOILED_OPT_RECOOK_LOCKED",
+			_conditions([
+				EventCondition.make("has_otaci", EventCondition.Op.GREATER_EQUAL, 1),
+			]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+			])
+		),
 		_choice("EVT_SPOILED_OPT_SHARE", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -4),
 			EventEffect.make(EventEffect.Type.MORALE, -5),
 		])),
 		_choice("EVT_SPOILED_OPT_RATION", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -4),
 			EventEffect.make(EventEffect.Type.MORALE, -15),
 			EventEffect.make(EventEffect.Type.REPUTATION, -3),
 			EventEffect.make(EventEffect.Type.PROVISIONS, 2),
@@ -200,17 +288,50 @@ static func _spoiled_provisions() -> GameEvent:
 static func _stowaway() -> GameEvent:
 	var event := _event("evt_stowaway", "EVT_STOWAWAY", 0.7)
 	event.fire_only_once = true
+	# Kaçak yolcu da yoldaki yolcu gibi: kim olduğu önceden bilinmiyor.
+	event.immediate_effects = _effects([
+		EventEffect.make(EventEffect.Type.ROLL_ENCOUNTER, 0, "stowaway"),
+	])
 	event.choices = _choices([
-		_choice("EVT_STOWAWAY_OPT_SHELTER", _effects([
-			EventEffect.make(EventEffect.Type.PROVISIONS, -2),
-			EventEffect.make(EventEffect.Type.MORALE, 4),
-			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "stowaway_helped"),
-			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_stowaway_repay"),
+		_choice_with_outcomes("EVT_STOWAWAY_OPT_SHELTER", _outcomes([
+			# Hırsıza kucak açmak pahalıya patlar.
+			_outcome_if("EVT_STOWAWAY_SHELTER_THIEF", _conditions([
+				EventCondition.make(
+					NpcDisposition.get_flag("stowaway", NpcDisposition.THIEF),
+					EventCondition.Op.HAS_FLAG
+				),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
+				EventEffect.make(EventEffect.Type.GOLD, -90),
+				EventEffect.make(EventEffect.Type.MORALE, -8),
+			]), 4.0),
+			# Çaresiz ya da sadık biri borcunu öder.
+			EventOutcome.make("EVT_STOWAWAY_SHELTER_GRATEFUL", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+				EventEffect.make(EventEffect.Type.SET_FLAG, 0, "stowaway_helped"),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_stowaway_repay"),
+			]), 1.0),
 		])),
-		_choice("EVT_STOWAWAY_OPT_TURN_IN", _effects([
-			EventEffect.make(EventEffect.Type.GOLD, 30),
-			EventEffect.make(EventEffect.Type.REPUTATION, -3),
-			EventEffect.make(EventEffect.Type.MORALE, -6),
+		_choice_with_outcomes("EVT_STOWAWAY_OPT_TURN_IN", _outcomes([
+			# Kinci birini ele vermek arkanda bir düşman bırakır.
+			_outcome_if("EVT_STOWAWAY_TURN_IN_GRUDGE", _conditions([
+				EventCondition.make(
+					NpcDisposition.get_flag("stowaway", NpcDisposition.VENGEFUL),
+					EventCondition.Op.HAS_FLAG
+				),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 30),
+				EventEffect.make(EventEffect.Type.REPUTATION, -3),
+				EventEffect.make(EventEffect.Type.MORALE, -6),
+				EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wanderer_scorned"),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wanderer_revenge"),
+			]), 4.0),
+			EventOutcome.make("EVT_STOWAWAY_TURN_IN_PLAIN", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 30),
+				EventEffect.make(EventEffect.Type.REPUTATION, -3),
+				EventEffect.make(EventEffect.Type.MORALE, -6),
+			]), 1.0),
 		])),
 	])
 	return event
@@ -275,6 +396,22 @@ static func _mutiny() -> GameEvent:
 				EventEffect.make(EventEffect.Type.MORALE, 30),
 			])
 		),
+		# Kandırmak: para vermeden söz vererek oyalamak. Dili kuvvetli biri
+		# gerekiyor ve tutulmayan söz bedava değil - ilerisi için itibar yer.
+		_gated_choice(
+			"EVT_MUTINY_OPT_MANIPULATE", "EVT_MUTINY_OPT_MANIPULATE_LOCKED",
+			_conditions([
+				EventCondition.make(
+					"best_charisma", EventCondition.Op.GREATER_EQUAL,
+					NpcDisposition.MANIPULATE_CHARISMA_THRESHOLD
+				),
+			]),
+			_effects([
+				EventEffect.make(EventEffect.Type.MORALE, 22),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+				EventEffect.make(EventEffect.Type.STRESS, 5),
+			])
+		),
 		_choice_with_outcomes("EVT_MUTINY_OPT_HARSH", _outcomes([
 			EventOutcome.make("EVT_MUTINY_HARSH_OBEY", _effects([
 				EventEffect.make(EventEffect.Type.MORALE, 10),
@@ -291,13 +428,34 @@ static func _mutiny() -> GameEvent:
 static func _abandoned_wagon() -> GameEvent:
 	var event := _event("evt_abandoned_wagon", "EVT_ABANDONED", 0.8)
 	event.choices = _choices([
-		_choice("EVT_ABANDONED_OPT_LOOT", _effects([
-			EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_furs"),
-			EventEffect.make(EventEffect.Type.DANGER, 10),
-			EventEffect.make(EventEffect.Type.MORALE, -3),
+		# Yağmalamak herkesin kabul edeceği bir şey değil: kervanda bunu
+		# uğursuzluk sayan ya da ahlaken doğru bulmayan biri çıkabilir.
+		_choice_with_outcomes("EVT_ABANDONED_OPT_LOOT", _outcomes([
+			EventOutcome.make("EVT_ABANDONED_LOOT_CLEAN", _effects([
+				EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_furs"),
+				EventEffect.make(EventEffect.Type.DANGER, 10),
+				EventEffect.make(EventEffect.Type.MORALE, -3),
+			]), 1.0),
+			EventOutcome.make("EVT_ABANDONED_LOOT_OMEN", _effects([
+				EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_furs"),
+				EventEffect.make(EventEffect.Type.DANGER, 10),
+				EventEffect.make(EventEffect.Type.MORALE, -12),
+				EventEffect.make(EventEffect.Type.STRESS, 8),
+			]), 0.9),
+			EventOutcome.make("EVT_ABANDONED_LOOT_OBJECTION", _effects([
+				EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_furs"),
+				EventEffect.make(EventEffect.Type.MORALE, -8),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+			]), 0.8),
 		])),
 		_choice("EVT_ABANDONED_OPT_LEAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 3),
+		])),
+		# Sahibini aramak: vakit yer ama vicdanı da itibarı da temiz tutar.
+		_choice("EVT_ABANDONED_OPT_SEARCH", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.MORALE, 6),
+			EventEffect.make(EventEffect.Type.REPUTATION, 3),
 		])),
 	])
 	return event
@@ -362,6 +520,8 @@ static func _forgotten_cache() -> GameEvent:
 	var event := _event("evt_forgotten_cache", "EVT_CACHE", 0.7)
 	event.cooldown_days = 5
 	event.choices = _choices([
+		# Toprağın altından her zaman hazine çıkmaz: burası bir mezarlık da
+		# olabilir ve kazmanın bedeli maldan değil kadronun ruhundan çıkar.
 		_choice_with_outcomes("EVT_CACHE_OPT_DIG", _outcomes([
 			EventOutcome.make("EVT_CACHE_DIG_RING", _effects([
 				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.RING_MARKSMAN),
@@ -369,11 +529,27 @@ static func _forgotten_cache() -> GameEvent:
 			EventOutcome.make("EVT_CACHE_DIG_AMULET", _effects([
 				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_WARD),
 			]), 1.0),
+			EventOutcome.make("EVT_CACHE_DIG_GRAVE", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -14),
+				EventEffect.make(EventEffect.Type.STRESS, 12),
+				EventEffect.make(EventEffect.Type.GRANT_TRAIT, 0, TraitCatalog.NAIVE),
+			]), 0.8),
 			EventOutcome.make("EVT_CACHE_DIG_NOTHING", _effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
 				EventEffect.make(EventEffect.Type.MORALE, -3),
 			]), 1.2),
 		])),
+		# Otacı toprağı okur: mezar mı zula mı, kazmadan önce anlaşılır.
+		_gated_choice(
+			"EVT_CACHE_OPT_READ_GROUND", "EVT_CACHE_OPT_READ_GROUND_LOCKED",
+			_conditions([
+				EventCondition.make("has_otaci", EventCondition.Op.GREATER_EQUAL, 1),
+			]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_WARD),
+				EventEffect.make(EventEffect.Type.MORALE, 3),
+			])
+		),
 		_choice("EVT_CACHE_OPT_LEAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 2),
 		])),
@@ -392,6 +568,30 @@ static func _traveling_tinker() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.GOLD, -120),
 				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_1),
+			])
+		),
+		# Demirci yalnızca silah satmaz: yoldaki asıl derdi olan hasarlı
+		# vagonu da onarır. Şehre kadar beklemeye değer mi, orası kararın.
+		_gated_choice(
+			"EVT_TINKER_OPT_REPAIR", "EVT_TINKER_OPT_REPAIR_LOCKED",
+			_conditions([
+				EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 60),
+				EventCondition.make("damaged_wagons", EventCondition.Op.GREATER_EQUAL, 1),
+			]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -60),
+				EventEffect.make(EventEffect.Type.WAGON_REPAIR, 1),
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+			])
+		),
+		# Yedek parça: şimdi ucuz, ileride vagonu kırıldığında işe yarar.
+		_gated_choice(
+			"EVT_TINKER_OPT_PARTS", "EVT_TINKER_OPT_PARTS_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 35)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -35),
+				EventEffect.make(EventEffect.Type.SET_FLAG, 0, "has_spare_parts"),
+				EventEffect.make(EventEffect.Type.MORALE, 2),
 			])
 		),
 		_choice("EVT_TINKER_OPT_IGNORE", _effects([
@@ -427,20 +627,43 @@ static func _scouted_pass() -> GameEvent:
 ## Göçebe kültüründen bir oyuncu bozkırda akraba bir boyla karşılaşır -
 ## kültürün kendi perki (erzak tüketimi) dışında ilk kez olay tarafında
 ## da bir sahnesi oluyor (bkz. CultureCatalog).
-static func _culture_nomad_kin() -> GameEvent:
-	var event := _event("evt_culture_nomad_kin", "EVT_NOMAD_KIN", 0.8)
-	event.conditions = _conditions([
-		EventCondition.make("is_nomad_culture", EventCondition.Op.GREATER_EQUAL, 1),
-	])
+## Yoldaki bir obayla karşılaşmak. Eskiden yalnızca Göçebe oyunculara
+## açıktı; artık herkese açık ve fark, karşındakinin **seninle aynı
+## kültürden** çıkıp çıkmadığında (bkz. ROLL_ENCOUNTER\'ın kin bayrağı).
+## Hangi kültürden olursan ol, kendi boyunla karşılaşmak başka bir kapı açar.
+static func _kin_encounter() -> GameEvent:
+	var event := _event("evt_kin_encounter", "EVT_KIN", 0.8)
 	event.cooldown_days = 8
+	event.immediate_effects = _effects([
+		EventEffect.make(EventEffect.Type.ROLL_ENCOUNTER, 0, "kin"),
+	])
 	event.choices = _choices([
-		_choice("EVT_NOMAD_KIN_OPT_TRADE", _effects([
-			EventEffect.make(EventEffect.Type.GOLD, -20),
-			EventEffect.make(EventEffect.Type.PROVISIONS, 4),
+		_choice_with_outcomes("EVT_KIN_OPT_TRADE", _outcomes([
+			# Kendi boyun sana hem ucuza verir hem fazlasını katar.
+			_outcome_if("EVT_KIN_TRADE_KIN", _conditions([
+				EventCondition.make("kin_kin", EventCondition.Op.HAS_FLAG),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -20),
+				EventEffect.make(EventEffect.Type.PROVISIONS, 8),
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+			]), 4.0),
+			EventOutcome.make("EVT_KIN_TRADE_PLAIN", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -20),
+				EventEffect.make(EventEffect.Type.PROVISIONS, 4),
+			]), 1.0),
 		])),
-		_choice("EVT_NOMAD_KIN_OPT_GREET", _effects([
-			EventEffect.make(EventEffect.Type.MORALE, 4),
-			EventEffect.make(EventEffect.Type.REPUTATION, 1),
+		_choice_with_outcomes("EVT_KIN_OPT_GREET", _outcomes([
+			_outcome_if("EVT_KIN_GREET_KIN", _conditions([
+				EventCondition.make("kin_kin", EventCondition.Op.HAS_FLAG),
+			]), _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 10),
+				EventEffect.make(EventEffect.Type.REPUTATION, 4),
+				EventEffect.make(EventEffect.Type.STRESS, -6),
+			]), 4.0),
+			EventOutcome.make("EVT_KIN_GREET_PLAIN", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+				EventEffect.make(EventEffect.Type.REPUTATION, 1),
+			]), 1.0),
 		])),
 	])
 	return event
@@ -493,9 +716,25 @@ static func _culture_port_gossip() -> GameEvent:
 	])
 	event.cooldown_days = 8
 	event.choices = _choices([
-		_choice("EVT_PORT_GOSSIP_OPT_LISTEN", _effects([
-			EventEffect.make(EventEffect.Type.GOLD, 20),
-			EventEffect.make(EventEffect.Type.REPUTATION, 3),
+		# Dedikodu artık düz bir bahşiş değil: duyduğun şey bir hazinenin
+		# yeri de olabilir, bir entrikanın ucu da, hiçbir şey de.
+		_choice_with_outcomes("EVT_PORT_GOSSIP_OPT_LISTEN", _outcomes([
+			EventOutcome.make("EVT_PORT_GOSSIP_TREASURE", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 140),
+				EventEffect.make(EventEffect.Type.MORALE, 6),
+			]), 0.8),
+			EventOutcome.make("EVT_PORT_GOSSIP_INTRIGUE", _effects([
+				EventEffect.make(EventEffect.Type.REPUTATION, 6),
+				EventEffect.make(EventEffect.Type.MARKET_SHOCK, -25, "test_loc_c|test_cloth|18"),
+			]), 1.0),
+			EventOutcome.make("EVT_PORT_GOSSIP_MYSTERY", _effects([
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_COURAGE),
+				EventEffect.make(EventEffect.Type.STRESS, 6),
+			]), 0.7),
+			EventOutcome.make("EVT_PORT_GOSSIP_NOTHING", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 20),
+				EventEffect.make(EventEffect.Type.REPUTATION, 1),
+			]), 1.2),
 		])),
 		_choice("EVT_PORT_GOSSIP_OPT_IGNORE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
@@ -638,6 +877,17 @@ static func _effects(items: Array) -> Array[EventEffect]:
 	for item in items:
 		result.append(item)
 	return result
+
+## Koşullu sonuç: yalnızca koşulu sağlandığında çekilebilir. Mizaca
+## (bkz. NpcDisposition) ve partinin kapasitesine göre dallanan olaylar
+## bununla kuruluyor.
+static func _outcome_if(
+	text_key: String, conditions: Array[EventCondition],
+	effects: Array[EventEffect], weight: float = 1.0
+) -> EventOutcome:
+	var outcome := EventOutcome.make(text_key, effects, weight)
+	outcome.conditions = conditions
+	return outcome
 
 static func _outcomes(items: Array) -> Array[EventOutcome]:
 	var result: Array[EventOutcome] = []

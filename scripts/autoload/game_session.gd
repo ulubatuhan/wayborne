@@ -314,6 +314,16 @@ func get_duty_discount(duty_id: String) -> float:
 func get_duty_flat_reduction(duty_id: String) -> int:
 	return maxi(0, int(floor((get_duty_multiplier(duty_id) - 1.0) / 0.2)))
 
+## Partideki en yüksek etkin stat değeri (bkz. CharacterStats.
+## get_effective_value). Parti bir ekip: bir işi en uygun olan yapar,
+## o yüzden "partide sezgisi kuvvetli biri var mı" sorusu ortalamaya
+## değil en iyisine bakar.
+func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
+	var best := 0.0
+	for character in get_party():
+		best = maxf(best, character.stats.get_effective_value(kind))
+	return best
+
 ## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
 ## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
 func grant_party_xp(amount: int) -> Dictionary:
@@ -916,7 +926,18 @@ func build_event_context() -> Dictionary:
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
 		# önceden 0/1'e çevrilip hazır veriliyor - bkz. evt_scouted_pass,
 		# evt_culture_*.
+		# Altı görevin hepsi bağlamda: bir olayın sonucu "kervanda aşçı/
+		# levazımcı/otacı var mı" sorusuna bakabilsin diye (bkz. evt_spoiled_
+		# provisions). Eskiden yalnızca İzci vardı.
+		"has_muhafiz": 1.0 if get_duty_holder(DutyCatalog.MUHAFIZ) != null else 0.0,
 		"has_izci": 1.0 if get_duty_holder(DutyCatalog.IZCI) != null else 0.0,
+		"has_levazimci": 1.0 if get_duty_holder(DutyCatalog.LEVAZIMCI) != null else 0.0,
+		"has_arabaci": 1.0 if get_duty_holder(DutyCatalog.ARABACI) != null else 0.0,
+		"has_tellal": 1.0 if get_duty_holder(DutyCatalog.TELLAL) != null else 0.0,
+		"has_otaci": 1.0 if get_duty_holder(DutyCatalog.OTACI) != null else 0.0,
+		# Karşındakini okumak ve kandırmak partinin en iyisine bakar.
+		"best_perception": get_best_effective_stat(CharacterStats.Kind.PERCEPTION),
+		"best_charisma": get_best_effective_stat(CharacterStats.Kind.CHARISMA),
 		"is_nomad_culture": 1.0 if culture_id == CultureCatalog.NOMAD else 0.0,
 		"is_valley_culture": 1.0 if culture_id == CultureCatalog.VALLEY else 0.0,
 		"is_highland_culture": 1.0 if culture_id == CultureCatalog.HIGHLAND else 0.0,

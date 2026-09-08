@@ -14,6 +14,9 @@ enum Type {
 	# Kervan
 	WAGON_DAMAGE,
 	WAGON_LOSE,
+	# Yolda vagon onarımı (bkz. evt_traveling_tinker). Şehirdeki kervansaray
+	# onarımının yol karşılığı - amount kaç vagonun onarılacağı.
+	WAGON_REPAIR,
 	MERCHANT_LEAVE,
 	MORALE,
 	STRESS,
@@ -37,6 +40,10 @@ enum Type {
 	# amount = yüzde değişim (+40 = %40 pahalanır), text_value =
 	# "location_id|item_id|gün"; item_id boşsa şehrin tamamı etkilenir.
 	MARKET_SHOCK,
+	# Karşılaşılan kişinin gizli mizacını ve kültür yakınlığını yuvarlar.
+	# text_value = bayrak öneki (ör. "wanderer"). Sonuçlar bu bayraklara
+	# bakar; oyuncu mizacı ancak sezgisi kuvvetliyse okuyabilir.
+	ROLL_ENCOUNTER,
 }
 
 @export var type: Type = Type.GOLD

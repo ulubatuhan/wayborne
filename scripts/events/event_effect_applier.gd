@@ -59,6 +59,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			var lost := session.caravan.lose_wagons(effect.amount)
 			if lost > 0:
 				result.lines.append("%d vagon kaybedildi" % lost)
+		EventEffect.Type.WAGON_REPAIR:
+			var repaired := session.caravan.repair_wagons(effect.amount)
+			if repaired > 0:
+				result.lines.append("%d vagon onarıldı" % repaired)
 		EventEffect.Type.MERCHANT_LEAVE:
 			var left := session.caravan.remove_merchants(effect.amount)
 			for merchant_name in left:
@@ -103,6 +107,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_grant_equipment(effect, session, result)
 		EventEffect.Type.MARKET_SHOCK:
 			_apply_market_shock(effect, session, result)
+		EventEffect.Type.ROLL_ENCOUNTER:
+			_apply_roll_encounter(effect, session, result)
 
 ## Huy her zaman oyuncunun kendi karakterine verilir - olayın kervanın
 ## lideri başına geldiği kabulüyle (bkz. GameEvent/RoadJourney tasarımı).
@@ -164,3 +170,49 @@ static func _apply_market_shock(
 		location_id, item_id, multiplier, session.total_days_elapsed + maxi(1, duration)
 	)
 	result.lines.append("Piyasa hareketlendi (%+d%%, %d gün)" % [effect.amount, duration])
+
+## Karşılaşılan kişinin gizli mizacını ve kültür yakınlığını belirler.
+## Bir yolcuyu almak tek başına iyi ya da kötü bir karar değil - kimi
+## aldığına bağlı, ve bunu oyuncu peşinen bilmiyor.
+##
+## Yuvarlama gün + önek ile tohumlanıyor: aynı olay aynı gün aynı kişiyi
+## çıkarır (ekranı kapatıp açmak mizacı yeniden atmaz), farklı günlerde
+## farklı biri çıkar.
+static func _apply_roll_encounter(
+	effect: EventEffect, session: GameSession, result: Result
+) -> void:
+	var prefix := effect.text_value
+	if prefix.is_empty():
+		return
+
+	# Önceki karşılaşmanın bayrakları temizlenmezse eski mizaç yenisine
+	# karışır ve sonuçlar iki kişiyi birden dinler.
+	for disposition in NpcDisposition.ALL:
+		session.clear_flag(NpcDisposition.get_flag(prefix, disposition))
+	session.clear_flag("%s_kin" % prefix)
+	session.clear_flag("%s_read" % prefix)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|%d|encounter" % [prefix, session.total_days_elapsed])
+
+	var disposition := NpcDisposition.roll(rng)
+	session.set_flag(NpcDisposition.get_flag(prefix, disposition))
+
+	# Kültür yakınlığı: karşındaki seninle aynı boydansa kapı başka açılır.
+	# Bu yalnızca göçebelere özgü değil - hangi kültürden olursan ol eşleşme
+	# aynı ağırlıkta çalışır.
+	var cultures := CultureCatalog.get_cultures()
+	var met_culture: Culture = cultures[rng.randi_range(0, cultures.size() - 1)]
+	if met_culture.culture_id == session.get_player_character().culture_id:
+		session.set_flag("%s_kin" % prefix)
+
+	# Sezgisi kuvvetli biri varsa parti karşısındakini okuyabilir; okuma
+	# bayrağı olayın "içine bak" seçeneğini açar.
+	if session.get_best_effective_stat(CharacterStats.Kind.PERCEPTION) >= NpcDisposition.READ_PERCEPTION_THRESHOLD:
+		session.set_flag("%s_read" % prefix)
+		result.lines.append(
+			"Sezgin bir şeyler fısıldıyor: %s" % tr_disposition(disposition)
+		)
+
+static func tr_disposition(disposition: String) -> String:
+	return String(TranslationServer.translate(NpcDisposition.get_label_key(disposition)))
