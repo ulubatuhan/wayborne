@@ -107,6 +107,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_grant_equipment(effect, session, result)
 		EventEffect.Type.MARKET_SHOCK:
 			_apply_market_shock(effect, session, result)
+		EventEffect.Type.ROUTE_CHANGE:
+			_apply_route_change(effect, session, result)
 		EventEffect.Type.ROLL_ENCOUNTER:
 			_apply_roll_encounter(effect, session, result)
 
@@ -170,6 +172,44 @@ static func _apply_market_shock(
 		location_id, item_id, multiplier, session.total_days_elapsed + maxi(1, duration)
 	)
 	result.lines.append("Piyasa hareketlendi (%+d%%, %d gün)" % [effect.amount, duration])
+
+## Yolun durumu bir süreliğine değişir - çığ, sel, eşkıya baskını ya da tam
+## tersi, yolu temizleyen bir devriye. Rotanın kendi tablosuna dokunulmuyor
+## (bkz. RouteConditions): coğrafya sabit kalır, üstündeki ağ oynar.
+static func _apply_route_change(
+	effect: EventEffect, session: GameSession, result: Result
+) -> void:
+	var parts := effect.text_value.split("|")
+	if parts.size() < 2:
+		return
+
+	# "current|durum": kervanın o an üstünde olduğu yol. Yol olayları belirli
+	# bir geçidin adını bilemez - hangi rotada oldukları çalışma anında
+	# belli olur, o yüzden kısayol gerekiyor.
+	var from_id := String(parts[0])
+	var to_id := String(parts[1])
+	var state_name := String(parts[2]) if parts.size() > 2 else ""
+	if from_id == "current":
+		from_id = session.journey_origin_id
+		to_id = session.journey_destination_id
+		state_name = String(parts[1])
+	if WorldMapData.get_route(from_id, to_id) == null:
+		return
+
+	var state := RouteConditions.parse_state(state_name)
+	var duration := maxi(1, effect.amount)
+	session.route_conditions.add_override(
+		from_id, to_id, state, session.total_days_elapsed + duration
+	)
+
+	var from_location := WorldMapData.get_location_by_id(from_id)
+	var to_location := WorldMapData.get_location_by_id(to_id)
+	result.lines.append("%s - %s yolu: %s (%d gün)" % [
+		from_location.location_name if from_location != null else from_id,
+		to_location.location_name if to_location != null else to_id,
+		RouteConditions.get_state_label(state),
+		duration,
+	])
 
 ## Karşılaşılan kişinin gizli mizacını ve kültür yakınlığını belirler.
 ## Bir yolcuyu almak tek başına iyi ya da kötü bir karar değil - kimi

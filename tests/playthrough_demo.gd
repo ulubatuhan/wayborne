@@ -81,13 +81,32 @@ func _run_leg(session: GameSession, leg_number: int) -> bool:
 		print("  (%s'den çıkan rota yok - duruldu)" % origin.location_name)
 		return false
 
-	var route: TravelRoute = routes[_rng.randi_range(0, routes.size() - 1)]
+	# Kapalı geçit yok sayılmıyor: oyuncu da o yolu seçemez (bkz.
+	# RouteConditions), demo da seçmemeli - yoksa gösterdiği akış oyunun
+	# akışı olmaktan çıkardı.
+	var open_routes: Array[TravelRoute] = []
+	for candidate in routes:
+		if session.is_route_open(candidate):
+			open_routes.append(candidate)
+	if open_routes.is_empty():
+		print("  (%s'den çıkan açık rota yok - duruldu)" % origin.location_name)
+		return false
+
+	var route: TravelRoute = open_routes[_rng.randi_range(0, open_routes.size() - 1)]
 	var destination := WorldMapData.get_location_by_id(route.to_location_id)
 
+	# Süre ve tehlike yolun o günkü halinden okunuyor, ham tablodan değil.
+	var travel_days := session.get_route_travel_days(route)
+	var danger := session.get_route_danger(route)
+	var state := session.get_route_state(route)
+	var state_note := ""
+	if state != RouteConditions.State.OPEN:
+		state_note = ", %s" % RouteConditions.get_state_label(state)
+
 	print("")
-	print("── %d. BACAK: %s → %s (%d gün, tehlike %%%d)" % [
+	print("── %d. BACAK: %s → %s (%d gün, tehlike %%%d%s)" % [
 		leg_number, origin.location_name, destination.location_name,
-		route.travel_days, int(round(session.get_effective_danger(route.danger_level) * 100.0))
+		travel_days, int(round(danger * 100.0)), state_note
 	])
 
 	_buy_trade_goods(session, origin)
@@ -95,14 +114,9 @@ func _run_leg(session: GameSession, leg_number: int) -> bool:
 	_stock_provisions(session, plan)
 
 	session.depart_with_contracts(plan.get_selected_offers())
-	session.start_journey(
-		destination.location_id,
-		route.travel_days,
-		session.get_effective_danger(route.danger_level),
-		plan
-	)
+	session.start_journey(destination.location_id, travel_days, danger, plan)
 
-	_travel(session, route.travel_days)
+	_travel(session, travel_days)
 
 	var payout := session.finish_journey()
 	print("   Varış: brüt %d → net %d GG · XP %d%s" % [
@@ -138,8 +152,11 @@ func _buy_trade_goods(session: GameSession, origin: Location) -> void:
 
 ## Kontrat panosundan hedefe giden teklifleri kabul edip vagona koy.
 func _build_plan(session: GameSession, destination: Location, route: TravelRoute) -> CaravanPlan:
+	# Erzak yolun o günkü süresine göre alınır: çamura batmış bir geçit
+	# uzadığı kadar erzak yer.
 	var plan := CaravanPlan.new(
-		destination, route.travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, session.owned_wagon_count
+		destination, session.get_route_travel_days(route),
+		CaravanPlan.DEFAULT_MAX_WAGONS, session.owned_wagon_count
 	)
 	for offer in WorldMapData.get_offers_from_origin(session.current_location_id):
 		if offer.destination_location_id != destination.location_id:

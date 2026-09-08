@@ -88,14 +88,25 @@ func _refresh_rows() -> void:
 		var buy_button: Button = row.buy_button
 		var known := _session.is_route_known(_session.current_location_id, route.to_location_id)
 
+		# Yolun o günkü hali herkesin gözü önünde - çamura batmış bir geçit
+		# dedikodu değil, meydan sohbeti. Parayla öğrenilen şey tehlikenin
+		# *yüzdesi* (bkz. GameSession.known_routes), yolun durumu değil.
+		var days := _session.get_route_travel_days(route)
+		var state := _session.get_route_state(route)
+		var state_note := ""
+		if state != RouteConditions.State.OPEN:
+			state_note = " · %s" % RouteConditions.get_state_label(state)
+
 		if known:
-			var effective_danger := _session.get_effective_danger(route.danger_level)
-			status_label.text = "%d gün · Tehlike: %d%%" % [route.travel_days, int(effective_danger * 100.0)]
+			var effective_danger := _session.get_route_danger(route)
+			status_label.text = "%d gün · Tehlike: %d%%%s" % [
+				days, int(effective_danger * 100.0), state_note
+			]
 			buy_button.text = "Öğrenildi"
 			buy_button.disabled = true
 		else:
 			var cost := _rumor_cost(route)
-			status_label.text = "%d gün · Tehlike: bilinmiyor" % route.travel_days
+			status_label.text = "%d gün · Tehlike: bilinmiyor%s" % [days, state_note]
 			buy_button.text = "Dedikodu Satın Al (%d GG)" % cost
 			buy_button.disabled = not _session.wallet.can_afford(cost)
 

@@ -10,6 +10,7 @@ var _session: GameSession
 var _plan: CaravanPlan
 var _destination: Location
 var _route_danger: float = 0.0
+var _route_state: RouteConditions.State = RouteConditions.State.OPEN
 var _offer_rows: Array[Dictionary] = []
 
 var _wagon_counter_label: Label
@@ -39,11 +40,15 @@ func _ready() -> void:
 	var route := WorldMapData.get_route(origin.location_id, _destination.location_id)
 	var travel_days: int = 1
 	if route != null:
-		# İzci öndeki tehlikeyi ve en kısa yolu bilir - kervandaysa yol
-		# kısalır (asla bir günün altına inmez), bkz. DutyCatalog.IZCI.
+		# Süre ve tehlike yolun ham tablosundan değil o günkü halinden
+		# geliyor (bkz. RouteConditions): çamur yolu uzatır, eşkıya
+		# tehlikeyi yükseltir. İzci bunun üstüne biner - öndeki tehlikeyi
+		# ve en kısa yolu bilir, kervandaysa yol kısalır (asla bir günün
+		# altına inmez), bkz. DutyCatalog.IZCI.
 		var izci_reduction := _session.get_duty_flat_reduction(DutyCatalog.IZCI)
-		travel_days = maxi(1, route.travel_days - izci_reduction)
-		_route_danger = _session.get_effective_danger(route.danger_level)
+		travel_days = maxi(1, _session.get_route_travel_days(route) - izci_reduction)
+		_route_danger = _session.get_route_danger(route)
+		_route_state = _session.get_route_state(route)
 
 	_plan = CaravanPlan.new(
 		_destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_count
@@ -73,8 +78,12 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(title)
 
 	var route_label := Label.new()
-	route_label.text = "Yol: %d gün · Tehlike: %d%% · Vagon limiti: %d (%d'si senin)" % [
+	var state_note := ""
+	if _route_state != RouteConditions.State.OPEN:
+		state_note = " · %s" % RouteConditions.get_state_label(_route_state)
+	route_label.text = "Yol: %d gün%s · Tehlike: %d%% · Vagon limiti: %d (%d'si senin)" % [
 		travel_days,
+		state_note,
 		int(_route_danger * 100.0),
 		_plan.max_wagons,
 		_plan.player_wagon_count,

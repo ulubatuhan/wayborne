@@ -1,11 +1,19 @@
 extends Control
 
 const POINT_SIZE: Vector2 = Vector2(130, 44)
-const ROUTE_COLOR: Color = Color(0.45, 0.4, 0.32)
 const ROUTE_WIDTH: float = 3.0
 const CURRENT_LOCATION_COLOR: Color = Color(1.0, 0.85, 0.4)
 const REACHABLE_COLOR: Color = Color(0.75, 0.85, 1.0)
 const UNREACHABLE_COLOR: Color = Color(0.5, 0.5, 0.5)
+## Yolun o günkü hali (bkz. RouteConditions) çizgiye de vuruyor: harita
+## tek bakışta hangi geçidin kapalı, hangisinin eşkıya kaynadığını
+## söylemezse dinamik rota diye bir şey oyuncu için yok demektir.
+const ROUTE_STATE_COLORS: Array[Color] = [
+	Color(0.45, 0.40, 0.32),
+	Color(0.55, 0.50, 0.25),
+	Color(0.62, 0.32, 0.28),
+	Color(0.32, 0.30, 0.30),
+]
 
 var _session: GameSession
 var _current_location_id: String = WorldMapData.START_LOCATION_ID
@@ -29,16 +37,20 @@ func _build_map() -> void:
 		var to_location := WorldMapData.get_location_by_id(route.to_location_id)
 		if from_location == null or to_location == null:
 			continue
-		_map_panel.add_child(_build_route_line(from_location.map_position, to_location.map_position))
+		_map_panel.add_child(_build_route_line(
+			from_location.map_position, to_location.map_position, _session.get_route_state(route)
+		))
 
 	for location in WorldMapData.get_locations():
 		_map_panel.add_child(_build_location_point(location))
 
-func _build_route_line(from_position: Vector2, to_position: Vector2) -> Line2D:
+func _build_route_line(
+	from_position: Vector2, to_position: Vector2, state: RouteConditions.State
+) -> Line2D:
 	var line := Line2D.new()
 	line.points = PackedVector2Array([from_position, to_position])
 	line.width = ROUTE_WIDTH
-	line.default_color = ROUTE_COLOR
+	line.default_color = ROUTE_STATE_COLORS[int(state)]
 	return line
 
 func _build_location_point(location: Location) -> Button:
@@ -54,10 +66,15 @@ func _build_location_point(location: Location) -> Button:
 		button.text = "%s\n(buradasın)" % location.location_name
 		button.disabled = true
 		button.modulate = CURRENT_LOCATION_COLOR
-	elif route == null:
+	elif route == null or not _session.is_route_open(route):
+		# Kapalı geçit tıklanamaz ama gizlenmez: kilitli olay seçenekleriyle
+		# aynı kural - sebebiyle birlikte gösterilir (bkz. CLAUDE.md).
 		button.text = location.location_name
+		if route != null:
+			button.text += "\n(%s)" % RouteConditions.get_state_label(RouteConditions.State.CLOSED)
 		button.disabled = true
 		button.modulate = UNREACHABLE_COLOR
+		button.mouse_entered.connect(_on_location_hovered.bind(location))
 	else:
 		button.text = location.location_name
 		button.modulate = REACHABLE_COLOR
@@ -85,10 +102,17 @@ func _refresh_info_panel() -> void:
 	var route := WorldMapData.get_route(_current_location_id, _focused_location.location_id)
 	if route == null:
 		_add_info_label("Buraya doğrudan bir yol yok.")
+		_add_detour_hint()
 		return
 
 	_add_info_label("Hedef: %s" % _focused_location.location_name)
 	_add_info_label(_route_summary(route))
+
+	# Kapalı yol çıkmaz sokak değil: dolambaçlı yol varsa oyuncu görmeli,
+	# yoksa harita kendini kilitlemiş gibi görünür.
+	if not _session.is_route_open(route):
+		_add_detour_hint()
+		return
 
 	var offers := _session.get_accepted_offers_for_destination(_focused_location.location_id)
 	if offers.is_empty():
@@ -110,13 +134,43 @@ func _refresh_info_panel() -> void:
 ## varsa (bkz. DutyCatalog.IZCI - ücretsiz, ödeme gerektirmeyen keşif)
 ## tam gösterilir; ikisi de yoksa kaba bir bant gösterir (bkz.
 ## GameSession.known_routes).
+## Süre ve tehlike artık rotanın ham tablosundan değil, yolun **o günkü**
+## halinden okunuyor (bkz. GameSession.get_route_travel_days/_danger):
+## ekranda görülen ile yolda yaşanan ayrışmasın diye.
 func _route_summary(route: TravelRoute) -> String:
-	var effective_danger := _session.get_effective_danger(route.danger_level)
+	var days := _session.get_route_travel_days(route)
+	var effective_danger := _session.get_route_danger(route)
+	var state := _session.get_route_state(route)
+	var state_note := ""
+	if state != RouteConditions.State.OPEN:
+		state_note = " · %s" % RouteConditions.get_state_label(state)
+
 	if _session.is_route_known(_current_location_id, route.to_location_id):
-		return "Yol: %d gün · Tehlike: %d%%" % [route.travel_days, int(effective_danger * 100.0)]
+		return "Yol: %d gün · Tehlike: %d%%%s" % [days, int(effective_danger * 100.0), state_note]
 	if _session.get_duty_holder(DutyCatalog.IZCI) != null:
-		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)" % [route.travel_days, int(effective_danger * 100.0)]
-	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)" % [route.travel_days, _danger_band(effective_danger)]
+		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)%s" % [
+			days, int(effective_danger * 100.0), state_note
+		]
+	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)%s" % [
+		days, _danger_band(effective_danger), state_note
+	]
+
+## Doğrudan yol kapalı ya da hiç yokken alternatifi gösterir.
+func _add_detour_hint() -> void:
+	var path := _session.find_open_path(_focused_location.location_id)
+	if path.size() < 2:
+		_add_info_label(RouteConditions.get_state_label(RouteConditions.State.CLOSED))
+		_add_info_label(String(TranslationServer.translate("ROUTE_NO_PATH")))
+		return
+
+	var names: Array[String] = []
+	for location_id in path:
+		var stop := WorldMapData.get_location_by_id(location_id)
+		names.append(stop.location_name if stop != null else location_id)
+	_add_info_label("%s: %s" % [
+		String(TranslationServer.translate("ROUTE_DETOUR_AVAILABLE")), " → ".join(names)
+	])
+	_add_info_label("İlk durak %s - önce oraya git." % names[1])
 
 func _danger_band(danger: float) -> String:
 	if danger < 0.3:

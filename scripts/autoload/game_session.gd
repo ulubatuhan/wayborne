@@ -22,6 +22,11 @@ var debts: DebtLedger
 ## ekonomik/politik şoklar. Fiyatın taban tablosu MarketPricing'de.
 var market: MarketConditions
 
+## Yolun o günkü hali (bkz. RouteConditions): sel, çığ, eşkıya. Coğrafya
+## WorldMapData'da sabit durur, üstündeki ağ her gün değişir - kapanan bir
+## geçit dolambaçlı yolu gerçek bir karara çevirir.
+var route_conditions: RouteConditions
+
 ## Ödemek zorunda olunan bedelin tek yolu - haraç, ceza, gümrük, faiz.
 ## Kese yetmezse eksiye düşer. İsteğe bağlı alışveriş bundan geçmez
 ## (bkz. Wallet.spend): oyuncu kendi isteğiyle borca batmaz, olaylar batırır.
@@ -124,6 +129,34 @@ const DANGER_GROWTH_CAP: float = 1.6
 func get_effective_danger(base_danger: float) -> float:
 	var growth := minf(1.0 + DANGER_GROWTH_PER_DAY * float(total_days_elapsed), DANGER_GROWTH_CAP)
 	return clampf(base_danger * growth, 0.0, 1.0)
+
+## --- Rotanın o günkü hali ---
+## Üç katman, üçü de ayrı: WorldMapData'nın sabit tablosu, yolun o günkü
+## durumu (RouteConditions) ve kervanın deneyim eğrisi (get_effective_danger).
+## Her ekran bu üçünü tek tek toplamak yerine bunları okur - biri unutulursa
+## ekranda görülenle yolda yaşanan ayrışırdı.
+
+func get_route_state(route: TravelRoute) -> RouteConditions.State:
+	return route_conditions.get_state(route, total_days_elapsed)
+
+func is_route_open(route: TravelRoute) -> bool:
+	return route_conditions.is_open(route, total_days_elapsed)
+
+func get_route_travel_days(route: TravelRoute) -> int:
+	return route_conditions.get_travel_days(route, total_days_elapsed)
+
+func get_route_danger(route: TravelRoute) -> float:
+	return get_effective_danger(route_conditions.get_danger(route, total_days_elapsed))
+
+## Bir olayın o yol üstünde hâlâ süren müdahalesi var mı (bkz. ROUTE_CHANGE).
+func has_route_override(from_id: String, to_id: String) -> bool:
+	return route_conditions.has_override(from_id, to_id, total_days_elapsed)
+
+## Kapalı yol çıkmaz sokak değil: dolambaçlı yol varsa şehir dizisini döner.
+func find_open_path(destination_id: String) -> Array[String]:
+	return route_conditions.find_open_path(
+		current_location_id, destination_id, total_days_elapsed
+	)
 
 ## Zenginlik hedefi: kervanın bir "kervan baronu" sayılacağı eşik.
 ## Oyunun DD tarzı felsefesinde yenilgi yok (bkz. CLAUDE.md) - bu yüzden
@@ -473,6 +506,9 @@ func advance_day() -> Array[String]:
 	reputation -= debts.advance_to_day(total_days_elapsed)
 	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
 	market.advance_day(total_days_elapsed)
+	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
+	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
+	route_conditions.advance_day(total_days_elapsed)
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -556,6 +592,7 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	caravan = CaravanState.new()
 	debts = DebtLedger.new()
 	market = MarketConditions.new()
+	route_conditions = RouteConditions.new()
 	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
 	# Erzak kargo ağırlığına dahil değil (bkz. get_cargo_weight), o yüzden
@@ -682,6 +719,54 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_days_remaining = journey_total_days
 	danger_level = danger
 	caravan = CaravanState.from_plan(plan)
+
+## Yolun ortasında planı değiştirmek. Şehirde kurulan plan bir niyet, bir
+## taahhüt değil: geçit kapanır, erzak biter, kervan zarar görür ve hedef
+## değişir. Kervan bulunduğu noktadan **yeni bir yola** girer; geride
+## bıraktığı hedefe yazılı kontratlar teslim edilemez, faturası varışta
+## kesilir (bkz. _apply_undelivered_contract_penalty).
+##
+## Yeni sefer nereden başlıyor sayılıyor? Kervanın gerçekte durduğu yer bir
+## şehir değil, iki şehir arasında bir nokta. Bunu yol üstünde geçirilen
+## günle temsil ediyoruz: dönüş/sapma süresi hedefin çıkış şehrine olan
+## mesafesi ile o ana kadar yürünen mesafenin toplamı.
+const MIN_DIVERT_DAYS: int = 1
+
+func get_days_travelled() -> int:
+	return maxi(0, journey_total_days - journey_days_remaining)
+
+## Geri dön: yürünen yol kadar geri yürünür. Her zaman mümkün - kervanın
+## geldiği yolu bulamaması diye bir şey yok.
+func turn_back() -> bool:
+	if not is_journey_active() or journey_origin_id.is_empty():
+		return false
+	var travelled := get_days_travelled()
+	journey_destination_id = journey_origin_id
+	journey_total_days = maxi(MIN_DIVERT_DAYS, travelled)
+	journey_days_remaining = journey_total_days
+	return true
+
+## Yolda hedef değiştir. Yalnızca çıkış şehrinden ulaşılabilen ve o gün
+## açık olan bir hedefe sapılabilir - kervan haritanın ortasında ışınlanmaz,
+## bildiği yola geri çıkıp oradan gider.
+func can_divert_to(destination_id: String) -> bool:
+	if not is_journey_active() or journey_origin_id.is_empty():
+		return false
+	if destination_id == journey_destination_id or destination_id == journey_origin_id:
+		return false
+	var route := WorldMapData.get_route(journey_origin_id, destination_id)
+	return route != null and is_route_open(route)
+
+func divert_journey(destination_id: String) -> bool:
+	if not can_divert_to(destination_id):
+		return false
+	var route := WorldMapData.get_route(journey_origin_id, destination_id)
+	var total := maxi(MIN_DIVERT_DAYS, get_days_travelled() + get_route_travel_days(route))
+	journey_destination_id = destination_id
+	journey_total_days = total
+	journey_days_remaining = total
+	danger_level = get_route_danger(route)
+	return true
 
 ## Hedefe varıldığında çağrılır: escort ücretini öder, sefer sırasındaki
 ## kayıp/hasarı oyuncunun kalıcı vagon sahipliğine taşır, konumu günceller
@@ -843,6 +928,7 @@ func to_save_dict() -> Dictionary:
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
+		"route_conditions": route_conditions.to_save_dict(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -853,6 +939,7 @@ func load_from_dict(data: Dictionary) -> void:
 	wallet.earn(int(data.get("gold", 0)))
 	debts.load_from_array(data.get("debts", []) as Array)
 	market.load_from_dict(data.get("market", {}) as Dictionary)
+	route_conditions.load_from_dict(data.get("route_conditions", {}) as Dictionary)
 
 	for entry in data.get("inventory", []):
 		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))

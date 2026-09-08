@@ -89,6 +89,8 @@ var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
 var _combat_holder: VBoxContainer
 var _recruit_holder: VBoxContainer
+var _replan_holder: VBoxContainer
+var _replan_button: Button
 var _log_list: VBoxContainer
 var _draw_button: Button
 var _reset_button: Button
@@ -165,6 +167,12 @@ func _build_ui() -> void:
 	_camp_button.pressed.connect(_on_camp_pressed)
 	controls_row.add_child(_camp_button)
 
+	_replan_button = Button.new()
+	_replan_button.text = "Rotayı Değiştir"
+	_replan_button.tooltip_text = "Şehirde kurulan plan bir taahhüt değil: yolda hedefi değiştirebilir ya da geri dönebilirsin."
+	_replan_button.pressed.connect(_on_replan_pressed)
+	controls_row.add_child(_replan_button)
+
 	_draw_button = Button.new()
 	_draw_button.text = tr("EVT_TEST_DRAW")
 	_draw_button.pressed.connect(_on_force_draw)
@@ -195,6 +203,10 @@ func _build_ui() -> void:
 
 	_recruit_holder = VBoxContainer.new()
 	_content.add_child(_recruit_holder)
+
+	_replan_holder = VBoxContainer.new()
+	_replan_holder.add_theme_constant_override("separation", 4)
+	_content.add_child(_replan_holder)
 
 	_arrive_button = Button.new()
 	_arrive_button.text = "Şehre Var"
@@ -742,7 +754,99 @@ func _has_open_panel() -> bool:
 		_combat_holder.get_child_count() > 0
 		or _haggle_holder.get_child_count() > 0
 		or _recruit_holder.get_child_count() > 0
+		or _replan_holder.get_child_count() > 0
 	)
+
+## --- Yolda planı değiştirmek ---
+## Şehirde kurulan plan bir niyet, bir taahhüt değil: geçit kapanır, erzak
+## biter, kervan hırpalanır ve hedef değişir. Karar verirken zaman durur
+## (bkz. _can_time_flow → _has_open_panel), kararın kendisi zaman yer -
+## kervanı döndürmek bedava değil.
+const REPLAN_HOURS: float = 2.0
+
+func _on_replan_pressed() -> void:
+	if _journey_finished or _current_event != null or _has_open_panel():
+		return
+	_set_journey_controls_enabled(false)
+	_build_replan_panel()
+
+func _build_replan_panel() -> void:
+	_clear_children(_replan_holder)
+
+	var title := Label.new()
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	title.text = "Yol ayrımı: şu an %s'e gidiyorsun (%d gün kaldı)." % [
+		destination.location_name if destination != null else _session.journey_destination_id,
+		_session.journey_days_remaining,
+	]
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_replan_holder.add_child(title)
+
+	var origin := WorldMapData.get_location_by_id(_session.journey_origin_id)
+	if origin != null:
+		var back_button := Button.new()
+		back_button.text = "Geri dön: %s (%d gün)" % [
+			origin.location_name, maxi(GameSession.MIN_DIVERT_DAYS, _session.get_days_travelled())
+		]
+		back_button.pressed.connect(_on_turn_back_pressed)
+		_replan_holder.add_child(back_button)
+
+	# Sapılabilecek hedefler çıkış şehrinden ölçülüyor: kervan haritanın
+	# ortasında ışınlanmaz, bildiği yola geri çıkıp oradan gider (bkz.
+	# GameSession.can_divert_to).
+	for route in WorldMapData.get_routes_from(_session.journey_origin_id):
+		if not _session.can_divert_to(route.to_location_id):
+			continue
+		var target := WorldMapData.get_location_by_id(route.to_location_id)
+		var total_days := _session.get_days_travelled() + _session.get_route_travel_days(route)
+		var divert_button := Button.new()
+		divert_button.text = "%s'e sap (%d gün · tehlike %d%%)" % [
+			target.location_name if target != null else route.to_location_id,
+			maxi(GameSession.MIN_DIVERT_DAYS, total_days),
+			int(_session.get_route_danger(route) * 100.0),
+		]
+		divert_button.pressed.connect(_on_divert_pressed.bind(route.to_location_id))
+		_replan_holder.add_child(divert_button)
+
+	var warning := Label.new()
+	warning.text = "Bıraktığın hedefe yazılı kontratlar teslim edilemez; faturası varışta kesilir."
+	warning.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_replan_holder.add_child(warning)
+
+	var cancel_button := Button.new()
+	cancel_button.text = "Vazgeç, yola devam"
+	cancel_button.pressed.connect(_close_replan)
+	_replan_holder.add_child(cancel_button)
+
+func _on_turn_back_pressed() -> void:
+	if not _session.turn_back():
+		_close_replan()
+		return
+	_apply_replan("Kervan geri döndü: %s")
+
+func _on_divert_pressed(destination_id: String) -> void:
+	if not _session.divert_journey(destination_id):
+		_close_replan()
+		return
+	_apply_replan("Rota değişti: yeni hedef %s")
+
+func _apply_replan(log_format: String) -> void:
+	_clock.consume_hours(REPLAN_HOURS)
+	# Yeni bacak yeni bir sefer: ilerleme çubuğu ve varış kontrolü yeni
+	# toplam güne göre okunmalı, yoksa çubuk dolu kalır ve sefer bitmiş
+	# görünürdü.
+	_journey_length_days = maxi(1, _session.journey_total_days)
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	_add_log(log_format % (
+		destination.location_name if destination != null else _session.journey_destination_id
+	), OUTCOME_COLOR)
+	_close_replan()
+
+func _close_replan() -> void:
+	_clear_children(_replan_holder)
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+	_check_journey_end()
 
 func _finish_journey() -> void:
 	_journey_finished = true
@@ -851,6 +955,9 @@ func _set_journey_controls_enabled(enabled: bool) -> void:
 	_draw_button.disabled = not enabled
 	_camp_button.disabled = not enabled
 	_speed_button.disabled = not enabled
+	# Plan yalnızca yolda değiştirilebilir: varış işlendikten sonra ortada
+	# değiştirilecek bir sefer kalmıyor.
+	_replan_button.disabled = not enabled or not _session.is_journey_active()
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan

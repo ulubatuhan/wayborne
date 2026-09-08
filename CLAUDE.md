@@ -425,6 +425,66 @@ Who you are travelling with, and who you meet, changes what an event does.
   early?" or "is there anyone here who could talk them down?" - see
   `evt_spoiled_provisions` and `evt_mutiny`'s manipulate option.
 
+### Route Rules
+
+Geography is fixed; the network on top of it is not. `WorldMapData`'s edge
+table stays the authored map - which city borders which, how far, how
+dangerous at rest. `RouteConditions` is the layer that makes the same seven
+edges behave like a different network every week: floods, landslides,
+brigand country, and the events that cause them.
+
+- **The split mirrors `MarketPricing`/`MarketConditions`**: a base table
+  plus a live layer that multiplies it. A caller that knows nothing about
+  the layer sees the old, static behaviour.
+- **Natural conditions are computed, never stored.** Each route rolls once
+  per `SPELL_DAYS` window from a `route_key + spell` seed, so reloading a
+  save cannot re-roll a closed pass open, and only event-driven overrides
+  (`add_override`, `EventEffect.Type.ROUTE_CHANGE`) live in the save file.
+  The window is offset per route, or every road in the world would change
+  on the same morning.
+- **A route's state is undirected.** An avalanche does not fall in one
+  direction; `route_key()` sorts the pair, and both directions read the
+  same entry.
+- **No city can ever be sealed off.** If a closure would leave a city with
+  no open exit, `get_state()` downgrades it to `SLOW` - the road is barely
+  passable rather than gone. Applying this in `get_state()` (not in
+  `is_open()`) is deliberate: duration, danger, the on-screen label and the
+  pathfinder all read `get_state()`, so a road the caravan is travelling
+  never displays as "Geçit kapalı". `get_raw_state()` is what the dice
+  actually said, for the rule itself and for tests.
+- **A closed road is a detour, not a dead end.** `find_open_path()` BFS's
+  the open network; the world map shows the alternative rather than just
+  greying the city out.
+- **Screens read the session, not the route.** `GameSession.get_route_
+  travel_days()/get_route_danger()/is_route_open()/get_route_state()`
+  compose all three layers (table, conditions, the caravan's own danger
+  growth). Reading `route.travel_days` directly is how the screen and the
+  road drift apart.
+- **Danger deltas apply to the headroom, not the total** (`base + delta *
+  (1 - base)`), so brigands make a quiet road genuinely risky without
+  turning an already-deadly one into a 90% coin flip.
+
+### En-Route Plan Rules
+
+The plan made in the city is an intention, not a commitment.
+
+- `GameSession.divert_journey()` / `turn_back()` are the only ways to change
+  a journey in progress. The caravan is not somewhere on the map it can
+  teleport from: a diversion is measured as *the days already walked* plus
+  the route from the origin city, so backtracking is paid for.
+- You may only divert to a city reachable **from the origin** whose route is
+  open that day (`can_divert_to`).
+- The new leg is a new journey: `journey_total_days` and
+  `journey_days_remaining` are both reset, or the progress bar would stay
+  full and the arrival check would fire immediately.
+- Contracts written to the abandoned destination cannot be delivered; the
+  bill is settled on arrival by `_apply_undelivered_contract_penalty()`.
+  Nothing special is needed for this - it is the same path a failed
+  delivery already takes.
+- Deciding is free of time pressure (the panel counts as an open panel, so
+  `_can_time_flow()` is false) but the decision itself costs hours: turning
+  a caravan around is not instant.
+
 ### Journey Time Rules
 
 The road used to advance one day per button press. It now runs on a
@@ -717,6 +777,11 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
   `GameSession`, `HagglingSession`. Never test engine internals or scene
   wiring.
+- `test_route_conditions.gd` locks the two properties the route layer would
+  be dangerous without: natural states are reproducible (a save reload
+  cannot re-roll a closed pass open) and no city is ever sealed off - the
+  latter is a 300-day sweep over every city, and it caught a real lock-up
+  on three days before the last-exit rule existed.
 - **Where a system can be exploited, assert the exploit is closed rather
   than asserting the formula.** `test_haggling.gd` does not check that a
   particular offer yields a particular price - it exhaustively searches the
@@ -986,11 +1051,32 @@ boşluklarını dolduran bir hat:
   tanıtıyor - `PulseBar` gibi sahnesiz, `.new()` ile kurulan bir bileşen,
   `city_map.gd`'nin ilk `_ready()`'sinden tetikleniyor.
 
-Sırada: karakter portreleri/görsel varlıklar (bu fazın ColorRect yer
-tutucuları hâlâ duruyor), ikinci bir şehir etkileşim katmanı (loncalar
-arası itibar rekabeti gibi derinlik), ya da equipment'in Faz 7'de
-bilerek dışarıda bırakılan kısımları (görsel ikonlar, envanterde
-ağırlık/slot sınırı) - kesin kapsam henüz seçilmedi.
+Faz 9 ("Derinleşen Dünya") tamamlandı - Codex incelemesinin açtığı yedi
+başlık, hepsi aynı desende: sabit bir taban tablo + üstüne binen dinamik
+bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
+
+- **A (borç)** kese eksiye düşebiliyor; `DebtLedger` vade, faiz ve yapılandırma
+  taşıyor, açık hesap kesenin eksi bakiyesinin *aynası* (iki kez sayılmasın diye).
+- **B (ağırlık)** kargo sınırı artık `Inventory.add_item`'in içinde, yani olay
+  ödülü de pazar alımıyla aynı kurala tabi. Erzak muaf.
+- **C (ekonomi)** `MarketConditions`: enflasyon, mevsim, oyuncunun kendi
+  ticaretinin yarattığı arz-talep baskısı ve `MARKET_SHOCK` olayları.
+- **D-E (karakter-duyarlı olaylar)** `NpcDisposition` + `ROLL_ENCOUNTER`: yolda
+  karşılaştığın kişinin gizli mizacı kararın sonucunu belirliyor, sezgisi
+  kuvvetli biri okuyabiliyor, kinci biri günler sonra dönebiliyor.
+- **F (pazarlık)** bkz. Haggling Rules - oyunun para basma noktası kapatıldı.
+- **G (dinamik rotalar + yolda değişen plan)** bkz. Route Rules ve En-Route
+  Plan Rules. `RouteConditions` sabit yedi kenarı her hafta başka bir ağa
+  çeviriyor (`ROUTE_CHANGE` ile `evt_landslide`/`evt_road_patrol` de bu
+  katmandan geçiyor), `divert_journey()`/`turn_back()` şehirde kurulan planı
+  bir taahhüt olmaktan çıkarıyor.
+
+Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
+duruyor), ekran katmanındaki ~238 sabit Türkçe metnin çeviri anahtarına
+taşınması (katalog içeriği bitti, ekranlar bitmedi - bkz. Localization
+Rules), ve moral dengesi: simülatörde 600 koşu boyunca moral hiç 100'ün
+altına inmiyor, bu yüzden `evt_mutiny` (moral ≤ 25 istiyor) hiç
+ateşlenmiyor.
 
 ## Quick Start
 

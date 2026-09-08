@@ -40,6 +40,11 @@ enum Type {
 	# amount = yüzde değişim (+40 = %40 pahalanır), text_value =
 	# "location_id|item_id|gün"; item_id boşsa şehrin tamamı etkilenir.
 	MARKET_SHOCK,
+	# Yolun durumunu bir süreliğine değiştirir: çığ geçidi kapatır, devriye
+	# eşkıyayı temizler, sel yolu çamura boğar. amount = kaç gün sürer,
+	# text_value = "from_id|to_id|durum" (open/slow/perilous/closed).
+	# Durum iki yöne birden işler - çığ tek yönlü düşmez.
+	ROUTE_CHANGE,
 	# Karşılaşılan kişinin gizli mizacını ve kültür yakınlığını yuvarlar.
 	# text_value = bayrak öneki (ör. "wanderer"). Sonuçlar bu bayraklara
 	# bakar; oyuncu mizacı ancak sezgisi kuvvetliyse okuyabilir.

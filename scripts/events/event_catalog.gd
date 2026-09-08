@@ -37,6 +37,8 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_forgotten_cache())
 	_road_events.append(_traveling_tinker())
 	_road_events.append(_scouted_pass())
+	_road_events.append(_landslide())
+	_road_events.append(_road_patrol())
 	_road_events.append(_kin_encounter())
 	_road_events.append(_culture_valley_dispute())
 	_road_events.append(_culture_highland_challenge())
@@ -619,6 +621,54 @@ static func _scouted_pass() -> GameEvent:
 			])
 		),
 		_choice("EVT_SCOUT_OPT_MAIN_ROAD", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+	])
+	return event
+
+## Kervanın arkasından geçit kapanır. Yolun *kendi tablosuna* dokunmuyor
+## (bkz. RouteConditions): coğrafya sabit kalır, üstündeki ağ oynar. Bu
+## kervanın kendi seferini bitirmesini engellemez - bedeli sonraki sefer
+## o yoldan dönemeyecek olmak, yani ROUTE_CHANGE'in asıl amacı: haritayı
+## sabit yedi kenar olmaktan çıkarmak.
+static func _landslide() -> GameEvent:
+	var event := _event("evt_landslide", "EVT_LANDSLIDE", 0.7)
+	event.cooldown_days = 12
+	event.choices = _choices([
+		_choice("EVT_LANDSLIDE_OPT_PUSH", _effects([
+			EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 14, "current|closed"),
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+			EventEffect.make(EventEffect.Type.STRESS, 4),
+		])),
+		_choice("EVT_LANDSLIDE_OPT_CLEAR", _effects([
+			EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 8, "current|slow"),
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 2),
+			EventEffect.make(EventEffect.Type.MORALE, -4),
+			EventEffect.make(EventEffect.Type.REPUTATION, 1),
+		])),
+	])
+	return event
+
+## Yolu temizleyen devriye - ROUTE_CHANGE'in ters yönü. Yolun hali yalnızca
+## kötüye gitmiyorsa dinamik rota bir ceza mekaniği olmaktan çıkıp gerçek
+## bir dünya katmanı oluyor.
+static func _road_patrol() -> GameEvent:
+	var event := _event("evt_road_patrol", "EVT_PATROL", 0.6)
+	event.conditions = _conditions([
+		# Bağlamdaki "danger" 0-1 arası bir oran, yüzde değil - 25 yazmak
+		# olayın hiç ateşlenmemesi demekti (simülatör yakaladı).
+		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.25),
+	])
+	event.cooldown_days = 10
+	event.choices = _choices([
+		_choice("EVT_PATROL_OPT_JOIN", _effects([
+			EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 12, "current|open"),
+			EventEffect.make(EventEffect.Type.DANGER, -10),
+			EventEffect.make(EventEffect.Type.REPUTATION, 2),
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+		])),
+		_choice("EVT_PATROL_OPT_PASS", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 2),
 		])),
 	])
