@@ -159,7 +159,8 @@ func _route_summary(route: TravelRoute) -> String:
 func _add_detour_hint() -> void:
 	var path := _session.find_open_path(_focused_location.location_id)
 	if path.size() < 2:
-		_add_info_label(RouteConditions.get_state_label(RouteConditions.State.CLOSED))
+		# Sebep satırını çağıran yazıyor ("yol yok" mu "geçit kapalı" mı) -
+		# burada yalnızca alternatifin olmadığı söyleniyor.
 		_add_info_label(String(TranslationServer.translate("ROUTE_NO_PATH")))
 		return
 
