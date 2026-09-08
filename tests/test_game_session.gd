@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_effective_danger_and_goal(t)
 	_test_change_provisions_reports_truth(t)
 	_test_fixed_playthrough_start(t)
+	_test_weight_limit_binds(t)
 
 ## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
 ## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
@@ -100,6 +101,54 @@ func _test_fixed_playthrough_start(t) -> void:
 		)
 		names[other.get_party()[1].character_name] = true
 	t.ok(names.size() > 1, "farklı tohumlar farklı yoldaşlar üretir")
+
+## Slot sayısı tek kısıt değil: bir vagon çok *çeşit* değil çok *yük*
+## taşıyamaz. Ağırlık eskiden yalnızca pazar ekranında kontrol ediliyordu,
+## yani olay ödülü gibi başka yollardan gelen mal kapasiteyi deliyordu -
+## kısıt artık Inventory.add_item'ın kendisinde.
+func _test_weight_limit_binds(t) -> void:
+	var session := GameSession.new(1000, 10, 1)
+	var capacity := session.get_cargo_capacity()
+	t.ok(capacity > 0.0, "tek vagonun bir kargo kapasitesi var")
+	t.ok(
+		is_equal_approx(session.inventory.weight_limit, capacity),
+		"envanterin ağırlık tavanı kargo kapasitesiyle aynı"
+	)
+
+	var heavy := ItemCatalog.get_item("test_weapon")
+	var fits := session.inventory.get_addable_quantity(heavy)
+	t.ok(fits > 0, "boş vagona en az bir ağır mal sığar")
+
+	t.ok(session.inventory.add_item(heavy, fits), "sığdığı kadarı eklenebilir")
+	t.eq(
+		session.inventory.get_addable_quantity(heavy), 0,
+		"kapasite dolunca daha fazlası sığmaz"
+	)
+	t.not_ok(session.inventory.add_item(heavy, 1), "kapasite aşan ekleme reddedilir")
+
+	# Kritik nokta: olay ödülü de aynı kapıdan geçmeli, yoksa kapasite
+	# yalnızca pazarda geçerli bir öneri olurdu.
+	var reward := EventEffectApplier.apply(
+		[EventEffect.make(EventEffect.Type.ITEM_ADD, 5, "test_weapon")] as Array[EventEffect],
+		session
+	)
+	t.eq(reward.lines.size(), 0, "yer yokken olay ödülü de eklenemez")
+
+	# Erzak muaf: kendi sefer formülüyle sınırlı, kargo yerinden çalmamalı.
+	t.eq(
+		session.change_provisions(50), 50,
+		"kargo dolu olsa da erzak alınabilir (ağırlıktan muaf)"
+	)
+
+	# Vagon almak yer açar - kapasite vagon sayısıyla birlikte büyümeli.
+	session.owned_wagon_count = 1
+	session.wallet.earn(5000)
+	t.ok(session.buy_wagon(), "vagon alınabilir")
+	t.ok(
+		session.inventory.weight_limit > capacity,
+		"vagon alınca ağırlık tavanı büyür"
+	)
+	t.ok(session.inventory.get_addable_quantity(heavy) > 0, "yeni vagon yer açar")
 
 func _make_recruit(recruit_name: String, cost: int) -> CharacterData:
 	var candidate := CharacterData.create(recruit_name, CultureCatalog.NOMAD, CharacterStats.new())

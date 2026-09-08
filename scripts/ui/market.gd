@@ -253,6 +253,8 @@ func _on_sell_pressed(item: Item, quantity_spin: SpinBox) -> void:
 		return
 	_session.inventory.remove_item(item.item_id, quantity)
 	_session.wallet.earn(_get_sell_price(item) * quantity)
+	# Aynı malı aynı şehre boca etmek fiyatını düşürür (bkz. MarketConditions).
+	_session.record_sale(item.item_id, quantity)
 	_clear_message()
 
 func _has_enough_stock(item: Item, quantity: int) -> bool:
@@ -268,7 +270,9 @@ func _has_enough_cargo_space(item: Item, quantity: int) -> bool:
 ## balıkçı kasabası yalnızca erzağı ucuza alır. Satış fiyatı etkilenmez -
 ## perk pazarlık gücü, tüccarlık değil.
 func _get_buy_price(item: Item) -> int:
-	var price := float(MarketPricing.get_buy_price(item, _current_location))
+	var price := float(MarketPricing.get_buy_price(
+		item, _current_location, _session.market, _session.total_days_elapsed
+	))
 	price *= _session.get_buy_price_multiplier()
 	if item.item_id == GameSession.PROVISIONS_ITEM_ID:
 		price *= _session.get_provision_cost_multiplier()
@@ -277,7 +281,9 @@ func _get_buy_price(item: Item) -> int:
 	return maxi(1, int(round(price)))
 
 func _get_sell_price(item: Item) -> int:
-	return MarketPricing.get_sell_price(item, _current_location)
+	return MarketPricing.get_sell_price(
+		item, _current_location, _session.market, _session.total_days_elapsed
+	)
 
 func _show_message(text: String) -> void:
 	_message_label.text = text

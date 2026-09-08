@@ -33,6 +33,10 @@ enum Type {
 	# Karakter
 	GRANT_TRAIT,
 	GRANT_EQUIPMENT,
+	# Ekonomi: süreli fiyat şoku (grev, kıtlık, ambargo, bereket).
+	# amount = yüzde değişim (+40 = %40 pahalanır), text_value =
+	# "location_id|item_id|gün"; item_id boşsa şehrin tamamı etkilenir.
+	MARKET_SHOCK,
 }
 
 @export var type: Type = Type.GOLD

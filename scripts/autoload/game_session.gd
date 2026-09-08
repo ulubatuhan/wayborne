@@ -17,6 +17,11 @@ var caravan: CaravanState
 ## kese eksiye düşer, açık hesap doğar, vadesi geçerse faiz ve itibar yer.
 var debts: DebtLedger
 
+## Pazarın zamana ve oyuncunun kendi ticaretine göre değişen katmanı
+## (bkz. MarketConditions): enflasyon, mevsim, arz-talep baskısı ve
+## ekonomik/politik şoklar. Fiyatın taban tablosu MarketPricing'de.
+var market: MarketConditions
+
 ## Ödemek zorunda olunan bedelin tek yolu - haraç, ceza, gümrük, faiz.
 ## Kese yetmezse eksiye düşer. İsteğe bağlı alışveriş bundan geçmez
 ## (bkz. Wallet.spend): oyuncu kendi isteğiyle borca batmaz, olaylar batırır.
@@ -207,6 +212,7 @@ const STARTING_PARTY_SIZE: int = 2
 
 func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerator) -> void:
 	owned_wagon_count = STARTING_WAGONS
+	_sync_cargo_capacity()
 	owned_wagon_damaged = 0
 
 	set_player_character(player_character)
@@ -455,6 +461,8 @@ func advance_day() -> Array[String]:
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
 	reputation -= debts.advance_to_day(total_days_elapsed)
+	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
+	market.advance_day(total_days_elapsed)
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -500,6 +508,7 @@ func buy_wagon() -> bool:
 		return false
 	wallet.spend(cost)
 	owned_wagon_count += 1
+	_sync_cargo_capacity()
 	return true
 
 func get_repair_cost() -> int:
@@ -536,8 +545,13 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	inventory = Inventory.new()
 	caravan = CaravanState.new()
 	debts = DebtLedger.new()
+	market = MarketConditions.new()
 	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
+	# Erzak kargo ağırlığına dahil değil (bkz. get_cargo_weight), o yüzden
+	# ağırlık kısıtından muaf.
+	inventory.exempt_item_ids = [PROVISIONS_ITEM_ID]
+	_sync_cargo_capacity()
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
@@ -562,9 +576,16 @@ var market_stock: Dictionary = {}
 func get_market_stock(item_id: String) -> int:
 	return market_stock.get(item_id, -1)
 
+## Alım hem stoğu düşürür hem o malı o şehirde pahalandırır - bir rotayı
+## sonsuza kadar sağmayı engelleyen şey bu baskı (bkz. MarketConditions).
 func consume_stock(item_id: String, quantity: int) -> void:
 	if market_stock.has(item_id):
 		market_stock[item_id] = maxi(0, market_stock[item_id] - quantity)
+	market.record_purchase(current_location_id, item_id, quantity)
+
+## Satış tersini yapar: aynı malı aynı şehre boca etmek getirisini düşürür.
+func record_sale(item_id: String, quantity: int) -> void:
+	market.record_sale(current_location_id, item_id, quantity)
 
 func _restock_current_location() -> void:
 	market_stock.clear()
@@ -718,6 +739,7 @@ func _apply_wagon_losses_to_ownership() -> void:
 	var player_damaged := caravan.damaged_wagons - escort_damaged
 
 	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
+	_sync_cargo_capacity()
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
 
 ## Şehre varış her zaman rahatlatır - kırılma riski sıfırlanmaz ama stres
@@ -762,17 +784,16 @@ func _calculate_arrival_payout() -> Dictionary:
 ## Yalnızca pazardan alınan mallara uygulanır (bkz. CARGO_PER_WAGON).
 ## Şehirdeyken geçerli olan sahiplik sayısını kullanır - sefer sırasında
 ## kargo alışverişi zaten mümkün değil (market yalnızca şehirde açılır).
+## Vagon sayısı her değiştiğinde envanterin ağırlık tavanı da değişir -
+## vagon almak yer açar, vagon kaybetmek yükü sınırlar.
+func _sync_cargo_capacity() -> void:
+	inventory.weight_limit = get_cargo_capacity()
+
 func get_cargo_capacity() -> float:
 	return owned_wagon_count * CARGO_PER_WAGON
 
 func get_cargo_weight() -> float:
-	var total := 0.0
-	for entry in inventory.get_all_entries():
-		var item: Item = entry.item
-		if item.item_id == PROVISIONS_ITEM_ID:
-			continue
-		total += item.unit_weight * entry.quantity
-	return total
+	return inventory.get_total_weight()
 
 func get_cargo_space_remaining() -> float:
 	return maxf(0.0, get_cargo_capacity() - get_cargo_weight())
@@ -811,6 +832,7 @@ func to_save_dict() -> Dictionary:
 		"party_stress": party_stress,
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
+		"market": market.to_save_dict(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -820,6 +842,7 @@ func load_from_dict(data: Dictionary) -> void:
 	# de taşır, ayrıca kenetleme yok.
 	wallet.earn(int(data.get("gold", 0)))
 	debts.load_from_array(data.get("debts", []) as Array)
+	market.load_from_dict(data.get("market", {}) as Dictionary)
 
 	for entry in data.get("inventory", []):
 		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
@@ -834,6 +857,7 @@ func load_from_dict(data: Dictionary) -> void:
 		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
 	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
+	_sync_cargo_capacity()
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
 	accepted_contracts = {}

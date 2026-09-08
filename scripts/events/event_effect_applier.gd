@@ -101,6 +101,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_grant_trait(effect, session, result)
 		EventEffect.Type.GRANT_EQUIPMENT:
 			_apply_grant_equipment(effect, session, result)
+		EventEffect.Type.MARKET_SHOCK:
+			_apply_market_shock(effect, session, result)
 
 ## Huy her zaman oyuncunun kendi karakterine verilir - olayın kervanın
 ## lideri başına geldiği kabulüyle (bkz. GameEvent/RoadJourney tasarımı).
@@ -142,3 +144,23 @@ static func _apply_gold(effect: EventEffect, session: GameSession, result: Resul
 	result.lines.append("Altın -%d" % demanded)
 	if before >= 0 and session.wallet.balance < 0:
 		result.lines.append("Kese boşaldı - kervan borca girdi")
+
+## Ekonomik/politik bir olayın fiyata süreli etkisi - grev, kıtlık, ambargo,
+## bereketli hasat. text_value "location_id|item_id|gün" biçiminde; item_id
+## boş bırakılırsa o şehirdeki tüm mallar etkilenir. Kâr yalnızca şehirler
+## arası farktan gelmiyor, bu da bir kaynağı (bkz. MarketConditions).
+static func _apply_market_shock(
+	effect: EventEffect, session: GameSession, result: Result
+) -> void:
+	var parts := effect.text_value.split("|")
+	if parts.is_empty() or String(parts[0]).is_empty():
+		return
+	var location_id := String(parts[0])
+	var item_id := String(parts[1]) if parts.size() > 1 else ""
+	var duration := int(String(parts[2])) if parts.size() > 2 else 14
+
+	var multiplier := 1.0 + float(effect.amount) / 100.0
+	session.market.add_shock(
+		location_id, item_id, multiplier, session.total_days_elapsed + maxi(1, duration)
+	)
+	result.lines.append("Piyasa hareketlendi (%+d%%, %d gün)" % [effect.amount, duration])
