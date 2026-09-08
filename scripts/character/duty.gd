@@ -7,8 +7,19 @@ extends Resource
 ## fiyat/tüketim/onarım gibi somut sistemlere çevirir.
 
 @export var duty_id: String = ""
-@export var display_name: String = ""
-@export var description: String = ""
+
+## Saklanan şey çeviri anahtarı (bkz. data/locale/game.csv); gösterilen
+## metin aşağıdaki hesaplanan özelliklerden okunur. Bu ayrım sayesinde
+## display_name/description okuyan ekranların hiçbiri değişmek zorunda
+## kalmadan çevrilebilir hale geldi - bkz. CLAUDE.md Localization Rules.
+@export var display_name_key: String = ""
+@export var description_key: String = ""
+
+var display_name: String:
+	get: return tr(display_name_key)
+
+var description: String:
+	get: return tr(description_key)
 
 ## Görevin gücünü hangi statın etkin değeri belirler (bkz.
 ## CharacterStats.get_effective_value).

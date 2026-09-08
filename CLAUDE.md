@@ -320,6 +320,44 @@ wayborne/
   back button **outside** it. Otherwise the back button is pushed off-screen and
   the player is stranded - this actually happened on the market screen.
 
+### Localization Rules
+
+The game targets **11 languages** (tr, en, de, fr, es, it, pt_BR, ru, pl,
+zh_CN, ja). Turkish is the source language; English is the fallback.
+
+- **`UserSettings.SUPPORTED` (`scripts/autoload/user_settings.gd`) is the
+  single source of truth for the language list.** It also persists the
+  player's choice to `user://settings.cfg` (separate from the save file, so
+  "New Game" never resets it) and picks the system language on first run.
+  No screen may hardcode a locale list - `settings.gd` reads it.
+- **Adding a language is three coordinated edits**: a row in
+  `UserSettings.SUPPORTED`, a column in *each* `data/locale/*.csv`, and the
+  three `.translation` paths in `project.godot`'s `locale/translations`.
+  `tests/test_localization.gd` fails loudly if these drift apart - it also
+  checks that `tr`/`en` are filled on every row and that no key is defined
+  in two files.
+- **An empty cell falls back to English, it does not render blank** (verified
+  against Godot 4.2.2 with `locale/fallback="en"`). So a language can ship
+  partially translated, and English must stay complete.
+- Translation CSVs are split by domain so translators can work in parallel
+  and prioritize: `ui.csv` (screens, buttons), `events.csv` (road event
+  prose), `game.csv` (catalog content - duties, enemies, cities, items,
+  traits, equipment, skills, classes, cultures).
+- **Catalog resources store keys, not prose.** `Duty`, `Trait`, `Equipment`,
+  `CombatSkill`, `Culture`, `CharacterClass`, `EnemyTemplate`, `Item` and
+  `Location` each keep a `*_key` export and expose the visible text as a
+  **computed property** (`var display_name: String: get: return
+  tr(display_name_key)`). This is why the ~67 places that read
+  `.display_name`/`.description` needed no change at all when the game
+  became translatable - never reintroduce a plain stored `display_name`.
+- **`tr()` is an `Object` instance method and cannot be called from a
+  `static func`.** Static catalogs must use
+  `TranslationServer.translate(key)` instead (see
+  `EnemyCatalog.get_kind_label`).
+- **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
+  resolves through the translation server, so without pinning, assertions on
+  display names would pass or fail depending on the machine's language.
+
 - **scripts/ui/**: User interface scripts
   - Menu controllers
   - HUD management

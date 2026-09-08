@@ -77,19 +77,19 @@ static func _ensure_built() -> void:
 ## döngü oluşturur, ikisi de gerçek rotalarla (bkz. _get_edges) bağlı.
 static func _build_locations() -> void:
 	_locations.append(_make_location(
-		"test_loc_a", "Karakonak", Vector2(110, 210), ["test_grain"], ["test_furs"]
+		"test_loc_a", "CITY_A_NAME", Vector2(110, 210), ["test_grain"], ["test_furs"]
 	))
 	_locations.append(_make_location(
-		"test_loc_b", "Kurtboğazı", Vector2(330, 90), ["test_furs"], ["test_weapon"]
+		"test_loc_b", "CITY_B_NAME", Vector2(330, 90), ["test_furs"], ["test_weapon"]
 	))
 	_locations.append(_make_location(
-		"test_loc_c", "İpekevi", Vector2(360, 330), ["test_cloth"], ["test_potion"]
+		"test_loc_c", "CITY_C_NAME", Vector2(360, 330), ["test_cloth"], ["test_potion"]
 	))
 	_locations.append(_make_location(
-		"test_loc_d", "Demirkapı", Vector2(560, 180), ["test_weapon"], ["test_grain"]
+		"test_loc_d", "CITY_D_NAME", Vector2(560, 180), ["test_weapon"], ["test_grain"]
 	))
 	_locations.append(_make_location(
-		"test_loc_e", "Yeşilova", Vector2(590, 370), ["test_potion"], ["test_cloth"]
+		"test_loc_e", "CITY_E_NAME", Vector2(590, 370), ["test_potion"], ["test_cloth"]
 	))
 	for location in _locations:
 		_location_by_id[location.location_id] = location
@@ -183,7 +183,7 @@ static func _make_location(
 ) -> Location:
 	var location := Location.new()
 	location.location_id = location_id
-	location.location_name = location_name
+	location.location_name_key = location_name
 	location.map_position = map_position
 	var produces_typed: Array[String] = []
 	for item_id in produces:

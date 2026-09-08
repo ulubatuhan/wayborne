@@ -24,6 +24,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_progression.gd",
 	"res://tests/test_duties.gd",
 	"res://tests/test_save_migration.gd",
+	"res://tests/test_localization.gd",
 	"res://tests/test_recruit_catalog.gd",
 	"res://tests/test_traits.gd",
 	"res://tests/test_stress.gd",
@@ -32,7 +33,14 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_enemy_variety.gd",
 ]
 
+## Katalog metinleri artık çeviri anahtarı taşıyor ve display_name gibi
+## alanlar o anki dile göre çözülüyor (bkz. CLAUDE.md Localization Rules).
+## Dil sabitlenmezse testler koşulduğu makinenin diline göre farklı sonuç
+## verirdi - kaynak dil Türkçe olduğu için ona sabitliyoruz.
+const TEST_LOCALE: String = "tr"
+
 func _initialize() -> void:
+	TranslationServer.set_locale(TEST_LOCALE)
 	print("── Wayborne test koşusu")
 
 	var reporter = load(REPORTER_PATH).new()

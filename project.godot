@@ -23,6 +23,7 @@ GameState="*res://scripts/autoload/game_state.gd"
 EventBus="*res://scripts/autoload/event_bus.gd"
 DevPanel="*res://scripts/autoload/dev_panel.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
+UserSettings="*res://scripts/autoload/user_settings.gd"
 
 [debug]
 
@@ -39,7 +40,8 @@ window/stretch/mode="canvas_layers"
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://data/locale/wayborne_text.tr.translation", "res://data/locale/wayborne_text.en.translation")
+locale/translations=PackedStringArray("res://data/locale/ui.tr.translation", "res://data/locale/ui.en.translation", "res://data/locale/ui.de.translation", "res://data/locale/ui.fr.translation", "res://data/locale/ui.es.translation", "res://data/locale/ui.it.translation", "res://data/locale/ui.pt_BR.translation", "res://data/locale/ui.ru.translation", "res://data/locale/ui.pl.translation", "res://data/locale/ui.zh_CN.translation", "res://data/locale/ui.ja.translation", "res://data/locale/events.tr.translation", "res://data/locale/events.en.translation", "res://data/locale/events.de.translation", "res://data/locale/events.fr.translation", "res://data/locale/events.es.translation", "res://data/locale/events.it.translation", "res://data/locale/events.pt_BR.translation", "res://data/locale/events.ru.translation", "res://data/locale/events.pl.translation", "res://data/locale/events.zh_CN.translation", "res://data/locale/events.ja.translation", "res://data/locale/game.tr.translation", "res://data/locale/game.en.translation", "res://data/locale/game.de.translation", "res://data/locale/game.fr.translation", "res://data/locale/game.es.translation", "res://data/locale/game.it.translation", "res://data/locale/game.pt_BR.translation", "res://data/locale/game.ru.translation", "res://data/locale/game.pl.translation", "res://data/locale/game.zh_CN.translation", "res://data/locale/game.ja.translation")
+locale/fallback="en"
 
 [rendering]
 

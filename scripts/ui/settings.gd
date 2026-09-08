@@ -5,8 +5,10 @@ extends Control
 ## için geri tuşu Nav.return_scene'e değil, doğrudan Nav.MAIN_MENU'ye
 ## döner (bkz. character.gd'nin aynı deseni, CLAUDE.md World Navigation
 ## Rules).
-const LOCALES: Array[String] = ["tr", "en"]
-const LOCALE_NAMES: Array[String] = ["Türkçe", "English"]
+## Dil listesi burada tutulmuyor: tek doğruluk kaynağı UserSettings.SUPPORTED
+## (bkz. o dosyanın başlığı). Yeni bir dil eklendiğinde bu ekran hiç
+## değişmeden onu göstermeye başlar.
+var _locale_codes: Array = []
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _language_label: Label = $MarginContainer/VBoxContainer/LanguageRow/LanguageLabel
@@ -18,20 +20,24 @@ func _ready() -> void:
 	_setup_language_selector()
 
 func _setup_language_selector() -> void:
-	for i in range(LOCALES.size()):
-		_language_button.add_item(LOCALE_NAMES[i], i)
+	_locale_codes = UserSettings.get_locale_codes()
+	var locale_names: Array = UserSettings.get_locale_names()
+	for i in range(_locale_codes.size()):
+		_language_button.add_item(str(locale_names[i]), i)
 
-	var current_locale := TranslationServer.get_locale().substr(0, 2)
-	var selected := LOCALES.find(current_locale)
+	# Tam kod aranıyor, ilk iki harf değil: pt_BR ile pt aynı şey değil.
+	var selected := _locale_codes.find(TranslationServer.get_locale())
 	_language_button.select(maxi(selected, 0))
 
 	_language_button.item_selected.connect(_on_language_selected)
 	_refresh_texts()
 
 func _on_language_selected(index: int) -> void:
-	if index < 0 or index >= LOCALES.size():
+	if index < 0 or index >= _locale_codes.size():
 		return
-	TranslationServer.set_locale(LOCALES[index])
+	# UserSettings hem uygular hem user://settings.cfg'ye yazar - seçim
+	# oyunu kapatınca kaybolmasın.
+	UserSettings.set_locale(str(_locale_codes[index]))
 	_refresh_texts()
 
 func _refresh_texts() -> void:

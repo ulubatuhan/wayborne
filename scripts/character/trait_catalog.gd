@@ -134,8 +134,8 @@ static func _make(
 ) -> Trait:
 	var trait_resource := Trait.new()
 	trait_resource.trait_id = trait_id
-	trait_resource.display_name = display_name
-	trait_resource.description = description
+	trait_resource.display_name_key = display_name
+	trait_resource.description_key = description
 	trait_resource.is_positive = is_positive
 	trait_resource.affinity_stat = affinity_stat
 	trait_resource.hp_bonus = int(bonuses.get("hp_bonus", 0))

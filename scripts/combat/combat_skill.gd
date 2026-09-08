@@ -12,8 +12,19 @@ enum Target {
 }
 
 @export var skill_id: String = ""
-@export var display_name: String = ""
-@export var description: String = ""
+## Saklanan sey ceviri anahtari (bkz. data/locale/game.csv); gosterilen
+## metin asagidaki hesaplanan ozelliklerden okunur. Bu ayrim sayesinde
+## bu alanlari okuyan ekranlarin hicbiri degismeden cevrilebilir oldu
+## - bkz. CLAUDE.md Localization Rules.
+@export var display_name_key: String = ""
+@export var description_key: String = ""
+
+var display_name: String:
+	get: return tr(display_name_key)
+
+var description: String:
+	get: return tr(description_key)
+
 
 @export var target_kind: Target = Target.ENEMY
 
@@ -85,8 +96,8 @@ static func make_attack(
 ) -> CombatSkill:
 	var skill := CombatSkill.new()
 	skill.skill_id = skill_id
-	skill.display_name = display_name
-	skill.description = description
+	skill.display_name_key = display_name
+	skill.description_key = description
 	skill.target_kind = Target.ENEMY
 	skill.usable_positions = to_position_array(usable_positions)
 	skill.target_positions = to_position_array(target_positions)
@@ -110,8 +121,8 @@ static func make_buff(
 ) -> CombatSkill:
 	var skill := CombatSkill.new()
 	skill.skill_id = skill_id
-	skill.display_name = display_name
-	skill.description = description
+	skill.display_name_key = display_name
+	skill.description_key = description
 	skill.target_kind = target_kind
 	skill.usable_positions = to_position_array(usable_positions)
 	skill.target_positions = to_position_array(target_positions)

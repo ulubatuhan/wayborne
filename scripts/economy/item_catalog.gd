@@ -44,7 +44,7 @@ static func _build_cache() -> void:
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()
 	item.item_id = item_id
-	item.item_name = item_name
+	item.item_name_key = item_name
 	item.base_price = base_price
 	item.unit_weight = unit_weight
 	_cache[item_id] = item

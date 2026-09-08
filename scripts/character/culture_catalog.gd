@@ -114,8 +114,8 @@ static func _make(
 ) -> Culture:
 	var culture := Culture.new()
 	culture.culture_id = culture_id
-	culture.culture_name = culture_name
-	culture.description = description
+	culture.culture_name_key = culture_name
+	culture.description_key = description
 	culture.stat_bonuses = stat_bonuses
 	var names: Array[String] = []
 	for entry in name_pool:

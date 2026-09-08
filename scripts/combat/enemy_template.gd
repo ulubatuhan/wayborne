@@ -5,7 +5,15 @@ extends Resource
 ## alanındaki bir savaşçıya çevirir.
 
 @export var enemy_id: String = ""
-@export var display_name: String = ""
+## Saklanan sey ceviri anahtari (bkz. data/locale/game.csv); gosterilen
+## metin asagidaki hesaplanan ozelliklerden okunur. Bu ayrim sayesinde
+## bu alanlari okuyan ekranlarin hicbiri degismeden cevrilebilir oldu
+## - bkz. CLAUDE.md Localization Rules.
+@export var display_name_key: String = ""
+
+var display_name: String:
+	get: return tr(display_name_key)
+
 
 @export var max_hp: int = 20
 @export var accuracy: int = 75

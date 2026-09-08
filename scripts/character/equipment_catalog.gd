@@ -125,8 +125,8 @@ static func _make(
 ) -> Equipment:
 	var equipment_resource := Equipment.new()
 	equipment_resource.equipment_id = equipment_id
-	equipment_resource.display_name = display_name
-	equipment_resource.description = description
+	equipment_resource.display_name_key = display_name
+	equipment_resource.description_key = description
 	equipment_resource.slot = slot
 	equipment_resource.tier = tier
 	equipment_resource.price = price
