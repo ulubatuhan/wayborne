@@ -61,12 +61,17 @@ func _test_days_reported_once_and_never_skipped(t) -> void:
 	var clock := JourneyClock.new()
 	t.eq(clock.take_elapsed_days(), 0, "başlangıçta işlenecek gün yok")
 
-	# START_HOUR 6, yani ilk tam gün 18 saat sonra dolar.
-	clock.consume_hours(17.0)
-	t.eq(clock.take_elapsed_days(), 0, "gün dolmadan gün raporlanmaz")
+	# Gün sınırı gece yarısı değil şafak (START_HOUR): kervanın günü ilk
+	# ışıkla döner, yoksa günlük olaylar hep 00:00'da yaşanırdı.
+	clock.consume_hours(23.0)
+	t.eq(clock.take_elapsed_days(), 0, "gece yarısı geçmek günü döndürmez")
 
-	clock.consume_hours(2.0)
-	t.eq(clock.take_elapsed_days(), 1, "gün dolunca bir kez raporlanır")
+	clock.consume_hours(1.5)
+	t.eq(clock.take_elapsed_days(), 1, "gün şafakta döner")
+	t.ok(
+		clock.get_phase() == JourneyClock.Phase.DAWN,
+		"gün döndüğünde vakit şafak - olaylar gündüz yaşansın diye"
+	)
 	t.eq(clock.take_elapsed_days(), 0, "aynı gün ikinci kez raporlanmaz")
 
 	# Tek çağrıda üç gün: 3x hızda ya da uzun bir olaydan sonra olabiliyor.

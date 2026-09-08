@@ -320,6 +320,54 @@ wayborne/
   back button **outside** it. Otherwise the back button is pushed off-screen and
   the player is stranded - this actually happened on the market screen.
 
+### Journey Time Rules
+
+The road used to advance one day per button press. It now runs on a
+continuously flowing clock (`JourneyClock`, `scripts/travel/`), while the
+day *mechanics* are unchanged.
+
+- **The clock counts days; it does not replace them.** Provisions, contract
+  deadlines and the event roll still happen once per day. `take_elapsed_days()`
+  answers "how many whole days completed since I last asked" and the road
+  screen runs the existing per-day logic that many times. It returns a count,
+  not a bool: at 3x speed, or after a long event, more than one day can
+  complete in a single frame. A day must never be processed twice and never
+  skipped - both are locked by `tests/test_journey_clock.gd`.
+- **The day rolls over at dawn (`START_HOUR`), not midnight.** With a
+  midnight boundary every daily event fired at 00:00, so the player never
+  saw one in daylight. Events now land around 07:30.
+- **Events consume time.** Resolving a card, a fight, a haggle or a road
+  recruit each spend hours (`consume_hours`), so the background moves while
+  the caravan is stopped - that is the "events eat time" rule.
+- **Time stops for decisions.** `_can_time_flow()` is false while an event
+  card is open or a side-channel panel (combat/haggle/recruit) is up.
+- **Camping is a state, not an instant.** Pressing camp lights the fire and
+  lets time keep flowing until `CAMP_HOURS` pass; the benefit (provisions
+  cost, stress relief) is applied when it ends. It is only offered when
+  `is_camp_time()` - evening or night.
+- `TravelBand` (`scripts/ui/`) owns the visuals: sky/ground colors
+  interpolate toward the *next* phase using `get_phase_progress()` so the
+  scene never snaps, the world scrolls under a stationary caravan (moving
+  the caravan would just hit the edge of the band), and the campfire adds a
+  flickering warm light. Still ColorRect placeholders.
+
+### Playthrough Start Rules
+
+- **The opening is fixed and not offered as a choice**: two party members
+  (the player plus one randomly rolled companion), one wagon, a random
+  starting city - see `GameSession.start_playthrough()`. One wagon is
+  exactly two party slots, so the roster starts full; a third member is
+  only possible after buying a wagon.
+- The companion comes from `RecruitCatalog.build_starting_companion()`,
+  which reuses the normal candidate generator rather than duplicating the
+  randomization.
+- `tests/playthrough_demo.gd` runs the whole loop headless (market,
+  contracts, travel with the real clock, events, arrival) and prints a
+  readable log. Like `simulate_journeys.gd` it is **not** a test - it never
+  fails, it shows whether the game actually loops. It mirrors the road
+  screen's `_process` order deliberately, so what it verifies is what the
+  screen does.
+
 ### Localization Rules
 
 The game targets **11 languages** (tr, en, de, fr, es, it, pt_BR, ru, pl,

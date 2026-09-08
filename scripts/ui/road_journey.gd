@@ -45,6 +45,19 @@ const COMBAT_DEFEAT_STRESS: int = 15
 ## Erzak tükenince moralin yanı sıra gerginlik de yükselir.
 const FAMINE_STRESS: int = 6
 
+## Yol artık tuşla değil akan zamanla ilerliyor (bkz. JourneyClock). Aşağıdaki
+## süreler olayların "arka planda zamandan yemesi" içindir: bir olay kartını
+## çözmek yolun bir parçasını tüketir, çarpışma daha fazlasını.
+const EVENT_HOURS: float = 1.5
+const COMBAT_HOURS: float = 2.5
+const HAGGLE_HOURS: float = 1.0
+const RECRUIT_HOURS: float = 0.5
+
+## Kamp anlık bir tuş değil, yaşanan bir durum: ateş yanar, zaman akmaya
+## devam eder ve sabah olunca kamp kendiliğinden kalkar. Faydası (erzak
+## bedeli + stres rahatlaması) kalkarken uygulanır.
+const CAMP_HOURS: float = 8.0
+
 ## Yolda karşılaşılan biri şehirdeki kadar seçici değil ama pazarlık payı
 ## da bırakmıyor.
 const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
@@ -59,6 +72,17 @@ var _pending_haggle_max: int = 0
 ## Varış bir kez işlenir - bkz. _check_journey_end.
 var _journey_finished: bool = false
 
+var _clock: JourneyClock
+var _band: TravelBand
+var _camping: bool = false
+var _camp_ends_at_hours: float = 0.0
+## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
+var _journey_length_days: int = 1
+
+var _clock_label: Label
+var _speed_button: Button
+var _progress_bar: ProgressBar
+
 var _seed_spin: SpinBox
 var _state_label: Label
 var _card_panel: VBoxContainer
@@ -66,7 +90,6 @@ var _haggle_holder: VBoxContainer
 var _combat_holder: VBoxContainer
 var _recruit_holder: VBoxContainer
 var _log_list: VBoxContainer
-var _advance_button: Button
 var _draw_button: Button
 var _reset_button: Button
 var _camp_button: Button
@@ -85,6 +108,37 @@ func _build_ui() -> void:
 	title.text = tr("EVT_TEST_TITLE")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(title)
+
+	# Manzara şeridi: gökyüzü/zemin günün evresine göre değişir, dünya
+	# kervanın altından akar (bkz. TravelBand).
+	_band = TravelBand.new()
+	_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(_band)
+
+	var time_row := HBoxContainer.new()
+	time_row.add_theme_constant_override("separation", 10)
+
+	_clock_label = Label.new()
+	_clock_label.custom_minimum_size = Vector2(210.0, 0.0)
+	time_row.add_child(_clock_label)
+
+	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
+	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
+	_speed_button = Button.new()
+	_speed_button.tooltip_text = "Zamanın akış hızı"
+	_speed_button.pressed.connect(_on_speed_pressed)
+	time_row.add_child(_speed_button)
+
+	_progress_bar = ProgressBar.new()
+	_progress_bar.min_value = 0.0
+	_progress_bar.max_value = 1.0
+	_progress_bar.step = 0.001
+	_progress_bar.show_percentage = false
+	_progress_bar.custom_minimum_size = Vector2(200.0, 0.0)
+	_progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	time_row.add_child(_progress_bar)
+
+	_content.add_child(time_row)
 
 	var controls_row := HBoxContainer.new()
 	controls_row.add_theme_constant_override("separation", 8)
@@ -105,14 +159,9 @@ func _build_ui() -> void:
 	_reset_button.pressed.connect(_on_reset_pressed)
 	controls_row.add_child(_reset_button)
 
-	_advance_button = Button.new()
-	_advance_button.text = tr("EVT_TEST_ADVANCE")
-	_advance_button.pressed.connect(_on_advance_day)
-	controls_row.add_child(_advance_button)
-
 	_camp_button = Button.new()
 	_camp_button.text = "Kamp Kur"
-	_camp_button.tooltip_text = "Bir gün kaybedip stresi azaltır."
+	_camp_button.tooltip_text = "Hava karardığında ateş yakıp mola verir; stresi azaltır, karşılığında zaman harcar."
 	_camp_button.pressed.connect(_on_camp_pressed)
 	controls_row.add_child(_camp_button)
 
@@ -193,6 +242,12 @@ func _init_journey() -> void:
 	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
 	_current_event = null
 	_journey_finished = false
+
+	# Saat sefer başına sıfırlanır: gün sayısı ve evre buradan akar.
+	_clock = JourneyClock.new()
+	_journey_length_days = maxi(1, _session.journey_total_days)
+	_camping = false
+	_band.set_camping(false)
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
 	_clear_children(_combat_holder)
@@ -251,10 +306,38 @@ func _on_reset_pressed() -> void:
 	_clear_children(_log_list)
 	_init_journey()
 
-func _on_advance_day() -> void:
-	if _current_event != null:
+## Zaman akıyor: her karede saat ilerler, dolan her gün için günlük mekanik
+## (erzak, kontrat, olay) bir kez işler. Bir karede birden fazla gün
+## geçebilir (3x hızda ya da uzun bir olaydan sonra), o yüzden döngü.
+##
+## Ortada çözülmemiş bir olay ya da açık bir panel varsa zaman durur -
+## oyuncu karar verirken kervan yol almamalı.
+func _process(delta: float) -> void:
+	if _clock == null:
 		return
 
+	if _can_time_flow():
+		_clock.advance(delta)
+		_process_elapsed_days()
+		_update_camp_state()
+
+	_refresh_time_ui()
+
+func _can_time_flow() -> bool:
+	return not _journey_finished and _current_event == null and not _has_open_panel()
+
+func _process_elapsed_days() -> void:
+	var days := _clock.take_elapsed_days()
+	for _index in days:
+		if _journey_finished:
+			return
+		_run_day()
+		# Gün içinde bir olay çıktıysa kalan günler beklemeli: oyuncu karar
+		# verene kadar kervan ilerlemez.
+		if _current_event != null or _has_open_panel():
+			return
+
+func _run_day() -> void:
 	_current_day += 1
 	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
 	_advance_contracts_and_provisions()
@@ -268,29 +351,80 @@ func _on_advance_day() -> void:
 	_refresh_state()
 	_check_journey_end()
 
+func _on_speed_pressed() -> void:
+	_clock.cycle_speed()
+	_refresh_time_ui()
+
+## Kamp bir tuş değil bir durum: ateş yanar, zaman akmaya devam eder,
+## süre dolunca kendiliğinden kalkar ve faydası o an uygulanır.
+func _update_camp_state() -> void:
+	if not _camping or _clock.total_hours < _camp_ends_at_hours:
+		return
+
+	var camp_result := _session.make_camp()
+	_add_log(
+		"Kamp söküldü (erzak -%d), kadro soluklandı (stres -%d)." % [
+			camp_result.provisions_spent, camp_result.stress_relief
+		],
+		OUTCOME_COLOR
+	)
+	_camping = false
+	_band.set_camping(false)
+	_refresh_state()
+
+func _refresh_time_ui() -> void:
+	if _clock == null:
+		return
+
+	var phase := _clock.get_phase()
+	_band.set_phase(phase, _clock.get_phase_progress())
+	_band.set_route_progress(_get_route_progress())
+
+	# Metin her karede yeniden kurulmuyor: saat dakikada bir, hız yalnızca
+	# değişince. Bunlar _process'ten çağrıldığı için her karede string
+	# biçimlendirmek boşuna tahsisat olurdu.
+	var clock_text := "Gün %d · %s · %s" % [
+		_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(phase))
+	]
+	if clock_text != _clock_label.text:
+		_clock_label.text = clock_text
+
+	var speed_text := "%sx" % String.num(_clock.get_speed(), 1).trim_suffix(".0")
+	if speed_text != _speed_button.text:
+		_speed_button.text = speed_text
+
+	_progress_bar.value = _get_route_progress()
+
+	# Kamp yalnızca hava kararınca anlamlı; gündüz durup ateş yakmak
+	# kervanı yavaşlatmaktan başka işe yaramaz.
+	_camp_button.disabled = (
+		_camping or not _clock.is_camp_time() or not _can_time_flow()
+	)
+
+func _get_route_progress() -> float:
+	if _journey_length_days <= 0:
+		return 1.0
+	var travelled := float(_journey_length_days - _session.journey_days_remaining)
+	return clampf(travelled / float(_journey_length_days), 0.0, 1.0)
+
 ## Kamp: günü ilerletir, erzak yer, ama olay çekmez - o günü dinlenerek
 ## geçirdiğin garanti, karşılığında stres belirgin azalır (bkz.
 ## GameSession.make_camp). "21. nasıl daha az maliyetli olacaksa" kararı:
 ## yeni bir gün döngüsü kurmak yerine mevcut gün ilerletme akışını
 ## paylaşıyor, yalnızca olay çekimini atlayıp kampın kendi payını ekliyor.
 func _on_camp_pressed() -> void:
-	if _current_event != null:
+	if _camping or _current_event != null or not _clock.is_camp_time():
 		return
 
-	_current_day += 1
-	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
-	_advance_contracts_and_provisions()
-
-	var camp_result := _session.make_camp()
-	_add_log(
-		"Gün %d: Kamp kuruldu (erzak -%d), kadro biraz soluklandı (stres -%d)." % [
-			_current_day, camp_result.provisions_spent, camp_result.stress_relief
-		],
-		OUTCOME_COLOR
-	)
-
+	# Kamp anlık bir kazanç değil, geçirilen bir süre: ateş yanar, zaman
+	# akmaya devam eder (oyuncu isterse hızlandırır) ve süre dolunca
+	# _update_camp_state faydayı uygular. Gün ilerlemesi kendiliğinden
+	# olur - saat gece yarısını geçince günlük mekanik zaten işler.
+	_camping = true
+	_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS
+	_band.set_camping(true)
+	_add_log("Ateş yakıldı, kervan mola verdi.", OUTCOME_COLOR)
 	_refresh_state()
-	_check_journey_end()
 
 func _advance_contracts_and_provisions() -> void:
 	var expired_contracts := _session.advance_day()
@@ -321,6 +455,9 @@ func _on_force_draw() -> void:
 
 func _present_event(event: GameEvent) -> void:
 	_current_event = event
+	# Olay arka planda zamandan yer: kervan kartı çözerken duruyor,
+	# saat ilerliyor, arka plan da buna göre değişiyor.
+	_clock.consume_hours(EVENT_HOURS)
 	_engine.mark_fired(event, _current_day)
 	EventBus.road_event_fired.emit(event)
 
@@ -417,6 +554,7 @@ func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 ## tayfa ekranıyla aynı havuzdan (RecruitCatalog) üretiliyor, yalnızca
 ## teklif tek kişilik ve anlık.
 func _open_recruit_offer() -> void:
+	_clock.consume_hours(RECRUIT_HOURS)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%d|%d" % [int(_seed_spin.value), _current_day])
 	var candidates := RecruitCatalog.build_candidates(
@@ -483,6 +621,7 @@ func _close_recruit_offer() -> void:
 func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	var danger := _session.danger_level if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
+	_clock.consume_hours(COMBAT_HOURS)
 	_set_journey_controls_enabled(false)
 	_clear_children(_combat_holder)
 
@@ -533,6 +672,7 @@ func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> v
 ## anlaşırsan anlaştığın fiyatı, anlaşamazsan tam bedeli ödersin.
 func _open_haggling(max_price: int) -> void:
 	_pending_haggle_max = max_price
+	_clock.consume_hours(HAGGLE_HOURS)
 	_set_journey_controls_enabled(false)
 	_clear_children(_haggle_holder)
 
@@ -694,10 +834,12 @@ func _on_enter_city_pressed() -> void:
 
 	get_tree().change_scene_to_file(Nav.CITY_MAP)
 
+## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve
+## eylemler kilitlenir - olay çözülmeden yol devam etmemeli.
 func _set_journey_controls_enabled(enabled: bool) -> void:
-	_advance_button.disabled = not enabled
 	_draw_button.disabled = not enabled
 	_camp_button.disabled = not enabled
+	_speed_button.disabled = not enabled
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan

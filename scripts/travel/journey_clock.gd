@@ -75,8 +75,12 @@ func consume_hours(hours: float) -> void:
 ## işletir; art arda çağrıda aynı gün iki kez dönmez. Bir karede birden
 ## fazla gün geçebilir (3x hızda ya da uzun bir olaydan sonra), o yüzden
 ## sayı dönüyor - bool değil.
+## Gün sınırı gece yarısı değil START_HOUR (şafak): kervanın günü ilk
+## ışıkla başlar. Gece yarısına göre sayarsak günlük mekanik - ve onunla
+## birlikte o günün olayı - hep 00:00'da işlerdi, yani oyuncu hiçbir olayı
+## gündüz yaşamazdı. Bu kaydırmayla günler sabah dönüyor.
 func take_elapsed_days() -> int:
-	var completed := int(floor(total_hours / HOURS_PER_DAY))
+	var completed := _completed_days()
 	var pending := completed - _days_reported
 	if pending <= 0:
 		return 0
@@ -85,7 +89,10 @@ func take_elapsed_days() -> int:
 
 ## Seferin kaçıncı gününde olduğumuz (0 = ilk gün).
 func get_day() -> int:
-	return int(floor(total_hours / HOURS_PER_DAY))
+	return _completed_days()
+
+func _completed_days() -> int:
+	return int(floor((total_hours - START_HOUR) / HOURS_PER_DAY))
 
 ## Gün içindeki saat, 0.0-24.0.
 func get_hour_of_day() -> float:

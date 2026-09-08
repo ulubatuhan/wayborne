@@ -502,7 +502,9 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
-	_provisions_item.item_name = PROVISIONS_ITEM_NAME
+	# item_name artık hesaplanan (salt-okunur) bir özellik; saklanan şey
+	# anahtar (bkz. CLAUDE.md Localization Rules).
+	_provisions_item.item_name_key = PROVISIONS_ITEM_NAME
 	_provisions_item.base_price = PROVISIONS_UNIT_PRICE
 
 	if starting_provisions > 0:
