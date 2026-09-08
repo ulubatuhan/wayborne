@@ -11,10 +11,6 @@ extends Control
 const STAT_POINTS: int = 6
 
 ## Vagonları süren tayfa: her vagonda en fazla iki kişi kalır.
-const MIN_CREW_SIZE: int = 1
-const MAX_CREW_SIZE: int = 12
-const PEOPLE_PER_WAGON: int = 2
-const DEFAULT_CREW_SIZE: int = 4
 
 const DEFAULT_STARTING_GOLD: int = 250
 const DEFAULT_STARTING_PROVISIONS: int = 20
@@ -39,8 +35,6 @@ var _skin_button: OptionButton
 var _skin_preview: ColorRect
 var _points_label: Label
 var _stat_rows: Array[Dictionary] = []
-var _crew_spin: SpinBox
-var _crew_wagon_label: Label
 var _summary_label: Label
 var _start_button: Button
 
@@ -60,7 +54,6 @@ func _build_ui() -> void:
 	_content.add_child(HSeparator.new())
 	_build_stats_section()
 	_content.add_child(HSeparator.new())
-	_build_crew_section()
 	_content.add_child(HSeparator.new())
 
 	_summary_label = Label.new()
@@ -214,31 +207,6 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 	})
 	return row
 
-func _build_crew_section() -> void:
-	_content.add_child(_make_section_title("Tayfa"))
-
-	var crew_row := HBoxContainer.new()
-	crew_row.add_theme_constant_override("separation", 8)
-
-	var crew_title := Label.new()
-	crew_title.text = tr("UI_PARTY_SIZE")
-	crew_title.custom_minimum_size = Vector2(120, 0)
-	crew_row.add_child(crew_title)
-
-	_crew_spin = SpinBox.new()
-	_crew_spin.min_value = MIN_CREW_SIZE
-	_crew_spin.max_value = MAX_CREW_SIZE
-	_crew_spin.value = DEFAULT_CREW_SIZE
-	_crew_spin.value_changed.connect(_on_crew_size_changed)
-	crew_row.add_child(_crew_spin)
-
-	_crew_wagon_label = Label.new()
-	crew_row.add_child(_crew_wagon_label)
-	_content.add_child(crew_row)
-
-	var note := _make_hint_label()
-	note.text = "Tayfa vagonları sürer ve kargo kapasiteni belirler. Yola tek başına çıkarsın; adı olan yoldaşları şehirde ve yolda toplarsın. Her vagonda iki kişi yattığı için partin vagon sayınla büyür, savaş alanı dört mevkiden ibaret olduğu için tavanı %d kişidir." % GameSession.MAX_PARTY_SIZE
-	_content.add_child(note)
 
 func _make_section_title(text: String) -> Label:
 	var label := Label.new()
@@ -294,9 +262,6 @@ func _on_stat_changed(kind: CharacterStats.Kind, delta: int) -> void:
 	_spent_points += _base_stats.get_value(kind) - before
 	_refresh()
 
-func _on_crew_size_changed(_value: float) -> void:
-	_refresh()
-
 # --- Görsel tazeleme ---
 
 func _refresh() -> void:
@@ -326,7 +291,6 @@ func _refresh() -> void:
 
 	_height_label.text = "%d cm — %s" % [int(_height_slider.value), _height_effect_text(preview)]
 	_skin_preview.color = CharacterData.get_skin_tone_color(_skin_button.selected)
-	_crew_wagon_label.text = tr("UI_PARTY_WAGON_NOTE") % _wagons_for_crew_size(int(_crew_spin.value))
 
 	_summary_label.text = "%s\nCan %d · İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d" % [
 		preview.get_summary_line(),
@@ -361,10 +325,6 @@ func _build_character() -> CharacterData:
 		_selected_class().class_id
 	)
 
-func _wagons_for_crew_size(crew_size: int) -> int:
-	var wagons := ceili(float(crew_size) / float(PEOPLE_PER_WAGON))
-	return clampi(wagons, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
-
 # --- Çıkış ---
 
 func _on_start_pressed() -> void:
@@ -381,9 +341,13 @@ func _on_start_pressed() -> void:
 	GameState.start_new_game(
 		DEFAULT_STARTING_GOLD,
 		DEFAULT_STARTING_PROVISIONS,
-		_wagons_for_crew_size(int(_crew_spin.value))
+		GameSession.STARTING_WAGONS
 	)
-	GameState.get_session().set_player_character(character)
+	# Vagon sayısı, yoldaş ve başlangıç şehri artık seçilmiyor: kervan her
+	# yeni oyunda iki kişi ve bir vagonla, rastgele bir şehirde yola çıkar
+	# (bkz. GameSession.start_playthrough).
+	var session: GameSession = GameState.get_session()
+	session.start_playthrough(character, _rng)
 
 	Nav.return_scene = Nav.WORLD_HUB
 	get_tree().change_scene_to_file(Nav.WORLD_HUB)

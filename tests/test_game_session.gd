@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_equipment_locker_and_equip(t)
 	_test_effective_danger_and_goal(t)
 	_test_change_provisions_reports_truth(t)
+	_test_fixed_playthrough_start(t)
 
 ## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
 ## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
@@ -41,6 +42,64 @@ func _test_change_provisions_reports_truth(t) -> void:
 	t.ok(packed.inventory.add_item(filler, 1), "tek slot dolduruldu")
 	t.eq(packed.change_provisions(5), 0, "envanterde yer yoksa 0 döner, yalan söylemez")
 	t.eq(packed.get_provisions(), 0, "gerçekten de erzak eklenmedi")
+
+## Oyunun açılışı artık seçime bırakılmıyor: her yeni oyun iki kişi ve bir
+## vagonla, rastgele bir şehirde başlıyor. Bir vagon tam iki kişilik yer
+## açtığı için kadro baştan dolu olmalı - üçüncü kişi ancak vagon alınınca
+## gelebilir.
+func _test_fixed_playthrough_start(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 12345
+
+	var session := GameSession.new(250, 20, 1)
+	var hero := CharacterData.create("Oyuncu", CultureCatalog.NOMAD, CharacterStats.new())
+	session.start_playthrough(hero, rng)
+
+	t.eq(session.get_party().size(), GameSession.STARTING_PARTY_SIZE, "parti iki kişi başlar")
+	t.eq(session.owned_wagon_count, GameSession.STARTING_WAGONS, "tek vagonla başlanır")
+	t.eq(session.get_party_capacity(), 2, "bir vagon iki kişilik yer açar")
+	t.not_ok(session.can_recruit(), "kadro baştan dolu, vagon almadan tayfa alınamaz")
+
+	t.ok(session.get_player_character().is_player, "oyuncu bayrağı doğru kişide")
+	var companion := session.get_party()[1]
+	t.not_ok(companion.is_player, "yoldaş oyuncu değil")
+	t.eq(companion.hire_cost, 0, "yoldaş işe alınmıyor, ücreti yok")
+	t.ok(companion.is_alive(), "yoldaş tam canla başlar")
+	t.ok(
+		ClassCatalog.get_character_class(companion.class_id) != null,
+		"yoldaşın sınıfı katalogda geçerli"
+	)
+
+	t.ok(
+		WorldMapData.get_location_by_id(session.current_location_id) != null,
+		"başlangıç şehri gerçek bir şehir"
+	)
+
+	# Aynı tohum aynı açılışı vermeli - hata ayıklanabilir olsun diye.
+	var repeat_rng := RandomNumberGenerator.new()
+	repeat_rng.seed = 12345
+	var twin := GameSession.new(250, 20, 1)
+	twin.start_playthrough(
+		CharacterData.create("Oyuncu", CultureCatalog.NOMAD, CharacterStats.new()), repeat_rng
+	)
+	t.eq(twin.current_location_id, session.current_location_id, "aynı tohum aynı şehri verir")
+	t.eq(
+		twin.get_party()[1].character_name, companion.character_name,
+		"aynı tohum aynı yoldaşı verir"
+	)
+
+	# Farklı tohumlar gerçekten farklı yoldaş üretmeli (aksi halde
+	# "rastgele" iddiası boş olurdu).
+	var names: Dictionary = {}
+	for seed_value in range(20):
+		var other_rng := RandomNumberGenerator.new()
+		other_rng.seed = seed_value
+		var other := GameSession.new(250, 20, 1)
+		other.start_playthrough(
+			CharacterData.create("Oyuncu", CultureCatalog.NOMAD, CharacterStats.new()), other_rng
+		)
+		names[other.get_party()[1].character_name] = true
+	t.ok(names.size() > 1, "farklı tohumlar farklı yoldaşlar üretir")
 
 func _make_recruit(recruit_name: String, cost: int) -> CharacterData:
 	var candidate := CharacterData.create(recruit_name, CultureCatalog.NOMAD, CharacterStats.new())

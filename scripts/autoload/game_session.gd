@@ -163,6 +163,35 @@ func set_player_character(character: CharacterData) -> void:
 	character.is_player = true
 	party = [character]
 
+## Oyunun sabit açılışı: parti her zaman iki kişi (oyuncu + rastgele bir
+## yoldaş), bir vagon, rastgele bir şehir. Oyuncu bunların hiçbirini
+## seçmiyor - açılış dengesi her yeni oyunda aynı kalsın, çeşitlilik
+## yoldaşın kim çıktığından ve nerede uyandığından gelsin diye.
+##
+## Bir vagon tam iki kişilik yer açar (get_party_capacity), yani kadro
+## baştan dolu: üçüncü kişi ancak kervansaraydan vagon alınca gelebilir.
+const STARTING_WAGONS: int = 1
+const STARTING_PARTY_SIZE: int = 2
+
+func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerator) -> void:
+	owned_wagon_count = STARTING_WAGONS
+	owned_wagon_damaged = 0
+
+	set_player_character(player_character)
+	party.append(RecruitCatalog.build_starting_companion(rng))
+
+	current_location_id = roll_starting_location(rng)
+	_restock_current_location()
+
+## Başlangıç şehri rastgele - her playthrough haritanın başka bir
+## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
+## yönden çözülsün diye.
+static func roll_starting_location(rng: RandomNumberGenerator) -> String:
+	var locations := WorldMapData.get_locations()
+	if locations.is_empty():
+		return WorldMapData.START_LOCATION_ID
+	return locations[rng.randi_range(0, locations.size() - 1)].location_id
+
 func can_recruit() -> bool:
 	_ensure_party()
 	return party.size() < get_party_capacity()
