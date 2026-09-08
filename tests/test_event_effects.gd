@@ -9,7 +9,7 @@ func suite_name() -> String:
 	return "EventEffects"
 
 func run(t) -> void:
-	_test_gold_never_negative(t)
+	_test_gold_can_go_into_debt(t)
 	_test_provisions_never_negative(t)
 	_test_player_wagon_survives(t)
 	_test_morale_stays_in_range(t)
@@ -26,18 +26,39 @@ func _effects(items: Array) -> Array[EventEffect]:
 func _session(gold: int = 100, provisions: int = 10, wagons: int = 1) -> GameSession:
 	return GameSession.new(gold, provisions, wagons)
 
-func _test_gold_never_negative(t) -> void:
+## Kervan yok olmaz ama borca batabilir: ödemek zorunda olduğu bedeli
+## karşılayamayan kervanın kesesi eksiye düşer ve fark açık hesaba yazılır.
+## Eskiden burada "kese sıfırda durur" clamp'i vardı - haraç verecek parası
+## olmayan kervan bedavaya kurtuluyordu.
+func _test_gold_can_go_into_debt(t) -> void:
 	var session := _session(100)
 	var spend := EventEffectApplier.apply(
-		_effects([EventEffect.make(EventEffect.Type.GOLD, -9999)]), session
+		_effects([EventEffect.make(EventEffect.Type.GOLD, -400)]), session
 	)
-	t.eq(session.wallet.balance, 0, "ödeyemediğinde borca girmez, kese boşalır")
+	t.eq(session.wallet.balance, -300, "ödeyemediğinde kese eksiye düşer")
 	t.ge(float(spend.lines.size()), 1.0, "harcama oyuncuya bildirilir")
 
-	var earn := EventEffectApplier.apply(
-		_effects([EventEffect.make(EventEffect.Type.GOLD, 250)]), session
+	t.eq(session.get_total_debt(), 300, "eksi bakiye borç olarak sayılır")
+	var overdraft := session.debts.get_debt(DebtLedger.OVERDRAFT_DEBT_ID)
+	t.ok(overdraft != null, "açık hesap borcu açıldı")
+	t.eq(overdraft.principal, 300, "açık hesabın anaparası eksinin kendisi")
+	t.eq(
+		overdraft.due_day, Debt.DEFAULT_TERM_DAYS,
+		"borcun vadesi bir ay - hemen kriz değil ama sayaç işliyor"
 	)
-	t.eq(session.wallet.balance, 250, "kazanç normal işler")
+
+	# Daha da batmak yeni borç açmaz, açık hesabı büyütür.
+	EventEffectApplier.apply(
+		_effects([EventEffect.make(EventEffect.Type.GOLD, -200)]), session
+	)
+	t.eq(session.wallet.balance, -500, "borç üstüne borç kesede birikir")
+	t.eq(session.debts.get_debts().size(), 1, "ikinci bir açık hesap açılmaz")
+	t.eq(session.debts.get_debt(DebtLedger.OVERDRAFT_DEBT_ID).principal, 500, "açık hesap büyür")
+
+	var earn := EventEffectApplier.apply(
+		_effects([EventEffect.make(EventEffect.Type.GOLD, 900)]), session
+	)
+	t.eq(session.wallet.balance, 400, "kazanç eksiyi kapatıp artıya geçirir")
 	t.ge(float(earn.lines.size()), 1.0, "kazanç oyuncuya bildirilir")
 
 func _test_provisions_never_negative(t) -> void:

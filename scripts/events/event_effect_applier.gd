@@ -4,6 +4,11 @@ extends RefCounted
 ## Etkileri oyun durumuna uygular ve oyuncuya gösterilecek özet satırlarını
 ## döner. Sınırlamalar tek tek olaylarda değil burada zorlanır: bir olay
 ## "10 vagon kaybet" derse bile kervan çekirdeği ayakta kalır.
+##
+## Ayakta kalmak dokunulmazlık değil (bkz. CLAUDE.md Caravan Ruin Rules):
+## lider, kendi vagonu ve ona sadık kalanlar dışında her şey kaybedilebilir,
+## kese eksiye düşebilir ve kervan borca batabilir. Kenetlenen tek şey
+## kervanın çekirdeği - para değil.
 
 ## Bir seferde uygulanabilecek etkiler burada toplanır; TRIGGER_HAGGLING
 ## gibi UI'a devredilen istekler ayrıca bildirilir.
@@ -120,15 +125,20 @@ static func _apply_grant_equipment(effect: EventEffect, session: GameSession, re
 	session.add_equipment(effect.text_value, maxi(1, effect.amount))
 	result.lines.append("Bulundu: %s" % equipment_resource.display_name)
 
+## Kervan borca batabilir: ödemek zorunda olduğun bedel kesende yoksa kese
+## eksiye düşer ve fark açık hesaba yazılır (bkz. GameSession.spend_or_owe).
+## Eskiden burada "kasada ne varsa o kadarı alınır" clamp'i vardı - haraç
+## verecek parası olmayan kervan bedavaya kurtuluyordu. Kervanın yok
+## olmaması onu dokunulmaz yapmıyor; sürünmesinin parasal karşılığı budur.
 static func _apply_gold(effect: EventEffect, session: GameSession, result: Result) -> void:
 	if effect.amount >= 0:
 		session.wallet.earn(effect.amount)
 		result.lines.append("Altın +%d" % effect.amount)
 		return
 
-	# Ödeyemediğinde borca girmez: kasada ne varsa o kadarı alınır.
 	var demanded := -effect.amount
-	var paid := mini(demanded, session.wallet.balance)
-	if paid > 0:
-		session.wallet.spend(paid)
-	result.lines.append("Altın -%d" % paid)
+	var before := session.wallet.balance
+	session.spend_or_owe(demanded)
+	result.lines.append("Altın -%d" % demanded)
+	if before >= 0 and session.wallet.balance < 0:
+		result.lines.append("Kese boşaldı - kervan borca girdi")

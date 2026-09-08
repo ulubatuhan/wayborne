@@ -13,6 +13,38 @@ var wallet: Wallet
 var inventory: Inventory
 var caravan: CaravanState
 
+## Borç defteri (bkz. DebtLedger). Kervan yok olmaz ama borca batabilir:
+## kese eksiye düşer, açık hesap doğar, vadesi geçerse faiz ve itibar yer.
+var debts: DebtLedger
+
+## Ödemek zorunda olunan bedelin tek yolu - haraç, ceza, gümrük, faiz.
+## Kese yetmezse eksiye düşer. İsteğe bağlı alışveriş bundan geçmez
+## (bkz. Wallet.spend): oyuncu kendi isteğiyle borca batmaz, olaylar batırır.
+func spend_or_owe(amount: int) -> void:
+	wallet.force_spend(amount)
+
+## Kesenin eksi bakiyesi ile defterdeki açık hesap aynı paradır; kese her
+## değiştiğinde ikisi burada senkronlanır. Ayrı ayrı tutulsalardı oyuncu
+## para kazanınca kese artıya geçer ama defterdeki açık hesap olduğu yerde
+## kalır, borç iki kez sayılırdı.
+func _on_balance_changed(new_balance: int) -> void:
+	debts.sync_overdraft(maxi(0, -new_balance), total_days_elapsed)
+
+## Toplam yük: açık hesap (eksi bakiye) + alınmış borçlar. Açık hesap zaten
+## defterde olduğu için ayrıca eksi bakiye eklenmiyor.
+func get_total_debt() -> int:
+	return debts.get_total_owed()
+
+## Borca ödeme: önce kesedeki para kadarı ödenir, fazlası istenmez.
+func repay_debt(debt_id: String, amount: int) -> int:
+	var payable := mini(maxi(0, amount), maxi(0, wallet.balance))
+	if payable <= 0:
+		return 0
+	var paid := debts.pay(debt_id, payable)
+	if paid > 0:
+		wallet.spend(paid)
+	return paid
+
 ## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
 ## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
 ## GRANT_EQUIPMENT ile bulunan Yüzük/Kolye buraya düşer; karakter ekranı
@@ -419,6 +451,11 @@ func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 ## (bkz. road_journey.gd - günlüğe not düşer).
 func advance_day() -> Array[String]:
 	total_days_elapsed += 1
+
+	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
+	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
+	reputation -= debts.advance_to_day(total_days_elapsed)
+
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
 		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
@@ -498,6 +535,8 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	wallet = Wallet.new(starting_gold)
 	inventory = Inventory.new()
 	caravan = CaravanState.new()
+	debts = DebtLedger.new()
+	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
 
 	_provisions_item = Item.new()
@@ -771,12 +810,16 @@ func to_save_dict() -> Dictionary:
 		"party": party_data,
 		"party_stress": party_stress,
 		"equipment_inventory": equipment_inventory.duplicate(),
+		"debts": debts.to_save_array(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
 ## sıfır başlangıç erzağıyla, aksi halde erzak iki kere eklenir.
 func load_from_dict(data: Dictionary) -> void:
+	# Kese eksi kaydedilmiş olabilir (borca batmış kervan) - earn() negatifi
+	# de taşır, ayrıca kenetleme yok.
 	wallet.earn(int(data.get("gold", 0)))
+	debts.load_from_array(data.get("debts", []) as Array)
 
 	for entry in data.get("inventory", []):
 		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
@@ -822,6 +865,10 @@ func build_event_context() -> Dictionary:
 	var party_size := get_party().size()
 	return {
 		"gold": wallet.balance,
+		# Borç olaylara açık: alacaklı baskısı, tefeci teklifi ve
+		# "borcun varken ne yaparsın" kararları bunlara bakar.
+		"debt": get_total_debt(),
+		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
 		"provisions": get_provisions(),
 		"wagons": caravan.wagon_count,
 		"healthy_wagons": caravan.get_healthy_wagon_count(),
