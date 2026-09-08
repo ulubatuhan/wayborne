@@ -776,6 +776,12 @@ func load_from_dict(data: Dictionary) -> void:
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.
 func build_event_context() -> Dictionary:
+	# Kültür kimliği ve parti boyutu bir kez okunuyor: ikisi de partiyi
+	# baştan tarıyor ve aşağıda beş kültür bayrağı + iki parti alanı
+	# tarafından paylaşılıyor. Sözlük yol günü başına tüm olay kataloğu
+	# için kurulduğundan tekrarlı tarama boşuna.
+	var culture_id := _player_culture_id()
+	var party_size := get_party().size()
 	return {
 		"gold": wallet.balance,
 		"provisions": get_provisions(),
@@ -789,24 +795,24 @@ func build_event_context() -> Dictionary:
 		"danger": danger_level,
 		"days_remaining": journey_days_remaining,
 		"reputation": reputation,
-		# get_party(), partiyi henüz kimse okumadıysa kurar. Doğrudan
-		# party.size() okumak taze bir oturumda 0 döndürüyordu, yani
-		# koşullar olmayan bir boş yer görüyordu.
-		"party_size": get_party().size(),
+		# party_size, get_party() üzerinden okunur (yukarıda): partiyi henüz
+		# kimse okumadıysa kurar. Doğrudan party.size() okumak taze bir
+		# oturumda 0 döndürüyordu, yani koşullar olmayan bir boş yer görüyordu.
+		"party_size": party_size,
 		# Koşullar başka bir anahtarla karşılaştırma yapamadığı için boş
 		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
-		"party_slots_free": maxi(0, get_party_capacity() - get_party().size()),
+		"party_slots_free": maxi(0, get_party_capacity() - party_size),
 		"flags": _flags,
 		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
 		# önceden 0/1'e çevrilip hazır veriliyor - bkz. evt_scouted_pass,
 		# evt_culture_*.
 		"has_izci": 1.0 if get_duty_holder(DutyCatalog.IZCI) != null else 0.0,
-		"is_nomad_culture": 1.0 if _player_culture_id() == CultureCatalog.NOMAD else 0.0,
-		"is_valley_culture": 1.0 if _player_culture_id() == CultureCatalog.VALLEY else 0.0,
-		"is_highland_culture": 1.0 if _player_culture_id() == CultureCatalog.HIGHLAND else 0.0,
-		"is_port_culture": 1.0 if _player_culture_id() == CultureCatalog.PORT else 0.0,
-		"is_fisher_culture": 1.0 if _player_culture_id() == CultureCatalog.FISHER else 0.0,
+		"is_nomad_culture": 1.0 if culture_id == CultureCatalog.NOMAD else 0.0,
+		"is_valley_culture": 1.0 if culture_id == CultureCatalog.VALLEY else 0.0,
+		"is_highland_culture": 1.0 if culture_id == CultureCatalog.HIGHLAND else 0.0,
+		"is_port_culture": 1.0 if culture_id == CultureCatalog.PORT else 0.0,
+		"is_fisher_culture": 1.0 if culture_id == CultureCatalog.FISHER else 0.0,
 	}
 
 func _player_culture_id() -> String:

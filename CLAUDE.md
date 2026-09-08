@@ -200,7 +200,14 @@ wayborne/
     different yöre teçhizatı. Winning against guards costs reputation
     instead of granting it (bkz. `road_journey.gd`'s
     `GUARD_VICTORY_REPUTATION`) - beating up the law isn't the same as
-    beating bandits, even in victory.
+    beating bandits, even in victory. **Player-facing combat text reads
+    `EnemyCatalog.get_kind_label(kind)`, never a hardcoded noun**:
+    `CombatEncounter.enemy_label` (passed in by `CombatPanel`) is what the
+    opening/victory/defeat log lines and the panel's enemy heading use.
+    When wildlife and guards were added the strings still said "Haydutlar",
+    so a bear ambush and a guard patrol were both announced as bandits.
+    The label is always used sentence-initial and in the nominative, which
+    is why one form per kind is enough.
   - `CombatUnit`: one fighter on the field. Wraps a `CharacterData` on the
     player side and writes HP back when the fight ends.
   - `CombatEncounter`: the engine itself - initiative order, accuracy vs

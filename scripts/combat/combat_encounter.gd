@@ -34,14 +34,24 @@ var round_number: int = 1
 var player_units: Array[CombatUnit] = []
 var enemy_units: Array[CombatUnit] = []
 
+## Karşı tarafın oyuncuya görünen adı (bkz. EnemyCatalog.get_kind_label).
+## Motor kadro türünü bilmez, yalnızca kayıtlarda geçen adı taşır - böylece
+## vahşi hayvan ya da muhafız kadrosu da kendi adıyla anılır.
+var enemy_label: String = "Haydutlar"
+
 var _order: Array[CombatUnit] = []
 var _order_index: int = 0
 var _rng: RandomNumberGenerator
 
-func _init(party: Array[CombatUnit], enemies: Array[CombatUnit], rng: RandomNumberGenerator = null) -> void:
+func _init(
+	party: Array[CombatUnit], enemies: Array[CombatUnit],
+	rng: RandomNumberGenerator = null, enemies_label: String = ""
+) -> void:
 	_rng = rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
 		_rng.randomize()
+	if not enemies_label.is_empty():
+		enemy_label = enemies_label
 
 	player_units = party.slice(0, MAX_SIDE_SIZE)
 	enemy_units = enemies.slice(0, MAX_SIDE_SIZE)
@@ -52,7 +62,7 @@ func _init(party: Array[CombatUnit], enemies: Array[CombatUnit], rng: RandomNumb
 ## Savaşı başlatır ve sıra düşmandaysa onların hamlelerini işler; sıra
 ## oyuncuya gelince durur.
 func start() -> void:
-	_emit_log("Haydutlar yolu kesti! %d kişilik kadron karşılarında." % player_units.size())
+	_emit_log("%s yolu kesti! %d kişilik kadron karşılarında." % [enemy_label, player_units.size()])
 	_run_until_player_turn()
 
 func get_active_unit() -> CombatUnit:
@@ -305,12 +315,12 @@ func _check_end() -> bool:
 		return true
 	if not _any_alive(enemy_units):
 		state = State.VICTORY
-		_emit_log("Haydutlar dağıldı. Yol yeniden senin.")
+		_emit_log("%s dağıldı. Yol yeniden senin." % enemy_label)
 		state_changed.emit(state)
 		return true
 	if not _any_alive(player_units):
 		state = State.DEFEAT
-		_emit_log("Kadron yere serildi; haydutlar kervana daldı.")
+		_emit_log("Kadron yere serildi. %s kervana daldı." % enemy_label)
 		state_changed.emit(state)
 		return true
 	return false

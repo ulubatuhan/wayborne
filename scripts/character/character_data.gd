@@ -444,5 +444,10 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	for slot in equipped_data:
 		character.equipped[str(slot)] = str(equipped_data[slot])
 
-	character.current_hp = int(data.get("current_hp", character.get_max_hp()))
+	# Kayıt dosyası dış sınır: kayıt alındıktan sonra ekipman çıkarılmış ya
+	# da huy silinmişse saklanan can artık ulaşılamayacak kadar yüksek
+	# olabilir; elle düzenlenmiş bir kayıt negatif de gelebilir (o hâlde
+	# karakter şehirde iyileşene kadar ölü görünürdü).
+	var max_hp := character.get_max_hp()
+	character.current_hp = clampi(int(data.get("current_hp", max_hp)), 0, max_hp)
 	return character

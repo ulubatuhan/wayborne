@@ -21,6 +21,7 @@ var _encounter: CombatEncounter
 var _selected_skill: CombatSkill
 var _built: bool = false
 
+var _enemy_title: Label
 var _enemy_list: VBoxContainer
 var _party_list: VBoxContainer
 var _turn_label: Label
@@ -64,10 +65,12 @@ func start_combat(
 	var enemies := EnemyCatalog.build_squad(
 		enemy_kind, region_id, danger_level, units.size(), combat_rng, average_level
 	)
+	var enemy_label := EnemyCatalog.get_kind_label(enemy_kind)
+	_enemy_title.text = enemy_label
 
 	_apply_muhafiz_opening_bonus(party, units)
 
-	_encounter = CombatEncounter.new(units, enemies, combat_rng)
+	_encounter = CombatEncounter.new(units, enemies, combat_rng, enemy_label)
 	_encounter.log_added.connect(_on_log_added)
 	_encounter.state_changed.connect(_on_state_changed)
 
@@ -106,9 +109,11 @@ func _ensure_built() -> void:
 
 	add_theme_constant_override("separation", 6)
 
-	var enemy_title := Label.new()
-	enemy_title.text = "Haydutlar"
-	add_child(enemy_title)
+	# Başlık start_combat'ta kadro türüne göre güncellenir; panel savaş
+	# açılmadan da kurulabildiği için burada varsayılanla başlıyor.
+	_enemy_title = Label.new()
+	_enemy_title.text = EnemyCatalog.get_kind_label(EnemyCatalog.KIND_BANDIT)
+	add_child(_enemy_title)
 	_enemy_list = VBoxContainer.new()
 	add_child(_enemy_list)
 
@@ -263,9 +268,9 @@ func _scroll_log_to_bottom() -> void:
 
 func _on_state_changed(new_state: CombatEncounter.State) -> void:
 	if new_state == CombatEncounter.State.VICTORY:
-		_result_label.text = "Zafer! Haydutların bıraktıklarını topluyorsun."
+		_result_label.text = "Zafer! %s geri çekildi, bıraktıklarını topluyorsun." % _encounter.enemy_label
 	else:
-		_result_label.text = "Yenilgi. Haydutlar yüklerin bir kısmını alıp kayboldu."
+		_result_label.text = "Yenilgi. %s yüklerin bir kısmını alıp kayboldu." % _encounter.enemy_label
 	_continue_button.visible = true
 
 func _on_continue_pressed() -> void:

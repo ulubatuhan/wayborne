@@ -32,12 +32,32 @@ const GARRISON_REGION_ID: String = "test_loc_d"  # Demirkapı
 ## Pusu kadrosu bu kadar savaşçıyı geçemez (savaş alanı 4 mevki).
 const MAX_SQUAD_SIZE: int = 4
 
+## Kadro türleri (bkz. build_squad). EventEffect.Type.TRIGGER_COMBAT'in
+## text_value'sundan gelir; boş değer KIND_BANDIT sayılır.
+const KIND_BANDIT: String = "bandit"
+const KIND_WILDLIFE: String = "wildlife"
+const KIND_GUARD: String = "guard"
+
+## Kadronun oyuncuya görünen adı. Savaş kayıtları ve panel başlığı bunu
+## okur - kadro türü Faz 8 PR-B'de çeşitlenince metinler sabit "Haydutlar"
+## kalmıştı, yani bir ayı sürüsü de muhafız devriyesi de haydut diye
+## anılıyordu. Etiket her zaman cümle başında/yalın halde kullanılır, o
+## yüzden tek biçim yetiyor.
+const _KIND_LABELS: Dictionary = {
+	KIND_BANDIT: "Haydutlar",
+	KIND_WILDLIFE: "Vahşi hayvanlar",
+	KIND_GUARD: "Şehir muhafızları",
+}
+
 static var _enemies: Array[EnemyTemplate] = []
 static var _enemy_by_id: Dictionary = {}
 
 static func get_enemy(enemy_id: String) -> EnemyTemplate:
 	_ensure_built()
 	return _enemy_by_id.get(enemy_id)
+
+static func get_kind_label(enemy_kind: String) -> String:
+	return _KIND_LABELS.get(enemy_kind, _KIND_LABELS[KIND_BANDIT])
 
 ## Tek giriş noktası: road_journey.gd/combat_panel.gd bu üçünden hangisini
 ## çağıracağını bilmek zorunda kalmaz. enemy_kind EventEffect.Type.
@@ -48,9 +68,9 @@ static func build_squad(
 	party_size: int, rng: RandomNumberGenerator, average_level: int = 1
 ) -> Array[CombatUnit]:
 	match enemy_kind:
-		"wildlife":
+		KIND_WILDLIFE:
 			return build_wildlife_squad(danger_level, party_size, rng, average_level)
-		"guard":
+		KIND_GUARD:
 			return build_guard_squad(danger_level, party_size, rng, average_level)
 		_:
 			return build_bandit_squad(danger_level, party_size, rng, average_level, region_id)
