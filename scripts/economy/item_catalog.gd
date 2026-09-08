@@ -35,11 +35,11 @@ static func get_trade_goods() -> Array[Item]:
 
 static func _build_cache() -> void:
 	_add(GameSession.PROVISIONS_ITEM_ID, GameSession.PROVISIONS_ITEM_NAME, GameSession.PROVISIONS_UNIT_PRICE, 0.5)
-	_add("test_grain", "Buğday", 5, 1.0)
-	_add("test_cloth", "Top Kumaş", 12, 1.5)
-	_add("test_weapon", "Demirci Malı Silah", 40, 2.5)
-	_add("test_potion", "Otacı İksiri", 20, 0.5)
-	_add("test_furs", "İşlenmiş Kürk", 30, 2.0)
+	_add("test_grain", "ITEM_GRAIN_NAME", 5, 1.0)
+	_add("test_cloth", "ITEM_CLOTH_NAME", 12, 1.5)
+	_add("test_weapon", "ITEM_WEAPON_NAME", 40, 2.5)
+	_add("test_potion", "ITEM_POTION_NAME", 20, 0.5)
+	_add("test_furs", "ITEM_FURS_NAME", 30, 2.0)
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()

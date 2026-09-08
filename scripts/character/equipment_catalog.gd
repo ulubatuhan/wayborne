@@ -65,54 +65,54 @@ static func _ensure_built() -> void:
 		return
 
 	_equipment.append(_make(
-		WEAPON_TIER_1, "Kervan Kılıcı", "Yolda taşınan, sıradan ama keskin bir kılıç.",
+		WEAPON_TIER_1, "EQUIP_WEAPON_TIER_1_NAME", "EQUIP_WEAPON_TIER_1_DESC",
 		SLOT_WEAPON, 1, 150, {"damage_bonus": 2}
 	))
 	_equipment.append(_make(
-		WEAPON_TIER_2, "Ustalık Kılıcı", "Usta bir demircinin elinden çıkma.",
+		WEAPON_TIER_2, "EQUIP_WEAPON_TIER_2_NAME", "EQUIP_WEAPON_TIER_2_DESC",
 		SLOT_WEAPON, 2, 350, {"damage_bonus": 4}
 	))
 	_equipment.append(_make(
-		WEAPON_TIER_3, "Şahin Kılıcı", "Nadir bulunan çelikten dövülmüş.",
+		WEAPON_TIER_3, "EQUIP_WEAPON_TIER_3_NAME", "EQUIP_WEAPON_TIER_3_DESC",
 		SLOT_WEAPON, 3, 650, {"damage_bonus": 6}
 	))
 
 	_equipment.append(_make(
-		ARMOR_TIER_1, "Deri Zırh", "Hafif ama işe yarar bir koruma.",
+		ARMOR_TIER_1, "EQUIP_ARMOR_TIER_1_NAME", "EQUIP_ARMOR_TIER_1_DESC",
 		SLOT_ARMOR, 1, 150, {"hp_bonus": 4}
 	))
 	_equipment.append(_make(
-		ARMOR_TIER_2, "Zincir Gömlek", "Ağır darbeleri de savar.",
+		ARMOR_TIER_2, "EQUIP_ARMOR_TIER_2_NAME", "EQUIP_ARMOR_TIER_2_DESC",
 		SLOT_ARMOR, 2, 350, {"hp_bonus": 8}
 	))
 	_equipment.append(_make(
-		ARMOR_TIER_3, "Plaka Zırh", "Kervan yolunda nadir görülen tam donanım.",
+		ARMOR_TIER_3, "EQUIP_ARMOR_TIER_3_NAME", "EQUIP_ARMOR_TIER_3_DESC",
 		SLOT_ARMOR, 3, 700, {"hp_bonus": 14}
 	))
 
 	_equipment.append(_make(
-		RING_MARKSMAN, "Nişancı Yüzüğü", "El daha kararlı nişan alır, ama ayak yavaşlar.",
+		RING_MARKSMAN, "EQUIP_RING_MARKSMAN_NAME", "EQUIP_RING_MARKSMAN_DESC",
 		SLOT_RING, 1, 0, {"accuracy_bonus": 5, "dodge_bonus": -2}
 	))
 	_equipment.append(_make(
-		RING_GAMBLER, "Kumarbaz Yüzüğü", "Ya tam vurur ya hiç isabet etmez.",
+		RING_GAMBLER, "EQUIP_RING_GAMBLER_NAME", "EQUIP_RING_GAMBLER_DESC",
 		SLOT_RING, 1, 0, {"crit_bonus": 3, "accuracy_bonus": -3}
 	))
 	_equipment.append(_make(
-		RING_CHARMED, "Tılsımlı Yüzük", "Vuruşu ağırlaştırır, bedeni yorar.",
+		RING_CHARMED, "EQUIP_RING_CHARMED_NAME", "EQUIP_RING_CHARMED_DESC",
 		SLOT_RING, 1, 0, {"damage_bonus": 2, "hp_bonus": -3}
 	))
 
 	_equipment.append(_make(
-		AMULET_WARD, "Muska", "Kötü niyeti savar ama kolu hafifletir.",
+		AMULET_WARD, "EQUIP_AMULET_WARD_NAME", "EQUIP_AMULET_WARD_DESC",
 		SLOT_AMULET, 1, 0, {"dodge_bonus": 3, "damage_bonus": -1}
 	))
 	_equipment.append(_make(
-		AMULET_WOLF_FANG, "Kurt Dişi Kolye", "Bünyeyi güçlendirir, ayağı ağırlaştırır.",
+		AMULET_WOLF_FANG, "EQUIP_AMULET_WOLF_FANG_NAME", "EQUIP_AMULET_WOLF_FANG_DESC",
 		SLOT_AMULET, 1, 0, {"hp_bonus": 3, "dodge_bonus": -2}
 	))
 	_equipment.append(_make(
-		AMULET_COURAGE, "Cesaret Muskası", "Vuruşu keskinleştirir, bedeni yorar.",
+		AMULET_COURAGE, "EQUIP_AMULET_COURAGE_NAME", "EQUIP_AMULET_COURAGE_DESC",
 		SLOT_AMULET, 1, 0, {"crit_bonus": 2, "hp_bonus": -2}
 	))
 

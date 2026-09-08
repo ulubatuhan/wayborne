@@ -37,8 +37,8 @@ static func _ensure_built() -> void:
 
 	_cultures.append(_make(
 		NOMAD,
-		"Göçebe Boyları",
-		"Bozkırda doğdun; yol senin evin, kervan senin obandır.",
+		"CULTURE_NOMAD_NAME",
+		"CULTURE_NOMAD_DESC",
 		{
 			CharacterStats.Kind.AGILITY: 2,
 			CharacterStats.Kind.ENDURANCE: 1,
@@ -51,8 +51,8 @@ static func _ensure_built() -> void:
 
 	_cultures.append(_make(
 		VALLEY,
-		"Vadi Loncaları",
-		"Taş köprüler ve lonca defterleri arasında büyüdün; rakam senin dilin.",
+		"CULTURE_VALLEY_NAME",
+		"CULTURE_VALLEY_DESC",
 		{
 			CharacterStats.Kind.INTELLECT: 2,
 			CharacterStats.Kind.CHARISMA: 1,
@@ -65,8 +65,8 @@ static func _ensure_built() -> void:
 
 	_cultures.append(_make(
 		HIGHLAND,
-		"Dağ Kabilesi",
-		"Geçitleri koruyan bir kabiledensin; kavga senin için pazarlıktan kolaydır.",
+		"CULTURE_HIGHLAND_NAME",
+		"CULTURE_HIGHLAND_DESC",
 		{
 			CharacterStats.Kind.STRENGTH: 2,
 			CharacterStats.Kind.ENDURANCE: 1,
@@ -79,8 +79,8 @@ static func _ensure_built() -> void:
 
 	_cultures.append(_make(
 		PORT,
-		"Liman Şehri",
-		"Rıhtımda beş dil öğrendin; her geminin taşıdığı dedikoduyu bilirsin.",
+		"CULTURE_PORT_NAME",
+		"CULTURE_PORT_DESC",
 		{
 			CharacterStats.Kind.CHARISMA: 2,
 			CharacterStats.Kind.PERCEPTION: 1,
@@ -93,8 +93,8 @@ static func _ensure_built() -> void:
 
 	_cultures.append(_make(
 		FISHER,
-		"Balıkçı Kasabası",
-		"Ağ onarmayı yürümeden önce öğrendin; sabır ve tuz senin sermayen.",
+		"CULTURE_FISHER_NAME",
+		"CULTURE_FISHER_DESC",
 		{
 			CharacterStats.Kind.ENDURANCE: 2,
 			CharacterStats.Kind.PERCEPTION: 1,

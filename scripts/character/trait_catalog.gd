@@ -77,51 +77,51 @@ static func _ensure_built() -> void:
 		return
 
 	_traits.append(_make(
-		MIGHTY_ARM, "Pazı Gücü", "Kolundaki güç vuruşlarına yansır.",
+		MIGHTY_ARM, "TRAIT_MIGHTY_ARM_NAME", "TRAIT_MIGHTY_ARM_DESC",
 		true, CharacterStats.Kind.STRENGTH, {"damage_bonus": 2}
 	))
 	_traits.append(_make(
-		WEAK_ARM, "Cılız Kol", "Vuruşlarında beklenen ağırlık yok.",
+		WEAK_ARM, "TRAIT_WEAK_ARM_NAME", "TRAIT_WEAK_ARM_DESC",
 		false, CharacterStats.Kind.STRENGTH, {"damage_bonus": -2}
 	))
 	_traits.append(_make(
-		NIMBLE_STEP, "Çevik Adım", "Ayakları hep bir adım önde.",
+		NIMBLE_STEP, "TRAIT_NIMBLE_STEP_NAME", "TRAIT_NIMBLE_STEP_DESC",
 		true, CharacterStats.Kind.AGILITY, {"dodge_bonus": 3}
 	))
 	_traits.append(_make(
-		CLUMSY_FOOT, "Beceriksiz Ayak", "Kaçınması gereken yerde tökezler.",
+		CLUMSY_FOOT, "TRAIT_CLUMSY_FOOT_NAME", "TRAIT_CLUMSY_FOOT_DESC",
 		false, CharacterStats.Kind.AGILITY, {"dodge_bonus": -3}
 	))
 	_traits.append(_make(
-		IRON_CONSTITUTION, "Demir Bünye", "Yaraya da açlığa da dayanıklı.",
+		IRON_CONSTITUTION, "TRAIT_IRON_CONSTITUTION_NAME", "TRAIT_IRON_CONSTITUTION_DESC",
 		true, CharacterStats.Kind.ENDURANCE, {"hp_bonus": 4}
 	))
 	_traits.append(_make(
-		FRAIL_CONSTITUTION, "Zayıf Bünye", "Küçük bir darbe bile ağır geçer.",
+		FRAIL_CONSTITUTION, "TRAIT_FRAIL_CONSTITUTION_NAME", "TRAIT_FRAIL_CONSTITUTION_DESC",
 		false, CharacterStats.Kind.ENDURANCE, {"hp_bonus": -4}
 	))
 	_traits.append(_make(
-		PRUDENT, "Basiretli", "Vurmadan önce düşünür, isabeti artar.",
+		PRUDENT, "TRAIT_PRUDENT_NAME", "TRAIT_PRUDENT_DESC",
 		true, CharacterStats.Kind.INTELLECT, {"accuracy_bonus": 2}
 	))
 	_traits.append(_make(
-		NAIVE, "Saf", "Sırası gelince kararsız kalır.",
+		NAIVE, "TRAIT_NAIVE_NAME", "TRAIT_NAIVE_DESC",
 		false, CharacterStats.Kind.INTELLECT, {"accuracy_bonus": -2}
 	))
 	_traits.append(_make(
-		SHARP_EYE, "Keskin Göz", "Zayıf noktayı hep bulur.",
+		SHARP_EYE, "TRAIT_SHARP_EYE_NAME", "TRAIT_SHARP_EYE_DESC",
 		true, CharacterStats.Kind.PERCEPTION, {"accuracy_bonus": 3, "crit_bonus": 1}
 	))
 	_traits.append(_make(
-		NEARSIGHTED, "Miyop", "Uzaktaki hedefi hep ıskalar.",
+		NEARSIGHTED, "TRAIT_NEARSIGHTED_NAME", "TRAIT_NEARSIGHTED_DESC",
 		false, CharacterStats.Kind.PERCEPTION, {"accuracy_bonus": -3}
 	))
 	_traits.append(_make(
-		REASSURING, "Güven Verici", "Yanındakiler onunla daha rahat savaşır.",
+		REASSURING, "TRAIT_REASSURING_NAME", "TRAIT_REASSURING_DESC",
 		true, CharacterStats.Kind.CHARISMA, {"dodge_bonus": 2}
 	))
 	_traits.append(_make(
-		OFF_PUTTING, "İtici", "Yanındakiler tedirgin, saf biraz bozuk.",
+		OFF_PUTTING, "TRAIT_OFF_PUTTING_NAME", "TRAIT_OFF_PUTTING_DESC",
 		false, CharacterStats.Kind.CHARISMA, {"dodge_bonus": -2}
 	))
 

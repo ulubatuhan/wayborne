@@ -43,38 +43,29 @@ var intellect: int = BASE_VALUE
 var perception: int = BASE_VALUE
 var charisma: int = BASE_VALUE
 
+## Stat adlarının/açıklamalarının çeviri anahtarları (bkz.
+## data/locale/game.csv). Bunlar static func olduğu için tr() değil
+## TranslationServer.translate() kullanılıyor - tr() bir Object örnek
+## metodu (bkz. CLAUDE.md Localization Rules).
+const _KIND_KEYS: Dictionary = {
+	Kind.STRENGTH: "STAT_STRENGTH",
+	Kind.AGILITY: "STAT_AGILITY",
+	Kind.ENDURANCE: "STAT_ENDURANCE",
+	Kind.INTELLECT: "STAT_INTELLECT",
+	Kind.PERCEPTION: "STAT_PERCEPTION",
+	Kind.CHARISMA: "STAT_CHARISMA",
+}
+
 static func kind_name(kind: Kind) -> String:
-	match kind:
-		Kind.STRENGTH:
-			return "Güç"
-		Kind.AGILITY:
-			return "Çeviklik"
-		Kind.ENDURANCE:
-			return "Dayanıklılık"
-		Kind.INTELLECT:
-			return "Zeka"
-		Kind.PERCEPTION:
-			return "Sezgi"
-		Kind.CHARISMA:
-			return "Karizma"
-	return "?"
+	if not _KIND_KEYS.has(kind):
+		return "?"
+	return String(TranslationServer.translate("%s_NAME" % _KIND_KEYS[kind]))
 
 ## Statın oyunda ne işe yaradığı - karakter ekranında gösterilir.
 static func kind_description(kind: Kind) -> String:
-	match kind:
-		Kind.STRENGTH:
-			return "Yakın dövüş hasarı"
-		Kind.AGILITY:
-			return "İnisiyatif ve kaçınma"
-		Kind.ENDURANCE:
-			return "Can puanı"
-		Kind.INTELLECT:
-			return "Yardım/iyileştirme gücü"
-		Kind.PERCEPTION:
-			return "İsabet ve kritik"
-		Kind.CHARISMA:
-			return "Pazarlık ve tayfa ücreti"
-	return ""
+	if not _KIND_KEYS.has(kind):
+		return ""
+	return String(TranslationServer.translate("%s_DESC" % _KIND_KEYS[kind]))
 
 func get_value(kind: Kind) -> int:
 	match kind:

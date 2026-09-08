@@ -38,8 +38,8 @@ static func _ensure_built() -> void:
 
 	var guard := CharacterClass.new()
 	guard.class_id = GUARD
-	guard.display_name = "Sıra Neferi"
-	guard.description = "Vagonların yanında yürüyen, mızrak ve sapanla idare eden sıradan bir korucu."
+	guard.display_name_key = "CLASS_GUARD_NAME"
+	guard.description_key = "CLASS_GUARD_DESC"
 	guard.bonus_max_hp = 6
 	guard.stat_affinity = [CharacterStats.Kind.ENDURANCE, CharacterStats.Kind.STRENGTH]
 	guard.duty_id = DutyCatalog.MUHAFIZ
@@ -54,8 +54,8 @@ static func _ensure_built() -> void:
 
 	var hunter := CharacterClass.new()
 	hunter.class_id = HUNTER
-	hunter.display_name = "Sekban"
-	hunter.description = "Rotayı önden tarayan, yayıyla arkadan vuran avcı."
+	hunter.display_name_key = "CLASS_HUNTER_NAME"
+	hunter.description_key = "CLASS_HUNTER_DESC"
 	hunter.bonus_max_hp = 2
 	hunter.stat_affinity = [CharacterStats.Kind.AGILITY, CharacterStats.Kind.PERCEPTION]
 	hunter.duty_id = DutyCatalog.IZCI
@@ -69,8 +69,8 @@ static func _ensure_built() -> void:
 
 	var breaker := CharacterClass.new()
 	breaker.class_id = BREAKER
-	breaker.display_name = "Kırıkçı"
-	breaker.description = "Ağır silahla öne dalan, hem düşmanı hem vagon tekerini kırmaya alışkın."
+	breaker.display_name_key = "CLASS_BREAKER_NAME"
+	breaker.description_key = "CLASS_BREAKER_DESC"
 	breaker.bonus_max_hp = 8
 	breaker.stat_affinity = [CharacterStats.Kind.STRENGTH, CharacterStats.Kind.ENDURANCE]
 	breaker.duty_id = DutyCatalog.ARABACI
@@ -84,8 +84,8 @@ static func _ensure_built() -> void:
 
 	var clerk := CharacterClass.new()
 	clerk.class_id = CLERK
-	clerk.display_name = "Kalem Efendisi"
-	clerk.description = "Defteri elden düşürmeyen, sözüyle de kervanı toparlayan yazman."
+	clerk.display_name_key = "CLASS_CLERK_NAME"
+	clerk.description_key = "CLASS_CLERK_DESC"
 	clerk.bonus_max_hp = 0
 	clerk.stat_affinity = [CharacterStats.Kind.INTELLECT, CharacterStats.Kind.CHARISMA]
 	clerk.duty_id = DutyCatalog.LEVAZIMCI

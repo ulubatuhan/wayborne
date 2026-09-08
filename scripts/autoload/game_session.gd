@@ -6,7 +6,7 @@ extends RefCounted
 ## yalnızca kalıcı bir örneği tutar.
 
 const PROVISIONS_ITEM_ID: String = "provisions"
-const PROVISIONS_ITEM_NAME: String = "Erzak"
+const PROVISIONS_ITEM_NAME: String = "ITEM_PROVISIONS_NAME"
 const PROVISIONS_UNIT_PRICE: int = 4
 
 var wallet: Wallet
