@@ -21,7 +21,6 @@ const TRADE_NOTE_COLOR: Color = Color(0.75, 0.85, 1.0)
 const MAX_BUY_QUANTITY: int = 99
 const MARKET_HAGGLE_GREED: float = 0.4
 const MARKET_HAGGLE_REPUTATION: float = 0.3
-const MARKET_HAGGLE_DRAIN_RATE: float = 20.0
 
 var _session: GameSession
 var _shop_items: Array[Item] = []
@@ -74,9 +73,9 @@ func _build_trade_note() -> String:
 	var demanded_names := _item_names(_current_location.demands)
 	var parts: Array[String] = []
 	if not produced_names.is_empty():
-		parts.append("Burada ucuz: %s" % ", ".join(produced_names))
+		parts.append(tr("UI_MARKET_CHEAP_HERE") % ", ".join(produced_names))
 	if not demanded_names.is_empty():
-		parts.append("Burada aranan: %s" % ", ".join(demanded_names))
+		parts.append(tr("UI_MARKET_WANTED_HERE") % ", ".join(demanded_names))
 	return " · ".join(parts)
 
 func _item_names(item_ids: Array[String]) -> Array[String]:
@@ -101,7 +100,7 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	row.add_child(name_label)
 
 	var price_label := Label.new()
-	price_label.text = "Al: %d GG · Sat: %d GG" % [_get_buy_price(item), _get_sell_price(item)]
+	price_label.text = tr("UI_MARKET_PRICES") % [_get_buy_price(item), _get_sell_price(item)]
 	price_label.custom_minimum_size = Vector2(160, 0)
 	row.add_child(price_label)
 
@@ -117,17 +116,17 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	row.add_child(quantity_spin)
 
 	var buy_button := Button.new()
-	buy_button.text = "Al"
+	buy_button.text = tr("UI_MARKET_BUY")
 	buy_button.pressed.connect(_on_buy_pressed.bind(item, quantity_spin))
 	row.add_child(buy_button)
 
 	var haggle_button := Button.new()
-	haggle_button.text = "Pazarlık Et"
+	haggle_button.text = tr("UI_MARKET_HAGGLE")
 	haggle_button.pressed.connect(_on_haggle_pressed.bind(item, quantity_spin))
 	row.add_child(haggle_button)
 
 	var sell_button := Button.new()
-	sell_button.text = "Sat"
+	sell_button.text = tr("UI_MARKET_SELL")
 	sell_button.pressed.connect(_on_sell_pressed.bind(item, quantity_spin))
 	row.add_child(sell_button)
 
@@ -148,7 +147,7 @@ func _refresh_shop_rows() -> void:
 		if remaining < 0:
 			stock_label.text = ""
 		else:
-			stock_label.text = "Stok: %d" % remaining
+			stock_label.text = tr("UI_MARKET_STOCK") % remaining
 
 		var out_of_stock := remaining == 0
 		row.buy_button.disabled = out_of_stock
@@ -161,18 +160,18 @@ func _on_buy_pressed(item: Item, quantity_spin: SpinBox) -> void:
 
 	var price := _get_buy_price(item) * quantity
 	if not _session.wallet.can_afford(price):
-		_show_message("Yetersiz kese: %d GG gerekiyor." % price)
+		_show_message(tr("UI_MARKET_NEED_GOLD") % price)
 		return
 	if not _has_enough_stock(item, quantity):
-		_show_message("Stokta yeterli %s yok." % item.item_name)
+		_show_message(tr("UI_NOT_ENOUGH_STOCK") % item.item_name)
 		return
 	if not _has_enough_cargo_space(item, quantity):
-		_show_message("Vagon kapasitesi yetersiz: %.1f / %.1f dolu." % [
+		_show_message(tr("UI_CARGO_FULL") % [
 			_session.get_cargo_weight(), _session.get_cargo_capacity()
 		])
 		return
 	if not _session.inventory.add_item(item, quantity):
-		_show_message("Envanterde yer yok.")
+		_show_message(tr("UI_MARKET_NO_ROOM"))
 		return
 
 	_session.consume_stock(item.item_id, quantity)
@@ -184,10 +183,10 @@ func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	if quantity <= 0:
 		return
 	if not _has_enough_stock(item, quantity):
-		_show_message("Stokta yeterli %s yok." % item.item_name)
+		_show_message(tr("UI_NOT_ENOUGH_STOCK") % item.item_name)
 		return
 	if not _has_enough_cargo_space(item, quantity):
-		_show_message("Vagon kapasitesi yetersiz: %.1f / %.1f dolu." % [
+		_show_message(tr("UI_CARGO_FULL") % [
 			_session.get_cargo_weight(), _session.get_cargo_capacity()
 		])
 		return
@@ -200,34 +199,54 @@ func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	var base_price := _get_buy_price(item) * quantity
 
 	var intro := Label.new()
-	intro.text = "Pazarlık: %d adet %s için tüccar %d GG istiyor." % [quantity, item.item_name, base_price]
+	intro.text = tr("UI_MARKET_HAGGLE_INTRO") % [quantity, item.item_name, base_price]
 	_haggle_holder.add_child(intro)
 
 	var panel := HagglingPanel.new()
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
+	# Pazarlık artık kör bir mini oyun değil: kervanın en iyi zekâsı ve
+	# karizması tüccarın taban fiyatını gerçekten aşağı çeker (bkz.
+	# HagglingSession.get_floor). Dilini iyi kullanan birini yanına almak
+	# burada somut para kazandırır.
 	panel.start_haggling(
-		float(base_price), MARKET_HAGGLE_GREED, MARKET_HAGGLE_REPUTATION, 0, 0, MARKET_HAGGLE_DRAIN_RATE, false
+		float(base_price),
+		MARKET_HAGGLE_GREED,
+		MARKET_HAGGLE_REPUTATION,
+		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
+		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
+		false
 	)
 
 func _on_haggle_deal(price: int) -> void:
 	if not _session.wallet.can_afford(price):
-		_show_message("Anlaşılan fiyatı ödeyecek kesen yok, alım iptal edildi.")
+		_show_message(tr("UI_MARKET_CANNOT_PAY"))
 		_close_haggling()
 		return
 	if not _session.inventory.add_item(_pending_purchase_item, _pending_purchase_quantity):
-		_show_message("Envanterde yer yok, alım iptal edildi.")
+		_show_message(tr("UI_MARKET_NO_ROOM_CANCELLED"))
 		_close_haggling()
 		return
 
 	_session.consume_stock(_pending_purchase_item.item_id, _pending_purchase_quantity)
 	_session.wallet.spend(price)
-	_show_message("Pazarlık tuttu: %d GG ödendi." % price)
+	_show_message(tr("UI_MARKET_HAGGLE_WON") % price)
 	_close_haggling()
 
-func _on_haggle_failed() -> void:
-	_show_message("Pazarlık koptu, alım gerçekleşmedi.")
+## Masadan kalkmak bedava değil: alım iptal olur *ve* itibar yersin. Bu ceza
+## olmadan "kopana kadar dip teklif ver, koparsa yeniden başla" bedava bir
+## deneme döngüsü olurdu - pazarlığın para basma noktasına dönüştüğü yer
+## tam olarak orasıydı (bkz. HagglingSession başlığı).
+func _on_haggle_failed(reputation_penalty: int) -> void:
+	if reputation_penalty > 0:
+		_session.reputation -= reputation_penalty
+		_show_message(
+			tr("UI_MARKET_HAGGLE_LOST_REPUTATION")
+			% reputation_penalty
+		)
+	else:
+		_show_message(tr("UI_MARKET_HAGGLE_LOST"))
 	_close_haggling()
 
 func _close_haggling() -> void:
@@ -249,10 +268,12 @@ func _on_sell_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	if quantity <= 0:
 		return
 	if not _session.inventory.has_item(item.item_id, quantity):
-		_show_message("Envanterde yeterli %s yok." % item.item_name)
+		_show_message(tr("UI_MARKET_NOT_ENOUGH_ITEM") % item.item_name)
 		return
 	_session.inventory.remove_item(item.item_id, quantity)
 	_session.wallet.earn(_get_sell_price(item) * quantity)
+	# Aynı malı aynı şehre boca etmek fiyatını düşürür (bkz. MarketConditions).
+	_session.record_sale(item.item_id, quantity)
 	_clear_message()
 
 func _has_enough_stock(item: Item, quantity: int) -> bool:
@@ -268,7 +289,9 @@ func _has_enough_cargo_space(item: Item, quantity: int) -> bool:
 ## balıkçı kasabası yalnızca erzağı ucuza alır. Satış fiyatı etkilenmez -
 ## perk pazarlık gücü, tüccarlık değil.
 func _get_buy_price(item: Item) -> int:
-	var price := float(MarketPricing.get_buy_price(item, _current_location))
+	var price := float(MarketPricing.get_buy_price(
+		item, _current_location, _session.market, _session.total_days_elapsed
+	))
 	price *= _session.get_buy_price_multiplier()
 	if item.item_id == GameSession.PROVISIONS_ITEM_ID:
 		price *= _session.get_provision_cost_multiplier()
@@ -277,7 +300,9 @@ func _get_buy_price(item: Item) -> int:
 	return maxi(1, int(round(price)))
 
 func _get_sell_price(item: Item) -> int:
-	return MarketPricing.get_sell_price(item, _current_location)
+	return MarketPricing.get_sell_price(
+		item, _current_location, _session.market, _session.total_days_elapsed
+	)
 
 func _show_message(text: String) -> void:
 	_message_label.text = text
@@ -296,7 +321,7 @@ func _on_inventory_changed(_item: Item, _quantity: int) -> void:
 
 func _refresh_header() -> void:
 	_balance_value_label.text = "%d GG" % _session.wallet.balance
-	_cargo_value_label.text = "Kargo: %.1f / %.1f" % [
+	_cargo_value_label.text = tr("UI_MARKET_CARGO") % [
 		_session.get_cargo_weight(), _session.get_cargo_capacity()
 	]
 
@@ -329,7 +354,7 @@ func _on_back_pressed() -> void:
 ## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
-	button.text = "Tayfa Ara"
+	button.text = tr("UI_LOOK_FOR_CREW")
 	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
 	var container := _back_button.get_parent()
 	container.add_child(button)

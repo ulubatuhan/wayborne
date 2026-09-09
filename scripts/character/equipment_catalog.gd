@@ -50,13 +50,13 @@ static func get_equipment_for_slot(slot: String) -> Array[Equipment]:
 static func get_slot_display_name(slot: String) -> String:
 	match slot:
 		SLOT_WEAPON:
-			return "Silah"
+			return String(TranslationServer.translate("EQUIP_SLOT_WEAPON"))
 		SLOT_ARMOR:
-			return "Zırh"
+			return String(TranslationServer.translate("EQUIP_SLOT_ARMOR"))
 		SLOT_RING:
-			return "Yüzük"
+			return String(TranslationServer.translate("EQUIP_SLOT_RING"))
 		SLOT_AMULET:
-			return "Kolye"
+			return String(TranslationServer.translate("EQUIP_SLOT_AMULET"))
 		_:
 			return slot
 

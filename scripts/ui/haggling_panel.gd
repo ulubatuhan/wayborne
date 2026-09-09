@@ -6,7 +6,10 @@ extends VBoxContainer
 ## böylece pazarlık mantığı tek bir yerde durur.
 
 signal deal_made(price: int)
-signal haggling_failed()
+## Masadan kalkmanın itibar bedeli birlikte taşınır: paneli açan ekran
+## cezayı kendi bağlamına göre uygular (şehir tüccarını kızdırmak kasabada
+## duyulur, yoldaki haydudu kızdırmak duyulmaz - bkz. market.gd/road_journey.gd).
+signal haggling_failed(reputation_penalty: int)
 
 const PATIENCE_HIGH_COLOR: Color = Color(0.3, 0.75, 0.3)
 const PATIENCE_LOW_COLOR: Color = Color(0.75, 0.2, 0.2)
@@ -16,6 +19,7 @@ var _built: bool = false
 
 var _range_value_label: Label
 var _patience_bar: ProgressBar
+var _rounds_label: Label
 var _offer_slider: HSlider
 var _offer_value_label: Label
 var _submit_button: Button
@@ -32,9 +36,8 @@ func start_haggling(
 	base_price: float,
 	merchant_greed: float,
 	reputation: float,
-	player_speech: int,
-	player_charisma: int,
-	patience_drain_rate: float,
+	player_speech: float,
+	player_charisma: float,
 	has_final_offer_perk: bool
 ) -> void:
 	_ensure_built()
@@ -45,7 +48,6 @@ func start_haggling(
 		reputation,
 		player_speech,
 		player_charisma,
-		patience_drain_rate,
 		has_final_offer_perk
 	)
 	_session.patience_changed.connect(_on_patience_changed)
@@ -64,9 +66,11 @@ func start_haggling(
 	_result_label.text = ""
 	_final_offer_panel.visible = false
 	_submit_button.disabled = false
+	_refresh_rounds_label()
 
 	_clear_log()
-	_add_log_entry("Pazarlık başladı. Tüccarın açılış fiyatı: %d GG" % _session.p_start)
+	_add_log_entry(tr("UI_HAGGLE_OPENING") % _session.p_start)
+	_add_log_entry(tr("UI_HAGGLE_RULES") % HagglingSession.MAX_ROUNDS)
 
 func _ensure_built() -> void:
 	if _built:
@@ -77,7 +81,7 @@ func _ensure_built() -> void:
 
 	var range_row := HBoxContainer.new()
 	var range_title := Label.new()
-	range_title.text = "Teklif Aralığı:"
+	range_title.text = tr("UI_HAGGLE_RANGE")
 	range_title.custom_minimum_size = Vector2(120, 0)
 	_range_value_label = Label.new()
 	_range_value_label.text = "-"
@@ -87,7 +91,7 @@ func _ensure_built() -> void:
 
 	var patience_row := HBoxContainer.new()
 	var patience_title := Label.new()
-	patience_title.text = "Tüccar Sabrı:"
+	patience_title.text = tr("UI_HAGGLE_ROUNDS")
 	patience_title.custom_minimum_size = Vector2(120, 0)
 	_patience_bar = ProgressBar.new()
 	_patience_bar.custom_minimum_size = Vector2(300, 24)
@@ -96,11 +100,14 @@ func _ensure_built() -> void:
 	_patience_bar.value = 100
 	patience_row.add_child(patience_title)
 	patience_row.add_child(_patience_bar)
+	_rounds_label = Label.new()
+	_rounds_label.custom_minimum_size = Vector2(90, 0)
+	patience_row.add_child(_rounds_label)
 	add_child(patience_row)
 
 	var offer_row := HBoxContainer.new()
 	var offer_title := Label.new()
-	offer_title.text = "Teklifin:"
+	offer_title.text = tr("UI_HAGGLE_YOUR_OFFER")
 	offer_title.custom_minimum_size = Vector2(120, 0)
 	_offer_slider = HSlider.new()
 	_offer_slider.custom_minimum_size = Vector2(300, 0)
@@ -114,7 +121,7 @@ func _ensure_built() -> void:
 	add_child(offer_row)
 
 	_submit_button = Button.new()
-	_submit_button.text = "Teklif Ver"
+	_submit_button.text = tr("UI_HAGGLE_SUBMIT")
 	_submit_button.disabled = true
 	_submit_button.pressed.connect(_on_submit_offer_pressed)
 	add_child(_submit_button)
@@ -125,10 +132,10 @@ func _ensure_built() -> void:
 	_final_offer_panel.add_child(_final_offer_label)
 	var final_buttons_row := HBoxContainer.new()
 	var accept_button := Button.new()
-	accept_button.text = "Kabul Et"
+	accept_button.text = tr("UI_HAGGLE_ACCEPT")
 	accept_button.pressed.connect(_on_final_offer_response.bind(true))
 	var reject_button := Button.new()
-	reject_button.text = "Reddet"
+	reject_button.text = tr("UI_HAGGLE_REJECT")
 	reject_button.pressed.connect(_on_final_offer_response.bind(false))
 	final_buttons_row.add_child(accept_button)
 	final_buttons_row.add_child(reject_button)
@@ -139,11 +146,16 @@ func _ensure_built() -> void:
 	add_child(_result_label)
 
 	var log_title := Label.new()
-	log_title.text = "Pazarlık Günlüğü"
+	log_title.text = tr("UI_HAGGLE_LOG")
 	add_child(log_title)
 
 	_log_list = VBoxContainer.new()
 	add_child(_log_list)
+
+func _refresh_rounds_label() -> void:
+	if _session == null:
+		return
+	_rounds_label.text = "%d / %d" % [_session.get_rounds_left(), HagglingSession.MAX_ROUNDS]
 
 func _on_offer_slider_changed(value: float) -> void:
 	_offer_value_label.text = "%d GG" % value
@@ -152,19 +164,34 @@ func _on_submit_offer_pressed() -> void:
 	if _session == null:
 		return
 	var offer := _offer_slider.value
-	_add_log_entry("Sen: %d GG teklif ettin." % offer)
+	_add_log_entry(tr("UI_HAGGLE_YOU_OFFERED") % offer)
+
+	# Teklifin ciddiye alınıp alınmadığı görünmezse "bir tur daha zorlayayım
+	# mı" kararı kör bir zar olur - pazarlığın tüm gerilimi bu geri bildirimde.
+	var insulting := _session.is_insulting(offer)
+	var credible := _session.is_credible(offer)
 	_session.submit_offer(offer)
+	_refresh_rounds_label()
+
+	if _session.state != HagglingSession.State.IN_PROGRESS:
+		return
+	if insulting:
+		_add_log_entry(tr("UI_HAGGLE_INSULTED"))
+	elif credible:
+		_add_log_entry(tr("UI_HAGGLE_CREDIBLE"))
+	else:
+		_add_log_entry(tr("UI_HAGGLE_NOT_CREDIBLE"))
 
 func _on_patience_changed(new_patience: float) -> void:
 	_patience_bar.value = new_patience
 	_patience_bar.modulate = PATIENCE_HIGH_COLOR.lerp(PATIENCE_LOW_COLOR, 1.0 - (new_patience / 100.0))
 
 func _on_counter_offer_made(npc_offer: float) -> void:
-	_add_log_entry("Tüccar: '%d GG öneriyorum.'" % npc_offer)
+	_add_log_entry(tr("UI_HAGGLE_COUNTER") % npc_offer)
 
 func _on_final_chance_offered(locked_offer: float) -> void:
-	_add_log_entry("Tüccar öfkeleniyor... 'Bu son kararım, işine gelirse!'")
-	_final_offer_label.text = "Son Teklif: %d GG" % locked_offer
+	_add_log_entry(tr("UI_HAGGLE_ULTIMATUM"))
+	_final_offer_label.text = tr("UI_HAGGLE_FINAL") % locked_offer
 	_final_offer_panel.visible = true
 	_submit_button.disabled = true
 
@@ -176,14 +203,14 @@ func _on_state_changed(new_state: HagglingSession.State) -> void:
 	match new_state:
 		HagglingSession.State.SUCCESS_DEAL:
 			var price := int(_session.final_price)
-			_result_label.text = "Anlaşma sağlandı! Fiyat: %d GG" % price
+			_result_label.text = tr("UI_HAGGLE_DEAL") % price
 			_submit_button.disabled = true
 			deal_made.emit(price)
 		HagglingSession.State.ANGER_QUIT:
-			_result_label.text = "Tüccar öfkeyle masayı terk etti!"
+			_result_label.text = tr("UI_HAGGLE_WALKOUT")
 			_submit_button.disabled = true
 			_final_offer_panel.visible = false
-			haggling_failed.emit()
+			haggling_failed.emit(_session.get_walkout_reputation_penalty())
 
 func _add_log_entry(text: String) -> void:
 	var label := Label.new()

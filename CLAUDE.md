@@ -56,9 +56,9 @@ wayborne/
 ### Event Engine Rules
 
 - Road events only. City interaction is deliberately **not** card-based.
-- A caravan can be ruined but never wiped out: the player's own wagon is never
-  lost, gold never goes negative, provisions never go below zero. These clamps
-  live in `EventEffectApplier`/`CaravanState`, never in individual events.
+- A caravan can be ruined but never wiped out - see **Caravan Ruin Rules**
+  below for exactly how far "ruined" goes. The clamps live in
+  `EventEffectApplier`/`CaravanState`, never in individual events.
 - Locked choices are shown disabled *with their reason*, not hidden, so the
   player learns what to prepare for next time.
 - All player-facing event text lives in `data/locale/wayborne_text.csv` as
@@ -320,6 +320,227 @@ wayborne/
   back button **outside** it. Otherwise the back button is pushed off-screen and
   the player is stranded - this actually happened on the market screen.
 
+### Caravan Ruin Rules
+
+"The caravan is never wiped out" does **not** mean it is untouchable. It can
+crawl: everything down to the leader, their own wagon and whoever stays loyal
+can be lost.
+
+- **Gold can go negative - the caravan can fall into debt.** Two spending
+  paths enforce the difference: `Wallet.spend()` is optional purchase (a
+  wagon, a hire, goods) and simply fails when you cannot afford it - the
+  player never sinks himself. `Wallet.force_spend()` /
+  `GameSession.spend_or_owe()` is money you *must* pay - tribute, a fine,
+  customs, interest - and it pushes the purse below zero.
+- **`DebtLedger` is the one place debt lives.** A debt carries a creditor, a
+  principal and a due day (a month). Past due, every 10 days adds 15%
+  interest and costs reputation; restructuring pushes the deadline out but
+  adds a fee to the principal, and the fee rate grows each time - endlessly
+  deferring must not be the cheap way out.
+- **The negative balance and the ledger's overdraft entry are the same
+  money.** `GameSession` syncs them on every `balance_changed`. Kept
+  separately they drift: earn gold and the purse recovers while the ledger
+  still shows the old debt, so the player is billed twice for it.
+- Provisions still never go below zero, but zero means you cannot feed the
+  caravan: hunger and morale losses follow.
+- **Debt the player cannot see is indistinguishable from a bug.**
+  `DebtPanel` (embedded in the Merchants' Guild, scene-less like
+  `PurificationPanel`) is where debts are read, paid and restructured; the
+  total also rides on the city and road HUDs. The ledger shipped without any
+  screen at all for a while - interest accrued and reputation drained
+  entirely out of sight.
+- **`SAVE_VERSION` is read, not just written.** `_migrate_save()` is a real
+  (currently empty) hook: every field is loaded with `.get(key, default)`,
+  so added fields need no migration, but a field whose *meaning* changes
+  does - and a version number nobody reads is a hook nobody remembers.
+
+### Morale Rules
+
+Morale was a dead stat for a long time: it started at 100 on every journey,
+fell only through discrete event hits, and never reached `evt_mutiny`'s
+threshold. Worse, nobody noticed, because the balance simulator read
+`caravan.morale` *after* `finish_journey()` - which resets the caravan - so
+the report said exactly 100.0 every run.
+
+- **Morale is that journey's mood; stress is the caravan's permanent wear.**
+  They stay separate stats (see Stress Rules). Stress *influences* the
+  morale a journey starts with; it is never spent or converted.
+- **The road itself wears you down.** `CaravanState.apply_daily_drift()`
+  takes `MORALE_DRAIN_PER_DAY` every day on the road, so a long journey is
+  genuinely more tiring than a short one. It stops at
+  `MORALE_DRIFT_FLOOR` - walking alone must never be enough to trigger a
+  mutiny; events have to go badly too.
+- **Departure morale reflects the world, not a constant.**
+  `GameSession.get_departure_morale()` composes it from systems that already
+  exist rather than inventing a "war/plague" mechanic: hardship
+  (`MarketConditions.get_hardship` - season, price shocks, inflation; famine,
+  embargo and strikes are all already modelled as `MARKET_SHOCK`), party
+  stress, overdue debt, and reputation as a small pride bonus. It never
+  drops below `DEPARTURE_MORALE_FLOOR` - a caravan sets out weary, never
+  hopeless.
+- **The number is shown with its reasons.**
+  `get_departure_morale_breakdown()` feeds the planner screen; an invisible
+  penalty is indistinguishable from a bug to the player.
+- **Eligibility is not enough - a crisis has to win the weighted draw.**
+  Lowering the mutiny threshold to 40 made it eligible on 45 simulated days
+  and it still fired zero times, losing every draw to ~25 rivals. It needed
+  an `EventWeightModifier` (×8 below the threshold) before it appeared at
+  all. When an event is "in the catalog but not in the game", check the
+  draw, not just the condition.
+
+### Economy Rules
+
+- **Profit is not only the price gap between cities.** `MarketPricing` holds
+  the base table (a city sells what it produces cheap, pays well for what it
+  demands); `MarketConditions` layers inflation, season, supply-and-demand
+  pressure and economic/political shocks on top and multiplies the base.
+  Passing no conditions yields the old, purely positional behaviour.
+- **Supply and demand is what stops a single route being farmed forever.**
+  Buying pushes that good's price up in that city; selling pushes it down;
+  the pressure decays back toward baseline over the following days. Any new
+  trade path must go through `consume_stock`/`record_sale` or it silently
+  bypasses this.
+- `EventEffect.Type.MARKET_SHOCK` is how a strike, famine, embargo or good
+  harvest moves prices for a while.
+- **Weight binds, not just slots.** The limit lives in `Inventory.add_item`
+  itself, so an event reward obeys it exactly like a market purchase - when
+  only the market screen checked it, everything else leaked through.
+  Provisions are exempt (they have their own journey formula and must not
+  eat cargo space), and the ceiling tracks `owned_wagon_count`.
+- Every number in these tables is a placeholder to be tuned.
+
+### Haggling Rules
+
+`HagglingSession` is the closest thing the game has to a money printer, and
+the same trap was walked into twice, so the invariants matter more than the
+numbers.
+
+1. **First design:** the acceptance threshold slid toward the absolute
+   minimum as patience fell, and the fastest way to burn patience was an
+   insulting lowball - so enraging the merchant was *rewarded*.
+2. **Second design:** the threshold never went below the floor and the floor
+   hardened per rejection. The exploit was closed, but both the threshold
+   and the floor were functions of **`rounds_used` alone** - so how you
+   haggled did not matter, only how many times you were refused, and the two
+   curves always met at the same number.
+
+**Current design - the path is what matters.**
+
+- **Offers are a countable resource** (`MAX_ROUNDS`, three), shown on screen.
+  No hidden curve to reverse-engineer by trial and error.
+- **The merchant concedes only after an offer he takes seriously**
+  (`is_credible`, `concessions`). A lowball burns a round without moving him,
+  which is precisely why "repeat the same bottom offer three times" cannot
+  work. `get_acceptable_threshold()` interpolates on `concessions`, never on
+  `rounds_used`.
+- **Every rejection still hardens the floor** (`FLOOR_HARDEN_PER_ROUND`), so
+  dragging it out costs you room even when your offers are credible.
+- **Out of offers, the merchant issues an ultimatum: pay list price or
+  leave.** `has_final_offer_perk` softens the ultimatum to his current floor
+  rather than list price - valuable, but still worse than spending the three
+  rounds well, which `tests/test_haggling.gd` asserts directly.
+- **Walking out costs a little reputation** (`WALKOUT_REPUTATION_PENALTY`,
+  1). Deliberately small: without any cost, "lowball until it breaks, then
+  reopen" is a free retry loop, but a broken negotiation should be a price,
+  not a disaster. The panel hands the penalty to whoever opened it
+  (`HagglingPanel.haggling_failed`) and each screen decides: a city
+  merchant's anger is heard around town (`market.gd`), a roadside bandit's is
+  not (`road_journey.gd`, which charges the full toll instead - through
+  `spend_or_owe`, so being broke is not an escape).
+- **Skill is read from the party, not hardcoded.** Callers pass
+  `get_best_effective_stat()` for Zeka and Karizma; those widen the floor.
+  Passing literal zeros (as both screens once did) made the whole mini-game
+  character-blind.
+
+The resulting gradient on a 135 list price (base 100, greed 0.5, rep 0.3):
+cautious play takes ~116 in round one, aiming play walks 116 → 99 → 83, and
+greedy play hits the ultimatum and pays 135 or leaves. A master talker
+(Zeka/Karizma maxed, trusted) pays 68 against a list of 100.
+
+### Event Character Rules
+
+Who you are travelling with, and who you meet, changes what an event does.
+
+- **People met on the road carry a hidden disposition** (`NpcDisposition`:
+  loyal / desperate / thief / vengeful). `EventEffect.Type.ROLL_ENCOUNTER`
+  rolls it into a flag and outcomes branch on that flag with
+  `EventCondition.HAS_FLAG`. The player is not told which - a party member
+  with strong Sezgi only gets a *hint*.
+- **The bill need not come due immediately.** Turning away a vengeful
+  traveller sets a flag and unlocks a `triggered_only` chain event that
+  fires days later (`evt_wanderer_revenge`). This is the pattern for any
+  "that decision comes back to you" design.
+- **Culture kinship is not one culture's privilege.** `ROLL_ENCOUNTER` also
+  rolls the met group's culture and sets a `<prefix>_kin` flag when it
+  matches the *leader's* culture, so meeting your own people works whichever
+  culture you chose (`evt_kin_encounter`, which replaced the Nomad-only
+  version).
+- **Party capability gates choices.** All six duty holders plus
+  `best_perception` / `best_charisma` are in the event context, so an
+  outcome can ask "is there a quartermaster who would have caught this
+  early?" or "is there anyone here who could talk them down?" - see
+  `evt_spoiled_provisions` and `evt_mutiny`'s manipulate option.
+
+### Route Rules
+
+Geography is fixed; the network on top of it is not. `WorldMapData`'s edge
+table stays the authored map - which city borders which, how far, how
+dangerous at rest. `RouteConditions` is the layer that makes the same seven
+edges behave like a different network every week: floods, landslides,
+brigand country, and the events that cause them.
+
+- **The split mirrors `MarketPricing`/`MarketConditions`**: a base table
+  plus a live layer that multiplies it. A caller that knows nothing about
+  the layer sees the old, static behaviour.
+- **Natural conditions are computed, never stored.** Each route rolls once
+  per `SPELL_DAYS` window from a `route_key + spell` seed, so reloading a
+  save cannot re-roll a closed pass open, and only event-driven overrides
+  (`add_override`, `EventEffect.Type.ROUTE_CHANGE`) live in the save file.
+  The window is offset per route, or every road in the world would change
+  on the same morning.
+- **A route's state is undirected.** An avalanche does not fall in one
+  direction; `route_key()` sorts the pair, and both directions read the
+  same entry.
+- **No city can ever be sealed off.** If a closure would leave a city with
+  no open exit, `get_state()` downgrades it to `SLOW` - the road is barely
+  passable rather than gone. Applying this in `get_state()` (not in
+  `is_open()`) is deliberate: duration, danger, the on-screen label and the
+  pathfinder all read `get_state()`, so a road the caravan is travelling
+  never displays as "Geçit kapalı". `get_raw_state()` is what the dice
+  actually said, for the rule itself and for tests.
+- **A closed road is a detour, not a dead end.** `find_open_path()` BFS's
+  the open network; the world map shows the alternative rather than just
+  greying the city out.
+- **Screens read the session, not the route.** `GameSession.get_route_
+  travel_days()/get_route_danger()/is_route_open()/get_route_state()`
+  compose all three layers (table, conditions, the caravan's own danger
+  growth). Reading `route.travel_days` directly is how the screen and the
+  road drift apart.
+- **Danger deltas apply to the headroom, not the total** (`base + delta *
+  (1 - base)`), so brigands make a quiet road genuinely risky without
+  turning an already-deadly one into a 90% coin flip.
+
+### En-Route Plan Rules
+
+The plan made in the city is an intention, not a commitment.
+
+- `GameSession.divert_journey()` / `turn_back()` are the only ways to change
+  a journey in progress. The caravan is not somewhere on the map it can
+  teleport from: a diversion is measured as *the days already walked* plus
+  the route from the origin city, so backtracking is paid for.
+- You may only divert to a city reachable **from the origin** whose route is
+  open that day (`can_divert_to`).
+- The new leg is a new journey: `journey_total_days` and
+  `journey_days_remaining` are both reset, or the progress bar would stay
+  full and the arrival check would fire immediately.
+- Contracts written to the abandoned destination cannot be delivered; the
+  bill is settled on arrival by `_apply_undelivered_contract_penalty()`.
+  Nothing special is needed for this - it is the same path a failed
+  delivery already takes.
+- Deciding is free of time pressure (the panel counts as an open panel, so
+  `_can_time_flow()` is false) but the decision itself costs hours: turning
+  a caravan around is not instant.
+
 ### Journey Time Rules
 
 The road used to advance one day per button press. It now runs on a
@@ -401,7 +622,35 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
 - **`tr()` is an `Object` instance method and cannot be called from a
   `static func`.** Static catalogs must use
   `TranslationServer.translate(key)` instead (see
-  `EnemyCatalog.get_kind_label`).
+  `EnemyCatalog.get_kind_label` and `Nav.label_for`).
+- **`tr()` cannot appear in a `const` either** - a constant must be a
+  constant expression. A const table of screen text therefore holds *keys*
+  and resolves them when the widget is built (see
+  `OnboardingPanel.TOPIC_KEYS`). Write the keys out in full rather than
+  assembling them at runtime (`tr("%s_TITLE" % topic)`), or neither the
+  undefined-key scan nor a translator searching the codebase can find them.
+- **Every layer that can show text is keyed, and a test keeps it that way.**
+  `test_localization.gd` scans *all* of `scripts/` for string literals
+  containing Turkish-specific letters. It started at `scripts/ui` +
+  `scripts/world` only, and that narrow scope hid a real gap: the combat log
+  (`combat_encounter.gd`), the event-effect lines
+  (`event_effect_applier.gd`), culture perk descriptions and equipment slot
+  names are all player-facing and were still nailed to Turkish.
+  Two exemption lists, both deliberate: the F1 developer scenes
+  (`haggling.gd`, `combat_test.gd`, `test_selector.gd`) never reach a player,
+  and `culture_catalog.gd`/`recruit_catalog.gd`/`user_settings.gd` hold
+  proper nouns - name pools, and **language names, which must stay in their
+  own language** or a player cannot find the one they read.
+- **A translation must carry the same format arguments, in the same order,
+  as the source.** GDScript's `%` operator has no positional form
+  (`%2$s`), so a reordered or dropped `%d` crashes the game the moment that
+  line is printed - and only in that language, where nobody testing in
+  Turkish would ever see it. `test_localization.gd` compares the
+  placeholder signature of every cell against its Turkish source, and it
+  caught exactly that: an English combat line that reordered `%s`/`%d`.
+  A format argument is only counted when it ends in a real conversion
+  character (`d s f x X o c`) - otherwise plain prose like "%30 az" or
+  "10% discount" reads as a placeholder and the check fires on nothing.
 - **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
   resolves through the translation server, so without pinning, assertions on
   display names would pass or fail depending on the machine's language.
@@ -610,7 +859,19 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   `run_tests.gd`'s `SUITE_PATHS`.
 - Test the UI-free cores, which is why they were written UI-free:
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
-  `GameSession`. Never test engine internals or scene wiring.
+  `GameSession`, `HagglingSession`. Never test engine internals or scene
+  wiring.
+- `test_route_conditions.gd` locks the two properties the route layer would
+  be dangerous without: natural states are reproducible (a save reload
+  cannot re-roll a closed pass open) and no city is ever sealed off - the
+  latter is a 300-day sweep over every city, and it caught a real lock-up
+  on three days before the last-exit rule existed.
+- **Where a system can be exploited, assert the exploit is closed rather
+  than asserting the formula.** `test_haggling.gd` does not check that a
+  particular offer yields a particular price - it exhaustively searches the
+  offer range for the best price patient play can reach, and asserts that
+  enraging the merchant lands strictly worse. A formula assertion would have
+  passed happily on the old, broken design.
 - `test_progression.gd` locks the XP curve, diminishing-returns stat math,
   auto-allocate and the multiclass unlock; `test_duties.gd` locks
   `DutyCatalog.get_duty_power()`'s class-match multipliers and the discount/
@@ -874,11 +1135,80 @@ boşluklarını dolduran bir hat:
   tanıtıyor - `PulseBar` gibi sahnesiz, `.new()` ile kurulan bir bileşen,
   `city_map.gd`'nin ilk `_ready()`'sinden tetikleniyor.
 
-Sırada: karakter portreleri/görsel varlıklar (bu fazın ColorRect yer
-tutucuları hâlâ duruyor), ikinci bir şehir etkileşim katmanı (loncalar
-arası itibar rekabeti gibi derinlik), ya da equipment'in Faz 7'de
-bilerek dışarıda bırakılan kısımları (görsel ikonlar, envanterde
-ağırlık/slot sınırı) - kesin kapsam henüz seçilmedi.
+Faz 9 ("Derinleşen Dünya") tamamlandı - Codex incelemesinin açtığı yedi
+başlık, hepsi aynı desende: sabit bir taban tablo + üstüne binen dinamik
+bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
+
+- **A (borç)** kese eksiye düşebiliyor; `DebtLedger` vade, faiz ve yapılandırma
+  taşıyor, açık hesap kesenin eksi bakiyesinin *aynası* (iki kez sayılmasın diye).
+- **B (ağırlık)** kargo sınırı artık `Inventory.add_item`'in içinde, yani olay
+  ödülü de pazar alımıyla aynı kurala tabi. Erzak muaf.
+- **C (ekonomi)** `MarketConditions`: enflasyon, mevsim, oyuncunun kendi
+  ticaretinin yarattığı arz-talep baskısı ve `MARKET_SHOCK` olayları.
+- **D-E (karakter-duyarlı olaylar)** `NpcDisposition` + `ROLL_ENCOUNTER`: yolda
+  karşılaştığın kişinin gizli mizacı kararın sonucunu belirliyor, sezgisi
+  kuvvetli biri okuyabiliyor, kinci biri günler sonra dönebiliyor.
+- **F (pazarlık)** bkz. Haggling Rules - oyunun para basma noktası kapatıldı.
+- **G (dinamik rotalar + yolda değişen plan)** bkz. Route Rules ve En-Route
+  Plan Rules. `RouteConditions` sabit yedi kenarı her hafta başka bir ağa
+  çeviriyor (`ROUTE_CHANGE` ile `evt_landslide`/`evt_road_patrol` de bu
+  katmandan geçiyor), `divert_journey()`/`turn_back()` şehirde kurulan planı
+  bir taahhüt olmaktan çıkarıyor.
+
+- **H (çeviri)** ekran, savaş ve olay katmanlarındaki ~300 sabit Türkçe
+  metni anahtara taşıdı; oyunun tamamı 11 dile açık. `test_localization.gd`
+  üç yeni koruma kazandı (sabit metin taraması, tanımsız anahtar taraması,
+  yer tutucu imzası) ve üçü de gerçek artık yakaladı - sonuncusu İngilizce
+  bir savaş satırındaki argüman sırası hatasını.
+- **I (moral)** bkz. Morale Rules. Moral ölü bir stattı; artık yol her gün
+  yıpratıyor, çıkış morali dünyanın haline bağlı ve `evt_mutiny` ilk kez
+  gerçekten ateşleniyor.
+- **A-E denetimi** "tamamlandı" işaretli aşamalarda üç eksik buldu ve
+  kapattı: borç defterinin hiçbir ekrana bağlı olmaması (`DebtPanel`),
+  çeviri taramasının yalnızca ui/world'ü kapsaması, ve `SAVE_VERSION`'ın
+  yazılıp hiç okunmaması.
+
+Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
+duruyor) ve **moral dengesi** - aşağıdaki açık madde.
+
+### Açık denge sorusu: stres eşiği ulaşılmıyor
+
+`evt_stress_brawl` stres ≥ 70 istiyor ama simülatörde varış stresi ortalama
+~25 - yani olay katalogda var, oyunda yok. Bu, moralin az önce çözülen
+durumunun aynısı (bkz. Morale Rules): eşik gerçekte görülen aralığın çok
+üstünde. Aynı üç yön geçerli - eşiği indirmek, günlük bir stres birikimi
+eklemek, ya da olay havuzunun stres bilançosunu kaydırmak. Bir denge
+tercihi olduğu için dokunulmadı.
+
+### Çözülmüş: isyan eşiği (kayıt için)
+
+Bir süre "moral hiç düşmüyor" sanıldı; bu bir **ölçüm hatasıydı**.
+`simulate_journeys.gd` morali `finish_journey()`'den *sonra* okuyordu, o
+çağrı da kervanı sıfırlıyor (`CaravanState.new()`, moral yeniden 100) - yani
+raporlanan sayı seferin morali değil, sıfırlanmış bir kervanınkiydi ve her
+koşuda tam olarak 100.0 çıkıyordu. Düzeltildi; simülatör artık varış moralini
+*ve* seferin dip noktasını ayrı ayrı basıyor.
+
+Gerçek tablo (200 koşu × 3 tehlike seviyesi):
+
+| tehlike | varış morali | seferin dibi | en kötü | isyan eşiğine (≤25) inen |
+|---|---|---|---|---|
+| %20 | 62.3 | 61.9 | 37 | %0 |
+| %40 | 62.4 | 62.1 | 35 | %0 |
+| %65 | 60.3 | 60.0 | 35 | %0 |
+
+Yani moral gerçekten düşüyor (100 → ~60) ama `evt_mutiny` hiçbir koşulda
+ateşlenmiyor: katalogda var, oyunda yok. Üç sebep birlikte çalışıyor -
+moral her seferde 100'den başlıyor (tasarım gereği: moral o seferin ruh
+hali, kalıcı olan stres), günlük bir aşınma yok (yalnızca kesikli olay
+darbeleri), ve olay havuzunun moral bilançosu neredeyse başabaş
+(+192 / -199).
+
+**Uygulanan çözüm (2+1):** günlük moral aşınması + eşiğin 40'a inmesi.
+Üçüncü bir adım da gerekti - eşik tek başına yetmedi, olay ağırlıklı çekimi
+hiç kazanamıyordu (bkz. Morale Rules'un son maddesi). Sonuç: varış morali
+~55, seferin dibi ~54 (en kötü 20), koşuların %7.5-10.5'i eşiğe iniyor ve
+`evt_mutiny` 600 koşuda 6 kez ateşleniyor.
 
 ## Quick Start
 

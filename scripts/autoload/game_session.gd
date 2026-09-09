@@ -13,6 +13,48 @@ var wallet: Wallet
 var inventory: Inventory
 var caravan: CaravanState
 
+## Borç defteri (bkz. DebtLedger). Kervan yok olmaz ama borca batabilir:
+## kese eksiye düşer, açık hesap doğar, vadesi geçerse faiz ve itibar yer.
+var debts: DebtLedger
+
+## Pazarın zamana ve oyuncunun kendi ticaretine göre değişen katmanı
+## (bkz. MarketConditions): enflasyon, mevsim, arz-talep baskısı ve
+## ekonomik/politik şoklar. Fiyatın taban tablosu MarketPricing'de.
+var market: MarketConditions
+
+## Yolun o günkü hali (bkz. RouteConditions): sel, çığ, eşkıya. Coğrafya
+## WorldMapData'da sabit durur, üstündeki ağ her gün değişir - kapanan bir
+## geçit dolambaçlı yolu gerçek bir karara çevirir.
+var route_conditions: RouteConditions
+
+## Ödemek zorunda olunan bedelin tek yolu - haraç, ceza, gümrük, faiz.
+## Kese yetmezse eksiye düşer. İsteğe bağlı alışveriş bundan geçmez
+## (bkz. Wallet.spend): oyuncu kendi isteğiyle borca batmaz, olaylar batırır.
+func spend_or_owe(amount: int) -> void:
+	wallet.force_spend(amount)
+
+## Kesenin eksi bakiyesi ile defterdeki açık hesap aynı paradır; kese her
+## değiştiğinde ikisi burada senkronlanır. Ayrı ayrı tutulsalardı oyuncu
+## para kazanınca kese artıya geçer ama defterdeki açık hesap olduğu yerde
+## kalır, borç iki kez sayılırdı.
+func _on_balance_changed(new_balance: int) -> void:
+	debts.sync_overdraft(maxi(0, -new_balance), total_days_elapsed)
+
+## Toplam yük: açık hesap (eksi bakiye) + alınmış borçlar. Açık hesap zaten
+## defterde olduğu için ayrıca eksi bakiye eklenmiyor.
+func get_total_debt() -> int:
+	return debts.get_total_owed()
+
+## Borca ödeme: önce kesedeki para kadarı ödenir, fazlası istenmez.
+func repay_debt(debt_id: String, amount: int) -> int:
+	var payable := mini(maxi(0, amount), maxi(0, wallet.balance))
+	if payable <= 0:
+		return 0
+	var paid := debts.pay(debt_id, payable)
+	if paid > 0:
+		wallet.spend(paid)
+	return paid
+
 ## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
 ## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
 ## GRANT_EQUIPMENT ile bulunan Yüzük/Kolye buraya düşer; karakter ekranı
@@ -87,6 +129,34 @@ const DANGER_GROWTH_CAP: float = 1.6
 func get_effective_danger(base_danger: float) -> float:
 	var growth := minf(1.0 + DANGER_GROWTH_PER_DAY * float(total_days_elapsed), DANGER_GROWTH_CAP)
 	return clampf(base_danger * growth, 0.0, 1.0)
+
+## --- Rotanın o günkü hali ---
+## Üç katman, üçü de ayrı: WorldMapData'nın sabit tablosu, yolun o günkü
+## durumu (RouteConditions) ve kervanın deneyim eğrisi (get_effective_danger).
+## Her ekran bu üçünü tek tek toplamak yerine bunları okur - biri unutulursa
+## ekranda görülenle yolda yaşanan ayrışırdı.
+
+func get_route_state(route: TravelRoute) -> RouteConditions.State:
+	return route_conditions.get_state(route, total_days_elapsed)
+
+func is_route_open(route: TravelRoute) -> bool:
+	return route_conditions.is_open(route, total_days_elapsed)
+
+func get_route_travel_days(route: TravelRoute) -> int:
+	return route_conditions.get_travel_days(route, total_days_elapsed)
+
+func get_route_danger(route: TravelRoute) -> float:
+	return get_effective_danger(route_conditions.get_danger(route, total_days_elapsed))
+
+## Bir olayın o yol üstünde hâlâ süren müdahalesi var mı (bkz. ROUTE_CHANGE).
+func has_route_override(from_id: String, to_id: String) -> bool:
+	return route_conditions.has_override(from_id, to_id, total_days_elapsed)
+
+## Kapalı yol çıkmaz sokak değil: dolambaçlı yol varsa şehir dizisini döner.
+func find_open_path(destination_id: String) -> Array[String]:
+	return route_conditions.find_open_path(
+		current_location_id, destination_id, total_days_elapsed
+	)
 
 ## Zenginlik hedefi: kervanın bir "kervan baronu" sayılacağı eşik.
 ## Oyunun DD tarzı felsefesinde yenilgi yok (bkz. CLAUDE.md) - bu yüzden
@@ -175,6 +245,7 @@ const STARTING_PARTY_SIZE: int = 2
 
 func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerator) -> void:
 	owned_wagon_count = STARTING_WAGONS
+	_sync_cargo_capacity()
 	owned_wagon_damaged = 0
 
 	set_player_character(player_character)
@@ -275,6 +346,16 @@ func get_duty_discount(duty_id: String) -> float:
 ## simülatöründe genişletilirken bu asimetri fark edildi.
 func get_duty_flat_reduction(duty_id: String) -> int:
 	return maxi(0, int(floor((get_duty_multiplier(duty_id) - 1.0) / 0.2)))
+
+## Partideki en yüksek etkin stat değeri (bkz. CharacterStats.
+## get_effective_value). Parti bir ekip: bir işi en uygun olan yapar,
+## o yüzden "partide sezgisi kuvvetli biri var mı" sorusu ortalamaya
+## değil en iyisine bakar.
+func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
+	var best := 0.0
+	for character in get_party():
+		best = maxf(best, character.stats.get_effective_value(kind))
+	return best
 
 ## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
 ## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
@@ -419,6 +500,20 @@ func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 ## (bkz. road_journey.gd - günlüğe not düşer).
 func advance_day() -> Array[String]:
 	total_days_elapsed += 1
+
+	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
+	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
+	reputation -= debts.advance_to_day(total_days_elapsed)
+	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
+	market.advance_day(total_days_elapsed)
+	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
+	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
+	route_conditions.advance_day(total_days_elapsed)
+	# Yolun kendisi yıpratır - yalnızca yoldayken (bkz.
+	# CaravanState.apply_daily_drift).
+	if is_journey_active():
+		caravan.apply_daily_drift()
+
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
 		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
@@ -463,6 +558,7 @@ func buy_wagon() -> bool:
 		return false
 	wallet.spend(cost)
 	owned_wagon_count += 1
+	_sync_cargo_capacity()
 	return true
 
 func get_repair_cost() -> int:
@@ -498,7 +594,15 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	wallet = Wallet.new(starting_gold)
 	inventory = Inventory.new()
 	caravan = CaravanState.new()
+	debts = DebtLedger.new()
+	market = MarketConditions.new()
+	route_conditions = RouteConditions.new()
+	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
+	# Erzak kargo ağırlığına dahil değil (bkz. get_cargo_weight), o yüzden
+	# ağırlık kısıtından muaf.
+	inventory.exempt_item_ids = [PROVISIONS_ITEM_ID]
+	_sync_cargo_capacity()
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
@@ -523,9 +627,16 @@ var market_stock: Dictionary = {}
 func get_market_stock(item_id: String) -> int:
 	return market_stock.get(item_id, -1)
 
+## Alım hem stoğu düşürür hem o malı o şehirde pahalandırır - bir rotayı
+## sonsuza kadar sağmayı engelleyen şey bu baskı (bkz. MarketConditions).
 func consume_stock(item_id: String, quantity: int) -> void:
 	if market_stock.has(item_id):
 		market_stock[item_id] = maxi(0, market_stock[item_id] - quantity)
+	market.record_purchase(current_location_id, item_id, quantity)
+
+## Satış tersini yapar: aynı malı aynı şehre boca etmek getirisini düşürür.
+func record_sale(item_id: String, quantity: int) -> void:
+	market.record_sale(current_location_id, item_id, quantity)
 
 func _restock_current_location() -> void:
 	market_stock.clear()
@@ -604,6 +715,66 @@ func clear_flag(flag: String) -> void:
 func is_journey_active() -> bool:
 	return not journey_destination_id.is_empty()
 
+## --- Sefere çıkış morali ---
+## Moral artık her seferde dolu başlamıyor. Kervan yola dünyanın o günkü
+## haliyle çıkıyor: bereketli bir ilkbaharda, borcu olmayan, tanınan bir
+## kervanın kadrosu keyifli; kıtlık kol gezen bir kışta, alacaklıları
+## kapıda bekleyen yorgun bir kadro değil.
+##
+## Kaynakların hepsi zaten var olan sistemler - yeni bir "savaş/salgın"
+## mekaniği icat edilmiyor: darlık MarketConditions'ın şok+mevsim+enflasyon
+## katmanı (kıtlık, ambargo, grev hepsi MARKET_SHOCK), yorgunluk kalıcı
+## stres, güvensizlik vadesi geçmiş borç, gurur ise itibar.
+##
+## Stres ile moral ayrı stat olmaya devam ediyor (bkz. CLAUDE.md Stress
+## Rules): stres burada moralin *başlangıcını* etkiliyor, moral olup
+## bitince stres'e dönüşmüyor. Biri kervanın kalıcı yıpranması, diğeri o
+## seferin ruh hali.
+const DEPARTURE_MORALE_FLOOR: int = 45
+const DEPARTURE_HARDSHIP_WEIGHT: int = 30
+const DEPARTURE_STRESS_WEIGHT: int = 25
+const DEPARTURE_OVERDUE_DEBT_PENALTY: int = 10
+const DEPARTURE_REPUTATION_BONUS_CAP: int = 8
+const DEPARTURE_REPUTATION_PER_POINT: float = 0.5
+
+func get_departure_morale() -> int:
+	var morale := float(CaravanState.MAX_MORALE)
+	morale -= market.get_hardship(current_location_id, total_days_elapsed) * float(DEPARTURE_HARDSHIP_WEIGHT)
+	morale -= (float(party_stress) / float(MAX_STRESS)) * float(DEPARTURE_STRESS_WEIGHT)
+	if not debts.get_overdue_debts(total_days_elapsed).is_empty():
+		morale -= float(DEPARTURE_OVERDUE_DEBT_PENALTY)
+	morale += clampf(
+		float(reputation) * DEPARTURE_REPUTATION_PER_POINT,
+		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
+	)
+	return clampi(int(round(morale)), DEPARTURE_MORALE_FLOOR, CaravanState.MAX_MORALE)
+
+## Çıkış moralini oluşturan kalemler - planlayıcı ekranı oyuncuya bunu
+## gösteriyor. Neden düşük moralle yola çıktığını göremeyen oyuncu için
+## mekanik görünmez bir cezadan ibaret kalırdı.
+func get_departure_morale_breakdown() -> Array[Dictionary]:
+	var lines: Array[Dictionary] = []
+	var hardship := market.get_hardship(current_location_id, total_days_elapsed)
+	if hardship > 0.0:
+		lines.append({
+			"key": "UI_MORALE_HARDSHIP",
+			"amount": -int(round(hardship * float(DEPARTURE_HARDSHIP_WEIGHT))),
+		})
+	if party_stress > 0:
+		lines.append({
+			"key": "UI_MORALE_STRESS",
+			"amount": -int(round((float(party_stress) / float(MAX_STRESS)) * float(DEPARTURE_STRESS_WEIGHT))),
+		})
+	if not debts.get_overdue_debts(total_days_elapsed).is_empty():
+		lines.append({"key": "UI_MORALE_OVERDUE_DEBT", "amount": -DEPARTURE_OVERDUE_DEBT_PENALTY})
+	var pride := int(clampf(
+		float(reputation) * DEPARTURE_REPUTATION_PER_POINT,
+		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
+	))
+	if pride > 0:
+		lines.append({"key": "UI_MORALE_REPUTATION", "amount": pride})
+	return lines
+
 ## Planlayıcıda onaylanan kervanı yola çıkarır.
 func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan) -> void:
 	journey_origin_id = current_location_id
@@ -611,7 +782,55 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_total_days = maxi(1, days)
 	journey_days_remaining = journey_total_days
 	danger_level = danger
-	caravan = CaravanState.from_plan(plan)
+	caravan = CaravanState.from_plan(plan, get_departure_morale())
+
+## Yolun ortasında planı değiştirmek. Şehirde kurulan plan bir niyet, bir
+## taahhüt değil: geçit kapanır, erzak biter, kervan zarar görür ve hedef
+## değişir. Kervan bulunduğu noktadan **yeni bir yola** girer; geride
+## bıraktığı hedefe yazılı kontratlar teslim edilemez, faturası varışta
+## kesilir (bkz. _apply_undelivered_contract_penalty).
+##
+## Yeni sefer nereden başlıyor sayılıyor? Kervanın gerçekte durduğu yer bir
+## şehir değil, iki şehir arasında bir nokta. Bunu yol üstünde geçirilen
+## günle temsil ediyoruz: dönüş/sapma süresi hedefin çıkış şehrine olan
+## mesafesi ile o ana kadar yürünen mesafenin toplamı.
+const MIN_DIVERT_DAYS: int = 1
+
+func get_days_travelled() -> int:
+	return maxi(0, journey_total_days - journey_days_remaining)
+
+## Geri dön: yürünen yol kadar geri yürünür. Her zaman mümkün - kervanın
+## geldiği yolu bulamaması diye bir şey yok.
+func turn_back() -> bool:
+	if not is_journey_active() or journey_origin_id.is_empty():
+		return false
+	var travelled := get_days_travelled()
+	journey_destination_id = journey_origin_id
+	journey_total_days = maxi(MIN_DIVERT_DAYS, travelled)
+	journey_days_remaining = journey_total_days
+	return true
+
+## Yolda hedef değiştir. Yalnızca çıkış şehrinden ulaşılabilen ve o gün
+## açık olan bir hedefe sapılabilir - kervan haritanın ortasında ışınlanmaz,
+## bildiği yola geri çıkıp oradan gider.
+func can_divert_to(destination_id: String) -> bool:
+	if not is_journey_active() or journey_origin_id.is_empty():
+		return false
+	if destination_id == journey_destination_id or destination_id == journey_origin_id:
+		return false
+	var route := WorldMapData.get_route(journey_origin_id, destination_id)
+	return route != null and is_route_open(route)
+
+func divert_journey(destination_id: String) -> bool:
+	if not can_divert_to(destination_id):
+		return false
+	var route := WorldMapData.get_route(journey_origin_id, destination_id)
+	var total := maxi(MIN_DIVERT_DAYS, get_days_travelled() + get_route_travel_days(route))
+	journey_destination_id = destination_id
+	journey_total_days = total
+	journey_days_remaining = total
+	danger_level = get_route_danger(route)
+	return true
 
 ## Hedefe varıldığında çağrılır: escort ücretini öder, sefer sırasındaki
 ## kayıp/hasarı oyuncunun kalıcı vagon sahipliğine taşır, konumu günceller
@@ -679,6 +898,7 @@ func _apply_wagon_losses_to_ownership() -> void:
 	var player_damaged := caravan.damaged_wagons - escort_damaged
 
 	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
+	_sync_cargo_capacity()
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
 
 ## Şehre varış her zaman rahatlatır - kırılma riski sıfırlanmaz ama stres
@@ -723,17 +943,16 @@ func _calculate_arrival_payout() -> Dictionary:
 ## Yalnızca pazardan alınan mallara uygulanır (bkz. CARGO_PER_WAGON).
 ## Şehirdeyken geçerli olan sahiplik sayısını kullanır - sefer sırasında
 ## kargo alışverişi zaten mümkün değil (market yalnızca şehirde açılır).
+## Vagon sayısı her değiştiğinde envanterin ağırlık tavanı da değişir -
+## vagon almak yer açar, vagon kaybetmek yükü sınırlar.
+func _sync_cargo_capacity() -> void:
+	inventory.weight_limit = get_cargo_capacity()
+
 func get_cargo_capacity() -> float:
 	return owned_wagon_count * CARGO_PER_WAGON
 
 func get_cargo_weight() -> float:
-	var total := 0.0
-	for entry in inventory.get_all_entries():
-		var item: Item = entry.item
-		if item.item_id == PROVISIONS_ITEM_ID:
-			continue
-		total += item.unit_weight * entry.quantity
-	return total
+	return inventory.get_total_weight()
 
 func get_cargo_space_remaining() -> float:
 	return maxf(0.0, get_cargo_capacity() - get_cargo_weight())
@@ -771,12 +990,40 @@ func to_save_dict() -> Dictionary:
 		"party": party_data,
 		"party_stress": party_stress,
 		"equipment_inventory": equipment_inventory.duplicate(),
+		"debts": debts.to_save_array(),
+		"market": market.to_save_dict(),
+		"route_conditions": route_conditions.to_save_dict(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
 ## sıfır başlangıç erzağıyla, aksi halde erzak iki kere eklenir.
-func load_from_dict(data: Dictionary) -> void:
+## Kayıttaki sürüm numarası. Şu ana kadar her alan `.get(key, default)` ile
+## okunduğu için eski kayıtlar kendiliğinden açılıyor (bkz.
+## tests/test_save_migration.gd) ve sürüme bakmaya gerek kalmıyor. Ama
+## "yazılıp hiç okunmayan" bir alan, gerçekten göç gerektiren ilk değişiklikte
+## kimsenin aklına gelmez - o yüzden okuma noktası ve göç kancası şimdiden
+## burada duruyor.
+func get_save_version(data: Dictionary) -> int:
+	return int(data.get("version", 0))
+
+## Sürümden sürüme taşıma. Bugün yapacak bir şey yok: `.get` varsayılanları
+## alan eklemelerini zaten karşılıyor. Bir alanın **anlamı** değiştiğinde
+## (yeniden adlandırma, birim değişikliği, bölünme) buraya bir dal eklenir.
+func _migrate_save(data: Dictionary) -> Dictionary:
+	var version := get_save_version(data)
+	if version >= SAVE_VERSION:
+		return data
+	# v0 (sürümsüz) -> v1: yalnızca alan eklendi, dönüştürme gerekmiyor.
+	return data
+
+func load_from_dict(raw_data: Dictionary) -> void:
+	var data := _migrate_save(raw_data)
+	# Kese eksi kaydedilmiş olabilir (borca batmış kervan) - earn() negatifi
+	# de taşır, ayrıca kenetleme yok.
 	wallet.earn(int(data.get("gold", 0)))
+	debts.load_from_array(data.get("debts", []) as Array)
+	market.load_from_dict(data.get("market", {}) as Dictionary)
+	route_conditions.load_from_dict(data.get("route_conditions", {}) as Dictionary)
 
 	for entry in data.get("inventory", []):
 		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
@@ -791,6 +1038,7 @@ func load_from_dict(data: Dictionary) -> void:
 		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
 	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
+	_sync_cargo_capacity()
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
 	accepted_contracts = {}
@@ -822,6 +1070,10 @@ func build_event_context() -> Dictionary:
 	var party_size := get_party().size()
 	return {
 		"gold": wallet.balance,
+		# Borç olaylara açık: alacaklı baskısı, tefeci teklifi ve
+		# "borcun varken ne yaparsın" kararları bunlara bakar.
+		"debt": get_total_debt(),
+		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
 		"provisions": get_provisions(),
 		"wagons": caravan.wagon_count,
 		"healthy_wagons": caravan.get_healthy_wagon_count(),
@@ -845,7 +1097,18 @@ func build_event_context() -> Dictionary:
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
 		# önceden 0/1'e çevrilip hazır veriliyor - bkz. evt_scouted_pass,
 		# evt_culture_*.
+		# Altı görevin hepsi bağlamda: bir olayın sonucu "kervanda aşçı/
+		# levazımcı/otacı var mı" sorusuna bakabilsin diye (bkz. evt_spoiled_
+		# provisions). Eskiden yalnızca İzci vardı.
+		"has_muhafiz": 1.0 if get_duty_holder(DutyCatalog.MUHAFIZ) != null else 0.0,
 		"has_izci": 1.0 if get_duty_holder(DutyCatalog.IZCI) != null else 0.0,
+		"has_levazimci": 1.0 if get_duty_holder(DutyCatalog.LEVAZIMCI) != null else 0.0,
+		"has_arabaci": 1.0 if get_duty_holder(DutyCatalog.ARABACI) != null else 0.0,
+		"has_tellal": 1.0 if get_duty_holder(DutyCatalog.TELLAL) != null else 0.0,
+		"has_otaci": 1.0 if get_duty_holder(DutyCatalog.OTACI) != null else 0.0,
+		# Karşındakini okumak ve kandırmak partinin en iyisine bakar.
+		"best_perception": get_best_effective_stat(CharacterStats.Kind.PERCEPTION),
+		"best_charisma": get_best_effective_stat(CharacterStats.Kind.CHARISMA),
 		"is_nomad_culture": 1.0 if culture_id == CultureCatalog.NOMAD else 0.0,
 		"is_valley_culture": 1.0 if culture_id == CultureCatalog.VALLEY else 0.0,
 		"is_highland_culture": 1.0 if culture_id == CultureCatalog.HIGHLAND else 0.0,

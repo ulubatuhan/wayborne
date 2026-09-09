@@ -45,7 +45,7 @@ static func _ensure_built() -> void:
 			CharacterStats.Kind.INTELLECT: -1,
 		},
 		["Arslan", "Bayra", "Kutalmış", "Yaruk", "Tegin", "Sarıca", "Bozkurt", "Alpagut"],
-		"Yolda günlük erzak tüketimin %30 az."
+		"CULTURE_NOMAD_PERK"
 	))
 	_cultures[-1].daily_provision_multiplier = 0.7
 
@@ -59,7 +59,7 @@ static func _ensure_built() -> void:
 			CharacterStats.Kind.STRENGTH: -1,
 		},
 		["Gerhardt", "Aldric", "Mathis", "Roswitha", "Benedikt", "Hilda", "Konrad", "Elsbeth"],
-		"Pazardan alımlarda %10 indirim."
+		"CULTURE_VALLEY_PERK"
 	))
 	_cultures[-1].buy_price_multiplier = 0.9
 
@@ -73,7 +73,7 @@ static func _ensure_built() -> void:
 			CharacterStats.Kind.CHARISMA: -1,
 		},
 		["Torgan", "Kaval", "Berku", "Ardıç", "Doruk", "Sarp", "Yıldırak", "Kayra"],
-		"Savaşta verdiğin hasar %15 fazla."
+		"CULTURE_HIGHLAND_PERK"
 	))
 	_cultures[-1].combat_damage_multiplier = 1.15
 
@@ -87,7 +87,7 @@ static func _ensure_built() -> void:
 			CharacterStats.Kind.ENDURANCE: -1,
 		},
 		["Nicolo", "Zara", "Emric", "Salda", "Vito", "Mira", "Andrea", "Kosta"],
-		"Tavernada rota dedikodusu %40 ucuz."
+		"CULTURE_PORT_PERK"
 	))
 	_cultures[-1].rumor_cost_multiplier = 0.6
 
@@ -101,7 +101,7 @@ static func _ensure_built() -> void:
 			CharacterStats.Kind.AGILITY: -1,
 		},
 		["Baran", "Yelda", "Marta", "Tarık", "Sena", "Duran", "İlkay", "Poyraz"],
-		"Erzak satın alımların %25 ucuz."
+		"CULTURE_FISHER_PERK"
 	))
 	_cultures[-1].provision_cost_multiplier = 0.75
 
@@ -121,5 +121,5 @@ static func _make(
 	for entry in name_pool:
 		names.append(entry)
 	culture.name_pool = names
-	culture.perk_text = perk_text
+	culture.perk_text_key = perk_text
 	return culture

@@ -8,6 +8,7 @@ extends Control
 ## (finish_journey) itibar cezası uygulanır.
 
 var _session: GameSession
+var _debt_panel: DebtPanel
 var _rows: Array[Dictionary] = []
 
 # Kontrat listesi büyüdükçe geri tuşunun ekrandan taşmaması için pano
@@ -28,12 +29,29 @@ func _ready() -> void:
 	_add_recruit_button(RecruitCatalog.VENUE_GUILD, Nav.GUILD)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
-	_title_label.text = "Tüccar Loncası" if location == null else "%s Tüccar Loncası" % location.location_name
-	_info_label.text = "Kabul ettiğin kontrat panodan kalkar; sefere çıkmadan süresi geçerse ya da yolda teslim edilmezse itibarın düşer."
+	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
+	_info_label.text = tr("UI_GUILD_HINT")
+
+	# Borç defteri lonca ekranında: alacaklı da kontrat da aynı deftere
+	# yazılır. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı değildi -
+	# kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu bunu
+	# göremiyordu.
+	_content.add_child(HSeparator.new())
+	_debt_panel = DebtPanel.new()
+	_content.add_child(_debt_panel)
+	_debt_panel.setup(_session)
+	_debt_panel.ledger_changed.connect(_rebuild)
+	_session.wallet.balance_changed.connect(_on_wallet_changed)
 
 	_rebuild()
 
+func _on_wallet_changed(_new_balance: int) -> void:
+	if _debt_panel != null:
+		_debt_panel.refresh()
+
 func _rebuild() -> void:
+	if _debt_panel != null:
+		_debt_panel.refresh()
 	_clear_children(_contract_list)
 	_clear_children(_accepted_list)
 	_rows.clear()
@@ -69,7 +87,7 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var info_label := Label.new()
-	info_label.text = "%s → %s — %d vagon — +%d GG — %d gün süre" % [
+	info_label.text = tr("UI_GUILD_OFFER") % [
 		offer.merchant_name,
 		destination.location_name if destination != null else offer.destination_location_id,
 		offer.wagon_count,
@@ -91,10 +109,10 @@ func _refresh_offer_rows() -> void:
 		var offer: MerchantOffer = row.offer
 		var accept_button: Button = row.accept_button
 		if _session.reputation < offer.required_reputation:
-			accept_button.text = "İtibar yetersiz (%d gerekli)" % offer.required_reputation
+			accept_button.text = tr("UI_GUILD_NEED_REPUTATION") % offer.required_reputation
 			accept_button.disabled = true
 		else:
-			accept_button.text = "Kontratı Kabul Et"
+			accept_button.text = tr("UI_GUILD_ACCEPT")
 			accept_button.disabled = false
 
 func _build_accepted_row(offer: MerchantOffer) -> Label:
@@ -103,7 +121,7 @@ func _build_accepted_row(offer: MerchantOffer) -> Label:
 	var days_left := maxi(0, accepted_at + offer.contract_deadline_days - _session.total_days_elapsed)
 
 	var label := Label.new()
-	label.text = "%s → %s — +%d GG — %d gün kaldı" % [
+	label.text = tr("UI_GUILD_ACCEPTED") % [
 		offer.merchant_name,
 		destination.location_name if destination != null else offer.destination_location_id,
 		offer.potential_profit,
@@ -129,7 +147,7 @@ func _on_back_pressed() -> void:
 ## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
-	button.text = "Tayfa Ara"
+	button.text = tr("UI_LOOK_FOR_CREW")
 	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
 	var container := _back_button.get_parent()
 	container.add_child(button)

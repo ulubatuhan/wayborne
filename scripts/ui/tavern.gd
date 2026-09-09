@@ -32,12 +32,12 @@ func _ready() -> void:
 	_add_recruit_button(RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
-	_title_label.text = "Taverna" if location == null else "%s Tavernası" % location.location_name
+	_title_label.text = tr("UI_TAVERN_TITLE") if location == null else tr("UI_TAVERN_TITLE_CITY") % location.location_name
 
 	_content.add_child(HSeparator.new())
 	_purification_panel = PurificationPanel.new()
 	_content.add_child(_purification_panel)
-	_purification_panel.setup(_session, "Huy Arındır", PURIFICATION_COST)
+	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
 	_purification_panel.trait_removed.connect(_refresh_rows)
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
@@ -88,15 +88,26 @@ func _refresh_rows() -> void:
 		var buy_button: Button = row.buy_button
 		var known := _session.is_route_known(_session.current_location_id, route.to_location_id)
 
+		# Yolun o günkü hali herkesin gözü önünde - çamura batmış bir geçit
+		# dedikodu değil, meydan sohbeti. Parayla öğrenilen şey tehlikenin
+		# *yüzdesi* (bkz. GameSession.known_routes), yolun durumu değil.
+		var days := _session.get_route_travel_days(route)
+		var state := _session.get_route_state(route)
+		var state_note := ""
+		if state != RouteConditions.State.OPEN:
+			state_note = " · %s" % RouteConditions.get_state_label(state)
+
 		if known:
-			var effective_danger := _session.get_effective_danger(route.danger_level)
-			status_label.text = "%d gün · Tehlike: %d%%" % [route.travel_days, int(effective_danger * 100.0)]
-			buy_button.text = "Öğrenildi"
+			var effective_danger := _session.get_route_danger(route)
+			status_label.text = tr("UI_TAVERN_ROUTE_KNOWN") % [
+				days, int(effective_danger * 100.0), state_note
+			]
+			buy_button.text = tr("UI_TAVERN_LEARNED")
 			buy_button.disabled = true
 		else:
 			var cost := _rumor_cost(route)
-			status_label.text = "%d gün · Tehlike: bilinmiyor" % route.travel_days
-			buy_button.text = "Dedikodu Satın Al (%d GG)" % cost
+			status_label.text = tr("UI_TAVERN_ROUTE_UNKNOWN") % [days, state_note]
+			buy_button.text = tr("UI_TAVERN_BUY_RUMOUR") % cost
 			buy_button.disabled = not _session.wallet.can_afford(cost)
 
 func _on_buy_pressed(route: TravelRoute) -> void:
@@ -122,7 +133,7 @@ func _on_back_pressed() -> void:
 ## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
-	button.text = "Tayfa Ara"
+	button.text = tr("UI_LOOK_FOR_CREW")
 	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
 	var container := _back_button.get_parent()
 	container.add_child(button)

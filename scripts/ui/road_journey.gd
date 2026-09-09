@@ -9,7 +9,11 @@ extends Control
 const SYNTHETIC_JOURNEY_DAYS: int = 8
 const SYNTHETIC_DANGER: float = 0.4
 const SYNTHETIC_WAGONS: int = 4
-const SYNTHETIC_MERCHANTS: Array = ["Deneme Tüccarı 1", "Deneme Tüccarı 2", "Deneme Tüccarı 3"]
+## Sentetik tüccarlar yalnızca F1 sahte seferinde görünür ama yine de
+## ekrana basılıyor, o yüzden isimleri de çeviriden geliyor (bkz.
+## test_localization.gd sabit metin taraması). Sayı çalışma anında
+## ekleniyor, üç ayrı anahtar açmaya değmez.
+const SYNTHETIC_MERCHANT_COUNT: int = 3
 const SYNTHETIC_PARTY_CULTURES: Array[String] = [
 	CultureCatalog.HIGHLAND, CultureCatalog.NOMAD, CultureCatalog.VALLEY,
 ]
@@ -20,7 +24,6 @@ const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 
 ## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
 const HAGGLE_FAIL_MORALE: int = -8
-const HAGGLE_DRAIN_RATE: float = 25.0
 
 ## Savaş sonuçları. Zafer yolu bir süre güvenli kılar ve yağma getirir;
 ## yenilgi ağır ama kervanı bitirmez (bkz. EventEffectApplier clamp'leri).
@@ -89,6 +92,8 @@ var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
 var _combat_holder: VBoxContainer
 var _recruit_holder: VBoxContainer
+var _replan_holder: VBoxContainer
+var _replan_button: Button
 var _log_list: VBoxContainer
 var _draw_button: Button
 var _reset_button: Button
@@ -125,7 +130,7 @@ func _build_ui() -> void:
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
 	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
 	_speed_button = Button.new()
-	_speed_button.tooltip_text = "Zamanın akış hızı"
+	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
 	time_row.add_child(_speed_button)
 
@@ -160,10 +165,16 @@ func _build_ui() -> void:
 	controls_row.add_child(_reset_button)
 
 	_camp_button = Button.new()
-	_camp_button.text = "Kamp Kur"
-	_camp_button.tooltip_text = "Hava karardığında ateş yakıp mola verir; stresi azaltır, karşılığında zaman harcar."
+	_camp_button.text = tr("UI_ROAD_MAKE_CAMP")
+	_camp_button.tooltip_text = tr("UI_ROAD_CAMP_TOOLTIP")
 	_camp_button.pressed.connect(_on_camp_pressed)
 	controls_row.add_child(_camp_button)
+
+	_replan_button = Button.new()
+	_replan_button.text = tr("UI_ROAD_REPLAN")
+	_replan_button.tooltip_text = tr("UI_ROAD_REPLAN_TOOLTIP")
+	_replan_button.pressed.connect(_on_replan_pressed)
+	controls_row.add_child(_replan_button)
 
 	_draw_button = Button.new()
 	_draw_button.text = tr("EVT_TEST_DRAW")
@@ -196,8 +207,12 @@ func _build_ui() -> void:
 	_recruit_holder = VBoxContainer.new()
 	_content.add_child(_recruit_holder)
 
+	_replan_holder = VBoxContainer.new()
+	_replan_holder.add_theme_constant_override("separation", 4)
+	_content.add_child(_replan_holder)
+
 	_arrive_button = Button.new()
-	_arrive_button.text = "Şehre Var"
+	_arrive_button.text = tr("UI_ROAD_ARRIVE")
 	_arrive_button.visible = false
 	_arrive_button.pressed.connect(_on_arrive_pressed)
 	_content.add_child(_arrive_button)
@@ -207,7 +222,7 @@ func _build_ui() -> void:
 	_content.add_child(_arrival_panel)
 
 	_enter_city_button = Button.new()
-	_enter_city_button.text = "Şehre Gir"
+	_enter_city_button.text = tr("UI_ROAD_ENTER_CITY")
 	_enter_city_button.visible = false
 	_enter_city_button.pressed.connect(_on_enter_city_pressed)
 	_content.add_child(_enter_city_button)
@@ -261,13 +276,13 @@ func _init_journey() -> void:
 	if _is_live_journey:
 		var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
 		var destination_name := "?" if destination == null else destination.location_name
-		_add_log("%s yolundasın: %d gün, tehlike %d%%." % [
+		_add_log(tr("UI_ROAD_DEPART") % [
 			destination_name,
 			_session.journey_days_remaining,
 			int(_session.danger_level * 100.0),
 		])
 	else:
-		_add_log("Deneme seferi: %d gün yol, tehlike %d%%." % [
+		_add_log(tr("UI_ROAD_SYNTHETIC") % [
 			_session.journey_days_remaining,
 			int(_session.danger_level * 100.0),
 		])
@@ -282,8 +297,8 @@ func _start_synthetic_journey() -> void:
 	_session.caravan.documents = SYNTHETIC_WAGONS
 
 	var merchants: Array[String] = []
-	for merchant_name in SYNTHETIC_MERCHANTS:
-		merchants.append(merchant_name)
+	for index in SYNTHETIC_MERCHANT_COUNT:
+		merchants.append(tr("UI_ROAD_SYNTHETIC_MERCHANT") % (index + 1))
 	_session.caravan.merchant_names = merchants
 
 	# Dev seferinde savaşı denemek için dolu bir kadro kurulur; gerçek
@@ -344,7 +359,7 @@ func _run_day() -> void:
 
 	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
 	if event == null:
-		_add_log("Gün %d: %s" % [_current_day, tr("EVT_TEST_QUIET_DAY")])
+		_add_log(tr("UI_ROAD_DAY_LINE") % [_current_day, tr("EVT_TEST_QUIET_DAY")])
 	else:
 		_present_event(event)
 
@@ -363,7 +378,7 @@ func _update_camp_state() -> void:
 
 	var camp_result := _session.make_camp()
 	_add_log(
-		"Kamp söküldü (erzak -%d), kadro soluklandı (stres -%d)." % [
+		tr("UI_ROAD_CAMP_STRUCK") % [
 			camp_result.provisions_spent, camp_result.stress_relief
 		],
 		OUTCOME_COLOR
@@ -383,7 +398,7 @@ func _refresh_time_ui() -> void:
 	# Metin her karede yeniden kurulmuyor: saat dakikada bir, hız yalnızca
 	# değişince. Bunlar _process'ten çağrıldığı için her karede string
 	# biçimlendirmek boşuna tahsisat olurdu.
-	var clock_text := "Gün %d · %s · %s" % [
+	var clock_text := tr("UI_ROAD_CLOCK") % [
 		_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(phase))
 	]
 	if clock_text != _clock_label.text:
@@ -423,13 +438,13 @@ func _on_camp_pressed() -> void:
 	_camping = true
 	_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS
 	_band.set_camping(true)
-	_add_log("Ateş yakıldı, kervan mola verdi.", OUTCOME_COLOR)
+	_add_log(tr("UI_ROAD_CAMP_LIT"), OUTCOME_COLOR)
 	_refresh_state()
 
 func _advance_contracts_and_provisions() -> void:
 	var expired_contracts := _session.advance_day()
 	for _merchant_id in expired_contracts:
-		_add_log("Loncadaki bir kontratın süresi doldu, itibarın düştü.")
+		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 
 	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
 	# Göçebe kültürü az yer (bkz. Culture.daily_provision_multiplier).
@@ -441,7 +456,7 @@ func _advance_contracts_and_provisions() -> void:
 	if _session.get_provisions() <= 0:
 		_session.caravan.change_morale(-10)
 		_session.change_stress(FAMINE_STRESS)
-		_add_log("Gün %d: Erzak tükendi, moral düşüyor." % _current_day)
+		_add_log(tr("UI_ROAD_FAMINE") % _current_day)
 
 func _on_force_draw() -> void:
 	if _current_event != null:
@@ -534,7 +549,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 	for event_id in result.unlocked_event_ids:
 		_engine.unlock_event(event_id)
-		_add_log("      (yeni olay açıldı)")
+		_add_log(tr("UI_ROAD_EVENT_UNLOCKED"))
 
 	if not result.combat_requests.is_empty():
 		var enemy_kind := "bandit"
@@ -561,7 +576,7 @@ func _open_recruit_offer() -> void:
 		RecruitCatalog.VENUE_TAVERN, rng, _session.get_player_character().level
 	)
 	if candidates.is_empty() or not _session.can_recruit():
-		_add_log("      Yolcu fikrini değiştirdi ve yoluna gitti.")
+		_add_log(tr("UI_ROAD_TRAVELLER_LEFT"))
 		return
 
 	var candidate := candidates[0]
@@ -573,7 +588,7 @@ func _open_recruit_offer() -> void:
 
 	var info := Label.new()
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info.text = "%s — can %d · isabet %d · kaçınma %d — %d GG istiyor." % [
+	info.text = tr("UI_ROAD_RECRUIT_OFFER") % [
 		candidate.get_summary_line(),
 		candidate.get_max_hp(),
 		candidate.get_accuracy(),
@@ -584,26 +599,26 @@ func _open_recruit_offer() -> void:
 
 	var hire_button := Button.new()
 	if _session.wallet.can_afford(candidate.hire_cost):
-		hire_button.text = "Partiye Kat (%d GG)" % candidate.hire_cost
+		hire_button.text = tr("UI_ROAD_RECRUIT_ACCEPT") % candidate.hire_cost
 		hire_button.pressed.connect(_on_road_recruit_accepted.bind(candidate))
 	else:
-		hire_button.text = "Kese yetmiyor"
+		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
 		hire_button.disabled = true
 		hire_button.modulate = LOCKED_COLOR
 	_recruit_holder.add_child(hire_button)
 
 	var decline_button := Button.new()
-	decline_button.text = "Vazgeç"
+	decline_button.text = tr("UI_CANCEL")
 	decline_button.pressed.connect(_on_road_recruit_declined)
 	_recruit_holder.add_child(decline_button)
 
 func _on_road_recruit_accepted(candidate: CharacterData) -> void:
 	if _session.recruit(candidate):
-		_add_log("      %s partine katıldı." % candidate.character_name, OUTCOME_COLOR)
+		_add_log(tr("UI_ROAD_RECRUIT_JOINED") % candidate.character_name, OUTCOME_COLOR)
 	_close_recruit_offer()
 
 func _on_road_recruit_declined() -> void:
-	_add_log("      Yolcuyla yollarınız ayrıldı.")
+	_add_log(tr("UI_ROAD_RECRUIT_DECLINED"))
 	_close_recruit_offer()
 
 func _close_recruit_offer() -> void:
@@ -636,7 +651,7 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> void:
 	if xp_awarded > 0:
 		_session.grant_party_xp(xp_awarded)
-		_add_log("      Kadro %d tecrübe kazandı." % xp_awarded, OUTCOME_COLOR)
+		_add_log(tr("UI_ROAD_PARTY_XP") % xp_awarded, OUTCOME_COLOR)
 
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
@@ -677,28 +692,38 @@ func _open_haggling(max_price: int) -> void:
 	_clear_children(_haggle_holder)
 
 	var intro := Label.new()
-	intro.text = "Pazarlık: karşı taraf %d GG istiyor." % max_price
+	intro.text = tr("UI_ROAD_HAGGLE_INTRO") % max_price
 	_haggle_holder.add_child(intro)
 
 	var panel := HagglingPanel.new()
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
-	panel.start_haggling(float(max_price), 0.5, 0.3, 0, 0, HAGGLE_DRAIN_RATE, false)
+	panel.start_haggling(
+		float(max_price),
+		0.5,
+		0.3,
+		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
+		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
+		false
+	)
 
+## Anlaşılan bedel kesende yoksa da ödenir: fark açık hesaba yazılır
+## (bkz. GameSession.spend_or_owe). Eskiden "kasada ne varsa o kadarı"
+## alınıyordu - parası olmayan kervan haraçtan bedavaya kurtuluyordu.
 func _on_haggle_deal(price: int) -> void:
-	var paid := mini(price, _session.wallet.balance)
-	if paid > 0:
-		_session.wallet.spend(paid)
-	_add_log("      Pazarlık tuttu: %d GG ödendi." % paid, OUTCOME_COLOR)
+	_session.spend_or_owe(price)
+	_add_log(tr("UI_ROAD_HAGGLE_WON") % price, OUTCOME_COLOR)
 	_close_haggling()
 
-func _on_haggle_failed() -> void:
-	var paid := mini(_pending_haggle_max, _session.wallet.balance)
-	if paid > 0:
-		_session.wallet.spend(paid)
+## Yolda pazarlık koparsa itibar cezası yok: karşındaki haydut, kasabada
+## kimseye şikâyet etmeyecek (bkz. HagglingPanel.haggling_failed). Bedel
+## burada tam haracı ödemek - ve ödeyecek paran yoksa borçlanmak.
+func _on_haggle_failed(_reputation_penalty: int) -> void:
+	var paid := _pending_haggle_max
+	_session.spend_or_owe(paid)
 	_session.caravan.change_morale(HAGGLE_FAIL_MORALE)
-	_add_log("      Pazarlık koptu: tam bedel %d GG ödendi." % paid)
+	_add_log(tr("UI_ROAD_HAGGLE_LOST") % paid)
 	_close_haggling()
 
 func _close_haggling() -> void:
@@ -731,12 +756,104 @@ func _has_open_panel() -> bool:
 		_combat_holder.get_child_count() > 0
 		or _haggle_holder.get_child_count() > 0
 		or _recruit_holder.get_child_count() > 0
+		or _replan_holder.get_child_count() > 0
 	)
+
+## --- Yolda planı değiştirmek ---
+## Şehirde kurulan plan bir niyet, bir taahhüt değil: geçit kapanır, erzak
+## biter, kervan hırpalanır ve hedef değişir. Karar verirken zaman durur
+## (bkz. _can_time_flow → _has_open_panel), kararın kendisi zaman yer -
+## kervanı döndürmek bedava değil.
+const REPLAN_HOURS: float = 2.0
+
+func _on_replan_pressed() -> void:
+	if _journey_finished or _current_event != null or _has_open_panel():
+		return
+	_set_journey_controls_enabled(false)
+	_build_replan_panel()
+
+func _build_replan_panel() -> void:
+	_clear_children(_replan_holder)
+
+	var title := Label.new()
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	title.text = tr("UI_ROAD_REPLAN_TITLE") % [
+		destination.location_name if destination != null else _session.journey_destination_id,
+		_session.journey_days_remaining,
+	]
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_replan_holder.add_child(title)
+
+	var origin := WorldMapData.get_location_by_id(_session.journey_origin_id)
+	if origin != null:
+		var back_button := Button.new()
+		back_button.text = tr("UI_ROAD_TURN_BACK") % [
+			origin.location_name, maxi(GameSession.MIN_DIVERT_DAYS, _session.get_days_travelled())
+		]
+		back_button.pressed.connect(_on_turn_back_pressed)
+		_replan_holder.add_child(back_button)
+
+	# Sapılabilecek hedefler çıkış şehrinden ölçülüyor: kervan haritanın
+	# ortasında ışınlanmaz, bildiği yola geri çıkıp oradan gider (bkz.
+	# GameSession.can_divert_to).
+	for route in WorldMapData.get_routes_from(_session.journey_origin_id):
+		if not _session.can_divert_to(route.to_location_id):
+			continue
+		var target := WorldMapData.get_location_by_id(route.to_location_id)
+		var total_days := _session.get_days_travelled() + _session.get_route_travel_days(route)
+		var divert_button := Button.new()
+		divert_button.text = tr("UI_ROAD_DIVERT") % [
+			target.location_name if target != null else route.to_location_id,
+			maxi(GameSession.MIN_DIVERT_DAYS, total_days),
+			int(_session.get_route_danger(route) * 100.0),
+		]
+		divert_button.pressed.connect(_on_divert_pressed.bind(route.to_location_id))
+		_replan_holder.add_child(divert_button)
+
+	var warning := Label.new()
+	warning.text = tr("UI_ROAD_REPLAN_WARNING")
+	warning.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_replan_holder.add_child(warning)
+
+	var cancel_button := Button.new()
+	cancel_button.text = tr("UI_ROAD_REPLAN_CANCEL")
+	cancel_button.pressed.connect(_close_replan)
+	_replan_holder.add_child(cancel_button)
+
+func _on_turn_back_pressed() -> void:
+	if not _session.turn_back():
+		_close_replan()
+		return
+	_apply_replan(tr("UI_ROAD_TURNED_BACK"))
+
+func _on_divert_pressed(destination_id: String) -> void:
+	if not _session.divert_journey(destination_id):
+		_close_replan()
+		return
+	_apply_replan(tr("UI_ROAD_DIVERTED"))
+
+func _apply_replan(log_format: String) -> void:
+	_clock.consume_hours(REPLAN_HOURS)
+	# Yeni bacak yeni bir sefer: ilerleme çubuğu ve varış kontrolü yeni
+	# toplam güne göre okunmalı, yoksa çubuk dolu kalır ve sefer bitmiş
+	# görünürdü.
+	_journey_length_days = maxi(1, _session.journey_total_days)
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	_add_log(log_format % (
+		destination.location_name if destination != null else _session.journey_destination_id
+	), OUTCOME_COLOR)
+	_close_replan()
+
+func _close_replan() -> void:
+	_clear_children(_replan_holder)
+	_set_journey_controls_enabled(true)
+	_refresh_state()
+	_check_journey_end()
 
 func _finish_journey() -> void:
 	_journey_finished = true
 	_set_journey_controls_enabled(false)
-	_add_log("Sefer tamamlandı. %d gün sürdü." % _current_day)
+	_add_log(tr("UI_ROAD_JOURNEY_DONE") % _current_day)
 	EventBus.journey_finished.emit(_current_day)
 
 	if _is_live_journey:
@@ -759,33 +876,33 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 	_clear_children(_arrival_panel)
 
 	var title := Label.new()
-	title.text = "Varış: Sefer Kazancı"
+	title.text = tr("UI_ROAD_ARRIVAL_TITLE")
 	_arrival_panel.add_child(title)
 
 	_arrival_panel.add_child(_make_summary_label(
-		"Escort ücreti (brüt): %d GG" % payout.gross
+		tr("UI_ROAD_ESCORT_FEE") % payout.gross
 	))
 	_arrival_panel.add_child(_make_summary_label(
-		"Moral çarpanı: %d%%" % int(round(payout.morale_factor * 100.0))
+		tr("UI_ROAD_MORALE_MULTIPLIER") % int(round(payout.morale_factor * 100.0))
 	))
 	_arrival_panel.add_child(_make_summary_label(
-		"Hasar çarpanı: %d%%" % int(round(payout.damage_factor * 100.0))
+		tr("UI_ROAD_DAMAGE_MULTIPLIER") % int(round(payout.damage_factor * 100.0))
 	))
 
-	var net_label := _make_summary_label("Net kazanç: %d GG" % payout.net)
+	var net_label := _make_summary_label(tr("UI_ROAD_NET") % payout.net)
 	net_label.modulate = OUTCOME_COLOR
 	_arrival_panel.add_child(net_label)
 
 	var xp_awarded: int = payout.get("xp_awarded", 0)
 	if xp_awarded > 0:
-		var xp_label := _make_summary_label("Sefer tecrübesi: %d XP" % xp_awarded)
+		var xp_label := _make_summary_label(tr("UI_ROAD_JOURNEY_XP") % xp_awarded)
 		xp_label.modulate = OUTCOME_COLOR
 		_arrival_panel.add_child(xp_label)
 
 	var lost_contracts: int = payout.get("lost_contracts", 0)
 	if lost_contracts > 0:
 		var penalty_label := _make_summary_label(
-			"Teslim edilemeyen kontrat: %d (itibar -%d)" % [
+			tr("UI_ROAD_LOST_CONTRACTS") % [
 				lost_contracts, lost_contracts * GameSession.REPUTATION_PENALTY_PER_LOST_CONTRACT
 			]
 		)
@@ -799,7 +916,7 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		break_label.modulate = LOCKED_COLOR if break_data.affliction else OUTCOME_COLOR
 		_arrival_panel.add_child(break_label)
 
-	_add_log("Şehre varıldı. Net kazanç: %d GG." % payout.net, OUTCOME_COLOR)
+	_add_log(tr("UI_ROAD_ARRIVED") % payout.net, OUTCOME_COLOR)
 
 ## Kırılan bir yoldaşın varış özetindeki tek satırlık dökümü - huy
 ## kazandıysa adı, ayrıldıysa bunun da belirtilmesi lazım, oyuncu neden
@@ -811,11 +928,11 @@ func _stress_break_line(break_data: Dictionary) -> String:
 	var trait_note := " (%s)" % trait_resource.display_name if trait_resource != null else ""
 
 	if break_data.departed:
-		return "%s stresten kırıldı ve kervandan ayrıldı%s." % [character_name, trait_note]
+		return tr("UI_STRESS_BROKE_LEFT") % [character_name, trait_note]
 	if trait_resource != null:
-		var kind := "olumlu bir" if trait_resource.is_positive else "yeni bir"
-		return "%s stresten kırıldı, %s huy edindi%s." % [character_name, kind, trait_note]
-	return "%s stresten kırıldı." % character_name
+		var kind := tr("UI_STRESS_VIRTUE") if trait_resource.is_positive else tr("UI_STRESS_AFFLICTION")
+		return tr("UI_STRESS_BROKE_TRAIT") % [character_name, kind, trait_note]
+	return tr("UI_STRESS_BROKE") % character_name
 
 func _make_summary_label(text: String) -> Label:
 	var label := Label.new()
@@ -840,10 +957,13 @@ func _set_journey_controls_enabled(enabled: bool) -> void:
 	_draw_button.disabled = not enabled
 	_camp_button.disabled = not enabled
 	_speed_button.disabled = not enabled
+	# Plan yalnızca yolda değiştirilebilir: varış işlendikten sonra ortada
+	# değiştirilecek bir sefer kalmıyor.
+	_replan_button.disabled = not enabled or not _session.is_journey_active()
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan
-	_state_label.text = "Gün %d · Kalan yol: %d gün · Tehlike: %d%%\nAltın: %d GG · Erzak: %d · İtibar: %d\nVagon: %d (%d hasarlı) · Tüccar: %d · Evrak: %d · Moral: %d · Stres: %d" % [
+	_state_label.text = tr("UI_ROAD_STATE") % [
 		_current_day,
 		_session.journey_days_remaining,
 		int(_session.danger_level * 100.0),

@@ -63,6 +63,9 @@ func _initialize() -> void:
 func _run_batch(danger: float) -> Dictionary:
 	var net_total := 0
 	var morale_total := 0
+	var morale_low_total := 0
+	var morale_worst := 100
+	var mutiny_reachable := 0
 	var provisions_out := 0
 	var wagons_lost := 0
 	var contracts_lost := 0
@@ -77,6 +80,12 @@ func _run_batch(danger: float) -> Dictionary:
 		var outcome := _run_single(danger, 1000 + run_index)
 		net_total += int(outcome.net)
 		morale_total += int(outcome.morale)
+		morale_low_total += int(outcome.morale_low)
+		morale_worst = mini(morale_worst, int(outcome.morale_low))
+		# evt_mutiny moral <= 25 istiyor: o eşiğe hiç inilmiyorsa olay
+		# katalogda var ama oyunda yok demektir.
+		if int(outcome.morale_low) <= EventCatalog.MUTINY_MORALE_THRESHOLD:
+			mutiny_reachable += 1
 		wagons_lost += int(outcome.wagons_lost)
 		contracts_lost += int(outcome.contracts_lost)
 		if bool(outcome.ran_out_of_provisions):
@@ -92,6 +101,9 @@ func _run_batch(danger: float) -> Dictionary:
 	return {
 		"net_avg": float(net_total) / float(RUN_COUNT),
 		"morale_avg": float(morale_total) / float(RUN_COUNT),
+		"morale_low_avg": float(morale_low_total) / float(RUN_COUNT),
+		"morale_worst": morale_worst,
+		"mutiny_reachable_pct": 100.0 * float(mutiny_reachable) / float(RUN_COUNT),
 		"starved_pct": 100.0 * float(provisions_out) / float(RUN_COUNT),
 		"wagons_lost_avg": float(wagons_lost) / float(RUN_COUNT),
 		"contracts_lost_avg": float(contracts_lost) / float(RUN_COUNT),
@@ -157,9 +169,17 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 
 	var starved := false
 	var fired_events: Array[String] = []
+	# Moralin *dip* noktası: seferin sonunda çoğu kez toparlanmış oluyor,
+	# o yüzden yalnızca bitiş değerine bakmak morali hiç düşmemiş gösterir.
+	var morale_low := session.caravan.morale
 
 	for day in range(1, JOURNEY_DAYS + 1):
 		session.journey_days_remaining = maxi(0, session.journey_days_remaining - 1)
+
+		# Simülatör GameSession.advance_day()'i çağırmıyor (kontrat süreleri
+		# bu döngüde işlenmiyor), o yüzden günlük moral aşınması burada elle
+		# uygulanıyor - yoksa ölçtüğü şey oyunun yaşadığı şey olmazdı.
+		session.caravan.apply_daily_drift()
 
 		var eaten := 1 + session.caravan.merchant_names.size()
 		eaten = maxi(1, int(round(eaten * session.get_daily_provision_multiplier())))
@@ -168,6 +188,11 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 			starved = true
 			session.caravan.change_morale(-10)
 			session.change_stress(6)  # bkz. road_journey.gd FAMINE_STRESS
+
+		# Dip her gün ölçülüyor, yalnızca olay çekilen günlerde değil:
+		# açlık cezası olaydan bağımsız işliyor ve ilk halinde gözden
+		# kaçıyordu (dip, varış değerinden yüksek çıkıyordu).
+		morale_low = mini(morale_low, session.caravan.morale)
 
 		var event := engine.roll_for_day(day, session.build_event_context())
 		if event == null:
@@ -179,6 +204,12 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 			_apply(event.immediate_effects, session, danger, rng, engine)
 		_resolve_first_available_choice(event, engine, session, danger, rng)
 
+	# finish_journey() kervanı sıfırlıyor (moral yeniden 100) - seferin
+	# morali ondan *önce* okunmalı. Eskiden sonra okunuyordu, o yüzden
+	# rapor her koşuda tam olarak 100.0 yazıyordu ve moral dengesi
+	# hakkında hiçbir şey söylemiyordu.
+	var morale_at_arrival := session.caravan.morale
+	morale_low = mini(morale_low, morale_at_arrival)
 	var wagons_before := session.caravan.wagon_count
 	var stress_before_rest := session.party_stress
 	var payout := session.finish_journey()
@@ -193,7 +224,8 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 
 	return {
 		"net": int(payout.net),
-		"morale": session.caravan.morale,
+		"morale": morale_at_arrival,
+		"morale_low": morale_low,
 		"wagons_lost": maxi(0, 4 - wagons_before),
 		"contracts_lost": int(payout.get("lost_contracts", 0)),
 		"ran_out_of_provisions": starved,
@@ -326,7 +358,11 @@ func _report(danger: float, stats: Dictionary) -> void:
 	print("    net kazanç      ortalama %7.1f GG   (en kötü %d, en iyi %d)" % [
 		stats.net_avg, stats.worst_net, stats.best_net
 	])
-	print("    bitiş morali    ortalama %7.1f" % stats.morale_avg)
+	print("    varış morali    ortalama %7.1f" % stats.morale_avg)
+	print("    moralin dibi    ortalama %7.1f   (en kötü %d · isyan eşiği %d)" % [
+		stats.morale_low_avg, stats.morale_worst, EventCatalog.MUTINY_MORALE_THRESHOLD
+	])
+	print("    isyan eşiğine indi  %%%.1f koşuda" % stats.mutiny_reachable_pct)
 	print("    erzak tükendi   %%%.1f koşuda" % stats.starved_pct)
 	print("    vagon kaybı     ortalama %7.2f" % stats.wagons_lost_avg)
 	print("    teslim edilemeyen kontrat  %.2f" % stats.contracts_lost_avg)

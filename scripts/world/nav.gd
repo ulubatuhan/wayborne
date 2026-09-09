@@ -42,12 +42,12 @@ static var character_target_index: int = 0
 ## döneceğini tuşa basmadan bilemiyor.
 static func label_for(scene_path: String) -> String:
 	if scene_path == WORLD_HUB:
-		return "Yola Dön"
+		return String(TranslationServer.translate("UI_BACK_TO_ROAD"))
 	if scene_path == CITY_MAP:
-		return "Şehre Dön"
+		return String(TranslationServer.translate("UI_BACK_TO_CITY"))
 	if scene_path == MAIN_MENU:
-		return "Ana Menüye Dön"
-	return "Geri"
+		return String(TranslationServer.translate("UI_BACK_TO_MENU"))
+	return String(TranslationServer.translate("UI_BACK"))
 
 static func return_label() -> String:
 	return label_for(return_scene)

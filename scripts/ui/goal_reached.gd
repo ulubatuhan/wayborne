@@ -16,8 +16,8 @@ func _ready() -> void:
 
 	var session: GameSession = GameState.get_session()
 	_summary_label.text = (
-		"%d gün süren yolculuğun sonunda kese %d GG'ye ulaştı.\n" +
-		"İtibar: %d · Parti: %d kişi · Vagon: %d"
+		tr("UI_GOAL_SUMMARY") +
+		tr("UI_GOAL_STATS")
 	) % [
 		session.total_days_elapsed,
 		session.wallet.balance,

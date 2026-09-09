@@ -29,14 +29,14 @@ func _ready() -> void:
 func _venue_title() -> String:
 	match Nav.recruit_venue:
 		RecruitCatalog.VENUE_GUILD:
-			return "Lonca Kayıt Defteri"
+			return tr("UI_CITY_GUILD_LEDGER")
 		RecruitCatalog.VENUE_MARKET:
-			return "Meydanda Bekleyenler"
+			return tr("UI_RECRUIT_CANDIDATES")
 		_:
-			return "Taverna Köşesi"
+			return tr("UI_CITY_TAVERN")
 
 func _refresh_wallet() -> void:
-	_wallet_label.text = "Kese: %d GG" % _session.wallet.balance
+	_wallet_label.text = tr("UI_PURSE") % _session.wallet.balance
 
 func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh_wallet()
