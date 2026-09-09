@@ -257,6 +257,23 @@ func _test_feast_costs_gold_and_relieves(t) -> void:
 	session.add_to_party(CharacterData.create("Yoldaş", CultureCatalog.VALLEY, CharacterStats.new()))
 	t.ok(session.get_feast_cost() > cost, "kadro büyüdükçe ziyafet pahalanır")
 
+	# Günde bir: sınırsız bırakıldığında beş ziyafet 225 GG'ye stresi
+	# sıfırlıyordu - bir seferin net kazancının altında bir bedelle.
+	t.ok(session.has_feasted_today(), "ziyafet günü işaretlenir")
+	t.not_ok(session.can_afford_feast(), "aynı gün ikinci ziyafet verilemez")
+	t.not_ok(session.throw_feast(), "aynı gün ikinci ziyafet uygulanmaz")
+	session.total_days_elapsed += 1
+	t.ok(session.can_afford_feast(), "ertesi gün yeniden ziyafet verilebilir")
+
+	# Kayda yazılmalı: yeniden yükleyip aynı gün tekrar ziyafet vermek
+	# sayacı sıfırlayan bir sömürü olurdu.
+	var reloaded := GameSession.new(0, 0, 1)
+	reloaded.load_from_dict(session.to_save_dict())
+	t.eq(
+		reloaded.last_feast_day, session.last_feast_day,
+		"son ziyafet günü kayıttan döner"
+	)
+
 	# Parası olmayan ziyafet veremez; stresi olmayanın da ziyafete ihtiyacı yok.
 	var broke := GameSession.new(0, 0, 1)
 	broke.change_stress(50)

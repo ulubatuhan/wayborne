@@ -305,24 +305,36 @@ wayborne/
   joining a battered caravan hears the stories. Without that share,
   "dismiss one, hire another" would be a free button that halves stress
   every cycle.
-- **The player needs a lever their purse can pull.** `throw_feast()` (in
-  the tavern) is paid relief priced per head. Camp is the free-but-slow
-  lever, the feast the paid-and-strong one, and stress-relieving events the
-  lucky one. Without a purchasable option an accumulating stat is just an
-  unavoidable countdown.
+- **The player needs a lever their purse can pull, and it must be rationed.**
+  `throw_feast()` (in the tavern) is paid relief priced per head, **once per
+  day** - which, since days only advance on the road, means once per city
+  visit. Unrationed it was the exploit: five feasts took stress from 90 to 0
+  for 225 gold, less than one journey's net income. You cannot sober a
+  company five times in one evening, and a persistent stat that gold erases
+  on the spot is not persistent. `last_feast_day` is saved, or reloading
+  would reset the counter.
+- **A stress lever that resets on reload is not a lever.** Same reasoning as
+  `RouteConditions`' computed states: anything a player could re-roll by
+  loading a save has to live in the save file.
 
-Measured curve over twelve consecutive journeys (~25 stress each):
+Camp is the free-but-slow lever, the feast the paid-and-rationed one, and
+stress-relieving events the lucky one. Measured over twelve consecutive
+journeys (~25 stress each):
 
 | play pattern | stress after 1 / 6 / 12 journeys | journeys at brawl threshold |
 |---|---|---|
 | no intervention | 11 / 69 / 88 (capped) | 84% |
 | one camp per journey | 4 / 22 / 49 | 43% |
-| one camp + feast when high | 4 / 22 / 32 (plateau) | 41% |
+| one camp + feast | 4 / 22 / 28 (plateau) | 37%, ~43 gold |
 | two camps per journey | 0 / 0 / 1 | 0% |
 
-The last row is deliberate, not an oversight: a player who spends the time
-and provisions to camp twice a journey *should* hold stress down. It costs
-nights, food and daylight.
+The last row is deliberate, not an oversight: a player who spends the nights,
+food and daylight to camp twice a journey *should* hold stress down.
+
+"Dismiss one, hire another" is not an exploit either, but only because it is
+*dominated*: churning the crew takes stress from 90 to 6 over eight hires -
+and eight hires cost far more than the feasts that do the same job, on top of
+losing every companion's levels, traits and equipment.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;

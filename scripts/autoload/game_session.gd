@@ -215,17 +215,33 @@ func add_to_party(character: CharacterData) -> void:
 const FEAST_COST_PER_HEAD: int = 45
 const FEAST_STRESS_RELIEF: int = 22
 
+## Ziyafet günde bir. Ölçüm gösterdi ki sınırsız bırakıldığında beş ziyafet
+## 225 GG'ye stresi 90'dan 0'a indiriyordu - bir seferin net kazancının
+## altında bir bedelle. Kadroyu bir akşamda beş kez ayıltamazsın; kalıcı
+## stat parayla anında silinebiliyorsa kalıcı değildir.
+##
+## Günler yalnızca yolda ilerlediği için bu pratikte "şehir ziyareti başına
+## bir ziyafet" demek. Kayda yazılıyor - yoksa kaydı yeniden yüklemek
+## sayacı sıfırlayan bir sömürü olurdu.
+var last_feast_day: int = -1
+
+func has_feasted_today() -> bool:
+	return last_feast_day == total_days_elapsed
+
 func get_feast_cost() -> int:
 	return FEAST_COST_PER_HEAD * maxi(1, party.size())
 
 func can_afford_feast() -> bool:
-	return party_stress > 0 and wallet.can_afford(get_feast_cost())
+	if party_stress <= 0 or has_feasted_today():
+		return false
+	return wallet.can_afford(get_feast_cost())
 
 func throw_feast() -> bool:
 	if not can_afford_feast():
 		return false
 	wallet.spend(get_feast_cost())
 	change_stress(-FEAST_STRESS_RELIEF)
+	last_feast_day = total_days_elapsed
 	return true
 
 ## Taverna'da ödeyip öğrenilmedikçe bir rotanın tam tehlike yüzdesi
@@ -1058,6 +1074,7 @@ func to_save_dict() -> Dictionary:
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
 		"party_stress": party_stress,
+		"last_feast_day": last_feast_day,
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
@@ -1120,6 +1137,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	_ensure_party()
 
 	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
+	last_feast_day = int(data.get("last_feast_day", -1))
 
 	equipment_inventory = {}
 	var equipment_data: Dictionary = data.get("equipment_inventory", {})
