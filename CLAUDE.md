@@ -1109,9 +1109,38 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   taraması ve yer tutucu imzası karşılaştırması.
 
 Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
-duruyor) ve moral dengesi: simülatörde 600 koşu boyunca moral hiç 100'ün
-altına inmiyor, bu yüzden `evt_mutiny` (moral ≤ 25 istiyor) hiç
-ateşlenmiyor.
+duruyor) ve **moral dengesi** - aşağıdaki açık madde.
+
+### Açık denge sorusu: isyan eşiği ulaşılmıyor
+
+Bir süre "moral hiç düşmüyor" sanıldı; bu bir **ölçüm hatasıydı**.
+`simulate_journeys.gd` morali `finish_journey()`'den *sonra* okuyordu, o
+çağrı da kervanı sıfırlıyor (`CaravanState.new()`, moral yeniden 100) - yani
+raporlanan sayı seferin morali değil, sıfırlanmış bir kervanınkiydi ve her
+koşuda tam olarak 100.0 çıkıyordu. Düzeltildi; simülatör artık varış moralini
+*ve* seferin dip noktasını ayrı ayrı basıyor.
+
+Gerçek tablo (200 koşu × 3 tehlike seviyesi):
+
+| tehlike | varış morali | seferin dibi | en kötü | isyan eşiğine (≤25) inen |
+|---|---|---|---|---|
+| %20 | 62.3 | 61.9 | 37 | %0 |
+| %40 | 62.4 | 62.1 | 35 | %0 |
+| %65 | 60.3 | 60.0 | 35 | %0 |
+
+Yani moral gerçekten düşüyor (100 → ~60) ama `evt_mutiny` hiçbir koşulda
+ateşlenmiyor: katalogda var, oyunda yok. Üç sebep birlikte çalışıyor -
+moral her seferde 100'den başlıyor (tasarım gereği: moral o seferin ruh
+hali, kalıcı olan stres), günlük bir aşınma yok (yalnızca kesikli olay
+darbeleri), ve olay havuzunun moral bilançosu neredeyse başabaş
+(+192 / -199).
+
+Üç olası yön, hiçbiri uygulanmadı - bu bir denge tercihi, hata değil:
+1. Eşiği ~40'a çekmek (en ucuzu; %65 tehlikede koşuların bir kısmı zaten
+   35-40 bandına iniyor).
+2. Günlük moral aşınması eklemek - uzun sefer kendiliğinden yıpratıcı olur.
+   "Oregon Trail" hissine en yakın seçenek, ama kısa seferi de etkiler.
+3. Olay havuzunun moral bilançosunu negatife kaydırmak.
 
 ## Quick Start
 
