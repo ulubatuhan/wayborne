@@ -1155,16 +1155,32 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   katmandan geçiyor), `divert_journey()`/`turn_back()` şehirde kurulan planı
   bir taahhüt olmaktan çıkarıyor.
 
-- **H (ekran katmanı çevirisi)** ekranlardaki 244 sabit Türkçe metni çeviri
-  anahtarına taşıdı; `data/locale/ui.csv` 10 satırdan 261'e çıktı. Artık
-  oyunun tamamı - katalog, olay ve ekran - 11 dile açık. `test_localization.gd`
-  üç yeni koruma kazandı: sabit Türkçe metin taraması, tanımsız anahtar
-  taraması ve yer tutucu imzası karşılaştırması.
+- **H (çeviri)** ekran, savaş ve olay katmanlarındaki ~300 sabit Türkçe
+  metni anahtara taşıdı; oyunun tamamı 11 dile açık. `test_localization.gd`
+  üç yeni koruma kazandı (sabit metin taraması, tanımsız anahtar taraması,
+  yer tutucu imzası) ve üçü de gerçek artık yakaladı - sonuncusu İngilizce
+  bir savaş satırındaki argüman sırası hatasını.
+- **I (moral)** bkz. Morale Rules. Moral ölü bir stattı; artık yol her gün
+  yıpratıyor, çıkış morali dünyanın haline bağlı ve `evt_mutiny` ilk kez
+  gerçekten ateşleniyor.
+- **A-E denetimi** "tamamlandı" işaretli aşamalarda üç eksik buldu ve
+  kapattı: borç defterinin hiçbir ekrana bağlı olmaması (`DebtPanel`),
+  çeviri taramasının yalnızca ui/world'ü kapsaması, ve `SAVE_VERSION`'ın
+  yazılıp hiç okunmaması.
 
 Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
 duruyor) ve **moral dengesi** - aşağıdaki açık madde.
 
-### Açık denge sorusu: isyan eşiği ulaşılmıyor
+### Açık denge sorusu: stres eşiği ulaşılmıyor
+
+`evt_stress_brawl` stres ≥ 70 istiyor ama simülatörde varış stresi ortalama
+~25 - yani olay katalogda var, oyunda yok. Bu, moralin az önce çözülen
+durumunun aynısı (bkz. Morale Rules): eşik gerçekte görülen aralığın çok
+üstünde. Aynı üç yön geçerli - eşiği indirmek, günlük bir stres birikimi
+eklemek, ya da olay havuzunun stres bilançosunu kaydırmak. Bir denge
+tercihi olduğu için dokunulmadı.
+
+### Çözülmüş: isyan eşiği (kayıt için)
 
 Bir süre "moral hiç düşmüyor" sanıldı; bu bir **ölçüm hatasıydı**.
 `simulate_journeys.gd` morali `finish_journey()`'den *sonra* okuyordu, o
@@ -1188,12 +1204,11 @@ hali, kalıcı olan stres), günlük bir aşınma yok (yalnızca kesikli olay
 darbeleri), ve olay havuzunun moral bilançosu neredeyse başabaş
 (+192 / -199).
 
-Üç olası yön, hiçbiri uygulanmadı - bu bir denge tercihi, hata değil:
-1. Eşiği ~40'a çekmek (en ucuzu; %65 tehlikede koşuların bir kısmı zaten
-   35-40 bandına iniyor).
-2. Günlük moral aşınması eklemek - uzun sefer kendiliğinden yıpratıcı olur.
-   "Oregon Trail" hissine en yakın seçenek, ama kısa seferi de etkiler.
-3. Olay havuzunun moral bilançosunu negatife kaydırmak.
+**Uygulanan çözüm (2+1):** günlük moral aşınması + eşiğin 40'a inmesi.
+Üçüncü bir adım da gerekti - eşik tek başına yetmedi, olay ağırlıklı çekimi
+hiç kazanamıyordu (bkz. Morale Rules'un son maddesi). Sonuç: varış morali
+~55, seferin dibi ~54 (en kötü 20), koşuların %7.5-10.5'i eşiğe iniyor ve
+`evt_mutiny` 600 koşuda 6 kez ateşleniyor.
 
 ## Quick Start
 
