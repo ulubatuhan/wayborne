@@ -446,8 +446,12 @@ func _hint(text: String) -> void:
 func _refresh_status() -> void:
 	var session: GameSession = GameState.get_session()
 	var location := WorldMapData.get_location_by_id(session.current_location_id)
-	var location_name := "Yolda" if location == null else location.location_name
-	_status_label.text = tr("UI_HUB_HUD") % [
+	# Türkçeye özgü harf taşımadığı için sabit metin taramasından kaçmıştı.
+	var location_name := tr("UI_HUB_ON_THE_ROAD") if location == null else location.location_name
+	var debt_note := ""
+	if session.get_total_debt() > 0:
+		debt_note = tr("UI_HUD_DEBT") % session.get_total_debt()
+	_status_label.text = (tr("UI_HUB_HUD") + debt_note) % [
 		location_name,
 		session.wallet.balance,
 		session.get_provisions(),

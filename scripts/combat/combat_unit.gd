@@ -154,10 +154,10 @@ func get_effective_damage_bonus() -> int:
 ## seçenekler).
 func get_skill_block_reason(skill: CombatSkill) -> String:
 	if not skill.can_use_from(position):
-		return "%d. mevkiden kullanılamaz" % position
+		return tr("CBT_BLOCK_POSITION") % position
 	var remaining := get_cooldown(skill.skill_id)
 	if remaining > 0:
-		return "%d tur bekliyor" % remaining
+		return tr("CBT_BLOCK_COOLDOWN") % remaining
 	return ""
 
 func can_use_skill(skill: CombatSkill) -> bool:

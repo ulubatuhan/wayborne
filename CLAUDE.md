@@ -343,6 +343,16 @@ can be lost.
   still shows the old debt, so the player is billed twice for it.
 - Provisions still never go below zero, but zero means you cannot feed the
   caravan: hunger and morale losses follow.
+- **Debt the player cannot see is indistinguishable from a bug.**
+  `DebtPanel` (embedded in the Merchants' Guild, scene-less like
+  `PurificationPanel`) is where debts are read, paid and restructured; the
+  total also rides on the city and road HUDs. The ledger shipped without any
+  screen at all for a while - interest accrued and reputation drained
+  entirely out of sight.
+- **`SAVE_VERSION` is read, not just written.** `_migrate_save()` is a real
+  (currently empty) hook: every field is loaded with `.get(key, default)`,
+  so added fields need no migration, but a field whose *meaning* changes
+  does - and a version number nobody reads is a hook nobody remembers.
 
 ### Morale Rules
 
@@ -619,19 +629,28 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   `OnboardingPanel.TOPIC_KEYS`). Write the keys out in full rather than
   assembling them at runtime (`tr("%s_TITLE" % topic)`), or neither the
   undefined-key scan nor a translator searching the codebase can find them.
-- **The screen layer is keyed too, and a test keeps it that way.**
-  `test_localization.gd` scans `scripts/ui` and `scripts/world` for string
-  literals containing Turkish-specific letters and fails on any it finds, so
-  a new screen string cannot quietly ship untranslated. The F1 developer
-  scenes (`haggling.gd`, `combat_test.gd`, `test_selector.gd`) are exempt by
-  name - they never reach a player, and keying them would only give
-  translators busywork.
+- **Every layer that can show text is keyed, and a test keeps it that way.**
+  `test_localization.gd` scans *all* of `scripts/` for string literals
+  containing Turkish-specific letters. It started at `scripts/ui` +
+  `scripts/world` only, and that narrow scope hid a real gap: the combat log
+  (`combat_encounter.gd`), the event-effect lines
+  (`event_effect_applier.gd`), culture perk descriptions and equipment slot
+  names are all player-facing and were still nailed to Turkish.
+  Two exemption lists, both deliberate: the F1 developer scenes
+  (`haggling.gd`, `combat_test.gd`, `test_selector.gd`) never reach a player,
+  and `culture_catalog.gd`/`recruit_catalog.gd`/`user_settings.gd` hold
+  proper nouns - name pools, and **language names, which must stay in their
+  own language** or a player cannot find the one they read.
 - **A translation must carry the same format arguments, in the same order,
   as the source.** GDScript's `%` operator has no positional form
   (`%2$s`), so a reordered or dropped `%d` crashes the game the moment that
   line is printed - and only in that language, where nobody testing in
   Turkish would ever see it. `test_localization.gd` compares the
-  placeholder signature of every cell against its Turkish source.
+  placeholder signature of every cell against its Turkish source, and it
+  caught exactly that: an English combat line that reordered `%s`/`%d`.
+  A format argument is only counted when it ends in a real conversion
+  character (`d s f x X o c`) - otherwise plain prose like "%30 az" or
+  "10% discount" reads as a placeholder and the check fires on nothing.
 - **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
   resolves through the translation server, so without pinning, assertions on
   display names would pass or fail depending on the machine's language.

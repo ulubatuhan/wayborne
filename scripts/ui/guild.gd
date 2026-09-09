@@ -8,6 +8,7 @@ extends Control
 ## (finish_journey) itibar cezası uygulanır.
 
 var _session: GameSession
+var _debt_panel: DebtPanel
 var _rows: Array[Dictionary] = []
 
 # Kontrat listesi büyüdükçe geri tuşunun ekrandan taşmaması için pano
@@ -31,9 +32,26 @@ func _ready() -> void:
 	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
 	_info_label.text = tr("UI_GUILD_HINT")
 
+	# Borç defteri lonca ekranında: alacaklı da kontrat da aynı deftere
+	# yazılır. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı değildi -
+	# kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu bunu
+	# göremiyordu.
+	_content.add_child(HSeparator.new())
+	_debt_panel = DebtPanel.new()
+	_content.add_child(_debt_panel)
+	_debt_panel.setup(_session)
+	_debt_panel.ledger_changed.connect(_rebuild)
+	_session.wallet.balance_changed.connect(_on_wallet_changed)
+
 	_rebuild()
 
+func _on_wallet_changed(_new_balance: int) -> void:
+	if _debt_panel != null:
+		_debt_panel.refresh()
+
 func _rebuild() -> void:
+	if _debt_panel != null:
+		_debt_panel.refresh()
 	_clear_children(_contract_list)
 	_clear_children(_accepted_list)
 	_rows.clear()

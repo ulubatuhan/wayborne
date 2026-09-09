@@ -36,7 +36,12 @@ func _refresh_title() -> void:
 	var wagon_note := tr("UI_PLANNER_WAGONS") % _session.owned_wagon_count
 	if _session.owned_wagon_damaged > 0:
 		wagon_note += tr("UI_CITY_DAMAGED_SUFFIX") % _session.owned_wagon_damaged
-	_title_label.text = tr("UI_CITY_HUD") % [
+	# Borç görünmezse oyuncu batmakta olduğunu ancak lonca ekranına
+	# girdiğinde fark eder (bkz. DebtPanel).
+	var debt_note := ""
+	if _session.get_total_debt() > 0:
+		debt_note = tr("UI_HUD_DEBT") % _session.get_total_debt()
+	_title_label.text = (tr("UI_CITY_HUD") + debt_note) % [
 		city_name,
 		_session.wallet.balance,
 		_session.get_provisions(),

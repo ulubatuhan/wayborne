@@ -47,25 +47,37 @@ var charisma: int = BASE_VALUE
 ## data/locale/game.csv). Bunlar static func olduğu için tr() değil
 ## TranslationServer.translate() kullanılıyor - tr() bir Object örnek
 ## metodu (bkz. CLAUDE.md Localization Rules).
-const _KIND_KEYS: Dictionary = {
-	Kind.STRENGTH: "STAT_STRENGTH",
-	Kind.AGILITY: "STAT_AGILITY",
-	Kind.ENDURANCE: "STAT_ENDURANCE",
-	Kind.INTELLECT: "STAT_INTELLECT",
-	Kind.PERCEPTION: "STAT_PERCEPTION",
-	Kind.CHARISMA: "STAT_CHARISMA",
+## Anahtarlar tam yazılıyor, "%s_NAME" gibi çalışma anında birleştirilmiyor:
+## birleştirilen bir anahtarı ne test_localization.gd'nin tanımsız-anahtar
+## taraması görebilir ne de bir çevirmen kod içinde arayabilir.
+const _KIND_NAME_KEYS: Dictionary = {
+	Kind.STRENGTH: "STAT_STRENGTH_NAME",
+	Kind.AGILITY: "STAT_AGILITY_NAME",
+	Kind.ENDURANCE: "STAT_ENDURANCE_NAME",
+	Kind.INTELLECT: "STAT_INTELLECT_NAME",
+	Kind.PERCEPTION: "STAT_PERCEPTION_NAME",
+	Kind.CHARISMA: "STAT_CHARISMA_NAME",
+}
+
+const _KIND_DESC_KEYS: Dictionary = {
+	Kind.STRENGTH: "STAT_STRENGTH_DESC",
+	Kind.AGILITY: "STAT_AGILITY_DESC",
+	Kind.ENDURANCE: "STAT_ENDURANCE_DESC",
+	Kind.INTELLECT: "STAT_INTELLECT_DESC",
+	Kind.PERCEPTION: "STAT_PERCEPTION_DESC",
+	Kind.CHARISMA: "STAT_CHARISMA_DESC",
 }
 
 static func kind_name(kind: Kind) -> String:
-	if not _KIND_KEYS.has(kind):
+	if not _KIND_NAME_KEYS.has(kind):
 		return "?"
-	return String(TranslationServer.translate("%s_NAME" % _KIND_KEYS[kind]))
+	return String(TranslationServer.translate(String(_KIND_NAME_KEYS[kind])))
 
 ## Statın oyunda ne işe yaradığı - karakter ekranında gösterilir.
 static func kind_description(kind: Kind) -> String:
-	if not _KIND_KEYS.has(kind):
+	if not _KIND_DESC_KEYS.has(kind):
 		return ""
-	return String(TranslationServer.translate("%s_DESC" % _KIND_KEYS[kind]))
+	return String(TranslationServer.translate(String(_KIND_DESC_KEYS[kind])))
 
 func get_value(kind: Kind) -> int:
 	match kind:

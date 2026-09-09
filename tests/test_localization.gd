@@ -164,6 +164,10 @@ func _test_placeholders_match_across_locales(t) -> void:
 	)
 
 ## "%d", "%s", "%.1f", "%+d" gibi argümanlar; "%%" kaçışı atlanır.
+## GDScript'in desteklediği dönüşüm karakterleri.
+const CONVERSIONS: String = "difsxXoc"
+
+
 func _placeholders(text: String) -> Array[String]:
 	var found: Array[String] = []
 	var index := 0
@@ -175,13 +179,20 @@ func _placeholders(text: String) -> Array[String]:
 		if cursor < text.length() and text[cursor] == "%":
 			index = cursor + 1
 			continue
-		while cursor < text.length() and "+- #0123456789.".contains(text[cursor]):
+		# Boşluk bilerek yok: printf'te geçerli bir bayrak ama pratikte
+		# "%15 fazla" / "10% discount" gibi düz yüzde ifadelerini argüman
+		# sanmamıza yol açıyordu.
+		while cursor < text.length() and "+-#0123456789.".contains(text[cursor]):
 			cursor += 1
-		if cursor < text.length():
+		# Gerçek bir biçim argümanı bir dönüşüm karakteriyle biter. Bu kontrol
+		# olmadan "%30 az" gibi düz bir yüzde ifadesi argüman sanılıyordu -
+		# Türkçe metin sahte bir yer tutucu taşıyor, İngilizcesi ("30% less")
+		# taşımıyor görünüyordu.
+		if cursor < text.length() and CONVERSIONS.contains(text[cursor]):
 			found.append("%" + text[cursor])
 			index = cursor + 1
 		else:
-			index = cursor
+			index = maxi(cursor, index + 1)
 	return found
 
 ## Koddan çağrılan her anahtar bir CSV'de tanımlı olmalı. Tanımsız anahtar
@@ -207,6 +218,8 @@ func _test_every_referenced_key_exists(t) -> void:
 func _test_no_hardcoded_prose_in_screens(t) -> void:
 	var offenders: Array[String] = []
 	for path in _screen_scripts():
+		if PROSE_EXEMPT_SCRIPTS.has(path.get_file()):
+			continue
 		for line in _read_text(path).split("\n"):
 			var stripped := line.strip_edges()
 			if stripped.begins_with("#"):
@@ -263,10 +276,31 @@ func _all_keys() -> Dictionary:
 			keys[str(rows[i][0])] = true
 	return keys
 
-## Oyuncunun gördüğü ekranlar. F1 geliştirici sahneleri (haggling/combat
-## test ekranı) bilerek dışarıda: oyuna girmiyorlar, çevrilmeleri
-## çevirmene boşuna iş çıkarırdı.
-const SCREEN_DIRS: Array[String] = ["res://scripts/ui", "res://scripts/world"]
+## Oyuncuya metin gösterebilen her katman. Başta yalnızca ui/world
+## taranıyordu ve bu gerçek bir boşluk bıraktı: savaş günlüğü
+## (combat_encounter.gd), olay etki satırları (event_effect_applier.gd),
+## kültür perk açıklamaları ve ekipman slot adları da oyuncuya görünüyor
+## ama taramanın dışındaydı, yani Türkçeye çivili kalmışlardı.
+##
+## F1 geliştirici sahneleri (haggling/combat test ekranı) bilerek dışarıda:
+## oyuna girmiyorlar, çevrilmeleri çevirmene boşuna iş çıkarırdı.
+const SCREEN_DIRS: Array[String] = [
+	"res://scripts/ui",
+	"res://scripts/world",
+	"res://scripts/combat",
+	"res://scripts/events",
+	"res://scripts/economy",
+	"res://scripts/travel",
+	"res://scripts/character",
+	"res://scripts/autoload",
+]
+
+## İsim havuzları ve id'ler: özel isimler çevrilmez, çevrilmemeli.
+## Dil adları bilerek çevrilmez: dil seçici her dili **kendi dilinde**
+## gösterir, yoksa aradığı dili bulamayan oyuncu seçemez.
+const PROSE_EXEMPT_SCRIPTS: Array[String] = [
+	"culture_catalog.gd", "recruit_catalog.gd", "user_settings.gd",
+]
 const DEV_ONLY_SCRIPTS: Array[String] = ["haggling.gd", "combat_test.gd", "test_selector.gd"]
 
 func _screen_scripts() -> Array[String]:

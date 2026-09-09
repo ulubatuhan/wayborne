@@ -62,7 +62,7 @@ func _init(
 ## Savaşı başlatır ve sıra düşmandaysa onların hamlelerini işler; sıra
 ## oyuncuya gelince durur.
 func start() -> void:
-	_emit_log("%s yolu kesti! %d kişilik kadron karşılarında." % [enemy_label, player_units.size()])
+	_emit_log(tr("CBT_LOG_OPENING") % [enemy_label, player_units.size()])
 	_run_until_player_turn()
 
 func get_active_unit() -> CombatUnit:
@@ -125,7 +125,7 @@ func swap_player_positions(first: CombatUnit, second: CombatUnit) -> bool:
 	first.position = second.position
 	second.position = temp
 	player_units.sort_custom(func(a, b): return a.position < b.position)
-	_emit_log("%s ile %s yer değiştirdi." % [first.display_name, second.display_name])
+	_emit_log(tr("CBT_LOG_SWAP") % [first.display_name, second.display_name])
 	_after_action()
 	return true
 
@@ -180,13 +180,13 @@ func _try_refuse_order(unit: CombatUnit) -> bool:
 		return false
 	if _rng.randi_range(1, 100) > STRESS_REFUSAL_CHANCE:
 		return false
-	_emit_log("%s emirlere kulak asmıyor." % unit.display_name)
+	_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
 	return true
 
 func _run_enemy_turn(unit: CombatUnit) -> void:
 	var choice := _pick_enemy_action(unit)
 	if choice.is_empty():
-		_emit_log("%s hizasını düzeltiyor." % unit.display_name)
+		_emit_log(tr("CBT_LOG_REPOSITION") % unit.display_name)
 		_shuffle_forward(unit)
 		return
 	var skill: CombatSkill = choice.skill
@@ -224,7 +224,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 		var healed := _roll_heal(unit, skill)
 		target.apply_heal(healed)
 		_apply_skill_modifier(skill, target)
-		_emit_log("%s, %s yeteneğiyle %s'in %d canını sardı." % [
+		_emit_log(tr("CBT_LOG_HEAL") % [
 			unit.display_name, skill.display_name, target.display_name, healed
 		])
 		return
@@ -233,7 +233,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	## atmadan doğrudan uygulanır - kendine/yoldaşa şans devreye girmez.
 	if skill.target_kind != CombatSkill.Target.ENEMY and skill.base_damage == 0:
 		_apply_skill_modifier(skill, target)
-		_emit_log("%s, %s yeteneğini kullandı." % [unit.display_name, skill.display_name])
+		_emit_log(tr("CBT_LOG_SKILL") % [unit.display_name, skill.display_name])
 		return
 
 	var hit_chance := clampi(
@@ -242,7 +242,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 		MAX_HIT_CHANCE
 	)
 	if _rng.randi_range(1, 100) > hit_chance:
-		_emit_log("%s ıskaladı (%s)." % [unit.display_name, skill.display_name])
+		_emit_log(tr("CBT_LOG_MISS") % [unit.display_name, skill.display_name])
 		return
 
 	var is_crit := _rng.randi_range(1, 100) <= unit.crit_chance + skill.crit_bonus
@@ -251,19 +251,19 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	_apply_skill_modifier(skill, target)
 
 	if is_crit:
-		_emit_log("KRİTİK! %s, %s ile %s'e %d hasar verdi." % [
+		_emit_log(tr("CBT_LOG_CRIT") % [
 			unit.display_name, skill.display_name, target.display_name, damage
 		])
 	else:
-		_emit_log("%s, %s ile %s'e %d hasar verdi." % [
+		_emit_log(tr("CBT_LOG_HIT") % [
 			unit.display_name, skill.display_name, target.display_name, damage
 		])
 
 	if not target.is_alive():
 		if target.is_player_side:
-			_emit_log("%s yere yığıldı." % target.display_name)
+			_emit_log(tr("CBT_LOG_DOWNED_ALLY") % target.display_name)
 		else:
-			_emit_log("%s devrildi." % target.display_name)
+			_emit_log(tr("CBT_LOG_DOWNED_ENEMY") % target.display_name)
 		_repack(_side_of(target))
 
 func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:
@@ -315,12 +315,12 @@ func _check_end() -> bool:
 		return true
 	if not _any_alive(enemy_units):
 		state = State.VICTORY
-		_emit_log("%s dağıldı. Yol yeniden senin." % enemy_label)
+		_emit_log(tr("CBT_LOG_VICTORY") % enemy_label)
 		state_changed.emit(state)
 		return true
 	if not _any_alive(player_units):
 		state = State.DEFEAT
-		_emit_log("Kadron yere serildi. %s kervana daldı." % enemy_label)
+		_emit_log(tr("CBT_LOG_DEFEAT") % enemy_label)
 		state_changed.emit(state)
 		return true
 	return false

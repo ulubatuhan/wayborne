@@ -25,7 +25,22 @@ class Result extends RefCounted:
 	var combat_kinds: Array[String] = []
 	## Yolda partiye katılma teklifi; değer istenen ücrettir.
 	var recruit_requests: Array[int] = []
+
+	## Yol ekranı bir olay çözümünde **tek** yan kanal açabilir (savaş,
+	## pazarlık ya da tayfa - bkz. road_journey.gd _apply_side_channels):
+	## panellerin hepsi aynı yeri kaplıyor ve zaman ikisi birden açıkken
+	## akmıyor. Bugün hiçbir olay ikisini birden istemiyor; isteseydi
+	## ikincisi sessizce düşerdi. Bu sayaç o sessizliği ölçülebilir kılıyor
+	## (bkz. tests/test_event_effects.gd).
 	var unlocked_event_ids: Array[String] = []
+
+	func get_side_channel_count() -> int:
+		return combat_requests.size() + recruit_requests.size() + haggling_requests.size()
+
+## tr() bir Object örnek metodu, buradaki her şey static (bkz. CLAUDE.md
+## Localization Rules) - o yüzden çeviriler TranslationServer'dan geçiyor.
+static func _t(key: String) -> String:
+	return String(TranslationServer.translate(key))
 
 static func apply(effects: Array[EventEffect], session: GameSession) -> Result:
 	var result := Result.new()
@@ -40,52 +55,52 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 		EventEffect.Type.PROVISIONS:
 			var changed := session.change_provisions(effect.amount)
 			if changed != 0:
-				result.lines.append("Erzak %+d" % changed)
+				result.lines.append(_t("EFF_PROVISIONS") % changed)
 		EventEffect.Type.ITEM_ADD:
 			var item := ItemCatalog.get_item(effect.text_value)
 			if item != null and session.inventory.add_item(item, effect.amount):
-				result.lines.append("%s +%d" % [item.item_name, effect.amount])
+				result.lines.append(_t("EFF_ITEM_ADD") % [item.item_name, effect.amount])
 		EventEffect.Type.ITEM_REMOVE:
 			var removed := session.inventory.remove_item(effect.text_value, effect.amount)
 			if removed:
-				result.lines.append("%s -%d" % [effect.text_value, effect.amount])
+				result.lines.append(_t("EFF_ITEM_REMOVE") % [effect.text_value, effect.amount])
 		EventEffect.Type.WAGON_DAMAGE:
 			# Arabacı elinden geldiğince hasarı azaltır ama tamamen sıfırlamaz.
 			var reduced := maxi(0, effect.amount - session.get_duty_flat_reduction(DutyCatalog.ARABACI))
 			var damaged := session.caravan.damage_wagons(reduced)
 			if damaged > 0:
-				result.lines.append("%d vagon hasar aldı" % damaged)
+				result.lines.append(_t("EFF_WAGON_DAMAGE") % damaged)
 		EventEffect.Type.WAGON_LOSE:
 			var lost := session.caravan.lose_wagons(effect.amount)
 			if lost > 0:
-				result.lines.append("%d vagon kaybedildi" % lost)
+				result.lines.append(_t("EFF_WAGON_LOSE") % lost)
 		EventEffect.Type.WAGON_REPAIR:
 			var repaired := session.caravan.repair_wagons(effect.amount)
 			if repaired > 0:
-				result.lines.append("%d vagon onarıldı" % repaired)
+				result.lines.append(_t("EFF_WAGON_REPAIR") % repaired)
 		EventEffect.Type.MERCHANT_LEAVE:
 			var left := session.caravan.remove_merchants(effect.amount)
 			for merchant_name in left:
-				result.lines.append("%s kervandan ayrıldı" % merchant_name)
+				result.lines.append(_t("EFF_MERCHANT_LEAVE") % merchant_name)
 		EventEffect.Type.MORALE:
 			session.caravan.change_morale(effect.amount)
-			result.lines.append("Moral %+d (şimdi %d)" % [effect.amount, session.caravan.morale])
+			result.lines.append(_t("EFF_MORALE") % [effect.amount, session.caravan.morale])
 		EventEffect.Type.STRESS:
 			session.change_stress(effect.amount)
-			result.lines.append("Stres %+d (şimdi %d)" % [effect.amount, session.party_stress])
+			result.lines.append(_t("EFF_STRESS") % [effect.amount, session.party_stress])
 		EventEffect.Type.TRAVEL_DAYS:
 			session.journey_days_remaining = maxi(0, session.journey_days_remaining + effect.amount)
-			result.lines.append("Yol %+d gün" % effect.amount)
+			result.lines.append(_t("EFF_TRAVEL_DAYS") % effect.amount)
 		EventEffect.Type.DANGER:
 			session.danger_level = clampf(session.danger_level + (effect.amount / 100.0), 0.0, 1.0)
-			result.lines.append("Tehlike %+d%%" % effect.amount)
+			result.lines.append(_t("EFF_DANGER") % effect.amount)
 		EventEffect.Type.REPUTATION:
 			session.reputation += effect.amount
-			result.lines.append("İtibar %+d" % effect.amount)
+			result.lines.append(_t("EFF_REPUTATION") % effect.amount)
 		EventEffect.Type.DOCUMENT_LOSE:
 			var seized := session.caravan.lose_documents(effect.amount)
 			if seized > 0:
-				result.lines.append("%d evraka el konuldu" % seized)
+				result.lines.append(_t("EFF_DOCUMENT_LOSE") % seized)
 		EventEffect.Type.SET_FLAG:
 			session.set_flag(effect.text_value)
 		EventEffect.Type.CLEAR_FLAG:
@@ -94,11 +109,11 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.unlocked_event_ids.append(effect.text_value)
 		EventEffect.Type.TRIGGER_HAGGLING:
 			result.haggling_requests.append(effect.amount)
-			result.lines.append("Pazarlık başlıyor…")
+			result.lines.append(_t("EFF_HAGGLE_OPENING"))
 		EventEffect.Type.TRIGGER_COMBAT:
 			result.combat_requests.append(effect.amount)
 			result.combat_kinds.append(effect.text_value if not effect.text_value.is_empty() else "bandit")
-			result.lines.append("Silahlara davranılıyor…")
+			result.lines.append(_t("EFF_COMBAT_OPENING"))
 		EventEffect.Type.TRIGGER_RECRUIT:
 			result.recruit_requests.append(effect.amount)
 		EventEffect.Type.GRANT_TRAIT:
@@ -122,7 +137,7 @@ static func _apply_grant_trait(effect: EventEffect, session: GameSession, result
 	if character.grant_trait(effect.text_value, session.total_days_elapsed):
 		var trait_resource := TraitCatalog.get_trait(effect.text_value)
 		if trait_resource != null:
-			result.lines.append("Yeni huy: %s" % trait_resource.display_name)
+			result.lines.append(_t("EFF_TRAIT_GRANTED") % trait_resource.display_name)
 
 ## Bulunan tılsım/parça doğrudan takılmaz - kervanın ekipman deposuna
 ## düşer (bkz. GameSession.equipment_inventory), oyuncu karakter
@@ -133,7 +148,7 @@ static func _apply_grant_equipment(effect: EventEffect, session: GameSession, re
 	if equipment_resource == null:
 		return
 	session.add_equipment(effect.text_value, maxi(1, effect.amount))
-	result.lines.append("Bulundu: %s" % equipment_resource.display_name)
+	result.lines.append(_t("EFF_EQUIPMENT_FOUND") % equipment_resource.display_name)
 
 ## Kervan borca batabilir: ödemek zorunda olduğun bedel kesende yoksa kese
 ## eksiye düşer ve fark açık hesaba yazılır (bkz. GameSession.spend_or_owe).
@@ -143,15 +158,15 @@ static func _apply_grant_equipment(effect: EventEffect, session: GameSession, re
 static func _apply_gold(effect: EventEffect, session: GameSession, result: Result) -> void:
 	if effect.amount >= 0:
 		session.wallet.earn(effect.amount)
-		result.lines.append("Altın +%d" % effect.amount)
+		result.lines.append(_t("EFF_GOLD_GAIN") % effect.amount)
 		return
 
 	var demanded := -effect.amount
 	var before := session.wallet.balance
 	session.spend_or_owe(demanded)
-	result.lines.append("Altın -%d" % demanded)
+	result.lines.append(_t("EFF_GOLD_LOSS") % demanded)
 	if before >= 0 and session.wallet.balance < 0:
-		result.lines.append("Kese boşaldı - kervan borca girdi")
+		result.lines.append(_t("EFF_WENT_INTO_DEBT"))
 
 ## Ekonomik/politik bir olayın fiyata süreli etkisi - grev, kıtlık, ambargo,
 ## bereketli hasat. text_value "location_id|item_id|gün" biçiminde; item_id
@@ -171,7 +186,7 @@ static func _apply_market_shock(
 	session.market.add_shock(
 		location_id, item_id, multiplier, session.total_days_elapsed + maxi(1, duration)
 	)
-	result.lines.append("Piyasa hareketlendi (%+d%%, %d gün)" % [effect.amount, duration])
+	result.lines.append(_t("EFF_MARKET_SHOCK") % [effect.amount, duration])
 
 ## Yolun durumu bir süreliğine değişir - çığ, sel, eşkıya baskını ya da tam
 ## tersi, yolu temizleyen bir devriye. Rotanın kendi tablosuna dokunulmuyor
@@ -204,7 +219,7 @@ static func _apply_route_change(
 
 	var from_location := WorldMapData.get_location_by_id(from_id)
 	var to_location := WorldMapData.get_location_by_id(to_id)
-	result.lines.append("%s - %s yolu: %s (%d gün)" % [
+	result.lines.append(_t("EFF_ROUTE_CHANGE") % [
 		from_location.location_name if from_location != null else from_id,
 		to_location.location_name if to_location != null else to_id,
 		RouteConditions.get_state_label(state),
@@ -251,7 +266,7 @@ static func _apply_roll_encounter(
 	if session.get_best_effective_stat(CharacterStats.Kind.PERCEPTION) >= NpcDisposition.READ_PERCEPTION_THRESHOLD:
 		session.set_flag("%s_read" % prefix)
 		result.lines.append(
-			"Sezgin bir şeyler fısıldıyor: %s" % tr_disposition(disposition)
+			_t("EFF_DISPOSITION_HINT") % tr_disposition(disposition)
 		)
 
 static func tr_disposition(disposition: String) -> String:

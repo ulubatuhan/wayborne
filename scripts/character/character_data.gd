@@ -13,12 +13,14 @@ const DEFAULT_HEIGHT_CM: int = 172
 const TALL_THRESHOLD_CM: int = 182
 const SHORT_THRESHOLD_CM: int = 166
 
+## Anahtar tutulur, metin okunduğu yerde çözülür - `const` içinde tr()
+## çağrılamaz (bkz. CLAUDE.md Localization Rules).
 const SKIN_TONE_NAMES: Array[String] = [
-	"Açık",
-	"Buğday",
-	"Zeytin",
-	"Bakır",
-	"Koyu",
+	"SKIN_TONE_FAIR",
+	"SKIN_TONE_WHEAT",
+	"SKIN_TONE_OLIVE",
+	"SKIN_TONE_COPPER",
+	"SKIN_TONE_DARK",
 ]
 
 static var _skin_tone_colors: Array[Color] = [
@@ -96,8 +98,10 @@ var is_player: bool = false
 static func get_skin_tone_color(index: int) -> Color:
 	return _skin_tone_colors[clampi(index, 0, _skin_tone_colors.size() - 1)]
 
+## static func olduğu için tr() yerine TranslationServer (bkz. CLAUDE.md).
 static func get_skin_tone_name(index: int) -> String:
-	return SKIN_TONE_NAMES[clampi(index, 0, SKIN_TONE_NAMES.size() - 1)]
+	var key := SKIN_TONE_NAMES[clampi(index, 0, SKIN_TONE_NAMES.size() - 1)]
+	return String(TranslationServer.translate(key))
 
 ## Kültür bonuslarını taban statlara uygulayıp canı dolduran fabrika.
 static func create(

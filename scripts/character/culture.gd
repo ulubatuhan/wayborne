@@ -38,7 +38,13 @@ var description: String:
 ## Tavernadaki rota dedikodusu fiyat çarpanı (liman şehri her dedikoduyu duyar).
 @export var rumor_cost_multiplier: float = 1.0
 
-@export var perk_text: String = ""
+## Perkin oyuncuya gösterilen metni - anahtar saklanır, metin hesaplanır
+## (bkz. CLAUDE.md Localization Rules: katalog kaynakları prose değil
+## anahtar tutar).
+@export var perk_text_key: String = ""
+
+var perk_text: String:
+	get: return tr(perk_text_key)
 
 func get_stat_bonus(kind: CharacterStats.Kind) -> int:
 	return int(stat_bonuses.get(kind, 0))

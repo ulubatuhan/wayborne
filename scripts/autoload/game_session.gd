@@ -997,7 +997,27 @@ func to_save_dict() -> Dictionary:
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
 ## sıfır başlangıç erzağıyla, aksi halde erzak iki kere eklenir.
-func load_from_dict(data: Dictionary) -> void:
+## Kayıttaki sürüm numarası. Şu ana kadar her alan `.get(key, default)` ile
+## okunduğu için eski kayıtlar kendiliğinden açılıyor (bkz.
+## tests/test_save_migration.gd) ve sürüme bakmaya gerek kalmıyor. Ama
+## "yazılıp hiç okunmayan" bir alan, gerçekten göç gerektiren ilk değişiklikte
+## kimsenin aklına gelmez - o yüzden okuma noktası ve göç kancası şimdiden
+## burada duruyor.
+func get_save_version(data: Dictionary) -> int:
+	return int(data.get("version", 0))
+
+## Sürümden sürüme taşıma. Bugün yapacak bir şey yok: `.get` varsayılanları
+## alan eklemelerini zaten karşılıyor. Bir alanın **anlamı** değiştiğinde
+## (yeniden adlandırma, birim değişikliği, bölünme) buraya bir dal eklenir.
+func _migrate_save(data: Dictionary) -> Dictionary:
+	var version := get_save_version(data)
+	if version >= SAVE_VERSION:
+		return data
+	# v0 (sürümsüz) -> v1: yalnızca alan eklendi, dönüştürme gerekmiyor.
+	return data
+
+func load_from_dict(raw_data: Dictionary) -> void:
+	var data := _migrate_save(raw_data)
 	# Kese eksi kaydedilmiş olabilir (borca batmış kervan) - earn() negatifi
 	# de taşır, ayrıca kenetleme yok.
 	wallet.earn(int(data.get("gold", 0)))
