@@ -60,10 +60,6 @@ func _initialize() -> void:
 
 	quit(0)
 
-## evt_mutiny'nin eligibility koşulu (bkz. EventCatalog._mutiny). Simülatör
-## bu eşiğe hiç inilmediğini gösteriyorsa olay katalogda var ama oyunda yok.
-const MUTINY_MORALE_THRESHOLD: int = 25
-
 func _run_batch(danger: float) -> Dictionary:
 	var net_total := 0
 	var morale_total := 0
@@ -88,7 +84,7 @@ func _run_batch(danger: float) -> Dictionary:
 		morale_worst = mini(morale_worst, int(outcome.morale_low))
 		# evt_mutiny moral <= 25 istiyor: o eşiğe hiç inilmiyorsa olay
 		# katalogda var ama oyunda yok demektir.
-		if int(outcome.morale_low) <= MUTINY_MORALE_THRESHOLD:
+		if int(outcome.morale_low) <= EventCatalog.MUTINY_MORALE_THRESHOLD:
 			mutiny_reachable += 1
 		wagons_lost += int(outcome.wagons_lost)
 		contracts_lost += int(outcome.contracts_lost)
@@ -179,6 +175,11 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 
 	for day in range(1, JOURNEY_DAYS + 1):
 		session.journey_days_remaining = maxi(0, session.journey_days_remaining - 1)
+
+		# Simülatör GameSession.advance_day()'i çağırmıyor (kontrat süreleri
+		# bu döngüde işlenmiyor), o yüzden günlük moral aşınması burada elle
+		# uygulanıyor - yoksa ölçtüğü şey oyunun yaşadığı şey olmazdı.
+		session.caravan.apply_daily_drift()
 
 		var eaten := 1 + session.caravan.merchant_names.size()
 		eaten = maxi(1, int(round(eaten * session.get_daily_provision_multiplier())))
@@ -359,7 +360,7 @@ func _report(danger: float, stats: Dictionary) -> void:
 	])
 	print("    varış morali    ortalama %7.1f" % stats.morale_avg)
 	print("    moralin dibi    ortalama %7.1f   (en kötü %d · isyan eşiği %d)" % [
-		stats.morale_low_avg, stats.morale_worst, MUTINY_MORALE_THRESHOLD
+		stats.morale_low_avg, stats.morale_worst, EventCatalog.MUTINY_MORALE_THRESHOLD
 	])
 	print("    isyan eşiğine indi  %%%.1f koşuda" % stats.mutiny_reachable_pct)
 	print("    erzak tükendi   %%%.1f koşuda" % stats.starved_pct)

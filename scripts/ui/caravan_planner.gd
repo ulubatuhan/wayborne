@@ -21,6 +21,8 @@ var _required_provisions_label: Label
 var _current_provisions_label: Label
 var _shortfall_label: Label
 var _profit_label: Label
+var _morale_label: Label
+var _morale_reasons: VBoxContainer
 var _buy_provisions_button: Button
 var _confirm_button: Button
 var _result_label: Label
@@ -130,6 +132,15 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(_shortfall_label)
 	_content.add_child(_profit_label)
 
+	# Çıkış morali görünmezse mekanik sessiz bir cezaya dönüşür: oyuncu
+	# neden düşük moralle yola çıktığını göremez (bkz. GameSession.
+	# get_departure_morale_breakdown).
+	_content.add_child(HSeparator.new())
+	_morale_label = Label.new()
+	_content.add_child(_morale_label)
+	_morale_reasons = VBoxContainer.new()
+	_content.add_child(_morale_reasons)
+
 	_buy_provisions_button = Button.new()
 	_buy_provisions_button.pressed.connect(_on_buy_provisions_pressed)
 	_content.add_child(_buy_provisions_button)
@@ -154,6 +165,30 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
 	_content.add_child(back_button)
+
+## Kervanın yola hangi ruh haliyle çıkacağı ve nedeni.
+func _refresh_departure_morale() -> void:
+	var departure := _session.get_departure_morale()
+	_morale_label.text = tr("UI_PLANNER_DEPARTURE_MORALE") % [
+		departure, CaravanState.MAX_MORALE
+	]
+
+	for child in _morale_reasons.get_children():
+		_morale_reasons.remove_child(child)
+		child.queue_free()
+
+	var breakdown := _session.get_departure_morale_breakdown()
+	if breakdown.is_empty():
+		var good_day := Label.new()
+		good_day.text = tr("UI_MORALE_GOOD_DAY")
+		_morale_reasons.add_child(good_day)
+		return
+
+	for entry in breakdown:
+		var line := Label.new()
+		line.text = "  %s %+d" % [tr(String(entry["key"])), int(entry["amount"])]
+		line.modulate = SATISFIED_COLOR if int(entry["amount"]) > 0 else SHORTFALL_COLOR
+		_morale_reasons.add_child(line)
 
 func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	var row := HBoxContainer.new()
@@ -206,6 +241,7 @@ func _on_buy_provisions_pressed() -> void:
 	_session.change_provisions(shortfall)
 
 func _refresh() -> void:
+	_refresh_departure_morale()
 	_gold_label.text = tr("UI_PURSE") % _session.wallet.balance
 	_wagon_counter_label.text = tr("UI_PLANNER_WAGON_SLOTS") % [
 		_plan.get_used_wagon_count(),

@@ -168,6 +168,51 @@ func get_price_multiplier(item_id: String, location_id: String, day: int) -> flo
 	multiplier *= _get_shock_multiplier(location_id, item_id, day)
 	return clampf(multiplier, TOTAL_MULTIPLIER_MIN, TOTAL_MULTIPLIER_MAX)
 
+## --- Zamanın ruhu ---
+## "Bugün nasıl bir günde yola çıkıyoruz?" sorusunun cevabı, 0 (bolluk) ile
+## 1 (darlık) arasında. Yeni bir sistem icat etmiyor: zaten var olan mevsim,
+## fiyat şoku ve enflasyon katmanlarını tek sayıya indiriyor. Kıtlık, ambargo
+## ya da grev (bkz. EventEffect.Type.MARKET_SHOCK) fiyatı yukarı iten bir
+## şok olarak zaten modelleniyor - "kötü zaman" tam olarak bu.
+##
+## Kervanın yola hangi moralle çıktığını bu belirliyor (bkz.
+## GameSession.get_departure_morale): bereketli bir ilkbaharda kadro
+## keyifli, kıtlık kol gezen bir kışta değil.
+const HARDSHIP_WINTER: float = 0.30
+const HARDSHIP_AUTUMN_RELIEF: float = -0.10
+const HARDSHIP_PER_SHOCK_STEP: float = 0.60
+const HARDSHIP_INFLATION_WEIGHT: float = 0.35
+
+func get_hardship(location_id: String, day: int) -> float:
+	var hardship := 0.0
+
+	match get_season(day):
+		Season.WINTER:
+			hardship += HARDSHIP_WINTER
+		Season.AUTUMN:
+			# Hasat sonrası ambarlar dolu.
+			hardship += HARDSHIP_AUTUMN_RELIEF
+		_:
+			pass
+
+	# Fiyatı yukarı iten şok darlık, aşağı iten bolluk demek. Şehrin tamamını
+	# etkileyen şok (item_id boş) burada ayrıca ağırlıklandırılmıyor - kaç
+	# kalem etkilendiği değil, hayatın ne kadar pahalandığı önemli.
+	var shock_multiplier := 1.0
+	for shock in _shocks:
+		if int(shock["until_day"]) < day:
+			continue
+		if str(shock["location_id"]) != location_id:
+			continue
+		shock_multiplier *= float(shock["multiplier"])
+	hardship += (shock_multiplier - 1.0) * HARDSHIP_PER_SHOCK_STEP
+
+	# Uzun bir oyunda para değer kaybeder; bu da bir tür yorgunluk.
+	var inflation := get_inflation_multiplier(day) - 1.0
+	hardship += inflation * HARDSHIP_INFLATION_WEIGHT
+
+	return clampf(hardship, 0.0, 1.0)
+
 func to_save_dict() -> Dictionary:
 	return {
 		"pressure": _pressure.duplicate(),

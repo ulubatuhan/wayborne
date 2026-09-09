@@ -509,6 +509,10 @@ func advance_day() -> Array[String]:
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
 	route_conditions.advance_day(total_days_elapsed)
+	# Yolun kendisi yıpratır - yalnızca yoldayken (bkz.
+	# CaravanState.apply_daily_drift).
+	if is_journey_active():
+		caravan.apply_daily_drift()
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -711,6 +715,66 @@ func clear_flag(flag: String) -> void:
 func is_journey_active() -> bool:
 	return not journey_destination_id.is_empty()
 
+## --- Sefere çıkış morali ---
+## Moral artık her seferde dolu başlamıyor. Kervan yola dünyanın o günkü
+## haliyle çıkıyor: bereketli bir ilkbaharda, borcu olmayan, tanınan bir
+## kervanın kadrosu keyifli; kıtlık kol gezen bir kışta, alacaklıları
+## kapıda bekleyen yorgun bir kadro değil.
+##
+## Kaynakların hepsi zaten var olan sistemler - yeni bir "savaş/salgın"
+## mekaniği icat edilmiyor: darlık MarketConditions'ın şok+mevsim+enflasyon
+## katmanı (kıtlık, ambargo, grev hepsi MARKET_SHOCK), yorgunluk kalıcı
+## stres, güvensizlik vadesi geçmiş borç, gurur ise itibar.
+##
+## Stres ile moral ayrı stat olmaya devam ediyor (bkz. CLAUDE.md Stress
+## Rules): stres burada moralin *başlangıcını* etkiliyor, moral olup
+## bitince stres'e dönüşmüyor. Biri kervanın kalıcı yıpranması, diğeri o
+## seferin ruh hali.
+const DEPARTURE_MORALE_FLOOR: int = 45
+const DEPARTURE_HARDSHIP_WEIGHT: int = 30
+const DEPARTURE_STRESS_WEIGHT: int = 25
+const DEPARTURE_OVERDUE_DEBT_PENALTY: int = 10
+const DEPARTURE_REPUTATION_BONUS_CAP: int = 8
+const DEPARTURE_REPUTATION_PER_POINT: float = 0.5
+
+func get_departure_morale() -> int:
+	var morale := float(CaravanState.MAX_MORALE)
+	morale -= market.get_hardship(current_location_id, total_days_elapsed) * float(DEPARTURE_HARDSHIP_WEIGHT)
+	morale -= (float(party_stress) / float(MAX_STRESS)) * float(DEPARTURE_STRESS_WEIGHT)
+	if not debts.get_overdue_debts(total_days_elapsed).is_empty():
+		morale -= float(DEPARTURE_OVERDUE_DEBT_PENALTY)
+	morale += clampf(
+		float(reputation) * DEPARTURE_REPUTATION_PER_POINT,
+		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
+	)
+	return clampi(int(round(morale)), DEPARTURE_MORALE_FLOOR, CaravanState.MAX_MORALE)
+
+## Çıkış moralini oluşturan kalemler - planlayıcı ekranı oyuncuya bunu
+## gösteriyor. Neden düşük moralle yola çıktığını göremeyen oyuncu için
+## mekanik görünmez bir cezadan ibaret kalırdı.
+func get_departure_morale_breakdown() -> Array[Dictionary]:
+	var lines: Array[Dictionary] = []
+	var hardship := market.get_hardship(current_location_id, total_days_elapsed)
+	if hardship > 0.0:
+		lines.append({
+			"key": "UI_MORALE_HARDSHIP",
+			"amount": -int(round(hardship * float(DEPARTURE_HARDSHIP_WEIGHT))),
+		})
+	if party_stress > 0:
+		lines.append({
+			"key": "UI_MORALE_STRESS",
+			"amount": -int(round((float(party_stress) / float(MAX_STRESS)) * float(DEPARTURE_STRESS_WEIGHT))),
+		})
+	if not debts.get_overdue_debts(total_days_elapsed).is_empty():
+		lines.append({"key": "UI_MORALE_OVERDUE_DEBT", "amount": -DEPARTURE_OVERDUE_DEBT_PENALTY})
+	var pride := int(clampf(
+		float(reputation) * DEPARTURE_REPUTATION_PER_POINT,
+		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
+	))
+	if pride > 0:
+		lines.append({"key": "UI_MORALE_REPUTATION", "amount": pride})
+	return lines
+
 ## Planlayıcıda onaylanan kervanı yola çıkarır.
 func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan) -> void:
 	journey_origin_id = current_location_id
@@ -718,7 +782,7 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_total_days = maxi(1, days)
 	journey_days_remaining = journey_total_days
 	danger_level = danger
-	caravan = CaravanState.from_plan(plan)
+	caravan = CaravanState.from_plan(plan, get_departure_morale())
 
 ## Yolun ortasında planı değiştirmek. Şehirde kurulan plan bir niyet, bir
 ## taahhüt değil: geçit kapanır, erzak biter, kervan zarar görür ve hedef

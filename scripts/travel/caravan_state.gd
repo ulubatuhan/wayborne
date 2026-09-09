@@ -7,6 +7,17 @@ extends RefCounted
 const MIN_WAGONS: int = 1
 const MAX_MORALE: int = 100
 
+## Yolun kendisi yıpratır. Moral eskiden yalnızca kesikli olay darbeleriyle
+## düşüyordu, o yüzden uzun bir sefer kısa bir seferden daha yorucu
+## değildi ve moral tabanı hiç görülmüyordu (bkz. CLAUDE.md Morale Rules).
+## Küçük tutuluyor: bir günü tek başına belirlemesin, ama on beş gün
+## sonunda kendini göstersin.
+const MORALE_DRAIN_PER_DAY: int = 1
+
+## Aşınmanın altına inemeyeceği taban. Kervan yorulur ama yalnızca yürüdüğü
+## için isyan etmez - dibe vurmak için gerçekten kötü şeyler olmalı.
+const MORALE_DRIFT_FLOOR: int = 35
+
 var wagon_count: int = MIN_WAGONS
 var damaged_wagons: int = 0
 var merchant_names: Array[String] = []
@@ -28,8 +39,13 @@ var original_merchant_names: Array[String] = []
 var wagons_at_start: int = MIN_WAGONS
 var player_wagon_count_at_start: int = MIN_WAGONS
 
-static func from_plan(plan: CaravanPlan) -> CaravanState:
+## departure_morale, kervanın yola hangi ruh haliyle çıktığı: dünyanın o
+## günkü hali belirliyor (bkz. GameSession.get_departure_morale). Verilmezse
+## eski davranış - dolu moralle çıkış - korunuyor, yani bu katmanı bilmeyen
+## bir çağıran (testler, F1 sahte seferi) etkilenmiyor.
+static func from_plan(plan: CaravanPlan, departure_morale: int = MAX_MORALE) -> CaravanState:
 	var state := CaravanState.new()
+	state.morale = clampi(departure_morale, 0, MAX_MORALE)
 	state.wagon_count = plan.get_total_wagon_count()
 	state.wagons_at_start = state.wagon_count
 	state.player_wagon_count_at_start = plan.player_wagon_count
@@ -73,6 +89,14 @@ func remove_merchants(count: int) -> Array[String]:
 
 func change_morale(delta: int) -> void:
 	morale = clampi(morale + delta, 0, MAX_MORALE)
+
+## Yolda geçen her günün kendi bedeli. Yalnızca tabanın üstündeyken işler:
+## yürümenin tek başına kervanı isyana sürüklememesi gerekiyor, oraya
+## inmek için olayların da kötü gitmesi lazım.
+func apply_daily_drift() -> void:
+	if morale <= MORALE_DRIFT_FLOOR:
+		return
+	morale = maxi(MORALE_DRIFT_FLOOR, morale - MORALE_DRAIN_PER_DAY)
 
 func lose_documents(count: int) -> int:
 	var actually_lost := mini(count, documents)

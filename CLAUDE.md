@@ -344,6 +344,40 @@ can be lost.
 - Provisions still never go below zero, but zero means you cannot feed the
   caravan: hunger and morale losses follow.
 
+### Morale Rules
+
+Morale was a dead stat for a long time: it started at 100 on every journey,
+fell only through discrete event hits, and never reached `evt_mutiny`'s
+threshold. Worse, nobody noticed, because the balance simulator read
+`caravan.morale` *after* `finish_journey()` - which resets the caravan - so
+the report said exactly 100.0 every run.
+
+- **Morale is that journey's mood; stress is the caravan's permanent wear.**
+  They stay separate stats (see Stress Rules). Stress *influences* the
+  morale a journey starts with; it is never spent or converted.
+- **The road itself wears you down.** `CaravanState.apply_daily_drift()`
+  takes `MORALE_DRAIN_PER_DAY` every day on the road, so a long journey is
+  genuinely more tiring than a short one. It stops at
+  `MORALE_DRIFT_FLOOR` - walking alone must never be enough to trigger a
+  mutiny; events have to go badly too.
+- **Departure morale reflects the world, not a constant.**
+  `GameSession.get_departure_morale()` composes it from systems that already
+  exist rather than inventing a "war/plague" mechanic: hardship
+  (`MarketConditions.get_hardship` - season, price shocks, inflation; famine,
+  embargo and strikes are all already modelled as `MARKET_SHOCK`), party
+  stress, overdue debt, and reputation as a small pride bonus. It never
+  drops below `DEPARTURE_MORALE_FLOOR` - a caravan sets out weary, never
+  hopeless.
+- **The number is shown with its reasons.**
+  `get_departure_morale_breakdown()` feeds the planner screen; an invisible
+  penalty is indistinguishable from a bug to the player.
+- **Eligibility is not enough - a crisis has to win the weighted draw.**
+  Lowering the mutiny threshold to 40 made it eligible on 45 simulated days
+  and it still fired zero times, losing every draw to ~25 rivals. It needed
+  an `EventWeightModifier` (×8 below the threshold) before it appeared at
+  all. When an event is "in the catalog but not in the game", check the
+  draw, not just the condition.
+
 ### Economy Rules
 
 - **Profit is not only the price gap between cities.** `MarketPricing` holds

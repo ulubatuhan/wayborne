@@ -14,6 +14,15 @@ extends RefCounted
 ## her sefer ekranı girişinde paylaşmak güvenli ve gereksiz yeniden
 ## inşayı önlüyor.
 
+## İsyanın moral eşiği. Burada duruyor çünkü hem olayın koşulu hem denge
+## simülatörünün raporu aynı sayıyı okumalı - ayrı tutulduklarında simülatör
+## "isyan ulaşılabilir" derken olay ateşlenmeyebilir.
+##
+## 25'ten 40'a çekildi: ölçüm düzeltilince moralin dibinin ~60, en kötü
+## koşuda 35 olduğu görüldü, yani 25 hiçbir zaman görülmüyordu (bkz.
+## CLAUDE.md Morale Rules).
+const MUTINY_MORALE_THRESHOLD: int = 40
+
 static var _road_events: Array[GameEvent] = []
 
 static func get_road_events() -> Array[GameEvent]:
@@ -385,8 +394,18 @@ static func _sick_merchant() -> GameEvent:
 static func _mutiny() -> GameEvent:
 	var event := _event("evt_mutiny", "EVT_MUTINY", 2.0)
 	event.conditions = _conditions([
-		EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, 25),
+		EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, MUTINY_MORALE_THRESHOLD),
 		EventCondition.make("merchants", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	# Uygun olmak yetmiyordu: moral eşiğin altına indiği 45 günde bile olay
+	# ~25 rakip arasında ağırlıklı çekimi hiç kazanamıyordu, yani "katalogda
+	# var, oyunda yok" durumu eşiği düzelttikten sonra da sürdü. Bir kriz
+	# çekimde baskın olmalı - moral gerçekten dibe vurduğunda kervanın o gün
+	# yaşayacağı şey isyandır, yol kenarındaki bir türbe değil.
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, MUTINY_MORALE_THRESHOLD),
+		]), 8.0),
 	])
 	event.cooldown_days = 4
 	event.choices = _choices([
