@@ -20,7 +20,6 @@ const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 
 ## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
 const HAGGLE_FAIL_MORALE: int = -8
-const HAGGLE_DRAIN_RATE: float = 25.0
 
 ## Savaş sonuçları. Zafer yolu bir süre güvenli kılar ve yağma getirir;
 ## yenilgi ağır ama kervanı bitirmez (bkz. EventEffectApplier clamp'leri).
@@ -702,7 +701,6 @@ func _open_haggling(max_price: int) -> void:
 		0.3,
 		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
 		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
-		HAGGLE_DRAIN_RATE,
 		false
 	)
 

@@ -21,7 +21,6 @@ const TRADE_NOTE_COLOR: Color = Color(0.75, 0.85, 1.0)
 const MAX_BUY_QUANTITY: int = 99
 const MARKET_HAGGLE_GREED: float = 0.4
 const MARKET_HAGGLE_REPUTATION: float = 0.3
-const MARKET_HAGGLE_DRAIN_RATE: float = 20.0
 
 var _session: GameSession
 var _shop_items: Array[Item] = []
@@ -217,7 +216,6 @@ func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 		MARKET_HAGGLE_REPUTATION,
 		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
 		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
-		MARKET_HAGGLE_DRAIN_RATE,
 		false
 	)
 

@@ -367,39 +367,51 @@ can be lost.
 
 ### Haggling Rules
 
-`HagglingSession` is the closest thing the game has to a money printer, so
-its invariants matter more than its numbers. The old design inverted its own
-incentive: the acceptance threshold slid toward the absolute minimum as
-patience fell, and the fastest way to burn patience was an insulting
-lowball - so enraging the merchant was *rewarded*, and spamming the bottom
-of the slider (then cashing the "final offer" perk) was strictly optimal.
+`HagglingSession` is the closest thing the game has to a money printer, and
+the same trap was walked into twice, so the invariants matter more than the
+numbers.
 
-- **Two prices, not one.** `get_floor()` is what the merchant could ever
-  accept; `get_acceptable_threshold()` is what they will accept *right now*.
-  The threshold slides from `p_start` down toward the floor as patience
-  drains, and **never below it**. That "never below" is the whole fix.
-- **The floor hardens, it never softens.** Every rejected offer adds
-  `FLOOR_HARDEN_PER_ROUND`; an insulting one adds `INSULT_EXTRA_ROUNDS` more.
-  So pushing for one more round costs you the room you are pushing for, and
-  the falling threshold meets the rising floor somewhere in the middle. That
-  meeting point is what a well-played haggle earns.
-- **Rage-quitting is a rescue, never a strategy.** The offer that empties
-  patience is itself a rejected offer, so it hardens the floor *before* the
-  final-chance price is computed, and that price is then marked up by
-  `FINAL_CHANCE_PENALTY`. Without the perk there is simply no deal.
-  `tests/test_haggling.gd` locks this as a direct comparison: the rage price
-  is worse than the best price an exhaustive patient search can reach.
-- **Walking out costs reputation** (`get_walkout_reputation_penalty`).
-  Without it, "lowball until it breaks, then reopen" was a free retry loop -
-  the actual farming exploit. The panel hands the penalty to whoever opened
-  it (`HagglingPanel.haggling_failed`) and each screen decides: a city
-  merchant's anger is heard around town (`market.gd`), a roadside bandit's
-  is not (`road_journey.gd`, which charges the full toll instead - through
+1. **First design:** the acceptance threshold slid toward the absolute
+   minimum as patience fell, and the fastest way to burn patience was an
+   insulting lowball - so enraging the merchant was *rewarded*.
+2. **Second design:** the threshold never went below the floor and the floor
+   hardened per rejection. The exploit was closed, but both the threshold
+   and the floor were functions of **`rounds_used` alone** - so how you
+   haggled did not matter, only how many times you were refused, and the two
+   curves always met at the same number.
+
+**Current design - the path is what matters.**
+
+- **Offers are a countable resource** (`MAX_ROUNDS`, three), shown on screen.
+  No hidden curve to reverse-engineer by trial and error.
+- **The merchant concedes only after an offer he takes seriously**
+  (`is_credible`, `concessions`). A lowball burns a round without moving him,
+  which is precisely why "repeat the same bottom offer three times" cannot
+  work. `get_acceptable_threshold()` interpolates on `concessions`, never on
+  `rounds_used`.
+- **Every rejection still hardens the floor** (`FLOOR_HARDEN_PER_ROUND`), so
+  dragging it out costs you room even when your offers are credible.
+- **Out of offers, the merchant issues an ultimatum: pay list price or
+  leave.** `has_final_offer_perk` softens the ultimatum to his current floor
+  rather than list price - valuable, but still worse than spending the three
+  rounds well, which `tests/test_haggling.gd` asserts directly.
+- **Walking out costs a little reputation** (`WALKOUT_REPUTATION_PENALTY`,
+  1). Deliberately small: without any cost, "lowball until it breaks, then
+  reopen" is a free retry loop, but a broken negotiation should be a price,
+  not a disaster. The panel hands the penalty to whoever opened it
+  (`HagglingPanel.haggling_failed`) and each screen decides: a city
+  merchant's anger is heard around town (`market.gd`), a roadside bandit's is
+  not (`road_journey.gd`, which charges the full toll instead - through
   `spend_or_owe`, so being broke is not an escape).
 - **Skill is read from the party, not hardcoded.** Callers pass
   `get_best_effective_stat()` for Zeka and Karizma; those widen the floor.
   Passing literal zeros (as both screens once did) made the whole mini-game
   character-blind.
+
+The resulting gradient on a 135 list price (base 100, greed 0.5, rep 0.3):
+cautious play takes ~116 in round one, aiming play walks 116 → 99 → 83, and
+greedy play hits the ultimatum and pays 135 or leaves. A master talker
+(Zeka/Karizma maxed, trusted) pays 68 against a list of 100.
 
 ### Event Character Rules
 

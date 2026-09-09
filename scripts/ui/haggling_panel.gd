@@ -19,6 +19,7 @@ var _built: bool = false
 
 var _range_value_label: Label
 var _patience_bar: ProgressBar
+var _rounds_label: Label
 var _offer_slider: HSlider
 var _offer_value_label: Label
 var _submit_button: Button
@@ -37,7 +38,6 @@ func start_haggling(
 	reputation: float,
 	player_speech: float,
 	player_charisma: float,
-	patience_drain_rate: float,
 	has_final_offer_perk: bool
 ) -> void:
 	_ensure_built()
@@ -48,7 +48,6 @@ func start_haggling(
 		reputation,
 		player_speech,
 		player_charisma,
-		patience_drain_rate,
 		has_final_offer_perk
 	)
 	_session.patience_changed.connect(_on_patience_changed)
@@ -67,9 +66,14 @@ func start_haggling(
 	_result_label.text = ""
 	_final_offer_panel.visible = false
 	_submit_button.disabled = false
+	_refresh_rounds_label()
 
 	_clear_log()
 	_add_log_entry("Pazarlık başladı. Tüccarın açılış fiyatı: %d GG" % _session.p_start)
+	_add_log_entry(
+		("%d teklif hakkın var. Ciddi bir teklif tüccarı bir adım yaklaştırır; "
+		+ "ciddiye alınmayan teklif yalnızca hakkını yakar.") % HagglingSession.MAX_ROUNDS
+	)
 
 func _ensure_built() -> void:
 	if _built:
@@ -90,7 +94,7 @@ func _ensure_built() -> void:
 
 	var patience_row := HBoxContainer.new()
 	var patience_title := Label.new()
-	patience_title.text = "Tüccar Sabrı:"
+	patience_title.text = "Teklif Hakkı:"
 	patience_title.custom_minimum_size = Vector2(120, 0)
 	_patience_bar = ProgressBar.new()
 	_patience_bar.custom_minimum_size = Vector2(300, 24)
@@ -99,6 +103,9 @@ func _ensure_built() -> void:
 	_patience_bar.value = 100
 	patience_row.add_child(patience_title)
 	patience_row.add_child(_patience_bar)
+	_rounds_label = Label.new()
+	_rounds_label.custom_minimum_size = Vector2(90, 0)
+	patience_row.add_child(_rounds_label)
 	add_child(patience_row)
 
 	var offer_row := HBoxContainer.new()
@@ -148,6 +155,11 @@ func _ensure_built() -> void:
 	_log_list = VBoxContainer.new()
 	add_child(_log_list)
 
+func _refresh_rounds_label() -> void:
+	if _session == null:
+		return
+	_rounds_label.text = "%d / %d" % [_session.get_rounds_left(), HagglingSession.MAX_ROUNDS]
+
 func _on_offer_slider_changed(value: float) -> void:
 	_offer_value_label.text = "%d GG" % value
 
@@ -157,16 +169,21 @@ func _on_submit_offer_pressed() -> void:
 	var offer := _offer_slider.value
 	_add_log_entry("Sen: %d GG teklif ettin." % offer)
 
-	# Sertleşme oyuncuya görünmezse "bir tur daha zorlayayım mı" kararı
-	# kör bir zar olur - pazarlığın tüm gerilimi bu geri bildirimde.
+	# Teklifin ciddiye alınıp alınmadığı görünmezse "bir tur daha zorlayayım
+	# mı" kararı kör bir zar olur - pazarlığın tüm gerilimi bu geri bildirimde.
 	var insulting := _session.is_insulting(offer)
-	var rounds_before := _session.rounds_used
+	var credible := _session.is_credible(offer)
 	_session.submit_offer(offer)
+	_refresh_rounds_label()
 
+	if _session.state != HagglingSession.State.IN_PROGRESS:
+		return
 	if insulting:
-		_add_log_entry("Tüccar teklifi hakaret saydı - sabrı ve payı hızla kapanıyor.")
-	if _session.state == HagglingSession.State.IN_PROGRESS and _session.rounds_used > rounds_before:
-		_add_log_entry("Tüccar diretiyor: pazarlık payı biraz daha daraldı.")
+		_add_log_entry("Tüccar teklifi hakaret saydı - tek hamlede iki hakkın gitti.")
+	elif credible:
+		_add_log_entry("Tüccar teklifi ciddiye aldı ve bir adım geri çekildi.")
+	else:
+		_add_log_entry("Tüccar teklifi ciddiye almadı: hakkın yandı, fiyatı da inmedi.")
 
 func _on_patience_changed(new_patience: float) -> void:
 	_patience_bar.value = new_patience
@@ -176,8 +193,8 @@ func _on_counter_offer_made(npc_offer: float) -> void:
 	_add_log_entry("Tüccar: '%d GG öneriyorum.'" % npc_offer)
 
 func _on_final_chance_offered(locked_offer: float) -> void:
-	_add_log_entry("Tüccar öfkeleniyor... 'Bu son kararım, işine gelirse!'")
-	_final_offer_label.text = "Son Teklif: %d GG" % locked_offer
+	_add_log_entry("Tüccarın sabrı taştı: 'Ya bu fiyattan alırsın, ya yolunu tutarsın.'")
+	_final_offer_label.text = "Son Teklif: %d GG - kabul et ya da masadan kalk" % locked_offer
 	_final_offer_panel.visible = true
 	_submit_button.disabled = true
 

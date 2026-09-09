@@ -7,7 +7,6 @@ extends Control
 var _base_price_spin: SpinBox
 var _greed_spin: SpinBox
 var _reputation_spin: SpinBox
-var _drain_rate_spin: SpinBox
 var _speech_spin: SpinBox
 var _charisma_spin: SpinBox
 var _final_offer_check: CheckBox
@@ -55,8 +54,6 @@ func _build_config_section() -> HBoxContainer:
 	_base_price_spin = _add_spin_row(merchant_box, "Taban Fiyat", 1.0, 1000.0, 1.0, 100.0)
 	_greed_spin = _add_spin_row(merchant_box, "Açgözlülük (0-1)", 0.0, 1.0, 0.05, 0.5)
 	_reputation_spin = _add_spin_row(merchant_box, "İtibar (0-1)", 0.0, 1.0, 0.05, 0.3)
-	# Tavan 100: en kötü teklifte tek hamlede sabrı çökertebilmek için.
-	_drain_rate_spin = _add_spin_row(merchant_box, "Sabır Tükenme Katsayısı", 0.1, 100.0, 0.5, 25.0)
 
 	var player_box := VBoxContainer.new()
 	var player_title := Label.new()
@@ -98,9 +95,8 @@ func _on_start_pressed() -> void:
 		_base_price_spin.value,
 		_greed_spin.value,
 		_reputation_spin.value,
-		int(_speech_spin.value),
-		int(_charisma_spin.value),
-		_drain_rate_spin.value,
+		_speech_spin.value,
+		_charisma_spin.value,
 		_final_offer_check.button_pressed
 	)
 
