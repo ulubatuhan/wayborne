@@ -16,6 +16,7 @@ func run(t) -> void:
 	_test_documents_and_merchants(t)
 	_test_bridges_are_reported(t)
 	_test_grant_equipment_fills_locker(t)
+	_test_vengeful_wanderer_chain(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -167,3 +168,51 @@ func _test_grant_equipment_fills_locker(t) -> void:
 		EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, "yok_boyle_bir_ekipman"),
 	]), session)
 	t.eq(invalid_result.lines.size(), 0, "katalogda olmayan ekipman sessizce yok sayılır")
+
+## Kinci yolcuyu görmezden gelmenin faturası günler sonra kesiliyor:
+## bayrak + UNLOCK_EVENT, sonra triggered_only olayın uygun hale gelmesi.
+## Denge simülatöründe evt_wanderer_revenge hiç ateşlenmiyor görünüyor -
+## bu bir hata değil, simülatörün "her zaman ilk seçeneği seç" politikası
+## zinciri hiç açmıyor. Zincirin kendisi burada uçtan uca sınanıyor.
+func _test_vengeful_wanderer_chain(t) -> void:
+	var session := GameSession.new(300, 20, 1)
+
+	# "Görmezden gel" seçeneğinin kinci sonucu: bayrağı diker ve olayı açar.
+	var scorn: Array[EventEffect] = [
+		EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wanderer_scorned"),
+		EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wanderer_revenge"),
+	]
+	var result := EventEffectApplier.apply(scorn, session)
+	t.ok(session.has_flag("wanderer_scorned"), "kinci yolcu küsmüş olarak işaretlenir")
+	t.ok(
+		result.unlocked_event_ids.has("evt_wanderer_revenge"),
+		"intikam olayı açılmak üzere bildirilir"
+	)
+
+	# Açılmadan çekilemez, açılınca çekilebilir.
+	var engine := EventEngine.new(EventCatalog.get_road_events(), 4242)
+	var context := session.build_event_context()
+	t.ok(
+		not _has_event(engine.get_eligible_events(1, context), "evt_wanderer_revenge"),
+		"açılmadan önce intikam olayı uygun değil"
+	)
+
+	for event_id in result.unlocked_event_ids:
+		engine.unlock_event(event_id)
+	t.ok(
+		_has_event(engine.get_eligible_events(1, session.build_event_context()), "evt_wanderer_revenge"),
+		"açıldıktan sonra intikam olayı uygun hale gelir"
+	)
+
+	# Bayrak temizlenince zincir kapanır - fatura bir kez kesilir.
+	session.clear_flag("wanderer_scorned")
+	t.ok(
+		not _has_event(engine.get_eligible_events(2, session.build_event_context()), "evt_wanderer_revenge"),
+		"bayrak temizlenince zincir kapanır"
+	)
+
+func _has_event(events: Array, event_id: String) -> bool:
+	for event in events:
+		if event.event_id == event_id:
+			return true
+	return false

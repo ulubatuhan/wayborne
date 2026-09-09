@@ -520,6 +520,12 @@ Who you are travelling with, and who you meet, changes what an event does.
   traveller sets a flag and unlocks a `triggered_only` chain event that
   fires days later (`evt_wanderer_revenge`). This is the pattern for any
   "that decision comes back to you" design.
+  The balance simulator reports this event as never firing; that is a
+  limitation of the simulator, not a bug. Its policy is "take the first
+  available choice", so it always takes the traveller in and never opens the
+  chain. `test_event_effects.gd` exercises the chain end to end instead -
+  when a report says an event never fires, check whether anything in the
+  harness could ever reach it before treating it as dead content.
 - **Culture kinship is not one culture's privilege.** `ROLL_ENCOUNTER` also
   rolls the met group's culture and sets a `<prefix>_kin` flag when it
   matches the *leader's* culture, so meeting your own people works whichever
