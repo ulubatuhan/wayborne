@@ -276,3 +276,5 @@
 "UI_DEBT_PAY","Öde (%d GG)","Pay (%d GP)","","","","","","","","",""
 "UI_DEBT_RESTRUCTURE","Yapılandır (+%d GG)","Restructure (+%d GP)","","","","","","","","",""
 "UI_DEBT_RESTRUCTURE_TOOLTIP","Vade uzar ama bedeli anaparaya biner ve her yapılandırmada artar.","The deadline moves out, but the fee is added to the principal - and it grows each time.","","","","","","","","",""
+"UI_TAVERN_FEAST_HINT","Kadronun gerginliği: %d / %d. Bir gece içki ve sıcak yemek %d puan alır.","The company's strain: %d / %d. A night of drink and hot food takes %d off.","","","","","","","","",""
+"UI_TAVERN_FEAST","Kadroya Ziyafet Çek (%d GG)","Throw the Company a Feast (%d GP)","","","","","","","","",""

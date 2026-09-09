@@ -285,6 +285,44 @@ wayborne/
   `stress` key is available in `GameSession.build_event_context()`, so an
   event's own eligibility can key off it directly (`evt_stress_brawl`)
   instead of needing a bespoke weight modifier.
+- **Stress accumulates across journeys; that is the whole point of it being
+  the persistent stat.** It did not, for a long time: a journey brought
+  ~25 and a city arrival wiped 35, so the number reset every loop and
+  `evt_stress_brawl` never fired. Arrival relief is now
+  `get_city_rest_relief()` - smaller than a journey's load, and *decaying
+  with `total_days_elapsed`* down to a floor, so the same inn helps a
+  weary company less ten journeys in. The gap is what accrues.
+- **Every tap must be measured, not just the obvious one.** Lowering the
+  arrival relief was not enough: `CAMP_STRESS_RELIEF` was 20, so one camp
+  per journey still erased the accumulation entirely (measured: stress
+  stayed under 20 across twelve journeys). Camp now *slows* accumulation
+  rather than deleting it. When a stat refuses to move, enumerate
+  everything that reduces it before touching what raises it.
+- **`party_stress` is the party's average, not one person's counter.** So
+  a newcomer dilutes it (`add_to_party` - the single door in, the
+  counterpart of `dismiss`), and replacing a crew over time brings it down.
+  A newcomer does not arrive at zero (`NEWCOMER_STRESS_SHARE`): someone
+  joining a battered caravan hears the stories. Without that share,
+  "dismiss one, hire another" would be a free button that halves stress
+  every cycle.
+- **The player needs a lever their purse can pull.** `throw_feast()` (in
+  the tavern) is paid relief priced per head. Camp is the free-but-slow
+  lever, the feast the paid-and-strong one, and stress-relieving events the
+  lucky one. Without a purchasable option an accumulating stat is just an
+  unavoidable countdown.
+
+Measured curve over twelve consecutive journeys (~25 stress each):
+
+| play pattern | stress after 1 / 6 / 12 journeys | journeys at brawl threshold |
+|---|---|---|
+| no intervention | 11 / 69 / 88 (capped) | 84% |
+| one camp per journey | 4 / 22 / 49 | 43% |
+| one camp + feast when high | 4 / 22 / 32 (plateau) | 41% |
+| two camps per journey | 0 / 0 / 1 | 0% |
+
+The last row is deliberate, not an oversight: a player who spends the time
+and provisions to camp twice a journey *should* hold stress down. It costs
+nights, food and daylight.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
@@ -1169,16 +1207,19 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   yazılıp hiç okunmaması.
 
 Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
-duruyor) ve **moral dengesi** - aşağıdaki açık madde.
+duruyor). Moral ve stres dengesi çözüldü - aşağıdaki kayıtlara bakılabilir.
 
-### Açık denge sorusu: stres eşiği ulaşılmıyor
+### Çözülmüş: stres eşiği (kayıt için)
 
-`evt_stress_brawl` stres ≥ 70 istiyor ama simülatörde varış stresi ortalama
-~25 - yani olay katalogda var, oyunda yok. Bu, moralin az önce çözülen
-durumunun aynısı (bkz. Morale Rules): eşik gerçekte görülen aralığın çok
-üstünde. Aynı üç yön geçerli - eşiği indirmek, günlük bir stres birikimi
-eklemek, ya da olay havuzunun stres bilançosunu kaydırmak. Bir denge
-tercihi olduğu için dokunulmadı.
+`evt_stress_brawl` stres ≥ 70 istiyordu, simülatörde varış stresi ~25'ti -
+olay katalogda vardı, oyunda yoktu. Üç kolun üçü birden gerekti (bkz.
+Stress Rules): eşik 40'a indi, varış rahatlaması 35'ten 14'e indi ve
+günlerle eriyor, kamp rahatlaması 20'den 8'e indi. Üçüncüsü ölçmeden
+görünmüyordu: ilk ikisi tek başına yetmiyordu çünkü her sefer kamp kuran
+oyuncuda stres hâlâ hiç birikmiyordu.
+
+Sonuç: `evt_stress_brawl` 600 koşuda 2 kez ateşleniyor, playthrough
+demosunda dört bacak sonunda stres 18 (eskiden 0).
 
 ### Çözülmüş: isyan eşiği (kayıt için)
 
