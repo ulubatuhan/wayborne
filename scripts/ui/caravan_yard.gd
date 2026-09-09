@@ -45,7 +45,7 @@ func _build_equipment_row(equipment_resource: Equipment) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var name_label := Label.new()
-	name_label.text = "%s (%s, tier %d)" % [
+	name_label.text = tr("UI_YARD_SMITH_ITEM") % [
 		equipment_resource.display_name,
 		EquipmentCatalog.get_slot_display_name(equipment_resource.slot),
 		equipment_resource.tier,
@@ -71,14 +71,14 @@ func _refresh_equipment_shop() -> void:
 		var equipment_resource: Equipment = row.equipment
 		var owned_label: Label = row.owned_label
 		var buy_button: Button = row.buy_button
-		owned_label.text = "Depoda: %d" % _session.get_equipment_count(equipment_resource.equipment_id)
-		buy_button.text = "Satın Al (%d GG)" % equipment_resource.price
+		owned_label.text = tr("UI_YARD_IN_STORE") % _session.get_equipment_count(equipment_resource.equipment_id)
+		buy_button.text = tr("UI_YARD_BUY") % equipment_resource.price
 		buy_button.disabled = not _session.wallet.can_afford(equipment_resource.price)
 
 func _refresh() -> void:
 	# Vagon almak yalnızca kargo değil, parti kapasitesi de açıyor
 	# (bkz. GameSession.get_party_capacity) - oyuncu bunu burada görsün.
-	_status_label.text = "Sahip olduğun vagon: %d / %d · Hasarlı: %d · Parti kapasiten: %d/%d" % [
+	_status_label.text = tr("UI_YARD_SUMMARY") % [
 		_session.owned_wagon_count,
 		CaravanPlan.DEFAULT_MAX_WAGONS,
 		_session.owned_wagon_damaged,
@@ -88,25 +88,25 @@ func _refresh() -> void:
 
 	if _session.owned_wagon_damaged > 0:
 		var repair_cost := _session.get_repair_cost()
-		_repair_button.text = "Tümünü Onar (%d GG)" % repair_cost
+		_repair_button.text = tr("UI_YARD_REPAIR_ALL") % repair_cost
 		_repair_button.disabled = not _session.wallet.can_afford(repair_cost)
 	else:
-		_repair_button.text = "Hasar Yok"
+		_repair_button.text = tr("UI_YARD_NO_DAMAGE")
 		_repair_button.disabled = true
 
 	if _session.can_buy_wagon():
 		var next_cost := _session.get_next_wagon_cost()
-		_buy_wagon_button.text = "Yeni Vagon Al (%d GG)" % next_cost
+		_buy_wagon_button.text = tr("UI_YARD_BUY_WAGON") % next_cost
 		_buy_wagon_button.disabled = not _session.wallet.can_afford(next_cost)
 	else:
-		_buy_wagon_button.text = "Vagon Limiti Doldu (%d)" % CaravanPlan.DEFAULT_MAX_WAGONS
+		_buy_wagon_button.text = tr("UI_YARD_WAGON_LIMIT") % CaravanPlan.DEFAULT_MAX_WAGONS
 		_buy_wagon_button.disabled = true
 
 	_refresh_equipment_shop()
 
 func _on_buy_equipment_pressed(equipment_resource: Equipment) -> void:
 	if not _session.wallet.can_afford(equipment_resource.price):
-		_show_message("Bu parça için yeterli kesen yok.")
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_GEAR"))
 		return
 	_session.wallet.spend(equipment_resource.price)
 	_session.add_equipment(equipment_resource.equipment_id, 1)
@@ -115,14 +115,14 @@ func _on_buy_equipment_pressed(equipment_resource: Equipment) -> void:
 
 func _on_repair_pressed() -> void:
 	if not _session.repair_wagons():
-		_show_message("Onarım için yeterli kesen yok.")
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_REPAIR"))
 		return
 	_clear_message()
 	_refresh()
 
 func _on_buy_wagon_pressed() -> void:
 	if not _session.buy_wagon():
-		_show_message("Yeni vagon için yeterli kesen yok ya da limit doldu.")
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_WAGON"))
 		return
 	_clear_message()
 	_refresh()

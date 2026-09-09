@@ -578,7 +578,26 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
 - **`tr()` is an `Object` instance method and cannot be called from a
   `static func`.** Static catalogs must use
   `TranslationServer.translate(key)` instead (see
-  `EnemyCatalog.get_kind_label`).
+  `EnemyCatalog.get_kind_label` and `Nav.label_for`).
+- **`tr()` cannot appear in a `const` either** - a constant must be a
+  constant expression. A const table of screen text therefore holds *keys*
+  and resolves them when the widget is built (see
+  `OnboardingPanel.TOPIC_KEYS`). Write the keys out in full rather than
+  assembling them at runtime (`tr("%s_TITLE" % topic)`), or neither the
+  undefined-key scan nor a translator searching the codebase can find them.
+- **The screen layer is keyed too, and a test keeps it that way.**
+  `test_localization.gd` scans `scripts/ui` and `scripts/world` for string
+  literals containing Turkish-specific letters and fails on any it finds, so
+  a new screen string cannot quietly ship untranslated. The F1 developer
+  scenes (`haggling.gd`, `combat_test.gd`, `test_selector.gd`) are exempt by
+  name - they never reach a player, and keying them would only give
+  translators busywork.
+- **A translation must carry the same format arguments, in the same order,
+  as the source.** GDScript's `%` operator has no positional form
+  (`%2$s`), so a reordered or dropped `%d` crashes the game the moment that
+  line is printed - and only in that language, where nobody testing in
+  Turkish would ever see it. `test_localization.gd` compares the
+  placeholder signature of every cell against its Turkish source.
 - **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
   resolves through the translation server, so without pinning, assertions on
   display names would pass or fail depending on the machine's language.
@@ -1083,10 +1102,14 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   katmandan geçiyor), `divert_journey()`/`turn_back()` şehirde kurulan planı
   bir taahhüt olmaktan çıkarıyor.
 
+- **H (ekran katmanı çevirisi)** ekranlardaki 244 sabit Türkçe metni çeviri
+  anahtarına taşıdı; `data/locale/ui.csv` 10 satırdan 261'e çıktı. Artık
+  oyunun tamamı - katalog, olay ve ekran - 11 dile açık. `test_localization.gd`
+  üç yeni koruma kazandı: sabit Türkçe metin taraması, tanımsız anahtar
+  taraması ve yer tutucu imzası karşılaştırması.
+
 Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
-duruyor), ekran katmanındaki ~238 sabit Türkçe metnin çeviri anahtarına
-taşınması (katalog içeriği bitti, ekranlar bitmedi - bkz. Localization
-Rules), ve moral dengesi: simülatörde 600 koşu boyunca moral hiç 100'ün
+duruyor) ve moral dengesi: simülatörde 600 koşu boyunca moral hiç 100'ün
 altına inmiyor, bu yüzden `evt_mutiny` (moral ≤ 25 istiyor) hiç
 ateşlenmiyor.
 

@@ -27,7 +27,7 @@ func _ready() -> void:
 
 func _refresh() -> void:
 	var party := _session.get_party()
-	_info_label.text = "Parti %d/%d · %d vagon · Sıra savaştaki mevki sırasıdır (1 = en önde). Her vagonda iki kişi yatar, savaş alanı dört mevkiden ibarettir." % [
+	_info_label.text = tr("UI_PARTY_HINT") % [
 		party.size(),
 		_session.get_party_capacity(),
 		_session.owned_wagon_count,
@@ -63,25 +63,25 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 		header.add_child(_build_move_button("↓", index, index + 1))
 
 	var character_button := Button.new()
-	character_button.text = "Karakter"
+	character_button.text = tr("UI_PARTY_OPEN_CHARACTER")
 	character_button.pressed.connect(_on_character_pressed.bind(index))
 	header.add_child(character_button)
 
 	if character.is_player:
 		var you_label := Label.new()
-		you_label.text = "(sen)"
+		you_label.text = tr("UI_PARTY_YOU")
 		you_label.modulate = LOCKED_COLOR
 		header.add_child(you_label)
 	else:
 		var dismiss_button := Button.new()
-		dismiss_button.text = "Yol Ver"
+		dismiss_button.text = tr("UI_DISMISS")
 		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))
 		header.add_child(dismiss_button)
 
 	card.add_child(header)
 
 	var hp_label := Label.new()
-	hp_label.text = "Seviye %d · Can %d/%d · %s" % [
+	hp_label.text = tr("UI_PARTY_MEMBER") % [
 		character.level, character.current_hp, character.get_max_hp(), character.get_appearance_line()
 	]
 	if character.current_hp < character.get_max_hp():
@@ -94,7 +94,7 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	card.add_child(stats_label)
 
 	var derived_label := Label.new()
-	derived_label.text = "İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d · Hasar +%d" % [
+	derived_label.text = tr("UI_STATLINE") % [
 		character.stats.get_initiative(),
 		character.get_accuracy(),
 		character.get_dodge(),
@@ -128,7 +128,7 @@ func _build_skill_label(skill: CombatSkill, position: int) -> Label:
 	var label := Label.new()
 	label.text = "  • %s (%s)" % [skill.display_name, skill.get_position_summary()]
 	if not skill.can_use_from(position):
-		label.text += " — bu mevkiden kullanılamaz"
+		label.text += tr("UI_COMBAT_BAD_POSITION")
 		label.modulate = LOCKED_COLOR
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	return label

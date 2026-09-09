@@ -63,17 +63,17 @@ func _ready() -> void:
 
 func _build_missing_context_ui() -> void:
 	var label := Label.new()
-	label.text = "Hedef seçilmedi. Haritadan bir hedef seçerek buraya gel."
+	label.text = tr("UI_PLANNER_NO_DESTINATION")
 	_content.add_child(label)
 
 	var back_button := Button.new()
-	back_button.text = "Haritaya Dön"
+	back_button.text = tr("UI_BACK_TO_MAP")
 	back_button.pressed.connect(_on_map_pressed)
 	_content.add_child(back_button)
 
 func _build_ui(origin: Location, destination: Location, travel_days: int) -> void:
 	var title := Label.new()
-	title.text = "Kervan Planı: %s → %s" % [origin.location_name, destination.location_name]
+	title.text = tr("UI_PLANNER_TITLE") % [origin.location_name, destination.location_name]
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(title)
 
@@ -81,7 +81,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	var state_note := ""
 	if _route_state != RouteConditions.State.OPEN:
 		state_note = " · %s" % RouteConditions.get_state_label(_route_state)
-	route_label.text = "Yol: %d gün%s · Tehlike: %d%% · Vagon limiti: %d (%d'si senin)" % [
+	route_label.text = tr("UI_PLANNER_ROUTE") % [
 		travel_days,
 		state_note,
 		int(_route_danger * 100.0),
@@ -99,13 +99,13 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(HSeparator.new())
 
 	var merchants_title := Label.new()
-	merchants_title.text = "Kervana Kabul Edilecek Tüccarlar"
+	merchants_title.text = tr("UI_PLANNER_MERCHANTS")
 	_content.add_child(merchants_title)
 
 	var accepted_offers := _session.get_accepted_offers_for_destination(destination.location_id)
 	if accepted_offers.is_empty():
 		var hint_label := Label.new()
-		hint_label.text = "Bu hedefe kabul ettiğin bir kontrat yok. Tüccar Loncası'ndan kontrat kabul et."
+		hint_label.text = tr("UI_NO_CONTRACTS_FOR_DESTINATION")
 		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		_content.add_child(hint_label)
 	for offer in accepted_offers:
@@ -114,7 +114,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(HSeparator.new())
 
 	var summary_title := Label.new()
-	summary_title.text = "Sefer Özeti"
+	summary_title.text = tr("UI_PLANNER_SUMMARY")
 	_content.add_child(summary_title)
 
 	_party_label = Label.new()
@@ -135,7 +135,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(_buy_provisions_button)
 
 	_confirm_button = Button.new()
-	_confirm_button.text = "Kervanı Onayla ve Yola Çık"
+	_confirm_button.text = tr("UI_CONFIRM_CARAVAN")
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_content.add_child(_confirm_button)
 
@@ -146,7 +146,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(HSeparator.new())
 
 	var map_button := Button.new()
-	map_button.text = "Haritaya Dön"
+	map_button.text = tr("UI_BACK_TO_MAP")
 	map_button.pressed.connect(_on_map_pressed)
 	_content.add_child(map_button)
 
@@ -169,12 +169,12 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	row.add_child(name_label)
 
 	var wagon_label := Label.new()
-	wagon_label.text = "%d vagon" % offer.wagon_count
+	wagon_label.text = tr("UI_PLANNER_WAGONS") % offer.wagon_count
 	wagon_label.custom_minimum_size = Vector2(90, 0)
 	row.add_child(wagon_label)
 
 	var profit_label := Label.new()
-	profit_label.text = "+%d GG" % offer.potential_profit
+	profit_label.text = tr("UI_PLANNER_PROFIT") % offer.potential_profit
 	profit_label.custom_minimum_size = Vector2(90, 0)
 	row.add_child(profit_label)
 
@@ -206,8 +206,8 @@ func _on_buy_provisions_pressed() -> void:
 	_session.change_provisions(shortfall)
 
 func _refresh() -> void:
-	_gold_label.text = "Kese: %d GG" % _session.wallet.balance
-	_wagon_counter_label.text = "Vagon: %d / %d (tüccarlara açık slot)" % [
+	_gold_label.text = tr("UI_PURSE") % _session.wallet.balance
+	_wagon_counter_label.text = tr("UI_PLANNER_WAGON_SLOTS") % [
 		_plan.get_used_wagon_count(),
 		_plan.get_available_wagon_slots(),
 	]
@@ -221,31 +221,31 @@ func _refresh() -> void:
 	var required_provisions := _plan.get_required_provisions()
 	var shortfall := _plan.get_provisions_shortfall(current_provisions)
 
-	_party_label.text = "Parti büyüklüğü: %d kişi · Toplam vagon: %d" % [
+	_party_label.text = tr("UI_PLANNER_PARTY") % [
 		_plan.get_party_size(),
 		_plan.get_total_wagon_count(),
 	]
-	_documents_label.text = "Gerekli evrak: %d adet (vagon başına 1)" % _plan.get_required_documents()
-	_required_provisions_label.text = "Gerekli erzak: %d birim" % required_provisions
-	_current_provisions_label.text = "Envanterdeki erzak: %d birim" % current_provisions
+	_documents_label.text = tr("UI_PLANNER_DOCUMENTS") % _plan.get_required_documents()
+	_required_provisions_label.text = tr("UI_PLANNER_PROVISIONS_NEEDED") % required_provisions
+	_current_provisions_label.text = tr("UI_PLANNER_PROVISIONS_HELD") % current_provisions
 
 	var shortfall_cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
 	if shortfall > 0:
-		_shortfall_label.text = "Eksik erzak: %d birim (%d GG)" % [shortfall, shortfall_cost]
+		_shortfall_label.text = tr("UI_PLANNER_PROVISIONS_SHORT") % [shortfall, shortfall_cost]
 		_shortfall_label.modulate = SHORTFALL_COLOR
 		_buy_provisions_button.visible = true
-		_buy_provisions_button.text = "Eksik erzağı satın al (%d GG)" % shortfall_cost
+		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % shortfall_cost
 		_buy_provisions_button.disabled = not _session.wallet.can_afford(shortfall_cost)
 		_confirm_button.disabled = true
-		_confirm_button.text = "Erzak yetersiz — yola çıkılamaz"
+		_confirm_button.text = tr("UI_PLANNER_BLOCKED")
 	else:
-		_shortfall_label.text = "Erzak yeterli, sefere hazırsın."
+		_shortfall_label.text = tr("UI_PLANNER_READY")
 		_shortfall_label.modulate = SATISFIED_COLOR
 		_buy_provisions_button.visible = false
 		_confirm_button.disabled = false
-		_confirm_button.text = "Kervanı Onayla ve Yola Çık"
+		_confirm_button.text = tr("UI_CONFIRM_CARAVAN")
 
-	_profit_label.text = "Toplam potansiyel getiri: %d GG" % _plan.get_total_profit()
+	_profit_label.text = tr("UI_TOTAL_POTENTIAL") % _plan.get_total_profit()
 
 func _on_confirm_pressed() -> void:
 	if _plan.get_provisions_shortfall(_session.get_provisions()) > 0:

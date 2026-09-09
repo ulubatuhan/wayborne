@@ -118,7 +118,7 @@ func _ensure_built() -> void:
 	add_child(_enemy_list)
 
 	var party_title := Label.new()
-	party_title.text = "Kadron"
+	party_title.text = tr("UI_COMBAT_YOUR_SIDE")
 	add_child(party_title)
 	_party_list = VBoxContainer.new()
 	add_child(_party_list)
@@ -137,13 +137,13 @@ func _ensure_built() -> void:
 	add_child(_result_label)
 
 	_continue_button = Button.new()
-	_continue_button.text = "Devam"
+	_continue_button.text = tr("UI_COMBAT_CONTINUE")
 	_continue_button.visible = false
 	_continue_button.pressed.connect(_on_continue_pressed)
 	add_child(_continue_button)
 
 	var log_title := Label.new()
-	log_title.text = "Çarpışma Günlüğü"
+	log_title.text = tr("UI_COMBAT_LOG")
 	add_child(log_title)
 
 	_log_scroll = ScrollContainer.new()
@@ -164,7 +164,7 @@ func _refresh_roster(container: VBoxContainer, units: Array[CombatUnit], color: 
 	for unit in units:
 		var label := Label.new()
 		var marker := "▶ " if unit == active and not _encounter.is_over() else "   "
-		label.text = "%s%d. %s — %d/%d" % [marker, unit.position, unit.display_name, unit.current_hp, unit.max_hp]
+		label.text = tr("UI_COMBAT_UNIT") % [marker, unit.position, unit.display_name, unit.current_hp, unit.max_hp]
 		label.modulate = color if unit.is_alive() else DOWNED_COLOR
 		container.add_child(label)
 
@@ -177,7 +177,7 @@ func _refresh_actions() -> void:
 		return
 
 	var unit := _encounter.get_active_unit()
-	_turn_label.text = "Tur %d — sıra %s'de (%d. mevki)" % [
+	_turn_label.text = tr("UI_COMBAT_TURN") % [
 		_encounter.round_number, unit.display_name, unit.position
 	]
 
@@ -214,7 +214,7 @@ func _build_swap_rows() -> Array[Button]:
 		if not first.is_alive() or not second.is_alive():
 			continue
 		var button := Button.new()
-		button.text = "Yer değiştir: %s ↔ %s" % [first.display_name, second.display_name]
+		button.text = tr("UI_COMBAT_SWAP") % [first.display_name, second.display_name]
 		button.pressed.connect(_on_swap_pressed.bind(first, second))
 		buttons.append(button)
 	return buttons
@@ -223,15 +223,15 @@ func _build_target_buttons(unit: CombatUnit, skill: CombatSkill) -> void:
 	var targets := _encounter.get_valid_targets(unit, skill)
 	var title := Label.new()
 	if targets.is_empty():
-		title.text = "%s için menzilde hedef yok." % skill.display_name
+		title.text = tr("UI_COMBAT_NO_TARGET") % skill.display_name
 		_target_list.add_child(title)
 		return
 
-	title.text = "%s — hedef seç:" % skill.display_name
+	title.text = tr("UI_COMBAT_PICK_TARGET") % skill.display_name
 	_target_list.add_child(title)
 	for target in targets:
 		var button := Button.new()
-		button.text = "%d. %s (%d/%d)" % [target.position, target.display_name, target.current_hp, target.max_hp]
+		button.text = tr("UI_COMBAT_TARGET") % [target.position, target.display_name, target.current_hp, target.max_hp]
 		button.pressed.connect(_on_target_pressed.bind(skill, target))
 		_target_list.add_child(button)
 
@@ -268,9 +268,9 @@ func _scroll_log_to_bottom() -> void:
 
 func _on_state_changed(new_state: CombatEncounter.State) -> void:
 	if new_state == CombatEncounter.State.VICTORY:
-		_result_label.text = "Zafer! %s geri çekildi, bıraktıklarını topluyorsun." % _encounter.enemy_label
+		_result_label.text = tr("UI_COMBAT_VICTORY") % _encounter.enemy_label
 	else:
-		_result_label.text = "Yenilgi. %s yüklerin bir kısmını alıp kayboldu." % _encounter.enemy_label
+		_result_label.text = tr("UI_COMBAT_DEFEAT") % _encounter.enemy_label
 	_continue_button.visible = true
 
 func _on_continue_pressed() -> void:

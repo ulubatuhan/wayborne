@@ -1,7 +1,7 @@
 class_name PurificationPanel
 extends VBoxContainer
 
-## "Huy Arındır" bölümü: taze (bkz. CharacterData.is_trait_fresh) huyları
+## tr("UI_PURIFY_TRAIT") bölümü: taze (bkz. CharacterData.is_trait_fresh) huyları
 ## ücret karşılığı siler. Taverna ve Kilise aynı paneli farklı ücretle
 ## kurar (bkz. RecruitPanel deseni) - arındırma tek bir sistem, iki mekân
 ## yalnızca fiyatla ayrışıyor.
@@ -44,12 +44,12 @@ func refresh() -> void:
 			any_fresh = true
 			_list.add_child(_build_row(character, trait_resource))
 
-	_info_label.text = "Arındırma ücreti: %d GG. Yalnızca son %d gün içinde kazanılan huylar silinebilir." % [
+	_info_label.text = tr("UI_PURIFY_HINT") % [
 		_cost, CharacterData.TRAIT_FRESH_WINDOW_DAYS
 	]
 	if not any_fresh:
 		var empty_label := Label.new()
-		empty_label.text = "Şu an arındırılabilecek taze bir huy yok."
+		empty_label.text = tr("UI_PURIFY_NONE")
 		empty_label.modulate = HINT_COLOR
 		_list.add_child(empty_label)
 
@@ -66,10 +66,10 @@ func _build_row(character: CharacterData, trait_resource: Trait) -> HBoxContaine
 
 	var button := Button.new()
 	if _session.wallet.can_afford(_cost):
-		button.text = "Arındır (%d GG)" % _cost
+		button.text = tr("UI_PURIFY_ACTION") % _cost
 		button.pressed.connect(_on_purify_pressed.bind(character, trait_resource.trait_id))
 	else:
-		button.text = "Kese yetmiyor"
+		button.text = tr("UI_NOT_ENOUGH_GOLD")
 		button.disabled = true
 		button.modulate = LOCKED_COLOR
 	row.add_child(button)

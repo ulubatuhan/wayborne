@@ -32,11 +32,11 @@ func _maybe_show_onboarding() -> void:
 
 func _refresh_title() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
-	var city_name := "Şehir" if location == null else location.location_name
-	var wagon_note := "%d vagon" % _session.owned_wagon_count
+	var city_name := tr("UI_CITY_FALLBACK_NAME") if location == null else location.location_name
+	var wagon_note := tr("UI_PLANNER_WAGONS") % _session.owned_wagon_count
 	if _session.owned_wagon_damaged > 0:
-		wagon_note += " (%d hasarlı)" % _session.owned_wagon_damaged
-	_title_label.text = "%s · Kese: %d GG · Erzak: %d · %s · Parti: %d/%d" % [
+		wagon_note += tr("UI_CITY_DAMAGED_SUFFIX") % _session.owned_wagon_damaged
+	_title_label.text = tr("UI_CITY_HUD") % [
 		city_name,
 		_session.wallet.balance,
 		_session.get_provisions(),
@@ -47,32 +47,32 @@ func _refresh_title() -> void:
 
 func _build_spots() -> void:
 	_add_spot(
-		"Pazar Meydanı",
-		"Genel mal alım satımı.",
+		tr("UI_CITY_MARKET"),
+		tr("UI_CITY_MARKET_DESC"),
 		Vector2(60, 40),
 		Nav.ECONOMY
 	)
 	_add_spot(
-		"Tüccar Loncası",
-		"Kontrat panosu.",
+		tr("UI_GUILD_TITLE"),
+		tr("UI_CITY_GUILD_DESC"),
 		Vector2(340, 150),
 		Nav.GUILD
 	)
 	_add_spot(
-		"Taverna",
-		"Yol dedikodusu ve harita.",
+		tr("UI_TAVERN_TITLE"),
+		tr("UI_CITY_TAVERN_DESC"),
 		Vector2(80, 260),
 		Nav.TAVERN
 	)
 	_add_spot(
-		"Kervan Avlusu",
-		"Vagon onarımı ve alımı.",
+		tr("UI_CITY_YARD"),
+		tr("UI_CITY_YARD_DESC"),
 		Vector2(400, 330),
 		Nav.CARAVAN_YARD
 	)
 	_add_spot(
-		"Kilise",
-		"Taze huyları arındırır.",
+		tr("UI_CITY_CHURCH"),
+		tr("UI_CITY_CHURCH_DESC"),
 		Vector2(400, 40),
 		Nav.CHURCH
 	)

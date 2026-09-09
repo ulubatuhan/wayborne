@@ -63,7 +63,7 @@ func _build_location_point(location: Location) -> Button:
 	var route := WorldMapData.get_route(_current_location_id, location.location_id)
 
 	if is_current:
-		button.text = "%s\n(buradasın)" % location.location_name
+		button.text = tr("UI_MAP_YOU_ARE_HERE") % location.location_name
 		button.disabled = true
 		button.modulate = CURRENT_LOCATION_COLOR
 	elif route == null or not _session.is_route_open(route):
@@ -86,8 +86,8 @@ func _build_location_point(location: Location) -> Button:
 func _show_hint() -> void:
 	_clear_info_panel()
 	var current := WorldMapData.get_location_by_id(_current_location_id)
-	_add_info_label("Mevcut Konum: %s" % current.location_name)
-	_add_info_label("Bir hedefin üzerine gel: oraya gitmek isteyen tüccarlar ve potansiyel getiri burada listelenir.")
+	_add_info_label(tr("UI_MAP_CURRENT") % current.location_name)
+	_add_info_label(tr("UI_MAP_HINT"))
 
 func _on_location_hovered(location: Location) -> void:
 	_focused_location = location
@@ -101,11 +101,11 @@ func _refresh_info_panel() -> void:
 
 	var route := WorldMapData.get_route(_current_location_id, _focused_location.location_id)
 	if route == null:
-		_add_info_label("Buraya doğrudan bir yol yok.")
+		_add_info_label(tr("UI_MAP_NO_DIRECT_ROUTE"))
 		_add_detour_hint()
 		return
 
-	_add_info_label("Hedef: %s" % _focused_location.location_name)
+	_add_info_label(tr("UI_MAP_DESTINATION") % _focused_location.location_name)
 	_add_info_label(_route_summary(route))
 
 	# Kapalı yol çıkmaz sokak değil: dolambaçlı yol varsa oyuncu görmeli,
@@ -116,17 +116,17 @@ func _refresh_info_panel() -> void:
 
 	var offers := _session.get_accepted_offers_for_destination(_focused_location.location_id)
 	if offers.is_empty():
-		_add_info_label("Bu hedefe kabul ettiğin bir kontrat yok. Tüccar Loncası'ndan kontrat kabul et.")
+		_add_info_label(tr("UI_NO_CONTRACTS_FOR_DESTINATION"))
 	else:
-		_add_info_label("Kabul ettiğin kontratlar (%d):" % offers.size())
+		_add_info_label(tr("UI_MAP_ACCEPTED_CONTRACTS") % offers.size())
 		var total_profit := 0
 		for offer in offers:
 			total_profit += offer.potential_profit
-			_add_info_label("  • %s — %d vagon — +%d GG" % [offer.merchant_name, offer.wagon_count, offer.potential_profit])
-		_add_info_label("Toplam potansiyel getiri: %d GG" % total_profit)
+			_add_info_label(tr("UI_MAP_CONTRACT_LINE") % [offer.merchant_name, offer.wagon_count, offer.potential_profit])
+		_add_info_label(tr("UI_TOTAL_POTENTIAL") % total_profit)
 
 	var plan_button := Button.new()
-	plan_button.text = "Planla: %s" % _focused_location.location_name
+	plan_button.text = tr("UI_MAP_PLAN") % _focused_location.location_name
 	plan_button.pressed.connect(_on_plan_pressed)
 	_info_panel.add_child(plan_button)
 
@@ -146,12 +146,12 @@ func _route_summary(route: TravelRoute) -> String:
 		state_note = " · %s" % RouteConditions.get_state_label(state)
 
 	if _session.is_route_known(_current_location_id, route.to_location_id):
-		return "Yol: %d gün · Tehlike: %d%%%s" % [days, int(effective_danger * 100.0), state_note]
+		return tr("UI_MAP_ROUTE_KNOWN") % [days, int(effective_danger * 100.0), state_note]
 	if _session.get_duty_holder(DutyCatalog.IZCI) != null:
-		return "Yol: %d gün · Tehlike: %d%% (İzci önden keşfetti)%s" % [
+		return tr("UI_MAP_ROUTE_SCOUTED") % [
 			days, int(effective_danger * 100.0), state_note
 		]
-	return "Yol: %d gün · Tehlike: %s (Taverna'da öğren)%s" % [
+	return tr("UI_MAP_ROUTE_UNKNOWN") % [
 		days, _danger_band(effective_danger), state_note
 	]
 
@@ -171,14 +171,14 @@ func _add_detour_hint() -> void:
 	_add_info_label("%s: %s" % [
 		String(TranslationServer.translate("ROUTE_DETOUR_AVAILABLE")), " → ".join(names)
 	])
-	_add_info_label("İlk durak %s - önce oraya git." % names[1])
+	_add_info_label(tr("UI_MAP_FIRST_STOP") % names[1])
 
 func _danger_band(danger: float) -> String:
 	if danger < 0.3:
-		return "düşük"
+		return tr("UI_DANGER_LOW")
 	if danger < 0.55:
-		return "orta"
-	return "yüksek"
+		return tr("UI_DANGER_MEDIUM")
+	return tr("UI_DANGER_HIGH")
 
 func _on_plan_pressed() -> void:
 	if _focused_location == null:

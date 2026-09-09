@@ -61,7 +61,7 @@ func _build_ui() -> void:
 	_content.add_child(_summary_label)
 
 	_start_button = Button.new()
-	_start_button.text = "Yola Çık"
+	_start_button.text = tr("UI_CREATE_START")
 	_start_button.pressed.connect(_on_start_pressed)
 	_content.add_child(_start_button)
 
@@ -71,7 +71,7 @@ func _build_ui() -> void:
 	_content.add_child(back_button)
 
 func _build_culture_section() -> void:
-	_content.add_child(_make_section_title("Kültür"))
+	_content.add_child(_make_section_title(tr("UI_CREATE_CULTURE")))
 
 	_culture_button = OptionButton.new()
 	for culture in CultureCatalog.get_cultures():
@@ -91,7 +91,7 @@ func _build_culture_section() -> void:
 	_content.add_child(_culture_perk)
 
 func _build_class_section() -> void:
-	_content.add_child(_make_section_title("Sınıf"))
+	_content.add_child(_make_section_title(tr("UI_CREATE_CLASS")))
 
 	_class_button = OptionButton.new()
 	for character_class in ClassCatalog.get_classes():
@@ -108,7 +108,7 @@ func _build_identity_section() -> void:
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 8)
 	var name_title := Label.new()
-	name_title.text = "İsim"
+	name_title.text = tr("UI_CREATE_NAME")
 	name_title.custom_minimum_size = Vector2(120, 0)
 	name_row.add_child(name_title)
 
@@ -118,7 +118,7 @@ func _build_identity_section() -> void:
 	name_row.add_child(_name_edit)
 
 	var random_button := Button.new()
-	random_button.text = "Rastgele"
+	random_button.text = tr("UI_CREATE_RANDOM")
 	random_button.pressed.connect(_roll_random_name)
 	name_row.add_child(random_button)
 	_content.add_child(name_row)
@@ -126,7 +126,7 @@ func _build_identity_section() -> void:
 	var height_row := HBoxContainer.new()
 	height_row.add_theme_constant_override("separation", 8)
 	var height_title := Label.new()
-	height_title.text = "Boy"
+	height_title.text = tr("UI_CREATE_HEIGHT")
 	height_title.custom_minimum_size = Vector2(120, 0)
 	height_row.add_child(height_title)
 
@@ -147,7 +147,7 @@ func _build_identity_section() -> void:
 	var skin_row := HBoxContainer.new()
 	skin_row.add_theme_constant_override("separation", 8)
 	var skin_title := Label.new()
-	skin_title.text = "Ten Rengi"
+	skin_title.text = tr("UI_CREATE_SKIN")
 	skin_title.custom_minimum_size = Vector2(120, 0)
 	skin_row.add_child(skin_title)
 
@@ -225,7 +225,7 @@ func _make_hint_label() -> Label:
 func _on_culture_selected(_index: int) -> void:
 	var culture := _selected_culture()
 	_culture_description.text = culture.description
-	_culture_bonus.text = "Kültür bonusu: %s" % culture.get_bonus_summary()
+	_culture_bonus.text = tr("UI_CREATE_CULTURE_BONUS") % culture.get_bonus_summary()
 	_culture_perk.text = culture.perk_text
 	if _name_edit.text.strip_edges().is_empty():
 		_roll_random_name()
@@ -269,11 +269,11 @@ func _refresh() -> void:
 	var character_class := _selected_class()
 	var preview := _build_character()
 
-	_class_description.text = "%s Uygun görev: %s." % [
+	_class_description.text = tr("UI_CREATE_CLASS_DUTY") % [
 		character_class.description, DutyCatalog.get_duty(character_class.duty_id).display_name
 	]
 
-	_points_label.text = "Dağıtılacak puan: %d / %d" % [STAT_POINTS - _spent_points, STAT_POINTS]
+	_points_label.text = tr("UI_CREATE_POINTS") % [STAT_POINTS - _spent_points, STAT_POINTS]
 	for row in _stat_rows:
 		var kind: CharacterStats.Kind = row.kind
 		var base_value := _base_stats.get_value(kind)
@@ -289,10 +289,10 @@ func _refresh() -> void:
 		minus_button.disabled = base_value <= CharacterStats.BASE_VALUE
 		plus_button.disabled = _spent_points >= STAT_POINTS or base_value >= CharacterStats.MAX_VALUE
 
-	_height_label.text = "%d cm — %s" % [int(_height_slider.value), _height_effect_text(preview)]
+	_height_label.text = tr("UI_CREATE_HEIGHT_VALUE") % [int(_height_slider.value), _height_effect_text(preview)]
 	_skin_preview.color = CharacterData.get_skin_tone_color(_skin_button.selected)
 
-	_summary_label.text = "%s\nCan %d · İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d" % [
+	_summary_label.text = tr("UI_CREATE_PREVIEW") % [
 		preview.get_summary_line(),
 		preview.get_max_hp(),
 		preview.stats.get_initiative(),
@@ -306,8 +306,8 @@ func _height_effect_text(preview: CharacterData) -> String:
 	var hp_bonus := preview.get_height_hp_bonus()
 	var dodge_bonus := preview.get_height_dodge_bonus()
 	if hp_bonus == 0 and dodge_bonus == 0:
-		return "orta boy, dengeli"
-	return "Can %+d · Kaçınma %+d" % [hp_bonus, dodge_bonus]
+		return tr("UI_CREATE_HEIGHT_AVERAGE")
+	return tr("UI_BONUS_HP_DODGE") % [hp_bonus, dodge_bonus]
 
 func _selected_culture() -> Culture:
 	return CultureCatalog.get_cultures()[maxi(_culture_button.selected, 0)]

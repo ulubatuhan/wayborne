@@ -3,7 +3,7 @@ extends Control
 ## Tek bir karakterin ayrıntı ekranı: stat/yetkinlik yatırımı, görev
 ## ataması, multiclass seçimi ve ekipman (bkz. GameSession.equip_to_character -
 ## takılan/çıkarılan parça kervanın ortak equipment_inventory deposuyla
-## alışveriş eder). Parti ekranından "Karakter" düğmesiyle açılır; hangi
+## alışveriş eder). Parti ekranından tr("UI_PARTY_OPEN_CHARACTER") düğmesiyle açılır; hangi
 ## üyeyi gösterdiği Nav.character_target_index'ten okunur.
 
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
@@ -22,7 +22,7 @@ func _ready() -> void:
 	# Bu ekran yalnızca parti ekranından açılıyor, dönüş hedefi de her
 	# zaman orası - Nav.return_scene'e dokunmuyoruz ki parti ekranının
 	# kendi dönüş hedefi (dünya ya da şehir haritası) burada kaybolmasın.
-	_back_button.text = "Partiye Dön"
+	_back_button.text = tr("UI_CHAR_BACK_TO_PARTY")
 	_back_button.pressed.connect(_on_back_pressed)
 
 	var party := _session.get_party()
@@ -59,11 +59,11 @@ func _build_identity_section() -> void:
 	_content.add_child(appearance)
 
 	var hp := Label.new()
-	hp.text = "Can %d/%d" % [_character.current_hp, _character.get_max_hp()]
+	hp.text = tr("UI_CHAR_HP") % [_character.current_hp, _character.get_max_hp()]
 	_content.add_child(hp)
 
 	var derived := Label.new()
-	derived.text = "İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d · Hasar +%d" % [
+	derived.text = tr("UI_STATLINE") % [
 		_character.stats.get_initiative(),
 		_character.get_accuracy(),
 		_character.get_dodge(),
@@ -85,7 +85,7 @@ func _build_traits_section() -> void:
 	var traits := _character.get_traits()
 	if traits.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "Henüz bir huyu yok."
+		empty_label.text = tr("UI_CHAR_NO_TRAITS")
 		empty_label.modulate = HINT_COLOR
 		_content.add_child(empty_label)
 		return
@@ -98,32 +98,32 @@ func _build_traits_section() -> void:
 		row.text = "%s — %s%s" % [
 			trait_resource.display_name,
 			trait_resource.description,
-			" (taze, tavernada/kilisede arındırılabilir)" if fresh else "",
+			tr("UI_CHAR_TRAIT_FRESH") if fresh else "",
 		]
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD
 		row.modulate = POSITIVE_COLOR if trait_resource.is_positive else NEGATIVE_COLOR
 		_content.add_child(row)
 
 func _build_progress_section() -> void:
-	_content.add_child(_make_section_title("İlerleme"))
+	_content.add_child(_make_section_title(tr("UI_CHAR_PROGRESSION")))
 
 	var level_label := Label.new()
 	if _character.level >= CharacterData.MAX_LEVEL:
-		level_label.text = "Seviye %d (tavan)" % _character.level
+		level_label.text = tr("UI_CHAR_LEVEL_CAP") % _character.level
 	else:
 		var required := CharacterData.xp_required_for_level(_character.level)
-		level_label.text = "Seviye %d — %d/%d XP" % [_character.level, _character.xp, required]
+		level_label.text = tr("UI_CHAR_LEVEL") % [_character.level, _character.xp, required]
 	_content.add_child(level_label)
 
 	var auto_check := CheckBox.new()
-	auto_check.text = "Seviye atlayınca otomatik dağıt"
+	auto_check.text = tr("UI_CHAR_AUTO_ALLOCATE")
 	auto_check.button_pressed = _character.auto_allocate
 	auto_check.toggled.connect(_on_auto_allocate_toggled)
 	_content.add_child(auto_check)
 
 	if not _character.auto_allocate:
 		var pending := Label.new()
-		pending.text = "Harcanmamış: %d stat puanı · %d yetkinlik puanı" % [
+		pending.text = tr("UI_CHAR_UNSPENT") % [
 			_character.unspent_stat_points, _character.unspent_skill_points
 		]
 		pending.modulate = HINT_COLOR
@@ -153,13 +153,13 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 	var maxed := _character.stats.get_value(kind) >= CharacterStats.MAX_VALUE
 	if _character.auto_allocate:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Otomatik dağıtım açık"
+		plus_button.tooltip_text = tr("UI_AUTO_ALLOCATE_ON")
 	elif _character.unspent_stat_points <= 0:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Harcanmamış puan yok"
+		plus_button.tooltip_text = tr("UI_NO_POINTS_LEFT")
 	elif maxed:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Tavanda"
+		plus_button.tooltip_text = tr("UI_AT_CAP")
 	else:
 		plus_button.pressed.connect(_on_stat_invest_pressed.bind(kind))
 	row.add_child(plus_button)
@@ -196,13 +196,13 @@ func _build_skill_row(skill: CombatSkill) -> HBoxContainer:
 	plus_button.text = "+"
 	if _character.auto_allocate:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Otomatik dağıtım açık"
+		plus_button.tooltip_text = tr("UI_AUTO_ALLOCATE_ON")
 	elif _character.unspent_skill_points <= 0:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Harcanmamış puan yok"
+		plus_button.tooltip_text = tr("UI_NO_POINTS_LEFT")
 	elif proficiency >= CharacterData.MAX_SKILL_PROFICIENCY:
 		plus_button.disabled = true
-		plus_button.tooltip_text = "Tavanda"
+		plus_button.tooltip_text = tr("UI_AT_CAP")
 	else:
 		plus_button.pressed.connect(_on_skill_invest_pressed.bind(skill.skill_id))
 	row.add_child(plus_button)
@@ -210,10 +210,10 @@ func _build_skill_row(skill: CombatSkill) -> HBoxContainer:
 	return row
 
 func _build_duty_section() -> void:
-	_content.add_child(_make_section_title("Görev"))
+	_content.add_child(_make_section_title(tr("UI_DUTY")))
 
 	var note := Label.new()
-	note.text = "Bir görevi yalnızca bir kişi tutabilir; başka birine verince eskisi boşa çıkar."
+	note.text = tr("UI_CHAR_DUTY_HINT")
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	note.modulate = HINT_COLOR
 	_content.add_child(note)
@@ -236,10 +236,10 @@ func _build_duty_section() -> void:
 	_content.add_child(duty_button)
 
 func _build_multiclass_section() -> void:
-	_content.add_child(_make_section_title("İkinci Sınıf"))
+	_content.add_child(_make_section_title(tr("UI_CHAR_SECOND_CLASS")))
 
 	var note := Label.new()
-	note.text = "Yedinci seviyeden sonra ikinci bir sınıfın yeteneklerini de kullanabilirsin."
+	note.text = tr("UI_CHAR_MULTICLASS_HINT")
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	note.modulate = HINT_COLOR
 	_content.add_child(note)
@@ -279,14 +279,14 @@ func _build_equipment_slot_row(slot: String) -> VBoxContainer:
 	header.add_child(slot_label)
 
 	var equipped_label := Label.new()
-	equipped_label.text = _equipment_summary(equipped) if equipped != null else "Boş"
+	equipped_label.text = _equipment_summary(equipped) if equipped != null else tr("UI_CHAR_EMPTY_SLOT")
 	equipped_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	equipped_label.modulate = HINT_COLOR if equipped == null else POSITIVE_COLOR
 	equipped_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(equipped_label)
 
 	var unequip_button := Button.new()
-	unequip_button.text = "Çıkar"
+	unequip_button.text = tr("UI_CHAR_UNEQUIP")
 	unequip_button.disabled = equipped == null
 	unequip_button.pressed.connect(_on_unequip_pressed.bind(slot))
 	header.add_child(unequip_button)
@@ -306,7 +306,7 @@ func _build_equip_option_row(slot: String, candidate: Equipment, available: int)
 	row.add_theme_constant_override("separation", 8)
 
 	var equip_button := Button.new()
-	equip_button.text = "Tak: %s (depoda %d)" % [candidate.display_name, available]
+	equip_button.text = tr("UI_CHAR_EQUIP") % [candidate.display_name, available]
 	equip_button.tooltip_text = candidate.description
 	equip_button.pressed.connect(_on_equip_pressed.bind(slot, candidate.equipment_id))
 	row.add_child(equip_button)
@@ -324,15 +324,15 @@ func _equipment_summary(equipment_resource: Equipment) -> String:
 func _equipment_bonus_text(equipment_resource: Equipment) -> String:
 	var parts: Array[String] = []
 	if equipment_resource.hp_bonus != 0:
-		parts.append("Can %+d" % equipment_resource.hp_bonus)
+		parts.append(tr("UI_BONUS_HP") % equipment_resource.hp_bonus)
 	if equipment_resource.dodge_bonus != 0:
-		parts.append("Kaçınma %+d" % equipment_resource.dodge_bonus)
+		parts.append(tr("UI_BONUS_DODGE") % equipment_resource.dodge_bonus)
 	if equipment_resource.accuracy_bonus != 0:
-		parts.append("İsabet %+d" % equipment_resource.accuracy_bonus)
+		parts.append(tr("UI_BONUS_ACCURACY") % equipment_resource.accuracy_bonus)
 	if equipment_resource.crit_bonus != 0:
-		parts.append("Kritik %+d" % equipment_resource.crit_bonus)
+		parts.append(tr("UI_BONUS_CRIT") % equipment_resource.crit_bonus)
 	if equipment_resource.damage_bonus != 0:
-		parts.append("Hasar %+d" % equipment_resource.damage_bonus)
+		parts.append(tr("UI_BONUS_DAMAGE") % equipment_resource.damage_bonus)
 	return ", ".join(parts)
 
 func _make_section_title(text: String) -> Label:

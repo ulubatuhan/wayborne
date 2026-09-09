@@ -1,7 +1,7 @@
 class_name RecruitPanel
 extends VBoxContainer
 
-## "Partiye Kat" bölümü. Taverna, lonca ve pazar meydanı aynı paneli
+## tr("UI_RECRUIT_HIRE") bölümü. Taverna, lonca ve pazar meydanı aynı paneli
 ## kurar, yalnızca mekân kimliği değişir - aday havuzunu ve ücret
 ## eğilimini RecruitCatalog belirler.
 ##
@@ -42,17 +42,17 @@ func refresh() -> void:
 	_clear_children(_candidate_list)
 	var required_reputation := RecruitCatalog.get_venue_required_reputation(_venue)
 	if _session.reputation < required_reputation:
-		_info_label.text = "Buradakiler tanımadıkları kimseyle yola çıkmaz. Gereken itibar: %d (senin: %d)" % [
+		_info_label.text = tr("UI_RECRUIT_REPUTATION_GATE") % [
 			required_reputation, _session.reputation
 		]
 		return
 
 	var candidates := _session.get_recruit_candidates(_venue)
 	if candidates.is_empty():
-		_info_label.text = "Şu an burada yola çıkmak isteyen kimse yok."
+		_info_label.text = tr("UI_RECRUIT_NOBODY")
 		return
 
-	_info_label.text = "Parti %d/%d · %d vagon. Her vagonda iki kişi yatar; savaş alanı da dört mevkiden ibaret." % [
+	_info_label.text = tr("UI_RECRUIT_HINT") % [
 		_session.get_party().size(),
 		_session.get_party_capacity(),
 		_session.owned_wagon_count,
@@ -77,7 +77,7 @@ func _ensure_built() -> void:
 	add_child(_info_label)
 
 	var party_title := Label.new()
-	party_title.text = "Partin"
+	party_title.text = tr("UI_RECRUIT_YOUR_PARTY")
 	add_child(party_title)
 
 	_party_list = VBoxContainer.new()
@@ -91,7 +91,7 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var label := Label.new()
-	label.text = "%d. %s (sv. %d) — can %d · %s" % [
+	label.text = tr("UI_RECRUIT_MEMBER") % [
 		slot, character.get_summary_line(), character.level, character.get_max_hp(), character.get_appearance_line()
 	]
 	label.custom_minimum_size = Vector2(520, 0)
@@ -106,7 +106,7 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 	# Oyuncunun kendisi çıkarılamaz; kontrol sıraya değil bayrağa bakıyor.
 	if not character.is_player:
 		var dismiss_button := Button.new()
-		dismiss_button.text = "Yol Ver"
+		dismiss_button.text = tr("UI_DISMISS")
 		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))
 		row.add_child(dismiss_button)
 
@@ -117,7 +117,7 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var label := Label.new()
-	label.text = "%s (sv. %d) — can %d · isabet %d · kaçınma %d — %d GG" % [
+	label.text = tr("UI_RECRUIT_CANDIDATE") % [
 		candidate.get_summary_line(),
 		candidate.level,
 		candidate.get_max_hp(),
@@ -132,17 +132,17 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	# Kilitli seçenek gizlenmez, sebebiyle gösterilir.
 	if not _session.can_recruit():
 		if _session.get_party_capacity() < GameSession.MAX_PARTY_SIZE:
-			hire_button.text = "Vagonlarında yer yok"
+			hire_button.text = tr("UI_RECRUIT_NO_WAGON_ROOM")
 		else:
-			hire_button.text = "Parti dolu"
+			hire_button.text = tr("UI_RECRUIT_PARTY_FULL")
 		hire_button.disabled = true
 		hire_button.modulate = LOCKED_COLOR
 	elif not _session.wallet.can_afford(candidate.hire_cost):
-		hire_button.text = "Kese yetmiyor"
+		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
 		hire_button.disabled = true
 		hire_button.modulate = LOCKED_COLOR
 	else:
-		hire_button.text = "Partiye Kat"
+		hire_button.text = tr("UI_RECRUIT_HIRE")
 		hire_button.pressed.connect(_on_hire_pressed.bind(candidate))
 	row.add_child(hire_button)
 

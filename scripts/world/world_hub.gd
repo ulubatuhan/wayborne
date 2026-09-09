@@ -214,7 +214,7 @@ func _build_scenery() -> void:
 
 func _build_spots() -> void:
 	_add_spot(
-		"Şehir Kapısı",
+		tr("UI_HUB_CITY_GATE"),
 		Vector2(1720.0, GROUND_Y - 230.0),
 		Vector2(150.0, 230.0),
 		GATE_COLOR,
@@ -244,7 +244,7 @@ func _add_spot(
 	add_child(name_label)
 
 	var prompt := Label.new()
-	prompt.text = "▼ tıkla ya da E"
+	prompt.text = tr("UI_HUB_INTERACT")
 	prompt.position = Vector2(position.x - 40.0, position.y + size.y + 6.0)
 	prompt.size = Vector2(size.x + 80.0, 24.0)
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -322,7 +322,7 @@ func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 	add_child(wagon)
 
 	var wagon_label := Label.new()
-	wagon_label.text = "Vagon %d" % (index + 1)
+	wagon_label.text = tr("UI_HUB_WAGON") % (index + 1)
 	wagon_label.position = Vector2(0.0, -26.0)
 	wagon_label.size = Vector2(WAGON_SIZE.x, 24.0)
 	wagon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -332,7 +332,7 @@ func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 		return wagon
 
 	var wagon_prompt := Label.new()
-	wagon_prompt.text = "▼ tıkla ya da E"
+	wagon_prompt.text = tr("UI_HUB_INTERACT")
 	wagon_prompt.position = Vector2(-40.0, WAGON_SIZE.y + 6.0)
 	wagon_prompt.size = Vector2(WAGON_SIZE.x + 80.0, 24.0)
 	wagon_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -427,7 +427,7 @@ func _try_interact_at(world_position: Vector2) -> void:
 		if _is_in_range(spot):
 			_enter_spot(spot)
 		else:
-			_hint("%s çok uzakta - yaklaş." % spot.name)
+			_hint(tr("UI_HUB_TOO_FAR") % spot.name)
 		return
 
 func _try_interact_nearest() -> void:
@@ -447,7 +447,7 @@ func _refresh_status() -> void:
 	var session: GameSession = GameState.get_session()
 	var location := WorldMapData.get_location_by_id(session.current_location_id)
 	var location_name := "Yolda" if location == null else location.location_name
-	_status_label.text = "%s · Kese: %d GG · Erzak: %d · Vagon: %d · Parti: %d/%d" % [
+	_status_label.text = tr("UI_HUB_HUD") % [
 		location_name,
 		session.wallet.balance,
 		session.get_provisions(),

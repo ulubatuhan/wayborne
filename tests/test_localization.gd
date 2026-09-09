@@ -28,6 +28,9 @@ func run(t) -> void:
 	_test_required_locales_are_filled(t)
 	_test_project_godot_lists_every_translation(t, locales)
 	_test_no_duplicate_keys(t)
+	_test_placeholders_match_across_locales(t)
+	_test_every_referenced_key_exists(t)
+	_test_no_hardcoded_prose_in_screens(t)
 
 func _supported_locales() -> Array:
 	var script = load(USER_SETTINGS_PATH)
@@ -131,3 +134,157 @@ func _test_no_duplicate_keys(t) -> void:
 		duplicates.size(), 0,
 		"anahtarlar dosyalar arasında benzersiz (çakışan: %s)" % ", ".join(duplicates.slice(0, 5))
 	)
+
+## Bir çeviri, kaynak metinle **aynı biçim argümanlarını aynı sırada**
+## taşımak zorunda. GDScript'in % operatörü konumlu argüman ("%2$s")
+## desteklemiyor, yani bir çevirmen sırayı değiştirirse ya da bir %d'yi
+## düşürürse oyun o satırı bastığı anda çöker - üstelik yalnızca o dilde,
+## yani test etmeyen kimse görmez. Kaçış olan %% argüman sayılmaz.
+func _test_placeholders_match_across_locales(t) -> void:
+	var mismatches: Array[String] = []
+	for csv_name in CSV_NAMES:
+		var rows := _read_csv(csv_name)
+		if rows.size() < 2:
+			continue
+		var header: Array = rows[0]
+		for i in range(1, rows.size()):
+			var row: Array = rows[i]
+			var key := str(row[0])
+			var source := _placeholders(str(row[1]))
+			for column in range(2, mini(header.size(), row.size())):
+				var value := str(row[column]).strip_edges()
+				if value.is_empty():
+					continue
+				if _placeholders(value) != source:
+					mismatches.append("%s[%s]" % [key, str(header[column])])
+	t.eq(
+		mismatches.size(), 0,
+		"her çeviri kaynakla aynı biçim argümanlarını taşıyor (bozuk: %s)"
+			% ", ".join(mismatches.slice(0, 5))
+	)
+
+## "%d", "%s", "%.1f", "%+d" gibi argümanlar; "%%" kaçışı atlanır.
+func _placeholders(text: String) -> Array[String]:
+	var found: Array[String] = []
+	var index := 0
+	while index < text.length():
+		if text[index] != "%":
+			index += 1
+			continue
+		var cursor := index + 1
+		if cursor < text.length() and text[cursor] == "%":
+			index = cursor + 1
+			continue
+		while cursor < text.length() and "+- #0123456789.".contains(text[cursor]):
+			cursor += 1
+		if cursor < text.length():
+			found.append("%" + text[cursor])
+			index = cursor + 1
+		else:
+			index = cursor
+	return found
+
+## Koddan çağrılan her anahtar bir CSV'de tanımlı olmalı. Tanımsız anahtar
+## Godot'ta hata vermez - ekrana anahtarın kendisi basılır ("UI_MARKET_BUY"
+## yazan bir düğme), yani yalnızca o ekranı açan görür.
+func _test_every_referenced_key_exists(t) -> void:
+	var defined := _all_keys()
+	var missing: Array[String] = []
+	for path in _screen_scripts():
+		var text := _read_text(path)
+		for key in _referenced_keys(text):
+			if not defined.has(key) and not missing.has(key):
+				missing.append(key)
+	t.eq(
+		missing.size(), 0,
+		"koddaki her çeviri anahtarı tanımlı (eksik: %s)" % ", ".join(missing.slice(0, 5))
+	)
+
+## Ekran katmanında sabit Türkçe metin kalmamalı. Türkçeye özgü harf
+## taşıyan bir dizeyi yakalıyor - kusursuz değil ama gerilemeyi yakalar:
+## yeni bir ekran metnini anahtara bağlamayı unutmak sessizce o metni
+## tek dile çiviler.
+func _test_no_hardcoded_prose_in_screens(t) -> void:
+	var offenders: Array[String] = []
+	for path in _screen_scripts():
+		for line in _read_text(path).split("\n"):
+			var stripped := line.strip_edges()
+			if stripped.begins_with("#"):
+				continue
+			for literal in _string_literals(stripped):
+				if _has_turkish_letter(literal):
+					offenders.append("%s: %s" % [path.get_file(), literal.substr(0, 32)])
+	t.eq(
+		offenders.size(), 0,
+		"ekranlarda sabit Türkçe metin yok (kalanlar: %s)" % ", ".join(offenders.slice(0, 5))
+	)
+
+func _has_turkish_letter(text: String) -> bool:
+	for letter in ["ğ", "ü", "ş", "ı", "ö", "ç", "Ğ", "Ü", "Ş", "İ", "Ö", "Ç"]:
+		if text.contains(letter):
+			return true
+	return false
+
+func _string_literals(line: String) -> Array[String]:
+	var found: Array[String] = []
+	var parts := line.split('"')
+	# Tırnaklar arasındaki her ikinci parça bir dize gövdesi.
+	for index in range(1, parts.size(), 2):
+		found.append(parts[index])
+	return found
+
+## `tr("X")` ve `TranslationServer.translate("X")` çağrılarındaki anahtarlar.
+func _referenced_keys(text: String) -> Array[String]:
+	var found: Array[String] = []
+	# Kaynak diziye açık tip verilmezse döngü değişkeni Variant'a düşer ve
+	# `:=` çıkarım yapamaz (bkz. CLAUDE.md `:=` / Variant tuzağı).
+	var markers: Array[String] = ['tr("', 'translate("']
+	for marker in markers:
+		var from := 0
+		while true:
+			var start := text.find(marker, from)
+			if start < 0:
+				break
+			var key_start := start + marker.length()
+			var key_end := text.find('"', key_start)
+			if key_end < 0:
+				break
+			var key := text.substr(key_start, key_end - key_start)
+			if not key.is_empty() and not found.has(key):
+				found.append(key)
+			from = key_end
+	return found
+
+func _all_keys() -> Dictionary:
+	var keys: Dictionary = {}
+	for csv_name in CSV_NAMES:
+		var rows := _read_csv(csv_name)
+		for i in range(1, rows.size()):
+			keys[str(rows[i][0])] = true
+	return keys
+
+## Oyuncunun gördüğü ekranlar. F1 geliştirici sahneleri (haggling/combat
+## test ekranı) bilerek dışarıda: oyuna girmiyorlar, çevrilmeleri
+## çevirmene boşuna iş çıkarırdı.
+const SCREEN_DIRS: Array[String] = ["res://scripts/ui", "res://scripts/world"]
+const DEV_ONLY_SCRIPTS: Array[String] = ["haggling.gd", "combat_test.gd", "test_selector.gd"]
+
+func _screen_scripts() -> Array[String]:
+	var paths: Array[String] = []
+	for directory in SCREEN_DIRS:
+		var names := DirAccess.get_files_at(directory)
+		if names == null:
+			continue
+		for name in names:
+			if not name.ends_with(".gd") or DEV_ONLY_SCRIPTS.has(name):
+				continue
+			paths.append("%s/%s" % [directory, name])
+	return paths
+
+func _read_text(path: String) -> String:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	var text := file.get_as_text()
+	file.close()
+	return text

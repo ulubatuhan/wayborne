@@ -19,11 +19,11 @@ func _ready() -> void:
 	_back_button.pressed.connect(_on_back_pressed)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
-	_title_label.text = "Kilise" if location == null else "%s Kilisesi" % location.location_name
+	_title_label.text = tr("UI_CITY_CHURCH") if location == null else tr("UI_CHURCH_TITLE_CITY") % location.location_name
 
 	_purification_panel = PurificationPanel.new()
 	_content.add_child(_purification_panel)
-	_purification_panel.setup(_session, "Huy Arındır", PURIFICATION_COST)
+	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 

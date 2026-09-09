@@ -12,33 +12,19 @@ signal dismissed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.6)
 const PANEL_SIZE: Vector2 = Vector2(520, 420)
-const TOPICS: Array[Dictionary] = [
-	{
-		"title": "Stres",
-		"text": "Moral her seferde sıfırdan başlar, ama stres kervanla \
-birlikte kalıcı olarak birikir - yalnızca şehirde dinlenmek ya da yolda \
-kamp kurmak azaltır. Çok gerilen bir yoldaş şehre varışta bir huy \
-kazanabilir, hatta kervandan ayrılabilir.",
-	},
-	{
-		"title": "Görev",
-		"text": "Parti üyelerine Muhafız, İzci, Levazımcı, Arabacı, Tellal \
-ya da Otacı gibi bir kervan görevi ver - Parti ekranından. Sınıfıyla \
-uyuşan biri o görevi daha iyi yapar; boş bırakılan bir görev asla ceza \
-getirmez.",
-	},
-	{
-		"title": "Huy",
-		"text": "Her karakterin en fazla üç huyu olabilir - kimi bir \
-erdem, kimi bir zaaf. Yeni kazanılmış (taze) bir huy Kilise'de ya da \
-Taverna'da arındırılabilir; kökleşmiş bir huya artık dokunulamaz.",
-	},
-	{
-		"title": "Ekipman",
-		"text": "Silah ve zırhı Kervan Avlusu'ndaki Demirci'den satın al; \
-yüzük ve kolye gibi tılsımları yolda bulursun. Karakter ekranından tak \
-ya da çıkar.",
-	},
+## Konular yalnızca **anahtar** taşır, metin değil: `const` ifadesinin
+## içinde `tr()` çağrılamaz (sabit ifade olmak zorunda) ve prose zaten
+## çeviri dosyasında yaşamalı (bkz. CLAUDE.md Localization Rules).
+## Metin _build() sırasında çözülüyor, yani panel açıldığı andaki dile
+## göre görünüyor.
+## Anahtarlar tam yazılıyor, çalışma anında birleştirilmiyor: birleştirilen
+## bir anahtarı ne test_localization.gd'nin "tanımsız anahtar" taraması
+## görebilir ne de bir çevirmen arayabilir.
+const TOPIC_KEYS: Array[Array] = [
+	["UI_ONBOARD_STRESS_TITLE", "UI_ONBOARD_STRESS_TEXT"],
+	["UI_ONBOARD_DUTY_TITLE", "UI_ONBOARD_DUTY_TEXT"],
+	["UI_ONBOARD_TRAIT_TITLE", "UI_ONBOARD_TRAIT_TEXT"],
+	["UI_ONBOARD_EQUIPMENT_TITLE", "UI_ONBOARD_EQUIPMENT_TEXT"],
 ]
 
 func _ready() -> void:
@@ -70,23 +56,24 @@ func _build() -> void:
 	margin.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "Kervana Hoş Geldin"
+	title.text = tr("UI_ONBOARD_TITLE")
 	title.add_theme_font_size_override("font_size", 22)
 	vbox.add_child(title)
 
-	for topic in TOPICS:
+	for topic in TOPIC_KEYS:
+		var keys: Array = topic
 		var topic_title := Label.new()
-		topic_title.text = topic.title
+		topic_title.text = tr(String(keys[0]))
 		topic_title.add_theme_font_size_override("font_size", 15)
 		vbox.add_child(topic_title)
 
 		var topic_text := Label.new()
-		topic_text.text = topic.text
+		topic_text.text = tr(String(keys[1]))
 		topic_text.autowrap_mode = TextServer.AUTOWRAP_WORD
 		vbox.add_child(topic_text)
 
 	var dismiss_button := Button.new()
-	dismiss_button.text = "Anladım, Devam Et"
+	dismiss_button.text = tr("UI_ONBOARD_DISMISS")
 	dismiss_button.pressed.connect(_on_dismiss_pressed)
 	vbox.add_child(dismiss_button)
 
