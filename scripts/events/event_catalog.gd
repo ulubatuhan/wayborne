@@ -23,6 +23,11 @@ extends RefCounted
 ## CLAUDE.md Morale Rules).
 const MUTINY_MORALE_THRESHOLD: int = 40
 
+## Kadro içi kavganın stres eşiği. 70'ten 40'a indi: ölçüm, varış stresinin
+## ortalama ~25 olduğunu ve 70'in hiçbir zaman görülmediğini gösterdi -
+## moraldeki isyan eşiğiyle birebir aynı durum (bkz. CLAUDE.md Stress Rules).
+const STRESS_BRAWL_THRESHOLD: int = 40
+
 static var _road_events: Array[GameEvent] = []
 
 static func get_road_events() -> Array[GameEvent]:
@@ -513,7 +518,7 @@ static func _troubled_night() -> GameEvent:
 static func _stress_brawl() -> GameEvent:
 	var event := _event("evt_stress_brawl", "EVT_BRAWL", 1.3)
 	event.conditions = _conditions([
-		EventCondition.make("stress", EventCondition.Op.GREATER_EQUAL, 70),
+		EventCondition.make("stress", EventCondition.Op.GREATER_EQUAL, STRESS_BRAWL_THRESHOLD),
 	])
 	event.cooldown_days = 4
 	event.choices = _choices([

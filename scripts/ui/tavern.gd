@@ -15,6 +15,8 @@ const PURIFICATION_COST: int = 60
 var _session: GameSession
 var _rows: Array[Dictionary] = []
 var _purification_panel: PurificationPanel
+var _feast_label: Label
+var _feast_button: Button
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
@@ -40,9 +42,33 @@ func _ready() -> void:
 	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
 	_purification_panel.trait_removed.connect(_refresh_rows)
 
+	# Ziyafet: stresin paralı kolu. Varış rahatlaması artık seferin
+	# getirdiğini tek başına eritmiyor (bkz. GameSession.get_city_rest_relief),
+	# o yüzden oyuncunun kesesiyle müdahale edebileceği bir yol olmalı -
+	# yoksa stres kaçınılmaz bir sayaca dönerdi.
+	_content.add_child(HSeparator.new())
+	_feast_label = Label.new()
+	_feast_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_content.add_child(_feast_label)
+	_feast_button = Button.new()
+	_feast_button.pressed.connect(_on_feast_pressed)
+	_content.add_child(_feast_button)
+
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_build_rows()
 	_refresh_rows()
+	_refresh_feast()
+
+func _refresh_feast() -> void:
+	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [
+		_session.party_stress, GameSession.MAX_STRESS, GameSession.FEAST_STRESS_RELIEF
+	]
+	_feast_button.text = tr("UI_TAVERN_FEAST") % _session.get_feast_cost()
+	_feast_button.disabled = not _session.can_afford_feast()
+
+func _on_feast_pressed() -> void:
+	if _session.throw_feast():
+		_refresh_feast()
 
 func _build_rows() -> void:
 	for route in WorldMapData.get_routes_from(_session.current_location_id):
@@ -120,6 +146,7 @@ func _on_buy_pressed(route: TravelRoute) -> void:
 
 func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh_rows()
+	_refresh_feast()
 	_purification_panel.refresh()
 
 func _on_map_pressed() -> void:

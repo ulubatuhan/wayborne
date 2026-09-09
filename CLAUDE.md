@@ -285,6 +285,56 @@ wayborne/
   `stress` key is available in `GameSession.build_event_context()`, so an
   event's own eligibility can key off it directly (`evt_stress_brawl`)
   instead of needing a bespoke weight modifier.
+- **Stress accumulates across journeys; that is the whole point of it being
+  the persistent stat.** It did not, for a long time: a journey brought
+  ~25 and a city arrival wiped 35, so the number reset every loop and
+  `evt_stress_brawl` never fired. Arrival relief is now
+  `get_city_rest_relief()` - smaller than a journey's load, and *decaying
+  with `total_days_elapsed`* down to a floor, so the same inn helps a
+  weary company less ten journeys in. The gap is what accrues.
+- **Every tap must be measured, not just the obvious one.** Lowering the
+  arrival relief was not enough: `CAMP_STRESS_RELIEF` was 20, so one camp
+  per journey still erased the accumulation entirely (measured: stress
+  stayed under 20 across twelve journeys). Camp now *slows* accumulation
+  rather than deleting it. When a stat refuses to move, enumerate
+  everything that reduces it before touching what raises it.
+- **`party_stress` is the party's average, not one person's counter.** So
+  a newcomer dilutes it (`add_to_party` - the single door in, the
+  counterpart of `dismiss`), and replacing a crew over time brings it down.
+  A newcomer does not arrive at zero (`NEWCOMER_STRESS_SHARE`): someone
+  joining a battered caravan hears the stories. Without that share,
+  "dismiss one, hire another" would be a free button that halves stress
+  every cycle.
+- **The player needs a lever their purse can pull, and it must be rationed.**
+  `throw_feast()` (in the tavern) is paid relief priced per head, **once per
+  day** - which, since days only advance on the road, means once per city
+  visit. Unrationed it was the exploit: five feasts took stress from 90 to 0
+  for 225 gold, less than one journey's net income. You cannot sober a
+  company five times in one evening, and a persistent stat that gold erases
+  on the spot is not persistent. `last_feast_day` is saved, or reloading
+  would reset the counter.
+- **A stress lever that resets on reload is not a lever.** Same reasoning as
+  `RouteConditions`' computed states: anything a player could re-roll by
+  loading a save has to live in the save file.
+
+Camp is the free-but-slow lever, the feast the paid-and-rationed one, and
+stress-relieving events the lucky one. Measured over twelve consecutive
+journeys (~25 stress each):
+
+| play pattern | stress after 1 / 6 / 12 journeys | journeys at brawl threshold |
+|---|---|---|
+| no intervention | 11 / 69 / 88 (capped) | 84% |
+| one camp per journey | 4 / 22 / 49 | 43% |
+| one camp + feast | 4 / 22 / 28 (plateau) | 37%, ~43 gold |
+| two camps per journey | 0 / 0 / 1 | 0% |
+
+The last row is deliberate, not an oversight: a player who spends the nights,
+food and daylight to camp twice a journey *should* hold stress down.
+
+"Dismiss one, hire another" is not an exploit either, but only because it is
+*dominated*: churning the crew takes stress from 90 to 6 over eight hires -
+and eight hires cost far more than the feasts that do the same job, on top of
+losing every companion's levels, traits and equipment.
 
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
@@ -470,6 +520,12 @@ Who you are travelling with, and who you meet, changes what an event does.
   traveller sets a flag and unlocks a `triggered_only` chain event that
   fires days later (`evt_wanderer_revenge`). This is the pattern for any
   "that decision comes back to you" design.
+  The balance simulator reports this event as never firing; that is a
+  limitation of the simulator, not a bug. Its policy is "take the first
+  available choice", so it always takes the traveller in and never opens the
+  chain. `test_event_effects.gd` exercises the chain end to end instead -
+  when a report says an event never fires, check whether anything in the
+  harness could ever reach it before treating it as dead content.
 - **Culture kinship is not one culture's privilege.** `ROLL_ENCOUNTER` also
   rolls the met group's culture and sets a `<prefix>_kin` flag when it
   matches the *leader's* culture, so meeting your own people works whichever
@@ -1169,16 +1225,19 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   yazılıp hiç okunmaması.
 
 Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
-duruyor) ve **moral dengesi** - aşağıdaki açık madde.
+duruyor). Moral ve stres dengesi çözüldü - aşağıdaki kayıtlara bakılabilir.
 
-### Açık denge sorusu: stres eşiği ulaşılmıyor
+### Çözülmüş: stres eşiği (kayıt için)
 
-`evt_stress_brawl` stres ≥ 70 istiyor ama simülatörde varış stresi ortalama
-~25 - yani olay katalogda var, oyunda yok. Bu, moralin az önce çözülen
-durumunun aynısı (bkz. Morale Rules): eşik gerçekte görülen aralığın çok
-üstünde. Aynı üç yön geçerli - eşiği indirmek, günlük bir stres birikimi
-eklemek, ya da olay havuzunun stres bilançosunu kaydırmak. Bir denge
-tercihi olduğu için dokunulmadı.
+`evt_stress_brawl` stres ≥ 70 istiyordu, simülatörde varış stresi ~25'ti -
+olay katalogda vardı, oyunda yoktu. Üç kolun üçü birden gerekti (bkz.
+Stress Rules): eşik 40'a indi, varış rahatlaması 35'ten 14'e indi ve
+günlerle eriyor, kamp rahatlaması 20'den 8'e indi. Üçüncüsü ölçmeden
+görünmüyordu: ilk ikisi tek başına yetmiyordu çünkü her sefer kamp kuran
+oyuncuda stres hâlâ hiç birikmiyordu.
+
+Sonuç: `evt_stress_brawl` 600 koşuda 2 kez ateşleniyor, playthrough
+demosunda dört bacak sonunda stres 18 (eskiden 0).
 
 ### Çözülmüş: isyan eşiği (kayıt için)
 

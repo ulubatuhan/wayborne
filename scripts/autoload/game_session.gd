@@ -182,6 +182,68 @@ var party_stress: int = 0
 func change_stress(delta: int) -> void:
 	party_stress = clampi(party_stress + delta, 0, MAX_STRESS)
 
+## `party_stress` kadronun **ortalaması**dır, tek bir kişinin değil. Bunun
+## mekanik sonucu şu: kadroya diri biri katıldığında ortalama düşer, kadro
+## tamamen yenilendiğinde stres neredeyse silinir. Darkest Dungeon'daki
+## "kırılmış kahramanı gönder, taze birini tut" kararının karşılığı.
+##
+## Yeni gelen sıfırla gelmiyor: batmış bir kervana katılan biri anlatılanları
+## duyar, kadronun havasının bir kısmını üstlenir (NEWCOMER_STRESS_SHARE).
+## Sıfırla gelseydi "birini gönder, yenisini tut" stresi tek hamlede yarıya
+## indiren bedava bir düğmeye dönerdi; bu payla her tur azalan bir getiri
+## veriyor ve her turun ücreti var (bkz. hire_cost).
+const NEWCOMER_STRESS_SHARE: float = 0.4
+
+## Partiye katılmanın tek kapısı. `dismiss()`in karşılığı: ortalamanın
+## seyrelmesi burada olur, `party.append()` doğrudan çağrılırsa olmaz.
+func add_to_party(character: CharacterData) -> void:
+	if character == null or party.has(character):
+		return
+	var previous_count := party.size()
+	party.append(character)
+	if previous_count <= 0:
+		return
+	var newcomer_stress := float(party_stress) * NEWCOMER_STRESS_SHARE
+	var diluted := (float(party_stress) * float(previous_count) + newcomer_stress) / float(party.size())
+	party_stress = clampi(int(round(diluted)), 0, MAX_STRESS)
+
+## Kadroya ziyafet: paralı stres rahatlaması. Birikme artık şehir varışının
+## tek başına eritemeyeceği kadar hızlı (bkz. get_city_rest_relief), o yüzden
+## oyuncunun kesesiyle müdahale edebileceği bir kolu olmalı - yoksa stres
+## kaçınılmaz bir sayaca dönerdi. Ücret kişi başı, çünkü kalabalık kadroyu
+## doyurmak pahalıdır.
+const FEAST_COST_PER_HEAD: int = 45
+const FEAST_STRESS_RELIEF: int = 22
+
+## Ziyafet günde bir. Ölçüm gösterdi ki sınırsız bırakıldığında beş ziyafet
+## 225 GG'ye stresi 90'dan 0'a indiriyordu - bir seferin net kazancının
+## altında bir bedelle. Kadroyu bir akşamda beş kez ayıltamazsın; kalıcı
+## stat parayla anında silinebiliyorsa kalıcı değildir.
+##
+## Günler yalnızca yolda ilerlediği için bu pratikte "şehir ziyareti başına
+## bir ziyafet" demek. Kayda yazılıyor - yoksa kaydı yeniden yüklemek
+## sayacı sıfırlayan bir sömürü olurdu.
+var last_feast_day: int = -1
+
+func has_feasted_today() -> bool:
+	return last_feast_day == total_days_elapsed
+
+func get_feast_cost() -> int:
+	return FEAST_COST_PER_HEAD * maxi(1, party.size())
+
+func can_afford_feast() -> bool:
+	if party_stress <= 0 or has_feasted_today():
+		return false
+	return wallet.can_afford(get_feast_cost())
+
+func throw_feast() -> bool:
+	if not can_afford_feast():
+		return false
+	wallet.spend(get_feast_cost())
+	change_stress(-FEAST_STRESS_RELIEF)
+	last_feast_day = total_days_elapsed
+	return true
+
 ## Taverna'da ödeyip öğrenilmedikçe bir rotanın tam tehlike yüzdesi
 ## bilinmez (bkz. tavern.gd, world_map.gd - kaba bir bant gösterirler).
 ## "from|to" anahtarlanır; rota simetrik olduğu için öğrenince iki yön
@@ -249,7 +311,7 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	owned_wagon_damaged = 0
 
 	set_player_character(player_character)
-	party.append(RecruitCatalog.build_starting_companion(rng))
+	add_to_party(RecruitCatalog.build_starting_companion(rng))
 
 	current_location_id = roll_starting_location(rng)
 	_restock_current_location()
@@ -277,7 +339,7 @@ func recruit(character: CharacterData) -> bool:
 	wallet.spend(character.hire_cost)
 	character.is_player = false
 	character.heal_full()
-	party.append(character)
+	add_to_party(character)
 	return true
 
 ## Oyuncunun kendisi çıkarılamaz. Kontrol sıraya göre değil bayrağa göre:
@@ -411,7 +473,16 @@ func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 ## Gün ilerletme/erzak tüketimi çağıran tarafın işi, burada yalnızca
 ## kampın kendi payı var.
 const CAMP_PROVISIONS_COST: int = 3
-const CAMP_STRESS_RELIEF: int = 20
+## Kamp eskiden 20 götürüyordu. Ölçüm bunun stresi tek başına sildiğini
+## gösterdi: sefer başına ~25 stres, kamp -20, varış -14 -> her sefer kamp
+## kuran oyuncuda stres 12 sefer boyunca 20'nin üstüne çıkmıyordu. Yani
+## eşiği ve varış rahatlamasını düzeltmek sorunu çözmüyor, yalnızca yerini
+## değiştiriyordu.
+##
+## Artık kamp birikmeyi **yavaşlatıyor**, silmiyor: bir gecelik mola bir
+## seferin yükünün üçte birini alıyor. Kesenin kolu (ziyafet) ondan güçlü,
+## çünkü onun bir bedeli var.
+const CAMP_STRESS_RELIEF: int = 8
 
 ## Otacı'nın görevi tam bu - "kampta yaraları ve gerginliği sarar" (bkz.
 ## DutyCatalog) - tutan biri varsa kampın rahatlatma payını büyütür.
@@ -858,7 +929,7 @@ func finish_journey() -> Dictionary:
 	var stress_rng := RandomNumberGenerator.new()
 	stress_rng.seed = hash("%s|%d|stress" % [current_location_id, total_days_elapsed])
 	payout["stress_breaks"] = resolve_stress_breaks(stress_rng)
-	change_stress(-CITY_REST_STRESS_RELIEF)
+	change_stress(-get_city_rest_relief())
 
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
@@ -903,7 +974,21 @@ func _apply_wagon_losses_to_ownership() -> void:
 
 ## Şehre varış her zaman rahatlatır - kırılma riski sıfırlanmaz ama stres
 ## seviyesi geri çekilir.
-const CITY_REST_STRESS_RELIEF: int = 35
+## Şehirde dinlenmek eskiden 35 götürüyordu - tipik bir sefer ~25-30 stres
+## biriktirdiği için stres seferden sefere **hiç birikmiyordu** ve
+## evt_stress_brawl (stres >= 40) hiç ateşlenmiyordu.
+##
+## Artık dinlenmek seferin getirdiğinin bir kısmını alıyor, hepsini değil:
+## fark birikiyor. Üstelik rahatlama günlerle eriyor - aynı han odası aynı
+## kadroya on sefer sonra daha az iyi geliyor - ki "birikme gittikçe artsın".
+## Taban var: dinlenmek hiçbir zaman tamamen işe yaramaz hale gelmemeli.
+const CITY_REST_STRESS_RELIEF: int = 14
+const CITY_REST_RELIEF_DECAY_PER_DAY: float = 0.02
+const CITY_REST_RELIEF_MIN: int = 6
+
+func get_city_rest_relief() -> int:
+	var decayed := float(CITY_REST_STRESS_RELIEF) - float(total_days_elapsed) * CITY_REST_RELIEF_DECAY_PER_DAY
+	return maxi(CITY_REST_RELIEF_MIN, int(round(decayed)))
 
 const JOURNEY_XP_BASE: int = 15
 const JOURNEY_XP_PER_DAY: float = 4.0
@@ -989,6 +1074,7 @@ func to_save_dict() -> Dictionary:
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
 		"party_stress": party_stress,
+		"last_feast_day": last_feast_day,
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
@@ -1051,6 +1137,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	_ensure_party()
 
 	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
+	last_feast_day = int(data.get("last_feast_day", -1))
 
 	equipment_inventory = {}
 	var equipment_data: Dictionary = data.get("equipment_inventory", {})
