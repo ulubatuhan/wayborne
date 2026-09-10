@@ -418,7 +418,7 @@ static func _mutiny() -> GameEvent:
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
 			EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, MUTINY_MORALE_THRESHOLD),
-		]), 8.0),
+		]), 24.0),
 	])
 	event.cooldown_days = 4
 	event.choices = _choices([

@@ -87,9 +87,6 @@ func take_elapsed_days() -> int:
 	_days_reported = completed
 	return pending
 
-## Seferin kaçıncı gününde olduğumuz (0 = ilk gün).
-func get_day() -> int:
-	return _completed_days()
 
 func _completed_days() -> int:
 	return int(floor((total_hours - START_HOUR) / HOURS_PER_DAY))

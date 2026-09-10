@@ -65,16 +65,6 @@ static func get_season(day: int) -> Season:
 	var index := int(floor(float(maxi(0, day)) / float(SEASON_LENGTH_DAYS))) % 4
 	return index as Season
 
-static func get_season_key(season: Season) -> String:
-	match season:
-		Season.SPRING:
-			return "SEASON_SPRING"
-		Season.SUMMER:
-			return "SEASON_SUMMER"
-		Season.AUTUMN:
-			return "SEASON_AUTUMN"
-		_:
-			return "SEASON_WINTER"
 
 ## Sezonun kaçıncı günündeyiz - "kış bitmek üzere" hissi için.
 static func get_days_into_season(day: int) -> int:

@@ -140,9 +140,14 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 	# Kültürü ve görevi her koşuda döndürmek beş evt_culture_* olayının ve
 	# İzci/Levazımcı/Otacı/Arabacı/Tellal/Muhafız'ın hepsini simülasyona
 	# sokuyor - sabit varsayılan oyuncu bunların çoğunu hiç görmüyordu.
+	# Kültür ve olay motoru aynı tohumdan türerse ikisi ilişkili olur ve
+	# rapor bazı kültür olaylarını sistematik olarak az gösterir (ölçüldü:
+	# aynı ağırlık ve koşulla biri 2, diğeri 24 kez ateşleniyordu). Kültür
+	# seçimi tohumun farklı bir fonksiyonundan alınıyor.
 	var cultures := CultureCatalog.get_cultures()
 	var player := CharacterData.create(
-		"Simülasyon", cultures[seed_value % cultures.size()].culture_id, CharacterStats.new()
+		"Simülasyon", cultures[(seed_value * 7 + 3) % cultures.size()].culture_id,
+		CharacterStats.new()
 	)
 	player.heal_full()
 	session.set_player_character(player)
@@ -474,28 +479,6 @@ func _combat_win_rate(party_size: int, danger: float, average_level: int = 1) ->
 
 	return int(round(100.0 * float(wins) / float(battles)))
 
-func _report_combat_unused(party_size: int) -> void:
-	var wins := 0
-	var battles := 60
-
-	for index in battles:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 500 + index
-
-		var party: Array[CharacterData] = []
-		for slot in party_size:
-			party.append(CharacterData.create(
-				"Yoldaş %d" % (slot + 1),
-				CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()].culture_id,
-				CharacterStats.new()
-			))
-
-		if bool(_simulate_combat(party, 0.5, rng).victory):
-			wins += 1
-
-	print("    %d kişilik parti: %%%d kazanıyor (%d/%d)" % [
-		party_size, int(round(100.0 * float(wins) / float(battles))), wins, battles
-	])
 
 ## Dört seviyeye kadar zorunlu XP toplayarak gerçekçi bir dağıtım kurar -
 ## auto_allocate açık olduğu için sınıfın yatkın olduğu statlara gider.

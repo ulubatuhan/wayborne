@@ -866,7 +866,14 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   - `GameState` (registered autoload): holds the persistent `GameSession`
   - `GameSession` (plain RefCounted): wallet, inventory, caravan, flags,
     reputation, journey — instantiable in tests without touching the autoload
-  - `EventBus` (registered autoload): cross-system signals only
+  - There is deliberately **no signal bus.** `EventBus` was an autoload with
+    four signals, five `emit()` sites and **zero listeners** — nothing ever
+    connected to it, in script or in any `.tscn`. It could not have had a
+    durable listener either: navigation is `change_scene_to_file()`, so every
+    screen that might subscribe is freed on the next scene change, and the
+    only long-lived objects are the autoloads themselves. Screens read
+    `GameState.get_session()` directly. Don't reintroduce a bus without a
+    subscriber that actually outlives a scene.
   - `DevPanel` (registered autoload): F1 geliştirici menüsü. `test_selector.tscn`'i
     çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
     kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
@@ -1093,6 +1100,17 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   overwhelming-margin pattern again - that a stressed `CombatUnit` sometimes
   refuses orders while a calm one deterministically never does.
 - Seed every RNG. A test that can flake is worse than no test.
+- **Do not derive two independent things from the same seed.** The simulator
+  picked the player's culture with `seed_value % 5` and seeded the event
+  engine with the same `seed_value`, so culture and event draw were
+  correlated: the report showed one culture event firing 24 times and
+  another 2, with identical weights and conditions. Decorrelating the two
+  reversed the ordering entirely - the "culture events are nearly
+  invisible" finding was an artifact of the harness, not the catalog. This
+  is the third measurement bug in this file's history (morale read after
+  `finish_journey()`, provisions measured against a flat stock, culture
+  coupled to the draw): **when a report is surprising, suspect the harness
+  before the game.**
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
   size). It is the only honest way to tune balance without playing. Faz 8

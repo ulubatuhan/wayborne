@@ -305,7 +305,6 @@ func _on_confirm_pressed() -> void:
 		_route_danger,
 		_plan
 	)
-	EventBus.caravan_changed.emit()
 	get_tree().change_scene_to_file(Nav.JOURNEY)
 
 func _on_map_pressed() -> void:

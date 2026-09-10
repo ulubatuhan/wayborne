@@ -37,7 +37,17 @@ jobs:
       - name: Import project
         run: |
           set -o pipefail
-          godot --headless --import 2>&1 | tee import.log
+          # Godot 4.2.2'nin headless import'u ara sıra motorun kendi içinde
+          # çöküyor (signal 4, iş parçacığı yarışı) - bir kez yaşandı ve
+          # merge edilmiş bir çalışma bir gün boyunca yayınlanmadan kaldı,
+          # kimse fark etmedi. Bir kez daha deneniyor; ikinci çökme gerçek
+          # sayılır. Betik hataları bu adımda değil aşağıdaki tarama
+          # kapısında yakalandığı için tekrar denemek gerçek bir hatayı
+          # gizlemiyor.
+          if ! godot --headless --import 2>&1 | tee import.log; then
+            echo "Import çöktü; bir kez daha deneniyor."
+            godot --headless --import 2>&1 | tee import.log
+          fi
 
       - name: Run tests
         run: |

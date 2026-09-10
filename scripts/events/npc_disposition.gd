@@ -64,7 +64,3 @@ static func get_label_key(disposition: String) -> String:
 		_:
 			return "DISPOSITION_LOYAL"
 
-## İyi niyetli mi - "aldığın kişi sana zarar verir mi" sorusunun cevabı.
-## Çaresiz biri kötü niyetli değildir ama yükü de hafif değildir.
-static func is_trustworthy(disposition: String) -> bool:
-	return disposition == LOYAL or disposition == DESPERATE
