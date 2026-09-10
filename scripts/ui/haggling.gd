@@ -40,7 +40,7 @@ func _build_ui() -> void:
 	var back_button := Button.new()
 	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
-	_content.add_child(back_button)
+	$MarginContainer/VBoxContainer.add_child(back_button)
 
 func _build_config_section() -> HBoxContainer:
 	var row := HBoxContainer.new()

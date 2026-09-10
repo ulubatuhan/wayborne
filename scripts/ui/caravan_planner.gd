@@ -71,7 +71,7 @@ func _build_missing_context_ui() -> void:
 	var back_button := Button.new()
 	back_button.text = tr("UI_BACK_TO_MAP")
 	back_button.pressed.connect(_on_map_pressed)
-	_content.add_child(back_button)
+	$MarginContainer/VBoxContainer.add_child(back_button)
 
 func _build_ui(origin: Location, destination: Location, travel_days: int) -> void:
 	var title := Label.new()
@@ -156,15 +156,20 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 
 	_content.add_child(HSeparator.new())
 
+	# Çıkış tuşları kaydırma kutusunun dışında: plan uzadıkça (kontratlar,
+	# erzak, moral dökümü) aşağı kayıp ekrandan taşmasınlar - pazar
+	# ekranında bir kez yaşanan tuzak (bkz. World Navigation Rules).
+	var exit_row := $MarginContainer/VBoxContainer
+
 	var map_button := Button.new()
 	map_button.text = tr("UI_BACK_TO_MAP")
 	map_button.pressed.connect(_on_map_pressed)
-	_content.add_child(map_button)
+	exit_row.add_child(map_button)
 
 	var back_button := Button.new()
 	back_button.text = Nav.return_label()
 	back_button.pressed.connect(_on_back_pressed)
-	_content.add_child(back_button)
+	exit_row.add_child(back_button)
 
 ## Kervanın yola hangi ruh haliyle çıkacağı ve nedeni.
 func _refresh_departure_morale() -> void:

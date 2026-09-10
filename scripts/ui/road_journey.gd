@@ -101,6 +101,7 @@ var _camp_button: Button
 var _arrive_button: Button
 var _arrival_panel: VBoxContainer
 var _enter_city_button: Button
+var _exit_button: Button
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
@@ -236,10 +237,14 @@ func _build_ui() -> void:
 	_log_list = VBoxContainer.new()
 	_content.add_child(_log_list)
 
-	var back_button := Button.new()
-	back_button.text = Nav.return_label()
-	back_button.pressed.connect(_on_back_pressed)
-	_content.add_child(back_button)
+	# Kaydırma kutusunun *dışında*: kayıt listesi uzadıkça aşağı kaymasın,
+	# yol ekranından çıkış her zaman görünür kalsın (bkz. World Navigation
+	# Rules'un kaydırma maddesi). Hedefi seferin canlı olup olmamasına
+	# göre _refresh_exit_button() belirler.
+	_exit_button = Button.new()
+	_exit_button.pressed.connect(_on_back_pressed)
+	$MarginContainer/VBoxContainer.add_child(_exit_button)
+	_refresh_exit_button()
 
 func _init_journey() -> void:
 	var live_session: GameSession = GameState.get_session()
@@ -254,6 +259,7 @@ func _init_journey() -> void:
 		_is_live_journey = false
 		_start_synthetic_journey()
 
+	_refresh_exit_button()
 	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
 	_current_event = null
 	_journey_finished = false
@@ -991,5 +997,17 @@ func _clear_children(container: Node) -> void:
 		container.remove_child(child)
 		child.queue_free()
 
+## Yoldan çıkış canlı seferde ana menüdür, return_scene değil. Eskiden
+## return_scene'e (şehir haritasına) dönüyordu: sefer `is_journey_active()`
+## olarak açık kalıyor, oyuncu kervanının bulunmadığı şehre düşüyor ve
+## yola geri dönebileceği hiçbir ekran kalmıyordu - Nav.JOURNEY'ye yalnızca
+## kervan planlayıcı sefer başlatınca geçiliyor. Sentetik F1 seferinde
+## (oyun akışının parçası değil) eski davranış korunur.
+func _refresh_exit_button() -> void:
+	if _exit_button == null:
+		return
+	var target := Nav.MAIN_MENU if _is_live_journey else Nav.return_scene
+	_exit_button.text = Nav.label_for(target)
+
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.MAIN_MENU if _is_live_journey else Nav.return_scene)
