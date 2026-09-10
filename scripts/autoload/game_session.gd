@@ -484,6 +484,17 @@ const CAMP_PROVISIONS_COST: int = 3
 ## çünkü onun bir bedeli var.
 const CAMP_STRESS_RELIEF: int = 8
 
+## Yolda geçen her günün gerginlik bedeli - CaravanState.MORALE_DRAIN_PER_DAY'in
+## stres karşılığı. Uzun süre yoktu ve fark edilmiyordu, çünkü yerini bir hata
+## dolduruyordu: açlık cezası doğru stoklanmış her seferde de işlediği için
+## sefer başına ~25 stres birikiyordu. Açlık düzeltilince (bkz. Provision
+## Rules) varış stresi 8'e düştü ve stresin seferler arası birikmesi -
+## kalıcı olmasının bütün anlamı - yeniden ortadan kalktı.
+##
+## Küçük tutuluyor: bir seferin yükünü olaylar ve savaş belirlemeli, yol
+## yalnızca tabanı koymalı.
+const ROAD_STRESS_PER_DAY: int = 2
+
 ## Otacı'nın görevi tam bu - "kampta yaraları ve gerginliği sarar" (bkz.
 ## DutyCatalog) - tutan biri varsa kampın rahatlatma payını büyütür.
 func make_camp() -> Dictionary:
@@ -515,6 +526,19 @@ func get_player_culture() -> Culture:
 
 func get_daily_provision_multiplier() -> float:
 	return get_player_culture().daily_provision_multiplier
+
+## Yolda bir günün erzak faturası. Planlayıcının gösterdiği sayıyla aynı
+## formülden çıkar (bkz. CaravanPlan.daily_consumption) - kültür perki ve
+## levazımcı indirimi dahil, yoksa planlayıcı yolda yenmeyecek bir sayı
+## gösterir.
+func get_daily_provision_consumption() -> int:
+	return CaravanPlan.daily_consumption(
+		get_party().size(),
+		owned_wagon_count,
+		caravan.merchant_names.size(),
+		get_daily_provision_multiplier(),
+		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
+	)
 
 func get_provision_cost_multiplier() -> float:
 	return get_player_culture().provision_cost_multiplier
@@ -581,9 +605,12 @@ func advance_day() -> Array[String]:
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
 	route_conditions.advance_day(total_days_elapsed)
 	# Yolun kendisi yıpratır - yalnızca yoldayken (bkz.
-	# CaravanState.apply_daily_drift).
+	# CaravanState.apply_daily_drift). Stres de aynı yerden, aynı gerekçeyle:
+	# uzun bir sefer kısa bir seferden yorucu olmalı ve bu yıpranma olay
+	# zarına bağlı olmamalı.
 	if is_journey_active():
 		caravan.apply_daily_drift()
+		change_stress(ROAD_STRESS_PER_DAY)
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():

@@ -253,6 +253,14 @@ static func _storm() -> GameEvent:
 				EventEffect.make(EventEffect.Type.PROVISIONS, -4),
 				EventEffect.make(EventEffect.Type.MORALE, -12),
 			]), 1.0),
+			# Vagon kaybının ikinci kapısı (bkz. evt_landslide). Nadir
+			# tutuluyor: kayıp bir ceza değil, hatırlanacak bir felaket olmalı.
+			EventOutcome.make("EVT_STORM_PRESS_LOST", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_LOSE, 1),
+				EventEffect.make(EventEffect.Type.PROVISIONS, -6),
+				EventEffect.make(EventEffect.Type.MORALE, -16),
+				EventEffect.make(EventEffect.Type.STRESS, 10),
+			]), 0.4),
 		])),
 	])
 	return event
@@ -410,7 +418,7 @@ static func _mutiny() -> GameEvent:
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
 			EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, MUTINY_MORALE_THRESHOLD),
-		]), 8.0),
+		]), 24.0),
 	])
 	event.cooldown_days = 4
 	event.choices = _choices([
@@ -659,11 +667,26 @@ static func _landslide() -> GameEvent:
 	var event := _event("evt_landslide", "EVT_LANDSLIDE", 0.7)
 	event.cooldown_days = 12
 	event.choices = _choices([
-		_choice("EVT_LANDSLIDE_OPT_PUSH", _effects([
-			EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 14, "current|closed"),
-			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
-			EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
-			EventEffect.make(EventEffect.Type.STRESS, 4),
+		# Kervanın gerçekten vagon kaybedebildiği iki yerden biri.
+		# EventEffect.Type.WAGON_LOSE applier'da işleniyordu ama hiçbir olay
+		# onu söylemiyordu: 600 koşuda ortalama vagon kaybı tam olarak 0.00
+		# çıkıyordu, yani "kervan mahvolabilir" kuralının bu yarısı yalnızca
+		# kâğıt üstündeydi. Kayıp CaravanState.lose_wagons() tarafından
+		# MIN_WAGONS'a kenetleniyor - oyuncunun kendi vagonu asla gitmez.
+		_choice_with_outcomes("EVT_LANDSLIDE_OPT_PUSH", _outcomes([
+			EventOutcome.make("EVT_LANDSLIDE_PUSH_OK", _effects([
+				EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 14, "current|closed"),
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+				EventEffect.make(EventEffect.Type.STRESS, 4),
+			]), 3.0),
+			EventOutcome.make("EVT_LANDSLIDE_PUSH_LOST", _effects([
+				EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 14, "current|closed"),
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+				EventEffect.make(EventEffect.Type.WAGON_LOSE, 1),
+				EventEffect.make(EventEffect.Type.MORALE, -10),
+				EventEffect.make(EventEffect.Type.STRESS, 8),
+			]), 1.0),
 		])),
 		_choice("EVT_LANDSLIDE_OPT_CLEAR", _effects([
 			EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 8, "current|slow"),

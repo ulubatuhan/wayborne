@@ -12,11 +12,17 @@ const MAX_MORALE: int = 100
 ## değildi ve moral tabanı hiç görülmüyordu (bkz. CLAUDE.md Morale Rules).
 ## Küçük tutuluyor: bir günü tek başına belirlemesin, ama on beş gün
 ## sonunda kendini göstersin.
-const MORALE_DRAIN_PER_DAY: int = 1
+const MORALE_DRAIN_PER_DAY: int = 2
 
 ## Aşınmanın altına inemeyeceği taban. Kervan yorulur ama yalnızca yürüdüğü
 ## için isyan etmez - dibe vurmak için gerçekten kötü şeyler olmalı.
-const MORALE_DRIFT_FLOOR: int = 35
+##
+## Bu yüzden taban isyan eşiğinin (EventCatalog.MUTINY_MORALE_THRESHOLD, 40)
+## *üstünde* olmak zorunda. 35'te değildi: yeterince uzun bir yolda yalnızca
+## yürümek isyanı uygun hale getirebiliyordu, yani kuralın kendisi kâğıt
+## üstünde kalıyordu. Günlük aşınma 2'ye çıkınca bu sınır gerçek bir
+## ihtimale dönüştü.
+const MORALE_DRIFT_FLOOR: int = 45
 
 var wagon_count: int = MIN_WAGONS
 var damaged_wagons: int = 0

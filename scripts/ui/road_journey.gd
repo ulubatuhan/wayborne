@@ -86,6 +86,12 @@ var _clock_label: Label
 var _speed_button: Button
 var _progress_bar: ProgressBar
 
+## _refresh_time_ui() her karede koşuyor; gösterilen değer değişmedikçe
+## yeniden string kurmamak için son basılan değerler burada tutuluyor.
+var _last_clock_text: String = ""
+var _last_phase: JourneyClock.Phase = JourneyClock.Phase.DAWN
+var _last_speed: float = -1.0
+
 var _seed_spin: SpinBox
 var _state_label: Label
 var _card_panel: VBoxContainer
@@ -399,22 +405,28 @@ func _refresh_time_ui() -> void:
 
 	var phase := _clock.get_phase()
 	_band.set_phase(phase, _clock.get_phase_progress())
-	_band.set_route_progress(_get_route_progress())
 
-	# Metin her karede yeniden kurulmuyor: saat dakikada bir, hız yalnızca
-	# değişince. Bunlar _process'ten çağrıldığı için her karede string
-	# biçimlendirmek boşuna tahsisat olurdu.
-	var clock_text := tr("UI_ROAD_CLOCK") % [
-		_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(phase))
-	]
-	if clock_text != _clock_label.text:
-		_clock_label.text = clock_text
+	var progress := _get_route_progress()
+	_band.set_route_progress(progress)
+	_progress_bar.value = progress
 
-	var speed_text := "%sx" % String.num(_clock.get_speed(), 1).trim_suffix(".0")
-	if speed_text != _speed_button.text:
-		_speed_button.text = speed_text
+	# Metin yalnızca *gösterilen değer* değişince kuruluyor. Buradaki yorum
+	# uzun süre bunu vaat ediyordu ama kod her karede string biçimliyor,
+	# sonra eskisiyle karşılaştırıyordu - yani tahsisat zaten yapılmış
+	# oluyordu. Saat dakikada bir değişir, kare başına değil; Web hedefinde
+	# saniyede 180 gereksiz string demekti.
+	var clock_text := _clock.get_clock_text()
+	if clock_text != _last_clock_text or phase != _last_phase:
+		_last_clock_text = clock_text
+		_last_phase = phase
+		_clock_label.text = tr("UI_ROAD_CLOCK") % [
+			_current_day + 1, clock_text, tr(JourneyClock.get_phase_key(phase))
+		]
 
-	_progress_bar.value = _get_route_progress()
+	var speed := _clock.get_speed()
+	if not is_equal_approx(speed, _last_speed):
+		_last_speed = speed
+		_speed_button.text = "%sx" % String.num(speed, 1).trim_suffix(".0")
 
 	# Kamp yalnızca hava kararınca anlamlı; gündüz durup ateş yakmak
 	# kervanı yavaşlatmaktan başka işe yaramaz.
@@ -452,14 +464,17 @@ func _advance_contracts_and_provisions() -> void:
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 
-	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
-	# Göçebe kültürü az yer (bkz. Culture.daily_provision_multiplier).
-	var daily_consumption := 1 + _session.caravan.merchant_names.size()
-	daily_consumption = maxi(1, int(round(daily_consumption * _session.get_daily_provision_multiplier())))
-	# Levazımcı ölçülü dağıtır: gücüne göre günlük tüketimden düşer.
-	daily_consumption = maxi(1, daily_consumption - _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI))
-	_session.change_provisions(-daily_consumption)
-	if _session.get_provisions() <= 0:
+	# Yol her gün erzak yer. Formül planlayıcınınkiyle aynı yerden gelir
+	# (bkz. CaravanPlan.daily_consumption) - kültür perki ve levazımcı
+	# indirimi dahil.
+	var daily_consumption := _session.get_daily_provision_consumption()
+	var fed := -_session.change_provisions(-daily_consumption)
+
+	# Açlık "kese sıfırlandı" değil, "bugün besleyemedik" demektir. Eskiden
+	# koşul `get_provisions() <= 0` idi: planlayıcının istediği erzağı tam
+	# alan oyuncu son gün tam sıfıra iniyor ve *doğru* stokladığı hâlde
+	# açlık cezası yiyordu - her seferde, ölçülen %100 koşuda.
+	if fed < daily_consumption:
 		_session.caravan.change_morale(-10)
 		_session.change_stress(FAMINE_STRESS)
 		_add_log(tr("UI_ROAD_FAMINE") % _current_day)
@@ -480,7 +495,6 @@ func _present_event(event: GameEvent) -> void:
 	# saat ilerliyor, arka plan da buna göre değişiyor.
 	_clock.consume_hours(EVENT_HOURS)
 	_engine.mark_fired(event, _current_day)
-	EventBus.road_event_fired.emit(event)
 
 	_add_log("── %s" % tr(event.title_key))
 
@@ -548,7 +562,6 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	if resolved_event.xp_value > 0:
 		_session.grant_party_xp(resolved_event.xp_value)
 
-	EventBus.road_event_resolved.emit(resolved_event, choice)
 	_refresh_state()
 	_check_journey_end()
 
@@ -860,7 +873,6 @@ func _finish_journey() -> void:
 	_journey_finished = true
 	_set_journey_controls_enabled(false)
 	_add_log(tr("UI_ROAD_JOURNEY_DONE") % _current_day)
-	EventBus.journey_finished.emit(_current_day)
 
 	if _is_live_journey:
 		_arrive_button.visible = true
@@ -869,7 +881,6 @@ func _on_arrive_pressed() -> void:
 	var payout: Dictionary = _session.finish_journey()
 	_arrive_button.visible = false
 	_render_arrival_summary(payout)
-	EventBus.caravan_changed.emit()
 
 	# Sefer içinde kayıt yok: yolda alınan riskin geri alınamaması
 	# olayları anlamlı kılıyor. Sentetik dev seferi gerçek kaydı kirletmez.

@@ -20,7 +20,6 @@ config/features=PackedStringArray("4.2", "forward_plus")
 [autoload]
 
 GameState="*res://scripts/autoload/game_state.gd"
-EventBus="*res://scripts/autoload/event_bus.gd"
 DevPanel="*res://scripts/autoload/dev_panel.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 UserSettings="*res://scripts/autoload/user_settings.gd"

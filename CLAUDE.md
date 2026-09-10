@@ -433,6 +433,110 @@ can be lost.
   so added fields need no migration, but a field whose *meaning* changes
   does - and a version number nobody reads is a hook nobody remembers.
 
+### Ruin Rules
+
+"The caravan can be ruined but never wiped out" is only half a rule if
+nothing can actually ruin it. Measured before this pass: average wagon loss
+0.00 across 600 journeys, a party of three or four winning 100% of fights at
+every danger level, and levelling that made the party *weaker*. The
+vocabulary existed; the game never spoke it.
+
+- **A dead effect type is worse than a missing one.**
+  `EventEffect.Type.WAGON_LOSE` was handled by the applier and used by no
+  event at all, so a wagon could never be lost. It now has two doors -
+  `evt_landslide`'s "squeeze past" and `evt_storm`'s "press on" - both rare
+  (measured ~1 wagon per 40 journeys), because a lost wagon should be a
+  disaster you remember, not a recurring fee. `CaravanState.lose_wagons()`
+  clamps at `MIN_WAGONS`, so the player's own wagon never goes.
+- **Losing a wagon does not evict party members.** Capacity falls below the
+  roster and recruiting is blocked until a wagon is re-bought; nobody is
+  thrown out. Kicking a levelled companion off the roster because a wagon
+  went over a cliff would break "never wiped out".
+- **Two knobs, because one cannot shape both ends of the curve.**
+  `POWER_SCALE_PER_LEVEL` answers "does levelling feel like progress" and
+  `POWER_SCALE_PER_PARTY_MEMBER` answers "is a full caravan untouchable".
+  Tuning enemy strength alone balanced the full party and drove the lone
+  traveller to 0% - as broken as 100%, because no decision remains.
+- **Level scaling must stay below the player's own growth.** At 8%/level
+  enemies reached 2.12× and the measured curve *inverted* (level 1: 98%,
+  level 15: 52%) - the player's HP only grows on ENDURANCE-affinity classes,
+  about +25% averaged across a mixed party, against enemies gaining far
+  more. At 2%/level the curve rises again.
+- **When the squad is trimmed to party size, composition order decides what
+  the player faces.** Trimming by rank position meant a lone traveller always
+  drew two cutters and never the leader, so a calm road and a bandit-infested
+  one were literally identical for them. The id list is now written in
+  priority order (the leader is pushed to the front at high danger) and
+  trimmed from the end. Trimming by raw threat was tried and flattened the
+  encounter - it dropped the archer every time, leaving three melee and
+  erasing the rank design.
+
+Measured win rate (party size × road danger, level 1):
+
+| party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 42% | 45% | 5% | 5% |
+| 2 | 100% | 72% | 23% | 23% |
+| 3 | 100% | 93% | 57% | 57% |
+| 4 | 100% | 100% | 88% | 88% |
+
+A lone traveller on a bandit-infested road is nearly hopeless, and that is
+the intended message rather than an oversight: the game starts you with two
+people, party 1 only exists if you dismiss someone, and losing a fight costs
+attrition, not death.
+
+**Still open: two of four classes gain almost no combat power from levels.**
+Kırıkçı and Sıra Neferi grow (HP and damage); Sekban only gains
+dodge/accuracy; Kalem Efendisi gains nothing but heal power and proficiency,
+because INTELLECT feeds only `get_support_power()` and CHARISMA feeds
+nothing in combat. That is why the level curve rises only modestly (23% →
+30%) instead of reaching the 75-88% the simulator's target line asks for.
+Closing it means giving every stat a combat derivation - a class-design
+change, not a tuning one.
+
+### Provision Rules
+
+Provisions are the Oregon Trail spine: the caravan eats every day whether
+or not the day went well.
+
+- **One formula, one place.** `CaravanPlan.daily_consumption()` is the only
+  place a daily provision cost is computed; the planner reads it through
+  `CaravanPlan.get_required_provisions()` and the road through
+  `GameSession.get_daily_provision_consumption()`. There were three drifting
+  copies (plan, road, simulator) - the plan counted only merchants, the road
+  also subtracted the quartermaster, the simulator did a third thing. **The
+  moment those diverge the planner lies and the player starves on a journey
+  they provisioned correctly.**
+- **Mouths are the real caravan**: named party members, `PEOPLE_PER_WAGON`
+  crew per owned wagon, and each contracted merchant. Buying a wagon is no
+  longer pure upside - it also brings two more mouths.
+- **Famine means "we could not feed them today", not "the stores hit zero".**
+  `change_provisions()` returns what actually moved; famine fires when that
+  is less than the day's need. The old condition was
+  `get_provisions() <= 0`, so buying *exactly* what the planner asked for
+  landed on zero after the last meal and took the famine penalty (-10
+  morale, +6 stress) on every single journey. Measured across 16
+  day/party combinations: 16 of 16 starved. It is the reason arrival morale
+  sat around 55 - a hidden per-journey tax that made morale look tuned when
+  it was not.
+- The culture perk (`daily_provision_multiplier`) and the Levazımcı's
+  `get_duty_flat_reduction()` both go through the shared formula, so the
+  planner shows the number the road will actually eat. Consumption never
+  drops below 1 no matter how good the perks are.
+- `tests/test_provisions.gd` locks all of it: plan and road agree across
+  party/wagon/merchant combinations, correct stocking never starves at any
+  journey length, an under-stocked caravan does starve (one unit short is
+  already famine), each wagon adds exactly `PEOPLE_PER_WAGON` mouths, and
+  the perks reach the planner.
+
+**The simulator's "net kazanç" is contract income only** - trading profit
+(buy cheap, sell where it's demanded) is not in it, and in real play that is
+where most of the money is: `playthrough_demo.gd` turns 98 gold of cloth
+into 294. Reading that line as "the game barely breaks even" repeats the
+morale measurement mistake. The demo now sells as well as buys; for a long
+time it only bought, so its economy print showed the cost of trading and
+none of the profit.
+
 ### Morale Rules
 
 Morale was a dead stat for a long time: it started at 100 on every journey,
@@ -449,6 +553,19 @@ the report said exactly 100.0 every run.
   genuinely more tiring than a short one. It stops at
   `MORALE_DRIFT_FLOOR` - walking alone must never be enough to trigger a
   mutiny; events have to go badly too.
+- **That rule only became true when the floor moved above the threshold.**
+  The floor was 35 and the mutiny threshold 40, so a long enough road made
+  mutiny eligible with nothing happening at all - and `test_morale.gd`
+  asserted the inverse (`threshold > floor`) with a message describing the
+  opposite of what it checked. The floor is now 45, above the threshold, and
+  the test asserts that drift alone can never reach mutiny while an event
+  hit still can.
+- **`ROAD_STRESS_PER_DAY` is the stress counterpart of the morale drain**,
+  and it exists because fixing the famine bug (see Provision Rules) removed
+  a hidden per-day stress tax that the whole stress-accumulation balance had
+  been resting on. Arrival stress fell from ~25 to ~8 the moment famine
+  stopped firing on correctly provisioned journeys, which quietly undid
+  "stress accumulates across journeys". The road now charges it honestly.
 - **Departure morale reflects the world, not a constant.**
   `GameSession.get_departure_morale()` composes it from systems that already
   exist rather than inventing a "war/plague" mechanic: hardship
@@ -749,7 +866,14 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   - `GameState` (registered autoload): holds the persistent `GameSession`
   - `GameSession` (plain RefCounted): wallet, inventory, caravan, flags,
     reputation, journey — instantiable in tests without touching the autoload
-  - `EventBus` (registered autoload): cross-system signals only
+  - There is deliberately **no signal bus.** `EventBus` was an autoload with
+    four signals, five `emit()` sites and **zero listeners** — nothing ever
+    connected to it, in script or in any `.tscn`. It could not have had a
+    durable listener either: navigation is `change_scene_to_file()`, so every
+    screen that might subscribe is freed on the next scene change, and the
+    only long-lived objects are the autoloads themselves. Screens read
+    `GameState.get_session()` directly. Don't reintroduce a bus without a
+    subscriber that actually outlives a scene.
   - `DevPanel` (registered autoload): F1 geliştirici menüsü. `test_selector.tscn`'i
     çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
     kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
@@ -976,6 +1100,17 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   overwhelming-margin pattern again - that a stressed `CombatUnit` sometimes
   refuses orders while a calm one deterministically never does.
 - Seed every RNG. A test that can flake is worse than no test.
+- **Do not derive two independent things from the same seed.** The simulator
+  picked the player's culture with `seed_value % 5` and seeded the event
+  engine with the same `seed_value`, so culture and event draw were
+  correlated: the report showed one culture event firing 24 times and
+  another 2, with identical weights and conditions. Decorrelating the two
+  reversed the ordering entirely - the "culture events are nearly
+  invisible" finding was an artifact of the harness, not the catalog. This
+  is the third measurement bug in this file's history (morale read after
+  `finish_journey()`, provisions measured against a flat stock, culture
+  coupled to the draw): **when a report is surprising, suspect the harness
+  before the game.**
 - `simulate_journeys.gd` is **not** a test - it never fails, it prints a
   distribution (net payout, morale, starvation rate, combat win rate by party
   size). It is the only honest way to tune balance without playing. Faz 8

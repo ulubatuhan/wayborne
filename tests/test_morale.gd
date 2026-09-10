@@ -153,12 +153,18 @@ func _test_breakdown_explains_the_number(t) -> void:
 ## Paketin asıl iddiası: isyan eşiği artık ulaşılabilir - ama yalnızca
 ## yürümekle değil, işler gerçekten kötü gittiğinde.
 func _test_mutiny_threshold_is_reachable(t) -> void:
+	# Aşınma tabanı isyan eşiğinin *üstünde* olmalı. Eskiden altındaydı
+	# (35 < 40) ve buradaki iddia da tersini yazıyordu - yani kod ile
+	# CLAUDE.md'nin "yalnızca yürümek isyana yetmemeli" kuralı birbirini
+	# tutmuyordu; yeterince uzun bir yolda kervan hiçbir şey olmadan
+	# isyana uygun hale geliyordu.
 	t.ok(
-		EventCatalog.MUTINY_MORALE_THRESHOLD > CaravanState.MORALE_DRIFT_FLOOR,
-		"eşik aşınma tabanının üstünde - yoksa her uzun sefer isyanla biterdi"
+		CaravanState.MORALE_DRIFT_FLOOR > EventCatalog.MUTINY_MORALE_THRESHOLD,
+		"aşınma tabanı eşiğin üstünde - yalnızca yürümek isyana yetmez"
 	)
 
-	# Kötü bir dünyadan çıkan kervan, uzun bir yolda eşiğe inebilmeli.
+	# En kötü dünyadan çıkan kervan bile, yolda hiçbir şey olmazsa eşiğe
+	# inmemeli: aşınma onu tabanda tutar.
 	var grim := GameSession.new(200, 200)
 	grim.change_stress(GameSession.MAX_STRESS)
 	grim.market.add_shock(grim.current_location_id, "", 2.0, 400)
@@ -166,8 +172,16 @@ func _test_mutiny_threshold_is_reachable(t) -> void:
 	for _day in 20:
 		grim.advance_day()
 	t.ok(
+		grim.caravan.morale > EventCatalog.MUTINY_MORALE_THRESHOLD,
+		"olaysız bir sefer, ne kadar uzun olursa olsun, isyana varmaz"
+	)
+
+	# Ama işler gerçekten kötü gittiğinde eşik ulaşılabilir olmalı - yoksa
+	# evt_mutiny yine katalogda var oyunda yok olurdu.
+	grim.caravan.change_morale(-(CaravanState.MORALE_DRIFT_FLOOR - EventCatalog.MUTINY_MORALE_THRESHOLD + 1))
+	t.ok(
 		grim.caravan.morale <= EventCatalog.MUTINY_MORALE_THRESHOLD,
-		"kötü koşullarda uzun bir sefer isyan eşiğine iner"
+		"olay darbeleri tabanın altına indirebilir"
 	)
 
 	# İyi bir dünyadan çıkan kısa sefer inmemeli.

@@ -35,8 +35,6 @@ func force_spend(amount: int) -> int:
 		return maxi(0, -balance)
 	return amount
 
-func is_in_debt() -> bool:
-	return balance < 0
 
 func earn(amount: int) -> void:
 	balance += amount
