@@ -85,7 +85,9 @@ func remove_equipment(equipment_id: String, quantity: int = 1) -> bool:
 ## Karaktere bir parça takar: yeni parça depodan düşer, o slotta zaten
 ## takılı olan (varsa) depoya geri döner. Depoda yoksa hiçbir şey değişmez.
 func equip_to_character(character: CharacterData, slot: String, equipment_id: String) -> bool:
-	if character == null or not remove_equipment(equipment_id, 1):
+	if character == null or not can_equip(character, equipment_id):
+		return false
+	if not remove_equipment(equipment_id, 1):
 		return false
 	var previous_id := character.get_equipped_id(slot)
 	if not character.equip(slot, equipment_id):
@@ -94,6 +96,18 @@ func equip_to_character(character: CharacterData, slot: String, equipment_id: St
 	if not previous_id.is_empty():
 		add_equipment(previous_id, 1)
 	return true
+
+## Seviye kapısının tek kontrol noktası. Parça satın alınıp depoda
+## bekleyebilir - kilitli olan kuşanmak, çünkü depo ortak ama seviye
+## kişiseldir: kıdemli bir yoldaşın kuşandığı zırhı yeni katılan çırak
+## giyemez (bkz. Equipment.required_level).
+func can_equip(character: CharacterData, equipment_id: String) -> bool:
+	if character == null:
+		return false
+	var piece := EquipmentCatalog.get_equipment(equipment_id)
+	if piece == null:
+		return false
+	return character.level >= piece.required_level
 
 ## Karakterden bir parçayı çıkarıp depoya geri koyar.
 func unequip_from_character(character: CharacterData, slot: String) -> bool:

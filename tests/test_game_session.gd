@@ -314,11 +314,22 @@ func _test_equipment_locker_and_equip(t) -> void:
 	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 0, "takılan parça depodan düşer")
 	t.eq(character.get_equipped_id(EquipmentCatalog.SLOT_WEAPON), EquipmentCatalog.WEAPON_TIER_1, "karakter parçayı taşır")
 
-	# Yükseltme: yeni parça depoda, eskisi takılıyken.
+	# Yükseltme: yeni parça depoda, eskisi takılıyken. Ama tier 2 artık
+	# seviye istiyor (bkz. Equipment.required_level) - önce reddedilmeli.
 	session.add_equipment(EquipmentCatalog.WEAPON_TIER_2, 1)
+	t.not_ok(
+		session.equip_to_character(character, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_2),
+		"seviyesi yetmeyen karakter üst tier'i kuşanamaz"
+	)
+	t.eq(
+		session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_2), 1,
+		"reddedilen parça depoda kalır, kaybolmaz"
+	)
+
+	character.level = EquipmentCatalog.TIER_2_LEVEL
 	t.ok(
 		session.equip_to_character(character, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_2),
-		"yükseltme takılabilir"
+		"seviye yetince yükseltme takılabilir"
 	)
 	t.eq(character.get_equipped_id(EquipmentCatalog.SLOT_WEAPON), EquipmentCatalog.WEAPON_TIER_2, "yeni parça takılı")
 	t.eq(session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_1), 1, "eski parça depoya geri döner")

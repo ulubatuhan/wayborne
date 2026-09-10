@@ -13,6 +13,7 @@ func run(t) -> void:
 	_test_unequip(t)
 	_test_derived_values_include_equipment(t)
 	_test_dict_round_trip(t)
+	_test_level_gate(t)
 
 func _test_catalog_shape(t) -> void:
 	var all_equipment := EquipmentCatalog.get_all_equipment()
@@ -81,3 +82,62 @@ func _test_dict_round_trip(t) -> void:
 	t.eq(restored.get_equipped_id(EquipmentCatalog.SLOT_WEAPON), EquipmentCatalog.WEAPON_TIER_2, "silah korunur")
 	t.eq(restored.get_equipped_id(EquipmentCatalog.SLOT_AMULET), EquipmentCatalog.AMULET_WARD, "kolye korunur")
 	t.eq(restored.get_max_hp(), original.get_max_hp(), "gidiş-dönüşten sonra türetilen değerler eşleşir")
+
+## Seviye kapısı: Darkest Dungeon'ın modeli - seviye stat vermez, teçhizatın
+## kapısını açar. Kapı olmadığında tek engel paraydı ve seviye ekipman
+## ekseninde hiçbir şey ifade etmiyordu.
+func _test_level_gate(t) -> void:
+	var session := GameSession.new(5000, 100)
+	var rookie := CharacterData.create("Çırak", CultureCatalog.VALLEY, CharacterStats.new())
+	session.party.clear()
+	rookie.is_player = true
+	session.party.append(rookie)
+
+	session.add_equipment(EquipmentCatalog.WEAPON_TIER_1, 1)
+	session.add_equipment(EquipmentCatalog.WEAPON_TIER_2, 1)
+	session.add_equipment(EquipmentCatalog.WEAPON_TIER_3, 1)
+
+	t.ok(
+		session.can_equip(rookie, EquipmentCatalog.WEAPON_TIER_1),
+		"ilk kademe seviye 1'de kuşanılabilir"
+	)
+	t.not_ok(
+		session.can_equip(rookie, EquipmentCatalog.WEAPON_TIER_2),
+		"ikinci kademe seviye ister"
+	)
+	t.not_ok(
+		session.can_equip(rookie, EquipmentCatalog.WEAPON_TIER_3),
+		"üçüncü kademe daha da fazla seviye ister"
+	)
+
+	# Reddedilen kuşanma depoyu bozmamalı: parça ne kaybolur ne çoğalır.
+	t.not_ok(
+		session.equip_to_character(rookie, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_3),
+		"seviyesi yetmeyen kuşanamaz"
+	)
+	t.eq(
+		session.get_equipment_count(EquipmentCatalog.WEAPON_TIER_3), 1,
+		"reddedilen parça depoda kalır"
+	)
+	t.eq(rookie.get_equipped(EquipmentCatalog.SLOT_WEAPON), null, "slot boş kalır")
+
+	rookie.level = EquipmentCatalog.TIER_3_LEVEL
+	t.ok(
+		session.equip_to_character(rookie, EquipmentCatalog.SLOT_WEAPON, EquipmentCatalog.WEAPON_TIER_3),
+		"seviye yetince kuşanılabilir"
+	)
+
+	# Kademeler arasında sıra bozulmamalı, yoksa merdiven anlamsızlaşır.
+	var tier_1 := EquipmentCatalog.get_equipment(EquipmentCatalog.WEAPON_TIER_1)
+	var tier_2 := EquipmentCatalog.get_equipment(EquipmentCatalog.WEAPON_TIER_2)
+	var tier_3 := EquipmentCatalog.get_equipment(EquipmentCatalog.WEAPON_TIER_3)
+	t.ok(tier_1.required_level < tier_2.required_level, "kademe arttıkça seviye şartı artar")
+	t.ok(tier_2.required_level < tier_3.required_level, "üçüncü kademe en yüksek şartı taşır")
+
+	# Tılsımlar (yüzük/kolye) olaylardan geliyor ve seviye istemiyor: bulunan
+	# bir şeyi kuşanamamak DD trinket mantığına ters olurdu.
+	for equipment_id in [EquipmentCatalog.RING_MARKSMAN, EquipmentCatalog.AMULET_WOLF_FANG]:
+		t.eq(
+			EquipmentCatalog.get_equipment(equipment_id).required_level, 1,
+			"tılsımlar seviye istemez"
+		)

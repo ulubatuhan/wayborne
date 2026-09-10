@@ -148,6 +148,24 @@ func get_damage_bonus() -> int:
 func get_support_power() -> int:
 	return 5 + int(round(get_effective_value(Kind.INTELLECT)))
 
+## Ateş altında sükûnet: kırılmış bir savaşçının emri reddetme ihtimalinden
+## düşülen puan (bkz. CombatEncounter._try_refuse_order).
+##
+## Karizma'nın savaşta tek karşılığı buydu - hiçbiri yoktu. Altı stattan
+## beşi savaşa bir şey veriyor, Karizma hiçbir şey vermiyordu; Kalem
+## Efendisi'nin afinitesinin yarısı olduğu için o sınıfın seviye
+## puanlarının yarısı savaşta ölü harcamaydı.
+##
+## Çözümün şekli muadillerden geliyor. Wartales'in Willpower'ı da seviyeyle
+## büyümüyor ama ölü değil: krit, moralin savaş başındaki zamanlaması ve
+## bir ölüm kurtarması veriyor. Dump-stat literatürü de aynı şeyi söylüyor -
+## Karizma D&D'de *moral, tepki ve tayfa sistemleri önemsizleşince* öldü,
+## reçete o sistemleri canlandırmak. Wayborne'da o sistemler zaten canlı
+## (stres, kırılma, emir reddi), o yüzden Karizma yeni bir sayıya değil
+## onlara bağlanıyor.
+func get_composure() -> int:
+	return int(round(1.5 * get_effective_value(Kind.CHARISMA)))
+
 func to_dict() -> Dictionary:
 	return {
 		"strength": strength,

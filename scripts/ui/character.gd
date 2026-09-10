@@ -306,9 +306,18 @@ func _build_equip_option_row(slot: String, candidate: Equipment, available: int)
 	row.add_theme_constant_override("separation", 8)
 
 	var equip_button := Button.new()
-	equip_button.text = tr("UI_CHAR_EQUIP") % [candidate.display_name, available]
 	equip_button.tooltip_text = candidate.description
 	equip_button.pressed.connect(_on_equip_pressed.bind(slot, candidate.equipment_id))
+	# Kilitli seçenek gizlenmez, sebebiyle gösterilir - olay kartlarındaki ve
+	# savaştaki yetenek kilidiyle aynı kural: oyuncu neye hazırlanacağını
+	# görmeli (bkz. Equipment.required_level).
+	if _session.can_equip(_character, candidate.equipment_id):
+		equip_button.text = tr("UI_CHAR_EQUIP") % [candidate.display_name, available]
+	else:
+		equip_button.disabled = true
+		equip_button.text = tr("UI_CHAR_EQUIP_LOCKED") % [
+			candidate.display_name, candidate.required_level
+		]
 	row.add_child(equip_button)
 
 	var bonus_label := Label.new()

@@ -282,6 +282,12 @@ func get_crit_chance() -> int:
 func get_damage_bonus() -> int:
 	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
 
+## Savaş bu sarmalayıcıyı okur, stats.get_composure()'ı değil - huy ve
+## ekipmanın da buraya girebilmesi için (bkz. CLAUDE.md'nin sarmalayıcı
+## kuralı). Şimdilik iki katmanın da sükûnet bonusu yok.
+func get_composure() -> int:
+	return stats.get_composure()
+
 # --- Huylar (Trait) ---
 
 func has_trait(trait_id: String) -> bool:
