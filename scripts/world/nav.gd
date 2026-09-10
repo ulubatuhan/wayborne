@@ -33,6 +33,15 @@ static var return_scene: String = WORLD_HUB
 ## ücretler buna göre değişir; gönderen ekran değiştirmekle yükümlü.
 static var recruit_venue: String = "tavern"
 
+## Tayfa ekranının kendi geri hedefi - character.gd'nin Nav.PARTY'yi
+## sabitlemesiyle aynı gerekçe, ama burada kaçınılan tuzak daha sert:
+## mekân ekranları (pazar/taverna/lonca) tayfa ekranını açarken
+## return_scene'e *kendilerini* yazıyordu, dönünce de kendi geri tuşları
+## kendilerine dönüyordu - oyuncu loncaya girip tayfa aradıktan sonra
+## şehre bir daha çıkamıyordu. Bir alt ekrana gitmek, gönderen ekranın
+## kendi geri hedefini asla ezmemeli.
+static var recruit_return_scene: String = CITY_MAP
+
 ## Karakter ekranını açan parti index'i - character.gd bunu okuyup hangi
 ## üyeyi göstereceğine karar verir. Parti değişmişse (biri yol verildi)
 ## ekran kendi tarafında sınırlara kırpar.
@@ -51,3 +60,15 @@ static func label_for(scene_path: String) -> String:
 
 static func return_label() -> String:
 	return label_for(return_scene)
+
+## Tayfa ekranına giriş/çıkış tek yerde: üç mekân ekranı (pazar, taverna,
+## lonca) aynı üç satırı kopyalıyordu ve üçü de return_scene'i eziyordu.
+## Buradan geçince o hata bir daha yazılamaz ve tests/test_navigation.gd
+## bunu doğrudan koşturabilir.
+static func open_recruit(venue: String, venue_scene: String) -> String:
+	recruit_venue = venue
+	recruit_return_scene = venue_scene
+	return RECRUIT
+
+static func close_recruit() -> String:
+	return recruit_return_scene

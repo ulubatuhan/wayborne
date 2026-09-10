@@ -14,7 +14,10 @@ var _panel: RecruitPanel
 
 func _ready() -> void:
 	_session = GameState.get_session()
-	_back_button.text = Nav.return_label()
+	# Geri hedefi return_scene değil, mekânın yazdığı recruit_return_scene:
+	# aksi halde geri dönülen mekânın kendi geri tuşu kendisine dönüyor
+	# (bkz. Nav.recruit_return_scene).
+	_back_button.text = Nav.label_for(Nav.close_recruit())
 	_back_button.pressed.connect(_on_back_pressed)
 	_title_label.text = _venue_title()
 
@@ -43,4 +46,4 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_panel.refresh()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.close_recruit())

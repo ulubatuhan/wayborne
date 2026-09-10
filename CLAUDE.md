@@ -368,7 +368,36 @@ losing every companion's levels, traits and equipment.
 - A screen whose content can grow past the viewport (market rows, the contract
   board, the party list) puts that content in a `ScrollContainer` and keeps the
   back button **outside** it. Otherwise the back button is pushed off-screen and
-  the player is stranded - this actually happened on the market screen.
+  the player is stranded - this actually happened on the market screen, and
+  again on four screens that built their exit button in code straight into
+  `_content` (character creation's "Başla" sat below six stat rows, on the
+  first screen of a new game).
+- **A screen that opens a sub-screen must not overwrite its own return
+  target.** `Nav.return_scene` belongs to whoever sent the player *here*;
+  writing your own scene into it so the sub-screen can come back destroys
+  the only way out. That is what locked the player inside the Guild: the
+  venue screens set `return_scene` to themselves before opening the recruit
+  screen, so on return their own back button reloaded them, forever. A
+  sub-screen gets its **own** variable - `Nav.recruit_return_scene`, reached
+  only through `Nav.open_recruit()`/`close_recruit()`, exactly like
+  `character.gd` hardcoding `Nav.PARTY` and the test selector keeping its
+  own target. Hub screens (road, city, main menu) writing `return_scene =
+  <themselves>` is the correct use, not the bug.
+- **The road is left through the road's own actions.** On a live journey
+  `road_journey.gd`'s exit goes to the main menu, never to `return_scene`:
+  it used to drop the player on the city map with `is_journey_active()`
+  still true, and since nothing but the planner ever navigates to
+  `Nav.JOURNEY`, the road could not be re-entered. Arriving, turning back
+  and diverting are the exits (see En-Route Plan Rules).
+- `tests/test_navigation.gd` locks all of this. Control scenes cannot be
+  instantiated headless, so it tests what the screens *call* plus the scene
+  files themselves: the recruit funnel preserves the caller's return target,
+  every `Nav` scene constant resolves to a file whose script has at least one
+  exit, no back label renders blank, no exit button is added to `_content`,
+  and - via `PackedScene.get_state()`, which reads a scene without building
+  it - every `$A/B` node path in a screen script actually exists in its
+  scene. That last one is the only cheap guard against a typo Godot reports
+  only when the player opens the screen.
 
 ### Caravan Ruin Rules
 

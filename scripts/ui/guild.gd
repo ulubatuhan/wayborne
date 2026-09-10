@@ -144,7 +144,9 @@ func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.return_scene)
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu buraya döner.
+## (bkz. Nav.recruit_venue). Geri tuşu buraya döner - ama bunu
+## return_scene'e yazarak değil (o bu ekranın *kendi* geri hedefi,
+## ezilirse şehre çıkış kapanır), Nav.recruit_return_scene üzerinden.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
 	button.text = tr("UI_LOOK_FOR_CREW")
@@ -154,6 +156,4 @@ func _add_recruit_button(venue: String, own_scene: String) -> void:
 	container.move_child(button, _back_button.get_index())
 
 func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	Nav.recruit_venue = venue
-	Nav.return_scene = own_scene
-	get_tree().change_scene_to_file(Nav.RECRUIT)
+	get_tree().change_scene_to_file(Nav.open_recruit(venue, own_scene))

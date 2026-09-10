@@ -60,15 +60,20 @@ func _build_ui() -> void:
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_content.add_child(_summary_label)
 
+	# Form uzun (kültür + sınıf + kimlik + altı stat); "Başla" ile "Geri"
+	# kaydırma kutusunun içinde kalırsa oyunun ilk ekranında oyuncu en
+	# dibe inmeden başlayamıyor. İkisi de dışarıda, hep görünür.
+	var exit_row := $MarginContainer/VBoxContainer
+
 	_start_button = Button.new()
 	_start_button.text = tr("UI_CREATE_START")
 	_start_button.pressed.connect(_on_start_pressed)
-	_content.add_child(_start_button)
+	exit_row.add_child(_start_button)
 
 	var back_button := Button.new()
 	back_button.text = Nav.label_for(Nav.MAIN_MENU)
 	back_button.pressed.connect(_on_back_pressed)
-	_content.add_child(back_button)
+	exit_row.add_child(back_button)
 
 func _build_culture_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CREATE_CULTURE")))
