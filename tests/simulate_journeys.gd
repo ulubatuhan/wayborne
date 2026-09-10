@@ -44,13 +44,16 @@ func _initialize() -> void:
 
 	_report_event_frequency(merged_event_counts)
 
-	print("── Savaş dengesi (parti büyüklüğüne göre kazanma oranı)")
-	var party_sizes: Array[int] = [1, 2, 3, 4]
-	for party_size in party_sizes:
-		_report_combat(party_size)
+	print("── Savaş dengesi (kazanma oranı: parti büyüklüğü × yol tehlikesi)")
+	print("   Hedef: yalnız yolcu sakin yolda zorlanmasın ama eşkıya kaynayan")
+	print("   yolda gerçekten kaybedebilsin; dolu parti güçlü olsun, dokunulmaz olmasın.")
+	_report_combat_matrix()
 
 	print("")
-	print("── Seviye dengesi (4 kişilik parti, tehlike %50, düşman da seviyeye göre büyür)")
+	# Parti 4 tehlike %50'de zaten tavana yakın kazanıyor; seviye farkı orada
+	# ölçülemez (aynı gerekçe ekipman A/B'sinde de yazıyor). İki kişilik
+	# partide tavan yok, sinyal görünüyor.
+	print("── Seviye dengesi (2 kişilik parti, tehlike %50, düşman da seviyeye göre büyür)")
 	print("   Hedef: seviye 1 ~%%40-55, seviye 15 ~%%75-88 kazanmalı - Sekban/Kırıkçı/Kalem")
 	print("   Efendisi katılımıyla dört sınıf da dönüşümlü test ediliyor.")
 	var levels_to_check: Array[int] = [1, 5, 10, 15]
@@ -178,6 +181,12 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 	# çıkılıyordu - rapordaki "%100 erzak tükendi" büyük ölçüde bunun
 	# ölçümüydü, oyunun değil. Bedava olduğu için net kazanç da erzağın
 	# maliyetini hiç görmüyordu.
+	# Kervan yola dolu moralle çıkmıyor: çıkış morali dünyanın o günkü
+	# haline bağlı (bkz. GameSession.get_departure_morale). Simülatör
+	# CaravanState'i elle kurduğu için hep 100'den başlıyordu, yani
+	# ölçtüğü moral oyuncunun yaşadığı moral değildi.
+	session.caravan.morale = session.get_departure_morale()
+
 	var required_provisions := session.get_daily_provision_consumption() * JOURNEY_DAYS
 	var provision_cost := required_provisions * GameSession.PROVISIONS_UNIT_PRICE
 	session.change_provisions(required_provisions - session.get_provisions())
@@ -200,6 +209,10 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		# bu döngüde işlenmiyor), o yüzden günlük moral aşınması burada elle
 		# uygulanıyor - yoksa ölçtüğü şey oyunun yaşadığı şey olmazdı.
 		session.caravan.apply_daily_drift()
+		# Yolun günlük stres bedeli GameSession.advance_day()'de; simülatör
+		# o çağrıyı yapmadığı için burada elle uygulanıyor (moral aşınmasıyla
+		# aynı gerekçe).
+		session.change_stress(GameSession.ROAD_STRESS_PER_DAY)
 
 		# Tüketim ve açlık koşulu yol ekranının okuduğu yerden gelmeli;
 		# simülatörün kendi kopyası varken levazımcı indirimini hiç
@@ -344,6 +357,19 @@ func _simulate_combat(
 	return {"victory": encounter.state == CombatEncounter.State.VICTORY, "downed_count": downed_count}
 
 ## En zayıf ulaşılabilir hedefe en sert vuran yeteneği seçer.
+## En çok yara almış ayaktaki yoldaş - yarısının altındaysa iyileştirmeye
+## değer. Kimse o kadar yaralı değilse null.
+func _most_wounded_ally(encounter: CombatEncounter) -> CombatUnit:
+	var worst: CombatUnit = null
+	for candidate in encounter.player_units:
+		if not candidate.is_alive():
+			continue
+		if float(candidate.current_hp) > float(candidate.max_hp) * 0.5:
+			continue
+		if worst == null or candidate.current_hp < worst.current_hp:
+			worst = candidate
+	return worst
+
 func _take_greedy_action(encounter: CombatEncounter) -> bool:
 	if not encounter.is_player_turn():
 		return false
@@ -351,6 +377,21 @@ func _take_greedy_action(encounter: CombatEncounter) -> bool:
 	var unit := encounter.get_active_unit()
 	var best_skill: CombatSkill = null
 	var best_target: CombatUnit = null
+
+	# Yaralı yoldaş varken iyileştir. Politika iyileştirmeyi tümden
+	# atlıyordu, yani Kalem Efendisi gibi şifacı bir sınıf simülasyonda
+	# ölü ağırlıktı ve "seviye atladıkça parti zayıflıyor" tablosunun
+	# yarısı bundan geliyordu - oyunun elindeki aracı kullanmayan bir
+	# ölçüm, oyunun dengesini değil kendi politikasını ölçer.
+	var wounded := _most_wounded_ally(encounter)
+	if wounded != null:
+		for skill in unit.skills:
+			if not skill.is_heal():
+				continue
+			var heal_targets := encounter.get_valid_targets(unit, skill)
+			for candidate in heal_targets:
+				if candidate == wounded:
+					return encounter.use_skill(skill, candidate)
 
 	for skill in unit.skills:
 		if skill.is_heal():
@@ -396,7 +437,44 @@ func _report(danger: float, stats: Dictionary) -> void:
 	])
 	print("")
 
-func _report_combat(party_size: int) -> void:
+## Tek bir tehlike seviyesinde ölçmek zorluk eğrisini gizliyordu: sakin bir
+## yolla eşkıya kaynayan bir yol arasındaki fark raporda hiç görünmüyordu.
+## Matris hem parti büyüklüğünü hem tehlikeyi tarıyor.
+func _report_combat_matrix() -> void:
+	var dangers: Array[float] = [0.2, 0.4, 0.65, 0.9]
+	var header := "    parti\\tehlike "
+	for danger in dangers:
+		header += "  %%%2d " % int(round(danger * 100.0))
+	print(header)
+
+	for party_size in [1, 2, 3, 4]:
+		var line: String = "    %d kişi         " % party_size
+		for danger in dangers:
+			line += " %3d%% " % _combat_win_rate(party_size, danger)
+		print(line)
+
+func _combat_win_rate(party_size: int, danger: float, average_level: int = 1) -> int:
+	var wins := 0
+	var battles := 60
+
+	for index in battles:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 500 + index
+
+		var party: Array[CharacterData] = []
+		for slot in party_size:
+			party.append(CharacterData.create(
+				"Yoldaş %d" % (slot + 1),
+				CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()].culture_id,
+				CharacterStats.new()
+			))
+
+		if bool(_simulate_combat(party, danger, rng, average_level).victory):
+			wins += 1
+
+	return int(round(100.0 * float(wins) / float(battles)))
+
+func _report_combat_unused(party_size: int) -> void:
 	var wins := 0
 	var battles := 60
 
@@ -438,11 +516,14 @@ func _report_combat_at_level(level: int) -> void:
 		rng.seed = 700 + index
 
 		var party: Array[CharacterData] = []
-		for slot in 4:
+		for slot in 2:
 			var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+			# Sınıf çifti savaştan savaşa kayıyor: `class_ids[slot]` iki
+			# kişilik partide her zaman aynı ilk iki sınıfı seçiyordu, yani
+			# "dört sınıf da dönüşümlü" iddiası ölçülen şeyde yoktu.
 			var character := CharacterData.create(
 				"Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new(),
-				CharacterData.DEFAULT_HEIGHT_CM, 1, class_ids[slot]
+				CharacterData.DEFAULT_HEIGHT_CM, 1, class_ids[(index + slot) % class_ids.size()]
 			)
 			_level_up(character, level)
 			party.append(character)

@@ -433,6 +433,67 @@ can be lost.
   so added fields need no migration, but a field whose *meaning* changes
   does - and a version number nobody reads is a hook nobody remembers.
 
+### Ruin Rules
+
+"The caravan can be ruined but never wiped out" is only half a rule if
+nothing can actually ruin it. Measured before this pass: average wagon loss
+0.00 across 600 journeys, a party of three or four winning 100% of fights at
+every danger level, and levelling that made the party *weaker*. The
+vocabulary existed; the game never spoke it.
+
+- **A dead effect type is worse than a missing one.**
+  `EventEffect.Type.WAGON_LOSE` was handled by the applier and used by no
+  event at all, so a wagon could never be lost. It now has two doors -
+  `evt_landslide`'s "squeeze past" and `evt_storm`'s "press on" - both rare
+  (measured ~1 wagon per 40 journeys), because a lost wagon should be a
+  disaster you remember, not a recurring fee. `CaravanState.lose_wagons()`
+  clamps at `MIN_WAGONS`, so the player's own wagon never goes.
+- **Losing a wagon does not evict party members.** Capacity falls below the
+  roster and recruiting is blocked until a wagon is re-bought; nobody is
+  thrown out. Kicking a levelled companion off the roster because a wagon
+  went over a cliff would break "never wiped out".
+- **Two knobs, because one cannot shape both ends of the curve.**
+  `POWER_SCALE_PER_LEVEL` answers "does levelling feel like progress" and
+  `POWER_SCALE_PER_PARTY_MEMBER` answers "is a full caravan untouchable".
+  Tuning enemy strength alone balanced the full party and drove the lone
+  traveller to 0% - as broken as 100%, because no decision remains.
+- **Level scaling must stay below the player's own growth.** At 8%/level
+  enemies reached 2.12× and the measured curve *inverted* (level 1: 98%,
+  level 15: 52%) - the player's HP only grows on ENDURANCE-affinity classes,
+  about +25% averaged across a mixed party, against enemies gaining far
+  more. At 2%/level the curve rises again.
+- **When the squad is trimmed to party size, composition order decides what
+  the player faces.** Trimming by rank position meant a lone traveller always
+  drew two cutters and never the leader, so a calm road and a bandit-infested
+  one were literally identical for them. The id list is now written in
+  priority order (the leader is pushed to the front at high danger) and
+  trimmed from the end. Trimming by raw threat was tried and flattened the
+  encounter - it dropped the archer every time, leaving three melee and
+  erasing the rank design.
+
+Measured win rate (party size × road danger, level 1):
+
+| party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 42% | 45% | 5% | 5% |
+| 2 | 100% | 72% | 23% | 23% |
+| 3 | 100% | 93% | 57% | 57% |
+| 4 | 100% | 100% | 88% | 88% |
+
+A lone traveller on a bandit-infested road is nearly hopeless, and that is
+the intended message rather than an oversight: the game starts you with two
+people, party 1 only exists if you dismiss someone, and losing a fight costs
+attrition, not death.
+
+**Still open: two of four classes gain almost no combat power from levels.**
+Kırıkçı and Sıra Neferi grow (HP and damage); Sekban only gains
+dodge/accuracy; Kalem Efendisi gains nothing but heal power and proficiency,
+because INTELLECT feeds only `get_support_power()` and CHARISMA feeds
+nothing in combat. That is why the level curve rises only modestly (23% →
+30%) instead of reaching the 75-88% the simulator's target line asks for.
+Closing it means giving every stat a combat derivation - a class-design
+change, not a tuning one.
+
 ### Provision Rules
 
 Provisions are the Oregon Trail spine: the caravan eats every day whether
@@ -492,6 +553,19 @@ the report said exactly 100.0 every run.
   genuinely more tiring than a short one. It stops at
   `MORALE_DRIFT_FLOOR` - walking alone must never be enough to trigger a
   mutiny; events have to go badly too.
+- **That rule only became true when the floor moved above the threshold.**
+  The floor was 35 and the mutiny threshold 40, so a long enough road made
+  mutiny eligible with nothing happening at all - and `test_morale.gd`
+  asserted the inverse (`threshold > floor`) with a message describing the
+  opposite of what it checked. The floor is now 45, above the threshold, and
+  the test asserts that drift alone can never reach mutiny while an event
+  hit still can.
+- **`ROAD_STRESS_PER_DAY` is the stress counterpart of the morale drain**,
+  and it exists because fixing the famine bug (see Provision Rules) removed
+  a hidden per-day stress tax that the whole stress-accumulation balance had
+  been resting on. Arrival stress fell from ~25 to ~8 the moment famine
+  stopped firing on correctly provisioned journeys, which quietly undid
+  "stress accumulates across journeys". The road now charges it honestly.
 - **Departure morale reflects the world, not a constant.**
   `GameSession.get_departure_morale()` composes it from systems that already
   exist rather than inventing a "war/plague" mechanic: hardship

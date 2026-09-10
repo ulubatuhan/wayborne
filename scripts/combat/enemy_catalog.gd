@@ -32,6 +32,32 @@ const GARRISON_REGION_ID: String = "test_loc_d"  # Demirkapı
 ## Pusu kadrosu bu kadar savaşçıyı geçemez (savaş alanı 4 mevki).
 const MAX_SQUAD_SIZE: int = 4
 
+## Düşmanın seviyeyle büyüme hızı - seviye atlamanın *ilerleme* gibi
+## hissetmesini belirleyen tek sayı, ve yanlış ayarlandığında sessizce
+## tersine dönüyor.
+##
+## Oyuncunun canı seviyeyle yalnızca Dayanıklılık afiniteli sınıflarda
+## büyüyor: 1→15 arasında Sıra Neferi 46→76 can kazanırken Sekban 42'de,
+## Kalem Efendisi 40'ta kalıyor - karışık bir partide ortalama büyüme
+## ~%25. Düşman canı ise bu sayının 14 katı kadar büyüyor. %8'de düşman
+## 2.12x'e çıkıyordu ve ölçülen sonuç sv1'de %98, sv15'te %52 kazanmaktı:
+## seviye atlamak partiyi *zayıflatıyordu*. %5 de yetmedi (sv1 %30 →
+## sv15 %12).
+##
+## %2'de düşman 15. seviyede 1.28x oluyor - hâlâ büyüyor (üst seviye bir
+## parti seviye 1 çöpüyle savaşmıyor) ama oyuncu öne geçebiliyor.
+const POWER_SCALE_PER_LEVEL: float = 0.02
+
+## Kervan büyüdükçe onu durduranlar da güçlenir. Yol dört muhafızlı bir
+## kervanın üstüne, yalnız bir seyyahın üstüne gönderdiği çeteyi
+## göndermez - dolu bir kervan daha zengin bir hedeftir.
+##
+## Bu ayrı bir kol olmak zorunda: kadroyu topluca sertleştirmek dolu
+## partiyi dengelerken yalnız yolcuyu %0'a düşürüyordu, çünkü tek bir
+## sayı eğrinin iki ucunu birden ayarlayamıyor. Ölçülen sorun dolu
+## partinin en tehlikeli yolda bile %98 kazanmasıydı.
+const POWER_SCALE_PER_PARTY_MEMBER: float = 0.10
+
 ## Kadro türleri (bkz. build_squad). EventEffect.Type.TRIGGER_COMBAT'in
 ## text_value'sundan gelir; boş değer KIND_BANDIT sayılır.
 const KIND_BANDIT: String = "bandit"
@@ -107,15 +133,19 @@ static func build_bandit_squad(
 	elif region_id == GARRISON_REGION_ID:
 		ranged_id = ARMED_BRIGAND
 
+	# Sıra = önem sırası. Küçük bir parti kadroyu kırptığında baştakiler
+	# kalır, o yüzden tehlike yükseldikçe reis listenin *başına* geçer:
+	# eşkıya kaynayan bir yolda yalnız yolcunun karşısına iki sıradan
+	# kesici değil, reis ve bir kesici çıkar.
 	var ids: Array[String] = [melee_id, melee_id]
 	if danger_level >= 0.25:
 		ids.append(ranged_id)
 	if danger_level >= 0.55:
-		ids.append(LEADER)
+		ids.insert(0, LEADER)
 	elif danger_level >= 0.40 and rng.randf() < 0.5:
 		ids.append(melee_id)
 
-	return _build_units(ids, party_size, average_level)
+	return _build_units(ids, party_size, average_level, danger_level)
 
 ## Doğada karşılaşılan hayvanlar (bkz. evt_wild_animal). Düşük tehlikede
 ## bir kurt sürüsü, ortada yaban domuzu katılır, yüksek tehlikede nadiren
@@ -128,13 +158,13 @@ static func build_wildlife_squad(
 
 	var ids: Array[String] = [WOLF, WOLF]
 	if danger_level >= 0.3:
-		ids.append(BOAR)
+		ids.insert(0, BOAR)
 	if danger_level >= 0.55 and rng.randf() < 0.35:
 		ids = [BEAR]
 		if party_size >= 2:
 			ids.append(WOLF)
 
-	return _build_units(ids, party_size, average_level)
+	return _build_units(ids, party_size, average_level, danger_level)
 
 ## Şüpheli/itibarsız bir kervanı durduran devriye (bkz. evt_guard_patrol).
 ## Danger_level burada road danger'ı taşır - yalnızca çavuşun katılıp
@@ -146,61 +176,76 @@ static func build_guard_squad(
 
 	var ids: Array[String] = [CITY_GUARD, CITY_GUARD]
 	if danger_level >= 0.4 or party_size >= 3:
-		ids.append(GUARD_SERGEANT)
+		ids.insert(0, GUARD_SERGEANT)
 
-	return _build_units(ids, party_size, average_level)
+	return _build_units(ids, party_size, average_level, danger_level)
 
 static func _build_units(
-	ids: Array[String], party_size: int, average_level: int
+	ids: Array[String], party_size: int, average_level: int, danger_level: float = 0.0
 ) -> Array[CombatUnit]:
 	var templates: Array[EnemyTemplate] = []
 	for enemy_id in ids:
 		var template := get_enemy(enemy_id)
 		if template != null:
 			templates.append(template)
-	templates.sort_custom(func(a, b): return a.preferred_position < b.preferred_position)
 
 	var squad_size := mini(templates.size(), MAX_SQUAD_SIZE)
 	squad_size = mini(squad_size, maxi(2, party_size + 1))
 
-	var power_scale := get_power_scale(average_level)
+	# Kadro partiye göre kırpıldığında *kimin* geleceği önemli. Eskiden önce
+	# mevkiye göre sıralanıp baştan alınıyordu: yalnız bir yolcuya her zaman
+	# iki kesici geliyor, reis ve okçu hep eleniyordu - o oyuncu için sakin
+	# bir yol ile eşkıya kaynayan bir yol birebir aynıydı (ölçüldü: %20 ve
+	# %90 tehlikede aynı kazanma oranı, %67).
+	#
+	# Artık kırpma, kadro kurucusunun verdiği *önem sırasını* izliyor
+	# (bkz. build_bandit_squad: tehlike yükseldikçe reis listenin başına
+	# geçer). Tehdide göre elemek de denendi ve kadroyu düzleştirdi -
+	# okçuyu hep atıp üç kesici bırakıyordu, yani mevki tasarımı kayboluyordu.
+	templates.resize(mini(squad_size, templates.size()))
+	templates.sort_custom(func(a, b): return a.preferred_position < b.preferred_position)
+
+	var power_scale := get_power_scale(average_level, party_size)
 	var units: Array[CombatUnit] = []
-	for index in squad_size:
+	for index in templates.size():
 		units.append(CombatUnit.from_enemy(templates[index], index + 1, power_scale))
 	return units
 
+
 ## Seviye 1'de 1.0; her seviye canı/hasarı %8 büyütür, üst sınır seviye
 ## 15'te ~%12'lik zafer oranına denk düşecek şekilde yumuşak tutulur.
-static func get_power_scale(average_level: int) -> float:
-	return 1.0 + 0.08 * float(maxi(0, average_level - 1))
+static func get_power_scale(average_level: int, party_size: int = 1) -> float:
+	var by_level := 1.0 + POWER_SCALE_PER_LEVEL * float(maxi(0, average_level - 1))
+	var by_party := 1.0 + POWER_SCALE_PER_PARTY_MEMBER * float(maxi(0, party_size - 1))
+	return by_level * by_party
 
 static func _ensure_built() -> void:
 	if not _enemies.is_empty():
 		return
 
-	_enemies.append(_make(CUTTER, "ENEMY_BANDIT_CUTTER_NAME", 24, 76, 5, 4, 3, 8, [SkillCatalog.CLEAVER], 1, 10))
-	_enemies.append(_make(ARCHER, "ENEMY_BANDIT_ARCHER_NAME", 18, 80, 8, 6, 2, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
+	_enemies.append(_make(CUTTER, "ENEMY_BANDIT_CUTTER_NAME", 27, 78, 6, 5, 4, 8, [SkillCatalog.CLEAVER], 1, 10))
+	_enemies.append(_make(ARCHER, "ENEMY_BANDIT_ARCHER_NAME", 22, 82, 9, 7, 3, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
 	_enemies.append(_make(
-		LEADER, "ENEMY_BANDIT_LEADER_NAME", 34, 82, 6, 8, 5, 10,
+		LEADER, "ENEMY_BANDIT_LEADER_NAME", 36, 84, 7, 9, 6, 10,
 		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2, 25
 	))
 
 	# Bölgesel reskin'ler: Kesici/Okçu'nun aynı mevki tercihiyle ama farklı
 	# yöre teçhizatıyla çıkan versiyonları (bkz. build_bandit_squad).
-	_enemies.append(_make(MOUNTAIN_BANDIT, "ENEMY_MOUNTAIN_BANDIT_NAME", 28, 74, 4, 4, 6, 7, [SkillCatalog.CLEAVER], 1, 12))
-	_enemies.append(_make(ARMED_BRIGAND, "ENEMY_ARMED_BRIGAND_NAME", 20, 86, 7, 9, 3, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
+	_enemies.append(_make(MOUNTAIN_BANDIT, "ENEMY_MOUNTAIN_BANDIT_NAME", 32, 76, 5, 5, 7, 7, [SkillCatalog.CLEAVER], 1, 12))
+	_enemies.append(_make(ARMED_BRIGAND, "ENEMY_ARMED_BRIGAND_NAME", 24, 88, 8, 10, 4, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
 
 	# Vahşi hayvanlar - kurt sürü halinde hızlı/hafif, ayı nadir/tekil ve
 	# ezici, domuz ortada saldırgan bir tekil tehdit (bkz. build_wildlife_squad).
-	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 16, 78, 12, 5, 2, 14, [SkillCatalog.WOLF_BITE], 1, 8))
-	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 55, 70, 2, 2, 8, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
-	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 28, 74, 5, 3, 5, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 19, 80, 13, 6, 3, 14, [SkillCatalog.WOLF_BITE], 1, 8))
+	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
+	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
 
 	# Şehir muhafızları - talimli ve isabetli ama haydutlar kadar sert
 	# vurmuyor, çavuş komuta eder (bkz. build_guard_squad, evt_guard_patrol).
-	_enemies.append(_make(CITY_GUARD, "ENEMY_CITY_GUARD_NAME", 26, 80, 6, 3, 4, 9, [SkillCatalog.GUARD_STRIKE], 1, 12))
+	_enemies.append(_make(CITY_GUARD, "ENEMY_CITY_GUARD_NAME", 31, 82, 7, 4, 5, 9, [SkillCatalog.GUARD_STRIKE], 1, 12))
 	_enemies.append(_make(
-		GUARD_SERGEANT, "ENEMY_GUARD_SERGEANT_NAME", 36, 82, 7, 5, 6, 10,
+		GUARD_SERGEANT, "ENEMY_GUARD_SERGEANT_NAME", 43, 84, 8, 6, 7, 10,
 		[SkillCatalog.GUARD_ORDER, SkillCatalog.GUARD_STRIKE], 2, 26
 	))
 
