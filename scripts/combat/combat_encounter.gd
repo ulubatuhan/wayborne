@@ -29,6 +29,11 @@ const MAX_HIT_CHANCE: int = 95
 ## davranışın en sade hâli: hamle yapamaz, sırası boşa gider.
 const STRESS_REFUSAL_CHANCE: int = 20
 
+## Sükûnet ne kadar yüksek olursa olsun stres bedavaya gelmez. Aynı gerekçe
+## pazarlığın tabanında ve "sahipsiz görev asla ceza değildir" kuralında da
+## var: bir sistemi tamamen kapatan bir stat, o sistemi silmek demektir.
+const MIN_STRESS_REFUSAL_CHANCE: int = 5
+
 var state: State = State.ONGOING
 var round_number: int = 1
 var player_units: Array[CombatUnit] = []
@@ -178,7 +183,8 @@ func _run_until_player_turn() -> void:
 func _try_refuse_order(unit: CombatUnit) -> bool:
 	if not unit.is_stressed:
 		return false
-	if _rng.randi_range(1, 100) > STRESS_REFUSAL_CHANCE:
+	var chance := maxi(MIN_STRESS_REFUSAL_CHANCE, STRESS_REFUSAL_CHANCE - unit.composure)
+	if _rng.randi_range(1, 100) > chance:
 		return false
 	_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
 	return true

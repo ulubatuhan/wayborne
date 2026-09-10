@@ -32,6 +32,14 @@ var description: String:
 ## (pazarda satılmaz, yalnızca EventEffect.Type.GRANT_EQUIPMENT verir).
 @export var price: int = 0
 
+## Bu parçayı kuşanabilmek için gereken seviye. Darkest Dungeon'ın modeli:
+## seviye atlamak *stat vermez*, daha iyi teçhizatın kapısını açar - can,
+## hasar ve isabet Demirci'den gelir, seviyeden değil. Wayborne'da tier'lerin
+## tek kapısı paraydı, yani seviye ekipman ekseninde hiçbir şey ifade
+## etmiyordu; oysa o eksen ölçülen en güçlü eksen (donanımsız %47,
+## tam donanımlı %75).
+@export var required_level: int = 1
+
 @export var hp_bonus: int = 0
 @export var dodge_bonus: int = 0
 @export var accuracy_bonus: int = 0

@@ -65,6 +65,14 @@ func _initialize() -> void:
 	_report_equipment_impact()
 
 	print("")
+	print("── İlerleme merdiveni (seviye teçhizatın kapısını açar, tehlike %65)")
+	_report_progression_ladder()
+
+	print("")
+	print("── Sükûnet: Karizma'nın savaştaki karşılığı (tehlike %50)")
+	_report_composure_impact()
+
+	print("")
 	print("── Görev sağlık kontrolü (Sıra Neferi, seviye 1 ve 10)")
 	_report_duty_impact()
 
@@ -572,14 +580,87 @@ func _battle_batch(battles: int, geared: bool) -> int:
 			wins += 1
 	return wins
 
+## Tam donanım artık seviye istiyor (bkz. Equipment.required_level), o yüzden
+## karakter önce o seviyeye çıkarılıyor: oyuncunun ulaşamayacağı bir birleşimi
+## ölçmek dengeye dair hiçbir şey söylemez.
 func _equip_best_gear(character: CharacterData) -> void:
+	_level_up(character, EquipmentCatalog.TIER_3_LEVEL)
 	var pieces: Array[String] = [
 		EquipmentCatalog.WEAPON_TIER_3, EquipmentCatalog.ARMOR_TIER_3,
 		EquipmentCatalog.RING_MARKSMAN, EquipmentCatalog.AMULET_WOLF_FANG,
 	]
 	for equipment_id in pieces:
 		var equipment_resource := EquipmentCatalog.get_equipment(equipment_id)
-		character.equip(equipment_resource.slot, equipment_id)
+		if character.level >= equipment_resource.required_level:
+			character.equip(equipment_resource.slot, equipment_id)
+
+## Oyuncunun gerçekten yürüdüğü ilerleme merdiveni: seviye tek başına stat
+## vermiyor, daha iyi teçhizatın kapısını açıyor (Darkest Dungeon'ın modeli).
+## Bu rapor "seviye atlamak ilerleme gibi hissettiriyor mu" sorusunun tek
+## dürüst cevabı - seviye ve teçhizatı ayrı ayrı ölçmek o bağı gizliyordu.
+func _report_progression_ladder() -> void:
+	var rungs: Array[Dictionary] = [
+		{"level": 1, "weapon": EquipmentCatalog.WEAPON_TIER_1, "armor": EquipmentCatalog.ARMOR_TIER_1},
+		{"level": EquipmentCatalog.TIER_2_LEVEL, "weapon": EquipmentCatalog.WEAPON_TIER_2, "armor": EquipmentCatalog.ARMOR_TIER_2},
+		{"level": EquipmentCatalog.TIER_3_LEVEL, "weapon": EquipmentCatalog.WEAPON_TIER_3, "armor": EquipmentCatalog.ARMOR_TIER_3},
+	]
+	for rung in rungs:
+		var level: int = rung.level
+		var wins := 0
+		var battles := 60
+		for index in battles:
+			var rng := RandomNumberGenerator.new()
+			rng.seed = 1300 + index
+			var party: Array[CharacterData] = []
+			for slot in 2:
+				var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+				var character := CharacterData.create(
+					"Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new()
+				)
+				_level_up(character, level)
+				for equipment_id in [String(rung.weapon), String(rung.armor)]:
+					var piece := EquipmentCatalog.get_equipment(equipment_id)
+					character.equip(piece.slot, equipment_id)
+				character.heal_full()
+				party.append(character)
+			# Tehlike %65: merdivenin üst basamağı %50'de tavana vuruyor ve
+			# basamaklar arası fark görünmez oluyor (aynı gerekçe seviye
+			# testinde ve ekipman A/B'sinde de yazılı).
+			if bool(_simulate_combat(party, 0.65, rng, level).victory):
+				wins += 1
+		print("    seviye %2d + tier %d teçhizat: %%%d kazanıyor (%d/%d)" % [
+			level, EquipmentCatalog.get_equipment(String(rung.weapon)).tier,
+			int(round(100.0 * float(wins) / float(battles))), wins, battles
+		])
+
+## Karizma'nın savaştaki tek karşılığı: kırılmış bir savaşçının emri
+## reddetme ihtimalini düşürmesi. Stres yokken hiçbir fark yaratmamalı -
+## bu da ölçülüyor, yoksa "her yerde işe yarayan" gizli bir bonus olurdu.
+func _report_composure_impact() -> void:
+	for stressed in [false, true]:
+		var line: String = "    %s parti: " % ("kırılmış" if stressed else "sakin")
+		for charisma in [5, 10, 15]:
+			var wins := 0
+			var battles := 60
+			for index in battles:
+				var rng := RandomNumberGenerator.new()
+				rng.seed = 1500 + index
+				var party: Array[CharacterData] = []
+				for slot in 2:
+					var stats := CharacterStats.new()
+					stats.set_value(CharacterStats.Kind.CHARISMA, charisma)
+					var character := CharacterData.create(
+						"Yoldaş %d" % (slot + 1), CultureCatalog.VALLEY, stats
+					)
+					character.heal_full()
+					party.append(character)
+				var stress: int = GameSession.MAX_STRESS if stressed else 0
+				if bool(_simulate_combat(party, 0.5, rng, 1, stress).victory):
+					wins += 1
+			line += "Karizma %2d → %%%d   " % [
+				charisma, int(round(100.0 * float(wins) / float(battles)))
+			]
+		print(line)
 
 ## Görev sayılarının kaba bir sağlık kontrolü - seviye ilerledikçe
 ## get_duty_flat_reduction/get_duty_discount anlamlı büyüyor mu, yoksa

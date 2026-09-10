@@ -189,6 +189,7 @@
 "UI_CHAR_EMPTY_SLOT","Boş","Empty","","","","","","","","",""
 "UI_CHAR_UNEQUIP","Çıkar","Take off","","","","","","","","",""
 "UI_CHAR_EQUIP","Tak: %s (depoda %d)","Equip: %s (%d in store)","","","","","","","","",""
+"UI_CHAR_EQUIP_LOCKED","Tak: %s (seviye %d gerekli)","Equip: %s (needs level %d)","","","","","","","","",""
 "UI_CHAR_PROGRESSION","İlerleme","Progression","","","","","","","","",""
 "UI_BONUS_HP","Can %+d","HP %+d","","","","","","","","",""
 "UI_BONUS_ACCURACY","İsabet %+d","Accuracy %+d","","","","","","","","",""

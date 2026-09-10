@@ -42,6 +42,10 @@ var xp_value: int = 0
 ## _try_refuse_order). Yalnızca oyuncu tarafında anlamlı.
 var is_stressed: bool = false
 
+## Ateş altında sükûnet: emir reddetme ihtimalinden düşülen puan
+## (bkz. CharacterStats.get_composure). Düşmanlarda her zaman 0.
+var composure: int = 0
+
 ## Yalnızca oyuncu tarafında dolu; savaş sonunda canı buraya yazarız.
 var source_character: CharacterData = null
 
@@ -62,6 +66,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()
+	unit.composure = character.get_composure()
 	unit.source_character = character
 	return unit
 

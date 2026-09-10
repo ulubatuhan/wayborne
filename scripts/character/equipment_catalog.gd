@@ -15,6 +15,12 @@ const SLOT_AMULET: String = "amulet"
 
 const ALL_SLOTS: Array[String] = [SLOT_WEAPON, SLOT_ARMOR, SLOT_RING, SLOT_AMULET]
 
+## Tier'lerin seviye eşikleri. DD'de üç teçhizat kademesi resolve seviyesine
+## bağlı açılır; buradaki üçüncü eşik multiclass kilidiyle (7) aynı bölgede
+## duruyor ki oyuncunun "artık kıdemliyim" hissi tek yerden gelsin.
+const TIER_2_LEVEL: int = 3
+const TIER_3_LEVEL: int = 6
+
 const WEAPON_TIER_1: String = "weapon_tier_1"
 const WEAPON_TIER_2: String = "weapon_tier_2"
 const WEAPON_TIER_3: String = "weapon_tier_3"
@@ -70,11 +76,11 @@ static func _ensure_built() -> void:
 	))
 	_equipment.append(_make(
 		WEAPON_TIER_2, "EQUIP_WEAPON_TIER_2_NAME", "EQUIP_WEAPON_TIER_2_DESC",
-		SLOT_WEAPON, 2, 350, {"damage_bonus": 4}
+		SLOT_WEAPON, 2, 350, {"damage_bonus": 4}, TIER_2_LEVEL
 	))
 	_equipment.append(_make(
 		WEAPON_TIER_3, "EQUIP_WEAPON_TIER_3_NAME", "EQUIP_WEAPON_TIER_3_DESC",
-		SLOT_WEAPON, 3, 650, {"damage_bonus": 6}
+		SLOT_WEAPON, 3, 650, {"damage_bonus": 6}, TIER_3_LEVEL
 	))
 
 	_equipment.append(_make(
@@ -83,11 +89,11 @@ static func _ensure_built() -> void:
 	))
 	_equipment.append(_make(
 		ARMOR_TIER_2, "EQUIP_ARMOR_TIER_2_NAME", "EQUIP_ARMOR_TIER_2_DESC",
-		SLOT_ARMOR, 2, 350, {"hp_bonus": 8}
+		SLOT_ARMOR, 2, 350, {"hp_bonus": 8}, TIER_2_LEVEL
 	))
 	_equipment.append(_make(
 		ARMOR_TIER_3, "EQUIP_ARMOR_TIER_3_NAME", "EQUIP_ARMOR_TIER_3_DESC",
-		SLOT_ARMOR, 3, 700, {"hp_bonus": 14}
+		SLOT_ARMOR, 3, 700, {"hp_bonus": 14}, TIER_3_LEVEL
 	))
 
 	_equipment.append(_make(
@@ -121,7 +127,7 @@ static func _ensure_built() -> void:
 
 static func _make(
 	equipment_id: String, display_name: String, description: String,
-	slot: String, tier: int, price: int, bonuses: Dictionary
+	slot: String, tier: int, price: int, bonuses: Dictionary, required_level: int = 1
 ) -> Equipment:
 	var equipment_resource := Equipment.new()
 	equipment_resource.equipment_id = equipment_id
@@ -130,6 +136,7 @@ static func _make(
 	equipment_resource.slot = slot
 	equipment_resource.tier = tier
 	equipment_resource.price = price
+	equipment_resource.required_level = required_level
 	equipment_resource.hp_bonus = int(bonuses.get("hp_bonus", 0))
 	equipment_resource.dodge_bonus = int(bonuses.get("dodge_bonus", 0))
 	equipment_resource.accuracy_bonus = int(bonuses.get("accuracy_bonus", 0))

@@ -485,14 +485,70 @@ the intended message rather than an oversight: the game starts you with two
 people, party 1 only exists if you dismiss someone, and losing a fight costs
 attrition, not death.
 
-**Still open: two of four classes gain almost no combat power from levels.**
-Kırıkçı and Sıra Neferi grow (HP and damage); Sekban only gains
-dodge/accuracy; Kalem Efendisi gains nothing but heal power and proficiency,
-because INTELLECT feeds only `get_support_power()` and CHARISMA feeds
-nothing in combat. That is why the level curve rises only modestly (23% →
-30%) instead of reaching the 75-88% the simulator's target line asks for.
-Closing it means giving every stat a combat derivation - a class-design
-change, not a tuning one.
+### Progression Rules
+
+"Levelling should feel like progress" was the open question after the ruin
+pass, and the answer came from looking at what comparable games actually do
+rather than from instinct. The instinct - *give every stat a combat
+derivation* - is **not** what the genre does:
+
+- **Darkest Dungeon**, the game this one names as its model, gives a resolve
+  level **no stat growth at all** - only +10% per level to trap disarm and
+  the stun/blight/bleed/move/debuff resists. HP, damage, accuracy and dodge
+  come from equipment bought at the Blacksmith and skill ranks bought at the
+  Guild, both **gated by resolve level**. The level is the *key* to power,
+  never the power.
+- **Wartales** has our exact problem stat: Willpower does not rise on
+  level-up for most classes, yet it is not dead - it buys crit (+1% per 5),
+  decides how fast the Galvanized morale buff lands, and grants a death save
+  at 15. It grows through traits, professions and knowledge instead.
+- **Battle Brothers** does grow attributes (three per level, +1..+4 by
+  talent stars, cap 11, then veteran levels at +1 and no perk point), but
+  its own guidance is "never spend on a stat the brother will not use" - it
+  accepts role-specific stats rather than making all six universal.
+- **Darkest Dungeon 2** removed hero levelling outright, moving growth to
+  meta-progression unlocks at the Altar of Hope.
+- The **dump-stat literature** is blunt about Charisma: it became a dump
+  stat *because* morale, reaction rolls and hirelings stopped mattering to
+  how people played. The prescribed fix is to make the systems it feeds
+  matter - not to bolt combat numbers onto the stat.
+
+Wayborne already had the Darkest Dungeon equipment axis, and it measurably
+works (bare 52% vs fully geared 70%). What it lacked was a link between the
+level and that axis, and any combat consequence for Karizma at all.
+
+- **`Equipment.required_level` is the level's job.** Tiers used to be gated
+  by gold alone, so a level-1 party could wear tier 3 the moment it could
+  pay - the level meant nothing on the strongest axis in the game. Tier 2
+  needs level 3, tier 3 needs level 6. Trinkets (ring/amulet) stay
+  ungated: they are found, not bought, and a DD curio you cannot use is a
+  non-reward. The gate lives in `GameSession.can_equip()`, checked by
+  `equip_to_character()`, and the character screen shows the locked piece
+  **disabled with its reason** - the same rule as locked event choices and
+  locked combat skills.
+- **Karizma buys composure under fire.** `CharacterStats.get_composure()`
+  subtracts from `CombatEncounter.STRESS_REFUSAL_CHANCE`, so a charismatic
+  fighter who has broken still takes orders. Measured: with a calm party
+  Karizma changes **nothing** (45% at 5, 10 and 15 alike - it is not a
+  hidden universal bonus), while a broken party goes 33% → 38% → 45%. It
+  never zeroes the refusal (`MIN_STRESS_REFUSAL_CHANCE`), for the same
+  reason the haggling floor exists: a stat that switches a whole system off
+  deletes that system.
+
+The ladder a player actually climbs, measured at 65% danger with a pair:
+
+| rung | win rate |
+|---|---|
+| level 1 + tier 1 gear | 33% |
+| level 3 + tier 2 gear | 70% |
+| level 6 + tier 3 gear | 88% |
+
+**Measure the rungs together, not the level and the gear separately.**
+Reporting them apart is what hid the problem for so long: the level report
+said "flat" and the equipment report said "strong", and neither said that
+the two were unconnected. The simulator's equipment A/B also has to level
+the geared character to the tier requirement now - measuring a combination
+the player cannot reach says nothing about balance.
 
 ### Provision Rules
 

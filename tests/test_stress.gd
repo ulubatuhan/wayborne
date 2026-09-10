@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_newcomer_dilutes_party_stress(t)
 	_test_feast_costs_gold_and_relieves(t)
 	_test_brawl_threshold_is_reachable(t)
+	_test_composure(t)
 
 func _test_change_stress_clamps(t) -> void:
 	var session := GameSession.new(100, 0, 1)
@@ -316,3 +317,49 @@ func _test_brawl_threshold_is_reachable(t) -> void:
 	relieved.change_stress(70)
 	relieved.throw_feast()
 	t.ok(relieved.party_stress < 70, "ziyafet birikmeyi geri çevirir")
+
+## Karizma'nın savaştaki tek karşılığı: kırılmış bir savaşçının emri
+## reddetme ihtimalini düşürmesi.
+##
+## Karizma altı stat içinde savaşa hiçbir şey vermeyen tekiydi ve Kalem
+## Efendisi'nin afinitesinin yarısıydı - o sınıfın seviye puanlarının yarısı
+## savaşta ölü harcamaydı. Çözümün şekli Wartales'in Willpower'ından:
+## seviyeyle büyümesi şart değil, ama bir karşılığı olmak zorunda.
+func _test_composure(t) -> void:
+	var plain := CharacterStats.new()
+	t.eq(plain.get_composure(), 0, "taban Karizma'da sükûnet nötr")
+
+	var talker := CharacterStats.new()
+	talker.set_value(CharacterStats.Kind.CHARISMA, 10)
+	t.ok(talker.get_composure() > 0, "Karizma sükûneti yükseltir")
+
+	var shy := CharacterStats.new()
+	shy.set_value(CharacterStats.Kind.CHARISMA, 1)
+	t.ok(shy.get_composure() < 0, "düşük Karizma sükûneti düşürür")
+
+	# Savaş CharacterData sarmalayıcısını okumalı, stats'ı doğrudan değil.
+	var character := CharacterData.create("Tellal", CultureCatalog.VALLEY, talker)
+	t.eq(
+		character.get_composure(), talker.get_composure(),
+		"CharacterData sükûneti aynen taşır"
+	)
+	var unit := CombatUnit.from_character(character, 1, true)
+	t.eq(unit.composure, character.get_composure(), "CombatUnit sükûneti karakterden alır")
+
+	# Düşmanların sükûneti yok - stres yalnızca oyuncu tarafında anlamlı.
+	var enemy := CombatUnit.from_enemy(EnemyCatalog.get_enemy(EnemyCatalog.CUTTER), 1)
+	t.eq(enemy.composure, 0, "düşmanlarda sükûnet nötr")
+
+	# Ve stres asla bedavaya gelmemeli: sükûnet ne kadar yüksek olursa olsun
+	# reddetme ihtimali tabanın altına inmez, yoksa tek stat bütün bir
+	# sistemi kapatırdı.
+	var saintly := CharacterStats.new()
+	saintly.set_value(CharacterStats.Kind.CHARISMA, CharacterStats.MAX_VALUE)
+	t.ok(
+		saintly.get_composure() < CombatEncounter.STRESS_REFUSAL_CHANCE,
+		"en yüksek Karizma bile reddetme ihtimalini sıfırlamaz"
+	)
+	t.ge(
+		float(CombatEncounter.MIN_STRESS_REFUSAL_CHANCE), 1.0,
+		"reddetme ihtimalinin tabanı sıfır değil"
+	)
