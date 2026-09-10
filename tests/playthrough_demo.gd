@@ -109,6 +109,7 @@ func _run_leg(session: GameSession, leg_number: int) -> bool:
 		travel_days, int(round(danger * 100.0)), state_note
 	])
 
+	_sell_trade_goods(session, origin)
 	_buy_trade_goods(session, origin)
 	var plan := _build_plan(session, destination, route)
 	_stock_provisions(session, plan)
@@ -130,6 +131,32 @@ func _run_leg(session: GameSession, leg_number: int) -> bool:
 			brk.character_name, " (kervandan ayrıldı)" if brk.departed else ""
 		])
 	return true
+
+## Vardığın şehirde talep edileni sat. Demo bunu uzun süre hiç yapmıyordu:
+## mal alıp hiç satmıyor, envanterde biriktiriyordu. O yüzden bastığı
+## ekonomi tablosu ticaretin kârını hiç göstermiyor, yalnızca kontrat
+## gelirini gösteriyordu - erzak maliyetini değerlendirmek imkânsızdı.
+func _sell_trade_goods(session: GameSession, origin: Location) -> void:
+	var entries: Array = session.inventory.get_all_entries().duplicate()
+	for entry in entries:
+		var item: Item = (entry as Dictionary).item
+		if item == null or item.item_id == GameSession.PROVISIONS_ITEM_ID:
+			continue
+		if not origin.demands.has(item.item_id):
+			continue
+		var item_id := item.item_id
+		var quantity := session.inventory.get_quantity(item_id)
+		if quantity <= 0:
+			continue
+		var unit_price := MarketPricing.get_sell_price(
+			item, origin, session.market, session.total_days_elapsed
+		)
+		session.inventory.remove_item(item_id, quantity)
+		session.wallet.earn(unit_price * quantity)
+		session.record_sale(item_id, quantity)
+		print("   Pazar: %d %s satıldı (%d GG)" % [
+			quantity, item.item_name, unit_price * quantity
+		])
 
 ## Şehirde ucuz olanı al: hedefin talep ettiği malı taşımak kârın kendisi.
 func _buy_trade_goods(session: GameSession, origin: Location) -> void:
@@ -158,6 +185,11 @@ func _build_plan(session: GameSession, destination: Location, route: TravelRoute
 		destination, session.get_route_travel_days(route),
 		CaravanPlan.DEFAULT_MAX_WAGONS, session.owned_wagon_count
 	)
+	# Planlayıcı ekranıyla aynı kervan bilgisi - yoksa demo yolun gerçekte
+	# yiyeceğinden az erzak stoklar (bkz. caravan_planner.gd).
+	plan.caravan_party_size = session.get_party().size()
+	plan.provision_multiplier = session.get_daily_provision_multiplier()
+	plan.provision_reduction = session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 	for offer in WorldMapData.get_offers_from_origin(session.current_location_id):
 		if offer.destination_location_id != destination.location_id:
 			continue

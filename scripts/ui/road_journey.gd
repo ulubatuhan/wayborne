@@ -452,14 +452,17 @@ func _advance_contracts_and_provisions() -> void:
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 
-	# Yol her gün erzak yer: parti büyüdükçe saat daha hızlı işler.
-	# Göçebe kültürü az yer (bkz. Culture.daily_provision_multiplier).
-	var daily_consumption := 1 + _session.caravan.merchant_names.size()
-	daily_consumption = maxi(1, int(round(daily_consumption * _session.get_daily_provision_multiplier())))
-	# Levazımcı ölçülü dağıtır: gücüne göre günlük tüketimden düşer.
-	daily_consumption = maxi(1, daily_consumption - _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI))
-	_session.change_provisions(-daily_consumption)
-	if _session.get_provisions() <= 0:
+	# Yol her gün erzak yer. Formül planlayıcınınkiyle aynı yerden gelir
+	# (bkz. CaravanPlan.daily_consumption) - kültür perki ve levazımcı
+	# indirimi dahil.
+	var daily_consumption := _session.get_daily_provision_consumption()
+	var fed := -_session.change_provisions(-daily_consumption)
+
+	# Açlık "kese sıfırlandı" değil, "bugün besleyemedik" demektir. Eskiden
+	# koşul `get_provisions() <= 0` idi: planlayıcının istediği erzağı tam
+	# alan oyuncu son gün tam sıfıra iniyor ve *doğru* stokladığı hâlde
+	# açlık cezası yiyordu - her seferde, ölçülen %100 koşuda.
+	if fed < daily_consumption:
 		_session.caravan.change_morale(-10)
 		_session.change_stress(FAMINE_STRESS)
 		_add_log(tr("UI_ROAD_FAMINE") % _current_day)

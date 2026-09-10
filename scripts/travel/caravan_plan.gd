@@ -15,6 +15,13 @@ var travel_days: int
 var max_wagons: int
 var player_wagon_count: int
 
+## Erzak hesabının kervana bağlı parçaları. Plan sahne ağacından bağımsız
+## kalsın diye oturumu tanımıyor; bunları planı kuran ekran doldurur
+## (bkz. caravan_planner.gd). Doldurulmazsa eski, tek kişilik davranış.
+var caravan_party_size: int = 1
+var provision_multiplier: float = 1.0
+var provision_reduction: int = 0
+
 var _selected_offers: Array[MerchantOffer] = []
 
 func _init(
@@ -74,8 +81,38 @@ func get_party_size() -> int:
 func get_required_documents() -> int:
 	return get_total_wagon_count()
 
+## Kervanın bir günde yediği erzak. Beslenen ağızlar: isimli parti üyeleri,
+## vagon başına tayfa (GameSession.PEOPLE_PER_WAGON) ve kervana katılan
+## tüccarlar - yani vagon almak artık yalnızca kapasite kazandırmıyor,
+## beslenecek iki ağız daha getiriyor.
+##
+## Bu formülün tek yerde durması şart. Üç ayrı kopyası vardı - planlayıcı
+## "şu kadar gerekli" derken yalnızca tüccarları sayıyor, yol tüketirken
+## levazımcıyı da düşüyor, simülatör üçüncü bir hesap yapıyordu. Kopyalar
+## birbirinden kaydığı an planlayıcı yalan söyler ve oyuncu yolda aç kalır.
+static func daily_consumption(
+	party_size: int, owned_wagons: int, merchant_count: int,
+	multiplier: float = 1.0, flat_reduction: int = 0
+) -> int:
+	var mouths := (
+		maxi(1, party_size)
+		+ maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON
+		+ maxi(0, merchant_count)
+	)
+	var eaten := int(round(float(mouths * PROVISIONS_PER_PERSON_PER_DAY) * maxf(0.0, multiplier)))
+	return maxi(1, eaten - maxi(0, flat_reduction))
+
+func get_daily_consumption() -> int:
+	return daily_consumption(
+		caravan_party_size,
+		player_wagon_count,
+		_selected_offers.size(),
+		provision_multiplier,
+		provision_reduction
+	)
+
 func get_required_provisions() -> int:
-	return get_party_size() * travel_days * PROVISIONS_PER_PERSON_PER_DAY
+	return get_daily_consumption() * maxi(0, travel_days)
 
 func get_provisions_shortfall(current_provisions: int) -> int:
 	return maxi(0, get_required_provisions() - current_provisions)

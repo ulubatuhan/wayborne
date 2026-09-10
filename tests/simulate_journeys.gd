@@ -21,6 +21,13 @@ func _initialize() -> void:
 	print("── Wayborne sefer simülasyonu (%d koşu × %d tehlike seviyesi)" % [
 		RUN_COUNT, DANGER_LEVELS.size()
 	])
+	# "net kazanç" yalnızca kontrat geliri eksi erzak/escort maliyetidir -
+	# ticaretin kârı (ucuza al, talep edilen şehirde sat) buraya girmez ve
+	# gerçek oyunda kazancın büyük kısmı odur (bkz. playthrough_demo.gd,
+	# 98 GG'ye alınan mal 294 GG'ye satılıyor). Bu satırı "oyun zar zor
+	# kâr ediyor" diye okumak, moral ölçümünde bir kez düşülen hataya
+	# düşmektir: rapor ölçtüğü şeyi söyler, oyunun tamamını değil.
+	print("   (net = kontrat geliri − erzak − escort; ticaret kârı dahil değil)")
 	print("")
 
 	# Faz 6-7'nin kültür/görev/ekipman koşullu içeriğini hiçbir zaman
@@ -67,6 +74,7 @@ func _run_batch(danger: float) -> Dictionary:
 	var morale_worst := 100
 	var mutiny_reachable := 0
 	var provisions_out := 0
+	var provision_cost_total := 0
 	var wagons_lost := 0
 	var contracts_lost := 0
 	var worst_net := 1 << 30
@@ -90,6 +98,7 @@ func _run_batch(danger: float) -> Dictionary:
 		contracts_lost += int(outcome.contracts_lost)
 		if bool(outcome.ran_out_of_provisions):
 			provisions_out += 1
+		provision_cost_total += int(outcome.provision_cost)
 		worst_net = mini(worst_net, int(outcome.net))
 		best_net = maxi(best_net, int(outcome.net))
 		stress_total += int(outcome.stress_before_rest)
@@ -105,6 +114,7 @@ func _run_batch(danger: float) -> Dictionary:
 		"morale_worst": morale_worst,
 		"mutiny_reachable_pct": 100.0 * float(mutiny_reachable) / float(RUN_COUNT),
 		"starved_pct": 100.0 * float(provisions_out) / float(RUN_COUNT),
+		"provision_cost_avg": float(provision_cost_total) / float(RUN_COUNT),
 		"wagons_lost_avg": float(wagons_lost) / float(RUN_COUNT),
 		"contracts_lost_avg": float(contracts_lost) / float(RUN_COUNT),
 		"worst_net": worst_net,
@@ -163,6 +173,16 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 	session.caravan.merchant_names = merchants
 	session.caravan.original_merchant_names = merchants.duplicate()
 
+	# Oyuncu gibi stoklan: planlayıcının istediği kadar erzak al ve parasını
+	# öde. Eskiden sabit STARTING_PROVISIONS (20) ile 32 erzaklık bir sefere
+	# çıkılıyordu - rapordaki "%100 erzak tükendi" büyük ölçüde bunun
+	# ölçümüydü, oyunun değil. Bedava olduğu için net kazanç da erzağın
+	# maliyetini hiç görmüyordu.
+	var required_provisions := session.get_daily_provision_consumption() * JOURNEY_DAYS
+	var provision_cost := required_provisions * GameSession.PROVISIONS_UNIT_PRICE
+	session.change_provisions(required_provisions - session.get_provisions())
+	session.wallet.force_spend(provision_cost)
+
 	var engine := EventEngine.new(EventCatalog.get_road_events(), seed_value)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
@@ -181,10 +201,12 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		# uygulanıyor - yoksa ölçtüğü şey oyunun yaşadığı şey olmazdı.
 		session.caravan.apply_daily_drift()
 
-		var eaten := 1 + session.caravan.merchant_names.size()
-		eaten = maxi(1, int(round(eaten * session.get_daily_provision_multiplier())))
-		session.change_provisions(-eaten)
-		if session.get_provisions() <= 0:
+		# Tüketim ve açlık koşulu yol ekranının okuduğu yerden gelmeli;
+		# simülatörün kendi kopyası varken levazımcı indirimini hiç
+		# uygulamıyordu, yani ölçtüğü şey oyunun yaşadığı şey değildi.
+		var eaten := session.get_daily_provision_consumption()
+		var fed := -session.change_provisions(-eaten)
+		if fed < eaten:
 			starved = true
 			session.caravan.change_morale(-10)
 			session.change_stress(6)  # bkz. road_journey.gd FAMINE_STRESS
@@ -223,7 +245,8 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 			departures += 1
 
 	return {
-		"net": int(payout.net),
+		"net": int(payout.net) - provision_cost,
+		"provision_cost": provision_cost,
 		"morale": morale_at_arrival,
 		"morale_low": morale_low,
 		"wagons_lost": maxi(0, 4 - wagons_before),
@@ -363,7 +386,9 @@ func _report(danger: float, stats: Dictionary) -> void:
 		stats.morale_low_avg, stats.morale_worst, EventCatalog.MUTINY_MORALE_THRESHOLD
 	])
 	print("    isyan eşiğine indi  %%%.1f koşuda" % stats.mutiny_reachable_pct)
-	print("    erzak tükendi   %%%.1f koşuda" % stats.starved_pct)
+	print("    erzak           %.0f GG stoklandı · tükendi %%%.1f koşuda" % [
+		stats.provision_cost_avg, stats.starved_pct
+	])
 	print("    vagon kaybı     ortalama %7.2f" % stats.wagons_lost_avg)
 	print("    teslim edilemeyen kontrat  %.2f" % stats.contracts_lost_avg)
 	print("    varışta stres   ortalama %7.1f · kırılma %.2f/sefer · toplam ayrılık %d" % [

@@ -516,6 +516,19 @@ func get_player_culture() -> Culture:
 func get_daily_provision_multiplier() -> float:
 	return get_player_culture().daily_provision_multiplier
 
+## Yolda bir günün erzak faturası. Planlayıcının gösterdiği sayıyla aynı
+## formülden çıkar (bkz. CaravanPlan.daily_consumption) - kültür perki ve
+## levazımcı indirimi dahil, yoksa planlayıcı yolda yenmeyecek bir sayı
+## gösterir.
+func get_daily_provision_consumption() -> int:
+	return CaravanPlan.daily_consumption(
+		get_party().size(),
+		owned_wagon_count,
+		caravan.merchant_names.size(),
+		get_daily_provision_multiplier(),
+		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
+	)
+
 func get_provision_cost_multiplier() -> float:
 	return get_player_culture().provision_cost_multiplier
 

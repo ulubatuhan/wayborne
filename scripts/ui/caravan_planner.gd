@@ -55,6 +55,12 @@ func _ready() -> void:
 	_plan = CaravanPlan.new(
 		_destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_count
 	)
+	# Erzak hesabının kervana bağlı parçaları: kimi besleyeceğimiz, kültürün
+	# iştahı ve levazımcının tasarrufu. Bunlar verilmezse plan yolun gerçekte
+	# yiyeceğinden az bir sayı gösterir.
+	_plan.caravan_party_size = _session.get_party().size()
+	_plan.provision_multiplier = _session.get_daily_provision_multiplier()
+	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_session.inventory.item_added.connect(_on_inventory_changed)

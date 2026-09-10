@@ -433,6 +433,49 @@ can be lost.
   so added fields need no migration, but a field whose *meaning* changes
   does - and a version number nobody reads is a hook nobody remembers.
 
+### Provision Rules
+
+Provisions are the Oregon Trail spine: the caravan eats every day whether
+or not the day went well.
+
+- **One formula, one place.** `CaravanPlan.daily_consumption()` is the only
+  place a daily provision cost is computed; the planner reads it through
+  `CaravanPlan.get_required_provisions()` and the road through
+  `GameSession.get_daily_provision_consumption()`. There were three drifting
+  copies (plan, road, simulator) - the plan counted only merchants, the road
+  also subtracted the quartermaster, the simulator did a third thing. **The
+  moment those diverge the planner lies and the player starves on a journey
+  they provisioned correctly.**
+- **Mouths are the real caravan**: named party members, `PEOPLE_PER_WAGON`
+  crew per owned wagon, and each contracted merchant. Buying a wagon is no
+  longer pure upside - it also brings two more mouths.
+- **Famine means "we could not feed them today", not "the stores hit zero".**
+  `change_provisions()` returns what actually moved; famine fires when that
+  is less than the day's need. The old condition was
+  `get_provisions() <= 0`, so buying *exactly* what the planner asked for
+  landed on zero after the last meal and took the famine penalty (-10
+  morale, +6 stress) on every single journey. Measured across 16
+  day/party combinations: 16 of 16 starved. It is the reason arrival morale
+  sat around 55 - a hidden per-journey tax that made morale look tuned when
+  it was not.
+- The culture perk (`daily_provision_multiplier`) and the Levazımcı's
+  `get_duty_flat_reduction()` both go through the shared formula, so the
+  planner shows the number the road will actually eat. Consumption never
+  drops below 1 no matter how good the perks are.
+- `tests/test_provisions.gd` locks all of it: plan and road agree across
+  party/wagon/merchant combinations, correct stocking never starves at any
+  journey length, an under-stocked caravan does starve (one unit short is
+  already famine), each wagon adds exactly `PEOPLE_PER_WAGON` mouths, and
+  the perks reach the planner.
+
+**The simulator's "net kazanç" is contract income only** - trading profit
+(buy cheap, sell where it's demanded) is not in it, and in real play that is
+where most of the money is: `playthrough_demo.gd` turns 98 gold of cloth
+into 294. Reading that line as "the game barely breaks even" repeats the
+morale measurement mistake. The demo now sells as well as buys; for a long
+time it only bought, so its economy print showed the cost of trading and
+none of the profit.
+
 ### Morale Rules
 
 Morale was a dead stat for a long time: it started at 100 on every journey,
