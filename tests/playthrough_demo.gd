@@ -47,7 +47,24 @@ func _initialize() -> void:
 	])
 	print("  Parti: %s" % _party_line(session))
 	print("  Envanter: %s" % _inventory_line(session))
+	print("  Kampanya: %s" % _campaign_line(session))
 	quit()
+
+## Hikâye gerçekten ilerliyor mu? Bölüm katalogda durup hiç kapanmıyorsa
+## bunu ancak burada, tam turu koşturan yerde görürüz (bkz. evt_mutiny'nin
+## "katalogda var, oyunda yok" hikâyesi).
+func _campaign_line(session: GameSession) -> String:
+	var chapter := session.get_current_chapter()
+	if chapter == null:
+		return "hikâye tamamlandı - serbest ticaret"
+	return "bölüm %d/%d (%s) · sefer %d · teslimat %d · şehir %d" % [
+		session.campaign_chapter_index + 1,
+		CampaignCatalog.chapter_count(),
+		String(TranslationServer.translate(chapter.title_key)),
+		session.journeys_completed,
+		session.contracts_delivered,
+		session.visited_location_ids.size(),
+	]
 
 func _print_start(session: GameSession) -> void:
 	var here := WorldMapData.get_location_by_id(session.current_location_id)

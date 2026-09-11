@@ -43,6 +43,7 @@ const STRESS_WARNING: int = 30
 const PROVISION_WARNING_DAYS: int = 6
 
 var _session: GameSession
+var _chapter_box: VBoxContainer
 var _needs_box: VBoxContainer
 var _routes_box: VBoxContainer
 
@@ -55,6 +56,13 @@ func _ensure_built() -> void:
 	if _needs_box != null:
 		return
 	add_theme_constant_override("separation", 10)
+
+	add_child(_heading(tr("UI_BRIEF_CHAPTER_TITLE")))
+	_chapter_box = VBoxContainer.new()
+	_chapter_box.add_theme_constant_override("separation", 4)
+	add_child(_chapter_box)
+
+	add_child(HSeparator.new())
 
 	add_child(_heading(tr("UI_BRIEF_NEEDS_TITLE")))
 	_needs_box = VBoxContainer.new()
@@ -72,10 +80,62 @@ func refresh() -> void:
 	if _session == null:
 		return
 	_ensure_built()
+	_clear(_chapter_box)
 	_clear(_needs_box)
 	_clear(_routes_box)
+	_build_chapter()
 	_build_needs()
 	_build_routes()
+
+# --- Hikâyenin neresindeyiz ---
+
+## Hikâye bittikten sonra da ekran boş kalmıyor: oyun kapanmıyor, serbest
+## ticaret sürüyor (bkz. CampaignCatalog'un `is_finale` notu), o yüzden
+## bunu söyleyen bir satır duruyor.
+func _build_chapter() -> void:
+	var chapter := _session.get_current_chapter()
+	if chapter == null:
+		var epilogue := Label.new()
+		epilogue.text = tr("UI_BRIEF_CHAPTER_DONE")
+		epilogue.autowrap_mode = TextServer.AUTOWRAP_WORD
+		epilogue.modulate = GOOD_COLOR
+		_chapter_box.add_child(epilogue)
+		return
+
+	var heading := Label.new()
+	heading.text = tr("UI_BRIEF_CHAPTER_LINE") % [
+		_session.campaign_chapter_index + 1,
+		CampaignCatalog.chapter_count(),
+		tr(chapter.title_key),
+	]
+	_chapter_box.add_child(heading)
+
+	var summary := Label.new()
+	summary.text = tr(chapter.summary_key)
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD
+	summary.modulate = NOTE_COLOR
+	_chapter_box.add_child(summary)
+
+	var objective := Label.new()
+	objective.text = tr(chapter.objective_key)
+	objective.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_chapter_box.add_child(objective)
+
+	# Sayaç hedefinde "tamam/değil" oyuncuya hiçbir şey söylemez; kaç kaldığı
+	# söyler (bkz. CampaignChapter.describe_progress).
+	var context := _session.build_campaign_context()
+	for row in chapter.describe_progress(context):
+		var line := Label.new()
+		var mark := tr("UI_BRIEF_OBJECTIVE_DONE") if bool(row.met) else tr("UI_BRIEF_OBJECTIVE_OPEN")
+		var label := CampaignCatalog.get_objective_label(String(row.key))
+		if bool(row.numeric):
+			line.text = "%s %s" % [
+				mark, tr("UI_BRIEF_OBJECTIVE_COUNT") % [label, int(row.current), int(row.target)]
+			]
+		else:
+			line.text = "%s %s" % [mark, label]
+		line.modulate = GOOD_COLOR if bool(row.met) else NOTE_COLOR
+		_chapter_box.add_child(line)
 
 # --- Kervanın ihtiyaçları ---
 

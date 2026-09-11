@@ -407,6 +407,11 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	current_location_id = roll_starting_location(rng)
 	_restock_current_location()
 
+	campaign_chapter_index = 0
+	journeys_completed = 0
+	contracts_delivered = 0
+	visited_location_ids = {current_location_id: true}
+
 ## Başlangıç şehri rastgele - her playthrough haritanın başka bir
 ## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
 ## yönden çözülsün diye.
@@ -1088,6 +1093,14 @@ func finish_journey() -> Dictionary:
 	_apply_wagon_losses_to_ownership()
 	payout["lost_contracts"] = _apply_undelivered_contract_penalty()
 
+	# Kariyer sayaçları: kampanya bölümleri bunlara bakıyor (bkz.
+	# build_campaign_context). Teslim edilen = yola çıkarken yazılı olan
+	# eksi yolda kaybedilen.
+	journeys_completed += 1
+	contracts_delivered += maxi(
+		0, caravan.original_merchant_names.size() - int(payout["lost_contracts"])
+	)
+
 	# XP hesabı sıfırlanmadan önce yapılmalı: moral ve kontrat kaybı seferin
 	# "başarılı" mı "başarısız" mı sayıldığını belirliyor (bkz. _calculate_journey_xp).
 	var journey_xp := _calculate_journey_xp(
@@ -1108,6 +1121,7 @@ func finish_journey() -> Dictionary:
 
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
+	visited_location_ids[current_location_id] = true
 	journey_origin_id = ""
 	journey_destination_id = ""
 	journey_total_days = 0
@@ -1116,6 +1130,11 @@ func finish_journey() -> Dictionary:
 	caravan = CaravanState.new()
 	_restock_current_location()
 	heal_party()
+
+	# Kampanya en sona bırakılıyor: bölüm hedefleri varışın *sonucunu*
+	# okumalı (ödeme yatmış, teslimat sayılmış, şehir görülmüş olmalı),
+	# yoksa bir bölüm hep bir sefer geriden kapanırdı.
+	payout["campaign_chapters"] = advance_campaign()
 
 	return payout
 
@@ -1254,6 +1273,10 @@ func to_save_dict() -> Dictionary:
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
+		"campaign_chapter_index": campaign_chapter_index,
+		"journeys_completed": journeys_completed,
+		"contracts_delivered": contracts_delivered,
+		"visited_location_ids": visited_location_ids.duplicate(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -1302,6 +1325,19 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	_sync_cargo_capacity()
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
+
+	# Kampanyayı bilmeyen bir kayıt ilk bölümden başlar ve sayaçları sıfır
+	# görür - bölümler zaten varışta değerlendirildiği için eski bir kayıt
+	# oynanmaya devam edince kendiliğinden yerine oturur.
+	campaign_chapter_index = clampi(
+		int(data.get("campaign_chapter_index", 0)), 0, CampaignCatalog.chapter_count()
+	)
+	journeys_completed = maxi(0, int(data.get("journeys_completed", 0)))
+	contracts_delivered = maxi(0, int(data.get("contracts_delivered", 0)))
+	visited_location_ids = (data.get("visited_location_ids", {}) as Dictionary).duplicate()
+	# Bulunduğun şehri görmemiş sayılmak olmaz; eski kayıtlar için de doğru.
+	visited_location_ids[current_location_id] = true
+
 	accepted_contracts = {}
 	for merchant_id in (data.get("accepted_contracts", {}) as Dictionary):
 		accepted_contracts[merchant_id] = int(data["accepted_contracts"][merchant_id])
@@ -1381,3 +1417,64 @@ func build_event_context() -> Dictionary:
 func _player_culture_id() -> String:
 	var player := get_player_character()
 	return player.culture_id if player != null else ""
+
+# --- Kampanya ---
+#
+# Oyunun sonu olan bir hikâyesi var ama son bölüm oyunu kapatmıyor
+# (bkz. CampaignCatalog). Bölüm hedefleri `EventCondition` ile yazılıyor -
+# yeni bir görev dili icat etmemek bilinçli - ama okudukları bağlam
+# ayrı: burası kervanın **ömrünü** anlatır, `build_event_context()` ise
+# o anki yolu. Bölüm hedefi yol bağlamına baksaydı, her varışta kervan
+# sıfırlandığı için tamamlanıp tamamlanmamaya geri dönerdi.
+
+var campaign_chapter_index: int = 0
+var journeys_completed: int = 0
+var contracts_delivered: int = 0
+
+## Görülen şehirler kümesi (location_id -> true). Sayısı kampanya
+## bağlamında `cities_visited` olarak duruyor.
+var visited_location_ids: Dictionary = {}
+
+func build_campaign_context() -> Dictionary:
+	return {
+		"gold": wallet.balance,
+		"debt": get_total_debt(),
+		"reputation": reputation,
+		"days": total_days_elapsed,
+		"party_size": get_party().size(),
+		"owned_wagons": owned_wagon_count,
+		"journeys_completed": journeys_completed,
+		"contracts_delivered": contracts_delivered,
+		"cities_visited": visited_location_ids.size(),
+		"flags": _flags,
+	}
+
+func get_current_chapter() -> CampaignChapter:
+	return CampaignCatalog.get_chapter(campaign_chapter_index)
+
+## Hikâye bitti mi? Bitmesi oyunun bitmesi değil - kese, yol ve pazar
+## olduğu gibi durur (bkz. CampaignCatalog'un `is_finale` notu).
+func is_campaign_finished() -> bool:
+	return campaign_chapter_index >= CampaignCatalog.chapter_count()
+
+## Şehre varışta çağrılır. Tamamlanan bölümleri sırayla kapatır - tek
+## varışta birden fazla bölüm bitebilir, çünkü uzun bir sefer iki hedefi
+## birden karşılayabilir ve oyuncuyu "bir varış = bir bölüm" diye
+## bekletmenin bir sebebi yok. Kapanan bölümlerin listesini döner.
+##
+## Bölüm bir kez kapandı mı bir daha değerlendirilmez: hedef "2500 altın"
+## ise, parayı sonra harcamak hikâyeyi geri almaz.
+func advance_campaign() -> Array[CampaignChapter]:
+	var completed: Array[CampaignChapter] = []
+	while not is_campaign_finished():
+		var chapter := get_current_chapter()
+		if chapter == null or not chapter.is_complete(build_campaign_context()):
+			break
+		campaign_chapter_index += 1
+		if not chapter.completion_flag.is_empty():
+			set_flag(chapter.completion_flag)
+		if chapter.reward_gold > 0:
+			wallet.earn(chapter.reward_gold)
+		reputation += chapter.reward_reputation
+		completed.append(chapter)
+	return completed

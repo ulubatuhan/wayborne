@@ -14,6 +14,7 @@ wayborne/
 ├── CLAUDE.md              # This file
 ├── scenes/                # Game scenes (*.tscn files)
 ├── scripts/
+│   ├── campaign/          # Story spine: chapters and their objectives
 │   ├── economy/           # Economy & trade system scripts
 │   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
@@ -418,6 +419,69 @@ target in `character.gd`, a `return` field carried in the road's spot table
   checks `can_instantiate()` and counts a broken suite as a failure. Same
   family as the CI log grep: Godot reports these and exits 0 anyway.
 
+### Campaign Rules
+
+The game has a story with an ending, and trade that can run forever after
+it. `scripts/campaign/` is that spine: `CampaignChapter` (one beat) and
+`CampaignCatalog` (the ordered five).
+
+- **A chapter objective is an `EventCondition`, not a new language.** Event
+  triggers already read a flat context dictionary, cheaply and with tests
+  behind them. Writing a second "quest condition" vocabulary would mean two
+  ways to say the same thing, diverging from day one. Objectives are the
+  same sentences.
+- **But they read a different context.** `build_campaign_context()`
+  describes the caravan's *career* — journeys completed, contracts
+  delivered, cities seen, wagons owned; `build_event_context()` describes
+  the journey happening *now*. A chapter objective reading the event context
+  would complete and un-complete on every arrival, because `finish_journey()`
+  resets the caravan. Add a career counter rather than reaching into the
+  road's numbers.
+- **A closed chapter never reopens.** Chapters advance by index and are
+  never re-evaluated, so "amass 2500 gold" stays earned after the gold is
+  spent. Progress that a purchase could undo is not progress.
+- **The finale is a threshold, not a stop.** `is_finale` shows an epilogue;
+  the purse, the roads and the market carry on exactly as before — the same
+  shape as the `GOAL_GOLD` screen's "Devam Et". `tests/test_campaign.gd`
+  asserts the game still works after the last chapter closes, because that
+  is the promise most easily broken by accident.
+- **Chapters close at arrival, and more than one may close at once.** The
+  check runs at the *end* of `finish_journey()`, after the payout, the
+  delivery count and the new city are recorded — otherwise a chapter would
+  always close one journey late. A long journey that satisfies two chapters
+  closes both; making the player sail back and forth for the bookkeeping
+  would be a worse game.
+- **Each chapter sets a flag on completion, and that is how the story
+  reaches the road.** An event can gate itself on `HAS_FLAG` — the campaign
+  plugs into the event pool that already exists instead of inventing a
+  parallel one.
+- **Campaign progress lives in the save.** Same reasoning as
+  `last_feast_day` and `RouteConditions`' computed states: anything a reload
+  could replay is not progress.
+
+**The chapter thresholds are unmeasured placeholders, and that is stated
+rather than hidden.** The structure is tested (`tests/test_campaign.gd`)
+and the first chapter is observed closing in `playthrough_demo.gd`, but
+"how many journeys is chapter 3" has *not* been measured, because nothing
+in the harness can answer it yet:
+
+- `simulate_journeys.gd` reports per-journey distributions, not a career
+  arc across twenty journeys.
+- Neither it nor the demo models market trading at length — and per
+  Provision Rules, contract income is the *minority* of real income. A
+  throwaway long-arc probe written for this pass walked straight into that:
+  with contract income only the caravan went broke by journey eight and
+  every threshold looked unreachable. It also accepted contracts bound for
+  cities it then did not travel to, cratering reputation to -44 and
+  freezing the run. Both were harness bugs, and they are recorded here
+  because the same two mistakes will be made again by whoever measures
+  this next — the third and fourth entries in this file's history of
+  measurement bugs.
+
+So: **do not treat the current numbers as balanced.** Tuning them needs a
+career-arc simulator that buys and sells in the market. Until then they are
+placeholders in the same sense as the price tables.
+
 ### City Hub Rules
 
 The city is where the player decides; the road is where the decision is
@@ -425,6 +489,10 @@ paid for. A new game starts in a city (`character_creation.gd` →
 `Nav.go_root(Nav.CITY_MAP)`), and so does every arrival and every
 "Continue".
 
+- **The brief leads with the story.** `CityBriefPanel`'s first block is the
+  current chapter, its narration and its objectives with live counts (see
+  Campaign Rules) — "where am I in this story" is the question a session
+  opens with, before "what do I lack" and "where do I go".
 - **The city answers two questions on one screen, or it answers neither.**
   It used to be five doors and an exit: to learn where you could even go,
   you had to walk tavern → world map → planner, and to learn what the
