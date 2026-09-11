@@ -11,11 +11,14 @@ var _session: GameSession
 var _debt_panel: DebtPanel
 var _rows: Array[Dictionary] = []
 
-# Kontrat listesi büyüdükçe geri tuşunun ekrandan taşmaması için pano
-# kaydırılabilir bir kutuda; başlık ve geri tuşu dışarıda kalır.
+# İki sekme: pano ve borç defteri. Her sekme kendi kaydırma kutusunda,
+# geri tuşu ikisinin de dışında - içerik uzadıkça çıkış ekrandan taşmasın
+# (bkz. World Navigation Rules).
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _tabs: TabContainer = $MarginContainer/VBoxContainer/TabContainer
+@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/TabContainer/ContractsTab/ContentContainer
+@onready var _debt_container: VBoxContainer = $MarginContainer/VBoxContainer/TabContainer/DebtsTab/DebtContainer
 @onready var _contract_list: VBoxContainer = _content.get_node("ContractList")
 @onready var _accepted_title: Label = _content.get_node("AcceptedTitle")
 @onready var _accepted_list: VBoxContainer = _content.get_node("AcceptedList")
@@ -32,13 +35,16 @@ func _ready() -> void:
 	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
 	_info_label.text = tr("UI_GUILD_HINT")
 
-	# Borç defteri lonca ekranında: alacaklı da kontrat da aynı deftere
-	# yazılır. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı değildi -
-	# kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu bunu
-	# göremiyordu.
-	_content.add_child(HSeparator.new())
+	# Borç defteri kendi sekmesinde: alacaklı da kontrat da loncanın
+	# defterinde durur. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı
+	# değildi - kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu
+	# bunu göremiyordu. Panonun altına gömülü bir bölüm olarak da
+	# görülmüyordu: kontrat listesi uzayınca aşağıda kalıyordu.
+	_tabs.set_tab_title(0, tr("UI_GUILD_TAB_CONTRACTS"))
+	_tabs.set_tab_title(1, tr("UI_GUILD_TAB_DEBTS"))
+
 	_debt_panel = DebtPanel.new()
-	_content.add_child(_debt_panel)
+	_debt_container.add_child(_debt_panel)
 	_debt_panel.setup(_session)
 	_debt_panel.ledger_changed.connect(_rebuild)
 	_session.wallet.balance_changed.connect(_on_wallet_changed)

@@ -55,6 +55,83 @@ func repay_debt(debt_id: String, amount: int) -> int:
 		wallet.spend(paid)
 	return paid
 
+## --- Lonca kredisi ---
+##
+## Oyuncunun *isteyerek* borçlandığı tek yol. `spend_or_owe` mecburi
+## ödemedir (haraç, ceza, faiz) ve kervanı istemeden batırır; bu onun tersi:
+## yola çıkmadan önce mal almak için bilerek alınan para.
+##
+## Üç kural bunu para basma düğmesi olmaktan çıkarıyor:
+##
+## 1. **Kredi hattı itibara bağlı.** Loncanın tanımadığı bir kervancıya
+##    verilen para azdır; itibar arttıkça büyür, `LOAN_MAX_LIMIT`'te durur.
+## 2. **Hattı *bütün* borçlar tüketir, açık hesap dahil.** Bu, en keskin
+##    sömürüyü kapatıyor: borç alıp açık hesabı kapatmak, açık hesabın
+##    vadesini bedavaya sıfırlayan bir yapılandırma olurdu (yapılandırmanın
+##    ücreti varken). Hat zaten doluysa yeni kredi yok.
+## 3. **Tahsis ücreti anaparaya biner.** 200 alırsan 220 borçlanırsın, yani
+##    zamanında ödesen bile borçlanmak bedava değil.
+const LOAN_BASE_LIMIT: int = 200
+const LOAN_LIMIT_PER_REPUTATION: int = 25
+const LOAN_MAX_LIMIT: int = 1200
+## Yüzde bilerek tam sayı: `200 * 0.1` kayan noktada 20.000000000000004
+## çıkıyor ve tavana yuvarlayınca 200'lük bir kredi 220 değil **221** borç
+## yazıyordu. Oyuncunun gördüğü tutar, kuruşu kuruşuna ilan edilen formülle
+## aynı olmalı.
+const LOAN_ORIGINATION_PERCENT: int = 10
+const LOAN_STEP: int = 25
+const LOAN_MIN_AMOUNT: int = 25
+
+## Loncanın kapıyı kapattığı nokta. Sıfırın altı "bu kervancı sözünü
+## tutmadı" demek - ucuz paranın tam ihtiyaç duyulduğu anda çekilmesi
+## bilerek: itibar, defterdeki tek gerçek teminat.
+const LOAN_MIN_REPUTATION: int = 0
+
+## Alacaklı adı bir çeviri anahtarı (bkz. DebtPanel'in creditor çözümü).
+const LOAN_CREDITOR_KEY: String = "DEBT_CREDITOR_GUILD"
+
+func get_credit_limit() -> int:
+	var limit := LOAN_BASE_LIMIT + maxi(0, reputation) * LOAN_LIMIT_PER_REPUTATION
+	return mini(limit, LOAN_MAX_LIMIT)
+
+## Hattan geriye kalan: borcun her kuruşu (açık hesap dahil) onu yer.
+func get_available_credit() -> int:
+	return maxi(0, get_credit_limit() - get_total_debt())
+
+## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
+## Ücret yukarı yuvarlanır, ama tam sayı aritmetiğiyle.
+func get_loan_principal(amount: int) -> int:
+	var fee := (amount * LOAN_ORIGINATION_PERCENT + 99) / 100
+	return amount + fee
+
+## Kredi kapalıysa sebebini anlatan çeviri anahtarı; boşsa açık.
+func get_loan_block_reason() -> String:
+	if is_journey_active():
+		return "UI_GUILD_LOAN_ON_ROAD"
+	if reputation < LOAN_MIN_REPUTATION:
+		return "UI_GUILD_LOAN_NO_TRUST"
+	if get_available_credit() < LOAN_MIN_AMOUNT:
+		return "UI_GUILD_LOAN_LINE_FULL"
+	return ""
+
+func can_borrow(amount: int) -> bool:
+	if not get_loan_block_reason().is_empty():
+		return false
+	return amount >= LOAN_MIN_AMOUNT and amount <= get_available_credit()
+
+## Parayı keseye yazar, anaparayı (ücretiyle) deftere. Başarısızsa hiçbir
+## şey değişmez.
+func borrow_from_guild(amount: int) -> bool:
+	if not can_borrow(amount):
+		return false
+	var debt := debts.borrow(
+		LOAN_CREDITOR_KEY, get_loan_principal(amount), total_days_elapsed
+	)
+	if debt == null:
+		return false
+	wallet.earn(amount)
+	return true
+
 ## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
 ## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
 ## GRANT_EQUIPMENT ile bulunan Yüzük/Kolye buraya düşer; karakter ekranı
@@ -670,6 +747,63 @@ func buy_wagon() -> bool:
 		return false
 	wallet.spend(cost)
 	owned_wagon_count += 1
+	_sync_cargo_capacity()
+	return true
+
+## Elden çıkarılan vagon aldığı parayı asla geri getirmez - yoksa alıp
+## satmak, sefer başına kapasiteyi bedavaya açıp kapatan bir düğme olurdu.
+## Hasarlı bir vagon daha da az eder ve avlu **önce onu** alır: bir enkazı
+## onarmak yerine satmak gerçek bir seçenek olsun diye. Onarım (30/vagon)
+## her zaman sat-ve-yeniden-al'dan ucuz, o yüzden bu bir kaçamak değil.
+const WAGON_RESALE_FACTOR: float = 0.55
+const WAGON_DAMAGED_RESALE_FACTOR: float = 0.6
+
+## Satılacak vagon, en son alınan vagondur: onu almak `get_next_wagon_cost`
+## bir kademe geriden neye mal olduysa o.
+func get_wagon_sale_value() -> int:
+	if not _has_wagon_to_spare():
+		return 0
+	var paid := get_next_wagon_cost() - WAGON_PURCHASE_COST_STEP
+	var value := float(paid) * WAGON_RESALE_FACTOR
+	if owned_wagon_damaged > 0:
+		value *= WAGON_DAMAGED_RESALE_FACTOR
+	return maxi(1, int(round(value)))
+
+func _has_wagon_to_spare() -> bool:
+	return owned_wagon_count > CaravanState.MIN_WAGONS
+
+## Satışın neden kapalı olduğunu anlatan anahtar; boşsa satış açık.
+## Kilitli seçenek *sebebiyle birlikte* gösterilir (bkz. World Navigation
+## Rules'un kilitli seçim kuralı), gizlenmez.
+func get_wagon_sale_block_reason() -> String:
+	if is_journey_active():
+		return "UI_YARD_SELL_ON_ROAD"
+	if not _has_wagon_to_spare():
+		return "UI_YARD_SELL_LAST_WAGON"
+	# Kervandan kimse atılmaz (bkz. Ruin Rules); o yüzden kadroyu kapasitenin
+	# üstünde bırakacak *gönüllü* satış en baştan kapalı.
+	var capacity_after := clampi(
+		(owned_wagon_count - 1) * PEOPLE_PER_WAGON, 1, MAX_PARTY_SIZE
+	)
+	if party.size() > capacity_after:
+		return "UI_YARD_SELL_PARTY_TOO_BIG"
+	if get_cargo_weight() > float(owned_wagon_count - 1) * CARGO_PER_WAGON:
+		return "UI_YARD_SELL_CARGO_TOO_HEAVY"
+	return ""
+
+func can_sell_wagon() -> bool:
+	return get_wagon_sale_block_reason().is_empty()
+
+## Başarısızsa hiçbir şey değişmez. Önce hasarlı vagon gider.
+func sell_wagon() -> bool:
+	if not can_sell_wagon():
+		return false
+	var value := get_wagon_sale_value()
+	owned_wagon_count -= 1
+	if owned_wagon_damaged > 0:
+		owned_wagon_damaged -= 1
+	owned_wagon_damaged = clampi(owned_wagon_damaged, 0, owned_wagon_count)
+	wallet.earn(value)
 	_sync_cargo_capacity()
 	return true
 

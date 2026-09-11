@@ -441,11 +441,46 @@ can be lost.
 - Provisions still never go below zero, but zero means you cannot feed the
   caravan: hunger and morale losses follow.
 - **Debt the player cannot see is indistinguishable from a bug.**
-  `DebtPanel` (embedded in the Merchants' Guild, scene-less like
-  `PurificationPanel`) is where debts are read, paid and restructured; the
-  total also rides on the city and road HUDs. The ledger shipped without any
-  screen at all for a while - interest accrued and reputation drained
-  entirely out of sight.
+  `DebtPanel` (scene-less like `PurificationPanel`) is where debts are
+  borrowed, read, paid and restructured; the total also rides on the city
+  and road HUDs. The ledger shipped without any screen at all for a while -
+  interest accrued and reputation drained entirely out of sight. It then
+  spent a while as a section buried under the guild's contract list, which
+  is barely better: it sits in its own **tab** of the guild now
+  (`UI_GUILD_TAB_DEBTS`), so a growing board cannot push the caravan's debts
+  below the fold.
+- **The guild lends, and the credit line is what keeps that honest.**
+  `spend_or_owe` is debt the world forces on you; `borrow_from_guild()` is
+  the opposite — money taken on purpose, in a city, to stock up before
+  setting out. Three rules stop it being a print button. The line scales
+  with reputation (`get_credit_limit`), so an untrusted caravan gets little
+  and `LOAN_MIN_REPUTATION` shuts the door on one that has burned the guild.
+  **Every debt consumes the line, the overdraft included** — that is what
+  closes the sharpest exploit here: the overdraft's due date is set at the
+  first dip, so borrowing to clear it would be a free restructure, and
+  restructuring costs a fee that grows each time. And an origination fee
+  rides on the principal, so borrowing is never free even when repaid on
+  time.
+- **Money the player sees must match the formula to the coin.** The
+  origination fee was a float rate, and `200 * 0.1` is `20.000000000000004`,
+  so a 200 loan wrote **221** into the ledger under a sign saying 10%. The
+  percentage is an integer (`LOAN_ORIGINATION_PERCENT`) and the fee is
+  integer arithmetic. A rounding artifact in a number the player is quoted
+  is indistinguishable from cheating.
+- **A wagon can be sold, and resale never returns its cost.** Otherwise
+  buy-then-sell is a free capacity toggle around every journey.
+  `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth
+  less again — and the yard takes the damaged one first, so selling a wreck
+  instead of repairing it is a real choice. It is only a choice because
+  repair stays strictly cheaper than sell-and-rebuy, which
+  `tests/test_city_commerce.gd` asserts rather than assuming.
+- **A voluntary sale never strands the caravan.** Losing a wagon on the road
+  may leave the roster over capacity (Ruin Rules: nobody is evicted), but a
+  *button* that quietly does that reads as a bug. So the sale is shown
+  **disabled with its reason** — last wagon, on the road, party would not
+  fit, cargo would not fit — the same rule as locked event choices, locked
+  skills and locked equipment. `get_wagon_sale_block_reason()` returns the
+  translation key and the screen prints it.
 - **`SAVE_VERSION` is read, not just written.** `_migrate_save()` is a real
   (currently empty) hook: every field is loaded with `.get(key, default)`,
   so added fields need no migration, but a field whose *meaning* changes

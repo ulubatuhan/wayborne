@@ -89,12 +89,12 @@ func _build_status_bars() -> void:
 	_morale_bar = PulseBar.new()
 	row.add_child(_morale_bar)
 	row.move_child(_morale_bar, _status_label.get_index() + 1)
-	_morale_bar.setup("Moral", Color(0.6, 0.75, 0.5))
+	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
 
 	_stress_bar = PulseBar.new()
 	row.add_child(_stress_bar)
 	row.move_child(_stress_bar, _morale_bar.get_index() + 1)
-	_stress_bar.setup("Stres", Color(0.8, 0.45, 0.4))
+	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
 
 func _process(delta: float) -> void:
 	_move_player(delta)
@@ -214,12 +214,22 @@ func _build_scenery() -> void:
 
 func _build_spots() -> void:
 	_add_spot(
-		tr("UI_HUB_CITY_GATE"),
+		_gate_label(),
 		Vector2(1720.0, GROUND_Y - 230.0),
 		Vector2(150.0, 230.0),
 		GATE_COLOR,
 		Nav.CITY_MAP
 	)
+
+## Kapının üstünde jenerik bir "Şehir Kapısı" değil, girilecek şehrin adı
+## yazar - oyuncu yolda dururken nerede olduğunu okumak için HUD'a bakmak
+## zorunda kalmasın. Şehir bilinmiyorsa (bozuk kayıt) jenerik etikete düşer.
+func _gate_label() -> String:
+	var session: GameSession = GameState.get_session()
+	var location := WorldMapData.get_location_by_id(session.current_location_id)
+	if location == null:
+		return tr("UI_HUB_CITY_GATE")
+	return tr("UI_HUB_CITY_GATE_NAMED") % location.location_name
 
 func _add_spot(
 	spot_name: String,
@@ -339,7 +349,7 @@ func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 
 	# Vagon hareket ettiği için kendi kaydı ayrı tutulur.
 	_spots.append({
-		"name": "Vagon",
+		"name": tr("UI_HUB_WAGON_SPOT"),
 		"rect": Rect2(),
 		"scene": Nav.ECONOMY,
 		"prompt": wagon_prompt,
