@@ -27,6 +27,8 @@ func run(t) -> void:
 	_test_progress_reports_counts_not_just_done(t)
 	_test_campaign_survives_a_save_round_trip(t)
 	_test_old_saves_start_at_the_first_chapter(t)
+	_test_chapters_do_not_land_on_the_same_beat(t)
+	_test_no_objective_asks_beyond_the_games_own_caps(t)
 
 func _session() -> GameSession:
 	return GameSession.new(0, 10, 1)
@@ -215,3 +217,69 @@ func _test_old_saves_start_at_the_first_chapter(t) -> void:
 
 func _companion() -> CharacterData:
 	return CharacterData.create("Yoldaş", "gocebe", CharacterStats.new())
+
+## Ölçümün bulduğu iki tuzak buraya kilitleniyor. İkisi de eşik sayısını
+## sabitlemiyor - sayıyı sabitlemek dengeyi değil, o günkü kararı test
+## etmek olurdu (bkz. test_haggling.gd'nin aynı gerekçesi). Kilitlenen şey
+## eşiklerin birbirine göre *duruşu*.
+func _test_chapters_do_not_land_on_the_same_beat(t) -> void:
+	# Aynı anda karşılanan iki bölüm iki perde değildir: ölçümde üçüncü ve
+	# dördüncü bölüm ikisi de 19. seferde kapanıyordu. Bir bölümün hedef
+	# kümesi bir sonrakinin *alt kümesi* olursa bu kaçınılmaz olur -
+	# ikincisi birincinin kapandığı varışta zaten sağlanmış olur.
+	var chapters := CampaignCatalog.get_chapters()
+	for index in range(chapters.size() - 1):
+		var current: CampaignChapter = chapters[index]
+		var next_chapter: CampaignChapter = chapters[index + 1]
+		t.not_ok(
+			_is_subsumed_by(next_chapter, current),
+			"%s bölümü %s'in alt kümesi değil - yoksa ikisi aynı varışta kapanır" % [
+				next_chapter.chapter_id, current.chapter_id
+			]
+		)
+
+## next'in her hedefi current tarafından zaten garanti ediliyor mu?
+func _is_subsumed_by(next_chapter: CampaignChapter, current: CampaignChapter) -> bool:
+	for condition in next_chapter.objectives:
+		var guaranteed := false
+		for earlier in current.objectives:
+			if earlier.key == condition.key and _at_least_as_strict(earlier, condition):
+				guaranteed = true
+				break
+		if not guaranteed:
+			return false
+	return true
+
+func _at_least_as_strict(earlier: EventCondition, later: EventCondition) -> bool:
+	if earlier.op != later.op:
+		return false
+	if earlier.op == EventCondition.Op.GREATER_EQUAL:
+		return earlier.value >= later.value
+	if earlier.op == EventCondition.Op.LESS_EQUAL:
+		return earlier.value <= later.value
+	return false
+
+## Hiçbir bölüm oyunun kendi tavanlarının ötesini istememeli - böyle bir
+## hedef bölümü sessizce ulaşılmaz kılar, ve "katalogda var, oyunda yok"
+## tam olarak budur (bkz. evt_mutiny, Morale Rules).
+func _test_no_objective_asks_beyond_the_games_own_caps(t) -> void:
+	for chapter in CampaignCatalog.get_chapters():
+		for condition in chapter.objectives:
+			if condition.op != EventCondition.Op.GREATER_EQUAL:
+				continue
+			match condition.key:
+				"owned_wagons":
+					t.le(
+						condition.value, float(CaravanPlan.DEFAULT_MAX_WAGONS),
+						"%s: vagon hedefi tavanın altında" % chapter.chapter_id
+					)
+				"party_size":
+					t.le(
+						condition.value, float(GameSession.MAX_PARTY_SIZE),
+						"%s: kadro hedefi tavanın altında" % chapter.chapter_id
+					)
+				"cities_visited":
+					t.le(
+						condition.value, float(WorldMapData.get_locations().size()),
+						"%s: şehir hedefi haritada var" % chapter.chapter_id
+					)

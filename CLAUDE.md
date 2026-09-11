@@ -459,28 +459,63 @@ it. `scripts/campaign/` is that spine: `CampaignChapter` (one beat) and
   `last_feast_day` and `RouteConditions`' computed states: anything a reload
   could replay is not progress.
 
-**The chapter thresholds are unmeasured placeholders, and that is stated
-rather than hidden.** The structure is tested (`tests/test_campaign.gd`)
-and the first chapter is observed closing in `playthrough_demo.gd`, but
-"how many journeys is chapter 3" has *not* been measured, because nothing
-in the harness can answer it yet:
+**The chapter thresholds are measured.** `tests/simulate_career.gd` is the
+tool that was missing when they were first written: `simulate_journeys.gd`
+measures *one journey* repeatedly, this measures *one caravan's life* —
+forty journeys of market trading, contracts, wagons and hires, reporting
+where the money, reputation and chapters actually land.
 
-- `simulate_journeys.gd` reports per-journey distributions, not a career
-  arc across twenty journeys.
-- Neither it nor the demo models market trading at length — and per
-  Provision Rules, contract income is the *minority* of real income. A
-  throwaway long-arc probe written for this pass walked straight into that:
-  with contract income only the caravan went broke by journey eight and
-  every threshold looked unreachable. It also accepted contracts bound for
-  cities it then did not travel to, cratering reputation to -44 and
-  freezing the run. Both were harness bugs, and they are recorded here
-  because the same two mistakes will be made again by whoever measures
-  this next — the third and fourth entries in this file's history of
-  measurement bugs.
+Measured over 8 caravans × 40 journeys, following the campaign (stay lean
+while delivering, expand once the ledger is clean):
 
-So: **do not treat the current numbers as balanced.** Tuning them needs a
-career-arc simulator that buys and sells in the market. Until then they are
-placeholders in the same sense as the price tables.
+| chapter | closed | earliest | median | latest |
+|---|---|---|---|---|
+| İlk Yol | 8/8 | 1 | 1 | 1 |
+| Bir Kadro | 7/8 | 5 | 11 | 20 |
+| Ağ | 6/8 | 8 | 16 | 36 |
+| Temiz Defter | 6/8 | 8 | 17 | 38 |
+| Kendi Hanın | 5/8 | 22 | 30 | 40 |
+
+So a full story runs roughly thirty journeys / 180 game days, and about a
+quarter of caravans never finish it — acceptable in a game where the
+caravan can be ruined, and worth revisiting if it ever feels punishing.
+
+Three findings came out of the measurement, and each is worth more than the
+numbers:
+
+- **Reputation is the scarcest resource in the game** and the real gate on
+  chapters 3 and 5 (average reputation is ~1 at journey 20, ~11 at 30). Any
+  future chapter that gates on it is gating on the slowest-moving stat.
+- **Buying wagons crowds out contracts.** `CaravanPlan.DEFAULT_MAX_WAGONS`
+  is the caravan's *total* cap, so the player's own wagons eat the merchant
+  slots: a caravan that buys five wagons has one escort slot left, and its
+  `contracts_delivered` froze at 11 while a lean caravan reached 41. That
+  is a real trade-off (haul your own goods, or escort others') rather than a
+  bug — but it means the two middle chapters pull in opposite directions,
+  and a player has to sequence them.
+- **Two chapters that close together are one beat.** Chapters 3 and 4 both
+  landed on journey 19. Dropping chapter 3's reputation bar from 8 to 5
+  separated them. Raising chapter 4's contract bar from 8 to 12 was tried
+  for the same purpose and **reverted**: it separated the beats but halved
+  the finale (6/8 → 3/8), because delaying chapter 4 delays the expansion
+  phase that chapter 5 needs. Tune the *earlier* gate, not the later one.
+
+Two things the harness itself got wrong first, recorded because the next
+person will hit them too (the third and fourth entries in this file's
+history of measurement bugs):
+
+1. **Running on contract income alone.** Most real income is market trading
+   (see Provision Rules). Without it the caravan went broke by journey eight
+   and every threshold looked unreachable.
+2. **Accepting contracts bound for cities it then did not travel to.** Every
+   undeliverable contract costs reputation; the probe cratered to -44 and
+   `required_reputation` closed the whole board. **Pick the route first,
+   then the contracts.**
+
+And one clean negative result worth keeping: making the simulated player
+expand one chapter earlier changed the outcome *not at all* (finale still
+5/8, median still 30), so the finale's failure rate is real difficulty and
+not an artifact of how the policy was written.
 
 ### City Hub Rules
 
@@ -1282,6 +1317,7 @@ Tests run headless with no addon - a plain GDScript `SceneTree` runner:
 ```bash
 godot --headless --script res://tests/run_tests.gd      # exit 1 on failure
 godot --headless --script res://tests/simulate_journeys.gd   # balance report
+godot --headless --script res://tests/simulate_career.gd     # career arc report
 ```
 
 - **No `class_name` in `tests/`.** Test scripts would otherwise land in the
@@ -1353,6 +1389,20 @@ godot --headless --script res://tests/simulate_journeys.gd   # balance report
   stat (e.g. Göçebe's INTELLECT -1 for Levazımcı) produced a worse result
   than leaving the duty unassigned, breaking the "a duty with no holder is
   never a penalty" rule for the *held*-but-mismatched case too.
+- **`simulate_career.gd` is its long-arc sibling, and the two answer
+  different questions.** `simulate_journeys.gd` runs one synthetic journey
+  many times: is a journey profitable, is combat winnable, does morale move.
+  `simulate_career.gd` runs one caravan's *life* through the real city loop
+  — market, contract board, caravan yard — for forty journeys, and reports
+  where gold, reputation, wagons and campaign chapters land (see Campaign
+  Rules for the numbers). Anything about progression over time needs the
+  second tool; the first cannot see it, which is exactly why the campaign
+  thresholds shipped unmeasured the first time.
+- **A balance report needs more than one policy, for the same reason ruin
+  tuning needed two knobs.** `simulate_career.gd` runs three — expand
+  aggressively, stay lean and haul contracts, and follow the campaign — and
+  the first two disagree so sharply (11 contracts delivered vs 41) that
+  either one alone would have given a confidently wrong answer.
 
 **CI is the real gate.** Godot prints parse errors and still exits `0`, so a
 broken script hid under a green build twice (`city_map.gd`,

@@ -105,6 +105,9 @@ static func _ensure_built() -> void:
 	))
 
 	# 3. Ağı gez: haritadaki beş şehrin dördünü gör, itibar kazan.
+	# İtibar eşiği ölçümle 8'den 5'e indi: 8'de bu bölüm dördüncüyle
+	# *aynı* seferde kapanıyordu (ikisinin de ortancası 19. sefer) ve
+	# birlikte kapanan iki bölüm iki perde değildir.
 	_chapters.append(CampaignChapter.make(
 		CHAPTER_THE_NETWORK,
 		"CAMPAIGN_NETWORK_TITLE",
@@ -112,13 +115,19 @@ static func _ensure_built() -> void:
 		"CAMPAIGN_NETWORK_OBJECTIVE",
 		[
 			EventCondition.make("cities_visited", EventCondition.Op.GREATER_EQUAL, 4),
-			EventCondition.make("reputation", EventCondition.Op.GREATER_EQUAL, 8),
+			EventCondition.make("reputation", EventCondition.Op.GREATER_EQUAL, 5),
 		],
 		FLAG_NETWORK, 200, 2
 	))
 
 	# 4. Defteri temizle: borçsuz ve teslimatı oturmuş bir kervan.
 	# Borç oyunun cezalandırıcı kolu; onu bir kez kapatmak gerçek bir dönüm.
+	# Teslimat eşiği 12'ye çıkarmak denendi ve **geri alındı**: bölümü
+	# ayırdı ama finali yarıya düşürdü (6/8 → 3/8). Sebep zincirleme:
+	# oyuncu dördüncü bölüm kapanana kadar yalın kervanla teslimat
+	# yapıyor, sonra genişliyor; dördüncüyü geciktirmek genişlemeyi de
+	# geciktiriyor ve final kırk seferin dışında kalıyordu. Üçüncü
+	# bölümden ayrılma işi itibar eşiğinin inmesiyle yapıldı.
 	_chapters.append(CampaignChapter.make(
 		CHAPTER_CLEAN_LEDGER,
 		"CAMPAIGN_CLEAN_LEDGER_TITLE",
