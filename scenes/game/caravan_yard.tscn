@@ -30,7 +30,7 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Kervan Avlusu"
+text = "UI_CITY_YARD"
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -51,7 +51,7 @@ text = "Yeni Vagon Al"
 [node name="EquipmentTitle" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Demirci: Silah ve Zırh Yükseltmeleri"
+text = "UI_YARD_SMITH_TITLE"
 
 [node name="EquipmentScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -64,4 +64,4 @@ theme_override_constants/separation = 6
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehre Dön"
+text = "UI_BACK"

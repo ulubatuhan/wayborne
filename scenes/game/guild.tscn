@@ -30,33 +30,44 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Tüccar Loncası"
+text = "UI_GUILD_TITLE"
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Kabul ettiğin kontrat panodan kalkar; sefere çıkmadan süresi geçerse ya da yolda teslim edilmezse itibarın düşer."
+text = "UI_GUILD_HINT"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+[node name="ContractsTab" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
+layout_mode = 2
+
+[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/ContractsTab"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="ContractList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
+[node name="ContractList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/ContractsTab/ContentContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AcceptedTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
+[node name="AcceptedTitle" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/ContractsTab/ContentContainer"]
 layout_mode = 2
-text = "Kabul Ettiğin Kontratlar"
+text = "UI_GUILD_ACCEPTED_TITLE"
 
-[node name="AcceptedList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
+[node name="AcceptedList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/ContractsTab/ContentContainer"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
+[node name="DebtsTab" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
+layout_mode = 2
+
+[node name="DebtContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/DebtsTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Geri"
+text = "UI_BACK"

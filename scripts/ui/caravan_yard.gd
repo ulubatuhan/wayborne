@@ -18,19 +18,34 @@ var _equipment_rows: Array[Dictionary] = []
 @onready var _message_label: Label = $MarginContainer/VBoxContainer/MessageLabel
 @onready var _repair_button: Button = $MarginContainer/VBoxContainer/RepairButton
 @onready var _buy_wagon_button: Button = $MarginContainer/VBoxContainer/BuyWagonButton
+var _sell_wagon_button: Button
 @onready var _equipment_container: VBoxContainer = $MarginContainer/VBoxContainer/EquipmentScroll/EquipmentContainer
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
 	_session = GameState.get_session()
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü
+	# her metin koddan, anahtarla gelir (bkz. Localization Rules).
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CITY_YARD")
+	$MarginContainer/VBoxContainer/EquipmentTitle.text = tr("UI_YARD_SMITH_TITLE")
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_repair_button.pressed.connect(_on_repair_pressed)
 	_buy_wagon_button.pressed.connect(_on_buy_wagon_pressed)
-	_back_button.text = Nav.return_label()
+	_build_sell_wagon_button()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_equipment_shop()
 	_refresh()
+
+## Satış tuşu alma tuşunun hemen altında durur; ekranın kendi VBox'ında,
+## kaydırma kutusunun dışında (bkz. World Navigation Rules).
+func _build_sell_wagon_button() -> void:
+	_sell_wagon_button = Button.new()
+	_sell_wagon_button.pressed.connect(_on_sell_wagon_pressed)
+	var container := _buy_wagon_button.get_parent()
+	container.add_child(_sell_wagon_button)
+	container.move_child(_sell_wagon_button, _buy_wagon_button.get_index() + 1)
 
 ## Silah/Zırh yalnızca burada satılır (price > 0) - Yüzük/Kolye pazarda
 ## yer almaz, yolda EventEffect.Type.GRANT_EQUIPMENT ile bulunur.
@@ -102,7 +117,26 @@ func _refresh() -> void:
 		_buy_wagon_button.text = tr("UI_YARD_WAGON_LIMIT") % CaravanPlan.DEFAULT_MAX_WAGONS
 		_buy_wagon_button.disabled = true
 
+	_refresh_sell_wagon()
 	_refresh_equipment_shop()
+
+## Satış kapalıysa *sebebiyle birlikte* gösterilir - gizlemek, oyuncuya
+## neye hazırlanacağını öğretmez (bkz. kilitli olay seçimi kuralı).
+func _refresh_sell_wagon() -> void:
+	var reason := _session.get_wagon_sale_block_reason()
+	if reason.is_empty():
+		_sell_wagon_button.text = tr("UI_YARD_SELL_WAGON") % _session.get_wagon_sale_value()
+		_sell_wagon_button.disabled = false
+		return
+	_sell_wagon_button.text = tr(reason)
+	_sell_wagon_button.disabled = true
+
+func _on_sell_wagon_pressed() -> void:
+	if not _session.sell_wagon():
+		_show_message(tr(_session.get_wagon_sale_block_reason()))
+		return
+	_clear_message()
+	_refresh()
 
 func _on_buy_equipment_pressed(equipment_resource: Equipment) -> void:
 	if not _session.wallet.can_afford(equipment_resource.price):
@@ -138,4 +172,4 @@ func _clear_message() -> void:
 	_message_label.text = ""
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

@@ -30,7 +30,7 @@ theme_override_constants/separation = 16
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Ayarlar"
+text = "UI_SETTINGS"
 
 [node name="LanguageRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -39,11 +39,11 @@ theme_override_constants/separation = 8
 
 [node name="LanguageLabel" type="Label" parent="MarginContainer/VBoxContainer/LanguageRow"]
 layout_mode = 2
-text = "Dil"
+text = "UI_LANGUAGE"
 
 [node name="LanguageButton" type="OptionButton" parent="MarginContainer/VBoxContainer/LanguageRow"]
 layout_mode = 2
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Ana Menüye Dön"
+text = "UI_BACK"

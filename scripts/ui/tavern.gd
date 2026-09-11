@@ -27,8 +27,12 @@ var _feast_button: Button
 
 func _ready() -> void:
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
+	# metin koddan, anahtarla gelir (bkz. Localization Rules).
+	_info_label.text = tr("UI_TAVERN_HINT")
+	_map_button.text = tr("UI_GO_TO_WORLD_MAP")
 	_session = GameState.get_session()
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_map_button.pressed.connect(_on_map_pressed)
 	_add_recruit_button(RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
@@ -150,16 +154,13 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_purification_panel.refresh()
 
 func _on_map_pressed() -> void:
-	Nav.return_scene = Nav.CITY_MAP
-	get_tree().change_scene_to_file(Nav.TRAVEL)
+	get_tree().change_scene_to_file(Nav.open(Nav.TAVERN, Nav.TRAVEL))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu buraya döner - ama bunu
-## return_scene'e yazarak değil (o bu ekranın *kendi* geri hedefi,
-## ezilirse şehre çıkış kapanır), Nav.recruit_return_scene üzerinden.
+## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
 	button.text = tr("UI_LOOK_FOR_CREW")

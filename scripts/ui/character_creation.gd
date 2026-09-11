@@ -41,6 +41,7 @@ var _start_button: Button
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CREATION_TITLE")
 	_rng.randomize()
 	_build_ui()
 	_on_culture_selected(0)
@@ -71,7 +72,7 @@ func _build_ui() -> void:
 	exit_row.add_child(_start_button)
 
 	var back_button := Button.new()
-	back_button.text = Nav.label_for(Nav.MAIN_MENU)
+	back_button.text = Nav.back_label()
 	back_button.pressed.connect(_on_back_pressed)
 	exit_row.add_child(back_button)
 
@@ -354,8 +355,7 @@ func _on_start_pressed() -> void:
 	var session: GameSession = GameState.get_session()
 	session.start_playthrough(character, _rng)
 
-	Nav.return_scene = Nav.WORLD_HUB
-	get_tree().change_scene_to_file(Nav.WORLD_HUB)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.MAIN_MENU)
+	get_tree().change_scene_to_file(Nav.back())

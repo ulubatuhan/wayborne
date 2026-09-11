@@ -173,7 +173,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	exit_row.add_child(map_button)
 
 	var back_button := Button.new()
-	back_button.text = Nav.return_label()
+	back_button.text = Nav.back_label()
 	back_button.pressed.connect(_on_back_pressed)
 	exit_row.add_child(back_button)
 
@@ -305,10 +305,10 @@ func _on_confirm_pressed() -> void:
 		_route_danger,
 		_plan
 	)
-	get_tree().change_scene_to_file(Nav.JOURNEY)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.JOURNEY))
 
 func _on_map_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.TRAVEL)
+	get_tree().change_scene_to_file(Nav.open(Nav.CARAVAN_PLANNER, Nav.TRAVEL))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

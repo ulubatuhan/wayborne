@@ -55,6 +55,83 @@ func repay_debt(debt_id: String, amount: int) -> int:
 		wallet.spend(paid)
 	return paid
 
+## --- Lonca kredisi ---
+##
+## Oyuncunun *isteyerek* borçlandığı tek yol. `spend_or_owe` mecburi
+## ödemedir (haraç, ceza, faiz) ve kervanı istemeden batırır; bu onun tersi:
+## yola çıkmadan önce mal almak için bilerek alınan para.
+##
+## Üç kural bunu para basma düğmesi olmaktan çıkarıyor:
+##
+## 1. **Kredi hattı itibara bağlı.** Loncanın tanımadığı bir kervancıya
+##    verilen para azdır; itibar arttıkça büyür, `LOAN_MAX_LIMIT`'te durur.
+## 2. **Hattı *bütün* borçlar tüketir, açık hesap dahil.** Bu, en keskin
+##    sömürüyü kapatıyor: borç alıp açık hesabı kapatmak, açık hesabın
+##    vadesini bedavaya sıfırlayan bir yapılandırma olurdu (yapılandırmanın
+##    ücreti varken). Hat zaten doluysa yeni kredi yok.
+## 3. **Tahsis ücreti anaparaya biner.** 200 alırsan 220 borçlanırsın, yani
+##    zamanında ödesen bile borçlanmak bedava değil.
+const LOAN_BASE_LIMIT: int = 200
+const LOAN_LIMIT_PER_REPUTATION: int = 25
+const LOAN_MAX_LIMIT: int = 1200
+## Yüzde bilerek tam sayı: `200 * 0.1` kayan noktada 20.000000000000004
+## çıkıyor ve tavana yuvarlayınca 200'lük bir kredi 220 değil **221** borç
+## yazıyordu. Oyuncunun gördüğü tutar, kuruşu kuruşuna ilan edilen formülle
+## aynı olmalı.
+const LOAN_ORIGINATION_PERCENT: int = 10
+const LOAN_STEP: int = 25
+const LOAN_MIN_AMOUNT: int = 25
+
+## Loncanın kapıyı kapattığı nokta. Sıfırın altı "bu kervancı sözünü
+## tutmadı" demek - ucuz paranın tam ihtiyaç duyulduğu anda çekilmesi
+## bilerek: itibar, defterdeki tek gerçek teminat.
+const LOAN_MIN_REPUTATION: int = 0
+
+## Alacaklı adı bir çeviri anahtarı (bkz. DebtPanel'in creditor çözümü).
+const LOAN_CREDITOR_KEY: String = "DEBT_CREDITOR_GUILD"
+
+func get_credit_limit() -> int:
+	var limit := LOAN_BASE_LIMIT + maxi(0, reputation) * LOAN_LIMIT_PER_REPUTATION
+	return mini(limit, LOAN_MAX_LIMIT)
+
+## Hattan geriye kalan: borcun her kuruşu (açık hesap dahil) onu yer.
+func get_available_credit() -> int:
+	return maxi(0, get_credit_limit() - get_total_debt())
+
+## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
+## Ücret yukarı yuvarlanır, ama tam sayı aritmetiğiyle.
+func get_loan_principal(amount: int) -> int:
+	var fee := (amount * LOAN_ORIGINATION_PERCENT + 99) / 100
+	return amount + fee
+
+## Kredi kapalıysa sebebini anlatan çeviri anahtarı; boşsa açık.
+func get_loan_block_reason() -> String:
+	if is_journey_active():
+		return "UI_GUILD_LOAN_ON_ROAD"
+	if reputation < LOAN_MIN_REPUTATION:
+		return "UI_GUILD_LOAN_NO_TRUST"
+	if get_available_credit() < LOAN_MIN_AMOUNT:
+		return "UI_GUILD_LOAN_LINE_FULL"
+	return ""
+
+func can_borrow(amount: int) -> bool:
+	if not get_loan_block_reason().is_empty():
+		return false
+	return amount >= LOAN_MIN_AMOUNT and amount <= get_available_credit()
+
+## Parayı keseye yazar, anaparayı (ücretiyle) deftere. Başarısızsa hiçbir
+## şey değişmez.
+func borrow_from_guild(amount: int) -> bool:
+	if not can_borrow(amount):
+		return false
+	var debt := debts.borrow(
+		LOAN_CREDITOR_KEY, get_loan_principal(amount), total_days_elapsed
+	)
+	if debt == null:
+		return false
+	wallet.earn(amount)
+	return true
+
 ## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
 ## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
 ## GRANT_EQUIPMENT ile bulunan Yüzük/Kolye buraya düşer; karakter ekranı
@@ -329,6 +406,11 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 
 	current_location_id = roll_starting_location(rng)
 	_restock_current_location()
+
+	campaign_chapter_index = 0
+	journeys_completed = 0
+	contracts_delivered = 0
+	visited_location_ids = {current_location_id: true}
 
 ## Başlangıç şehri rastgele - her playthrough haritanın başka bir
 ## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
@@ -673,6 +755,63 @@ func buy_wagon() -> bool:
 	_sync_cargo_capacity()
 	return true
 
+## Elden çıkarılan vagon aldığı parayı asla geri getirmez - yoksa alıp
+## satmak, sefer başına kapasiteyi bedavaya açıp kapatan bir düğme olurdu.
+## Hasarlı bir vagon daha da az eder ve avlu **önce onu** alır: bir enkazı
+## onarmak yerine satmak gerçek bir seçenek olsun diye. Onarım (30/vagon)
+## her zaman sat-ve-yeniden-al'dan ucuz, o yüzden bu bir kaçamak değil.
+const WAGON_RESALE_FACTOR: float = 0.55
+const WAGON_DAMAGED_RESALE_FACTOR: float = 0.6
+
+## Satılacak vagon, en son alınan vagondur: onu almak `get_next_wagon_cost`
+## bir kademe geriden neye mal olduysa o.
+func get_wagon_sale_value() -> int:
+	if not _has_wagon_to_spare():
+		return 0
+	var paid := get_next_wagon_cost() - WAGON_PURCHASE_COST_STEP
+	var value := float(paid) * WAGON_RESALE_FACTOR
+	if owned_wagon_damaged > 0:
+		value *= WAGON_DAMAGED_RESALE_FACTOR
+	return maxi(1, int(round(value)))
+
+func _has_wagon_to_spare() -> bool:
+	return owned_wagon_count > CaravanState.MIN_WAGONS
+
+## Satışın neden kapalı olduğunu anlatan anahtar; boşsa satış açık.
+## Kilitli seçenek *sebebiyle birlikte* gösterilir (bkz. World Navigation
+## Rules'un kilitli seçim kuralı), gizlenmez.
+func get_wagon_sale_block_reason() -> String:
+	if is_journey_active():
+		return "UI_YARD_SELL_ON_ROAD"
+	if not _has_wagon_to_spare():
+		return "UI_YARD_SELL_LAST_WAGON"
+	# Kervandan kimse atılmaz (bkz. Ruin Rules); o yüzden kadroyu kapasitenin
+	# üstünde bırakacak *gönüllü* satış en baştan kapalı.
+	var capacity_after := clampi(
+		(owned_wagon_count - 1) * PEOPLE_PER_WAGON, 1, MAX_PARTY_SIZE
+	)
+	if party.size() > capacity_after:
+		return "UI_YARD_SELL_PARTY_TOO_BIG"
+	if get_cargo_weight() > float(owned_wagon_count - 1) * CARGO_PER_WAGON:
+		return "UI_YARD_SELL_CARGO_TOO_HEAVY"
+	return ""
+
+func can_sell_wagon() -> bool:
+	return get_wagon_sale_block_reason().is_empty()
+
+## Başarısızsa hiçbir şey değişmez. Önce hasarlı vagon gider.
+func sell_wagon() -> bool:
+	if not can_sell_wagon():
+		return false
+	var value := get_wagon_sale_value()
+	owned_wagon_count -= 1
+	if owned_wagon_damaged > 0:
+		owned_wagon_damaged -= 1
+	owned_wagon_damaged = clampi(owned_wagon_damaged, 0, owned_wagon_count)
+	wallet.earn(value)
+	_sync_cargo_capacity()
+	return true
+
 func get_repair_cost() -> int:
 	var base := owned_wagon_damaged * WAGON_REPAIR_COST_PER_WAGON
 	return int(round(base * (1.0 - get_duty_discount(DutyCatalog.ARABACI))))
@@ -954,6 +1093,14 @@ func finish_journey() -> Dictionary:
 	_apply_wagon_losses_to_ownership()
 	payout["lost_contracts"] = _apply_undelivered_contract_penalty()
 
+	# Kariyer sayaçları: kampanya bölümleri bunlara bakıyor (bkz.
+	# build_campaign_context). Teslim edilen = yola çıkarken yazılı olan
+	# eksi yolda kaybedilen.
+	journeys_completed += 1
+	contracts_delivered += maxi(
+		0, caravan.original_merchant_names.size() - int(payout["lost_contracts"])
+	)
+
 	# XP hesabı sıfırlanmadan önce yapılmalı: moral ve kontrat kaybı seferin
 	# "başarılı" mı "başarısız" mı sayıldığını belirliyor (bkz. _calculate_journey_xp).
 	var journey_xp := _calculate_journey_xp(
@@ -974,6 +1121,7 @@ func finish_journey() -> Dictionary:
 
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
+	visited_location_ids[current_location_id] = true
 	journey_origin_id = ""
 	journey_destination_id = ""
 	journey_total_days = 0
@@ -982,6 +1130,11 @@ func finish_journey() -> Dictionary:
 	caravan = CaravanState.new()
 	_restock_current_location()
 	heal_party()
+
+	# Kampanya en sona bırakılıyor: bölüm hedefleri varışın *sonucunu*
+	# okumalı (ödeme yatmış, teslimat sayılmış, şehir görülmüş olmalı),
+	# yoksa bir bölüm hep bir sefer geriden kapanırdı.
+	payout["campaign_chapters"] = advance_campaign()
 
 	return payout
 
@@ -1120,6 +1273,10 @@ func to_save_dict() -> Dictionary:
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
+		"campaign_chapter_index": campaign_chapter_index,
+		"journeys_completed": journeys_completed,
+		"contracts_delivered": contracts_delivered,
+		"visited_location_ids": visited_location_ids.duplicate(),
 	}
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
@@ -1168,6 +1325,19 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	_sync_cargo_capacity()
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
+
+	# Kampanyayı bilmeyen bir kayıt ilk bölümden başlar ve sayaçları sıfır
+	# görür - bölümler zaten varışta değerlendirildiği için eski bir kayıt
+	# oynanmaya devam edince kendiliğinden yerine oturur.
+	campaign_chapter_index = clampi(
+		int(data.get("campaign_chapter_index", 0)), 0, CampaignCatalog.chapter_count()
+	)
+	journeys_completed = maxi(0, int(data.get("journeys_completed", 0)))
+	contracts_delivered = maxi(0, int(data.get("contracts_delivered", 0)))
+	visited_location_ids = (data.get("visited_location_ids", {}) as Dictionary).duplicate()
+	# Bulunduğun şehri görmemiş sayılmak olmaz; eski kayıtlar için de doğru.
+	visited_location_ids[current_location_id] = true
+
 	accepted_contracts = {}
 	for merchant_id in (data.get("accepted_contracts", {}) as Dictionary):
 		accepted_contracts[merchant_id] = int(data["accepted_contracts"][merchant_id])
@@ -1247,3 +1417,64 @@ func build_event_context() -> Dictionary:
 func _player_culture_id() -> String:
 	var player := get_player_character()
 	return player.culture_id if player != null else ""
+
+# --- Kampanya ---
+#
+# Oyunun sonu olan bir hikâyesi var ama son bölüm oyunu kapatmıyor
+# (bkz. CampaignCatalog). Bölüm hedefleri `EventCondition` ile yazılıyor -
+# yeni bir görev dili icat etmemek bilinçli - ama okudukları bağlam
+# ayrı: burası kervanın **ömrünü** anlatır, `build_event_context()` ise
+# o anki yolu. Bölüm hedefi yol bağlamına baksaydı, her varışta kervan
+# sıfırlandığı için tamamlanıp tamamlanmamaya geri dönerdi.
+
+var campaign_chapter_index: int = 0
+var journeys_completed: int = 0
+var contracts_delivered: int = 0
+
+## Görülen şehirler kümesi (location_id -> true). Sayısı kampanya
+## bağlamında `cities_visited` olarak duruyor.
+var visited_location_ids: Dictionary = {}
+
+func build_campaign_context() -> Dictionary:
+	return {
+		"gold": wallet.balance,
+		"debt": get_total_debt(),
+		"reputation": reputation,
+		"days": total_days_elapsed,
+		"party_size": get_party().size(),
+		"owned_wagons": owned_wagon_count,
+		"journeys_completed": journeys_completed,
+		"contracts_delivered": contracts_delivered,
+		"cities_visited": visited_location_ids.size(),
+		"flags": _flags,
+	}
+
+func get_current_chapter() -> CampaignChapter:
+	return CampaignCatalog.get_chapter(campaign_chapter_index)
+
+## Hikâye bitti mi? Bitmesi oyunun bitmesi değil - kese, yol ve pazar
+## olduğu gibi durur (bkz. CampaignCatalog'un `is_finale` notu).
+func is_campaign_finished() -> bool:
+	return campaign_chapter_index >= CampaignCatalog.chapter_count()
+
+## Şehre varışta çağrılır. Tamamlanan bölümleri sırayla kapatır - tek
+## varışta birden fazla bölüm bitebilir, çünkü uzun bir sefer iki hedefi
+## birden karşılayabilir ve oyuncuyu "bir varış = bir bölüm" diye
+## bekletmenin bir sebebi yok. Kapanan bölümlerin listesini döner.
+##
+## Bölüm bir kez kapandı mı bir daha değerlendirilmez: hedef "2500 altın"
+## ise, parayı sonra harcamak hikâyeyi geri almaz.
+func advance_campaign() -> Array[CampaignChapter]:
+	var completed: Array[CampaignChapter] = []
+	while not is_campaign_finished():
+		var chapter := get_current_chapter()
+		if chapter == null or not chapter.is_complete(build_campaign_context()):
+			break
+		campaign_chapter_index += 1
+		if not chapter.completion_flag.is_empty():
+			set_flag(chapter.completion_flag)
+		if chapter.reward_gold > 0:
+			wallet.earn(chapter.reward_gold)
+		reputation += chapter.reward_reputation
+		completed.append(chapter)
+	return completed

@@ -18,10 +18,10 @@ var _character: CharacterData
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CHARACTER_TITLE")
 	_session = GameState.get_session()
 	# Bu ekran yalnızca parti ekranından açılıyor, dönüş hedefi de her
-	# zaman orası - Nav.return_scene'e dokunmuyoruz ki parti ekranının
-	# kendi dönüş hedefi (dünya ya da şehir haritası) burada kaybolmasın.
+	# zaman orası; gezinme yığını geri yolunu zaten taşıyor (bkz. Nav).
 	_back_button.text = tr("UI_CHAR_BACK_TO_PARTY")
 	_back_button.pressed.connect(_on_back_pressed)
 
@@ -396,4 +396,4 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.PARTY)
+	get_tree().change_scene_to_file(Nav.back())

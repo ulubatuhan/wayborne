@@ -14,6 +14,7 @@ wayborne/
 ├── CLAUDE.md              # This file
 ├── scenes/                # Game scenes (*.tscn files)
 ├── scripts/
+│   ├── campaign/          # Story spine: chapters and their objectives
 │   ├── economy/           # Economy & trade system scripts
 │   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
@@ -342,29 +343,44 @@ losing every companion's levels, traits and equipment.
     one wagon per `owned_wagon_count`. The city gate and the first wagon are
     interaction spots: walk within `INTERACT_RANGE`, then click them or press E. No physics bodies — plain position arithmetic on a
     single ground line, so it stays cheap on Web export.
-  - `city_map.gd`: placeholder city map. City interaction is deliberately
-    **not** card-based (see Event Engine Rules): each location button opens its
-    own screen (market → economy, guild → haggling, tavern → travel map).
-  - `nav.gd`: every scene path lives here, plus `Nav.return_scene` — the screen
-    a sub-screen's back button returns to. A spot sets it before changing
-    scenes, so the same economy screen returns to the road or to the city
-    depending on where it was entered from. `selector_return_scene` is the
-    test selector's own back target, kept separate because sub-tests overwrite
-    `return_scene` to point back at the selector; `character.gd` (opened only
-    from `party.gd`) follows the same pattern by hardcoding its own back
-    target to `Nav.PARTY` instead of touching `return_scene` at all, so the
-    party screen's own return target (world hub or city map, whoever sent the
-    player there) survives the detour. `character_target_index` carries which
-    party member the character screen shows.
+  - `city_map.gd`: the city, and the game's decision hub. A new game starts
+    here, not on the road. City interaction is deliberately **not** card-based
+    (see Event Engine Rules): each location button opens its own screen.
+    Beside the map sits `CityBriefPanel` (see City Hub Rules).
+  - `nav.gd`: every scene path lives here, plus the **navigation stack** —
+    `open(from, to)` pushes the sender, `back()` pops one, `go_root(scene)`
+    clears it. `recruit_venue` and `character_target_index` are the only
+    remaining statics, and neither is navigation: they are data a screen
+    carries to the next one (which candidate pool, which party member).
   - There is no SceneManager autoload: navigation is `change_scene_to_file()`
-    plus these static vars.
+    plus this stack.
 
 ### World Navigation Rules
 
+Getting stuck in a menu was this project's most-repeated complaint, and it
+was **architectural, not a run of separate bugs**. `Nav` used to hold a
+single `return_scene` string, and one string can only remember *one* level
+of history: the moment navigation went two deep (city → guild → recruit)
+somebody had to overwrite that slot, and whoever overwrote it destroyed
+another screen's only way out. Three ad-hoc patches had already been made
+to the same hole — a second variable for the recruit screen, a hardcoded
+target in `character.gd`, a `return` field carried in the road's spot table
+— and every new screen would have wanted a fourth.
+
+- **Navigation is a stack.** `Nav.open(from, to)` pushes `from`;
+  `Nav.back()` pops. Back **always shrinks the stack**, so a loop cannot be
+  built, and depth is bounded only by `MAX_DEPTH`, so no screen can overwrite
+  another's exit. Never add a per-screen "where do I return to" variable
+  again — that is the bug this replaced.
 - Never hardcode a `res://scenes/...` path in a screen script; use `Nav`.
-- A screen's back button goes to `Nav.return_scene`, never to a fixed scene.
-- Whoever sends the player somewhere is responsible for setting
-  `Nav.return_scene` first.
+- A screen's back button goes to `Nav.back()` and is labelled
+  `Nav.back_label()`, so the player reads where it leads before pressing it.
+- **Roots are gone to, not returned to.** `Nav.ROOTS` (road, city, main menu)
+  carry their own exits instead of a back button, and reaching one clears the
+  stack — `go_root()` explicitly, and `open()` too when the destination is a
+  root, so a screen that opens the city gate cannot leave a stale road on the
+  stack. An empty stack still lands somewhere (`FALLBACK_ROOT`): a back button
+  that goes nowhere is just another word for stuck.
 - A screen whose content can grow past the viewport (market rows, the contract
   board, the party list) puts that content in a `ScrollContainer` and keeps the
   back button **outside** it. Otherwise the back button is pushed off-screen and
@@ -372,32 +388,138 @@ losing every companion's levels, traits and equipment.
   again on four screens that built their exit button in code straight into
   `_content` (character creation's "Başla" sat below six stat rows, on the
   first screen of a new game).
-- **A screen that opens a sub-screen must not overwrite its own return
-  target.** `Nav.return_scene` belongs to whoever sent the player *here*;
-  writing your own scene into it so the sub-screen can come back destroys
-  the only way out. That is what locked the player inside the Guild: the
-  venue screens set `return_scene` to themselves before opening the recruit
-  screen, so on return their own back button reloaded them, forever. A
-  sub-screen gets its **own** variable - `Nav.recruit_return_scene`, reached
-  only through `Nav.open_recruit()`/`close_recruit()`, exactly like
-  `character.gd` hardcoding `Nav.PARTY` and the test selector keeping its
-  own target. Hub screens (road, city, main menu) writing `return_scene =
-  <themselves>` is the correct use, not the bug.
 - **The road is left through the road's own actions.** On a live journey
-  `road_journey.gd`'s exit goes to the main menu, never to `return_scene`:
+  `road_journey.gd`'s exit goes to the main menu, never through the stack:
   it used to drop the player on the city map with `is_journey_active()`
   still true, and since nothing but the planner ever navigates to
   `Nav.JOURNEY`, the road could not be re-entered. Arriving, turning back
   and diverting are the exits (see En-Route Plan Rules).
-- `tests/test_navigation.gd` locks all of this. Control scenes cannot be
-  instantiated headless, so it tests what the screens *call* plus the scene
-  files themselves: the recruit funnel preserves the caller's return target,
-  every `Nav` scene constant resolves to a file whose script has at least one
-  exit, no back label renders blank, no exit button is added to `_content`,
-  and - via `PackedScene.get_state()`, which reads a scene without building
-  it - every `$A/B` node path in a screen script actually exists in its
-  scene. That last one is the only cheap guard against a typo Godot reports
-  only when the player opens the screen.
+- `tests/test_navigation.gd` locks all of this, and **derives the screen
+  graph from the source** rather than from a hand-written table — a table
+  drifts from the code and then certifies the wrong game. It scans every
+  `Nav.open(Nav.A, Nav.B)` call; for the two screens that carry their
+  destination in a table (`city_map`, `world_hub`) and therefore pass it as a
+  variable, it treats every scene constant the script mentions as a
+  destination, which is exactly how the city's five venues re-entered the
+  graph after the migration. On that graph it asserts: every edge returns to
+  its opener, every path from every root unwinds to a root with the stack
+  shrinking at each step, back always leads somewhere, no screen opens
+  itself, roots clear the stack, the stack cannot grow without bound, and no
+  screen is orphaned. Control scenes cannot be instantiated headless, so the
+  rest is checked against the files: every `Nav` scene constant resolves to a
+  scene whose script has at least one exit, no back label renders blank, no
+  exit button is added to `_content`, and — via `PackedScene.get_state()`,
+  which reads a scene without building it — every `$A/B` node path in a
+  screen script actually exists in its scene. That last one is the only cheap
+  guard against a typo Godot reports only when the player opens the screen.
+- **A suite that cannot load must fail the run.** A parse error in a test
+  file made `load(path).new()` abort `run_tests.gd` mid-loop, and since
+  `_process()` still returned true the runner exited **0** — the navigation
+  suite silently stopped running and the build stayed green. The runner now
+  checks `can_instantiate()` and counts a broken suite as a failure. Same
+  family as the CI log grep: Godot reports these and exits 0 anyway.
+
+### Campaign Rules
+
+The game has a story with an ending, and trade that can run forever after
+it. `scripts/campaign/` is that spine: `CampaignChapter` (one beat) and
+`CampaignCatalog` (the ordered five).
+
+- **A chapter objective is an `EventCondition`, not a new language.** Event
+  triggers already read a flat context dictionary, cheaply and with tests
+  behind them. Writing a second "quest condition" vocabulary would mean two
+  ways to say the same thing, diverging from day one. Objectives are the
+  same sentences.
+- **But they read a different context.** `build_campaign_context()`
+  describes the caravan's *career* — journeys completed, contracts
+  delivered, cities seen, wagons owned; `build_event_context()` describes
+  the journey happening *now*. A chapter objective reading the event context
+  would complete and un-complete on every arrival, because `finish_journey()`
+  resets the caravan. Add a career counter rather than reaching into the
+  road's numbers.
+- **A closed chapter never reopens.** Chapters advance by index and are
+  never re-evaluated, so "amass 2500 gold" stays earned after the gold is
+  spent. Progress that a purchase could undo is not progress.
+- **The finale is a threshold, not a stop.** `is_finale` shows an epilogue;
+  the purse, the roads and the market carry on exactly as before — the same
+  shape as the `GOAL_GOLD` screen's "Devam Et". `tests/test_campaign.gd`
+  asserts the game still works after the last chapter closes, because that
+  is the promise most easily broken by accident.
+- **Chapters close at arrival, and more than one may close at once.** The
+  check runs at the *end* of `finish_journey()`, after the payout, the
+  delivery count and the new city are recorded — otherwise a chapter would
+  always close one journey late. A long journey that satisfies two chapters
+  closes both; making the player sail back and forth for the bookkeeping
+  would be a worse game.
+- **Each chapter sets a flag on completion, and that is how the story
+  reaches the road.** An event can gate itself on `HAS_FLAG` — the campaign
+  plugs into the event pool that already exists instead of inventing a
+  parallel one.
+- **Campaign progress lives in the save.** Same reasoning as
+  `last_feast_day` and `RouteConditions`' computed states: anything a reload
+  could replay is not progress.
+
+**The chapter thresholds are unmeasured placeholders, and that is stated
+rather than hidden.** The structure is tested (`tests/test_campaign.gd`)
+and the first chapter is observed closing in `playthrough_demo.gd`, but
+"how many journeys is chapter 3" has *not* been measured, because nothing
+in the harness can answer it yet:
+
+- `simulate_journeys.gd` reports per-journey distributions, not a career
+  arc across twenty journeys.
+- Neither it nor the demo models market trading at length — and per
+  Provision Rules, contract income is the *minority* of real income. A
+  throwaway long-arc probe written for this pass walked straight into that:
+  with contract income only the caravan went broke by journey eight and
+  every threshold looked unreachable. It also accepted contracts bound for
+  cities it then did not travel to, cratering reputation to -44 and
+  freezing the run. Both were harness bugs, and they are recorded here
+  because the same two mistakes will be made again by whoever measures
+  this next — the third and fourth entries in this file's history of
+  measurement bugs.
+
+So: **do not treat the current numbers as balanced.** Tuning them needs a
+career-arc simulator that buys and sells in the market. Until then they are
+placeholders in the same sense as the price tables.
+
+### City Hub Rules
+
+The city is where the player decides; the road is where the decision is
+paid for. A new game starts in a city (`character_creation.gd` →
+`Nav.go_root(Nav.CITY_MAP)`), and so does every arrival and every
+"Continue".
+
+- **The brief leads with the story.** `CityBriefPanel`'s first block is the
+  current chapter, its narration and its objectives with live counts (see
+  Campaign Rules) — "where am I in this story" is the question a session
+  opens with, before "what do I lack" and "where do I go".
+- **The city answers two questions on one screen, or it answers neither.**
+  It used to be five doors and an exit: to learn where you could even go,
+  you had to walk tavern → world map → planner, and to learn what the
+  caravan lacked you had to visit all five doors. `CityBriefPanel` answers
+  *what does the caravan need* and *where can it go today* beside the map.
+- **Every warning names the screen that fixes it, and pressing it goes
+  there.** A warning that only worries the player is worse than no warning.
+  `tests/test_city_commerce.gd` asserts every produced need points at a
+  screen the city can actually open — a dead button here would drop the
+  player back into exactly the stuck feeling the navigation stack was built
+  to remove.
+- **No need, no row.** A permanent checklist of green ticks is noise; when
+  nothing is wrong the panel says so in one line.
+- **Debt shows whenever it exists, not only when it is nearly due.** Showing
+  it only inside the warning window meant a caravan 350 in the hole read as
+  healthy until the last week. Urgency lives in the colour, not in whether
+  the row appears at all.
+- **The panel invents nothing.** Every line reads a value the session
+  already publishes (`get_route_danger`, `get_daily_provision_consumption`,
+  `get_accepted_offers_for_destination`, `party_stress`). It shows; it does
+  not decide. Navigation is likewise not its job: it emits
+  `screen_requested`/`planner_requested` and `city_map.gd` does the
+  `Nav.open()`, because the screen that sends the player is always the one
+  that pushes the stack.
+- **Setting out from the brief is the same handoff the map uses**
+  (`TravelContext.selected_destination_id` then the planner), so there is
+  one path into a journey, not two.
 
 ### Caravan Ruin Rules
 
@@ -423,11 +545,46 @@ can be lost.
 - Provisions still never go below zero, but zero means you cannot feed the
   caravan: hunger and morale losses follow.
 - **Debt the player cannot see is indistinguishable from a bug.**
-  `DebtPanel` (embedded in the Merchants' Guild, scene-less like
-  `PurificationPanel`) is where debts are read, paid and restructured; the
-  total also rides on the city and road HUDs. The ledger shipped without any
-  screen at all for a while - interest accrued and reputation drained
-  entirely out of sight.
+  `DebtPanel` (scene-less like `PurificationPanel`) is where debts are
+  borrowed, read, paid and restructured; the total also rides on the city
+  and road HUDs. The ledger shipped without any screen at all for a while -
+  interest accrued and reputation drained entirely out of sight. It then
+  spent a while as a section buried under the guild's contract list, which
+  is barely better: it sits in its own **tab** of the guild now
+  (`UI_GUILD_TAB_DEBTS`), so a growing board cannot push the caravan's debts
+  below the fold.
+- **The guild lends, and the credit line is what keeps that honest.**
+  `spend_or_owe` is debt the world forces on you; `borrow_from_guild()` is
+  the opposite — money taken on purpose, in a city, to stock up before
+  setting out. Three rules stop it being a print button. The line scales
+  with reputation (`get_credit_limit`), so an untrusted caravan gets little
+  and `LOAN_MIN_REPUTATION` shuts the door on one that has burned the guild.
+  **Every debt consumes the line, the overdraft included** — that is what
+  closes the sharpest exploit here: the overdraft's due date is set at the
+  first dip, so borrowing to clear it would be a free restructure, and
+  restructuring costs a fee that grows each time. And an origination fee
+  rides on the principal, so borrowing is never free even when repaid on
+  time.
+- **Money the player sees must match the formula to the coin.** The
+  origination fee was a float rate, and `200 * 0.1` is `20.000000000000004`,
+  so a 200 loan wrote **221** into the ledger under a sign saying 10%. The
+  percentage is an integer (`LOAN_ORIGINATION_PERCENT`) and the fee is
+  integer arithmetic. A rounding artifact in a number the player is quoted
+  is indistinguishable from cheating.
+- **A wagon can be sold, and resale never returns its cost.** Otherwise
+  buy-then-sell is a free capacity toggle around every journey.
+  `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth
+  less again — and the yard takes the damaged one first, so selling a wreck
+  instead of repairing it is a real choice. It is only a choice because
+  repair stays strictly cheaper than sell-and-rebuy, which
+  `tests/test_city_commerce.gd` asserts rather than assuming.
+- **A voluntary sale never strands the caravan.** Losing a wagon on the road
+  may leave the roster over capacity (Ruin Rules: nobody is evicted), but a
+  *button* that quietly does that reads as a bug. So the sale is shown
+  **disabled with its reason** — last wagon, on the road, party would not
+  fit, cargo would not fit — the same rule as locked event choices, locked
+  skills and locked equipment. `get_wagon_sale_block_reason()` returns the
+  translation key and the screen prints it.
 - **`SAVE_VERSION` is read, not just written.** `_migrate_save()` is a real
   (currently empty) hook: every field is loaded with `.get(key, default)`,
   so added fields need no migration, but a field whose *meaning* changes
@@ -899,6 +1056,18 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   and `culture_catalog.gd`/`recruit_catalog.gd`/`user_settings.gd` hold
   proper nouns - name pools, and **language names, which must stay in their
   own language** or a player cannot find the one they read.
+- **A `.tscn` is a text layer too, and the scan could not see it.** The
+  prose scan covered `scripts/` only, so every static label baked into a
+  scene file — the market's headings, the church's explanation, "Partiyi
+  Görüntüle", the road's control hint — stayed Turkish in ten of the eleven
+  languages. Twenty-two of them. Scene text is now always a **key**, the
+  screen assigns the visible string from `tr()` in `_ready()`, and two
+  checks keep it that way: no scene may contain a text literal with
+  Turkish-specific letters, and every key-shaped scene literal must be
+  defined in a CSV (the sole exception is `WAYBORNE`, the game's own name).
+  Putting the key in the scene rather than blanking it is deliberate: if a
+  screen ever forgets to assign, the player sees `UI_MARKET_SHOP` — loud —
+  instead of silent Turkish.
 - **A translation must carry the same format arguments, in the same order,
   as the source.** GDScript's `%` operator has no positional form
   (`%2$s`), so a reordered or dropped `%d` crashes the game the moment that
@@ -932,8 +1101,8 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
     subscriber that actually outlives a scene.
   - `DevPanel` (registered autoload): F1 geliştirici menüsü. `test_selector.tscn`'i
     çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
-    kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
-    ekranın geri tuşu paneli açtığın yere döner, panele değil.
+    kapatır. Bir hedefe geçerken gezinme yığınına *o anki* sahneyi iter, o
+    yüzden hedefin geri tuşu paneli açtığın yere döner, panele değil.
   - `SaveManager` (registered autoload): `GameSession.to_save_dict()` /
     `load_from_dict()` içeriği bilir, burada yalnızca `user://save.json`
     G/Ç'si var. Yalnızca şehir varışında (`finish_journey()` sonrası)

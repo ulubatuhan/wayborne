@@ -11,11 +11,14 @@ var _session: GameSession
 var _debt_panel: DebtPanel
 var _rows: Array[Dictionary] = []
 
-# Kontrat listesi büyüdükçe geri tuşunun ekrandan taşmaması için pano
-# kaydırılabilir bir kutuda; başlık ve geri tuşu dışarıda kalır.
+# İki sekme: pano ve borç defteri. Her sekme kendi kaydırma kutusunda,
+# geri tuşu ikisinin de dışında - içerik uzadıkça çıkış ekrandan taşmasın
+# (bkz. World Navigation Rules).
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _tabs: TabContainer = $MarginContainer/VBoxContainer/TabContainer
+@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/TabContainer/ContractsTab/ContentContainer
+@onready var _debt_container: VBoxContainer = $MarginContainer/VBoxContainer/TabContainer/DebtsTab/DebtContainer
 @onready var _contract_list: VBoxContainer = _content.get_node("ContractList")
 @onready var _accepted_title: Label = _content.get_node("AcceptedTitle")
 @onready var _accepted_list: VBoxContainer = _content.get_node("AcceptedList")
@@ -24,21 +27,25 @@ var _rows: Array[Dictionary] = []
 func _ready() -> void:
 	_session = GameState.get_session()
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_add_recruit_button(RecruitCatalog.VENUE_GUILD, Nav.GUILD)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
 	_info_label.text = tr("UI_GUILD_HINT")
+	_accepted_title.text = tr("UI_GUILD_ACCEPTED_TITLE")
 
-	# Borç defteri lonca ekranında: alacaklı da kontrat da aynı deftere
-	# yazılır. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı değildi -
-	# kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu bunu
-	# göremiyordu.
-	_content.add_child(HSeparator.new())
+	# Borç defteri kendi sekmesinde: alacaklı da kontrat da loncanın
+	# defterinde durur. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı
+	# değildi - kervan borca batıyor, faiz işliyor, itibar eriyor ve oyuncu
+	# bunu göremiyordu. Panonun altına gömülü bir bölüm olarak da
+	# görülmüyordu: kontrat listesi uzayınca aşağıda kalıyordu.
+	_tabs.set_tab_title(0, tr("UI_GUILD_TAB_CONTRACTS"))
+	_tabs.set_tab_title(1, tr("UI_GUILD_TAB_DEBTS"))
+
 	_debt_panel = DebtPanel.new()
-	_content.add_child(_debt_panel)
+	_debt_container.add_child(_debt_panel)
 	_debt_panel.setup(_session)
 	_debt_panel.ledger_changed.connect(_rebuild)
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
@@ -141,12 +148,10 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu buraya döner - ama bunu
-## return_scene'e yazarak değil (o bu ekranın *kendi* geri hedefi,
-## ezilirse şehre çıkış kapanır), Nav.recruit_return_scene üzerinden.
+## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
 	button.text = tr("UI_LOOK_FOR_CREW")

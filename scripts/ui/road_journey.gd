@@ -957,16 +957,15 @@ func _make_summary_label(text: String) -> Label:
 	return label
 
 func _on_enter_city_pressed() -> void:
-	Nav.return_scene = Nav.CITY_MAP
 
 	if _session.has_reached_goal():
 		_session.set_flag(GameSession.GOAL_FLAG)
 		if _is_live_journey:
 			SaveManager.save_session(_session)
-		get_tree().change_scene_to_file(Nav.GOAL_REACHED)
+		get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.GOAL_REACHED))
 		return
 
-	get_tree().change_scene_to_file(Nav.CITY_MAP)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve
 ## eylemler kilitlenir - olay çözülmeden yol devam etmemeli.
@@ -1008,17 +1007,18 @@ func _clear_children(container: Node) -> void:
 		container.remove_child(child)
 		child.queue_free()
 
-## Yoldan çıkış canlı seferde ana menüdür, return_scene değil. Eskiden
-## return_scene'e (şehir haritasına) dönüyordu: sefer `is_journey_active()`
-## olarak açık kalıyor, oyuncu kervanının bulunmadığı şehre düşüyor ve
-## yola geri dönebileceği hiçbir ekran kalmıyordu - Nav.JOURNEY'ye yalnızca
-## kervan planlayıcı sefer başlatınca geçiliyor. Sentetik F1 seferinde
-## (oyun akışının parçası değil) eski davranış korunur.
+## Yol bir kök ekrandır: sefer başlayınca yığın temizlenir, çünkü yoldan
+## "geri" diye bir şey yok - varılır, dönülür ya da rota değiştirilir.
+## Canlı seferde çıkış ana menüye gider; eskiden şehir haritasına
+## dönüyordu ve sefer `is_journey_active()` olarak açık kaldığı için
+## oyuncu kervanının bulunmadığı şehre düşüyor, yola bir daha
+## dönemiyordu. Sentetik F1 seferi oyun akışının parçası değil, o yüzden
+## orada normal geri davranışı korunur.
 func _refresh_exit_button() -> void:
 	if _exit_button == null:
 		return
-	var target := Nav.MAIN_MENU if _is_live_journey else Nav.return_scene
+	var target := Nav.MAIN_MENU if _is_live_journey else Nav.peek()
 	_exit_button.text = Nav.label_for(target)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.MAIN_MENU if _is_live_journey else Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU) if _is_live_journey else Nav.back())

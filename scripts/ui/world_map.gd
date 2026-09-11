@@ -24,9 +24,10 @@ var _focused_location: Location
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_MAP_TITLE")
 	_session = GameState.get_session()
 	_current_location_id = _session.current_location_id
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
 	_show_hint()
@@ -187,7 +188,7 @@ func _on_plan_pressed() -> void:
 
 func _go_to_planner(location: Location) -> void:
 	TravelContext.selected_destination_id = location.location_id
-	get_tree().change_scene_to_file(Nav.CARAVAN_PLANNER)
+	get_tree().change_scene_to_file(Nav.open(Nav.TRAVEL, Nav.CARAVAN_PLANNER))
 
 func _add_info_label(text: String) -> void:
 	var label := Label.new()
@@ -201,4 +202,4 @@ func _clear_info_panel() -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

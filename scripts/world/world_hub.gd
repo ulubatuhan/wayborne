@@ -68,7 +68,12 @@ var _morale_bar: PulseBar
 var _stress_bar: PulseBar
 
 func _ready() -> void:
-	Nav.return_scene = Nav.WORLD_HUB
+	Nav.go_root(Nav.WORLD_HUB)
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
+	# metin koddan, anahtarla gelir (bkz. Localization Rules).
+	_party_button.text = tr("UI_HUB_PARTY")
+	_menu_button.text = tr("UI_HUB_MENU")
+	_hint_label.text = tr("UI_HUB_CONTROLS")
 	_party_button.pressed.connect(_on_party_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 	_build_status_bars()
@@ -89,12 +94,12 @@ func _build_status_bars() -> void:
 	_morale_bar = PulseBar.new()
 	row.add_child(_morale_bar)
 	row.move_child(_morale_bar, _status_label.get_index() + 1)
-	_morale_bar.setup("Moral", Color(0.6, 0.75, 0.5))
+	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
 
 	_stress_bar = PulseBar.new()
 	row.add_child(_stress_bar)
 	row.move_child(_stress_bar, _morale_bar.get_index() + 1)
-	_stress_bar.setup("Stres", Color(0.8, 0.45, 0.4))
+	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
 
 func _process(delta: float) -> void:
 	_move_player(delta)
@@ -214,21 +219,29 @@ func _build_scenery() -> void:
 
 func _build_spots() -> void:
 	_add_spot(
-		tr("UI_HUB_CITY_GATE"),
+		_gate_label(),
 		Vector2(1720.0, GROUND_Y - 230.0),
 		Vector2(150.0, 230.0),
 		GATE_COLOR,
-		Nav.CITY_MAP,
 		Nav.CITY_MAP
 	)
+
+## Kapının üstünde jenerik bir "Şehir Kapısı" değil, girilecek şehrin adı
+## yazar - oyuncu yolda dururken nerede olduğunu okumak için HUD'a bakmak
+## zorunda kalmasın. Şehir bilinmiyorsa (bozuk kayıt) jenerik etikete düşer.
+func _gate_label() -> String:
+	var session: GameSession = GameState.get_session()
+	var location := WorldMapData.get_location_by_id(session.current_location_id)
+	if location == null:
+		return tr("UI_HUB_CITY_GATE")
+	return tr("UI_HUB_CITY_GATE_NAMED") % location.location_name
 
 func _add_spot(
 	spot_name: String,
 	position: Vector2,
 	size: Vector2,
 	color: Color,
-	scene_path: String,
-	return_scene: String
+	scene_path: String
 ) -> void:
 	var body := ColorRect.new()
 	body.color = color
@@ -256,7 +269,6 @@ func _add_spot(
 		"name": spot_name,
 		"rect": Rect2(position, size),
 		"scene": scene_path,
-		"return": return_scene,
 		"prompt": prompt,
 	})
 
@@ -342,10 +354,9 @@ func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 
 	# Vagon hareket ettiği için kendi kaydı ayrı tutulur.
 	_spots.append({
-		"name": "Vagon",
+		"name": tr("UI_HUB_WAGON_SPOT"),
 		"rect": Rect2(),
 		"scene": Nav.ECONOMY,
-		"return": Nav.WORLD_HUB,
 		"prompt": wagon_prompt,
 		"follows_wagon": true,
 	})
@@ -437,8 +448,7 @@ func _try_interact_nearest() -> void:
 			return
 
 func _enter_spot(spot: Dictionary) -> void:
-	Nav.return_scene = spot.get("return", Nav.WORLD_HUB)
-	get_tree().change_scene_to_file(spot.scene)
+	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 func _hint(text: String) -> void:
 	_hint_label.text = text
@@ -463,8 +473,7 @@ func _refresh_status() -> void:
 	_stress_bar.set_value(session.party_stress, GameSession.MAX_STRESS)
 
 func _on_party_pressed() -> void:
-	Nav.return_scene = Nav.WORLD_HUB
-	get_tree().change_scene_to_file(Nav.PARTY)
+	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, Nav.PARTY))
 
 func _on_menu_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.MAIN_MENU)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU))

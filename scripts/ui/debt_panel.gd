@@ -10,7 +10,10 @@ extends VBoxContainer
 ## kurulur, kendini koda göre inşa eder. Tüccar Loncası'na gömülü - alacaklı
 ## da kontrat da aynı defterde durur.
 ##
-## İki eylem var, ikisi de `DebtLedger`'ın kendi kurallarını çağırır:
+## Üç eylem var, üçü de kuralları `GameSession`/`DebtLedger`'dan okur:
+##   - **Borç al**: yola çıkmadan mal alabilmek için (bkz. GameSession.
+##     borrow_from_guild). Kredi hattı itibara bağlı ve *bütün* borçlar onu
+##     tüketir; tahsis ücreti anaparaya biner.
 ##   - **Öde**: kesedeki para kadarı ödenir (bkz. GameSession.repay_debt).
 ##     Kısmi ödeme serbest; kapanan borç defterden düşer.
 ##   - **Yapılandır**: vade uzar, bedel anaparaya biner ve her seferinde
@@ -30,6 +33,10 @@ var _session: GameSession
 var _title_label: Label
 var _summary_label: Label
 var _rows: VBoxContainer
+var _credit_label: Label
+var _amount_spin: SpinBox
+var _borrow_button: Button
+var _refreshing_amount: bool = false
 
 func setup(session: GameSession) -> void:
 	_session = session
@@ -53,6 +60,34 @@ func _ensure_built() -> void:
 	_rows.add_theme_constant_override("separation", 4)
 	add_child(_rows)
 
+	_build_borrow_row()
+
+## Kredi hattı defterin *üstünde* durur: borcun ne kadarının hâlâ
+## alınabilir olduğu, borcun kendisiyle aynı ekranda okunmazsa oyuncu
+## hattın borçla tükendiğini fark edemez.
+func _build_borrow_row() -> void:
+	add_child(HSeparator.new())
+
+	_credit_label = Label.new()
+	_credit_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	add_child(_credit_label)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	add_child(row)
+
+	_amount_spin = SpinBox.new()
+	_amount_spin.min_value = GameSession.LOAN_MIN_AMOUNT
+	_amount_spin.step = GameSession.LOAN_STEP
+	_amount_spin.value = GameSession.LOAN_MIN_AMOUNT
+	_amount_spin.custom_minimum_size = Vector2(110, 0)
+	_amount_spin.value_changed.connect(_on_amount_changed)
+	row.add_child(_amount_spin)
+
+	_borrow_button = Button.new()
+	_borrow_button.pressed.connect(_on_borrow_pressed)
+	row.add_child(_borrow_button)
+
 func refresh() -> void:
 	if _session == null:
 		return
@@ -61,6 +96,8 @@ func refresh() -> void:
 	for child in _rows.get_children():
 		_rows.remove_child(child)
 		child.queue_free()
+
+	_refresh_borrow_row()
 
 	var total := _session.get_total_debt()
 	if total <= 0:
@@ -74,6 +111,49 @@ func refresh() -> void:
 
 	for debt in _session.debts.get_debts():
 		_rows.add_child(_build_row(debt))
+
+func _refresh_borrow_row() -> void:
+	# SpinBox.value'ya yazmak `value_changed` yayar, o da buraya döner;
+	# bayrak olmadan kendi kendini çağıran bir tazeleme olurdu.
+	if _refreshing_amount:
+		return
+	_refreshing_amount = true
+	_do_refresh_borrow_row()
+	_refreshing_amount = false
+
+func _do_refresh_borrow_row() -> void:
+	var available := _session.get_available_credit()
+	_credit_label.text = tr("UI_GUILD_LOAN_LINE") % [
+		available, _session.get_credit_limit(), GameSession.LOAN_ORIGINATION_PERCENT
+	]
+
+	var reason := _session.get_loan_block_reason()
+	if not reason.is_empty():
+		# Kilitli seçenek sebebiyle birlikte gösterilir, gizlenmez.
+		_amount_spin.editable = false
+		_borrow_button.disabled = true
+		_borrow_button.text = tr(reason)
+		return
+
+	_amount_spin.editable = true
+	_amount_spin.max_value = available
+	if _amount_spin.value > available:
+		_amount_spin.value = available
+
+	var amount := int(_amount_spin.value)
+	_borrow_button.disabled = not _session.can_borrow(amount)
+	_borrow_button.text = tr("UI_GUILD_LOAN_TAKE") % [
+		amount, _session.get_loan_principal(amount), Debt.DEFAULT_TERM_DAYS
+	]
+
+func _on_amount_changed(_new_value: float) -> void:
+	_refresh_borrow_row()
+
+func _on_borrow_pressed() -> void:
+	if not _session.borrow_from_guild(int(_amount_spin.value)):
+		return
+	refresh()
+	ledger_changed.emit()
 
 func _build_row(debt: Debt) -> HBoxContainer:
 	var row := HBoxContainer.new()

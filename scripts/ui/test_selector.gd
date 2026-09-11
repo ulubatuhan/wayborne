@@ -2,9 +2,9 @@ extends Control
 
 ## Geliştirici menüsü. DevPanel autoload'u tarafından oyun başında bir kez
 ## kurulup gizlenir, F1 ile açılıp kapanır - normal oyun akışının bir
-## parçası değildir, bu yüzden Nav.return_scene'e hiç dokunmaz: bir
-## ekrana geçersen o ekranın geri tuşu seni buraya değil, paneli açtığın
-## yere döndürür.
+## parçası değildir. Bir hedefe geçerken paneli açtığın ekranı gezinme
+## yığınına iter, böylece o ekranın geri tuşu seni buraya değil, paneli
+## açtığın yere döndürür.
 
 # Bir sistemi test edilebilir hale getirmek için burada boş string yerine
 # ilgili sahnenin yolunu yazmak yeterli.
@@ -40,7 +40,11 @@ func _ready() -> void:
 
 func _on_test_button_pressed(scene_path: String) -> void:
 	DevPanel.hide_panel()
-	get_tree().change_scene_to_file(scene_path)
+	# Paneli açtığın ekran yığına itiliyor, böylece hedefteki geri tuşu
+	# seni oraya döndürür (bkz. Nav gezinme yığını).
+	var current := get_tree().current_scene
+	var from_path: String = "" if current == null else current.scene_file_path
+	get_tree().change_scene_to_file(Nav.open(from_path, scene_path))
 
 func _on_close_pressed() -> void:
 	DevPanel.hide_panel()

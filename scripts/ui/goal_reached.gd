@@ -5,13 +5,16 @@ extends Control
 ## _on_enter_city_pressed. Oyunun DD tarzı felsefesinde yenilgi/"game
 ## over" yok, bu yüzden bu bir bitiş değil, oyuna kaldığı yerden devam
 ## edilen bir kilometre taşı. Yalnızca oradan açıldığı için "Devam Et"
-## Nav.return_scene'e değil, doğrudan Nav.CITY_MAP'e döner (bkz.
+## Şehre kök olarak döner - hedefe ulaşmak bir alt ekran değil, oyunun
+## kaldığı yerden sürmesi (bkz.
 ## settings.gd'nin aynı deseni).
 
 @onready var _summary_label: Label = $MarginContainer/VBoxContainer/SummaryLabel
 @onready var _continue_button: Button = $MarginContainer/VBoxContainer/ContinueButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_GOAL_TITLE")
+	_continue_button.text = tr("UI_CONTINUE")
 	_continue_button.pressed.connect(_on_continue_pressed)
 
 	var session: GameSession = GameState.get_session()
@@ -27,4 +30,4 @@ func _ready() -> void:
 	]
 
 func _on_continue_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.CITY_MAP)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))

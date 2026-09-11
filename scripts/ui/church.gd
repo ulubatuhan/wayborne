@@ -14,8 +14,9 @@ var _purification_panel: PurificationPanel
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/InfoLabel.text = tr("UI_CHURCH_HINT")
 	_session = GameState.get_session()
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
@@ -31,4 +32,4 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_purification_panel.refresh()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

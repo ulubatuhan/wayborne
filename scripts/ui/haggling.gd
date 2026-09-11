@@ -38,7 +38,7 @@ func _build_ui() -> void:
 	_content.add_child(HSeparator.new())
 
 	var back_button := Button.new()
-	back_button.text = Nav.return_label()
+	back_button.text = Nav.back_label()
 	back_button.pressed.connect(_on_back_pressed)
 	$MarginContainer/VBoxContainer.add_child(back_button)
 
@@ -101,4 +101,4 @@ func _on_start_pressed() -> void:
 	)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

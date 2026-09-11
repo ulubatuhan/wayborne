@@ -19,9 +19,10 @@ var _session: GameSession
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_PARTY_TITLE")
 	_session = GameState.get_session()
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_refresh()
 
@@ -150,11 +151,9 @@ func _on_dismiss_pressed(character: CharacterData) -> void:
 		_refresh()
 
 ## Karakter ekranı yalnızca buradan açılıyor ve buraya dönüyor - dönüş
-## hedefini sabit tutuyoruz ki bu ekranın kendi Nav.return_scene'i (world
-## hub ya da şehir haritası, kimin gönderdiğine göre) burada kaybolmasın.
 func _on_character_pressed(index: int) -> void:
 	Nav.character_target_index = index
-	get_tree().change_scene_to_file(Nav.CHARACTER)
+	get_tree().change_scene_to_file(Nav.open(Nav.PARTY, Nav.CHARACTER))
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():
@@ -162,4 +161,4 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

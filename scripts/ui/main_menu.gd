@@ -15,6 +15,7 @@ extends Control
 var _confirm_dialog: ConfirmationDialog
 
 func _ready() -> void:
+	Nav.go_root(Nav.MAIN_MENU)
 	_continue_button.visible = SaveManager.has_save()
 	_continue_button.pressed.connect(_on_continue_pressed)
 	_play_button.pressed.connect(_on_play_pressed)
@@ -34,8 +35,7 @@ func _on_continue_pressed() -> void:
 	if session == null:
 		return
 	GameState.set_session(session)
-	Nav.return_scene = Nav.CITY_MAP
-	get_tree().change_scene_to_file(Nav.CITY_MAP)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 func _on_play_pressed() -> void:
 	if SaveManager.has_save():
@@ -54,10 +54,10 @@ func _confirm_new_game() -> void:
 ## Kayıt yalnızca karakter oluşturma tamamlanınca silinir; oyuncu geri
 ## dönerse eski kaydı yerinde durur.
 func _open_character_creation() -> void:
-	get_tree().change_scene_to_file(Nav.CHARACTER_CREATION)
+	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.CHARACTER_CREATION))
 
 func _on_settings_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.SETTINGS)
+	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.SETTINGS))
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

@@ -30,7 +30,7 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Parti"
+text = "UI_PARTY_TITLE"
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -47,4 +47,4 @@ theme_override_constants/separation = 14
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Geri"
+text = "UI_BACK"

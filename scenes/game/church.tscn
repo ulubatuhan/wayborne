@@ -30,7 +30,7 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Kilise"
+text = "UI_CITY_CHURCH"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -43,8 +43,8 @@ theme_override_constants/separation = 14
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
-text = "Rahip yeni edinilmiş bir huyu sabırla dinler ve arındırır - eski, kökleşmiş bir huya elini süremez."
+text = "UI_CHURCH_HINT"
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehre Dön"
+text = "UI_BACK"

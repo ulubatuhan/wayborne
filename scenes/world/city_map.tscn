@@ -30,21 +30,36 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Şehir"
+text = "UI_CITY_HUD"
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Bir lokasyona tıkla. Kapıdan çıkınca yola dönersin."
+text = "UI_CITY_INFO"
 
-[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer"]
+[node name="MainRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer/MainRow"]
 custom_minimum_size = Vector2(640, 440)
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="BriefScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/MainRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BriefContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MainRow/BriefScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
 [node name="PartyButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Partiyi Görüntüle"
+text = "UI_CITY_VIEW_PARTY"
 
 [node name="GateButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehir Kapısından Çık"
+text = "UI_CITY_LEAVE_BY_GATE"
