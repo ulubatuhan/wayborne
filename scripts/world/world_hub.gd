@@ -68,7 +68,7 @@ var _morale_bar: PulseBar
 var _stress_bar: PulseBar
 
 func _ready() -> void:
-	Nav.return_scene = Nav.WORLD_HUB
+	Nav.go_root(Nav.WORLD_HUB)
 	_party_button.pressed.connect(_on_party_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 	_build_status_bars()
@@ -218,7 +218,6 @@ func _build_spots() -> void:
 		Vector2(1720.0, GROUND_Y - 230.0),
 		Vector2(150.0, 230.0),
 		GATE_COLOR,
-		Nav.CITY_MAP,
 		Nav.CITY_MAP
 	)
 
@@ -227,8 +226,7 @@ func _add_spot(
 	position: Vector2,
 	size: Vector2,
 	color: Color,
-	scene_path: String,
-	return_scene: String
+	scene_path: String
 ) -> void:
 	var body := ColorRect.new()
 	body.color = color
@@ -256,7 +254,6 @@ func _add_spot(
 		"name": spot_name,
 		"rect": Rect2(position, size),
 		"scene": scene_path,
-		"return": return_scene,
 		"prompt": prompt,
 	})
 
@@ -345,7 +342,6 @@ func _build_wagon(index: int, wagon_x: float) -> ColorRect:
 		"name": "Vagon",
 		"rect": Rect2(),
 		"scene": Nav.ECONOMY,
-		"return": Nav.WORLD_HUB,
 		"prompt": wagon_prompt,
 		"follows_wagon": true,
 	})
@@ -437,8 +433,7 @@ func _try_interact_nearest() -> void:
 			return
 
 func _enter_spot(spot: Dictionary) -> void:
-	Nav.return_scene = spot.get("return", Nav.WORLD_HUB)
-	get_tree().change_scene_to_file(spot.scene)
+	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 func _hint(text: String) -> void:
 	_hint_label.text = text
@@ -463,8 +458,7 @@ func _refresh_status() -> void:
 	_stress_bar.set_value(session.party_stress, GameSession.MAX_STRESS)
 
 func _on_party_pressed() -> void:
-	Nav.return_scene = Nav.WORLD_HUB
-	get_tree().change_scene_to_file(Nav.PARTY)
+	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, Nav.PARTY))
 
 func _on_menu_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.MAIN_MENU)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU))

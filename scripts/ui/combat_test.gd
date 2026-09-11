@@ -20,7 +20,7 @@ var _result_label: Label
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 
 	var danger_row := HBoxContainer.new()
@@ -78,4 +78,4 @@ func _on_combat_finished(victory: bool, xp_awarded: int, _downed_count: int) -> 
 	_result_label.text = "Sonuç: %s (%d XP)" % ["zafer" if victory else "yenilgi", xp_awarded]
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

@@ -52,7 +52,7 @@ func _ready() -> void:
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_session.inventory.item_added.connect(_on_inventory_changed)
 	_session.inventory.item_removed.connect(_on_inventory_changed)
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_add_recruit_button(RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
 
@@ -348,12 +348,10 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu buraya döner - ama bunu
-## return_scene'e yazarak değil (o bu ekranın *kendi* geri hedefi,
-## ezilirse yola/şehre çıkış kapanır), Nav.recruit_return_scene üzerinden.
+## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
 func _add_recruit_button(venue: String, own_scene: String) -> void:
 	var button := Button.new()
 	button.text = tr("UI_LOOK_FOR_CREW")

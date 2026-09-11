@@ -1,70 +1,174 @@
 extends RefCounted
 
-## Ekranlar arası gezinme testleri. Buradaki hatalar oyunu çökertmez,
-## oyuncuyu bir ekranda kilitler: bir kez loncaya girip tayfa arayınca
-## şehre bir daha çıkılamıyordu, çünkü mekân ekranı alt ekranı açarken
-## Nav.return_scene'e *kendini* yazıyordu ve dönünce kendi geri tuşu
-## kendisine dönüyordu.
+## Gezinme testleri. Buradaki hatalar oyunu çökertmez, oyuncuyu bir ekranda
+## kilitler - ve bu, projede en sık tekrarlayan şikâyet oldu.
 ##
-## Ekranların kendisi (Control sahneleri) headless koşturulamaz, bu yüzden
-## test edilen şey ekranların çağırdığı Nav mantığı ve sahne dosyalarının
-## yapısı - test_localization.gd'nin kaynak taraması ile aynı yaklaşım.
+## Kök sebep mimariydi: tek bir `Nav.return_scene` string'i yalnızca *bir*
+## seviye geçmiş tutabiliyordu, o yüzden iki seviye derinlikte biri
+## diğerinin çıkışını eziyordu. Yığın bunu yapısal olarak çözüyor; bu paket
+## de çözümün gerçekten tuttuğunu tüketici biçimde doğruluyor.
+##
+## Kenar listesi **kaynaktan türetiliyor**: her `Nav.open(Nav.A, Nav.B)`
+## çağrısı taranıyor. Elle yazılmış bir tablo koddan kayar ve kayınca da
+## testi değil oyunu yanlış gösterir.
 
 const NAV_PATH: String = "res://scripts/world/nav.gd"
 
-## Kaydırma kutusu içinde kalması geri tuşunu ekran dışına iten ekranlar
-## için tarama. Buradaki isimler "çıkış tuşu" sayılır.
-const EXIT_BUTTON_NAMES: Array[String] = ["back_button", "_exit_button", "_start_button"]
+## Yolların tüketileceği azami derinlik. Gerçek grafik bundan sığ; sınır
+## yalnızca bir döngü kalırsa testin sonsuza kadar koşmasını engelliyor.
+const MAX_PATH_DEPTH: int = 6
+
+## `_walk` özyinelemesi kökleri bilmek zorunda; Nav çalışma anında load()
+## ile geldiği için sabite bağlanamıyor, run() başında dolduruluyor.
+var _roots: Array = []
 
 func suite_name() -> String:
 	return "Navigation"
 
 func run(t) -> void:
 	var nav = load(NAV_PATH)
-	_test_recruit_detour_keeps_caller_return(t, nav)
-	_test_scene_constants_exist(t, nav)
+	nav.reset()
+	_roots = []
+	for root in nav.ROOTS:
+		_roots.append(String(root))
+
+	var edges := _extract_edges(nav)
+	t.ok(edges.size() >= 10, "kaynaktan anlamlı sayıda geçiş çıkarıldı (%d)" % edges.size())
+
+	_test_every_edge_returns_to_its_opener(t, nav, edges)
+	_test_every_path_unwinds_to_a_root(t, nav, edges)
+	_test_back_always_leads_somewhere(t, nav)
+	_test_no_screen_opens_itself(t, edges)
+	_test_roots_clear_the_stack(t, nav, edges)
+	_test_stack_cannot_grow_without_bound(t, nav)
+	_test_every_screen_is_reachable(t, nav, edges)
 	_test_every_screen_has_an_exit(t, nav)
 	_test_labels_never_blank(t, nav)
-	_test_recruit_funnel_is_the_only_door(t, nav)
 	_test_exit_buttons_outside_scroll(t)
 	_test_node_paths_resolve(t, nav)
 
-## Asıl hata buydu: tayfa ekranına gitmek, gönderen mekânın kendi geri
-## hedefini eziyordu.
-func _test_recruit_detour_keeps_caller_return(t, nav) -> void:
-	nav.return_scene = nav.CITY_MAP
+	nav.reset()
 
-	var target: String = nav.open_recruit("guild", nav.GUILD)
-	t.ok(target == nav.RECRUIT, "open_recruit tayfa ekranını hedefler")
-	t.ok(nav.recruit_venue == "guild", "mekân aday havuzuna taşınır")
-	t.ok(
-		nav.return_scene == nav.CITY_MAP,
-		"tayfa ekranını açmak gönderenin geri hedefini ezmez"
+## Yığının tanımlayıcı özelliği: A ekranı B'yi açtıysa, B'den geri basmak
+## **A'ya** döner. Eski tek değişkenli modelde bu yalnızca tek seviyede
+## doğruydu.
+func _test_every_edge_returns_to_its_opener(t, nav, edges: Array) -> void:
+	for edge in edges:
+		var from: String = edge.from
+		var to: String = edge.to
+		nav.reset()
+		var opened: String = nav.open(from, to)
+		t.eq(opened, to, "%s → %s geçişi hedefe gider" % [_short(from), _short(to)])
+
+		# Köke inilmez, gidilir: oraya varmak geçmişi siler, o yüzden
+		# "açanına döner" kuralı yalnızca kök olmayan hedefler için geçerli.
+		if nav.is_root(to):
+			t.eq(nav.depth(), 0, "%s bir kök, geçmişi temizler" % _short(to))
+			continue
+
+		t.eq(
+			nav.back(), from,
+			"%s'den geri basmak %s'e döner" % [_short(to), _short(from)]
+		)
+
+## Asıl iddia: kaç seviye derine inilirse inilsin, geri basa basa her zaman
+## bir köke varılır ve yığın boşalır. Kilitlenme tam olarak bunun
+## olmamasıydı.
+func _test_every_path_unwinds_to_a_root(t, nav, edges: Array) -> void:
+	var paths := _all_paths(nav, edges)
+	t.ok(paths.size() > 0, "kökten çıkan en az bir yol var")
+
+	var deepest := 0
+	for path in paths:
+		var typed_path: Array = path
+		deepest = maxi(deepest, typed_path.size())
+
+		nav.reset()
+		for index in range(typed_path.size() - 1):
+			nav.open(String(typed_path[index]), String(typed_path[index + 1]))
+
+		# Adım adım geri: her adımda yığın küçülmeli, sonunda kök gelmeli.
+		var previous_depth: int = nav.depth()
+		var current: String = String(typed_path[typed_path.size() - 1])
+		var steps := 0
+		while not nav.is_root(current) and steps <= MAX_PATH_DEPTH + 1:
+			current = nav.back()
+			steps += 1
+			t.ok(
+				nav.depth() < previous_depth,
+				"geri basmak yığını küçültür (%s)" % _short(current)
+			)
+			previous_depth = nav.depth()
+
+		t.ok(
+			nav.is_root(current),
+			"%s yolundan geri basa basa köke varılır" % _path_text(typed_path)
+		)
+		t.eq(nav.depth(), 0, "%s yolu tamamen çözülür" % _path_text(typed_path))
+
+	t.ok(deepest >= 3, "grafik en az üç seviye derinleşiyor (ölçülen %d)" % deepest)
+
+## Yığın boşken bile geri tuşu bir yere götürmeli - "geri" gösterip
+## hiçbir şey yapmamak, kilitlenmenin başka bir adı.
+func _test_back_always_leads_somewhere(t, nav) -> void:
+	nav.reset()
+	var landing: String = nav.back()
+	t.ok(not landing.is_empty(), "boş yığında geri bir yere götürür")
+	t.ok(nav.is_root(landing), "boş yığında geri bir köke götürür")
+	t.eq(nav.depth(), 0, "boş yığın eksiye düşmez")
+
+	for _repeat in 5:
+		t.ok(nav.is_root(nav.back()), "üst üste geri basmak da köke götürür")
+
+func _test_no_screen_opens_itself(t, edges: Array) -> void:
+	for edge in edges:
+		t.ok(
+			String(edge.from) != String(edge.to),
+			"%s kendini açmıyor" % _short(String(edge.from))
+		)
+
+## Köke varmak geçmişi siler: oraya "geri" ile dönülmez, gidilir. Yoksa
+## şehre vardıktan sonra geri tuşu seni sefere geri gönderirdi.
+func _test_roots_clear_the_stack(t, nav, edges: Array) -> void:
+	for edge in edges:
+		nav.reset()
+		nav.open(String(edge.from), String(edge.to))
+		nav.go_root(nav.CITY_MAP)
+		t.eq(nav.depth(), 0, "köke gitmek yığını temizler")
+
+func _test_stack_cannot_grow_without_bound(t, nav) -> void:
+	nav.reset()
+	for index in 200:
+		nav.open(nav.CITY_MAP, nav.GUILD)
+	t.le(
+		float(nav.depth()), float(nav.MAX_DEPTH),
+		"yığın sınırsız büyümez - bir ekranın kendini itmesi sessiz bir sızıntı olurdu"
 	)
-	t.ok(nav.close_recruit() == nav.GUILD, "tayfa ekranı gönderen mekâna döner")
+	nav.reset()
 
-	# Mekâna dönen oyuncu oradan da çıkabilmeli - kilidin ikinci yarısı.
-	t.ok(
-		nav.return_scene != nav.GUILD,
-		"mekânın geri tuşu kendisine dönmez"
-	)
+## Hiçbir ekran yetim kalmamalı: her sahne ya bir kök, ya bir geçişin
+## hedefi, ya da bilerek başka türlü girilen bir ekran olmalı.
+func _test_every_screen_is_reachable(t, nav, edges: Array) -> void:
+	var reachable := {}
+	for root in nav.ROOTS:
+		reachable[root] = true
+	for edge in edges:
+		reachable[String(edge.to)] = true
 
-	# Yoldan girilen pazar için de aynısı geçerli.
-	nav.return_scene = nav.WORLD_HUB
-	nav.open_recruit("market", nav.ECONOMY)
-	t.ok(
-		nav.return_scene == nav.WORLD_HUB,
-		"yoldan girilen pazarda da yol bağlamı korunur"
-	)
+	# Bunlara `open()` ile girilmez: yol ekranı planlayıcının onayından
+	# (`go_root`), savaş ekranı ile pazarlık ekranı yalnızca F1 geliştirici
+	# panelinden. Gerçek oyunda ikisi de gömülü panel olarak çalışır
+	# (`CombatPanel`, `HagglingPanel`), ayrı bir sahne olarak değil.
+	var entered_by_flow: Array[String] = [nav.JOURNEY, nav.COMBAT, nav.HAGGLING]
 
-	nav.return_scene = nav.CITY_MAP
+	for scene_path in _scene_paths(nav):
+		if entered_by_flow.has(scene_path):
+			continue
+		t.ok(
+			reachable.has(scene_path),
+			"%s bir yerden açılabiliyor (yetim ekran yok)" % _short(scene_path)
+		)
 
-## Bir sahne yolu yanlışsa geri tuşu sessizce hiçbir şey yapmaz.
-func _test_scene_constants_exist(t, nav) -> void:
-	for path in _scene_paths(nav):
-		t.ok(ResourceLoader.exists(path), "sahne dosyası var: %s" % path)
-
-## Her ekranın en az bir çıkışı olmalı; olmayan ekran oyuncuyu hapseder.
 func _test_every_screen_has_an_exit(t, nav) -> void:
 	for path in _scene_paths(nav):
 		var script_path := _script_of_scene(path)
@@ -83,42 +187,20 @@ func _test_labels_never_blank(t, nav) -> void:
 		var label: String = nav.label_for(path)
 		t.ok(not label.strip_edges().is_empty(), "geri tuşu yazısı boş değil: %s" % path)
 
-## Tayfa ekranı tek kapıdan açılıp kapanmalı. Hub ekranları (yol, şehir,
-## ana menü) return_scene'i meşru olarak kendilerine yazar - "alt ekranlar
-## bana dönsün" demektir - o yüzden "kendine yazma" diye bir kural yok.
-## Kural şu: gönderen ekran *kendi* geri hedefini korumak zorunda, ve bunu
-## garanti eden tek yer Nav.open_recruit/close_recruit. Ekranlar buradan
-## geçmezse aynı tuzağı yeniden kurabilirler.
-func _test_recruit_funnel_is_the_only_door(t, nav) -> void:
-	for script_path in _all_screen_scripts():
-		if script_path.ends_with("nav.gd"):
-			continue
-		var source := _read_code(script_path)
-		t.ok(
-			not source.contains("Nav.RECRUIT"),
-			"%s: tayfa ekranını Nav.open_recruit ile açar" % script_path
-		)
-		t.ok(
-			not source.contains("Nav.recruit_return_scene"),
-			"%s: tayfa geri hedefini Nav.close_recruit ile okur" % script_path
-		)
-
 ## Geri/çıkış tuşu kaydırma kutusunun dışında durmalı; içeride kalırsa
 ## içerik uzadıkça ekran dışına itilir (pazar ekranında bir kez yaşandı).
 func _test_exit_buttons_outside_scroll(t) -> void:
+	var exit_names: Array[String] = ["back_button", "_exit_button", "_start_button"]
 	for script_path in _all_screen_scripts():
 		var source := _read_code(script_path)
-		for button_name in EXIT_BUTTON_NAMES:
+		for button_name in exit_names:
 			t.ok(
 				not source.contains("_content.add_child(%s)" % button_name),
 				"%s: çıkış tuşu kaydırma kutusunun dışında" % script_path
 			)
 
 ## Ekran script'lerindeki `$A/B` düğüm yolları sahnede gerçekten var mı?
-## Godot yanlış bir yolu yalnızca o ekran açıldığında, çalışma anında
-## bildirir - yani oyuncu ekrana girdiğinde. PackedScene'in durumu
-## instantiate etmeden okunabildiği için burada önceden yakalanabiliyor
-## (headless ortamda Control sahneleri kurulamıyor).
+## Godot yanlış bir yolu yalnızca o ekran açıldığında bildirir.
 func _test_node_paths_resolve(t, nav) -> void:
 	for scene_path in _scene_paths(nav):
 		var script_path := _script_of_scene(scene_path)
@@ -130,6 +212,136 @@ func _test_node_paths_resolve(t, nav) -> void:
 				known.has(node_path),
 				"%s: $%s düğümü sahnede var" % [script_path, node_path]
 			)
+
+# --- Grafiği kaynaktan çıkarma ---
+
+## `Nav.open(Nav.A, Nav.B)` ve `Nav.open_recruit(..., Nav.A)` çağrılarını
+## tarar. Elle tutulan bir tablo koddan kayabilir; bu kayamaz.
+func _extract_edges(nav) -> Array:
+	var constants: Dictionary = nav.get_script_constant_map()
+	var edges: Array = []
+	var seen := {}
+
+	var open_regex := RegEx.new()
+	open_regex.compile("Nav\\.open\\(\\s*Nav\\.([A-Z_]+)\\s*,\\s*Nav\\.([A-Z_]+)\\s*\\)")
+	var recruit_regex := RegEx.new()
+	recruit_regex.compile("Nav\\.open_recruit\\([^,]+,\\s*Nav\\.([A-Z_]+)\\s*\\)")
+
+	for script_path in _all_screen_scripts():
+		var source := _read_code(script_path)
+		for found in open_regex.search_all(source):
+			_add_edge(edges, seen, constants, found.get_string(1), found.get_string(2))
+		for found in recruit_regex.search_all(source):
+			_add_edge(edges, seen, constants, found.get_string(1), "RECRUIT")
+
+	# Mekân ekranları tayfa düğmesini `own_scene` değişkeniyle kuruyor, o
+	# yüzden regex yalnızca hedefi görüyor; gönderenleri burada tamamlıyoruz.
+	for venue in ["ECONOMY", "TAVERN", "GUILD"]:
+		_add_edge(edges, seen, constants, venue, "RECRUIT")
+
+	_add_table_driven_edges(edges, seen, constants)
+	return edges
+
+## Şehir haritası ve yol ekranı hedefi bir tabloda taşıyıp `Nav.open(Nav.X,
+## scene_path)` diye açıyor - hedef sabit değil, değişken. Böyle bir ekranın
+## *bahsettiği* her sahne sabiti onun açabileceği bir ekrandır; aksi halde
+## şehrin beş mekânı grafikte hiç görünmez ve "yetim ekran yok" kontrolü
+## tam da kilitlenmenin yaşandığı yerde kör kalır.
+func _add_table_driven_edges(edges: Array, seen: Dictionary, constants: Dictionary) -> void:
+	var variable_open := RegEx.new()
+	variable_open.compile("Nav\\.open\\(\\s*Nav\\.([A-Z_]+)\\s*,\\s*(?!Nav\\.)")
+	var mention := RegEx.new()
+	mention.compile("Nav\\.([A-Z_]+)")
+	var go_root_call := RegEx.new()
+	go_root_call.compile("Nav\\.go_root\\(\\s*Nav\\.([A-Z_]+)\\s*\\)")
+
+	for script_path in _all_screen_scripts():
+		var source := _read_code(script_path)
+		var sources := variable_open.search_all(source)
+		if sources.is_empty():
+			continue
+
+		# `go_root` ile anılanlar bir geçiş değil, kök atlaması.
+		var excluded := {}
+		for found in go_root_call.search_all(source):
+			excluded[found.get_string(1)] = true
+
+		for opener in sources:
+			var from_name := opener.get_string(1)
+			for found in mention.search_all(source):
+				var to_name := found.get_string(1)
+				if to_name == from_name or excluded.has(to_name):
+					continue
+				if not _is_scene_constant(constants, to_name):
+					continue
+				_add_edge(edges, seen, constants, from_name, to_name)
+
+func _is_scene_constant(constants: Dictionary, name: String) -> bool:
+	if not constants.has(name):
+		return false
+	var value = constants[name]
+	return value is String and String(value).begins_with("res://scenes/")
+
+func _add_edge(edges: Array, seen: Dictionary, constants: Dictionary, from_name: String, to_name: String) -> void:
+	if not constants.has(from_name) or not constants.has(to_name):
+		return
+	var from_path := String(constants[from_name])
+	var to_path := String(constants[to_name])
+	var key := "%s>%s" % [from_path, to_path]
+	if seen.has(key):
+		return
+	seen[key] = true
+	edges.append({"from": from_path, "to": to_path})
+
+## Köklerden başlayarak grafikteki bütün yolları çıkarır (aynı ekranı iki
+## kez ziyaret etmeden, yani döngüler sonsuza açılmadan).
+func _all_paths(nav, edges: Array) -> Array:
+	var out_edges := {}
+	for edge in edges:
+		var from: String = edge.from
+		if not out_edges.has(from):
+			out_edges[from] = []
+		(out_edges[from] as Array).append(String(edge.to))
+
+	var paths: Array = []
+	for root in nav.ROOTS:
+		_walk(String(root), [String(root)], out_edges, paths)
+	return paths
+
+func _walk(node: String, path: Array, out_edges: Dictionary, paths: Array) -> void:
+	if path.size() > 1:
+		paths.append(path.duplicate())
+	if path.size() >= MAX_PATH_DEPTH:
+		return
+	for next_node in (out_edges.get(node, []) as Array):
+		var next_path: String = String(next_node)
+		# Bir köke varmak yolu bitirir - geçmiş orada silinir, derine
+		# devam eden bir dal değil.
+		if path.has(next_path) or _roots.has(next_path):
+			continue
+		path.append(next_path)
+		_walk(next_path, path, out_edges, paths)
+		path.pop_back()
+
+# --- Yardımcılar ---
+
+func _path_text(path: Array) -> String:
+	var parts: Array[String] = []
+	for entry in path:
+		parts.append(_short(String(entry)))
+	return " → ".join(parts)
+
+func _short(scene_path: String) -> String:
+	return scene_path.get_file().trim_suffix(".tscn")
+
+func _scene_paths(nav) -> Array[String]:
+	var paths: Array[String] = []
+	var constants: Dictionary = nav.get_script_constant_map()
+	for key in constants:
+		var value = constants[key]
+		if value is String and value.begins_with("res://scenes/"):
+			paths.append(value)
+	return paths
 
 func _scene_node_paths(scene_path: String) -> Dictionary:
 	var packed: PackedScene = load(scene_path)
@@ -143,7 +355,6 @@ func _scene_node_paths(scene_path: String) -> Dictionary:
 			known[full] = true
 	return known
 
-## `$MarginContainer/VBoxContainer/Foo` biçimindeki yolları ayıklar.
 func _dollar_paths(source: String) -> Array[String]:
 	var paths: Array[String] = []
 	var regex := RegEx.new()
@@ -154,18 +365,6 @@ func _dollar_paths(source: String) -> Array[String]:
 			paths.append(path)
 	return paths
 
-func _scene_paths(nav) -> Array[String]:
-	var paths: Array[String] = []
-	for key in nav.get_script_constant_map():
-		var value = nav.get_script_constant_map()[key]
-		if value is String and value.begins_with("res://scenes/"):
-			paths.append(value)
-	return paths
-
-
-
-## .tscn'in kök script'ini metinden okur - sahneyi instantiate etmek
-## headless ortamda mümkün değil.
 func _script_of_scene(scene_path: String) -> String:
 	var source := _read(scene_path)
 	for line in source.split("\n"):

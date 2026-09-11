@@ -15,6 +15,7 @@ var _session: GameSession
 
 func _ready() -> void:
 	_session = GameState.get_session()
+	Nav.go_root(Nav.CITY_MAP)
 	_party_button.pressed.connect(_on_party_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_refresh_title()
@@ -94,13 +95,10 @@ func _add_spot(spot_name: String, description: String, position: Vector2, scene_
 	_map_panel.add_child(button)
 
 func _on_spot_pressed(scene_path: String) -> void:
-	Nav.return_scene = Nav.CITY_MAP
-	get_tree().change_scene_to_file(scene_path)
+	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, scene_path))
 
 func _on_party_pressed() -> void:
-	Nav.return_scene = Nav.CITY_MAP
-	get_tree().change_scene_to_file(Nav.PARTY)
+	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.PARTY))
 
 func _on_gate_pressed() -> void:
-	Nav.return_scene = Nav.WORLD_HUB
-	get_tree().change_scene_to_file(Nav.WORLD_HUB)
+	get_tree().change_scene_to_file(Nav.go_root(Nav.WORLD_HUB))

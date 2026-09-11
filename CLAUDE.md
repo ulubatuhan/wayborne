@@ -345,26 +345,40 @@ losing every companion's levels, traits and equipment.
   - `city_map.gd`: placeholder city map. City interaction is deliberately
     **not** card-based (see Event Engine Rules): each location button opens its
     own screen (market → economy, guild → haggling, tavern → travel map).
-  - `nav.gd`: every scene path lives here, plus `Nav.return_scene` — the screen
-    a sub-screen's back button returns to. A spot sets it before changing
-    scenes, so the same economy screen returns to the road or to the city
-    depending on where it was entered from. `selector_return_scene` is the
-    test selector's own back target, kept separate because sub-tests overwrite
-    `return_scene` to point back at the selector; `character.gd` (opened only
-    from `party.gd`) follows the same pattern by hardcoding its own back
-    target to `Nav.PARTY` instead of touching `return_scene` at all, so the
-    party screen's own return target (world hub or city map, whoever sent the
-    player there) survives the detour. `character_target_index` carries which
-    party member the character screen shows.
+  - `nav.gd`: every scene path lives here, plus the **navigation stack** —
+    `open(from, to)` pushes the sender, `back()` pops one, `go_root(scene)`
+    clears it. `recruit_venue` and `character_target_index` are the only
+    remaining statics, and neither is navigation: they are data a screen
+    carries to the next one (which candidate pool, which party member).
   - There is no SceneManager autoload: navigation is `change_scene_to_file()`
-    plus these static vars.
+    plus this stack.
 
 ### World Navigation Rules
 
+Getting stuck in a menu was this project's most-repeated complaint, and it
+was **architectural, not a run of separate bugs**. `Nav` used to hold a
+single `return_scene` string, and one string can only remember *one* level
+of history: the moment navigation went two deep (city → guild → recruit)
+somebody had to overwrite that slot, and whoever overwrote it destroyed
+another screen's only way out. Three ad-hoc patches had already been made
+to the same hole — a second variable for the recruit screen, a hardcoded
+target in `character.gd`, a `return` field carried in the road's spot table
+— and every new screen would have wanted a fourth.
+
+- **Navigation is a stack.** `Nav.open(from, to)` pushes `from`;
+  `Nav.back()` pops. Back **always shrinks the stack**, so a loop cannot be
+  built, and depth is bounded only by `MAX_DEPTH`, so no screen can overwrite
+  another's exit. Never add a per-screen "where do I return to" variable
+  again — that is the bug this replaced.
 - Never hardcode a `res://scenes/...` path in a screen script; use `Nav`.
-- A screen's back button goes to `Nav.return_scene`, never to a fixed scene.
-- Whoever sends the player somewhere is responsible for setting
-  `Nav.return_scene` first.
+- A screen's back button goes to `Nav.back()` and is labelled
+  `Nav.back_label()`, so the player reads where it leads before pressing it.
+- **Roots are gone to, not returned to.** `Nav.ROOTS` (road, city, main menu)
+  carry their own exits instead of a back button, and reaching one clears the
+  stack — `go_root()` explicitly, and `open()` too when the destination is a
+  root, so a screen that opens the city gate cannot leave a stale road on the
+  stack. An empty stack still lands somewhere (`FALLBACK_ROOT`): a back button
+  that goes nowhere is just another word for stuck.
 - A screen whose content can grow past the viewport (market rows, the contract
   board, the party list) puts that content in a `ScrollContainer` and keeps the
   back button **outside** it. Otherwise the back button is pushed off-screen and
@@ -372,32 +386,36 @@ losing every companion's levels, traits and equipment.
   again on four screens that built their exit button in code straight into
   `_content` (character creation's "Başla" sat below six stat rows, on the
   first screen of a new game).
-- **A screen that opens a sub-screen must not overwrite its own return
-  target.** `Nav.return_scene` belongs to whoever sent the player *here*;
-  writing your own scene into it so the sub-screen can come back destroys
-  the only way out. That is what locked the player inside the Guild: the
-  venue screens set `return_scene` to themselves before opening the recruit
-  screen, so on return their own back button reloaded them, forever. A
-  sub-screen gets its **own** variable - `Nav.recruit_return_scene`, reached
-  only through `Nav.open_recruit()`/`close_recruit()`, exactly like
-  `character.gd` hardcoding `Nav.PARTY` and the test selector keeping its
-  own target. Hub screens (road, city, main menu) writing `return_scene =
-  <themselves>` is the correct use, not the bug.
 - **The road is left through the road's own actions.** On a live journey
-  `road_journey.gd`'s exit goes to the main menu, never to `return_scene`:
+  `road_journey.gd`'s exit goes to the main menu, never through the stack:
   it used to drop the player on the city map with `is_journey_active()`
   still true, and since nothing but the planner ever navigates to
   `Nav.JOURNEY`, the road could not be re-entered. Arriving, turning back
   and diverting are the exits (see En-Route Plan Rules).
-- `tests/test_navigation.gd` locks all of this. Control scenes cannot be
-  instantiated headless, so it tests what the screens *call* plus the scene
-  files themselves: the recruit funnel preserves the caller's return target,
-  every `Nav` scene constant resolves to a file whose script has at least one
-  exit, no back label renders blank, no exit button is added to `_content`,
-  and - via `PackedScene.get_state()`, which reads a scene without building
-  it - every `$A/B` node path in a screen script actually exists in its
-  scene. That last one is the only cheap guard against a typo Godot reports
-  only when the player opens the screen.
+- `tests/test_navigation.gd` locks all of this, and **derives the screen
+  graph from the source** rather than from a hand-written table — a table
+  drifts from the code and then certifies the wrong game. It scans every
+  `Nav.open(Nav.A, Nav.B)` call; for the two screens that carry their
+  destination in a table (`city_map`, `world_hub`) and therefore pass it as a
+  variable, it treats every scene constant the script mentions as a
+  destination, which is exactly how the city's five venues re-entered the
+  graph after the migration. On that graph it asserts: every edge returns to
+  its opener, every path from every root unwinds to a root with the stack
+  shrinking at each step, back always leads somewhere, no screen opens
+  itself, roots clear the stack, the stack cannot grow without bound, and no
+  screen is orphaned. Control scenes cannot be instantiated headless, so the
+  rest is checked against the files: every `Nav` scene constant resolves to a
+  scene whose script has at least one exit, no back label renders blank, no
+  exit button is added to `_content`, and — via `PackedScene.get_state()`,
+  which reads a scene without building it — every `$A/B` node path in a
+  screen script actually exists in its scene. That last one is the only cheap
+  guard against a typo Godot reports only when the player opens the screen.
+- **A suite that cannot load must fail the run.** A parse error in a test
+  file made `load(path).new()` abort `run_tests.gd` mid-loop, and since
+  `_process()` still returned true the runner exited **0** — the navigation
+  suite silently stopped running and the build stayed green. The runner now
+  checks `can_instantiate()` and counts a broken suite as a failure. Same
+  family as the CI log grep: Godot reports these and exits 0 anyway.
 
 ### Caravan Ruin Rules
 
@@ -932,8 +950,8 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
     subscriber that actually outlives a scene.
   - `DevPanel` (registered autoload): F1 geliştirici menüsü. `test_selector.tscn`'i
     çalışma anında `load()` ile kurup bir CanvasLayer'a gizli ekler; F1 açıp
-    kapatır. `Nav.return_scene`'e dokunmaz, bu yüzden bir hedefe geçince o
-    ekranın geri tuşu paneli açtığın yere döner, panele değil.
+    kapatır. Bir hedefe geçerken gezinme yığınına *o anki* sahneyi iter, o
+    yüzden hedefin geri tuşu paneli açtığın yere döner, panele değil.
   - `SaveManager` (registered autoload): `GameSession.to_save_dict()` /
     `load_from_dict()` içeriği bilir, burada yalnızca `user://save.json`
     G/Ç'si var. Yalnızca şehir varışında (`finish_journey()` sonrası)

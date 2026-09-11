@@ -2,7 +2,7 @@ extends Control
 
 ## Ana menüden açılan tek ayar ekranı - şimdilik dil seçimi (eskiden ana
 ## menüde duruyordu, bkz. main_menu.gd). Yalnızca ana menüden açıldığı
-## için geri tuşu Nav.return_scene'e değil, doğrudan Nav.MAIN_MENU'ye
+## için geri tuşu gezinme yığınını izler ve açıldığı yere
 ## döner (bkz. character.gd'nin aynı deseni, CLAUDE.md World Navigation
 ## Rules).
 ## Dil listesi burada tutulmuyor: tek doğruluk kaynağı UserSettings.SUPPORTED
@@ -46,4 +46,4 @@ func _refresh_texts() -> void:
 	_back_button.text = tr("UI_BACK_TO_MENU")
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.MAIN_MENU)
+	get_tree().change_scene_to_file(Nav.back())

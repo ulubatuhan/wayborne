@@ -27,7 +27,7 @@ func _ready() -> void:
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_repair_button.pressed.connect(_on_repair_pressed)
 	_buy_wagon_button.pressed.connect(_on_buy_wagon_pressed)
-	_back_button.text = Nav.return_label()
+	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_equipment_shop()
 	_refresh()
@@ -138,4 +138,4 @@ func _clear_message() -> void:
 	_message_label.text = ""
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.return_scene)
+	get_tree().change_scene_to_file(Nav.back())

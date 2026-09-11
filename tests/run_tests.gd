@@ -54,19 +54,33 @@ func _initialize() -> void:
 
 	var reporter = load(REPORTER_PATH).new()
 	var missing: Array[String] = []
+	var broken: Array[String] = []
 
 	for suite_path in SUITE_PATHS:
 		if not ResourceLoader.exists(suite_path):
 			missing.append(suite_path)
 			continue
 
-		var suite = load(suite_path).new()
+		# Ayrıştırma hatası olan bir paket `load()`'tan null *dönmez*, kurulamaz
+		# bir GDScript döner - ve `.new()` çağrısı _initialize'ı ortasında
+		# kesip koşucuyu 0 ile çıkartırdı. Bir paketin sessizce hiç koşmaması
+		# yeşil bir koşudan daha kötü: gerçekten yaşandı (bkz. CLAUDE.md,
+		# "Godot ayrıştırma hatasını basıp 0 ile çıkar").
+		var script = load(suite_path)
+		if script == null or not script.can_instantiate():
+			broken.append(suite_path)
+			continue
+
+		var suite = script.new()
 		reporter.begin_suite(suite.suite_name())
 		suite.run(reporter)
 		print(reporter.end_suite())
 
 	for suite_path in missing:
 		print("  ! paket bulunamadı: %s" % suite_path)
+
+	for suite_path in broken:
+		print("  ! paket kurulamadı (ayrıştırma hatası?): %s" % suite_path)
 
 	if not reporter.failures.is_empty():
 		print("")
@@ -79,7 +93,7 @@ func _initialize() -> void:
 
 	# reporter çalışma anında load() ile geldiği için Variant; ondan
 	# türeyen ifadede `:=` çıkarım yapamaz (bkz. city_map.gd hatası).
-	var has_error: bool = reporter.failed > 0 or not missing.is_empty()
+	var has_error: bool = reporter.failed > 0 or not missing.is_empty() or not broken.is_empty()
 	quit(1 if has_error else 0)
 
 ## quit() ana döngüyü bir sonraki karede kapatır; işi _initialize'da
