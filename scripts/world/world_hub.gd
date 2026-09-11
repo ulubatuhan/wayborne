@@ -69,6 +69,11 @@ var _stress_bar: PulseBar
 
 func _ready() -> void:
 	Nav.go_root(Nav.WORLD_HUB)
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
+	# metin koddan, anahtarla gelir (bkz. Localization Rules).
+	_party_button.text = tr("UI_HUB_PARTY")
+	_menu_button.text = tr("UI_HUB_MENU")
+	_hint_label.text = tr("UI_HUB_CONTROLS")
 	_party_button.pressed.connect(_on_party_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 	_build_status_bars()

@@ -13,6 +13,8 @@ extends Control
 @onready var _continue_button: Button = $MarginContainer/VBoxContainer/ContinueButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_GOAL_TITLE")
+	_continue_button.text = tr("UI_CONTINUE")
 	_continue_button.pressed.connect(_on_continue_pressed)
 
 	var session: GameSession = GameState.get_session()

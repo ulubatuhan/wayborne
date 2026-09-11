@@ -45,6 +45,12 @@ var _pending_purchase_quantity: int = 0
 
 func _ready() -> void:
 	_session = GameState.get_session()
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
+	# metin koddan, anahtarla gelir (bkz. Localization Rules).
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_MARKET_TITLE")
+	_content.get_node("BalanceRow/BalanceLabel").text = tr("UI_MARKET_BALANCE")
+	_content.get_node("ContentRow/ShopPanel/ShopTitle").text = tr("UI_MARKET_SHOP")
+	_content.get_node("ContentRow/InventoryPanel/InventoryTitle").text = tr("UI_MARKET_INVENTORY")
 	_current_location = WorldMapData.get_location_by_id(_session.current_location_id)
 	_inventory_grid.columns = GRID_COLUMNS
 	_shop_items = ItemCatalog.get_trade_goods()

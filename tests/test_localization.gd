@@ -31,6 +31,8 @@ func run(t) -> void:
 	_test_placeholders_match_across_locales(t)
 	_test_every_referenced_key_exists(t)
 	_test_no_hardcoded_prose_in_screens(t)
+	_test_no_hardcoded_prose_in_scenes(t)
+	_test_scene_keys_are_defined(t)
 
 func _supported_locales() -> Array:
 	var script = load(USER_SETTINGS_PATH)
@@ -322,3 +324,86 @@ func _read_text(path: String) -> String:
 	var text := file.get_as_text()
 	file.close()
 	return text
+
+## Metin taraması yalnızca `scripts/`'e bakıyordu, ve bu gerçek bir gediği
+## sakladı: `.tscn` dosyalarındaki statik etiketler (pazar başlığı, kilise
+## açıklaması, "Partiyi Görüntüle" tuşu...) hiçbir zaman çevrilmiyordu.
+## Ekranın `_ready()`'si o düğümün yazısını anahtarla atamazsa, sahnedeki
+## Türkçe olduğu gibi kalıyor - on bir dilin onunda.
+##
+## Kural basit ve makineyle denetlenebilir: sahne dosyasındaki hiçbir
+## `text = "..."` Türkçeye özgü harf taşımasın. Böyle bir yazı ya koddan
+## atanmıyordur (hata) ya da atanıyordur ama sahnedeki kopya yanıltıcıdır -
+## iki durumda da sahneden temizlenmesi doğrusu.
+func _test_no_hardcoded_prose_in_scenes(t) -> void:
+	var turkish := RegEx.new()
+	turkish.compile("[şŞıİğĞüÜöÖçÇ]")
+	var text_line := RegEx.new()
+	text_line.compile('^text = "(.*)"$')
+
+	for scene_path in _scene_files():
+		var source := _read_text(scene_path)
+		for line in source.split("\n"):
+			var found := text_line.search(line)
+			if found == null:
+				continue
+			var value := found.get_string(1)
+			t.ok(
+				turkish.search(value) == null,
+				"%s: sahnedeki yazı koddan anahtarla gelmeli, sahnede sabit değil (\"%s\")" % [
+					scene_path, value.substr(0, 40)
+				]
+			)
+
+## F1 geliştirici ekranları oyuncuya hiç ulaşmaz (bkz. DEV_ONLY_SCRIPTS),
+## oyunun adı da her dilde aynı kalır.
+const SCENE_EXEMPT: Array[String] = [
+	"res://scenes/game/combat.tscn",
+	"res://scenes/ui/test_selector.tscn",
+	"res://scenes/game/haggling.tscn",
+]
+
+func _scene_files() -> Array[String]:
+	var found: Array[String] = []
+	_collect_scenes("res://scenes", found)
+	return found
+
+func _collect_scenes(directory: String, found: Array[String]) -> void:
+	var dir := DirAccess.open(directory)
+	if dir == null:
+		return
+	for name in dir.get_files():
+		if not name.ends_with(".tscn"):
+			continue
+		var path := "%s/%s" % [directory, name]
+		if not SCENE_EXEMPT.has(path):
+			found.append(path)
+	for name in dir.get_directories():
+		_collect_scenes("%s/%s" % [directory, name], found)
+
+## Sahneler artık Türkçe yerine **anahtar** taşıyor, ama tanımsız bir
+## anahtar aynı sessiz hata: ekranda "UI_MARKET_SHOP" yazar ve bunu yalnızca
+## o ekranı açan görür. Sahnedeki her anahtar bir CSV'de tanımlı olmalı.
+func _test_scene_keys_are_defined(t) -> void:
+	var defined := _all_keys()
+	var key_shape := RegEx.new()
+	key_shape.compile("^[A-Z][A-Z0-9_]+$")
+	var text_line := RegEx.new()
+	text_line.compile('^text = "(.*)"$')
+
+	for scene_path in _scene_files():
+		for line in _read_text(scene_path).split("\n"):
+			var found := text_line.search(line)
+			if found == null:
+				continue
+			var value := found.get_string(1)
+			if key_shape.search(value) == null or SCENE_TEXT_NOT_A_KEY.has(value):
+				continue
+			t.ok(
+				defined.has(value),
+				"%s: sahnedeki anahtar tanımlı (%s)" % [scene_path.get_file(), value]
+			)
+
+## Anahtar biçimine uyan ama anahtar olmayan tek metin: oyunun kendi adı.
+## Özel isim, her dilde aynı kalır.
+const SCENE_TEXT_NOT_A_KEY: Array[String] = ["WAYBORNE"]

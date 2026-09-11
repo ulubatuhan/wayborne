@@ -29,7 +29,7 @@ theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Harita"
+text = "UI_MAP_TITLE"
 horizontal_alignment = 1
 
 [node name="ContentRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
@@ -52,4 +52,4 @@ theme_override_constants/separation = 6
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Ana Menüye Dön"
+text = "UI_BACK"

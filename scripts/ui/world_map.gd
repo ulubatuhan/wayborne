@@ -24,6 +24,7 @@ var _focused_location: Location
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_MAP_TITLE")
 	_session = GameState.get_session()
 	_current_location_id = _session.current_location_id
 	_back_button.text = Nav.back_label()

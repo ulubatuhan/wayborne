@@ -24,6 +24,10 @@ var _sell_wagon_button: Button
 
 func _ready() -> void:
 	_session = GameState.get_session()
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü
+	# her metin koddan, anahtarla gelir (bkz. Localization Rules).
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CITY_YARD")
+	$MarginContainer/VBoxContainer/EquipmentTitle.text = tr("UI_YARD_SMITH_TITLE")
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_repair_button.pressed.connect(_on_repair_pressed)

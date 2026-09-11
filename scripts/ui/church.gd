@@ -14,6 +14,7 @@ var _purification_panel: PurificationPanel
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/InfoLabel.text = tr("UI_CHURCH_HINT")
 	_session = GameState.get_session()
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)

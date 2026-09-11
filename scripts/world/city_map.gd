@@ -5,22 +5,46 @@ extends Control
 
 const SPOT_SIZE: Vector2 = Vector2(190, 76)
 
-@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MapPanel
+@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapPanel
+@onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
 @onready var _party_button: Button = $MarginContainer/VBoxContainer/PartyButton
 @onready var _gate_button: Button = $MarginContainer/VBoxContainer/GateButton
 
 var _session: GameSession
+var _brief_panel: CityBriefPanel
 
 func _ready() -> void:
 	_session = GameState.get_session()
 	Nav.go_root(Nav.CITY_MAP)
+	# Sahne dosyasındaki yazı yalnızca editörde ne olduğunu görmek için;
+	# oyuncunun gördüğü metin her zaman koddan, anahtarla gelir - yoksa
+	# ekran hangi dile geçilirse geçilsin Türkçe kalır.
+	_info_label.text = tr("UI_CITY_INFO")
+	_party_button.text = tr("UI_CITY_VIEW_PARTY")
+	_gate_button.text = tr("UI_CITY_LEAVE_BY_GATE")
 	_party_button.pressed.connect(_on_party_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_refresh_title()
 	_build_spots()
+	_build_brief()
 	_maybe_show_onboarding()
+
+## Şehir artık bir kapı listesi değil, kararın verildiği yer: kervanın
+## neye ihtiyacı olduğu ve bugün nereye gidilebileceği burada okunuyor
+## (bkz. CityBriefPanel). Ekran değiştirmeyi panel değil bu ekran yapıyor -
+## gezinme yığınını iten taraf her zaman gönderen ekrandır (bkz. Nav).
+func _build_brief() -> void:
+	_brief_panel = CityBriefPanel.new()
+	_brief_container.add_child(_brief_panel)
+	_brief_panel.screen_requested.connect(_on_spot_pressed)
+	_brief_panel.planner_requested.connect(_on_planner_requested)
+	_brief_panel.setup(_session)
+
+func _on_planner_requested(destination_id: String) -> void:
+	TravelContext.selected_destination_id = destination_id
+	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.CARAVAN_PLANNER))
 
 ## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
 ## mahsus, atlanabilir bir ipucu katmanı gösterir (bkz. OnboardingPanel,

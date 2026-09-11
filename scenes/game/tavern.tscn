@@ -30,7 +30,7 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Taverna"
+text = "UI_CITY_TAVERN"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -43,7 +43,7 @@ theme_override_constants/separation = 14
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
-text = "Yolcular burada rota dedikodusu satar. Ödersen tehlikeyi tam bilirsin; ödemezsen kaba bir tahminle yola çıkarsın."
+text = "UI_TAVERN_HINT"
 
 [node name="RumorList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
@@ -51,8 +51,8 @@ theme_override_constants/separation = 8
 
 [node name="MapButton" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
-text = "Dünya Haritasına Git"
+text = "UI_GO_TO_WORLD_MAP"
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Şehre Dön"
+text = "UI_BACK"

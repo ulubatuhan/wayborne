@@ -29,7 +29,7 @@ theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Pazar"
+text = "UI_MARKET_TITLE"
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
@@ -51,7 +51,7 @@ theme_override_constants/separation = 8
 
 [node name="BalanceLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/BalanceRow"]
 layout_mode = 2
-text = "Gümüş Groat:"
+text = "UI_MARKET_BALANCE"
 
 [node name="BalanceValueLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/BalanceRow"]
 layout_mode = 2
@@ -76,7 +76,7 @@ theme_override_constants/separation = 8
 
 [node name="ShopTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/ShopPanel"]
 layout_mode = 2
-text = "Mağaza"
+text = "UI_MARKET_SHOP"
 
 [node name="ShopList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/ShopPanel"]
 layout_mode = 2
@@ -89,7 +89,7 @@ theme_override_constants/separation = 8
 
 [node name="InventoryTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/InventoryPanel"]
 layout_mode = 2
-text = "Envanter"
+text = "UI_MARKET_INVENTORY"
 
 [node name="InventoryGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/InventoryPanel"]
 layout_mode = 2

@@ -342,9 +342,10 @@ losing every companion's levels, traits and equipment.
     one wagon per `owned_wagon_count`. The city gate and the first wagon are
     interaction spots: walk within `INTERACT_RANGE`, then click them or press E. No physics bodies — plain position arithmetic on a
     single ground line, so it stays cheap on Web export.
-  - `city_map.gd`: placeholder city map. City interaction is deliberately
-    **not** card-based (see Event Engine Rules): each location button opens its
-    own screen (market → economy, guild → haggling, tavern → travel map).
+  - `city_map.gd`: the city, and the game's decision hub. A new game starts
+    here, not on the road. City interaction is deliberately **not** card-based
+    (see Event Engine Rules): each location button opens its own screen.
+    Beside the map sits `CityBriefPanel` (see City Hub Rules).
   - `nav.gd`: every scene path lives here, plus the **navigation stack** —
     `open(from, to)` pushes the sender, `back()` pops one, `go_root(scene)`
     clears it. `recruit_venue` and `character_target_index` are the only
@@ -416,6 +417,41 @@ target in `character.gd`, a `return` field carried in the road's spot table
   suite silently stopped running and the build stayed green. The runner now
   checks `can_instantiate()` and counts a broken suite as a failure. Same
   family as the CI log grep: Godot reports these and exits 0 anyway.
+
+### City Hub Rules
+
+The city is where the player decides; the road is where the decision is
+paid for. A new game starts in a city (`character_creation.gd` →
+`Nav.go_root(Nav.CITY_MAP)`), and so does every arrival and every
+"Continue".
+
+- **The city answers two questions on one screen, or it answers neither.**
+  It used to be five doors and an exit: to learn where you could even go,
+  you had to walk tavern → world map → planner, and to learn what the
+  caravan lacked you had to visit all five doors. `CityBriefPanel` answers
+  *what does the caravan need* and *where can it go today* beside the map.
+- **Every warning names the screen that fixes it, and pressing it goes
+  there.** A warning that only worries the player is worse than no warning.
+  `tests/test_city_commerce.gd` asserts every produced need points at a
+  screen the city can actually open — a dead button here would drop the
+  player back into exactly the stuck feeling the navigation stack was built
+  to remove.
+- **No need, no row.** A permanent checklist of green ticks is noise; when
+  nothing is wrong the panel says so in one line.
+- **Debt shows whenever it exists, not only when it is nearly due.** Showing
+  it only inside the warning window meant a caravan 350 in the hole read as
+  healthy until the last week. Urgency lives in the colour, not in whether
+  the row appears at all.
+- **The panel invents nothing.** Every line reads a value the session
+  already publishes (`get_route_danger`, `get_daily_provision_consumption`,
+  `get_accepted_offers_for_destination`, `party_stress`). It shows; it does
+  not decide. Navigation is likewise not its job: it emits
+  `screen_requested`/`planner_requested` and `city_map.gd` does the
+  `Nav.open()`, because the screen that sends the player is always the one
+  that pushes the stack.
+- **Setting out from the brief is the same handoff the map uses**
+  (`TravelContext.selected_destination_id` then the planner), so there is
+  one path into a journey, not two.
 
 ### Caravan Ruin Rules
 
@@ -952,6 +988,18 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   and `culture_catalog.gd`/`recruit_catalog.gd`/`user_settings.gd` hold
   proper nouns - name pools, and **language names, which must stay in their
   own language** or a player cannot find the one they read.
+- **A `.tscn` is a text layer too, and the scan could not see it.** The
+  prose scan covered `scripts/` only, so every static label baked into a
+  scene file — the market's headings, the church's explanation, "Partiyi
+  Görüntüle", the road's control hint — stayed Turkish in ten of the eleven
+  languages. Twenty-two of them. Scene text is now always a **key**, the
+  screen assigns the visible string from `tr()` in `_ready()`, and two
+  checks keep it that way: no scene may contain a text literal with
+  Turkish-specific letters, and every key-shaped scene literal must be
+  defined in a CSV (the sole exception is `WAYBORNE`, the game's own name).
+  Putting the key in the scene rather than blanking it is deliberate: if a
+  screen ever forgets to assign, the player sees `UI_MARKET_SHOP` — loud —
+  instead of silent Turkish.
 - **A translation must carry the same format arguments, in the same order,
   as the source.** GDScript's `%` operator has no positional form
   (`%2$s`), so a reordered or dropped `%d` crashes the game the moment that

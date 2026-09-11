@@ -1,9 +1,11 @@
 extends RefCounted
 
-## Şehirde yapılan iki yeni para hamlesi: vagon satmak ve loncadan borç
-## almak. İkisi de kervanın kalıcı durumunu değiştiriyor, yani ikisi de
-## sömürüye açık - o yüzden burada formülden çok **sömürünün kapalı
-## olduğu** doğrulanıyor (bkz. test_haggling.gd'nin aynı yaklaşımı).
+## Şehirde verilen kararlar: vagon satmak, loncadan borç almak ve şehrin
+## karar paneli (`CityBriefPanel`). İlk ikisi kervanın kalıcı durumunu
+## değiştiriyor, yani ikisi de sömürüye açık - o yüzden orada formülden çok
+## **sömürünün kapalı olduğu** doğrulanıyor (bkz. test_haggling.gd'nin aynı
+## yaklaşımı). Panel tarafında doğrulanan şey farklı: her uyarının onu
+## çözen ekranı gösterdiği, ve hiçbir uyarının ölü bir düğmeye bağlanmadığı.
 ##
 ## Kapatılan üç kaçamak:
 ##   1. Al-sat döngüsü: vagon alıp satmak para kazandırmamalı.
@@ -26,6 +28,10 @@ func run(t) -> void:
 	_test_borrowing_to_clear_an_overdraft_is_not_free(t)
 	_test_loan_costs_more_than_it_pays(t)
 	_test_loan_closed_on_the_road_and_without_trust(t)
+	_test_brief_flags_what_the_caravan_lacks(t)
+	_test_brief_needs_point_at_real_screens(t)
+	_test_brief_shows_debt_even_when_the_term_is_far_off(t)
+	_test_brief_offers_every_open_route(t)
 
 func _session(gold: int = 500, wagons: int = 1) -> GameSession:
 	return GameSession.new(gold, 10, wagons)
@@ -211,3 +217,126 @@ func _test_loan_closed_on_the_road_and_without_trust(t) -> void:
 	t.ne(session.get_loan_block_reason(), "", "itibarsız kervana kredi kapalı")
 	t.not_ok(session.borrow_from_guild(GameSession.LOAN_MIN_AMOUNT), "kapalı kredi para vermez")
 	t.eq(session.wallet.balance, 200, "kese değişmedi")
+
+# --- Şehrin karar paneli ---
+#
+# Panel hiçbir mekanik icat etmiyor, oturumun yayımladığı değerleri
+# gösteriyor. O yüzden burada sayı değil **bağlantı** doğrulanıyor: bir
+# eksiklik varsa karşılığı olan satır çıkıyor mu, ve o satırın düğmesi
+# gerçekten o eksikliği çözen ekrana mı gidiyor. Ölü bir uyarı - "erzağın
+# az" deyip hiçbir yere götürmeyen bir düğme - kilitli menüyle aynı hayal
+# kırıklığı.
+
+func _brief_session(gold: int, provisions: int) -> GameSession:
+	var session := GameSession.new(gold, provisions, 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var player := CharacterData.create("Kervanbaşı", "gocebe", CharacterStats.new())
+	player.is_player = true
+	session.start_playthrough(player, rng)
+	session.change_provisions(provisions - session.get_provisions())
+	return session
+
+## Paneli kurup ürettiği ihtiyaç listesini döner, sonra düğümü serbest
+## bırakır - testlerin ObjectDB'de iz bırakmaması için.
+func _brief_needs(session: GameSession) -> Array[Dictionary]:
+	var panel := CityBriefPanel.new()
+	panel.setup(session)
+	var needs := panel._collect_needs()
+	panel.free()
+	return needs
+
+func _need_texts(needs: Array[Dictionary]) -> Array[String]:
+	var scenes: Array[String] = []
+	for need in needs:
+		scenes.append(String(need.scene))
+	return scenes
+
+func _test_brief_flags_what_the_caravan_lacks(t) -> void:
+	var stocked := _brief_session(900, 90)
+	var offers := WorldMapData.get_offers_from_origin(stocked.current_location_id)
+	if not offers.is_empty():
+		stocked.accept_contract(offers[0])
+	t.ok(
+		_brief_needs(stocked).is_empty(),
+		"hazır kervanda uyarı listesi boş - boş bir uyarı listesi gürültüdür"
+	)
+
+	var lacking := _brief_session(40, 2)
+	lacking.owned_wagon_damaged = 1
+	lacking.party_stress = GameSession.MAX_STRESS
+	var scenes := _need_texts(_brief_needs(lacking))
+	t.ok(scenes.has(Nav.ECONOMY), "az erzak pazarı gösterir")
+	t.ok(scenes.has(Nav.CARAVAN_YARD), "hasarlı vagon avluyu gösterir")
+	t.ok(scenes.has(Nav.GUILD), "kontratsızlık loncayı gösterir")
+	t.ok(scenes.has(Nav.TAVERN), "yüksek stres tavernayı gösterir")
+
+## Her uyarının düğmesi gerçek bir ekrana gitmeli; şehirden açılamayan bir
+## sahneyi göstermek oyuncuyu tam da paneli çözmek için yazdığımız yere
+## geri düşürürdü.
+func _test_brief_needs_point_at_real_screens(t) -> void:
+	var openable: Array[String] = [
+		Nav.ECONOMY, Nav.GUILD, Nav.TAVERN, Nav.CARAVAN_YARD, Nav.CHURCH
+	]
+	var session := _brief_session(0, 0)
+	session.owned_wagon_damaged = 1
+	session.party_stress = GameSession.MAX_STRESS
+	session.spend_or_owe(300)
+
+	var needs := _brief_needs(session)
+	t.ok(not needs.is_empty(), "boş kervan için uyarı üretilir")
+	for need in needs:
+		t.ok(
+			openable.has(String(need.scene)),
+			"uyarı şehirden açılabilen bir ekrana gider: %s" % String(need.scene)
+		)
+		t.ok(not String(need.action).strip_edges().is_empty(), "düğme yazısı boş değil")
+		t.ok(not String(need.text).strip_edges().is_empty(), "uyarı metni boş değil")
+
+## Vadesi bir ay sonra olan 350 altınlık açık, bu ekranda görünmeliydi ve
+## görünmüyordu: yalnızca vade yaklaşınca uyarmak, oyuncuya battığını son
+## hafta haber vermek olurdu.
+func _test_brief_shows_debt_even_when_the_term_is_far_off(t) -> void:
+	var session := _brief_session(900, 90)
+	var offers := WorldMapData.get_offers_from_origin(session.current_location_id)
+	if not offers.is_empty():
+		session.accept_contract(offers[0])
+	t.ok(_brief_needs(session).is_empty(), "borçsuz hazır kervanda uyarı yok")
+
+	session.spend_or_owe(session.wallet.balance + 350)
+	t.ge(float(session.get_total_debt()), 350.0, "açık hesap doğdu")
+	t.ok(
+		_need_texts(_brief_needs(session)).has(Nav.GUILD),
+		"vadesi uzak olsa da borç panelde görünür"
+	)
+
+## Açık her yol için bir satır; kapalı yol gizlenmez, sebebiyle birlikte
+## kapalı gösterilir (bkz. Route Rules - kapalı yol çıkmaz sokak değil).
+func _test_brief_offers_every_open_route(t) -> void:
+	var session := _brief_session(500, 40)
+	var panel := CityBriefPanel.new()
+	panel.setup(session)
+
+	var routes := WorldMapData.get_routes_from(session.current_location_id)
+	t.ok(routes.size() > 0, "başlangıç şehrinden çıkan yol var")
+
+	var buttons := _collect_buttons(panel)
+	var route_buttons := 0
+	for button in buttons:
+		if button.disabled:
+			t.ok(not button.text.strip_edges().is_empty(), "kapalı yol sebebiyle yazılır")
+		route_buttons += 1
+	t.ge(
+		float(route_buttons), float(routes.size()),
+		"her komşu şehir için bir düğme var"
+	)
+	panel.free()
+
+func _collect_buttons(node: Node) -> Array[Button]:
+	var found: Array[Button] = []
+	if node is Button:
+		found.append(node)
+	for child in node.get_children():
+		for button in _collect_buttons(child):
+			found.append(button)
+	return found

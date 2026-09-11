@@ -30,7 +30,7 @@ theme_override_constants/separation = 16
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Kervan Baronu Oldun!"
+text = "UI_GOAL_TITLE"
 
 [node name="SummaryLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -38,4 +38,4 @@ autowrap_mode = 3
 
 [node name="ContinueButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Devam Et"
+text = "UI_CONTINUE"

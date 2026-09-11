@@ -41,6 +41,7 @@ var _start_button: Button
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
+	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CREATION_TITLE")
 	_rng.randomize()
 	_build_ui()
 	_on_culture_selected(0)

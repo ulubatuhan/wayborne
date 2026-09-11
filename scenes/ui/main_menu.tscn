@@ -35,16 +35,16 @@ horizontal_alignment = 1
 [node name="ContinueButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 visible = false
-text = "Devam Et"
+text = "UI_CONTINUE"
 
 [node name="PlayButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Yeni Oyun"
+text = "UI_PLAY"
 
 [node name="SettingsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Ayarlar"
+text = "UI_SETTINGS"
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Çıkış"
+text = "UI_QUIT"

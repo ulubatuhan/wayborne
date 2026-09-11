@@ -27,6 +27,10 @@ var _feast_button: Button
 
 func _ready() -> void:
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
+	# metin koddan, anahtarla gelir (bkz. Localization Rules).
+	_info_label.text = tr("UI_TAVERN_HINT")
+	_map_button.text = tr("UI_GO_TO_WORLD_MAP")
 	_session = GameState.get_session()
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)

@@ -34,6 +34,7 @@ func _ready() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
 	_info_label.text = tr("UI_GUILD_HINT")
+	_accepted_title.text = tr("UI_GUILD_ACCEPTED_TITLE")
 
 	# Borç defteri kendi sekmesinde: alacaklı da kontrat da loncanın
 	# defterinde durur. Mekanik Faz 9 A'da vardı ama hiçbir ekrana bağlı

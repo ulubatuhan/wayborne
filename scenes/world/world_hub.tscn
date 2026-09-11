@@ -31,11 +31,11 @@ text = "Kervan"
 
 [node name="PartyButton" type="Button" parent="HUD/TopBar/Row"]
 layout_mode = 2
-text = "Parti"
+text = "UI_HUB_PARTY"
 
 [node name="MenuButton" type="Button" parent="HUD/TopBar/Row"]
 layout_mode = 2
-text = "Ana Menü"
+text = "UI_HUB_MENU"
 
 [node name="HintBar" type="MarginContainer" parent="HUD"]
 anchors_preset = 12
@@ -52,5 +52,5 @@ theme_override_constants/margin_bottom = 12
 
 [node name="HintLabel" type="Label" parent="HUD/HintBar"]
 layout_mode = 2
-text = "A / D ya da ok tuşları ile yürü · vagona veya şehir kapısına yaklaşıp tıkla ya da E · F1: geliştirici menüsü"
+text = "UI_HUB_CONTROLS"
 horizontal_alignment = 1
