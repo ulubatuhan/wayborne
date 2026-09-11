@@ -1716,6 +1716,20 @@ hiç kazanamıyordu (bkz. Morale Rules'un son maddesi). Sonuç: varış morali
 4. Reference scenes/scripts using `res://` paths
 5. Push to `main` branch to trigger automatic Web export & deployment
 
+## Codex
+
+`docs/Wayborne-Codex.pdf` is the game's design document — 66 pages covering
+every mechanic in prose, plus a one-page decision tree for each of the 27
+road events (trigger, options, weighted outcomes, effects). It is
+**generated**, not written: `docs/codex/` holds the reportlab source and
+`python3 docs/codex/codex_main.py` rebuilds the PDF in place. This file
+(CLAUDE.md) stays the rule book — what must never be broken and why; the
+codex is the explanation, for a reader who has not read the code.
+
+Its event chapter mirrors `scripts/events/event_catalog.gd` by hand, so a
+new or retuned event needs a matching edit in `docs/codex/codex_events_data.py`
+— see that folder's README for why it is not derived automatically.
+
 ## Useful Links
 
 - [Godot 4 Documentation](https://docs.godotengine.org/en/stable/)
