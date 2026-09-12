@@ -412,6 +412,32 @@ target in `character.gd`, a `return` field carried in the road's spot table
   which reads a scene without building it — every `$A/B` node path in a
   screen script actually exists in its scene. That last one is the only cheap
   guard against a typo Godot reports only when the player opens the screen.
+- **A full-screen overlay can trap the player too, and the scroll rule
+  applies to it verbatim.** `OnboardingPanel` is the first thing a new game
+  shows, and its four wrapped topics grew past the viewport with the
+  dismiss button below the fold — the opening screen of the game had no
+  exit. Three causes, all the same omission (nobody asked what happens when
+  the content outgrows the screen): the content was in no
+  `ScrollContainer`; the panel was centred with `PRESET_CENTER` plus a
+  `position -= PANEL_SIZE * 0.5` nudge, i.e. against its *guessed* height
+  rather than its real one, so growing pushed it off the bottom; and a
+  `CanvasLayer` is not a `Control`, so an anchor preset on its direct child
+  has no rect to anchor against and the backdrop never covered the screen.
+  The layer's root is now a full-rect `Control`, a `CenterContainer` does
+  the centring at whatever the real height is, the topics sit in a
+  `ScrollContainer` with the dismiss button outside it, and the panel
+  carries an explicit opaque `StyleBoxFlat` (the default theme let the city
+  map read straight through the text). Dismissal is no longer one button
+  either — the backdrop and Esc both close it, because a player's first
+  reflex is to click outside.
+- **`test_navigation.gd` guards that overlay by building it**, which is
+  possible precisely because it is scene-less (`.new()` + an explicit
+  `_ready()`, since suites run before the tree is live). What it asserts is
+  structural — content in a scroll, dismiss button not inside it, more than
+  one way out — and that is deliberate: **a wrapped `Label`'s minimum
+  height is one line without a layout pass**, so a height assertion cannot
+  see wrap-driven overflow at all. Verified by mutation: against the old
+  panel three assertions fail and the height one does not.
 - **A suite that cannot load must fail the run.** A parse error in a test
   file made `load(path).new()` abort `run_tests.gd` mid-loop, and since
   `_process()` still returned true the runner exited **0** — the navigation
