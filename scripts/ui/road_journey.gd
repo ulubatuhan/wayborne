@@ -65,6 +65,21 @@ const CAMP_HOURS: float = 8.0
 ## da bırakmıyor.
 const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 
+## --- Yürümek ---
+## Yol kendiliğinden kat edilmez: kervan ancak oyuncu yürüttüğü sürece
+## ilerler (A/D ya da ok tuşları). Zaman yine kendi başına akar - durmak
+## günü durdurmaz, erzağı da durdurmaz; yalnızca yol kısalmaz. Oregon
+## Trail'in asıl gerilimi bu: oyalanmanın bedelini takvim ödetir.
+##
+## İleri tempo 1.0: durmadan yürüyen bir oyuncu seferi tam olarak
+## planlayıcının söylediği günde bitirir, yani erzak sözü ("doğru
+## stoklayan asla aç kalmaz", bkz. Provision Rules) yürüyen oyuncu için
+## aynen korunur. Bozulan tek şey oyalanmanın bedava olması.
+const WALK_FORWARD_RATE: float = 1.0
+## Geri dönmek ileri gitmekle aynı şey değil: dar yolda altı vagonu
+## çevirmek, hayvanları döndürmek, yükü yeniden dengelemek zaman yer.
+const WALK_BACKWARD_RATE: float = 0.25
+
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
@@ -81,6 +96,13 @@ var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
 var _journey_length_days: int = 1
+## Kat edilen yol, "gün" cinsinden. Konumun tek doğruluk kaynağı burası:
+## `journey_days_remaining` artık bir sayaç değil, bundan *türetilen* bir
+## gösterge (bkz. _sync_days_remaining). Ters sırada tutulsaydı bir olayın
+## "yol +1 gün" etkisi bir sonraki karede silinirdi.
+var _days_covered: float = 0.0
+## Son karede hangi yöne yürüdüğümüz - ipucu satırı bunu gösteriyor.
+var _walk_direction: float = 0.0
 
 var _clock_label: Label
 var _speed_button: Button
@@ -91,8 +113,11 @@ var _progress_bar: ProgressBar
 var _last_clock_text: String = ""
 var _last_phase: JourneyClock.Phase = JourneyClock.Phase.DAWN
 var _last_speed: float = -1.0
+var _last_walk_hint: String = ""
 
 var _seed_spin: SpinBox
+var _dev_row: HBoxContainer
+var _walk_hint: Label
 var _state_label: Label
 var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
@@ -101,7 +126,6 @@ var _recruit_holder: VBoxContainer
 var _replan_holder: VBoxContainer
 var _replan_button: Button
 var _log_list: VBoxContainer
-var _draw_button: Button
 var _reset_button: Button
 var _camp_button: Button
 var _arrive_button: Button
@@ -152,24 +176,37 @@ func _build_ui() -> void:
 
 	_content.add_child(time_row)
 
-	var controls_row := HBoxContainer.new()
-	controls_row.add_theme_constant_override("separation", 8)
+	# Yolu oyuncu yürüyor: bunu söylemeyen bir ekran, oyuncuya "kontrol
+	# bende değil" dedirtiyordu (ilk şikâyet tam olarak buydu).
+	_walk_hint = Label.new()
+	_walk_hint.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_content.add_child(_walk_hint)
+
+	# Geliştirici kutusu (tohum + sıfırla) yalnızca F1 sentetik seferinde
+	# görünür; gerçek bir seferde oyuncunun önünde duracak işi yok.
+	_dev_row = HBoxContainer.new()
+	_dev_row.add_theme_constant_override("separation", 8)
 
 	var seed_label := Label.new()
 	seed_label.text = "Seed:"
-	controls_row.add_child(seed_label)
+	_dev_row.add_child(seed_label)
 
 	_seed_spin = SpinBox.new()
 	_seed_spin.min_value = 0
 	_seed_spin.max_value = 999999
 	_seed_spin.step = 1
 	_seed_spin.value = 1234
-	controls_row.add_child(_seed_spin)
+	_dev_row.add_child(_seed_spin)
 
 	_reset_button = Button.new()
 	_reset_button.text = tr("EVT_TEST_RESET")
 	_reset_button.pressed.connect(_on_reset_pressed)
-	controls_row.add_child(_reset_button)
+	_dev_row.add_child(_reset_button)
+
+	_content.add_child(_dev_row)
+
+	var controls_row := HBoxContainer.new()
+	controls_row.add_theme_constant_override("separation", 8)
 
 	_camp_button = Button.new()
 	_camp_button.text = tr("UI_ROAD_MAKE_CAMP")
@@ -182,11 +219,6 @@ func _build_ui() -> void:
 	_replan_button.tooltip_text = tr("UI_ROAD_REPLAN_TOOLTIP")
 	_replan_button.pressed.connect(_on_replan_pressed)
 	controls_row.add_child(_replan_button)
-
-	_draw_button = Button.new()
-	_draw_button.text = tr("EVT_TEST_DRAW")
-	_draw_button.pressed.connect(_on_force_draw)
-	controls_row.add_child(_draw_button)
 
 	_content.add_child(controls_row)
 	_content.add_child(HSeparator.new())
@@ -265,14 +297,32 @@ func _init_journey() -> void:
 		_is_live_journey = false
 		_start_synthetic_journey()
 
+	# Tohum kutusu yalnızca sentetik seferi tekrarlanabilir kılmak için var.
+	# Canlı seferde de onun değeri (sabit 1234) kullanılıyordu, yani gerçek
+	# oyunda *her sefer aynı olay dizisini* çekiyordu - yol kendini tekrar
+	# ediyordu ve sebebi bir geliştirici kutusuydu. Canlı sefer artık
+	# hedeften ve geçen günden tohum alıyor: aynı kaydı yeniden yükleyen
+	# oyuncu aynı yolu bulur (sefer içinde kayıt yok, o yüzden bu bir
+	# yeniden-zar atma kapısı açmıyor), ama her yeni sefer başka bir yoldur.
+	_dev_row.visible = not _is_live_journey
+	var engine_seed := int(_seed_spin.value)
+	if _is_live_journey:
+		engine_seed = hash("%s|%s|%d" % [
+			_session.journey_origin_id,
+			_session.journey_destination_id,
+			_session.total_days_elapsed,
+		])
+
 	_refresh_exit_button()
-	_engine = EventEngine.new(EventCatalog.get_road_events(), int(_seed_spin.value))
+	_engine = EventEngine.new(EventCatalog.get_road_events(), engine_seed)
 	_current_event = null
 	_journey_finished = false
 
 	# Saat sefer başına sıfırlanır: gün sayısı ve evre buradan akar.
 	_clock = JourneyClock.new()
 	_journey_length_days = maxi(1, _session.journey_total_days)
+	_days_covered = float(_current_day)
+	_walk_direction = 0.0
 	_camping = false
 	_band.set_camping(false)
 	_clear_children(_card_panel)
@@ -344,11 +394,52 @@ func _process(delta: float) -> void:
 		return
 
 	if _can_time_flow():
-		_clock.advance(delta)
+		var hours := _clock.advance(delta)
+		_advance_position(hours)
 		_process_elapsed_days()
 		_update_camp_state()
+	else:
+		_walk_direction = 0.0
 
 	_refresh_time_ui()
+
+## Kervanı oyuncu yürütür. Zaman kendi başına akar; bu fonksiyon yalnızca
+## *yolun* ne kadarının kat edildiğini belirler - yani durmak günü değil,
+## sadece mesafeyi durdurur.
+##
+## Mesafe geçen oyun saatinden ölçülüyor, gerçek kareden değil: hız tuşu
+## (1x/1.5x/3x) hem saati hem yolu aynı oranda hızlandırır, yoksa 3x'te
+## günler yola göre daha hızlı akar ve kervan hep aç kalırdı.
+func _advance_position(hours: float) -> void:
+	_walk_direction = 0.0
+	if hours <= 0.0 or _camping:
+		return
+
+	var direction := 0.0
+	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
+		direction += 1.0
+	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
+		direction -= 1.0
+	if is_zero_approx(direction):
+		return
+
+	_walk_direction = direction
+	var rate := WALK_FORWARD_RATE if direction > 0.0 else -WALK_BACKWARD_RATE
+	_days_covered = clampf(
+		_days_covered + rate * hours / JourneyClock.HOURS_PER_DAY,
+		0.0,
+		float(_journey_length_days)
+	)
+	_sync_days_remaining()
+
+## `journey_days_remaining` artık bağımsız bir sayaç değil, kat edilen
+## yoldan türetilen bir gösterge - HUD, sapma maliyeti (get_days_travelled)
+## ve varış kontrolü hep aynı mesafeyi okusun diye. Geri yürüyen bir kervan
+## için "kalan yol" gerçekten uzar.
+func _sync_days_remaining() -> void:
+	_session.journey_days_remaining = maxi(
+		0, ceili(float(_journey_length_days) - _days_covered)
+	)
 
 func _can_time_flow() -> bool:
 	return not _journey_finished and _current_event == null and not _has_open_panel()
@@ -364,9 +455,12 @@ func _process_elapsed_days() -> void:
 		if _current_event != null or _has_open_panel():
 			return
 
+## Gün, yolun değil takvimin birimi: erzak yenir, kontrat süresi işler,
+## günün olayı çekilir. Kalan yolu artık burası eksiltmiyor - onu yürümek
+## eksiltiyor (bkz. _advance_position). Oyalanan kervan günü de erzağı da
+## harcar, mesafeyi kapatmaz; Oregon Trail'in bütün gerilimi bu farkta.
 func _run_day() -> void:
 	_current_day += 1
-	_session.journey_days_remaining = maxi(0, _session.journey_days_remaining - 1)
 	_advance_contracts_and_provisions()
 
 	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
@@ -434,11 +528,33 @@ func _refresh_time_ui() -> void:
 		_camping or not _clock.is_camp_time() or not _can_time_flow()
 	)
 
+	_refresh_walk_hint()
+
+## Oyuncunun ne yaptığını ve neyi yapmadığını tek satırda söyler: duran
+## kervan "bekliyor" değil, *yol almıyor* - ve bunu görmezse oyuncu ekranın
+## bozuk olduğunu sanıyor.
+func _refresh_walk_hint() -> void:
+	var key := "UI_ROAD_WALK_IDLE"
+	if _camping:
+		key = "UI_ROAD_WALK_CAMPING"
+	elif _walk_direction > 0.0:
+		key = "UI_ROAD_WALK_FORWARD"
+	elif _walk_direction < 0.0:
+		key = "UI_ROAD_WALK_BACKWARD"
+
+	var text := tr(key)
+	if text == _last_walk_hint:
+		return
+	_last_walk_hint = text
+	_walk_hint.text = text
+	_walk_hint.modulate = (
+		LOCKED_COLOR if is_zero_approx(_walk_direction) and not _camping else Color.WHITE
+	)
+
 func _get_route_progress() -> float:
 	if _journey_length_days <= 0:
 		return 1.0
-	var travelled := float(_journey_length_days - _session.journey_days_remaining)
-	return clampf(travelled / float(_journey_length_days), 0.0, 1.0)
+	return clampf(_days_covered / float(_journey_length_days), 0.0, 1.0)
 
 ## Kamp: günü ilerletir, erzak yer, ama olay çekmez - o günü dinlenerek
 ## geçirdiğin garanti, karşılığında stres belirgin azalır (bkz.
@@ -479,15 +595,19 @@ func _advance_contracts_and_provisions() -> void:
 		_session.change_stress(FAMINE_STRESS)
 		_add_log(tr("UI_ROAD_FAMINE") % _current_day)
 
-func _on_force_draw() -> void:
-	if _current_event != null:
-		return
-
-	var event := _engine.draw_event(_current_day, _session.build_event_context())
-	if event == null:
-		_add_log(tr("EVT_TEST_NO_EVENT"))
-		return
-	_present_event(event)
+## Olayların etkileri hep buradan geçer. Sebebi tek bir tip: TRAVEL_DAYS
+## (`yol +1 gün`) `journey_days_remaining`'e yazıyor, ama o alan artık kat
+## edilen yoldan türetiliyor - doğrudan yazılan değer bir sonraki karede
+## silinirdi. Fark burada yakalanıp yolun *uzunluğuna* ekleniyor: yol
+## gerçekten uzuyor, kervan da onu yürümek zorunda kalıyor.
+func _apply_effects(effects: Array[EventEffect]) -> EventEffectApplier.Result:
+	var before := _session.journey_days_remaining
+	var result := EventEffectApplier.apply(effects, _session)
+	var delta := _session.journey_days_remaining - before
+	if delta != 0:
+		_journey_length_days = maxi(1, _journey_length_days + delta)
+	_sync_days_remaining()
+	return result
 
 func _present_event(event: GameEvent) -> void:
 	_current_event = event
@@ -499,7 +619,7 @@ func _present_event(event: GameEvent) -> void:
 	_add_log("── %s" % tr(event.title_key))
 
 	if not event.immediate_effects.is_empty():
-		var immediate := EventEffectApplier.apply(event.immediate_effects, _session)
+		var immediate := _apply_effects(event.immediate_effects)
 		_apply_side_channels(immediate)
 		for line in immediate.lines:
 			_add_log("   %s" % line, IMMEDIATE_COLOR)
@@ -546,7 +666,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	_add_log("   → %s" % tr(choice.text_key))
 
 	if not choice.effects.is_empty():
-		var result := EventEffectApplier.apply(choice.effects, _session)
+		var result := _apply_effects(choice.effects)
 		_apply_side_channels(result)
 		for line in result.lines:
 			_add_log("      %s" % line)
@@ -554,7 +674,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	var outcome := _engine.resolve_outcome(choice, _session.build_event_context())
 	if outcome != null:
 		_add_log("   %s" % tr(outcome.text_key), OUTCOME_COLOR)
-		var outcome_result := EventEffectApplier.apply(outcome.effects, _session)
+		var outcome_result := _apply_effects(outcome.effects)
 		_apply_side_channels(outcome_result)
 		for line in outcome_result.lines:
 			_add_log("      %s" % line)
@@ -693,7 +813,7 @@ func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> v
 		effects.append(EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, COMBAT_DEFEAT_MERCHANTS))
 		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_DEFEAT_MORALE))
 
-	var result := EventEffectApplier.apply(effects, _session)
+	var result := _apply_effects(effects)
 	for line in result.lines:
 		_add_log("      %s" % line, OUTCOME_COLOR if victory else LOCKED_COLOR)
 
@@ -767,7 +887,8 @@ func _close_haggling() -> void:
 func _check_journey_end() -> void:
 	if _journey_finished or _current_event != null or _has_open_panel():
 		return
-	if _session.journey_days_remaining <= 0:
+	# Varış artık "gün bitti" değil, "mesafe kapandı" demek.
+	if _days_covered >= float(_journey_length_days):
 		_finish_journey()
 
 func _has_open_panel() -> bool:
@@ -857,6 +978,10 @@ func _apply_replan(log_format: String) -> void:
 	# toplam güne göre okunmalı, yoksa çubuk dolu kalır ve sefer bitmiş
 	# görünürdü.
 	_journey_length_days = maxi(1, _session.journey_total_days)
+	# Yeni bacak sıfırdan yürünür: kervan çıkış şehrine döndü ya da başka
+	# bir yola saptı, kat edilmiş mesafe o yola ait değil.
+	_days_covered = 0.0
+	_sync_days_remaining()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
 	_add_log(log_format % (
 		destination.location_name if destination != null else _session.journey_destination_id
@@ -970,7 +1095,6 @@ func _on_enter_city_pressed() -> void:
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve
 ## eylemler kilitlenir - olay çözülmeden yol devam etmemeli.
 func _set_journey_controls_enabled(enabled: bool) -> void:
-	_draw_button.disabled = not enabled
 	_camp_button.disabled = not enabled
 	_speed_button.disabled = not enabled
 	# Plan yalnızca yolda değiştirilebilir: varış işlendikten sonra ortada

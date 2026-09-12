@@ -991,6 +991,50 @@ The plan made in the city is an intention, not a commitment.
   `_can_time_flow()` is false) but the decision itself costs hours: turning
   a caravan around is not instant.
 
+### Road Movement Rules
+
+The road used to run itself: the clock ticked, days fell off a counter and
+the caravan arrived. The player's only input was a speed button, and the
+screen read as broken — *"we're standing still, we have no control."*
+
+- **The player walks the road; the clock only counts days.** A/D or the
+  arrow keys drive `_days_covered` in `road_journey.gd`; standing still
+  stops the *distance*, never the day. Provisions are still eaten,
+  contracts still expire, the day's event still fires. Dawdling is paid for
+  by the calendar — that is the whole Oregon Trail tension, and it did not
+  exist while arrival was a timer.
+- **Walking forward at full tempo reproduces the old behaviour exactly**
+  (`WALK_FORWARD_RATE` 1.0), so the planner's provision promise — *correct
+  stocking never starves* (see Provision Rules) — still holds for a player
+  who simply walks. The only thing that broke is idling being free.
+- **Going back is much slower than going forward** (`WALK_BACKWARD_RATE`
+  0.25): turning a wagon train around on a narrow road costs real time.
+- **Distance is measured in game hours, not frames.** The speed button
+  scales the clock and the road by the same factor; driving movement off
+  the raw frame delta would make days outrun the road at 3x and starve
+  every fast-forwarding caravan.
+- **`journey_days_remaining` is now derived, not counted.**
+  `_sync_days_remaining()` computes it from the distance covered, so the
+  HUD, the divert cost (`get_days_travelled`) and the arrival check all
+  read one number. Arrival fires on distance, not on a day counter.
+- **Therefore every event effect goes through `_apply_effects()`.**
+  `EventEffect.Type.TRAVEL_DAYS` writes to `journey_days_remaining`, which
+  the next frame would overwrite; the wrapper catches the delta and adds it
+  to the route's *length* instead. So "the road got longer" means the
+  caravan must actually walk the extra distance.
+- **Events are never drawn by the player.** The "Olay Çek" button is gone
+  from every mode. A card the player summons is a debug tool, not a road.
+- **Dev controls do not ship in a live journey.** The seed box and reset
+  button are hidden unless the journey is the F1 synthetic one.
+
+**A dev default silently shipped as game behaviour.** The event engine was
+seeded from the dev seed box (`1234`) on *every* live journey, so every
+real road drew the same event sequence in the same order. A live journey
+now seeds from origin + destination + `total_days_elapsed`: reproducible
+within a save (there is no mid-journey save, so this opens no re-roll
+door), different for every new journey. Check what a debug control feeds
+before assuming it only affects debug.
+
 ### Journey Time Rules
 
 The road used to advance one day per button press. It now runs on a
