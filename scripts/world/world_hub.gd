@@ -19,19 +19,22 @@ const INTERACT_RANGE: float = 150.0
 const WAGON_SIZE: Vector2 = Vector2(132, 96)
 const WAGON_FOLLOW_SPEED: float = 7.0
 
-## Kervanın dizilişi: lider önde, isimli parti üyeleri onu simetrik bir
-## muhafız düzeninde çevreler (biri hemen arkasında, biri ortalarda, biri
-## vagonların gerisinde), vagonlar en arkada.
-const FOLLOWER_GAP: float = 46.0
-const MID_GUARD_GAP: float = 96.0
-const REAR_GUARD_TRAIL: float = 50.0
-## Simetrik muhafız düzeninde liderin önünden gelen en fazla kaç kişi -
-## geri kalanı (üçüncüsü varsa) vagonların gerisinde nöbet tutar.
-const FRONT_ESCORT_LIMIT: int = 2
-## Aralıklar vagon genişliğinden ve öküzün boyundan büyük olmalı, yoksa
-## öküz vagonun içinde yürüyor gibi duruyor.
-const WAGON_GAP: float = 170.0
-const WAGON_SPACING: float = 250.0
+## Kolon aralıkları - hepsi **boşluk**, konum değil. Konumlar
+## `_column_positions`'ta gerçek genişliklerden hesaplanıyor.
+const GAP_TIGHT: float = 30.0
+const GAP_NORMAL: float = 54.0
+const GAP_WAGONS: float = 110.0
+## Öküz ile çektiği vagon arasındaki ok mesafesi.
+const HITCH_GAP: float = 26.0
+
+## Yan yana en fazla iki kişi. Aralarındaki mesafe kişinin
+## genişliğinden türetiliyor, sabit değil - sabit bir sayı figür
+## genişliği değişince üst üste binmeye dönüyor.
+const PAIR_GAP: float = 24.0
+const MAX_ABREAST: int = 2
+
+## Liderin kolonun ne kadar önünde gittiği.
+const LEADER_LEAD: float = 150.0
 
 ## Karakterin boyu görünürde de fark etsin diye gövde yüksekliği bu
 ## aralıkta ölçeklenir (bkz. CharacterData.MIN/MAX_HEIGHT_CM).
@@ -49,15 +52,13 @@ const MOUNTED_WIDTH: float = 150.0
 ## figürün ayakları oynarsa yerde kayıyor gibi duruyor.
 const STEP_PER_UNIT: float = 0.034
 
-## Öküzün vagonun ne kadar önünde yürüdüğü ve ölçüsü.
-const OX_LEAD: float = 152.0
+## Öküz ölçüsü. Konumu artık `_column_positions` veriyor.
 const OX_SIZE: Vector2 = Vector2(146.0, 86.0)
 
 ## Vagonu süren isimsiz tayfa (bkz. GameSession.PEOPLE_PER_WAGON) - adı
 ## olan parti üyelerinden görsel olarak ayrışsın diye soluk/nötr renkte,
 ## etiketsiz, sabit boyda.
 const CREW_BODY_HEIGHT: float = 72.0
-const CREW_GAP: float = 22.0
 
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
@@ -148,95 +149,110 @@ func _move_player(delta: float) -> void:
 
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
-	var leader_x := _player.position.x
-	var escort_count := _followers.size()
+	var column := _column_positions(
+		_player.position.x, _followers.size(), _wagons.size()
+	)
 
-	for index in escort_count:
-		var follower := _followers[index]
-		var follower_target := _follower_target_x(index, leader_x, escort_count, _wagons.size())
-		var before := follower.position.x
-		follower.position.x = lerpf(before, follower_target, weight)
-		# Her figür kendi kat ettiği mesafeyle adım atıyor: lidere
-		# yetişmeye çalışan biri hızlı, yerinde duran biri hiç.
-		follower.advance(delta, (follower.position.x - before) * STEP_PER_UNIT / maxf(delta, 0.0001))
+	_chase(_followers, column.escorts, weight, delta)
+	_chase(_oxen, column.oxen, weight, delta)
+	_chase(_crew, column.crew, weight, delta)
 
+	var wagon_targets: Array[float] = column.wagons
 	for index in _wagons.size():
+		if index >= wagon_targets.size():
+			break
 		var wagon := _wagons[index]
-		var wagon_target := _wagon_target_x(index, leader_x, escort_count)
-		var wagon_before := wagon.position.x
-		wagon.position.x = lerpf(wagon_before, wagon_target, weight)
-		wagon.roll(wagon.position.x - wagon_before)
-		if index < _oxen.size():
-			var ox := _oxen[index]
-			var ox_before := ox.position.x
-			ox.position.x = lerpf(ox_before, wagon.position.x + OX_LEAD, weight)
-			ox.advance(delta, (ox.position.x - ox_before) * STEP_PER_UNIT / maxf(delta, 0.0001))
-		_follow_wagon_crew(index, wagon_target, weight, delta)
+		var before := wagon.position.x
+		wagon.position.x = lerpf(before, wagon_targets[index] - WAGON_SIZE.x * 0.5, weight)
+		wagon.roll(wagon.position.x - before)
 
-## Öndeki muhafızlar arasında liderden uzaklaştıkça açılan mesafe -
-## 0. muhafız (levazımcı/kıdemli) tam arkasında, 1.'si biraz daha geride.
-func _front_escort_gap(index: int) -> float:
-	return FOLLOWER_GAP if index <= 0 else MID_GUARD_GAP
-
-## Aşağıdaki üç hedef formülü saf aritmetik: düğüm durumuna değil verilen
-## sayılara bakıyorlar. Böylece hem her karede lerp hedefi hem de kervan
-## kurulurken ilk konum olarak kullanılabiliyorlar - takipçiler eskiden
-## hepsi aynı noktada kurulup ilk karelerde yerlerine kayıyordu (bkz.
-## _build_crew_member'ın zaten kaçındığı aynı tuzak).
-func _train_start_x(leader_x: float, escort_count: int) -> float:
-	var front_count := mini(escort_count, FRONT_ESCORT_LIMIT)
-	var front_span := _front_escort_gap(front_count - 1) if front_count > 0 else 0.0
-	return leader_x - front_span - WAGON_GAP
-
-func _wagon_target_x(wagon_index: int, leader_x: float, escort_count: int) -> float:
-	return _train_start_x(leader_x, escort_count) - WAGON_SPACING * wagon_index
-
-## FRONT_ESCORT_LIMIT'e kadar olan muhafızlar liderin arkasında yürür;
-## üstündeki (üçüncü parti üyesi) vagonların gerisinde arka nöbetçidir.
-func _follower_target_x(
-	index: int, leader_x: float, escort_count: int, wagon_count: int
-) -> float:
-	if index < FRONT_ESCORT_LIMIT or wagon_count <= 0:
-		return leader_x - _front_escort_gap(index)
-	return _wagon_target_x(wagon_count - 1, leader_x, escort_count) - REAR_GUARD_TRAIL
-
-## Bir vagonun tayfası (bkz. GameSession.PEOPLE_PER_WAGON) vagonun etrafında
-## dağınık yürür - isimli muhafızların aksine düzenli bir sıra tutmazlar,
-## kervan resimlerindeki gibi bazısı önde bazısı yanında yürür (bkz.
-## _crew_offset).
-func _follow_wagon_crew(
-	wagon_index: int, wagon_target_x: float, weight: float, delta: float
+## Bir figür dizisini hedeflerine doğru çeker ve her birini **kendi kat
+## ettiği mesafeyle** yürütür: lidere yetişmeye çalışan hızlı adım atar,
+## yerinde duran hiç atmaz. Tek bir yerde durması, üç ayrı döngünün
+## adım hesabının birbirinden kaymasını engelliyor.
+func _chase(
+	figures: Array[WalkFigure], targets: Array[float], weight: float, delta: float
 ) -> void:
-	for crew_slot in GameSession.PEOPLE_PER_WAGON:
-		var crew_index := wagon_index * GameSession.PEOPLE_PER_WAGON + crew_slot
-		if crew_index >= _crew.size():
-			continue
-		var crew_member := _crew[crew_index]
-		var offset := _crew_offset(wagon_index, crew_slot)
-		var crew_target := wagon_target_x + WAGON_SIZE.x * 0.5 + offset.x
-		var before := crew_member.position.x
-		crew_member.position.x = lerpf(before, crew_target, weight)
-		crew_member.position.y = lerpf(
-			crew_member.position.y, GROUND_Y - CREW_BODY_HEIGHT + offset.y, weight
-		)
-		crew_member.advance(
-			delta, (crew_member.position.x - before) * STEP_PER_UNIT / maxf(delta, 0.0001)
+	for index in figures.size():
+		if index >= targets.size():
+			break
+		var figure := figures[index]
+		var before := figure.position.x
+		var centred := targets[index] - figure.size.x * 0.5
+		figure.position.x = lerpf(before, centred, weight)
+		figure.advance(
+			delta, (figure.position.x - before) * STEP_PER_UNIT / maxf(delta, 0.0001)
 		)
 
-## Vagon başına asimetrik bir konum üretir - vagon+mevki'ye göre sabit
-## (aynı tayfa her karede aynı yerde yürür) ama sıra hissi vermez: değişen
-## mesafe, hafif dikey kayma ve vagondan vagona değişen yön.
-func _crew_offset(wagon_index: int, crew_slot: int) -> Vector2:
-	var alternates := (wagon_index + crew_slot) % 2 == 0
-	var lead := CREW_GAP * (0.7 if crew_slot == 0 else 1.8)
-	var side_kick := 8.0 if alternates else -8.0
-	var drift := -6.0 if crew_slot == 0 else 9.0
-	return Vector2(-lead + side_kick, drift)
+## Kolonun tamamı tek bir yerde hesaplanıyor: her parça kendi
+## *genişliği* kadar yer tüketiyor ve araya bir boşluk giriyor, yani
+## **çakışma tasarım gereği imkânsız**.
+##
+## Öncesinde her parçanın kendi sabit adımı vardı (`WAGON_SPACING`,
+## `FOLLOWER_GAP`, `REAR_GUARD_TRAIL`) ve bunlar gerçek ölçülerden
+## bağımsızdı. Sonuç ekran görüntüsünde görüldü: arkadaki vagonun öküzü
+## öndeki vagonun içine giriyordu, ve isimsiz tayfa kervanın kuyruğunda
+## sürükleniyordu. Aynı ders yol ekranında da alındı (bkz. RoadCaravan).
+##
+## Saf aritmetik: düğüm durumuna değil verilen sayılara bakıyor. Böylece
+## hem her karede lerp hedefi hem de kervan kurulurken ilk konum olarak
+## kullanılabiliyor - takipçiler eskiden hepsi aynı noktada kurulup ilk
+## karelerde yerlerine kayıyordu.
+##
+## Diziliş: lider en önde (kolondan bağımsız), parti üyeleri kolon
+## boyunca ikişerli gruplar hâlinde dağılmış, her vagon biriminde
+## [öküz] [tayfa] [vagon] sırası.
+func _column_positions(
+	leader_x: float, escort_count: int, wagon_count: int
+) -> Dictionary:
+	var escorts: Array[float] = []
+	var wagons: Array[float] = []
+	var oxen: Array[float] = []
+	var crew: Array[float] = []
 
-## Şehrin dışındaki kır. Öncesinde iki dikdörtgen (bir gökyüzü, bir
-## zemin) ve on dört çizgiden oluşuyordu; yol ekranıyla aynı şikâyetin
-## aynı sebebi. Artık `HubScenery` çiziyor: aynı palet, aynı fırçalar,
-## yani oyunun geri kalanıyla aynı dünya.
+	var cursor := leader_x - LEADER_LEAD
+	var placed := 0
+
+	# Liderin hemen arkasındaki muhafız grubu.
+	cursor = _append_escort_group(escorts, cursor, placed, escort_count)
+	placed += MAX_ABREAST
+
+	for index in wagon_count:
+		cursor -= OX_SIZE.x * 0.5
+		oxen.append(cursor)
+		cursor -= OX_SIZE.x * 0.5 + GAP_TIGHT
+
+		# Yürüyen tayfa vagonun **önünde**: vagon başına iki tayfadan
+		# biri sürüyor (vagonun üstünde çiziliyor), biri yürüyor.
+		crew.append(cursor - BODY_WIDTH * 0.5)
+		cursor -= BODY_WIDTH + HITCH_GAP
+
+		wagons.append(cursor - WAGON_SIZE.x * 0.5)
+		cursor -= WAGON_SIZE.x + GAP_WAGONS
+
+		if placed < escort_count and index < wagon_count - 1:
+			cursor = _append_escort_group(escorts, cursor, placed, escort_count)
+			placed += MAX_ABREAST
+
+	while placed < escort_count:
+		cursor = _append_escort_group(escorts, cursor, placed, escort_count)
+		placed += MAX_ABREAST
+
+	return {"escorts": escorts, "wagons": wagons, "oxen": oxen, "crew": crew}
+
+## İkişerli bir muhafız grubunun merkezlerini ekler ve imleci grubun
+## tükettiği kadar geriye alır.
+func _append_escort_group(
+	into: Array[float], cursor: float, from_index: int, escort_count: int
+) -> float:
+	var count := mini(MAX_ABREAST, escort_count - from_index)
+	if count <= 0:
+		return cursor
+	var step := BODY_WIDTH + PAIR_GAP
+	for slot in count:
+		into.append(cursor - float(slot) * step)
+	return cursor - float(count - 1) * step - BODY_WIDTH - GAP_NORMAL
+
 func _build_scenery() -> void:
 	var span := Rect2(
 		Vector2(WORLD_MIN_X - 500.0, GROUND_Y - 620.0),
@@ -325,24 +341,24 @@ func _build_caravan() -> void:
 	var wagon_count := maxi(1, session.owned_wagon_count)
 	# Lider her zaman x=0'da kuruluyor (bkz. _build_person); kervanın geri
 	# kalanı ilk karede yerine kaymasın diye ilk konumunu her karede
-	# kullanılan hedef formülünden alıyor. Ekleme sırası çizim sırasıdır -
+	# kullanılan *aynı* formülden alıyor. Ekleme sırası çizim sırasıdır -
 	# vagonlar ve tayfa önce, insanlar üstlerine.
-	var leader_x := 0.0
+	var column := _column_positions(0.0, escorts.size(), wagon_count)
 
 	for index in wagon_count:
-		var wagon_x := _wagon_target_x(index, leader_x, escorts.size())
+		var wagon_x: float = column.wagons[index] - WAGON_SIZE.x * 0.5
 		_wagons.append(_build_wagon(index, wagon_x))
 		# Vagonu çeken öküz. Olmadığı ilk ekran görüntüsünde vagonlar
-		# kendi kendine yürüyor gibi duruyordu - kervan resmindeki en
-		# temel öge eksikti.
-		_oxen.append(_build_ox(wagon_x))
-		for crew_slot in GameSession.PEOPLE_PER_WAGON:
-			_crew.append(_build_crew_member(wagon_x, index, crew_slot))
+		# kendi kendine yürüyor gibi duruyordu.
+		_oxen.append(_build_ox(column.oxen[index]))
+		# Vagon başına iki tayfa var (`PEOPLE_PER_WAGON`): biri sürüyor -
+		# `ArtDraw.wagon` onu brandanın önünde çiziyor - biri yürüyor.
+		_crew.append(_build_crew_member(column.crew[index]))
 
 	_player = _build_person(party[0], true)
 	for index in escorts.size():
 		var follower := _build_person(escorts[index], false)
-		follower.position.x = _follower_target_x(index, leader_x, escorts.size(), wagon_count)
+		follower.position.x = column.escorts[index] - follower.size.x * 0.5
 		_followers.append(follower)
 
 ## Lideri saymadan geri kalan parti üyelerini muhafız sırasına dizer: en
@@ -408,30 +424,26 @@ func _build_wagon(index: int, wagon_x: float) -> WagonFigure:
 ## wagon_x, o vagonun o anki x'i - _follow_wagon_crew'daki hedef formülüyle
 ## aynısı (_crew_offset dahil) kullanılır ki ilk karede kervan konumundan
 ## içeri kaymasın.
-func _build_ox(wagon_x: float) -> WalkFigure:
+func _build_ox(centre_x: float) -> WalkFigure:
 	var ox := WalkFigure.new()
 	ox.size = OX_SIZE
-	ox.position = Vector2(wagon_x + OX_LEAD, GROUND_Y - OX_SIZE.y)
+	ox.position = Vector2(centre_x - OX_SIZE.x * 0.5, GROUND_Y - OX_SIZE.y)
 	add_child(ox)
 	ox.set_kind(WalkFigure.KIND_OX, "bandit")
-	ox.set_phase_offset(wagon_x * 0.02)
+	ox.set_phase_offset(centre_x * 0.02)
 	return ox
 
-func _build_crew_member(wagon_x: float, wagon_index: int, crew_slot: int) -> WalkFigure:
-	var offset := _crew_offset(wagon_index, crew_slot)
+func _build_crew_member(centre_x: float) -> WalkFigure:
 	var body := WalkFigure.new()
 	body.size = Vector2(BODY_WIDTH, CREW_BODY_HEIGHT)
-	body.position = Vector2(
-		wagon_x + WAGON_SIZE.x * 0.5 + offset.x,
-		GROUND_Y - CREW_BODY_HEIGHT + offset.y
-	)
+	body.position = Vector2(centre_x - BODY_WIDTH * 0.5, GROUND_Y - CREW_BODY_HEIGHT)
 	add_child(body)
 	# Tayfa isimsiz: sınıfı yok, nötr bir silüet paleti taşıyor.
 	body.set_kind(
 		WalkFigure.KIND_PERSON, "bandit", 0.95,
-		CharacterData.get_skin_tone_color(wagon_index * 2 + crew_slot), true
+		CharacterData.get_skin_tone_color(int(absf(centre_x)) % 4), true
 	)
-	body.set_phase_offset(float(wagon_index * 3 + crew_slot) * 1.31)
+	body.set_phase_offset(centre_x * 0.03)
 	return body
 
 ## Gövde yüksekliği karakterin boyundan, rengi ten renginden geliyor -

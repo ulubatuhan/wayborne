@@ -26,12 +26,26 @@ extends Control
 const LEAD_WALKING: float = 92.0
 const LEAD_MOUNTED: float = 148.0
 
-## Kolon aralıkları. Vagon aralığı vagonun genişliğinden *belirgin* olarak
-## büyük olmalı: ilk ölçülerde 132'ye 138 genişlik vardı ve iki vagon üst
-## üste biniyordu - ekran görüntüsünde tek bir dev branda gibi duruyordu.
-const PARTY_SPACING: float = 44.0
-const WAGON_SPACING: float = 176.0
-const OX_OFFSET: float = 58.0
+## Kolon aralıkları. **Hepsi boşluk, konum değil.** Yerleşim sabit
+## adımlarla değil, her parçanın gerçek genişliğini tüketen bir imleçle
+## kuruluyor (bkz. _layout): sabit adım kullanıldığında vagon genişliği
+## ya da öküz boyu değişince çakışma geri geliyordu - iki kez yaşandı,
+## önce iki vagon üst üste bindi, sonra arkadaki vagonun öküzü öndeki
+## vagonun içine girdi. Boşluklar birbirine eklendiği için çakışma artık
+## tasarım gereği imkânsız.
+const GAP_TIGHT: float = 26.0
+const GAP_NORMAL: float = 46.0
+const GAP_WAGONS: float = 88.0
+## Öküz ile çektiği vagon arasındaki ok mesafesi.
+const HITCH_GAP: float = 22.0
+
+## Yan yana en fazla iki kişi yürüyor. Aralarındaki mesafe **kişinin
+## genişliğinden türetiliyor**, sabit değil: sabit bir 30 piksel,
+## seksen piksel genişliğindeki bir figürde iki kişiyi üst üste
+## bindiriyordu. Kolonun geri kalanında olduğu gibi burada da ölçü
+## boşluk, konum değil.
+const PAIR_GAP: float = 22.0
+const MAX_ABREAST: int = 2
 
 ## Figür boyları (şeridin yüksekliğine oranlı, yoksa küçük ekranda dev
 ## gibi duruyorlar).
@@ -63,6 +77,11 @@ var _leader_offset: float = 0.0
 var _wagon_count: int = 1
 var _wheel_angle: float = 0.0
 var _detached: bool = false
+
+## Yerleşimin hesapladığı vagon merkezleri. Çizim bunları okuyor,
+## kendi aritmetiğini yapmıyor: iki ayrı formül tam olarak öküzün
+## vagonun içine girmesine yol açan şeydi.
+var _wagon_centres: Array[float] = []
 
 var _leader: WalkFigure
 var _leader_mounted: bool = false
@@ -128,7 +147,10 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 			WalkFigure.KIND_OX, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
 		))
 
-	var walking_crew := mini(MAX_WALKING_CREW, _wagon_count * GameSession.PEOPLE_PER_WAGON - _wagon_count)
+	# Vagon başına iki tayfa var (`PEOPLE_PER_WAGON`): biri sürüyor -
+	# `ArtDraw.wagon` onu brandanın önünde çiziyor - biri yürüyor. Yani
+	# yürüyen tayfa sayısı vagon sayısı kadar.
+	var walking_crew := mini(MAX_WALKING_CREW, _wagon_count)
 	for index in maxi(0, walking_crew):
 		# Tayfa isimsiz: sınıfı yok, o yüzden nötr bir silüet paleti
 		# taşıyorlar. Ten renkleri yine oyunun kendi tonlarından.
@@ -223,11 +245,22 @@ func set_detached(detached: bool) -> void:
 	_detached = detached
 	queue_redraw()
 
+## Kolonun toplam boyu - lider bu kadar geriye gidebiliyor. Yerleşimle
+## aynı boşluklardan hesaplanıyor: ayrı bir tahmin tutmak, liderin
+## kolonun ucundan taşmasına ya da kuyruğa hiç ulaşamamasına yol
+## açardı.
 func _column_length() -> float:
+	var height := maxf(size.y, 1.0)
 	var lead := LEAD_MOUNTED if _leader_mounted else LEAD_WALKING
+	var person_w := height * PERSON_HEIGHT_RATIO * 0.9
+	var wagon_w := height * WAGON_WIDTH_RATIO
+	var ox_w := height * OX_HEIGHT_RATIO * 2.0
+	var groups := int(ceil(float(_party_figures.size()) / float(MAX_ABREAST)))
 	return (
-		lead + float(_party_figures.size()) * PARTY_SPACING
-		+ float(_wagon_count) * WAGON_SPACING + 40.0
+		lead
+		+ float(groups) * (float(MAX_ABREAST) * (person_w + PAIR_GAP) + GAP_NORMAL)
+		+ float(_wagon_count) * (ox_w + HITCH_GAP + wagon_w + GAP_WAGONS)
+		+ GAP_TIGHT
 	)
 
 func _process(delta: float) -> void:
@@ -244,38 +277,101 @@ func _process(delta: float) -> void:
 		_wheel_angle = fmod(_wheel_angle + delta * _speed * 4.2, TAU)
 		queue_redraw()
 
-## Kolonun yerleşimi. Hepsi çapadan (kervanın ekrandaki sabit noktası)
-## geriye doğru; lider öne.
+## Kolonun yerleşimi: çapadan geriye doğru yürüyen bir imleç.
+##
+## Her parça kendi genişliği kadar yer tüketiyor ve araya bir boşluk
+## giriyor, yani **çakışma tasarım gereği imkânsız**. Sabit adımlı ilk
+## sürümde öyle değildi: `WAGON_SPACING` vagon genişliğinden bağımsızdı,
+## bir ölçü değişince arkadaki vagonun öküzü öndeki vagonun içine
+## giriyordu.
+##
+## Diziliş kuralları:
+## - Lider en önde ve kolondan bağımsız.
+## - Parti üyeleri **kolon boyunca dağılıyor**, en fazla ikişer yan yana:
+##   hepsini liderin arkasına dizmek bir muhafız duvarı yapıyordu.
+## - Tayfa kendi vagonunun *yanında* yürüyor, arkasında değil - kervanın
+##   en arkasında yürüyen isimsiz bir kuyruk, sürüklenen bir grup gibi
+##   duruyordu.
 func _layout() -> void:
 	if _leader == null or _ground_y <= 0.0 or size.y < MIN_DRAW_HEIGHT:
 		return
+	_wagon_centres.clear()
 	var height := maxf(size.y, 1.0)
 	var person_h := height * PERSON_HEIGHT_RATIO
+	var person_w := person_h * 0.9
 	var mounted_h := height * MOUNTED_HEIGHT_RATIO
 	var ox_h := height * OX_HEIGHT_RATIO
+	var ox_w := ox_h * 2.0
+	var wagon_w := height * WAGON_WIDTH_RATIO
 
 	var lead := LEAD_MOUNTED if _leader_mounted else LEAD_WALKING
 	var leader_h := mounted_h if _leader_mounted else person_h
 	_place(_leader, _anchor_x + lead + _leader_offset, leader_h, leader_h * 1.6)
 
+	# Parti üyeleri kolon boyunca ikişerli gruplar hâlinde dağılıyor.
+	var placed := 0
 	var cursor := _anchor_x
-	for figure in _party_figures:
-		_place(figure, cursor, person_h, person_h * 0.9)
-		cursor -= PARTY_SPACING
 
-	# Vagonlar ve onları çeken öküzler; öküz vagonun önünde.
-	var wagon_w := height * WAGON_WIDTH_RATIO
+	# Önce liderin hemen arkasındaki muhafız grubu.
+	cursor = _place_escort_group(cursor, placed, person_h, person_w)
+	placed += MAX_ABREAST
+
 	for index in _wagon_count:
-		var wagon_x := cursor - float(index) * WAGON_SPACING - wagon_w * 0.5
+		# Bir vagon birimi, önden arkaya: [öküz] [tayfa] [vagon].
+		# Yürüyen tayfa **vagonun önünde**, öküzle vagon arasında. Yanına
+		# koymak gövdeyle örtüşüyordu; arkasına koymak da tam olarak
+		# istenmeyen şeydi - vagonların arkasında sürüklenen isimsiz bir
+		# kuyruk.
 		if index < _oxen.size():
-			_place(_oxen[index], wagon_x + wagon_w * 0.5 + OX_OFFSET, ox_h, ox_h * 2.0)
+			cursor -= ox_w * 0.5
+			_place(_oxen[index], cursor, ox_h, ox_w)
+			cursor -= ox_w * 0.5 + GAP_TIGHT
 
-	var crew_base := cursor - float(_wagon_count) * WAGON_SPACING
-	for index in _crew_figures.size():
-		# Tayfa düzenli sıra tutmuyor (bkz. world_hub'ın _crew_offset'i):
-		# vagonun yanında dağınık yürüyorlar.
-		var jitter := sin(float(index) * 2.4) * 26.0
-		_place(_crew_figures[index], crew_base + jitter - float(index) * 34.0, person_h * 0.95, person_h * 0.9)
+		cursor = _place_crew(index, cursor, person_h, person_w)
+		cursor -= HITCH_GAP
+
+		var wagon_centre := cursor - wagon_w * 0.5
+		_wagon_centres.append(wagon_centre)
+		cursor -= wagon_w + GAP_WAGONS
+
+		# Vagonlar arasına bir parti grubu daha serpiştiriyoruz: parti
+		# kolon boyunca dağılıyor, hepsi liderin arkasında toplanmıyor.
+		if placed < _party_figures.size() and index < _wagon_count - 1:
+			cursor = _place_escort_group(cursor, placed, person_h, person_w)
+			placed += MAX_ABREAST
+
+	# Artakalan parti üyeleri en arkada, ama tayfayla aynı hizada değil.
+	while placed < _party_figures.size():
+		cursor = _place_escort_group(cursor, placed, person_h, person_w)
+		placed += MAX_ABREAST
+
+## İkişerli bir muhafız grubu yerleştirir ve imleci grubun tükettiği
+## kadar geriye alır.
+func _place_escort_group(
+	cursor: float, from_index: int, person_h: float, person_w: float
+) -> float:
+	var count := mini(MAX_ABREAST, _party_figures.size() - from_index)
+	if count <= 0:
+		return cursor
+	var step := person_w + PAIR_GAP
+	for slot in count:
+		_place(
+			_party_figures[from_index + slot],
+			cursor - float(slot) * step, person_h, person_w
+		)
+	return cursor - float(count - 1) * step - person_w - GAP_NORMAL
+
+## Tek bir tayfa figürünü imlecin bulunduğu yere koyar ve imleci onun
+## genişliği kadar geriye alır. O tayfa yoksa (vagon sayısına göre
+## tayfa tavanı dolmuşsa) imleç olduğu gibi dönüyor - boşluk bile
+## bırakmıyor, yoksa var olmayan bir kişi için kolonda delik kalırdı.
+func _place_crew(
+	crew_index: int, cursor: float, person_h: float, person_w: float
+) -> float:
+	if crew_index >= _crew_figures.size():
+		return cursor
+	_place(_crew_figures[crew_index], cursor - person_w * 0.5, person_h * 0.95, person_w)
+	return cursor - person_w - GAP_TIGHT
 
 func _place(figure: WalkFigure, x: float, height: float, width: float) -> void:
 	figure.size = Vector2(width, height)
@@ -287,15 +383,14 @@ func _draw() -> void:
 	var height := size.y
 	var wagon_w := height * WAGON_WIDTH_RATIO
 	var wagon_h := height * WAGON_HEIGHT_RATIO
-	var cursor := _anchor_x - float(_party_figures.size()) * PARTY_SPACING
 
-	for index in _wagon_count:
-		var x := cursor - float(index) * WAGON_SPACING - wagon_w * 0.5
-		# Vagon `ArtDraw`'da: aynı vagon şehir dışı yürüyüş alanında da
-		# çiziliyor ve iki kopya tutulunca aynı kervan iki ekranda iki
-		# farklı şey oluyordu.
+	for index in _wagon_centres.size():
+		# Merkez yerleşimden geliyor, burada yeniden hesaplanmıyor.
+		# Vagon gövdesi `ArtDraw`'da: aynı vagon şehir dışı yürüyüş
+		# alanında da çiziliyor ve iki kopya tutulunca aynı kervan iki
+		# ekranda iki farklı şey oluyordu.
 		ArtDraw.wagon(
-			self, Vector2(x, _ground_y), wagon_w, wagon_h,
+			self, Vector2(_wagon_centres[index], _ground_y), wagon_w, wagon_h,
 			_wheel_angle, _light, index == 0
 		)
 

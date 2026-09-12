@@ -37,40 +37,57 @@ func _init() -> void:
 	root.add_child(back)
 	back.setup(span, GROUND_Y, WorldMapData.START_LOCATION_ID, HubScenery.LAYER_BACK)
 
-	# Kervan: atlı lider önde, iki yoldaş, iki vagon ve tayfaları -
-	# world_hub'ın kurduğu dizilişin aynısı.
+	# Kervan: world_hub'ın kolon aritmetiğinin aynısı. Sayılar elle
+	# yansıtılıyor (araç sahneyi yükleyemiyor, bkz. yukarısı) - aynı
+	# kural playthrough_demo.gd'de de var: yol ekranının _process
+	# sırasını bilerek taklit ediyor.
+	const GAP_TIGHT := 30.0
+	const GAP_NORMAL := 54.0
+	const GAP_WAGONS := 110.0
+	const HITCH_GAP := 26.0
+	const PAIR_GAP := 24.0
+	const BODY_W := 46.0
+	const OX_W := 146.0
+	const WAGON_W := 132.0
+
+	var cursor := 900.0
 	_leader = _figure(
 		WalkFigure.KIND_MOUNTED, ClassCatalog.GUARD,
-		Vector2(150.0, 128.0), Vector2(900.0, GROUND_Y - 128.0)
+		Vector2(150.0, 128.0), Vector2(cursor, GROUND_Y - 128.0)
 	)
-	_escorts.append(_figure(
-		WalkFigure.KIND_PERSON, ClassCatalog.HUNTER,
-		Vector2(46.0, 82.0), Vector2(806.0, GROUND_Y - 82.0)
-	))
-	_escorts.append(_figure(
-		WalkFigure.KIND_PERSON, ClassCatalog.BREAKER,
-		Vector2(46.0, 86.0), Vector2(742.0, GROUND_Y - 86.0)
-	))
+	cursor -= 150.0
+
+	# Liderin arkasındaki muhafız çifti.
+	var pair_step := BODY_W + PAIR_GAP
+	for slot in 2:
+		_escorts.append(_figure(
+			WalkFigure.KIND_PERSON,
+			ClassCatalog.HUNTER if slot == 0 else ClassCatalog.BREAKER,
+			Vector2(BODY_W, 82.0 + float(slot) * 4.0),
+			Vector2(cursor - float(slot) * pair_step - BODY_W * 0.5, GROUND_Y - 82.0)
+		))
+	cursor -= pair_step + BODY_W + GAP_NORMAL
 
 	for index in 2:
-		var wagon := WagonFigure.new()
-		wagon.position = Vector2(520.0 - float(index) * 250.0, GROUND_Y - 96.0)
-		root.add_child(wagon)
-		wagon.setup(Vector2(132.0, 96.0), index == 0)
-		_wagons.append(wagon)
-		# Vagonu çeken öküz - world_hub'daki dizilişin aynısı.
+		cursor -= OX_W * 0.5
 		_oxen.append(_figure(
-			WalkFigure.KIND_OX, "bandit", Vector2(146.0, 86.0),
-			Vector2(wagon.position.x + 152.0, GROUND_Y - 86.0)
+			WalkFigure.KIND_OX, "bandit", Vector2(OX_W, 86.0),
+			Vector2(cursor - OX_W * 0.5, GROUND_Y - 86.0)
 		))
-		for slot in 2:
-			_figure(
-				WalkFigure.KIND_PERSON, ClassCatalog.GUARD, Vector2(44.0, 76.0),
-				Vector2(
-					wagon.position.x + 74.0 - float(slot) * 34.0,
-					GROUND_Y - 76.0 + float(slot) * 4.0
-				)
-			)
+		cursor -= OX_W * 0.5 + GAP_TIGHT
+
+		_figure(
+			WalkFigure.KIND_PERSON, ClassCatalog.GUARD, Vector2(BODY_W, 72.0),
+			Vector2(cursor - BODY_W * 0.5, GROUND_Y - 72.0)
+		)
+		cursor -= BODY_W + HITCH_GAP
+
+		var wagon := WagonFigure.new()
+		wagon.position = Vector2(cursor - WAGON_W, GROUND_Y - 96.0)
+		root.add_child(wagon)
+		wagon.setup(Vector2(WAGON_W, 96.0), index == 0)
+		_wagons.append(wagon)
+		cursor -= WAGON_W + GAP_WAGONS
 
 	# Ön plan kervandan *sonra* ekleniyor: yolun altındaki alçak şeyler
 	# figürlerin önünde durmalı - world_hub'da bunu z_index yapıyor,
