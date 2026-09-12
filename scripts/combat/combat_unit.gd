@@ -18,8 +18,16 @@ var dodge: int = 0
 var crit_chance: int = 5
 var damage_bonus: int = 0
 var support_power: int = 0
+## Taban hız. Tur sırası artık buna her round bir zar eklenerek kuruluyor
+## (bkz. CombatEncounter.roll_turn_speeds) - eskiden savaş başında bir kez
+## okunup bütün savaş boyunca sabit kalıyordu, yani sıra hiç değişmiyordu.
 var initiative: int = 5
+## O round için atılmış hız (taban + zar). Sıralama bunu okur.
+var turn_speed: int = 0
 var damage_multiplier: float = 1.0
+
+## Zırh: gelen hasarı yüzde olarak düşürür. 0 = azaltma yok.
+var protection: int = 0
 
 var skills: Array[CombatSkill] = []
 
@@ -49,6 +57,34 @@ var composure: int = 0
 ## Yalnızca oyuncu tarafında dolu; savaş sonunda canı buraya yazarız.
 var source_character: CharacterData = null
 
+## --- Ölümün Kıyısı ---
+## Zırh hiçbir zaman hasarı tamamen kesmez: bir statın bütün bir sistemi
+## kapatması o sistemi silmek demektir (aynı gerekçe pazarlığın tabanında
+## ve "sahipsiz görev asla ceza değildir" kuralında da var).
+const MAX_PROT: int = 80
+## Zırh ne olursa olsun vuran bir hamle en az bunu götürür.
+const MIN_DAMAGE_THROUGH_PROT: int = 1
+
+## Ölümcül vuruş direnci: Ölümün Kıyısı'ndayken gelen her hasarda bu
+## yüzdeyle bir zar atılır, zar tutmazsa karakter kalıcı olarak ölür.
+const DEFAULT_DEATHBLOW_RESIST: int = 67
+## Kıyıdayken savaşmak kolay değil - isabet ve hasar düşer.
+const DEATHS_DOOR_ACCURACY_PENALTY: int = 15
+const DEATHS_DOOR_DAMAGE_PENALTY: int = 3
+
+## Ölümün Kıyısı **yalnızca ana karaktere** ait. Yoldaşlar ve düşmanlar canı
+## sıfırlanınca eskisi gibi saftan düşer; yoldaşlar savaş sonunda 1 canla
+## ayağa kalkar (bkz. CombatEncounter.write_back_party). Oyunun kuralı
+## "kervan mahvolabilir ama yok olamaz"dı ve yoldaş kalıcı ölümü seviye/huy/
+## ekipman kaybı demek olduğu için stres-kadro dengesini de değiştirirdi;
+## riski taşıyan lider olunca gerilim geliyor, denge duruyor.
+var is_player_character: bool = false
+var on_deaths_door: bool = false
+var deathblow_resist: int = DEFAULT_DEATHBLOW_RESIST
+## Kalıcı ölüm. `is_alive()` bunu okur, `current_hp` değil - Kıyıdaki bir
+## karakter 0 canla hâlâ ayaktadır.
+var is_dead: bool = false
+
 static func from_character(character: CharacterData, position: int, is_stressed: bool = false) -> CombatUnit:
 	var unit := CombatUnit.new()
 	unit.display_name = character.character_name
@@ -63,6 +99,9 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.damage_bonus = character.get_damage_bonus()
 	unit.support_power = character.stats.get_support_power()
 	unit.initiative = character.stats.get_initiative()
+	unit.protection = character.stats.get_protection()
+	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
+	unit.is_player_character = character.is_player
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()
@@ -84,18 +123,69 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	unit.crit_chance = template.crit_chance
 	unit.damage_bonus = maxi(0, int(round(template.damage_bonus * power_scale)))
 	unit.initiative = template.initiative
+	# Zırh yüzde olduğu için power_scale ile büyütülmüyor: %20 azaltma
+	# zayıf da güçlü de olsa aynı oranı keser, ölçeklenince tavanı
+	# zorlar ve savaşı kilitlerdi.
+	unit.protection = template.protection
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
 	unit.xp_value = template.xp_value
 	return unit
 
+## Kıyıdaki bir karakter 0 canla hâlâ ayaktadır, o yüzden bu `current_hp`
+## değil `is_dead` okur. Aksi halde ana karakter Kıyı'ya girdiği anda
+## saftan düşer ve savaş yenilgiyle kapanırdı.
 func is_alive() -> bool:
-	return current_hp > 0
+	return not is_dead and (current_hp > 0 or on_deaths_door)
 
-func apply_damage(amount: int) -> void:
-	current_hp = clampi(current_hp - amount, 0, max_hp)
+## Zırhtan geçen hasar. `MIN_DAMAGE_THROUGH_PROT` tabanı, zırhın vuruşu
+## tamamen yok saymasını engelliyor.
+func reduce_by_protection(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	var prot := clampi(protection, 0, MAX_PROT)
+	var through := int(round(float(amount) * (1.0 - float(prot) / 100.0)))
+	return maxi(MIN_DAMAGE_THROUGH_PROT, through)
 
+## Hasar uygular ve **ne olduğunu** döner, çünkü çağıranın (motor) bunu
+## kayda geçirmesi gerekiyor: "hit" / "deaths_door" (Kıyı'ya girdi) /
+## "survived_deathblow" (zar tuttu) / "killed" (kalıcı öldü) / "downed"
+## (yoldaş/düşman saftan düştü).
+##
+## `rng` yalnızca ölümcül vuruş zarı için gerekli; verilmezse zar atılmaz ve
+## Kıyıdaki karakter hayatta kalır - testlerin zar atmadan hasar
+## uygulayabilmesi için.
+func apply_damage(amount: int, rng: RandomNumberGenerator = null) -> String:
+	var taken := reduce_by_protection(amount)
+	current_hp = clampi(current_hp - taken, 0, max_hp)
+	if current_hp > 0:
+		return "hit"
+
+	if on_deaths_door:
+		# Kıyıdayken gelen her vuruş bir ölümcül vuruş zarı - DD'nin
+		# asıl gerilimi bu tekrarlanan zarda.
+		if rng != null and rng.randi_range(1, 100) > deathblow_resist:
+			is_dead = true
+			return "killed"
+		return "survived_deathblow"
+
+	if can_enter_deaths_door():
+		on_deaths_door = true
+		return "deaths_door"
+
+	return "downed"
+
+## Kıyı'ya yalnızca ana karakter girer; gerekçesi yukarıdaki alan yorumunda.
+func can_enter_deaths_door() -> bool:
+	return is_player_character and not is_dead
+
+## İyileştirme Kıyı'dan çıkarır: bir puan can bile ayağa kaldırır, ki DD'de
+## de böyle - Kıyı bir eşik, bir hapis değil.
 func apply_heal(amount: int) -> void:
+	if is_dead:
+		return
 	current_hp = clampi(current_hp + amount, 0, max_hp)
+	if current_hp > 0:
+		on_deaths_door = false
 
 func get_cooldown(skill_id: String) -> int:
 	return int(_cooldowns.get(skill_id, 0))
@@ -145,14 +235,23 @@ func _modifier_sum(stat: String) -> int:
 			total += int(modifier.amount)
 	return total
 
+## Kıyıdayken dövüşmek ayrı bir şey: isabet ve hasar düşer. Ceza buradan
+## uygulanıyor, süreli değiştirici olarak değil - Kıyı bir süre değil bir
+## *durum*, iyileşince kendiliğinden kalkması gerekiyor.
 func get_effective_accuracy() -> int:
-	return accuracy + _modifier_sum("accuracy")
+	var total := accuracy + _modifier_sum("accuracy")
+	if on_deaths_door:
+		total -= DEATHS_DOOR_ACCURACY_PENALTY
+	return total
 
 func get_effective_dodge() -> int:
 	return maxi(0, dodge + _modifier_sum("dodge"))
 
 func get_effective_damage_bonus() -> int:
-	return damage_bonus + _modifier_sum("damage")
+	var total := damage_bonus + _modifier_sum("damage")
+	if on_deaths_door:
+		total -= DEATHS_DOOR_DAMAGE_PENALTY
+	return total
 
 ## Yetenek şu an kullanılabilir mi; kullanılamıyorsa neden - UI kilitli
 ## butonu sebebiyle birlikte gösterir (bkz. olay ekranındaki kilitli
@@ -168,7 +267,10 @@ func get_skill_block_reason(skill: CombatSkill) -> String:
 func can_use_skill(skill: CombatSkill) -> bool:
 	return get_skill_block_reason(skill).is_empty()
 
-## Savaş bittiğinde canı asıl karaktere geri yazar.
+## Savaş bittiğinde canı asıl karaktere geri yazar. Kalıcı ölümü buraya
+## yazmıyoruz: kimin öldüğüne ve verasete `GameSession` karar veriyor
+## (bkz. CombatEncounter.get_dead_characters), çünkü partiden çıkarma ve
+## liderliğin devri oturum işi, savaş motorunun işi değil.
 func write_back() -> void:
 	if source_character != null:
 		source_character.current_hp = current_hp

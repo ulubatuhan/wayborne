@@ -449,6 +449,65 @@ func dismiss(character: CharacterData) -> bool:
 	party.remove_at(index)
 	return true
 
+## --- Savaşta ölüm ve liderliğin devri ---
+## Ölüm yalnızca savaşta olur ve yalnızca ana karakteri bulur (bkz.
+## CombatUnit'in Ölümün Kıyısı bölümü). Olay sonuçları hiçbir zaman
+## öldürmez - ağır yaralar, orası değişmedi.
+##
+## Lider ölürse kervan dağılmaz: en kıdemli yoldaş liderliği alır ve hikâye
+## onunla sürer. Kimse yoksa oyun biter - oyunun ilk gerçek game-over'ı bu,
+## ve tek koşulu "ölen liderin yerine geçecek kimse kalmamış" olması.
+const RUN_OVER_FLAG: String = "run_ended_leader_lost"
+
+## Kıdem = seviye, eşitlikte XP. Parti sırası değil: o sıra savaş mevkisi,
+## kıdem göstergesi değil (bkz. Character & Party Rules).
+func _compare_seniority(a: CharacterData, b: CharacterData) -> bool:
+	if a.level != b.level:
+		return a.level > b.level
+	return a.xp > b.xp
+
+## Savaşta kalıcı ölenleri partiden çıkarır, gerekiyorsa liderliği devreder.
+## Dönen sözlük ekranın anlatması gerekenleri taşır:
+##   dead_names       -> ölen karakterlerin adları
+##   new_leader       -> liderlik devredildiyse yeni lider, yoksa null
+##   run_over         -> ölen liderin yerine geçecek kimse kalmadı mı
+func resolve_combat_deaths(dead: Array[CharacterData]) -> Dictionary:
+	var result := {"dead_names": [], "new_leader": null, "run_over": false}
+	if dead.is_empty():
+		return result
+
+	var leader_died := false
+	for character in dead:
+		if character == null:
+			continue
+		result["dead_names"].append(character.character_name)
+		if character.is_player:
+			leader_died = true
+			character.is_player = false
+		var index := party.find(character)
+		if index >= 0:
+			party.remove_at(index)
+
+	if not leader_died:
+		return result
+
+	if party.is_empty():
+		result["run_over"] = true
+		set_flag(RUN_OVER_FLAG)
+		return result
+
+	# Kalan en kıdemli yoldaş liderliği alır. Partiden çıkarılıp başa
+	# konmuyor: sıra savaş mevkisi, liderlik ayrı bir bayrak.
+	var candidates: Array[CharacterData] = party.duplicate()
+	candidates.sort_custom(_compare_seniority)
+	var heir: CharacterData = candidates[0]
+	heir.is_player = true
+	result["new_leader"] = heir
+	return result
+
+func is_run_over() -> bool:
+	return has_flag(RUN_OVER_FLAG)
+
 ## Parti mevkilerini değiştirir; oyuncu da yer değiştirebilir - sırası
 ## savaştaki mevkisidir, kim olduğunu belirlemez.
 func swap_party_positions(first_index: int, second_index: int) -> bool:

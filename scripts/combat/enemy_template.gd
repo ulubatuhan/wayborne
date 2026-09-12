@@ -21,6 +21,13 @@ var display_name: String:
 @export var crit_chance: int = 4
 @export var damage_bonus: int = 2
 @export var initiative: int = 8
+## Zırh: gelen hasarı yüzde olarak düşürür (bkz. CombatUnit.apply_damage).
+## Varsayılan 0 - mevcut bütün kadrolar bu alan eklenmemiş gibi davranır,
+## yalnızca açıkça zırhlı yazılanlar (muhafız, ağır haydut) değer taşır.
+@export var protection: int = 0
+## Ölümcül vuruş direnci düşmanlarda kullanılmıyor: Ölümün Kıyısı yalnızca
+## ana karaktere ait (bkz. CombatUnit.can_enter_deaths_door). Düşman canı
+## sıfırlanınca doğrudan düşer.
 
 @export var skill_ids: Array[String] = []
 

@@ -166,6 +166,18 @@ func get_support_power() -> int:
 func get_composure() -> int:
 	return int(round(1.5 * get_effective_value(Kind.CHARISMA)))
 
+## Zırh (PROT): gelen hasarı yüzde olarak düşürür (bkz.
+## CombatUnit.apply_damage). Darkest Dungeon'daki PROT'un karşılığı.
+##
+## Taban 0, yani statı 5'te duran taze bir karakter bu sistem yokmuş gibi
+## davranır - dosyadaki bütün türetilmiş formüllerin kuralı bu ve ölçülmüş
+## kazanma oranı tablolarını bozmamanın tek yolu. Katsayı bilerek küçük:
+## Dayanıklılığı 15'e çıkaran biri %10 civarında azaltma alır, ki
+## `CombatUnit.MAX_PROT` tavanının çok altında. Hasarı tamamen kesen bir
+## stat, savaşı silmek demektir (aynı gerekçe pazarlığın tabanında da var).
+func get_protection() -> int:
+	return maxi(0, int(round(1.2 * get_effective_value(Kind.ENDURANCE))))
+
 func to_dict() -> Dictionary:
 	return {
 		"strength": strength,

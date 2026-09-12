@@ -9,7 +9,10 @@ extends VBoxContainer
 ## gömülür. Böylece sefer sırasında sahne değiştirip durum taşımak
 ## gerekmez.
 
-signal combat_finished(victory, xp_awarded, downed_count)  # bool, int, int
+## dead_characters: savaşta kalıcı ölen CharacterData listesi (bkz.
+## CombatUnit'in Ölümün Kıyısı bölümü). Panel bunu *uygulamaz* - partiden
+## çıkarma ve liderliğin devri oturumun işi, ekranın değil.
+signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bool, int, int, Array[CharacterData]
 
 const ENEMY_COLOR: Color = Color(0.85, 0.45, 0.4)
 const PLAYER_COLOR: Color = Color(0.55, 0.8, 0.55)
@@ -282,9 +285,13 @@ func _on_continue_pressed() -> void:
 	# downed_count write_back_party()'den önce okunmalı - o çağrı düşenleri
 	# 1 canla ayağa kaldırıyor, sonrasında kimse "düşmüş" sayılmıyor.
 	var downed_count := _encounter.get_downed_count()
+	# Ölenler write_back_party()'den *önce* okunmalı değil - o çağrı ölüyü
+	# diriltmiyor, yalnızca düşen yoldaşları kaldırıyor; yine de listeyi
+	# burada alıp yukarı veriyoruz ki ekran motoru bir daha sorgulamasın.
+	var dead := _encounter.get_dead_characters()
 	_encounter.write_back_party()
 	_continue_button.visible = false
-	combat_finished.emit(victory, xp_awarded, downed_count)
+	combat_finished.emit(victory, xp_awarded, downed_count, dead)
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

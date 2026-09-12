@@ -787,10 +787,18 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 		enemy_kind, _session.journey_destination_id
 	)
 
-func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> void:
+func _on_combat_finished(
+	victory: bool, xp_awarded: int, downed_count: int, dead_characters: Array
+) -> void:
 	if xp_awarded > 0:
 		_session.grant_party_xp(xp_awarded)
 		_add_log(tr("UI_ROAD_PARTY_XP") % xp_awarded, OUTCOME_COLOR)
+
+	# Ölüm yalnızca savaşta ve yalnızca liderde olur; sonucunu oturum
+	# uygular (partiden çıkarma + liderliğin devri). Kimse ölmediyse
+	# bu tamamen sessiz - eski davranış aynen sürüyor.
+	if not dead_characters.is_empty():
+		_report_combat_deaths(dead_characters)
 
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
@@ -821,6 +829,51 @@ func _on_combat_finished(victory: bool, xp_awarded: int, downed_count: int) -> v
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
+
+## Savaşta ölenleri oturuma bildirir ve sonucunu oyuncuya *anlatır*.
+## Sessiz bir ölüm hatadan ayırt edilemez: kimin öldüğü, liderliğin kime
+## geçtiği ya da oyunun bittiği kayda tek tek yazılıyor.
+func _report_combat_deaths(dead_characters: Array) -> void:
+	var typed: Array[CharacterData] = []
+	for entry in dead_characters:
+		var character: CharacterData = entry
+		typed.append(character)
+
+	var outcome := _session.resolve_combat_deaths(typed)
+	for name_text in (outcome.get("dead_names", []) as Array):
+		_add_log(tr("UI_ROAD_COMBAT_DEATH") % name_text, LOCKED_COLOR)
+
+	if outcome.get("run_over", false):
+		# Oyunun ilk gerçek sonu: ölen liderin yerine geçecek kimse yok.
+		# Sefer burada kapanır, varış ekranı hiç açılmaz.
+		_add_log(tr("UI_ROAD_RUN_OVER"), LOCKED_COLOR)
+		_journey_finished = true
+		_set_journey_controls_enabled(false)
+		_arrive_button.visible = false
+		_show_run_over()
+		return
+
+	var heir: CharacterData = outcome.get("new_leader")
+	if heir != null:
+		_add_log(tr("UI_ROAD_NEW_LEADER") % heir.character_name, OUTCOME_COLOR)
+
+## Kervanı sürecek kimse kalmadı. Ana menüye dönmekten başka bir çıkış
+## sunulmuyor ve kayıt silinmiyor - "Devam Et"in kapalı bir seferi
+## yüklememesi için `RUN_OVER_FLAG` kayda giriyor (bkz. GameSession).
+func _show_run_over() -> void:
+	_clear_children(_arrival_panel)
+	var title := Label.new()
+	title.text = tr("UI_ROAD_RUN_OVER_TITLE")
+	_arrival_panel.add_child(title)
+
+	var body := Label.new()
+	body.text = tr("UI_ROAD_RUN_OVER_BODY")
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD
+	body.modulate = LOCKED_COLOR
+	_arrival_panel.add_child(body)
+
+	if _is_live_journey:
+		SaveManager.save_session(_session)
 
 ## Bir olay pazarlık istediğinde gerçek pazarlık paneli açılır:
 ## anlaşırsan anlaştığın fiyatı, anlaşamazsan tam bedeli ödersin.

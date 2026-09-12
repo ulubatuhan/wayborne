@@ -24,6 +24,13 @@ const CRIT_MULTIPLIER: float = 1.5
 const MIN_HIT_CHANCE: int = 5
 const MAX_HIT_CHANCE: int = 95
 
+## Tur sırası her round yeniden atılır: taban hız + 1..SPEED_DIE. Eskiden
+## inisiyatif savaş başında bir kez okunuyordu, yani sıra bütün savaş
+## boyunca sabitti - hızlı olan her round önce vuruyor, yavaş olan hiç
+## öne geçemiyordu. Zar, DD'de olduğu gibi sıralamayı her round oynatıyor
+## ve "bu round kim önce davranacak" belirsizliğini geri getiriyor.
+const SPEED_DIE: int = 8
+
 ## Kırılma noktasını aşmış (CombatUnit.is_stressed) bir savaşçının, sırası
 ## geldiğinde emirlere kulak asmama ihtimali - DD'deki "irrasyonel"
 ## davranışın en sade hâli: hamle yapamaz, sırası boşa gider.
@@ -63,6 +70,10 @@ func _init(
 	_repack(player_units)
 	_repack(enemy_units)
 	_build_order()
+	# İlk sıradaki zaten düşmüşse (canı sıfır bir karakterle girilmişse)
+	# ona tur verilmemeli.
+	if not _order.is_empty() and not _order[0].is_alive():
+		_advance_turn()
 
 ## Savaşı başlatır ve sıra düşmandaysa onların hamlelerini işler; sıra
 ## oyuncuya gelince durur.
@@ -115,6 +126,23 @@ func use_skill(skill: CombatSkill, target: CombatUnit) -> bool:
 	_after_action()
 	return true
 
+## O round'un tur sırası, hız zarı atılmış haliyle. Savaş alanı görünümü
+## bunu üstte gösteriyor (DD'de olduğu gibi), test de sıranın gerçekten
+## round başına değiştiğini bununla okuyor.
+func get_turn_order() -> Array[CombatUnit]:
+	return _order.duplicate()
+
+## Turu harcamadan geçmek. DD'de de var ve motorun kendisi için de gerekli:
+## elinde kullanılabilir yeteneği kalmamış bir savaşçı (hepsi beklemede ya
+## da mevki kilitli) yoksa sırayı hiç bırakamaz ve savaş kilitlenirdi.
+func pass_turn() -> bool:
+	var unit := get_active_unit()
+	if is_over() or unit == null or not unit.is_player_side:
+		return false
+	_emit_log(tr("CBT_LOG_PASS") % unit.display_name)
+	_after_action()
+	return true
+
 ## Sırayı harcayarak iki yoldaşın yerini değiştirir - mevki kilidine
 ## takılan bir kadro böyle toparlanır.
 func swap_player_positions(first: CombatUnit, second: CombatUnit) -> bool:
@@ -136,11 +164,30 @@ func swap_player_positions(first: CombatUnit, second: CombatUnit) -> bool:
 
 ## Savaş bittiğinde canları asıl karakterlere yazar; düşenler 1 canla
 ## ayağa kalkar - kervan yok olmaz.
+## Savaş bittiğinde canları asıl karakterlere yazar. Düşen **yoldaşlar** 1
+## canla ayağa kalkar - kervan yok olmaz, kural değişmedi. Tek istisna
+## kalıcı ölen ana karakter: onu ayağa kaldırmak Ölümün Kıyısı'nı anlamsız
+## kılardı, o yüzden canı sıfırda bırakılıyor ve kimin öldüğünü
+## `get_dead_characters()` ile oturum öğreniyor (veraset onun işi).
 func write_back_party() -> void:
 	for unit in player_units:
+		if unit.is_dead:
+			unit.current_hp = 0
+			unit.write_back()
+			continue
 		if unit.current_hp <= 0:
 			unit.current_hp = 1
 		unit.write_back()
+
+## Savaşta kalıcı olarak ölen karakterler. `GameSession` bunları partiden
+## çıkarıp gerekiyorsa liderliği devrediyor - motor kimin lider olacağını
+## bilmez, yalnızca kimin öldüğünü bildirir.
+func get_dead_characters() -> Array[CharacterData]:
+	var dead: Array[CharacterData] = []
+	for unit in player_units:
+		if unit.is_dead and unit.source_character != null:
+			dead.append(unit.source_character)
+	return dead
 
 func get_downed_count() -> int:
 	var downed := 0
@@ -253,24 +300,42 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 
 	var is_crit := _rng.randi_range(1, 100) <= unit.crit_chance + skill.crit_bonus
 	var damage := _roll_damage(unit, skill, is_crit)
-	target.apply_damage(damage)
+	# Zırh ve ölümcül vuruş zarı `apply_damage`ın içinde; ne olduğunu
+	# dönüyor, çünkü kayıt satırı sonuca göre değişiyor.
+	var outcome := target.apply_damage(damage, _rng)
+	var taken := target.reduce_by_protection(damage)
 	_apply_skill_modifier(skill, target)
 
 	if is_crit:
 		_emit_log(tr("CBT_LOG_CRIT") % [
-			unit.display_name, skill.display_name, target.display_name, damage
+			unit.display_name, skill.display_name, target.display_name, taken
 		])
 	else:
 		_emit_log(tr("CBT_LOG_HIT") % [
-			unit.display_name, skill.display_name, target.display_name, damage
+			unit.display_name, skill.display_name, target.display_name, taken
 		])
 
-	if not target.is_alive():
-		if target.is_player_side:
-			_emit_log(tr("CBT_LOG_DOWNED_ALLY") % target.display_name)
-		else:
-			_emit_log(tr("CBT_LOG_DOWNED_ENEMY") % target.display_name)
-		_repack(_side_of(target))
+	_report_damage_outcome(target, outcome)
+
+## Hasarın sonucunu kayda geçirir ve gerekirse safı yeniden paketler.
+## Ölümün Kıyısı'ndaki karakter **saftan düşmez** - 0 canla mevkisinde
+## durmaya devam eder, o yüzden yalnızca gerçekten düşen/ölen için
+## _repack çağırıyoruz.
+func _report_damage_outcome(target: CombatUnit, outcome: String) -> void:
+	match outcome:
+		"deaths_door":
+			_emit_log(tr("CBT_LOG_DEATHS_DOOR") % target.display_name)
+		"survived_deathblow":
+			_emit_log(tr("CBT_LOG_DEATHBLOW_SURVIVED") % target.display_name)
+		"killed":
+			_emit_log(tr("CBT_LOG_KILLED") % target.display_name)
+			_repack(_side_of(target))
+		"downed":
+			if target.is_player_side:
+				_emit_log(tr("CBT_LOG_DOWNED_ALLY") % target.display_name)
+			else:
+				_emit_log(tr("CBT_LOG_DOWNED_ENEMY") % target.display_name)
+			_repack(_side_of(target))
 
 func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:
 	if skill.has_modifier():
@@ -293,26 +358,41 @@ func _roll_heal(unit: CombatUnit, skill: CombatSkill) -> int:
 	var base := skill.heal_amount + variance + int(unit.support_power / 2.0)
 	return maxi(1, int(round(float(base) * unit.get_proficiency_multiplier(skill.skill_id))))
 
+## Round'un sırasını kurar: her savaşçı hızını yeniden atar, sıralama ona
+## göre yapılır. Beraberlikte taban hız, o da eşitse oyuncu tarafı önce -
+## rastgele bir eşitlik bozucu, aynı seed'de farklı sonuç üretirdi.
 func _build_order() -> void:
 	_order.clear()
 	_order.append_array(player_units)
 	_order.append_array(enemy_units)
-	_order.sort_custom(func(a, b): return a.initiative > b.initiative)
+	for unit in _order:
+		unit.turn_speed = unit.initiative + _rng.randi_range(1, SPEED_DIE)
+	_order.sort_custom(_compare_turn_speed)
 	_order_index = 0
-	if not _order.is_empty() and not _order[0].is_alive():
-		_advance_turn()
 
+func _compare_turn_speed(a: CombatUnit, b: CombatUnit) -> bool:
+	if a.turn_speed != b.turn_speed:
+		return a.turn_speed > b.turn_speed
+	if a.initiative != b.initiative:
+		return a.initiative > b.initiative
+	return a.is_player_side and not b.is_player_side
+
+## Sıradaki ayakta olan savaşçıya geçer. Round dolduğunda bekleme süreleri
+## ve süreli değiştiriciler işler, **sonra sıra yeniden atılır** - zarın
+## round başında atılması gerekiyor, ortasında değil.
 func _advance_turn() -> void:
 	if _order.is_empty():
 		return
+	# Tur sayısı kadar dene: hepsi ölüyse sonsuz döngüye girmesin (bitişi
+	# _check_end zaten yakalar, bu yalnızca güvenlik ağı).
 	for _step in _order.size() + 1:
 		_order_index += 1
 		if _order_index >= _order.size():
-			_order_index = 0
 			round_number += 1
 			for unit in _order:
 				unit.tick_cooldowns()
 				unit.tick_modifiers()
+			_build_order()
 		if _order[_order_index].is_alive():
 			return
 
