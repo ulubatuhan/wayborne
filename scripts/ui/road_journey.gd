@@ -80,6 +80,32 @@ const WALK_FORWARD_RATE: float = 1.0
 ## çevirmek, hayvanları döndürmek, yükü yeniden dengelemek zaman yer.
 const WALK_BACKWARD_RATE: float = 0.25
 
+## --- Kervan emirleri (F2) ---
+## Mount & Blade'in emir menüsü: bir tuş listeyi açar, sayı emri verir.
+## F1 geliştirici paneline ait olduğu için (bkz. DevPanel) kök tuş F2.
+##
+## Tempo yolun *hızını* çarpıyor. Normal tempo 1.0, yani emir vermeyen bir
+## oyuncu için hiçbir şey değişmiyor - "durmadan ileri yürüyen oyuncu
+## seferi planlayıcının söylediği günde bitirir" sözü aynen duruyor.
+const COMMAND_KEY: Key = KEY_F2
+const PACE_STEADY: float = 1.0
+const PACE_FAST: float = 1.35
+const PACE_SLOW: float = 0.70
+const PACE_HALT: float = 0.0
+
+## Hızlı tempo bedava değil, yavaş tempo boşuna değil: ikisi de zaten var
+## olan kollardan geçiyor (stres ve moral), yeni bir sistem açmıyor.
+## Olmasa "hızlan" her koşulda doğru cevap olurdu ve bir emir menüsü
+## tek seçenekten oluşurdu.
+const PACE_FAST_STRESS_PER_DAY: int = 3
+const PACE_FAST_MORALE_PER_DAY: int = -2
+const PACE_SLOW_MORALE_PER_DAY: int = 2
+
+## Lider kolonda gezerken adım hızı (gün/saat cinsinden değil, kolondaki
+## piksel/saat): kervanın boyu zaten sınırlı, bu yalnızca ne kadar çabuk
+## arkaya inildiğini belirliyor.
+const LEADER_WALK_SPEED: float = 46.0
+
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
@@ -92,6 +118,20 @@ var _journey_finished: bool = false
 
 var _clock: JourneyClock
 var _band: TravelBand
+var _caravan: RoadCaravan
+## Yolun coğrafyası ve o günkü havası. İkisi de tohumdan hesaplanıyor,
+## planlayıcının gösterdiğiyle birebir aynı (bkz. RouteTerrain,
+## RouteWeather) - yolda başka bir arazi görülürse planlayıcı yalan
+## söylemiş olur.
+var _terrain: RouteTerrain
+var _route_key: String = ""
+var _weather: String = RouteWeather.CLEAR
+var _pace: float = PACE_STEADY
+var _pace_key: String = "UI_ROAD_PACE_STEADY"
+## Lider kolondan ayrıldı mı: ayrıldıysa A/D onu yürütüyor, kervanı değil.
+var _leader_detached: bool = false
+var _leader_offset: float = 0.0
+var _command_panel: PanelContainer
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
@@ -118,6 +158,8 @@ var _last_walk_hint: String = ""
 var _seed_spin: SpinBox
 var _dev_row: HBoxContainer
 var _walk_hint: Label
+var _conditions_label: Label
+var _last_conditions: String = ""
 var _state_label: Label
 var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
@@ -151,6 +193,19 @@ func _build_ui() -> void:
 	_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(_band)
 
+	# Kervan şeridin *çocuğu*: manzara arkada çizilir, figürler onun
+	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
+	# hesaplanırdı ve eğimli yolda kervan havada yürürdü.
+	_caravan = RoadCaravan.new()
+	_band.add_child(_caravan)
+	_band.ground_line_changed.connect(_caravan.set_ground_line)
+
+	# Emir menüsü: F2 açıyor, sayı tuşu emri veriyor. Şeridin üstünde
+	# duruyor (Mount & Blade'de de ekranın üstünde belirir) ve varsayılan
+	# olarak gizli - açık bir menü ekranı kalabalıklaştırır.
+	_command_panel = _build_command_panel()
+	_content.add_child(_command_panel)
+
 	var time_row := HBoxContainer.new()
 	time_row.add_theme_constant_override("separation", 10)
 
@@ -181,6 +236,14 @@ func _build_ui() -> void:
 	_walk_hint = Label.new()
 	_walk_hint.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_content.add_child(_walk_hint)
+
+	# Arazi, hava ve tempo tek satırda. Hava yalnızca görsel değil (yolu
+	# yavaşlatıyor, tehlikeyi büyütüyor), o yüzden oyuncunun okuyabileceği
+	# bir yerde durması şart - görünmeyen bir ceza hatadan ayırt edilemez.
+	_conditions_label = Label.new()
+	_conditions_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_conditions_label.modulate = Color(0.80, 0.82, 0.76)
+	_content.add_child(_conditions_label)
 
 	# Geliştirici kutusu (tohum + sıfırla) yalnızca F1 sentetik seferinde
 	# görünür; gerçek bir seferde oyuncunun önünde duracak işi yok.
@@ -284,6 +347,92 @@ func _build_ui() -> void:
 	$MarginContainer/VBoxContainer.add_child(_exit_button)
 	_refresh_exit_button()
 
+## Emirler tek yerde tanımlı: hem menü satırları hem tuş eşlemesi buradan
+## okunuyor, yoksa ekranda yazan sayı ile işe yarayan sayı ayrışır.
+const COMMANDS: Array[Dictionary] = [
+	{"key": "UI_ROAD_CMD_MARCH", "pace": PACE_STEADY, "pace_key": "UI_ROAD_PACE_STEADY"},
+	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST"},
+	{"key": "UI_ROAD_CMD_SLOW", "pace": PACE_SLOW, "pace_key": "UI_ROAD_PACE_SLOW"},
+	{"key": "UI_ROAD_CMD_HALT", "pace": PACE_HALT, "pace_key": "UI_ROAD_PACE_HALT"},
+	{"key": "UI_ROAD_CMD_DETACH", "pace": -1.0, "pace_key": ""},
+]
+
+func _build_command_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.visible = false
+	# Kendi arka planı: varsayılan tema saydam bırakıyor ve menü manzaranın
+	# üstünde okunmuyordu (aynı hata OnboardingPanel'de de yaşandı).
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.075, 0.085, 0.94)
+	style.border_color = ArtPalette.GOLD_DIM
+	style.set_border_width_all(1)
+	style.set_content_margin_all(10)
+	panel.add_theme_stylebox_override("panel", style)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 2)
+	panel.add_child(column)
+
+	var title := Label.new()
+	title.text = tr("UI_ROAD_COMMANDS_TITLE")
+	title.modulate = ArtPalette.GOLD
+	column.add_child(title)
+
+	for index in COMMANDS.size():
+		var row := Label.new()
+		row.text = "%d. %s" % [index + 1, tr(String(COMMANDS[index].key))]
+		column.add_child(row)
+
+	return panel
+
+## Emir menüsü klavyeden sürülüyor (Mount & Blade deseni): F2 açar, sayı
+## emri verir, Esc kapatır. Buton koymak yerine tuş olması oyuncunun
+## eli yürüme tuşlarından kalkmasın diye.
+func _input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+
+	if key_event.keycode == COMMAND_KEY:
+		_command_panel.visible = not _command_panel.visible
+		accept_event()
+		return
+
+	if not _command_panel.visible:
+		return
+
+	if key_event.keycode == KEY_ESCAPE:
+		_command_panel.visible = false
+		accept_event()
+		return
+
+	var index := key_event.keycode - KEY_1
+	if index >= 0 and index < COMMANDS.size():
+		_issue_command(index)
+		accept_event()
+
+func _issue_command(index: int) -> void:
+	var command: Dictionary = COMMANDS[index]
+	_command_panel.visible = false
+
+	var pace := float(command.pace)
+	if pace < 0.0:
+		# Ayrılma emri bir anahtar: lideri kolona indiriyor, geri dönmek de
+		# aynı emrin kendisi.
+		_leader_detached = not _leader_detached
+		if not _leader_detached:
+			_leader_offset = 0.0
+		_caravan.set_detached(_leader_detached)
+		_caravan.set_leader_offset(_leader_offset)
+		_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(
+			"UI_ROAD_CMD_DETACH" if _leader_detached else "UI_ROAD_CMD_REJOIN"
+		), OUTCOME_COLOR)
+		return
+
+	_pace = pace
+	_pace_key = String(command.pace_key)
+	_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(String(command.key)), OUTCOME_COLOR)
+
 func _init_journey() -> void:
 	var live_session: GameSession = GameState.get_session()
 
@@ -325,6 +474,27 @@ func _init_journey() -> void:
 	_walk_direction = 0.0
 	_camping = false
 	_band.set_camping(false)
+
+	# Yolun coğrafyası: planlayıcı hangi araziyi gösterdiyse yolda o
+	# görünüyor, çünkü ikisi de aynı `route_key`'den hesaplanıyor. Sentetik
+	# seferde iki uç da aynı şehir; anahtar yine tutarlı çıkıyor.
+	_route_key = RouteConditions.route_key(
+		_session.journey_origin_id, _session.journey_destination_id
+	)
+	_terrain = RouteTerrain.build(_route_key, _journey_length_days)
+	_band.set_route(_terrain)
+	_pace = PACE_STEADY
+	_pace_key = "UI_ROAD_PACE_STEADY"
+	_leader_detached = false
+	_leader_offset = 0.0
+	_command_panel.visible = false
+	_refresh_weather()
+
+	# Kervan parti ve vagon sayısından kuruluyor; bu yüzden sefer başında
+	# bir kez (yolda bir yoldaş katılırsa yine) çağrılıyor, karede değil.
+	_caravan.configure(_session)
+	_caravan.set_detached(false)
+	_caravan.set_leader_offset(0.0)
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
 	_clear_children(_combat_holder)
@@ -420,13 +590,41 @@ func _advance_position(hours: float) -> void:
 		direction += 1.0
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		direction -= 1.0
+
+	# Lider kolondan ayrıldıysa A/D *onu* yürütüyor: kervan verilen
+	# tempoyla kendi kendine ilerliyor, lider kolonun içinde geziyor.
+	# "Siz devam edin" emri bunu ifade ediyor - kervanı durdurmadan
+	# arkaya inmek.
+	if _leader_detached:
+		if not is_zero_approx(direction):
+			_leader_offset = clampf(
+				_leader_offset + direction * LEADER_WALK_SPEED * hours,
+				-_caravan.get_column_length(), 0.0
+			)
+			_caravan.set_leader_offset(_leader_offset)
+		_walk_at(_pace, hours)
+		return
+
 	if is_zero_approx(direction):
 		return
 
 	_walk_direction = direction
 	var rate := WALK_FORWARD_RATE if direction > 0.0 else -WALK_BACKWARD_RATE
+	_walk_at(rate * _pace, hours)
+
+## Yolun tek yürüme kapısı. Tempo ve hava burada çarpılıyor - iki ayrı
+## yerde çarpılırsa biri güncellenmeyi unutuyor.
+##
+## Havanın yolu yavaşlatması erzak sözünü bozmuyor çünkü planlayıcı bu
+## payı önceden istiyor (bkz. CaravanPlan.weather_reserve_days); açık
+## havada ve normal tempoda çarpan tam 1.0, yani eski davranış aynen.
+func _walk_at(rate: float, hours: float) -> void:
+	if is_zero_approx(rate):
+		return
+	_walk_direction = signf(rate)
+	var effective := rate * RouteWeather.pace_multiplier(_weather)
 	_days_covered = clampf(
-		_days_covered + rate * hours / JourneyClock.HOURS_PER_DAY,
+		_days_covered + effective * hours / JourneyClock.HOURS_PER_DAY,
 		0.0,
 		float(_journey_length_days)
 	)
@@ -461,6 +659,8 @@ func _process_elapsed_days() -> void:
 ## harcar, mesafeyi kapatmaz; Oregon Trail'in bütün gerilimi bu farkta.
 func _run_day() -> void:
 	_current_day += 1
+	_refresh_weather()
+	_apply_daily_pace_and_weather()
 	_advance_contracts_and_provisions()
 
 	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
@@ -493,6 +693,22 @@ func _update_camp_state() -> void:
 	_band.set_camping(false)
 	_refresh_state()
 
+## Hava günden ve rotadan hesaplanıyor, saklanmıyor: aynı kaydı yeniden
+## yükleyen oyuncu aynı havayı buluyor (bkz. RouteWeather). Biyom da
+## okunuyor, çünkü gölde sis, dağda fırtına daha sık.
+func _refresh_weather() -> void:
+	var biome := ArtPalette.FALLBACK_BIOME
+	if _terrain != null:
+		biome = _terrain.biome_at(_days_covered)
+	# Gün numarası **yalnızca** `total_days_elapsed + 1`. İlk yazışta
+	# `+ _current_day` de ekliyordum ve bu sessiz bir hataydı: `advance_day()`
+	# zaten her gün `total_days_elapsed`'i artırıyor, yani ikisini toplamak
+	# hava dizisini E+1, E+3, E+5 diye atlatıyordu. Planlayıcının tahmini
+	# E+1, E+2, E+3 üzerinden hesaplandığı için hava payı yolda yaşananla
+	# örtüşmez ve "doğru stokladım, yine aç kaldım" geri gelirdi.
+	_weather = RouteWeather.at(_route_key, _session.total_days_elapsed + 1, biome)
+	_band.set_weather(_weather)
+
 func _refresh_time_ui() -> void:
 	if _clock == null:
 		return
@@ -501,8 +717,13 @@ func _refresh_time_ui() -> void:
 	_band.set_phase(phase, _clock.get_phase_progress())
 
 	var progress := _get_route_progress()
-	_band.set_route_progress(progress)
+	_band.set_route_progress(progress, _days_covered)
 	_progress_bar.value = progress
+
+	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
+	# hesaplanırsa gece kervanı gündüz aydınlatılmış görünür.
+	_caravan.set_light(_band.get_light())
+	_caravan.set_speed(0.0 if _camping else absf(_walk_direction) * _pace)
 
 	# Metin yalnızca *gösterilen değer* değişince kuruluyor. Buradaki yorum
 	# uzun süre bunu vaat ediyordu ama kod her karede string biçimliyor,
@@ -529,6 +750,25 @@ func _refresh_time_ui() -> void:
 	)
 
 	_refresh_walk_hint()
+	_refresh_conditions()
+
+## Arazi, hava ve tempo. Hava mekanik olarak yolu yavaşlatıp tehlikeyi
+## büyüttüğü için burada yazması şart: görünmeyen bir ceza oyuncu için
+## hatadan ayırt edilemez (aynı gerekçe planlayıcının moral dökümünde de
+## var).
+func _refresh_conditions() -> void:
+	var biome := ArtPalette.FALLBACK_BIOME
+	if _terrain != null:
+		biome = _terrain.biome_at(_days_covered)
+	var text := "%s · %s · %s" % [
+		tr("UI_ROAD_TERRAIN_NOW") % tr(RouteTerrain.biome_name_key(biome)),
+		tr("UI_ROAD_WEATHER") % tr(RouteWeather.name_key(_weather)),
+		tr("UI_ROAD_PACE_LABEL") % tr(_pace_key),
+	]
+	if text == _last_conditions:
+		return
+	_last_conditions = text
+	_conditions_label.text = text
 
 ## Oyuncunun ne yaptığını ve neyi yapmadığını tek satırda söyler: duran
 ## kervan "bekliyor" değil, *yol almıyor* - ve bunu görmezse oyuncu ekranın
@@ -537,6 +777,8 @@ func _refresh_walk_hint() -> void:
 	var key := "UI_ROAD_WALK_IDLE"
 	if _camping:
 		key = "UI_ROAD_WALK_CAMPING"
+	elif _leader_detached:
+		key = "UI_ROAD_WALK_DETACHED"
 	elif _walk_direction > 0.0:
 		key = "UI_ROAD_WALK_FORWARD"
 	elif _walk_direction < 0.0:
@@ -574,6 +816,37 @@ func _on_camp_pressed() -> void:
 	_band.set_camping(true)
 	_add_log(tr("UI_ROAD_CAMP_LIT"), OUTCOME_COLOR)
 	_refresh_state()
+
+## Havanın ve temponun günlük bedeli. Hepsi *zaten var olan* kollardan
+## geçiyor - moral ve stres - yani hava ayrı bir hesap defteri açmıyor
+## (aynı kural kültür perklerinde de var: hiçbir perk yeni sistem icat
+## etmez).
+##
+## Tehlike kolu da havadan besleniyor ama orada değil: rota tehlikesi
+## `GameSession.get_route_danger()` üzerinden okunuyor, bkz. oradaki
+## hava deltası.
+func _apply_daily_pace_and_weather() -> void:
+	var bite := RouteWeather.morale_bite(_weather)
+	if bite != 0:
+		_session.caravan.change_morale(bite)
+
+	if is_equal_approx(_pace, PACE_FAST):
+		_session.change_stress(PACE_FAST_STRESS_PER_DAY)
+		_session.caravan.change_morale(PACE_FAST_MORALE_PER_DAY)
+	elif is_equal_approx(_pace, PACE_SLOW):
+		_session.caravan.change_morale(PACE_SLOW_MORALE_PER_DAY)
+
+## Havanın tehlike kolu. Delta *başlıktaki paya* uygulanıyor - aynı kural
+## `RouteConditions`'ın tehlike deltasında da var (`base + delta * (1-base)`):
+## sisli bir yol sessiz yolu gerçekten riskli kılıyor ama zaten ölümcül
+## olanı yazı-turaya çevirmiyor.
+##
+## Saklanan `danger_level`'a *yazmıyoruz*: yazsak her gün üstüne binerdi
+## ve on günlük bir sefer sonunda tehlike havadan değil aritmetikten
+## yüzde doksana çıkardı.
+func _weathered_danger() -> float:
+	var base := _session.danger_level
+	return clampf(base + RouteWeather.danger_delta(_weather) * (1.0 - base), 0.0, 1.0)
 
 func _advance_contracts_and_provisions() -> void:
 	var expired_contracts := _session.advance_day()
@@ -773,7 +1046,7 @@ func _close_recruit_offer() -> void:
 ## region_id'si) sefer hedefinden okunuyor - haydut kadrosu gidilen yöreye
 ## göre reskin oluyor.
 func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
-	var danger := _session.danger_level if danger_percent <= 0 else danger_percent / 100.0
+	var danger := _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
 	_clock.consume_hours(COMBAT_HOURS)
 	_set_journey_controls_enabled(false)
