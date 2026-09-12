@@ -270,7 +270,7 @@ static func _ensure_built() -> void:
 		"SKILL_WOLF_BITE_DESC",
 		[1, 2], [1, 2],
 		7, 3, 5, 5
-	), CombatUnit.STATUS_BLEED, 3, 3, 60))
+	), CombatUnit.STATUS_BLEED, 2, 2, 55))
 
 	# Ayı pençesi iki mevkiye birden iniyor: kadronun en tehlikeli
 	# yeteneği, ve oyuncuyu safını dağıtmaya zorlayan şey.
@@ -280,7 +280,7 @@ static func _ensure_built() -> void:
 		"SKILL_BEAR_CLAW_DESC",
 		[1], [1, 2],
 		10, 4, -5, 0, 1
-	), CombatUnit.STATUS_BLEED, 4, 3, 55), CombatSkill.Area.ADJACENT))
+	), CombatUnit.STATUS_BLEED, 2, 2, 45), CombatSkill.Area.ADJACENT))
 
 	# Domuz hücumu devirir: sersemletmenin düşman tarafındaki karşılığı.
 	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(

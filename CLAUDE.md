@@ -238,6 +238,66 @@ wayborne/
   once a skill might have buffed/debuffed them. A skill with no damage, no
   heal and a non-enemy target (SELF/ALLY) applies its modifier without an
   accuracy roll - see `CombatSkill.make_buff()`.
+- **Status effects are the second sanctioned reach beyond a hit**, and they
+  are a separate field group from timed modifiers because they are a
+  different thing: a modifier bends a number, a status *acts on its own at
+  the start of a turn*. `CombatSkill` carries `status_kind`
+  (`bleed`/`blight`/`stun`), `status_amount`, `status_rounds` and
+  `status_chance`; a kind the engine does not know silently does nothing,
+  the same trap as an unhandled `EventEffect.Type`, so
+  `test_combat_dd.gd` scans the whole catalogue for it.
+  - **Damage-over-time goes through the one damage door** (`apply_damage`):
+    PROT, Death's Door and the deathblow roll all live there. A second door
+    would mean bleed does not know about armour - and a companion would die
+    of it, breaking "only the leader can die".
+  - **A status ticks at the start of the affected unit's own turn.** At the
+    end is not the same thing: a bleeding fighter would then strike before
+    bleeding, and the damage would land a round late.
+  - **Two exploits are closed by construction, not by numbers.** Stun cannot
+    be chained (a unit that comes out of a stun carries
+    `STUN_RECOVERY_RESIST` for two rounds - without it, stunning the same
+    target every turn is the single correct strategy and the rest of combat
+    disappears); and the same status does not stack, it *refreshes* (two
+    bleeds doing double damage makes "do the same thing again" correct
+    again). Bleed and blight *do* stack with each other - two systems, and
+    opening both is a real tactic.
+  - **Resistance never closes the system in either direction**
+    (`MIN/MAX_STATUS_CHANCE`), the same rule as hit chance: a stat that can
+    switch a whole system off deletes that system. The baseline resist is
+    not zero either, or a fresh character bleeds on every hit and bleed
+    stops being a choice and becomes a tax on every attack.
+
+- **Level buys resistance, not stats** - `CharacterData.get_bleed_resist()`
+  and its siblings add `RESIST_PER_LEVEL` per level on top of the
+  Dayanıklılık-derived base, capped by `MAX_STATUS_RESIST`. This is not an
+  invention: it is exactly what the Progression Rules research already found
+  Darkest Dungeon does (a resolve level grants *only* resist growth), and
+  measurement said it was needed - with resistance coming from Dayanıklılık
+  alone, levelling bought nothing defensively for the classes that do not
+  invest there. Combat reads the `CharacterData` wrapper, never
+  `character.stats`, for the same reason trait and equipment bonuses do.
+
+- **Area skills must never beat single-target skills on the same side.**
+  `CombatSkill.Area` is `SINGLE` (default, so every pre-existing skill is
+  untouched), `ADJACENT`, `ALL` or `RANDOM`. The damage difference is set in
+  the **catalogue, not the engine**: a global "area skills do 60%" multiplier
+  would mean a skill's number is read from two places. `test_combat_dd.gd`
+  compares per side and caught the bear on the first run - it swiped two
+  ranks for more than the strongest single-target skill. A bear is dangerous
+  through *breadth* now, not through a bigger number.
+  - Adjacency is computed from **rank**, not array order: the array and the
+    ranks stop agreeing the moment a side is repacked.
+  - `RANDOM` exists only where the fiction demands it (a bandit leader's wild
+    swing). Given to the player it would be a skill that takes the decision
+    away, which is a penalty, not a mechanic. It never wastes a turn: if a
+    valid target exists it always hits one.
+- **`shift_amount` pushes or pulls the target, and the side is always
+  repacked afterwards.** Without the repack a pushed enemy climbs to rank 5,
+  falls outside every skill's reach and the fight locks - the same danger
+  `RouteConditions` closes with "no city can ever be sealed off". "Ayak
+  Bağı" pulling the back-rank archer forward is a turn won without damage:
+  the rank design used from the other side.
+
 - **Yetkinlik (skill proficiency) lives on the character, never on the
   shared `CombatSkill` resource.** `CombatUnit.skill_proficiency` (0-100 per
   skill, invested via `CharacterData.invest_skill_point()`) scales that
@@ -246,6 +306,118 @@ wayborne/
   every other user of that skill/template, which is why enemy level scaling
   is a `power_scale` multiplier applied only to the freshly-built
   `CombatUnit`, not the `EnemyTemplate` itself.
+
+### Art Rules
+
+The game was drawn in `ColorRect`s: the road was two rectangles and
+fourteen sliding lines, the city five buttons, the caravan a row of
+coloured boxes. The complaint - *"it looks like we are making a game in
+Excel"* - was correct, and the deeper half of it is that a rectangle
+cannot lie about being still but lies immediately once it moves.
+
+Everything is drawn in `_draw()`. There are no asset files yet; when
+hand-drawn art arrives, `ArtPalette` stays and the drawing functions give
+way to textures.
+
+- **One palette, one set of brushes.** `ArtPalette` is the game's only
+  colour source (four day phases, five biomes, each biome filling the same
+  four roles so a biome change can be a `lerp` rather than a cut);
+  `ArtDraw` is the only set of brushes (gradient band, silhouette ridge,
+  tree, conifer, rock, shrub, water, light pool, vignette, inked fill,
+  wagon). Every screen inventing its own colours is why the game did not
+  look like one production.
+- **A shape drawn in two places is two different shapes.** The wagon lives
+  in `ArtDraw.wagon()` because the road band and the walking area both draw
+  it; keeping a copy each meant the same caravan's wagon was two different
+  objects on two screens. Same reasoning as
+  `CaravanPlan.daily_consumption()`.
+- **Scenery is generated from world coordinates, never from a list.** Each
+  layer's props come from `hash(cell index)`; cells enter as the view
+  scrolls and are forgotten as they leave. A fixed array wraps around, the
+  player sees the repeat, and the road becomes a treadmill.
+- **Nothing tall below the road; nothing low-and-near above it.** Trees,
+  conifers, boulders and mountains all sit on the far side; below the road
+  there are only shrubs, grass, small stones, mud and (in rain) puddles.
+  Perspective is the reason: below is the closest point to the camera, and
+  a tree there hides both the scene and the caravan.
+- **Whatever is in front of the caravan must be drawn after it.** A band's
+  own `_draw()` runs *under* its children, so anything it draws is behind
+  the caravan - which is why figures looked like they were walking on top
+  of the trees. `TravelForeground` is a sibling added after the caravan
+  (`TravelBand.add_actor_layer()` is the single door that keeps the order);
+  `HubScenery` splits into `LAYER_BACK` and `LAYER_FRONT` on two `z_index`
+  values.
+- **Column layout is spacing, never fixed steps.** Every piece of the
+  caravan consumes its own width and a gap follows it, so an overlap is
+  arithmetically impossible. Fixed steps failed twice - two wagons on top of
+  each other, then the rear wagon's ox inside the front wagon - because the
+  step was unrelated to the real widths. At most two people walk abreast and
+  the gap between them is *derived from the figure's width*: a constant 30
+  put two eighty-pixel figures on top of each other. Party members are
+  spread along the column rather than stacked behind the leader, and the
+  walking crew go **ahead of** their own wagon: beside it overlapped the
+  body, behind it produced exactly the nameless tail the design does not
+  want.
+- **A figure that moves needs joints.** `WalkFigure` solves hip → knee →
+  foot with two bones; swinging a single-piece leg reads as scissors. The
+  foot stays put while it is on the ground, so the figure does not slide.
+  Wheels and walk cycles advance with **distance, not time** - a stationary
+  wagon whose wheels turn is the vehicle-shaped version of a sliding
+  rectangle.
+- **Palettes are shared with combat.** `WalkFigure` reads
+  `CombatFigure.ARCHETYPES`: the guard you saw in the fight walks the road
+  in the same colours. Skin tone comes from `CharacterData`, height scales
+  the figure - what character creation chose has to be visible or the
+  choice is only text.
+- **The anchor-preset trap, three times.** `PRESET_FULL_RECT` hands the size
+  down only when the parent *resizes*; a child added after the parent was
+  already sized never gets that notification and stays (0,0). It has now hit
+  `OnboardingPanel` (a `CanvasLayer` is not a `Control`), `RoadCaravan`
+  (invisible figures, half-pixel wagons, silent triangulation failures) and
+  `TravelForeground` (an empty strip below the road). Components adopt
+  `get_parent_control().size` explicitly instead of trusting the anchor.
+- **Godot's `_draw()` fails silently.** A degenerate polygon prints
+  "Invalid polygon data, triangulation failed", skips that shape and carries
+  on - invisible without a rendered frame. Do not append a base edge to a
+  shape whose arc already closes on it.
+
+**Structural tests verify layout; they never verify appearance.** That is
+what the screenshot tools are for - see Testing.
+
+### Route Terrain & Weather Rules
+
+`WorldMapData` is the unchanging map and `RouteConditions` is this week's
+state; `RouteTerrain` is the third layer, the road's *geography*, and
+`RouteWeather` is the day's sky. Both are **computed from a seed, never
+stored** - the same reasoning as `RouteConditions`' natural states: two
+cities are always joined by the same terrain, and reloading a save cannot
+re-roll the rain away.
+
+- **Terrain is data before it is a picture.** Segments, their biomes, the
+  roadside stops (hamlet, outpost, mine, pass, shrine, bridge) and the
+  slope all come from `RouteTerrain`; the road screen draws them and the
+  planner prints them in one line, so choosing a route is no longer blind.
+  Biomes step at most two places along `BIOME_CHAIN`, because steppe
+  straight into mountains does not read as geography.
+- **Weather invents no system.** All of it turns levers that already exist:
+  walking pace, route danger (applied to the headroom, `base + delta *
+  (1-base)`, the same rule as `RouteConditions`) and the daily morale drain.
+  Clear weather - the most common - is exactly neutral, or weather stops
+  being an event and becomes a hidden tax on every journey.
+- **Weather slows the road, so the planner asks for the food it will
+  cost.** This is the one place weather could have broken a promise:
+  *correct stocking never starves* (see Provision Rules). Because weather
+  comes from a seed, the planner can read the whole journey's weather in
+  advance - `RouteWeather.forecast_extra_days()` walks the days and returns
+  an **exact** reserve, not an estimate, and `CaravanPlan` adds it to the
+  provisions required and shows it as its own line. `test_route_terrain.gd`
+  runs 80 route/length/departure combinations and asserts a caravan stocked
+  with the reserve never runs out before the road ends.
+- **The day number is `total_days_elapsed + 1`, nothing else.** Adding the
+  journey's own day counter on top double-counts (`advance_day()` already
+  moves `total_days_elapsed`) and the weather sequence skips every other
+  day - which would silently desynchronise it from the planner's forecast
+  and bring the starvation back.
 
 ### Stress Rules
 
@@ -689,19 +861,34 @@ vocabulary existed; the game never spoke it.
   encounter - it dropped the archer every time, leaving three melee and
   erasing the rank design.
 
-Measured win rate (party size × road danger, level 1):
+Measured win rate (party size × road danger, level 1), **re-measured after
+the Darkest Dungeon pass** (PROT, the per-round speed die, Death's Door,
+status effects, area skills):
 
 | party | 20% | 40% | 65% | 90% |
 |---|---|---|---|---|
-| 1 | 42% | 45% | 5% | 5% |
-| 2 | 100% | 72% | 23% | 23% |
-| 3 | 100% | 93% | 57% | 57% |
-| 4 | 100% | 100% | 88% | 88% |
+| 1 | 32% | 32% | 7% | 7% |
+| 2 | 95% | 58% | 12% | 12% |
+| 3 | 100% | 92% | 50% | 50% |
+| 4 | 100% | 100% | 87% | 87% |
 
 A lone traveller on a bandit-infested road is nearly hopeless, and that is
 the intended message rather than an oversight: the game starts you with two
 people, party 1 only exists if you dismiss someone, and losing a fight costs
 attrition, not death.
+
+**The whole table moved down, and the cause is DD-1, not the content added
+after it.** Enemy PROT and the re-rolled speed die were never re-measured
+when they landed; DoT and area skills were added later and, when tempered,
+moved these numbers **not at all** (the table's squad is bandits, whose only
+new trick is a small cleaver bleed). The lesson is the one this file keeps
+recording in other forms: *a mechanic that is not re-measured when it lands
+is a balance change nobody has seen.*
+
+The number worth revisiting is **party 2 at 65% danger: 23% → 12%**. Two is
+the starting party, so that is the pair's odds on a road the tavern openly
+calls dangerous. It is defensible - the player chooses the road and can pay
+to learn its danger first - but it is the tightest square in the table.
 
 ### Progression Rules
 
@@ -1401,6 +1588,14 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
   `GameSession`, `HagglingSession`. Never test engine internals or scene
   wiring.
+- `test_route_terrain.gd` locks the road's geography and weather: both
+  reproducible from a seed, segments covering the whole route with no gaps,
+  biomes never jumping, stops never landing on the destination city, clear
+  weather exactly neutral, every lever inside its range, the biome bias
+  actually biasing (the overwhelming-margin pattern again), the visuals
+  agreeing with the mechanics (the slowest weather is also the darkest), and
+  - the suite's most important claim - the provision promise surviving
+  weather.
 - `test_route_conditions.gd` locks the two properties the route layer would
   be dangerous without: natural states are reproducible (a save reload
   cannot re-roll a closed pass open) and no city is ever sealed off - the
@@ -1430,6 +1625,33 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   parties never breaking), `make_camp()`, the `STRESS` effect, and - same
   overwhelming-margin pattern again - that a stressed `CombatUnit` sometimes
   refuses orders while a calm one deterministically never does.
+- **`tests/screenshot_*.gd` are the visual checks, and they are not tests** -
+  they never fail, they render PNGs (`screenshot_combat`, `screenshot_road`,
+  `screenshot_city`, `screenshot_hub`). They exist because a structural test
+  verifies *layout* and never *appearance*, and this repository ships
+  headless: an interface change went unseen for a long time. Run them with a
+  virtual screen and the software rasteriser, since the environment has no
+  Vulkan:
+
+  ```bash
+  godot --headless --import
+  LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x900x24" \
+    godot --path . --rendering-driver opengl3 --script res://tests/screenshot_road.gd
+  ```
+
+  Between them they have found: figures walking on top of trees, a rider
+  floating twenty pixels above his horse, a headless ox, wagons overlapping
+  each other, an ox inside the wagon in front, an invisible caravan
+  (the anchor trap), a road indistinguishable from the ground it lay on, a
+  vignette that drew vertical bars instead of a soft edge, a snow cap that
+  painted the whole mountain white, a lake five-sixths hidden under the
+  ground, and an empty strip below the road. **Not one of those is visible
+  to any assertion in the suite.**
+- **A screenshot tool can measure the wrong thing too.** The road tool's
+  "forest" frame contained no forest: it checked the biome at day zero and
+  then moved the camera to day 2.1, which had long since crossed into
+  another segment. Fourth measurement bug in this file's history - suspect
+  the harness before the game, including the harness you just wrote.
 - Seed every RNG. A test that can flake is worse than no test.
 - **Do not derive two independent things from the same seed.** The simulator
   picked the player's culture with `seed_value % 5` and seeded the event
@@ -1733,8 +1955,29 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
   çeviri taramasının yalnızca ui/world'ü kapsaması, ve `SAVE_VERSION`'ın
   yazılıp hiç okunmaması.
 
-Sırada: karakter portreleri/görsel varlıklar (ColorRect yer tutucuları hâlâ
-duruyor). Moral ve stres dengesi çözüldü - aşağıdaki kayıtlara bakılabilir.
+Faz 10 ("Oyun bir şeye benzesin") tamamlandı - iki hat, biri savaşın
+derinliği biri oyunun görüntüsü.
+
+**Darkest Dungeon hattı (DD-1..DD-5).** Zırh (PROT), her round yeniden
+atılan hız zarı ve Ölümün Kıyısı (yalnızca lider ölür, kıdemliye devir,
+varis yoksa oyun biter); savaş alanı görünümü (liste değil saf düzeni);
+durum efektleri (kanama/zehir/sersemletme, dirençler, zincirlenemeyen
+sersemletme, üst üste binmeyen DoT); alan hedefleme ve mevki kaydırma.
+Denge yeniden ölçüldü ve tablo düştü - sebebi hiç ölçülmemiş olan DD-1
+çıktı (bkz. Ruin Rules).
+
+**Sanat hattı (ART-A..ART-D).** Oyunun tamamı `ColorRect`'ten çizilmiş
+görsele geçti: tek palet ve tek fırça seti (`ArtPalette`/`ArtDraw`),
+katmanlı paralaks bir yol (arazi ve hava veriden geliyor, yağmur hem
+görünüyor hem yolu yavaşlatıyor), eklemli yürüyen figürler ve atlı bir
+lider, üstten bakışlı izometrik bir şehir (beş mekânın kendi mimarisi,
+üstüne gelince ne yapabileceğini söyleyen balon). Kervan emirleri
+(F2 + sayı) ve liderin kolondan ayrılıp gezebilmesi de bu hatta geldi.
+
+Sırada: elle çizilmiş varlıklar (her şey hâlâ `_draw()` ile çiziliyor -
+`ArtPalette` kalır, çizim fonksiyonları dokuya yerini bırakır) ve
+Ruin Rules'un işaretlediği tek denge sorusu (iki kişilik parti %65
+tehlikede %12).
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

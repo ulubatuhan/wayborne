@@ -107,9 +107,13 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.support_power = character.stats.get_support_power()
 	unit.initiative = character.stats.get_initiative()
 	unit.protection = character.stats.get_protection()
-	unit.bleed_resist = character.stats.get_bleed_resist()
-	unit.blight_resist = character.stats.get_blight_resist()
-	unit.stun_resist = character.stats.get_stun_resist()
+	# `character.stats` değil `character`: seviye payı orada (bkz.
+	# CharacterData.get_bleed_resist). Aynı kural huy ve ekipman
+	# bonuslarında da var - stat'a doğrudan gitmek onları sessizce
+	# düşürüyor.
+	unit.bleed_resist = character.get_bleed_resist()
+	unit.blight_resist = character.get_blight_resist()
+	unit.stun_resist = character.get_stun_resist()
 	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
 	unit.is_player_character = character.is_player
 	unit.figure_kind = character.class_id
