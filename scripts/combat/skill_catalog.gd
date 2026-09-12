@@ -30,6 +30,7 @@ const ROUSING_SPEECH: String = "rousing_speech"
 const TALLY_RECKON: String = "tally_reckon"
 const CUTTING_WORD: String = "cutting_word"
 const KEEP_LEDGER: String = "keep_ledger"
+const BLIGHT_FLASK: String = "blight_flask"
 
 # Düşman yetenekleri - haydutlar
 const CLEAVER: String = "bandit_cleave"
@@ -52,6 +53,13 @@ static func get_skill(skill_id: String) -> CombatSkill:
 	_ensure_built()
 	return _skill_by_id.get(skill_id)
 
+## Bütün yetenekler. Test tarafı bunu okuyor: bir yeteneğin tanınmayan
+## bir durum efekti yazması sessizce hiçbir şey yapar, o yüzden katalog
+## bir bütün olarak taranabilmeli (bkz. test_combat_dd.gd).
+static func get_all_skills() -> Array[CombatSkill]:
+	_ensure_built()
+	return _skills
+
 ## Kimliklerden yetenek listesi kurar; bilinmeyen kimlikleri sessizce atlar.
 static func get_skills(skill_ids: Array[String]) -> Array[CombatSkill]:
 	var skills: Array[CombatSkill] = []
@@ -65,13 +73,15 @@ static func _ensure_built() -> void:
 	if not _skills.is_empty():
 		return
 
-	_skills.append(CombatSkill.make_attack(
+	# Kalkan darbesi sersemletiyor: bir muhafızın işi hasar vermek değil,
+	# öndeki düşmanı bir tur oyundan çıkarmak.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		SHIELD_BASH,
 		"SKILL_SHIELD_BASH_NAME",
 		"SKILL_SHIELD_BASH_DESC",
 		[1, 2], [1, 2],
 		6, 2, 10, 0
-	))
+	), CombatUnit.STATUS_STUN, 0, 1, 60))
 
 	_skills.append(CombatSkill.make_attack(
 		SPEAR_THRUST,
@@ -125,13 +135,15 @@ static func _ensure_built() -> void:
 		"dodge", -8, 2
 	))
 
-	_skills.append(CombatSkill.make_attack(
+	# Nişanlı ok kanatıyor: yavaş ve pahalı bir yetenek, karşılığı
+	# zamana yayılan hasar.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		AIMED_SHOT,
 		"SKILL_AIMED_SHOT_NAME",
 		"SKILL_AIMED_SHOT_DESC",
 		[3, 4], [2, 3, 4],
 		10, 2, -5, 15, 3
-	))
+	), CombatUnit.STATUS_BLEED, 3, 3, 70))
 
 	_skills.append(CombatSkill.make_buff(
 		STEP_BACK, "SKILL_STEP_BACK_NAME", "SKILL_STEP_BACK_DESC",
@@ -204,13 +216,24 @@ static func _ensure_built() -> void:
 		"dodge", 8, 2, 3
 	))
 
-	_skills.append(CombatSkill.make_attack(
+	# Kalem Efendisi'nin zehirli şişesi: oyuncu tarafındaki tek zehir
+	# kaynağı. Anlık hasarı düşük, değeri zamana yayılıyor - sınıfın
+	# "sayılarla dövüşür" kimliğine uyan tek saldırı biçimi.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		BLIGHT_FLASK,
+		"SKILL_BLIGHT_FLASK_NAME",
+		"SKILL_BLIGHT_FLASK_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		3, 1, 5, 0, 2
+	), CombatUnit.STATUS_BLIGHT, 4, 3, 75))
+
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		CLEAVER,
 		"SKILL_CLEAVER_NAME",
 		"SKILL_CLEAVER_DESC",
 		[1, 2], [1, 2],
 		8, 3, 0, 3
-	))
+	), CombatUnit.STATUS_BLEED, 2, 2, 45))
 
 	_skills.append(CombatSkill.make_attack(
 		BANDIT_ARROW,
@@ -228,29 +251,32 @@ static func _ensure_built() -> void:
 		11, 4, 5, 5
 	))
 
-	_skills.append(CombatSkill.make_attack(
+	# Hayvan ısırığı kanatıyor, pençe daha çok: vahşi hayvan kadrosunun
+	# haydutlardan farkı anlık hasar değil, açtığı yara.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		WOLF_BITE,
 		"SKILL_WOLF_BITE_NAME",
 		"SKILL_WOLF_BITE_DESC",
 		[1, 2], [1, 2],
 		7, 3, 5, 5
-	))
+	), CombatUnit.STATUS_BLEED, 3, 3, 60))
 
-	_skills.append(CombatSkill.make_attack(
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		BEAR_CLAW,
 		"SKILL_BEAR_CLAW_NAME",
 		"SKILL_BEAR_CLAW_DESC",
 		[1], [1, 2],
 		16, 6, -5, 0, 1
-	))
+	), CombatUnit.STATUS_BLEED, 4, 3, 55))
 
-	_skills.append(CombatSkill.make_attack(
+	# Domuz hücumu devirir: sersemletmenin düşman tarafındaki karşılığı.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
 		BOAR_CHARGE,
 		"SKILL_BOAR_CHARGE_NAME",
 		"SKILL_BOAR_CHARGE_DESC",
 		[1], [1],
 		10, 4, 0, 8
-	))
+	), CombatUnit.STATUS_STUN, 0, 1, 55))
 
 	_skills.append(CombatSkill.make_attack(
 		GUARD_STRIKE,

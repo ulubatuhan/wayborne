@@ -24,6 +24,13 @@ func run(t) -> void:
 	_test_succession_promotes_the_most_senior(t)
 	_test_run_ends_only_when_nobody_can_succeed(t)
 	_test_battlefield_is_a_field_not_a_list(t)
+	_test_status_resist_never_certain_never_impossible(t)
+	_test_stun_cannot_be_chained(t)
+	_test_dot_does_not_stack_with_itself(t)
+	_test_dot_goes_through_the_one_damage_door(t)
+	_test_dot_ticks_at_the_start_of_the_turn(t)
+	_test_endurance_buys_status_resistance(t)
+	_test_every_status_a_skill_can_apply_is_handled(t)
 
 func _leader(name_text: String = "Lider") -> CharacterData:
 	var character := CharacterData.create(
@@ -354,3 +361,201 @@ func _selectable_count(panel) -> int:
 			if slot.mouse_default_cursor_shape == Control.CURSOR_POINTING_HAND:
 				count += 1
 	return count
+
+# --- Durum efektleri ---
+
+## Direnç şansı büker ama hiçbir yönde kapatmaz - aynı kural isabet
+## şansında da var (MIN/MAX_HIT_CHANCE). Bir statı yeterince yükselterek
+## bir sistemi tamamen kapatabilmek, o sistemi silmek demektir.
+func _test_status_resist_never_certain_never_impossible(t) -> void:
+	var unit := CombatUnit.new()
+	unit.bleed_resist = 999
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var landed := 0
+	for _attempt in 600:
+		if unit.roll_status(CombatUnit.STATUS_BLEED, 100, rng):
+			landed += 1
+	t.ge(float(landed), 1.0, "sınırsız direnç bile kanamayı imkânsız kılmamalı")
+	t.le(float(landed), 120.0, "yüksek direnç kanamayı belirgin şekilde azaltmalı")
+
+	var fragile := CombatUnit.new()
+	fragile.bleed_resist = -999
+	var missed := 0
+	for _attempt in 600:
+		if not fragile.roll_status(CombatUnit.STATUS_BLEED, 10, rng):
+			missed += 1
+	t.ge(float(missed), 1.0, "sıfır direnç bile kanamayı garanti kılmamalı")
+
+## Buradaki asıl iddia: **sersemletme zincirlenemez.** Zincirlenebilseydi
+## tek doğru strateji her turda aynı hedefi sersemletmek olurdu ve
+## savaşın geri kalanı silinirdi (aynı gerekçe pazarlıkta "aynı düşük
+## teklifi üç kez yapmak" kapatılırken de vardı).
+func _test_stun_cannot_be_chained(t) -> void:
+	var unit := CombatUnit.new()
+	var before := unit.get_status_resist(CombatUnit.STATUS_STUN)
+
+	unit.apply_status(CombatUnit.STATUS_STUN, 0, 1)
+	t.ok(unit.is_stunned, "sersemletme uygulanmalı")
+	unit.consume_stun()
+	t.not_ok(unit.is_stunned, "sersemlik bir tur sonra kalkmalı")
+	# İddia **kesin olarak daha yüksek** olmak zorunda. İlk yazışta
+	# `before + STUN_RECOVERY_RESIST` ile karşılaştırıyordum, yani
+	# korumak istediği sabitin kendisini kullanıyordu: sabit sıfıra
+	# çekilince iddia sessizce geçiyordu. Mutasyonla yakalandı - ve bu
+	# tam olarak CLAUDE.md'nin "formülü değil sömürüyü doğrula"
+	# maddesinin anlattığı hata.
+	t.ok(
+		unit.get_status_resist(CombatUnit.STATUS_STUN) > before,
+		"sersemlikten çıkan savaşçı bir süre daha dirençli olmalı"
+	)
+	t.ge(
+		float(CombatUnit.STUN_RECOVERY_RESIST), 20.0,
+		"koruma anlamlı olacak kadar büyük olmalı, yoksa zincirleme açık kalır"
+	)
+	t.ge(
+		float(CombatUnit.STUN_RECOVERY_ROUNDS), 1.0,
+		"koruma en az bir tur sürmeli"
+	)
+
+	# Direnç kalıcı değil: iki tur sonra normale dönüyor, yoksa
+	# sersemletme bir kez kullanılıp bir daha işe yaramayan bir yetenek
+	# olurdu.
+	for _round in CombatUnit.STUN_RECOVERY_ROUNDS:
+		unit.tick_statuses()
+	t.eq(
+		unit.get_status_resist(CombatUnit.STATUS_STUN), before,
+		"koruma süresi bitince direnç normale dönmeli"
+	)
+
+## Aynı türden ikinci bir efekt üst üste binmiyor, yeniliyor. Binse iki
+## kanama tek kanamanın iki katı hasar verirdi ve doğru strateji yine
+## "hep aynı şeyi yap" olurdu.
+func _test_dot_does_not_stack_with_itself(t) -> void:
+	var unit := CombatUnit.new()
+	unit.apply_status(CombatUnit.STATUS_BLEED, 3, 2)
+	unit.apply_status(CombatUnit.STATUS_BLEED, 2, 4)
+	t.eq(unit.drain_status_damage(), 3, "kanama üst üste binmemeli, en güçlüsü kalmalı")
+	t.eq(
+		unit.get_status_rounds(CombatUnit.STATUS_BLEED), 4,
+		"süre uzayabilmeli - yenilemek bunun için var"
+	)
+
+	# Kanama ve zehir *birlikte* binebiliyor: ikisi ayrı sistem, ikisini
+	# de açmak gerçek bir taktik.
+	unit.apply_status(CombatUnit.STATUS_BLIGHT, 4, 2)
+	t.eq(unit.drain_status_damage(), 7, "kanama ve zehir ayrı ayrı işlemeli")
+
+## Kanama hasarı `apply_damage`tan geçmeli: zırh, Ölümün Kıyısı ve
+## ölümcül vuruş zarı orada. İkinci bir hasar kapısı, kanamanın zırhı
+## bilmemesi demekti.
+func _test_dot_goes_through_the_one_damage_door(t) -> void:
+	var armoured := CombatUnit.from_character(_companion(), 1)
+	armoured.protection = 50
+	armoured.max_hp = 100
+	armoured.current_hp = 100
+	armoured.apply_status(CombatUnit.STATUS_BLEED, 10, 3)
+
+	var drained := armoured.drain_status_damage()
+	t.eq(drained, 10, "kanama kendi ham hasarını bildirmeli")
+	t.eq(
+		armoured.reduce_by_protection(drained), 5,
+		"zırh kanamayı da kesmeli - hasarın tek kapısı olmasının sebebi bu"
+	)
+
+	# Yoldaş (lider değil) kanamadan ölmez, düşer: "yalnızca lider
+	# ölebilir" kuralı durum efektleri için de geçerli.
+	armoured.current_hp = 2
+	var outcome := armoured.apply_damage(999, null)
+	t.eq(outcome, "downed", "yoldaş kanamadan ölmemeli, düşmeli")
+	t.not_ok(armoured.is_dead, "yoldaş ölü işaretlenmemeli")
+
+## Efekt hedefin *kendi turu başında* işliyor. Tur sonunda işlemek aynı
+## şey değil: o zaman kanayan biri kanamadan önce vuruyor ve hasar bir
+## tur geç geliyor.
+func _test_dot_ticks_at_the_start_of_the_turn(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 991
+	var encounter := _build_encounter(rng, 2, 2)
+	# `start()` şart: çağrılmadan aktif birim bir düşman olabiliyor ve
+	# `pass_turn()` düşman için false dönüyor - döngü hiç ilerlemiyor.
+	# İlk yazışta bu atlanmıştı ve test "kanama işlemiyor" diyordu, oysa
+	# kanama işliyordu. Harnesse güvenmeden önce harnessi kontrol et.
+	encounter.start()
+
+	var victim := encounter.get_active_unit()
+	t.ok(victim != null, "sıradaki birim olmalı")
+	victim.apply_status(CombatUnit.STATUS_BLEED, 7, 2)
+	var hp_before: int = victim.current_hp
+
+	# Sırayı bir tam tur döndürüyoruz; kurbanın sırası tekrar gelince
+	# kanaması işlemiş olmalı.
+	var guard := 0
+	while encounter.get_active_unit() == victim and guard < 40:
+		guard += 1
+		encounter.pass_turn()
+	guard = 0
+	while encounter.get_active_unit() != victim and guard < 40 and not encounter.is_over():
+		guard += 1
+		encounter.pass_turn()
+
+	t.le(
+		float(victim.current_hp), float(hp_before - 1),
+		"sırası gelen birim kanamasını turun başında yemiş olmalı"
+	)
+
+## Dayanıklılık dirence dönüşüyor ve taban sıfır değil: sıfır olsa taze
+## bir karakter her vuruşta kanardı, yani kanama bir seçenek olmaktan
+## çıkıp her saldırıya binen bir ek hasar olurdu.
+func _test_endurance_buys_status_resistance(t) -> void:
+	var fresh := CharacterStats.new()
+	t.ge(float(fresh.get_bleed_resist()), 1.0, "taze karakterin de bir direnci olmalı")
+
+	var tough := CharacterStats.new()
+	tough.endurance = 15
+	t.ge(
+		float(tough.get_bleed_resist()), float(fresh.get_bleed_resist() + 10),
+		"Dayanıklılık kanama direncini belirgin şekilde artırmalı"
+	)
+	t.ge(
+		float(tough.get_blight_resist()), float(fresh.get_blight_resist()),
+		"zehir direnci de Dayanıklılıkla artmalı"
+	)
+	t.ge(
+		float(tough.get_stun_resist()), float(fresh.get_stun_resist()),
+		"sersemletme direnci de Dayanıklılıkla artmalı"
+	)
+	# Zehre direnmek kanamaya direnmekten daha zor - iki katsayının
+	# farklı olması bilinçli, aynı olsa iki durum aynı şey olurdu.
+	t.le(
+		float(tough.get_blight_resist()), float(tough.get_bleed_resist()),
+		"zehir kanamadan daha zor dirençlenmeli"
+	)
+
+## Katalogdaki her durum efekti motorun tanıdığı üçünden biri olmalı.
+## Tanımadığı bir ad sessizce hiçbir şey yapar - `EventEffect.Type`'ın
+## ölü tipiyle aynı tuzak, ve o tuzak bu depoda bir kez kapandı
+## (WAGON_LOSE hiç kullanılmıyordu).
+func _test_every_status_a_skill_can_apply_is_handled(t) -> void:
+	var known := [
+		CombatUnit.STATUS_BLEED, CombatUnit.STATUS_BLIGHT, CombatUnit.STATUS_STUN
+	]
+	var used := {}
+	for skill in SkillCatalog.get_all_skills():
+		if not skill.has_status():
+			continue
+		t.ok(
+			known.has(skill.status_kind),
+			"%s tanınmayan bir durum yazıyor: %s" % [skill.skill_id, skill.status_kind]
+		)
+		t.ok(skill.status_chance > 0, "%s: durum şansı sıfır olamaz" % skill.skill_id)
+		if skill.status_kind != CombatUnit.STATUS_STUN:
+			t.ok(
+				skill.status_amount > 0,
+				"%s: hasar veren durumun miktarı sıfır olamaz" % skill.skill_id
+			)
+		used[skill.status_kind] = true
+	# Üçünün de en az bir kaynağı olmalı: kullanılmayan bir durum, ölü
+	# bir efekt tipinden farksızdır.
+	for kind in known:
+		t.ok(used.has(kind), "hiçbir yetenek '%s' uygulamıyor - ölü sistem" % kind)

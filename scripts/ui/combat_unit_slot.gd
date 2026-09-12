@@ -169,6 +169,22 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 	if bound_unit.is_stressed:
 		_add_badge(tr("UI_COMBAT_BADGE_STRESSED"), Color(0.78, 0.62, 0.35))
 
+	# Durum efektleri kalan turlarıyla görünüyor. Görünmeyen bir kanama,
+	# "canım neden azalıyor" sorusunu cevapsız bırakır - kilitli
+	# yeteneğin sebebini göstermekle aynı kural.
+	if bound_unit.has_status(CombatUnit.STATUS_BLEED):
+		_add_badge(
+			tr("UI_COMBAT_BADGE_BLEED") % bound_unit.get_status_rounds(CombatUnit.STATUS_BLEED),
+			ArtPalette.BLOOD
+		)
+	if bound_unit.has_status(CombatUnit.STATUS_BLIGHT):
+		_add_badge(
+			tr("UI_COMBAT_BADGE_BLIGHT") % bound_unit.get_status_rounds(CombatUnit.STATUS_BLIGHT),
+			Color(0.48, 0.66, 0.34)
+		)
+	if bound_unit.is_stunned:
+		_add_badge(tr("UI_COMBAT_BADGE_STUN"), Color(0.86, 0.82, 0.40))
+
 func _add_badge(text: String, color: Color) -> void:
 	var badge := Label.new()
 	badge.text = text

@@ -54,6 +54,24 @@ var description: String:
 @export var modifier_amount: int = 0
 @export var modifier_rounds: int = 0
 
+## --- Durum efektleri (kanama / zehir / sersemletme) ---
+## Darkest Dungeon'ın "hasarın hepsi anında değil" katmanı. Süreli stat
+## değiştiricinin (`modifier_*`) yanına ayrı bir alan grubu olarak
+## geliyor çünkü ikisi başka şey: değiştirici bir sayıyı büküyor, durum
+## efekti *tur başında kendi başına iş yapıyor* (bkz. CombatUnit'in
+## `tick_statuses`'u).
+##
+## `status_chance` ham şans; hedefin direnci düşülüyor, yani zırhlı bir
+## düşmana kanama açmak zor. Direnç olmasa kanama her vuruşta binen bir
+## ek hasara dönüşürdü ve tek doğru strateji "her zaman kanat" olurdu.
+@export var status_kind: String = ""
+@export var status_amount: int = 0
+@export var status_rounds: int = 0
+@export var status_chance: int = 0
+
+func has_status() -> bool:
+	return status_rounds > 0 and not status_kind.is_empty()
+
 func has_modifier() -> bool:
 	return modifier_rounds > 0 and not modifier_stat.is_empty()
 
@@ -109,6 +127,19 @@ static func make_attack(
 	skill.modifier_stat = modifier_stat
 	skill.modifier_amount = modifier_amount
 	skill.modifier_rounds = modifier_rounds
+	return skill
+
+## Durum efektini bir saldırıya ekler. Ayrı bir fabrika yerine zincir
+## hâlinde kullanılıyor (`with_status(make_attack(...), ...)`) çünkü
+## `make_attack`'ın on üç parametresi var ve dördünü daha eklemek çağrı
+## yerini okunmaz hâle getiriyordu.
+static func with_status(
+	skill: CombatSkill, kind: String, amount: int, rounds: int, chance: int
+) -> CombatSkill:
+	skill.status_kind = kind
+	skill.status_amount = amount
+	skill.status_rounds = rounds
+	skill.status_chance = chance
 	return skill
 
 ## Hasarsız/iyileştirmesiz bir süreli değiştirici: kendine ya da bir

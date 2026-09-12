@@ -210,6 +210,16 @@ func _run_until_player_turn() -> void:
 		if unit == null:
 			return
 
+		# Durum efektleri **sırası gelen birimin turu başında** işliyor:
+		# kanama ve zehir hasarını orada veriyor, sersemlik orada bir tur
+		# yiyor. Tur sonunda işlemek aynı şey değil - o zaman kanayan
+		# biri kanamadan önce vuruyor ve kanama bir turu geç geliyor.
+		if not _begin_unit_turn(unit):
+			if _check_end():
+				return
+			_advance_turn()
+			continue
+
 		if is_player_turn():
 			if not _try_refuse_order(unit):
 				break
@@ -223,6 +233,34 @@ func _run_until_player_turn() -> void:
 
 	if not is_over():
 		turn_started.emit(get_active_unit())
+
+## Sırası gelen birimin turunu açar. `false` dönerse tur zaten tüketildi
+## (birim sersemlemiş ya da kanamadan düştü) ve çağıran `_advance_turn()`'e
+## geçmeli - aynı sözleşme `_try_refuse_order`'da da var.
+func _begin_unit_turn(unit: CombatUnit) -> bool:
+	var drained := unit.drain_status_damage()
+	if drained > 0:
+		# Hasar `apply_damage`tan geçiyor: zırh, Ölümün Kıyısı ve ölümcül
+		# vuruş zarı orada. İkinci bir hasar kapısı açmak, kanamanın
+		# zırhı ve Kıyı'yı bilmemesi demekti.
+		var outcome := unit.apply_damage(drained, _rng)
+		var taken := unit.reduce_by_protection(drained)
+		var key := "CBT_LOG_BLEED_TICK"
+		if unit.has_status(CombatUnit.STATUS_BLIGHT) and not unit.has_status(CombatUnit.STATUS_BLEED):
+			key = "CBT_LOG_BLIGHT_TICK"
+		_emit_log(tr(key) % [unit.display_name, taken])
+		_report_damage_outcome(unit, outcome)
+		if not unit.is_alive():
+			unit.tick_statuses()
+			return false
+
+	unit.tick_statuses()
+
+	if unit.is_stunned:
+		unit.consume_stun()
+		_emit_log(tr("CBT_LOG_STUN_SKIP") % unit.display_name)
+		return false
+	return true
 
 ## Stresten kırılmış bir savaşçı sırası geldiğinde emre kulak asmayabilir -
 ## sırası tamamen boşa gider, oyuncuya hiçbir seçenek sunulmaz. true
@@ -305,6 +343,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	var outcome := target.apply_damage(damage, _rng)
 	var taken := target.reduce_by_protection(damage)
 	_apply_skill_modifier(skill, target)
+	_apply_skill_status(skill, target)
 
 	if is_crit:
 		_emit_log(tr("CBT_LOG_CRIT") % [
@@ -340,6 +379,29 @@ func _report_damage_outcome(target: CombatUnit, outcome: String) -> void:
 func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:
 	if skill.has_modifier():
 		target.apply_modifier(skill.modifier_stat, skill.modifier_amount, skill.modifier_rounds)
+
+## Durum efekti isabet eden vuruşta uygulanıyor, ama ikinci bir zar
+## atılıyor: hedefin direnci. Direnilen bir efekt de kayda geçiyor -
+## oyuncu neden kanamadığını görmezse sistem bozuk sanılır (aynı gerekçe
+## kilitli yeteneğin sebebini göstermekte de var).
+func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
+	if not skill.has_status() or not target.is_alive():
+		return
+	if not target.roll_status(skill.status_kind, skill.status_chance, _rng):
+		_emit_log(tr("CBT_LOG_STATUS_RESIST") % [
+			target.display_name, tr(_status_name_key(skill.status_kind))
+		])
+		return
+	target.apply_status(skill.status_kind, skill.status_amount, skill.status_rounds)
+	_emit_log(tr("CBT_LOG_STATUS_APPLIED") % [
+		target.display_name, tr(_status_name_key(skill.status_kind)), skill.status_rounds
+	])
+
+func _status_name_key(kind: String) -> String:
+	match kind:
+		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
+		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
+		_: return "CBT_STATUS_BLEED"
 
 func _roll_damage(unit: CombatUnit, skill: CombatSkill, is_crit: bool) -> int:
 	var variance := _rng.randi_range(-skill.damage_variance, skill.damage_variance)

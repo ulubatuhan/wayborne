@@ -94,6 +94,7 @@ static func _ensure_built() -> void:
 		SkillCatalog.TALLY_RECKON,
 		SkillCatalog.CUTTING_WORD,
 		SkillCatalog.KEEP_LEDGER,
+		SkillCatalog.BLIGHT_FLASK,
 	]
 	_classes.append(clerk)
 

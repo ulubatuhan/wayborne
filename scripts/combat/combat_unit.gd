@@ -107,6 +107,9 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.support_power = character.stats.get_support_power()
 	unit.initiative = character.stats.get_initiative()
 	unit.protection = character.stats.get_protection()
+	unit.bleed_resist = character.stats.get_bleed_resist()
+	unit.blight_resist = character.stats.get_blight_resist()
+	unit.stun_resist = character.stats.get_stun_resist()
 	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
 	unit.is_player_character = character.is_player
 	unit.figure_kind = character.class_id
@@ -135,6 +138,9 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	# zayıf da güçlü de olsa aynı oranı keser, ölçeklenince tavanı
 	# zorlar ve savaşı kilitlerdi.
 	unit.protection = template.protection
+	unit.bleed_resist = template.bleed_resist
+	unit.blight_resist = template.blight_resist
+	unit.stun_resist = template.stun_resist
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
 	unit.figure_kind = template.enemy_id
 	unit.xp_value = template.xp_value
@@ -223,6 +229,119 @@ func get_skill_proficiency(skill_id: String) -> int:
 ## 0-100 yetkinlik hasarı/iyileştirmeyi %0'dan %50'ye kadar büyütür.
 func get_proficiency_multiplier(skill_id: String) -> float:
 	return 1.0 + float(get_skill_proficiency(skill_id)) / 200.0
+
+# --- Durum efektleri ---
+
+## Üç durum: kanama ve zehir tur başında hasar veriyor, sersemletme bir
+## turu yiyor. `STATUS_*` sabitleri `CombatSkill.status_kind`'in
+## sözlüğü - bir yeteneğin yazdığı ad buradaki üçünden biri olmalı,
+## yoksa efekt sessizce hiçbir şey yapmaz (aynı kural
+## `EventEffect.Type`/`EventEffectApplier` ikilisinde de var).
+const STATUS_BLEED: String = "bleed"
+const STATUS_BLIGHT: String = "blight"
+const STATUS_STUN: String = "stun"
+
+## Sersemletmeden çıkan savaşçı bir süre tekrar sersemletilemiyor -
+## Darkest Dungeon'ın "stun resist buff"ı. Bu olmadan sersemletme tek
+## başına kazanan strateji: her turda aynı hedefi sersemletip hiç sıra
+## vermemek. Kapanan sömürü, formülden önce gelir.
+const STUN_RECOVERY_RESIST: int = 55
+const STUN_RECOVERY_ROUNDS: int = 2
+
+## Direnç tabanı sıfır değil: sıfır olsa taze bir karakter her vuruşta
+## kanıyordu ve kanama bir seçenek olmaktan çıkıp her saldırıya binen bir
+## ek hasara dönüşüyordu.
+const DEFAULT_STATUS_RESIST: int = 20
+const MIN_STATUS_CHANCE: int = 5
+const MAX_STATUS_CHANCE: int = 95
+
+var bleed_resist: int = DEFAULT_STATUS_RESIST
+var blight_resist: int = DEFAULT_STATUS_RESIST
+var stun_resist: int = DEFAULT_STATUS_RESIST
+
+## Her biri {"kind", "amount", "rounds_left"}.
+var _statuses: Array = []
+var is_stunned: bool = false
+var _stun_recovery_rounds: int = 0
+
+func get_status_resist(kind: String) -> int:
+	match kind:
+		STATUS_BLEED: return bleed_resist
+		STATUS_BLIGHT: return blight_resist
+		STATUS_STUN:
+			# Sersemletmeden yeni çıkmış birine ikinci kez vurmak zor.
+			return stun_resist + (STUN_RECOVERY_RESIST if _stun_recovery_rounds > 0 else 0)
+		_: return 100
+
+## Direnç şansı düşürüyor ama hiç sıfırlamıyor ve hiç garantilemiyor -
+## aynı taban/tavan kuralı isabet şansında da var (MIN/MAX_HIT_CHANCE):
+## bir sistemi tamamen kapatan bir stat o sistemi siler.
+func roll_status(kind: String, chance: int, rng: RandomNumberGenerator) -> bool:
+	if chance <= 0 or rng == null:
+		return false
+	var final_chance := clampi(
+		chance - get_status_resist(kind), MIN_STATUS_CHANCE, MAX_STATUS_CHANCE
+	)
+	return rng.randi_range(1, 100) <= final_chance
+
+func apply_status(kind: String, amount: int, rounds: int) -> void:
+	if rounds <= 0:
+		return
+	if kind == STATUS_STUN:
+		is_stunned = true
+		return
+	# Aynı türden ikinci bir efekt üst üste binmiyor, *yeniliyor*: üst
+	# üste binse iki kanama açmak tek kanamanın iki katı hasar verirdi ve
+	# doğru strateji yine "hep aynı şeyi yap" olurdu.
+	for status in _statuses:
+		if String(status.kind) == kind:
+			status.amount = maxi(int(status.amount), amount)
+			status.rounds_left = maxi(int(status.rounds_left), rounds)
+			return
+	_statuses.append({"kind": kind, "amount": amount, "rounds_left": rounds})
+
+func has_status(kind: String) -> bool:
+	for status in _statuses:
+		if String(status.kind) == kind:
+			return true
+	return false
+
+func get_status_rounds(kind: String) -> int:
+	for status in _statuses:
+		if String(status.kind) == kind:
+			return int(status.rounds_left)
+	return 0
+
+## Bu turda durumların vereceği toplam hasar. Hasarı *uygulamıyor* -
+## uygulamak `apply_damage`ın işi, çünkü zırh, Ölümün Kıyısı ve ölümcül
+## vuruş zarı orada. İki ayrı hasar kapısı olsa kanama zırhı bilmezdi.
+func drain_status_damage() -> int:
+	var total := 0
+	for status in _statuses:
+		if String(status.kind) != STATUS_STUN:
+			total += int(status.amount)
+	return total
+
+## Turların sayılması. `tick_modifiers` ile aynı anda çağrılıyor ama ayrı
+## bir fonksiyon: değiştiriciler tur *sayısıyla* eriyor, durumlar
+## hedefin kendi turu geldiğinde.
+func tick_statuses() -> void:
+	var kept: Array = []
+	for status in _statuses:
+		var remaining: int = int(status.rounds_left) - 1
+		if remaining > 0:
+			kept.append({
+				"kind": status.kind, "amount": status.amount, "rounds_left": remaining
+			})
+	_statuses = kept
+	if _stun_recovery_rounds > 0:
+		_stun_recovery_rounds -= 1
+
+## Sersemliği tüketir: bir tur kaybediliyor ve karakter bir süre tekrar
+## sersemletilemiyor.
+func consume_stun() -> void:
+	is_stunned = false
+	_stun_recovery_rounds = STUN_RECOVERY_ROUNDS
 
 func apply_modifier(stat: String, amount: int, rounds: int) -> void:
 	if rounds <= 0 or amount == 0:

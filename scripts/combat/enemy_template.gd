@@ -25,6 +25,16 @@ var display_name: String:
 ## Varsayılan 0 - mevcut bütün kadrolar bu alan eklenmemiş gibi davranır,
 ## yalnızca açıkça zırhlı yazılanlar (muhafız, ağır haydut) değer taşır.
 @export var protection: int = 0
+
+## Durum efekti dirençleri. Hayvanlar kanamaya daha açık, zırhlı insanlar
+## daha kapalı - kadro kurulurken bunu ayarlamak, aynı saldırının farklı
+## düşmanlarda farklı işlemesini sağlıyor (bkz. EnemyCatalog).
+##
+## `power_scale` ile büyütülmüyorlar, zırhla aynı gerekçe: yüzde olan bir
+## şey ölçeklenince tavanı zorlar ve sistemi kapatır.
+@export var bleed_resist: int = 20
+@export var blight_resist: int = 20
+@export var stun_resist: int = 20
 ## Ölümcül vuruş direnci düşmanlarda kullanılmıyor: Ölümün Kıyısı yalnızca
 ## ana karaktere ait (bkz. CombatUnit.can_enter_deaths_door). Düşman canı
 ## sıfırlanınca doğrudan düşer.

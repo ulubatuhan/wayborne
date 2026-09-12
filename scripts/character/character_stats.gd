@@ -178,6 +178,27 @@ func get_composure() -> int:
 func get_protection() -> int:
 	return maxi(0, int(round(1.2 * get_effective_value(Kind.ENDURANCE))))
 
+## Durum efekti dirençleri (kanama / zehir / sersemletme). Üçü de
+## Dayanıklılık'tan besleniyor: bedenin dayanması meselesi. Karizma'ya
+## bağlamak olmazdı, ona ateş altında sükûnet zaten verildi (bkz.
+## get_composure) ve iki sistem aynı stata binerse ikisi de ölçülemez
+## hâle gelir.
+##
+## Taban `CombatUnit.DEFAULT_STATUS_RESIST` ile aynı olmak zorunda değil
+## ama aynı gerekçeyi taşıyor: sıfır direnç her vuruşta kanamak demek,
+## yani kanama bir seçenek olmaktan çıkıp her saldırıya binen bir ek
+## hasara dönüşür. Katsayılar farklı, çünkü zehir kanamadan daha zor
+## dirençlenir (DD'de de öyle) ve sersemletmeye direnç en değerlisi -
+## kaybedilen bir tur, alınan hasardan pahalıdır.
+func get_bleed_resist() -> int:
+	return 20 + int(round(2.2 * get_effective_value(Kind.ENDURANCE)))
+
+func get_blight_resist() -> int:
+	return 20 + int(round(1.8 * get_effective_value(Kind.ENDURANCE)))
+
+func get_stun_resist() -> int:
+	return 20 + int(round(1.4 * get_effective_value(Kind.ENDURANCE)))
+
 func to_dict() -> Dictionary:
 	return {
 		"strength": strength,
