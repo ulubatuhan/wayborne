@@ -27,3 +27,7 @@ build/
 
 # Personal Claude Code overrides - not shared with the repo/CI
 .claude/settings.local.json
+
+# Codex üretecinin Python artıkları (docs/codex/)
+__pycache__/
+*.pyc

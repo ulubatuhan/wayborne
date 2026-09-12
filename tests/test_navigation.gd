@@ -46,6 +46,7 @@ func run(t) -> void:
 	_test_labels_never_blank(t, nav)
 	_test_exit_buttons_outside_scroll(t)
 	_test_node_paths_resolve(t, nav)
+	_test_overlay_never_traps_the_player(t)
 
 	nav.reset()
 
@@ -402,3 +403,86 @@ func _read(path: String) -> String:
 	if file == null:
 		return ""
 	return file.get_as_text()
+
+
+## Tam ekran bir katman da oyuncuyu kilitleyebilir - ve kilitledi.
+## `OnboardingPanel` yeni oyunun ilk şehir varışında açılıyor, içeriği
+## görüntü alanını aşıyordu ve kapat tuşu altta kalıyordu: oyuncunun ilk
+## gördüğü ekran, çıkışı olmayan bir ekrandı.
+##
+## Buradaki kural ekranların kaydırma kuralının aynısı (bkz. World
+## Navigation Rules) - yalnızca bir ekrana değil bir katmana uygulanıyor,
+## o yüzden kimse uygulamamıştı. Taşma taşmadır.
+##
+## Bu paket ağaç canlı değilken koştuğu için `_ready()` kendiliğinden
+## çalışmaz; inşayı testin kendisi tetikliyor.
+const OVERLAY_PATH: String = "res://scripts/ui/onboarding_panel.gd"
+## project.godot'un tasarım yüksekliği. Panel bunu aşarsa oyuncu alt
+## kısmına hiçbir pencere boyutunda ulaşamaz (stretch mode canvas_layers,
+## yani tasarım alanı pencereye ölçekleniyor).
+const DESIGN_HEIGHT: float = 1080.0
+
+func _test_overlay_never_traps_the_player(t) -> void:
+	var script = load(OVERLAY_PATH)
+	t.ok(script != null, "onboarding katmanı yüklenebiliyor")
+	if script == null:
+		return
+
+	var overlay = script.new()
+	overlay._ready()
+
+	var scrolls := _descendants_of_class(overlay, "ScrollContainer")
+	t.eq(scrolls.size(), 1, "katmanın uzayabilen içeriği bir ScrollContainer'da")
+
+	var buttons := _descendants_of_class(overlay, "Button")
+	t.ok(buttons.size() >= 1, "katmanı kapatan bir tuş var")
+	for button in buttons:
+		t.not_ok(
+			_has_ancestor_of_class(button, "ScrollContainer"),
+			"kapat tuşu kaydırma alanının dışında - içinde kalırsa içerik onu ekrandan atar"
+		)
+
+	# Panelin kendi asgari boyu tasarım alanına sığmalı: ScrollContainer'ın
+	# asgarisi içeriğini saymadığı için bu, içerik ne kadar uzarsa uzasın
+	# sabit kalır. Sığmazsa kapat tuşu yine erişilemez olur.
+	#
+	# Bu kontrolün *göremediği* şey kaydedilmeye değer, çünkü asıl hata
+	# oradan geldi: sarmalanan bir `Label`'ın asgari yüksekliği düzen
+	# geçişi olmadan tek satırdır (sarma, bilinmeyen genişliğe bağlı), o
+	# yüzden eski panelin taşması bu ölçüme hiç yansımıyordu - mutasyon
+	# denemesinde ateşlenen üç doğrulama aşağıdaki yapısal olanlardı, bu
+	# değil. Yani bu satır yalnızca sabit boyların büyümesini yakalar;
+	# metin taşmasına karşı gerçek koruma "içerik kaydırmada, tuş dışında"
+	# yapısıdır - onunla birlikte sarma ne kadar uzarsa uzasın tuşu
+	# ekrandan atamaz.
+	for panel in _descendants_of_class(overlay, "PanelContainer"):
+		var needed: float = panel.get_combined_minimum_size().y
+		t.ok(
+			needed <= DESIGN_HEIGHT,
+			"katman tasarım yüksekliğine sığıyor (%d <= %d)" % [int(needed), int(DESIGN_HEIGHT)]
+		)
+
+	# Tuş tek çıkış yolu olmamalı: oyuncunun ilk refleksi kenara tıklamak.
+	t.ok(
+		overlay.has_method("_on_backdrop_input"),
+		"perdeye tıklamak da kapatıyor"
+	)
+	t.ok(overlay.has_method("_unhandled_input"), "Esc de kapatıyor")
+
+	overlay.free()
+
+func _descendants_of_class(node: Node, cls: String) -> Array:
+	var found := []
+	for child in node.get_children():
+		if child.is_class(cls):
+			found.append(child)
+		found.append_array(_descendants_of_class(child, cls))
+	return found
+
+func _has_ancestor_of_class(node: Node, cls: String) -> bool:
+	var parent := node.get_parent()
+	while parent != null:
+		if parent.is_class(cls):
+			return true
+		parent = parent.get_parent()
+	return false

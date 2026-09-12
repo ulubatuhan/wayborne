@@ -412,6 +412,32 @@ target in `character.gd`, a `return` field carried in the road's spot table
   which reads a scene without building it — every `$A/B` node path in a
   screen script actually exists in its scene. That last one is the only cheap
   guard against a typo Godot reports only when the player opens the screen.
+- **A full-screen overlay can trap the player too, and the scroll rule
+  applies to it verbatim.** `OnboardingPanel` is the first thing a new game
+  shows, and its four wrapped topics grew past the viewport with the
+  dismiss button below the fold — the opening screen of the game had no
+  exit. Three causes, all the same omission (nobody asked what happens when
+  the content outgrows the screen): the content was in no
+  `ScrollContainer`; the panel was centred with `PRESET_CENTER` plus a
+  `position -= PANEL_SIZE * 0.5` nudge, i.e. against its *guessed* height
+  rather than its real one, so growing pushed it off the bottom; and a
+  `CanvasLayer` is not a `Control`, so an anchor preset on its direct child
+  has no rect to anchor against and the backdrop never covered the screen.
+  The layer's root is now a full-rect `Control`, a `CenterContainer` does
+  the centring at whatever the real height is, the topics sit in a
+  `ScrollContainer` with the dismiss button outside it, and the panel
+  carries an explicit opaque `StyleBoxFlat` (the default theme let the city
+  map read straight through the text). Dismissal is no longer one button
+  either — the backdrop and Esc both close it, because a player's first
+  reflex is to click outside.
+- **`test_navigation.gd` guards that overlay by building it**, which is
+  possible precisely because it is scene-less (`.new()` + an explicit
+  `_ready()`, since suites run before the tree is live). What it asserts is
+  structural — content in a scroll, dismiss button not inside it, more than
+  one way out — and that is deliberate: **a wrapped `Label`'s minimum
+  height is one line without a layout pass**, so a height assertion cannot
+  see wrap-driven overflow at all. Verified by mutation: against the old
+  panel three assertions fail and the height one does not.
 - **A suite that cannot load must fail the run.** A parse error in a test
   file made `load(path).new()` abort `run_tests.gd` mid-loop, and since
   `_process()` still returned true the runner exited **0** — the navigation
@@ -990,6 +1016,50 @@ The plan made in the city is an intention, not a commitment.
 - Deciding is free of time pressure (the panel counts as an open panel, so
   `_can_time_flow()` is false) but the decision itself costs hours: turning
   a caravan around is not instant.
+
+### Road Movement Rules
+
+The road used to run itself: the clock ticked, days fell off a counter and
+the caravan arrived. The player's only input was a speed button, and the
+screen read as broken — *"we're standing still, we have no control."*
+
+- **The player walks the road; the clock only counts days.** A/D or the
+  arrow keys drive `_days_covered` in `road_journey.gd`; standing still
+  stops the *distance*, never the day. Provisions are still eaten,
+  contracts still expire, the day's event still fires. Dawdling is paid for
+  by the calendar — that is the whole Oregon Trail tension, and it did not
+  exist while arrival was a timer.
+- **Walking forward at full tempo reproduces the old behaviour exactly**
+  (`WALK_FORWARD_RATE` 1.0), so the planner's provision promise — *correct
+  stocking never starves* (see Provision Rules) — still holds for a player
+  who simply walks. The only thing that broke is idling being free.
+- **Going back is much slower than going forward** (`WALK_BACKWARD_RATE`
+  0.25): turning a wagon train around on a narrow road costs real time.
+- **Distance is measured in game hours, not frames.** The speed button
+  scales the clock and the road by the same factor; driving movement off
+  the raw frame delta would make days outrun the road at 3x and starve
+  every fast-forwarding caravan.
+- **`journey_days_remaining` is now derived, not counted.**
+  `_sync_days_remaining()` computes it from the distance covered, so the
+  HUD, the divert cost (`get_days_travelled`) and the arrival check all
+  read one number. Arrival fires on distance, not on a day counter.
+- **Therefore every event effect goes through `_apply_effects()`.**
+  `EventEffect.Type.TRAVEL_DAYS` writes to `journey_days_remaining`, which
+  the next frame would overwrite; the wrapper catches the delta and adds it
+  to the route's *length* instead. So "the road got longer" means the
+  caravan must actually walk the extra distance.
+- **Events are never drawn by the player.** The "Olay Çek" button is gone
+  from every mode. A card the player summons is a debug tool, not a road.
+- **Dev controls do not ship in a live journey.** The seed box and reset
+  button are hidden unless the journey is the F1 synthetic one.
+
+**A dev default silently shipped as game behaviour.** The event engine was
+seeded from the dev seed box (`1234`) on *every* live journey, so every
+real road drew the same event sequence in the same order. A live journey
+now seeds from origin + destination + `total_days_elapsed`: reproducible
+within a save (there is no mid-journey save, so this opens no re-roll
+door), different for every new journey. Check what a debug control feeds
+before assuming it only affects debug.
 
 ### Journey Time Rules
 
@@ -1715,6 +1785,20 @@ hiç kazanamıyordu (bkz. Morale Rules'un son maddesi). Sonuç: varış morali
 3. Create scripts in appropriate `scripts/` subfolders
 4. Reference scenes/scripts using `res://` paths
 5. Push to `main` branch to trigger automatic Web export & deployment
+
+## Codex
+
+`docs/Wayborne-Codex.pdf` is the game's design document — 66 pages covering
+every mechanic in prose, plus a one-page decision tree for each of the 27
+road events (trigger, options, weighted outcomes, effects). It is
+**generated**, not written: `docs/codex/` holds the reportlab source and
+`python3 docs/codex/codex_main.py` rebuilds the PDF in place. This file
+(CLAUDE.md) stays the rule book — what must never be broken and why; the
+codex is the explanation, for a reader who has not read the code.
+
+Its event chapter mirrors `scripts/events/event_catalog.gd` by hand, so a
+new or retuned event needs a matching edit in `docs/codex/codex_events_data.py`
+— see that folder's README for why it is not derived automatically.
 
 ## Useful Links
 
