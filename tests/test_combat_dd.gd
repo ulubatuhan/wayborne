@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_dead_leader_is_not_stood_back_up(t)
 	_test_succession_promotes_the_most_senior(t)
 	_test_run_ends_only_when_nobody_can_succeed(t)
+	_test_battlefield_is_a_field_not_a_list(t)
 
 func _leader(name_text: String = "Lider") -> CharacterData:
 	var character := CharacterData.create(
@@ -264,3 +265,92 @@ func _test_run_ends_only_when_nobody_can_succeed(t) -> void:
 	t.not_ok(companion_result["run_over"], "yoldaş ölümü oyunu bitirmez")
 	t.eq(companion_result["new_leader"], null, "liderlik devretmedi")
 	t.ok(boss.is_player, "lider hâlâ lider")
+
+
+# --- Savaş alanı görünümü ---
+
+## Panel sahnesiz olduğu için test onu gerçekten kurabiliyor - ve kurması
+## gerekiyor: **test paketi ekran betiklerini hiç yüklemiyordu**, yani
+## combat_panel.gd'deki bir ayrıştırma hatası oyuncu savaşa girene kadar
+## gizli kalıyordu (yerelde `--headless --import` ve CI'ın log taraması
+## dışında hiçbir şey görmüyordu).
+##
+## Doğrulananlar yapısal: iki karşılıklı saf var, oyuncu safı ters dizili
+## (1. mevki ortada), hedef *sahnede* işaretleniyor. Bunlar "savaş bir
+## liste değil mekân" iddiasının kendisi; renk ve boşluk ayarlanacak,
+## bunlar ayarlanmayacak.
+const PANEL_PATH: String = "res://scripts/ui/combat_panel.gd"
+
+func _test_battlefield_is_a_field_not_a_list(t) -> void:
+	var script = load(PANEL_PATH)
+	t.ok(script != null, "savaş paneli yüklenebiliyor (ayrıştırma hatası yok)")
+	if script == null:
+		return
+
+	var panel = script.new()
+	panel._ready()
+
+	var party: Array[CharacterData] = []
+	for index in 3:
+		var character := _companion("K%d" % index)
+		if index == 0:
+			character.is_player = true
+		party.append(character)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9091
+	panel.start_combat(party, 0.4, rng, 0, "bandit", "")
+
+	t.eq(panel._player_row.get_child_count(), 3, "oyuncu safı üç mevki kurdu")
+	t.ok(panel._enemy_row.get_child_count() > 0, "düşman safı kuruldu")
+	t.ok(panel._skill_row.get_child_count() > 0, "yetenek kartları kuruldu")
+	t.ok(panel._order_strip.get_child_count() > 0, "tur sırası şeridi dolu")
+
+	# Oyuncu safı ters: 1. mevki en sağda, yani düşmanın 1. mevkisinin
+	# karşısında. "Ön saf" ancak karşı karşıya durunca anlam taşır.
+	var player_ranks: Array = []
+	for slot in panel._player_row.get_children():
+		var bound: CombatUnit = slot.unit
+		player_ranks.append(bound.position)
+	t.eq(player_ranks, [3, 2, 1], "oyuncu safı ters dizili (1. mevki ortaya bakıyor)")
+
+	var enemy_ranks: Array = []
+	for slot in panel._enemy_row.get_children():
+		var bound: CombatUnit = slot.unit
+		enemy_ranks.append(bound.position)
+	var expected_enemy: Array = []
+	for index in enemy_ranks.size():
+		expected_enemy.append(index + 1)
+	t.eq(enemy_ranks, expected_enemy, "düşman safı düz dizili")
+
+	# Hedefleme sahnede: yetenek seçilmeden hiçbir mevki seçilebilir
+	# değil, seçildikten sonra menzildeki mevkiler seçilebilir oluyor.
+	t.eq(_selectable_count(panel), 0, "yetenek seçilmemişken hiçbir hedef tıklanabilir değil")
+
+	var usable: CombatSkill = null
+	var active: CombatUnit = panel._encounter.get_active_unit()
+	for skill in active.skills:
+		if active.can_use_skill(skill) and not panel._encounter.get_valid_targets(active, skill).is_empty():
+			usable = skill
+			break
+	t.ok(usable != null, "sırası gelen savaşçının kullanılabilir bir yeteneği var")
+	if usable == null:
+		panel.free()
+		return
+
+	panel._on_skill_pressed(usable)
+	t.ok(_selectable_count(panel) > 0, "yetenek seçilince hedefler sahnede işaretleniyor")
+
+	# Aynı yeteneğe ikinci basış vazgeçmek: hedef seçmekten dönüş yolu olmalı.
+	panel._on_skill_pressed(usable)
+	t.eq(_selectable_count(panel), 0, "yeteneğe tekrar basmak seçimi kaldırıyor")
+
+	panel.free()
+
+func _selectable_count(panel) -> int:
+	var count := 0
+	for row in [panel._player_row, panel._enemy_row]:
+		for slot in row.get_children():
+			if slot.mouse_default_cursor_shape == Control.CURSOR_POINTING_HAND:
+				count += 1
+	return count
