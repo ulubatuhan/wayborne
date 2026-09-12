@@ -234,6 +234,94 @@ static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> 
 		points.append(centre + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
 	return points
 
+## Üstü kemerli branda örtülü kervan vagonu, yandan. `base` arka
+## tekerleğin yere bastığı çizginin ortası.
+##
+## Buraya taşınmasının sebebi iki ekranda çizilmesi: yol şeridi ve şehir
+## dışı yürüyüş alanı. İki kopya tutulunca aynı kervanın vagonu iki
+## ekranda iki farklı şey oluyordu - `CaravanPlan.daily_consumption`'ın
+## tek yerde durma gerekçesinin görsel karşılığı.
+static func wagon(
+	canvas: CanvasItem, base: Vector2, w: float, h: float,
+	wheel_angle: float, tint: Color, with_load: bool = false
+) -> void:
+	var body := _tint(ArtPalette.WAGON_BODY, tint)
+	var dark := _tint(ArtPalette.WAGON_BODY_DARK, tint)
+	var cover := _tint(ArtPalette.WAGON_CANVAS, tint)
+	var wheel := _tint(ArtPalette.WAGON_WHEEL, tint)
+	var wheel_r := h * 0.34
+
+	ellipse(canvas, base, Vector2(w * 0.55, h * 0.07), Color(0.0, 0.0, 0.0, 0.22))
+	_wheel(canvas, Vector2(base.x - w * 0.30, base.y - wheel_r), wheel_r, wheel, wheel_angle)
+
+	var bed_y := base.y - wheel_r * 1.35
+	canvas.draw_rect(
+		Rect2(Vector2(base.x - w * 0.5, bed_y - h * 0.16), Vector2(w, h * 0.16)), body, true
+	)
+	canvas.draw_line(
+		Vector2(base.x - w * 0.5, bed_y), Vector2(base.x + w * 0.5, bed_y),
+		dark, maxf(1.4, h * 0.05)
+	)
+
+	# Branda: kemerli bir kabuk. Yayın iki ucu zaten tabanda bittiği için
+	# şekil kendiliğinden kapanıyor - tabanı ayrıca eklemek çakışan köşe
+	# üretiyor ve Godot'un üçgenlemesi sessizce düşüyor.
+	var hoop_top := bed_y - h * 0.16
+	var arch := PackedVector2Array()
+	var steps := 16
+	for step in steps + 1:
+		var ratio := float(step) / float(steps)
+		var angle := PI * ratio
+		arch.append(Vector2(
+			base.x - cos(angle) * w * 0.44, hoop_top - sin(angle) * h * 0.62
+		))
+	inked(canvas, arch, cover, maxf(1.2, h * 0.035))
+	for rib in 4:
+		var ratio := 0.2 + float(rib) * 0.2
+		var angle := PI * ratio
+		canvas.draw_line(
+			Vector2(base.x - cos(angle) * w * 0.44, hoop_top - sin(angle) * h * 0.62),
+			Vector2(base.x - cos(angle) * w * 0.44, hoop_top),
+			cover.darkened(0.16), maxf(1.0, h * 0.022)
+		)
+
+	# Arabacı: brandanın önünde oturan bir silüet. Vagonu süren birinin
+	# olması "tayfa gerçekten var" demenin en ucuz yolu.
+	var bench := Vector2(base.x + w * 0.34, hoop_top - h * 0.04)
+	canvas.draw_circle(
+		bench + Vector2(0.0, -h * 0.26), h * 0.075, _tint(Color(0.74, 0.60, 0.46), tint)
+	)
+	canvas.draw_colored_polygon(PackedVector2Array([
+		bench + Vector2(-h * 0.09, -h * 0.20),
+		bench + Vector2(h * 0.09, -h * 0.20),
+		bench + Vector2(h * 0.07, 0.0),
+		bench + Vector2(-h * 0.07, 0.0),
+	]), _tint(Color(0.36, 0.32, 0.26), tint))
+
+	_wheel(canvas, Vector2(base.x + w * 0.30, base.y - wheel_r), wheel_r, wheel, wheel_angle)
+
+	# Arkadan sarkan denk: kervanın taşıdığı şey görünsün.
+	if with_load:
+		canvas.draw_rect(Rect2(
+			Vector2(base.x - w * 0.54, bed_y - h * 0.34), Vector2(w * 0.16, h * 0.20)
+		), _tint(ArtPalette.WAGON_LOAD, tint), true)
+
+static func _wheel(
+	canvas: CanvasItem, centre: Vector2, radius: float, color: Color, angle: float
+) -> void:
+	canvas.draw_arc(centre, radius, 0.0, TAU, 20, color, maxf(1.8, radius * 0.20))
+	for spoke in 6:
+		var a := angle + TAU * float(spoke) / 6.0
+		canvas.draw_line(
+			centre, centre + Vector2(cos(a), sin(a)) * radius * 0.86,
+			color.lightened(0.12), maxf(1.0, radius * 0.10)
+		)
+	canvas.draw_circle(centre, radius * 0.16, color.darkened(0.2))
+
+## Günün ışığı bütün çizimleri aynı şekilde çarpıyor.
+static func _tint(color: Color, light: Color) -> Color:
+	return Color(color.r * light.r, color.g * light.g, color.b * light.b, color.a)
+
 ## Dolgu + koyu kontur. Yassı-resimsel stilin "mürekkep" hissi bundan.
 static func inked(canvas: CanvasItem, points: PackedVector2Array, fill: Color, width: float = 1.6) -> void:
 	if points.size() < 3:

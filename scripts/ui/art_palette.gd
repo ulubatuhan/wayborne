@@ -86,6 +86,15 @@ const TERRAIN: Dictionary = {
 	},
 }
 
+## Kervan vagonunun paleti. Burada duruyor çünkü vagon iki ayrı ekranda
+## çiziliyor (yol şeridi ve şehir dışı yürüyüş alanı) ve iki ayrı tabloda
+## tutulunca ikisi farklı renkte bir vagon gösteriyordu.
+const WAGON_BODY: Color = Color(0.40, 0.28, 0.18)
+const WAGON_BODY_DARK: Color = Color(0.27, 0.19, 0.13)
+const WAGON_CANVAS: Color = Color(0.80, 0.75, 0.63)
+const WAGON_WHEEL: Color = Color(0.24, 0.18, 0.13)
+const WAGON_LOAD: Color = Color(0.46, 0.38, 0.26)
+
 const FALLBACK_BIOME: String = BIOME_STEPPE
 const FALLBACK_PHASE: String = PHASE_DAY
 

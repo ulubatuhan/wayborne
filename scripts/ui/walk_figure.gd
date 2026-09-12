@@ -381,34 +381,60 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 
 	# Boyun kısa ve kalın, baş büyük: ikisi de ilk denemede ince ve
 	# küçüktü, o yüzden silüet at değil lama okuyordu.
-	# Baş boynun *ucunda ve yukarıda*: ilk ölçüde baş öne ve aşağı
-	# uzuyordu, o yüzden silüet at değil geyik/deve okuyordu. Bir at
-	# başını omuz hizasının üstünde taşır.
+	# Boyun ve baş. İki tur ölçüm gerekti ve ikisi de ekran görüntüsünden
+	# çıktı: önce baş öne-aşağı uzuyordu (geyik), sonra boyun dikleşip
+	# baş tepeye çıktı (lama). Bir atın boynu omuzdan ~40 derece
+	# yükselir ve **baş boynun ucundan aşağı sarkar** - asıl at okuyan
+	# şey o kırılma.
+	# Atın başı omuz hizasının *üstünde*, öküzün *altında* - iki hayvanı
+	# ayıran en güçlü ipucu bu. İlk ölçüde ikisi de yukarıdaydı ve öküz
+	# başsız kahverengi bir levha gibi duruyordu: başı omuz hizasında
+	# olduğu için gövdeye karışıyordu.
 	var neck_base := Vector2(front_x + h * 0.04 * _facing, back_y + h * 0.02 + bob)
-	var head := neck_base + Vector2(
-		h * (0.15 if is_horse else 0.19) * _facing,
-		-h * (0.30 if is_horse else 0.08)
+	var poll := neck_base + Vector2(
+		h * (0.26 if is_horse else 0.30) * _facing,
+		h * (-0.22 if is_horse else 0.12)
 	)
 	ArtDraw.inked(self, PackedVector2Array([
-		neck_base + Vector2(-h * 0.08 * _facing, h * 0.02),
-		neck_base + Vector2(h * 0.02 * _facing, -h * 0.06),
-		head + Vector2(-h * 0.04 * _facing, -h * 0.04),
-		head + Vector2(h * 0.03 * _facing, h * 0.09),
-		neck_base + Vector2(h * 0.06 * _facing, h * 0.20),
+		neck_base + Vector2(-h * 0.10 * _facing, h * 0.02),
+		neck_base + Vector2(h * 0.04 * _facing, -h * 0.08),
+		poll + Vector2(-h * 0.03 * _facing, -h * 0.05),
+		poll + Vector2(h * 0.05 * _facing, h * 0.06),
+		neck_base + Vector2(h * 0.10 * _facing, h * 0.20),
 	]), body, maxf(1.2, h * 0.011))
+
+	# Baş: alından burna doğru aşağı eğik bir dörtgen.
+	var muzzle := poll + Vector2(h * 0.14 * _facing, h * 0.13)
 	ArtDraw.inked(self, PackedVector2Array([
-		head + Vector2(-h * 0.07 * _facing, -h * 0.07),
-		head + Vector2(h * 0.16 * _facing, -h * 0.03),
-		head + Vector2(h * 0.18 * _facing, h * 0.07),
-		head + Vector2(-h * 0.05 * _facing, h * 0.08),
+		poll + Vector2(-h * 0.04 * _facing, -h * 0.06),
+		poll + Vector2(h * 0.07 * _facing, -h * 0.03),
+		muzzle + Vector2(h * 0.04 * _facing, 0.0),
+		muzzle + Vector2(-h * 0.03 * _facing, h * 0.03),
 	]), body, maxf(1.0, h * 0.010))
-	draw_circle(head + Vector2(h * 0.02 * _facing, -h * 0.015), maxf(1.2, h * 0.017), ArtPalette.INK)
+	# Kulak ve göz.
+	draw_line(
+		poll + Vector2(-h * 0.01 * _facing, -h * 0.05),
+		poll + Vector2(-h * 0.03 * _facing, -h * 0.13),
+		body.darkened(0.18), maxf(1.2, h * 0.018)
+	)
+	draw_circle(
+		poll + Vector2(h * 0.035 * _facing, h * 0.005),
+		maxf(1.2, h * 0.016), ArtPalette.INK
+	)
+
+	if not is_horse:
+		# Omuz hörgücü: öküzü attan ayıran ikinci ipucu.
+		ArtDraw.ellipse(
+			self, Vector2(front_x - h * 0.06 * _facing, back_y + bob),
+			Vector2(h * 0.22, h * 0.12), body.lightened(0.04)
+		)
 
 	if is_horse:
+		# Yal: omuzdan ense üstüne. Atı öküzden ayıran ikinci ipucu.
 		draw_line(
-			neck_base + Vector2(h * 0.01 * _facing, -h * 0.05),
-			head + Vector2(-h * 0.04 * _facing, -h * 0.05),
-			_tinted(HORSE_MANE), maxf(1.8, h * 0.040)
+			neck_base + Vector2(h * 0.02 * _facing, -h * 0.06),
+			poll + Vector2(-h * 0.02 * _facing, -h * 0.06),
+			_tinted(HORSE_MANE), maxf(1.8, h * 0.045)
 		)
 		# Kuyruk: yürürken hafifçe sallanıyor, duran attan ayıran detay.
 		var tail := Vector2(rear_x - h * 0.09 * _facing, back_y + h * 0.06 + bob)
@@ -419,9 +445,9 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 	else:
 		for side in [-1.0, 1.0]:
 			draw_line(
-				head + Vector2(-h * 0.02 * _facing, -h * 0.05),
-				head + Vector2((-h * 0.02 + h * 0.09 * side) * _facing, -h * 0.13),
-				_tinted(OX_HORN), maxf(1.4, h * 0.018)
+				poll + Vector2(-h * 0.01 * _facing, -h * 0.05),
+				poll + Vector2((-h * 0.01 + h * 0.10 * side) * _facing, -h * 0.15),
+				_tinted(OX_HORN), maxf(1.4, h * 0.020)
 			)
 
 	return back_y + bob

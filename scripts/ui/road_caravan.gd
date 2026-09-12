@@ -48,11 +48,6 @@ const STEP_RATE: float = 2.6
 const WAGON_WIDTH_RATIO: float = 0.21
 const WAGON_HEIGHT_RATIO: float = 0.17
 
-const WAGON_BODY: Color = Color(0.40, 0.28, 0.18)
-const WAGON_BODY_DARK: Color = Color(0.27, 0.19, 0.13)
-const WAGON_CANVAS: Color = Color(0.80, 0.75, 0.63)
-const WAGON_WHEEL: Color = Color(0.24, 0.18, 0.13)
-
 ## Çizilen yürüyen tayfa sayısı tavanlı: altı vagonlu bir kervanda on iki
 ## tayfa var ama her biri kendi poligonlarını çiziyor ve Web hedefinde
 ## bunun bedeli görünür. Arabacılar zaten vagonun üstünde çiziliyor;
@@ -296,7 +291,13 @@ func _draw() -> void:
 
 	for index in _wagon_count:
 		var x := cursor - float(index) * WAGON_SPACING - wagon_w * 0.5
-		_draw_wagon(Vector2(x, _ground_y), wagon_w, wagon_h, index)
+		# Vagon `ArtDraw`'da: aynı vagon şehir dışı yürüyüş alanında da
+		# çiziliyor ve iki kopya tutulunca aynı kervan iki ekranda iki
+		# farklı şey oluyordu.
+		ArtDraw.wagon(
+			self, Vector2(x, _ground_y), wagon_w, wagon_h,
+			_wheel_angle, _light, index == 0
+		)
 
 	if _detached:
 		# Lider kolondan ayrıldığında kervanın başı işaretli: oyuncu
@@ -306,98 +307,3 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([
 			marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
 		]), Color(ArtPalette.GOLD, 0.85))
-
-## Üstü kemerli branda örtülü kervan vagonu - referans görsellerdeki
-## siluetin aynısı. Tekerlekler yolun hızıyla dönüyor; dönmeyen tekerlek
-## "yerde süzülme" hissinin asıl kaynağıydı.
-func _draw_wagon(base: Vector2, w: float, h: float, index: int) -> void:
-	var body := _tint(WAGON_BODY)
-	var dark := _tint(WAGON_BODY_DARK)
-	var canvas_color := _tint(WAGON_CANVAS)
-	var wheel := _tint(WAGON_WHEEL)
-	var wheel_r := h * 0.34
-
-	ArtDraw.ellipse(
-		self, Vector2(base.x, base.y), Vector2(w * 0.55, h * 0.07),
-		Color(0.0, 0.0, 0.0, 0.22)
-	)
-
-	# Arka tekerlek önce: gövde onu kısmen kapatınca derinlik oluşuyor.
-	_draw_wheel(Vector2(base.x - w * 0.30, base.y - wheel_r), wheel_r, wheel, _wheel_angle)
-
-	var bed_y := base.y - wheel_r * 1.35
-	draw_rect(
-		Rect2(Vector2(base.x - w * 0.5, bed_y - h * 0.16), Vector2(w, h * 0.16)), body, true
-	)
-	draw_line(
-		Vector2(base.x - w * 0.5, bed_y), Vector2(base.x + w * 0.5, bed_y),
-		dark, maxf(1.4, h * 0.05)
-	)
-
-	# Branda: kemerli bir kabuk. Yayın iki ucu zaten `hoop_top` üstünde
-	# bittiği için şekil kendiliğinden kapanıyor - tabanı ayrıca eklemek
-	# çakışan köşe noktaları üretiyor ve Godot'un üçgenlemesi "Invalid
-	# polygon data" ile düşüyor (ekran görüntüsü alınmasa görülmezdi,
-	# çünkü hata çizimi atlıyor ama oyunu durdurmuyor).
-	var hoop_top := bed_y - h * 0.16
-	var arch := PackedVector2Array()
-	var steps := 16
-	for step in steps + 1:
-		var ratio := float(step) / float(steps)
-		var angle := PI * ratio
-		arch.append(Vector2(
-			base.x - cos(angle) * w * 0.44,
-			hoop_top - sin(angle) * h * 0.62
-		))
-	ArtDraw.inked(self, arch, canvas_color, maxf(1.2, h * 0.035))
-	for rib in 4:
-		var ratio := 0.2 + float(rib) * 0.2
-		var angle := PI * ratio
-		draw_line(
-			Vector2(base.x - cos(angle) * w * 0.44, hoop_top - sin(angle) * h * 0.62),
-			Vector2(base.x - cos(angle) * w * 0.44, hoop_top),
-			canvas_color.darkened(0.16), maxf(1.0, h * 0.022)
-		)
-
-	# Arabacı: brandanın önünde oturan bir silüet. Vagonu süren birinin
-	# olması "tayfa gerçekten var" demenin en ucuz yolu (bkz. Faz 8 PR-C).
-	var bench := Vector2(base.x + w * 0.34, hoop_top - h * 0.04)
-	draw_circle(bench + Vector2(0.0, -h * 0.26), h * 0.075, _tint(Color(0.74, 0.60, 0.46)))
-	draw_colored_polygon(PackedVector2Array([
-		bench + Vector2(-h * 0.09, -h * 0.20),
-		bench + Vector2(h * 0.09, -h * 0.20),
-		bench + Vector2(h * 0.07, 0.0),
-		bench + Vector2(-h * 0.07, 0.0),
-	]), _tint(Color(0.36, 0.32, 0.26)))
-
-	# Ok (öküze bağlanan kol).
-	draw_line(
-		Vector2(base.x + w * 0.48, bed_y - h * 0.04),
-		Vector2(base.x + w * 0.5 + OX_OFFSET * 0.55, base.y - h * 0.22),
-		dark, maxf(1.4, h * 0.04)
-	)
-
-	_draw_wheel(Vector2(base.x + w * 0.30, base.y - wheel_r), wheel_r, wheel, _wheel_angle)
-
-	# Yüklü vagonun arkasından sarkan denk: kervanın taşıdığı şey görünsün.
-	if index == 0:
-		draw_rect(
-			Rect2(
-				Vector2(base.x - w * 0.54, bed_y - h * 0.34),
-				Vector2(w * 0.16, h * 0.20)
-			),
-			_tint(Color(0.46, 0.38, 0.26)), true
-		)
-
-func _draw_wheel(centre: Vector2, radius: float, color: Color, angle: float) -> void:
-	draw_arc(centre, radius, 0.0, TAU, 20, color, maxf(1.8, radius * 0.20))
-	for spoke in 6:
-		var a := angle + TAU * float(spoke) / 6.0
-		draw_line(
-			centre, centre + Vector2(cos(a), sin(a)) * radius * 0.86,
-			color.lightened(0.12), maxf(1.0, radius * 0.10)
-		)
-	draw_circle(centre, radius * 0.16, color.darkened(0.2))
-
-func _tint(color: Color) -> Color:
-	return Color(color.r * _light.r, color.g * _light.g, color.b * _light.b, color.a)
