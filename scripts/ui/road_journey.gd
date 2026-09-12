@@ -197,7 +197,11 @@ func _build_ui() -> void:
 	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
 	# hesaplanırdı ve eğimli yolda kervan havada yürürdü.
 	_caravan = RoadCaravan.new()
-	_band.add_child(_caravan)
+	# `add_child` değil `add_actor_layer`: şerit ön plan katmanını her
+	# zaman en üstte tutuyor, yoksa yolun önündeki çalılar kervanın
+	# arkasına düşüyor ve figürler onların üzerinde yürüyor gibi
+	# duruyor (bkz. TravelForeground).
+	_band.add_actor_layer(_caravan)
 	_band.ground_line_changed.connect(_caravan.set_ground_line)
 
 	# Emir menüsü: F2 açıyor, sayı tuşu emri veriyor. Şeridin üstünde

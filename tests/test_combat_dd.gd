@@ -31,6 +31,11 @@ func run(t) -> void:
 	_test_dot_ticks_at_the_start_of_the_turn(t)
 	_test_endurance_buys_status_resistance(t)
 	_test_every_status_a_skill_can_apply_is_handled(t)
+	_test_area_skills_never_beat_single_target(t)
+	_test_adjacent_hits_only_neighbours(t)
+	_test_random_targeting_never_wastes_a_turn(t)
+	_test_shift_keeps_ranks_contiguous(t)
+	_test_shift_cannot_remove_a_unit_from_the_field(t)
 
 func _leader(name_text: String = "Lider") -> CharacterData:
 	var character := CharacterData.create(
@@ -559,3 +564,151 @@ func _test_every_status_a_skill_can_apply_is_handled(t) -> void:
 	# bir efekt tipinden farksızdır.
 	for kind in known:
 		t.ok(used.has(kind), "hiçbir yetenek '%s' uygulamıyor - ölü sistem" % kind)
+
+# --- Alan hedefleme ve mevki kaydırma ---
+
+## Alan yeteneği tek hedefe vurandan **zayıf** olmalı. Güçlü olsaydı tek
+## doğru seçim o olur, mevki tasarımı ve hedef seçimi silinirdi - aynı
+## gerekçe pazarlıkta "hep aynı teklifi yap" kapatılırken de vardı.
+##
+## Motora genel bir "alan yetenekleri %60 hasar verir" çarpanı koymak
+## yerine katalogda ayarlanıyor, o yüzden burada katalog taranıyor.
+func _test_area_skills_never_beat_single_target(t) -> void:
+	# Karşılaştırma **taraf içinde**: oyuncunun alan yeteneği oyuncunun
+	# tek hedeflisiyle, düşmanın düşmanınkiyle. Hepsini tek havuzda
+	# karşılaştırmak ilk yazışta yapılan hataydı ve testi ayı pençesi
+	# üzerinden düşürdü - oysa oradaki soru "düşman çok mu vuruyor"
+	# değil, "aynı tarafta bir seçim diğerini eziyor mu".
+	var player_ids := {}
+	for character_class in ClassCatalog.get_classes():
+		for skill_id in character_class.skill_ids:
+			player_ids[skill_id] = true
+
+	var best_single := {true: 0, false: 0}
+	var area_skills: Array[CombatSkill] = []
+	for skill in SkillCatalog.get_all_skills():
+		if skill.target_kind != CombatSkill.Target.ENEMY or skill.is_heal():
+			continue
+		var is_player: bool = player_ids.has(skill.skill_id)
+		if skill.area == CombatSkill.Area.ADJACENT or skill.area == CombatSkill.Area.ALL:
+			area_skills.append(skill)
+		else:
+			best_single[is_player] = maxi(int(best_single[is_player]), skill.base_damage)
+
+	t.ge(float(area_skills.size()), 1.0, "en az bir alan yeteneği olmalı - yoksa sistem ölü")
+	for skill in area_skills:
+		var owner: bool = player_ids.has(skill.skill_id)
+		t.ok(
+			skill.base_damage < int(best_single[owner]),
+			"%s alan yeteneği aynı taraftaki tek hedeflilerden güçlü olmamalı (%d vs %d)" % [
+				skill.skill_id, skill.base_damage, int(best_single[owner])
+			]
+		)
+
+## Komşuluk *mevkiye* göre: saf yeniden paketlendiğinde dizi sırası
+## mevkiyle örtüşmeyebiliyor, o yüzden diziye göre komşuluk yanlış
+## hedefleri toplardı.
+func _test_adjacent_hits_only_neighbours(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4242
+	var encounter := _build_encounter(rng, 1, 4)
+	encounter.start()
+
+	var sweep := SkillCatalog.get_skill(SkillCatalog.SWEEPING_BLOW)
+	t.ok(sweep != null, "savuran darbe katalogda olmalı")
+	t.eq(sweep.area, CombatSkill.Area.ADJACENT, "savuran darbe komşulara vurmalı")
+
+	var attacker := encounter.player_units[0]
+	attacker.skills = [sweep]
+	var middle: CombatUnit = encounter.enemy_units[1]
+	var affected := encounter._affected_targets(attacker, sweep, middle)
+
+	t.ge(float(affected.size()), 2.0, "komşu mevkiler de etkilenmeli")
+	for unit in affected:
+		t.le(
+			float(absi(unit.position - middle.position)), 1.0,
+			"yalnızca komşu mevkiler etkilenmeli (%s)" % unit.display_name
+		)
+	# Menzil dışı bir mevki komşu olsa bile giremez: alan, yeteneğin
+	# kendi menzilini genişletmiyor.
+	for unit in affected:
+		t.ok(sweep.can_reach(unit.position), "alan menzili aşmamalı")
+
+## Rastgele hedefleme seçimi zara bırakıyor ama boşa harcanan bir tur
+## üretmiyor: geçerli bir hedef varsa mutlaka birine vuruyor. Aksi hâlde
+## zar atmanın kendisi ceza olurdu.
+func _test_random_targeting_never_wastes_a_turn(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 606
+	var encounter := _build_encounter(rng, 4, 1)
+	encounter.start()
+
+	var wild := SkillCatalog.get_skill(SkillCatalog.BANDIT_ORDER)
+	t.eq(wild.area, CombatSkill.Area.RANDOM, "haydut reisinin sallaması rastgele olmalı")
+
+	var attacker := encounter.enemy_units[0]
+	attacker.skills = [wild]
+	var hit_counts := {}
+	for _attempt in 200:
+		var affected := encounter._affected_targets(attacker, wild, null)
+		t.eq(affected.size(), 1, "rastgele hedefleme tam bir hedef seçmeli")
+		hit_counts[affected[0].display_name] = true
+	t.ge(
+		float(hit_counts.size()), 2.0,
+		"rastgele hedefleme gerçekten farklı hedeflere düşmeli"
+	)
+
+## Kaydırmadan sonra mevkiler 1'den başlayan kesintisiz bir dizi
+## kalmalı. Kalmazsa itilen bir düşman hiçbir yeteneğin menziline
+## girmez ve savaş kilitlenir - aynı sınıf tehlike RouteConditions'ın
+## "hiçbir şehir kapatılamaz" kuralında da vardı.
+func _test_shift_keeps_ranks_contiguous(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var encounter := _build_encounter(rng, 1, 4)
+
+	var push := CombatSkill.with_area(
+		CombatSkill.make_attack("probe_push", "N", "D", [1], [1, 2, 3, 4], 1, 0),
+		CombatSkill.Area.SINGLE, 1
+	)
+	var pull := CombatSkill.with_area(
+		CombatSkill.make_attack("probe_pull", "N", "D", [1], [1, 2, 3, 4], 1, 0),
+		CombatSkill.Area.SINGLE, -3
+	)
+
+	for skill in [push, pull, push, push, pull]:
+		encounter._apply_skill_shift(skill, encounter.enemy_units[0])
+		var seen := {}
+		for unit in encounter.enemy_units:
+			t.ok(
+				unit.position >= 1 and unit.position <= CombatEncounter.MAX_SIDE_SIZE,
+				"mevki sahada kalmalı: %d" % unit.position
+			)
+			t.not_ok(seen.has(unit.position), "iki birim aynı mevkide olamaz")
+			seen[unit.position] = true
+		t.eq(seen.size(), encounter.enemy_units.size(), "mevkiler kesintisiz olmalı")
+
+## Kaydırma bir birimi sahadan çıkarmıyor: sonuna itilen de başa çekilen
+## de hâlâ hedeflenebilir olmalı.
+func _test_shift_cannot_remove_a_unit_from_the_field(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 88
+	var encounter := _build_encounter(rng, 1, 3)
+	var far_push := CombatSkill.with_area(
+		CombatSkill.make_attack("probe_far", "N", "D", [1], [1, 2, 3, 4], 1, 0),
+		CombatSkill.Area.SINGLE, 99
+	)
+	var target := encounter.enemy_units[0]
+	encounter._apply_skill_shift(far_push, target)
+	t.le(
+		float(target.position), float(encounter.enemy_units.size()),
+		"birim safın dışına itilmemeli"
+	)
+	t.ge(float(target.position), 1.0, "mevki bire eşit ya da büyük kalmalı")
+
+	# Tek başına kalan bir düşman kaydırılamaz (kaydıracak yer yok) ama
+	# bu bir hata değil, sessiz bir no-op olmalı.
+	var lone := _build_encounter(rng, 1, 1)
+	var only := lone.enemy_units[0]
+	lone._apply_skill_shift(far_push, only)
+	t.eq(only.position, 1, "tek düşman birinci mevkide kalmalı")

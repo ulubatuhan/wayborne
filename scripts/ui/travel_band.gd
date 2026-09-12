@@ -38,12 +38,10 @@ const PARALLAX_FAR: float = 0.10
 const PARALLAX_MID: float = 0.26
 const PARALLAX_TREES: float = 0.52
 const PARALLAX_GROUND: float = 1.0
-const PARALLAX_FORE: float = 1.55
 
 ## Hücre aralıkları (dünya pikseli). Bir hücrede en fazla bir nesne var.
 const CELL_TREES: float = 120.0
 const CELL_GROUND: float = 165.0
-const CELL_FORE: float = 260.0
 
 const CARAVAN_X_RATIO: float = 0.34
 
@@ -58,10 +56,6 @@ const RAIN_MAX_DROPS: int = 260
 const RAIN_SPEED: float = 1250.0
 const RAIN_SLANT: float = 0.30
 const FOG_BANDS: int = 7
-
-## Menzil taşları: yolda her gün bir taş. "Ne kadar yol aldım" sorusunun
-## en okunur cevabı, ilerleme çubuğundan bağımsız olarak manzarada.
-const MILESTONE_HEIGHT: float = 26.0
 
 ## Evre eşlemesi: saatin altı evresi paletin dört gökyüzüne düşüyor.
 ## Palet dört tutuluyor çünkü sabah/öğle ya da akşam/gece arasındaki fark
@@ -107,11 +101,28 @@ var _time: float = 0.0
 ## üstünde ya da altında yürüyor.
 signal ground_line_changed(caravan_x: float, ground_y: float)
 
+var _foreground: TravelForeground
+
 func _ready() -> void:
 	custom_minimum_size = Vector2(0.0, BAND_HEIGHT)
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_announce_ground_line)
+
+	# Yolun önündeki şerit ayrı bir çocuk: şeridin kendi `_draw()`'u
+	# kervanın *altında* kalıyor (kervan da bir çocuk), o yüzden orada
+	# çizilen hiçbir şey kervanın önüne geçemiyordu - figürler ağaçların
+	# üzerinde yürüyor gibi duruyordu.
+	_foreground = TravelForeground.new()
+	add_child(_foreground)
+
+## Kervan gibi bir aktör katmanını ekler ve ön planı **her zaman en
+## üstte** tutar. `add_child` ile doğrudan eklemek, aktörü ön planın
+## üstüne koyar ve derinlik sırası yine bozulur - o yüzden ekleme tek
+## bir kapıdan geçiyor.
+func add_actor_layer(node: Node) -> void:
+	add_child(node)
+	move_child(_foreground, get_child_count() - 1)
 
 ## Rotanın coğrafyası. Seferin başında bir kez veriliyor; `null` ise şerit
 ## bozkıra düşer (F1 sentetik seferi ve testler için).
@@ -216,8 +227,13 @@ func _draw() -> void:
 	_draw_cities(area, horizon)
 	_draw_stops(area, horizon)
 	_draw_ground_props(area, horizon)
-	_draw_milestones(area, horizon)
-	_draw_foreground(area, horizon)
+	# Yolun önü ayrı bir katmanda (bkz. TravelForeground): burada
+	# çizilse kervanın arkasında kalırdı.
+	_foreground.sync_state(
+		_colors, _light, _world_x, _ground_y_at_screen(area.size.x * 0.5),
+		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
+		CARAVAN_X_RATIO
+	)
 	if _camping:
 		_draw_campfire(area)
 	_draw_weather(area, horizon)
@@ -610,8 +626,16 @@ func _draw_hut(base: Vector2, height: float, wall: Color, roof: Color) -> void:
 		Color(glow, 0.55 + _night_ratio * 0.45), true
 	)
 
-## Zemin üstü bitki/kaya: yolun iki yanı. Paralaksı tam, yani kervanla
-## aynı hızda kayıyor - yere basan şeyler bunlar.
+## Yolun **üst** tarafındaki bitki ve kaya - yani uzak kenar. Yüksek
+## nesnelerin hepsi burada: ağaç, çam, kaya kütlesi.
+##
+## Önceden hem üste hem alta serpiliyordu (`side` ±1) ve aşağıya düşen
+## ağaçlar iki ayrı sorun üretiyordu. Perspektif: aşağısı kameraya en
+## yakın yer, oraya konan bir ağaç bütün sahneyi kapatıyor. Ve derinlik:
+## şeridin kendi `_draw()`'u kervanın *altında* kaldığı için o ağaç
+## kervanın arkasına düşüyor, yani figürler ağaçların üzerinde yürüyor
+## gibi duruyordu. Aşağıya artık yalnızca alçak şeyler gidiyor ve onları
+## `TravelForeground` çiziyor - kervandan sonra.
 func _draw_ground_props(area: Rect2, horizon: float) -> void:
 	var offset := -_world_x * PARALLAX_GROUND
 	var first := int(floor((-offset - CELL_GROUND) / CELL_GROUND))
@@ -625,9 +649,8 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 		var x := float(cell) * CELL_GROUND + offset + rng.randf_range(-50.0, 50.0)
 		if x < -70.0 or x > area.size.x + 70.0:
 			continue
-		# Yolun üstünde değil kenarında: hangi tarafta olduğu da rastgele.
-		var side := 1.0 if rng.randf() < 0.5 else -1.0
-		var y := _ground_y_at_screen(x) + area.size.y * 0.085 * side * rng.randf_range(0.9, 2.1)
+		# Yalnızca yolun üstü: y küçüldükçe uzaklaşıyor.
+		var y := _ground_y_at_screen(x) - area.size.y * rng.randf_range(0.045, 0.16)
 		var base := Vector2(x, y)
 		if roll < 0.30:
 			ArtDraw.rock(
@@ -649,54 +672,6 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 				ArtDraw.conifer(self, base, height * 1.15, near.darkened(0.45), flora)
 			else:
 				ArtDraw.tree(self, base, height, near.darkened(0.45), flora.lightened(0.05))
-
-## Menzil taşları: yolda her gün bir taş, üstünde kalan gün. Oyuncu
-## ilerleme çubuğuna bakmadan da kaç gün kaldığını okuyor.
-func _draw_milestones(area: Rect2, horizon: float) -> void:
-	var days := int(ceil(_route_days()))
-	for day in range(1, days + 1):
-		var world := float(day) * PIXELS_PER_DAY - _world_x
-		var x := area.size.x * CARAVAN_X_RATIO + world
-		if x < -40.0 or x > area.size.x + 40.0:
-			continue
-		var base := Vector2(x, _ground_y_at_screen(x) + area.size.y * 0.055)
-		var h := MILESTONE_HEIGHT
-		# Taş kireç beyazı değil, aşınmış kaya. İlk denemede parlak beyazdı
-		# ve yol boyunca dizili mezar taşları gibi duruyordu.
-		ArtDraw.inked(self, PackedVector2Array([
-			base + Vector2(-h * 0.22, 0.0),
-			base + Vector2(-h * 0.18, -h * 0.82),
-			base + Vector2(0.0, -h),
-			base + Vector2(h * 0.18, -h * 0.82),
-			base + Vector2(h * 0.22, 0.0),
-		]), Color(0.46, 0.44, 0.40) * _light, 1.2)
-
-## Ön plan: ekranın alt kenarından taşan, hızlı kayan siluetler. Derinlik
-## hissinin yarısı buradan - kameranın önünde bir şey olmalı.
-func _draw_foreground(area: Rect2, horizon: float) -> void:
-	var offset := -_world_x * PARALLAX_FORE
-	var first := int(floor((-offset - CELL_FORE) / CELL_FORE))
-	var last := int(ceil((-offset + area.size.x + CELL_FORE) / CELL_FORE))
-	# İlk denemede bunlar %55 karartılmıştı ve ekranın altında simsiyah
-	# lekeler halinde duruyordu - ön plan değil, yanık bir çalı çırpı
-	# gibi. Ön plan koyu olmalı ama zeminin *rengini* taşımalı.
-	var dark := Color(_colors.near).darkened(0.34)
-	for cell in range(first, last + 1):
-		var rng := RandomNumberGenerator.new()
-		rng.seed = hash("fore|%d" % cell)
-		if rng.randf() > 0.55:
-			continue
-		var x := float(cell) * CELL_FORE + offset + rng.randf_range(-80.0, 80.0)
-		if x < -160.0 or x > area.size.x + 160.0:
-			continue
-		var base := Vector2(x, area.size.y + area.size.y * rng.randf_range(0.06, 0.16))
-		if rng.randf() < 0.45:
-			ArtDraw.rock(self, base, area.size.y * 0.20, area.size.y * 0.13, dark, cell * 13)
-		else:
-			ArtDraw.shrub(
-				self, base, area.size.y * 0.17, area.size.y * 0.15,
-				Color(_colors.flora).darkened(0.30), cell * 29
-			)
 
 func _draw_campfire(area: Rect2) -> void:
 	# Ateş kolonun *önünde*: ilk konumu kervanın içindeydi ve vagonun

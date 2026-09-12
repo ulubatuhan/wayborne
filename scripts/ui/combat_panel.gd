@@ -347,7 +347,45 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 
 	card.add_child(_build_mark_row(tr("UI_COMBAT_MARK_LAUNCH"), skill.usable_positions, LAUNCH_COLOR))
 	card.add_child(_build_mark_row(tr("UI_COMBAT_MARK_TARGET"), skill.target_positions, TARGET_MARK_COLOR))
+
+	# Yeteneğin "ne yaptığı" yalnızca adında yazmamalı: alan genişliği,
+	# mevki kaydırması ve durum efekti oyuncunun kararını değiştiren
+	# şeyler. Görünmeyen bir etki, bir mekaniğin hiç olmaması gibidir.
+	var notes := _skill_notes(skill)
+	if not notes.is_empty():
+		var note := Label.new()
+		note.text = " · ".join(notes)
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD
+		note.modulate = ArtPalette.GOLD_DIM
+		card.add_child(note)
 	return card
+
+func _skill_notes(skill: CombatSkill) -> Array[String]:
+	var notes: Array[String] = []
+	match skill.area:
+		CombatSkill.Area.ADJACENT:
+			notes.append(tr("UI_COMBAT_AREA_ADJACENT"))
+		CombatSkill.Area.ALL:
+			notes.append(tr("UI_COMBAT_AREA_ALL"))
+		CombatSkill.Area.RANDOM:
+			notes.append(tr("UI_COMBAT_AREA_RANDOM"))
+		_:
+			pass
+	if skill.shifts():
+		notes.append(tr(
+			"UI_COMBAT_SHIFT_PUSH" if skill.shift_amount > 0 else "UI_COMBAT_SHIFT_PULL"
+		))
+	if skill.has_status():
+		notes.append(tr("UI_COMBAT_SKILL_STATUS") % [
+			tr(_status_label_key(skill.status_kind)), skill.status_chance
+		])
+	return notes
+
+func _status_label_key(kind: String) -> String:
+	match kind:
+		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
+		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
+		_: return "CBT_STATUS_BLEED"
 
 func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> Label:
 	var marks := ""

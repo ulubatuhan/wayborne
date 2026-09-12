@@ -310,7 +310,55 @@ func _shuffle_forward(unit: CombatUnit) -> void:
 	ahead.position = temp
 	side.sort_custom(func(a, b): return a.position < b.position)
 
+## Yeteneği çözer. Alan yetenekleri için bir dağıtıcı: etkilenen hedef
+## kümesini kurup her biri için tek hedeflik çözümü çağırıyor. Tek
+## hedeflik yol hiç değişmedi - `SINGLE` varsayılan olduğu için alan
+## sistemi eklenmeden önce yazılmış her yetenek aynen çalışıyor.
 func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) -> void:
+	var affected := _affected_targets(unit, skill, target)
+	if affected.is_empty():
+		_emit_log(tr("CBT_LOG_NO_TARGET") % [unit.display_name, skill.display_name])
+		return
+	if affected.size() > 1:
+		_emit_log(tr("CBT_LOG_AREA") % [
+			unit.display_name, skill.display_name, affected.size()
+		])
+	for each in affected:
+		if is_over():
+			return
+		_resolve_on_target(unit, skill, each)
+
+## Etkilenen hedefler. `RANDOM` seçimi oyuncudan alıyor ama **boşa
+## harcanan bir tur üretmiyor**: geçerli bir hedef varsa mutlaka birine
+## vuruyor, yoksa zar atmak cezanın kendisi olurdu.
+func _affected_targets(
+	unit: CombatUnit, skill: CombatSkill, target: CombatUnit
+) -> Array[CombatUnit]:
+	var reachable := get_valid_targets(unit, skill)
+	match skill.area:
+		CombatSkill.Area.ALL:
+			return reachable
+		CombatSkill.Area.RANDOM:
+			var picked: Array[CombatUnit] = []
+			if not reachable.is_empty():
+				picked.append(reachable[_rng.randi_range(0, reachable.size() - 1)])
+			return picked
+		CombatSkill.Area.ADJACENT:
+			# Komşuluk *mevkiye* göre, diziye göre değil: saf yeniden
+			# paketlendiğinde (biri düştüğünde) dizi sırası mevkiyle
+			# örtüşmeyebiliyor.
+			var neighbours: Array[CombatUnit] = []
+			for candidate in reachable:
+				if absi(candidate.position - target.position) <= 1:
+					neighbours.append(candidate)
+			return neighbours
+		_:
+			var single: Array[CombatUnit] = []
+			if target != null:
+				single.append(target)
+			return single
+
+func _resolve_on_target(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) -> void:
 	if skill.is_heal():
 		var healed := _roll_heal(unit, skill)
 		target.apply_heal(healed)
@@ -344,6 +392,7 @@ func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) ->
 	var taken := target.reduce_by_protection(damage)
 	_apply_skill_modifier(skill, target)
 	_apply_skill_status(skill, target)
+	_apply_skill_shift(skill, target)
 
 	if is_crit:
 		_emit_log(tr("CBT_LOG_CRIT") % [
@@ -396,6 +445,36 @@ func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
 	_emit_log(tr("CBT_LOG_STATUS_APPLIED") % [
 		target.display_name, tr(_status_name_key(skill.status_kind)), skill.status_rounds
 	])
+
+## Mevki kaydırma: hedefi safta iter ya da çeker. Kaydırmadan sonra saf
+## **her zaman** yeniden paketleniyor, yani mevkiler 1'den başlayan
+## kesintisiz bir dizi kalıyor - aksi hâlde itilen bir düşman 5.
+## mevkiye çıkıp hiçbir yeteneğin menziline girmez ve savaş kilitlenir.
+func _apply_skill_shift(skill: CombatSkill, target: CombatUnit) -> void:
+	if not skill.shifts() or not target.is_alive():
+		return
+	var side := _side_of(target)
+	var alive: Array[CombatUnit] = []
+	for unit in side:
+		if unit.is_alive():
+			alive.append(unit)
+	if alive.size() < 2:
+		return
+
+	alive.sort_custom(func(a, b): return a.position < b.position)
+	var index := alive.find(target)
+	var wanted := clampi(index + skill.shift_amount, 0, alive.size() - 1)
+	if wanted == index:
+		return
+
+	alive.remove_at(index)
+	alive.insert(wanted, target)
+	for slot in alive.size():
+		alive[slot].position = slot + 1
+	_repack(side)
+	_emit_log(tr(
+		"CBT_LOG_PUSHED" if skill.shift_amount > 0 else "CBT_LOG_PULLED"
+	) % [target.display_name, target.position])
 
 func _status_name_key(kind: String) -> String:
 	match kind:

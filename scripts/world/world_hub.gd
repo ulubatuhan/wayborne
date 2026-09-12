@@ -238,17 +238,24 @@ func _crew_offset(wagon_index: int, crew_slot: int) -> Vector2:
 ## aynı sebebi. Artık `HubScenery` çiziyor: aynı palet, aynı fırçalar,
 ## yani oyunun geri kalanıyla aynı dünya.
 func _build_scenery() -> void:
-	var scenery := HubScenery.new()
-	scenery.z_index = -20
-	add_child(scenery)
-	scenery.setup(
-		Rect2(
-			Vector2(WORLD_MIN_X - 500.0, GROUND_Y - 620.0),
-			Vector2(WORLD_MAX_X - WORLD_MIN_X + 1100.0, 1020.0)
-		),
-		GROUND_Y,
-		GameState.get_session().current_location_id
+	var span := Rect2(
+		Vector2(WORLD_MIN_X - 500.0, GROUND_Y - 620.0),
+		Vector2(WORLD_MAX_X - WORLD_MIN_X + 1100.0, 1020.0)
 	)
+	var city_id: String = GameState.get_session().current_location_id
+
+	var back := HubScenery.new()
+	back.z_index = -20
+	add_child(back)
+	back.setup(span, GROUND_Y, city_id, HubScenery.LAYER_BACK)
+
+	# Yolun altındaki alçak şeyler kervanın **önünde** duruyor. Tek
+	# katman olduğunda hepsi arkada kalıyordu ve figürler çalıların,
+	# ağaçların üzerinde yürüyor gibi görünüyordu.
+	var front := HubScenery.new()
+	front.z_index = 10
+	add_child(front)
+	front.setup(span, GROUND_Y, city_id, HubScenery.LAYER_FRONT)
 
 func _build_spots() -> void:
 	_add_spot(

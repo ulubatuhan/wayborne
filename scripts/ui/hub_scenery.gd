@@ -17,6 +17,18 @@ extends Node2D
 ## Her şey bir kez çiziliyor: manzara durağan, kamera hareket ediyor.
 ## Bu yüzden `_process` yok - aynı şeyi her karede yeniden çizmek Web
 ## hedefinde bedava değil.
+##
+## **İki katman var ve ikisi ayrı düğüm.** `LAYER_BACK` yolun üstündeki
+## her şeyi çiziyor (gökyüzü, sırtlar, zemin, yol, ağaçlar) ve kervanın
+## arkasında duruyor; `LAYER_FRONT` yolun altındaki alçak şeyleri
+## çiziyor ve kervanın *önünde* duruyor. Tek katman olduğunda iki kusur
+## birden çıkıyordu: yolun altına düşen ağaçlar kameraya en yakın yeri
+## kapatıyordu, ve hepsi kervanın arkasında kaldığı için figürler
+## ağaçların üzerinde yürüyor gibi duruyordu.
+##
+## **Yolun altında yüksek bir şey olmaz.** Aşağıda yalnızca çalı, ot,
+## küçük taş, çamur ve su birikintisi; ağaç, kaya kütlesi ve dağ hep
+## yukarıda.
 
 ## Kır her zaman şehrin çevresi: bozkırdan biraz daha yeşil, çünkü şehir
 ## ekilebilir toprağın olduğu yere kurulur.
@@ -29,13 +41,25 @@ const HORIZON_RATIO: float = 0.62
 const CELL_FAR_TREES: float = 210.0
 const CELL_NEAR: float = 150.0
 
+const LAYER_BACK: String = "back"
+const LAYER_FRONT: String = "front"
+
+## Yolun altındaki hiçbir şey bundan yüksek olamaz. Kuralı bir sayıya
+## bağlamak, ileride "biraz daha büyük olsun" diye kaydırılmasını
+## zorlaştırıyor.
+const MAX_FRONT_HEIGHT: float = 46.0
+
 var _area: Rect2 = Rect2()
 var _ground_y: float = 0.0
 var _seed: int = 0
+var _layer: String = LAYER_BACK
 
-func setup(area: Rect2, ground_y: float, city_id: String) -> void:
+func setup(
+	area: Rect2, ground_y: float, city_id: String, layer: String = LAYER_BACK
+) -> void:
 	_area = area
 	_ground_y = ground_y
+	_layer = layer
 	# Manzara şehirden şehre değişiyor: aynı kapıya her seferinde aynı
 	# ağaçların arasından yürüyorsun, ama başka bir şehirde başka
 	# ağaçlar var.
@@ -44,6 +68,9 @@ func setup(area: Rect2, ground_y: float, city_id: String) -> void:
 
 func _draw() -> void:
 	if _area.size.x <= 0.0:
+		return
+	if _layer == LAYER_FRONT:
+		_draw_front()
 		return
 	var sky := ArtPalette.sky(ArtPalette.PHASE_DAY)
 	var colors := ArtPalette.terrain(BIOME)
@@ -113,8 +140,9 @@ func _draw_road() -> void:
 			rng.randf_range(1.2, 3.0), road.darkened(rng.randf_range(0.05, 0.30))
 		)
 
-## Bitki örtüsü iki katmanda: yolun *gerisinde* (ufka doğru, soluk ve
-## küçük) ve yolun *önünde* (koyu, büyük, kervanın önünden geçiyor).
+## Yolun **üstündeki** bitki örtüsü: ağaçlar ve çamlar. Hepsi uzak
+## kenarda, çünkü aşağısı kameraya en yakın yer ve oraya konan bir ağaç
+## hem sahneyi hem kervanı kapatıyor.
 func _draw_flora(colors: Dictionary, haze: Color) -> void:
 	var far_flora := ArtPalette.fade_to_haze(Color(colors.flora), haze, 0.22)
 	var far_trunk := ArtPalette.fade_to_haze(Color(colors.near).darkened(0.40), haze, 0.22)
@@ -122,34 +150,45 @@ func _draw_flora(colors: Dictionary, haze: Color) -> void:
 	for index in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _seed + index * 31
-		if rng.randf() > 0.68:
+		if rng.randf() > 0.72:
 			continue
 		var x := _area.position.x + float(index) * CELL_FAR_TREES + rng.randf_range(-60.0, 60.0)
-		var base := Vector2(x, _ground_y - rng.randf_range(14.0, 42.0))
+		var base := Vector2(x, _ground_y - rng.randf_range(18.0, 58.0))
 		if rng.randf() < 0.35:
-			ArtDraw.conifer(self, base, rng.randf_range(90.0, 150.0), far_trunk, far_flora)
+			ArtDraw.conifer(self, base, rng.randf_range(100.0, 170.0), far_trunk, far_flora)
 		else:
-			ArtDraw.tree(self, base, rng.randf_range(80.0, 130.0), far_trunk, far_flora)
+			ArtDraw.tree(self, base, rng.randf_range(90.0, 145.0), far_trunk, far_flora)
 
-	var near_count := int(_area.size.x / CELL_NEAR)
-	for index in near_count:
+## Yolun **altı**: kervanın önünde kalan şerit. Yalnızca alçak şeyler -
+## çalı, ot, küçük taş, çamur lekesi.
+func _draw_front() -> void:
+	var colors := ArtPalette.terrain(BIOME)
+	var flora := Color(colors.flora).darkened(0.20)
+	var stone := Color(colors.near).lerp(Color(colors.accent), 0.28)
+	var soil := Color(colors.near).darkened(0.20)
+	var count := int(_area.size.x / CELL_NEAR)
+	for index in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _seed + index * 57 + 9
-		var roll := rng.randf()
-		var x := _area.position.x + float(index) * CELL_NEAR + rng.randf_range(-50.0, 50.0)
-		var base := Vector2(x, _ground_y + rng.randf_range(84.0, 190.0))
-		if roll < 0.26:
-			ArtDraw.rock(
-				self, base, rng.randf_range(50.0, 96.0), rng.randf_range(28.0, 54.0),
-				Color(colors.near).lerp(Color(colors.accent), 0.30), _seed + index
-			)
-		elif roll < 0.72:
-			ArtDraw.shrub(
-				self, base, rng.randf_range(50.0, 90.0), rng.randf_range(34.0, 62.0),
-				Color(colors.flora).darkened(0.18), _seed + index * 7
-			)
-		else:
-			ArtDraw.tree(
-				self, base, rng.randf_range(150.0, 230.0),
-				Color(colors.near).darkened(0.48), Color(colors.flora).darkened(0.08)
-			)
+		var slots := 1 + int(rng.randf() * 2.0)
+		for slot in slots:
+			var x := _area.position.x + float(index) * CELL_NEAR + rng.randf_range(-60.0, 60.0)
+			var base := Vector2(x, _ground_y + rng.randf_range(96.0, 230.0))
+			var roll := rng.randf()
+			if roll < 0.24:
+				ArtDraw.rock(
+					self, base, rng.randf_range(24.0, MAX_FRONT_HEIGHT),
+					rng.randf_range(12.0, MAX_FRONT_HEIGHT * 0.55), stone,
+					_seed + index * 7 + slot
+				)
+			elif roll < 0.82:
+				ArtDraw.shrub(
+					self, base, rng.randf_range(30.0, MAX_FRONT_HEIGHT),
+					rng.randf_range(20.0, MAX_FRONT_HEIGHT), flora,
+					_seed + index * 13 + slot
+				)
+			else:
+				ArtDraw.ellipse(
+					self, base,
+					Vector2(rng.randf_range(30.0, 70.0), rng.randf_range(6.0, 13.0)), soil
+				)

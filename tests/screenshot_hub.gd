@@ -32,12 +32,10 @@ func _init() -> void:
 	var root := get_root()
 	root.size = VIEW_SIZE
 
-	var scenery := HubScenery.new()
-	root.add_child(scenery)
-	scenery.setup(
-		Rect2(Vector2(-200.0, -160.0), Vector2(1800.0, 820.0)),
-		GROUND_Y, WorldMapData.START_LOCATION_ID
-	)
+	var span := Rect2(Vector2(-200.0, -160.0), Vector2(1800.0, 820.0))
+	var back := HubScenery.new()
+	root.add_child(back)
+	back.setup(span, GROUND_Y, WorldMapData.START_LOCATION_ID, HubScenery.LAYER_BACK)
 
 	# Kervan: atlı lider önde, iki yoldaş, iki vagon ve tayfaları -
 	# world_hub'ın kurduğu dizilişin aynısı.
@@ -73,6 +71,13 @@ func _init() -> void:
 					GROUND_Y - 76.0 + float(slot) * 4.0
 				)
 			)
+
+	# Ön plan kervandan *sonra* ekleniyor: yolun altındaki alçak şeyler
+	# figürlerin önünde durmalı - world_hub'da bunu z_index yapıyor,
+	# burada ekleme sırası.
+	var front := HubScenery.new()
+	root.add_child(front)
+	front.setup(span, GROUND_Y, WorldMapData.START_LOCATION_ID, HubScenery.LAYER_FRONT)
 
 	await _settle()
 	_save("01_duran_kervan.png")

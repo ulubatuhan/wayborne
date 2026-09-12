@@ -292,3 +292,7 @@
 "CBT_LOG_BLEED_TICK","%s kanıyor: %d hasar.","%s bleeds: %d damage.","","","","","","","","",""
 "CBT_LOG_BLIGHT_TICK","%s zehirden kıvranıyor: %d hasar.","%s writhes from the blight: %d damage.","","","","","","","","",""
 "CBT_LOG_STUN_SKIP","%s sersemlemiş, sırasını kaçırdı.","%s is stunned and loses the turn.","","","","","","","","",""
+"CBT_LOG_AREA","%s: %s - %d hedefe birden.","%s: %s - striking %d targets at once.","","","","","","","","",""
+"CBT_LOG_NO_TARGET","%s %s için ulaşılabilir hedef bulamadı.","%s found no reachable target for %s.","","","","","","","","",""
+"CBT_LOG_PUSHED","%s geriye itildi (mevki %d).","%s is pushed back (rank %d).","","","","","","","","",""
+"CBT_LOG_PULLED","%s öne çekildi (mevki %d).","%s is pulled forward (rank %d).","","","","","","","","",""

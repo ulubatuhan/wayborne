@@ -72,6 +72,33 @@ var description: String:
 func has_status() -> bool:
 	return status_rounds > 0 and not status_kind.is_empty()
 
+## --- Hedef genişliği ve mevki kaydırma ---
+## `SINGLE` tek hedef (varsayılan, eski davranış). `ADJACENT` seçilen
+## hedefin komşu mevkilerine de vuruyor, `ALL` karşı safın tamamına,
+## `RANDOM` seçimi oyuncudan alıp zara bırakıyor (savruk bir sallama).
+##
+## Hasarın alan yeteneklerinde düşük olması motorda değil **katalogda**
+## ayarlanıyor: motora "alan yetenekleri %60 hasar verir" gibi bir
+## çarpan koymak, bir yeteneğin sayısını iki yerden okumak demekti
+## (bkz. CaravanPlan.daily_consumption'ın aynı gerekçesi). Alan
+## yeteneği tek hedefe vurandan zayıf olmalı, yoksa tek doğru seçim o
+## olur - `test_combat_dd.gd` bunu doğruluyor.
+enum Area { SINGLE, ADJACENT, ALL, RANDOM }
+
+@export var area: Area = Area.SINGLE
+
+## İsabet eden vuruşta hedefi safta kaydırıyor: pozitif = geriye iter,
+## negatif = öne çeker. Mevki tasarımının tersi taraftan kullanılması -
+## arkadaki okçuyu öne çekmek onu kendi yeteneklerinin menzilinden
+## çıkarıyor, bu da hasar vermeden kazanılan bir tur.
+@export var shift_amount: int = 0
+
+func is_area() -> bool:
+	return area != Area.SINGLE
+
+func shifts() -> bool:
+	return shift_amount != 0
+
 func has_modifier() -> bool:
 	return modifier_rounds > 0 and not modifier_stat.is_empty()
 
@@ -133,6 +160,15 @@ static func make_attack(
 ## hâlinde kullanılıyor (`with_status(make_attack(...), ...)`) çünkü
 ## `make_attack`'ın on üç parametresi var ve dördünü daha eklemek çağrı
 ## yerini okunmaz hâle getiriyordu.
+## Alan genişliğini ve/veya mevki kaydırmasını bir yeteneğe ekler -
+## `with_status` ile aynı zincir deseni, aynı gerekçe.
+static func with_area(
+	skill: CombatSkill, area_kind: Area, shift: int = 0
+) -> CombatSkill:
+	skill.area = area_kind
+	skill.shift_amount = shift
+	return skill
+
 static func with_status(
 	skill: CombatSkill, kind: String, amount: int, rounds: int, chance: int
 ) -> CombatSkill:
