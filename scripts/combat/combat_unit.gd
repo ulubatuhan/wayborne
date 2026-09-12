@@ -45,6 +45,13 @@ var _timed_modifiers: Array = []
 ## Yalnızca düşman tarafında anlamlı: yenilince oyuncuya verilen XP.
 var xp_value: int = 0
 
+## Hangi silüetle çizileceği (bkz. CombatFigure.ARCHETYPES): oyuncu
+## tarafında sınıf kimliği, düşman tarafında düşman kimliği. Motorun
+## çizimle ilgisi yok, yalnızca kimliği taşıyor - ekran ondan silüeti
+## seçiyor. Tanınmayan bir kimlik haydut silüetine düşer, yani yeni bir
+## düşman hiçbir zaman çizimsiz kalmaz.
+var figure_kind: String = "bandit"
+
 ## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
 ## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
 ## _try_refuse_order). Yalnızca oyuncu tarafında anlamlı.
@@ -102,6 +109,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.protection = character.stats.get_protection()
 	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
 	unit.is_player_character = character.is_player
+	unit.figure_kind = character.class_id
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()
@@ -128,6 +136,7 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	# zorlar ve savaşı kilitlerdi.
 	unit.protection = template.protection
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
+	unit.figure_kind = template.enemy_id
 	unit.xp_value = template.xp_value
 	return unit
 

@@ -32,6 +32,10 @@ const MAX_LOG_LINES: int = 40
 const MARK_ON: String = "●"
 const MARK_OFF: String = "○"
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
+const SKILL_CARD_WIDTH: float = 156.0
+## Savaş alanının en az yüksekliği. İlk denemede alan 900 pikselin
+## üst 200'ünde ince bir şeritti; DD'de savaş alanı ekranın kendisidir.
+const STAGE_HEIGHT: float = 380.0
 const TARGET_MARK_COLOR: Color = Color(0.90, 0.45, 0.40)
 
 var _encounter: CombatEncounter
@@ -154,28 +158,51 @@ func _build_header() -> void:
 ## ortaya, yani düşmanın 1. mevkisinin karşısına gelmeli - "ön saf" ancak
 ## karşı karşıya durunca anlam taşır.
 func _build_field() -> void:
+	# Figürler boşlukta duruyordu ve savaş bir tabloya benziyordu. Zemin
+	# katmanı (karanlık kuyu + ufuk + meşale ışığı + vinyet) saflardan
+	# *önce* çiziliyor; saflar onun üstünde duruyor.
+	var stage := Panel.new()
+	var stage_style := StyleBoxFlat.new()
+	stage_style.bg_color = Color(0, 0, 0, 0)
+	stage_style.border_color = Color(0.30, 0.25, 0.18, 0.8)
+	stage_style.set_border_width_all(1)
+	stage.add_theme_stylebox_override("panel", stage_style)
+	# Dikeyde *uzamıyor*: EXPAND_FILL'de eldeki bütün boşluğu yutup
+	# figürleri dibe itiyordu. Sahne her ekranda aynı yükseklikte durmalı.
+	stage.custom_minimum_size = Vector2(0.0, STAGE_HEIGHT)
+	stage.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	add_child(stage)
+
+	var backdrop := CombatBackdrop.new()
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	stage.add_child(backdrop)
+
 	var field := HBoxContainer.new()
+	field.set_anchors_preset(Control.PRESET_FULL_RECT)
 	field.add_theme_constant_override("separation", 10)
 	field.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	_player_row = HBoxContainer.new()
 	_player_row.add_theme_constant_override("separation", 4)
 	_player_row.alignment = BoxContainer.ALIGNMENT_END
+	_player_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_player_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	field.add_child(_player_row)
 
-	var divider := ColorRect.new()
-	divider.color = Color(0.55, 0.48, 0.36, 0.5)
-	divider.custom_minimum_size = Vector2(2.0, 0.0)
-	field.add_child(divider)
+	# İki tarafın arasında ince bir boşluk yeter: zemin ve ışık havuzu
+	# ayrımı zaten taşıyor, ek bir çizgi sahneyi ikiye biçiyordu.
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(26.0, 0.0)
+	field.add_child(gap)
 
 	_enemy_row = HBoxContainer.new()
 	_enemy_row.add_theme_constant_override("separation", 4)
 	_enemy_row.alignment = BoxContainer.ALIGNMENT_BEGIN
+	_enemy_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_enemy_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	field.add_child(_enemy_row)
 
-	add_child(field)
+	stage.add_child(field)
 
 func _build_action_area() -> void:
 	_active_label = Label.new()
@@ -299,6 +326,9 @@ func _refresh_actions() -> void:
 func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 	var card := VBoxContainer.new()
 	card.add_theme_constant_override("separation", 1)
+	# Eşit genişlik: ilk görüntüde kartlar ad uzunluğuna göre farklı
+	# genişlikteydi ve satır tırtıklı duruyordu.
+	card.custom_minimum_size = Vector2(SKILL_CARD_WIDTH, 0.0)
 
 	var button := Button.new()
 	button.text = skill.display_name
@@ -325,7 +355,7 @@ func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> Lab
 		marks += MARK_ON if positions.has(rank) else MARK_OFF
 	var label := Label.new()
 	label.text = "%s %s" % [prefix, marks]
-	label.add_theme_font_size_override("font_size", 9)
+	label.add_theme_font_size_override("font_size", 11)
 	label.modulate = color
 	return label
 

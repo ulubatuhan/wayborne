@@ -7,20 +7,20 @@ extends PanelContainer
 ## menüden seçiliyordu, o yüzden pozisyona dayalı bir savaş visual novel
 ## gibi okunuyordu.
 ##
-## Figür hâlâ `ColorRect` yer tutucu (bkz. CLAUDE.md'nin "karakter
-## portreleri/görsel varlıklar" maddesi). Yapı sprite geldiğinde
-## değişmeyecek: `_figure`'ın yerine bir `TextureRect` koymak yeterli,
-## can barı/durum/tıklama mantığına dokunulmaz.
+## Figür artık `ColorRect` değil, `CombatFigure` - poligonla çizilmiş bir
+## silüet. Dikdörtgen bir yer tutucu *kimseyi* temsil etmiyordu: dört sınıf
+## ve dokuz düşman aynı renkli kutuydu. Sprite geldiğinde yapı
+## değişmeyecek, `_figure`'ın yerine bir `TextureRect` koymak yeterli.
 
 signal clicked(unit)  # CombatUnit
 
-const SLOT_WIDTH: float = 104.0
-const FIGURE_HEIGHT: float = 108.0
+## İlk denemede 104x108'di ve sanal ekranda alınan görüntüde savaş alanı
+## 900 piksel yüksekliğin yalnızca üst 200'ünde ince bir şerit olarak
+## duruyordu - mekân hissi vermiyordu. Figür artık ekranın gövdesini
+## dolduruyor; DD'de de savaş alanı ekranın kendisidir.
+const SLOT_WIDTH: float = 136.0
+const FIGURE_HEIGHT: float = 208.0
 
-const PLAYER_FIGURE: Color = Color(0.42, 0.55, 0.42)
-const ENEMY_FIGURE: Color = Color(0.55, 0.34, 0.32)
-const DOWNED_FIGURE: Color = Color(0.28, 0.28, 0.30)
-const DEAD_FIGURE: Color = Color(0.16, 0.14, 0.14)
 
 const ACTIVE_BORDER: Color = Color(0.95, 0.82, 0.45)
 const TARGET_BORDER: Color = Color(0.90, 0.35, 0.30)
@@ -32,7 +32,7 @@ const DEATHS_DOOR_FIGURE: Color = Color(0.62, 0.16, 0.16)
 
 var unit: CombatUnit
 
-var _figure: ColorRect
+var _figure: CombatFigure
 var _hp_bar: ProgressBar
 var _hp_label: Label
 var _name_label: Label
@@ -46,11 +46,13 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	_style = StyleBoxFlat.new()
-	_style.bg_color = Color(0.10, 0.10, 0.11, 0.55)
+	# Kutu neredeyse şeffaf: arkadaki zemin görünmeli, kutu bir
+	# çerçeve olmalı, bir pencere değil.
+	_style.bg_color = Color(0.06, 0.05, 0.06, 0.30)
 	_style.set_corner_radius_all(3)
 	_style.set_content_margin_all(4)
 	_style.border_color = IDLE_BORDER
-	_style.set_border_width_all(2)
+	_style.set_border_width_all(3)
 	add_theme_stylebox_override("panel", _style)
 
 	var column := VBoxContainer.new()
@@ -59,31 +61,40 @@ func _init() -> void:
 
 	_rank_label = Label.new()
 	_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_rank_label.add_theme_font_size_override("font_size", 9)
+	_rank_label.add_theme_font_size_override("font_size", 10)
 	_rank_label.modulate = Color(0.7, 0.68, 0.62)
 	column.add_child(_rank_label)
 
-	_figure = ColorRect.new()
+	_figure = CombatFigure.new()
 	_figure.custom_minimum_size = Vector2(0.0, FIGURE_HEIGHT)
 	_figure.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_figure)
 
 	_name_label = Label.new()
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.add_theme_font_size_override("font_size", 10)
+	_name_label.add_theme_font_size_override("font_size", 12)
 	_name_label.clip_text = true
 	column.add_child(_name_label)
 
+	# Varsayılan tema barı koyu zeminde neredeyse görünmüyordu (görüntüde
+	# ölçüldü), o yüzden dolgu ve zemin açıkça veriliyor.
 	_hp_bar = ProgressBar.new()
 	_hp_bar.show_percentage = false
-	_hp_bar.custom_minimum_size = Vector2(0.0, 7.0)
+	_hp_bar.custom_minimum_size = Vector2(0.0, 10.0)
 	_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(0.07, 0.07, 0.08)
+	track.set_corner_radius_all(2)
+	_hp_bar.add_theme_stylebox_override("background", track)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.68, 0.20, 0.18)
+	fill.set_corner_radius_all(2)
+	_hp_bar.add_theme_stylebox_override("fill", fill)
 	column.add_child(_hp_bar)
 
 	_hp_label = Label.new()
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hp_label.add_theme_font_size_override("font_size", 9)
+	_hp_label.add_theme_font_size_override("font_size", 10)
 	column.add_child(_hp_label)
 
 	_status_row = HBoxContainer.new()
@@ -107,7 +118,12 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	_hp_bar.value = clampf(float(bound_unit.current_hp), 0.0, _hp_bar.max_value)
 	_hp_label.text = "%d/%d" % [bound_unit.current_hp, bound_unit.max_hp]
 
-	_figure.color = _figure_color(bound_unit)
+	# Silüet: oyuncu sağa, düşman sola bakar. Derinlik arka mevkileri
+	# hafifçe küçültüp karartıyor - dört mevkinin sıralı durduğu hissi.
+	var depth := float(bound_unit.position - 1) / float(maxi(1, CombatEncounter.MAX_SIDE_SIZE - 1))
+	_figure.setup(
+		bound_unit.figure_kind, bound_unit.is_player_side, _figure_state(bound_unit), depth
+	)
 	_style.border_color = _border_color(is_active, is_target)
 	_refresh_status(bound_unit)
 
@@ -118,14 +134,17 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 		Control.CURSOR_POINTING_HAND if is_target else Control.CURSOR_ARROW
 	)
 
-func _figure_color(bound_unit: CombatUnit) -> Color:
+## Silüetin duruşunu ve paletini belirleyen durum. Düşen bir figür
+## ayakta soluk durmuyor, yere çöküyor - "düşmüş" ancak duruş değişince
+## okunuyor.
+func _figure_state(bound_unit: CombatUnit) -> String:
 	if bound_unit.is_dead:
-		return DEAD_FIGURE
+		return "dead"
 	if bound_unit.on_deaths_door:
-		return DEATHS_DOOR_FIGURE
+		return "deaths_door"
 	if not bound_unit.is_alive():
-		return DOWNED_FIGURE
-	return PLAYER_FIGURE if bound_unit.is_player_side else ENEMY_FIGURE
+		return "downed"
+	return "normal"
 
 func _border_color(is_active: bool, is_target: bool) -> Color:
 	if is_active:
@@ -153,7 +172,7 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 func _add_badge(text: String, color: Color) -> void:
 	var badge := Label.new()
 	badge.text = text
-	badge.add_theme_font_size_override("font_size", 8)
+	badge.add_theme_font_size_override("font_size", 10)
 	badge.modulate = color
 	_status_row.add_child(badge)
 
