@@ -19,7 +19,17 @@ extends SceneTree
 ##     --script res://tests/screenshot_road.gd
 
 const SHOT_DIR: String = "user://road_shots"
-const VIEW_SIZE: Vector2i = Vector2i(1500, 460)
+
+## Oyunun kendi oranı. **Bu araç uzun süre başka bir yol çiziyordu**:
+## çerçeve 1500×460'tı, oysa şerit oyunda 1920 genişliğinde ve
+## `BAND_HEIGHT` (320) yüksekliğinde duruyor. Figürler şeridin
+## *yüksekliğine* oranlı olduğu için 460'lık bir bantta kervan 1.44 kat
+## büyüyor, genişlik ise aynı kalıyor - kolon o kadar uzuyordu ki iki
+## vagon da karenin solundan dışarı çıkıyordu. Yani araç, oyunun hiç
+## çizmediği bir kervanın resmini basıyordu ve yoldaki vagon bir kez bile
+## görsel olarak doğrulanmamıştı. Bu depoda beşinci ölçüm hatası:
+## **oyundan önce ölçen aleti şüphelen** - kendi yazdığın alet dâhil.
+const VIEW_SIZE: Vector2i = Vector2i(1920, 320)
 
 ## Her kare: dosya adı, biyom, hava, gün evresi, yolun katedilen oranı.
 const SHOTS: Array[Dictionary] = [
@@ -61,9 +71,13 @@ func _init() -> void:
 	_band.size = Vector2(VIEW_SIZE)
 	root.add_child(_band)
 
+	# `add_child` değil `add_actor_layer` - oyunun yaptığının aynısı.
+	# Doğrudan eklemek ön plan katmanını kervanın altında bırakıyordu,
+	# yani araç oyunun derinlik sırasını da taklit etmiyordu.
 	_caravan = RoadCaravan.new()
-	_band.add_child(_caravan)
+	_band.add_actor_layer(_caravan)
 	_band.ground_line_changed.connect(_caravan.set_ground_line)
+	_caravan.column_length_changed.connect(_band.set_column_length)
 	_caravan.configure(_build_session())
 
 	for shot in SHOTS:
@@ -105,6 +119,20 @@ func _init() -> void:
 	await _settle()
 	_save("11_lider_kolonda.png")
 
+	# Vagon sayısı taraması. Bu kareler **tam olarak gözden kaçan şey
+	# yüzünden** var: araç iki vagonluk bir kervan kuruyordu ve ikisi de
+	# karenin dışında kalıyordu, yani yoldaki vagon hiç görülmedi. Kolonun
+	# çapaya sığması artık vagon sayısıyla değişiyor (bkz.
+	# RoadCaravan.MIN_COLUMN_SCALE), o yüzden her uç ayrı basılıyor.
+	_caravan.set_detached(false)
+	_caravan.set_leader_offset(0.0)
+	for wagons in [1, 4, 6]:
+		_caravan.configure(_build_session(wagons))
+		_caravan.set_light(_band.get_light())
+		_caravan.set_speed(1.0)
+		await _settle()
+		_save("12_vagon_%d.png" % wagons)
+
 	print("Görüntüler: ", ProjectSettings.globalize_path(SHOT_DIR))
 	quit(0)
 
@@ -120,11 +148,10 @@ func _terrain_with(biome: String) -> Dictionary:
 	var fallback := RouteTerrain.build("shot_probe_0", 6)
 	return {"terrain": fallback, "day": 1.0}
 
-## Dört sınıflı bir parti ve iki vagon: kolonun tamamı tek karede
-## görülebilsin.
-func _build_session() -> GameSession:
+## Üç sınıflı bir parti: kolonun tamamı tek karede görülebilsin.
+func _build_session(wagons: int = 2) -> GameSession:
 	var session := GameSession.new()
-	session.owned_wagon_count = 2
+	session.owned_wagon_count = wagons
 	var culture := CultureCatalog.get_cultures()[0]
 	var classes: Array[String] = [
 		ClassCatalog.GUARD, ClassCatalog.HUNTER, ClassCatalog.BREAKER

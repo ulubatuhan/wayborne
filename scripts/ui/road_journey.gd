@@ -203,6 +203,9 @@ func _build_ui() -> void:
 	# duruyor (bkz. TravelForeground).
 	_band.add_actor_layer(_caravan)
 	_band.ground_line_changed.connect(_caravan.set_ground_line)
+	# Kolon uzadıkça çapa sağa kayıyor, yoksa satın alınan her vagon
+	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
+	_caravan.column_length_changed.connect(_band.set_column_length)
 
 	# Emir menüsü: F2 açıyor, sayı tuşu emri veriyor. Şeridin üstünde
 	# duruyor (Mount & Blade'de de ekranın üstünde belirir) ve varsayılan
