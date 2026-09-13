@@ -390,6 +390,15 @@ way to textures.
   `RoadCaravan._walk_column(scale, place)` walks the cursor once and either
   places or only measures — the same reasoning that already puts the wagon
   centres in the layout rather than in `_draw()`.
+- **A body part is the silhouette, not a decal on it.** The ox's shoulder
+  hump — the cue that separates it from the horse — was a pale, un-inked
+  ellipse laid over the back, and it read as exactly that: a disc stuck on
+  the animal's nape. It was also the only shape on the whole figure drawn
+  without `ArtDraw.inked`, so it did not even belong to the same drawing
+  language as the body, neck and head. The hump is now two vertices in the
+  body outline, so the topline itself humps; the small light ellipse that
+  remains sits *inside* the body as a volume cue, which is the one place
+  an outline-free shape is right.
 - **A figure that moves needs joints.** `WalkFigure` solves hip → knee →
   foot with two bones; swinging a single-piece leg reads as scissors. The
   foot stays put while it is on the ground, so the figure does not slide.
