@@ -69,18 +69,20 @@ func _init() -> void:
 	cursor -= pair_step + BODY_W + GAP_NORMAL
 
 	for index in 2:
+		# Vagon birimi, önden arkaya: [tayfa] [öküz] [vagon]. Öküzle
+		# vagonun arasına hiçbir şey girmez - orası koşum yeri.
+		_figure(
+			WalkFigure.KIND_PERSON, ClassCatalog.GUARD, Vector2(BODY_W, 72.0),
+			Vector2(cursor - BODY_W * 0.5, GROUND_Y - 72.0)
+		)
+		cursor -= BODY_W + GAP_TIGHT
+
 		cursor -= OX_W * 0.5
 		_oxen.append(_figure(
 			WalkFigure.KIND_OX, "bandit", Vector2(OX_W, 86.0),
 			Vector2(cursor - OX_W * 0.5, GROUND_Y - 86.0)
 		))
-		cursor -= OX_W * 0.5 + GAP_TIGHT
-
-		_figure(
-			WalkFigure.KIND_PERSON, ClassCatalog.GUARD, Vector2(BODY_W, 72.0),
-			Vector2(cursor - BODY_W * 0.5, GROUND_Y - 72.0)
-		)
-		cursor -= BODY_W + HITCH_GAP
+		cursor -= OX_W * 0.5 + HITCH_GAP
 
 		var wagon := WagonFigure.new()
 		wagon.position = Vector2(cursor - WAGON_W, GROUND_Y - 96.0)

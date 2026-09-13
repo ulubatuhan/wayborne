@@ -285,6 +285,14 @@ func get_column_scale() -> float:
 func get_wagon_centres() -> Array[float]:
 	return _wagon_centres
 
+## Öküzlerin merkezleri, vagonlarla aynı sırada. Testin öküzün gerçekten
+## kendi vagonuna koşulu olduğunu doğrulayabilmesi için.
+func get_ox_centres() -> Array[float]:
+	var centres: Array[float] = []
+	for ox in _oxen:
+		centres.append(ox.position.x + ox.size.x * 0.5)
+	return centres
+
 func _process(delta: float) -> void:
 	if _leader == null:
 		return
@@ -371,17 +379,16 @@ func _walk_column(scale: float, place: bool) -> float:
 	placed += MAX_ABREAST
 
 	for index in _wagon_count:
-		# Bir vagon birimi, önden arkaya: [öküz] [tayfa] [vagon].
-		# Yürüyen tayfa **vagonun önünde**, öküzle vagon arasında. Yanına
-		# koymak gövdeyle örtüşüyordu; arkasına koymak da tam olarak
-		# istenmeyen şeydi - vagonların arkasında sürüklenen isimsiz bir
-		# kuyruk.
-		if index < _oxen.size():
-			cursor -= ox_w * 0.5
-			if place:
-				_place(_oxen[index], cursor, ox_h, ox_w)
-			cursor -= ox_w * 0.5 + gap_tight
-
+		# Bir vagon birimi, önden arkaya: [tayfa] [öküz] [vagon].
+		#
+		# **Öküzle vagonun arasına hiçbir şey girmez** - orası koşum yeri.
+		# Tayfa bir ara oraya konmuştu (vagonun yanı gövdeyle örtüşüyordu,
+		# arkası da istenmeyen isimsiz kuyruğu üretiyordu) ve sonuç ekranda
+		# apaçıktı: öküzle vagon arası vagonun kendisinden neredeyse iki
+		# kat genişti ve ortada bir adam duruyordu, yani öküz o vagonu
+		# çeken hayvan gibi değil başıboş bir hayvan gibi okunuyordu.
+		# Yürüyen tayfa artık öküzün **başında**, onu yederek yürüyor -
+		# öküz arabası zaten böyle sürülür.
 		if index < _crew_figures.size():
 			if place:
 				_place(
@@ -389,6 +396,12 @@ func _walk_column(scale: float, place: bool) -> float:
 					person_h * 0.95, person_w
 				)
 			cursor -= person_w + gap_tight
+
+		if index < _oxen.size():
+			cursor -= ox_w * 0.5
+			if place:
+				_place(_oxen[index], cursor, ox_h, ox_w)
+			cursor -= ox_w * 0.5
 		cursor -= hitch_gap
 
 		if place:
@@ -445,8 +458,14 @@ func _draw() -> void:
 		# Vagon gövdesi `ArtDraw`'da: aynı vagon şehir dışı yürüyüş
 		# alanında da çiziliyor ve iki kopya tutulunca aynı kervan iki
 		# ekranda iki farklı şey oluyordu.
+		var centre := _wagon_centres[index]
+		# Koşum oku vagondan *önce*: kalas gövdenin altından çıkıyor.
+		ArtDraw.draught_pole(
+			self, Vector2(centre + wagon_w * 0.48, _ground_y),
+			HITCH_GAP * _scale * 1.7, wagon_h, _light
+		)
 		ArtDraw.wagon(
-			self, Vector2(_wagon_centres[index], _ground_y), wagon_w, wagon_h,
+			self, Vector2(centre, _ground_y), wagon_w, wagon_h,
 			_wheel_angle, _light, index == 0
 		)
 

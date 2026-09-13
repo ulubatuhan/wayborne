@@ -71,6 +71,27 @@ func _check(t, wagons: int, party: int) -> void:
 			"%s: %d. ve %d. vagon üst üste biniyor" % [label, index, index + 1]
 		)
 
+	# **Öküz kendi vagonuna koşulu.** Aralarına bir tayfa konmuştu ve
+	# ekranda öküz o vagonu çeken hayvan gibi değil, önünde yürüyen
+	# başıboş bir hayvan gibi duruyordu: aradaki mesafe (128 px) vagonun
+	# kendisinden (67 px) neredeyse iki kat genişti. Koşum yerine hiçbir
+	# şey giremez.
+	var ox_centres: Array[float] = caravan.get_ox_centres()
+	t.eq(ox_centres.size(), wagons, "%s: öküz sayısı vagon sayısını tutmuyor" % label)
+	var ox_w := BAND.y * caravan.get_column_scale() * RoadCaravan.OX_HEIGHT_RATIO * 2.0
+	for index in mini(ox_centres.size(), centres.size()):
+		var clearance := (ox_centres[index] - ox_w * 0.5) - (centres[index] + wagon_w * 0.5)
+		t.ok(
+			clearance >= 0.0,
+			"%s: %d. öküz vagonun içine girdi (%.0f)" % [label, index + 1, clearance]
+		)
+		t.ok(
+			clearance <= wagon_w * 0.6,
+			"%s: %d. öküz vagonundan kopuk (%.0f px, vagon %.0f px)" % [
+				label, index + 1, clearance, wagon_w
+			]
+		)
+
 	# İlk `FULLY_VISIBLE_WAGONS` vagon **koşulsuz** ekranda. Şart koymak
 	# ("ölçek tabana dayanmadıysa") tam olarak korumak istediği şeyi
 	# kapatıyordu: çapayı eski sabitine geri çeken bir mutasyonda ölçek
