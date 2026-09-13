@@ -368,16 +368,30 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 	# Gövde derin: ilk ölçüde sırt ile karın arası boyun uzunluğundan
 	# kısaydı ve hayvan deveye benziyordu. Bir at derin göğüslüdür.
 	var bob := sin(_phase * 2.0) * h * 0.012 if _moving else 0.0
-	ArtDraw.inked(self, PackedVector2Array([
+	var outline := PackedVector2Array([
 		Vector2(rear_x - h * 0.12 * _facing, back_y + h * 0.10 + bob),
 		Vector2(rear_x - h * 0.02 * _facing, back_y - h * 0.02 + bob),
 		Vector2(cx, back_y - h * 0.05 + bob),
-		Vector2(front_x, back_y - h * 0.01 + bob),
-		Vector2(front_x + h * 0.11 * _facing, back_y + h * 0.16 + bob),
-		Vector2(front_x * 0.6 + cx * 0.4, back_y + h * 0.34 + bob),
-		Vector2(cx, back_y + h * 0.36 + bob),
-		Vector2(rear_x - h * 0.04 * _facing, back_y + h * 0.30 + bob),
-	]), body, maxf(1.2, h * 0.012))
+	])
+	if not is_horse:
+		# Omuz hörgücü **sırt çizgisinin kendisi**, gövdenin üstüne konmuş
+		# bir leke değil. Önce açık renkli, konturu olmayan bir elipsti -
+		# hayvanın mürekkeple çizilmemiş tek parçası - ve ekranda hörgüç
+		# değil, öküzün ensesine yapıştırılmış soluk bir disk gibi
+		# duruyordu. Bir hörgücü hörgüç yapan şey siluetteki kambur.
+		outline.append(Vector2(cx + body_len * 0.13 * _facing, back_y - h * 0.10 + bob))
+		outline.append(Vector2(front_x - h * 0.06 * _facing, back_y - h * 0.17 + bob))
+		# Hörgüçten boyna **yumuşak** iniş. Doğrudan atın omuz noktasına
+		# düşmek 0.17h'lik bir uçurum bırakıyordu ve hörgücün önünde
+		# çentik gibi duruyordu.
+		outline.append(Vector2(front_x + h * 0.04 * _facing, back_y - h * 0.07 + bob))
+	else:
+		outline.append(Vector2(front_x, back_y - h * 0.01 + bob))
+	outline.append(Vector2(front_x + h * 0.11 * _facing, back_y + h * 0.16 + bob))
+	outline.append(Vector2(front_x * 0.6 + cx * 0.4, back_y + h * 0.34 + bob))
+	outline.append(Vector2(cx, back_y + h * 0.36 + bob))
+	outline.append(Vector2(rear_x - h * 0.04 * _facing, back_y + h * 0.30 + bob))
+	ArtDraw.inked(self, outline, body, maxf(1.2, h * 0.012))
 
 	# Boyun kısa ve kalın, baş büyük: ikisi de ilk denemede ince ve
 	# küçüktü, o yüzden silüet at değil lama okuyordu.
@@ -423,10 +437,12 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 	)
 
 	if not is_horse:
-		# Omuz hörgücü: öküzü attan ayıran ikinci ipucu.
+		# Hörgücün üstüne düşen ışık - yalnızca hacim ipucu, şeklin
+		# kendisi yukarıda siluetten geliyor. Gövdenin *içinde* kalıyor,
+		# o yüzden kontursuz olması burada doğru.
 		ArtDraw.ellipse(
-			self, Vector2(front_x - h * 0.06 * _facing, back_y + bob),
-			Vector2(h * 0.22, h * 0.12), body.lightened(0.04)
+			self, Vector2(front_x - h * 0.04 * _facing, back_y - h * 0.11 + bob),
+			Vector2(h * 0.10, h * 0.035), body.lightened(0.07)
 		)
 
 	if is_horse:
