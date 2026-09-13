@@ -52,7 +52,16 @@ const GROUND_EDGE_AMP_RATIO: float = 0.022
 const GROUND_EDGE_WAVE_RATIO: float = 0.42
 const GROUND_EDGE_SEED: int = 29
 
+## Kervanın durduğu yer, şeridin genişliğine oranla. **Sabit değil, bir
+## aralık**: kolonun arkasına sığması gereken uzunluk kadar sağa kayıyor.
+## Sabitken (0.34) şeridin yalnızca üçte biri kervanın arkasındaydı ve
+## ikinci vagondan itibaren her şey ekranın solundan dışarı çıkıyordu -
+## yani oyuncu kaç vagon alırsa alsın yolda hep bir vagon görüyordu.
+## Vagon almanın görünür bir karşılığı olmaması, `PEOPLE_PER_WAGON`
+## tayfasının görünmez olmasıyla aynı kusur.
 const CARAVAN_X_RATIO: float = 0.34
+const CARAVAN_X_MAX_RATIO: float = 0.62
+const CARAVAN_EDGE_MARGIN: float = 28.0
 
 ## Kamp ateşi.
 const FIRE_FLICKER_SPEED: float = 9.0
@@ -104,6 +113,7 @@ var _day_position: float = 0.0
 var _world_x: float = 0.0
 var _camping: bool = false
 var _time: float = 0.0
+var _column_length: float = 0.0
 
 ## Kervan katmanı: figürleri bu şerit değil `RoadCaravan` çiziyor, ama
 ## zemin çizgisini ondan o alıyor - ikisi ayrı hesaplarsa kervan yolun
@@ -186,8 +196,33 @@ func set_camping(camping: bool) -> void:
 func get_light() -> Color:
 	return _light
 
+## Kervanın çapadan **geriye** doğru ne kadar yer istediği. `RoadCaravan`
+## bunu kolonun ölçeklenmemiş boyundan hesaplayıp bildiriyor; şerit de
+## çapayı ona göre kaydırıyor. Ölçeklenmemiş olması kasıtlı: kervan
+## kendini çapaya göre küçültüyor, çapa da kervana göre kaysaydı ikisi
+## birbirini kovalardı.
+func set_column_length(trailing_px: float) -> void:
+	var wanted := maxf(0.0, trailing_px)
+	if is_equal_approx(_column_length, wanted):
+		return
+	_column_length = wanted
+	queue_redraw()
+	_announce_ground_line()
+
+func caravan_x_ratio() -> float:
+	if _column_length <= 0.0 or size.x <= 1.0:
+		return CARAVAN_X_RATIO
+	return clampf(
+		(_column_length + CARAVAN_EDGE_MARGIN) / size.x,
+		CARAVAN_X_RATIO, CARAVAN_X_MAX_RATIO
+	)
+
+func caravan_x() -> float:
+	return size.x * caravan_x_ratio()
+
 func get_caravan_anchor() -> Vector2:
-	return Vector2(size.x * CARAVAN_X_RATIO, _ground_y_at_screen(size.x * CARAVAN_X_RATIO))
+	var x := caravan_x()
+	return Vector2(x, _ground_y_at_screen(x))
 
 func _process(delta: float) -> void:
 	# Yağmur ve ateş kendi başına canlanıyor; hava açık ve kamp yoksa
@@ -249,7 +284,7 @@ func _draw() -> void:
 	_foreground.sync_state(
 		_colors, _light, _world_x, _ground_y_at_screen(area.size.x * 0.5),
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
-		CARAVAN_X_RATIO
+		caravan_x_ratio()
 	)
 	if _camping:
 		_draw_campfire(area)
@@ -564,7 +599,7 @@ func _draw_stops(area: Rect2, horizon: float) -> void:
 	# kaydıkça yanlış hızda süzülüyordu.
 	for entry in _terrain.get_stops():
 		var day := float(entry.day)
-		var x := area.size.x * CARAVAN_X_RATIO + (day * PIXELS_PER_DAY - _world_x)
+		var x := caravan_x() + (day * PIXELS_PER_DAY - _world_x)
 		if x < -180.0 or x > area.size.x + 180.0:
 			continue
 		# Yolun biraz gerisine oturuyorlar - kervan önlerinden geçiyor.
@@ -809,5 +844,5 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 		)
 
 func _announce_ground_line() -> void:
-	var x := size.x * CARAVAN_X_RATIO
+	var x := caravan_x()
 	ground_line_changed.emit(x, _ground_y_at_screen(x))

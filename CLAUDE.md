@@ -358,6 +358,25 @@ way to textures.
   walking crew go **ahead of** their own wagon: beside it overlapped the
   body, behind it produced exactly the nameless tail the design does not
   want.
+- **The caravan must fit the frame it stands in, because it grows.** The
+  anchor was a constant 0.34 of the band's width, so only a third of the
+  screen sat behind the caravan — measured, a two-wagon caravan had its
+  second wagon at x = −264 and a six-wagon one showed nothing but the
+  first. Buying wagons is what the campaign pushes the player toward, and
+  it had no visible consequence at all: the same failure as the nameless
+  crew being invisible before Faz 8 PR-C. The anchor now slides right with
+  the column (`TravelBand.caravan_x_ratio()`, clamped) and, only if that
+  is not enough, `RoadCaravan` scales the whole column down to
+  `MIN_COLUMN_SCALE`. Everything up to `FULLY_VISIBLE_WAGONS` (4) is on
+  screen; a longer train's tail leaving the frame is honest, since a long
+  caravan is longer than the view.
+- **Measuring the column and placing it are the same function.** They were
+  two, and they disagreed: the measuring copy forgot the walking crew
+  member and two tight gaps inside each wagon unit, so the column read 66px
+  short per wagon and the tail overflowed a frame it was calculated to fit.
+  `RoadCaravan._walk_column(scale, place)` walks the cursor once and either
+  places or only measures — the same reasoning that already puts the wagon
+  centres in the layout rather than in `_draw()`.
 - **A figure that moves needs joints.** `WalkFigure` solves hip → knee →
   foot with two bones; swinging a single-piece leg reads as scissors. The
   foot stays put while it is on the ground, so the figure does not slide.
@@ -1697,6 +1716,26 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   then moved the camera to day 2.1, which had long since crossed into
   another segment. Fourth measurement bug in this file's history - suspect
   the harness before the game, including the harness you just wrote.
+- **A screenshot tool must reproduce the game's own frame, or it is
+  photographing a different game.** The road tool rendered a 1500×460 band
+  where the game's is 1920×`BAND_HEIGHT` (320). Figures scale with the
+  band's *height*, so the caravan came out 1.44× larger against the same
+  width and the column ran off the left edge — **the tool had never once
+  shown a wagon on the road**, and nobody noticed because the frames were
+  full of landscape. It also called `add_child` instead of
+  `add_actor_layer`, so it did not even reproduce the depth order the
+  band's single door exists to guarantee. Fifth measurement bug here, and
+  the first one where the harness hid a real defect in the game rather
+  than inventing a fake one. The tool now sweeps wagon counts 1/4/6 as
+  its own frames, and `tests/test_caravan_layout.gd` asserts the
+  arithmetic that the picture only illustrates.
+- **An assertion that switches itself off protects nothing.** The first
+  draft of the caravan guard only checked "every wagon is on screen" when
+  the column had *not* been scaled to its floor — so the mutation that
+  pinned the anchor back to its old constant drove the scale to the floor,
+  turned the assertion off, and passed. Same shape as the stun-resist
+  assertion that measured itself against the constant it guarded. Both
+  mutations fail now (15 and 12 assertions).
 - Seed every RNG. A test that can flake is worse than no test.
 - **Do not derive two independent things from the same seed.** The simulator
   picked the player's culture with `seed_value % 5` and seeded the event
