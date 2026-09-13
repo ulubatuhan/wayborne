@@ -422,6 +422,28 @@ static func wagon(
 			Vector2(base.x - w * 0.54, bed_y - h * 0.34), Vector2(w * 0.16, h * 0.20)
 		), _tint(ArtPalette.WAGON_LOAD, tint), true)
 
+## Koşum oku: öküzü vagona bağlayan kalas ve boyunduruk. Kısa ama
+## vazgeçilmez - onsuz öküz vagonun önünde *duran* bir hayvan, çeken
+## hayvan değil. Vagonla aynı dosyada, çünkü ikisi bir arada bir şey.
+static func draught_pole(
+	canvas: CanvasItem, wagon_front: Vector2, length: float, h: float, tint: Color
+) -> void:
+	if length <= 0.0 or h <= 0.0:
+		return
+	var timber := _tint(ArtPalette.WAGON_BODY_DARK, tint)
+	var pole_y := wagon_front.y - h * 0.34
+	canvas.draw_line(
+		Vector2(wagon_front.x, pole_y),
+		Vector2(wagon_front.x + length, pole_y - h * 0.05),
+		timber, maxf(1.6, h * 0.05)
+	)
+	# Boyunduruk: okun ucunda kısa bir dikey kalas.
+	canvas.draw_line(
+		Vector2(wagon_front.x + length, pole_y - h * 0.18),
+		Vector2(wagon_front.x + length, pole_y + h * 0.06),
+		timber, maxf(1.4, h * 0.045)
+	)
+
 static func _wheel(
 	canvas: CanvasItem, centre: Vector2, radius: float, color: Color, angle: float
 ) -> void:

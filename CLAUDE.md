@@ -358,6 +358,19 @@ way to textures.
   walking crew go **ahead of** their own wagon: beside it overlapped the
   body, behind it produced exactly the nameless tail the design does not
   want.
+- **Nothing stands between an ox and its wagon — that space is the
+  hitch.** The wagon unit was `[ox] [crew] [wagon]`, because the walking
+  crew member could not go beside the wagon (it overlapped the body) or
+  behind it (that is the nameless tail the design rejects). Putting them
+  in the only remaining place put them *inside the harness*: measured, the
+  ox sat 128px from its wagon against a wagon 67px wide, with a man
+  standing in the middle, so the ox read as a stray animal rather than the
+  one pulling that wagon. The drover now walks at the ox's head, which is
+  how an ox cart is actually driven, and `ArtDraw.draught_pole()` draws
+  the pole and yoke — without it the ox is an animal *standing* in front
+  of a wagon. `tests/test_caravan_layout.gd` asserts the clearance is
+  neither negative (ox inside the wagon) nor more than 0.6 × the wagon's
+  width; the old order fails it 48 times.
 - **The caravan must fit the frame it stands in, because it grows.** The
   anchor was a constant 0.34 of the band's width, so only a third of the
   screen sat behind the caravan — measured, a two-wagon caravan had its

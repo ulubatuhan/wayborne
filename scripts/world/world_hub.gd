@@ -218,14 +218,18 @@ func _column_positions(
 	placed += MAX_ABREAST
 
 	for index in wagon_count:
+		# Bir vagon birimi, önden arkaya: [tayfa] [öküz] [vagon].
+		# **Öküzle vagonun arasına hiçbir şey girmez** - orası koşum yeri.
+		# Tayfa bir ara oraya konmuştu ve öküz o vagonu çeken hayvan gibi
+		# değil başıboş bir hayvan gibi okunuyordu (bkz. RoadCaravan).
+		# Vagon başına iki tayfadan biri sürüyor (vagonun üstünde
+		# çiziliyor), biri öküzü yederek yürüyor.
+		crew.append(cursor - BODY_WIDTH * 0.5)
+		cursor -= BODY_WIDTH + GAP_TIGHT
+
 		cursor -= OX_SIZE.x * 0.5
 		oxen.append(cursor)
-		cursor -= OX_SIZE.x * 0.5 + GAP_TIGHT
-
-		# Yürüyen tayfa vagonun **önünde**: vagon başına iki tayfadan
-		# biri sürüyor (vagonun üstünde çiziliyor), biri yürüyor.
-		crew.append(cursor - BODY_WIDTH * 0.5)
-		cursor -= BODY_WIDTH + HITCH_GAP
+		cursor -= OX_SIZE.x * 0.5 + HITCH_GAP
 
 		wagons.append(cursor - WAGON_SIZE.x * 0.5)
 		cursor -= WAGON_SIZE.x + GAP_WAGONS
