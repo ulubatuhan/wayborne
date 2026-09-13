@@ -1,9 +1,13 @@
 extends Control
 
-## Placeholder şehir haritası. Şehir kart tabanlı değil: her lokasyon kendi
-## ekranını açar, oyuncu neyle etkileşime gireceğini kendisi seçer.
-
-const SPOT_SIZE: Vector2 = Vector2(190, 76)
+## Şehir ekranı. Şehir kart tabanlı değil: her lokasyon kendi ekranını
+## açar, oyuncu neyle etkileşime gireceğini kendisi seçer.
+##
+## Haritanın kendisi artık beş buton değil, üstten bakışlı izometrik bir
+## kasaba (bkz. CityView). Bu ekranın işi kasabayı kurmak, başlığı basmak
+## ve **gezinmeyi yapmak**: `CityView` yalnızca hangi mekâna basıldığını
+## bildiriyor, sahne değiştirmeyi burası yapıyor - gezinme yığınını iten
+## taraf her zaman gönderen ekrandır (bkz. Nav).
 
 @onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapPanel
 @onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
@@ -14,6 +18,7 @@ const SPOT_SIZE: Vector2 = Vector2(190, 76)
 
 var _session: GameSession
 var _brief_panel: CityBriefPanel
+var _city_view: CityView
 
 func _ready() -> void:
 	_session = GameState.get_session()
@@ -75,48 +80,31 @@ func _refresh_title() -> void:
 		_session.get_party_capacity(),
 	]
 
+## Kasabayı kurar. Mekânların *yeri* artık burada yazmıyor: yerleşim
+## şehrin kendi tohumundan çıkıyor (bkz. CityView), yani Karakonak ile
+## Demirkapı aynı kasaba değil. Elle konmuş beş koordinat hem her şehri
+## aynı gösteriyordu hem de yeni bir mekân eklemek altıncı bir koordinat
+## uydurmak anlamına geliyordu.
 func _build_spots() -> void:
-	_add_spot(
-		tr("UI_CITY_MARKET"),
-		tr("UI_CITY_MARKET_DESC"),
-		Vector2(60, 40),
-		Nav.ECONOMY
-	)
-	_add_spot(
-		tr("UI_GUILD_TITLE"),
-		tr("UI_CITY_GUILD_DESC"),
-		Vector2(340, 150),
-		Nav.GUILD
-	)
-	_add_spot(
-		tr("UI_TAVERN_TITLE"),
-		tr("UI_CITY_TAVERN_DESC"),
-		Vector2(80, 260),
-		Nav.TAVERN
-	)
-	_add_spot(
-		tr("UI_CITY_YARD"),
-		tr("UI_CITY_YARD_DESC"),
-		Vector2(400, 330),
-		Nav.CARAVAN_YARD
-	)
-	_add_spot(
-		tr("UI_CITY_CHURCH"),
-		tr("UI_CITY_CHURCH_DESC"),
-		Vector2(400, 40),
-		Nav.CHURCH
-	)
+	_city_view = CityView.new()
+	_city_view.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_map_panel.add_child(_city_view)
+	_city_view.venue_pressed.connect(_on_spot_pressed)
+	_city_view.setup(_session)
 
-func _add_spot(spot_name: String, description: String, position: Vector2, scene_path: String) -> void:
-	var button := Button.new()
-	button.text = "%s\n%s" % [spot_name, description]
-	button.custom_minimum_size = SPOT_SIZE
-	button.size = SPOT_SIZE
-	button.position = position
-	button.disabled = scene_path.is_empty()
-	if not button.disabled:
-		button.pressed.connect(_on_spot_pressed.bind(scene_path))
-	_map_panel.add_child(button)
+	# Fare ile keşfedilen bir ekranın kendini bir kez anlatması lazım:
+	# tıklanabilir olduğu belli olmayan bir kasaba, dekordan ibaret kalır.
+	var hint := Label.new()
+	hint.text = tr("UI_CITY_HOVER_HINT")
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD
+	hint.modulate = Color(0.72, 0.70, 0.64)
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_left = 10.0
+	hint.offset_right = -10.0
+	hint.offset_top = -30.0
+	hint.offset_bottom = -6.0
+	_map_panel.add_child(hint)
 
 func _on_spot_pressed(scene_path: String) -> void:
 	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, scene_path))

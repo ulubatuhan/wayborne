@@ -261,6 +261,14 @@ func _add_table_driven_edges(edges: Array, seen: Dictionary, constants: Dictiona
 		var sources := variable_open.search_all(source)
 		if sources.is_empty():
 			continue
+		# Tablo bazen ekranın kendi dosyasında değil, kurduğu bileşenin
+		# içinde duruyor: şehir haritası mekânları artık `CityView`'dan
+		# alıyor. Ekranın *kurduğu* sınıfların kaynağını da tarıyoruz,
+		# yoksa beş mekân grafikten düşüyor - ki tam bu oldu, ve test
+		# haklı olarak "yetim ekran" dedi. Bahsedilen her `Nav` sabitini
+		# bütün dosyalardan toplamak da olmazdı: o zaman her tablo
+		# taşıyan ekran her ekranı açıyor sayılırdı.
+		source += _component_sources(source)
 
 		# `go_root` ile anılanlar bir geçiş değil, kök atlaması.
 		var excluded := {}
@@ -379,6 +387,32 @@ func _script_of_scene(scene_path: String) -> String:
 		if end > start:
 			return line.substr(start, end - start)
 	return ""
+
+## Bir ekranın `X.new()` ile kurduğu bileşenlerin kaynağı. Yalnızca
+## `scripts/ui` ve `scripts/world` altındaki `class_name`'ler sayılıyor -
+## grafiği besleyen tablolar orada duruyor.
+func _component_sources(source: String) -> String:
+	var instantiation := RegEx.new()
+	instantiation.compile("([A-Z][A-Za-z0-9]+)\\.new\\(")
+	var classes := {}
+	for found in instantiation.search_all(source):
+		classes[found.get_string(1)] = true
+
+	var joined := ""
+	for script_path in _all_screen_scripts():
+		var component := _read_code(script_path)
+		var declared := RegEx.new()
+		# `(?m)`: `class_name` dosyanın ilk satırı olmak zorunda değil.
+		# Çok satır kipi olmadan yalnızca birinci satırda arıyordu ve
+		# tesadüfen çalışıyordu - bu depodaki dosyaların hepsinde ilk
+		# satır olduğu için.
+		declared.compile("(?m)^class_name\\s+([A-Za-z0-9]+)")
+		var match_result := declared.search(component)
+		if match_result == null:
+			continue
+		if classes.has(match_result.get_string(1)):
+			joined += "\n" + component
+	return joined
 
 func _all_screen_scripts() -> Array[String]:
 	var scripts: Array[String] = []

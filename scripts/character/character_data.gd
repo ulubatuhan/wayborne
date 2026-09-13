@@ -336,6 +336,37 @@ func get_stress_resistance() -> int:
 func is_stressed(current_party_stress: int) -> bool:
 	return current_party_stress >= get_stress_resistance()
 
+## Durum efekti dirençleri: stat payı + **seviye payı**.
+##
+## Seviye payı, bu depoda zaten yapılmış bir araştırmanın doğrudan
+## sonucu (bkz. CLAUDE.md, Progression Rules): Darkest Dungeon'ın
+## resolve seviyesi hiç stat vermez, yalnızca sersemletme/kanama/zehir
+## dirençlerini büyütür. Seviye orada gücün kendisi değil, gücün
+## *anahtarı*.
+##
+## Ölçümle de gerekli olduğu görüldü: dirençler yalnızca Dayanıklılık'tan
+## gelirken seviye eğrisi düpedüz düzdü (seviye 1 %28, seviye 15 %30) -
+## çünkü düşmanlar seviyeyle büyüyor ve kanama düz hasar veriyor, ama
+## çoğu sınıf Dayanıklılık'a puan koymuyor. Yani seviye atlamak
+## savunmada hiçbir şey getirmiyordu.
+##
+## Tavan var: hiçbir seviye bir sistemi tamamen kapatmamalı - aynı kural
+## `CombatUnit`'in MIN/MAX_STATUS_CHANCE'ında da var.
+const RESIST_PER_LEVEL: int = 3
+const MAX_STATUS_RESIST: int = 80
+
+func _level_resist_bonus() -> int:
+	return RESIST_PER_LEVEL * maxi(0, level - 1)
+
+func get_bleed_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_bleed_resist() + _level_resist_bonus())
+
+func get_blight_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_blight_resist() + _level_resist_bonus())
+
+func get_stun_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_stun_resist() + _level_resist_bonus())
+
 func _trait_bonus_sum(field: String) -> int:
 	var total := 0
 	for trait_id in trait_ids:

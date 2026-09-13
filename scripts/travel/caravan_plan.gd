@@ -22,6 +22,16 @@ var caravan_party_size: int = 1
 var provision_multiplier: float = 1.0
 var provision_reduction: int = 0
 
+## Kötü havanın yola kattığı gün - planı kuran ekran
+## `RouteWeather.forecast_extra_days()` ile dolduruyor.
+##
+## Bu alan bir denge yamasından çok bir sözün bedeli: hava yolu
+## yavaşlatıyor (yağmurda çamur, fırtınada durma), o yüzden aynı rota daha
+## çok gün yiyor. Erzak payı buraya yazılmasa "doğru stokladım ve yine aç
+## kaldım" olurdu - ki tam olarak kıtlık hatasının yaptığı şeydi
+## (bkz. Provision Rules). Sıfırsa davranış hava eklenmeden önceki gibi.
+var weather_reserve_days: int = 0
+
 var _selected_offers: Array[MerchantOffer] = []
 
 func _init(
@@ -111,8 +121,12 @@ func get_daily_consumption() -> int:
 		provision_reduction
 	)
 
+## Yolun *gerçekte* kaç gün süreceği: taban süre + kötü hava payı.
+func get_provisioned_days() -> int:
+	return maxi(0, travel_days) + maxi(0, weather_reserve_days)
+
 func get_required_provisions() -> int:
-	return get_daily_consumption() * maxi(0, travel_days)
+	return get_daily_consumption() * get_provisioned_days()
 
 func get_provisions_shortfall(current_provisions: int) -> int:
 	return maxi(0, get_required_provisions() - current_provisions)

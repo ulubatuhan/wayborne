@@ -18,6 +18,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_culture.gd",
 	"res://tests/test_character_data.gd",
 	"res://tests/test_combat.gd",
+	"res://tests/test_combat_dd.gd",
 	"res://tests/test_event_engine.gd",
 	"res://tests/test_event_effects.gd",
 	"res://tests/test_game_session.gd",
@@ -30,6 +31,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_market_conditions.gd",
 	"res://tests/test_haggling.gd",
 	"res://tests/test_route_conditions.gd",
+	"res://tests/test_route_terrain.gd",
 	"res://tests/test_morale.gd",
 	"res://tests/test_recruit_catalog.gd",
 	"res://tests/test_traits.gd",
@@ -42,6 +44,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_ruin.gd",
 	"res://tests/test_city_commerce.gd",
 	"res://tests/test_campaign.gd",
+	"res://tests/test_art_geometry.gd",
 ]
 
 ## Katalog metinleri artık çeviri anahtarı taşıyor ve display_name gibi

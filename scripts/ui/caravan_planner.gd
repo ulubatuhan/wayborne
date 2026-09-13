@@ -11,6 +11,7 @@ var _plan: CaravanPlan
 var _destination: Location
 var _route_danger: float = 0.0
 var _route_state: RouteConditions.State = RouteConditions.State.OPEN
+var _terrain: RouteTerrain
 var _offer_rows: Array[Dictionary] = []
 
 var _wagon_counter_label: Label
@@ -62,6 +63,21 @@ func _ready() -> void:
 	_plan.provision_multiplier = _session.get_daily_provision_multiplier()
 	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 
+	# Yolun coğrafyası ve havası. İkisi de tohumdan hesaplanıyor, yani
+	# burada gösterilen arazi ve hava payı yolda birebir yaşanacak olan
+	# (bkz. RouteTerrain, RouteWeather) - planlayıcı "muhtemelen" demiyor.
+	#
+	# Hava payı erzak hesabına giriyor çünkü yağmur yolu yavaşlatıyor: bu
+	# satır olmasa "planlayıcının istediğini aldım ve yine aç kaldım"
+	# olurdu (bkz. Provision Rules).
+	var route_key := RouteConditions.route_key(
+		origin.location_id, _destination.location_id
+	)
+	_terrain = RouteTerrain.build(route_key, travel_days)
+	_plan.weather_reserve_days = int(ceil(RouteWeather.forecast_extra_days(
+		route_key, _session.total_days_elapsed + 1, _terrain, travel_days
+	)))
+
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_session.inventory.item_added.connect(_on_inventory_changed)
 	_session.inventory.item_removed.connect(_on_inventory_changed)
@@ -97,6 +113,23 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		_plan.player_wagon_count,
 	]
 	_content.add_child(route_label)
+
+	# Arazi: rota seçimi kör bir karar olmasın. "İki gün bozkır, sonra
+	# orman" cümlesi oyuncuya neyle karşılaşacağını söylüyor ve yol
+	# ekranındaki manzarayla birebir eşleşiyor.
+	if _terrain != null:
+		var terrain_label := Label.new()
+		terrain_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		terrain_label.text = tr("UI_PLANNER_TERRAIN") % _terrain.describe()
+		terrain_label.modulate = Color(0.78, 0.80, 0.74)
+		_content.add_child(terrain_label)
+
+	if _plan.weather_reserve_days > 0:
+		var weather_label := Label.new()
+		weather_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		weather_label.text = tr("UI_PLANNER_WEATHER_RESERVE") % _plan.weather_reserve_days
+		weather_label.modulate = SHORTFALL_COLOR
+		_content.add_child(weather_label)
 
 	_gold_label = Label.new()
 	_content.add_child(_gold_label)

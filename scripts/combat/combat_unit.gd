@@ -18,8 +18,16 @@ var dodge: int = 0
 var crit_chance: int = 5
 var damage_bonus: int = 0
 var support_power: int = 0
+## Taban hız. Tur sırası artık buna her round bir zar eklenerek kuruluyor
+## (bkz. CombatEncounter.roll_turn_speeds) - eskiden savaş başında bir kez
+## okunup bütün savaş boyunca sabit kalıyordu, yani sıra hiç değişmiyordu.
 var initiative: int = 5
+## O round için atılmış hız (taban + zar). Sıralama bunu okur.
+var turn_speed: int = 0
 var damage_multiplier: float = 1.0
+
+## Zırh: gelen hasarı yüzde olarak düşürür. 0 = azaltma yok.
+var protection: int = 0
 
 var skills: Array[CombatSkill] = []
 
@@ -37,6 +45,13 @@ var _timed_modifiers: Array = []
 ## Yalnızca düşman tarafında anlamlı: yenilince oyuncuya verilen XP.
 var xp_value: int = 0
 
+## Hangi silüetle çizileceği (bkz. CombatFigure.ARCHETYPES): oyuncu
+## tarafında sınıf kimliği, düşman tarafında düşman kimliği. Motorun
+## çizimle ilgisi yok, yalnızca kimliği taşıyor - ekran ondan silüeti
+## seçiyor. Tanınmayan bir kimlik haydut silüetine düşer, yani yeni bir
+## düşman hiçbir zaman çizimsiz kalmaz.
+var figure_kind: String = "bandit"
+
 ## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
 ## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
 ## _try_refuse_order). Yalnızca oyuncu tarafında anlamlı.
@@ -48,6 +63,34 @@ var composure: int = 0
 
 ## Yalnızca oyuncu tarafında dolu; savaş sonunda canı buraya yazarız.
 var source_character: CharacterData = null
+
+## --- Ölümün Kıyısı ---
+## Zırh hiçbir zaman hasarı tamamen kesmez: bir statın bütün bir sistemi
+## kapatması o sistemi silmek demektir (aynı gerekçe pazarlığın tabanında
+## ve "sahipsiz görev asla ceza değildir" kuralında da var).
+const MAX_PROT: int = 80
+## Zırh ne olursa olsun vuran bir hamle en az bunu götürür.
+const MIN_DAMAGE_THROUGH_PROT: int = 1
+
+## Ölümcül vuruş direnci: Ölümün Kıyısı'ndayken gelen her hasarda bu
+## yüzdeyle bir zar atılır, zar tutmazsa karakter kalıcı olarak ölür.
+const DEFAULT_DEATHBLOW_RESIST: int = 67
+## Kıyıdayken savaşmak kolay değil - isabet ve hasar düşer.
+const DEATHS_DOOR_ACCURACY_PENALTY: int = 15
+const DEATHS_DOOR_DAMAGE_PENALTY: int = 3
+
+## Ölümün Kıyısı **yalnızca ana karaktere** ait. Yoldaşlar ve düşmanlar canı
+## sıfırlanınca eskisi gibi saftan düşer; yoldaşlar savaş sonunda 1 canla
+## ayağa kalkar (bkz. CombatEncounter.write_back_party). Oyunun kuralı
+## "kervan mahvolabilir ama yok olamaz"dı ve yoldaş kalıcı ölümü seviye/huy/
+## ekipman kaybı demek olduğu için stres-kadro dengesini de değiştirirdi;
+## riski taşıyan lider olunca gerilim geliyor, denge duruyor.
+var is_player_character: bool = false
+var on_deaths_door: bool = false
+var deathblow_resist: int = DEFAULT_DEATHBLOW_RESIST
+## Kalıcı ölüm. `is_alive()` bunu okur, `current_hp` değil - Kıyıdaki bir
+## karakter 0 canla hâlâ ayaktadır.
+var is_dead: bool = false
 
 static func from_character(character: CharacterData, position: int, is_stressed: bool = false) -> CombatUnit:
 	var unit := CombatUnit.new()
@@ -63,6 +106,17 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.damage_bonus = character.get_damage_bonus()
 	unit.support_power = character.stats.get_support_power()
 	unit.initiative = character.stats.get_initiative()
+	unit.protection = character.stats.get_protection()
+	# `character.stats` değil `character`: seviye payı orada (bkz.
+	# CharacterData.get_bleed_resist). Aynı kural huy ve ekipman
+	# bonuslarında da var - stat'a doğrudan gitmek onları sessizce
+	# düşürüyor.
+	unit.bleed_resist = character.get_bleed_resist()
+	unit.blight_resist = character.get_blight_resist()
+	unit.stun_resist = character.get_stun_resist()
+	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
+	unit.is_player_character = character.is_player
+	unit.figure_kind = character.class_id
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()
@@ -84,18 +138,73 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	unit.crit_chance = template.crit_chance
 	unit.damage_bonus = maxi(0, int(round(template.damage_bonus * power_scale)))
 	unit.initiative = template.initiative
+	# Zırh yüzde olduğu için power_scale ile büyütülmüyor: %20 azaltma
+	# zayıf da güçlü de olsa aynı oranı keser, ölçeklenince tavanı
+	# zorlar ve savaşı kilitlerdi.
+	unit.protection = template.protection
+	unit.bleed_resist = template.bleed_resist
+	unit.blight_resist = template.blight_resist
+	unit.stun_resist = template.stun_resist
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
+	unit.figure_kind = template.enemy_id
 	unit.xp_value = template.xp_value
 	return unit
 
+## Kıyıdaki bir karakter 0 canla hâlâ ayaktadır, o yüzden bu `current_hp`
+## değil `is_dead` okur. Aksi halde ana karakter Kıyı'ya girdiği anda
+## saftan düşer ve savaş yenilgiyle kapanırdı.
 func is_alive() -> bool:
-	return current_hp > 0
+	return not is_dead and (current_hp > 0 or on_deaths_door)
 
-func apply_damage(amount: int) -> void:
-	current_hp = clampi(current_hp - amount, 0, max_hp)
+## Zırhtan geçen hasar. `MIN_DAMAGE_THROUGH_PROT` tabanı, zırhın vuruşu
+## tamamen yok saymasını engelliyor.
+func reduce_by_protection(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	var prot := clampi(protection, 0, MAX_PROT)
+	var through := int(round(float(amount) * (1.0 - float(prot) / 100.0)))
+	return maxi(MIN_DAMAGE_THROUGH_PROT, through)
 
+## Hasar uygular ve **ne olduğunu** döner, çünkü çağıranın (motor) bunu
+## kayda geçirmesi gerekiyor: "hit" / "deaths_door" (Kıyı'ya girdi) /
+## "survived_deathblow" (zar tuttu) / "killed" (kalıcı öldü) / "downed"
+## (yoldaş/düşman saftan düştü).
+##
+## `rng` yalnızca ölümcül vuruş zarı için gerekli; verilmezse zar atılmaz ve
+## Kıyıdaki karakter hayatta kalır - testlerin zar atmadan hasar
+## uygulayabilmesi için.
+func apply_damage(amount: int, rng: RandomNumberGenerator = null) -> String:
+	var taken := reduce_by_protection(amount)
+	current_hp = clampi(current_hp - taken, 0, max_hp)
+	if current_hp > 0:
+		return "hit"
+
+	if on_deaths_door:
+		# Kıyıdayken gelen her vuruş bir ölümcül vuruş zarı - DD'nin
+		# asıl gerilimi bu tekrarlanan zarda.
+		if rng != null and rng.randi_range(1, 100) > deathblow_resist:
+			is_dead = true
+			return "killed"
+		return "survived_deathblow"
+
+	if can_enter_deaths_door():
+		on_deaths_door = true
+		return "deaths_door"
+
+	return "downed"
+
+## Kıyı'ya yalnızca ana karakter girer; gerekçesi yukarıdaki alan yorumunda.
+func can_enter_deaths_door() -> bool:
+	return is_player_character and not is_dead
+
+## İyileştirme Kıyı'dan çıkarır: bir puan can bile ayağa kaldırır, ki DD'de
+## de böyle - Kıyı bir eşik, bir hapis değil.
 func apply_heal(amount: int) -> void:
+	if is_dead:
+		return
 	current_hp = clampi(current_hp + amount, 0, max_hp)
+	if current_hp > 0:
+		on_deaths_door = false
 
 func get_cooldown(skill_id: String) -> int:
 	return int(_cooldowns.get(skill_id, 0))
@@ -125,6 +234,119 @@ func get_skill_proficiency(skill_id: String) -> int:
 func get_proficiency_multiplier(skill_id: String) -> float:
 	return 1.0 + float(get_skill_proficiency(skill_id)) / 200.0
 
+# --- Durum efektleri ---
+
+## Üç durum: kanama ve zehir tur başında hasar veriyor, sersemletme bir
+## turu yiyor. `STATUS_*` sabitleri `CombatSkill.status_kind`'in
+## sözlüğü - bir yeteneğin yazdığı ad buradaki üçünden biri olmalı,
+## yoksa efekt sessizce hiçbir şey yapmaz (aynı kural
+## `EventEffect.Type`/`EventEffectApplier` ikilisinde de var).
+const STATUS_BLEED: String = "bleed"
+const STATUS_BLIGHT: String = "blight"
+const STATUS_STUN: String = "stun"
+
+## Sersemletmeden çıkan savaşçı bir süre tekrar sersemletilemiyor -
+## Darkest Dungeon'ın "stun resist buff"ı. Bu olmadan sersemletme tek
+## başına kazanan strateji: her turda aynı hedefi sersemletip hiç sıra
+## vermemek. Kapanan sömürü, formülden önce gelir.
+const STUN_RECOVERY_RESIST: int = 55
+const STUN_RECOVERY_ROUNDS: int = 2
+
+## Direnç tabanı sıfır değil: sıfır olsa taze bir karakter her vuruşta
+## kanıyordu ve kanama bir seçenek olmaktan çıkıp her saldırıya binen bir
+## ek hasara dönüşüyordu.
+const DEFAULT_STATUS_RESIST: int = 20
+const MIN_STATUS_CHANCE: int = 5
+const MAX_STATUS_CHANCE: int = 95
+
+var bleed_resist: int = DEFAULT_STATUS_RESIST
+var blight_resist: int = DEFAULT_STATUS_RESIST
+var stun_resist: int = DEFAULT_STATUS_RESIST
+
+## Her biri {"kind", "amount", "rounds_left"}.
+var _statuses: Array = []
+var is_stunned: bool = false
+var _stun_recovery_rounds: int = 0
+
+func get_status_resist(kind: String) -> int:
+	match kind:
+		STATUS_BLEED: return bleed_resist
+		STATUS_BLIGHT: return blight_resist
+		STATUS_STUN:
+			# Sersemletmeden yeni çıkmış birine ikinci kez vurmak zor.
+			return stun_resist + (STUN_RECOVERY_RESIST if _stun_recovery_rounds > 0 else 0)
+		_: return 100
+
+## Direnç şansı düşürüyor ama hiç sıfırlamıyor ve hiç garantilemiyor -
+## aynı taban/tavan kuralı isabet şansında da var (MIN/MAX_HIT_CHANCE):
+## bir sistemi tamamen kapatan bir stat o sistemi siler.
+func roll_status(kind: String, chance: int, rng: RandomNumberGenerator) -> bool:
+	if chance <= 0 or rng == null:
+		return false
+	var final_chance := clampi(
+		chance - get_status_resist(kind), MIN_STATUS_CHANCE, MAX_STATUS_CHANCE
+	)
+	return rng.randi_range(1, 100) <= final_chance
+
+func apply_status(kind: String, amount: int, rounds: int) -> void:
+	if rounds <= 0:
+		return
+	if kind == STATUS_STUN:
+		is_stunned = true
+		return
+	# Aynı türden ikinci bir efekt üst üste binmiyor, *yeniliyor*: üst
+	# üste binse iki kanama açmak tek kanamanın iki katı hasar verirdi ve
+	# doğru strateji yine "hep aynı şeyi yap" olurdu.
+	for status in _statuses:
+		if String(status.kind) == kind:
+			status.amount = maxi(int(status.amount), amount)
+			status.rounds_left = maxi(int(status.rounds_left), rounds)
+			return
+	_statuses.append({"kind": kind, "amount": amount, "rounds_left": rounds})
+
+func has_status(kind: String) -> bool:
+	for status in _statuses:
+		if String(status.kind) == kind:
+			return true
+	return false
+
+func get_status_rounds(kind: String) -> int:
+	for status in _statuses:
+		if String(status.kind) == kind:
+			return int(status.rounds_left)
+	return 0
+
+## Bu turda durumların vereceği toplam hasar. Hasarı *uygulamıyor* -
+## uygulamak `apply_damage`ın işi, çünkü zırh, Ölümün Kıyısı ve ölümcül
+## vuruş zarı orada. İki ayrı hasar kapısı olsa kanama zırhı bilmezdi.
+func drain_status_damage() -> int:
+	var total := 0
+	for status in _statuses:
+		if String(status.kind) != STATUS_STUN:
+			total += int(status.amount)
+	return total
+
+## Turların sayılması. `tick_modifiers` ile aynı anda çağrılıyor ama ayrı
+## bir fonksiyon: değiştiriciler tur *sayısıyla* eriyor, durumlar
+## hedefin kendi turu geldiğinde.
+func tick_statuses() -> void:
+	var kept: Array = []
+	for status in _statuses:
+		var remaining: int = int(status.rounds_left) - 1
+		if remaining > 0:
+			kept.append({
+				"kind": status.kind, "amount": status.amount, "rounds_left": remaining
+			})
+	_statuses = kept
+	if _stun_recovery_rounds > 0:
+		_stun_recovery_rounds -= 1
+
+## Sersemliği tüketir: bir tur kaybediliyor ve karakter bir süre tekrar
+## sersemletilemiyor.
+func consume_stun() -> void:
+	is_stunned = false
+	_stun_recovery_rounds = STUN_RECOVERY_ROUNDS
+
 func apply_modifier(stat: String, amount: int, rounds: int) -> void:
 	if rounds <= 0 or amount == 0:
 		return
@@ -145,14 +367,23 @@ func _modifier_sum(stat: String) -> int:
 			total += int(modifier.amount)
 	return total
 
+## Kıyıdayken dövüşmek ayrı bir şey: isabet ve hasar düşer. Ceza buradan
+## uygulanıyor, süreli değiştirici olarak değil - Kıyı bir süre değil bir
+## *durum*, iyileşince kendiliğinden kalkması gerekiyor.
 func get_effective_accuracy() -> int:
-	return accuracy + _modifier_sum("accuracy")
+	var total := accuracy + _modifier_sum("accuracy")
+	if on_deaths_door:
+		total -= DEATHS_DOOR_ACCURACY_PENALTY
+	return total
 
 func get_effective_dodge() -> int:
 	return maxi(0, dodge + _modifier_sum("dodge"))
 
 func get_effective_damage_bonus() -> int:
-	return damage_bonus + _modifier_sum("damage")
+	var total := damage_bonus + _modifier_sum("damage")
+	if on_deaths_door:
+		total -= DEATHS_DOOR_DAMAGE_PENALTY
+	return total
 
 ## Yetenek şu an kullanılabilir mi; kullanılamıyorsa neden - UI kilitli
 ## butonu sebebiyle birlikte gösterir (bkz. olay ekranındaki kilitli
@@ -168,7 +399,10 @@ func get_skill_block_reason(skill: CombatSkill) -> String:
 func can_use_skill(skill: CombatSkill) -> bool:
 	return get_skill_block_reason(skill).is_empty()
 
-## Savaş bittiğinde canı asıl karaktere geri yazar.
+## Savaş bittiğinde canı asıl karaktere geri yazar. Kalıcı ölümü buraya
+## yazmıyoruz: kimin öldüğüne ve verasete `GameSession` karar veriyor
+## (bkz. CombatEncounter.get_dead_characters), çünkü partiden çıkarma ve
+## liderliğin devri oturum işi, savaş motorunun işi değil.
 func write_back() -> void:
 	if source_character != null:
 		source_character.current_hp = current_hp
