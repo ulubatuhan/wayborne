@@ -38,8 +38,8 @@ const SKY_TOP_RATIO: float = 0.0
 const HORIZON_RATIO: float = 0.62
 
 ## Ağaç/kaya/çalı aralıkları (dünya pikseli).
-const CELL_FAR_TREES: float = 210.0
-const CELL_NEAR: float = 150.0
+const CELL_FAR_TREES: float = 148.0
+const CELL_NEAR: float = 104.0
 
 const LAYER_BACK: String = "back"
 const LAYER_FRONT: String = "front"
@@ -48,6 +48,22 @@ const LAYER_FRONT: String = "front"
 ## bağlamak, ileride "biraz daha büyük olsun" diye kaydırılmasını
 ## zorlaştırıyor.
 const MAX_FRONT_HEIGHT: float = 46.0
+
+## Yakın sırt - ağaçların üstünde durduğu arazi. Sayılar burada duruyor
+## çünkü hem çizilirken hem de "ağaç nereye basacak" diye sorulurken
+## okunuyorlar; ikinci bir kopya, ağacın sırtın tepesinde havada,
+## çukurunda gömülü kalması demek.
+## Dalga boyu genlikle birlikte okunmalı: 0.16 oranında bir dalga boyuna
+## 54 piksel genlik, bir arazi değil sıra sıra köstebek tepesi veriyordu.
+## Sırtlar seyrekleştikçe manzara oluyor.
+## Sırtın **çukuru da** zemin çizgisinin üstünde kalmalı: taban çizgisi
+## `_ground_y`'ye yakınken sırtın yalnızca tepeleri görünüyordu ve arazi
+## yerine ayrık ayrık gri höyükler çıkıyordu. Taban genlik kadar
+## yukarıda olunca sırt kesintisiz bir siluet oluyor.
+const NEAR_RIDGE_DROP: float = -68.0
+const NEAR_RIDGE_AMPLITUDE: float = 60.0
+const NEAR_RIDGE_WAVE_RATIO: float = 0.38
+const NEAR_RIDGE_SEED_OFFSET: int = 11
 
 var _area: Rect2 = Rect2()
 var _ground_y: float = 0.0
@@ -85,12 +101,13 @@ func _draw() -> void:
 
 	# İki sırt: uzak olan pusun içinde, yakın olan araziyi taşıyor.
 	ArtDraw.ridge(
-		self, _area, _ground_y - 24.0, 96.0, _area.size.x * 0.30, 0.0,
+		self, _area, _ground_y - 132.0, 116.0, _area.size.x * 0.72, 0.0,
 		ArtPalette.fade_to_haze(Color(colors.far), haze, 0.52), _seed + 3
 	)
 	ArtDraw.ridge(
-		self, _area, _ground_y - 6.0, 54.0, _area.size.x * 0.16, 0.0,
-		ArtPalette.fade_to_haze(Color(colors.far), haze, 0.26), _seed + 11
+		self, _area, _ground_y + NEAR_RIDGE_DROP, NEAR_RIDGE_AMPLITUDE,
+		_near_ridge_wavelength(), 0.0,
+		ArtPalette.fade_to_haze(Color(colors.far), haze, 0.26), _seed + NEAR_RIDGE_SEED_OFFSET
 	)
 
 	# Zemin.
@@ -143,21 +160,48 @@ func _draw_road() -> void:
 ## Yolun **üstündeki** bitki örtüsü: ağaçlar ve çamlar. Hepsi uzak
 ## kenarda, çünkü aşağısı kameraya en yakın yer ve oraya konan bir ağaç
 ## hem sahneyi hem kervanı kapatıyor.
+## Her ağacın tabanı **çizilen** arazi kenarının üstünde. Önceden
+## `_ground_y - rastgele(18..58)` yazıyordu, yani ağaç sırtın nerede
+## olduğuna bakmadan yerleşiyordu: sırtın alçaldığı yerde gövdesi
+## gökyüzünde bitiyor, ağaç havada duruyordu. Boy da artık derinlikten
+## geliyor - uzaktaki küçük, yakındaki büyük - ve hepsinin altında
+## `wagon()`/`WalkFigure`'ın baştan beri çizdiği temas gölgesi var.
 func _draw_flora(colors: Dictionary, haze: Color) -> void:
-	var far_flora := ArtPalette.fade_to_haze(Color(colors.flora), haze, 0.22)
-	var far_trunk := ArtPalette.fade_to_haze(Color(colors.near).darkened(0.40), haze, 0.22)
 	var count := int(_area.size.x / CELL_FAR_TREES)
 	for index in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _seed + index * 31
-		if rng.randf() > 0.72:
+		if rng.randf() > 0.80:
 			continue
 		var x := _area.position.x + float(index) * CELL_FAR_TREES + rng.randf_range(-60.0, 60.0)
-		var base := Vector2(x, _ground_y - rng.randf_range(18.0, 58.0))
+		var depth := rng.randf()
+		var base := Vector2(x, _flora_ground_at(x, depth))
+		var fade := 0.36 - depth * 0.20
+		var flora := ArtPalette.fade_to_haze(Color(colors.flora), haze, fade)
+		var trunk := ArtPalette.fade_to_haze(Color(colors.near).darkened(0.40), haze, fade)
 		if rng.randf() < 0.35:
-			ArtDraw.conifer(self, base, rng.randf_range(100.0, 170.0), far_trunk, far_flora)
+			var h := 78.0 + depth * 96.0
+			ArtDraw.contact_shadow(self, base, h * 0.34, 0.12 + depth * 0.08)
+			ArtDraw.conifer(self, base, h, trunk, flora)
 		else:
-			ArtDraw.tree(self, base, rng.randf_range(90.0, 145.0), far_trunk, far_flora)
+			var h := 70.0 + depth * 82.0
+			ArtDraw.contact_shadow(self, base, h * 0.42, 0.12 + depth * 0.08)
+			ArtDraw.tree(self, base, h, trunk, flora)
+
+## Ağacın basacağı y. Sırt zeminden *önce* çizildiği için görünen kenar
+## ikisinin yükseği: sırtın çukurları zemin gradyanının altında kalıyor.
+func _flora_ground_at(x: float, depth: float) -> float:
+	var ridge := ArtDraw.ridge_y(
+		_area, _ground_y + NEAR_RIDGE_DROP, NEAR_RIDGE_AMPLITUDE,
+		_near_ridge_wavelength(), 0.0, _seed + NEAR_RIDGE_SEED_OFFSET, x
+	)
+	# Yolun bankı `_ground_y - 12`'den başlıyor; ağaç oraya kadar inerse
+	# yolun üstünde biter. Yakın uç o yüzden kenetli.
+	var far_edge := minf(ridge, _ground_y - 24.0)
+	return lerpf(far_edge + 5.0, _ground_y - 16.0, depth)
+
+func _near_ridge_wavelength() -> float:
+	return _area.size.x * NEAR_RIDGE_WAVE_RATIO
 
 ## Yolun **altı**: kervanın önünde kalan şerit. Yalnızca alçak şeyler -
 ## çalı, ot, küçük taş, çamur lekesi.
@@ -173,17 +217,23 @@ func _draw_front() -> void:
 		var slots := 1 + int(rng.randf() * 2.0)
 		for slot in slots:
 			var x := _area.position.x + float(index) * CELL_NEAR + rng.randf_range(-60.0, 60.0)
-			var base := Vector2(x, _ground_y + rng.randf_range(96.0, 230.0))
+			# Yolun bankı `_ground_y + 62`'de bitiyor; aralık oradan
+			# başlamalı, yoksa alt şerit boş kalıyor.
+			var base := Vector2(x, _ground_y + rng.randf_range(74.0, 178.0))
 			var roll := rng.randf()
 			if roll < 0.24:
+				var rock_w := rng.randf_range(24.0, MAX_FRONT_HEIGHT)
+				ArtDraw.contact_shadow(self, base, rock_w * 1.2, 0.17)
 				ArtDraw.rock(
-					self, base, rng.randf_range(24.0, MAX_FRONT_HEIGHT),
+					self, base, rock_w,
 					rng.randf_range(12.0, MAX_FRONT_HEIGHT * 0.55), stone,
 					_seed + index * 7 + slot
 				)
 			elif roll < 0.82:
+				var shrub_w := rng.randf_range(30.0, MAX_FRONT_HEIGHT)
+				ArtDraw.contact_shadow(self, base, shrub_w * 1.1, 0.14)
 				ArtDraw.shrub(
-					self, base, rng.randf_range(30.0, MAX_FRONT_HEIGHT),
+					self, base, shrub_w,
 					rng.randf_range(20.0, MAX_FRONT_HEIGHT), flora,
 					_seed + index * 13 + slot
 				)

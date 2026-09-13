@@ -376,6 +376,51 @@ way to textures.
   (invisible figures, half-pixel wagons, silent triangulation failures) and
   `TravelForeground` (an empty strip below the road). Components adopt
   `get_parent_control().size` explicitly instead of trusting the anchor.
+- **Everything that stands on the ground gets a contact shadow.**
+  `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
+  `WalkFigure`'s comment already said why — *without it the figure really
+  does look like it is floating*. The scenery never got the same
+  treatment, and the complaint came back in exactly those words: *"the
+  trees look like they are hanging in the air."* `ArtDraw.contact_shadow()`
+  is now the one brush, used by every tree, conifer, rock, shrub, roadside
+  stop and milestone. A shape whose body simply stops on a flat gradient
+  has no ground; the ellipse is the ground.
+- **A prop's size, haze and base all come from one `depth`, never
+  independently.** The tree line used to place every tree on one flat line
+  with a random height, so a small tree and a large one stood on the same
+  spot and neither read as nearer than the other. One `depth` in 0..1 now
+  drives base y, height and how far the colour fades into the haze — that
+  is the whole of the perspective.
+- **Anything standing on a ridge must read the ridge's *drawn* edge.**
+  `ArtDraw.ridge()` samples its sine every `_ridge_step` and draws
+  straight lines between the samples, so the real silhouette is that
+  polyline, not the sine. A base computed from the continuous sine leaves
+  the prop hanging at a crest and buried in a trough — half of the
+  floating-trees bug. `ArtDraw.ridge_y()` reads the same polyline, and
+  `ridge()`/`ridge_snow()` build their polygons through `ridge_points()`/
+  `snow_runs()` precisely so `tests/test_art_geometry.gd` can assert the
+  two agree; a polygon already drawn onto a canvas cannot be read back.
+  Verified by mutation: computing `ridge_y` from the sine fails 590
+  assertions.
+- **Draw order below the horizon is depth order, and the road is last.**
+  Sky → ridges → lake → distant cities → ground fill → tree line →
+  roadside stops → near props → road. The tree line used to be drawn
+  *before* the ground, so every trunk's foot was painted over by the
+  ground gradient and the tree ended behind the grass rather than on it.
+  The road going last is what makes a shrub at the verge disappear behind
+  it correctly — which also means the near props' range has to stop above
+  the verge, or that whole strip renders empty.
+- **Snow is a region, not an outline.** Drawing the same ridge twice at
+  slightly different amplitudes left a thin white line along the peaks —
+  a pencil stroke, not snow. `ArtDraw.ridge_snow()` fills only the parts
+  above a snow line, as separate polygons, so low hills stay bare and the
+  high one really is capped; its lower hem carries a short-wavelength
+  wobble because a dead-straight cut reads as a white triangle glued on.
+- **Wavelength and amplitude are read together.** A 54px amplitude on a
+  wavelength of 0.16 × width gave the city outskirts rows of grey
+  molehills, and a ridge whose troughs fall below the ground line shows
+  only its peaks — which is the same molehills by a different route. The
+  trough has to clear the ground line for the silhouette to be continuous.
 - **Godot's `_draw()` fails silently.** A degenerate polygon prints
   "Invalid polygon data, triangulation failed", skips that shape and carries
   on - invisible without a rendered frame. Do not append a base edge to a

@@ -41,7 +41,16 @@ const PARALLAX_GROUND: float = 1.0
 
 ## Hücre aralıkları (dünya pikseli). Bir hücrede en fazla bir nesne var.
 const CELL_TREES: float = 120.0
-const CELL_GROUND: float = 165.0
+const CELL_GROUND: float = 118.0
+
+## Zeminin ufka değdiği kenar. Hem çizilirken hem de üstüne bir şey
+## oturtulurken **aynı** sayılar okunuyor: iki kopya tutmak, ağaçların
+## sırtın tepesinde havada kalması demekti (bkz. ArtDraw.ridge_y).
+const GROUND_TOP_RATIO: float = 0.075
+const GROUND_EDGE_DROP_RATIO: float = 0.012
+const GROUND_EDGE_AMP_RATIO: float = 0.022
+const GROUND_EDGE_WAVE_RATIO: float = 0.42
+const GROUND_EDGE_SEED: int = 29
 
 const CARAVAN_X_RATIO: float = 0.34
 
@@ -222,11 +231,19 @@ func _draw() -> void:
 	_draw_mid_ridges(area, horizon)
 	if _biome == ArtPalette.BIOME_LAKE:
 		_draw_lake(area, horizon)
-	_draw_tree_line(area, horizon)
-	_draw_ground(area, horizon)
+	# Şehir silüetleri zeminden *önce*: tabanları çayırın ufka değdiği
+	# kenarın altında kalmalı, yoksa uzaktaki şehir de havada durur.
 	_draw_cities(area, horizon)
+	# Sıra buradan itibaren derinlik sırası: zemin serilir, üstüne
+	# uzaktan yakına her şey, en sonda yol. Ağaç hattı önceden zeminden
+	# *önce* çiziliyordu, yani gövdelerin dibi zemin gradyanıyla
+	# kapatılıyordu ve ağaç görünen çimenin üstünde değil, arkasında
+	# bitiyordu.
+	_draw_ground_fill(area, horizon)
+	_draw_tree_line(area, horizon)
 	_draw_stops(area, horizon)
 	_draw_ground_props(area, horizon)
+	_draw_road(area)
 	# Yolun önü ayrı bir katmanda (bkz. TravelForeground): burada
 	# çizilse kervanın arkasında kalırdı.
 	_foreground.sync_state(
@@ -312,18 +329,17 @@ func _draw_mid_ridges(area: Rect2, horizon: float) -> void:
 	var wavelength := area.size.x * 0.78
 	var offset := -_world_x * PARALLAX_MID
 
-	# Karlı tepe. Sıra **önce kar, sonra kaya**: `ridge` aşağıya doğru
-	# dolduruyor, yani kayayı önce çizip karı sonra koymak dağın tamamını
-	# beyaza boyuyordu (ekran görüntüsünde dağ değil dev bir kar duvarı
-	# görünüyordu). Aynı tohum ve aynı dalga boyu ile karın sırtı biraz
-	# daha yüksek olunca üstte ince bir kar bandı kalıyor - kalpak.
+	# Karlı tepe. Önce kaya, sonra kar - ama kar `ridge_snow` ile, yani
+	# yalnızca kar çizgisinin üstünde kalan tepelerde. Bu sıra iki eski
+	# kusuru birden kapatıyor: `ridge` aşağı doğru dolduğu için karı önce
+	# çizip kayayı sonra koymak dağın tamamını beyaza boyuyordu, iki kez
+	# çizilen sırt ise kar yerine ince beyaz bir kontur bırakıyordu.
 	if _biome == ArtPalette.BIOME_MOUNTAIN:
-		ArtDraw.ridge(
+		ArtDraw.ridge(self, area, base_y, amplitude, wavelength, offset, mid, 11)
+		ArtDraw.ridge_snow(
 			self, area, base_y, amplitude, wavelength, offset,
-			ArtPalette.fade_to_haze(Color(0.84, 0.86, 0.90), haze, 0.30), 11
-		)
-		ArtDraw.ridge(
-			self, area, base_y, amplitude * 0.84, wavelength, offset, mid, 11
+			ArtPalette.fade_to_haze(Color(0.88, 0.90, 0.94), haze, 0.26), 11,
+			base_y - amplitude * 0.42
 		)
 	else:
 		ArtDraw.ridge(self, area, base_y, amplitude, wavelength, offset, mid, 11)
@@ -347,11 +363,13 @@ func _draw_lake(area: Rect2, horizon: float) -> void:
 
 ## Ağaç hattı: biyomun kimliği. Orman iğne yapraklı, bozkır seyrek ve
 ## bodur, bataklık cılız, dağ neredeyse çıplak.
+## Her ağacın kendi **derinliği** var (0 = ufuk, 1 = yola yakın) ve boyu,
+## tabanı, pusu, gölgesi hep ondan türüyor. Önceden hepsi tek bir yatay
+## çizgide, ama boyları rastgele duruyordu: aynı çizgide duran küçük ve
+## büyük ağaç, birbirine göre uzak/yakın okunamayınca manzaraya değil
+## camın üstüne yapıştırılmış gibi duruyor.
 func _draw_tree_line(area: Rect2, horizon: float) -> void:
 	var haze := Color(_sky.haze)
-	var flora := ArtPalette.fade_to_haze(Color(_colors.flora), haze, 0.16)
-	var trunk := ArtPalette.fade_to_haze(Color(_colors.near).darkened(0.35), haze, 0.16)
-	var base_y := horizon + area.size.y * 0.075
 	var density := _tree_density()
 	if density <= 0.0:
 		return
@@ -367,8 +385,21 @@ func _draw_tree_line(area: Rect2, horizon: float) -> void:
 		var x := float(cell) * CELL_TREES + offset + rng.randf_range(-28.0, 28.0)
 		if x < -60.0 or x > area.size.x + 60.0:
 			continue
-		var h := area.size.y * rng.randf_range(0.11, 0.20)
-		var base := Vector2(x, base_y + rng.randf_range(-4.0, 6.0))
+
+		var depth := rng.randf()
+		# Taban: çizilen zemin kenarının *altı*. Kenarın kendisine
+		# oturtmak, sırtın kırık çizgisi yüzünden yer yer havada
+		# bırakıyordu; birkaç piksel aşağısı her zaman zeminin içi.
+		var base := Vector2(
+			x, _ground_top_at(x) + area.size.y * (0.006 + depth * 0.050)
+		)
+		var h := area.size.y * (0.085 + depth * 0.105)
+		var fade := 0.34 - depth * 0.22
+		var flora := ArtPalette.fade_to_haze(Color(_colors.flora), haze, fade)
+		var trunk := ArtPalette.fade_to_haze(
+			Color(_colors.near).darkened(0.35), haze, fade
+		)
+		ArtDraw.contact_shadow(self, base, h * 0.34, 0.10 + depth * 0.10)
 		match _biome:
 			ArtPalette.BIOME_FOREST, ArtPalette.BIOME_MOUNTAIN:
 				ArtDraw.conifer(self, base, h, trunk, flora)
@@ -388,8 +419,8 @@ func _tree_density() -> float:
 ## Zemin: ufuktan aşağı bir gradyan, üstünde yolun kendisi. Yol eğimli -
 ## eğim `RouteTerrain`'den geliyor, yani dağa tırmanan yol gerçekten
 ## yukarı gidiyor.
-func _draw_ground(area: Rect2, horizon: float) -> void:
-	var ground_top := horizon + area.size.y * 0.075
+func _draw_ground_fill(area: Rect2, horizon: float) -> void:
+	var ground_top := horizon + area.size.y * GROUND_TOP_RATIO
 	var far := ArtPalette.fade_to_haze(Color(_colors.far), Color(_sky.haze), 0.12)
 	ArtDraw.gradient_band(
 		self,
@@ -401,10 +432,30 @@ func _draw_ground(area: Rect2, horizon: float) -> void:
 	# kırıyoruz, ama zeminin kendi rengiyle: bu bir tepe değil, çayırın
 	# ufka değdiği kenar.
 	ArtDraw.ridge(
-		self, area, ground_top + area.size.y * 0.012, area.size.y * 0.022,
-		area.size.x * 0.42, -_world_x * PARALLAX_TREES, far, 29
+		self, area, _ground_edge_base(), area.size.y * GROUND_EDGE_AMP_RATIO,
+		_ground_edge_wavelength(), -_world_x * PARALLAX_TREES, far, GROUND_EDGE_SEED
 	)
 
+## Çayırın ufka değdiği kenarın x'teki y'si - yani "burada zemin nerede
+## başlıyor". Ağaç hattı bunu okuyor; kenarı iki ayrı yerde hesaplamak,
+## ağacın sırtın tepesinde havada kalması demek.
+func _ground_top_at(x: float) -> float:
+	var height := maxf(size.y, BAND_HEIGHT)
+	return ArtDraw.ridge_y(
+		Rect2(Vector2.ZERO, Vector2(maxf(size.x, 1.0), height)),
+		_ground_edge_base(), height * GROUND_EDGE_AMP_RATIO,
+		_ground_edge_wavelength(), -_world_x * PARALLAX_TREES, GROUND_EDGE_SEED, x
+	)
+
+func _ground_edge_base() -> float:
+	var height := maxf(size.y, BAND_HEIGHT)
+	return height * (HORIZON_RATIO + GROUND_TOP_RATIO + GROUND_EDGE_DROP_RATIO)
+
+func _ground_edge_wavelength() -> float:
+	return maxf(size.x, 1.0) * GROUND_EDGE_WAVE_RATIO
+
+func _draw_road(area: Rect2) -> void:
+	var near := Color(_colors.near)
 	# Yol şeridi. İlk denemede rengi zeminden yalnızca %42 ayrılıyordu ve
 	# ekran görüntüsünde yol *hiç görünmüyordu* - kervan tek renk bir
 	# kahverengi zeminde yürüyordu. Yol artık hem daha açık hem daha az
@@ -413,7 +464,6 @@ func _draw_ground(area: Rect2, horizon: float) -> void:
 	var left_y := _ground_y_at_screen(0.0)
 	var right_y := _ground_y_at_screen(area.size.x)
 	var band := area.size.y * 0.085
-	var near := Color(_colors.near)
 	var road := near.lerp(Color(0.68, 0.60, 0.46), 0.62)
 	var verge := near.darkened(0.30)
 
@@ -519,7 +569,9 @@ func _draw_stops(area: Rect2, horizon: float) -> void:
 			continue
 		# Yolun biraz gerisine oturuyorlar - kervan önlerinden geçiyor.
 		var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.045)
-		_draw_stop(String(entry.stop), base, area.size.y * 0.15)
+		var stop_height := area.size.y * 0.15
+		ArtDraw.contact_shadow(self, base, stop_height * 1.9, 0.15)
+		_draw_stop(String(entry.stop), base, stop_height)
 
 func _draw_stop(stop: String, base: Vector2, height: float) -> void:
 	var haze := Color(_sky.haze)
@@ -649,25 +701,38 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 		var x := float(cell) * CELL_GROUND + offset + rng.randf_range(-50.0, 50.0)
 		if x < -70.0 or x > area.size.x + 70.0:
 			continue
-		# Yalnızca yolun üstü: y küçüldükçe uzaklaşıyor.
-		var y := _ground_y_at_screen(x) - area.size.y * rng.randf_range(0.045, 0.16)
-		var base := Vector2(x, y)
+		# Yalnızca yolun üstü. `depth` 1'e yaklaştıkça yola (kameraya)
+		# yaklaşıyor - taban da boy da pus da ondan türüyor, yani uzaktaki
+		# nesne gerçekten küçük. Boyun konumdan bağımsız rastgele olması,
+		# ağaç hattındakiyle aynı hatanın yakın kenardaki kopyasıydı.
+		# Yakın uç yolun **bankında** bitmeli, üstünde değil: yol en son
+		# çiziliyor, o yüzden banka kadar inen bir çalı yolun altında
+		# kalıp kayboluyor. İlk ölçüde tam bu oldu - yakın kenar boşaldı.
+		var depth := rng.randf()
+		var base := Vector2(
+			x, _ground_y_at_screen(x) - area.size.y * (0.175 - depth * 0.100)
+		)
+		var scale := 0.72 + depth * 0.56
 		if roll < 0.30:
+			var rock_w := area.size.y * rng.randf_range(0.03, 0.07) * scale
+			ArtDraw.contact_shadow(self, base, rock_w * 1.15, 0.13)
 			ArtDraw.rock(
-				self, base, area.size.y * rng.randf_range(0.03, 0.07),
-				area.size.y * rng.randf_range(0.025, 0.055),
+				self, base, rock_w, area.size.y * rng.randf_range(0.025, 0.055) * scale,
 				near.lerp(Color(_colors.accent), 0.35), cell * 31 + 7
 			)
 		elif roll < 0.78:
+			var shrub_w := area.size.y * rng.randf_range(0.035, 0.075) * scale
+			ArtDraw.contact_shadow(self, base, shrub_w * 1.05, 0.11)
 			ArtDraw.shrub(
-				self, base, area.size.y * rng.randf_range(0.035, 0.075),
-				area.size.y * rng.randf_range(0.035, 0.075), flora, cell * 17 + 3
+				self, base, shrub_w,
+				area.size.y * rng.randf_range(0.035, 0.075) * scale, flora, cell * 17 + 3
 			)
 		else:
 			# Yol kenarındaki ağaç da biyomun ağacı olmalı: ilk hâlinde
 			# hep yuvarlak taçlıydı, yani çam ormanının ortasında
 			# meyve ağaçları bitiyordu.
-			var height := area.size.y * rng.randf_range(0.14, 0.24)
+			var height := area.size.y * rng.randf_range(0.14, 0.24) * scale
+			ArtDraw.contact_shadow(self, base, height * 0.40, 0.16)
 			if _biome == ArtPalette.BIOME_FOREST or _biome == ArtPalette.BIOME_MOUNTAIN:
 				ArtDraw.conifer(self, base, height * 1.15, near.darkened(0.45), flora)
 			else:

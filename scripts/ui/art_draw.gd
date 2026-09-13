@@ -38,22 +38,138 @@ static func ridge(
 	canvas: CanvasItem, area: Rect2, base_y: float, amplitude: float,
 	wavelength: float, offset: float, color: Color, seed_value: int
 ) -> void:
+	canvas.draw_colored_polygon(
+		ridge_points(area, base_y, amplitude, wavelength, offset, seed_value), color
+	)
+
+## Sırtın çokgeni. Ayrı bir fonksiyon olmasının sebebi `ridge_y`: ikisi
+## aynı örneklemeyi kullandığını *kanıtlanabilir* kılıyor
+## (tests/test_art_geometry.gd), çünkü tuval üzerine çizilmiş bir çokgen
+## geri okunamıyor.
+static func ridge_points(
+	area: Rect2, base_y: float, amplitude: float, wavelength: float,
+	offset: float, seed_value: int
+) -> PackedVector2Array:
 	var points := PackedVector2Array()
-	var step := maxf(8.0, wavelength * 0.12)
+	var step := _ridge_step(wavelength)
+	var floor_y := area.position.y + area.size.y
 	var x := area.position.x - step
-	points.append(Vector2(x, area.position.y + area.size.y))
+	points.append(Vector2(x, floor_y))
 	while x <= area.position.x + area.size.x + step:
-		var phase := (x + offset) / maxf(1.0, wavelength)
-		# İki farklı frekans üst üste: tek sinüs yapay bir dalga gibi
-		# duruyor, ikisi birlikte sırt gibi duruyor.
-		var height := (
-			sin(phase * TAU + float(seed_value) * 0.37) * 0.62
-			+ sin(phase * TAU * 2.3 + float(seed_value) * 1.11) * 0.38
-		)
-		points.append(Vector2(x, base_y - height * amplitude))
+		points.append(Vector2(x, base_y - ridge_wave(x, wavelength, offset, seed_value) * amplitude))
 		x += step
-	points.append(Vector2(x, area.position.y + area.size.y))
-	canvas.draw_colored_polygon(points, color)
+	points.append(Vector2(x, floor_y))
+	return points
+
+## Sırtın belirli bir x'teki dalga yüksekliği (-1..1).
+##
+## İki farklı frekans üst üste: tek sinüs yapay bir dalga gibi duruyor,
+## ikisi birlikte sırt gibi duruyor.
+static func ridge_wave(x: float, wavelength: float, offset: float, seed_value: int) -> float:
+	var phase := (x + offset) / maxf(1.0, wavelength)
+	return (
+		sin(phase * TAU + float(seed_value) * 0.37) * 0.62
+		+ sin(phase * TAU * 2.3 + float(seed_value) * 1.11) * 0.38
+	)
+
+## Bir sırtın **çizilen** üst kenarının y'si. Sırtın üstüne bir şey
+## oturtacaksak (ağaç, kaya, bina) bu okunmalı: `ridge` sinüsü `step`
+## aralıklarla örnekleyip aralarını *düz* çiziyor, yani gerçek kenar
+## sinüsün kendisi değil o kırık çizgi. Sürekli sinüsten hesaplanan bir
+## taban, sırtın tepesinde nesneyi havada, çukurunda gömülü bırakıyor -
+## "ağaçlar havada duruyor" şikâyetinin yarısı buydu.
+static func ridge_y(
+	area: Rect2, base_y: float, amplitude: float, wavelength: float,
+	offset: float, seed_value: int, x: float
+) -> float:
+	var step := _ridge_step(wavelength)
+	var start := area.position.x - step
+	var x0 := start + floorf((x - start) / step) * step
+	var y0 := base_y - ridge_wave(x0, wavelength, offset, seed_value) * amplitude
+	var y1 := base_y - ridge_wave(x0 + step, wavelength, offset, seed_value) * amplitude
+	return lerpf(y0, y1, clampf((x - x0) / step, 0.0, 1.0))
+
+## Sırt kaç pikselde bir örnekleniyor. 0.12 iken tepeler bir dağdan çok
+## kırık bir zikzak gibi duruyordu ve kar başlığı tek bir kocaman üçgene
+## düşüyordu; kenar sayısı bir dörtte bire inince hem sırtlar hem kar
+## sınırı yumuşadı. Örnekleme `ridge`, `ridge_y` ve `ridge_snow` için
+## ortak - ayrılırlarsa üstlerine oturan her şey havada kalır.
+static func _ridge_step(wavelength: float) -> float:
+	return maxf(6.0, wavelength * 0.03)
+
+## Sırtın kar başlığı: yalnızca `snow_line`'ın **üstünde** kalan tepeler
+## beyaza boyanıyor.
+##
+## İlk çözüm aynı sırtı ikinci kez biraz düşük genlikle çizmekti ve
+## ekranda sonucu belliydi: kar değil, tepelerin üstünde ince beyaz bir
+## kalem çizgisi. Kar bir *bölge*, bir kontur değil - yükseklik eşiğinin
+## üstünde kalan her parça ayrı bir çokgen olarak doluyor, o yüzden alçak
+## tepeler karsız kalıyor ve yükseği gerçekten kalpaklı oluyor.
+static func ridge_snow(
+	canvas: CanvasItem, area: Rect2, base_y: float, amplitude: float,
+	wavelength: float, offset: float, color: Color, seed_value: int,
+	snow_line: float
+) -> void:
+	for polygon in snow_runs(area, base_y, amplitude, wavelength, offset, seed_value, snow_line):
+		canvas.draw_colored_polygon(polygon, color)
+
+## Kar başlığının çokgenleri - `ridge_points` ile aynı gerekçeyle ayrı:
+## test edilebilmesi için.
+static func snow_runs(
+	area: Rect2, base_y: float, amplitude: float, wavelength: float,
+	offset: float, seed_value: int, snow_line: float
+) -> Array[PackedVector2Array]:
+	var runs: Array[PackedVector2Array] = []
+	var step := _ridge_step(wavelength)
+	# Kar çizgisinin alt kenarı düz olmamalı: dümdüz yatay bir kesik,
+	# dağa yapıştırılmış beyaz bir üçgen gibi duruyor. Kısa dalga boylu
+	# küçük bir salınım onu kar sınırına çeviriyor.
+	var wobble := amplitude * 0.10
+	var run := PackedVector2Array()
+	var hem := PackedVector2Array()
+	var x := area.position.x - step
+	var limit := area.position.x + area.size.x + step * 2.0
+	while x <= limit:
+		var y := base_y - ridge_wave(x, wavelength, offset, seed_value) * amplitude
+		var hem_y := snow_line + ridge_wave(x, wavelength * 0.22, offset, seed_value + 5) * wobble
+		if y < hem_y:
+			run.append(Vector2(x, y))
+			hem.append(Vector2(x, hem_y))
+		else:
+			_close_snow(runs, run, hem)
+			run = PackedVector2Array()
+			hem = PackedVector2Array()
+		x += step
+	_close_snow(runs, run, hem)
+	return runs
+
+static func _close_snow(
+	runs: Array[PackedVector2Array], run: PackedVector2Array, hem: PackedVector2Array
+) -> void:
+	if run.size() < 2:
+		return
+	var points := run.duplicate()
+	for index in range(hem.size() - 1, -1, -1):
+		points.append(hem[index])
+	runs.append(points)
+
+## Nesnenin yere değdiği yerdeki basık gölge.
+##
+## `wagon()` ve `WalkFigure` bunu baştan beri çiziyordu ve gerekçesi
+## `WalkFigure`'da yazılı: gölge olmayınca figür hakikaten havada
+## süzülüyor gibi duruyor. Manzara nesneleri (ağaç, çam, kaya, çalı, yol
+## kenarı yapıları) bu muameleyi hiç görmedi - hepsi düz bir zemin
+## gradyanının üstünde gövdesi biten şekiller olarak duruyordu. Aynı
+## fırça artık hepsinde.
+static func contact_shadow(
+	canvas: CanvasItem, base: Vector2, width: float, strength: float = 0.22
+) -> void:
+	if width <= 0.0:
+		return
+	ellipse(
+		canvas, base, Vector2(width * 0.5, maxf(1.0, width * 0.16)),
+		Color(0.0, 0.0, 0.0, strength)
+	)
 
 ## Yuvarlak taçlı ağaç: gövde + üç örtüşen küme. Yassı-resimsel stilin
 ## en çok tekrarlanan parçası, o yüzden ucuz tutuldu.

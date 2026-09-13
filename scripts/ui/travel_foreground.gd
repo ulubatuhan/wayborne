@@ -121,13 +121,17 @@ func _draw_low_props(area: Rect2) -> void:
 					Color(0.58, 0.66, 0.72, 0.24 + _wetness * 0.26)
 				)
 			elif roll < 0.40:
+				var rock_w := ceiling * rng.randf_range(0.5, 1.1)
+				ArtDraw.contact_shadow(self, base, rock_w * 1.2, 0.17)
 				ArtDraw.rock(
-					self, base, ceiling * rng.randf_range(0.5, 1.1),
+					self, base, rock_w,
 					ceiling * rng.randf_range(0.28, 0.62), stone, cell * 19 + slot
 				)
 			elif roll < 0.86:
+				var shrub_w := ceiling * rng.randf_range(0.6, 1.2)
+				ArtDraw.contact_shadow(self, base, shrub_w * 1.1, 0.14)
 				ArtDraw.shrub(
-					self, base, ceiling * rng.randf_range(0.6, 1.2),
+					self, base, shrub_w,
 					ceiling * rng.randf_range(0.45, 1.0), flora, cell * 31 + slot
 				)
 			else:
@@ -146,6 +150,7 @@ func _draw_milestones(area: Rect2) -> void:
 			continue
 		var base := Vector2(x, _road_y(x) + area.size.y * 0.085)
 		var h := MILESTONE_HEIGHT
+		ArtDraw.contact_shadow(self, base, h * 0.70, 0.20)
 		ArtDraw.inked(self, PackedVector2Array([
 			base + Vector2(-h * 0.22, 0.0),
 			base + Vector2(-h * 0.18, -h * 0.82),
