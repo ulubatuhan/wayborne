@@ -386,15 +386,23 @@ func _build_command_panel() -> PanelContainer:
 	column.add_child(title)
 
 	for index in COMMANDS.size():
-		var row := Label.new()
+		# Sıra tuşu (1-5) hâlâ birincil yol - Button olması kumanda/fare
+		# ile de tıklanabilsin diye (bkz. GamepadCursor). `flat` düz
+		# metne yakın duruyor, ama artık gerçekten tıklanabilir.
+		var row := Button.new()
+		row.flat = true
+		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.text = "%d. %s" % [index + 1, tr(String(COMMANDS[index].key))]
+		row.pressed.connect(_issue_command.bind(index))
 		column.add_child(row)
 
 	return panel
 
 ## Emir menüsü klavyeden sürülüyor (Mount & Blade deseni): F2 açar, sayı
-## emri verir, Esc kapatır. Buton koymak yerine tuş olması oyuncunun
-## eli yürüme tuşlarından kalkmasın diye.
+## emri verir, Esc kapatır - oyuncunun eli yürüme tuşlarından kalkmıyor.
+## Sıralar artık aynı zamanda birer Button (bkz. yukarısı): kumandanın
+## sanal imleci ya da bir fare de aynı satıra tıklayabiliyor,
+## `_issue_command` ikisinde de aynı yoldan çağrılıyor.
 func _input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if key_event == null or not key_event.pressed or key_event.echo:
@@ -597,6 +605,10 @@ func _advance_position(hours: float) -> void:
 		direction += 1.0
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		direction -= 1.0
+	# RT/LT: analog, dijital tuşlarla toplanıp kırpılıyor - aynı yöndeyse
+	# birbirini güçlendirmiyor (1'de tavanlanıyor), ters yöndeyse
+	# birbirini götürüyor.
+	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
 
 	# Lider kolondan ayrıldıysa A/D *onu* yürütüyor: kervan verilen
 	# tempoyla kendi kendine ilerliyor, lider kolonun içinde geziyor.
