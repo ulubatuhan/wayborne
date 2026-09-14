@@ -224,6 +224,14 @@ func get_caravan_anchor() -> Vector2:
 	var x := caravan_x()
 	return Vector2(x, _ground_y_at_screen(x))
 
+## Bir "gün" konumunun şerit üzerindeki ekran koordinatı - `_draw_stops()`'un
+## konum hesabıyla birebir aynı formül. Yaklaşan bir olay işareti (bkz.
+## RoadEncounter) bunu okuyarak kervanla aynı dünyada duruyor: ikisi de
+## `_world_x`'ten türediği için biri kayarken öteki geride kalmıyor.
+func screen_position_for_day(day_position: float) -> Vector2:
+	var x := caravan_x() + (day_position * PIXELS_PER_DAY - _world_x)
+	return Vector2(x, _ground_y_at_screen(x))
+
 func _process(delta: float) -> void:
 	# Yağmur ve ateş kendi başına canlanıyor; hava açık ve kamp yoksa
 	# yeniden çizmeye gerek yok (oyuncu yürüdükçe set_route_progress
