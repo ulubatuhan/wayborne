@@ -133,6 +133,8 @@ func _move_player(delta: float) -> void:
 		direction += 1.0
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		direction -= 1.0
+	# RT/LT: bkz. road_journey.gd'deki aynı satır.
+	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
 
 	_walk_direction = direction
 	# Faz mesafeden sürülüyor: duran bir figürün ayakları oynamıyor,

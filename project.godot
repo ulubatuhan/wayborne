@@ -23,6 +23,7 @@ GameState="*res://scripts/autoload/game_state.gd"
 DevPanel="*res://scripts/autoload/dev_panel.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 UserSettings="*res://scripts/autoload/user_settings.gd"
+GamepadCursor="*res://scripts/autoload/gamepad_cursor.gd"
 
 [debug]
 
