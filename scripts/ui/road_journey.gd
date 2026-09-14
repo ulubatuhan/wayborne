@@ -80,6 +80,52 @@ const WALK_FORWARD_RATE: float = 1.0
 ## çevirmek, hayvanları döndürmek, yükü yeniden dengelemek zaman yer.
 const WALK_BACKWARD_RATE: float = 0.25
 
+## --- Yolda yaklaşan olay ---
+## Günün olayı ("kurt var", "evrak isteyen bir görevli") artık kart olarak
+## anında açılmıyor: önce yolda bir figür olarak görünüyor (bkz.
+## RoadEncounter), kervan ona yaklaşınca kart açılıyor. Yalnızca bir
+## *fiziksel karşılığı* olan olaylar bunu yapıyor (EVENT_ROAD_MARKER_KIND'de
+## listelenenler) - kendi vagonunun bozulması, hava ya da parti içi bir
+## mesele gibi yolda "görülecek" bir şeyi olmayan olaylar eskisi gibi
+## anında açılıyor.
+##
+## `ENCOUNTER_APPROACH_DAYS` işaretin kervandan ne kadar önde belirdiği
+## (gün cinsinden mesafe - `TravelBand.PIXELS_PER_DAY` ile piksele çevrilir).
+## Küçük tutulmalı: büyürse oyuncu günün geri kalanını bir şeye doğru
+## yürüyerek geçirir, bu bir onay adımı olmalı, ikinci bir yolculuk değil.
+const ENCOUNTER_APPROACH_DAYS: float = 0.35
+const ENCOUNTER_TRIGGER_EPSILON: float = 0.01
+
+## event_id -> CombatFigure.ARCHETYPES kategorisi. Eşlemede olmayan her
+## olay eskisi gibi davranır (hiç işaret yok, kart anında açılır) - bu
+## sessiz bir eksiklik değil, çünkü o olayların yolda gösterilecek somut
+## bir figürü yok (bkz. yukarıdaki not).
+const EVENT_ROAD_MARKER_KIND: Dictionary = {
+	"evt_wild_animal": "wildlife",
+	"evt_bandit_ambush": "bandit",
+	"evt_wanderer_revenge": "bandit",
+	"evt_guard_patrol": "guard",
+	"evt_customs_checkpoint": "guard",
+	"evt_road_patrol": "guard",
+	"evt_road_wanderer": "traveler",
+	"evt_traveling_tinker": "traveler",
+	"evt_kin_encounter": "traveler",
+	"evt_culture_valley_dispute": "traveler",
+	"evt_culture_highland_challenge": "traveler",
+	"evt_culture_port_gossip": "traveler",
+	"evt_culture_fisher_catch": "traveler",
+}
+
+## Her kategori birden fazla `CombatFigure` arketipine düşebiliyor (aynı
+## haydut pususunun kadroda birkaç çeşidi olması gibi) - tekdüzeliği kırıyor
+## ama günün sayısından türediği için bir kez seçilince karede değişmiyor.
+const MARKER_ARCHETYPES: Dictionary = {
+	"wildlife": ["wolf", "bear", "boar"],
+	"bandit": ["bandit", "bandit_leader"],
+	"guard": ["guard", "guard_sergeant"],
+	"traveler": ["clerk", "hunter"],
+}
+
 ## --- Kervan emirleri (F2) ---
 ## Mount & Blade'in emir menüsü: bir tuş listeyi açar, sayı emri verir.
 ## F1 geliştirici paneline ait olduğu için (bkz. DevPanel) kök tuş F2.
@@ -109,6 +155,10 @@ const LEADER_WALK_SPEED: float = 46.0
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
+## Yolda görünüp kartı henüz açılmamış olay - bkz. Yolda yaklaşan olay.
+var _pending_event: GameEvent = null
+var _pending_event_day_position: float = 0.0
+var _encounter: RoadEncounter = null
 var _current_combat_kind: String = "bandit"
 var _current_day: int = 0
 var _is_live_journey: bool = false
@@ -187,11 +237,21 @@ func _build_ui() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(title)
 
+	# Manzara şeridi ve (varsa) savaş sahnesi aynı çerçeveyi paylaşıyor:
+	# ikisi ekranın aynı bölgesinin iki hâli, biri diğerinin altına eklenen
+	# ayrı bir blok değil. `_combat_holder` boşken bir VBoxContainer
+	# çocuğunun görünmez olması yer kaplamıyor, o yüzden savaş kapalıyken
+	# şerit sahnenin tamamını kaplıyor; `_open_combat()`/`_on_combat_
+	# finished()` ikisinin görünürlüğünü değiş tokuş ediyor.
+	var scene_stage := VBoxContainer.new()
+	scene_stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(scene_stage)
+
 	# Manzara şeridi: gökyüzü/zemin günün evresine göre değişir, dünya
 	# kervanın altından akar (bkz. TravelBand).
 	_band = TravelBand.new()
 	_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(_band)
+	scene_stage.add_child(_band)
 
 	# Kervan şeridin *çocuğu*: manzara arkada çizilir, figürler onun
 	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
@@ -206,6 +266,10 @@ func _build_ui() -> void:
 	# Kolon uzadıkça çapa sağa kayıyor, yoksa satın alınan her vagon
 	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
 	_caravan.column_length_changed.connect(_band.set_column_length)
+
+	_combat_holder = VBoxContainer.new()
+	_combat_holder.visible = false
+	scene_stage.add_child(_combat_holder)
 
 	# Emir menüsü: F2 açıyor, sayı tuşu emri veriyor. Şeridin üstünde
 	# duruyor (Mount & Blade'de de ekranın üstünde belirir) ve varsayılan
@@ -310,8 +374,9 @@ func _build_ui() -> void:
 	_haggle_holder = VBoxContainer.new()
 	_content.add_child(_haggle_holder)
 
-	_combat_holder = VBoxContainer.new()
-	_content.add_child(_combat_holder)
+	# _combat_holder artık burada değil, manzara şeridiyle aynı
+	# `scene_stage`'de kuruluyor (bkz. yukarısı) - savaş yolun durduğu
+	# yerde açılsın diye.
 
 	_recruit_holder = VBoxContainer.new()
 	_content.add_child(_recruit_holder)
@@ -513,8 +578,12 @@ func _init_journey() -> void:
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
 	_clear_children(_combat_holder)
+	_combat_holder.visible = false
+	_band.visible = true
 	_clear_children(_recruit_holder)
 	_clear_children(_arrival_panel)
+	_pending_event = null
+	_clear_encounter()
 	_arrive_button.visible = false
 	_enter_city_button.visible = false
 	_set_journey_controls_enabled(true)
@@ -648,6 +717,7 @@ func _walk_at(rate: float, hours: float) -> void:
 		float(_journey_length_days)
 	)
 	_sync_days_remaining()
+	_check_pending_event_reached()
 
 ## `journey_days_remaining` artık bağımsız bir sayaç değil, kat edilen
 ## yoldan türetilen bir gösterge - HUD, sapma maliyeti (get_days_travelled)
@@ -664,12 +734,13 @@ func _can_time_flow() -> bool:
 func _process_elapsed_days() -> void:
 	var days := _clock.take_elapsed_days()
 	for _index in days:
-		if _journey_finished:
+		if _journey_finished or _pending_event != null:
 			return
 		_run_day()
-		# Gün içinde bir olay çıktıysa kalan günler beklemeli: oyuncu karar
-		# verene kadar kervan ilerlemez.
-		if _current_event != null or _has_open_panel():
+		# Gün içinde bir olay çıktıysa (kart olarak ya da yolda beliren bir
+		# işaret olarak) kalan günler beklemeli: oyuncu karar verene ya da
+		# işarete yaklaşana kadar takvim ilerlemez.
+		if _current_event != null or _pending_event != null or _has_open_panel():
 			return
 
 ## Gün, yolun değil takvimin birimi: erzak yenir, kontrat süresi işler,
@@ -686,7 +757,7 @@ func _run_day() -> void:
 	if event == null:
 		_add_log(tr("UI_ROAD_DAY_LINE") % [_current_day, tr("EVT_TEST_QUIET_DAY")])
 	else:
-		_present_event(event)
+		_queue_event(event)
 
 	_refresh_state()
 	_check_journey_end()
@@ -738,6 +809,7 @@ func _refresh_time_ui() -> void:
 	var progress := _get_route_progress()
 	_band.set_route_progress(progress, _days_covered)
 	_progress_bar.value = progress
+	_position_encounter()
 
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
 	# hesaplanırsa gece kervanı gündüz aydınlatılmış görünür.
@@ -900,6 +972,61 @@ func _apply_effects(effects: Array[EventEffect]) -> EventEffectApplier.Result:
 		_journey_length_days = maxi(1, _journey_length_days + delta)
 	_sync_days_remaining()
 	return result
+
+## Günün olayı fiziksel bir karşılığı olan türdense (bkz.
+## EVENT_ROAD_MARKER_KIND) kartı hemen açmaz: kervanın biraz önüne yolda
+## görünen bir işaret koyar (bkz. RoadEncounter), kartın açılışı
+## `_check_pending_event_reached()`'e kalır. Fiziksel karşılığı olmayan bir
+## olay (kendi vagonun, hava, parti içi bir mesele) eskisi gibi anında açılır.
+func _queue_event(event: GameEvent) -> void:
+	var kind: String = EVENT_ROAD_MARKER_KIND.get(event.event_id, "")
+	if kind.is_empty():
+		_present_event(event)
+		return
+
+	_pending_event = event
+	_pending_event_day_position = minf(
+		_days_covered + ENCOUNTER_APPROACH_DAYS, float(_journey_length_days)
+	)
+	_spawn_encounter(kind)
+
+func _spawn_encounter(kind: String) -> void:
+	_clear_encounter()
+	var archetypes: Array = MARKER_ARCHETYPES.get(kind, ["clerk"])
+	var archetype: String = archetypes[absi(hash("%d|%s" % [_current_day, kind])) % archetypes.size()]
+	_encounter = RoadEncounter.new()
+	_encounter.setup(archetype)
+	# `add_child` değil `add_actor_layer`: kervanla aynı kuralı okuyor,
+	# ön plandaki çalıların arkasına düşmesin diye (bkz. yukarıdaki not).
+	_band.add_actor_layer(_encounter)
+	_position_encounter()
+
+## Şerit her karede dünyayı kaydırdığı için işaretin ekran konumu da her
+## karede yeniden okunmalı - `_refresh_time_ui()`'den çağrılıyor.
+func _position_encounter() -> void:
+	if _encounter == null:
+		return
+	_encounter.set_screen_position(_band.screen_position_for_day(_pending_event_day_position))
+
+func _clear_encounter() -> void:
+	if _encounter == null:
+		return
+	_encounter.queue_free()
+	_encounter = null
+
+## Kervan işarete yeterince yaklaştı mı - `_walk_at()`'in her çağrısında
+## sınanıyor, çünkü mesafe yalnızca orada ilerliyor. Geriye yürüyen bir
+## kervan işaretten uzaklaşır ve hiçbir şey tetiklenmez; tekrar yaklaşınca
+## aynı kontrol yine çalışır.
+func _check_pending_event_reached() -> void:
+	if _pending_event == null:
+		return
+	if _days_covered + ENCOUNTER_TRIGGER_EPSILON < _pending_event_day_position:
+		return
+	var event := _pending_event
+	_pending_event = null
+	_clear_encounter()
+	_present_event(event)
 
 func _present_event(event: GameEvent) -> void:
 	_current_event = event
@@ -1071,6 +1198,12 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_set_journey_controls_enabled(false)
 	_clear_children(_combat_holder)
 
+	# Savaş yolun *yerine* açılıyor: şerit gizlenip savaş sahnesi onun
+	# çerçevesinde beliriyor - önceden savaş, şerit görünür kalırken
+	# ekranın altına eklenen ayrı bir blok gibi duruyordu.
+	_band.visible = false
+	_combat_holder.visible = true
+
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
@@ -1118,6 +1251,8 @@ func _on_combat_finished(
 		_add_log("      %s" % line, OUTCOME_COLOR if victory else LOCKED_COLOR)
 
 	_clear_children(_combat_holder)
+	_combat_holder.visible = false
+	_band.visible = true
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
@@ -1230,7 +1365,7 @@ func _close_haggling() -> void:
 ## _finish_journey() çağrılıp varış bir daha işlenebiliyordu - ikinci bir
 ## kırılma zarı ve ikinci bir kayıt dahil.
 func _check_journey_end() -> void:
-	if _journey_finished or _current_event != null or _has_open_panel():
+	if _journey_finished or _current_event != null or _pending_event != null or _has_open_panel():
 		return
 	# Varış artık "gün bitti" değil, "mesafe kapandı" demek.
 	if _days_covered >= float(_journey_length_days):
@@ -1324,7 +1459,11 @@ func _apply_replan(log_format: String) -> void:
 	# görünürdü.
 	_journey_length_days = maxi(1, _session.journey_total_days)
 	# Yeni bacak sıfırdan yürünür: kervan çıkış şehrine döndü ya da başka
-	# bir yola saptı, kat edilmiş mesafe o yola ait değil.
+	# bir yola saptı, kat edilmiş mesafe o yola ait değil. Eski yolda
+	# beliren bir işaret de o yolla birlikte geride kalıyor - kervan artık
+	# oraya hiç gitmeyecek.
+	_pending_event = null
+	_clear_encounter()
 	_days_covered = 0.0
 	_sync_days_remaining()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)

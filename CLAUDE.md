@@ -1365,6 +1365,69 @@ day *mechanics* are unchanged.
   the caravan would just hit the edge of the band), and the campfire adds a
   flickering warm light. Still ColorRect placeholders.
 
+### Road Encounter Rules
+
+A day's event used to become a card the instant the day rolled over - no
+warning, and combat opened as a panel appended *below* the road view rather
+than replacing it, so a fight read as a log entry, not a scene.
+
+- **Combat happens where the road was, not underneath it.** `road_journey.gd`
+  wraps `TravelBand` and `_combat_holder` in one `scene_stage`; `_open_combat()`
+  hides the band and shows the holder, `_on_combat_finished()` reverses it.
+  `CombatPanel` was already a real drawn battlefield (bkz. Combat Rules) - the
+  fix is spatial, not visual: the same screen area shows the fight instead of
+  the road, rather than a second block stacking under the walk hint, the
+  conditions line and the state dump.
+- **An event with a physical stand-in appears on the road before its card
+  does.** `EVENT_ROAD_MARKER_KIND` maps an `event_id` to a `CombatFigure`
+  archetype category (wildlife/bandit/guard/traveler) - deliberately only the
+  events that *have* something to be seen (a wolf, a patrol demanding papers,
+  a wanderer). An event with no physical presence (your own wagon breaking,
+  weather, a party-internal matter) is not in the map and still opens
+  instantly, which is correct, not a gap: there is nothing to place on the
+  road for "the axle snapped."
+- **The marker reuses combat's own figures, not a new drawing.** `RoadEncounter`
+  hosts a bare `CombatFigure` - the same wolf/guard/bandit silhouette the
+  player already meets in the fight itself, same reasoning as `WalkFigure`
+  reading `CombatFigure.ARCHETYPES` for the party's own walk cycle ("the
+  guard you saw in the fight walks the road in the same colours"). Building
+  it in `_init()` rather than `_ready()` matters here specifically:
+  `road_journey.gd` calls `setup()` before the node ever enters the tree
+  (before `add_actor_layer()`), and `_ready()` would still be unset at
+  that point - `_figure` would be `null` and `setup()` would fail every
+  single time, not silently.
+- **The day still rolls, the card just waits.** `_run_day()` rolls the event
+  exactly as before and, for a mapped kind, stores it as `_pending_event`
+  instead of presenting it immediately, placing the marker
+  `ENCOUNTER_APPROACH_DAYS` ahead of the caravan's current position (in the
+  same day-units `_days_covered` already uses). `_walk_at()` checks on every
+  step whether the caravan has closed that gap; only then does
+  `_present_event()` run. Walking away from the marker never triggers it -
+  approaching is the whole point, and the same check on the next step of
+  approach catches it again if the player turns back.
+- **A pending marker freezes the calendar the same way an open card does.**
+  `_process_elapsed_days()` and `_check_journey_end()` already skip forward
+  while `_current_event != null`; `_pending_event != null` joins that same
+  guard, or a second day's provisions/contracts would process - or the
+  journey could even "arrive" - while the first day's wolf is still standing
+  unresolved on the road. Time itself (`_can_time_flow()`) is *not* gated by
+  it: the whole point is that the caravan keeps walking and the world keeps
+  turning while the marker is approached.
+- **A replan discards whatever was pending.** `_apply_replan()` (turning
+  back or diverting) resets `_days_covered` to the new leg's zero - a marker
+  positioned on the abandoned road would otherwise sit at a day-position
+  that means nothing on the new one. Turning back is now also an honest way
+  to avoid a wolf you can see coming.
+- **`TravelBand.screen_position_for_day()`** is the one door a marker (or
+  anything else that needs to sit at a fixed point along the route) reads to
+  convert a day-position into screen space - the exact formula
+  `_draw_stops()` already used inline for roadside stops, now public so it
+  is not duplicated a third time.
+- `tests/screenshot_road_encounter.gd` renders each marker kind and the
+  combat stage once (bkz. Testing) - not a test, a picture, same reasoning
+  as every other `screenshot_*.gd` tool: a structural pass cannot see that a
+  figure is actually standing on the road.
+
 ### Playthrough Start Rules
 
 - **The opening is fixed and not offered as a choice**: two party members
