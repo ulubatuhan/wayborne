@@ -328,11 +328,13 @@ static func vignette(canvas: CanvasItem, area: Rect2, strength: float = 0.055) -
 ## Yumuşak ışık havuzu - meşale, kamp ateşi, pencere. Basık elips
 ## halkaları; yuvarlak bir küre "ışık" gibi durmuyor, yerden yansıyan
 ## basık bir havuz duruyor.
+## `rings` büyük bir havuzda gerekiyor: halka sayısı sabit kaldığı sürece
+## yarıçap büyüdükçe her halka kalınlaşıyor ve yumuşak geçiş yerine iç içe
+## daireler görünüyor - ana menünün alçak güneşinde tam olarak bu oldu.
 static func light_pool(
 	canvas: CanvasItem, centre: Vector2, radius: float,
-	color: Color, strength: float, flatten: float = 0.55
+	color: Color, strength: float, flatten: float = 0.55, rings: int = 16
 ) -> void:
-	var rings := 16
 	for index in range(rings, 0, -1):
 		var ratio := float(index) / float(rings)
 		ellipse(

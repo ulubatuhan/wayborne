@@ -7,6 +7,13 @@ extends Control
 ## oluşturma ekranında seçiliyor - "Yeni Oyun" oraya gider, oturum da
 ## orada kurulur.
 
+## Başlık ve butonların arkasındaki karartma. Manzaranın üstüne çıplak
+## metin koymak, gökyüzünün açık olduğu yerde başlığı okunmaz yapıyor -
+## olay kartının kendi opak kutusunu taşımasıyla aynı gerekçe.
+const SCRIM_PAD: Vector2 = Vector2(56.0, 40.0)
+const SCRIM_COLOR: Color = Color(0.04, 0.035, 0.045, 0.62)
+
+@onready var _menu_box: VBoxContainer = $VBoxContainer
 @onready var _continue_button: Button = $VBoxContainer/ContinueButton
 @onready var _play_button: Button = $VBoxContainer/PlayButton
 @onready var _settings_button: Button = $VBoxContainer/SettingsButton
@@ -16,6 +23,7 @@ var _confirm_dialog: ConfirmationDialog
 
 func _ready() -> void:
 	Nav.go_root(Nav.MAIN_MENU)
+	_build_backdrop()
 	_continue_button.visible = SaveManager.has_save()
 	_continue_button.pressed.connect(_on_continue_pressed)
 	_play_button.pressed.connect(_on_play_pressed)
@@ -23,6 +31,30 @@ func _ready() -> void:
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 	_refresh_texts()
+
+## Manzara ve karartma butonların **arkasına** giriyor: `add_child` onları
+## en sona koyar, `move_child(…, 0)` en başa. Sahne dosyasına eklemek
+## yerine kodda kurulmalarının sebebi `PulseBar`/`OnboardingPanel` ile
+## aynı - sahnesiz bir bileşen tek bir yerde tanımlı kalıyor.
+func _build_backdrop() -> void:
+	var backdrop := MenuBackdrop.new()
+	add_child(backdrop)
+	move_child(backdrop, 0)
+
+	var scrim := ColorRect.new()
+	scrim.color = SCRIM_COLOR
+	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(scrim)
+	move_child(scrim, 1)
+	_fit_scrim(scrim)
+	# Butonların kutusu yerleşim geçişinden önce doğru boyunu bilmiyor
+	# (dil değişince metin de değişiyor), o yüzden karartma onu izliyor.
+	_menu_box.resized.connect(_fit_scrim.bind(scrim))
+	_menu_box.item_rect_changed.connect(_fit_scrim.bind(scrim))
+
+func _fit_scrim(scrim: ColorRect) -> void:
+	scrim.position = _menu_box.position - SCRIM_PAD
+	scrim.size = _menu_box.size + SCRIM_PAD * 2.0
 
 func _refresh_texts() -> void:
 	_continue_button.text = tr("UI_CONTINUE")
