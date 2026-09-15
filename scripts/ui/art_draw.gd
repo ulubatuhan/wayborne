@@ -468,3 +468,97 @@ static func inked(canvas: CanvasItem, points: PackedVector2Array, fill: Color, w
 	var closed := points.duplicate()
 	closed.append(points[0])
 	canvas.draw_polyline(closed, ArtPalette.INK, width)
+
+
+## Uzaktaki şehir: sur hattı, iki burç, bir kapı kemeri ve surun arkasında
+## yükselen düz damlı bloklar. Ayrıntı yok, çünkü ufukta ayrıntı pusun
+## içinde kaybolur zaten - ama **siluetin kendisi bir yer söylüyor**.
+##
+## İki şey bilerek yok. Üçgen külahlı kare kuleler kuzey Avrupa kalesiydi;
+## oyun orada geçmiyor. Kubbe ve minare de denendi ve **geri alındı**:
+## oyunun dünyasında böyle bir kurum yok, yani ufka konan her ibadet yapısı
+## oyunun kendi lore'unun dışından bir şey söylüyor. Wayborne'un şehirleri
+## ticaretten büyümüş yerler - sur, kapı, depo. Silueti okunur kılan şey
+## bunların **farklı yükseklikte** olması, sembol olması değil.
+static func city_silhouette(
+	canvas: CanvasItem, base: Vector2, height: float, color: Color
+) -> void:
+	var w := height * 2.1
+
+	# Surun arkasındaki bloklar - sur çizgisinden önce, arkada kalsınlar.
+	var blocks := [
+		[-0.30, 0.86, 0.34], [-0.02, 1.08, 0.30], [0.26, 0.78, 0.26],
+	]
+	for block in blocks:
+		var bx: float = base.x + w * float(block[0])
+		var bh: float = height * float(block[1])
+		var bw: float = height * float(block[2])
+		canvas.draw_rect(
+			Rect2(Vector2(bx - bw * 0.5, base.y - bh), Vector2(bw, bh)), color, true
+		)
+		# Düz damın üstünde alçak bir korkuluk: damı bir çatı değil bir
+		# teras yapan şey.
+		canvas.draw_rect(
+			Rect2(
+				Vector2(bx - bw * 0.58, base.y - bh - height * 0.05),
+				Vector2(bw * 1.16, height * 0.05)
+			), color, true
+		)
+
+	# Sur hattı.
+	canvas.draw_rect(
+		Rect2(base - Vector2(w * 0.5, height * 0.52), Vector2(w, height * 0.52)), color, true
+	)
+	_battlements(canvas, base, w, height, color)
+
+	# Burçlar: sur hattını bitiren şey, surdan biraz yüksek ve kalın.
+	for side in [-1.0, 1.0]:
+		var tx: float = base.x + w * 0.46 * side
+		var th := height * 0.74
+		var tw := height * 0.26
+		canvas.draw_rect(
+			Rect2(Vector2(tx - tw * 0.5, base.y - th), Vector2(tw, th)), color, true
+		)
+		canvas.draw_rect(
+			Rect2(
+				Vector2(tx - tw * 0.66, base.y - th - height * 0.06),
+				Vector2(tw * 1.32, height * 0.06)
+			), color, true
+		)
+
+	_gate(canvas, base, height, color)
+
+## Sur dişleri. Düz bir üst kenar sur değil duvar; diş sırası surun tek
+## okunur işareti ve boyu küçüldüğünde bile bir doku olarak kalıyor.
+static func _battlements(
+	canvas: CanvasItem, base: Vector2, w: float, height: float, color: Color
+) -> void:
+	var top := base.y - height * 0.52
+	var merlon := maxf(2.0, height * 0.075)
+	var count := int(w / (merlon * 2.0))
+	for index in count:
+		var mx := base.x - w * 0.5 + float(index) * merlon * 2.0
+		canvas.draw_rect(
+			Rect2(Vector2(mx, top - merlon * 0.8), Vector2(merlon, merlon * 0.8)), color, true
+		)
+
+## Kapı: sur hattındaki kemerli boşluk. Siluetin *içine* oyulan tek şey -
+## şehrin girilebilir bir yer olduğunu söyleyen işaret.
+static func _gate(canvas: CanvasItem, base: Vector2, height: float, color: Color) -> void:
+	# Kemer dolgu rengiyle değil, siluetin kendisinden biraz açık bir tonla
+	# çiziliyor: tam dolgu renginde bir kemer görünmez, arka plan renginde
+	# bir kemer ise silueti deler ve arkasındaki gökyüzü kapıdan sızar.
+	var arch := color.lightened(0.18)
+	var gate_w := height * 0.22
+	var gate_h := height * 0.34
+	var top := base.y - gate_h
+	canvas.draw_rect(
+		Rect2(Vector2(base.x - gate_w * 0.5, top), Vector2(gate_w, gate_h)), arch, true
+	)
+	var points := PackedVector2Array()
+	for step in 11:
+		var angle := PI + float(step) / 10.0 * PI
+		points.append(Vector2(
+			base.x + cos(angle) * gate_w * 0.5, top + sin(angle) * gate_w * 0.5
+		))
+	canvas.draw_colored_polygon(points, arch)

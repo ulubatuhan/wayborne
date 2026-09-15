@@ -70,10 +70,19 @@ const FIRE_FLICKER_SPEED: float = 9.0
 ## bile Web hedefini boğmayacak kadar.
 ## Damlalar kısa ve çok: ilk ölçüde uzun ve seyrekti, ekranda yağmur
 ## değil cam çizikleri gibi duruyordu.
-const RAIN_MAX_DROPS: int = 260
+const RAIN_MAX_DROPS: int = 190
 const RAIN_SPEED: float = 1250.0
 const RAIN_SLANT: float = 0.30
+const RAIN_WIDTH: float = 0.85
+const RAIN_ALPHA_BASE: float = 0.17
+const RAIN_ALPHA_PER_RAIN: float = 0.15
 const FOG_BANDS: int = 7
+
+## Kasvetin gökyüzüne karışma payı - 1.0 olduğunda günün evresi tamamen
+## siliniyordu (bkz. _draw_sky). Ufuk daha az karışıyor: bulutun altından
+## giren ışık orada.
+const GLOOM_SKY_MIX: float = 0.62
+const GLOOM_HORIZON_MIX: float = 0.34
 
 ## Evre eşlemesi: saatin altı evresi paletin dört gökyüzüne düşüyor.
 ## Palet dört tutuluyor çünkü sabah/öğle ya da akşam/gece arasındaki fark
@@ -307,9 +316,16 @@ func _draw_sky(area: Rect2, horizon: float) -> void:
 	if gloom > 0.0:
 		# Kapalı hava gökyüzünü karartmıyor, *griye* çekiyor: karartmak
 		# geceyle karışıyordu.
+		#
+		# Gri de bir yere kadar. Kasvet tam griye gidince günün evresi
+		# silinip yağmurlu her saat aynı kurşuni ekran oluyordu - şafakta
+		# yağmur yağdığında gökyüzü hâlâ şafak. Ufuk çizgisi (`bottom`)
+		# kasvetin en az değdiği yer, çünkü ışık bulutun altından oradan
+		# giriyor: yağmurun içindeki o sıcak şerit sahneyi ayakta tutan
+		# şey.
 		var lead := Color(0.36, 0.37, 0.39)
-		top = top.lerp(lead.darkened(0.35), gloom)
-		bottom = bottom.lerp(lead, gloom * 0.8)
+		top = top.lerp(lead.darkened(0.35), gloom * GLOOM_SKY_MIX)
+		bottom = bottom.lerp(lead, gloom * GLOOM_HORIZON_MIX)
 	ArtDraw.gradient_band(
 		self, Rect2(area.position, Vector2(area.size.x, horizon + 2.0)), top, bottom
 	)
@@ -564,36 +580,19 @@ func _draw_cities(area: Rect2, horizon: float) -> void:
 		# doğru geliyor.
 		var near_ratio := clampf((_progress - 0.42) / 0.58, 0.0, 1.0)
 		var scale := 0.32 + near_ratio * 0.85
-		_draw_city_silhouette(
+		ArtDraw.city_silhouette(
+			self,
 			Vector2(area.size.x * (0.96 - near_ratio * 0.22), horizon + area.size.y * 0.02),
 			area.size.y * 0.14 * scale,
 			ArtPalette.fade_to_haze(silhouette, haze, 0.55 - near_ratio * 0.35)
 		)
 	if _progress < 0.55:
 		var behind := clampf(1.0 - _progress / 0.55, 0.0, 1.0)
-		_draw_city_silhouette(
+		ArtDraw.city_silhouette(
+			self,
 			Vector2(area.size.x * (0.04 + (1.0 - behind) * 0.10), horizon + area.size.y * 0.02),
 			area.size.y * 0.13 * (0.30 + behind * 0.55), silhouette
 		)
-
-## Uzaktaki şehir: sur çizgisi, üç kule, bir kilise kulesi. Ayrıntı yok,
-## çünkü ufukta ayrıntı pusun içinde kaybolur zaten.
-func _draw_city_silhouette(base: Vector2, height: float, color: Color) -> void:
-	var w := height * 2.1
-	draw_rect(Rect2(base - Vector2(w * 0.5, height * 0.52), Vector2(w, height * 0.52)), color, true)
-	var towers := [-0.36, 0.0, 0.34]
-	for index in towers.size():
-		var tx: float = base.x + w * float(towers[index])
-		var th: float = height * (0.95 if index == 1 else 0.70)
-		draw_rect(
-			Rect2(Vector2(tx - height * 0.16, base.y - th), Vector2(height * 0.32, th)),
-			color, true
-		)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(tx - height * 0.20, base.y - th),
-			Vector2(tx, base.y - th - height * 0.30),
-			Vector2(tx + height * 0.20, base.y - th),
-		]), color)
 
 ## Ara duraklar: köy, karakol, maden, geçit, sunak, köprü. Konumları gün
 ## cinsinden; ekranda ancak yakınına gelince görünüyorlar.
@@ -829,7 +828,9 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 	var drops := int(RAIN_MAX_DROPS * rain)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 31337
-	var color := Color(0.74, 0.80, 0.88, 0.30 + rain * 0.22)
+	# Damla ince ve yarı saydam: kalın çizgi yağmur değil tarama gibi
+	# okunuyor ve arkasındaki manzarayı siliyor.
+	var color := Color(0.74, 0.80, 0.88, RAIN_ALPHA_BASE + rain * RAIN_ALPHA_PER_RAIN)
 	for _index in drops:
 		var speed := rng.randf_range(0.75, 1.35)
 		var x0 := rng.randf() * area.size.x * 1.3 - area.size.x * 0.15
@@ -839,7 +840,7 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 		var length := area.size.y * rng.randf_range(0.035, 0.075) * (0.6 + rain * 0.6)
 		draw_line(
 			Vector2(x0, y0), Vector2(x0 - length * RAIN_SLANT, y0 + length),
-			color, maxf(1.0, rain * 1.4)
+			color, RAIN_WIDTH
 		)
 	# Yerde sıçrama: yağmurun yola değdiğini gösteren şey.
 	var splash_rng := RandomNumberGenerator.new()
