@@ -1428,6 +1428,85 @@ than replacing it, so a fight read as a log entry, not a scene.
   as every other `screenshot_*.gd` tool: a structural pass cannot see that a
   figure is actually standing on the road.
 
+### Road Screen Layout Rules
+
+The road screen was a **scrolling column of text** for a long time: the
+landscape band was one row of it, the event card another, the state dump
+and the log filled the rest. The complaint - *"the game still looks like a
+text-based RPG"* - was about the layout, not the art: the world was a small
+box inside the text, so the text was the screen.
+
+- **The world is the screen, and the HUD is its edge** (Kingdom Two Crowns
+  layout). `road_journey.tscn` is four stacked full-rect layers - `World`,
+  `Hud`, `LogOverlay`, `Modal` - and the landscape fills the first one
+  completely. The HUD is two thin bars (time/state on top, walk hint, last
+  log line and actions at the bottom) with the world visible between them.
+- **A layer is a container, not an anchor preset.** `World` and
+  `LogOverlay` are `MarginContainer`s and `Hud` is a `VBoxContainer`, all
+  anchored *in the scene file*. That sidesteps the anchor-preset trap (see
+  Art Rules) by construction: a container sizes its children, so nothing
+  depends on a resize notification that may never arrive.
+- **Decisions are one card in the middle of the screen** (EU4 layout). The
+  event card, the haggle panel, the road recruit offer, the replan panel
+  and the arrival summary all open inside the single framed card in
+  `Modal/Center`, over a dimmed backdrop. Choices are **buttons inside the
+  card**, styled explicitly (`_style_choice_button`) - the default theme box
+  vanishes on the card's dark ground and the options read as plain text
+  lines rather than something to click.
+- **The card's visibility is read from its content, every frame**
+  (`_refresh_modal`). Seven call sites fill and clear those holders; asking
+  each of them to also toggle the layer means one of them eventually
+  forgets and leaves the screen dimmed behind an empty card. An empty
+  `VBoxContainer` still contributes separation, so empty holders are hidden
+  too, or the card grows a visible gap under the choices.
+- **The log is one line plus a button, never the whole ledger.** The bottom
+  bar shows the last entry; `LogOverlay` holds the full list in a
+  `ScrollContainer` with its close button outside it (same rule as every
+  other screen). What a player needs while walking is what just happened,
+  not the transcript.
+- **A multi-line translation becomes one line in a bar.** `UI_ROAD_STATE`
+  is three lines by design (the city screens want it that way); the road
+  HUD joins them with " · " at display time rather than splitting the key.
+- `tests/screenshot_journey_screen.gd` photographs **the real scene** with a
+  live session, not a hand-built band - the other screenshot tools show the
+  landscape but cannot show the layout, and the layout was the complaint.
+
+### Encounter Timing Rules
+
+- **An encounter begins when it touches the caravan's nose.** The trigger
+  used to compare the marker against the band's anchor, but the anchor sits
+  *behind* the leader (`RoadCaravan.get_front_offset()` is how far the front
+  actually reaches), so the official walked past the player and the card
+  only opened once he drew level with a wagon. The player was talking to
+  someone he had already overtaken.
+- **Arrival is checked where distance changes, not where days change.**
+  `_walk_at()` calls `_check_journey_end()` directly. Before that, arrival
+  was only tested when a day rolled over, so a caravan that closed the last
+  stretch early hit a wall it could not cross and nothing happened until the
+  calendar caught up - the "invisible wall" the road ended in.
+
+### Reputation Rules
+
+Reputation had **six ways down and none that the player controlled**:
+undelivered contracts, overdue debt, fighting the watch, being caught at
+customs, walking out of a haggle, and events. The caravan's actual job -
+delivering the contract it accepted - paid nothing. So the number only
+ever fell, and the career simulation had already measured the result
+(average reputation ~1 at journey 20) without anyone reading it as a bug.
+
+- **Delivering pays.** `REPUTATION_PER_DELIVERED_CONTRACT` is granted in
+  `finish_journey()`, per merchant actually delivered. With the loss per
+  undelivered contract dropped to 3, a caravan that lands three of four is
+  net positive - playing well now moves the stat that gates the game.
+- **`change_reputation()` is the only door**, and the floor
+  (`MIN_REPUTATION`) lives in it. The simulator once produced a caravan at
+  -44: past that point every door is shut and the player holds no lever
+  that opens one, which is a silent game over rather than a hard game.
+- **The cheapest hiring venue never closes.** Meydan and taverna both asked
+  for reputation 0, so a single bad journey locked *every* way to rebuild a
+  crew at once. The people waiting in a market square are the ones without
+  work; a caravan with a bad name loses the guild, not the square.
+
 ### Playthrough Start Rules
 
 - **The opening is fixed and not offered as a choice**: two party members

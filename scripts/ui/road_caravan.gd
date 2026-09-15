@@ -280,6 +280,19 @@ func get_trailing_length() -> float:
 func get_column_scale() -> float:
 	return _scale
 
+## Kervanın **en önündeki** noktanın çapaya uzaklığı (piksel). Lider
+## çapanın üstünde değil, `_lead_at()` kadar önünde duruyor - yani çapa
+## kolonun ortasına yakın bir yer, burnu değil.
+##
+## Yolda yaklaşan bir olay bunu okuyor: tetik çapaya bağlıyken görevli
+## önce liderin *yanından geçiyor*, kart ancak arkadaki vagona
+## geldiğinde açılıyordu. Karşılaşma, karşılaşılan şey kervanın burnuna
+## değdiğinde başlamalı.
+func get_front_offset() -> float:
+	if _leader == null:
+		return 0.0
+	return _lead_at(_scale) + _leader.size.x * 0.5
+
 ## Yerleşimin hesapladığı vagon merkezleri - çizim de test de bunu okuyor,
 ## kimse kendi aritmetiğini yapmıyor.
 func get_wagon_centres() -> Array[float]:

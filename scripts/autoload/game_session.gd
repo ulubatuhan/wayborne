@@ -715,7 +715,35 @@ var total_days_elapsed: int = 0
 ## (yolda ayrılma, varışta ödeme) geçerlidir. Süresi geçerse advance_day()
 ## itibar cezasıyla kaldırır.
 var accepted_contracts: Dictionary = {}
-const REPUTATION_PENALTY_PER_LOST_CONTRACT: int = 5
+
+## --- İtibar ---
+## İtibarın tek yönlü olduğu bir dönem yaşandı ve oyunu kilitliyordu:
+## kaybettiren *altı* kol vardı (teslim edilemeyen kontrat, vadesi geçen
+## borç, muhafızla çatışma, gümrükte yakalanma, pazarlıktan kalkmak,
+## olaylar) ve kazandıran tek kol olayların keyfine kalmıştı. Kervanın
+## asıl işi - kontratı teslim etmek - itibar *hiç* getirmiyordu, yani
+## oyuncu doğru oynadıkça bile sayı aşağı gidiyordu. Kariyer ölçümü de
+## bunu görmüştü: 20. seferde ortalama itibar ~1.
+##
+## Teslimat artık kazandırıyor ve kayıp cezası düştü: dört kontratın
+## üçünü teslim eden bir kervan net **artıda** çıkar (3×2 − 1×3 = +3).
+const REPUTATION_PENALTY_PER_LOST_CONTRACT: int = 3
+const REPUTATION_PER_DELIVERED_CONTRACT: int = 2
+## İtibarın dibi. Simülatörde -44'e kadar inen bir kervan gördük: o
+## noktadan sonra bütün kapılar kapalı ve oyuncunun elinde onu geri
+## çevirecek hiçbir kol yok, yani oyun sessizce bitmiş oluyor. Dip,
+## "toparlanabilir bir kötü durum" ile "kilitlenme" arasındaki sınır.
+const MIN_REPUTATION: int = -20
+const MAX_REPUTATION: int = 100
+
+## İtibarın **tek** değişim kapısı - dip ve tavan burada uygulanıyor.
+## Doğrudan `reputation += x` yazmak, o dibi olmayan tek bir yol bırakmak
+## demek (aynı gerekçe `Inventory.add_item`'ın ağırlık kontrolünü kendi
+## içinde tutmasında da var).
+func change_reputation(delta: int) -> int:
+	var before := reputation
+	reputation = clampi(reputation + delta, MIN_REPUTATION, MAX_REPUTATION)
+	return reputation - before
 
 func accept_contract(offer: MerchantOffer) -> void:
 	accepted_contracts[offer.merchant_id] = total_days_elapsed
@@ -753,7 +781,7 @@ func advance_day() -> Array[String]:
 
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
-	reputation -= debts.advance_to_day(total_days_elapsed)
+	change_reputation(-debts.advance_to_day(total_days_elapsed))
 	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
 	market.advance_day(total_days_elapsed)
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
@@ -778,7 +806,7 @@ func advance_day() -> Array[String]:
 
 	for merchant_id in expired:
 		accepted_contracts.erase(merchant_id)
-		reputation -= REPUTATION_PENALTY_PER_LOST_CONTRACT
+		change_reputation(-REPUTATION_PENALTY_PER_LOST_CONTRACT)
 
 	return expired
 
@@ -1156,8 +1184,18 @@ func finish_journey() -> Dictionary:
 	# build_campaign_context). Teslim edilen = yola çıkarken yazılı olan
 	# eksi yolda kaybedilen.
 	journeys_completed += 1
-	contracts_delivered += maxi(
+	var delivered := maxi(
 		0, caravan.original_merchant_names.size() - int(payout["lost_contracts"])
+	)
+	contracts_delivered += delivered
+
+	# Teslim edilen her kontrat itibar kazandırır. Bu, kaybettiren kolun
+	# (bkz. REPUTATION_PENALTY_PER_LOST_CONTRACT) eksik olan karşılığı:
+	# olmadığı sürece oyuncunun itibarı yalnızca *düşebiliyordu*, yani
+	# doğru oynamanın bir ödülü yoktu ve tek kötü sefer tayfa toplamayı
+	# kalıcı olarak kilitliyordu.
+	payout["reputation_gained"] = change_reputation(
+		delivered * REPUTATION_PER_DELIVERED_CONTRACT
 	)
 
 	# XP hesabı sıfırlanmadan önce yapılmalı: moral ve kontrat kaybı seferin
@@ -1204,7 +1242,7 @@ func _apply_undelivered_contract_penalty() -> int:
 	for merchant_name in caravan.original_merchant_names:
 		if not caravan.merchant_names.has(merchant_name):
 			lost += 1
-	reputation -= lost * REPUTATION_PENALTY_PER_LOST_CONTRACT
+	change_reputation(-lost * REPUTATION_PENALTY_PER_LOST_CONTRACT)
 	return lost
 
 ## Sefer sırasındaki kayıp/hasar kervanın havuzundan (oyuncu + escort
@@ -1534,6 +1572,6 @@ func advance_campaign() -> Array[CampaignChapter]:
 			set_flag(chapter.completion_flag)
 		if chapter.reward_gold > 0:
 			wallet.earn(chapter.reward_gold)
-		reputation += chapter.reward_reputation
+		change_reputation(chapter.reward_reputation)
 		completed.append(chapter)
 	return completed
