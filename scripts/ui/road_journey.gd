@@ -1795,15 +1795,12 @@ func _make_summary_label(text: String) -> Label:
 	label.text = text
 	return label
 
+## Varış her zaman şehre çıkar. Eskiden burada bir "zenginlik hedefi"
+## ekranı vardı (kese 5000'e ulaşınca); kaldırıldı, çünkü oyunun hedefi
+## kesenin dolması değil adın yolda kalması (bkz. GameSession'ın soy
+## bölümü). Oyunun tek gerçek sonu hâlâ var ve o da burada değil:
+## liderin ölüp yerine geçecek kimsenin kalmaması (_show_run_over).
 func _on_enter_city_pressed() -> void:
-
-	if _session.has_reached_goal():
-		_session.set_flag(GameSession.GOAL_FLAG)
-		if _is_live_journey:
-			SaveManager.save_session(_session)
-		get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.GOAL_REACHED))
-		return
-
 	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve

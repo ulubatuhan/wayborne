@@ -115,6 +115,10 @@ func _test_one_arrival_can_close_several(t) -> void:
 	session.visited_location_ids = {"a": true, "b": true, "c": true, "d": true, "e": true}
 	session.owned_wagon_count = 4
 	session.wallet.earn(5000)
+	# Final artık keseye değil liderin dönemine bakıyor (bkz.
+	# CampaignCatalog'un beşinci bölümü): adı bir mevsim taşımış olmak.
+	session.total_days_elapsed = 200
+	session.leader_since_day = 0
 	while session.party.size() < 3:
 		session.add_to_party(_companion())
 

@@ -2,10 +2,10 @@ class_name CampaignCatalog
 extends RefCounted
 
 ## Kampanyanın omurgası: sırayla geçilen bölümler. Oyunun bir sonu var,
-## ama son bölüm bittiğinde oyun kapanmıyor - `GOAL_GOLD` ekranındaki gibi
-## (bkz. goal_reached.tscn) hikâye biter, ticaret sürer. "Sonsuza kadar
-## devam edilebilir" tasarım kararı buradan geçiyor: `is_finale` bir
-## bitiş değil, bir **eşik**.
+## ama son bölüm bittiğinde oyun kapanmıyor: hikâye biter, ticaret sürer.
+## "Sonsuza kadar devam edilebilir" tasarım kararı buradan geçiyor:
+## `is_finale` bir bitiş değil, bir **eşik**. Oyunun tek gerçek sonu
+## soyun tükenmesi (bkz. GameSession.RUN_OVER_FLAG).
 ##
 ## Beş bölüm, beşi de oyunda zaten olan sistemlerin diliyle yazıldı - yeni
 ## bir görev mekaniği yok. Her bölüm oyuncuyu bir sonraki sistemi
@@ -44,6 +44,8 @@ const OBJECTIVE_LABEL_KEYS: Dictionary = {
 	"journeys_completed": "CAMPAIGN_OBJ_JOURNEYS",
 	"contracts_delivered": "CAMPAIGN_OBJ_CONTRACTS",
 	"cities_visited": "CAMPAIGN_OBJ_CITIES",
+	"days_as_leader": "CAMPAIGN_OBJ_DAYS_AS_LEADER",
+	"lineage_generation": "CAMPAIGN_OBJ_GENERATION",
 }
 
 ## Tanınmayan bir anahtar ekranda ham haliyle görünür - sessizce boş
@@ -142,13 +144,22 @@ static func _ensure_built() -> void:
 
 	# 5. Kendi hanını kur - hikâyenin sonu. Sonrasında oyun kapanmıyor:
 	# epilog gösterilir ve serbest ticaret sürer (bkz. is_finale).
+	#
+	# Altın eşiği (2500) `days_as_leader` ile değiştirildi. Sebep omurga:
+	# oyunun konusu kesenin dolması değil, adın yolda kalması - saf bir
+	# para kapısı finali "yeterince zengin oldun" diye kapatıyordu.
+	# Ölçüm bozulmadı: liderin hiç ölmediği bir oyunda dönem = toplam gün
+	# ve final ortancası 30. seferde (~180 gün), yani 60 gün rahat
+	# aşılıyor. Diğer iki eşik ölçülmüş hâliyle duruyor (bkz. CLAUDE.md
+	# Campaign Rules - dördüncü bölümün eşiğini oynatmak finali yarıya
+	# düşürmüştü).
 	_chapters.append(CampaignChapter.make(
 		CHAPTER_THE_HOUSE,
 		"CAMPAIGN_HOUSE_TITLE",
 		"CAMPAIGN_HOUSE_SUMMARY",
 		"CAMPAIGN_HOUSE_OBJECTIVE",
 		[
-			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 2500),
+			EventCondition.make("days_as_leader", EventCondition.Op.GREATER_EQUAL, 60),
 			EventCondition.make("owned_wagons", EventCondition.Op.GREATER_EQUAL, 4),
 			EventCondition.make("reputation", EventCondition.Op.GREATER_EQUAL, 15),
 		],
