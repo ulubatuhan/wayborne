@@ -751,6 +751,10 @@ func make_camp() -> Dictionary:
 	change_provisions(-paid)
 	var relief := CAMP_STRESS_RELIEF + get_duty_flat_reduction(DutyCatalog.OTACI) * 2
 	change_stress(-relief)
+	# Kamp takati de tazeliyor: zorlamanın bedeli var ama çıkışı da var,
+	# yoksa bir kez zorlayan kervan seferin geri kalanını sürünerek
+	# bitirirdi (bkz. CaravanState'in tempo bölümü).
+	caravan.rest_at_camp()
 	return {"provisions_spent": paid, "stress_relief": relief}
 
 func heal_party() -> void:

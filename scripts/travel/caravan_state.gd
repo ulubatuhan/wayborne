@@ -42,6 +42,42 @@ var original_merchant_names: Array[String] = []
 ## Sefer başındaki anlık görüntü: kayıp/hasarı GameSession.finish_journey()
 ## oyuncunun kalıcı sahipliğine adil paylaştırabilsin diye tutulur -
 ## escort vagonları önce gider, oyuncunun kendi vagonu en son.
+## --- Tempo bir tuş değil, harcanan bir kaynak ---
+## Hız eskiden 1x/2x/3x butonuydu: bedava, geri alınabilir, sonuçsuz.
+## Yani "hızlı git" hiçbir zaman bir karar değildi, çünkü yavaş gitmenin
+## de hızlı gitmenin de bir bedeli yoktu.
+##
+## Şimdi zorlamak dayanıklılık yakıyor. Dayanıklılık bittiğinde kervan
+## zorlayamıyor - dinlenmesi gerekiyor. Bu, takvimle (kontrat süresi,
+## borç vadesi, mevsim) gerçek bir gerilim kuruyor: acelen varsa
+## ödeyeceksin, yoksa günler seni yiyecek.
+##
+## Not: dayanıklılık **sefere ait**, kalıcı değil - stres o işi zaten
+## yapıyor ve iki kalıcı yıpranma sayacı birbirini gölgelerdi.
+const MAX_STAMINA: int = 100
+const STAMINA_PUSH_COST_PER_DAY: int = 26
+const STAMINA_RECOVER_PER_DAY: int = 9
+const STAMINA_CAMP_RECOVERY: int = 34
+## Bunun altında zorlanamaz. Sıfır değil: tam bitmiş bir kaynağın geri
+## dönüşü belirsiz hissettiriyor, görünür bir eşik ise bir karar.
+const STAMINA_PUSH_FLOOR: int = 12
+
+var stamina: int = MAX_STAMINA
+
+func can_push() -> bool:
+	return stamina >= STAMINA_PUSH_FLOOR
+
+## `pushing` o gün zorlanıp zorlanmadığı. Zorlanmayan gün dinlendiriyor
+## ama zorlanan günün yaktığından az: tempo kazancı bedava geri alınamaz.
+func apply_stamina_drift(pushing: bool) -> void:
+	if pushing:
+		stamina = maxi(0, stamina - STAMINA_PUSH_COST_PER_DAY)
+	else:
+		stamina = mini(MAX_STAMINA, stamina + STAMINA_RECOVER_PER_DAY)
+
+func rest_at_camp() -> void:
+	stamina = mini(MAX_STAMINA, stamina + STAMINA_CAMP_RECOVERY)
+
 var wagons_at_start: int = MIN_WAGONS
 var player_wagon_count_at_start: int = MIN_WAGONS
 

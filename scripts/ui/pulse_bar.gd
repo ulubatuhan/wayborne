@@ -10,7 +10,10 @@ const IDLE_ALPHA: float = 0.35
 const VISIBLE_ALPHA: float = 1.0
 const FADE_DELAY: float = 2.5
 const FADE_DURATION: float = 1.2
-const BAR_SIZE: Vector2 = Vector2(150, 16)
+## Ölçüldü ve daraltıldı: yol HUD'una dördüncü çubuk (takat) eklenince
+## 150'lik çubuklar üst şeridi taşırıp kervan sayılarını kırpmaya
+## başladı. Etiket + yüzde 122'de hâlâ okunuyor.
+const BAR_SIZE: Vector2 = Vector2(122, 16)
 
 var _value: float = 0.0
 var _max_value: float = 100.0
