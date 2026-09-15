@@ -143,6 +143,9 @@ const PACE_HALT: float = 0.0
 ## olan kollardan geçiyor (stres ve moral), yeni bir sistem açmıyor.
 ## Olmasa "hızlan" her koşulda doğru cevap olurdu ve bir emir menüsü
 ## tek seçenekten oluşurdu.
+## Savaşta yere düşen kişinin kendi üstünde kalan iz.
+const DOWNED_STRESS_MARK: int = 9
+
 ## Görmezden gelinen bir işaretin bedeli.
 const SIGNAL_STRAGGLER_STRESS: int = 5
 ## Birikmiş duman payının tavanı: yol tehlikeli olabilir, imkânsız olamaz.
@@ -954,7 +957,9 @@ func _refresh_attention_zone() -> void:
 ## İşaretler saatle yaşıyor, günle değil - asıl boşluk günlerin arası
 ## değil, kartlar arasındaki 23 saatti.
 func _tick_signals(hours: float) -> void:
-	var outcome := _signals.tick(hours, _attention_zone, _signal_rng)
+	var outcome := _signals.tick(
+		hours, _attention_zone, _signal_rng, _session.get_affliction_count()
+	)
 	for kind in outcome["appeared"]:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
 	for kind in outcome["resolved"]:
@@ -1570,6 +1575,13 @@ func _on_combat_finished(
 
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
+	# Yere düşen yoldaş kalıcı bir iz bırakıyor. Ölüm hâlâ yalnızca
+	# lideri buluyor (kervan yok olmaz), ama kayıp gerçek olmalı: düşen
+	# kişinin kendi stresi ayrıca artıyor ve bu, şehir varışındaki
+	# kırılma zarını besliyor - yani bir yoldaşı savaşta *kaybetmenin*
+	# yolu var, ayrı bir ölüm kuralı icat etmeden.
+	_apply_downed_marks(downed_count)
+
 	var stress_delta := COMBAT_STRESS_BASE + downed_count * COMBAT_STRESS_PER_DOWN
 	stress_delta += -COMBAT_VICTORY_STRESS_RELIEF if victory else COMBAT_DEFEAT_STRESS
 
@@ -1599,6 +1611,18 @@ func _on_combat_finished(
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
+
+## Yere düşenler kendi stresini alıyor. Kimin düştüğü savaş panelinden
+## sayı olarak geliyor (isim değil), o yüzden en yorgun olanlardan
+## başlanıyor: zaten en kırılgan olanı kırmak, rastgele birini
+## kırmaktan hem daha okunur hem daha adil.
+func _apply_downed_marks(downed_count: int) -> void:
+	if downed_count <= 0:
+		return
+	var ordered: Array[CharacterData] = _session.get_party().duplicate()
+	ordered.sort_custom(func(a, b): return a.stress > b.stress)
+	for index in mini(downed_count, ordered.size()):
+		_session.change_character_stress(ordered[index], DOWNED_STRESS_MARK)
 
 ## Savaşta ölenleri oturuma bildirir ve sonucunu oyuncuya *anlatır*.
 ## Sessiz bir ölüm hatadan ayırt edilemez: kimin öldüğü, liderliğin kime

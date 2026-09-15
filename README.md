@@ -36,7 +36,17 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
    karakterler tam cana döner, stres bir miktar dinlenir, ilerleme
    kaydedilir.
 
-Tasarımın değişmez kuralı: **kervan ağır kayıp yaşayabilir ama asla yok
+Tasarımın omurgası: **kervanın adı liderinden uzun yaşar.** Lider
+ölürse en kıdemli yoldaş devralır, ad ve defter kalır, kuşak ilerler;
+oyunun tek gerçek sonu adı taşıyacak kimsenin kalmamasıdır. Kervan
+defteri (`CaravanLedger`) hiçbir satırı silmez - ayrılan bir ismin üstü
+çizilir.
+
+Yolda yürümek bir karar: liderin kolondaki yeri neye dikkat ettiğini
+belirler (ön / vagonlar / arka), yol sürekli küçük işaretler verir ve
+ihmal edilen işaret büyür, tempoyu zorlamak takat yakar.
+
+Diğer değişmez kural: **kervan ağır kayıp yaşayabilir ama asla yok
 olmaz.** Altın negatife düşmez, erzak sıfırın altına inmez, oyuncunun son
 vagonu kaybedilmez, savaşta düşen biri ölmez — 1 canla ayağa kalkar.
 
@@ -53,8 +63,10 @@ wayborne/
 │   ├── combat/             # Darkest Dungeon tarzı çarpışma motoru
 │   ├── world/              # 2D dünya, sahne navigasyonu
 │   ├── ui/                 # Ekranlar ve yeniden kullanılabilir paneller
-│   └── autoload/           # GameState, EventBus, DevPanel, SaveManager
+│   ├── campaign/           # Kampanya bölümleri + kervan defteri
+│   └── autoload/           # GameState, DevPanel, SaveManager, AudioManager
 ├── data/
+│   ├── assets/audio/       # Müzik (ana menü+yol, şehir)
 │   ├── locale/             # Çeviri metinleri (tr/en)
 │   └── config/             # (henüz kullanılmıyor)
 └── tests/                  # Headless GDScript testleri + denge simülatörü

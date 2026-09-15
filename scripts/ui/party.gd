@@ -35,8 +35,56 @@ func _refresh() -> void:
 	]
 
 	_clear_children(_content)
+	_content.add_child(_build_ledger())
 	for index in party.size():
 		_content.add_child(_build_member_card(party[index], index, party.size()))
+
+## Kervan defteri: kim geldi, kim gitti, kim öldü, liderlik kime geçti.
+##
+## **Ayrılan bir isim silinmiyor, üstü çiziliyor** (bkz. CaravanLedger).
+## Parti listesinin üstünde duruyor çünkü kervanın kim olduğu sorusunun
+## cevabı yalnızca şu an yanında yürüyenler değil - buraya kadar kimlerle
+## geldiğin de o cevabın parçası.
+const LEDGER_RECENT_LIMIT: int = 8
+const STRUCK_COLOR: Color = Color(0.55, 0.52, 0.55)
+
+func _build_ledger() -> VBoxContainer:
+	var box := VBoxContainer.new()
+
+	var title := Label.new()
+	title.text = tr("UI_LEDGER_TITLE")
+	title.add_theme_font_size_override("font_size", 18)
+	box.add_child(title)
+
+	var heading := Label.new()
+	heading.text = tr("UI_LEDGER_GENERATION") % [
+		_session.lineage_generation, _session.get_caravan_name()
+	]
+	heading.modulate = PERK_COLOR
+	box.add_child(heading)
+
+	var entries := _session.ledger.recent(LEDGER_RECENT_LIMIT)
+	if entries.is_empty():
+		var empty := Label.new()
+		empty.text = tr("UI_LEDGER_EMPTY")
+		empty.modulate = HINT_COLOR
+		box.add_child(empty)
+		return box
+
+	for entry in entries:
+		var line := Label.new()
+		line.text = "%s · %s — %s" % [
+			tr("UI_LEDGER_DAY") % int(entry.get("day", 0)),
+			String(entry.get("name", "")),
+			CaravanLedger.get_kind_label(String(entry.get("kind", ""))),
+		]
+		# Üstü çizili satır soluk: kaybın kaydı duruyor ama artık
+		# yanında yürüyen biri değil.
+		if _session.ledger.is_struck(entry):
+			line.modulate = STRUCK_COLOR
+		box.add_child(line)
+
+	return box
 
 func _build_member_card(character: CharacterData, index: int, party_size: int) -> VBoxContainer:
 	var card := VBoxContainer.new()

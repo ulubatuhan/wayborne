@@ -336,6 +336,19 @@ func change_character_stress(character: CharacterData, delta: int) -> void:
 		return
 	character.change_stress(delta)
 
+## Kadrodaki olumsuz huy sayısı. Huy uzun süre yalnızca savaşta bir
+## sayıyı bükeyordu - Darkest Dungeon'da ise affliction *görülür ve
+## duyulur*. Yol katmanı bunu okuyup işaret sıklığını artırıyor:
+## dağılmış bir kadro daha çok aksatır, daha çok geride kalır. Yeni bir
+## sistem değil, var olan işaret katmanının çarpanı (bkz. RoadSignals).
+func get_affliction_count() -> int:
+	var total := 0
+	for character in party:
+		for trait_resource in character.get_traits():
+			if not trait_resource.is_positive:
+				total += 1
+	return total
+
 ## Kadroda kırılma noktasını aşmış olanlar (bkz. CharacterData.is_stressed).
 func get_stressed_characters() -> Array[CharacterData]:
 	var stressed: Array[CharacterData] = []

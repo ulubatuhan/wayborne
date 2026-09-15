@@ -307,6 +307,105 @@ wayborne/
   is a `power_scale` multiplier applied only to the freshly-built
   `CombatUnit`, not the `EnemyTemplate` itself.
 
+### Lineage Rules
+
+The game's own codex states the thesis — *"the subject is not the caravan
+but the people pulling it, and their wearing down"* — and for a long time
+the systems contradicted it: the win condition was `GOAL_GOLD = 5000`. A
+game about attrition cannot be won by filling a purse, and a gold target
+frames the whole thing as a trade sim. The target and its screen are gone.
+
+What replaced it was already half-written in the code as an edge rule:
+**the leader dies, the senior companion takes over, the caravan does not
+disband.** That is now the spine. The player does not run a caravan; they
+carry a caravan *name* down the road.
+
+- **The name outlives the leader.** `caravan_name` comes from the founder
+  and survives succession; `lineage_generation` counts how many times the
+  name has changed hands, not how many times you restarted.
+- **`leader_since_day` makes the era a thing the story can ask about.**
+  Campaign objectives read `days_as_leader`, so a chapter can gate on
+  *this* leader's tenure rather than the caravan's total age.
+- **The only real ending is having nobody left to carry the name**
+  (`RUN_OVER_FLAG`). Wealth ends nothing.
+- **`CaravanLedger` never deletes a line.** Someone who leaves or dies
+  stays in the book, struck through. The reason is not mechanical: a
+  deleted name reads as never having existed, a struck one is the
+  player's own past. The ledger is also the world's memory —
+  `build_campaign_context()` exposes counts from it, so events and
+  chapters can read history without a second "memory system" being
+  invented. Same discipline as objectives being `EventCondition`s.
+- **The finale's gold gate became `days_as_leader`.** A pure money gate
+  closed the story with "you got rich enough". The measurement survives:
+  with a leader who never dies, tenure equals elapsed days and the finale's
+  median lands at journey 30 (~180 days), so 60 is comfortably cleared. The
+  other two thresholds stay as measured — Campaign Rules already records
+  that moving the *later* gate halved the finale.
+
+### Road Layer Rules
+
+The road was "hold a key, a card opens at dawn". The only input was *are
+you moving*, and the answer was always yes — so walking was never a
+decision. The fix was not to shorten the road (the parallax landscape and
+the walking figures are the game's strongest asset) but to deepen it.
+
+- **Where you stand is what you notice.** `RoadAttention` splits the
+  column into three zones and the leader can only be in one: the head
+  (see an encounter early), the wagons (catch the axle before it breaks),
+  the rear (gather the stragglers). Each zone's reward exists **only** in
+  that zone; if one spot paid all three there would be no decision. The
+  leader could already walk the column (`RoadCaravan.set_leader_offset`)
+  — that movement was purely cosmetic and is now the mechanic.
+- **The gap between cards was the emptiness, not the cards.** A day's
+  event fired once, at dawn, leaving 23 silent hours. `RoadSignals` fills
+  them and is deliberately **non-modal**: no card, no paused clock, no
+  forced choice. Attending one *is* walking to its zone, so no new input
+  is invented either.
+- **An ignored signal grows.** A creaking wheel is a snapped axle three
+  days later. The cost is always paid in the game's existing vocabulary —
+  wagon damage, stress, route danger applied to the headroom — never a
+  new punishment system. A signal that could be ignored for free would be
+  scenery.
+- **Pace is a resource, not a toggle.** The speed button was free,
+  reversible and consequence-less. Pushing now burns `CaravanState.stamina`
+  and an exhausted caravan drops back to steady on its own; camp is the
+  way out. That is what makes hurrying a decision against the calendar
+  (contract deadlines, debt, season) rather than a setting.
+- **Combat frequency and avoidability ship together.** The game's deepest
+  system was its rarest. Ambush weight went 1.4 → 3.2 with a shorter
+  cooldown and a tiered danger multiplier; wildlife 1.0 → 2.2. Frequency
+  *alone* would have made fights a tax — the counterweight is the
+  attention layer, where a player at the head of the column sees the
+  encounter half a day out and can prepare or turn back.
+- **An invisible resource is not a resource.** Stamina got a bar and
+  attention got a label. The label sits in the *bottom* bar next to the
+  walk hint, because that is where the player's hands are and attention is
+  changed by walking. Adding a fourth bar overflowed the top strip and
+  clipped the caravan numbers, so `PulseBar` narrowed 150 → 122 — when a
+  strip fills up, first ask what actually belongs there.
+- **A trait must be visible outside combat.** Afflictions used to bend a
+  combat number and nothing else; they now raise the signal rate, so a
+  frayed company visibly fumbles more on the road.
+
+### Audio Rules
+
+- **One place knows which screen plays what.** `AudioManager` maps screens
+  to tracks; the menu and the road share one (both are "you are on the
+  way"), the city has its own (arrival). Same reasoning as `ArtPalette`
+  being the only colour source.
+- **A transition is a crossfade, not a cut.** Two players, not one: the
+  moment the road ends and the city begins is where the game most needs to
+  say *we arrived*, and a hard cut breaks it.
+- **`play_track` is idempotent**, so moving between city screens does not
+  restart the music.
+- **The loop flag is set in code, not in the import settings.** `.import`
+  files are gitignored and CI regenerates them, so a flag set there would
+  vanish in a clean clone.
+- **The default volume has exactly one owner** (`UserSettings`), and
+  `AudioManager` reads it lazily. A second default is a silently wrong
+  opening volume the day the two drift — and laziness also removes the
+  dependency on autoload ordering.
+
 ### Art Rules
 
 The game was drawn in `ColorRect`s: the road was two rectangles and
@@ -619,6 +718,25 @@ re-roll the rain away.
   stayed under 20 across twelve journeys). Camp now *slows* accumulation
   rather than deleting it. When a stat refuses to move, enumerate
   everything that reduces it before touching what raises it.
+- **Stress belongs to a person, not to the party.** `CharacterData.stress`
+  is the owner; `GameSession.party_stress` is a **lens onto the average**,
+  readable and writable because the HUD bar, departure morale, the event
+  context and `evt_stress_brawl` all ask "what shape is the company in",
+  and the answer to *that* is an average. But *who breaks* is not an
+  average question, so the break roll and combat's order-refusal read the
+  character's own stress (`is_stressed()` takes no argument). A single
+  number made the durable one and the nearly-broken one the same number —
+  which is the source of the whole genre's drama, deleted before it could
+  happen. Two consequences, both correct: `change_stress` wears the whole
+  party with **per-person clamping** (someone at the cap absorbs an
+  increase, someone at the floor absorbs a decrease — exactly what one
+  shared clamp hid), and a party with no members has stress zero, because
+  there is nobody to carry it.
+- **`_migrate_save` earned its keep here.** `SAVE_VERSION` 2 spreads a v1
+  save's single average across every party member. Inventing who was worn
+  down and by how much would be inventing information that never existed;
+  the information *was* the average. This is the first case `.get`
+  defaults could not cover, which is the hook's entire reason to exist.
 - **`party_stress` is the party's average, not one person's counter.** So
   a newcomer dilutes it (`add_to_party` - the single door in, the
   counterpart of `dismiss`), and replacing a crew over time brings it down.

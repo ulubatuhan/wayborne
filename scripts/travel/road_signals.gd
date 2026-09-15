@@ -72,6 +72,13 @@ const MAX_OPEN: int = 2
 ## uygulanır, bkz. Route Rules - toplamın kendisine değil).
 const SMOKE_DANGER_DELTA: float = 0.18
 
+## Kadrodaki her olumsuz huy işaret sıklığını bu kadar artırıyor. Huy
+## uzun süre yalnızca savaşta bir sayıyı bükeyordu; Darkest Dungeon'da
+## ise affliction *görülür*. Dağılmış bir kadro yolda daha çok aksatıyor,
+## daha çok geride kalıyor - yeni bir sistem değil, var olan katmanın
+## çarpanı.
+const AFFLICTION_SPAWN_BONUS: float = 0.35
+
 ## Açık işaretler: her biri {kind, age_hours}.
 var open_signals: Array[Dictionary] = []
 
@@ -105,7 +112,8 @@ static func get_escalated_key(kind: String) -> String:
 ## kendi bölgesinde ilgilenilince çözülür: dikkat sonlu olmasaydı bütün
 ## katman bedava olurdu.
 func tick(
-	hours: float, attention_zone: String, rng: RandomNumberGenerator
+	hours: float, attention_zone: String, rng: RandomNumberGenerator,
+	affliction_count: int = 0
 ) -> Dictionary:
 	var result := {"appeared": [], "resolved": [], "escalated": []}
 	if hours <= 0.0:
@@ -129,7 +137,8 @@ func tick(
 	# Sonra doğuş. Saat başına atılıyor ama tik bir saatten uzun
 	# olabiliyor (3x hız, uzun bir olay), o yüzden ihtimal süreyle
 	# ölçekleniyor - yoksa hızlı oynayan oyuncu daha az işaret görürdü.
-	var chance := clampf(SPAWN_CHANCE_PER_HOUR * hours, 0.0, 1.0)
+	var affliction_scale := 1.0 + float(maxi(0, affliction_count)) * AFFLICTION_SPAWN_BONUS
+	var chance := clampf(SPAWN_CHANCE_PER_HOUR * hours * affliction_scale, 0.0, 1.0)
 	if open_signals.size() < MAX_OPEN and rng.randf() < chance:
 		var kind := _roll_kind(rng)
 		if not get_open_kinds().has(kind):
