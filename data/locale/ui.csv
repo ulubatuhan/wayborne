@@ -66,6 +66,8 @@
 "UI_HUB_WAGON_SPOT","Vagon","Wagon","","","","","","","","",""
 "UI_HUB_MORALE","Moral","Morale","","","","","","","","",""
 "UI_HUB_STRESS","Stres","Stress","","","","","","","","",""
+"UI_HUB_DANGER","Tehlike","Danger","","","","","","","","",""
+"UI_ROAD_CHIPS","Altın: %d GG · Erzak: %d · İtibar: %d · Vagon: %d (%d hasarlı) · Tüccar: %d · Evrak: %d","Gold: %d GP · Provisions: %d · Reputation: %d · Wagons: %d (%d damaged) · Merchants: %d · Papers: %d","","","","","","","","",""
 "UI_HUB_INTERACT","▼ tıkla ya da E","▼ click or press E","","","","","","","","",""
 "UI_HUB_TOO_FAR","%s çok uzakta - yaklaş.","%s is too far away - get closer.","","","","","","","","",""
 "UI_HUB_HUD","%s · Kese: %d GG · Erzak: %d · Vagon: %d · Parti: %d/%d","%s · Purse: %d GP · Provisions: %d · Wagons: %d · Party: %d/%d","","","","","","","","",""
