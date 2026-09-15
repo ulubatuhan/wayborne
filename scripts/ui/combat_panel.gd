@@ -59,12 +59,13 @@ func _ready() -> void:
 	_ensure_built()
 
 ## Verilen parti ve tehlike seviyesiyle yeni bir savaş açar. Parti
-## CharacterData listesidir; sıralaması mevki sırasıdır. party_stress
+## CharacterData listesidir; sıralaması mevki sırasıdır. Kırılmışlık
 ## GameSession'dan geçirilir - kırılma noktasını aşmış (bkz.
-## CharacterData.is_stressed) her karakter emirlere kulak asmayabilir.
+## CharacterData.is_stressed) her karakter emirlere kulak asmayabilir -
+## ve bu artık kadronun ortalamasına değil kişinin kendi stresine bakıyor.
 func start_combat(
 	party: Array[CharacterData], danger_level: float,
-	rng: RandomNumberGenerator = null, party_stress: int = 0,
+	rng: RandomNumberGenerator = null,
 	enemy_kind: String = "bandit", region_id: String = ""
 ) -> void:
 	_ensure_built()
@@ -80,7 +81,7 @@ func start_combat(
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
-		units.append(CombatUnit.from_character(character, position, character.is_stressed(party_stress)))
+		units.append(CombatUnit.from_character(character, position, character.is_stressed()))
 		level_total += character.level
 		position += 1
 

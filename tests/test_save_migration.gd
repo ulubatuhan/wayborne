@@ -11,6 +11,7 @@ func run(t) -> void:
 	_test_old_character_dict_loads_with_defaults(t)
 	_test_old_session_save_loads(t)
 	_test_current_hp_is_clamped_to_max(t)
+	_test_v1_party_stress_spreads_to_members(t)
 
 ## Faz 5'te yazılmış olabilecek, yeni alanları hiç bilmeyen bir kayıt.
 func _old_character_dict() -> Dictionary:
@@ -86,3 +87,48 @@ func _test_current_hp_is_clamped_to_max(t) -> void:
 	var intact := _old_character_dict()
 	intact["current_hp"] = 12
 	t.eq(CharacterData.from_dict(intact).current_hp, 12, "aralıktaki can olduğu gibi korunur")
+
+## v1 -> v2: stres kadronun tek bir sayısıyken kişiye taşındı. Bu, bir
+## alanın **anlamının** değiştiği ilk durum - `.get` varsayılanlarının
+## karşılayamadığı ve `_migrate_save`'in var olma sebebi olan tam olarak
+## bu. Eski ortalama kadronun her üyesine dağıtılıyor; kimin ne kadar
+## yıprandığını geriye dönük uydurmak, olmayan bir bilgiyi uydurmak olurdu.
+func _test_v1_party_stress_spreads_to_members(t) -> void:
+	var session := GameSession.new(100, 0, 1)
+	var first := _old_character_dict()
+	first["name"] = "Kıdemli"
+	first["is_player"] = true
+	var second := _old_character_dict()
+	second["name"] = "Yoldaş"
+
+	session.load_from_dict({
+		"version": 1,
+		"gold": 100,
+		"current_location_id": WorldMapData.START_LOCATION_ID,
+		"party": [first, second],
+		"party_stress": 64,
+	})
+
+	t.eq(session.party.size(), 2, "göç kadroyu bozmaz")
+	for character in session.party:
+		t.eq(character.stress, 64, "eski ortalama her üyeye dağıtılır")
+	t.eq(session.party_stress, 64, "mercek aynı ortalamayı geri verir")
+
+	# v2 kaydı dokunulmadan geçmeli: göç yalnızca eski sürümde çalışır,
+	# yoksa her yüklemede kişilerin kendi değerlerini ortalamaya ezerdi.
+	var fresh := GameSession.new(100, 0, 1)
+	var tired := _old_character_dict()
+	tired["name"] = "Bitkin"
+	tired["is_player"] = true
+	tired["stress"] = 90
+	var rested := _old_character_dict()
+	rested["name"] = "Dinç"
+	rested["stress"] = 10
+	fresh.load_from_dict({
+		"version": GameSession.SAVE_VERSION,
+		"gold": 100,
+		"current_location_id": WorldMapData.START_LOCATION_ID,
+		"party": [tired, rested],
+	})
+	t.eq(fresh.party[0].stress, 90, "güncel kayıtta kişinin kendi stresi korunur")
+	t.eq(fresh.party[1].stress, 10, "kadrodaki ikinci kişi ayrı bir değer taşır")

@@ -352,7 +352,7 @@ func _simulate_combat(
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
-		units.append(CombatUnit.from_character(character, position, character.is_stressed(party_stress)))
+		units.append(CombatUnit.from_character(character, position, character.is_stressed()))
 		position += 1
 
 	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng, average_level)

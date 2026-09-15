@@ -68,7 +68,7 @@ func _init() -> void:
 	]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 77
-	panel.start_combat(party, 0.4, rng, 0, "wildlife", "")
+	panel.start_combat(party, 0.4, rng, "wildlife", "")
 	await _settle()
 	_save("combat_stage.png")
 

@@ -1438,7 +1438,7 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
 	panel.start_combat(
-		_session.get_party(), danger, null, _session.party_stress,
+		_session.get_party(), danger, null,
 		enemy_kind, _session.journey_destination_id
 	)
 

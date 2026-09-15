@@ -47,8 +47,20 @@ func _test_stress_resistance_scales_with_endurance(t) -> void:
 	t.ok(low.get_stress_resistance() < baseline.get_stress_resistance(), "düşük dayanıklılık direnci düşürür")
 	t.ok(high.get_stress_resistance() > baseline.get_stress_resistance(), "yüksek dayanıklılık direnci artırır")
 
-	t.not_ok(baseline.is_stressed(0), "stressiz kervan kimseyi kırmaz")
-	t.ok(baseline.is_stressed(GameSession.MAX_STRESS), "tavan stres herkesi kırar")
+	# Kırılmışlık artık kişinin **kendi** stresine bakıyor, kadronun
+	# ortalamasına değil (bkz. CharacterData.is_stressed).
+	baseline.stress = 0
+	t.not_ok(baseline.is_stressed(), "dinç biri kırılmış sayılmaz")
+	baseline.stress = CharacterData.MAX_STRESS
+	t.ok(baseline.is_stressed(), "tavana dayanmış biri kırılır")
+
+	# Aynı stres, farklı direnç: dayanıklı olan ayakta kalır. Ortalama
+	# tutulurken bu ayrım hiç yapılamıyordu - bu satır o yüzden var.
+	var midpoint := baseline.get_stress_resistance()
+	low.stress = midpoint
+	high.stress = midpoint
+	t.ok(low.is_stressed(), "aynı streste düşük dayanıklılık kırılır")
+	t.not_ok(high.is_stressed(), "aynı streste yüksek dayanıklılık dayanır")
 
 func _test_resolve_stress_breaks(t) -> void:
 	var session := GameSession.new(200, 0, 2)
@@ -188,7 +200,8 @@ func _test_city_rest_no_longer_erases_a_journey(t) -> void:
 	)
 
 ## Kadroya katılan biri ortalamayı aşağı çeker - `party_stress` kadronun
-## ortalaması, tek bir kişinin sayacı değil.
+## **ortalamasına bakan bir mercek**, ayrı tutulan bir sayaç değil
+## (bkz. GameSession.party_stress ve CharacterData.stress).
 func _test_newcomer_dilutes_party_stress(t) -> void:
 	var session := GameSession.new(500, 0, 2)
 	session.set_player_character(CharacterData.create("Lider", CultureCatalog.VALLEY, CharacterStats.new()))
@@ -216,14 +229,18 @@ func _test_newcomer_dilutes_party_stress(t) -> void:
 		t.ok(cycles[index] <= cycles[index - 1], "her yenileme turu stresi düşürür ya da sabit tutar")
 	t.ok(cycles[cycles.size() - 1] > 0, "sonsuz yenileme stresi sıfırlamaz")
 
-	# Boş partiye katılan ilk kişi seyreltme yapmaz - bölecek bir ortalama yok.
+	# Boş kadroda stres tutacak kimse yok: stresin sahibi kişi olduğu için
+	# (bkz. CharacterData.stress) kadrosuz bir kervanın stresi tanımsız
+	# değil, **sıfırdır**. Eskiden GameSession ayrı bir sayı tuttuğu için
+	# boş kadroya stres yazılabiliyordu - kimsenin taşımadığı bir yıpranma.
 	# Gerçek oyunda parti hiç boş kalmıyor (GameSession.new zaten bir oyuncu
 	# karakteri kuruyor), bu yüzden koruma elle boşaltılarak sınanıyor.
 	var empty := GameSession.new(100, 0, 1)
 	empty.party.clear()
 	empty.change_stress(50)
+	t.eq(empty.party_stress, 0, "kadrosuz kervanın stresi sıfırdır")
 	empty.add_to_party(CharacterData.create("İlk", CultureCatalog.VALLEY, CharacterStats.new()))
-	t.eq(empty.party_stress, 50, "ilk üye ortalamayı değiştirmez")
+	t.eq(empty.party_stress, 0, "ilk üye taşıyacak bir yıpranma bulamaz")
 
 	# Aynı kişiyi iki kez eklemek seyreltmemeli.
 	var guarded := GameSession.new(100, 0, 1)

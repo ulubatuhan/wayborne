@@ -267,36 +267,75 @@ const ONBOARDING_FLAG: String = "onboarding_seen"
 ## anki seferin ruh hali. Stres bunun tam tersi: seferler arası kalıcı,
 ## yalnızca şehirde dinlenmek ya da kampta mola vermek azaltır. İkisi de
 ## ana ekranda ayrı birer çubukla gösterilir (bkz. world_hub.gd).
-const MAX_STRESS: int = 100
-var party_stress: int = 0
+## Stresin **sahibi artık kişidir** (bkz. CharacterData.stress). Buradaki
+## tavan onun takma adı: iki ayrı sayı tutmak, ikisi ayrıştığı gün
+## kenetlemenin bir tarafta çalışıp öbüründe çalışmaması demekti.
+const MAX_STRESS: int = CharacterData.MAX_STRESS
 
-func change_stress(delta: int) -> void:
-	party_stress = clampi(party_stress + delta, 0, MAX_STRESS)
-
-## `party_stress` kadronun **ortalaması**dır, tek bir kişinin değil. Bunun
-## mekanik sonucu şu: kadroya diri biri katıldığında ortalama düşer, kadro
-## tamamen yenilendiğinde stres neredeyse silinir. Darkest Dungeon'daki
-## "kırılmış kahramanı gönder, taze birini tut" kararının karşılığı.
+## Kadronun ortalamasına bakan **mercek**. Okunabilir ve yazılabilir
+## olması bilinçli: HUD çubuğu, çıkış morali, olay bağlamı ve
+## `evt_stress_brawl` hep "kadro ne hâlde" sorusunu soruyor ve bunun
+## cevabı ortalamadır. Ama kimin kırılacağı sorusunun cevabı ortalama
+## *değildir* - o yüzden kırılma zarı (bkz. resolve_stress_breaks) ve
+## savaşta emir reddi artık kişinin kendi stresini okuyor.
 ##
+## Yazmak kadronun tamamına aynı değeri dağıtıyor: "kervan bu hâlde"
+## demenin tek anlamlı karşılığı bu. Boş kadroda yazmak hiçbir şey
+## yapmaz, çünkü stres tutacak kimse yoktur.
+var party_stress: int:
+	get:
+		if party.is_empty():
+			return 0
+		var total := 0
+		for character in party:
+			total += character.stress
+		return int(round(float(total) / float(party.size())))
+	set(value):
+		var clamped := clampi(value, 0, MAX_STRESS)
+		for character in party:
+			character.stress = clamped
+
+## Kadronun tamamını aynı miktarda yıpratır/dinlendirir - yol aşınması,
+## açlık, kamp, ziyafet ve `EventEffect.Type.STRESS` bunu kullanır.
+## Kenetleme kişi başına olduğu için tavana dayanmış biri artırmayı
+## yutar, dibe inmiş biri azaltmayı: ortalama üzerinden tek bir
+## kenetlemenin gizlediği tam da buydu.
+func change_stress(delta: int) -> void:
+	for character in party:
+		character.change_stress(delta)
+
+## Tek bir kişiyi yıpratır. Yolun "nerede durduğun = neye dikkat ettiğin"
+## katmanı ve kişiye özel olaylar bunu kullanıyor.
+func change_character_stress(character: CharacterData, delta: int) -> void:
+	if character == null:
+		return
+	character.change_stress(delta)
+
+## Kadroda kırılma noktasını aşmış olanlar (bkz. CharacterData.is_stressed).
+func get_stressed_characters() -> Array[CharacterData]:
+	var stressed: Array[CharacterData] = []
+	for character in party:
+		if character.is_stressed():
+			stressed.append(character)
+	return stressed
+
 ## Yeni gelen sıfırla gelmiyor: batmış bir kervana katılan biri anlatılanları
-## duyar, kadronun havasının bir kısmını üstlenir (NEWCOMER_STRESS_SHARE).
-## Sıfırla gelseydi "birini gönder, yenisini tut" stresi tek hamlede yarıya
-## indiren bedava bir düğmeye dönerdi; bu payla her tur azalan bir getiri
-## veriyor ve her turun ücreti var (bkz. hire_cost).
+## duyar, kadronun havasının bir kısmını üstlenir. Sıfırla gelseydi "birini
+## gönder, yenisini tut" stresi tek hamlede düşüren bedava bir düğmeye
+## dönerdi; bu payla her tur azalan bir getiri veriyor ve her turun ücreti
+## var (bkz. hire_cost).
 const NEWCOMER_STRESS_SHARE: float = 0.4
 
-## Partiye katılmanın tek kapısı. `dismiss()`in karşılığı: ortalamanın
-## seyrelmesi burada olur, `party.append()` doğrudan çağrılırsa olmaz.
+## Partiye katılmanın tek kapısı. `dismiss()`in karşılığı: yeni gelenin
+## payı burada belirlenir, `party.append()` doğrudan çağrılırsa belirlenmez.
 func add_to_party(character: CharacterData) -> void:
 	if character == null or party.has(character):
 		return
-	var previous_count := party.size()
+	# Payı *katılmadan önceki* ortalamadan alıyor: kendisi de ortalamaya
+	# girdikten sonra okunsaydı kendi sıfırıyla kendi payını düşürürdü.
+	var inherited := int(round(float(party_stress) * NEWCOMER_STRESS_SHARE))
 	party.append(character)
-	if previous_count <= 0:
-		return
-	var newcomer_stress := float(party_stress) * NEWCOMER_STRESS_SHARE
-	var diluted := (float(party_stress) * float(previous_count) + newcomer_stress) / float(party.size())
-	party_stress = clampi(int(round(diluted)), 0, MAX_STRESS)
+	character.stress = clampi(inherited, 0, MAX_STRESS)
 
 ## Kadroya ziyafet: paralı stres rahatlaması. Birikme artık şehir varışının
 ## tek başına eritemeyeceği kadar hızlı (bkz. get_city_rest_relief), o yüzden
@@ -604,7 +643,7 @@ func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	# dönüş tipini çıkaramıyor (bkz. CLAUDE.md'deki := / Variant tuzağı).
 	var stressed_party: Array[CharacterData] = get_party().duplicate()
 	for character in stressed_party:
-		if not character.is_stressed(party_stress):
+		if not character.is_stressed():
 			continue
 
 		var affliction := rng.randf() < BREAK_AFFLICTION_CHANCE
@@ -1339,7 +1378,7 @@ func get_cargo_space_remaining() -> float:
 ## alanlarına taşımıştır. Bu yüzden journey_*/caravan hiç serileştirilmiyor
 ## - saklayacak anlamlı bir durumları yok; owned_wagon_* kalıcı olduğu
 ## için serileştiriliyor.
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
 
 func to_save_dict() -> Dictionary:
 	var inventory_data: Array = []
@@ -1364,7 +1403,6 @@ func to_save_dict() -> Dictionary:
 		"total_days_elapsed": total_days_elapsed,
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
-		"party_stress": party_stress,
 		"last_feast_day": last_feast_day,
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
@@ -1395,6 +1433,18 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 	if version >= SAVE_VERSION:
 		return data
 	# v0 (sürümsüz) -> v1: yalnızca alan eklendi, dönüştürme gerekmiyor.
+	#
+	# v1 -> v2: stres kadronun tek bir sayısıyken kişiye taşındı (bkz.
+	# CharacterData.stress). Bu, bir alanın **anlamının** değiştiği ilk
+	# durum - `.get` varsayılanlarının karşılayamadığı tam olarak bu, ve
+	# `_migrate_save`'in var olma sebebi. Eski ortalama kadronun her
+	# üyesine dağıtılıyor: bilgi zaten ortalamaydı, kimin ne kadar
+	# yıprandığını geriye dönük uydurmak yanlış olurdu.
+	if version < 2 and data.has("party_stress"):
+		var legacy_stress := clampi(int(data["party_stress"]), 0, MAX_STRESS)
+		for entry in data.get("party", []):
+			if entry is Dictionary and not entry.has("stress"):
+				entry["stress"] = legacy_stress
 	return data
 
 func load_from_dict(raw_data: Dictionary) -> void:
@@ -1444,7 +1494,6 @@ func load_from_dict(raw_data: Dictionary) -> void:
 		party.append(CharacterData.from_dict(entry))
 	_ensure_party()
 
-	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
 	last_feast_day = int(data.get("last_feast_day", -1))
 
 	equipment_inventory = {}
