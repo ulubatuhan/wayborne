@@ -466,6 +466,58 @@ way to textures.
   "Invalid polygon data, triangulation failed", skips that shape and carries
   on - invisible without a rendered frame. Do not append a base edge to a
   shape whose arc already closes on it.
+- **The frame closes at the bottom, or the eye falls out of it.** The
+  strip below the road used to be the road's own light tone, so the
+  picture *opened* downward and the caravan never separated from the
+  ground. `TravelForeground`'s apron is a near-black earth band, and it
+  is a depth rule, not a fill: the nearest strip is the darkest one.
+  Which flips the props on it — shrub, stone and mud are now chosen
+  **lighter than the apron**, because a dark shrub on dark ground is no
+  shrub at all.
+- **Flat marks are ground; standing props stand on it.** Puddles and bare
+  soil are painted *onto* the earth and may merge freely — two puddles
+  running together is what puddles do. A shrub and a stone are volume:
+  two in the same place read as one lump. So they are two passes, marks
+  first, and the standing pass obeys the column rule — **each prop
+  consumes its own width** (`RoadCaravan._walk_column`'s reasoning), the
+  next one starts after it, and what does not fit is dropped. Mixed into
+  one pass, a puddle got painted over a tuft of grass.
+- **Size and density must come from the same measure.** The foreground's
+  cell spacing was a fixed 130 world px while prop size was a ratio of
+  the band's height. That agreed only at `BAND_HEIGHT`; when the road
+  screen went full-frame the band became ~990px, props tripled and the
+  spacing did not, so everything piled up. Spacing is derived from the
+  prop ceiling now. Whenever one of a pair is a ratio and the other a
+  constant, the pair is a bug waiting for a resolution change.
+- **Gloom must not delete the hour.** Rain lerped the sky fully to grey,
+  so every rainy hour was the same lead-coloured screen. The mix is
+  partial and the *horizon* takes the least of it — the light under the
+  cloud comes in there, and that warm strip is what holds the scene up.
+- **The world's architecture is the world's, not a borrowed one.** The
+  distant city was square towers under triangular caps, which is a north
+  European keep. Domes and minarets were tried as the fix and
+  **reverted**: Wayborne has no such institution, so a place of worship
+  on the horizon states something from outside the game's own lore.
+  Wayborne's cities grew out of trade — wall, gate, warehouse — and what
+  makes the silhouette readable is those blocks being at *different
+  heights*, not a symbol. `ArtDraw.city_silhouette` is one brush because
+  the main menu's horizon shows the same city.
+- **A silhouette is read by the gaps, not the mass.** In flat ink every
+  cue that separated two shapes by tone is gone, so shapes that work in
+  colour collapse. Measured on `MenuBackdrop` in one pass: a walker whose
+  torso reached the ground had its legs drawn *inside* it and read as a
+  skittle; a wagon whose canopy was as wide as its bed became a tunnel
+  (the canopy is narrower now, so there is a shoulder); a horse's legs
+  were a fixed ratio and hung below the contact line, so the rider read
+  as a four-legged stool; and the yoked ox pair, at the *road's* own
+  offsets, merged into one humped mass — a silhouette needs those
+  offsets larger than a tinted drawing does.
+- **One wagon is drawn by a pair of oxen.** A single animal is a horse's
+  harness, not a yoke. The far ox is pushed back by three marks at once —
+  slightly ahead, slightly higher, slightly smaller — because any one or
+  two of them alone reads as a thick shadow of the near ox rather than a
+  second animal. The column's measurements still come from the near ox
+  only, so `get_ox_centres()` keeps returning one centre per wagon.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.
@@ -1855,7 +1907,11 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   refuses orders while a calm one deterministically never does.
 - **`tests/screenshot_*.gd` are the visual checks, and they are not tests** -
   they never fail, they render PNGs (`screenshot_combat`, `screenshot_road`,
-  `screenshot_city`, `screenshot_hub`). They exist because a structural test
+  `screenshot_city`, `screenshot_hub`, `screenshot_journey_screen`,
+  `screenshot_road_encounter`, `screenshot_menu` — the last one exists
+  because the main menu was the only screen never drawn at all, four
+  buttons on flat grey, and no assertion anywhere could say so). They
+  exist because a structural test
   verifies *layout* and never *appearance*, and this repository ships
   headless: an interface change went unseen for a long time. Run them with a
   virtual screen and the software rasteriser, since the environment has no

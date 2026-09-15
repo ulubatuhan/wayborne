@@ -53,6 +53,24 @@ const PERSON_HEIGHT_RATIO: float = 0.19
 const MOUNTED_HEIGHT_RATIO: float = 0.27
 const OX_HEIGHT_RATIO: float = 0.15
 
+## Bir vagonu **çift öküz** çeker. Tek hayvan boyunduruk değil tek at
+## koşumudur; konsept görsellerinde de kervanın yükünü hep bir çift
+## çekiyor. İkinci öküz uzak taraftadır, o yüzden üç işaretle geriye
+## itiliyor - biraz ileride (`PAIR_LEAD`), biraz yukarıda (`PAIR_RISE`,
+## yani zemin çizgisi ona daha uzakta) ve biraz küçük (`PAIR_DEPTH`).
+## Üçü birden olmazsa çift, iki ayrı öküz gibi değil, tek öküzün kalın
+## bir gölgesi gibi okunuyor.
+##
+## Yakın öküz *sonra* yaratılıyor: çocuk sırası çizim sırası, uzaktaki
+## arkada kalmalı.
+## Ölçüldü: ilk değerler (0.16/0.17) çifti tek bir hayvana çeviriyordu -
+## ekranda sekiz bacaklı bir kütle görünüyordu, iki öküz değil. İki
+## gövdenin ayrı okunması için kayma öküz boyunun üçte birine yaklaşmalı.
+const OX_PAIR_LEAD: float = 0.34
+const OX_PAIR_RISE: float = 0.38
+const OX_PAIR_DEPTH: float = 0.88
+const OX_PAIR_SHADE: float = 0.74
+
 ## Yürüyüş temposu: bir "gün/saniye"lik hız kaç adım. Sayının kendisi
 ## görsel; yolun gerçek hızı road_journey'de.
 const STEP_RATE: float = 2.6
@@ -88,7 +106,12 @@ var _leader: WalkFigure
 var _leader_mounted: bool = false
 var _party_figures: Array[WalkFigure] = []
 var _crew_figures: Array[WalkFigure] = []
+## Koşumun yakın tarafındaki öküzler - kolonun ölçüsünü bunlar belirliyor.
 var _oxen: Array[WalkFigure] = []
+## Uzak taraftakiler, aynı sırada. Ayrı bir dizi çünkü yerleşim ve test
+## kolonu *yakın* öküz üzerinden okuyor: `get_ox_centres()` vagon başına
+## tek merkez döndürmeye devam ediyor.
+var _oxen_far: Array[WalkFigure] = []
 
 ## Altında bir şey çizmenin anlamı olmadığı boy. Bunun altında vagonun
 ## bütün ölçüleri piksel altına düşüyor ve çokgenlerin köşeleri aynı
@@ -132,6 +155,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_party_figures.clear()
 	_crew_figures.clear()
 	_oxen.clear()
+	_oxen_far.clear()
 	_leader = null
 
 	_wagon_count = maxi(1, session.owned_wagon_count)
@@ -158,6 +182,12 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 
 
 	for index in _wagon_count:
+		# Uzaktaki önce: çocuk sırası çizim sırası.
+		var far := _make_figure(
+			WalkFigure.KIND_OX, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
+		)
+		far.modulate = Color(OX_PAIR_SHADE, OX_PAIR_SHADE, OX_PAIR_SHADE, 1.0)
+		_oxen_far.append(far)
 		_oxen.append(_make_figure(
 			WalkFigure.KIND_OX, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
 		))
@@ -413,6 +443,15 @@ func _walk_column(scale: float, place: bool) -> float:
 		if index < _oxen.size():
 			cursor -= ox_w * 0.5
 			if place:
+				# Çift öküz: uzaktaki kolonun ölçüsüne girmiyor, çünkü
+				# yakınının *yanında* duruyor - ileri kaydırması boşluk
+				# değil derinlik işareti.
+				if index < _oxen_far.size():
+					_place(
+						_oxen_far[index], cursor + ox_w * OX_PAIR_LEAD,
+						ox_h * OX_PAIR_DEPTH, ox_w * OX_PAIR_DEPTH,
+						ox_h * OX_PAIR_RISE
+					)
 				_place(_oxen[index], cursor, ox_h, ox_w)
 			cursor -= ox_w * 0.5
 		cursor -= hitch_gap
@@ -455,9 +494,13 @@ func _walk_escort_group(
 			)
 	return cursor - float(count - 1) * step - person_w - gap_normal
 
-func _place(figure: WalkFigure, x: float, height: float, width: float) -> void:
+## `lift` figürü zemin çizgisinden yukarı alır: yolun karşı tarafında
+## duran bir şey kameradan uzaktır, uzak olan da yukarıda durur.
+func _place(
+	figure: WalkFigure, x: float, height: float, width: float, lift: float = 0.0
+) -> void:
 	figure.size = Vector2(width, height)
-	figure.position = Vector2(x - width * 0.5, _ground_y - height)
+	figure.position = Vector2(x - width * 0.5, _ground_y - height - lift)
 
 func _draw() -> void:
 	if _ground_y <= 0.0 or size.y < MIN_DRAW_HEIGHT:
