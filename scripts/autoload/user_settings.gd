@@ -17,6 +17,14 @@ const CONFIG_PATH: String = "user://settings.cfg"
 const CONFIG_SECTION: String = "locale"
 const CONFIG_KEY: String = "code"
 
+## Ses. Dosyanın sahibi bu autoload olduğu için müzik seviyesi de
+## buradan okunup yazılıyor - `AudioManager` sesi *çalar*, tercihi
+## saklamaz. İki ayrı yazıcı olsaydı biri ötekinin bölümünü silerdi
+## (config.load + set_value + save deseninin var olma sebebi tam bu).
+const AUDIO_SECTION: String = "audio"
+const AUDIO_KEY_MUSIC: String = "music_volume"
+const DEFAULT_MUSIC_VOLUME: float = 0.7
+
 ## Boş bırakılan hücreler bu dile düşer (Godot'ta doğrulandı: eksik çeviri
 ## anahtarı basmaz, fallback locale'in metnini basar), bu yüzden İngilizce
 ## her zaman eksiksiz dolu olmalı.
@@ -84,6 +92,21 @@ func save_locale(code: String) -> void:
 	# tercihler (ses, tuş atamaları) bu yazımda silinmesin.
 	config.load(CONFIG_PATH)
 	config.set_value(CONFIG_SECTION, CONFIG_KEY, code)
+	config.save(CONFIG_PATH)
+
+func load_music_volume() -> float:
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) != OK:
+		return DEFAULT_MUSIC_VOLUME
+	return clampf(
+		float(config.get_value(AUDIO_SECTION, AUDIO_KEY_MUSIC, DEFAULT_MUSIC_VOLUME)),
+		0.0, 1.0
+	)
+
+func save_music_volume(volume: float) -> void:
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	config.set_value(AUDIO_SECTION, AUDIO_KEY_MUSIC, clampf(volume, 0.0, 1.0))
 	config.save(CONFIG_PATH)
 
 ## "de_DE" gibi bölgeli bir sistem kodu önce tam eşleşme, sonra dil kökü

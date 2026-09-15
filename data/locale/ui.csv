@@ -3,6 +3,7 @@
 "UI_PLAY","Yeni Oyun","New Game","","","","","","","","",""
 "UI_CONTINUE","Devam Et","Continue","","","","","","","","",""
 "UI_SETTINGS","Ayarlar","Settings","","","","","","","","",""
+"UI_MUSIC_VOLUME","Müzik Sesi","Music Volume","","","","","","","","",""
 "UI_QUIT","Çıkış","Quit","","","","","","","","",""
 "UI_NEW_GAME_CONFIRM","Mevcut kayıt silinip yeni bir oyun başlatılacak. Emin misin?","This will delete your save and start a new game. Are you sure?","","","","","","","","",""
 "UI_PARTY_SIZE","Parti Büyüklüğü","Party Size","","","","","","","","",""

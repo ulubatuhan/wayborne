@@ -265,6 +265,7 @@ var _danger_bar: PulseBar
 var _modal_open: bool = false
 
 func _ready() -> void:
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_ui()
 	_init_journey()
 
