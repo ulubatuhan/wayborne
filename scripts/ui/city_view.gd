@@ -65,6 +65,37 @@ const HOUSE_CHANCE: float = 0.38
 
 const ROOF_COLORS: Array[Color] = [ROOF_TILE, ROOF_THATCH, ROOF_SLATE]
 
+## --- Kasabanın durduğu yer ---
+## Kasaba uzun süre düz bir gradyanın üstünde duruyordu: gökyüzü yok,
+## ufuk yok, zemin yok, gölge yok. Yol ve ana menü kendi gökyüzünü,
+## sırtlarını ve temas gölgelerini kazandıktan sonra fark bariz hâle
+## geldi - şehir aynı oyuna ait görünmüyordu, masaya konmuş bir maket
+## gibi duruyordu. Buradaki her değer yolun kendi kurallarının şehirdeki
+## karşılığı: gökyüzü `ArtPalette`'ten, sırtlar `ArtDraw.ridge`'den,
+## yere basan her şeyin altında `ArtDraw.contact_shadow`.
+const SKY_PHASE: String = ArtPalette.PHASE_DAY
+const HORIZON_RATIO: float = 0.30
+
+## Ufuktaki sırtlar: taban y'si, genlik, dalga boyu, pusa karışma payı -
+## menünün `RIDGES` tablosuyla aynı dört alan, aynı gerekçe (boy, pus ve
+## taban tek bir derinlikten gelir).
+const RIDGES: Array = [
+	[0.295, 0.070, 0.70, 0.74],
+	[0.302, 0.046, 0.46, 0.46],
+]
+
+## Sur dışındaki kır: kasabayı bir yere oturtan şey. Ağaçlar yalnızca
+## ufkun altındaki şeritte, kasabanın **arkasında** duruyor - önüne
+## konan bir ağaç, yolun "aşağıda yüksek bir şey olmaz" kuralının aynısı
+## gereği kasabayı gizlerdi.
+const COUNTRYSIDE_TREES: int = 26
+const COUNTRYSIDE_SEED: int = 7731
+
+## Kasabanın kendi gölgesi. Kütle kadar geniş, ışığın geldiği yönün
+## tersine kayık: altında hiçbir şey yokken kasaba havada duruyordu.
+const SLAB_SHADOW_OFFSET: Vector2 = Vector2(18.0, 14.0)
+const SLAB_SHADOW_ALPHA: float = 0.20
+
 ## Mekânlar. `kind` mimariyi, `name_key`/`desc_key` balonu, `scene` de
 ## tıklayınca açılacak ekranı veriyor. Tek tablo: ekranda görünen bina ile
 ## açılan ekran ayrışamaz.
@@ -225,17 +256,88 @@ func _draw() -> void:
 	if _buildings.is_empty():
 		return
 	var area := Rect2(Vector2.ZERO, size)
-	# Kasabanın çevresi: şehir surunun dışındaki kır. Koyu bir hiçlik
-	# yerine gerçek bir arazi olması, kasabanın bir yerde durduğunu
-	# söylüyor.
-	ArtDraw.gradient_band(
-		self, area, Color(0.30, 0.36, 0.40), Color(0.36, 0.38, 0.28)
-	)
+	# Sıra yolunkiyle aynı: gökyüzü → sırtlar → zemin → kır → kasabanın
+	# gölgesi → kasaba. Ufkun altı ufkun üstünün önünde.
+	_draw_surroundings(area)
+	_draw_slab_shadow()
 	_draw_ground()
 	_draw_walls()
 	for index in _buildings.size():
 		_draw_building(index, index == _hovered)
-	ArtDraw.vignette(self, area, 0.06)
+	ArtDraw.vignette(self, area, 0.09)
+
+## Kasabanın durduğu dünya. Buradan önce bu ekranda düz bir gradyan
+## vardı - gökyüzü de ufuk da zemin de aynı iki rengin arasındaydı, yani
+## kasaba hiçbir yerde durmuyordu.
+func _draw_surroundings(area: Rect2) -> void:
+	var sky := ArtPalette.sky(SKY_PHASE)
+	var haze := Color(sky.haze)
+	var horizon := area.size.y * HORIZON_RATIO
+
+	ArtDraw.gradient_band(
+		self, Rect2(Vector2.ZERO, Vector2(area.size.x, horizon + 2.0)),
+		Color(sky.top), Color(sky.bottom)
+	)
+
+	var rock := ArtPalette.terrain(ArtPalette.BIOME_MOUNTAIN)
+	for index in RIDGES.size():
+		var layer: Array = RIDGES[index]
+		ArtDraw.ridge(
+			self, area, area.size.y * float(layer[0]),
+			area.size.y * float(layer[1]), area.size.x * float(layer[2]),
+			float(index) * 270.0,
+			ArtPalette.fade_to_haze(
+				Color(rock.far).darkened(0.28), haze, float(layer[3])
+			),
+			COUNTRYSIDE_SEED + index * 13
+		)
+
+	var field := ArtPalette.terrain(ArtPalette.BIOME_STEPPE)
+	ArtDraw.gradient_band(
+		self, Rect2(Vector2(0.0, horizon), Vector2(area.size.x, area.size.y - horizon)),
+		ArtPalette.fade_to_haze(Color(field.far), haze, 0.34),
+		Color(field.near).darkened(0.10)
+	)
+	_draw_countryside(area, horizon, haze)
+
+## Sur dışındaki ağaçlar. Yalnızca ufkun hemen altındaki dar şeritte,
+## yani kasabanın arkasında: önüne konan bir ağaç, yolun "aşağıda yüksek
+## bir şey olmaz" kuralıyla aynı sebepten kasabayı gizler.
+func _draw_countryside(area: Rect2, horizon: float, haze: Color) -> void:
+	var wood := ArtPalette.terrain(ArtPalette.BIOME_FOREST)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|kir" % _city_id) if not _city_id.is_empty() else COUNTRYSIDE_SEED
+	for _index in COUNTRYSIDE_TREES:
+		var depth := rng.randf()
+		var base := Vector2(
+			rng.randf() * area.size.x,
+			horizon + area.size.y * 0.004 + depth * area.size.y * 0.090
+		)
+		var height := area.size.y * (0.046 + depth * 0.046)
+		var leaf := ArtPalette.fade_to_haze(
+			Color(wood.flora), haze, 0.42 - depth * 0.30
+		)
+		var trunk := ArtPalette.fade_to_haze(
+			Color(wood.accent).darkened(0.30), haze, 0.42 - depth * 0.30
+		)
+		ArtDraw.contact_shadow(self, base, height * 0.52, 0.16)
+		if rng.randf() < 0.45:
+			ArtDraw.conifer(self, base, height, trunk, leaf)
+		else:
+			ArtDraw.tree(self, base, height, trunk, leaf)
+
+## Kasabanın kendi temas gölgesi - ada gibi duran bir kütlenin altında
+## hiçbir şey yoksa o kütle havada durur (bkz. Art Rules'un aynı
+## maddesi, orada ağaçlar için yazılmıştı).
+func _draw_slab_shadow() -> void:
+	var corners := PackedVector2Array([
+		_tile(-1.0, -1.0), _tile(float(GRID) + 1.0, -1.0),
+		_tile(float(GRID) + 1.0, float(GRID) + 1.0), _tile(-1.0, float(GRID) + 1.0),
+	])
+	var shifted := PackedVector2Array()
+	for corner in corners:
+		shifted.append(corner + SLAB_SHADOW_OFFSET)
+	draw_colored_polygon(shifted, Color(0.0, 0.0, 0.0, SLAB_SHADOW_ALPHA))
 
 func _draw_ground() -> void:
 	for gx in GRID:
