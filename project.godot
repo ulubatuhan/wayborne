@@ -24,6 +24,7 @@ DevPanel="*res://scripts/autoload/dev_panel.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 UserSettings="*res://scripts/autoload/user_settings.gd"
 GamepadCursor="*res://scripts/autoload/gamepad_cursor.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [debug]
 

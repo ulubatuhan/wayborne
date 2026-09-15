@@ -23,6 +23,10 @@ var _city_view: CityView
 func _ready() -> void:
 	_session = GameState.get_session()
 	Nav.go_root(Nav.CITY_MAP)
+	# Şehrin kendi parçası: varış hissi. Şehir içindeki ekranlar
+	# (pazar, lonca...) parçayı değiştirmiyor - play_track aynı parçayı
+	# ikinci kez çalmıyor, o yüzden ekran gezmek müziği baştan başlatmaz.
+	AudioManager.play_track(AudioManager.TRACK_CITY)
 	# Sahne dosyasındaki yazı yalnızca editörde ne olduğunu görmek için;
 	# oyuncunun gördüğü metin her zaman koddan, anahtarla gelir - yoksa
 	# ekran hangi dile geçilirse geçilsin Türkçe kalır.

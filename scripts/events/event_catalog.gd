@@ -150,13 +150,24 @@ static func _wanderer_revenge() -> GameEvent:
 	return event
 
 static func _bandit_ambush() -> GameEvent:
-	var event := _event("evt_bandit_ambush", "EVT_AMBUSH", 1.4)
-	event.cooldown_days = 2
-	# Tehlikeli yollarda ve morali düşük kervanlarda daha sık.
+	var event := _event("evt_bandit_ambush", "EVT_AMBUSH", 3.2)
+	event.cooldown_days = 1
+	# **Savaş seyrekti ve bu, oyunun en derin sisteminin en az görülen
+	# sistemi olması demekti.** Taban ağırlık yükseltildi, bekleme
+	# kısaltıldı ve tehlike çarpanı kademelendi - sakin bir yolda hâlâ
+	# nadir, haydut yatağında neredeyse kaçınılmaz.
+	#
+	# Sıklık tek başına gelseydi savaş bir vergi olurdu; dengesi yolun
+	# dikkat katmanı: kolonun önünde yürüyen oyuncu karşılaşmayı
+	# uzaktan görüp hazırlanabiliyor ya da dönebiliyor (bkz.
+	# RoadAttention.FRONT_SPOT_BONUS_DAYS).
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
-			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.5),
-		]), 2.0),
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
+		]), 1.8),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.6),
+		]), 2.2),
 	])
 	event.choices = _choices([
 		_gated_choice(
@@ -883,8 +894,15 @@ static func _roadside_shrine() -> GameEvent:
 ## Kaçmak/beslemek savaşsız atlatır ama bedelsiz değil - besleme erzak
 ## yer, kaçış tehlikeyi artırır (ürkütülen hayvanlar iz bırakır).
 static func _wild_animal() -> GameEvent:
-	var event := _event("evt_wild_animal", "EVT_WILD", 1.0)
-	event.cooldown_days = 3
+	var event := _event("evt_wild_animal", "EVT_WILD", 2.2)
+	event.cooldown_days = 2
+	# Vahşi hayvan tehlikeyle değil ıssızlıkla gelir, ama sıklık
+	# gerekçesi haydutunkiyle aynı (bkz. _bandit_ambush).
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.4),
+		]), 1.6),
+	])
 	event.choices = _choices([
 		_choice("EVT_WILD_OPT_FIGHT", _effects([
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "wildlife"),

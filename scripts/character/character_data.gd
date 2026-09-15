@@ -327,14 +327,34 @@ func get_traits() -> Array[Trait]:
 			result.append(trait_resource)
 	return result
 
-## Direnç ne kadar yüksekse parti stresi bu karakteri o kadar geç kırar -
+## --- Stres ---
+## **Stres kişiye aittir, kadroya değil.** Uzun süre `GameSession` tek bir
+## `party_stress` sayısı tutuyordu ve bu, oyunun kendi tezini siliyordu:
+## "asıl konu kervanı çeken insanların yıpranması" diyen bir oyunda kimin
+## yıprandığı sorusunun cevabı yoktu. Ortalama, dayanıklı olanla kırılmak
+## üzere olanı aynı sayıya indiriyor - yani Darkest Dungeon'ın bütün
+## dramının kaynağını (şu adam bitti, öteki hâlâ ayakta) baştan yok
+## ediyordu.
+##
+## `GameSession.party_stress` artık bu değerlerin **ortalamasına bakan bir
+## mercek**: okunabilir, yazılabilir, ama sahibi burası.
+const MAX_STRESS: int = 100
+
+var stress: int = 0
+
+func change_stress(delta: int) -> void:
+	stress = clampi(stress + delta, 0, MAX_STRESS)
+
+## Direnç ne kadar yüksekse bu karakter o kadar geç kırılır -
 ## dayanıklılığa bağlı (bkz. GameSession.resolve_stress_breaks). Herkes
 ## er ya da geç kırılabilir, yalnızca eşiği farklı.
 func get_stress_resistance() -> int:
 	return 50 + int(round(3.0 * stats.get_effective_value(CharacterStats.Kind.ENDURANCE)))
 
-func is_stressed(current_party_stress: int) -> bool:
-	return current_party_stress >= get_stress_resistance()
+## Argüman almıyor: kırılma artık kadronun ortalamasına değil **kişinin
+## kendi** stresine bakıyor.
+func is_stressed() -> bool:
+	return stress >= get_stress_resistance()
 
 ## Durum efekti dirençleri: stat payı + **seviye payı**.
 ##
@@ -441,6 +461,7 @@ func to_dict() -> Dictionary:
 		"skin_tone": skin_tone,
 		"stats": stats.to_dict(),
 		"current_hp": current_hp,
+		"stress": stress,
 		"hire_cost": hire_cost,
 		"is_player": is_player,
 		"level": level,
@@ -464,6 +485,7 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.height_cm = clampi(int(data.get("height_cm", DEFAULT_HEIGHT_CM)), MIN_HEIGHT_CM, MAX_HEIGHT_CM)
 	character.skin_tone = int(data.get("skin_tone", 1))
 	character.stats = CharacterStats.from_dict(data.get("stats", {}))
+	character.stress = clampi(int(data.get("stress", 0)), 0, MAX_STRESS)
 	character.hire_cost = int(data.get("hire_cost", 0))
 	character.is_player = bool(data.get("is_player", false))
 	character.level = maxi(1, int(data.get("level", 1)))

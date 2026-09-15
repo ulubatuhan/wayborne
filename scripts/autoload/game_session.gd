@@ -249,15 +249,40 @@ func find_open_path(destination_id: String) -> Array[String]:
 		current_location_id, destination_id, total_days_elapsed
 	)
 
-## Zenginlik hedefi: kervanın bir "kervan baronu" sayılacağı eşik.
-## Oyunun DD tarzı felsefesinde yenilgi yok (bkz. CLAUDE.md) - bu yüzden
-## bir "game over" değil, bir kereye mahsus kutlama ekranı (bkz.
-## road_journey.gd _on_enter_city_pressed, scripts/ui/goal_reached.gd).
-const GOAL_GOLD: int = 5000
-const GOAL_FLAG: String = "goal_wealth_reached"
+## --- Soy: kervanın adı liderden uzun yaşar ---
+## Oyunun kazanma koşulu bir süre `GOAL_GOLD = 5000` idi ve bu, oyunu
+## kendi tezine rağmen bir ticaret simülasyonu olarak çerçeveliyordu:
+## "asıl konu kervanı çeken insanların yıpranması" diyen bir oyunda hedef
+## kesenin dolması olamaz. Hedef kaldırıldı; yerine geçen şey zaten
+## kodda yarısı yazılı duran fikirdi - **lider ölür, kervanın adı kalır.**
+##
+## Oyuncu bir kervan yönetmiyor, bir kervan *adını* yol boyunca taşıyor.
+## Her lider bir kuşak; kuşak değişiminde ad, defter ve insanlar kalır.
+## Oyun ancak ada sahip çıkacak kimse kalmadığında biter (RUN_OVER_FLAG).
+var caravan_name: String = ""
 
-func has_reached_goal() -> bool:
-	return wallet.balance >= GOAL_GOLD and not has_flag(GOAL_FLAG)
+## Kaçıncı kuşak. Lider öldüğünde ve varis geçtiğinde artar - yani bu
+## sayı "kaç kez yeniden başladın" değil, "bu ad kaç kez el değiştirdi".
+var lineage_generation: int = 1
+
+## Mevcut liderin dönemi bu günde başladı. Kampanya bölümleri bunu
+## okuyabiliyor (bkz. build_campaign_context): hikâye kervanın toplam
+## yaşına değil, *bu liderin* dönemine bakabilsin diye.
+var leader_since_day: int = 0
+
+## Kervanın hafızası - kim geldi, kim gitti, kim öldü, liderlik kime
+## geçti. Hiçbir satır silinmiyor (bkz. CaravanLedger).
+var ledger: CaravanLedger = CaravanLedger.new()
+
+func get_caravan_name() -> String:
+	if not caravan_name.is_empty():
+		return caravan_name
+	# Adı olmayan bir kayıt (ya da eski kayıt) liderinin adını taşır -
+	# kervanlar zaten kurucusunun adıyla anılır.
+	return get_player_character().character_name
+
+func get_days_as_leader() -> int:
+	return maxi(0, total_days_elapsed - leader_since_day)
 
 ## İlk şehir varışında bir kereye mahsus gösterilen atlanabilir ipucu
 ## katmanının bayrağı (bkz. city_map.gd, scripts/ui/onboarding_panel.gd).
@@ -267,36 +292,92 @@ const ONBOARDING_FLAG: String = "onboarding_seen"
 ## anki seferin ruh hali. Stres bunun tam tersi: seferler arası kalıcı,
 ## yalnızca şehirde dinlenmek ya da kampta mola vermek azaltır. İkisi de
 ## ana ekranda ayrı birer çubukla gösterilir (bkz. world_hub.gd).
-const MAX_STRESS: int = 100
-var party_stress: int = 0
+## Stresin **sahibi artık kişidir** (bkz. CharacterData.stress). Buradaki
+## tavan onun takma adı: iki ayrı sayı tutmak, ikisi ayrıştığı gün
+## kenetlemenin bir tarafta çalışıp öbüründe çalışmaması demekti.
+const MAX_STRESS: int = CharacterData.MAX_STRESS
 
-func change_stress(delta: int) -> void:
-	party_stress = clampi(party_stress + delta, 0, MAX_STRESS)
-
-## `party_stress` kadronun **ortalaması**dır, tek bir kişinin değil. Bunun
-## mekanik sonucu şu: kadroya diri biri katıldığında ortalama düşer, kadro
-## tamamen yenilendiğinde stres neredeyse silinir. Darkest Dungeon'daki
-## "kırılmış kahramanı gönder, taze birini tut" kararının karşılığı.
+## Kadronun ortalamasına bakan **mercek**. Okunabilir ve yazılabilir
+## olması bilinçli: HUD çubuğu, çıkış morali, olay bağlamı ve
+## `evt_stress_brawl` hep "kadro ne hâlde" sorusunu soruyor ve bunun
+## cevabı ortalamadır. Ama kimin kırılacağı sorusunun cevabı ortalama
+## *değildir* - o yüzden kırılma zarı (bkz. resolve_stress_breaks) ve
+## savaşta emir reddi artık kişinin kendi stresini okuyor.
 ##
+## Yazmak kadronun tamamına aynı değeri dağıtıyor: "kervan bu hâlde"
+## demenin tek anlamlı karşılığı bu. Boş kadroda yazmak hiçbir şey
+## yapmaz, çünkü stres tutacak kimse yoktur.
+var party_stress: int:
+	get:
+		if party.is_empty():
+			return 0
+		var total := 0
+		for character in party:
+			total += character.stress
+		return int(round(float(total) / float(party.size())))
+	set(value):
+		var clamped := clampi(value, 0, MAX_STRESS)
+		for character in party:
+			character.stress = clamped
+
+## Kadronun tamamını aynı miktarda yıpratır/dinlendirir - yol aşınması,
+## açlık, kamp, ziyafet ve `EventEffect.Type.STRESS` bunu kullanır.
+## Kenetleme kişi başına olduğu için tavana dayanmış biri artırmayı
+## yutar, dibe inmiş biri azaltmayı: ortalama üzerinden tek bir
+## kenetlemenin gizlediği tam da buydu.
+func change_stress(delta: int) -> void:
+	for character in party:
+		character.change_stress(delta)
+
+## Tek bir kişiyi yıpratır. Yolun "nerede durduğun = neye dikkat ettiğin"
+## katmanı ve kişiye özel olaylar bunu kullanıyor.
+func change_character_stress(character: CharacterData, delta: int) -> void:
+	if character == null:
+		return
+	character.change_stress(delta)
+
+## Kadrodaki olumsuz huy sayısı. Huy uzun süre yalnızca savaşta bir
+## sayıyı bükeyordu - Darkest Dungeon'da ise affliction *görülür ve
+## duyulur*. Yol katmanı bunu okuyup işaret sıklığını artırıyor:
+## dağılmış bir kadro daha çok aksatır, daha çok geride kalır. Yeni bir
+## sistem değil, var olan işaret katmanının çarpanı (bkz. RoadSignals).
+func get_affliction_count() -> int:
+	var total := 0
+	for character in party:
+		for trait_resource in character.get_traits():
+			if not trait_resource.is_positive:
+				total += 1
+	return total
+
+## Kadroda kırılma noktasını aşmış olanlar (bkz. CharacterData.is_stressed).
+func get_stressed_characters() -> Array[CharacterData]:
+	var stressed: Array[CharacterData] = []
+	for character in party:
+		if character.is_stressed():
+			stressed.append(character)
+	return stressed
+
 ## Yeni gelen sıfırla gelmiyor: batmış bir kervana katılan biri anlatılanları
-## duyar, kadronun havasının bir kısmını üstlenir (NEWCOMER_STRESS_SHARE).
-## Sıfırla gelseydi "birini gönder, yenisini tut" stresi tek hamlede yarıya
-## indiren bedava bir düğmeye dönerdi; bu payla her tur azalan bir getiri
-## veriyor ve her turun ücreti var (bkz. hire_cost).
+## duyar, kadronun havasının bir kısmını üstlenir. Sıfırla gelseydi "birini
+## gönder, yenisini tut" stresi tek hamlede düşüren bedava bir düğmeye
+## dönerdi; bu payla her tur azalan bir getiri veriyor ve her turun ücreti
+## var (bkz. hire_cost).
 const NEWCOMER_STRESS_SHARE: float = 0.4
 
-## Partiye katılmanın tek kapısı. `dismiss()`in karşılığı: ortalamanın
-## seyrelmesi burada olur, `party.append()` doğrudan çağrılırsa olmaz.
+## Partiye katılmanın tek kapısı. `dismiss()`in karşılığı: yeni gelenin
+## payı burada belirlenir, `party.append()` doğrudan çağrılırsa belirlenmez.
 func add_to_party(character: CharacterData) -> void:
 	if character == null or party.has(character):
 		return
-	var previous_count := party.size()
+	# Payı *katılmadan önceki* ortalamadan alıyor: kendisi de ortalamaya
+	# girdikten sonra okunsaydı kendi sıfırıyla kendi payını düşürürdü.
+	var inherited := int(round(float(party_stress) * NEWCOMER_STRESS_SHARE))
 	party.append(character)
-	if previous_count <= 0:
-		return
-	var newcomer_stress := float(party_stress) * NEWCOMER_STRESS_SHARE
-	var diluted := (float(party_stress) * float(previous_count) + newcomer_stress) / float(party.size())
-	party_stress = clampi(int(round(diluted)), 0, MAX_STRESS)
+	character.stress = clampi(inherited, 0, MAX_STRESS)
+	ledger.record(
+		CaravanLedger.KIND_JOINED, character.character_name,
+		total_days_elapsed, lineage_generation
+	)
 
 ## Kadroya ziyafet: paralı stres rahatlaması. Birikme artık şehir varışının
 ## tek başına eritemeyeceği kadar hızlı (bkz. get_city_rest_relief), o yüzden
@@ -397,6 +478,13 @@ const STARTING_WAGONS: int = 1
 const STARTING_PARTY_SIZE: int = 2
 
 func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerator) -> void:
+	# Kervan kurucusunun adını taşır; lider değişse de ad kalır.
+	caravan_name = player_character.character_name
+	lineage_generation = 1
+	leader_since_day = 0
+	ledger.entries.clear()
+	ledger.record(CaravanLedger.KIND_LED, player_character.character_name, 0, 1)
+
 	owned_wagon_count = STARTING_WAGONS
 	_sync_cargo_capacity()
 	owned_wagon_damaged = 0
@@ -447,6 +535,11 @@ func dismiss(character: CharacterData) -> bool:
 	if index < 0:
 		return false
 	party.remove_at(index)
+	# Kervandan çıkmak defterden çıkmak değil: satır kalır, üstü çizilir.
+	ledger.record(
+		CaravanLedger.KIND_DEPARTED, character.character_name,
+		total_days_elapsed, lineage_generation
+	)
 	return true
 
 ## --- Savaşta ölüm ve liderliğin devri ---
@@ -481,6 +574,10 @@ func resolve_combat_deaths(dead: Array[CharacterData]) -> Dictionary:
 		if character == null:
 			continue
 		result["dead_names"].append(character.character_name)
+		ledger.record(
+			CaravanLedger.KIND_DIED, character.character_name,
+			total_days_elapsed, lineage_generation
+		)
 		if character.is_player:
 			leader_died = true
 			character.is_player = false
@@ -502,7 +599,17 @@ func resolve_combat_deaths(dead: Array[CharacterData]) -> Dictionary:
 	candidates.sort_custom(_compare_seniority)
 	var heir: CharacterData = candidates[0]
 	heir.is_player = true
+	# Ad kalır, kuşak ilerler: oyuncu yeni bir kervan kurmuyor, aynı adı
+	# devralıyor. Dönem sayacı sıfırlanıyor ki kampanya "bu liderin
+	# dönemi" diye sorabilsin.
+	lineage_generation += 1
+	leader_since_day = total_days_elapsed
+	ledger.record(
+		CaravanLedger.KIND_LED, heir.character_name,
+		total_days_elapsed, lineage_generation
+	)
 	result["new_leader"] = heir
+	result["generation"] = lineage_generation
 	return result
 
 func is_run_over() -> bool:
@@ -604,7 +711,7 @@ func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	# dönüş tipini çıkaramıyor (bkz. CLAUDE.md'deki := / Variant tuzağı).
 	var stressed_party: Array[CharacterData] = get_party().duplicate()
 	for character in stressed_party:
-		if not character.is_stressed(party_stress):
+		if not character.is_stressed():
 			continue
 
 		var affliction := rng.randf() < BREAK_AFFLICTION_CHANCE
@@ -657,6 +764,10 @@ func make_camp() -> Dictionary:
 	change_provisions(-paid)
 	var relief := CAMP_STRESS_RELIEF + get_duty_flat_reduction(DutyCatalog.OTACI) * 2
 	change_stress(-relief)
+	# Kamp takati de tazeliyor: zorlamanın bedeli var ama çıkışı da var,
+	# yoksa bir kez zorlayan kervan seferin geri kalanını sürünerek
+	# bitirirdi (bkz. CaravanState'in tempo bölümü).
+	caravan.rest_at_camp()
 	return {"provisions_spent": paid, "stress_relief": relief}
 
 func heal_party() -> void:
@@ -1339,7 +1450,7 @@ func get_cargo_space_remaining() -> float:
 ## alanlarına taşımıştır. Bu yüzden journey_*/caravan hiç serileştirilmiyor
 ## - saklayacak anlamlı bir durumları yok; owned_wagon_* kalıcı olduğu
 ## için serileştiriliyor.
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
 
 func to_save_dict() -> Dictionary:
 	var inventory_data: Array = []
@@ -1364,7 +1475,10 @@ func to_save_dict() -> Dictionary:
 		"total_days_elapsed": total_days_elapsed,
 		"accepted_contracts": accepted_contracts.duplicate(),
 		"party": party_data,
-		"party_stress": party_stress,
+		"caravan_name": caravan_name,
+		"lineage_generation": lineage_generation,
+		"leader_since_day": leader_since_day,
+		"ledger": ledger.to_array(),
 		"last_feast_day": last_feast_day,
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
@@ -1395,6 +1509,18 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 	if version >= SAVE_VERSION:
 		return data
 	# v0 (sürümsüz) -> v1: yalnızca alan eklendi, dönüştürme gerekmiyor.
+	#
+	# v1 -> v2: stres kadronun tek bir sayısıyken kişiye taşındı (bkz.
+	# CharacterData.stress). Bu, bir alanın **anlamının** değiştiği ilk
+	# durum - `.get` varsayılanlarının karşılayamadığı tam olarak bu, ve
+	# `_migrate_save`'in var olma sebebi. Eski ortalama kadronun her
+	# üyesine dağıtılıyor: bilgi zaten ortalamaydı, kimin ne kadar
+	# yıprandığını geriye dönük uydurmak yanlış olurdu.
+	if version < 2 and data.has("party_stress"):
+		var legacy_stress := clampi(int(data["party_stress"]), 0, MAX_STRESS)
+		for entry in data.get("party", []):
+			if entry is Dictionary and not entry.has("stress"):
+				entry["stress"] = legacy_stress
 	return data
 
 func load_from_dict(raw_data: Dictionary) -> void:
@@ -1444,7 +1570,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 		party.append(CharacterData.from_dict(entry))
 	_ensure_party()
 
-	party_stress = clampi(int(data.get("party_stress", 0)), 0, MAX_STRESS)
+	caravan_name = String(data.get("caravan_name", ""))
+	lineage_generation = maxi(1, int(data.get("lineage_generation", 1)))
+	leader_since_day = maxi(0, int(data.get("leader_since_day", 0)))
+	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 
 	equipment_inventory = {}
@@ -1543,6 +1672,12 @@ func build_campaign_context() -> Dictionary:
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
 		"cities_visited": visited_location_ids.size(),
+		# Soy: hikâye kervanın toplam yaşına değil, bu liderin dönemine de
+		# bakabiliyor. Bir bölüm "şu kadar gün bu adı taşı" diyebilir.
+		"lineage_generation": lineage_generation,
+		"days_as_leader": get_days_as_leader(),
+		"companions_lost": ledger.count_of(CaravanLedger.KIND_DIED)
+			+ ledger.count_of(CaravanLedger.KIND_DEPARTED),
 		"flags": _flags,
 	}
 

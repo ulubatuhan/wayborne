@@ -23,6 +23,9 @@ var _confirm_dialog: ConfirmationDialog
 
 func _ready() -> void:
 	Nav.go_root(Nav.MAIN_MENU)
+	# Ana menü ile yol aynı parçayı paylaşıyor (bkz. AudioManager):
+	# menüdeki ekran da bir yol manzarası, aynı his.
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_backdrop()
 	_continue_button.visible = SaveManager.has_save()
 	_continue_button.pressed.connect(_on_continue_pressed)

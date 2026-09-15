@@ -143,6 +143,14 @@ const PACE_HALT: float = 0.0
 ## olan kollardan geçiyor (stres ve moral), yeni bir sistem açmıyor.
 ## Olmasa "hızlan" her koşulda doğru cevap olurdu ve bir emir menüsü
 ## tek seçenekten oluşurdu.
+## Savaşta yere düşen kişinin kendi üstünde kalan iz.
+const DOWNED_STRESS_MARK: int = 9
+
+## Görmezden gelinen bir işaretin bedeli.
+const SIGNAL_STRAGGLER_STRESS: int = 5
+## Birikmiş duman payının tavanı: yol tehlikeli olabilir, imkânsız olamaz.
+const SIGNAL_DANGER_CAP: float = 0.35
+
 const PACE_FAST_STRESS_PER_DAY: int = 3
 const PACE_FAST_MORALE_PER_DAY: int = -2
 const PACE_SLOW_MORALE_PER_DAY: int = 2
@@ -188,6 +196,15 @@ var _pace_key: String = "UI_ROAD_PACE_STEADY"
 ## Lider kolondan ayrıldı mı: ayrıldıysa A/D onu yürütüyor, kervanı değil.
 var _leader_detached: bool = false
 var _leader_offset: float = 0.0
+## Liderin kolondaki yeri = neye dikkat ettiği (bkz. RoadAttention).
+## Kolona bağlıyken lider baştadır, yani ön bölgededir.
+var _attention_zone: String = RoadAttention.ZONE_FRONT
+## Yolun sürekli konuşan katmanı (bkz. RoadSignals) - modal değil,
+## kart açmıyor, zamanı durdurmuyor.
+var _signals: RoadSignals = RoadSignals.new()
+var _signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Duman görmezden gelindiğinde yolun tehlikesine eklenen pay.
+var _signal_danger_bonus: float = 0.0
 var _command_panel: PanelContainer
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
@@ -260,11 +277,17 @@ var _log_button: Button
 var _morale_bar: PulseBar
 var _stress_bar: PulseBar
 var _danger_bar: PulseBar
+## Takat: temponun harcanan kaynağı. Görünmeyen bir kaynak kaynak
+## değildir - oyuncu neyi harcadığını görmeden harcama kararı veremez.
+var _stamina_bar: PulseBar
+## Liderin o an neye dikkat ettiği. Mekanik görünmezse hata gibi okunur.
+var _attention_label: Label
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
 
 func _ready() -> void:
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_ui()
 	_init_journey()
 
@@ -358,7 +381,11 @@ func _build_top_bar() -> PanelContainer:
 	_conditions_label.clip_text = true
 	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
 	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
-	_conditions_label.custom_minimum_size = Vector2(395.0, 0.0)
+	# Takat çubuğu eklenince üst şerit taştı ve kervan sayıları
+	# kırpılmaya başladı; koşul satırı daraltıldı. Şeridin dolduğu her
+	# seferde önce *neyin* oraya ait olduğu sorulmalı - dikkat etiketi
+	# bu yüzden alt şeride taşındı.
+	_conditions_label.custom_minimum_size = Vector2(372.0, 0.0)
 	row.add_child(_conditions_label)
 
 	_morale_bar = PulseBar.new()
@@ -374,6 +401,11 @@ func _build_top_bar() -> PanelContainer:
 	_danger_bar = PulseBar.new()
 	row.add_child(_danger_bar)
 	_danger_bar.setup(tr("UI_HUB_DANGER"), Color(0.85, 0.62, 0.30))
+
+	_stamina_bar = PulseBar.new()
+	row.add_child(_stamina_bar)
+	_stamina_bar.setup(tr("UI_ROAD_STAMINA"), Color(0.55, 0.70, 0.85))
+
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
 	# bir döküm HUD'u yeniden metin duvarına çeviriyordu.
@@ -418,6 +450,19 @@ func _build_bottom_bar() -> PanelContainer:
 	_walk_hint = Label.new()
 	_walk_hint.clip_text = true
 	row.add_child(_walk_hint)
+
+	# Dikkat bir çubuk değil çünkü oran değil, bir *yer*: üç bölgeden
+	# biri. Çubuk yapmak "biraz öndeyim" gibi olmayan bir ara durum
+	# uydururdu. Yeri de üst şerit değil alt şerit: oyuncunun ellerinin
+	# olduğu yer burası, yürüme ipucunun tam yanı - dikkat zaten
+	# yürüyerek değiştiriliyor.
+	_attention_label = Label.new()
+	_attention_label.modulate = Color(0.78, 0.80, 0.86)
+	_attention_label.clip_text = true
+	# Yürüme ipucu boşken etiket sıfıra çöküyordu: alt şeritteki diğer
+	# her şey gibi kendi yerini istemesi gerekiyor.
+	_attention_label.custom_minimum_size = Vector2(200.0, 0.0)
+	row.add_child(_attention_label)
 
 	row.add_child(VSeparator.new())
 
@@ -734,6 +779,14 @@ func _init_journey() -> void:
 	_pace_key = "UI_ROAD_PACE_STEADY"
 	_leader_detached = false
 	_leader_offset = 0.0
+	_attention_zone = RoadAttention.ZONE_FRONT
+	_signals.clear()
+	_signal_danger_bonus = 0.0
+	# İşaretler seferin kendi tohumundan: aynı kaydı yeniden yükleyen
+	# oyuncu aynı yolu bulsun (bkz. Route Rules'un aynı gerekçesi).
+	_signal_rng.seed = hash("%s|%s|signals" % [
+		_session.journey_origin_id, _session.journey_destination_id
+	])
 	_command_panel.visible = false
 	_refresh_weather()
 
@@ -817,6 +870,7 @@ func _process(delta: float) -> void:
 	if _can_time_flow():
 		var hours := _clock.advance(delta)
 		_advance_position(hours)
+		_tick_signals(hours)
 		_process_elapsed_days()
 		_update_camp_state()
 	else:
@@ -858,6 +912,7 @@ func _advance_position(hours: float) -> void:
 				-_caravan.get_column_length(), 0.0
 			)
 			_caravan.set_leader_offset(_leader_offset)
+			_refresh_attention_zone()
 		_walk_at(_pace, hours)
 		return
 
@@ -891,6 +946,43 @@ func _walk_at(rate: float, hours: float) -> void:
 	# ilerlemiyor ama hiçbir şey de olmuyordu, yani oyuncu görünmez bir
 	# duvara dayanıp bir sonraki günü bekliyordu.
 	_check_journey_end()
+
+## Liderin kolondaki oranı -> bölge. Kolona bağlıyken (offset 0) lider
+## kolonun başındadır; geriye yürüdükçe vagonlara, sonra kuyruğa geçer.
+func _refresh_attention_zone() -> void:
+	var column := _caravan.get_column_length()
+	var ratio := 0.0 if column <= 0.0 else clampf(-_leader_offset / column, 0.0, 1.0)
+	_attention_zone = RoadAttention.zone_for(ratio)
+
+## İşaretler saatle yaşıyor, günle değil - asıl boşluk günlerin arası
+## değil, kartlar arasındaki 23 saatti.
+func _tick_signals(hours: float) -> void:
+	var outcome := _signals.tick(
+		hours, _attention_zone, _signal_rng, _session.get_affliction_count()
+	)
+	for kind in outcome["appeared"]:
+		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
+	for kind in outcome["resolved"]:
+		_add_log(tr(RoadSignals.get_resolved_key(String(kind))), OUTCOME_COLOR)
+	for kind in outcome["escalated"]:
+		_apply_signal_escalation(String(kind))
+
+## İhmal edilen işaretin bedeli oyunun kendi diliyle ödeniyor: vagon
+## hasarı, stres, tehlike. Yeni bir ceza mekaniği yok.
+func _apply_signal_escalation(kind: String) -> void:
+	_add_log(tr(RoadSignals.get_escalated_key(kind)), LOCKED_COLOR)
+	match kind:
+		RoadSignals.KIND_WHEEL:
+			_session.caravan.damage_wagons(1)
+		RoadSignals.KIND_STRAGGLER:
+			_session.change_stress(SIGNAL_STRAGGLER_STRESS)
+		RoadSignals.KIND_SMOKE:
+			# Duman bir pusunun habercisi: görmezden gelinirse yolun
+			# tehlikesi artıyor, yani savaş ihtimali yükseliyor.
+			_signal_danger_bonus = minf(
+				_signal_danger_bonus + RoadSignals.SMOKE_DANGER_DELTA, SIGNAL_DANGER_CAP
+			)
+	_refresh_state()
 
 ## `journey_days_remaining` artık bağımsız bir sayaç değil, kat edilen
 ## yoldan türetilen bir gösterge - HUD, sapma maliyeti (get_days_travelled)
@@ -1094,11 +1186,27 @@ func _apply_daily_pace_and_weather() -> void:
 	if bite != 0:
 		_session.caravan.change_morale(bite)
 
-	if is_equal_approx(_pace, PACE_FAST):
+	# Tempo artık bir tuş değil harcanan bir kaynak: zorlamak dayanıklılık
+	# yakıyor, yakıt bitince kervan kendi kendine normale dönüyor. Yavaş
+	# gitmek de bedava değil - takvim yiyor (kontrat, borç, mevsim).
+	var pushing := is_equal_approx(_pace, PACE_FAST)
+	_session.caravan.apply_stamina_drift(pushing)
+	if pushing and not _session.caravan.can_push():
+		_pace = PACE_STEADY
+		_pace_key = "UI_ROAD_PACE_STEADY"
+		_add_log(tr("UI_ROAD_PACE_EXHAUSTED"), LOCKED_COLOR)
+
+	if pushing:
 		_session.change_stress(PACE_FAST_STRESS_PER_DAY)
 		_session.caravan.change_morale(PACE_FAST_MORALE_PER_DAY)
 	elif is_equal_approx(_pace, PACE_SLOW):
 		_session.caravan.change_morale(PACE_SLOW_MORALE_PER_DAY)
+
+	# Kuyrukla ilgilenmek günün stres birikimini kesiyor - dikkatin
+	# üçüncü ödülü (bkz. RoadAttention).
+	var relief := RoadAttention.stress_relief_per_day(_attention_zone)
+	if relief > 0:
+		_session.change_stress(-relief)
 
 ## Havanın tehlike kolu. Delta *başlıktaki paya* uygulanıyor - aynı kural
 ## `RouteConditions`'ın tehlike deltasında da var (`base + delta * (1-base)`):
@@ -1108,9 +1216,14 @@ func _apply_daily_pace_and_weather() -> void:
 ## Saklanan `danger_level`'a *yazmıyoruz*: yazsak her gün üstüne binerdi
 ## ve on günlük bir sefer sonunda tehlike havadan değil aritmetikten
 ## yüzde doksana çıkardı.
+## Görmezden gelinen dumanın payı da aynı kuralla biniyor: başlıktaki
+## paya, toplamın kendisine değil.
 func _weathered_danger() -> float:
 	var base := _session.danger_level
-	return clampf(base + RouteWeather.danger_delta(_weather) * (1.0 - base), 0.0, 1.0)
+	var weathered := clampf(
+		base + RouteWeather.danger_delta(_weather) * (1.0 - base), 0.0, 1.0
+	)
+	return clampf(weathered + _signal_danger_bonus * (1.0 - weathered), 0.0, 1.0)
 
 func _advance_contracts_and_provisions() -> void:
 	var expired_contracts := _session.advance_day()
@@ -1158,8 +1271,14 @@ func _queue_event(event: GameEvent) -> void:
 		return
 
 	_pending_event = event
+	# Öndeyken karşılaşma daha uzaktan görünür: işaret daha ileriye
+	# konur, yani oyuncunun hazırlanacak (ya da geri dönecek) yolu olur.
+	# Savaşın sıklaşmasının dengesi bu - sıklaştırılmış ama kaçınılamayan
+	# bir savaş mekanik değil vergidir.
 	_pending_event_day_position = minf(
-		_days_covered + ENCOUNTER_APPROACH_DAYS, float(_journey_length_days)
+		_days_covered + ENCOUNTER_APPROACH_DAYS
+			+ RoadAttention.spot_bonus_days(_attention_zone),
+		float(_journey_length_days)
 	)
 	_spawn_encounter(kind)
 
@@ -1437,7 +1556,7 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
 	panel.start_combat(
-		_session.get_party(), danger, null, _session.party_stress,
+		_session.get_party(), danger, null,
 		enemy_kind, _session.journey_destination_id
 	)
 
@@ -1456,6 +1575,13 @@ func _on_combat_finished(
 
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
+	# Yere düşen yoldaş kalıcı bir iz bırakıyor. Ölüm hâlâ yalnızca
+	# lideri buluyor (kervan yok olmaz), ama kayıp gerçek olmalı: düşen
+	# kişinin kendi stresi ayrıca artıyor ve bu, şehir varışındaki
+	# kırılma zarını besliyor - yani bir yoldaşı savaşta *kaybetmenin*
+	# yolu var, ayrı bir ölüm kuralı icat etmeden.
+	_apply_downed_marks(downed_count)
+
 	var stress_delta := COMBAT_STRESS_BASE + downed_count * COMBAT_STRESS_PER_DOWN
 	stress_delta += -COMBAT_VICTORY_STRESS_RELIEF if victory else COMBAT_DEFEAT_STRESS
 
@@ -1485,6 +1611,18 @@ func _on_combat_finished(
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
+
+## Yere düşenler kendi stresini alıyor. Kimin düştüğü savaş panelinden
+## sayı olarak geliyor (isim değil), o yüzden en yorgun olanlardan
+## başlanıyor: zaten en kırılgan olanı kırmak, rastgele birini
+## kırmaktan hem daha okunur hem daha adil.
+func _apply_downed_marks(downed_count: int) -> void:
+	if downed_count <= 0:
+		return
+	var ordered: Array[CharacterData] = _session.get_party().duplicate()
+	ordered.sort_custom(func(a, b): return a.stress > b.stress)
+	for index in mini(downed_count, ordered.size()):
+		_session.change_character_stress(ordered[index], DOWNED_STRESS_MARK)
 
 ## Savaşta ölenleri oturuma bildirir ve sonucunu oyuncuya *anlatır*.
 ## Sessiz bir ölüm hatadan ayırt edilemez: kimin öldüğü, liderliğin kime
@@ -1794,15 +1932,12 @@ func _make_summary_label(text: String) -> Label:
 	label.text = text
 	return label
 
+## Varış her zaman şehre çıkar. Eskiden burada bir "zenginlik hedefi"
+## ekranı vardı (kese 5000'e ulaşınca); kaldırıldı, çünkü oyunun hedefi
+## kesenin dolması değil adın yolda kalması (bkz. GameSession'ın soy
+## bölümü). Oyunun tek gerçek sonu hâlâ var ve o da burada değil:
+## liderin ölüp yerine geçecek kimsenin kalmaması (_show_run_over).
 func _on_enter_city_pressed() -> void:
-
-	if _session.has_reached_goal():
-		_session.set_flag(GameSession.GOAL_FLAG)
-		if _is_live_journey:
-			SaveManager.save_session(_session)
-		get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.GOAL_REACHED))
-		return
-
 	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve
@@ -1820,7 +1955,11 @@ func _refresh_state() -> void:
 	# üst şerit bir döküm sayfasına dönüyordu.
 	_morale_bar.set_value(caravan.morale, CaravanState.MAX_MORALE)
 	_stress_bar.set_value(_session.party_stress, GameSession.MAX_STRESS)
-	_danger_bar.set_value(_session.danger_level * 100.0, 100.0)
+	_danger_bar.set_value(_weathered_danger() * 100.0, 100.0)
+	_stamina_bar.set_value(caravan.stamina, CaravanState.MAX_STAMINA)
+	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
+		_attention_zone
+	)
 
 	_state_label.text = tr("UI_ROAD_CHIPS") % [
 		_session.wallet.balance,

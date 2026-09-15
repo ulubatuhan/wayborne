@@ -311,7 +311,7 @@ func _test_battlefield_is_a_field_not_a_list(t) -> void:
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9091
-	panel.start_combat(party, 0.4, rng, 0, "bandit", "")
+	panel.start_combat(party, 0.4, rng, "bandit", "")
 
 	t.eq(panel._player_row.get_child_count(), 3, "oyuncu safı üç mevki kurdu")
 	t.ok(panel._enemy_row.get_child_count() > 0, "düşman safı kuruldu")

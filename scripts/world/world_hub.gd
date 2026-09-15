@@ -89,6 +89,7 @@ var _stress_bar: PulseBar
 
 func _ready() -> void:
 	Nav.go_root(Nav.WORLD_HUB)
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
 	# metin koddan, anahtarla gelir (bkz. Localization Rules).
 	_party_button.text = tr("UI_HUB_PARTY")
