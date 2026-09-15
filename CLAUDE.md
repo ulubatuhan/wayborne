@@ -512,6 +512,16 @@ way to textures.
   as a four-legged stool; and the yoked ox pair, at the *road's* own
   offsets, merged into one humped mass — a silhouette needs those
   offsets larger than a tinted drawing does.
+- **Every screen stands somewhere, or it is a model on a table.** The
+  city was an isometric slab on a flat two-colour gradient: no sky, no
+  horizon, no ground, and no shadow under it. On its own it looked
+  deliberate; beside a road and a menu that had all four it was plainly
+  a different production. `CityView` now draws sky → ridges → field →
+  countryside → the town's own contact shadow → the town, which is the
+  road's depth order applied to a screen that is not the road. The
+  lesson generalises: when one screen gets the treatment, the screens
+  that did not are now *wrong*, not merely older — a shared visual
+  language is only shared if every screen speaks it.
 - **One wagon is drawn by a pair of oxen.** A single animal is a horse's
   harness, not a yoke. The far ox is pushed back by three marks at once —
   slightly ahead, slightly higher, slightly smaller — because any one or
