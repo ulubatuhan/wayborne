@@ -252,6 +252,14 @@ var _exit_button: Button
 ## Alt şeritteki tek satırlık kayıt - listenin tamamı artık `_log_overlay`'de.
 var _last_log_label: Label
 var _log_button: Button
+## Moral/stres/tehlike sayı değil **çubuk**: bir orandan ibaret olan üç
+## değeri rakam olarak okumak, oyuncuyu her karede metin okumaya zorluyor.
+## `PulseBar` şehir dışı HUD'da zaten bunu yapıyor (bkz. world_hub.gd) -
+## aynı çubuk burada da kullanılıyor, yol ekranı kendi göstergesini icat
+## etmiyor.
+var _morale_bar: PulseBar
+var _stress_bar: PulseBar
+var _danger_bar: PulseBar
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -350,8 +358,22 @@ func _build_top_bar() -> PanelContainer:
 	_conditions_label.clip_text = true
 	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
 	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
-	_conditions_label.custom_minimum_size = Vector2(430.0, 0.0)
+	_conditions_label.custom_minimum_size = Vector2(395.0, 0.0)
 	row.add_child(_conditions_label)
+
+	_morale_bar = PulseBar.new()
+	row.add_child(_morale_bar)
+	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
+
+	_stress_bar = PulseBar.new()
+	row.add_child(_stress_bar)
+	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
+
+	# Tehlike de bir oran, o yüzden o da çubuk - ve yolun tehlikesi
+	# oyuncunun en sık baktığı sayı olduğu için metin içinde kaybolmamalı.
+	_danger_bar = PulseBar.new()
+	row.add_child(_danger_bar)
+	_danger_bar.setup(tr("UI_HUB_DANGER"), Color(0.85, 0.62, 0.30))
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
 	# bir döküm HUD'u yeniden metin duvarına çeviriyordu.
@@ -1794,13 +1816,13 @@ func _set_journey_controls_enabled(enabled: bool) -> void:
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan
-	# Çeviri metni üç satır: HUD şeridinde tek satıra iniyor. Anahtarı
-	# bölmek yerine burada birleştirmek, aynı metnin şehir ekranlarında
-	# çok satırlı kalmasına izin veriyor.
-	_state_label.text = (tr("UI_ROAD_STATE") % [
-		_current_day,
-		_session.journey_days_remaining,
-		int(_session.danger_level * 100.0),
+	# Oranlar çubukta, sayılar tek satırda. İkisi birden metinde olduğunda
+	# üst şerit bir döküm sayfasına dönüyordu.
+	_morale_bar.set_value(caravan.morale, CaravanState.MAX_MORALE)
+	_stress_bar.set_value(_session.party_stress, GameSession.MAX_STRESS)
+	_danger_bar.set_value(_session.danger_level * 100.0, 100.0)
+
+	_state_label.text = tr("UI_ROAD_CHIPS") % [
 		_session.wallet.balance,
 		_session.get_provisions(),
 		_session.reputation,
@@ -1808,9 +1830,7 @@ func _refresh_state() -> void:
 		caravan.damaged_wagons,
 		caravan.merchant_names.size(),
 		caravan.documents,
-		caravan.morale,
-		_session.party_stress,
-	]).replace("\n", " · ")
+	]
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt
