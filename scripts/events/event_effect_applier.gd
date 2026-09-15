@@ -95,7 +95,7 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			session.danger_level = clampf(session.danger_level + (effect.amount / 100.0), 0.0, 1.0)
 			result.lines.append(_t("EFF_DANGER") % effect.amount)
 		EventEffect.Type.REPUTATION:
-			session.reputation += effect.amount
+			session.change_reputation(effect.amount)
 			result.lines.append(_t("EFF_REPUTATION") % effect.amount)
 		EventEffect.Type.DOCUMENT_LOSE:
 			var seized := session.caravan.lose_documents(effect.amount)

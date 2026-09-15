@@ -152,6 +152,13 @@ const PACE_SLOW_MORALE_PER_DAY: int = 2
 ## arkaya inildiğini belirliyor.
 const LEADER_WALK_SPEED: float = 46.0
 
+## Ortadaki karar kartının genişliği. EU4'ün olay kartı gibi: ekranın
+## tamamını kaplamıyor, arkasında dünyanın durduğu görünüyor.
+const CARD_WIDTH: float = 660.0
+## Kart gövdesinin en fazla ne kadar yer kaplayacağı - uzun bir metin
+## kartı ekran boyu uzatmasın diye kaydırma kutusuna giriyor.
+const CARD_BODY_MAX_HEIGHT: float = 320.0
+
 var _session: GameSession
 var _engine: EventEngine
 var _current_event: GameEvent
@@ -225,33 +232,49 @@ var _arrival_panel: VBoxContainer
 var _enter_city_button: Button
 var _exit_button: Button
 
-@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+## --- Ekranın dört katmanı ---
+## Yol ekranı uzun süre *kaydırılan bir metin sütunuydu*: manzara şeridi o
+## sütunun bir satırı, olay kartı başka bir satırı, durum dökümü ve kayıt
+## listesi geri kalanıydı. Şikâyet buydu - "oyun hâlâ text based RPG gibi".
+## Sebep düzendi: dünya, ekranın küçük bir kutusuydu ve metin ekranı
+## yutuyordu.
+##
+## Artık dünya ekranın kendisi (Kingdom Two Crowns yerleşimi): manzara tam
+## ekran, HUD onun üstünde ince iki şerit, kararlar ekranın ortasında bir
+## kart (EU4 yerleşimi), kayıt listesi ise bir tuşla açılan ayrı bir
+## katman. Metin artık ekranı değil, ekranın kenarını kullanıyor.
+@onready var _world: MarginContainer = $World
+@onready var _hud: VBoxContainer = $Hud
+@onready var _modal: Control = $Modal
+@onready var _modal_center: CenterContainer = $Modal/Center
+@onready var _log_overlay: MarginContainer = $LogOverlay
+
+## Alt şeritteki tek satırlık kayıt - listenin tamamı artık `_log_overlay`'de.
+var _last_log_label: Label
+var _log_button: Button
+## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
+## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
+var _modal_open: bool = false
 
 func _ready() -> void:
 	_build_ui()
 	_init_journey()
 
 func _build_ui() -> void:
-	var title := Label.new()
-	title.text = tr("EVT_TEST_TITLE")
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_content.add_child(title)
+	_build_world_layer()
+	_build_hud_layer()
+	_build_modal_layer()
+	_build_log_layer()
+	_refresh_exit_button()
 
-	# Manzara şeridi ve (varsa) savaş sahnesi aynı çerçeveyi paylaşıyor:
-	# ikisi ekranın aynı bölgesinin iki hâli, biri diğerinin altına eklenen
-	# ayrı bir blok değil. `_combat_holder` boşken bir VBoxContainer
-	# çocuğunun görünmez olması yer kaplamıyor, o yüzden savaş kapalıyken
-	# şerit sahnenin tamamını kaplıyor; `_open_combat()`/`_on_combat_
-	# finished()` ikisinin görünürlüğünü değiş tokuş ediyor.
-	var scene_stage := VBoxContainer.new()
-	scene_stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(scene_stage)
-
+## Dünya katmanı: manzara ve (savaş varsa) savaş sahnesi. `MarginContainer`
+## çocuklarını kendi dikdörtgenine oturtuyor, yani ikisi de tam ekran -
+## çapa ön ayarına güvenmek gerekmiyor (bkz. Art Rules'un çapa tuzağı).
+func _build_world_layer() -> void:
 	# Manzara şeridi: gökyüzü/zemin günün evresine göre değişir, dünya
 	# kervanın altından akar (bkz. TravelBand).
 	_band = TravelBand.new()
-	_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scene_stage.add_child(_band)
+	_world.add_child(_band)
 
 	# Kervan şeridin *çocuğu*: manzara arkada çizilir, figürler onun
 	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
@@ -267,54 +290,76 @@ func _build_ui() -> void:
 	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
 	_caravan.column_length_changed.connect(_band.set_column_length)
 
+	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
 	_combat_holder.visible = false
-	scene_stage.add_child(_combat_holder)
+	_world.add_child(_combat_holder)
 
-	# Emir menüsü: F2 açıyor, sayı tuşu emri veriyor. Şeridin üstünde
-	# duruyor (Mount & Blade'de de ekranın üstünde belirir) ve varsayılan
-	# olarak gizli - açık bir menü ekranı kalabalıklaştırır.
+## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
+## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
+## yutmuyor - aradaki boşluk `MOUSE_FILTER_IGNORE`.
+func _build_hud_layer() -> void:
+	_hud.add_child(_build_top_bar())
+
+	var middle := HBoxContainer.new()
+	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(middle)
+
+	# Emir menüsü (F2) manzaranın üstünde, sol altta duruyor - Mount &
+	# Blade'de de ekranın kenarında belirir. Varsayılan olarak gizli.
+	var command_column := VBoxContainer.new()
+	command_column.size_flags_vertical = Control.SIZE_SHRINK_END
+	command_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_command_panel = _build_command_panel()
-	_content.add_child(_command_panel)
+	command_column.add_child(_command_panel)
+	middle.add_child(command_column)
 
-	var time_row := HBoxContainer.new()
-	time_row.add_theme_constant_override("separation", 10)
+	_hud.add_child(_build_bottom_bar())
+
+func _build_top_bar() -> PanelContainer:
+	var bar := _make_bar()
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	bar.add_child(row)
 
 	_clock_label = Label.new()
 	_clock_label.custom_minimum_size = Vector2(210.0, 0.0)
-	time_row.add_child(_clock_label)
+	row.add_child(_clock_label)
 
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
 	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
 	_speed_button = Button.new()
 	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
-	time_row.add_child(_speed_button)
+	row.add_child(_speed_button)
 
 	_progress_bar = ProgressBar.new()
 	_progress_bar.min_value = 0.0
 	_progress_bar.max_value = 1.0
 	_progress_bar.step = 0.001
 	_progress_bar.show_percentage = false
-	_progress_bar.custom_minimum_size = Vector2(200.0, 0.0)
-	_progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	time_row.add_child(_progress_bar)
+	_progress_bar.custom_minimum_size = Vector2(160.0, 14.0)
+	row.add_child(_progress_bar)
 
-	_content.add_child(time_row)
-
-	# Yolu oyuncu yürüyor: bunu söylemeyen bir ekran, oyuncuya "kontrol
-	# bende değil" dedirtiyordu (ilk şikâyet tam olarak buydu).
-	_walk_hint = Label.new()
-	_walk_hint.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_content.add_child(_walk_hint)
-
-	# Arazi, hava ve tempo tek satırda. Hava yalnızca görsel değil (yolu
-	# yavaşlatıyor, tehlikeyi büyütüyor), o yüzden oyuncunun okuyabileceği
-	# bir yerde durması şart - görünmeyen bir ceza hatadan ayırt edilemez.
+	# Arazi, hava ve tempo. Hava yalnızca görsel değil (yolu yavaşlatıyor,
+	# tehlikeyi büyütüyor), o yüzden okunabilir bir yerde durması şart -
+	# görünmeyen bir ceza oyuncu için hatadan ayırt edilemez.
 	_conditions_label = Label.new()
-	_conditions_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_conditions_label.modulate = Color(0.80, 0.82, 0.76)
-	_content.add_child(_conditions_label)
+	_conditions_label.clip_text = true
+	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
+	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
+	_conditions_label.custom_minimum_size = Vector2(430.0, 0.0)
+	row.add_child(_conditions_label)
+
+	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
+	# bir döküm HUD'u yeniden metin duvarına çeviriyordu.
+	_state_label = Label.new()
+	_state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_state_label.clip_text = true
+	_state_label.add_theme_font_size_override("font_size", 12)
+	row.add_child(_state_label)
 
 	# Geliştirici kutusu (tohum + sıfırla) yalnızca F1 sentetik seferinde
 	# görünür; gerçek bir seferde oyuncunun önünde duracak işi yok.
@@ -337,87 +382,187 @@ func _build_ui() -> void:
 	_reset_button.pressed.connect(_on_reset_pressed)
 	_dev_row.add_child(_reset_button)
 
-	_content.add_child(_dev_row)
+	row.add_child(_dev_row)
+	return bar
 
-	var controls_row := HBoxContainer.new()
-	controls_row.add_theme_constant_override("separation", 8)
+func _build_bottom_bar() -> PanelContainer:
+	var bar := _make_bar()
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	bar.add_child(row)
+
+	# Yolu oyuncu yürüyor: bunu söylemeyen bir ekran, oyuncuya "kontrol
+	# bende değil" dedirtiyordu (ilk şikâyet tam olarak buydu).
+	_walk_hint = Label.new()
+	_walk_hint.clip_text = true
+	row.add_child(_walk_hint)
+
+	row.add_child(VSeparator.new())
+
+	# Kayıt listesinin tamamı yerine **son satırı**. Listenin kendisi
+	# `_log_overlay`'de, bir tuşla açılıyor: yolda okunması gereken şey
+	# son ne olduğu, bütün defter değil.
+	_last_log_label = Label.new()
+	_last_log_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_last_log_label.clip_text = true
+	_last_log_label.modulate = Color(0.82, 0.84, 0.80)
+	row.add_child(_last_log_label)
 
 	_camp_button = Button.new()
 	_camp_button.text = tr("UI_ROAD_MAKE_CAMP")
 	_camp_button.tooltip_text = tr("UI_ROAD_CAMP_TOOLTIP")
 	_camp_button.pressed.connect(_on_camp_pressed)
-	controls_row.add_child(_camp_button)
+	row.add_child(_camp_button)
 
 	_replan_button = Button.new()
 	_replan_button.text = tr("UI_ROAD_REPLAN")
 	_replan_button.tooltip_text = tr("UI_ROAD_REPLAN_TOOLTIP")
 	_replan_button.pressed.connect(_on_replan_pressed)
-	controls_row.add_child(_replan_button)
+	row.add_child(_replan_button)
 
-	_content.add_child(controls_row)
-	_content.add_child(HSeparator.new())
+	_log_button = Button.new()
+	_log_button.text = tr("EVT_TEST_LOG")
+	_log_button.toggle_mode = true
+	_log_button.toggled.connect(_on_log_toggled)
+	row.add_child(_log_button)
 
-	var state_title := Label.new()
-	state_title.text = tr("EVT_TEST_STATE")
-	_content.add_child(state_title)
-
-	_state_label = Label.new()
-	_state_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_content.add_child(_state_label)
-
-	_content.add_child(HSeparator.new())
-
-	_card_panel = VBoxContainer.new()
-	_card_panel.add_theme_constant_override("separation", 6)
-	_content.add_child(_card_panel)
-
-	_haggle_holder = VBoxContainer.new()
-	_content.add_child(_haggle_holder)
-
-	# _combat_holder artık burada değil, manzara şeridiyle aynı
-	# `scene_stage`'de kuruluyor (bkz. yukarısı) - savaş yolun durduğu
-	# yerde açılsın diye.
-
-	_recruit_holder = VBoxContainer.new()
-	_content.add_child(_recruit_holder)
-
-	_replan_holder = VBoxContainer.new()
-	_replan_holder.add_theme_constant_override("separation", 4)
-	_content.add_child(_replan_holder)
-
+	# Varış artık mesafe kapanır kapanmaz beliriyor (bkz. _walk_at) -
+	# oyuncu görünmez bir duvara dayanıp beklemiyor.
 	_arrive_button = Button.new()
 	_arrive_button.text = tr("UI_ROAD_ARRIVE")
 	_arrive_button.visible = false
 	_arrive_button.pressed.connect(_on_arrive_pressed)
-	_content.add_child(_arrive_button)
+	row.add_child(_arrive_button)
+
+	# Çıkış her zaman görünür ve hiçbir kaydırma kutusunun içinde değil
+	# (bkz. World Navigation Rules). Hedefi seferin canlı olup olmamasına
+	# göre _refresh_exit_button() belirler.
+	_exit_button = Button.new()
+	_exit_button.pressed.connect(_on_back_pressed)
+	row.add_child(_exit_button)
+
+	return bar
+
+## Kararların katmanı: olay kartı, pazarlık, tayfa teklifi, rota değişimi
+## ve varış özeti. Hepsi ekranın ortasında **tek** bir çerçevede açılıyor;
+## EU4'ün olay kartı tam olarak bu - dünyayı karartıp önüne bir kart
+## koymak, kartın seçeneklerini de kartın içine almak.
+func _build_modal_layer() -> void:
+	var frame := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.085, 0.095, 0.98)
+	style.border_color = ArtPalette.GOLD_DIM
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(18)
+	frame.add_theme_stylebox_override("panel", style)
+	frame.custom_minimum_size = Vector2(CARD_WIDTH, 0.0)
+	_modal_center.add_child(frame)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	frame.add_child(column)
+
+	_card_panel = VBoxContainer.new()
+	_card_panel.add_theme_constant_override("separation", 8)
+	column.add_child(_card_panel)
+
+	_haggle_holder = VBoxContainer.new()
+	column.add_child(_haggle_holder)
+
+	_recruit_holder = VBoxContainer.new()
+	_recruit_holder.add_theme_constant_override("separation", 6)
+	column.add_child(_recruit_holder)
+
+	_replan_holder = VBoxContainer.new()
+	_replan_holder.add_theme_constant_override("separation", 4)
+	column.add_child(_replan_holder)
 
 	_arrival_panel = VBoxContainer.new()
 	_arrival_panel.add_theme_constant_override("separation", 4)
-	_content.add_child(_arrival_panel)
+	column.add_child(_arrival_panel)
 
 	_enter_city_button = Button.new()
 	_enter_city_button.text = tr("UI_ROAD_ENTER_CITY")
 	_enter_city_button.visible = false
 	_enter_city_button.pressed.connect(_on_enter_city_pressed)
-	_content.add_child(_enter_city_button)
+	column.add_child(_enter_city_button)
 
-	_content.add_child(HSeparator.new())
+## Kayıt katmanı: bir tuşla açılıyor, listenin kendisi kaydırma kutusunda,
+## kapatma tuşu kutunun *dışında* (bkz. World Navigation Rules).
+func _build_log_layer() -> void:
+	var frame := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.07, 0.068, 0.075, 0.97)
+	style.border_color = ArtPalette.GOLD_DIM
+	style.set_border_width_all(1)
+	style.set_content_margin_all(14)
+	frame.add_theme_stylebox_override("panel", style)
+	_log_overlay.add_child(frame)
 
-	var log_title := Label.new()
-	log_title.text = tr("EVT_TEST_LOG")
-	_content.add_child(log_title)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	frame.add_child(column)
+
+	var title := Label.new()
+	title.text = tr("EVT_TEST_LOG")
+	title.modulate = ArtPalette.GOLD
+	column.add_child(title)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(scroll)
 
 	_log_list = VBoxContainer.new()
-	_content.add_child(_log_list)
+	_log_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_log_list)
 
-	# Kaydırma kutusunun *dışında*: kayıt listesi uzadıkça aşağı kaymasın,
-	# yol ekranından çıkış her zaman görünür kalsın (bkz. World Navigation
-	# Rules'un kaydırma maddesi). Hedefi seferin canlı olup olmamasına
-	# göre _refresh_exit_button() belirler.
-	_exit_button = Button.new()
-	_exit_button.pressed.connect(_on_back_pressed)
-	$MarginContainer/VBoxContainer.add_child(_exit_button)
-	_refresh_exit_button()
+	var close_button := Button.new()
+	close_button.text = tr("UI_CANCEL")
+	close_button.pressed.connect(_on_log_closed)
+	column.add_child(close_button)
+
+## HUD şeritlerinin ortak çerçevesi - iki şerit iki ayrı stil kurmasın.
+func _make_bar() -> PanelContainer:
+	var bar := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.058, 0.065, 0.82)
+	style.set_content_margin_all(8)
+	bar.add_theme_stylebox_override("panel", style)
+	return bar
+
+func _on_log_toggled(pressed: bool) -> void:
+	_log_overlay.visible = pressed
+
+func _on_log_closed() -> void:
+	_log_button.button_pressed = false
+	_log_overlay.visible = false
+
+## Ortadaki kart yalnızca içinde bir şey varken görünüyor. Görünürlüğü her
+## karede *içerikten* okumak, onu açıp kapatan yedi ayrı çağrı yerinin
+## birini unutmaktan daha güvenli - unutulan bir tanesi ekranı karartıp
+## boş bir kart bırakırdı.
+func _refresh_modal() -> void:
+	var open := (
+		_card_panel.get_child_count() > 0
+		or _haggle_holder.get_child_count() > 0
+		or _recruit_holder.get_child_count() > 0
+		or _replan_holder.get_child_count() > 0
+		or _arrival_panel.get_child_count() > 0
+	)
+	# Boş bir `VBoxContainer` bile ayırıcı boşluk üretiyor: beş boş
+	# taşıyıcı kartın altına görünür bir boşluk ekliyordu. Gizli çocuk
+	# yer kaplamıyor.
+	_card_panel.visible = _card_panel.get_child_count() > 0
+	_haggle_holder.visible = _haggle_holder.get_child_count() > 0
+	_recruit_holder.visible = _recruit_holder.get_child_count() > 0
+	_replan_holder.visible = _replan_holder.get_child_count() > 0
+	_arrival_panel.visible = _arrival_panel.get_child_count() > 0
+
+	if open == _modal_open:
+		return
+	_modal_open = open
+	_modal.visible = open
 
 ## Emirler tek yerde tanımlı: hem menü satırları hem tuş eşlemesi buradan
 ## okunuyor, yoksa ekranda yazan sayı ile işe yarayan sayı ayrışır.
@@ -656,6 +801,7 @@ func _process(delta: float) -> void:
 		_walk_direction = 0.0
 
 	_refresh_time_ui()
+	_refresh_modal()
 
 ## Kervanı oyuncu yürütür. Zaman kendi başına akar; bu fonksiyon yalnızca
 ## *yolun* ne kadarının kat edildiğini belirler - yani durmak günü değil,
@@ -718,6 +864,11 @@ func _walk_at(rate: float, hours: float) -> void:
 	)
 	_sync_days_remaining()
 	_check_pending_event_reached()
+	# Varış mesafeyle olur, günle değil - ve **o anda** olmalı. Eskiden
+	# yalnızca gün dönerken sınanıyordu: mesafe kapandıktan sonra kervan
+	# ilerlemiyor ama hiçbir şey de olmuyordu, yani oyuncu görünmez bir
+	# duvara dayanıp bir sonraki günü bekliyordu.
+	_check_journey_end()
 
 ## `journey_days_remaining` artık bağımsız bir sayaç değil, kat edilen
 ## yoldan türetilen bir gösterge - HUD, sapma maliyeti (get_days_travelled)
@@ -1008,6 +1159,17 @@ func _position_encounter() -> void:
 		return
 	_encounter.set_screen_position(_band.screen_position_for_day(_pending_event_day_position))
 
+## İşaretin kartı açtığı nokta. Kervanın **burnu** işarete değdiğinde
+## açılmalı: tetik çapaya bağlıyken (çapa liderin arkasında, bkz.
+## RoadCaravan.get_front_offset) görevli önce liderin yanından geçiyor,
+## kart ancak o arkadaki vagona ulaştığında açılıyordu - oyuncu adamı
+## geçtikten sonra konuşmaya başlıyordu.
+func _encounter_trigger_day() -> float:
+	var front := 0.0
+	if _caravan != null:
+		front = _caravan.get_front_offset()
+	return _pending_event_day_position - front / TravelBand.PIXELS_PER_DAY
+
 func _clear_encounter() -> void:
 	if _encounter == null:
 		return
@@ -1021,7 +1183,7 @@ func _clear_encounter() -> void:
 func _check_pending_event_reached() -> void:
 	if _pending_event == null:
 		return
-	if _days_covered + ENCOUNTER_TRIGGER_EPSILON < _pending_event_day_position:
+	if _days_covered + ENCOUNTER_TRIGGER_EPSILON < _encounter_trigger_day():
 		return
 	var event := _pending_event
 	_pending_event = null
@@ -1051,12 +1213,30 @@ func _render_card(event: GameEvent) -> void:
 
 	var title := Label.new()
 	title.text = tr(event.title_key)
+	title.add_theme_font_size_override("font_size", 20)
+	title.modulate = ArtPalette.GOLD
 	_card_panel.add_child(title)
+
+	# Gövde kaydırma kutusunda, seçenekler **dışında**: uzun bir olay metni
+	# seçenekleri kartın altından taşırmasın (bkz. World Navigation
+	# Rules'un kaydırma maddesi - orada çıkış tuşu, burada karar tuşları).
+	var body_scroll := ScrollContainer.new()
+	body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body_scroll.custom_minimum_size = Vector2(0.0, 0.0)
+	_card_panel.add_child(body_scroll)
 
 	var body := Label.new()
 	body.text = tr(event.text_key)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_card_panel.add_child(body)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, 0.0)
+	body_scroll.add_child(body)
+	# Sarılan bir etiketin asgari boyu yerleşim geçmeden bir satır
+	# görünür, o yüzden kutunun boyu metnin *gerçek* yüksekliğinden
+	# sonra kırpılıyor - kısa metin kısa kart, uzun metin kaydırılan kart.
+	body_scroll.custom_minimum_size = Vector2(
+		0.0, minf(body.get_combined_minimum_size().y, CARD_BODY_MAX_HEIGHT)
+	)
 
 	var context := _session.build_event_context()
 	for choice in event.choices:
@@ -1064,6 +1244,7 @@ func _render_card(event: GameEvent) -> void:
 
 func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	var button := Button.new()
+	_style_choice_button(button)
 	var available := choice.is_available(context)
 
 	if available:
@@ -1076,6 +1257,32 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		button.modulate = LOCKED_COLOR
 
 	return button
+
+## Karar tuşlarının ortak görünümü. Varsayılan tema kutusu kartın koyu
+## zemininde kayboluyor ve seçenekler tıklanabilir görünmüyordu - EU4'ün
+## kartında seçenek bir *satır* değil, bir tuştur.
+func _style_choice_button(button: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.15, 0.14, 0.15, 0.95)
+	normal.border_color = ArtPalette.GOLD_DIM
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(3)
+	normal.set_content_margin_all(9)
+	button.add_theme_stylebox_override("normal", normal)
+
+	var hover := normal.duplicate()
+	hover.bg_color = Color(0.22, 0.20, 0.16, 0.98)
+	hover.border_color = ArtPalette.GOLD
+	button.add_theme_stylebox_override("hover", hover)
+
+	var pressed := normal.duplicate()
+	pressed.bg_color = Color(0.10, 0.09, 0.09, 0.98)
+	button.add_theme_stylebox_override("pressed", pressed)
+
+	var disabled := normal.duplicate()
+	disabled.bg_color = Color(0.11, 0.11, 0.11, 0.85)
+	disabled.border_color = Color(0.30, 0.29, 0.27)
+	button.add_theme_stylebox_override("disabled", disabled)
 
 func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event
@@ -1587,7 +1794,10 @@ func _set_journey_controls_enabled(enabled: bool) -> void:
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan
-	_state_label.text = tr("UI_ROAD_STATE") % [
+	# Çeviri metni üç satır: HUD şeridinde tek satıra iniyor. Anahtarı
+	# bölmek yerine burada birleştirmek, aynı metnin şehir ekranlarında
+	# çok satırlı kalmasına izin veriyor.
+	_state_label.text = (tr("UI_ROAD_STATE") % [
 		_current_day,
 		_session.journey_days_remaining,
 		int(_session.danger_level * 100.0),
@@ -1600,9 +1810,15 @@ func _refresh_state() -> void:
 		caravan.documents,
 		caravan.morale,
 		_session.party_stress,
-	]
+	]).replace("\n", " · ")
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
+	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt
+	# katmanında duruyor (bkz. _build_log_layer).
+	if _last_log_label != null:
+		_last_log_label.text = text
+		_last_log_label.modulate = Color(0.82, 0.84, 0.80) if color == Color.WHITE else color
+
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD

@@ -20,7 +20,15 @@ const EPITHETS: Array[String] = [
 
 ## Mekân başına: [aday sayısı, dağıtılan ekstra stat puanı, taban ücret,
 ## puan başına ücret, gereken itibar]
-const VENUE_MARKET_PROFILE: Array[int] = [2, 2, 40, 12, 0]
+##
+## **Meydan hiçbir zaman kapanmaz** (`GameSession.MIN_REPUTATION`, yani
+## itibarın dibi). Eskiden 0 istiyordu ve taverna da 0 istediği için tek
+## kötü sefer - itibarı eksiye düşüren bir teslimat kaybı - kervanın
+## *bütün* tayfa toplama kapılarını birden kapatıyordu: oyuncu ne meydana
+## ne tavernaya girebiliyor, kadrosunu bir daha kuramıyordu. Meydanda
+## bekleyenler zaten işi olmayan insanlar; kervanının adı kötüye çıkmışsa
+## pahalı olan lonca kapanır, en ucuz kapı değil.
+const VENUE_MARKET_PROFILE: Array[int] = [2, 2, 40, 12, GameSession.MIN_REPUTATION]
 const VENUE_TAVERN_PROFILE: Array[int] = [3, 5, 70, 15, 0]
 const VENUE_GUILD_PROFILE: Array[int] = [2, 9, 140, 20, 5]
 
