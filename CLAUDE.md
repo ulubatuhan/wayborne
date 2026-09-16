@@ -418,6 +418,42 @@ the walking figures are the game's strongest asset) but to deepen it.
   struck, then re-lit before anyone got home - not reachable at `CAMP_HOURS`
   today, but the code must not assume it stays that way) can't strand a
   figure hanging between two points.
+- **A gathering nobody can see is not a gathering.** The first version
+  put exactly one walking crew figure at each fire and called it done -
+  measured against a real screenshot, it read as a lone sentry, not a
+  camp. Two fixes closed the gap, both playtest-driven:
+  - **The driver joins too.** `ArtDraw.wagon()`'s seated silhouette is
+    normally the *only* trace of that wagon's second crew member (bkz.
+    `PEOPLE_PER_WAGON` - two people per wagon, one drives, one walks);
+    it never left the bench. `RoadCaravan` now keeps a parallel,
+    initially-invisible `_driver_figures` array, and when camp starts
+    that figure becomes visible and gathers exactly like the walking
+    one, while `wagon()`'s own `draw_driver` flag goes false so the seat
+    isn't drawn twice. `ArtDraw.wagon_driver_seat()` is the one formula
+    for where that seat is - `wagon()` reads it for the static silhouette,
+    `RoadCaravan` reads it for the WalkFigure's departure point, because
+    a seat computed in two places is two different seats.
+  - **Shared fires need shared seats, not a shared point.** Every figure
+    assigned to the same fire was targeting the *identical* coordinate -
+    two or three people collapsing onto one pixel reads as one person.
+    `CAMPFIRE_SEAT_OFFSETS` fans them out left/right of the flame by a
+    few pixels each (`CAMPFIRE_SEAT_SPACING`), assigned in gathering
+    order so the driver, the walking crew and any party members sharing
+    a fire land on different seats. `test_camp_gathering.gd`'s stacking
+    check is the general form of the same mistake the layout tests
+    already guard against elsewhere in this file: two things placed by
+    the same formula are the same thing unless something forces them
+    apart.
+  - One trap both fixes had to dodge: a figure's *target* y has to be
+    the true ground line, always - not "wherever it currently stands."
+    The walking crew and party already stood at ground level, so reading
+    their current y was harmless, but the driver starts on the wagon's
+    raised seat; reusing that as the fire-side height left them floating
+    at bench-height the whole walk. The fire target now always resolves
+    to `_ground_y - figure.size.y`, which is a no-op for anyone who
+    started on the ground and a real descent for anyone who didn't -
+    the same target drives the return trip, so climbing back onto the
+    seat falls out of the same fix for free.
 
 ### Audio Rules
 
