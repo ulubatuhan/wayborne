@@ -28,6 +28,13 @@ func _ready() -> void:
 	# (pazar, lonca...) parçayı değiştirmiyor - play_track aynı parçayı
 	# ikinci kez çalmıyor, o yüzden ekran gezmek müziği baştan başlatmaz.
 	AudioManager.play_track(AudioManager.TRACK_CITY)
+	# Kapı sesi yalnızca gerçek bir girişte - bkz. Nav.city_gate_opening'in
+	# notu. Bayrak tüketiliyor (hemen false'a dönüyor), yoksa pazar/lonca
+	# gibi bir alt ekrandan geri dönmek de aynı sahneyi yeniden yükler ve
+	# kapı her seferinde bir daha "açılırdı".
+	if Nav.city_gate_opening:
+		Nav.city_gate_opening = false
+		AudioManager.play_sfx(AudioManager.SFX_GATE)
 	# Sahne dosyasındaki yazı yalnızca editörde ne olduğunu görmek için;
 	# oyuncunun gördüğü metin her zaman koddan, anahtarla gelir - yoksa
 	# ekran hangi dile geçilirse geçilsin Türkçe kalır.

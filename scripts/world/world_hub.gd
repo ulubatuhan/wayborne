@@ -536,6 +536,9 @@ func _try_interact_nearest() -> void:
 			return
 
 func _enter_spot(spot: Dictionary) -> void:
+	# Yalnızca kapının kendisi bir girişi işaretliyor - bkz. Nav'daki not.
+	if spot.scene == Nav.CITY_MAP:
+		Nav.city_gate_opening = true
 	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 func _hint(text: String) -> void:

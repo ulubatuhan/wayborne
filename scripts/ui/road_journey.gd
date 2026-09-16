@@ -2059,6 +2059,9 @@ func _make_summary_label(text: String) -> Label:
 ## bölümü). Oyunun tek gerçek sonu hâlâ var ve o da burada değil:
 ## liderin ölüp yerine geçecek kimsenin kalmaması (_show_run_over).
 func _on_enter_city_pressed() -> void:
+	# `city_map.gd` bunu okuyup kapı sesini çalıyor - bkz. Nav'daki not,
+	# neden bir is_journey_active() kontrolü değil de taşınan bir bayrak.
+	Nav.city_gate_opening = true
 	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve

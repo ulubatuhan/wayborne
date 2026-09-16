@@ -1,6 +1,7 @@
 "keys","tr","en","de","fr","es","it","pt_BR","ru","pl","zh_CN","ja"
 "UI_LANGUAGE","Dil","Language","","","","","","","","",""
 "UI_PLAY","Yeni Oyun","New Game","","","","","","","","",""
+"UI_TITLE_PROMPT","Yola çıkmak için bir tuşa basın","Press any key to set out","","","","","","","","",""
 "UI_CONTINUE","Devam Et","Continue","","","","","","","","",""
 "UI_SETTINGS","Ayarlar","Settings","","","","","","","","",""
 "UI_MUSIC_VOLUME","Müzik Sesi","Music Volume","","","","","","","","",""
