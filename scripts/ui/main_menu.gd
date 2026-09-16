@@ -30,6 +30,18 @@ const SCRIM_COLOR: Color = Color(0.04, 0.035, 0.045, 0.62)
 const PROMPT_PULSE_SECONDS: float = 1.35
 const PROMPT_DIM_ALPHA: float = 0.35
 
+## Davet metni artık düz varsayılan boyutta değil - küçüklüğü playtest'te
+## "fark edilmiyor" diye geldi. Işıması `ArtPalette.TORCH`'tan: arka
+## planın kendi güneşiyle aynı sıcak ton, yoksa metin manzaradan kopuk bir
+## öge gibi durur (bkz. Art Rules'un "tek palet" ilkesi). Sıfır ofsetli
+## geniş bir gölge Godot'un SDF font gölgesini bir hâleye çeviriyor - ayrı
+## bir shader ya da ikinci bir Label gerekmiyor. İnce bir mürekkep dış
+## çizgisi de var, yalnızca gökyüzü açıkken metnin okunurluğu düşmesin diye.
+const PROMPT_FONT_SIZE: int = 26
+const PROMPT_GLOW_ALPHA: float = 0.6
+const PROMPT_GLOW_SIZE: int = 14
+const PROMPT_OUTLINE_SIZE: int = 2
+
 ## Butonlar beliriken her biri öncekinden bu kadar geç başlıyor - tek
 ## seferde hepsinin birden açılması "belirmek" değil "anahtarı çevirmek"
 ## gibi duruyordu.
@@ -113,6 +125,7 @@ func _begin_title_phase() -> void:
 
 	_prompt_label = Label.new()
 	_prompt_label.text = tr("UI_TITLE_PROMPT")
+	_prompt_label.label_settings = _build_prompt_label_settings()
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_prompt_label.position.y -= 64.0
@@ -126,6 +139,17 @@ func _begin_title_phase() -> void:
 	_prompt_tween.tween_property(_prompt_label, "modulate:a", 1.0, PROMPT_PULSE_SECONDS)
 
 	AudioManager.play_ambience(AudioManager.AMBIENCE_WIND)
+
+func _build_prompt_label_settings() -> LabelSettings:
+	var settings := LabelSettings.new()
+	settings.font_size = PROMPT_FONT_SIZE
+	settings.font_color = ArtPalette.BONE
+	settings.outline_size = PROMPT_OUTLINE_SIZE
+	settings.outline_color = Color(ArtPalette.INK, 0.7)
+	settings.shadow_size = PROMPT_GLOW_SIZE
+	settings.shadow_offset = Vector2.ZERO
+	settings.shadow_color = Color(ArtPalette.TORCH, PROMPT_GLOW_ALPHA)
+	return settings
 
 ## Menü sahnesiz bir kere daha açıldığında (Ayarlar'dan dönüş gibi) evre
 ## hiç yaşanmadan doğrudan bu hâle geçiyor - eski davranışın aynısı.
