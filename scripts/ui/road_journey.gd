@@ -207,6 +207,7 @@ var _signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _signal_danger_bonus: float = 0.0
 var _command_panel: PanelContainer
 var _in_game_menu: InGameMenu = null
+var _succession_panel: SuccessionPanel = null
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
@@ -1526,17 +1527,35 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	var button := Button.new()
 	_style_choice_button(button)
 	var available := choice.is_available(context)
+	var label := tr(choice.text_key)
+	if _choice_triggers_combat(choice):
+		# %12 kazanma oranı bir dengesizlik değil bir okunabilirlik sorunu:
+		# oyuncu göze aldığı riski seçmeden *önce* görsün, savaş panelinde
+		# değil. Sayı zaten var - HUD'daki tehlike çubuğunun aynısı
+		# (_weathered_danger) - burada yalnızca karar anında da görünür
+		# kılınıyor.
+		label = tr("UI_ROAD_CHOICE_DANGER") % [label, roundi(_weathered_danger() * 100.0)]
 
 	if available:
-		button.text = tr(choice.text_key)
+		button.text = label
 		button.pressed.connect(_on_choice_pressed.bind(choice))
 	else:
 		# Kilitli seçenek gizlenmez: oyuncu neyi kaçırdığını görsün.
-		button.text = "%s — %s" % [tr(choice.text_key), tr(choice.unavailable_text_key)]
+		button.text = "%s — %s" % [label, tr(choice.unavailable_text_key)]
 		button.disabled = true
 		button.modulate = LOCKED_COLOR
 
 	return button
+
+## Savaşı doğrudan tetikleyen seçenek mi - tehlike etiketi yalnızca bunlara
+## eklenir. Şu an her TRIGGER_COMBAT garantili `effects` içinde (evt_bandit_
+## ambush, evt_wild_animal, evt_guard_patrol, evt_wanderer_revenge); ağırlıklı
+## `outcomes` içinde kullanan bir olay yok.
+func _choice_triggers_combat(choice: EventChoice) -> bool:
+	for effect in choice.effects:
+		if effect.type == EventEffect.Type.TRIGGER_COMBAT:
+			return true
+	return false
 
 ## Karar tuşlarının ortak görünümü. Varsayılan tema kutusu kartın koyu
 ## zemininde kayboluyor ve seçenekler tıklanabilir görünmüyordu - EU4'ün
@@ -1789,6 +1808,9 @@ func _report_combat_deaths(dead_characters: Array) -> void:
 	var heir: CharacterData = outcome.get("new_leader")
 	if heir != null:
 		_add_log(tr("UI_ROAD_NEW_LEADER") % heir.character_name, OUTCOME_COLOR)
+		var fallen_names: Array = outcome.get("dead_names", [])
+		var fallen_name := String(fallen_names[0]) if not fallen_names.is_empty() else ""
+		_open_succession_panel(fallen_name, heir.character_name, outcome.get("generation", _session.lineage_generation))
 
 ## Kervanı sürecek kimse kalmadı. Ana menüye dönmekten başka bir çıkış
 ## sunulmuyor ve kayıt silinmiyor - "Devam Et"in kapalı bir seferi
@@ -1884,6 +1906,7 @@ func _has_open_panel() -> bool:
 		or _recruit_holder.get_child_count() > 0
 		or _replan_holder.get_child_count() > 0
 		or _in_game_menu != null
+		or _succession_panel != null
 	)
 
 ## Sefer sürerken kayıt hiç yapılamaz - `SaveManager`in başındaki not:
@@ -1900,6 +1923,19 @@ func _open_in_game_menu() -> void:
 
 func _on_in_game_menu_dismissed() -> void:
 	_in_game_menu = null
+
+## Liderlik devrinin töreni (bkz. SuccessionPanel) - `_has_open_panel()`'e
+## eklendiği için `_check_journey_end()` ve zaman akışı bu ekranda durur,
+## aynı `_in_game_menu`'nün yaptığı gibi.
+func _open_succession_panel(fallen_name: String, heir_name: String, generation: int) -> void:
+	_succession_panel = SuccessionPanel.new()
+	_succession_panel.dismissed.connect(_on_succession_dismissed)
+	add_child(_succession_panel)
+	_succession_panel.setup(_session.get_caravan_name(), fallen_name, heir_name, generation)
+
+func _on_succession_dismissed() -> void:
+	_succession_panel = null
+	_check_journey_end()
 
 ## --- Yolda planı değiştirmek ---
 ## Şehirde kurulan plan bir niyet, bir taahhüt değil: geçit kapanır, erzak

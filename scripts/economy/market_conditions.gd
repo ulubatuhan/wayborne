@@ -125,15 +125,30 @@ func get_active_shocks(day: int) -> Array:
 func _get_shock_multiplier(location_id: String, item_id: String, day: int) -> float:
 	var multiplier := 1.0
 	for shock in _shocks:
-		if int(shock["until_day"]) < day:
-			continue
-		if str(shock["location_id"]) != location_id:
-			continue
-		var shock_item := str(shock["item_id"])
-		if not shock_item.is_empty() and shock_item != item_id:
-			continue
-		multiplier *= float(shock["multiplier"])
+		if _shock_matches(shock, location_id, item_id, day):
+			multiplier *= float(shock["multiplier"])
 	return multiplier
+
+func _shock_matches(shock: Dictionary, location_id: String, item_id: String, day: int) -> bool:
+	if int(shock["until_day"]) < day:
+		return false
+	if str(shock["location_id"]) != location_id:
+		return false
+	var shock_item := str(shock["item_id"])
+	if not shock_item.is_empty() and shock_item != item_id:
+		return false
+	return true
+
+## Ekranların "bu fiyat neden oynadı" sorusuna cevap verebilmesi için:
+## market.gd bir malın satırını çizerken bunu okuyup küçük bir işaret
+## gösterebilir. `add_shock` zaten bir `label_key` taşıyordu ama hiçbir
+## çağıran doldurmuyordu ve hiçbir ekran `get_active_shocks`'u okumuyordu -
+## piyasa şoku etkisi gerçekti, görünürlüğü yoktu.
+func is_shocked(location_id: String, item_id: String, day: int) -> bool:
+	for shock in _shocks:
+		if _shock_matches(shock, location_id, item_id, day):
+			return true
+	return false
 
 ## Günlük işleyiş: baskı tabana doğru çekilir, süresi dolan şoklar düşer.
 func advance_day(day: int) -> void:

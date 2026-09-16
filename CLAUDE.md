@@ -62,6 +62,14 @@ wayborne/
   `EventEffectApplier`/`CaravanState`, never in individual events.
 - Locked choices are shown disabled *with their reason*, not hidden, so the
   player learns what to prepare for next time.
+- **A choice that opens combat says so before it's picked, not after.**
+  `road_journey.gd`'s `_choice_triggers_combat()` scans a choice's
+  `effects` for `TRIGGER_COMBAT` and appends the road's current effective
+  danger (`_weathered_danger()` - the same number the HUD's danger bar
+  already shows) straight onto the button. A steep win-rate gap between
+  road-danger tiers is a real difficulty curve, not a bug, but a fight the
+  player couldn't see coming *is* a legibility bug - the fix is telling the
+  player what they're gambling on, not softening the odds.
 - All player-facing event text lives in `data/locale/wayborne_text.csv` as
   translation keys; scripts call `tr(key)`. Never hardcode event prose.
 - New effects must be added to the `EventEffect.Type` enum **and** handled in
@@ -328,6 +336,17 @@ carry a caravan *name* down the road.
   *this* leader's tenure rather than the caravan's total age.
 - **The only real ending is having nobody left to carry the name**
   (`RUN_OVER_FLAG`). Wealth ends nothing.
+- **The one non-negotiable rule needs a scene, not a log line.** Succession
+  used to be `UI_ROAD_NEW_LEADER` - one line among a dozen others in the
+  road log, indistinguishable from a famine warning. `SuccessionPanel`
+  (`OnboardingPanel`'s scene-less pattern) is a full-screen, unskippable
+  moment `road_journey.gd` opens whenever `resolve_combat_deaths()` returns
+  a new leader: the caravan's name, the generation number, who fell, who
+  leads now. Deliberately **not** dismissible by Esc or a backdrop click
+  like every other overlay in the game - the one rule the whole game is
+  built around doesn't get the casual-dismiss treatment. It joins
+  `_has_open_panel()` so time and arrival both wait for it, same as the
+  in-game menu.
 - **`CaravanLedger` never deletes a line.** Someone who leaves or dies
   stays in the book, struck through. The reason is not mechanical: a
   deleted name reads as never having existed, a struck one is the
@@ -1631,6 +1650,15 @@ the report said exactly 100.0 every run.
   bypasses this.
 - `EventEffect.Type.MARKET_SHOCK` is how a strike, famine, embargo or good
   harvest moves prices for a while.
+- **An effect that moves a number without showing why is indistinguishable
+  from an unbalanced price table.** `add_shock()` always carried a
+  `label_key` and `get_active_shocks()` always existed, but nothing ever
+  called either - a shock changed the price a market screen displayed and
+  said nothing about it. `MarketConditions.is_shocked()` is the one door
+  `market.gd` reads to mark an affected row (`UI_MARKET_SHOCK_MARK`,
+  refreshed alongside the price on every buy/sell/haggle), same rule as
+  weather being shown because a hidden penalty is indistinguishable from a
+  bug.
 - **Weight binds, not just slots.** The limit lives in `Inventory.add_item`
   itself, so an event reward obeys it exactly like a market purchase - when
   only the market screen checked it, everything else leaked through.
@@ -2848,6 +2876,33 @@ olduğundan bile emin değildi. `RoadSignals` zaten üç olumsuz tür
 taşıyor (bkz. Road Layer Rules) ve dördüncü, olumlu bir tür eklemek
 mimari olarak ucuz - ama bu, playtest'in kendi hedefiyle çelişen bir
 mekaniği inşa etmek olurdu. Fikir burada duruyor, bir görev değil.
+
+Faz 12 ("Dışarıdan bakış") - oyunun kendi Codex'i beş farklı yapay zeka
+modeline "bunu sıfırdan sen yapsaydın nasıl olurdu" diye soruldu; beşi de
+birbirinden habersiz aynı iki şeye parmak bastı: dünya sahneleri (menü/yol/
+şehir/savaş) ile yönetim ekranlarının (pazar/lonca/karakter...) iki ayrı
+prodüksiyon gibi görünmesi, ve `RoadAttention`'ın taşıdığı karmaşıklığa
+göre az iş yapması. İkincisi ciddiye alınmadı - oyunun kendi Road Layer
+Rules'u bu mekaniği zaten playtest edilmiş, kasıtlı derinleştirilmiş bir
+sistem olarak kaydediyor, kısa bir özetten görüp verilen bir oybirliği onu
+sökmeye yetmez. Düşük riskli, kaynağı ne olursa olsun uygulanabilir üç
+öneri alındı:
+
+- **Tehlike artık seçilmeden önce görünüyor.** %12'lik bir kazanma oranı
+  dengesizlik değildi, okunabilirlik sorunuydu - bkz. Event Engine Rules'un
+  `_choice_triggers_combat()` maddesi.
+- **Liderlik devri bir sahne oldu**, bir log satırı olmaktan çıktı - bkz.
+  Lineage Rules'un `SuccessionPanel` maddesi.
+- **Piyasa şoku artık görünür.** `add_shock()`'un hiç okunmayan
+  `label_key`'i ve hiç çağrılmayan `get_active_shocks()`'u vardı - bkz.
+  Economy Rules'un `is_shocked()` maddesi.
+
+Geri kalan öneriler (stres/moral birleşmesi, rota/hava sadeleştirmesi, borç
+sisteminin kapsamı, ekipmanın kargoya dönüşmesi, kampanya bölümlerinin
+sadeleşmesi, ve en büyüğü - iki katmanlı "defter" sanat yönüne geçiş)
+bilerek uygulanmadı: her biri oyunun zaten ölçülmüş ya da test edilmiş bir
+sistemine dokunuyor ve iki taraf da modeller arasında gerçek savunucular
+buldu. Karar oyuncuda, görev değil.
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

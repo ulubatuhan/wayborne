@@ -110,6 +110,16 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	price_label.custom_minimum_size = Vector2(160, 0)
 	row.add_child(price_label)
 
+	# Piyasa şoku gerçekti ama görünürlüğü yoktu: fiyat oynuyordu, hiçbir
+	## ekran nedenini söylemiyordu (bkz. MarketConditions.is_shocked).
+	## Küçük, ayrı bir etiket - fiyatın kendisine karışmıyor, yalnızca
+	## "bu fiyat şu an geçici bir olayın etkisinde" diyor.
+	var shock_label := Label.new()
+	shock_label.custom_minimum_size = Vector2(90, 0)
+	shock_label.modulate = Color(0.85, 0.62, 0.30)
+	shock_label.tooltip_text = tr("UI_MARKET_SHOCK_TOOLTIP")
+	row.add_child(shock_label)
+
 	var stock_label := Label.new()
 	stock_label.custom_minimum_size = Vector2(90, 0)
 	row.add_child(stock_label)
@@ -138,6 +148,8 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 
 	_shop_rows.append({
 		"item": item,
+		"price_label": price_label,
+		"shock_label": shock_label,
 		"stock_label": stock_label,
 		"buy_button": buy_button,
 		"haggle_button": haggle_button,
@@ -158,6 +170,18 @@ func _refresh_shop_rows() -> void:
 		var out_of_stock := remaining == 0
 		row.buy_button.disabled = out_of_stock
 		row.haggle_button.disabled = out_of_stock
+
+		# Fiyat alım-satımla (arz-talep baskısı) değişiyor, o yüzden burada
+		# da tazeleniyor - yoksa şok işareti güncel kalsa bile yanındaki
+		# fiyat sefer başında donup kalırdı.
+		var price_label: Label = row.price_label
+		price_label.text = tr("UI_MARKET_PRICES") % [_get_buy_price(item), _get_sell_price(item)]
+
+		var shock_label: Label = row.shock_label
+		var shocked := _session.market.is_shocked(
+			_session.current_location_id, item.item_id, _session.total_days_elapsed
+		)
+		shock_label.text = tr("UI_MARKET_SHOCK_MARK") if shocked else ""
 
 func _on_buy_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	var quantity := int(quantity_spin.value)
