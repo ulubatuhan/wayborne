@@ -21,11 +21,18 @@ var _documents_label: Label
 var _required_provisions_label: Label
 var _current_provisions_label: Label
 var _shortfall_label: Label
+## Eksik erzakla çıkmanın somut bedeli: kaç gün aç kalınacağı. Ayrı bir
+## etiket, çünkü eksiklik satırı "ne kadar eksik / kaça alınır" diyor;
+## bu satır "çıkarsan ne olur" diyor ve ikisi farklı sorular.
+var _risk_label: Label
 var _profit_label: Label
 var _morale_label: Label
 var _morale_reasons: VBoxContainer
 var _buy_provisions_button: Button
 var _confirm_button: Button
+## Onay silahlanmış mı (bkz. _on_confirm_pressed). Ekran her açıldığında
+## sıfırdan başlar, yani bir önceki ziyaretin onayı taşınmaz.
+var _departure_armed: bool = false
 var _result_label: Label
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
@@ -163,12 +170,17 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_required_provisions_label = Label.new()
 	_current_provisions_label = Label.new()
 	_shortfall_label = Label.new()
+	_risk_label = Label.new()
+	_risk_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_risk_label.modulate = SHORTFALL_COLOR
+	_risk_label.visible = false
 	_profit_label = Label.new()
 	_content.add_child(_party_label)
 	_content.add_child(_documents_label)
 	_content.add_child(_required_provisions_label)
 	_content.add_child(_current_provisions_label)
 	_content.add_child(_shortfall_label)
+	_content.add_child(_risk_label)
 	_content.add_child(_profit_label)
 
 	# Çıkış morali görünmezse mekanik sessiz bir cezaya dönüşür: oyuncu
@@ -316,19 +328,36 @@ func _refresh() -> void:
 		_buy_provisions_button.visible = true
 		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % shortfall_cost
 		_buy_provisions_button.disabled = not _session.wallet.can_afford(shortfall_cost)
-		_confirm_button.disabled = true
-		_confirm_button.text = tr("UI_PLANNER_BLOCKED")
+
+		# Yola çıkmak **yasak değil, riskli**. Kilit yerine silahlanan bir
+		# onay: ilk basış riski sayıyla söylüyor, ikincisi çıkıyor.
+		_confirm_button.disabled = false
+		_confirm_button.modulate = SHORTFALL_COLOR
+		if _departure_armed:
+			_confirm_button.text = tr("UI_PLANNER_DEPART_CONFIRM")
+		else:
+			_confirm_button.text = tr("UI_PLANNER_DEPART_HUNGRY")
+		_risk_label.visible = true
+		_risk_label.text = tr("UI_PLANNER_HUNGER_RISK") % _plan.get_hungry_days(current_provisions)
 	else:
 		_shortfall_label.text = tr("UI_PLANNER_READY")
 		_shortfall_label.modulate = SATISFIED_COLOR
 		_buy_provisions_button.visible = false
 		_confirm_button.disabled = false
+		_confirm_button.modulate = Color.WHITE
 		_confirm_button.text = tr("UI_CONFIRM_CARAVAN")
+		_risk_label.visible = false
+		_departure_armed = false
 
 	_profit_label.text = tr("UI_TOTAL_POTENTIAL") % _plan.get_total_profit()
 
+## Eksik erzakla çıkmak iki basış ister: ilki riski söyler, ikincisi
+## kabul eder. Tek basış, ekranı okumayan bir oyuncuyu kazara aç bir yola
+## sokardı; onay kutusu ise oyunun hiçbir yerinde olmayan bir kalıp.
 func _on_confirm_pressed() -> void:
-	if _plan.get_provisions_shortfall(_session.get_provisions()) > 0:
+	if _plan.get_provisions_shortfall(_session.get_provisions()) > 0 and not _departure_armed:
+		_departure_armed = true
+		_refresh()
 		return
 
 	_session.depart_with_contracts(_plan.get_selected_offers())

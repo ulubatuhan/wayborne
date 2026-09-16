@@ -430,6 +430,19 @@ way to textures.
   it; keeping a copy each meant the same caravan's wagon was two different
   objects on two screens. Same reasoning as
   `CaravanPlan.daily_consumption()`.
+- **The UI's own small marks are drawn too, never dialed from a font.**
+  Position pips, sort chevrons and the objective check were Unicode
+  characters (`●○↑↓✓`) for a while, and every one of them rendered as an
+  empty box: Godot's default font doesn't carry Geometric Shapes, Arrows
+  or Dingbats. A playtest photographed the combat panel's position marks;
+  the same failure was sitting in eleven other player-facing spots
+  (`UiIcon.gd`'s header lists them) and no test could see any of them,
+  because the text itself was correct and translated - it just couldn't be
+  rendered. `UiIcon` (`scripts/ui/`) draws these through `ArtDraw.pip()`/
+  `chevron()`/`check()` instead, the same reasoning as the wagon: a shape
+  is drawn once, not dialed from a font that may not carry it. See
+  Localization Rules for the guard that now catches a glyph the font can't
+  show, in either a CSV cell or a screen literal.
 - **Scenery is generated from world coordinates, never from a list.** Each
   layer's props come from `hash(cell index)`; cells enter as the view
   scrolls and are forgotten as they leave. A fixed array wraps around, the
@@ -1255,6 +1268,16 @@ or not the day went well.
   journey length, an under-stocked caravan does starve (one unit short is
   already famine), each wagon adds exactly `PEOPLE_PER_WAGON` mouths, and
   the perks reach the planner.
+- **Setting out under-stocked is a risk, not a wall.** The planner used to
+  disable "Confirm" outright when the plan was short - a playtest read
+  this correctly: *"can we settle for it anyway, but tell the player about
+  the risk"*. A game whose whole point is attrition should let the player
+  choose to gamble. `CaravanPlan.get_hungry_days()` computes the exact
+  count the road will actually charge (same formula, so the number is a
+  fact, not an estimate) and the confirm button arms in two presses - the
+  first names the cost, the second commits - the same shape as a
+  destructive confirm anywhere else in the UI, and consistent with no
+  other screen in the game using a checkbox for this.
 
 **The simulator's "net kazanç" is contract income only** - trading profit
 (buy cheap, sell where it's demanded) is not in it, and in real play that is
@@ -1650,6 +1673,19 @@ box inside the text, so the text was the screen.
 - `tests/screenshot_journey_screen.gd` photographs **the real scene** with a
   live session, not a hand-built band - the other screenshot tools show the
   landscape but cannot show the layout, and the layout was the complaint.
+- **The thin HUD is deliberate, but it means the kervanın detayı has to
+  live somewhere.** A playtest asked for exactly that - *"a detailed 'My
+  Caravan Status' tab"*, then *"status, map, inventory, contracts"*
+  buttons. `CaravanStatusPanel` (`scripts/ui/`) is the one answer to
+  both: a `Tab`-toggled layer over the road (fifth stacked layer,
+  `StatusOverlay`, between `LogOverlay` and `Modal`) that reads the
+  session and shows the kadro, wagons, provisions/gold/debt, cargo,
+  carried contracts and the ledger's last lines - **never decides
+  anything**, same rule as `CityBriefPanel`. It is scene-less
+  (`.new()` + `setup()`), and `setup()` can be called before the road's
+  real session exists (`_build_ui()` runs before `_init_journey()`
+  assigns `_session`) - `set_session()` is the second call that actually
+  fills it, once the session is real.
 
 ### Encounter Timing Rules
 
@@ -1686,6 +1722,16 @@ ever fell, and the career simulation had already measured the result
   for reputation 0, so a single bad journey locked *every* way to rebuild a
   crew at once. The people waiting in a market square are the ones without
   work; a caravan with a bad name loses the guild, not the square.
+- **A reward nobody sees is a reward that doesn't feel like playing well.**
+  Delivery pays reputation and happens automatically on arrival - there is
+  deliberately no "deliver" button (see Event Engine Rules, City Hub
+  Rules). But the arrival summary and the guild board never *said* either
+  of those things, so a playtest asked where the delivery screen was and
+  reported that arriving felt no different from failing. The arrival
+  summary now names the delivered count and the reputation gained, and the
+  guild's accepted-contracts list carries one line saying delivery happens
+  the moment the caravan reaches the destination - the same rule as every
+  other screen having to name the mechanic it's leaning on.
 
 ### Playthrough Start Rules
 
@@ -1781,6 +1827,18 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
 - **`tests/run_tests.gd` pins the locale to Turkish.** Catalog text now
   resolves through the translation server, so without pinning, assertions on
   display names would pass or fail depending on the machine's language.
+- **A correct, translated string is not the same claim as a *renderable*
+  one.** Godot's default font doesn't carry Geometric Shapes, Arrows, Box
+  Drawing or Dingbats, so `●○↑↓✓` and friends rendered as empty boxes
+  everywhere the UI used them as icons - twelve player-facing spots, found
+  by a playtest photographing only one of them. `_test_every_glyph_is_
+  renderable` checks every CSV cell and every screen string literal
+  against `ThemeDB.fallback_font.has_char()`. The one exemption is
+  `UserSettings.SUPPORTED`'s language names (`user_settings.gd`): they
+  must stay in their own script (see the exemption above) even where CJK
+  isn't renderable yet, so `settings.gd` appends the locale code next to
+  an unrenderable name instead of hiding the option - a language you
+  can't read the name of should still be one you can find by its code.
 
 - **scripts/ui/**: User interface scripts
   - Menu controllers
@@ -2410,6 +2468,41 @@ Sırada: elle çizilmiş varlıklar (her şey hâlâ `_draw()` ile çiziliyor -
 `ArtPalette` kalır, çizim fonksiyonları dokuya yerini bırakır) ve
 Ruin Rules'un işaretlediği tek denge sorusu (iki kişilik parti %65
 tehlikede %12).
+
+Faz 11 ("Playtest 14.09.2026") - bir dış oyuncunun ilk elden bulduğu beş
+gerçek eksik, hepsi küçük ama biri projeyi baştan sona kesiyordu:
+
+- **Font kapsamı.** Savaşın mevki belirteçleri (`●○`) boş kutu olarak
+  çıkıyordu - playtest bunu fotoğrafladı. Taradığında aynı hata on bir
+  yerde daha çıktı (parti sıralama okları, brifingin tamamlandı tiki, yol
+  kaydının ayırıcıları...). Hepsi `UiIcon`'a taşındı (bkz. Art Rules) ve
+  `test_localization.gd` artık her CSV hücresini ve her ekran dizesini
+  fontun kapsamına karşı sınıyor - bir daha aynı hata sessizce giremez.
+- **Erzak kilidi risk oldu.** "Yetersiz erzak - yola çıkılamaz" oyunun
+  kendi tezine (kervan ruined olabilir ama kararı oyuncu verir) aykırıydı.
+  Artık iki basışlık bir onay: ilki kaç gün aç kalınacağını söylüyor,
+  ikincisi kabul ediyor (bkz. Provision Rules).
+- **Teslimat görünür oldu.** Kontrat teslimi varışta kendiliğinden oluyor
+  ama hiçbir ekran bunu söylemiyordu - playtest "teslim et" ekranı aradı.
+  Varış özeti artık teslim sayısını ve kazanılan itibarı yazıyor, lonca
+  panosu kabul edilen kontratın yanına teslimatın nasıl işlediğini
+  anlatan bir satır ekliyor (bkz. Reputation Rules).
+- **Kervan dökümü.** "My Caravan Status" isteğine ve "status/map/
+  inventory/contracts gibi düğmeler" fikrine tek cevap:
+  `CaravanStatusPanel`, yol ekranında `Tab` ile açılan, kadro/vagon/erzak/
+  kargo/kontrat/defter dökümü (bkz. Road Screen Layout Rules).
+- **İsteğe bağlı yardım.** Sistem anlatımı (`OnboardingPanel`) bir kereye
+  mahsus otomatik açılıyordu, bir daha bulunamıyordu. Şehirde ve yolda
+  `F3` ya da bir "Yardım" tuşu artık aynı katmanı bayrağa dokunmadan
+  yeniden açıyor.
+
+**Bilerek uygulanmadı, not olarak duruyor:** playtest yürürken küçük
+rastgele ödüller ya da mini-oyunlar önerdi, ama kendi sözleriyle *"erken
+bir fikir olabilir, dursun bir köşede"* dedi ve oyunun text-tabanlı mı
+olduğundan bile emin değildi. `RoadSignals` zaten üç olumsuz tür
+taşıyor (bkz. Road Layer Rules) ve dördüncü, olumlu bir tür eklemek
+mimari olarak ucuz - ama bu, playtest'in kendi hedefiyle çelişen bir
+mekaniği inşa etmek olurdu. Fikir burada duruyor, bir görev değil.
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

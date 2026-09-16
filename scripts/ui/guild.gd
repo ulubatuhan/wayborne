@@ -7,6 +7,8 @@ extends Control
 ## çıkılmadan süresi geçerse (advance_day) ya da yolda teslim edilemezse
 ## (finish_journey) itibar cezası uygulanır.
 
+const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
+
 var _session: GameSession
 var _debt_panel: DebtPanel
 var _rows: Array[Dictionary] = []
@@ -69,6 +71,16 @@ func _rebuild() -> void:
 
 	var accepted := _accepted_offers()
 	_accepted_title.visible = not accepted.is_empty()
+	if not accepted.is_empty():
+		# **Teslimat nerede yapılır?** Hedefe varıldığı anda kendiliğinden -
+		# ayrı bir tuş yok. Oyun bunu hiç söylemiyordu ve bir playtest
+		# oyuncusu kontratı taşıdıktan sonra şehirde "teslim et" ekranı
+		# aradı. Kabul ettiği yerde okuması gereken cümle bu.
+		var how := Label.new()
+		how.text = tr("UI_GUILD_DELIVERY_HINT")
+		how.autowrap_mode = TextServer.AUTOWRAP_WORD
+		how.modulate = HINT_COLOR
+		_accepted_list.add_child(how)
 	for offer in accepted:
 		_accepted_list.add_child(_build_accepted_row(offer))
 

@@ -11,6 +11,9 @@ const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
 const HURT_COLOR: Color = Color(0.9, 0.55, 0.45)
 const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
+## Sıralama tuşları kare: içlerindeki ikon çizim, metin değil, o yüzden
+## genişliği metin belirlemiyor - kendi yerini istemesi gerekiyor.
+const MOVE_BUTTON_SIZE: float = 34.0
 
 var _session: GameSession
 
@@ -107,9 +110,9 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	# Oyuncunun kendisi çıkarılamaz ama her mevkiye geçebilir; bu yüzden
 	# kontrol sıraya değil is_player bayrağına bakıyor.
 	if index > 0:
-		header.add_child(_build_move_button("↑", index, index - 1))
+		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_UP, index, index - 1))
 	if index < party_size - 1:
-		header.add_child(_build_move_button("↓", index, index + 1))
+		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_DOWN, index, index + 1))
 
 	var character_button := Button.new()
 	character_button.text = tr("UI_PARTY_OPEN_CHARACTER")
@@ -165,10 +168,22 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	card.add_child(HSeparator.new())
 	return card
 
-func _build_move_button(text: String, from_index: int, to_index: int) -> Button:
+## Yön oku bir *karakter* değil, çizim: `↑`/`↓` varsayılan fontta yok ve
+## bu iki tuş ekranda boş kutu olarak duruyordu (bkz. `UiIcon`). İkon
+## tuşun içine çocuk olarak giriyor, çünkü `Button.icon` bir `Texture2D`
+## istiyor - elimizde doku değil bir `_draw()` var.
+func _build_move_button(icon_kind: int, from_index: int, to_index: int) -> Button:
 	var button := Button.new()
-	button.text = text
+	button.custom_minimum_size = Vector2(MOVE_BUTTON_SIZE, 0.0)
 	button.pressed.connect(_on_move_pressed.bind(from_index, to_index))
+	button.tooltip_text = tr(
+		"UI_PARTY_MOVE_UP" if icon_kind == UiIcon.Kind.CHEVRON_UP else "UI_PARTY_MOVE_DOWN"
+	)
+
+	var icon := UiIcon.new()
+	icon.setup(icon_kind, ArtPalette.GOLD)
+	button.add_child(icon)
+	icon.fill_parent()
 	return button
 
 ## Yetenek bu mevkiden kullanılamıyorsa gizlenmiyor, sebebiyle

@@ -25,12 +25,16 @@ signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bo
 const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 const MAX_LOG_LINES: int = 40
 
-## Mevki belirteçleri: dolu daire "burada durabilir" / "buraya vurabilir",
-## boş daire duramaz/vuramaz. DD'nin yetenek ikonundaki nokta dizisinin
+## Mevki belirteçleri: dolu nokta "burada durabilir" / "buraya vurabilir",
+## boş nokta duramaz/vuramaz. DD'nin yetenek ikonundaki nokta dizisinin
 ## karşılığı - sayı yerine şekil, çünkü oyuncunun bunu okumak için durup
 ## düşünmemesi gerekiyor.
-const MARK_ON: String = "●"
-const MARK_OFF: String = "○"
+##
+## Bir süre `●`/`○` karakterleriyle yazılıyordu ve ekranda **boş kutu**
+## olarak çıkıyordu: varsayılan font Geometric Shapes bloğunu taşımıyor.
+## Playtest'in fotoğrafladığı hata buydu. Artık çiziliyor (bkz. `UiIcon`),
+## ki zaten oyunun geri kalanının çizim dili bu.
+const MARK_SIZE: float = 9.0
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
 const SKILL_CARD_WIDTH: float = 156.0
 ## Savaş alanının en az yüksekliği. İlk denemede alan 900 pikselin
@@ -388,15 +392,23 @@ func _status_label_key(kind: String) -> String:
 		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
 		_: return "CBT_STATUS_BLEED"
 
-func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> Label:
-	var marks := ""
-	for rank in range(1, CombatEncounter.MAX_SIDE_SIZE + 1):
-		marks += MARK_ON if positions.has(rank) else MARK_OFF
+func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 5)
+
 	var label := Label.new()
-	label.text = "%s %s" % [prefix, marks]
+	label.text = prefix
 	label.add_theme_font_size_override("font_size", 11)
 	label.modulate = color
-	return label
+	row.add_child(label)
+
+	var pips := UiIcon.new()
+	# Dikey ortalama şart: ikon `HBoxContainer` içinde kendi asgari boyuyla
+	# duruyor, hizalanmazsa etiketin tepesine yapışıyor.
+	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pips.setup_pips(CombatEncounter.MAX_SIDE_SIZE, positions, color, MARK_SIZE)
+	row.add_child(pips)
+	return row
 
 ## Yetenek dışı eylemler: mevki değiştirmek ve turu geçmek. Turu geçmek
 ## motorun kendisi için de gerekli - elinde kullanılabilir yeteneği

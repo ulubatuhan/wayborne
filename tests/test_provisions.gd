@@ -22,6 +22,7 @@ func run(t) -> void:
 	_test_mouths_scale_with_the_caravan(t)
 	_test_perks_reach_the_planner(t)
 	_test_consumption_never_free(t)
+	_test_hungry_days_predicts_the_road(t)
 
 ## Planın istediği = yolun yediği. İkisi ayrı formüllerken planlayıcı
 ## yalnızca tüccarları sayıyor, yol levazımcıyı da düşüyordu.
@@ -163,3 +164,41 @@ func _plan(session: GameSession, days: int, merchants: int) -> CaravanPlan:
 		offer.wagon_count = 1
 		plan.toggle_merchant(offer)
 	return plan
+
+## Erzak eksikken yola çıkmak artık **yasak değil, riskli** (bkz.
+## caravan_planner.gd). Uyarının verdiği sayı yolun gerçekten yaşatacağı
+## açlık olmak zorunda - yoksa kilidi kaldırmak dürüst bir risk yerine
+## yeni bir yalan olurdu, ki bu paketin tamamı o yalana karşı yazılmış.
+func _test_hungry_days_predicts_the_road(t) -> void:
+	for days in JOURNEY_LENGTHS:
+		for merchants in [0, 2]:
+			var session := _session(2, 2, merchants)
+			var plan := _plan(session, days, merchants)
+			var daily := plan.get_daily_consumption()
+
+			# Tam stok: hiç aç kalınmaz, ne tahminde ne yolda.
+			session.change_provisions(-session.get_provisions())
+			session.change_provisions(plan.get_required_provisions())
+			t.eq(
+				plan.get_hungry_days(session.get_provisions()), 0,
+				"tam stokta aç gün yok (%d gün, %d tüccar)" % [days, merchants]
+			)
+
+			# Yarım stok: tahmin yolun yaşattığıyla birebir aynı olmalı.
+			var half := (daily * days) / 2
+			var short_session := _session(2, 2, merchants)
+			short_session.change_provisions(-short_session.get_provisions())
+			short_session.change_provisions(half)
+			var predicted := plan.get_hungry_days(half)
+			t.eq(
+				_walk(short_session, plan.get_provisioned_days()), predicted,
+				"aç gün tahmini yolun yaşattığına eşit (%d gün, %d tüccar)" % [days, merchants]
+			)
+
+	# Hiç erzak yoksa yolun her günü açtır - uyarı "0 gün" diyemez.
+	var empty := _session(2, 2, 0)
+	var empty_plan := _plan(empty, 4, 0)
+	t.eq(
+		empty_plan.get_hungry_days(0), empty_plan.get_provisioned_days(),
+		"bomboş depoyla yolun her günü aç geçer"
+	)

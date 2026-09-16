@@ -13,8 +13,9 @@ extends Control
 @onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _party_button: Button = $MarginContainer/VBoxContainer/PartyButton
-@onready var _gate_button: Button = $MarginContainer/VBoxContainer/GateButton
+@onready var _party_button: Button = $MarginContainer/VBoxContainer/BottomRow/PartyButton
+@onready var _gate_button: Button = $MarginContainer/VBoxContainer/BottomRow/GateButton
+@onready var _help_button: Button = $MarginContainer/VBoxContainer/BottomRow/HelpButton
 
 var _session: GameSession
 var _brief_panel: CityBriefPanel
@@ -33,8 +34,11 @@ func _ready() -> void:
 	_info_label.text = tr("UI_CITY_INFO")
 	_party_button.text = tr("UI_CITY_VIEW_PARTY")
 	_gate_button.text = tr("UI_CITY_LEAVE_BY_GATE")
+	_help_button.text = tr("UI_HELP_OPEN")
+	_help_button.tooltip_text = tr("UI_HELP_TOOLTIP")
 	_party_button.pressed.connect(_on_party_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
+	_help_button.pressed.connect(_show_help)
 	_refresh_title()
 	_build_spots()
 	_build_brief()
@@ -63,6 +67,28 @@ func _maybe_show_onboarding() -> void:
 		return
 	_session.set_flag(GameSession.ONBOARDING_FLAG)
 	add_child(OnboardingPanel.new())
+
+## Onboarding'i **isteğe bağlı yeniden açan** kapı. Panel bir kereye
+## mahsus otomatik açılıyordu ve bir playtest tam bunu sordu: *"info
+## pop-up'ları eklenmeli kesinlikle, bir kısayol tuşuyla aktive
+## olabilir"* - stres/görev/huy/ekipman anlatımını bir kez görüp
+## unutan oyuncunun onu yeniden bulabileceği bir yer yoktu. Bayrağa hiç
+## dokunmuyor: otomatik gösterimin "bir kereliğine" sözü burada da
+## geçerli, bu yalnızca elle açılan ikinci bir kapı.
+func _show_help() -> void:
+	# F3'e basılı tutmak ya da art arda basmak yığın üstüne yığın açmasın -
+	# panel kendi kendini `queue_free()` ile kapatıyor, yeni bir tanesi
+	# ancak öncekinin gerçekten gittiğinde açılmalı.
+	for child in get_children():
+		if child is OnboardingPanel:
+			return
+	add_child(OnboardingPanel.new())
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F3:
+			_show_help()
+			get_viewport().set_input_as_handled()
 
 func _refresh_title() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)

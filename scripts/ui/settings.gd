@@ -43,7 +43,7 @@ func _setup_language_selector() -> void:
 	_locale_codes = UserSettings.get_locale_codes()
 	var locale_names: Array = UserSettings.get_locale_names()
 	for i in range(_locale_codes.size()):
-		_language_button.add_item(str(locale_names[i]), i)
+		_language_button.add_item(_readable_locale_name(str(locale_names[i]), str(_locale_codes[i])), i)
 
 	# Tam kod aranıyor, ilk iki harf değil: pt_BR ile pt aynı şey değil.
 	var selected := _locale_codes.find(TranslationServer.get_locale())
@@ -51,6 +51,28 @@ func _setup_language_selector() -> void:
 
 	_language_button.item_selected.connect(_on_language_selected)
 	_refresh_texts()
+
+## **Bir dilin adı okunamıyorsa o dil seçilemez.**
+##
+## Dil adları bilerek kendi dillerinde yazılı (bkz. UserSettings.SUPPORTED):
+## oyuncunun aradığı şey "Chinese" değil "简体中文". Ama varsayılan font CJK
+## taşımıyor, yani Çince ve Japonca satırları ekranda boş kutu olarak
+## çıkıyordu - kuralın engellemeye çalıştığı şeyin ta kendisi, bu sefer
+## fontun eliyle. Font kapsamı taraması (bkz. test_localization.gd) bunu
+## yakaladı.
+##
+## Çözüm dil adını Latinceye çevirmek *değil*: adın yanına dil kodu
+## ekleniyor, yalnızca ad çizilemiyorsa. "zh_CN" en azından aranabilir bir
+## şey; ad çizilebildiği gün (CJK taşıyan bir font geldiğinde) ek
+## kendiliğinden kayboluyor.
+func _readable_locale_name(locale_name: String, code: String) -> String:
+	var font := ThemeDB.fallback_font
+	if font == null:
+		return locale_name
+	for index in locale_name.length():
+		if not font.has_char(locale_name.unicode_at(index)):
+			return "%s (%s)" % [locale_name, code]
+	return locale_name
 
 func _on_language_selected(index: int) -> void:
 	if index < 0 or index >= _locale_codes.size():
