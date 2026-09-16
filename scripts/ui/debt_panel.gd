@@ -26,8 +26,19 @@ const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
 const DUE_SOON_COLOR: Color = Color(0.9, 0.8, 0.4)
 const SETTLED_COLOR: Color = Color(0.45, 0.8, 0.45)
 
-## Bu kadar gün kalınca satır sarıya döner - "yaklaşıyor" hissi.
+## Bu kadar gün kalınca satır sarıya dönmeye **başlar** - tam eşikte değil,
+## `_severity_color` bu sınırdan sıfıra doğru yumuşakça koyulaşıyor. Sabit
+## bir eşik "yaklaşıyor" ile "yakın" arasında tek bir kareydi; oysa bir
+## borcun baskısı gün gün büyür, o yüzden renk de gün gün büyümeli - aynı
+## `PulseBar`ın "değişimi göster" mantığı, burada zamana yayılmış hâli.
 const DUE_SOON_DAYS: int = 7
+
+## Vadeyi bu kadar gün geçince satır tam `OVERDUE_SEVERE_COLOR`'a varır -
+## sabit değil, `Debt.OVERDUE_PERIOD_DAYS` (ilk gecikme faizinin bindiği
+## gün) ile aynı: renk gerçekten daha kötüye gittiği anda en koyusuna
+## ulaşıyor, keyfi bir sayıda değil.
+const OVERDUE_SEVERE_COLOR: Color = Color(0.72, 0.14, 0.12)
+const OVERDUE_SEVERE_DAYS: int = Debt.OVERDUE_PERIOD_DAYS
 
 var _session: GameSession
 var _title_label: Label
@@ -124,7 +135,7 @@ func _refresh_borrow_row() -> void:
 func _do_refresh_borrow_row() -> void:
 	var available := _session.get_available_credit()
 	_credit_label.text = tr("UI_GUILD_LOAN_LINE") % [
-		available, _session.get_credit_limit(), GameSession.LOAN_ORIGINATION_PERCENT
+		available, _session.get_credit_limit(), _session.get_loan_fee_percent()
 	]
 
 	var reason := _session.get_loan_block_reason()
@@ -155,6 +166,20 @@ func _on_borrow_pressed() -> void:
 	refresh()
 	ledger_changed.emit()
 
+## Bir borç satırının rengi - vade yaklaştıkça sarıya, vade geçtikçe
+## kırmızıdan koyu bir kızıla kayıyor. İki ayrı bant (yaklaşan/geçmiş)
+## kendi içinde sürekli: satır tek bir karede sarıdan kırmızıya
+## sıçramıyor, gün gün koyulaşıyor.
+func _severity_color(days_left: int, overdue: bool) -> Color:
+	if overdue:
+		var overdue_days := -days_left
+		var t := clampf(float(overdue_days) / float(OVERDUE_SEVERE_DAYS), 0.0, 1.0)
+		return OVERDUE_COLOR.lerp(OVERDUE_SEVERE_COLOR, t)
+	if days_left <= DUE_SOON_DAYS:
+		var t := 1.0 - clampf(float(days_left) / float(DUE_SOON_DAYS), 0.0, 1.0)
+		return Color.WHITE.lerp(DUE_SOON_COLOR, t)
+	return Color.WHITE
+
 func _build_row(debt: Debt) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
@@ -169,11 +194,9 @@ func _build_row(debt: Debt) -> HBoxContainer:
 	var creditor := String(TranslationServer.translate(debt.creditor_name))
 	if overdue:
 		label.text = tr("UI_DEBT_ROW_OVERDUE") % [creditor, debt.principal, -days_left]
-		label.modulate = OVERDUE_COLOR
 	else:
 		label.text = tr("UI_DEBT_ROW") % [creditor, debt.principal, days_left]
-		if days_left <= DUE_SOON_DAYS:
-			label.modulate = DUE_SOON_COLOR
+	label.modulate = _severity_color(days_left, overdue)
 	label.custom_minimum_size = Vector2(340, 0)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	row.add_child(label)

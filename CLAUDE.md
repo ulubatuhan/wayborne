@@ -1181,6 +1181,19 @@ can be lost.
   is barely better: it sits in its own **tab** of the guild now
   (`UI_GUILD_TAB_DEBTS`), so a growing board cannot push the caravan's debts
   below the fold.
+- **A debt's urgency is a gradient, not a threshold.** Each row used to
+  snap between three fixed colours - white, then yellow at exactly
+  `DUE_SOON_DAYS`, then red the instant it crossed the due day - so a debt
+  read identically at 8 days left and at 30, and a single day's passing
+  could jump the colour straight from calm to alarmed. `DebtPanel.
+  _severity_color()` lerps continuously within each band instead: white to
+  `DUE_SOON_COLOR` as the due day approaches, then `OVERDUE_COLOR` toward a
+  darker `OVERDUE_SEVERE_COLOR` as it slips further past - deliberately
+  reaching full severity at `Debt.OVERDUE_PERIOD_DAYS`, the same day the
+  first real interest period actually bites, not an arbitrary constant of
+  its own. No new art: this is a colour interpolation on the label that
+  was already there, the same vocabulary `PulseBar` uses to show change
+  without a new widget.
 - **The guild lends, and the credit line is what keeps that honest.**
   `spend_or_owe` is debt the world forces on you; `borrow_from_guild()` is
   the opposite — money taken on purpose, in a city, to stock up before
@@ -1196,9 +1209,24 @@ can be lost.
 - **Money the player sees must match the formula to the coin.** The
   origination fee was a float rate, and `200 * 0.1` is `20.000000000000004`,
   so a 200 loan wrote **221** into the ledger under a sign saying 10%. The
-  percentage is an integer (`LOAN_ORIGINATION_PERCENT`) and the fee is
-  integer arithmetic. A rounding artifact in a number the player is quoted
-  is indistinguishable from cheating.
+  percentage is an integer and the fee is integer arithmetic. A rounding
+  artifact in a number the player is quoted is indistinguishable from
+  cheating.
+- **The origination fee is a band, not a flat rate, for the same reason the
+  credit line already scaled with reputation.** A caravan the guild
+  doesn't trust pays more to borrow at all - `get_loan_fee_percent()` runs
+  from `LOAN_ORIGINATION_PERCENT_UNTRUSTED` (15%) at reputation 0 down to
+  `LOAN_ORIGINATION_PERCENT_TRUSTED` (5%) at `LOAN_FEE_REPUTATION_CAP`
+  reputation, and integer division keeps every point on that band as exact
+  as the old flat rate was. The band was deliberately calibrated to cross
+  10% - the old constant - at reputation 20, which is not a coincidence:
+  three existing tests already borrowed at reputation 20 and asserted an
+  exact 10% fee, and recalibrating the *band* instead of picking round
+  numbers for its ends meant those tests kept passing unchanged instead of
+  needing to be rewritten around the new mechanic. `get_loan_principal()`
+  itself didn't need to change at all - it already read the fee percentage
+  through a function call, never the constant directly, so plugging in a
+  reputation-dependent answer under that call was the entire change.
 - **A wagon can be sold, and resale never returns its cost.** Otherwise
   buy-then-sell is a free capacity toggle around every journey.
   `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth

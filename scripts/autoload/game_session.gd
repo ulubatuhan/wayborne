@@ -69,16 +69,22 @@ func repay_debt(debt_id: String, amount: int) -> int:
 ##    sömürüyü kapatıyor: borç alıp açık hesabı kapatmak, açık hesabın
 ##    vadesini bedavaya sıfırlayan bir yapılandırma olurdu (yapılandırmanın
 ##    ücreti varken). Hat zaten doluysa yeni kredi yok.
-## 3. **Tahsis ücreti anaparaya biner.** 200 alırsan 220 borçlanırsın, yani
-##    zamanında ödesen bile borçlanmak bedava değil.
+## 3. **Tahsis ücreti anaparaya biner ve itibara göre değişir.** 200
+##    alırsan (orta itibarda) 220 borçlanırsın, yani zamanında ödesen bile
+##    borçlanmak bedava değil - ve loncanın tanımadığı bir kervancı daha
+##    kötü şartla borçlanır, tıpkı kredi hattının kendisi gibi.
 const LOAN_BASE_LIMIT: int = 200
 const LOAN_LIMIT_PER_REPUTATION: int = 25
 const LOAN_MAX_LIMIT: int = 1200
-## Yüzde bilerek tam sayı: `200 * 0.1` kayan noktada 20.000000000000004
-## çıkıyor ve tavana yuvarlayınca 200'lük bir kredi 220 değil **221** borç
-## yazıyordu. Oyuncunun gördüğü tutar, kuruşu kuruşuna ilan edilen formülle
-## aynı olmalı.
-const LOAN_ORIGINATION_PERCENT: int = 10
+## Ücret sabit değil, itibarla **daralan bir bant**: güvensiz bir kervancı
+## %15 öder, `LOAN_FEE_REPUTATION_CAP`'e ulaşmış biri %5. Bant 20 itibarda
+## tam ortadan (%10) geçiyor - eski sabit oranın değeriydi, bilerek: bu
+## depoda zaten reputation=20 ile test edilen üç senaryo var
+## (`test_city_commerce.gd`), ortalamayı oraya sabitlemek onları hiç
+## dokunmadan doğru bırakıyor.
+const LOAN_ORIGINATION_PERCENT_UNTRUSTED: int = 15
+const LOAN_ORIGINATION_PERCENT_TRUSTED: int = 5
+const LOAN_FEE_REPUTATION_CAP: int = 40
 const LOAN_STEP: int = 25
 const LOAN_MIN_AMOUNT: int = 25
 
@@ -98,10 +104,18 @@ func get_credit_limit() -> int:
 func get_available_credit() -> int:
 	return maxi(0, get_credit_limit() - get_total_debt())
 
+## İtibara göre daralan tahsis ücreti yüzdesi - tam sayı aritmetiğiyle,
+## aynı gerekçeyle `get_loan_principal` yukarı yuvarlıyor: oyuncunun
+## gördüğü yüzde ile defterdeki tutar kuruşu kuruşuna aynı kalsın.
+func get_loan_fee_percent() -> int:
+	var spread := LOAN_ORIGINATION_PERCENT_UNTRUSTED - LOAN_ORIGINATION_PERCENT_TRUSTED
+	var clamped := clampi(reputation, 0, LOAN_FEE_REPUTATION_CAP)
+	return LOAN_ORIGINATION_PERCENT_UNTRUSTED - (spread * clamped) / LOAN_FEE_REPUTATION_CAP
+
 ## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
 ## Ücret yukarı yuvarlanır, ama tam sayı aritmetiğiyle.
 func get_loan_principal(amount: int) -> int:
-	var fee := (amount * LOAN_ORIGINATION_PERCENT + 99) / 100
+	var fee := (amount * get_loan_fee_percent() + 99) / 100
 	return amount + fee
 
 ## Kredi kapalıysa sebebini anlatan çeviri anahtarı; boşsa açık.

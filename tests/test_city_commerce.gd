@@ -27,6 +27,7 @@ func run(t) -> void:
 	_test_debt_consumes_the_credit_line(t)
 	_test_borrowing_to_clear_an_overdraft_is_not_free(t)
 	_test_loan_costs_more_than_it_pays(t)
+	_test_loan_fee_scales_with_reputation(t)
 	_test_loan_closed_on_the_road_and_without_trust(t)
 	_test_brief_flags_what_the_caravan_lacks(t)
 	_test_brief_needs_point_at_real_screens(t)
@@ -210,6 +211,37 @@ func _test_loan_costs_more_than_it_pays(t) -> void:
 	t.eq(session.get_loan_principal(200), 220, "yüzde 10'luk ücret tam çıkar")
 	t.eq(session.get_loan_principal(100), 110, "küçük tutarda da tam çıkar")
 	t.eq(session.get_loan_principal(0), 0, "sıfırın ücreti yok")
+
+## Ücret sabit bir yüzde değil - loncanın tanımadığı bir kervancı daha
+## kötü şartla borçlanır. Bant `LOAN_FEE_REPUTATION_CAP`'te düzleşiyor
+## (daha fazla itibar daha ucuz yapmıyor) ve reputation=20'de tam eski
+## sabit değere (%10) denk geliyor - bu yüzden yukarıdaki
+## `_test_loan_costs_more_than_it_pays` hâlâ o tutarı bekleyebiliyor.
+func _test_loan_fee_scales_with_reputation(t) -> void:
+	var untrusted := _session(0, 1)
+	untrusted.reputation = 0
+	t.eq(
+		untrusted.get_loan_fee_percent(), GameSession.LOAN_ORIGINATION_PERCENT_UNTRUSTED,
+		"itibarsız kervancı en yüksek ücreti öder"
+	)
+
+	var trusted := _session(0, 1)
+	trusted.reputation = GameSession.LOAN_FEE_REPUTATION_CAP
+	t.eq(
+		trusted.get_loan_fee_percent(), GameSession.LOAN_ORIGINATION_PERCENT_TRUSTED,
+		"tavan itibarda en düşük ücret"
+	)
+
+	var beyond_cap := _session(0, 1)
+	beyond_cap.reputation = GameSession.LOAN_FEE_REPUTATION_CAP * 5
+	t.eq(
+		beyond_cap.get_loan_fee_percent(), trusted.get_loan_fee_percent(),
+		"tavanın ötesinde ücret daha da düşmüyor"
+	)
+
+	var midpoint := _session(0, 1)
+	midpoint.reputation = 20
+	t.eq(midpoint.get_loan_fee_percent(), 10, "20 itibar tam eski sabit orana denk geliyor")
 
 func _test_loan_closed_on_the_road_and_without_trust(t) -> void:
 	var session := _session(200, 1)
