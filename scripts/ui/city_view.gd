@@ -120,12 +120,27 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	resized.connect(queue_redraw)
 	_build_tooltip()
+	_adopt_parent_size()
 
 func setup(session: GameSession) -> void:
+	# Çapaya güvenmiyoruz - `MapPanel` bir `Container` değil (düz bir
+	# `Panel`), o yüzden `PRESET_FULL_RECT` yalnızca ebeveyn *yeniden
+	# boyutlanınca* boyu aktarıyor; buraya `_ready()`'den sonra, ebeveyn
+	# zaten son boyuna ulaşmışken eklendiğimiz için o bildirim hiç
+	# gelmiyor. Aynı hata sınıfı `OnboardingPanel`/`RoadCaravan`/
+	# `TravelForeground`'da da yaşandı (bkz. Art Rules'un "anchor-preset
+	# trap"i) - düzeltilmezse `MapPanel`'in kendi varsayılan tema kutusu
+	# CityView'in çizdiği manzaranın arkasında gri bir çerçeve gibi kalır.
+	_adopt_parent_size()
 	_session = session
 	_city_id = session.current_location_id
 	_lay_out_city()
 	queue_redraw()
+
+func _adopt_parent_size() -> void:
+	var host := get_parent_control()
+	if host != null and host.size != size:
+		size = host.size
 
 func _process(delta: float) -> void:
 	# Yalnızca duman ve ışık kıpırdıyor; sahne bunun dışında durağan.

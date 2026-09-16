@@ -206,6 +206,7 @@ var _signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Duman görmezden gelindiğinde yolun tehlikesine eklenen pay.
 var _signal_danger_bonus: float = 0.0
 var _command_panel: PanelContainer
+var _in_game_menu: InGameMenu = null
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
@@ -777,12 +778,21 @@ func _input(event: InputEvent) -> void:
 		accept_event()
 		return
 
-	if not _command_panel.visible:
+	if key_event.keycode == KEY_ESCAPE:
+		if _command_panel.visible:
+			_command_panel.visible = false
+			accept_event()
+			return
+		# Emir menüsü kapalıyken ve başka bir panel (olay kartı, savaş,
+		# pazarlık, tayfa teklifi, yeniden planlama) açık değilken Esc
+		# oyun içi menüyü açar - "menüye dönünce ana menüye gitmeyelim
+		# direkt" şikâyetinin aynısı, bkz. InGameMenu.
+		if _in_game_menu == null and _current_event == null and not _has_open_panel():
+			_open_in_game_menu()
+			accept_event()
 		return
 
-	if key_event.keycode == KEY_ESCAPE:
-		_command_panel.visible = false
-		accept_event()
+	if not _command_panel.visible:
 		return
 
 	var index := key_event.keycode - KEY_1
@@ -981,7 +991,7 @@ func _process(delta: float) -> void:
 ## günler yola göre daha hızlı akar ve kervan hep aç kalırdı.
 func _advance_position(hours: float) -> void:
 	_walk_direction = 0.0
-	if hours <= 0.0 or _camping:
+	if hours <= 0.0:
 		return
 
 	var direction := 0.0
@@ -993,6 +1003,21 @@ func _advance_position(hours: float) -> void:
 	# birbirini güçlendirmiyor (1'de tavanlanıyor), ters yöndeyse
 	# birbirini götürüyor.
 	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
+
+	# Kervan kamptayken hiç ilerlemiyor, ama lider hâlâ sütun içinde
+	# gezinebilir - önceden burada bütün fonksiyon `_camping`de dönüyordu,
+	# yani ateşin başındaki durağan kervanda bile lider en önde kilitli
+	# kalıyor, geri oynatılamıyordu. `_walk_at` çağrılmıyor: kampta kat
+	# edilecek mesafe yok, yalnızca kolon içindeki yer değişiyor.
+	if _camping:
+		if not is_zero_approx(direction):
+			_leader_offset = clampf(
+				_leader_offset + direction * LEADER_WALK_SPEED * hours,
+				-_caravan.get_column_length(), 0.0
+			)
+			_caravan.set_leader_offset(_leader_offset)
+			_refresh_attention_zone()
+		return
 
 	# Lider kolondan ayrıldıysa A/D *onu* yürütüyor: kervan verilen
 	# tempoyla kendi kendine ilerliyor, lider kolonun içinde geziyor.
@@ -1140,6 +1165,14 @@ func _update_camp_state() -> void:
 	_camping = false
 	_band.set_camping(false)
 	_caravan.set_camping(false)
+	# Kamp sırasında lider kolonda gezinmiş olabilir (bkz. `_advance_position`).
+	# Ayrılma emri hiç verilmediyse yürüyüş yeniden başlarken lider en öne
+	# döner - "kervana bağlı" mod zaten liderin her zaman başta olduğunu
+	# varsayıyor, yoksa kervan ilerlerken lider kolonun ortasında asılı kalır.
+	if not _leader_detached:
+		_leader_offset = 0.0
+		_caravan.set_leader_offset(0.0)
+		_refresh_attention_zone()
 	_refresh_state()
 
 ## Hava günden ve rotadan hesaplanıyor, saklanmıyor: aynı kaydı yeniden
@@ -1173,7 +1206,13 @@ func _refresh_time_ui() -> void:
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
 	# hesaplanırsa gece kervanı gündüz aydınlatılmış görünür.
 	_caravan.set_light(_band.get_light())
-	_caravan.set_speed(0.0 if _camping else absf(_walk_direction) * _pace)
+	# Bacak fazı da saatin hız çarpanını taşımalı - taşımadığı sürece
+	# `_days_covered` (dolayısıyla arka planın `_world_x`'i) 3x'te üç kat
+	# hızlı akarken bacaklar hep aynı, sabit hızda sallanıyordu: kervan
+	# ekranda kayıyormuş gibi görünüyordu, tempo değişse de değişmese de.
+	# `_clock.get_speed()` 1x'te 1.0 olduğu için varsayılan davranış
+	# hiç değişmiyor.
+	_caravan.set_speed(0.0 if _camping else absf(_walk_direction) * _pace * _clock.get_speed())
 
 	# Metin yalnızca *gösterilen değer* değişince kuruluyor. Buradaki yorum
 	# uzun süre bunu vaat ediyordu ama kod her karede string biçimliyor,
@@ -1844,7 +1883,23 @@ func _has_open_panel() -> bool:
 		or _haggle_holder.get_child_count() > 0
 		or _recruit_holder.get_child_count() > 0
 		or _replan_holder.get_child_count() > 0
+		or _in_game_menu != null
 	)
+
+## Sefer sürerken kayıt hiç yapılamaz - `SaveManager`in başındaki not:
+## `to_save_dict()` sefer alanlarını hiç taşımıyor, yazmak sefer bilgisini
+## sessizce kaybettirir. F1'in sentetik seferi de aynı ekranı paylaştığı
+## için aynı kural geçerli.
+func _open_in_game_menu() -> void:
+	if _in_game_menu != null:
+		return
+	_in_game_menu = InGameMenu.new()
+	_in_game_menu.dismissed.connect(_on_in_game_menu_dismissed)
+	add_child(_in_game_menu)
+	_in_game_menu.setup(false)
+
+func _on_in_game_menu_dismissed() -> void:
+	_in_game_menu = null
 
 ## --- Yolda planı değiştirmek ---
 ## Şehirde kurulan plan bir niyet, bir taahhüt değil: geçit kapanır, erzak
@@ -2124,8 +2179,15 @@ func _clear_children(container: Node) -> void:
 func _refresh_exit_button() -> void:
 	if _exit_button == null:
 		return
-	var target := Nav.MAIN_MENU if _is_live_journey else Nav.peek()
-	_exit_button.text = Nav.label_for(target)
+	# Canlı seferde tuş artık dosdoğru ana menüye gitmiyor, oyun içi menüyü
+	# açıyor (bkz. InGameMenu) - etiketi de artık "ana menüye dön" değil
+	# "menü" diyor, aksi hâlde tuş söylediğini yapmıyor gibi dururdu.
+	_exit_button.text = (
+		tr("UI_INGAME_MENU_TITLE") if _is_live_journey else Nav.label_for(Nav.peek())
+	)
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU) if _is_live_journey else Nav.back())
+	if _is_live_journey:
+		_open_in_game_menu()
+	else:
+		get_tree().change_scene_to_file(Nav.back())

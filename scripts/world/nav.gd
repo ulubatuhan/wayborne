@@ -25,6 +25,7 @@ const CITY_MAP: String = "res://scenes/world/city_map.tscn"
 const MAIN_MENU: String = "res://scenes/ui/main_menu.tscn"
 const CHARACTER_CREATION: String = "res://scenes/ui/character_creation.tscn"
 const SETTINGS: String = "res://scenes/ui/settings.tscn"
+const SAVES: String = "res://scenes/ui/saves.tscn"
 
 const ECONOMY: String = "res://scenes/game/market.tscn"
 const HAGGLING: String = "res://scenes/game/haggling.tscn"
@@ -72,6 +73,13 @@ static var character_target_index: int = 0
 ## yüzden bu bir `is_journey_active()` kontrolü değil - tek seferlik,
 ## taşınan bir veri, `recruit_venue` ile aynı desen.
 static var city_gate_opening: bool = false
+
+## Lonca ekranı hangi sekmeyle açılsın (0 = kontratlar, 1 = borçlar).
+## Planlayıcıda "Borç Al" basılınca loncaya borçlar sekmesi açık gitmek
+## için kullanılıyor - `city_gate_opening` ile aynı desen: `guild.gd`
+## okur okumaz hemen sıfırlıyor, yoksa şehir haritasından normal bir
+## girişte bile eski ziyaretin sekmesi yapışık kalır.
+static var guild_initial_tab: int = 0
 
 ## Bir köke git: yığın temizlenir. Kök ekranların `_ready`'si bunu çağırır,
 ## böylece oraya nasıl gelinirse gelinsin (kapıdan, varıştan, menüden)

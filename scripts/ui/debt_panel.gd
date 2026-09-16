@@ -42,6 +42,7 @@ const OVERDUE_SEVERE_DAYS: int = Debt.OVERDUE_PERIOD_DAYS
 
 var _session: GameSession
 var _title_label: Label
+var _purse_label: Label
 var _summary_label: Label
 var _rows: VBoxContainer
 var _credit_label: Label
@@ -62,6 +63,13 @@ func _ensure_built() -> void:
 	_title_label = Label.new()
 	_title_label.text = tr("UI_DEBT_TITLE")
 	add_child(_title_label)
+
+	# Borç kararı (öde/yapılandır/borç al) kesedeki parayı bilmeden
+	# verilemez - önceden bu ekranda hiç görünmüyordu, oyuncu miktarı
+	# akılda tutmak ya da lonca sekmesinden çıkıp kontrol etmek zorunda
+	# kalıyordu.
+	_purse_label = Label.new()
+	add_child(_purse_label)
 
 	_summary_label = Label.new()
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -103,6 +111,7 @@ func refresh() -> void:
 	if _session == null:
 		return
 	_ensure_built()
+	_purse_label.text = tr("UI_PURSE") % _session.wallet.balance
 
 	for child in _rows.get_children():
 		_rows.remove_child(child)

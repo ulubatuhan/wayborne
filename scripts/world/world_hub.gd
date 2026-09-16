@@ -508,6 +508,10 @@ func _is_in_range(spot: Dictionary) -> bool:
 	return absf(rect.get_center().x - player_center) <= INTERACT_RANGE
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_open_in_game_menu()
+		return
+
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_try_interact_at(get_global_mouse_position())
 		return
@@ -566,5 +570,17 @@ func _refresh_status() -> void:
 func _on_party_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, Nav.PARTY))
 
+## Eskiden dosdoğru ana menüye atlıyordu - playtest'in "menüye dönünce ana
+## menüye gitmeyelim direkt" şikâyeti (bkz. InGameMenu). Burada hiçbir
+## sefer canlı olamaz (yol yalnızca `Nav.JOURNEY`'de yaşanıyor), o yüzden
+## kayıt hep açık.
 func _on_menu_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU))
+	_open_in_game_menu()
+
+func _open_in_game_menu() -> void:
+	if has_node("InGameMenu"):
+		return
+	var menu := InGameMenu.new()
+	menu.name = "InGameMenu"
+	add_child(menu)
+	menu.setup(true)
