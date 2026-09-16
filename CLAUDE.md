@@ -730,6 +730,32 @@ way to textures.
   caravan have to agree, or the game looks like two productions again.
   The column's measurements already came from the near ox only, so
   `get_ox_centres()` (one centre per wagon) needed no change at all.
+- **A memory that never moves is a photograph, not a memory.** The menu's
+  caravan was a single static frame - `MenuBackdrop._draw_caravan` ran
+  once per resize and just sat there. Asked for explicitly: a road, real
+  motion, a longer and busier column. `MenuBackdrop` now draws a
+  perspective road (`_draw_road`, a trapezoid narrowing from a near edge
+  to a point right at the horizon city - the road leads *there* on
+  purpose, since that is where the caravan is actually going) and drives
+  a looping walk (`_time`/`CARAVAN_WALK_SECONDS`) from the road's near end
+  to that vanishing point. The shrink is **one transform, not a second
+  scale hidden in the figures**: every `_silhouette_*` call still draws
+  from a local (0,0) ground line exactly as before, and a single
+  `draw_set_transform(position, 0.0, scale)` around the whole formation
+  moves and shrinks it together - the same reasoning as the wagon living
+  in one brush instead of two: scaling the figures *and* the position
+  independently would drift the moment either one changed. The loop wraps
+  by fading `ink.a` to zero at both ends (`_draw_caravan`'s fade line), or
+  the caravan would pop from a speck at the city gate back to full size at
+  the near edge in one frame. Starting `_time` at `0` failed exactly that
+  fade window on the very first frame - the game's opening shot, and this
+  file's own `screenshot_menu.gd` (which only waits a handful of frames),
+  both showed an empty road. `_time` now starts partway through the loop
+  so neither ever catches the invisible instant. The column itself grew
+  from two wagons to `CARAVAN_WAGON_COUNT` (4) for the "kalabalık ve uzun"
+  ask - the per-wagon walker/ox/wagon triplet was already the unit of
+  length, so lengthening the caravan was raising one loop bound, not
+  inventing a new pattern.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.
