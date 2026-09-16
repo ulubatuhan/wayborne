@@ -130,9 +130,11 @@ func _draw_ground(area: Rect2, horizon: float, haze: Color) -> void:
 		ArtPalette.fade_to_haze(near.lightened(0.10), haze, 0.18), near
 	)
 
-## Karşı ışıkta bir kervan: atlı lider, iki çift öküz, iki vagon ve
-## aralarında yürüyenler. Yolun kolon kuralı burada da geçerli - her parça
-## kendi genişliğini tüketiyor, sabit adım yok.
+## Karşı ışıkta bir kervan: atlı lider, tek öküzlü iki vagon ve aralarında
+## yürüyenler. Yolun kolon kuralı burada da geçerli - her parça kendi
+## genişliğini tüketiyor, sabit adım yok. Yol tarafı çift öküzden tek öküze
+## döndüğünde (bkz. CLAUDE.md Art Rules) bu bağımsız siluet de aynı geçişi
+## yaptı - iki kervan aynı hayvanı çekmeli.
 func _draw_caravan(area: Rect2) -> void:
 	var unit := size.y * CARAVAN_SCALE
 	var ground_y := size.y * CARAVAN_GROUND_RATIO
@@ -145,19 +147,7 @@ func _draw_caravan(area: Rect2) -> void:
 	for wagon in 2:
 		_silhouette_walker(Vector2(cursor, ground_y), unit * 0.95, ink)
 		cursor += unit * 1.5
-		for ox in 2:
-			# Çift öküz, yolun kendi kuralıyla aynı: uzaktaki biraz
-			# ileride, biraz yukarıda ve biraz küçük. Kaymalar **siluette
-			# daha büyük olmak zorunda**: renkli çizimde iki gövdeyi
-			# birbirinden ayıran ton farkı var, tek renkte yok - yolun
-			# değerleriyle (0.34/0.38) iki öküz tek bir kambur kütleye
-			# dönüşüyordu.
-			var lift := 0.0 if ox == 0 else unit * 0.34
-			var scale := 1.0 if ox == 0 else 0.86
-			_silhouette_ox(
-				Vector2(cursor + (0.0 if ox == 0 else unit * 0.62), ground_y - lift),
-				unit * 0.72 * scale, ink
-			)
+		_silhouette_ox(Vector2(cursor, ground_y), unit * 0.72, ink)
 		cursor += unit * 2.2
 		_silhouette_wagon(Vector2(cursor, ground_y), unit * 1.5, ink)
 		cursor += unit * 2.6
