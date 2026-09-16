@@ -27,7 +27,21 @@ func _init() -> void:
 	var screen: Control = load("res://scenes/ui/main_menu.tscn").instantiate()
 	root.add_child(screen)
 	await _settle()
-	_save("01_ana_menu.png")
+	_save("01_baslik_ekrani.png")
+
+	# "Bir tuşa basın" evresinden menüye - sahne değişmeden, aynı ekranın
+	# canlı kalan bir geçişi (bkz. main_menu.gd'nin dosya başı notu). Gerçek
+	# bir tuş basımını simüle etmek gerekiyor, çünkü geçiş `_unhandled_input`
+	# üzerinden tetikleniyor.
+	var key_event := InputEventKey.new()
+	key_event.keycode = KEY_SPACE
+	key_event.pressed = true
+	Input.parse_input_event(key_event)
+	await _settle()
+	# Belirme animasyonu (`REVEAL_SECONDS` + kademeler) bitene kadar bekle.
+	for _frame in 60:
+		await process_frame
+	_save("02_ana_menu.png")
 
 	quit()
 

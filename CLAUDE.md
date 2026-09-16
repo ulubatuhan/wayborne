@@ -483,6 +483,77 @@ the walking figures are the game's strongest asset) but to deepen it.
   `AudioManager` reads it lazily. A second default is a silently wrong
   opening volume the day the two drift — and laziness also removes the
   dependency on autoload ordering.
+- **Ambience is a third layer, not a variant of music.** The title screen
+  needed wind playing while there is deliberately no music yet, and the
+  moment the player presses a key both have to move at once - wind fading
+  out under the road track fading in. Forcing that through the two-player
+  crossfade built for *music-to-music* transitions would have meant either
+  ambience competing with music for the same two players, or one of the
+  two cutting instead of fading. `_ambience_player` is a third, independent
+  `AudioStreamPlayer` with its own fade (`play_ambience`/`stop_ambience`),
+  so the two layers can move in opposite directions in the same moment
+  without touching each other's state.
+- **A one-shot sound never shares a player.** `play_sfx()` spins up a
+  fresh `AudioStreamPlayer`, plays it, and frees it on `finished` - it does
+  not reuse `_active`/`_standby`/`_ambience_player`. Those three are always
+  mid-crossfade or mid-loop; a gate creak and a menu-transition thud can
+  land in the same moment, and stealing a busy player to play one of them
+  would cut off whatever it was already doing.
+- **A sound effect asset that doesn't exist yet is still safe to call.**
+  `play_sfx`/`play_ambience` check `ResourceLoader.exists()` exactly like
+  `_load_stream` already did for music, and no-op quietly if the file is
+  missing - calling code never needs to know whether the asset landed yet.
+  The wind bed, the wooden thud and the gate creak currently shipped are
+  themselves placeholders in that same sense: synthesized in pure Python
+  (`wave` + sine/noise, no external tools) rather than recorded, the audio
+  equivalent of a `ColorRect` before the hand-drawn pass (see Art Rules).
+  `AudioManager` has no idea which kind it's playing - swapping a `.wav`
+  for a real recording later touches no code.
+
+### Title Screen Rules
+
+The opening screen used to be the main menu itself, buttons and all, the
+instant the game launched - "a simple technical step" rather than the
+first beat of the game's own tone. It now opens on the same dusk vista
+with nothing on it but a slowly pulsing invitation, and only turns into
+the menu once the player does something.
+
+- **It's a phase of `MainMenu`, not a separate scene.** The whole point was
+  a transition that doesn't cut - "the screen must not go black and
+  reload." A dedicated title-screen scene that `change_scene_to_file`s
+  into the main menu would rebuild `MenuBackdrop` from scratch, restarting
+  the caravan's walk-the-road loop at the exact moment it's supposed to
+  read as continuous. `main_menu.gd` instead starts in a title phase
+  (prompt visible, buttons transparent and disabled) and reveals the menu
+  in place on the first qualifying input, in the same scene, the same
+  backdrop, the same frame.
+- **The buttons are transparent, not invisible, during the title phase -
+  measured, not assumed.** The first version set the button box's
+  `visible = false`. `VBoxContainer` only lays out its children while
+  visible, and hiding it in the very frame it's created meant it never got
+  a layout pass at all - a screenshot caught every button collapsed onto
+  the same point, reading as one smeared label instead of a menu. Setting
+  `modulate:a = 0` instead of `visible = false` keeps the container live
+  for layout purposes the whole time; only its rendered alpha (and each
+  button's `disabled` flag, so nothing is clickable through the fade) is
+  what hides it.
+- **The phase runs once per process, not once per visit.** Returning from
+  Settings re-loads `main_menu.tscn` (every `Nav` transition is a scene
+  change), which would replay the whole "press a key" ritual on every trip
+  back to the root if nothing remembered it had already happened. A
+  `static var` on the script itself - the same GDScript feature `Nav`
+  already leans on for `recruit_venue` - survives exactly as long as the
+  process does, which is exactly the lifetime this needs.
+- **A city's gate opens once, and only for a real entrance.** Both ways
+  into `city_map.tscn` that are actually "walking through a gate" -
+  finishing a road journey, and crossing the gate spot in `world_hub` -
+  set `Nav.city_gate_opening` before the scene change; `city_map.gd` reads
+  it once and clears it immediately. It can't be a check like
+  `is_journey_active()`, because leaving a sub-screen (market, guild) also
+  reloads `city_map.tscn` and would replay the creak on every single trip
+  back from browsing the stalls. Same pattern as `recruit_venue` and
+  `character_target_index`: data one screen hands the next, not state
+  either screen owns.
 
 ### Art Rules
 
@@ -2019,7 +2090,8 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
     çağrılır - sefer/kervan alanları o an her zaman sıfırlanmış olduğu
     için hiç serileştirilmez. `GameSession`'ı `load()` ile kurup normal
     örnek metodu çağırır, hiçbir yerde `class_name` ile anmaz.
-  - AudioManager (planned)
+  - `AudioManager` (registered autoload): music crossfade, ambience and
+    one-shot SFX - see Audio Rules and Title Screen Rules.
 
 **Autoload rule:** never reference a `class_name` inside an autoload script —
 not in a type annotation, not in a body. Autoloads are parsed before the global

@@ -6,12 +6,38 @@ extends Control
 ## Tayfa büyüklüğü ve karakterin kendisi artık burada değil, karakter
 ## oluşturma ekranında seçiliyor - "Yeni Oyun" oraya gider, oturum da
 ## orada kurulur.
+##
+## **Bir "bir tuşa basın" evresiyle açılıyor, ayrı bir sahne olarak değil.**
+## İstenen şey sahne değişmeden yaşanan bir geçişti ("ekran siyahlanıp
+## yeniden yüklenmemeli") - `MenuBackdrop`'u ayrı bir title-screen sahnesine
+## taşıyıp oradan `change_scene_to_file` ile buraya geçmek tam da
+## istenmeyen şeyi yapardı: manzara sıfırdan kurulur, kervanın döngüsü
+## yeniden başlardı. Bunun yerine `MainMenu`'nün kendisi iki evreli: önce
+## yalnızca nabız gibi atan bir davet metni, ilk girdide (klavye/fare/kol
+## fark etmez) aynı sahnede butonlar beliriyor. Evre yalnızca **süreç içi**
+## bir kez yaşanıyor - `_title_shown_this_run` bir statik değişken (bkz.
+## `Nav`'ın `recruit_venue`'sü, aynı GDScript özelliği), yoksa Ayarlar'dan
+## geri dönmek bile oyuncuyu yeniden "bir tuşa bas" ekranına düşürürdü.
 
 ## Başlık ve butonların arkasındaki karartma. Manzaranın üstüne çıplak
 ## metin koymak, gökyüzünün açık olduğu yerde başlığı okunmaz yapıyor -
 ## olay kartının kendi opak kutusunu taşımasıyla aynı gerekçe.
 const SCRIM_PAD: Vector2 = Vector2(56.0, 40.0)
 const SCRIM_COLOR: Color = Color(0.04, 0.035, 0.045, 0.62)
+
+## Davet metninin nabız hızı ve parlaklık aralığı - `PulseBar`'ın "değişimi
+## göster" mantığının aynısı, burada sürekli tekrar eden bir davet için.
+const PROMPT_PULSE_SECONDS: float = 1.35
+const PROMPT_DIM_ALPHA: float = 0.35
+
+## Butonlar beliriken her biri öncekinden bu kadar geç başlıyor - tek
+## seferde hepsinin birden açılması "belirmek" değil "anahtarı çevirmek"
+## gibi duruyordu.
+const REVEAL_STAGGER_SECONDS: float = 0.09
+const REVEAL_SECONDS: float = 0.45
+const REVEAL_SLIDE_PX: float = 14.0
+
+static var _title_shown_this_run: bool = false
 
 @onready var _menu_box: VBoxContainer = $VBoxContainer
 @onready var _continue_button: Button = $VBoxContainer/ContinueButton
@@ -20,12 +46,13 @@ const SCRIM_COLOR: Color = Color(0.04, 0.035, 0.045, 0.62)
 @onready var _quit_button: Button = $VBoxContainer/QuitButton
 
 var _confirm_dialog: ConfirmationDialog
+var _scrim: ColorRect
+var _prompt_label: Label
+var _prompt_tween: Tween
+var _in_title_phase: bool = false
 
 func _ready() -> void:
 	Nav.go_root(Nav.MAIN_MENU)
-	# Ana menü ile yol aynı parçayı paylaşıyor (bkz. AudioManager):
-	# menüdeki ekran da bir yol manzarası, aynı his.
-	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_backdrop()
 	_continue_button.visible = SaveManager.has_save()
 	_continue_button.pressed.connect(_on_continue_pressed)
@@ -34,6 +61,11 @@ func _ready() -> void:
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 	_refresh_texts()
+
+	if _title_shown_this_run:
+		_show_menu_immediately()
+	else:
+		_begin_title_phase()
 
 ## Manzara ve karartma butonların **arkasına** giriyor: `add_child` onları
 ## en sona koyar, `move_child(…, 0)` en başa. Sahne dosyasına eklemek
@@ -44,20 +76,135 @@ func _build_backdrop() -> void:
 	add_child(backdrop)
 	move_child(backdrop, 0)
 
-	var scrim := ColorRect.new()
-	scrim.color = SCRIM_COLOR
-	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(scrim)
-	move_child(scrim, 1)
-	_fit_scrim(scrim)
+	_scrim = ColorRect.new()
+	_scrim.color = SCRIM_COLOR
+	_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_scrim)
+	move_child(_scrim, 1)
+	_fit_scrim()
 	# Butonların kutusu yerleşim geçişinden önce doğru boyunu bilmiyor
 	# (dil değişince metin de değişiyor), o yüzden karartma onu izliyor.
-	_menu_box.resized.connect(_fit_scrim.bind(scrim))
-	_menu_box.item_rect_changed.connect(_fit_scrim.bind(scrim))
+	_menu_box.resized.connect(_fit_scrim)
+	_menu_box.item_rect_changed.connect(_fit_scrim)
 
-func _fit_scrim(scrim: ColorRect) -> void:
-	scrim.position = _menu_box.position - SCRIM_PAD
-	scrim.size = _menu_box.size + SCRIM_PAD * 2.0
+func _fit_scrim() -> void:
+	_scrim.position = _menu_box.position - SCRIM_PAD
+	_scrim.size = _menu_box.size + SCRIM_PAD * 2.0
+
+## --- "Bir tuşa basın" evresi ---
+
+## Sahne canlı kalıyor (bkz. dosya başındaki not): butonlar ve karartma
+## saydam ve tıklanamaz, yalnızca manzara ve davet metni görünür. Müzik de
+## henüz yok - `AudioManager.play_ambience` rüzgarı çalıyor, ilk girdiye
+## kadar tek ses o.
+##
+## `visible = false` değil `modulate:a = 0` kullanılıyor - **bilerek**.
+## `VBoxContainer` çocuklarını yalnızca görünürken diziyor; sahne henüz ilk
+## yerleşim geçişini yapmadan `visible`'ı kapatırsak butonlar hiç
+## dizilmeden kalıyor ve `_reveal_menu()` hepsini aynı (0,0) civarındaki
+## bayat konumdan okuyup üst üste bindiriyordu - ölçüldü, tam bu oldu.
+## Saydam ama görünür bir kutu her zaman doğru dizili kalıyor.
+func _begin_title_phase() -> void:
+	_in_title_phase = true
+	_menu_box.modulate.a = 0.0
+	_set_buttons_enabled(false)
+	_scrim.visible = false
+	set_process_unhandled_input(true)
+
+	_prompt_label = Label.new()
+	_prompt_label.text = tr("UI_TITLE_PROMPT")
+	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_prompt_label.position.y -= 64.0
+	_prompt_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_prompt_label)
+
+	_prompt_tween = create_tween()
+	_prompt_tween.set_loops()
+	_prompt_tween.tween_property(_prompt_label, "modulate:a", PROMPT_DIM_ALPHA, PROMPT_PULSE_SECONDS)
+	_prompt_tween.tween_property(_prompt_label, "modulate:a", 1.0, PROMPT_PULSE_SECONDS)
+
+	AudioManager.play_ambience(AudioManager.AMBIENCE_WIND)
+
+## Menü sahnesiz bir kere daha açıldığında (Ayarlar'dan dönüş gibi) evre
+## hiç yaşanmadan doğrudan bu hâle geçiyor - eski davranışın aynısı.
+func _show_menu_immediately() -> void:
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
+	_menu_box.modulate.a = 1.0
+	_set_buttons_enabled(true)
+	_scrim.visible = true
+
+func _set_buttons_enabled(enabled: bool) -> void:
+	_continue_button.disabled = not enabled
+	_play_button.disabled = not enabled
+	_settings_button.disabled = not enabled
+	_quit_button.disabled = not enabled
+
+## Klavye, fare ya da kol - hangisiyle oynadığı önemli değil, ilki geçişi
+## başlatıyor. `echo`'yu eleniyor yoksa tuşu basılı tutmak onlarca kez
+## tetiklerdi (yalnızca bir kez tetiklenmesi gerektiği için önemli, aksi
+## hâlde _begin_transition çoklu çağrıdan zarar görmez ama gereksiz).
+func _unhandled_input(event: InputEvent) -> void:
+	if not _in_title_phase:
+		return
+	var qualifies: bool = (
+		(event is InputEventKey and event.pressed and not event.echo)
+		or (event is InputEventJoypadButton and event.pressed)
+		or (event is InputEventMouseButton and event.pressed)
+	)
+	if not qualifies:
+		return
+	get_viewport().set_input_as_handled()
+	_begin_transition()
+
+## Rüzgar sönerken yol müziği yükseliyor (iki ayrı çalıcı, bkz.
+## AudioManager), davet metni soluyor, butonlar mürekkep gibi yukarıdan
+## aşağıya belirir - hiçbiri sahne değiştirmeden, `MenuBackdrop` hiç
+## kesilmeden sürüyor.
+func _begin_transition() -> void:
+	_in_title_phase = false
+	_title_shown_this_run = true
+	set_process_unhandled_input(false)
+
+	AudioManager.play_sfx(AudioManager.SFX_THUD)
+	AudioManager.stop_ambience()
+	AudioManager.play_track(AudioManager.TRACK_ROAD)
+
+	if _prompt_tween != null and _prompt_tween.is_valid():
+		_prompt_tween.kill()
+	var prompt := _prompt_label
+	var fade_out := create_tween()
+	fade_out.tween_property(prompt, "modulate:a", 0.0, 0.4)
+	fade_out.tween_callback(prompt.queue_free)
+
+	_reveal_menu()
+
+func _reveal_menu() -> void:
+	_scrim.visible = true
+	_scrim.modulate.a = 0.0
+	create_tween().tween_property(_scrim, "modulate:a", 1.0, REVEAL_SECONDS)
+
+	# Kutunun kendisi zaten görünürdü (bkz. `_begin_title_phase`'in notu) -
+	# yalnızca saydamlığı kaldırılıyor, çocukların gerçek dizilimine hiç
+	# dokunulmadan.
+	_menu_box.modulate.a = 1.0
+	_set_buttons_enabled(true)
+
+	var index := 0
+	for child in _menu_box.get_children():
+		if not (child is Control) or not child.visible:
+			continue
+		var control := child as Control
+		control.modulate.a = 0.0
+		var home_y := control.position.y
+		control.position.y = home_y - REVEAL_SLIDE_PX
+		var delay := index * REVEAL_STAGGER_SECONDS
+		var reveal := create_tween()
+		reveal.set_parallel(true)
+		reveal.tween_property(control, "modulate:a", 1.0, REVEAL_SECONDS).set_delay(delay)
+		reveal.tween_property(control, "position:y", home_y, REVEAL_SECONDS).set_delay(delay).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		index += 1
 
 func _refresh_texts() -> void:
 	_continue_button.text = tr("UI_CONTINUE")

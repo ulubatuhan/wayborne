@@ -63,6 +63,16 @@ static var recruit_venue: String = "tavern"
 ## ekran kendi tarafında sınırlara kırpar.
 static var character_target_index: int = 0
 
+## Şehir ekranının açılışı gerçekten kapıdan bir giriş miydi - iki yerden
+## işaretleniyor: `road_journey.gd` bir sefer bitirip şehre girince, ve
+## `world_hub.gd` oyuncu kapıya yürüyüp geçince. `city_map.gd` bunu okuyup
+## kapı sesini çalar ve hemen sıfırlar (bkz. oradaki not). Şehre pazar/
+## lonca gibi bir alt ekrandan geri dönmek de aynı `city_map.tscn`'i
+## yeniden yüklüyor (`Nav`'ın her geçişi `change_scene_to_file` olması), o
+## yüzden bu bir `is_journey_active()` kontrolü değil - tek seferlik,
+## taşınan bir veri, `recruit_venue` ile aynı desen.
+static var city_gate_opening: bool = false
+
 ## Bir köke git: yığın temizlenir. Kök ekranların `_ready`'si bunu çağırır,
 ## böylece oraya nasıl gelinirse gelinsin (kapıdan, varıştan, menüden)
 ## geçmiş sıfırlanır ve eski bir yol yanlışlıkla miras kalmaz.
