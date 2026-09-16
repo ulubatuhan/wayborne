@@ -53,23 +53,12 @@ const PERSON_HEIGHT_RATIO: float = 0.19
 const MOUNTED_HEIGHT_RATIO: float = 0.27
 const OX_HEIGHT_RATIO: float = 0.15
 
-## Bir vagonu **çift öküz** çeker. Tek hayvan boyunduruk değil tek at
-## koşumudur; konsept görsellerinde de kervanın yükünü hep bir çift
-## çekiyor. İkinci öküz uzak taraftadır, o yüzden üç işaretle geriye
-## itiliyor - biraz ileride (`PAIR_LEAD`), biraz yukarıda (`PAIR_RISE`,
-## yani zemin çizgisi ona daha uzakta) ve biraz küçük (`PAIR_DEPTH`).
-## Üçü birden olmazsa çift, iki ayrı öküz gibi değil, tek öküzün kalın
-## bir gölgesi gibi okunuyor.
-##
-## Yakın öküz *sonra* yaratılıyor: çocuk sırası çizim sırası, uzaktaki
-## arkada kalmalı.
-## Ölçüldü: ilk değerler (0.16/0.17) çifti tek bir hayvana çeviriyordu -
-## ekranda sekiz bacaklı bir kütle görünüyordu, iki öküz değil. İki
-## gövdenin ayrı okunması için kayma öküz boyunun üçte birine yaklaşmalı.
-const OX_PAIR_LEAD: float = 0.34
-const OX_PAIR_RISE: float = 0.38
-const OX_PAIR_DEPTH: float = 0.88
-const OX_PAIR_SHADE: float = 0.74
+## Bir vagonu **tek öküz** çeker. Bir süre çift öküzdü (bkz. Faz 10'un
+## ART-C hattı) - tek hayvanın boyunduruk değil at koşumu gibi okunduğu
+## gerekçesiyle - ama açıkça istenerek teke geri döndü (bkz. CLAUDE.md
+## Art Rules). Eski çiftin geriye itme işaretleri (`PAIR_LEAD`/`RISE`/
+## `DEPTH`/`SHADE`) bu yüzden kalkı: tek hayvan artık kendi tam boyutunda
+## ve tam tonunda, koşumun tam ortasında duruyor.
 
 ## Yürüyüş temposu: bir "gün/saniye"lik hız kaç adım. Sayının kendisi
 ## görsel; yolun gerçek hızı road_journey'de.
@@ -113,10 +102,17 @@ const CAMP_WALK_STEP: float = 1.8
 ## Aynı ateşe birden fazla kişi geliyor (sürücü + yürüyen tayfa + sırayla
 ## dağılan parti). Hedefleri tek noktaya kenetlemek tek bir figür gibi
 ## görünmelerine yol açıyordu - "kervandakiler toplandı" hissi tam da bu
-## yüzden kayboluyordu. Her koltuk ateşin solunda/sağında küçük bir
-## kayma alıyor, böylece bir küme okunuyor, bir leke değil.
+## yüzden kayboluyordu. Her koltuk ateşin etrafında küçük bir (x, y)
+## kayma alıyor - yalnızca sağa/sola değil, ateşin önüne/arkasına da -
+## böylece bir çember okunuyor, tek bir yatay sıra değil. `x` bileşenleri
+## kasıtlı olarak birbirinden ayrı tutuluyor (bkz. `_fire_tolerance` ve
+## `test_camp_gathering.gd`'nin üst üste binme testi): ayrım ekseni yine
+## `x`, `y` yalnızca kümeyi ateşin tamamen etrafına yayıyor.
 const CAMPFIRE_SEAT_SPACING: float = 15.0
-const CAMPFIRE_SEAT_OFFSETS: Array[float] = [-0.6, 0.7, -1.5, 1.6, 0.0]
+const CAMPFIRE_SEATS: Array[Vector2] = [
+	Vector2(-0.6, 0.5), Vector2(0.7, -0.6), Vector2(-1.5, -0.3),
+	Vector2(1.6, 0.4), Vector2(0.0, -1.1), Vector2(-2.3, 0.2),
+]
 
 var _anchor_x: float = 0.0
 var _ground_y: float = 0.0
@@ -163,12 +159,8 @@ var _crew_figures: Array[WalkFigure] = []
 ## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
 ## sırasında gerçek birer figüre dönüşüyor (bkz. `configure`'daki not).
 var _driver_figures: Array[WalkFigure] = []
-## Koşumun yakın tarafındaki öküzler - kolonun ölçüsünü bunlar belirliyor.
+## Vagon başına tek öküz - koşumun ölçüsünü bunlar belirliyor.
 var _oxen: Array[WalkFigure] = []
-## Uzak taraftakiler, aynı sırada. Ayrı bir dizi çünkü yerleşim ve test
-## kolonu *yakın* öküz üzerinden okuyor: `get_ox_centres()` vagon başına
-## tek merkez döndürmeye devam ediyor.
-var _oxen_far: Array[WalkFigure] = []
 
 ## Altında bir şey çizmenin anlamı olmadığı boy. Bunun altında vagonun
 ## bütün ölçüleri piksel altına düşüyor ve çokgenlerin köşeleri aynı
@@ -213,7 +205,6 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_crew_figures.clear()
 	_driver_figures.clear()
 	_oxen.clear()
-	_oxen_far.clear()
 	_leader = null
 
 	# Kamp durumu eski figürlere işaret ediyor olabilir - `queue_free()`
@@ -255,12 +246,6 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 
 
 	for index in _wagon_count:
-		# Uzaktaki önce: çocuk sırası çizim sırası.
-		var far := _make_figure(
-			WalkFigure.KIND_OX, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
-		)
-		far.modulate = Color(OX_PAIR_SHADE, OX_PAIR_SHADE, OX_PAIR_SHADE, 1.0)
-		_oxen_far.append(far)
 		_oxen.append(_make_figure(
 			WalkFigure.KIND_OX, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
 		))
@@ -404,7 +389,7 @@ func _begin_gathering() -> void:
 		return
 	var fire_count := _wagon_centres.size()
 	# Ateş başına kaç koltuk dolduğu - üst üste binmesinler diye (bkz.
-	# CAMPFIRE_SEAT_OFFSETS'in notu).
+	# CAMPFIRE_SEATS'in notu).
 	var seats_taken: Dictionary = {}
 
 	for index in _driver_figures.size():
@@ -464,12 +449,18 @@ func _assign_driver_gather(figure: WalkFigure, wagon_index: int, seats_taken: Di
 ## Aynı hedef hem gidişte hem dönüşte kullanıldığı için (bkz.
 ## `_advance_gather`'ın home/dest çifti) düzeltme iki yönü de kapsıyor -
 ## arabacı ateşe inerken alçalıyor, dönerken yeniden koltuğa çıkıyor.
-## `seat` aynı ateşe gelen ikinci/üçüncü kişiyi yana kaydırıyor (bkz.
-## CAMPFIRE_SEAT_OFFSETS'in notu) - yoksa hepsi aynı noktaya biner.
+## `seat` aynı ateşe gelen ikinci/üçüncü kişiyi ateşin etrafında bir
+## çembere yayıyor (bkz. CAMPFIRE_SEATS'in notu) - yoksa hepsi aynı
+## noktaya biner. Taban çizgisi yine gerçek zemin: `y` bileşeni oradan bir
+## sapma, ateşin kendi çizim noktasından değil - yoksa ateş her koltuk
+## için ayrı bir zemin tanımlamış olurdu.
 func _campfire_target(figure: WalkFigure, fire_index: int, seat: int) -> Vector2:
 	var fire := _campfire_position(fire_index)
-	var offset := CAMPFIRE_SEAT_OFFSETS[seat % CAMPFIRE_SEAT_OFFSETS.size()] * CAMPFIRE_SEAT_SPACING * _scale
-	return Vector2(fire.x + offset - figure.size.x * 0.5, _ground_y - figure.size.y)
+	var seat_ratio: Vector2 = CAMPFIRE_SEATS[seat % CAMPFIRE_SEATS.size()]
+	var offset := seat_ratio * CAMPFIRE_SEAT_SPACING * _scale
+	return Vector2(
+		fire.x + offset.x - figure.size.x * 0.5, _ground_y + offset.y - figure.size.y
+	)
 
 ## Bir vagonun ateşinin durduğu yer. Ateş vagonun **kuyruk yönüne**
 ## kayıyor (bkz. CAMPFIRE_TRAIL_RATIO'nun notu) - önü zaten öküz ve
@@ -770,15 +761,6 @@ func _walk_column(scale: float, place: bool) -> float:
 		if index < _oxen.size():
 			cursor -= ox_w * 0.5
 			if place:
-				# Çift öküz: uzaktaki kolonun ölçüsüne girmiyor, çünkü
-				# yakınının *yanında* duruyor - ileri kaydırması boşluk
-				# değil derinlik işareti.
-				if index < _oxen_far.size():
-					_place(
-						_oxen_far[index], cursor + ox_w * OX_PAIR_LEAD,
-						ox_h * OX_PAIR_DEPTH, ox_w * OX_PAIR_DEPTH,
-						ox_h * OX_PAIR_RISE
-					)
 				_place(_oxen[index], cursor, ox_h, ox_w)
 			cursor -= ox_w * 0.5
 		cursor -= hitch_gap

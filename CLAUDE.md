@@ -436,14 +436,13 @@ the walking figures are the game's strongest asset) but to deepen it.
   - **Shared fires need shared seats, not a shared point.** Every figure
     assigned to the same fire was targeting the *identical* coordinate -
     two or three people collapsing onto one pixel reads as one person.
-    `CAMPFIRE_SEAT_OFFSETS` fans them out left/right of the flame by a
-    few pixels each (`CAMPFIRE_SEAT_SPACING`), assigned in gathering
-    order so the driver, the walking crew and any party members sharing
-    a fire land on different seats. `test_camp_gathering.gd`'s stacking
-    check is the general form of the same mistake the layout tests
-    already guard against elsewhere in this file: two things placed by
-    the same formula are the same thing unless something forces them
-    apart.
+    `CAMPFIRE_SEATS` fans them out around the flame by a few pixels each
+    (`CAMPFIRE_SEAT_SPACING`), assigned in gathering order so the driver,
+    the walking crew and any party members sharing a fire land on
+    different seats. `test_camp_gathering.gd`'s stacking check is the
+    general form of the same mistake the layout tests already guard
+    against elsewhere in this file: two things placed by the same formula
+    are the same thing unless something forces them apart.
   - One trap both fixes had to dodge: a figure's *target* y has to be
     the true ground line, always - not "wherever it currently stands."
     The walking crew and party already stood at ground level, so reading
@@ -454,6 +453,17 @@ the walking figures are the game's strongest asset) but to deepen it.
     started on the ground and a real descent for anyone who didn't -
     the same target drives the return trip, so climbing back onto the
     seat falls out of the same fix for free.
+- **A row is not a ring.** The seat offsets above shipped `x`-only, so a
+  fire with four or five people gathered still read as a line standing
+  shoulder to shoulder on one side of the flame - "everyone stacked at
+  the same spot" had been fixed, "everyone spread around the fire" had
+  not. `CAMPFIRE_SEATS` is now `Array[Vector2]`: each seat also carries a
+  `y` ratio, added straight onto `_ground_y` (never onto the fire's own
+  drawn position, which already carries its own near-offset - stacking
+  the two would give every seat a different notion of "ground"). The `x`
+  ratios keep the exact values and the exact separation the stacking test
+  already verified; only `y` is new, so a fix aimed at "surround the
+  fire" could not quietly reopen "don't stand on top of each other."
 
 ### Audio Rules
 
@@ -702,12 +712,24 @@ way to textures.
   lesson generalises: when one screen gets the treatment, the screens
   that did not are now *wrong*, not merely older — a shared visual
   language is only shared if every screen speaks it.
-- **One wagon is drawn by a pair of oxen.** A single animal is a horse's
-  harness, not a yoke. The far ox is pushed back by three marks at once —
-  slightly ahead, slightly higher, slightly smaller — because any one or
-  two of them alone reads as a thick shadow of the near ox rather than a
-  second animal. The column's measurements still come from the near ox
-  only, so `get_ox_centres()` keeps returning one centre per wagon.
+- **One wagon is drawn by one ox, and that reverses an earlier decision.**
+  For a while it was a pair: a single animal reads as a horse's harness,
+  not a yoke, and the far ox was pushed back by three marks at once -
+  slightly ahead, slightly higher, slightly smaller - because any one or
+  two of them alone read as a thick shadow of the near ox rather than a
+  second animal. Asked for explicitly, it went back to one - same family
+  as the mosque/minaret reversal in this section: a design tried,
+  measured, and then undone on its own merits rather than because the
+  first attempt was wrong. `RoadCaravan` no longer creates a second,
+  shaded figure per wagon at all (`_oxen_far` and its `PAIR_LEAD`/`RISE`/
+  `DEPTH`/`SHADE` offsets are gone, not merely hidden), and
+  `menu_backdrop.gd`'s independent backlit-caravan silhouette - a second,
+  separate implementation of the same pair, because a silhouette can't
+  share a `WalkFigure` with the road - got the same edit for the same
+  reason `ArtPalette`/`ArtDraw` exist: two places drawing the same
+  caravan have to agree, or the game looks like two productions again.
+  The column's measurements already came from the near ox only, so
+  `get_ox_centres()` (one centre per wagon) needed no change at all.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.

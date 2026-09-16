@@ -69,12 +69,14 @@ func _walk_frames(caravan: RoadCaravan, frames: int, dt: float = 1.0 / 30.0) -> 
 		caravan._process(dt)
 
 ## Aynı ateşe gelen ikinci/üçüncü kişi merkezden kayıyor (bkz.
-## CAMPFIRE_SEAT_OFFSETS), o yüzden "ateşe vardı" iddiası artık tam
-## merkeze değil, koltukların kapladığı aralığa karşı sınanıyor.
+## CAMPFIRE_SEATS - artık hem x hem y kayıyor), o yüzden "ateşe vardı"
+## iddiası artık tam merkeze değil, koltukların kapladığı aralığa karşı
+## sınanıyor. Yalnızca `x` bileşeni ölçülüyor çünkü test getters'ı da
+## (`get_party_centres()` vb.) yalnızca yatay merkezi döndürüyor.
 func _fire_tolerance(caravan: RoadCaravan) -> float:
 	var max_offset := 0.0
-	for offset in RoadCaravan.CAMPFIRE_SEAT_OFFSETS:
-		max_offset = maxf(max_offset, absf(offset))
+	for seat in RoadCaravan.CAMPFIRE_SEATS:
+		max_offset = maxf(max_offset, absf(seat.x))
 	return max_offset * RoadCaravan.CAMPFIRE_SEAT_SPACING * caravan.get_column_scale() + 1.0
 
 func _test_one_fire_per_wagon(t) -> void:
