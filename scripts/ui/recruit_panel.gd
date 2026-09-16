@@ -12,6 +12,7 @@ signal party_changed()
 
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
+const MOVE_BUTTON_SIZE: float = 34.0
 
 var _session: GameSession
 var _venue: String = RecruitCatalog.VENUE_TAVERN
@@ -98,10 +99,18 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 	row.add_child(label)
 
 	if slot > 1:
+		# Ok bir karakter değil çizim: `↑` varsayılan fontta yok ve bu tuş
+		# ekranda boş kutu olarak duruyordu (bkz. `UiIcon`).
 		var up_button := Button.new()
-		up_button.text = "↑"
+		up_button.custom_minimum_size = Vector2(MOVE_BUTTON_SIZE, 0.0)
+		up_button.tooltip_text = tr("UI_PARTY_MOVE_UP")
 		up_button.pressed.connect(_on_move_up_pressed.bind(slot - 1))
 		row.add_child(up_button)
+
+		var up_icon := UiIcon.new()
+		up_icon.setup(UiIcon.Kind.CHEVRON_UP, ArtPalette.GOLD)
+		up_button.add_child(up_icon)
+		up_icon.fill_parent()
 
 	# Oyuncunun kendisi çıkarılamaz; kontrol sıraya değil bayrağa bakıyor.
 	if not character.is_player:

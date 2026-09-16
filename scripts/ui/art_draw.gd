@@ -345,6 +345,61 @@ static func light_pool(
 static func ellipse(canvas: CanvasItem, centre: Vector2, radii: Vector2, color: Color) -> void:
 	canvas.draw_colored_polygon(ellipse_points(centre, radii), color)
 
+## Arayüz işaretleri - **metin değil çizim.**
+##
+## Bunlar bir süre Unicode karakterdi (`●○↑↓→✓`) ve hepsi ekranda boş
+## kutu olarak çıkıyordu: Godot'un varsayılan fontu o blokları taşımıyor.
+## Bir playtest'te savaş ekranındaki mevki belirteçleri fotoğraflandı ama
+## hata tek bir yerde değildi - on iki oyuncu-yüzlü yerdeydi ve hiçbir
+## test göremezdi, çünkü metin *doğru*ydu, yalnızca çizilemiyordu.
+##
+## Zaten oyunun her şeyi `_draw()` ile çiziliyor; bir şekli metinden
+## dilenmek en baştan yanlış kapıydı. Çizilen işaret ayrıca boyutlanabilir
+## ve palete uyar - font ne taşırsa onunla yetinmez.
+
+## Dolu ya da boş nokta. Savaşın mevki belirteci: dolu "burada durabilir",
+## boş duramaz.
+static func pip(
+	canvas: CanvasItem, centre: Vector2, radius: float, color: Color, filled: bool
+) -> void:
+	if filled:
+		ellipse(canvas, centre, Vector2(radius, radius), color)
+		return
+	# Boş nokta bir *halka*: içi boş bırakılmış bir daire, soluk bir dolu
+	# daire değil. Soluklaştırmak iki durumu yan yana ayırt edilemez
+	# kılıyordu, çünkü fark renk farkına iniyordu.
+	canvas.draw_arc(centre, radius, 0.0, TAU, 14, color, maxf(1.0, radius * 0.45), true)
+
+## Yön oku - üç çizgili bir şevron. Dolu bir üçgen aynı boyutta çok daha
+## ağır okunuyor ve metin satırının içinde bir leke gibi duruyor.
+## `direction`: -1 yukarı/sol, +1 aşağı/sağ.
+static func chevron(
+	canvas: CanvasItem, centre: Vector2, size: float, color: Color,
+	direction: int, horizontal: bool = false
+) -> void:
+	var half := size * 0.5
+	var tip := half * float(signi(direction))
+	var points := PackedVector2Array()
+	if horizontal:
+		points.append(centre + Vector2(-tip, -half))
+		points.append(centre + Vector2(tip, 0.0))
+		points.append(centre + Vector2(-tip, half))
+	else:
+		points.append(centre + Vector2(-half, -tip))
+		points.append(centre + Vector2(0.0, tip))
+		points.append(centre + Vector2(half, -tip))
+	canvas.draw_polyline(points, color, maxf(1.0, size * 0.18), true)
+
+## Onay işareti - tamamlanmış bir hedefin yanındaki tik.
+static func check(canvas: CanvasItem, centre: Vector2, size: float, color: Color) -> void:
+	var half := size * 0.5
+	var points := PackedVector2Array([
+		centre + Vector2(-half, 0.0),
+		centre + Vector2(-half * 0.2, half * 0.7),
+		centre + Vector2(half, -half * 0.75),
+	])
+	canvas.draw_polyline(points, color, maxf(1.0, size * 0.18), true)
+
 static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	for index in steps:

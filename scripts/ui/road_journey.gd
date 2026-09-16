@@ -265,10 +265,16 @@ var _exit_button: Button
 @onready var _modal: Control = $Modal
 @onready var _modal_center: CenterContainer = $Modal/Center
 @onready var _log_overlay: MarginContainer = $LogOverlay
+## Kervanın tam dökümü. Kendi katmanı, çünkü kayıt katmanıyla aynı anda
+## açık olmaları anlamsız ama biri ötekini kapatmak zorunda da değil.
+@onready var _status_overlay: MarginContainer = $StatusOverlay
 
 ## Alt şeritteki tek satırlık kayıt - listenin tamamı artık `_log_overlay`'de.
 var _last_log_label: Label
 var _log_button: Button
+var _status_button: Button
+var _status_panel: CaravanStatusPanel
+var _help_button: Button
 ## Moral/stres/tehlike sayı değil **çubuk**: bir orandan ibaret olan üç
 ## değeri rakam olarak okumak, oyuncuyu her karede metin okumaya zorluyor.
 ## `PulseBar` şehir dışı HUD'da zaten bunu yapıyor (bkz. world_hub.gd) -
@@ -296,6 +302,7 @@ func _build_ui() -> void:
 	_build_hud_layer()
 	_build_modal_layer()
 	_build_log_layer()
+	_build_status_layer()
 	_refresh_exit_button()
 
 ## Dünya katmanı: manzara ve (savaş varsa) savaş sahnesi. `MarginContainer`
@@ -487,6 +494,26 @@ func _build_bottom_bar() -> PanelContainer:
 	_replan_button.pressed.connect(_on_replan_pressed)
 	row.add_child(_replan_button)
 
+	# Playtest: *"status, map, inventory, my contracts gibi"* düğmeler.
+	# Dördü de aynı soruyu soruyor - kervan ne durumda - ve cevabı tek bir
+	# dökümde duruyor (bkz. CaravanStatusPanel). Dört ayrı ekran, bir
+	# ekranın dört sekmesi kadar bile bilgi vermezdi.
+	_status_button = Button.new()
+	_status_button.text = tr("UI_STATUS_OPEN")
+	_status_button.tooltip_text = tr("UI_STATUS_TOOLTIP")
+	_status_button.toggle_mode = true
+	_status_button.toggled.connect(_on_status_toggled)
+	row.add_child(_status_button)
+
+	# Aynı kısayol, aynı katman şeklinde şehirde de açılıyor (bkz.
+	# city_map.gd'nin `_show_help`'i) - playtest'in *"kesinlikle bir
+	# kısayol tuşuyla"* isteği ekrana bağlı değil.
+	_help_button = Button.new()
+	_help_button.text = tr("UI_HELP_OPEN")
+	_help_button.tooltip_text = tr("UI_HELP_TOOLTIP")
+	_help_button.pressed.connect(_show_help)
+	row.add_child(_help_button)
+
 	_log_button = Button.new()
 	_log_button.text = tr("EVT_TEST_LOG")
 	_log_button.toggle_mode = true
@@ -598,6 +625,54 @@ func _make_bar() -> PanelContainer:
 	bar.add_theme_stylebox_override("panel", style)
 	return bar
 
+## Kervanın dökümü: bir tuş, bir katman. Şehre girmek ya da sahne
+## değiştirmek gerekmiyor - yol yürümeye devam ediyor, oyuncu üstüne
+## bakıyor. Kapatma tuşu kaydırma kutusunun dışında (bkz. `setup`).
+func _build_status_layer() -> void:
+	var frame := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.07, 0.068, 0.075, 0.97)
+	style.border_color = ArtPalette.GOLD_DIM
+	style.set_border_width_all(1)
+	style.set_content_margin_all(16)
+	frame.add_theme_stylebox_override("panel", style)
+	_status_overlay.add_child(frame)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	frame.add_child(column)
+
+	_status_panel = CaravanStatusPanel.new()
+	_status_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_status_panel)
+	_status_panel.setup(_session)
+
+	var close_button := Button.new()
+	close_button.text = tr("UI_CANCEL")
+	close_button.pressed.connect(_on_status_closed)
+	column.add_child(close_button)
+
+## Döküm **açıldığı anda** tazeleniyor, her karede değil: yol her saniye
+## değişiyor ama panel yalnızca bakılırken var.
+func _on_status_toggled(pressed: bool) -> void:
+	if pressed:
+		_status_panel.refresh()
+	_status_overlay.visible = pressed
+
+func _on_status_closed() -> void:
+	_status_button.button_pressed = false
+	_status_overlay.visible = false
+
+## Şehirdekiyle aynı kapı (bkz. city_map.gd'nin `_show_help`'i): bir kereye
+## mahsus otomatik gösterimin bayrağına dokunmadan, isteğe bağlı yeniden
+## açılıyor. Zamanı durdurmuyor - bu bir okuma, bir karar değil, log ve
+## durum katmanlarıyla aynı muamele (bkz. `_can_time_flow`).
+func _show_help() -> void:
+	for child in get_children():
+		if child is OnboardingPanel:
+			return
+	add_child(OnboardingPanel.new())
+
 func _on_log_toggled(pressed: bool) -> void:
 	_log_overlay.visible = pressed
 
@@ -690,6 +765,18 @@ func _input(event: InputEvent) -> void:
 		accept_event()
 		return
 
+	# Tab: kervanın dökümü. Emir menüsüyle aynı fikir - elin yürüme
+	# tuşlarından kalkmadan, bir tuşla açılıp kapanan bir katman.
+	if key_event.keycode == KEY_TAB:
+		_status_button.button_pressed = not _status_button.button_pressed
+		accept_event()
+		return
+
+	if key_event.keycode == KEY_F3:
+		_show_help()
+		accept_event()
+		return
+
 	if not _command_panel.visible:
 		return
 
@@ -758,6 +845,11 @@ func _init_journey() -> void:
 	_engine = EventEngine.new(EventCatalog.get_road_events(), engine_seed)
 	_current_event = null
 	_journey_finished = false
+
+	# Durum paneli `_build_ui()` sırasında kuruldu, ama o an henüz gerçek
+	# oturum yoktu (`_session` burada ilk kez atanıyor) - panel de sessizce
+	# boş kaldı. Gerçek oturum eldeyken şimdi dolduruluyor.
+	_status_panel.set_session(_session)
 
 	# Saat sefer başına sıfırlanır: gün sayısı ve evre buradan akar.
 	_clock = JourneyClock.new()
@@ -1338,7 +1430,7 @@ func _present_event(event: GameEvent) -> void:
 	_clock.consume_hours(EVENT_HOURS)
 	_engine.mark_fired(event, _current_day)
 
-	_add_log("── %s" % tr(event.title_key))
+	_add_log("—— %s" % tr(event.title_key))
 
 	if not event.immediate_effects.is_empty():
 		var immediate := _apply_effects(event.immediate_effects)
@@ -1430,7 +1522,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	_current_event = null
 	_clear_children(_card_panel)
 
-	_add_log("   → %s" % tr(choice.text_key))
+	_add_log("   » %s" % tr(choice.text_key))
 
 	if not choice.effects.is_empty():
 		var result := _apply_effects(choice.effects)
@@ -1885,6 +1977,27 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 	var net_label := _make_summary_label(tr("UI_ROAD_NET") % payout.net)
 	net_label.modulate = OUTCOME_COLOR
 	_arrival_panel.add_child(net_label)
+
+	# Teslim edilen kontratlar. Bu satır uzun süre yoktu ve teslimat
+	# varışta kendiliğinden olduğu için oyuncu şehirde bir "teslim et"
+	# tuşu arıyordu - playtest'te tam olarak bu yaşandı. Kaybedilen
+	# kontratın satırı vardı, kazanılanınki yoktu: yalnızca cezayı
+	# gösteren bir özet, oyuna hak ettiğinden kötü bir yüz veriyor.
+	var delivered: int = payout.get("delivered_contracts", 0)
+	if delivered > 0:
+		var delivered_label := _make_summary_label(tr("UI_ROAD_DELIVERED") % delivered)
+		delivered_label.modulate = OUTCOME_COLOR
+		_arrival_panel.add_child(delivered_label)
+
+	# İtibar oyunun en kıt kaynağı (bkz. Reputation Rules) ve kazanıldığı
+	# yer burası - ama kazanç hiç yazılmıyordu.
+	var reputation_gained: int = payout.get("reputation_gained", 0)
+	if reputation_gained > 0:
+		var reputation_label := _make_summary_label(
+			tr("UI_ROAD_REPUTATION_GAINED") % reputation_gained
+		)
+		reputation_label.modulate = OUTCOME_COLOR
+		_arrival_panel.add_child(reputation_label)
 
 	var xp_awarded: int = payout.get("xp_awarded", 0)
 	if xp_awarded > 0:

@@ -131,6 +131,23 @@ func get_required_provisions() -> int:
 func get_provisions_shortfall(current_provisions: int) -> int:
 	return maxi(0, get_required_provisions() - current_provisions)
 
+## Eksik erzakla yola çıkılırsa kervanın **kaç gün aç kalacağı.**
+##
+## Planlayıcı bir süre erzak eksikken sefere çıkmayı tamamen kilitliyordu.
+## Risk almanın oyunu olan bir oyunda oyuncunun riski almasına izin
+## vermemek yanlış kapı: Oregon Trail da eksik erzakla yola çıkmana izin
+## verir, sonucunu da ödetir. Kilit artık bir uyarı (bkz.
+## caravan_planner.gd), ama uyarının **kaç gün** diyebilmesi için sayının
+## burada, formülün yanında hesaplanması gerekiyor - erzak hesabının tek
+## bir yerde durması kuralı bunun için var (bkz. CLAUDE.md Provision
+## Rules).
+func get_hungry_days(current_provisions: int) -> int:
+	var daily := get_daily_consumption()
+	if daily <= 0:
+		return 0
+	var fed_days := maxi(0, current_provisions) / daily
+	return maxi(0, get_provisioned_days() - fed_days)
+
 func get_total_profit() -> int:
 	var total := 0
 	for offer in _selected_offers:

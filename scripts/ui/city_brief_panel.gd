@@ -28,6 +28,7 @@ signal planner_requested(destination_id: String)
 const URGENT_COLOR: Color = Color(0.9, 0.45, 0.35)
 const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
+const OBJECTIVE_MARK_SIZE: float = 11.0
 
 ## Bu kadar gün kalınca vade "yaklaşıyor" sayılır - DebtPanel ile aynı eşik.
 const DUE_SOON_DAYS: int = 7
@@ -125,16 +126,34 @@ func _build_chapter() -> void:
 	# söyler (bkz. CampaignChapter.describe_progress).
 	var context := _session.build_campaign_context()
 	for row in chapter.describe_progress(context):
-		var line := Label.new()
-		var mark := tr("UI_BRIEF_OBJECTIVE_DONE") if bool(row.met) else tr("UI_BRIEF_OBJECTIVE_OPEN")
-		var label := CampaignCatalog.get_objective_label(String(row.key))
-		if bool(row.numeric):
-			line.text = "%s %s" % [
-				mark, tr("UI_BRIEF_OBJECTIVE_COUNT") % [label, int(row.current), int(row.target)]
-			]
+		# Tamamlanmış hedefin tiki bir süre `✓` karakteriydi ve ekranda boş
+		# kutu olarak çıkıyordu (varsayılan font o bloğu taşımıyor), yani
+		# *biten* hedef bozuk görünüyordu. Artık çiziliyor, bkz. `UiIcon`.
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 6)
+
+		var met := bool(row.met)
+		var color: Color = GOOD_COLOR if met else NOTE_COLOR
+
+		var mark := UiIcon.new()
+		mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if met:
+			mark.setup(UiIcon.Kind.CHECK, color, OBJECTIVE_MARK_SIZE)
 		else:
-			line.text = "%s %s" % [mark, label]
-		line.modulate = GOOD_COLOR if bool(row.met) else NOTE_COLOR
+			mark.setup_pips(1, [], color, OBJECTIVE_MARK_SIZE)
+		line.add_child(mark)
+
+		var label := CampaignCatalog.get_objective_label(String(row.key))
+		var text := Label.new()
+		if bool(row.numeric):
+			text.text = tr("UI_BRIEF_OBJECTIVE_COUNT") % [label, int(row.current), int(row.target)]
+		else:
+			text.text = label
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.modulate = color
+		line.add_child(text)
+
 		_chapter_box.add_child(line)
 
 # --- Kervanın ihtiyaçları ---

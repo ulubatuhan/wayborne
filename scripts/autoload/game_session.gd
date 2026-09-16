@@ -1299,6 +1299,13 @@ func finish_journey() -> Dictionary:
 		0, caravan.original_merchant_names.size() - int(payout["lost_contracts"])
 	)
 	contracts_delivered += delivered
+	# Teslimat **varışta kendiliğinden** oluyor - ayrı bir "teslim et"
+	# ekranı yok, çünkü kervan malı zaten getirdi. Ama bunu hiçbir yer
+	# söylemiyordu: bir playtest oyuncusu Demirkapı'dan Kurtboğazı'na
+	# kontrat taşıdı ve "Contracts Deliver kısmını bulamadım" diye yazdı.
+	# Görünmeyen bir teslimat, olmayan bir teslimattan ayırt edilemez -
+	# aynı kural görünmeyen ceza için de yazılıydı (bkz. DebtPanel).
+	payout["delivered_contracts"] = delivered
 
 	# Teslim edilen her kontrat itibar kazandırır. Bu, kaybettiren kolun
 	# (bkz. REPUTATION_PENALTY_PER_LOST_CONTRACT) eksik olan karşılığı:

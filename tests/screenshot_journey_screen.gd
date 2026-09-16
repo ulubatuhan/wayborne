@@ -42,6 +42,11 @@ func _init() -> void:
 	await _settle()
 	_save("02_olay_karti.png")
 
+	# Kervan dökümü: playtest'in "My Caravan Status" isteği.
+	screen.call("_on_status_toggled", true)
+	await _settle()
+	_save("03_durum.png")
+
 	quit()
 
 func _start_journey() -> void:

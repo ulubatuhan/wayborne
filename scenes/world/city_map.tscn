@@ -56,10 +56,19 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="PartyButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PartyButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
 layout_mode = 2
 text = "UI_CITY_VIEW_PARTY"
 
-[node name="GateButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="GateButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
 layout_mode = 2
 text = "UI_CITY_LEAVE_BY_GATE"
+
+[node name="HelpButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+text = "UI_HELP_OPEN"
+tooltip_text = "UI_HELP_TOOLTIP"

@@ -170,7 +170,7 @@ func _add_detour_hint() -> void:
 		var stop := WorldMapData.get_location_by_id(location_id)
 		names.append(stop.location_name if stop != null else location_id)
 	_add_info_label("%s: %s" % [
-		String(TranslationServer.translate("ROUTE_DETOUR_AVAILABLE")), " → ".join(names)
+		String(TranslationServer.translate("ROUTE_DETOUR_AVAILABLE")), " » ".join(names)
 	])
 	_add_info_label(tr("UI_MAP_FIRST_STOP") % names[1])
 

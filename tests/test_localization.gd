@@ -33,6 +33,7 @@ func run(t) -> void:
 	_test_no_hardcoded_prose_in_screens(t)
 	_test_no_hardcoded_prose_in_scenes(t)
 	_test_scene_keys_are_defined(t)
+	_test_every_glyph_is_renderable(t)
 
 func _supported_locales() -> Array:
 	var script = load(USER_SETTINGS_PATH)
@@ -407,3 +408,82 @@ func _test_scene_keys_are_defined(t) -> void:
 ## Anahtar biçimine uyan ama anahtar olmayan tek metin: oyunun kendi adı.
 ## Özel isim, her dilde aynı kalır.
 const SCENE_TEXT_NOT_A_KEY: Array[String] = ["WAYBORNE"]
+
+## **Fontun çizemediği bir karakter, doğru yazılmış bir metindir - ve
+## ekranda boş kutu olarak görünür.**
+##
+## Godot'un varsayılan fontu Latin-1 + Latin Extended-A civarını taşıyor;
+## Geometric Shapes (`●○`), Arrows (`↑↓→↔`), Box Drawing (`─│`) ve
+## Dingbats (`✓✗`) bloklarını taşımıyor. Oyun bir süre bu blokların
+## dokuzunu birden kullandı: savaşın mevki belirteçleri, parti sıralama
+## tuşları, kontrat panosundaki rota oku, şehir brifingindeki "tamamlandı"
+## tiki, yol kaydının ayırıcısı. On iki oyuncu-yüzlü yer, hepsi kutu.
+##
+## Bir playtest yalnızca savaş ekranındakini fotoğrafladı. Hiçbir test
+## göremezdi: metin doğruydu, anahtarı vardı, çevrilmişti - yalnızca
+## *çizilemiyordu*. Sabit-Türkçe taraması da yer tutucu imzası kontrolü de
+## bu boyuta hiç bakmıyordu.
+##
+## Artık her CSV hücresi ve her ekran dizesi fontun kapsamına karşı
+## sınanıyor. Şekil isteyen yer onu `UiIcon` ile *çiziyor* (zaten oyunun
+## geri kalanının dili bu), metin ise fontun taşıdığıyla yazılıyor.
+##
+## `ThemeDB.fallback_font` headless koşuda da dolu: yazı tipi motoru
+## pencere olmadan da kuruluyor.
+func _test_every_glyph_is_renderable(t) -> void:
+	var font := ThemeDB.fallback_font
+	t.ok(font != null, "varsayılan font okunabiliyor")
+	if font == null:
+		return
+
+	var missing: Dictionary = {}
+
+	for csv_name in CSV_NAMES:
+		var rows := _read_csv(csv_name)
+		for row_index in range(1, rows.size()):
+			var row: Array = rows[row_index]
+			for column in range(1, row.size()):
+				_collect_missing_glyphs(font, String(row[column]), missing)
+
+	# Ekran dizeleri: çeviriden geçmeyen ama yine de çizilen metinler
+	# (ayırıcılar, biçim kalıpları). Yorum satırları hariç - oradaki ok
+	# işareti oyuncuya hiç görünmüyor.
+	for path in _screen_scripts():
+		if GLYPH_EXEMPT_SCRIPTS.has(path.get_file()):
+			continue
+		for line in _read_text(path).split("\n"):
+			var stripped := line.strip_edges()
+			if stripped.begins_with("#"):
+				continue
+			for literal in _string_literals(stripped):
+				_collect_missing_glyphs(font, literal, missing)
+
+	var report: Array[String] = []
+	for glyph in missing:
+		report.append("%s (%s)" % [glyph, String(missing[glyph])])
+	t.eq(
+		report.size(), 0,
+		"oyuncuya gösterilen her karakter fontta var (eksikler: %s)" % ", ".join(report)
+	)
+
+func _collect_missing_glyphs(font: Font, text: String, missing: Dictionary) -> void:
+	for index in text.length():
+		var code := text.unicode_at(index)
+		# Sekme/satır sonu gibi çizilmeyen karakterler fontta da yok;
+		# onları eksik saymak her satırda yanlış alarm verirdi.
+		if code < 32:
+			continue
+		if font.has_char(code):
+			continue
+		var glyph := String.chr(code)
+		if not missing.has(glyph):
+			missing[glyph] = "U+%04X" % code
+
+## Tek muafiyet ve sebebi: dil adları kendi alfabelerinde yazılı olmak
+## **zorunda** (bkz. UserSettings.SUPPORTED) ve varsayılan font CJK
+## taşımıyor. Adı Latinceye çevirmek kuralı bozardı - onun yerine ayar
+## ekranı çizilemeyen bir adın yanına dil kodunu yazıyor (bkz.
+## settings.gd'nin `_readable_locale_name`'i), yani satır boş kutu olsa
+## bile aranabilir kalıyor. CJK taşıyan bir font geldiği gün muafiyet de
+## gereksizleşir.
+const GLYPH_EXEMPT_SCRIPTS: Array[String] = ["user_settings.gd"]
