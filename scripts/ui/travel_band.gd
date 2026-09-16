@@ -63,9 +63,6 @@ const CARAVAN_X_RATIO: float = 0.34
 const CARAVAN_X_MAX_RATIO: float = 0.62
 const CARAVAN_EDGE_MARGIN: float = 28.0
 
-## Kamp ateşi.
-const FIRE_FLICKER_SPEED: float = 9.0
-
 ## Yağmur ve sis. Damla sayısı yoğunlukla ölçekleniyor, en kötü havada
 ## bile Web hedefini boğmayacak kadar.
 ## Damlalar kısa ve çok: ilk ölçüde uzun ve seyrekti, ekranda yağmur
@@ -242,10 +239,10 @@ func screen_position_for_day(day_position: float) -> Vector2:
 	return Vector2(x, _ground_y_at_screen(x))
 
 func _process(delta: float) -> void:
-	# Yağmur ve ateş kendi başına canlanıyor; hava açık ve kamp yoksa
-	# yeniden çizmeye gerek yok (oyuncu yürüdükçe set_route_progress
-	# zaten çağırıyor).
-	if float(_weather_visuals.rain) <= 0.0 and not _camping:
+	# Yağmur kendi başına canlanıyor; hava açıksa yeniden çizmeye gerek
+	# yok (oyuncu yürüdükçe set_route_progress zaten çağırıyor). Ateşin
+	# titremesi artık burada değil - bkz. RoadCaravan._draw_campfires.
+	if float(_weather_visuals.rain) <= 0.0:
 		return
 	_time += delta
 	queue_redraw()
@@ -303,8 +300,11 @@ func _draw() -> void:
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
 		caravan_x_ratio()
 	)
-	if _camping:
-		_draw_campfire(area)
+	# Ateşin kendisi artık burada değil: vagon başına bir tane oldu
+	# (bkz. RoadCaravan._draw_campfires) ve bu şeridin kendi `_draw()`'u
+	# aktör katmanının (kervanın) *altında* kalıyor - vagon merkezli
+	# ateşler orada kalırsa hep bir vagonun arkasına düşerdi. `_camping`
+	# burada yalnızca sıcak ışık tonu için yaşıyor (bkz. set_phase).
 	_draw_weather(area, horizon)
 	ArtDraw.vignette(self, area, 0.07)
 	_announce_ground_line()
@@ -779,29 +779,6 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 				ArtDraw.conifer(self, base, height * 1.15, near.darkened(0.45), flora)
 			else:
 				ArtDraw.tree(self, base, height, near.darkened(0.45), flora.lightened(0.05))
-
-func _draw_campfire(area: Rect2) -> void:
-	# Ateş kolonun *önünde*: ilk konumu kervanın içindeydi ve vagonun
-	# arkasında kalıyordu, yani gece karesinde ateş görünmüyordu.
-	var anchor := get_caravan_anchor()
-	var fire := anchor + Vector2(area.size.x * 0.055, area.size.y * 0.02)
-	var flicker := 0.82 + 0.18 * sin(_time * FIRE_FLICKER_SPEED)
-	ArtDraw.light_pool(
-		self, fire, area.size.y * 0.42, ArtPalette.TORCH, 0.085 * flicker, 0.48
-	)
-	# Odun + alev: alev üç dilim, en içi en açık.
-	for side in [-1.0, 1.0]:
-		draw_line(
-			fire + Vector2(-14.0 * side, 2.0), fire + Vector2(9.0 * side, -7.0),
-			Color(0.32, 0.24, 0.18), 3.5
-		)
-	var h := 22.0 * flicker
-	draw_colored_polygon(PackedVector2Array([
-		fire + Vector2(-8.0, 0.0), fire + Vector2(0.0, -h), fire + Vector2(8.0, 0.0),
-	]), Color(0.92, 0.42, 0.16, 0.92))
-	draw_colored_polygon(PackedVector2Array([
-		fire + Vector2(-4.5, 0.0), fire + Vector2(0.5, -h * 0.66), fire + Vector2(4.5, 0.0),
-	]), Color(1.0, 0.82, 0.40, 0.95))
 
 ## Hava. Üç katman: kasvet gökyüzünde (bkz. _draw_sky), sis ufukta,
 ## yağmur her yerde. Yoğunluklar `RouteWeather.visuals`'tan - ekran kendi

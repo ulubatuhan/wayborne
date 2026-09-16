@@ -858,6 +858,7 @@ func _init_journey() -> void:
 	_walk_direction = 0.0
 	_camping = false
 	_band.set_camping(false)
+	_caravan.set_camping(false)
 
 	# Yolun coğrafyası: planlayıcı hangi araziyi gösterdiyse yolda o
 	# görünüyor, çünkü ikisi de aynı `route_key`'den hesaplanıyor. Sentetik
@@ -1138,6 +1139,7 @@ func _update_camp_state() -> void:
 	)
 	_camping = false
 	_band.set_camping(false)
+	_caravan.set_camping(false)
 	_refresh_state()
 
 ## Hava günden ve rotadan hesaplanıyor, saklanmıyor: aynı kaydı yeniden
@@ -1261,7 +1263,13 @@ func _on_camp_pressed() -> void:
 	# olur - saat gece yarısını geçince günlük mekanik zaten işler.
 	_camping = true
 	_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS
+	# Kamp kendi hızını öneriyor: 8 saatlik bir mola 1x'te dakikalarca
+	# beklemek demek, oysa kampın kendi görüntüsü (ateş, dinlenen kervan)
+	# bu kadar uzun izlenecek bir şey değil. Oyuncu isterse yine
+	# değiştirir - bu yalnızca varsayılan, kilit değil.
+	_clock.set_speed_index(_clock.camp_speed_index())
 	_band.set_camping(true)
+	_caravan.set_camping(true)
 	_add_log(tr("UI_ROAD_CAMP_LIT"), OUTCOME_COLOR)
 	_refresh_state()
 

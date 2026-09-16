@@ -386,6 +386,38 @@ the walking figures are the game's strongest asset) but to deepen it.
 - **A trait must be visible outside combat.** Afflictions used to bend a
   combat number and nothing else; they now raise the signal rate, so a
   frayed company visibly fumbles more on the road.
+- **Camp is a place, not a pause icon, and "vagon başına bir tane" is
+  also a placement problem.** A single campfire could sit in the one
+  patch of screen with no silhouette behind it - ahead of the whole
+  column, in open ground (see the old `TravelBand._draw_campfire`, now
+  gone). Multiplying it by wagon count removed that escape: every fire
+  now belongs to `RoadCaravan`, not `TravelBand`, and sits at its own
+  wagon's **trailing** side (`CAMPFIRE_TRAIL_RATIO`) - the front is
+  already occupied by that wagon's own ox and crew, so the only open
+  pocket is behind it, inside `GAP_WAGONS`. Moving the fire into
+  `RoadCaravan` was not just a placement fix: `TravelBand` draws itself
+  *under* its children, `RoadCaravan` *is* one of those children, so a
+  fire drawn from `TravelBand` could never win against a wagon it
+  overlapped - only moving the art into the same node as the wagons let
+  later draw calls paint over them on purpose.
+- **"Kervandakiler ateşe gelsin" is a walk, not a teleport, and it has to
+  survive being interrupted.** `RoadCaravan._advance_gather` eases a
+  shared `_gather_progress` between each figure's column "home" and its
+  assigned fire (crew tied 1:1 to their own wagon's fire; party split
+  round-robin across the fires) and drives the same `WalkFigure.advance()`
+  the normal column walk uses, so gathering isn't a different kind of
+  motion, only a different target. The leader (on watch) and the oxen
+  (still in harness) never join - the mechanic is about the *people*.
+  Two things this had to get right or the illusion breaks the moment
+  anything else touches the scene: `_place()` (the formation layout that
+  normally snaps every figure to its slot) redirects a gathering figure's
+  call into just *updating its stored home*, never its on-screen
+  position, or a mid-transition window resize teleports it there
+  instantly; and the progress direction is read from `_camping` itself
+  every frame rather than latched once, so reversing mid-return (camp
+  struck, then re-lit before anyone got home - not reachable at `CAMP_HOURS`
+  today, but the code must not assume it stays that way) can't strand a
+  figure hanging between two points.
 
 ### Audio Rules
 
@@ -1562,11 +1594,19 @@ day *mechanics* are unchanged.
   lets time keep flowing until `CAMP_HOURS` pass; the benefit (provisions
   cost, stress relief) is applied when it ends. It is only offered when
   `is_camp_time()` - evening or night.
-- `TravelBand` (`scripts/ui/`) owns the visuals: sky/ground colors
-  interpolate toward the *next* phase using `get_phase_progress()` so the
-  scene never snaps, the world scrolls under a stationary caravan (moving
-  the caravan would just hit the edge of the band), and the campfire adds a
-  flickering warm light. Still ColorRect placeholders.
+- **The clock's own speed is one of its levers, and camp reaches for it.**
+  `JourneyClock.SPEEDS` gained `0.5` - eight in-game hours at 1x is minutes
+  of real time nobody wants to sit through *and* too fast to read the
+  scene it exists to show. `_on_camp_pressed()` sets the speed to
+  `camp_speed_index()` (found by value, not a hardcoded slot, so
+  reordering `SPEEDS` can't silently break it) the moment camp is made -
+  a default, not a lock, so the player can still push it back up.
+- `TravelBand` (`scripts/ui/`) owns the landscape visuals: sky/ground
+  colors interpolate toward the *next* phase using `get_phase_progress()`
+  so the scene never snaps, and the world scrolls under a stationary
+  caravan (moving the caravan would just hit the edge of the band).
+  `_camping` still tints the light warm here, but the fire itself moved to
+  `RoadCaravan` - see Road Layer Rules for why and what changed with it.
 
 ### Road Encounter Rules
 

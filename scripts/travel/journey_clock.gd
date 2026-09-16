@@ -17,8 +17,12 @@ const REAL_SECONDS_PER_DAY: float = 45.0
 const HOURS_PER_DAY: float = 24.0
 
 ## Oyuncunun seçebileceği hız çarpanları (bkz. yol ekranındaki tuşlar).
-const SPEEDS: Array[float] = [1.0, 1.5, 3.0]
-const DEFAULT_SPEED_INDEX: int = 0
+## 0.5x kampın kendi hızı - kamp kurulunca saat bu hıza düşüyor (bkz.
+## road_journey.gd'nin `_on_camp_pressed`'i): kamp saatlerce sürüyor,
+## normal 1x'te oturup beklemek can sıkıcı, oysa kampın kendi görsel
+## keyfi (ateş, dinlenen kervan) hızlı geçince kayboluyor.
+const SPEEDS: Array[float] = [0.5, 1.0, 1.5, 3.0]
+const DEFAULT_SPEED_INDEX: int = 1
 
 ## Sefer sabahın erken saatinde başlar - ilk gün baştan gece olmasın diye.
 const START_HOUR: float = 6.0
@@ -53,6 +57,13 @@ func set_speed_index(index: int) -> void:
 
 func cycle_speed() -> void:
 	speed_index = (speed_index + 1) % SPEEDS.size()
+
+## Kampın varsayılan hızının indeksi - `SPEEDS`'ten arıyor, sabit bir
+## sayı yazmıyor: dizinin sırası değişirse kamp de otomatik doğru hızı
+## bulmalı, ikinci bir yerde sabitlenmiş bir indeks değil.
+func camp_speed_index() -> int:
+	var index := SPEEDS.find(0.5)
+	return index if index >= 0 else DEFAULT_SPEED_INDEX
 
 ## Gerçek zamanı oyun saatine çevirip ilerletir. Yol ekranı bunu _process'ten
 ## çağırır; delta gerçek saniye, dönüş o çağrıda eklenen oyun saati.
