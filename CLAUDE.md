@@ -804,29 +804,57 @@ way to textures.
 - **A memory that never moves is a photograph, not a memory.** The menu's
   caravan was a single static frame - `MenuBackdrop._draw_caravan` ran
   once per resize and just sat there. Asked for explicitly: a road, real
-  motion, a longer and busier column. `MenuBackdrop` now draws a
-  perspective road (`_draw_road`, a trapezoid narrowing from a near edge
-  to a point right at the horizon city - the road leads *there* on
-  purpose, since that is where the caravan is actually going) and drives
-  a looping walk (`_time`/`CARAVAN_WALK_SECONDS`) from the road's near end
-  to that vanishing point. The shrink is **one transform, not a second
-  scale hidden in the figures**: every `_silhouette_*` call still draws
-  from a local (0,0) ground line exactly as before, and a single
-  `draw_set_transform(position, 0.0, scale)` around the whole formation
-  moves and shrinks it together - the same reasoning as the wagon living
-  in one brush instead of two: scaling the figures *and* the position
-  independently would drift the moment either one changed. The loop wraps
-  by fading `ink.a` to zero at both ends (`_draw_caravan`'s fade line), or
-  the caravan would pop from a speck at the city gate back to full size at
-  the near edge in one frame. Starting `_time` at `0` failed exactly that
-  fade window on the very first frame - the game's opening shot, and this
-  file's own `screenshot_menu.gd` (which only waits a handful of frames),
-  both showed an empty road. `_time` now starts partway through the loop
-  so neither ever catches the invisible instant. The column itself grew
-  from two wagons to `CARAVAN_WAGON_COUNT` (4) for the "kalabalık ve uzun"
-  ask - the per-wagon walker/ox/wagon triplet was already the unit of
-  length, so lengthening the caravan was raising one loop bound, not
-  inventing a new pattern.
+  motion, a longer and busier column.
+- **The road and the caravan have to travel in the same direction, or
+  neither one reads as a road.** The first attempt drew a *perspective*
+  road - a trapezoid narrowing from a near edge up to a vanishing point at
+  the horizon city - and slid the caravan from the near end toward that
+  point, shrinking it as it went. It shipped, and it was wrong: the road
+  ran steeply toward one corner of the screen while the caravan's own
+  formation stayed flat and horizontal the whole time, so the two visibly
+  disagreed about which way "forward" was - a road that read as vertical
+  under a caravan that read as horizontal. Reported back in exactly those
+  terms. The fix was not a smaller correction to the perspective version,
+  it was dropping the premise: `_draw_road` is now a flat horizontal band
+  at `ground_y`, the same height the caravan draws at, spanning the full
+  width. `_draw_caravan` no longer scales or changes height at all - it
+  only translates in `x` - so the caravan's baseline and the road's
+  centre-line are *the same line* by construction, and "walking off the
+  road" stops being a thing that can happen rather than a case that is
+  checked for.
+- **Measuring the column and placing it are the same function, here too**
+  (bkz. `RoadCaravan._walk_column`'s original statement of the rule).
+  `_walk_caravan(unit, ink, place)` is called once with `place = false` to
+  get the formation's total width (for the loop math below) and once with
+  `place = true` to actually draw - a second, separately-written measuring
+  pass is exactly how the road screen's own column drifted from its
+  drawing in the first place.
+- **The leader draws at the *highest* local `x`, not `0`.** The formation
+  moves in `+x` (the horse's neck in `_silhouette_rider` already points
+  that way, from the very first version of this file), so whichever figure
+  sits at the largest local `x` is the one that leads. Building the column
+  rider-first, as the static version had, put the leader at the *smallest*
+  `x` - correct for a motionless portrait, but the moment the formation
+  starts sliding in `+x` that makes the wagons lead and the rider trail
+  behind them. `_walk_caravan` places the wagons and walkers first and the
+  rider last for exactly this reason - no figure's own drawing changed,
+  only the order along the shared cursor.
+- **Looping by wrapping off-screen beats looping by fading.** The
+  perspective version had to fade `ink.a` to zero at both ends of its loop
+  to hide the pop between "a speck at the vanishing point" and "full size
+  at the near edge" - and still needed a special-cased starting `_time` so
+  neither the game's opening frame nor `screenshot_menu.gd` caught the
+  invisible instant. None of that exists in the flat version: `span` is
+  the screen width plus the formation's own total width, and `start_x =
+  fposmod(_time * speed, span) - total_width` sweeps continuously from
+  fully off the left edge to fully off the right - the formation is
+  always either fully visible or fully off-screen, so there is no
+  transparent instant to land on and nothing to special-case at `_time =
+  0`.
+- The column itself grew from two wagons to `CARAVAN_WAGON_COUNT` (4) for
+  the "kalabalık ve uzun" ask - the per-wagon walker/ox/wagon triplet was
+  already the unit of length, so lengthening the caravan was raising one
+  loop bound, not inventing a new pattern.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.

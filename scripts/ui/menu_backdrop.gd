@@ -2,7 +2,7 @@ class_name MenuBackdrop
 extends Control
 
 ## Ana menünün arkasındaki manzara: alçak bir güneş, sırtlar, uzakta bir
-## şehir ve ufka doğru yürüyen bir kervan silueti.
+## şehir ve yatay bir yol üzerinde yürüyen bir kervan silueti.
 ##
 ## Oyunun **ilk gördüğü ekran** buydu ve hiç çizilmemişti: düz gri bir
 ## zemin üstünde dört buton. Yol sahnesi, savaş ve şehir çizilmişken
@@ -50,29 +50,26 @@ const RIDGES: Array = [
 const CITY_X_RATIO: float = 0.22
 const CITY_HEIGHT_RATIO: float = 0.060
 
-## Kervan silueti bir **yol** üzerinde, ufka doğru ilerliyor - artık sabit
-## bir kare değil, bir döngü. `CARAVAN_START_RATIO`/`CARAVAN_GROUND_RATIO`
-## yakın uç (döngünün başı, en büyük göründüğü an); yol, ufuktaki şehre
-## kadar daralarak uzanıyor (`ROAD_VANISH_X_RATIO` - şehrin kendisi, çünkü
-## kervanın gittiği yer zaten orası) ve kervan `CARAVAN_WALK_SECONDS`'te bir
-## o noktaya varıp küçüle küçüle kayboluyor, sonra döngü baştan başlıyor.
-## Küçülme kervanın kendi çiziminde değil, `draw_set_transform`'da: her
-## figür yine yerel (0,0) tabanlı çiziliyor, tek bir konum+ölçek dönüşümü
-## bütün siluet grubunu aynı anda taşıyor - iki ayrı yerde ölçeklemek iki
-## farklı kervan demek olurdu (bkz. Art Rules'un "bir şekil iki yerde
-## çizilirse iki farklı şekildir" kuralı).
+## Kervan silueti bir **yatay** yol üzerinde yürüyor. İlk sürüm yolu
+## ufuktaki şehre daralan bir perspektif şerit olarak çizmişti ve kervan
+## kendi biçimini hiç döndürmeden yalnızca yatay kayıyordu - sonuç yol dik
+## bir çizgi gibi dururken kervan onun üstünde yatay süzülüyordu, ikisi
+## aynı yöne gitmiyordu. Artık ikisi de aynı şey: yol `CARAVAN_GROUND_RATIO`
+## yüksekliğinde yatay bir şerit, kervan da tam o yükseklikte (`ground_y`)
+## yalnızca x ekseninde ilerliyor - "yoldan çıkma" geometrik olarak imkânsız,
+## çünkü kervanın tabanı hep yolun kendisi.
 const CARAVAN_GROUND_RATIO: float = 0.80
-const CARAVAN_START_RATIO: float = 0.10
 const CARAVAN_SCALE: float = 0.042
-const CARAVAN_WALK_SECONDS: float = 85.0
-const CARAVAN_FAR_SCALE: float = 0.18
-const ROAD_VANISH_X_RATIO: float = CITY_X_RATIO
+## Saniyede kaç `unit` ilerlediği - gerçek bir yürüyüş temposu gibi,
+## ekran genişliğine göre değil figürün kendi boyuna göre ölçekli.
+const CARAVAN_SPEED_UNITS_PER_SEC: float = 2.6
 ## Vagon sayısı: ilk ölçüde 2'ydi (bkz. eski "küçük" notu) - istenerek
 ## kalabalıklaştırıldı, bir kervan bir at ve iki vagondan daha uzun bir
 ## şey olmalı.
 const CARAVAN_WAGON_COUNT: int = 4
-const ROAD_NEAR_HALF_RATIO: float = 0.15
-const ROAD_FAR_HALF_RATIO: float = 0.006
+## Yolun kalınlığı, ekran yüksekliğine oranlı - `TravelBand._draw_road`'un
+## kendi bandıyla aynı mertebede.
+const ROAD_BAND_RATIO: float = 0.05
 
 ## Döngünün ne kadarının geçtiği - `_process` besliyor, `_draw` okuyor.
 ## Menü tek bir örnek ve maliyeti bir avuç poligon, o yüzden her karede
@@ -89,12 +86,6 @@ func _ready() -> void:
 	var host := get_parent_control()
 	if host != null:
 		size = host.size
-	# `_time` sıfırdan başlarsa `progress` de sıfırdan başlar - tam da
-	# döngünün saydam olduğu an (bkz. `_draw_caravan`'ın solma notu). Oyuncu
-	# menüyü ilk açtığında kervanı görmemesi bir kusurdu, ekran görüntüsü
-	# aracı da (yalnızca birkaç kare bekliyor) aynı anı yakalayıp boş bir
-	# kervan basıyordu. Döngünün ortasından başlamak ikisini de çözüyor.
-	_time = CARAVAN_WALK_SECONDS * 0.35
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -119,11 +110,9 @@ func _draw() -> void:
 	_draw_ridges(area, horizon, Color(sky.haze))
 	_draw_ground(area, horizon, Color(sky.haze))
 
-	var progress := fmod(_time / CARAVAN_WALK_SECONDS, 1.0)
-	var near_anchor := Vector2(size.x * CARAVAN_START_RATIO, size.y * CARAVAN_GROUND_RATIO)
-	var vanish_anchor := Vector2(size.x * ROAD_VANISH_X_RATIO, horizon + size.y * 0.006)
-	_draw_road(near_anchor, vanish_anchor)
-	_draw_caravan(near_anchor, vanish_anchor, progress)
+	var ground_y := size.y * CARAVAN_GROUND_RATIO
+	_draw_road(ground_y)
+	_draw_caravan(ground_y)
 	ArtDraw.vignette(self, area, 0.14)
 
 ## Alçak güneş ve etrafındaki halka. Konsept görselin bütün kompozisyonu
@@ -167,34 +156,18 @@ func _draw_ground(area: Rect2, horizon: float, haze: Color) -> void:
 		ArtPalette.fade_to_haze(near.lightened(0.10), haze, 0.18), near
 	)
 
-## Yolun kendisi: yakın uçtan (kervanın döngüye başladığı nokta) ufuktaki
-## şehre kadar daralan bir şerit - `TravelBand._draw_road`'un aynı
-## mantığı (açık bir gövde, iki yanında koyu bir bank), tek fark burada
-## eğim yok, gerçek bir perspektif daralması var, çünkü menü kervanı
-## kenara değil derinliğe doğru yürüyor.
-func _draw_road(near_anchor: Vector2, vanish: Vector2) -> void:
+## Yolun kendisi: yatay bir şerit tam `ground_y`'de, ekranın tamamını
+## kaplıyor - `TravelBand._draw_road`'un aynı mantığı (açık bir gövde,
+## koyu bir bank arkasında), ama burada eğim yok: kervan da aynı yükseklikte
+## yalnızca yatay ilerlediği için ikisi hep aynı çizgide kalıyor.
+func _draw_road(ground_y: float) -> void:
 	var ground := ArtPalette.terrain(ArtPalette.BIOME_STEPPE)
 	var road := Color(ground.near).lerp(Color(0.68, 0.60, 0.46), 0.55).darkened(0.34)
 	var verge := Color(ground.near).darkened(0.58)
-	var near_y := size.y * 1.04
-	var near_half := size.x * ROAD_NEAR_HALF_RATIO
-	var far_half := maxf(size.x * ROAD_FAR_HALF_RATIO, 1.0)
+	var band := size.y * ROAD_BAND_RATIO
 
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(near_anchor.x - near_half * 1.18, near_y),
-		Vector2(near_anchor.x + near_half * 1.18, near_y),
-		Vector2(vanish.x + far_half * 2.4, vanish.y),
-		Vector2(vanish.x - far_half * 2.4, vanish.y),
-	]), verge)
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(near_anchor.x - near_half, near_y),
-		Vector2(near_anchor.x + near_half, near_y),
-		Vector2(vanish.x + far_half, vanish.y),
-		Vector2(vanish.x - far_half, vanish.y),
-	]), road)
-
-func _formation_scale(progress: float) -> float:
-	return lerp(1.0, CARAVAN_FAR_SCALE, progress)
+	draw_rect(Rect2(Vector2(0.0, ground_y - band * 1.3), Vector2(size.x, band * 2.6)), verge)
+	draw_rect(Rect2(Vector2(0.0, ground_y - band), Vector2(size.x, band * 2.0)), road)
 
 ## Karşı ışıkta bir kervan: atlı lider, tek öküzlü dört vagon ve aralarında
 ## yürüyenler - `CARAVAN_WAGON_COUNT`'un notu, kalabalık ve uzun olsun diye
@@ -202,35 +175,63 @@ func _formation_scale(progress: float) -> float:
 ## kendi genişliğini tüketiyor, sabit adım yok.
 ##
 ## Her figür yerel (0,0) tabanına göre çiziliyor (kervanın kendi taban
-## çizgisi, ekranın değil) - `draw_set_transform` tek bir konum+ölçek ile
-## bütün grubu `near_anchor`'dan `vanish`'e taşıyor. Figürlerin içinde
-## ayrıca bir ölçek hesaplamak iki kervan demek olurdu: biri yol üstünde
-## küçülen, biri kendi çiziminde küçülen - aynı şeyin iki farklı cevabı.
-func _draw_caravan(near_anchor: Vector2, vanish: Vector2, progress: float) -> void:
+## çizgisi, ekranın değil) - `draw_set_transform` tek bir konum ile bütün
+## grubu `ground_y`'ye, `_time`'ın belirlediği x'e taşıyor. **Ölçek hep
+## 1.0**: kervan yakınlaşıp uzaklaşmıyor, yol boyunca yürüyor - önceki
+## sürümün perspektifle küçülmesi tam da şikâyet edilen şeydi, yol yatay
+## dururken kervan diyagonal bir çizgi üstünde ilerliyormuş gibi görünen
+## bir çelişki yaratıyordu.
+##
+## Ekrana **girip çıkarak** döngüleniyor, solmuyor: `span` ekran genişliği
+## artı kervanın kendi toplam boyu, `_time * hız`'ın `span`'e göre modu bir
+## x konumu veriyor - kervan sağdan girip soldan çıkıyor (ya da tersi,
+## `fposmod`'un işaretine bağlı), her zaman ekranın dışında başlayıp dışında
+## bitiyor, yani kaybolma anı hiç görünmüyor - önceki sürümün alfa
+## solmasına hiç ihtiyaç yok.
+func _draw_caravan(ground_y: float) -> void:
 	var unit := size.y * CARAVAN_SCALE
 	var ink := ArtPalette.INK.lerp(Color(0.10, 0.09, 0.12), 0.5)
-	# Döngü baştan başlarken sıçramasın diye iki uçta da saydamlaşıyor -
-	# yoksa "ufukta küçülüp kayboldu" karesinden "yakında kocaman belirdi"
-	# karesine tek karede atlıyordu, göz onu bir kesinti olarak okuyordu.
-	ink.a *= clampf(minf(progress / 0.05, (1.0 - progress) / 0.08), 0.0, 1.0)
+
+	var total_width := _walk_caravan(unit, ink, false)
+	var span := size.x + total_width
+	var speed := unit * CARAVAN_SPEED_UNITS_PER_SEC
+	var start_x := fposmod(_time * speed, span) - total_width
+
+	draw_set_transform(Vector2(start_x, ground_y), 0.0, Vector2.ONE)
+	_walk_caravan(unit, ink, true)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## Kolonun tek aritmetiği: `place` kapalıyken yalnızca tüketilen genişliği
+## ölçer, açıkken aynı sırayla gerçekten çizer - `RoadCaravan._walk_column`
+## ile aynı disiplin (bkz. Art Rules: "measuring the column and placing it
+## are the same function"), iki ayrı kopya iki farklı kervan üretirdi.
+##
+## Lider en **büyük** yerel x'te, kuyrukta değil öncü konumda: kervan +x
+## yönünde yürüyor ve atın boynu da zaten +x'e bakıyor (bkz.
+## `_silhouette_rider`), o yüzden vagonlar/tayfa önce, lider en sonda -
+## yürüyüş yönünde en öndeki o.
+func _walk_caravan(unit: float, ink: Color, place: bool) -> float:
 	var cursor := 0.0
 
-	draw_set_transform(near_anchor.lerp(vanish, progress), 0.0, Vector2.ONE * _formation_scale(progress))
-
-	_silhouette_rider(Vector2(cursor, 0.0), unit * 1.25, ink)
-	cursor += unit * 2.4
-
 	for wagon in CARAVAN_WAGON_COUNT:
-		_silhouette_walker(Vector2(cursor, 0.0), unit * 0.95, ink)
+		if place:
+			_silhouette_walker(Vector2(cursor, 0.0), unit * 0.95, ink)
 		cursor += unit * 1.5
-		_silhouette_ox(Vector2(cursor, 0.0), unit * 0.72, ink)
+		if place:
+			_silhouette_ox(Vector2(cursor, 0.0), unit * 0.72, ink)
 		cursor += unit * 2.2
-		_silhouette_wagon(Vector2(cursor, 0.0), unit * 1.5, ink)
+		if place:
+			_silhouette_wagon(Vector2(cursor, 0.0), unit * 1.5, ink)
 		cursor += unit * 2.6
 
-	_silhouette_walker(Vector2(cursor, 0.0), unit * 0.92, ink)
+	if place:
+		_silhouette_walker(Vector2(cursor, 0.0), unit * 0.92, ink)
+	cursor += unit * 2.4
 
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if place:
+		_silhouette_rider(Vector2(cursor, 0.0), unit * 1.25, ink)
+
+	return cursor
 
 ## Gövde **zemine kadar inmiyor**; ilk hâlinde iniyordu ve bacaklar onun
 ## *içine* çiziliyordu, yani siluet bir insan değil bir labut gibi
