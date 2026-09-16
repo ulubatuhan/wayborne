@@ -99,14 +99,24 @@ const CAMPFIRE_NEAR_OFFSET: float = 9.0
 const FIRE_FLICKER_SPEED: float = 9.0
 
 ## İnsanlar ateşe yürüyor, hayvanlar ve lider yerinde kalıyor: öküz
-## koşumdan çözülmüyor, lider nöbette kabul ediliyor. Süre `CAMP_HOURS`
-## (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı ama oyuncunun
-## sabrını da sınamamalı.
+## koşumdan çözülmüyor, lider nöbette kabul ediliyor. "İnsanlar" tayfanın
+## ikisi de - yürüyen ve süren (bkz. `_driver_figures`'ın notu), yoksa
+## tek kişilik bir ateş "kervandakiler toplandı" demiyordu. Süre
+## `CAMP_HOURS` (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı
+## ama oyuncunun sabrını da sınamamalı.
 const CAMP_GATHER_SECONDS: float = 1.3
 ## Toplanma/dönüş sırasında bacakların oynaması için figüre verilen
 ## görsel adım - `_speed * STEP_RATE`'in büyüklüğüyle aynı mertebede,
 ## kamp sırasında gerçek `_speed` sıfır olduğu için ayrıca besleniyor.
 const CAMP_WALK_STEP: float = 1.8
+
+## Aynı ateşe birden fazla kişi geliyor (sürücü + yürüyen tayfa + sırayla
+## dağılan parti). Hedefleri tek noktaya kenetlemek tek bir figür gibi
+## görünmelerine yol açıyordu - "kervandakiler toplandı" hissi tam da bu
+## yüzden kayboluyordu. Her koltuk ateşin solunda/sağında küçük bir
+## kayma alıyor, böylece bir küme okunuyor, bir leke değil.
+const CAMPFIRE_SEAT_SPACING: float = 15.0
+const CAMPFIRE_SEAT_OFFSETS: Array[float] = [-0.6, 0.7, -1.5, 1.6, 0.0]
 
 var _anchor_x: float = 0.0
 var _ground_y: float = 0.0
@@ -141,12 +151,18 @@ var _gather_targets: Dictionary = {}
 ## çalışırsa (bkz. `_place`'in kamp yönlendirmesi) hedefi aynı ateşe göre
 ## tazeleyebilmek için.
 var _gather_fire_index: Dictionary = {}
+## Aynı ateşe atanan figürler tek noktada üst üste binmesin diye her
+## figürün oturduğu "koltuk" sırası - bkz. `_seat_offset`.
+var _gather_seat_index: Dictionary = {}
 var _gathering_figures: Array[WalkFigure] = []
 
 var _leader: WalkFigure
 var _leader_mounted: bool = false
 var _party_figures: Array[WalkFigure] = []
 var _crew_figures: Array[WalkFigure] = []
+## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
+## sırasında gerçek birer figüre dönüşüyor (bkz. `configure`'daki not).
+var _driver_figures: Array[WalkFigure] = []
 ## Koşumun yakın tarafındaki öküzler - kolonun ölçüsünü bunlar belirliyor.
 var _oxen: Array[WalkFigure] = []
 ## Uzak taraftakiler, aynı sırada. Ayrı bir dizi çünkü yerleşim ve test
@@ -195,6 +211,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 		child.queue_free()
 	_party_figures.clear()
 	_crew_figures.clear()
+	_driver_figures.clear()
 	_oxen.clear()
 	_oxen_far.clear()
 	_leader = null
@@ -212,6 +229,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_gather_homes.clear()
 	_gather_targets.clear()
 	_gather_fire_index.clear()
+	_gather_seat_index.clear()
 
 	_wagon_count = maxi(1, session.owned_wagon_count)
 	_leader_mounted = mounted_leader
@@ -258,6 +276,20 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 			WalkFigure.KIND_PERSON, "bandit", 0.94 + float(index % 3) * 0.04,
 			CharacterData.get_skin_tone_color(index), true
 		))
+
+	# Arabacı normalde `ArtDraw.wagon()`'un kendi çizdiği sabit bir silüet -
+	# bkz. oradaki `draw_driver`. Kamp kurulunca o koltuğu gerçek bir figür
+	# devralıyor (bkz. `_begin_gathering`), yoksa "kervandakiler ateşe
+	# gelsin" sözü tek kişiyle (yürüyen tayfa) sınırlı kalırdı; sürücü de
+	# aynı vagonun adamı. Görünmez başlıyor - kamp kurulana kadar sahnede
+	# hiçbir işi yok, sabit silüet onun yerini tutuyor.
+	for index in maxi(0, walking_crew):
+		var driver := _make_figure(
+			WalkFigure.KIND_PERSON, "bandit", 0.92 + float((index + 1) % 3) * 0.04,
+			CharacterData.get_skin_tone_color(index + 2), false
+		)
+		driver.visible = false
+		_driver_figures.append(driver)
 
 	_layout()
 
@@ -356,40 +388,88 @@ func set_camping(camping: bool) -> void:
 	if camping:
 		_begin_gathering()
 
-## Ateşe kimin gideceği: tayfa zaten vagon başına bir kişi (bkz.
-## `configure`), o yüzden tayfa `i` doğrudan ateş `i`'ye gidiyor. Parti
-## üyeleri ateşler arasında sırayla dağıtılıyor - hepsi aynı ateşte
-## toplanmak kalabalık, hiçbiri gitmemek de eksik dururdu. Lider nöbette
-## kabul ediliyor, öküzler koşumdan çözülmüyor - ikisi de katılmıyor.
+## Ateşe kimin gideceği: tayfanın **ikisi de** - sürücü ve yürüyen -
+## kendi vagonunun ateşine gidiyor (bkz. `_driver_figures`'ın notu, ikisi
+## de vagon `i`'nin adamı). Parti üyeleri ateşler arasında sırayla
+## dağıtılıyor - hepsi aynı ateşte toplanmak kalabalık, hiçbiri gitmemek
+## de eksik dururdu. Lider nöbette kabul ediliyor, öküzler koşumdan
+## çözülmüyor - ikisi de katılmıyor.
 func _begin_gathering() -> void:
 	_gathering_figures.clear()
 	_gather_homes.clear()
 	_gather_targets.clear()
 	_gather_fire_index.clear()
+	_gather_seat_index.clear()
 	if _wagon_centres.is_empty():
 		return
 	var fire_count := _wagon_centres.size()
+	# Ateş başına kaç koltuk dolduğu - üst üste binmesinler diye (bkz.
+	# CAMPFIRE_SEAT_OFFSETS'in notu).
+	var seats_taken: Dictionary = {}
+
+	for index in _driver_figures.size():
+		if index >= fire_count:
+			break
+		_assign_driver_gather(_driver_figures[index], index, seats_taken)
 	for index in _crew_figures.size():
 		if index >= fire_count:
 			break
-		_assign_gather(_crew_figures[index], index)
+		_assign_gather(_crew_figures[index], index, seats_taken)
 	for index in _party_figures.size():
-		_assign_gather(_party_figures[index], index % fire_count)
+		_assign_gather(_party_figures[index], index % fire_count, seats_taken)
 
-func _assign_gather(figure: WalkFigure, fire_index: int) -> void:
+func _take_seat(fire_index: int, seats_taken: Dictionary) -> int:
+	var seat := int(seats_taken.get(fire_index, 0))
+	seats_taken[fire_index] = seat + 1
+	return seat
+
+func _assign_gather(figure: WalkFigure, fire_index: int, seats_taken: Dictionary) -> void:
 	if figure == null:
 		return
+	var seat := _take_seat(fire_index, seats_taken)
 	_gathering_figures.append(figure)
 	_gather_fire_index[figure] = fire_index
+	_gather_seat_index[figure] = seat
 	_gather_homes[figure] = figure.position
-	_gather_targets[figure] = _campfire_target(figure, fire_index)
+	_gather_targets[figure] = _campfire_target(figure, fire_index, seat)
 
-## Figürün ateşteki hedefi. Yalnızca x'i ateşe taşıyor - boy ve taban
-## çizgisi (`position.y`) aynı kalıyor, yoksa figür ateşe "uçar" gibi
-## duruyor. Yükseklik zaten `_layout()`'ta doğru ayarlanmış.
-func _campfire_target(figure: WalkFigure, fire_index: int) -> Vector2:
+## Sürücü normalde koltuğu hiç terk etmiyor (bkz. ArtDraw.wagon()'un
+## sabit silüeti) - kamp onu ilk kez sahneye çıkarıyor, o yüzden "ev"i
+## mevcut bir konum değil, oturduğu koltuğun kendisi (bkz.
+## `_driver_bench_position`). Aynı çağrı figürü görünür de yapıyor -
+## `configure()` onu gizli kurmuştu, sahneye ilk kez burada giriyor.
+func _assign_driver_gather(figure: WalkFigure, wagon_index: int, seats_taken: Dictionary) -> void:
+	if figure == null:
+		return
+	figure.visible = true
+	var bench := _driver_bench_position(wagon_index)
+	# `bench` koltuğun kendisi (gövde hizası), figürün *ayağının bastığı*
+	# nokta değil - `_place()`'in `ground_y - height` deseninin aynısı,
+	# yoksa figür koltuğun tepesinden başlayıp gerçek zeminin altına
+	# gömülür.
+	var home := Vector2(bench.x - figure.size.x * 0.5, bench.y - figure.size.y)
+	figure.position = home
+	var seat := _take_seat(wagon_index, seats_taken)
+	_gathering_figures.append(figure)
+	_gather_fire_index[figure] = wagon_index
+	_gather_seat_index[figure] = seat
+	_gather_homes[figure] = home
+	_gather_targets[figure] = _campfire_target(figure, wagon_index, seat)
+
+## Figürün ateşteki hedefi. Taban çizgisi her zaman **gerçek zemin**
+## (`_ground_y - height`), figürün o an durduğu yer değil - tayfa ve
+## parti için ikisi zaten aynı (`_place()` onları oraya koyuyor), ama
+## arabacı koltuktan (yükseltilmiş bir taban) geliyor: hedef koltuk
+## yüksekliğini korusaydı arabacı ateşin yanında havada asılı kalırdı.
+## Aynı hedef hem gidişte hem dönüşte kullanıldığı için (bkz.
+## `_advance_gather`'ın home/dest çifti) düzeltme iki yönü de kapsıyor -
+## arabacı ateşe inerken alçalıyor, dönerken yeniden koltuğa çıkıyor.
+## `seat` aynı ateşe gelen ikinci/üçüncü kişiyi yana kaydırıyor (bkz.
+## CAMPFIRE_SEAT_OFFSETS'in notu) - yoksa hepsi aynı noktaya biner.
+func _campfire_target(figure: WalkFigure, fire_index: int, seat: int) -> Vector2:
 	var fire := _campfire_position(fire_index)
-	return Vector2(fire.x - figure.size.x * 0.5, figure.position.y)
+	var offset := CAMPFIRE_SEAT_OFFSETS[seat % CAMPFIRE_SEAT_OFFSETS.size()] * CAMPFIRE_SEAT_SPACING * _scale
+	return Vector2(fire.x + offset - figure.size.x * 0.5, _ground_y - figure.size.y)
 
 ## Bir vagonun ateşinin durduğu yer. Ateş vagonun **kuyruk yönüne**
 ## kayıyor (bkz. CAMPFIRE_TRAIL_RATIO'nun notu) - önü zaten öküz ve
@@ -403,6 +483,17 @@ func _campfire_position(index: int) -> Vector2:
 		_ground_y + CAMPFIRE_NEAR_OFFSET * _scale
 	)
 
+## Arabacının normalde oturduğu koltuk - `ArtDraw.wagon_driver_seat()`'in
+## aynısı, aynı yerde iki kez hesaplanmasın diye oradan okunuyor. Kamp
+## kurulunca gerçek figür tam bu noktadan "kalkıp" ateşe yürüyor.
+func _driver_bench_position(index: int) -> Vector2:
+	if index < 0 or index >= _wagon_centres.size():
+		return Vector2(_anchor_x, _ground_y)
+	var height := maxf(size.y, 1.0) * _scale
+	var wagon_w := height * WAGON_WIDTH_RATIO
+	var wagon_h := height * WAGON_HEIGHT_RATIO
+	return ArtDraw.wagon_driver_seat(Vector2(_wagon_centres[index], _ground_y), wagon_w, wagon_h)
+
 ## `_layout()`'un sonunda çağrılıyor (bkz. oradaki not): kamp sırasında
 ## bir yeniden boyutlanma vagon merkezlerini kaydırırsa, dönüş yürüyüşü
 ## artık doğru olmayan eski bir noktaya değil güncel ateşe gider.
@@ -411,7 +502,9 @@ func _refresh_gather_targets() -> void:
 		return
 	for figure in _gathering_figures:
 		if _gather_fire_index.has(figure):
-			_gather_targets[figure] = _campfire_target(figure, int(_gather_fire_index[figure]))
+			_gather_targets[figure] = _campfire_target(
+				figure, int(_gather_fire_index[figure]), int(_gather_seat_index.get(figure, 0))
+			)
 
 ## Kolonun toplam boyu - lider bu kadar geriye gidebiliyor. Yerleşimle
 ## aynı boşluklardan hesaplanıyor: ayrı bir tahmin tutmak, liderin
@@ -486,6 +579,15 @@ func get_crew_centres() -> Array[float]:
 		centres.append(figure.position.x + figure.size.x * 0.5)
 	return centres
 
+## Arabacıların merkezleri - kamp dışında anlamsız (görünmezler, bkz.
+## `configure`'daki not), kamp sırasında/dönüşünde `_party_centres` ile
+## aynı desende okunuyor.
+func get_driver_centres() -> Array[float]:
+	var centres: Array[float] = []
+	for figure in _driver_figures:
+		centres.append(figure.position.x + figure.size.x * 0.5)
+	return centres
+
 func get_leader_centre() -> float:
 	if _leader == null:
 		return 0.0
@@ -542,12 +644,18 @@ func _advance_gather(delta: float) -> void:
 		figure.advance(delta, walk_step)
 
 	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor,
-	# yoksa bir sonraki kampa kadar boşuna taşınırlar.
+	# yoksa bir sonraki kampa kadar boşuna taşınırlar. Sürücüler ayrıca
+	# gizleniyor: koltuğu artık yeniden `ArtDraw.wagon()`'un sabit
+	# silüeti tutuyor (bkz. `_draw()`'daki `driver_gone`), ikisi aynı
+	# anda görünürse aynı kişi iki kez sahnede olur.
 	if not _camping and is_zero_approx(_gather_progress):
+		for figure in _driver_figures:
+			figure.visible = false
 		_gathering_figures.clear()
 		_gather_homes.clear()
 		_gather_targets.clear()
 		_gather_fire_index.clear()
+		_gather_seat_index.clear()
 
 ## Yumuşak geçiş (smoothstep): doğrusal enterpolasyon yürüyüşü başta ve
 ## sonda aniden kesiyor, figür ateşin dibinde fren yapmış gibi duruyordu.
@@ -590,6 +698,17 @@ func _layout() -> void:
 	)
 	_walk_column(_scale, true)
 	column_length_changed.emit(get_trailing_length())
+
+	# Arabacılar kolonun kendi yerleşiminde yer tutmuyor (koltukları
+	# vagonun üstü, `_walk_column`'un imleci oraya hiç uğramıyor), o
+	# yüzden boyları burada ayrıca veriliyor - aynı formül `_walk_column`
+	# tayfaya ne veriyorsa (bkz. oradaki person_h/person_w).
+	var height := maxf(size.y, 1.0) * _scale
+	var person_h := height * PERSON_HEIGHT_RATIO
+	var person_w := person_h * 0.9
+	for driver in _driver_figures:
+		driver.size = Vector2(person_w, person_h)
+
 	# Kamp sırasında bir yeniden boyutlanma vagon merkezlerini kaydırabilir;
 	# ateş hedefleri de tazelenmeli, yoksa dönüş yürüyüşü artık doğru
 	# olmayan eski bir noktaya yönelir.
@@ -738,9 +857,13 @@ func _draw() -> void:
 			self, Vector2(centre + wagon_w * 0.48, _ground_y),
 			HITCH_GAP * _scale * 1.7, wagon_h, _light
 		)
+		# Sürücü koltuğu boş çizilir yalnızca gerçek bir figür onu
+		# devralmışsa (bkz. `_assign_driver_gather`) - ikisi aynı anda
+		# çizilirse aynı kişi iki kez görünür.
+		var driver_gone := index < _driver_figures.size() and _driver_figures[index].visible
 		ArtDraw.wagon(
 			self, Vector2(centre, _ground_y), wagon_w, wagon_h,
-			_wheel_angle, _light, index == 0
+			_wheel_angle, _light, index == 0, not driver_gone
 		)
 
 	if _camping:
@@ -767,12 +890,17 @@ func _draw() -> void:
 ## kendi vagonunun *arkasında* (bkz. yukarıdaki not) duruyor; çizim,
 ## rengi ve titreme deseni tek ateşin aynısı.
 func _draw_campfires() -> void:
-	var glow_radius := size.y * 0.22
-	var flicker := 0.82 + 0.18 * sin(_camp_time * FIRE_FLICKER_SPEED)
+	var glow_radius := size.y * 0.24
+	var flicker := 0.88 + 0.12 * sin(_camp_time * FIRE_FLICKER_SPEED)
 	var flame_h := 22.0 * flicker * _scale
 	for index in _wagon_centres.size():
 		var fire := _campfire_position(index)
-		ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.085 * flicker, 0.48)
+		# İki katman: geniş ve soluk bir haleyle sahnenin geneli ısınıyor
+		# (bkz. "sıcak bir ortam" - tek dar bir ışık çemberi yalnızca
+		# ateşin kendisini aydınlatıyordu, etrafındaki toplanmayı değil),
+		# dar ve parlak olan ateşin hemen dibini.
+		ArtDraw.light_pool(self, fire, glow_radius * 2.1, ArtPalette.TORCH, 0.05 * flicker, 0.60)
+		ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.11 * flicker, 0.48)
 		# Odun + alev: alev üç dilim, en içi en açık.
 		for side in [-1.0, 1.0]:
 			draw_line(

@@ -2,7 +2,7 @@ extends RefCounted
 
 ## Kamp kurulunca kadro ve tayfa kendi ateşine yürüyor, kamp kalkınca
 ## aynı yoldan geri dönüyor (bkz. RoadCaravan'ın `_advance_gather`'ı).
-## Bu paket üç iddiayı koruyor:
+## Bu paket beş iddiayı koruyor:
 ##
 ## 1. Ateş sayısı vagon sayısı kadar ve hiçbiri bir vagonun/bir sonraki
 ##    vagonun üstüne binmiyor - "vagon başına bir tane" kelimesi kadar
@@ -11,6 +11,11 @@ extends RefCounted
 ##    kalan biri, dönüşü hiç başlamamış biri kadar bir kusur.
 ## 3. Lider ve öküzler hiç kıpırdamıyor - nöbet/koşum kuralı görsel
 ##    olarak da geçerli.
+## 4. Arabacı da ateşe geliyor - yürüyen tayfayla birlikte vagonun
+##    **ikisi de** insanı toplanıyor, "kervandakiler" tek kişi değil.
+## 5. Aynı ateşe gelen birden fazla kişi üst üste binmiyor - erken bir
+##    sürümde herkesin hedefi tam olarak ateşin merkeziydi, yani iki
+##    kişi tek bir figür gibi görünüyordu; koltuk kayması bunu ayırıyor.
 ##
 ## `RoadCaravan` sahnesiz kurulabiliyor (`test_caravan_layout.gd` ile
 ## aynı numara); `_process()` de doğrudan çağrılıyor - Godot onu ancak
@@ -26,6 +31,8 @@ func run(t) -> void:
 	_test_one_fire_per_wagon(t)
 	_test_fires_clear_the_wagons(t)
 	_test_humans_gather_and_return(t)
+	_test_drivers_join_the_gathering(t)
+	_test_shared_fire_seats_do_not_stack(t)
 	_test_leader_and_oxen_never_move(t)
 	_test_returning_is_interrupted_cleanly_by_a_new_camp(t)
 
@@ -60,6 +67,15 @@ func _build(wagons: int, party: int) -> RoadCaravan:
 func _walk_frames(caravan: RoadCaravan, frames: int, dt: float = 1.0 / 30.0) -> void:
 	for _frame in frames:
 		caravan._process(dt)
+
+## Aynı ateşe gelen ikinci/üçüncü kişi merkezden kayıyor (bkz.
+## CAMPFIRE_SEAT_OFFSETS), o yüzden "ateşe vardı" iddiası artık tam
+## merkeze değil, koltukların kapladığı aralığa karşı sınanıyor.
+func _fire_tolerance(caravan: RoadCaravan) -> float:
+	var max_offset := 0.0
+	for offset in RoadCaravan.CAMPFIRE_SEAT_OFFSETS:
+		max_offset = maxf(max_offset, absf(offset))
+	return max_offset * RoadCaravan.CAMPFIRE_SEAT_SPACING * caravan.get_column_scale() + 1.0
 
 func _test_one_fire_per_wagon(t) -> void:
 	for wagons in [1, 2, 4, 6]:
@@ -101,13 +117,14 @@ func _test_humans_gather_and_return(t) -> void:
 	_walk_frames(caravan, 120)
 
 	var fires := caravan.get_campfire_positions()
+	var tolerance := _fire_tolerance(caravan)
 	var party_at_fire := caravan.get_party_centres()
 	var fire_count := fires.size()
 	for index in party_at_fire.size():
 		var fire_index := index % fire_count
 		t.ok(
-			absf(party_at_fire[index] - fires[fire_index].x) < 2.0,
-			"%d. parti üyesi toplanma bitince kendi ateşinde değil" % (index + 1)
+			absf(party_at_fire[index] - fires[fire_index].x) < tolerance,
+			"%d. parti üyesi toplanma bitince kendi ateşinin yakınında değil" % (index + 1)
 		)
 		t.ok(
 			absf(party_at_fire[index] - party_home[index]) > 1.0,
@@ -130,6 +147,59 @@ func _test_humans_gather_and_return(t) -> void:
 			absf(crew_after[index] - crew_home[index]) < 1.0,
 			"%d. tayfa kendi yerine dönmedi" % (index + 1)
 		)
+
+## Arabacı normalde `ArtDraw.wagon()`'un sabit silüeti - kamp onu ilk
+## kez gerçek bir figüre çeviriyor. "Kervandakiler ateşe gelsin" isteği
+## yalnızca yürüyen tayfayla sınırlı kalmamalı, çünkü vagon başına iki
+## tayfa var (bkz. PEOPLE_PER_WAGON) ve ikisi de kervanın adamı.
+func _test_drivers_join_the_gathering(t) -> void:
+	var caravan := _build(2, 1)
+	t.eq(
+		caravan.get_driver_centres().size(), 2,
+		"iki vagon: iki arabacı figürü kurulmalı (görünmez de olsa)"
+	)
+
+	caravan.set_camping(true)
+	_walk_frames(caravan, 120)
+
+	var fires := caravan.get_campfire_positions()
+	var tolerance := _fire_tolerance(caravan)
+	var drivers_at_fire := caravan.get_driver_centres()
+	for index in drivers_at_fire.size():
+		t.ok(
+			absf(drivers_at_fire[index] - fires[index].x) < tolerance,
+			"%d. arabacı toplanma bitince kendi ateşinin yakınında değil" % (index + 1)
+		)
+
+	caravan.set_camping(false)
+	_walk_frames(caravan, 120)
+	t.not_ok(caravan.is_gathering(), "arabacılar da dönünce toplanma bitmeli")
+
+## Erken bir sürümde `_campfire_target` yalnızca ateş indeksine bakıyordu,
+## yani aynı ateşe atanan herkesin hedefi **aynı noktaydı** - iki kişi
+## tek bir figür gibi görünüyordu ve "toplanma" hiç okunmuyordu. Koltuk
+## kayması bunu ayırıyor; burada tam bunu sınıyoruz.
+func _test_shared_fire_seats_do_not_stack(t) -> void:
+	# Tek vagon, iki parti üyesi + arabacı + tayfa: dördü de aynı ateşe
+	# gidiyor (fire_count == 1), yani en az ikisinin ayrışması zorunlu.
+	var caravan := _build(1, 3)
+	caravan.set_camping(true)
+	_walk_frames(caravan, 120)
+
+	var seat_positions: Array[float] = []
+	seat_positions.append_array(caravan.get_party_centres())
+	seat_positions.append_array(caravan.get_crew_centres())
+	seat_positions.append_array(caravan.get_driver_centres())
+	t.ok(seat_positions.size() >= 3, "sınamak için yeterli figür toplanmadı")
+
+	var min_gap := INF
+	for i in seat_positions.size():
+		for j in range(i + 1, seat_positions.size()):
+			min_gap = minf(min_gap, absf(seat_positions[i] - seat_positions[j]))
+	t.ok(
+		min_gap > 3.0,
+		"aynı ateşteki iki figür üst üste biniyor (en yakın çift %.1f piksel arayla)" % min_gap
+	)
 
 ## Lider nöbette, öküzler koşumda - "kervandakiler ateşe gelsin" isteği
 ## ikisini kapsamıyor (bkz. `_begin_gathering`'in notu).
@@ -168,11 +238,11 @@ func _test_returning_is_interrupted_cleanly_by_a_new_camp(t) -> void:
 	_walk_frames(caravan, 120)
 
 	var fires := caravan.get_campfire_positions()
-	var fire_count := fires.size()
+	var tolerance := _fire_tolerance(caravan)
 	var back_at_fire := caravan.get_party_centres()
 	for index in back_at_fire.size():
 		t.ok(
-			absf(back_at_fire[index] - fires[index % fire_count].x) < 2.0,
+			absf(back_at_fire[index] - fires[index % fires.size()].x) < tolerance,
 			"%d. parti üyesi yarıda kesilen dönüşten sonra ateşe ulaşamadı" % (index + 1)
 		)
 		# Yarı yoldaki nokta ev ile ateş arasında bir yerde olmalıydı -

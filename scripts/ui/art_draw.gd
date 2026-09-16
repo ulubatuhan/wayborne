@@ -414,9 +414,22 @@ static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> 
 ## dışı yürüyüş alanı. İki kopya tutulunca aynı kervanın vagonu iki
 ## ekranda iki farklı şey oluyordu - `CaravanPlan.daily_consumption`'ın
 ## tek yerde durma gerekçesinin görsel karşılığı.
+## Arabacının oturduğu nokta - brandanın önü, kasanın üstü. Vagonla aynı
+## formülü iki kez yazmamak için ayrı: `wagon()` kendi arabacı silüetini
+## buradan okuyor, `RoadCaravan` da kamp sırasında o silüetin yerini
+## alan gerçek figürün "ev"ini (döndüğü nokta) buradan.
+static func wagon_driver_seat(base: Vector2, w: float, h: float) -> Vector2:
+	var wheel_r := h * 0.34
+	var bed_y := base.y - wheel_r * 1.35
+	var hoop_top := bed_y - h * 0.16
+	return Vector2(base.x + w * 0.34, hoop_top - h * 0.04)
+
+## `draw_driver` kapalıyken arabacı silüeti hiç çizilmiyor - kamp sırasında
+## o koltuğu gerçek bir figür (bkz. RoadCaravan) alıyor, ikisi aynı anda
+## çizilirse aynı kişi iki kez görünür.
 static func wagon(
 	canvas: CanvasItem, base: Vector2, w: float, h: float,
-	wheel_angle: float, tint: Color, with_load: bool = false
+	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true
 ) -> void:
 	var body := _tint(ArtPalette.WAGON_BODY, tint)
 	var dark := _tint(ArtPalette.WAGON_BODY_DARK, tint)
@@ -460,16 +473,17 @@ static func wagon(
 
 	# Arabacı: brandanın önünde oturan bir silüet. Vagonu süren birinin
 	# olması "tayfa gerçekten var" demenin en ucuz yolu.
-	var bench := Vector2(base.x + w * 0.34, hoop_top - h * 0.04)
-	canvas.draw_circle(
-		bench + Vector2(0.0, -h * 0.26), h * 0.075, _tint(Color(0.74, 0.60, 0.46), tint)
-	)
-	canvas.draw_colored_polygon(PackedVector2Array([
-		bench + Vector2(-h * 0.09, -h * 0.20),
-		bench + Vector2(h * 0.09, -h * 0.20),
-		bench + Vector2(h * 0.07, 0.0),
-		bench + Vector2(-h * 0.07, 0.0),
-	]), _tint(Color(0.36, 0.32, 0.26), tint))
+	if draw_driver:
+		var bench := wagon_driver_seat(base, w, h)
+		canvas.draw_circle(
+			bench + Vector2(0.0, -h * 0.26), h * 0.075, _tint(Color(0.74, 0.60, 0.46), tint)
+		)
+		canvas.draw_colored_polygon(PackedVector2Array([
+			bench + Vector2(-h * 0.09, -h * 0.20),
+			bench + Vector2(h * 0.09, -h * 0.20),
+			bench + Vector2(h * 0.07, 0.0),
+			bench + Vector2(-h * 0.07, 0.0),
+		]), _tint(Color(0.36, 0.32, 0.26), tint))
 
 	_wheel(canvas, Vector2(base.x + w * 0.30, base.y - wheel_r), wheel_r, wheel, wheel_angle)
 
