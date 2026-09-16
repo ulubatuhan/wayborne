@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqworld002city"]
+[gd_scene load_steps=3 format=3 uid="uid://bqworld002city"]
 
 [ext_resource type="Script" path="res://scripts/world/city_map.gd" id="1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mappanel"]
 
 [node name="CityMap" type="Control"]
 layout_mode = 3
@@ -45,6 +47,7 @@ theme_override_constants/separation = 20
 custom_minimum_size = Vector2(640, 440)
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mappanel")
 
 [node name="BriefScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/MainRow"]
 layout_mode = 2

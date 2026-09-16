@@ -29,6 +29,10 @@ var _profit_label: Label
 var _morale_label: Label
 var _morale_reasons: VBoxContainer
 var _buy_provisions_button: Button
+## Satın alma yetmezse görünür - loncanın borçlar sekmesine götürür.
+## Ekranın kendisi borç vermiyor; DebtPanel zaten kredi hattı ve tahsis
+## ücreti kurallarını taşıyor, burası yalnızca oraya işaret ediyor.
+var _borrow_button: Button
 var _confirm_button: Button
 ## Onay silahlanmış mı (bkz. _on_confirm_pressed). Ekran her açıldığında
 ## sıfırdan başlar, yani bir önceki ziyaretin onayı taşınmaz.
@@ -196,6 +200,12 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_buy_provisions_button.pressed.connect(_on_buy_provisions_pressed)
 	_content.add_child(_buy_provisions_button)
 
+	_borrow_button = Button.new()
+	_borrow_button.text = tr("UI_PLANNER_BORROW_FOR_PROVISIONS")
+	_borrow_button.visible = false
+	_borrow_button.pressed.connect(_on_borrow_pressed)
+	_content.add_child(_borrow_button)
+
 	_confirm_button = Button.new()
 	_confirm_button.text = tr("UI_CONFIRM_CARAVAN")
 	_confirm_button.pressed.connect(_on_confirm_pressed)
@@ -296,6 +306,10 @@ func _on_buy_provisions_pressed() -> void:
 	_session.wallet.spend(cost)
 	_session.change_provisions(shortfall)
 
+func _on_borrow_pressed() -> void:
+	Nav.guild_initial_tab = 1
+	get_tree().change_scene_to_file(Nav.open(Nav.CARAVAN_PLANNER, Nav.GUILD))
+
 func _refresh() -> void:
 	_refresh_departure_morale()
 	_gold_label.text = tr("UI_PURSE") % _session.wallet.balance
@@ -327,7 +341,13 @@ func _refresh() -> void:
 		_shortfall_label.modulate = SHORTFALL_COLOR
 		_buy_provisions_button.visible = true
 		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % shortfall_cost
-		_buy_provisions_button.disabled = not _session.wallet.can_afford(shortfall_cost)
+		var can_afford := _session.wallet.can_afford(shortfall_cost)
+		_buy_provisions_button.disabled = not can_afford
+		# Alacak param yoksa satın alma tuşu kilitli kalır ve tek başına
+		# çıkmaza götürür - oyuncu ya eksik erzakla yola çıkmayı kabul
+		# etmeli ya da loncadan borç almalı. İkinci seçenek burada, bir
+		# tık uzakta olmasın diye.
+		_borrow_button.visible = not can_afford
 
 		# Yola çıkmak **yasak değil, riskli**. Kilit yerine silahlanan bir
 		# onay: ilk basış riski sayıyla söylüyor, ikincisi çıkıyor.
@@ -343,6 +363,7 @@ func _refresh() -> void:
 		_shortfall_label.text = tr("UI_PLANNER_READY")
 		_shortfall_label.modulate = SATISFIED_COLOR
 		_buy_provisions_button.visible = false
+		_borrow_button.visible = false
 		_confirm_button.disabled = false
 		_confirm_button.modulate = Color.WHITE
 		_confirm_button.text = tr("UI_CONFIRM_CARAVAN")

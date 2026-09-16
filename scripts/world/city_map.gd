@@ -96,6 +96,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_F3:
 			_show_help()
 			get_viewport().set_input_as_handled()
+			return
+	if event.is_action_pressed("ui_cancel"):
+		_open_in_game_menu()
+		get_viewport().set_input_as_handled()
+
+## Sefer hiçbir zaman burada canlı olamaz (yol yalnızca `Nav.JOURNEY`'de
+## yaşanıyor), o yüzden kayıt hep açık - bkz. InGameMenu'nün başındaki not.
+func _open_in_game_menu() -> void:
+	if has_node("InGameMenu"):
+		return
+	var menu := InGameMenu.new()
+	menu.name = "InGameMenu"
+	add_child(menu)
+	menu.setup(true)
 
 func _refresh_title() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)

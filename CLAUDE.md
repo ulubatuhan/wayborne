@@ -356,6 +356,25 @@ the walking figures are the game's strongest asset) but to deepen it.
   that zone; if one spot paid all three there would be no decision. The
   leader could already walk the column (`RoadCaravan.set_leader_offset`)
   — that movement was purely cosmetic and is now the mechanic.
+- **Walking the column shouldn't stop just because the caravan itself
+  did.** Camp froze `_advance_position()` entirely, so the leader was
+  stuck wherever they stood the moment the fire was lit - reported back
+  exactly that way, "stuck at the front, can't walk back". Camp now only
+  skips `_walk_at()` (there is no distance to cover while making camp);
+  A/D still moves `_leader_offset` within the stationary column, the same
+  arithmetic the detach command already used. If the leader was never
+  explicitly detached, camp ending snaps the offset back to 0 - the
+  "attached" march assumes the leader leads at the front, and camp is not
+  a second way to leave that assumption unstated.
+- **A speed lever has to move everything it looks like it's moving.**
+  `JourneyClock`'s speed multiplier already scaled `_days_covered` (hence
+  the background's `_world_x`) through `hours`, but `RoadCaravan`'s own
+  leg-swing cadence (`_speed`) was pace-only and never touched by that
+  multiplier - at 3x the scenery raced by while the walk cycle stayed at
+  its 1x cadence, reading as the caravan sliding rather than running.
+  `_caravan.set_speed()` now also multiplies by `_clock.get_speed()`; at
+  the default 1x that's a no-op, so nothing about the un-sped-up game
+  changed.
 - **The gap between cards was the emptiness, not the cards.** A day's
   event fired once, at dawn, leaving 23 silent hours. `RoadSignals` fills
   them and is deliberately **non-modal**: no card, no paused clock, no
@@ -671,13 +690,22 @@ way to textures.
   in the same colours. Skin tone comes from `CharacterData`, height scales
   the figure - what character creation chose has to be visible or the
   choice is only text.
-- **The anchor-preset trap, three times.** `PRESET_FULL_RECT` hands the size
+- **The anchor-preset trap, four times.** `PRESET_FULL_RECT` hands the size
   down only when the parent *resizes*; a child added after the parent was
   already sized never gets that notification and stays (0,0). It has now hit
   `OnboardingPanel` (a `CanvasLayer` is not a `Control`), `RoadCaravan`
-  (invisible figures, half-pixel wagons, silent triangulation failures) and
-  `TravelForeground` (an empty strip below the road). Components adopt
-  `get_parent_control().size` explicitly instead of trusting the anchor.
+  (invisible figures, half-pixel wagons, silent triangulation failures),
+  `TravelForeground` (an empty strip below the road) and `CityView` (its
+  parent `MapPanel` is a plain `Panel`, not a `Container` - `city_map.gd`
+  builds `CityView`, sets its anchors, *then* adds it as a child, by which
+  point `MapPanel` has already reached its final size and never resizes
+  again). The fourth case had its own symptom: a stale, wrongly-sized
+  `CityView` left `MapPanel`'s own default theme box showing behind the
+  drawn town as a plain grey frame - a playtest photographed exactly that.
+  Components adopt `get_parent_control().size` explicitly instead of
+  trusting the anchor, and `MapPanel` also carries an explicit
+  `StyleBoxEmpty` now, so even a transient sizing miss shows nothing
+  instead of the default theme's grey panel.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really
@@ -1305,6 +1333,18 @@ can be lost.
   restructuring costs a fee that grows each time. And an origination fee
   rides on the principal, so borrowing is never free even when repaid on
   time.
+- **A locked purchase needs to name its own way out.** The caravan
+  planner's "buy the shortfall" button just sat there disabled when the
+  purse couldn't cover it, the same dead end as a hidden need on
+  `CityBriefPanel` (see City Hub Rules) - the fix there was "every warning
+  names the screen that fixes it", and it applies here too. A "Borç Al"
+  button appears in exactly that state and sends the player straight to
+  the guild's Debts tab (`Nav.guild_initial_tab`, consumed the moment
+  `guild.gd` reads it - `Nav.city_gate_opening`'s pattern, or a later,
+  unrelated visit to the guild would open on the wrong tab). `DebtPanel`
+  itself was also missing the one number every decision there needs - how
+  much gold is actually in the purse - so it's now the first line, same
+  `UI_PURSE` key the planner already used.
 - **Money the player sees must match the formula to the coin.** The
   origination fee was a float rate, and `200 * 0.1` is `20.000000000000004`,
   so a 200 loan wrote **221** into the ledger under a sign saying 10%. The
@@ -2000,6 +2040,59 @@ ever fell, and the career simulation had already measured the result
   fails, it shows whether the game actually loops. It mirrors the road
   screen's `_process` order deliberately, so what it verifies is what the
   screen does.
+
+### Save & Menu Rules
+
+A playtest found the save system was really just one autosave with no
+front door, and that "return to menu" meant a silent, unconfirmed jump
+straight to the main menu from two separate buttons (`world_hub.gd`'s
+"Menü", `road_journey.gd`'s live-journey exit) - a single caravan lost to
+Ruin Rules' own attrition had nowhere to go back to, and quitting mid-city
+never asked first.
+
+- **Slot 0 is the autosave; the rest are the player's.** `SaveManager`
+  went from one file (`user://save.json`) to numbered slots
+  (`user://saves/slot_N.json`, `SLOT_COUNT`). Every existing call site
+  (`SaveManager.save_session(session)`, `.load_session()`, `.has_save()`,
+  `.delete_save()`) defaults to `AUTOSAVE_SLOT` and keeps behaving exactly
+  as before - city arrival still writes it silently, "Devam Et" still
+  reads it directly, "New Game" still only clears it. The manual slots are
+  strictly additive.
+- **There is still no mid-journey save**, and the multi-slot system did not
+  relax that: `to_save_dict()` never carried `journey_*` fields (see
+  `SaveManager`'s own header comment), so writing to any slot while
+  `is_journey_active()` is true would silently drop the journey. Every
+  screen that can save passes `can_save` down instead of hiding the
+  question - `SaveSlotsPanel` shows the reason
+  (`UI_SAVES_CANT_SAVE_JOURNEY`) rather than just omitting the button, the
+  same "disabled with its reason" rule as a locked event choice or a locked
+  combat skill.
+- **One list, two doors.** `SaveSlotsPanel` (scene-less, `DebtPanel`'s
+  pattern) is the only save/load UI in the game; `saves.tscn` shows it
+  alone for the main menu (load-only, no live session to save from) and
+  `InGameMenu` embeds the same instance-type for the in-game case
+  (`can_save = true` there). Two separate lists would have meant two
+  numbering schemes drifting apart, the same reasoning as
+  `CaravanPlan.daily_consumption()`.
+- **`InGameMenu` (`OnboardingPanel`'s CanvasLayer/backdrop pattern) is what
+  the two "return to menu" actions open now, instead of jumping.** Ana
+  Menüye Dön is still there, just behind a confirmation instead of being
+  the only thing the button could do. Esc reaches it from the road
+  (`_input`, only when no card/panel is already up), the world hub and the
+  city map (`_unhandled_input`) - the three screens the player is actually
+  "in the game" on. Sub-screens reached through the `Nav` stack keep their
+  own back buttons; they were never the ones jumping to the main menu
+  without asking.
+- **Settings is deliberately not in `InGameMenu`.** `Nav.open()` pushes the
+  caller's scene onto the stack, but the road (`Nav.JOURNEY`) is never
+  entered through that stack (see Road Movement Rules) - pushing it from a
+  live journey to reach Settings would mean Settings' back button
+  reloading `road_journey.tscn` from scratch, a path that has never been
+  exercised and that the "no mid-journey save" rule above already warns is
+  risky. `InGameMenu` never changes the underlying scene except on Kayıtlar
+  (load, an explicit scene replacement to `Nav.CITY_MAP`) or Ana Menüye Dön
+  - both of which discard the current scene entirely instead of asking to
+  return to it.
 
 ### Localization Rules
 

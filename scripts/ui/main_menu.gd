@@ -54,6 +54,7 @@ static var _title_shown_this_run: bool = false
 @onready var _menu_box: VBoxContainer = $VBoxContainer
 @onready var _continue_button: Button = $VBoxContainer/ContinueButton
 @onready var _play_button: Button = $VBoxContainer/PlayButton
+@onready var _saves_button: Button = $VBoxContainer/SavesButton
 @onready var _settings_button: Button = $VBoxContainer/SettingsButton
 @onready var _quit_button: Button = $VBoxContainer/QuitButton
 
@@ -67,8 +68,15 @@ func _ready() -> void:
 	Nav.go_root(Nav.MAIN_MENU)
 	_build_backdrop()
 	_continue_button.visible = SaveManager.has_save()
+	# Elle kayıt yuvaları otomatik kayıttan ayrı sayılıyor (bkz.
+	# SaveManager'ın başındaki not) - "Devam Et" hâlâ yalnızca otomatik
+	# kaydı okuyor, "Kayıtlar" hepsini listeliyor. Hiç kayıt yoksa
+	# (ne otomatik ne elle) düğme de gizli - boş bir liste açmanın anlamı
+	# yok, tıpkı Devam Et'in kendisi gibi.
+	_saves_button.visible = SaveManager.has_any_save()
 	_continue_button.pressed.connect(_on_continue_pressed)
 	_play_button.pressed.connect(_on_play_pressed)
+	_saves_button.pressed.connect(_on_saves_pressed)
 	_settings_button.pressed.connect(_on_settings_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
 
@@ -162,6 +170,7 @@ func _show_menu_immediately() -> void:
 func _set_buttons_enabled(enabled: bool) -> void:
 	_continue_button.disabled = not enabled
 	_play_button.disabled = not enabled
+	_saves_button.disabled = not enabled
 	_settings_button.disabled = not enabled
 	_quit_button.disabled = not enabled
 
@@ -233,6 +242,7 @@ func _reveal_menu() -> void:
 func _refresh_texts() -> void:
 	_continue_button.text = tr("UI_CONTINUE")
 	_play_button.text = tr("UI_PLAY")
+	_saves_button.text = tr("UI_MAIN_MENU_SAVES")
 	_settings_button.text = tr("UI_SETTINGS")
 	_quit_button.text = tr("UI_QUIT")
 
@@ -261,6 +271,9 @@ func _confirm_new_game() -> void:
 ## dönerse eski kaydı yerinde durur.
 func _open_character_creation() -> void:
 	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.CHARACTER_CREATION))
+
+func _on_saves_pressed() -> void:
+	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.SAVES))
 
 func _on_settings_pressed() -> void:
 	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.SETTINGS))

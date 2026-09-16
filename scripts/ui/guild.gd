@@ -45,6 +45,8 @@ func _ready() -> void:
 	# görülmüyordu: kontrat listesi uzayınca aşağıda kalıyordu.
 	_tabs.set_tab_title(0, tr("UI_GUILD_TAB_CONTRACTS"))
 	_tabs.set_tab_title(1, tr("UI_GUILD_TAB_DEBTS"))
+	_tabs.current_tab = Nav.guild_initial_tab
+	Nav.guild_initial_tab = 0
 
 	_debt_panel = DebtPanel.new()
 	_debt_container.add_child(_debt_panel)
