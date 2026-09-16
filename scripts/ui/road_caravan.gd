@@ -86,6 +86,28 @@ const WAGON_HEIGHT_RATIO: float = 0.17
 ## yürüyenler onların fazlası.
 const MAX_WALKING_CREW: int = 4
 
+## Kamp ateşi vagon başına bir tane. Tek ateş kolonun önündeydi (boş
+## alan, hiçbir silüetin arkasına düşmüyordu); vagon başına çoğaltınca o
+## kaçış yolu yok - her ateş kendi vagonunun **arkasına** (kuyruk yönüne)
+## kayıyor, çünkü önü zaten o vagonun öküzü ve tayfasıyla dolu. Vagonlar
+## arası boşluk (`GAP_WAGONS`) bunu rahatça karşılıyor; ölçüldü, en
+## yakın komşu figüre değmiyor.
+const CAMPFIRE_TRAIL_RATIO: float = 0.62
+## Zemin çizgisinden biraz izleyiciye doğru (aşağı) - tam tekerleğin
+## dibine oturmasın diye (bkz. Art Rules'un "yakın olan aşağıda" kuralı).
+const CAMPFIRE_NEAR_OFFSET: float = 9.0
+const FIRE_FLICKER_SPEED: float = 9.0
+
+## İnsanlar ateşe yürüyor, hayvanlar ve lider yerinde kalıyor: öküz
+## koşumdan çözülmüyor, lider nöbette kabul ediliyor. Süre `CAMP_HOURS`
+## (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı ama oyuncunun
+## sabrını da sınamamalı.
+const CAMP_GATHER_SECONDS: float = 1.3
+## Toplanma/dönüş sırasında bacakların oynaması için figüre verilen
+## görsel adım - `_speed * STEP_RATE`'in büyüklüğüyle aynı mertebede,
+## kamp sırasında gerçek `_speed` sıfır olduğu için ayrıca besleniyor.
+const CAMP_WALK_STEP: float = 1.8
+
 var _anchor_x: float = 0.0
 var _ground_y: float = 0.0
 var _light: Color = Color.WHITE
@@ -101,6 +123,25 @@ var _scale: float = 1.0
 ## kendi aritmetiğini yapmıyor: iki ayrı formül tam olarak öküzün
 ## vagonun içine girmesine yol açan şeydi.
 var _wagon_centres: Array[float] = []
+
+## Kamp durumu. `_gather_progress` 0 = herkes kendi kolon yerinde, 1 =
+## herkes kendi ateşinde; kamp başlayınca 0→1'e, bitince 1→0'a akıyor.
+## Ayrı bir yön değişkeni yok - `_camping`'in kendisi yön: doğru
+## yöne akmayı `_process` karar veriyor.
+var _camping: bool = false
+var _gather_progress: float = 0.0
+var _camp_time: float = 0.0
+## Toplanan her figürün kolondaki "ev" konumu ve ateşteki hedefi - ikisi
+## arasında `_gather_progress` kadar ilerliyor. `_layout()` her çalıştığında
+## tazeleniyor (bkz. `_layout`), o yüzden ekran yeniden boyutlanırsa bile
+## bayat bir eve dönmüyor.
+var _gather_homes: Dictionary = {}
+var _gather_targets: Dictionary = {}
+## Her toplanan figürün gittiği ateşin sırası - `_layout()` yeniden
+## çalışırsa (bkz. `_place`'in kamp yönlendirmesi) hedefi aynı ateşe göre
+## tazeleyebilmek için.
+var _gather_fire_index: Dictionary = {}
+var _gathering_figures: Array[WalkFigure] = []
 
 var _leader: WalkFigure
 var _leader_mounted: bool = false
@@ -157,6 +198,20 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_oxen.clear()
 	_oxen_far.clear()
 	_leader = null
+
+	# Kamp durumu eski figürlere işaret ediyor olabilir - `queue_free()`
+	# bu kareyi bitirene kadar onları serbest bırakmıyor, ama kamp/kayıt
+	# durumu temizlenmezse `_process()` bir sonraki karede "previously
+	# freed" bir düğüme erişmeye çalışır (bu tam olarak sefer başına bir
+	# kez çağrılan bir fonksiyon olduğu için nadiren yakalanan bir hata -
+	# yol ekranında hep tek bir `configure()` çağrısı vardır, çoklu şehir/
+	# vagon karesi basan araçlarda ise `RoadCaravan` yeniden kullanılıyor).
+	_camping = false
+	_gather_progress = 0.0
+	_gathering_figures.clear()
+	_gather_homes.clear()
+	_gather_targets.clear()
+	_gather_fire_index.clear()
 
 	_wagon_count = maxi(1, session.owned_wagon_count)
 	_leader_mounted = mounted_leader
@@ -290,6 +345,74 @@ func set_detached(detached: bool) -> void:
 	_detached = detached
 	queue_redraw()
 
+## Kamp kurulunca/kalkınca çağrılır. Ateşler burada değil `_draw()`'da
+## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
+## yürüyeceğini belirliyor. Yön ayrı bir bayrak değil - `_gather_progress`
+## `_camping`'e doğru akıyor, `_advance_gather` kararı orada veriyor.
+func set_camping(camping: bool) -> void:
+	if _camping == camping:
+		return
+	_camping = camping
+	if camping:
+		_begin_gathering()
+
+## Ateşe kimin gideceği: tayfa zaten vagon başına bir kişi (bkz.
+## `configure`), o yüzden tayfa `i` doğrudan ateş `i`'ye gidiyor. Parti
+## üyeleri ateşler arasında sırayla dağıtılıyor - hepsi aynı ateşte
+## toplanmak kalabalık, hiçbiri gitmemek de eksik dururdu. Lider nöbette
+## kabul ediliyor, öküzler koşumdan çözülmüyor - ikisi de katılmıyor.
+func _begin_gathering() -> void:
+	_gathering_figures.clear()
+	_gather_homes.clear()
+	_gather_targets.clear()
+	_gather_fire_index.clear()
+	if _wagon_centres.is_empty():
+		return
+	var fire_count := _wagon_centres.size()
+	for index in _crew_figures.size():
+		if index >= fire_count:
+			break
+		_assign_gather(_crew_figures[index], index)
+	for index in _party_figures.size():
+		_assign_gather(_party_figures[index], index % fire_count)
+
+func _assign_gather(figure: WalkFigure, fire_index: int) -> void:
+	if figure == null:
+		return
+	_gathering_figures.append(figure)
+	_gather_fire_index[figure] = fire_index
+	_gather_homes[figure] = figure.position
+	_gather_targets[figure] = _campfire_target(figure, fire_index)
+
+## Figürün ateşteki hedefi. Yalnızca x'i ateşe taşıyor - boy ve taban
+## çizgisi (`position.y`) aynı kalıyor, yoksa figür ateşe "uçar" gibi
+## duruyor. Yükseklik zaten `_layout()`'ta doğru ayarlanmış.
+func _campfire_target(figure: WalkFigure, fire_index: int) -> Vector2:
+	var fire := _campfire_position(fire_index)
+	return Vector2(fire.x - figure.size.x * 0.5, figure.position.y)
+
+## Bir vagonun ateşinin durduğu yer. Ateş vagonun **kuyruk yönüne**
+## kayıyor (bkz. CAMPFIRE_TRAIL_RATIO'nun notu) - önü zaten öküz ve
+## tayfayla dolu.
+func _campfire_position(index: int) -> Vector2:
+	if index < 0 or index >= _wagon_centres.size():
+		return Vector2(_anchor_x, _ground_y)
+	var wagon_w := maxf(size.y, 1.0) * _scale * WAGON_WIDTH_RATIO
+	return Vector2(
+		_wagon_centres[index] - wagon_w * CAMPFIRE_TRAIL_RATIO,
+		_ground_y + CAMPFIRE_NEAR_OFFSET * _scale
+	)
+
+## `_layout()`'un sonunda çağrılıyor (bkz. oradaki not): kamp sırasında
+## bir yeniden boyutlanma vagon merkezlerini kaydırırsa, dönüş yürüyüşü
+## artık doğru olmayan eski bir noktaya değil güncel ateşe gider.
+func _refresh_gather_targets() -> void:
+	if _gathering_figures.is_empty():
+		return
+	for figure in _gathering_figures:
+		if _gather_fire_index.has(figure):
+			_gather_targets[figure] = _campfire_target(figure, int(_gather_fire_index[figure]))
+
 ## Kolonun toplam boyu - lider bu kadar geriye gidebiliyor. Yerleşimle
 ## aynı boşluklardan hesaplanıyor: ayrı bir tahmin tutmak, liderin
 ## kolonun ucundan taşmasına ya da kuyruğa hiç ulaşamamasına yol
@@ -336,19 +459,100 @@ func get_ox_centres() -> Array[float]:
 		centres.append(ox.position.x + ox.size.x * 0.5)
 	return centres
 
+## Ateşlerin merkezleri, vagonlarla aynı sırada - `_wagon_centres` gibi
+## test bunu okuyor, kendi aritmetiğini yapmıyor.
+func get_campfire_positions() -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	for index in _wagon_centres.size():
+		positions.append(_campfire_position(index))
+	return positions
+
+## Şu an ateşe/kolona doğru yürüyen biri var mı - testin "kamp bitti,
+## herkes yerine döndü" iddiasını doğrulaması için.
+func is_gathering() -> bool:
+	return not _gathering_figures.is_empty()
+
+## Parti/tayfa/liderin merkezleri - `get_wagon_centres()`/`get_ox_centres()`
+## ile aynı desen: test kendi aritmetiğini yapmadan gerçek konumu okuyor.
+func get_party_centres() -> Array[float]:
+	var centres: Array[float] = []
+	for figure in _party_figures:
+		centres.append(figure.position.x + figure.size.x * 0.5)
+	return centres
+
+func get_crew_centres() -> Array[float]:
+	var centres: Array[float] = []
+	for figure in _crew_figures:
+		centres.append(figure.position.x + figure.size.x * 0.5)
+	return centres
+
+func get_leader_centre() -> float:
+	if _leader == null:
+		return 0.0
+	return _leader.position.x + _leader.size.x * 0.5
+
 func _process(delta: float) -> void:
 	if _leader == null:
 		return
+	_camp_time += delta
+	_advance_gather(delta)
+
 	# Faz herkeste ilerliyor; duran bir figür de `advance(0)` alıyor ki
-	# ayaklarını yan yana toplasın.
+	# ayaklarını yan yana toplasın. Toplanan figürler burada atlanıyor -
+	# onların fazını `_advance_gather` kendi adım büyüklüğüyle sürüyor,
+	# çünkü kamp sırasında gerçek `_speed` zaten sıfır (bkz. orası).
 	var step := _speed * STEP_RATE
 	for child in get_children():
 		var figure := child as WalkFigure
-		if figure != null:
-			figure.advance(delta, step)
+		if figure == null or _gather_homes.has(figure):
+			continue
+		figure.advance(delta, step)
+
 	if not is_zero_approx(_speed):
 		_wheel_angle = fmod(_wheel_angle + delta * _speed * 4.2, TAU)
+	# Yeniden çizim üç sebepten gerekebilir: tekerlek dönüyor, ateş
+	# titriyor, ya da biri hâlâ ateşe/koluna yürüyor - üçü de kendi
+	# koşuluyla bağımsız.
+	if not is_zero_approx(_speed) or _camping or not _gathering_figures.is_empty():
 		queue_redraw()
+
+## Toplanma ve dönüş: `_gather_progress` kampa göre 0↔1 arası akıyor,
+## her toplanan figürün ekrandaki yeri ev-ateş arasında bu oranla
+## enterpole ediliyor. Figürün kendi yürüyüş fazı da burada sürülüyor -
+## `_speed`'den değil, çünkü kamp sırasında gerçek `_speed` sıfır.
+func _advance_gather(delta: float) -> void:
+	if _gathering_figures.is_empty():
+		return
+	var target := 1.0 if _camping else 0.0
+	var moving := not is_equal_approx(_gather_progress, target)
+	if moving:
+		var step := delta / CAMP_GATHER_SECONDS
+		_gather_progress = clampf(
+			_gather_progress + (step if _camping else -step), 0.0, 1.0
+		)
+	var eased := _ease_gather(_gather_progress)
+	for figure in _gathering_figures:
+		var home: Vector2 = _gather_homes.get(figure, figure.position)
+		var dest: Vector2 = _gather_targets.get(figure, home)
+		var new_position: Vector2 = home.lerp(dest, eased)
+		var walk_step := 0.0
+		if moving:
+			walk_step = CAMP_WALK_STEP if new_position.x >= figure.position.x else -CAMP_WALK_STEP
+		figure.position = new_position
+		figure.advance(delta, walk_step)
+
+	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor,
+	# yoksa bir sonraki kampa kadar boşuna taşınırlar.
+	if not _camping and is_zero_approx(_gather_progress):
+		_gathering_figures.clear()
+		_gather_homes.clear()
+		_gather_targets.clear()
+		_gather_fire_index.clear()
+
+## Yumuşak geçiş (smoothstep): doğrusal enterpolasyon yürüyüşü başta ve
+## sonda aniden kesiyor, figür ateşin dibinde fren yapmış gibi duruyordu.
+func _ease_gather(t: float) -> float:
+	return t * t * (3.0 - 2.0 * t)
 
 ## Kolonun yerleşimi: çapadan geriye doğru yürüyen bir imleç.
 ##
@@ -386,6 +590,10 @@ func _layout() -> void:
 	)
 	_walk_column(_scale, true)
 	column_length_changed.emit(get_trailing_length())
+	# Kamp sırasında bir yeniden boyutlanma vagon merkezlerini kaydırabilir;
+	# ateş hedefleri de tazelenmeli, yoksa dönüş yürüyüşü artık doğru
+	# olmayan eski bir noktaya yönelir.
+	_refresh_gather_targets()
 
 ## Kolonun tek aritmetiği: imleç çapadan geriye yürür, her parça kendi
 ## genişliğini tüketir, araya boşluk girer. `place` yanlışsa hiçbir şey
@@ -496,11 +704,21 @@ func _walk_escort_group(
 
 ## `lift` figürü zemin çizgisinden yukarı alır: yolun karşı tarafında
 ## duran bir şey kameradan uzaktır, uzak olan da yukarıda durur.
+##
+## Toplanan bir figür (bkz. `_begin_gathering`) burada **atlanıyor**: onun
+## ekrandaki yerini `_advance_gather`'ın enterpolasyonu yönetiyor, bu
+## fonksiyon üstüne yazarsa yarı yoldaki figür ateşe/koluna anında
+## ışınlanır. Yalnızca "ev" hedefi tazeleniyor - ölçek değişmiş olabilir -
+## dönüş yürüyüşü güncel noktaya gitsin diye.
 func _place(
 	figure: WalkFigure, x: float, height: float, width: float, lift: float = 0.0
 ) -> void:
 	figure.size = Vector2(width, height)
-	figure.position = Vector2(x - width * 0.5, _ground_y - height - lift)
+	var home := Vector2(x - width * 0.5, _ground_y - height - lift)
+	if _gather_homes.has(figure):
+		_gather_homes[figure] = home
+		return
+	figure.position = home
 
 func _draw() -> void:
 	if _ground_y <= 0.0 or size.y < MIN_DRAW_HEIGHT:
@@ -525,6 +743,13 @@ func _draw() -> void:
 			_wheel_angle, _light, index == 0
 		)
 
+	if _camping:
+		# Ateşler vagonlardan *sonra* çiziliyor (aynı `_draw()` çağrısı,
+		# yani üstlerine biner) ama figürlerden *önce*: figürler bu
+		# fonksiyondan sonra, ayrı çocuklar olarak çiziliyor, yani ateşin
+		# başında toplanan biri alevin önünde duruyor - tam istenen sıra.
+		_draw_campfires()
+
 	if _detached:
 		# Lider kolondan ayrıldığında kervanın başı işaretli: oyuncu
 		# hangisinin kendisi olduğunu karıştırmasın.
@@ -534,3 +759,31 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([
 			marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
 		]), Color(ArtPalette.GOLD, 0.85))
+
+## Kamp ateşi vagon başına bir tane (bkz. `_campfire_position`'ın notu).
+## Önceden yolun tamamı tek bir ateşi paylaşıyordu ve o ateş kolonun
+## önünde, boş alanda duruyordu - hiçbir silüetin arkasına düşmeden.
+## Vagon başına çoğaltınca o kaçış yolu kapandı, bu yüzden her ateş artık
+## kendi vagonunun *arkasında* (bkz. yukarıdaki not) duruyor; çizim,
+## rengi ve titreme deseni tek ateşin aynısı.
+func _draw_campfires() -> void:
+	var glow_radius := size.y * 0.22
+	var flicker := 0.82 + 0.18 * sin(_camp_time * FIRE_FLICKER_SPEED)
+	var flame_h := 22.0 * flicker * _scale
+	for index in _wagon_centres.size():
+		var fire := _campfire_position(index)
+		ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.085 * flicker, 0.48)
+		# Odun + alev: alev üç dilim, en içi en açık.
+		for side in [-1.0, 1.0]:
+			draw_line(
+				fire + Vector2(-14.0 * side, 2.0) * _scale, fire + Vector2(9.0 * side, -7.0) * _scale,
+				Color(0.32, 0.24, 0.18), 3.5 * _scale
+			)
+		draw_colored_polygon(PackedVector2Array([
+			fire + Vector2(-8.0, 0.0) * _scale, fire + Vector2(0.0, -flame_h),
+			fire + Vector2(8.0, 0.0) * _scale,
+		]), Color(0.92, 0.42, 0.16, 0.92))
+		draw_colored_polygon(PackedVector2Array([
+			fire + Vector2(-4.5, 0.0) * _scale, fire + Vector2(0.5, -flame_h * 0.66),
+			fire + Vector2(4.5, 0.0) * _scale,
+		]), Color(1.0, 0.82, 0.40, 0.95))

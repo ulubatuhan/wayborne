@@ -101,16 +101,21 @@ func _init() -> void:
 		await _settle()
 		_save("%s.png" % String(shot.file))
 
-	# Kamp: ateş, sıcak ışık ve duran figürler.
+	# Kamp: ateş vagon başına bir tane, kadro ve tayfa kendi ateşine
+	# yürüyor. Toplanma `RoadCaravan.CAMP_GATHER_SECONDS` sürüyor - normal
+	# `_settle()`in birkaç karesi buna yetmez, geçiş bitene kadar bekleniyor.
 	_band.set_phase(JourneyClock.Phase.NIGHT, 0.3)
 	_band.set_camping(true)
 	_caravan.set_light(_band.get_light())
 	_caravan.set_speed(0.0)
-	await _settle()
+	_caravan.set_camping(true)
+	for _frame in 100:
+		await process_frame
 	_save("10_kamp.png")
 
 	# Lider kolona indi: kervanın önü işaretli, lider arkada.
 	_band.set_camping(false)
+	_caravan.set_camping(false)
 	_band.set_phase(JourneyClock.Phase.NOON, 0.5)
 	_caravan.set_light(_band.get_light())
 	_caravan.set_speed(1.0)
