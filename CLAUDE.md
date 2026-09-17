@@ -2904,6 +2904,74 @@ bilerek uygulanmadı: her biri oyunun zaten ölçülmüş ya da test edilmiş bi
 sistemine dokunuyor ve iki taraf da modeller arasında gerçek savunucular
 buldu. Karar oyuncuda, görev değil.
 
+Faz 13 hazırlık notu (CLAUDE.md) - kervanla ilgili yıllar önce tutulmuş 26
+notun triyajı. Her not mevcut sistemlere karşı üç kefeye ayrıldı:
+
+**Zaten karşılanıyor, yeni iş gerekmiyor:** kervanın uzun süre yüksek
+stresle dağılması (bkz. Stress Rules'un `resolve_stress_breaks`/
+`evt_stress_brawl`/`evt_mutiny` üçlüsü), kararların gecikmeli sonuç
+doğurması (bkz. Event Character Rules'un `evt_wanderer_revenge` zinciri -
+mevcut bayrak/tetikleme vokabülerinin kendisi bu), Darkest Dungeon tarzı
+kombat (bkz. Combat Rules/DD-1..DD-5), göç sırasında bölgeye göre değişen,
+tükenmeyen arkaplan çeşitliliği (bkz. Art Rules'un `hash(cell index)`
+maddesi ve Route Terrain & Weather Rules), karizmaya bağlı pazar fiyatı +
+partideki ticaret gücünden faydalanma (bkz. Haggling Rules ve Tellal
+görevinin `get_duty_discount`'u), eylem sırasında zamanın eyleme göre akması
+(bkz. Journey Time Rules'un `consume_hours` maddesi), ve "gelişme başarma
+hissi" (bkz. Progression Rules'un ölçülen merdiveni). Rota uzayıp da
+teslimat deadline'ı içinde kalırsa yine başarılı sayılması da zaten
+`TRAVEL_DAYS` + kontrat deadline mekaniğinin doğal sonucu.
+
+**Mevcut, kasıtlı tasarlanmış bir sistemle çelişiyor:** "stres parti
+genelinde, moral bireysel" notu bugünkü sistemin **tam tersi** -
+Stress Rules'un kendi tarihi tam olarak bunun (tek paylaşılan bir stat)
+iki kez denenip iki kez başarısız olduğunu, bugünkü ayrımın (stres kişide,
+moral seferde) o başarısızlıklardan sonra kasıtlı seçildiğini kaydediyor.
+Not eski bir fikir olarak kalıyor, uygulanmadı.
+
+**Mevcut vokabülerle uyumlu, düşük-orta riskli - Faz 13'e alındı**
+(görev listesi #112-#119, "yap" denene kadar plan aşamasında):
+
+- Rota değişince o yöne gitmeyecek tüccarların tepki vermesi (moral +
+  event card) - En-Route Plan Rules'un zaten yaptığı kesintiyi
+  hikâyeleştiriyor.
+- Bölge/duty bilgisine bağlı toplama-av olayı - yeni bir sistem değil,
+  `EventEffect.Type.PROVISIONS` + mevcut `RouteTerrain` biyomu.
+- Kervan hızına açlığın etkisi - tempo zaten stamina'ya bağlı (bkz. Road
+  Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak ekleniyor.
+- Kombatta kısa, sessiz yorum balonları (isabet/kritik/düşüş anında) -
+  seslendirme değil, yalnızca metin; `UiIcon`/log satırı deseniyle aynı aile.
+- Karar önizlemesi: Zeka/Sezgi'ye göre sonuç ipucu - Faz 12'nin tehlike
+  etiketiyle aynı okunabilirlik ailesi, `get_best_effective_stat` zaten
+  event context'te var.
+- Kervan-içi hırsızlık/cinayet soruşturma zinciri - `NpcDisposition` ve
+  `evt_wanderer_revenge`'in zincir deseninin parti-içi versiyonu.
+- Yeni yol konvoyu türleri (askeri/mülteci/dini/tüccar) - mevcut
+  `EVENT_ROAD_MARKER_KIND`/`MARKER_ARCHETYPES`'a yeni girişler, yeni sistem
+  değil.
+- Görev gücüne kişisel kondisyon (can/stres/moral) etkisi - `DutyCatalog.
+  get_duty_power()` şu an yalnızca sınıf eşleşmesine bakıyor, holder'ın
+  `CombatUnit.is_stressed`'inin zaten okuduğu veriyi görev formülüne de
+  taşımak.
+
+**Büyük mimari/prodüksiyon kararı gerektiriyor - plana alınmadı, oyuncuya
+soruldu:** kişiye özel açlık/hastalık (yeni bir per-character sistem,
+stres'in ikinci bir kopyası olma riski taşıyor); seslendirmeli anlatım ve
+kombat nidaları (gerçek ses kaydı - `AudioManager`'ın şu an sentezlenmiş
+placeholder'lardan ibaret olduğu, bir prodüksiyon/bütçe kararı); iki dini
+yaratılış efsanesi + fragman (lore yönü - şehir mimarisinde din motifinin
+bilerek reddedildiği Art Rules'daki cami/minare geri alımıyla gerginlik
+taşıyor, ve fragman zaten bu kod tabanının işi değil); npc kıyafet
+çeşitliliği (henüz içe aktarılmış görsel varlık olmadığı için Faz 12'nin
+büyük sanat yönü kararına bağlı); "npc'ler kendini geliştirip karar alır"
+(kapsamı belirsiz - mevcut companion XP/auto-allocate mi, yoksa tam bağımsız
+bir dünya simülasyonu mu, netleşmeden plana alınamaz); manipülasyon
+stat'ı/perk'i (altıncı stat listesi zaten dolu ve her ekranda sayılıyor -
+yedinci bir temel stat eklemek yerine mevcut `Trait` sistemine bir huy
+olarak eklenmesi önerilir, ama karar oyuncuda); vagon-başı envanter +
+crafting (paylaşılan tek `Inventory`'nin kasıtlı sadeliğini bozan, ağırlık/
+kargo testlerinin tamamını yeniden yazdıracak en büyük değişiklik).
+
 ### Çözülmüş: stres eşiği (kayıt için)
 
 `evt_stress_brawl` stres ≥ 70 istiyordu, simülatörde varış stresi ~25'ti -
