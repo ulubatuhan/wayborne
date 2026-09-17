@@ -422,10 +422,13 @@ func _report_damage_outcome(target: CombatUnit, outcome: String) -> void:
 	match outcome:
 		"deaths_door":
 			_emit_log(tr("CBT_LOG_DEATHS_DOOR") % target.display_name)
+			unit_barked.emit(target, tr("CBT_BARK_DEATHS_DOOR"))
 		"survived_deathblow":
 			_emit_log(tr("CBT_LOG_DEATHBLOW_SURVIVED") % target.display_name)
+			unit_barked.emit(target, tr("CBT_BARK_SURVIVED"))
 		"killed":
 			_emit_log(tr("CBT_LOG_KILLED") % target.display_name)
+			unit_barked.emit(target, tr("CBT_BARK_KILLED"))
 			_repack(_side_of(target))
 		"downed":
 			if target.is_player_side:

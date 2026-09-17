@@ -732,13 +732,18 @@ func apply_event_stress(delta: int) -> void:
 			amount = int(round(float(delta) * PRUDENT_EVENT_STRESS_RESIST))
 		character.change_stress(amount)
 
-## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
-## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
-func grant_party_xp(amount: int) -> Dictionary:
+## Tüm partiye (ya da verilirse yalnızca `targets`'a) eşit XP dağıtır,
+## kimin kaç seviye atladığını döner (isim -> seviye sayısı; hiç atlamayan
+## kişi listede yer almaz). `targets` boşsa eski davranış: sefer varışı ve
+## olay ödülleri hâlâ yoldaki herkese dağıtıyor. Savaş artık bir istisna -
+## `PreCombatPanel`de dışarıda bırakılan kimse deneyim kazanmıyor, çünkü
+## risk almadı.
+func grant_party_xp(amount: int, targets: Array[CharacterData] = []) -> Dictionary:
 	var levels_gained: Dictionary = {}
 	if amount <= 0:
 		return levels_gained
-	for character in get_party():
+	var recipients := targets if not targets.is_empty() else get_party()
+	for character in recipients:
 		var gained := character.gain_xp(amount)
 		if gained > 0:
 			levels_gained[character.character_name] = gained
@@ -858,6 +863,108 @@ func get_daily_provision_consumption() -> int:
 		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
 		CaravanPlan.height_adjustment_for(party)
 	)
+
+## Akşam sofrası: erzak artık her gün sessizce, herkese eşit dağılmıyor -
+## oyuncu kime yediğini seçiyor (bkz. `MealDistributionPanel`). "Ekip"
+## (isimli parti) ve "kervan" (vagon tayfası + kervana katılan tüccarlar -
+## isimsiz, tek tek hedeflenemez) ayrı iki lokma: toplam ihtiyaç hâlâ
+## `get_daily_provision_consumption()`'dan geliyor - erzak hesabının tek
+## yerde durması kuralı burada da geçerli, bu yalnızca o toplamı kime
+## dağıtacağını seçiyor.
+const MEAL_MODE_ALL: String = "all"
+const MEAL_MODE_PARTY_ONLY: String = "party_only"
+const MEAL_MODE_CREW_ONLY: String = "crew_only"
+const MEAL_MODE_SPECIFIC: String = "specific"
+const MEAL_MODE_SELF_ONLY: String = "self_only"
+
+## Kişi başına açlığın bedeli - kim aç kaldıysa doğrudan onun stresine
+## işler (bkz. Stress Rules'un "stres bir kişiye ait" maddesi), ortalamaya
+## değil. Kervan/tayfa aç kalırsa kimse kişisel bir stres almaz (isimsiz),
+## ama moral bir kez düşer - herkes bunu hissediyor.
+const PERSONAL_HUNGER_STRESS: int = 6
+const MEAL_HUNGER_MORALE_PENALTY: int = -8
+
+## Dağıtım sonucu: kim beslendi, kim aç kaldı, kervan aç kaldı mı. Ekran
+## bunu isimlerle anlatıyor - bkz. Faz 14 hazırlık notu, "her metrik bir
+## isim taşımalı, ortalama değil".
+func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) -> Dictionary:
+	var named_party := get_party()
+	var party_mouths := named_party.size()
+	var other_mouths := owned_wagon_count * PEOPLE_PER_WAGON + caravan.merchant_names.size()
+	var total_mouths := maxi(1, party_mouths + other_mouths)
+	var full_total := get_daily_provision_consumption()
+	var party_share := int(round(float(full_total) * float(party_mouths) / float(total_mouths)))
+	var other_share := full_total - party_share
+
+	var fed_party: Array[CharacterData] = []
+	var feed_other := true
+	var intended := full_total
+
+	match mode:
+		MEAL_MODE_PARTY_ONLY:
+			fed_party = named_party.duplicate()
+			feed_other = false
+			intended = party_share
+		MEAL_MODE_CREW_ONLY:
+			fed_party = []
+			feed_other = true
+			intended = other_share
+		MEAL_MODE_SPECIFIC:
+			for character in named_party:
+				if selected.has(character):
+					fed_party.append(character)
+			feed_other = true
+			var per_head := 0.0 if party_mouths <= 0 else float(party_share) / float(party_mouths)
+			intended = other_share + int(round(per_head * fed_party.size()))
+		MEAL_MODE_SELF_ONLY:
+			var leader := get_player_character()
+			if leader != null:
+				fed_party = [leader]
+			feed_other = false
+			var self_share := 0.0 if party_mouths <= 0 else float(party_share) / float(party_mouths)
+			intended = int(round(self_share))
+		_:
+			fed_party = named_party.duplicate()
+			feed_other = true
+			intended = full_total
+
+	var actual := -change_provisions(-intended)
+	# Erzak niyet edilenden de azsa (kese gerçekten boşsa) seçim anlamını
+	# kaybediyor - o gece kimse gerçekten karnını doyurmuyor.
+	var starved := actual < intended
+
+	var hungry_party: Array[CharacterData] = []
+	var crew_hungry := starved or not feed_other
+	if starved:
+		hungry_party = named_party.duplicate()
+	else:
+		for character in named_party:
+			if not fed_party.has(character):
+				hungry_party.append(character)
+
+	var hungry_names: Array[String] = []
+	for character in hungry_party:
+		character.change_stress(PERSONAL_HUNGER_STRESS)
+		hungry_names.append(character.character_name)
+
+	if not hungry_party.is_empty() or crew_hungry:
+		caravan.change_morale(MEAL_HUNGER_MORALE_PENALTY)
+
+	var fed_names: Array[String] = []
+	if not starved:
+		fed_names = _character_names(fed_party)
+	return {
+		"consumed": actual,
+		"fed_names": fed_names,
+		"hungry_names": hungry_names,
+		"crew_hungry": crew_hungry,
+	}
+
+func _character_names(characters: Array[CharacterData]) -> Array[String]:
+	var names: Array[String] = []
+	for character in characters:
+		names.append(character.character_name)
+	return names
 
 func get_provision_cost_multiplier() -> float:
 	return get_player_culture().provision_cost_multiplier

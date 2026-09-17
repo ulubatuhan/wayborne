@@ -156,6 +156,27 @@ func _build_chapter() -> void:
 
 		_chapter_box.add_child(line)
 
+	_build_memory()
+
+## Defter hiçbir satırı silmiyor ama pasifti - yalnızca yol ekranındaki
+## `CaravanStatusPanel`'i `Tab` ile açan biri görüyordu. Brifing zaten her
+## varışta kendiliğinden açılan ekran (bkz. City Hub Rules'un "hikâye ile
+## başlar" maddesi), o yüzden en son düşen/ayrılan isim buraya da taşınıyor -
+## oyuncu aramadan önüne geliyor. "No need, no row" burada da geçerli:
+## defterde üstü çizili hiçbir satır yoksa bu blok da yok.
+func _build_memory() -> void:
+	var struck := _session.ledger.recent().filter(_session.ledger.is_struck)
+	if struck.is_empty():
+		return
+	var entry: Dictionary = struck[0]
+	var key := "UI_BRIEF_MEMORY_DIED" if String(entry.get("kind", "")) == CaravanLedger.KIND_DIED \
+		else "UI_BRIEF_MEMORY_DEPARTED"
+	var memory := Label.new()
+	memory.text = tr(key) % String(entry.get("name", ""))
+	memory.autowrap_mode = TextServer.AUTOWRAP_WORD
+	memory.modulate = NOTE_COLOR
+	_chapter_box.add_child(memory)
+
 # --- Kervanın ihtiyaçları ---
 
 func _build_needs() -> void:

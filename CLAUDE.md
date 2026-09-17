@@ -230,8 +230,11 @@ wayborne/
 
 - Four ranks per side, 1 = front. A skill the current position cannot use is
   shown **disabled with its reason**, never hidden - same rule as event choices.
-- Losing a fight is not death: `write_back_party()` stands downed characters
-  back up at 1 HP. The caravan can be ruined, never wiped out.
+- Losing a fight is not automatically death: `write_back_party()` stands a
+  unit that merely fell (never reached Death's Door, or reached it and won
+  the deathblow roll) back up at 1 HP. But death is real now - see Death's
+  Door below, which any party member can reach, not only the leader. The
+  caravan can be ruined, never wiped out; the *people* in it can die.
 - Combat is entered only through `EventEffect.Type.TRIGGER_COMBAT`, bridged by
   `EventEffectApplier.Result.combat_requests` and applied in `road_journey.gd`
   `_on_combat_finished(victory, xp_awarded)`. The bandit ambush's "fight"
@@ -256,8 +259,9 @@ wayborne/
   `test_combat_dd.gd` scans the whole catalogue for it.
   - **Damage-over-time goes through the one damage door** (`apply_damage`):
     PROT, Death's Door and the deathblow roll all live there. A second door
-    would mean bleed does not know about armour - and a companion would die
-    of it, breaking "only the leader can die".
+    would mean bleed does not know about armour, and could kill a character
+    outright without ever giving them the deathblow save roll everyone else
+    gets.
   - **A status ticks at the start of the affected unit's own turn.** At the
     end is not the same thing: a bleeding fighter would then strike before
     bleeding, and the damage would land a round late.
@@ -1455,8 +1459,9 @@ status effects, area skills):
 
 A lone traveller on a bandit-infested road is nearly hopeless, and that is
 the intended message rather than an oversight: the game starts you with two
-people, party 1 only exists if you dismiss someone, and losing a fight costs
-attrition, not death.
+people, and party 1 only exists if you dismiss someone. Losing a fight used
+to cost only attrition; since Faz 14 it can cost a real, permanent death to
+anyone on the field, not only the leader (see the Faz 14 note below).
 
 **The whole table moved down, and the cause is DD-1, not the content added
 after it.** Enemy PROT and the re-rolled speed die were never re-measured
@@ -1470,6 +1475,39 @@ The number worth revisiting is **party 2 at 65% danger: 23% → 12%**. Two is
 the starting party, so that is the pair's odds on a road the tavern openly
 calls dangerous. It is defensible - the player chooses the road and can pay
 to learn its danger first - but it is the tightest square in the table.
+
+**Re-measured after Faz 14 opened Death's Door to the whole party** (see
+Combat Rules): the table moved up everywhere, not down, and the size of the
+jump was not predicted going in.
+
+| party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 53% | 55% | 23% | 23% |
+| 2 | 100% | 93% | 60% | 60% |
+| 3 | 100% | 100% | 88% | 88% |
+| 4 | 100% | 100% | 100% | 100% |
+
+**The cause is a kill-sponge effect, not a damage or accuracy change.** A
+companion on Death's Door used to leave the fight the instant they hit 0
+HP - one less body on the field, full stop. Now they stay on the field at
+0 HP, still swinging (at the accuracy/damage penalty), and every subsequent
+hit against them is a deathblow roll the attacker only wins `100 -
+deathblow_resist` (33%) of the time. The enemy AI always targets the
+weakest reachable unit, so a Death's Door companion becomes the enemy's
+preferred target - and two hits in three land on someone who was already
+"spent," instead of carrying over to a still-healthy ally. The party is
+statistically tankier in aggregate *because* any one member is now
+individually more fragile, which is exactly backwards from what the
+raw feeling of "everyone can die now" would suggest.
+
+**Not retuned in the same pass, on purpose.** The point of Faz 14 was
+making death real, not rebalancing the ladder - and this file's own
+recurring lesson is not to ship a second unmeasured change on top of the
+first. Party 4 reading 100% at every danger tier does violate "dokunulmaz
+olmasın" (never untouchable) at the high end and is the next thing to
+look at, most likely by trimming `DEFAULT_DEATHBLOW_RESIST` rather than
+touching PROT or accuracy - the failure mode this table already flags,
+just larger now, not a new one.
 
 ### Progression Rules
 
@@ -3049,6 +3087,55 @@ motifinin bilerek reddedildiği Art Rules'daki cami/minare geri alımıyla
 gerginlik taşıyor, fragman da bu kod tabanının işi değil). Üçü de
 "sonra üstüne çalışacağız" notuyla plana geri dönebilir - kapatılmadı,
 yalnızca beklemede.
+
+Faz 14 ("This War of Mine hissi") - oyunun kendi "çok vanilya, dümdüz bir
+kervan oyunu gibi" itirafından doğan bir hat: sanat olmadan da hissettirecek
+beş sistemsel değişiklik, hepsi mevcut vokabüleri genişleterek, yeni bir
+sistem icat etmeden.
+
+- **A. Herkes ölebilir.** `CombatUnit.can_enter_deaths_door()` tersine
+  çevrildi - artık `is_player_character and not is_dead` değil,
+  `is_player_side and not is_dead`: Ölümün Kıyısı'na oyuncu tarafındaki
+  **herkes** girer, `is_player_character` alanı tamamen kaldırıldı. Zar
+  (`deathblow_resist`, varsayılan %67) hâlâ aynı - önce hayata tutunma
+  şansı, tutmazsa kalıcı ölüm. `write_back_party()`/`get_dead_characters()`/
+  `GameSession.resolve_combat_deaths()` hiç değişmedi, çünkü zaten
+  genelciydi (yalnızca kimin lider olduğuna, "kim öldü"ye değil bakıyordu) -
+  tek kilit `can_enter_deaths_door()`'daydı. Ölçüm sürpriz çıktı: bkz.
+  Ruin Rules'un "kill-sponge" notu - tablo düşmedi, yükseldi, çünkü Kıyı'da
+  duran biri artık sahadan çıkmıyor ve düşman AI'ının "en zayıfı vur"
+  kuralı yüzünden sağlıklı yoldaşları koruyan bir süngere dönüşüyor.
+- **B. İsimli açlık/stres.** `_apply_downed_marks()` artık kimi işaretlediğini
+  kayda yazıyor ("X bu çarpışmadan sarsılmış çıktı"), sayı olarak değil.
+  Asıl derinleşme C'de - açlığın artık isimle geldiği yer orası.
+- **C. Akşam sofrası.** `_run_day()`'in sessizce uyguladığı tek bir
+  `daily_consumption` artık bir karar: `MealDistributionPanel` her gün
+  beş seçenek sunuyor (herkese/yalnızca ekibe/yalnızca kervana/belirli
+  kişilere/yalnızca lidere dağıt), `GameSession.apply_meal_distribution()`
+  toplamı (hâlâ `get_daily_provision_consumption()`'dan - formül tek yerde
+  kuralı bozulmadı) gruplar arasında bölüştürüp aç kalanı **isimle**
+  bildiriyor. Kamp ateşi kararın sahnesi: `RoadCaravan.set_camping()`'in
+  görsel ateş+toplanma animasyonu ödünç alınıyor (mekanik "Kamp Kur" hâli
+  dokunulmadan), panelin arka planı `SuccessionPanel`in tam siyahı değil
+  yolun kendi `%55` alfalı perdesi - ateş arkada görünsün diye.
+- **D. Savaş öncesi kadro.** `PreCombatPanel` her çarpışmadan önce kimin
+  katılacağını ve bu çarpışmaya özel sırayı soruyor - `party.tscn`'nin
+  genel marş sırasına dokunmuyor. Dışarıda kalan risk almaz, XP de
+  almaz (`grant_party_xp()`'in artık isteğe bağlı `targets` parametresi);
+  düşen izi de (B) yalnızca gerçekten savaşanlardan seçiliyor
+  (`_current_combat_party`, tüm parti değil).
+- **E. Defter artık kendiliğinden geliyor.** `CaravanLedger` hiçbir satırı
+  silmiyordu ama pasifti - yalnızca yol ekranında `Tab`'la açılan
+  `CaravanStatusPanel`de görünüyordu. `CityBriefPanel._build_memory()`
+  en son üstü çizili satırı (öldü/ayrıldı) her şehir varışında hikâye
+  bloğunun sonuna ekliyor - "no need, no row" burada da geçerli, hiç
+  üstü çizili satır yoksa blok da yok.
+
+**Bilerek bu turda yapılmayan:** A'nın açtığı denge sorusu (parti 4'ün her
+tehlike seviyesinde %100 kazanması) ölçüldü ve kaydedildi ama retune
+edilmedi - iki değişikliği aynı pasta ölçmeden üst üste bindirmek bu
+dosyanın kendi kuralı. `DEFAULT_DEATHBLOW_RESIST`'i düşürmek en olası
+yön, ama kendi ölçümünü ister.
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

@@ -271,18 +271,17 @@ func _travel(session: GameSession, total_days: int) -> void:
 		session.caravan.morale, session.get_provisions()
 	])
 
-## Yol ekranının _advance_contracts_and_provisions'ının aynısı: önce
-## kontrat günü işler (süresi dolan varsa itibar yer), sonra erzak.
+## Yol ekranının aynısı: önce kontrat günü işler (süresi dolan varsa itibar
+## yer), sonra akşam sofrasını dağıtır. Simüle edilen oyuncu her zaman
+## "herkese dağıt" seçiyor - `MealDistributionPanel`in en hızlı, en sık
+## seçilecek onayı - ki gerçek formül (`GameSession.
+## apply_meal_distribution`) burada da, ekranda da aynı yerden gelsin.
 func _consume_daily(session: GameSession) -> void:
 	for _merchant_id in session.advance_day():
 		print("   Kontrat süresi doldu, itibar düştü.")
-	var daily := 1 + session.caravan.merchant_names.size()
-	daily = maxi(1, int(round(daily * session.get_daily_provision_multiplier())))
-	daily = maxi(1, daily - session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI))
-	session.change_provisions(-daily)
-	if session.get_provisions() <= 0:
-		session.caravan.change_morale(-10)
-		session.change_stress(6)
+	var result := session.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
+	if not (result.get("hungry_names", []) as Array).is_empty() or result.get("crew_hungry", false):
+		print("   O gece açlık vardı.")
 
 func _resolve_event(
 	session: GameSession, engine: EventEngine, event: GameEvent, day: int, clock: JourneyClock
