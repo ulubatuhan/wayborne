@@ -3618,6 +3618,31 @@ tahmini aşabilir, ama bu weather'ın kendisinin de paylaşmadığı bir risk
 değil - `HUNGRY_PACE_MULTIPLIER` gibi geri besleme etkileri de hiç
 forecast edilmiyor, aynı kabul.
 
+**Faz 16-C: oyunun ilk elle çizilmiş (AI-üretimli) sanat varlığı.** Art
+Rules'un uzun süredir yazdığı "henüz asset dosyası yok" cümlesi artık
+tam doğru değil - `data/assets/ui/ledger_mockup/` bir deri cilt dokusu,
+bir balmumu mühür (taç motifi) ve bir parşömen sayfası taşıyor, Gemini ile
+üretilip Python/PIL ile (renk mesafesine göre lineer alfa rampası)
+şeffaflaştırılmış. Kullanılan tek ekran **`DebtPanel`** (Lonca > Borçlar
+sekmesi): `VBoxContainer`'dan `PanelContainer`'a çevrildi, zemini deri
+dokusu (`StyleBoxTexture`, 9-slice - kenar süslemesi hangi boyutta
+gösterilirse gösterilsin bozulmuyor), başlığın yanında mühür ikonu var.
+Seçim kasıtlı dar: CLAUDE.md'nin kendi hikâye metni borç senetlerini zaten
+"soğuk balmumu mühürlerle bezenmiş" diye tarif ediyor - yani bu, Empire/
+Faith anlatı yönüne hiç taahhüt etmeden yapılabilecek tek köşeydi. Kalan
+üç varlık **bilerek kullanılmadı**: parşömen sayfası kare ve düzensiz
+(yırtık) kenarlı - 9-slice kenarları düzleştirir, sabit boyut da geniş/dar
+panellerde kırpılır/boşluk bırakır, gerçek kare bir alan (örn. tam ekranlı
+bir gelecekteki "Kervan Defteri") açılana kadar bekliyor; beş ticaret
+eşyası ikonu borç defterine değil pazar/göçebe takas ekranına ait; kilim
+deseni ise **hiç kullanılmadı ve kullanılmamalı** - kenar motifleri
+yakından bakınca gerçekten "S" harfini tekrarlıyor, üretim hatası, ve
+Localization Rules'un "hiçbir görselde yazı olmaz" kuralını doğrudan
+ihlal ediyor. Bu ekranın dışındaki hiçbir yer (dünya sahneleri, diğer
+yönetim ekranları) bu dokuya geçmedi - Art Rules'un "iki ayrı prodüksiyon"
+uyarısı burada da geçerli, tek bir ekranı reskinlemek bilinçli, sınırlı
+bir adım, tüm arayüzün sessizce yeni bir görsel dile kayması değil.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+

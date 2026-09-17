@@ -1,5 +1,5 @@
 class_name DebtPanel
-extends VBoxContainer
+extends PanelContainer
 
 ## Borç defteri arayüzü. `DebtLedger` Faz 9 A'da yazıldı ama hiçbir ekrana
 ## bağlanmamıştı: kervan borca batabiliyor, faiz işliyor, vadesi geçince
@@ -19,8 +19,21 @@ extends VBoxContainer
 ##   - **Yapılandır**: vade uzar, bedel anaparaya biner ve her seferinde
 ##     artar (bkz. Debt.get_restructure_fee). Para gerektirmez - anlamı
 ##     zaten "şimdi ödeyemiyorum".
+##
+## Panelin kendi zemini artık deri ciltli bir defter dokusu
+## (`StyleBoxTexture`, 9-slice) - CLAUDE.md'nin borç senetlerini "soğuk
+## balmumu mühürlerle bezenmiş" tarif ettiği yer tam olarak burası, o
+## yüzden ilk elle çizilmiş sanat varlığı deri/mühür ikilisiyle buraya
+## geldi. Mühür ikonu yalnızca süs değil - defterin "resmî" olduğunu
+## anlatıyor. Kervanın kendi envanteri/kilim motifleri buraya karışmıyor;
+## bu ekran imparatorluk tarafının senedi, göçebe pazarlığının değil.
 
 signal ledger_changed
+
+const LEATHER_TEXTURE: Texture2D = preload("res://data/assets/ui/ledger_mockup/leather_cover.png")
+const SEAL_TEXTURE: Texture2D = preload("res://data/assets/ui/ledger_mockup/wax_seal_crown.png")
+const LEATHER_BORDER_MARGIN: float = 60.0
+const SEAL_SIZE: float = 56.0
 
 const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
 const DUE_SOON_COLOR: Color = Color(0.9, 0.8, 0.4)
@@ -41,6 +54,7 @@ const OVERDUE_SEVERE_COLOR: Color = Color(0.72, 0.14, 0.12)
 const OVERDUE_SEVERE_DAYS: int = Debt.OVERDUE_PERIOD_DAYS
 
 var _session: GameSession
+var _body: VBoxContainer
 var _title_label: Label
 var _purse_label: Label
 var _summary_label: Label
@@ -58,26 +72,56 @@ func setup(session: GameSession) -> void:
 func _ensure_built() -> void:
 	if _title_label != null:
 		return
-	add_theme_constant_override("separation", 6)
+
+	var leather := StyleBoxTexture.new()
+	leather.texture = LEATHER_TEXTURE
+	leather.texture_margin_left = LEATHER_BORDER_MARGIN
+	leather.texture_margin_right = LEATHER_BORDER_MARGIN
+	leather.texture_margin_top = LEATHER_BORDER_MARGIN
+	leather.texture_margin_bottom = LEATHER_BORDER_MARGIN
+	leather.content_margin_left = LEATHER_BORDER_MARGIN + 10.0
+	leather.content_margin_right = LEATHER_BORDER_MARGIN + 10.0
+	leather.content_margin_top = LEATHER_BORDER_MARGIN + 10.0
+	leather.content_margin_bottom = LEATHER_BORDER_MARGIN + 10.0
+	add_theme_stylebox_override("panel", leather)
+
+	_body = VBoxContainer.new()
+	_body.add_theme_constant_override("separation", 6)
+	add_child(_body)
+
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 8)
+	_body.add_child(header)
 
 	_title_label = Label.new()
 	_title_label.text = tr("UI_DEBT_TITLE")
-	add_child(_title_label)
+	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_title_label.modulate = ArtPalette.GOLD
+	header.add_child(_title_label)
+
+	# Mühür yalnızca süs değil - "bu defter resmî" diyen tek görsel imza,
+	# aynı balmumu mühür imparatorluk kontratlarının hikâye metninde zaten
+	# tarif edildiği yer.
+	var seal := TextureRect.new()
+	seal.texture = SEAL_TEXTURE
+	seal.custom_minimum_size = Vector2(SEAL_SIZE, SEAL_SIZE)
+	seal.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	header.add_child(seal)
 
 	# Borç kararı (öde/yapılandır/borç al) kesedeki parayı bilmeden
 	# verilemez - önceden bu ekranda hiç görünmüyordu, oyuncu miktarı
 	# akılda tutmak ya da lonca sekmesinden çıkıp kontrol etmek zorunda
 	# kalıyordu.
 	_purse_label = Label.new()
-	add_child(_purse_label)
+	_body.add_child(_purse_label)
 
 	_summary_label = Label.new()
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	add_child(_summary_label)
+	_body.add_child(_summary_label)
 
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", 4)
-	add_child(_rows)
+	_body.add_child(_rows)
 
 	_build_borrow_row()
 
@@ -85,15 +129,15 @@ func _ensure_built() -> void:
 ## alınabilir olduğu, borcun kendisiyle aynı ekranda okunmazsa oyuncu
 ## hattın borçla tükendiğini fark edemez.
 func _build_borrow_row() -> void:
-	add_child(HSeparator.new())
+	_body.add_child(HSeparator.new())
 
 	_credit_label = Label.new()
 	_credit_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	add_child(_credit_label)
+	_body.add_child(_credit_label)
 
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	add_child(row)
+	_body.add_child(row)
 
 	_amount_spin = SpinBox.new()
 	_amount_spin.min_value = GameSession.LOAN_MIN_AMOUNT
