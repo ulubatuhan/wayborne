@@ -3367,6 +3367,105 @@ hiç kazanamıyordu (bkz. Morale Rules'un son maddesi). Sonuç: varış morali
 ~55, seferin dibi ~54 (en kötü 20), koşuların %7.5-10.5'i eşiğe iniyor ve
 `evt_mutiny` 600 koşuda 6 kez ateşleniyor.
 
+Faz 16 hazırlık notu (CLAUDE.md) - Faz 12'nin dışarıdan-bakış triyajından
+kalan altı öneri ve Faz 15'in vagon envanteri tasarım notunun karşılanmayan
+iki parçası, oyuncunun kendi elemesiyle karara bağlandı:
+
+**Reddedildi:**
+- **Stres/moral birleşmesi.** Zaten Faz 13'ün kendi triyajının kaydettiği
+  gibi bugünkü sistemin tam tersi - iki kez denenip iki kez başarısız
+  olduğu için kasıtlı ayrı tutuluyor (bkz. Stress Rules). Bir daha
+  gündeme gelmeyecek.
+- **Borç sisteminin kapsamının daraltılması.** Doğrudan reddedildi,
+  gerekçe verilmedi.
+- **Ekipmanın kargoya (envantere) dönüşmesi.** Doğrudan reddedildi, ve
+  reddin kendi gerekçesi mevcut ayrımın *neden* doğru olduğunu netleştirdi:
+  üstümüzde taşıdığımız (kılıç, zırh gibi) şeyler envanter kalemi değil -
+  envantere konulabilir ama o zaman takılı olmazlar. Bu tam olarak
+  `Equipment`'ın `equipment_inventory`'si (depoda, kimseye takılı değil)
+  ile bir karakterin `equipped` sözlüğü (üstünde, takılı) arasında zaten
+  çizdiği çizgi - Kervan Envanteri Rules'daki `wagon_inventories`'in
+  Equipment'a hiç dokunmamasının sebebi de bu; iki sistem aynı isimde
+  bonus alanları taşısa da (bkz. Equipment/Trait bölümü) birleşmiyorlar.
+
+**Ertelendi (henüz erken):**
+- **Kampanya bölümlerinin sadeleştirilmesi.** Sadeleştirilecek olan asıl
+  hikâye/anlatı içeriği henüz yazılmadı - mevcut beş bölüm (bkz. Campaign
+  Rules) şu an yalnızca eşik/bayrak mekaniğini taşıyor. İçerik yazılmadan
+  yapı sadeleştirilemez; bu not içerik yazıldıktan sonra tekrar gündeme
+  gelebilir.
+
+**Ana hedeflere terfi etti (artık backlog değil, aktif yol haritasının
+parçası):**
+- **İki katmanlı "defter" sanat yönüne geçiş** - Faz 12'de "en büyüğü"
+  diye işaretlenen öneri, mevcut prosedürel `_draw()` sanatından farklı
+  bir görsel kimlik.
+- **Gerçek seslendirme + savaş nidaları** (#7, #11) - `AudioManager`'ın
+  bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
+  Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
+  karşılığı olarak zaten kurulu.
+- **İki dini yaratılış efsanesi + fragman/sinematik** (#12).
+
+Üçünün de ne zaman ele alınacağı ayrı bir sıralama kararı - "oyun her an
+inşa halinde" olduğu için artık "playtest sonrası" gibi bir eşiğe
+bağlanmıyorlar (bkz. aşağıdaki not, aynı gerekçeyle #9'u da kapsıyor).
+
+**"Playtest" diye ayrı bir dönem yok.** Faz 11'in "erken bir fikir olabilir,
+dursun bir köşede" notuyla ertelediği yoldaki küçük olumlu sinyal fikri
+(#9), oyunun sürekli inşa halinde olduğu gerekçesiyle o çerçeveden çıkarıldı
+- ne zaman ele alınacağı hâlâ ayrı bir karar ama artık "bir playtest dönemi
+gelince" diye bir ön koşulu yok. `RoadSignals`'ın üç türü (bkz. Road Layer
+Rules) her biri bir dikkat bölgesine bağlı (`RoadAttention`: baş/vagonlar/
+arka) ve ihmal edilince büyüyor; bir dördüncü, olumlu tür aynı mimariye
+oturur ama ihmal edilince *büyümemeli*, yalnızca fırsat kaçmış olmalı -
+"hiçbir olumlu şey cezaya dönüşmez" (negatif sinyallerin tersi). Değerlendirmeye
+açık üç aday, üçü de mevcut vokabüleri kullanıyor, yeni bir sistem
+icat etmiyor:
+- **Baş bölgesi - "İz" sinyali.** Yakalanırsa küçük bir erzak bulma ya da
+  bir sonraki durağın erken açığa çıkması (İzci'nin zaten yaptığı erken
+  tehlike/duraklık gösteriminin bir günlük hali).
+- **Vagonlar bölgesi - "Yardımcı el" sinyali.** Yakalanırsa küçük bir vagon
+  hasarı iyileşmesi ya da o günkü erzak tüketiminde küçük bir tasarruf.
+- **Arka bölgesi - "Sohbet" sinyali.** Yakalanırsa küçük bir stres/moral
+  iyileşmesi - kampın "ücretsiz ama yavaş" kolunun günlük, küçük bir
+  eşdeğeri.
+
+**Kıyafet sisteminin kapsamı netleşti.** `OutfitCatalog`/`OutfitPiece`
+bugün yalnızca `OutfitPreview`'da (karakter oluşturmadaki boydan önizleme)
+okunuyor - `WalkFigure` (dünya) ve `CombatFigure` (savaş) hiçbir zaman
+`CharacterData.outfit`'e bakmıyor, yani bir kıyafet seçimi şu an oyunun
+geri kalanında **görünmüyor**, yalnızca o önizleme penceresinde. Elle
+çizilmiş görsellerin (Faz 10'un işaretlediği, hâlâ tamamlanmamış "next")
+ilk hedeflerinden biri bu boşluğu kapatmak olmalı - altı slot (şapka/
+gömlek/ceket/eldiven/pantolon/ayakkabı) zaten parça parça ayrılmış durumda
+(`OutfitCatalog.SLOT_*`, her biri kendi küçük havuzuyla), tek eksik olan bu
+parçaların `WalkFigure`/`CombatFigure` üzerinde de okunup çizilmesi -
+sistemin kendisi (Faz 13 PR'ının kasıtlı sırasıyla: "önce sistemi kur,
+seçenekleri sonra ekle") zaten buna hazır kurulmuş durumda. `Equipment`
+(kılıç/zırh gibi combat parçaları) tamamen ayrı bir sistem kalır - `outfit`
+kozmetik, `equipped` savaşı etkiler; ikisi de karaktere görsel bir katman
+eklerken birbirine karışmaz (yukarıdaki "reddedildi" maddesinin gerekçesi).
+
+**Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
+tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"
+notu). Kervana kabul edilmiş (yani eskort olarak taşınan) bir tüccarın
+vagonuna tıklamak onunla bir sohbet açar: izin verirse envanteri
+görüntülenir, vermezse oyuncu zorla bakmayı deneyebilir, tekrar ikna
+etmeyi deneyebilir, ya da vazgeçebilir - salt bir "göster/gösterme"
+anahtarı değil, `NpcDisposition`/ikna vokabülerinin (bkz. Event Character
+Rules, `evt_mutiny`'nin manipüle seçeneği) vagon etkileşimine taşınmış
+hâli. Henüz uygulanmadı, tasarım notu olarak duruyor.
+
+**Genel bir "Kervan Yükü" ekranı artık daha geniş tanımlandı**: kervanın
+sembolik bir görünümü, her vagonun altında o vagonun ağırlığı, ona bağlı
+kişiler ve hesaplanan hızı; en sağda kervanın **teorik hızı** - en yavaş
+vagonun hızı (bir kervan en yavaş tekerleğinden hızlı gidemez). Aynı
+ekrandan kervandaki herkesin açlık/stres/moral durumu ve kervan hakkındaki
+toplu "düşünceleri" görülebilmeli. `CaravanStatusPanel`'in (bkz. Road
+Screen Layout Rules) salt-okunur dökümüyle akraba ama ondan geniş - o yol
+ekranının bir Tab paneli, bu ayrı, kendi başına bir ekran/mekanik. Henüz
+uygulanmadı, tasarım notu olarak duruyor.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
