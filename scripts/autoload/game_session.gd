@@ -720,6 +720,65 @@ func get_effective_manipulation() -> float:
 	var bonus := PRUDENT_MANIPULATION_BONUS if party_has_trait(TraitCatalog.PRUDENT) else 0.0
 	return get_best_effective_stat(CharacterStats.Kind.CHARISMA) + bonus
 
+## --- Yabancı tüccarın vagonuna diyalog yoluyla bakış (bkz. CLAUDE.md Ana
+## Hedefler'in "#11" notu) ---
+## Kervana kabul edilmiş (eskort olarak taşınan) bir tüccarın vagonuna
+## yolda tıklamak bir sohbet açar: izin iste / zorla bak / tekrar ikna et
+## / vazgeç. Ödül ekonomik değil - mizacın kendisi (bkz. NpcDisposition),
+## Event Character Rules'un zaten kurduğu "oyuncuya söylenmez, yalnızca
+## Sezgi ile ipucu" kuralının aynısı. Bu yüzden ekonomiye sızma riski yok
+## (bkz. Kervan Envanteri Rules'un "yazma yolu hiç yok" notu).
+
+## Zorla bakmak izin gerektirmiyor ama bedelsiz değil - `HagglingSession.
+## WALKOUT_REPUTATION_PENALTY`'nin aynı ailesinden küçük bir itibar bedeli.
+const FORCE_LOOK_MERCHANT_REPUTATION_PENALTY: int = 2
+
+## "Tekrar ikna et" - `evt_mutiny`'nin manipüle seçeneğiyle aynı vokabüler
+## (get_effective_manipulation), yeni bir sistem icat etmiyor.
+const MERCHANT_PERSUASION_BASE_CHANCE: float = 0.25
+const MERCHANT_PERSUASION_PER_CHARISMA: float = 0.08
+const MERCHANT_PERSUASION_MIN_CHANCE: float = 0.05
+const MERCHANT_PERSUASION_MAX_CHANCE: float = 0.85
+
+## LOYAL ve DESPERATE'in saklayacağı bir şey yok; THIEF ve VENGEFUL izin
+## vermez - "izin iste" adımının cevabı.
+func merchant_grants_permission(merchant_name: String) -> bool:
+	var disposition := String(caravan.merchant_disposition_by_name.get(
+		merchant_name, NpcDisposition.LOYAL
+	))
+	return disposition == NpcDisposition.LOYAL or disposition == NpcDisposition.DESPERATE
+
+func attempt_merchant_persuasion(rng: RandomNumberGenerator) -> bool:
+	var chance := clampf(
+		MERCHANT_PERSUASION_BASE_CHANCE
+			+ get_effective_manipulation() * MERCHANT_PERSUASION_PER_CHARISMA,
+		MERCHANT_PERSUASION_MIN_CHANCE, MERCHANT_PERSUASION_MAX_CHANCE
+	)
+	return rng.randf() < chance
+
+func force_look_merchant_wagon(merchant_name: String) -> void:
+	caravan.merchant_known_by_name[merchant_name] = true
+	change_reputation(-FORCE_LOOK_MERCHANT_REPUTATION_PENALTY)
+
+func grant_merchant_look(merchant_name: String) -> void:
+	caravan.merchant_known_by_name[merchant_name] = true
+
+func is_merchant_known(merchant_name: String) -> bool:
+	return bool(caravan.merchant_known_by_name.get(merchant_name, false))
+
+## Mizaç yalnızca güçlü Sezgi ile okunur - `ROLL_ENCOUNTER`'ın "oyuncuya
+## söylenmez, yalnızca ipucu" kuralının aynısı (bkz. Event Character
+## Rules). Bilinmiyorsa (izin/zorla bakış henüz olmadıysa) boş döner.
+func get_merchant_disposition_label(merchant_name: String) -> String:
+	if not is_merchant_known(merchant_name):
+		return ""
+	if get_best_effective_stat(CharacterStats.Kind.PERCEPTION) < NpcDisposition.READ_PERCEPTION_THRESHOLD:
+		return ""
+	var disposition := String(caravan.merchant_disposition_by_name.get(
+		merchant_name, NpcDisposition.LOYAL
+	))
+	return EventEffectApplier.tr_disposition(disposition)
+
 ## Olay kaynaklı stres darbelerine karşı - "dış olaylardan az etkilenir"
 ## (bkz. CLAUDE.md Faz 13). Bilerek `change_stress()`'in kendisine değil,
 ## yalnızca buraya eklendi: günlük yol aşınması, kamp ve tempo cezası
@@ -1626,13 +1685,9 @@ func _sync_wagon_inventories() -> void:
 func get_cargo_capacity() -> float:
 	return owned_wagon_count * CARGO_PER_WAGON
 
-## Bir vagonun ne kadar dolu olduğu, yolun kendi hızına henüz hiç
-## dokunmayan (bkz. Road Movement Rules'un WALK_FORWARD_RATE'i, hâlâ tek
-## başına geçerli), yalnızca bu ekranda gösterilen **bilgilendirici** bir
-## oran. Kervanın gerçek yürüyüş hızını bugün etkilemiyor - bunu asıl
-## tempoya bağlamak Provision Rules'un "correct stocking never starves"
-## sözünü etkileyen, kendi başına ölçülmesi gereken ayrı bir denge kararı
-## (bkz. Ruin Rules'un "measure before wiring into balance" disiplini).
+## Bir vagonun ne kadar dolu olduğu - bkz. `get_caravan_theoretical_speed()`,
+## artık yalnızca bilgilendirici değil, yolun gerçek yürüyüş hızını da
+## belirliyor (bkz. road_journey.gd'nin `_walk_at()`'i).
 const WAGON_LOAD_SPEED_PENALTY: float = 0.35
 const WAGON_MIN_SPEED_FACTOR: float = 0.55
 
@@ -1643,13 +1698,30 @@ func get_wagon_speed_factor(wagon_index: int) -> float:
 	var load_ratio := clampf(wagon_inventory.get_total_weight() / CARGO_PER_WAGON, 0.0, 1.0)
 	return clampf(1.0 - WAGON_LOAD_SPEED_PENALTY * load_ratio, WAGON_MIN_SPEED_FACTOR, 1.0)
 
-## Bir kervan en yavaş tekerleğinden hızlı gidemez - kervanın "teorik
-## hızı" vagonların en düşük yük faktörü. Vagon yoksa (kuramsal, oyun
-## her zaman en az bir vagonla başlar) tam hız varsayılır.
-func get_caravan_theoretical_speed() -> float:
-	if wagon_inventories.is_empty():
-		return 1.0
+## Adı `DutyCatalog.get_condition_multiplier()`'la aynı fikri taşıyor
+## (kırılmış ya da canının yarısının altında biri daha az katkı verir) -
+## burada görev gücüne değil, o kişinin yürüyüşe kattığı hıza uygulanıyor.
+## Aynı formülü ikinci kez yazmak yerine doğrudan çağırıyor: iki sistem de
+## "kondisyon" kelimesini aynı sayıyla anlamalı.
+func get_party_condition_speed_factor() -> float:
 	var slowest := 1.0
+	for character in get_party():
+		slowest = minf(slowest, DutyCatalog.get_condition_multiplier(character))
+	return slowest
+
+## Bir kervan en yavaş tekerleğinden ya da en bitkin/yaralı yolcusundan
+## hızlı gidemez - "teorik hızı" vagonların yük faktörleriyle partinin
+## kondisyon faktörünün **en düşüğü**. Vagon yoksa (kuramsal, oyun her
+## zaman en az bir vagonla başlar) tam hız varsayılır; parti her zaman en
+## az bir kişi (oyuncu) içerir.
+##
+## Bu sayı `CaravanOverviewPanel`de gösteriliyordu ama bir süre yalnızca
+## bilgilendiriciydi (bkz. Provision Rules'un `travel_reserve_days`'i -
+## planlayıcı artık bu payı önceden istiyor, tam olarak havanın yaptığı
+## gibi). Tam kondisyonda ve boş vagonda çarpan tam 1.0, yani eski
+## davranış aynen.
+func get_caravan_theoretical_speed() -> float:
+	var slowest := get_party_condition_speed_factor()
 	for index in wagon_inventories.size():
 		slowest = minf(slowest, get_wagon_speed_factor(index))
 	return slowest

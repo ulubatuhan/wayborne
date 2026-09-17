@@ -114,22 +114,33 @@ static func pace_multiplier(weather: String) -> float:
 ## her gününün havasını *şimdiden* biliyor. Kervanın her gün `pace` kadar
 ## yol aldığı düşünülürse, bir günlük mesafeyi yürümek `1/pace` gün
 ## sürüyor; fark da yolun uzaması.
+##
+## `condition_factor` kervanın kendi durumundan gelen ek bir çarpan
+## (bkz. GameSession.get_caravan_theoretical_speed - vagon yükü ve parti
+## kondisyonunun en yavaşı). Varsayılanı 1.0, yani eski çağrı yerleri
+## (ve bu imzayı hâlâ 4 parametreyle çağıran testler) hiç değişmeden
+## geçer. İki yavaşlatıcıyı **aynı günlük yürüyüşün içinde** çarpmak
+## şart - hava payını ve kondisyon payını ayrı ayrı hesaplayıp toplamak
+## bileşik yavaşlamayı hafife alırdı (iki çarpan birlikte etkiliyken tek
+## başına hesaplanan iki rezerv, gerçek ihtiyacın altında kalabilir).
 static func forecast_extra_days(
-	route_key: String, start_day: int, terrain: RouteTerrain, travel_days: int
+	route_key: String, start_day: int, terrain: RouteTerrain, travel_days: int,
+	condition_factor: float = 1.0
 ) -> float:
 	var days := maxi(1, travel_days)
 	var walked := 0.0
 	var spent := 0
-	# Yol bitene kadar gün gün yürüyoruz; kötü havada bir gün bir günden
-	# az mesafe kapatıyor, o yüzden döngü `days`'ten uzun sürebilir.
-	# Tavan güvenlik için: en kötü hava bile yolu iki katından fazla
-	# uzatmıyor (bkz. PACE'in en küçük değeri).
-	while walked < float(days) and spent < days * 3 + 6:
+	var condition := clampf(condition_factor, 0.05, 1.0)
+	# Yol bitene kadar gün gün yürüyoruz; kötü havada ya da düşük
+	# kondisyonda bir gün bir günden az mesafe kapatıyor, o yüzden döngü
+	# `days`'ten uzun sürebilir. Tavan güvenlik için: en kötü hava/kondisyon
+	# bileşimi bile yolu sınırsız uzatamaz.
+	while walked < float(days) and spent < days * 6 + 12:
 		var biome := ArtPalette.FALLBACK_BIOME
 		if terrain != null:
 			biome = terrain.biome_at(walked)
 		var weather := at(route_key, start_day + spent, biome)
-		walked += pace_multiplier(weather)
+		walked += pace_multiplier(weather) * condition
 		spent += 1
 	return maxf(0.0, float(spent) - float(days))
 

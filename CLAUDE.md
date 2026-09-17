@@ -1844,11 +1844,18 @@ turns materials into other materials, per the #22 backlog note above.
   is **disabled with its reason** (`get_craft_block_reason_in_wagon()`),
   the same rule as a locked event choice, a locked skill or a locked
   equipment tier - never hidden.
-- **What #22's own design note asked for and did not get:** a read-only
-  view into a *foreign* trader's wagon, and a dedicated "Kervan Yükü"
-  screen for placing cargo wagon-by-wagon on purpose ahead of time (rather
-  than discovering the split by walking up to each wagon). Neither exists
-  yet. Either is a real follow-up, not a rejection.
+- **What #22's own design note asked for, and how much of it landed:** a
+  read-only view into a *foreign* trader's wagon (Faz 16 - see
+  `MerchantDialoguePanel` below), and a dedicated "Kervan Yükü" screen
+  for placing cargo wagon-by-wagon on purpose ahead of time (rather than
+  discovering the split by walking up to each wagon). The first shipped,
+  but as a dialogue that reveals the trader's hidden *disposition*
+  (`NpcDisposition`) rather than a literal item list - there is still no
+  real inventory model for an escort merchant's cargo (`MerchantOffer`
+  only carries an abstract profit/wagon count), so a disposition reveal
+  is what "look into their wagon" honestly cashes out to today. The
+  second - "Kervan Yükü" - still doesn't exist; a real follow-up, not a
+  rejection.
 - `tests/test_wagon_inventory.gd` locks the load-bearing claims: each wagon
   keeps its own weight ceiling, a stack splits across wagons when it must,
   an over-total request touches no wagon, selling a wagon never loses
@@ -2852,15 +2859,6 @@ verir.
   (küçük hasar iyileşmesi/erzak tasarrufu), arka bölgede "Sohbet" (küçük
   stres/moral iyileşmesi) - ihmal edilince ceza yok, yalnızca fırsat
   kaçmış olur. Hangisiyle başlanacağı ayrı bir karar.
-- **Yabancı tüccarın vagonuna diyalog yoluyla bakış.** Kervana kabul
-  edilmiş bir tüccarın vagonuna tıklamak sohbet açar: izin/zorla bak/
-  tekrar ikna et/vazgeç. `NpcDisposition`/ikna vokabülerinin (bkz. Event
-  Character Rules) vagon etkileşimine taşınmış hâli - bkz. Kervan
-  Envanteri Rules'un "#22'nin karşılanmayan" notu. Tasarım hazır,
-  uygulanmadı.
-- **Kampanya bölümlerinin sadeleştirilmesi - ertelendi.** Sadeleştirilecek
-  asıl hikâye/anlatı içeriği henüz yazılmadı; içerik yazılınca tekrar
-  gündeme gelebilir.
 - **Beş yol durağının hâlâ mekanik karşılığı yok.** Faz 16'nın rota/hava
   denetimi `evt_roadside_shrine`'ı gerçek sunak durağına bağladı (bkz.
   Route Terrain & Weather Rules) ama konak/karakol/maden/geçit/köprü
@@ -2869,8 +2867,14 @@ verir.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
-`evt_roadside_shrine`'ın gerçek sunak durağına bağlanması - üçü de
-aşağıdaki Faz 16 anlatısında ve Route Terrain & Weather Rules'ta.
+`evt_roadside_shrine`'ın gerçek sunak durağına bağlanması, yabancı
+tüccarın vagonuna diyalog yoluyla bakış (`MerchantDialoguePanel`),
+vagonun ve partinin kondisyonunun yolun gerçek yürüyüş hızını belirlemesi
+- beşi de aşağıdaki Faz 16 anlatısında ve Route Terrain & Weather
+Rules'ta.
+
+**Silindi (oyuncunun kendi kararıyla, bir daha gündeme gelmeyecek):**
+kampanya bölümlerinin sadeleştirilmesi.
 
 **Kalıcı olarak reddedildi, bir daha gündeme gelmeyecek:** stres/moral
 birleşmesi, borç sisteminin kapsamının daraltılması, ekipmanın kargoya
@@ -3535,20 +3539,37 @@ bu aynı altı-slot mimarisi belirleyecek; yapı değişmez, yalnızca `_draw()`
 çağrıları `TextureRect`/`Sprite2D`'ye yer açar (Art Rules'un genel sprite
 geçiş kuralı).
 
-Faz 16 böylece fiilen başladı - kıyafet, genel kervan ekranı ve
+Faz 16 böylece fiilen başladı - kıyafet, genel kervan ekranı,
 `evt_roadside_shrine`'ın rota coğrafyasına bağlanması (bkz. Route Terrain
-& Weather Rules) tamamlanan üç parça, aşağıdaki (yabancı vagon diyaloğu)
-hâlâ tasarım notu.
+& Weather Rules), yabancı tüccarın vagonuna diyalog yoluyla bakış ve
+vagon/parti kondisyonunun yolun gerçek hızını belirlemesi - beşi de
+tamamlandı.
 
-**Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
-tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"
-notu). Kervana kabul edilmiş (yani eskort olarak taşınan) bir tüccarın
-vagonuna tıklamak onunla bir sohbet açar: izin verirse envanteri
-görüntülenir, vermezse oyuncu zorla bakmayı deneyebilir, tekrar ikna
-etmeyi deneyebilir, ya da vazgeçebilir - salt bir "göster/gösterme"
-anahtarı değil, `NpcDisposition`/ikna vokabülerinin (bkz. Event Character
-Rules, `evt_mutiny`'nin manipüle seçeneği) vagon etkileşimine taşınmış
-hâli. Henüz uygulanmadı, tasarım notu olarak duruyor.
+**Yabancı tüccarın vagonuna bakış bir diyalog mekaniği olarak uygulandı:
+`MerchantDialoguePanel`** (bkz. Kervan Envanteri Rules'un "#22'nin
+karşılanmayan" notu). F2 emir menüsünün yeni bir komutu - "Tüccarla
+Konuş" - eskort tüccar yoksa kilitli gösteriliyor, kendi sebebiyle
+(`UI_ROAD_CMD_TALK_MERCHANT_LOCKED`), aynı "disabled with reason" kuralı
+olay seçimi/ekipman/vagon satışında geçerli olduğu gibi burada da.
+Birden çok eskort varsa önce bir liste, sonra seçilen tüccarın kendi
+görünümü. Kervana kabul edilmiş (eskort olarak taşınan) bir tüccarla
+konuşmak izin sorusunu otomatik sorar: `NpcDisposition.LOYAL`/`DESPERATE`
+her zaman izin verir, `THIEF`/`VENGEFUL` vermez (bkz.
+`GameSession.merchant_grants_permission()`). Reddedilirse üç yol açılır -
+**Zorla Bak** (izin gerektirmiyor ama küçük bir itibar bedeli var,
+`HagglingSession.WALKOUT_REPUTATION_PENALTY`'nin aynı ailesinden),
+**Tekrar İkna Et** (`get_effective_manipulation()` - `evt_mutiny`'nin
+manipüle seçeneğiyle aynı vokabüler, yeni bir sistem icat etmiyor) ve
+**Vazgeç** (listeye dönüş, hiçbir bedeli yok). **Ödül ekonomik değil,
+bilgi**: mizacın kendisi - ve o bile Sezgi eşiğiyle sınırlı
+(`NpcDisposition.READ_PERCEPTION_THRESHOLD`), Event Character Rules'un
+zaten kurduğu "oyuncuya söylenmez, yalnızca ipucu" kuralının aynısı. Bu
+yüzden `#22`'nin tasarım notunun "yazma yolu hiç yok, ekonomiye sızma
+riski yok" garantisi burada da geçerli - görüntülenecek bir envanter bile
+icat edilmedi, çünkü mizaç zaten kendi başına yeterli bir ödül. Mizaç
+tüccarın isminden türetilmiş sabit bir tohumla atanıyor
+(`CaravanState.from_plan()`): aynı isimli bir tüccarla ileride tekrar
+karşılaşmak hep aynı huyu buluyor.
 
 **Genel bir kervan yönetimi ekranı uygulandı: `CaravanOverviewPanel`.**
 Kervan burada gerçekten sembolize ediliyor - her vagon kendi simgesiyle
@@ -3571,13 +3592,31 @@ da hiç var olmadı (açlık yalnızca yolda anlık bir olay), o yüzden icat
 edilmedi. Kervandaki herkesin kısa bir "düşüncesi" (stres/can okunarak
 seçilen bir satır, Faz 13 PR-D'nin kısa savaş yorumlarıyla aynı disiplin -
 metin, yeni sistem değil) da burada.
-**Vagon hızı bugün yalnızca bilgilendirici** - `GameSession.
-get_wagon_speed_factor()`'ın kendi yorum satırı bunu açıkça söylüyor:
-yolun gerçek tempusuna henüz bağlı değil. Bunu asıl yürüyüşe bağlamak
-Provision Rules'un "correct stocking never starves" sözünü etkileyen ayrı,
-kendi başına ölçülmesi gereken bir denge kararı - Ruin Rules'un kendi
-"measure before wiring into balance" disiplini burada da geçerli, iki
-karar aynı pastada ölçülmeden üst üste bindirilmiyor.
+**Vagon hızı artık yolun gerçek yürüyüş hızını da belirliyor - iki karar
+aynı pastada, ama ölçülerek.** `get_caravan_theoretical_speed()` sadece
+vagonların yük faktörünü değil, partinin kendi kondisyonunu da okuyor:
+`get_party_condition_speed_factor()` `DutyCatalog.get_condition_
+multiplier()`'ın aynı formülünü (kırılmış ya da canının yarısının
+altındaki biri daha az katkı verir) görev gücüne değil yürüyüş hızına
+uyguluyor - aynı "kondisyon" kelimesi iki sistemde de aynı sayı olsun
+diye, formül ikinci kez yazılmadı. Kervanın teorik hızı ikisinin
+**en düşüğü**; `road_journey.gd`'nin tek yürüme kapısı `_walk_at()`
+artık bunu tempo ve havanın yanına üçüncü çarpan olarak ekliyor - tam
+kondisyonda ve boş vagonda çarpan tam 1.0, yani eski davranış aynen.
+Ruin Rules'un "measure before wiring into balance" disiplini burada da
+işletildi: bu yavaşlama Provision Rules'un "correct stocking never
+starves" sözünü bozabilirdi, o yüzden `RouteWeather.forecast_extra_days()`
+bir `condition_factor` parametresi aldı ve hava ile kondisyonu **aynı
+günlük yürüyüşte çarpıyor** - ikisini ayrı ayrı hesaplayıp toplamak
+bileşik yavaşlamayı hafife alırdı (weather_avg × condition ≠ weather_avg +
+condition - 1). Alanın adı da bu yüzden `CaravanPlan.weather_reserve_
+days`'ten `travel_reserve_days`'e değişti: artık ikisinin bileşik payını
+taşıyor. Planlayıcı bunu **yola çıkış anındaki** kondisyonla hesaplıyor
+(can zaten tam - `finish_journey()` şehir varışında iyileştiriyor -,
+stres ve vagon yükü o an ne ise); sefer ortasında alınan bir yara bu
+tahmini aşabilir, ama bu weather'ın kendisinin de paylaşmadığı bir risk
+değil - `HUNGRY_PACE_MULTIPLIER` gibi geri besleme etkileri de hiç
+forecast edilmiyor, aynı kabul.
 
 ## Quick Start
 
