@@ -2,8 +2,9 @@ extends RefCounted
 
 ## Vagon-bazlı envanter (bkz. GameSession.wagon_inventories), kişisel çanta
 ## taşkını (bkz. CharacterData.personal_inventory) ve Atölye craftlaması
-## (bkz. RecipeCatalog/GameSession.craft) - CLAUDE.md #22 tasarım notunun
-## Faz 15'te uygulanan hâli.
+## (bkz. RecipeCatalog/GameSession.craft_in_wagon - yolda tıklanan vagonun
+## kendi envanterinden okur/yazar, bkz. world_hub.gd) - CLAUDE.md #22
+## tasarım notunun Faz 15'te uygulanan hâli.
 
 func suite_name() -> String:
 	return "WagonInventory"
@@ -20,6 +21,7 @@ func run(t) -> void:
 	_test_save_round_trip_preserves_wagon_split_and_bags(t)
 	_test_legacy_single_inventory_save_still_loads(t)
 	_test_craft_bandage(t)
+	_test_craft_ignores_materials_in_other_wagons(t)
 	_test_repair_wagon_canvas_recipe(t)
 	_test_dismantle_recipe(t)
 	_test_craft_block_reasons(t)
@@ -202,45 +204,74 @@ func _test_legacy_single_inventory_save_still_loads(t) -> void:
 	})
 	t.eq(session.get_total_quantity("test_cloth"), 4, "eski tek liste vagona dağıtılarak yükleniyor")
 
+## Atölye o vagonun kendisi (bkz. world_hub.gd'nin vagon etkileşim
+## noktaları) - tarifler kervanın toplamından değil, yalnızca tıklanan
+## vagonun kendi envanterinden okur/yazar.
 func _test_craft_bandage(t) -> void:
 	var session := GameSession.new(0, 0, 1)
 	var recipe := RecipeCatalog.get_recipe(RecipeCatalog.CRAFT_BANDAGE)
-	t.not_ok(session.can_craft(recipe), "malzemesiz craftlanamaz")
-	t.eq(session.get_craft_block_reason(recipe), "UI_CRAFT_MISSING_MATERIAL", "sebep malzeme eksikliği")
+	t.not_ok(session.can_craft_in_wagon(0, recipe), "malzemesiz craftlanamaz")
+	t.eq(
+		session.get_craft_block_reason_in_wagon(0, recipe), "UI_CRAFT_MISSING_MATERIAL",
+		"sebep malzeme eksikliği"
+	)
 
-	session.add_to_cargo(ItemCatalog.get_item("test_cloth"), 2)
-	t.ok(session.can_craft(recipe), "iki kumaşla craftlanabilir")
-	t.ok(session.craft(RecipeCatalog.CRAFT_BANDAGE), "craft başarılı")
-	t.eq(session.get_total_quantity("test_cloth"), 0, "malzeme tüketildi")
-	t.eq(session.get_total_quantity("test_bandage"), 1, "bandaj üretildi")
+	session.wagon_inventories[0].add_item(ItemCatalog.get_item("test_cloth"), 2)
+	t.ok(session.can_craft_in_wagon(0, recipe), "iki kumaşla craftlanabilir")
+	t.ok(session.craft_in_wagon(0, RecipeCatalog.CRAFT_BANDAGE), "craft başarılı")
+	t.eq(session.wagon_inventories[0].get_quantity("test_cloth"), 0, "malzeme tüketildi")
+	t.eq(session.wagon_inventories[0].get_quantity("test_bandage"), 1, "bandaj aynı vagona yazıldı")
+
+## Asıl mesele bu: malzeme *başka* bir vagondaysa, bu vagonda craftlanamaz.
+## "Hangi vagonda ne var" ilk kez gerçekten anlam taşıyor.
+func _test_craft_ignores_materials_in_other_wagons(t) -> void:
+	var session := GameSession.new(1000, 0, 1)
+	session.wallet.earn(5000)
+	session.buy_wagon()  # iki vagon
+
+	var recipe := RecipeCatalog.get_recipe(RecipeCatalog.CRAFT_BANDAGE)
+	session.wagon_inventories[1].add_item(ItemCatalog.get_item("test_cloth"), 2)
+
+	t.not_ok(
+		session.can_craft_in_wagon(0, recipe),
+		"kumaş ikinci vagondayken birinci vagonda craftlanamaz"
+	)
+	t.ok(session.can_craft_in_wagon(1, recipe), "kumaşın olduğu vagonda craftlanabilir")
 
 func _test_repair_wagon_canvas_recipe(t) -> void:
 	var session := GameSession.new(0, 0, 1)
 	var recipe := RecipeCatalog.get_recipe(RecipeCatalog.REPAIR_WAGON_CANVAS)
-	session.add_to_cargo(ItemCatalog.get_item("test_cloth"), 3)
+	session.wagon_inventories[0].add_item(ItemCatalog.get_item("test_cloth"), 3)
 
-	t.not_ok(session.can_craft(recipe), "hasar yokken onarım tarifi kapalı")
-	t.eq(session.get_craft_block_reason(recipe), "UI_CRAFT_NO_DAMAGE", "sebep hasarsızlık")
+	t.not_ok(session.can_craft_in_wagon(0, recipe), "hasar yokken onarım tarifi kapalı")
+	t.eq(
+		session.get_craft_block_reason_in_wagon(0, recipe), "UI_CRAFT_NO_DAMAGE",
+		"sebep hasarsızlık"
+	)
 
 	session.owned_wagon_damaged = 1
-	t.ok(session.can_craft(recipe), "hasar varken malzemeyle onarılabilir")
-	t.ok(session.craft(RecipeCatalog.REPAIR_WAGON_CANVAS), "onarım başarılı")
+	t.ok(session.can_craft_in_wagon(0, recipe), "hasar varken malzemeyle onarılabilir")
+	t.ok(session.craft_in_wagon(0, RecipeCatalog.REPAIR_WAGON_CANVAS), "onarım başarılı")
 	t.eq(session.owned_wagon_damaged, 0, "hasar malzemeyle düştü")
-	t.eq(session.get_total_quantity("test_cloth"), 0, "malzeme tüketildi")
+	t.eq(session.wagon_inventories[0].get_quantity("test_cloth"), 0, "malzeme tüketildi")
 
 func _test_dismantle_recipe(t) -> void:
 	var session := GameSession.new(0, 0, 1)
-	session.add_to_cargo(ItemCatalog.get_item("test_furs"), 1)
-	t.ok(session.craft(RecipeCatalog.DISMANTLE_TO_BANDAGE), "sökme başarılı")
-	t.eq(session.get_total_quantity("test_furs"), 0, "kürk tüketildi")
-	t.eq(session.get_total_quantity("test_bandage"), 2, "iki bandaj çıktı")
+	session.wagon_inventories[0].add_item(ItemCatalog.get_item("test_furs"), 1)
+	t.ok(session.craft_in_wagon(0, RecipeCatalog.DISMANTLE_TO_BANDAGE), "sökme başarılı")
+	t.eq(session.wagon_inventories[0].get_quantity("test_furs"), 0, "kürk tüketildi")
+	t.eq(session.wagon_inventories[0].get_quantity("test_bandage"), 2, "iki bandaj aynı vagona çıktı")
 
-## Kilitli bir tarif *sebebiyle birlikte* gösterilir - hem craft() hem
-## get_craft_block_reason() aynı kilide bakmalı.
+## Kilitli bir tarif *sebebiyle birlikte* gösterilir - hem craft_in_wagon()
+## hem get_craft_block_reason_in_wagon() aynı kilide bakmalı.
 func _test_craft_block_reasons(t) -> void:
 	var session := GameSession.new(0, 0, 1)
-	t.not_ok(session.craft("bilinmeyen_tarif"), "olmayan tarif craftlanamaz")
+	t.not_ok(session.craft_in_wagon(0, "bilinmeyen_tarif"), "olmayan tarif craftlanamaz")
 	t.not_ok(
-		session.craft(RecipeCatalog.CRAFT_BANDAGE),
-		"malzemesiz craft() de başarısız olur, get_craft_block_reason'la tutarlı"
+		session.craft_in_wagon(0, RecipeCatalog.CRAFT_BANDAGE),
+		"malzemesiz craft_in_wagon() de başarısız olur, get_craft_block_reason_in_wagon'la tutarlı"
+	)
+	t.not_ok(
+		session.can_craft_in_wagon(99, RecipeCatalog.get_recipe(RecipeCatalog.CRAFT_BANDAGE)),
+		"var olmayan bir vagon indeksi de kapalı sayılır"
 	)
