@@ -86,8 +86,15 @@ func _ready() -> void:
 		origin.location_id, _destination.location_id
 	)
 	_terrain = RouteTerrain.build(route_key, travel_days)
-	_plan.weather_reserve_days = int(ceil(RouteWeather.forecast_extra_days(
-		route_key, _session.total_days_elapsed + 1, _terrain, travel_days
+	# Kondisyon payı hava payıyla aynı hesaba giriyor (bkz. RouteWeather.
+	# forecast_extra_days'in condition_factor notu) - vagon yükü ve parti
+	# kondisyonunun bugünkü (yola çıkış anındaki) en yavaşı, seferin
+	# kalanında da geçerli varsayılıyor. Şehre varışta can zaten tam
+	# (bkz. finish_journey), o yüzden bu anlık görüntü genelde iyimser
+	# değil gerçekçi bir taban.
+	_plan.travel_reserve_days = int(ceil(RouteWeather.forecast_extra_days(
+		route_key, _session.total_days_elapsed + 1, _terrain, travel_days,
+		_session.get_caravan_theoretical_speed()
 	)))
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
@@ -134,10 +141,10 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		terrain_label.modulate = Color(0.78, 0.80, 0.74)
 		_content.add_child(terrain_label)
 
-	if _plan.weather_reserve_days > 0:
+	if _plan.travel_reserve_days > 0:
 		var weather_label := Label.new()
 		weather_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-		weather_label.text = tr("UI_PLANNER_WEATHER_RESERVE") % _plan.weather_reserve_days
+		weather_label.text = tr("UI_PLANNER_WEATHER_RESERVE") % _plan.travel_reserve_days
 		weather_label.modulate = SHORTFALL_COLOR
 		_content.add_child(weather_label)
 

@@ -217,9 +217,11 @@ var _signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Duman görmezden gelindiğinde yolun tehlikesine eklenen pay.
 var _signal_danger_bonus: float = 0.0
 var _command_panel: PanelContainer
+var _talk_merchant_button: Button
 var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
+var _merchant_dialogue_panel: MerchantDialoguePanel = null
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
@@ -728,6 +730,7 @@ const COMMANDS: Array[Dictionary] = [
 	{"key": "UI_ROAD_CMD_SLOW", "pace": PACE_SLOW, "pace_key": "UI_ROAD_PACE_SLOW"},
 	{"key": "UI_ROAD_CMD_HALT", "pace": PACE_HALT, "pace_key": "UI_ROAD_PACE_HALT"},
 	{"key": "UI_ROAD_CMD_DETACH", "pace": -1.0, "pace_key": ""},
+	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": ""},
 ]
 
 func _build_command_panel() -> PanelContainer:
@@ -761,8 +764,30 @@ func _build_command_panel() -> PanelContainer:
 		row.text = "%d. %s" % [index + 1, tr(String(COMMANDS[index].key))]
 		row.pressed.connect(_issue_command.bind(index))
 		column.add_child(row)
+		if is_equal_approx(float(COMMANDS[index].pace), -2.0):
+			_talk_merchant_button = row
 
 	return panel
+
+## Eskort tüccarı yoksa komut **kilitli değil**, çünkü kilitleme kendi
+## satırının sırasını değiştirmez ve tuş 1-6 hep aynı emre karşılık
+## gelmeli (bkz. yukarısındaki "sıra tuşu hâlâ birincil yol" notu) - ama
+## kilitli olay seçimi/ekipman/vagon satışıyla aynı kural burada da
+## geçerli: sebep gösterilmeden pasifleştirilmez. F2 açılırken çağrılır,
+## çünkü tüccar listesi sefer boyunca değişebilir (kaybedilebilir).
+func _refresh_talk_merchant_row() -> void:
+	if _talk_merchant_button == null:
+		return
+	if _session.caravan.merchant_names.is_empty():
+		_talk_merchant_button.text = "%d. %s" % [
+			COMMANDS.size(), tr("UI_ROAD_CMD_TALK_MERCHANT_LOCKED")
+		]
+		_talk_merchant_button.disabled = true
+	else:
+		_talk_merchant_button.text = "%d. %s" % [
+			COMMANDS.size(), tr("UI_ROAD_CMD_TALK_MERCHANT")
+		]
+		_talk_merchant_button.disabled = false
 
 ## Emir menüsü klavyeden sürülüyor (Mount & Blade deseni): F2 açar, sayı
 ## emri verir, Esc kapatır - oyuncunun eli yürüme tuşlarından kalkmıyor.
@@ -776,6 +801,8 @@ func _input(event: InputEvent) -> void:
 
 	if key_event.keycode == COMMAND_KEY:
 		_command_panel.visible = not _command_panel.visible
+		if _command_panel.visible:
+			_refresh_talk_merchant_row()
 		accept_event()
 		return
 
@@ -818,6 +845,9 @@ func _issue_command(index: int) -> void:
 	_command_panel.visible = false
 
 	var pace := float(command.pace)
+	if is_equal_approx(pace, -2.0):
+		_open_merchant_dialogue()
+		return
 	if pace < 0.0:
 		# Ayrılma emri bir anahtar: lideri kolona indiriyor, geri dönmek de
 		# aynı emrin kendisi.
@@ -1054,17 +1084,25 @@ func _advance_position(hours: float) -> void:
 	var rate := WALK_FORWARD_RATE if direction > 0.0 else -WALK_BACKWARD_RATE
 	_walk_at(rate * _pace, hours)
 
-## Yolun tek yürüme kapısı. Tempo ve hava burada çarpılıyor - iki ayrı
-## yerde çarpılırsa biri güncellenmeyi unutuyor.
+## Yolun tek yürüme kapısı. Tempo, hava ve kervanın kendi kondisyonu
+## burada çarpılıyor - iki ayrı yerde çarpılırsa biri güncellenmeyi
+## unutuyor.
 ##
-## Havanın yolu yavaşlatması erzak sözünü bozmuyor çünkü planlayıcı bu
-## payı önceden istiyor (bkz. CaravanPlan.weather_reserve_days); açık
-## havada ve normal tempoda çarpan tam 1.0, yani eski davranış aynen.
+## Havanın ve kondisyonun yolu yavaşlatması erzak sözünü bozmuyor çünkü
+## planlayıcı bu payı önceden istiyor (bkz. CaravanPlan.travel_reserve_days,
+## RouteWeather.forecast_extra_days'in condition_factor'ü); tam kondisyonda,
+## açık havada ve normal tempoda çarpan tam 1.0, yani eski davranış aynen.
+##
+## `get_caravan_theoretical_speed()` vagonun yüküyle partinin en yorgun/
+## yaralı üyesinin **en yavaşını** okur (bkz. o fonksiyonun kendi notu) -
+## kervan en yavaş tekerleğinden ya da en bitkin yolcusundan hızlı gidemez.
+## Bu sayı `CaravanOverviewPanel`de zaten gösteriliyordu, sadece
+## bilgilendiriciydi; artık gerçek yürüyüşü de belirliyor.
 func _walk_at(rate: float, hours: float) -> void:
 	if is_zero_approx(rate):
 		return
 	_walk_direction = signf(rate)
-	var effective := rate * RouteWeather.pace_multiplier(_weather)
+	var effective := rate * RouteWeather.pace_multiplier(_weather) * _session.get_caravan_theoretical_speed()
 	if _hungry:
 		effective *= HUNGRY_PACE_MULTIPLIER
 	_days_covered = clampf(
@@ -1977,6 +2015,7 @@ func _has_open_panel() -> bool:
 		or _succession_panel != null
 		or _meal_panel != null
 		or _pre_combat_panel != null
+		or _merchant_dialogue_panel != null
 	)
 
 ## Sefer sürerken kayıt hiç yapılamaz - `SaveManager`in başındaki not:
@@ -1993,6 +2032,22 @@ func _open_in_game_menu() -> void:
 
 func _on_in_game_menu_dismissed() -> void:
 	_in_game_menu = null
+
+## Yabancı tüccarın vagonuna diyalog yoluyla bakış (bkz. CLAUDE.md Ana
+## Hedefler'in "#11" notu) - F2 emir menüsünün "Tüccarla Konuş" komutu.
+## Eskort yoksa `_talk_merchant_button` zaten kilitli gösteriliyor (bkz.
+## `_refresh_talk_merchant_row`), o yüzden burada tekrar sınamaya gerek
+## yok - komut yalnızca gerçekten açılabildiğinde tetiklenir.
+func _open_merchant_dialogue() -> void:
+	if _merchant_dialogue_panel != null:
+		return
+	_merchant_dialogue_panel = MerchantDialoguePanel.new()
+	_merchant_dialogue_panel.closed.connect(_on_merchant_dialogue_closed)
+	add_child(_merchant_dialogue_panel)
+	_merchant_dialogue_panel.setup(_session)
+
+func _on_merchant_dialogue_closed() -> void:
+	_merchant_dialogue_panel = null
 
 ## Liderlik devrinin töreni (bkz. SuccessionPanel) - `_has_open_panel()`'e
 ## eklendiği için `_check_journey_end()` ve zaman akışı bu ekranda durur,

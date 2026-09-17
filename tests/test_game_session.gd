@@ -20,6 +20,8 @@ func run(t) -> void:
 	_test_fixed_playthrough_start(t)
 	_test_weight_limit_binds(t)
 	_test_wagon_speed_factor(t)
+	_test_party_condition_speed_factor(t)
+	_test_merchant_dialogue(t)
 
 ## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
 ## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
@@ -392,3 +394,112 @@ func _test_wagon_speed_factor(t) -> void:
 		session.get_caravan_theoretical_speed(), loaded_factor,
 		"kervanın teorik hızı en yavaş (en yüklü) vagona eşit"
 	)
+
+## Vagon boş olsa da kırılmış ya da yaralı bir yolcu kervanı yavaşlatır -
+## `DutyCatalog.get_condition_multiplier()`'ın aynı formülü, burada görev
+## gücüne değil yürüyüş hızına uygulanmış (bkz. GameSession.
+## get_party_condition_speed_factor). Teorik hız artık ikisinin en yavaşı.
+func _test_party_condition_speed_factor(t) -> void:
+	var session := GameSession.new(1000, 0, 1)
+	var calm := CharacterData.create("Dinç", CultureCatalog.NOMAD, CharacterStats.new())
+	session.party.append(calm)
+	t.almost(
+		session.get_party_condition_speed_factor(), 1.0, "dinç ve sağlıklı bir parti tam hızda"
+	)
+	t.almost(
+		session.get_caravan_theoretical_speed(), 1.0, "boş vagon + dinç parti tam hızda"
+	)
+
+	var weary := CharacterData.create("Yorgun", CultureCatalog.NOMAD, CharacterStats.new())
+	weary.stress = CharacterData.MAX_STRESS
+	session.party.append(weary)
+	var weary_factor := DutyCatalog.get_condition_multiplier(weary)
+	t.ok(weary_factor < 1.0, "kırılmış biri tam hızın altında")
+	t.almost(
+		session.get_party_condition_speed_factor(), weary_factor,
+		"parti hızı en yorgun üyeye eşit"
+	)
+	t.almost(
+		session.get_caravan_theoretical_speed(), weary_factor,
+		"vagon boşken kervanın teorik hızı en yorgun üyeye eşit"
+	)
+
+	# Vagon yükü de devrede: ikisinin en yavaşı kazanmalı.
+	var cloth := ItemCatalog.get_item("test_cloth")
+	var near_full := session.wagon_inventories[0].get_addable_quantity(cloth)
+	session.wagon_inventories[0].add_item(cloth, near_full)
+	var wagon_factor := session.get_wagon_speed_factor(0)
+	t.almost(
+		session.get_caravan_theoretical_speed(), minf(wagon_factor, weary_factor),
+		"kervanın teorik hızı vagon ve parti faktörlerinin en düşüğü"
+	)
+
+## Yabancı tüccarın vagonuna diyalog yoluyla bakış (bkz. CLAUDE.md Ana
+## Hedefler'in "#11" notu): izin/zorla bak/tekrar ikna et/vazgeç.
+func _test_merchant_dialogue(t) -> void:
+	var destination := WorldMapData.get_locations()[0]
+	var plan := CaravanPlan.new(destination, 5)
+	var offer := MerchantOffer.new()
+	offer.merchant_name = "Test Tüccarı"
+	offer.wagon_count = 1
+	offer.potential_profit = 10
+	t.ok(plan.toggle_merchant(offer), "eskort teklifi eklenebiliyor")
+
+	var session := GameSession.new(1000, 0, 1)
+	session.caravan = CaravanState.from_plan(plan)
+
+	# from_plan her tüccar için geçerli, tekrarlanabilir bir mizaç atıyor.
+	var disposition := String(session.caravan.merchant_disposition_by_name.get(offer.merchant_name, ""))
+	t.ok(NpcDisposition.ALL.has(disposition), "atanan mizaç katalogda tanımlı")
+	var repeat_state := CaravanState.from_plan(plan)
+	t.eq(
+		String(repeat_state.merchant_disposition_by_name.get(offer.merchant_name, "")), disposition,
+		"aynı isim aynı mizacı verir - kalıcı bir kimlik, sefer başına yeniden zar değil"
+	)
+
+	t.not_ok(session.is_merchant_known(offer.merchant_name), "bakılmadan önce mizaç bilinmiyor")
+	t.eq(
+		session.get_merchant_disposition_label(offer.merchant_name), "",
+		"bilinmeyen bir mizaç hiç gösterilmez"
+	)
+
+	# İzin mizaca göre: LOYAL/DESPERATE her zaman izin verir, THIEF/VENGEFUL vermez.
+	session.caravan.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.LOYAL
+	t.ok(session.merchant_grants_permission(offer.merchant_name), "LOYAL izin verir")
+	session.caravan.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.DESPERATE
+	t.ok(session.merchant_grants_permission(offer.merchant_name), "DESPERATE izin verir")
+	session.caravan.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.THIEF
+	t.not_ok(session.merchant_grants_permission(offer.merchant_name), "THIEF izin vermez")
+	session.caravan.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.VENGEFUL
+	t.not_ok(session.merchant_grants_permission(offer.merchant_name), "VENGEFUL izin vermez")
+
+	# Zorla bakmak izin gerektirmiyor ama itibar bedeli var.
+	var reputation_before := session.reputation
+	session.force_look_merchant_wagon(offer.merchant_name)
+	t.ok(session.is_merchant_known(offer.merchant_name), "zorla bakış mizacı öğretir")
+	t.eq(
+		session.reputation, reputation_before - GameSession.FORCE_LOOK_MERCHANT_REPUTATION_PENALTY,
+		"zorla bakmak itibara mal olur"
+	)
+
+	# Sezgi eşiğinin altında mizaç hâlâ bilinse de gösterilmez (bkz.
+	# Event Character Rules'un "oyuncuya söylenmez, yalnızca ipucu" kuralı).
+	t.eq(
+		session.get_merchant_disposition_label(offer.merchant_name), "",
+		"düşük Sezgiyle bilinen bir mizaç bile gösterilmez"
+	)
+
+	# Tekrar ikna etme - get_effective_manipulation'a göre bir şans; çok
+	# tekrarda hem başarı hem başarısızlık görülmeli (aşırı marj deseni,
+	# bkz. test_traits.gd'nin roll_seed_trait sınaması).
+	var persuade_rng := RandomNumberGenerator.new()
+	persuade_rng.seed = 77
+	var successes := 0
+	var attempts := 400
+	for _i in attempts:
+		if session.attempt_merchant_persuasion(persuade_rng):
+			successes += 1
+	var rate := float(successes) / float(attempts)
+	t.ge(rate, GameSession.MERCHANT_PERSUASION_MIN_CHANCE - 0.05, "ikna şansı taban altına inmez")
+	t.le(rate, GameSession.MERCHANT_PERSUASION_MAX_CHANCE + 0.05, "ikna şansı tavanı aşmaz")
+	t.ok(successes > 0 and successes < attempts, "ikna hem başarabilir hem başarısız olabilir")

@@ -36,6 +36,7 @@ func run(t) -> void:
 	_test_biome_bias_actually_biases(t)
 	_test_visuals_match_the_mechanics(t)
 	_test_weather_reserve_keeps_the_provision_promise(t)
+	_test_condition_reserve_keeps_the_provision_promise(t)
 	_test_weather_reserve_stays_proportionate(t)
 
 func _test_terrain_is_reproducible(t) -> void:
@@ -317,7 +318,7 @@ func _test_weather_reserve_keeps_the_provision_promise(t) -> void:
 				var terrain := RouteTerrain.build(key, travel_days)
 				var plan := CaravanPlan.new(destination, travel_days, 6, 2)
 				plan.caravan_party_size = 3
-				plan.weather_reserve_days = int(ceil(
+				plan.travel_reserve_days = int(ceil(
 					RouteWeather.forecast_extra_days(key, start_day, terrain, travel_days)
 				))
 
@@ -342,7 +343,44 @@ func _test_weather_reserve_keeps_the_provision_promise(t) -> void:
 					"yol bitmeden erzak tükenmemeli (%s/%d gün/%d. gün)" % [key, travel_days, start_day]
 				)
 	t.eq(starved, 0, "hava payıyla stoklayan kervan hiç aç kalmamalı")
-	t.ge(float(checked), 80.0, "yeterince kombinasyon denenmiş olmalı")
+
+## Aynı söz, bu kez hava **ve** kervanın kendi kondisyonu (yüklü vagon,
+## yaralı/kırılmış bir parti üyesi) birlikte yavaşlatırken - bkz.
+## GameSession.get_caravan_theoretical_speed, road_journey.gd'nin
+## `_walk_at()`'i. `forecast_extra_days`'in `condition_factor` parametresi
+## ikisini aynı günlük yürüyüşte çarpıyor; burada da öyle yapılmalı, ayrı
+## ayrı hesaplayıp toplamak (bileşik yavaşlamayı hafife alır) değil.
+func _test_condition_reserve_keeps_the_provision_promise(t) -> void:
+	var destination := WorldMapData.get_locations()[0]
+	var starved := 0
+	for key in SAMPLE_KEYS:
+		for travel_days in [3, 5, 7]:
+			for condition in [1.0, 0.85, GameSession.WAGON_MIN_SPEED_FACTOR]:
+				var terrain := RouteTerrain.build(key, travel_days)
+				var plan := CaravanPlan.new(destination, travel_days, 6, 2)
+				plan.caravan_party_size = 3
+				plan.travel_reserve_days = int(ceil(
+					RouteWeather.forecast_extra_days(key, 1, terrain, travel_days, condition)
+				))
+
+				var provisions := plan.get_required_provisions()
+				var daily := plan.get_daily_consumption()
+				var walked := 0.0
+				var day := 0
+				while walked < float(travel_days) and day < travel_days * 8 + 16:
+					var weather := RouteWeather.at(key, 1 + day, terrain.biome_at(walked))
+					provisions -= daily
+					if provisions < 0:
+						starved += 1
+						break
+					walked += RouteWeather.pace_multiplier(weather) * condition
+					day += 1
+				t.ge(
+					float(walked), float(travel_days) - 0.001,
+					"kondisyon payıyla stoklayan kervan yol bitmeden aç kalmamalı (%s/%d gün/%.2f kondisyon)"
+						% [key, travel_days, condition]
+				)
+	t.eq(starved, 0, "kondisyon payıyla stoklayan kervan hiç aç kalmamalı")
 
 ## Pay orantılı kalmalı: kötü hava yolu uzatıyor ama yolculuğu ikiye
 ## katlamıyor. Payın kontrolsüz büyümesi, erzak maliyetinin ticareti

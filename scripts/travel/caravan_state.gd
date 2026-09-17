@@ -39,6 +39,18 @@ var merchant_profit_by_name: Dictionary = {}
 ## (kontratın teslim edilemediğini) bulur ve itibar cezası uygular.
 var original_merchant_names: Array[String] = []
 
+## Yabancı tüccarın gizli mizacı (bkz. NpcDisposition) - vagonuna diyalog
+## yoluyla bakış (bkz. CLAUDE.md Ana Hedefler'in "#11" notu) bunu okur.
+## İsimden türetilmiş sabit bir tohumla atanıyor: aynı isimli bir tüccarla
+## ileride tekrar karşılaşmak hep aynı huyu buluyor - kalıcı bir kimlik,
+## sefer başına yeniden zar değil. Sefer içinde kayıt yok (bkz. Save &
+## Menu Rules), o yüzden bu alanın serileşmesi hiç gerekmiyor.
+var merchant_disposition_by_name: Dictionary = {}
+
+## İzin verilmiş ya da zorla bakılmış tüccarlar - bir kez öğrenilen mizaç
+## aynı sefer içinde tekrar sorulmaz.
+var merchant_known_by_name: Dictionary = {}
+
 ## Sefer başındaki anlık görüntü: kayıp/hasarı GameSession.finish_journey()
 ## oyuncunun kalıcı sahipliğine adil paylaştırabilsin diye tutulur -
 ## escort vagonları önce gider, oyuncunun kendi vagonu en son.
@@ -95,6 +107,9 @@ static func from_plan(plan: CaravanPlan, departure_morale: int = MAX_MORALE) -> 
 	for offer in plan.get_selected_offers():
 		state.merchant_names.append(offer.merchant_name)
 		state.merchant_profit_by_name[offer.merchant_name] = offer.potential_profit
+		var disposition_rng := RandomNumberGenerator.new()
+		disposition_rng.seed = hash("merchant_disposition|%s" % offer.merchant_name)
+		state.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.roll(disposition_rng)
 	state.original_merchant_names = state.merchant_names.duplicate()
 	return state
 
