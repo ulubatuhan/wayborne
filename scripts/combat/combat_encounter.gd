@@ -12,6 +12,12 @@ extends RefCounted
 signal log_added(line)  # String
 signal state_changed(new_state)  # State
 signal turn_started(unit)  # CombatUnit
+## Sessiz yorum balonu: log satırından ayrı, çünkü log tüm satırı yazıyor
+## ("X, Y'ye Z zarar verdi"), balon ise sahnede birimin üstünde tek kelimelik
+## bir tepki - seslendirme değil, yalnızca metin (bkz. UiIcon/log satırı
+## deseni). Panel bunu hangi CombatUnitSlot'a yazacağını unit referansından
+## bulur.
+signal unit_barked(unit, text)  # CombatUnit, String
 
 enum State {
 	ONGOING,
@@ -272,6 +278,7 @@ func _try_refuse_order(unit: CombatUnit) -> bool:
 	if _rng.randi_range(1, 100) > chance:
 		return false
 	_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
+	unit_barked.emit(unit, tr("CBT_BARK_REFUSE"))
 	return true
 
 func _run_enemy_turn(unit: CombatUnit) -> void:
@@ -398,10 +405,12 @@ func _resolve_on_target(unit: CombatUnit, skill: CombatSkill, target: CombatUnit
 		_emit_log(tr("CBT_LOG_CRIT") % [
 			unit.display_name, skill.display_name, target.display_name, taken
 		])
+		unit_barked.emit(target, tr("CBT_BARK_CRIT"))
 	else:
 		_emit_log(tr("CBT_LOG_HIT") % [
 			unit.display_name, skill.display_name, target.display_name, taken
 		])
+		unit_barked.emit(target, tr("CBT_BARK_HIT"))
 
 	_report_damage_outcome(target, outcome)
 
@@ -423,6 +432,7 @@ func _report_damage_outcome(target: CombatUnit, outcome: String) -> void:
 				_emit_log(tr("CBT_LOG_DOWNED_ALLY") % target.display_name)
 			else:
 				_emit_log(tr("CBT_LOG_DOWNED_ENEMY") % target.display_name)
+			unit_barked.emit(target, tr("CBT_BARK_DOWNED"))
 			_repack(_side_of(target))
 
 func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:

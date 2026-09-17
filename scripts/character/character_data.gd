@@ -83,6 +83,20 @@ var trait_granted_day: Dictionary = {}
 ## başına bir parça); boş slot sözlükte hiç yer almaz.
 var equipped: Dictionary = {}
 
+## OutfitCatalog.SLOT_* -> piece_id. Equipment'ın aksine tamamen kozmetik -
+## hiçbir derived getter bunu okumuyor. Boş slot sözlükte hiç yer almaz,
+## `get_outfit_piece()` o hâlde OutfitCatalog.NONE_PIECE döner.
+var outfit: Dictionary = {}
+
+func get_outfit_piece(slot: String) -> String:
+	return str(outfit.get(slot, OutfitCatalog.NONE_PIECE))
+
+func set_outfit_piece(slot: String, piece_id: String) -> void:
+	if piece_id.is_empty():
+		outfit.erase(slot)
+	else:
+		outfit[slot] = piece_id
+
 ## Açıkken seviye atlayınca puanlar otomatik dağıtılır (yoldaşlar için
 ## varsayılan). Oyuncu kendi karakterinde bunu kapatıp elle dağıtabilir.
 var auto_allocate: bool = true
@@ -256,6 +270,18 @@ func get_height_dodge_bonus() -> int:
 	if height_cm >= TALL_THRESHOLD_CM:
 		return -2
 	return 0
+
+## Bir 1.90 boylu erkekle bir 1.60 boylu kadının açlığı aynı olmamalı -
+## boy zaten can/kaçınma bonusunu bu eşiklerle veriyor, erzak tüketimi de
+## aynı eşiklerden okuyor (tek boy sistemi, iki sonuç). Varsayılan (eşikler
+## arası) 1.0 - `CaravanPlan.daily_consumption()`'ın eski, boy-kör tek
+## kişilik payı aynen kalıyor, yalnızca uçlardaki karakterler sapıyor.
+func get_provision_weight() -> float:
+	if height_cm >= TALL_THRESHOLD_CM:
+		return 1.15
+	if height_cm <= SHORT_THRESHOLD_CM:
+		return 0.85
+	return 1.0
 
 func get_max_hp() -> int:
 	return maxi(
@@ -475,6 +501,7 @@ func to_dict() -> Dictionary:
 		"trait_ids": trait_ids.duplicate(),
 		"trait_granted_day": trait_granted_day.duplicate(),
 		"equipped": equipped.duplicate(),
+		"outfit": outfit.duplicate(),
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -506,6 +533,11 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.equipped.clear()
 	for slot in equipped_data:
 		character.equipped[str(slot)] = str(equipped_data[slot])
+
+	var outfit_data: Dictionary = data.get("outfit", {})
+	character.outfit.clear()
+	for slot in outfit_data:
+		character.outfit[str(slot)] = str(outfit_data[slot])
 
 	# Kayıt dosyası dış sınır: kayıt alındıktan sonra ekipman çıkarılmış ya
 	# da huy silinmişse saklanan can artık ulaşılamayacak kadar yüksek

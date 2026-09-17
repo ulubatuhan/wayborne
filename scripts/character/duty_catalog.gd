@@ -20,6 +20,16 @@ const PRIMARY_MATCH_MULTIPLIER: float = 1.5
 ## Yalnızca ikinci sınıf (multiclass) eşleşirse bu kadar.
 const SECONDARY_MATCH_MULTIPLIER: float = 1.25
 
+## Kişisel kondisyon: kırılmış (bkz. CharacterData.is_stressed - kişinin
+## kendi stresi, kadro ortalaması değil) ya da can yarısının altındaki bir
+## görevli, göreve o kadar iyi bakamaz. `CombatUnit.is_stressed`'in savaşta
+## zaten okuduğu veriyi görev formülüne taşıyor - yeni bir sistem değil.
+## Sağlıklı ve dinç varsayılan (tam can, sıfır stres) çarpanı 1.0'da tutar,
+## o yüzden mevcut hiçbir ölçüm/test etkilenmez.
+const STRESSED_CONDITION_PENALTY: float = 0.85
+const LOW_HP_CONDITION_PENALTY: float = 0.85
+const LOW_HP_THRESHOLD_RATIO: float = 0.5
+
 static var _duties: Array[Duty] = []
 static var _duty_by_id: Dictionary = {}
 
@@ -52,7 +62,19 @@ static func get_duty_power(character: CharacterData, duty_id: String) -> float:
 		if second_class != null and second_class.duty_id == duty_id:
 			multiplier = SECONDARY_MATCH_MULTIPLIER
 
-	return base * multiplier
+	return base * multiplier * get_condition_multiplier(character)
+
+## Bkz. STRESSED_CONDITION_PENALTY'nin yorumu. Sahipsiz bir görev bu
+## fonksiyona hiç girmez (get_duty_power sahipsizken 1.0'ı doğrudan döner),
+## o yüzden bu her zaman *atanmış* birinin kendi kondisyonunu ölçer.
+static func get_condition_multiplier(character: CharacterData) -> float:
+	var multiplier := 1.0
+	if character.is_stressed():
+		multiplier *= STRESSED_CONDITION_PENALTY
+	var max_hp := character.get_max_hp()
+	if max_hp > 0 and float(character.current_hp) / float(max_hp) < LOW_HP_THRESHOLD_RATIO:
+		multiplier *= LOW_HP_CONDITION_PENALTY
+	return multiplier
 
 static func _ensure_built() -> void:
 	if not _duties.is_empty():
