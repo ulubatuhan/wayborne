@@ -75,6 +75,9 @@ var _crew: Array[WalkFigure] = []
 var _spots: Array[Dictionary] = []
 ## Her vagonun öküzü - vagonla birlikte, onun bir tık önünde yürüyor.
 var _oxen: Array[WalkFigure] = []
+## Açık vagon paneli - varsa hareket ve diğer etkileşimler durur (bkz.
+## _process/_unhandled_input), tıpkı InGameMenu açıkken olduğu gibi.
+var _wagon_panel: WagonPanel = null
 ## Son karede liderin yürüdüğü yön - yürüyüş fazı ve bakış yönü bundan.
 var _walk_direction: float = 0.0
 
@@ -123,10 +126,16 @@ func _build_status_bars() -> void:
 	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
 
 func _process(delta: float) -> void:
-	_move_player(delta)
+	if not _has_blocking_panel():
+		_move_player(delta)
 	_follow_with_wagon(delta)
 	_update_prompts()
 	_camera.position = Vector2(_player.position.x, GROUND_Y - 150.0)
+
+## Vagon paneli ya da in-game menü açıkken lider durur - Rust tarzı bir
+## menü açıkken kervanın kayıp gitmesi tuhaf kaçardı.
+func _has_blocking_panel() -> bool:
+	return _wagon_panel != null or has_node("InGameMenu")
 
 func _move_player(delta: float) -> void:
 	var direction := 0.0
@@ -392,7 +401,10 @@ func _order_escorts(session: GameSession, party: Array[CharacterData]) -> Array[
 			ordered.append(candidate)
 	return ordered
 
-## Sadece ilk vagon etkileşim noktası - kervanın yükü tek envanterde.
+## Her vagon kendi etkileşim noktası - her birinin kendi envanteri var
+## artık (bkz. GameSession.wagon_inventories), o yüzden hangi vagona
+## yaklaştığın önemli: tıklayınca *o* vagonun envanteri ve craft menüsü
+## açılır (bkz. WagonPanel), şehrin Kervan Avlusu'yla ilgisi yok.
 func _build_wagon(index: int, wagon_x: float) -> WagonFigure:
 	var wagon := WagonFigure.new()
 	wagon.position = Vector2(wagon_x, GROUND_Y - WAGON_SIZE.y)
@@ -406,9 +418,6 @@ func _build_wagon(index: int, wagon_x: float) -> WagonFigure:
 	wagon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	wagon.add_child(wagon_label)
 
-	if index > 0:
-		return wagon
-
 	var wagon_prompt := Label.new()
 	wagon_prompt.text = tr("UI_HUB_INTERACT")
 	wagon_prompt.position = Vector2(-40.0, WAGON_SIZE.y + 6.0)
@@ -418,13 +427,15 @@ func _build_wagon(index: int, wagon_x: float) -> WagonFigure:
 	wagon_prompt.visible = false
 	wagon.add_child(wagon_prompt)
 
-	# Vagon hareket ettiği için kendi kaydı ayrı tutulur.
+	# Vagon hareket ettiği için kendi kaydı ayrı tutulur, wagon_index
+	# hangi WagonFigure/hangi wagon_inventories girdisine baktığını taşır.
 	_spots.append({
-		"name": tr("UI_HUB_WAGON_SPOT"),
+		"name": tr("UI_HUB_WAGON_SPOT") % (index + 1),
 		"rect": Rect2(),
-		"scene": Nav.ECONOMY,
+		"scene": "",
 		"prompt": wagon_prompt,
 		"follows_wagon": true,
+		"wagon_index": index,
 	})
 	return wagon
 
@@ -495,7 +506,7 @@ func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
 
 func _get_spot_rect(spot: Dictionary) -> Rect2:
 	if spot.get("follows_wagon", false):
-		return Rect2(_wagons[0].position, WAGON_SIZE)
+		return Rect2(_wagons[int(spot.wagon_index)].position, WAGON_SIZE)
 	return spot.rect
 
 func _update_prompts() -> void:
@@ -508,6 +519,13 @@ func _is_in_range(spot: Dictionary) -> bool:
 	return absf(rect.get_center().x - player_center) <= INTERACT_RANGE
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Vagon paneli açıkken Esc yalnızca paneli kapatır - InGameMenu'nün
+	# üstüne binmez, diğer etkileşimler de bu sırada devre dışı.
+	if _wagon_panel != null:
+		if event.is_action_pressed("ui_cancel"):
+			_close_wagon_panel()
+		return
+
 	if event.is_action_pressed("ui_cancel"):
 		_open_in_game_menu()
 		return
@@ -540,10 +558,32 @@ func _try_interact_nearest() -> void:
 			return
 
 func _enter_spot(spot: Dictionary) -> void:
+	if spot.get("follows_wagon", false):
+		_open_wagon_panel(int(spot.wagon_index))
+		return
 	# Yalnızca kapının kendisi bir girişi işaretliyor - bkz. Nav'daki not.
 	if spot.scene == Nav.CITY_MAP:
 		Nav.city_gate_opening = true
 	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
+
+## Sahne değiştirmez - `MealDistributionPanel` gibi sahnesiz bir overlay,
+## çünkü bu bir gezinme adımı değil, vagonun yanında durup içine bakmak.
+func _open_wagon_panel(wagon_index: int) -> void:
+	if _wagon_panel != null:
+		return
+	_wagon_panel = WagonPanel.new()
+	add_child(_wagon_panel)
+	_wagon_panel.closed.connect(_on_wagon_panel_closed)
+	_wagon_panel.setup(GameState.get_session(), wagon_index)
+
+func _close_wagon_panel() -> void:
+	if _wagon_panel == null:
+		return
+	_wagon_panel.queue_free()
+	_wagon_panel = null
+
+func _on_wagon_panel_closed() -> void:
+	_wagon_panel = null
 
 func _hint(text: String) -> void:
 	_hint_label.text = text

@@ -1057,8 +1057,14 @@ losing every companion's levels, traits and equipment.
 - **scripts/world/**: Explorable 2D spaces the player physically moves through
   - `world_hub.gd`: side-scrolling road. The caravan leader walks left/right;
     the party then the wagons lerp-follow behind, one body per party member and
-    one wagon per `owned_wagon_count`. The city gate and the first wagon are
-    interaction spots: walk within `INTERACT_RANGE`, then click them or press E. No physics bodies — plain position arithmetic on a
+    one wagon per `owned_wagon_count`. The city gate and **every** wagon are
+    interaction spots: walk within `INTERACT_RANGE`, then click one or press E
+    (only the first wagon carried a spot until Faz 15's wagon-based inventory -
+    when cargo was one shared pool, which specific wagon you clicked didn't
+    matter). Walking up to a wagon opens `WagonPanel` (scene-less, see Kervan
+    Envanteri Rules) showing *that* wagon's own inventory and its Rust-simple
+    craft menu - never a scene change, and nothing to do with the city's
+    Kervan Avlusu. No physics bodies — plain position arithmetic on a
     single ground line, so it stays cheap on Web export.
   - `city_map.gd`: the city, and the game's decision hub. A new game starts
     here, not on the road. City interaction is deliberately **not** card-based
@@ -1796,27 +1802,40 @@ turns materials into other materials, per the #22 backlog note above.
   such guarantee - whatever doesn't fit in the wagons that survive is
   gone with it, the same "the caravan can be ruined" stakes Ruin Rules
   already applies to the wagon itself.
-- **Atölye (Workshop) is a Rust-simple craft menu, not a new system.**
-  `CraftingRecipe` (a resource: inputs, an output item *or* a wagon-repair
-  effect) and the static `RecipeCatalog` are the whole vocabulary; three
-  recipes ship (`craft_bandage`: cloth → bandage; `repair_wagon_canvas`:
-  cloth → wagon damage -1, a material-priced alternative to the Kervan
-  Avlusu's gold repair; `dismantle_to_bandage`: fur → two bandages, the
-  "dismantle" verb the player asked for). `GameSession.craft()` consumes
-  inputs from the same total (wagons then bags) and writes its output
-  through `add_to_cargo_or_bag()` - a recipe invents no second inventory
-  door. A recipe that cannot be made yet is **disabled with its reason**
-  (`get_craft_block_reason()`), the same rule as a locked event choice, a
-  locked skill or a locked equipment tier - never hidden. The button lives
-  on `caravan_yard.gd`, built in code exactly like its own sell-wagon
-  button, opening `CraftingPanel` (`MealDistributionPanel`'s scene-less
-  `CanvasLayer` pattern) rather than a new scene.
+- **Atölye (Workshop) lives at the wagon, not in a city screen - and it
+  reads only that wagon.** This was gotten wrong once and corrected: a
+  first pass bolted a "Workshop" button onto `caravan_yard.gd` reading the
+  caravan's aggregate total, which has nothing to do with what was asked
+  for. The real design: every wagon is its own interaction spot in
+  `world_hub.gd` (previously only wagon 0 was, back when cargo was one
+  shared pool - see World Navigation Rules' own note on that stale
+  comment), walked up to and clicked/E'd exactly like the city gate.
+  Interacting opens `WagonPanel` (`MealDistributionPanel`'s scene-less
+  `CanvasLayer` pattern, not a scene change - this is standing at a wagon,
+  not navigating anywhere) showing **that wagon's own inventory** and a
+  Rust-simple craft menu that reads and writes **only that wagon's**
+  `Inventory`, never the caravan's total. `CraftingRecipe` (a resource:
+  inputs, an output item *or* a wagon-repair effect) and the static
+  `RecipeCatalog` are the whole vocabulary; three recipes ship
+  (`craft_bandage`: cloth → bandage; `repair_wagon_canvas`: cloth → wagon
+  damage -1, a material-priced alternative to the Kervan Avlusu's gold
+  repair; `dismantle_to_bandage`: fur → two bandages, the "dismantle" verb
+  the player asked for). `GameSession.craft_in_wagon(wagon_index, recipe_id)`
+  consumes inputs from that one `wagon_inventories[wagon_index]` and writes
+  its output back into it (falling back to `add_to_cargo_or_bag()` only if
+  that exact wagon has no room for the output, so a craft never destroys
+  what it just made) - this is the part of the #22 design note that
+  actually matters: cloth left in the wrong wagon genuinely cannot be
+  turned into a bandage at a different one, so which vagon carries what is
+  now a real decision, not flavour text. A recipe that cannot be made yet
+  is **disabled with its reason** (`get_craft_block_reason_in_wagon()`),
+  the same rule as a locked event choice, a locked skill or a locked
+  equipment tier - never hidden.
 - **What #22's own design note asked for and did not get:** a read-only
   view into a *foreign* trader's wagon, and a dedicated "Kervan Yükü"
-  screen for placing cargo wagon-by-wagon on purpose. Neither exists yet -
-  the aggregate functions above are deliberately silent about which wagon
-  holds what, because nothing in this pass needed that distinction. Either
-  is a real follow-up, not a rejection.
+  screen for placing cargo wagon-by-wagon on purpose ahead of time (rather
+  than discovering the split by walking up to each wagon). Neither exists
+  yet. Either is a real follow-up, not a rejection.
 - `tests/test_wagon_inventory.gd` locks the load-bearing claims: each wagon
   keeps its own weight ceiling, a stack splits across wagons when it must,
   an over-total request touches no wagon, selling a wagon never loses
@@ -1824,7 +1843,9 @@ turns materials into other materials, per the #22 backlog note above.
   purchases never route to it, removal drains wagons before bags, the
   save round-trip preserves the split and the bags, a pre-Faz-15 save's
   single flat `inventory` list still loads (poured through `add_to_cargo`),
-  and each of the three recipes - including their block reasons.
+  each of the three recipes with their block reasons, and - the point of
+  the whole redesign - that a recipe craftable in one wagon is correctly
+  *not* craftable in another wagon holding no materials at all.
 
 ### Haggling Rules
 
@@ -3284,10 +3305,16 @@ turda:
   `CharacterData.personal_inventory` küçük bir kişisel taşkın alanı açtı,
   `get_total_quantity()`/`get_total_inventory_entries()` ikisini şehirde
   tek bir toplam olarak gösterdi - kullanıcının kendi tarifiyle "vagonlarımızın
-  ve çantamızın toplamı." `RecipeCatalog`'un üç tarifi (bandaj craftlamak,
-  vagon bezini malzemeyle tamir etmek, kürk söküp bandaja çevirmek)
-  `CraftingPanel` (yeni bir sahne değil, `MealDistributionPanel`'in
-  sahnesiz deseni) üzerinden Kervan Avlusu'na eklendi. Tam ölçüm, tasarım
+  ve çantamızın toplamı." **İlk sürüm Atölye'yi yanlış yere koydu** - Kervan
+  Avlusu'na bir düğme, kervanın toplamını okuyan bir panel - ve düzeltildi:
+  craft menüsünün şehirle hiçbir ilgisi yok, oyuncu yolda ilgili vagona
+  yürüyüp tıklıyor (`world_hub.gd`'nin artık her vagon için ayrı bir
+  etkileşim noktası olması - eskiden yalnızca ilk vagondu, tek paylaşılan
+  envanterin kalıntısı bir varsayımdı), açılan `WagonPanel` yalnızca **o
+  vagonun** envanterini ve craft menüsünü gösteriyor - `GameSession.
+  craft_in_wagon()` kervanın toplamından değil, tıklanan vagonun kendi
+  `Inventory`'sinden okuyup yazıyor. Bu, #22'nin asıl istediği şeydi:
+  malzeme yanlış vagondaysa orada craftlanamaz. Tam ölçüm, tasarım
   gerekçesi ve neyin bilerek kapsam dışı bırakıldığı (yabancı vagon
   görünümü, ayrı bir "Kervan Yükü" ekranı) Kervan Envanteri Rules'ta.
 - **C. Ana menünün tıkla-geç açığı.** "Bir tuşa basın" evresinde düğmeler

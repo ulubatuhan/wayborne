@@ -1728,37 +1728,50 @@ func _merge_entries(totals: Dictionary, entries: Array) -> void:
 		else:
 			totals[item.item_id] = {"item": item, "quantity": int(entry.quantity)}
 
-## Bir tarifin şu an craftlanıp craftlanamayacağının sebebi - kilitli bir
-## olay seçimi/görev/ekipman gibi "sebebiyle birlikte" gösterilir, boşsa
-## craftlanabilir.
-func get_craft_block_reason(recipe: CraftingRecipe) -> String:
+## Atölye kervanın herhangi bir ekranı değil, **o vagonun kendisi** -
+## oyuncu yolda vagona yürüyüp tıklar (bkz. world_hub.gd'nin vagon
+## etkileşim noktaları). Bu yüzden bir tarif kervanın toplamından değil,
+## yalnızca **o vagonun kendi envanterinden** okur/yazar: malzemeyi hangi
+## vagona yüklediğin ilk kez gerçekten anlam kazanıyor - kumaş başka bir
+## vagondaysa bu vagonda bandaj sarılamaz. Kilitli bir tarif "sebebiyle
+## birlikte" gösterilir, aynı kural her yerde.
+func get_craft_block_reason_in_wagon(wagon_index: int, recipe: CraftingRecipe) -> String:
+	if wagon_index < 0 or wagon_index >= wagon_inventories.size():
+		return "UI_CRAFT_MISSING_MATERIAL"
 	if recipe.effect == CraftingRecipe.Effect.WAGON_REPAIR and owned_wagon_damaged <= 0:
 		return "UI_CRAFT_NO_DAMAGE"
+	var wagon_inventory := wagon_inventories[wagon_index]
 	for item_id in recipe.inputs:
-		if get_total_quantity(String(item_id)) < int(recipe.inputs[item_id]):
+		if wagon_inventory.get_quantity(String(item_id)) < int(recipe.inputs[item_id]):
 			return "UI_CRAFT_MISSING_MATERIAL"
 	return ""
 
-func can_craft(recipe: CraftingRecipe) -> bool:
-	return get_craft_block_reason(recipe).is_empty()
+func can_craft_in_wagon(wagon_index: int, recipe: CraftingRecipe) -> bool:
+	return get_craft_block_reason_in_wagon(wagon_index, recipe).is_empty()
 
-## Malzemeleri tüketir ve tarifin sonucunu uygular. Başarısızsa (malzeme
-## yetersiz ya da onarımın gerekmediği bir onarım tarifi) hiçbir şey
-## değişmez.
-func craft(recipe_id: String) -> bool:
+## Malzemeleri o vagondan tüketir ve tarifin sonucunu uygular - onarım
+## kervanın genel hasar sayacını düşürür (vagon başına hasar takibi yok,
+## bkz. owned_wagon_damaged), bir eşya üretimi doğrudan aynı vagona yazılır.
+## O vagon (girdiler tüketildikten sonra bile) çıktıyı almayacak kadar
+## doluysa - küçük bir bandajın olması beklenmez ama imkânsız değil -
+## `add_to_cargo_or_bag` son çare: üretilen mal hâlâ hiçbir yerde
+## kaybolmaz. Başarısızsa (malzeme yetersiz ya da gereksiz bir onarım)
+## hiçbir şey değişmez.
+func craft_in_wagon(wagon_index: int, recipe_id: String) -> bool:
 	var recipe := RecipeCatalog.get_recipe(recipe_id)
-	if recipe == null or not can_craft(recipe):
+	if recipe == null or not can_craft_in_wagon(wagon_index, recipe):
 		return false
 
+	var wagon_inventory := wagon_inventories[wagon_index]
 	for item_id in recipe.inputs:
-		remove_from_cargo_or_bags(String(item_id), int(recipe.inputs[item_id]))
+		wagon_inventory.remove_item(String(item_id), int(recipe.inputs[item_id]))
 
 	match recipe.effect:
 		CraftingRecipe.Effect.WAGON_REPAIR:
 			owned_wagon_damaged = maxi(0, owned_wagon_damaged - 1)
 		CraftingRecipe.Effect.ITEM:
 			var output := ItemCatalog.get_item(recipe.output_item_id)
-			if output != null:
+			if output != null and not wagon_inventory.add_item(output, recipe.output_quantity):
 				add_to_cargo_or_bag(output, recipe.output_quantity)
 	return true
 
