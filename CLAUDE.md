@@ -925,6 +925,19 @@ re-roll the rain away.
   planner prints them in one line, so choosing a route is no longer blind.
   Biomes step at most two places along `BIOME_CHAIN`, because steppe
   straight into mountains does not read as geography.
+- **A drawn stop that no event ever reads is scenery with a name on it,
+  not a feature.** `evt_roadside_shrine` fired from the general pool with
+  no idea whether a shrine stop was actually on screen that day - the
+  card and the marker were two systems that had never been introduced.
+  `road_journey.gd`'s `_run_day()` now reads `_terrain.segment_at(
+  _days_covered).stop` and hands the event pool a `near_shrine` flag; the
+  event's own base weight dropped low (an unmarked wayside shrine can
+  still turn up, rarely) and an `EventWeightModifier` (×8, the same
+  pattern as `evt_forage`'s İzci bonus) makes it fire reliably on the day
+  the caravan actually passes one. The other five stop kinds (hamlet,
+  outpost, mine, pass, bridge) still have no mechanical hook - a real
+  follow-up, not a rejection, and each would need its own event rather
+  than reusing this one's wiring.
 - **Weather invents no system.** All of it turns levers that already exist:
   walking pace, route danger (applied to the headroom, `base + delta *
   (1-base)`, the same rule as `RouteConditions`) and the daily morale drain.
@@ -2810,6 +2823,59 @@ Visit `http://localhost:8000` in browser.
 
 ## Development Status
 
+### Ana Hedefler
+
+Oyunun aktif, henüz kapanmamış hedeflerinin tek listesi - **bundan sonra
+yeni bir açık iş burada birikir, Development Status'un tarih akışı içine
+dağılmış ayrı notlar olarak değil.** Bir madde kapandığında buradan
+silinir; tarihçesi (nasıl karara bağlandığı, ölçümü) aşağıdaki Faz
+anlatısında kalır - bu liste yalnızca "şu an açık olan ne" sorusuna cevap
+verir.
+
+- **Elle çizilmiş görsel varlıklar.** Oyunun tamamı hâlâ `_draw()` ile
+  çiziliyor (`ArtPalette` kalacak, çizim fonksiyonlarının yerini dokular
+  alacak) - Faz 10'dan beri işaretli en büyük, hiç başlanmamış kalem.
+  Kıyafet sisteminin altı slotu (bkz. Kervan Envanteri Rules'un yanındaki
+  kıyafet notu) buna hazır bekliyor.
+- **İki katmanlı "defter" sanat yönüne geçiş.** Faz 12'de "en büyüğü"
+  diye işaretlenen öneri - mevcut prosedürel sanattan farklı bir görsel
+  kimlik.
+- **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
+  bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
+  Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
+  karşılığı olarak zaten kurulu.
+- **İki dini yaratılış efsanesi + fragman/sinematik** (#12 - backlog
+  numarası, ekran değil).
+- **Yolda küçük olumlu bir sinyal türü.** `RoadSignals`'ın üç türü (bkz.
+  Road Layer Rules) hepsi olumsuz; üç somut aday var - baş bölgesinde
+  "İz" (erken erzak/durak bilgisi), vagonlar bölgesinde "Yardımcı el"
+  (küçük hasar iyileşmesi/erzak tasarrufu), arka bölgede "Sohbet" (küçük
+  stres/moral iyileşmesi) - ihmal edilince ceza yok, yalnızca fırsat
+  kaçmış olur. Hangisiyle başlanacağı ayrı bir karar.
+- **Yabancı tüccarın vagonuna diyalog yoluyla bakış.** Kervana kabul
+  edilmiş bir tüccarın vagonuna tıklamak sohbet açar: izin/zorla bak/
+  tekrar ikna et/vazgeç. `NpcDisposition`/ikna vokabülerinin (bkz. Event
+  Character Rules) vagon etkileşimine taşınmış hâli - bkz. Kervan
+  Envanteri Rules'un "#22'nin karşılanmayan" notu. Tasarım hazır,
+  uygulanmadı.
+- **Kampanya bölümlerinin sadeleştirilmesi - ertelendi.** Sadeleştirilecek
+  asıl hikâye/anlatı içeriği henüz yazılmadı; içerik yazılınca tekrar
+  gündeme gelebilir.
+- **Beş yol durağının hâlâ mekanik karşılığı yok.** Faz 16'nın rota/hava
+  denetimi `evt_roadside_shrine`'ı gerçek sunak durağına bağladı (bkz.
+  Route Terrain & Weather Rules) ama konak/karakol/maden/geçit/köprü
+  hâlâ salt görsel - her biri kendi olayını/etkisini isteyecek ayrı bir
+  iş, bu turda kasıtlı kapsam dışı bırakıldı.
+
+**Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
+bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
+`evt_roadside_shrine`'ın gerçek sunak durağına bağlanması - üçü de
+aşağıdaki Faz 16 anlatısında ve Route Terrain & Weather Rules'ta.
+
+**Kalıcı olarak reddedildi, bir daha gündeme gelmeyecek:** stres/moral
+birleşmesi, borç sisteminin kapsamının daraltılması, ekipmanın kargoya
+dönüşmesi - üçünün de gerekçesi Faz 16 anlatısında.
+
 Faz 0-3 tamamlandı. Oyun bir tur dönüyor (kazanç ödeniyor, harita tam
 bağlı, fiyat şehre göre değişiyor, kargo kapasitesi var), test iskelesi
 oyuna çevrildi (`scenes/game/`, F1 dev paneli), ilerleme kalıcı
@@ -3469,8 +3535,10 @@ bu aynı altı-slot mimarisi belirleyecek; yapı değişmez, yalnızca `_draw()`
 çağrıları `TextureRect`/`Sprite2D`'ye yer açar (Art Rules'un genel sprite
 geçiş kuralı).
 
-Faz 16 böylece fiilen başladı - kıyafet ve genel kervan ekranı tamamlanan
-iki parça, aşağıdaki (yabancı vagon diyaloğu) hâlâ tasarım notu.
+Faz 16 böylece fiilen başladı - kıyafet, genel kervan ekranı ve
+`evt_roadside_shrine`'ın rota coğrafyasına bağlanması (bkz. Route Terrain
+& Weather Rules) tamamlanan üç parça, aşağıdaki (yabancı vagon diyaloğu)
+hâlâ tasarım notu.
 
 **Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
 tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"

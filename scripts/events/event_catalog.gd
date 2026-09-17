@@ -885,9 +885,25 @@ static func _culture_fisher_catch() -> GameEvent:
 
 ## DD tarzı bir "curio": kültürden bağımsız, dua etmek güvenli bir stres
 ## azaltıcı, adakları almaksa kumarlı bir kazanç.
+##
+## `RouteTerrain` yolun bazı parçalarını biyoma uygun bir "sunak" durağıyla
+## çiziyor (bkz. `RouteTerrain.STOP_SHRINE`) ama bu olay o durağa hiç
+## bakmıyordu - ekranda gerçek bir sunak dururken olay hiç ateşlenmeyebilir,
+## sunak hiç yokken de ateşlenebilirdi; oyuncunun gördüğü işaretle çekilen
+## kart birbirinden habersizdi. Taban ağırlık şimdi düşük (işaretsiz bir
+## yerde de nadiren bir sunağa rastlanabilir) ve `near_shrine` bayrağı -
+## `road_journey.gd`'nin o günkü terrain segmentinden okuyup context'e
+## eklediği - `evt_forage`'ın İzci çarpanıyla aynı desende ağırlığı
+## katlıyor: sunak durağının önünden geçilen gün olay neredeyse kesin
+## çekiliyor, başka hiçbir gün neredeyse hiç çekilmiyor.
 static func _roadside_shrine() -> GameEvent:
-	var event := _event("evt_roadside_shrine", "EVT_SHRINE", 0.8)
+	var event := _event("evt_roadside_shrine", "EVT_SHRINE", 0.15)
 	event.cooldown_days = 6
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_shrine", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 8.0),
+	])
 	event.choices = _choices([
 		_choice("EVT_SHRINE_OPT_PRAY", _effects([
 			EventEffect.make(EventEffect.Type.STRESS, -10),
