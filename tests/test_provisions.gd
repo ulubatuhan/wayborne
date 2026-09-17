@@ -122,7 +122,7 @@ func _test_consumption_never_free(t) -> void:
 	)
 
 ## Seferi gün gün yürütür ve kaç gün aç kalındığını döner - yol ekranının
-## _advance_contracts_and_provisions()'ıyla aynı sıra.
+## GameSession.apply_meal_distribution()'ıyla aynı formülü okur.
 func _walk(session: GameSession, days: int) -> int:
 	var starved_days := 0
 	for _day in days:
