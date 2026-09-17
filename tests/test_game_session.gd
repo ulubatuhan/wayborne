@@ -19,6 +19,7 @@ func run(t) -> void:
 	_test_change_provisions_reports_truth(t)
 	_test_fixed_playthrough_start(t)
 	_test_weight_limit_binds(t)
+	_test_wagon_speed_factor(t)
 
 ## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
 ## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
@@ -362,3 +363,32 @@ func _test_effective_danger_and_goal(t) -> void:
 	var rich := GameSession.new(0, 0, 1)
 	rich.wallet.earn(100000)
 	t.not_ok(rich.is_run_over(), "zenginlik oyunu bitirmez")
+
+## Bir vagon en yavaş tekerleğinden hızlı gidemez: kervanın "teorik hızı"
+## vagonların en düşük yük faktörü. Bugün yalnızca bilgilendirici (bkz.
+## GameSession.WAGON_LOAD_SPEED_PENALTY'nin yanındaki not) - yolun gerçek
+## tempusuna henüz bağlı değil, o ayrı bir denge kararı.
+func _test_wagon_speed_factor(t) -> void:
+	var session := GameSession.new(1000, 0, 2)
+	t.almost(
+		session.get_wagon_speed_factor(0), 1.0, "boş bir vagon tam hızda"
+	)
+	t.almost(
+		session.get_caravan_theoretical_speed(), 1.0, "iki vagon da boşken kervan tam hızda"
+	)
+
+	# Vagon aşırı yüklenemez (bkz. Inventory.add_item'ın kendi kapasite
+	# kısıtı) - tavana yakın, sığan en fazla miktarı ekliyoruz.
+	var cloth := ItemCatalog.get_item("test_cloth")
+	var near_full := session.wagon_inventories[0].get_addable_quantity(cloth)
+	t.ok(session.wagon_inventories[0].add_item(cloth, near_full), "tavana yakın miktar sığar")
+	var loaded_factor := session.get_wagon_speed_factor(0)
+	t.ok(loaded_factor < 1.0, "dolu bir vagon tam hızdan yavaş")
+	t.ge(loaded_factor, GameSession.WAGON_MIN_SPEED_FACTOR, "hiçbir vagon taban hızın altına inmez")
+	t.almost(
+		session.get_wagon_speed_factor(1), 1.0, "ikinci vagon hâlâ boş, hâlâ tam hızda"
+	)
+	t.almost(
+		session.get_caravan_theoretical_speed(), loaded_factor,
+		"kervanın teorik hızı en yavaş (en yüklü) vagona eşit"
+	)

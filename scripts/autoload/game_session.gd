@@ -1626,6 +1626,34 @@ func _sync_wagon_inventories() -> void:
 func get_cargo_capacity() -> float:
 	return owned_wagon_count * CARGO_PER_WAGON
 
+## Bir vagonun ne kadar dolu olduğu, yolun kendi hızına henüz hiç
+## dokunmayan (bkz. Road Movement Rules'un WALK_FORWARD_RATE'i, hâlâ tek
+## başına geçerli), yalnızca bu ekranda gösterilen **bilgilendirici** bir
+## oran. Kervanın gerçek yürüyüş hızını bugün etkilemiyor - bunu asıl
+## tempoya bağlamak Provision Rules'un "correct stocking never starves"
+## sözünü etkileyen, kendi başına ölçülmesi gereken ayrı bir denge kararı
+## (bkz. Ruin Rules'un "measure before wiring into balance" disiplini).
+const WAGON_LOAD_SPEED_PENALTY: float = 0.35
+const WAGON_MIN_SPEED_FACTOR: float = 0.55
+
+func get_wagon_speed_factor(wagon_index: int) -> float:
+	if wagon_index < 0 or wagon_index >= wagon_inventories.size():
+		return 1.0
+	var wagon_inventory := wagon_inventories[wagon_index]
+	var load_ratio := clampf(wagon_inventory.get_total_weight() / CARGO_PER_WAGON, 0.0, 1.0)
+	return clampf(1.0 - WAGON_LOAD_SPEED_PENALTY * load_ratio, WAGON_MIN_SPEED_FACTOR, 1.0)
+
+## Bir kervan en yavaş tekerleğinden hızlı gidemez - kervanın "teorik
+## hızı" vagonların en düşük yük faktörü. Vagon yoksa (kuramsal, oyun
+## her zaman en az bir vagonla başlar) tam hız varsayılır.
+func get_caravan_theoretical_speed() -> float:
+	if wagon_inventories.is_empty():
+		return 1.0
+	var slowest := 1.0
+	for index in wagon_inventories.size():
+		slowest = minf(slowest, get_wagon_speed_factor(index))
+	return slowest
+
 func get_cargo_weight() -> float:
 	var total := 0.0
 	for wagon_inventory in wagon_inventories:

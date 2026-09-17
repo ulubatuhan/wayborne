@@ -3469,9 +3469,8 @@ bu aynı altı-slot mimarisi belirleyecek; yapı değişmez, yalnızca `_draw()`
 çağrıları `TextureRect`/`Sprite2D`'ye yer açar (Art Rules'un genel sprite
 geçiş kuralı).
 
-Faz 16 böylece fiilen başladı - yukarıdaki kıyafet maddesi tamamlanan ilk
-parça, aşağıdaki ikisi (yabancı vagon diyaloğu, genel kervan ekranı) hâlâ
-tasarım notu.
+Faz 16 böylece fiilen başladı - kıyafet ve genel kervan ekranı tamamlanan
+iki parça, aşağıdaki (yabancı vagon diyaloğu) hâlâ tasarım notu.
 
 **Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
 tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"
@@ -3483,15 +3482,34 @@ anahtarı değil, `NpcDisposition`/ikna vokabülerinin (bkz. Event Character
 Rules, `evt_mutiny`'nin manipüle seçeneği) vagon etkileşimine taşınmış
 hâli. Henüz uygulanmadı, tasarım notu olarak duruyor.
 
-**Genel bir "Kervan Yükü" ekranı artık daha geniş tanımlandı**: kervanın
-sembolik bir görünümü, her vagonun altında o vagonun ağırlığı, ona bağlı
-kişiler ve hesaplanan hızı; en sağda kervanın **teorik hızı** - en yavaş
-vagonun hızı (bir kervan en yavaş tekerleğinden hızlı gidemez). Aynı
-ekrandan kervandaki herkesin açlık/stres/moral durumu ve kervan hakkındaki
-toplu "düşünceleri" görülebilmeli. `CaravanStatusPanel`'in (bkz. Road
-Screen Layout Rules) salt-okunur dökümüyle akraba ama ondan geniş - o yol
-ekranının bir Tab paneli, bu ayrı, kendi başına bir ekran/mekanik. Henüz
-uygulanmadı, tasarım notu olarak duruyor.
+**Genel bir kervan yönetimi ekranı uygulandı: `CaravanOverviewPanel`.**
+Kervan burada gerçekten sembolize ediliyor - her vagon kendi simgesiyle
+(`CaravanWagonIcon`, `ArtDraw.wagon()`'u üçüncü bir bağlamda kullanan aynı
+fırça, bkz. Art Rules'un "a shape drawn in two places is two different
+shapes" maddesi), altında o vagonun yükü/kapasitesi, tayfa sayısı ve
+hesaplanan hızı; ayrı bir satırda kervanın **teorik hızı** - vagonların en
+düşük hız faktörü (bir kervan en yavaş tekerleğinden hızlı gidemez, bkz.
+`GameSession.get_caravan_theoretical_speed()`). Kervan Avlusu'ndan
+("Kervan Dökümü" düğmesi, `WagonPanel`'inkiyle aynı sahnesiz `CanvasLayer`
+deseni) açılıyor - `CaravanStatusPanel`'in yol ekranındaki salt-okunur
+dökümüyle akraba ama onun yerine geçmiyor, o bir Tab paneli, bu ayrı bir
+ekran.
+**Tasarımdaki tek bilinçli sapma**: istenen "açlık/moral" yerine
+**stres** gösteriliyor - Stress Rules'un kendi ayrımı gereği moral o
+seferin ruh hali (yalnızca bir yolculuk sırasında anlamlı), stres kalıcı
+olan (her zaman okunabilir); şehirden açılan bir ekranda moral göstermek
+sefer dışındayken anlamsız bir sayı gösterirdi. Kalıcı bir açlık stat'ı
+da hiç var olmadı (açlık yalnızca yolda anlık bir olay), o yüzden icat
+edilmedi. Kervandaki herkesin kısa bir "düşüncesi" (stres/can okunarak
+seçilen bir satır, Faz 13 PR-D'nin kısa savaş yorumlarıyla aynı disiplin -
+metin, yeni sistem değil) da burada.
+**Vagon hızı bugün yalnızca bilgilendirici** - `GameSession.
+get_wagon_speed_factor()`'ın kendi yorum satırı bunu açıkça söylüyor:
+yolun gerçek tempusuna henüz bağlı değil. Bunu asıl yürüyüşe bağlamak
+Provision Rules'un "correct stocking never starves" sözünü etkileyen ayrı,
+kendi başına ölçülmesi gereken bir denge kararı - Ruin Rules'un kendi
+"measure before wiring into balance" disiplini burada da geçerli, iki
+karar aynı pastada ölçülmeden üst üste bindirilmiyor.
 
 ## Quick Start
 
