@@ -56,7 +56,15 @@ const POWER_SCALE_PER_LEVEL: float = 0.02
 ## partiyi dengelerken yalnız yolcuyu %0'a düşürüyordu, çünkü tek bir
 ## sayı eğrinin iki ucunu birden ayarlayamıyor. Ölçülen sorun dolu
 ## partinin en tehlikeli yolda bile %98 kazanmasıydı.
-const POWER_SCALE_PER_PARTY_MEMBER: float = 0.10
+##
+## Faz 15'te 0.10 → 0.30: `_build_units()` kadroyu `MAX_SQUAD_SIZE`'da
+## (4, savaş alanının kendi mevki sınırı) kırptığı için parti 3 ile parti
+## 4 zaten aynı düşman sayısıyla dövüşüyordu - dördüncü kişi karşılıksız
+## bir fazla vurucuydu. Önce yanlış kol denendi ve ölçüldü:
+## `DEFAULT_DEATHBLOW_RESIST`'i 67'den 33'e indirmek parti 4'ü neredeyse
+## hiç etkilemedi (%100/%100/%98/%98) - kısa süren bir savaş ölümcül
+## vuruş zarını zaten yeterince atmıyor. Asıl kol buydu (bkz. Ruin Rules).
+const POWER_SCALE_PER_PARTY_MEMBER: float = 0.30
 
 ## Kadro türleri (bkz. build_squad). EventEffect.Type.TRIGGER_COMBAT'in
 ## text_value'sundan gelir; boş değer KIND_BANDIT sayılır.

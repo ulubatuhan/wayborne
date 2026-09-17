@@ -128,6 +128,7 @@ func _begin_title_phase() -> void:
 	_in_title_phase = true
 	_menu_box.modulate.a = 0.0
 	_set_buttons_enabled(false)
+	_set_buttons_mouse_ignore(true)
 	_scrim.visible = false
 	set_process_unhandled_input(true)
 
@@ -173,6 +174,21 @@ func _set_buttons_enabled(enabled: bool) -> void:
 	_saves_button.disabled = not enabled
 	_settings_button.disabled = not enabled
 	_quit_button.disabled = not enabled
+
+## `disabled` yalnızca "pressed" sinyalini susturur - düğme hâlâ varsayılan
+## mouse_filter'ıyla (STOP) fareyi kendi dikdörtgeninde durdurur, saydam
+## olsa da. Tuş basımı bunu hiç görmüyor (doğrudan _unhandled_input'a
+## düşüyor), bu yüzden klavye/kol zaten çalışırken bir tık yalnızca ekranın
+## boş kısımlarında işe yarıyordu - oyuncunun tam olarak butonların
+## durduğu yere tıklaması en olası davranış. Başlık evresinde düğmeler
+## fareyi de görmezden gelmeli ki tık, tuş basımıyla aynı yoldan geçsin.
+func _set_buttons_mouse_ignore(ignore: bool) -> void:
+	var filter := Control.MOUSE_FILTER_IGNORE if ignore else Control.MOUSE_FILTER_STOP
+	_continue_button.mouse_filter = filter
+	_play_button.mouse_filter = filter
+	_saves_button.mouse_filter = filter
+	_settings_button.mouse_filter = filter
+	_quit_button.mouse_filter = filter
 
 ## Klavye, fare ya da kol - hangisiyle oynadığı önemli değil, ilki geçişi
 ## başlatıyor. `echo`'yu eleniyor yoksa tuşu basılı tutmak onlarca kez
@@ -223,6 +239,7 @@ func _reveal_menu() -> void:
 	# dokunulmadan.
 	_menu_box.modulate.a = 1.0
 	_set_buttons_enabled(true)
+	_set_buttons_mouse_ignore(false)
 
 	var index := 0
 	for child in _menu_box.get_children():

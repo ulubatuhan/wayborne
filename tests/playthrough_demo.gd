@@ -85,7 +85,7 @@ func _party_line(session: GameSession) -> String:
 
 func _inventory_line(session: GameSession) -> String:
 	var parts: Array[String] = []
-	for entry in session.inventory.get_all_entries():
+	for entry in session.get_total_inventory_entries():
 		var item: Item = entry.item
 		parts.append("%s×%d" % [item.item_name, entry.quantity])
 	return "boş" if parts.is_empty() else ", ".join(parts)
@@ -154,7 +154,7 @@ func _run_leg(session: GameSession, leg_number: int) -> bool:
 ## ekonomi tablosu ticaretin kârını hiç göstermiyor, yalnızca kontrat
 ## gelirini gösteriyordu - erzak maliyetini değerlendirmek imkânsızdı.
 func _sell_trade_goods(session: GameSession, origin: Location) -> void:
-	var entries: Array = session.inventory.get_all_entries().duplicate()
+	var entries: Array = session.get_total_inventory_entries().duplicate()
 	for entry in entries:
 		var item: Item = (entry as Dictionary).item
 		if item == null or item.item_id == GameSession.PROVISIONS_ITEM_ID:
@@ -162,13 +162,13 @@ func _sell_trade_goods(session: GameSession, origin: Location) -> void:
 		if not origin.demands.has(item.item_id):
 			continue
 		var item_id := item.item_id
-		var quantity := session.inventory.get_quantity(item_id)
+		var quantity := session.get_total_quantity(item_id)
 		if quantity <= 0:
 			continue
 		var unit_price := MarketPricing.get_sell_price(
 			item, origin, session.market, session.total_days_elapsed
 		)
-		session.inventory.remove_item(item_id, quantity)
+		session.remove_from_cargo_or_bags(item_id, quantity)
 		session.wallet.earn(unit_price * quantity)
 		session.record_sale(item_id, quantity)
 		print("   Pazar: %d %s satıldı (%d GG)" % [
@@ -187,7 +187,7 @@ func _buy_trade_goods(session: GameSession, origin: Location) -> void:
 		var quantity := mini(mini(affordable, by_space), session.get_market_stock(item_id))
 		if quantity <= 0:
 			continue
-		if session.inventory.add_item(item, quantity):
+		if session.add_to_cargo(item, quantity):
 			session.consume_stock(item_id, quantity)
 			session.wallet.spend(unit_price * quantity)
 			print("   Pazar: %d %s alındı (%d GG)" % [

@@ -40,6 +40,9 @@ static func _build_cache() -> void:
 	_add("test_weapon", "ITEM_WEAPON_NAME", 40, 2.5)
 	_add("test_potion", "ITEM_POTION_NAME", 20, 0.5)
 	_add("test_furs", "ITEM_FURS_NAME", 30, 2.0)
+	# Pazarda satılmıyor - yalnızca Atölye'de craftlanır ya da sökülür
+	# (bkz. RecipeCatalog), o yüzden get_trade_goods()'a girmiyor.
+	_add("test_bandage", "ITEM_BANDAGE_NAME", 0, 0.3)
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()

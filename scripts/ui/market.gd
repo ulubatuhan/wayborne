@@ -56,8 +56,6 @@ func _ready() -> void:
 	_shop_items = ItemCatalog.get_trade_goods()
 
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
-	_session.inventory.item_added.connect(_on_inventory_changed)
-	_session.inventory.item_removed.connect(_on_inventory_changed)
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_add_recruit_button(RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
@@ -200,13 +198,14 @@ func _on_buy_pressed(item: Item, quantity_spin: SpinBox) -> void:
 			_session.get_cargo_weight(), _session.get_cargo_capacity()
 		])
 		return
-	if not _session.inventory.add_item(item, quantity):
+	if not _session.add_to_cargo(item, quantity):
 		_show_message(tr("UI_MARKET_NO_ROOM"))
 		return
 
 	_session.consume_stock(item.item_id, quantity)
 	_session.wallet.spend(price)
 	_clear_message()
+	_on_inventory_changed()
 
 func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	var quantity := int(quantity_spin.value)
@@ -254,7 +253,7 @@ func _on_haggle_deal(price: int) -> void:
 		_show_message(tr("UI_MARKET_CANNOT_PAY"))
 		_close_haggling()
 		return
-	if not _session.inventory.add_item(_pending_purchase_item, _pending_purchase_quantity):
+	if not _session.add_to_cargo(_pending_purchase_item, _pending_purchase_quantity):
 		_show_message(tr("UI_MARKET_NO_ROOM_CANCELLED"))
 		_close_haggling()
 		return
@@ -263,6 +262,7 @@ func _on_haggle_deal(price: int) -> void:
 	_session.wallet.spend(price)
 	_show_message(tr("UI_MARKET_HAGGLE_WON") % price)
 	_close_haggling()
+	_on_inventory_changed()
 
 ## Masadan kalkmak bedava değil: alım iptal olur *ve* itibar yersin. Bu ceza
 ## olmadan "kopana kadar dip teklif ver, koparsa yeniden başla" bedava bir
@@ -297,14 +297,15 @@ func _on_sell_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	var quantity := int(quantity_spin.value)
 	if quantity <= 0:
 		return
-	if not _session.inventory.has_item(item.item_id, quantity):
+	if _session.get_total_quantity(item.item_id) < quantity:
 		_show_message(tr("UI_MARKET_NOT_ENOUGH_ITEM") % item.item_name)
 		return
-	_session.inventory.remove_item(item.item_id, quantity)
+	_session.remove_from_cargo_or_bags(item.item_id, quantity)
 	_session.wallet.earn(_get_sell_price(item) * quantity)
 	# Aynı malı aynı şehre boca etmek fiyatını düşürür (bkz. MarketConditions).
 	_session.record_sale(item.item_id, quantity)
 	_clear_message()
+	_on_inventory_changed()
 
 func _has_enough_stock(item: Item, quantity: int) -> bool:
 	var remaining := _session.get_market_stock(item.item_id)
@@ -344,7 +345,7 @@ func _clear_message() -> void:
 func _on_wallet_balance_changed(_new_balance: int) -> void:
 	_refresh_header()
 
-func _on_inventory_changed(_item: Item, _quantity: int) -> void:
+func _on_inventory_changed() -> void:
 	_refresh_header()
 	_refresh_shop_rows()
 	_refresh_inventory_grid()
@@ -360,7 +361,7 @@ func _refresh_inventory_grid() -> void:
 		_inventory_grid.remove_child(child)
 		child.queue_free()
 
-	var entries := _session.inventory.get_all_entries()
+	var entries := _session.get_total_inventory_entries()
 	var total_slots := GRID_COLUMNS * GRID_ROWS
 
 	for i in range(total_slots):

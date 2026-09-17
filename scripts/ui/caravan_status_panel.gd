@@ -173,7 +173,7 @@ func _build_cargo() -> void:
 		var debt_row := _line(tr("UI_STATUS_DEBT") % debt)
 		debt_row.modulate = URGENT_COLOR
 
-	var entries := _session.inventory.get_all_entries()
+	var entries := _session.get_total_inventory_entries()
 	if entries.is_empty():
 		_line(tr("UI_STATUS_CARGO_EMPTY")).modulate = NOTE_COLOR
 		return

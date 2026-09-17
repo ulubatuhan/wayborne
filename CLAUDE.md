@@ -1500,14 +1500,59 @@ statistically tankier in aggregate *because* any one member is now
 individually more fragile, which is exactly backwards from what the
 raw feeling of "everyone can die now" would suggest.
 
-**Not retuned in the same pass, on purpose.** The point of Faz 14 was
-making death real, not rebalancing the ladder - and this file's own
-recurring lesson is not to ship a second unmeasured change on top of the
-first. Party 4 reading 100% at every danger tier does violate "dokunulmaz
-olmasın" (never untouchable) at the high end and is the next thing to
-look at, most likely by trimming `DEFAULT_DEATHBLOW_RESIST` rather than
-touching PROT or accuracy - the failure mode this table already flags,
-just larger now, not a new one.
+**Faz 15 retuned it - and the guessed lever was wrong.** The Faz 14 note
+above named `DEFAULT_DEATHBLOW_RESIST` as the most likely fix. Measured
+instead of assumed: dropping it from 67 all the way to 33 (nearly a
+coin-flip against permanent death on every Death's Door hit) left party 4
+at **100% / 100% / 98% / 98%** - almost unchanged. The kill-sponge diagnosis
+was correct, but the resist percentage was never the dial that mattered for
+*this* symptom - a battle a full party wins in two or three rounds barely
+exercises the deathblow roll at all, so hardening it does nothing to a fight
+that was never close. Guessing the lever without re-measuring would have
+shipped a much harsher permadeath for every party size to fix a problem
+specific to party 4, which is exactly the mistake this file exists to catch.
+
+The real cause was arithmetic, not the death mechanic: `_build_units()`
+caps squad size at `MAX_SQUAD_SIZE` (4, the battlefield's own rank limit),
+and a danger-appropriate bandit squad already reaches 4 templates (leader +
+two melee + archer) at high danger. Party 3 and party 4 therefore already
+face the *same* enemy count - party 4's fourth member is a free extra
+attacker with no corresponding extra defender, which is the actual source
+of the runaway win rate, independent of anything Death's Door changed.
+
+`POWER_SCALE_PER_PARTY_MEMBER` is the knob that already exists for exactly
+this ("kervan büyüdükçe onu durduranlar da güçlenir"), and it was under-set
+at 0.10. Measured at three values (60 battles each, same seeds):
+
+| `POWER_SCALE_PER_PARTY_MEMBER` | party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|---|
+| 0.10 (Faz 14) | 4 | 100% | 100% | 100% | 100% |
+| 0.20 | 4 | 100% | 100% | 98% | 98% |
+| 0.30 (shipped) | 4 | 100% | 100% | 92% | 92% |
+
+0.30 is the value that ships. It breaks the specific violation - party 4 no
+longer reads 100% at the two dangerous tiers, where "dokunulmaz olmasın"
+actually matters - while leaving a calm road (20%/40%) trivially safe for a
+full crew on purpose, the same design intent that already lets a lone
+traveller walk an easy road unbothered. The full retuned table:
+
+| party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 53% | 55% | 23% | 23% |
+| 2 | 100% | 68% | 43% | 43% |
+| 3 | 100% | 97% | 68% | 68% |
+| 4 | 100% | 100% | 92% | 92% |
+
+Party 1 is bit-for-bit unchanged (the multiplier is `1 + k*(party_size-1)`,
+so a lone traveller was never touched by this dial - confirmed, not
+assumed). Party 2 and 3 move down more than party 4 does in relative terms,
+because the same linear dial that finally dents the capped-squad case also
+bites everyone above party 1; party 2 at 65%/90% landing at 43% (down from
+60%) is a bigger swing than the table's own history treats lightly (bkz.
+the "tightest square" note above), but it moves *toward* the game's stated
+goal - "eşkıya kaynayan yolda gerçekten kaybedebilsin" - not away from it,
+and `DEFAULT_DEATHBLOW_RESIST` stays at 67, untouched, because it was never
+the problem.
 
 ### Progression Rules
 
@@ -1703,6 +1748,83 @@ the report said exactly 100.0 every run.
   Provisions are exempt (they have their own journey formula and must not
   eat cargo space), and the ceiling tracks `owned_wagon_count`.
 - Every number in these tables is a placeholder to be tuned.
+
+### Kervan Envanteri Rules
+
+The cargo hold used to be one shared `Inventory` for the whole caravan, with
+a single weight ceiling that scaled with `owned_wagon_count`. Faz 15 split
+it the way the game's own vocabulary already implied - a caravan is
+*wagons*, plural - and added a small personal buffer and a workshop that
+turns materials into other materials, per the #22 backlog note above.
+
+- **Cargo lives per wagon, not in one pool.** `GameSession.wagon_inventories:
+  Array[Inventory]` is `owned_wagon_count` long; `_sync_wagon_inventories()`
+  keeps it in step with the fleet - buying a wagon appends a fresh, empty
+  `Inventory` (weight limit `CARGO_PER_WAGON`, same as before), losing or
+  selling one pops the last entry and tries to pour its cargo into the
+  wagons that remain. Provisions stay exempt from weight in every wagon,
+  the same rule as before, just applied per-wagon instead of once.
+- **A stack does not have to fit one wagon, only the fleet.** `add_to_cargo()`
+  plans how much each wagon can still take (`Inventory.get_max_addable`,
+  which reads but does not mutate) before committing anything - a purchase
+  that doesn't fit in any single wagon but fits split across two still
+  succeeds. It is deliberately all-or-nothing: if the *total* doesn't fit,
+  nothing is written to any wagon, because a partially-applied purchase
+  would need to explain itself twice.
+- **A character carries a small, limited bag of their own.**
+  `CharacterData.personal_inventory` (`PERSONAL_BAG_CAPACITY`, a tenth of a
+  wagon) is outside the wagon system entirely. Its one job is to catch a
+  small windfall the wagons have no room for (`add_to_cargo_or_bag()`,
+  read by event loot) so a good roll doesn't vanish for a reason the player
+  never sees - the same "a hidden penalty is a bug" reasoning Economy Rules
+  already states for market shocks. Market purchases and haggling
+  deliberately do **not** call this - there, "kargo dolu" has to stay a
+  visible message, not a silent slide into someone's pocket.
+- **The city sees one number: the sum.** `get_total_quantity()`/
+  `get_total_inventory_entries()` merge every wagon and every party
+  member's bag into the single total the market screen, the road's cargo
+  dump and the trading AI all read - "vagonlarımızın ve çantamızın
+  toplamı," in the player's own words. Nothing reads a single wagon
+  directly outside `GameSession` itself; `remove_from_cargo_or_bags()`
+  drains the wagons first and only reaches into bags once they're empty,
+  so a sale never surprises the player by emptying a companion's pocket
+  while a wagon still has stock.
+- **A wagon lost to the road can really lose its cargo; a wagon sold
+  cannot.** `sell_wagon()` is already gated on the remaining fleet having
+  room for everything (`get_wagon_sale_block_reason`), so redistribution on
+  a sale always succeeds. A wagon lost in combat or an event carries no
+  such guarantee - whatever doesn't fit in the wagons that survive is
+  gone with it, the same "the caravan can be ruined" stakes Ruin Rules
+  already applies to the wagon itself.
+- **Atölye (Workshop) is a Rust-simple craft menu, not a new system.**
+  `CraftingRecipe` (a resource: inputs, an output item *or* a wagon-repair
+  effect) and the static `RecipeCatalog` are the whole vocabulary; three
+  recipes ship (`craft_bandage`: cloth → bandage; `repair_wagon_canvas`:
+  cloth → wagon damage -1, a material-priced alternative to the Kervan
+  Avlusu's gold repair; `dismantle_to_bandage`: fur → two bandages, the
+  "dismantle" verb the player asked for). `GameSession.craft()` consumes
+  inputs from the same total (wagons then bags) and writes its output
+  through `add_to_cargo_or_bag()` - a recipe invents no second inventory
+  door. A recipe that cannot be made yet is **disabled with its reason**
+  (`get_craft_block_reason()`), the same rule as a locked event choice, a
+  locked skill or a locked equipment tier - never hidden. The button lives
+  on `caravan_yard.gd`, built in code exactly like its own sell-wagon
+  button, opening `CraftingPanel` (`MealDistributionPanel`'s scene-less
+  `CanvasLayer` pattern) rather than a new scene.
+- **What #22's own design note asked for and did not get:** a read-only
+  view into a *foreign* trader's wagon, and a dedicated "Kervan Yükü"
+  screen for placing cargo wagon-by-wagon on purpose. Neither exists yet -
+  the aggregate functions above are deliberately silent about which wagon
+  holds what, because nothing in this pass needed that distinction. Either
+  is a real follow-up, not a rejection.
+- `tests/test_wagon_inventory.gd` locks the load-bearing claims: each wagon
+  keeps its own weight ceiling, a stack splits across wagons when it must,
+  an over-total request touches no wagon, selling a wagon never loses
+  cargo while losing one can, the personal bag catches overflow but market
+  purchases never route to it, removal drains wagons before bags, the
+  save round-trip preserves the split and the bags, a pre-Faz-15 save's
+  single flat `inventory` list still loads (poured through `add_to_cargo`),
+  and each of the three recipes - including their block reasons.
 
 ### Haggling Rules
 
@@ -3045,8 +3167,9 @@ kendi önceliklendirmesiyle):
   `change_stress()`'i doğrudan okuyor - Stress Rules'un ölçülmüş dengesi
   bu fonksiyona hiç dokunulmadan korunuyor.
 
-**#22 (vagon-bazlı envanter + loot crafting) - yeniden tasarlandı, kod bu
-turda gönderilmedi.** Kullanıcının notu ilk triyajdaki "paylaşılan tek
+**#22 (vagon-bazlı envanter + loot crafting) - tasarlandı burada, uygulandı
+Faz 15'te (bkz. Development Status'un Faz 15 girişi ve CLAUDE.md Kervan
+Envanteri Rules).** Kullanıcının notu ilk triyajdaki "paylaşılan tek
 envanter" okumasını düzeltiyor: istenen, kervanın **kendi** vagonlarının
 her birinin ayrı bir envanteri olması ve bunların bir crafting sistemine
 girdi olması; başkasının (yabancı bir tüccarın) vagonu ise izin verilirse
@@ -3070,12 +3193,17 @@ salt-okunur görüntülenebilir, hiç kullanılamaz. Tasarım notu:
   girmez; ayrı, salt-okunur bir görünüm alır (bir olay ya da lonca
   etkileşimiyle "izin verilirse" açılan bir pencere) - yazma yolu hiç yok,
   yani ekonomiye sızma riski yok.
-- **Neden bu turda değil:** bu, tek `Inventory`'nin kasıtlı sadeliğini
-  bozan ve ağırlık/kargo testlerinin (`test_city_commerce.gd`,
-  `test_provisions.gd`) çoğunu yeniden yazacak en büyük değişiklik - Ruin
-  Rules'un kendi dersi tam bunun için var: "ölçülmeden gönderilen bir
-  mekanik, kimsenin görmediği bir denge değişikliğidir." Kendi PR'ını ve
-  kendi denge ölçümünü (simulate_journeys.gd'ye yeni bir rapor) istiyor.
+- **O zaman ertelenme sebebi, ilk PR'ında geçerliliğini korudu.** Bu, tek
+  `Inventory`'nin kasıtlı sadeliğini bozan ve ağırlık/kargo testlerinin
+  çoğunu yeniden yazan en büyük değişikliklerden biriydi - Faz 15
+  `test_game_session.gd`'nin iki ağırlık testini gerçekten yeniden yazdı
+  ve kendi PR'ını, kendi test paketini (`test_wagon_inventory.gd`) aldı,
+  tam bu notun istediği gibi. Uygulanan şekliyle tek fark: "yabancı vagon
+  salt-okunur görünümü" ve ayrı bir "Kervan Yükü" ekranı bu turda da
+  kapsam dışı bırakıldı - kullanıcının asıl istediği (vagon başına
+  envanter + kişisel çanta + şehirde toplam görünüm + basit bir craft
+  menüsü) mevcut ekranların (pazar, Kervan Avlusu) üstüne bindirildi,
+  yeni bir ekran icat edilmedi.
 
 **Plana alınmadı, oyuncunun kendi isteğiyle bilerek beklemede (rejected
 değil, backlog):** seslendirmeli anlatım ve kombat nidaları (#7, #11 -
@@ -3136,6 +3264,39 @@ tehlike seviyesinde %100 kazanması) ölçüldü ve kaydedildi ama retune
 edilmedi - iki değişikliği aynı pasta ölçmeden üst üste bindirmek bu
 dosyanın kendi kuralı. `DEFAULT_DEATHBLOW_RESIST`'i düşürmek en olası
 yön, ama kendi ölçümünü ister.
+
+Faz 15 ("Ölçüm ve vagonlar") - Faz 14'ün kendi açık uçlarından biri, ve
+kullanıcının uzun süredir istediği en büyük backlog kalemi (#22), aynı
+turda:
+
+- **A. Kill-sponge retune - ama tahmin edilen kol değil.** Faz 14'ün notu
+  `DEFAULT_DEATHBLOW_RESIST`'i en olası düzeltme diye işaretlemişti. Ölçüm
+  bunu çürüttü: direnci 67'den 33'e (ölümcül vuruş zarının neredeyse
+  yazı-tura olduğu bir sertliğe) indirmek parti 4'ü hiç kıpırdatmadı
+  (%100/%100/%98/%98). Asıl sebep aritmetikti: `EnemyCatalog._build_units()`
+  kadroyu `MAX_SQUAD_SIZE`'da (4) kırptığı için parti 3 ile parti 4 zaten
+  aynı sayıda düşmanla dövüşüyordu - dördüncü kişi karşılıksız bir fazla
+  vurucuydu. Gerçek kol `POWER_SCALE_PER_PARTY_MEMBER` (0.10 → 0.30) çıktı;
+  tam ölçüm ve tablo Ruin Rules'ta. `DEFAULT_DEATHBLOW_RESIST` hiç
+  değişmedi.
+- **B. Kervan Envanteri + Atölye (#22'nin kendisi).** `GameSession.
+  wagon_inventories` tek paylaşılan `Inventory`'nin yerini aldı,
+  `CharacterData.personal_inventory` küçük bir kişisel taşkın alanı açtı,
+  `get_total_quantity()`/`get_total_inventory_entries()` ikisini şehirde
+  tek bir toplam olarak gösterdi - kullanıcının kendi tarifiyle "vagonlarımızın
+  ve çantamızın toplamı." `RecipeCatalog`'un üç tarifi (bandaj craftlamak,
+  vagon bezini malzemeyle tamir etmek, kürk söküp bandaja çevirmek)
+  `CraftingPanel` (yeni bir sahne değil, `MealDistributionPanel`'in
+  sahnesiz deseni) üzerinden Kervan Avlusu'na eklendi. Tam ölçüm, tasarım
+  gerekçesi ve neyin bilerek kapsam dışı bırakıldığı (yabancı vagon
+  görünümü, ayrı bir "Kervan Yükü" ekranı) Kervan Envanteri Rules'ta.
+- **C. Ana menünün tıkla-geç açığı.** "Bir tuşa basın" evresinde düğmeler
+  saydamdı ama `disabled` bir düğmenin varsayılan `mouse_filter`'ını
+  (`STOP`) değiştirmiyor - fare tıklaması klavye basımının hiç görmediği
+  bu yolu (GUI hit-testing) izlediği için, düğmelerin durduğu yere
+  tıklamak sessizce yutuluyordu; boş bir alana tıklamak çalışıyordu. Evre
+  boyunca düğmelerin `mouse_filter`'ı da `IGNORE`'a çevrilip menü açılırken
+  geri alınıyor (bkz. `main_menu.gd`'nin `_set_buttons_mouse_ignore`).
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

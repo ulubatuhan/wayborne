@@ -210,20 +210,20 @@ func _run_leg(session: GameSession, rng: RandomNumberGenerator) -> Dictionary:
 # --- Şehirdeki para akışı (playthrough_demo.gd ile aynı politika) ---
 
 func _sell_trade_goods(session: GameSession, origin: Location) -> void:
-	var entries: Array = session.inventory.get_all_entries().duplicate()
+	var entries: Array = session.get_total_inventory_entries().duplicate()
 	for entry in entries:
 		var item: Item = (entry as Dictionary).item
 		if item == null or item.item_id == GameSession.PROVISIONS_ITEM_ID:
 			continue
 		if not origin.demands.has(item.item_id):
 			continue
-		var quantity := session.inventory.get_quantity(item.item_id)
+		var quantity := session.get_total_quantity(item.item_id)
 		if quantity <= 0:
 			continue
 		var unit_price := MarketPricing.get_sell_price(
 			item, origin, session.market, session.total_days_elapsed
 		)
-		session.inventory.remove_item(item.item_id, quantity)
+		session.remove_from_cargo_or_bags(item.item_id, quantity)
 		session.wallet.earn(unit_price * quantity)
 		session.record_sale(item.item_id, quantity)
 
@@ -238,7 +238,7 @@ func _buy_trade_goods(session: GameSession, origin: Location) -> void:
 		var quantity := mini(mini(affordable, by_space), session.get_market_stock(item_id))
 		if quantity <= 0:
 			continue
-		if session.inventory.add_item(item, quantity):
+		if session.add_to_cargo(item, quantity):
 			session.consume_stock(item_id, quantity)
 			session.wallet.spend(unit_price * quantity)
 

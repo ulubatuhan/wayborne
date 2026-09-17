@@ -10,7 +10,15 @@ const PROVISIONS_ITEM_NAME: String = "ITEM_PROVISIONS_NAME"
 const PROVISIONS_UNIT_PRICE: int = 4
 
 var wallet: Wallet
-var inventory: Inventory
+## Kervanın kargosu artık tek bir paylaşılan havuz değil, vagon başına
+## ayrı bir `Inventory` (bkz. CLAUDE.md #22 tasarım notu). `owned_wagon_count`
+## uzunluğunda tutulur, `_sync_wagon_inventories()` vagon alınıp
+## satıldıkça/kaybedildikçe büyütür ya da küçültür. Hangi vagonun ne
+## taşıdığı Atölye'nin tarifleri açısından önemli değil - bu turda tek
+## fark eden şey vagonların *toplamı*; okuyucular `get_total_quantity()`/
+## `add_to_cargo()`/`remove_from_cargo_or_bags()` üzerinden erişir, tek
+## bir vagonu doğrudan okumaz.
+var wagon_inventories: Array[Inventory] = []
 var caravan: CaravanState
 
 ## Borç defteri (bkz. DebtLedger). Kervan yok olmaz ama borca batabilir:
@@ -500,7 +508,7 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	ledger.record(CaravanLedger.KIND_LED, player_character.character_name, 0, 1)
 
 	owned_wagon_count = STARTING_WAGONS
-	_sync_cargo_capacity()
+	_sync_wagon_inventories()
 	owned_wagon_damaged = 0
 
 	set_player_character(player_character)
@@ -1110,7 +1118,7 @@ func buy_wagon() -> bool:
 		return false
 	wallet.spend(cost)
 	owned_wagon_count += 1
-	_sync_cargo_capacity()
+	_sync_wagon_inventories()
 	return true
 
 ## Elden çıkarılan vagon aldığı parayı asla geri getirmez - yoksa alıp
@@ -1167,7 +1175,7 @@ func sell_wagon() -> bool:
 		owned_wagon_damaged -= 1
 	owned_wagon_damaged = clampi(owned_wagon_damaged, 0, owned_wagon_count)
 	wallet.earn(value)
-	_sync_cargo_capacity()
+	_sync_wagon_inventories()
 	return true
 
 func get_repair_cost() -> int:
@@ -1201,17 +1209,14 @@ var _provisions_item: Item
 
 func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wagon_count: int = 1) -> void:
 	wallet = Wallet.new(starting_gold)
-	inventory = Inventory.new()
+	wagon_inventories = []
 	caravan = CaravanState.new()
 	debts = DebtLedger.new()
 	market = MarketConditions.new()
 	route_conditions = RouteConditions.new()
 	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
-	# Erzak kargo ağırlığına dahil değil (bkz. get_cargo_weight), o yüzden
-	# ağırlık kısıtından muaf.
-	inventory.exempt_item_ids = [PROVISIONS_ITEM_ID]
-	_sync_cargo_capacity()
+	_sync_wagon_inventories()
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
@@ -1221,7 +1226,7 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	_provisions_item.base_price = PROVISIONS_UNIT_PRICE
 
 	if starting_provisions > 0:
-		inventory.add_item(_provisions_item, starting_provisions)
+		add_to_cargo(_provisions_item, starting_provisions)
 
 	_restock_current_location()
 
@@ -1296,7 +1301,7 @@ func hire_recruit(venue: String, candidate: CharacterData) -> bool:
 	return true
 
 func get_provisions() -> int:
-	return inventory.get_quantity(PROVISIONS_ITEM_ID)
+	return get_total_quantity(PROVISIONS_ITEM_ID)
 
 ## Negatif miktarlarda sıfırın altına inmez; her iki yönde de gerçekten
 ## değişen miktarı döner.
@@ -1309,11 +1314,11 @@ func get_provisions() -> int:
 ## gerçek olur.
 func change_provisions(delta: int) -> int:
 	if delta > 0:
-		return delta if inventory.add_item(_provisions_item, delta) else 0
+		return delta if add_to_cargo(_provisions_item, delta) else 0
 
 	var removable := mini(-delta, get_provisions())
 	if removable > 0:
-		inventory.remove_item(PROVISIONS_ITEM_ID, removable)
+		remove_from_cargo_or_bags(PROVISIONS_ITEM_ID, removable)
 	return -removable
 
 func has_flag(flag: String) -> bool:
@@ -1544,7 +1549,7 @@ func _apply_wagon_losses_to_ownership() -> void:
 	var player_damaged := caravan.damaged_wagons - escort_damaged
 
 	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
-	_sync_cargo_capacity()
+	_sync_wagon_inventories()
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
 
 ## Şehre varış her zaman rahatlatır - kırılma riski sıfırlanmaz ama stres
@@ -1600,22 +1605,162 @@ func _calculate_arrival_payout() -> Dictionary:
 		"net": net,
 	}
 
-## Yalnızca pazardan alınan mallara uygulanır (bkz. CARGO_PER_WAGON).
-## Şehirdeyken geçerli olan sahiplik sayısını kullanır - sefer sırasında
-## kargo alışverişi zaten mümkün değil (market yalnızca şehirde açılır).
-## Vagon sayısı her değiştiğinde envanterin ağırlık tavanı da değişir -
-## vagon almak yer açar, vagon kaybetmek yükü sınırlar.
-func _sync_cargo_capacity() -> void:
-	inventory.weight_limit = get_cargo_capacity()
+## Vagon sayısı her değiştiğinde vagon envanterleri dizisi de büyür/küçülür
+## - vagon almak yeni, boş bir vagon envanteri açar; vagon kaybetmek/satmak
+## kalan vagonun kargosunu diğer vagonlara dağıtır (bkz. `add_to_cargo` -
+## bir tek yığın gerekirse birden fazla vagona bölünür), sığmayan kısım
+## vagonla birlikte gerçekten kaybolur (bkz. CLAUDE.md Ruin Rules).
+func _sync_wagon_inventories() -> void:
+	while wagon_inventories.size() < owned_wagon_count:
+		var wagon_inventory := Inventory.new()
+		wagon_inventory.weight_limit = CARGO_PER_WAGON
+		# Erzak kargo ağırlığına dahil değil (bkz. get_cargo_weight), o
+		# yüzden her vagonda ağırlık kısıtından muaf.
+		wagon_inventory.exempt_item_ids = [PROVISIONS_ITEM_ID]
+		wagon_inventories.append(wagon_inventory)
+	while wagon_inventories.size() > owned_wagon_count:
+		var removed: Inventory = wagon_inventories.pop_back()
+		for entry in removed.get_all_entries():
+			add_to_cargo(entry.item, entry.quantity)
 
 func get_cargo_capacity() -> float:
 	return owned_wagon_count * CARGO_PER_WAGON
 
 func get_cargo_weight() -> float:
-	return inventory.get_total_weight()
+	var total := 0.0
+	for wagon_inventory in wagon_inventories:
+		total += wagon_inventory.get_total_weight()
+	return total
 
 func get_cargo_space_remaining() -> float:
 	return maxf(0.0, get_cargo_capacity() - get_cargo_weight())
+
+## Bir yığın tek bir vagona sığmak zorunda değil - alım kervanın *toplam*
+## kargosuna sığmalı, tek bir vagonun kapasitesine değil. Önce her vagonun
+## ne kadarını alabileceği planlanır (get_max_addable, hiçbir şeyi
+## değiştirmez); toplam sığmıyorsa hiçbir vagona dokunulmaz - "hepsi ya da
+## hiçbiri", yarım yamalak bir alım kafa karıştırır.
+func add_to_cargo(item: Item, quantity: int) -> bool:
+	if quantity <= 0:
+		return false
+	var remaining := quantity
+	var plan: Array[Dictionary] = []
+	for wagon_inventory in wagon_inventories:
+		if remaining <= 0:
+			break
+		var addable := wagon_inventory.get_max_addable(item)
+		if addable <= 0:
+			continue
+		var take := mini(remaining, addable)
+		plan.append({"wagon": wagon_inventory, "quantity": take})
+		remaining -= take
+	if remaining > 0:
+		return false
+	for step in plan:
+		var wagon_inventory: Inventory = step.wagon
+		wagon_inventory.add_item(item, int(step.quantity))
+	return true
+
+## Vagonlara sığmayan küçük bir kazanç (bkz. Faz 13 evt_forgotten_cache gibi
+## olay ödülleri) tamamen kaybolmasın diye - kişisel çantalara (bkz.
+## CharacterData.personal_inventory) taşan bir son çare. Alım/pazarlık
+## kasıtlı olarak bunu çağırmıyor - orada oyuncunun "kargo dolu" diye
+## bilgilendirilmesi gerekiyor, sessizce çantaya kaymaması.
+func add_to_cargo_or_bag(item: Item, quantity: int) -> bool:
+	if add_to_cargo(item, quantity):
+		return true
+	for character in get_party():
+		if character.personal_inventory.add_item(item, quantity):
+			return true
+	return false
+
+## Vagonlar + kişisel çantalar toplamında bir malın kaç birimi var -
+## "şehre gittiğimizde vagonlarımızın ve çantamızın toplamı" sorusunun
+## tek bir malı için karşılığı.
+func get_total_quantity(item_id: String) -> int:
+	var total := 0
+	for wagon_inventory in wagon_inventories:
+		total += wagon_inventory.get_quantity(item_id)
+	for character in get_party():
+		total += character.personal_inventory.get_quantity(item_id)
+	return total
+
+## Kargo bittikçe çantalara devam eder, hepsi tükenene kadar. Talep edilen
+## toplamdan azı varsa hiçbir şey eksiltmez (hepsi ya da hiçbiri, `add_to_
+## cargo`nun ayna kuralı) - satış/craft ekranı önce `get_total_quantity`
+## ile sorar, burası yalnızca gerçekten yeterince varken çağrılır.
+func remove_from_cargo_or_bags(item_id: String, quantity: int) -> bool:
+	if quantity <= 0 or get_total_quantity(item_id) < quantity:
+		return false
+	var remaining := quantity
+	for wagon_inventory in wagon_inventories:
+		if remaining <= 0:
+			break
+		var take := mini(remaining, wagon_inventory.get_quantity(item_id))
+		if take > 0:
+			wagon_inventory.remove_item(item_id, take)
+			remaining -= take
+	for character in get_party():
+		if remaining <= 0:
+			break
+		var take := mini(remaining, character.personal_inventory.get_quantity(item_id))
+		if take > 0:
+			character.personal_inventory.remove_item(item_id, take)
+			remaining -= take
+	return true
+
+## Vagonlar + kişisel çantalar toplamı, tek bir listeye eritilmiş - pazar
+## ve kargo dökümü ekranlarının okuduğu şey (bkz. Inventory.get_all_entries
+## ile aynı şekil: {"item": Item, "quantity": int}).
+func get_total_inventory_entries() -> Array:
+	var totals: Dictionary = {}
+	for wagon_inventory in wagon_inventories:
+		_merge_entries(totals, wagon_inventory.get_all_entries())
+	for character in get_party():
+		_merge_entries(totals, character.personal_inventory.get_all_entries())
+	return totals.values()
+
+func _merge_entries(totals: Dictionary, entries: Array) -> void:
+	for entry in entries:
+		var item: Item = entry.item
+		if totals.has(item.item_id):
+			totals[item.item_id].quantity += int(entry.quantity)
+		else:
+			totals[item.item_id] = {"item": item, "quantity": int(entry.quantity)}
+
+## Bir tarifin şu an craftlanıp craftlanamayacağının sebebi - kilitli bir
+## olay seçimi/görev/ekipman gibi "sebebiyle birlikte" gösterilir, boşsa
+## craftlanabilir.
+func get_craft_block_reason(recipe: CraftingRecipe) -> String:
+	if recipe.effect == CraftingRecipe.Effect.WAGON_REPAIR and owned_wagon_damaged <= 0:
+		return "UI_CRAFT_NO_DAMAGE"
+	for item_id in recipe.inputs:
+		if get_total_quantity(String(item_id)) < int(recipe.inputs[item_id]):
+			return "UI_CRAFT_MISSING_MATERIAL"
+	return ""
+
+func can_craft(recipe: CraftingRecipe) -> bool:
+	return get_craft_block_reason(recipe).is_empty()
+
+## Malzemeleri tüketir ve tarifin sonucunu uygular. Başarısızsa (malzeme
+## yetersiz ya da onarımın gerekmediği bir onarım tarifi) hiçbir şey
+## değişmez.
+func craft(recipe_id: String) -> bool:
+	var recipe := RecipeCatalog.get_recipe(recipe_id)
+	if recipe == null or not can_craft(recipe):
+		return false
+
+	for item_id in recipe.inputs:
+		remove_from_cargo_or_bags(String(item_id), int(recipe.inputs[item_id]))
+
+	match recipe.effect:
+		CraftingRecipe.Effect.WAGON_REPAIR:
+			owned_wagon_damaged = maxi(0, owned_wagon_damaged - 1)
+		CraftingRecipe.Effect.ITEM:
+			var output := ItemCatalog.get_item(recipe.output_item_id)
+			if output != null:
+				add_to_cargo_or_bag(output, recipe.output_quantity)
+	return true
 
 ## Kalıcı kayıt yalnızca şehir varışında alınır (bkz. SaveManager,
 ## scripts/ui/road_journey.gd), o noktada sefer hiç aktif değildir ve
@@ -1623,13 +1768,18 @@ func get_cargo_space_remaining() -> float:
 ## alanlarına taşımıştır. Bu yüzden journey_*/caravan hiç serileştirilmiyor
 ## - saklayacak anlamlı bir durumları yok; owned_wagon_* kalıcı olduğu
 ## için serileştiriliyor.
-const SAVE_VERSION: int = 2
+##
+## v2 -> v3: tek paylaşılan `inventory` vagon başına ayrı `Inventory`'lere
+## bölündü (bkz. wagon_inventories). Eski kayıtların "inventory" anahtarı
+## hâlâ okunuyor (bkz. load_from_dict) - `_migrate_save`de değil, orada
+## çünkü dönüşüm vagonların senkron edilmiş olmasını gerektiriyor ve o
+## sıra load_from_dict'in kendi akışında.
+const SAVE_VERSION: int = 3
 
 func to_save_dict() -> Dictionary:
-	var inventory_data: Array = []
-	for entry in inventory.get_all_entries():
-		var item: Item = entry.item
-		inventory_data.append({"item_id": item.item_id, "quantity": entry.quantity})
+	var wagon_inventory_data: Array = []
+	for wagon_inventory in wagon_inventories:
+		wagon_inventory_data.append(wagon_inventory.to_save_array())
 
 	var party_data: Array = []
 	for character in party:
@@ -1638,7 +1788,7 @@ func to_save_dict() -> Dictionary:
 	return {
 		"version": SAVE_VERSION,
 		"gold": wallet.balance,
-		"inventory": inventory_data,
+		"wagon_inventories": wagon_inventory_data,
 		"current_location_id": current_location_id,
 		"reputation": reputation,
 		"flags": _flags.duplicate(),
@@ -1705,20 +1855,34 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	market.load_from_dict(data.get("market", {}) as Dictionary)
 	route_conditions.load_from_dict(data.get("route_conditions", {}) as Dictionary)
 
-	for entry in data.get("inventory", []):
-		var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
-		var quantity := int(entry.get("quantity", 0))
-		if item != null and quantity > 0:
-			inventory.add_item(item, quantity)
+	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
+	# sayısındayken doğru sığar (bkz. `_sync_wagon_inventories`). Eskiden
+	# envanter, vagon sayısı düzeltilmeden önce yükleniyordu; tek vagonluk
+	# taze bir GameSession'a üç vagonluk bir kargoyu yüklemek o an fazla
+	# olan kısmı sessizce düşürüyordu - vagon sayısını önce okumak bunu da
+	# düzeltiyor.
+	owned_wagon_count = clampi(
+		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
+	)
+	_sync_wagon_inventories()
+
+	if data.has("wagon_inventories"):
+		var saved_wagons: Array = data["wagon_inventories"]
+		for index in mini(saved_wagons.size(), wagon_inventories.size()):
+			wagon_inventories[index].load_from_array(saved_wagons[index] as Array)
+	else:
+		# v2 ve öncesi: tek paylaşılan envanter. `add_to_cargo` kendiliğinden
+		# vagonlara bölüp dağıtıyor.
+		for entry in data.get("inventory", []):
+			var item := ItemCatalog.get_item(String(entry.get("item_id", "")))
+			var quantity := int(entry.get("quantity", 0))
+			if item != null and quantity > 0:
+				add_to_cargo(item, quantity)
 
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
 	reputation = int(data.get("reputation", 0))
 	_flags = (data.get("flags", {}) as Dictionary).duplicate()
-	owned_wagon_count = clampi(
-		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
-	)
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
-	_sync_cargo_capacity()
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
 
