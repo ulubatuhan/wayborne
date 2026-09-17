@@ -62,18 +62,12 @@ func _draw() -> void:
 	var feet_rect := Rect2(legs_rect.position.x, legs_rect.position.y + legs_rect.size.y, legs_rect.size.x, feet_height)
 	draw_rect(feet_rect, _piece_color(OutfitCatalog.SLOT_SHOES, Color(0.3, 0.3, 0.3)))
 
+## Bu ekranın ve figürlerin (WalkFigure/CombatFigure) aynı kuralı okuması
+## için asıl mantık OutfitCatalog.resolve_color()'da - bkz. o dosyanın
+## "Figürlerin okuduğu çözümleyiciler" başlığı.
 func _piece_color(slot: String, fallback: Color) -> Color:
-	var piece_id: String = str(_outfit.get(slot, OutfitCatalog.NONE_PIECE))
-	if piece_id.is_empty():
-		return fallback
-	var piece := OutfitCatalog.get_piece(piece_id)
-	if piece == null:
-		return fallback
-	return piece.color
+	return OutfitCatalog.resolve_color(_outfit, slot, fallback)
 
 ## Ceket varsa gömleğin üstünü kapatır; ikisi de yoksa çıplak ten görünür.
 func _torso_color(skin: Color) -> Color:
-	var jacket_id: String = str(_outfit.get(OutfitCatalog.SLOT_JACKET, OutfitCatalog.NONE_PIECE))
-	if not jacket_id.is_empty():
-		return _piece_color(OutfitCatalog.SLOT_JACKET, skin)
-	return _piece_color(OutfitCatalog.SLOT_SHIRT, skin)
+	return OutfitCatalog.resolve_torso_color(_outfit, skin)

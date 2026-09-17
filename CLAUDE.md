@@ -3430,21 +3430,48 @@ icat etmiyor:
   iyileşmesi - kampın "ücretsiz ama yavaş" kolunun günlük, küçük bir
   eşdeğeri.
 
-**Kıyafet sisteminin kapsamı netleşti.** `OutfitCatalog`/`OutfitPiece`
-bugün yalnızca `OutfitPreview`'da (karakter oluşturmadaki boydan önizleme)
-okunuyor - `WalkFigure` (dünya) ve `CombatFigure` (savaş) hiçbir zaman
-`CharacterData.outfit`'e bakmıyor, yani bir kıyafet seçimi şu an oyunun
-geri kalanında **görünmüyor**, yalnızca o önizleme penceresinde. Elle
-çizilmiş görsellerin (Faz 10'un işaretlediği, hâlâ tamamlanmamış "next")
-ilk hedeflerinden biri bu boşluğu kapatmak olmalı - altı slot (şapka/
-gömlek/ceket/eldiven/pantolon/ayakkabı) zaten parça parça ayrılmış durumda
-(`OutfitCatalog.SLOT_*`, her biri kendi küçük havuzuyla), tek eksik olan bu
-parçaların `WalkFigure`/`CombatFigure` üzerinde de okunup çizilmesi -
-sistemin kendisi (Faz 13 PR'ının kasıtlı sırasıyla: "önce sistemi kur,
-seçenekleri sonra ekle") zaten buna hazır kurulmuş durumda. `Equipment`
-(kılıç/zırh gibi combat parçaları) tamamen ayrı bir sistem kalır - `outfit`
-kozmetik, `equipped` savaşı etkiler; ikisi de karaktere görsel bir katman
-eklerken birbirine karışmaz (yukarıdaki "reddedildi" maddesinin gerekçesi).
+**Kıyafet seçimi artık oyunun geri kalanında da görünüyor (Faz 16).**
+`OutfitCatalog`/`OutfitPiece` bir süre yalnızca `OutfitPreview`'da
+(karakter oluşturmadaki boydan önizleme) okunuyordu - `WalkFigure` (dünya)
+ve `CombatFigure` (savaş) `CharacterData.outfit`'e hiç bakmıyordu, yani bir
+kıyafet seçimi şu ekranın dışında görünmüyordu. Üç dosyanın da (önizleme +
+iki gerçek figür) aynı mantığı okuması için tek doğruluk kaynağı
+`OutfitCatalog`'a taşındı: `resolve_color()` (bir slotta parça seçiliyse
+onun rengi, değilse verilen fallback), `resolve_torso_color()` (ceket
+gömleğin üstünü kapatır - `CaravanPlan.daily_consumption()`'ın "tek
+formül, tek yer" kuralının kıyafet karşılığı) ve `resolve_headgear()`
+(bir şapkanın `head_shape`'i varsa - `hat_hood`→"hood", `hat_felt`→"cap" -
+figür gerçekten farklı bir kafa silüeti çiziyor, kendi rengiyle).
+`WalkFigure.set_kind()` ve `CombatFigure.setup()` artık bir `outfit`
+parametresi alıyor (varsayılanı boş sözlük); `world_hub.gd`
+`character.outfit`'i doğrudan geçiyor, `CombatUnit.outfit` (`from_character`'da
+kopyalanan, `from_enemy`'de hiç dokunulmayan - düşmanın kıyafeti yok) aynı
+bilgiyi savaş tarafına taşıyor, `CombatUnitSlot.bind()` onu `CombatFigure`'a
+iletiyor.
+**Her çözümleyici, override yokken tam olarak eski değeri döner** - bu
+sistemin en önemli garantisi: kıyafetsiz bir karakter (tayfa, her düşman,
+kıyafet seçmemiş bir oyuncu) bu sistem hiç var olmadan önceki hâliyle
+birebir aynı çiziliyor, `test_outfit.gd`'nin `override` alanını doğrudan
+sınadığı satır bunu kilitliyor. Savaş silüeti küçük ölçekte ayrı bir
+ayakkabı/eldiven şekli taşımadığı için `CombatFigure` yalnızca gövde
+(ceket/gömlek), bacak (pantolon) ve baş (şapka) alanlarını okuyor;
+`WalkFigure` altı slotun tamamını (eldiven/ayakkabı dahil) okuyor - hangi
+figürün hangi slotu okuduğu, o figürün gerçekten çizdiği bir şekle karşılık
+gelip gelmediğine bağlı, eksiksizlik uğruna yeni bir şekil icat edilmedi.
+`Equipment` (kılıç/zırh gibi combat parçaları) tamamen ayrı bir sistem
+kalır - `outfit` kozmetik, `equipped` savaşı etkiler; ikisi de karaktere
+görsel bir katman eklerken birbirine karışmaz (yukarıdaki "reddedildi"
+maddesinin gerekçesi). Gerçek sprite'lar geldiğinde (kullanıcının kendi
+sözleriyle "tek tek çizip vereceğim") her slotun kendi rengi zaten kendi
+parçasına ait - `OutfitPiece.color`'ın yerini `OutfitPiece.texture`
+almasını, hangi figürün hangi `Sprite2D`'yi hangi slotta göstereceğini
+bu aynı altı-slot mimarisi belirleyecek; yapı değişmez, yalnızca `_draw()`
+çağrıları `TextureRect`/`Sprite2D`'ye yer açar (Art Rules'un genel sprite
+geçiş kuralı).
+
+Faz 16 böylece fiilen başladı - yukarıdaki kıyafet maddesi tamamlanan ilk
+parça, aşağıdaki ikisi (yabancı vagon diyaloğu, genel kervan ekranı) hâlâ
+tasarım notu.
 
 **Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
 tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"
