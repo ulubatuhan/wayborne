@@ -45,8 +45,6 @@ const COMBAT_STRESS_PER_DOWN: int = 6
 const COMBAT_VICTORY_STRESS_RELIEF: int = 4
 const COMBAT_DEFEAT_STRESS: int = 15
 
-## Erzak tükenince moralin yanı sıra gerginlik de yükselir.
-const FAMINE_STRESS: int = 6
 ## Aç bir kervan daha yavaş yürür - tempo zaten stamina'ya bağlı (bkz. Road
 ## Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak ekleniyor.
 ## Havanın çarpanıyla aynı yerde, aynı şekilde uygulanıyor.
@@ -182,6 +180,11 @@ var _pending_event: GameEvent = null
 var _pending_event_day_position: float = 0.0
 var _encounter: RoadEncounter = null
 var _current_combat_kind: String = "bandit"
+var _pending_combat_danger: float = 0.0
+var _pre_combat_panel: PreCombatPanel = null
+## Bu savaşa gerçekten katılanlar (bkz. PreCombatPanel) - dışarıda
+## kalanlar risk almadığı için ne XP alır ne düşme izi taşır.
+var _current_combat_party: Array[CharacterData] = []
 var _current_day: int = 0
 var _hungry: bool = false
 var _is_live_journey: bool = false
@@ -216,6 +219,7 @@ var _signal_danger_bonus: float = 0.0
 var _command_panel: PanelContainer
 var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
+var _meal_panel: MealDistributionPanel = null
 var _camping: bool = false
 var _camp_ends_at_hours: float = 0.0
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
@@ -1145,7 +1149,46 @@ func _run_day() -> void:
 	_current_day += 1
 	_refresh_weather()
 	_apply_daily_pace_and_weather()
-	_advance_contracts_and_provisions()
+
+	var expired_contracts := _session.advance_day()
+	for _merchant_id in expired_contracts:
+		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
+
+	_open_meal_panel()
+
+## Akşam sofrası artık `_run_day()`'in sessizce uyguladığı bir formül değil,
+## oyuncuya sorulan bir karar - `_meal_panel != null` `_has_open_panel()`'e
+## girdiği için takvim ve `_check_journey_end()` bu ekranda da durur, tıpkı
+## bir olay kartı gibi. Günün olay çekimi karardan *sonra* gelir
+## (bkz. `_on_meal_confirmed`), aksi hâlde iki karar aynı anda açılırdı.
+func _open_meal_panel() -> void:
+	_meal_panel = MealDistributionPanel.new()
+	_meal_panel.confirmed.connect(_on_meal_confirmed)
+	add_child(_meal_panel)
+	# Kamp ateşi bu kararın sahnesi - kervanın mekanik "Kamp Kur" hâli
+	# değişmiyor (`_camping` dokunulmuyor), yalnızca görsel ateş+toplanma
+	# ödünç alınıyor. Zaten kamp kuruluysa üstüne binmiyoruz.
+	if not _camping:
+		_band.set_camping(true)
+		_caravan.set_camping(true)
+	_meal_panel.setup(_session)
+
+func _on_meal_confirmed(mode: String, selected: Array) -> void:
+	var typed_selected: Array[CharacterData] = []
+	for character in selected:
+		typed_selected.append(character)
+
+	var result := _session.apply_meal_distribution(mode, typed_selected)
+	_hungry = not (result.get("hungry_names", []) as Array).is_empty() or result.get("crew_hungry", false)
+	for name_text in (result.get("hungry_names", []) as Array):
+		_add_log(tr("UI_ROAD_MEAL_HUNGRY") % name_text, LOCKED_COLOR)
+	if result.get("crew_hungry", false):
+		_add_log(tr("UI_ROAD_MEAL_CREW_HUNGRY"), LOCKED_COLOR)
+
+	_meal_panel = null
+	if not _camping:
+		_band.set_camping(false)
+		_caravan.set_camping(false)
 
 	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
 	if event == null:
@@ -1374,27 +1417,6 @@ func _weathered_danger() -> float:
 		base + RouteWeather.danger_delta(_weather) * (1.0 - base), 0.0, 1.0
 	)
 	return clampf(weathered + _signal_danger_bonus * (1.0 - weathered), 0.0, 1.0)
-
-func _advance_contracts_and_provisions() -> void:
-	var expired_contracts := _session.advance_day()
-	for _merchant_id in expired_contracts:
-		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
-
-	# Yol her gün erzak yer. Formül planlayıcınınkiyle aynı yerden gelir
-	# (bkz. CaravanPlan.daily_consumption) - kültür perki ve levazımcı
-	# indirimi dahil.
-	var daily_consumption := _session.get_daily_provision_consumption()
-	var fed := -_session.change_provisions(-daily_consumption)
-
-	# Açlık "kese sıfırlandı" değil, "bugün besleyemedik" demektir. Eskiden
-	# koşul `get_provisions() <= 0` idi: planlayıcının istediği erzağı tam
-	# alan oyuncu son gün tam sıfıra iniyor ve *doğru* stokladığı hâlde
-	# açlık cezası yiyordu - her seferde, ölçülen %100 koşuda.
-	_hungry = fed < daily_consumption
-	if _hungry:
-		_session.caravan.change_morale(-10)
-		_session.change_stress(FAMINE_STRESS)
-		_add_log(tr("UI_ROAD_FAMINE") % _current_day)
 
 ## Olayların etkileri hep buradan geçer. Sebebi tek bir tip: TRAVEL_DAYS
 ## (`yol +1 gün`) `journey_days_remaining`'e yazıyor, ama o alan artık kat
@@ -1713,10 +1735,25 @@ func _close_recruit_offer() -> void:
 ## region_id'si) sefer hedefinden okunuyor - haydut kadrosu gidilen yöreye
 ## göre reskin oluyor.
 func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
-	var danger := _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
+	_pending_combat_danger = _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
-	_clock.consume_hours(COMBAT_HOURS)
 	_set_journey_controls_enabled(false)
+
+	# Kimin bu çarpışmaya gireceğini ve hangi sırada dizileceğini artık
+	# oyuncu seçiyor (bkz. PreCombatPanel) - `_pre_combat_panel != null`
+	# `_has_open_panel()`'e girdiği için takvim burada da durur.
+	_pre_combat_panel = PreCombatPanel.new()
+	_pre_combat_panel.confirmed.connect(_on_pre_combat_confirmed)
+	add_child(_pre_combat_panel)
+	_pre_combat_panel.setup(_session.get_party())
+
+func _on_pre_combat_confirmed(ordered: Array) -> void:
+	_pre_combat_panel = null
+	_current_combat_party.clear()
+	for character in ordered:
+		_current_combat_party.append(character)
+
+	_clock.consume_hours(COMBAT_HOURS)
 	_clear_children(_combat_holder)
 
 	# Savaş yolun *yerine* açılıyor: şerit gizlenip savaş sahnesi onun
@@ -1729,30 +1766,33 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
 	panel.start_combat(
-		_session.get_party(), danger, null,
-		enemy_kind, _session.journey_destination_id
+		_current_combat_party, _pending_combat_danger, null,
+		_current_combat_kind, _session.journey_destination_id
 	)
 
 func _on_combat_finished(
 	victory: bool, xp_awarded: int, downed_count: int, dead_characters: Array
 ) -> void:
 	if xp_awarded > 0:
-		_session.grant_party_xp(xp_awarded)
+		# Yalnızca bu savaşa girenler (bkz. PreCombatPanel) - risk almayan
+		# deneyim de kazanmaz.
+		_session.grant_party_xp(xp_awarded, _current_combat_party)
 		_add_log(tr("UI_ROAD_PARTY_XP") % xp_awarded, OUTCOME_COLOR)
 
-	# Ölüm yalnızca savaşta ve yalnızca liderde olur; sonucunu oturum
-	# uygular (partiden çıkarma + liderliğin devri). Kimse ölmediyse
-	# bu tamamen sessiz - eski davranış aynen sürüyor.
+	# Ölüm artık savaşta herkesi bulabilir, lideri de yoldaşı da - kural
+	# tersine çevrildi (bkz. CombatUnit.can_enter_deaths_door). Sonucunu
+	# oturum uygular: her ölen partiden çıkar, liderlik yalnızca *lider*
+	# öldüyse devredilir. Kimse ölmediyse bu tamamen sessiz - eski
+	# davranış aynen sürüyor.
 	if not dead_characters.is_empty():
 		_report_combat_deaths(dead_characters)
 
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
-	# Yere düşen yoldaş kalıcı bir iz bırakıyor. Ölüm hâlâ yalnızca
-	# lideri buluyor (kervan yok olmaz), ama kayıp gerçek olmalı: düşen
-	# kişinin kendi stresi ayrıca artıyor ve bu, şehir varışındaki
-	# kırılma zarını besliyor - yani bir yoldaşı savaşta *kaybetmenin*
-	# yolu var, ayrı bir ölüm kuralı icat etmeden.
+	# Yere düşüp hayatta kalan yoldaş da kalıcı bir iz bırakıyor: kendi
+	# stresi ayrıca artıyor ve bu, şehir varışındaki kırılma zarını
+	# besliyor - ölüm artık gerçek bir olasılık olduğu için bu ayrı iz
+	# hâlâ anlamlı, ölümün yerini almıyor.
 	_apply_downed_marks(downed_count)
 
 	var stress_delta := COMBAT_STRESS_BASE + downed_count * COMBAT_STRESS_PER_DOWN
@@ -1788,14 +1828,20 @@ func _on_combat_finished(
 ## Yere düşenler kendi stresini alıyor. Kimin düştüğü savaş panelinden
 ## sayı olarak geliyor (isim değil), o yüzden en yorgun olanlardan
 ## başlanıyor: zaten en kırılgan olanı kırmak, rastgele birini
-## kırmaktan hem daha okunur hem daha adil.
+## kırmaktan hem daha okunur hem daha adil. Kayıt da bunu isimle söylüyor -
+## "parti stresi +N" değil, "X hâlâ o vuruşu hissediyor" (bkz. Faz 14
+## hazırlık notu, "her metrik bir isim taşımalı, ortalama değil").
 func _apply_downed_marks(downed_count: int) -> void:
 	if downed_count <= 0:
 		return
-	var ordered: Array[CharacterData] = _session.get_party().duplicate()
+	# Bu savaşa girmeyen biri düşemez - iz yalnızca gerçekten savaşanlar
+	# arasından seçilir (bkz. PreCombatPanel).
+	var ordered: Array[CharacterData] = _current_combat_party.duplicate()
 	ordered.sort_custom(func(a, b): return a.stress > b.stress)
 	for index in mini(downed_count, ordered.size()):
-		_session.change_character_stress(ordered[index], DOWNED_STRESS_MARK)
+		var character := ordered[index]
+		_session.change_character_stress(character, DOWNED_STRESS_MARK)
+		_add_log(tr("UI_ROAD_DOWNED_MARK") % character.character_name, LOCKED_COLOR)
 
 ## Savaşta ölenleri oturuma bildirir ve sonucunu oyuncuya *anlatır*.
 ## Sessiz bir ölüm hatadan ayırt edilemez: kimin öldüğü, liderliğin kime
@@ -1922,6 +1968,8 @@ func _has_open_panel() -> bool:
 		or _replan_holder.get_child_count() > 0
 		or _in_game_menu != null
 		or _succession_panel != null
+		or _meal_panel != null
+		or _pre_combat_panel != null
 	)
 
 ## Sefer sürerken kayıt hiç yapılamaz - `SaveManager`in başındaki not:

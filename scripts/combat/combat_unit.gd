@@ -79,13 +79,15 @@ const DEFAULT_DEATHBLOW_RESIST: int = 67
 const DEATHS_DOOR_ACCURACY_PENALTY: int = 15
 const DEATHS_DOOR_DAMAGE_PENALTY: int = 3
 
-## Ölümün Kıyısı **yalnızca ana karaktere** ait. Yoldaşlar ve düşmanlar canı
-## sıfırlanınca eskisi gibi saftan düşer; yoldaşlar savaş sonunda 1 canla
-## ayağa kalkar (bkz. CombatEncounter.write_back_party). Oyunun kuralı
-## "kervan mahvolabilir ama yok olamaz"dı ve yoldaş kalıcı ölümü seviye/huy/
-## ekipman kaybı demek olduğu için stres-kadro dengesini de değiştirirdi;
-## riski taşıyan lider olunca gerilim geliyor, denge duruyor.
-var is_player_character: bool = false
+## Ölümün Kıyısı **bütün oyuncu tarafına** açık - eskiden yalnızca ana
+## karakter girebiliyordu, "yoldaş kalıcı ölümü seviye/huy/ekipman kaybı
+## demek, bu da stres-kadro dengesini değiştirir" gerekçesiyle. Kural
+## bilerek tersine çevrildi: kervan hâlâ mahvolabilir ama yok olamaz -
+## fakat içindeki insanlar artık gerçekten ölebilir, tıpkı Darkest
+## Dungeon'ın kendi kahramanlarının öldüğü gibi. Herkes önce bu zarı
+## görür (`deathblow_resist`), tutmazsa ölür - risk artık lidere değil,
+## her isme ait. Düşman tarafı hâlâ girmiyor: `is_player_side` bunu
+## doğal olarak dışlıyor, düşmanın Kıyı'ya ihtiyacı yok.
 var on_deaths_door: bool = false
 var deathblow_resist: int = DEFAULT_DEATHBLOW_RESIST
 ## Kalıcı ölüm. `is_alive()` bunu okur, `current_hp` değil - Kıyıdaki bir
@@ -114,8 +116,6 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.bleed_resist = character.get_bleed_resist()
 	unit.blight_resist = character.get_blight_resist()
 	unit.stun_resist = character.get_stun_resist()
-	# Riski taşıyan lider: Ölümün Kıyısı yalnızca onda işler.
-	unit.is_player_character = character.is_player
 	unit.figure_kind = character.class_id
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
@@ -193,9 +193,10 @@ func apply_damage(amount: int, rng: RandomNumberGenerator = null) -> String:
 
 	return "downed"
 
-## Kıyı'ya yalnızca ana karakter girer; gerekçesi yukarıdaki alan yorumunda.
+## Kıyı'ya artık oyuncu tarafındaki herkes girer; gerekçesi yukarıdaki alan
+## yorumunda. Düşman tarafı `is_player_side` ile doğal olarak dışlanıyor.
 func can_enter_deaths_door() -> bool:
-	return is_player_character and not is_dead
+	return is_player_side and not is_dead
 
 ## İyileştirme Kıyı'dan çıkarır: bir puan can bile ayağa kaldırır, ki DD'de
 ## de böyle - Kıyı bir eşik, bir hapis değil.

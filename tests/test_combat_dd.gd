@@ -3,11 +3,12 @@ extends RefCounted
 ## Darkest Dungeon hattının motor tarafı: zırh (PROT), her round yeniden
 ## atılan hız zarı, Ölümün Kıyısı ve liderliğin devri.
 ##
-## Buradaki doğrulamaların çoğu formül değil **kural** kilitliyor: "yalnızca
-## lider ölebilir", "kıyıdaki karakter saftan düşmez", "zırh hasarı tamamen
-## kesemez". Formül sayıları ayarlanacak, kurallar ayarlanmayacak - ve bir
-## kural sessizce bozulursa oyunun kimliği bozulur (bkz. CLAUDE.md'nin
-## "sömürüyü doğrula, formülü değil" maddesi).
+## Buradaki doğrulamaların çoğu formül değil **kural** kilitliyor: "Ölümün
+## Kıyısı'na oyuncu tarafındaki herkes girer" (Faz 14'te tersine çevrildi -
+## eskiden yalnızca lider girebiliyordu), "kıyıdaki karakter saftan düşmez",
+## "zırh hasarı tamamen kesemez". Formül sayıları ayarlanacak, kurallar
+## ayarlanmayacak - ve bir kural sessizce bozulursa oyunun kimliği bozulur
+## (bkz. CLAUDE.md'nin "sömürüyü doğrula, formülü değil" maddesi).
 
 func suite_name() -> String:
 	return "CombatDD"
@@ -16,11 +17,11 @@ func run(t) -> void:
 	_test_protection_reduces_but_never_erases(t)
 	_test_fresh_character_has_no_protection(t)
 	_test_turn_order_is_rerolled_each_round(t)
-	_test_only_the_leader_reaches_deaths_door(t)
+	_test_deaths_door_is_open_to_the_whole_party(t)
 	_test_deaths_door_keeps_the_leader_standing(t)
 	_test_healing_leaves_deaths_door(t)
 	_test_deathblow_can_kill_and_resist_can_save(t)
-	_test_dead_leader_is_not_stood_back_up(t)
+	_test_dead_characters_are_not_stood_back_up(t)
 	_test_succession_promotes_the_most_senior(t)
 	_test_run_ends_only_when_nobody_can_succeed(t)
 	_test_battlefield_is_a_field_not_a_list(t)
@@ -153,19 +154,23 @@ func _build_encounter(rng: RandomNumberGenerator, party_size: int, enemy_size: i
 
 # --- Ölümün Kıyısı ---
 
-func _test_only_the_leader_reaches_deaths_door(t) -> void:
+## Kural tersine çevrildi: kıyıya artık oyuncu tarafındaki herkes girer,
+## yalnızca düşman tarafı hâlâ dışarıda - `can_enter_deaths_door()`
+## `is_player_side` okuyor, `is_player_character` diye ayrı bir bayrak
+## yok artık.
+func _test_deaths_door_is_open_to_the_whole_party(t) -> void:
 	var leader := CombatUnit.from_character(_leader(), 1)
 	var companion := CombatUnit.from_character(_companion(), 2)
 
 	t.ok(leader.can_enter_deaths_door(), "lider kıyıya girebilir")
-	t.not_ok(companion.can_enter_deaths_door(), "yoldaş kıyıya girmez")
+	t.ok(companion.can_enter_deaths_door(), "yoldaş da artık kıyıya girebilir")
 
-	t.eq(companion.apply_damage(9999), "downed", "yoldaş doğrudan saftan düşer")
-	t.not_ok(companion.on_deaths_door, "yoldaş kıyıda değil")
-	t.not_ok(companion.is_dead, "yoldaş ölmedi - kural korundu")
+	t.eq(companion.apply_damage(9999), "deaths_door", "yoldaş da önce kıyıya girer")
+	t.ok(companion.on_deaths_door, "yoldaş kıyıda")
+	t.not_ok(companion.is_dead, "zar atılmadan ölüm yok")
 
 	var enemy := CombatUnit.new()
-	t.eq(enemy.apply_damage(9999), "downed", "düşman da doğrudan düşer")
+	t.eq(enemy.apply_damage(9999), "downed", "düşman hâlâ doğrudan düşer, kıyıya girmez")
 
 func _test_deaths_door_keeps_the_leader_standing(t) -> void:
 	var leader := CombatUnit.from_character(_leader(), 1)
@@ -211,28 +216,45 @@ func _test_deathblow_can_kill_and_resist_can_save(t) -> void:
 		t.eq(tough.apply_damage(1, rng), "survived_deathblow", "direnç 100 iken ölüm yok")
 	t.not_ok(tough.is_dead, "yirmi vuruş sonra hâlâ hayatta")
 
-func _test_dead_leader_is_not_stood_back_up(t) -> void:
+## Üç durum bir arada: gerçekten ölen lider, gerçekten ölen bir yoldaş
+## (kural artık ikisi için de aynı) ve sadece düşüp zar tutan bir başka
+## yoldaş - üçü de aynı `write_back_party()` çağrısından geçiyor.
+func _test_dead_characters_are_not_stood_back_up(t) -> void:
 	var leader_data := _leader()
-	var companion_data := _companion()
+	var dead_companion_data := _companion("Ölen")
+	var survivor_data := _companion("Hayatta Kalan")
 	var leader := CombatUnit.from_character(leader_data, 1)
-	var companion := CombatUnit.from_character(companion_data, 2)
+	var dead_companion := CombatUnit.from_character(dead_companion_data, 2)
+	var survivor := CombatUnit.from_character(survivor_data, 3)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
 
 	leader.deathblow_resist = 0
 	leader.apply_damage(9999)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 11
 	leader.apply_damage(1, rng)
-	companion.apply_damage(9999)
 
-	var encounter := CombatEncounter.new([leader, companion] as Array[CombatUnit], [] as Array[CombatUnit], rng)
+	dead_companion.deathblow_resist = 0
+	dead_companion.apply_damage(9999)
+	dead_companion.apply_damage(1, rng)
+
+	survivor.deathblow_resist = 100
+	survivor.apply_damage(9999)
+	survivor.apply_damage(1, rng)
+
+	var units: Array[CombatUnit] = [leader, dead_companion, survivor]
+	var encounter := CombatEncounter.new(units, [] as Array[CombatUnit], rng)
 	encounter.write_back_party()
 
-	t.eq(companion_data.current_hp, 1, "düşen yoldaş 1 canla kalkar - kural değişmedi")
 	t.eq(leader_data.current_hp, 0, "ölen lider ayağa kaldırılmaz")
+	t.eq(dead_companion_data.current_hp, 0, "ölen yoldaş da ayağa kaldırılmaz - kural artık ikisi için de aynı")
+	t.eq(survivor_data.current_hp, 1, "zar tutan yoldaş 1 canla kalkar - kural değişmedi")
 
 	var dead := encounter.get_dead_characters()
-	t.eq(dead.size(), 1, "motor yalnızca ölen lideri bildirir")
-	t.eq(dead[0], leader_data, "bildirilen karakter doğru")
+	t.eq(dead.size(), 2, "motor gerçekten ölen herkesi bildirir, sadece lideri değil")
+	t.ok(dead.has(leader_data), "lider bildirilenler arasında")
+	t.ok(dead.has(dead_companion_data), "yoldaş da bildirilenler arasında")
+	t.not_ok(dead.has(survivor_data), "hayatta kalan bildirilmez")
 
 # --- Veraset ---
 
@@ -468,12 +490,18 @@ func _test_dot_goes_through_the_one_damage_door(t) -> void:
 		"zırh kanamayı da kesmeli - hasarın tek kapısı olmasının sebebi bu"
 	)
 
-	# Yoldaş (lider değil) kanamadan ölmez, düşer: "yalnızca lider
-	# ölebilir" kuralı durum efektleri için de geçerli.
+	# Kanama da tek hasar kapısından geçtiği için yoldaşı da kıyıya
+	# sokabilir, zar atılmadan öldüremez: aynı kapı, aynı kural.
 	armoured.current_hp = 2
 	var outcome := armoured.apply_damage(999, null)
-	t.eq(outcome, "downed", "yoldaş kanamadan ölmemeli, düşmeli")
-	t.not_ok(armoured.is_dead, "yoldaş ölü işaretlenmemeli")
+	t.eq(outcome, "deaths_door", "kanama da yoldaşı kıyıya sokabilir")
+	t.not_ok(armoured.is_dead, "zarsız çağrıda ölüm yok")
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	armoured.deathblow_resist = 0
+	t.eq(armoured.apply_damage(1, rng), "killed", "kıyıdayken gelen kanama da öldürebilir")
+	t.ok(armoured.is_dead, "yoldaş da kalıcı ölebilir - kural artık lidere özel değil")
 
 ## Efekt hedefin *kendi turu başında* işliyor. Tur sonunda işlemek aynı
 ## şey değil: o zaman kanayan biri kanamadan önce vuruyor ve hasar bir
