@@ -2929,48 +2929,126 @@ iki kez denenip iki kez başarısız olduğunu, bugünkü ayrımın (stres kişi
 moral seferde) o başarısızlıklardan sonra kasıtlı seçildiğini kaydediyor.
 Not eski bir fikir olarak kalıyor, uygulanmadı.
 
-**Mevcut vokabülerle uyumlu, düşük-orta riskli - Faz 13'e alındı**
-(görev listesi #112-#119, "yap" denene kadar plan aşamasında):
+**Faz 13 - oyuncunun kendi rafine ettiği son karar, uygulandı** (görev
+listesi #112-#119, hepsi tamamlandı):
 
-- Rota değişince o yöne gitmeyecek tüccarların tepki vermesi (moral +
-  event card) - En-Route Plan Rules'un zaten yaptığı kesintiyi
-  hikâyeleştiriyor.
-- Bölge/duty bilgisine bağlı toplama-av olayı - yeni bir sistem değil,
-  `EventEffect.Type.PROVISIONS` + mevcut `RouteTerrain` biyomu.
-- Kervan hızına açlığın etkisi - tempo zaten stamina'ya bağlı (bkz. Road
-  Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak ekleniyor.
-- Kombatta kısa, sessiz yorum balonları (isabet/kritik/düşüş anında) -
-  seslendirme değil, yalnızca metin; `UiIcon`/log satırı deseniyle aynı aile.
-- Karar önizlemesi: Zeka/Sezgi'ye göre sonuç ipucu - Faz 12'nin tehlike
-  etiketiyle aynı okunabilirlik ailesi, `get_best_effective_stat` zaten
-  event context'te var.
-- Kervan-içi hırsızlık/cinayet soruşturma zinciri - `NpcDisposition` ve
-  `evt_wanderer_revenge`'in zincir deseninin parti-içi versiyonu.
-- Yeni yol konvoyu türleri (askeri/mülteci/dini/tüccar) - mevcut
-  `EVENT_ROAD_MARKER_KIND`/`MARKER_ARCHETYPES`'a yeni girişler, yeni sistem
-  değil.
-- Görev gücüne kişisel kondisyon (can/stres/moral) etkisi - `DutyCatalog.
-  get_duty_power()` şu an yalnızca sınıf eşleşmesine bakıyor, holder'ın
-  `CombatUnit.is_stressed`'inin zaten okuduğu veriyi görev formülüne de
-  taşımak.
+- Rota değişince o yöne gitmeyecek tüccarların tepki vermesi
+  (`evt_route_diversion`, `triggered_only` - `road_journey.gd`'nin
+  `_apply_replan()`'ından doğrudan sunulur, havuzdan çekilmez) - En-Route
+  Plan Rules'un zaten yaptığı kesintiyi hikâyeleştiriyor.
+- Bölge/duty bilgisine bağlı toplama-av olayı (`evt_forage` - İzci varsa
+  ağırlığı ×1.6) - yeni bir sistem değil, `EventEffect.Type.PROVISIONS` +
+  mevcut `RouteTerrain`/`has_izci` bayrağı.
+- Kervan hızına açlığın etkisi (`road_journey.gd`'nin `_hungry` bayrağı,
+  `HUNGRY_PACE_MULTIPLIER`) - tempo zaten hava çarpanına bağlıydı (bkz.
+  Road Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak
+  eklendi: `_advance_contracts_and_provisions()`'ın kendi açlık koşulu
+  `_walk_at()`'ın hız formülüne giriyor.
+- Kombatta kısa, sessiz yorum balonları (isabet/kritik/düşüş/emir reddi
+  anında) - seslendirme değil, yalnızca metin. `CombatEncounter.unit_barked`
+  sinyali `CombatPanel._bark_texts`'te gerçek zaman damgasıyla tutuluyor,
+  çünkü `CombatUnitSlot`'lar her `_refresh()`'te yeniden kuruluyor - bir
+  Tween'in üzerinde kalabileceği kalıcı bir düğüm yok.
+- Karar önizlemesi: Zeka/Sezgi'ye göre sonuç ipucu (`EventChoice.
+  hint_text_key`/`hint_stat`/`hint_threshold`) - Faz 12'nin tehlike
+  etiketiyle aynı okunabilirlik ailesi: ipucu zarı değiştirmiyor, yalnızca
+  oyuncuyu bilgilendiriyor (New Vegas'ın skill-check önizlemesi gibi).
+  `evt_party_investigation`'ın suçlama seçeneği ilk kullanımı.
+- Kervan-içi hırsızlık/cinayet soruşturma zinciri (`evt_party_theft` →
+  `UNLOCK_EVENT` → `evt_party_investigation`) - `NpcDisposition` ve
+  `evt_wanderer_revenge`'in zincir deseninin parti-içi versiyonu; suçlama
+  %50 doğru %50 yanlış bir kumar, hint bunu değiştirmiyor.
+- Yeni yol konvoyu türleri (`evt_military_convoy`, `evt_refugee_column`,
+  `evt_merchant_caravan`) - mevcut `EVENT_ROAD_MARKER_KIND`'a "guard"/
+  "traveler" kategorileriyle yeni girişler, yeni bir figür çizmiyor.
+- Görev gücüne kişisel kondisyon etkisi (`DutyCatalog.
+  get_condition_multiplier()`) - kırılmış (`CharacterData.is_stressed()`)
+  ya da canının yarısının altındaki bir görevli göreve daha az katkı verir;
+  sağlıklı/dinç varsayılan (tam can, sıfır stres) çarpanı 1.0'da tuttuğu
+  için mevcut hiçbir ölçüm/test etkilenmedi.
 
-**Büyük mimari/prodüksiyon kararı gerektiriyor - plana alınmadı, oyuncuya
-soruldu:** kişiye özel açlık/hastalık (yeni bir per-character sistem,
-stres'in ikinci bir kopyası olma riski taşıyor); seslendirmeli anlatım ve
-kombat nidaları (gerçek ses kaydı - `AudioManager`'ın şu an sentezlenmiş
-placeholder'lardan ibaret olduğu, bir prodüksiyon/bütçe kararı); iki dini
-yaratılış efsanesi + fragman (lore yönü - şehir mimarisinde din motifinin
-bilerek reddedildiği Art Rules'daki cami/minare geri alımıyla gerginlik
-taşıyor, ve fragman zaten bu kod tabanının işi değil); npc kıyafet
-çeşitliliği (henüz içe aktarılmış görsel varlık olmadığı için Faz 12'nin
-büyük sanat yönü kararına bağlı); "npc'ler kendini geliştirip karar alır"
-(kapsamı belirsiz - mevcut companion XP/auto-allocate mi, yoksa tam bağımsız
-bir dünya simülasyonu mu, netleşmeden plana alınamaz); manipülasyon
-stat'ı/perk'i (altıncı stat listesi zaten dolu ve her ekranda sayılıyor -
-yedinci bir temel stat eklemek yerine mevcut `Trait` sistemine bir huy
-olarak eklenmesi önerilir, ama karar oyuncuda); vagon-başı envanter +
-crafting (paylaşılan tek `Inventory`'nin kasıtlı sadeliğini bozan, ağırlık/
-kargo testlerinin tamamını yeniden yazdıracak en büyük değişiklik).
+**Aynı triyajın kervanla ilgili dört notu da uygulandı** (kullanıcının
+kendi önceliklendirmesiyle):
+
+- **Boya bağlı açlık (#2).** "1.90 boyunda bir erkek ile 1.60 boyunda bir
+  kadının açlığı aynı olmamalı" - `CharacterData.get_provision_weight()`
+  uzun/kısa boy için ±%15, `CaravanPlan.daily_consumption()`'ın altıncı
+  (varsayılan 0) parametresi olarak eklendi; `test_provisions.gd`'nin düz
+  tam sayı çağrıları hiç değişmeden geçiyor.
+- **Kıyafet sistemi (#14) - şimdilik yalnızca sistem, kullanıcının kendi
+  isteğiyle.** Altı slot (şapka/gömlek/ceket/eldiven/pantolon/ayakkabı),
+  `OutfitCatalog`/`OutfitPiece`, `CharacterData.outfit` - tamamen kozmetik,
+  hiçbir derived getter bunu okumuyor (Equipment'ın aksine). Karakter
+  oluşturmada boydan bir önizleme penceresi (`OutfitPreview`, basit bir
+  `_draw()` taslağı - gerçek sprite'lar Faz 12'nin büyük sanat kararına
+  bağlı) ve her slot için sağa/sola kaydırma (`OutfitCatalog.cycle()`).
+  Seçenekler kasıtlı az; "önce sistemi kur, seçenekleri sonra ekle" burada
+  tam olarak budur.
+- **Arkada yaşayan dünya (#15).** Adaylar her şehir varışında bir seed'den
+  yeniden atıldığı için (bkz. RecruitCatalog'un kendi notu) kalıcı bir
+  kimlikleri yok - büyüme, `RecruitCatalog.get_world_growth_levels(
+  journeys_completed)` ile dünyanın kendi seviyesinin zamanla yükselmesi
+  olarak modellendi: on sefer önce meydanda karşılaşılan biriyle bugün
+  karşılaşılan eşdeğer aday artık biraz daha tecrübeli çıkıyor. Hem şehir
+  (`GameSession._restock_recruits`) hem yol (`evt_road_wanderer`) aynı
+  fonksiyonu okuyor.
+- **Manipülasyon (#19/#20) bir huy olarak, yedinci stat değil.** Kullanıcı
+  bunu açıkça bir `Trait` istedi ("zekası yüksek kişilerde çıkan bir huy").
+  Yeni bir huy eklemek `test_traits.gd`'nin kilitlediği on iki parçalık
+  katalog şeklini bozardı, o yüzden mevcut `PRUDENT` (Zeka huyu) davranışı
+  genişletildi: `GameSession.get_effective_manipulation()` PRUDENT'lı bir
+  parti için Karizma'ya `PRUDENT_MANIPULATION_BONUS` ekliyor
+  (`evt_mutiny`'nin manipüle seçeneği artık bunu okuyor - düşük zekalıları
+  ikna kolaylığı) ve `GameSession.apply_event_stress()` PRUDENT'lı
+  karakterlerin olay kaynaklı stresini `PRUDENT_EVENT_STRESS_RESIST`
+  kadar hafifletiyor (dıştan gelen ikna/motivasyon etkilerine direnç).
+  Bu ikinci fonksiyon kasıtlı dar: yalnızca `EventEffectApplier`'ın
+  `STRESS` dalı bunu çağırıyor, yol yıpranması/kamp/tempo hâlâ
+  `change_stress()`'i doğrudan okuyor - Stress Rules'un ölçülmüş dengesi
+  bu fonksiyona hiç dokunulmadan korunuyor.
+
+**#22 (vagon-bazlı envanter + loot crafting) - yeniden tasarlandı, kod bu
+turda gönderilmedi.** Kullanıcının notu ilk triyajdaki "paylaşılan tek
+envanter" okumasını düzeltiyor: istenen, kervanın **kendi** vagonlarının
+her birinin ayrı bir envanteri olması ve bunların bir crafting sistemine
+girdi olması; başkasının (yabancı bir tüccarın) vagonu ise izin verilirse
+salt-okunur görüntülenebilir, hiç kullanılamaz. Tasarım notu:
+
+- `Inventory` bugün tek bir `item_id -> miktar` sözlüğü ve tek bir ağırlık
+  tavanı (`owned_wagon_count`'a bağlı - bkz. Economy Rules'un "Weight
+  binds" maddesi). Yeniden tasarım bunu `GameSession.wagon_inventories:
+  Array[Inventory]` yapar - `owned_wagon_count` uzunluğunda, her biri
+  kendi tavanına sahip. Pazar/kargo ekranlarının okuduğu "toplam" bir
+  toplama fonksiyonundan gelir, tek envanterin yerini almaz; bu yüzden
+  mevcut hiçbir ekran aynı anda kırılmaz - yalnızca yeni bir "Kervan Yükü"
+  ekranı vagon vagon dağıtımı gösterir/değiştirir.
+- Crafting: bir tarif belirli vagonlardaki belirli malzemeleri tüketip
+  yeni bir eşya üretir (`RecipeCatalog` + `EventEffect`/ekran eylemi,
+  Equipment'ın "parça asla doğrudan karaktere değil önce depoya" kuralıyla
+  aynı aile - tarif sonucu önce ilgili vagona yazılır). Hangi vagonun
+  girdiyi taşıdığı önemli, yani oyuncu yükünü vagonlar arasında bilerek
+  dağıtmak zorunda kalır - "hangi vagonda ne var" ilk kez anlam kazanır.
+- Yabancı vagonlar (diğer tüccarların) hiçbir zaman `wagon_inventories`'e
+  girmez; ayrı, salt-okunur bir görünüm alır (bir olay ya da lonca
+  etkileşimiyle "izin verilirse" açılan bir pencere) - yazma yolu hiç yok,
+  yani ekonomiye sızma riski yok.
+- **Neden bu turda değil:** bu, tek `Inventory`'nin kasıtlı sadeliğini
+  bozan ve ağırlık/kargo testlerinin (`test_city_commerce.gd`,
+  `test_provisions.gd`) çoğunu yeniden yazacak en büyük değişiklik - Ruin
+  Rules'un kendi dersi tam bunun için var: "ölçülmeden gönderilen bir
+  mekanik, kimsenin görmediği bir denge değişikliğidir." Kendi PR'ını ve
+  kendi denge ölçümünü (simulate_journeys.gd'ye yeni bir rapor) istiyor.
+
+**Plana alınmadı, oyuncunun kendi isteğiyle bilerek beklemede (rejected
+değil, backlog):** seslendirmeli anlatım ve kombat nidaları (#7, #11 -
+gerçek ses kaydı; `AudioManager`'ın şu an sentezlenmiş placeholder'lardan
+ibaret olduğu bir prodüksiyon/bütçe kararı - Faz 13 PR-D bunun **metin**
+karşılığını zaten kurdu, seslendirme üstüne eklenecek bir katman); iki
+dini yaratılış efsanesi + fragman (#12 - lore yönü, şehir mimarisinde din
+motifinin bilerek reddedildiği Art Rules'daki cami/minare geri alımıyla
+gerginlik taşıyor, fragman da bu kod tabanının işi değil). Üçü de
+"sonra üstüne çalışacağız" notuyla plana geri dönebilir - kapatılmadı,
+yalnızca beklemede.
 
 ### Çözülmüş: stres eşiği (kayıt için)
 

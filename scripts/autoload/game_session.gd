@@ -695,6 +695,43 @@ func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
 		best = maxf(best, character.stats.get_effective_value(kind))
 	return best
 
+func party_has_trait(trait_id: String) -> bool:
+	for character in get_party():
+		if character.has_trait(trait_id):
+			return true
+	return false
+
+## Zekası taban üstündeki bir huy (Sağduyulu/PRUDENT) kandırma gücüne
+## ekleniyor - Karizma zaten manipülasyonun genel ekseni (bkz. Progression
+## Rules), huy onun üstüne binen, herkeste çıkmayan bir keskinlik. Karizma'yı
+## değiştirmiyoruz, üstüne bir pay ekliyoruz - stat kendi başına yeter,
+## huy şansı olan için bir eşiği daha kolay geçirir.
+const PRUDENT_MANIPULATION_BONUS: float = 1.5
+
+func get_effective_manipulation() -> float:
+	var bonus := PRUDENT_MANIPULATION_BONUS if party_has_trait(TraitCatalog.PRUDENT) else 0.0
+	return get_best_effective_stat(CharacterStats.Kind.CHARISMA) + bonus
+
+## Olay kaynaklı stres darbelerine karşı - "dış olaylardan az etkilenir"
+## (bkz. CLAUDE.md Faz 13). Bilerek `change_stress()`'in kendisine değil,
+## yalnızca buraya eklendi: günlük yol aşınması, kamp ve tempo cezası
+## Stress Rules'ta ölçülmüş sayılar - PRUDENT'ı oraya da bulaştırmak o
+## ölçümü sessizce geçersiz kılardı. Yalnızca olay etkisi (EventEffect.
+## Type.STRESS) bu kapıdan geçiyor, ve yalnızca stresi *yükselten* bir
+## darbeyi hafifletiyor - bir olayın stres *azaltan* tarafını (dinlenme,
+## iyi haber) kısmıyor değiliz.
+const PRUDENT_EVENT_STRESS_RESIST: float = 0.7
+
+func apply_event_stress(delta: int) -> void:
+	if delta <= 0:
+		change_stress(delta)
+		return
+	for character in party:
+		var amount := delta
+		if character.has_trait(TraitCatalog.PRUDENT):
+			amount = int(round(float(delta) * PRUDENT_EVENT_STRESS_RESIST))
+		character.change_stress(amount)
+
 ## Tüm partiye eşit XP dağıtır, kimin kaç seviye atladığını döner
 ## (isim -> seviye sayısı; hiç atlamayan kişi listede yer almaz).
 func grant_party_xp(amount: int) -> Dictionary:
@@ -812,12 +849,14 @@ func get_daily_provision_multiplier() -> float:
 ## levazımcı indirimi dahil, yoksa planlayıcı yolda yenmeyecek bir sayı
 ## gösterir.
 func get_daily_provision_consumption() -> int:
+	var party := get_party()
 	return CaravanPlan.daily_consumption(
-		get_party().size(),
+		party.size(),
 		owned_wagon_count,
 		caravan.merchant_names.size(),
 		get_daily_provision_multiplier(),
-		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
+		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
+		CaravanPlan.height_adjustment_for(party)
 	)
 
 func get_provision_cost_multiplier() -> float:
@@ -1120,10 +1159,16 @@ func _restock_recruits() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%s|%d" % [current_location_id, total_days_elapsed])
 	var player_level := get_player_character().level
+	# "Arkada yaşayan ve gelişen bir dünya" (bkz. RecruitCatalog.
+	# get_world_growth_levels) - seferler tamamlandıkça meydanda/tavernada/
+	# loncada bekleyenler de biraz daha tecrübeli çıkar.
+	var world_growth := RecruitCatalog.get_world_growth_levels(journeys_completed)
 	for venue in [
 		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
 	]:
-		recruit_candidates[venue] = RecruitCatalog.build_candidates(venue, rng, player_level)
+		recruit_candidates[venue] = RecruitCatalog.build_candidates(
+			venue, rng, player_level, world_growth
+		)
 
 func get_recruit_candidates(venue: String) -> Array[CharacterData]:
 	var candidates: Array[CharacterData] = []
@@ -1654,6 +1699,10 @@ func build_event_context() -> Dictionary:
 		# Karşındakini okumak ve kandırmak partinin en iyisine bakar.
 		"best_perception": get_best_effective_stat(CharacterStats.Kind.PERCEPTION),
 		"best_charisma": get_best_effective_stat(CharacterStats.Kind.CHARISMA),
+		"best_intellect": get_best_effective_stat(CharacterStats.Kind.INTELLECT),
+		# Sağduyulu (Zeka'nın huyu) Karizma'nın üstüne bir kandırma payı
+		# bindiriyor - bkz. PRUDENT_MANIPULATION_BONUS.
+		"effective_manipulation": get_effective_manipulation(),
 		"is_nomad_culture": 1.0 if culture_id == CultureCatalog.NOMAD else 0.0,
 		"is_valley_culture": 1.0 if culture_id == CultureCatalog.VALLEY else 0.0,
 		"is_highland_culture": 1.0 if culture_id == CultureCatalog.HIGHLAND else 0.0,

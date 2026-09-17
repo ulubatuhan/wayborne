@@ -38,6 +38,13 @@ var _stat_rows: Array[Dictionary] = []
 var _summary_label: Label
 var _start_button: Button
 
+## OutfitCatalog.SLOT_* -> piece_id, tamamen kozmetik (bkz. CLAUDE.md
+## Faz 13 hazırlık notu #14). Her `_refresh()`'te yeni bir önizleme
+## karakteri kurulduğu için seçimler ekranın kendisinde tutuluyor.
+var _outfit: Dictionary = {}
+var _outfit_preview: OutfitPreview
+var _outfit_rows: Array[Dictionary] = []
+
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
@@ -52,6 +59,8 @@ func _build_ui() -> void:
 	_build_class_section()
 	_content.add_child(HSeparator.new())
 	_build_identity_section()
+	_content.add_child(HSeparator.new())
+	_build_outfit_section()
 	_content.add_child(HSeparator.new())
 	_build_stats_section()
 	_content.add_child(HSeparator.new())
@@ -168,6 +177,57 @@ func _build_identity_section() -> void:
 	_skin_preview.custom_minimum_size = Vector2(48, 24)
 	skin_row.add_child(_skin_preview)
 	_content.add_child(skin_row)
+
+## Karakteri boydan gösteren önizleme + her slotu sağa/sola kaydıran
+## seçiciler (bkz. OutfitCatalog.cycle). Tamamen dış görünüm için.
+func _build_outfit_section() -> void:
+	_content.add_child(_make_section_title(tr("UI_CREATE_OUTFIT")))
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+
+	_outfit_preview = OutfitPreview.new()
+	_outfit_preview.custom_minimum_size = Vector2(120, 220)
+	row.add_child(_outfit_preview)
+
+	var slots_column := VBoxContainer.new()
+	slots_column.add_theme_constant_override("separation", 4)
+	for slot in OutfitCatalog.ALL_SLOTS:
+		slots_column.add_child(_build_outfit_row(slot))
+	row.add_child(slots_column)
+
+	_content.add_child(row)
+
+func _build_outfit_row(slot: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+
+	var name_label := Label.new()
+	name_label.text = OutfitCatalog.get_slot_display_name(slot)
+	name_label.custom_minimum_size = Vector2(90, 0)
+	row.add_child(name_label)
+
+	var prev_button := Button.new()
+	prev_button.text = "<"
+	prev_button.pressed.connect(_on_outfit_cycle.bind(slot, -1))
+	row.add_child(prev_button)
+
+	var value_label := Label.new()
+	value_label.custom_minimum_size = Vector2(150, 0)
+	row.add_child(value_label)
+
+	var next_button := Button.new()
+	next_button.text = ">"
+	next_button.pressed.connect(_on_outfit_cycle.bind(slot, 1))
+	row.add_child(next_button)
+
+	_outfit_rows.append({"slot": slot, "value_label": value_label})
+	return row
+
+func _on_outfit_cycle(slot: String, direction: int) -> void:
+	var current: String = _outfit.get(slot, OutfitCatalog.NONE_PIECE)
+	_outfit[slot] = OutfitCatalog.cycle(slot, current, direction)
+	_refresh()
 
 func _build_stats_section() -> void:
 	_content.add_child(_make_section_title("Statlar"))
@@ -298,6 +358,16 @@ func _refresh() -> void:
 	_height_label.text = tr("UI_CREATE_HEIGHT_VALUE") % [int(_height_slider.value), _height_effect_text(preview)]
 	_skin_preview.color = CharacterData.get_skin_tone_color(_skin_button.selected)
 
+	for outfit_row in _outfit_rows:
+		var slot: String = outfit_row.slot
+		var piece_id: String = _outfit.get(slot, OutfitCatalog.NONE_PIECE)
+		var value_label: Label = outfit_row.value_label
+		if piece_id.is_empty():
+			value_label.text = tr("UI_CREATE_OUTFIT_NONE")
+		else:
+			value_label.text = OutfitCatalog.get_piece(piece_id).display_name
+	_outfit_preview.setup(preview, _outfit)
+
 	_summary_label.text = tr("UI_CREATE_PREVIEW") % [
 		preview.get_summary_line(),
 		preview.get_max_hp(),
@@ -322,7 +392,7 @@ func _selected_class() -> CharacterClass:
 	return ClassCatalog.get_classes()[maxi(_class_button.selected, 0)]
 
 func _build_character() -> CharacterData:
-	return CharacterData.create(
+	var character := CharacterData.create(
 		_name_edit.text.strip_edges(),
 		_selected_culture().culture_id,
 		_base_stats,
@@ -330,6 +400,8 @@ func _build_character() -> CharacterData:
 		_skin_button.selected,
 		_selected_class().class_id
 	)
+	character.outfit = _outfit.duplicate()
+	return character
 
 # --- Çıkış ---
 

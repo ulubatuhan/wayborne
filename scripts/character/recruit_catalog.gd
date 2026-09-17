@@ -43,6 +43,21 @@ const VENUE_GUILD_LEVEL_SPREAD: Array[int] = [0, 3]
 ## bu yalnızca "daha tecrübeli" olmanın kendi payı.
 const HIRE_COST_PER_LEVEL: int = 10
 
+## "Arkada yaşayan ve gelişen bir dünya" - her sefer tamamlandığında
+## kervan biraz daha ileri gider ama şehirde bekleyen adaylar da rastgele
+## sıfırdan atılmıyor: dünyanın kendisi de biraz daha tecrübeli çıkıyor.
+## Adaylar her şehir varışında yeniden atıldığı için (bkz.
+## GameSession._restock_recruits) kalıcı bir kimlikleri yok - büyüme,
+## oyuncu seviyesine eklenen bir dünya payı olarak modelleniyor: bugün
+## meydanda karşılaşılan biri, on sefer önce karşılaşılan eşdeğerinden
+## biraz daha güçlü çıkar. `GameSession.journeys_completed` zaten var,
+## yeni bir sayaç icat etmiyor.
+const WORLD_GROWTH_JOURNEYS_PER_LEVEL: int = 4
+const WORLD_GROWTH_MAX_LEVELS: int = 6
+
+static func get_world_growth_levels(journeys_completed: int) -> int:
+	return mini(WORLD_GROWTH_MAX_LEVELS, journeys_completed / WORLD_GROWTH_JOURNEYS_PER_LEVEL)
+
 static func get_venue_profile(venue: String) -> Array[int]:
 	match venue:
 		VENUE_GUILD:
@@ -65,14 +80,16 @@ static func get_venue_required_reputation(venue: String) -> int:
 	return get_venue_profile(venue)[4]
 
 static func build_candidates(
-	venue: String, rng: RandomNumberGenerator, player_level: int = 1
+	venue: String, rng: RandomNumberGenerator, player_level: int = 1,
+	world_growth_levels: int = 0
 ) -> Array[CharacterData]:
 	var profile := get_venue_profile(venue)
 	var spread := get_venue_level_spread(venue)
 	var candidates: Array[CharacterData] = []
 	for _index in profile[0]:
 		var level := clampi(
-			player_level + rng.randi_range(spread[0], spread[1]), 1, CharacterData.MAX_LEVEL
+			player_level + world_growth_levels + rng.randi_range(spread[0], spread[1]),
+			1, CharacterData.MAX_LEVEL
 		)
 		candidates.append(_make_candidate(profile, rng, level))
 	return candidates

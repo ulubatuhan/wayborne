@@ -38,6 +38,7 @@ var _hp_label: Label
 var _name_label: Label
 var _rank_label: Label
 var _status_row: HBoxContainer
+var _bark_label: Label
 var _style: StyleBoxFlat
 var _selectable: bool = false
 
@@ -58,6 +59,17 @@ func _init() -> void:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
 	add_child(column)
+
+	# Yorum balonu: sessiz, kısa bir metin - "isabet/kritik/düşüş/dinlemiyor"
+	# gibi. `visible = false` iken VBoxContainer hiç yer ayırmıyor, o yüzden
+	# boşta hiçbir görsel maliyeti yok. `show_bark()` çağrılmadıkça hep
+	# gizli kalır (bkz. CombatPanel._apply_pending_bark).
+	_bark_label = Label.new()
+	_bark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bark_label.add_theme_font_size_override("font_size", 11)
+	_bark_label.modulate = Color(0.95, 0.88, 0.55)
+	_bark_label.visible = false
+	column.add_child(_bark_label)
 
 	_rank_label = Label.new()
 	_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -184,6 +196,13 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 		)
 	if bound_unit.is_stunned:
 		_add_badge(tr("UI_COMBAT_BADGE_STUN"), Color(0.86, 0.82, 0.40))
+
+## Sessiz yorum balonu: seslendirme değil, yalnızca metin - bkz. UiIcon/log
+## satırı deseniyle aynı aile. `bind()` her tazelemede yeni bir Label
+## kurduğu için burada yalnızca metni yazıp görünür kılmak yeterli.
+func show_bark(text: String) -> void:
+	_bark_label.text = text
+	_bark_label.visible = true
 
 func _add_badge(text: String, color: Color) -> void:
 	var badge := Label.new()

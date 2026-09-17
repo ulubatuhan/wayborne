@@ -24,6 +24,11 @@ signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bo
 
 const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 const MAX_LOG_LINES: int = 40
+## Yorum balonu ne kadar sürsün. Slotlar her `_refresh()`'te yeniden
+## kuruluyor (bkz. `_refresh_side`), o yüzden balon bir Tween'le değil
+## gerçek zaman damgasıyla tutuluyor - `_bark_texts` her yeni slota
+## `bind()`'tan sonra süresi geçmemişse yeniden basılıyor.
+const BARK_DURATION_MSEC: int = 2200
 
 ## Mevki belirteçleri: dolu nokta "burada durabilir" / "buraya vurabilir",
 ## boş nokta duramaz/vuramaz. DD'nin yetenek ikonundaki nokta dizisinin
@@ -58,6 +63,7 @@ var _result_label: Label
 var _continue_button: Button
 var _log_scroll: ScrollContainer
 var _log_list: VBoxContainer
+var _bark_texts: Dictionary = {}  # CombatUnit -> {"text": String, "expires_at": int}
 
 func _ready() -> void:
 	_ensure_built()
@@ -100,11 +106,13 @@ func start_combat(
 	_encounter = CombatEncounter.new(units, enemies, combat_rng, enemy_label)
 	_encounter.log_added.connect(_on_log_added)
 	_encounter.state_changed.connect(_on_state_changed)
+	_encounter.unit_barked.connect(_on_unit_barked)
 
 	_selected_skill = null
 	_result_label.text = ""
 	_continue_button.visible = false
 	_clear_children(_log_list)
+	_bark_texts.clear()
 
 	_encounter.start()
 	_refresh()
@@ -295,6 +303,22 @@ func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order:
 		row.add_child(slot)
 		slot.bind(unit, unit == active and not _encounter.is_over(), targets.has(unit))
 		slot.clicked.connect(_on_unit_clicked)
+		_apply_pending_bark(slot, unit)
+
+## Slotlar her tazelemede yeniden kuruluyor (bkz. `_refresh_side`'ın kendi
+## yorumu), o yüzden balon burada -panelde- gerçek zaman damgasıyla tutulup
+## yeni slota basılıyor; süresi geçmişse hiç basılmıyor ve unutuluyor.
+func _on_unit_barked(unit: CombatUnit, text: String) -> void:
+	_bark_texts[unit] = {"text": text, "expires_at": Time.get_ticks_msec() + BARK_DURATION_MSEC}
+
+func _apply_pending_bark(slot: CombatUnitSlot, unit: CombatUnit) -> void:
+	var data: Dictionary = _bark_texts.get(unit, {})
+	if data.is_empty():
+		return
+	if Time.get_ticks_msec() >= int(data.get("expires_at", 0)):
+		_bark_texts.erase(unit)
+		return
+	slot.show_bark(String(data.get("text", "")))
 
 func _current_targets() -> Array[CombatUnit]:
 	var empty: Array[CombatUnit] = []

@@ -61,7 +61,23 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_roadside_shrine())
 	_road_events.append(_wild_animal())
 	_road_events.append(_guard_patrol())
+	_road_events.append(_route_diversion())
+	_road_events.append(_forage())
+	_road_events.append(_party_theft())
+	_road_events.append(_party_investigation())
+	_road_events.append(_military_convoy())
+	_road_events.append(_refugee_column())
+	_road_events.append(_merchant_caravan())
 	return _road_events
+
+## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
+## çekilmeyen) olaylar için, bkz. `evt_route_diversion`'ın road_journey.gd
+## `_apply_replan()`'dan çağrılması.
+static func get_event(event_id: String) -> GameEvent:
+	for event in get_road_events():
+		if event.event_id == event_id:
+			return event
+	return null
 
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
 ## karşılığı: kadro yalnızca şehirde değil, yolda da büyüyebilsin diye.
@@ -447,7 +463,7 @@ static func _mutiny() -> GameEvent:
 			"EVT_MUTINY_OPT_MANIPULATE", "EVT_MUTINY_OPT_MANIPULATE_LOCKED",
 			_conditions([
 				EventCondition.make(
-					"best_charisma", EventCondition.Op.GREATER_EQUAL,
+					"effective_manipulation", EventCondition.Op.GREATER_EQUAL,
 					NpcDisposition.MANIPULATE_CHARISMA_THRESHOLD
 				),
 			]),
@@ -949,6 +965,166 @@ static func _guard_patrol() -> GameEvent:
 		])),
 		_choice("EVT_GUARD_PATROL_OPT_RESIST", _effects([
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
+		])),
+	])
+	return event
+
+## Rota değişince o yöne gitmeyecek tüccarlar bunu fark eder - En-Route
+## Plan Rules'un zaten yaptığı sessiz kesintiyi (bkz.
+## `_apply_undelivered_contract_penalty()`) hikâyeleştiriyor. Havuzdan
+## hiç çekilmez (`triggered_only`, taban ağırlığı 0) - road_journey.gd
+## `_apply_replan()`'dan, kervan gerçekten yön değiştirdiği anda doğrudan
+## sunulur, bir olay değil bir sonuç olduğu için.
+static func _route_diversion() -> GameEvent:
+	var event := _event("evt_route_diversion", "EVT_ROUTE_DIVERSION", 0.0)
+	event.triggered_only = true
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_ROUTE_DIVERSION_OPT_PAY", "EVT_ROUTE_DIVERSION_OPT_PAY_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 60)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -60),
+			])
+		),
+		_choice("EVT_ROUTE_DIVERSION_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -8),
+		])),
+	])
+	return event
+
+## Bölgeyi bilen biri - İzci ya da rotanın kendi biyomu - kervanı
+## besleyebilir. Yeni bir sistem değil: `EventEffect.Type.PROVISIONS`
+## zaten var, burada yalnızca yeni bir kapı. Zaman zaten her olay gibi
+## `_present_event()`'in `EVENT_HOURS`'u üzerinden tüketiliyor.
+static func _forage() -> GameEvent:
+	var event := _event("evt_forage", "EVT_FORAGE", 1.1)
+	event.cooldown_days = 3
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("has_izci", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 1.6),
+	])
+	event.choices = _choices([
+		_choice("EVT_FORAGE_OPT_GATHER", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, 6),
+		])),
+		_choice("EVT_FORAGE_OPT_SKIP", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## Kervan içi hırsızlık - `NpcDisposition`'ın gizli-mizaç + zincir
+## deseninin (bkz. `evt_wanderer_revenge`) parti-içi versiyonu. Kim
+## aldığı hemen söylenmez; ertesi güne değil, `UNLOCK_EVENT` ile açılan
+## soruşturmaya bırakılır.
+static func _party_theft() -> GameEvent:
+	var event := _event("evt_party_theft", "EVT_PARTY_THEFT", 1.0)
+	event.cooldown_days = 10
+	event.choices = _choices([
+		_choice("EVT_PARTY_THEFT_OPT_INVESTIGATE", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "theft_pending"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_party_investigation"),
+			EventEffect.make(EventEffect.Type.MORALE, -4),
+		])),
+		_choice("EVT_PARTY_THEFT_OPT_SHRUG", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -6),
+		])),
+	])
+	return event
+
+## Soruşturma: herkes suçlayabilir, ama sonuç %50 doğru %50 yanlış bir
+## kumar (bkz. `_choice_with_outcomes`) - Sezgisi kuvvetli bir parti
+## seçmeden *önce* bir ipucu görür (bkz. `EventChoice.hint_text_key`,
+## Faz 12'nin tehlike-etiketiyle aynı okunabilirlik ailesi), ama ipucu
+## zarı değiştirmiyor, yalnızca oyuncuyu bilgilendiriyor - New Vegas'ın
+## skill-check önizlemesiyle aynı kural.
+static func _party_investigation() -> GameEvent:
+	var event := _event("evt_party_investigation", "EVT_PARTY_INVESTIGATION", 2.0)
+	event.triggered_only = true
+	event.conditions = _conditions([
+		EventCondition.make("theft_pending", EventCondition.Op.HAS_FLAG),
+	])
+	var accuse := _choice_with_outcomes("EVT_PARTY_INVESTIGATION_OPT_ACCUSE", _outcomes([
+		EventOutcome.make("EVT_PARTY_INVESTIGATION_ACCUSE_RIGHT", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "theft_pending"),
+			EventEffect.make(EventEffect.Type.REPUTATION, 2),
+		]), 1.0),
+		EventOutcome.make("EVT_PARTY_INVESTIGATION_ACCUSE_WRONG", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "theft_pending"),
+			EventEffect.make(EventEffect.Type.MORALE, -10),
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+		]), 1.0),
+	]))
+	accuse.hint_text_key = "EVT_PARTY_INVESTIGATION_HINT"
+	accuse.hint_stat = CharacterStats.Kind.PERCEPTION
+	accuse.hint_threshold = 2.0
+	event.choices = _choices([
+		accuse,
+		_choice("EVT_PARTY_INVESTIGATION_OPT_DROP", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "theft_pending"),
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+		])),
+	])
+	return event
+
+## Askeri konvoy - `EVENT_ROAD_MARKER_KIND`'de mevcut "guard" kategorisini
+## yeniden kullanır (bkz. road_journey.gd), yeni bir figür çizmiyor.
+static func _military_convoy() -> GameEvent:
+	var event := _event("evt_military_convoy", "EVT_MILITARY_CONVOY", 0.7)
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice("EVT_MILITARY_CONVOY_OPT_YIELD", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -1),
+		])),
+		_gated_choice(
+			"EVT_MILITARY_CONVOY_OPT_ESCORT", "EVT_MILITARY_CONVOY_OPT_ESCORT_LOCKED",
+			_conditions([EventCondition.make("has_muhafiz", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.REPUTATION, 3),
+				EventEffect.make(EventEffect.Type.GOLD, 40),
+			])
+		),
+	])
+	return event
+
+## Mülteci kolonu - mevcut "traveler" kategorisini yeniden kullanır
+## (bkz. `evt_road_wanderer`).
+static func _refugee_column() -> GameEvent:
+	var event := _event("evt_refugee_column", "EVT_REFUGEE_COLUMN", 0.7)
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_REFUGEE_COLUMN_OPT_SHARE", "EVT_REFUGEE_COLUMN_OPT_SHARE_LOCKED",
+			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -6),
+				EventEffect.make(EventEffect.Type.MORALE, 6),
+				EventEffect.make(EventEffect.Type.REPUTATION, 2),
+			])
+		),
+		_choice("EVT_REFUGEE_COLUMN_OPT_PASS", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -2),
+		])),
+	])
+	return event
+
+## Başka bir tüccar kervanı - mevcut "traveler" kategorisini yeniden
+## kullanır.
+static func _merchant_caravan() -> GameEvent:
+	var event := _event("evt_merchant_caravan", "EVT_MERCHANT_CARAVAN", 0.7)
+	event.cooldown_days = 8
+	event.choices = _choices([
+		_choice_with_outcomes("EVT_MERCHANT_CARAVAN_OPT_TRADE", _outcomes([
+			EventOutcome.make("EVT_MERCHANT_CARAVAN_TRADE_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 30),
+			]), 1.0),
+			EventOutcome.make("EVT_MERCHANT_CARAVAN_TRADE_FLAT", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -10),
+			]), 1.0),
+		])),
+		_choice("EVT_MERCHANT_CARAVAN_OPT_WAVE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
 	])
 	return event

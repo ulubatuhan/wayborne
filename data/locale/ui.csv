@@ -299,6 +299,8 @@
 "UI_CREATE_POINTS","Dağıtılacak puan: %d / %d","Points to spend: %d / %d","","","","","","","","",""
 "UI_CREATE_HEIGHT_VALUE","%d cm — %s","%d cm — %s","","","","","","","","",""
 "UI_CREATE_HEIGHT_AVERAGE","orta boy, dengeli","average height, balanced","","","","","","","","",""
+"UI_CREATE_OUTFIT","Kıyafet","Outfit","","","","","","","","",""
+"UI_CREATE_OUTFIT_NONE","(hiçbiri)","(none)","","","","","","","","",""
 "UI_CREATE_PREVIEW","%s\nCan %d · İnisiyatif %d · İsabet %d · Kaçınma %d · Kritik %%%d","%s\nHP %d · Initiative %d · Accuracy %d · Dodge %d · Crit %d%%","","","","","","","","",""
 "UI_PARTY_HINT","Parti %d/%d · %d vagon · Sıra savaştaki mevki sırasıdır (1 = en önde). Her vagonda iki kişi yatar, savaş alanı dört mevkiden ibarettir.","Party %d/%d · %d wagons · The order is your battle rank (1 = front). Two sleep per wagon, and the field has only four ranks.","","","","","","","","",""
 "UI_PARTY_OPEN_CHARACTER","Karakter","Character","","","","","","","","",""

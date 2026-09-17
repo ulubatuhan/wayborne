@@ -47,6 +47,10 @@ const COMBAT_DEFEAT_STRESS: int = 15
 
 ## Erzak tükenince moralin yanı sıra gerginlik de yükselir.
 const FAMINE_STRESS: int = 6
+## Aç bir kervan daha yavaş yürür - tempo zaten stamina'ya bağlı (bkz. Road
+## Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak ekleniyor.
+## Havanın çarpanıyla aynı yerde, aynı şekilde uygulanıyor.
+const HUNGRY_PACE_MULTIPLIER: float = 0.85
 
 ## Yol artık tuşla değil akan zamanla ilerliyor (bkz. JourneyClock). Aşağıdaki
 ## süreler olayların "arka planda zamandan yemesi" içindir: bir olay kartını
@@ -114,6 +118,9 @@ const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_culture_highland_challenge": "traveler",
 	"evt_culture_port_gossip": "traveler",
 	"evt_culture_fisher_catch": "traveler",
+	"evt_military_convoy": "guard",
+	"evt_refugee_column": "traveler",
+	"evt_merchant_caravan": "traveler",
 }
 
 ## Her kategori birden fazla `CombatFigure` arketipine düşebiliyor (aynı
@@ -176,6 +183,7 @@ var _pending_event_day_position: float = 0.0
 var _encounter: RoadEncounter = null
 var _current_combat_kind: String = "bandit"
 var _current_day: int = 0
+var _hungry: bool = false
 var _is_live_journey: bool = false
 var _pending_haggle_max: int = 0
 ## Varış bir kez işlenir - bkz. _check_journey_end.
@@ -1053,6 +1061,8 @@ func _walk_at(rate: float, hours: float) -> void:
 		return
 	_walk_direction = signf(rate)
 	var effective := rate * RouteWeather.pace_multiplier(_weather)
+	if _hungry:
+		effective *= HUNGRY_PACE_MULTIPLIER
 	_days_covered = clampf(
 		_days_covered + effective * hours / JourneyClock.HOURS_PER_DAY,
 		0.0,
@@ -1380,7 +1390,8 @@ func _advance_contracts_and_provisions() -> void:
 	# koşul `get_provisions() <= 0` idi: planlayıcının istediği erzağı tam
 	# alan oyuncu son gün tam sıfıra iniyor ve *doğru* stokladığı hâlde
 	# açlık cezası yiyordu - her seferde, ölçülen %100 koşuda.
-	if fed < daily_consumption:
+	_hungry = fed < daily_consumption
+	if _hungry:
 		_session.caravan.change_morale(-10)
 		_session.change_stress(FAMINE_STRESS)
 		_add_log(tr("UI_ROAD_FAMINE") % _current_day)
@@ -1528,6 +1539,9 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	_style_choice_button(button)
 	var available := choice.is_available(context)
 	var label := tr(choice.text_key)
+	var hint_key := choice.get_hint_text(_session.get_best_effective_stat(choice.hint_stat))
+	if not hint_key.is_empty():
+		label = "%s (%s)" % [label, tr(hint_key)]
 	if _choice_triggers_combat(choice):
 		# %12 kazanma oranı bir dengesizlik değil bir okunabilirlik sorunu:
 		# oyuncu göze aldığı riski seçmeden *önce* görsün, savaş panelinde
@@ -1637,7 +1651,8 @@ func _open_recruit_offer() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%d|%d" % [int(_seed_spin.value), _current_day])
 	var candidates := RecruitCatalog.build_candidates(
-		RecruitCatalog.VENUE_TAVERN, rng, _session.get_player_character().level
+		RecruitCatalog.VENUE_TAVERN, rng, _session.get_player_character().level,
+		RecruitCatalog.get_world_growth_levels(_session.journeys_completed)
 	)
 	if candidates.is_empty() or not _session.can_recruit():
 		_add_log(tr("UI_ROAD_TRAVELLER_LEFT"))
@@ -2029,6 +2044,15 @@ func _apply_replan(log_format: String) -> void:
 		destination.location_name if destination != null else _session.journey_destination_id
 	), OUTCOME_COLOR)
 	_close_replan()
+
+	# Kervandaki tüccarlar bunu fark eder - En-Route Plan Rules'un zaten
+	# yaptığı sessiz kesintiyi (varışta uygulanan itibar cezası) burada
+	# hikâyeleştiriyoruz. original_merchant_names sefer başından beri
+	# değişmez, yani "aboard tüccar var mı" sorusunun cevabı hâlâ doğru.
+	if not _session.caravan.original_merchant_names.is_empty():
+		var diversion_event := EventCatalog.get_event("evt_route_diversion")
+		if diversion_event != null:
+			_present_event(diversion_event)
 
 func _close_replan() -> void:
 	_clear_children(_replan_holder)

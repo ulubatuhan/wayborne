@@ -100,17 +100,37 @@ func get_required_documents() -> int:
 ## "şu kadar gerekli" derken yalnızca tüccarları sayıyor, yol tüketirken
 ## levazımcıyı da düşüyor, simülatör üçüncü bir hesap yapıyordu. Kopyalar
 ## birbirinden kaydığı an planlayıcı yalan söyler ve oyuncu yolda aç kalır.
+##
+## `height_adjustment` isteğe bağlı bir düzeltme payı: 1.90 boylu biri ile
+## 1.60 boylu birinin açlığı aynı olmamalı (bkz. CharacterData.
+## get_provision_weight()). Varsayılan 0.0 - hem eski çağrı yerleri hem
+## `test_provisions.gd`'nin doğrudan sabit sayılarla çağırdığı testler
+## hiç değişmeden geçer; yalnızca gerçek bir parti veren iki canlı çağıran
+## (planlayıcı, yol) bu payı dolduruyor.
 static func daily_consumption(
 	party_size: int, owned_wagons: int, merchant_count: int,
-	multiplier: float = 1.0, flat_reduction: int = 0
+	multiplier: float = 1.0, flat_reduction: int = 0, height_adjustment: float = 0.0
 ) -> int:
 	var mouths := (
-		maxi(1, party_size)
-		+ maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON
-		+ maxi(0, merchant_count)
+		float(maxi(1, party_size))
+		+ float(maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON)
+		+ float(maxi(0, merchant_count))
+		+ height_adjustment
 	)
-	var eaten := int(round(float(mouths * PROVISIONS_PER_PERSON_PER_DAY) * maxf(0.0, multiplier)))
+	var eaten := int(round(mouths * float(PROVISIONS_PER_PERSON_PER_DAY) * maxf(0.0, multiplier)))
 	return maxi(1, eaten - maxi(0, flat_reduction))
+
+## Planlayıcı ekranı doldurmazsa 0.0 - eski, boy-kör davranış.
+var height_adjustment: float = 0.0
+
+## Gerçek partiden `height_adjustment`'ı hesaplar - planlayıcı ve yol aynı
+## partiyi okuduğu için burada da aynı sonucu üretirler (bkz. Provision
+## Rules'un "plan ve yol anlaşıyor" testi).
+static func height_adjustment_for(party: Array[CharacterData]) -> float:
+	var adjustment := 0.0
+	for character in party:
+		adjustment += character.get_provision_weight() - 1.0
+	return adjustment
 
 func get_daily_consumption() -> int:
 	return daily_consumption(
@@ -118,7 +138,8 @@ func get_daily_consumption() -> int:
 		player_wagon_count,
 		_selected_offers.size(),
 		provision_multiplier,
-		provision_reduction
+		provision_reduction,
+		height_adjustment
 	)
 
 ## Yolun *gerçekte* kaç gün süreceği: taban süre + kötü hava payı.
