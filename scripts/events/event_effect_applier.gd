@@ -58,10 +58,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_PROVISIONS") % changed)
 		EventEffect.Type.ITEM_ADD:
 			var item := ItemCatalog.get_item(effect.text_value)
-			if item != null and session.inventory.add_item(item, effect.amount):
+			if item != null and session.add_to_cargo_or_bag(item, effect.amount):
 				result.lines.append(_t("EFF_ITEM_ADD") % [item.item_name, effect.amount])
 		EventEffect.Type.ITEM_REMOVE:
-			var removed := session.inventory.remove_item(effect.text_value, effect.amount)
+			var removed := session.remove_from_cargo_or_bags(effect.text_value, effect.amount)
 			if removed:
 				result.lines.append(_t("EFF_ITEM_REMOVE") % [effect.text_value, effect.amount])
 		EventEffect.Type.WAGON_DAMAGE:

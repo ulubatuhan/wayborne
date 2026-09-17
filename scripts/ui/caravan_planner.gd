@@ -91,8 +91,6 @@ func _ready() -> void:
 	)))
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
-	_session.inventory.item_added.connect(_on_inventory_changed)
-	_session.inventory.item_removed.connect(_on_inventory_changed)
 
 	_build_ui(origin, _destination, travel_days)
 	_refresh()
@@ -290,9 +288,6 @@ func _on_offer_toggled(_toggled_on: bool, offer: MerchantOffer, checkbox: CheckB
 	_refresh()
 
 func _on_wallet_changed(_new_balance: int) -> void:
-	_refresh()
-
-func _on_inventory_changed(_item: Item, _quantity: int) -> void:
 	_refresh()
 
 func _on_buy_provisions_pressed() -> void:

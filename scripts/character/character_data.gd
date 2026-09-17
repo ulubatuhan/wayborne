@@ -101,6 +101,16 @@ func set_outfit_piece(slot: String, piece_id: String) -> void:
 ## varsayılan). Oyuncu kendi karakterinde bunu kapatıp elle dağıtabilir.
 var auto_allocate: bool = true
 
+## Karakterin üstünde taşıdığı küçük, kısıtlı çanta - kervanın vagon
+## envanterlerinin (bkz. GameSession.wagon_inventories) *dışında* kalan
+## kişisel bir pay. Bir vagon dolduğunda küçük bir ödülün tamamen
+## kaybolmaması için taşkın alanı görevi görür (bkz. GameSession.
+## add_to_cargo_or_bag) ve şehirdeki toplam envanter (bkz. GameSession.
+## get_total_inventory_entries) buna da bakar - "kısıtlı" sözü tam burada:
+## kapasitesi bir vagonun onda biri kadar.
+const PERSONAL_BAG_CAPACITY: float = 5.0
+var personal_inventory: Inventory = Inventory.new(8, PERSONAL_BAG_CAPACITY)
+
 ## Tayfayı işe alma ücreti; oyuncunun kendisi için 0.
 var hire_cost: int = 0
 
@@ -502,6 +512,7 @@ func to_dict() -> Dictionary:
 		"trait_granted_day": trait_granted_day.duplicate(),
 		"equipped": equipped.duplicate(),
 		"outfit": outfit.duplicate(),
+		"personal_inventory": personal_inventory.to_save_array(),
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -545,4 +556,7 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	# karakter şehirde iyileşene kadar ölü görünürdü).
 	var max_hp := character.get_max_hp()
 	character.current_hp = clampi(int(data.get("current_hp", max_hp)), 0, max_hp)
+
+	character.personal_inventory = Inventory.new(8, PERSONAL_BAG_CAPACITY)
+	character.personal_inventory.load_from_array(data.get("personal_inventory", []) as Array)
 	return character

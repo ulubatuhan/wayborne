@@ -96,3 +96,30 @@ func has_item(item_id: String, quantity: int = 1) -> bool:
 
 func get_all_entries() -> Array:
 	return _entries.values()
+
+## `has_space_for`in tam miktar istemeyen hâli - GameSession.add_to_cargo
+## bir yığını birden fazla vagona bölerken önce her vagonun *ne kadar*
+## alabileceğini soruyor, "alabilir mi" değil.
+func get_max_addable(item: Item) -> int:
+	if not _entries.has(item.item_id) and _entries.size() >= max_slots:
+		return 0
+	return get_addable_quantity(item)
+
+## `CaravanLedger`in kendi to_array/load_from_array deseni: Inventory bir
+## Resource değil, kendi kalıcı serileşmesini taşımak zorunda - GameSession
+## (vagon başına) ve CharacterData (kişisel çanta) aynı iki fonksiyonu okur.
+func to_save_array() -> Array:
+	var data: Array = []
+	for entry in _entries.values():
+		var item: Item = entry.item
+		data.append({"item_id": item.item_id, "quantity": entry.quantity})
+	return data
+
+func load_from_array(data: Array) -> void:
+	for raw in data:
+		if not (raw is Dictionary):
+			continue
+		var item := ItemCatalog.get_item(str(raw.get("item_id", "")))
+		var quantity := int(raw.get("quantity", 0))
+		if item != null and quantity > 0:
+			add_item(item, quantity)
