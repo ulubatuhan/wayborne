@@ -1190,7 +1190,14 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 		_band.set_camping(false)
 		_caravan.set_camping(false)
 
-	var event := _engine.roll_for_day(_current_day, _session.build_event_context())
+	var context := _session.build_event_context()
+	# evt_roadside_shrine yalnızca ekranda gerçekten bir sunak durağı
+	# geçilirken güvenle çekilsin diye - bkz. o olayın kendi notu.
+	context["near_shrine"] = (
+		1.0 if _terrain != null and _terrain.segment_at(_days_covered).stop == RouteTerrain.STOP_SHRINE
+		else 0.0
+	)
+	var event := _engine.roll_for_day(_current_day, context)
 	if event == null:
 		_add_log(tr("UI_ROAD_DAY_LINE") % [_current_day, tr("EVT_TEST_QUIET_DAY")])
 	else:

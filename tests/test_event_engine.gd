@@ -15,6 +15,7 @@ func run(t) -> void:
 	_test_seed_is_reproducible(t)
 	_test_daily_chance_follows_danger(t)
 	_test_shipped_catalog_is_sane(t)
+	_test_shrine_weight_follows_terrain(t)
 
 func _make_event(event_id: String, weight: float = 1.0) -> GameEvent:
 	var event := GameEvent.new()
@@ -134,3 +135,23 @@ func _test_shipped_catalog_is_sane(t) -> void:
 				not choice.effects.is_empty() or not choice.outcomes.is_empty(),
 				"%s seçeneğinin bir karşılığı var" % event.event_id
 			)
+
+## `RouteTerrain` bir yol parçasını biyoma uygun bir sunak durağıyla
+## çizebiliyor (bkz. RouteTerrain.STOP_SHRINE) - evt_roadside_shrine bu
+## durağın önünden geçilen gün neredeyse kesin, başka günler nadiren
+## çekilmeli. road_journey.gd bu bayrağı context'e "near_shrine" olarak
+## ekliyor (bkz. o dosyanın _run_day'i); burada katalogdaki olayın kendi
+## ağırlık tepkisini doğruca sınıyoruz - motoru koşturmaya gerek yok.
+func _test_shrine_weight_follows_terrain(t) -> void:
+	var events := EventCatalog.get_road_events()
+	var shrine_event: GameEvent = null
+	for event in events:
+		if event.event_id == "evt_roadside_shrine":
+			shrine_event = event
+			break
+	t.ne(shrine_event, null, "evt_roadside_shrine katalogda var")
+
+	var away_weight := shrine_event.get_weight({"near_shrine": 0.0})
+	var near_weight := shrine_event.get_weight({"near_shrine": 1.0})
+	t.ok(away_weight > 0.0, "sunak yokken bile küçük bir şans kalır")
+	t.ok(near_weight > away_weight * 5.0, "sunağın önündeyken ağırlık kayda değer büyür")

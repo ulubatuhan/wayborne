@@ -62,6 +62,11 @@ var _facing: float = 1.0
 var _tint: Color = Color.WHITE
 var _moving: bool = true
 var _carries_pack: bool = false
+## `CharacterData.outfit` - boş sözlük (tayfa, düşman reskin'i, oxen) hiçbir
+## şeyi değiştirmez, figür tamamen sınıf/arketip paletinde kalır. Yalnızca
+## karakter oluşturmada seçilen bir parça varsa o slotun rengi/kafa şekli
+## bunun yerine geçer - bkz. OutfitCatalog'un çözümleyicileri.
+var _outfit: Dictionary = {}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -70,7 +75,7 @@ func _ready() -> void:
 ## haydut paletine düşer (aynı kural savaş figüründe de var).
 func set_kind(
 	kind: String, archetype_id: String, height_scale: float = 1.0,
-	skin: Color = FALLBACK_SKIN, carries_pack: bool = false
+	skin: Color = FALLBACK_SKIN, carries_pack: bool = false, outfit: Dictionary = {}
 ) -> void:
 	_kind = kind
 	_archetype = CombatFigure.ARCHETYPES.get(
@@ -79,6 +84,7 @@ func set_kind(
 	_scale = clampf(height_scale, 0.82, 1.18)
 	_skin = skin
 	_carries_pack = carries_pack
+	_outfit = outfit
 	queue_redraw()
 
 ## Yürüyüş fazını ilerletir. `speed` 0 ise figür duruyor: ayakları yere
@@ -139,11 +145,22 @@ func _draw() -> void:
 func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	var h := figure_h * _scale
 	var cx := size.x * 0.5
-	var cloth: Color = _tinted(_archetype.get("cloth", Color(0.3, 0.25, 0.22)))
+	var base_cloth: Color = _archetype.get("cloth", Color(0.3, 0.25, 0.22))
 	var trim: Color = _tinted(_archetype.get("trim", Color(0.4, 0.3, 0.22)))
 	var metal: Color = _tinted(_archetype.get("metal", ArtPalette.STEEL))
 	var skin := _tinted(_skin)
 	var bulk: float = float(_archetype.get("bulk", 1.0))
+
+	# Kıyafet seçimi (ceket/gömlek/pantolon/ayakkabı/eldiven) burada devreye
+	# giriyor - hiçbiri seçilmemişse (`_outfit` boş, tayfa/düşman gibi) her
+	# çözümleyici verdiği fallback'i olduğu gibi geri döner, yani sistem
+	# hiç var olmadan önceki görünüm birebir korunur.
+	var cloth := _tinted(OutfitCatalog.resolve_torso_color(_outfit, base_cloth))
+	var pants_color := _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_PANTS, base_cloth))
+	var shoes_color := _tinted(
+		OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_SHOES, base_cloth.darkened(0.35))
+	)
+	var gloves_color := _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_GLOVES, _skin))
 
 	# Yürüyen figürde `ground_y` ayağın bastığı yer, o yüzden kalça
 	# yukarıda. Oturan figürde `ground_y` **eyerin kendisi**, yani kalça
@@ -161,10 +178,12 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			self, Vector2(cx, ground_y), Vector2(h * 0.16, h * 0.028),
 			Color(0.0, 0.0, 0.0, 0.26)
 		)
-		_draw_leg(hip, ground_y, h, _phase + PI, cloth.darkened(0.28))
-		_draw_leg(hip, ground_y, h, _phase, cloth)
+		_draw_leg(
+			hip, ground_y, h, _phase + PI, pants_color.darkened(0.28), shoes_color.darkened(0.28)
+		)
+		_draw_leg(hip, ground_y, h, _phase, pants_color, shoes_color)
 	else:
-		_draw_seated_legs(hip, h, cloth)
+		_draw_seated_legs(hip, h, pants_color, shoes_color)
 
 	var shoulder := hip + Vector2(0.0, -h * 0.26)
 	# Gövde: omuzdan kalçaya doğru daralan bir gövde. Dikdörtgen yerine
@@ -188,14 +207,19 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			back + Vector2(h * 0.01 * _facing, h * 0.15),
 		]), trim.darkened(0.15), maxf(1.0, h * 0.010))
 
-	_draw_arm(shoulder, h, _phase, cloth.darkened(0.18), skin)
-	_draw_head(shoulder, h, bulk, skin, cloth, trim, metal)
-	_draw_arm(shoulder, h, _phase + PI, cloth, skin)
+	var headgear := OutfitCatalog.resolve_headgear(_outfit, String(_archetype.get("head", "bare")))
+	_draw_arm(shoulder, h, _phase, cloth.darkened(0.18), gloves_color)
+	_draw_head(shoulder, h, bulk, skin, cloth, trim, metal, headgear)
+	_draw_arm(shoulder, h, _phase + PI, cloth, gloves_color)
 	_draw_slung_weapon(shoulder, h, metal, trim)
 
 ## Kalça → diz → ayak. Ayağın *hedefi* hesaplanıyor, diz ondan çözülüyor;
-## tersi (dizi sallamak) ayağı yerde kaydırıyor.
-func _draw_leg(hip: Vector2, ground_y: float, h: float, phase: float, color: Color) -> void:
+## tersi (dizi sallamak) ayağı yerde kaydırıyor. `foot_color` ayakkabı
+## seçimini taşır (bkz. `_draw_person`) - pantolonla aynı renk değil
+## artık, çünkü ayakkabı kendi slotunun rengini taşıyabiliyor.
+func _draw_leg(
+	hip: Vector2, ground_y: float, h: float, phase: float, color: Color, foot_color: Color
+) -> void:
 	var leg_len := ground_y - hip.y
 	var stride := h * STRIDE_RATIO if _moving else 0.0
 	var lift := h * LIFT_RATIO if _moving else 0.0
@@ -213,12 +237,12 @@ func _draw_leg(hip: Vector2, ground_y: float, h: float, phase: float, color: Col
 	# Ayak: yürüyüşün okunmasını sağlayan en küçük detay.
 	draw_line(
 		foot, foot + Vector2(h * 0.048 * _facing, 0.0),
-		color.darkened(0.35), maxf(1.5, h * 0.022)
+		foot_color, maxf(1.5, h * 0.022)
 	)
 
 ## Atlı oturuyor: bacaklar eyerden aşağı sarkıyor, yürüyüş fazı bacağa
 ## değil atın ritmine bağlı.
-func _draw_seated_legs(hip: Vector2, h: float, color: Color) -> void:
+func _draw_seated_legs(hip: Vector2, h: float, color: Color, foot_color: Color) -> void:
 	var width := maxf(2.0, h * 0.042)
 	var knee := hip + Vector2(h * 0.10 * _facing, h * 0.14)
 	var foot := knee + Vector2(-h * 0.02 * _facing, h * 0.16)
@@ -226,10 +250,12 @@ func _draw_seated_legs(hip: Vector2, h: float, color: Color) -> void:
 	draw_line(knee, foot, color.darkened(0.20), width * 0.88)
 	draw_line(
 		foot, foot + Vector2(h * 0.045 * _facing, 0.0),
-		color.darkened(0.40), maxf(1.5, h * 0.022)
+		foot_color.darkened(0.15), maxf(1.5, h * 0.022)
 	)
 
-func _draw_arm(shoulder: Vector2, h: float, phase: float, color: Color, skin: Color) -> void:
+## `hand_color` eldiven seçiliyse onun rengi, değilse ten rengi - bkz.
+## `_draw_person`'ın `gloves_color` çözümü.
+func _draw_arm(shoulder: Vector2, h: float, phase: float, color: Color, hand_color: Color) -> void:
 	var swing := (sin(phase) if _moving else 0.35) * 0.55
 	var upper := h * 0.15
 	var lower := h * 0.14
@@ -242,11 +268,15 @@ func _draw_arm(shoulder: Vector2, h: float, phase: float, color: Color, skin: Co
 	var width := maxf(1.6, h * 0.032)
 	draw_line(shoulder, elbow, color, width)
 	draw_line(elbow, hand, color, width * 0.85)
-	draw_circle(hand, maxf(1.2, h * 0.020), skin)
+	draw_circle(hand, maxf(1.2, h * 0.020), hand_color)
 
+## `headgear` `OutfitCatalog.resolve_headgear()`'ın döndürdüğü
+## `{kind, color, override}` - `override` false'sa `color` hiç okunmaz,
+## her dal kendi eski (sınıf/arketip kaynaklı) rengini kullanır, yani
+## kıyafetsiz bir figür bu sistemden önceki hâliyle birebir aynı kalır.
 func _draw_head(
 	shoulder: Vector2, h: float, bulk: float, skin: Color,
-	cloth: Color, trim: Color, metal: Color
+	cloth: Color, trim: Color, metal: Color, headgear: Dictionary
 ) -> void:
 	var radius := h * 0.058 * (0.92 + bulk * 0.08)
 	var centre := shoulder + Vector2(h * 0.012 * _facing, -radius * 1.35)
@@ -258,14 +288,16 @@ func _draw_head(
 	ArtDraw.ellipse(self, centre, Vector2(radius * 0.92, radius), skin)
 	draw_arc(centre, radius, 0.0, TAU, 18, ArtPalette.INK, maxf(1.0, h * 0.010))
 
-	match String(_archetype.get("head", "bare")):
+	var override: bool = headgear.get("override", false)
+	var head_color: Color = _tinted(headgear.get("color", Color.WHITE))
+	match String(headgear.get("kind", "bare")):
 		"helmet":
 			ArtDraw.inked(self, PackedVector2Array([
 				centre + Vector2(-radius, -radius * 0.15),
 				centre + Vector2(-radius * 0.7, -radius * 1.15),
 				centre + Vector2(radius * 0.7, -radius * 1.15),
 				centre + Vector2(radius, -radius * 0.15),
-			]), metal, maxf(1.0, h * 0.009))
+			]), head_color if override else metal, maxf(1.0, h * 0.009))
 		"hood":
 			ArtDraw.inked(self, PackedVector2Array([
 				centre + Vector2(-radius * 1.15, radius * 0.35),
@@ -273,18 +305,18 @@ func _draw_head(
 				centre + Vector2(radius * 0.55, -radius * 1.1),
 				centre + Vector2(radius * 0.9, radius * 0.2),
 				centre + Vector2(-radius * 0.2, radius * 0.5),
-			]), cloth.darkened(0.18), maxf(1.0, h * 0.009))
+			]), head_color if override else cloth.darkened(0.18), maxf(1.0, h * 0.009))
 		"wrap":
 			draw_line(
 				centre + Vector2(-radius, -radius * 0.4),
 				centre + Vector2(radius, -radius * 0.55),
-				trim, maxf(1.6, radius * 0.55)
+				head_color if override else trim, maxf(1.6, radius * 0.55)
 			)
 		"cap":
 			draw_line(
 				centre + Vector2(-radius * 0.95, -radius * 0.65),
 				centre + Vector2(radius * 0.95, -radius * 0.65),
-				trim, maxf(1.6, radius * 0.5)
+				head_color if override else trim, maxf(1.6, radius * 0.5)
 			)
 		_:
 			# Saç: tek yönden ışık aldığı için tepesi biraz açık.

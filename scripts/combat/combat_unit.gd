@@ -52,6 +52,11 @@ var xp_value: int = 0
 ## düşman hiçbir zaman çizimsiz kalmaz.
 var figure_kind: String = "bandit"
 
+## `CharacterData.outfit` (oyuncu tarafı) ya da boş (düşman - hiç kıyafeti
+## yok, `figure_kind`'ın kendi arketip paleti aynen kullanılır). `CombatFigure`
+## bunu `figure_kind`'la aynı yerden, `CombatUnitSlot.bind()`'dan okuyor.
+var outfit: Dictionary = {}
+
 ## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
 ## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
 ## _try_refuse_order). Yalnızca oyuncu tarafında anlamlı.
@@ -117,6 +122,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.blight_resist = character.get_blight_resist()
 	unit.stun_resist = character.get_stun_resist()
 	unit.figure_kind = character.class_id
+	unit.outfit = character.outfit
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()

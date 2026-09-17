@@ -11,6 +11,13 @@ extends Resource
 @export var slot: String = ""
 @export var display_name_key: String = ""
 @export var color: Color = Color.WHITE
+## Yalnızca SLOT_HAT parçaları için: WalkFigure/CombatFigure'ın ortak
+## "head" vokabülerinden biri ("helmet"/"hood"/"wrap"/"cap"/"bare") - bu
+## parça seçiliyken figürün kafasında hangi silüetin çizileceğini
+## belirler. Boşsa (diğer beş slot hep böyledir) figür kendi sınıf/düşman
+## arketipinin varsayılan kafa şeklini kullanır - bkz.
+## OutfitCatalog.resolve_headgear().
+@export var head_shape: String = ""
 
 var display_name: String:
 	get: return tr(display_name_key)

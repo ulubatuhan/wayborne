@@ -105,17 +105,24 @@ var _face_right: bool = true
 var _state: String = "normal"
 ## Arka mevkiler biraz küçük ve koyu çizilir - saf derinliği hissi.
 var _depth: float = 0.0
+## `CharacterData.outfit` - yalnızca oyuncu tarafı taşır, düşmanlar hiç
+## göndermez (boş sözlük = arketipin kendi paleti, WalkFigure'daki aynı
+## kural - bkz. OutfitCatalog'un çözümleyicileri).
+var _outfit: Dictionary = {}
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
-func setup(kind: String, face_right: bool, state: String, depth: float) -> void:
+func setup(
+	kind: String, face_right: bool, state: String, depth: float, outfit: Dictionary = {}
+) -> void:
 	_kind = kind if ARCHETYPES.has(kind) else FALLBACK_KIND
 	_face_right = face_right
 	_state = state
 	_depth = clampf(depth, 0.0, 1.0)
+	_outfit = outfit
 	queue_redraw()
 
 func _archetype() -> Dictionary:
@@ -159,8 +166,15 @@ func _draw_ground_shadow(box: Vector2, bulk: float) -> void:
 # --- İki ayaklı ---
 
 func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
-	var cloth := _tint(archetype.cloth)
+	# Kıyafet burada da WalkFigure'la aynı kuralı okuyor - `_outfit` boşsa
+	# (her düşman, tayfa figürü) her çözümleyici fallback'i aynen geri
+	# döner, görünüm bu sistemden önceki hâliyle birebir aynı kalır.
+	# Savaş silüeti küçük ölçekte ayrı bir ayakkabı/eldiven şekli
+	# taşımıyor, o yüzden yalnızca gövde (ceket/gömlek), bacak (pantolon)
+	# ve baş (şapka) burada gerçek bir görsel karşılık buluyor.
+	var cloth := _tint(OutfitCatalog.resolve_torso_color(_outfit, archetype.cloth))
 	var trim := _tint(archetype.trim)
+	var pants := _tint(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_PANTS, archetype.trim))
 	var metal := _tint(archetype.metal)
 	var skin := _tint(SKIN_WARM if _kind.begins_with("bandit") else SKIN_PALE)
 
@@ -184,11 +198,11 @@ func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	_filled(_quad(
 		Vector2(cx - half_hip * 0.75, leg_top), Vector2(cx - half_hip * 0.75 + leg_w, leg_top),
 		Vector2(cx - leg_w * 0.4, ground), Vector2(cx - leg_w * 1.5, ground)
-	), trim.darkened(0.18))
+	), pants.darkened(0.18))
 	_filled(_quad(
 		Vector2(cx + half_hip * 0.75 - leg_w, leg_top), Vector2(cx + half_hip * 0.75, leg_top),
 		Vector2(cx + leg_w * 1.5, ground), Vector2(cx + leg_w * 0.4, ground)
-	), trim.darkened(0.30))
+	), pants.darkened(0.30))
 
 	# Pelerin (lider/kalem efendisi) - gövdenin arkasına
 	if String(archetype.head) == "cap" or _kind == "bandit_leader":
@@ -222,7 +236,8 @@ func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	var head_c := Vector2(cx + lean * 1.4, shoulder_y - head_r * 0.95)
 	_draw_ellipse(head_c, Vector2(head_r, head_r * 1.06), skin)
 	_draw_ellipse_outline(head_c, Vector2(head_r, head_r * 1.06), OUTLINE, 1.5)
-	_draw_headgear(String(archetype.head), head_c, head_r, cloth, trim, metal)
+	var headgear := OutfitCatalog.resolve_headgear(_outfit, String(archetype.head))
+	_draw_headgear(headgear, head_c, head_r, cloth, trim, metal)
 
 	# Kenar ışığı: bakan tarafa ince bir çizgi. Mürekkep hissinin
 	# yarısı buradan geliyor.
@@ -253,17 +268,25 @@ func _draw_fallen(box: Vector2, cloth: Color, trim: Color, skin: Color, bulk: fl
 		trim, 3.0
 	)
 
+## `headgear` `OutfitCatalog.resolve_headgear()`'ın döndürdüğü
+## `{kind, color, override}` - `override` false'sa `color` hiç okunmaz,
+## her dal kendi eski (sınıf/düşman arketipi kaynaklı) rengini kullanır,
+## yani kıyafetsiz bir figür (her düşman, tüm eski test/ölçüm verisi)
+## bu sistemden önceki hâliyle birebir aynı kalır.
 func _draw_headgear(
-	head: String, centre: Vector2, radius: float,
+	headgear: Dictionary, centre: Vector2, radius: float,
 	cloth: Color, trim: Color, metal: Color
 ) -> void:
-	match head:
+	var override: bool = headgear.get("override", false)
+	var head_color: Color = _tint(headgear.get("color", Color.WHITE)) if override else Color.WHITE
+	match String(headgear.get("kind", "bare")):
 		"helmet":
-			_draw_arc_cap(centre, radius * 1.12, metal)
+			var col := head_color if override else metal
+			_draw_arc_cap(centre, radius * 1.12, col)
 			draw_line(
 				Vector2(centre.x - radius, centre.y + radius * 0.18),
 				Vector2(centre.x + radius, centre.y + radius * 0.18),
-				metal.darkened(0.3), 2.0
+				col.darkened(0.3), 2.0
 			)
 		"hood":
 			_filled(_quad(
@@ -271,17 +294,17 @@ func _draw_headgear(
 				Vector2(centre.x, centre.y - radius * 1.5),
 				Vector2(centre.x + radius * 1.35, centre.y + radius * 0.55),
 				Vector2(centre.x, centre.y + radius * 0.2)
-			), cloth.darkened(0.22))
+			), head_color if override else cloth.darkened(0.22))
 		"wrap":
 			draw_rect(Rect2(
 				Vector2(centre.x - radius, centre.y - radius * 0.55),
 				Vector2(radius * 2.0, radius * 0.52)
-			), trim, true)
+			), head_color if override else trim, true)
 		"cap":
 			draw_rect(Rect2(
 				Vector2(centre.x - radius * 0.95, centre.y - radius * 1.25),
 				Vector2(radius * 1.9, radius * 0.62)
-			), cloth.darkened(0.2), true)
+			), head_color if override else cloth.darkened(0.2), true)
 		_:
 			# Başı açık: saç bir kavis olarak.
 			_draw_arc_cap(centre, radius * 1.02, cloth.darkened(0.5))

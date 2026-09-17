@@ -13,6 +13,7 @@ const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 
 var _session: GameSession
 var _equipment_rows: Array[Dictionary] = []
+var _overview_panel: CaravanOverviewPanel = null
 
 @onready var _status_label: Label = $MarginContainer/VBoxContainer/StatusLabel
 @onready var _message_label: Label = $MarginContainer/VBoxContainer/MessageLabel
@@ -33,6 +34,7 @@ func _ready() -> void:
 	_repair_button.pressed.connect(_on_repair_pressed)
 	_buy_wagon_button.pressed.connect(_on_buy_wagon_pressed)
 	_build_sell_wagon_button()
+	_build_overview_button()
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_equipment_shop()
@@ -46,6 +48,29 @@ func _build_sell_wagon_button() -> void:
 	var container := _buy_wagon_button.get_parent()
 	container.add_child(_sell_wagon_button)
 	container.move_child(_sell_wagon_button, _buy_wagon_button.get_index() + 1)
+
+## Kervanın genel dökümü - vagon sembolleri, yükleri, hesaplanan hızları
+## ve kadronun stres/can durumu (bkz. `CaravanOverviewPanel`). Satış
+## tuşunun deseniyle aynı: kod içinde eklenen bir sıra düğmesi, .tscn'e
+## hiç dokunmuyor.
+func _build_overview_button() -> void:
+	var button := Button.new()
+	button.text = tr("UI_CARAVAN_OVERVIEW_BUTTON")
+	button.pressed.connect(_on_overview_pressed)
+	var container := _sell_wagon_button.get_parent()
+	container.add_child(button)
+	container.move_child(button, _sell_wagon_button.get_index() + 1)
+
+func _on_overview_pressed() -> void:
+	if _overview_panel != null:
+		return
+	_overview_panel = CaravanOverviewPanel.new()
+	add_child(_overview_panel)
+	_overview_panel.closed.connect(_on_overview_closed)
+	_overview_panel.setup(_session)
+
+func _on_overview_closed() -> void:
+	_overview_panel = null
 
 ## Silah/Zırh yalnızca burada satılır (price > 0) - Yüzük/Kolye pazarda
 ## yer almaz, yolda EventEffect.Type.GRANT_EQUIPMENT ile bulunur.

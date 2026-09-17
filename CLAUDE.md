@@ -925,6 +925,19 @@ re-roll the rain away.
   planner prints them in one line, so choosing a route is no longer blind.
   Biomes step at most two places along `BIOME_CHAIN`, because steppe
   straight into mountains does not read as geography.
+- **A drawn stop that no event ever reads is scenery with a name on it,
+  not a feature.** `evt_roadside_shrine` fired from the general pool with
+  no idea whether a shrine stop was actually on screen that day - the
+  card and the marker were two systems that had never been introduced.
+  `road_journey.gd`'s `_run_day()` now reads `_terrain.segment_at(
+  _days_covered).stop` and hands the event pool a `near_shrine` flag; the
+  event's own base weight dropped low (an unmarked wayside shrine can
+  still turn up, rarely) and an `EventWeightModifier` (×8, the same
+  pattern as `evt_forage`'s İzci bonus) makes it fire reliably on the day
+  the caravan actually passes one. The other five stop kinds (hamlet,
+  outpost, mine, pass, bridge) still have no mechanical hook - a real
+  follow-up, not a rejection, and each would need its own event rather
+  than reusing this one's wiring.
 - **Weather invents no system.** All of it turns levers that already exist:
   walking pace, route danger (applied to the headroom, `base + delta *
   (1-base)`, the same rule as `RouteConditions`) and the daily morale drain.
@@ -2810,6 +2823,59 @@ Visit `http://localhost:8000` in browser.
 
 ## Development Status
 
+### Ana Hedefler
+
+Oyunun aktif, henüz kapanmamış hedeflerinin tek listesi - **bundan sonra
+yeni bir açık iş burada birikir, Development Status'un tarih akışı içine
+dağılmış ayrı notlar olarak değil.** Bir madde kapandığında buradan
+silinir; tarihçesi (nasıl karara bağlandığı, ölçümü) aşağıdaki Faz
+anlatısında kalır - bu liste yalnızca "şu an açık olan ne" sorusuna cevap
+verir.
+
+- **Elle çizilmiş görsel varlıklar.** Oyunun tamamı hâlâ `_draw()` ile
+  çiziliyor (`ArtPalette` kalacak, çizim fonksiyonlarının yerini dokular
+  alacak) - Faz 10'dan beri işaretli en büyük, hiç başlanmamış kalem.
+  Kıyafet sisteminin altı slotu (bkz. Kervan Envanteri Rules'un yanındaki
+  kıyafet notu) buna hazır bekliyor.
+- **İki katmanlı "defter" sanat yönüne geçiş.** Faz 12'de "en büyüğü"
+  diye işaretlenen öneri - mevcut prosedürel sanattan farklı bir görsel
+  kimlik.
+- **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
+  bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
+  Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
+  karşılığı olarak zaten kurulu.
+- **İki dini yaratılış efsanesi + fragman/sinematik** (#12 - backlog
+  numarası, ekran değil).
+- **Yolda küçük olumlu bir sinyal türü.** `RoadSignals`'ın üç türü (bkz.
+  Road Layer Rules) hepsi olumsuz; üç somut aday var - baş bölgesinde
+  "İz" (erken erzak/durak bilgisi), vagonlar bölgesinde "Yardımcı el"
+  (küçük hasar iyileşmesi/erzak tasarrufu), arka bölgede "Sohbet" (küçük
+  stres/moral iyileşmesi) - ihmal edilince ceza yok, yalnızca fırsat
+  kaçmış olur. Hangisiyle başlanacağı ayrı bir karar.
+- **Yabancı tüccarın vagonuna diyalog yoluyla bakış.** Kervana kabul
+  edilmiş bir tüccarın vagonuna tıklamak sohbet açar: izin/zorla bak/
+  tekrar ikna et/vazgeç. `NpcDisposition`/ikna vokabülerinin (bkz. Event
+  Character Rules) vagon etkileşimine taşınmış hâli - bkz. Kervan
+  Envanteri Rules'un "#22'nin karşılanmayan" notu. Tasarım hazır,
+  uygulanmadı.
+- **Kampanya bölümlerinin sadeleştirilmesi - ertelendi.** Sadeleştirilecek
+  asıl hikâye/anlatı içeriği henüz yazılmadı; içerik yazılınca tekrar
+  gündeme gelebilir.
+- **Beş yol durağının hâlâ mekanik karşılığı yok.** Faz 16'nın rota/hava
+  denetimi `evt_roadside_shrine`'ı gerçek sunak durağına bağladı (bkz.
+  Route Terrain & Weather Rules) ama konak/karakol/maden/geçit/köprü
+  hâlâ salt görsel - her biri kendi olayını/etkisini isteyecek ayrı bir
+  iş, bu turda kasıtlı kapsam dışı bırakıldı.
+
+**Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
+bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
+`evt_roadside_shrine`'ın gerçek sunak durağına bağlanması - üçü de
+aşağıdaki Faz 16 anlatısında ve Route Terrain & Weather Rules'ta.
+
+**Kalıcı olarak reddedildi, bir daha gündeme gelmeyecek:** stres/moral
+birleşmesi, borç sisteminin kapsamının daraltılması, ekipmanın kargoya
+dönüşmesi - üçünün de gerekçesi Faz 16 anlatısında.
+
 Faz 0-3 tamamlandı. Oyun bir tur dönüyor (kazanç ödeniyor, harita tam
 bağlı, fiyat şehre göre değişiyor, kargo kapasitesi var), test iskelesi
 oyuna çevrildi (`scenes/game/`, F1 dev paneli), ilerleme kalıcı
@@ -3430,21 +3496,49 @@ icat etmiyor:
   iyileşmesi - kampın "ücretsiz ama yavaş" kolunun günlük, küçük bir
   eşdeğeri.
 
-**Kıyafet sisteminin kapsamı netleşti.** `OutfitCatalog`/`OutfitPiece`
-bugün yalnızca `OutfitPreview`'da (karakter oluşturmadaki boydan önizleme)
-okunuyor - `WalkFigure` (dünya) ve `CombatFigure` (savaş) hiçbir zaman
-`CharacterData.outfit`'e bakmıyor, yani bir kıyafet seçimi şu an oyunun
-geri kalanında **görünmüyor**, yalnızca o önizleme penceresinde. Elle
-çizilmiş görsellerin (Faz 10'un işaretlediği, hâlâ tamamlanmamış "next")
-ilk hedeflerinden biri bu boşluğu kapatmak olmalı - altı slot (şapka/
-gömlek/ceket/eldiven/pantolon/ayakkabı) zaten parça parça ayrılmış durumda
-(`OutfitCatalog.SLOT_*`, her biri kendi küçük havuzuyla), tek eksik olan bu
-parçaların `WalkFigure`/`CombatFigure` üzerinde de okunup çizilmesi -
-sistemin kendisi (Faz 13 PR'ının kasıtlı sırasıyla: "önce sistemi kur,
-seçenekleri sonra ekle") zaten buna hazır kurulmuş durumda. `Equipment`
-(kılıç/zırh gibi combat parçaları) tamamen ayrı bir sistem kalır - `outfit`
-kozmetik, `equipped` savaşı etkiler; ikisi de karaktere görsel bir katman
-eklerken birbirine karışmaz (yukarıdaki "reddedildi" maddesinin gerekçesi).
+**Kıyafet seçimi artık oyunun geri kalanında da görünüyor (Faz 16).**
+`OutfitCatalog`/`OutfitPiece` bir süre yalnızca `OutfitPreview`'da
+(karakter oluşturmadaki boydan önizleme) okunuyordu - `WalkFigure` (dünya)
+ve `CombatFigure` (savaş) `CharacterData.outfit`'e hiç bakmıyordu, yani bir
+kıyafet seçimi şu ekranın dışında görünmüyordu. Üç dosyanın da (önizleme +
+iki gerçek figür) aynı mantığı okuması için tek doğruluk kaynağı
+`OutfitCatalog`'a taşındı: `resolve_color()` (bir slotta parça seçiliyse
+onun rengi, değilse verilen fallback), `resolve_torso_color()` (ceket
+gömleğin üstünü kapatır - `CaravanPlan.daily_consumption()`'ın "tek
+formül, tek yer" kuralının kıyafet karşılığı) ve `resolve_headgear()`
+(bir şapkanın `head_shape`'i varsa - `hat_hood`→"hood", `hat_felt`→"cap" -
+figür gerçekten farklı bir kafa silüeti çiziyor, kendi rengiyle).
+`WalkFigure.set_kind()` ve `CombatFigure.setup()` artık bir `outfit`
+parametresi alıyor (varsayılanı boş sözlük); `world_hub.gd`
+`character.outfit`'i doğrudan geçiyor, `CombatUnit.outfit` (`from_character`'da
+kopyalanan, `from_enemy`'de hiç dokunulmayan - düşmanın kıyafeti yok) aynı
+bilgiyi savaş tarafına taşıyor, `CombatUnitSlot.bind()` onu `CombatFigure`'a
+iletiyor.
+**Her çözümleyici, override yokken tam olarak eski değeri döner** - bu
+sistemin en önemli garantisi: kıyafetsiz bir karakter (tayfa, her düşman,
+kıyafet seçmemiş bir oyuncu) bu sistem hiç var olmadan önceki hâliyle
+birebir aynı çiziliyor, `test_outfit.gd`'nin `override` alanını doğrudan
+sınadığı satır bunu kilitliyor. Savaş silüeti küçük ölçekte ayrı bir
+ayakkabı/eldiven şekli taşımadığı için `CombatFigure` yalnızca gövde
+(ceket/gömlek), bacak (pantolon) ve baş (şapka) alanlarını okuyor;
+`WalkFigure` altı slotun tamamını (eldiven/ayakkabı dahil) okuyor - hangi
+figürün hangi slotu okuduğu, o figürün gerçekten çizdiği bir şekle karşılık
+gelip gelmediğine bağlı, eksiksizlik uğruna yeni bir şekil icat edilmedi.
+`Equipment` (kılıç/zırh gibi combat parçaları) tamamen ayrı bir sistem
+kalır - `outfit` kozmetik, `equipped` savaşı etkiler; ikisi de karaktere
+görsel bir katman eklerken birbirine karışmaz (yukarıdaki "reddedildi"
+maddesinin gerekçesi). Gerçek sprite'lar geldiğinde (kullanıcının kendi
+sözleriyle "tek tek çizip vereceğim") her slotun kendi rengi zaten kendi
+parçasına ait - `OutfitPiece.color`'ın yerini `OutfitPiece.texture`
+almasını, hangi figürün hangi `Sprite2D`'yi hangi slotta göstereceğini
+bu aynı altı-slot mimarisi belirleyecek; yapı değişmez, yalnızca `_draw()`
+çağrıları `TextureRect`/`Sprite2D`'ye yer açar (Art Rules'un genel sprite
+geçiş kuralı).
+
+Faz 16 böylece fiilen başladı - kıyafet, genel kervan ekranı ve
+`evt_roadside_shrine`'ın rota coğrafyasına bağlanması (bkz. Route Terrain
+& Weather Rules) tamamlanan üç parça, aşağıdaki (yabancı vagon diyaloğu)
+hâlâ tasarım notu.
 
 **Yabancı tüccarın vagonuna bakış artık bir diyalog mekaniği olarak
 tasarlandı** (bkz. Kervan Envanteri Rules'un "#22'nin karşılanmayan"
@@ -3456,15 +3550,34 @@ anahtarı değil, `NpcDisposition`/ikna vokabülerinin (bkz. Event Character
 Rules, `evt_mutiny`'nin manipüle seçeneği) vagon etkileşimine taşınmış
 hâli. Henüz uygulanmadı, tasarım notu olarak duruyor.
 
-**Genel bir "Kervan Yükü" ekranı artık daha geniş tanımlandı**: kervanın
-sembolik bir görünümü, her vagonun altında o vagonun ağırlığı, ona bağlı
-kişiler ve hesaplanan hızı; en sağda kervanın **teorik hızı** - en yavaş
-vagonun hızı (bir kervan en yavaş tekerleğinden hızlı gidemez). Aynı
-ekrandan kervandaki herkesin açlık/stres/moral durumu ve kervan hakkındaki
-toplu "düşünceleri" görülebilmeli. `CaravanStatusPanel`'in (bkz. Road
-Screen Layout Rules) salt-okunur dökümüyle akraba ama ondan geniş - o yol
-ekranının bir Tab paneli, bu ayrı, kendi başına bir ekran/mekanik. Henüz
-uygulanmadı, tasarım notu olarak duruyor.
+**Genel bir kervan yönetimi ekranı uygulandı: `CaravanOverviewPanel`.**
+Kervan burada gerçekten sembolize ediliyor - her vagon kendi simgesiyle
+(`CaravanWagonIcon`, `ArtDraw.wagon()`'u üçüncü bir bağlamda kullanan aynı
+fırça, bkz. Art Rules'un "a shape drawn in two places is two different
+shapes" maddesi), altında o vagonun yükü/kapasitesi, tayfa sayısı ve
+hesaplanan hızı; ayrı bir satırda kervanın **teorik hızı** - vagonların en
+düşük hız faktörü (bir kervan en yavaş tekerleğinden hızlı gidemez, bkz.
+`GameSession.get_caravan_theoretical_speed()`). Kervan Avlusu'ndan
+("Kervan Dökümü" düğmesi, `WagonPanel`'inkiyle aynı sahnesiz `CanvasLayer`
+deseni) açılıyor - `CaravanStatusPanel`'in yol ekranındaki salt-okunur
+dökümüyle akraba ama onun yerine geçmiyor, o bir Tab paneli, bu ayrı bir
+ekran.
+**Tasarımdaki tek bilinçli sapma**: istenen "açlık/moral" yerine
+**stres** gösteriliyor - Stress Rules'un kendi ayrımı gereği moral o
+seferin ruh hali (yalnızca bir yolculuk sırasında anlamlı), stres kalıcı
+olan (her zaman okunabilir); şehirden açılan bir ekranda moral göstermek
+sefer dışındayken anlamsız bir sayı gösterirdi. Kalıcı bir açlık stat'ı
+da hiç var olmadı (açlık yalnızca yolda anlık bir olay), o yüzden icat
+edilmedi. Kervandaki herkesin kısa bir "düşüncesi" (stres/can okunarak
+seçilen bir satır, Faz 13 PR-D'nin kısa savaş yorumlarıyla aynı disiplin -
+metin, yeni sistem değil) da burada.
+**Vagon hızı bugün yalnızca bilgilendirici** - `GameSession.
+get_wagon_speed_factor()`'ın kendi yorum satırı bunu açıkça söylüyor:
+yolun gerçek tempusuna henüz bağlı değil. Bunu asıl yürüyüşe bağlamak
+Provision Rules'un "correct stocking never starves" sözünü etkileyen ayrı,
+kendi başına ölçülmesi gereken bir denge kararı - Ruin Rules'un kendi
+"measure before wiring into balance" disiplini burada da geçerli, iki
+karar aynı pastada ölçülmeden üst üste bindirilmiyor.
 
 ## Quick Start
 
