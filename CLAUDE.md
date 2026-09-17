@@ -2866,6 +2866,14 @@ verir.
   Route Terrain & Weather Rules) ama konak/karakol/maden/geçit/köprü
   hâlâ salt görsel - her biri kendi olayını/etkisini isteyecek ayrı bir
   iş, bu turda kasıtlı kapsam dışı bırakıldı.
+- **Vagon hızı henüz yolun gerçek temposuna bağlı değil.**
+  `GameSession.get_wagon_speed_factor()`/`get_caravan_theoretical_speed()`
+  (Faz 16, `CaravanOverviewPanel`) bugün yalnızca bilgilendirici - bir
+  vagonun yükü ekranda görünüyor ama seferin gerçek yürüyüş hızını
+  etkilemiyor. Bunu asıl yürüyüşe bağlamak Provision Rules'un "correct
+  stocking never starves" sözünü etkileyen ayrı, kendi başına ölçülmesi
+  gereken bir denge kararı - Ruin Rules'un "measure before wiring into
+  balance" disiplini burada da geçerli.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
