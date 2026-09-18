@@ -20,19 +20,15 @@ extends PanelContainer
 ##     artar (bkz. Debt.get_restructure_fee). Para gerektirmez - anlamı
 ##     zaten "şimdi ödeyemiyorum".
 ##
-## Panelin kendi zemini artık deri ciltli bir defter dokusu
-## (`StyleBoxTexture`, 9-slice) - CLAUDE.md'nin borç senetlerini "soğuk
-## balmumu mühürlerle bezenmiş" tarif ettiği yer tam olarak burası, o
-## yüzden ilk elle çizilmiş sanat varlığı deri/mühür ikilisiyle buraya
-## geldi. Mühür ikonu yalnızca süs değil - defterin "resmî" olduğunu
-## anlatıyor. Kervanın kendi envanteri/kilim motifleri buraya karışmıyor;
-## bu ekran imparatorluk tarafının senedi, göçebe pazarlığının değil.
+## Panel kendi zemini çizmiyor artık - `guild.tscn`'in tüm ekranı kaplayan
+## masa/defter arka planı (`BackgroundArt`) zaten "resmî senet" hissini
+## veriyor, bir de panelin kendi dokusu üstüne binerse iki ayrı deri yüzeyi
+## çakışırdı. Mühür ikonu tek başına kalan görsel imza - CLAUDE.md'nin borç
+## senetlerini "soğuk balmumu mühürlerle bezenmiş" tarif ettiği yer.
 
 signal ledger_changed
 
-const LEATHER_TEXTURE: Texture2D = preload("res://data/assets/ui/ledger_mockup/leather_cover.png")
 const SEAL_TEXTURE: Texture2D = preload("res://data/assets/ui/ledger_mockup/wax_seal_crown.png")
-const LEATHER_BORDER_MARGIN: float = 60.0
 const SEAL_SIZE: float = 56.0
 
 const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
@@ -72,18 +68,6 @@ func setup(session: GameSession) -> void:
 func _ensure_built() -> void:
 	if _title_label != null:
 		return
-
-	var leather := StyleBoxTexture.new()
-	leather.texture = LEATHER_TEXTURE
-	leather.texture_margin_left = LEATHER_BORDER_MARGIN
-	leather.texture_margin_right = LEATHER_BORDER_MARGIN
-	leather.texture_margin_top = LEATHER_BORDER_MARGIN
-	leather.texture_margin_bottom = LEATHER_BORDER_MARGIN
-	leather.content_margin_left = LEATHER_BORDER_MARGIN + 10.0
-	leather.content_margin_right = LEATHER_BORDER_MARGIN + 10.0
-	leather.content_margin_top = LEATHER_BORDER_MARGIN + 10.0
-	leather.content_margin_bottom = LEATHER_BORDER_MARGIN + 10.0
-	add_theme_stylebox_override("panel", leather)
 
 	_body = VBoxContainer.new()
 	_body.add_theme_constant_override("separation", 6)

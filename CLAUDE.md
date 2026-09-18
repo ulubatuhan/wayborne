@@ -3619,29 +3619,36 @@ değil - `HUNGRY_PACE_MULTIPLIER` gibi geri besleme etkileri de hiç
 forecast edilmiyor, aynı kabul.
 
 **Faz 16-C: oyunun ilk elle çizilmiş (AI-üretimli) sanat varlığı.** Art
-Rules'un uzun süredir yazdığı "henüz asset dosyası yok" cümlesi artık
-tam doğru değil - `data/assets/ui/ledger_mockup/` bir deri cilt dokusu,
-bir balmumu mühür (taç motifi) ve bir parşömen sayfası taşıyor, Gemini ile
-üretilip Python/PIL ile (renk mesafesine göre lineer alfa rampası)
-şeffaflaştırılmış. Kullanılan tek ekran **`DebtPanel`** (Lonca > Borçlar
-sekmesi): `VBoxContainer`'dan `PanelContainer`'a çevrildi, zemini deri
-dokusu (`StyleBoxTexture`, 9-slice - kenar süslemesi hangi boyutta
-gösterilirse gösterilsin bozulmuyor), başlığın yanında mühür ikonu var.
-Seçim kasıtlı dar: CLAUDE.md'nin kendi hikâye metni borç senetlerini zaten
-"soğuk balmumu mühürlerle bezenmiş" diye tarif ediyor - yani bu, Empire/
-Faith anlatı yönüne hiç taahhüt etmeden yapılabilecek tek köşeydi. Kalan
-üç varlık **bilerek kullanılmadı**: parşömen sayfası kare ve düzensiz
-(yırtık) kenarlı - 9-slice kenarları düzleştirir, sabit boyut da geniş/dar
-panellerde kırpılır/boşluk bırakır, gerçek kare bir alan (örn. tam ekranlı
-bir gelecekteki "Kervan Defteri") açılana kadar bekliyor; beş ticaret
-eşyası ikonu borç defterine değil pazar/göçebe takas ekranına ait; kilim
-deseni ise **hiç kullanılmadı ve kullanılmamalı** - kenar motifleri
-yakından bakınca gerçekten "S" harfini tekrarlıyor, üretim hatası, ve
-Localization Rules'un "hiçbir görselde yazı olmaz" kuralını doğrudan
-ihlal ediyor. Bu ekranın dışındaki hiçbir yer (dünya sahneleri, diğer
-yönetim ekranları) bu dokuya geçmedi - Art Rules'un "iki ayrı prodüksiyon"
-uyarısı burada da geçerli, tek bir ekranı reskinlemek bilinçli, sınırlı
-bir adım, tüm arayüzün sessizce yeni bir görsel dile kayması değil.
+Rules'un uzun süredir yazdığı "henüz asset dosyası yok" cümlesi artık tam
+doğru değil - `data/assets/ui/ledger_mockup/` bir masa sahnesi taşıyor,
+Gemini ile üretilmiş. **İlk deneme (deri kaplı bir `StyleBoxTexture`,
+panelin kendi zemini) kullanıcının kendi referans görseliyle hiç
+örtüşmüyordu** - küçük, düz bir doku parçasıydı, referansın zengin "masa
+başında duruyorsun" sahnesi değildi. Doğru çözüm panelin kendi zemini
+değil, **`guild.tscn`'in tüm ekranını kaplayan tek bir arka plan
+illüstrasyonu** çıktı (`guild_desk_bg.jpg` - açık bir defter, mum, mürekkep
+hokkası, balmumu mühür, altın sikkeler): `BackgroundArt` (`TextureRect`,
+`STRETCH_KEEP_ASPECT_COVERED` + `EXPAND_IGNORE_SIZE`, oran ne gelirse
+gelsin kırpılarak dolduruyor) `MarginContainer`'ın **altında**, aynı sırada
+bir `BackgroundScrim` (%35 siyah) ile - metin defterin boş sayfalarının
+üstünde okunur kalsın diye. `DebtPanel` artık kendi zeminini çizmiyor -
+panelin deri dokusu masa arka planıyla çakışırdı, tek görsel imza olarak
+yalnızca başlığın yanındaki mühür ikonu kaldı.
+**İkinci bir tuzak, `MapPanel`'in aynısı (bkz. Art Rules):**
+`TabContainer`'ın varsayılan `panel` stylebox'ı - koyu gri, yarı saydam bir
+kutu - sekme içeriğinin arkasına otomatik çiziliyor ve tam defterin boş
+sayfalarının üstüne oturuyor, sahneyi görünmez kılıyordu. Aynı çözüm:
+`TabContainer` artık açık bir `StyleBoxEmpty` (`theme_override_styles/
+panel`) taşıyor. Bu ekranın dışındaki hiçbir yer bu sahneye geçmedi -
+kullanıcı "genel gri arka plan sorununu da çözelim" dediğinde bilerek
+**ekran ekran arka plan görseli** yolu seçildi (kod-tabanlı tek bir Theme
+kaynağı değil), yani her önemli yönetim ekranı (Pazar, Taverna, Kervan
+Avlusu) kendi Gemini sahnesini isteyecek - aynı üretim tarifi (stil satırı
+sabit, masadaki nesneler ekrana göre değişir, merkezde metin için sakin/
+boş bir bölge) tekrar kullanılabilir ama her biri kendi turu. Kilim deseni
+hâlâ **kullanılmadı** - kenar motifleri "S" harfini tekrarlıyor, üretim
+hatası, Localization Rules'un "hiçbir görselde yazı olmaz" kuralını ihlal
+ediyor.
 
 ## Quick Start
 
