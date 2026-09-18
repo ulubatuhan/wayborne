@@ -3650,6 +3650,17 @@ hâlâ **kullanılmadı** - kenar motifleri "S" harfini tekrarlıyor, üretim
 hatası, Localization Rules'un "hiçbir görselde yazı olmaz" kuralını ihlal
 ediyor.
 
+**Aynı tarif üç yönetim ekranına daha uygulandı: Pazar Meydanı, Taverna,
+Kervan Avlusu.** `market.tscn`/`tavern.tscn`/`caravan_yard.tscn` Lonca ile
+aynı iskeleti (`MarginContainer` > `VBoxContainer` > başlık/liste/geri
+düğmesi) paylaştığı için aynı `BackgroundArt`/`BackgroundScrim` ikilisi
+değişmeden tekrar kullanıldı - stil satırı sabit tutuldu (aynı ink-wash
+palet), yalnızca masadaki nesneler ekrana göre değişti (terazi/çuval/
+kavanoz Pazar'da, maşrapa/harita/hançer Taverna'da, nal/urgan/tekerlek
+Kervan Avlusu'nda). Hiçbiri `TabContainer` kullanmadığı için Lonca'daki
+gri panel tuzağı burada hiç oluşmadı - üçü de ekstra bir `StyleBoxEmpty`
+gerektirmedi.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
