@@ -850,6 +850,30 @@ way to textures.
   lesson generalises: when one screen gets the treatment, the screens
   that did not are now *wrong*, not merely older — a shared visual
   language is only shared if every screen speaks it.
+- **A correct gradient can still read as an empty gray frame.**
+  `CityView`'s field gradient technically covered every pixel outside the
+  wall, but the countryside layer only ever put something *on* it near
+  the horizon (trees, behind the town) — the whole strip in front of and
+  beside the town stayed one flat, uninterrupted colour. On a tall
+  (phone-ratio) window that strip is most of the screen, and it was
+  reported back in exactly the words a real layout bug gets: "gray
+  background frame." It wasn't a sizing bug (`_adopt_parent_size` already
+  covers that, see above) — it was the same "flat marks are ground,
+  standing props stand on it" gap `TravelForeground`'s apron closed for
+  the road, never closed here. `CityView._draw_foreground` reuses that
+  exact vocabulary (`ArtDraw.shrub`/`rock`/`ellipse`/`contact_shadow`,
+  same "referenced off the ground colour, always lighter" rule) scattered
+  across the whole surrounding countryside — not just a bottom strip,
+  because an isometric top-down view has no single "front"; excluded is
+  only the town's own outer-wall bounding rectangle, so nothing grows
+  through a wall. A naive random scatter first clumped into a "mushroom
+  farm" (three shrubs on the same spot read as one blob, the same
+  stacking mistake `CAMPFIRE_SEATS` already caught elsewhere) — fixed
+  with the same fix, a minimum gap checked against every already-placed
+  prop before a candidate is accepted. Trees stay exactly where they were
+  (only behind the town, only near the horizon): "nothing tall below/near
+  the camera" is still the rule, this only fills in what was never
+  allowed to be tall.
 - **One wagon is drawn by one ox, and that reverses an earlier decision.**
   For a while it was a pair: a single animal reads as a horse's harness,
   not a yoke, and the far ox was pushed back by three marks at once -

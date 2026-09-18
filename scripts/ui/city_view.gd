@@ -91,6 +91,25 @@ const RIDGES: Array = [
 const COUNTRYSIDE_TREES: int = 26
 const COUNTRYSIDE_SEED: int = 7731
 
+## Sur ile ekranın alt/yan kenarları arasında kalan kır: eskiden burası
+## `_draw_surroundings`'in düz alan gradyanından ibaretti - özellikle
+## kasabanın **önündeki** (aşağısındaki) şerit ekranın en büyük boş
+## bandıydı, bir oyuncu ekran görüntüsünde bunu gri/boş bir çerçeve
+## sandı. `TravelForeground`'un önlüğüyle aynı kural: en yakın şerit en
+## koyu, üstündeki her şey (çalı, taş, çıplak toprak) ondan açık - ama
+## burada tek bir şerit değil, kasabanın **etrafındaki** bütün kır, çünkü
+## izometrik bakışta "kameraya yakın" tek yönde değil aşağıda VE yanlarda.
+## Ağaçlar burada yok - onlar hâlâ yalnızca ufkun arkasında, "aşağıda
+## yüksek bir şey olmaz" kuralı burada da geçerli.
+const FOREGROUND_PROPS: int = 42
+const FOREGROUND_SEED: int = 5179
+const FOREGROUND_MAX_HEIGHT_RATIO: float = 0.030
+const FOREGROUND_EXCLUSION_MARGIN_RATIO: float = 0.02
+## İki nesne arasındaki en az boşluk - `TravelForeground.PROP_MIN_GAP_RATIO`
+## ile aynı gerekçe: yoksa rastgele serpiştirme aynı noktaya iki üç çalı
+## koyup bir "mantar tarlası" gibi yığın oluşturuyor.
+const FOREGROUND_MIN_GAP_RATIO: float = 2.4
+
 ## Kasabanın kendi gölgesi. Kütle kadar geniş, ışığın geldiği yönün
 ## tersine kayık: altında hiçbir şey yokken kasaba havada duruyordu.
 const SLAB_SHADOW_OFFSET: Vector2 = Vector2(18.0, 14.0)
@@ -314,6 +333,7 @@ func _draw_surroundings(area: Rect2) -> void:
 		Color(field.near).darkened(0.10)
 	)
 	_draw_countryside(area, horizon, haze)
+	_draw_foreground(area, horizon, haze)
 
 ## Sur dışındaki ağaçlar. Yalnızca ufkun hemen altındaki dar şeritte,
 ## yani kasabanın arkasında: önüne konan bir ağaç, yolun "aşağıda yüksek
@@ -340,6 +360,81 @@ func _draw_countryside(area: Rect2, horizon: float, haze: Color) -> void:
 			ArtDraw.conifer(self, base, height, trunk, leaf)
 		else:
 			ArtDraw.tree(self, base, height, trunk, leaf)
+
+## Sur dışının etrafı: kasabanın dış duvar dikdörtgeni hariç, ufkun
+## altındaki bütün alana serpiştirilmiş çalı/taş/çıplak toprak. `soil`
+## ve `flora`/`stone` referans noktası zeminin kendisi - `TravelForeground`
+## ile aynı sebep: koyu zeminde koyu bir çalı görünmez, o yüzden hepsi
+## alan rengin açığı.
+func _draw_foreground(area: Rect2, horizon: float, haze: Color) -> void:
+	var field := ArtPalette.terrain(ArtPalette.BIOME_STEPPE)
+	var ground := ArtPalette.fade_to_haze(Color(field.near), haze, 0.02).darkened(0.10)
+	var flora := ground.lerp(Color(field.flora), 0.60).lightened(0.14)
+	var stone := ground.lerp(Color(field.accent), 0.50).lightened(0.18)
+	var soil := ground.lightened(0.10)
+
+	var bounds := _town_bounds().grow(area.size.x * FOREGROUND_EXCLUSION_MARGIN_RATIO)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|onculu" % _city_id) if not _city_id.is_empty() else FOREGROUND_SEED
+	var ceiling := area.size.y * FOREGROUND_MAX_HEIGHT_RATIO
+	var min_gap := ceiling * FOREGROUND_MIN_GAP_RATIO
+
+	var placed := 0
+	var tries := 0
+	var attempt_cap := FOREGROUND_PROPS * 8
+	var placed_at: Array[Vector2] = []
+	while placed < FOREGROUND_PROPS and tries < attempt_cap:
+		tries += 1
+		var at := Vector2(
+			rng.randf() * area.size.x, horizon + rng.randf() * (area.size.y - horizon)
+		)
+		if bounds.has_point(at):
+			continue
+		var too_close := false
+		for other in placed_at:
+			if at.distance_to(other) < min_gap:
+				too_close = true
+				break
+		if too_close:
+			continue
+		placed_at.append(at)
+		placed += 1
+		var roll := rng.randf()
+		if roll < 0.22:
+			# Çıplak toprak lekesi: yassı, yere boyanmış - hacim değil.
+			ArtDraw.ellipse(
+				self, at, Vector2(ceiling * rng.randf_range(1.4, 2.6), ceiling * 0.40), soil
+			)
+		elif roll < 0.66:
+			var w := ceiling * rng.randf_range(0.9, 1.7)
+			var h := ceiling * rng.randf_range(0.7, 1.3)
+			ArtDraw.contact_shadow(self, at, w * 1.1, 0.14)
+			ArtDraw.shrub(self, at, w, h, flora, placed * 97 + tries)
+		else:
+			var w := ceiling * rng.randf_range(0.7, 1.3)
+			var h := ceiling * rng.randf_range(0.5, 0.9)
+			ArtDraw.contact_shadow(self, at, w * 1.2, 0.16)
+			ArtDraw.rock(self, at, w, h, stone, placed * 53 + tries)
+
+## Surun dış hattının ekran dikdörtgeni - `_draw_slab_shadow`'un kullandığı
+## dört köşenin bounding box'ı. Kırın kasaba çizilmeden önce çizilmesi
+## gerektiği için (bkz. `_draw_surroundings`'in katman sırası) tam
+## izometrik eşkenar dörtgen yerine onu saran dikdörtgeni dışlıyoruz -
+## fazladan boş kalan dört köşe kırın parçası olarak görünür, kasabanın
+## üstüne bir çalı büyümesi ise hiç yaşanmaz.
+func _town_bounds() -> Rect2:
+	var corners := PackedVector2Array([
+		_tile(-1.0, -1.0), _tile(float(GRID) + 1.0, -1.0),
+		_tile(float(GRID) + 1.0, float(GRID) + 1.0), _tile(-1.0, float(GRID) + 1.0),
+	])
+	var min_pt := corners[0]
+	var max_pt := corners[0]
+	for corner in corners:
+		min_pt.x = minf(min_pt.x, corner.x)
+		min_pt.y = minf(min_pt.y, corner.y)
+		max_pt.x = maxf(max_pt.x, corner.x)
+		max_pt.y = maxf(max_pt.y, corner.y)
+	return Rect2(min_pt, max_pt - min_pt)
 
 ## Kasabanın kendi temas gölgesi - ada gibi duran bir kütlenin altında
 ## hiçbir şey yoksa o kütle havada durur (bkz. Art Rules'un aynı
