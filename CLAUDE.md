@@ -596,6 +596,22 @@ the menu once the player does something.
   back from browsing the stalls. Same pattern as `recruit_venue` and
   `character_target_index`: data one screen hands the next, not state
   either screen owns.
+- **A full-screen `Control` that never sets its own `mouse_filter` still
+  stops every click underneath it.** Reported as "can't skip the title
+  screen by touching my phone" - measured, it wasn't touch-specific: a
+  real mouse click didn't work either, only keyboard did. `MainMenu`'s
+  root `Control` covers the whole viewport and never overrode its default
+  `mouse_filter` (`STOP`), so it absorbed every pointer event before
+  `_unhandled_input` ever saw it - the buttons, scrim and prompt label were
+  already correctly set to `IGNORE` (see the note above), but the outermost
+  node wrapping all of them wasn't. Keyboard input never goes through a
+  Control's mouse filter at all, which is exactly why it kept working and
+  hid the bug. Fixed in `main_menu.tscn` (`mouse_filter = 2`), not by
+  chasing the input *type* - adding `InputEventScreenTouch` alongside
+  `InputEventMouseButton` in `_unhandled_input`'s qualifying list is a
+  reasonable belt-and-suspenders (touch-to-mouse emulation is a project
+  setting, not a guarantee), but it doesn't fix anything on its own if the
+  event never reaches that function to begin with.
 
 ### Art Rules
 
