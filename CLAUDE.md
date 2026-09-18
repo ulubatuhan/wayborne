@@ -841,6 +841,32 @@ way to textures.
   no longer grow taller than it is wide regardless of the viewport's own
   aspect ratio. `city_map.gd`'s `_map_panel` path grew one segment
   (`MainRow/MapFrame/MapPanel`) to match.
+- **The brief moved below the map, and that surfaced a real overflow -
+  asked for explicitly.** `MainRow` (the `HBoxContainer` that put the map
+  and `CityBriefPanel` side by side) is gone; `MapFrame` and `BriefScroll`
+  are now direct, stacked children of the screen's own `VBoxContainer`,
+  and `city_map.gd`'s two node paths grew one segment shorter to match.
+  Moving them didn't just rearrange - it exposed a bug the old layout had
+  been hiding: `TitleLabel`/`InfoLabel` never had `autowrap_mode` set, so
+  their *unwrapped* text width was their minimum size, and on a narrow
+  viewport that dragged the whole screen's minimum width past the
+  viewport itself - with the root `Control`'s `grow_horizontal/vertical`
+  both `GROW_BOTH`, the overflow split evenly off *both* edges, clipping
+  the first and last few characters of every line at once (map included).
+  The side-by-side layout never showed this because `BriefScroll`'s own
+  `size_flags_horizontal = 3` (expand) absorbed the slack instead of the
+  root ever needing to grow. Both labels now carry `autowrap_mode = 2`.
+  `MapFrame`'s own `custom_minimum_size` also came down from 440 to 320 -
+  440 was tuned for the old wide layout and became the *next* thing
+  forcing the root wider than a narrow phone's viewport once the labels
+  stopped being the tallest culprit; `_town_scale()` (see the bullet
+  above) already exists precisely so the town keeps degrading gracefully
+  at this smaller floor, so nothing else needed to change to absorb it.
+  One more knock-on: the map's own hover hint (`UI_CITY_HOVER_HINT`) wraps
+  to three lines at 320px where it used to fit one, and `Panel` doesn't
+  clip its children, so the extra lines spilled past the frame onto the
+  welcome heading below - `city_map.gd`'s hint label reserves 70px now
+  instead of 30.
 - **The brief now opens with where you are, not just what to do.**
   `CityBriefPanel._welcome_heading()` prints the city's own name (a
   proper noun, same exemption as the culture name pools - not run through
