@@ -3618,6 +3618,49 @@ tahmini aşabilir, ama bu weather'ın kendisinin de paylaşmadığı bir risk
 değil - `HUNGRY_PACE_MULTIPLIER` gibi geri besleme etkileri de hiç
 forecast edilmiyor, aynı kabul.
 
+**Faz 16-C: oyunun ilk elle çizilmiş (AI-üretimli) sanat varlığı.** Art
+Rules'un uzun süredir yazdığı "henüz asset dosyası yok" cümlesi artık tam
+doğru değil - `data/assets/ui/ledger_mockup/` bir masa sahnesi taşıyor,
+Gemini ile üretilmiş. **İlk deneme (deri kaplı bir `StyleBoxTexture`,
+panelin kendi zemini) kullanıcının kendi referans görseliyle hiç
+örtüşmüyordu** - küçük, düz bir doku parçasıydı, referansın zengin "masa
+başında duruyorsun" sahnesi değildi. Doğru çözüm panelin kendi zemini
+değil, **`guild.tscn`'in tüm ekranını kaplayan tek bir arka plan
+illüstrasyonu** çıktı (`guild_desk_bg.jpg` - açık bir defter, mum, mürekkep
+hokkası, balmumu mühür, altın sikkeler): `BackgroundArt` (`TextureRect`,
+`STRETCH_KEEP_ASPECT_COVERED` + `EXPAND_IGNORE_SIZE`, oran ne gelirse
+gelsin kırpılarak dolduruyor) `MarginContainer`'ın **altında**, aynı sırada
+bir `BackgroundScrim` (%35 siyah) ile - metin defterin boş sayfalarının
+üstünde okunur kalsın diye. `DebtPanel` artık kendi zeminini çizmiyor -
+panelin deri dokusu masa arka planıyla çakışırdı, tek görsel imza olarak
+yalnızca başlığın yanındaki mühür ikonu kaldı.
+**İkinci bir tuzak, `MapPanel`'in aynısı (bkz. Art Rules):**
+`TabContainer`'ın varsayılan `panel` stylebox'ı - koyu gri, yarı saydam bir
+kutu - sekme içeriğinin arkasına otomatik çiziliyor ve tam defterin boş
+sayfalarının üstüne oturuyor, sahneyi görünmez kılıyordu. Aynı çözüm:
+`TabContainer` artık açık bir `StyleBoxEmpty` (`theme_override_styles/
+panel`) taşıyor. Bu ekranın dışındaki hiçbir yer bu sahneye geçmedi -
+kullanıcı "genel gri arka plan sorununu da çözelim" dediğinde bilerek
+**ekran ekran arka plan görseli** yolu seçildi (kod-tabanlı tek bir Theme
+kaynağı değil), yani her önemli yönetim ekranı (Pazar, Taverna, Kervan
+Avlusu) kendi Gemini sahnesini isteyecek - aynı üretim tarifi (stil satırı
+sabit, masadaki nesneler ekrana göre değişir, merkezde metin için sakin/
+boş bir bölge) tekrar kullanılabilir ama her biri kendi turu. Kilim deseni
+hâlâ **kullanılmadı** - kenar motifleri "S" harfini tekrarlıyor, üretim
+hatası, Localization Rules'un "hiçbir görselde yazı olmaz" kuralını ihlal
+ediyor.
+
+**Aynı tarif üç yönetim ekranına daha uygulandı: Pazar Meydanı, Taverna,
+Kervan Avlusu.** `market.tscn`/`tavern.tscn`/`caravan_yard.tscn` Lonca ile
+aynı iskeleti (`MarginContainer` > `VBoxContainer` > başlık/liste/geri
+düğmesi) paylaştığı için aynı `BackgroundArt`/`BackgroundScrim` ikilisi
+değişmeden tekrar kullanıldı - stil satırı sabit tutuldu (aynı ink-wash
+palet), yalnızca masadaki nesneler ekrana göre değişti (terazi/çuval/
+kavanoz Pazar'da, maşrapa/harita/hançer Taverna'da, nal/urgan/tekerlek
+Kervan Avlusu'nda). Hiçbiri `TabContainer` kullanmadığı için Lonca'daki
+gri panel tuzağı burada hiç oluşmadı - üçü de ekstra bir `StyleBoxEmpty`
+gerektirmedi.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
