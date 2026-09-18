@@ -28,7 +28,14 @@ extends PanelContainer
 
 signal ledger_changed
 
-const SEAL_TEXTURE: Texture2D = preload("res://data/assets/ui/ledger_mockup/wax_seal_crown.png")
+## `load()`, not `preload()` - a brand-new binary asset has no `.import`
+## metadata on a fresh checkout yet (`.import` files are gitignored, CI
+## regenerates them), and `preload()` resolves at parse time, before that
+## metadata exists. That raced CI's single `--headless --import` pass:
+## "Parse Error: ... has no resource loaders" on the very first import of
+## this exact file. `load()` defers to `_ensure_built()`, which runs after
+## import has settled.
+const SEAL_TEXTURE_PATH: String = "res://data/assets/ui/ledger_mockup/wax_seal_crown.png"
 const SEAL_SIZE: float = 56.0
 
 const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
@@ -87,7 +94,7 @@ func _ensure_built() -> void:
 	# aynı balmumu mühür imparatorluk kontratlarının hikâye metninde zaten
 	# tarif edildiği yer.
 	var seal := TextureRect.new()
-	seal.texture = SEAL_TEXTURE
+	seal.texture = load(SEAL_TEXTURE_PATH)
 	seal.custom_minimum_size = Vector2(SEAL_SIZE, SEAL_SIZE)
 	seal.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	header.add_child(seal)
