@@ -138,7 +138,16 @@ func _refresh_title() -> void:
 ## uydurmak anlamına geliyordu.
 func _build_spots() -> void:
 	_city_view = CityView.new()
-	_city_view.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Çapayı FULL_RECT'e sabitleme: `CityView._adopt_parent_size()` boyutu
+	# ve konumu doğrudan `size`/`position` ile yazıyor (`FRAME_INSET`
+	# kadar içeri çekiyor) - anchor'lar hâlâ (0,0,1,1) ise Godot her
+	# yeniden düzenlemede dikdörtgeni çapadan yeniden hesaplıyor ve bu iki
+	# yazım birbiriyle çelişiyor ("If you want to set size, change the
+	# anchors..." uyarısı). Sonuç: CityView'in kendi çiziminin sağ kenarı
+	# çerçevenin gerçek sınırının dışına, `MapPanel`/`BriefScroll` arasındaki
+	# boşluğa taşıyordu - iki kez "düzeltildi" denen gri şerit aslında bu
+	# taşmaydı. Varsayılan (0,0,0,0) çapa serbest konumlandırma anlamına
+	# geliyor, tam olarak `_adopt_parent_size()`'ın beklediği şey.
 	_map_panel.add_child(_city_view)
 	_city_view.venue_pressed.connect(_on_spot_pressed)
 	_city_view.setup(_session)

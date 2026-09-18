@@ -791,7 +791,17 @@ way to textures.
   that still carried the very bug being reported, because verification
   glanced at the picture's own edge and never sampled the screen's outer
   edge - "fixed" was said twice before it was checked where the report
-  actually pointed.
+  actually pointed. A second, smaller issue turned up in the same pass:
+  `city_map.gd` built `CityView` with `PRESET_FULL_RECT` anchors *and*
+  `_adopt_parent_size()` writes `size`/`position` directly - the exact
+  combination this file's own "anchor-preset trap" already warns against,
+  confirmed by Godot's own runtime warning ("If you want to set size,
+  change the anchors..."). It never produced a visible symptom here (the
+  direct write still won at draw time), so it was not the source of the
+  gray strip, but it is exactly the kind of latent fragility that has
+  produced a visible bug elsewhere in this list - fixed by leaving
+  `CityView` unanchored (the default), which is what `_adopt_parent_size()`
+  already assumes.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really
