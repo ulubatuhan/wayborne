@@ -775,6 +775,23 @@ way to textures.
   already does for free. `bg_color` stays fully transparent, keeping the
   same "a transient sizing miss shows nothing, not a filled box" guarantee
   the `StyleBoxEmpty` it replaced was there for.
+- **Fixing the strip beside the picture is not the same claim as fixing
+  every gray strip on the screen.** Two rounds of `CityView` sizing fixes
+  (the two bullets above) both closed real bugs, and both times the report
+  came back "still there, same spot" - because neither one had ever
+  touched the screen's own outer frame. `city_map.tscn`'s root
+  `MarginContainer` reserves 24px on every side for the whole screen, and
+  nothing painted that margin: it showed Godot's raw, unthemed viewport
+  `clear_color` (`Color(0.3,0.3,0.3)`, confirmed the same way as
+  before - sampling the reporter's own screenshot found `(77,77,77)` along
+  the entire left edge, not just beside `MapPanel`). A `BackgroundFill`
+  `ColorRect` (`ArtPalette.INK`, `mouse_filter = 2`) as the scene's first
+  child, behind `MarginContainer`, closes it. The lesson isn't the fix,
+  it's the miss: two fixes had each been verified against a screenshot
+  that still carried the very bug being reported, because verification
+  glanced at the picture's own edge and never sampled the screen's outer
+  edge - "fixed" was said twice before it was checked where the report
+  actually pointed.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really
