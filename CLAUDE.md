@@ -745,6 +745,24 @@ way to textures.
   trusting the anchor, and `MapPanel` also carries an explicit
   `StyleBoxEmpty` now, so even a transient sizing miss shows nothing
   instead of the default theme's grey panel.
+- **A one-shot `_adopt_parent_size()` call is still a snapshot - it can go
+  stale a second time.** Fixed once, `CityView` still left two thin
+  vertical bars flanking the picture, on the *screen itself*, not the
+  theme's grey panel this time but the raw viewport `clear_color`
+  (Godot's own default, `Color(0.3,0.3,0.3)` → `(77,77,77)` - confirmed
+  by sampling the reported screenshot's own pixels at that exact value).
+  `_build_spots()` grabs `MapPanel`'s size once, synchronously, but
+  `_build_brief()` - which fills `BriefScroll` with the chapter/needs
+  text - runs *after* it in the same `_ready()`; that content can change
+  how much width `MainRow`'s `HBoxContainer` leaves `MapPanel`, and on
+  the web export the browser's own adaptive canvas resize
+  (`html/canvas_resize_policy=2`) can resize the whole window *after* the
+  scene has already settled once, same trigger, same symptom. A single
+  `_adopt_parent_size()` call at `_ready()`/`setup()` catches neither.
+  `CityView` now also subscribes to `get_parent_control().resized`, so it
+  re-syncs to `MapPanel`'s size every time it changes for the rest of the
+  screen's life, not just once - closing the class of bug at its root
+  (a stale cached size) instead of chasing each new trigger for it.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really

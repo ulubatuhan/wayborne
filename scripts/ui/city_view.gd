@@ -140,6 +140,20 @@ func _ready() -> void:
 	resized.connect(queue_redraw)
 	_build_tooltip()
 	_adopt_parent_size()
+	# Tek seferlik `_adopt_parent_size()` çağrısı, `MapPanel` bu ilk
+	# eşitlemeden *sonra* tekrar boyut değiştirirse yine eskimiş kalır -
+	# `_build_brief()` bu düğümden sonra çalışıp `BriefScroll`'u gerçek
+	# içerikle dolduruyor, bu da `MainRow`'un genişlik dağılımını
+	# değiştirebilir; web export'ta `canvas_resize_policy` (Adaptive) da
+	# sahne kurulduktan **sonra** tarayıcının kendi ölçümüyle pencereyi
+	# yeniden boyutlandırabiliyor. İkisinde de sonuç aynı: `CityView`
+	# `MapPanel`'den dar kalıyor ve aradaki şerit, hiçbir Control'ün
+	# boyamadığı ham viewport `clear_color`'ını (varsayılan gri) gösteriyor.
+	# Ebeveynin kendi `resized` sinyaline abone olmak - tek seferlik bir
+	# anlık görüntü yerine - bunu kaynağı ne olursa olsun kapatıyor.
+	var host := get_parent_control()
+	if host != null and not host.resized.is_connected(_adopt_parent_size):
+		host.resized.connect(_adopt_parent_size)
 
 func setup(session: GameSession) -> void:
 	# Çapaya güvenmiyoruz - `MapPanel` bir `Container` değil (düz bir
