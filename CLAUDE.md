@@ -802,6 +802,55 @@ way to textures.
   produced a visible bug elsewhere in this list - fixed by leaving
   `CityView` unanchored (the default), which is what `_adopt_parent_size()`
   already assumes.
+- **The strip was never the margin fix's job to close, because it lived
+  one layer further in than either previous fix ever looked.** Both the
+  margin fix above and a follow-up "make the picture square" request
+  still left a thin, symmetric gray-blue band running the full height of
+  the picture, just inside the golden border, on both sides at once. The
+  colour was a giveaway once actually sampled instead of eyeballed: not
+  `(77,77,77)` (the raw `clear_color`, already ruled out) and not a plain
+  darkening - it was the WALL/GROUND palette's own cool grey. The isometric
+  town's real footprint, wall margin included, is `(GRID + 2) * TILE_W` =
+  638px; `CityView` never clipped or scaled its own drawing, so on any
+  frame narrower than that (the old 640px-wide rectangle happened to just
+  clear it - not by design - and the square request's ~424px definitely
+  didn't) the grid/walls/buildings kept drawing at full, unclipped size
+  and the overflow painted straight over the golden border sitting right
+  outside `CityView`'s own rect. Two earlier "fixes" had each been
+  screenshotted and declared done without ever sampling *this* specific
+  band, because it reads at a glance as terrain, not a leak.
+  `_town_scale()` (`city_view.gd`) is `min(1, size.x / footprint)`;
+  `_draw()` wraps only the town-specific calls (slab shadow, ground,
+  walls, buildings - never the sky/ridge/countryside backdrop, which
+  already fills `size` correctly) in `draw_set_transform()` at that
+  scale, centred. Scaling only the *drawing* would have silently broken
+  clicking - `_building_at()`'s stored `bounds` are computed in the same
+  unscaled space `_tile()` always used, so `_building_at()` now runs the
+  mouse position through `_to_town_space()` (the exact inverse transform)
+  before testing it, or a visually-shrunk building would need a click well
+  outside its own picture to register. `clip_contents = true` on
+  `CityView` is the belt-and-suspenders on top: whatever the exact reason
+  a future shape doesn't fit, it now cannot repaint the border beside it
+  regardless.
+- **The town picture is square now, asked for explicitly** ("bu kadar
+  uzun bir dikdörtgen olmasın" - a tall/narrow viewport had been
+  stretching `MapPanel`'s height with nothing capping it). `MapFrame`
+  (`AspectRatioContainer`, `ratio = 1.0`) sits between `MainRow` and
+  `MapPanel` in `city_map.tscn`; it takes whatever rect `MainRow` gives
+  it and holds `MapPanel` to a real square inside it, so the picture can
+  no longer grow taller than it is wide regardless of the viewport's own
+  aspect ratio. `city_map.gd`'s `_map_panel` path grew one segment
+  (`MainRow/MapFrame/MapPanel`) to match.
+- **The brief now opens with where you are, not just what to do.**
+  `CityBriefPanel._welcome_heading()` prints the city's own name (a
+  proper noun, same exemption as the culture name pools - not run through
+  `tr()`) as the panel's first line, with a generic, suffix-free
+  `UI_BRIEF_WELCOME_LINE` ("Hoş geldiniz.") under it. Turkish's dative
+  case ("İpekevi'ne", "Yeşilova'ya") needs a different buffer letter per
+  city name depending on vowel harmony, which a `%s`-formatted key cannot
+  get right for names not yet written - splitting the city name onto its
+  own line sidesteps needing that logic at all, for this or any later
+  city.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really

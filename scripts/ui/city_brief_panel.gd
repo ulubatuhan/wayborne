@@ -58,6 +58,10 @@ func _ensure_built() -> void:
 		return
 	add_theme_constant_override("separation", 10)
 
+	add_child(_welcome_heading())
+	add_child(_note(tr("UI_BRIEF_WELCOME_LINE")))
+	add_child(HSeparator.new())
+
 	add_child(_heading(tr("UI_BRIEF_CHAPTER_TITLE")))
 	_chapter_box = VBoxContainer.new()
 	_chapter_box.add_theme_constant_override("separation", 4)
@@ -352,6 +356,20 @@ func _on_screen_requested(scene_path: String) -> void:
 
 func _on_planner_requested(destination_id: String) -> void:
 	planner_requested.emit(destination_id)
+
+## Şehrin adı, kervanın neye ihtiyacı olduğu/nereye gidilebileceğinden
+## önce gelen ilk satır - "burada durduğun yer" sorusuna cevap. Şehir
+## isimleri `culture_catalog.gd`'nin isim havuzları gibi özel ad, tr()
+## taramasının muaf tuttuğu kategori - yalnızca "Hoş geldiniz." satırı
+## çevrilir.
+func _welcome_heading() -> Label:
+	var location := WorldMapData.get_location_by_id(_session.current_location_id)
+	var city_name := tr("UI_CITY_FALLBACK_NAME") if location == null else location.location_name
+	var label := Label.new()
+	label.text = city_name
+	label.add_theme_font_size_override("font_size", 24)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	return label
 
 func _heading(text: String) -> Label:
 	var label := Label.new()

@@ -145,6 +145,12 @@ var _time: float = 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	# `_town_scale()` covers the known way the town's own drawing could
+	# reach past its own rect (the grid+wall footprint wider than the
+	# frame). This is the safety net for any case that isn't - a shape
+	# drawn one pixel too wide should never repaint the golden border
+	# beside it, regardless of the reason.
+	clip_contents = true
 	resized.connect(queue_redraw)
 	_build_tooltip()
 	_adopt_parent_size()
@@ -316,6 +322,34 @@ func _tile_quad(gx: float, gy: float, w: float, d: float) -> PackedVector2Array:
 
 # --- Çizim ---
 
+## Kasabanın ızgarası + sur payı `(GRID + 2) * TILE_W` genişliğinde -
+## `_town_bounds()`'un kendi -1..GRID+1 payıyla aynı hesap. Çerçeve bu
+## kadar geniş değilse (kare istek `CityView`'i eski dikdörtgenden daha
+## dar bıraktı, ya da dar bir ekran `MapPanel`'i kendi minimumunun altına
+## sıkıştırdı) kasabanın ızgarası/duvarları/binaları hiç kırpılmadan
+## çizildiği için `size.x`'i aşan kısım çerçevenin *dışına*, altın
+## kenarlığın üstüne taşıyordu - "gri şerit" diye bildirilen buydu, dağ
+## silüeti değil. `_town_scale()` < 1 olduğunda `_draw()` kasaba
+## çizimini bu oranda küçültüyor; `_building_at()` da aynı oranı tersine
+## uygulayıp fare konumunu aynı uzaya çeviriyor, yoksa görsel olarak
+## küçültülmüş bir bina eski (küçültülmemiş) `bounds`'una göre tıklanamaz
+## hâle gelirdi.
+func _town_scale() -> float:
+	var footprint := float(GRID + 2) * TILE_W
+	if footprint <= 0.0 or size.x <= 0.0:
+		return 1.0
+	return minf(1.0, size.x / footprint)
+
+## Ekrandaki bir noktayı (fare konumu gibi) kasabanın kendi, küçültülmemiş
+## çizim uzayına çevirir - `_town_scale()` merkez etrafında uyguladığı
+## için ters dönüşüm de aynı merkezi kullanmak zorunda.
+func _to_town_space(at: Vector2) -> Vector2:
+	var scale := _town_scale()
+	if scale >= 1.0:
+		return at
+	var center := size * 0.5
+	return center + (at - center) / scale
+
 func _draw() -> void:
 	if _buildings.is_empty():
 		return
@@ -323,11 +357,17 @@ func _draw() -> void:
 	# Sıra yolunkiyle aynı: gökyüzü → sırtlar → zemin → kır → kasabanın
 	# gölgesi → kasaba. Ufkun altı ufkun üstünün önünde.
 	_draw_surroundings(area)
+
+	var scale := _town_scale()
+	var center := size * 0.5
+	draw_set_transform(center * (1.0 - scale), 0.0, Vector2(scale, scale))
 	_draw_slab_shadow()
 	_draw_ground()
 	_draw_walls()
 	for index in _buildings.size():
 		_draw_building(index, index == _hovered)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 	ArtDraw.vignette(self, area, 0.09)
 
 ## Kasabanın durduğu dünya. Buradan önce bu ekranda düz bir gradyan
@@ -875,11 +915,12 @@ func _place_tooltip(at: Vector2) -> void:
 ## için tersten yokluyoruz. Aksi hâlde arkadaki bina öndekinin üstünden
 ## tıklanabiliyor - kutular üst üste biniyor, bu kaçınılmaz.
 func _building_at(at: Vector2) -> int:
+	var town_at := _to_town_space(at)
 	for index in range(_buildings.size() - 1, -1, -1):
 		var building: Dictionary = _buildings[index]
 		if not bool(building.venue):
 			continue
 		var bounds: Rect2 = building.get("bounds", Rect2())
-		if bounds.size.x > 0.0 and bounds.has_point(at):
+		if bounds.size.x > 0.0 and bounds.has_point(town_at):
 			return index
 	return -1

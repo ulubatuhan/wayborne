@@ -65,9 +65,15 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 20
 
-[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer/MainRow"]
-custom_minimum_size = Vector2(640, 440)
+[node name="MapFrame" type="AspectRatioContainer" parent="MarginContainer/VBoxContainer/MainRow"]
+custom_minimum_size = Vector2(440, 440)
 layout_mode = 2
+size_flags_vertical = 3
+ratio = 1.0
+
+[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer/MainRow/MapFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_mappanel")
 

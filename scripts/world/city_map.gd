@@ -9,7 +9,7 @@ extends Control
 ## bildiriyor, sahne değiştirmeyi burası yapıyor - gezinme yığınını iten
 ## taraf her zaman gönderen ekrandır (bkz. Nav).
 
-@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapPanel
+@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapFrame/MapPanel
 @onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
