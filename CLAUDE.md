@@ -763,6 +763,18 @@ way to textures.
   re-syncs to `MapPanel`'s size every time it changes for the rest of the
   screen's life, not just once - closing the class of bug at its root
   (a stale cached size) instead of chasing each new trigger for it.
+- **The town picture is a picture now, not a rectangle pasted onto the
+  screen.** Asked for explicitly: a frame around the map inside the city
+  menu. `CityView` no longer fills `MapPanel` edge to edge - `FRAME_INSET`
+  (8px) pulls it in on all four sides, and `MapPanel`'s own stylebox
+  (`StyleBoxFlat`, transparent fill, a `GOLD_DIM` border, rounded corners,
+  a soft drop shadow) fills that gap. The border is drawn by the *panel*,
+  not a second overlay node added after `CityView`, so it needed no new
+  anchor-trap bookkeeping of its own - only `CityView`'s own inset had to
+  track `_adopt_parent_size()`'s existing resize subscription, which it
+  already does for free. `bg_color` stays fully transparent, keeping the
+  same "a transient sizing miss shows nothing, not a filled box" guarantee
+  the `StyleBoxEmpty` it replaced was there for.
 - **Everything that stands on the ground gets a contact shadow.**
   `ArtDraw.wagon()` and `WalkFigure` had one from the first day, and
   `WalkFigure`'s comment already said why — *without it the figure really

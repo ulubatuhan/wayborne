@@ -192,6 +192,88 @@ bir güzellik.
 
 ---
 
+## 4. Şehir Menüsü Arka Planı (kumandanın masası)
+
+Bu, madde 2'deki "Şehir Sahnesi"nden **farklı** bir görsel: o, oyunun
+kendi izometrik kasaba çizimi için bir konsept referansıydı ve oyunun
+içinde `CityView`'in `_draw()`'u olarak zaten yaşıyor. Bu prompt onun
+yerine geçmiyor - şehir menüsünün (`city_map.tscn`) kendi **masa sahnesi**
+arka planı için, Lonca/Pazar/Taverna/Kervan Avlusu'nun zaten aldığı
+muameleyle aynı aile (bkz. Development Status'un Faz 16-C notu:
+`guild_desk_bg.jpg`/`market_bg.jpg`/`tavern_bg.jpg`/`caravan_yard_bg.jpg`
+- aynı ink-wash deri/ahşap palet, `BackgroundArt`+`BackgroundScrim`
+ikilisiyle ekranın tamamını kaplıyor). Şehir menüsü bu dörtlüden eksik
+kalan beşinci ekran.
+
+```
+[ORTAK BAĞLAM]
+
+SAHNE: Bir kervanbaşının karar masası, kuşbakışına yakın bir açıdan -
+Lonca/Pazar/Taverna/Kervan Avlusu'nun masa sahneleriyle **aynı açı ve
+aynı ışık tarifi**: eski, çizik deri veya koyu ahşap bir masa yüzeyi,
+sıcak bir lamba/mum ışığı havuzu ortada, kenarlara doğru pusa/gölgeye
+soluyor. Tek kare, ekranın tamamını kaplayacak geniş bir kompozisyon
+(dikey de kırpılabilecek kadar bol boşluklu üst ve alt kenar).
+
+KOMPOZİSYON - masa ikiye ayrılıyor, kasıtlı olarak:
+
+1. SOL YARI (masanın yaklaşık %55-60'ı) - BÜYÜK, SAKİN BİR BOŞLUK:
+   Masanın üstüne büyük, dışarı doğru katları olan bir kasaba/bölge
+   haritası yayılmış - **ama haritanın kendi çizimi görece boş ve
+   detaysız kalsın**: kaba bir kıyı/dağ hattı, birkaç soluk mürekkep
+   çizgisi, belki tek bir pusula gülü - kalabalık bir harita değil.
+   Bunun sebebi teknik: oyunun kendisi bu alanın **tam ortasına**,
+   dört köşesi ince altın/pirinç renkli bir çerçeveyle çevrili, kendi
+   canlı kasaba çizimini bindiriyor (bkz. `CityView` + `MapPanel`'in
+   `StyleBoxFlat` çerçevesi, `CLAUDE.md` Art Rules) - haritanın **ortası
+   ne çizilirse çizilsin görünmeyecek**, yalnızca kenarları (birkaç
+   santim taşan bir şerit) kalacak. Haritanın kâğıdı masanın ortasında
+   geniş, dikdörtgene yakın, hafif düzensiz kenarlı (kıvrılmış/yırtık
+   köşeli deri veya kalın parşömen) bir alan olarak dursun - bu alan
+   **oyunun kendi altın çerçevesinden büyük ve onu rahatça içine alacak
+   kadar bol paylı olsun**, tam hizalama garanti edilemediği için pay
+   şart. Haritanın dört köşesini masaya bastıran küçük ağırlıklar -
+   pirinç bir pusula, küçük bir hançer, cilalı bir taş, bir mühür kutusu.
+2. SAĞ YARI VE ÜST/ALT KENARLAR - MASANIN CANLI TARAFI: Buraya kervan
+   idaresine ait nesneler: mühürlü bir zarf/rapor tomarı, bir tüy kalem
+   ve mürekkep hokkası, küçük deri bir defter (kapalı, üstünde yazı
+   YOK), bir kese altın, bir fener ya da mum, belki askıda küçük bir
+   kervan çanı. Bu taraf diğer dört masa sahnesiyle aynı yoğunlukta
+   olsun - oyunun üst bilgi şeridi (kese/erzak/vagon sayısı) ve sağ
+   sütunundaki metin (bölüm/görev/gitme yerleri) bu nesnelerin üstüne
+   bineceği için, hiçbir nesne masanın **dikey orta şeridine çok
+   sokulmasın**.
+
+IŞIK: Diğer dört masa sahnesiyle aynı - tek, sıcak bir kaynaktan (kadraj
+dışı bir lamba/mum), harita kâğıdının ve sağ taraftaki nesnelerin üstünde
+yumuşak bir ışık havuzu, kenarlara doğru koyu, ama hiçbir yer tamamen
+karanlığa gömülmesin (üstüne konacak açık renkli metnin okunabilmesi
+lazım).
+
+KOMPOZİSYON NOTU (en önemlisi): Haritanın kâğıdının kendi çizimi
+**bilerek sade ve boş** - oyunun kendi canlı kasaba resmi tam oraya
+oturacak, o yüzden orada ayrıntılı bir şehir/yol ağı çizmenin bir anlamı
+yok, zaten görünmeyecek. Asıl görsel zenginlik sağ yarıda ve kenarlarda.
+
+HİSSİYAT: Diğer dört masa sahnesiyle aynı üretim - "bu kervanbaşının
+kendi çalışma masası", yorgun ama düzenli, resmiyetten çok kullanılmış
+bir alet edevat hissi.
+```
+
+**Not:** Diğer dört arka planla aynı üretim tarifini kullan - stil
+satırını (ink-wash, düz renk alanları, koyu kontur, doku yok) ve masa
+malzemesini (deri/ahşap) onlarla birebir tutmaya çalış, yoksa beş ekran
+yine iki ayrı prodüksiyon gibi görünür (bkz. Art Rules'un "a shared
+visual language is only shared if every screen speaks it" maddesi).
+Üretilen görsel `data/assets/ui/ledger_mockup/city_menu_bg.jpg` olarak
+kaydedilip verilirse, `city_map.tscn`'e Lonca/Pazar/Taverna/Kervan
+Avlusu'nun aynı `BackgroundArt`(`STRETCH_KEEP_ASPECT_COVERED` +
+`EXPAND_IGNORE_SIZE`)/`BackgroundScrim` (%35 siyah) ikilisiyle,
+`MarginContainer`'ın altına eklenir - kod tarafında yeni bir şey icat
+etmeye gerek yok, dört ekranın deseni aynen tekrarlanır.
+
+---
+
 ## Çalışmayan promptlar için notlar
 
 Görsel modeller şu üç şeyde tökezliyor, tekrar denerken bunları açıkça

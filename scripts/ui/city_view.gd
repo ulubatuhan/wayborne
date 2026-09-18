@@ -34,6 +34,14 @@ signal venue_pressed(scene_path: String)
 const TILE_W: float = 58.0
 const TILE_H: float = 29.0
 
+## Kasaba resmi artık ebeveynin tam köşesine değil, ondan `FRAME_INSET`
+## kadar içeri oturuyor - `MapPanel`'in kendi `StyleBoxFlat` kenarlığı
+## (bkz. `city_map.tscn`) bu boşlukta görünür oluyor, yani resim gerçekten
+## çerçevelenmiş okunuyor, masaya yapıştırılmış bir dikdörtgen değil. Kenarlık
+## `CityView`'den *sonra* çizilmiyor - tam tersi, `CityView` kenarlığın
+## *içine* çekiliyor, o yüzden hangisi üstte olduğu hiç önemli değil.
+const FRAME_INSET: float = 8.0
+
 ## Kasaba ızgarası. Beş mekân + sivil evler bunun içine yerleşiyor.
 const GRID: int = 9
 
@@ -172,8 +180,16 @@ func setup(session: GameSession) -> void:
 
 func _adopt_parent_size() -> void:
 	var host := get_parent_control()
-	if host != null and host.size != size:
-		size = host.size
+	if host == null:
+		return
+	var target_size := host.size - Vector2(FRAME_INSET, FRAME_INSET) * 2.0
+	target_size.x = maxf(0.0, target_size.x)
+	target_size.y = maxf(0.0, target_size.y)
+	if size != target_size:
+		size = target_size
+	var target_position := Vector2(FRAME_INSET, FRAME_INSET)
+	if position != target_position:
+		position = target_position
 
 func _process(delta: float) -> void:
 	# Yalnızca duman ve ışık kıpırdıyor; sahne bunun dışında durağan.

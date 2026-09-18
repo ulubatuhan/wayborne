@@ -2,7 +2,19 @@
 
 [ext_resource type="Script" path="res://scripts/world/city_map.gd" id="1"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mappanel"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mappanel"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.52, 0.42, 0.22, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 4
 
 [node name="CityMap" type="Control"]
 layout_mode = 3
@@ -47,7 +59,7 @@ theme_override_constants/separation = 20
 custom_minimum_size = Vector2(640, 440)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_mappanel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_mappanel")
 
 [node name="BriefScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/MainRow"]
 layout_mode = 2
