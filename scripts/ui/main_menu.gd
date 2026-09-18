@@ -13,11 +13,26 @@ extends Control
 ## taşıyıp oradan `change_scene_to_file` ile buraya geçmek tam da
 ## istenmeyen şeyi yapardı: manzara sıfırdan kurulur, kervanın döngüsü
 ## yeniden başlardı. Bunun yerine `MainMenu`'nün kendisi iki evreli: önce
-## yalnızca nabız gibi atan bir davet metni, ilk girdide (klavye/fare/kol
-## fark etmez) aynı sahnede butonlar beliriyor. Evre yalnızca **süreç içi**
+## yalnızca nabız gibi atan bir davet metni, ilk girdide (klavye/fare/kol/
+## dokunmatik fark etmez) aynı sahnede butonlar beliriyor. Evre yalnızca **süreç içi**
 ## bir kez yaşanıyor - `_title_shown_this_run` bir statik değişken (bkz.
 ## `Nav`'ın `recruit_venue`'sü, aynı GDScript özelliği), yoksa Ayarlar'dan
 ## geri dönmek bile oyuncuyu yeniden "bir tuşa bas" ekranına düşürürdü.
+##
+## **Dokunuşla (ve aslında fareyle de) geçilemiyordu - klavye hep
+## çalışıyordu.** "Telefonda dokunarak geçemiyorum" diye bildirildi;
+## ölçüldüğünde neden dokunmatığa özgü değil çıktı: sahnenin kök
+## `Control`'ü (`MainMenu`'nün kendisi, tam ekran) kendi `mouse_filter`'ını
+## hiç ayarlamamıştı, yani varsayılan `STOP`'ta kaldı. Butonlar/karartma/
+## davet metni zaten `IGNORE`'du (aşağıdaki `_set_buttons_mouse_ignore`'un
+## notu bunu anlatıyor) ama en dıştaki, tüm ekranı kaplayan kök hâlâ her
+## işaretçi olayını kendi üstünde durduruyordu - klavye bu yoldan hiç
+## geçmediği için etkilenmedi, fare tıklaması ve dokunuşun emüle ettiği
+## fare tıklaması ikisi de `_unhandled_input`'a hiç ulaşamadan yutuluyordu.
+## Kökün `mouse_filter`'ı da `IGNORE` olunca (bkz. `main_menu.tscn`) ikisi
+## de düzeldi - `InputEventScreenTouch`'u da hedef listesine eklemek tek
+## başına yetmezdi, çünkü sorun hangi olay türünün tanındığı değil, olayın
+## hiç ulaşmamasıydı.
 
 ## Başlık ve butonların arkasındaki karartma. Manzaranın üstüne çıplak
 ## metin koymak, gökyüzünün açık olduğu yerde başlığı okunmaz yapıyor -
@@ -190,10 +205,14 @@ func _set_buttons_mouse_ignore(ignore: bool) -> void:
 	_settings_button.mouse_filter = filter
 	_quit_button.mouse_filter = filter
 
-## Klavye, fare ya da kol - hangisiyle oynadığı önemli değil, ilki geçişi
-## başlatıyor. `echo`'yu eleniyor yoksa tuşu basılı tutmak onlarca kez
-## tetiklerdi (yalnızca bir kez tetiklenmesi gerektiği için önemli, aksi
-## hâlde _begin_transition çoklu çağrıdan zarar görmez ama gereksiz).
+## Klavye, fare, kol ya da dokunmatik - hangisiyle oynadığı önemli değil,
+## ilki geçişi başlatıyor. `echo`'yu eleniyor yoksa tuşu basılı tutmak
+## onlarca kez tetiklerdi (yalnızca bir kez tetiklenmesi gerektiği için
+## önemli, aksi hâlde _begin_transition çoklu çağrıdan zarar görmez ama
+## gereksiz). `InputEventScreenTouch`'un burada ayrıca sayılması, tek
+## başına dokunuşun fareye emülasyonuna (`InputEventMouseButton`) bel
+## bağlamamak için - emülasyon proje ayarına bağlı, kapalıyken ya da
+## ikincil bir parmak için hiç üretilmeyebilir.
 func _unhandled_input(event: InputEvent) -> void:
 	if not _in_title_phase:
 		return
@@ -201,6 +220,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		(event is InputEventKey and event.pressed and not event.echo)
 		or (event is InputEventJoypadButton and event.pressed)
 		or (event is InputEventMouseButton and event.pressed)
+		or (event is InputEventScreenTouch and event.pressed)
 	)
 	if not qualifies:
 		return
