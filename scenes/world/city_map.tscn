@@ -62,24 +62,29 @@ layout_mode = 2
 text = "UI_CITY_INFO"
 autowrap_mode = 2
 
-[node name="MapFrame" type="AspectRatioContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MainRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="MapFrame" type="AspectRatioContainer" parent="MarginContainer/VBoxContainer/MainRow"]
 custom_minimum_size = Vector2(320, 320)
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_vertical = 3
 ratio = 1.0
 
-[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer/MapFrame"]
+[node name="MapPanel" type="Panel" parent="MarginContainer/VBoxContainer/MainRow/MapFrame"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_mappanel")
 
-[node name="BriefScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+[node name="BriefScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/MainRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="BriefContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BriefScroll"]
+[node name="BriefContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MainRow/BriefScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10

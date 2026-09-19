@@ -9,8 +9,8 @@ extends Control
 ## bildiriyor, sahne değiştirmeyi burası yapıyor - gezinme yığınını iten
 ## taraf her zaman gönderen ekrandır (bkz. Nav).
 
-@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MapFrame/MapPanel
-@onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/BriefScroll/BriefContainer
+@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapFrame/MapPanel
+@onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
 @onready var _party_button: Button = $MarginContainer/VBoxContainer/BottomRow/PartyButton
@@ -151,26 +151,6 @@ func _build_spots() -> void:
 	_map_panel.add_child(_city_view)
 	_city_view.venue_pressed.connect(_on_spot_pressed)
 	_city_view.setup(_session)
-
-	# Fare ile keşfedilen bir ekranın kendini bir kez anlatması lazım:
-	# tıklanabilir olduğu belli olmayan bir kasaba, dekordan ibaret kalır.
-	var hint := Label.new()
-	hint.text = tr("UI_CITY_HOVER_HINT")
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD
-	hint.modulate = Color(0.72, 0.70, 0.64)
-	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	hint.offset_left = 10.0
-	hint.offset_right = -10.0
-	# `MapPanel`'in kare çerçeveden sonraki genişliği artık 320px'e kadar
-	# inebiliyor (bkz. Art Rules) - bu satır tek satıra sığmayıp üç satıra
-	# kırılabiliyor ve `Panel` çocuklarını kırpmadığı için taşan satır(lar)
-	# çerçevenin dışına, alttaki hoşgeldiniz başlığının üstüne taşıyordu.
-	# -30 yalnızca tek satırlık bir hattı varsayıyordu; üç satır güvenle
-	# sığacak kadar pay bırakılıyor.
-	hint.offset_top = -70.0
-	hint.offset_bottom = -6.0
-	_map_panel.add_child(hint)
 
 func _on_spot_pressed(scene_path: String) -> void:
 	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, scene_path))

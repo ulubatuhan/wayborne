@@ -841,32 +841,56 @@ way to textures.
   no longer grow taller than it is wide regardless of the viewport's own
   aspect ratio. `city_map.gd`'s `_map_panel` path grew one segment
   (`MainRow/MapFrame/MapPanel`) to match.
-- **The brief moved below the map, and that surfaced a real overflow -
-  asked for explicitly.** `MainRow` (the `HBoxContainer` that put the map
-  and `CityBriefPanel` side by side) is gone; `MapFrame` and `BriefScroll`
-  are now direct, stacked children of the screen's own `VBoxContainer`,
-  and `city_map.gd`'s two node paths grew one segment shorter to match.
-  Moving them didn't just rearrange - it exposed a bug the old layout had
-  been hiding: `TitleLabel`/`InfoLabel` never had `autowrap_mode` set, so
-  their *unwrapped* text width was their minimum size, and on a narrow
-  viewport that dragged the whole screen's minimum width past the
-  viewport itself - with the root `Control`'s `grow_horizontal/vertical`
-  both `GROW_BOTH`, the overflow split evenly off *both* edges, clipping
-  the first and last few characters of every line at once (map included).
-  The side-by-side layout never showed this because `BriefScroll`'s own
-  `size_flags_horizontal = 3` (expand) absorbed the slack instead of the
-  root ever needing to grow. Both labels now carry `autowrap_mode = 2`.
-  `MapFrame`'s own `custom_minimum_size` also came down from 440 to 320 -
-  440 was tuned for the old wide layout and became the *next* thing
-  forcing the root wider than a narrow phone's viewport once the labels
-  stopped being the tallest culprit; `_town_scale()` (see the bullet
-  above) already exists precisely so the town keeps degrading gracefully
-  at this smaller floor, so nothing else needed to change to absorb it.
-  One more knock-on: the map's own hover hint (`UI_CITY_HOVER_HINT`) wraps
-  to three lines at 320px where it used to fit one, and `Panel` doesn't
-  clip its children, so the extra lines spilled past the frame onto the
-  welcome heading below - `city_map.gd`'s hint label reserves 70px now
-  instead of 30.
+- **The brief briefly moved below the map, and moving it surfaced a real
+  overflow.** For one round `MainRow` (the `HBoxContainer` that puts the
+  map and `CityBriefPanel` side by side) was removed and `MapFrame`/
+  `BriefScroll` became stacked children instead. That exposed a bug the
+  side-by-side layout had been hiding: `TitleLabel`/`InfoLabel` never had
+  `autowrap_mode` set, so their *unwrapped* text width was their minimum
+  size, and on a narrow viewport that dragged the whole screen's minimum
+  width past the viewport itself - with the root `Control`'s
+  `grow_horizontal/vertical` both `GROW_BOTH`, the overflow split evenly
+  off *both* edges, clipping the first and last few characters of every
+  line at once (map included). Both labels now carry `autowrap_mode = 2`
+  - this fix is real and stayed. `MapFrame`'s `custom_minimum_size` also
+  came down from 440 to 320 in that round and stayed too; `_town_scale()`
+  (see the bullet above) already exists precisely so the town keeps
+  degrading gracefully at the smaller floor.
+- **The stacked layout and the map's own hover hint were both asked to be
+  undone, explicitly and by name: "harita solda, menü sağda", "haritanın
+  üzerindeki yazıyı kaldır komple."** `MainRow` is back, wrapping
+  `MapFrame` (still square, still 320 minimum) and `BriefScroll` side by
+  side exactly as before Faz 16's square-map round; `city_map.gd`'s two
+  node paths grew the `MainRow` segment back. The hover-hint `Label` -
+  the thing the previous round had been *widening its reserved space
+  for* - is deleted outright rather than resized again, per the explicit
+  "kaldır komple": `UI_CITY_HOVER_HINT` is now an unused CSV key, kept
+  rather than pruned since nothing scans for that.
+  **Reverting to side-by-side surfaced the actual overflow bug**, and it
+  was not in `city_map.tscn` at all - it was in `CityBriefPanel`, which
+  this whole layout back-and-forth had never touched. Two of its `Label`s
+  (the chapter-line heading and the shared `_heading()` helper used for
+  "Hikâyenin Neresindesin?"/"Kervanın Durumu"/"Nereye Gidilir?") never had
+  `autowrap_mode` set, the same class of bug as `TitleLabel`/`InfoLabel`
+  above - and a need-row `Label` (`_build_need_row()`) carried a hardcoded
+  `custom_minimum_size = Vector2(330, 0)`, which forces a container's
+  minimum width regardless of autowrap. Any one of these forces the whole
+  `BriefContainer`'s minimum width wide, and since a `VBoxContainer`
+  gives every child the *same* resolved width, even the correctly
+  autowrap-enabled siblings then get handed that same wide rect and never
+  actually wrap - they just fit inside space that happens to be generous.
+  This had been sitting in `CityBriefPanel` since it was written; it
+  never showed because `BriefScroll` always had generous width until this
+  session started testing narrower ones. Fixed by adding the missing
+  `autowrap_mode` and dropping the hardcoded 330 minimum (the label
+  already had `SIZE_EXPAND_FILL`, which grows it at wide widths without
+  needing a floor). Verified at 700px: what used to be `"...ve bir yol
+  ark"` / `"...önce birinin sar"` (mid-word clipping, not wrapping) is
+  now full sentences wrapped cleanly at word boundaries. At an extreme
+  420px phone width the map's fixed 320 minimum still leaves the brief
+  column only ~55px wide - inherent to a literal side-by-side layout at
+  that width, not a bug this fix could close, and not what was asked to
+  be fixed this round.
 - **The brief now opens with where you are, not just what to do.**
   `CityBriefPanel._welcome_heading()` prints the city's own name (a
   proper noun, same exemption as the culture name pools - not run through

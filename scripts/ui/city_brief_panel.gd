@@ -113,6 +113,7 @@ func _build_chapter() -> void:
 		CampaignCatalog.chapter_count(),
 		tr(chapter.title_key),
 	]
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_chapter_box.add_child(heading)
 
 	var summary := Label.new()
@@ -267,7 +268,6 @@ func _build_need_row(need: Dictionary) -> HBoxContainer:
 	var label := Label.new()
 	label.text = String(need.text)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	label.custom_minimum_size = Vector2(330, 0)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if bool(need.urgent):
 		label.modulate = URGENT_COLOR
@@ -307,6 +307,7 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 		payout += offer.potential_profit
 
 	var contract_note := Label.new()
+	contract_note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	contract_note.modulate = NOTE_COLOR
 	if offers.is_empty():
 		contract_note.text = tr("UI_BRIEF_ROUTE_NO_CONTRACT")
@@ -375,6 +376,7 @@ func _heading(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 18)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	return label
 
 func _note(text: String) -> Label:
