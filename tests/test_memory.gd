@@ -25,6 +25,7 @@ func run(t) -> void:
 	_test_check_names_the_roller(t)
 	_test_grievances_from_deliberate_choices(t)
 	_test_starvation_can_kill(t)
+	_test_unfed_crew_can_starve(t)
 	_test_heir_is_chosen_and_passing_over_costs(t)
 	_test_named_crew_die_with_their_wagon(t)
 	_test_profiteering_is_remembered(t)
@@ -160,6 +161,7 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"wallet": "gold",
 	"_flags": "flags",
 	"_next_character_serial": "next_character_serial",
+	"_crew_name_serial": "crew_name_serial",
 	"_delivered_wagon_quest_ids": "delivered_wagon_quest_ids",
 	"_fulfilled_commission_starts": "fulfilled_commission_starts",
 	"caravan": "journey",
@@ -357,6 +359,57 @@ func _test_starvation_can_kill(t) -> void:
 		fed.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
 	for character in fed.get_party():
 		t.eq(character.consecutive_hungry_days, 0, "doğru doyurulan hiç aç kalmaz")
+
+## İsimsizler de sayılır: tayfayı art arda aç bırakmak moralini giderek
+## daha çok düşürür ve üçüncü geceden itibaren her gece birini adıyla
+## öldürür. Herkesi doyuran kervanda sayaç hiç artmaz.
+func _test_unfed_crew_can_starve(t) -> void:
+	var session := _session()
+	session.change_provisions(500)
+	var crew_before := session.crew_names.duplicate()
+	t.eq(
+		GameSession.get_crew_hunger_morale_penalty(1), GameSession.MEAL_HUNGER_MORALE_PENALTY,
+		"ilk aç gece eskisi kadar"
+	)
+	t.ok(
+		GameSession.get_crew_hunger_morale_penalty(3) < GameSession.get_crew_hunger_morale_penalty(1),
+		"art arda gece daha çok düşürür"
+	)
+	t.eq(
+		GameSession.get_crew_hunger_morale_penalty(50), GameSession.MAX_CREW_HUNGER_MORALE_PENALTY,
+		"düşüşün bir tavanı var"
+	)
+
+	var starved: Array[String] = []
+	for night in GameSession.STARVATION_HP_LOSS_START_DAY:
+		var result := session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
+		t.eq(int(result["crew_hungry_nights"]), night + 1, "aç gece sayılıyor")
+		for name_text in (result["crew_starved_names"] as Array):
+			starved.append(String(name_text))
+	t.eq(starved.size(), 1, "üçüncü gece tayfadan biri öldü")
+	t.ok(crew_before.has(starved[0]), "ölen gerçek bir tayfa adı")
+	var entry: Dictionary = session.ledger.recent(1)[0]
+	t.eq(String(entry["kind"]), CaravanLedger.KIND_DIED, "deftere ölü yazıldı")
+	t.eq(String(entry["cause"]), "LEDGER_CAUSE_STARVED", "sebebi açlık")
+	t.eq(
+		session.crew_names.size(), session.owned_wagon_count * GameSession.PEOPLE_PER_WAGON,
+		"vagon yine sürülüyor"
+	)
+	t.not_ok(session.crew_names.has(starved[0]) and crew_before.count(starved[0]) == 1,
+		"ölen ad yerine yeniden gelmiyor")
+	var reloaded := _reload(session)
+	t.eq(reloaded.crew_hungry_nights, session.crew_hungry_nights, "aç gece kayda giriyor")
+	t.eq(reloaded.crew_names, session.crew_names, "tayfa yeniden atılmıyor")
+
+	session.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
+	t.eq(session.crew_hungry_nights, 0, "doyurulunca sayaç sıfırlanır")
+
+	var fed := _session()
+	fed.change_provisions(500)
+	for _night in 10:
+		var fed_result := fed.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
+		t.eq((fed_result["crew_starved_names"] as Array).size(), 0, "doyurulan tayfa ölmez")
+	t.eq(fed.crew_hungry_nights, 0, "doğru doyuran kervanda sayaç hiç artmaz")
 
 # --- S11: liderlik seçimi ---
 
