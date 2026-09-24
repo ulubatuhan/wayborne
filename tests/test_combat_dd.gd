@@ -426,7 +426,7 @@ func _test_bark_drives_flash_and_lunge(t) -> void:
 	panel._on_unit_barked(target, "vur", CombatEncounter.BARK_HIT)
 	t.ok(panel._flash_states.has(target), "isabet hedefte parlama kaydı bırakır")
 	t.ok(panel._lunge_states.has(attacker), "isabet saldıranda kayma kaydı bırakır")
-	var lunge_offset: float = panel._lunge_states[attacker]["offset"]
+	var lunge_offset: float = panel._lunge_states[attacker]["direction"]
 	if attacker.is_player_side:
 		t.ok(lunge_offset > 0.0, "oyuncu tarafı hedefe doğru pozitif kayar")
 	else:
@@ -452,8 +452,8 @@ func _test_bark_drives_flash_and_lunge(t) -> void:
 
 	# Süresi geçmiş bir kayıt uygulanınca nötre döner ve kendini siler -
 	# `_apply_pending_bark`'ın süre dolunca unutma kuralının aynısı.
-	panel._flash_states[target] = {"color": ArtPalette.FX_FLASH_CRIT, "expires_at": 0}
-	panel._lunge_states[attacker] = {"offset": CombatPanel.LUNGE_DISTANCE, "expires_at": 0}
+	panel._flash_states[target] = {"color": ArtPalette.FX_FLASH_CRIT, "start": 0, "duration": 1}
+	panel._lunge_states[attacker] = {"direction": 1.0, "magnitude": 0.06, "start": 0}
 	var probe := CombatUnitSlot.new()
 	panel._apply_pending_animation(probe, target)
 	t.not_ok(panel._flash_states.has(target), "süresi geçen parlama kaydı silinir")

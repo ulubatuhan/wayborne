@@ -116,7 +116,17 @@ var _outfit: Dictionary = {}
 ## `CombatPanel` her `_refresh()`'te yeniden kurulduğu için (bkz. o
 ## dosyaların kendi notu) bu iki alan da her yeni figürde varsayılana
 ## (saydamlık yok, kayma yok) döner - ayrı bir sıfırlama gerekmez.
-var _lunge: float = 0.0
+var _offset: Vector2 = Vector2.ZERO
+## Düşüşün ilerlemesi (0 ayakta, 1 yerde). Varsayılan 1: düşmüş/ölü bir
+## birim yeniden kurulduğunda yere serili çizilir, yalnızca düşüşün kendi
+## anında panel bunu 0'dan yürütür (bkz. CombatFx.fall_at).
+var _fall: float = 1.0
+## Durum uygulandığında figürün etrafında genişleyen halka.
+var _ring_color: Color = Color(0, 0, 0, 0)
+var _ring: float = 1.0
+## Sersem birimin başının üstünde durağan yaylar - hareketsiz, çünkü
+## sersemlik bir an değil bir durum.
+var _stunned: bool = false
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -143,8 +153,38 @@ func set_flash(color: Color) -> void:
 ## başında uygulanan yatay bir dönüşüm, silüetin kendi çizimi hiç
 ## değişmeden kayıyor.
 func set_lunge(offset: float) -> void:
-	_lunge = offset
+	set_shift(Vector2(offset, 0.0))
+
+## Hamle ve sarsıntının toplamı - silüetin tamamı kayıyor.
+func set_shift(offset: Vector2) -> void:
+	if _offset == offset:
+		return
+	_offset = offset
 	queue_redraw()
+
+func set_fall(progress: float) -> void:
+	var clamped := clampf(progress, 0.0, 1.0)
+	if is_equal_approx(_fall, clamped):
+		return
+	_fall = clamped
+	queue_redraw()
+
+func set_ring(color: Color, progress: float) -> void:
+	_ring_color = color
+	_ring = clampf(progress, 0.0, 1.0)
+	queue_redraw()
+
+func set_stunned(stunned: bool) -> void:
+	_stunned = stunned
+	queue_redraw()
+
+## Yerde serili çizilmeli mi: düşmüş/ölü *ve* düşüşü bitmiş. Düşüşün
+## ortasında figür ayakta çiziliyor, yalnızca dönüşümle deviriliyor.
+func _draws_fallen() -> bool:
+	return (_state == "downed" or _state == "dead") and _fall >= 1.0
+
+func _is_falling() -> bool:
+	return (_state == "downed" or _state == "dead") and _fall < 1.0
 
 func _archetype() -> Dictionary:
 	return ARCHETYPES[_kind]
@@ -169,9 +209,16 @@ func _draw() -> void:
 	var box := size
 	if box.x <= 4.0 or box.y <= 4.0:
 		return
-	# Hamle kayması: sıfırken no-op, tüm çizim aynen eskisi gibi kalır.
-	if not is_zero_approx(_lunge):
-		draw_set_transform(Vector2(_lunge, 0.0))
+	# Hamle/sarsıntı kayması ve düşüşün devrilmesi: ikisi de sıfırken
+	# no-op, tüm çizim aynen eskisi gibi kalır. Devrilme ayak ucunun
+	# etrafında - figür yerinden kaymadan yere iniyor.
+	if _is_falling():
+		var side := 1.0 if _face_right else -1.0
+		var angle := side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
+		var pivot := Vector2(box.x * 0.5, box.y * 0.95)
+		draw_set_transform(_offset + pivot - pivot.rotated(angle), angle)
+	elif _offset != Vector2.ZERO:
+		draw_set_transform(_offset)
 	var archetype := _archetype()
 	var bulk: float = float(archetype.bulk) * (1.0 - _depth * 0.10)
 
@@ -180,6 +227,28 @@ func _draw() -> void:
 		_draw_beast(box, archetype, bulk)
 	else:
 		_draw_humanoid(box, archetype, bulk)
+
+	draw_set_transform(_offset)
+	if _stunned and not _draws_fallen():
+		_draw_stun_arcs(box)
+	if _ring < 1.0 and _ring_color.a > 0.0:
+		var centre := Vector2(box.x * 0.5, box.y * 0.55)
+		var radius := lerpf(box.x * 0.20, box.x * 0.50, _ring)
+		draw_arc(
+			centre, radius, 0.0, TAU, 32,
+			Color(_ring_color, _ring_color.a * (1.0 - _ring)), maxf(2.0, box.x * 0.025)
+		)
+	draw_set_transform(Vector2.ZERO)
+
+func _draw_stun_arcs(box: Vector2) -> void:
+	var centre := Vector2(box.x * 0.5, box.y * 0.10)
+	var radius := box.x * 0.06
+	for index in 3:
+		var start := float(index) * TAU / 3.0
+		draw_arc(
+			centre + Vector2(cos(start), sin(start) * 0.4) * radius * 1.6,
+			radius, start, start + PI * 0.9, 8, ArtPalette.FX_STUN, maxf(1.5, box.x * 0.014)
+		)
 
 func _draw_ground_shadow(box: Vector2, bulk: float) -> void:
 	var width := box.x * 0.62 * bulk
@@ -212,7 +281,7 @@ func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	var lean := (1.0 if _face_right else -1.0) * box.x * 0.02
 
 	# Düşmüş bir figür ayakta durmaz: öne doğru çöker.
-	if _state == "downed" or _state == "dead":
+	if _draws_fallen():
 		_draw_fallen(box, cloth, trim, skin, bulk)
 		return
 
@@ -399,7 +468,7 @@ func _draw_beast(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	var dark := _tint(archetype.trim)
 	var tooth := _tint(archetype.metal)
 
-	if _state == "downed" or _state == "dead":
+	if _draws_fallen():
 		_draw_fallen(box, fur, dark, fur, bulk)
 		return
 
