@@ -58,9 +58,9 @@ func _test_skill_position_gating(t) -> void:
 	)
 
 func _test_cooldowns(t) -> void:
-	var rally := SkillCatalog.get_skill(SkillCatalog.RALLY)
-	t.ok(rally.is_heal(), "toparlan bir iyileştirme")
-	t.eq(rally.cooldown_rounds, 2, "toparlan iki tur bekler")
+	var rally := SkillCatalog.get_skill(SkillCatalog.ROUSING_SPEECH)
+	t.ok(rally.is_heal(), "moral nutku bir iyileştirme")
+	t.eq(rally.cooldown_rounds, 2, "moral nutku iki tur bekler")
 
 	var unit := CombatUnit.from_character(_make_hero("Şifacı"), 3)
 	t.ok(unit.can_use_skill(rally), "başlangıçta bekleme yok")

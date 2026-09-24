@@ -34,6 +34,7 @@ func run(t) -> void:
 	_test_endurance_buys_status_resistance(t)
 	_test_every_status_a_skill_can_apply_is_handled(t)
 	_test_every_modifier_stat_is_handled(t)
+	_test_each_class_owns_its_axes(t)
 	_test_prot_modifier_bends_the_damage_door(t)
 	_test_area_skills_never_beat_single_target(t)
 	_test_adjacent_hits_only_neighbours(t)
@@ -684,6 +685,32 @@ func _test_every_modifier_stat_is_handled(t) -> void:
 			CombatUnit.MODIFIER_STATS.has(skill.modifier_stat),
 			"%s tanınmayan bir değiştirici yazıyor: %s" % [skill.skill_id, skill.modifier_stat]
 		)
+
+## Sınıf kimliği: yalnızca Kalem Efendisi iyileştirir ve iki sınıf aynı
+## sayıyı aynı yönde bükmez (biri zırh verir, biri kaçınma, biri hasar, biri
+## isabet; bozanlar da ayrı). Üç sınıfın aynı kaçınma buff'ını taşıdığı ve
+## muhafızın şifacıdan iyi sardığı hâle geri dönülmesin diye.
+func _test_each_class_owns_its_axes(t) -> void:
+	var buff_owner := {}
+	var debuff_owner := {}
+	for character_class in ClassCatalog.get_classes():
+		for skill in SkillCatalog.get_skills(character_class.skill_ids):
+			if skill.is_heal():
+				t.eq(
+					character_class.class_id, ClassCatalog.CLERK,
+					"%s iyileştiriyor - iyileştirme Kalem Efendisi'nin" % skill.skill_id
+				)
+			if not skill.has_modifier():
+				continue
+			var owners: Dictionary = buff_owner if skill.modifier_amount > 0 else debuff_owner
+			var stat := skill.modifier_stat
+			if owners.has(stat):
+				t.eq(
+					owners[stat], character_class.class_id,
+					"'%s' iki sınıfta birden: %s ve %s" % [stat, owners[stat], character_class.class_id]
+				)
+			else:
+				owners[stat] = character_class.class_id
 
 ## Zırh değiştiricisi tek hasar kapısından geçiyor ve zırhı hiçbir yönde
 ## tavanın dışına itemiyor.

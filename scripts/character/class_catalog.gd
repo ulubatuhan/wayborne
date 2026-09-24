@@ -47,8 +47,7 @@ static func _ensure_built() -> void:
 		SkillCatalog.SHIELD_BASH,
 		SkillCatalog.SPEAR_THRUST,
 		SkillCatalog.SLING_SHOT,
-		SkillCatalog.RALLY,
-		SkillCatalog.TAKE_COVER,
+		SkillCatalog.BRACE,
 	]
 	_classes.append(guard)
 
@@ -91,7 +90,6 @@ static func _ensure_built() -> void:
 	clerk.duty_id = DutyCatalog.LEVAZIMCI
 	clerk.skill_ids = [
 		SkillCatalog.ROUSING_SPEECH,
-		SkillCatalog.TALLY_RECKON,
 		SkillCatalog.CUTTING_WORD,
 		SkillCatalog.KEEP_LEDGER,
 		SkillCatalog.BLIGHT_FLASK,
