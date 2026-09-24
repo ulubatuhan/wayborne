@@ -623,13 +623,7 @@ func _build_bottom_bar() -> PanelContainer:
 ## koymak, kartın seçeneklerini de kartın içine almak.
 func _build_modal_layer() -> void:
 	var frame := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.09, 0.085, 0.095, 0.98)
-	style.border_color = ArtPalette.GOLD_DIM
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(18)
-	frame.add_theme_stylebox_override("panel", style)
+	frame.theme_type_variation = WaybookTheme.SEAL_PANEL
 	frame.custom_minimum_size = Vector2(CARD_WIDTH, 0.0)
 	_modal_center.add_child(frame)
 
@@ -670,12 +664,6 @@ func _build_modal_layer() -> void:
 ## kapatma tuşu kutunun *dışında* (bkz. World Navigation Rules).
 func _build_log_layer() -> void:
 	var frame := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.07, 0.068, 0.075, 0.97)
-	style.border_color = ArtPalette.GOLD_DIM
-	style.set_border_width_all(1)
-	style.set_content_margin_all(14)
-	frame.add_theme_stylebox_override("panel", style)
 	_log_overlay.add_child(frame)
 
 	var column := VBoxContainer.new()
@@ -703,10 +691,7 @@ func _build_log_layer() -> void:
 ## HUD şeritlerinin ortak çerçevesi - iki şerit iki ayrı stil kurmasın.
 func _make_bar() -> PanelContainer:
 	var bar := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.06, 0.058, 0.065, 0.82)
-	style.set_content_margin_all(8)
-	bar.add_theme_stylebox_override("panel", style)
+	bar.theme_type_variation = WaybookTheme.HUD_BAR
 	return bar
 
 ## Kervanın dökümü: bir tuş, bir katman. Şehre girmek ya da sahne
@@ -714,12 +699,6 @@ func _make_bar() -> PanelContainer:
 ## bakıyor. Kapatma tuşu kaydırma kutusunun dışında (bkz. `setup`).
 func _build_status_layer() -> void:
 	var frame := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.07, 0.068, 0.075, 0.97)
-	style.border_color = ArtPalette.GOLD_DIM
-	style.set_border_width_all(1)
-	style.set_content_margin_all(16)
-	frame.add_theme_stylebox_override("panel", style)
 	_status_overlay.add_child(frame)
 
 	var column := VBoxContainer.new()
@@ -807,14 +786,8 @@ const COMMANDS: Array[Dictionary] = [
 func _build_command_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.visible = false
-	# Kendi arka planı: varsayılan tema saydam bırakıyor ve menü manzaranın
-	# üstünde okunmuyordu (aynı hata OnboardingPanel'de de yaşandı).
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.075, 0.085, 0.94)
-	style.border_color = ArtPalette.GOLD_DIM
-	style.set_border_width_all(1)
-	style.set_content_margin_all(10)
-	panel.add_theme_stylebox_override("panel", style)
+	# Opak zemin temanın cilt panelinden geliyor: saydam bir menü
+	# manzaranın üstünde okunmuyordu (aynı hata OnboardingPanel'de de yaşandı).
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
@@ -1724,8 +1697,9 @@ func _render_card(event: GameEvent) -> void:
 		_card_panel.add_child(_build_choice_button(choice, context))
 
 func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
+	# Görünüm WaybookTheme'in düğme sekmesinden geliyor: EU4'ün kartında
+	# seçenek bir satır değil bir tuş, ve kilitli olan üstü çizili sekme.
 	var button := Button.new()
-	_style_choice_button(button)
 	var available := choice.is_available(context)
 	var label := tr(choice.text_key)
 	var hint_key := choice.get_hint_text(_session.get_best_effective_stat(choice.hint_stat))
@@ -1764,32 +1738,6 @@ func _choice_triggers_combat(choice: EventChoice) -> bool:
 		if effect.type == EventEffect.Type.TRIGGER_COMBAT:
 			return true
 	return false
-
-## Karar tuşlarının ortak görünümü. Varsayılan tema kutusu kartın koyu
-## zemininde kayboluyor ve seçenekler tıklanabilir görünmüyordu - EU4'ün
-## kartında seçenek bir *satır* değil, bir tuştur.
-func _style_choice_button(button: Button) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.15, 0.14, 0.15, 0.95)
-	normal.border_color = ArtPalette.GOLD_DIM
-	normal.set_border_width_all(1)
-	normal.set_corner_radius_all(3)
-	normal.set_content_margin_all(9)
-	button.add_theme_stylebox_override("normal", normal)
-
-	var hover := normal.duplicate()
-	hover.bg_color = Color(0.22, 0.20, 0.16, 0.98)
-	hover.border_color = ArtPalette.GOLD
-	button.add_theme_stylebox_override("hover", hover)
-
-	var pressed := normal.duplicate()
-	pressed.bg_color = Color(0.10, 0.09, 0.09, 0.98)
-	button.add_theme_stylebox_override("pressed", pressed)
-
-	var disabled := normal.duplicate()
-	disabled.bg_color = Color(0.11, 0.11, 0.11, 0.85)
-	disabled.border_color = Color(0.30, 0.29, 0.27)
-	button.add_theme_stylebox_override("disabled", disabled)
 
 func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event

@@ -22,8 +22,6 @@ signal dismissed
 signal heir_chosen(heir)
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.85)
-const PANEL_BACKGROUND: Color = Color(0.09, 0.08, 0.07)
-const PANEL_BORDER: Color = Color(0.55, 0.45, 0.28)
 const PANEL_WIDTH: float = 560.0
 const SELECTED_COLOR: Color = Color(1.0, 0.9, 0.6)
 const IDLE_COLOR: Color = Color(0.75, 0.72, 0.66)
@@ -57,13 +55,7 @@ func setup(
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_BACKGROUND
-	style.border_color = PANEL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(26)
-	panel.add_theme_stylebox_override("panel", style)
+	panel.theme_type_variation = WaybookTheme.SEAL_PANEL
 	center.add_child(panel)
 
 	var vbox := VBoxContainer.new()

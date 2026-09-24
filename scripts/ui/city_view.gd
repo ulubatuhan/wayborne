@@ -834,29 +834,20 @@ func _build_tooltip() -> void:
 	_tooltip = PanelContainer.new()
 	_tooltip.visible = false
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Kendi opak arka planı: varsayılan tema saydam bırakıyor ve balon
-	# kasabanın üstünde okunmuyordu (aynı hata OnboardingPanel'de de
-	# yaşandı).
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.07, 0.07, 0.08, 0.96)
-	style.border_color = ArtPalette.GOLD_DIM
-	style.set_border_width_all(1)
-	style.set_content_margin_all(8)
-	style.corner_radius_top_left = 3
-	style.corner_radius_top_right = 3
-	style.corner_radius_bottom_left = 3
-	style.corner_radius_bottom_right = 3
-	_tooltip.add_theme_stylebox_override("panel", style)
+	# Balon, iğneyle tutturulmuş bir kâğıt fişi (WaybookTheme.SLIP_PANEL):
+	# opak, kasabanın üstünde okunuyor, yazısı kâğıt üstü mürekkep.
+	_tooltip.theme_type_variation = WaybookTheme.SLIP_PANEL
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 3)
 	_tooltip.add_child(column)
 
 	_tooltip_title = Label.new()
-	_tooltip_title.modulate = ArtPalette.GOLD
+	_tooltip_title.theme_type_variation = WaybookTheme.PAGE_HEADING
 	column.add_child(_tooltip_title)
 
 	_tooltip_body = Label.new()
+	_tooltip_body.theme_type_variation = WaybookTheme.PAGE_LABEL
 	_tooltip_body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_tooltip_body.custom_minimum_size = Vector2(230.0, 0.0)
 	column.add_child(_tooltip_body)

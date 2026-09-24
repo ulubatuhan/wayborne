@@ -12,8 +12,6 @@ extends CanvasLayer
 signal closed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.6)
-const PANEL_BACKGROUND: Color = Color(0.09, 0.08, 0.07)
-const PANEL_BORDER: Color = Color(0.55, 0.45, 0.28)
 const PANEL_WIDTH: float = 480.0
 const OK_COLOR: Color = Color(0.7, 0.85, 0.7)
 const MISSING_COLOR: Color = Color(0.85, 0.45, 0.4)
@@ -47,13 +45,6 @@ func setup(session: GameSession, wagon_index: int) -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_BACKGROUND
-	style.border_color = PANEL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(20)
-	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
 
 	var vbox := VBoxContainer.new()

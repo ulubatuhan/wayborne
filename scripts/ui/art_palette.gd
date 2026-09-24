@@ -27,6 +27,36 @@ const MOSS: Color = Color(0.34, 0.46, 0.30)
 const STEEL: Color = Color(0.62, 0.65, 0.68)
 const TORCH: Color = Color(0.96, 0.68, 0.34)
 
+# --- Arayüz rolleri (Waybook) ---
+## Paneller ve düğmeler dokudan geliyor (bkz. WaybookTheme), ama doku
+## renk kararı vermiyor: bir panelin iç zemini, yazının rengi, bir düğmenin
+## üstüne gelinince ne kadar aydınlandığı burada. Dokunun kendi deri/pirinç
+## tonu boyanmış bir malzeme; bu roller onun *üstüne* biniyor.
+## Panelin cilt çerçevesinin içindeki zemin: lamba isi değmiş kâğıt.
+const UI_PANEL_FILL: Color = Color(0.085, 0.074, 0.066, 0.97)
+## Yol HUD şeritleri - dünyayı tamamen örtmeyen yarı saydam kuşak.
+const UI_HUD_BAR: Color = Color(0.06, 0.058, 0.065, 0.82)
+## Tam ekran bir kararın arkasındaki karartma.
+const UI_BACKDROP: Color = Color(0.0, 0.0, 0.0, 0.72)
+## Liderlik devri gibi geri alınamaz anların daha koyu karartması.
+const UI_BACKDROP_SOLEMN: Color = Color(0.0, 0.0, 0.0, 0.85)
+const UI_TEXT: Color = BONE
+const UI_TEXT_DIM: Color = BONE_DIM
+## Açık kâğıt (ipucu fişi, sayfa) üstündeki yazı.
+const UI_TEXT_ON_PAGE: Color = INK
+const UI_ACCENT: Color = GOLD
+## Düğme durumları dokuyu yeniden boyamıyor, çarpıyor: üstüne gelince
+## deri ışığa döner, basılınca gölgeye çekilir, kilitliyken solar.
+const UI_TINT_HOVER: Color = Color(1.18, 1.10, 0.98)
+const UI_TINT_PRESSED: Color = Color(0.78, 0.74, 0.70)
+const UI_TINT_DISABLED: Color = Color(0.62, 0.60, 0.58)
+const UI_FOCUS: Color = Color(0.86, 0.70, 0.34, 0.85)
+## Mürekkep işaretleri (kilitli düğmenin üstünü çizen kalem, ayırıcı
+## çizgi) koyu deri ve koyu kâğıt üstünde siyah mürekkeple görünmüyordu;
+## oyunun zemini koyu olduğu için "mürekkep" burada solgun kemik rengi.
+const UI_INK_MARK: Color = Color(0.80, 0.74, 0.64, 0.85)
+const UI_RULE: Color = Color(0.52, 0.42, 0.22, 0.7)
+
 # --- Gün evreleri: gökyüzü üstü/altı ve ışığın rengi ---
 ## Yol ve şehir aynı tabloyu okuyor, o yüzden bir sefer akşamüstü
 ## çıkıldığında şehir de aynı akşamüstünde görünüyor.

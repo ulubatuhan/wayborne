@@ -34,8 +34,6 @@ extends CanvasLayer
 signal dismissed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.72)
-const PANEL_BACKGROUND: Color = Color(0.11, 0.10, 0.09)
-const PANEL_BORDER: Color = Color(0.45, 0.40, 0.32)
 
 ## Genişlik sabit, yükseklik **kaydırma alanının** payına bırakılmış:
 ## `ScrollContainer`'ın asgari boyu içeriğini saymaz (kaydırmanın anlamı
@@ -85,15 +83,9 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	# Arka plan açıkça opak: varsayılan tema şeffaf kalınca şehir haritası
-	# metnin arasından okunuyordu, iki katman üst üste binmiş görünüyordu.
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_BACKGROUND
-	style.border_color = PANEL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(20)
-	panel.add_theme_stylebox_override("panel", style)
+	# Arka plan opak olmak zorunda: şeffaf bir panelde şehir haritası metnin
+	# arasından okunuyordu. Opaklık artık WaybookTheme'in cilt panelinden
+	# geliyor (iç zemin ArtPalette.UI_PANEL_FILL) - ekranın kendi kutusu yok.
 	center.add_child(panel)
 
 	var vbox := VBoxContainer.new()

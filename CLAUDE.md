@@ -716,9 +716,10 @@ coloured boxes. The complaint - *"it looks like we are making a game in
 Excel"* - was correct, and the deeper half of it is that a rectangle
 cannot lie about being still but lies immediately once it moves.
 
-Everything is drawn in `_draw()`. There are no asset files yet; when
-hand-drawn art arrives, `ArtPalette` stays and the drawing functions give
-way to textures.
+The world (road, city, combat, menu backdrop) is drawn in `_draw()`. The
+UI chrome has started moving to textures - see Waybook UI Rules - and
+`ArtPalette` stays the colour authority either way; drawing functions give
+way to textures one screen at a time.
 
 - **One palette, one set of brushes.** `ArtPalette` is the game's only
   colour source (four day phases, five biomes, each biome filling the same
@@ -1200,6 +1201,68 @@ way to textures.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.
+
+### Waybook UI Rules
+
+The management screens, overlays and HUD are dressed as one object: the
+caravan's own account book (the "Waybook"). The world scenes (road, city,
+combat, menu backdrop) stay procedural; the Waybook *frames* them.
+
+- **One theme, installed into the engine's default theme.**
+  `WaybookTheme` (`scripts/ui/waybook_theme.gd`) builds every chrome style
+  - leather binding (`PanelContainer`/`Panel`), sealed binding
+  (`SealPanel`), index-tab buttons, pinned-slip tooltip (`TooltipPanel`,
+  `SlipPanel`), ink rule (`HSeparator`), ribbon scrollbar - and the
+  `UiTheme` autoload (first in the autoload list, runs in `_init`)
+  merges it into `ThemeDB.get_default_theme()`. Not a project `.tres`: a
+  `Control` under a `CanvasLayer` does not inherit its parent's theme, and
+  almost every overlay here is a scene-less `CanvasLayer` panel; the
+  default theme is the last link of every lookup, so it reaches them all.
+  Headless screenshot tools that build UI before the first frame call
+  `WaybookTheme.install()` themselves (idempotent).
+- **A screen does not build its own panel.** Nine overlays each built the
+  same `StyleBoxFlat` with their own `PANEL_BACKGROUND`/`PANEL_BORDER`
+  constants; they now inherit the theme, and `test_waybook_theme.gd` fails
+  if a `const PANEL_BACKGROUND`/`PANEL_BORDER` comes back. A screen that
+  needs a different tier opts in with `theme_type_variation`
+  (`WaybookTheme.SEAL_PANEL` for irreversible decisions - the road's event
+  card and `SuccessionPanel`; `HUD_BAR` for the road's translucent strips;
+  `SLIP_PANEL` + `PAGE_LABEL`/`PAGE_HEADING` for paper with ink text).
+- **Textures are material; colour is still `ArtPalette`.** Leather, brass
+  and paper arrive painted, and that is their only colour. Every decision
+  the UI makes - a panel's inner ground (`UI_PANEL_FILL`), text
+  (`UI_TEXT`/`UI_TEXT_ON_PAGE`), hover/pressed/locked tints, the ink marks
+  (`UI_INK_MARK`, `UI_RULE`) - is a palette role. The panel's inner ground
+  is composed at runtime (fill, then the stain-grain *mask*, then the
+  frame) so no colour is baked into a PNG. Ink marks are recoloured, not
+  modulated: multiplying dark ink can never lighten it, and black ink on
+  dark leather was invisible in the first render.
+- **A locked button is scratched out, never hidden.** The disabled tab is
+  the same tab with the ledger's scratch-out composed over it, faded; the
+  reason stays live text beside it. The contract from Event Engine Rules
+  is unchanged - the chrome only makes "locked" louder.
+- **Nine-slice geometry is measured, not guessed.** Slice margins live as
+  constants in `WaybookTheme` and each must contain its corner ornament
+  whole. The sealed frame was painted with a clasp mid-side; stretched it
+  smeared into a bar, tiled it became a row of clasps. The pipeline's
+  `declasp` rebuilds each side from a mirrored plain strip so it tiles
+  seamlessly.
+- **Art arrives through one pipeline.** Raw generated sheets live in
+  `art_source/waybook/` (a `.gdignore` keeps them out of import and
+  export); `python3 tools/waybook_assets.py` keys the flat grey backdrop
+  to alpha (only backdrop *connected* to the border or a named seed, so a
+  grey inside the art survives), crops, scales to on-screen size and
+  writes `data/assets/ui/waybook/`. The sheets came as JPGs with no alpha;
+  never hand-edit an output PNG - change the pipeline and re-run it.
+- **One book face for every language.** EB Garamond (OFL,
+  `data/assets/fonts/`) with the engine's own font as its fallback, so
+  nothing the old font could draw becomes a tofu box. Size 18, because the
+  face has a smaller eye than the engine's sans. `test_localization.gd`
+  now checks the game's real font chain, and separately that every
+  non-CJK language's alphabet is in the book face *itself* - the ru/pl
+  columns are still empty, so a CSV-only check would have tested nothing.
+  CJK still falls through to the engine font; a Noto Serif CJK fallback
+  is an open item (size cost on Web).
 
 ### Route Terrain & Weather Rules
 
@@ -3310,14 +3373,15 @@ silinir; tarihçesi (nasıl karara bağlandığı, ölçümü) aşağıdaki Faz
 anlatısında kalır - bu liste yalnızca "şu an açık olan ne" sorusuna cevap
 verir.
 
-- **Elle çizilmiş görsel varlıklar.** Oyunun tamamı hâlâ `_draw()` ile
-  çiziliyor (`ArtPalette` kalacak, çizim fonksiyonlarının yerini dokular
-  alacak) - Faz 10'dan beri işaretli en büyük, hiç başlanmamış kalem.
-  Kıyafet sisteminin altı slotu (bkz. Kervan Envanteri Rules'un yanındaki
-  kıyafet notu) buna hazır bekliyor.
-- **İki katmanlı "defter" sanat yönüne geçiş.** Faz 12'de "en büyüğü"
-  diye işaretlenen öneri - mevcut prosedürel sanattan farklı bir görsel
-  kimlik.
+- **Waybook sanat geçişi - Faz 2-7.** Faz 0 (tek tema, palet rolleri,
+  kitap yüzü) ve Faz 1 (global cilt/sekme/fiş/çizgi/kurdele) `dev`'de
+  (bkz. Waybook UI Rules). Kalan: ana menü defteri (M1-M3), soy defteri
+  paneli (L1/L2), SuccessionPanel'in mühür/çizgi anı (R9, G9), yönetim
+  ekranı arka planları (B1-B9), yol HUD'u (R1-R8), savaş (K1-K7),
+  karakter/parti (P1-P6), mal ikonları, geçişler. Ham varlıkların hepsi
+  `art_source/waybook/`'ta. İkon aileleri üslupça tutarsız geldi (bir
+  kısmı çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
+  kartlı) - kullanılmadan önce aile başına tek üsluba çekilmeli.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin

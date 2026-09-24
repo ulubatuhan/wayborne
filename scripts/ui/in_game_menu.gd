@@ -30,8 +30,6 @@ extends CanvasLayer
 signal dismissed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.72)
-const PANEL_BACKGROUND: Color = Color(0.11, 0.10, 0.09)
-const PANEL_BORDER: Color = Color(0.45, 0.40, 0.32)
 const PANEL_WIDTH: float = 520.0
 
 var _can_save: bool = true
@@ -67,13 +65,6 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_BACKGROUND
-	style.border_color = PANEL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(20)
-	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
 
 	var stack := VBoxContainer.new()
