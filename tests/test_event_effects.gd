@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_every_effect_type_is_handled(t)
 	_test_grave_chain(t)
 	_test_deserter_chain(t)
+	_test_wolf_year_chain(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -402,3 +403,37 @@ func _test_deserter_chain(t) -> void:
 	t.eq(lucky.equipment_inventory.get(EquipmentCatalog.WEAPON_TIER_1, 0), 1, "kılıç depoya girdi")
 	t.not_ok(lucky.has_flag("deserters_met"), "zincir kapandı")
 	t.ge(float(gift.lines.size()), 0.0, "etki satırı")
+
+## Zincir C: etin bedeli ya geri ödenir ya sürüyle yüzleşilir. Son halka
+## iki bayrak ister ve vahşi hayvan savaşı açar.
+func _test_wolf_year_chain(t) -> void:
+	var session := GameSession.new(300, 30, 2)
+	session.danger_level = 0.5
+	var engine := EventEngine.new(EventCatalog.get_road_events(), 21)
+	t.ok(_has_event(engine.get_eligible_events(1, session.build_event_context()), "evt_carcass_on_road"), "tehlikeli yolda leş çıkabilir")
+	var carcass := EventCatalog.get_event("evt_carcass_on_road")
+	_pick(engine, session, carcass.choices[0])
+	t.ok(session.has_flag("wolf_scent"), "et kokusu işaretlendi")
+	t.ok(_has_event(engine.get_eligible_events(2, session.build_event_context()), "evt_wolves_follow"), "sürü peşe düştü")
+
+	# Eti bırakmak zinciri kapatır: kazanılan erzak tam geri verilir.
+	var dropper := GameSession.new(300, 30, 2)
+	var drop_engine := EventEngine.new(EventCatalog.get_road_events(), 22)
+	_pick(drop_engine, dropper, carcass.choices[0])
+	var before := dropper.get_provisions()
+	_pick(drop_engine, dropper, EventCatalog.get_event("evt_wolves_follow").choices[0])
+	t.eq(dropper.get_provisions(), before - 10, "et geri bırakıldı")
+	t.not_ok(dropper.has_flag("wolf_scent"), "koku kalktı")
+
+	var follow := EventCatalog.get_event("evt_wolves_follow")
+	var count: EventChoice = follow.choices[1]
+	t.ok(count.check != null, "saymak bir Sezgi zarı")
+	t.not_ok(_has_event(engine.get_eligible_events(3, session.build_event_context()), "evt_wolf_pack"), "sayılmadan sürü gelmez")
+	_take_outcome(engine, session, _outcome_for(engine, session, count, 0))
+	t.eq(session.caravan.damaged_wagons, 1, "zar tutmazsa bir koşum yaralanır")
+	t.ok(_has_event(engine.get_eligible_events(3, session.build_event_context()), "evt_wolf_pack"), "iki bayrakla sürü geldi")
+
+	var pack := EventCatalog.get_event("evt_wolf_pack")
+	var fight := EventEffectApplier.apply(pack.choices[0].effects, session)
+	t.eq(fight.combat_kinds, ["wildlife"] as Array[String], "sürüyle vahşi hayvan savaşı")
+	t.not_ok(session.has_flag("wolf_scent") or session.has_flag("wolves_counted"), "zincir kapandı")

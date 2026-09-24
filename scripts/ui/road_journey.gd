@@ -101,6 +101,7 @@ const ENCOUNTER_APPROACH_DAYS: float = 0.35
 ## bir figürü yok (bkz. yukarıdaki not).
 const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_wild_animal": "wildlife",
+	"evt_wolf_pack": "wildlife",
 	"evt_bandit_ambush": "bandit",
 	"evt_deserter_search": "guard",
 	"evt_deserter_plea": "traveler",
