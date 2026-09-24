@@ -427,9 +427,13 @@ static func wagon_driver_seat(base: Vector2, w: float, h: float) -> Vector2:
 ## `draw_driver` kapalıyken arabacı silüeti hiç çizilmiyor - kamp sırasında
 ## o koltuğu gerçek bir figür (bkz. RoadCaravan) alıyor, ikisi aynı anda
 ## çizilirse aynı kişi iki kez görünür.
+## `canopy_sway` brandanın tepesinin yana kayması (piksel): yolda giden
+## bir vagonun kumaşı tekerleğin ritmiyle hafifçe salınıyor. Taban
+## kasaya çakılı, kayma yükseklikle orantılı - kemer eğiliyor, kaymıyor.
 static func wagon(
 	canvas: CanvasItem, base: Vector2, w: float, h: float,
-	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true
+	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true,
+	canopy_sway: float = 0.0
 ) -> void:
 	var body := _tint(ArtPalette.WAGON_BODY, tint)
 	var dark := _tint(ArtPalette.WAGON_BODY_DARK, tint)
@@ -459,14 +463,18 @@ static func wagon(
 		var ratio := float(step) / float(steps)
 		var angle := PI * ratio
 		arch.append(Vector2(
-			base.x - cos(angle) * w * 0.44, hoop_top - sin(angle) * h * 0.62
+			base.x - cos(angle) * w * 0.44 + sin(angle) * canopy_sway,
+			hoop_top - sin(angle) * h * 0.62
 		))
 	inked(canvas, arch, cover, maxf(1.2, h * 0.035))
 	for rib in 4:
 		var ratio := 0.2 + float(rib) * 0.2
 		var angle := PI * ratio
 		canvas.draw_line(
-			Vector2(base.x - cos(angle) * w * 0.44, hoop_top - sin(angle) * h * 0.62),
+			Vector2(
+				base.x - cos(angle) * w * 0.44 + sin(angle) * canopy_sway,
+				hoop_top - sin(angle) * h * 0.62
+			),
 			Vector2(base.x - cos(angle) * w * 0.44, hoop_top),
 			cover.darkened(0.16), maxf(1.0, h * 0.022)
 		)
