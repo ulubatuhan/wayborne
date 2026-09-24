@@ -429,7 +429,7 @@ func _on_start_pressed() -> void:
 	var session: GameSession = GameState.get_session()
 	session.start_playthrough(character, _rng)
 
-	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
+	SceneInk.go(Nav.go_root(Nav.CITY_MAP))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

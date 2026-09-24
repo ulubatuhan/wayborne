@@ -265,7 +265,7 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
 ## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
@@ -278,4 +278,4 @@ func _add_recruit_button(venue: String, own_scene: String) -> void:
 	container.move_child(button, _back_button.get_index())
 
 func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	get_tree().change_scene_to_file(Nav.open_recruit(venue, own_scene))
+	SceneInk.go(Nav.open_recruit(venue, own_scene))

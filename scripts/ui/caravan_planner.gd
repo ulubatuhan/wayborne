@@ -316,7 +316,7 @@ func _on_buy_provisions_pressed() -> void:
 
 func _on_borrow_pressed() -> void:
 	Nav.guild_initial_tab = 1
-	get_tree().change_scene_to_file(Nav.open(Nav.CARAVAN_PLANNER, Nav.GUILD))
+	SceneInk.go(Nav.open(Nav.CARAVAN_PLANNER, Nav.GUILD))
 
 func _refresh() -> void:
 	_refresh_departure_morale()
@@ -396,10 +396,10 @@ func _on_confirm_pressed() -> void:
 		_route_danger,
 		_plan
 	)
-	get_tree().change_scene_to_file(Nav.go_root(Nav.JOURNEY))
+	SceneInk.go(Nav.go_root(Nav.JOURNEY))
 
 func _on_map_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.CARAVAN_PLANNER, Nav.TRAVEL))
+	SceneInk.go(Nav.open(Nav.CARAVAN_PLANNER, Nav.TRAVEL))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

@@ -397,7 +397,7 @@ func _on_continue_pressed() -> void:
 		return
 	GameState.set_session(session)
 	# Sefer ortasında alınmış bir otomatik kayıt yola döner (bkz. Nav.resume_scene).
-	get_tree().change_scene_to_file(Nav.resume_scene(session))
+	SceneInk.go(Nav.resume_scene(session))
 
 func _on_play_pressed() -> void:
 	if SaveManager.has_save():
@@ -416,13 +416,13 @@ func _confirm_new_game() -> void:
 ## Kayıt yalnızca karakter oluşturma tamamlanınca silinir; oyuncu geri
 ## dönerse eski kaydı yerinde durur.
 func _open_character_creation() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.CHARACTER_CREATION))
+	SceneInk.go(Nav.open(Nav.MAIN_MENU, Nav.CHARACTER_CREATION))
 
 func _on_saves_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.SAVES))
+	SceneInk.go(Nav.open(Nav.MAIN_MENU, Nav.SAVES))
 
 func _on_settings_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.MAIN_MENU, Nav.SETTINGS))
+	SceneInk.go(Nav.open(Nav.MAIN_MENU, Nav.SETTINGS))
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

@@ -154,10 +154,10 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_purification_panel.refresh()
 
 func _on_map_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.TAVERN, Nav.TRAVEL))
+	SceneInk.go(Nav.open(Nav.TAVERN, Nav.TRAVEL))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())
 
 ## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
 ## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
@@ -170,4 +170,4 @@ func _add_recruit_button(venue: String, own_scene: String) -> void:
 	container.move_child(button, _back_button.get_index())
 
 func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	get_tree().change_scene_to_file(Nav.open_recruit(venue, own_scene))
+	SceneInk.go(Nav.open_recruit(venue, own_scene))

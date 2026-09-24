@@ -569,7 +569,7 @@ func _enter_spot(spot: Dictionary) -> void:
 		Nav.city_gate_opening = true
 		# Şehre giriş mürekkepte bir an bekliyor: "vardık" anı (bkz. SceneInk).
 		SceneInk.hold_next(ARRIVAL_INK_HOLD)
-	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
+	SceneInk.go(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 ## Sahne değiştirmez - `MealDistributionPanel` gibi sahnesiz bir overlay,
 ## çünkü bu bir gezinme adımı değil, vagonun yanında durup içine bakmak.
@@ -613,7 +613,7 @@ func _refresh_status() -> void:
 	_stress_bar.set_value(session.party_stress, GameSession.MAX_STRESS)
 
 func _on_party_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, Nav.PARTY))
+	SceneInk.go(Nav.open(Nav.WORLD_HUB, Nav.PARTY))
 
 ## Eskiden dosdoğru ana menüye atlıyordu - playtest'in "menüye dönünce ana
 ## menüye gitmeyelim direkt" şikâyeti (bkz. InGameMenu). Burada hiçbir

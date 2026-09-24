@@ -44,7 +44,7 @@ func _on_test_button_pressed(scene_path: String) -> void:
 	# seni oraya döndürür (bkz. Nav gezinme yığını).
 	var current := get_tree().current_scene
 	var from_path: String = "" if current == null else current.scene_file_path
-	get_tree().change_scene_to_file(Nav.open(from_path, scene_path))
+	SceneInk.go(Nav.open(from_path, scene_path))
 
 func _on_close_pressed() -> void:
 	DevPanel.hide_panel()

@@ -31,6 +31,7 @@ func run(t) -> void:
 	_roots = []
 	for root in nav.ROOTS:
 		_roots.append(String(root))
+	_test_scene_changes_go_through_one_door(t)
 
 	var edges := _extract_edges(nav)
 	t.ok(edges.size() >= 10, "kaynaktan anlamlı sayıda geçiş çıkarıldı (%d)" % edges.size())
@@ -178,7 +179,7 @@ func _test_every_screen_has_an_exit(t, nav) -> void:
 			continue
 		var source := _read(script_path)
 		var has_exit := (
-			source.contains("change_scene_to_file")
+			source.contains("SceneInk.go(")
 			or source.contains("get_tree().quit()")
 		)
 		t.ok(has_exit, "ekranın çıkışı var: %s" % script_path)
@@ -520,3 +521,46 @@ func _has_ancestor_of_class(node: Node, cls: String) -> bool:
 			return true
 		parent = parent.get_parent()
 	return false
+
+## Sahne değiştirmenin tek kapısı SceneInk.go: geçiş (resim + mürekkep ya da
+## sayfa çevirme) orada. Bir ekran change_scene_to_file'ı doğrudan çağırırsa
+## o geçiş sessizce kesilir - aynı "bir ekran eninde sonunda unutur" gerekçe.
+func _test_scene_changes_go_through_one_door(t) -> void:
+	var offenders: Array[String] = []
+	for path in _all_scripts("res://scripts"):
+		if path.ends_with("scene_ink.gd"):
+			continue
+		var source := _read(path)
+		for line in source.split("\n"):
+			if line.strip_edges().begins_with("#"):
+				continue
+			if line.contains("change_scene_to_file("):
+				offenders.append(path)
+				break
+	t.eq(offenders, [] as Array[String], "sahne yalnızca SceneInk.go ile değişiyor")
+
+	var ink: GDScript = load("res://scripts/autoload/scene_ink.gd")
+	t.eq(ink.transition_kind(Nav.MOVE_OPEN), ink.Kind.SLIDE_IN, "derine inmek sayfa çevirir")
+	t.eq(ink.transition_kind(Nav.MOVE_BACK), ink.Kind.SLIDE_BACK, "geri dönmek sayfayı geri çevirir")
+	t.eq(ink.transition_kind(Nav.MOVE_ROOT), ink.Kind.FADE, "köke gitmek mürekkebe batar")
+	t.eq(ink.transition_kind(Nav.MOVE_OPEN, true), ink.Kind.FADE, "hareketi azalt açıkken kayma yok")
+	Nav.reset()
+	Nav.open(Nav.CITY_MAP, Nav.GUILD)
+	t.eq(Nav.last_move, Nav.MOVE_OPEN, "open hareketi kaydediyor")
+	Nav.back()
+	t.eq(Nav.last_move, Nav.MOVE_BACK, "köke geri dönmek de 'geri'")
+	Nav.open(Nav.GUILD, Nav.CITY_MAP)
+	t.eq(Nav.last_move, Nav.MOVE_ROOT, "köke açılan kapı 'kök'")
+	Nav.reset()
+
+func _all_scripts(root: String) -> Array[String]:
+	var found: Array[String] = []
+	var dir := DirAccess.open(root)
+	if dir == null:
+		return found
+	for file_name in dir.get_files():
+		if file_name.ends_with(".gd"):
+			found.append(root.path_join(file_name))
+	for sub in dir.get_directories():
+		found.append_array(_all_scripts(root.path_join(sub)))
+	return found

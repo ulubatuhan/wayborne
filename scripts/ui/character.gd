@@ -432,4 +432,4 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

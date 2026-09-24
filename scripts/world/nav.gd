@@ -55,6 +55,14 @@ const MAX_DEPTH: int = 16
 
 static var _stack: Array[String] = []
 
+## Son hareketin türü - SceneInk sayfanın hangi yöne çevrileceğini buradan
+## okuyor (derine: sola, geri: sağa, köke: mürekkep). Yığın derinliği
+## yetmiyordu: köke *geri* dönmek de köke *gitmek* de yığını boşaltıyor.
+const MOVE_OPEN: String = "open"
+const MOVE_BACK: String = "back"
+const MOVE_ROOT: String = "root"
+static var last_move: String = MOVE_ROOT
+
 ## Tayfa ekranını açan mekân (RecruitCatalog.VENUE_*). Aday havuzu ve
 ## ücretler buna göre değişir - bu bir gezinme değil, taşınan veri.
 static var recruit_venue: String = "tavern"
@@ -86,6 +94,7 @@ static var guild_initial_tab: int = 0
 ## geçmiş sıfırlanır ve eski bir yol yanlışlıkla miras kalmaz.
 static func go_root(scene_path: String) -> String:
 	_stack.clear()
+	last_move = MOVE_ROOT
 	return scene_path
 
 ## Bir kayıt yüklendiğinde nereye gidilir: sefer ortasında kaydedilmişse
@@ -111,12 +120,14 @@ static func open(from_scene: String, to_scene: String) -> String:
 		_stack.append(from_scene)
 		if _stack.size() > MAX_DEPTH:
 			_stack.remove_at(0)
+	last_move = MOVE_OPEN
 	return to_scene
 
 ## Geri: bir seviye çıkar. Yığın boşsa kökten birine düşülür - bir ekran
 ## "geri" tuşu gösterip hiçbir yere götürmemektense her zaman bir yere
 ## götürmeli.
 static func back() -> String:
+	last_move = MOVE_BACK
 	if _stack.is_empty():
 		return FALLBACK_ROOT
 	return _stack.pop_back()
