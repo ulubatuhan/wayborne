@@ -36,7 +36,13 @@ func _init() -> void:
 
 	var candidates: Array[CharacterData] = session.party.duplicate()
 	var succession := SuccessionPanel.new()
-	succession.setup(session.caravan_name, "Ahmet", "Ahmet — kurtlara yem oldu, Kurtboğazı yakınında (gün 43)", candidates, 3)
+	var testimony := {}
+	for index in candidates.size():
+		testimony[candidates[index]] = {"served_days": 43 - index * 20, "benched": index == 1}
+	succession.setup(
+		session.caravan_name, "Ahmet", "Ahmet — kurtlara yem oldu, Kurtboğazı yakınında (gün 43)",
+		candidates, 3, testimony
+	)
 	get_root().add_child(succession)
 	# Mürekkep darbesi yarı yoldayken ve bittikten sonra.
 	await _wait_seconds(0.9)

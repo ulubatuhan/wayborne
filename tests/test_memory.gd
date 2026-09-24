@@ -28,6 +28,7 @@ func run(t) -> void:
 	_test_unfed_crew_can_starve(t)
 	_test_heir_is_chosen_and_passing_over_costs(t)
 	_test_seniority_is_time_served(t)
+	_test_succession_testimony_and_shared_grief(t)
 	_test_named_crew_die_with_their_wagon(t)
 	_test_profiteering_is_remembered(t)
 	_test_leave_behind_and_party_hp(t)
@@ -413,6 +414,51 @@ func _test_unfed_crew_can_starve(t) -> void:
 	t.eq(fed.crew_hungry_nights, 0, "doğru doyuran kervanda sayaç hiç artmaz")
 
 # --- S11: liderlik seçimi ---
+
+## Tören adaylar hakkında defterin bildiğini söylüyor; uzun süre birlikte
+## yürümüş olanın yası daha ağır, ama kırgınlık herkese eşit.
+func _test_succession_testimony_and_shared_grief(t) -> void:
+	var session := _session()
+	session.owned_wagon_count = 3
+	var veteran := _companion(session)
+	session.total_days_elapsed = 50
+	var newcomer := CharacterData.create("Yeni Gelen", CultureCatalog.VALLEY, CharacterStats.new())
+	session.add_to_party(newcomer)
+	session.total_days_elapsed = 55
+	t.eq(session.get_days_served_under_leader(veteran), 55, "baştan beri hizmet")
+	t.eq(session.get_days_served_under_leader(newcomer), 5, "beş gündür burada")
+	t.eq(session.get_shared_days(veteran, newcomer), 5, "birlikte geçen gün")
+
+	var veteran_stress := veteran.stress
+	var newcomer_stress := newcomer.stress
+	var leader := session.get_player_character()
+	session.resolve_deaths([leader] as Array[CharacterData], "LEDGER_CAUSE_COMBAT")
+	t.eq(
+		veteran.stress - veteran_stress, GameSession.SHARED_GRIEF_STRESS,
+		"uzun süre birlikte yürüyen daha ağır yas tutar"
+	)
+	t.eq(newcomer.stress, newcomer_stress, "dün gelen için ek yas yok")
+	t.eq(
+		veteran.grievances.get(CharacterData.GRIEVANCE_WITNESSED_DEATH, 0),
+		newcomer.grievances.get(CharacterData.GRIEVANCE_WITNESSED_DEATH, 0),
+		"kırgınlık herkese eşit"
+	)
+
+	var line := SuccessionPanel.candidate_line(veteran, true, 55, false)
+	t.ok(line.contains("55"), "tören hizmet gününü söylüyor")
+	var benched_line := SuccessionPanel.candidate_line(newcomer, false, 5, true)
+	t.ok(
+		benched_line.contains(tr_key("UI_SUCCESSION_BENCHED")),
+		"savaşın dışında tutulan söyleniyor"
+	)
+	t.eq(
+		SuccessionPanel.candidate_line(newcomer, false),
+		SuccessionPanel.candidate_line(newcomer, false, -1, false),
+		"tanıksız çağrı eski satırı verir"
+	)
+
+func tr_key(key: String) -> String:
+	return String(TranslationServer.translate(key))
 
 ## Kıdem hizmet süresidir: geç gelen yüksek seviyeli biri, baştan beri
 ## yürüyen düşük seviyeli yoldaşın önüne geçemez. Aynı gün katılanlarda

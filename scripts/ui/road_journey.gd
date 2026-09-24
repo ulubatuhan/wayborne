@@ -2113,7 +2113,9 @@ func _report_combat_deaths(dead_characters: Array) -> void:
 		var character: CharacterData = entry
 		typed.append(character)
 	var cause := "LEDGER_CAUSE_COMBAT_%s" % _current_combat_kind.to_upper()
+	_death_from_combat = true
 	_handle_death_outcome(_session.resolve_deaths(typed, cause, _session.journey_destination_id))
+	_death_from_combat = false
 
 ## Ölümün ekrandaki tek kapısı - savaş da açlık da buradan geçer. Kimin
 ## öldüğünü sebebiyle yazar; lider öldüyse varisi oyuncuya seçtirir.
@@ -2141,7 +2143,25 @@ func _handle_death_outcome(outcome: Dictionary) -> void:
 		for candidate in (outcome.get("heir_candidates", []) as Array):
 			candidates.append(candidate)
 		var fallen_name := String(dead_names[0]) if not dead_names.is_empty() else ""
-		_open_succession_panel(fallen_name, _fallen_leader_line(fallen_name), candidates)
+		_open_succession_panel(
+			fallen_name, _fallen_leader_line(fallen_name), candidates,
+			_succession_testimony(candidates)
+		)
+
+## Ölüm bir savaştan mı geldi - törenin "savaşın dışında tutuldu" satırı
+## yalnızca o zaman anlamlı (açlıkta kimse savaşın dışında tutulmadı).
+var _death_from_combat: bool = false
+
+## Her aday için törenin söyleyeceği: düşen liderin döneminde kaç gün
+## hizmet etti, liderin öldüğü savaşın dışında mı tutuldu.
+func _succession_testimony(candidates: Array[CharacterData]) -> Dictionary:
+	var testimony := {}
+	for candidate in candidates:
+		testimony[candidate] = {
+			"served_days": _session.get_days_served_under_leader(candidate),
+			"benched": _death_from_combat and not _current_combat_party.has(candidate),
+		}
+	return testimony
 
 ## Düşen liderin defterdeki satırı (sebep ve yer), törende adının altında.
 func _fallen_leader_line(fallen_name: String) -> String:
@@ -2323,7 +2343,8 @@ func _close_debt_panel() -> void:
 ## eklendiği için `_check_journey_end()` ve zaman akışı bu ekranda durur,
 ## aynı `_in_game_menu`'nün yaptığı gibi.
 func _open_succession_panel(
-	fallen_name: String, fallen_line: String, candidates: Array[CharacterData]
+	fallen_name: String, fallen_line: String, candidates: Array[CharacterData],
+	testimony: Dictionary = {}
 ) -> void:
 	_succession_panel = SuccessionPanel.new()
 	_succession_panel.heir_chosen.connect(_on_heir_chosen)
@@ -2331,7 +2352,7 @@ func _open_succession_panel(
 	add_child(_succession_panel)
 	_succession_panel.setup(
 		_session.get_caravan_name(), fallen_name, fallen_line,
-		candidates, _session.lineage_generation + 1
+		candidates, _session.lineage_generation + 1, testimony
 	)
 
 func _on_heir_chosen(heir) -> void:

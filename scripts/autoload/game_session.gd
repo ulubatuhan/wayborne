@@ -660,6 +660,31 @@ func _compare_seniority(a: CharacterData, b: CharacterData) -> bool:
 		return a.level > b.level
 	return a.xp > b.xp
 
+## Uzun süre birlikte yürümüş olanın yası daha ağır. Kırgınlık herkese
+## eşit yazılıyor (ölüm görüldü), ama dün katılanla iki yüz gündür aynı
+## yolu yürüyen aynı ölümü aynı yükle taşımıyor. Ağırlık kalıcı kırgınlığa
+## değil strese biniyor - stres handa erir, kırgınlık erimez, ve Stress
+## Rules'un ölçülmüş ayrılma tavanı böylece yerinde kalıyor.
+const SHARED_GRIEF_DAYS: int = 30
+const SHARED_GRIEF_STRESS: int = PASSED_OVER_STRESS / 3
+
+func _apply_shared_grief(survivor: CharacterData, dead: Array[CharacterData]) -> void:
+	for fallen in dead:
+		if fallen == null or fallen == survivor:
+			continue
+		if get_shared_days(survivor, fallen) >= SHARED_GRIEF_DAYS:
+			change_character_stress(survivor, SHARED_GRIEF_STRESS)
+
+## İki kişinin aynı kervanda geçirdiği gün sayısı, defterden.
+func get_shared_days(a: CharacterData, b: CharacterData) -> int:
+	return maxi(0, total_days_elapsed - maxi(get_join_day(a), get_join_day(b)))
+
+## Adayın, o an lider olan kişinin döneminde kaç gün hizmet ettiği.
+## Veraset töreni bunu okuyor: lider öldükten sonra, varis atanmadan önce
+## `leader_since_day` hâlâ düşenin dönemini gösteriyor.
+func get_days_served_under_leader(candidate: CharacterData) -> int:
+	return maxi(0, total_days_elapsed - maxi(get_join_day(candidate), leader_since_day))
+
 ## Kişinin deftere ilk katıldığı gün. Katılma satırı olmayan (partiye
 ## doğrudan yerleştirilmiş, ya da ilk lider) 0 sayılır: en eski dönemden.
 func get_join_day(character: CharacterData) -> int:
@@ -733,6 +758,7 @@ func resolve_deaths(
 
 	for survivor in party:
 		survivor.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH, died_count)
+		_apply_shared_grief(survivor, dead)
 
 	if not leader_died:
 		return result
