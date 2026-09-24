@@ -646,12 +646,31 @@ func _ledger_location_id() -> String:
 ## ve tek koşulu "ölen liderin yerine geçecek kimse kalmamış" olması.
 const RUN_OVER_FLAG: String = "run_ended_leader_lost"
 
-## Kıdem = seviye, eşitlikte XP. Parti sırası değil: o sıra savaş mevkisi,
-## kıdem göstergesi değil (bkz. Character & Party Rules).
+## Kıdem = hizmet süresi: deftere en erken katılan en kıdemli. Seviye
+## eşitlikte karar verir. Eskiden kıdem seviyeydi, yani loncadan geç ama
+## yüksek seviyeli tutulan biri kurucudan beri yürüyen bir yoldaşın önüne
+## geçiyordu - "kıdem" kelimesinin tam tersi. Parti sırası değil: o sıra
+## savaş mevkisi (bkz. Character & Party Rules).
 func _compare_seniority(a: CharacterData, b: CharacterData) -> bool:
+	var a_joined := get_join_day(a)
+	var b_joined := get_join_day(b)
+	if a_joined != b_joined:
+		return a_joined < b_joined
 	if a.level != b.level:
 		return a.level > b.level
 	return a.xp > b.xp
+
+## Kişinin deftere ilk katıldığı gün. Katılma satırı olmayan (partiye
+## doğrudan yerleştirilmiş, ya da ilk lider) 0 sayılır: en eski dönemden.
+func get_join_day(character: CharacterData) -> int:
+	var earliest := -1
+	for entry in ledger.entries_for_id(character.character_id, character.character_name):
+		if String(entry.get("kind", "")) != CaravanLedger.KIND_JOINED:
+			continue
+		var day := int(entry.get("day", 0))
+		if earliest < 0 or day < earliest:
+			earliest = day
+	return maxi(0, earliest)
 
 ## Savaşta kalıcı ölenleri partiden çıkarır, gerekiyorsa liderliği devreder.
 ## Dönen sözlük ekranın anlatması gerekenleri taşır:
