@@ -70,4 +70,4 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_purification_panel.refresh()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

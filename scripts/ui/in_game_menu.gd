@@ -124,7 +124,7 @@ func _on_saves_back_pressed() -> void:
 
 func _on_save_loaded(session) -> void:
 	GameState.set_session(session)
-	get_tree().change_scene_to_file(Nav.resume_scene(session))
+	SceneInk.go(Nav.resume_scene(session))
 
 func _on_quit_pressed() -> void:
 	if _confirm_dialog == null:
@@ -135,7 +135,7 @@ func _on_quit_pressed() -> void:
 	_confirm_dialog.popup_centered()
 
 func _on_quit_confirmed() -> void:
-	get_tree().change_scene_to_file(Nav.go_root(Nav.MAIN_MENU))
+	SceneInk.go(Nav.go_root(Nav.MAIN_MENU))
 
 ## Perdeye tıklamak da kapatır - OnboardingPanel'in aynı gerekçesi.
 func _on_backdrop_input(event: InputEvent) -> void:

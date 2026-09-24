@@ -68,7 +68,7 @@ func _build_brief() -> void:
 
 func _on_planner_requested(destination_id: String) -> void:
 	TravelContext.selected_destination_id = destination_id
-	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.CARAVAN_PLANNER))
+	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.CARAVAN_PLANNER))
 
 ## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
 ## mahsus, atlanabilir bir ipucu katmanı gösterir (bkz. OnboardingPanel,
@@ -168,10 +168,10 @@ func _build_spots() -> void:
 	_city_view.setup(_session)
 
 func _on_spot_pressed(scene_path: String) -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, scene_path))
+	SceneInk.go(Nav.open(Nav.CITY_MAP, scene_path))
 
 func _on_party_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.open(Nav.CITY_MAP, Nav.PARTY))
+	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.PARTY))
 
 func _on_gate_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.go_root(Nav.WORLD_HUB))
+	SceneInk.go(Nav.go_root(Nav.WORLD_HUB))

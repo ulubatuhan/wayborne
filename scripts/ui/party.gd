@@ -250,7 +250,7 @@ func _on_dismiss_pressed(character: CharacterData) -> void:
 ## Karakter ekranı yalnızca buradan açılıyor ve buraya dönüyor - dönüş
 func _on_character_pressed(index: int) -> void:
 	Nav.character_target_index = index
-	get_tree().change_scene_to_file(Nav.open(Nav.PARTY, Nav.CHARACTER))
+	SceneInk.go(Nav.open(Nav.PARTY, Nav.CHARACTER))
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():
@@ -258,4 +258,4 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

@@ -2603,7 +2603,7 @@ func _on_enter_city_pressed() -> void:
 	Nav.city_gate_opening = true
 	# Şehre giriş mürekkepte bir an bekliyor: "vardık" anı (bkz. SceneInk).
 	SceneInk.hold_next(ARRIVAL_INK_HOLD)
-	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
+	SceneInk.go(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve
 ## eylemler kilitlenir - olay çözülmeden yol devam etmemeli.
@@ -2710,4 +2710,4 @@ func _on_back_pressed() -> void:
 	if _is_live_journey:
 		_open_in_game_menu()
 	else:
-		get_tree().change_scene_to_file(Nav.back())
+		SceneInk.go(Nav.back())

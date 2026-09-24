@@ -89,4 +89,4 @@ func _refresh_texts() -> void:
 	_back_button.text = tr("UI_BACK_TO_MENU")
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())

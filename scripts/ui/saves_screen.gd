@@ -27,7 +27,7 @@ func _ready() -> void:
 
 func _on_loaded(session) -> void:
 	GameState.set_session(session)
-	get_tree().change_scene_to_file(Nav.resume_scene(session))
+	SceneInk.go(Nav.resume_scene(session))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(Nav.back())
+	SceneInk.go(Nav.back())
