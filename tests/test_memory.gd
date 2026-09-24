@@ -27,6 +27,7 @@ func run(t) -> void:
 	_test_starvation_can_kill(t)
 	_test_unfed_crew_can_starve(t)
 	_test_heir_is_chosen_and_passing_over_costs(t)
+	_test_seniority_is_time_served(t)
 	_test_named_crew_die_with_their_wagon(t)
 	_test_profiteering_is_remembered(t)
 	_test_leave_behind_and_party_hp(t)
@@ -412,6 +413,35 @@ func _test_unfed_crew_can_starve(t) -> void:
 	t.eq(fed.crew_hungry_nights, 0, "doğru doyuran kervanda sayaç hiç artmaz")
 
 # --- S11: liderlik seçimi ---
+
+## Kıdem hizmet süresidir: geç gelen yüksek seviyeli biri, baştan beri
+## yürüyen düşük seviyeli yoldaşın önüne geçemez. Aynı gün katılanlarda
+## seviye karar verir.
+func _test_seniority_is_time_served(t) -> void:
+	var session := _session()
+	session.owned_wagon_count = 3
+	var veteran := _companion(session)
+	veteran.level = 1
+	session.total_days_elapsed = 40
+	var late := CharacterData.create("Geç Gelen", CultureCatalog.VALLEY, CharacterStats.new())
+	late.level = 9
+	session.add_to_party(late)
+	t.ok(session.get_join_day(veteran) < session.get_join_day(late), "katılış günleri defterden")
+	var leader := session.get_player_character()
+	var outcome := session.resolve_deaths([leader] as Array[CharacterData], "LEDGER_CAUSE_COMBAT")
+	t.eq((outcome["heir_candidates"] as Array)[0], veteran, "baştan beri yürüyen kıdemli")
+
+	var same_day := _session()
+	same_day.owned_wagon_count = 3
+	var low := _companion(same_day)
+	var high := CharacterData.create("Aynı Gün", CultureCatalog.VALLEY, CharacterStats.new())
+	high.level = 4
+	same_day.add_to_party(high)
+	var tie := same_day.resolve_deaths(
+		[same_day.get_player_character()] as Array[CharacterData], "LEDGER_CAUSE_COMBAT"
+	)
+	t.eq((tie["heir_candidates"] as Array)[0], high, "aynı gün katılanlarda seviye karar verir")
+	t.ne(low, high, "iki ayrı aday")
 
 func _test_heir_is_chosen_and_passing_over_costs(t) -> void:
 	var session := _session()
