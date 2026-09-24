@@ -10,8 +10,7 @@ extends RefCounted
 const SHIELD_BASH: String = "shield_bash"
 const SPEAR_THRUST: String = "spear_thrust"
 const SLING_SHOT: String = "sling_shot"
-const RALLY: String = "rally"
-const TAKE_COVER: String = "take_cover"
+const BRACE: String = "brace"
 
 # Oyuncu yetenekleri - Sekban
 const ARROW_SHOT: String = "arrow_shot"
@@ -27,7 +26,6 @@ const SWEEPING_BLOW: String = "sweeping_blow"
 
 # Oyuncu yetenekleri - Kalem Efendisi
 const ROUSING_SPEECH: String = "rousing_speech"
-const TALLY_RECKON: String = "tally_reckon"
 const CUTTING_WORD: String = "cutting_word"
 const KEEP_LEDGER: String = "keep_ledger"
 const BLIGHT_FLASK: String = "blight_flask"
@@ -100,23 +98,13 @@ static func _ensure_built() -> void:
 		7, 4, -5, 5
 	))
 
-	var rally := CombatSkill.new()
-	rally.skill_id = RALLY
-	rally.display_name_key = "SKILL_RALLY_NAME"
-	rally.description_key = "SKILL_RALLY_DESC"
-	rally.target_kind = CombatSkill.Target.ALLY
-	rally.usable_positions = CombatSkill.to_position_array([2, 3, 4])
-	rally.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
-	rally.heal_amount = 8
-	rally.damage_variance = 2
-	rally.cooldown_rounds = 2
-	rally.scales_with_support = true
-	_skills.append(rally)
-
+	# Sıra Neferi'nin tek desteği zırh: kendini ya da hemen yanındakini
+	# siper eder. İyileştirme artık yalnızca Kalem Efendisi'nin işi - bir
+	# muhafızın şifacıdan iyi sarması iki sınıfı aynı sınıfa çeviriyordu.
 	_skills.append(CombatSkill.make_buff(
-		TAKE_COVER, "SKILL_TAKE_COVER_NAME", "SKILL_TAKE_COVER_DESC",
-		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
-		"dodge", 10, 2, 3
+		BRACE, "SKILL_BRACE_NAME", "SKILL_BRACE_DESC",
+		CombatSkill.Target.ALLY, [1, 2], [1, 2],
+		"prot", 20, 2, 2
 	))
 
 	_skills.append(CombatSkill.make_attack(
@@ -149,11 +137,13 @@ static func _ensure_built() -> void:
 		10, 2, -5, 15, 3
 	), CombatUnit.STATUS_BLEED, 3, 3, 70))
 
-	_skills.append(CombatSkill.make_buff(
+	# Geri Adım gerçekten geri adım atıyor: öne itilmiş bir okçunun
+	# menziline dönmesinin yolu.
+	_skills.append(CombatSkill.with_area(CombatSkill.make_buff(
 		STEP_BACK, "SKILL_STEP_BACK_NAME", "SKILL_STEP_BACK_DESC",
 		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
 		"dodge", 6, 1, 2
-	))
+	), CombatSkill.Area.SINGLE, 1))
 
 	_skills.append(CombatSkill.make_attack(
 		SLEDGE_STRIKE,
@@ -169,7 +159,7 @@ static func _ensure_built() -> void:
 		"SKILL_SHIELD_BREAK_DESC",
 		[1, 2], [1, 2],
 		6, 2, 0, 0, 2,
-		"dodge", -6, 2
+		"prot", -25, 2
 	))
 
 	_skills.append(CombatSkill.make_buff(
@@ -195,19 +185,13 @@ static func _ensure_built() -> void:
 	rousing_speech.display_name_key = "SKILL_ROUSING_SPEECH_NAME"
 	rousing_speech.description_key = "SKILL_ROUSING_SPEECH_DESC"
 	rousing_speech.target_kind = CombatSkill.Target.ALLY
-	rousing_speech.usable_positions = CombatSkill.to_position_array([3, 4])
+	rousing_speech.usable_positions = CombatSkill.to_position_array([2, 3, 4])
 	rousing_speech.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
-	rousing_speech.heal_amount = 6
+	rousing_speech.heal_amount = 9
 	rousing_speech.damage_variance = 2
 	rousing_speech.cooldown_rounds = 2
 	rousing_speech.scales_with_support = true
 	_skills.append(rousing_speech)
-
-	_skills.append(CombatSkill.make_buff(
-		TALLY_RECKON, "SKILL_TALLY_RECKON_NAME", "SKILL_TALLY_RECKON_DESC",
-		CombatSkill.Target.SELF, [2, 3, 4], [],
-		"accuracy", 10, 2, 3
-	))
 
 	_skills.append(CombatSkill.make_attack(
 		CUTTING_WORD,
@@ -221,7 +205,7 @@ static func _ensure_built() -> void:
 	_skills.append(CombatSkill.make_buff(
 		KEEP_LEDGER, "SKILL_KEEP_LEDGER_NAME", "SKILL_KEEP_LEDGER_DESC",
 		CombatSkill.Target.ALLY, [3, 4], [1, 2, 3, 4],
-		"dodge", 8, 2, 3
+		"accuracy", 10, 2, 3
 	))
 
 	# Kalem Efendisi'nin zehirli şişesi: oyuncu tarafındaki tek zehir

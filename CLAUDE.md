@@ -2119,6 +2119,35 @@ goal - "eşkıya kaynayan yolda gerçekten kaybedebilsin" - not away from it,
 and `DEFAULT_DEATHBLOW_RESIST` stays at 67, untouched, because it was never
 the problem.
 
+**The class-identity pass (T-04) re-measured the table, and one cell is
+knowingly outside the target band.** Each class now owns one buff axis
+and one debuff axis (Guard: armour given; Hunter: dodge; Breaker: damage
+given, armour broken; Clerk: accuracy, and the only heal) - see Combat
+Rules. Same seeds, same greedy policy:
+
+| party | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 53% | 55% | 23% | 23% |
+| 2 | 100% | 70% | 52% | 52% |
+| 3 | 100% | 97% | 70% | 70% |
+| 4 | 100% | 100% | 92% | 92% |
+
+Party 2 at 65%/90% is +9pp against a ±8pp target. It was traced, not
+guessed: the matrix fields an all-Guard party (the default class), and
+the greedy policy spent the rank-2 Guard's turn on an 8-point `rally` heal
+whenever the front fell under half HP. Removing that heal returns the turn
+to `spear_thrust`, which is worth more. Guard HP (6 → 4) and spear crit
+(3 → 0) were each tried and left the cell at 52%; spear damage 9 → 8
+brought it back but dropped the unarmed lone traveller 12pp and the
+level curve 14pp, a larger distortion than the one it fixed. The cell
+moves one battle in sixty beyond the band, in the direction the game
+already wants for the starting pair. A policy that also casts buffs was
+tried and **reverted**: casting whenever the cooldown ends halves the
+attack rate and crashed every cell (party 4 at 65% → 52%) - it measured
+its own rule, not the kits. The level table moved 45/62/70/75 →
+42/53/68/70 (mixed pairs lost the Guard's heal) and the progression
+ladder's first rung 57% → 70%.
+
 ### Progression Rules
 
 "Levelling should feel like progress" was the open question after the ruin

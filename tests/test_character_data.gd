@@ -100,7 +100,7 @@ func _test_class_and_skills(t) -> void:
 	var character := CharacterData.create("Muhafız", CultureCatalog.VALLEY, CharacterStats.new())
 
 	t.eq(character.class_id, ClassCatalog.GUARD, "varsayılan sınıf Sıra Neferi")
-	t.eq(character.get_skills().size(), 5, "sıra neferinin beş yeteneği var")
+	t.eq(character.get_skills().size(), 4, "sıra neferinin dört yeteneği var")
 	t.ne(ClassCatalog.get_character_class_or_default("yok"), null, "sınıf çözümlemesi null dönmez")
 
 	var height_clamped := CharacterData.create("Dev", CultureCatalog.NOMAD, CharacterStats.new(), 999, 0)
