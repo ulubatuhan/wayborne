@@ -32,6 +32,26 @@ extends Resource
 func is_available(context: Dictionary) -> bool:
 	return EventCondition.are_all_met(requirements, context)
 
+## "Neredeyse": kilitli ama tek bir sayısal eşiğin hemen altında (eksik
+## eşiğin çeyreği ya da 1 birim, hangisi büyükse). Kilitli seçenek zaten
+## sebebini söylüyor; bu, sebebin "az kaldı" mı yoksa "çok uzak" mı
+## olduğunu ayırıyor - oyuncu bir dahaki sefere neyi hazırlayacağını
+## bilsin (bkz. Event Engine Rules'un kilitli seçenek maddesi).
+const NEAR_MISS_RATIO: float = 0.25
+
+func is_near_miss(context: Dictionary) -> bool:
+	var unmet: EventCondition = null
+	for condition in requirements:
+		if condition.is_met(context):
+			continue
+		if unmet != null:
+			return false
+		unmet = condition
+	if unmet == null or unmet.op != EventCondition.Op.GREATER_EQUAL or not context.has(unmet.key):
+		return false
+	var shortfall := unmet.value - float(context[unmet.key])
+	return shortfall > 0.0 and shortfall <= maxf(1.0, absf(unmet.value) * NEAR_MISS_RATIO)
+
 ## Butonun üstünde gösterilecek "Zeka · %72" gibi bir önizleme - check
 ## yoksa boş döner. `stat_value` çağıran tarafından context'ten okunur
 ## (bkz. road_journey.gd), çünkü EventChoice bir Resource, GameSession'a

@@ -13,6 +13,10 @@ extends Node
 ## görmeyebilir.
 
 const THEME_SCRIPT_PATH: String = "res://scripts/ui/waybook_theme.gd"
+## Düğmenin eldeki hissi (bkz. ButtonFeedback) - her düğmeye burada, aynı
+## kapıdan takılıyor. `class_name` ile anılmıyor (autoload kuralı).
+const FEEDBACK_SCRIPT_PATH: String = "res://scripts/ui/button_feedback.gd"
+var _feedback_script: Script
 
 func _init() -> void:
 	load(THEME_SCRIPT_PATH).install()
@@ -29,6 +33,10 @@ func _ready() -> void:
 	get_tree().node_added.connect(_on_node_added)
 
 func _on_node_added(node: Node) -> void:
+	if node is BaseButton:
+		if _feedback_script == null:
+			_feedback_script = load(FEEDBACK_SCRIPT_PATH)
+		_feedback_script.attach(node)
 	if node.get_class() != "Button":
 		return
 	var button := node as Button

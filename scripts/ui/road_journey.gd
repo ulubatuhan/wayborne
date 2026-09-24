@@ -19,6 +19,13 @@ const SYNTHETIC_PARTY_CULTURES: Array[String] = [
 ]
 
 const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
+## Seçenek işaretleri (bkz. _mark_choice): stat amblemi ve savaş şeridi.
+const CHOICE_ICON_SIZE: int = 22
+const CHOICE_STRIPE_WIDTH: float = 4.0
+## Şerit sekmenin süslü köşesinin içinde, koyu yüzünde duruyor - kenarda
+## köşe süsünün üstüne biniyordu (ekran görüntüsünde ölçüldü).
+const CHOICE_STRIPE_INSET_X: float = 14.0
+const CHOICE_STRIPE_INSET_Y: float = 9.0
 const IMMEDIATE_COLOR: Color = Color(0.95, 0.8, 0.45)
 const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 
@@ -1861,12 +1868,41 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		button.text = label
 		button.pressed.connect(_on_choice_pressed.bind(choice))
 	else:
-		# Kilitli seçenek gizlenmez: oyuncu neyi kaçırdığını görsün.
+		# Kilitli seçenek gizlenmez: oyuncu neyi kaçırdığını görsün. Az
+		# kalmışsa sebebi vurgu renginde - "neredeyse" ile "çok uzak" aynı
+		# gri olunca hangi eksiğin kapatılmaya değdiği okunmuyordu.
 		button.text = "%s — %s" % [label, tr(choice.unavailable_text_key)]
 		button.disabled = true
-		button.modulate = LOCKED_COLOR
+		if choice.is_near_miss(context):
+			button.add_theme_color_override("font_disabled_color", ArtPalette.UI_ACCENT)
+		else:
+			button.modulate = LOCKED_COLOR
 
+	_mark_choice(button, choice)
 	return button
+
+## Seçeneğin türü metinden önce, bir bakışta: savaş açabilen seçeneğin
+## solunda kan renginde bir şerit, zara bağlı seçeneğin başında zarı atan
+## statın amblemi (bkz. WaybookIcons.STAT_EMBLEMS - karakter ekranının
+## aynı amblemi). Metin hâlâ her şeyi söylüyor; işaret yalnızca gözü
+## doğru seçeneğe götürüyor.
+func _mark_choice(button: Button, choice: EventChoice) -> void:
+	if choice.check != null:
+		var emblem := String(WaybookIcons.STAT_EMBLEMS.get(choice.check.stat, ""))
+		if not emblem.is_empty():
+			button.icon = WaybookTheme.texture(emblem)
+			button.add_theme_constant_override("icon_max_width", CHOICE_ICON_SIZE)
+	if _choice_triggers_combat(choice):
+		var stripe := ColorRect.new()
+		stripe.color = ArtPalette.UI_CHOICE_COMBAT
+		stripe.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stripe.anchor_top = 0.0
+		stripe.anchor_bottom = 1.0
+		stripe.offset_left = CHOICE_STRIPE_INSET_X
+		stripe.offset_right = CHOICE_STRIPE_INSET_X + CHOICE_STRIPE_WIDTH
+		stripe.offset_top = CHOICE_STRIPE_INSET_Y
+		stripe.offset_bottom = -CHOICE_STRIPE_INSET_Y
+		button.add_child(stripe)
 
 ## Savaşı doğrudan tetikleyen seçenek mi - tehlike etiketi yalnızca bunlara
 ## eklenir - garantili `effects` içinde ya da bir sonucun içinde olsun.

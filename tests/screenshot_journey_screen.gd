@@ -47,6 +47,14 @@ func _init() -> void:
 	await _settle()
 	_save("02_olay_karti.png")
 
+	# Zara bağlı seçenekler: başında zarı atan statın amblemi.
+	for event in EventCatalog.get_road_events():
+		if event.event_id == "evt_landslide":
+			screen.call("_clear_children", screen.get("_card_panel"))
+			screen.call("_present_event", event)
+	await _settle()
+	_save("02b_olay_karti_zar.png")
+
 	# Kervan dökümü: playtest'in "My Caravan Status" isteği.
 	screen.call("_on_status_toggled", true)
 	await _settle()
