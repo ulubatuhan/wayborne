@@ -242,6 +242,15 @@ func _build_wagon_column(wagon_index: int) -> VBoxContainer:
 	crew_label.text = tr("UI_CARAVAN_OVERVIEW_WAGON_CREW") % GameSession.PEOPLE_PER_WAGON
 	column.add_child(crew_label)
 
+	# Tayfanın adları: vagon kaybedilirse defterde bu iki isim çizilir.
+	var names_label := Label.new()
+	names_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	names_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	names_label.add_theme_font_size_override("font_size", 11)
+	names_label.modulate = HINT_COLOR
+	names_label.text = ", ".join(_session.get_wagon_crew_names(wagon_index))
+	column.add_child(names_label)
+
 	var speed_label := Label.new()
 	speed_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	speed_label.add_theme_font_size_override("font_size", 11)
@@ -284,14 +293,33 @@ func _refresh_party() -> void:
 ## Kervan hakkında kısa bir düşünce - yeni bir stat değil, var olan
 ## stres/can okunarak seçilen bir satır (bkz. Faz 13 PR-D'nin kısa savaş
 ## yorumları, aynı "metin, yeni sistem değil" disiplini).
+## Kırgınlık, anlık halden önce gelir: bir kişinin aklında kalan, o gün
+## nasıl hissettiğinden daha çok şey söyler (bkz. CharacterData.grievances).
+const GRIEVANCE_THOUGHT_THRESHOLD: int = 2
+const GRIEVANCE_THOUGHT_KEYS: Dictionary = {
+	CharacterData.GRIEVANCE_UNFED: "UI_THOUGHT_UNFED",
+	CharacterData.GRIEVANCE_BENCHED: "UI_THOUGHT_BENCHED",
+	CharacterData.GRIEVANCE_WITNESSED_DEATH: "UI_THOUGHT_WITNESSED_DEATH",
+	CharacterData.GRIEVANCE_PASSED_OVER: "UI_THOUGHT_PASSED_OVER",
+}
+
 func _thought_for(character: CharacterData) -> String:
+	return thought_for(character)
+
+static func thought_for(character: CharacterData) -> String:
+	var top := character.get_top_grievance()
+	if not top.is_empty() and (
+		character.get_grievance(top) >= GRIEVANCE_THOUGHT_THRESHOLD
+		or top == CharacterData.GRIEVANCE_PASSED_OVER
+	):
+		return String(TranslationServer.translate(String(GRIEVANCE_THOUGHT_KEYS[top]))) % character.character_name
 	if character.is_stressed():
-		return tr("UI_CARAVAN_OVERVIEW_THOUGHT_BROKEN")
+		return String(TranslationServer.translate("UI_CARAVAN_OVERVIEW_THOUGHT_BROKEN"))
 	if float(character.stress) >= float(character.get_stress_resistance()) * STRESS_WARNING_RATIO:
-		return tr("UI_CARAVAN_OVERVIEW_THOUGHT_TENSE")
+		return String(TranslationServer.translate("UI_CARAVAN_OVERVIEW_THOUGHT_TENSE"))
 	if character.current_hp < character.get_max_hp() / 2:
-		return tr("UI_CARAVAN_OVERVIEW_THOUGHT_WOUNDED")
-	return tr("UI_CARAVAN_OVERVIEW_THOUGHT_FINE")
+		return String(TranslationServer.translate("UI_CARAVAN_OVERVIEW_THOUGHT_WOUNDED"))
+	return String(TranslationServer.translate("UI_CARAVAN_OVERVIEW_THOUGHT_FINE"))
 
 func _on_close_pressed() -> void:
 	closed.emit()

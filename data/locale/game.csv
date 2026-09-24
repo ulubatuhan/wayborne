@@ -355,3 +355,6 @@
 "RECIPE_REPAIR_CANVAS_DESC","Üç top kumaşla hasarlı bir vagonun bezini onarır - gümüş yerine malzemeyle.","Patches a damaged wagon's canvas with three bolts of cloth - materials instead of coin.","","","","","","","","",""
 "RECIPE_DISMANTLE_NAME","Kürkü Söküp Bandaj Yap","Dismantle Fur into Bandages","","","","","","","","",""
 "RECIPE_DISMANTLE_DESC","İşlenmiş bir kürkü sökerek iki bandaj çıkarır.","Dismantles a piece of processed fur into two bandages.","","","","","","","","",""
+"EFF_LEFT_BEHIND","%s yolda, bir köyde bırakıldı","%s was left behind in a village","","","","","","","","",""
+"EFF_PARTY_HEAL","%s iyileşti (+%d can)","%s was healed (+%d HP)","","","","","","","","",""
+"EFF_PARTY_HURT","%s yaralandı (-%d can)","%s was hurt (-%d HP)","","","","","","","","",""

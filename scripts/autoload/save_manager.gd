@@ -15,12 +15,13 @@ extends Node
 ## okunabilir/silinebilir - tek bir otomatik kayıda bağlı kalmak, kervan
 ## mahvolduğunda (bkz. Ruin Rules) geri dönecek hiçbir yer bırakmıyordu.
 ##
-## **Sefer ortasında kayıt yok, kasıtlı.** `to_save_dict()` `journey_*`
-## alanlarını hiç taşımıyor (yalnızca `finish_journey()` sonrası çağrılır,
-## o an kervan/sefer alanları zaten sıfırlanmış oluyor) - bir yuvaya
-## sefer ortasında yazmak sefer bilgisini sessizce kaybederdi. Ekranlar
-## bu yüzden `Kaydet`i yalnızca `not GameSession.is_journey_active()`
-## iken sunar (bkz. InGameMenu).
+## **Sefer ortası: yalnızca otomatik kayıt, yalnızca sakin anlarda.** Yol
+## ekranı günün kararı çözüldükten sonra (kart, savaş, pazarlık açıkken
+## değil) yuva 0'a yazar; kayıt `GameSession.to_save_dict()`'in "journey"
+## bloğunu ve `JourneyController`'ın anlık görüntüsünü taşır, "Devam Et" yola
+## döner (bkz. Nav.resume_scene). Elle kayıt sefer boyunca hâlâ kapalı
+## (bkz. InGameMenu) - bir kararın hemen önüne elle kayıt almak, sonucu
+## beğenmeyince yeniden denemenin kapısı olurdu.
 
 const SAVE_DIR: String = "user://saves"
 const AUTOSAVE_SLOT: int = 0
@@ -31,7 +32,8 @@ func _slot_path(slot: int) -> String:
 	return "%s/slot_%d.json" % [SAVE_DIR, slot]
 
 func has_save(slot: int = AUTOSAVE_SLOT) -> bool:
-	return FileAccess.file_exists(_slot_path(slot))
+	var path := _slot_path(slot)
+	return FileAccess.file_exists(path) or FileAccess.file_exists(path + ".bak")
 
 func has_any_save() -> bool:
 	for slot in SLOT_COUNT:
@@ -39,14 +41,24 @@ func has_any_save() -> bool:
 			return true
 	return false
 
+## Yazım atomik: önce `.tmp`'ye yazılır, mevcut kayıt `.bak`'a kopyalanır,
+## sonra `.tmp` asıl dosyanın yerine taşınır. Yazım ortasında kapanan bir
+## sekme (Web) ya da dolan bir kota yarım bir JSON bırakmasın diye - bir
+## soyun tek kaydı olan otomatik kaydı kesik bir dosyaya kaybetmek, kalıcı
+## kaybı konu alan bir oyunda en ağır hata.
 func save_session(session, slot: int = AUTOSAVE_SLOT) -> bool:
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
-	var file := FileAccess.open(_slot_path(slot), FileAccess.WRITE)
+	var path := _slot_path(slot)
+	var tmp_path := path + ".tmp"
+	var file := FileAccess.open(tmp_path, FileAccess.WRITE)
 	if file == null:
 		return false
 	file.store_string(JSON.stringify(session.to_save_dict()))
 	file.close()
-	return true
+	if FileAccess.file_exists(path):
+		DirAccess.copy_absolute(path, path + ".bak")
+		DirAccess.remove_absolute(path)
+	return DirAccess.rename_absolute(tmp_path, path) == OK
 
 ## Kayıt yoksa ya da bozuksa null döner.
 func load_session(slot: int = AUTOSAVE_SLOT):
@@ -61,8 +73,10 @@ func load_session(slot: int = AUTOSAVE_SLOT):
 	return session
 
 func delete_save(slot: int = AUTOSAVE_SLOT) -> void:
-	if has_save(slot):
-		DirAccess.remove_absolute(_slot_path(slot))
+	var path := _slot_path(slot)
+	for candidate in [path, path + ".bak", path + ".tmp"]:
+		if FileAccess.file_exists(candidate):
+			DirAccess.remove_absolute(candidate)
 
 ## Bir kayıt satırının özeti - `Kayıtlar` ekranı `SLOT_COUNT` tane tam
 ## `GameSession` kurup atmak yerine yalnızca birkaç alanı okuyor. Boş
@@ -79,16 +93,25 @@ func get_summary(slot: int) -> Dictionary:
 		"current_location_id": String(parsed.get("current_location_id", "")),
 	}
 
+## Asıl dosya bozuk ya da eksikse bir önceki kayda (`.bak`) düşer.
 func _read_slot(slot: int) -> Dictionary:
-	if not has_save(slot):
+	var path := _slot_path(slot)
+	var parsed := _read_json(path)
+	if parsed.is_empty():
+		parsed = _read_json(path + ".bak")
+	return parsed
+
+func _read_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
 		return {}
-	var file := FileAccess.open(_slot_path(slot), FileAccess.READ)
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return {}
 	var text := file.get_as_text()
 	file.close()
-
-	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
+	# `JSON.parse_string` bozuk bir dosyada hata basıyor; kesik bir kayıt
+	# burada beklenen bir durum (yedeğe düşülecek), gürültü değil.
+	var json := JSON.new()
+	if json.parse(text) != OK or typeof(json.data) != TYPE_DICTIONARY:
 		return {}
-	return parsed
+	return json.data

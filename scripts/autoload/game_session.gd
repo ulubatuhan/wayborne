@@ -413,10 +413,21 @@ func add_to_party(character: CharacterData) -> void:
 	var inherited := int(round(float(party_stress) * NEWCOMER_STRESS_SHARE))
 	party.append(character)
 	character.stress = clampi(inherited, 0, MAX_STRESS)
+	_assign_character_id(character)
 	ledger.record(
 		CaravanLedger.KIND_JOINED, character.character_name,
-		total_days_elapsed, lineage_generation
+		total_days_elapsed, lineage_generation, character.character_id
 	)
+
+## Kalıcı kimlik sayacı - kayda yazılıyor, yoksa yeniden yüklenen bir oturum
+## aynı kimliği ikinci kez dağıtırdı.
+var _next_character_serial: int = 1
+
+func _assign_character_id(character: CharacterData) -> void:
+	if character == null or not character.character_id.is_empty():
+		return
+	character.character_id = "c%d_%d" % [total_days_elapsed, _next_character_serial]
+	_next_character_serial += 1
 
 ## Kadroya ziyafet: paralı stres rahatlaması. Birikme artık şehir varışının
 ## tek başına eritemeyeceği kadar hızlı (bkz. get_city_rest_relief), o yüzden
@@ -505,6 +516,7 @@ func get_player_character() -> CharacterData:
 func set_player_character(character: CharacterData) -> void:
 	character.is_player = true
 	party = [character]
+	_assign_character_id(character)
 
 ## Oyunun sabit açılışı: parti her zaman iki kişi (oyuncu + rastgele bir
 ## yoldaş), bir vagon, rastgele bir şehir. Oyuncu bunların hiçbirini
@@ -522,7 +534,16 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	lineage_generation = 1
 	leader_since_day = 0
 	ledger.entries.clear()
-	ledger.record(CaravanLedger.KIND_LED, player_character.character_name, 0, 1)
+	# Defter boş başlamasın: adı senden önce taşıyan biri vardı.
+	ledger.record(
+		CaravanLedger.KIND_FOUNDER, _roll_founder_name(player_character, rng), 0, 0,
+		"", "LEDGER_CAUSE_FOUNDER"
+	)
+	_assign_character_id(player_character)
+	ledger.record(
+		CaravanLedger.KIND_LED, player_character.character_name, 0, 1,
+		player_character.character_id
+	)
 
 	owned_wagon_count = STARTING_WAGONS
 	_sync_wagon_inventories()
@@ -530,6 +551,10 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 
 	set_player_character(player_character)
 	add_to_party(RecruitCatalog.build_starting_companion(rng))
+	# Tayfa adları liderin kültürüne ve kervanın adına bağlı - ikisi de
+	# ancak şimdi belli.
+	crew_names.clear()
+	_sync_crew_names()
 
 	current_location_id = roll_starting_location(rng)
 	_restock_current_location()
@@ -538,6 +563,18 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	journeys_completed = 0
 	contracts_delivered = 0
 	visited_location_ids = {current_location_id: true}
+
+## Kurucunun adı oyuncunun kültür havuzundan; oyuncunun kendi adıyla
+## çakışırsa bir sonrakine geçilir.
+static func _roll_founder_name(player_character: CharacterData, rng: RandomNumberGenerator) -> String:
+	var pool := player_character.get_culture().name_pool
+	if pool.is_empty():
+		return ""
+	var index := rng.randi_range(0, pool.size() - 1)
+	var name := String(pool[index])
+	if name == player_character.character_name and pool.size() > 1:
+		name = String(pool[(index + 1) % pool.size()])
+	return name
 
 ## Başlangıç şehri rastgele - her playthrough haritanın başka bir
 ## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
@@ -567,7 +604,7 @@ func recruit(character: CharacterData) -> bool:
 
 ## Oyuncunun kendisi çıkarılamaz. Kontrol sıraya göre değil bayrağa göre:
 ## oyuncu arkaya geçtiğinde kendini atabilmesi bir hataydı.
-func dismiss(character: CharacterData) -> bool:
+func dismiss(character: CharacterData, cause_key: String = "LEDGER_CAUSE_DISMISSED") -> bool:
 	if character == null or character.is_player:
 		return false
 	var index := party.find(character)
@@ -577,17 +614,23 @@ func dismiss(character: CharacterData) -> bool:
 	# Kervandan çıkmak defterden çıkmak değil: satır kalır, üstü çizilir.
 	ledger.record(
 		CaravanLedger.KIND_DEPARTED, character.character_name,
-		total_days_elapsed, lineage_generation
+		total_days_elapsed, lineage_generation, character.character_id,
+		cause_key, _ledger_location_id()
 	)
 	return true
 
+## Defter satırının yeri: yoldaysak gidilen şehrin yolu, değilsek bulunulan
+## şehir.
+func _ledger_location_id() -> String:
+	return journey_destination_id if is_journey_active() else current_location_id
+
 ## --- Savaşta ölüm ve liderliğin devri ---
-## Ölüm yalnızca savaşta olur ve yalnızca ana karakteri bulur (bkz.
-## CombatUnit'in Ölümün Kıyısı bölümü). Olay sonuçları hiçbir zaman
-## öldürmez - ağır yaralar, orası değişmedi.
+## Ölümün iki kapısı var: savaş (bkz. CombatUnit'in Ölümün Kıyısı bölümü,
+## herkes girebilir) ve açlık (bkz. apply_meal_distribution). Olay sonuçları
+## hiçbir zaman öldürmez - ağır yaralar, can 1'de kenetlenir.
 ##
-## Lider ölürse kervan dağılmaz: en kıdemli yoldaş liderliği alır ve hikâye
-## onunla sürer. Kimse yoksa oyun biter - oyunun ilk gerçek game-over'ı bu,
+## Lider ölürse kervan dağılmaz: oyuncu hayatta kalanlardan birini seçer
+## (kıdemli önceden seçili), hikâye onunla sürer. Kimse yoksa oyun biter - oyunun ilk gerçek game-over'ı bu,
 ## ve tek koşulu "ölen liderin yerine geçecek kimse kalmamış" olması.
 const RUN_OVER_FLAG: String = "run_ended_leader_lost"
 
@@ -603,26 +646,62 @@ func _compare_seniority(a: CharacterData, b: CharacterData) -> bool:
 ##   dead_names       -> ölen karakterlerin adları
 ##   new_leader       -> liderlik devredildiyse yeni lider, yoksa null
 ##   run_over         -> ölen liderin yerine geçecek kimse kalmadı mı
-func resolve_combat_deaths(dead: Array[CharacterData]) -> Dictionary:
-	var result := {"dead_names": [], "new_leader": null, "run_over": false}
+func resolve_combat_deaths(
+	dead: Array[CharacterData], cause_key: String = "LEDGER_CAUSE_COMBAT", location_id: String = ""
+) -> Dictionary:
+	var result := resolve_deaths(dead, cause_key, location_id)
+	# Geriye dönük uyumlu yol (simülatörler, eski testler): varis seçilmeyi
+	# beklemiyor, en kıdemli kendiliğinden geçiyor. Oyunun kendisi
+	# `resolve_deaths()` + `SuccessionPanel` + `appoint_heir()` yolunu kullanır.
+	if bool(result.get("awaiting_heir", false)):
+		var candidates: Array = result["heir_candidates"]
+		appoint_heir(candidates[0])
+		result["new_leader"] = candidates[0]
+		result["generation"] = lineage_generation
+	return result
+
+## Ölümün tek kapısı: savaş, açlık, geride bırakılmanın yol açtığı her ölüm
+## buradan geçer. Satıra sebebi ve yeri yazar, hayatta kalanlara "ölüme
+## tanık oldu" kırgınlığını ekler. Lider öldüyse varisi **seçmez** - aday
+## listesini (kıdem sırasıyla) döner, seçim `appoint_heir()`'ın işi.
+##
+## Dönen sözlük:
+##   dead_names       -> ölen karakterlerin adları
+##   new_leader       -> her zaman null (seçim appoint_heir'da)
+##   awaiting_heir    -> lider öldü ve yerine geçebilecek biri var
+##   heir_candidates  -> kıdem sırasıyla adaylar
+##   run_over         -> ölen liderin yerine geçecek kimse kalmadı mı
+func resolve_deaths(
+	dead: Array[CharacterData], cause_key: String, location_id: String = ""
+) -> Dictionary:
+	var result := {
+		"dead_names": [], "new_leader": null, "run_over": false,
+		"awaiting_heir": false, "heir_candidates": [],
+	}
 	if dead.is_empty():
 		return result
+	if location_id.is_empty():
+		location_id = _ledger_location_id()
 
 	var leader_died := false
+	var died_count := 0
 	for character in dead:
-		if character == null:
+		if character == null or not party.has(character):
 			continue
+		died_count += 1
 		result["dead_names"].append(character.character_name)
 		ledger.record(
 			CaravanLedger.KIND_DIED, character.character_name,
-			total_days_elapsed, lineage_generation
+			total_days_elapsed, lineage_generation, character.character_id,
+			cause_key, location_id
 		)
 		if character.is_player:
 			leader_died = true
 			character.is_player = false
-		var index := party.find(character)
-		if index >= 0:
-			party.remove_at(index)
+		party.erase(character)
+
+	for survivor in party:
+		survivor.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH, died_count)
 
 	if not leader_died:
 		return result
@@ -632,27 +711,42 @@ func resolve_combat_deaths(dead: Array[CharacterData]) -> Dictionary:
 		set_flag(RUN_OVER_FLAG)
 		return result
 
-	# Kalan en kıdemli yoldaş liderliği alır. Partiden çıkarılıp başa
-	# konmuyor: sıra savaş mevkisi, liderlik ayrı bir bayrak.
 	var candidates: Array[CharacterData] = party.duplicate()
 	candidates.sort_custom(_compare_seniority)
-	var heir: CharacterData = candidates[0]
+	result["awaiting_heir"] = true
+	result["heir_candidates"] = candidates
+	return result
+
+## Liderliği devreder. Sıra savaş mevkisi, liderlik ayrı bir bayrak - varis
+## partide yerinden oynatılmıyor. Ad kalır, kuşak ilerler: oyuncu yeni bir
+## kervan kurmuyor, aynı adı devralıyor. Kıdemliyi geçip başkasını seçmek
+## kıdemliye bir kırgınlık ve stres bırakır - liderliğin kime geçtiği bir
+## karar, bir bildirim değil. Yeni kuşak numarasını döner.
+const PASSED_OVER_STRESS: int = 15
+
+func appoint_heir(heir: CharacterData) -> int:
+	if heir == null or not party.has(heir):
+		return lineage_generation
+	var candidates: Array[CharacterData] = party.duplicate()
+	candidates.sort_custom(_compare_seniority)
+	var senior: CharacterData = candidates[0]
+	for character in party:
+		character.is_player = false
 	heir.is_player = true
-	# Ad kalır, kuşak ilerler: oyuncu yeni bir kervan kurmuyor, aynı adı
-	# devralıyor. Dönem sayacı sıfırlanıyor ki kampanya "bu liderin
-	# dönemi" diye sorabilsin.
+	if senior != heir:
+		senior.add_grievance(CharacterData.GRIEVANCE_PASSED_OVER)
+		change_character_stress(senior, PASSED_OVER_STRESS)
+	# Dönem sayacı sıfırlanıyor ki kampanya "bu liderin dönemi" diye sorabilsin.
 	lineage_generation += 1
 	leader_since_day = total_days_elapsed
 	ledger.record(
 		CaravanLedger.KIND_LED, heir.character_name,
-		total_days_elapsed, lineage_generation
+		total_days_elapsed, lineage_generation, heir.character_id
 	)
-	result["new_leader"] = heir
-	result["generation"] = lineage_generation
-	return result
+	return lineage_generation
 
 func is_run_over() -> bool:
-	return has_flag(RUN_OVER_FLAG)
+	return get_phase() == Phase.RUN_OVER
 
 ## Parti mevkilerini değiştirir; oyuncu da yer değiştirebilir - sırası
 ## savaştaki mevkisidir, kim olduğunu belirlemez.
@@ -724,6 +818,27 @@ func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
 		var effective := character.stats.get_effective_value(kind) + character.get_check_modifier(kind)
 		best = maxf(best, effective)
 	return best
+
+## `get_best_effective_stat()`'ın sahibi: sayı değil kişi. Bir zar "Sezgi
+## %62" diye değil "Elif izleri okuyor, %62" diye sunulsun diye - karar
+## isimli birine yapılan bir bahis olur.
+func get_best_stat_holder(kind: CharacterStats.Kind) -> CharacterData:
+	var best_character: CharacterData = null
+	var best := -INF
+	for character in get_party():
+		var effective := character.stats.get_effective_value(kind) + character.get_check_modifier(kind)
+		if effective > best:
+			best = effective
+			best_character = character
+	return best_character
+
+## Bir check'i kimin atacağı: lider check'inde lider, ortak çabada en iyisi.
+func get_check_roller(check: SkillCheck) -> CharacterData:
+	if check == null:
+		return null
+	if check.source == SkillCheck.Source.LEADER:
+		return get_player_character()
+	return get_best_stat_holder(check.stat)
 
 ## Liderin (bkz. CharacterData.is_player - liderlik devrinde bu bayrak
 ## yeni lidere taşınır, bkz. Lineage Rules) kendi etkin statı - "lider
@@ -869,6 +984,19 @@ func grant_party_xp(amount: int, targets: Array[CharacterData] = []) -> Dictiona
 const BREAK_AFFLICTION_CHANCE: float = 0.85
 const BREAK_DEPARTURE_CHANCE: float = 0.2
 
+## Kırgınlık ayrılma zarını büyütür: aç bırakılan, savaşın dışında
+## tutulup kaybı izleyen, liderlikte geçilen biri kırıldığında gitmeye daha
+## yakındır. Yalnızca zaten kırılmış birinde işler - kırılma eşiğinin
+## kendisine dokunmuyor, Stress Rules'un ölçülmüş tablosu korunuyor.
+const GRIEVANCE_DEPARTURE_PER_POINT: float = 0.03
+const MAX_BREAK_DEPARTURE_CHANCE: float = 0.6
+
+func get_break_departure_chance(character: CharacterData) -> float:
+	return minf(
+		MAX_BREAK_DEPARTURE_CHANCE,
+		BREAK_DEPARTURE_CHANCE + GRIEVANCE_DEPARTURE_PER_POINT * float(character.get_grievance_total())
+	)
+
 func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	# Kopya üzerinde geziniyoruz: dismiss() partiden çıkarabiliyor, canlı
@@ -886,8 +1014,13 @@ func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 		var granted := character.grant_trait(trait_id, total_days_elapsed)
 
 		var departed := false
-		if affliction and not character.is_player and rng.randf() < BREAK_DEPARTURE_CHANCE:
-			departed = dismiss(character)
+		if affliction and not character.is_player \
+				and rng.randf() < get_break_departure_chance(character):
+			var cause := "LEDGER_CAUSE_BROKE"
+			var top := character.get_top_grievance()
+			if top == CharacterData.GRIEVANCE_UNFED or top == CharacterData.GRIEVANCE_PASSED_OVER:
+				cause = "LEDGER_CAUSE_BROKE_GRIEVANCE"
+			departed = dismiss(character, cause)
 
 		results.append({
 			"character_name": character.character_name,
@@ -1008,6 +1141,12 @@ const MEAL_MODE_SELF_ONLY: String = "self_only"
 ## değil. Kervan/tayfa aç kalırsa kimse kişisel bir stres almaz (isimsiz),
 ## ama moral bir kez düşer - herkes bunu hissediyor.
 const PERSONAL_HUNGER_STRESS: int = 6
+## Art arda aç geçen üçüncü günden itibaren her aç gün can yer. Doğru
+## stoklayıp herkesi doyuran bir kervanda sayaç hiç artmaz (bkz. Provision
+## Rules'un "correct stocking never starves" sözü) - bu yalnızca seçilerek
+## ya da kıtlıkla aç bırakılanı bulur.
+const STARVATION_HP_LOSS_START_DAY: int = 3
+const STARVATION_HP_LOSS_PER_DAY: int = 4
 const MEAL_HUNGER_MORALE_PENALTY: int = -8
 
 ## Dağıtım sonucu: kim beslendi, kim aç kaldı, kervan aç kaldı mı. Ekran
@@ -1069,9 +1208,26 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 				hungry_party.append(character)
 
 	var hungry_names: Array[String] = []
+	var starving: Array[CharacterData] = []
 	for character in hungry_party:
 		character.change_stress(PERSONAL_HUNGER_STRESS)
 		hungry_names.append(character.character_name)
+		character.consecutive_hungry_days += 1
+		# Kırgınlık yalnızca bir *seçimin* bedeli: erzak gerçekten bittiyse
+		# kimse kimseyi aç bırakmadı, herkes birlikte aç kaldı.
+		if not starved:
+			character.add_grievance(CharacterData.GRIEVANCE_UNFED)
+		if character.consecutive_hungry_days >= STARVATION_HP_LOSS_START_DAY:
+			character.apply_damage(STARVATION_HP_LOSS_PER_DAY)
+			if not character.is_alive():
+				starving.append(character)
+	for character in fed_party:
+		if not starved:
+			character.consecutive_hungry_days = 0
+
+	# Açlık öldürebilir. Kimi doyurduğun sadece bir stres düğmesi olsaydı
+	# "bu gece kim yiyecek" ahlaki bir seçim değil bir ayar olurdu.
+	var death_outcome := resolve_deaths(starving, "LEDGER_CAUSE_STARVED")
 
 	if not hungry_party.is_empty() or crew_hungry:
 		caravan.change_morale(MEAL_HUNGER_MORALE_PENALTY)
@@ -1084,6 +1240,7 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		"fed_names": fed_names,
 		"hungry_names": hungry_names,
 		"crew_hungry": crew_hungry,
+		"death_outcome": death_outcome,
 	}
 
 func _character_names(characters: Array[CharacterData]) -> Array[String]:
@@ -1397,9 +1554,29 @@ func consume_stock(item_id: String, quantity: int, total_price: int = 0) -> void
 ## sınırı UI'da kontrol et, burası yalnızca kaydeder ve hiçbir zaman
 ## eksiye düşürmez).
 func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
+	# Önce okunuyor: satış baskıyı değiştirmeden önceki şok hali sayılır.
+	if is_profiteering_sale(item_id):
+		profiteering_sales += 1
 	market.record_sale(current_location_id, item_id, quantity)
 	if total_price > 0:
 		market.spend_city_gold(current_location_id, total_price)
+
+## Krizden kâr etmenin sayacı. Veba vurmuş ya da yolunda savaş olan bir
+## şehre, fiyatı o kriz yüzünden şişmiş bir malı satmak - dünya bunu
+## hatırlıyor (bkz. evt_profiteer_recognized). Kayda yazılıyor.
+var profiteering_sales: int = 0
+
+func is_city_in_crisis(location_id: String) -> bool:
+	if world_events.has_kind_on_city(WorldEvents.Kind.PLAGUE, location_id, total_days_elapsed):
+		return true
+	for entry in world_events.get_active_by_kind(WorldEvents.Kind.REGIONAL_WAR, total_days_elapsed):
+		if (String(entry["target"]).split("|") as Array).has(location_id):
+			return true
+	return false
+
+func is_profiteering_sale(item_id: String) -> bool:
+	return is_city_in_crisis(current_location_id) \
+		and market.is_shocked(current_location_id, item_id, total_days_elapsed)
 
 ## Şu an bulunduğun şehrin altın hazinesi - satışların tavanı.
 func get_city_gold_reserve() -> int:
@@ -1426,6 +1603,11 @@ func _restock_current_location() -> void:
 ## değiştirmez.
 var recruit_candidates: Dictionary = {}
 
+## Bu varışta tutulan adayların **üretildikleri sıradaki** indisleri (mekân ->
+## Array[int]). Adaylar tohumdan yeniden üretildiği için kayda kimlerin
+## tutulduğu yazılmalı; varışta temizlenir.
+var hired_recruit_indices: Dictionary = {}
+
 func _restock_recruits() -> void:
 	recruit_candidates.clear()
 	var rng := RandomNumberGenerator.new()
@@ -1438,9 +1620,20 @@ func _restock_recruits() -> void:
 	for venue in [
 		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
 	]:
-		recruit_candidates[venue] = RecruitCatalog.build_candidates(
+		var candidates: Array[CharacterData] = RecruitCatalog.build_candidates(
 			venue, rng, player_level, world_growth
 		)
+		# Bu varışta zaten tutulmuş olanlar yeniden çekilen listeden düşer;
+		# yoksa şehirde alınan bir kayıt, tutulmuş bir yoldaşı panoya geri
+		# getirip ikinci kez tutulabilir kılıyordu (aynı kişi iki kez).
+		var hired: Array = hired_recruit_indices.get(venue, [])
+		var sorted_hired := hired.duplicate()
+		sorted_hired.sort()
+		sorted_hired.reverse()
+		for index in sorted_hired:
+			if int(index) >= 0 and int(index) < candidates.size():
+				candidates.remove_at(int(index))
+		recruit_candidates[venue] = candidates
 
 func get_recruit_candidates(venue: String) -> Array[CharacterData]:
 	var candidates: Array[CharacterData] = []
@@ -1455,10 +1648,26 @@ func hire_recruit(venue: String, candidate: CharacterData) -> bool:
 		return false
 	if not recruit_candidates.get(venue, []).has(candidate):
 		return false
+	var list_index: int = recruit_candidates[venue].find(candidate)
 	if not recruit(candidate):
 		return false
+	var original_index := _original_candidate_index(venue, list_index)
+	if not hired_recruit_indices.has(venue):
+		hired_recruit_indices[venue] = []
+	hired_recruit_indices[venue].append(original_index)
 	recruit_candidates[venue].erase(candidate)
 	return true
+
+## Listedeki konumu, daha önce tutulanlar çıkarılmadan önceki üretim
+## sırasına çevirir.
+func _original_candidate_index(venue: String, list_index: int) -> int:
+	var hired: Array = (hired_recruit_indices.get(venue, []) as Array).duplicate()
+	hired.sort()
+	var original := list_index
+	for index in hired:
+		if int(index) <= original:
+			original += 1
+	return original
 
 func get_provisions() -> int:
 	return get_total_quantity(PROVISIONS_ITEM_ID)
@@ -1492,8 +1701,26 @@ func clear_flag(flag: String) -> void:
 
 # --- Sefer ---
 
+## Oturumun evresi. Ayrı saklanmıyor, var olan tek doğruluk kaynaklarından
+## türetiliyor (sefer hedefi, soy tükenme bayrağı): ayrı bir alan tutulsaydı
+## sefer alanlarını doğrudan yazan her yol (geliştirici seferi, testler) onu
+## da güncellemeyi unutabilir ve iki gerçek birbirinden kopardı.
+enum Phase { CITY, JOURNEY, RUN_OVER }
+
+func get_phase() -> Phase:
+	if has_flag(RUN_OVER_FLAG):
+		return Phase.RUN_OVER
+	if not journey_destination_id.is_empty():
+		return Phase.JOURNEY
+	return Phase.CITY
+
 func is_journey_active() -> bool:
-	return not journey_destination_id.is_empty()
+	return get_phase() == Phase.JOURNEY
+
+## Yol ekranının `JourneyController.to_dict()` anlık görüntüsü. Sefer
+## ortası kaydı bunu taşır; yol ekranı açılırken doluysa sefer kaldığı
+## yerden devam eder, boşsa yeni başlar. Varışta temizlenir.
+var journey_snapshot: Dictionary = {}
 
 ## --- Sefere çıkış morali ---
 ## Moral artık her seferde dolu başlamıyor. Kervan yola dünyanın o günkü
@@ -1577,6 +1804,9 @@ func get_departure_morale_breakdown() -> Array[Dictionary]:
 
 ## Planlayıcıda onaylanan kervanı yola çıkarır.
 func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan) -> void:
+	if get_phase() == Phase.RUN_OVER:
+		push_error("start_journey: run is over, cannot open a new journey")
+		return
 	journey_origin_id = current_location_id
 	journey_destination_id = destination_id
 	journey_total_days = maxi(1, days)
@@ -1689,12 +1919,14 @@ func finish_journey() -> Dictionary:
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	visited_location_ids[current_location_id] = true
+	journey_snapshot = {}
 	journey_origin_id = ""
 	journey_destination_id = ""
 	journey_total_days = 0
 	journey_days_remaining = 0
 	danger_level = 0.0
 	caravan = CaravanState.new()
+	hired_recruit_indices = {}
 	_restock_current_location()
 	heal_party()
 
@@ -1729,7 +1961,9 @@ func _apply_wagon_losses_to_ownership() -> void:
 	var escort_damaged := mini(caravan.damaged_wagons, escort_remaining)
 	var player_damaged := caravan.damaged_wagons - escort_damaged
 
-	owned_wagon_count = maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
+	var new_count := maxi(CaravanState.MIN_WAGONS, owned_wagon_count - player_lost)
+	_record_crew_lost_with_wagons(owned_wagon_count - new_count)
+	owned_wagon_count = new_count
 	_sync_wagon_inventories()
 	owned_wagon_damaged = clampi(owned_wagon_damaged + player_damaged, 0, owned_wagon_count)
 
@@ -1828,7 +2062,54 @@ func _calculate_arrival_payout() -> Dictionary:
 ## kalan vagonun kargosunu diğer vagonlara dağıtır (bkz. `add_to_cargo` -
 ## bir tek yığın gerekirse birden fazla vagona bölünür), sığmayan kısım
 ## vagonla birlikte gerçekten kaybolur (bkz. CLAUDE.md Ruin Rules).
+## --- Tayfanın adları ---
+## Vagonları süren tayfa savaşmaz, partiye girmez (bkz. Character & Party
+## Rules: tayfa ≠ savaş partisi) ama adsız da değil. Bir vagon uçurumdan
+## düştüğünde bir kapasite sayısı değil iki isim kaybedilir. İsimler
+## liderin kültür havuzundan, `caravan_name|sıra` tohumuyla - aynı kervan
+## hep aynı tayfayı çıkarır, kayıt yüklemek yeniden atmaz.
+var crew_names: Array[String] = []
+
+func _sync_crew_names() -> void:
+	var target := owned_wagon_count * PEOPLE_PER_WAGON
+	while crew_names.size() < target:
+		crew_names.append(_roll_crew_name(crew_names.size()))
+	while crew_names.size() > target:
+		crew_names.pop_back()
+
+func _roll_crew_name(index: int) -> String:
+	var leader := get_player_character() if not party.is_empty() else null
+	var culture := leader.get_culture() if leader != null else CultureCatalog.get_culture(CultureCatalog.NOMAD)
+	var pool: Array[String] = culture.name_pool if culture != null else []
+	if pool.is_empty():
+		return ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|crew|%d" % [caravan_name, index])
+	return pool[rng.randi_range(0, pool.size() - 1)]
+
+## Bir vagonun tayfası (vagon sırası 0'dan).
+func get_wagon_crew_names(wagon_index: int) -> Array[String]:
+	var names: Array[String] = []
+	for offset in PEOPLE_PER_WAGON:
+		var index := wagon_index * PEOPLE_PER_WAGON + offset
+		if index >= 0 and index < crew_names.size():
+			names.append(crew_names[index])
+	return names
+
+## Kaybedilen vagonların tayfası deftere ölü olarak yazılır - satılan
+## vagonunki yazılmaz, onlar parasını alıp ayrılır, kaybedilmez.
+func _record_crew_lost_with_wagons(wagons_lost: int) -> void:
+	for _i in wagons_lost * PEOPLE_PER_WAGON:
+		if crew_names.is_empty():
+			return
+		var crew_name: String = crew_names.pop_back()
+		ledger.record(
+			CaravanLedger.KIND_DIED, crew_name, total_days_elapsed, lineage_generation,
+			"", "LEDGER_CAUSE_WAGON_LOST", _ledger_location_id()
+		)
+
 func _sync_wagon_inventories() -> void:
+	_sync_crew_names()
 	while wagon_inventories.size() < owned_wagon_count:
 		var wagon_inventory := Inventory.new()
 		wagon_inventory.weight_limit = CARGO_PER_WAGON
@@ -2134,7 +2415,39 @@ func to_save_dict() -> Dictionary:
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
+		"market_stock": market_stock.duplicate(),
+		"hired_recruit_indices": hired_recruit_indices.duplicate(true),
+		"next_character_serial": _next_character_serial,
+		"profiteering_sales": profiteering_sales,
+		"crew_names": crew_names.duplicate(),
+		# Sefer ortası kaydı (bkz. Save & Menu Rules): yalnızca sefer açıkken
+		# yazılır - şehirde alınan bir kayıt bu bloğu hiç taşımaz.
+		"journey": _journey_save_block(),
 	}
+
+func _journey_save_block() -> Dictionary:
+	if not is_journey_active():
+		return {}
+	return {
+		"origin_id": journey_origin_id,
+		"destination_id": journey_destination_id,
+		"total_days": journey_total_days,
+		"days_remaining": journey_days_remaining,
+		"danger_level": danger_level,
+		"caravan": caravan.to_dict(),
+		"controller": journey_snapshot.duplicate(true),
+	}
+
+func _load_journey_block(block: Dictionary) -> void:
+	if block.is_empty() or String(block.get("destination_id", "")).is_empty():
+		return
+	journey_origin_id = String(block.get("origin_id", ""))
+	journey_destination_id = String(block.get("destination_id", ""))
+	journey_total_days = maxi(1, int(block.get("total_days", 1)))
+	journey_days_remaining = clampi(int(block.get("days_remaining", journey_total_days)), 0, journey_total_days)
+	danger_level = clampf(float(block.get("danger_level", 0.0)), 0.0, 1.0)
+	caravan = CaravanState.from_dict(block.get("caravan", {}) as Dictionary)
+	journey_snapshot = (block.get("controller", {}) as Dictionary).duplicate(true)
 
 ## Çağıranın taze bir GameSession.new(0, 0) üzerinde çağırması beklenir -
 ## sıfır başlangıç erzağıyla, aksi halde erzak iki kere eklenir.
@@ -2248,7 +2561,37 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	for equipment_id in equipment_data:
 		equipment_inventory[str(equipment_id)] = int(equipment_data[equipment_id])
 
+	hired_recruit_indices = {}
+	var hired_data: Dictionary = data.get("hired_recruit_indices", {})
+	for venue in hired_data:
+		var indices: Array = []
+		for index in (hired_data[venue] as Array):
+			indices.append(int(index))
+		hired_recruit_indices[str(venue)] = indices
+	profiteering_sales = maxi(0, int(data.get("profiteering_sales", 0)))
+
+	# Kimliği olmayan (eski kayıttan gelen) herkes kimliğini burada alır;
+	# sayaç kayıttakinden ve partidekinin en büyüğünden küçük olamaz.
+	_next_character_serial = maxi(1, int(data.get("next_character_serial", 1)))
+	for character in party:
+		_assign_character_id(character)
+
+	crew_names.clear()
+	for crew_name in (data.get("crew_names", []) as Array):
+		crew_names.append(String(crew_name))
+	_sync_crew_names()
+
 	_restock_current_location()
+	# Pazar stoğu en son: kayıtta varsa tazelenmiş tam stoğun üstüne yazılır,
+	# yoksa (eski kayıt) şehrin tam stoğu kalır. Yazılmasaydı şehirde
+	# alınan bir kayıt, boşaltılmış pazarı yeniden doldururdu.
+	if data.has("market_stock"):
+		market_stock.clear()
+		var stock_data: Dictionary = data["market_stock"]
+		for item_id in stock_data:
+			market_stock[str(item_id)] = maxi(0, int(stock_data[item_id]))
+
+	_load_journey_block(data.get("journey", {}) as Dictionary)
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.
@@ -2283,6 +2626,16 @@ func build_event_context() -> Dictionary:
 		# Koşullar başka bir anahtarla karşılaştırma yapamadığı için boş
 		# yer sayısı hazır veriliyor (bkz. evt_road_wanderer).
 		"party_slots_free": maxi(0, get_party_capacity() - party_size),
+		# Defterin olay havuzuna açılan hafızası (bkz. CaravanLedger başlığı):
+		# yol kimin öldüğünü, kimin gittiğini, kaçıncı kuşakta olduğunu okuyabilir.
+		"companions_died": ledger.count_of(CaravanLedger.KIND_DIED),
+		"companions_departed": ledger.count_of(CaravanLedger.KIND_DEPARTED),
+		"companions_lost": ledger.count_of(CaravanLedger.KIND_DIED)
+			+ ledger.count_of(CaravanLedger.KIND_DEPARTED),
+		"lineage_generation": lineage_generation,
+		"days_as_leader": get_days_as_leader(),
+		"profiteering_sales": profiteering_sales,
+		"weakest_companion_hp_ratio": _weakest_companion_hp_ratio(),
 		"flags": _flags,
 		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
@@ -2342,6 +2695,16 @@ const COMMISSION_TRIBUTE_REWARD_REPUTATION: int = 6
 
 ## Loncanın harita çapında haberi var mı - kervanın hangi şehirde/rotada
 ## olduğuna bakmaz (bkz. WorldEvents.get_active_by_kind).
+## Oyuncu dışındaki en yaralı yoldaşın can oranı; yoldaş yoksa 1.0
+## (kimse "geride bırakılacak kadar" yaralı değil).
+func _weakest_companion_hp_ratio() -> float:
+	var weakest := 1.0
+	for character in party:
+		if character.is_player:
+			continue
+		weakest = minf(weakest, float(character.current_hp) / float(maxi(1, character.get_max_hp())))
+	return weakest
+
 func has_active_world_event(kind: WorldEvents.Kind) -> bool:
 	return not world_events.get_active_by_kind(kind, total_days_elapsed).is_empty()
 

@@ -37,10 +37,15 @@ func is_available(context: Dictionary) -> bool:
 ## (bkz. road_journey.gd), çünkü EventChoice bir Resource, GameSession'a
 ## bağımlı değil. Oyuncuya "kaç" statın olduğu değil, neye bahse girdiği
 ## gösteriliyor - Faz 12'nin tehlike-etiketiyle aynı okunabilirlik ailesi.
-func get_check_preview(stat_value: float) -> String:
+## `roller_name` verilirse zar isimli birine bağlanır ("Elif · Sezgi · %62").
+func get_check_preview(stat_value: float, roller_name: String = "") -> String:
 	if check == null:
 		return ""
-	return "%s · %%%d" % [CharacterStats.kind_name(check.stat), check.get_chance(stat_value)]
+	var stat_label := CharacterStats.kind_name(check.stat)
+	var chance := check.get_chance(stat_value)
+	if roller_name.is_empty():
+		return "%s · %%%d" % [stat_label, chance]
+	return String(TranslationServer.translate("UI_CHECK_PREVIEW_NAMED")) % [roller_name, stat_label, chance]
 
 func get_hint_text(best_stat_value: float) -> String:
 	if hint_text_key.is_empty() or best_stat_value < hint_threshold:

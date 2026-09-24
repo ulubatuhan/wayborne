@@ -83,6 +83,37 @@ func mark_fired(event: GameEvent, current_day: int) -> void:
 func unlock_event(event_id: String) -> void:
 	_unlocked[event_id] = true
 
+## Sefer ortası kaydı için motorun kendi durumu: bir-kez/bekleme/açılmış
+## zincir kayıtları ve zarın *o anki* konumu. RNG'nin tohumu değil durumu
+## yazılıyor - yeniden yüklenen bir sefer kaldığı yerden aynı zarları atsın,
+## yükleyip yeniden zar attırmak bir sömürü kapısı olmasın.
+func to_dict() -> Dictionary:
+	return {
+		"fired_once": _fired_once.keys(),
+		"available_after_day": _available_after_day.duplicate(),
+		"unlocked": _unlocked.keys(),
+		"rng_seed": str(_rng.seed),
+		"rng_state": str(_rng.state),
+	}
+
+func load_from_dict(data: Dictionary) -> void:
+	_fired_once = {}
+	for event_id in (data.get("fired_once", []) as Array):
+		_fired_once[String(event_id)] = true
+	_available_after_day = {}
+	var after: Dictionary = data.get("available_after_day", {})
+	for event_id in after:
+		_available_after_day[String(event_id)] = int(after[event_id])
+	_unlocked = {}
+	for event_id in (data.get("unlocked", []) as Array):
+		_unlocked[String(event_id)] = true
+	# 64 bitlik değerler JSON'da float'a düşüp hassasiyet kaybeder - metin
+	# olarak yazılıp okunuyor.
+	if data.has("rng_seed"):
+		_rng.seed = String(data["rng_seed"]).to_int()
+	if data.has("rng_state"):
+		_rng.state = String(data["rng_state"]).to_int()
+
 ## Faz 17: seçeneğin arkasında bir SkillCheck varsa zar atar ve context'in
 ## bir KOPYASINA "check_tier" (0/1/2) yazar - orijinal context'e dokunmuyor,
 ## çünkü aynı context aynı çağrıda başka seçeneklerin önizlemesinde de

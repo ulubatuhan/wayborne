@@ -121,6 +121,9 @@ func _test_one_arrival_can_close_several(t) -> void:
 	session.leader_since_day = 0
 	while session.party.size() < 3:
 		session.add_to_party(_companion())
+	# Finalin hafıza kapısı: defterde iki üstü çizili ad.
+	session.ledger.record(CaravanLedger.KIND_DIED, "Geçmiş Biri", 50)
+	session.ledger.record(CaravanLedger.KIND_DEPARTED, "Giden Biri", 90)
 
 	var closed := session.advance_campaign()
 	t.eq(

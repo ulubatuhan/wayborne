@@ -76,11 +76,17 @@ func _build_ledger() -> VBoxContainer:
 
 	for entry in entries:
 		var line := Label.new()
-		line.text = "%s · %s — %s" % [
-			tr("UI_LEDGER_DAY") % int(entry.get("day", 0)),
-			String(entry.get("name", "")),
-			CaravanLedger.get_kind_label(String(entry.get("kind", ""))),
-		]
+		# Sebebi olan satır kendi cümlesini taşıyor ("... kurtlara düştü,
+		# Kurtboğazı yakınlarında"); olmayan eski biçimde kalıyor.
+		if String(entry.get("cause", "")).is_empty():
+			line.text = "%s · %s — %s" % [
+				tr("UI_LEDGER_DAY") % int(entry.get("day", 0)),
+				String(entry.get("name", "")),
+				CaravanLedger.get_kind_label(String(entry.get("kind", ""))),
+			]
+		else:
+			line.text = CaravanLedger.describe(entry)
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD
 		# Üstü çizili satır soluk: kaybın kaydı duruyor ama artık
 		# yanında yürüyen biri değil.
 		if _session.ledger.is_struck(entry):

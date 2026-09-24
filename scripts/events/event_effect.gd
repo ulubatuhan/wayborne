@@ -56,6 +56,14 @@ enum Type {
 	# kısayolu - kervanın o an üstünde olduğu yol), şehir-türü olaylarda
 	# "current" kervanın gittiği şehri işaret eder.
 	WORLD_EVENT_START,
+	# Oyuncu dışındaki en yaralı yoldaşı yolda bırakır (bkz. evt_leave_the_
+	# wounded). Kervandan çıkar ama ölmez; defterde üstü çizili, sebebiyle.
+	LEAVE_BEHIND,
+	# Tek bir kişinin canı: amount +iyileştirir/-yaralar, text_value kimi
+	# seçeceğini söyler: "weakest" (en yaralı yoldaş), bir stat adı
+	# ("strength", "agility"...) = o statta en iyi olan, boş = lider. Olaylar
+	# öldürmez - can en az 1'de kenetlenir (ölüm savaşın ve açlığın işi).
+	PARTY_HP,
 }
 
 @export var type: Type = Type.GOLD

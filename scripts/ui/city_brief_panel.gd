@@ -30,19 +30,6 @@ const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
 const OBJECTIVE_MARK_SIZE: float = 11.0
 
-## Bu kadar gün kalınca vade "yaklaşıyor" sayılır - DebtPanel ile aynı eşik.
-const DUE_SOON_DAYS: int = 7
-
-## Stres bu çizginin üstündeyse şehirde müdahale önerilir. Kavga olayının
-## eşiğinin (bkz. evt_stress_brawl) biraz altında: uyarı, kriz patladıktan
-## sonra değil, önce gelmeli.
-const STRESS_WARNING: int = 30
-
-## Eldeki erzak bu kadar günden aza yetiyorsa uyarılır. Haritadaki en kısa
-## bacak dört gün, en uzunu altı; altının altına düşmek "hiçbir yere
-## gidemezsin" demek.
-const PROVISION_WARNING_DAYS: int = 6
-
 var _session: GameSession
 var _chapter_box: VBoxContainer
 var _needs_box: VBoxContainer
@@ -170,17 +157,20 @@ func _build_chapter() -> void:
 ## oyuncu aramadan önüne geliyor. "No need, no row" burada da geçerli:
 ## defterde üstü çizili hiçbir satır yoksa bu blok da yok.
 func _build_memory() -> void:
-	var struck := _session.ledger.recent().filter(_session.ledger.is_struck)
-	if struck.is_empty():
+	var memory_data := CityBriefModel.build_memory(_session)
+	if memory_data.is_empty():
 		return
-	var entry: Dictionary = struck[0]
-	var key := "UI_BRIEF_MEMORY_DIED" if String(entry.get("kind", "")) == CaravanLedger.KIND_DIED \
-		else "UI_BRIEF_MEMORY_DEPARTED"
 	var memory := Label.new()
-	memory.text = tr(key) % String(entry.get("name", ""))
+	memory.text = String(memory_data["text"])
 	memory.autowrap_mode = TextServer.AUTOWRAP_WORD
 	memory.modulate = NOTE_COLOR
 	_chapter_box.add_child(memory)
+	if not String(memory_data["detail"]).is_empty():
+		var detail := Label.new()
+		detail.text = String(memory_data["detail"])
+		detail.autowrap_mode = TextServer.AUTOWRAP_WORD
+		detail.modulate = NOTE_COLOR
+		_chapter_box.add_child(detail)
 
 # --- Kervanın ihtiyaçları ---
 
@@ -200,66 +190,9 @@ func _build_needs() -> void:
 ## Satırlar aciliyet sırasında: vadesi geçmiş borç, yolda kalmaya yol
 ## açacak eksikler, sonra fırsatlar. Karşılığı olmayan bir ihtiyaç hiç
 ## üretilmiyor - boş bir uyarı listesi gürültüdür.
+## Liste `CityBriefModel`'den gelir - panel yalnızca çizer.
 func _collect_needs() -> Array[Dictionary]:
-	var needs: Array[Dictionary] = []
-
-	# Borç varsa *her zaman* görünür, vadesi uzak olsa bile: kervanın 350
-	# altın açığı olması başlı başına bir ihtiyaçtır ve yalnızca vade
-	# yaklaşınca göstermek, oyuncuya batışını son hafta haber verirdi.
-	# Aciliyet renkte: gecikmiş ve yaklaşan kırmızı, uzak vade sade.
-	if _session.get_total_debt() > 0:
-		var soonest := _session.debts.get_soonest_due_in_days(_session.total_days_elapsed)
-		if soonest < 0:
-			needs.append(_need(
-				tr("UI_BRIEF_NEED_DEBT_OVERDUE") % _session.get_total_debt(),
-				tr("UI_BRIEF_GO_GUILD"), Nav.GUILD, true
-			))
-		else:
-			needs.append(_need(
-				tr("UI_BRIEF_NEED_DEBT_SOON") % [_session.get_total_debt(), soonest],
-				tr("UI_BRIEF_GO_GUILD"), Nav.GUILD, soonest <= DUE_SOON_DAYS
-			))
-
-	# Erzak, yolun omurgası: kervan gün iyi geçse de kötü geçse de yiyor.
-	# Sefer başına *gereken* miktar hedef seçilmeden bilinemez, ama eldeki
-	# erzağın kaç güne yettiği rotadan bağımsız ve dürüst bir sayı - ve
-	# planlayıcıya girmeden görülebilmesi gereken tek erzak bilgisi bu.
-	var daily := _session.get_daily_provision_consumption()
-	var days_of_food := _session.get_provisions() / maxi(1, daily)
-	if days_of_food < PROVISION_WARNING_DAYS:
-		needs.append(_need(
-			tr("UI_BRIEF_NEED_PROVISIONS") % [_session.get_provisions(), days_of_food, daily],
-			tr("UI_BRIEF_GO_MARKET"), Nav.ECONOMY, days_of_food <= 0
-		))
-
-	if _session.owned_wagon_damaged > 0:
-		needs.append(_need(
-			tr("UI_BRIEF_NEED_REPAIR") % _session.owned_wagon_damaged,
-			tr("UI_BRIEF_GO_YARD"), Nav.CARAVAN_YARD, true
-		))
-
-	if _session.accepted_contracts.is_empty():
-		needs.append(_need(
-			tr("UI_BRIEF_NEED_CONTRACT"), tr("UI_BRIEF_GO_GUILD"), Nav.GUILD, false
-		))
-
-	if _session.party_stress >= STRESS_WARNING:
-		needs.append(_need(
-			tr("UI_BRIEF_NEED_STRESS") % [_session.party_stress, GameSession.MAX_STRESS],
-			tr("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
-		))
-
-	var free_slots := _session.get_party_capacity() - _session.get_party().size()
-	if free_slots > 0:
-		needs.append(_need(
-			tr("UI_BRIEF_NEED_CREW") % free_slots,
-			tr("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
-		))
-
-	return needs
-
-func _need(text: String, action_label: String, scene_path: String, urgent: bool) -> Dictionary:
-	return {"text": text, "action": action_label, "scene": scene_path, "urgent": urgent}
+	return CityBriefModel.build_needs(_session)
 
 func _build_need_row(need: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()

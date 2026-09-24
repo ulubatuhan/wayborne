@@ -43,8 +43,8 @@ var original_merchant_names: Array[String] = []
 ## yoluyla bakış (bkz. CLAUDE.md Ana Hedefler'in "#11" notu) bunu okur.
 ## İsimden türetilmiş sabit bir tohumla atanıyor: aynı isimli bir tüccarla
 ## ileride tekrar karşılaşmak hep aynı huyu buluyor - kalıcı bir kimlik,
-## sefer başına yeniden zar değil. Sefer içinde kayıt yok (bkz. Save &
-## Menu Rules), o yüzden bu alanın serileşmesi hiç gerekmiyor.
+## sefer başına yeniden zar değil. Sefer ortası kaydında `to_dict()` ile
+## yazılıyor (bkz. Save & Menu Rules).
 var merchant_disposition_by_name: Dictionary = {}
 
 ## Yabancı tüccarın vagonunda **gerçekten** taşıdığı yük (bkz.
@@ -166,6 +166,63 @@ static func _roll_merchant_cargo(merchant_name: String, offer_wagon_count: int, 
 		var quantity := rng.randi_range(MERCHANT_CARGO_MIN_QUANTITY, MERCHANT_CARGO_MAX_QUANTITY) * offer_wagon_count
 		cargo.add_item(item, quantity)
 	return cargo
+
+## Sefer ortası kaydı: kervanın o anki hali. Tüccarın kargosu da yazılıyor -
+## tohumdan yeniden üretilebilirdi ama yolda değişebilir, yazmak güvenli.
+func to_dict() -> Dictionary:
+	var cargo := {}
+	for merchant_name in merchant_cargo_by_name:
+		var inventory: Inventory = merchant_cargo_by_name[merchant_name]
+		cargo[merchant_name] = inventory.to_save_array()
+	var dispositions := {}
+	for merchant_name in merchant_disposition_by_name:
+		dispositions[merchant_name] = String(merchant_disposition_by_name[merchant_name])
+	return {
+		"wagon_count": wagon_count,
+		"damaged_wagons": damaged_wagons,
+		"merchant_names": merchant_names.duplicate(),
+		"original_merchant_names": original_merchant_names.duplicate(),
+		"morale": morale,
+		"documents": documents,
+		"stamina": stamina,
+		"wagons_at_start": wagons_at_start,
+		"player_wagon_count_at_start": player_wagon_count_at_start,
+		"merchant_profit_by_name": merchant_profit_by_name.duplicate(),
+		"merchant_disposition_by_name": dispositions,
+		"merchant_cargo_by_name": cargo,
+		"merchant_known_by_name": merchant_known_by_name.duplicate(),
+	}
+
+static func from_dict(data: Dictionary) -> CaravanState:
+	var state := CaravanState.new()
+	state.wagon_count = maxi(MIN_WAGONS, int(data.get("wagon_count", MIN_WAGONS)))
+	state.damaged_wagons = clampi(int(data.get("damaged_wagons", 0)), 0, state.wagon_count)
+	for merchant_name in (data.get("merchant_names", []) as Array):
+		state.merchant_names.append(String(merchant_name))
+	for merchant_name in (data.get("original_merchant_names", []) as Array):
+		state.original_merchant_names.append(String(merchant_name))
+	state.morale = clampi(int(data.get("morale", MAX_MORALE)), 0, MAX_MORALE)
+	state.documents = maxi(0, int(data.get("documents", 0)))
+	state.stamina = clampi(int(data.get("stamina", MAX_STAMINA)), 0, MAX_STAMINA)
+	state.wagons_at_start = maxi(MIN_WAGONS, int(data.get("wagons_at_start", state.wagon_count)))
+	state.player_wagon_count_at_start = maxi(
+		MIN_WAGONS, int(data.get("player_wagon_count_at_start", MIN_WAGONS))
+	)
+	var profits: Dictionary = data.get("merchant_profit_by_name", {})
+	for merchant_name in profits:
+		state.merchant_profit_by_name[String(merchant_name)] = int(profits[merchant_name])
+	var dispositions: Dictionary = data.get("merchant_disposition_by_name", {})
+	for merchant_name in dispositions:
+		state.merchant_disposition_by_name[String(merchant_name)] = String(dispositions[merchant_name])
+	var cargo: Dictionary = data.get("merchant_cargo_by_name", {})
+	for merchant_name in cargo:
+		var inventory := Inventory.new()
+		inventory.load_from_array(cargo[merchant_name] as Array)
+		state.merchant_cargo_by_name[String(merchant_name)] = inventory
+	var known: Dictionary = data.get("merchant_known_by_name", {})
+	for merchant_name in known:
+		state.merchant_known_by_name[String(merchant_name)] = bool(known[merchant_name])
+	return state
 
 func get_healthy_wagon_count() -> int:
 	return maxi(0, wagon_count - damaged_wagons)

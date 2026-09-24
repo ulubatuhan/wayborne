@@ -269,14 +269,10 @@ func _brief_session(gold: int, provisions: int) -> GameSession:
 	session.change_provisions(provisions - session.get_provisions())
 	return session
 
-## Paneli kurup ürettiği ihtiyaç listesini döner, sonra düğümü serbest
-## bırakır - testlerin ObjectDB'de iz bırakmaması için.
+## Brifingin ihtiyaç listesi - panel değil model üzerinden (bkz. CityBriefModel).
 func _brief_needs(session: GameSession) -> Array[Dictionary]:
-	var panel := CityBriefPanel.new()
-	panel.setup(session)
-	var needs := panel._collect_needs()
-	panel.free()
-	return needs
+	# Model düğümsüz: sahne ağacı ya da Control kurmadan sınanıyor.
+	return CityBriefModel.build_needs(session)
 
 func _need_texts(needs: Array[Dictionary]) -> Array[String]:
 	var scenes: Array[String] = []
