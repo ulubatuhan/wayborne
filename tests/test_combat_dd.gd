@@ -415,11 +415,11 @@ func _test_bark_drives_flash_and_lunge(t) -> void:
 
 	# Renk eşlemesi: her tanınan tür kendi rengini döner, tanınmayan bir
 	# tür (ör. gelecekte eklenecek bir bark) nötre düşer, hiç kırılmaz.
-	t.eq(panel._flash_for_kind(CombatEncounter.BARK_CRIT), CombatPanel.FLASH_CRIT, "kritik kendi rengini döner")
-	t.eq(panel._flash_for_kind(CombatEncounter.BARK_HIT), CombatPanel.FLASH_HIT, "isabet kendi rengini döner")
-	t.eq(panel._flash_for_kind(CombatEncounter.BARK_MISS), CombatPanel.FLASH_MISS, "kaçırma kendi rengini döner")
-	t.eq(panel._flash_for_kind(CombatEncounter.BARK_REFUSE), CombatPanel.FLASH_REFUSE, "red kendi rengini döner")
-	t.eq(panel._flash_for_kind("bilinmeyen"), CombatPanel.FLASH_NEUTRAL, "tanınmayan tür nötr kalır")
+	t.eq(panel._flash_for_kind(CombatEncounter.BARK_CRIT), ArtPalette.FX_FLASH_CRIT, "kritik kendi rengini döner")
+	t.eq(panel._flash_for_kind(CombatEncounter.BARK_HIT), ArtPalette.FX_FLASH_HIT, "isabet kendi rengini döner")
+	t.eq(panel._flash_for_kind(CombatEncounter.BARK_MISS), ArtPalette.FX_FLASH_MISS, "kaçırma kendi rengini döner")
+	t.eq(panel._flash_for_kind(CombatEncounter.BARK_REFUSE), ArtPalette.FX_FLASH_REFUSE, "red kendi rengini döner")
+	t.eq(panel._flash_for_kind("bilinmeyen"), ArtPalette.FX_FLASH_NEUTRAL, "tanınmayan tür nötr kalır")
 
 	# İsabet: hedef kendi rengiyle parlar, saldıran kendi tarafına işaretli
 	# bir kayma kazanır (oyuncu ileri/pozitif, düşman ileri/negatif).
@@ -439,7 +439,7 @@ func _test_bark_drives_flash_and_lunge(t) -> void:
 	panel._lunge_states.clear()
 	panel._on_unit_barked(target, "ıska", CombatEncounter.BARK_MISS)
 	t.ok(panel._flash_states.has(target), "kaçırma hedefte parlama kaydı bırakır")
-	t.eq(panel._flash_states[target]["color"], CombatPanel.FLASH_MISS, "kaçırma kendi rengini taşır")
+	t.eq(panel._flash_states[target]["color"], ArtPalette.FX_FLASH_MISS, "kaçırma kendi rengini taşır")
 	t.ok(panel._lunge_states.has(attacker), "kaçırma da saldıranda kayma kaydı bırakır - hamle taze")
 
 	# Red: yalnızca soluk bir parlama - reddin kendisi bir hamle değil,
@@ -452,7 +452,7 @@ func _test_bark_drives_flash_and_lunge(t) -> void:
 
 	# Süresi geçmiş bir kayıt uygulanınca nötre döner ve kendini siler -
 	# `_apply_pending_bark`'ın süre dolunca unutma kuralının aynısı.
-	panel._flash_states[target] = {"color": CombatPanel.FLASH_CRIT, "expires_at": 0}
+	panel._flash_states[target] = {"color": ArtPalette.FX_FLASH_CRIT, "expires_at": 0}
 	panel._lunge_states[attacker] = {"offset": CombatPanel.LUNGE_DISTANCE, "expires_at": 0}
 	var probe := CombatUnitSlot.new()
 	panel._apply_pending_animation(probe, target)

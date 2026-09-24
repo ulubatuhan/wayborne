@@ -186,10 +186,18 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 
 	# Ölü/düşmüş bir birim soluk durur ama gizlenmez: saftaki boşluğu
 	# görmek mevki mantığının okunabilmesi için gerekli.
-	modulate = Color(1, 1, 1, 1) if bound_unit.is_alive() else Color(1, 1, 1, 0.55)
+	modulate = Color(1, 1, 1, _field_alpha(bound_unit))
 	mouse_default_cursor_shape = (
 		Control.CURSOR_POINTING_HAND if is_target else Control.CURSOR_ARROW
 	)
+
+## Sahadaki soluklaşma: düşen hâlâ saftaki bir boşluk, ölü daha da silik.
+static func _field_alpha(bound_unit: CombatUnit) -> float:
+	if bound_unit.is_dead:
+		return ArtPalette.UI_DEAD_ALPHA
+	if not bound_unit.is_alive():
+		return ArtPalette.UI_FALLEN_ALPHA
+	return 1.0
 
 ## Silüetin duruşunu ve paletini belirleyen durum. Düşen bir figür
 ## ayakta soluk durmuyor, yere çöküyor - "düşmüş" ancak duruş değişince
