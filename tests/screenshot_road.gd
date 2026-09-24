@@ -93,6 +93,7 @@ func _init() -> void:
 		var found := _terrain_with(String(shot.biome))
 		_band.set_route(found.terrain)
 		_band.set_weather(String(shot.weather))
+		_caravan.set_weather(String(shot.weather))
 		_band.set_phase(shot.phase, 0.45)
 		var day: float = found.day
 		_band.set_route_progress(day / float(found.terrain.total_days), day)

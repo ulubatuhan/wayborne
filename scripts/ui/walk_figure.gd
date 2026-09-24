@@ -33,6 +33,18 @@ const BOB_RATIO: float = 0.018
 
 const HORSE_PHASES: Array[float] = [0.0, PI, PI * 0.5, PI * 1.5]
 
+## Duruşa ve yürüyüşe geçiş süreleri. Figür durunca faz sıfıra atlıyordu:
+## yarım adımdaki bacak tek karede yan yana geliyordu - kırık bir kare.
+## Artık adımın genliği (`_motion`) sönüyor, ayaklar kendiliğinden
+## toplanıyor. Kalkış daha kısa: yürümeye başlamak bir karar, durmak bir
+## yavaşlama.
+const REST_EASE_SECONDS: float = 0.25
+const START_EASE_SECONDS: float = 0.12
+
+## Öküzün başı her adımda hafifçe iner - yük çeken hayvanı duran bir
+## heykelden ayıran şey (ikincil hareket). Figür boyuna oranlı.
+const OX_NOD_RATIO: float = 0.018
+
 ## Atlı figürün iki parçasının payı. At, figür kutusunun yarısından biraz
 ## fazlası; binici at sırtından yukarıya kalan pay. Toplamı 1'i geçiyor,
 ## çünkü binicinin bacakları atın gövdesiyle örtüşüyor - örtüşmeyince
@@ -61,6 +73,12 @@ var _phase: float = 0.0
 var _facing: float = 1.0
 var _tint: Color = Color.WHITE
 var _moving: bool = true
+## Yürüyüşün genliği (0 duruyor, 1 tam adım). Bütün yürüyüş formülleri
+## bununla çarpılıyor; `_moving` yalnızca hedefi söylüyor.
+var _motion: float = 1.0
+## Rüzgâra eğilme (radyan, yürüme yönüne doğru pozitif). Yalnızca insan
+## gövdesi eğiliyor - bkz. RoadCaravan.set_weather.
+var _lean: float = 0.0
 var _carries_pack: bool = false
 ## `CharacterData.outfit` - boş sözlük (tayfa, düşman reskin'i, oxen) hiçbir
 ## şeyi değiştirmez, figür tamamen sınıf/arketip paletinde kalır. Yalnızca
@@ -92,15 +110,28 @@ func set_kind(
 ## çünkü bütün kervan aynı tempoyu paylaşmalı ama aynı *anda* aynı adımı
 ## atmamalı (bkz. RoadCaravan'ın faz kaydırması).
 func advance(delta: float, speed: float) -> void:
-	var was_moving := _moving
 	_moving = absf(speed) > 0.01
 	if _moving:
 		_phase = fmod(_phase + delta * speed * TAU, TAU)
 		_facing = 1.0 if speed >= 0.0 else -1.0
-	elif was_moving:
-		# Durunca ayakları yan yana bırakıyoruz; yarım adımda donmuş bir
-		# figür kırılmış gibi duruyor.
-		_phase = 0.0
+	_motion = ease_motion(_motion, _moving, delta)
+	queue_redraw()
+
+## Genliğin bir karelik adımı. Saf fonksiyon - test sahnesiz okuyabilsin.
+## Durunca faz donuyor ama adımın boyu sönüyor, yani ayak yarım adımda
+## kalmıyor, yerine süzülüyor.
+static func ease_motion(current: float, moving: bool, delta: float) -> float:
+	if moving:
+		return minf(1.0, current + delta / START_EASE_SECONDS)
+	return maxf(0.0, current - delta / REST_EASE_SECONDS)
+
+func get_motion() -> float:
+	return _motion
+
+func set_lean(radians: float) -> void:
+	if is_equal_approx(_lean, radians):
+		return
+	_lean = radians
 	queue_redraw()
 
 func set_phase_offset(offset: float) -> void:
@@ -168,7 +199,7 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	# atın kırk piksel üstünde havada duruyordu (ekran görüntüsünde
 	# apaçık, yapısal testte görünmez).
 	var hip := Vector2(cx, ground_y if seated else ground_y - h * 0.46)
-	var bob := sin(_phase * 2.0) * h * BOB_RATIO if _moving else 0.0
+	var bob := sin(_phase * 2.0) * h * BOB_RATIO * _motion
 	hip.y += bob
 
 	if not seated:
@@ -185,7 +216,11 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	else:
 		_draw_seated_legs(hip, h, pants_color, shoes_color)
 
-	var shoulder := hip + Vector2(0.0, -h * 0.26)
+	# Rüzgârda gövde kalçadan öne eğiliyor; baş ve kollar omuza bağlı
+	# olduğu için onlar da kendiliğinden eğiliyor. Oturan binici eyere
+	# bağlı, o yalnızca yarısı kadar.
+	var lean := _lean * (0.5 if seated else 1.0)
+	var shoulder := hip + Vector2(sin(lean) * h * 0.26 * _facing, -cos(lean) * h * 0.26)
 	# Gövde: omuzdan kalçaya doğru daralan bir gövde. Dikdörtgen yerine
 	# çokgen olması silüeti tanınır kılıyor.
 	var half_top := h * 0.098 * bulk
@@ -221,8 +256,8 @@ func _draw_leg(
 	hip: Vector2, ground_y: float, h: float, phase: float, color: Color, foot_color: Color
 ) -> void:
 	var leg_len := ground_y - hip.y
-	var stride := h * STRIDE_RATIO if _moving else 0.0
-	var lift := h * LIFT_RATIO if _moving else 0.0
+	var stride := h * STRIDE_RATIO * _motion
+	var lift := h * LIFT_RATIO * _motion
 	var foot := Vector2(
 		hip.x + cos(phase) * stride * _facing,
 		ground_y - maxf(0.0, sin(phase)) * lift
@@ -256,7 +291,7 @@ func _draw_seated_legs(hip: Vector2, h: float, color: Color, foot_color: Color) 
 ## `hand_color` eldiven seçiliyse onun rengi, değilse ten rengi - bkz.
 ## `_draw_person`'ın `gloves_color` çözümü.
 func _draw_arm(shoulder: Vector2, h: float, phase: float, color: Color, hand_color: Color) -> void:
-	var swing := (sin(phase) if _moving else 0.35) * 0.55
+	var swing := lerpf(0.35, sin(phase), _motion) * 0.55
 	var upper := h * 0.15
 	var lower := h * 0.14
 	var elbow := shoulder + Vector2(
@@ -399,7 +434,7 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 
 	# Gövde derin: ilk ölçüde sırt ile karın arası boyun uzunluğundan
 	# kısaydı ve hayvan deveye benziyordu. Bir at derin göğüslüdür.
-	var bob := sin(_phase * 2.0) * h * 0.012 if _moving else 0.0
+	var bob := sin(_phase * 2.0) * h * 0.012 * _motion
 	var outline := PackedVector2Array([
 		Vector2(rear_x - h * 0.12 * _facing, back_y + h * 0.10 + bob),
 		Vector2(rear_x - h * 0.02 * _facing, back_y - h * 0.02 + bob),
@@ -437,9 +472,10 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 	# başsız kahverengi bir levha gibi duruyordu: başı omuz hizasında
 	# olduğu için gövdeye karışıyordu.
 	var neck_base := Vector2(front_x + h * 0.04 * _facing, back_y + h * 0.02 + bob)
+	var nod := 0.0 if is_horse else _motion * OX_NOD_RATIO * h * maxf(0.0, sin(_phase * 2.0))
 	var poll := neck_base + Vector2(
 		h * (0.26 if is_horse else 0.30) * _facing,
-		h * (-0.22 if is_horse else 0.12)
+		h * (-0.22 if is_horse else 0.12) + nod
 	)
 	ArtDraw.inked(self, PackedVector2Array([
 		neck_base + Vector2(-h * 0.10 * _facing, h * 0.02),
@@ -503,8 +539,8 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 func _draw_quad_leg(
 	shoulder: Vector2, ground_y: float, h: float, phase: float, color: Color
 ) -> void:
-	var stride := h * 0.13 if _moving else 0.0
-	var lift := h * 0.055 if _moving else 0.0
+	var stride := h * 0.13 * _motion
+	var lift := h * 0.055 * _motion
 	var hoof := Vector2(
 		shoulder.x + cos(phase) * stride * _facing,
 		ground_y - maxf(0.0, sin(phase)) * lift

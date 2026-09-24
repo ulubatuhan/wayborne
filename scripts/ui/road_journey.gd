@@ -1523,6 +1523,8 @@ func _refresh_weather() -> void:
 	# örtüşmez ve "doğru stokladım, yine aç kaldım" geri gelirdi.
 	_weather = RouteWeather.at(_route_key, _session.total_days_elapsed + 1, biome)
 	_band.set_weather(_weather)
+	if _caravan != null:
+		_caravan.set_weather(_weather)
 
 func _refresh_time_ui() -> void:
 	if _clock == null:

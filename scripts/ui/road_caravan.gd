@@ -118,6 +118,25 @@ var _anchor_x: float = 0.0
 var _ground_y: float = 0.0
 var _light: Color = Color.WHITE
 var _speed: float = 0.0
+
+## İkincil hareket (bkz. WalkFigure'ın OX_NOD_RATIO'su): vagonun brandası
+## tekerleğin ritmiyle salınıyor, yağmurda ve fırtınada insanlar rüzgâra
+## eğiliyor. Rüzgâr yalnızca insanları eğiyor - öküz ve vagon eğilmez,
+## eğilen bir vagon devrilen bir vagondur.
+const CANOPY_SWAY_RATIO: float = 0.03
+const WIND_LEAN: Dictionary = {
+	RouteWeather.RAIN: 0.035,
+	RouteWeather.STORM: 0.07,
+}
+## Bora: eğilme sabit değil, figür başına kaydırılmış bir dalga - herkes
+## aynı anda aynı açıya eğilirse rüzgâr değil kalıp okunur.
+const GUST_AMPLITUDE: float = 0.35
+const GUST_SPEED: float = 1.7
+var _wind_lean: float = 0.0
+var _anim_time: float = 0.0
+## Vagonların yürüyüş genliği - figürlerin `_motion`'ının aynısı, aynı
+## sönümle: kervan durunca branda bir karede donmasın.
+var _wagon_motion: float = 0.0
 ## Liderin kolondaki yeri: 0 en önde, negatif geriye doğru.
 var _leader_offset: float = 0.0
 var _wagon_count: int = 1
@@ -345,6 +364,20 @@ func set_light(light: Color) -> void:
 ## 0 durgun, 1 normal). Yürüyüş fazı ve tekerlek dönüşü bundan.
 func set_speed(speed: float) -> void:
 	_speed = speed
+
+func set_weather(weather: String) -> void:
+	_wind_lean = float(WIND_LEAN.get(weather, 0.0))
+
+## Bir figürün o anki rüzgâr eğilmesi. Saf fonksiyon (test sahnesiz okur).
+static func wind_lean_at(base: float, time: float, index: int) -> float:
+	if is_zero_approx(base):
+		return 0.0
+	return base * (1.0 + GUST_AMPLITUDE * sin(time * GUST_SPEED + float(index) * 1.3))
+
+## Brandanın salınımı (piksel). Genlik sıfırsa tam sıfır - duran kervanın
+## brandası kıpırdamaz.
+static func canopy_sway_at(wheel_angle: float, index: int, wagon_h: float, motion: float) -> float:
+	return sin(wheel_angle * 2.0 + float(index) * 0.9) * wagon_h * CANOPY_SWAY_RATIO * motion
 
 ## Lider kolondan ayrıldığında A/D onu yürütüyor, kervanı değil. Sınır
 ## kolonun uzunluğu: lider kervanı bırakıp gidemiyor.
@@ -594,19 +627,27 @@ func _process(delta: float) -> void:
 	# ayaklarını yan yana toplasın. Toplanan figürler burada atlanıyor -
 	# onların fazını `_advance_gather` kendi adım büyüklüğüyle sürüyor,
 	# çünkü kamp sırasında gerçek `_speed` zaten sıfır (bkz. orası).
+	_anim_time += delta
 	var step := _speed * STEP_RATE
+	var figure_index := 0
 	for child in get_children():
 		var figure := child as WalkFigure
-		if figure == null or _gather_homes.has(figure):
+		if figure == null:
+			continue
+		figure_index += 1
+		figure.set_lean(wind_lean_at(_wind_lean, _anim_time, figure_index))
+		if _gather_homes.has(figure):
 			continue
 		figure.advance(delta, step)
 
+	var was_swaying := _wagon_motion > 0.0
+	_wagon_motion = WalkFigure.ease_motion(_wagon_motion, not is_zero_approx(_speed), delta)
 	if not is_zero_approx(_speed):
 		_wheel_angle = fmod(_wheel_angle + delta * _speed * 4.2, TAU)
 	# Yeniden çizim üç sebepten gerekebilir: tekerlek dönüyor, ateş
 	# titriyor, ya da biri hâlâ ateşe/koluna yürüyor - üçü de kendi
 	# koşuluyla bağımsız.
-	if not is_zero_approx(_speed) or _camping or not _gathering_figures.is_empty():
+	if not is_zero_approx(_speed) or was_swaying or _camping or not _gathering_figures.is_empty():
 		queue_redraw()
 
 ## Toplanma ve dönüş: `_gather_progress` kampa göre 0↔1 arası akıyor,
@@ -845,7 +886,8 @@ func _draw() -> void:
 		var driver_gone := index < _driver_figures.size() and _driver_figures[index].visible
 		ArtDraw.wagon(
 			self, Vector2(centre, _ground_y), wagon_w, wagon_h,
-			_wheel_angle, _light, index == 0, not driver_gone
+			_wheel_angle, _light, index == 0, not driver_gone,
+			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion)
 		)
 
 	if _camping:
