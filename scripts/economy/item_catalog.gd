@@ -1,0 +1,74 @@
+class_name ItemCatalog
+extends RefCounted
+
+## id -> Item çözümlemesi. Olaylar envantere eşya eklerken yalnızca id
+## bildirir; nesnenin kendisi buradan gelir.
+##
+## item_id'ler ("test_grain" vb.) kalıcı kayıtlarda ve olay tanımlarında
+## (bkz. event_catalog.gd) saklandığı için değiştirilmez - yalnızca
+## item_name/description'ı gerçek lore'a çevirmek güvenlidir (bkz. Faz 7
+## PR-D).
+
+static var _cache: Dictionary = {}
+
+static func get_item(item_id: String) -> Item:
+	if _cache.is_empty():
+		_build_cache()
+	return _cache.get(item_id)
+
+## Şehir pazarında alınıp satılabilen mallar, sabit sırayla. Faz 17 PR-5
+## altı yeni malla genişletti (bkz. WorldMapData'nın ikinci ticaret döngüsü) -
+## eskisi hâlâ baştan, yenileri sona ekleniyor ki mevcut sırayı okuyan hiçbir
+## ekran/test bozulmasın.
+static func get_trade_goods() -> Array[Item]:
+	var ids := [
+		GameSession.PROVISIONS_ITEM_ID,
+		"test_grain",
+		"test_cloth",
+		"test_weapon",
+		"test_potion",
+		"test_furs",
+		"spice",
+		"honey",
+		"silk",
+		"jewelry",
+		"fish",
+		"wine",
+	]
+	var items: Array[Item] = []
+	for item_id in ids:
+		var item := get_item(item_id)
+		if item != null:
+			items.append(item)
+	return items
+
+static func _build_cache() -> void:
+	_add(GameSession.PROVISIONS_ITEM_ID, GameSession.PROVISIONS_ITEM_NAME, GameSession.PROVISIONS_UNIT_PRICE, 0.5)
+	_add("test_grain", "ITEM_GRAIN_NAME", 5, 1.0)
+	_add("test_cloth", "ITEM_CLOTH_NAME", 12, 1.5)
+	_add("test_weapon", "ITEM_WEAPON_NAME", 40, 2.5)
+	_add("test_potion", "ITEM_POTION_NAME", 20, 0.5)
+	_add("test_furs", "ITEM_FURS_NAME", 30, 2.0)
+	# Pazarda satılmıyor - yalnızca Atölye'de craftlanır ya da sökülür
+	# (bkz. RecipeCatalog), o yüzden get_trade_goods()'a girmiyor.
+	_add("test_bandage", "ITEM_BANDAGE_NAME", 0, 0.3)
+
+	# Faz 17 PR-5: ikinci ticaret döngüsü (bkz. WorldMapData) - beş şehri
+	# tek bir beşgen halkada birbirine bağlayan ek mallar. Ağırlık/fiyat
+	# ilişkisi kasıtlı: mücevher en pahalı ve en hafif (gerçek bir lüks),
+	# balık en ucuz ve nispeten hafif (bir taşra iaşesi), şarap en ağır
+	# (fıçı - taşımanın kendisi bir maliyet).
+	_add("spice", "ITEM_SPICE_NAME", 35, 0.4)
+	_add("honey", "ITEM_HONEY_NAME", 15, 1.2)
+	_add("silk", "ITEM_SILK_NAME", 45, 0.6)
+	_add("jewelry", "ITEM_JEWELRY_NAME", 60, 0.2)
+	_add("fish", "ITEM_FISH_NAME", 8, 1.0)
+	_add("wine", "ITEM_WINE_NAME", 18, 1.8)
+
+static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
+	var item := Item.new()
+	item.item_id = item_id
+	item.item_name_key = item_name
+	item.base_price = base_price
+	item.unit_weight = unit_weight
+	_cache[item_id] = item

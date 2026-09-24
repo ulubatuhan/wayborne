@@ -1,0 +1,49 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to keys
+
+config_version=5
+
+[application]
+
+config/name="Wayborne"
+config/description="A Godot 4 game project"
+config/version="0.1.0"
+config/windows_native_title=true
+run/main_scene="res://scenes/ui/main_menu.tscn"
+config/features=PackedStringArray("4.2", "forward_plus")
+
+[autoload]
+
+GameState="*res://scripts/autoload/game_state.gd"
+DevPanel="*res://scripts/autoload/dev_panel.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+UserSettings="*res://scripts/autoload/user_settings.gd"
+GamepadCursor="*res://scripts/autoload/gamepad_cursor.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
+
+[debug]
+
+gdscript/warnings/unused_variable=1
+gdscript/warnings/unused_argument=1
+gdscript/warnings/unused_signal=1
+gdscript/warnings/return_value_discarded=1
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_layers"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://data/locale/ui.tr.translation", "res://data/locale/ui.en.translation", "res://data/locale/ui.de.translation", "res://data/locale/ui.fr.translation", "res://data/locale/ui.es.translation", "res://data/locale/ui.it.translation", "res://data/locale/ui.pt_BR.translation", "res://data/locale/ui.ru.translation", "res://data/locale/ui.pl.translation", "res://data/locale/ui.zh_CN.translation", "res://data/locale/ui.ja.translation", "res://data/locale/events.tr.translation", "res://data/locale/events.en.translation", "res://data/locale/events.de.translation", "res://data/locale/events.fr.translation", "res://data/locale/events.es.translation", "res://data/locale/events.it.translation", "res://data/locale/events.pt_BR.translation", "res://data/locale/events.ru.translation", "res://data/locale/events.pl.translation", "res://data/locale/events.zh_CN.translation", "res://data/locale/events.ja.translation", "res://data/locale/game.tr.translation", "res://data/locale/game.en.translation", "res://data/locale/game.de.translation", "res://data/locale/game.fr.translation", "res://data/locale/game.es.translation", "res://data/locale/game.it.translation", "res://data/locale/game.pt_BR.translation", "res://data/locale/game.ru.translation", "res://data/locale/game.pl.translation", "res://data/locale/game.zh_CN.translation", "res://data/locale/game.ja.translation")
+locale/fallback="en"
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

@@ -1,0 +1,151 @@
+class_name CultureCatalog
+extends RefCounted
+
+## Beş kültür. Her biri bir stat eğilimi, bir isim havuzu ve tek bir
+## mekanik perk taşır; perkler mevcut sistemlere bağlanır (erzak tüketimi,
+## erzak fiyatı, pazar fiyatı, savaş hasarı, dedikodu fiyatı).
+##
+## Tablo bir kez kurulup statik önbelleğe alınır (bkz. ItemCatalog deseni).
+
+const NOMAD: String = "nomad"
+const VALLEY: String = "valley"
+const HIGHLAND: String = "highland"
+const PORT: String = "port"
+const FISHER: String = "fisher"
+
+static var _cultures: Array[Culture] = []
+static var _culture_by_id: Dictionary = {}
+
+static func get_cultures() -> Array[Culture]:
+	_ensure_built()
+	return _cultures
+
+static func get_culture(culture_id: String) -> Culture:
+	_ensure_built()
+	return _culture_by_id.get(culture_id)
+
+## Kültür bulunamazsa oyunun çökmemesi için ilk kültüre düşer.
+static func get_culture_or_default(culture_id: String) -> Culture:
+	var culture := get_culture(culture_id)
+	if culture != null:
+		return culture
+	return get_cultures()[0]
+
+static func _ensure_built() -> void:
+	if not _cultures.is_empty():
+		return
+
+	_cultures.append(_make(
+		NOMAD,
+		"CULTURE_NOMAD_NAME",
+		"CULTURE_NOMAD_DESC",
+		{
+			CharacterStats.Kind.AGILITY: 2,
+			CharacterStats.Kind.ENDURANCE: 1,
+			CharacterStats.Kind.INTELLECT: -1,
+			# Göçebe, yıldızdan ve arazi izinden okur - kitaptan değil
+			# sahadan gelen bir bilgelik (bkz. CLAUDE.md Progression Rules).
+			CharacterStats.Kind.WISDOM: 1,
+		},
+		[
+			"Arslan", "Bayra", "Kutalmış", "Yaruk", "Tegin", "Sarıca", "Bozkurt", "Alpagut",
+			"Buğra", "Külbilge", "Temir", "Ötüken", "Sabar", "Ayçiçek", "Kunçuy", "Erke",
+		],
+		"CULTURE_NOMAD_PERK"
+	))
+	_cultures[-1].daily_provision_multiplier = 0.7
+
+	_cultures.append(_make(
+		VALLEY,
+		"CULTURE_VALLEY_NAME",
+		"CULTURE_VALLEY_DESC",
+		{
+			CharacterStats.Kind.INTELLECT: 2,
+			CharacterStats.Kind.CHARISMA: 1,
+			CharacterStats.Kind.STRENGTH: -1,
+			# Lonca hesabı dünyevi - defter iyi tutulur, sunağa az gidilir.
+			CharacterStats.Kind.FAITH: -1,
+		},
+		[
+			"Gerhardt", "Aldric", "Mathis", "Roswitha", "Benedikt", "Hilda", "Konrad", "Elsbeth",
+			"Friedrich", "Lorenz", "Gisela", "Otto", "Brunhild", "Ingrid", "Sieglinde", "Waldemar",
+		],
+		"CULTURE_VALLEY_PERK"
+	))
+	_cultures[-1].buy_price_multiplier = 0.9
+
+	_cultures.append(_make(
+		HIGHLAND,
+		"CULTURE_HIGHLAND_NAME",
+		"CULTURE_HIGHLAND_DESC",
+		{
+			CharacterStats.Kind.STRENGTH: 2,
+			CharacterStats.Kind.ENDURANCE: 1,
+			CharacterStats.Kind.CHARISMA: -1,
+			# Dağ kabilesi ayin bağlıdır - güç sınavı da bir tür ibadettir.
+			CharacterStats.Kind.FAITH: 1,
+		},
+		[
+			"Torgan", "Kaval", "Berku", "Ardıç", "Doruk", "Sarp", "Yıldırak", "Kayra",
+			"Boran", "Karlık", "Bahadır", "Gökçe", "Yalın", "Tuğrul", "Aktaş", "Demren",
+		],
+		"CULTURE_HIGHLAND_PERK"
+	))
+	_cultures[-1].combat_damage_multiplier = 1.15
+
+	_cultures.append(_make(
+		PORT,
+		"CULTURE_PORT_NAME",
+		"CULTURE_PORT_DESC",
+		{
+			CharacterStats.Kind.CHARISMA: 2,
+			CharacterStats.Kind.PERCEPTION: 1,
+			CharacterStats.Kind.ENDURANCE: -1,
+			# Limanın rıhtımı her halktan tüccar görür - dünya bilgisi birikir.
+			CharacterStats.Kind.WISDOM: 1,
+		},
+		[
+			"Nicolo", "Zara", "Emric", "Salda", "Vito", "Mira", "Andrea", "Kosta",
+			"Lucia", "Matteo", "Serafin", "Bianca", "Renzo", "Giulia", "Dorio", "Paulina",
+		],
+		"CULTURE_PORT_PERK"
+	))
+	_cultures[-1].rumor_cost_multiplier = 0.6
+
+	_cultures.append(_make(
+		FISHER,
+		"CULTURE_FISHER_NAME",
+		"CULTURE_FISHER_DESC",
+		{
+			CharacterStats.Kind.ENDURANCE: 2,
+			CharacterStats.Kind.PERCEPTION: 1,
+			CharacterStats.Kind.AGILITY: -1,
+			# Denize açılan önce dua eder - fırtınaya karşı tek güvence budur.
+			CharacterStats.Kind.FAITH: 1,
+		},
+		[
+			"Baran", "Yelda", "Marta", "Tarık", "Sena", "Duran", "İlkay", "Poyraz",
+			"Deniz", "Suna", "Halim", "Nazlı", "Kaya", "Yasemin", "Turgay", "Filiz",
+		],
+		"CULTURE_FISHER_PERK"
+	))
+	_cultures[-1].provision_cost_multiplier = 0.75
+
+	for culture in _cultures:
+		_culture_by_id[culture.culture_id] = culture
+
+static func _make(
+	culture_id: String, culture_name: String, description: String,
+	stat_bonuses: Dictionary, name_pool: Array, perk_text: String
+) -> Culture:
+	var culture := Culture.new()
+	culture.culture_id = culture_id
+	culture.culture_name_key = culture_name
+	culture.description_key = description
+	culture.stat_bonuses = stat_bonuses
+	var names: Array[String] = []
+	for entry in name_pool:
+		names.append(entry)
+	culture.name_pool = names
+	culture.perk_text_key = perk_text
+	return culture

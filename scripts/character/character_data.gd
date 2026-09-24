@@ -1,0 +1,636 @@
+class_name CharacterData
+extends RefCounted
+
+## Bir kişi: kimlik (isim/kültür), görünüş (boy/ten), statlar, sınıf ve
+## anlık can. Savaş motoru bunu sarmalar (CombatUnit), şehir ekranları
+## doğrudan okur. Sahne ağacı gerektirmez, testte doğrudan örneklenebilir.
+
+const MIN_HEIGHT_CM: int = 155
+const MAX_HEIGHT_CM: int = 200
+const DEFAULT_HEIGHT_CM: int = 172
+
+## Boyun eşiği: bunun üstü "uzun", altı "kısa" sayılır.
+const TALL_THRESHOLD_CM: int = 182
+const SHORT_THRESHOLD_CM: int = 166
+
+## Anahtar tutulur, metin okunduğu yerde çözülür - `const` içinde tr()
+## çağrılamaz (bkz. CLAUDE.md Localization Rules).
+const SKIN_TONE_NAMES: Array[String] = [
+	"SKIN_TONE_FAIR",
+	"SKIN_TONE_WHEAT",
+	"SKIN_TONE_OLIVE",
+	"SKIN_TONE_COPPER",
+	"SKIN_TONE_DARK",
+]
+
+static var _skin_tone_colors: Array[Color] = [
+	Color(0.93, 0.80, 0.68),
+	Color(0.85, 0.68, 0.52),
+	Color(0.72, 0.56, 0.40),
+	Color(0.58, 0.41, 0.28),
+	Color(0.38, 0.26, 0.19),
+]
+
+const MAX_LEVEL: int = 20
+const XP_BASE: int = 50
+const XP_GROWTH: float = 1.25
+const STAT_POINTS_PER_LEVEL: int = 1
+const SKILL_POINTS_PER_LEVEL: int = 2
+const MULTICLASS_UNLOCK_LEVEL: int = 7
+const MAX_SKILL_PROFICIENCY: int = 100
+
+var character_name: String = ""
+var culture_id: String = CultureCatalog.NOMAD
+var class_id: String = ClassCatalog.GUARD
+var height_cm: int = DEFAULT_HEIGHT_CM
+var skin_tone: int = 1
+
+## Kültür bonusları uygulanmış hâli - taban statlar saklanmaz, karakter
+## kurulurken bir kez birleştirilir.
+var stats: CharacterStats = CharacterStats.new()
+
+var current_hp: int = 0
+
+var level: int = 1
+var xp: int = 0
+var unspent_stat_points: int = 0
+var unspent_skill_points: int = 0
+
+## skill_id -> 0-100 arası yetkinlik. Metin2 tarzı: sabit kademeler yok,
+## her puan aynı yeteneği biraz daha güçlendirir (bkz. CombatUnit).
+var skill_proficiency: Dictionary = {}
+
+## Seviye 7'den sonra ikinci bir sınıfın yeteneklerini de açar.
+var second_class_id: String = ""
+
+## DutyCatalog kimliklerinden biri ya da boş - GameSession.assign_duty()
+## tarafından yönetilir.
+var duty_id: String = ""
+
+const MAX_TRAITS: int = 3
+## Yalnızca "taze" (bkz. is_trait_fresh) bir huy tavernada/kilisede
+## silinebilir - eski huylar kalıcılaşır.
+const TRAIT_FRESH_WINDOW_DAYS: int = 5
+
+## En fazla MAX_TRAITS kimlik. TraitCatalog.roll_seed_trait() karakter
+## kurulurken bir tane verir; GRANT_TRAIT olay etkisi yolda ekleyebilir.
+var trait_ids: Array[String] = []
+## trait_id -> verildiği gün (GameSession.total_days_elapsed) - saflık
+## penceresi bunun üstünden hesaplanır.
+var trait_granted_day: Dictionary = {}
+
+## EquipmentCatalog.SLOT_* -> equipment_id. En fazla dört giriş (slot
+## başına bir parça); boş slot sözlükte hiç yer almaz.
+var equipped: Dictionary = {}
+
+## OutfitCatalog.SLOT_* -> piece_id. Equipment'ın aksine tamamen kozmetik -
+## hiçbir derived getter bunu okumuyor. Boş slot sözlükte hiç yer almaz,
+## `get_outfit_piece()` o hâlde OutfitCatalog.NONE_PIECE döner.
+var outfit: Dictionary = {}
+
+func get_outfit_piece(slot: String) -> String:
+	return str(outfit.get(slot, OutfitCatalog.NONE_PIECE))
+
+func set_outfit_piece(slot: String, piece_id: String) -> void:
+	if piece_id.is_empty():
+		outfit.erase(slot)
+	else:
+		outfit[slot] = piece_id
+
+## Açıkken seviye atlayınca puanlar otomatik dağıtılır (yoldaşlar için
+## varsayılan). Oyuncu kendi karakterinde bunu kapatıp elle dağıtabilir.
+var auto_allocate: bool = true
+
+## Karakterin üstünde taşıdığı küçük, kısıtlı çanta - kervanın vagon
+## envanterlerinin (bkz. GameSession.wagon_inventories) *dışında* kalan
+## kişisel bir pay. Bir vagon dolduğunda küçük bir ödülün tamamen
+## kaybolmaması için taşkın alanı görevi görür (bkz. GameSession.
+## add_to_cargo_or_bag) ve şehirdeki toplam envanter (bkz. GameSession.
+## get_total_inventory_entries) buna da bakar - "kısıtlı" sözü tam burada:
+## kapasitesi bir vagonun onda biri kadar.
+const PERSONAL_BAG_CAPACITY: float = 5.0
+var personal_inventory: Inventory = Inventory.new(8, PERSONAL_BAG_CAPACITY)
+
+## Tayfayı işe alma ücreti; oyuncunun kendisi için 0.
+var hire_cost: int = 0
+
+## Oyuncunun kendisi mi? Parti sırası aynı zamanda savaş mevki sırası
+## olduğu için oyuncu arkaya geçebiliyor; kim olduğu bu yüzden sıradan
+## değil bu bayraktan okunur (bkz. GameSession.dismiss).
+var is_player: bool = false
+
+static func get_skin_tone_color(index: int) -> Color:
+	return _skin_tone_colors[clampi(index, 0, _skin_tone_colors.size() - 1)]
+
+## static func olduğu için tr() yerine TranslationServer (bkz. CLAUDE.md).
+static func get_skin_tone_name(index: int) -> String:
+	var key := SKIN_TONE_NAMES[clampi(index, 0, SKIN_TONE_NAMES.size() - 1)]
+	return String(TranslationServer.translate(key))
+
+## Kültür bonuslarını taban statlara uygulayıp canı dolduran fabrika.
+static func create(
+	character_name: String, culture_id: String, base_stats: CharacterStats,
+	height_cm: int = DEFAULT_HEIGHT_CM, skin_tone: int = 1,
+	class_id: String = ClassCatalog.GUARD
+) -> CharacterData:
+	var character := CharacterData.new()
+	character.character_name = character_name
+	character.culture_id = culture_id
+	character.class_id = class_id
+	character.height_cm = clampi(height_cm, MIN_HEIGHT_CM, MAX_HEIGHT_CM)
+	character.skin_tone = skin_tone
+	character.stats = CultureCatalog.get_culture_or_default(culture_id).apply_to(base_stats)
+	character.heal_full()
+	return character
+
+func get_culture() -> Culture:
+	return CultureCatalog.get_culture_or_default(culture_id)
+
+func get_character_class() -> CharacterClass:
+	return ClassCatalog.get_character_class_or_default(class_id)
+
+## Ana sınıfın yetenekleri, seviye 7'den sonra seçilmiş ikinci sınıfınkiyle
+## birleşir (bkz. set_second_class). Aynı kimlik iki kez eklenmez.
+func get_skills() -> Array[CombatSkill]:
+	var skill_ids: Array[String] = get_character_class().skill_ids.duplicate()
+	if not second_class_id.is_empty():
+		var second_class := ClassCatalog.get_character_class(second_class_id)
+		if second_class != null:
+			for skill_id in second_class.skill_ids:
+				if not skill_ids.has(skill_id):
+					skill_ids.append(skill_id)
+	return SkillCatalog.get_skills(skill_ids)
+
+# --- Tecrübe, seviye, yetkinlik ---
+
+## Bir sonraki seviyeye çıkmak için gereken XP - katlanarak büyür, tavan
+## seviyede tanımsızdır (gain_xp orada zaten durur).
+static func xp_required_for_level(current_level: int) -> int:
+	return int(round(float(XP_BASE) * pow(XP_GROWTH, float(current_level - 1))))
+
+## Bilgelik'in "tecrübeden öğrenme" karşılığı - taban 0 (Bilgelik 5'te
+## eski davranış birebir korunur), tavan/taban var ki hiçbir stat XP
+## eğrisinin kendisini anlamsızlaştırmasın (bkz. CLAUDE.md'nin "bir stat
+## bir sistemi asla tamamen kapatmaz" tekrarlayan kuralı).
+const MAX_XP_BONUS_PERCENT: int = 40
+const MIN_XP_BONUS_PERCENT: int = -40
+
+func get_xp_bonus_percent() -> int:
+	return clampi(
+		int(round(4.0 * stats.get_effective_value(CharacterStats.Kind.WISDOM)))
+		+ _trait_bonus_sum("xp_gain_bonus_percent"),
+		MIN_XP_BONUS_PERCENT, MAX_XP_BONUS_PERCENT
+	)
+
+## XP ekler, gerekirse birden çok seviye birden atlar. auto_allocate açıksa
+## her seviyenin puanları hemen dağıtılır; kapalıysa unspent_* birikir ve
+## karakter ekranında elle yatırılır. Kaç seviye atlandığını döner.
+func gain_xp(amount: int) -> int:
+	if amount <= 0 or level >= MAX_LEVEL:
+		return 0
+	var adjusted := int(round(float(amount) * (1.0 + float(get_xp_bonus_percent()) / 100.0)))
+	xp += maxi(1, adjusted)
+	var levels_gained := 0
+	while level < MAX_LEVEL and xp >= xp_required_for_level(level):
+		xp -= xp_required_for_level(level)
+		level += 1
+		levels_gained += 1
+		unspent_stat_points += STAT_POINTS_PER_LEVEL
+		unspent_skill_points += SKILL_POINTS_PER_LEVEL
+		if auto_allocate:
+			_auto_allocate_level_up()
+	if level >= MAX_LEVEL:
+		xp = 0
+	return levels_gained
+
+func invest_stat_point(kind: CharacterStats.Kind) -> bool:
+	if unspent_stat_points <= 0 or stats.get_value(kind) >= CharacterStats.MAX_VALUE:
+		return false
+	stats.add_value(kind, 1)
+	unspent_stat_points -= 1
+	return true
+
+func get_skill_proficiency(skill_id: String) -> int:
+	return int(skill_proficiency.get(skill_id, 0))
+
+func invest_skill_point(skill_id: String) -> bool:
+	if unspent_skill_points <= 0:
+		return false
+	var current := get_skill_proficiency(skill_id)
+	if current >= MAX_SKILL_PROFICIENCY:
+		return false
+	skill_proficiency[skill_id] = mini(MAX_SKILL_PROFICIENCY, current + 1)
+	unspent_skill_points -= 1
+	return true
+
+func can_multiclass() -> bool:
+	return level >= MULTICLASS_UNLOCK_LEVEL
+
+func set_second_class(new_class_id: String) -> bool:
+	if not can_multiclass() or new_class_id == class_id:
+		return false
+	if ClassCatalog.get_character_class(new_class_id) == null:
+		return false
+	second_class_id = new_class_id
+	return true
+
+func clear_second_class() -> void:
+	second_class_id = ""
+
+## Tik açılırken birikmiş puan varsa hemen harcar - oyuncu "otomatik"
+## dediğinde beklemeden devreye girsin diye (bkz. auto_allocate).
+func flush_pending_points() -> void:
+	_auto_allocate_level_up()
+
+## Yoldaşlar için varsayılan yol: statı sınıfının yatkın olduğu alana,
+## yetkinliği sınıfın kendi yeteneklerine sırayla yatırır. Yatkınlık
+## dolmuşsa herhangi bir dolmamış stata geçer - puan asla boşa gitmez.
+func _auto_allocate_level_up() -> void:
+	_auto_allocate_stats()
+	_auto_allocate_skills()
+
+func _auto_allocate_stats() -> void:
+	while unspent_stat_points > 0:
+		var target := _pick_stat_to_invest()
+		if target < 0 or not invest_stat_point(target):
+			break
+
+func _pick_stat_to_invest() -> int:
+	for kind in get_character_class().stat_affinity:
+		if stats.get_value(kind) < CharacterStats.MAX_VALUE:
+			return kind
+	for kind in CharacterStats.KIND_ORDER:
+		if stats.get_value(kind) < CharacterStats.MAX_VALUE:
+			return kind
+	return -1
+
+func _auto_allocate_skills() -> void:
+	var skill_ids := get_character_class().skill_ids
+	if skill_ids.is_empty():
+		return
+	var index := 0
+	while unspent_skill_points > 0:
+		var progressed := false
+		for _attempt in skill_ids.size():
+			var skill_id: String = skill_ids[index % skill_ids.size()]
+			index += 1
+			if invest_skill_point(skill_id):
+				progressed = true
+				break
+		if not progressed:
+			break
+
+# --- Boy: uzun daha çok can taşır, kısa daha iyi kaçınır ---
+
+func get_height_hp_bonus() -> int:
+	if height_cm >= TALL_THRESHOLD_CM:
+		return 3
+	if height_cm <= SHORT_THRESHOLD_CM:
+		return -2
+	return 0
+
+func get_height_dodge_bonus() -> int:
+	if height_cm <= SHORT_THRESHOLD_CM:
+		return 4
+	if height_cm >= TALL_THRESHOLD_CM:
+		return -2
+	return 0
+
+## Bir 1.90 boylu erkekle bir 1.60 boylu kadının açlığı aynı olmamalı -
+## boy zaten can/kaçınma bonusunu bu eşiklerle veriyor, erzak tüketimi de
+## aynı eşiklerden okuyor (tek boy sistemi, iki sonuç). Varsayılan (eşikler
+## arası) 1.0 - `CaravanPlan.daily_consumption()`'ın eski, boy-kör tek
+## kişilik payı aynen kalıyor, yalnızca uçlardaki karakterler sapıyor.
+func get_provision_weight() -> float:
+	if height_cm >= TALL_THRESHOLD_CM:
+		return 1.15
+	if height_cm <= SHORT_THRESHOLD_CM:
+		return 0.85
+	return 1.0
+
+func get_max_hp() -> int:
+	return maxi(
+		1,
+		stats.get_max_hp() + get_character_class().bonus_max_hp
+		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
+	)
+
+func get_dodge() -> int:
+	return maxi(
+		0,
+		stats.get_dodge() + get_height_dodge_bonus()
+		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus")
+	)
+
+## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy ve
+## ekipman bonusları burada eklenir (bkz. CombatUnit.from_character).
+func get_accuracy() -> int:
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus")
+
+func get_crit_chance() -> int:
+	return stats.get_crit_chance() + _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus")
+
+func get_damage_bonus() -> int:
+	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
+
+## Savaş bu sarmalayıcıyı okur, stats.get_composure()'ı değil - huy ve
+## ekipmanın da buraya girebilmesi için (bkz. CLAUDE.md'nin sarmalayıcı
+## kuralı). Şimdilik iki katmanın da sükûnet bonusu yok.
+func get_composure() -> int:
+	return stats.get_composure()
+
+## İnanç'ın Ölümün Kıyısı karşılığı: hayata tutunma zarına kişisel bir ek.
+## Taban `CombatUnit.DEFAULT_DEATHBLOW_RESIST` (67) hiç değişmiyor - Ruin
+## Rules'un Faz 15-A ölçümü o sabitin doğru olduğunu zaten kanıtladı, bu
+## yalnızca üstüne binen kişisel bir pay. İnanç 5'te (taban) tam sıfır -
+## fark yalnızca oyuncunun bu stata gerçekten yatırım yapmasıyla doğar.
+func get_deathblow_resist_bonus() -> int:
+	return int(round(1.5 * stats.get_effective_value(CharacterStats.Kind.FAITH))) \
+		+ _trait_bonus_sum("deathblow_resist_bonus")
+
+## Faz 17: bir huy kendi affinity_stat'ının check'lerine küçük bir pay
+## ekler/çıkarır - GameSession.get_best_effective_stat()/
+## get_leader_effective_stat() bu karakterin etkin statına bunu ekliyor,
+## SkillCheck'in kendisi hiç değişmeden. Yalnızca *o statın* huyları
+## sayılıyor (bkz. Trait.affinity_stat) - bir Güç huyu bir Zeka check'ini
+## etkilemiyor, tıpkı hp_bonus'un yalnızca canı etkilemesi gibi.
+func get_check_modifier(kind: CharacterStats.Kind) -> float:
+	var total := 0.0
+	for trait_id in trait_ids:
+		var trait_resource := TraitCatalog.get_trait(trait_id)
+		if trait_resource != null and trait_resource.affinity_stat == kind:
+			total += trait_resource.check_bonus
+	return total
+
+## Faz 17: DD'nin "irrasyonel davranış" katmanı - yalnızca zaten kırılmış
+## (CombatUnit.is_stressed) bir birimde CombatEncounter._try_refuse_order()'ın
+## okuduğu, emir reddetme ihtimaline eklenen küçük bir pay. Sağlam huylar
+## sakinleştirir, sarsılmış huylar tetikler - kırılma eşiğinin kendisini
+## değiştirmiyor, yalnızca eşiği aşmış birinin o an ne kadar dinleyeceğini.
+func get_refusal_bonus() -> int:
+	return _trait_bonus_sum("refusal_bonus")
+
+# --- Huylar (Trait) ---
+
+func has_trait(trait_id: String) -> bool:
+	return trait_ids.has(trait_id)
+
+## Huy sayısı MAX_TRAITS'i aşamaz, aynı huy iki kez verilmez. granted_day
+## GameSession.total_days_elapsed'ten geçirilir - saflık penceresi bunu
+## kullanır.
+func grant_trait(trait_id: String, granted_day: int) -> bool:
+	if trait_ids.size() >= MAX_TRAITS or has_trait(trait_id):
+		return false
+	if TraitCatalog.get_trait(trait_id) == null:
+		return false
+	trait_ids.append(trait_id)
+	trait_granted_day[trait_id] = granted_day
+	return true
+
+func remove_trait(trait_id: String) -> bool:
+	if not trait_ids.has(trait_id):
+		return false
+	trait_ids.erase(trait_id)
+	trait_granted_day.erase(trait_id)
+	return true
+
+## Yalnızca TRAIT_FRESH_WINDOW_DAYS içinde kazanılmış huylar silinebilir -
+## eski bir huy artık kimliğin parçası, tavernada da kilisede de kalıcı.
+func is_trait_fresh(trait_id: String, current_day: int) -> bool:
+	if not trait_granted_day.has(trait_id):
+		return false
+	return current_day - int(trait_granted_day[trait_id]) <= TRAIT_FRESH_WINDOW_DAYS
+
+func get_traits() -> Array[Trait]:
+	var result: Array[Trait] = []
+	for trait_id in trait_ids:
+		var trait_resource := TraitCatalog.get_trait(trait_id)
+		if trait_resource != null:
+			result.append(trait_resource)
+	return result
+
+## --- Stres ---
+## **Stres kişiye aittir, kadroya değil.** Uzun süre `GameSession` tek bir
+## `party_stress` sayısı tutuyordu ve bu, oyunun kendi tezini siliyordu:
+## "asıl konu kervanı çeken insanların yıpranması" diyen bir oyunda kimin
+## yıprandığı sorusunun cevabı yoktu. Ortalama, dayanıklı olanla kırılmak
+## üzere olanı aynı sayıya indiriyor - yani Darkest Dungeon'ın bütün
+## dramının kaynağını (şu adam bitti, öteki hâlâ ayakta) baştan yok
+## ediyordu.
+##
+## `GameSession.party_stress` artık bu değerlerin **ortalamasına bakan bir
+## mercek**: okunabilir, yazılabilir, ama sahibi burası.
+const MAX_STRESS: int = 100
+
+var stress: int = 0
+
+func change_stress(delta: int) -> void:
+	stress = clampi(stress + delta, 0, MAX_STRESS)
+
+## Direnç ne kadar yüksekse bu karakter o kadar geç kırılır -
+## dayanıklılığa bağlı (bkz. GameSession.resolve_stress_breaks). Herkes
+## er ya da geç kırılabilir, yalnızca eşiği farklı.
+func get_stress_resistance() -> int:
+	return 50 + int(round(3.0 * stats.get_effective_value(CharacterStats.Kind.ENDURANCE))) \
+		+ _trait_bonus_sum("stress_resistance_bonus")
+
+## PR-3'ün ilk kancası: "ne kadar dayanıklıysan o kadar geç kırılırsın"
+## (yukarısı) yalnızca *eşiği* belirliyordu, günün kendisinin bıraktığı
+## yıpranmaya hiç dokunmuyordu - Demir/Zayıf Bünye'nin stress_resistance_
+## bonus'u burada da okunuyor, aynı stat iki formülde de tutarlı bir
+## dayanıklılık anlatsın diye (bkz. IRON_CONSTITUTION'ın kendi yorumu).
+## Taban huysuzda tam 1.0 - "fresh character unchanged" garantisi burada
+## da geçerli. Tavan/taban var ki hiçbir huy günlük yıpranmayı sıfırlamasın
+## ya da ikiye katlamasın (bkz. CLAUDE.md'nin "bir stat bir sistemi asla
+## tamamen kapatmaz" tekrarlayan kuralı).
+##
+## Katsayı %1 değil %6/puan: `ROAD_STRESS_PER_DAY` (2) o kadar küçük ki
+## `change_stress()`'in tamsayı yuvarlaması küçük yüzdeleri yutuyor -
+## ölçüldü, %1'de tek bir Demir/Zayıf Bünye (±5 puan) hiçbir günde farklı
+## bir tamsayıya yuvarlanmıyordu, yani huy sessizce hiçbir şey yapmıyordu.
+## %6'da tek huy tavan/tabana tam oturuyor (±5*0.06=±0.30) - "bir huy görünür
+## olmalı" kuralı (bkz. Road Layer Rules'un aynı gerekçesi) küçük bir tabanda
+## ancak böyle tutulabiliyordu.
+const DAILY_STRESS_GAIN_PER_RESIST_POINT: float = -0.06
+const MIN_DAILY_STRESS_GAIN_MULT: float = 0.7
+const MAX_DAILY_STRESS_GAIN_MULT: float = 1.3
+
+func get_daily_stress_gain_multiplier() -> float:
+	return clampf(
+		1.0 + DAILY_STRESS_GAIN_PER_RESIST_POINT * float(_trait_bonus_sum("stress_resistance_bonus")),
+		MIN_DAILY_STRESS_GAIN_MULT, MAX_DAILY_STRESS_GAIN_MULT
+	)
+
+## Argüman almıyor: kırılma artık kadronun ortalamasına değil **kişinin
+## kendi** stresine bakıyor.
+func is_stressed() -> bool:
+	return stress >= get_stress_resistance()
+
+## Durum efekti dirençleri: stat payı + **seviye payı**.
+##
+## Seviye payı, bu depoda zaten yapılmış bir araştırmanın doğrudan
+## sonucu (bkz. CLAUDE.md, Progression Rules): Darkest Dungeon'ın
+## resolve seviyesi hiç stat vermez, yalnızca sersemletme/kanama/zehir
+## dirençlerini büyütür. Seviye orada gücün kendisi değil, gücün
+## *anahtarı*.
+##
+## Ölçümle de gerekli olduğu görüldü: dirençler yalnızca Dayanıklılık'tan
+## gelirken seviye eğrisi düpedüz düzdü (seviye 1 %28, seviye 15 %30) -
+## çünkü düşmanlar seviyeyle büyüyor ve kanama düz hasar veriyor, ama
+## çoğu sınıf Dayanıklılık'a puan koymuyor. Yani seviye atlamak
+## savunmada hiçbir şey getirmiyordu.
+##
+## Tavan var: hiçbir seviye bir sistemi tamamen kapatmamalı - aynı kural
+## `CombatUnit`'in MIN/MAX_STATUS_CHANCE'ında da var.
+const RESIST_PER_LEVEL: int = 3
+const MAX_STATUS_RESIST: int = 80
+
+func _level_resist_bonus() -> int:
+	return RESIST_PER_LEVEL * maxi(0, level - 1)
+
+func get_bleed_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_bleed_resist() + _level_resist_bonus())
+
+func get_blight_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_blight_resist() + _level_resist_bonus())
+
+func get_stun_resist() -> int:
+	return mini(MAX_STATUS_RESIST, stats.get_stun_resist() + _level_resist_bonus())
+
+func _trait_bonus_sum(field: String) -> int:
+	var total := 0
+	for trait_id in trait_ids:
+		var trait_resource := TraitCatalog.get_trait(trait_id)
+		if trait_resource != null:
+			total += int(trait_resource.get(field))
+	return total
+
+# --- Ekipman ---
+
+func get_equipped_id(slot: String) -> String:
+	return str(equipped.get(slot, ""))
+
+func get_equipped(slot: String) -> Equipment:
+	var equipment_id := get_equipped_id(slot)
+	if equipment_id.is_empty():
+		return null
+	return EquipmentCatalog.get_equipment(equipment_id)
+
+## Parça, verilen slota gerçekten aitse takar (o slottaki eskisinin yerine
+## geçer - envantere geri koymak çağıranın işi, bkz. character.gd Faz 7 PR-B).
+func equip(slot: String, equipment_id: String) -> bool:
+	var equipment_resource := EquipmentCatalog.get_equipment(equipment_id)
+	if equipment_resource == null or equipment_resource.slot != slot:
+		return false
+	equipped[slot] = equipment_id
+	return true
+
+func unequip(slot: String) -> bool:
+	if not equipped.has(slot):
+		return false
+	equipped.erase(slot)
+	return true
+
+func _equipment_bonus_sum(field: String) -> int:
+	var total := 0
+	for slot in equipped:
+		var equipment_resource := EquipmentCatalog.get_equipment(str(equipped[slot]))
+		if equipment_resource != null:
+			total += int(equipment_resource.get(field))
+	return total
+
+func is_alive() -> bool:
+	return current_hp > 0
+
+func heal_full() -> void:
+	current_hp = get_max_hp()
+
+func apply_damage(amount: int) -> void:
+	current_hp = clampi(current_hp - amount, 0, get_max_hp())
+
+func apply_heal(amount: int) -> void:
+	current_hp = clampi(current_hp + amount, 0, get_max_hp())
+
+## "Torgan · Dağ Kabilesi · Sıra Neferi" gibi tek satırlık kimlik.
+func get_summary_line() -> String:
+	return "%s · %s · %s" % [
+		character_name,
+		get_culture().culture_name,
+		get_character_class().display_name,
+	]
+
+func get_appearance_line() -> String:
+	return "%d cm · %s ten" % [height_cm, get_skin_tone_name(skin_tone)]
+
+func to_dict() -> Dictionary:
+	return {
+		"name": character_name,
+		"culture_id": culture_id,
+		"class_id": class_id,
+		"height_cm": height_cm,
+		"skin_tone": skin_tone,
+		"stats": stats.to_dict(),
+		"current_hp": current_hp,
+		"stress": stress,
+		"hire_cost": hire_cost,
+		"is_player": is_player,
+		"level": level,
+		"xp": xp,
+		"unspent_stat_points": unspent_stat_points,
+		"unspent_skill_points": unspent_skill_points,
+		"skill_proficiency": skill_proficiency.duplicate(),
+		"second_class_id": second_class_id,
+		"duty_id": duty_id,
+		"auto_allocate": auto_allocate,
+		"trait_ids": trait_ids.duplicate(),
+		"trait_granted_day": trait_granted_day.duplicate(),
+		"equipped": equipped.duplicate(),
+		"outfit": outfit.duplicate(),
+		"personal_inventory": personal_inventory.to_save_array(),
+	}
+
+static func from_dict(data: Dictionary) -> CharacterData:
+	var character := CharacterData.new()
+	character.character_name = str(data.get("name", ""))
+	character.culture_id = str(data.get("culture_id", CultureCatalog.NOMAD))
+	character.class_id = str(data.get("class_id", ClassCatalog.GUARD))
+	character.height_cm = clampi(int(data.get("height_cm", DEFAULT_HEIGHT_CM)), MIN_HEIGHT_CM, MAX_HEIGHT_CM)
+	character.skin_tone = int(data.get("skin_tone", 1))
+	character.stats = CharacterStats.from_dict(data.get("stats", {}))
+	character.stress = clampi(int(data.get("stress", 0)), 0, MAX_STRESS)
+	character.hire_cost = int(data.get("hire_cost", 0))
+	character.is_player = bool(data.get("is_player", false))
+	character.level = maxi(1, int(data.get("level", 1)))
+	character.xp = maxi(0, int(data.get("xp", 0)))
+	character.unspent_stat_points = maxi(0, int(data.get("unspent_stat_points", 0)))
+	character.unspent_skill_points = maxi(0, int(data.get("unspent_skill_points", 0)))
+	character.skill_proficiency = (data.get("skill_proficiency", {}) as Dictionary).duplicate()
+	character.second_class_id = str(data.get("second_class_id", ""))
+	character.duty_id = str(data.get("duty_id", ""))
+	character.auto_allocate = bool(data.get("auto_allocate", true))
+
+	character.trait_ids.clear()
+	for trait_id in (data.get("trait_ids", []) as Array):
+		character.trait_ids.append(str(trait_id))
+	character.trait_granted_day = (data.get("trait_granted_day", {}) as Dictionary).duplicate()
+
+	var equipped_data: Dictionary = data.get("equipped", {})
+	character.equipped.clear()
+	for slot in equipped_data:
+		character.equipped[str(slot)] = str(equipped_data[slot])
+
+	var outfit_data: Dictionary = data.get("outfit", {})
+	character.outfit.clear()
+	for slot in outfit_data:
+		character.outfit[str(slot)] = str(outfit_data[slot])
+
+	# Kayıt dosyası dış sınır: kayıt alındıktan sonra ekipman çıkarılmış ya
+	# da huy silinmişse saklanan can artık ulaşılamayacak kadar yüksek
+	# olabilir; elle düzenlenmiş bir kayıt negatif de gelebilir (o hâlde
+	# karakter şehirde iyileşene kadar ölü görünürdü).
+	var max_hp := character.get_max_hp()
+	character.current_hp = clampi(int(data.get("current_hp", max_hp)), 0, max_hp)
+
+	character.personal_inventory = Inventory.new(8, PERSONAL_BAG_CAPACITY)
+	character.personal_inventory.load_from_array(data.get("personal_inventory", []) as Array)
+	return character

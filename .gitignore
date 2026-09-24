@@ -1,0 +1,33 @@
+# Godot 4+ specific ignores
+.godot/
+.nomedia
+
+# Godot-specific ignores
+.import/
+export.cfg
+export_credentials.cfg
+*.tmp
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# Godot import metadata - CI regenerates it with `godot --headless --import`,
+# and the repo has never tracked it; without this it shows up as untracked
+# noise after every local import.
+*.import
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# Build exports
+build/
+*.zip
+
+# Personal Claude Code overrides - not shared with the repo/CI
+.claude/settings.local.json
+
+# Codex üretecinin Python artıkları (docs/codex/)
+__pycache__/
+*.pyc

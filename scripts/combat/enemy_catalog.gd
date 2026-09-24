@@ -1,0 +1,298 @@
+class_name EnemyCatalog
+extends RefCounted
+
+## Düşman tablosu ve pusu kadrosu kurucusu.
+##
+## Tablo bir kez kurulup statik önbelleğe alınır (bkz. ItemCatalog deseni).
+
+const CUTTER: String = "bandit_cutter"
+const ARCHER: String = "bandit_archer"
+const LEADER: String = "bandit_leader"
+
+## Bölgesel haydut reskin'leri (bkz. build_bandit_squad) - yalnızca
+## görünüm/sayı değişir, pusunun genel yapısı aynı kalır.
+const MOUNTAIN_BANDIT: String = "mountain_bandit"
+const ARMED_BRIGAND: String = "armed_brigand"
+
+## Vahşi hayvanlar (bkz. build_wildlife_squad, evt_wild_animal).
+const WOLF: String = "wolf"
+const BEAR: String = "bear"
+const BOAR: String = "boar"
+
+## Şehir muhafızları (bkz. build_guard_squad, evt_guard_patrol).
+const CITY_GUARD: String = "city_guard"
+const GUARD_SERGEANT: String = "guard_sergeant"
+
+## Bölge kimlikleri WorldMapData'nın location_id'leriyle eşleşir. Id'ler
+## kalıcı kayıt uyumluluğu için "test_loc_x" kalsa da isimler artık
+## Kurtboğazı/Demirkapı (bkz. Faz 7 PR-D).
+const MOUNTAIN_REGION_ID: String = "test_loc_b"  # Kurtboğazı
+const GARRISON_REGION_ID: String = "test_loc_d"  # Demirkapı
+
+## Pusu kadrosu bu kadar savaşçıyı geçemez (savaş alanı 4 mevki).
+const MAX_SQUAD_SIZE: int = 4
+
+## Düşmanın seviyeyle büyüme hızı - seviye atlamanın *ilerleme* gibi
+## hissetmesini belirleyen tek sayı, ve yanlış ayarlandığında sessizce
+## tersine dönüyor.
+##
+## Oyuncunun canı seviyeyle yalnızca Dayanıklılık afiniteli sınıflarda
+## büyüyor: 1→15 arasında Sıra Neferi 46→76 can kazanırken Sekban 42'de,
+## Kalem Efendisi 40'ta kalıyor - karışık bir partide ortalama büyüme
+## ~%25. Düşman canı ise bu sayının 14 katı kadar büyüyor. %8'de düşman
+## 2.12x'e çıkıyordu ve ölçülen sonuç sv1'de %98, sv15'te %52 kazanmaktı:
+## seviye atlamak partiyi *zayıflatıyordu*. %5 de yetmedi (sv1 %30 →
+## sv15 %12).
+##
+## %2'de düşman 15. seviyede 1.28x oluyor - hâlâ büyüyor (üst seviye bir
+## parti seviye 1 çöpüyle savaşmıyor) ama oyuncu öne geçebiliyor.
+const POWER_SCALE_PER_LEVEL: float = 0.02
+
+## Kervan büyüdükçe onu durduranlar da güçlenir. Yol dört muhafızlı bir
+## kervanın üstüne, yalnız bir seyyahın üstüne gönderdiği çeteyi
+## göndermez - dolu bir kervan daha zengin bir hedeftir.
+##
+## Bu ayrı bir kol olmak zorunda: kadroyu topluca sertleştirmek dolu
+## partiyi dengelerken yalnız yolcuyu %0'a düşürüyordu, çünkü tek bir
+## sayı eğrinin iki ucunu birden ayarlayamıyor. Ölçülen sorun dolu
+## partinin en tehlikeli yolda bile %98 kazanmasıydı.
+##
+## Faz 15'te 0.10 → 0.30: `_build_units()` kadroyu `MAX_SQUAD_SIZE`'da
+## (4, savaş alanının kendi mevki sınırı) kırptığı için parti 3 ile parti
+## 4 zaten aynı düşman sayısıyla dövüşüyordu - dördüncü kişi karşılıksız
+## bir fazla vurucuydu. Önce yanlış kol denendi ve ölçüldü:
+## `DEFAULT_DEATHBLOW_RESIST`'i 67'den 33'e indirmek parti 4'ü neredeyse
+## hiç etkilemedi (%100/%100/%98/%98) - kısa süren bir savaş ölümcül
+## vuruş zarını zaten yeterince atmıyor. Asıl kol buydu (bkz. Ruin Rules).
+const POWER_SCALE_PER_PARTY_MEMBER: float = 0.30
+
+## Kadro türleri (bkz. build_squad). EventEffect.Type.TRIGGER_COMBAT'in
+## text_value'sundan gelir; boş değer KIND_BANDIT sayılır.
+const KIND_BANDIT: String = "bandit"
+const KIND_WILDLIFE: String = "wildlife"
+const KIND_GUARD: String = "guard"
+
+## Kadronun oyuncuya görünen adı. Savaş kayıtları ve panel başlığı bunu
+## okur - kadro türü Faz 8 PR-B'de çeşitlenince metinler sabit "Haydutlar"
+## kalmıştı, yani bir ayı sürüsü de muhafız devriyesi de haydut diye
+## anılıyordu. Etiket her zaman cümle başında/yalın halde kullanılır, o
+## yüzden tek biçim yetiyor.
+const _KIND_LABELS: Dictionary = {
+	KIND_BANDIT: "ENEMY_KIND_BANDIT",
+	KIND_WILDLIFE: "ENEMY_KIND_WILDLIFE",
+	KIND_GUARD: "ENEMY_KIND_GUARD",
+}
+
+static var _enemies: Array[EnemyTemplate] = []
+static var _enemy_by_id: Dictionary = {}
+
+static func get_enemy(enemy_id: String) -> EnemyTemplate:
+	_ensure_built()
+	return _enemy_by_id.get(enemy_id)
+
+## tr() bir Object örnek metodu, static bağlamdan çağrılamıyor - static
+## katalogların çeviri yolu TranslationServer.translate().
+static func get_kind_label(enemy_kind: String) -> String:
+	var key: String = str(_KIND_LABELS.get(enemy_kind, _KIND_LABELS[KIND_BANDIT]))
+	return String(TranslationServer.translate(key))
+
+## Tek giriş noktası: road_journey.gd/combat_panel.gd bu üçünden hangisini
+## çağıracağını bilmek zorunda kalmaz. enemy_kind EventEffect.Type.
+## TRIGGER_COMBAT'in text_value'sundan gelir ("bandit"/"wildlife"/"guard"),
+## region_id yalnızca "bandit" kadrosunu etkiler (bkz. build_bandit_squad).
+## biome (Faz 17 PR-6) yalnızca "wildlife" kadrosunu etkiler (bkz.
+## build_wildlife_squad) - road_journey.gd'nin o günkü RouteTerrain
+## biyomu, karşılaşmanın nerede geçtiğini savaşın kompozisyonuna taşıyor.
+static func build_squad(
+	enemy_kind: String, region_id: String, danger_level: float,
+	party_size: int, rng: RandomNumberGenerator, average_level: int = 1,
+	biome: String = ""
+) -> Array[CombatUnit]:
+	match enemy_kind:
+		KIND_WILDLIFE:
+			return build_wildlife_squad(danger_level, party_size, rng, average_level, biome)
+		KIND_GUARD:
+			return build_guard_squad(danger_level, party_size, rng, average_level)
+		_:
+			return build_bandit_squad(danger_level, party_size, rng, average_level, region_id)
+
+## Tehlike seviyesine göre bir haydut kadrosu kurar (danger_level 0..1,
+## GameSession ile aynı ölçek). Düşük tehlikede iki kesici, yükseldikçe
+## okçu ve reis eklenir - yolun tehlikesi savaşta da hissedilsin diye.
+##
+## region_id sefer hedefinin location_id'si (bkz. road_journey.gd
+## _open_combat): Kurtboğazı çevresinde kesici yerine ağır vuran Dağ
+## Haydutu, Demirkapı çevresinde okçu yerine daha isabetli/kritikli
+## Silahlı Eşkıya çıkar - aynı pusu iskeleti, farklı yöre teçhizatı.
+##
+## Kadro ayrıca partiden en fazla bir kişi fazla olabilir: tek başına yola
+## çıkan bir oyuncu dört haydutla karşılaşmaz, ama hep de rahat etmez.
+##
+## average_level partinin ortalama seviyesidir; seviye arttıkça haydutların
+## canı/hasarı da hafifçe büyür ki üst seviye bir parti hep ezici galip
+## gelmesin - EnemyTemplate'in kendisi sabit kalır, ölçek yalnızca
+## CombatUnit.from_enemy()'e power_scale olarak geçer.
+static func build_bandit_squad(
+	danger_level: float, party_size: int, rng: RandomNumberGenerator,
+	average_level: int = 1, region_id: String = ""
+) -> Array[CombatUnit]:
+	_ensure_built()
+
+	var melee_id := CUTTER
+	var ranged_id := ARCHER
+	if region_id == MOUNTAIN_REGION_ID:
+		melee_id = MOUNTAIN_BANDIT
+	elif region_id == GARRISON_REGION_ID:
+		ranged_id = ARMED_BRIGAND
+
+	# Sıra = önem sırası. Küçük bir parti kadroyu kırptığında baştakiler
+	# kalır, o yüzden tehlike yükseldikçe reis listenin *başına* geçer:
+	# eşkıya kaynayan bir yolda yalnız yolcunun karşısına iki sıradan
+	# kesici değil, reis ve bir kesici çıkar.
+	var ids: Array[String] = [melee_id, melee_id]
+	if danger_level >= 0.25:
+		ids.append(ranged_id)
+	if danger_level >= 0.55:
+		ids.insert(0, LEADER)
+	elif danger_level >= 0.40 and rng.randf() < 0.5:
+		ids.append(melee_id)
+
+	return _build_units(ids, party_size, average_level, danger_level)
+
+## Doğada karşılaşılan hayvanlar (bkz. evt_wild_animal). Düşük tehlikede
+## bir kurt sürüsü, ortada yaban domuzu katılır, yüksek tehlikede nadiren
+## (%35) sürü yerine tek başına gezen bir ayı çıkar - sayıca az ama tek
+## başına çok daha tehlikeli, DD'nin "curio canavarı" mantığına yakın.
+## Faz 17 PR-6: biome artık kompozisyonu da eğiyor - orman kurt sürüsünü
+## büyütür ("wildlife packs"), dağ ayıyı daha olası kılar. `biome`
+## verilmezse (varsayılan "") eski davranış birebir sürüyor - fresh-
+## caller-unchanged, tıpkı region_id'nin bandit tarafındaki rolü gibi.
+static func build_wildlife_squad(
+	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1,
+	biome: String = ""
+) -> Array[CombatUnit]:
+	_ensure_built()
+
+	var ids: Array[String] = [WOLF, WOLF]
+	if danger_level >= 0.3:
+		ids.insert(0, BOAR)
+	if biome == ArtPalette.BIOME_FOREST:
+		ids.append(WOLF)
+
+	var bear_chance := 0.35
+	if biome == ArtPalette.BIOME_MOUNTAIN:
+		bear_chance = 0.55
+	if danger_level >= 0.55 and rng.randf() < bear_chance:
+		ids = [BEAR]
+		if party_size >= 2:
+			ids.append(WOLF)
+
+	return _build_units(ids, party_size, average_level, danger_level)
+
+## Şüpheli/itibarsız bir kervanı durduran devriye (bkz. evt_guard_patrol).
+## Danger_level burada road danger'ı taşır - yalnızca çavuşun katılıp
+## katılmayacağını belirler, haydut kadrosuyla aynı ölçek kullanılır.
+static func build_guard_squad(
+	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1
+) -> Array[CombatUnit]:
+	_ensure_built()
+
+	var ids: Array[String] = [CITY_GUARD, CITY_GUARD]
+	if danger_level >= 0.4 or party_size >= 3:
+		ids.insert(0, GUARD_SERGEANT)
+
+	return _build_units(ids, party_size, average_level, danger_level)
+
+static func _build_units(
+	ids: Array[String], party_size: int, average_level: int, danger_level: float = 0.0
+) -> Array[CombatUnit]:
+	var templates: Array[EnemyTemplate] = []
+	for enemy_id in ids:
+		var template := get_enemy(enemy_id)
+		if template != null:
+			templates.append(template)
+
+	var squad_size := mini(templates.size(), MAX_SQUAD_SIZE)
+	squad_size = mini(squad_size, maxi(2, party_size + 1))
+
+	# Kadro partiye göre kırpıldığında *kimin* geleceği önemli. Eskiden önce
+	# mevkiye göre sıralanıp baştan alınıyordu: yalnız bir yolcuya her zaman
+	# iki kesici geliyor, reis ve okçu hep eleniyordu - o oyuncu için sakin
+	# bir yol ile eşkıya kaynayan bir yol birebir aynıydı (ölçüldü: %20 ve
+	# %90 tehlikede aynı kazanma oranı, %67).
+	#
+	# Artık kırpma, kadro kurucusunun verdiği *önem sırasını* izliyor
+	# (bkz. build_bandit_squad: tehlike yükseldikçe reis listenin başına
+	# geçer). Tehdide göre elemek de denendi ve kadroyu düzleştirdi -
+	# okçuyu hep atıp üç kesici bırakıyordu, yani mevki tasarımı kayboluyordu.
+	templates.resize(mini(squad_size, templates.size()))
+	templates.sort_custom(func(a, b): return a.preferred_position < b.preferred_position)
+
+	var power_scale := get_power_scale(average_level, party_size)
+	var units: Array[CombatUnit] = []
+	for index in templates.size():
+		units.append(CombatUnit.from_enemy(templates[index], index + 1, power_scale))
+	return units
+
+
+## Seviye 1'de 1.0; her seviye canı/hasarı %8 büyütür, üst sınır seviye
+## 15'te ~%12'lik zafer oranına denk düşecek şekilde yumuşak tutulur.
+static func get_power_scale(average_level: int, party_size: int = 1) -> float:
+	var by_level := 1.0 + POWER_SCALE_PER_LEVEL * float(maxi(0, average_level - 1))
+	var by_party := 1.0 + POWER_SCALE_PER_PARTY_MEMBER * float(maxi(0, party_size - 1))
+	return by_level * by_party
+
+static func _ensure_built() -> void:
+	if not _enemies.is_empty():
+		return
+
+	_enemies.append(_make(CUTTER, "ENEMY_BANDIT_CUTTER_NAME", 27, 78, 6, 5, 4, 8, [SkillCatalog.CLEAVER], 1, 10))
+	_enemies.append(_make(ARCHER, "ENEMY_BANDIT_ARCHER_NAME", 22, 82, 9, 7, 3, 11, [SkillCatalog.BANDIT_ARROW], 3, 12))
+	_enemies.append(_make(
+		LEADER, "ENEMY_BANDIT_LEADER_NAME", 36, 84, 7, 9, 6, 10,
+		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2, 25
+	))
+
+	# Bölgesel reskin'ler: Kesici/Okçu'nun aynı mevki tercihiyle ama farklı
+	# yöre teçhizatıyla çıkan versiyonları (bkz. build_bandit_squad).
+	_enemies.append(_make(MOUNTAIN_BANDIT, "ENEMY_MOUNTAIN_BANDIT_NAME", 32, 76, 5, 5, 7, 7, [SkillCatalog.CLEAVER], 1, 12))
+	_enemies.append(_make(ARMED_BRIGAND, "ENEMY_ARMED_BRIGAND_NAME", 24, 88, 8, 10, 4, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
+
+	# Vahşi hayvanlar - kurt sürü halinde hızlı/hafif, ayı nadir/tekil ve
+	# ezici, domuz ortada saldırgan bir tekil tehdit (bkz. build_wildlife_squad).
+	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 19, 80, 13, 6, 3, 14, [SkillCatalog.WOLF_BITE], 1, 8))
+	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
+	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+
+	# Şehir muhafızları - talimli ve isabetli ama haydutlar kadar sert
+	# vurmuyor, çavuş komuta eder (bkz. build_guard_squad, evt_guard_patrol).
+	_enemies.append(_make(CITY_GUARD, "ENEMY_CITY_GUARD_NAME", 31, 82, 7, 4, 5, 9, [SkillCatalog.GUARD_STRIKE], 1, 12))
+	_enemies.append(_make(
+		GUARD_SERGEANT, "ENEMY_GUARD_SERGEANT_NAME", 43, 84, 8, 6, 7, 10,
+		[SkillCatalog.GUARD_ORDER, SkillCatalog.GUARD_STRIKE], 2, 26
+	))
+
+	for enemy in _enemies:
+		_enemy_by_id[enemy.enemy_id] = enemy
+
+static func _make(
+	enemy_id: String, display_name: String, max_hp: int, accuracy: int,
+	dodge: int, crit_chance: int, damage_bonus: int, initiative: int,
+	skill_ids: Array, preferred_position: int, xp_value: int = 10
+) -> EnemyTemplate:
+	var enemy := EnemyTemplate.new()
+	enemy.enemy_id = enemy_id
+	enemy.display_name_key = display_name
+	enemy.max_hp = max_hp
+	enemy.accuracy = accuracy
+	enemy.dodge = dodge
+	enemy.crit_chance = crit_chance
+	enemy.damage_bonus = damage_bonus
+	enemy.initiative = initiative
+	var typed_skill_ids: Array[String] = []
+	for skill_id in skill_ids:
+		typed_skill_ids.append(skill_id)
+	enemy.skill_ids = typed_skill_ids
+	enemy.preferred_position = preferred_position
+	enemy.xp_value = xp_value
+	return enemy

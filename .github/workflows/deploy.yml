@@ -1,0 +1,103 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.2.2
+          use-dotnet: false
+          include-templates: true
+
+      # Godot ayrıştırma hatalarını basıp yine de 0 ile çıkıyor: bozuk bir
+      # betik yeşil bir yapının altında gizlenebiliyordu ve iki kez öyle
+      # oldu (city_map.gd, class_catalog.gd). Bu yüzden çıktı dosyaya
+      # alınıyor ve aşağıdaki kapı adımı taranıyor.
+      - name: Import project
+        run: |
+          set -o pipefail
+          # Godot 4.2.2'nin headless import'u ara sıra motorun kendi içinde
+          # çöküyor (signal 4, iş parçacığı yarışı) - bir kez yaşandı ve
+          # merge edilmiş bir çalışma bir gün boyunca yayınlanmadan kaldı,
+          # kimse fark etmedi. Bir kez daha deneniyor; ikinci çökme gerçek
+          # sayılır. Betik hataları bu adımda değil aşağıdaki tarama
+          # kapısında yakalandığı için tekrar denemek gerçek bir hatayı
+          # gizlemiyor.
+          if ! godot --headless --import 2>&1 | tee import.log; then
+            echo "Import çöktü; bir kez daha deneniyor."
+            godot --headless --import 2>&1 | tee import.log
+          fi
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          godot --headless --script res://tests/run_tests.gd 2>&1 | tee tests.log
+
+      - name: Export to HTML5
+        run: |
+          set -o pipefail
+          mkdir -p build/web
+          godot --headless --export-release Web build/web/index.html 2>&1 | tee export.log
+        continue-on-error: false
+
+      # Testler geçse bile ayrıştırma hatası kalmış olabilir (hatalı betik
+      # yalnızca bir ekranda kullanılıyorsa testler onu hiç görmez).
+      - name: Fail on script errors
+        if: always()
+        run: |
+          found=0
+          for log in import.log tests.log export.log; do
+            [ -f "$log" ] || continue
+            if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' "$log"; then
+              echo "::error file=$log::$log içinde betik hatası var"
+              found=1
+            fi
+          done
+          if [ "$found" -ne 0 ]; then
+            echo "Godot bu hataları basıp yine de sıfırla çıkıyor; yapı bilerek düşürüldü."
+            exit 1
+          fi
+          echo "Betik hatası yok."
+
+      - name: Add Cross-Origin Isolation service worker
+        run: |
+          cp web/coi-serviceworker.js build/web/coi-serviceworker.js
+          sed -i 's#</head>#<script src="coi-serviceworker.js"></script>\n</head>#' build/web/index.html
+          grep -q 'coi-serviceworker.js' build/web/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

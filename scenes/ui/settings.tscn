@@ -1,0 +1,68 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqsettings001"]
+
+[ext_resource type="Script" path="res://scripts/ui/settings.gd" id="1"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "UI_SETTINGS"
+
+[node name="LanguageRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="LanguageLabel" type="Label" parent="MarginContainer/VBoxContainer/LanguageRow"]
+layout_mode = 2
+text = "UI_LANGUAGE"
+
+[node name="LanguageButton" type="OptionButton" parent="MarginContainer/VBoxContainer/LanguageRow"]
+layout_mode = 2
+
+[node name="MusicRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="MusicLabel" type="Label" parent="MarginContainer/VBoxContainer/MusicRow"]
+layout_mode = 2
+text = "UI_MUSIC_VOLUME"
+
+[node name="MusicSlider" type="HSlider" parent="MarginContainer/VBoxContainer/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 0)
+max_value = 1.0
+step = 0.05
+
+[node name="MusicValueLabel" type="Label" parent="MarginContainer/VBoxContainer/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "UI_BACK"

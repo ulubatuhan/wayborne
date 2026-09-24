@@ -1,0 +1,311 @@
+class_name SkillCatalog
+extends RefCounted
+
+## Yetenek tablosu. Hem oyuncu sınıfları hem düşmanlar buradan okur, böylece
+## bir yeteneğin sayıları tek yerde durur.
+##
+## Tablo bir kez kurulup statik önbelleğe alınır (bkz. ItemCatalog deseni).
+
+# Oyuncu yetenekleri - Sıra Neferi
+const SHIELD_BASH: String = "shield_bash"
+const SPEAR_THRUST: String = "spear_thrust"
+const SLING_SHOT: String = "sling_shot"
+const RALLY: String = "rally"
+const TAKE_COVER: String = "take_cover"
+
+# Oyuncu yetenekleri - Sekban
+const ARROW_SHOT: String = "arrow_shot"
+const LEG_TIE: String = "leg_tie"
+const AIMED_SHOT: String = "aimed_shot"
+const STEP_BACK: String = "step_back"
+
+# Oyuncu yetenekleri - Kırıkçı
+const SLEDGE_STRIKE: String = "sledge_strike"
+const SHIELD_BREAK: String = "shield_break"
+const RAGE: String = "rage"
+const SWEEPING_BLOW: String = "sweeping_blow"
+
+# Oyuncu yetenekleri - Kalem Efendisi
+const ROUSING_SPEECH: String = "rousing_speech"
+const TALLY_RECKON: String = "tally_reckon"
+const CUTTING_WORD: String = "cutting_word"
+const KEEP_LEDGER: String = "keep_ledger"
+const BLIGHT_FLASK: String = "blight_flask"
+
+# Düşman yetenekleri - haydutlar
+const CLEAVER: String = "bandit_cleave"
+const BANDIT_ARROW: String = "bandit_arrow"
+const BANDIT_ORDER: String = "bandit_order"
+
+# Düşman yetenekleri - vahşi hayvanlar (bkz. Faz 8 PR-B)
+const WOLF_BITE: String = "wolf_bite"
+const BEAR_CLAW: String = "bear_claw"
+const BOAR_CHARGE: String = "boar_charge"
+
+# Düşman yetenekleri - şehir muhafızları
+const GUARD_STRIKE: String = "guard_strike"
+const GUARD_ORDER: String = "guard_order"
+
+static var _skills: Array[CombatSkill] = []
+static var _skill_by_id: Dictionary = {}
+
+static func get_skill(skill_id: String) -> CombatSkill:
+	_ensure_built()
+	return _skill_by_id.get(skill_id)
+
+## Bütün yetenekler. Test tarafı bunu okuyor: bir yeteneğin tanınmayan
+## bir durum efekti yazması sessizce hiçbir şey yapar, o yüzden katalog
+## bir bütün olarak taranabilmeli (bkz. test_combat_dd.gd).
+static func get_all_skills() -> Array[CombatSkill]:
+	_ensure_built()
+	return _skills
+
+## Kimliklerden yetenek listesi kurar; bilinmeyen kimlikleri sessizce atlar.
+static func get_skills(skill_ids: Array[String]) -> Array[CombatSkill]:
+	var skills: Array[CombatSkill] = []
+	for skill_id in skill_ids:
+		var skill := get_skill(skill_id)
+		if skill != null:
+			skills.append(skill)
+	return skills
+
+static func _ensure_built() -> void:
+	if not _skills.is_empty():
+		return
+
+	# Kalkan darbesi sersemletiyor: bir muhafızın işi hasar vermek değil,
+	# öndeki düşmanı bir tur oyundan çıkarmak.
+	# Kalkan darbesi hem sersemletiyor hem geriye itiyor - klasik eşleşme.
+	_skills.append(CombatSkill.with_area(CombatSkill.with_status(CombatSkill.make_attack(
+		SHIELD_BASH,
+		"SKILL_SHIELD_BASH_NAME",
+		"SKILL_SHIELD_BASH_DESC",
+		[1, 2], [1, 2],
+		6, 2, 10, 0
+	), CombatUnit.STATUS_STUN, 0, 1, 60), CombatSkill.Area.SINGLE, 1))
+
+	_skills.append(CombatSkill.make_attack(
+		SPEAR_THRUST,
+		"SKILL_SPEAR_THRUST_NAME",
+		"SKILL_SPEAR_THRUST_DESC",
+		[1, 2, 3], [1, 2, 3],
+		9, 3, 0, 3
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		SLING_SHOT,
+		"SKILL_SLING_SHOT_NAME",
+		"SKILL_SLING_SHOT_DESC",
+		[3, 4], [2, 3, 4],
+		7, 4, -5, 5
+	))
+
+	var rally := CombatSkill.new()
+	rally.skill_id = RALLY
+	rally.display_name_key = "SKILL_RALLY_NAME"
+	rally.description_key = "SKILL_RALLY_DESC"
+	rally.target_kind = CombatSkill.Target.ALLY
+	rally.usable_positions = CombatSkill.to_position_array([2, 3, 4])
+	rally.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
+	rally.heal_amount = 8
+	rally.damage_variance = 2
+	rally.cooldown_rounds = 2
+	rally.scales_with_support = true
+	_skills.append(rally)
+
+	_skills.append(CombatSkill.make_buff(
+		TAKE_COVER, "SKILL_TAKE_COVER_NAME", "SKILL_TAKE_COVER_DESC",
+		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
+		"dodge", 10, 2, 3
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		ARROW_SHOT,
+		"SKILL_ARROW_SHOT_NAME",
+		"SKILL_ARROW_SHOT_DESC",
+		[3, 4], [1, 2, 3, 4],
+		8, 3, 8, 3
+	))
+
+	# Ayak bağı hedefi **öne çekiyor**: arkadaki okçuyu öne çekmek onu
+	# kendi menzilinden çıkarıyor, yani hasar vermeden kazanılan bir
+	# tur. Mevki tasarımının karşı taraftan kullanılması.
+	_skills.append(CombatSkill.with_area(CombatSkill.make_attack(
+		LEG_TIE,
+		"SKILL_LEG_TIE_NAME",
+		"SKILL_LEG_TIE_DESC",
+		[2, 3, 4], [1, 2, 3],
+		4, 1, 0, 0, 2,
+		"dodge", -8, 2
+	), CombatSkill.Area.SINGLE, -1))
+
+	# Nişanlı ok kanatıyor: yavaş ve pahalı bir yetenek, karşılığı
+	# zamana yayılan hasar.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		AIMED_SHOT,
+		"SKILL_AIMED_SHOT_NAME",
+		"SKILL_AIMED_SHOT_DESC",
+		[3, 4], [2, 3, 4],
+		10, 2, -5, 15, 3
+	), CombatUnit.STATUS_BLEED, 3, 3, 70))
+
+	_skills.append(CombatSkill.make_buff(
+		STEP_BACK, "SKILL_STEP_BACK_NAME", "SKILL_STEP_BACK_DESC",
+		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
+		"dodge", 6, 1, 2
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		SLEDGE_STRIKE,
+		"SKILL_SLEDGE_STRIKE_NAME",
+		"SKILL_SLEDGE_STRIKE_DESC",
+		[1, 2], [1, 2],
+		14, 5, -5, 0, 1
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		SHIELD_BREAK,
+		"SKILL_SHIELD_BREAK_NAME",
+		"SKILL_SHIELD_BREAK_DESC",
+		[1, 2], [1, 2],
+		6, 2, 0, 0, 2,
+		"dodge", -6, 2
+	))
+
+	_skills.append(CombatSkill.make_buff(
+		RAGE, "SKILL_RAGE_NAME", "SKILL_RAGE_DESC",
+		CombatSkill.Target.SELF, [1, 2, 3, 4], [],
+		"damage", 6, 2, 3
+	))
+
+	# "Savuran Darbe" adı zaten alan vaat ediyordu ama tek hedefe
+	# vuruyordu - ölü bir vaat. Hasarı tek hedefli SLEDGE_STRIKE'ın
+	# belirgin altında: alan yeteneği tek hedefe vurandan güçlü olursa
+	# tek doğru seçim o olur.
+	_skills.append(CombatSkill.with_area(CombatSkill.make_attack(
+		SWEEPING_BLOW,
+		"SKILL_SWEEPING_BLOW_NAME",
+		"SKILL_SWEEPING_BLOW_DESC",
+		[1], [1, 2],
+		7, 2, 0, 0, 2
+	), CombatSkill.Area.ADJACENT))
+
+	var rousing_speech := CombatSkill.new()
+	rousing_speech.skill_id = ROUSING_SPEECH
+	rousing_speech.display_name_key = "SKILL_ROUSING_SPEECH_NAME"
+	rousing_speech.description_key = "SKILL_ROUSING_SPEECH_DESC"
+	rousing_speech.target_kind = CombatSkill.Target.ALLY
+	rousing_speech.usable_positions = CombatSkill.to_position_array([3, 4])
+	rousing_speech.target_positions = CombatSkill.to_position_array([1, 2, 3, 4])
+	rousing_speech.heal_amount = 6
+	rousing_speech.damage_variance = 2
+	rousing_speech.cooldown_rounds = 2
+	rousing_speech.scales_with_support = true
+	_skills.append(rousing_speech)
+
+	_skills.append(CombatSkill.make_buff(
+		TALLY_RECKON, "SKILL_TALLY_RECKON_NAME", "SKILL_TALLY_RECKON_DESC",
+		CombatSkill.Target.SELF, [2, 3, 4], [],
+		"accuracy", 10, 2, 3
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		CUTTING_WORD,
+		"SKILL_CUTTING_WORD_NAME",
+		"SKILL_CUTTING_WORD_DESC",
+		[3, 4], [1, 2, 3, 4],
+		3, 1, 0, 0, 2,
+		"accuracy", -8, 2
+	))
+
+	_skills.append(CombatSkill.make_buff(
+		KEEP_LEDGER, "SKILL_KEEP_LEDGER_NAME", "SKILL_KEEP_LEDGER_DESC",
+		CombatSkill.Target.ALLY, [3, 4], [1, 2, 3, 4],
+		"dodge", 8, 2, 3
+	))
+
+	# Kalem Efendisi'nin zehirli şişesi: oyuncu tarafındaki tek zehir
+	# kaynağı. Anlık hasarı düşük, değeri zamana yayılıyor - sınıfın
+	# "sayılarla dövüşür" kimliğine uyan tek saldırı biçimi.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		BLIGHT_FLASK,
+		"SKILL_BLIGHT_FLASK_NAME",
+		"SKILL_BLIGHT_FLASK_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		3, 1, 5, 0, 2
+	), CombatUnit.STATUS_BLIGHT, 4, 3, 75))
+
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		CLEAVER,
+		"SKILL_CLEAVER_NAME",
+		"SKILL_CLEAVER_DESC",
+		[1, 2], [1, 2],
+		8, 3, 0, 3
+	), CombatUnit.STATUS_BLEED, 2, 2, 45))
+
+	_skills.append(CombatSkill.make_attack(
+		BANDIT_ARROW,
+		"SKILL_BANDIT_ARROW_NAME",
+		"SKILL_BANDIT_ARROW_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		6, 3, 5, 5
+	))
+
+	# Haydut reisinin savruk sallaması: hedefi zar seçiyor. Rastgele
+	# hedefleme yalnızca anlatı bunu gerektirdiği yerde var - oyuncuya
+	# verilen bir yetenek olsaydı seçimi elinden alan bir ceza olurdu.
+	_skills.append(CombatSkill.with_area(CombatSkill.make_attack(
+		BANDIT_ORDER,
+		"SKILL_BANDIT_ORDER_NAME",
+		"SKILL_BANDIT_ORDER_DESC",
+		[1, 2, 3], [1, 2],
+		11, 4, 5, 5
+	), CombatSkill.Area.RANDOM))
+
+	# Hayvan ısırığı kanatıyor, pençe daha çok: vahşi hayvan kadrosunun
+	# haydutlardan farkı anlık hasar değil, açtığı yara.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		WOLF_BITE,
+		"SKILL_WOLF_BITE_NAME",
+		"SKILL_WOLF_BITE_DESC",
+		[1, 2], [1, 2],
+		7, 3, 5, 5
+	), CombatUnit.STATUS_BLEED, 2, 2, 55))
+
+	# Ayı pençesi iki mevkiye birden iniyor: kadronun en tehlikeli
+	# yeteneği, ve oyuncuyu safını dağıtmaya zorlayan şey.
+	_skills.append(CombatSkill.with_area(CombatSkill.with_status(CombatSkill.make_attack(
+		BEAR_CLAW,
+		"SKILL_BEAR_CLAW_NAME",
+		"SKILL_BEAR_CLAW_DESC",
+		[1], [1, 2],
+		10, 4, -5, 0, 1
+	), CombatUnit.STATUS_BLEED, 2, 2, 45), CombatSkill.Area.ADJACENT))
+
+	# Domuz hücumu devirir: sersemletmenin düşman tarafındaki karşılığı.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		BOAR_CHARGE,
+		"SKILL_BOAR_CHARGE_NAME",
+		"SKILL_BOAR_CHARGE_DESC",
+		[1], [1],
+		10, 4, 0, 8
+	), CombatUnit.STATUS_STUN, 0, 1, 55))
+
+	_skills.append(CombatSkill.make_attack(
+		GUARD_STRIKE,
+		"SKILL_GUARD_STRIKE_NAME",
+		"SKILL_GUARD_STRIKE_DESC",
+		[1, 2], [1, 2],
+		8, 2, 8, 0
+	))
+
+	_skills.append(CombatSkill.make_attack(
+		GUARD_ORDER,
+		"SKILL_GUARD_ORDER_NAME",
+		"SKILL_GUARD_ORDER_DESC",
+		[1, 2, 3], [1, 2],
+		10, 3, 5, 0
+	))
+
+	for skill in _skills:
+		_skill_by_id[skill.skill_id] = skill

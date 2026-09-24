@@ -1,0 +1,200 @@
+class_name CombatSkill
+extends Resource
+
+## Darkest Dungeon tarzı mevki kilitli yetenek: hem kullanıcının hangi
+## sırada durması gerektiğini hem de hangi sıradaki hedefe ulaşabildiğini
+## taşır. Mevkiler 1..4 arasıdır; 1 en önde, 4 en arkada.
+
+enum Target {
+	ENEMY,
+	ALLY,
+	SELF,
+}
+
+@export var skill_id: String = ""
+## Saklanan sey ceviri anahtari (bkz. data/locale/game.csv); gosterilen
+## metin asagidaki hesaplanan ozelliklerden okunur. Bu ayrim sayesinde
+## bu alanlari okuyan ekranlarin hicbiri degismeden cevrilebilir oldu
+## - bkz. CLAUDE.md Localization Rules.
+@export var display_name_key: String = ""
+@export var description_key: String = ""
+
+var display_name: String:
+	get: return tr(display_name_key)
+
+var description: String:
+	get: return tr(description_key)
+
+
+@export var target_kind: Target = Target.ENEMY
+
+## Yeteneği kullanabilmek için gereken kendi mevkiler.
+@export var usable_positions: Array[int] = [1, 2, 3, 4]
+## Ulaşılabilen hedef mevkileri.
+@export var target_positions: Array[int] = [1, 2, 3, 4]
+
+@export var base_damage: int = 0
+## Hasara eklenen rastgele aralık: [-variance, +variance].
+@export var damage_variance: int = 0
+@export var heal_amount: int = 0
+
+@export var accuracy_bonus: int = 0
+@export var crit_bonus: int = 0
+
+## Kaç tur beklemesi gerektiği. 0 = her tur kullanılabilir.
+@export var cooldown_rounds: int = 0
+
+## Açık ise hasar/iyileştirme Güç yerine Zeka'dan ölçeklenir.
+@export var scales_with_support: bool = false
+
+## Süreli stat değiştirici: hedefe (ya da SELF/ALLY için kullanıcıya)
+## modifier_rounds tur boyunca modifier_amount kadar "accuracy", "dodge"
+## ya da "damage" ekler/çıkarır. modifier_rounds = 0 -> değiştirici yok.
+@export var modifier_stat: String = ""
+@export var modifier_amount: int = 0
+@export var modifier_rounds: int = 0
+
+## --- Durum efektleri (kanama / zehir / sersemletme) ---
+## Darkest Dungeon'ın "hasarın hepsi anında değil" katmanı. Süreli stat
+## değiştiricinin (`modifier_*`) yanına ayrı bir alan grubu olarak
+## geliyor çünkü ikisi başka şey: değiştirici bir sayıyı büküyor, durum
+## efekti *tur başında kendi başına iş yapıyor* (bkz. CombatUnit'in
+## `tick_statuses`'u).
+##
+## `status_chance` ham şans; hedefin direnci düşülüyor, yani zırhlı bir
+## düşmana kanama açmak zor. Direnç olmasa kanama her vuruşta binen bir
+## ek hasara dönüşürdü ve tek doğru strateji "her zaman kanat" olurdu.
+@export var status_kind: String = ""
+@export var status_amount: int = 0
+@export var status_rounds: int = 0
+@export var status_chance: int = 0
+
+func has_status() -> bool:
+	return status_rounds > 0 and not status_kind.is_empty()
+
+## --- Hedef genişliği ve mevki kaydırma ---
+## `SINGLE` tek hedef (varsayılan, eski davranış). `ADJACENT` seçilen
+## hedefin komşu mevkilerine de vuruyor, `ALL` karşı safın tamamına,
+## `RANDOM` seçimi oyuncudan alıp zara bırakıyor (savruk bir sallama).
+##
+## Hasarın alan yeteneklerinde düşük olması motorda değil **katalogda**
+## ayarlanıyor: motora "alan yetenekleri %60 hasar verir" gibi bir
+## çarpan koymak, bir yeteneğin sayısını iki yerden okumak demekti
+## (bkz. CaravanPlan.daily_consumption'ın aynı gerekçesi). Alan
+## yeteneği tek hedefe vurandan zayıf olmalı, yoksa tek doğru seçim o
+## olur - `test_combat_dd.gd` bunu doğruluyor.
+enum Area { SINGLE, ADJACENT, ALL, RANDOM }
+
+@export var area: Area = Area.SINGLE
+
+## İsabet eden vuruşta hedefi safta kaydırıyor: pozitif = geriye iter,
+## negatif = öne çeker. Mevki tasarımının tersi taraftan kullanılması -
+## arkadaki okçuyu öne çekmek onu kendi yeteneklerinin menzilinden
+## çıkarıyor, bu da hasar vermeden kazanılan bir tur.
+@export var shift_amount: int = 0
+
+func is_area() -> bool:
+	return area != Area.SINGLE
+
+func shifts() -> bool:
+	return shift_amount != 0
+
+func has_modifier() -> bool:
+	return modifier_rounds > 0 and not modifier_stat.is_empty()
+
+func can_use_from(position: int) -> bool:
+	return position in usable_positions
+
+func can_reach(position: int) -> bool:
+	return position in target_positions
+
+func is_heal() -> bool:
+	return heal_amount > 0
+
+## "Mevki 1-2 · Hedef 1-2" gibi tek satırlık özet - buton ipucunda gösterilir.
+func get_position_summary() -> String:
+	return "Mevki %s · Hedef %s" % [
+		_format_positions(usable_positions),
+		_format_positions(target_positions),
+	]
+
+func _format_positions(positions: Array[int]) -> String:
+	var parts: Array[String] = []
+	for position in positions:
+		parts.append(str(position))
+	return "-".join(parts)
+
+## Mevki listeleri düz Array olarak alınır ve içeride Array[int]'e
+## çevrilir - çağrı yerinde köşeli parantezle yazmak kolay olsun diye.
+static func to_position_array(values: Array) -> Array[int]:
+	var positions: Array[int] = []
+	for value in values:
+		positions.append(int(value))
+	return positions
+
+static func make_attack(
+	skill_id: String, display_name: String, description: String,
+	usable_positions: Array, target_positions: Array,
+	base_damage: int, damage_variance: int,
+	accuracy_bonus: int = 0, crit_bonus: int = 0, cooldown_rounds: int = 0,
+	modifier_stat: String = "", modifier_amount: int = 0, modifier_rounds: int = 0
+) -> CombatSkill:
+	var skill := CombatSkill.new()
+	skill.skill_id = skill_id
+	skill.display_name_key = display_name
+	skill.description_key = description
+	skill.target_kind = Target.ENEMY
+	skill.usable_positions = to_position_array(usable_positions)
+	skill.target_positions = to_position_array(target_positions)
+	skill.base_damage = base_damage
+	skill.damage_variance = damage_variance
+	skill.accuracy_bonus = accuracy_bonus
+	skill.crit_bonus = crit_bonus
+	skill.cooldown_rounds = cooldown_rounds
+	skill.modifier_stat = modifier_stat
+	skill.modifier_amount = modifier_amount
+	skill.modifier_rounds = modifier_rounds
+	return skill
+
+## Durum efektini bir saldırıya ekler. Ayrı bir fabrika yerine zincir
+## hâlinde kullanılıyor (`with_status(make_attack(...), ...)`) çünkü
+## `make_attack`'ın on üç parametresi var ve dördünü daha eklemek çağrı
+## yerini okunmaz hâle getiriyordu.
+## Alan genişliğini ve/veya mevki kaydırmasını bir yeteneğe ekler -
+## `with_status` ile aynı zincir deseni, aynı gerekçe.
+static func with_area(
+	skill: CombatSkill, area_kind: Area, shift: int = 0
+) -> CombatSkill:
+	skill.area = area_kind
+	skill.shift_amount = shift
+	return skill
+
+static func with_status(
+	skill: CombatSkill, kind: String, amount: int, rounds: int, chance: int
+) -> CombatSkill:
+	skill.status_kind = kind
+	skill.status_amount = amount
+	skill.status_rounds = rounds
+	skill.status_chance = chance
+	return skill
+
+## Hasarsız/iyileştirmesiz bir süreli değiştirici: kendine ya da bir
+## yoldaşa şans atmadan uygulanır (bkz. CombatEncounter._resolve_skill).
+static func make_buff(
+	skill_id: String, display_name: String, description: String,
+	target_kind: Target, usable_positions: Array, target_positions: Array,
+	modifier_stat: String, modifier_amount: int, modifier_rounds: int,
+	cooldown_rounds: int = 0
+) -> CombatSkill:
+	var skill := CombatSkill.new()
+	skill.skill_id = skill_id
+	skill.display_name_key = display_name
+	skill.description_key = description
+	skill.target_kind = target_kind
+	skill.usable_positions = to_position_array(usable_positions)
+	skill.target_positions = to_position_array(target_positions)
+	skill.modifier_stat = modifier_stat
+	skill.modifier_amount = modifier_amount
+	skill.modifier_rounds = modifier_rounds
+	skill.cooldown_rounds = cooldown_rounds
+	return skill

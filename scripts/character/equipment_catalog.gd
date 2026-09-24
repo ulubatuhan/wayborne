@@ -1,0 +1,145 @@
+class_name EquipmentCatalog
+extends RefCounted
+
+## Ekipman tablosu: dört slot, üçer parça - Silah/Zırh üç tier'lik kalıcı
+## yükseltme (Kervan Avlusu'nda parayla, bkz. Equipment.price), Yüzük/Kolye
+## üçer ödünlü tılsım (yolda EventEffect.Type.GRANT_EQUIPMENT ile bulunur,
+## pazarda satılmaz - price 0).
+##
+## Tablo bir kez kurulup statik önbelleğe alınır (bkz. TraitCatalog deseni).
+
+const SLOT_WEAPON: String = "weapon"
+const SLOT_ARMOR: String = "armor"
+const SLOT_RING: String = "ring"
+const SLOT_AMULET: String = "amulet"
+
+const ALL_SLOTS: Array[String] = [SLOT_WEAPON, SLOT_ARMOR, SLOT_RING, SLOT_AMULET]
+
+## Tier'lerin seviye eşikleri. DD'de üç teçhizat kademesi resolve seviyesine
+## bağlı açılır; buradaki üçüncü eşik multiclass kilidiyle (7) aynı bölgede
+## duruyor ki oyuncunun "artık kıdemliyim" hissi tek yerden gelsin.
+const TIER_2_LEVEL: int = 3
+const TIER_3_LEVEL: int = 6
+
+const WEAPON_TIER_1: String = "weapon_tier_1"
+const WEAPON_TIER_2: String = "weapon_tier_2"
+const WEAPON_TIER_3: String = "weapon_tier_3"
+const ARMOR_TIER_1: String = "armor_tier_1"
+const ARMOR_TIER_2: String = "armor_tier_2"
+const ARMOR_TIER_3: String = "armor_tier_3"
+const RING_MARKSMAN: String = "ring_marksman"
+const RING_GAMBLER: String = "ring_gambler"
+const RING_CHARMED: String = "ring_charmed"
+const AMULET_WARD: String = "amulet_ward"
+const AMULET_WOLF_FANG: String = "amulet_wolf_fang"
+const AMULET_COURAGE: String = "amulet_courage"
+
+static var _equipment: Array[Equipment] = []
+static var _by_id: Dictionary = {}
+
+static func get_all_equipment() -> Array[Equipment]:
+	_ensure_built()
+	return _equipment
+
+static func get_equipment(equipment_id: String) -> Equipment:
+	_ensure_built()
+	return _by_id.get(equipment_id)
+
+static func get_equipment_for_slot(slot: String) -> Array[Equipment]:
+	_ensure_built()
+	var result: Array[Equipment] = []
+	for equipment_resource in _equipment:
+		if equipment_resource.slot == slot:
+			result.append(equipment_resource)
+	return result
+
+static func get_slot_display_name(slot: String) -> String:
+	match slot:
+		SLOT_WEAPON:
+			return String(TranslationServer.translate("EQUIP_SLOT_WEAPON"))
+		SLOT_ARMOR:
+			return String(TranslationServer.translate("EQUIP_SLOT_ARMOR"))
+		SLOT_RING:
+			return String(TranslationServer.translate("EQUIP_SLOT_RING"))
+		SLOT_AMULET:
+			return String(TranslationServer.translate("EQUIP_SLOT_AMULET"))
+		_:
+			return slot
+
+static func _ensure_built() -> void:
+	if not _equipment.is_empty():
+		return
+
+	_equipment.append(_make(
+		WEAPON_TIER_1, "EQUIP_WEAPON_TIER_1_NAME", "EQUIP_WEAPON_TIER_1_DESC",
+		SLOT_WEAPON, 1, 150, {"damage_bonus": 2}
+	))
+	_equipment.append(_make(
+		WEAPON_TIER_2, "EQUIP_WEAPON_TIER_2_NAME", "EQUIP_WEAPON_TIER_2_DESC",
+		SLOT_WEAPON, 2, 350, {"damage_bonus": 4}, TIER_2_LEVEL
+	))
+	_equipment.append(_make(
+		WEAPON_TIER_3, "EQUIP_WEAPON_TIER_3_NAME", "EQUIP_WEAPON_TIER_3_DESC",
+		SLOT_WEAPON, 3, 650, {"damage_bonus": 6}, TIER_3_LEVEL
+	))
+
+	_equipment.append(_make(
+		ARMOR_TIER_1, "EQUIP_ARMOR_TIER_1_NAME", "EQUIP_ARMOR_TIER_1_DESC",
+		SLOT_ARMOR, 1, 150, {"hp_bonus": 4}
+	))
+	_equipment.append(_make(
+		ARMOR_TIER_2, "EQUIP_ARMOR_TIER_2_NAME", "EQUIP_ARMOR_TIER_2_DESC",
+		SLOT_ARMOR, 2, 350, {"hp_bonus": 8}, TIER_2_LEVEL
+	))
+	_equipment.append(_make(
+		ARMOR_TIER_3, "EQUIP_ARMOR_TIER_3_NAME", "EQUIP_ARMOR_TIER_3_DESC",
+		SLOT_ARMOR, 3, 700, {"hp_bonus": 14}, TIER_3_LEVEL
+	))
+
+	_equipment.append(_make(
+		RING_MARKSMAN, "EQUIP_RING_MARKSMAN_NAME", "EQUIP_RING_MARKSMAN_DESC",
+		SLOT_RING, 1, 0, {"accuracy_bonus": 5, "dodge_bonus": -2}
+	))
+	_equipment.append(_make(
+		RING_GAMBLER, "EQUIP_RING_GAMBLER_NAME", "EQUIP_RING_GAMBLER_DESC",
+		SLOT_RING, 1, 0, {"crit_bonus": 3, "accuracy_bonus": -3}
+	))
+	_equipment.append(_make(
+		RING_CHARMED, "EQUIP_RING_CHARMED_NAME", "EQUIP_RING_CHARMED_DESC",
+		SLOT_RING, 1, 0, {"damage_bonus": 2, "hp_bonus": -3}
+	))
+
+	_equipment.append(_make(
+		AMULET_WARD, "EQUIP_AMULET_WARD_NAME", "EQUIP_AMULET_WARD_DESC",
+		SLOT_AMULET, 1, 0, {"dodge_bonus": 3, "damage_bonus": -1}
+	))
+	_equipment.append(_make(
+		AMULET_WOLF_FANG, "EQUIP_AMULET_WOLF_FANG_NAME", "EQUIP_AMULET_WOLF_FANG_DESC",
+		SLOT_AMULET, 1, 0, {"hp_bonus": 3, "dodge_bonus": -2}
+	))
+	_equipment.append(_make(
+		AMULET_COURAGE, "EQUIP_AMULET_COURAGE_NAME", "EQUIP_AMULET_COURAGE_DESC",
+		SLOT_AMULET, 1, 0, {"crit_bonus": 2, "hp_bonus": -2}
+	))
+
+	for equipment_resource in _equipment:
+		_by_id[equipment_resource.equipment_id] = equipment_resource
+
+static func _make(
+	equipment_id: String, display_name: String, description: String,
+	slot: String, tier: int, price: int, bonuses: Dictionary, required_level: int = 1
+) -> Equipment:
+	var equipment_resource := Equipment.new()
+	equipment_resource.equipment_id = equipment_id
+	equipment_resource.display_name_key = display_name
+	equipment_resource.description_key = description
+	equipment_resource.slot = slot
+	equipment_resource.tier = tier
+	equipment_resource.price = price
+	equipment_resource.required_level = required_level
+	equipment_resource.hp_bonus = int(bonuses.get("hp_bonus", 0))
+	equipment_resource.dodge_bonus = int(bonuses.get("dodge_bonus", 0))
+	equipment_resource.accuracy_bonus = int(bonuses.get("accuracy_bonus", 0))
+	equipment_resource.crit_bonus = int(bonuses.get("crit_bonus", 0))
+	equipment_resource.damage_bonus = int(bonuses.get("damage_bonus", 0))
+	return equipment_resource

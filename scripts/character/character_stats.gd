@@ -1,0 +1,258 @@
+class_name CharacterStats
+extends RefCounted
+
+## Altı temel stat ve bunlardan türeyen savaş/yol değerleri. UI'dan
+## bağımsız: sahne ağacı gerektirmez, doğrudan örneklenip test edilebilir.
+##
+## Türetilmiş değerler tek yerde durur - hem karakter ekranı hem savaş
+## motoru buradan okur, formül iki yere kopyalanmaz.
+
+const BASE_VALUE: int = 5
+const MIN_VALUE: int = 1
+const MAX_VALUE: int = 15
+
+## 10'a kadar statın her puanı tam değer katar; 10'un üstü yarı değerde -
+## seviye atlayınca statı hep aynı yere yığmanın getirisi azalır. stat=5
+## (başlangıç değeri) her zaman 0 döner, böylece türetilmiş formüller
+## baseline'da değişmeden kalır.
+static func effective_value(raw: int) -> float:
+	return float(mini(raw, 10) - BASE_VALUE) + 0.5 * float(maxi(0, raw - 10))
+
+## Sekiz stat, iki bütçe. İlk altısı Faz 6'dan beri savaşın omurgası;
+## son ikisi (Bilgelik/İnanç) Faz 17'de eklendi ve kasıtlı olarak
+## savaşa hiç dokunmaz - her biri kendi "dünya" alanını açar (bkz.
+## CLAUDE.md Progression Rules'un genişlemesi). Divinity: Original Sin 2'nin
+## dersi budur: attribute'lar savaşı açar, civil stat'lar dünyayı açar,
+## ikisi ayrı bütçedir - aksi halde her check Zeka/Karizma'ya düşer ve
+## kalan statlar dump stat olur.
+##
+## Bilgelik: "yargı" - doğru kararı seçmek, tecrübeden öğrenmek
+## (bkz. CharacterData.get_xp_bonus_percent), olay check'lerinde öğüt.
+## İnanç: "irade" - Ölümün Kıyısı'nda hayata tutunmak (bkz.
+## CharacterData.get_deathblow_resist_bonus), umutsuzluğa direnç, ritüel
+## ve kutsal/kehanet olayları.
+enum Kind {
+	STRENGTH,
+	AGILITY,
+	ENDURANCE,
+	INTELLECT,
+	PERCEPTION,
+	CHARISMA,
+	WISDOM,
+	FAITH,
+}
+
+const KIND_ORDER: Array[Kind] = [
+	Kind.STRENGTH,
+	Kind.AGILITY,
+	Kind.ENDURANCE,
+	Kind.INTELLECT,
+	Kind.PERCEPTION,
+	Kind.CHARISMA,
+	Kind.WISDOM,
+	Kind.FAITH,
+]
+
+var strength: int = BASE_VALUE
+var agility: int = BASE_VALUE
+var endurance: int = BASE_VALUE
+var intellect: int = BASE_VALUE
+var perception: int = BASE_VALUE
+var charisma: int = BASE_VALUE
+var wisdom: int = BASE_VALUE
+var faith: int = BASE_VALUE
+
+## Stat adlarının/açıklamalarının çeviri anahtarları (bkz.
+## data/locale/game.csv). Bunlar static func olduğu için tr() değil
+## TranslationServer.translate() kullanılıyor - tr() bir Object örnek
+## metodu (bkz. CLAUDE.md Localization Rules).
+## Anahtarlar tam yazılıyor, "%s_NAME" gibi çalışma anında birleştirilmiyor:
+## birleştirilen bir anahtarı ne test_localization.gd'nin tanımsız-anahtar
+## taraması görebilir ne de bir çevirmen kod içinde arayabilir.
+const _KIND_NAME_KEYS: Dictionary = {
+	Kind.STRENGTH: "STAT_STRENGTH_NAME",
+	Kind.AGILITY: "STAT_AGILITY_NAME",
+	Kind.ENDURANCE: "STAT_ENDURANCE_NAME",
+	Kind.INTELLECT: "STAT_INTELLECT_NAME",
+	Kind.PERCEPTION: "STAT_PERCEPTION_NAME",
+	Kind.CHARISMA: "STAT_CHARISMA_NAME",
+	Kind.WISDOM: "STAT_WISDOM_NAME",
+	Kind.FAITH: "STAT_FAITH_NAME",
+}
+
+const _KIND_DESC_KEYS: Dictionary = {
+	Kind.STRENGTH: "STAT_STRENGTH_DESC",
+	Kind.AGILITY: "STAT_AGILITY_DESC",
+	Kind.ENDURANCE: "STAT_ENDURANCE_DESC",
+	Kind.INTELLECT: "STAT_INTELLECT_DESC",
+	Kind.PERCEPTION: "STAT_PERCEPTION_DESC",
+	Kind.CHARISMA: "STAT_CHARISMA_DESC",
+	Kind.WISDOM: "STAT_WISDOM_DESC",
+	Kind.FAITH: "STAT_FAITH_DESC",
+}
+
+static func kind_name(kind: Kind) -> String:
+	if not _KIND_NAME_KEYS.has(kind):
+		return "?"
+	return String(TranslationServer.translate(String(_KIND_NAME_KEYS[kind])))
+
+## Statın oyunda ne işe yaradığı - karakter ekranında gösterilir.
+static func kind_description(kind: Kind) -> String:
+	if not _KIND_DESC_KEYS.has(kind):
+		return ""
+	return String(TranslationServer.translate(String(_KIND_DESC_KEYS[kind])))
+
+func get_value(kind: Kind) -> int:
+	match kind:
+		Kind.STRENGTH:
+			return strength
+		Kind.AGILITY:
+			return agility
+		Kind.ENDURANCE:
+			return endurance
+		Kind.INTELLECT:
+			return intellect
+		Kind.PERCEPTION:
+			return perception
+		Kind.CHARISMA:
+			return charisma
+		Kind.WISDOM:
+			return wisdom
+		Kind.FAITH:
+			return faith
+	return 0
+
+func set_value(kind: Kind, value: int) -> void:
+	var clamped := clampi(value, MIN_VALUE, MAX_VALUE)
+	match kind:
+		Kind.STRENGTH:
+			strength = clamped
+		Kind.AGILITY:
+			agility = clamped
+		Kind.ENDURANCE:
+			endurance = clamped
+		Kind.INTELLECT:
+			intellect = clamped
+		Kind.PERCEPTION:
+			perception = clamped
+		Kind.CHARISMA:
+			charisma = clamped
+		Kind.WISDOM:
+			wisdom = clamped
+		Kind.FAITH:
+			faith = clamped
+
+func add_value(kind: Kind, delta: int) -> void:
+	set_value(kind, get_value(kind) + delta)
+
+func copy() -> CharacterStats:
+	var copied := CharacterStats.new()
+	for kind in KIND_ORDER:
+		copied.set_value(kind, get_value(kind))
+	return copied
+
+func get_effective_value(kind: Kind) -> float:
+	return effective_value(get_value(kind))
+
+# --- Türetilmiş değerler ---
+# Her formül baseline (stat=5, effective=0) sonucu + katsayı * effective(stat)
+# biçiminde: 10'a kadar eski davranışla birebir aynı, 10 üstü yavaşlar.
+
+func get_max_hp() -> int:
+	return 40 + int(round(4.0 * get_effective_value(Kind.ENDURANCE)))
+
+func get_initiative() -> int:
+	return 10 + int(round(get_effective_value(Kind.AGILITY)))
+
+func get_accuracy() -> int:
+	return 80 + int(round(2.0 * get_effective_value(Kind.PERCEPTION)))
+
+func get_dodge() -> int:
+	return 10 + int(round(2.0 * get_effective_value(Kind.AGILITY)))
+
+func get_crit_chance() -> int:
+	return 7 + int(round(get_effective_value(Kind.PERCEPTION)))
+
+func get_damage_bonus() -> int:
+	return 5 + int(round(get_effective_value(Kind.STRENGTH)))
+
+func get_support_power() -> int:
+	return 5 + int(round(get_effective_value(Kind.INTELLECT)))
+
+## Ateş altında sükûnet: kırılmış bir savaşçının emri reddetme ihtimalinden
+## düşülen puan (bkz. CombatEncounter._try_refuse_order).
+##
+## Karizma'nın savaşta tek karşılığı buydu - hiçbiri yoktu. Altı stattan
+## beşi savaşa bir şey veriyor, Karizma hiçbir şey vermiyordu; Kalem
+## Efendisi'nin afinitesinin yarısı olduğu için o sınıfın seviye
+## puanlarının yarısı savaşta ölü harcamaydı.
+##
+## Çözümün şekli muadillerden geliyor. Wartales'in Willpower'ı da seviyeyle
+## büyümüyor ama ölü değil: krit, moralin savaş başındaki zamanlaması ve
+## bir ölüm kurtarması veriyor. Dump-stat literatürü de aynı şeyi söylüyor -
+## Karizma D&D'de *moral, tepki ve tayfa sistemleri önemsizleşince* öldü,
+## reçete o sistemleri canlandırmak. Wayborne'da o sistemler zaten canlı
+## (stres, kırılma, emir reddi), o yüzden Karizma yeni bir sayıya değil
+## onlara bağlanıyor.
+func get_composure() -> int:
+	return int(round(1.5 * get_effective_value(Kind.CHARISMA)))
+
+## Zırh (PROT): gelen hasarı yüzde olarak düşürür (bkz.
+## CombatUnit.apply_damage). Darkest Dungeon'daki PROT'un karşılığı.
+##
+## Taban 0, yani statı 5'te duran taze bir karakter bu sistem yokmuş gibi
+## davranır - dosyadaki bütün türetilmiş formüllerin kuralı bu ve ölçülmüş
+## kazanma oranı tablolarını bozmamanın tek yolu. Katsayı bilerek küçük:
+## Dayanıklılığı 15'e çıkaran biri %10 civarında azaltma alır, ki
+## `CombatUnit.MAX_PROT` tavanının çok altında. Hasarı tamamen kesen bir
+## stat, savaşı silmek demektir (aynı gerekçe pazarlığın tabanında da var).
+func get_protection() -> int:
+	return maxi(0, int(round(1.2 * get_effective_value(Kind.ENDURANCE))))
+
+## Durum efekti dirençleri (kanama / zehir / sersemletme). Üçü de
+## Dayanıklılık'tan besleniyor: bedenin dayanması meselesi. Karizma'ya
+## bağlamak olmazdı, ona ateş altında sükûnet zaten verildi (bkz.
+## get_composure) ve iki sistem aynı stata binerse ikisi de ölçülemez
+## hâle gelir.
+##
+## Taban `CombatUnit.DEFAULT_STATUS_RESIST` ile aynı olmak zorunda değil
+## ama aynı gerekçeyi taşıyor: sıfır direnç her vuruşta kanamak demek,
+## yani kanama bir seçenek olmaktan çıkıp her saldırıya binen bir ek
+## hasara dönüşür. Katsayılar farklı, çünkü zehir kanamadan daha zor
+## dirençlenir (DD'de de öyle) ve sersemletmeye direnç en değerlisi -
+## kaybedilen bir tur, alınan hasardan pahalıdır.
+func get_bleed_resist() -> int:
+	return 20 + int(round(2.2 * get_effective_value(Kind.ENDURANCE)))
+
+func get_blight_resist() -> int:
+	return 20 + int(round(1.8 * get_effective_value(Kind.ENDURANCE)))
+
+func get_stun_resist() -> int:
+	return 20 + int(round(1.4 * get_effective_value(Kind.ENDURANCE)))
+
+func to_dict() -> Dictionary:
+	return {
+		"strength": strength,
+		"agility": agility,
+		"endurance": endurance,
+		"intellect": intellect,
+		"perception": perception,
+		"charisma": charisma,
+		"wisdom": wisdom,
+		"faith": faith,
+	}
+
+## Eksik "wisdom"/"faith" (Faz 17 öncesi kayıtlar) tabana düşer - yeni bir
+## migrasyon kancası gerekmiyor, çünkü BASE_VALUE zaten "bu sistem hiç
+## yokmuş gibi davran" değeri (bkz. effective_value(5) == 0).
+static func from_dict(data: Dictionary) -> CharacterStats:
+	var stats := CharacterStats.new()
+	stats.strength = int(data.get("strength", BASE_VALUE))
+	stats.agility = int(data.get("agility", BASE_VALUE))
+	stats.endurance = int(data.get("endurance", BASE_VALUE))
+	stats.intellect = int(data.get("intellect", BASE_VALUE))
+	stats.perception = int(data.get("perception", BASE_VALUE))
+	stats.charisma = int(data.get("charisma", BASE_VALUE))
+	stats.wisdom = int(data.get("wisdom", BASE_VALUE))
+	stats.faith = int(data.get("faith", BASE_VALUE))
+	return stats
