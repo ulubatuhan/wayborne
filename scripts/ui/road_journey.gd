@@ -2491,6 +2491,8 @@ func _finish_journey() -> void:
 		_arrive_button.visible = true
 
 func _on_arrive_pressed() -> void:
+	# Şehrin gökyüzü varılan saatten (bkz. GameSession.last_clock_hour).
+	_session.last_clock_hour = _clock.get_hour_of_day()
 	var payout: Dictionary = _session.finish_journey()
 	_arrive_button.visible = false
 	_render_arrival_summary(payout)

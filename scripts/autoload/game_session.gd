@@ -486,6 +486,12 @@ const FEAST_STRESS_RELIEF: int = 22
 ## sayacı sıfırlayan bir sömürü olurdu.
 var last_feast_day: int = -1
 
+## Son seferin bittiği saat (0-24). Şehrin ve şehir dışının gökyüzü bunu
+## okuyor: akşam varılan şehir öğle güneşinde görünmesin. Kayda yazılıyor,
+## yoksa yeniden yüklemek şehrin saatini değiştirirdi. Yeni oyunun
+## varsayılanı seferin başladığı şafak.
+var last_clock_hour: float = JourneyClock.START_HOUR
+
 func has_feasted_today() -> bool:
 	return last_feast_day == total_days_elapsed
 
@@ -2557,6 +2563,7 @@ func to_save_dict() -> Dictionary:
 		"leader_since_day": leader_since_day,
 		"ledger": ledger.to_array(),
 		"last_feast_day": last_feast_day,
+		"last_clock_hour": last_clock_hour,
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
 		"equipment_inventory": equipment_inventory.duplicate(),
@@ -2704,6 +2711,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	leader_since_day = maxi(0, int(data.get("leader_since_day", 0)))
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
+	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	_fulfilled_commission_starts = {}
 	for kind_id in (data.get("fulfilled_commission_starts", {}) as Dictionary):
 		_fulfilled_commission_starts[int(kind_id)] = int(data["fulfilled_commission_starts"][kind_id])

@@ -69,10 +69,14 @@ var _area: Rect2 = Rect2()
 var _ground_y: float = 0.0
 var _seed: int = 0
 var _layer: String = LAYER_BACK
+## Şehir dışı yürüyüş alanının gökyüzü de varış saatinden (bkz. CityView).
+var _hour: float = 12.0
 
 func setup(
-	area: Rect2, ground_y: float, city_id: String, layer: String = LAYER_BACK
+	area: Rect2, ground_y: float, city_id: String, layer: String = LAYER_BACK,
+	hour_of_day: float = 12.0
 ) -> void:
+	_hour = hour_of_day
 	_area = area
 	_ground_y = ground_y
 	_layer = layer
@@ -88,7 +92,7 @@ func _draw() -> void:
 	if _layer == LAYER_FRONT:
 		_draw_front()
 		return
-	var sky := ArtPalette.sky(ArtPalette.PHASE_DAY)
+	var sky := TravelBand.sky_for_hour(_hour)
 	var colors := ArtPalette.terrain(BIOME)
 	var haze := Color(sky.haze)
 
@@ -122,6 +126,11 @@ func _draw() -> void:
 
 	_draw_road()
 	_draw_flora(colors, haze)
+	# Arka katman figürlerin altında: gece örtüsü manzarayı karartıyor,
+	# kervan ise ateş başındaki gibi önde okunuyor.
+	var wash := TravelBand.night_wash_for_hour(_hour)
+	if wash.a > 0.0:
+		draw_rect(_area, wash)
 
 ## Kervanın yürüdüğü yol: iki yanında koyu bank, üstünde tekerlek izleri.
 ## Yolun okunması banklardan geliyor, kendi renginden değil (aynı ders

@@ -40,6 +40,12 @@ const PHASE_BOUNDS: Array = [
 	[20.0, Phase.NIGHT],
 ]
 
+## Gecenin koyulaştığı ve açıldığı saatler (bkz. darkness_for_hour).
+const DUSK_DARK_FROM: float = 17.0
+const DUSK_DARK_FULL: float = 21.0
+const DAWN_DARK_FULL: float = 4.0
+const DAWN_DARK_UNTIL: float = 7.0
+
 ## Seferin başından beri geçen toplam saat. Gün sayısı bundan türetilir -
 ## iki ayrı sayaç tutmak ikisinin ayrışması demekti.
 var total_hours: float = START_HOUR
@@ -107,7 +113,18 @@ func get_hour_of_day() -> float:
 	return fposmod(total_hours, HOURS_PER_DAY)
 
 func get_phase() -> Phase:
-	var hour := get_hour_of_day()
+	return phase_for_hour(get_hour_of_day())
+
+## Evrenin içinde ne kadar ilerlediğimiz (0.0-1.0) - arka plan renklerini
+## evreler arasında yumuşak geçirmek için (bkz. gündüz/gece katmanı).
+func get_phase_progress() -> float:
+	return phase_progress_for_hour(get_hour_of_day())
+
+## Saatten evre - statik, çünkü şehir de (varış saatinden) aynı soruyu
+## soruyor ve saatin kendisi o an ortada yok. İki kopya iki farklı akşam
+## demekti.
+static func phase_for_hour(hour_of_day: float) -> Phase:
+	var hour := fposmod(hour_of_day, HOURS_PER_DAY)
 	# Gece gün dönümünü aştığı için önce onu eliyoruz.
 	if hour < PHASE_BOUNDS[0][0] or hour >= PHASE_BOUNDS[PHASE_BOUNDS.size() - 1][0]:
 		return Phase.NIGHT
@@ -117,10 +134,21 @@ func get_phase() -> Phase:
 			result = bound[1]
 	return result
 
-## Evrenin içinde ne kadar ilerlediğimiz (0.0-1.0) - arka plan renklerini
-## evreler arasında yumuşak geçirmek için (bkz. gündüz/gece katmanı).
-func get_phase_progress() -> float:
-	var hour := get_hour_of_day()
+## Gecenin koyuluğu (0-1): gündüz 0, 21:00-04:00 tam 1, arada doğrusal.
+## Gökyüzü paletinden türetilemiyor - gece evresi dokuz saat boyunca
+## şafağa doğru karıştığı için saat 02:00'de palet zaten açılmış oluyor.
+static func darkness_for_hour(hour_of_day: float) -> float:
+	var hour := fposmod(hour_of_day, HOURS_PER_DAY)
+	if hour >= DUSK_DARK_FROM and hour < DUSK_DARK_FULL:
+		return (hour - DUSK_DARK_FROM) / (DUSK_DARK_FULL - DUSK_DARK_FROM)
+	if hour >= DUSK_DARK_FULL or hour < DAWN_DARK_FULL:
+		return 1.0
+	if hour < DAWN_DARK_UNTIL:
+		return 1.0 - (hour - DAWN_DARK_FULL) / (DAWN_DARK_UNTIL - DAWN_DARK_FULL)
+	return 0.0
+
+static func phase_progress_for_hour(hour_of_day: float) -> float:
+	var hour := fposmod(hour_of_day, HOURS_PER_DAY)
 	var start := 0.0
 	var end := 0.0
 	if hour < PHASE_BOUNDS[0][0]:

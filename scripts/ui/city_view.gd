@@ -81,7 +81,10 @@ const ROOF_COLORS: Array[Color] = [ROOF_TILE, ROOF_THATCH, ROOF_SLATE]
 ## gibi duruyordu. Buradaki her değer yolun kendi kurallarının şehirdeki
 ## karşılığı: gökyüzü `ArtPalette`'ten, sırtlar `ArtDraw.ridge`'den,
 ## yere basan her şeyin altında `ArtDraw.contact_shadow`.
-const SKY_PHASE: String = ArtPalette.PHASE_DAY
+## Gökyüzü sabit bir öğle değil, kervanın gerçekten vardığı saat
+## (`GameSession.last_clock_hour`): yol akşam bittiyse kapıdan akşam
+## girilir. Oturum yoksa (ekran görüntüsü araçları) öğle.
+const FALLBACK_HOUR: float = 12.0
 const HORIZON_RATIO: float = 0.30
 
 ## Ufuktaki sırtlar: taban y'si, genlik, dalga boyu, pusa karışma payı -
@@ -366,13 +369,22 @@ func _draw() -> void:
 		_draw_building(index, index == _hovered)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+	var wash := TravelBand.night_wash_for_hour(_current_hour())
+	if wash.a > 0.0:
+		draw_rect(Rect2(Vector2.ZERO, area.size), wash)
 	ArtDraw.vignette(self, area, 0.09)
+
+func _current_hour() -> float:
+	return FALLBACK_HOUR if _session == null else _session.last_clock_hour
+
+func _current_sky() -> Dictionary:
+	return TravelBand.sky_for_hour(_current_hour())
 
 ## Kasabanın durduğu dünya. Buradan önce bu ekranda düz bir gradyan
 ## vardı - gökyüzü de ufuk da zemin de aynı iki rengin arasındaydı, yani
 ## kasaba hiçbir yerde durmuyordu.
 func _draw_surroundings(area: Rect2) -> void:
-	var sky := ArtPalette.sky(SKY_PHASE)
+	var sky := _current_sky()
 	var haze := Color(sky.haze)
 	var horizon := area.size.y * HORIZON_RATIO
 
