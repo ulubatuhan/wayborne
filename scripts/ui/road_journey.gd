@@ -594,6 +594,12 @@ func _build_bottom_bar() -> PanelContainer:
 	_help_button.pressed.connect(_show_help)
 	row.add_child(_help_button)
 
+	# Defterin tamamı: yardım katmanı gibi bir okuma, zamanı durdurmuyor.
+	var waybook_button := Button.new()
+	waybook_button.text = tr("UI_WAYBOOK_OPEN")
+	waybook_button.pressed.connect(_show_waybook)
+	row.add_child(waybook_button)
+
 	_log_button = Button.new()
 	_log_button.text = tr("EVT_TEST_LOG")
 	_log_button.toggle_mode = true
@@ -730,6 +736,14 @@ func _on_status_closed() -> void:
 ## mahsus otomatik gösterimin bayrağına dokunmadan, isteğe bağlı yeniden
 ## açılıyor. Zamanı durdurmuyor - bu bir okuma, bir karar değil, log ve
 ## durum katmanlarıyla aynı muamele (bkz. `_can_time_flow`).
+const WAYBOOK_KEY: Key = KEY_L
+
+func _show_waybook() -> void:
+	for child in get_children():
+		if child is WaybookPanel:
+			return
+	add_child(WaybookPanel.new().setup(_session))
+
 func _show_help() -> void:
 	for child in get_children():
 		if child is OnboardingPanel:
@@ -864,6 +878,11 @@ func _input(event: InputEvent) -> void:
 
 	if key_event.keycode == KEY_F3:
 		_show_help()
+		accept_event()
+		return
+
+	if key_event.keycode == WAYBOOK_KEY:
+		_show_waybook()
 		accept_event()
 		return
 
@@ -2024,8 +2043,15 @@ func _fallen_leader_line(fallen_name: String) -> String:
 ## Kervanı sürecek kimse kalmadı. Ana menüye dönmekten başka bir çıkış
 ## sunulmuyor ve kayıt silinmiyor - "Devam Et"in kapalı bir seferi
 ## yüklememesi için `RUN_OVER_FLAG` kayda giriyor (bkz. GameSession).
+const RUN_OVER_BOOK_HEIGHT: float = 220.0
+
 func _show_run_over() -> void:
 	_clear_children(_arrival_panel)
+	# Defter kapandı ve bağlandı: adı taşıyacak kimse kalmadı. Görselde yazı
+	# yok, son söz aşağıdaki canlı metin.
+	var book := WaybookTheme.picture("m3_closed.png", RUN_OVER_BOOK_HEIGHT)
+	book.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_arrival_panel.add_child(book)
 	var title := Label.new()
 	title.text = tr("UI_ROAD_RUN_OVER_TITLE")
 	_arrival_panel.add_child(title)

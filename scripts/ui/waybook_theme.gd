@@ -92,6 +92,20 @@ static func get_font() -> Font:
 static func texture(file_name: String) -> Texture2D:
 	return load(ART_DIR + file_name) as Texture2D
 
+## Tek bir Waybook resmi (ikon, mühür, defter nesnesi) verilen yükseklikte,
+## oranı korunarak. Ekranlar resmi hep bu kapıdan alıyor ki boyut ve
+## germe kuralı her yerde aynı olsun.
+static func picture(file_name: String, height: float) -> TextureRect:
+	var rect := TextureRect.new()
+	var tex := texture(file_name)
+	rect.texture = tex
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var aspect := 1.0 if tex == null else tex.get_size().x / maxf(tex.get_size().y, 1.0)
+	rect.custom_minimum_size = Vector2(height * aspect, height)
+	return rect
+
 static func build() -> Theme:
 	var theme := Theme.new()
 	_build_panels(theme)

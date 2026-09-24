@@ -46,6 +46,10 @@ func _ready() -> void:
 	_party_button.pressed.connect(_on_party_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_help_button.pressed.connect(_show_help)
+	var waybook_button := Button.new()
+	waybook_button.text = tr("UI_WAYBOOK_OPEN")
+	waybook_button.pressed.connect(_show_waybook)
+	_help_button.get_parent().add_child(waybook_button)
 	_refresh_title()
 	_build_spots()
 	_build_brief()
@@ -91,10 +95,21 @@ func _show_help() -> void:
 			return
 	add_child(OnboardingPanel.new())
 
+## Defterin tamamı (bkz. WaybookPanel) - yolda da aynı panel, aynı tuş.
+func _show_waybook() -> void:
+	for child in get_children():
+		if child is WaybookPanel:
+			return
+	add_child(WaybookPanel.new().setup(_session))
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F3:
 			_show_help()
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode == KEY_L:
+			_show_waybook()
 			get_viewport().set_input_as_handled()
 			return
 	if event.is_action_pressed("ui_cancel"):

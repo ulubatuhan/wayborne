@@ -34,11 +34,20 @@ extends Control
 ## başına yetmezdi, çünkü sorun hangi olay türünün tanındığı değil, olayın
 ## hiç ulaşmamasıydı.
 
-## Başlık ve butonların arkasındaki karartma. Manzaranın üstüne çıplak
-## metin koymak, gökyüzünün açık olduğu yerde başlığı okunmaz yapıyor -
-## olay kartının kendi opak kutusunu taşımasıyla aynı gerekçe.
-const SCRIM_PAD: Vector2 = Vector2(56.0, 40.0)
-const SCRIM_COLOR: Color = Color(0.04, 0.035, 0.045, 0.62)
+## Menü bir defterin sayfasında duruyor (bkz. Waybook UI Rules): başlık
+## evresinde kapalı kapak, ilk girdide kapak açılıyor ve düğmeler sağ
+## sayfada. Defter manzaranın üstünde kendi zeminini taşıyor - eski düz
+## karartma kutusunun işini artık o yapıyor.
+const BOOK_WIDTH_RATIO: float = 0.5
+const BOOK_MAX_WIDTH: float = 1000.0
+const BOOK_CENTER: Vector2 = Vector2(0.36, 0.40)
+## Sayfa ve plaka bölgeleri, dokunun kendi boyutuna oranla (m2_spread.png /
+## m1_cover.png üstünde ölçüldü). Yazı bu dikdörtgenlerin içinde kalıyor.
+const SPREAD_LEFT_PAGE: Rect2 = Rect2(0.225, 0.15, 0.17, 0.56)
+const SPREAD_RIGHT_PAGE: Rect2 = Rect2(0.555, 0.13, 0.26, 0.60)
+const COVER_NAMEPLATE: Rect2 = Rect2(0.356, 0.268, 0.369, 0.116)
+const COVER_LOWER: Rect2 = Rect2(0.14, 0.62, 0.72, 0.18)
+const COVER_OPEN_SECONDS: float = 0.35
 
 ## Davet metninin nabız hızı ve parlaklık aralığı - `PulseBar`'ın "değişimi
 ## göster" mantığının aynısı, burada sürekli tekrar eden bir davet için.
@@ -74,7 +83,10 @@ static var _title_shown_this_run: bool = false
 @onready var _quit_button: Button = $VBoxContainer/QuitButton
 
 var _confirm_dialog: ConfirmationDialog
-var _scrim: ColorRect
+var _book: Control
+var _cover: TextureRect
+var _spread: TextureRect
+var _left_page: VBoxContainer
 var _prompt_label: Label
 var _prompt_tween: Tween
 var _in_title_phase: bool = false
@@ -102,7 +114,7 @@ func _ready() -> void:
 	else:
 		_begin_title_phase()
 
-## Manzara ve karartma butonların **arkasına** giriyor: `add_child` onları
+## Manzara ve defter butonların **arkasına** giriyor: `add_child` onları
 ## en sona koyar, `move_child(…, 0)` en başa. Sahne dosyasına eklemek
 ## yerine kodda kurulmalarının sebebi `PulseBar`/`OnboardingPanel` ile
 ## aynı - sahnesiz bir bileşen tek bir yerde tanımlı kalıyor.
@@ -110,21 +122,112 @@ func _build_backdrop() -> void:
 	var backdrop := MenuBackdrop.new()
 	add_child(backdrop)
 	move_child(backdrop, 0)
+	_build_book()
+	get_viewport().size_changed.connect(_layout_book)
+	_layout_book()
 
-	_scrim = ColorRect.new()
-	_scrim.color = SCRIM_COLOR
-	_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_scrim)
-	move_child(_scrim, 1)
-	_fit_scrim()
-	# Butonların kutusu yerleşim geçişinden önce doğru boyunu bilmiyor
-	# (dil değişince metin de değişiyor), o yüzden karartma onu izliyor.
-	_menu_box.resized.connect(_fit_scrim)
-	_menu_box.item_rect_changed.connect(_fit_scrim)
+## Kapak ve açık sayfa aynı `_book` düğümünün çocukları. Düğmelerin kutusu
+## sağ sayfaya taşınıyor, başlık sol sayfaya - sahne dosyasındaki düğüm
+## yolları (`$VBoxContainer/...`) değişmiyor, yalnızca ebeveynleri.
+func _build_book() -> void:
+	_book = Control.new()
+	_book.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_book)
+	move_child(_book, 1)
 
-func _fit_scrim() -> void:
-	_scrim.position = _menu_box.position - SCRIM_PAD
-	_scrim.size = _menu_box.size + SCRIM_PAD * 2.0
+	_spread = _book_texture("m2_spread.png")
+	_book.add_child(_spread)
+	_cover = _book_texture("m1_cover.png")
+	_book.add_child(_cover)
+
+	_left_page = VBoxContainer.new()
+	_left_page.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_left_page.add_theme_constant_override("separation", 6)
+	_spread.add_child(_left_page)
+	var title := $VBoxContainer/TitleLabel as Label
+	title.reparent(_left_page, false)
+	title.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
+	title.add_theme_font_size_override("font_size", 34)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for line in _lineage_lines():
+		_left_page.add_child(_page_label(line, false))
+
+	_menu_box.reparent(_spread, false)
+	_menu_box.add_theme_constant_override("separation", 10)
+	_menu_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
+
+	var plate := _page_label("WAYBORNE", true)
+	plate.name = "Nameplate"
+	# Tek kelime: sarılırsa harf harf bölünüp plakadan taşıyordu.
+	plate.autowrap_mode = TextServer.AUTOWRAP_OFF
+	plate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	plate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_cover.add_child(plate)
+	var lower := VBoxContainer.new()
+	lower.name = "CoverLower"
+	lower.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for line in _lineage_lines():
+		var label := _page_label(line, false)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_color_override("font_color", ArtPalette.UI_TEXT)
+		lower.add_child(label)
+	_cover.add_child(lower)
+
+func _book_texture(file_name: String) -> TextureRect:
+	var rect := TextureRect.new()
+	rect.texture = WaybookTheme.texture(file_name)
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_SCALE
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rect
+
+func _page_label(text: String, engraved: bool) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
+	if engraved:
+		label.add_theme_font_size_override("font_size", 18)
+	return label
+
+## Kapağın ve sol sayfanın söylediği: bu defteri kim taşıyor. Otomatik
+## kayıt yoksa kapak boş bir defter olduğunu söylüyor - isim ve kuşak
+## canlı metin, görselde hiçbir yazı yok (Localization Rules).
+func _lineage_lines() -> Array[String]:
+	var summary := SaveManager.get_summary(SaveManager.AUTOSAVE_SLOT)
+	var lines: Array[String] = []
+	if summary.is_empty() or String(summary.get("caravan_name", "")).is_empty():
+		lines.append(tr("UI_WAYBOOK_UNWRITTEN"))
+		return lines
+	lines.append(String(summary["caravan_name"]))
+	lines.append(tr("UI_WAYBOOK_GENERATION") % int(summary.get("lineage_generation", 1)))
+	lines.append(tr("UI_WAYBOOK_DAYS") % int(summary.get("total_days_elapsed", 0)))
+	return lines
+
+## Defterin boyu ekrana göre; kapak açık defterin sağ yarısının üstünde
+## duruyor, sırtı ortada - açılınca sola doğru katlanıyor.
+func _layout_book() -> void:
+	var view := get_viewport_rect().size
+	var spread_size := _spread.texture.get_size()
+	var cover_size := _cover.texture.get_size()
+	var width := minf(view.x * BOOK_WIDTH_RATIO, BOOK_MAX_WIDTH)
+	var height := width * spread_size.y / spread_size.x
+	_spread.size = Vector2(width, height)
+	_spread.position = view * BOOK_CENTER - _spread.size * 0.5
+	var cover_height := height * 0.98
+	_cover.size = Vector2(cover_height * cover_size.x / cover_size.y, cover_height)
+	_cover.position = Vector2(_spread.position.x + width * 0.5, _spread.position.y + (height - cover_height) * 0.5)
+	_cover.pivot_offset = Vector2(0.0, cover_height * 0.5)
+	_place(_left_page, SPREAD_LEFT_PAGE, _spread.size)
+	_place(_menu_box, SPREAD_RIGHT_PAGE, _spread.size)
+	_place(_cover.get_node("Nameplate") as Control, COVER_NAMEPLATE, _cover.size)
+	_place(_cover.get_node("CoverLower") as Control, COVER_LOWER, _cover.size)
+
+func _place(control: Control, ratio: Rect2, parent_size: Vector2) -> void:
+	control.position = ratio.position * parent_size
+	control.size = ratio.size * parent_size
+	control.custom_minimum_size = Vector2(ratio.size.x * parent_size.x, 0.0)
 
 ## --- "Bir tuşa basın" evresi ---
 
@@ -144,7 +247,8 @@ func _begin_title_phase() -> void:
 	_menu_box.modulate.a = 0.0
 	_set_buttons_enabled(false)
 	_set_buttons_mouse_ignore(true)
-	_scrim.visible = false
+	_spread.modulate.a = 0.0
+	_cover.visible = true
 	set_process_unhandled_input(true)
 
 	_prompt_label = Label.new()
@@ -181,7 +285,8 @@ func _show_menu_immediately() -> void:
 	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_menu_box.modulate.a = 1.0
 	_set_buttons_enabled(true)
-	_scrim.visible = true
+	_cover.visible = false
+	_spread.modulate.a = 1.0
 
 func _set_buttons_enabled(enabled: bool) -> void:
 	_continue_button.disabled = not enabled
@@ -249,10 +354,13 @@ func _begin_transition() -> void:
 
 	_reveal_menu()
 
+## Kapak sırtından sola katlanıyor (x ölçeği 1 → 0), sonra açık sayfa
+## beliriyor. Aynı sahne, aynı manzara - yalnızca defter açılıyor.
 func _reveal_menu() -> void:
-	_scrim.visible = true
-	_scrim.modulate.a = 0.0
-	create_tween().tween_property(_scrim, "modulate:a", 1.0, REVEAL_SECONDS)
+	var open := create_tween()
+	open.tween_property(_cover, "scale:x", 0.0, COVER_OPEN_SECONDS).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	open.tween_callback(func() -> void: _cover.visible = false)
+	open.tween_property(_spread, "modulate:a", 1.0, REVEAL_SECONDS)
 
 	# Kutunun kendisi zaten görünürdü (bkz. `_begin_title_phase`'in notu) -
 	# yalnızca saydamlığı kaldırılıyor, çocukların gerçek dizilimine hiç

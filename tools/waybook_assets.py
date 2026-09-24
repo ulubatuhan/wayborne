@@ -203,7 +203,143 @@ def phase1() -> None:
         save(rgba, name, (1280, 720))
 
 
+def split_components(rgba: np.ndarray, count: int, min_area: int = 400, grow: int = 6) -> list[np.ndarray]:
+    """Split a sheet holding several separate pieces into `count` crops,
+    ordered left to right. Pieces are found as connected alpha regions; the
+    largest `count` win, so specks of stray ink do not become a piece."""
+    mask = rgba[..., 3] > 24
+    labels, n = ndimage.label(ndimage.binary_dilation(mask, iterations=grow) if grow else mask)
+    areas = ndimage.sum(mask, labels, range(1, n + 1))
+    order = [i + 1 for i in np.argsort(areas)[::-1] if areas[i] >= min_area][:count]
+    boxes = []
+    for label in order:
+        ys, xs = np.nonzero(labels == label)
+        boxes.append((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
+    boxes.sort()
+    out = []
+    for (x0, y0, x1, y1) in boxes:
+        out.append(crop_to_alpha(rgba[y0:y1, x0:x1].copy()))
+    return out
+
+
+def icon(src: str, name: str, size: int = 128) -> None:
+    rgba = crop_to_alpha(key(_load(src)))
+    h, w = rgba.shape[:2]
+    scale = size / max(h, w)
+    save(rgba, name, (max(1, round(w * scale)), max(1, round(h * scale))))
+
+
+def background(src: str, name: str) -> None:
+    """A full-bleed scene. Some arrived as a torn page on a white sheet;
+    the white outside the torn edge is filled with ink-dark so the page
+    reads as lying on a dark desk instead of floating on a white card."""
+    rgb = _load(src)
+    white = rgb.min(axis=2) > 232
+    labels, _ = ndimage.label(white)
+    border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])))
+    border.discard(0)
+    outside = np.isin(labels, list(border))
+    outside = ndimage.binary_dilation(outside, iterations=2)
+    rgb[outside] = (14, 12, 11)
+    img = Image.fromarray(rgb.astype(np.uint8), "RGB")
+    os.makedirs(OUT, exist_ok=True)
+    img.save(os.path.join(OUT, name), quality=86, optimize=True)
+    print(f"  {name:28s} {img.size[0]}x{img.size[1]} (outside filled: {int(outside.mean() * 100)}%)")
+
+
+def phase2plus() -> None:
+    print("Phase 2+ - moments, screens, HUD, combat, people, goods")
+    # Book objects (menu, run over) and the ledger.
+    icon("M1_waybook_cover_closed.jpg", "m1_cover.png", 560)
+    icon("M2_waybook_open_spread.jpg", "m2_spread.png", 900)
+    icon("M3_run_over_screen.jpg", "m3_closed.png", 560)
+    background("L1_ledger_spread.jpg", "l1_ledger.jpg")
+    rgba = crop_to_alpha(key(_load("L2_generation_divider.jpg")))
+    save(rgba, "l2_ribbon.png", scale_to_width(rgba, 420))
+    rgba = crop_to_alpha(key(_load("R9_name_strike_stroke.jpg")))
+    save(rgba, "r9_strike.png", scale_to_width(rgba, 480))
+    icon("C1_mourning_crepe.jpg", "c1_crepe.png", 160)
+    icon("P1_portrait_cameo_frame.jpg", "p1_cameo.png", 220)
+
+    # Backgrounds.
+    for src, name in [("B1_guild_bg.jpg", "b1_guild.jpg"), ("B2_market_bg.jpg", "b2_market.jpg"),
+                      ("B3_tavern_bg.jpg", "b3_tavern.jpg"), ("B4_caravan_yard_bg.jpg", "b4_yard.jpg"),
+                      ("B5_church_bg.jpg", "b5_church.jpg"), ("B6_world_map_parchment.jpg", "b6_map.jpg"),
+                      ("B7_caravan_planner_bg.jpg", "b7_planner.jpg"), ("B8_recruit_bg.jpg", "b8_recruit.jpg"),
+                      ("B9_character_party_bg.jpg", "b9_tent.jpg")]:
+        background(src, name)
+    icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
+
+    # Road HUD.
+    for src, name in [("R1_hud_top_strap.jpg", "r1_strap_top.png"), ("R2_hud_bottom_strap.jpg", "r2_strap_bottom.png")]:
+        rgba = crop_to_alpha(key(_load(src)))
+        save(rgba, name, scale_to_width(rgba, 640))
+    dial, needle = split_components(crop_to_alpha(key(_load("R3_time_dial_face.jpg"))), 2)
+    save(dial, "r3_dial.png", (96, round(dial.shape[0] * 96 / dial.shape[1])))
+    save(needle, "r3_needle.png", (round(needle.shape[1] * 90 / needle.shape[0]), 90))
+    rgba = crop_to_alpha(key(_load("R4_pulsebar_vial_frame.jpg")))
+    save(rgba, "r4_vial.png", scale_to_width(rgba, 240))
+    for src, name in [("R4a_pulsebar_icon_morale.jpg", "r4a_morale.png"), ("R4b_pulsebar_icon_stress.jpg", "r4b_stress.png"),
+                      ("R4c_pulsebar_icon_danger.jpg", "r4c_danger.png"), ("R4d_pulsebar_icon_stamina.jpg", "r4d_stamina.png"),
+                      ("R6a_attention_icon_front.jpg", "r6a_front.png"), ("R6b_attention_icon_wagons.jpg", "r6b_wagons.png"),
+                      ("R6c_attention_icon_rear.jpg", "r6c_rear.png"), ("R7a_road_signal_wheel.jpg", "r7a_wheel.png"),
+                      ("R7b_road_signal_straggler.jpg", "r7b_straggler.png"), ("R7c_road_signal_smoke.jpg", "r7c_smoke.png"),
+                      ("R8a_meal_bowl_full.jpg", "r8a_bowl_full.png"), ("R8b_meal_bowl_empty.jpg", "r8b_bowl_empty.png")]:
+        icon(src, name, 96)
+    rgba = crop_to_alpha(key(_load("R5_event_card_parchment.jpg")))
+    save(rgba, "r5_parchment.png", scale_to_width(rgba, 420))
+
+    # Combat.
+    rgba = crop_to_alpha(key(_load("K1_combat_slot_frame.jpg"), seeds=[(728, 360)]))
+    save(rgba, "k1_slot.png", scale_to_width(rgba, 150))
+    rgba = crop_to_alpha(key(_load("K2_deaths_door_overlay.jpg"), seeds=[(728, 360)]))
+    save(rgba, "k2_door.png", scale_to_width(rgba, 150))
+    rgba = crop_to_alpha(key(_load("K3_hp_stress_bar_frame.jpg"), seeds=[(176, 1464)]))
+    save(rgba, "k3_bar.png", scale_to_width(rgba, 240))
+    for src, name in [("K4a_status_bleed.jpg", "k4a_bleed.png"), ("K4b_status_blight.jpg", "k4b_blight.png"),
+                      ("K4c_status_stun.jpg", "k4c_stun.png"), ("K4d_status_stun_resist.jpg", "k4d_stun_resist.png"),
+                      ("K4e_modifier_buff_rising.jpg", "k4e_buff.png"), ("K4f_modifier_debuff_falling.jpg", "k4f_debuff.png"),
+                      ("K6a_class_guard.jpg", "k6a_guard.png"), ("K6b_class_hunter.jpg", "k6b_hunter.png"),
+                      ("K6c_class_breaker.jpg", "k6c_breaker.png"), ("K6d_class_clerk.jpg", "k6d_clerk.png")]:
+        icon(src, name, 96)
+    # The two studs sit on one small plate, so they are one alpha region:
+    # split the plate down its middle instead.
+    plate = crop_to_alpha(key(_load("K5_rank_pips.jpg")))
+    half = plate.shape[1] // 2
+    filled, hollow = crop_to_alpha(plate[:, :half]), crop_to_alpha(plate[:, half:])
+    save(filled, "k5_pip_filled.png", (32, 32))
+    save(hollow, "k5_pip_hollow.png", (32, 32))
+    for piece, name in zip(split_components(crop_to_alpha(key(_load("K7_area_shift_glyphs.jpg"))), 4),
+                           ["k7_adjacent.png", "k7_all.png", "k7_push.png", "k7_pull.png"]):
+        h, w = piece.shape[:2]
+        save(piece, name, (round(w * 48 / h), 48))
+
+    # People.
+    virtue, affliction = split_components(crop_to_alpha(key(_load("P2_trait_tokens.jpg"))), 2)
+    save(virtue, "p2_virtue.png", (48, 48))
+    save(affliction, "p2_affliction.png", (48, 48))
+    for src, name in [("P3a_stat_strength.jpg", "p3_strength.png"), ("P3b_stat_agility.jpg", "p3_agility.png"),
+                      ("P3c_stat_endurance.jpg", "p3_endurance.png"), ("P3d_stat_intellect.jpg", "p3_intellect.png"),
+                      ("P3e_stat_perception.jpg", "p3_perception.png"), ("P3f_stat_charisma.jpg", "p3_charisma.png"),
+                      ("P3g_stat_wisdom.jpg", "p3_wisdom.png"), ("P3h_stat_faith.jpg", "p3_faith.png"),
+                      ("P4a_grievance_unfed.jpg", "p4_unfed.png"), ("P4b_grievance_benched.jpg", "p4_benched.png"),
+                      ("P4c_grievance_witnessed_death.jpg", "p4_witnessed_death.png"),
+                      ("P4d_grievance_passed_over.jpg", "p4_passed_over.png"),
+                      ("P5a_duty_guard.jpg", "p5_guard.png"), ("P5b_duty_scout.jpg", "p5_scout.png"),
+                      ("P5c_duty_quartermaster.jpg", "p5_quartermaster.png"), ("P5d_duty_wagoner.jpg", "p5_wagoner.png"),
+                      ("P5e_duty_crier.jpg", "p5_crier.png"), ("P5f_duty_herbalist.jpg", "p5_herbalist.png")]:
+        icon(src, name, 96)
+    rgba = crop_to_alpha(key(_load("P6_hunger_tally_stick.jpg")))
+    save(rgba, "p6_tally.png", scale_to_width(rgba, 240))
+
+    # Goods.
+    for item in ["bandage", "cloth", "fish", "furs", "grain", "honey", "jewelry", "potion",
+                 "provisions", "silk", "spice", "weapon", "wine"]:
+        icon(f"item_{item}.jpg", f"item_{item}.png", 96)
+
+
 if __name__ == "__main__":
     if not os.path.isdir(SRC):
         sys.exit("run from the repository root")
     phase1()
+    phase2plus()

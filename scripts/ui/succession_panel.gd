@@ -22,7 +22,7 @@ signal dismissed
 signal heir_chosen(heir)
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.85)
-const PANEL_WIDTH: float = 560.0
+const PANEL_WIDTH: float = 640.0
 const SELECTED_COLOR: Color = Color(1.0, 0.9, 0.6)
 const IDLE_COLOR: Color = Color(0.75, 0.72, 0.66)
 
@@ -30,6 +30,14 @@ var _candidates: Array[CharacterData] = []
 var _selected: CharacterData = null
 var _candidate_buttons: Array[Button] = []
 var _heir_label: Label = null
+var _heir_cameo: PortraitCameo = null
+
+## Düşenin adı büyük yazılıp üstü mürekkeple çiziliyor; seçilen varisin
+## portresi madalyonda; onay düğmesinin üstünde mühür (bkz. Waybook UI
+## Rules - geri alınamaz karar mühürlü cilt ve mühür taşır).
+const FALLEN_NAME_FONT_SIZE: int = 30
+const HEIR_CAMEO_HEIGHT: float = 120.0
+const SEAL_HEIGHT: float = 64.0
 
 func setup(
 	caravan_name: String, fallen_name: String, fallen_line: String,
@@ -83,6 +91,11 @@ func setup(
 
 	vbox.add_child(HSeparator.new())
 
+	var struck := StruckLine.new().setup(fallen_name, true)
+	struck.label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	struck.label.add_theme_font_size_override("font_size", FALLEN_NAME_FONT_SIZE)
+	vbox.add_child(struck)
+
 	var fallen_label := Label.new()
 	fallen_label.text = tr("UI_SUCCESSION_FALLEN") % fallen_name
 	fallen_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -112,11 +125,23 @@ func setup(
 		vbox.add_child(button)
 		_candidate_buttons.append(button)
 
+	var heir_row := HBoxContainer.new()
+	heir_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	heir_row.add_theme_constant_override("separation", 14)
+	vbox.add_child(heir_row)
+	_heir_cameo = PortraitCameo.new().setup(_selected, HEIR_CAMEO_HEIGHT)
+	heir_row.add_child(_heir_cameo)
 	_heir_label = Label.new()
-	_heir_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_heir_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_heir_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_heir_label.custom_minimum_size = Vector2(PANEL_WIDTH * 0.5, 0.0)
+	_heir_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_heir_label.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(_heir_label)
+	heir_row.add_child(_heir_label)
+
+	var seal := WaybookTheme.picture("g9_seal.png", SEAL_HEIGHT)
+	seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(seal)
 
 	var continue_button := Button.new()
 	continue_button.text = tr("UI_SUCCESSION_CONFIRM")
@@ -166,6 +191,8 @@ func _refresh_selection() -> void:
 		_candidate_buttons[index].modulate = SELECTED_COLOR if chosen else IDLE_COLOR
 	if _heir_label == null or _selected == null:
 		return
+	if _heir_cameo != null:
+		_heir_cameo.setup(_selected, HEIR_CAMEO_HEIGHT)
 	var text := tr("UI_SUCCESSION_HEIR") % _selected.character_name
 	if not _candidates.is_empty() and _selected != _candidates[0]:
 		text += "\n" + tr("UI_SUCCESSION_PASSED_OVER_WARNING") % _candidates[0].character_name
