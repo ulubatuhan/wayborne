@@ -404,6 +404,10 @@ func _resolve_on_target(unit: CombatUnit, skill: CombatSkill, target: CombatUnit
 	if skill.target_kind != CombatSkill.Target.ENEMY and skill.base_damage == 0:
 		_apply_skill_modifier(skill, target)
 		_emit_log(tr("CBT_LOG_SKILL") % [unit.display_name, skill.display_name])
+		# Kendine kaydırma ("Geri Adım") da buradan geçiyor: kaydırma eskiden
+		# yalnızca saldırı yolundaydı, adı yer değiştirmeyi vaat eden bir
+		# yetenek yerinde sayıyordu.
+		_apply_skill_shift(skill, target)
 		return
 
 	var hit_chance := clampi(
@@ -510,9 +514,10 @@ func _apply_skill_shift(skill: CombatSkill, target: CombatUnit) -> void:
 	for slot in alive.size():
 		alive[slot].position = slot + 1
 	_repack(side)
-	_emit_log(tr(
-		"CBT_LOG_PUSHED" if skill.shift_amount > 0 else "CBT_LOG_PULLED"
-	) % [target.display_name, target.position])
+	var key := "CBT_LOG_PUSHED" if skill.shift_amount > 0 else "CBT_LOG_PULLED"
+	if skill.target_kind == CombatSkill.Target.SELF:
+		key = "CBT_LOG_STEPPED_BACK" if skill.shift_amount > 0 else "CBT_LOG_STEPPED_FORWARD"
+	_emit_log(tr(key) % [target.display_name, target.position])
 
 func _status_name_key(kind: String) -> String:
 	match kind:
