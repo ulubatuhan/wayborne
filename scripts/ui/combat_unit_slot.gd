@@ -230,9 +230,9 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 
 	if bound_unit.on_deaths_door:
 		_add_badge(tr("UI_COMBAT_BADGE_DEATHS_DOOR"), DEATHS_DOOR_FIGURE)
-	if bound_unit.protection > 0:
+	if bound_unit.get_effective_protection() > 0:
 		_add_badge(
-			tr("UI_COMBAT_BADGE_PROT") % bound_unit.protection, Color(0.55, 0.62, 0.72)
+			tr("UI_COMBAT_BADGE_PROT") % bound_unit.get_effective_protection(), Color(0.55, 0.62, 0.72)
 		)
 	if bound_unit.is_stressed:
 		_add_badge(tr("UI_COMBAT_BADGE_STRESSED"), Color(0.78, 0.62, 0.35))

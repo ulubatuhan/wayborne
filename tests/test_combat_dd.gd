@@ -33,6 +33,8 @@ func run(t) -> void:
 	_test_dot_ticks_at_the_start_of_the_turn(t)
 	_test_endurance_buys_status_resistance(t)
 	_test_every_status_a_skill_can_apply_is_handled(t)
+	_test_every_modifier_stat_is_handled(t)
+	_test_prot_modifier_bends_the_damage_door(t)
 	_test_area_skills_never_beat_single_target(t)
 	_test_adjacent_hits_only_neighbours(t)
 	_test_random_targeting_never_wastes_a_turn(t)
@@ -670,6 +672,34 @@ func _test_every_status_a_skill_can_apply_is_handled(t) -> void:
 	# bir efekt tipinden farksızdır.
 	for kind in known:
 		t.ok(used.has(kind), "hiçbir yetenek '%s' uygulamıyor - ölü sistem" % kind)
+
+## Süreli değiştiricinin adı bilinmeyen bir sayıysa `_modifier_sum` onu hiç
+## okumaz - yetenek kullanılır, kayıtta görünür, hiçbir şey olmaz.
+func _test_every_modifier_stat_is_handled(t) -> void:
+	for skill in SkillCatalog.get_all_skills():
+		if not skill.has_modifier():
+			continue
+		t.ok(
+			CombatUnit.MODIFIER_STATS.has(skill.modifier_stat),
+			"%s tanınmayan bir değiştirici yazıyor: %s" % [skill.skill_id, skill.modifier_stat]
+		)
+
+## Zırh değiştiricisi tek hasar kapısından geçiyor ve zırhı hiçbir yönde
+## tavanın dışına itemiyor.
+func _test_prot_modifier_bends_the_damage_door(t) -> void:
+	var unit := CombatUnit.new()
+	unit.max_hp = 100
+	unit.current_hp = 100
+	unit.protection = 20
+	var base := unit.reduce_by_protection(20)
+	unit.apply_modifier("prot", -25, 2)
+	t.eq(unit.get_effective_protection(), 0, "kırılan zırh sıfırın altına inmez")
+	t.ok(unit.reduce_by_protection(20) > base, "kırılan zırhtan daha çok hasar geçer")
+	unit.apply_modifier("prot", 500, 2)
+	t.eq(unit.get_effective_protection(), CombatUnit.MAX_PROT, "zırh tavanı aşamaz")
+	unit.tick_modifiers()
+	unit.tick_modifiers()
+	t.eq(unit.get_effective_protection(), 20, "süre dolunca zırh eski hâline döner")
 
 # --- Alan hedefleme ve mevki kaydırma ---
 

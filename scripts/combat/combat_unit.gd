@@ -78,6 +78,13 @@ var source_character: CharacterData = null
 ## kapatması o sistemi silmek demektir (aynı gerekçe pazarlığın tabanında
 ## ve "sahipsiz görev asla ceza değildir" kuralında da var).
 const MAX_PROT: int = 80
+
+## Süreli değiştiricilerin bükebileceği sayılar. Bir yetenek bunların dışında
+## bir ad yazarsa değiştirici sessizce hiçbir şey yapmaz - bilinmeyen bir
+## durum türüyle aynı tuzak, o yüzden test_combat_dd katalogu bu listeye
+## karşı tarıyor. "prot" Kırıkçı'nın zırh kırmasının ve Sıra Neferi'nin
+## siper almasının tek kapısı.
+const MODIFIER_STATS: Array[String] = ["accuracy", "dodge", "damage", "prot"]
 ## Zırh ne olursa olsun vuran bir hamle en az bunu götürür.
 const MIN_DAMAGE_THROUGH_PROT: int = 1
 
@@ -180,7 +187,7 @@ func is_alive() -> bool:
 func reduce_by_protection(amount: int) -> int:
 	if amount <= 0:
 		return 0
-	var prot := clampi(protection, 0, MAX_PROT)
+	var prot := get_effective_protection()
 	var through := int(round(float(amount) * (1.0 - float(prot) / 100.0)))
 	return maxi(MIN_DAMAGE_THROUGH_PROT, through)
 
@@ -415,6 +422,12 @@ func get_effective_accuracy() -> int:
 
 func get_effective_dodge() -> int:
 	return maxi(0, dodge + _modifier_sum("dodge"))
+
+## Zırh da süreli bir değiştiriciyle bükülebilir (zırh kırma, siper). Tek
+## hasar kapısı `reduce_by_protection` bunu okuyor, yani kanama ve zehir de
+## kırılmış zırhı görüyor.
+func get_effective_protection() -> int:
+	return clampi(protection + _modifier_sum("prot"), 0, MAX_PROT)
 
 func get_effective_damage_bonus() -> int:
 	var total := damage_bonus + _modifier_sum("damage")
