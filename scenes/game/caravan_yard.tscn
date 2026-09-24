@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bqcaravanyard001"]
 
 [ext_resource type="Script" path="res://scripts/ui/caravan_yard.gd" id="1"]
-[ext_resource type="Texture2D" path="res://data/assets/ui/ledger_mockup/caravan_yard_bg.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://data/assets/ui/waybook/b4_yard.jpg" id="2"]
 
 [node name="CaravanYard" type="Control"]
 layout_mode = 3

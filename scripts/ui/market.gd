@@ -353,6 +353,9 @@ func _item_names(item_ids: Array[String]) -> Array[String]:
 			names.append(item.item_name)
 	return names
 
+const ITEM_ICON_SIZE: float = 32.0
+const PROFITEER_MARK_FILE: String = "b2b_thumb.png"
+
 func _build_shop_rows() -> void:
 	for item in _shop_items:
 		_shop_list.add_child(_build_shop_row(item))
@@ -360,6 +363,8 @@ func _build_shop_rows() -> void:
 func _build_shop_row(item: Item) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
+
+	row.add_child(WaybookTheme.item_icon(item.item_id, ITEM_ICON_SIZE))
 
 	var name_label := Label.new()
 	name_label.text = item.item_name
@@ -377,7 +382,7 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	## "bu fiyat şu an geçici bir olayın etkisinde" diyor.
 	var shock_label := Label.new()
 	shock_label.custom_minimum_size = Vector2(90, 0)
-	shock_label.modulate = Color(0.85, 0.62, 0.30)
+	shock_label.modulate = ArtPalette.TORCH
 	shock_label.tooltip_text = tr("UI_MARKET_SHOCK_TOOLTIP")
 	row.add_child(shock_label)
 
@@ -407,6 +412,14 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	sell_button.pressed.connect(_on_sell_pressed.bind(item, quantity_spin))
 	row.add_child(sell_button)
 
+	# Krizdeki bir şehre tam da krizin malını satmak dünyanın hafızasına
+	# yazılıyor (bkz. GameSession.is_profiteering_sale). Satış yasak değil -
+	# yalnızca kanlı bir parmak izi, satmadan *önce* ne yaptığını söylüyor.
+	var profiteer_mark := WaybookTheme.picture(PROFITEER_MARK_FILE, ITEM_ICON_SIZE)
+	profiteer_mark.tooltip_text = tr("UI_MARKET_PROFITEERING_TOOLTIP")
+	profiteer_mark.mouse_filter = Control.MOUSE_FILTER_PASS
+	row.add_child(profiteer_mark)
+
 	# Faz 17 PR-5: sepete ekle. Toptan pazarlığın çoklu-mal hali - bu satırın
 	# kendi miktar seçicisini okuyup sepete katar, ayrı bir mini-mağazaya
 	# ihtiyaç duymadan.
@@ -423,6 +436,7 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 		"buy_button": buy_button,
 		"haggle_button": haggle_button,
 		"basket_button": basket_button,
+		"profiteer_mark": profiteer_mark,
 	})
 	return row
 
@@ -453,6 +467,11 @@ func _refresh_shop_rows() -> void:
 			_session.current_location_id, item.item_id, _session.total_days_elapsed
 		)
 		shock_label.text = tr("UI_MARKET_SHOCK_MARK") if shocked else ""
+		# Görünmez değil saydam: satır hizası mal mal kaymasın.
+		var mark: Control = row.profiteer_mark
+		var profiteering := _session.is_profiteering_sale(item.item_id)
+		mark.modulate.a = 1.0 if profiteering else 0.0
+		mark.mouse_filter = Control.MOUSE_FILTER_PASS if profiteering else Control.MOUSE_FILTER_IGNORE
 
 func _on_buy_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	var quantity := int(quantity_spin.value)

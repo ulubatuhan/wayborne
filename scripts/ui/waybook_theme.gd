@@ -53,7 +53,7 @@ const SEAL_FILL_INSET: int = 26
 const SEAL_CONTENT: int = 60
 ## Sekmenin sol ucu kıvrık bir kulak, o yüzden sol pay daha geniş.
 const TAB_SLICE: Array[int] = [40, 14, 24, 14]
-const TAB_CONTENT: Array[int] = [30, 16, 22, 16]
+const TAB_CONTENT: Array[int] = [34, 16, 20, 16]
 const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
 const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
 
@@ -105,6 +105,17 @@ static func picture(file_name: String, height: float) -> TextureRect:
 	var aspect := 1.0 if tex == null else tex.get_size().x / maxf(tex.get_size().y, 1.0)
 	rect.custom_minimum_size = Vector2(height * aspect, height)
 	return rect
+
+## Bir malın ikonu (`item_<id>.png`). Kayıt uyumluluğu için sabit kalan
+## `test_` önekli eski id'ler (bkz. ItemCatalog) dosya adında düşüyor.
+## İkonu olmayan bir mal boş bir yer tutucu alır - satır hizası bozulmasın.
+static func item_icon(item_id: String, height: float) -> Control:
+	var file_name := "item_%s.png" % item_id.trim_prefix("test_")
+	if not ResourceLoader.exists(ART_DIR + file_name):
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(height, height)
+		return spacer
+	return picture(file_name, height)
 
 static func build() -> Theme:
 	var theme := Theme.new()

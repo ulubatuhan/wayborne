@@ -627,3 +627,4 @@
 "UI_WAYBOOK_DEPARTED","Ayrılan: %d","Departed: %d","","","","","","","","",""
 "UI_WAYBOOK_EMPTY","Defterde henüz satır yok.","The book holds no lines yet.","","","","","","","","",""
 "UI_WAYBOOK_FOUNDING","Kuruluş","The founding","","","","","","","","",""
+"UI_MARKET_PROFITEERING_TOOLTIP","Bu şehir kriz içinde ve bu mal krizin malı. Satarsan hatırlanır.","This city is in crisis and this is the crisis good. Sell it and it will be remembered.","","","","","","","","",""
