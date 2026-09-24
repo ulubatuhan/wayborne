@@ -22,6 +22,7 @@ func run(t) -> void:
 	_test_feast_costs_gold_and_relieves(t)
 	_test_brawl_threshold_is_reachable(t)
 	_test_composure(t)
+	_test_worst_person_is_marked(t)
 
 func _test_change_stress_clamps(t) -> void:
 	var session := GameSession.new(100, 0, 1)
@@ -401,3 +402,29 @@ func _test_composure(t) -> void:
 		float(CombatEncounter.MIN_STRESS_REFUSAL_CHANCE), 1.0,
 		"reddetme ihtimalinin tabanı sıfır değil"
 	)
+
+## Ortalama en yıpranmış kişiyi saklıyor; HUD şişesi onun değerinde bir
+## çentik taşıyor ve ipucu adını söylüyor.
+func _test_worst_person_is_marked(t) -> void:
+	var session := GameSession.new(100, 10, 2)
+	session.set_player_character(CharacterData.create("Lider", CultureCatalog.VALLEY, CharacterStats.new()))
+	var frayed := CharacterData.create("Yıpranmış", CultureCatalog.VALLEY, CharacterStats.new())
+	session.add_to_party(frayed)
+	t.eq(session.get_max_stress_character(), session.get_player_character(), "eşitken ilk kişi")
+	session.change_character_stress(frayed, 60)
+	t.eq(session.get_max_stress_character(), frayed, "en yüksek stres bulunur")
+
+	var bar := PulseBar.new()
+	bar.setup("Stres", ArtPalette.UI_GAUGE_STRESS)
+	bar.set_value(session.party_stress, GameSession.MAX_STRESS)
+	t.not_ok(bar.is_marker_visible(), "işaret istenmeden görünmez")
+	bar.set_marker(frayed.stress, "En yıpranmış: Yıpranmış")
+	t.ok(bar.is_marker_visible(), "işaret görünür")
+	t.ok(bar.tooltip_text.contains("Yıpranmış"), "ipucu kişiyi adıyla söylüyor")
+	var high_x := bar.get_marker_x()
+	bar.set_marker(10.0, "düşük")
+	t.ok(bar.get_marker_x() < high_x, "çentik değere göre yer alıyor")
+	bar.set_marker(-1.0)
+	t.not_ok(bar.is_marker_visible(), "negatif değer işareti kaldırır")
+	t.not_ok(bar.tooltip_text.contains("düşük"), "kaldırılınca ipucu da temizlenir")
+	bar.free()

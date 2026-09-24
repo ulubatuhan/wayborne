@@ -59,6 +59,8 @@ func _init() -> void:
 	# işareti ve sofra kâseleri aynı karede.
 	var session: GameSession = get_root().get_node("GameState").call("get_session")
 	session.change_stress(60)
+	# Biri ortalamadan belirgin yukarıda: stres şişesinde onun çentiği.
+	session.change_character_stress(session.party[session.party.size() - 1], 30)
 	for character in session.party:
 		character.consecutive_hungry_days = 3
 	screen.call("_flash_signal_icon", RoadSignals.KIND_WHEEL, ArtPalette.UI_SIGNAL_ESCALATED)

@@ -645,3 +645,4 @@
 "UI_SUCCESSION_SERVED","onun döneminde %d gün","%d days under them","","","","","","","","",""
 "UI_SUCCESSION_BENCHED","o savaşın dışında tutuldu","kept out of that fight","","","","","","","","",""
 "UI_ROAD_CHOICE_TARGET","%s — %s","%s — %s","","","","","","","","",""
+"UI_HUD_STRESS_WORST","En yıpranmış: %s (%d)","Most worn: %s (%d)","","","","","","","","",""

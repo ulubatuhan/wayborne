@@ -27,12 +27,15 @@ const ICON_SIZE: float = 20.0
 const VIAL_SIZE: Vector2 = Vector2(96.0, 12.0)
 const VALUE_WIDTH: float = 26.0
 const VIAL_LIQUID: Rect2 = Rect2(0.10, 0.24, 0.80, 0.52)
+const MARKER_WIDTH: float = 2.0
 
 var _icon: TextureRect
 var _vial: TextureRect
 var _empty: ColorRect
 var _fill: ColorRect
 var _label: Label
+var _marker: ColorRect
+var _marker_note: String = ""
 var _fade_tween: Tween
 var _built: bool = false
 
@@ -91,6 +94,16 @@ func _ensure_built() -> void:
 	_fill.size = Vector2(0.0, liquid.size.y)
 	add_child(_fill)
 
+	# İşaret: ortalamanın yanında tek bir kişinin değeri (bkz. set_marker).
+	# Şişenin içinde, sıvının üstünde ince bir çentik.
+	_marker = ColorRect.new()
+	_marker.color = ArtPalette.UI_SIGNAL_ESCALATED
+	_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_marker.size = Vector2(MARKER_WIDTH, liquid.size.y + 4.0)
+	_marker.position = Vector2(liquid.position.x, liquid.position.y - 2.0)
+	_marker.visible = false
+	add_child(_marker)
+
 	_label = Label.new()
 	_label.position = Vector2(vial_origin.x + VIAL_SIZE.x + 3.0, 0.0)
 	_label.size = Vector2(VALUE_WIDTH, BAR_SIZE.y)
@@ -121,10 +134,34 @@ func set_value(new_value: float, max_value: float = 100.0) -> void:
 
 	_fill.size.x = _empty.size.x * clampf(_value / _max_value, 0.0, 1.0)
 	_label.text = "%d" % int(round(_value))
-	tooltip_text = "%s %d" % [_label_prefix, int(round(_value))]
+	_refresh_tooltip()
 
 	if changed:
 		_pulse()
+
+## Ortalamanın yanında bir kişiyi işaretler: stres çubuğu partinin
+## ortalamasını gösteriyor, ama kırılan ortalama değil kişi. Çentik en
+## yıpranmış kişinin değerinde durur, ipucu adını söyler. Negatif değer
+## işareti kaldırır.
+func set_marker(value: float, note: String = "") -> void:
+	_ensure_built()
+	_marker.visible = value >= 0.0
+	_marker_note = note if value >= 0.0 else ""
+	if _marker.visible:
+		var ratio := clampf(value / _max_value, 0.0, 1.0)
+		_marker.position.x = _empty.position.x + _empty.size.x * ratio - MARKER_WIDTH * 0.5
+	_refresh_tooltip()
+
+func is_marker_visible() -> bool:
+	return _marker != null and _marker.visible
+
+func get_marker_x() -> float:
+	return _marker.position.x + MARKER_WIDTH * 0.5 if _marker != null else 0.0
+
+func _refresh_tooltip() -> void:
+	tooltip_text = "%s %d" % [_label_prefix, int(round(_value))]
+	if not _marker_note.is_empty():
+		tooltip_text += "\n" + _marker_note
 
 func _pulse() -> void:
 	if _fade_tween != null and _fade_tween.is_valid():

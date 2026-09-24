@@ -370,6 +370,14 @@ func change_stress(delta: int) -> void:
 
 ## Tek bir kişiyi yıpratır. Yolun "nerede durduğun = neye dikkat ettiğin"
 ## katmanı ve kişiye özel olaylar bunu kullanıyor.
+## Partide stresi en yüksek kişi - ortalamanın sakladığı. Boş partide null.
+func get_max_stress_character() -> CharacterData:
+	var worst: CharacterData = null
+	for character in get_party():
+		if worst == null or character.stress > worst.stress:
+			worst = character
+	return worst
+
 func change_character_stress(character: CharacterData, delta: int) -> void:
 	if character == null:
 		return

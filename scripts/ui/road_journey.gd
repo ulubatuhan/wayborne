@@ -2613,12 +2613,27 @@ func _set_journey_controls_enabled(enabled: bool) -> void:
 	# değiştirilecek bir sefer kalmıyor.
 	_replan_button.disabled = not enabled or not _session.is_journey_active()
 
+## Ortalama kimin kırılmak üzere olduğunu saklıyor (bkz. Stress Rules'un
+## "stres bir kişiye ait" maddesi): şişede en yıpranmış kişinin çentiği.
+## Kimse ortalamadan belirgin yukarıda değilse çentik gereksiz gürültü.
+const STRESS_MARKER_MIN_GAP: int = 5
+
+func _refresh_stress_marker() -> void:
+	var worst := _session.get_max_stress_character()
+	if worst == null or worst.stress - _session.party_stress < STRESS_MARKER_MIN_GAP:
+		_stress_bar.set_marker(-1.0)
+		return
+	_stress_bar.set_marker(
+		worst.stress, tr("UI_HUD_STRESS_WORST") % [worst.character_name, worst.stress]
+	)
+
 func _refresh_state() -> void:
 	var caravan := _session.caravan
 	# Oranlar çubukta, sayılar tek satırda. İkisi birden metinde olduğunda
 	# üst şerit bir döküm sayfasına dönüyordu.
 	_morale_bar.set_value(caravan.morale, CaravanState.MAX_MORALE)
 	_stress_bar.set_value(_session.party_stress, GameSession.MAX_STRESS)
+	_refresh_stress_marker()
 	_danger_bar.set_value(_weathered_danger() * 100.0, 100.0)
 	_stamina_bar.set_value(caravan.stamina, CaravanState.MAX_STAMINA)
 	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
