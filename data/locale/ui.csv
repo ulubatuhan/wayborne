@@ -644,3 +644,4 @@
 "UI_ROAD_MEAL_CREW_STARVED","Tayfadan %s açlıktan öldü.","%s of the crew died of hunger.","","","","","","","","",""
 "UI_SUCCESSION_SERVED","onun döneminde %d gün","%d days under them","","","","","","","","",""
 "UI_SUCCESSION_BENCHED","o savaşın dışında tutuldu","kept out of that fight","","","","","","","","",""
+"UI_ROAD_CHOICE_TARGET","%s — %s","%s — %s","","","","","","","","",""

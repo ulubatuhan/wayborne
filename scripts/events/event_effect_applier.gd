@@ -162,6 +162,20 @@ static func _apply_party_hp(effect: EventEffect, session: GameSession, result: R
 	target.apply_damage(damage)
 	result.lines.append(_t("EFF_PARTY_HURT") % [target.character_name, damage])
 
+## Seçenek belirli bir kişinin başına gelecekse (geride bırakılmak, ağır
+## yara, şifa) o kişi. Kart bunu seçmeden *önce* adıyla yazıyor: "birini
+## bırak" deyip kimin bırakılacağını algoritmaya bırakmak, en ağır kararın
+## sorumluluğunu oyuncudan alıyordu. Önizleme ve uygulama aynı seçiciyi
+## okuyor - iki yerde hesaplanan hedef iki ayrı hedeftir.
+static func get_choice_target(choice: EventChoice, session: GameSession) -> CharacterData:
+	for effect in choice.effects:
+		match effect.type:
+			EventEffect.Type.LEAVE_BEHIND:
+				return _weakest_companion(session)
+			EventEffect.Type.PARTY_HP:
+				return _pick_party_target(effect.text_value, session)
+	return null
+
 static func _pick_party_target(selector: String, session: GameSession) -> CharacterData:
 	if selector == "weakest":
 		return _weakest_companion(session)

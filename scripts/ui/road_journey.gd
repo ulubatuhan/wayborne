@@ -1840,6 +1840,9 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		var roller := _session.get_check_roller(choice.check)
 		var roller_name := roller.character_name if roller != null else ""
 		label = "%s — %s" % [label, choice.get_check_preview(stat_value, roller_name)]
+	var target := EventEffectApplier.get_choice_target(choice, _session)
+	if target != null:
+		label = tr("UI_ROAD_CHOICE_TARGET") % [label, target.character_name]
 	if _choice_triggers_combat(choice):
 		# %12 kazanma oranı bir dengesizlik değil bir okunabilirlik sorunu:
 		# oyuncu göze aldığı riski seçmeden *önce* görsün, savaş panelinde
