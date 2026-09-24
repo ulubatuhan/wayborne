@@ -554,6 +554,8 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	# Tayfa adları liderin kültürüne ve kervanın adına bağlı - ikisi de
 	# ancak şimdi belli.
 	crew_names.clear()
+	_crew_name_serial = 0
+	crew_hungry_nights = 0
 	_sync_crew_names()
 
 	current_location_id = roll_starting_location(rng)
@@ -1158,6 +1160,15 @@ const PERSONAL_HUNGER_STRESS: int = 6
 const STARVATION_HP_LOSS_START_DAY: int = 3
 const STARVATION_HP_LOSS_PER_DAY: int = 4
 const MEAL_HUNGER_MORALE_PENALTY: int = -8
+## Tayfanın açlığı da birikiyor. Eskiden tayfayı aç bırakmak, tek bir
+## isimli kişiyi aç bırakmakla aynı tek seferlik moral düşüşüydü - ve
+## tayfa ağızların çoğu olduğu için "yalnızca ekip yesin" hep en ucuz
+## seçimdi; isimsizler hiç sayılmıyordu. Art arda her aç gece moral biraz
+## daha düşüyor, ve üçüncü geceden itibaren her gece tayfadan biri açlıktan
+## ölüyor - deftere adıyla.
+const CREW_HUNGER_MORALE_PER_NIGHT: int = 3
+const MAX_CREW_HUNGER_MORALE_PENALTY: int = -20
+var crew_hungry_nights: int = 0
 
 ## Bu kip seçilirse sofraya kim oturuyor - dağıtımın kendisi ve sofra
 ## ekranının kâseleri aynı cevabı okuyor, iki yerde iki ayrı kural olmasın.
@@ -1246,7 +1257,16 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 	# "bu gece kim yiyecek" ahlaki bir seçim değil bir ayar olurdu.
 	var death_outcome := resolve_deaths(starving, "LEDGER_CAUSE_STARVED")
 
-	if not hungry_party.is_empty() or crew_hungry:
+	crew_hungry_nights = crew_hungry_nights + 1 if crew_hungry else 0
+	var crew_starved: Array[String] = []
+	if crew_hungry and crew_hungry_nights >= STARVATION_HP_LOSS_START_DAY:
+		var starved_name := _starve_one_crew_member()
+		if not starved_name.is_empty():
+			crew_starved.append(starved_name)
+
+	if crew_hungry:
+		caravan.change_morale(get_crew_hunger_morale_penalty(crew_hungry_nights))
+	elif not hungry_party.is_empty():
 		caravan.change_morale(MEAL_HUNGER_MORALE_PENALTY)
 
 	var fed_names: Array[String] = []
@@ -1257,8 +1277,32 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		"fed_names": fed_names,
 		"hungry_names": hungry_names,
 		"crew_hungry": crew_hungry,
+		"crew_hungry_nights": crew_hungry_nights,
+		"crew_starved_names": crew_starved,
 		"death_outcome": death_outcome,
 	}
+
+## İlk aç gece tek seferlik düşüş; sonraki her art arda gece biraz daha.
+static func get_crew_hunger_morale_penalty(nights: int) -> int:
+	return maxi(
+		MAX_CREW_HUNGER_MORALE_PENALTY,
+		MEAL_HUNGER_MORALE_PENALTY - CREW_HUNGER_MORALE_PER_NIGHT * maxi(0, nights - 1)
+	)
+
+## Son vagonun tayfasından biri açlıktan ölür. Vagon onu hemen başka bir
+## elle doldurur (tüketim vagon sayısından hesaplanıyor, isim listesinden
+## değil), ama yeni adla - ölen ad bir daha dönmez. Kayıt ölüm anında
+## değiştiği için yeniden yüklemek de onu geri getirmez.
+func _starve_one_crew_member() -> String:
+	if crew_names.is_empty():
+		return ""
+	var crew_name: String = crew_names.pop_back()
+	ledger.record(
+		CaravanLedger.KIND_DIED, crew_name, total_days_elapsed, lineage_generation,
+		"", "LEDGER_CAUSE_STARVED", _ledger_location_id()
+	)
+	_sync_crew_names()
+	return crew_name
 
 func _character_names(characters: Array[CharacterData]) -> Array[String]:
 	var names: Array[String] = []
@@ -1884,6 +1928,8 @@ func divert_journey(destination_id: String) -> bool:
 ## ve seferi temizler (escort ettiği tüccarlar hedefe ulaşıp ayrılmıştır).
 ## Ödeme dökümünü döner.
 func finish_journey() -> Dictionary:
+	# Şehirde herkes yer - tayfanın aç gece sayacı burada kapanır.
+	crew_hungry_nights = 0
 	var payout := _calculate_arrival_payout()
 	wallet.earn(payout.net)
 	_apply_wagon_losses_to_ownership()
@@ -2086,11 +2132,17 @@ func _calculate_arrival_payout() -> Dictionary:
 ## liderin kültür havuzundan, `caravan_name|sıra` tohumuyla - aynı kervan
 ## hep aynı tayfayı çıkarır, kayıt yüklemek yeniden atmaz.
 var crew_names: Array[String] = []
+## Kaçıncı tayfa adının atılacağı. Sıra indeksiyle atmak, ölen ya da
+## vagonuyla kaybolan bir adın yerine birebir aynı adı getiriyordu - ölü
+## biri yeniden işe başlıyordu. Sayaç yalnızca artar; ilk atışlar eskisiyle
+## aynı (sayaç o ana kadar indeksle eşit).
+var _crew_name_serial: int = 0
 
 func _sync_crew_names() -> void:
 	var target := owned_wagon_count * PEOPLE_PER_WAGON
 	while crew_names.size() < target:
-		crew_names.append(_roll_crew_name(crew_names.size()))
+		crew_names.append(_roll_crew_name(_crew_name_serial))
+		_crew_name_serial += 1
 	while crew_names.size() > target:
 		crew_names.pop_back()
 
@@ -2437,6 +2489,8 @@ func to_save_dict() -> Dictionary:
 		"next_character_serial": _next_character_serial,
 		"profiteering_sales": profiteering_sales,
 		"crew_names": crew_names.duplicate(),
+		"crew_name_serial": _crew_name_serial,
+		"crew_hungry_nights": crew_hungry_nights,
 		# Sefer ortası kaydı (bkz. Save & Menu Rules): yalnızca sefer açıkken
 		# yazılır - şehirde alınan bir kayıt bu bloğu hiç taşımaz.
 		"journey": _journey_save_block(),
@@ -2596,6 +2650,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	crew_names.clear()
 	for crew_name in (data.get("crew_names", []) as Array):
 		crew_names.append(String(crew_name))
+	# Eski kayıtta sayaç yok: listedeki ad sayısından başlamak en fazla
+	# bir kez eski bir adı tekrar edebilir, hiçbir zaman mevcut birini ezmez.
+	_crew_name_serial = maxi(int(data.get("crew_name_serial", 0)), crew_names.size())
+	crew_hungry_nights = maxi(0, int(data.get("crew_hungry_nights", 0)))
 	_sync_crew_names()
 
 	_restock_current_location()

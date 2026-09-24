@@ -641,3 +641,4 @@
 "UI_SKILL_POSITIONS","Mevki %s · Hedef %s","From %s · Hits %s","","","","","","","","",""
 "UI_BRIEF_MOURNING","Kervan yasta","The caravan is in mourning","","","","","","","","",""
 "UI_SUCCESSION_SEAL_CRACKED","Kıdemliyi geçmek kırgınlık bırakır.","Passing over the senior leaves a grievance.","","","","","","","","",""
+"UI_ROAD_MEAL_CREW_STARVED","Tayfadan %s açlıktan öldü.","%s of the crew died of hunger.","","","","","","","","",""

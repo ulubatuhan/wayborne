@@ -1447,6 +1447,8 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 		_add_log(tr("UI_ROAD_MEAL_HUNGRY") % name_text, LOCKED_COLOR)
 	if result.get("crew_hungry", false):
 		_add_log(tr("UI_ROAD_MEAL_CREW_HUNGRY"), LOCKED_COLOR)
+	for name_text in (result.get("crew_starved_names", []) as Array):
+		_add_log(tr("UI_ROAD_MEAL_CREW_STARVED") % name_text, LOCKED_COLOR)
 	var death_outcome: Dictionary = result.get("death_outcome", {})
 	if not (death_outcome.get("dead_names", []) as Array).is_empty():
 		_handle_death_outcome(death_outcome)
