@@ -175,6 +175,7 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 		bound_unit.figure_kind, bound_unit.is_player_side, _figure_state(bound_unit), depth,
 		bound_unit.outfit
 	)
+	_figure.set_stunned(bound_unit.is_stunned and bound_unit.is_alive())
 	_border.border_color = _border_color(is_active, is_target)
 	add_theme_stylebox_override("panel", _door_frame if bound_unit.on_deaths_door else _frame)
 	queue_redraw()
@@ -276,8 +277,20 @@ func show_bark(text: String) -> void:
 ## figürün kendi state/depth/outfit'ini yeniden hesaplamadan yalnızca
 ## parlama ve kayma uyguluyor.
 func apply_action_animation(flash: Color, lunge: float) -> void:
+	apply_fx(flash, Vector2(lunge, 0.0), 1.0, Color(0, 0, 0, 0), 1.0)
+
+## Panelin her karede bastığı anlık durum (bkz. CombatFx): parlama, kayma
+## (hamle + sarsıntı), düşüşün ilerlemesi, durum halkası.
+func apply_fx(flash: Color, offset: Vector2, fall: float, ring_color: Color, ring: float) -> void:
 	_figure.set_flash(flash)
-	_figure.set_lunge(lunge)
+	_figure.set_shift(offset)
+	_figure.set_fall(fall)
+	_figure.set_ring(ring_color, ring)
+
+## Figürün yatay ekseni (hamlenin ölçüsü). Yerleşim henüz yapılmadıysa
+## slotun sabit genişliği.
+func get_figure_width() -> float:
+	return _figure.size.x if _figure.size.x > 1.0 else SLOT_WIDTH
 
 func _add_status_icon(file_name: String, count: String, tooltip: String) -> void:
 	var holder := HBoxContainer.new()

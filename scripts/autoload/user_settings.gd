@@ -24,6 +24,11 @@ const CONFIG_KEY: String = "code"
 const AUDIO_SECTION: String = "audio"
 const AUDIO_KEY_MUSIC: String = "music_volume"
 const DEFAULT_MUSIC_VOLUME: float = 0.7
+## Hareket hassasiyeti: açıkken sahne geçişleri kaymak yerine mürekkepten
+## belirir ve savaş sahnesi sarsılmaz. Bilgi taşıyan hiçbir şey (parlama,
+## hasar sayısı, düşüş) kapanmıyor - yalnızca ekranın kendisinin oynaması.
+const MOTION_SECTION: String = "motion"
+const MOTION_KEY_REDUCE: String = "reduce"
 
 ## Boş bırakılan hücreler bu dile düşer (Godot'ta doğrulandı: eksik çeviri
 ## anahtarı basmaz, fallback locale'in metnini basar), bu yüzden İngilizce
@@ -47,8 +52,24 @@ const SUPPORTED: Array[Dictionary] = [
 	{"code": "ja", "name": "日本語"},
 ]
 
+var reduce_motion: bool = false
+
 func _ready() -> void:
 	apply_saved_locale()
+	reduce_motion = load_reduce_motion()
+
+func load_reduce_motion() -> bool:
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) != OK:
+		return false
+	return bool(config.get_value(MOTION_SECTION, MOTION_KEY_REDUCE, false))
+
+func set_reduce_motion(enabled: bool) -> void:
+	reduce_motion = enabled
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	config.set_value(MOTION_SECTION, MOTION_KEY_REDUCE, enabled)
+	config.save(CONFIG_PATH)
 
 func get_locale_codes() -> Array:
 	var codes: Array = []

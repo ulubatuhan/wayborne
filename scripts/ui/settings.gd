@@ -9,6 +9,7 @@ extends Control
 ## (bkz. o dosyanın başlığı). Yeni bir dil eklendiğinde bu ekran hiç
 ## değişmeden onu göstermeye başlar.
 var _locale_codes: Array = []
+var _motion_toggle: CheckButton
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _language_label: Label = $MarginContainer/VBoxContainer/LanguageRow/LanguageLabel
@@ -22,6 +23,7 @@ func _ready() -> void:
 	_back_button.pressed.connect(_on_back_pressed)
 	_setup_language_selector()
 	_setup_music_slider()
+	_setup_motion_toggle()
 
 ## Ses seviyesi **anında** uygulanıyor, "Uygula" tuşu yok: oyuncu sesi
 ## ayarlarken duyduğu şeyi ayarlıyor olmalı. `AudioManager` değeri
@@ -38,6 +40,18 @@ func _on_music_volume_changed(value: float) -> void:
 
 func _refresh_music_value() -> void:
 	_music_value.text = "%d%%" % roundi(_music_slider.value * 100.0)
+
+## Kod içinde kuruluyor ve geri tuşunun hemen üstüne yerleşiyor - sahne
+## dosyasında ayrı bir satır açmak, bir onay kutusu için bir düğüm yolu
+## daha demekti.
+func _setup_motion_toggle() -> void:
+	_motion_toggle = CheckButton.new()
+	_motion_toggle.button_pressed = UserSettings.reduce_motion
+	_motion_toggle.toggled.connect(UserSettings.set_reduce_motion)
+	var column := _back_button.get_parent()
+	column.add_child(_motion_toggle)
+	column.move_child(_motion_toggle, _back_button.get_index())
+	_refresh_texts()
 
 func _setup_language_selector() -> void:
 	_locale_codes = UserSettings.get_locale_codes()
@@ -86,6 +100,8 @@ func _refresh_texts() -> void:
 	_title_label.text = tr("UI_SETTINGS")
 	_language_label.text = tr("UI_LANGUAGE")
 	_music_label.text = tr("UI_MUSIC_VOLUME")
+	if _motion_toggle != null:
+		_motion_toggle.text = tr("UI_SETTINGS_REDUCE_MOTION")
 	_back_button.text = tr("UI_BACK_TO_MENU")
 
 func _on_back_pressed() -> void:

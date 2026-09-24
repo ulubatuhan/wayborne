@@ -30,16 +30,16 @@ const MAX_LOG_LINES: int = 40
 ## `bind()`'tan sonra süresi geçmemişse yeniden basılıyor.
 const BARK_DURATION_MSEC: int = 2200
 
-## Faz 17 PR-7: savaş animasyon katmanı - bark'la aynı mimari zorunluluk
-## (slotlar her `_refresh()`'te yeniden kuruluyor, bir Tween figürün
-## kendisine bağlanamaz), o yüzden bu da gerçek zaman damgalı bir durum:
-## `_flash_states`/`_lunge_states` panelde tutulur, her yeni slota
-## `bind()`'tan sonra yeniden uygulanır (bkz. `_apply_pending_animation`).
-## Süreler bark'tan kısa - bir vuruşun "az önce oldu" hissi anlık olmalı,
-## balonun okunacak kadar kalması gereken metniyle aynı ritimde değil.
-const FLASH_DURATION_MSEC: int = 500
-const LUNGE_DURATION_MSEC: int = 260
+## Savaş animasyon katmanı. Slotlar her `_refresh()`'te yeniden kurulduğu
+## için (bkz. `_refresh_side`) bir Tween figüre bağlanamıyor; durum panelde
+## gerçek zaman damgasıyla tutuluyor ve `_process` her karede canlı
+## slotlara `CombatFx` eğrilerinden okunan değeri basıyor. Önceki katman
+## bunu yalnızca `bind()` anında yapıyordu: parlama bir sonraki tazelemeye
+## kadar donuk bir renk olarak kalıp tek karede kayboluyordu. Eğriler ve
+## süreler `CombatFx`'te - tek yerde.
 const LUNGE_DISTANCE: float = 14.0
+## Hasar sayılarının yazı boyu.
+const NUMBER_FONT_SIZE: int = 20
 
 ## Parlama renkleri ArtPalette.FX_FLASH_* - renk tek yerden gelir.
 
@@ -83,8 +83,21 @@ var _continue_button: Button
 var _log_scroll: ScrollContainer
 var _log_list: VBoxContainer
 var _bark_texts: Dictionary = {}  # CombatUnit -> {"text": String, "expires_at": int}
-var _flash_states: Dictionary = {}  # CombatUnit -> {"color": Color, "expires_at": int}
-var _lunge_states: Dictionary = {}  # CombatUnit -> {"offset": float, "expires_at": int}
+var _flash_states: Dictionary = {}  # CombatUnit -> {"color": Color, "start": int, "duration": int}
+var _lunge_states: Dictionary = {}  # CombatUnit -> {"direction": float, "magnitude": float, "start": int}
+var _fall_states: Dictionary = {}  # CombatUnit -> {"start": int}
+var _ring_states: Dictionary = {}  # CombatUnit -> {"color": Color, "start": int}
+var _shake: Dictionary = {}  # {"amplitude": float, "start": int}
+## Yüzen hasar/iyileşme sayıları: {"unit", "label", "start", "slot_index"}.
+var _numbers: Array = []
+## Son görülen can - sayılar motorun ne dediğinden değil, canın gerçekte
+## ne kadar değiştiğinden çıkıyor (zırh, Kıyı, iyileşme tavanı hepsi
+## zaten içinde).
+var _hp_seen: Dictionary = {}  # CombatUnit -> int
+## Son vuruşu kritik olan birimler: sayısı kritik renginde çıkıyor.
+var _crit_marks: Dictionary = {}  # CombatUnit -> true
+var _slot_by_unit: Dictionary = {}  # CombatUnit -> CombatUnitSlot
+var _fx_overlay: Control
 
 func _ready() -> void:
 	_ensure_built()
@@ -134,8 +147,11 @@ func start_combat(
 	_continue_button.visible = false
 	_clear_children(_log_list)
 	_bark_texts.clear()
+	_reset_fx()
 
 	_encounter.start()
+	for unit in _encounter.player_units + _encounter.enemy_units:
+		_hp_seen[unit] = unit.current_hp
 	_refresh()
 
 ## Muhafız görevini tutan biri varsa kadro ilk tura iyi konumlanmış girer:
@@ -238,6 +254,13 @@ func _build_field() -> void:
 
 	stage.add_child(field)
 
+	# Yüzen sayılar sahnenin üstünde ama saflardan bağımsız bir katmanda:
+	# slotlar her tazelemede yeniden kurulurken sayı yaşamaya devam etmeli.
+	_fx_overlay = Control.new()
+	_fx_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fx_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_fx_overlay)
+
 func _build_action_area() -> void:
 	_active_label = Label.new()
 	add_child(_active_label)
@@ -282,6 +305,8 @@ func _refresh() -> void:
 	_refresh_side(_player_row, _encounter.player_units, true)
 	_refresh_side(_enemy_row, _encounter.enemy_units, false)
 	_refresh_actions()
+	_spawn_hp_numbers()
+	_animate(Time.get_ticks_msec())
 
 func _refresh_header() -> void:
 	_round_label.text = tr("UI_COMBAT_ROUND") % _encounter.round_number
@@ -310,6 +335,10 @@ func _build_order_chip(unit: CombatUnit, is_active: bool) -> Label:
 ## _build_field). Hedeflenebilirlik seçili yetenekten geliyor, o yüzden
 ## her tazelemede yeniden hesaplanıyor.
 func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order: bool) -> void:
+	for child in row.get_children():
+		var old := child as CombatUnitSlot
+		if old != null and _slot_by_unit.get(old.unit) == old:
+			_slot_by_unit.erase(old.unit)
 	_clear_children(row)
 
 	var ordered: Array[CombatUnit] = units.duplicate()
@@ -324,6 +353,7 @@ func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order:
 		row.add_child(slot)
 		slot.bind(unit, unit == active and not _encounter.is_over(), targets.has(unit))
 		slot.clicked.connect(_on_unit_clicked)
+		_slot_by_unit[unit] = slot
 		_apply_pending_bark(slot, unit)
 		_apply_pending_animation(slot, unit)
 
@@ -331,31 +361,48 @@ func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order:
 ## yorumu), o yüzden balon burada -panelde- gerçek zaman damgasıyla tutulup
 ## yeni slota basılıyor; süresi geçmişse hiç basılmıyor ve unutuluyor.
 ##
-## `kind` (bkz. CombatEncounter.BARK_*) hedefin/reddedenin parlamasını
-## belirliyor; vuruş/kritik ayrıca hamleyi yapan birimi (o an sırası gelen
-## birim, `_encounter.get_active_unit()`) hedefe doğru kaydırıyor - reddin
-## kendisi bir hamle olmadığı için kayma yok, yalnızca soluk bir parlama.
+## `kind` (bkz. CombatEncounter.BARK_*) bir anın *türü*: hedefin parlaması,
+## saldıranın hamlesi (isabet/kritik/kaçırma - o an sırası gelen birim,
+## `_encounter.get_active_unit()`), sarsıntı, düşüş, durum halkası. Reddin
+## kendisi bir hamle değil, yalnızca soluk bir parlama. Metni boş bir bark
+## (durum efektleri) balon açmıyor - o bir yorum değil, bir an.
 func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
-	_bark_texts[unit] = {"text": text, "expires_at": Time.get_ticks_msec() + BARK_DURATION_MSEC}
+	var now := Time.get_ticks_msec()
+	if not text.is_empty():
+		_bark_texts[unit] = {"text": text, "expires_at": now + BARK_DURATION_MSEC}
 
 	var flash := _flash_for_kind(kind)
 	if flash != ArtPalette.FX_FLASH_NEUTRAL:
 		_flash_states[unit] = {
-			"color": flash, "expires_at": Time.get_ticks_msec() + FLASH_DURATION_MSEC,
+			"color": flash, "start": now, "duration": CombatFx.flash_duration(kind),
 		}
+	if kind == CombatEncounter.BARK_CRIT:
+		_crit_marks[unit] = true
+
+	if CombatFx.is_status_application(kind):
+		_ring_states[unit] = {"color": CombatFx.status_color(kind), "start": now}
 
 	# Bir kaçırma da taze bir hamle - saldıran gerçekten kılıcını salladı,
-	# yalnızca değmedi. HIT/CRIT'in "bu bir vuruş girişimiydi" kategorisine
-	# giriyor, DEATHS_DOOR/SURVIVED/KILLED/DOWNED'ın "bu bir sonuç" ailesine
-	# değil - o yüzden onlar gibi yalnızca parlama değil, kayma da alıyor.
-	if kind == CombatEncounter.BARK_HIT or kind == CombatEncounter.BARK_CRIT or kind == CombatEncounter.BARK_MISS:
+	# yalnızca değmedi. HIT/CRIT'in "bu bir vuruş girişimiydi" ailesinde,
+	# DEATHS_DOOR/SURVIVED/KILLED/DOWNED'ın "bu bir sonuç" ailesinde değil.
+	var magnitude := CombatFx.recoil_magnitude(kind)
+	if magnitude > 0.0:
 		var attacker := _encounter.get_active_unit()
 		if attacker != null and attacker != unit:
-			var direction := 1.0 if attacker.is_player_side else -1.0
 			_lunge_states[attacker] = {
-				"offset": direction * LUNGE_DISTANCE,
-				"expires_at": Time.get_ticks_msec() + LUNGE_DURATION_MSEC,
+				"direction": 1.0 if attacker.is_player_side else -1.0,
+				"magnitude": magnitude, "start": now,
 			}
+
+	var amplitude := CombatFx.shake_amplitude(kind)
+	if amplitude > 0.0 and not _reduce_motion():
+		if _shake.is_empty() or amplitude >= float(_shake.get("amplitude", 0.0)) \
+				or now - int(_shake.get("start", 0)) >= CombatFx.SHAKE_MSEC:
+			_shake = {"amplitude": amplitude, "start": now}
+
+	if CombatFx.starts_fall(kind):
+		_fall_states[unit] = {"start": now}
+	set_process(true)
 
 func _flash_for_kind(kind: String) -> Color:
 	match kind:
@@ -367,6 +414,9 @@ func _flash_for_kind(kind: String) -> Color:
 		CombatEncounter.BARK_SURVIVED: return ArtPalette.FX_FLASH_SURVIVED
 		CombatEncounter.BARK_KILLED: return ArtPalette.FX_FLASH_KILLED
 		CombatEncounter.BARK_DOWNED: return ArtPalette.FX_FLASH_DOWNED
+		CombatEncounter.BARK_BLEED_TICK: return ArtPalette.FX_BLEED
+		CombatEncounter.BARK_BLIGHT_TICK: return ArtPalette.FX_BLIGHT
+		CombatEncounter.BARK_STUN_SKIP: return ArtPalette.FX_STUN
 		_: return ArtPalette.FX_FLASH_NEUTRAL
 
 func _apply_pending_bark(slot: CombatUnitSlot, unit: CombatUnit) -> void:
@@ -379,24 +429,177 @@ func _apply_pending_bark(slot: CombatUnitSlot, unit: CombatUnit) -> void:
 	slot.show_bark(String(data.get("text", "")))
 
 func _apply_pending_animation(slot: CombatUnitSlot, unit: CombatUnit) -> void:
-	var now := Time.get_ticks_msec()
+	_apply_fx(slot, unit, Time.get_ticks_msec())
+
+## Bir birimin o anki efektlerini slotuna basar; süresi geçen kayıtları
+## siler. `true` dönerse birim hâlâ canlanıyor.
+func _apply_fx(slot: CombatUnitSlot, unit: CombatUnit, now: int) -> bool:
+	var active := false
+
 	var flash := ArtPalette.FX_FLASH_NEUTRAL
 	var flash_data: Dictionary = _flash_states.get(unit, {})
 	if not flash_data.is_empty():
-		if now >= int(flash_data.get("expires_at", 0)):
+		var u := CombatFx.progress(int(flash_data.get("start", 0)), int(flash_data.get("duration", 0)), now)
+		if u >= 1.0:
 			_flash_states.erase(unit)
 		else:
-			flash = flash_data.get("color", ArtPalette.FX_FLASH_NEUTRAL)
+			flash = CombatFx.flash_at(flash_data.get("color", ArtPalette.FX_FLASH_NEUTRAL), u)
+			active = true
 
-	var lunge := 0.0
+	var offset := _shake_offset(now, unit)
 	var lunge_data: Dictionary = _lunge_states.get(unit, {})
 	if not lunge_data.is_empty():
-		if now >= int(lunge_data.get("expires_at", 0)):
+		var u := CombatFx.progress(int(lunge_data.get("start", 0)), CombatFx.RECOIL_MSEC, now)
+		if u >= 1.0:
 			_lunge_states.erase(unit)
 		else:
-			lunge = float(lunge_data.get("offset", 0.0))
+			offset.x += float(lunge_data.get("direction", 1.0)) * float(lunge_data.get("magnitude", 0.0)) \
+				* slot.get_figure_width() * CombatFx.recoil(u)
+			active = true
 
-	slot.apply_action_animation(flash, lunge)
+	var fall := 1.0
+	var fall_data: Dictionary = _fall_states.get(unit, {})
+	if not fall_data.is_empty():
+		fall = CombatFx.progress(int(fall_data.get("start", 0)), CombatFx.FALL_MSEC, now)
+		if fall >= 1.0:
+			_fall_states.erase(unit)
+		else:
+			active = true
+
+	var ring_color := Color(0, 0, 0, 0)
+	var ring := 1.0
+	var ring_data: Dictionary = _ring_states.get(unit, {})
+	if not ring_data.is_empty():
+		ring = CombatFx.progress(int(ring_data.get("start", 0)), CombatFx.RING_MSEC, now)
+		if ring >= 1.0:
+			_ring_states.erase(unit)
+		else:
+			ring_color = ring_data.get("color", ring_color)
+			active = true
+
+	slot.apply_fx(flash, offset, fall, ring_color, ring)
+	return active
+
+## Sarsıntı her figürde aynı zarf, ama birim başına kaydırılmış bir faz:
+## herkes aynı yöne aynı anda kayarsa sahne değil kamera sallanır.
+func _shake_offset(now: int, unit: CombatUnit) -> Vector2:
+	if _shake.is_empty():
+		return Vector2.ZERO
+	var elapsed := float(now - int(_shake.get("start", 0))) / 1000.0
+	return CombatFx.shake_at(float(_shake.get("amplitude", 0.0)), elapsed, float(unit.position) * 1.9)
+
+func _reduce_motion() -> bool:
+	if not is_inside_tree():
+		return false
+	var settings := get_node_or_null("/root/UserSettings")
+	return settings != null and bool(settings.get("reduce_motion"))
+
+func _reset_fx() -> void:
+	_flash_states.clear()
+	_lunge_states.clear()
+	_fall_states.clear()
+	_ring_states.clear()
+	_shake = {}
+	_hp_seen.clear()
+	_crit_marks.clear()
+	for entry in _numbers:
+		var label: Label = entry.get("label")
+		if is_instance_valid(label):
+			label.queue_free()
+	_numbers.clear()
+
+func _process(_delta: float) -> void:
+	if not _animate(Time.get_ticks_msec()):
+		set_process(false)
+
+## Bir karelik canlandırma: canlı slotlar, yüzen sayılar, sarsıntı ve -
+## düşüşler bitene kadar - Devam tuşunun kilidi. `true` dönerse hâlâ
+## oynayan bir şey var.
+func _animate(now: int) -> bool:
+	var active := false
+	for unit in _slot_by_unit.keys():
+		var slot: CombatUnitSlot = _slot_by_unit[unit]
+		if not is_instance_valid(slot):
+			_slot_by_unit.erase(unit)
+			continue
+		if _apply_fx(slot, unit, now):
+			active = true
+	if not _shake.is_empty():
+		if now - int(_shake.get("start", 0)) >= CombatFx.SHAKE_MSEC:
+			_shake = {}
+		else:
+			active = true
+	if _animate_numbers(now):
+		active = true
+	if _continue_button != null and _continue_button.visible:
+		_continue_button.disabled = falls_pending()
+	return active
+
+## Düşen birim yere inene kadar savaş bitmiş sayılmıyor: son vuruşun
+## kendisini görmeden sonuç ekranına geçmek, sonucu okunmaz kılıyordu.
+func falls_pending() -> bool:
+	return not _fall_states.is_empty()
+
+## Canı değişen her birim için bir sayı. Can farkından okunuyor, motorun
+## vuruş satırından değil: kanama, zırh, Kıyı ve iyileşme hepsi aynı
+## kapıdan gelsin diye.
+func _spawn_hp_numbers() -> void:
+	if _fx_overlay == null:
+		return
+	var every_unit: Array[CombatUnit] = []
+	every_unit.append_array(_encounter.player_units)
+	every_unit.append_array(_encounter.enemy_units)
+	for unit in every_unit:
+		var before := int(_hp_seen.get(unit, unit.current_hp))
+		var delta := unit.current_hp - before
+		_hp_seen[unit] = unit.current_hp
+		if delta == 0:
+			continue
+		var label := Label.new()
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size", NUMBER_FONT_SIZE)
+		label.text = ("+%d" % delta) if delta > 0 else ("%d" % delta)
+		var color := ArtPalette.FX_HEAL if delta > 0 else ArtPalette.FX_DAMAGE
+		if delta < 0 and _crit_marks.has(unit):
+			color = ArtPalette.FX_CRIT
+		label.modulate = color
+		label.visible = false
+		_fx_overlay.add_child(label)
+		var stacked := 0
+		for entry in _numbers:
+			if entry.get("unit") == unit:
+				stacked += 1
+		_numbers.append({
+			"unit": unit, "label": label, "start": Time.get_ticks_msec(), "stack": stacked,
+		})
+	_crit_marks.clear()
+	if not _numbers.is_empty():
+		set_process(true)
+
+func _animate_numbers(now: int) -> bool:
+	var kept: Array = []
+	for entry in _numbers:
+		var label: Label = entry.get("label")
+		if not is_instance_valid(label):
+			continue
+		var u := CombatFx.progress(int(entry.get("start", 0)), CombatFx.NUMBER_MSEC, now)
+		if u >= 1.0:
+			label.queue_free()
+			continue
+		kept.append(entry)
+		var slot: CombatUnitSlot = _slot_by_unit.get(entry.get("unit"))
+		if slot == null or not is_instance_valid(slot) or not slot.is_inside_tree():
+			label.visible = false
+			continue
+		var anchor := slot.global_position - _fx_overlay.global_position
+		label.visible = true
+		label.reset_size()
+		label.position = anchor + Vector2(
+			(slot.size.x - label.size.x) * 0.5, slot.size.y * 0.12 - float(entry.get("stack", 0)) * 18.0
+		) + CombatFx.number_offset(u)
+		label.modulate.a = CombatFx.number_alpha(u)
+	_numbers = kept
+	return not _numbers.is_empty()
 
 func _current_targets() -> Array[CombatUnit]:
 	var empty: Array[CombatUnit] = []
@@ -619,8 +822,11 @@ func _on_state_changed(new_state: CombatEncounter.State) -> void:
 		_result_label.text = tr("UI_COMBAT_DEFEAT") % _encounter.enemy_label
 	_continue_button.visible = true
 	_refresh()
+	_continue_button.disabled = falls_pending()
 
 func _on_continue_pressed() -> void:
+	if falls_pending():
+		return
 	var victory := _encounter.state == CombatEncounter.State.VICTORY
 	var xp_awarded := 0
 	for unit in _encounter.enemy_units:

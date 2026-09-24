@@ -90,7 +90,7 @@ func go(path: String) -> void:
 
 func _reduce_motion() -> bool:
 	var settings := get_node_or_null("/root/UserSettings")
-	if settings == null or not ("reduce_motion" in settings):
+	if settings == null:
 		return false
 	return bool(settings.get("reduce_motion"))
 

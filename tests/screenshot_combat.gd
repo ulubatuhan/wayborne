@@ -68,6 +68,38 @@ func _init() -> void:
 	await _settle()
 	_save("03_olumun_kiyisi.png")
 
+	# Hareket katmanı (bkz. CombatFx): bir kritik anı, bir durum halkası ve
+	# bir düşüşün ortası. Zaman burada donduruluyor - `_process` kapalı,
+	# kare `_animate`'e sabit bir an verilerek çiziliyor, yoksa yazılımsal
+	# rasterleştiricinin yavaşlığı her çalıştırmada başka bir anı yakalar.
+	var enemies: Array[CombatUnit] = panel._encounter.enemy_units
+	var start := Time.get_ticks_msec()
+	enemies[0].current_hp -= 7
+	panel._on_unit_barked(enemies[0], tr("CBT_BARK_CRIT"), CombatEncounter.BARK_CRIT)
+	panel._on_unit_barked(enemies[1], "", CombatEncounter.BARK_STATUS_BLEED)
+	panel._refresh()
+	panel.set_process(false)
+	panel._flash_states[enemies[0]]["start"] = start
+	panel._ring_states[enemies[1]]["start"] = start
+	panel._shake["start"] = start
+	panel._numbers[panel._numbers.size() - 1]["start"] = start
+	await _settle()
+	panel._animate(start + 90)
+	await _settle()
+	_save("04_kritik_ani.png")
+
+	var victim := enemies[enemies.size() - 1]
+	victim.apply_damage(9999)
+	panel._on_unit_barked(victim, tr("CBT_BARK_KILLED"), CombatEncounter.BARK_KILLED)
+	panel._refresh()
+	panel.set_process(false)
+	var fall_start := Time.get_ticks_msec()
+	panel._fall_states[victim]["start"] = fall_start
+	await _settle()
+	panel._animate(fall_start + 170)
+	await _settle()
+	_save("05_dusus_ortasi.png")
+
 	print("Görüntüler: ", ProjectSettings.globalize_path(SHOT_DIR))
 	quit(0)
 

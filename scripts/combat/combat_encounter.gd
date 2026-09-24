@@ -36,6 +36,16 @@ const BARK_DOWNED: String = "downed"
 ## görsel bir tepki alırken bir kaçırma aynı kareyi (hiçbir şey) çiziyordu.
 ## Hedefe emitleniyor, isabet/kritikle aynı sözleşme (bkz. _resolve_on_target).
 const BARK_MISS: String = "miss"
+## Durum efektlerinin görsel sözleşmesi. Metinleri boş: bunlar bir yorum
+## balonu değil, bir halka/renk anı (bkz. CombatPanel) - kayda zaten
+## tam cümlesi düşüyor. Uygulama ayrı, her tur başındaki tık ayrı: biri
+## "yara açıldı", öteki "yara hâlâ kanıyor".
+const BARK_STATUS_BLEED: String = "status_bleed"
+const BARK_STATUS_BLIGHT: String = "status_blight"
+const BARK_STATUS_STUN: String = "status_stun"
+const BARK_BLEED_TICK: String = "bleed_tick"
+const BARK_BLIGHT_TICK: String = "blight_tick"
+const BARK_STUN_SKIP: String = "stun_skip"
 
 enum State {
 	ONGOING,
@@ -273,9 +283,12 @@ func _begin_unit_turn(unit: CombatUnit) -> bool:
 		var outcome := unit.apply_damage(drained, _rng)
 		var taken := unit.reduce_by_protection(drained)
 		var key := "CBT_LOG_BLEED_TICK"
+		var bark := BARK_BLEED_TICK
 		if unit.has_status(CombatUnit.STATUS_BLIGHT) and not unit.has_status(CombatUnit.STATUS_BLEED):
 			key = "CBT_LOG_BLIGHT_TICK"
+			bark = BARK_BLIGHT_TICK
 		_emit_log(tr(key) % [unit.display_name, taken])
+		unit_barked.emit(unit, "", bark)
 		_report_damage_outcome(unit, outcome)
 		if not unit.is_alive():
 			unit.tick_statuses()
@@ -286,6 +299,7 @@ func _begin_unit_turn(unit: CombatUnit) -> bool:
 	if unit.is_stunned:
 		unit.consume_stun()
 		_emit_log(tr("CBT_LOG_STUN_SKIP") % unit.display_name)
+		unit_barked.emit(unit, "", BARK_STUN_SKIP)
 		return false
 	return true
 
@@ -475,6 +489,12 @@ func _apply_skill_modifier(skill: CombatSkill, target: CombatUnit) -> void:
 ## atılıyor: hedefin direnci. Direnilen bir efekt de kayda geçiyor -
 ## oyuncu neden kanamadığını görmezse sistem bozuk sanılır (aynı gerekçe
 ## kilitli yeteneğin sebebini göstermekte de var).
+static func status_bark(kind: String) -> String:
+	match kind:
+		CombatUnit.STATUS_BLIGHT: return BARK_STATUS_BLIGHT
+		CombatUnit.STATUS_STUN: return BARK_STATUS_STUN
+	return BARK_STATUS_BLEED
+
 func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
 	if not skill.has_status() or not target.is_alive():
 		return
@@ -487,6 +507,7 @@ func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
 	_emit_log(tr("CBT_LOG_STATUS_APPLIED") % [
 		target.display_name, tr(_status_name_key(skill.status_kind)), skill.status_rounds
 	])
+	unit_barked.emit(target, "", status_bark(skill.status_kind))
 
 ## Mevki kaydırma: hedefi safta iter ya da çeker. Kaydırmadan sonra saf
 ## **her zaman** yeniden paketleniyor, yani mevkiler 1'den başlayan
