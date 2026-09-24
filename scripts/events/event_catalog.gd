@@ -81,6 +81,12 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_frontier_outpost())
 	_road_events.append(_mine_collapse())
 	_road_events.append(_failing_bridge())
+	_road_events.append(_grave_on_the_road())
+	_road_events.append(_grave_keeper())
+	_road_events.append(_grave_offering())
+	_road_events.append(_deserter_plea())
+	_road_events.append(_deserter_search())
+	_road_events.append(_deserter_debt())
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -1709,6 +1715,196 @@ static func _failing_bridge() -> GameEvent:
 		_choice("EVT_BRIDGE_OPT_DETOUR", _effects([
 			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
 		])),
+	])
+	return event
+
+## --- Zincir A: İşaretsiz Mezar ---
+## Defteri okuyan ilk zincir: kervan birini gömmüşse (companions_died)
+## yolda işaretsiz bir mezar çıkabilir, ve kuşak ilerledikçe daha sık
+## çıkar. Mezara bakmak bir gün yer; bakıp bakmadığın mezarın bekçisi
+## tarafından hatırlanır. Zincirin sonu bayrakları temizler, yani sonraki
+## kuşaklar aynı yolu yeniden yürüyebilir.
+static func _grave_on_the_road() -> GameEvent:
+	var event := _event("evt_grave_on_the_road", "EVT_GRAVE", 0.8)
+	event.cooldown_days = 20
+	event.conditions = _conditions([
+		EventCondition.make("companions_died", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("grave_seen", EventCondition.Op.NOT_HAS_FLAG),
+	])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("lineage_generation", EventCondition.Op.GREATER_EQUAL, 2),
+		]), 2.0),
+	])
+	event.choices = _choices([
+		_choice("EVT_GRAVE_OPT_TEND", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "grave_seen"),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "grave_tended"),
+			EventEffect.make(EventEffect.Type.STRESS, -6),
+			EventEffect.make(EventEffect.Type.MORALE, 4),
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_grave_keeper"),
+		])),
+		_choice("EVT_GRAVE_OPT_PASS", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "grave_seen"),
+			EventEffect.make(EventEffect.Type.STRESS, 4),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_grave_keeper"),
+		])),
+	])
+	return event
+
+static func _grave_keeper() -> GameEvent:
+	var event := _event("evt_grave_keeper", "EVT_GRAVE_KEEPER", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("grave_seen", EventCondition.Op.HAS_FLAG),
+	])
+	# Bekçiyi dinlemek Bilgelik ister; ama bekçi yalnızca mezara bakanı
+	# güvenilir bulur - iyi bir dinleyici olmak geçip gitmiş olmayı silmez.
+	var listen := EventChoice.new()
+	listen.text_key = "EVT_GRAVE_KEEPER_OPT_LISTEN"
+	listen.check = SkillCheck.make(CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER, 1.0)
+	listen.outcomes = _outcomes([
+		_outcome_if("EVT_GRAVE_KEEPER_TRUST", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 1.0),
+			EventCondition.make("grave_tended", EventCondition.Op.HAS_FLAG),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "keeper_trusted"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_grave_offering"),
+		])),
+		_outcome_if("EVT_GRAVE_KEEPER_KIND", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 1.0),
+			EventCondition.make("grave_tended", EventCondition.Op.NOT_HAS_FLAG),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, 1),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_seen"),
+		])),
+		_outcome_if("EVT_GRAVE_KEEPER_COLD", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 0.0),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.STRESS, 5),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_seen"),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_tended"),
+		])),
+	])
+	event.choices = _choices([
+		listen,
+		_choice("EVT_GRAVE_KEEPER_OPT_LEAVE", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_seen"),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_tended"),
+		])),
+	])
+	return event
+
+static func _grave_offering() -> GameEvent:
+	var event := _event("evt_grave_offering", "EVT_GRAVE_OFFERING", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("grave_seen", EventCondition.Op.HAS_FLAG),
+		EventCondition.make("keeper_trusted", EventCondition.Op.HAS_FLAG),
+	])
+	var clear := [
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_seen"),
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "grave_tended"),
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "keeper_trusted"),
+	]
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_GRAVE_OFFERING_OPT_GIVE", "EVT_GRAVE_OFFERING_OPT_GIVE_LOCKED",
+			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 5)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -5),
+				EventEffect.make(EventEffect.Type.GRANT_TRAIT, 0, TraitCatalog.STEADFAST_FAITH),
+			] + clear)
+		),
+		_choice("EVT_GRAVE_OFFERING_OPT_WALK", _effects(clear)),
+	])
+	return event
+
+## --- Zincir B: Firariler ---
+## Bölgesel savaşın yolda bir yüzü: cepheden kaçmış iki genç. Onları
+## saklamak iyilik, ama devriye gelir; yalanın tutarsa bir borç doğar,
+## tutmazsa kanunla dövüşürsün (muhafız zaferi itibar kaybettirir).
+static func _deserter_plea() -> GameEvent:
+	var event := _event("evt_deserter_plea", "EVT_DESERTER", 1.6)
+	event.cooldown_days = 15
+	event.conditions = _conditions([
+		EventCondition.make("route_has_regional_war", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("deserters_met", EventCondition.Op.NOT_HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice("EVT_DESERTER_OPT_HIDE", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "deserters_met"),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "deserters_hidden"),
+			EventEffect.make(EventEffect.Type.PROVISIONS, -6),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_deserter_search"),
+		])),
+		_choice("EVT_DESERTER_OPT_REPORT", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "deserters_met"),
+			EventEffect.make(EventEffect.Type.REPUTATION, 2),
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+		])),
+		_choice("EVT_DESERTER_OPT_REFUSE", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "deserters_met"),
+			EventEffect.make(EventEffect.Type.STRESS, 3),
+		])),
+	])
+	return event
+
+static func _deserter_search() -> GameEvent:
+	var event := _event("evt_deserter_search", "EVT_DESERTER_SEARCH", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("deserters_hidden", EventCondition.Op.HAS_FLAG),
+	])
+	var lie := _checked_choice(
+		"EVT_DESERTER_SEARCH_OPT_LIE",
+		SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST, 1.5),
+		"EVT_DESERTER_SEARCH_LIE_GOOD", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "deserters_safe"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_deserter_debt"),
+		]),
+		"EVT_DESERTER_SEARCH_LIE_BAD", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_hidden"),
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
+		])
+	)
+	event.choices = _choices([
+		lie,
+		_choice("EVT_DESERTER_SEARCH_OPT_HANDOVER", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, 1),
+			EventEffect.make(EventEffect.Type.STRESS, 8),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_hidden"),
+		])),
+	])
+	return event
+
+static func _deserter_debt() -> GameEvent:
+	var event := _event("evt_deserter_debt", "EVT_DESERTER_DEBT", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("deserters_hidden", EventCondition.Op.HAS_FLAG),
+		EventCondition.make("deserters_safe", EventCondition.Op.HAS_FLAG),
+	])
+	var clear := [
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_met"),
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_hidden"),
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_safe"),
+	]
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_DESERTER_DEBT_OPT_JOIN", "EVT_DESERTER_DEBT_OPT_JOIN_LOCKED",
+			_conditions([EventCondition.make("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([EventEffect.make(EventEffect.Type.TRIGGER_RECRUIT, 0)] + clear)
+		),
+		_choice("EVT_DESERTER_DEBT_OPT_GIFT", _effects([
+			EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_1),
+		] + clear)),
 	])
 	return event
 

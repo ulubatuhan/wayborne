@@ -102,6 +102,8 @@ const ENCOUNTER_APPROACH_DAYS: float = 0.35
 const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_wild_animal": "wildlife",
 	"evt_bandit_ambush": "bandit",
+	"evt_deserter_search": "guard",
+	"evt_deserter_plea": "traveler",
 	"evt_wanderer_revenge": "bandit",
 	"evt_guard_patrol": "guard",
 	"evt_customs_checkpoint": "guard",
@@ -1863,13 +1865,18 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	return button
 
 ## Savaşı doğrudan tetikleyen seçenek mi - tehlike etiketi yalnızca bunlara
-## eklenir. Şu an her TRIGGER_COMBAT garantili `effects` içinde (evt_bandit_
-## ambush, evt_wild_animal, evt_guard_patrol, evt_wanderer_revenge); ağırlıklı
-## `outcomes` içinde kullanan bir olay yok.
+## eklenir - garantili `effects` içinde ya da bir sonucun içinde olsun.
 func _choice_triggers_combat(choice: EventChoice) -> bool:
 	for effect in choice.effects:
 		if effect.type == EventEffect.Type.TRIGGER_COMBAT:
 			return true
+	# Zarı tutmazsa savaşa dönen bir seçenek de (evt_deserter_search'ün
+	# yalanı) seçilmeden önce söylesin - kural "savaş açabilen seçenek",
+	# "savaşı garanti eden seçenek" değil.
+	for outcome in choice.outcomes:
+		for effect in outcome.effects:
+			if effect.type == EventEffect.Type.TRIGGER_COMBAT:
+				return true
 	return false
 
 func _on_choice_pressed(choice: EventChoice) -> void:
