@@ -10,17 +10,27 @@ const IDLE_ALPHA: float = 0.35
 const VISIBLE_ALPHA: float = 1.0
 const FADE_DELAY: float = 2.5
 const FADE_DURATION: float = 1.2
-## Ölçüldü ve daraltıldı: yol HUD'una dördüncü çubuk (takat) eklenince
-## 150'lik çubuklar üst şeridi taşırıp kervan sayılarını kırpmaya
-## başladı. Etiket + yüzde 122'de hâlâ okunuyor.
-const BAR_SIZE: Vector2 = Vector2(122, 16)
+## Ölçüldü: yol HUD'una dördüncü çubuk (takat) eklenince 150'lik metin
+## çubukları üst şeridi taşırmıştı. Şişe hâlinde adı ikon ve ipucu taşıyor,
+## yalnızca sayı yazılı kalıyor - ikon + şişe + sayı 148'e sığıyor.
+const BAR_SIZE: Vector2 = Vector2(148, 22)
 
 var _value: float = 0.0
 var _max_value: float = 100.0
 var _label_prefix: String = ""
 var _has_value: bool = false
 
-var _background: ColorRect
+## Şişe: Waybook'un pirinç kapaklı cam tüpü (r4_vial). Sıvı camın içinde,
+## iki kapağın arasında duruyor - oran dokunun kendisi üstünde ölçüldü.
+const VIAL_FILE: String = "r4_vial.png"
+const ICON_SIZE: float = 20.0
+const VIAL_SIZE: Vector2 = Vector2(96.0, 12.0)
+const VALUE_WIDTH: float = 26.0
+const VIAL_LIQUID: Rect2 = Rect2(0.10, 0.24, 0.80, 0.52)
+
+var _icon: TextureRect
+var _vial: TextureRect
+var _empty: ColorRect
 var _fill: ColorRect
 var _label: Label
 var _fade_tween: Tween
@@ -39,28 +49,65 @@ func _ensure_built() -> void:
 
 	custom_minimum_size = BAR_SIZE
 	modulate.a = IDLE_ALPHA
+	mouse_filter = Control.MOUSE_FILTER_PASS
+	# Çocuklar sabit konumlu; şerit satırı daha yüksek olduğunda çubuk
+	# satırın ortasında dursun, tepesinde değil.
+	size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
-	_background = ColorRect.new()
-	_background.color = Color(0.18, 0.18, 0.2, 0.85)
-	_background.size = BAR_SIZE
-	add_child(_background)
+	_icon = TextureRect.new()
+	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_icon.size = Vector2(ICON_SIZE, ICON_SIZE)
+	_icon.position = Vector2(0.0, (BAR_SIZE.y - ICON_SIZE) * 0.5)
+	add_child(_icon)
+
+	var vial_origin := Vector2(ICON_SIZE + 2.0, (BAR_SIZE.y - VIAL_SIZE.y) * 0.5)
+	var liquid := Rect2(
+		vial_origin + VIAL_LIQUID.position * VIAL_SIZE, VIAL_LIQUID.size * VIAL_SIZE
+	)
+	_vial = TextureRect.new()
+	_vial.texture = WaybookTheme.texture(VIAL_FILE)
+	_vial.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_vial.stretch_mode = TextureRect.STRETCH_SCALE
+	_vial.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_vial.position = vial_origin
+	_vial.size = VIAL_SIZE
+	add_child(_vial)
+
+	# Boş cam koyulaşıyor, sıvı onun üstünde: cam dokusu açık gri
+	# boyanmış, boş bir şişeyle dolu bir şişe öyle ayırt edilmiyordu.
+	_empty = ColorRect.new()
+	_empty.color = ArtPalette.UI_GAUGE_EMPTY
+	_empty.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_empty.position = liquid.position
+	_empty.size = liquid.size
+	add_child(_empty)
 
 	_fill = ColorRect.new()
-	_fill.color = Color(0.6, 0.75, 0.5)
-	_fill.size = Vector2(0.0, BAR_SIZE.y)
+	_fill.color = ArtPalette.UI_GAUGE_MORALE
+	_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fill.position = liquid.position
+	_fill.size = Vector2(0.0, liquid.size.y)
 	add_child(_fill)
 
 	_label = Label.new()
-	_label.size = BAR_SIZE
-	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label.position = Vector2(vial_origin.x + VIAL_SIZE.x + 3.0, 0.0)
+	_label.size = Vector2(VALUE_WIDTH, BAR_SIZE.y)
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_label.add_theme_font_size_override("font_size", 11)
+	_label.add_theme_font_size_override("font_size", 14)
+	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_label)
 
-func setup(label_prefix: String, fill_color: Color) -> void:
+## `icon_file` boşsa (eski çağıranlar) ikon yeri boş kalır; çubuğun adı
+## her durumda ipucunda - ikon adı okutmuyor, yalnızca hatırlatıyor.
+func setup(label_prefix: String, fill_color: Color, icon_file: String = "") -> void:
 	_ensure_built()
 	_label_prefix = label_prefix
 	_fill.color = fill_color
+	tooltip_text = label_prefix
+	if icon_file != "":
+		_icon.texture = WaybookTheme.texture(icon_file)
 
 ## Değer değişmediyse yalnızca metni/doluluğu tazeler, parlamaz - ilk
 ## çağrıda (henüz değer yokken) da parlamıyor, oyun açılır açılmaz çubuk
@@ -72,8 +119,9 @@ func set_value(new_value: float, max_value: float = 100.0) -> void:
 	_value = new_value
 	_max_value = maxf(1.0, max_value)
 
-	_fill.size.x = BAR_SIZE.x * clampf(_value / _max_value, 0.0, 1.0)
-	_label.text = "%s %d" % [_label_prefix, int(round(_value))]
+	_fill.size.x = _empty.size.x * clampf(_value / _max_value, 0.0, 1.0)
+	_label.text = "%d" % int(round(_value))
+	tooltip_text = "%s %d" % [_label_prefix, int(round(_value))]
 
 	if changed:
 		_pulse()

@@ -19,12 +19,14 @@ config/features=PackedStringArray("4.2", "forward_plus")
 
 [autoload]
 
+UiTheme="*res://scripts/autoload/ui_theme.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 DevPanel="*res://scripts/autoload/dev_panel.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 UserSettings="*res://scripts/autoload/user_settings.gd"
 GamepadCursor="*res://scripts/autoload/gamepad_cursor.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
+SceneInk="*res://scripts/autoload/scene_ink.gd"
 
 [debug]
 

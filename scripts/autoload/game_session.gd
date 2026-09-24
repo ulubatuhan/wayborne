@@ -1149,6 +1149,29 @@ const STARVATION_HP_LOSS_START_DAY: int = 3
 const STARVATION_HP_LOSS_PER_DAY: int = 4
 const MEAL_HUNGER_MORALE_PENALTY: int = -8
 
+## Bu kip seçilirse sofraya kim oturuyor - dağıtımın kendisi ve sofra
+## ekranının kâseleri aynı cevabı okuyor, iki yerde iki ayrı kural olmasın.
+func get_meal_fed_party(mode: String, selected: Array[CharacterData] = []) -> Array[CharacterData]:
+	var named_party := get_party()
+	var fed: Array[CharacterData] = []
+	match mode:
+		MEAL_MODE_CREW_ONLY:
+			pass
+		MEAL_MODE_SPECIFIC:
+			for character in named_party:
+				if selected.has(character):
+					fed.append(character)
+		MEAL_MODE_SELF_ONLY:
+			var leader := get_player_character()
+			if leader != null:
+				fed.append(leader)
+		_:
+			fed = named_party.duplicate()
+	return fed
+
+func meal_feeds_crew(mode: String) -> bool:
+	return mode != MEAL_MODE_PARTY_ONLY and mode != MEAL_MODE_SELF_ONLY
+
 ## Dağıtım sonucu: kim beslendi, kim aç kaldı, kervan aç kaldı mı. Ekran
 ## bunu isimlerle anlatıyor - bkz. Faz 14 hazırlık notu, "her metrik bir
 ## isim taşımalı, ortalama değil".
@@ -1161,37 +1184,21 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 	var party_share := int(round(float(full_total) * float(party_mouths) / float(total_mouths)))
 	var other_share := full_total - party_share
 
-	var fed_party: Array[CharacterData] = []
-	var feed_other := true
+	var fed_party := get_meal_fed_party(mode, selected)
+	var feed_other := meal_feeds_crew(mode)
 	var intended := full_total
 
 	match mode:
 		MEAL_MODE_PARTY_ONLY:
-			fed_party = named_party.duplicate()
-			feed_other = false
 			intended = party_share
 		MEAL_MODE_CREW_ONLY:
-			fed_party = []
-			feed_other = true
 			intended = other_share
 		MEAL_MODE_SPECIFIC:
-			for character in named_party:
-				if selected.has(character):
-					fed_party.append(character)
-			feed_other = true
 			var per_head := 0.0 if party_mouths <= 0 else float(party_share) / float(party_mouths)
 			intended = other_share + int(round(per_head * fed_party.size()))
 		MEAL_MODE_SELF_ONLY:
-			var leader := get_player_character()
-			if leader != null:
-				fed_party = [leader]
-			feed_other = false
 			var self_share := 0.0 if party_mouths <= 0 else float(party_share) / float(party_mouths)
 			intended = int(round(self_share))
-		_:
-			fed_party = named_party.duplicate()
-			feed_other = true
-			intended = full_total
 
 	var actual := -change_provisions(-intended)
 	# Erzak niyet edilenden de azsa (kese gerçekten boşsa) seçim anlamını

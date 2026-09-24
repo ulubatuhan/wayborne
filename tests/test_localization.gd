@@ -428,13 +428,17 @@ const SCENE_TEXT_NOT_A_KEY: Array[String] = ["WAYBORNE"]
 ## sınanıyor. Şekil isteyen yer onu `UiIcon` ile *çiziyor* (zaten oyunun
 ## geri kalanının dili bu), metin ise fontun taşıdığıyla yazılıyor.
 ##
-## `ThemeDB.fallback_font` headless koşuda da dolu: yazı tipi motoru
-## pencere olmadan da kuruluyor.
+## Sınanan font oyunun gerçekte çizdiği font: `WaybookTheme.get_font()` -
+## kitap yüzü (EB Garamond) ve arkasındaki motor fontu. Motorun varsayılanı
+## sınanmaya devam etseydi test yeşil kalırken oyun başka bir fontla
+## çizerdi. Bir karakter zincirin *herhangi* bir halkasındaysa çizilir;
+## yazı motoru eksik glifi sıradaki fontta arıyor.
 func _test_every_glyph_is_renderable(t) -> void:
-	var font := ThemeDB.fallback_font
-	t.ok(font != null, "varsayılan font okunabiliyor")
+	var font := load("res://scripts/ui/waybook_theme.gd").get_font() as Font
+	t.ok(font != null, "oyunun fontu okunabiliyor")
 	if font == null:
 		return
+	_test_book_face_covers_latin_and_cyrillic(t, font)
 
 	var missing: Dictionary = {}
 
@@ -473,11 +477,72 @@ func _collect_missing_glyphs(font: Font, text: String, missing: Dictionary) -> v
 		# onları eksik saymak her satırda yanlış alarm verirdi.
 		if code < 32:
 			continue
-		if font.has_char(code):
+		if _chain_has_char(font, code):
 			continue
 		var glyph := String.chr(code)
 		if not missing.has(glyph):
 			missing[glyph] = "U+%04X" % code
+
+## tr, de, fr, es, it, pt_BR, pl, ru - UserSettings.SUPPORTED'ın CJK dışı
+## dillerinin harfleri (büyük/küçük), artı metinlerin kullandığı noktalama.
+const BOOK_FACE_ALPHABETS: Array[String] = [
+	"çÇğĞıİöÖşŞüÜ",
+	"äÄöÖüÜß",
+	"àÀâÂæÆçÇéÉèÈêÊëËîÎïÏôÔœŒùÙûÛüÜÿŸ",
+	"áÁéÉíÍñÑóÓúÚüÜ¿¡",
+	"àÀèÈéÉìÌòÒùÙ",
+	"ãÃõÕâÂêÊôÔçÇáÁéÉíÍóÓúÚ",
+	"ąĄćĆęĘłŁńŃóÓśŚźŹżŻ",
+	"абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
+	"«»„“”‘’—–…·%№",
+]
+
+func _chain_has_char(font: Font, code: int) -> bool:
+	if font.has_char(code):
+		return true
+	for fallback in font.fallbacks:
+		if _chain_has_char(fallback, code):
+			return true
+	return false
+
+## Zincirin yetmesi, kitap yüzünün kendisinin yetmesi demek değil: Rusça
+## metin sessizce arkadaki sans'a düşseydi test yeşil kalır, ekran iki
+## farklı fontla yazılmış görünürdü. CJK dışındaki her dilin sütunu kitap
+## yüzünün *kendisinde* olmalı.
+func _test_book_face_covers_latin_and_cyrillic(t, font: Font) -> void:
+	var missing: Dictionary = {}
+	for csv_name in CSV_NAMES:
+		var rows := _read_csv(csv_name)
+		if rows.is_empty():
+			continue
+		var header: Array = rows[0]
+		for column in range(1, header.size()):
+			if String(header[column]) in ["zh_CN", "ja"]:
+				continue
+			for row_index in range(1, rows.size()):
+				var row: Array = rows[row_index]
+				if column >= row.size():
+					continue
+				var text := String(row[column])
+				for index in text.length():
+					var code := text.unicode_at(index)
+					if code >= 32 and not font.has_char(code):
+						missing[String.chr(code)] = "U+%04X" % code
+	# Sütunların çoğu henüz boş (boş hücre İngilizceye düşer), o yüzden
+	# yalnızca CSV'ye bakmak bugün Rusça'yı hiç sınamazdı. Her CJK dışı
+	# dilin kendi alfabesi de ayrıca taranıyor.
+	for text in BOOK_FACE_ALPHABETS:
+		for index in text.length():
+			var code := text.unicode_at(index)
+			if not font.has_char(code):
+				missing[String.chr(code)] = "U+%04X" % code
+	var report: Array[String] = []
+	for glyph in missing:
+		report.append("%s (%s)" % [glyph, String(missing[glyph])])
+	t.eq(
+		report.size(), 0,
+		"CJK dışı her dil kitap yüzünün kendisiyle yazılıyor (eksikler: %s)" % ", ".join(report)
+	)
 
 ## Tek muafiyet ve sebebi: dil adları kendi alfabelerinde yazılı olmak
 ## **zorunda** (bkz. UserSettings.SUPPORTED) ve varsayılan font CJK

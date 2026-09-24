@@ -7,6 +7,8 @@ extends Node2D
 ## Geliştirici test menüsü artık yolun içinde değil, F1 ile her yerden
 ## açılan bir overlay (bkz. scripts/autoload/dev_panel.gd).
 
+## Şehir kapısından girişte yeni sahne mürekkepte bekliyor (bkz. SceneInk).
+const ARRIVAL_INK_HOLD: float = 0.6
 const GROUND_Y: float = 430.0
 const WORLD_MIN_X: float = -160.0
 const WORLD_MAX_X: float = 2100.0
@@ -118,12 +120,12 @@ func _build_status_bars() -> void:
 	_morale_bar = PulseBar.new()
 	row.add_child(_morale_bar)
 	row.move_child(_morale_bar, _status_label.get_index() + 1)
-	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
+	_morale_bar.setup(tr("UI_HUB_MORALE"), ArtPalette.UI_GAUGE_MORALE, "r4a_morale.png")
 
 	_stress_bar = PulseBar.new()
 	row.add_child(_stress_bar)
 	row.move_child(_stress_bar, _morale_bar.get_index() + 1)
-	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
+	_stress_bar.setup(tr("UI_HUB_STRESS"), ArtPalette.UI_GAUGE_STRESS, "r4b_stress.png")
 
 func _process(delta: float) -> void:
 	if not _has_blocking_panel():
@@ -565,6 +567,8 @@ func _enter_spot(spot: Dictionary) -> void:
 	# Yalnızca kapının kendisi bir girişi işaretliyor - bkz. Nav'daki not.
 	if spot.scene == Nav.CITY_MAP:
 		Nav.city_gate_opening = true
+		# Şehre giriş mürekkepte bir an bekliyor: "vardık" anı (bkz. SceneInk).
+		SceneInk.hold_next(ARRIVAL_INK_HOLD)
 	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 ## Sahne değiştirmez - `MealDistributionPanel` gibi sahnesiz bir overlay,

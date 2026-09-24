@@ -684,3 +684,6 @@ func _test_city_brief_model_without_a_scene(t) -> void:
 	var memory := CityBriefModel.build_memory(session)
 	t.ok(String(memory["text"]).contains(dead[0].character_name), "en son kayıp anılıyor")
 	t.ok(String(memory["detail"]).contains(tr("LEDGER_CAUSE_STARVED")), "sebebiyle")
+	t.ok(bool(memory["mourning"]), "yakın bir ölüm yas kurdelesi taşır")
+	session.total_days_elapsed += CityBriefModel.MOURNING_DAYS + 1
+	t.ok(not bool(CityBriefModel.build_memory(session)["mourning"]), "yas günlerce sürer, sonsuza dek değil")

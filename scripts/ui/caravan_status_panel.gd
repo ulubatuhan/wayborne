@@ -34,6 +34,8 @@ const URGENT_COLOR: Color = Color(0.90, 0.45, 0.35)
 ## kırılır sorusunun cevabı bir ortalama değil.
 const STRESS_WARNING_RATIO: float = 0.75
 
+const ITEM_ICON_SIZE: float = 22.0
+
 var _session: GameSession
 var _body: VBoxContainer
 
@@ -182,7 +184,9 @@ func _build_cargo() -> void:
 		var item: Item = row["item"]
 		if item == null:
 			continue
-		_line("     %s" % (tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(row["quantity"])]))
+		_body.add_child(WaybookTheme.item_line(
+			item.item_id, tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(row["quantity"])], ITEM_ICON_SIZE
+		))
 
 func _build_contracts() -> void:
 	# Playtest'in "Contracts Deliver kısmını bulamadım" şikâyetinin yoldaki

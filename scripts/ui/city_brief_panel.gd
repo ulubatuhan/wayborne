@@ -30,6 +30,9 @@ const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
 const OBJECTIVE_MARK_SIZE: float = 11.0
 
+const CREPE_FILE: String = "c1_crepe.png"
+const CREPE_HEIGHT: float = 34.0
+
 var _session: GameSession
 var _chapter_box: VBoxContainer
 var _needs_box: VBoxContainer
@@ -164,7 +167,19 @@ func _build_memory() -> void:
 	memory.text = String(memory_data["text"])
 	memory.autowrap_mode = TextServer.AUTOWRAP_WORD
 	memory.modulate = NOTE_COLOR
-	_chapter_box.add_child(memory)
+	memory.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if bool(memory_data.get("mourning", false)):
+		# Yakın bir ölümün yası: hatıranın başında siyah kurdele (C1).
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var crepe := WaybookTheme.picture(CREPE_FILE, CREPE_HEIGHT)
+		crepe.tooltip_text = tr("UI_BRIEF_MOURNING")
+		crepe.mouse_filter = Control.MOUSE_FILTER_PASS
+		row.add_child(crepe)
+		row.add_child(memory)
+		_chapter_box.add_child(row)
+	else:
+		_chapter_box.add_child(memory)
 	if not String(memory_data["detail"]).is_empty():
 		var detail := Label.new()
 		detail.text = String(memory_data["detail"])

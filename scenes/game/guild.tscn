@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bqguild001"]
 
 [ext_resource type="Script" path="res://scripts/ui/guild.gd" id="1"]
-[ext_resource type="Texture2D" path="res://data/assets/ui/ledger_mockup/guild_desk_bg.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://data/assets/ui/waybook/b1_guild.jpg" id="2"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tabpanel"]
 

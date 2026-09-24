@@ -35,7 +35,12 @@ signal ledger_changed
 ## "Parse Error: ... has no resource loaders" on the very first import of
 ## this exact file. `load()` defers to `_ensure_built()`, which runs after
 ## import has settled.
-const SEAL_TEXTURE_PATH: String = "res://data/assets/ui/ledger_mockup/wax_seal_crown.png"
+## Borç bir mühürle bağlı bir senet: vadesi geçince mühür çatlıyor (G9 ->
+## G9b). Başlıktaki mühür defterin bütününü, satırdaki mühür o borcu
+## söylüyor; ikisi de `_severity_color`'ın tonunu alıyor.
+const SEAL_INTACT_FILE: String = "g9_seal.png"
+const SEAL_CRACKED_FILE: String = "g9b_seal_cracked.png"
+const ROW_SEAL_SIZE: float = 30.0
 const SEAL_SIZE: float = 56.0
 
 const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
@@ -67,6 +72,8 @@ var _amount_spin: SpinBox
 var _borrow_button: Button
 var _refreshing_amount: bool = false
 
+var _header_seal: TextureRect
+
 func setup(session: GameSession) -> void:
 	_session = session
 	_ensure_built()
@@ -93,11 +100,8 @@ func _ensure_built() -> void:
 	# Mühür yalnızca süs değil - "bu defter resmî" diyen tek görsel imza,
 	# aynı balmumu mühür imparatorluk kontratlarının hikâye metninde zaten
 	# tarif edildiği yer.
-	var seal := TextureRect.new()
-	seal.texture = load(SEAL_TEXTURE_PATH)
-	seal.custom_minimum_size = Vector2(SEAL_SIZE, SEAL_SIZE)
-	seal.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	header.add_child(seal)
+	_header_seal = WaybookTheme.picture(SEAL_INTACT_FILE, SEAL_SIZE)
+	header.add_child(_header_seal)
 
 	# Borç kararı (öde/yapılandır/borç al) kesedeki parayı bilmeden
 	# verilemez - önceden bu ekranda hiç görünmüyordu, oyuncu miktarı
@@ -153,6 +157,9 @@ func refresh() -> void:
 		child.queue_free()
 
 	_refresh_borrow_row()
+
+	var any_overdue := not _session.debts.get_overdue_debts(_session.total_days_elapsed).is_empty()
+	_header_seal.texture = WaybookTheme.texture(SEAL_CRACKED_FILE if any_overdue else SEAL_INTACT_FILE)
 
 	var total := _session.get_total_debt()
 	if total <= 0:
@@ -230,6 +237,10 @@ func _build_row(debt: Debt) -> HBoxContainer:
 
 	var days_left := debt.get_days_remaining(_session.total_days_elapsed)
 	var overdue := debt.is_overdue(_session.total_days_elapsed)
+
+	var seal := WaybookTheme.picture(SEAL_CRACKED_FILE if overdue else SEAL_INTACT_FILE, ROW_SEAL_SIZE)
+	seal.modulate = _severity_color(days_left, overdue)
+	row.add_child(seal)
 
 	var label := Label.new()
 	# Alacaklı adı bir çeviri anahtarı (açık hesap) ya da düz bir isim

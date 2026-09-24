@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqchurch001"]
+[gd_scene load_steps=3 format=3 uid="uid://bqchurch001"]
 
 [ext_resource type="Script" path="res://scripts/ui/church.gd" id="1"]
+[ext_resource type="Texture2D" path="res://data/assets/ui/waybook/b5_church.jpg" id="bg_art"]
 
 [node name="Church" type="Control"]
 layout_mode = 3
@@ -10,6 +11,28 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+
+[node name="BackgroundArt" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_art")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackgroundScrim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1

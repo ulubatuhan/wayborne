@@ -367,6 +367,23 @@ func consume_stun() -> void:
 	is_stunned = false
 	_stun_recovery_rounds = STUN_RECOVERY_ROUNDS
 
+## Ekranın okuduğu durum özetleri - savaş alanının ikonları motorun iç
+## listelerine dokunmadan buradan besleniyor.
+func has_stun_recovery() -> bool:
+	return _stun_recovery_rounds > 0
+
+func has_timed_buff() -> bool:
+	for modifier in _timed_modifiers:
+		if int(modifier.amount) > 0:
+			return true
+	return false
+
+func has_timed_debuff() -> bool:
+	for modifier in _timed_modifiers:
+		if int(modifier.amount) < 0:
+			return true
+	return false
+
 func apply_modifier(stat: String, amount: int, rounds: int) -> void:
 	if rounds <= 0 or amount == 0:
 		return

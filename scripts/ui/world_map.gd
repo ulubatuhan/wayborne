@@ -32,7 +32,24 @@ func _ready() -> void:
 	_build_map()
 	_show_hint()
 
+## Harita, yazısız bir arazi parşömeni (B6): şehirler ve yollar görselde
+## yok, `Location.map_position`'dan canlı çiziliyor - isim, yol durumu ve
+## dil ne olursa olsun resim doğru kalıyor (Localization Rules).
+const MAP_ART_FILE: String = "b6_map.jpg"
+## Şehir düğümleri en fazla ~(650, 400)'e uzanıyor; parşömen biraz taşsın ki
+## kenardaki şehir de kâğıdın üstünde dursun.
+const MAP_ART_MARGIN: Vector2 = Vector2(30.0, 30.0)
+
 func _build_map() -> void:
+	var art := TextureRect.new()
+	art.texture = WaybookTheme.texture(MAP_ART_FILE)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_SCALE
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art.position = -MAP_ART_MARGIN
+	art.size = _map_panel.custom_minimum_size + MAP_ART_MARGIN * 2.0
+	_map_panel.add_child(art)
+
 	for route in WorldMapData.get_routes_from(_current_location_id):
 		var from_location := WorldMapData.get_location_by_id(route.from_location_id)
 		var to_location := WorldMapData.get_location_by_id(route.to_location_id)

@@ -12,12 +12,12 @@ extends CanvasLayer
 signal closed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.6)
-const PANEL_BACKGROUND: Color = Color(0.09, 0.08, 0.07)
-const PANEL_BORDER: Color = Color(0.55, 0.45, 0.28)
 const PANEL_WIDTH: float = 480.0
 const OK_COLOR: Color = Color(0.7, 0.85, 0.7)
 const MISSING_COLOR: Color = Color(0.85, 0.45, 0.4)
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
+
+const ITEM_ICON_SIZE: float = 26.0
 
 var _session: GameSession
 var _wagon_index: int = 0
@@ -47,13 +47,6 @@ func setup(session: GameSession, wagon_index: int) -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_BACKGROUND
-	style.border_color = PANEL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(20)
-	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
 
 	var vbox := VBoxContainer.new()
@@ -147,9 +140,9 @@ func _refresh_inventory() -> void:
 
 	for entry in entries:
 		var item: Item = entry.item
-		var line := Label.new()
-		line.text = tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(entry.quantity)]
-		_inventory_list.add_child(line)
+		_inventory_list.add_child(WaybookTheme.item_line(
+			item.item_id, tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(entry.quantity)], ITEM_ICON_SIZE
+		))
 
 ## Her satır kendi malzeme sahip/gerek sayısını gösterir - kilitli bir
 ## tarif *sebebiyle birlikte* gösterilir, gizlenmez (bkz. kilitli olay
