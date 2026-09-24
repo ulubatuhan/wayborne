@@ -56,6 +56,9 @@ const TAB_SLICE: Array[int] = [40, 14, 24, 14]
 const TAB_CONTENT: Array[int] = [34, 16, 20, 16]
 const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
 const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
+## Kayışın yuvarlak uçları döşenirken her parçada tekrar etmesin diye
+## kırpılan genişlik (doku pikseli).
+const STRAP_END_CROP: int = 30
 
 static var _installed: bool = false
 static var _font: Font = null
@@ -192,6 +195,24 @@ static func _filled_frame(frame_file: String, inset: int) -> Texture2D:
 	composed.blend_rect(grain, Rect2i(Vector2i.ZERO, inner.size), inner.position)
 	composed.blend_rect(frame, Rect2i(Vector2i.ZERO, size), Vector2i.ZERO)
 	return ImageTexture.create_from_image(composed)
+
+## Yol HUD'unun şeritleriyle dünya arasındaki perçinli kayış (r1): bir
+## kuşak, çerçeve değil. Yazı kayışın üstünde değil - perçinler harflerin
+## arasına giriyor, okunmuyordu (ölçüldü) - kayış yalnızca iki şeridin
+## dünyaya bakan kenarında. Yuvarlak uçları kırpılmış orta parça döşeniyor.
+static func strap_rule(height: float) -> TextureRect:
+	var source := texture("r1_strap_top.png").get_image()
+	source.decompress()
+	var middle := source.get_region(Rect2i(STRAP_END_CROP, 0, source.get_width() - STRAP_END_CROP * 2, source.get_height()))
+	var scale := height / float(middle.get_height())
+	middle.resize(maxi(1, int(round(middle.get_width() * scale))), int(round(height)), Image.INTERPOLATE_LANCZOS)
+	var rule := TextureRect.new()
+	rule.texture = ImageTexture.create_from_image(middle)
+	rule.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rule.stretch_mode = TextureRect.STRETCH_TILE
+	rule.custom_minimum_size = Vector2(0.0, height)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rule
 
 static func _slip() -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()

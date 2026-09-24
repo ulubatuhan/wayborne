@@ -169,6 +169,33 @@ const CARD_WIDTH: float = 660.0
 ## kartı ekran boyu uzatmasın diye kaydırma kutusuna giriyor.
 const CARD_BODY_MAX_HEIGHT: float = 320.0
 
+## Yol HUD'unun Waybook parçaları (bkz. Waybook UI Rules).
+const TIME_DIAL_SIZE: float = 34.0
+const STRAP_HEIGHT: float = 14.0
+const HUD_ICON_SIZE: float = 24.0
+const ZONE_ICONS: Dictionary = {
+	RoadAttention.ZONE_FRONT: "r6a_front.png",
+	RoadAttention.ZONE_WAGONS: "r6b_wagons.png",
+	RoadAttention.ZONE_REAR: "r6c_rear.png",
+}
+const SIGNAL_ICONS: Dictionary = {
+	RoadSignals.KIND_WHEEL: "r7a_wheel.png",
+	RoadSignals.KIND_STRAGGLER: "r7b_straggler.png",
+	RoadSignals.KIND_SMOKE: "r7c_smoke.png",
+}
+const SIGNAL_FLASH_SECONDS: float = 1.6
+const SIGNAL_FADE_SECONDS: float = 0.8
+const EDGE_STRESS_FILE: String = "g11_edge_bleed.png"
+const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
+const EDGE_MAX_ALPHA: float = 0.85
+## Stres kırılma bölgesine yaklaşırken leke başlıyor (Stress Rules'un
+## kavga eşiği 40), dolmuş bir kervanda tam koyulukta.
+const EDGE_STRESS_FROM: float = 35.0
+const EDGE_STRESS_FULL: float = 85.0
+## Açlıktan can kaybı üçüncü gecede başlıyor (STARVATION_HP_LOSS_START_DAY);
+## kenar ondan bir gece sonra tamamen kavrulmuş.
+const EDGE_HUNGER_FULL_NIGHTS: int = 4
+
 var _session: GameSession
 ## Seferin görsel olmayan durumu (mesafe, gün, tempo, kamp, saat, olay
 ## motoru) - bkz. JourneyController. Aşağıdaki alanlar ona açılan takma
@@ -368,6 +395,17 @@ var _danger_bar: PulseBar
 var _stamina_bar: PulseBar
 ## Liderin o an neye dikkat ettiği. Mekanik görünmezse hata gibi okunur.
 var _attention_label: Label
+## Dikkatin yeri bir ikon da taşıyor (baş/vagonlar/art) - etiket okunmadan
+## bir bakışta. Açık bir yol işareti de kendi ikonuyla yanında duruyor.
+var _attention_icon: TextureRect
+var _signal_icon: TextureRect
+var _signal_tween: Tween
+var _time_dial: TimeDial
+## Kenar lekeleri: stres yükseldikçe mürekkep kenardan sızıyor, açlık
+## gecesi uzadıkça sayfanın kenarı kavruluyor. Sayı değil his - sayısı
+## zaten şişede yazılı.
+var _stress_edge: TextureRect
+var _hunger_edge: TextureRect
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -413,11 +451,27 @@ func _build_world_layer() -> void:
 	_combat_holder.visible = false
 	_world.add_child(_combat_holder)
 
+	# Kenar lekeleri dünyanın üstünde, HUD'un altında; savaşta da duruyor,
+	# çünkü yıpranma savaşa girince geçmiyor.
+	_stress_edge = _edge_overlay(EDGE_STRESS_FILE, ArtPalette.UI_EDGE_STRESS)
+	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
+
+func _edge_overlay(file_name: String, tint: Color) -> TextureRect:
+	var overlay := TextureRect.new()
+	overlay.texture = WaybookTheme.texture(file_name)
+	overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	overlay.stretch_mode = TextureRect.STRETCH_SCALE
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.modulate = Color(tint, 0.0)
+	_world.add_child(overlay)
+	return overlay
+
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
 ## yutmuyor - aradaki boşluk `MOUSE_FILTER_IGNORE`.
 func _build_hud_layer() -> void:
 	_hud.add_child(_build_top_bar())
+	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
 
 	var middle := HBoxContainer.new()
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -433,16 +487,22 @@ func _build_hud_layer() -> void:
 	command_column.add_child(_command_panel)
 	middle.add_child(command_column)
 
+	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
 	_hud.add_child(_build_bottom_bar())
 
 func _build_top_bar() -> PanelContainer:
 	var bar := _make_bar()
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 10)
 	bar.add_child(row)
 
+	_time_dial = TimeDial.new()
+	_time_dial.custom_minimum_size = Vector2(TIME_DIAL_SIZE, TIME_DIAL_SIZE)
+	row.add_child(_time_dial)
+
 	_clock_label = Label.new()
-	_clock_label.custom_minimum_size = Vector2(210.0, 0.0)
+	_clock_label.custom_minimum_size = Vector2(150.0, 0.0)
+	_clock_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(_clock_label)
 
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
@@ -457,14 +517,15 @@ func _build_top_bar() -> PanelContainer:
 	_progress_bar.max_value = 1.0
 	_progress_bar.step = 0.001
 	_progress_bar.show_percentage = false
-	_progress_bar.custom_minimum_size = Vector2(160.0, 14.0)
+	_progress_bar.custom_minimum_size = Vector2(110.0, 14.0)
+	_progress_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(_progress_bar)
 
 	# Arazi, hava ve tempo. Hava yalnızca görsel değil (yolu yavaşlatıyor,
 	# tehlikeyi büyütüyor), o yüzden okunabilir bir yerde durması şart -
 	# görünmeyen bir ceza oyuncu için hatadan ayırt edilemez.
 	_conditions_label = Label.new()
-	_conditions_label.modulate = Color(0.80, 0.82, 0.76)
+	_conditions_label.modulate = ArtPalette.UI_HUD_NOTE
 	_conditions_label.clip_text = true
 	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
 	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
@@ -472,26 +533,31 @@ func _build_top_bar() -> PanelContainer:
 	# kırpılmaya başladı; koşul satırı daraltıldı. Şeridin dolduğu her
 	# seferde önce *neyin* oraya ait olduğu sorulmalı - dikkat etiketi
 	# bu yüzden alt şeride taşındı.
-	_conditions_label.custom_minimum_size = Vector2(372.0, 0.0)
+	# Ölçüldü (1280x720): sabit 372'lik koşul satırı ve dört şişe üst şeridin
+	# asgari genişliğini 1582'ye çıkarıp HUD'u ekranın iki yanından
+	# taşırıyordu - alt şerit de aynı sütunda olduğu için o da kırpılıyordu.
+	# Koşul satırı artık kervan sayılarıyla kalan yeri paylaşıyor.
+	_conditions_label.custom_minimum_size = Vector2(150.0, 0.0)
+	_conditions_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_conditions_label)
 
 	_morale_bar = PulseBar.new()
 	row.add_child(_morale_bar)
-	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
+	_morale_bar.setup(tr("UI_HUB_MORALE"), ArtPalette.UI_GAUGE_MORALE, "r4a_morale.png")
 
 	_stress_bar = PulseBar.new()
 	row.add_child(_stress_bar)
-	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
+	_stress_bar.setup(tr("UI_HUB_STRESS"), ArtPalette.UI_GAUGE_STRESS, "r4b_stress.png")
 
 	# Tehlike de bir oran, o yüzden o da çubuk - ve yolun tehlikesi
 	# oyuncunun en sık baktığı sayı olduğu için metin içinde kaybolmamalı.
 	_danger_bar = PulseBar.new()
 	row.add_child(_danger_bar)
-	_danger_bar.setup(tr("UI_HUB_DANGER"), Color(0.85, 0.62, 0.30))
+	_danger_bar.setup(tr("UI_HUB_DANGER"), ArtPalette.UI_GAUGE_DANGER, "r4c_danger.png")
 
 	_stamina_bar = PulseBar.new()
 	row.add_child(_stamina_bar)
-	_stamina_bar.setup(tr("UI_ROAD_STAMINA"), Color(0.55, 0.70, 0.85))
+	_stamina_bar.setup(tr("UI_ROAD_STAMINA"), ArtPalette.UI_GAUGE_STAMINA, "r4d_stamina.png")
 
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
@@ -543,13 +609,23 @@ func _build_bottom_bar() -> PanelContainer:
 	# uydururdu. Yeri de üst şerit değil alt şerit: oyuncunun ellerinin
 	# olduğu yer burası, yürüme ipucunun tam yanı - dikkat zaten
 	# yürüyerek değiştiriliyor.
+	_attention_icon = WaybookTheme.picture(ZONE_ICONS[RoadAttention.ZONE_FRONT], HUD_ICON_SIZE)
+	row.add_child(_attention_icon)
+
 	_attention_label = Label.new()
-	_attention_label.modulate = Color(0.78, 0.80, 0.86)
+	_attention_label.modulate = ArtPalette.UI_HUD_NOTE
 	_attention_label.clip_text = true
 	# Yürüme ipucu boşken etiket sıfıra çöküyordu: alt şeritteki diğer
 	# her şey gibi kendi yerini istemesi gerekiyor.
 	_attention_label.custom_minimum_size = Vector2(200.0, 0.0)
 	row.add_child(_attention_label)
+
+	# Açık bir işaret yoksa gizli; varsa kendi bölgesine yürünmesi gereken
+	# şeyin resmi. Büyüyünce kan, yetişilince yosun rengiyle bir an parlıyor.
+	_signal_icon = WaybookTheme.picture(SIGNAL_ICONS[RoadSignals.KIND_WHEEL], HUD_ICON_SIZE)
+	_signal_icon.mouse_filter = Control.MOUSE_FILTER_PASS
+	_signal_icon.visible = false
+	row.add_child(_signal_icon)
 
 	row.add_child(VSeparator.new())
 
@@ -559,7 +635,7 @@ func _build_bottom_bar() -> PanelContainer:
 	_last_log_label = Label.new()
 	_last_log_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_last_log_label.clip_text = true
-	_last_log_label.modulate = Color(0.82, 0.84, 0.80)
+	_last_log_label.modulate = ArtPalette.UI_HUD_NOTE
 	row.add_child(_last_log_label)
 
 	_camp_button = Button.new()
@@ -1254,8 +1330,38 @@ func _tick_signals(hours: float) -> void:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
 	for kind in outcome["resolved"]:
 		_add_log(tr(RoadSignals.get_resolved_key(String(kind))), OUTCOME_COLOR)
+		_flash_signal_icon(String(kind), ArtPalette.UI_SIGNAL_RESOLVED)
 	for kind in outcome["escalated"]:
 		_apply_signal_escalation(String(kind))
+		_flash_signal_icon(String(kind), ArtPalette.UI_SIGNAL_ESCALATED)
+	if _signal_tween == null:
+		_refresh_signal_icon()
+
+## Açık işaretlerin ilki, kendi ikonu ve ipucuyla; yoksa ikon gizli.
+func _refresh_signal_icon() -> void:
+	var kinds := _signals.get_open_kinds()
+	_signal_icon.visible = not kinds.is_empty()
+	if kinds.is_empty():
+		return
+	_signal_icon.texture = WaybookTheme.texture(SIGNAL_ICONS[kinds[0]])
+	_signal_icon.modulate = Color.WHITE
+	_signal_icon.tooltip_text = tr(RoadSignals.get_notice_key(kinds[0]))
+
+## Kapanan bir işaret bir an kendi sonucunun renginde görünüp sönüyor;
+## ardından ikon kalan açık işarete dönüyor.
+func _flash_signal_icon(kind: String, tint: Color) -> void:
+	if _signal_tween != null and _signal_tween.is_valid():
+		_signal_tween.kill()
+	_signal_icon.texture = WaybookTheme.texture(SIGNAL_ICONS[kind])
+	_signal_icon.visible = true
+	_signal_icon.modulate = tint
+	_signal_tween = create_tween()
+	_signal_tween.tween_interval(SIGNAL_FLASH_SECONDS)
+	_signal_tween.tween_property(_signal_icon, "modulate:a", 0.0, SIGNAL_FADE_SECONDS)
+	_signal_tween.finished.connect(func() -> void:
+		_signal_tween = null
+		_refresh_signal_icon()
+	)
 
 ## İhmal edilen işaretin bedeli oyunun kendi diliyle ödeniyor: vagon
 ## hasarı, stres, tehlike. Yeni bir ceza mekaniği yok.
@@ -1438,6 +1544,7 @@ func _refresh_time_ui() -> void:
 	# sonra eskisiyle karşılaştırıyordu - yani tahsisat zaten yapılmış
 	# oluyordu. Saat dakikada bir değişir, kare başına değil; Web hedefinde
 	# saniyede 180 gereksiz string demekti.
+	_time_dial.set_hour(_clock.get_hour_of_day())
 	var clock_text := _clock.get_clock_text()
 	if clock_text != _last_clock_text or phase != _last_phase:
 		_last_clock_text = clock_text
@@ -2479,6 +2586,12 @@ func _refresh_state() -> void:
 	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
 		_attention_zone
 	)
+	_attention_icon.texture = WaybookTheme.texture(ZONE_ICONS.get(
+		_attention_zone, ZONE_ICONS[RoadAttention.ZONE_WAGONS]
+	))
+	_refresh_edges()
+	if _signal_tween == null:
+		_refresh_signal_icon()
 
 	_state_label.text = tr("UI_ROAD_CHIPS") % [
 		_session.wallet.balance,
@@ -2490,12 +2603,25 @@ func _refresh_state() -> void:
 		caravan.documents,
 	]
 
+## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
+## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.
+func _refresh_edges() -> void:
+	_stress_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
+		(_session.party_stress - EDGE_STRESS_FROM) / (EDGE_STRESS_FULL - EDGE_STRESS_FROM), 0.0, 1.0
+	)
+	var hungry_nights := 0
+	for character in _session.party:
+		hungry_nights = maxi(hungry_nights, character.consecutive_hungry_days)
+	_hunger_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
+		float(hungry_nights) / float(EDGE_HUNGER_FULL_NIGHTS), 0.0, 1.0
+	)
+
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt
 	# katmanında duruyor (bkz. _build_log_layer).
 	if _last_log_label != null:
 		_last_log_label.text = text
-		_last_log_label.modulate = Color(0.82, 0.84, 0.80) if color == Color.WHITE else color
+		_last_log_label.modulate = ArtPalette.UI_HUD_NOTE if color == Color.WHITE else color
 
 	var label := Label.new()
 	label.text = text

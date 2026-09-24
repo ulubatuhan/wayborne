@@ -118,12 +118,12 @@ func _build_status_bars() -> void:
 	_morale_bar = PulseBar.new()
 	row.add_child(_morale_bar)
 	row.move_child(_morale_bar, _status_label.get_index() + 1)
-	_morale_bar.setup(tr("UI_HUB_MORALE"), Color(0.6, 0.75, 0.5))
+	_morale_bar.setup(tr("UI_HUB_MORALE"), ArtPalette.UI_GAUGE_MORALE, "r4a_morale.png")
 
 	_stress_bar = PulseBar.new()
 	row.add_child(_stress_bar)
 	row.move_child(_stress_bar, _morale_bar.get_index() + 1)
-	_stress_bar.setup(tr("UI_HUB_STRESS"), Color(0.8, 0.45, 0.4))
+	_stress_bar.setup(tr("UI_HUB_STRESS"), ArtPalette.UI_GAUGE_STRESS, "r4b_stress.png")
 
 func _process(delta: float) -> void:
 	if not _has_blocking_panel():

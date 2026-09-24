@@ -27,6 +27,11 @@ OUT = "data/assets/ui/waybook"
 # ink edges anti-aliased instead of cut out with scissors.
 KEY_HARD = 14.0
 KEY_SOFT = 26.0
+# Danger-edge sheets: how far in the torn paper border reaches, the paper's
+# brightness, and how much darker than paper counts as full ink.
+EDGE_INSET = 0.035
+EDGE_PAPER_LUMA = 205.0
+EDGE_INK_RANGE = 150.0
 # Backdrop is a neutral grey: anything noticeably saturated is art, even
 # if its brightness happens to match.
 KEY_MAX_CHROMA = 12.0
@@ -195,12 +200,27 @@ def phase1() -> None:
         rgba = crop_to_alpha(key(_load(src)))
         save(rgba, name, scale_to_width(rgba, 192))
 
+    edge_masks()
+
+
+def edge_masks() -> None:
     for src, name in [("G11b_danger_edge_frost.jpg", "g11_edge_bleed.png"),
                       ("G11c_danger_edge_scorch.jpg", "g11_edge_scorch.png")]:
         rgb = _load(src)
         h, w = rgb.shape[:2]
-        rgba = key(rgb, seeds=[(h // 2, w // 2)])
-        save(rgba, name, (1280, 720))
+        rgba = crop_to_alpha(key(rgb, seeds=[(h // 2, w // 2)]), pad=0)
+        # The sheets were painted on a torn paper card: its white border and
+        # the pale wash under the ink are the card, not the stain. Cut the
+        # border off so the stain reaches the screen edge, then keep only
+        # the ink as a white mask - the game colours it from ArtPalette.
+        ch, cw = rgba.shape[:2]
+        inset_y, inset_x = round(ch * EDGE_INSET), round(cw * EDGE_INSET)
+        rgba = rgba[inset_y:ch - inset_y, inset_x:cw - inset_x].astype(np.float32)
+        luma = rgba[..., :3].mean(axis=2)
+        ink = np.clip((EDGE_PAPER_LUMA - luma) / EDGE_INK_RANGE, 0.0, 1.0)
+        alpha = ink * (rgba[..., 3] / 255.0) * 255.0
+        mask = np.dstack([np.full_like(luma, 255.0)] * 3 + [alpha]).astype(np.uint8)
+        save(mask, name, (1280, 720))
 
 
 def split_components(rgba: np.ndarray, count: int, min_area: int = 400, grow: int = 6) -> list[np.ndarray]:

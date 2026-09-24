@@ -37,6 +37,7 @@ func _init() -> void:
 	if args.size() >= 2:
 		view = Vector2i(int(args[0]), int(args[1]))
 	get_root().size = view
+	DisplayServer.window_set_size(view)
 	# Autoload'lar ilk kareden sonra ağaçta (bkz. screenshot_journey_screen).
 	await _settle()
 	_prepare_session()

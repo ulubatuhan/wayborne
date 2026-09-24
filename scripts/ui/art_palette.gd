@@ -56,6 +56,25 @@ const UI_FOCUS: Color = Color(0.86, 0.70, 0.34, 0.85)
 ## oyunun zemini koyu olduğu için "mürekkep" burada solgun kemik rengi.
 const UI_INK_MARK: Color = Color(0.80, 0.74, 0.64, 0.85)
 const UI_RULE: Color = Color(0.52, 0.42, 0.22, 0.7)
+## Şişe göstergelerinin (moral/stres/tehlike/takat) sıvısı. Şişe camı
+## dokudan geliyor, içindeki renk burada - iki ekran (yol, dünya hub'ı)
+## aynı sıvıyı okusun.
+const UI_GAUGE_MORALE: Color = Color(0.52, 0.70, 0.44)
+const UI_GAUGE_STRESS: Color = Color(0.78, 0.36, 0.30)
+const UI_GAUGE_DANGER: Color = Color(0.88, 0.60, 0.26)
+const UI_GAUGE_STAMINA: Color = Color(0.50, 0.66, 0.84)
+const UI_GAUGE_EMPTY: Color = Color(0.10, 0.09, 0.09, 0.85)
+## Yol şeridindeki ikincil satırlar (koşullar, dikkat, son kayıt).
+const UI_HUD_NOTE: Color = Color(0.82, 0.80, 0.72)
+## Bir yol işareti büyüdüğünde ve oyuncu ona yetiştiğinde ikonun tonu.
+## İkonun kendi mürekkebiyle çarpıldığı için kan/yosunun açık hâli - koyu
+## hâli koyu şeritte görünmüyordu (ölçüldü).
+const UI_SIGNAL_ESCALATED: Color = Color(1.0, 0.46, 0.40)
+const UI_SIGNAL_RESOLVED: Color = Color(0.66, 0.95, 0.58)
+## Yolun kenar lekeleri (g11 maskeleri beyaz; renk burada): stres kanlı bir
+## mürekkep, açlık kavrulmuş bir kahve.
+const UI_EDGE_STRESS: Color = Color(0.16, 0.04, 0.05)
+const UI_EDGE_HUNGER: Color = Color(0.20, 0.12, 0.05)
 
 # --- Gün evreleri: gökyüzü üstü/altı ve ışığın rengi ---
 ## Yol ve şehir aynı tabloyu okuyor, o yüzden bir sefer akşamüstü
