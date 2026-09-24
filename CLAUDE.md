@@ -1263,6 +1263,71 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   columns are still empty, so a CSV-only check would have tested nothing.
   CJK still falls through to the engine font; a Noto Serif CJK fallback
   is an open item (size cost on Web).
+- **The book is the lineage, not a decoration of it.** The main menu is
+  a closed leather cover that opens into a spread (M1/M2) - the cover
+  names the caravan and its generation from the save; the run-over screen
+  closes the book (M3). `WaybookPanel` (L to open, road and city) is the
+  whole `CaravanLedger` as a two-page book, generations divided by a
+  ribbon (L2), struck lines drawn with `StruckLine` - the ink stroke R9,
+  animated only when a name is struck *now* (`SuccessionPanel`), static
+  everywhere else. A struck name is a stroke through the name, never a
+  grey label: the party screen's ledger uses the same line.
+- **One icon table for people** (`WaybookIcons`): stat emblems (P3),
+  duty emblems (P5), grievance marginalia (P4), class emblems (K6), trait
+  tokens (P2), the hunger tally (P6). The character screen, party screen,
+  caravan overview and the battlefield read this one table - the wagon
+  rule again, for icons. Icons from it sit in a square box so a column
+  beside them cannot drift with the emblem's aspect ratio. The tally
+  stick was painted blank; the game cuts one ink notch per hungry night
+  (`TallyStick`), so the picture *is* the count.
+- **Goods have one door too** (`WaybookTheme.item_line`/`item_icon`):
+  wagon, caravan load and the road's status list all go through it. An
+  item without an icon gets a spacer, never a crash or a jagged row.
+- **The road HUD is a dark band edged by a studded belt, never text on
+  leather.** The first pass put the HUD text *on* the R1/R2 straps -
+  measured, the rivets ran through the letters and the vials vanished.
+  The bars stay `HUD_BAR` and `WaybookTheme.strap_rule()` tiles R1's
+  middle between each bar and the world. Gauges are `PulseBar` vials
+  (R4 + an R4a-d icon + the number; the name is in the tooltip) whose
+  liquid colours are `ArtPalette.UI_GAUGE_*`; the clock has a `TimeDial`
+  (R3, sun at noon, stars at midnight); attention and an open road signal
+  show their R6/R7 icon, the signal flashing blood when it escalates and
+  moss when it is caught.
+- **Wear shows at the edge of the world, never as a number.** Stress
+  bleeds ink in from the frame (G11 bleed) past `EDGE_STRESS_FROM`, and
+  the longest hungry streak in the party scorches it (G11 scorch). The
+  source sheets were painted on a torn paper card; the pipeline cuts the
+  card off and ships only the ink as a white mask, coloured from
+  `ArtPalette.UI_EDGE_*` - as shipped first, the card's white border and
+  pale wash covered the scene.
+- **Who eats is one function** (`GameSession.get_meal_fed_party()`/
+  `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per
+  person plus one for the nameless crew) and the distribution itself
+  read it, so the picture shown before confirming is the meal served.
+- **The battlefield is framed, not boxed.** Slots use K1 at half scale as
+  a nine-slice (at full scale its 30 px border ate the 136 px slot); a
+  unit on Death's Door swaps to the cracked K2. The active/target colour
+  is a separate border drawn over the frame, because tinting dark wood
+  did not read. Statuses are K4 icons with remaining rounds (stun
+  recovery and timed buffs/debuffs included - `CombatUnit` exposes read-
+  only summaries so the UI never touches its lists); pips are K5 brass
+  studs; area/push/pull carry K7 glyphs beside their text note.
+- **Scenes arrive out of ink** (`SceneInk` autoload): every scene change
+  fades in from `ArtPalette.INK`, detected by the layer itself watching
+  `current_scene` - no screen has to remember to call it. A city entrance
+  holds the ink a moment longer (`hold_next`), the one "we arrived" beat.
+- **A recent death puts the caravan in mourning.** The city brief's memory
+  carries the crepe (C1) when its line is a death within
+  `CityBriefModel.MOURNING_DAYS` - read from the ledger's own day, not a
+  new saved field, so a reload neither lengthens nor shortens it.
+- **Passing over the senior cracks the seal before you confirm.**
+  `SuccessionPanel` shows G9b instead of G9 the moment a non-senior heir
+  is selected; confirming stamps the seal (the choice is emitted at once;
+  the stamp is only the moment).
+- **Nothing painted ships unread.** The Web build downloads every
+  texture, so a sheet the game never draws (G1 page tile, G10 colour
+  tile, R2, R5) is not written by the pipeline at all; the reason stays
+  as a comment in `tools/waybook_assets.py`. Shipped Waybook set: ~7.3 MB.
 
 ### Route Terrain & Weather Rules
 
@@ -3202,7 +3267,10 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
 - **`tests/screenshot_*.gd` are the visual checks, and they are not tests** -
   they never fail, they render PNGs (`screenshot_combat`, `screenshot_road`,
   `screenshot_city`, `screenshot_hub`, `screenshot_journey_screen`,
-  `screenshot_road_encounter`, `screenshot_menu` — the last one exists
+  `screenshot_road_encounter`, `screenshot_waybook` (ledger, succession,
+  the closed book), `screenshot_screens` (every management screen with a
+  live session; takes an optional `-- width height`, as does
+  `screenshot_journey_screen`), `screenshot_menu` — the last one exists
   because the main menu was the only screen never drawn at all, four
   buttons on flat grey, and no assertion anywhere could say so). They
   exist because a structural test
@@ -3373,15 +3441,13 @@ silinir; tarihçesi (nasıl karara bağlandığı, ölçümü) aşağıdaki Faz
 anlatısında kalır - bu liste yalnızca "şu an açık olan ne" sorusuna cevap
 verir.
 
-- **Waybook sanat geçişi - Faz 2-7.** Faz 0 (tek tema, palet rolleri,
-  kitap yüzü) ve Faz 1 (global cilt/sekme/fiş/çizgi/kurdele) `dev`'de
-  (bkz. Waybook UI Rules). Kalan: ana menü defteri (M1-M3), soy defteri
-  paneli (L1/L2), SuccessionPanel'in mühür/çizgi anı (R9, G9), yönetim
-  ekranı arka planları (B1-B9), yol HUD'u (R1-R8), savaş (K1-K7),
-  karakter/parti (P1-P6), mal ikonları, geçişler. Ham varlıkların hepsi
-  `art_source/waybook/`'ta. İkon aileleri üslupça tutarsız geldi (bir
-  kısmı çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
-  kartlı) - kullanılmadan önce aile başına tek üsluba çekilmeli.
+- **Waybook'un kalan sanat borcu.** Faz 0-8 `dev`'de (bkz. Waybook UI
+  Rules). Açık kalanlar: ikon aileleri üslupça tutarsız (bir kısmı
+  çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
+  kartlı) - aile başına tek üsluba yeniden üretilmeli; yönetim ekranı
+  arka planları 1376x768'de geldi, 1920'de yumuşuyor; G11'in "don" kenarı
+  hiç gelmedi (gelen sayfa mürekkep sızıntısıydı, stres kenarı olarak o
+  kullanılıyor); CJK için kitap yüzüne uygun bir serif yedek font.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin

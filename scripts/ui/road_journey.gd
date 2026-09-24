@@ -172,6 +172,8 @@ const CARD_BODY_MAX_HEIGHT: float = 320.0
 ## Yol HUD'unun Waybook parçaları (bkz. Waybook UI Rules).
 const TIME_DIAL_SIZE: float = 34.0
 const STRAP_HEIGHT: float = 14.0
+## Şehre varışta yeni sahne mürekkepte bu kadar bekliyor (bkz. SceneInk).
+const ARRIVAL_INK_HOLD: float = 0.6
 const HUD_ICON_SIZE: float = 24.0
 const ZONE_ICONS: Dictionary = {
 	RoadAttention.ZONE_FRONT: "r6a_front.png",
@@ -2564,6 +2566,8 @@ func _on_enter_city_pressed() -> void:
 	# `city_map.gd` bunu okuyup kapı sesini çalıyor - bkz. Nav'daki not,
 	# neden bir is_journey_active() kontrolü değil de taşınan bir bayrak.
 	Nav.city_gate_opening = true
+	# Şehre giriş mürekkepte bir an bekliyor: "vardık" anı (bkz. SceneInk).
+	SceneInk.hold_next(ARRIVAL_INK_HOLD)
 	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
 
 ## Bir yan kanal paneli (savaş/pazarlık/tayfa) açıkken zaman durur ve

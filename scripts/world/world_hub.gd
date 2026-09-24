@@ -7,6 +7,8 @@ extends Node2D
 ## Geliştirici test menüsü artık yolun içinde değil, F1 ile her yerden
 ## açılan bir overlay (bkz. scripts/autoload/dev_panel.gd).
 
+## Şehir kapısından girişte yeni sahne mürekkepte bekliyor (bkz. SceneInk).
+const ARRIVAL_INK_HOLD: float = 0.6
 const GROUND_Y: float = 430.0
 const WORLD_MIN_X: float = -160.0
 const WORLD_MAX_X: float = 2100.0
@@ -565,6 +567,8 @@ func _enter_spot(spot: Dictionary) -> void:
 	# Yalnızca kapının kendisi bir girişi işaretliyor - bkz. Nav'daki not.
 	if spot.scene == Nav.CITY_MAP:
 		Nav.city_gate_opening = true
+		# Şehre giriş mürekkepte bir an bekliyor: "vardık" anı (bkz. SceneInk).
+		SceneInk.hold_next(ARRIVAL_INK_HOLD)
 	get_tree().change_scene_to_file(Nav.open(Nav.WORLD_HUB, spot.scene))
 
 ## Sahne değiştirmez - `MealDistributionPanel` gibi sahnesiz bir overlay,

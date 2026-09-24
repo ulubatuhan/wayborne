@@ -73,6 +73,11 @@ func _prepare_session() -> void:
 	companion.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH)
 	companion.consecutive_hungry_days = 2
 	companion.duty_id = DutyCatalog.LEVAZIMCI
+	# Yakın bir ölüm: şehir brifingi yas kurdelesini taşısın.
+	var fallen := CharacterData.create("Yaruk", CultureCatalog.NOMAD, CharacterStats.new())
+	session.add_to_party(fallen)
+	var dead: Array[CharacterData] = [fallen]
+	session.resolve_deaths(dead, "LEDGER_CAUSE_COMBAT_WILDLIFE", session.current_location_id)
 
 func _settle() -> void:
 	for _frame in 10:

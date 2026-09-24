@@ -150,11 +150,13 @@ def seam_error(rgb: np.ndarray) -> float:
 
 def phase1() -> None:
     print("Phase 1 - global chrome")
-    for src, name in [("G1_page_surface.jpg", "g1_page_tile.png"),
-                      ("G10_grain_stain_overlay.jpg", "g10_grain_tile.png")]:
+    # G1 (page surface) and G10 as a full-colour tile are not shipped: the
+    # panels compose their ground from ArtPalette + the grain mask below, so
+    # a baked-colour tile would be ~0.7 MB of Web download nothing reads.
+    # Seam quality of the tiling itself is still reported.
+    for src in ["G1_page_surface.jpg", "G10_grain_stain_overlay.jpg"]:
         tile = make_tile(_load(src), 512)
-        print(f"  {src}: seam ratio before {seam_error(_load(src)):.2f}, after {seam_error(tile):.2f}")
-        save(tile, name)
+        print(f"  {src}: seam ratio before {seam_error(_load(src)):.2f}, after {seam_error(tile):.2f} (not shipped)")
 
     # Grain as a *mask*, not a picture: black specks whose alpha is how
     # dark the stain sheet was. The game lays it over a panel fill whose
@@ -291,9 +293,11 @@ def phase2plus() -> None:
     icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
 
     # Road HUD.
-    for src, name in [("R1_hud_top_strap.jpg", "r1_strap_top.png"), ("R2_hud_bottom_strap.jpg", "r2_strap_bottom.png")]:
-        rgba = crop_to_alpha(key(_load(src)))
-        save(rgba, name, scale_to_width(rgba, 640))
+    # Only the top strap ships: the HUD draws one studded belt along each
+    # bar's world-facing edge (text over the rivets did not read), and the
+    # bottom strap's buckle has no place in a tiled belt.
+    rgba = crop_to_alpha(key(_load("R1_hud_top_strap.jpg")))
+    save(rgba, "r1_strap_top.png", scale_to_width(rgba, 640))
     dial, needle = split_components(crop_to_alpha(key(_load("R3_time_dial_face.jpg"))), 2)
     save(dial, "r3_dial.png", (96, round(dial.shape[0] * 96 / dial.shape[1])))
     save(needle, "r3_needle.png", (round(needle.shape[1] * 90 / needle.shape[0]), 90))
@@ -306,8 +310,9 @@ def phase2plus() -> None:
                       ("R7b_road_signal_straggler.jpg", "r7b_straggler.png"), ("R7c_road_signal_smoke.jpg", "r7c_smoke.png"),
                       ("R8a_meal_bowl_full.jpg", "r8a_bowl_full.png"), ("R8b_meal_bowl_empty.jpg", "r8b_bowl_empty.png")]:
         icon(src, name, 96)
-    rgba = crop_to_alpha(key(_load("R5_event_card_parchment.jpg")))
-    save(rgba, "r5_parchment.png", scale_to_width(rgba, 420))
+    # R5 (event card parchment) is not shipped: the event card is the sealed
+    # binding, dark ground, bone text - a light parchment card would need
+    # every card line recoloured and fought the seal frame.
 
     # Combat.
     rgba = crop_to_alpha(key(_load("K1_combat_slot_frame.jpg"), seeds=[(728, 360)]))

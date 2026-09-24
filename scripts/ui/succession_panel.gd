@@ -31,6 +31,9 @@ var _selected: CharacterData = null
 var _candidate_buttons: Array[Button] = []
 var _heir_label: Label = null
 var _heir_cameo: PortraitCameo = null
+var _seal: TextureRect = null
+var _continue_button: Button = null
+var _confirmed: bool = false
 
 ## Düşenin adı büyük yazılıp üstü mürekkeple çiziliyor; seçilen varisin
 ## portresi madalyonda; onay düğmesinin üstünde mühür (bkz. Waybook UI
@@ -38,6 +41,11 @@ var _heir_cameo: PortraitCameo = null
 const FALLEN_NAME_FONT_SIZE: int = 30
 const HEIR_CAMEO_HEIGHT: float = 120.0
 const SEAL_HEIGHT: float = 64.0
+const SEAL_FILE: String = "g9_seal.png"
+const SEAL_CRACKED_FILE: String = "g9b_seal_cracked.png"
+const SEAL_PRESS_SCALE: float = 0.82
+const SEAL_PRESS_SECONDS: float = 0.35
+const SEAL_HOLD_SECONDS: float = 0.35
 
 func setup(
 	caravan_name: String, fallen_name: String, fallen_line: String,
@@ -139,14 +147,14 @@ func setup(
 	_heir_label.add_theme_font_size_override("font_size", 16)
 	heir_row.add_child(_heir_label)
 
-	var seal := WaybookTheme.picture("g9_seal.png", SEAL_HEIGHT)
-	seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	vbox.add_child(seal)
+	_seal = WaybookTheme.picture(SEAL_FILE, SEAL_HEIGHT)
+	_seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(_seal)
 
-	var continue_button := Button.new()
-	continue_button.text = tr("UI_SUCCESSION_CONFIRM")
-	continue_button.pressed.connect(_on_continue_pressed)
-	vbox.add_child(continue_button)
+	_continue_button = Button.new()
+	_continue_button.text = tr("UI_SUCCESSION_CONFIRM")
+	_continue_button.pressed.connect(_on_continue_pressed)
+	vbox.add_child(_continue_button)
 	_refresh_selection()
 
 ## "Ad · Sv N · stres S · (kıdemli)" ve varsa en ağır kırgınlık.
@@ -197,9 +205,32 @@ func _refresh_selection() -> void:
 	if not _candidates.is_empty() and _selected != _candidates[0]:
 		text += "\n" + tr("UI_SUCCESSION_PASSED_OVER_WARNING") % _candidates[0].character_name
 	_heir_label.text = text
+	# Kıdemliyi geçmek mührü çatlatıyor: seçimin bedeli (kırgınlık) onay
+	# basılmadan önce resimde de görünüyor.
+	if _seal != null:
+		var passes_over := not _candidates.is_empty() and _selected != _candidates[0]
+		_seal.texture = WaybookTheme.texture(SEAL_CRACKED_FILE if passes_over else SEAL_FILE)
+		_seal.tooltip_text = tr("UI_SUCCESSION_SEAL_CRACKED") if passes_over else ""
 
+## Onay mührü basıyor: kısa bir baskı, sonra panel kapanıyor. Karar o anda
+## veriliyor (sinyal hemen gidiyor); baskı yalnızca anın kendisi.
 func _on_continue_pressed() -> void:
+	if _confirmed:
+		return
+	_confirmed = true
+	_continue_button.disabled = true
 	if _selected != null:
 		heir_chosen.emit(_selected)
+	if _seal == null or not is_inside_tree():
+		_finish()
+		return
+	_seal.pivot_offset = _seal.size * 0.5
+	var press := create_tween()
+	press.tween_property(_seal, "scale", Vector2(SEAL_PRESS_SCALE, SEAL_PRESS_SCALE), SEAL_PRESS_SECONDS * 0.4)
+	press.tween_property(_seal, "scale", Vector2.ONE, SEAL_PRESS_SECONDS * 0.6)
+	press.tween_interval(SEAL_HOLD_SECONDS)
+	press.finished.connect(_finish)
+
+func _finish() -> void:
 	dismissed.emit()
 	queue_free()

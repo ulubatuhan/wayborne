@@ -84,6 +84,12 @@ static func build_needs(session: GameSession) -> Array[Dictionary]:
 ## Defterin en son üstü çizili satırı: {"text", "detail"}. `detail`, satırın
 ## sebebi ve yeri varsa onun okunur hali; yoksa boş. Hiç üstü çizili satır
 ## yoksa boş sözlük ("no need, no row").
+## Yas: son çizili satır bir ölümse ve bu kadar gün içinde yazıldıysa
+## brifingin hatırası siyah bir kurdele (C1) taşıyor. Kaydedilen yeni bir
+## alan değil - defterin kendi günü ile takvimden okunuyor, yeniden
+## yüklemek yası ne uzatır ne kısaltır.
+const MOURNING_DAYS: int = 14
+
 static func build_memory(session: GameSession) -> Dictionary:
 	var struck := session.ledger.recent().filter(session.ledger.is_struck)
 	if struck.is_empty():
@@ -98,7 +104,13 @@ static func build_memory(session: GameSession) -> Dictionary:
 	var detail := ""
 	if not String(entry.get("cause", "")).is_empty():
 		detail = CaravanLedger.describe(entry)
-	return {"text": _t(key) % String(entry.get("name", "")), "detail": detail}
+	var mourning := (
+		kind == CaravanLedger.KIND_DIED
+		and session.total_days_elapsed - int(entry.get("day", -MOURNING_DAYS - 1)) <= MOURNING_DAYS
+	)
+	return {
+		"text": _t(key) % String(entry.get("name", "")), "detail": detail, "mourning": mourning,
+	}
 
 static func _need(text: String, action_label: String, scene_path: String, urgent: bool) -> Dictionary:
 	return {"text": text, "action": action_label, "scene": scene_path, "urgent": urgent}
