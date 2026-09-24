@@ -32,6 +32,7 @@ func run(t) -> void:
 	_test_named_crew_die_with_their_wagon(t)
 	_test_profiteering_is_remembered(t)
 	_test_leave_behind_and_party_hp(t)
+	_test_leave_behind_names_its_target_first(t)
 	_test_stop_events_follow_their_stop(t)
 	_test_finale_needs_struck_names(t)
 	_test_event_resolver_is_the_single_path(t)
@@ -412,6 +413,33 @@ func _test_unfed_crew_can_starve(t) -> void:
 		var fed_result := fed.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
 		t.eq((fed_result["crew_starved_names"] as Array).size(), 0, "doyurulan tayfa ölmez")
 	t.eq(fed.crew_hungry_nights, 0, "doğru doyuran kervanda sayaç hiç artmaz")
+
+## Geride bırakma seçeneği kimi bırakacağını seçmeden önce söylüyor; kartın
+## söylediği kişi ile gerçekten bırakılan her kadro düzeninde aynı.
+func _test_leave_behind_names_its_target_first(t) -> void:
+	var event := EventCatalog.get_event("evt_leave_the_wounded")
+	var leave: EventChoice = event.choices[0]
+	var carry: EventChoice = event.choices[1]
+	for layout in 4:
+		var session := _session()
+		session.owned_wagon_count = 3
+		for index in 2:
+			session.add_to_party(
+				CharacterData.create("Yaralı %d" % index, CultureCatalog.VALLEY, CharacterStats.new())
+			)
+		var party := session.get_party()
+		for index in party.size():
+			var character := party[index]
+			if character.is_player:
+				continue
+			# Her düzende başka biri en ağır yaralı.
+			var ratio := 0.2 if (index + layout) % party.size() == 0 else 0.8
+			character.current_hp = maxi(1, int(character.get_max_hp() * ratio))
+		var named := EventEffectApplier.get_choice_target(leave, session)
+		t.ok(named != null and not named.is_player, "kart bir yoldaşı adıyla gösteriyor")
+		EventEffectApplier.apply(leave.effects, session)
+		t.not_ok(session.get_party().has(named), "bırakılan, kartın söylediği kişi")
+	t.eq(EventEffectApplier.get_choice_target(carry, _session()), null, "kimseye dokunmayan seçenek ad göstermez")
 
 # --- S11: liderlik seçimi ---
 
