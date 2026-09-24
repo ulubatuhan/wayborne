@@ -144,12 +144,10 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
-	var info_label := Label.new()
-	info_label.text = _offer_line_text(offer, destination_name)
-	info_label.custom_minimum_size = Vector2(440, 0)
+	var info_label := _row_label(_offer_line_text(offer, destination_name))
 	row.add_child(info_label)
 
-	var accept_button := Button.new()
+	var accept_button := _row_action()
 	accept_button.pressed.connect(_on_accept_pressed.bind(offer))
 	row.add_child(accept_button)
 
@@ -213,15 +211,11 @@ func _build_commission_row(kind: WorldEvents.Kind) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
-	var info_label := Label.new()
-	info_label.text = "%s\n%s" % [
+	row.add_child(_row_label("%s\n%s" % [
 		tr(String(COMMISSION_TITLE_KEYS[kind])), tr(String(COMMISSION_DESC_KEYS[kind])),
-	]
-	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info_label.custom_minimum_size = Vector2(440, 0)
-	row.add_child(info_label)
+	]))
 
-	var button := Button.new()
+	var button := _row_action()
 	var block_reason := _session.get_commission_block_reason(kind)
 	if block_reason.is_empty():
 		button.text = tr("UI_COMMISSION_ACCEPT")
@@ -231,6 +225,29 @@ func _build_commission_row(kind: WorldEvents.Kind) -> HBoxContainer:
 		button.disabled = true
 	row.add_child(button)
 	return row
+
+## Satırın metni kalan yeri alıyor ve sarılıyor; eylem düğmesi kendi
+## genişliğini koruyor. Metnin sabit 440'lık bir asgarisi vardı ve
+## sarılmıyordu - dar pencerede satır düğmeyi ekranın dışına itiyor, uzun
+## kilit sebebi ("İtibar yetersiz (5 gerekli)") sekmenin kenarından
+## taşıyordu (ölçüldü).
+const ROW_TEXT_MIN_WIDTH: float = 240.0
+const ROW_ACTION_MIN_WIDTH: float = 230.0
+
+func _row_label(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.custom_minimum_size = Vector2(ROW_TEXT_MIN_WIDTH, 0.0)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	return label
+
+func _row_action() -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(ROW_ACTION_MIN_WIDTH, 0.0)
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return button
 
 func _on_commission_pressed(kind: WorldEvents.Kind) -> void:
 	if _session.fulfill_commission(kind):

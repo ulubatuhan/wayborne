@@ -1324,6 +1324,44 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   `SuccessionPanel` shows G9b instead of G9 the moment a non-senior heir
   is selected; confirming stamps the seal (the choice is emitted at once;
   the stamp is only the moment).
+- **A stretched tab is a stripe, not a button.** A `Button` that fills its
+  row (VBox child with `SIZE_FILL`, HBox child with `SIZE_EXPAND`) wears
+  `RowButton` - G2 at `ROW_SCALE` as a nine-slice - and the `UiTheme`
+  autoload assigns it as the node enters the tree (`is_wide_button`), the
+  `SceneInk` pattern: no screen has to remember. Measured: the Caravan
+  Yard's actions and every back button were the G4 tab stretched to
+  1000+ px, its grain turned into horizontal bars. A button that already
+  carries a variation or a stylebox override is left alone. The tab's own
+  middle slice now tiles (`TILE_FIT`) instead of stretching for the same
+  reason. Inputs (`LineEdit`, inside every `SpinBox`) and cargo cells
+  (`CELL_PANEL`) use the same small binding - the engine's black box and
+  the market's green `ColorRect` cells (`PlaceholderHelper`, deleted) were
+  the last unskinned widgets.
+- **The lock mark never crosses the reason.** The disabled tab's scratch
+  sits only on the tab's curled ear (a fixed nine-slice corner, so it is in
+  the same place at any width), inked `UI_LOCK_MARK`; the disabled row's
+  sits inside its fixed corner - a mark in a tiled edge strip repeated
+  along the whole border. Drawn across the body, the pale scratch made
+  "Reputation too low (5 required)" unreadable, which is the one line the
+  locked-with-reason rule exists to show.
+- **Bone text always carries a dark halo.** `Label` has a `UI_TEXT_HALO`
+  shadow, `Button`/`LineEdit` an outline (`TEXT_OUTLINE_SIZE`), because the
+  scene backgrounds, leather and scratch marks all have pale patches. Paper
+  variations (`PageLabel`, `PageHeading`, tooltips) switch it off - ink on
+  paper needs none.
+- **A map is written on, not stuck on.** City markers on the B6 parchment
+  are `MapLabel` buttons - no box, ink text with a parchment-coloured halo,
+  blood for "you are here", faded ink for a closed road (still shown, still
+  with its reason) - over a K5 stud. The tab buttons (and the disabled
+  tab's scratch) sat on the map as grey patches.
+- **Paper an asset was painted on is not the asset.** Three icons (K6
+  clerk, P3 strength, P4 witnessed death) came on an off-white card and the
+  K5 studs on a bone plate; keying cannot see either (it removes the grey
+  backdrop only). The pipeline's `unpaper` drops pale, unsaturated paper
+  connected to the outside, `disc` cuts the studs round, and `loose_page`
+  ships B6 as a torn page with a transparent surround instead of the
+  desk-ink fill full-bleed scenes get. A square corner on an icon is a
+  pipeline bug, not a styling choice.
 - **Nothing painted ships unread.** The Web build downloads every
   texture, so a sheet the game never draws (G1 page tile, G10 colour
   tile, R2, R5) is not written by the pipeline at all; the reason stays

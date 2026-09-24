@@ -56,6 +56,14 @@ const UI_FOCUS: Color = Color(0.86, 0.70, 0.34, 0.85)
 ## oyunun zemini koyu olduğu için "mürekkep" burada solgun kemik rengi.
 const UI_INK_MARK: Color = Color(0.80, 0.74, 0.64, 0.85)
 const UI_RULE: Color = Color(0.52, 0.42, 0.22, 0.7)
+## Kemik rengi yazının koyu halesi/gölgesi.
+const UI_TEXT_HALO: Color = Color(0.03, 0.025, 0.03, 0.9)
+## Kilitli düğmenin kulağındaki karalama: kan mürekkebi, yazıdan uzakta.
+const UI_LOCK_MARK: Color = Color(0.78, 0.30, 0.24, 0.95)
+## Harita parşömenindeki şehir yazısı: kapalı yolun şehri soluk mürekkep,
+## hepsinin çevresinde kâğıt renginde bir hale (tarama üstünde okunsun).
+const UI_MAP_INK_FADED: Color = Color(0.055, 0.050, 0.058, 0.72)
+const UI_MAP_HALO: Color = Color(0.90, 0.85, 0.74, 0.85)
 ## Şişe göstergelerinin (moral/stres/tehlike/takat) sıvısı. Şişe camı
 ## dokudan geliyor, içindeki renk burada - iki ekran (yol, dünya hub'ı)
 ## aynı sıvıyı okusun.
