@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_locked_button_is_marked(t, theme)
 	_test_nine_slice_leaves_a_centre(t, theme)
 	_test_no_screen_builds_its_own_panel(t)
+	_test_fx_colours_live_in_the_palette(t)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
@@ -81,3 +82,14 @@ func _test_no_screen_builds_its_own_panel(t) -> void:
 		if text.contains("const PANEL_BACKGROUND") or text.contains("const PANEL_BORDER"):
 			offenders.append(file_name)
 	t.eq(offenders.size(), 0, "hiçbir ekran kendi panel rengini tanımlamıyor (%s)" % ", ".join(offenders))
+
+## Efekt renkleri ArtPalette'te: savaş paneli kendi parlama sabitini bir daha
+## tanımlamasın (aynı "ekran kendi panelini kurmaz" koruması).
+func _test_fx_colours_live_in_the_palette(t) -> void:
+	var file := FileAccess.open("res://scripts/ui/combat_panel.gd", FileAccess.READ)
+	t.ok(file != null, "savaş paneli okunabiliyor")
+	if file == null:
+		return
+	var regex := RegEx.new()
+	regex.compile("const FLASH_\\w+\\s*:\\s*Color")
+	t.eq(regex.search(file.get_as_text()), null, "parlama rengi yalnızca ArtPalette'te")

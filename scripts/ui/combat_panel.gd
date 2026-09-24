@@ -41,21 +41,7 @@ const FLASH_DURATION_MSEC: int = 500
 const LUNGE_DURATION_MSEC: int = 260
 const LUNGE_DISTANCE: float = 14.0
 
-## Modulate çarpanları 1.0'ın üstüne çıkabiliyor - Godot bunu kenetlemiyor,
-## zaten açık renkli bir zemin üstünde "parlama" hissi böyle ucuza elde
-## ediliyor, yeni bir blend modu icat etmeden.
-const FLASH_CRIT: Color = Color(2.0, 1.7, 0.65)
-const FLASH_HIT: Color = Color(1.7, 0.6, 0.55)
-## Faz 17 PR-7 eksiği: bir kaçırmanın motorda hiç barkı yoktu, o yüzden
-## isabet/kritikle aynı kareyi paylaşıyordu. Soğuk/berrak bir ton kasıtlı -
-## FLASH_HIT'in sıcak kırmızısının tam tersi, "temas etmedi" hissi.
-const FLASH_MISS: Color = Color(1.3, 1.5, 1.7)
-const FLASH_REFUSE: Color = Color(0.55, 0.55, 0.6, 0.75)
-const FLASH_DEATHS_DOOR: Color = Color(1.4, 0.25, 0.25)
-const FLASH_SURVIVED: Color = Color(1.5, 1.4, 0.85)
-const FLASH_KILLED: Color = Color(0.35, 0.32, 0.34)
-const FLASH_DOWNED: Color = Color(0.5, 0.48, 0.5)
-const FLASH_NEUTRAL: Color = Color(1, 1, 1, 1)
+## Parlama renkleri ArtPalette.FX_FLASH_* - renk tek yerden gelir.
 
 ## Mevki belirteçleri: dolu nokta "burada durabilir" / "buraya vurabilir",
 ## boş nokta duramaz/vuramaz. DD'nin yetenek ikonundaki nokta dizisinin
@@ -353,7 +339,7 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 	_bark_texts[unit] = {"text": text, "expires_at": Time.get_ticks_msec() + BARK_DURATION_MSEC}
 
 	var flash := _flash_for_kind(kind)
-	if flash != FLASH_NEUTRAL:
+	if flash != ArtPalette.FX_FLASH_NEUTRAL:
 		_flash_states[unit] = {
 			"color": flash, "expires_at": Time.get_ticks_msec() + FLASH_DURATION_MSEC,
 		}
@@ -373,15 +359,15 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 
 func _flash_for_kind(kind: String) -> Color:
 	match kind:
-		CombatEncounter.BARK_CRIT: return FLASH_CRIT
-		CombatEncounter.BARK_HIT: return FLASH_HIT
-		CombatEncounter.BARK_MISS: return FLASH_MISS
-		CombatEncounter.BARK_REFUSE: return FLASH_REFUSE
-		CombatEncounter.BARK_DEATHS_DOOR: return FLASH_DEATHS_DOOR
-		CombatEncounter.BARK_SURVIVED: return FLASH_SURVIVED
-		CombatEncounter.BARK_KILLED: return FLASH_KILLED
-		CombatEncounter.BARK_DOWNED: return FLASH_DOWNED
-		_: return FLASH_NEUTRAL
+		CombatEncounter.BARK_CRIT: return ArtPalette.FX_FLASH_CRIT
+		CombatEncounter.BARK_HIT: return ArtPalette.FX_FLASH_HIT
+		CombatEncounter.BARK_MISS: return ArtPalette.FX_FLASH_MISS
+		CombatEncounter.BARK_REFUSE: return ArtPalette.FX_FLASH_REFUSE
+		CombatEncounter.BARK_DEATHS_DOOR: return ArtPalette.FX_FLASH_DEATHS_DOOR
+		CombatEncounter.BARK_SURVIVED: return ArtPalette.FX_FLASH_SURVIVED
+		CombatEncounter.BARK_KILLED: return ArtPalette.FX_FLASH_KILLED
+		CombatEncounter.BARK_DOWNED: return ArtPalette.FX_FLASH_DOWNED
+		_: return ArtPalette.FX_FLASH_NEUTRAL
 
 func _apply_pending_bark(slot: CombatUnitSlot, unit: CombatUnit) -> void:
 	var data: Dictionary = _bark_texts.get(unit, {})
@@ -394,13 +380,13 @@ func _apply_pending_bark(slot: CombatUnitSlot, unit: CombatUnit) -> void:
 
 func _apply_pending_animation(slot: CombatUnitSlot, unit: CombatUnit) -> void:
 	var now := Time.get_ticks_msec()
-	var flash := FLASH_NEUTRAL
+	var flash := ArtPalette.FX_FLASH_NEUTRAL
 	var flash_data: Dictionary = _flash_states.get(unit, {})
 	if not flash_data.is_empty():
 		if now >= int(flash_data.get("expires_at", 0)):
 			_flash_states.erase(unit)
 		else:
-			flash = flash_data.get("color", FLASH_NEUTRAL)
+			flash = flash_data.get("color", ArtPalette.FX_FLASH_NEUTRAL)
 
 	var lunge := 0.0
 	var lunge_data: Dictionary = _lunge_states.get(unit, {})

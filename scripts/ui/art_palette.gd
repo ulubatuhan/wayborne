@@ -84,6 +84,38 @@ const UI_SIGNAL_RESOLVED: Color = Color(0.66, 0.95, 0.58)
 const UI_EDGE_STRESS: Color = Color(0.16, 0.04, 0.05)
 const UI_EDGE_HUNGER: Color = Color(0.20, 0.12, 0.05)
 
+# --- Savaş ve yol efektleri (FX) ---
+# Parlama değerleri bir `modulate` çarpanı: 1.0'ın üstü "parlama" demek,
+# Godot bunu kenetlemiyor. Eskiden CombatPanel'in kendi sabitleriydi -
+# "renk tek yerden gelir" kuralı efektler için de geçerli.
+const FX_FLASH_CRIT: Color = Color(2.0, 1.7, 0.65)
+const FX_FLASH_HIT: Color = Color(1.7, 0.6, 0.55)
+# Kaçırma soğuk ve berrak: isabetin sıcak kırmızısının tersi, "değmedi".
+const FX_FLASH_MISS: Color = Color(1.3, 1.5, 1.7)
+const FX_FLASH_REFUSE: Color = Color(0.55, 0.55, 0.6, 0.75)
+const FX_FLASH_DEATHS_DOOR: Color = Color(1.4, 0.25, 0.25)
+const FX_FLASH_SURVIVED: Color = Color(1.5, 1.4, 0.85)
+const FX_FLASH_KILLED: Color = Color(0.35, 0.32, 0.34)
+const FX_FLASH_DOWNED: Color = Color(0.5, 0.48, 0.5)
+const FX_FLASH_NEUTRAL: Color = Color(1, 1, 1, 1)
+# Durum efektleri: kanama isabetten koyu ve daha doygun (atardamar), zehir
+# hastalıklı yeşil, sersemletme soluk altın. Hepsi hem parlama çarpanı hem
+# halka/işaret rengi olarak okunur.
+const FX_BLEED: Color = Color(1.35, 0.25, 0.30)
+const FX_BLIGHT: Color = Color(0.85, 1.35, 0.45)
+const FX_STUN: Color = Color(0.95, 0.85, 0.45)
+# Savaş sayıları: hasar, kritik, şifa.
+const FX_DAMAGE: Color = Color(0.93, 0.86, 0.74)
+const FX_CRIT: Color = Color(1.0, 0.78, 0.30)
+const FX_HEAL: Color = Color(0.62, 0.90, 0.56)
+# Düşmüş ve ölü bir birimin sahadaki soluklaşması - ikisi ayrı: ölü daha da
+# silik, düşen hâlâ saftaki bir boşluk.
+const UI_FALLEN_ALPHA: float = 0.55
+const UI_DEAD_ALPHA: float = 0.35
+# Savaş açabilen olay seçeneğinin kenar çizgisi - tehlike çubuğunun
+# kehribarından (UI_GAUGE_DANGER) bilerek ayrı: kan.
+const UI_CHOICE_COMBAT: Color = Color(0.66, 0.19, 0.17)
+
 # --- Gün evreleri: gökyüzü üstü/altı ve ışığın rengi ---
 ## Yol ve şehir aynı tabloyu okuyor, o yüzden bir sefer akşamüstü
 ## çıkıldığında şehir de aynı akşamüstünde görünüyor.
