@@ -137,6 +137,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_world_event_start(effect, session, result)
 		EventEffect.Type.LEAVE_BEHIND:
 			_apply_leave_behind(session, result)
+		EventEffect.Type.DEBT_SETTLE:
+			var settled := session.settle_debts_in_kind(effect.amount)
+			if settled > 0:
+				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
 

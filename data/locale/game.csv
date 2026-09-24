@@ -356,3 +356,4 @@
 "CBT_LOG_STEPPED_FORWARD","%s öne atıldı (mevki %d).","%s steps forward (rank %d).","","","","","","","","",""
 "SKILL_BRACE_NAME","Kalkan Duvarı","Shield Wall","","","","","","","","",""
 "SKILL_BRACE_DESC","Kendine ya da yanındaki yoldaşa iki tur zırh verir.","Grants himself or the comrade beside him armour for two rounds.","","","","","","","","",""
+"EFF_DEBT_SETTLED","Borçtan %d GG düşüldü.","%d GP taken off the debt.","","","","","","","","",""
