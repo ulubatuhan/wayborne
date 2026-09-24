@@ -69,16 +69,29 @@ wayborne/
   player learns what to prepare for next time.
 - **A choice that opens combat says so before it's picked, not after.**
   `road_journey.gd`'s `_choice_triggers_combat()` scans a choice's
-  `effects` for `TRIGGER_COMBAT` and appends the road's current effective
+  `effects` **and its outcomes' effects** for `TRIGGER_COMBAT` (a check
+  whose failure turns into a fight - `evt_deserter_search` - is a choice
+  that can open combat too) and appends the road's current effective
   danger (`_weathered_danger()` - the same number the HUD's danger bar
   already shows) straight onto the button. A steep win-rate gap between
   road-danger tiers is a real difficulty curve, not a bug, but a fight the
   player couldn't see coming *is* a legibility bug - the fix is telling the
   player what they're gambling on, not softening the odds.
-- All player-facing event text lives in `data/locale/wayborne_text.csv` as
-  translation keys; scripts call `tr(key)`. Never hardcode event prose.
+- All player-facing event text lives in `data/locale/events.csv` (effect
+  lines in `game.csv`) as translation keys; scripts call `tr(key)`. Never
+  hardcode event prose.
 - New effects must be added to the `EventEffect.Type` enum **and** handled in
   `EventEffectApplier`, otherwise they silently do nothing.
+  `test_event_effects::_test_every_effect_type_is_handled` scans the
+  applier's source for a `match` arm per enum value - a runtime probe could
+  not see it, because an unhandled type returns an empty result and an
+  empty result is the right answer for some types (`SET_FLAG`).
+- **A choice that falls on a named person says who before it is picked.**
+  `EventEffectApplier.get_choice_target()` reads the same selector the apply
+  path uses (`LEAVE_BEHIND`, `PARTY_HP`), and the card appends that name to
+  the button. "Leave someone behind" with the someone decided afterwards by
+  an algorithm took the heaviest decision in the game out of the player's
+  hands - the same legibility rule as the check preview naming its roller.
 - **A chosen option resolves through exactly one path: `EventResolver`.**
   Effects → skill-check roll → weighted outcome → outcome effects → the
   event's XP used to live inside `road_journey.gd` and was hand-copied into
@@ -89,6 +102,13 @@ wayborne/
   own effect hook (`Callable`) when it needs one (the road's `TRAVEL_DAYS`
   wrapper, the simulator's inline combat). `EventResolver.stop_context()`
   is likewise the one place a road stop becomes a `near_*` flag.
+- **Only `DEBT_SETTLE` pays a debt.** A negative `GOLD` goes through
+  `spend_or_owe` and *adds* debt; `DEBT_SETTLE` credits `amount` against the
+  debts in kind (overdue first, oldest due first) through
+  `GameSession.settle_debts_in_kind()`. It never produces gold, discards
+  anything beyond what is owed, and credits the overdraft's share to the
+  purse - the overdraft is the purse's mirror, so clearing it only in the
+  ledger would bring it back on the next balance change.
 - **Events never kill.** `PARTY_HP` clamps at 1 HP; the doors to death are
   combat and starvation (see Character & Party Rules). `LEAVE_BEHIND` removes
   the weakest non-leader companion as a *departure* (struck, not dead) - the
@@ -244,10 +264,22 @@ wayborne/
   everyone never increments the counter, so Provision Rules' promise
   (correct stocking never starves) still holds - `test_memory.gd` asserts
   it. Without this, "who eats tonight" was a stress dial, not a choice.
+- **The nameless go hungry too, and it adds up.** Leaving the crew unfed
+  used to cost the same single morale hit as leaving one named person
+  unfed - and since the crew are most of the mouths, "feed only the party"
+  was always the cheapest mode. `crew_hungry_nights` counts consecutive
+  unfed nights (saved; reset on a fed night and on city arrival), the
+  morale penalty grows per night (`get_crew_hunger_morale_penalty`, capped),
+  and from `STARVATION_HP_LOSS_START_DAY` one crew member dies each night,
+  into the ledger by name (`LEDGER_CAUSE_STARVED`). The wagon is driven on
+  by a new hand under a **new** name: crew names come from an ever-growing
+  `_crew_name_serial`, because rolling by list index handed the dead
+  person's exact name to their replacement.
 - **The crew are nameless in combat, not in the ledger.** `crew_names`
   holds `PEOPLE_PER_WAGON` names per owned wagon, seeded from
-  `caravan_name|index` and the leader's culture pool, so a reload never
-  re-rolls them. A wagon lost on the road (`_apply_wagon_losses_to_ownership`)
+  `caravan_name|serial` (a saved, ever-growing counter) and the leader's
+  culture pool, so a reload never re-rolls them and a replacement never
+  inherits a dead name. A wagon lost on the road (`_apply_wagon_losses_to_ownership`)
   records its two crew as dead (`LEDGER_CAUSE_WAGON_LOST`); a wagon *sold*
   does not - they are paid off, not lost. Crew still never fight (crew ≠
   combat party).
@@ -307,15 +339,27 @@ wayborne/
   `_on_combat_finished(victory, xp_awarded)`. The bandit ambush's "fight"
   choice no longer rolls dice - it opens the real panel.
 - **Timed stat modifiers are the one sanctioned way a skill reaches beyond
-  its own hit.** A `CombatSkill` can carry `modifier_stat` ("accuracy",
-  "dodge" or "damage"), `modifier_amount` and `modifier_rounds`; landing the
+  its own hit.** A `CombatSkill` can carry `modifier_stat` (one of
+  `CombatUnit.MODIFIER_STATS`: "accuracy", "dodge", "damage" or "prot"), `modifier_amount` and `modifier_rounds`; landing the
   skill calls `CombatUnit.apply_modifier()` on the target, and
   `CombatEncounter` ticks every unit's modifiers down by one each time the
   round number advances. `get_effective_accuracy()/_dodge()/_damage_bonus()`
   are what combat resolution actually reads - never the raw fields directly
   once a skill might have buffed/debuffed them. A skill with no damage, no
   heal and a non-enemy target (SELF/ALLY) applies its modifier without an
-  accuracy roll - see `CombatSkill.make_buff()`.
+  accuracy roll - see `CombatSkill.make_buff()`. "prot" is read by the one
+  damage door (`reduce_by_protection` → `get_effective_protection()`), so
+  bleed and blight see broken armour too; `test_combat_dd` fails on any
+  modifier name outside the list, the same trap as an unknown status. Such a
+  skill also applies its `shift_amount` to itself (a real "Step Back") -
+  shifts used to run only on the attack path.
+- **Each class owns one buff axis and one debuff axis, and only the Clerk
+  heals.** Guard gives armour (`brace`), Hunter dodge (and steps back),
+  Breaker damage and *breaks armour* (`shield_break`, −25 PROT), Clerk
+  accuracy (`keep_ledger`) and the only heal (`rousing_speech`). Three
+  classes had carried the same dodge buff and the Guard out-healed the
+  healer. `test_combat_dd::_test_each_class_owns_its_axes` locks it; the
+  re-measured win-rate table and its one out-of-band cell are in Ruin Rules.
 - **Status effects are the second sanctioned reach beyond a hit**, and they
   are a separate field group from timed modifiers because they are a
   different thing: a modifier bends a number, a status *acts on its own at
@@ -439,6 +483,18 @@ carry a caravan *name* down the road.
   heir and the one the company would follow are allowed to be different
   people. The panel is still unskippable: confirming a choice is its only
   exit.
+- **Seniority is time served, not level.** `_compare_seniority` reads the
+  earliest `KIND_JOINED` day (`get_join_day`), then level, then XP. As a
+  level sort, a late, high-level guild hire outranked a companion who had
+  walked since the founder - the opposite of what *kıdem* means.
+- **The ceremony testifies.** Each candidate line says how many days they
+  served under the fallen leader and whether they were kept out of the
+  fight that killed them - read from the ledger and the fight's roster, no
+  new saved field. And grief is weighted by shared time: in
+  `resolve_deaths`, a survivor who walked `SHARED_GRIEF_DAYS` with the dead
+  takes `SHARED_GRIEF_STRESS` on top. The grievance stays equal for everyone
+  - the weight lands on stress, which melts, not on grievance, which does
+  not, so the measured departure cap is untouched.
 - **A ledger line is a memory, not a statistic.** Entries carry `cause`
   (a translation key, `LEDGER_CAUSE_*`) and `location`;
   `CaravanLedger.describe()` is the one formatter every screen uses ("… fell
@@ -453,6 +509,12 @@ carry a caravan *name* down the road.
   `build_event_context()` exposes `companions_died`, `companions_departed`,
   `companions_lost`, `lineage_generation` and `days_as_leader`; for a long
   time only the campaign context had them and no event could ask.
+- **A loss cannot be bought.** `companions_lost` (event and campaign
+  contexts both read `get_companions_lost()`) excludes departures whose
+  cause is `LEDGER_CAUSE_DISMISSED`. Counting every departure let two cheap
+  market-square hires, dismissed in town, satisfy the finale's "two struck
+  names" gate - the one gate that reads loss, bought with gold. Left behind,
+  broken and gone, died, lost with a wagon: those still count.
 - **The finale's gold gate became `days_as_leader`.** A pure money gate
   closed the story with "you got rich enough". The measurement survives:
   with a leader who never dies, tenure equals elapsed days and the finale's
@@ -1484,6 +1546,13 @@ re-roll the rain away.
   increase, someone at the floor absorbs a decrease — exactly what one
   shared clamp hid), and a party with no members has stress zero, because
   there is nobody to carry it.
+- **The HUD's stress vial shows the average and marks the person.** The
+  average is the right answer to "what shape is the company in", the wrong
+  one to "who is about to break" - so when someone sits 5+ above it, the
+  vial carries a notch at their value and the tooltip names them
+  (`GameSession.get_max_stress_character()`, `PulseBar.set_marker()`).
+  Darkest Dungeon never shows a party-level bar at all; this keeps the bar
+  and adds the person.
 - **`_migrate_save` earned its keep here.** `SAVE_VERSION` 2 spreads a v1
   save's single average across every party member. Inventing who was worn
   down and by how much would be inventing information that never existed;
@@ -3519,9 +3588,9 @@ verir.
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
   karşılığı olarak zaten kurulu.
-- **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı yeni
-  kart ekledi; codex bunları (ve Faz 17 PR-9'un kaydettiği önceki açığı)
-  henüz işlemedi - bilerek ertelendi.
+- **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
+  on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
+  PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -5112,6 +5181,38 @@ hafızaya, zorluktan trajediye:
   (brifingin düğümsüz yarısı), `GameSession.Phase` (türetilmiş evre), sefer
   ortası otomatik kaydı.
 - **Finalin hafıza kapısı.** Ölçüldü, bkz. Campaign Rules.
+
+**Faz 19 ("Sistem mimarisi incelemesi") tamamlandı.** Dört aşamalı bir
+inceleme (Bogost'un prosedürel retoriği; Frostpunk, This War of Mine,
+Darkest Dungeon karşılaştırması) sistemlerin ne *söylediğini* denetledi ve
+on beş biletlik bir backlog çıkardı; her bilet kendi PR'ıyla, sırayla
+birleştirildi:
+
+- **Korumalar önce.** Her olay etkisi tipinin uygulayıcıda karşılandığını
+  (T-01) ve her süreli değiştirici adının motorca bilindiğini (T-02) sınayan
+  testler - ikisi de yalnızca yazılı bir kural olarak duruyordu.
+- **Sınıf kimliği (T-02..T-04).** Zırh değiştiricisi, kendine kaydırma, sınıf
+  başına tek destek ve tek bozma ekseni, tek şifacı. Denge yeniden ölçüldü;
+  bir hücre bandın bir savaş dışında, sebebi Ruin Rules'ta.
+- **Kayıp satın alınamaz (T-05).** İşten çıkarmak finalin kayıp kapısını
+  artık açmıyor.
+- **İsimsizler sayılır (T-06).** Aç bırakılan tayfa birikir ve ölür, adıyla.
+- **Veraset (T-07, T-08).** Kıdem hizmet süresi; tören adaylar hakkında
+  defterin bildiğini söylüyor; uzun süre birlikte yürüyenin yası ağır.
+- **Geride bırakılan önceden adıyla (T-09).**
+- **Zincirler (T-10, T-11, T-14).** İşaretsiz Mezar (defteri okur),
+  Firariler (bölgesel savaşı okur), Kurt Yılı (vahşi hayvan savaşıyla
+  biter), borç krizi (alacaklının atlısı → icra memurları). Denge
+  simülatörü taze oturumlarla çalıştığı için ilk üçünün son halkalarına
+  ulaşamıyor; hepsinin uçtan uca testi var.
+- **Borç ayni ödenebilir (T-13).** `DEBT_SETTLE`, vokabülerde borcu azaltan
+  ilk etki.
+- **Ortalamanın sakladığı kişi (T-12).** Stres şişesinde en yıpranmış
+  kişinin çentiği.
+
+İncelemeden bilerek sapılan tek yer: borç krizinde "vagon teslim et"
+seçeneği yok - yolda kaybedilen vagonun tayfası deftere ölü yazılıyor, el
+konulan bir vagon için bu yanlış bir hatıra olurdu.
 
 ## Quick Start
 
