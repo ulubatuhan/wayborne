@@ -1378,6 +1378,8 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   fades in from `ArtPalette.INK`, detected by the layer itself watching
   `current_scene` - no screen has to remember to call it. A city entrance
   holds the ink a moment longer (`hold_next`), the one "we arrived" beat.
+  Since SENSORY-002 the change itself goes through the same door - see
+  Motion Rules.
 - **A recent death puts the caravan in mourning.** The city brief's memory
   carries the crepe (C1) when its line is a death within
   `CityBriefModel.MOURNING_DAYS` - read from the ledger's own day, not a
@@ -1428,6 +1430,90 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   texture, so a sheet the game never draws (G1 page tile, G10 colour
   tile, R2, R5) is not written by the pipeline at all; the reason stays
   as a comment in `tools/waybook_assets.py`. Shipped Waybook set: ~7.3 MB.
+
+### Motion Rules
+
+The world was drawn well and moved like a slideshow: a scene change was a
+cut, a figure that stopped walking snapped its legs together in one frame,
+a hit in combat was a colour that sat frozen until the next refresh and
+then vanished, a button did nothing under the cursor. SENSORY-001..013
+gave the game its motion, and every piece of it follows the same few rules.
+
+- **Motion has one clock per system and it lives in a pure function.**
+  `CombatFx` (recoil, flash, shake, fall, numbers), `WalkFigure.ease_motion`,
+  `RoadCaravan.wind_lean_at`/`canopy_sway_at`, `JourneyClock.phase_for_hour`/
+  `darkness_for_hour`, `ButtonFeedback.hover_scale` and
+  `SceneInk.transition_kind` are all static and scene-free, so
+  `test_motion.gd`/`test_combat_fx.gd`/`test_ui_feel.gd` read the same
+  numbers the screen draws. A curve written inside a `_draw()` is a curve
+  no test can see.
+- **Every motion starts at rest and ends at rest, exactly.** Recoil is
+  `sin(πu)·(1−0.35u)` (zero at both ends), a flash fades to
+  `FX_FLASH_NEUTRAL` (u²), shake is exactly zero after 250 ms, a stopping
+  figure's stride decays to zero over `REST_EASE_SECONDS`. The tests assert
+  the endpoints, because a motion that ends *near* rest leaves a figure a
+  pixel off forever.
+- **Rebuilt nodes cannot own a tween; the owner drives them per frame.**
+  `CombatPanel` rebuilds its slots on every `_refresh()`, so combat state
+  is timestamped in the panel (`_flash_states`, `_lunge_states`,
+  `_fall_states`, `_ring_states`, `_shake`) and `_animate(now)` stamps the
+  current value onto the live slots each frame, turning its own
+  processing off when nothing is moving. The first version applied the
+  state only at `bind()`: a flash sat frozen until the next click and
+  then vanished in one frame.
+- **Numbers come from what changed, not from what was said.** Damage and
+  heal numbers are the difference in `current_hp` between refreshes, so
+  armour, Death's Door, bleed and the heal cap are all already in them -
+  reading the engine's hit line would have shown damage armour absorbed.
+- **The engine says *what kind* of moment it was; the screen decides how
+  it looks.** Status application, bleed/blight ticks and stun skips are
+  `unit_barked` kinds (`BARK_STATUS_*`, `BARK_*_TICK`, `BARK_STUN_SKIP`)
+  with empty text - a moment, not a speech bubble. Never branch on the
+  translated text (Localization Rules).
+- **The last blow is seen before the result.** A kill or a downing starts
+  a 300 ms fall around the figure's feet, and `CombatPanel.falls_pending()`
+  keeps Continue disabled until every fall lands.
+- **Only figures shake; text never does.** Shake (3/6/8 px for hit/crit/
+  kill) moves figure drawings, never labels, bars or buttons - what is
+  read must not tremble.
+- **Scene changes have one door: `SceneInk.go(path)`.** It snapshots the
+  outgoing frame, changes the scene at once (the new scene's `_ready` is
+  never delayed), then animates the snapshot away: `Nav.open` slides the
+  page left, `Nav.back` slides it right, a root change sinks into ink.
+  The kind comes from `Nav.last_move`, so none of the call sites chooses.
+  Two traps were measured: `change_scene_to_file` passes through a frame
+  where `current_scene` is null (treating that frame as an arrival killed
+  the slide), and a back move to a root empties the stack (so depth
+  comparison called it a root change - hence `last_move`).
+- **Reduce Motion is honoured everywhere motion is decoration.**
+  `UserSettings.reduce_motion` (saved, Settings screen) turns page slides
+  into the ink fade, stops the combat shake and freezes button scale.
+  Flashes, numbers and falls stay: they carry information.
+- **Secondary motion belongs to the thing that is moving.** Canopy sway
+  and the ox's nod are multiplied by the same motion weight as the walk,
+  so a stopped caravan is completely still. Wind leans people only, in
+  rain and storm, with a per-figure gust phase - a wagon that leans is a
+  wagon that tips over.
+- **The city keeps the road's hour.** `GameSession.last_clock_hour`
+  (saved) is written on arrival; `CityView` and `HubScenery` read the sky
+  from `TravelBand.sky_for_hour` - the road's own table - plus a night wash
+  from `JourneyClock.darkness_for_hour`. The darkness is a curve of the
+  hour, not of the palette: the night phase blends toward dawn for nine
+  hours, so by 02:00 the palette is already bright (measured).
+- **A button under the cursor answers.** `ButtonFeedback` attaches itself
+  to every button through `UiTheme`'s `node_added` (the `RowButton`
+  pattern): hover grows `1+min(3%, 6px/width)` - 3% of a 1000 px row is a
+  jump -, press dips to 0.96, release overshoots to 1.02 and settles. It
+  only touches `scale` (containers rewrite position, never scale), the
+  tweens belong to the button, a locked button does not move, and it has
+  no `class_name`: the autoload loads it, and a script that names itself
+  could not compile there (measured).
+- **A choice says what kind of risk it is before it is read.** Choices
+  that can open combat carry a blood stripe (`UI_CHOICE_COMBAT`), checked
+  choices the stat emblem of their roller, and a locked choice whose one
+  numeric requirement is just short (`EventChoice.is_near_miss`, within a
+  quarter or one unit) shows its reason in `UI_ACCENT` instead of the
+  locked grey.
 
 ### Route Terrain & Weather Rules
 
@@ -1638,6 +1724,10 @@ target in `character.gd`, a `return` field carried in the road's spot table
   another's exit. Never add a per-screen "where do I return to" variable
   again — that is the bug this replaced.
 - Never hardcode a `res://scenes/...` path in a screen script; use `Nav`.
+- **Never call `change_scene_to_file()` either; call `SceneInk.go(Nav.x(...))`.**
+  `SceneInk` is the only script allowed to change scenes, and
+  `test_navigation.gd` fails on any other caller (see Motion Rules for
+  why the transition needs the door).
 - A screen's back button goes to `Nav.back()` and is labelled
   `Nav.back_label()`, so the player reads where it leads before pressing it.
 - **Roots are gone to, not returned to.** `Nav.ROOTS` (road, city, main menu)
@@ -3363,6 +3453,13 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   profiteering memory, `LEAVE_BEHIND`/`PARTY_HP`, the stop cards, the
   finale's memory gate, `EventResolver`, `JourneyController`, and a
   mid-journey save round trip that replays **the same dice** after a reload.
+- `test_motion.gd`, `test_combat_fx.gd` and `test_ui_feel.gd` (Faz 20) lock
+  the motion layer's contracts rather than its look: every curve starts and
+  ends at rest, a stop is a settle not a snap, wind only blows in bad
+  weather, the engine emits the status moments, a live combat slot returns
+  to neutral on its own, numbers are the real HP difference, a fall holds
+  Continue, hover growth stays a few pixels on a wide row, and "near miss"
+  means one numeric requirement just short (see Motion Rules).
 - `test_route_terrain.gd` locks the road's geography and weather: both
   reproducible from a seed, segments covering the whole route with no gaps,
   biomes never jumping, stops never landing on the destination city, clear
@@ -5213,6 +5310,28 @@ birleştirildi:
 İncelemeden bilerek sapılan tek yer: borç krizinde "vagon teslim et"
 seçeneği yok - yolda kaybedilen vagonun tayfası deftere ölü yazılıyor, el
 konulan bir vagon için bu yanlış bir hatıra olurdu.
+
+
+**Faz 20 ("Duyu") tamamlandı.** Bir Principal Technical Artist / UI-UX
+incelemesi dört sütunda (geçişler, prosedürel animasyon, savaş efekti,
+düğme hissi) on dört biletlik bir SENSORY backlog'u çıkardı; her bilet
+kendi PR'ıyla, sırayla birleştirildi. Kurallar Motion Rules'ta:
+
+- **Renk tek yerden (001).** Savaş efektlerinin renkleri `ArtPalette.FX_*`.
+- **Sahne geçişi (002).** `SceneInk.go` - kırk beş çağrı yeri tek kapıda;
+  derine inmek sayfayı sola, geri dönmek sağa çeviriyor, köke gitmek
+  mürekkebe batıyor.
+- **Şehir yolun saatinde (003).** Varış saati kayda yazılıyor, gökyüzü ve
+  gece örtüsü ondan.
+- **Yürüyüş (004/005).** Kopmasız duruş, branda salınımı, öküzün baş
+  sallaması, yağmurda ve fırtınada rüzgâra eğilme.
+- **Savaş (006-011).** Karede sürülen parlama ve hamle, düşüş (Devam'ı
+  tutuyor), yalnızca figürlerin sarsıntısı, gerçek can farkından hasar
+  sayıları, durum halkaları ve tıkları, sersemlik yayları, "Hareketi Azalt"
+  ayarı.
+- **Düğme ve seçenek (012/013).** Her düğmede eldeki his; savaş açan
+  seçenekte kan şeridi, zara bağlı seçenekte stat amblemi, "neredeyse"
+  kilitte vurgu rengi.
 
 ## Quick Start
 
