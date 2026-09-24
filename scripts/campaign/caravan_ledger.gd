@@ -81,6 +81,20 @@ func count_of(kind: String) -> int:
 			total += 1
 	return total
 
+## Bir türün satırları, belirli bir sebep hariç. Finalin kayıp kapısı
+## kendi isteğiyle yollanan (şehirde işten çıkarılan) biri için
+## açılmasın diye var - aksi hâlde meydandan iki ucuz tayfa tutup
+## göndermek "kayıp" satın almak olurdu.
+func count_of_excluding_cause(kind: String, excluded_cause: String) -> int:
+	var total := 0
+	for entry in entries:
+		if String(entry.get("kind", "")) != kind:
+			continue
+		if String(entry.get("cause", "")) == excluded_cause:
+			continue
+		total += 1
+	return total
+
 ## Bir ismin defterdeki bütün satırları - parti ekranı bir kişinin
 ## hikâyesini bir arada gösterebilsin diye.
 func entries_for(character_name: String) -> Array[Dictionary]:

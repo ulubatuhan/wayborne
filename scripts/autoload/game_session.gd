@@ -604,7 +604,17 @@ func recruit(character: CharacterData) -> bool:
 
 ## Oyuncunun kendisi çıkarılamaz. Kontrol sıraya göre değil bayrağa göre:
 ## oyuncu arkaya geçtiğinde kendini atabilmesi bir hataydı.
-func dismiss(character: CharacterData, cause_key: String = "LEDGER_CAUSE_DISMISSED") -> bool:
+const DISMISSED_CAUSE_KEY: String = "LEDGER_CAUSE_DISMISSED"
+
+## Kaybedilenler: ölenler ve gidenler - ama oyuncunun kendi isteğiyle
+## gönderdikleri değil. Geride bırakılan, kırılıp giden, vagonuyla kaybolan
+## sayılır; şehirde işten çıkarılan sayılmaz. Olay ve kampanya bağlamı aynı
+## sayıyı okur.
+func get_companions_lost() -> int:
+	return ledger.count_of(CaravanLedger.KIND_DIED) \
+		+ ledger.count_of_excluding_cause(CaravanLedger.KIND_DEPARTED, DISMISSED_CAUSE_KEY)
+
+func dismiss(character: CharacterData, cause_key: String = DISMISSED_CAUSE_KEY) -> bool:
 	if character == null or character.is_player:
 		return false
 	var index := party.find(character)
@@ -2637,8 +2647,7 @@ func build_event_context() -> Dictionary:
 		# yol kimin öldüğünü, kimin gittiğini, kaçıncı kuşakta olduğunu okuyabilir.
 		"companions_died": ledger.count_of(CaravanLedger.KIND_DIED),
 		"companions_departed": ledger.count_of(CaravanLedger.KIND_DEPARTED),
-		"companions_lost": ledger.count_of(CaravanLedger.KIND_DIED)
-			+ ledger.count_of(CaravanLedger.KIND_DEPARTED),
+		"companions_lost": get_companions_lost(),
 		"lineage_generation": lineage_generation,
 		"days_as_leader": get_days_as_leader(),
 		"profiteering_sales": profiteering_sales,
@@ -2857,8 +2866,7 @@ func build_campaign_context() -> Dictionary:
 		# bakabiliyor. Bir bölüm "şu kadar gün bu adı taşı" diyebilir.
 		"lineage_generation": lineage_generation,
 		"days_as_leader": get_days_as_leader(),
-		"companions_lost": ledger.count_of(CaravanLedger.KIND_DIED)
-			+ ledger.count_of(CaravanLedger.KIND_DEPARTED),
+		"companions_lost": get_companions_lost(),
 		"flags": _flags,
 	}
 

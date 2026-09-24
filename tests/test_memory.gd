@@ -523,6 +523,34 @@ func _test_finale_needs_struck_names(t) -> void:
 		keys.append(condition.key)
 	t.ok(keys.has("companions_lost"), "final defterde üstü çizili ad istiyor")
 
+	# Kayıp satın alınamaz: meydandan iki kişi tutup şehirde göndermek
+	# finalin kapısını açmamalı.
+	var session := _session()
+	var baseline := int(session.build_campaign_context()["companions_lost"])
+	for index in 2:
+		var hire := CharacterData.create("Tutulan %d" % index, CultureCatalog.VALLEY, CharacterStats.new())
+		session.add_to_party(hire)
+		t.ok(session.dismiss(hire), "şehirde gönderildi")
+	t.eq(
+		int(session.build_campaign_context()["companions_lost"]), baseline,
+		"kendi isteğiyle gönderilen kayıp sayılmaz"
+	)
+	t.eq(
+		int(session.build_event_context()["companions_lost"]), baseline,
+		"olay bağlamı da aynı sayıyı okur"
+	)
+	t.eq(
+		int(session.build_event_context()["companions_departed"]), 2,
+		"ayrılan satırı yine de defterde"
+	)
+	var left := CharacterData.create("Bırakılan", CultureCatalog.VALLEY, CharacterStats.new())
+	session.add_to_party(left)
+	session.dismiss(left, "LEDGER_CAUSE_LEFT_BEHIND")
+	t.eq(
+		int(session.build_campaign_context()["companions_lost"]), baseline + 1,
+		"geride bırakılan kayıp sayılır"
+	)
+
 # --- S9: tek çözüm yolu ---
 
 func _test_event_resolver_is_the_single_path(t) -> void:
