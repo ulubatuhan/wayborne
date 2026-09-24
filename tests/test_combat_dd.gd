@@ -40,6 +40,7 @@ func run(t) -> void:
 	_test_random_targeting_never_wastes_a_turn(t)
 	_test_shift_keeps_ranks_contiguous(t)
 	_test_shift_cannot_remove_a_unit_from_the_field(t)
+	_test_self_shift_moves_the_user(t)
 
 func _leader(name_text: String = "Lider") -> CharacterData:
 	var character := CharacterData.create(
@@ -848,3 +849,28 @@ func _test_shift_cannot_remove_a_unit_from_the_field(t) -> void:
 	var only := lone.enemy_units[0]
 	lone._apply_skill_shift(far_push, only)
 	t.eq(only.position, 1, "tek düşman birinci mevkide kalmalı")
+
+## Kendine yönelik bir kaydırma kullananı yerinden oynatıyor; saf yine
+## kesintisiz kalıyor ve tek başına duran biri hiçbir yere gitmiyor.
+func _test_self_shift_moves_the_user(t) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 91
+	var encounter := _build_encounter(rng, 3, 1)
+	var step := CombatSkill.with_area(CombatSkill.make_buff(
+		"probe_step", "N", "D", CombatSkill.Target.SELF, [1, 2, 3, 4], [],
+		"dodge", 5, 1
+	), CombatSkill.Area.SINGLE, 1)
+	var user := encounter.player_units[0]
+	t.eq(user.position, 1, "başlangıçta önde")
+	encounter._resolve_on_target(user, step, user)
+	t.eq(user.position, 2, "geri adım kullananı bir mevki geriye alır")
+	t.eq(user.get_effective_dodge(), 5, "değiştirici de uygulanır")
+	var seen := {}
+	for unit in encounter.player_units:
+		seen[unit.position] = true
+	t.eq(seen.size(), 3, "saf kesintisiz kalır")
+
+	var lone := _build_encounter(rng, 1, 1)
+	var alone := lone.player_units[0]
+	lone._resolve_on_target(alone, step, alone)
+	t.eq(alone.position, 1, "tek kişilik saf yer değiştirmez")

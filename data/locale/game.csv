@@ -358,3 +358,5 @@
 "EFF_LEFT_BEHIND","%s yolda, bir köyde bırakıldı","%s was left behind in a village","","","","","","","","",""
 "EFF_PARTY_HEAL","%s iyileşti (+%d can)","%s was healed (+%d HP)","","","","","","","","",""
 "EFF_PARTY_HURT","%s yaralandı (-%d can)","%s was hurt (-%d HP)","","","","","","","","",""
+"CBT_LOG_STEPPED_BACK","%s geri çekildi (mevki %d).","%s steps back (rank %d).","","","","","","","","",""
+"CBT_LOG_STEPPED_FORWARD","%s öne atıldı (mevki %d).","%s steps forward (rank %d).","","","","","","","","",""
