@@ -19,6 +19,8 @@ func run(t) -> void:
 	_test_vengeful_wanderer_chain(t)
 	_test_pilgrim_blessing_chain(t)
 	_test_every_effect_type_is_handled(t)
+	_test_grave_chain(t)
+	_test_deserter_chain(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -284,3 +286,119 @@ func _test_every_effect_type_is_handled(t) -> void:
 			source.contains("EventEffect.Type.%s:" % type_name),
 			"EventEffect.Type.%s uygulayıcıda karşılanıyor" % type_name
 		)
+
+## Seçeneğin etkilerini uygular ve açtığı olayları motora bildirir -
+## yol ekranının yaptığı sıra.
+func _pick(engine: EventEngine, session: GameSession, choice: EventChoice) -> EventEffectApplier.Result:
+	var result := EventEffectApplier.apply(choice.effects, session)
+	for event_id in result.unlocked_event_ids:
+		engine.unlock_event(event_id)
+	return result
+
+func _outcome_for(engine: EventEngine, session: GameSession, choice: EventChoice, tier: int) -> EventOutcome:
+	var context := session.build_event_context()
+	context["check_tier"] = tier
+	return engine.resolve_outcome(choice, context)
+
+func _take_outcome(engine: EventEngine, session: GameSession, outcome: EventOutcome) -> EventEffectApplier.Result:
+	var result := EventEffectApplier.apply(outcome.effects, session)
+	for event_id in result.unlocked_event_ids:
+		engine.unlock_event(event_id)
+	return result
+
+## Zincir A defteri okuyor: ölü yoksa mezar yok. Mezara bakan bekçinin
+## güvenini kazanabilir, geçip giden kazanamaz; son halka iki bayrak
+## ister ve bitince zinciri sonraki kuşak için yeniden açar.
+func _test_grave_chain(t) -> void:
+	var session := GameSession.new(300, 20, 1)
+	session.set_player_character(CharacterData.create("Lider", CultureCatalog.VALLEY, CharacterStats.new()))
+	var engine := EventEngine.new(EventCatalog.get_road_events(), 99)
+	t.not_ok(
+		_has_event(engine.get_eligible_events(1, session.build_event_context()), "evt_grave_on_the_road"),
+		"kimse ölmeden mezar çıkmaz"
+	)
+	session.ledger.record(CaravanLedger.KIND_DIED, "Gömülen", 0)
+	t.ok(
+		_has_event(engine.get_eligible_events(1, session.build_event_context()), "evt_grave_on_the_road"),
+		"defterde bir ölü varsa mezar çıkabilir"
+	)
+	var grave := EventCatalog.get_event("evt_grave_on_the_road")
+	t.not_ok(
+		_has_event(engine.get_eligible_events(1, session.build_event_context()), "evt_grave_keeper"),
+		"bekçi açılmadan gelmez"
+	)
+	_pick(engine, session, grave.choices[0])
+	t.ok(session.has_flag("grave_tended"), "mezara bakıldı")
+	t.not_ok(
+		_has_event(engine.get_eligible_events(2, session.build_event_context()), "evt_grave_on_the_road"),
+		"zincir sürerken ikinci mezar çıkmaz"
+	)
+	t.ok(
+		_has_event(engine.get_eligible_events(2, session.build_event_context()), "evt_grave_keeper"),
+		"bekçi açıldı"
+	)
+
+	var keeper := EventCatalog.get_event("evt_grave_keeper")
+	var listen: EventChoice = keeper.choices[0]
+	t.ok(listen.check != null, "dinlemek bir Bilgelik zarı")
+	t.eq(_outcome_for(engine, session, listen, 0).text_key, "EVT_GRAVE_KEEPER_COLD", "zar tutmazsa soğuk")
+	t.eq(_outcome_for(engine, session, listen, 2).text_key, "EVT_GRAVE_KEEPER_TRUST", "bakan güveni kazanır")
+	var passer := GameSession.new(300, 20, 1)
+	passer.set_flag("grave_seen")
+	t.eq(_outcome_for(engine, passer, listen, 2).text_key, "EVT_GRAVE_KEEPER_KIND", "geçip giden kazanamaz")
+
+	var offering_id := "evt_grave_offering"
+	t.not_ok(
+		_has_event(engine.get_eligible_events(3, session.build_event_context()), offering_id),
+		"güven kazanılmadan adak yok"
+	)
+	_take_outcome(engine, session, _outcome_for(engine, session, listen, 2))
+	t.ok(
+		_has_event(engine.get_eligible_events(3, session.build_event_context()), offering_id),
+		"iki bayrakla adak açıldı"
+	)
+	var offering := EventCatalog.get_event(offering_id)
+	_pick(engine, session, offering.choices[0])
+	t.ok(
+		session.get_player_character().has_trait(TraitCatalog.STEADFAST_FAITH),
+		"adak lidere Sarsılmaz İnanç verdi"
+	)
+	for flag in ["grave_seen", "grave_tended", "keeper_trusted"]:
+		t.not_ok(session.has_flag(flag), "zincir kapanınca bayrak temiz: %s" % flag)
+	t.ok(
+		_has_event(engine.get_eligible_events(40, session.build_event_context()), "evt_grave_on_the_road"),
+		"sonraki kuşak için zincir yeniden açık"
+	)
+
+## Zincir B dünya olayını okuyor: savaş yoksa firari yok. Yalan tutmazsa
+## seçenek muhafız savaşı açıyor - ve kart bunu seçmeden önce söylüyor.
+func _test_deserter_chain(t) -> void:
+	var session := GameSession.new(300, 20, 1)
+	var engine := EventEngine.new(EventCatalog.get_road_events(), 7)
+	var context := session.build_event_context()
+	t.not_ok(_has_event(engine.get_eligible_events(1, context), "evt_deserter_plea"), "savaş yokken firari yok")
+	context["route_has_regional_war"] = 1.0
+	t.ok(_has_event(engine.get_eligible_events(1, context), "evt_deserter_plea"), "savaş yolunda firari çıkar")
+
+	var plea := EventCatalog.get_event("evt_deserter_plea")
+	_pick(engine, session, plea.choices[0])
+	t.ok(session.has_flag("deserters_hidden"), "saklandılar")
+	var search := EventCatalog.get_event("evt_deserter_search")
+	t.ok(_has_event(engine.get_eligible_events(2, session.build_event_context()), "evt_deserter_search"), "devriye geliyor")
+
+	var lie: EventChoice = search.choices[0]
+	var caught := _take_outcome(engine, session, _outcome_for(engine, session, lie, 0))
+	t.eq(caught.combat_kinds, ["guard"] as Array[String], "yalan tutmazsa muhafızla savaş")
+	t.not_ok(session.has_flag("deserters_hidden"), "yakalananlar saklı değil")
+
+	var lucky := GameSession.new(300, 20, 1)
+	var lucky_engine := EventEngine.new(EventCatalog.get_road_events(), 8)
+	_pick(lucky_engine, lucky, plea.choices[0])
+	_take_outcome(lucky_engine, lucky, _outcome_for(lucky_engine, lucky, lie, 2))
+	t.ok(lucky.has_flag("deserters_safe"), "yalan tuttu")
+	t.ok(_has_event(lucky_engine.get_eligible_events(3, lucky.build_event_context()), "evt_deserter_debt"), "borç açıldı")
+	var debt := EventCatalog.get_event("evt_deserter_debt")
+	var gift := _pick(lucky_engine, lucky, debt.choices[1])
+	t.eq(lucky.equipment_inventory.get(EquipmentCatalog.WEAPON_TIER_1, 0), 1, "kılıç depoya girdi")
+	t.not_ok(lucky.has_flag("deserters_met"), "zincir kapandı")
+	t.ge(float(gift.lines.size()), 0.0, "etki satırı")
