@@ -33,6 +33,8 @@ const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const BLOCK_COLOR: Color = Color(0.85, 0.45, 0.4)
 const MOVE_BUTTON_SIZE: float = 20.0
 
+const ITEM_ICON_SIZE: float = 24.0
+
 var _session: GameSession
 var _column_row: HBoxContainer
 
@@ -155,10 +157,9 @@ func _build_item_row(wagon_index: int, entry: Dictionary) -> VBoxContainer:
 	var row := VBoxContainer.new()
 	row.add_theme_constant_override("separation", 1)
 
-	var name_label := Label.new()
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	name_label.text = tr("UI_STATUS_CARGO_ITEM") % [item.item_name, available]
-	row.add_child(name_label)
+	row.add_child(WaybookTheme.item_line(
+		item.item_id, tr("UI_STATUS_CARGO_ITEM") % [item.item_name, available], ITEM_ICON_SIZE
+	))
 
 	# Varsayılan değer elindeki tam yığın - tek tıkla "hepsini taşı" hâlâ
 	# eski davranışla birebir aynı, yalnızca oyuncu isterse düşürebiliyor.

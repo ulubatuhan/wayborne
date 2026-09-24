@@ -10,6 +10,11 @@ const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
 const POSITIVE_COLOR: Color = Color(0.6, 0.85, 0.6)
 const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
+## Waybook işaretleri (bkz. WaybookIcons): madalyon portre, stat/görev
+## amblemleri, huy mühürleri, kırgınlık notları.
+const CAMEO_HEIGHT: float = 120.0
+const EMBLEM_SIZE: float = 26.0
+const TOKEN_SIZE: float = 22.0
 
 var _session: GameSession
 var _character: CharacterData
@@ -51,7 +56,26 @@ func _refresh() -> void:
 	_build_equipment_section()
 
 func _build_identity_section() -> void:
-	_content.add_child(_make_section_title(_character.get_summary_line()))
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 12)
+	_content.add_child(header)
+	header.add_child(PortraitCameo.new().setup(_character, CAMEO_HEIGHT))
+	var heading := VBoxContainer.new()
+	heading.alignment = BoxContainer.ALIGNMENT_CENTER
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(heading)
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	title_row.add_child(WaybookIcons.picture(WaybookIcons.CLASS_EMBLEMS, _character.class_id, EMBLEM_SIZE))
+	title_row.add_child(_make_section_title(_character.get_summary_line()))
+	heading.add_child(title_row)
+	# Kırgınlıklar ve açlık çetelesi kişinin kenarına düşülmüş notlar:
+	# ihtiyaç yoksa satır da yok.
+	var marks := HBoxContainer.new()
+	marks.add_theme_constant_override("separation", 12)
+	marks.add_child(WaybookIcons.grievance_row(_character, TOKEN_SIZE))
+	marks.add_child(WaybookIcons.hunger_tally(_character, TOKEN_SIZE))
+	heading.add_child(marks)
 
 	var appearance := Label.new()
 	appearance.text = _character.get_appearance_line()
@@ -80,7 +104,7 @@ func _build_identity_section() -> void:
 	_content.add_child(perk)
 
 func _build_traits_section() -> void:
-	_content.add_child(_make_section_title("Huylar"))
+	_content.add_child(_make_section_title(tr("UI_CHAR_TRAITS")))
 
 	var traits := _character.get_traits()
 	if traits.is_empty():
@@ -91,7 +115,13 @@ func _build_traits_section() -> void:
 		return
 
 	for trait_resource in traits:
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 8)
+		var token := WaybookIcons.trait_token(trait_resource.is_positive, TOKEN_SIZE)
+		token.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		line.add_child(token)
 		var row := Label.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var fresh := _character.is_trait_fresh(
 			trait_resource.trait_id, _session.total_days_elapsed
 		)
@@ -102,7 +132,8 @@ func _build_traits_section() -> void:
 		]
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD
 		row.modulate = POSITIVE_COLOR if trait_resource.is_positive else NEGATIVE_COLOR
-		_content.add_child(row)
+		line.add_child(row)
+		_content.add_child(line)
 
 func _build_progress_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CHAR_PROGRESSION")))
@@ -130,7 +161,7 @@ func _build_progress_section() -> void:
 		_content.add_child(pending)
 
 func _build_stats_section() -> void:
-	_content.add_child(_make_section_title("Statlar"))
+	_content.add_child(_make_section_title(tr("UI_CHAR_STATS")))
 	for kind in CharacterStats.KIND_ORDER:
 		_content.add_child(_build_stat_row(kind))
 
@@ -138,6 +169,7 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
+	row.add_child(WaybookIcons.picture(WaybookIcons.STAT_EMBLEMS, kind, EMBLEM_SIZE))
 	var name_label := Label.new()
 	name_label.text = CharacterStats.kind_name(kind)
 	name_label.custom_minimum_size = Vector2(120, 0)
@@ -172,7 +204,7 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 	return row
 
 func _build_skills_section() -> void:
-	_content.add_child(_make_section_title("Yetkinlik"))
+	_content.add_child(_make_section_title(tr("UI_CHAR_SKILLS")))
 	for skill in _character.get_skills():
 		_content.add_child(_build_skill_row(skill))
 
@@ -218,8 +250,11 @@ func _build_duty_section() -> void:
 	note.modulate = HINT_COLOR
 	_content.add_child(note)
 
+	var duty_row := HBoxContainer.new()
+	duty_row.add_theme_constant_override("separation", 8)
+	duty_row.add_child(WaybookIcons.picture(WaybookIcons.DUTY_EMBLEMS, _character.duty_id, EMBLEM_SIZE))
 	var duty_button := OptionButton.new()
-	duty_button.add_item("Yok")
+	duty_button.add_item(tr("UI_DUTY_NONE"))
 	var duties := DutyCatalog.get_duties()
 	var selected_index := 0
 	for i in duties.size():
@@ -227,13 +262,14 @@ func _build_duty_section() -> void:
 		var holder := _session.get_duty_holder(duty.duty_id)
 		var suffix := ""
 		if holder != null and holder != _character:
-			suffix = " (%s tutuyor)" % holder.character_name
+			suffix = " " + tr("UI_DUTY_HELD_BY") % holder.character_name
 		duty_button.add_item("%s%s" % [duty.display_name, suffix])
 		if _character.duty_id == duty.duty_id:
 			selected_index = i + 1
 	duty_button.select(selected_index)
 	duty_button.item_selected.connect(_on_duty_selected.bind(duties))
-	_content.add_child(duty_button)
+	duty_row.add_child(duty_button)
+	_content.add_child(duty_row)
 
 func _build_multiclass_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CHAR_SECOND_CLASS")))

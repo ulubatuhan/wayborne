@@ -26,6 +26,24 @@ const ACTIVE_BORDER: Color = Color(0.95, 0.82, 0.45)
 const TARGET_BORDER: Color = Color(0.90, 0.35, 0.30)
 const IDLE_BORDER: Color = Color(0.0, 0.0, 0.0, 0.0)
 
+## Mevkinin Waybook çerçevesi (K1) ve Ölümün Kıyısı'ndaki çatlak hâli (K2).
+## Doku yarı ölçekte dokuz parça: tam ölçekte 30 piksellik kenar 136'lık
+## mevkide figürü sıkıştırıyordu.
+const FRAME_FILE: String = "k1_slot.png"
+const DOOR_FRAME_FILE: String = "k2_door.png"
+const FRAME_SCALE: float = 0.5
+const FRAME_SLICE: int = 16
+const DOOR_FRAME_SLICE: int = 22
+const FRAME_CONTENT: int = 12
+## Can çubuğunun demir çerçevesi (K3) - dolgu çerçevenin içinde kalsın diye
+## dolgunun saydam bir kenarı var.
+const HP_FRAME_FILE: String = "k3_bar.png"
+const HP_FRAME_SLICE_X: int = 8
+const HP_FRAME_SLICE_Y: int = 4
+const HP_BAR_HEIGHT: float = 12.0
+const STATUS_ICON_SIZE: float = 18.0
+const EMBLEM_SIZE: float = 18.0
+
 ## Ölümün Kıyısı'nı ayrı bir renkle veriyoruz: oyuncunun tek bir vuruşla
 ## karakterini kaybedebileceğini *görmeden* anlaması mümkün değil.
 const DEATHS_DOOR_FIGURE: Color = Color(0.62, 0.16, 0.16)
@@ -39,22 +57,28 @@ var _name_label: Label
 var _rank_label: Label
 var _status_row: HBoxContainer
 var _bark_label: Label
-var _style: StyleBoxFlat
+var _frame: StyleBoxTexture
+var _door_frame: StyleBoxTexture
+var _border: StyleBoxFlat
+var _emblem: TextureRect
 var _selectable: bool = false
 
 func _init() -> void:
 	custom_minimum_size = Vector2(SLOT_WIDTH, 0.0)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-	_style = StyleBoxFlat.new()
-	# Kutu neredeyse şeffaf: arkadaki zemin görünmeli, kutu bir
-	# çerçeve olmalı, bir pencere değil.
-	_style.bg_color = Color(0.06, 0.05, 0.06, 0.30)
-	_style.set_corner_radius_all(3)
-	_style.set_content_margin_all(4)
-	_style.border_color = IDLE_BORDER
-	_style.set_border_width_all(3)
-	add_theme_stylebox_override("panel", _style)
+	# Çerçeve içi boş: arkadaki zemin görünmeli, mevki bir çerçeve
+	# olmalı, bir pencere değil.
+	_frame = _frame_box(FRAME_FILE, FRAME_SLICE)
+	_door_frame = _frame_box(DOOR_FRAME_FILE, DOOR_FRAME_SLICE)
+	add_theme_stylebox_override("panel", _frame)
+	# Sıra/hedef vurgusu çerçevenin *üstünde* ayrı bir kenar (bkz. _draw):
+	# koyu ahşabı altına boyamak onu okunur kılmıyordu.
+	_border = StyleBoxFlat.new()
+	_border.draw_center = false
+	_border.border_color = IDLE_BORDER
+	_border.set_border_width_all(3)
+	_border.set_corner_radius_all(3)
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
@@ -71,11 +95,18 @@ func _init() -> void:
 	_bark_label.visible = false
 	column.add_child(_bark_label)
 
+	var rank_row := HBoxContainer.new()
+	rank_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	rank_row.add_theme_constant_override("separation", 4)
+	column.add_child(rank_row)
+	_emblem = WaybookTheme.picture(WaybookIcons.CLASS_EMBLEMS[ClassCatalog.GUARD], EMBLEM_SIZE)
+	_emblem.visible = false
+	rank_row.add_child(_emblem)
 	_rank_label = Label.new()
 	_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_rank_label.add_theme_font_size_override("font_size", 10)
-	_rank_label.modulate = Color(0.7, 0.68, 0.62)
-	column.add_child(_rank_label)
+	_rank_label.add_theme_font_size_override("font_size", 12)
+	_rank_label.modulate = ArtPalette.UI_TEXT_DIM
+	rank_row.add_child(_rank_label)
 
 	_figure = CombatFigure.new()
 	_figure.custom_minimum_size = Vector2(0.0, FIGURE_HEIGHT)
@@ -92,15 +123,22 @@ func _init() -> void:
 	# ölçüldü), o yüzden dolgu ve zemin açıkça veriliyor.
 	_hp_bar = ProgressBar.new()
 	_hp_bar.show_percentage = false
-	_hp_bar.custom_minimum_size = Vector2(0.0, 10.0)
+	_hp_bar.custom_minimum_size = Vector2(0.0, HP_BAR_HEIGHT)
 	_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var track := StyleBoxFlat.new()
-	track.bg_color = Color(0.07, 0.07, 0.08)
-	track.set_corner_radius_all(2)
+	var track := StyleBoxTexture.new()
+	track.texture = WaybookTheme.texture(HP_FRAME_FILE)
+	track.texture_margin_left = HP_FRAME_SLICE_X
+	track.texture_margin_right = HP_FRAME_SLICE_X
+	track.texture_margin_top = HP_FRAME_SLICE_Y
+	track.texture_margin_bottom = HP_FRAME_SLICE_Y
 	_hp_bar.add_theme_stylebox_override("background", track)
 	var fill := StyleBoxFlat.new()
-	fill.bg_color = Color(0.68, 0.20, 0.18)
-	fill.set_corner_radius_all(2)
+	fill.bg_color = ArtPalette.BLOOD
+	fill.border_color = Color(0, 0, 0, 0)
+	fill.border_width_left = 3
+	fill.border_width_right = 3
+	fill.border_width_top = 3
+	fill.border_width_bottom = 3
 	_hp_bar.add_theme_stylebox_override("fill", fill)
 	column.add_child(_hp_bar)
 
@@ -137,7 +175,13 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 		bound_unit.figure_kind, bound_unit.is_player_side, _figure_state(bound_unit), depth,
 		bound_unit.outfit
 	)
-	_style.border_color = _border_color(is_active, is_target)
+	_border.border_color = _border_color(is_active, is_target)
+	add_theme_stylebox_override("panel", _door_frame if bound_unit.on_deaths_door else _frame)
+	queue_redraw()
+	var emblem_file := String(WaybookIcons.CLASS_EMBLEMS.get(bound_unit.figure_kind, "")) if bound_unit.is_player_side else ""
+	_emblem.visible = emblem_file != ""
+	if _emblem.visible:
+		_emblem.texture = WaybookTheme.texture(emblem_file)
 	_refresh_status(bound_unit)
 
 	# Ölü/düşmüş bir birim soluk durur ama gizlenmez: saftaki boşluğu
@@ -150,6 +194,17 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 ## Silüetin duruşunu ve paletini belirleyen durum. Düşen bir figür
 ## ayakta soluk durmuyor, yere çöküyor - "düşmüş" ancak duruş değişince
 ## okunuyor.
+func _frame_box(file_name: String, slice: int) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = WaybookTheme.scaled_texture(file_name, FRAME_SCALE)
+	box.set_texture_margin_all(slice)
+	box.set_content_margin_all(FRAME_CONTENT)
+	return box
+
+func _draw() -> void:
+	if _border.border_color.a > 0.0:
+		draw_style_box(_border, Rect2(Vector2.ZERO, size))
+
 func _figure_state(bound_unit: CombatUnit) -> String:
 	if bound_unit.is_dead:
 		return "dead"
@@ -185,18 +240,21 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 	# Durum efektleri kalan turlarıyla görünüyor. Görünmeyen bir kanama,
 	# "canım neden azalıyor" sorusunu cevapsız bırakır - kilitli
 	# yeteneğin sebebini göstermekle aynı kural.
+	# İkonlar (K4) kalan tur sayısıyla; adı ve tam metni ipucunda.
 	if bound_unit.has_status(CombatUnit.STATUS_BLEED):
-		_add_badge(
-			tr("UI_COMBAT_BADGE_BLEED") % bound_unit.get_status_rounds(CombatUnit.STATUS_BLEED),
-			ArtPalette.BLOOD
-		)
+		var rounds := bound_unit.get_status_rounds(CombatUnit.STATUS_BLEED)
+		_add_status_icon("k4a_bleed.png", str(rounds), tr("UI_COMBAT_BADGE_BLEED") % rounds)
 	if bound_unit.has_status(CombatUnit.STATUS_BLIGHT):
-		_add_badge(
-			tr("UI_COMBAT_BADGE_BLIGHT") % bound_unit.get_status_rounds(CombatUnit.STATUS_BLIGHT),
-			Color(0.48, 0.66, 0.34)
-		)
+		var rounds := bound_unit.get_status_rounds(CombatUnit.STATUS_BLIGHT)
+		_add_status_icon("k4b_blight.png", str(rounds), tr("UI_COMBAT_BADGE_BLIGHT") % rounds)
 	if bound_unit.is_stunned:
-		_add_badge(tr("UI_COMBAT_BADGE_STUN"), Color(0.86, 0.82, 0.40))
+		_add_status_icon("k4c_stun.png", "", tr("UI_COMBAT_BADGE_STUN"))
+	elif bound_unit.has_stun_recovery():
+		_add_status_icon("k4d_stun_resist.png", "", tr("UI_COMBAT_BADGE_STUN_RESIST"))
+	if bound_unit.has_timed_buff():
+		_add_status_icon("k4e_buff.png", "", tr("UI_COMBAT_BADGE_BUFF"))
+	if bound_unit.has_timed_debuff():
+		_add_status_icon("k4f_debuff.png", "", tr("UI_COMBAT_BADGE_DEBUFF"))
 
 ## Sessiz yorum balonu: seslendirme değil, yalnızca metin - bkz. UiIcon/log
 ## satırı deseniyle aynı aile. `bind()` her tazelemede yeni bir Label
@@ -212,6 +270,19 @@ func show_bark(text: String) -> void:
 func apply_action_animation(flash: Color, lunge: float) -> void:
 	_figure.set_flash(flash)
 	_figure.set_lunge(lunge)
+
+func _add_status_icon(file_name: String, count: String, tooltip: String) -> void:
+	var holder := HBoxContainer.new()
+	holder.add_theme_constant_override("separation", 1)
+	holder.tooltip_text = tooltip
+	holder.mouse_filter = Control.MOUSE_FILTER_PASS
+	holder.add_child(WaybookTheme.picture(file_name, STATUS_ICON_SIZE))
+	if count != "":
+		var label := Label.new()
+		label.text = count
+		label.add_theme_font_size_override("font_size", 11)
+		holder.add_child(label)
+	_status_row.add_child(holder)
 
 func _add_badge(text: String, color: Color) -> void:
 	var badge := Label.new()

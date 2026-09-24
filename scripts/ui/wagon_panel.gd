@@ -17,6 +17,8 @@ const OK_COLOR: Color = Color(0.7, 0.85, 0.7)
 const MISSING_COLOR: Color = Color(0.85, 0.45, 0.4)
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 
+const ITEM_ICON_SIZE: float = 26.0
+
 var _session: GameSession
 var _wagon_index: int = 0
 var _rows: Array[Dictionary] = []
@@ -138,9 +140,9 @@ func _refresh_inventory() -> void:
 
 	for entry in entries:
 		var item: Item = entry.item
-		var line := Label.new()
-		line.text = tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(entry.quantity)]
-		_inventory_list.add_child(line)
+		_inventory_list.add_child(WaybookTheme.item_line(
+			item.item_id, tr("UI_STATUS_CARGO_ITEM") % [item.item_name, int(entry.quantity)], ITEM_ICON_SIZE
+		))
 
 ## Her satır kendi malzeme sahip/gerek sayısını gösterir - kilitli bir
 ## tarif *sebebiyle birlikte* gösterilir, gizlenmez (bkz. kilitli olay

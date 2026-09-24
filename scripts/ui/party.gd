@@ -14,6 +14,10 @@ const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 ## Sıralama tuşları kare: içlerindeki ikon çizim, metin değil, o yüzden
 ## genişliği metin belirlemiyor - kendi yerini istemesi gerekiyor.
 const MOVE_BUTTON_SIZE: float = 34.0
+## Waybook işaretleri (bkz. WaybookIcons).
+const CAMEO_HEIGHT: float = 64.0
+const EMBLEM_SIZE: float = 24.0
+const TOKEN_SIZE: float = 20.0
 
 var _session: GameSession
 
@@ -75,22 +79,28 @@ func _build_ledger() -> VBoxContainer:
 		return box
 
 	for entry in entries:
-		var line := Label.new()
+		var text := ""
 		# Sebebi olan satır kendi cümlesini taşıyor ("... kurtlara düştü,
 		# Kurtboğazı yakınlarında"); olmayan eski biçimde kalıyor.
 		if String(entry.get("cause", "")).is_empty():
-			line.text = "%s · %s — %s" % [
+			text = "%s · %s — %s" % [
 				tr("UI_LEDGER_DAY") % int(entry.get("day", 0)),
 				String(entry.get("name", "")),
 				CaravanLedger.get_kind_label(String(entry.get("kind", ""))),
 			]
 		else:
-			line.text = CaravanLedger.describe(entry)
-		line.autowrap_mode = TextServer.AUTOWRAP_WORD
-		# Üstü çizili satır soluk: kaybın kaydı duruyor ama artık
-		# yanında yürüyen biri değil.
+			text = CaravanLedger.describe(entry)
+		# Üstü çizili satır gerçekten çizili: kaybın kaydı duruyor ama artık
+		# yanında yürüyen biri değil (Waybook'un mürekkep darbesi, bkz.
+		# StruckLine - soy defteriyle aynı çizgi).
 		if _session.ledger.is_struck(entry):
-			line.modulate = STRUCK_COLOR
+			var struck := StruckLine.new().setup(text, false)
+			struck.modulate = STRUCK_COLOR
+			box.add_child(struck)
+			continue
+		var line := Label.new()
+		line.text = text
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD
 		box.add_child(line)
 
 	return box
@@ -102,10 +112,10 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
 
-	var portrait := ColorRect.new()
-	portrait.color = CharacterData.get_skin_tone_color(character.skin_tone)
-	portrait.custom_minimum_size = Vector2(28, 28)
-	header.add_child(portrait)
+	header.add_child(PortraitCameo.new().setup(character, CAMEO_HEIGHT))
+	header.add_child(WaybookIcons.picture(
+		WaybookIcons.CLASS_EMBLEMS, character.class_id, EMBLEM_SIZE, character.get_character_class().display_name
+	))
 
 	var name_label := Label.new()
 	name_label.text = "%d. %s" % [index + 1, character.get_summary_line()]
@@ -137,6 +147,24 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 		header.add_child(dismiss_button)
 
 	card.add_child(header)
+
+	# Kişinin işaretleri tek satırda: görevi, huyları, kırgınlıkları, açlığı.
+	var marks := HBoxContainer.new()
+	marks.add_theme_constant_override("separation", 6)
+	if character.duty_id != "":
+		var duty := DutyCatalog.get_duty(character.duty_id)
+		marks.add_child(WaybookIcons.picture(
+			WaybookIcons.DUTY_EMBLEMS, character.duty_id, EMBLEM_SIZE,
+			duty.display_name if duty != null else ""
+		))
+	for trait_resource in character.get_traits():
+		var token := WaybookIcons.trait_token(trait_resource.is_positive, TOKEN_SIZE)
+		token.tooltip_text = "%s — %s" % [trait_resource.display_name, trait_resource.description]
+		token.mouse_filter = Control.MOUSE_FILTER_PASS
+		marks.add_child(token)
+	marks.add_child(WaybookIcons.grievance_row(character, TOKEN_SIZE))
+	marks.add_child(WaybookIcons.hunger_tally(character, TOKEN_SIZE))
+	card.add_child(marks)
 
 	var hp_label := Label.new()
 	hp_label.text = tr("UI_PARTY_MEMBER") % [

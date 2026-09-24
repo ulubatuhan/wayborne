@@ -260,6 +260,15 @@ func _refresh_party() -> void:
 	var party := _session.get_party()
 	for index in party.size():
 		var character: CharacterData = party[index]
+		# Madalyon ve kişinin kenar notları (bkz. WaybookIcons): kırgınlık
+		# bir sayı olarak değil, kişinin yanına düşülmüş bir işaret olarak.
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 8)
+		line.add_child(PortraitCameo.new().setup(character, PARTY_CAMEO_HEIGHT))
+		var text_column := VBoxContainer.new()
+		text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line.add_child(text_column)
+		_party_body.add_child(line)
 		var row := Label.new()
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD
 		row.text = tr("UI_STATUS_MEMBER") % [
@@ -273,13 +282,19 @@ func _refresh_party() -> void:
 			row.modulate = HURT_COLOR
 		elif character.current_hp < character.get_max_hp():
 			row.modulate = HURT_COLOR
-		_party_body.add_child(row)
+		text_column.add_child(row)
 
 		var thought := Label.new()
-		thought.text = "     %s" % _thought_for(character)
+		thought.text = _thought_for(character)
 		thought.modulate = HINT_COLOR
 		thought.autowrap_mode = TextServer.AUTOWRAP_WORD
-		_party_body.add_child(thought)
+		text_column.add_child(thought)
+
+		var marks := HBoxContainer.new()
+		marks.add_theme_constant_override("separation", 10)
+		marks.add_child(WaybookIcons.grievance_row(character, PARTY_MARK_SIZE))
+		marks.add_child(WaybookIcons.hunger_tally(character, PARTY_MARK_SIZE))
+		text_column.add_child(marks)
 
 ## Kervan hakkında kısa bir düşünce - yeni bir stat değil, var olan
 ## stres/can okunarak seçilen bir satır (bkz. Faz 13 PR-D'nin kısa savaş
@@ -287,6 +302,8 @@ func _refresh_party() -> void:
 ## Kırgınlık, anlık halden önce gelir: bir kişinin aklında kalan, o gün
 ## nasıl hissettiğinden daha çok şey söyler (bkz. CharacterData.grievances).
 const GRIEVANCE_THOUGHT_THRESHOLD: int = 2
+const PARTY_CAMEO_HEIGHT: float = 56.0
+const PARTY_MARK_SIZE: float = 18.0
 const GRIEVANCE_THOUGHT_KEYS: Dictionary = {
 	CharacterData.GRIEVANCE_UNFED: "UI_THOUGHT_UNFED",
 	CharacterData.GRIEVANCE_BENCHED: "UI_THOUGHT_BENCHED",

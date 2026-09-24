@@ -66,7 +66,13 @@ const FLASH_NEUTRAL: Color = Color(1, 1, 1, 1)
 ## olarak çıkıyordu: varsayılan font Geometric Shapes bloğunu taşımıyor.
 ## Playtest'in fotoğrafladığı hata buydu. Artık çiziliyor (bkz. `UiIcon`),
 ## ki zaten oyunun geri kalanının çizim dili bu.
-const MARK_SIZE: float = 9.0
+const MARK_SIZE: float = 13.0
+## Pirinç düğme pipler (K5): dolu "burada/buraya", boş "değil". Renk hâlâ
+## çıkış/hedef ayrımını taşıyor, düğmenin kendisi dokudan.
+const PIP_FILLED_FILE: String = "k5_pip_filled.png"
+const PIP_HOLLOW_FILE: String = "k5_pip_hollow.png"
+## Alan ve kaydırma işaretleri (K7) yeteneğin not satırının başında.
+const AREA_GLYPH_HEIGHT: float = 16.0
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
 const SKILL_CARD_WIDTH: float = 156.0
 ## Savaş alanının en az yüksekliği. İlk denemede alan 900 pikselin
@@ -466,6 +472,10 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 	# Yeteneğin "ne yaptığı" yalnızca adında yazmamalı: alan genişliği,
 	# mevki kaydırması ve durum efekti oyuncunun kararını değiştiren
 	# şeyler. Görünmeyen bir etki, bir mekaniğin hiç olmaması gibidir.
+	var glyphs := _skill_glyphs(skill)
+	if glyphs.get_child_count() > 0:
+		card.add_child(glyphs)
+
 	var notes := _skill_notes(skill)
 	if not notes.is_empty():
 		var note := Label.new()
@@ -474,6 +484,30 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 		note.modulate = ArtPalette.GOLD_DIM
 		card.add_child(note)
 	return card
+
+## Notun resmi: ok satırı gibi okunuyor, metni yine notta ve ipucunda.
+func _skill_glyphs(skill: CombatSkill) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	var entries: Array = []
+	match skill.area:
+		CombatSkill.Area.ADJACENT:
+			entries.append(["k7_adjacent.png", "UI_COMBAT_AREA_ADJACENT"])
+		CombatSkill.Area.ALL:
+			entries.append(["k7_all.png", "UI_COMBAT_AREA_ALL"])
+		_:
+			pass
+	if skill.shifts():
+		if skill.shift_amount > 0:
+			entries.append(["k7_push.png", "UI_COMBAT_SHIFT_PUSH"])
+		else:
+			entries.append(["k7_pull.png", "UI_COMBAT_SHIFT_PULL"])
+	for entry in entries:
+		var glyph := WaybookTheme.picture(String(entry[0]), AREA_GLYPH_HEIGHT)
+		glyph.tooltip_text = tr(String(entry[1]))
+		glyph.mouse_filter = Control.MOUSE_FILTER_PASS
+		row.add_child(glyph)
+	return row
 
 func _skill_notes(skill: CombatSkill) -> Array[String]:
 	var notes: Array[String] = []
@@ -512,11 +546,16 @@ func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBo
 	label.modulate = color
 	row.add_child(label)
 
-	var pips := UiIcon.new()
-	# Dikey ortalama şart: ikon `HBoxContainer` içinde kendi asgari boyuyla
-	# duruyor, hizalanmazsa etiketin tepesine yapışıyor.
+	# Dikey ortalama şart: pipler kendi asgari boylarıyla duruyor,
+	# hizalanmazsa etiketin tepesine yapışıyor.
+	var pips := HBoxContainer.new()
+	pips.add_theme_constant_override("separation", 2)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	pips.setup_pips(CombatEncounter.MAX_SIDE_SIZE, positions, color, MARK_SIZE)
+	for rank in range(1, CombatEncounter.MAX_SIDE_SIZE + 1):
+		var filled := positions.has(rank)
+		var pip := WaybookTheme.picture(PIP_FILLED_FILE if filled else PIP_HOLLOW_FILE, MARK_SIZE)
+		pip.modulate = color if filled else Color(color, 0.55)
+		pips.add_child(pip)
 	row.add_child(pips)
 	return row
 

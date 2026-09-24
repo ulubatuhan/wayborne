@@ -95,6 +95,26 @@ static func get_font() -> Font:
 static func texture(file_name: String) -> Texture2D:
 	return load(ART_DIR + file_name) as Texture2D
 
+static var _scaled_cache: Dictionary = {}
+
+## Bir çerçeveyi dokuz parça olarak kullanmadan önce küçültmek için: dokuz
+## parçanın köşeleri doku pikseliyle çiziliyor, 30 piksellik bir kenar dar
+## bir kutuda gövdeyi yutuyordu. Ölçek başına bir kez üretilip saklanıyor.
+static func scaled_texture(file_name: String, scale: float) -> Texture2D:
+	var key := "%s@%s" % [file_name, scale]
+	if _scaled_cache.has(key):
+		return _scaled_cache[key]
+	var image := texture(file_name).get_image()
+	image.decompress()
+	image.resize(
+		maxi(1, int(round(image.get_width() * scale))),
+		maxi(1, int(round(image.get_height() * scale))),
+		Image.INTERPOLATE_LANCZOS
+	)
+	var result := ImageTexture.create_from_image(image)
+	_scaled_cache[key] = result
+	return result
+
 ## Tek bir Waybook resmi (ikon, mühür, defter nesnesi) verilen yükseklikte,
 ## oranı korunarak. Ekranlar resmi hep bu kapıdan alıyor ki boyut ve
 ## germe kuralı her yerde aynı olsun.
@@ -119,6 +139,20 @@ static func item_icon(item_id: String, height: float) -> Control:
 		spacer.custom_minimum_size = Vector2(height, height)
 		return spacer
 	return picture(file_name, height)
+
+## Bir malın satırı: ikonu ve yanında canlı metin. Kargo listelerinin
+## (vagon, kervan yükü, yol dökümü) hepsi aynı kapıdan geçiyor.
+static func item_line(item_id: String, text: String, icon_height: float) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.add_child(item_icon(item_id, icon_height))
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(label)
+	return row
 
 static func build() -> Theme:
 	var theme := Theme.new()

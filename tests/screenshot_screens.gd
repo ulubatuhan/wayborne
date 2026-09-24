@@ -66,6 +66,13 @@ func _prepare_session() -> void:
 	session.add_to_cargo(ItemCatalog.get_item("silk"), 3)
 	session.spend_or_owe(400)
 	session.total_days_elapsed = 60
+	# Kenar notları görünsün: bir kırgınlık, bir açlık çetelesi, bir huy.
+	var companion: CharacterData = session.party[session.party.size() - 1]
+	companion.add_grievance(CharacterData.GRIEVANCE_UNFED)
+	companion.add_grievance(CharacterData.GRIEVANCE_UNFED)
+	companion.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH)
+	companion.consecutive_hungry_days = 2
+	companion.duty_id = DutyCatalog.LEVAZIMCI
 
 func _settle() -> void:
 	for _frame in 10:

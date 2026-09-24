@@ -113,7 +113,7 @@ func is_heal() -> bool:
 
 ## "Mevki 1-2 · Hedef 1-2" gibi tek satırlık özet - buton ipucunda gösterilir.
 func get_position_summary() -> String:
-	return "Mevki %s · Hedef %s" % [
+	return TranslationServer.translate("UI_SKILL_POSITIONS") % [
 		_format_positions(usable_positions),
 		_format_positions(target_positions),
 	]
