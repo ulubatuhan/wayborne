@@ -41,6 +41,15 @@ const SLIP_PANEL: StringName = &"SlipPanel"
 const HUD_BAR: StringName = &"HudBar"
 const PAGE_LABEL: StringName = &"PageLabel"
 const PAGE_HEADING: StringName = &"PageHeading"
+## Tam genişlikte duran düğmeler (ekranın asıl eylem sıraları, geri tuşu):
+## sekmenin kulağı ve dikişi 1000 pikselde çizgili bir şeride dönüyordu;
+## bu sıralar ciltli çerçevenin (G2) küçültülmüş dokuz parçası.
+const ROW_BUTTON: StringName = &"RowButton"
+## Harita parşömeninin üstündeki şehir yazısı: kutu yok, mürekkep yazı ve
+## kâğıt renginde bir hale - haritacının yazdığı gibi.
+const MAP_LABEL: StringName = &"MapLabel"
+## Kargo/pazar hücresi: aynı küçültülmüş cilt, içinde malın resmi.
+const CELL_PANEL: StringName = &"CellPanel"
 
 ## Dokuz parça geometrisi, doku pikseli cinsinden, işlenmiş PNG'ler
 ## üstünde ölçüldü (tools/waybook_assets.py boyutları basıyor). Her pay köşe
@@ -59,6 +68,15 @@ const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
 ## Kayışın yuvarlak uçları döşenirken her parçada tekrar etmesin diye
 ## kırpılan genişlik (doku pikseli).
 const STRAP_END_CROP: int = 30
+## Sıra düğmesinin ve hücrenin cildi G2'nin bu ölçeği: 60 piksellik köşe
+## 21'e iniyor, 50 piksellik bir düğmeye sığıyor.
+const ROW_SCALE: float = 0.35
+const ROW_SLICE: int = 21
+const ROW_CONTENT: Array[int] = [22, 12, 22, 12]
+## Yazının arkasındaki koyu hale: deri, leke ve karalama üstünde bile
+## kemik rengi yazı okunsun (bkz. Waybook UI Rules - kontrast).
+const TEXT_OUTLINE_SIZE: int = 4
+const MAP_LABEL_HALO_SIZE: int = 6
 
 static var _installed: bool = false
 static var _font: Font = null
@@ -261,6 +279,9 @@ static func _tab(tint: Color, scratched: bool = false) -> StyleBoxTexture:
 	box.texture = _scratched_tab() if scratched else texture("g4_tab.png")
 	box.modulate_color = tint
 	_set_margins(box, TAB_SLICE, TAB_CONTENT)
+	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
+	# düğmede yatay çizgilere dönüşüyordu.
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	return box
 
 ## Kilitli düğme sekmesini koruyor, üstüne defterin karalama çizgisi
@@ -271,11 +292,14 @@ static func _scratched_tab() -> Texture2D:
 	var tab := texture("g4_tab.png").get_image()
 	tab.decompress()
 	tab.convert(Image.FORMAT_RGBA8)
-	var scratch := _recoloured("g5_scratch.png", ArtPalette.UI_INK_MARK)
-	var body := Vector2i(tab.get_width() - TAB_SLICE[0] - TAB_SLICE[2] + 20, tab.get_height() - 22)
-	scratch.resize(body.x, body.y, Image.INTERPOLATE_LANCZOS)
-	var at := Vector2i(TAB_SLICE[0] - 10, (tab.get_height() - body.y) / 2)
-	tab.blend_rect(scratch, Rect2i(Vector2i.ZERO, body), at)
+	# Karalama yalnızca sekmenin kıvrık kulağında: yazının üstünden
+	# geçen soluk çizgiler kilidin sebebini okunmaz yapıyordu (ölçüldü -
+	# "İtibar yetersiz" satırı karalamanın altında kayboluyordu). Kulak
+	# dokuz parçanın sabit köşesi, yani işaret her genişlikte aynı yerde.
+	var scratch := _recoloured("g5_scratch.png", ArtPalette.UI_LOCK_MARK)
+	var ear := Vector2i(TAB_SLICE[0] - 6, tab.get_height() - 18)
+	scratch.resize(ear.x, ear.y, Image.INTERPOLATE_LANCZOS)
+	tab.blend_rect(scratch, Rect2i(Vector2i.ZERO, ear), Vector2i(4, 9))
 	return ImageTexture.create_from_image(tab)
 
 static func _focus() -> StyleBoxFlat:
@@ -301,6 +325,90 @@ static func _build_buttons(theme: Theme) -> void:
 		theme.set_color("font_hover_pressed_color", type_name, ArtPalette.UI_ACCENT)
 		theme.set_color("font_focus_color", type_name, ArtPalette.UI_TEXT)
 		theme.set_color("font_disabled_color", type_name, ArtPalette.UI_TEXT_DIM)
+		theme.set_color("font_outline_color", type_name, ArtPalette.UI_TEXT_HALO)
+		theme.set_constant("outline_size", type_name, TEXT_OUTLINE_SIZE)
+	_build_row_buttons(theme)
+	_build_map_labels(theme)
+
+static func row_frame(tint: Color, scratched: bool = false) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = _row_texture(scratched)
+	box.modulate_color = tint
+	box.set_texture_margin_all(ROW_SLICE)
+	_set_content(box, ROW_CONTENT)
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return box
+
+static var _row_cache: Dictionary = {}
+
+## Doldurulmuş cilt (G2 + palet zemini + leke maskesi) sıra ölçeğine
+## küçültülmüş; kilitlisinde sol köşede aynı kilit karalaması.
+static func _row_texture(scratched: bool) -> Texture2D:
+	if _row_cache.has(scratched):
+		return _row_cache[scratched]
+	var image := _filled_frame("g2_binding.png", BINDING_FILL_INSET).get_image()
+	image.resize(
+		int(round(image.get_width() * ROW_SCALE)), int(round(image.get_height() * ROW_SCALE)),
+		Image.INTERPOLATE_LANCZOS
+	)
+	if scratched:
+		var scratch := _recoloured("g5_scratch.png", ArtPalette.UI_LOCK_MARK)
+		# Yalnızca sabit köşe diliminin içine: kenar dilimleri döşendiği
+		# için oraya taşan bir işaret bütün kenar boyunca tekrar ediyordu.
+		var mark := ROW_SLICE - 3
+		scratch.resize(mark, mark, Image.INTERPOLATE_LANCZOS)
+		image.blend_rect(scratch, Rect2i(0, 0, mark, mark), Vector2i(1, 1))
+	var result := ImageTexture.create_from_image(image)
+	_row_cache[scratched] = result
+	return result
+
+static func _build_row_buttons(theme: Theme) -> void:
+	theme.set_type_variation(ROW_BUTTON, "Button")
+	theme.set_stylebox("normal", ROW_BUTTON, row_frame(Color.WHITE))
+	theme.set_stylebox("hover", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_HOVER))
+	theme.set_stylebox("pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
+	theme.set_stylebox("hover_pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
+	theme.set_stylebox("disabled", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_DISABLED, true))
+
+	# Sayı/yazı alanları (SpinBox'ın içindeki LineEdit dahil) aynı küçük cilt:
+	# motorun siyah giriş kutusu defterin hiçbir parçasına benzemiyordu.
+	var field := row_frame(Color.WHITE)
+	_set_content(field, [12, 4, 12, 4])
+	var field_locked := row_frame(ArtPalette.UI_TINT_DISABLED)
+	_set_content(field_locked, [12, 4, 12, 4])
+	theme.set_stylebox("normal", "LineEdit", field)
+	theme.set_stylebox("focus", "LineEdit", _focus())
+	theme.set_stylebox("read_only", "LineEdit", field_locked)
+	theme.set_color("font_color", "LineEdit", ArtPalette.UI_TEXT)
+	theme.set_color("font_outline_color", "LineEdit", ArtPalette.UI_TEXT_HALO)
+	theme.set_constant("outline_size", "LineEdit", TEXT_OUTLINE_SIZE)
+	theme.set_color("caret_color", "LineEdit", ArtPalette.UI_ACCENT)
+
+	theme.set_type_variation(CELL_PANEL, "PanelContainer")
+	var cell := row_frame(Color.WHITE)
+	_set_content(cell, [8, 6, 8, 6])
+	theme.set_stylebox("panel", CELL_PANEL, cell)
+
+static func _build_map_labels(theme: Theme) -> void:
+	theme.set_type_variation(MAP_LABEL, "Button")
+	var empty := StyleBoxEmpty.new()
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		theme.set_stylebox(state, MAP_LABEL, empty)
+	theme.set_color("font_color", MAP_LABEL, ArtPalette.UI_TEXT_ON_PAGE)
+	theme.set_color("font_hover_color", MAP_LABEL, ArtPalette.BLOOD)
+	theme.set_color("font_pressed_color", MAP_LABEL, ArtPalette.BLOOD)
+	theme.set_color("font_hover_pressed_color", MAP_LABEL, ArtPalette.BLOOD)
+	theme.set_color("font_focus_color", MAP_LABEL, ArtPalette.UI_TEXT_ON_PAGE)
+	theme.set_color("font_disabled_color", MAP_LABEL, ArtPalette.UI_MAP_INK_FADED)
+	theme.set_color("font_outline_color", MAP_LABEL, ArtPalette.UI_MAP_HALO)
+	theme.set_constant("outline_size", MAP_LABEL, MAP_LABEL_HALO_SIZE)
+
+static func _set_content(box: StyleBox, content: Array) -> void:
+	box.content_margin_left = content[0]
+	box.content_margin_top = content[1]
+	box.content_margin_right = content[2]
+	box.content_margin_bottom = content[3]
 
 # --- Sekmeler ---
 
@@ -361,10 +469,17 @@ static func _build_tooltip(theme: Theme) -> void:
 
 static func _build_labels(theme: Theme) -> void:
 	theme.set_color("font_color", "Label", ArtPalette.UI_TEXT)
-	# Kâğıda (fiş, sayfa) dizilen yazı kemik değil mürekkep rengi.
-	theme.set_type_variation(PAGE_LABEL, "Label")
+	# Koyu zemindeki (deri, mürekkep sahneleri) kemik rengi yazının gölgesi:
+	# sahne resimlerinin açık lekeleri üstünden geçerken bile okunsun.
+	theme.set_color("font_shadow_color", "Label", ArtPalette.UI_TEXT_HALO)
+	theme.set_constant("shadow_offset_x", "Label", 1)
+	theme.set_constant("shadow_offset_y", "Label", 1)
+	theme.set_constant("shadow_outline_size", "Label", 3)
+	# Kâğıda (fiş, sayfa) dizilen yazı kemik değil mürekkep rengi, gölgesiz.
+	for variation in [PAGE_LABEL, PAGE_HEADING]:
+		theme.set_type_variation(variation, "Label")
+		theme.set_color("font_shadow_color", variation, Color(0, 0, 0, 0))
 	theme.set_color("font_color", PAGE_LABEL, ArtPalette.UI_TEXT_ON_PAGE)
-	theme.set_type_variation(PAGE_HEADING, "Label")
 	theme.set_color("font_color", PAGE_HEADING, ArtPalette.BLOOD)
 
 ## Bir mürekkep işaretinin şeklini (alfa) koruyup rengini paletten verir.

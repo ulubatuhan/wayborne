@@ -225,6 +225,29 @@ def edge_masks() -> None:
         save(mask, name, (1280, 720))
 
 
+def disc(rgba: np.ndarray, paper_luma: float = 165.0) -> np.ndarray:
+    """Cut a round stud out of the square of paper it was painted on.
+
+    The K5 studs came on a bone-paper plate that keying cannot remove (it
+    is not the grey backdrop), so every pip shipped as a beige square - the
+    square read as a patch over the map and the skill cards. The stud's
+    radius is where the pixels stop being darker than the paper along the
+    centre row; outside it alpha falls to zero over a one-pixel edge.
+    """
+    h, w = rgba.shape[:2]
+    cy, cx = h / 2.0, w / 2.0
+    luma = rgba[..., :3].astype(np.float32).mean(axis=2)
+    row = luma[int(cy)]
+    dark = np.nonzero(row < paper_luma)[0]
+    radius = (dark.max() - dark.min()) / 2.0 if dark.size else min(h, w) * 0.42
+    yy, xx = np.mgrid[0:h, 0:w]
+    dist = np.sqrt((yy + 0.5 - cy) ** 2 + (xx + 0.5 - cx) ** 2)
+    edge = np.clip(radius + 0.5 - dist, 0.0, 1.0)
+    out = rgba.copy().astype(np.float32)
+    out[..., 3] = out[..., 3] * edge
+    return crop_to_alpha(out.astype(np.uint8), pad=1)
+
+
 def split_components(rgba: np.ndarray, count: int, min_area: int = 400, grow: int = 6) -> list[np.ndarray]:
     """Split a sheet holding several separate pieces into `count` crops,
     ordered left to right. Pieces are found as connected alpha regions; the
@@ -244,8 +267,43 @@ def split_components(rgba: np.ndarray, count: int, min_area: int = 400, grow: in
     return out
 
 
+# Pale, nearly unsaturated paper an icon was painted on (see unpaper).
+PAPER_MIN = 196
+PAPER_MAX_CHROMA = 28
+
+
+def unpaper(rgba: np.ndarray) -> np.ndarray:
+    """Remove the paper card an icon was painted on, when there is one.
+
+    A few icons (K6 clerk, P3 strength, P4 witnessed death) came on an
+    off-white card instead of the grey backdrop, so keying left a beige
+    square behind them - a pasted-on look over leather and parchment.
+    Only paper *connected to the outside* goes, the same rule as `key`, so a
+    pale highlight inside the drawing survives. An icon without a card is
+    returned unchanged.
+    """
+    rgb = rgba[..., :3].astype(np.int32)
+    paper = (rgb.min(axis=2) >= PAPER_MIN) & ((rgb.max(axis=2) - rgb.min(axis=2)) <= PAPER_MAX_CHROMA)
+    paper &= rgba[..., 3] > 0
+    labels, _ = ndimage.label(paper)
+    # The card usually sits inside the keyed grey, so "outside" means touching
+    # the image border *or* already-transparent backdrop.
+    outside = ndimage.binary_dilation(rgba[..., 3] == 0)
+    outside[0, :] = outside[-1, :] = outside[:, 0] = outside[:, -1] = True
+    border = set(np.unique(labels[outside & paper]))
+    border.discard(0)
+    if not border:
+        return rgba
+    mask = np.isin(labels, list(border))
+    # Soften the cut by one pixel so the drawing's edge is not stair-stepped.
+    soft = ndimage.binary_dilation(mask) & ~mask
+    out = rgba.copy()
+    out[..., 3] = np.where(mask, 0, np.where(soft, out[..., 3] // 2, out[..., 3]))
+    return out
+
+
 def icon(src: str, name: str, size: int = 128) -> None:
-    rgba = crop_to_alpha(key(_load(src)))
+    rgba = crop_to_alpha(unpaper(key(_load(src))))
     h, w = rgba.shape[:2]
     scale = size / max(h, w)
     save(rgba, name, (max(1, round(w * scale)), max(1, round(h * scale))))
@@ -269,6 +327,29 @@ def background(src: str, name: str) -> None:
     print(f"  {name:28s} {img.size[0]}x{img.size[1]} (outside filled: {int(outside.mean() * 100)}%)")
 
 
+LOOSE_PAGE_DARK = 30
+
+
+def loose_page(src: str, name: str, width: int) -> None:
+    """A torn page laid *on* a screen rather than filling it (the world map).
+
+    `background` fills the white outside the tear with desk-ink, right for a
+    full-bleed scene; for a page placed on the desk that fill became a dark
+    rectangle around the parchment. Here the outside goes transparent.
+    """
+    rgb = _load(src)
+    # The B6 sheet has the page on a near-black desk, others on white: both
+    # count as outside when they reach the sheet's edge.
+    surround = (rgb.min(axis=2) > 232) | (rgb.max(axis=2) < LOOSE_PAGE_DARK)
+    labels, _ = ndimage.label(surround)
+    border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])))
+    border.discard(0)
+    outside = ndimage.binary_dilation(np.isin(labels, list(border)), iterations=2)
+    alpha = np.where(outside, 0, 255).astype(np.uint8)
+    rgba = crop_to_alpha(np.dstack([rgb.astype(np.uint8), alpha]))
+    save(rgba, name, scale_to_width(rgba, width))
+
+
 def phase2plus() -> None:
     print("Phase 2+ - moments, screens, HUD, combat, people, goods")
     # Book objects (menu, run over) and the ledger.
@@ -286,10 +367,11 @@ def phase2plus() -> None:
     # Backgrounds.
     for src, name in [("B1_guild_bg.jpg", "b1_guild.jpg"), ("B2_market_bg.jpg", "b2_market.jpg"),
                       ("B3_tavern_bg.jpg", "b3_tavern.jpg"), ("B4_caravan_yard_bg.jpg", "b4_yard.jpg"),
-                      ("B5_church_bg.jpg", "b5_church.jpg"), ("B6_world_map_parchment.jpg", "b6_map.jpg"),
+                      ("B5_church_bg.jpg", "b5_church.jpg"),
                       ("B7_caravan_planner_bg.jpg", "b7_planner.jpg"), ("B8_recruit_bg.jpg", "b8_recruit.jpg"),
                       ("B9_character_party_bg.jpg", "b9_tent.jpg")]:
         background(src, name)
+    loose_page("B6_world_map_parchment.jpg", "b6_map.png", 1100)
     icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
 
     # Road HUD.
@@ -332,8 +414,8 @@ def phase2plus() -> None:
     plate = crop_to_alpha(key(_load("K5_rank_pips.jpg")))
     half = plate.shape[1] // 2
     filled, hollow = crop_to_alpha(plate[:, :half]), crop_to_alpha(plate[:, half:])
-    save(filled, "k5_pip_filled.png", (32, 32))
-    save(hollow, "k5_pip_hollow.png", (32, 32))
+    save(disc(filled), "k5_pip_filled.png", (32, 32))
+    save(disc(hollow), "k5_pip_hollow.png", (32, 32))
     for piece, name in zip(split_components(crop_to_alpha(key(_load("K7_area_shift_glyphs.jpg"))), 4),
                            ["k7_adjacent.png", "k7_all.png", "k7_push.png", "k7_pull.png"]):
         h, w = piece.shape[:2]

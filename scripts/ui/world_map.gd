@@ -2,9 +2,11 @@ extends Control
 
 const POINT_SIZE: Vector2 = Vector2(130, 44)
 const ROUTE_WIDTH: float = 3.0
-const CURRENT_LOCATION_COLOR: Color = Color(1.0, 0.85, 0.4)
-const REACHABLE_COLOR: Color = Color(0.75, 0.85, 1.0)
-const UNREACHABLE_COLOR: Color = Color(0.5, 0.5, 0.5)
+const PIN_FILE: String = "k5_pip_filled.png"
+const PIN_CLOSED_FILE: String = "k5_pip_hollow.png"
+const PIN_SIZE: float = 22.0
+## Uzun şehir adı raptiyenin iki yanına taşabilsin (yazı kutuya sığdırılmıyor).
+const LABEL_OVERHANG: float = 40.0
 ## Yolun o günkü hali (bkz. RouteConditions) çizgiye de vuruyor: harita
 ## tek bakışta hangi geçidin kapalı, hangisinin eşkıya kaynadığını
 ## söylemezse dinamik rota diye bir şey oyuncu için yok demektir.
@@ -35,7 +37,7 @@ func _ready() -> void:
 ## Harita, yazısız bir arazi parşömeni (B6): şehirler ve yollar görselde
 ## yok, `Location.map_position`'dan canlı çiziliyor - isim, yol durumu ve
 ## dil ne olursa olsun resim doğru kalıyor (Localization Rules).
-const MAP_ART_FILE: String = "b6_map.jpg"
+const MAP_ART_FILE: String = "b6_map.png"
 ## Şehir düğümleri en fazla ~(650, 400)'e uzanıyor; parşömen biraz taşsın ki
 ## kenardaki şehir de kâğıdın üstünde dursun.
 const MAP_ART_MARGIN: Vector2 = Vector2(30.0, 30.0)
@@ -71,11 +73,27 @@ func _build_route_line(
 	line.default_color = ROUTE_STATE_COLORS[int(state)]
 	return line
 
-func _build_location_point(location: Location) -> Button:
+## Şehir, parşömene mürekkeple yazılmış bir ad ve altında pirinç bir raptiye:
+## kutu yok. Düz bir düğme kutusu (ve kapalı yolun karalanmış sekmesi)
+## haritanın taramasının üstünde gri bir yama gibi duruyordu (ölçüldü).
+## Kilitli şehir yine gizlenmiyor: soluk mürekkep ve sebebi yazıda.
+func _build_location_point(location: Location) -> Control:
+	var marker := Control.new()
+	marker.position = location.map_position - (POINT_SIZE / 2.0)
+	marker.size = POINT_SIZE
+	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var pin := WaybookTheme.picture(PIN_FILE, PIN_SIZE)
+	pin.position = Vector2((POINT_SIZE.x - PIN_SIZE) * 0.5, (POINT_SIZE.y - PIN_SIZE) * 0.5)
+	pin.size = Vector2(PIN_SIZE, PIN_SIZE)
+	marker.add_child(pin)
+
 	var button := Button.new()
-	button.custom_minimum_size = POINT_SIZE
-	button.size = POINT_SIZE
-	button.position = location.map_position - (POINT_SIZE / 2.0)
+	button.theme_type_variation = WaybookTheme.MAP_LABEL
+	button.position = Vector2(-LABEL_OVERHANG, POINT_SIZE.y * 0.5 + PIN_SIZE * 0.3)
+	button.custom_minimum_size = Vector2(POINT_SIZE.x + LABEL_OVERHANG * 2.0, 0.0)
+	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	marker.add_child(button)
 
 	var is_current := location.location_id == _current_location_id
 	var route := WorldMapData.get_route(_current_location_id, location.location_id)
@@ -83,7 +101,8 @@ func _build_location_point(location: Location) -> Button:
 	if is_current:
 		button.text = tr("UI_MAP_YOU_ARE_HERE") % location.location_name
 		button.disabled = true
-		button.modulate = CURRENT_LOCATION_COLOR
+		# Buradasın: dolu raptiye, yazı da tam mürekkep (soluk değil).
+		button.add_theme_color_override("font_disabled_color", ArtPalette.BLOOD)
 	elif route == null or not _session.is_route_open(route):
 		# Kapalı geçit tıklanamaz ama gizlenmez: kilitli olay seçenekleriyle
 		# aynı kural - sebebiyle birlikte gösterilir (bkz. CLAUDE.md).
@@ -91,16 +110,16 @@ func _build_location_point(location: Location) -> Button:
 		if route != null:
 			button.text += "\n(%s)" % RouteConditions.get_state_label(RouteConditions.State.CLOSED)
 		button.disabled = true
-		button.modulate = UNREACHABLE_COLOR
+		pin.texture = WaybookTheme.texture(PIN_CLOSED_FILE)
+		pin.modulate = Color(1, 1, 1, 0.6)
 		button.mouse_entered.connect(_on_location_hovered.bind(location))
 	else:
 		button.text = location.location_name
-		button.modulate = REACHABLE_COLOR
 		button.mouse_entered.connect(_on_location_hovered.bind(location))
 		button.pressed.connect(_on_location_pressed.bind(location))
 
 	button.text += _city_event_suffix(location.location_id)
-	return button
+	return marker
 
 ## Faz 17: haritanın büyük, adlı olayları (bkz. WorldEvents) burada da
 ## görünür olmalı - "her hidden penalty bir bug'dır" kuralının aynısı

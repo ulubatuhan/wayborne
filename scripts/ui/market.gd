@@ -12,8 +12,11 @@ extends Control
 const GRID_COLUMNS: int = 5
 const GRID_ROWS: int = 4
 const SLOT_SIZE: Vector2 = Vector2(80, 80)
-const EMPTY_SLOT_COLOR: Color = Color(0.2, 0.2, 0.2)
-const FILLED_SLOT_COLOR: Color = Color(0.3, 0.5, 0.3)
+## Boş hücre aynı cilt, soluk: yer var ama içinde bir şey yok.
+const EMPTY_CELL_ALPHA: float = 0.4
+const CELL_ICON_SIZE: float = 36.0
+const NAME_COLUMN_WIDTH: float = 150.0
+const PRICE_COLUMN_WIDTH: float = 190.0
 
 const MESSAGE_COLOR: Color = Color(0.9, 0.45, 0.35)
 const TRADE_NOTE_COLOR: Color = Color(0.75, 0.85, 1.0)
@@ -368,12 +371,18 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 
 	var name_label := Label.new()
 	name_label.text = item.item_name
-	name_label.custom_minimum_size = Vector2(120, 0)
+	# Sabit sütun, uzun ad sarılıyor: "Otacı İksiri" gibi bir ad satırın
+	# kalanını sağa itiyor, sütunlar satırdan satıra kayıyordu (ölçüldü).
+	name_label.custom_minimum_size = Vector2(NAME_COLUMN_WIDTH, 0)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(name_label)
 
 	var price_label := Label.new()
 	price_label.text = tr("UI_MARKET_PRICES") % [_get_buy_price(item), _get_sell_price(item)]
-	price_label.custom_minimum_size = Vector2(160, 0)
+	price_label.custom_minimum_size = Vector2(PRICE_COLUMN_WIDTH, 0)
+	price_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	price_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(price_label)
 
 	# Piyasa şoku gerçekti ama görünürlüğü yoktu: fiyat oynuyordu, hiçbir
@@ -705,10 +714,35 @@ func _refresh_inventory_grid() -> void:
 		if i < entries.size():
 			var entry: Dictionary = entries[i]
 			var item: Item = entry.item
-			var label_text := "%s\nx%d" % [item.item_name, entry.quantity]
-			_inventory_grid.add_child(PlaceholderHelper.create_box(SLOT_SIZE, FILLED_SLOT_COLOR, label_text))
+			_inventory_grid.add_child(_cargo_cell(item, int(entry.quantity)))
 		else:
-			_inventory_grid.add_child(PlaceholderHelper.create_box(SLOT_SIZE, EMPTY_SLOT_COLOR, ""))
+			_inventory_grid.add_child(_cargo_cell(null, 0))
+
+## Kargo hücresi ciltli küçük bir kutu (`CELL_PANEL`): malın resmi ve
+## miktarı, adı ipucunda. Düz yeşil/gri `ColorRect` kutuları defterin hiçbir
+## parçasına benzemiyordu.
+func _cargo_cell(item: Item, quantity: int) -> Control:
+	var cell := PanelContainer.new()
+	cell.theme_type_variation = WaybookTheme.CELL_PANEL
+	cell.custom_minimum_size = SLOT_SIZE
+	if item == null:
+		cell.modulate.a = EMPTY_CELL_ALPHA
+		return cell
+	cell.tooltip_text = "%s ×%d" % [item.item_name, quantity]
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override("separation", 0)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cell.add_child(column)
+	var icon := WaybookTheme.item_icon(item.item_id, CELL_ICON_SIZE)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(icon)
+	var amount := Label.new()
+	amount.text = "×%d" % quantity
+	amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	amount.add_theme_font_size_override("font_size", 15)
+	column.add_child(amount)
+	return cell
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

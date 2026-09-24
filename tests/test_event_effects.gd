@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_grant_equipment_fills_locker(t)
 	_test_vengeful_wanderer_chain(t)
 	_test_pilgrim_blessing_chain(t)
+	_test_every_effect_type_is_handled(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -265,3 +266,21 @@ func _has_event(events: Array, event_id: String) -> bool:
 		if event.event_id == event_id:
 			return true
 	return false
+
+## Bir etki tipi enum'a eklenip uygulayıcıda karşılanmazsa sessizce hiçbir
+## şey yapmaz (bkz. proje kuralları, Event Engine Rules). Uygulayıcının
+## kaynağı taranıyor: her tipin kendi `match` kolu olmalı. Çalışma anında
+## denemek yetmiyordu - `match`'e düşmeyen bir tip hata vermez, yalnızca
+## boş bir sonuç döner, ve boş sonuç bazı tipler için (SET_FLAG) zaten
+## doğru cevap.
+func _test_every_effect_type_is_handled(t) -> void:
+	var file := FileAccess.open("res://scripts/events/event_effect_applier.gd", FileAccess.READ)
+	t.ok(file != null, "uygulayıcının kaynağı okunabiliyor")
+	if file == null:
+		return
+	var source := file.get_as_text()
+	for type_name in EventEffect.Type.keys():
+		t.ok(
+			source.contains("EventEffect.Type.%s:" % type_name),
+			"EventEffect.Type.%s uygulayıcıda karşılanıyor" % type_name
+		)
