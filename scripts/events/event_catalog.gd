@@ -87,6 +87,9 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_deserter_plea())
 	_road_events.append(_deserter_search())
 	_road_events.append(_deserter_debt())
+	_road_events.append(_carcass_on_road())
+	_road_events.append(_wolves_follow())
+	_road_events.append(_wolf_pack())
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -1905,6 +1908,90 @@ static func _deserter_debt() -> GameEvent:
 		_choice("EVT_DESERTER_DEBT_OPT_GIFT", _effects([
 			EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_1),
 		] + clear)),
+	])
+	return event
+
+## --- Zincir C: Kurt Yılı ---
+## Yol kenarında taze bir leş: kesip erzağa katmak cazip, ama et kokusu
+## peşine sürü takar. Etin bedeli bir sonraki kartta geri ödenebilir
+## (eti bırak), ya da sürüyle yüzleşmek gerekir. Zincirin sonu gerçek bir
+## vahşi hayvan savaşı - ormanda üç kurtluk bir sürü (bkz. build_wildlife_
+## squad'ın biyom parametresi).
+static func _carcass_on_road() -> GameEvent:
+	var event := _event("evt_carcass_on_road", "EVT_CARCASS", 0.9)
+	event.cooldown_days = 12
+	event.conditions = _conditions([
+		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.3),
+		EventCondition.make("wolf_scent", EventCondition.Op.NOT_HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice("EVT_CARCASS_OPT_BUTCHER", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, 10),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wolf_scent"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wolves_follow"),
+		])),
+		_choice("EVT_CARCASS_OPT_BURN", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -2),
+		])),
+	])
+	return event
+
+static func _wolves_follow() -> GameEvent:
+	var event := _event("evt_wolves_follow", "EVT_WOLVES_FOLLOW", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("wolf_scent", EventCondition.Op.HAS_FLAG),
+	])
+	# Saymak sürüyü durdurmuyor, yalnızca ne geldiğini bildiriyor - zar
+	# tutmazsa bir kurt gece bir koşum hayvanını yaralıyor.
+	var count := _checked_choice(
+		"EVT_WOLVES_FOLLOW_OPT_COUNT",
+		SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.LEADER, 1.0),
+		"EVT_WOLVES_FOLLOW_COUNTED", _effects([
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wolves_counted"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wolf_pack"),
+		]),
+		"EVT_WOLVES_FOLLOW_SURPRISED", _effects([
+			EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "wolves_counted"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_wolf_pack"),
+		])
+	)
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_WOLVES_FOLLOW_OPT_DROP", "EVT_WOLVES_FOLLOW_OPT_DROP_LOCKED",
+			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 10)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -10),
+				EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "wolf_scent"),
+			])
+		),
+		count,
+	])
+	return event
+
+static func _wolf_pack() -> GameEvent:
+	var event := _event("evt_wolf_pack", "EVT_WOLF_PACK", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("wolf_scent", EventCondition.Op.HAS_FLAG),
+		EventCondition.make("wolves_counted", EventCondition.Op.HAS_FLAG),
+	])
+	var clear := [
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "wolf_scent"),
+		EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "wolves_counted"),
+	]
+	event.choices = _choices([
+		_choice("EVT_WOLF_PACK_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "wildlife"),
+		] + clear)),
+		_gated_choice(
+			"EVT_WOLF_PACK_OPT_OX", "EVT_WOLF_PACK_OPT_OX_LOCKED",
+			_conditions([EventCondition.make("wagons", EventCondition.Op.GREATER_EQUAL, 2)]),
+			_effects([EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 2)] + clear)
+		),
 	])
 	return event
 
