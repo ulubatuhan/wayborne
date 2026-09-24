@@ -277,11 +277,12 @@ func _build_scenery() -> void:
 		Vector2(WORLD_MAX_X - WORLD_MIN_X + 1100.0, 1020.0)
 	)
 	var city_id: String = GameState.get_session().current_location_id
+	var hour: float = GameState.get_session().last_clock_hour
 
 	var back := HubScenery.new()
 	back.z_index = -20
 	add_child(back)
-	back.setup(span, GROUND_Y, city_id, HubScenery.LAYER_BACK)
+	back.setup(span, GROUND_Y, city_id, HubScenery.LAYER_BACK, hour)
 
 	# Yolun altındaki alçak şeyler kervanın **önünde** duruyor. Tek
 	# katman olduğunda hepsi arkada kalıyordu ve figürler çalıların,
@@ -289,7 +290,7 @@ func _build_scenery() -> void:
 	var front := HubScenery.new()
 	front.z_index = 10
 	add_child(front)
-	front.setup(span, GROUND_Y, city_id, HubScenery.LAYER_FRONT)
+	front.setup(span, GROUND_Y, city_id, HubScenery.LAYER_FRONT, hour)
 
 func _build_spots() -> void:
 	_add_spot(

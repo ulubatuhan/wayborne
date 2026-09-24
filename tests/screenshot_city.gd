@@ -47,6 +47,16 @@ func _init() -> void:
 		await _settle()
 		_save("%02d_%s.png" % [index, location.location_id])
 
+	# Varış saati (bkz. GameSession.last_clock_hour): aynı şehir şafakta,
+	# akşam ve gece - gökyüzü yolun bittiği saatten okunuyor.
+	for hour in [6.5, 18.5, 23.0]:
+		var session := GameSession.new()
+		session.current_location_id = WorldMapData.get_locations()[0].location_id
+		session.last_clock_hour = hour
+		_view.setup(session)
+		await _settle()
+		_save("80_saat_%02d.png" % int(hour))
+
 	# Balon: hem ortadaki mekânda hem de sağ alt köşeye yakın bir noktada,
 	# ekranın dışına taşmadığı görülsün.
 	_view._update_hover(Vector2(VIEW_SIZE) * 0.5)

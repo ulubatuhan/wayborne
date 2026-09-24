@@ -19,6 +19,7 @@ func run(t) -> void:
 	_test_phase_progress(t)
 	_test_camp_window(t)
 	_test_save_round_trip(t)
+	_test_arrival_hour_colours_the_city(t)
 
 func _test_speed_selection(t) -> void:
 	var clock := JourneyClock.new()
@@ -170,3 +171,43 @@ func _test_save_round_trip(t) -> void:
 	var legacy := JourneyClock.new()
 	legacy.load_from_dict({})
 	t.ok(is_equal_approx(legacy.total_hours, JourneyClock.START_HOUR), "eksik kayıt başlangıç saatine düşer")
+
+## Şehrin gökyüzü varış saatinden (SENSORY-003): statik evre saatin kendi
+## evresiyle her saatte aynı olmalı, yoksa yol akşam biter de şehir başka
+## bir akşamda açılır. Saat kayda yazılmalı.
+func _test_arrival_hour_colours_the_city(t) -> void:
+	var clock := JourneyClock.new()
+	var mismatches := 0
+	for step in range(96):
+		clock.total_hours = step * 0.25
+		var hour := clock.get_hour_of_day()
+		if JourneyClock.phase_for_hour(hour) != clock.get_phase():
+			mismatches += 1
+		if not is_equal_approx(JourneyClock.phase_progress_for_hour(hour), clock.get_phase_progress()):
+			mismatches += 1
+	t.eq(mismatches, 0, "statik evre saatin evresiyle her çeyrek saatte aynı")
+
+	var noon: Dictionary = TravelBand.sky_for_hour(12.0)
+	var night: Dictionary = TravelBand.sky_for_hour(23.0)
+	t.ok(
+		Color(night.top).get_luminance() < Color(noon.top).get_luminance(),
+		"gece varılan şehrin gökyüzü öğleninkinden karanlık"
+	)
+
+	t.eq(JourneyClock.darkness_for_hour(12.0), 0.0, "öğle karanlık değil")
+	t.eq(JourneyClock.darkness_for_hour(2.0), 1.0, "02:00 tam gece - gökyüzü şafağa karışsa da")
+	t.ok(JourneyClock.darkness_for_hour(19.0) > 0.0 and JourneyClock.darkness_for_hour(19.0) < 1.0,
+		"akşam alacakaranlıkta yarı koyu")
+	t.eq(TravelBand.night_wash_for_hour(12.0).a, 0.0, "öğle şehri örtüsüz")
+
+	var session := GameSession.new()
+	t.eq(session.last_clock_hour, JourneyClock.START_HOUR, "yeni oyun şafakta başlar")
+	session.last_clock_hour = 19.5
+	var restored := GameSession.new()
+	restored.load_from_dict(session.to_save_dict())
+	t.ok(is_equal_approx(restored.last_clock_hour, 19.5), "varış saati kayıttan geri gelir")
+	var legacy := session.to_save_dict()
+	legacy.erase("last_clock_hour")
+	var old := GameSession.new()
+	old.load_from_dict(legacy)
+	t.eq(old.last_clock_hour, JourneyClock.START_HOUR, "eski kayıt şafağa düşer")

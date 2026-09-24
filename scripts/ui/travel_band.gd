@@ -93,6 +93,8 @@ const PHASE_SKY: Dictionary = {
 	JourneyClock.Phase.NIGHT: ArtPalette.PHASE_NIGHT,
 }
 
+const NIGHT_WASH_MAX: float = 0.5
+
 const PHASE_ORDER: Array = [
 	JourneyClock.Phase.DAWN,
 	JourneyClock.Phase.MORNING,
@@ -175,11 +177,33 @@ func set_route_progress(progress: float, day_position: float = -1.0) -> void:
 	_refresh_terrain()
 	queue_redraw()
 
-func set_phase(phase: JourneyClock.Phase, phase_progress: float) -> void:
+## Bir evrenin (ve içindeki ilerlemenin) gökyüzü. Statik: şehir ve şehir
+## dışı yürüyüş alanı da aynı gökyüzünü varış saatinden okuyor - yol
+## akşam bittiyse şehir de akşam.
+static func sky_for_phase(phase: JourneyClock.Phase, phase_progress: float) -> Dictionary:
 	var from_key: String = PHASE_SKY.get(phase, ArtPalette.PHASE_DAY)
 	var to_key: String = PHASE_SKY.get(_next_phase(phase), ArtPalette.PHASE_DAY)
+	return ArtPalette.blend_sky(from_key, to_key, clampf(phase_progress, 0.0, 1.0))
+
+## Gökyüzünün ne kadar gece olduğu (0-1) - yıldızlar, meşale ışığı ve
+## şehrin gece örtüsü aynı sayıyı okusun.
+static func night_ratio_of(sky: Dictionary) -> float:
+	return clampf(1.0 - Color(sky.bottom).get_luminance() * 2.6, 0.0, 1.0)
+
+## Gece örtüsü: yol gökyüzünü zaten ışıkla boyuyor; şehir ve şehir dışı
+## tek renk çizildiği için gece altında öğle gibi parlıyordu. Gece
+## gökyüzünün üst rengiyle, saatin koyuluğu kadar yarı saydam bir örtü.
+static func night_wash_for_hour(hour_of_day: float) -> Color:
+	var ink := Color(ArtPalette.sky(ArtPalette.PHASE_NIGHT).top)
+	return Color(ink, JourneyClock.darkness_for_hour(hour_of_day) * NIGHT_WASH_MAX)
+
+static func sky_for_hour(hour_of_day: float) -> Dictionary:
+	return sky_for_phase(JourneyClock.phase_for_hour(hour_of_day),
+		JourneyClock.phase_progress_for_hour(hour_of_day))
+
+func set_phase(phase: JourneyClock.Phase, phase_progress: float) -> void:
 	var blend := clampf(phase_progress, 0.0, 1.0)
-	_sky = ArtPalette.blend_sky(from_key, to_key, blend)
+	_sky = sky_for_phase(phase, blend)
 	_light = Color(_sky.light)
 	if _camping:
 		_light = _light.lerp(ArtPalette.TORCH, 0.45)
@@ -188,7 +212,7 @@ func set_phase(phase: JourneyClock.Phase, phase_progress: float) -> void:
 	# hesabı tutmak ikisinin ayrışması demekti.
 	var index := PHASE_ORDER.find(phase)
 	var day_span := float(index) + blend
-	_night_ratio = clampf(1.0 - Color(_sky.bottom).get_luminance() * 2.6, 0.0, 1.0)
+	_night_ratio = night_ratio_of(_sky)
 	_sun_ratio = clampf(day_span / float(PHASE_ORDER.size()), 0.0, 1.0)
 	queue_redraw()
 
@@ -260,7 +284,7 @@ func _refresh_terrain() -> void:
 	_biome = _terrain.biome_at(_day_position)
 	_slope = _terrain.slope_at(_day_position)
 
-func _next_phase(phase: JourneyClock.Phase) -> JourneyClock.Phase:
+static func _next_phase(phase: JourneyClock.Phase) -> JourneyClock.Phase:
 	var index := PHASE_ORDER.find(phase)
 	if index < 0:
 		return phase
