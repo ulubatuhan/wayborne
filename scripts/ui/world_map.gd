@@ -33,6 +33,9 @@ func _ready() -> void:
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
 	_show_hint()
+	var row: Control = _map_panel.get_parent()
+	row.resized.connect(_fit_map)
+	_fit_map()
 
 ## Harita, yazısız bir arazi parşömeni (B6): şehirler ve yollar görselde
 ## yok, `Location.map_position`'dan canlı çiziliyor - isim, yol durumu ve
@@ -41,28 +44,56 @@ const MAP_ART_FILE: String = "b6_map.png"
 ## Şehir düğümleri en fazla ~(650, 400)'e uzanıyor; parşömen biraz taşsın ki
 ## kenardaki şehir de kâğıdın üstünde dursun.
 const MAP_ART_MARGIN: Vector2 = Vector2(30.0, 30.0)
+## Şehirlerin konumları 700x420'lik sabit bir tuvalde; 1920 genişlikte bu
+## ekranın köşesinde küçük bir kâğıt kalıyordu (ölçüldü). Tuval, satırın
+## bu oranına kadar büyüyor - bilgi paneline yer bırakarak.
+const MAP_BASE_SIZE: Vector2 = Vector2(700.0, 420.0)
+const MAP_ROW_SHARE: float = 0.58
+const MAP_MAX_SCALE: float = 1.8
+
+var _map_canvas: Control
+
+## Haritanın ölçeği: satırın genişliğinin MAP_ROW_SHARE'i ve yüksekliği
+## içinde kalan en büyük değer, asla 1'in altında değil.
+static func map_scale(row_size: Vector2) -> float:
+	var padded := MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0
+	var by_width := row_size.x * MAP_ROW_SHARE / padded.x
+	var by_height := row_size.y / padded.y
+	return clampf(minf(by_width, by_height), 1.0, MAP_MAX_SCALE)
+
+func _fit_map() -> void:
+	var row: Control = _map_panel.get_parent()
+	var factor := map_scale(row.size)
+	_map_canvas.scale = Vector2(factor, factor)
+	_map_canvas.position = MAP_ART_MARGIN * factor
+	_map_panel.custom_minimum_size = (MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0) * factor
 
 func _build_map() -> void:
+	# Bütün harita tek bir tuvalde, tek bir ölçekle - düğmeler de ölçekle
+	# birlikte tıklanıyor, konumlar Location.map_position olarak kalıyor.
+	_map_canvas = Control.new()
+	_map_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_panel.add_child(_map_canvas)
 	var art := TextureRect.new()
 	art.texture = WaybookTheme.texture(MAP_ART_FILE)
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_SCALE
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art.position = -MAP_ART_MARGIN
-	art.size = _map_panel.custom_minimum_size + MAP_ART_MARGIN * 2.0
-	_map_panel.add_child(art)
+	art.size = MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0
+	_map_canvas.add_child(art)
 
 	for route in WorldMapData.get_routes_from(_current_location_id):
 		var from_location := WorldMapData.get_location_by_id(route.from_location_id)
 		var to_location := WorldMapData.get_location_by_id(route.to_location_id)
 		if from_location == null or to_location == null:
 			continue
-		_map_panel.add_child(_build_route_line(
+		_map_canvas.add_child(_build_route_line(
 			from_location.map_position, to_location.map_position, _session.get_route_state(route)
 		))
 
 	for location in WorldMapData.get_locations():
-		_map_panel.add_child(_build_location_point(location))
+		_map_canvas.add_child(_build_location_point(location))
 
 func _build_route_line(
 	from_position: Vector2, to_position: Vector2, state: RouteConditions.State
