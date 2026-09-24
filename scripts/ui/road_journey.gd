@@ -201,6 +201,12 @@ const SIGNAL_FADE_SECONDS: float = 0.8
 const EDGE_STRESS_FILE: String = "g11_edge_bleed.png"
 const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
 const EDGE_MAX_ALPHA: float = 0.85
+## Maskenin boyandığı boyut ve dokuz dilim payları - ölçüldü: yan kenarların
+## koyuluğu ~340 px'te, üst/alt ~200 px'te sıfıra iniyor (1280x720).
+const EDGE_MASK_SIZE: Vector2 = Vector2(1280.0, 720.0)
+const EDGE_SLICE_SIDE: int = 360
+const EDGE_SLICE_TOP_BOTTOM: int = 220
+const EDGE_MAX_SIDE_RATIO: float = 0.2
 ## Stres kırılma bölgesine yaklaşırken leke başlıyor (Stress Rules'un
 ## kavga eşiği 40), dolmuş bir kervanda tam koyulukta.
 const EDGE_STRESS_FROM: float = 35.0
@@ -417,8 +423,8 @@ var _time_dial: TimeDial
 ## Kenar lekeleri: stres yükseldikçe mürekkep kenardan sızıyor, açlık
 ## gecesi uzadıkça sayfanın kenarı kavruluyor. Sayı değil his - sayısı
 ## zaten şişede yazılı.
-var _stress_edge: TextureRect
-var _hunger_edge: TextureRect
+var _stress_edge: Control
+var _hunger_edge: Control
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -469,15 +475,49 @@ func _build_world_layer() -> void:
 	_stress_edge = _edge_overlay(EDGE_STRESS_FILE, ArtPalette.UI_EDGE_STRESS)
 	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
 
-func _edge_overlay(file_name: String, tint: Color) -> TextureRect:
-	var overlay := TextureRect.new()
-	overlay.texture = WaybookTheme.texture(file_name)
-	overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	overlay.stretch_mode = TextureRect.STRETCH_SCALE
-	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	overlay.modulate = Color(tint, 0.0)
-	_world.add_child(overlay)
-	return overlay
+## Kenar lekesi bir çerçeve, bir resim değil: yatay bir ekran için
+## boyanmış maske `STRETCH_SCALE` ile telefonun dikey ekranına gerilince
+## dallar üç kat uzuyor ve sahnenin yarısını kaplıyordu (oyuncunun ekran
+## görüntüsü). Artık dokuz dilimli (`EDGE_SLICE_*`, maskeden ölçüldü) ve
+## tek biçimli ölçekleniyor (`edge_frame_scale`): çerçevenin kalınlığı
+## ekranın kısa kenarına göre, en boy oranı ne olursa olsun aynı.
+## Kap (`_world` bir MarginContainer) çocuklarının boyunu yazdığı için
+## çerçeve sade bir Control'ün içinde - boyu ve ölçeği ona göre kuruluyor.
+func _edge_overlay(file_name: String, tint: Color) -> Control:
+	var holder := Control.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.modulate = Color(tint, 0.0)
+	_world.add_child(holder)
+
+	var frame := NinePatchRect.new()
+	frame.texture = WaybookTheme.texture(file_name)
+	frame.patch_margin_left = EDGE_SLICE_SIDE
+	frame.patch_margin_right = EDGE_SLICE_SIDE
+	frame.patch_margin_top = EDGE_SLICE_TOP_BOTTOM
+	frame.patch_margin_bottom = EDGE_SLICE_TOP_BOTTOM
+	frame.axis_stretch_horizontal = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
+	frame.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(frame)
+	holder.resized.connect(_fit_edge_frame.bind(holder, frame))
+	_fit_edge_frame(holder, frame)
+	return holder
+
+func _fit_edge_frame(holder: Control, frame: NinePatchRect) -> void:
+	var factor := edge_frame_scale(holder.size)
+	frame.scale = Vector2(factor, factor)
+	frame.position = Vector2.ZERO
+	frame.size = holder.size / factor
+
+## Çerçevenin ölçeği: maske 1280x720'ye boyandı, 16:9'da eskisiyle birebir
+## aynı ölçek (1920x1080'de 1.5). Başka bir oranda kısa kenar belirliyor.
+static func edge_frame_scale(area: Vector2) -> float:
+	if area.x <= 0.0 or area.y <= 0.0:
+		return 1.0
+	var factor := minf(area.x / EDGE_MASK_SIZE.x, area.y / EDGE_MASK_SIZE.y)
+	# Yan kenarlar ekranın genişliğinin EDGE_MAX_SIDE_RATIO'sunu geçmesin:
+	# dar bir ekranda leke sahneyi yutmamalı, kenarda durmalı.
+	return minf(factor, area.x * EDGE_MAX_SIDE_RATIO / float(EDGE_SLICE_SIDE))
 
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
@@ -505,8 +545,7 @@ func _build_hud_layer() -> void:
 
 func _build_top_bar() -> PanelContainer:
 	var bar := _make_bar()
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := _make_bar_row()
 	bar.add_child(row)
 
 	_time_dial = TimeDial.new()
@@ -605,10 +644,19 @@ func _build_top_bar() -> PanelContainer:
 	row.add_child(_dev_row)
 	return bar
 
+## Şeridin satırı akışlı: genişlik yetiyorsa tek satır (masaüstünde eskisi
+## gibi), yetmiyorsa ikinci satıra iniyor. Tek satırlık bir `HBoxContainer`
+## telefonun dikey ekranında asgari genişliğini ekranın iki katına çıkarıp
+## HUD'u iki yandan kırpıyordu (oyuncunun ekran görüntüsünde ölçüldü).
+func _make_bar_row() -> HFlowContainer:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 10)
+	row.add_theme_constant_override("v_separation", 4)
+	return row
+
 func _build_bottom_bar() -> PanelContainer:
 	var bar := _make_bar()
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := _make_bar_row()
 	bar.add_child(row)
 
 	# Yolu oyuncu yürüyor: bunu söylemeyen bir ekran, oyuncuya "kontrol
