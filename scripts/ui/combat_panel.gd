@@ -429,7 +429,7 @@ func _refresh_actions() -> void:
 
 	var unit := _encounter.get_active_unit()
 	_active_label.text = tr("UI_COMBAT_ACTIVE") % [
-		unit.display_name, unit.position, unit.get_effective_accuracy(), unit.protection
+		unit.display_name, unit.position, unit.get_effective_accuracy(), unit.get_effective_protection()
 	]
 	if _selected_skill != null:
 		_hint_label.text = tr("UI_COMBAT_HINT_PICK_TARGET") % _selected_skill.display_name
