@@ -46,6 +46,7 @@ const OBJECTIVE_LABEL_KEYS: Dictionary = {
 	"cities_visited": "CAMPAIGN_OBJ_CITIES",
 	"days_as_leader": "CAMPAIGN_OBJ_DAYS_AS_LEADER",
 	"lineage_generation": "CAMPAIGN_OBJ_GENERATION",
+	"companions_lost": "CAMPAIGN_OBJ_COMPANIONS_LOST",
 }
 
 ## Tanınmayan bir anahtar ekranda ham haliyle görünür - sessizce boş
@@ -162,6 +163,10 @@ static func _ensure_built() -> void:
 			EventCondition.make("days_as_leader", EventCondition.Op.GREATER_EQUAL, 60),
 			EventCondition.make("owned_wagons", EventCondition.Op.GREATER_EQUAL, 4),
 			EventCondition.make("reputation", EventCondition.Op.GREATER_EQUAL, 15),
+			# Kaybetmeden varılan bir son tezle çelişir: "konu kervan değil,
+			# onu çekenler ve aşınmaları". Defterde en az iki üstü çizili ad
+			# (ölen ya da giden - kurucu sayılmaz) olmadan hanın kapısı açılmaz.
+			EventCondition.make("companions_lost", EventCondition.Op.GREATER_EQUAL, 2),
 		],
 		FLAG_HOUSE, 0, 5, true
 	))

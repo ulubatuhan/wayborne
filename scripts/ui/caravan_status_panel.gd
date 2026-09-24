@@ -206,10 +206,12 @@ func _build_ledger() -> void:
 		return
 	_section(tr("UI_STATUS_LEDGER"))
 	for entry in recent:
-		var row := _line("     %s" % (tr("UI_STATUS_LEDGER_ROW") % [
-			int(entry.get("day", 0)), String(entry.get("name", "")),
-			CaravanLedger.get_kind_label(String(entry.get("kind", "")))
-		]))
+		var text := CaravanLedger.describe(entry) if not String(entry.get("cause", "")).is_empty() \
+			else tr("UI_STATUS_LEDGER_ROW") % [
+				int(entry.get("day", 0)), String(entry.get("name", "")),
+				CaravanLedger.get_kind_label(String(entry.get("kind", "")))
+			]
+		var row := _line("     %s" % text)
 		row.modulate = NOTE_COLOR
 
 const LEDGER_LIMIT: int = 4

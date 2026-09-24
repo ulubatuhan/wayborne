@@ -424,6 +424,53 @@ const MAX_STRESS: int = 100
 
 var stress: int = 0
 
+## Kalıcı kimlik. İsim havuzları kültür başına on altı isim - kırk seferlik bir
+## kariyerde iki "Elif" kaçınılmaz, ve defter isme bakarsa iki ölüyü tek bir
+## geçmişte birleştirir. Kimliği `GameSession.add_to_party()` atar; boşsa
+## henüz partiye girmemiş (aday) demektir.
+var character_id: String = ""
+
+## Kişinin taşıdığı kırgınlıklar: anahtar -> sayı. Bir karar ("bu gece kim
+## yiyecek", "kim savaşa girmeyecek", "kim lider olacak") şehir varışında
+## eriyen stresin yanında kişide bir iz bırakıyor. Bkz.
+## `GameSession.resolve_stress_breaks()` - ayrılma zarı bunu okuyor.
+const GRIEVANCE_UNFED: String = "unfed"
+const GRIEVANCE_BENCHED: String = "benched"
+const GRIEVANCE_WITNESSED_DEATH: String = "witnessed_death"
+const GRIEVANCE_PASSED_OVER: String = "passed_over"
+const GRIEVANCE_KEYS: Array[String] = [
+	GRIEVANCE_UNFED, GRIEVANCE_BENCHED, GRIEVANCE_WITNESSED_DEATH, GRIEVANCE_PASSED_OVER,
+]
+
+var grievances: Dictionary = {}
+
+## Art arda aç geçirilen günler. Doyurulduğu ilk akşam sıfırlanır; eşiği
+## geçince canından yer (bkz. `GameSession.STARVATION_HP_LOSS_START_DAY`).
+var consecutive_hungry_days: int = 0
+
+func add_grievance(key: String, amount: int = 1) -> void:
+	grievances[key] = int(grievances.get(key, 0)) + amount
+
+func get_grievance(key: String) -> int:
+	return int(grievances.get(key, 0))
+
+func get_grievance_total() -> int:
+	var total := 0
+	for key in grievances:
+		total += int(grievances[key])
+	return total
+
+## En ağır kırgınlık; hiç yoksa boş dize.
+func get_top_grievance() -> String:
+	var best := ""
+	var best_count := 0
+	for key in GRIEVANCE_KEYS:
+		var count := get_grievance(key)
+		if count > best_count:
+			best = key
+			best_count = count
+	return best
+
 func change_stress(delta: int) -> void:
 	stress = clampi(stress + delta, 0, MAX_STRESS)
 
@@ -587,6 +634,9 @@ func to_dict() -> Dictionary:
 		"equipped": equipped.duplicate(),
 		"outfit": outfit.duplicate(),
 		"personal_inventory": personal_inventory.to_save_array(),
+		"character_id": character_id,
+		"grievances": grievances.duplicate(),
+		"consecutive_hungry_days": consecutive_hungry_days,
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -633,4 +683,11 @@ static func from_dict(data: Dictionary) -> CharacterData:
 
 	character.personal_inventory = Inventory.new(8, PERSONAL_BAG_CAPACITY)
 	character.personal_inventory.load_from_array(data.get("personal_inventory", []) as Array)
+
+	character.character_id = str(data.get("character_id", ""))
+	character.grievances = {}
+	var grievance_data: Dictionary = data.get("grievances", {})
+	for key in grievance_data:
+		character.grievances[str(key)] = maxi(0, int(grievance_data[key]))
+	character.consecutive_hungry_days = maxi(0, int(data.get("consecutive_hungry_days", 0)))
 	return character

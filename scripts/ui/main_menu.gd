@@ -288,7 +288,8 @@ func _on_continue_pressed() -> void:
 	if session == null:
 		return
 	GameState.set_session(session)
-	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
+	# Sefer ortasında alınmış bir otomatik kayıt yola döner (bkz. Nav.resume_scene).
+	get_tree().change_scene_to_file(Nav.resume_scene(session))
 
 func _on_play_pressed() -> void:
 	if SaveManager.has_save():

@@ -309,15 +309,8 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 	if chosen == null:
 		return
 
-	var result := EventEffectApplier.apply(chosen.effects, session)
-	for event_id in result.unlocked_event_ids:
-		engine.unlock_event(event_id)
-
-	# Faz 17: gerçek yol ekranıyla aynı sıra - check varsa önce zar atılır.
-	var checked_context := engine.resolve_check(chosen, session.build_event_context())
-	var outcome := engine.resolve_outcome(chosen, checked_context)
-	if outcome != null:
-		EventEffectApplier.apply(outcome.effects, session)
+	# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver).
+	EventResolver.resolve_choice(session, engine, event, chosen)
 
 # --- Rapor ---
 

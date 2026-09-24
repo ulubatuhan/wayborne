@@ -249,7 +249,7 @@ func _run_single(danger: float, seed_value: int) -> Dictionary:
 		engine.mark_fired(event, day)
 		fired_events.append(event.event_id)
 		if not event.immediate_effects.is_empty():
-			_apply(event.immediate_effects, session, danger, rng, engine)
+			var _immediate := _apply(event.immediate_effects, session, danger, rng, engine)
 		_resolve_first_available_choice(event, engine, session, danger, rng)
 
 	# finish_journey() kervanı sıfırlıyor (moral yeniden 100) - seferin
@@ -292,12 +292,14 @@ func _resolve_first_available_choice(
 	for choice in event.choices:
 		if not choice.is_available(context):
 			continue
-		_apply(choice.effects, session, danger, rng, engine)
-		# Faz 17: gerçek yol ekranıyla aynı sıra - check varsa önce zar atılır.
-		var checked_context := engine.resolve_check(choice, session.build_event_context())
-		var outcome := engine.resolve_outcome(choice, checked_context)
-		if outcome != null:
-			_apply(outcome.effects, session, danger, rng, engine)
+		# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver); etkileri
+		# simülatörün kendi sarmalayıcısı uyguluyor ki savaş isteği gerçek
+		# motorla koşturulsun.
+		EventResolver.resolve_choice(
+			session, engine, event, choice,
+			func(effects: Array[EventEffect]) -> EventEffectApplier.Result:
+				return _apply(effects, session, danger, rng, engine)
+		)
 		return
 
 ## Etkiler uygulanır; savaş isteği çıkarsa gerçek motor koşturulur ve
@@ -310,7 +312,7 @@ const SIM_COMBAT_DEFEAT_STRESS: int = 15
 func _apply(
 	effects: Array[EventEffect], session: GameSession,
 	danger: float, rng: RandomNumberGenerator, engine: EventEngine = null
-) -> void:
+) -> EventEffectApplier.Result:
 	var result := EventEffectApplier.apply(effects, session)
 
 	# road_journey.gd zincir olaylarını böyle açıyor (bkz.
@@ -323,7 +325,7 @@ func _apply(
 			engine.unlock_event(event_id)
 
 	if result.combat_requests.is_empty():
-		return
+		return result
 
 	var combat_result := _simulate_combat(session.get_party(), danger, rng, 1, session.party_stress)
 	var victory: bool = combat_result.victory
@@ -344,6 +346,7 @@ func _apply(
 		aftermath.append(EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1))
 		aftermath.append(EventEffect.make(EventEffect.Type.MORALE, -20))
 	var _aftermath_result := EventEffectApplier.apply(aftermath, session)
+	return result
 
 func _simulate_combat(
 	party: Array[CharacterData], danger: float, rng: RandomNumberGenerator,

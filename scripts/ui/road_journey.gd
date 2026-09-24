@@ -45,10 +45,8 @@ const COMBAT_STRESS_PER_DOWN: int = 6
 const COMBAT_VICTORY_STRESS_RELIEF: int = 4
 const COMBAT_DEFEAT_STRESS: int = 15
 
-## Aç bir kervan daha yavaş yürür - tempo zaten stamina'ya bağlı (bkz. Road
-## Layer Rules'un "Pace is a resource" maddesi), aynı kalıba erzak ekleniyor.
-## Havanın çarpanıyla aynı yerde, aynı şekilde uygulanıyor.
-const HUNGRY_PACE_MULTIPLIER: float = 0.85
+## Aç bir kervanın yavaşlaması (`HUNGRY_PACE_MULTIPLIER`) ve karşılaşmaya
+## ulaşma payı artık `JourneyController`'da - yürüyüş formülü orada tek yerde.
 
 ## Yol artık tuşla değil akan zamanla ilerliyor (bkz. JourneyClock). Aşağıdaki
 ## süreler olayların "arka planda zamandan yemesi" içindir: bir olay kartını
@@ -96,7 +94,6 @@ const WALK_BACKWARD_RATE: float = 0.25
 ## Küçük tutulmalı: büyürse oyuncu günün geri kalanını bir şeye doğru
 ## yürüyerek geçirir, bu bir onay adımı olmalı, ikinci bir yolculuk değil.
 const ENCOUNTER_APPROACH_DAYS: float = 0.35
-const ENCOUNTER_TRIGGER_EPSILON: float = 0.01
 
 ## event_id -> CombatFigure.ARCHETYPES kategorisi. Eşlemede olmayan her
 ## olay eskisi gibi davranır (hiç işaret yok, kart anında açılır) - bu
@@ -173,11 +170,28 @@ const CARD_WIDTH: float = 660.0
 const CARD_BODY_MAX_HEIGHT: float = 320.0
 
 var _session: GameSession
-var _engine: EventEngine
+## Seferin görsel olmayan durumu (mesafe, gün, tempo, kamp, saat, olay
+## motoru) - bkz. JourneyController. Aşağıdaki alanlar ona açılan takma
+## adlar: ekranın geri kalanı değişmeden okuyup yazabilsin, ama tek
+## doğruluk kaynağı ve kaydedilen şey controller.
+var _journey: JourneyController = JourneyController.new()
+var _engine: EventEngine:
+	get:
+		return _journey.engine
+	set(value):
+		_journey.engine = value
 var _current_event: GameEvent
 ## Yolda görünüp kartı henüz açılmamış olay - bkz. Yolda yaklaşan olay.
-var _pending_event: GameEvent = null
-var _pending_event_day_position: float = 0.0
+var _pending_event: GameEvent:
+	get:
+		return _journey.pending_event
+	set(value):
+		_journey.pending_event = value
+var _pending_event_day_position: float:
+	get:
+		return _journey.pending_event_day_position
+	set(value):
+		_journey.pending_event_day_position = value
 var _encounter: RoadEncounter = null
 var _current_combat_kind: String = "bandit"
 var _pending_combat_danger: float = 0.0
@@ -185,14 +199,26 @@ var _pre_combat_panel: PreCombatPanel = null
 ## Bu savaşa gerçekten katılanlar (bkz. PreCombatPanel) - dışarıda
 ## kalanlar risk almadığı için ne XP alır ne düşme izi taşır.
 var _current_combat_party: Array[CharacterData] = []
-var _current_day: int = 0
-var _hungry: bool = false
+var _current_day: int:
+	get:
+		return _journey.current_day
+	set(value):
+		_journey.current_day = value
+var _hungry: bool:
+	get:
+		return _journey.hungry
+	set(value):
+		_journey.hungry = value
 var _is_live_journey: bool = false
 var _pending_haggle_max: int = 0
 ## Varış bir kez işlenir - bkz. _check_journey_end.
 var _journey_finished: bool = false
 
-var _clock: JourneyClock
+var _clock: JourneyClock:
+	get:
+		return _journey.clock
+	set(value):
+		_journey.clock = value
 var _band: TravelBand
 var _caravan: RoadCaravan
 ## Yolun coğrafyası ve o günkü havası. İkisi de tohumdan hesaplanıyor,
@@ -202,8 +228,16 @@ var _caravan: RoadCaravan
 var _terrain: RouteTerrain
 var _route_key: String = ""
 var _weather: String = RouteWeather.CLEAR
-var _pace: float = PACE_STEADY
-var _pace_key: String = "UI_ROAD_PACE_STEADY"
+var _pace: float:
+	get:
+		return _journey.pace
+	set(value):
+		_journey.pace = value
+var _pace_key: String:
+	get:
+		return _journey.pace_key
+	set(value):
+		_journey.pace_key = value
 ## Lider kolondan ayrıldı mı: ayrıldıysa A/D onu yürütüyor, kervanı değil.
 var _leader_detached: bool = false
 var _leader_offset: float = 0.0
@@ -213,9 +247,17 @@ var _attention_zone: String = RoadAttention.ZONE_FRONT
 ## Yolun sürekli konuşan katmanı (bkz. RoadSignals) - modal değil,
 ## kart açmıyor, zamanı durdurmuyor.
 var _signals: RoadSignals = RoadSignals.new()
-var _signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _signal_rng: RandomNumberGenerator:
+	get:
+		return _journey.signal_rng
+	set(value):
+		_journey.signal_rng = value
 ## Duman görmezden gelindiğinde yolun tehlikesine eklenen pay.
-var _signal_danger_bonus: float = 0.0
+var _signal_danger_bonus: float:
+	get:
+		return _journey.signal_danger_bonus
+	set(value):
+		_journey.signal_danger_bonus = value
 var _command_panel: PanelContainer
 var _talk_merchant_button: Button
 var _talk_merchant_row_number: int = 0
@@ -223,15 +265,31 @@ var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
 var _merchant_dialogue_panel: MerchantDialoguePanel = null
-var _camping: bool = false
-var _camp_ends_at_hours: float = 0.0
+var _camping: bool:
+	get:
+		return _journey.camping
+	set(value):
+		_journey.camping = value
+var _camp_ends_at_hours: float:
+	get:
+		return _journey.camp_ends_at_hours
+	set(value):
+		_journey.camp_ends_at_hours = value
 ## Seferin toplam gün uzunluğu - ilerleme çubuğu bunun üzerinden hesaplanır.
-var _journey_length_days: int = 1
+var _journey_length_days: int:
+	get:
+		return _journey.journey_length_days
+	set(value):
+		_journey.journey_length_days = value
 ## Kat edilen yol, "gün" cinsinden. Konumun tek doğruluk kaynağı burası:
 ## `journey_days_remaining` artık bir sayaç değil, bundan *türetilen* bir
 ## gösterge (bkz. _sync_days_remaining). Ters sırada tutulsaydı bir olayın
 ## "yol +1 gün" etkisi bir sonraki karede silinirdi.
-var _days_covered: float = 0.0
+var _days_covered: float:
+	get:
+		return _journey.days_covered
+	set(value):
+		_journey.days_covered = value
 ## Son karede hangi yöne yürüdüğümüz - ipucu satırı bunu gösteriyor.
 var _walk_direction: float = 0.0
 
@@ -888,6 +946,9 @@ func _issue_command(index: int) -> void:
 
 func _init_journey() -> void:
 	var live_session: GameSession = GameState.get_session()
+	# Her sefer taze bir controller ile başlar; sefer ortası kaydından
+	# gelindiyse aşağıda kaydın durumuyla doldurulur.
+	_journey = JourneyController.new()
 
 	if live_session.is_journey_active():
 		_is_live_journey = true
@@ -904,8 +965,9 @@ func _init_journey() -> void:
 	# oyunda *her sefer aynı olay dizisini* çekiyordu - yol kendini tekrar
 	# ediyordu ve sebebi bir geliştirici kutusuydu. Canlı sefer artık
 	# hedeften ve geçen günden tohum alıyor: aynı kaydı yeniden yükleyen
-	# oyuncu aynı yolu bulur (sefer içinde kayıt yok, o yüzden bu bir
-	# yeniden-zar atma kapısı açmıyor), ama her yeni sefer başka bir yoldur.
+	# oyuncu aynı yolu bulur (sefer ortası kaydı zarın *durumunu* taşıyor,
+	# tohumunu değil - bkz. EventEngine.to_dict - o yüzden bu bir yeniden-zar
+	# atma kapısı açmıyor), ama her yeni sefer başka bir yoldur.
 	_dev_row.visible = not _is_live_journey
 	var engine_seed := int(_seed_spin.value)
 	if _is_live_journey:
@@ -974,6 +1036,11 @@ func _init_journey() -> void:
 	_arrive_button.visible = false
 	_enter_city_button.visible = false
 	_set_journey_controls_enabled(true)
+
+	if _is_live_journey and not _session.journey_snapshot.is_empty():
+		_restore_journey_snapshot()
+		return
+
 	_refresh_state()
 
 	if _is_live_journey:
@@ -989,6 +1056,43 @@ func _init_journey() -> void:
 			_session.journey_days_remaining,
 			int(_session.danger_level * 100.0),
 		])
+
+## Sefer ortası kaydından dönüş: saat, mesafe, tempo, kamp, olay motoru ve
+## yolda bekleyen karşılaşma kayıttan okunur (bkz. JourneyController).
+## Arazi ve hava zaten tohumdan hesaplandığı için yeniden yazılmıyor.
+func _restore_journey_snapshot() -> void:
+	_journey.load_from_dict(_session.journey_snapshot, EventCatalog.get_road_events())
+	_session.journey_snapshot = {}
+	_sync_days_remaining()
+	_refresh_weather()
+	_band.set_camping(_camping)
+	_caravan.set_camping(_camping)
+	if _pending_event != null:
+		var kind: String = EVENT_ROAD_MARKER_KIND.get(_pending_event.event_id, "")
+		if kind.is_empty():
+			var event := _pending_event
+			_pending_event = null
+			_present_event(event)
+		else:
+			_spawn_encounter(kind)
+	_refresh_state()
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	_add_log(tr("UI_ROAD_RESUMED") % [
+		"?" if destination == null else destination.location_name,
+		_session.journey_days_remaining,
+	])
+
+## Sefer ortası otomatik kaydı. Yalnızca sakin bir anda alınır: açık bir
+## kart, savaş, pazarlık ya da karar paneli varken değil - yüklenen bir kayıt
+## yarım kalmış bir kararın ortasına düşmesin, ve bir kararı yeniden
+## denemek için kayıt yüklemek bir kapı olmasın. Günün kararı (sofra ve
+## günün olayı) çözüldükten sonra çağrılıyor, yani fiilen günde bir kez.
+func _autosave_journey() -> void:
+	if not _is_live_journey or _journey_finished or _current_event != null or _has_open_panel():
+		return
+	_session.journey_snapshot = _journey.to_dict()
+	SaveManager.save_session(_session)
+	_session.journey_snapshot = {}
 
 func _start_synthetic_journey() -> void:
 	_session = GameSession.new()
@@ -1123,20 +1227,16 @@ func _walk_at(rate: float, hours: float) -> void:
 	if is_zero_approx(rate):
 		return
 	_walk_direction = signf(rate)
-	var effective := rate * RouteWeather.pace_multiplier(_weather) * _session.get_caravan_theoretical_speed()
 	# Faz 17 PR-6: eğim artık yalnızca çizilen bir yol değil, gerçek bir
 	# yavaşlatıcı/hızlandırıcı - RouteWeather.forecast_extra_days() aynı
 	# çarpanı planlayıcının erzak payına ekliyor, yoksa tırmanışlı bir
 	# rotada "doğru stoklayan asla aç kalmaz" sözü sessizce bozulurdu.
-	if _terrain != null:
-		effective *= _terrain.speed_factor_at(_days_covered)
-	if _hungry:
-		effective *= HUNGRY_PACE_MULTIPLIER
-	_days_covered = clampf(
-		_days_covered + effective * hours / JourneyClock.HOURS_PER_DAY,
-		0.0,
-		float(_journey_length_days)
+	var terrain_factor := 1.0 if _terrain == null else _terrain.speed_factor_at(_days_covered)
+	var effective := JourneyController.effective_rate(
+		rate, RouteWeather.pace_multiplier(_weather),
+		_session.get_caravan_theoretical_speed(), terrain_factor, _hungry
 	)
+	_journey.walk(effective, hours)
 	_sync_days_remaining()
 	_check_pending_event_reached()
 	# Varış mesafeyle olur, günle değil - ve **o anda** olmalı. Eskiden
@@ -1187,9 +1287,7 @@ func _apply_signal_escalation(kind: String) -> void:
 ## ve varış kontrolü hep aynı mesafeyi okusun diye. Geri yürüyen bir kervan
 ## için "kalan yol" gerçekten uzar.
 func _sync_days_remaining() -> void:
-	_session.journey_days_remaining = maxi(
-		0, ceili(float(_journey_length_days) - _days_covered)
-	)
+	_journey.sync_days_remaining(_session)
 
 func _can_time_flow() -> bool:
 	return not _journey_finished and _current_event == null and not _has_open_panel()
@@ -1249,6 +1347,9 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 		_add_log(tr("UI_ROAD_MEAL_HUNGRY") % name_text, LOCKED_COLOR)
 	if result.get("crew_hungry", false):
 		_add_log(tr("UI_ROAD_MEAL_CREW_HUNGRY"), LOCKED_COLOR)
+	var death_outcome: Dictionary = result.get("death_outcome", {})
+	if not (death_outcome.get("dead_names", []) as Array).is_empty():
+		_handle_death_outcome(death_outcome)
 
 	_meal_panel = null
 	if not _camping:
@@ -1256,19 +1357,11 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 		_caravan.set_camping(false)
 
 	var context := _session.build_event_context()
-	# evt_roadside_shrine yalnızca ekranda gerçekten bir sunak durağı
-	# geçilirken güvenle çekilsin diye - bkz. o olayın kendi notu.
-	context["near_shrine"] = (
-		1.0 if _terrain != null and _terrain.segment_at(_days_covered).stop == RouteTerrain.STOP_SHRINE
-		else 0.0
-	)
-	# Faz 17 PR-6: aynı desen, dağ geçidi için - evt_culture_highland_
-	# challenge'ın "Güç Sınavı" artık gerçekten bir geçit durağının
-	# önünden geçilirken çekiliyor, tesadüfen değil.
-	context["near_mountain_pass"] = (
-		1.0 if _terrain != null and _terrain.segment_at(_days_covered).stop == RouteTerrain.STOP_PASS
-		else 0.0
-	)
+	# Günün durağı olay bağlamına bayrak olarak giriyor (near_shrine,
+	# near_hamlet, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
+	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
+	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_days_covered).stop
+	context.merge(EventResolver.stop_context(stop), true)
 	var event := _engine.roll_for_day(_current_day, context)
 	if event == null:
 		_add_log(tr("UI_ROAD_DAY_LINE") % [_current_day, tr("EVT_TEST_QUIET_DAY")])
@@ -1277,6 +1370,7 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 
 	_refresh_state()
 	_check_journey_end()
+	_autosave_journey()
 
 func _on_speed_pressed() -> void:
 	_clock.cycle_speed()
@@ -1552,16 +1646,11 @@ func _position_encounter() -> void:
 		return
 	_encounter.set_screen_position(_band.screen_position_for_day(_pending_event_day_position))
 
-## İşaretin kartı açtığı nokta. Kervanın **burnu** işarete değdiğinde
-## açılmalı: tetik çapaya bağlıyken (çapa liderin arkasında, bkz.
-## RoadCaravan.get_front_offset) görevli önce liderin yanından geçiyor,
-## kart ancak o arkadaki vagona ulaştığında açılıyordu - oyuncu adamı
-## geçtikten sonra konuşmaya başlıyordu.
-func _encounter_trigger_day() -> float:
-	var front := 0.0
-	if _caravan != null:
-		front = _caravan.get_front_offset()
-	return _pending_event_day_position - front / TravelBand.PIXELS_PER_DAY
+## İşaretin kartı açtığı nokta kervanın **burnu** - tetik çapaya bağlıyken
+## (çapa liderin arkasında, bkz. RoadCaravan.get_front_offset) görevli önce
+## liderin yanından geçiyor, kart ancak arkadaki vagona ulaşınca açılıyordu.
+## Hesap `JourneyController.has_reached_pending()`'de; burnun gün cinsinden
+## payı `_check_pending_event_reached()`'den veriliyor.
 
 func _clear_encounter() -> void:
 	if _encounter == null:
@@ -1574,9 +1663,8 @@ func _clear_encounter() -> void:
 ## kervan işaretten uzaklaşır ve hiçbir şey tetiklenmez; tekrar yaklaşınca
 ## aynı kontrol yine çalışır.
 func _check_pending_event_reached() -> void:
-	if _pending_event == null:
-		return
-	if _days_covered + ENCOUNTER_TRIGGER_EPSILON < _encounter_trigger_day():
+	var front_days := 0.0 if _caravan == null else _caravan.get_front_offset() / TravelBand.PIXELS_PER_DAY
+	if not _journey.has_reached_pending(front_days):
 		return
 	var event := _pending_event
 	_pending_event = null
@@ -1645,7 +1733,9 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		label = "%s (%s)" % [label, tr(hint_key)]
 	if choice.check != null:
 		var stat_value: float = float(context.get(choice.check.get_context_key(), 0.0))
-		label = "%s — %s" % [label, choice.get_check_preview(stat_value)]
+		var roller := _session.get_check_roller(choice.check)
+		var roller_name := roller.character_name if roller != null else ""
+		label = "%s — %s" % [label, choice.get_check_preview(stat_value, roller_name)]
 	if _choice_triggers_combat(choice):
 		# %12 kazanma oranı bir dengesizlik değil bir okunabilirlik sorunu:
 		# oyuncu göze aldığı riski seçmeden *önce* görsün, savaş panelinde
@@ -1708,28 +1798,25 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 
 	_add_log("   » %s" % tr(choice.text_key))
 
-	if not choice.effects.is_empty():
-		var result := _apply_effects(choice.effects)
-		_apply_side_channels(result)
-		for line in result.lines:
+	# Çözümün sırası (etkiler → zar → sonuç → XP) tek yerde: EventResolver.
+	# Ekran yalnızca sonucu anlatıyor ve yan kanalları açıyor.
+	var resolution := EventResolver.resolve_choice(
+		_session, _engine, resolved_event, choice, _apply_effects
+	)
+	if resolution.choice_result != null:
+		_apply_side_channels(resolution.choice_result)
+		for line in resolution.choice_result.lines:
 			_add_log("      %s" % line)
-
-	# Faz 17: check varsa burada zar atılıyor - context'in koşullar
-	# tarafından görülen kopyası artık "check_tier" (0/1/2) taşıyor.
-	var checked_context := _engine.resolve_check(choice, _session.build_event_context())
-	var outcome := _engine.resolve_outcome(choice, checked_context)
-	if outcome != null:
-		_add_log("   %s" % tr(outcome.text_key), OUTCOME_COLOR)
-		var outcome_result := _apply_effects(outcome.effects)
-		_apply_side_channels(outcome_result)
-		for line in outcome_result.lines:
-			_add_log("      %s" % line)
-
-	if resolved_event.xp_value > 0:
-		_session.grant_party_xp(resolved_event.xp_value)
+	if resolution.outcome != null:
+		_add_log("   %s" % tr(resolution.outcome.text_key), OUTCOME_COLOR)
+		if resolution.outcome_result != null:
+			_apply_side_channels(resolution.outcome_result)
+			for line in resolution.outcome_result.lines:
+				_add_log("      %s" % line)
 
 	_refresh_state()
 	_check_journey_end()
+	_autosave_journey()
 
 func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 	for event_id in result.unlocked_event_ids:
@@ -1876,6 +1963,13 @@ func _on_combat_finished(
 	if not dead_characters.is_empty():
 		_report_combat_deaths(dead_characters)
 
+	# Savaşın dışında tutulan biri, kaybı ya da bir ölümü uzaktan izledi -
+	# bunu unutmaz (bkz. CharacterData.GRIEVANCE_BENCHED).
+	if not victory or not dead_characters.is_empty():
+		for character in _session.get_party():
+			if not _current_combat_party.has(character):
+				character.add_grievance(CharacterData.GRIEVANCE_BENCHED)
+
 	# Her çarpışma bir miktar gerginlik bırakır; düşen her yoldaş bunu
 	# katlar. Zafer bunu biraz yumuşatır, yenilgi daha da ağırlaştırır.
 	# Yere düşüp hayatta kalan yoldaş da kalıcı bir iz bırakıyor: kendi
@@ -1940,10 +2034,19 @@ func _report_combat_deaths(dead_characters: Array) -> void:
 	for entry in dead_characters:
 		var character: CharacterData = entry
 		typed.append(character)
+	var cause := "LEDGER_CAUSE_COMBAT_%s" % _current_combat_kind.to_upper()
+	_handle_death_outcome(_session.resolve_deaths(typed, cause, _session.journey_destination_id))
 
-	var outcome := _session.resolve_combat_deaths(typed)
-	for name_text in (outcome.get("dead_names", []) as Array):
-		_add_log(tr("UI_ROAD_COMBAT_DEATH") % name_text, LOCKED_COLOR)
+## Ölümün ekrandaki tek kapısı - savaş da açlık da buradan geçer. Kimin
+## öldüğünü sebebiyle yazar; lider öldüyse varisi oyuncuya seçtirir.
+func _handle_death_outcome(outcome: Dictionary) -> void:
+	var dead_names: Array = outcome.get("dead_names", [])
+	# Defterin kendi satırı - sebebiyle ve yeriyle, "öldü" değil.
+	var recent_deaths := _session.ledger.recent(dead_names.size() + 2).filter(
+		func(entry): return String(entry.get("kind", "")) == CaravanLedger.KIND_DIED
+	)
+	for index in mini(dead_names.size(), recent_deaths.size()):
+		_add_log(CaravanLedger.describe(recent_deaths[index]), LOCKED_COLOR)
 
 	if outcome.get("run_over", false):
 		# Oyunun ilk gerçek sonu: ölen liderin yerine geçecek kimse yok.
@@ -1955,12 +2058,20 @@ func _report_combat_deaths(dead_characters: Array) -> void:
 		_show_run_over()
 		return
 
-	var heir: CharacterData = outcome.get("new_leader")
-	if heir != null:
-		_add_log(tr("UI_ROAD_NEW_LEADER") % heir.character_name, OUTCOME_COLOR)
-		var fallen_names: Array = outcome.get("dead_names", [])
-		var fallen_name := String(fallen_names[0]) if not fallen_names.is_empty() else ""
-		_open_succession_panel(fallen_name, heir.character_name, outcome.get("generation", _session.lineage_generation))
+	if outcome.get("awaiting_heir", false):
+		var candidates: Array[CharacterData] = []
+		for candidate in (outcome.get("heir_candidates", []) as Array):
+			candidates.append(candidate)
+		var fallen_name := String(dead_names[0]) if not dead_names.is_empty() else ""
+		_open_succession_panel(fallen_name, _fallen_leader_line(fallen_name), candidates)
+
+## Düşen liderin defterdeki satırı (sebep ve yer), törende adının altında.
+func _fallen_leader_line(fallen_name: String) -> String:
+	for entry in _session.ledger.recent(6):
+		if String(entry.get("kind", "")) == CaravanLedger.KIND_DIED \
+				and String(entry.get("name", "")) == fallen_name:
+			return CaravanLedger.describe(entry)
+	return ""
 
 ## Kervanı sürecek kimse kalmadı. Ana menüye dönmekten başka bir çıkış
 ## sunulmuyor ve kayıt silinmiyor - "Devam Et"in kapalı bir seferi
@@ -2046,7 +2157,7 @@ func _check_journey_end() -> void:
 	if _journey_finished or _current_event != null or _pending_event != null or _has_open_panel():
 		return
 	# Varış artık "gün bitti" değil, "mesafe kapandı" demek.
-	if _days_covered >= float(_journey_length_days):
+	if _journey.has_arrived():
 		_finish_journey()
 
 func _has_open_panel() -> bool:
@@ -2126,11 +2237,22 @@ func _close_debt_panel() -> void:
 ## Liderlik devrinin töreni (bkz. SuccessionPanel) - `_has_open_panel()`'e
 ## eklendiği için `_check_journey_end()` ve zaman akışı bu ekranda durur,
 ## aynı `_in_game_menu`'nün yaptığı gibi.
-func _open_succession_panel(fallen_name: String, heir_name: String, generation: int) -> void:
+func _open_succession_panel(
+	fallen_name: String, fallen_line: String, candidates: Array[CharacterData]
+) -> void:
 	_succession_panel = SuccessionPanel.new()
+	_succession_panel.heir_chosen.connect(_on_heir_chosen)
 	_succession_panel.dismissed.connect(_on_succession_dismissed)
 	add_child(_succession_panel)
-	_succession_panel.setup(_session.get_caravan_name(), fallen_name, heir_name, generation)
+	_succession_panel.setup(
+		_session.get_caravan_name(), fallen_name, fallen_line,
+		candidates, _session.lineage_generation + 1
+	)
+
+func _on_heir_chosen(heir) -> void:
+	var character: CharacterData = heir
+	_session.appoint_heir(character)
+	_add_log(tr("UI_ROAD_NEW_LEADER") % character.character_name, OUTCOME_COLOR)
 
 func _on_succession_dismissed() -> void:
 	_succession_panel = null
@@ -2214,14 +2336,12 @@ func _apply_replan(log_format: String) -> void:
 	# Yeni bacak yeni bir sefer: ilerleme çubuğu ve varış kontrolü yeni
 	# toplam güne göre okunmalı, yoksa çubuk dolu kalır ve sefer bitmiş
 	# görünürdü.
-	_journey_length_days = maxi(1, _session.journey_total_days)
 	# Yeni bacak sıfırdan yürünür: kervan çıkış şehrine döndü ya da başka
 	# bir yola saptı, kat edilmiş mesafe o yola ait değil. Eski yolda
 	# beliren bir işaret de o yolla birlikte geride kalıyor - kervan artık
 	# oraya hiç gitmeyecek.
-	_pending_event = null
+	_journey.start_leg(_session.journey_total_days)
 	_clear_encounter()
-	_days_covered = 0.0
 	_sync_days_remaining()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
 	_add_log(log_format % (
@@ -2257,8 +2377,10 @@ func _on_arrive_pressed() -> void:
 	_arrive_button.visible = false
 	_render_arrival_summary(payout)
 
-	# Sefer içinde kayıt yok: yolda alınan riskin geri alınamaması
-	# olayları anlamlı kılıyor. Sentetik dev seferi gerçek kaydı kirletmez.
+	# Varışın kaydı. Sefer boyunca yalnızca sakin anlarda otomatik kayıt
+	# var (bkz. _autosave_journey) - elle kayıt yok, yolda alınan riskin geri
+	# alınamaması olayları anlamlı kılıyor. Sentetik dev seferi gerçek kaydı
+	# kirletmez.
 	if _is_live_journey:
 		SaveManager.save_session(_session)
 

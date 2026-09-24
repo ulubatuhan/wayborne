@@ -88,6 +88,16 @@ static func go_root(scene_path: String) -> String:
 	_stack.clear()
 	return scene_path
 
+## Bir kayıt yüklendiğinde nereye gidilir: sefer ortasında kaydedilmişse
+## yola (kaldığı yerden - bkz. JourneyController), değilse şehre. Yığın
+## her iki durumda da temizlenir; yol zaten yığından değil kendi
+## eylemleriyle terk ediliyor (bkz. World Navigation Rules).
+## session: GameSession (autoload sırasından bağımsız kalsın diye tipsiz).
+static func resume_scene(session) -> String:
+	if session != null and session.is_journey_active():
+		return go_root(JOURNEY)
+	return go_root(CITY_MAP)
+
 ## Bir alt ekrana in: gönderen ekran yığına itilir.
 ##
 ## Hedef bir kökse itilmez, temizlenir - köke inilmez, gidilir. Bunu

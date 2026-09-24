@@ -133,7 +133,7 @@ func _on_saves_back_pressed() -> void:
 
 func _on_save_loaded(session) -> void:
 	GameState.set_session(session)
-	get_tree().change_scene_to_file(Nav.go_root(Nav.CITY_MAP))
+	get_tree().change_scene_to_file(Nav.resume_scene(session))
 
 func _on_quit_pressed() -> void:
 	if _confirm_dialog == null:

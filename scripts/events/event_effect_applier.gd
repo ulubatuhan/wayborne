@@ -135,6 +135,54 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_roll_encounter(effect, session, result)
 		EventEffect.Type.WORLD_EVENT_START:
 			_apply_world_event_start(effect, session, result)
+		EventEffect.Type.LEAVE_BEHIND:
+			_apply_leave_behind(session, result)
+		EventEffect.Type.PARTY_HP:
+			_apply_party_hp(effect, session, result)
+
+## En yaralı yoldaş kervandan ayrılır - ölüm değil, geride bırakılma.
+## Lider asla bırakılmaz, tek kişilik bir parti hiç kimseyi bırakamaz.
+static func _apply_leave_behind(session: GameSession, result: Result) -> void:
+	var target := _weakest_companion(session)
+	if target == null:
+		return
+	if session.dismiss(target, "LEDGER_CAUSE_LEFT_BEHIND"):
+		result.lines.append(_t("EFF_LEFT_BEHIND") % target.character_name)
+
+static func _apply_party_hp(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var target := _pick_party_target(effect.text_value, session)
+	if target == null or effect.amount == 0:
+		return
+	if effect.amount > 0:
+		target.apply_heal(effect.amount)
+		result.lines.append(_t("EFF_PARTY_HEAL") % [target.character_name, effect.amount])
+		return
+	# Olay yaralar ama öldürmez: ölümün kapıları savaş ve açlık.
+	var damage := mini(-effect.amount, maxi(0, target.current_hp - 1))
+	target.apply_damage(damage)
+	result.lines.append(_t("EFF_PARTY_HURT") % [target.character_name, damage])
+
+static func _pick_party_target(selector: String, session: GameSession) -> CharacterData:
+	if selector == "weakest":
+		return _weakest_companion(session)
+	if selector.is_empty():
+		return session.get_player_character()
+	var kind_index := CharacterStats.Kind.keys().find(selector.to_upper())
+	if kind_index < 0:
+		return session.get_player_character()
+	return session.get_best_stat_holder(kind_index as CharacterStats.Kind)
+
+static func _weakest_companion(session: GameSession) -> CharacterData:
+	var weakest: CharacterData = null
+	var weakest_ratio := INF
+	for character in session.get_party():
+		if character.is_player:
+			continue
+		var ratio := float(character.current_hp) / float(maxi(1, character.get_max_hp()))
+		if ratio < weakest_ratio:
+			weakest_ratio = ratio
+			weakest = character
+	return weakest
 
 ## Huy her zaman oyuncunun kendi karakterine verilir - olayın kervanın
 ## lideri başına geldiği kabulüyle (bkz. GameEvent/RoadJourney tasarımı).

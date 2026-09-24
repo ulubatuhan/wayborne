@@ -45,6 +45,11 @@ wayborne/
   - Locations, routes and world map data
   - Caravan composition (wagon limits, documents, provisions)
   - Travel context shared between map and planner screens
+  - `JourneyController`: the non-visual half of a journey (distance covered,
+    calendar day, pace, camp, pending encounter, clock, event engine) -
+    `road_journey.gd` keeps only presentation and input, reaching the state
+    through property aliases. It is what makes the mid-journey autosave and
+    headless tests of the walk/arrival rules possible.
 
 - **scripts/events/**: Event & narrative systems
   - EU4-style road event cards: `GameEvent` → `EventChoice` → `EventOutcome`
@@ -74,6 +79,20 @@ wayborne/
   translation keys; scripts call `tr(key)`. Never hardcode event prose.
 - New effects must be added to the `EventEffect.Type` enum **and** handled in
   `EventEffectApplier`, otherwise they silently do nothing.
+- **A chosen option resolves through exactly one path: `EventResolver`.**
+  Effects → skill-check roll → weighted outcome → outcome effects → the
+  event's XP used to live inside `road_journey.gd` and was hand-copied into
+  `playthrough_demo.gd`, `simulate_journeys.gd` and `simulate_career.gd` -
+  every change (Faz 17's `resolve_check()`) had to land in four places.
+  `EventResolver.resolve_choice()` now owns the order; the screen only
+  narrates the result and opens side channels, and each harness passes its
+  own effect hook (`Callable`) when it needs one (the road's `TRAVEL_DAYS`
+  wrapper, the simulator's inline combat). `EventResolver.stop_context()`
+  is likewise the one place a road stop becomes a `near_*` flag.
+- **Events never kill.** `PARTY_HP` clamps at 1 HP; the doors to death are
+  combat and starvation (see Character & Party Rules). `LEAVE_BEHIND` removes
+  the weakest non-leader companion as a *departure* (struck, not dead) - the
+  leader is never left, and a lone leader cannot leave anyone.
 
 - **scripts/character/**: Who the people in the caravan are
   - `CharacterStats`: eight base stats - six combat (Güç/Çeviklik/
@@ -197,6 +216,41 @@ wayborne/
   that tested `index == 0` let them dismiss themselves, kept a companion
   undismissable, and handed the companion's culture perk to the whole caravan.
   `get_player_character()` and `dismiss()` read the flag.
+- **A person has an id, not just a name.** Culture name pools hold sixteen
+  names, so two companions called "Elif" are routine over a career, and a
+  ledger keyed by name merged two dead people into one history.
+  `CharacterData.character_id` is assigned by `GameSession.add_to_party()`/
+  `set_player_character()` from a saved serial (`_next_character_serial`),
+  written into every ledger line, and backfilled for old saves on load.
+  `CaravanLedger.entries_for_id()` falls back to the name only for lines
+  that predate ids.
+- **A decision leaves a mark on the person it was made about.**
+  `CharacterData.grievances` counts what was done *to* someone: left unfed
+  by a deliberate meal choice (`GRIEVANCE_UNFED` - a genuine famine where
+  everyone starves counts for nobody), kept out of a fight that was lost or
+  cost a life (`BENCHED`), a death witnessed (`WITNESSED_DEATH`), passed over
+  for the name (`PASSED_OVER`). Stress melts at the next inn; grievances do
+  not. They only bite once someone has already broken:
+  `get_break_departure_chance()` adds `GRIEVANCE_DEPARTURE_PER_POINT` per
+  point on top of `BREAK_DEPARTURE_CHANCE`, capped at
+  `MAX_BREAK_DEPARTURE_CHANCE`, so the measured break threshold in Stress
+  Rules is untouched. `CaravanOverviewPanel.thought_for()` says the top
+  grievance out loud, by name.
+- **Hunger can kill - but only the hunger you chose, or a real famine.**
+  `consecutive_hungry_days` counts nights without a meal and resets at the
+  first one; from `STARVATION_HP_LOSS_START_DAY` (3) each hungry night costs
+  `STARVATION_HP_LOSS_PER_DAY` HP, and a character who reaches 0 goes
+  through `resolve_deaths(..., "LEDGER_CAUSE_STARVED")`. A caravan that feeds
+  everyone never increments the counter, so Provision Rules' promise
+  (correct stocking never starves) still holds - `test_memory.gd` asserts
+  it. Without this, "who eats tonight" was a stress dial, not a choice.
+- **The crew are nameless in combat, not in the ledger.** `crew_names`
+  holds `PEOPLE_PER_WAGON` names per owned wagon, seeded from
+  `caravan_name|index` and the leader's culture pool, so a reload never
+  re-rolls them. A wagon lost on the road (`_apply_wagon_losses_to_ownership`)
+  records its two crew as dead (`LEDGER_CAUSE_WAGON_LOST`); a wagon *sold*
+  does not - they are paid off, not lost. Crew still never fight (crew ≠
+  combat party).
 - Party order **is** combat rank order (1 = front). `party.tscn` is where the
   player reads and reorders it (reachable from the road HUD and the city map).
 - Characters heal to full on city arrival (`finish_journey()`); the road is
@@ -371,6 +425,34 @@ carry a caravan *name* down the road.
   `build_campaign_context()` exposes counts from it, so events and
   chapters can read history without a second "memory system" being
   invented. Same discipline as objectives being `EventCondition`s.
+- **Death has one door: `resolve_deaths(dead, cause_key, location_id)`.**
+  Combat and starvation both go through it; it writes the ledger line with
+  its cause and place, marks every survivor with `GRIEVANCE_WITNESSED_DEATH`,
+  and - if the leader died - returns `heir_candidates` (by seniority)
+  instead of choosing. `resolve_combat_deaths()` survives only as the
+  backward-compatible wrapper the harnesses use (it auto-appoints the
+  senior).
+- **The heir is chosen, not announced.** `SuccessionPanel` lists the
+  survivors with the senior preselected; `appoint_heir()` performs the
+  generation step. Picking someone else costs the senior a
+  `GRIEVANCE_PASSED_OVER` and `PASSED_OVER_STRESS` - the mechanically best
+  heir and the one the company would follow are allowed to be different
+  people. The panel is still unskippable: confirming a choice is its only
+  exit.
+- **A ledger line is a memory, not a statistic.** Entries carry `cause`
+  (a translation key, `LEDGER_CAUSE_*`) and `location`;
+  `CaravanLedger.describe()` is the one formatter every screen uses ("… fell
+  to wild beasts, near Kurtboğazı (day 43)"). Lines without a cause (old
+  saves, joins, successions) keep the old "name — kind" shape.
+- **The ledger never starts empty.** `start_playthrough()` writes a
+  `KIND_FOUNDER` line first: the name the player inherits was already
+  someone's struck-through name. It is struck but counted by nothing -
+  `companions_lost`/`companions_died` read `KIND_DIED`/`KIND_DEPARTED` only -
+  because the founder is an inheritance, not a loss.
+- **The event pool reads the ledger now, as this section always claimed.**
+  `build_event_context()` exposes `companions_died`, `companions_departed`,
+  `companions_lost`, `lineage_generation` and `days_as_leader`; for a long
+  time only the campaign context had them and no event could ask.
 - **The finale's gold gate became `days_as_leader`.** A pure money gate
   closed the story with "you got rich enough". The measurement survives:
   with a leader who never dies, tenure equals elapsed days and the finale's
@@ -1143,10 +1225,13 @@ re-roll the rain away.
   event's own base weight dropped low (an unmarked wayside shrine can
   still turn up, rarely) and an `EventWeightModifier` (×8, the same
   pattern as `evt_forage`'s İzci bonus) makes it fire reliably on the day
-  the caravan actually passes one. The other five stop kinds (hamlet,
-  outpost, mine, pass, bridge) still have no mechanical hook - a real
-  follow-up, not a rejection, and each would need its own event rather
-  than reusing this one's wiring.
+  the caravan actually passes one. Every stop kind has a card now, each on
+  the same wiring (`EventResolver.stop_context()` → `near_<stop>` flag, low
+  base weight, ×6-×8 modifier): pass → `evt_culture_highland_challenge`,
+  hamlet → `evt_leave_the_wounded`, outpost → `evt_frontier_outpost`
+  (Zeka), mine → `evt_mine_collapse` (Dayanıklılık), bridge →
+  `evt_failing_bridge` (Bilgelik). Each also carries one option whose cost
+  lands on a *named* person (`PARTY_HP` on the best holder of a stat).
 - **Weather invents no system.** All of it turns levers that already exist:
   walking pace, route danger (applied to the headroom, `base + delta *
   (1-base)`, the same rule as `RouteConditions`) and the daily morale drain.
@@ -1551,6 +1636,28 @@ a genuinely new instance of that kind starts. `simulate_career.gd` never
 called `fulfill_commission()` at all, so this exploit is not what produced
 the reputation numbers above — it is a real, separate finding the same
 measurement pass turned up.
+
+**Faz 18 touched the finale, and measured it the way this section demands.**
+The finale now also asks for `companions_lost >= 2` (two struck names in the
+ledger - dead or departed, crew lost with a wagon included, the founder
+excluded). A threshold reached without losing anyone contradicts the
+thesis; this is the one gate in the game that reads loss rather than
+accumulation. Re-measured with `simulate_career.gd`, all three policies,
+8×40:
+
+| policy | finale closed | earliest | median | latest |
+|---|---|---|---|---|
+| kampanyacı (before) | 8/8 | 10 | 12 | 13 |
+| kampanyacı (after) | 8/8 | 9 | 16 | 30 |
+| genişleyen (after) | 8/8 | 9 | 16 | 30 |
+| kontratçı (after) | 0/8 | — | — | — |
+
+The finale no longer arrives on schedule: a caravan that loses people
+early closes it by journey 9, one that keeps everyone waits until its
+losses catch up. The contract policy's 0/8 is **not** this gate - that
+policy's caravans stop at three wagons and never meet the finale's
+existing `owned_wagons >= 4`, which is the "buying wagons crowds out
+contracts" finding above, unchanged.
 
 ### City Hub Rules
 
@@ -2379,8 +2486,9 @@ screen read as broken — *"we're standing still, we have no control."*
 seeded from the dev seed box (`1234`) on *every* live journey, so every
 real road drew the same event sequence in the same order. A live journey
 now seeds from origin + destination + `total_days_elapsed`: reproducible
-within a save (there is no mid-journey save, so this opens no re-roll
-door), different for every new journey. Check what a debug control feeds
+within a save (the mid-journey autosave stores the engine's RNG *state*,
+not its seed - see `EventEngine.to_dict()` - so reloading replays the same
+dice and opens no re-roll door), different for every new journey. Check what a debug control feeds
 before assuming it only affects debug.
 
 ### Journey Time Rules
@@ -2621,15 +2729,35 @@ never asked first.
   as before - city arrival still writes it silently, "Devam Et" still
   reads it directly, "New Game" still only clears it. The manual slots are
   strictly additive.
-- **There is still no mid-journey save**, and the multi-slot system did not
-  relax that: `to_save_dict()` never carried `journey_*` fields (see
-  `SaveManager`'s own header comment), so writing to any slot while
-  `is_journey_active()` is true would silently drop the journey. Every
-  screen that can save passes `can_save` down instead of hiding the
-  question - `SaveSlotsPanel` shows the reason
-  (`UI_SAVES_CANT_SAVE_JOURNEY`) rather than just omitting the button, the
-  same "disabled with its reason" rule as a locked event choice or a locked
-  combat skill.
+- **The journey autosaves; the player still cannot save by hand on the
+  road.** The rule used to be "no mid-journey save", and its reason was
+  architectural, not a design goal: journey state was scattered across
+  `road_journey.gd`'s fields, so a save could not hold it - and on the Web
+  target closing a tab lost the whole leg. `JourneyController` now owns that
+  state and serializes it; `GameSession.to_save_dict()` writes a `journey`
+  block (route, caravan via `CaravanState.to_dict()`, controller snapshot)
+  only while a journey is active. `road_journey.gd`'s `_autosave_journey()`
+  writes slot 0 at quiet moments only - after the day's decision resolves,
+  never with a card, fight, haggle or panel open - and "Devam Et"/load go
+  through `Nav.resume_scene()`, which lands on the road when the save has
+  a journey. Manual saving stays disabled on the road (`can_save`,
+  `UI_SAVES_CANT_SAVE_JOURNEY`, disabled with its reason): a hand save
+  right before a card is a retry button.
+- **A save never re-rolls or clones the world.** Two holes found by reading
+  `load_from_dict()` against `_restock_current_location()`: market stock
+  refilled on load (buy out, save, reload, buy again) and hired recruits
+  reappeared (the board is re-rolled from its seed, so the same person could
+  be hired twice). `market_stock` and `hired_recruit_indices` (generation
+  indices of this arrival's hires) are saved now.
+  `test_memory.gd`'s `_test_every_persistent_field_is_saved` walks
+  `GameSession`'s script variables and fails on any that is neither saved
+  nor on an explicit, commented transient list - a forgotten field is a
+  test failure now, not a playtest discovery.
+- **Writes are atomic.** `SaveManager.save_session()` writes `.tmp`, keeps
+  the previous file as `.bak`, then renames; `_read_slot()` falls back to
+  the backup when the main file is truncated or unparsable. A lineage's only
+  autosave lost to an interrupted write is the worst bug a game about
+  irreversible loss can have.
 - **One list, two doors.** `SaveSlotsPanel` (scene-less, `DebtPanel`'s
   pattern) is the only save/load UI in the game; `saves.tscn` shows it
   alone for the main menu (load-only, no live session to save from) and
@@ -2962,6 +3090,15 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   `CharacterStats`, `CombatEncounter`, `EventEngine`, `EventEffectApplier`,
   `GameSession`, `HagglingSession`. Never test engine internals or scene
   wiring.
+- `test_memory.gd` (Faz 18) locks the save's integrity - atomic writes with
+  a backup, no recruit cloned by a reload, market stock not refilled by one,
+  every `GameSession` script variable either saved or on a commented
+  transient list - plus character ids, ledger causes/places, the founder
+  line, grievances, starvation deaths (and that a fed caravan never counts a
+  hungry day), the chosen heir, named crew dying with their wagon,
+  profiteering memory, `LEAVE_BEHIND`/`PARTY_HP`, the stop cards, the
+  finale's memory gate, `EventResolver`, `JourneyController`, and a
+  mid-journey save round trip that replays **the same dice** after a reload.
 - `test_route_terrain.gd` locks the road's geography and weather: both
   reproducible from a seed, segments covering the whole route with no gaps,
   biomes never jumping, stops never landing on the destination city, clear
@@ -3185,12 +3322,9 @@ verir.
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
   karşılığı olarak zaten kurulu.
-- **Dört yol durağının hâlâ mekanik karşılığı yok.** Faz 16'nın rota/hava
-  denetimi `evt_roadside_shrine`'ı gerçek sunak durağına bağladı, Faz 17
-  PR-6 `evt_culture_highland_challenge`'ı gerçek geçit durağına bağladı
-  (bkz. Route Terrain & Weather Rules) ama konak/karakol/maden/köprü
-  hâlâ salt görsel - her biri kendi olayını/etkisini isteyecek ayrı bir
-  iş, kasıtlı kapsam dışı bırakıldı.
+- **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı yeni
+  kart ekledi; codex bunları (ve Faz 17 PR-9'un kaydettiği önceki açığı)
+  henüz işlemedi - bilerek ertelendi.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -4752,6 +4886,35 @@ kendi notu bunun "bu kod tabanının işi değil" olduğunu zaten söylüyor.**
   kart kendi flavor/trigger/note metnini istiyor, tahmin edilerek
   yazılmadı); fragman/sinematik (#12'nin kendi notu zaten "bu kod
   tabanının işi değil" diyor).
+
+**Faz 18 ("Hafıza ve bedel") tamamlandı.** Dışarıdan-bakış bir tasarım
+incelemesi yirmi üç öneri döndürdü; kodeks güncellemesi (#23)
+oyuncunun isteğiyle ertelendi, kalan yirmi ikisi uygulandı. Ortak tez
+oyunun kendi codex cümlesi: konu kervan değil, onu çekenler ve aşınmaları.
+Üç eksen üzerinden - kaynak yönetiminden ahlaki muhasebeye, yıpranmadan
+hafızaya, zorluktan trajediye:
+
+- **Kaydın bütünlüğü.** Atomik yazım + `.bak` yedeği; yeniden yüklemenin
+  tutulmuş bir yoldaşı klonlaması ve boşaltılmış pazarı doldurması
+  kapatıldı; her kalıcı alanın kayda girdiğini söyleyen yansımalı bir test.
+- **Kişilerin kimliği.** `character_id` - aynı adı taşıyan iki ölü artık
+  tek bir geçmişte birleşmiyor.
+- **Defter bir hatıra.** Her satır sebebini ve yerini taşıyor, ilk satırı
+  oyuncudan önce adı taşıyan kurucu; olay havuzu defteri okuyor (bu dosya
+  bunu yıllardır iddia ediyordu, kod yapmıyordu).
+- **Ahlaki muhasebe.** Kırgınlık (aç bırakılmak, savaşın dışında tutulmak,
+  ölüm görmek, liderlikte geçilmek), bilerek aç bırakılanın ölebilmesi,
+  varisin seçilmesi (kıdemliyi geçmenin bedeliyle), vagonuyla birlikte
+  kaybolan isimli tayfa, krizden kâr etmenin dünyadaki hafızası, skill-check
+  önizlemesinde zarı atan kişinin adı.
+- **Trajedi kartları.** `evt_leave_the_wounded` - verimli seçimin düzgün bir
+  insanın yapmayacağı seçim olduğu ilk kart; karakol/maden/köprü kartlarıyla
+  birlikte yolun bütün durak türleri artık mekanik taşıyor.
+- **Mimari.** `EventResolver` (tek çözüm yolu, dört kopyanın yerine),
+  `JourneyController` (seferin görsel olmayan çekirdeği), `CityBriefModel`
+  (brifingin düğümsüz yarısı), `GameSession.Phase` (türetilmiş evre), sefer
+  ortası otomatik kaydı.
+- **Finalin hafıza kapısı.** Ölçüldü, bkz. Campaign Rules.
 
 ## Quick Start
 

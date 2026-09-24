@@ -12,14 +12,33 @@ extends CanvasLayer
 ## KAPATMIYOR. Törenin tek çıkışı "Devam Et" tuşu: bu an atlanabilir olursa
 ## bir bildirimden farkı kalmaz.
 
+## Faz 18: devir artık bir karar. Adaylar kıdem sırasıyla listelenir,
+## kıdemli önceden seçili gelir; oyuncu başkasını seçerse kıdemli bunu
+## unutmaz (bkz. `GameSession.appoint_heir`). Tören yine atlanamaz - tek
+## çıkış seçimi onaylamak.
+
 signal dismissed
+## heir: CharacterData
+signal heir_chosen(heir)
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.85)
 const PANEL_BACKGROUND: Color = Color(0.09, 0.08, 0.07)
 const PANEL_BORDER: Color = Color(0.55, 0.45, 0.28)
 const PANEL_WIDTH: float = 560.0
+const SELECTED_COLOR: Color = Color(1.0, 0.9, 0.6)
+const IDLE_COLOR: Color = Color(0.75, 0.72, 0.66)
 
-func setup(caravan_name: String, fallen_name: String, heir_name: String, generation: int) -> void:
+var _candidates: Array[CharacterData] = []
+var _selected: CharacterData = null
+var _candidate_buttons: Array[Button] = []
+var _heir_label: Label = null
+
+func setup(
+	caravan_name: String, fallen_name: String, fallen_line: String,
+	candidates: Array[CharacterData], generation: int
+) -> void:
+	_candidates = candidates
+	_selected = candidates[0] if not candidates.is_empty() else null
 	layer = 70
 	var root := Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -78,18 +97,90 @@ func setup(caravan_name: String, fallen_name: String, heir_name: String, generat
 	fallen_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	vbox.add_child(fallen_label)
 
-	var heir_label := Label.new()
-	heir_label.text = tr("UI_SUCCESSION_HEIR") % heir_name
-	heir_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heir_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	heir_label.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(heir_label)
+	if not fallen_line.is_empty():
+		var cause_label := Label.new()
+		cause_label.text = fallen_line
+		cause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cause_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		cause_label.modulate = ArtPalette.GOLD_DIM
+		vbox.add_child(cause_label)
+
+	var prompt := Label.new()
+	prompt.text = tr("UI_SUCCESSION_CHOOSE")
+	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD
+	vbox.add_child(prompt)
+
+	for index in candidates.size():
+		var candidate := candidates[index]
+		var button := Button.new()
+		button.text = candidate_line(candidate, index == 0)
+		button.toggle_mode = true
+		button.pressed.connect(_on_candidate_pressed.bind(candidate))
+		vbox.add_child(button)
+		_candidate_buttons.append(button)
+
+	_heir_label = Label.new()
+	_heir_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_heir_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_heir_label.add_theme_font_size_override("font_size", 16)
+	vbox.add_child(_heir_label)
 
 	var continue_button := Button.new()
-	continue_button.text = tr("UI_CONTINUE")
+	continue_button.text = tr("UI_SUCCESSION_CONFIRM")
 	continue_button.pressed.connect(_on_continue_pressed)
 	vbox.add_child(continue_button)
+	_refresh_selection()
+
+## "Ad · Sv N · stres S · (kıdemli)" ve varsa en ağır kırgınlık.
+static func candidate_line(candidate: CharacterData, is_senior: bool) -> String:
+	var line := String(TranslationServer.translate("UI_SUCCESSION_CANDIDATE")) % [
+		candidate.character_name, candidate.level, candidate.stress
+	]
+	if is_senior:
+		line += " · " + String(TranslationServer.translate("UI_SUCCESSION_SENIOR"))
+	var grievance := candidate.get_top_grievance()
+	if not grievance.is_empty():
+		line += " · " + String(TranslationServer.translate(grievance_label_key(grievance)))
+	return line
+
+static func grievance_label_key(grievance: String) -> String:
+	match grievance:
+		CharacterData.GRIEVANCE_UNFED:
+			return "UI_GRIEVANCE_UNFED"
+		CharacterData.GRIEVANCE_BENCHED:
+			return "UI_GRIEVANCE_BENCHED"
+		CharacterData.GRIEVANCE_WITNESSED_DEATH:
+			return "UI_GRIEVANCE_WITNESSED_DEATH"
+		CharacterData.GRIEVANCE_PASSED_OVER:
+			return "UI_GRIEVANCE_PASSED_OVER"
+	return grievance
+
+func get_selected() -> CharacterData:
+	return _selected
+
+func select(candidate: CharacterData) -> void:
+	if _candidates.has(candidate):
+		_selected = candidate
+		_refresh_selection()
+
+func _on_candidate_pressed(candidate: CharacterData) -> void:
+	select(candidate)
+
+func _refresh_selection() -> void:
+	for index in _candidate_buttons.size():
+		var chosen := _candidates[index] == _selected
+		_candidate_buttons[index].button_pressed = chosen
+		_candidate_buttons[index].modulate = SELECTED_COLOR if chosen else IDLE_COLOR
+	if _heir_label == null or _selected == null:
+		return
+	var text := tr("UI_SUCCESSION_HEIR") % _selected.character_name
+	if not _candidates.is_empty() and _selected != _candidates[0]:
+		text += "\n" + tr("UI_SUCCESSION_PASSED_OVER_WARNING") % _candidates[0].character_name
+	_heir_label.text = text
 
 func _on_continue_pressed() -> void:
+	if _selected != null:
+		heir_chosen.emit(_selected)
 	dismissed.emit()
 	queue_free()

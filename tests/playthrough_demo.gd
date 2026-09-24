@@ -299,18 +299,12 @@ func _resolve_event(
 		day, clock.get_clock_text(), tr(event.title_key), tr(chosen.text_key)
 	])
 
-	var result := EventEffectApplier.apply(chosen.effects, session)
-	for event_id in result.unlocked_event_ids:
-		engine.unlock_event(event_id)
+	# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver).
+	var resolution := EventResolver.resolve_choice(session, engine, event, chosen)
 	# Savaş/pazarlık gibi yan kanallar yol ekranında panel açıyor ve zamandan
 	# yiyor; burada paneli açamadığımız için yalnızca süresini işliyoruz.
-	if not result.combat_requests.is_empty():
-		clock.consume_hours(2.5)
-	if not result.haggling_requests.is_empty():
-		clock.consume_hours(1.0)
-
-	# Faz 17: gerçek yol ekranıyla aynı sıra - check varsa önce zar atılır.
-	var checked_context := engine.resolve_check(chosen, session.build_event_context())
-	var outcome := engine.resolve_outcome(chosen, checked_context)
-	if outcome != null:
-		EventEffectApplier.apply(outcome.effects, session)
+	for result in resolution.get_results():
+		if not result.combat_requests.is_empty():
+			clock.consume_hours(2.5)
+		if not result.haggling_requests.is_empty():
+			clock.consume_hours(1.0)

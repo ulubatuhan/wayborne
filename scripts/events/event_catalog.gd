@@ -75,6 +75,12 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_trade_fair_news())
 	_road_events.append(_bandit_tribute_zone_news())
 	_road_events.append(_bandit_tribute_toll())
+	_road_events.append(_leave_the_wounded())
+	_road_events.append(_left_behind_return())
+	_road_events.append(_profiteer_recognized())
+	_road_events.append(_frontier_outpost())
+	_road_events.append(_mine_collapse())
+	_road_events.append(_failing_bridge())
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -1510,6 +1516,198 @@ static func _bandit_tribute_toll() -> GameEvent:
 		),
 		_choice("EVT_TRIBUTE_TOLL_OPT_RESIST", _effects([
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
+		])),
+	])
+	return event
+
+## Faz 18: ilk "verimli seçim, düzgün insanın yapmayacağı seçim" kartı.
+## Bir köyün önünden geçerken ağır yaralı bir yoldaş: onu köylülere
+## bırakmak kervanı hızlandırır ve erzak kazandırır, taşımak yavaşlatır,
+## iyileştirmek pahalıdır. Aynı zamanda konak durağının ilk mekanik
+## karşılığı (bkz. near_hamlet).
+static func _leave_the_wounded() -> GameEvent:
+	var event := _event("evt_leave_the_wounded", "EVT_LEAVE_WOUNDED", 0.3)
+	event.cooldown_days = 10
+	event.conditions = _conditions([
+		EventCondition.make("weakest_companion_hp_ratio", EventCondition.Op.LESS_EQUAL, 0.35),
+		EventCondition.make("party_size", EventCondition.Op.GREATER_EQUAL, 2),
+	])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_hamlet", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 6.0),
+	])
+	event.choices = _choices([
+		_choice("EVT_LEAVE_WOUNDED_OPT_LEAVE", _effects([
+			EventEffect.make(EventEffect.Type.LEAVE_BEHIND),
+			EventEffect.make(EventEffect.Type.PROVISIONS, 6),
+			EventEffect.make(EventEffect.Type.STRESS, 8),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "companion_left_behind"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_left_behind_return"),
+		])),
+		_choice("EVT_LEAVE_WOUNDED_OPT_CARRY", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.MORALE, -6),
+		])),
+		_gated_choice(
+			"EVT_LEAVE_WOUNDED_OPT_HEALER", "EVT_LEAVE_WOUNDED_OPT_HEALER_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 60)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -60),
+				EventEffect.make(EventEffect.Type.PARTY_HP, 20, "weakest"),
+			])
+		),
+	])
+	return event
+
+## Geride bırakılanın haberi, günler sonra. Bir fatura değil bir hesap:
+## köy onu ya ayağa kaldırdı ya gömdü - oyuncu hangisi olduğunu seçmiyor.
+static func _left_behind_return() -> GameEvent:
+	var event := _event("evt_left_behind_return", "EVT_LEFT_BEHIND_RETURN", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("companion_left_behind", EventCondition.Op.HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice_with_outcomes("EVT_LEFT_BEHIND_RETURN_OPT_LISTEN", _outcomes([
+			EventOutcome.make("EVT_LEFT_BEHIND_RETURN_RECOVERED", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, -6),
+				EventEffect.make(EventEffect.Type.PROVISIONS, 4),
+				EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "companion_left_behind"),
+			]), 1.0),
+			EventOutcome.make("EVT_LEFT_BEHIND_RETURN_BURIED", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, 10),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+				EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "companion_left_behind"),
+			]), 1.0),
+		])),
+	])
+	return event
+
+## Krizden kâr etmenin dünyadaki hafızası (bkz. GameSession.
+## profiteering_sales): vebalı ya da savaşın kestiği bir şehre şişmiş fiyatla
+## mal satan kervanı bir mülteci kolu tanıyor.
+static func _profiteer_recognized() -> GameEvent:
+	var event := _event("evt_profiteer_recognized", "EVT_PROFITEER", 1.2)
+	event.cooldown_days = 20
+	event.conditions = _conditions([
+		EventCondition.make("profiteering_sales", EventCondition.Op.GREATER_EQUAL, 3),
+		EventCondition.make("profiteer_reckoned", EventCondition.Op.NOT_HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice("EVT_PROFITEER_OPT_RESTITUTION", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, -80),
+			EventEffect.make(EventEffect.Type.REPUTATION, 3),
+			EventEffect.make(EventEffect.Type.STRESS, -4),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "profiteer_reckoned"),
+		])),
+		_choice("EVT_PROFITEER_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -4),
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "profiteer_reckoned"),
+		])),
+	])
+	return event
+
+## Karakol durağının kartı: Zeka check'i (defterle, yazıyla tartışmak) ya
+## da isimli bir bedel - en dayanıklı olan garnizonla geceyi nöbette geçirir.
+static func _frontier_outpost() -> GameEvent:
+	var event := _event("evt_frontier_outpost", "EVT_OUTPOST", 0.25)
+	event.cooldown_days = 6
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_outpost", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 6.0),
+	])
+	event.choices = _choices([
+		_checked_choice(
+			"EVT_OUTPOST_OPT_ARGUE",
+			SkillCheck.make(CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_OUTPOST_ARGUE_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.REPUTATION, 2),
+			]),
+			"EVT_OUTPOST_ARGUE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+				EventEffect.make(EventEffect.Type.REPUTATION, -1),
+			])
+		),
+		_choice("EVT_OUTPOST_OPT_PAY", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, -25),
+		])),
+		_choice("EVT_OUTPOST_OPT_WATCH", _effects([
+			EventEffect.make(EventEffect.Type.PARTY_HP, -8, "endurance"),
+			EventEffect.make(EventEffect.Type.REPUTATION, 3),
+			EventEffect.make(EventEffect.Type.DANGER, -5),
+		])),
+	])
+	return event
+
+## Maden durağının kartı: göçükte kalanlar. En dayanıklı olan şafta iner
+## (Dayanıklılık check'i) - başarırsa madenciler borcunu öder, başaramazsa
+## o kişi yaralı çıkar. Yürüyüp geçmek de bir seçim, sesi duyduktan sonra.
+static func _mine_collapse() -> GameEvent:
+	var event := _event("evt_mine_collapse", "EVT_MINE", 0.25)
+	event.cooldown_days = 8
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_mine", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 6.0),
+	])
+	event.choices = _choices([
+		_checked_choice(
+			"EVT_MINE_OPT_DESCEND",
+			SkillCheck.make(CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_MINE_DESCEND_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 60),
+				EventEffect.make(EventEffect.Type.REPUTATION, 2),
+			]),
+			"EVT_MINE_DESCEND_BAD", _effects([
+				EventEffect.make(EventEffect.Type.PARTY_HP, -15, "endurance"),
+				EventEffect.make(EventEffect.Type.STRESS, 6),
+			])
+		),
+		_choice("EVT_MINE_OPT_DIG", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+			EventEffect.make(EventEffect.Type.REPUTATION, 3),
+		])),
+		_choice("EVT_MINE_OPT_WALK_ON", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+			EventEffect.make(EventEffect.Type.STRESS, 3),
+		])),
+	])
+	return event
+
+## Köprü durağının kartı: çürümüş bir köprü. Lider ırmağı okuyup sığ bir
+## geçit bulabilir (Bilgelik), en çevik olan tahtaları önce yürüyüp
+## sınayabilir (isimli bir risk), ya da kervan dolaşır.
+static func _failing_bridge() -> GameEvent:
+	var event := _event("evt_failing_bridge", "EVT_BRIDGE", 0.25)
+	event.cooldown_days = 6
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_bridge", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 6.0),
+	])
+	event.choices = _choices([
+		_checked_choice(
+			"EVT_BRIDGE_OPT_FORD",
+			SkillCheck.make(CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER, 0.0),
+			"EVT_BRIDGE_FORD_GOOD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 2),
+			]),
+			"EVT_BRIDGE_FORD_BAD", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+				EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+			])
+		),
+		_choice("EVT_BRIDGE_OPT_TEST", _effects([
+			EventEffect.make(EventEffect.Type.PARTY_HP, -5, "agility"),
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+		_choice("EVT_BRIDGE_OPT_DETOUR", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
 		])),
 	])
 	return event
