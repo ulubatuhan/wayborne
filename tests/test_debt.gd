@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_repay_only_spends_what_you_have(t)
 	_test_save_round_trip(t)
 	_test_debt_settle_effect(t)
+	_test_debt_crisis_chain(t)
 
 func _session(gold: int = 100) -> GameSession:
 	return GameSession.new(gold, 10, 1)
@@ -216,3 +217,53 @@ func _test_debt_settle_effect(t) -> void:
 	t.eq(overdrawn.get_total_debt(), 30, "defter keseyle aynı")
 	overdrawn.wallet.earn(5)
 	t.eq(overdrawn.get_total_debt(), 25, "sonraki kese değişikliğinde borç geri gelmedi")
+
+## Vadesi geçmiş borç yolda bir yüze kavuşuyor: önce atlı uyarır, sonra
+## memurlar gelir. Erzak teslimi borçtan tam o kadar düşer; direnmek
+## muhafız savaşı açar; yalvarmak tutmazsa memurlar yine gelir.
+func _test_debt_crisis_chain(t) -> void:
+	var session := GameSession.new(0, 40)
+	session.debts.borrow("Tefeci", 200, 0)
+	var engine := EventEngine.new(EventCatalog.get_road_events(), 5)
+	t.not_ok(_eligible(engine, session, 1, "evt_creditor_rider"), "vadesi gelmeden atlı yok")
+	session.total_days_elapsed = 45
+	t.ok(_eligible(engine, session, 45, "evt_creditor_rider"), "vadesi geçince atlı gelir")
+	t.not_ok(_eligible(engine, session, 45, "evt_bailiffs_at_camp"), "uyarılmadan memur gelmez")
+
+	var rider := EventCatalog.get_event("evt_creditor_rider")
+	var warned := EventEffectApplier.apply(rider.choices[0].effects, session)
+	for event_id in warned.unlocked_event_ids:
+		engine.unlock_event(event_id)
+	t.ok(_eligible(engine, session, 46, "evt_bailiffs_at_camp"), "uyarıdan sonra memurlar gelir")
+	t.not_ok(_eligible(engine, session, 46, "evt_creditor_rider"), "memurlar beklenirken ikinci atlı yok")
+
+	var bailiffs := EventCatalog.get_event("evt_bailiffs_at_camp")
+	var before := session.get_total_debt()
+	EventEffectApplier.apply(bailiffs.choices[0].effects, session)
+	t.eq(session.get_total_debt(), before - 80, "erzak teslimi borçtan tam o kadar düştü")
+	t.eq(session.wallet.balance, 0, "altın üretilmedi")
+	t.not_ok(session.has_flag("creditor_warned"), "kriz kapandı")
+
+	var resist := EventEffectApplier.apply(bailiffs.choices[2].effects, session)
+	t.eq(resist.combat_kinds, ["guard"] as Array[String], "direnmek muhafız savaşı")
+
+	var plead: EventChoice = bailiffs.choices[1]
+	var context := session.build_event_context()
+	context["check_tier"] = 0
+	var failed := engine.resolve_outcome(plead, context)
+	t.eq(failed.text_key, "EVT_BAILIFFS_PLEAD_FAIL", "yalvarmak tutmadı")
+	var has_return := false
+	for effect in failed.effects:
+		if effect.type == EventEffect.Type.UNLOCK_EVENT and effect.text_value == "evt_bailiffs_at_camp":
+			has_return = true
+	t.ok(has_return, "memurlar yine gelecek")
+
+	var poor := GameSession.new(0, 5)
+	t.not_ok(bailiffs.choices[0].is_available(poor.build_event_context()), "erzak yoksa teslim kilitli")
+	t.ne(bailiffs.choices[0].unavailable_text_key, "", "kilidin sebebi yazılı")
+
+func _eligible(engine: EventEngine, session: GameSession, day: int, event_id: String) -> bool:
+	for event in engine.get_eligible_events(day, session.build_event_context()):
+		if event.event_id == event_id:
+			return true
+	return false

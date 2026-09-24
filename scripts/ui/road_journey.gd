@@ -104,6 +104,7 @@ const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_wolf_pack": "wildlife",
 	"evt_bandit_ambush": "bandit",
 	"evt_deserter_search": "guard",
+	"evt_bailiffs_at_camp": "guard",
 	"evt_deserter_plea": "traveler",
 	"evt_wanderer_revenge": "bandit",
 	"evt_guard_patrol": "guard",

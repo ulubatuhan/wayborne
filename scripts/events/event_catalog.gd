@@ -90,6 +90,8 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_carcass_on_road())
 	_road_events.append(_wolves_follow())
 	_road_events.append(_wolf_pack())
+	_road_events.append(_creditor_rider())
+	_road_events.append(_bailiffs_at_camp())
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -1992,6 +1994,85 @@ static func _wolf_pack() -> GameEvent:
 			_conditions([EventCondition.make("wagons", EventCondition.Op.GREATER_EQUAL, 2)]),
 			_effects([EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 2)] + clear)
 		),
+	])
+	return event
+
+## --- Borç krizi ---
+## Vadesi geçmiş bir borç artık yalnızca faiz ve itibar olarak işlemiyor:
+## önce alacaklının atlısı gelip uyarıyor, sonra icra memurları kampa
+## geliyor. Ödeme ayni (DEBT_SETTLE): erzak teslim edilir ve borçtan düşülür.
+## Vagon teslimi bilerek yok - yolda kaybedilen vagonun tayfası deftere ölü
+## yazılıyor, el konulan bir vagon için bu yanlış bir hatıra olurdu.
+static func _creditor_rider() -> GameEvent:
+	var event := _event("evt_creditor_rider", "EVT_CREDITOR", 1.5)
+	event.cooldown_days = 15
+	event.conditions = _conditions([
+		EventCondition.make("debt_overdue", EventCondition.Op.GREATER_EQUAL, 1.0),
+		EventCondition.make("debt", EventCondition.Op.GREATER_EQUAL, 150),
+		EventCondition.make("creditor_warned", EventCondition.Op.NOT_HAS_FLAG),
+	])
+	event.choices = _choices([
+		_choice("EVT_CREDITOR_OPT_PROMISE", _effects([
+			EventEffect.make(EventEffect.Type.STRESS, 3),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "creditor_warned"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_bailiffs_at_camp"),
+		])),
+		_choice("EVT_CREDITOR_OPT_DISMISS", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -1),
+			EventEffect.make(EventEffect.Type.SET_FLAG, 0, "creditor_warned"),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_bailiffs_at_camp"),
+		])),
+	])
+	return event
+
+static func _bailiffs_at_camp() -> GameEvent:
+	var event := _event("evt_bailiffs_at_camp", "EVT_BAILIFFS", 3.0)
+	event.triggered_only = true
+	event.category = GameEvent.Category.CHAIN
+	event.conditions = _conditions([
+		EventCondition.make("creditor_warned", EventCondition.Op.HAS_FLAG),
+		EventCondition.make("debt_overdue", EventCondition.Op.GREATER_EQUAL, 1.0),
+	])
+	var plead := EventChoice.new()
+	plead.text_key = "EVT_BAILIFFS_OPT_PLEAD"
+	plead.check = SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 2.0)
+	plead.outcomes = _outcomes([
+		_outcome_if("EVT_BAILIFFS_PLEAD_FULL", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 2.0),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "creditor_warned"),
+		])),
+		_outcome_if("EVT_BAILIFFS_PLEAD_NARROW", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 1.0),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -1),
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "creditor_warned"),
+		])),
+		# Yalvarmak tutmazsa memurlar gitmiyor: bayrak kalıyor, bir sonraki
+		# günlerde yeniden gelebilirler.
+		_outcome_if("EVT_BAILIFFS_PLEAD_FAIL", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 0.0),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -3),
+			EventEffect.make(EventEffect.Type.STRESS, 10),
+			EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_bailiffs_at_camp"),
+		])),
+	])
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_BAILIFFS_OPT_STORES", "EVT_BAILIFFS_OPT_STORES_LOCKED",
+			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 20)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -20),
+				EventEffect.make(EventEffect.Type.DEBT_SETTLE, 80),
+				EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "creditor_warned"),
+			])
+		),
+		plead,
+		_choice("EVT_BAILIFFS_OPT_RESIST", _effects([
+			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "creditor_warned"),
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
+		])),
 	])
 	return event
 
