@@ -49,7 +49,7 @@ const SEAL_HOLD_SECONDS: float = 0.35
 
 func setup(
 	caravan_name: String, fallen_name: String, fallen_line: String,
-	candidates: Array[CharacterData], generation: int
+	candidates: Array[CharacterData], generation: int, testimony: Dictionary = {}
 ) -> void:
 	_candidates = candidates
 	_selected = candidates[0] if not candidates.is_empty() else null
@@ -127,7 +127,11 @@ func setup(
 	for index in candidates.size():
 		var candidate := candidates[index]
 		var button := Button.new()
-		button.text = candidate_line(candidate, index == 0)
+		var facts: Dictionary = testimony.get(candidate, {})
+		button.text = candidate_line(
+			candidate, index == 0,
+			int(facts.get("served_days", -1)), bool(facts.get("benched", false))
+		)
 		button.toggle_mode = true
 		button.pressed.connect(_on_candidate_pressed.bind(candidate))
 		vbox.add_child(button)
@@ -157,13 +161,22 @@ func setup(
 	vbox.add_child(_continue_button)
 	_refresh_selection()
 
-## "Ad · Sv N · stres S · (kıdemli)" ve varsa en ağır kırgınlık.
-static func candidate_line(candidate: CharacterData, is_senior: bool) -> String:
+## "Ad · Sv N · stres S · (kıdemli)", düşen liderin döneminde kaç gün
+## hizmet ettiği, o savaşın dışında tutulup tutulmadığı ve varsa en ağır
+## kırgınlık. Hepsi defterden ve o anki savaş kadrosundan - adaylar hakkında
+## yeni bir şey icat edilmiyor, yalnızca zaten bilinen söyleniyor.
+static func candidate_line(
+	candidate: CharacterData, is_senior: bool, served_days: int = -1, benched: bool = false
+) -> String:
 	var line := String(TranslationServer.translate("UI_SUCCESSION_CANDIDATE")) % [
 		candidate.character_name, candidate.level, candidate.stress
 	]
 	if is_senior:
 		line += " · " + String(TranslationServer.translate("UI_SUCCESSION_SENIOR"))
+	if served_days >= 0:
+		line += " · " + String(TranslationServer.translate("UI_SUCCESSION_SERVED")) % served_days
+	if benched:
+		line += " · " + String(TranslationServer.translate("UI_SUCCESSION_BENCHED"))
 	var grievance := candidate.get_top_grievance()
 	if not grievance.is_empty():
 		line += " · " + String(TranslationServer.translate(grievance_label_key(grievance)))
