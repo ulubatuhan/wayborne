@@ -69,6 +69,37 @@ func repay_debt(debt_id: String, amount: int) -> int:
 		wallet.spend(paid)
 	return paid
 
+## Ayni ödeme: `amount` altınlık değer borçlardan düşülür - önce vadesi
+## geçmişler (en eski vade önce), sonra kalanlar. Altın üretmez: borçtan
+## fazlası boşa gider, keseye girmez. Açık hesap kesenin eksi bakiyesinin
+## aynası olduğu için ona düşen pay keseye yazılıyor (bakiye sıfıra doğru
+## yükselir, defter senkronla kapanır) - yalnızca defterden silinseydi bir
+## sonraki kese değişikliği borcu geri getirirdi. Gerçekten düşülen toplamı
+## döner.
+func settle_debts_in_kind(amount: int) -> int:
+	var remaining := maxi(0, amount)
+	var ordered: Array[Debt] = debts.get_debts().duplicate()
+	var today := total_days_elapsed
+	ordered.sort_custom(func(a: Debt, b: Debt) -> bool:
+		if a.is_overdue(today) != b.is_overdue(today):
+			return a.is_overdue(today)
+		return a.due_day < b.due_day
+	)
+	var settled := 0
+	for debt in ordered:
+		if remaining <= 0:
+			break
+		var share := mini(remaining, debt.principal)
+		if share <= 0:
+			continue
+		if debt.debt_id == DebtLedger.OVERDRAFT_DEBT_ID:
+			wallet.earn(share)
+		else:
+			debts.pay(debt.debt_id, share)
+		remaining -= share
+		settled += share
+	return settled
+
 ## --- Lonca kredisi ---
 ##
 ## Oyuncunun *isteyerek* borçlandığı tek yol. `spend_or_owe` mecburi

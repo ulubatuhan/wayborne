@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_restructure_extends_and_costs_more_each_time(t)
 	_test_repay_only_spends_what_you_have(t)
 	_test_save_round_trip(t)
+	_test_debt_settle_effect(t)
 
 func _session(gold: int = 100) -> GameSession:
 	return GameSession.new(gold, 10, 1)
@@ -184,3 +185,34 @@ func _test_save_round_trip(t) -> void:
 		"yeni borç eskisinin üstüne yazmaz"
 	)
 	t.ok(fresh.debt_id != "loan_1", "yeni borç yeni bir kimlik alır")
+
+## Ayni ödeme borcu düşürür, altın üretmez; önce vadesi geçmiş borç
+## kapanır; açık hesaba düşen pay keseyi sıfıra doğru taşır ve sonraki kese
+## değişikliğinde borç geri gelmez.
+func _test_debt_settle_effect(t) -> void:
+	var session := GameSession.new(0, 0)
+	session.debts.borrow("Tefeci", 100, 0)
+	session.total_days_elapsed = 40
+	session.debts.borrow("Lonca", 100, 40)
+	var before := session.get_total_debt()
+	var result := EventEffectApplier.apply(
+		[EventEffect.make(EventEffect.Type.DEBT_SETTLE, 60)] as Array[EventEffect], session
+	)
+	t.eq(session.get_total_debt(), before - 60, "borç tam o kadar düştü")
+	t.eq(session.debts.get_overdue_debts(40)[0].principal, 40, "önce vadesi geçmiş borç ödendi")
+	t.eq(session.wallet.balance, 0, "kese değişmedi - altın üretilmedi")
+	t.ge(float(result.lines.size()), 1.0, "oyuncuya söylendi")
+
+	var settled := session.settle_debts_in_kind(10000)
+	t.eq(settled, 140, "borçtan fazlası düşülmez")
+	t.eq(session.get_total_debt(), 0, "borç kapandı")
+	t.eq(session.wallet.balance, 0, "fazlası keseye girmedi")
+
+	var overdrawn := GameSession.new(0, 0)
+	overdrawn.spend_or_owe(80)
+	t.eq(overdrawn.get_total_debt(), 80, "açık hesap var")
+	overdrawn.settle_debts_in_kind(50)
+	t.eq(overdrawn.wallet.balance, -30, "açık hesaba düşen pay keseye yazıldı")
+	t.eq(overdrawn.get_total_debt(), 30, "defter keseyle aynı")
+	overdrawn.wallet.earn(5)
+	t.eq(overdrawn.get_total_debt(), 25, "sonraki kese değişikliğinde borç geri gelmedi")

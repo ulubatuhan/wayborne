@@ -64,6 +64,11 @@ enum Type {
 	# ("strength", "agility"...) = o statta en iyi olan, boş = lider. Olaylar
 	# öldürmez - can en az 1'de kenetlenir (ölüm savaşın ve açlığın işi).
 	PARTY_HP,
+	# Ayni ödeme: kervanın bir borcundan `amount` altın düşer - yük, vagon ya
+	# da hizmetle ödenen borç (bkz. evt_bailiffs_at_camp). Eksi bir GOLD
+	# etkisi borcu azaltmaz, spend_or_owe üzerinden *artırır*; borcu kapatan
+	# başka bir etki yoktu. Hiçbir zaman altın üretmez.
+	DEBT_SETTLE,
 }
 
 @export var type: Type = Type.GOLD
