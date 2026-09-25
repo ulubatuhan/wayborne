@@ -2304,8 +2304,9 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		button.disabled = true
 		if choice.is_near_miss(context):
 			button.add_theme_color_override("font_disabled_color", ArtPalette.UI_ACCENT)
-		else:
-			button.modulate = LOCKED_COLOR
+		# "Çok uzak" durumda `modulate` uygulanmıyor artık: düğmenin dokusunu
+		# ve yazısını birlikte karartıp sebebi okunaksız kılıyordu (~2.8:1);
+		# `disabled = true` temanın kendi ölçülmüş kontrastını zaten sağlıyor.
 
 	_mark_choice(button, choice)
 	return button
@@ -2432,9 +2433,10 @@ func _open_recruit_offer() -> void:
 		hire_button.text = tr("UI_ROAD_RECRUIT_ACCEPT") % candidate.hire_cost
 		hire_button.pressed.connect(_on_road_recruit_accepted.bind(candidate))
 	else:
+		# `modulate` yazıyı da karartıp sebebi okunaksız kılıyordu;
+		# `disabled = true` temanın kendi ölçülmüş kontrastını sağlıyor.
 		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
 		hire_button.disabled = true
-		hire_button.modulate = LOCKED_COLOR
 	_recruit_holder.add_child(hire_button)
 
 	var decline_button := Button.new()

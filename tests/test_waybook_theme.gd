@@ -60,6 +60,30 @@ func _test_locked_button_is_marked(t, theme: Theme) -> void:
 		theme.get_color("font_disabled_color", "Button"), theme.get_color("font_color", "Button"),
 		"kilitli düğmenin yazısı da soluk (sebep satırı ayrı ve canlı)"
 	)
+	# Ekranların bir kısmı `disabled = true`'nun üstüne bir de `modulate`
+	# uyguluyordu - düğmenin dokusunu *ve* yazısını birlikte karartıp
+	# sebebi ~2.8:1'e düşürüyordu (WCAG AA'nın altında, ölçülen: Recruit/
+	# Guild/Planner/Combat/Purification). Temanın kendi kontrastı tek
+	# başına ≥4.5:1 kalmalı - `modulate` eklenmediği sürece artık öyle.
+	t.ge(
+		_contrast_ratio(theme.get_color("font_disabled_color", "Button"), ArtPalette.UI_PANEL_FILL),
+		4.5,
+		"kilitli düğme yazısı panel zemininde WCAG AA'yı geçiyor"
+	)
+
+## WCAG bağıl parlaklık/kontrast formülü - `_test_locked_button_is_marked`'ın
+## kendi iddiasını gerçek bir sayı ile doğrulaması için.
+func _relative_luminance(c: Color) -> float:
+	var channels := [c.r, c.g, c.b]
+	var linear := []
+	for channel in channels:
+		linear.append(channel / 12.92 if channel <= 0.03928 else pow((channel + 0.055) / 1.055, 2.4))
+	return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+func _contrast_ratio(a: Color, b: Color) -> float:
+	var l1 := _relative_luminance(a) + 0.05
+	var l2 := _relative_luminance(b) + 0.05
+	return maxf(l1, l2) / minf(l1, l2)
 
 ## Kenar payları dokunun yarısını geçerse ortada esneyecek bir bölge kalmaz
 ## ve Godot çerçeveyi bozuk çizer.

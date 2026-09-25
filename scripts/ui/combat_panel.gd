@@ -22,7 +22,6 @@ extends VBoxContainer
 ## çıkarma ve liderliğin devri oturumun işi, ekranın değil.
 signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bool, int, int, Array[CharacterData]
 
-const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 const MAX_LOG_LINES: int = 40
 ## Yorum balonu ne kadar sürsün. Slotlar her `_refresh()`'te yeniden
 ## kuruluyor (bkz. `_refresh_side`), o yüzden balon bir Tween'le değil
@@ -677,8 +676,10 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 	if reason.is_empty():
 		button.pressed.connect(_on_skill_pressed.bind(skill))
 	else:
+		# `modulate` düğmenin dokusunu ve yazısını birlikte karartıp sebebi
+		# ~2.8:1'e düşürüyordu; `disabled = true` temanın kendi ölçülmüş
+		# kontrastını (font_disabled_color) zaten sağlıyor.
 		button.disabled = true
-		button.modulate = LOCKED_COLOR
 		button.tooltip_text = "%s\n%s" % [skill.description, reason]
 	card.add_child(button)
 

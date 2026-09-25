@@ -14,7 +14,6 @@ signal trait_removed()
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const POSITIVE_COLOR: Color = Color(0.6, 0.85, 0.6)
 const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
-const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
 
 var _session: GameSession
 var _cost: int = 0
@@ -69,9 +68,11 @@ func _build_row(character: CharacterData, trait_resource: Trait) -> HBoxContaine
 		button.text = tr("UI_PURIFY_ACTION") % _cost
 		button.pressed.connect(_on_purify_pressed.bind(character, trait_resource.trait_id))
 	else:
+		# `modulate` düğmenin dokusunu ve yazısını birlikte karartıp sebebi
+		# okunaksız kılıyordu; `disabled = true` temanın kendi ölçülmüş
+		# kontrastını zaten sağlıyor.
 		button.text = tr("UI_NOT_ENOUGH_GOLD")
 		button.disabled = true
-		button.modulate = LOCKED_COLOR
 	row.add_child(button)
 
 	return row
