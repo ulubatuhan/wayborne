@@ -23,6 +23,7 @@ var _character: CharacterData
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CHARACTER_TITLE")
 	_session = GameState.get_session()
 	# Bu ekran yalnızca parti ekranından açılıyor, dönüş hedefi de her

@@ -42,6 +42,7 @@ var _result_label: Label
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
 
 	_destination = WorldMapData.get_location_by_id(TravelContext.selected_destination_id)

@@ -13,6 +13,7 @@ var _panel: RecruitPanel
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
 	# Geri hedefi gezinme yığınından gelir: hangi mekândan girildiyse
 	# oraya döner, o mekânın kendi çıkışına dokunmadan (bkz. Nav).

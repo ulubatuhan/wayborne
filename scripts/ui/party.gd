@@ -26,6 +26,7 @@ var _session: GameSession
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_PARTY_TITLE")
 	_session = GameState.get_session()
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD

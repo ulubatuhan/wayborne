@@ -26,6 +26,7 @@ var _overview_wagon_button: Button
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
 	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü
 	# her metin koddan, anahtarla gelir (bkz. Localization Rules).

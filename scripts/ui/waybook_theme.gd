@@ -267,6 +267,56 @@ static func _filled_frame(frame_file: String, inset: int) -> Texture2D:
 ## kuşak, çerçeve değil. Yazı kayışın üstünde değil - perçinler harflerin
 ## arasına giriyor, okunmuyordu (ölçüldü) - kayış yalnızca iki şeridin
 ## dünyaya bakan kenarında. Yuvarlak uçları kırpılmış orta parça döşeniyor.
+## --- Masa çalışma alanı ---
+## Yönetim ekranlarının arka planı bir masa resmi: kenarlarındaki mum,
+## mühür, terazi resmin kendisi. Satırlar ekranın bir ucundan öbür ucuna
+## uzanınca hem o nesnelerin üstünden geçiyor hem de açık renkli çadır
+## bezinde okunmuyordu. Metin ortada, genişliğin en çok %65'ini tutan bir
+## sütuna çekiliyor; arkasına kenarları yumuşak bir mürekkep bandı iniyor,
+## kenarlardaki perde hafifliyor ki masa görünsün. Dar ekranda sütun tam
+## genişlik - yan boşluk, satırı kırmaktan daha pahalı.
+const WORKSPACE_WIDTH_RATIO: float = 0.65
+const WORKSPACE_FULL_WIDTH_BELOW: float = 1100.0
+const WORKSPACE_EDGE_MARGIN: int = 24
+const WORKSPACE_BAND_ALPHA: float = 0.55
+const WORKSPACE_BAND_FEATHER: int = 56
+const WORKSPACE_SIDE_SCRIM_ALPHA: float = 0.38
+
+## Bir kenardaki boşluk, ekran genişliğine göre. Saf fonksiyon - test ve
+## ekran aynı sayıyı okusun diye.
+static func workspace_side_margin(total_width: float) -> int:
+	if total_width < WORKSPACE_FULL_WIDTH_BELOW:
+		return WORKSPACE_EDGE_MARGIN
+	return maxi(WORKSPACE_EDGE_MARGIN, int(round(total_width * (1.0 - WORKSPACE_WIDTH_RATIO) * 0.5)))
+
+## `root`: BackgroundArt / BackgroundScrim / MarginContainer iskeletini
+## taşıyan masa ekranının kökü. Eksik parça varsa hiçbir şeye dokunmaz.
+static func fit_desk_workspace(root: Control) -> void:
+	var margin := root.get_node_or_null("MarginContainer") as MarginContainer
+	var scrim := root.get_node_or_null("BackgroundScrim") as ColorRect
+	if margin == null or scrim == null:
+		return
+	scrim.color = Color(ArtPalette.INK, WORKSPACE_SIDE_SCRIM_ALPHA)
+	var band := Panel.new()
+	band.name = "WorkspaceBand"
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
+	style.shadow_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
+	style.shadow_size = WORKSPACE_BAND_FEATHER
+	band.add_theme_stylebox_override("panel", style)
+	root.add_child(band)
+	root.move_child(band, margin.get_index())
+	var apply := func() -> void:
+		var side := workspace_side_margin(root.size.x)
+		margin.add_theme_constant_override("margin_left", side)
+		margin.add_theme_constant_override("margin_right", side)
+		band.position = Vector2(side - WORKSPACE_EDGE_MARGIN, 0.0)
+		band.size = Vector2(maxf(0.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN)), root.size.y)
+		band.visible = side > WORKSPACE_EDGE_MARGIN
+	root.resized.connect(apply)
+	apply.call()
+
 static func strap_rule(height: float) -> TextureRect:
 	var source := texture("r1_strap_top.png").get_image()
 	source.decompress()

@@ -26,6 +26,7 @@ var _feast_button: Button
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
 	# metin koddan, anahtarla gelir (bkz. Localization Rules).
