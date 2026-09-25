@@ -66,7 +66,7 @@ const RECRUIT_HOURS: float = 0.5
 ## Kamp anlık bir tuş değil, yaşanan bir durum: ateş yanar, zaman akmaya
 ## devam eder ve sabah olunca kamp kendiliğinden kalkar. Faydası (erzak
 ## bedeli + stres rahatlaması) kalkarken uygulanır.
-const CAMP_HOURS: float = 8.0
+const CAMP_HOURS: float = GameSession.CAMP_HOURS
 
 ## Yolda karşılaşılan biri şehirdeki kadar seçici değil ama pazarlık payı
 ## da bırakmıyor.

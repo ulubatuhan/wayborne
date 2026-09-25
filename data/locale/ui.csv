@@ -498,6 +498,7 @@
 "UI_BRIEF_MEMORY_DEPARTED","%s'in kervandan ayrılışı hâlâ hatırlanıyor.","%s's leaving the caravan is still remembered.","","","","","","","","",""
 "UI_BRIEF_OBJECTIVE_COUNT","%s: %d / %d","%s: %d / %d","","","","","","","","",""
 "UI_PLANNER_TERRAIN","Arazi: %s","Terrain: %s","","","","","","","","",""
+"UI_PLANNER_CAMP_RESERVE","Akşam kampı emri açık: yol daha uzun sürer, kamp ateşleri için ayrıca %d erzak.","Camp-at-dusk order is on: the road takes longer, plus %d provisions for the campfires.","","","","","","","","",""
 "UI_PLANNER_WEATHER_RESERVE","Yol payı: +%d gün erzak (hava ve kervanın kendi hâli yolu yavaşlatır)","Travel reserve: +%d days of provisions (weather and the caravan's own condition slow the road)","","","","","","","","",""
 "UI_ROAD_WEATHER","Hava: %s","Weather: %s","","","","","","","","",""
 "UI_ROAD_TERRAIN_NOW","Arazi: %s","Terrain: %s","","","","","","","","",""

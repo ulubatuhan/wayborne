@@ -541,11 +541,10 @@ the walking figures are the game's strongest asset) but to deepen it.
   stuck wherever they stood the moment the fire was lit - reported back
   exactly that way, "stuck at the front, can't walk back". Camp now only
   skips `_walk_at()` (there is no distance to cover while making camp);
-  A/D still moves `_leader_offset` within the stationary column, the same
-  arithmetic the detach command already used. If the leader was never
-  explicitly detached, camp ending snaps the offset back to 0 - the
-  "attached" march assumes the leader leads at the front, and camp is not
-  a second way to leave that assumption unstated.
+  A/D, a click or a tap still moves `_leader_offset` within the
+  stationary column. Since the control redesign the leader is always free
+  in the column (see Road Movement Rules), so camp ending leaves them
+  where they stand.
 - **A speed lever has to move everything it looks like it's moving.**
   `JourneyClock`'s speed multiplier already scaled `_days_covered` (hence
   the background's `_world_x`) through `hours`, but `RoadCaravan`'s own
@@ -2820,20 +2819,60 @@ The plan made in the city is an intention, not a commitment.
 
 The road used to run itself: the clock ticked, days fell off a counter and
 the caravan arrived. The player's only input was a speed button, and the
-screen read as broken — *"we're standing still, we have no control."*
+screen read as broken — *"we're standing still, we have no control."* The
+first fix handed the player the caravan's legs (hold D to walk), and that
+was the wrong half: holding a key is continuous input with no decision in
+it. The rule the control redesign settled on, and that every control on
+the road now follows:
 
-- **The player walks the road; the clock only counts days.** A/D or the
-  arrow keys drive `_days_covered` in `road_journey.gd`; standing still
-  stops the *distance*, never the day. Provisions are still eaten,
-  contracts still expire, the day's event still fires. Dawdling is paid for
-  by the calendar — that is the whole Oregon Trail tension, and it did not
-  exist while arrival was a timer.
-- **Walking forward at full tempo reproduces the old behaviour exactly**
-  (`WALK_FORWARD_RATE` 1.0), so the planner's provision promise — *correct
-  stocking never starves* (see Provision Rules) — still holds for a player
-  who simply walks. The only thing that broke is idling being free.
-- **Going back is much slower than going forward** (`WALK_BACKWARD_RATE`
-  0.25): turning a wagon train around on a narrow road costs real time.
+**Input is a decision. Input that carries no decision becomes automatic;
+every decision has a visible control, and a key is only its shortcut.**
+
+- **The caravan marches at the pace you ordered; you walk the leader.**
+  The orders panel's pace buttons (Dur/Yavaş/Normal/Hızlı - `COMMANDS`,
+  1-4 and F2 as shortcuts) set `_pace`, and `_advance_position()` walks the
+  column at it every hour. A/D, the arrow keys, the triggers, a click or a
+  tap move only the leader along the column (`_move_leader`,
+  `RoadCaravan.leader_offset_for_x`) - the one body the player moves
+  directly, which is also what `RoadAttention` reads. The gold mark over
+  the leader is always drawn.
+- **Halting is an order, not an absence of input.** "Dur" is a pace. The
+  day still passes (provisions, contracts, the day's event): dawdling is
+  paid for by the calendar, which is the Oregon Trail tension, and it no
+  longer depends on the player letting go of a key.
+- **Steady pace reproduces the old full-tempo walk exactly** (rate 1.0), so
+  the planner's provision promise - *correct stocking never starves* -
+  holds for a player who never touches the pace.
+- **Backward walking and the detach command are gone, and what replaced
+  them.** Walking the wagons backward at quarter speed was never a real
+  choice - turning back is `turn_back()`/`divert_journey()` (En-Route Plan
+  Rules), which already discards a pending marker. "Detach and walk the
+  column" became the default: the leader is always free within the column.
+- **Days are taken one at a time** (`JourneyClock.take_one_day()`). The old
+  loop took every completed day at once and dropped the ones it could not
+  process behind an open card - and while an encounter marker was pending
+  it processed none, so halting in front of a marker was a free wait with
+  no provisions eaten. Now the days run; only a *new* event is not drawn
+  while one is pending.
+- **A decision made the same way every day is a standing order**
+  (`GameSession`'s "Kalıcı emirler"). The meal policy is remembered and
+  served without asking (`meal_needs_decision()`) - unless provisions run
+  short, or the policy would push someone (or the crew) into the night
+  where hunger starts costing HP: a standing order never kills anyone
+  without the player seeing it first. "Camp at dusk" lights the fire by
+  itself in the evening phase only (camp outlasts the evening, so it cannot
+  relight the same night, even after a reload). The pre-combat roster and
+  order are remembered, with Confirm focused. All three are saved.
+- **A standing order the planner does not know about is a starvation
+  trap.** Camping every evening stops the column for `CAMP_HOURS` a day and
+  burns `CAMP_PROVISIONS_COST` a night; `forecast_extra_days(...,
+  walking_hours)` and `CaravanPlan.camp_provisions` put both into the
+  planner's number, and `test_route_terrain.gd` asserts a caravan stocked
+  that way still never runs out.
+- **Every key has an on-screen control** (touch parity). The hub walks to
+  a tapped point and opens a tapped gate or wagon on arrival;
+  `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and
+  fails on one without its on-screen counterpart in the same script.
 - **Distance is measured in game hours, not frames.** The speed button
   scales the clock and the road by the same factor; driving movement off
   the raw frame delta would make days outrun the road at 3x and starve
@@ -5346,6 +5385,26 @@ kendi PR'ıyla, sırayla birleştirildi. Kurallar Motion Rules'ta:
 - **Düğme ve seçenek (012/013).** Her düğmede eldeki his; savaş açan
   seçenekte kan şeridi, zara bağlı seçenekte stat amblemi, "neredeyse"
   kilitte vurgu rengi.
+
+**Faz 21 ("Kontrol") tamamlandı.** Soru şuydu: A/D ile mi yürüyelim, yoksa
+kervan kendiliğinden yürüsün ve biz emir mi verelim? Cevap bütün oyuna
+uygulanan tek kural oldu: girdi bir karardır; karar taşımayan sürekli
+girdi otomatiğe döner; her kararın görünür bir kontrolü vardır, tuş
+yalnızca kısayoldur. Beş PR, kurallar Road Movement Rules'ta:
+
+- **Kontrol-1:** kervan emredilen tempoda kendiliğinden yürüyor, A/D ve
+  dokunma yalnızca lideri kolonda yürütüyor. Geri yürüme ve "kolona
+  ineceğim" emri kaldırıldı. Günler tek tek işleniyor, işaretin önünde
+  durmak artık bedava gün değil.
+- **Kontrol-2:** F2'nin arkasındaki emir menüsü her zaman görünen bir
+  panele dönüştü: tempo, Tüccar ve Borçlar.
+- **Kontrol-3:** kalıcı emirler. Sofra politikası, akşam kampı ve savaş
+  kadrosu hatırlanıyor; durum değişince oyun yeniden soruyor.
+- **Kontrol-4:** hub'da dokunarak yürüme ve dokunmatik denklik testi.
+- **Kontrol-5:** simülatörler koşturuldu. Yol ekranından geçmedikleri için
+  sayıları değişmedi, çünkü normal tempo eski tam tempo yürüyüşünün
+  aynısı. Ölçülen tek yeni risk akşam kampı emrinin erzak sözünü
+  bozmasıydı; planlayıcıya kamp payı eklendi.
 
 ## Quick Start
 

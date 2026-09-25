@@ -1137,6 +1137,9 @@ func resolve_stress_breaks(rng: RandomNumberGenerator) -> Array[Dictionary]:
 ## Gün ilerletme/erzak tüketimi çağıran tarafın işi, burada yalnızca
 ## kampın kendi payı var.
 const CAMP_PROVISIONS_COST: int = 3
+## Kampın sürdüğü oyun saati: o saatlerde kervan yol almıyor. Yol ekranı ve
+## planlayıcının akşam kampı payı aynı sayıyı okuyor.
+const CAMP_HOURS: float = 8.0
 ## Kamp eskiden 20 götürüyordu. Ölçüm bunun stresi tek başına sildiğini
 ## gösterdi: sefer başına ~25 stres, kamp -20, varış -14 -> her sefer kamp
 ## kuran oyuncuda stres 12 sefer boyunca 20'nin üstüne çıkmıyordu. Yani
