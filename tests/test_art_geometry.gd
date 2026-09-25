@@ -27,6 +27,8 @@ func run(t) -> void:
 	_test_snow_never_reaches_below_the_snow_line(t)
 	_test_a_low_ridge_gets_no_snow(t)
 	_test_contact_shadow_is_flat(t)
+	_test_vignette_strips_tile_without_overlap_or_gap(t)
+	_test_vignette_bottom_strip_stops_at_side_strips(t)
 
 func _area() -> Rect2:
 	return Rect2(Vector2.ZERO, Vector2(1500.0, 460.0))
@@ -138,3 +140,58 @@ func _test_contact_shadow_is_flat(t) -> void:
 		(max_x - min_x) > (max_y - min_y) * 2.0,
 		"temas gölgesi basık değil"
 	)
+
+## Eski `vignette()` her dilimi `+1.0` genişletiyordu - komşusuyla 1 px
+## çakışıp o pikselde alfayı iki katına çıkarıyordu (ölçülen belirti:
+## ~13 px'te bir koyu dikey/yatay çizgi). `vignette_strips()`'in ürettiği
+## dilimler artık ne çakışmalı ne boşluklu olmalı - `vignette_strips()`
+## sırayı [sol, sağ, alt] × steps olarak döndürüyor (bkz. kendi kaynağı).
+func _test_vignette_strips_tile_without_overlap_or_gap(t) -> void:
+	var area := Rect2(Vector2.ZERO, Vector2(1920.0, 1080.0))
+	var strips := ArtDraw.vignette_strips(area, 0.055)
+	var left := []
+	var right := []
+	var bottom := []
+	for index in strips.size():
+		match index % 3:
+			0: left.append(strips[index].rect)
+			1: right.append(strips[index].rect)
+			2: bottom.append(strips[index].rect)
+	left.sort_custom(func(a, b): return a.position.x < b.position.x)
+	right.sort_custom(func(a, b): return a.position.x < b.position.x)
+	bottom.sort_custom(func(a, b): return a.position.y < b.position.y)
+	for group in [left, right, bottom]:
+		var axis_is_x: bool = group != bottom
+		for i in range(group.size() - 1):
+			var current: Rect2 = group[i]
+			var next: Rect2 = group[i + 1]
+			if axis_is_x:
+				t.almost(
+					next.position.x, current.position.x + current.size.x,
+					"vignette dilimi çakışıyor ya da boşluk bırakıyor (x)", 0.01
+				)
+			else:
+				t.almost(
+					next.position.y, current.position.y + current.size.y,
+					"vignette dilimi çakışıyor ya da boşluk bırakıyor (y)", 0.01
+				)
+
+## Alt şerit sol/sağ şeritlerin kapladığı sütunlara taşarsa köşelerde alfa
+## iki kez toplanır (çift koyu köşe). Her alt dilim tam olarak yan
+## şeritlerin iç kenarları arasında kalmalı.
+func _test_vignette_bottom_strip_stops_at_side_strips(t) -> void:
+	var area := Rect2(Vector2.ZERO, Vector2(1920.0, 1080.0))
+	var side := area.size.x * ArtDraw.VIGNETTE_SIDE_RATIO
+	var strips := ArtDraw.vignette_strips(area, 0.055)
+	var checked := 0
+	for index in strips.size():
+		if index % 3 != 2:
+			continue
+		var rect: Rect2 = strips[index].rect
+		t.almost(rect.position.x, area.position.x + side, "alt şerit sol köşeye taşıyor", 0.01)
+		t.almost(
+			rect.position.x + rect.size.x, area.position.x + area.size.x - side,
+			"alt şerit sağ köşeye taşıyor", 0.01
+		)
+		checked += 1
+	t.ok(checked == ArtDraw.VIGNETTE_STEPS, "alt şerit sayısı beklenenden farklı")

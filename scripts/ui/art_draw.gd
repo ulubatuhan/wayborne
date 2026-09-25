@@ -302,28 +302,69 @@ static func water(
 ## dikey çubuk. Kontur kalınlığı genişliğe oranlıydı, yani geniş bir şeritte
 ## çubuklar da kalınlaşıyordu. Şimdi her kenar kendi ince dilimleriyle
 ## karartılıyor - kenar başına doğrusal bir solma, çerçeve yok.
-static func vignette(canvas: CanvasItem, area: Rect2, strength: float = 0.055) -> void:
-	var steps := 18
-	var side := area.size.x * 0.10
-	var vertical := area.size.y * 0.16
-	for index in steps:
-		var ratio := float(index) / float(steps)
+const VIGNETTE_STEPS: int = 18
+const VIGNETTE_SIDE_RATIO: float = 0.10
+const VIGNETTE_VERTICAL_RATIO: float = 0.16
+
+## Sol/sağ/alt kenar dilimlerinin geometrisini çizimden ayrı, saf olarak
+## döndürür - `test_art_geometry.gd` çakışma/boşluk olmadığını bir
+## `CanvasItem` kurmadan sınayabilsin diye (bkz. `ridge_points()`'in aynı
+## gerekçesi). Her giriş `{rect: Rect2, alpha: float}`.
+static func vignette_strips(area: Rect2, strength: float = 0.055) -> Array:
+	var strips := []
+	var side := area.size.x * VIGNETTE_SIDE_RATIO
+	var vertical := area.size.y * VIGNETTE_VERTICAL_RATIO
+	var thickness_x := side / float(VIGNETTE_STEPS)
+	var thickness_y := vertical / float(VIGNETTE_STEPS)
+	for index in VIGNETTE_STEPS:
+		var ratio := float(index) / float(VIGNETTE_STEPS)
 		var alpha := strength * (1.0 - ratio)
-		var thickness_x := side / float(steps) + 1.0
-		var thickness_y := vertical / float(steps) + 1.0
-		var shade := Color(0.0, 0.0, 0.0, alpha)
-		canvas.draw_rect(Rect2(
-			Vector2(area.position.x + side * ratio, area.position.y),
-			Vector2(thickness_x, area.size.y)
-		), shade, true)
-		canvas.draw_rect(Rect2(
-			Vector2(area.position.x + area.size.x - side * ratio - thickness_x, area.position.y),
-			Vector2(thickness_x, area.size.y)
-		), shade, true)
-		canvas.draw_rect(Rect2(
-			Vector2(area.position.x, area.position.y + area.size.y - vertical * ratio - thickness_y),
-			Vector2(area.size.x, thickness_y)
-		), shade, true)
+		strips.append({
+			"rect": Rect2(
+				Vector2(area.position.x + side * ratio, area.position.y),
+				Vector2(thickness_x, area.size.y)
+			),
+			"alpha": alpha,
+		})
+		strips.append({
+			"rect": Rect2(
+				Vector2(area.position.x + area.size.x - side * ratio - thickness_x, area.position.y),
+				Vector2(thickness_x, area.size.y)
+			),
+			"alpha": alpha,
+		})
+		# Alt şerit tam genişlikte çizilirse sol/sağ kenar şeritleriyle
+		# köşelerde üst üste biner, alfa orada iki kez toplanıp köşeler
+		# çift koyulaşır. Alt şerit artık yalnızca yan şeritlerin iç
+		# kenarları arasında - köşeler zaten yan şeritlerden karanlık.
+		strips.append({
+			"rect": Rect2(
+				Vector2(
+					area.position.x + side,
+					area.position.y + area.size.y - vertical * ratio - thickness_y
+				),
+				Vector2(area.size.x - side * 2.0, thickness_y)
+			),
+			"alpha": alpha,
+		})
+	return strips
+
+## Kenarlardan içe kararma. Her sahnede var, çünkü çerçeveyi o kapatıyor.
+##
+## İlk hâli iç içe *dikdörtgen konturları* çiziyordu ve ekran görüntüsünde
+## sonucu belliydi: yumuşak bir kararma değil, sol ve sağ kenarda dizi dizi
+## dikey çubuk. Kontur kalınlığı genişliğe oranlıydı, yani geniş bir şeritte
+## çubuklar da kalınlaşıyordu. Şimdi her kenar kendi ince dilimleriyle
+## karartılıyor - kenar başına doğrusal bir solma, çerçeve yok.
+##
+## Eskiden her dilim `side / steps + 1.0` genişliğindeydi - komşusuyla 1 px
+## çakışıyor, o çakışan piksel şeridin alfasını iki katına çıkarıyordu.
+## Sol/sağ/alt kenarda ~13 px'te bir koyu dikey/yatay çizgi olarak ölçüldü.
+## Dilim artık tam `side / steps` - ne çakışma ne boşluk (float koordinatlar
+## zaten piksel arası boşluk bırakmıyor). Geometri `vignette_strips()`'te.
+static func vignette(canvas: CanvasItem, area: Rect2, strength: float = 0.055) -> void:
+	for strip in vignette_strips(area, strength):
+		canvas.draw_rect(strip.rect, Color(0.0, 0.0, 0.0, strip.alpha), true)
 
 ## Yumuşak ışık havuzu - meşale, kamp ateşi, pencere. Basık elips
 ## halkaları; yuvarlak bir küre "ışık" gibi durmuyor, yerden yansıyan
@@ -399,6 +440,15 @@ static func check(canvas: CanvasItem, centre: Vector2, size: float, color: Color
 		centre + Vector2(half, -half * 0.75),
 	])
 	canvas.draw_polyline(points, color, maxf(1.0, size * 0.18), true)
+
+## Yakınlaştırma tuşlarının "−"/"+" işareti: font glyph'i değil, chevron/
+## check'le aynı çizim dili. `plus`, false ise yalnızca yatay çizgi (eksi).
+static func plus_minus(canvas: CanvasItem, centre: Vector2, size: float, color: Color, plus: bool) -> void:
+	var half := size * 0.5
+	var width := maxf(1.0, size * 0.18)
+	canvas.draw_line(centre + Vector2(-half, 0.0), centre + Vector2(half, 0.0), color, width, true)
+	if plus:
+		canvas.draw_line(centre + Vector2(0.0, -half), centre + Vector2(0.0, half), color, width, true)
 
 static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> PackedVector2Array:
 	var points := PackedVector2Array()

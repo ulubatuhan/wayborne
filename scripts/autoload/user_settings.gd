@@ -38,18 +38,25 @@ const FALLBACK_LOCALE: String = "en"
 ## code: Godot locale kodu ve CSV sütun adı - ikisi birebir aynı olmalı.
 ## name: dilin kendi dilindeki adı (endonym) - dil seçici her zaman kendi
 ## dilinde okunur, oyuncu bilmediği bir dilde kendi dilini arayamaz.
+## complete: bu dilin CSV sütunları gerçekten dolu mu. Seçiciyi asla
+## sessizce İngilizce'ye düşürmemek için var (bkz. `settings.gd`'nin
+## `_readable_locale_name()`'i - dolu olmayan bir dilin adının yanına
+## "(henüz İngilizce)" ekliyor). Elle tutulan bir sabit, çünkü bir CSV'nin
+## dolu olup olmadığı derleme zamanında bilinen, çeviri ilerledikçe elle
+## güncellenmesi gereken bir gerçek - `test_localization.gd`'nin zaten
+## kilitlediği tr/en-her-zaman-dolu kuralının aynı ailesinden.
 const SUPPORTED: Array[Dictionary] = [
-	{"code": "tr", "name": "Türkçe"},
-	{"code": "en", "name": "English"},
-	{"code": "de", "name": "Deutsch"},
-	{"code": "fr", "name": "Français"},
-	{"code": "es", "name": "Español"},
-	{"code": "it", "name": "Italiano"},
-	{"code": "pt_BR", "name": "Português (Brasil)"},
-	{"code": "ru", "name": "Русский"},
-	{"code": "pl", "name": "Polski"},
-	{"code": "zh_CN", "name": "简体中文"},
-	{"code": "ja", "name": "日本語"},
+	{"code": "tr", "name": "Türkçe", "complete": true},
+	{"code": "en", "name": "English", "complete": true},
+	{"code": "de", "name": "Deutsch", "complete": false},
+	{"code": "fr", "name": "Français", "complete": false},
+	{"code": "es", "name": "Español", "complete": false},
+	{"code": "it", "name": "Italiano", "complete": false},
+	{"code": "pt_BR", "name": "Português (Brasil)", "complete": false},
+	{"code": "ru", "name": "Русский", "complete": false},
+	{"code": "pl", "name": "Polski", "complete": false},
+	{"code": "zh_CN", "name": "简体中文", "complete": false},
+	{"code": "ja", "name": "日本語", "complete": false},
 ]
 
 var reduce_motion: bool = false
@@ -82,6 +89,15 @@ func get_locale_names() -> Array:
 	for entry in SUPPORTED:
 		names.append(entry["name"])
 	return names
+
+## Dil seçicinin `_readable_locale_name()`'i bunu her satır için bir kez
+## okuyup çeviri eksikse "(henüz İngilizce)" ekliyor - seçenek listesindeki
+## sırayla birebir aynı sırada.
+func get_locale_completeness() -> Array:
+	var flags: Array = []
+	for entry in SUPPORTED:
+		flags.append(bool(entry["complete"]))
+	return flags
 
 func is_supported(code: String) -> bool:
 	return get_locale_codes().has(code)

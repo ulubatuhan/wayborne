@@ -45,6 +45,7 @@ func run(t) -> void:
 	_test_every_screen_is_reachable(t, nav, edges)
 	_test_every_screen_has_an_exit(t, nav)
 	_test_labels_never_blank(t, nav)
+	_test_titles_use_page_title_variation(t, nav)
 	_test_exit_buttons_outside_scroll(t)
 	_test_node_paths_resolve(t, nav)
 	_test_overlay_never_traps_the_player(t)
@@ -188,6 +189,34 @@ func _test_labels_never_blank(t, nav) -> void:
 	for path in _scene_paths(nav):
 		var label: String = nav.label_for(path)
 		t.ok(not label.strip_edges().is_empty(), "geri tuşu yazısı boş değil: %s" % path)
+
+## Sekiz ekran başlığını sahne dosyasında elle 24 px'e sabitlemişti, geri
+## kalanı (Market, World Map, Character Creation) varsayılan 18 px'te
+## kalmıştı - gövde metniyle aynı boyda okunuyordu (bkz. CLAUDE.md'nin
+## Typography maddesi). `WaybookTheme.PAGE_TITLE` artık tek doğruluk kaynağı;
+## bu test bir TitleLabel'ın onu taşımadan sahneye geri girmesini engelliyor.
+func _test_titles_use_page_title_variation(t, nav) -> void:
+	var checked := 0
+	for path in _scene_paths(nav):
+		# Ana menünün "WAYBORNE" başlığı oyunun kendi logosu (48 px,
+		# `main_menu.tscn`) - bir ekran başlığı değil, bilerek istisna.
+		if path == "res://scenes/ui/main_menu.tscn":
+			continue
+		var source := _read(path)
+		var marker := "[node name=\"TitleLabel\""
+		var start := source.find(marker)
+		if start < 0:
+			continue
+		var block_end := source.find("[node ", start + marker.length())
+		if block_end < 0:
+			block_end = source.length()
+		var block := source.substr(start, block_end - start)
+		checked += 1
+		t.ok(
+			block.contains("theme_type_variation = &\"PageTitle\""),
+			"%s: TitleLabel PageTitle varyasyonunu taşıyor" % path
+		)
+	t.ok(checked >= 8, "yeterli sayıda TitleLabel tarandı (%d)" % checked)
 
 ## Geri/çıkış tuşu kaydırma kutusunun dışında durmalı; içeride kalırsa
 ## içerik uzadıkça ekran dışına itilir (pazar ekranında bir kez yaşandı).

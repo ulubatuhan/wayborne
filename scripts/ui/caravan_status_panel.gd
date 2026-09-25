@@ -74,6 +74,11 @@ func set_session(session: GameSession) -> void:
 	_session = session
 	refresh()
 
+## Kendi perdesi yok, `_status_overlay`'in (road_journey.gd) `visible`
+## anahtarına biniyor - `setup()`'ın kendi çağrısı katman henüz görünmezken
+## olur (görünmez bir devinim), asıl an `_on_status_toggled(true)`'ın her
+## açılışta tazelediği bu çağrı: içerik yeniden kurulurken kart da soluk+
+## ölçekli açılıyor.
 func refresh() -> void:
 	if _session == null or _body == null:
 		return
@@ -87,6 +92,7 @@ func refresh() -> void:
 	_build_cargo()
 	_build_contracts()
 	_build_ledger()
+	WaybookTheme.present(self, null, self)
 
 # --- Bölümler ---
 

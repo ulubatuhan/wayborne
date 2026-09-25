@@ -20,11 +20,13 @@ func run(t) -> void:
 	_test_fx_colours_live_in_the_palette(t)
 	_test_cold_edge_reads_season_and_biome(t)
 	_test_desk_workspace_keeps_the_props(t)
+	_test_warning_colour_is_readable(t)
+	_test_present_dismiss_is_a_settle_not_a_snap(t)
+	_test_default_button_is_minimal(t, theme)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
 		["panel", "PanelContainer"], ["panel", "SealPanel"], ["panel", "SlipPanel"],
-		["normal", "Button"], ["disabled", "Button"], ["normal", "OptionButton"],
 		["tab_selected", "TabContainer"], ["separator", "HSeparator"],
 		["grabber", "VScrollBar"], ["panel", "TooltipPanel"],
 	]
@@ -47,24 +49,48 @@ func _test_panel_fill_comes_from_palette(t, theme: Theme) -> void:
 	var distance := absf(centre.r - fill.r) + absf(centre.g - fill.g) + absf(centre.b - fill.b)
 	t.le(distance, 0.12, "panelin iç zemini ArtPalette.UI_PANEL_FILL")
 
-## "Disabled with its reason": kilitli düğme sekmesini kaybetmiyor, yalnızca
-## siliniyor - karalama yok (oyuncu testinde reddedildi), aynı doku, yarı
-## saydam ton.
+## "Disabled with its reason": kilitli düğme çerçevesini/köşesini kaybetmiyor
+## (aynı aile - `_minimal_button`), yalnızca dolgusu ve çerçevesi soluyor -
+## karalama yok (oyuncu testinde reddedildi), yarı saydam ton.
 func _test_locked_button_is_marked(t, theme: Theme) -> void:
-	var normal := theme.get_stylebox("normal", "Button") as StyleBoxTexture
-	var locked := theme.get_stylebox("disabled", "Button") as StyleBoxTexture
-	t.eq(locked.texture, normal.texture, "kilitli sekme karalamasız, aynı doku")
-	t.ne(locked.modulate_color, normal.modulate_color, "kilitli sekme soluk")
-	t.ok(locked.modulate_color.a < 1.0, "kilitli sekme yarı saydam - silik")
+	var normal := theme.get_stylebox("normal", "Button") as StyleBoxFlat
+	var locked := theme.get_stylebox("disabled", "Button") as StyleBoxFlat
+	t.eq(locked.corner_radius_top_left, normal.corner_radius_top_left, "kilitli düğme aynı aile - köşe yarıçapı ortak")
+	t.ok(locked.bg_color.a < normal.bg_color.a, "kilitli düğme dolgusu soluk")
+	t.ok(locked.border_color.a < normal.border_color.a, "kilitli düğme çerçevesi soluk")
 	t.ne(
 		theme.get_color("font_disabled_color", "Button"), theme.get_color("font_color", "Button"),
 		"kilitli düğmenin yazısı da soluk (sebep satırı ayrı ve canlı)"
 	)
+	# Ekranların bir kısmı `disabled = true`'nun üstüne bir de `modulate`
+	# uyguluyordu - düğmenin dokusunu *ve* yazısını birlikte karartıp
+	# sebebi ~2.8:1'e düşürüyordu (WCAG AA'nın altında, ölçülen: Recruit/
+	# Guild/Planner/Combat/Purification). Temanın kendi kontrastı tek
+	# başına ≥4.5:1 kalmalı - `modulate` eklenmediği sürece artık öyle.
+	t.ge(
+		_contrast_ratio(theme.get_color("font_disabled_color", "Button"), ArtPalette.UI_PANEL_FILL),
+		4.5,
+		"kilitli düğme yazısı panel zemininde WCAG AA'yı geçiyor"
+	)
+
+## WCAG bağıl parlaklık/kontrast formülü - `_test_locked_button_is_marked`'ın
+## kendi iddiasını gerçek bir sayı ile doğrulaması için.
+func _relative_luminance(c: Color) -> float:
+	var channels := [c.r, c.g, c.b]
+	var linear := []
+	for channel in channels:
+		linear.append(channel / 12.92 if channel <= 0.03928 else pow((channel + 0.055) / 1.055, 2.4))
+	return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+func _contrast_ratio(a: Color, b: Color) -> float:
+	var l1 := _relative_luminance(a) + 0.05
+	var l2 := _relative_luminance(b) + 0.05
+	return maxf(l1, l2) / minf(l1, l2)
 
 ## Kenar payları dokunun yarısını geçerse ortada esneyecek bir bölge kalmaz
 ## ve Godot çerçeveyi bozuk çizer.
 func _test_nine_slice_leaves_a_centre(t, theme: Theme) -> void:
-	for pair in [["panel", "PanelContainer"], ["panel", "SealPanel"], ["normal", "Button"], ["panel", "SlipPanel"]]:
+	for pair in [["panel", "PanelContainer"], ["panel", "SealPanel"], ["tab_selected", "TabContainer"], ["panel", "SlipPanel"]]:
 		var box := theme.get_stylebox(pair[0], pair[1]) as StyleBoxTexture
 		var size := box.texture.get_size()
 		t.ok(
@@ -111,6 +137,44 @@ func _test_cold_edge_reads_season_and_biome(t) -> void:
 	)
 	t.le(road.cold_level(true, ArtPalette.BIOME_MOUNTAIN), 1.0, "don tavanı aşmıyor")
 
+## Uyarı turuncusu (planlayıcı/borç paneli/şehir brifingi) panel zemininde
+## WCAG AA'yı geçmeli - defect matrix'in ölçtüğü eski `.modulate` hatası
+## (2.4-3.7:1) bir daha sessizce geri gelmesin diye.
+func _test_warning_colour_is_readable(t) -> void:
+	t.ge(
+		_contrast_ratio(ArtPalette.UI_WARNING, ArtPalette.UI_PANEL_FILL),
+		4.5,
+		"UI_WARNING panel zemininde WCAG AA'yı geçiyor"
+	)
+
+## Sahnesiz panellerin açılış/kapanış devinimi (bkz. defect matrix'in "15
+## scene-less panel" maddesi). Bir tween ağaç dışında koşamadığı için
+## (`create_tween` bir düğümün ağaçta olmasını ister) burada canlı bir
+## devinim ölçülemiyor - `_verify_present_dismiss.gd` (bu oturumda xvfb
+## altında koşturuldu) canlı uçtan uca doğrulamayı yaptı. Burada kilitlenen
+## iki saf iddia: ağaç dışında çağrılmak güvenle no-op kalıyor (çökmüyor,
+## `root`u değiştirmiyor) ve kapanış açılıştan kısa - "bir durma bir
+## yerleşmedir, ani bir kesme değil" kuralının süre tarafı.
+func _test_present_dismiss_is_a_settle_not_a_snap(t) -> void:
+	var theme_script = load(THEME_PATH)
+	t.ok(theme_script.PRESENT_CARD_START_SCALE < 1.0, "kart küçükten büyüğe açılıyor")
+	t.le(theme_script.DISMISS_SECONDS, theme_script.PRESENT_CARD_SECONDS, "kapanış açılıştan kısa ya da eşit")
+	t.le(theme_script.PRESENT_BACKDROP_SECONDS, theme_script.PRESENT_CARD_SECONDS + 0.01, "perde karttan daha uzun sürmüyor")
+
+	# Ağaçta olmayan bir düğümde present()/dismiss() çökmemeli, sessizce
+	# no-op kalmalı (bkz. WaybookTheme.present/dismiss'in `is_inside_tree`
+	# koruması).
+	var orphan := PanelContainer.new()
+	var before_scale := orphan.scale
+	var before_alpha := orphan.modulate.a
+	theme_script.present(orphan, null, null)
+	t.eq(orphan.scale, before_scale, "ağaç dışı kart present() ile değişmiyor")
+	t.eq(orphan.modulate.a, before_alpha, "ağaç dışı kart present() ile solmuyor")
+	var completed := [false]
+	theme_script.dismiss(orphan, null, null, func(): completed[0] = true)
+	t.ok(completed[0], "ağaç dışı dismiss() geri çağrıyı hemen çağırıyor")
+	orphan.free()
+
 ## Masa ekranlarında metin ortada bir sütunda: geniş ekranda genişliğin en
 ## çok %65'i (kenarlardaki nesneler resmin kendisi), dar ekranda tam genişlik.
 func _test_desk_workspace_keeps_the_props(t) -> void:
@@ -132,3 +196,33 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 	for screen in screens:
 		var source := FileAccess.get_file_as_string("res://scripts/ui/%s.gd" % screen)
 		t.ok(source.contains("fit_desk_workspace"), "%s masa sütununu kullanıyor" % screen)
+
+## Oyuncu G4'ün opak deri dokusunu oyunun *varsayılan* düğmesi olarak
+## reddetti (bkz. WaybookTheme._tab()'ın kendi notu) - emir panelinin
+## minimal ilkesi (`_ghost_button`) artık her ekranın düğmesi. Ama sekme
+## (TabContainer), tam genişlikte sıra düğmesi (RowButton) ve HUD simge
+## düğmesi (IconTab) kasıtlı olarak G4'te kaldı - farklı, ayrı üsluplar,
+## bu değişikliğin kapsamı dışında. Bu test her iki ailenin de doğru
+## dokuda kalmasını kilitliyor; biri yanlışlıkla ötekine kayarsa (ya da
+## bir "hepsini minimal yap" refactor'ü sekmeleri de sürüklerse) burada
+## kırılır.
+func _test_default_button_is_minimal(t, theme: Theme) -> void:
+	for type_name in ["Button", "OptionButton", "MenuButton"]:
+		var normal := theme.get_stylebox("normal", type_name)
+		t.ok(normal is StyleBoxFlat, "%s artık G4 dokusu değil, düz kutu" % type_name)
+	var normal := theme.get_stylebox("normal", "Button") as StyleBoxFlat
+	var hover := theme.get_stylebox("hover", "Button") as StyleBoxFlat
+	var pressed := theme.get_stylebox("pressed", "Button") as StyleBoxFlat
+	t.ok(hover.bg_color.a > normal.bg_color.a, "üstüne gelince dolgu artıyor")
+	t.ok(pressed.bg_color.a > hover.bg_color.a, "basılınca dolgu daha da artıyor")
+	t.ok(normal.border_width_left > 0, "minimal düğme yine de bir çerçeve taşıyor")
+	# Kasıtlı olarak G4'te kalan aileler: sekme, sıra düğmesi, HUD simgesi.
+	t.ok(
+		theme.get_stylebox("tab_selected", "TabContainer") is StyleBoxTexture,
+		"sekmeler kasıtlı olarak G4'te kaldı"
+	)
+	var theme_script = load(THEME_PATH)
+	var row := theme.get_stylebox("normal", theme_script.ROW_BUTTON)
+	t.ok(row is StyleBoxTexture, "tam genişlik sıra düğmesi (RowButton) kasıtlı olarak dokulu kaldı")
+	var icon_tab := theme.get_stylebox("normal", theme_script.ICON_TAB)
+	t.ok(icon_tab is StyleBoxTexture, "HUD simge düğmesi (IconTab) kasıtlı olarak dokulu kaldı")

@@ -41,6 +41,13 @@ const CJK_FONTS: Array = [
 ## okunuyor ve aşağı yukarı aynı genişliği kaplıyor.
 const FONT_SIZE: int = 18
 const TOOLTIP_FONT_SIZE: int = 16
+## Savaş panelinin en küçük yazı boyutu. Sıra şeridi, yorum balonu, mevki/
+## isim etiketi ve kayıt satırı 9-12 px'e kadar düşmüştü - EB Garamond'un
+## küçük gözünde okunaksız (CLAUDE.md'nin "Combat micro-fonts" maddesi).
+## Saf sayı taşıyan etiketler (can, durum turu sayacı) `FONT_NUMBER`;
+## geri kalan her küçük savaş metni `FONT_MIN`.
+const FONT_MIN: int = 15
+const FONT_NUMBER: int = 16
 
 ## Ekranların `theme_type_variation` ile seçtiği tema çeşitleri.
 const SEAL_PANEL: StringName = &"SealPanel"
@@ -48,6 +55,14 @@ const SLIP_PANEL: StringName = &"SlipPanel"
 const HUD_BAR: StringName = &"HudBar"
 const PAGE_LABEL: StringName = &"PageLabel"
 const PAGE_HEADING: StringName = &"PageHeading"
+## Ekranın kendi başlığı (üst-sol köşedeki TitleLabel). Sekiz ekran bunu
+## sahne dosyasında elle 24 px'e sabitlemişti, geri kalanı (Market, World
+## Map, Caravan Planner, City Map, Character Creation) varsayılan 18 px'te
+## kalmıştı - gövde metniyle aynı boyda okunuyordu. `PAGE_HEADING`'in
+## kırmızısı sayfa içeriği için (bkz. yukarısı); başlık desk zemininde
+## duruyor, o yüzden Label'ın kendi UI_TEXT/gölge çiftini koruyor.
+const PAGE_TITLE: StringName = &"PageTitle"
+const PAGE_TITLE_FONT_SIZE: int = 24
 ## Tam genişlikte duran düğmeler (ekranın asıl eylem sıraları, geri tuşu):
 ## sekmenin kulağı ve dikişi 1000 pikselde çizgili bir şeride dönüyordu;
 ## bu sıralar ciltli çerçevenin (G2) küçültülmüş dokuz parçası.
@@ -63,6 +78,10 @@ const CELL_PANEL: StringName = &"CellPanel"
 ## Dolgu yerine ince bir çerçeve çiziyor; hover/basılıyken dolgu belirir.
 const HUD_GHOST_BUTTON: StringName = &"HudGhostButton"
 
+## "1x", "–", "+" gibi 1-2 karakterlik yol HUD düğmeleri için - aynı G4
+## dokusu, yalnızca simetrik dolgu (bkz. ICON_TAB_CONTENT).
+const ICON_TAB: StringName = &"IconTab"
+
 ## Dokuz parça geometrisi, doku pikseli cinsinden, işlenmiş PNG'ler
 ## üstünde ölçüldü (tools/waybook_assets.py boyutları basıyor). Her pay köşe
 ## süsünü bütünüyle içermeli, yoksa esneme onu bulaştırır.
@@ -75,6 +94,10 @@ const SEAL_CONTENT: int = 60
 ## Sekmenin sol ucu kıvrık bir kulak, o yüzden sol pay daha geniş.
 const TAB_SLICE: Array[int] = [40, 14, 24, 14]
 const TAB_CONTENT: Array[int] = [34, 16, 20, 16]
+## "1x"/"–"/"+" gibi 1-2 karakterlik simge düğmeleri kulağın asimetrisini
+## taşıyamıyor - metin kutunun merkezinden 7px sağa kayıyordu (34/20 payı
+## dengesiz). Aynı toplam dolguyu ([54, 32]) simetrik dağıtıyor.
+const ICON_TAB_CONTENT: Array[int] = [27, 16, 27, 16]
 const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
 const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
 ## Kayışın yuvarlak uçları döşenirken her parçada tekrar etmesin diye
@@ -324,14 +347,32 @@ static func fit_desk_workspace(root: Control) -> void:
 	if margin == null or scrim == null:
 		return
 	scrim.color = Color(ArtPalette.INK, WORKSPACE_SIDE_SCRIM_ALPHA)
-	var band := Panel.new()
+	# `StyleBoxFlat.shadow_*` düz bir `Panel`de kenarları yumuşatmıyordu -
+	# gölge rengi dolgu rengiyle birebir aynı olduğu için (ikisi de aynı
+	# alfa) düz kutunun keskin kenarıyla gölgenin bulanıklığı görsel olarak
+	# ayırt edilemiyordu, iki dikey çizgi gibi okunuyordu (ölçüldü). Gerçek
+	# bir alfa rampası için `GradientTexture2D` kullanılıyor: 0 → hedef →
+	# hedef → 0, `WORKSPACE_BAND_FEATHER`lik rampalarla.
+	var gradient := Gradient.new()
+	gradient.colors = PackedColorArray([
+		Color(ArtPalette.INK, 0.0), Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA),
+		Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA), Color(ArtPalette.INK, 0.0),
+	])
+	gradient.offsets = PackedFloat32Array([0.0, 0.1, 0.9, 1.0])
+	var gradient_texture := GradientTexture2D.new()
+	gradient_texture.gradient = gradient
+	gradient_texture.fill = GradientTexture2D.FILL_LINEAR
+	gradient_texture.fill_from = Vector2(0.0, 0.5)
+	gradient_texture.fill_to = Vector2(1.0, 0.5)
+	gradient_texture.width = 512
+	gradient_texture.height = 8
+
+	var band := TextureRect.new()
 	band.name = "WorkspaceBand"
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
-	style.shadow_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
-	style.shadow_size = WORKSPACE_BAND_FEATHER
-	band.add_theme_stylebox_override("panel", style)
+	band.texture = gradient_texture
+	band.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	band.stretch_mode = TextureRect.STRETCH_SCALE
 	root.add_child(band)
 	root.move_child(band, margin.get_index())
 	# Bant dar ekranda da kalıyor: tam genişlikte soluk çadır bezi yine
@@ -340,8 +381,15 @@ static func fit_desk_workspace(root: Control) -> void:
 		var side := workspace_side_margin(root.size.x, _workspace_content_min(margin))
 		margin.add_theme_constant_override("margin_left", side)
 		margin.add_theme_constant_override("margin_right", side)
+		var band_width := maxf(1.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN))
 		band.position = Vector2(side - WORKSPACE_EDGE_MARGIN, 0.0)
-		band.size = Vector2(maxf(0.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN)), root.size.y)
+		band.size = Vector2(band_width, root.size.y)
+		# Rampa genişliği (56px) bant genişliğine göre bir oran - bant
+		# yeniden boyutlanınca gradyanın kendi 0..1 uzayındaki karşılığı
+		# da yeniden hesaplanıyor, yoksa geniş bir bantta rampa görünmez
+		# kadar dar, dar bir bantta neredeyse tüm bandı yerdi.
+		var feather_ratio := clampf(float(WORKSPACE_BAND_FEATHER) / band_width, 0.0, 0.5)
+		gradient.offsets = PackedFloat32Array([0.0, feather_ratio, 1.0 - feather_ratio, 1.0])
 	root.resized.connect(apply)
 	# Satırlar _ready'den sonra da kuruluyor; içerik büyüyünce sütun genişler.
 	for scroll in margin.find_children("*", "ScrollContainer", true, false):
@@ -377,14 +425,47 @@ static func _slip() -> StyleBoxTexture:
 ## Engine Rules: *sebebiyle* kilitli, asla gizli değil). Bir süre üstüne
 ## defterin karalama işareti de biniyordu; oyuncu testinde güzel
 ## görünmediği için kaldırıldı - silik olmak yetiyor.
-static func _tab(tint: Color) -> StyleBoxTexture:
+##
+## **Yalnızca `TabContainer`in kendi sekmelerinde ve `ROW_BUTTON`/
+## `ICON_TAB`'ın taşıdığı ayrı dokularda kalıyor** - oyuncu G4'ün opak deri
+## dokusunu tüm oyunun varsayılan düğmesi (Pazar/Lonca/Taverna/Kervan
+## Avlusu/Kilise/Karakter/Parti/Dünya Haritası - hemen her ekran) olarak
+## reddetti; emir panelinin zaten kurduğu minimal ilkeyi (`_ghost_button`)
+## referans gösterdi. Bkz. `_minimal_button()`.
+static func _tab(tint: Color, content: Array[int] = TAB_CONTENT) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
 	box.texture = texture("g4_tab.png")
 	box.modulate_color = tint
-	_set_margins(box, TAB_SLICE, TAB_CONTENT)
+	_set_margins(box, TAB_SLICE, content)
 	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
 	# düğmede yatay çizgilere dönüşüyordu.
 	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return box
+
+## Oyunun varsayılan düğmesi: çerçeve + hafif dolgu, `_ghost_button()`
+## (emir paneli) ile aynı ilke - opak bir doku değil, iki çizgi ve bir ton
+## farkı. `_ghost_button()`'ın kendisi camsı bir HUD şeridinin üstü için
+## ayarlı (mürekkep tabanlı, çok düşük alfa); bu düğme çoğu ekranın opak
+## deri panel zemininin (`UI_PANEL_FILL`, kendisi neredeyse mürekkep tonu)
+## üstünde duruyor, o yüzden dolgu mürekkep yerine altın tonundan ısıtılmış
+## - aksi halde iki neredeyse-siyah katman üst üste binip düğme panelinin
+## içinde kaybolurdu (ölçüldü). Köşe yarıçapı ve çerçeve kalınlığı emir
+## panelininkiyle birebir aynı, tek aile iki bağlamda okunsun diye.
+static func _minimal_button(fill_alpha: float, border: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	var gold_dim := ArtPalette.GOLD_DIM
+	box.bg_color = Color(gold_dim.r, gold_dim.g, gold_dim.b, fill_alpha)
+	box.border_color = border
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(3)
+	# Simetrik dolgu: G4'ün kıvrık kulağının asimetrisi (bkz. TAB_CONTENT'in
+	# kendi notu) burada hiç yok, çünkü doku değil düz bir kutu - "1x"/"–"
+	# gibi tek haneli metinler artık ayrı bir ICON_TAB varyasyonuna muhtaç
+	# kalmadan da merkezde duruyor.
+	box.content_margin_left = 16
+	box.content_margin_right = 16
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
 	return box
 
 static func _focus() -> StyleBoxFlat:
@@ -398,11 +479,11 @@ static func _focus() -> StyleBoxFlat:
 
 static func _build_buttons(theme: Theme) -> void:
 	for type_name in ["Button", "OptionButton", "MenuButton"]:
-		theme.set_stylebox("normal", type_name, _tab(Color.WHITE))
-		theme.set_stylebox("hover", type_name, _tab(ArtPalette.UI_TINT_HOVER))
-		theme.set_stylebox("pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
-		theme.set_stylebox("hover_pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
-		theme.set_stylebox("disabled", type_name, _tab(ArtPalette.UI_TINT_DISABLED))
+		theme.set_stylebox("normal", type_name, _minimal_button(0.16, ArtPalette.UI_RULE))
+		theme.set_stylebox("hover", type_name, _minimal_button(0.28, ArtPalette.GOLD_DIM))
+		theme.set_stylebox("pressed", type_name, _minimal_button(0.42, ArtPalette.UI_ACCENT))
+		theme.set_stylebox("hover_pressed", type_name, _minimal_button(0.42, ArtPalette.UI_ACCENT))
+		theme.set_stylebox("disabled", type_name, _minimal_button(0.08, Color(ArtPalette.UI_RULE, 0.3)))
 		theme.set_stylebox("focus", type_name, _focus())
 		theme.set_color("font_color", type_name, ArtPalette.UI_TEXT)
 		theme.set_color("font_hover_color", type_name, ArtPalette.UI_ACCENT)
@@ -415,6 +496,19 @@ static func _build_buttons(theme: Theme) -> void:
 	_build_row_buttons(theme)
 	_build_map_labels(theme)
 	_build_hud_ghost_button(theme)
+	_build_icon_tab(theme)
+
+## "1x"/"–"/"+" gibi yol HUD'unun kısa metinli düğmeleri: aynı G4 dokusu,
+## yalnızca `ICON_TAB_CONTENT`in simetrik dolgusuyla - kulağın asimetrisi
+## (bkz. TAB_CONTENT'in kendi yorumu) bir haneli bir metni merkezden 7px
+## kaydırıyordu.
+static func _build_icon_tab(theme: Theme) -> void:
+	theme.set_type_variation(ICON_TAB, "Button")
+	theme.set_stylebox("normal", ICON_TAB, _tab(Color.WHITE, ICON_TAB_CONTENT))
+	theme.set_stylebox("hover", ICON_TAB, _tab(ArtPalette.UI_TINT_HOVER, ICON_TAB_CONTENT))
+	theme.set_stylebox("pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
+	theme.set_stylebox("hover_pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
+	theme.set_stylebox("disabled", ICON_TAB, _tab(ArtPalette.UI_TINT_DISABLED, ICON_TAB_CONTENT))
 
 ## Çerçeve + dolgusuz zemin, `_tab()`in opak deri dokusunun aksine - bir
 ## cam panelin üstünde okunması gereken tek düğme ailesi. `Button.new()`
@@ -591,6 +685,9 @@ static func _build_labels(theme: Theme) -> void:
 	theme.set_color("font_color", PAGE_LABEL, ArtPalette.UI_TEXT_ON_PAGE)
 	theme.set_color("font_color", PAGE_HEADING, ArtPalette.BLOOD)
 
+	theme.set_type_variation(PAGE_TITLE, "Label")
+	theme.set_font_size("font_size", PAGE_TITLE, PAGE_TITLE_FONT_SIZE)
+
 ## Bir mürekkep işaretinin şeklini (alfa) koruyup rengini paletten verir.
 ## Çarpımsal `modulate` koyu bir mürekkebi açamaz; renk burada yeniden
 ## atanıyor, ama yalnızca işaretin kendisine - deri ve pirinç dokulara asla.
@@ -614,3 +711,75 @@ static func _set_margins(box: StyleBoxTexture, slice: Array[int], content: Array
 	box.content_margin_top = content[1]
 	box.content_margin_right = content[2]
 	box.content_margin_bottom = content[3]
+
+# --- Açılış/kapanış (sahnesiz panellerin ortak devinimi) ---
+## Onboarding, Vagon, Sofra, Savaş Öncesi, Tüccar, Waybook, Kervan Dökümü/
+## Yükü gibi sahnesiz `.new()` panelleri tek karede belirip kayboluyordu -
+## `create_tween` çağıran yalnızca sekiz dosya vardı (bkz. Motion Rules'un
+## "motion has one clock per system" kuralı, burada "presenter" hiç yoktu).
+## Bu iki statik fonksiyon `fit_desk_workspace`'in kurduğu aynı disiplinle
+## çalışıyor: gevşek tipli düğümler alıyor, eksik/uygunsuz girdide sessizce
+## no-op ya da doğrudan tamamlanıyor.
+const PRESENT_BACKDROP_SECONDS: float = 0.18
+const PRESENT_CARD_SECONDS: float = 0.2
+const DISMISS_SECONDS: float = 0.12
+## Kartın açılış ölçeği - `reduce_motion` açıkken hiç uygulanmıyor, yalnızca
+## alfa kalıyor (Motion Rules: azaltılmış hareket süsü kapatır, bilgiyi
+## taşıyanı kapatmaz - burada "az önce açıldı" bilgisini alfa taşıyor).
+const PRESENT_CARD_START_SCALE: float = 0.97
+
+## Bir paneli açılış anında canlandırır. `backdrop` sahibi olmayan gömülü
+## panellerde (bkz. Debt/SaveSlots/CaravanStatus/Haggling/Purification/
+## Recruit - kendi perdeleri yok, ev sahibi ekranınki) `null` geçilir ve
+## yalnızca kart canlanır. `context` yalnızca `reduce_motion`'ı okumak için:
+## `WaybookTheme` durumsuz bir `RefCounted`, ağaçta değil.
+static func present(root: Control, backdrop: CanvasItem, context: Node) -> void:
+	if root == null or not root.is_inside_tree():
+		return
+	var reduce := _reduce_motion(context)
+	root.modulate.a = 0.0
+	if not reduce:
+		root.pivot_offset = root.size * 0.5
+		root.scale = Vector2(PRESENT_CARD_START_SCALE, PRESENT_CARD_START_SCALE)
+	if backdrop != null:
+		backdrop.modulate.a = 0.0
+	var tween := root.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(root, "modulate:a", 1.0, PRESENT_CARD_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if not reduce:
+		tween.tween_property(root, "scale", Vector2.ONE, PRESENT_CARD_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if backdrop != null:
+		tween.tween_property(backdrop, "modulate:a", 1.0, PRESENT_BACKDROP_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+## Kapanışı canlandırıp `on_complete`'i (genelde `dismissed.emit(); queue_free()`)
+## devinim bitince çağırır. Kök ağaçta değilse (zaten serbest bırakılmış,
+## ya da hiç sahnelenmemiş) devinim atlanıp `on_complete` hemen çağrılır -
+## bir tween'in var olmayan bir düğümde çalışmaya çalışması yerine.
+static func dismiss(root: Control, backdrop: CanvasItem, context: Node, on_complete: Callable) -> void:
+	if root == null or not root.is_inside_tree():
+		on_complete.call()
+		return
+	var reduce := _reduce_motion(context)
+	var tween := root.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(root, "modulate:a", 0.0, DISMISS_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if not reduce:
+		tween.tween_property(root, "scale", Vector2(PRESENT_CARD_START_SCALE, PRESENT_CARD_START_SCALE), DISMISS_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if backdrop != null:
+		tween.tween_property(backdrop, "modulate:a", 0.0, DISMISS_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(on_complete)
+
+## `combat_panel.gd`/`button_feedback.gd`'nin zaten kurduğu korumalı okuma -
+## `WaybookTheme`'in kendisi bir düğüm değil, `context`'in ağaçta olup
+## olmadığını önce sormak gerekiyor.
+static func _reduce_motion(context: Node) -> bool:
+	if context == null or not context.is_inside_tree():
+		return false
+	var settings := context.get_node_or_null("/root/UserSettings")
+	return settings != null and bool(settings.get("reduce_motion"))

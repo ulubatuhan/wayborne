@@ -11,7 +11,6 @@ extends VBoxContainer
 signal party_changed()
 
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
-const LOCKED_COLOR: Color = Color(0.65, 0.6, 0.55)
 const MOVE_BUTTON_SIZE: float = 34.0
 
 var _session: GameSession
@@ -29,6 +28,10 @@ func setup(session: GameSession, venue: String, title: String) -> void:
 	_venue = venue
 	_title_label.text = title
 	refresh()
+	# Kendi perdesi yok - salt gövde, `recruit.tscn`'in kalıcı içeriği.
+	# `refresh()` tek başına de tekrar tekrar çağrıldığı için (aday
+	# alma/çıkarma) devinim yalnızca ilk kuruluşta, burada.
+	WaybookTheme.present(self, null, self)
 
 func refresh() -> void:
 	if _session == null:
@@ -138,18 +141,20 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	row.add_child(label)
 
 	var hire_button := Button.new()
-	# Kilitli seçenek gizlenmez, sebebiyle gösterilir.
+	# Kilitli seçenek gizlenmez, sebebiyle gösterilir - ve o sebep okunabilir
+	# kalmalı. `disabled = true` zaten temanın kendi kontrastı ölçülmüş
+	# soluklaştırmasını (font_disabled_color) tetikliyor; üstüne bir de
+	# `modulate` ile karartmak metni ~2.8:1'e düşürüyordu (WCAG AA'nın
+	# altında) - bir düğmenin dokusunu *ve* yazısını birlikte çarpıyor.
 	if not _session.can_recruit():
 		if _session.get_party_capacity() < GameSession.MAX_PARTY_SIZE:
 			hire_button.text = tr("UI_RECRUIT_NO_WAGON_ROOM")
 		else:
 			hire_button.text = tr("UI_RECRUIT_PARTY_FULL")
 		hire_button.disabled = true
-		hire_button.modulate = LOCKED_COLOR
 	elif not _session.wallet.can_afford(candidate.hire_cost):
 		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
 		hire_button.disabled = true
-		hire_button.modulate = LOCKED_COLOR
 	else:
 		hire_button.text = tr("UI_RECRUIT_HIRE")
 		hire_button.pressed.connect(_on_hire_pressed.bind(candidate))

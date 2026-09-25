@@ -10,7 +10,6 @@ extends Control
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
 const HURT_COLOR: Color = Color(0.9, 0.55, 0.45)
-const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 ## Sıralama tuşları kare: içlerindeki ikon çizim, metin değil, o yüzden
 ## genişliği metin belirlemiyor - kendi yerini istemesi gerekiyor.
 const MOVE_BUTTON_SIZE: float = 34.0
@@ -54,7 +53,6 @@ func _refresh() -> void:
 ## cevabı yalnızca şu an yanında yürüyenler değil - buraya kadar kimlerle
 ## geldiğin de o cevabın parçası.
 const LEDGER_RECENT_LIMIT: int = 8
-const STRUCK_COLOR: Color = Color(0.55, 0.52, 0.55)
 
 func _build_ledger() -> VBoxContainer:
 	var box := VBoxContainer.new()
@@ -95,8 +93,13 @@ func _build_ledger() -> VBoxContainer:
 		# yanında yürüyen biri değil (Waybook'un mürekkep darbesi, bkz.
 		# StruckLine - soy defteriyle aynı çizgi).
 		if _session.ledger.is_struck(entry):
+			# `modulate` düğüm bazında çarpıyor - metni 3.9:1'e, mürekkep
+			# darbesini de gereksiz yere karartıyordu. Yalnızca yazının
+			# kendi rengi soluklaşıyor artık (UI_TEXT_DIM, panelde 6.36:1) -
+			# darbe kendi tonunda kalıyor, üstü çizili olmak zaten kaybın
+			# işareti.
 			var struck := StruckLine.new().setup(text, false)
-			struck.modulate = STRUCK_COLOR
+			struck.label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_DIM)
 			box.add_child(struck)
 			continue
 		var line := Label.new()
@@ -139,7 +142,10 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	if character.is_player:
 		var you_label := Label.new()
 		you_label.text = tr("UI_PARTY_YOU")
-		you_label.modulate = LOCKED_COLOR
+		# `modulate` etiketin yazısını gereğinden fazla karartıyordu (bkz.
+		# üstü çizili satırın aynı düzeltmesi) - yalnızca yazının kendi
+		# rengi soluklaşıyor artık.
+		you_label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_DIM)
 		header.add_child(you_label)
 	else:
 		var dismiss_button := Button.new()
@@ -228,7 +234,9 @@ func _build_skill_label(skill: CombatSkill, position: int) -> Label:
 	label.text = "  • %s (%s)" % [skill.display_name, skill.get_position_summary()]
 	if not skill.can_use_from(position):
 		label.text += tr("UI_COMBAT_BAD_POSITION")
-		label.modulate = LOCKED_COLOR
+		# `modulate` metnin tamamını karartıyordu; yalnızca yazının rengi
+		# soluklaşıyor artık (üstteki iki düzeltmeyle aynı WCAG kuralı).
+		label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_DIM)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	return label
 

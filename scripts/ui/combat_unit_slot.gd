@@ -90,7 +90,7 @@ func _init() -> void:
 	# gizli kalır (bkz. CombatPanel._apply_pending_bark).
 	_bark_label = Label.new()
 	_bark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_bark_label.add_theme_font_size_override("font_size", 11)
+	_bark_label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	_bark_label.modulate = Color(0.95, 0.88, 0.55)
 	_bark_label.visible = false
 	column.add_child(_bark_label)
@@ -104,7 +104,7 @@ func _init() -> void:
 	rank_row.add_child(_emblem)
 	_rank_label = Label.new()
 	_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_rank_label.add_theme_font_size_override("font_size", 12)
+	_rank_label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	_rank_label.modulate = ArtPalette.UI_TEXT_DIM
 	rank_row.add_child(_rank_label)
 
@@ -115,7 +115,7 @@ func _init() -> void:
 
 	_name_label = Label.new()
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.add_theme_font_size_override("font_size", 12)
+	_name_label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	_name_label.clip_text = true
 	column.add_child(_name_label)
 
@@ -144,7 +144,7 @@ func _init() -> void:
 
 	_hp_label = Label.new()
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hp_label.add_theme_font_size_override("font_size", 10)
+	_hp_label.add_theme_font_size_override("font_size", WaybookTheme.FONT_NUMBER)
 	column.add_child(_hp_label)
 
 	_status_row = HBoxContainer.new()
@@ -180,8 +180,16 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	add_theme_stylebox_override("panel", _door_frame if bound_unit.on_deaths_door else _frame)
 	queue_redraw()
 	var emblem_file := String(WaybookIcons.CLASS_EMBLEMS.get(bound_unit.figure_kind, "")) if bound_unit.is_player_side else ""
-	_emblem.visible = emblem_file != ""
-	if _emblem.visible:
+	# `visible = false` bir Container'da düğümü yerleşimden tamamen
+	# çıkarıyor - düşman kartları hiç sınıf amblemi taşımadığı için
+	# `rank_row`'ları oyuncu kartlarınınkinden birkaç piksel kısa kalıyor,
+	# altındaki figür/isim/can bloğu her iki safta farklı yükseklikte
+	# başlıyordu (ölçülen belirti: düşman kareleri oyuncu karelerinden
+	# hizasız duruyor). Amblem artık her zaman görünür, yalnızca boşken
+	# saydam - CLAUDE.md'nin "Title Screen Rules"ta zaten kaydettiği
+	# `visible=false` / `modulate:a=0` ayrımının aynısı.
+	_emblem.modulate.a = 1.0 if emblem_file != "" else 0.0
+	if emblem_file != "":
 		_emblem.texture = WaybookTheme.texture(emblem_file)
 	_refresh_status(bound_unit)
 
@@ -301,14 +309,14 @@ func _add_status_icon(file_name: String, count: String, tooltip: String) -> void
 	if count != "":
 		var label := Label.new()
 		label.text = count
-		label.add_theme_font_size_override("font_size", 11)
+		label.add_theme_font_size_override("font_size", WaybookTheme.FONT_NUMBER)
 		holder.add_child(label)
 	_status_row.add_child(holder)
 
 func _add_badge(text: String, color: Color) -> void:
 	var badge := Label.new()
 	badge.text = text
-	badge.add_theme_font_size_override("font_size", 10)
+	badge.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	badge.modulate = color
 	_status_row.add_child(badge)
 

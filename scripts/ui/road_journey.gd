@@ -588,16 +588,24 @@ func _build_top_bar() -> PanelContainer:
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
 	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
 	_speed_button = Button.new()
+	_speed_button.theme_type_variation = WaybookTheme.ICON_TAB
 	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
 	row.add_child(_speed_button)
 
 	for step in [-1, 1]:
 		var zoom_button := Button.new()
-		zoom_button.text = "–" if step < 0 else "+"
+		zoom_button.theme_type_variation = WaybookTheme.ICON_TAB
 		zoom_button.tooltip_text = tr("UI_ROAD_ZOOM_OUT" if step < 0 else "UI_ROAD_ZOOM_IN")
 		zoom_button.pressed.connect(_step_zoom.bind(step))
 		row.add_child(zoom_button)
+		# "–"/"+" font glyph'i değil çizim: kulağın simetrik ICON_TAB'ı bile
+		# tek bir karakterin fontun kendi metrik boşluğuyla ortalanmamasını
+		# düzeltmiyor - UiIcon aynı chevron/check diliyle tam merkezde çiziyor.
+		var zoom_icon := UiIcon.new()
+		zoom_icon.setup(UiIcon.Kind.MINUS if step < 0 else UiIcon.Kind.PLUS, ArtPalette.UI_TEXT)
+		zoom_button.add_child(zoom_icon)
+		zoom_icon.fill_parent()
 
 	_progress_bar = ProgressBar.new()
 	_progress_bar.min_value = 0.0
@@ -606,6 +614,23 @@ func _build_top_bar() -> PanelContainer:
 	_progress_bar.show_percentage = false
 	_progress_bar.custom_minimum_size = Vector2(110.0, 14.0)
 	_progress_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Boyanmamış bir ProgressBar zoom düğmeleriyle koşullar metni arasında
+	# koyu, tanımsız bir boşluk gibi okunuyordu ("dark empty gauge slot") -
+	# HUD'un geri kalanı gibi temalanmadığı sürece bu bir kusurdan farksız.
+	var progress_empty := StyleBoxFlat.new()
+	progress_empty.bg_color = ArtPalette.UI_GAUGE_EMPTY
+	progress_empty.corner_radius_top_left = 3
+	progress_empty.corner_radius_top_right = 3
+	progress_empty.corner_radius_bottom_left = 3
+	progress_empty.corner_radius_bottom_right = 3
+	var progress_fill := StyleBoxFlat.new()
+	progress_fill.bg_color = ArtPalette.UI_GAUGE_JOURNEY
+	progress_fill.corner_radius_top_left = 3
+	progress_fill.corner_radius_top_right = 3
+	progress_fill.corner_radius_bottom_left = 3
+	progress_fill.corner_radius_bottom_right = 3
+	_progress_bar.add_theme_stylebox_override("background", progress_empty)
+	_progress_bar.add_theme_stylebox_override("fill", progress_fill)
 	row.add_child(_progress_bar)
 
 	# Arazi, hava ve tempo. Hava yalnızca görsel değil (yolu yavaşlatıyor,
@@ -613,7 +638,6 @@ func _build_top_bar() -> PanelContainer:
 	# görünmeyen bir ceza oyuncu için hatadan ayırt edilemez.
 	_conditions_label = Label.new()
 	_conditions_label.modulate = ArtPalette.UI_HUD_NOTE
-	_conditions_label.clip_text = true
 	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
 	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
 	# Takat çubuğu eklenince üst şerit taştı ve kervan sayıları
@@ -624,6 +648,10 @@ func _build_top_bar() -> PanelContainer:
 	# asgari genişliğini 1582'ye çıkarıp HUD'u ekranın iki yanından
 	# taşırıyordu - alt şerit de aynı sütunda olduğu için o da kırpılıyordu.
 	# Koşul satırı artık kervan sayılarıyla kalan yeri paylaşıyor.
+	# `clip_text` harfi ortadan kesiyordu ("...Weather: Clear · P") - alt
+	# şeridin `_walk_hint`/`_last_log_label`'ında bulunan aynı düzeltme:
+	# elips + tam metni tooltip'e taşımak.
+	_conditions_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_conditions_label.custom_minimum_size = Vector2(150.0, 0.0)
 	_conditions_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_conditions_label)
@@ -648,11 +676,21 @@ func _build_top_bar() -> PanelContainer:
 
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
-	# bir döküm HUD'u yeniden metin duvarına çeviriyordu.
+	# bir döküm HUD'u yeniden metin duvarına çeviriyordu. `clip_text` ise
+	# harfi ortadan kesiyordu ("Wagons: 1 (0...") - aynı elips + tooltip
+	# düzeltmesi. Font da 12 px'ten (EB Garamond'un küçük gözü için okunaksız)
+	# güvenlik tabanı 15 px'e çıktı.
+	# Bu satır (altı sayı: altın/erzak/itibar/vagon/tüccar/evrak) komşu koşul
+	# etiketinden çok daha uzun metin taşıyor ("Terrain...Pace" ~50 karakter,
+	# bu satır ~95); eşit 50/50 pay bölüşümü onu neredeyse hep elipse
+	# düşürüyordu. Asgari genişlik ve payı komşusundan büyük - HFlowContainer
+	# geri kalan alanı stretch oranına göre bölüştürüyor.
 	_state_label = Label.new()
 	_state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_state_label.clip_text = true
-	_state_label.add_theme_font_size_override("font_size", 12)
+	_state_label.size_flags_stretch_ratio = 1.6
+	_state_label.custom_minimum_size = Vector2(300.0, 0.0)
+	_state_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_state_label.add_theme_font_size_override("font_size", 15)
 	row.add_child(_state_label)
 
 	# Geliştirici kutusu (tohum + sıfırla) yalnızca F1 sentetik seferinde
@@ -1911,6 +1949,7 @@ func _refresh_time_ui() -> void:
 	var progress := _get_route_progress()
 	_band.set_route_progress(progress, _days_covered)
 	_progress_bar.value = progress
+	_progress_bar.tooltip_text = tr("UI_ROAD_PROGRESS_TOOLTIP") % int(round(progress * 100.0))
 	_position_encounter()
 
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
@@ -1999,6 +2038,7 @@ func _refresh_conditions() -> void:
 		return
 	_last_conditions = text
 	_conditions_label.text = text
+	_conditions_label.tooltip_text = text
 
 ## Oyuncunun ne yaptığını ve neyi yapmadığını tek satırda söyler: duran
 ## kervan "bekliyor" değil, *yol almıyor* - ve bunu görmezse oyuncu ekranın
@@ -2272,8 +2312,9 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		button.disabled = true
 		if choice.is_near_miss(context):
 			button.add_theme_color_override("font_disabled_color", ArtPalette.UI_ACCENT)
-		else:
-			button.modulate = LOCKED_COLOR
+		# "Çok uzak" durumda `modulate` uygulanmıyor artık: düğmenin dokusunu
+		# ve yazısını birlikte karartıp sebebi okunaksız kılıyordu (~2.8:1);
+		# `disabled = true` temanın kendi ölçülmüş kontrastını zaten sağlıyor.
 
 	_mark_choice(button, choice)
 	return button
@@ -2400,9 +2441,10 @@ func _open_recruit_offer() -> void:
 		hire_button.text = tr("UI_ROAD_RECRUIT_ACCEPT") % candidate.hire_cost
 		hire_button.pressed.connect(_on_road_recruit_accepted.bind(candidate))
 	else:
+		# `modulate` yazıyı da karartıp sebebi okunaksız kılıyordu;
+		# `disabled = true` temanın kendi ölçülmüş kontrastını sağlıyor.
 		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
 		hire_button.disabled = true
-		hire_button.modulate = LOCKED_COLOR
 	_recruit_holder.add_child(hire_button)
 
 	var decline_button := Button.new()
@@ -3104,6 +3146,7 @@ func _refresh_state() -> void:
 		caravan.merchant_names.size(),
 		caravan.documents,
 	]
+	_state_label.tooltip_text = _state_label.text
 
 ## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
 ## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.

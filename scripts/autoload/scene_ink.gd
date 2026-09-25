@@ -78,15 +78,27 @@ static func transition_kind(move: String, reduce_motion: bool = false) -> Kind:
 func go(path: String) -> void:
 	var kind := transition_kind(String(load(NAV_PATH).last_move), _reduce_motion())
 	var snapshot := _capture()
+	if snapshot != null:
+		# Sayfa hemen görünür oluyor - aşağıdaki bekleme boyunca ekranda
+		# duran şey bu kare, yeni sahnenin henüz bitmemiş inşası değil.
+		_show_snapshot(snapshot)
 	var error := get_tree().change_scene_to_file(path)
 	if error != OK:
+		_hide_page()
 		return
 	_handled_change = true
 	if snapshot == null:
 		# Resim alınamadıysa (başsız sürücü) eski davranış: mürekkepten belir.
 		_handled_change = false
 		return
-	_play(kind, snapshot)
+	# Ağır sahnelerin `_ready()` inşası bu karelerde oluyor (ölçülen: yol
+	# 413-532ms, şehir 177-252ms) - tween'i hemen başlatmak ilk karelerini
+	# bu inşaya kaybediyordu, sayfa 3 karede 1280px atlayarak "kesiyordu".
+	# Sayfa `_show_snapshot`'ın bıraktığı yerde (x=0, tam görünür) durur;
+	# yeni sahne iki kare işlendikten sonra devinim gerçekten başlar.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_animate(kind, snapshot)
 
 func _reduce_motion() -> bool:
 	var settings := get_node_or_null("/root/UserSettings")
@@ -105,7 +117,10 @@ func _capture() -> ImageTexture:
 		return null
 	return ImageTexture.create_from_image(image)
 
-func _play(kind: Kind, snapshot: ImageTexture) -> void:
+## Eski ekranın son karesini hemen ekrana koyar - devinim henüz başlamaz.
+## `go()` bunu sahne değişiminden *önce* çağırır, ki yeni sahnenin `_ready()`
+## inşası süresince ekranda donuk bir kare değil bu görünsün.
+func _show_snapshot(snapshot: ImageTexture) -> void:
 	_kill_tween()
 	var screen := get_viewport().get_visible_rect().size
 	# Çapa değil doğrudan boyut: CanvasLayer bir Control değil (bkz. Art
@@ -117,6 +132,13 @@ func _play(kind: Kind, snapshot: ImageTexture) -> void:
 	_page.visible = true
 	_ink.size = screen
 	_ink.modulate.a = 0.0
+
+func _animate(kind: Kind, snapshot: ImageTexture) -> void:
+	_kill_tween()
+	var screen := get_viewport().get_visible_rect().size
+	_page.texture = snapshot
+	_page.size = screen
+	_ink.size = screen
 	_tween = create_tween()
 	match kind:
 		Kind.SLIDE_IN, Kind.SLIDE_BACK:

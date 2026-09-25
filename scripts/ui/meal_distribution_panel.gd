@@ -29,6 +29,11 @@ var _mode_buttons: Dictionary = {}  # String -> Button
 var _specific_list: VBoxContainer
 var _bowls: Dictionary = {}  # CharacterData -> TextureRect
 var _crew_bowl: TextureRect
+var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" (`panel`) - `backdrop`in kardeşi, `root`'un torunu değil.
+var _card: PanelContainer
+var _dismissing: bool = false
 
 ## `policy_only`: gece değil, emir ekranı - yemek dağıtılmıyor, yalnızca
 ## kalıcı sofra emri değişiyor (yol ekranındaki "Sofra" düğmesi).
@@ -40,11 +45,13 @@ func setup(session: GameSession, policy_only: bool = false) -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP_COLOR
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -54,6 +61,7 @@ func setup(session: GameSession, policy_only: bool = false) -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
 	center.add_child(panel)
+	_card = panel
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -119,6 +127,7 @@ func setup(session: GameSession, policy_only: bool = false) -> void:
 	for character in _session.get_meal_policy_selected():
 		(_specific_checks[character] as CheckBox).button_pressed = true
 	_select_mode(_session.meal_policy_mode)
+	WaybookTheme.present(_card, _backdrop, self)
 
 func _build_table() -> Control:
 	var table := HFlowContainer.new()
@@ -181,12 +190,22 @@ func _select_mode(mode: String) -> void:
 	_refresh_bowls()
 
 func _on_confirm_pressed() -> void:
+	if _dismissing:
+		return
+	_dismissing = true
 	var selected: Array[CharacterData] = []
 	if _mode == GameSession.MEAL_MODE_SPECIFIC:
 		selected = _checked()
-	confirmed.emit(_mode, selected)
-	queue_free()
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		confirmed.emit(_mode, selected)
+		queue_free()
+	)
 
 func _on_cancel_pressed() -> void:
-	cancelled.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		cancelled.emit()
+		queue_free()
+	)

@@ -24,6 +24,11 @@ var _wagon_index: int = 0
 var _rows: Array[Dictionary] = []
 var _message_label: Label
 var _inventory_list: VBoxContainer
+var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" (`panel`) - `backdrop`in kardeşi, `root`'un torunu değil.
+var _card: PanelContainer
+var _dismissing: bool = false
 
 func setup(session: GameSession, wagon_index: int) -> void:
 	_session = session
@@ -34,11 +39,13 @@ func setup(session: GameSession, wagon_index: int) -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP_COLOR
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -48,6 +55,7 @@ func setup(session: GameSession, wagon_index: int) -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
 	center.add_child(panel)
+	_card = panel
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -94,6 +102,7 @@ func setup(session: GameSession, wagon_index: int) -> void:
 	vbox.add_child(close_button)
 
 	_refresh()
+	WaybookTheme.present(_card, _backdrop, self)
 
 func _build_recipe_row(recipe: CraftingRecipe) -> VBoxContainer:
 	var row := VBoxContainer.new()
@@ -184,5 +193,10 @@ func _on_craft_pressed(recipe: CraftingRecipe) -> void:
 	_refresh()
 
 func _on_close_pressed() -> void:
-	closed.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		closed.emit()
+		queue_free()
+	)

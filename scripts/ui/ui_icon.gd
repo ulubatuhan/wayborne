@@ -25,6 +25,8 @@ enum Kind {
 	CHEVRON_LEFT,
 	CHEVRON_RIGHT,
 	CHECK,
+	PLUS,
+	MINUS,
 }
 
 const DEFAULT_SIZE: float = 12.0
@@ -105,6 +107,10 @@ func _draw() -> void:
 			ArtDraw.chevron(self, centre, _glyph_size * 0.7, _color, 1, true)
 		Kind.CHECK:
 			ArtDraw.check(self, centre, _glyph_size * 0.8, _color)
+		Kind.PLUS:
+			ArtDraw.plus_minus(self, centre, _glyph_size * 0.7, _color, true)
+		Kind.MINUS:
+			ArtDraw.plus_minus(self, centre, _glyph_size * 0.7, _color, false)
 
 func _draw_pips() -> void:
 	var radius := _glyph_size * 0.3

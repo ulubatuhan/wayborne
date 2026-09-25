@@ -43,7 +43,9 @@ const SEAL_CRACKED_FILE: String = "g9b_seal_cracked.png"
 const ROW_SEAL_SIZE: float = 30.0
 const SEAL_SIZE: float = 56.0
 
-const OVERDUE_COLOR: Color = Color(0.9, 0.45, 0.35)
+## Planlayıcının uyarı turuncusuyla aynı rol - ArtPalette.UI_WARNING (bkz.
+## onun kendi yorumu, aynı 2.4-3.7:1'e düşen `.modulate` hatası buradaydı).
+const OVERDUE_COLOR: Color = ArtPalette.UI_WARNING
 const DUE_SOON_COLOR: Color = Color(0.9, 0.8, 0.4)
 const SETTLED_COLOR: Color = Color(0.45, 0.8, 0.45)
 
@@ -78,6 +80,11 @@ func setup(session: GameSession) -> void:
 	_session = session
 	_ensure_built()
 	refresh()
+	# Kendi perdesi yok (bkz. sınıf yorumu) - yalnızca kart canlanıyor,
+	# `backdrop` argümanı `null`. Ev sahibi ekran (guild.tscn'in sabit
+	# sekmesi ya da road_journey.gd'nin modal kartı) her ikisinde de aynı
+	# giriş: tek karede beliren panel artık soluk+ölçekli açılıyor.
+	WaybookTheme.present(self, null, self)
 
 func _ensure_built() -> void:
 	if _title_label != null:
@@ -164,11 +171,13 @@ func refresh() -> void:
 	var total := _session.get_total_debt()
 	if total <= 0:
 		_summary_label.text = tr("UI_DEBT_NONE")
-		_summary_label.modulate = SETTLED_COLOR
+		# `.modulate` zaten çözülmüş font_color'ı bir kez daha çarpıyordu
+		# (planlayıcıdaki aynı hata) - yalnızca yazının rengi değişiyor artık.
+		_summary_label.add_theme_color_override("font_color", SETTLED_COLOR)
 		return
 
 	var soonest := _session.debts.get_soonest_due_in_days(_session.total_days_elapsed)
-	_summary_label.modulate = Color.WHITE
+	_summary_label.remove_theme_color_override("font_color")
 	_summary_label.text = tr("UI_DEBT_SUMMARY") % [total, maxi(0, soonest)]
 
 	for debt in _session.debts.get_debts():
@@ -251,7 +260,9 @@ func _build_row(debt: Debt) -> HBoxContainer:
 		label.text = tr("UI_DEBT_ROW_OVERDUE") % [creditor, debt.principal, -days_left]
 	else:
 		label.text = tr("UI_DEBT_ROW") % [creditor, debt.principal, days_left]
-	label.modulate = _severity_color(days_left, overdue)
+	# Aynı hata, aynı düzeltme: yazının rengi doğrudan, `.modulate` üstünden
+	# değil - font_color'ı ikinci kez çarpmasın diye.
+	label.add_theme_color_override("font_color", _severity_color(days_left, overdue))
 	label.custom_minimum_size = Vector2(340, 0)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	row.add_child(label)

@@ -71,6 +71,9 @@ func start_haggling(
 	_clear_log()
 	_add_log_entry(tr("UI_HAGGLE_OPENING") % _session.p_start)
 	_add_log_entry(tr("UI_HAGGLE_RULES") % HagglingSession.MAX_ROUNDS)
+	# Kendi perdesi yok - salt gövde. Ağaca eklenmeden çağrılabildiği için
+	# (bkz. üstteki yorum) `present` ağaçta değilse sessizce no-op kalır.
+	WaybookTheme.present(self, null, self)
 
 func _ensure_built() -> void:
 	if _built:

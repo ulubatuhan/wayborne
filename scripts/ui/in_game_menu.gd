@@ -34,10 +34,17 @@ const PANEL_WIDTH: float = 520.0
 
 var _can_save: bool = true
 var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" (`panel`) - `backdrop`in kardeşi, `root`'un torunu değil
+## (bkz. OnboardingPanel'in aynı yorumu): yalnızca bu ölçekleniyor/soluyor.
+var _card: PanelContainer
 var _menu_page: VBoxContainer
 var _saves_page: VBoxContainer
 var _saves_panel: SaveSlotsPanel
 var _confirm_dialog: ConfirmationDialog
+## Kapanış üç yoldan (tuş/perde/Esc) tetiklenebiliyor - devinim sürerken
+## ikincisi ikinci bir tween başlatıp `dismissed`i iki kez yaymasın diye.
+var _dismissing: bool = false
 
 func setup(can_save: bool) -> void:
 	_can_save = can_save
@@ -52,11 +59,11 @@ func _build() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_root)
 
-	var backdrop := ColorRect.new()
-	backdrop.color = BACKDROP_COLOR
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backdrop.gui_input.connect(_on_backdrop_input)
-	_root.add_child(backdrop)
+	_backdrop = ColorRect.new()
+	_backdrop.color = BACKDROP_COLOR
+	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_backdrop.gui_input.connect(_on_backdrop_input)
+	_root.add_child(_backdrop)
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -66,6 +73,7 @@ func _build() -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
 	center.add_child(panel)
+	_card = panel
 
 	var stack := VBoxContainer.new()
 	stack.add_theme_constant_override("separation", 12)
@@ -86,6 +94,8 @@ func _build() -> void:
 	_saves_page.visible = false
 	stack.add_child(_saves_page)
 	_build_saves_page()
+
+	WaybookTheme.present(_card, _backdrop, self)
 
 func _build_menu_page() -> void:
 	var resume := Button.new()
@@ -148,5 +158,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_dismiss_pressed() -> void:
-	dismissed.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		dismissed.emit()
+		queue_free()
+	)

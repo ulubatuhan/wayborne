@@ -35,6 +35,18 @@ signal dismissed
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.72)
 
+var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" - `panel`'in kendisi, `root` değil. `backdrop` `root`'un
+## çocuğu ama `panel`'in kardeşi (ikisi de `center`/`root` altında ayrı
+## dallar), o yüzden yalnızca `panel`'i ölçekleyip soldurmak `backdrop`'u
+## da birlikte küçültmüyor - ikisi bağımsız devinmeli (bkz. defect
+## matrix'in "backdrop alfa, kart alfa+ölçek ayrı" maddesi).
+var _card: PanelContainer
+## Kapanış üç yoldan (tuş/perde/Esc) tetiklenebiliyor - devinim sürerken
+## ikincisi ikinci bir tween başlatıp `dismissed`i iki kez yaymasın diye.
+var _dismissing: bool = false
+
 ## Genişlik sabit, yükseklik **kaydırma alanının** payına bırakılmış:
 ## `ScrollContainer`'ın asgari boyu içeriğini saymaz (kaydırmanın anlamı
 ## bu), o yüzden panelin toplam boyu başlık + bu + tuş kadar kalır ve
@@ -69,12 +81,14 @@ func _build() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP_COLOR
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.gui_input.connect(_on_backdrop_input)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -87,6 +101,7 @@ func _build() -> void:
 	# arasından okunuyordu. Opaklık artık WaybookTheme'in cilt panelinden
 	# geliyor (iç zemin ArtPalette.UI_PANEL_FILL) - ekranın kendi kutusu yok.
 	center.add_child(panel)
+	_card = panel
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 12)
@@ -128,6 +143,8 @@ func _build() -> void:
 	dismiss_button.pressed.connect(_on_dismiss_pressed)
 	vbox.add_child(dismiss_button)
 
+	WaybookTheme.present(_card, _backdrop, self)
+
 ## Perdeye tıklamak da kapatır: oyuncunun ilk refleksi kenara tıklamak
 ## oluyor ve hiçbir şey olmaması ekranı kilitlenmiş gösteriyordu.
 func _on_backdrop_input(event: InputEvent) -> void:
@@ -140,5 +157,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_dismiss_pressed() -> void:
-	dismissed.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		dismissed.emit()
+		queue_free()
+	)

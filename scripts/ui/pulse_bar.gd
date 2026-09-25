@@ -12,8 +12,10 @@ const FADE_DELAY: float = 2.5
 const FADE_DURATION: float = 1.2
 ## Ölçüldü: yol HUD'una dördüncü çubuk (takat) eklenince 150'lik metin
 ## çubukları üst şeridi taşırmıştı. Şişe hâlinde adı ikon ve ipucu taşıyor,
-## yalnızca sayı yazılı kalıyor - ikon + şişe + sayı 148'e sığıyor.
-const BAR_SIZE: Vector2 = Vector2(148, 22)
+## yalnızca sayı yazılı kalıyor - ikon + şişe + sayı 154'e sığıyor (rakam
+## fontu 14'ten 16'ya çıkınca 6 px'lik pay eklendi, `VALUE_WIDTH`'in
+## kendisiyle birlikte).
+const BAR_SIZE: Vector2 = Vector2(154, 22)
 
 var _value: float = 0.0
 var _max_value: float = 100.0
@@ -25,7 +27,7 @@ var _has_value: bool = false
 const VIAL_FILE: String = "r4_vial.png"
 const ICON_SIZE: float = 20.0
 const VIAL_SIZE: Vector2 = Vector2(96.0, 12.0)
-const VALUE_WIDTH: float = 26.0
+const VALUE_WIDTH: float = 32.0
 const VIAL_LIQUID: Rect2 = Rect2(0.10, 0.24, 0.80, 0.52)
 const MARKER_WIDTH: float = 2.0
 
@@ -108,7 +110,7 @@ func _ensure_built() -> void:
 	_label.position = Vector2(vial_origin.x + VIAL_SIZE.x + 3.0, 0.0)
 	_label.size = Vector2(VALUE_WIDTH, BAR_SIZE.y)
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_label.add_theme_font_size_override("font_size", 14)
+	_label.add_theme_font_size_override("font_size", 16)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_label)
 

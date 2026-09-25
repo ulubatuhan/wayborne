@@ -22,7 +22,6 @@ extends VBoxContainer
 ## çıkarma ve liderliğin devri oturumun işi, ekranın değil.
 signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bool, int, int, Array[CharacterData]
 
-const LOCKED_COLOR: Color = Color(0.6, 0.6, 0.6)
 const MAX_LOG_LINES: int = 40
 ## Yorum balonu ne kadar sürsün. Slotlar her `_refresh()`'te yeniden
 ## kuruluyor (bkz. `_refresh_side`), o yüzden balon bir Tween'le değil
@@ -289,12 +288,39 @@ func _build_action_area() -> void:
 	add_child(_continue_button)
 
 func _build_log() -> void:
+	# Sahne sabit yükseklikte (STAGE_HEIGHT), yetenek düğmeleri de kendi
+	# içeriği kadar - altlarında ekranın neredeyse yarısı boş siyah
+	# kalıyordu (ölçüldü: 1920x1080'de ~45%). ScrollContainer'ın kendi
+	# hiç çizilen zemini olmadığı için yalnızca `size_flags_vertical`
+	# büyütmek görsel olarak hiçbir şeyi değiştirmiyordu - genişleyen alan
+	# hâlâ boş siyah okunuyordu. Kayıt artık HUD_BAR temalı bir panelin
+	# içinde: hem kalan boşluğu dolduruyor hem de "burası kaydın olduğu
+	# yer" diyen görünür bir zemin taşıyor.
+	var log_panel := PanelContainer.new()
+	# HUD_BAR (bkz. WaybookTheme) dünyanın kendi renkli zemini üstünde
+	# okunmak üzere neredeyse siyah boyanmış - savaş sahnesinin zaten
+	# neredeyse siyah arka planında tamamen kayboluyordu. Sahnenin kendi
+	# kart çerçevesiyle (`stage_style`, yukarıda) aynı aileden, biraz
+	# daha açık bir zemin kullanılıyor.
+	var log_style := StyleBoxFlat.new()
+	log_style.bg_color = Color(0.12, 0.11, 0.10, 0.55)
+	log_style.border_color = Color(0.30, 0.25, 0.18, 0.8)
+	log_style.set_border_width_all(1)
+	log_style.content_margin_left = 8
+	log_style.content_margin_right = 8
+	log_style.content_margin_top = 6
+	log_style.content_margin_bottom = 6
+	log_panel.add_theme_stylebox_override("panel", log_style)
+	log_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(log_panel)
+
 	_log_scroll = ScrollContainer.new()
 	_log_scroll.custom_minimum_size = Vector2(0, 96)
+	log_panel.add_child(_log_scroll)
+
 	_log_list = VBoxContainer.new()
 	_log_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_log_scroll.add_child(_log_list)
-	add_child(_log_scroll)
 
 # --- Tazeleme ---
 
@@ -322,7 +348,7 @@ func _refresh_header() -> void:
 func _build_order_chip(unit: CombatUnit, is_active: bool) -> Label:
 	var chip := Label.new()
 	chip.text = unit.display_name
-	chip.add_theme_font_size_override("font_size", 9)
+	chip.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	if is_active:
 		chip.modulate = CombatUnitSlot.ACTIVE_BORDER
 	elif unit.is_player_side:
@@ -650,8 +676,10 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 	if reason.is_empty():
 		button.pressed.connect(_on_skill_pressed.bind(skill))
 	else:
+		# `modulate` düğmenin dokusunu ve yazısını birlikte karartıp sebebi
+		# ~2.8:1'e düşürüyordu; `disabled = true` temanın kendi ölçülmüş
+		# kontrastını (font_disabled_color) zaten sağlıyor.
 		button.disabled = true
-		button.modulate = LOCKED_COLOR
 		button.tooltip_text = "%s\n%s" % [skill.description, reason]
 	card.add_child(button)
 
@@ -731,7 +759,7 @@ func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBo
 
 	var label := Label.new()
 	label.text = prefix
-	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	label.modulate = color
 	row.add_child(label)
 
@@ -800,7 +828,7 @@ func _on_pass_pressed() -> void:
 func _on_log_added(line: String) -> void:
 	var label := Label.new()
 	label.text = line
-	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_log_list.add_child(label)
 	while _log_list.get_child_count() > MAX_LOG_LINES:
