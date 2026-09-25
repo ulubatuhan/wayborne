@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_nine_slice_leaves_a_centre(t, theme)
 	_test_no_screen_builds_its_own_panel(t)
 	_test_fx_colours_live_in_the_palette(t)
+	_test_cold_edge_reads_season_and_biome(t)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
@@ -95,3 +96,16 @@ func _test_fx_colours_live_in_the_palette(t) -> void:
 	var regex := RegEx.new()
 	regex.compile("const FLASH_\\w+\\s*:\\s*Color")
 	t.eq(regex.search(file.get_as_text()), null, "parlama rengi yalnızca ArtPalette'te")
+
+## Don kenarı yalnızca soğukta: yaz bozkırında hiç görünmez, kışın görünür,
+## dağ kışı en koyusu ama tavanı aşmaz.
+func _test_cold_edge_reads_season_and_biome(t) -> void:
+	var road: Script = load("res://scripts/ui/road_journey.gd")
+	t.eq(road.cold_level(false, ArtPalette.BIOME_STEPPE), 0.0, "yaz bozkırında don yok")
+	t.ok(road.cold_level(true, ArtPalette.BIOME_STEPPE) > 0.0, "kışın don var")
+	t.ok(road.cold_level(false, ArtPalette.BIOME_MOUNTAIN) > 0.0, "dağ geçidi kışın dışında da serin")
+	t.ok(
+		road.cold_level(true, ArtPalette.BIOME_MOUNTAIN) > road.cold_level(true, ArtPalette.BIOME_STEPPE),
+		"dağ kışı ovadaki kıştan koyu"
+	)
+	t.le(road.cold_level(true, ArtPalette.BIOME_MOUNTAIN), 1.0, "don tavanı aşmıyor")

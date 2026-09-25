@@ -1365,14 +1365,18 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   card off and ships only the ink as a white mask, coloured from
   `ArtPalette.UI_EDGE_*` - as shipped first, the card's white border and
   pale wash covered the scene. The stress bleed was later repainted as a
-  square white-ink frame; the generator only exports JPG, so its
-  transparency arrives as a *baked* grey checkerboard - `checker_mask()`
-  keys it by luminance (the ink is far brighter than either checker
-  square), and a new JPG from the same tool can go straight into
-  `art_source/waybook/`. Each edge mask carries its own nine-slice
-  geometry (`EDGE_GEOMETRY`); a mask painted as one whole frame (heavy
-  corners, sparse mid-sides) *stretches* its middle, because tiling it
-  drew a hard seam where two copies met.
+  square white-ink frame, and a third edge arrived with it: frost, shown
+  in the cold (`cold_level()` - winter adds most, a mountain pass a
+  little even out of season; a picture only, it moves no number). The
+  generator only exports JPG, so transparency arrives as a *baked* grey
+  checkerboard - `checker_mask()` keys it by luminance (the ink is far
+  brighter than either square) and cuts JPG ringing below
+  `CHECKER_ALPHA_CUTOFF`, so a new JPG from the same tool can go straight
+  into `art_source/waybook/`. Each mask is drawn **whole, stretched over
+  the screen** (`STRETCH_SCALE`): for one round they were nine-sliced so
+  the thickness would not depend on the aspect ratio, and the player
+  rejected it - the masks are painted as whole frames and slicing
+  separated each corner from its sides.
 - **Who eats is one function** (`GameSession.get_meal_fed_party()`/
   `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per
   person plus one for the nameless crew) and the distribution itself
@@ -3682,9 +3686,8 @@ verir.
   Rules). Açık kalanlar: ikon aileleri üslupça tutarsız (bir kısmı
   çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
   kartlı) - aile başına tek üsluba yeniden üretilmeli; yönetim ekranı
-  arka planları 1376x768'de geldi, 1920'de yumuşuyor; G11'in "don" kenarı
-  hiç gelmedi (gelen sayfa mürekkep sızıntısıydı, stres kenarı olarak o
-  kullanılıyor); CJK için kitap yüzüne uygun bir serif yedek font.
+  arka planları 1376x768'de geldi, 1920'de yumuşuyor; CJK için kitap
+  yüzüne uygun bir serif yedek font.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin

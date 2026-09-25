@@ -80,6 +80,16 @@ func _init() -> void:
 	meal.call("_select_mode", GameSession.MEAL_MODE_SELF_ONLY)
 	await _settle()
 	_save("04_yipranmis.png")
+	meal.queue_free()
+
+	# Kış: don kenarı. Stres ve açlık sönük, yalnızca soğuk görünsün.
+	session.change_stress(-100)
+	for character in session.party:
+		character.consecutive_hungry_days = 0
+	session.total_days_elapsed = MarketConditions.SEASON_LENGTH_DAYS * 3 + 2
+	screen.call("_refresh_state")
+	await _settle()
+	_save("05_kis.png")
 
 	quit()
 

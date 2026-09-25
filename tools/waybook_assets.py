@@ -211,20 +211,25 @@ def phase1() -> None:
 ## brightness alone - no backdrop keying, no card to cut off.
 CHECKER_LUMA_FLOOR = 110.0
 CHECKER_LUMA_RANGE = 110.0
+CHECKER_ALPHA_CUTOFF = 10.0
 
 
 def checker_mask(src: str, name: str) -> None:
     rgb = _load(src).astype(np.float32)
     luma = rgb[..., :3].mean(axis=2)
     alpha = np.clip((luma - CHECKER_LUMA_FLOOR) / CHECKER_LUMA_RANGE, 0.0, 1.0) * 255.0
+    # JPG ringing leaves the lighter checker squares a few levels of alpha:
+    # stretched over the screen that faint grid reads as a pattern.
+    alpha[alpha < CHECKER_ALPHA_CUTOFF] = 0.0
     mask = np.dstack([np.full_like(luma, 255.0)] * 3 + [alpha]).astype(np.uint8)
     save(mask, name)
 
 
 def edge_masks() -> None:
-    # Stress edge v2: a square nine-slice sheet (corners dense, edges tileable),
-    # painted for the road's NinePatchRect instead of one 16:9 picture.
+    # Stress bleed and cold frost: square whole-frame sheets, stretched over
+    # the screen as one picture (the player rejected the nine-slice).
     checker_mask("G11a_edge_bleed_v2.jpg", "g11_edge_bleed.png")
+    checker_mask("G11b_edge_frost_v2.jpg", "g11_edge_frost.png")
     for src, name in [("G11c_danger_edge_scorch.jpg", "g11_edge_scorch.png")]:
         rgb = _load(src)
         h, w = rgb.shape[:2]

@@ -81,6 +81,8 @@ const UI_SIGNAL_RESOLVED: Color = Color(0.66, 0.95, 0.58)
 ## mürekkep, açlık kavrulmuş bir kahve.
 const UI_EDGE_STRESS: Color = Color(0.16, 0.04, 0.05)
 const UI_EDGE_HUNGER: Color = Color(0.20, 0.12, 0.05)
+## Don açık renk: buz karanlığa değil, soluk ışığa çalar.
+const UI_EDGE_COLD: Color = Color(0.80, 0.88, 0.95)
 
 # --- Savaş ve yol efektleri (FX) ---
 # Parlama değerleri bir `modulate` çarpanı: 1.0'ın üstü "parlama" demek,
