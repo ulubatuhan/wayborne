@@ -194,6 +194,10 @@ const STRAP_HEIGHT: float = 14.0
 ## Şehre varışta yeni sahne mürekkepte bu kadar bekliyor (bkz. SceneInk).
 const ARRIVAL_INK_HOLD: float = 0.6
 const HUD_ICON_SIZE: float = 24.0
+## Alt şeritteki yürüme ipucu ve son kayıt satırı - ikisi de `clip_text`
+## sayesinde kendi asgari genişliği sıfıra düşen `Label`'lar, bu taban
+## olmadan `HFlowContainer` onları neredeyse hiç yer vermeden sıkıştırıyordu.
+const HUD_HINT_MIN_WIDTH: float = 220.0
 const ZONE_ICONS: Dictionary = {
 	RoadAttention.ZONE_FRONT: "r6a_front.png",
 	RoadAttention.ZONE_WAGONS: "r6b_wagons.png",
@@ -691,8 +695,17 @@ func _build_bottom_bar() -> PanelContainer:
 	bar.add_child(row)
 
 	# Yolu oyuncu yürüyor: bunu söylemeyen bir ekran, oyuncuya "kontrol
-	# bende değil" dedirtiyordu (ilk şikâyet tam olarak buydu).
+	# bende değil" dedirtiyordu (ilk şikâyet tam olarak buydu). `clip_text`
+	# bir Label'ın asgari genişliğini metinden bağımsız sıfıra düşürüyor -
+	# `HFlowContainer` da her çocuğa yalnızca kendi asgarisi kadar yer
+	# ayırdığı için, altyazı hiçbir zaman taşmadan bir piksele kadar
+	# sıkışabiliyordu (P0 - oyuncunun A/D'yi öğrendiği tek yer buydu).
+	# Taban genişlik onu sıfıra inmekten koruyor, `OVERRUN_TRIM_ELLIPSIS`
+	# de taşan kısmı "…" ile kesip tam metni `tooltip_text`'te tutuyor.
 	_walk_hint = Label.new()
+	_walk_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_walk_hint.custom_minimum_size = Vector2(HUD_HINT_MIN_WIDTH, 0.0)
+	_walk_hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_walk_hint.clip_text = true
 	row.add_child(_walk_hint)
 
@@ -707,6 +720,7 @@ func _build_bottom_bar() -> PanelContainer:
 	_attention_label = Label.new()
 	_attention_label.modulate = ArtPalette.UI_HUD_NOTE
 	_attention_label.clip_text = true
+	_attention_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	# Yürüme ipucu boşken etiket sıfıra çöküyordu: alt şeritteki diğer
 	# her şey gibi kendi yerini istemesi gerekiyor.
 	_attention_label.custom_minimum_size = Vector2(200.0, 0.0)
@@ -726,6 +740,8 @@ func _build_bottom_bar() -> PanelContainer:
 	# son ne olduğu, bütün defter değil.
 	_last_log_label = Label.new()
 	_last_log_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_last_log_label.custom_minimum_size = Vector2(HUD_HINT_MIN_WIDTH, 0.0)
+	_last_log_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_last_log_label.clip_text = true
 	_last_log_label.modulate = ArtPalette.UI_HUD_NOTE
 	row.add_child(_last_log_label)
@@ -1999,6 +2015,9 @@ func _refresh_walk_hint() -> void:
 		return
 	_last_walk_hint = text
 	_walk_hint.text = text
+	# Dar bir şeritte cümle kesilebiliyor - tam metin en azından hover'da
+	# okunabiliyor.
+	_walk_hint.tooltip_text = text
 	_walk_hint.modulate = (
 		LOCKED_COLOR if is_zero_approx(_walk_direction) and not _camping else Color.WHITE
 	)
@@ -3068,6 +3087,7 @@ func _refresh_state() -> void:
 	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
 		_attention_zone
 	)
+	_attention_label.tooltip_text = _attention_label.text
 	_attention_icon.texture = WaybookTheme.texture(ZONE_ICONS.get(
 		_attention_zone, ZONE_ICONS[RoadAttention.ZONE_WAGONS]
 	))
@@ -3106,6 +3126,7 @@ func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# katmanında duruyor (bkz. _build_log_layer).
 	if _last_log_label != null:
 		_last_log_label.text = text
+		_last_log_label.tooltip_text = text
 		_last_log_label.modulate = ArtPalette.UI_HUD_NOTE if color == Color.WHITE else color
 
 	var label := Label.new()
