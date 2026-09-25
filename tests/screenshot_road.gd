@@ -114,13 +114,12 @@ func _init() -> void:
 		await process_frame
 	_save("10_kamp.png")
 
-	# Lider kolona indi: kervanın önü işaretli, lider arkada.
+	# Lider kolonda geriye yürüdü: altın işaret onun başında.
 	_band.set_camping(false)
 	_caravan.set_camping(false)
 	_band.set_phase(JourneyClock.Phase.NOON, 0.5)
 	_caravan.set_light(_band.get_light())
 	_caravan.set_speed(1.0)
-	_caravan.set_detached(true)
 	_caravan.set_leader_offset(-320.0)
 	await _settle()
 	_save("11_lider_kolonda.png")
@@ -130,7 +129,6 @@ func _init() -> void:
 	# karenin dışında kalıyordu, yani yoldaki vagon hiç görülmedi. Kolonun
 	# çapaya sığması artık vagon sayısıyla değişiyor (bkz.
 	# RoadCaravan.MIN_COLUMN_SCALE), o yüzden her uç ayrı basılıyor.
-	_caravan.set_detached(false)
 	_caravan.set_leader_offset(0.0)
 	for wagons in [1, 4, 6]:
 		_caravan.configure(_build_session(wagons))

@@ -73,19 +73,17 @@ const CAMP_HOURS: float = 8.0
 const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 
 ## --- Yürümek ---
-## Yol kendiliğinden kat edilmez: kervan ancak oyuncu yürüttüğü sürece
-## ilerler (A/D ya da ok tuşları). Zaman yine kendi başına akar - durmak
-## günü durdurmaz, erzağı da durdurmaz; yalnızca yol kısalmaz. Oregon
-## Trail'in asıl gerilimi bu: oyalanmanın bedelini takvim ödetir.
+## Kervan seçilen tempoyla kendi yürür; oyuncunun eli kervanda değil
+## liderde. Bir süre yol ancak D basılı tutulduğu sürece kat ediliyordu -
+## o basış hiçbir karar taşımıyordu, yalnızca angaryayı ölçüyordu. Yoldaki
+## gerçek kararlar tempo (yavaş/normal/hızlı/dur), liderin kolondaki yeri
+## (bkz. RoadAttention), kamp ve dönüp dönmemek; giriş artık onlara gidiyor.
+## Durmak yine günü durdurmaz: "Dur" temposunda erzak yenir, yol kısalmaz -
+## oyalanmanın bedelini takvim ödetir, tıpkı eskisi gibi.
 ##
-## İleri tempo 1.0: durmadan yürüyen bir oyuncu seferi tam olarak
-## planlayıcının söylediği günde bitirir, yani erzak sözü ("doğru
-## stoklayan asla aç kalmaz", bkz. Provision Rules) yürüyen oyuncu için
-## aynen korunur. Bozulan tek şey oyalanmanın bedava olması.
-const WALK_FORWARD_RATE: float = 1.0
-## Geri dönmek ileri gitmekle aynı şey değil: dar yolda altı vagonu
-## çevirmek, hayvanları döndürmek, yükü yeniden dengelemek zaman yer.
-const WALK_BACKWARD_RATE: float = 0.25
+## Geri yürüme (eski A, 0.25 hızla) kaldırıldı; görülen bir tehlikeden
+## kaçınmanın yolları Dur ve Geri Dön/Rota Değiştir (bkz. `_apply_replan`,
+## bekleyen karşılaşmayı eski yolla birlikte geride bırakır).
 
 ## --- Yolda yaklaşan olay ---
 ## Günün olayı ("kurt var", "evrak isteyen bir görevli") artık kart olarak
@@ -284,9 +282,12 @@ var _pace_key: String:
 		return _journey.pace_key
 	set(value):
 		_journey.pace_key = value
-## Lider kolondan ayrıldı mı: ayrıldıysa A/D onu yürütüyor, kervanı değil.
-var _leader_detached: bool = false
+## Liderin kolondaki yeri (0 = baş, eksi = geriye doğru). A/D, ok tuşları,
+## kumanda ya da kervana dokunmak/tıklamak onu yürütür; kervanı değil.
 var _leader_offset: float = 0.0
+## Dokunma/tıklama hedefi: lider oraya kendi yürür, klavye girişi iptal eder.
+var _leader_target: float = 0.0
+var _has_leader_target: bool = false
 ## Liderin kolondaki yeri = neye dikkat ettiği (bkz. RoadAttention).
 ## Kolona bağlıyken lider baştadır, yani ön bölgededir.
 var _attention_zone: String = RoadAttention.ZONE_FRONT
@@ -908,7 +909,6 @@ const COMMANDS: Array[Dictionary] = [
 	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST"},
 	{"key": "UI_ROAD_CMD_SLOW", "pace": PACE_SLOW, "pace_key": "UI_ROAD_PACE_SLOW"},
 	{"key": "UI_ROAD_CMD_HALT", "pace": PACE_HALT, "pace_key": "UI_ROAD_PACE_HALT"},
-	{"key": "UI_ROAD_CMD_DETACH", "pace": -1.0, "pace_key": ""},
 	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": ""},
 	{"key": "UI_ROAD_CMD_DEBT", "pace": -3.0, "pace_key": ""},
 ]
@@ -1035,19 +1035,6 @@ func _issue_command(index: int) -> void:
 	if is_equal_approx(pace, -3.0):
 		_open_debt_panel()
 		return
-	if pace < 0.0:
-		# Ayrılma emri bir anahtar: lideri kolona indiriyor, geri dönmek de
-		# aynı emrin kendisi.
-		_leader_detached = not _leader_detached
-		if not _leader_detached:
-			_leader_offset = 0.0
-		_caravan.set_detached(_leader_detached)
-		_caravan.set_leader_offset(_leader_offset)
-		_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(
-			"UI_ROAD_CMD_DETACH" if _leader_detached else "UI_ROAD_CMD_REJOIN"
-		), OUTCOME_COLOR)
-		return
-
 	_pace = pace
 	_pace_key = String(command.pace_key)
 	_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(String(command.key)), OUTCOME_COLOR)
@@ -1114,8 +1101,8 @@ func _init_journey() -> void:
 	_band.set_route(_terrain)
 	_pace = PACE_STEADY
 	_pace_key = "UI_ROAD_PACE_STEADY"
-	_leader_detached = false
 	_leader_offset = 0.0
+	_has_leader_target = false
 	_attention_zone = RoadAttention.ZONE_FRONT
 	_signals.clear()
 	_signal_danger_bonus = 0.0
@@ -1130,7 +1117,6 @@ func _init_journey() -> void:
 	# Kervan parti ve vagon sayısından kuruluyor; bu yüzden sefer başında
 	# bir kez (yolda bir yoldaş katılırsa yine) çağrılıyor, karede değil.
 	_caravan.configure(_session)
-	_caravan.set_detached(false)
 	_caravan.set_leader_offset(0.0)
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
@@ -1258,64 +1244,65 @@ func _process(delta: float) -> void:
 	_refresh_time_ui()
 	_refresh_modal()
 
-## Kervanı oyuncu yürütür. Zaman kendi başına akar; bu fonksiyon yalnızca
-## *yolun* ne kadarının kat edildiğini belirler - yani durmak günü değil,
-## sadece mesafeyi durdurur.
+## Kervan tempoyla kendi yürür; giriş yalnızca lideri kolon içinde
+## gezdirir (bkz. yukarıdaki "Yürümek" notu). Kampta kervan durur, lider
+## yine gezebilir.
 ##
 ## Mesafe geçen oyun saatinden ölçülüyor, gerçek kareden değil: hız tuşu
-## (1x/1.5x/3x) hem saati hem yolu aynı oranda hızlandırır, yoksa 3x'te
+## (0.5x-3x) hem saati hem yolu aynı oranda hızlandırır, yoksa hızlı akışta
 ## günler yola göre daha hızlı akar ve kervan hep aç kalırdı.
 func _advance_position(hours: float) -> void:
 	_walk_direction = 0.0
 	if hours <= 0.0:
 		return
+	_move_leader(hours)
+	if _camping:
+		return
+	_walk_at(_pace, hours)
 
+## Klavye/kumanda yönü dokunma hedefinden önce gelir: ikisi aynı anda
+## verilirse eldeki tuş kazanır ve hedef unutulur.
+func _move_leader(hours: float) -> void:
 	var direction := 0.0
 	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
 		direction += 1.0
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		direction -= 1.0
-	# RT/LT: analog, dijital tuşlarla toplanıp kırpılıyor - aynı yöndeyse
-	# birbirini güçlendirmiyor (1'de tavanlanıyor), ters yöndeyse
-	# birbirini götürüyor.
 	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
 
-	# Kervan kamptayken hiç ilerlemiyor, ama lider hâlâ sütun içinde
-	# gezinebilir - önceden burada bütün fonksiyon `_camping`de dönüyordu,
-	# yani ateşin başındaki durağan kervanda bile lider en önde kilitli
-	# kalıyor, geri oynatılamıyordu. `_walk_at` çağrılmıyor: kampta kat
-	# edilecek mesafe yok, yalnızca kolon içindeki yer değişiyor.
-	if _camping:
-		if not is_zero_approx(direction):
-			_leader_offset = clampf(
-				_leader_offset + direction * LEADER_WALK_SPEED * hours,
-				-_caravan.get_column_length(), 0.0
-			)
-			_caravan.set_leader_offset(_leader_offset)
-			_refresh_attention_zone()
+	var step := LEADER_WALK_SPEED * hours
+	var target := _leader_offset
+	if not is_zero_approx(direction):
+		_has_leader_target = false
+		target = _leader_offset + direction * step
+	elif _has_leader_target:
+		target = move_toward(_leader_offset, _leader_target, step)
+		if is_equal_approx(target, _leader_target):
+			_has_leader_target = false
+	else:
 		return
+	_leader_offset = clampf(target, -_caravan.get_column_length(), 0.0)
+	_caravan.set_leader_offset(_leader_offset)
+	_refresh_attention_zone()
 
-	# Lider kolondan ayrıldıysa A/D *onu* yürütüyor: kervan verilen
-	# tempoyla kendi kendine ilerliyor, lider kolonun içinde geziyor.
-	# "Siz devam edin" emri bunu ifade ediyor - kervanı durdurmadan
-	# arkaya inmek.
-	if _leader_detached:
-		if not is_zero_approx(direction):
-			_leader_offset = clampf(
-				_leader_offset + direction * LEADER_WALK_SPEED * hours,
-				-_caravan.get_column_length(), 0.0
-			)
-			_caravan.set_leader_offset(_leader_offset)
-			_refresh_attention_zone()
-		_walk_at(_pace, hours)
+## Kervana dokunmak/tıklamak lideri oraya yürütür. Dünya katmanları fareyi
+## yoksaydığı için tıklama buraya ancak hiçbir düğmeye değmediyse düşer.
+func _unhandled_input(event: InputEvent) -> void:
+	var position := Vector2.ZERO
+	var mouse := event as InputEventMouseButton
+	var touch := event as InputEventScreenTouch
+	if mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT:
+		position = mouse.position
+	elif touch != null and touch.pressed:
+		position = touch.position
+	else:
 		return
-
-	if is_zero_approx(direction):
+	if _clock == null or _current_event != null or _has_open_panel() or not _band.visible:
 		return
-
-	_walk_direction = direction
-	var rate := WALK_FORWARD_RATE if direction > 0.0 else -WALK_BACKWARD_RATE
-	_walk_at(rate * _pace, hours)
+	var local := _caravan.get_global_transform_with_canvas().affine_inverse() * position
+	_leader_target = _caravan.leader_offset_for_x(local.x)
+	_has_leader_target = true
+	get_viewport().set_input_as_handled()
 
 ## Yolun tek yürüme kapısı. Tempo, hava ve kervanın kendi kondisyonu
 ## burada çarpılıyor - iki ayrı yerde çarpılırsa biri güncellenmeyi
@@ -1430,17 +1417,17 @@ func _sync_days_remaining() -> void:
 func _can_time_flow() -> bool:
 	return not _journey_finished and _current_event == null and not _has_open_panel()
 
+## Günler tek tek alınıyor: bir kart ya da sofra paneli açılınca kalan
+## gün saatte **bekler**, kaybolmaz. Eskiden hepsi birden alınıp açık bir
+## panelde bırakılıyordu - ve yolda bekleyen bir karşılaşma varken hiç
+## işlenmiyordu: işaretin önünde durmak günleri erzaksız geçiriyordu.
+## Bekleyen karşılaşma artık günü durdurmuyor, yalnızca o günün yeni bir
+## olay çekmesini (bkz. `_on_meal_confirmed`).
 func _process_elapsed_days() -> void:
-	var days := _clock.take_elapsed_days()
-	for _index in days:
-		if _journey_finished or _pending_event != null:
+	while not _journey_finished and _current_event == null and not _has_open_panel():
+		if not _clock.take_one_day():
 			return
 		_run_day()
-		# Gün içinde bir olay çıktıysa (kart olarak ya da yolda beliren bir
-		# işaret olarak) kalan günler beklemeli: oyuncu karar verene ya da
-		# işarete yaklaşana kadar takvim ilerlemez.
-		if _current_event != null or _pending_event != null or _has_open_panel():
-			return
 
 ## Gün, yolun değil takvimin birimi: erzak yenir, kontrat süresi işler,
 ## günün olayı çekilir. Kalan yolu artık burası eksiltmiyor - onu yürümek
@@ -1502,8 +1489,12 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
 	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_days_covered).stop
 	context.merge(EventResolver.stop_context(stop), true)
-	var event := _engine.roll_for_day(_current_day, context)
-	if event == null:
+	# Yolda zaten bir karşılaşma bekliyorsa ikincisi çekilmiyor: iki işaret
+	# aynı anda yola dizilmesin, önceki çözülmeden sıradaki gelmesin.
+	var event: GameEvent = null if _pending_event != null else _engine.roll_for_day(_current_day, context)
+	if event == null and _pending_event != null:
+		pass
+	elif event == null:
 		_add_log(tr("UI_ROAD_DAY_LINE") % [_current_day, tr("EVT_TEST_QUIET_DAY")])
 	else:
 		_queue_event(event)
@@ -1532,14 +1523,6 @@ func _update_camp_state() -> void:
 	_camping = false
 	_band.set_camping(false)
 	_caravan.set_camping(false)
-	# Kamp sırasında lider kolonda gezinmiş olabilir (bkz. `_advance_position`).
-	# Ayrılma emri hiç verilmediyse yürüyüş yeniden başlarken lider en öne
-	# döner - "kervana bağlı" mod zaten liderin her zaman başta olduğunu
-	# varsayıyor, yoksa kervan ilerlerken lider kolonun ortasında asılı kalır.
-	if not _leader_detached:
-		_leader_offset = 0.0
-		_caravan.set_leader_offset(0.0)
-		_refresh_attention_zone()
 	_refresh_state()
 
 ## Hava günden ve rotadan hesaplanıyor, saklanmıyor: aynı kaydı yeniden
@@ -1636,12 +1619,8 @@ func _refresh_walk_hint() -> void:
 	var key := "UI_ROAD_WALK_IDLE"
 	if _camping:
 		key = "UI_ROAD_WALK_CAMPING"
-	elif _leader_detached:
-		key = "UI_ROAD_WALK_DETACHED"
 	elif _walk_direction > 0.0:
 		key = "UI_ROAD_WALK_FORWARD"
-	elif _walk_direction < 0.0:
-		key = "UI_ROAD_WALK_BACKWARD"
 
 	var text := tr(key)
 	if text == _last_walk_hint:

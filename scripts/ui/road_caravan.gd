@@ -141,7 +141,6 @@ var _wagon_motion: float = 0.0
 var _leader_offset: float = 0.0
 var _wagon_count: int = 1
 var _wheel_angle: float = 0.0
-var _detached: bool = false
 var _scale: float = 1.0
 
 ## Yerleşimin hesapladığı vagon merkezleri. Çizim bunları okuyor,
@@ -379,8 +378,9 @@ static func wind_lean_at(base: float, time: float, index: int) -> float:
 static func canopy_sway_at(wheel_angle: float, index: int, wagon_h: float, motion: float) -> float:
 	return sin(wheel_angle * 2.0 + float(index) * 0.9) * wagon_h * CANOPY_SWAY_RATIO * motion
 
-## Lider kolondan ayrıldığında A/D onu yürütüyor, kervanı değil. Sınır
-## kolonun uzunluğu: lider kervanı bırakıp gidemiyor.
+## Kervan kendi temposuyla yürüyor; oyuncunun doğrudan yürüttüğü tek beden
+## lider, kolon boyunca. Sınır kolonun uzunluğu: lider kervanı bırakıp
+## gidemiyor.
 func set_leader_offset(offset: float) -> void:
 	_leader_offset = clampf(offset, -_column_length(), 0.0)
 	_layout()
@@ -391,9 +391,11 @@ func get_leader_offset() -> float:
 func get_column_length() -> float:
 	return _column_length()
 
-func set_detached(detached: bool) -> void:
-	_detached = detached
-	queue_redraw()
+## Ekrandaki bir x (bu düğümün yerel uzayında) liderin kolondaki hangi
+## yerine düşüyor - dokunarak/tıklayarak yürümenin hedefi. Aynı sınır
+## `set_leader_offset`'inki: kolonun dışına tıklamak ucuna yürütür.
+func leader_offset_for_x(x: float) -> float:
+	return clampf(x - (_anchor_x + _lead_at(_scale)), -_column_length(), 0.0)
 
 ## Kamp kurulunca/kalkınca çağrılır. Ateşler burada değil `_draw()`'da
 ## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
@@ -897,15 +899,16 @@ func _draw() -> void:
 		# başında toplanan biri alevin önünde duruyor - tam istenen sıra.
 		_draw_campfires()
 
-	if _detached:
-		# Lider kolondan ayrıldığında kervanın başı işaretli: oyuncu
-		# hangisinin kendisi olduğunu karıştırmasın.
-		var marker := Vector2(
-			_anchor_x + _lead_at(_scale) + _leader_offset, _ground_y - height * 0.40
-		)
-		draw_colored_polygon(PackedVector2Array([
-			marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
-		]), Color(ArtPalette.GOLD, 0.85))
+	# Liderin başı her zaman işaretli: kolonda serbestçe yürüyen tek
+	# beden o, oyuncu hangisinin kendisi olduğunu karıştırmasın.
+	if _leader == null:
+		return
+	# Başının hemen üstünde: çapadan hesaplanan bir yükseklik geniş bir
+	# şeritte liderin çok üstünde, havada asılı kalıyordu.
+	var marker := Vector2(get_leader_centre(), _leader.position.y - 4.0)
+	draw_colored_polygon(PackedVector2Array([
+		marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
+	]), Color(ArtPalette.GOLD, 0.85))
 
 ## Kamp ateşi vagon başına bir tane (bkz. `_campfire_position`'ın notu).
 ## Önceden yolun tamamı tek bir ateşi paylaşıyordu ve o ateş kolonun

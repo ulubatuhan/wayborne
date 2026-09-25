@@ -105,6 +105,16 @@ func take_elapsed_days() -> int:
 	return pending
 
 
+## Tamamlanmış ama henüz işlenmemiş günlerden yalnızca birini alır. Gün
+## gün işleyen çağıran (yol ekranı) bir karar açıldığında durabilsin ve
+## kalan günler kaybolmasın diye: `take_elapsed_days()` hepsini birden
+## tüketiyordu, bir kart açık kalınca aradaki günler sessizce düşüyordu.
+func take_one_day() -> bool:
+	if _completed_days() <= _days_reported:
+		return false
+	_days_reported += 1
+	return true
+
 func _completed_days() -> int:
 	return int(floor((total_hours - START_HOUR) / HOURS_PER_DAY))
 
