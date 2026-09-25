@@ -201,11 +201,24 @@ const SIGNAL_FADE_SECONDS: float = 0.8
 const EDGE_STRESS_FILE: String = "g11_edge_bleed.png"
 const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
 const EDGE_MAX_ALPHA: float = 0.85
-## Maskenin boyandığı boyut ve dokuz dilim payları - ölçüldü: yan kenarların
-## koyuluğu ~340 px'te, üst/alt ~200 px'te sıfıra iniyor (1280x720).
-const EDGE_MASK_SIZE: Vector2 = Vector2(1280.0, 720.0)
-const EDGE_SLICE_SIDE: int = 360
-const EDGE_SLICE_TOP_BOTTOM: int = 220
+## Her maskenin kendi boyutu ve dokuz dilim payları - ikisi de maskeden
+## ölçüldü. Stres maskesi kare (1024) ve mürekkebi yanlarda ~160 px'te,
+## üst/altta ~130 px'te sönüyor; kavrulma maskesi 1280x720, ~340/~200.
+## Dilim mürekkebin söndüğü yerin biraz ötesinde: bir dal dilimin
+## ortasından kesilirse esneyen parça onu çizgiye çeker. Stres maskesi
+## bütün bir çerçeve olarak boyandı - köşeleri yoğun, kenar ortaları seyrek
+## - o yüzden ortası döşenmiyor, geriliyor: döşenince iki kopyanın buluştuğu
+## yerde dallar kesik bir dikiş çiziyordu (ölçüldü, 1920x1080'de tam ortada).
+const EDGE_GEOMETRY: Dictionary = {
+	EDGE_STRESS_FILE: {
+		"size": Vector2(1024.0, 1024.0), "side": 200, "top_bottom": 170,
+		"stretch": NinePatchRect.AXIS_STRETCH_MODE_STRETCH,
+	},
+	EDGE_HUNGER_FILE: {
+		"size": Vector2(1280.0, 720.0), "side": 360, "top_bottom": 220,
+		"stretch": NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT,
+	},
+}
 const EDGE_MAX_SIDE_RATIO: float = 0.2
 ## Stres kırılma bölgesine yaklaşırken leke başlıyor (Stress Rules'un
 ## kavga eşiği 40), dolmuş bir kervanda tam koyulukta.
@@ -478,7 +491,7 @@ func _build_world_layer() -> void:
 ## Kenar lekesi bir çerçeve, bir resim değil: yatay bir ekran için
 ## boyanmış maske `STRETCH_SCALE` ile telefonun dikey ekranına gerilince
 ## dallar üç kat uzuyor ve sahnenin yarısını kaplıyordu (oyuncunun ekran
-## görüntüsü). Artık dokuz dilimli (`EDGE_SLICE_*`, maskeden ölçüldü) ve
+## görüntüsü). Artık dokuz dilimli (`EDGE_GEOMETRY`, maskeden ölçüldü) ve
 ## tek biçimli ölçekleniyor (`edge_frame_scale`): çerçevenin kalınlığı
 ## ekranın kısa kenarına göre, en boy oranı ne olursa olsun aynı.
 ## Kap (`_world` bir MarginContainer) çocuklarının boyunu yazdığı için
@@ -489,35 +502,36 @@ func _edge_overlay(file_name: String, tint: Color) -> Control:
 	holder.modulate = Color(tint, 0.0)
 	_world.add_child(holder)
 
+	var geometry: Dictionary = EDGE_GEOMETRY[file_name]
 	var frame := NinePatchRect.new()
 	frame.texture = WaybookTheme.texture(file_name)
-	frame.patch_margin_left = EDGE_SLICE_SIDE
-	frame.patch_margin_right = EDGE_SLICE_SIDE
-	frame.patch_margin_top = EDGE_SLICE_TOP_BOTTOM
-	frame.patch_margin_bottom = EDGE_SLICE_TOP_BOTTOM
-	frame.axis_stretch_horizontal = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
-	frame.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
+	frame.patch_margin_left = int(geometry["side"])
+	frame.patch_margin_right = int(geometry["side"])
+	frame.patch_margin_top = int(geometry["top_bottom"])
+	frame.patch_margin_bottom = int(geometry["top_bottom"])
+	frame.axis_stretch_horizontal = geometry["stretch"]
+	frame.axis_stretch_vertical = geometry["stretch"]
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(frame)
-	holder.resized.connect(_fit_edge_frame.bind(holder, frame))
-	_fit_edge_frame(holder, frame)
+	holder.resized.connect(_fit_edge_frame.bind(holder, frame, geometry))
+	_fit_edge_frame(holder, frame, geometry)
 	return holder
 
-func _fit_edge_frame(holder: Control, frame: NinePatchRect) -> void:
-	var factor := edge_frame_scale(holder.size)
+func _fit_edge_frame(holder: Control, frame: NinePatchRect, geometry: Dictionary) -> void:
+	var factor := edge_frame_scale(holder.size, geometry["size"], int(geometry["side"]))
 	frame.scale = Vector2(factor, factor)
 	frame.position = Vector2.ZERO
 	frame.size = holder.size / factor
 
-## Çerçevenin ölçeği: maske 1280x720'ye boyandı, 16:9'da eskisiyle birebir
-## aynı ölçek (1920x1080'de 1.5). Başka bir oranda kısa kenar belirliyor.
-static func edge_frame_scale(area: Vector2) -> float:
+## Çerçevenin ölçeği: maskenin boyandığı boyuta göre, kısa kenar belirliyor -
+## en boy oranı ne olursa olsun kalınlık aynı.
+static func edge_frame_scale(area: Vector2, mask_size: Vector2, side_slice: int) -> float:
 	if area.x <= 0.0 or area.y <= 0.0:
 		return 1.0
-	var factor := minf(area.x / EDGE_MASK_SIZE.x, area.y / EDGE_MASK_SIZE.y)
+	var factor := minf(area.x / mask_size.x, area.y / mask_size.y)
 	# Yan kenarlar ekranın genişliğinin EDGE_MAX_SIDE_RATIO'sunu geçmesin:
 	# dar bir ekranda leke sahneyi yutmamalı, kenarda durmalı.
-	return minf(factor, area.x * EDGE_MAX_SIDE_RATIO / float(EDGE_SLICE_SIDE))
+	return minf(factor, area.x * EDGE_MAX_SIDE_RATIO / float(side_slice))
 
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı

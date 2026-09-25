@@ -1364,7 +1364,15 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   source sheets were painted on a torn paper card; the pipeline cuts the
   card off and ships only the ink as a white mask, coloured from
   `ArtPalette.UI_EDGE_*` - as shipped first, the card's white border and
-  pale wash covered the scene.
+  pale wash covered the scene. The stress bleed was later repainted as a
+  square white-ink frame; the generator only exports JPG, so its
+  transparency arrives as a *baked* grey checkerboard - `checker_mask()`
+  keys it by luminance (the ink is far brighter than either checker
+  square), and a new JPG from the same tool can go straight into
+  `art_source/waybook/`. Each edge mask carries its own nine-slice
+  geometry (`EDGE_GEOMETRY`); a mask painted as one whole frame (heavy
+  corners, sparse mid-sides) *stretches* its middle, because tiling it
+  drew a hard seam where two copies met.
 - **Who eats is one function** (`GameSession.get_meal_fed_party()`/
   `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per
   person plus one for the nameless crew) and the distribution itself
