@@ -1448,7 +1448,20 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   on a dark band, full width below `WORKSPACE_FULL_WIDTH_BELOW`; every desk
   screen calls it first in `_ready()`. The market is the one exception,
   on purpose: its stall row and cargo column side by side do not fit 65%,
-  and squeezing them opened a horizontal scrollbar.
+  and squeezing them opened a horizontal scrollbar. The column never goes
+  narrower than its scrolled content (`workspace_side_margin(w,
+  content_min)`), and the band stays at every width - on a narrow screen
+  pale canvas behind bone text is exactly where contrast was lost. The city
+  map is a desk screen too now (B10, `b10_city.jpg`): it was the one screen
+  left on flat ink.
+- **The generator stops at ~1376 px; the pipeline can upscale.**
+  `background(src, name, width)` resizes with Lanczos plus a light unsharp
+  mask, which keeps ink lines crisper than the GPU's bilinear stretch but
+  adds no detail. Only B10 uses it: the other eight backgrounds are no
+  longer reproduced byte-for-byte by the pipeline (the shipped B7 is
+  1376x768, the pipeline now crops it to 1311x705), so regenerating them
+  would change art nobody asked to change. Reconcile that drift before
+  re-running the whole pipeline.
 - **Nothing painted ships unread.** The Web build downloads every
   texture, so a sheet the game never draws (G1 page tile, G10 colour
   tile, R2, R5) is not written by the pipeline at all; the reason stays
@@ -3751,7 +3764,10 @@ verir.
   Rules). Açık kalanlar: ikon aileleri üslupça tutarsız (bir kısmı
   çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
   kartlı) - aile başına tek üsluba yeniden üretilmeli; yönetim ekranı
-  arka planları 1376x768'de geldi, 1920'de yumuşuyor.
+  arka planları 1376x768'de geldi, 1920'de yumuşuyor (üreteç bu boyutta
+  duruyor; B10 hattın Lanczos büyütmesiyle geldi, diğerleri için önce
+  hattın sevk edilen dosyalarla uyuşmazlığı giderilmeli - Waybook UI
+  Rules).
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin

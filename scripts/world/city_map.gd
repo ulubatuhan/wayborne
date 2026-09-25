@@ -22,6 +22,7 @@ var _brief_panel: CityBriefPanel
 var _city_view: CityView
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
 	Nav.go_root(Nav.CITY_MAP)
 	# Şehrin kendi parçası: varış hissi. Şehir içindeki ekranlar
