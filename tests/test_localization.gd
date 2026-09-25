@@ -544,11 +544,10 @@ func _test_book_face_covers_latin_and_cyrillic(t, font: Font) -> void:
 		"CJK dışı her dil kitap yüzünün kendisiyle yazılıyor (eksikler: %s)" % ", ".join(report)
 	)
 
-## Tek muafiyet ve sebebi: dil adları kendi alfabelerinde yazılı olmak
-## **zorunda** (bkz. UserSettings.SUPPORTED) ve varsayılan font CJK
-## taşımıyor. Adı Latinceye çevirmek kuralı bozardı - onun yerine ayar
-## ekranı çizilemeyen bir adın yanına dil kodunu yazıyor (bkz.
-## settings.gd'nin `_readable_locale_name`'i), yani satır boş kutu olsa
-## bile aranabilir kalıyor. CJK taşıyan bir font geldiği gün muafiyet de
-## gereksizleşir.
-const GLYPH_EXEMPT_SCRIPTS: Array[String] = ["user_settings.gd"]
+## Muafiyet yok artık: dil adları kendi alfabelerinde yazılı olmak
+## zorunda (bkz. UserSettings.SUPPORTED) ve varsayılan font CJK
+## taşımadığı için user_settings.gd uzun süre bu taramadan muaftı. Kitap
+## yüzünün CJK yedekleri (Noto Serif SC/JP alt kümeleri) gelince "简体中文"
+## ve "日本語" da çizilir oldu, muafiyet kalktı - bir daha çizilemeyen bir
+## dil adı gelirse test onu yakalar.
+const GLYPH_EXEMPT_SCRIPTS: Array[String] = []
