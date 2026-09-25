@@ -1299,10 +1299,13 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   frame) so no colour is baked into a PNG. Ink marks are recoloured, not
   modulated: multiplying dark ink can never lighten it, and black ink on
   dark leather was invisible in the first render.
-- **A locked button is scratched out, never hidden.** The disabled tab is
-  the same tab with the ledger's scratch-out composed over it, faded; the
-  reason stays live text beside it. The contract from Event Engine Rules
-  is unchanged - the chrome only makes "locked" louder.
+- **A locked button is faded, never hidden - and never scratched.** The
+  disabled tab (and row) is the same texture at `UI_TINT_DISABLED`, which
+  carries its own alpha; the reason stays live text beside it (Event
+  Engine Rules). For a while the ledger's scratch-out (G5) was composed
+  over the tab's ear; the player rejected it in playtest ("güzel
+  gözükmüyor, silik olması yeterli"), so it is gone from the theme and
+  from the pipeline's output.
 - **Nine-slice geometry is measured, not guessed.** Slice margins live as
   constants in `WaybookTheme` and each must contain its corner ornament
   whole. The sealed frame was painted with a clasp mid-side; stretched it
@@ -1401,23 +1404,16 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (`CELL_PANEL`) use the same small binding - the engine's black box and
   the market's green `ColorRect` cells (`PlaceholderHelper`, deleted) were
   the last unskinned widgets.
-- **The lock mark never crosses the reason.** The disabled tab's scratch
-  sits only on the tab's curled ear (a fixed nine-slice corner, so it is in
-  the same place at any width), inked `UI_LOCK_MARK`; the disabled row's
-  sits inside its fixed corner - a mark in a tiled edge strip repeated
-  along the whole border. Drawn across the body, the pale scratch made
-  "Reputation too low (5 required)" unreadable, which is the one line the
-  locked-with-reason rule exists to show.
 - **Bone text always carries a dark halo.** `Label` has a `UI_TEXT_HALO`
   shadow, `Button`/`LineEdit` an outline (`TEXT_OUTLINE_SIZE`), because the
-  scene backgrounds, leather and scratch marks all have pale patches. Paper
+  scene backgrounds and leather both have pale patches. Paper
   variations (`PageLabel`, `PageHeading`, tooltips) switch it off - ink on
   paper needs none.
 - **A map is written on, not stuck on.** City markers on the B6 parchment
   are `MapLabel` buttons - no box, ink text with a parchment-coloured halo,
   blood for "you are here", faded ink for a closed road (still shown, still
   with its reason) - over a K5 stud. The tab buttons (and the disabled
-  tab's scratch) sat on the map as grey patches.
+  tab) sat on the map as grey patches.
 - **Paper an asset was painted on is not the asset.** Three icons (K6
   clerk, P3 strength, P4 witnessed death) came on an off-white card and the
   K5 studs on a bone plate; keying cannot see either (it removes the grey

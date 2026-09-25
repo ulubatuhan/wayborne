@@ -274,33 +274,20 @@ static func _slip() -> StyleBoxTexture:
 
 # --- Düğmeler ---
 
-static func _tab(tint: Color, scratched: bool = false) -> StyleBoxTexture:
+## Kilitli düğme aynı sekme, yalnızca silik (`UI_TINT_DISABLED`'ın
+## yarı saydamlığı) - sebep yanında canlı metin olarak kalıyor (Event
+## Engine Rules: *sebebiyle* kilitli, asla gizli değil). Bir süre üstüne
+## defterin karalama işareti de biniyordu; oyuncu testinde güzel
+## görünmediği için kaldırıldı - silik olmak yetiyor.
+static func _tab(tint: Color) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
-	box.texture = _scratched_tab() if scratched else texture("g4_tab.png")
+	box.texture = texture("g4_tab.png")
 	box.modulate_color = tint
 	_set_margins(box, TAB_SLICE, TAB_CONTENT)
 	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
 	# düğmede yatay çizgilere dönüşüyordu.
 	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	return box
-
-## Kilitli düğme sekmesini koruyor, üstüne defterin karalama çizgisi
-## biniyor. Sebep düğmenin yanında ya da altında canlı metin olarak kalıyor
-## - çizgi "şimdi değil" diyor, metin nedenini (Event Engine Rules:
-## *sebebiyle* kilitli, asla gizli değil).
-static func _scratched_tab() -> Texture2D:
-	var tab := texture("g4_tab.png").get_image()
-	tab.decompress()
-	tab.convert(Image.FORMAT_RGBA8)
-	# Karalama yalnızca sekmenin kıvrık kulağında: yazının üstünden
-	# geçen soluk çizgiler kilidin sebebini okunmaz yapıyordu (ölçüldü -
-	# "İtibar yetersiz" satırı karalamanın altında kayboluyordu). Kulak
-	# dokuz parçanın sabit köşesi, yani işaret her genişlikte aynı yerde.
-	var scratch := _recoloured("g5_scratch.png", ArtPalette.UI_LOCK_MARK)
-	var ear := Vector2i(TAB_SLICE[0] - 6, tab.get_height() - 18)
-	scratch.resize(ear.x, ear.y, Image.INTERPOLATE_LANCZOS)
-	tab.blend_rect(scratch, Rect2i(Vector2i.ZERO, ear), Vector2i(4, 9))
-	return ImageTexture.create_from_image(tab)
 
 static func _focus() -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
@@ -317,7 +304,7 @@ static func _build_buttons(theme: Theme) -> void:
 		theme.set_stylebox("hover", type_name, _tab(ArtPalette.UI_TINT_HOVER))
 		theme.set_stylebox("pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
 		theme.set_stylebox("hover_pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
-		theme.set_stylebox("disabled", type_name, _tab(ArtPalette.UI_TINT_DISABLED, true))
+		theme.set_stylebox("disabled", type_name, _tab(ArtPalette.UI_TINT_DISABLED))
 		theme.set_stylebox("focus", type_name, _focus())
 		theme.set_color("font_color", type_name, ArtPalette.UI_TEXT)
 		theme.set_color("font_hover_color", type_name, ArtPalette.UI_ACCENT)
@@ -330,9 +317,9 @@ static func _build_buttons(theme: Theme) -> void:
 	_build_row_buttons(theme)
 	_build_map_labels(theme)
 
-static func row_frame(tint: Color, scratched: bool = false) -> StyleBoxTexture:
+static func row_frame(tint: Color) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
-	box.texture = _row_texture(scratched)
+	box.texture = _row_texture()
 	box.modulate_color = tint
 	box.set_texture_margin_all(ROW_SLICE)
 	_set_content(box, ROW_CONTENT)
@@ -340,28 +327,20 @@ static func row_frame(tint: Color, scratched: bool = false) -> StyleBoxTexture:
 	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	return box
 
-static var _row_cache: Dictionary = {}
+static var _row_cache: Texture2D
 
 ## Doldurulmuş cilt (G2 + palet zemini + leke maskesi) sıra ölçeğine
-## küçültülmüş; kilitlisinde sol köşede aynı kilit karalaması.
-static func _row_texture(scratched: bool) -> Texture2D:
-	if _row_cache.has(scratched):
-		return _row_cache[scratched]
+## küçültülmüş. Kilitlisi aynı doku, yalnızca silik tonla.
+static func _row_texture() -> Texture2D:
+	if _row_cache != null:
+		return _row_cache
 	var image := _filled_frame("g2_binding.png", BINDING_FILL_INSET).get_image()
 	image.resize(
 		int(round(image.get_width() * ROW_SCALE)), int(round(image.get_height() * ROW_SCALE)),
 		Image.INTERPOLATE_LANCZOS
 	)
-	if scratched:
-		var scratch := _recoloured("g5_scratch.png", ArtPalette.UI_LOCK_MARK)
-		# Yalnızca sabit köşe diliminin içine: kenar dilimleri döşendiği
-		# için oraya taşan bir işaret bütün kenar boyunca tekrar ediyordu.
-		var mark := ROW_SLICE - 3
-		scratch.resize(mark, mark, Image.INTERPOLATE_LANCZOS)
-		image.blend_rect(scratch, Rect2i(0, 0, mark, mark), Vector2i(1, 1))
-	var result := ImageTexture.create_from_image(image)
-	_row_cache[scratched] = result
-	return result
+	_row_cache = ImageTexture.create_from_image(image)
+	return _row_cache
 
 static func _build_row_buttons(theme: Theme) -> void:
 	theme.set_type_variation(ROW_BUTTON, "Button")
@@ -369,7 +348,7 @@ static func _build_row_buttons(theme: Theme) -> void:
 	theme.set_stylebox("hover", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_HOVER))
 	theme.set_stylebox("pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
 	theme.set_stylebox("hover_pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
-	theme.set_stylebox("disabled", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_DISABLED, true))
+	theme.set_stylebox("disabled", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_DISABLED))
 
 	# Sayı/yazı alanları (SpinBox'ın içindeki LineEdit dahil) aynı küçük cilt:
 	# motorun siyah giriş kutusu defterin hiçbir parçasına benzemiyordu.
@@ -416,7 +395,7 @@ static func _build_tabs(theme: Theme) -> void:
 	theme.set_stylebox("tab_selected", "TabContainer", _tab(ArtPalette.UI_TINT_HOVER))
 	theme.set_stylebox("tab_hovered", "TabContainer", _tab(Color.WHITE))
 	theme.set_stylebox("tab_unselected", "TabContainer", _tab(ArtPalette.UI_TINT_PRESSED))
-	theme.set_stylebox("tab_disabled", "TabContainer", _tab(ArtPalette.UI_TINT_DISABLED, true))
+	theme.set_stylebox("tab_disabled", "TabContainer", _tab(ArtPalette.UI_TINT_DISABLED))
 	theme.set_stylebox("tab_focus", "TabContainer", _focus())
 	theme.set_stylebox("panel", "TabContainer", binding_panel())
 	theme.set_color("font_selected_color", "TabContainer", ArtPalette.UI_ACCENT)
