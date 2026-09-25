@@ -120,6 +120,11 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 		var column: float = width - 2.0 * side
 		t.ok(column <= width * theme_script.WORKSPACE_WIDTH_RATIO + 1.0, "geniş ekranda sütun en çok %%65 (%d)" % int(width))
 	t.eq(theme_script.workspace_side_margin(1080.0), theme_script.WORKSPACE_EDGE_MARGIN, "dar ekranda sütun tam genişlik")
+	# İçerik sütundan genişse sütun içeriğe açılıyor, yatay kaydırma olmuyor.
+	var wide_side: int = theme_script.workspace_side_margin(1280.0, 900.0)
+	t.ok(1280.0 - 2.0 * wide_side >= 900.0, "sütun içeriğin en dar genişliğinden dar değil")
+	t.eq(theme_script.workspace_side_margin(1920.0, 400.0), theme_script.workspace_side_margin(1920.0), "dar içerik oranı değiştirmiyor")
+	t.eq(theme_script.workspace_side_margin(1280.0, 5000.0), theme_script.WORKSPACE_EDGE_MARGIN, "kenar payı hiç sıfırın altına inmiyor")
 	var screens := [
 		"guild", "tavern", "caravan_yard", "church", "recruit",
 		"character", "party", "caravan_planner", "character_creation",

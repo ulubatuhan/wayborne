@@ -284,10 +284,32 @@ const WORKSPACE_SIDE_SCRIM_ALPHA: float = 0.38
 
 ## Bir kenardaki boşluk, ekran genişliğine göre. Saf fonksiyon - test ve
 ## ekran aynı sayıyı okusun diye.
-static func workspace_side_margin(total_width: float) -> int:
+## `content_min`: sütundaki içeriğin en dar genişliği. Sütun ondan dar
+## olamaz - %65 oranı içeriği sıkıştırınca 1280'de parti ve tayfa
+## ekranlarında yatay kaydırma çubuğu açılıyordu (ölçüldü).
+static func workspace_side_margin(total_width: float, content_min: float = 0.0) -> int:
 	if total_width < WORKSPACE_FULL_WIDTH_BELOW:
 		return WORKSPACE_EDGE_MARGIN
-	return maxi(WORKSPACE_EDGE_MARGIN, int(round(total_width * (1.0 - WORKSPACE_WIDTH_RATIO) * 0.5)))
+	var side := int(round(total_width * (1.0 - WORKSPACE_WIDTH_RATIO) * 0.5))
+	if content_min > 0.0:
+		side = mini(side, int(floor((total_width - content_min) * 0.5)))
+	return maxi(WORKSPACE_EDGE_MARGIN, side)
+
+## Sütunun taşıması gereken en dar genişlik: kaydırılan içeriğin kendi
+## en dar genişliği (ScrollContainer bunu kendi minimumuna katmıyor) ve
+## sütunun geri kalanı.
+static func _workspace_content_min(margin: MarginContainer) -> float:
+	var need := 0.0
+	for child in margin.get_children():
+		if child is Control:
+			need = maxf(need, (child as Control).get_combined_minimum_size().x)
+	for scroll in margin.find_children("*", "ScrollContainer", true, false):
+		var bar := (scroll as ScrollContainer).get_v_scroll_bar()
+		var bar_w := bar.get_combined_minimum_size().x if bar != null else 0.0
+		for inner in scroll.get_children():
+			if inner is Control and not (inner is ScrollBar):
+				need = maxf(need, (inner as Control).get_combined_minimum_size().x + bar_w)
+	return need
 
 ## `root`: BackgroundArt / BackgroundScrim / MarginContainer iskeletini
 ## taşıyan masa ekranının kökü. Eksik parça varsa hiçbir şeye dokunmaz.
@@ -307,14 +329,20 @@ static func fit_desk_workspace(root: Control) -> void:
 	band.add_theme_stylebox_override("panel", style)
 	root.add_child(band)
 	root.move_child(band, margin.get_index())
+	# Bant dar ekranda da kalıyor: tam genişlikte soluk çadır bezi yine
+	# metnin arkasına geliyordu (karakter/parti, 1080 genişlikte ölçüldü).
 	var apply := func() -> void:
-		var side := workspace_side_margin(root.size.x)
+		var side := workspace_side_margin(root.size.x, _workspace_content_min(margin))
 		margin.add_theme_constant_override("margin_left", side)
 		margin.add_theme_constant_override("margin_right", side)
 		band.position = Vector2(side - WORKSPACE_EDGE_MARGIN, 0.0)
 		band.size = Vector2(maxf(0.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN)), root.size.y)
-		band.visible = side > WORKSPACE_EDGE_MARGIN
 	root.resized.connect(apply)
+	# Satırlar _ready'den sonra da kuruluyor; içerik büyüyünce sütun genişler.
+	for scroll in margin.find_children("*", "ScrollContainer", true, false):
+		for inner in scroll.get_children():
+			if inner is Control and not (inner is ScrollBar):
+				(inner as Control).minimum_size_changed.connect(apply)
 	apply.call()
 
 static func strap_rule(height: float) -> TextureRect:
