@@ -45,6 +45,12 @@ const UI_TEXT_DIM: Color = BONE_DIM
 ## Açık kâğıt (ipucu fişi, sayfa) üstündeki yazı.
 const UI_TEXT_ON_PAGE: Color = INK
 const UI_ACCENT: Color = GOLD
+## Uyarı turuncusu - "erzak yetmiyor", "3 gündür aç" gibi kervanın hayatta
+## kalıp kalmayacağını söyleyen satırlar. Eskiden her ekranın kendi
+## sabitiydi (ör. `caravan_planner.gd`'nin `SHORTFALL_COLOR`'ı, 2.4-3.7:1'e
+## düşen bir ton) - tek role taşındı, INK üstünde ≥4.5:1 kalacak şekilde
+## ölçülüp seçildi.
+const UI_WARNING: Color = Color(0.89, 0.60, 0.47)
 ## Düğme durumları dokuyu yeniden boyamıyor, çarpıyor: üstüne gelince
 ## deri ışığa döner, basılınca gölgeye çekilir, kilitliyken solar.
 const UI_TINT_HOVER: Color = Color(1.18, 1.10, 0.98)

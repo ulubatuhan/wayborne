@@ -3,7 +3,10 @@ extends Control
 ## Kervan planlayıcı. Erzağı gerçek envanterden okur, eksiği cüzdandan
 ## satın aldırır ve onaylandığında kervanı gerçekten yola çıkarır.
 
-const SHORTFALL_COLOR: Color = Color(0.9, 0.45, 0.35)
+## Uyarı turuncusu artık ArtPalette.UI_WARNING'te (bkz. onun kendi yorumu) -
+## bu ekranın satırları defect matrix'in ölçtüğü 2.4-3.7:1'e düşen yerdi,
+## çünkü `.modulate` zaten çözülmüş `font_color`'ı bir kez daha çarpıyordu.
+## Etiketler artık `add_theme_color_override("font_color", ...)` kullanıyor.
 const SATISFIED_COLOR: Color = Color(0.45, 0.8, 0.45)
 
 var _session: GameSession
@@ -154,14 +157,14 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		var weather_label := Label.new()
 		weather_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		weather_label.text = tr("UI_PLANNER_WEATHER_RESERVE") % _plan.travel_reserve_days
-		weather_label.modulate = SHORTFALL_COLOR
+		weather_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		_content.add_child(weather_label)
 
 	if _plan.camp_provisions > 0:
 		var camp_label := Label.new()
 		camp_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		camp_label.text = tr("UI_PLANNER_CAMP_RESERVE") % _plan.camp_provisions
-		camp_label.modulate = SHORTFALL_COLOR
+		camp_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		_content.add_child(camp_label)
 
 	_gold_label = Label.new()
@@ -198,7 +201,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_shortfall_label = Label.new()
 	_risk_label = Label.new()
 	_risk_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_risk_label.modulate = SHORTFALL_COLOR
+	_risk_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 	_risk_label.visible = false
 	_profit_label = Label.new()
 	_content.add_child(_party_label)
@@ -275,7 +278,8 @@ func _refresh_departure_morale() -> void:
 	for entry in breakdown:
 		var line := Label.new()
 		line.text = "  %s %+d" % [tr(String(entry["key"])), int(entry["amount"])]
-		line.modulate = SATISFIED_COLOR if int(entry["amount"]) > 0 else SHORTFALL_COLOR
+		var line_color := SATISFIED_COLOR if int(entry["amount"]) > 0 else ArtPalette.UI_WARNING
+		line.add_theme_color_override("font_color", line_color)
 		_morale_reasons.add_child(line)
 
 func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
@@ -362,7 +366,7 @@ func _refresh() -> void:
 	var shortfall_cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
 	if shortfall > 0:
 		_shortfall_label.text = tr("UI_PLANNER_PROVISIONS_SHORT") % [shortfall, shortfall_cost]
-		_shortfall_label.modulate = SHORTFALL_COLOR
+		_shortfall_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		_buy_provisions_button.visible = true
 		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % shortfall_cost
 		var can_afford := _session.wallet.can_afford(shortfall_cost)
@@ -375,8 +379,10 @@ func _refresh() -> void:
 
 		# Yola çıkmak **yasak değil, riskli**. Kilit yerine silahlanan bir
 		# onay: ilk basış riski sayıyla söylüyor, ikincisi çıkıyor.
+		# `.modulate` düğmenin dokusunu *ve* yazısını birlikte karartıyordu
+		# (parti ekranındaki aynı hata) - yalnızca yazının rengi uyarıyor.
 		_confirm_button.disabled = false
-		_confirm_button.modulate = SHORTFALL_COLOR
+		_confirm_button.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		if _departure_armed:
 			_confirm_button.text = tr("UI_PLANNER_DEPART_CONFIRM")
 		else:
@@ -385,11 +391,11 @@ func _refresh() -> void:
 		_risk_label.text = tr("UI_PLANNER_HUNGER_RISK") % _plan.get_hungry_days(current_provisions)
 	else:
 		_shortfall_label.text = tr("UI_PLANNER_READY")
-		_shortfall_label.modulate = SATISFIED_COLOR
+		_shortfall_label.add_theme_color_override("font_color", SATISFIED_COLOR)
 		_buy_provisions_button.visible = false
 		_borrow_button.visible = false
 		_confirm_button.disabled = false
-		_confirm_button.modulate = Color.WHITE
+		_confirm_button.remove_theme_color_override("font_color")
 		_confirm_button.text = tr("UI_CONFIRM_CARAVAN")
 		_risk_label.visible = false
 		_departure_armed = false

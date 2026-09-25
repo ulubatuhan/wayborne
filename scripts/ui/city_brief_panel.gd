@@ -25,7 +25,8 @@ extends VBoxContainer
 signal screen_requested(scene_path: String)
 signal planner_requested(destination_id: String)
 
-const URGENT_COLOR: Color = Color(0.9, 0.45, 0.35)
+## Planlayıcının/borç panelinin aynı uyarı turuncusu - ArtPalette.UI_WARNING.
+const URGENT_COLOR: Color = ArtPalette.UI_WARNING
 const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
 const OBJECTIVE_MARK_SIZE: float = 11.0
@@ -218,7 +219,9 @@ func _build_need_row(need: Dictionary) -> HBoxContainer:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if bool(need.urgent):
-		label.modulate = URGENT_COLOR
+		# `.modulate` zaten çözülmüş font_color'ı bir kez daha çarpıyordu
+		# (planlayıcı/borç paneliyle aynı hata) - yazının rengi doğrudan.
+		label.add_theme_color_override("font_color", URGENT_COLOR)
 	row.add_child(label)
 
 	var button := Button.new()

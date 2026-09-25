@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_fx_colours_live_in_the_palette(t)
 	_test_cold_edge_reads_season_and_biome(t)
 	_test_desk_workspace_keeps_the_props(t)
+	_test_warning_colour_is_readable(t)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
@@ -134,6 +135,16 @@ func _test_cold_edge_reads_season_and_biome(t) -> void:
 		"dağ kışı ovadaki kıştan koyu"
 	)
 	t.le(road.cold_level(true, ArtPalette.BIOME_MOUNTAIN), 1.0, "don tavanı aşmıyor")
+
+## Uyarı turuncusu (planlayıcı/borç paneli/şehir brifingi) panel zemininde
+## WCAG AA'yı geçmeli - defect matrix'in ölçtüğü eski `.modulate` hatası
+## (2.4-3.7:1) bir daha sessizce geri gelmesin diye.
+func _test_warning_colour_is_readable(t) -> void:
+	t.ge(
+		_contrast_ratio(ArtPalette.UI_WARNING, ArtPalette.UI_PANEL_FILL),
+		4.5,
+		"UI_WARNING panel zemininde WCAG AA'yı geçiyor"
+	)
 
 ## Masa ekranlarında metin ortada bir sütunda: geniş ekranda genişliğin en
 ## çok %65'i (kenarlardaki nesneler resmin kendisi), dar ekranda tam genişlik.
