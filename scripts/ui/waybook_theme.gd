@@ -55,6 +55,14 @@ const SLIP_PANEL: StringName = &"SlipPanel"
 const HUD_BAR: StringName = &"HudBar"
 const PAGE_LABEL: StringName = &"PageLabel"
 const PAGE_HEADING: StringName = &"PageHeading"
+## Ekranın kendi başlığı (üst-sol köşedeki TitleLabel). Sekiz ekran bunu
+## sahne dosyasında elle 24 px'e sabitlemişti, geri kalanı (Market, World
+## Map, Caravan Planner, City Map, Character Creation) varsayılan 18 px'te
+## kalmıştı - gövde metniyle aynı boyda okunuyordu. `PAGE_HEADING`'in
+## kırmızısı sayfa içeriği için (bkz. yukarısı); başlık desk zemininde
+## duruyor, o yüzden Label'ın kendi UI_TEXT/gölge çiftini koruyor.
+const PAGE_TITLE: StringName = &"PageTitle"
+const PAGE_TITLE_FONT_SIZE: int = 24
 ## Tam genişlikte duran düğmeler (ekranın asıl eylem sıraları, geri tuşu):
 ## sekmenin kulağı ve dikişi 1000 pikselde çizgili bir şeride dönüyordu;
 ## bu sıralar ciltli çerçevenin (G2) küçültülmüş dokuz parçası.
@@ -597,6 +605,9 @@ static func _build_labels(theme: Theme) -> void:
 		theme.set_color("font_shadow_color", variation, Color(0, 0, 0, 0))
 	theme.set_color("font_color", PAGE_LABEL, ArtPalette.UI_TEXT_ON_PAGE)
 	theme.set_color("font_color", PAGE_HEADING, ArtPalette.BLOOD)
+
+	theme.set_type_variation(PAGE_TITLE, "Label")
+	theme.set_font_size("font_size", PAGE_TITLE, PAGE_TITLE_FONT_SIZE)
 
 ## Bir mürekkep işaretinin şeklini (alfa) koruyup rengini paletten verir.
 ## Çarpımsal `modulate` koyu bir mürekkebi açamaz; renk burada yeniden

@@ -52,7 +52,7 @@ theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"PageTitle"
 text = "UI_CITY_TAVERN"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]

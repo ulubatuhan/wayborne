@@ -124,6 +124,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	var title := Label.new()
 	title.text = tr("UI_PLANNER_TITLE") % [origin.location_name, destination.location_name]
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.theme_type_variation = WaybookTheme.PAGE_TITLE
 	_content.add_child(title)
 
 	var route_label := Label.new()

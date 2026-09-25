@@ -54,7 +54,7 @@ theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"PageTitle"
 text = "UI_GUILD_TITLE"
 
 [node name="InfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
