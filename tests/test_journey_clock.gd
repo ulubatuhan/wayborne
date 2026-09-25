@@ -93,6 +93,13 @@ func _test_days_reported_once_and_never_skipped(t) -> void:
 	t.eq(clock.take_elapsed_days(), 3, "bir seferde geçen üç gün de raporlanır")
 	t.eq(clock.take_elapsed_days(), 0, "arkasından tekrar raporlanmaz")
 
+	# Gün gün alma: bir kart açılıp işlem durduğunda kalan günler kaybolmaz.
+	clock.consume_hours(JourneyClock.HOURS_PER_DAY * 2.0)
+	t.ok(clock.take_one_day(), "birinci gün alınır")
+	t.ok(clock.take_one_day(), "ikinci gün sonraki çağrıda da duruyor")
+	t.ok(not clock.take_one_day(), "üçüncü gün yok")
+	t.eq(clock.take_elapsed_days(), 0, "tek tek alınan günler toplu da tekrar gelmez")
+
 func _test_consumed_hours_count_as_time(t) -> void:
 	var clock := JourneyClock.new()
 	var before := clock.total_hours
