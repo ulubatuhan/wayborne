@@ -215,7 +215,7 @@ func _build_plan(session: GameSession, destination: Location, route: TravelRoute
 		session.accept_contract(offer)
 		if plan.toggle_merchant(offer):
 			print("   Lonca: %s kontratı alındı (%d GG, %d gün süre)" % [
-				offer.merchant_name, offer.potential_profit, offer.contract_deadline_days
+				TranslationServer.translate(offer.merchant_name), offer.potential_profit, offer.contract_deadline_days
 			])
 	return plan
 

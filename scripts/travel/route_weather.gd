@@ -123,14 +123,19 @@ static func pace_multiplier(weather: String) -> float:
 ## şart - hava payını ve kondisyon payını ayrı ayrı hesaplayıp toplamak
 ## bileşik yavaşlamayı hafife alırdı (iki çarpan birlikte etkiliyken tek
 ## başına hesaplanan iki rezerv, gerçek ihtiyacın altında kalabilir).
+##
+## `walking_hours`: günün kaçı yürüyerek geçiyor. Akşam kampı emri açıksa
+## her akşam sekiz saat yol alınmıyor (bkz. GameSession.CAMP_HOURS) -
+## planlayıcı bunu bilmezse kalıcı emir sessizce açlığa dönerdi.
 static func forecast_extra_days(
 	route_key: String, start_day: int, terrain: RouteTerrain, travel_days: int,
-	condition_factor: float = 1.0
+	condition_factor: float = 1.0, walking_hours: float = 24.0
 ) -> float:
 	var days := maxi(1, travel_days)
 	var walked := 0.0
 	var spent := 0
 	var condition := clampf(condition_factor, 0.05, 1.0)
+	var day_share := clampf(walking_hours / 24.0, 0.05, 1.0)
 	# Yol bitene kadar gün gün yürüyoruz; kötü havada ya da düşük
 	# kondisyonda bir gün bir günden az mesafe kapatıyor, o yüzden döngü
 	# `days`'ten uzun sürebilir. Tavan güvenlik için: en kötü hava/kondisyon
@@ -146,7 +151,7 @@ static func forecast_extra_days(
 			# kendi notunun uyardığı gibi.
 			slope_factor = terrain.speed_factor_at(walked)
 		var weather := at(route_key, start_day + spent, biome)
-		walked += pace_multiplier(weather) * condition * slope_factor
+		walked += pace_multiplier(weather) * condition * slope_factor * day_share
 		spent += 1
 	return maxf(0.0, float(spent) - float(days))
 

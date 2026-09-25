@@ -37,6 +37,10 @@ var provision_reduction: int = 0
 ## şeydi (bkz. Provision Rules). Sıfırsa davranış bu pay eklenmeden
 ## önceki gibi.
 var travel_reserve_days: int = 0
+## Akşam kampı emri açıksa kampların kendi erzağı (gece başına
+## GameSession.CAMP_PROVISIONS_COST). Kampın yoldan yediği saatler
+## `travel_reserve_days`'e giriyor; bu alan yalnızca ateşin başındaki pay.
+var camp_provisions: int = 0
 
 var _selected_offers: Array[MerchantOffer] = []
 
@@ -153,7 +157,7 @@ func get_provisioned_days() -> int:
 	return maxi(0, travel_days) + maxi(0, travel_reserve_days)
 
 func get_required_provisions() -> int:
-	return get_daily_consumption() * get_provisioned_days()
+	return get_daily_consumption() * get_provisioned_days() + maxi(0, camp_provisions)
 
 func get_provisions_shortfall(current_provisions: int) -> int:
 	return maxi(0, get_required_provisions() - current_provisions)

@@ -40,6 +40,7 @@ func run(t) -> void:
 	_test_weather_reserve_stays_proportionate(t)
 	_test_slope_speed_factor_stays_in_range(t)
 	_test_terrain_reserve_keeps_the_provision_promise(t)
+	_test_camp_order_reserve_keeps_the_provision_promise(t)
 
 func _test_terrain_is_reproducible(t) -> void:
 	for key in SAMPLE_KEYS:
@@ -483,3 +484,38 @@ func _test_terrain_reserve_keeps_the_provision_promise(t) -> void:
 				"eğim payıyla stoklayan kervan yol bitmeden aç kalmamalı (%s/%d gün)" % [key, travel_days]
 			)
 	t.eq(starved, 0, "eğim payıyla stoklayan kervan hiç aç kalmamalı")
+
+## Akşam kampı emri: her gün sekiz saat yol alınmıyor ve her akşam ateş
+## kendi erzağını yiyor. Kalıcı bir emir sözü sessizce bozmamalı - planlayıcı
+## emri biliyorsa, onun istediğini alan kervan yine aç kalmaz.
+func _test_camp_order_reserve_keeps_the_provision_promise(t) -> void:
+	var destination := WorldMapData.get_locations()[0]
+	var walking_hours := 24.0 - GameSession.CAMP_HOURS
+	var starved := 0
+	for key in SAMPLE_KEYS:
+		for travel_days in [3, 5, 7]:
+			var terrain := RouteTerrain.build(key, travel_days)
+			var plan := CaravanPlan.new(destination, travel_days, 6, 2)
+			plan.caravan_party_size = 3
+			plan.travel_reserve_days = int(ceil(RouteWeather.forecast_extra_days(
+				key, 1, terrain, travel_days, 1.0, walking_hours
+			)))
+			plan.camp_provisions = GameSession.CAMP_PROVISIONS_COST * plan.get_provisioned_days()
+			t.ok(plan.travel_reserve_days > 0, "kamp emri yolu uzatıyor (%s/%d)" % [key, travel_days])
+
+			var provisions := plan.get_required_provisions()
+			var daily := plan.get_daily_consumption()
+			var walked := 0.0
+			var day := 0
+			while walked < float(travel_days) and day < travel_days * 8 + 16:
+				var weather := RouteWeather.at(key, 1 + day, terrain.biome_at(walked))
+				provisions -= daily + GameSession.CAMP_PROVISIONS_COST
+				if provisions < 0:
+					starved += 1
+					break
+				walked += (
+					RouteWeather.pace_multiplier(weather) * terrain.speed_factor_at(walked)
+					* walking_hours / 24.0
+				)
+				day += 1
+	t.eq(starved, 0, "kamp emrini bilen planlayıcıyla stoklayan kervan aç kalmaz")

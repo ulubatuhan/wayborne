@@ -92,10 +92,17 @@ func _ready() -> void:
 	# kalanında da geçerli varsayılıyor. Şehre varışta can zaten tam
 	# (bkz. finish_journey), o yüzden bu anlık görüntü genelde iyimser
 	# değil gerçekçi bir taban.
+	# Akşam kampı emri de aynı hesaba giriyor: her akşam sekiz saat yol
+	# alınmıyor ve ateşin kendi erzağı var (bkz. GameSession.CAMP_HOURS).
+	var walking_hours := 24.0
+	if _session.standing_camp_at_dusk:
+		walking_hours -= GameSession.CAMP_HOURS
 	_plan.travel_reserve_days = int(ceil(RouteWeather.forecast_extra_days(
 		route_key, _session.total_days_elapsed + 1, _terrain, travel_days,
-		_session.get_caravan_theoretical_speed()
+		_session.get_caravan_theoretical_speed(), walking_hours
 	)))
+	if _session.standing_camp_at_dusk:
+		_plan.camp_provisions = GameSession.CAMP_PROVISIONS_COST * _plan.get_provisioned_days()
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 
@@ -147,6 +154,13 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		weather_label.text = tr("UI_PLANNER_WEATHER_RESERVE") % _plan.travel_reserve_days
 		weather_label.modulate = SHORTFALL_COLOR
 		_content.add_child(weather_label)
+
+	if _plan.camp_provisions > 0:
+		var camp_label := Label.new()
+		camp_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		camp_label.text = tr("UI_PLANNER_CAMP_RESERVE") % _plan.camp_provisions
+		camp_label.modulate = SHORTFALL_COLOR
+		_content.add_child(camp_label)
 
 	_gold_label = Label.new()
 	_content.add_child(_gold_label)
