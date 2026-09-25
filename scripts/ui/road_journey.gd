@@ -201,25 +201,12 @@ const SIGNAL_FADE_SECONDS: float = 0.8
 const EDGE_STRESS_FILE: String = "g11_edge_bleed.png"
 const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
 const EDGE_MAX_ALPHA: float = 0.85
-## Her maskenin kendi boyutu ve dokuz dilim payları - ikisi de maskeden
-## ölçüldü. Stres maskesi kare (1024) ve mürekkebi yanlarda ~160 px'te,
-## üst/altta ~130 px'te sönüyor; kavrulma maskesi 1280x720, ~340/~200.
-## Dilim mürekkebin söndüğü yerin biraz ötesinde: bir dal dilimin
-## ortasından kesilirse esneyen parça onu çizgiye çeker. Stres maskesi
-## bütün bir çerçeve olarak boyandı - köşeleri yoğun, kenar ortaları seyrek
-## - o yüzden ortası döşenmiyor, geriliyor: döşenince iki kopyanın buluştuğu
-## yerde dallar kesik bir dikiş çiziyordu (ölçüldü, 1920x1080'de tam ortada).
-const EDGE_GEOMETRY: Dictionary = {
-	EDGE_STRESS_FILE: {
-		"size": Vector2(1024.0, 1024.0), "side": 200, "top_bottom": 170,
-		"stretch": NinePatchRect.AXIS_STRETCH_MODE_STRETCH,
-	},
-	EDGE_HUNGER_FILE: {
-		"size": Vector2(1280.0, 720.0), "side": 360, "top_bottom": 220,
-		"stretch": NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT,
-	},
-}
-const EDGE_MAX_SIDE_RATIO: float = 0.2
+const EDGE_COLD_FILE: String = "g11_edge_frost.png"
+## Don kenarı soğuktan: kış mevsimi en çok, dağ geçidi kışın dışında da
+## biraz. Hava bir sistem icat etmiyor (Route Terrain & Weather Rules) -
+## don yalnızca görüntü, hiçbir sayıya dokunmuyor.
+const EDGE_COLD_WINTER: float = 0.7
+const EDGE_COLD_MOUNTAIN: float = 0.35
 ## Stres kırılma bölgesine yaklaşırken leke başlıyor (Stress Rules'un
 ## kavga eşiği 40), dolmuş bir kervanda tam koyulukta.
 const EDGE_STRESS_FROM: float = 35.0
@@ -438,6 +425,7 @@ var _time_dial: TimeDial
 ## zaten şişede yazılı.
 var _stress_edge: Control
 var _hunger_edge: Control
+var _cold_edge: Control
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -487,51 +475,28 @@ func _build_world_layer() -> void:
 	# çünkü yıpranma savaşa girince geçmiyor.
 	_stress_edge = _edge_overlay(EDGE_STRESS_FILE, ArtPalette.UI_EDGE_STRESS)
 	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
+	_cold_edge = _edge_overlay(EDGE_COLD_FILE, ArtPalette.UI_EDGE_COLD)
 
-## Kenar lekesi bir çerçeve, bir resim değil: yatay bir ekran için
-## boyanmış maske `STRETCH_SCALE` ile telefonun dikey ekranına gerilince
-## dallar üç kat uzuyor ve sahnenin yarısını kaplıyordu (oyuncunun ekran
-## görüntüsü). Artık dokuz dilimli (`EDGE_GEOMETRY`, maskeden ölçüldü) ve
-## tek biçimli ölçekleniyor (`edge_frame_scale`): çerçevenin kalınlığı
-## ekranın kısa kenarına göre, en boy oranı ne olursa olsun aynı.
-## Kap (`_world` bir MarginContainer) çocuklarının boyunu yazdığı için
-## çerçeve sade bir Control'ün içinde - boyu ve ölçeği ona göre kuruluyor.
+## Kenar maskesi tek parça bir resim: ekranın tamamına geriliyor. Bir süre
+## dokuz dilimliydi (kalınlık en boy oranından bağımsız kalsın diye) ama
+## maskeler bütün bir çerçeve olarak boyandı ve oyuncu onları öyle görmek
+## istedi - dilimlenince köşe süslemesi ile kenar ortası birbirinden koptu.
 func _edge_overlay(file_name: String, tint: Color) -> Control:
-	var holder := Control.new()
-	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	holder.modulate = Color(tint, 0.0)
-	_world.add_child(holder)
-
-	var geometry: Dictionary = EDGE_GEOMETRY[file_name]
-	var frame := NinePatchRect.new()
+	var frame := TextureRect.new()
 	frame.texture = WaybookTheme.texture(file_name)
-	frame.patch_margin_left = int(geometry["side"])
-	frame.patch_margin_right = int(geometry["side"])
-	frame.patch_margin_top = int(geometry["top_bottom"])
-	frame.patch_margin_bottom = int(geometry["top_bottom"])
-	frame.axis_stretch_horizontal = geometry["stretch"]
-	frame.axis_stretch_vertical = geometry["stretch"]
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode = TextureRect.STRETCH_SCALE
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	holder.add_child(frame)
-	holder.resized.connect(_fit_edge_frame.bind(holder, frame, geometry))
-	_fit_edge_frame(holder, frame, geometry)
-	return holder
+	frame.modulate = Color(tint, 0.0)
+	_world.add_child(frame)
+	return frame
 
-func _fit_edge_frame(holder: Control, frame: NinePatchRect, geometry: Dictionary) -> void:
-	var factor := edge_frame_scale(holder.size, geometry["size"], int(geometry["side"]))
-	frame.scale = Vector2(factor, factor)
-	frame.position = Vector2.ZERO
-	frame.size = holder.size / factor
-
-## Çerçevenin ölçeği: maskenin boyandığı boyuta göre, kısa kenar belirliyor -
-## en boy oranı ne olursa olsun kalınlık aynı.
-static func edge_frame_scale(area: Vector2, mask_size: Vector2, side_slice: int) -> float:
-	if area.x <= 0.0 or area.y <= 0.0:
-		return 1.0
-	var factor := minf(area.x / mask_size.x, area.y / mask_size.y)
-	# Yan kenarlar ekranın genişliğinin EDGE_MAX_SIDE_RATIO'sunu geçmesin:
-	# dar bir ekranda leke sahneyi yutmamalı, kenarda durmalı.
-	return minf(factor, area.x * EDGE_MAX_SIDE_RATIO / float(side_slice))
+## Soğuğun koyuluğu (0..1): kış ve dağ toplanıyor, üstü kesiliyor.
+static func cold_level(is_winter: bool, biome: String) -> float:
+	var level := EDGE_COLD_WINTER if is_winter else 0.0
+	if biome == ArtPalette.BIOME_MOUNTAIN:
+		level += EDGE_COLD_MOUNTAIN
+	return clampf(level, 0.0, 1.0)
 
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
@@ -2771,6 +2736,9 @@ func _refresh_edges() -> void:
 	_hunger_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
 		float(hungry_nights) / float(EDGE_HUNGER_FULL_NIGHTS), 0.0, 1.0
 	)
+	var is_winter := MarketConditions.get_season(_session.total_days_elapsed) == MarketConditions.Season.WINTER
+	var biome := _terrain.biome_at(_days_covered) if _terrain != null else ""
+	_cold_edge.modulate.a = EDGE_MAX_ALPHA * cold_level(is_winter, biome)
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt
