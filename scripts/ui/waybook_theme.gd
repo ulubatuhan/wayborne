@@ -425,6 +425,13 @@ static func _slip() -> StyleBoxTexture:
 ## Engine Rules: *sebebiyle* kilitli, asla gizli değil). Bir süre üstüne
 ## defterin karalama işareti de biniyordu; oyuncu testinde güzel
 ## görünmediği için kaldırıldı - silik olmak yetiyor.
+##
+## **Yalnızca `TabContainer`in kendi sekmelerinde ve `ROW_BUTTON`/
+## `ICON_TAB`'ın taşıdığı ayrı dokularda kalıyor** - oyuncu G4'ün opak deri
+## dokusunu tüm oyunun varsayılan düğmesi (Pazar/Lonca/Taverna/Kervan
+## Avlusu/Kilise/Karakter/Parti/Dünya Haritası - hemen her ekran) olarak
+## reddetti; emir panelinin zaten kurduğu minimal ilkeyi (`_ghost_button`)
+## referans gösterdi. Bkz. `_minimal_button()`.
 static func _tab(tint: Color, content: Array[int] = TAB_CONTENT) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
 	box.texture = texture("g4_tab.png")
@@ -433,6 +440,32 @@ static func _tab(tint: Color, content: Array[int] = TAB_CONTENT) -> StyleBoxText
 	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
 	# düğmede yatay çizgilere dönüşüyordu.
 	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return box
+
+## Oyunun varsayılan düğmesi: çerçeve + hafif dolgu, `_ghost_button()`
+## (emir paneli) ile aynı ilke - opak bir doku değil, iki çizgi ve bir ton
+## farkı. `_ghost_button()`'ın kendisi camsı bir HUD şeridinin üstü için
+## ayarlı (mürekkep tabanlı, çok düşük alfa); bu düğme çoğu ekranın opak
+## deri panel zemininin (`UI_PANEL_FILL`, kendisi neredeyse mürekkep tonu)
+## üstünde duruyor, o yüzden dolgu mürekkep yerine altın tonundan ısıtılmış
+## - aksi halde iki neredeyse-siyah katman üst üste binip düğme panelinin
+## içinde kaybolurdu (ölçüldü). Köşe yarıçapı ve çerçeve kalınlığı emir
+## panelininkiyle birebir aynı, tek aile iki bağlamda okunsun diye.
+static func _minimal_button(fill_alpha: float, border: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	var gold_dim := ArtPalette.GOLD_DIM
+	box.bg_color = Color(gold_dim.r, gold_dim.g, gold_dim.b, fill_alpha)
+	box.border_color = border
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(3)
+	# Simetrik dolgu: G4'ün kıvrık kulağının asimetrisi (bkz. TAB_CONTENT'in
+	# kendi notu) burada hiç yok, çünkü doku değil düz bir kutu - "1x"/"–"
+	# gibi tek haneli metinler artık ayrı bir ICON_TAB varyasyonuna muhtaç
+	# kalmadan da merkezde duruyor.
+	box.content_margin_left = 16
+	box.content_margin_right = 16
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
 	return box
 
 static func _focus() -> StyleBoxFlat:
@@ -446,11 +479,11 @@ static func _focus() -> StyleBoxFlat:
 
 static func _build_buttons(theme: Theme) -> void:
 	for type_name in ["Button", "OptionButton", "MenuButton"]:
-		theme.set_stylebox("normal", type_name, _tab(Color.WHITE))
-		theme.set_stylebox("hover", type_name, _tab(ArtPalette.UI_TINT_HOVER))
-		theme.set_stylebox("pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
-		theme.set_stylebox("hover_pressed", type_name, _tab(ArtPalette.UI_TINT_PRESSED))
-		theme.set_stylebox("disabled", type_name, _tab(ArtPalette.UI_TINT_DISABLED))
+		theme.set_stylebox("normal", type_name, _minimal_button(0.16, ArtPalette.UI_RULE))
+		theme.set_stylebox("hover", type_name, _minimal_button(0.28, ArtPalette.GOLD_DIM))
+		theme.set_stylebox("pressed", type_name, _minimal_button(0.42, ArtPalette.UI_ACCENT))
+		theme.set_stylebox("hover_pressed", type_name, _minimal_button(0.42, ArtPalette.UI_ACCENT))
+		theme.set_stylebox("disabled", type_name, _minimal_button(0.08, Color(ArtPalette.UI_RULE, 0.3)))
 		theme.set_stylebox("focus", type_name, _focus())
 		theme.set_color("font_color", type_name, ArtPalette.UI_TEXT)
 		theme.set_color("font_hover_color", type_name, ArtPalette.UI_ACCENT)

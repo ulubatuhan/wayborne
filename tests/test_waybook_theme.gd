@@ -22,11 +22,11 @@ func run(t) -> void:
 	_test_desk_workspace_keeps_the_props(t)
 	_test_warning_colour_is_readable(t)
 	_test_present_dismiss_is_a_settle_not_a_snap(t)
+	_test_default_button_is_minimal(t, theme)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
 		["panel", "PanelContainer"], ["panel", "SealPanel"], ["panel", "SlipPanel"],
-		["normal", "Button"], ["disabled", "Button"], ["normal", "OptionButton"],
 		["tab_selected", "TabContainer"], ["separator", "HSeparator"],
 		["grabber", "VScrollBar"], ["panel", "TooltipPanel"],
 	]
@@ -49,15 +49,15 @@ func _test_panel_fill_comes_from_palette(t, theme: Theme) -> void:
 	var distance := absf(centre.r - fill.r) + absf(centre.g - fill.g) + absf(centre.b - fill.b)
 	t.le(distance, 0.12, "panelin iç zemini ArtPalette.UI_PANEL_FILL")
 
-## "Disabled with its reason": kilitli düğme sekmesini kaybetmiyor, yalnızca
-## siliniyor - karalama yok (oyuncu testinde reddedildi), aynı doku, yarı
-## saydam ton.
+## "Disabled with its reason": kilitli düğme çerçevesini/köşesini kaybetmiyor
+## (aynı aile - `_minimal_button`), yalnızca dolgusu ve çerçevesi soluyor -
+## karalama yok (oyuncu testinde reddedildi), yarı saydam ton.
 func _test_locked_button_is_marked(t, theme: Theme) -> void:
-	var normal := theme.get_stylebox("normal", "Button") as StyleBoxTexture
-	var locked := theme.get_stylebox("disabled", "Button") as StyleBoxTexture
-	t.eq(locked.texture, normal.texture, "kilitli sekme karalamasız, aynı doku")
-	t.ne(locked.modulate_color, normal.modulate_color, "kilitli sekme soluk")
-	t.ok(locked.modulate_color.a < 1.0, "kilitli sekme yarı saydam - silik")
+	var normal := theme.get_stylebox("normal", "Button") as StyleBoxFlat
+	var locked := theme.get_stylebox("disabled", "Button") as StyleBoxFlat
+	t.eq(locked.corner_radius_top_left, normal.corner_radius_top_left, "kilitli düğme aynı aile - köşe yarıçapı ortak")
+	t.ok(locked.bg_color.a < normal.bg_color.a, "kilitli düğme dolgusu soluk")
+	t.ok(locked.border_color.a < normal.border_color.a, "kilitli düğme çerçevesi soluk")
 	t.ne(
 		theme.get_color("font_disabled_color", "Button"), theme.get_color("font_color", "Button"),
 		"kilitli düğmenin yazısı da soluk (sebep satırı ayrı ve canlı)"
@@ -90,7 +90,7 @@ func _contrast_ratio(a: Color, b: Color) -> float:
 ## Kenar payları dokunun yarısını geçerse ortada esneyecek bir bölge kalmaz
 ## ve Godot çerçeveyi bozuk çizer.
 func _test_nine_slice_leaves_a_centre(t, theme: Theme) -> void:
-	for pair in [["panel", "PanelContainer"], ["panel", "SealPanel"], ["normal", "Button"], ["panel", "SlipPanel"]]:
+	for pair in [["panel", "PanelContainer"], ["panel", "SealPanel"], ["tab_selected", "TabContainer"], ["panel", "SlipPanel"]]:
 		var box := theme.get_stylebox(pair[0], pair[1]) as StyleBoxTexture
 		var size := box.texture.get_size()
 		t.ok(
@@ -196,3 +196,33 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 	for screen in screens:
 		var source := FileAccess.get_file_as_string("res://scripts/ui/%s.gd" % screen)
 		t.ok(source.contains("fit_desk_workspace"), "%s masa sütununu kullanıyor" % screen)
+
+## Oyuncu G4'ün opak deri dokusunu oyunun *varsayılan* düğmesi olarak
+## reddetti (bkz. WaybookTheme._tab()'ın kendi notu) - emir panelinin
+## minimal ilkesi (`_ghost_button`) artık her ekranın düğmesi. Ama sekme
+## (TabContainer), tam genişlikte sıra düğmesi (RowButton) ve HUD simge
+## düğmesi (IconTab) kasıtlı olarak G4'te kaldı - farklı, ayrı üsluplar,
+## bu değişikliğin kapsamı dışında. Bu test her iki ailenin de doğru
+## dokuda kalmasını kilitliyor; biri yanlışlıkla ötekine kayarsa (ya da
+## bir "hepsini minimal yap" refactor'ü sekmeleri de sürüklerse) burada
+## kırılır.
+func _test_default_button_is_minimal(t, theme: Theme) -> void:
+	for type_name in ["Button", "OptionButton", "MenuButton"]:
+		var normal := theme.get_stylebox("normal", type_name)
+		t.ok(normal is StyleBoxFlat, "%s artık G4 dokusu değil, düz kutu" % type_name)
+	var normal := theme.get_stylebox("normal", "Button") as StyleBoxFlat
+	var hover := theme.get_stylebox("hover", "Button") as StyleBoxFlat
+	var pressed := theme.get_stylebox("pressed", "Button") as StyleBoxFlat
+	t.ok(hover.bg_color.a > normal.bg_color.a, "üstüne gelince dolgu artıyor")
+	t.ok(pressed.bg_color.a > hover.bg_color.a, "basılınca dolgu daha da artıyor")
+	t.ok(normal.border_width_left > 0, "minimal düğme yine de bir çerçeve taşıyor")
+	# Kasıtlı olarak G4'te kalan aileler: sekme, sıra düğmesi, HUD simgesi.
+	t.ok(
+		theme.get_stylebox("tab_selected", "TabContainer") is StyleBoxTexture,
+		"sekmeler kasıtlı olarak G4'te kaldı"
+	)
+	var theme_script = load(THEME_PATH)
+	var row := theme.get_stylebox("normal", theme_script.ROW_BUTTON)
+	t.ok(row is StyleBoxTexture, "tam genişlik sıra düğmesi (RowButton) kasıtlı olarak dokulu kaldı")
+	var icon_tab := theme.get_stylebox("normal", theme_script.ICON_TAB)
+	t.ok(icon_tab is StyleBoxTexture, "HUD simge düğmesi (IconTab) kasıtlı olarak dokulu kaldı")
