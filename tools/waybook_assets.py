@@ -183,8 +183,8 @@ def phase1() -> None:
     rgba = crop_to_alpha(key(_load("G4_button_tab.jpg")))
     save(rgba, "g4_tab.png", scale_to_width(rgba, 240))
 
-    rgba = crop_to_alpha(key(_load("G5_disabled_scratchout.jpg")))
-    save(rgba, "g5_scratch.png", scale_to_width(rgba, 240))
+    # G5 (kilit karalaması) yazılmıyor: oyuncu testinde kilitli düğmenin
+    # üstündeki karalama güzel görünmedi, kilit artık yalnızca silik ton.
 
     rgba = crop_to_alpha(key(_load("G6_ink_rule_separator.jpg")))
     save(rgba, "g6_rule.png", scale_to_width(rgba, 420))

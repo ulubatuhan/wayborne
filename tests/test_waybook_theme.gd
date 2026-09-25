@@ -45,13 +45,15 @@ func _test_panel_fill_comes_from_palette(t, theme: Theme) -> void:
 	var distance := absf(centre.r - fill.r) + absf(centre.g - fill.g) + absf(centre.b - fill.b)
 	t.le(distance, 0.12, "panelin iç zemini ArtPalette.UI_PANEL_FILL")
 
-## "Disabled with its reason": kilitli düğme sekmesini kaybetmiyor, üstü
-## çiziliyor ve soluyor - normal sekmeyle aynı doku olamaz.
+## "Disabled with its reason": kilitli düğme sekmesini kaybetmiyor, yalnızca
+## siliniyor - karalama yok (oyuncu testinde reddedildi), aynı doku, yarı
+## saydam ton.
 func _test_locked_button_is_marked(t, theme: Theme) -> void:
 	var normal := theme.get_stylebox("normal", "Button") as StyleBoxTexture
 	var locked := theme.get_stylebox("disabled", "Button") as StyleBoxTexture
-	t.ne(locked.texture, normal.texture, "kilitli sekme üstü çizili ayrı bir doku")
+	t.eq(locked.texture, normal.texture, "kilitli sekme karalamasız, aynı doku")
 	t.ne(locked.modulate_color, normal.modulate_color, "kilitli sekme soluk")
+	t.ok(locked.modulate_color.a < 1.0, "kilitli sekme yarı saydam - silik")
 	t.ne(
 		theme.get_color("font_disabled_color", "Button"), theme.get_color("font_color", "Button"),
 		"kilitli düğmenin yazısı da soluk (sebep satırı ayrı ve canlı)"
