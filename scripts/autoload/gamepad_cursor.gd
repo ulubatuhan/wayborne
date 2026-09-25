@@ -24,7 +24,7 @@ extends CanvasLayer
 ## - A: sol tık
 ## - B: Esc'in karşılığı (panel kapatma, iptal)
 ## - X: E'nin karşılığı (şehir kapısı/vagon etkileşimi)
-## - LB: F2'nin karşılığı (kervan emir menüsü)
+## - LB: F2'nin karşılığı (yolda tempoyu bir kademe değiştirir)
 ## - RT/LT: yolda ileri/geri (`get_move_axis()` - `road_journey.gd` ve
 ##   `world_hub.gd` kendi A/D okumalarına bunu topluyor, burada değil)
 ##

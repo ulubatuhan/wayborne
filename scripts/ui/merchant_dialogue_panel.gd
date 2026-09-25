@@ -2,7 +2,7 @@ class_name MerchantDialoguePanel
 extends CanvasLayer
 
 ## Kervana kabul edilmiş (eskort) bir tüccarla yolda açılan sohbet - bkz.
-## CLAUDE.md Ana Hedefler'in "#11" notu. F2 emir menüsünün "Tüccarla
+## CLAUDE.md Ana Hedefler'in "#11" notu. yol ekranının emir panelindeki "Tüccarla
 ## Konuş" komutuyla açılıyor (bkz. road_journey.gd).
 ##
 ## Birden çok tüccar eskort edilebildiği için önce bir liste gösteriliyor;
