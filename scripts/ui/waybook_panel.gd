@@ -30,6 +30,9 @@ var _session: GameSession
 var _book: TextureRect
 var _left: ScrollContainer
 var _right: VBoxContainer
+var _root: Control
+var _backdrop: ColorRect
+var _dismissing: bool = false
 
 func setup(session: GameSession) -> WaybookPanel:
 	_session = session
@@ -41,12 +44,14 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = ArtPalette.UI_BACKDROP
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.gui_input.connect(_on_backdrop_input)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	_book = TextureRect.new()
 	_book.texture = WaybookTheme.texture(BOOK_FILE)
@@ -70,6 +75,7 @@ func _ready() -> void:
 
 	root.resized.connect(_layout)
 	_layout()
+	WaybookTheme.present(_book, _backdrop, self)
 
 func _layout() -> void:
 	var view := _book.get_viewport_rect().size
@@ -159,5 +165,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _close() -> void:
-	dismissed.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_book, _backdrop, self, func():
+		dismissed.emit()
+		queue_free()
+	)

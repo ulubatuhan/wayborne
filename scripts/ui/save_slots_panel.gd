@@ -32,6 +32,10 @@ func setup(can_save: bool) -> void:
 	_can_save = can_save
 	_ensure_built()
 	refresh()
+	# Kendi perdesi yok - salt gövde. `saves.tscn`'de tek başına ya da
+	# `InGameMenu`'nün Kayıtlar alt sayfasında, ikisinde de tek karede
+	# beliren liste artık soluk+ölçekli açılıyor.
+	WaybookTheme.present(self, null, self)
 
 func _ensure_built() -> void:
 	if _rows != null:

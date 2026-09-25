@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_cold_edge_reads_season_and_biome(t)
 	_test_desk_workspace_keeps_the_props(t)
 	_test_warning_colour_is_readable(t)
+	_test_present_dismiss_is_a_settle_not_a_snap(t)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
@@ -145,6 +146,34 @@ func _test_warning_colour_is_readable(t) -> void:
 		4.5,
 		"UI_WARNING panel zemininde WCAG AA'yı geçiyor"
 	)
+
+## Sahnesiz panellerin açılış/kapanış devinimi (bkz. defect matrix'in "15
+## scene-less panel" maddesi). Bir tween ağaç dışında koşamadığı için
+## (`create_tween` bir düğümün ağaçta olmasını ister) burada canlı bir
+## devinim ölçülemiyor - `_verify_present_dismiss.gd` (bu oturumda xvfb
+## altında koşturuldu) canlı uçtan uca doğrulamayı yaptı. Burada kilitlenen
+## iki saf iddia: ağaç dışında çağrılmak güvenle no-op kalıyor (çökmüyor,
+## `root`u değiştirmiyor) ve kapanış açılıştan kısa - "bir durma bir
+## yerleşmedir, ani bir kesme değil" kuralının süre tarafı.
+func _test_present_dismiss_is_a_settle_not_a_snap(t) -> void:
+	var theme_script = load(THEME_PATH)
+	t.ok(theme_script.PRESENT_CARD_START_SCALE < 1.0, "kart küçükten büyüğe açılıyor")
+	t.le(theme_script.DISMISS_SECONDS, theme_script.PRESENT_CARD_SECONDS, "kapanış açılıştan kısa ya da eşit")
+	t.le(theme_script.PRESENT_BACKDROP_SECONDS, theme_script.PRESENT_CARD_SECONDS + 0.01, "perde karttan daha uzun sürmüyor")
+
+	# Ağaçta olmayan bir düğümde present()/dismiss() çökmemeli, sessizce
+	# no-op kalmalı (bkz. WaybookTheme.present/dismiss'in `is_inside_tree`
+	# koruması).
+	var orphan := PanelContainer.new()
+	var before_scale := orphan.scale
+	var before_alpha := orphan.modulate.a
+	theme_script.present(orphan, null, null)
+	t.eq(orphan.scale, before_scale, "ağaç dışı kart present() ile değişmiyor")
+	t.eq(orphan.modulate.a, before_alpha, "ağaç dışı kart present() ile solmuyor")
+	var completed := [false]
+	theme_script.dismiss(orphan, null, null, func(): completed[0] = true)
+	t.ok(completed[0], "ağaç dışı dismiss() geri çağrıyı hemen çağırıyor")
+	orphan.free()
 
 ## Masa ekranlarında metin ortada bir sütunda: geniş ekranda genişliğin en
 ## çok %65'i (kenarlardaki nesneler resmin kendisi), dar ekranda tam genişlik.

@@ -632,3 +632,75 @@ static func _set_margins(box: StyleBoxTexture, slice: Array[int], content: Array
 	box.content_margin_top = content[1]
 	box.content_margin_right = content[2]
 	box.content_margin_bottom = content[3]
+
+# --- Açılış/kapanış (sahnesiz panellerin ortak devinimi) ---
+## Onboarding, Vagon, Sofra, Savaş Öncesi, Tüccar, Waybook, Kervan Dökümü/
+## Yükü gibi sahnesiz `.new()` panelleri tek karede belirip kayboluyordu -
+## `create_tween` çağıran yalnızca sekiz dosya vardı (bkz. Motion Rules'un
+## "motion has one clock per system" kuralı, burada "presenter" hiç yoktu).
+## Bu iki statik fonksiyon `fit_desk_workspace`'in kurduğu aynı disiplinle
+## çalışıyor: gevşek tipli düğümler alıyor, eksik/uygunsuz girdide sessizce
+## no-op ya da doğrudan tamamlanıyor.
+const PRESENT_BACKDROP_SECONDS: float = 0.18
+const PRESENT_CARD_SECONDS: float = 0.2
+const DISMISS_SECONDS: float = 0.12
+## Kartın açılış ölçeği - `reduce_motion` açıkken hiç uygulanmıyor, yalnızca
+## alfa kalıyor (Motion Rules: azaltılmış hareket süsü kapatır, bilgiyi
+## taşıyanı kapatmaz - burada "az önce açıldı" bilgisini alfa taşıyor).
+const PRESENT_CARD_START_SCALE: float = 0.97
+
+## Bir paneli açılış anında canlandırır. `backdrop` sahibi olmayan gömülü
+## panellerde (bkz. Debt/SaveSlots/CaravanStatus/Haggling/Purification/
+## Recruit - kendi perdeleri yok, ev sahibi ekranınki) `null` geçilir ve
+## yalnızca kart canlanır. `context` yalnızca `reduce_motion`'ı okumak için:
+## `WaybookTheme` durumsuz bir `RefCounted`, ağaçta değil.
+static func present(root: Control, backdrop: CanvasItem, context: Node) -> void:
+	if root == null or not root.is_inside_tree():
+		return
+	var reduce := _reduce_motion(context)
+	root.modulate.a = 0.0
+	if not reduce:
+		root.pivot_offset = root.size * 0.5
+		root.scale = Vector2(PRESENT_CARD_START_SCALE, PRESENT_CARD_START_SCALE)
+	if backdrop != null:
+		backdrop.modulate.a = 0.0
+	var tween := root.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(root, "modulate:a", 1.0, PRESENT_CARD_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if not reduce:
+		tween.tween_property(root, "scale", Vector2.ONE, PRESENT_CARD_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if backdrop != null:
+		tween.tween_property(backdrop, "modulate:a", 1.0, PRESENT_BACKDROP_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+## Kapanışı canlandırıp `on_complete`'i (genelde `dismissed.emit(); queue_free()`)
+## devinim bitince çağırır. Kök ağaçta değilse (zaten serbest bırakılmış,
+## ya da hiç sahnelenmemiş) devinim atlanıp `on_complete` hemen çağrılır -
+## bir tween'in var olmayan bir düğümde çalışmaya çalışması yerine.
+static func dismiss(root: Control, backdrop: CanvasItem, context: Node, on_complete: Callable) -> void:
+	if root == null or not root.is_inside_tree():
+		on_complete.call()
+		return
+	var reduce := _reduce_motion(context)
+	var tween := root.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(root, "modulate:a", 0.0, DISMISS_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if not reduce:
+		tween.tween_property(root, "scale", Vector2(PRESENT_CARD_START_SCALE, PRESENT_CARD_START_SCALE), DISMISS_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if backdrop != null:
+		tween.tween_property(backdrop, "modulate:a", 0.0, DISMISS_SECONDS) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(on_complete)
+
+## `combat_panel.gd`/`button_feedback.gd`'nin zaten kurduğu korumalı okuma -
+## `WaybookTheme`'in kendisi bir düğüm değil, `context`'in ağaçta olup
+## olmadığını önce sormak gerekiyor.
+static func _reduce_motion(context: Node) -> bool:
+	if context == null or not context.is_inside_tree():
+		return false
+	var settings := context.get_node_or_null("/root/UserSettings")
+	return settings != null and bool(settings.get("reduce_motion"))

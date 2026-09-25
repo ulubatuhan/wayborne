@@ -21,6 +21,11 @@ var _order: Array[CharacterData] = []
 var _included: Dictionary = {}  # CharacterData -> bool
 var _rows_container: VBoxContainer
 var _confirm_button: Button
+var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" (`panel`) - `backdrop`in kardeşi, `root`'un torunu değil.
+var _card: PanelContainer
+var _dismissing: bool = false
 
 ## `benched`: son savaşta dışarıda tutulanlar - kadro hatırlanıyor, değişen
 ## bir şey yoksa oyuncu yalnızca onaylıyor. Hepsi dışarıdaysa (hatırlanan
@@ -41,11 +46,13 @@ func setup(party: Array[CharacterData], benched: Array[CharacterData] = []) -> v
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP_COLOR
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -55,6 +62,7 @@ func setup(party: Array[CharacterData], benched: Array[CharacterData] = []) -> v
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
 	center.add_child(panel)
+	_card = panel
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 8)
@@ -88,6 +96,7 @@ func setup(party: Array[CharacterData], benched: Array[CharacterData] = []) -> v
 
 	_refresh_rows()
 	_confirm_button.call_deferred("grab_focus")
+	WaybookTheme.present(_card, _backdrop, self)
 
 ## Her satır: yukarı/aşağı ile bu savaşa özel mevki sırası, kutu ile
 ## katılıp katılmayacağı. En az bir kişi katılmalı - hepsi çıkarsa
@@ -147,9 +156,14 @@ func _on_include_toggled(pressed: bool, character: CharacterData) -> void:
 	_refresh_rows()
 
 func _on_confirm_pressed() -> void:
+	if _dismissing:
+		return
+	_dismissing = true
 	var chosen: Array[CharacterData] = []
 	for character in _order:
 		if _included.get(character, true):
 			chosen.append(character)
-	confirmed.emit(chosen)
-	queue_free()
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		confirmed.emit(chosen)
+		queue_free()
+	)

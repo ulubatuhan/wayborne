@@ -80,6 +80,11 @@ func setup(session: GameSession) -> void:
 	_session = session
 	_ensure_built()
 	refresh()
+	# Kendi perdesi yok (bkz. sınıf yorumu) - yalnızca kart canlanıyor,
+	# `backdrop` argümanı `null`. Ev sahibi ekran (guild.tscn'in sabit
+	# sekmesi ya da road_journey.gd'nin modal kartı) her ikisinde de aynı
+	# giriş: tek karede beliren panel artık soluk+ölçekli açılıyor.
+	WaybookTheme.present(self, null, self)
 
 func _ensure_built() -> void:
 	if _title_label != null:

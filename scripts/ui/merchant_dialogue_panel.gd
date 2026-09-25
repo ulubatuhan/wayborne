@@ -37,6 +37,11 @@ var _detail_body: VBoxContainer
 var _list_holder: Control
 var _detail_holder: Control
 var _selected_merchant: String = ""
+var _root: Control
+var _backdrop: ColorRect
+## Devinen "kart" (`panel`) - `backdrop`in kardeşi, `root`'un torunu değil.
+var _card: PanelContainer
+var _dismissing: bool = false
 
 func setup(session: GameSession, rng: RandomNumberGenerator = null) -> void:
 	_session = session
@@ -47,11 +52,13 @@ func setup(session: GameSession, rng: RandomNumberGenerator = null) -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
+	_root = root
 
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP_COLOR
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(backdrop)
+	_backdrop = backdrop
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -61,6 +68,7 @@ func setup(session: GameSession, rng: RandomNumberGenerator = null) -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
 	center.add_child(panel)
+	_card = panel
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -95,6 +103,7 @@ func setup(session: GameSession, rng: RandomNumberGenerator = null) -> void:
 	vbox.add_child(close_button)
 
 	_refresh()
+	WaybookTheme.present(_card, _backdrop, self)
 
 func _refresh() -> void:
 	if _selected_merchant.is_empty():
@@ -252,5 +261,10 @@ func _on_back_pressed() -> void:
 	_refresh()
 
 func _on_close_pressed() -> void:
-	closed.emit()
-	queue_free()
+	if _dismissing:
+		return
+	_dismissing = true
+	WaybookTheme.dismiss(_card, _backdrop, self, func():
+		closed.emit()
+		queue_free()
+	)

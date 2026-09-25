@@ -29,6 +29,8 @@ func setup(session: GameSession, title: String, cost: int) -> void:
 	_cost = cost
 	_title_label.text = title
 	refresh()
+	# Kendi perdesi yok - salt gövde, Taverna/Kilise'nin sekmesine gömülü.
+	WaybookTheme.present(self, null, self)
 
 func refresh() -> void:
 	if _session == null:

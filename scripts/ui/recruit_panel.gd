@@ -28,6 +28,10 @@ func setup(session: GameSession, venue: String, title: String) -> void:
 	_venue = venue
 	_title_label.text = title
 	refresh()
+	# Kendi perdesi yok - salt gövde, `recruit.tscn`'in kalıcı içeriği.
+	# `refresh()` tek başına de tekrar tekrar çağrıldığı için (aday
+	# alma/çıkarma) devinim yalnızca ilk kuruluşta, burada.
+	WaybookTheme.present(self, null, self)
 
 func refresh() -> void:
 	if _session == null:
