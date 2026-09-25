@@ -77,16 +77,26 @@ func _setup_language_selector() -> void:
 ##
 ## Çözüm dil adını Latinceye çevirmek *değil*: adın yanına dil kodu
 ## ekleniyor, yalnızca ad çizilemiyorsa. "zh_CN" en azından aranabilir bir
-## şey; ad çizilebildiği gün (CJK taşıyan bir font geldiğinde) ek
+## şey; ad çizilebildiğinde (kitap yüzünün CJK yedekleri geldi) ek
 ## kendiliğinden kayboluyor.
 func _readable_locale_name(locale_name: String, code: String) -> String:
 	var font := ThemeDB.fallback_font
 	if font == null:
 		return locale_name
 	for index in locale_name.length():
-		if not font.has_char(locale_name.unicode_at(index)):
+		if not _chain_has_char(font, locale_name.unicode_at(index)):
 			return "%s (%s)" % [locale_name, code]
 	return locale_name
+
+## Kitap yüzü CJK'yı kendisi değil yedekleriyle çiziyor; yalnızca ana fonta
+## bakmak her CJK adına gereksiz yere kod eklerdi.
+func _chain_has_char(font: Font, code: int) -> bool:
+	if font.has_char(code):
+		return true
+	for fallback in font.fallbacks:
+		if _chain_has_char(fallback, code):
+			return true
+	return false
 
 func _on_language_selected(index: int) -> void:
 	if index < 0 or index >= _locale_codes.size():

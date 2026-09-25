@@ -1326,8 +1326,12 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   now checks the game's real font chain, and separately that every
   non-CJK language's alphabet is in the book face *itself* - the ru/pl
   columns are still empty, so a CSV-only check would have tested nothing.
-  CJK still falls through to the engine font; a Noto Serif CJK fallback
-  is an open item (size cost on Web).
+  CJK falls to Noto Serif SC/JP (OFL) - cut by
+  `tools/cjk_font_subset.py` to GB2312 level 1 / kana + JIS level 1 plus
+  every CJK character already in the CSVs (~1.4 + 1.5 MB instead of
+  18 MB whole); re-run it when the zh_CN/ja columns are filled. Each face
+  refuses the other's language (`set_language_support_override`), because
+  the same Han character is drawn differently in Chinese and Japanese.
 - **The book is the lineage, not a decoration of it.** The main menu is
   a closed leather cover that opens into a spread (M1/M2) - the cover
   names the caravan and its generation from the save; the run-over screen
@@ -3230,12 +3234,12 @@ zh_CN, ja). Turkish is the source language; English is the fallback.
   everywhere the UI used them as icons - twelve player-facing spots, found
   by a playtest photographing only one of them. `_test_every_glyph_is_
   renderable` checks every CSV cell and every screen string literal
-  against `ThemeDB.fallback_font.has_char()`. The one exemption is
-  `UserSettings.SUPPORTED`'s language names (`user_settings.gd`): they
-  must stay in their own script (see the exemption above) even where CJK
-  isn't renderable yet, so `settings.gd` appends the locale code next to
-  an unrenderable name instead of hiding the option - a language you
-  can't read the name of should still be one you can find by its code.
+  against `ThemeDB.fallback_font.has_char()`. There is no exemption any
+  more: `user_settings.gd`'s language names ("简体中文", "日本語") were
+  exempt while no font carried CJK, and became renderable with the book
+  face's CJK fallbacks. `settings.gd` still appends the locale code to a
+  name it cannot draw (checking the whole fallback chain), so a future
+  language without a face stays findable by its code.
 
 - **scripts/ui/**: User interface scripts
   - Menu controllers
@@ -3686,8 +3690,7 @@ verir.
   Rules). Açık kalanlar: ikon aileleri üslupça tutarsız (bir kısmı
   çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
   kartlı) - aile başına tek üsluba yeniden üretilmeli; yönetim ekranı
-  arka planları 1376x768'de geldi, 1920'de yumuşuyor; CJK için kitap
-  yüzüne uygun bir serif yedek font.
+  arka planları 1376x768'de geldi, 1920'de yumuşuyor.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin

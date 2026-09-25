@@ -30,6 +30,13 @@ extends RefCounted
 
 const ART_DIR: String = "res://data/assets/ui/waybook/"
 const FONT_PATH: String = "res://data/assets/fonts/EBGaramond.ttf"
+## Kitap yüzünün CJK yedekleri (Noto Serif, alt küme - bkz.
+## tools/cjk_font_subset.py). Aynı Han karakteri Çince ve Japoncada farklı
+## çiziliyor, o yüzden ikisi de kendi dili dışında geri çekiliyor.
+const CJK_FONTS: Array = [
+	["res://data/assets/fonts/NotoSerifSC-Subset.otf", "zh", "ja"],
+	["res://data/assets/fonts/NotoSerifJP-Subset.otf", "ja", "zh"],
+]
 ## Kitap yüzünün göz yüksekliği motorun sans'ından küçük; 18 eski 16 gibi
 ## okunuyor ve aşağı yukarı aynı genişliği kaplıyor.
 const FONT_SIZE: int = 18
@@ -94,19 +101,27 @@ static func install() -> void:
 	ThemeDB.fallback_font = get_font()
 	ThemeDB.fallback_font_size = FONT_SIZE
 
-## Oyunun yüzü, arkasında motorun kendi fontu: EB Garamond Latin (Türkçe
-## dahil) ve Kiril'i taşıyor, taşımadığı her şey (bugün CJK) daha önce
-## çizilen fonta düşüyor - önceki fontun çizebildiği bir karakter asla boş
-## kutuya dönmüyor.
+## Oyunun yüzü: EB Garamond Latin (Türkçe dahil) ve Kiril'i taşıyor, Han
+## ve kana tırnaklı CJK yedeklerine düşüyor, kalan her şey motorun kendi
+## fontuna - önceki fontun çizebildiği bir karakter asla boş kutuya dönmüyor.
 static func get_font() -> Font:
 	if _font != null:
 		return _font
 	var book: FontFile = load(FONT_PATH)
+	var fallbacks: Array[Font] = []
+	for entry in CJK_FONTS:
+		var face: FontFile = load(entry[0])
+		if face == null:
+			continue
+		face.set_language_support_override(entry[1], true)
+		face.set_language_support_override(entry[2], false)
+		fallbacks.append(face)
 	var engine_default := ThemeDB.get_default_theme().default_font
 	if engine_default == null:
 		engine_default = ThemeDB.fallback_font
 	if engine_default != null and engine_default != book:
-		book.fallbacks = [engine_default]
+		fallbacks.append(engine_default)
+	book.fallbacks = fallbacks
 	_font = book
 	return _font
 
