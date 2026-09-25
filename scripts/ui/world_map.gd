@@ -122,7 +122,10 @@ func _build_location_point(location: Location) -> Control:
 	var button := Button.new()
 	button.theme_type_variation = WaybookTheme.MAP_LABEL
 	button.position = Vector2(-LABEL_OVERHANG, POINT_SIZE.y * 0.5 + PIN_SIZE * 0.3)
-	button.custom_minimum_size = Vector2(POINT_SIZE.x + LABEL_OVERHANG * 2.0, 0.0)
+	# Ölçüldü: metinle taşınan yükseklik 27-38 px'e düşüyordu - dokunma/
+	# tıklama hedefi olarak dar. POINT_SIZE.y (44) zaten bu işaretin kendi
+	# tasarlanmış boyu, tabanı da ondan alıyor.
+	button.custom_minimum_size = Vector2(POINT_SIZE.x + LABEL_OVERHANG * 2.0, POINT_SIZE.y)
 	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	marker.add_child(button)
 
