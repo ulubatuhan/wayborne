@@ -41,6 +41,13 @@ const CJK_FONTS: Array = [
 ## okunuyor ve aşağı yukarı aynı genişliği kaplıyor.
 const FONT_SIZE: int = 18
 const TOOLTIP_FONT_SIZE: int = 16
+## Savaş panelinin en küçük yazı boyutu. Sıra şeridi, yorum balonu, mevki/
+## isim etiketi ve kayıt satırı 9-12 px'e kadar düşmüştü - EB Garamond'un
+## küçük gözünde okunaksız (CLAUDE.md'nin "Combat micro-fonts" maddesi).
+## Saf sayı taşıyan etiketler (can, durum turu sayacı) `FONT_NUMBER`;
+## geri kalan her küçük savaş metni `FONT_MIN`.
+const FONT_MIN: int = 15
+const FONT_NUMBER: int = 16
 
 ## Ekranların `theme_type_variation` ile seçtiği tema çeşitleri.
 const SEAL_PANEL: StringName = &"SealPanel"

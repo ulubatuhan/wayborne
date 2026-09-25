@@ -322,7 +322,7 @@ func _refresh_header() -> void:
 func _build_order_chip(unit: CombatUnit, is_active: bool) -> Label:
 	var chip := Label.new()
 	chip.text = unit.display_name
-	chip.add_theme_font_size_override("font_size", 9)
+	chip.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	if is_active:
 		chip.modulate = CombatUnitSlot.ACTIVE_BORDER
 	elif unit.is_player_side:
@@ -731,7 +731,7 @@ func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBo
 
 	var label := Label.new()
 	label.text = prefix
-	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	label.modulate = color
 	row.add_child(label)
 
@@ -800,7 +800,7 @@ func _on_pass_pressed() -> void:
 func _on_log_added(line: String) -> void:
 	var label := Label.new()
 	label.text = line
-	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_log_list.add_child(label)
 	while _log_list.get_child_count() > MAX_LOG_LINES:
