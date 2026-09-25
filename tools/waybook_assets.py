@@ -205,9 +205,27 @@ def phase1() -> None:
     edge_masks()
 
 
+## Checkerboard keying: generators hand back "transparent" PNGs as JPGs with
+## the editor's grey checkerboard baked in as pixels. The ink is white and
+## the checkerboard never rises above ~95 luma, so the alpha is a ramp on
+## brightness alone - no backdrop keying, no card to cut off.
+CHECKER_LUMA_FLOOR = 110.0
+CHECKER_LUMA_RANGE = 110.0
+
+
+def checker_mask(src: str, name: str) -> None:
+    rgb = _load(src).astype(np.float32)
+    luma = rgb[..., :3].mean(axis=2)
+    alpha = np.clip((luma - CHECKER_LUMA_FLOOR) / CHECKER_LUMA_RANGE, 0.0, 1.0) * 255.0
+    mask = np.dstack([np.full_like(luma, 255.0)] * 3 + [alpha]).astype(np.uint8)
+    save(mask, name)
+
+
 def edge_masks() -> None:
-    for src, name in [("G11b_danger_edge_frost.jpg", "g11_edge_bleed.png"),
-                      ("G11c_danger_edge_scorch.jpg", "g11_edge_scorch.png")]:
+    # Stress edge v2: a square nine-slice sheet (corners dense, edges tileable),
+    # painted for the road's NinePatchRect instead of one 16:9 picture.
+    checker_mask("G11a_edge_bleed_v2.jpg", "g11_edge_bleed.png")
+    for src, name in [("G11c_danger_edge_scorch.jpg", "g11_edge_scorch.png")]:
         rgb = _load(src)
         h, w = rgb.shape[:2]
         rgba = crop_to_alpha(key(rgb, seeds=[(h // 2, w // 2)]), pad=0)
