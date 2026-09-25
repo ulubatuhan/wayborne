@@ -332,11 +332,39 @@ def icon(src: str, name: str, size: int = 128) -> None:
     save(rgba, name, (max(1, round(w * scale)), max(1, round(h * scale))))
 
 
+PAPER_FRAME_LUMA = 150.0
+PAPER_FRAME_ROW = 0.3
+PAPER_FRAME_MARGIN = 10
+
+
+def crop_paper_frame(rgb: np.ndarray) -> np.ndarray:
+    """Some desk scenes came framed in a cream paper border with a torn inner
+    edge. Walk in from each side while the row/column is mostly paper, then
+    take a margin more so the torn nibbles go with it. A scene without a
+    frame (candle glow at the top edge is a minority of the row) is left
+    untouched."""
+    luma = rgb[..., :3].mean(axis=2)
+    pale = luma > PAPER_FRAME_LUMA
+
+    def inset(profile) -> int:
+        n = 0
+        while n < len(profile) // 4 and profile[n] > PAPER_FRAME_ROW:
+            n += 1
+        return n + PAPER_FRAME_MARGIN if n else 0
+
+    top = inset(pale.mean(axis=1))
+    bottom = inset(pale.mean(axis=1)[::-1])
+    left = inset(pale.mean(axis=0))
+    right = inset(pale.mean(axis=0)[::-1])
+    h, w = luma.shape
+    return rgb[top:h - bottom, left:w - right]
+
+
 def background(src: str, name: str) -> None:
     """A full-bleed scene. Some arrived as a torn page on a white sheet;
     the white outside the torn edge is filled with ink-dark so the page
     reads as lying on a dark desk instead of floating on a white card."""
-    rgb = _load(src)
+    rgb = crop_paper_frame(_load(src))
     white = rgb.min(axis=2) > 232
     labels, _ = ndimage.label(white)
     border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])))
