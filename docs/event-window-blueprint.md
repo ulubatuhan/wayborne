@@ -1,7 +1,8 @@
 # Olay Penceresi Yeniden Tasarımı — Mimari + Varlık Üretim Planı
 
-**Durum:** Tasarım aşaması. Bu belge onaylanmadan hiçbir Godot kodu
-yazılmadı. `docs/art-prompts.md`'nin kardeşi: o dünya sahneleri
+**Durum:** Mimari ve varlık listesi onaylandı (§2, §8). Henüz hiçbir
+Godot kodu yazılmadı ve ham görseller üretilmedi — sıradaki adım için
+bkz. §8. `docs/art-prompts.md`'nin kardeşi: o dünya sahneleri
 (yol/şehir/menü) için, bu **olay kartı arayüz kromu ve olay
 illüstrasyonları** için.
 
@@ -30,10 +31,13 @@ Modal/Center                              (mevcut - road_journey.tscn)
         ├── ChoiceRow × N  [E_Choice_Row_Normal / _Hover]
         │   ├── StatEmblem (mevcut WaybookIcons.STAT_EMBLEMS)
         │   ├── ChoiceLabel (mevcut metin + check preview + danger etiketi)
-        │   ├── CombatStripe (mevcut ColorRect, UI_CHOICE_COMBAT)
-        │   └── LockedScratch [E_Choice_Row_Locked]  (yalnızca kilitliyse)
+        │   └── CombatStripe (mevcut ColorRect, UI_CHOICE_COMBAT)
         └── ...
 ```
+
+**Karar (bkz. §2): kilitli seçenek çizgi taşımıyor.** Yalnızca solma -
+mevcut `font_disabled_color`/`disabled = true` çözümü aynen kalıyor,
+yeni bir katman eklenmiyor.
 
 Hiçbir mevcut veri sözleşmesi değişmiyor: `GameEvent → EventChoice →
 EventOutcome` ağacı, `EventCondition`, `SkillCheck`, `get_check_preview()`,
@@ -78,43 +82,26 @@ varyant. Yeni bir görsel dil icat edilmiyor, var olanı genişletiyor.
 
 ---
 
-## 2. Açık tasarım çatışması — onay gerekiyor
+## 2. Tasarım kararı — çözüldü
 
-**`E_Choice_Row_Locked`'ın istediği "mürekkep karalama" (G5), daha önce
-denenmiş ve oyuncu playtest'inde reddedilmişti.** CLAUDE.md'nin kendi
-kaydı (Waybook UI Rules): *"For a while the ledger's scratch-out (G5) was
-composed over the tab's ear; the player rejected it in playtest ('güzel
-gözükmüyor, silik olması yeterli'), so it is gone from the theme and from
-the pipeline's output."* `art_source/waybook/G5_disabled_scratchout.jpg`
-hâlâ diskte duruyor ama hiçbir yere işlenmiyor — tam olarak bu redde
-takılı kaldığı için.
+**Kilitli seçenek çizgi taşımayacak, yalnızca solacak.** G5'in "mürekkep
+karalama" fikri daha önce (kalıcı kilitli menü düğmeleri için) playtest'te
+reddedilmişti (CLAUDE.md, Waybook UI Rules: *"the player rejected it in
+playtest ('güzel gözükmüyor, silik olması yeterli')"*). Olay kartı
+bağlamında dar bir versiyonu önerilmişti (§2'nin eski hali) ama karar
+**hayır** - hiçbir yeni işaret eklenmiyor. `E_Choice_Row_Locked` varlığı
+**listeden çıkarıldı**; kilitli bir seçenek `_build_choice_button()`'ın
+zaten yaptığı gibi yalnızca soluyor (`font_disabled_color`,
+`disabled = true`) - `_mark_choice()`'a hiçbir yeni katman eklenmiyor.
+Beş varlık dörde indi: **E_Frame_Master, E_Header_Banner,
+E_Choice_Row_Normal, E_Choice_Row_Hover.**
 
-Bu yeni istek aynı fikri **farklı bir bağlamda** (kalıcı bir kilitli
-menü düğmesi değil, tek seferlik bir olay kararı) geri getiriyor. İki
-bağlam gerçekten farklı — bir olay kartında kilitli bir seçenek "bu kapı
-şimdilik kapalı, bir daha bu kartı görmeyeceksin" der, bir ekipman
-sekmesindeki kilitli düğme "henüz değil, tekrar gelirsin" der — ama
-görsel aynı fikrin ikinci denemesi olduğu için bunu sessizce
-uygulamıyorum. Önerim:
-
-1. Eski G5'in hatası **tüm düğmenin üstünü** karalamaktı (kulakla
-   çakışıyordu, dolgun bir yüzeyi bölüyordu). `E_Choice_Row_Locked`
-   yalnızca **satırın sol kenarından çıkan tek bir mürekkep çizgisi**
-   olsun — metnin üstünden geçmeyen, yalnızca "bu satır artık dışarıda"
-   diyen ince bir iz (aşağıdaki prompt bunu tarif ediyor).
-2. Bu varlık üretilip koda bağlanmadan **önce** tek bir ekranda (yalnızca
-   olay kartında, başka hiçbir yerde) gerçek bir playtest turu geçmeli.
-   Reddedilirse aynı akıbeti paylaşır ve `_mark_choice()`'ın zaten
-   ölçülmüş "silik olmak yetiyor" çözümüne (bkz. Event Engine Rules)
-   geri dönülür — kod tarafında bu iki seçenek arasında geçiş tek bir
-   satır (`if choice card ise scratch, değilse mevcut fade`).
-
-**Bu belge bu soruyu çözmüyor, yalnızca varlığı hazırlıyor.** Onay
-kullanıcıdan.
+`art_source/waybook/G5_disabled_scratchout.jpg` kullanılmıyor, orphan
+kalmaya devam ediyor.
 
 ---
 
-## 3. Beş çekirdek varlık
+## 3. Dört çekirdek varlık
 
 Üretim tarifi mevcut G-serisiyle **birebir aynı**: düz orta gri
 (`~rgb(140,140,140)`, `key()` fonksiyonunun zaten kilitlendiği ton) arka
@@ -124,7 +111,7 @@ tarama gölgeler, eskitilmiş deri/pirinç, dikiş izleri). **Bu, dünya
 sahneleri için `docs/art-prompts.md`'nin "yassı-resimsel" stilinden
 ayrı bir tarif** — orası boyalı bir manzara, burası boyanmış bir nesne.
 
-Ortak ön-ek (beşinin de promptunun başına ekle):
+Ortak ön-ek (dördünün de promptunun başına ekle):
 
 ```
 Bir masaüstü/web oyunu için UI çerçeve dokusu çiziyorsun (ikon değil,
@@ -148,15 +135,14 @@ watermark ÇİZME.
 | **E_Header_Banner** | `art_source/waybook/E2_header_banner.jpg` | `data/assets/ui/waybook/e2_banner.png` | Kaynak 1536×384 (yatay şerit), dokuz-parça yalnızca yatay dilim ~120px uçlarda, orta döşenir | Yatay bir "isim plakası" şeridi — R1'in HUD kayışıyla aynı aile (perçinli deri kuşak) ama iki ucu sivri/kalkan biçimli kapanan bir levha, ortası düz gri (başlık metni oraya gelecek). | `SAHNE: Yatay, ince bir pirinç isim plakası/levha - iki ucu üçgen/kalkan şeklinde sivrilerek kapanıyor (bir zırh göğüs plakasının üst kenarı gibi), uçlarında birer küçük perçin. Levhanın ortası (yaklaşık %70'i) tamamen düz, boş, tekdüze gri kalsın - metin oraya bindirilecek. Levhanın kendisi hafif kabartma/rölyef hissi versin (kenarları biraz daha koyu, ortası biraz daha açık ton) ama gerçek bir gölge/gradyan ARKA PLANA değil yalnızca levhanın metaline uygulansın.` |
 | **E_Choice_Row_Normal** | `art_source/waybook/E3_choice_row_normal.jpg` | `data/assets/ui/waybook/e3_row_normal.png` | Kaynak 1536×256 (yatay şerit), dokuz-parça simetrik dilim ~48px (IconTab'ın simetri dersini uygula - kulak YOK) | Dar, yatay bir "defter satırı" şeridi — G4'ün kulak/asimetrisi yok (Faz 21'de default düğmeler zaten bu hataya düştü ve düzeltildi, tekrarlanmasın), düz iki uçlu, hafif kabartmalı ince deri kenarlıklı çizgili kâğıt hissi. | `SAHNE: Yatay, dar (kart genişliğinde) bir "defter satırı" - L1'deki çizgili muhasebe kâğıdının dokusu (ince yatay cetvel çizgileri, lekeli sararmış kâğıt) ince bir koyu deri çerçeve içinde. ÇERÇEVE SİMETRİK olmalı - sol ve sağ kenar birbirinin aynı, G4'teki gibi bir "kulak" ya da çıkıntı OLMASIN. Üst ve alt kenarda ince bir dikiş izi. Sol kenarda küçük bir boşluk bırak (bir stat amblemi ikonu oraya bindirilecek).` |
 | **E_Choice_Row_Hover** | `art_source/waybook/E4_choice_row_hover.jpg` | `data/assets/ui/waybook/e4_row_hover.png` | E_Choice_Row_Normal ile birebir aynı kesim/dilim | Aynı satır, yalnızca kenarlık soluk altına (GOLD) dönmüş ve kâğıt zemini hafif aydınlanmış — üstüne gelinen bir satır "seçilmeye hazır" okunsun. | `[E_Choice_Row_Normal promptunun BİREBİR AYNISI], tek fark: deri çerçevenin rengi koyu bordo yerine sıcak soluk altın/pirinç tonunda (#DCB357 civarı), ve kâğıdın üstünde çok hafif bir sıcak ışık havuzu var - sanki bir mum ona yaklaşmış gibi.` |
-| **E_Choice_Row_Locked** *(§2'deki onaya bağlı)* | `art_source/waybook/E5_choice_row_locked.jpg` | `data/assets/ui/waybook/e5_scratch.png` | Kaynak 1536×256, şeffaf maske (yalnızca çizgi, arka plan tamamen kırpılacak) | **Tüm satırı değil, yalnızca satırın en solundan çıkıp yaklaşık %35'ine uzanan TEK bir mürekkep çizgisi** — G5'in eski hatası (tüm satırı bölen üç çizgi) tekrarlanmıyor, R9'un "isim üstü çizme" darbesiyle aynı ölçüde kısıtlı bir iz. | `SAHNE: Tamamen düz gri arka plan üstünde TEK bir mürekkep fırça darbesi - sol kenardan başlayıp sağa doğru incelerek biten, hafif eğik, suluboya kenarlı bir çizgi (R9'daki isim-üstü-çizme darbesiyle aynı fırça hissi). Çizgi genişliğin yalnızca ilk üçte birini kaplasın, tüm satırı KAT ETMESİN. Başka hiçbir şey çizme - ne çerçeve ne doku, yalnızca bu tek darbe.` |
 
-**Not — zaten diskte var, tekrar üretmeden önce kontrol et:**
-`art_source/waybook/G5_disabled_scratchout.jpg` (1376×768, üç geniş
-çizgi) tam olarak §2'nin reddettiği eski tasarım; `E5` onun yerini
-alıyor, onu değil. `art_source/waybook/A0_style_anchor.jpg` (1376×768) da
-hiçbir yere işlenmemiş, kullanılmayan bir defter-sayfası konsepti —
-§5'in stil temeliyle karışmasın diye burada not düşülüyor, illüstrasyon
-temeli değil, muhtemelen erken bir `L1` denemesi.
+**Kilitli satır (§2):** ayrı bir varlık yok. `EVENT_CHOICE_ROW`
+varyasyonunun `disabled` state'i `_ghost_button`/`_minimal_button`'ın
+zaten kurduğu kalıbı izler - `E_Choice_Row_Normal`'ın aynısı, yalnızca
+`ArtPalette.UI_TINT_DISABLED` ile soluklaştırılmış (`modulate_color`
+üzerinden, ayrı bir kaynak dosya gerektirmeden). `art_source/waybook/
+G5_disabled_scratchout.jpg` ve `A0_style_anchor.jpg` bu tasarımın dışında
+kalıyor, orphan.
 
 ---
 
@@ -166,15 +152,16 @@ Kod tarafında değişmeyecek olan (hatırlatma, üretime etkisi yok):
 `_mark_choice()`'ın kan şeridi (`UI_CHOICE_COMBAT`) ve stat amblemi
 zaten var — yeni `E_Choice_Row_*` yalnızca bunların **üstüne bindiği
 zemin**. Kilit sebebi metni (`unavailable_text_key`) hâlâ düğmenin
-`font_disabled_color`'ıyla canlı okunuyor; `E_Choice_Row_Locked`
-yalnızca sol kenara bir işaret ekliyor, metni gizlemiyor —
-"disabled with reason" sözleşmesi bozulmuyor.
+`font_disabled_color`'ıyla canlı okunuyor; kilitli satır (§2) yalnızca
+soluyor, metni gizlemiyor — "disabled with reason" sözleşmesi
+bozulmuyor, yeni bir görsel katman eklenmiyor.
 
 ---
 
 ## 5. Sanat Stili Temel Şablonu — olay illüstrasyonları
 
-Bu, beşinci varlık: tek bir dosya değil, **her illüstrasyon promptunun
+Bu, dört çekirdek varlığın dışında ayrıca hazırlanan beşinci parça: tek
+bir dosya değil, **her illüstrasyon promptunun
 başına eklenen sabit blok**. `docs/art-prompts.md`'nin "Ortak Bağlam"
 deseninin aynısı — ama iki fark var:
 
@@ -314,18 +301,20 @@ kendi belgeleme borcu (bkz. CLAUDE.md Faz 17 PR-9'un notu, 41 karttan
 `tools/waybook_assets.py`'a eklenecek olan (bu belge onaylanınca, ayrı
 bir PR'da):
 
-- `_build_event_card()` fonksiyonu: `E1`-`E5` için `_filled_frame()`/
+- `_build_event_card()` fonksiyonu: `E1`-`E4` için `_filled_frame()`/
   `key()`/`_set_margins()` çağrıları — G-serisininkiyle birebir aynı
   kalıp, yalnızca dosya adları yeni.
 - `_build_event_illustrations()`: `E6a`-`E6u` için düz `background()`/
   `icon()` benzeri bir ölçekleme (nine-slice yok) — `B10_city_desk_bg.jpg`
   için zaten kullanılan Lanczos+unsharp büyütme/küçültme yolunu izler.
 - `WaybookTheme`'e yeni sabitler: `EVENT_CARD` (`PanelContainer`
-  varyasyonu), `EVENT_CHOICE_ROW` (`Button` varyasyonu, normal/hover
-  state'leri E3/E4'ten), `EventIllustrations.FILE_BY_EVENT_ID` (bu
-  belgenin §6.1 tablosunun GDScript karşılığı - `Dictionary[String,
-  String]`, bilinmeyen bir `event_id` `""` döner ve `IllustrationCanvas`
-  o zaman gizlenir, boş bir kutu göstermez).
+  varyasyonu), `EVENT_CHOICE_ROW` (`Button` varyasyonu; normal/hover
+  state'leri E3/E4'ten, disabled state'i §2 gereği E3'ün
+  `UI_TINT_DISABLED` ile modüle edilmiş hali — ayrı kaynak dosya yok),
+  `EventIllustrations.FILE_BY_EVENT_ID` (bu belgenin §6.1 tablosunun
+  GDScript karşılığı - `Dictionary[String, String]`, bilinmeyen bir
+  `event_id` `""` döner ve `IllustrationCanvas` o zaman gizlenir, boş bir
+  kutu göstermez).
 - `test_waybook_theme.gd`'ye: her `event_id`'nin (event_catalog.gd'den
   taranan) `FILE_BY_EVENT_ID`'de bir karşılığı olduğunu kilitleyen bir
   test — yeni bir olay eklenip kategori atanmayı unutulursa CI kırılır
@@ -335,9 +324,14 @@ bir PR'da):
 
 ## 8. Sonraki adım
 
-Bu belge bir onay bekliyor: (1) §2'deki `E_Choice_Row_Locked` çizgisi
-üretilsin mi yoksa mevcut "yalnızca solma" çözümü korunsun mu, (2) beş
-çekirdek varlık + 21 illüstrasyon promptu bu haliyle üretime girsin mi.
-Onay sonrası sıradaki iş: ham JPG'lerin `art_source/waybook/`'a
-eklenmesi, `tools/waybook_assets.py`'ın §7'deki genişlemesi, ve ancak
+**Onaylandı:** (1) kilitli seçenek yalnızca soluyor, çizgi yok — §2, (2)
+dört çekirdek varlık + 21 illüstrasyon promptu bu haliyle üretime giriyor.
+
+Sıradaki iş, bu oturumun **yapamayacağı** tek parça: bu belgedeki 25
+promptun (4 çekirdek + 21 illüstrasyon) bir görsel üretim modeline
+(Gemini/FLUX) verilip ham JPG'lerin üretilmesi — bu oturumda görsel
+üretim aracı yok, promptlar kopyala-yapıştıra hazır ama çalıştırmak
+kullanıcı tarafında. Ham dosyalar `art_source/waybook/`'a (bu belgedeki
+`E1`-`E4`/`E6a`-`E6u` adlarıyla) eklenince sıradaki iki adım burada
+yapılabilir: `tools/waybook_assets.py`'ın §7'deki genişlemesi, ve ancak
 ondan sonra `road_journey.gd`'nin gerçek kod değişikliği.
