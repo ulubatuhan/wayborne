@@ -100,6 +100,14 @@ const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 ## yürüyerek geçirir, bu bir onay adımı olmalı, ikinci bir yolculuk değil.
 const ENCOUNTER_APPROACH_DAYS: float = 0.35
 
+## "Kervan Emirleri" paneli manzaranın üstünde, sol altta duruyor (bkz.
+## _build_hud_layer) ve dile/genişliğe göre kendi boyunu değiştiriyor.
+## Kolon panelin sağından başlasın diye genişliği her karede
+## `TravelBand`/`RoadCaravan`'a bildiriliyor - vagon panelin altına
+## girerse kervanın kendisi görünmez olur, bu bir okunabilirlik hatası
+## değil bir bilgi kaybıdır.
+const ORDERS_PANEL_SAFE_MARGIN: float = 16.0
+
 ## event_id -> CombatFigure.ARCHETYPES kategorisi. Eşlemede olmayan her
 ## olay eskisi gibi davranır (hiç işaret yok, kart anında açılır) - bu
 ## sessiz bir eksiklik değil, çünkü o olayların yolda gösterilecek somut
@@ -308,6 +316,18 @@ var _signal_danger_bonus: float:
 	set(value):
 		_journey.signal_danger_bonus = value
 var _command_panel: PanelContainer
+var _orders_button: Button
+## Panel varsayılan olarak kapalı başlıyor (bkz. Road Movement Rules'un
+## Kontrol-7 notu) - bu, düğmenin gerçek durumu, `_command_panel.visible`
+## savaş/kapanış gibi başka sebeplerle de false olabildiği için tek başına
+## yetmiyor.
+var _orders_open: bool = false
+## Panel ilk kez açıldığında varsayılan bir konuma (eski, hep-açık halinin
+## durduğu yere yakın) yerleşiyor; oyuncu bir kez sürükleyince bu bayrak
+## true olur ve bir daha otomatik konumlanmaz.
+var _orders_positioned: bool = false
+var _orders_dragging: bool = false
+var _orders_drag_offset: Vector2 = Vector2.ZERO
 var _pace_buttons: Array[Button] = []
 var _talk_merchant_button: Button
 var _debt_button: Button
@@ -412,6 +432,9 @@ var _exit_button: Button
 ## katman. Metin artık ekranı değil, ekranın kenarını kullanıyor.
 @onready var _world: MarginContainer = $World
 @onready var _hud: VBoxContainer = $Hud
+## "Kervan Emirleri" paneli artık bir Container çocuğu değil - serbestçe
+## sürüklenebilmesi için kendi düz katmanında duruyor (bkz. _build_orders_panel).
+@onready var _orders_layer: Control = $OrdersLayer
 @onready var _modal: Control = $Modal
 @onready var _modal_center: CenterContainer = $Modal/Center
 @onready var _log_overlay: MarginContainer = $LogOverlay
@@ -532,21 +555,17 @@ func _build_hud_layer() -> void:
 	_hud.add_child(_build_top_bar())
 	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
 
+	# Boş - dünyanın göründüğü aralığı iki şerit arasında açık tutuyor.
+	# Emir paneli artık burada değil, kendi serbest katmanında (bkz.
+	# _build_orders_panel): bir Container'ın çocuğuyken elle taşınamıyordu.
 	var middle := HBoxContainer.new()
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(middle)
 
-	# Emir paneli manzaranın üstünde, sol altta - hep görünür.
-	var command_column := VBoxContainer.new()
-	command_column.size_flags_vertical = Control.SIZE_SHRINK_END
-	command_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_command_panel = _build_command_panel()
-	command_column.add_child(_command_panel)
-	middle.add_child(command_column)
-
 	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
 	_hud.add_child(_build_bottom_bar())
+	_build_orders_panel()
 
 func _build_top_bar() -> PanelContainer:
 	var bar := _make_bar()
@@ -722,6 +741,20 @@ func _build_bottom_bar() -> PanelContainer:
 	_replan_button.tooltip_text = tr("UI_ROAD_REPLAN_TOOLTIP")
 	_replan_button.pressed.connect(_on_replan_pressed)
 	row.add_child(_replan_button)
+
+	# Emir paneli artık kapalı başlıyor ve bu düğmeyle açılıp kapanıyor
+	# (bkz. _build_orders_panel) - sürekli açık kalan hali dar ekranda ve
+	# dikeyde kervanın kendisini kapatıyordu (bkz. `set_safe_left`'in
+	# kendi notu). Kontrol-2'nin "her zaman görünen panel" kararının
+	# tersi, ama aynı kuralın (her kararın görünür bir kontrolü var) bir
+	# başka okunuşu: panelin kendisi artık o kontrol, düğme onu açıp
+	# kapatan kontrol.
+	_orders_button = Button.new()
+	_orders_button.text = tr("UI_ROAD_ORDERS_OPEN")
+	_orders_button.tooltip_text = tr("UI_ROAD_ORDERS_TOOLTIP")
+	_orders_button.toggle_mode = true
+	_orders_button.toggled.connect(_on_orders_toggled)
+	row.add_child(_orders_button)
 
 	# Playtest: *"status, map, inventory, my contracts gibi"* düğmeler.
 	# Dördü de aynı soruyu soruyor - kervan ne durumda - ve cevabı tek bir
@@ -955,28 +988,57 @@ const MEAL_POLICY_LABELS: Dictionary = {
 	GameSession.MEAL_MODE_SELF_ONLY: "UI_MEAL_POLICY_SELF",
 }
 
-func _build_command_panel() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = WaybookTheme.HUD_BAR
+## Panel artık `_orders_layer`'ın (bir Container değil, düz bir `Control`)
+## çocuğu - Container yönetimindeyken `.position` elle değiştirilemiyordu,
+## sürüklemenin ön şartı bu. `_command_panel` alanına atanıyor, hiçbir yere
+## `add_child` edilerek döndürülmüyor: çağıran (_build_hud_layer) tek yaptığı
+## bunu çağırmak.
+## Panelin sürüklenebilir hale gelmesiyle genişliği kervanın önünü kapatan
+## asıl değişken oldu (bkz. `_sync_orders_panel_safe_left()`), o yüzden
+## gövdesi mümkün olduğunca dar: dört tempo düğmesi tek sırada değil 2x2
+## ızgarada, ve zemin `HUD_BAR`'ın kendi yarı saydamlığından da bir adım
+## daha saydam - panel dünyanın üstünde asılı duran ince bir katman
+## olarak okunsun, opak bir kutu değil.
+const ORDERS_PANEL_ALPHA: float = 0.58
+
+func _build_orders_panel() -> void:
+	_command_panel = PanelContainer.new()
+	_command_panel.theme_type_variation = WaybookTheme.HUD_BAR
+	var bg := ArtPalette.UI_HUD_BAR
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(bg.r, bg.g, bg.b, ORDERS_PANEL_ALPHA)
+	panel_style.set_content_margin_all(6)
+	_command_panel.add_theme_stylebox_override("panel", panel_style)
+	_command_panel.visible = false
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	panel.add_child(column)
+	column.add_theme_constant_override("separation", 3)
+	_command_panel.add_child(column)
 
 	var title := Label.new()
 	title.text = tr("UI_ROAD_COMMANDS_TITLE")
 	title.modulate = ArtPalette.GOLD
+	# Başlık aynı zamanda sürükleme tutamacı. Label varsayılan olarak
+	# MOUSE_FILTER_IGNORE ile geliyor - STOP olmadan `gui_input` hiç
+	# tetiklenmez ve sürükleme hiçbir zaman başlamaz.
+	title.mouse_filter = Control.MOUSE_FILTER_STOP
+	title.gui_input.connect(_on_orders_title_gui_input)
 	column.add_child(title)
 
 	# Tempo tek bir seçim: dört düğme, biri hep basılı. ButtonGroup basılı
 	# olanı kendisi bırakıyor, ekran ayrıca bir "hangisi seçili" tutmuyor.
-	var pace_row := HBoxContainer.new()
-	pace_row.add_theme_constant_override("separation", 4)
+	# 2x2 ızgara - tek sıradaki dört düğme panelin genişliğini kervanın
+	# önünü kapatacak kadar büyütüyordu (bkz. `_sync_orders_panel_safe_left`).
+	var pace_row := GridContainer.new()
+	pace_row.columns = 2
+	pace_row.add_theme_constant_override("h_separation", 4)
+	pace_row.add_theme_constant_override("v_separation", 4)
 	column.add_child(pace_row)
 	var group := ButtonGroup.new()
 	_pace_buttons.clear()
 	for index in PACE_COMMAND_COUNT:
 		var button := Button.new()
+		button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
 		button.toggle_mode = true
 		button.button_group = group
 		button.text = tr(String(COMMANDS[index].short))
@@ -989,10 +1051,12 @@ func _build_command_panel() -> PanelContainer:
 	action_row.add_theme_constant_override("separation", 4)
 	column.add_child(action_row)
 	_talk_merchant_button = Button.new()
+	_talk_merchant_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
 	_talk_merchant_button.text = tr("UI_ROAD_ORDER_MERCHANT")
 	_talk_merchant_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT))
 	action_row.add_child(_talk_merchant_button)
 	_debt_button = Button.new()
+	_debt_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
 	_debt_button.text = tr("UI_ROAD_ORDER_DEBT")
 	_debt_button.tooltip_text = "%s (%d)" % [tr("UI_ROAD_CMD_DEBT"), PACE_COMMAND_COUNT + 2]
 	_debt_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT + 1))
@@ -1005,18 +1069,75 @@ func _build_command_panel() -> PanelContainer:
 	standing_row.add_theme_constant_override("separation", 4)
 	column.add_child(standing_row)
 	_meal_policy_button = Button.new()
+	_meal_policy_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
 	_meal_policy_button.text = tr("UI_ROAD_ORDER_MEAL")
 	_meal_policy_button.tooltip_text = tr("UI_ROAD_ORDER_MEAL_TOOLTIP")
 	_meal_policy_button.pressed.connect(_open_meal_policy_panel)
 	standing_row.add_child(_meal_policy_button)
 	_camp_order_button = Button.new()
+	_camp_order_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
 	_camp_order_button.text = tr("UI_ROAD_ORDER_CAMP_DUSK")
 	_camp_order_button.tooltip_text = tr("UI_ROAD_ORDER_CAMP_DUSK_TOOLTIP")
 	_camp_order_button.toggle_mode = true
 	_camp_order_button.toggled.connect(_on_camp_order_toggled)
 	standing_row.add_child(_camp_order_button)
 
-	return panel
+	_orders_layer.add_child(_command_panel)
+
+## Başlığa basılı tutmak paneli sürüklemeye başlatır/bitirir - gerçek hareket
+## `_input()`'ta izleniyor, çünkü sürüklenen fare kolayca başlığın kendi
+## sınırlarının dışına çıkar ve `gui_input` orada artık tetiklenmez.
+func _on_orders_title_gui_input(event: InputEvent) -> void:
+	var mb := event as InputEventMouseButton
+	if mb == null or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if mb.pressed:
+		_orders_dragging = true
+		_orders_positioned = true
+		_orders_drag_offset = _command_panel.position - get_global_mouse_position()
+	else:
+		_orders_dragging = false
+
+## Panel `_orders_layer`'ın dışına hiç çıkmasın - dışarı sürüklenen bir panel
+## kapatma düğmesine bile erişilemez hale gelirdi.
+func _clamp_orders_position(pos: Vector2) -> Vector2:
+	if _orders_layer == null or _command_panel == null:
+		return pos
+	var max_pos := _orders_layer.size - _command_panel.size
+	return Vector2(
+		clampf(pos.x, 0.0, maxf(0.0, max_pos.x)),
+		clampf(pos.y, 0.0, maxf(0.0, max_pos.y)),
+	)
+
+## Panel ilk kez açıldığında eski, hep-açık halinin durduğu köşeye yakın bir
+## yerde beliriyor - alt şeridin gerçek yüksekliği (dinamik) `_hud`'un son
+## çocuğundan okunuyor, sabit bir sayı tahmin edilmiyor.
+func _default_orders_position() -> Vector2:
+	var margin := ORDERS_PANEL_SAFE_MARGIN
+	if _orders_layer == null or _command_panel == null:
+		return Vector2(margin, margin)
+	var bottom_height := STRAP_HEIGHT
+	if _hud != null and _hud.get_child_count() > 0:
+		var bottom := _hud.get_child(_hud.get_child_count() - 1) as Control
+		if bottom != null:
+			bottom_height = bottom.size.y
+	var y := _orders_layer.size.y - bottom_height - STRAP_HEIGHT - _command_panel.size.y - margin
+	return Vector2(margin, maxf(margin, y))
+
+## Emir paneli açılıp kapanır (bkz. `_orders_button`) - sürüklenmiş bir
+## paneli her açılışta sıfırlamıyor, yalnızca hiç konumlanmamışsa
+## varsayılana yerleşiyor.
+func _on_orders_toggled(pressed: bool) -> void:
+	_orders_open = pressed
+	if pressed and _command_panel != null:
+		_command_panel.reset_size()
+		if _orders_positioned:
+			_command_panel.position = _clamp_orders_position(_command_panel.position)
+		else:
+			_command_panel.position = _default_orders_position()
+			_orders_positioned = true
+	_refresh_command_panel()
+	_sync_orders_panel_safe_left()
 
 ## Tempo düğmeleri tempoyu *gösteriyor* da: tempo yalnızca düğmeyle
 ## değişmiyor (dayanıklılık bitince kervan kendi normale dönüyor, kaydın
@@ -1025,8 +1146,9 @@ func _build_command_panel() -> PanelContainer:
 func _refresh_command_panel() -> void:
 	if _pace_buttons.is_empty():
 		return
-	# Savaş yolun yerini alınca emir paneli onun üstünde durmamalı.
-	_command_panel.visible = _band.visible
+	# Panel yalnızca oyuncu düğmeyle açtıysa görünür - ve savaş yolun
+	# yerini alınca (band gizlenince) onun üstünde durmamalı.
+	_command_panel.visible = _orders_open and _band.visible
 	for index in PACE_COMMAND_COUNT:
 		var selected := is_equal_approx(_pace, float(COMMANDS[index].pace))
 		if _pace_buttons[index].button_pressed != selected:
@@ -1067,6 +1189,22 @@ func _refresh_talk_merchant_row() -> void:
 ## Kısayollar: 1-6 emirler, F2 tempoyu bir üst kademeye çeviriyor (kumandada
 ## LB). Hepsinin ekranda bir düğmesi var - tuş yalnızca kestirme.
 func _input(event: InputEvent) -> void:
+	if _orders_dragging:
+		# Fare sürüklenirken tutamacın (başlığın) sınırlarını kolayca aşar -
+		# `gui_input` orada artık tetiklenmediği için hareketi burada, tüm
+		# ekranın girdisinde izliyoruz, tıpkı bırakmayı da.
+		var motion := event as InputEventMouseMotion
+		if motion != null:
+			_command_panel.position = _clamp_orders_position(
+				get_global_mouse_position() + _orders_drag_offset
+			)
+			_sync_orders_panel_safe_left()
+			return
+		var release := event as InputEventMouseButton
+		if release != null and release.button_index == MOUSE_BUTTON_LEFT and not release.pressed:
+			_orders_dragging = false
+			return
+
 	var key_event := event as InputEventKey
 	if key_event == null or not key_event.pressed or key_event.echo:
 		return
@@ -1750,6 +1888,7 @@ func _refresh_time_ui() -> void:
 	if _clock == null:
 		return
 
+	_sync_orders_panel_safe_left()
 	var phase := _clock.get_phase()
 	_band.set_phase(phase, _clock.get_phase_progress())
 
@@ -1805,6 +1944,27 @@ func _refresh_time_ui() -> void:
 	_refresh_walk_hint()
 	_refresh_conditions()
 	_refresh_command_panel()
+
+## Kolon panelin altına girmesin diye onun genişliğini her karede
+## `TravelBand`/`RoadCaravan`'a bildiriyor. İkisinin de kendi setter'ı
+## değişmeyen bir değeri sessizce yok sayıyor, o yüzden her karede
+## çağırmak ucuz.
+func _sync_orders_panel_safe_left() -> void:
+	if _command_panel == null or _band == null or _caravan == null or _orders_layer == null:
+		return
+	# Panel artık sürüklenebilir - sabit bir sol-alt konum bir varsayım
+	# değil. Kervanın önünü yalnızca panel gerçekten ekranın sol yarısında
+	# duruyorken kapatır; oyuncu onu sağa/yukarı taşırsa bıraktığı boşluğu
+	# kervan geri alır.
+	var safe_left := 0.0
+	if (
+		_command_panel.visible
+		and _orders_layer.size.x > 1.0
+		and _command_panel.position.x < _orders_layer.size.x * 0.5
+	):
+		safe_left = _command_panel.position.x + _command_panel.size.x + ORDERS_PANEL_SAFE_MARGIN
+	_band.set_safe_left(safe_left)
+	_caravan.set_safe_left(safe_left)
 
 ## Arazi, hava ve tempo. Hava mekanik olarak yolu yavaşlatıp tehlikeyi
 ## büyüttüğü için burada yazması şart: görünmeyen bir ceza oyuncu için

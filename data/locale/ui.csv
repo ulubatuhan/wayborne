@@ -505,6 +505,8 @@
 "UI_ROAD_WEATHER","Hava: %s","Weather: %s","","","","","","","","",""
 "UI_ROAD_TERRAIN_NOW","Arazi: %s","Terrain: %s","","","","","","","","",""
 "UI_ROAD_COMMANDS_TITLE","Kervan Emirleri","Caravan Orders","","","","","","","","",""
+"UI_ROAD_ORDERS_OPEN","Emirler","Orders","","","","","","","","",""
+"UI_ROAD_ORDERS_TOOLTIP","Kervan emirleri panelini aç/kapat - başlığından sürüklenebilir","Open/close the caravan orders panel - drag it by its title","","","","","","","","",""
 "UI_ROAD_ORDER_HALT","Dur","Halt","","","","","","","","",""
 "UI_ROAD_ORDER_SLOW","Yavaş","Slow","","","","","","","","",""
 "UI_ROAD_ORDER_STEADY","Normal","Steady","","","","","","","","",""

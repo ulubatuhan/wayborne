@@ -122,6 +122,10 @@ var _world_x: float = 0.0
 var _camping: bool = false
 var _time: float = 0.0
 var _column_length: float = 0.0
+## HUD'un dünyanın üstüne çizdiği bir panel varsa (bkz. "Kervan Emirleri"),
+## onun sağ kenarı - çapa bunun solunda hiç durmuyor. Sıfır (varsayılan)
+## eski davranış.
+var _safe_left: float = 0.0
 
 ## Kervan katmanı: figürleri bu şerit değil `RoadCaravan` çiziyor, ama
 ## zemin çizgisini ondan o alıyor - ikisi ayrı hesaplarsa kervan yolun
@@ -239,12 +243,36 @@ func set_column_length(trailing_px: float) -> void:
 	queue_redraw()
 	_announce_ground_line()
 
+## Bir panel önündeyse çapa - lideri de kapsayarak - hiç onun solunda
+## durmasın diye taban oranı bununla birlikte yükseliyor.
+func set_safe_left(px: float) -> void:
+	var wanted := maxf(0.0, px)
+	if is_equal_approx(_safe_left, wanted):
+		return
+	_safe_left = wanted
+	_announce_ground_line()
+
 func caravan_x_ratio() -> float:
+	# `min_ratio` panelin ardından geliyor; ekran o paneli bile
+	# taşıyamayacak kadar darsa (yol ekranının çalışması beklenen en dar
+	# genişliğin çok altı) tavanın altına kenetleniyor - ikisi ters
+	# dönüp `clampf`in min/max'ı takas etmesindense.
+	var min_ratio := CARAVAN_X_RATIO
+	if _safe_left > 0.0 and size.x > 1.0:
+		min_ratio = minf(CARAVAN_X_MAX_RATIO, maxf(min_ratio, (_safe_left + CARAVAN_EDGE_MARGIN) / size.x))
 	if _column_length <= 0.0 or size.x <= 1.0:
-		return CARAVAN_X_RATIO
+		return min_ratio
+	# `_safe_left` burada da ekleniyor - yoksa panelin kendi genişliği ve
+	# kolonun doğal uzunluğu birbirinden bağımsız iki taban olarak kalır
+	# (`maxf` ile "hangisi büyükse") ve hiçbiri panelin *ardında* kolonun
+	# tüm uzunluğunu barındıracak kadar çapayı sağa itmez - RoadCaravan'ın
+	# `room`u (`_anchor_x - safe_left`) o zaman kolonun doğal uzunluğundan
+	# küçük kalır, `MIN_COLUMN_SCALE` tabanı da yetmez ve kuyruk panelin
+	# altına taşar. İkisi toplanınca `room` her zaman en az kolonun doğal
+	# uzunluğu kadar oluyor.
 	return clampf(
-		(_column_length + CARAVAN_EDGE_MARGIN) / size.x,
-		CARAVAN_X_RATIO, CARAVAN_X_MAX_RATIO
+		(_safe_left + _column_length + CARAVAN_EDGE_MARGIN) / size.x,
+		min_ratio, CARAVAN_X_MAX_RATIO
 	)
 
 func caravan_x() -> float:
