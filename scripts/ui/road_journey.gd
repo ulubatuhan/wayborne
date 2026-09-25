@@ -137,14 +137,16 @@ const MARKER_ARCHETYPES: Dictionary = {
 	"traveler": ["clerk", "hunter"],
 }
 
-## --- Kervan emirleri (F2) ---
-## Mount & Blade'in emir menüsü: bir tuş listeyi açar, sayı emri verir.
-## F1 geliştirici paneline ait olduğu için (bkz. DevPanel) kök tuş F2.
+## --- Kervan emirleri ---
+## Her zaman görünen bir panel: tempo dört düğmeden biri, tüccar ve borç
+## birer düğme. Eskiden F2'nin arkasında gizli bir menüydü - dokunmatik
+## ekranda hiç açılamıyordu ve oyuncu temponun bir karar olduğunu
+## göremiyordu. Tuşlar (1-6, F2 ile tempo döngüsü) yalnızca kısayol.
 ##
 ## Tempo yolun *hızını* çarpıyor. Normal tempo 1.0, yani emir vermeyen bir
 ## oyuncu için hiçbir şey değişmiyor - "durmadan ileri yürüyen oyuncu
 ## seferi planlayıcının söylediği günde bitirir" sözü aynen duruyor.
-const COMMAND_KEY: Key = KEY_F2
+const PACE_CYCLE_KEY: Key = KEY_F2
 const PACE_STEADY: float = 1.0
 const PACE_FAST: float = 1.35
 const PACE_SLOW: float = 0.70
@@ -306,8 +308,12 @@ var _signal_danger_bonus: float:
 	set(value):
 		_journey.signal_danger_bonus = value
 var _command_panel: PanelContainer
+var _pace_buttons: Array[Button] = []
 var _talk_merchant_button: Button
-var _talk_merchant_row_number: int = 0
+var _debt_button: Button
+## Yan kanal açıkken emirler kilitli; her karede tazelenen düğmeler bu
+## kilidi ezmesin diye ayrı tutuluyor.
+var _orders_enabled: bool = true
 var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
@@ -511,8 +517,7 @@ func _build_hud_layer() -> void:
 	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(middle)
 
-	# Emir menüsü (F2) manzaranın üstünde, sol altta duruyor - Mount &
-	# Blade'de de ekranın kenarında belirir. Varsayılan olarak gizli.
+	# Emir paneli manzaranın üstünde, sol altta - hep görünür.
 	var command_column := VBoxContainer.new()
 	command_column.size_flags_vertical = Control.SIZE_SHRINK_END
 	command_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -902,25 +907,25 @@ func _refresh_modal() -> void:
 	_modal_open = open
 	_modal.visible = open
 
-## Emirler tek yerde tanımlı: hem menü satırları hem tuş eşlemesi buradan
-## okunuyor, yoksa ekranda yazan sayı ile işe yarayan sayı ayrışır.
+## Emirler tek yerde tanımlı: hem düğmeler hem tuş eşlemesi buradan
+## okunuyor, yoksa ekranda yazan sayı ile işe yarayan sayı ayrışır. İlk
+## dördü tempo, sırası yavaştan hızlıya - döngü tuşu da bu sırayı izliyor.
 const COMMANDS: Array[Dictionary] = [
-	{"key": "UI_ROAD_CMD_MARCH", "pace": PACE_STEADY, "pace_key": "UI_ROAD_PACE_STEADY"},
-	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST"},
-	{"key": "UI_ROAD_CMD_SLOW", "pace": PACE_SLOW, "pace_key": "UI_ROAD_PACE_SLOW"},
-	{"key": "UI_ROAD_CMD_HALT", "pace": PACE_HALT, "pace_key": "UI_ROAD_PACE_HALT"},
-	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": ""},
-	{"key": "UI_ROAD_CMD_DEBT", "pace": -3.0, "pace_key": ""},
+	{"key": "UI_ROAD_CMD_HALT", "pace": PACE_HALT, "pace_key": "UI_ROAD_PACE_HALT", "short": "UI_ROAD_ORDER_HALT"},
+	{"key": "UI_ROAD_CMD_SLOW", "pace": PACE_SLOW, "pace_key": "UI_ROAD_PACE_SLOW", "short": "UI_ROAD_ORDER_SLOW"},
+	{"key": "UI_ROAD_CMD_MARCH", "pace": PACE_STEADY, "pace_key": "UI_ROAD_PACE_STEADY", "short": "UI_ROAD_ORDER_STEADY"},
+	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST", "short": "UI_ROAD_ORDER_FAST"},
+	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": "", "short": "UI_ROAD_CMD_TALK_MERCHANT"},
+	{"key": "UI_ROAD_CMD_DEBT", "pace": -3.0, "pace_key": "", "short": "UI_ROAD_CMD_DEBT"},
 ]
+const PACE_COMMAND_COUNT: int = 4
 
 func _build_command_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.visible = false
-	# Opak zemin temanın cilt panelinden geliyor: saydam bir menü
-	# manzaranın üstünde okunmuyordu (aynı hata OnboardingPanel'de de yaşandı).
+	panel.theme_type_variation = WaybookTheme.HUD_BAR
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 2)
+	column.add_theme_constant_override("separation", 4)
 	panel.add_child(column)
 
 	var title := Label.new()
@@ -928,65 +933,90 @@ func _build_command_panel() -> PanelContainer:
 	title.modulate = ArtPalette.GOLD
 	column.add_child(title)
 
-	for index in COMMANDS.size():
-		# Sıra tuşu (1-7) hâlâ birincil yol - Button olması kumanda/fare
-		# ile de tıklanabilsin diye (bkz. GamepadCursor). `flat` düz
-		# metne yakın duruyor, ama artık gerçekten tıklanabilir.
-		var row := Button.new()
-		row.flat = true
-		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		row.text = "%d. %s" % [index + 1, tr(String(COMMANDS[index].key))]
-		row.pressed.connect(_issue_command.bind(index))
-		column.add_child(row)
-		if is_equal_approx(float(COMMANDS[index].pace), -2.0):
-			_talk_merchant_button = row
-			# Kendi sıra numarasını da tutuyoruz - Faz 17 PR-6 Borç
-			# Defteri emrini Tüccarla Konuş'un *ardına* ekledi, yani artık
-			# listenin son satırı değil; COMMANDS.size() varsayımı yanlış
-			# numarayı basardı.
-			_talk_merchant_row_number = index + 1
+	# Tempo tek bir seçim: dört düğme, biri hep basılı. ButtonGroup basılı
+	# olanı kendisi bırakıyor, ekran ayrıca bir "hangisi seçili" tutmuyor.
+	var pace_row := HBoxContainer.new()
+	pace_row.add_theme_constant_override("separation", 4)
+	column.add_child(pace_row)
+	var group := ButtonGroup.new()
+	_pace_buttons.clear()
+	for index in PACE_COMMAND_COUNT:
+		var button := Button.new()
+		button.toggle_mode = true
+		button.button_group = group
+		button.text = tr(String(COMMANDS[index].short))
+		button.tooltip_text = "%s (%d)" % [tr(String(COMMANDS[index].key)), index + 1]
+		button.pressed.connect(_issue_command.bind(index))
+		pace_row.add_child(button)
+		_pace_buttons.append(button)
+
+	var action_row := HBoxContainer.new()
+	action_row.add_theme_constant_override("separation", 4)
+	column.add_child(action_row)
+	_talk_merchant_button = Button.new()
+	_talk_merchant_button.text = tr("UI_ROAD_ORDER_MERCHANT")
+	_talk_merchant_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT))
+	action_row.add_child(_talk_merchant_button)
+	_debt_button = Button.new()
+	_debt_button.text = tr("UI_ROAD_ORDER_DEBT")
+	_debt_button.tooltip_text = "%s (%d)" % [tr("UI_ROAD_CMD_DEBT"), PACE_COMMAND_COUNT + 2]
+	_debt_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT + 1))
+	action_row.add_child(_debt_button)
 
 	return panel
 
-## Eskort tüccarı yoksa komut **kilitli değil**, çünkü kilitleme kendi
-## satırının sırasını değiştirmez ve tuşlar hep aynı emre karşılık gelmeli
-## (bkz. yukarısındaki "sıra tuşu hâlâ birincil yol" notu) - ama kilitli
-## olay seçimi/ekipman/vagon satışıyla aynı kural burada da geçerli:
-## sebep gösterilmeden pasifleştirilmez. F2 açılırken çağrılır, çünkü
-## tüccar listesi sefer boyunca değişebilir (kaybedilebilir).
-func _refresh_talk_merchant_row() -> void:
-	if _talk_merchant_button == null:
+## Tempo düğmeleri tempoyu *gösteriyor* da: tempo yalnızca düğmeyle
+## değişmiyor (dayanıklılık bitince kervan kendi normale dönüyor, kaydın
+## yüklenmesi), o yüzden basılı düğme her karede tempodan okunuyor.
+## Hızlanamayan kervanın "Hızlı"sı kilitli, sebebi yanında - saklanmıyor.
+func _refresh_command_panel() -> void:
+	if _pace_buttons.is_empty():
 		return
-	if _session.caravan.merchant_names.is_empty():
-		_talk_merchant_button.text = "%d. %s" % [
-			_talk_merchant_row_number, tr("UI_ROAD_CMD_TALK_MERCHANT_LOCKED")
-		]
-		_talk_merchant_button.disabled = true
-	else:
-		_talk_merchant_button.text = "%d. %s" % [
-			_talk_merchant_row_number, tr("UI_ROAD_CMD_TALK_MERCHANT")
-		]
-		_talk_merchant_button.disabled = false
+	# Savaş yolun yerini alınca emir paneli onun üstünde durmamalı.
+	_command_panel.visible = _band.visible
+	for index in PACE_COMMAND_COUNT:
+		var selected := is_equal_approx(_pace, float(COMMANDS[index].pace))
+		if _pace_buttons[index].button_pressed != selected:
+			_pace_buttons[index].set_pressed_no_signal(selected)
+	var fast := _pace_buttons[PACE_COMMAND_COUNT - 1]
+	var can_push := _session == null or _session.caravan.can_push() or is_equal_approx(_pace, PACE_FAST)
+	for index in PACE_COMMAND_COUNT - 1:
+		_pace_buttons[index].disabled = not _orders_enabled
+	fast.disabled = not can_push or not _orders_enabled
+	if _debt_button != null:
+		_debt_button.disabled = not _orders_enabled
+	fast.tooltip_text = (
+		"%s (%d)" % [tr("UI_ROAD_CMD_FAST"), PACE_COMMAND_COUNT]
+		if can_push else tr("UI_ROAD_ORDER_FAST_LOCKED")
+	)
+	_refresh_talk_merchant_row()
 
-## Emir menüsü klavyeden sürülüyor (Mount & Blade deseni): F2 açar, sayı
-## emri verir, Esc kapatır - oyuncunun eli yürüme tuşlarından kalkmıyor.
-## Sıralar artık aynı zamanda birer Button (bkz. yukarısı): kumandanın
-## sanal imleci ya da bir fare de aynı satıra tıklayabiliyor,
-## `_issue_command` ikisinde de aynı yoldan çağrılıyor.
+## Eskort tüccarı yoksa düğme kilitli ama sebebiyle birlikte görünüyor -
+## kilitli olay seçimi/ekipman/vagon satışıyla aynı kural.
+func _refresh_talk_merchant_row() -> void:
+	if _talk_merchant_button == null or _session == null:
+		return
+	var locked := _session.caravan.merchant_names.is_empty()
+	_talk_merchant_button.disabled = locked or not _orders_enabled
+	_talk_merchant_button.tooltip_text = (
+		tr("UI_ROAD_CMD_TALK_MERCHANT_LOCKED") if locked
+		else "%s (%d)" % [tr("UI_ROAD_CMD_TALK_MERCHANT"), PACE_COMMAND_COUNT + 1]
+	)
+
+## Kısayollar: 1-6 emirler, F2 tempoyu bir üst kademeye çeviriyor (kumandada
+## LB). Hepsinin ekranda bir düğmesi var - tuş yalnızca kestirme.
 func _input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if key_event == null or not key_event.pressed or key_event.echo:
 		return
 
-	if key_event.keycode == COMMAND_KEY:
-		_command_panel.visible = not _command_panel.visible
-		if _command_panel.visible:
-			_refresh_talk_merchant_row()
+	if key_event.keycode == PACE_CYCLE_KEY:
+		if _orders_accept_input():
+			_cycle_pace()
 		accept_event()
 		return
 
-	# Tab: kervanın dökümü. Emir menüsüyle aynı fikir - elin yürüme
-	# tuşlarından kalkmadan, bir tuşla açılıp kapanan bir katman.
+	# Tab: kervanın dökümü - bir tuşla açılıp kapanan bir katman.
 	if key_event.keycode == KEY_TAB:
 		_status_button.button_pressed = not _status_button.button_pressed
 		accept_event()
@@ -1003,41 +1033,53 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_ESCAPE:
-		if _command_panel.visible:
-			_command_panel.visible = false
-			accept_event()
-			return
-		# Emir menüsü kapalıyken ve başka bir panel (olay kartı, savaş,
-		# pazarlık, tayfa teklifi, yeniden planlama) açık değilken Esc
-		# oyun içi menüyü açar - "menüye dönünce ana menüye gitmeyelim
-		# direkt" şikâyetinin aynısı, bkz. InGameMenu.
+		# Başka bir panel (olay kartı, savaş, pazarlık, tayfa teklifi,
+		# yeniden planlama) açık değilken Esc oyun içi menüyü açar - bkz.
+		# InGameMenu.
 		if _in_game_menu == null and _current_event == null and not _has_open_panel():
 			_open_in_game_menu()
 			accept_event()
 		return
 
-	if not _command_panel.visible:
-		return
-
 	var index := key_event.keycode - KEY_1
-	if index >= 0 and index < COMMANDS.size():
+	if index >= 0 and index < COMMANDS.size() and _orders_accept_input():
 		_issue_command(index)
 		accept_event()
 
+## Düğmeler kilitliyse kısayol da kilitli: aynı emrin iki kapısı ayrı
+## kurallara uymamalı.
+func _orders_accept_input() -> bool:
+	return _command_panel != null and _command_panel.visible and _orders_enabled
+
+func _cycle_pace() -> void:
+	var current := 0
+	for index in PACE_COMMAND_COUNT:
+		if is_equal_approx(_pace, float(COMMANDS[index].pace)):
+			current = index
+	var next := (current + 1) % PACE_COMMAND_COUNT
+	if _pace_buttons[next].disabled:
+		next = 0
+	_issue_command(next)
+
 func _issue_command(index: int) -> void:
 	var command: Dictionary = COMMANDS[index]
-	_command_panel.visible = false
-
 	var pace := float(command.pace)
 	if is_equal_approx(pace, -2.0):
-		_open_merchant_dialogue()
+		if not _talk_merchant_button.disabled:
+			_open_merchant_dialogue()
 		return
 	if is_equal_approx(pace, -3.0):
 		_open_debt_panel()
 		return
+	if index < PACE_COMMAND_COUNT and _pace_buttons[index].disabled:
+		return
+	if is_equal_approx(_pace, pace):
+		_refresh_command_panel()
+		return
 	_pace = pace
 	_pace_key = String(command.pace_key)
 	_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(String(command.key)), OUTCOME_COLOR)
+	_refresh_command_panel()
 
 func _init_journey() -> void:
 	var live_session: GameSession = GameState.get_session()
@@ -1111,7 +1153,7 @@ func _init_journey() -> void:
 	_signal_rng.seed = hash("%s|%s|signals" % [
 		_session.journey_origin_id, _session.journey_destination_id
 	])
-	_command_panel.visible = false
+	_refresh_command_panel()
 	_refresh_weather()
 
 	# Kervan parti ve vagon sayısından kuruluyor; bu yüzden sefer başında
@@ -1593,6 +1635,7 @@ func _refresh_time_ui() -> void:
 
 	_refresh_walk_hint()
 	_refresh_conditions()
+	_refresh_command_panel()
 
 ## Arazi, hava ve tempo. Hava mekanik olarak yolu yavaşlatıp tehlikeyi
 ## büyüttüğü için burada yazması şart: görünmeyen bir ceza oyuncu için
@@ -2351,7 +2394,7 @@ func _on_in_game_menu_dismissed() -> void:
 	_in_game_menu = null
 
 ## Yabancı tüccarın vagonuna diyalog yoluyla bakış (bkz. CLAUDE.md Ana
-## Hedefler'in "#11" notu) - F2 emir menüsünün "Tüccarla Konuş" komutu.
+## Hedefler'in "#11" notu) - emir panelinin "Tüccarla Konuş" düğmesi.
 ## Eskort yoksa `_talk_merchant_button` zaten kilitli gösteriliyor (bkz.
 ## `_refresh_talk_merchant_row`), o yüzden burada tekrar sınamaya gerek
 ## yok - komut yalnızca gerçekten açılabildiğinde tetiklenir.
@@ -2656,6 +2699,8 @@ func _on_enter_city_pressed() -> void:
 func _set_journey_controls_enabled(enabled: bool) -> void:
 	_camp_button.disabled = not enabled
 	_speed_button.disabled = not enabled
+	_orders_enabled = enabled
+	_refresh_command_panel()
 	# Plan yalnızca yolda değiştirilebilir: varış işlendikten sonra ortada
 	# değiştirilecek bir sefer kalmıyor.
 	_replan_button.disabled = not enabled or not _session.is_journey_active()
