@@ -22,10 +22,18 @@ var _included: Dictionary = {}  # CharacterData -> bool
 var _rows_container: VBoxContainer
 var _confirm_button: Button
 
-func setup(party: Array[CharacterData]) -> void:
+## `benched`: son savaşta dışarıda tutulanlar - kadro hatırlanıyor, değişen
+## bir şey yoksa oyuncu yalnızca onaylıyor. Hepsi dışarıdaysa (hatırlanan
+## herkes partiden ayrıldıysa) hatıra geçersiz, herkes dahil.
+func setup(party: Array[CharacterData], benched: Array[CharacterData] = []) -> void:
 	_order = party.duplicate()
+	var any_included := false
 	for character in _order:
-		_included[character] = true
+		_included[character] = not benched.has(character)
+		any_included = any_included or bool(_included[character])
+	if not any_included:
+		for character in _order:
+			_included[character] = true
 
 	layer = 66
 
@@ -79,6 +87,7 @@ func setup(party: Array[CharacterData]) -> void:
 	vbox.add_child(_confirm_button)
 
 	_refresh_rows()
+	_confirm_button.call_deferred("grab_focus")
 
 ## Her satır: yukarı/aşağı ile bu savaşa özel mevki sırası, kutu ile
 ## katılıp katılmayacağı. En az bir kişi katılmalı - hepsi çıkarsa
