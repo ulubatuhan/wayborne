@@ -82,6 +82,12 @@ var _oxen: Array[WalkFigure] = []
 var _wagon_panel: WagonPanel = null
 ## Son karede liderin yürüdüğü yön - yürüyüş fazı ve bakış yönü bundan.
 var _walk_direction: float = 0.0
+## Dokunarak/tıklayarak yürüme: lider hedefe kendi yürür, klavye iptal
+## eder. Uzaktaki bir noktaya (kapı, vagon) dokunmak oraya yürüyüp varınca
+## onu açar - dokunmatik ekranda A/D'nin ve E'nin karşılığı.
+var _walk_target_x: float = 0.0
+var _has_walk_target: bool = false
+var _pending_spot: Dictionary = {}
 
 @onready var _camera: Camera2D = $Camera2D
 @onready var _status_label: Label = $HUD/TopBar/Row/StatusLabel
@@ -147,6 +153,19 @@ func _move_player(delta: float) -> void:
 		direction -= 1.0
 	# RT/LT: bkz. road_journey.gd'deki aynı satır.
 	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
+	if not is_zero_approx(direction):
+		_clear_walk_target()
+	elif _has_walk_target:
+		var centre := _player.position.x + _player.size.x * 0.5
+		var gap := _walk_target_x - centre
+		if absf(gap) <= WALK_SPEED * delta or (not _pending_spot.is_empty() and _is_in_range(_pending_spot)):
+			var spot := _pending_spot
+			_clear_walk_target()
+			if not spot.is_empty():
+				_enter_spot(spot)
+				return
+		else:
+			direction = signf(gap)
 
 	_walk_direction = direction
 	# Faz mesafeden sürülüyor: duran bir figürün ayakları oynamıyor,
@@ -552,8 +571,18 @@ func _try_interact_at(world_position: Vector2) -> void:
 		if _is_in_range(spot):
 			_enter_spot(spot)
 		else:
-			_hint(tr("UI_HUB_TOO_FAR") % spot.name)
+			_walk_to(_get_spot_rect(spot).get_center().x, spot)
 		return
+	_walk_to(world_position.x)
+
+func _walk_to(x: float, spot: Dictionary = {}) -> void:
+	_walk_target_x = clampf(x, WORLD_MIN_X, WORLD_MAX_X)
+	_has_walk_target = true
+	_pending_spot = spot
+
+func _clear_walk_target() -> void:
+	_has_walk_target = false
+	_pending_spot = {}
 
 func _try_interact_nearest() -> void:
 	for spot in _spots:
