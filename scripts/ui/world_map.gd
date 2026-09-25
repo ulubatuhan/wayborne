@@ -32,7 +32,7 @@ func _ready() -> void:
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
-	_show_hint()
+	_select_default_destination()
 	var row: Control = _map_panel.get_parent()
 	row.resized.connect(_fit_map)
 	_fit_map()
@@ -188,12 +188,33 @@ func _show_hint() -> void:
 	_add_info_label(tr("UI_MAP_CURRENT") % current.location_name)
 	_add_info_label(tr("UI_MAP_HINT"))
 
+## Sağ sütun eskiden yalnızca "bir yere gelin" ipucuyla açılıyordu - dokunmada
+## hover diye bir şey yok, o yüzden sütun dokunmatik bir cihazda hiç
+## dolmuyordu. Açılışta ilk gidilebilir rota kendiliğinden seçili gelir;
+## gidilebilir hiçbir rota yoksa (kuramsal, beş şehirlik haritada olmaz)
+## eski statik ipucuna düşer.
+func _select_default_destination() -> void:
+	for route in WorldMapData.get_routes_from(_current_location_id):
+		if not _session.is_route_open(route):
+			continue
+		var destination := WorldMapData.get_location_by_id(route.to_location_id)
+		if destination == null:
+			continue
+		_focused_location = destination
+		_refresh_info_panel()
+		return
+	_show_hint()
+
 func _on_location_hovered(location: Location) -> void:
 	_focused_location = location
 	_refresh_info_panel()
 
+## Tıklama artık doğrudan planlayıcıya atlamıyor - seçim yapıyor (hover ile
+## aynı yol), "Bu rotayı planla" düğmesi kararı tamamlıyor. Fareyle gezinme
+## deneyimini dokunmatikte de tek tıkla eşitliyor.
 func _on_location_pressed(location: Location) -> void:
-	_go_to_planner(location)
+	_focused_location = location
+	_refresh_info_panel()
 
 func _refresh_info_panel() -> void:
 	_clear_info_panel()
