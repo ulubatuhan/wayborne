@@ -2873,6 +2873,16 @@ every decision has a visible control, and a key is only its shortcut.**
   a tapped point and opens a tapped gate or wagon on arrival;
   `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and
   fails on one without its on-screen counterpart in the same script.
+- **The road can be zoomed a little, never out past the frame.** Wheel,
+  trackpad/two-finger pinch or the HUD's +/– buttons (touch parity) scale
+  `TravelBand` between `ZOOM_MIN` (1.0 - the band already fills the
+  screen, so zooming out would show its edge) and `ZOOM_MAX` (1.6),
+  eased per frame. The pivot is the leader's head on the ground line
+  (`RoadCaravan.get_ground_y()`), so the eye stays on the caravan and the
+  ground never slides; `_world.clip_contents` keeps the scaled band under
+  the HUD. Tap-to-walk needs nothing new - it already reads the
+  caravan's canvas transform, which carries the scale. A pinch is checked
+  before a tap, so two fingers never walk the leader.
 - **Distance is measured in game hours, not frames.** The speed button
   scales the clock and the road by the same factor; driving movement off
   the raw frame delta would make days outrun the road at 3x and starve

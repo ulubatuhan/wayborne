@@ -198,6 +198,8 @@
 "UI_DANGER_LOW","düşük","low","","","","","","","","",""
 "UI_DANGER_MEDIUM","orta","moderate","","","","","","","","",""
 "UI_DANGER_HIGH","yüksek","high","","","","","","","","",""
+"UI_ROAD_ZOOM_IN","Yakınlaş (tekerlek ya da iki parmak)","Zoom in (wheel or pinch)","","","","","","","","",""
+"UI_ROAD_ZOOM_OUT","Uzaklaş (tekerlek ya da iki parmak)","Zoom out (wheel or pinch)","","","","","","","","",""
 "UI_ROAD_SPEED_TOOLTIP","Zamanın akış hızı","How fast time flows","","","","","","","","",""
 "UI_ROAD_WALK_FORWARD","Kervan kendi temposuyla yol alıyor — A/D ya da kervana dokunarak kolonda yürü.","The caravan keeps its own pace — use A/D or tap the column to walk along it.","","","","","","","","",""
 "UI_ROAD_WALK_IDLE","Kervan duruyor — gün, siz dursanız da geçer. Yola devam için bir tempo seç.","The caravan is halted — the day passes all the same. Pick a pace to move on.","","","","","","","","",""

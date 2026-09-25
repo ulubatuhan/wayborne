@@ -614,6 +614,11 @@ func get_driver_centres() -> Array[float]:
 		centres.append(figure.position.x + figure.size.x * 0.5)
 	return centres
 
+## Zemin çizgisi, bu düğümün yerel uzayında - yakınlaştırmanın dikey
+## ekseni: zemin yerinde kalsın, kervan ayağının altından kaymasın.
+func get_ground_y() -> float:
+	return _ground_y
+
 func get_leader_centre() -> float:
 	if _leader == null:
 		return 0.0

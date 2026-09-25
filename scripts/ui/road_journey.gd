@@ -350,6 +350,21 @@ var _walk_direction: float = 0.0
 
 var _clock_label: Label
 var _speed_button: Button
+## --- Yakınlaştırma ---
+## Yolda bir miktar yakınlaşıp uzaklaşılabiliyor: tekerlek, iki parmak ya
+## da HUD'daki +/- düğmeleri (dokunmatik denklik). Alt sınır 1.0, çünkü
+## şerit ekranın tamamını dolduruyor - daha uzağı manzaranın kenarını
+## gösterirdi. Merkez liderin başı ve zemin çizgisi: yakınlaşan göz
+## kervandan kopmasın.
+const ZOOM_MIN: float = 1.0
+const ZOOM_MAX: float = 1.6
+const ZOOM_STEP: float = 0.1
+const ZOOM_EASE: float = 8.0
+## Süreç boyunca akılda: bir sonraki seferde de oyuncunun seçtiği yakınlık.
+static var _zoom_target: float = ZOOM_MIN
+var _zoom: float = ZOOM_MIN
+var _pinch_points: Dictionary = {}  # index -> Vector2
+var _pinch_distance: float = 0.0
 var _progress_bar: ProgressBar
 
 ## _refresh_time_ui() her karede koşuyor; gösterilen değer değişmedikçe
@@ -460,6 +475,9 @@ func _build_world_layer() -> void:
 	# kervanın altından akar (bkz. TravelBand).
 	_band = TravelBand.new()
 	_world.add_child(_band)
+	# Yakınlaşan şerit dünya katmanının dışına taşmasın (HUD şeritlerinin
+	# altına sızardı).
+	_world.clip_contents = true
 
 	# Kervan şeridin *çocuğu*: manzara arkada çizilir, figürler onun
 	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
@@ -550,6 +568,13 @@ func _build_top_bar() -> PanelContainer:
 	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
 	row.add_child(_speed_button)
+
+	for step in [-1, 1]:
+		var zoom_button := Button.new()
+		zoom_button.text = "–" if step < 0 else "+"
+		zoom_button.tooltip_text = tr("UI_ROAD_ZOOM_OUT" if step < 0 else "UI_ROAD_ZOOM_IN")
+		zoom_button.pressed.connect(_step_zoom.bind(step))
+		row.add_child(zoom_button)
 
 	_progress_bar = ProgressBar.new()
 	_progress_bar.min_value = 0.0
@@ -1309,6 +1334,7 @@ func _on_reset_pressed() -> void:
 func _process(delta: float) -> void:
 	if _clock == null:
 		return
+	_apply_zoom(delta)
 
 	if _can_time_flow():
 		var hours := _clock.advance(delta)
@@ -1365,7 +1391,63 @@ func _move_leader(hours: float) -> void:
 
 ## Kervana dokunmak/tıklamak lideri oraya yürütür. Dünya katmanları fareyi
 ## yoksaydığı için tıklama buraya ancak hiçbir düğmeye değmediyse düşer.
+static func step_zoom_value(current: float, direction: int) -> float:
+	return clampf(snappedf(current + ZOOM_STEP * direction, ZOOM_STEP / 2.0), ZOOM_MIN, ZOOM_MAX)
+
+func _step_zoom(direction: int) -> void:
+	_zoom_target = step_zoom_value(_zoom_target, direction)
+
+## Tekerlek, trackpad ve iki parmak. Tıklayarak yürümeden önce bakılıyor:
+## iki parmakla sıkıştırmak lideri yürütmemeli.
+func _handle_zoom_input(event: InputEvent) -> bool:
+	var mouse := event as InputEventMouseButton
+	if mouse != null and mouse.pressed and (
+		mouse.button_index == MOUSE_BUTTON_WHEEL_UP or mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN
+	):
+		_step_zoom(1 if mouse.button_index == MOUSE_BUTTON_WHEEL_UP else -1)
+		return true
+	var magnify := event as InputEventMagnifyGesture
+	if magnify != null:
+		_zoom_target = clampf(_zoom_target * magnify.factor, ZOOM_MIN, ZOOM_MAX)
+		return true
+	var touch := event as InputEventScreenTouch
+	if touch != null:
+		if touch.pressed:
+			_pinch_points[touch.index] = touch.position
+		else:
+			_pinch_points.erase(touch.index)
+		_pinch_distance = _current_pinch_distance()
+		return _pinch_points.size() >= 2
+	var drag := event as InputEventScreenDrag
+	if drag != null and _pinch_points.has(drag.index):
+		_pinch_points[drag.index] = drag.position
+		var distance := _current_pinch_distance()
+		if _pinch_distance > 0.0 and distance > 0.0:
+			_zoom_target = clampf(_zoom_target * distance / _pinch_distance, ZOOM_MIN, ZOOM_MAX)
+		_pinch_distance = distance
+		return _pinch_points.size() >= 2
+	return false
+
+func _current_pinch_distance() -> float:
+	if _pinch_points.size() < 2:
+		return 0.0
+	var points: Array = _pinch_points.values()
+	return (points[0] as Vector2).distance_to(points[1] as Vector2)
+
+## Şerit kendi yerinde ölçekleniyor; merkez liderin başı ve zemin çizgisi.
+func _apply_zoom(delta: float) -> void:
+	_zoom = lerpf(_zoom, _zoom_target, minf(1.0, ZOOM_EASE * delta))
+	if absf(_zoom - _zoom_target) < 0.001:
+		_zoom = _zoom_target
+	_band.pivot_offset = _caravan.position + Vector2(
+		_caravan.get_leader_centre(), _caravan.get_ground_y()
+	)
+	_band.scale = Vector2(_zoom, _zoom)
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _band != null and _band.visible and _handle_zoom_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	var position := Vector2.ZERO
 	var mouse := event as InputEventMouseButton
 	var touch := event as InputEventScreenTouch
