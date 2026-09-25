@@ -16,6 +16,11 @@ extends Control
 ## seçmez, tıpkı beş kültürün hiçbirinin oyunun "resmi" kültürü olmaması
 ## gibi.
 const PURIFICATION_COST: int = 35
+## Metin sütunu ekranın sol kısmında kalıyor: arka planın sağ yanı (mumlar,
+## kemikler, kâğıtlar) resmin kendisi, efsane satırları onun üstüne
+## uzanınca ikisi de okunmuyordu. Dar ekranda sütun tam genişliğe açılır.
+const TEXT_COLUMN_RATIO: float = 0.58
+const TEXT_COLUMN_MIN_WIDTH: float = 560.0
 
 var _session: GameSession
 var _purification_panel: PurificationPanel
@@ -23,6 +28,7 @@ var _purification_panel: PurificationPanel
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
+@onready var _scroll: ScrollContainer = $MarginContainer/VBoxContainer/ScrollContainer
 
 func _ready() -> void:
 	$MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/InfoLabel.text = tr("UI_CHURCH_HINT")
@@ -38,6 +44,9 @@ func _ready() -> void:
 	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
 
 	_build_myths()
+	_content.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_scroll.resized.connect(_fit_text_column)
+	_fit_text_column()
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 
@@ -65,6 +74,15 @@ func _add_myth_label(title_text: String, body_text: String) -> void:
 	body.text = body_text
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_content.add_child(body)
+
+func _fit_text_column() -> void:
+	_content.custom_minimum_size.x = text_column_width(_scroll.size.x)
+
+static func text_column_width(available: float) -> float:
+	# Dar (dikey) ekranda resim altta kalıyor, metnin yanında değil.
+	if available < TEXT_COLUMN_MIN_WIDTH * 2.0:
+		return available
+	return maxf(available * TEXT_COLUMN_RATIO, TEXT_COLUMN_MIN_WIDTH)
 
 func _on_wallet_changed(_new_balance: int) -> void:
 	_purification_panel.refresh()
