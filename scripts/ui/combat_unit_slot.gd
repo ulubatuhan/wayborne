@@ -180,8 +180,16 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	add_theme_stylebox_override("panel", _door_frame if bound_unit.on_deaths_door else _frame)
 	queue_redraw()
 	var emblem_file := String(WaybookIcons.CLASS_EMBLEMS.get(bound_unit.figure_kind, "")) if bound_unit.is_player_side else ""
-	_emblem.visible = emblem_file != ""
-	if _emblem.visible:
+	# `visible = false` bir Container'da düğümü yerleşimden tamamen
+	# çıkarıyor - düşman kartları hiç sınıf amblemi taşımadığı için
+	# `rank_row`'ları oyuncu kartlarınınkinden birkaç piksel kısa kalıyor,
+	# altındaki figür/isim/can bloğu her iki safta farklı yükseklikte
+	# başlıyordu (ölçülen belirti: düşman kareleri oyuncu karelerinden
+	# hizasız duruyor). Amblem artık her zaman görünür, yalnızca boşken
+	# saydam - CLAUDE.md'nin "Title Screen Rules"ta zaten kaydettiği
+	# `visible=false` / `modulate:a=0` ayrımının aynısı.
+	_emblem.modulate.a = 1.0 if emblem_file != "" else 0.0
+	if emblem_file != "":
 		_emblem.texture = WaybookTheme.texture(emblem_file)
 	_refresh_status(bound_unit)
 

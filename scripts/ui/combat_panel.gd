@@ -289,12 +289,39 @@ func _build_action_area() -> void:
 	add_child(_continue_button)
 
 func _build_log() -> void:
+	# Sahne sabit yükseklikte (STAGE_HEIGHT), yetenek düğmeleri de kendi
+	# içeriği kadar - altlarında ekranın neredeyse yarısı boş siyah
+	# kalıyordu (ölçüldü: 1920x1080'de ~45%). ScrollContainer'ın kendi
+	# hiç çizilen zemini olmadığı için yalnızca `size_flags_vertical`
+	# büyütmek görsel olarak hiçbir şeyi değiştirmiyordu - genişleyen alan
+	# hâlâ boş siyah okunuyordu. Kayıt artık HUD_BAR temalı bir panelin
+	# içinde: hem kalan boşluğu dolduruyor hem de "burası kaydın olduğu
+	# yer" diyen görünür bir zemin taşıyor.
+	var log_panel := PanelContainer.new()
+	# HUD_BAR (bkz. WaybookTheme) dünyanın kendi renkli zemini üstünde
+	# okunmak üzere neredeyse siyah boyanmış - savaş sahnesinin zaten
+	# neredeyse siyah arka planında tamamen kayboluyordu. Sahnenin kendi
+	# kart çerçevesiyle (`stage_style`, yukarıda) aynı aileden, biraz
+	# daha açık bir zemin kullanılıyor.
+	var log_style := StyleBoxFlat.new()
+	log_style.bg_color = Color(0.12, 0.11, 0.10, 0.55)
+	log_style.border_color = Color(0.30, 0.25, 0.18, 0.8)
+	log_style.set_border_width_all(1)
+	log_style.content_margin_left = 8
+	log_style.content_margin_right = 8
+	log_style.content_margin_top = 6
+	log_style.content_margin_bottom = 6
+	log_panel.add_theme_stylebox_override("panel", log_style)
+	log_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(log_panel)
+
 	_log_scroll = ScrollContainer.new()
 	_log_scroll.custom_minimum_size = Vector2(0, 96)
+	log_panel.add_child(_log_scroll)
+
 	_log_list = VBoxContainer.new()
 	_log_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_log_scroll.add_child(_log_list)
-	add_child(_log_scroll)
 
 # --- Tazeleme ---
 
