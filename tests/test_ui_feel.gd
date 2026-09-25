@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_hover_growth_is_bounded(t)
 	_test_feedback_attaches_once(t)
 	_test_near_miss(t)
+	_test_road_zoom_is_bounded(t)
 
 func _test_hover_growth_is_bounded(t) -> void:
 	var feedback = load(FEEDBACK_PATH)
@@ -54,3 +55,15 @@ func _test_near_miss(t) -> void:
 	var flag := EventChoice.new()
 	flag.requirements = [EventCondition.make("has_izci", EventCondition.Op.HAS_FLAG)]
 	t.not_ok(flag.is_near_miss({"flags": {}}), "bayrak kilidi sayısal değil, neredeyse olamaz")
+
+## Yol yakınlaşması: adım adım, iki uçta kenetli - uzaklaşmak manzaranın
+## kenarını hiç göstermiyor, yakınlaşmak kervanı kadrajdan taşırmıyor.
+func _test_road_zoom_is_bounded(t) -> void:
+	var road = load("res://scripts/ui/road_journey.gd")
+	var z: float = road.ZOOM_MIN
+	t.ok(is_equal_approx(road.step_zoom_value(z, -1), road.ZOOM_MIN), "en uzakta daha uzağa gidilmiyor")
+	t.ok(road.step_zoom_value(z, 1) > z, "yakınlaşma adımı büyütüyor")
+	for _i in 20:
+		z = road.step_zoom_value(z, 1)
+	t.ok(is_equal_approx(z, road.ZOOM_MAX), "en yakında kenetli")
+	t.ok(road.ZOOM_MIN >= 1.0, "şerit ekranı hep dolduruyor")

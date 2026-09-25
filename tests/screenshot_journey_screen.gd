@@ -91,6 +91,13 @@ func _init() -> void:
 	await _settle()
 	_save("05_kis.png")
 
+	# Yakınlaşma: kervan kadrajda, zemin yerinde kalıyor mu.
+	screen.set("_zoom_target", 1.6)
+	screen.set("_zoom", 1.6)
+	await _settle()
+	_save("06_yakin.png")
+	screen.set("_zoom_target", 1.0)
+
 	quit()
 
 func _start_journey() -> void:
