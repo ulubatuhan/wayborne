@@ -347,14 +347,32 @@ static func fit_desk_workspace(root: Control) -> void:
 	if margin == null or scrim == null:
 		return
 	scrim.color = Color(ArtPalette.INK, WORKSPACE_SIDE_SCRIM_ALPHA)
-	var band := Panel.new()
+	# `StyleBoxFlat.shadow_*` düz bir `Panel`de kenarları yumuşatmıyordu -
+	# gölge rengi dolgu rengiyle birebir aynı olduğu için (ikisi de aynı
+	# alfa) düz kutunun keskin kenarıyla gölgenin bulanıklığı görsel olarak
+	# ayırt edilemiyordu, iki dikey çizgi gibi okunuyordu (ölçüldü). Gerçek
+	# bir alfa rampası için `GradientTexture2D` kullanılıyor: 0 → hedef →
+	# hedef → 0, `WORKSPACE_BAND_FEATHER`lik rampalarla.
+	var gradient := Gradient.new()
+	gradient.colors = PackedColorArray([
+		Color(ArtPalette.INK, 0.0), Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA),
+		Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA), Color(ArtPalette.INK, 0.0),
+	])
+	gradient.offsets = PackedFloat32Array([0.0, 0.1, 0.9, 1.0])
+	var gradient_texture := GradientTexture2D.new()
+	gradient_texture.gradient = gradient
+	gradient_texture.fill = GradientTexture2D.FILL_LINEAR
+	gradient_texture.fill_from = Vector2(0.0, 0.5)
+	gradient_texture.fill_to = Vector2(1.0, 0.5)
+	gradient_texture.width = 512
+	gradient_texture.height = 8
+
+	var band := TextureRect.new()
 	band.name = "WorkspaceBand"
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
-	style.shadow_color = Color(ArtPalette.INK, WORKSPACE_BAND_ALPHA)
-	style.shadow_size = WORKSPACE_BAND_FEATHER
-	band.add_theme_stylebox_override("panel", style)
+	band.texture = gradient_texture
+	band.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	band.stretch_mode = TextureRect.STRETCH_SCALE
 	root.add_child(band)
 	root.move_child(band, margin.get_index())
 	# Bant dar ekranda da kalıyor: tam genişlikte soluk çadır bezi yine
@@ -363,8 +381,15 @@ static func fit_desk_workspace(root: Control) -> void:
 		var side := workspace_side_margin(root.size.x, _workspace_content_min(margin))
 		margin.add_theme_constant_override("margin_left", side)
 		margin.add_theme_constant_override("margin_right", side)
+		var band_width := maxf(1.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN))
 		band.position = Vector2(side - WORKSPACE_EDGE_MARGIN, 0.0)
-		band.size = Vector2(maxf(0.0, root.size.x - 2.0 * (side - WORKSPACE_EDGE_MARGIN)), root.size.y)
+		band.size = Vector2(band_width, root.size.y)
+		# Rampa genişliği (56px) bant genişliğine göre bir oran - bant
+		# yeniden boyutlanınca gradyanın kendi 0..1 uzayındaki karşılığı
+		# da yeniden hesaplanıyor, yoksa geniş bir bantta rampa görünmez
+		# kadar dar, dar bir bantta neredeyse tüm bandı yerdi.
+		var feather_ratio := clampf(float(WORKSPACE_BAND_FEATHER) / band_width, 0.0, 0.5)
+		gradient.offsets = PackedFloat32Array([0.0, feather_ratio, 1.0 - feather_ratio, 1.0])
 	root.resized.connect(apply)
 	# Satırlar _ready'den sonra da kuruluyor; içerik büyüyünce sütun genişler.
 	for scroll in margin.find_children("*", "ScrollContainer", true, false):
