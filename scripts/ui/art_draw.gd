@@ -441,6 +441,15 @@ static func check(canvas: CanvasItem, centre: Vector2, size: float, color: Color
 	])
 	canvas.draw_polyline(points, color, maxf(1.0, size * 0.18), true)
 
+## Yakınlaştırma tuşlarının "−"/"+" işareti: font glyph'i değil, chevron/
+## check'le aynı çizim dili. `plus`, false ise yalnızca yatay çizgi (eksi).
+static func plus_minus(canvas: CanvasItem, centre: Vector2, size: float, color: Color, plus: bool) -> void:
+	var half := size * 0.5
+	var width := maxf(1.0, size * 0.18)
+	canvas.draw_line(centre + Vector2(-half, 0.0), centre + Vector2(half, 0.0), color, width, true)
+	if plus:
+		canvas.draw_line(centre + Vector2(0.0, -half), centre + Vector2(0.0, half), color, width, true)
+
 static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	for index in steps:

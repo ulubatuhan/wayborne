@@ -588,16 +588,24 @@ func _build_top_bar() -> PanelContainer:
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
 	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
 	_speed_button = Button.new()
+	_speed_button.theme_type_variation = WaybookTheme.ICON_TAB
 	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
 	row.add_child(_speed_button)
 
 	for step in [-1, 1]:
 		var zoom_button := Button.new()
-		zoom_button.text = "–" if step < 0 else "+"
+		zoom_button.theme_type_variation = WaybookTheme.ICON_TAB
 		zoom_button.tooltip_text = tr("UI_ROAD_ZOOM_OUT" if step < 0 else "UI_ROAD_ZOOM_IN")
 		zoom_button.pressed.connect(_step_zoom.bind(step))
 		row.add_child(zoom_button)
+		# "–"/"+" font glyph'i değil çizim: kulağın simetrik ICON_TAB'ı bile
+		# tek bir karakterin fontun kendi metrik boşluğuyla ortalanmamasını
+		# düzeltmiyor - UiIcon aynı chevron/check diliyle tam merkezde çiziyor.
+		var zoom_icon := UiIcon.new()
+		zoom_icon.setup(UiIcon.Kind.MINUS if step < 0 else UiIcon.Kind.PLUS, ArtPalette.UI_TEXT)
+		zoom_button.add_child(zoom_icon)
+		zoom_icon.fill_parent()
 
 	_progress_bar = ProgressBar.new()
 	_progress_bar.min_value = 0.0

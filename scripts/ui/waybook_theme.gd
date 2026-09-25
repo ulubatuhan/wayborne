@@ -78,6 +78,10 @@ const CELL_PANEL: StringName = &"CellPanel"
 ## Dolgu yerine ince bir çerçeve çiziyor; hover/basılıyken dolgu belirir.
 const HUD_GHOST_BUTTON: StringName = &"HudGhostButton"
 
+## "1x", "–", "+" gibi 1-2 karakterlik yol HUD düğmeleri için - aynı G4
+## dokusu, yalnızca simetrik dolgu (bkz. ICON_TAB_CONTENT).
+const ICON_TAB: StringName = &"IconTab"
+
 ## Dokuz parça geometrisi, doku pikseli cinsinden, işlenmiş PNG'ler
 ## üstünde ölçüldü (tools/waybook_assets.py boyutları basıyor). Her pay köşe
 ## süsünü bütünüyle içermeli, yoksa esneme onu bulaştırır.
@@ -90,6 +94,10 @@ const SEAL_CONTENT: int = 60
 ## Sekmenin sol ucu kıvrık bir kulak, o yüzden sol pay daha geniş.
 const TAB_SLICE: Array[int] = [40, 14, 24, 14]
 const TAB_CONTENT: Array[int] = [34, 16, 20, 16]
+## "1x"/"–"/"+" gibi 1-2 karakterlik simge düğmeleri kulağın asimetrisini
+## taşıyamıyor - metin kutunun merkezinden 7px sağa kayıyordu (34/20 payı
+## dengesiz). Aynı toplam dolguyu ([54, 32]) simetrik dağıtıyor.
+const ICON_TAB_CONTENT: Array[int] = [27, 16, 27, 16]
 const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
 const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
 ## Kayışın yuvarlak uçları döşenirken her parçada tekrar etmesin diye
@@ -392,11 +400,11 @@ static func _slip() -> StyleBoxTexture:
 ## Engine Rules: *sebebiyle* kilitli, asla gizli değil). Bir süre üstüne
 ## defterin karalama işareti de biniyordu; oyuncu testinde güzel
 ## görünmediği için kaldırıldı - silik olmak yetiyor.
-static func _tab(tint: Color) -> StyleBoxTexture:
+static func _tab(tint: Color, content: Array[int] = TAB_CONTENT) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
 	box.texture = texture("g4_tab.png")
 	box.modulate_color = tint
-	_set_margins(box, TAB_SLICE, TAB_CONTENT)
+	_set_margins(box, TAB_SLICE, content)
 	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
 	# düğmede yatay çizgilere dönüşüyordu.
 	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
@@ -430,6 +438,19 @@ static func _build_buttons(theme: Theme) -> void:
 	_build_row_buttons(theme)
 	_build_map_labels(theme)
 	_build_hud_ghost_button(theme)
+	_build_icon_tab(theme)
+
+## "1x"/"–"/"+" gibi yol HUD'unun kısa metinli düğmeleri: aynı G4 dokusu,
+## yalnızca `ICON_TAB_CONTENT`in simetrik dolgusuyla - kulağın asimetrisi
+## (bkz. TAB_CONTENT'in kendi yorumu) bir haneli bir metni merkezden 7px
+## kaydırıyordu.
+static func _build_icon_tab(theme: Theme) -> void:
+	theme.set_type_variation(ICON_TAB, "Button")
+	theme.set_stylebox("normal", ICON_TAB, _tab(Color.WHITE, ICON_TAB_CONTENT))
+	theme.set_stylebox("hover", ICON_TAB, _tab(ArtPalette.UI_TINT_HOVER, ICON_TAB_CONTENT))
+	theme.set_stylebox("pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
+	theme.set_stylebox("hover_pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
+	theme.set_stylebox("disabled", ICON_TAB, _tab(ArtPalette.UI_TINT_DISABLED, ICON_TAB_CONTENT))
 
 ## Çerçeve + dolgusuz zemin, `_tab()`in opak deri dokusunun aksine - bir
 ## cam panelin üstünde okunması gereken tek düğme ailesi. `Button.new()`
