@@ -116,6 +116,12 @@ const CAMPFIRE_SEATS: Array[Vector2] = [
 
 var _anchor_x: float = 0.0
 var _ground_y: float = 0.0
+## HUD katmanının dünyanın üstüne çizdiği bir panel varsa (bkz. "Kervan
+## Emirleri"), o panelin sağ kenarı - kolon bunun solunda hiç durmuyor,
+## sığmıyorsa `COLUMN_EDGE_MARGIN`'in yerine bu tavana göre küçülüyor.
+## Sıfır (varsayılan) eski davranış: hiçbir çağıran bunu ayarlamazsa
+## `COLUMN_EDGE_MARGIN` hiç değişmeden kullanılır.
+var _safe_left: float = 0.0
 var _light: Color = Color.WHITE
 var _speed: float = 0.0
 
@@ -346,6 +352,21 @@ func set_ground_line(anchor_x: float, ground_y: float) -> void:
 			return
 	_anchor_x = anchor_x
 	_ground_y = ground_y
+	_layout()
+	queue_redraw()
+
+## HUD'un "Kervan Emirleri" paneli manzaranın üstünde, sol altta duruyor
+## (bkz. road_journey.gd::_build_hud_layer) - kolon onun sağından
+## başlamalı, yoksa panel arka vagonu (ve öküzünü) kapatır. Panel dile
+## ve genişliğe göre kendi boyunu değiştirdiği için çağıran (road_journey.gd
+## ::_sync_orders_panel_safe_left) bunu her karede yeniden okuyor - erken
+## çıkış (`is_equal_approx`) değişmeyen bir değeri sessizce yok saydığı
+## için bu ucuz.
+func set_safe_left(px: float) -> void:
+	var wanted := maxf(0.0, px)
+	if is_equal_approx(_safe_left, wanted):
+		return
+	_safe_left = wanted
 	_layout()
 	queue_redraw()
 
@@ -723,7 +744,7 @@ func _layout() -> void:
 	# Ölçek önce: kolon çapanın arkasına sığmıyorsa taşmak yerine
 	# küçülüyor. Her terim boşluk ya da yüksekliğe oranlı bir genişlik
 	# olduğu için uzunluk ölçekte doğrusal - yani tek bir çarpan yetiyor.
-	var room := maxf(1.0, _anchor_x - COLUMN_EDGE_MARGIN)
+	var room := maxf(1.0, _anchor_x - maxf(COLUMN_EDGE_MARGIN, _safe_left))
 	_scale = clampf(
 		room / maxf(1.0, _walk_column(1.0, false)), MIN_COLUMN_SCALE, 1.0
 	)

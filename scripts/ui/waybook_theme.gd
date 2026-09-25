@@ -57,6 +57,11 @@ const ROW_BUTTON: StringName = &"RowButton"
 const MAP_LABEL: StringName = &"MapLabel"
 ## Kargo/pazar hücresi: aynı küçültülmüş cilt, içinde malın resmi.
 const CELL_PANEL: StringName = &"CellPanel"
+## Sürüklenebilir "Kervan Emirleri" paneli yarı saydam bir cam gibi okunuyor
+## (bkz. road_journey.gd::_build_orders_panel) - üstündeki düğmeler G4'ün
+## opak deri dokusunu taşırsa cam zeminin üstünde iki ayrı dil okunur.
+## Dolgu yerine ince bir çerçeve çiziyor; hover/basılıyken dolgu belirir.
+const HUD_GHOST_BUTTON: StringName = &"HudGhostButton"
 
 ## Dokuz parça geometrisi, doku pikseli cinsinden, işlenmiş PNG'ler
 ## üstünde ölçüldü (tools/waybook_assets.py boyutları basıyor). Her pay köşe
@@ -409,6 +414,38 @@ static func _build_buttons(theme: Theme) -> void:
 		theme.set_constant("outline_size", type_name, TEXT_OUTLINE_SIZE)
 	_build_row_buttons(theme)
 	_build_map_labels(theme)
+	_build_hud_ghost_button(theme)
+
+## Çerçeve + dolgusuz zemin, `_tab()`in opak deri dokusunun aksine - bir
+## cam panelin üstünde okunması gereken tek düğme ailesi. `Button.new()`
+## sonrası `theme_type_variation = HUD_GHOST_BUTTON` ile açılır.
+static func _ghost_button(fill_alpha: float, border: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(ArtPalette.INK.r, ArtPalette.INK.g, ArtPalette.INK.b, fill_alpha)
+	box.border_color = border
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(3)
+	box.content_margin_left = 10
+	box.content_margin_right = 10
+	box.content_margin_top = 6
+	box.content_margin_bottom = 6
+	return box
+
+static func _build_hud_ghost_button(theme: Theme) -> void:
+	theme.set_type_variation(HUD_GHOST_BUTTON, "Button")
+	theme.set_stylebox("normal", HUD_GHOST_BUTTON, _ghost_button(0.16, ArtPalette.UI_RULE))
+	theme.set_stylebox("hover", HUD_GHOST_BUTTON, _ghost_button(0.28, ArtPalette.GOLD_DIM))
+	theme.set_stylebox("pressed", HUD_GHOST_BUTTON, _ghost_button(0.42, ArtPalette.UI_ACCENT))
+	theme.set_stylebox("hover_pressed", HUD_GHOST_BUTTON, _ghost_button(0.42, ArtPalette.UI_ACCENT))
+	theme.set_stylebox("disabled", HUD_GHOST_BUTTON, _ghost_button(0.08, Color(ArtPalette.UI_RULE, 0.3)))
+	theme.set_stylebox("focus", HUD_GHOST_BUTTON, _focus())
+	theme.set_color("font_color", HUD_GHOST_BUTTON, ArtPalette.UI_TEXT)
+	theme.set_color("font_hover_color", HUD_GHOST_BUTTON, ArtPalette.UI_ACCENT)
+	theme.set_color("font_pressed_color", HUD_GHOST_BUTTON, ArtPalette.UI_ACCENT)
+	theme.set_color("font_hover_pressed_color", HUD_GHOST_BUTTON, ArtPalette.UI_ACCENT)
+	theme.set_color("font_disabled_color", HUD_GHOST_BUTTON, ArtPalette.UI_TEXT_DIM)
+	theme.set_color("font_outline_color", HUD_GHOST_BUTTON, ArtPalette.UI_TEXT_HALO)
+	theme.set_constant("outline_size", HUD_GHOST_BUTTON, TEXT_OUTLINE_SIZE)
 
 static func row_frame(tint: Color) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
