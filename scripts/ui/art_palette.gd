@@ -70,6 +70,12 @@ const UI_GAUGE_STRESS: Color = Color(0.78, 0.36, 0.30)
 const UI_GAUGE_DANGER: Color = Color(0.88, 0.60, 0.26)
 const UI_GAUGE_STAMINA: Color = Color(0.50, 0.66, 0.84)
 const UI_GAUGE_EMPTY: Color = Color(0.10, 0.09, 0.09, 0.85)
+## Üst şeridin sefer ilerleme çubuğu - diğer dört şişeden ayrı bir rol,
+## çünkü bu bir moral/stres/tehlike/takat değeri değil, yolun kendisinde
+## ne kadar yol alındığı. Boyanmamış bir `ProgressBar` koyu bir boşluk
+## gibi okunuyordu ("dark empty gauge slot"); altın tonu HUD'un kendi
+## vurgu rengiyle (`UI_ACCENT`) aynı aileden.
+const UI_GAUGE_JOURNEY: Color = GOLD
 ## Yol şeridindeki ikincil satırlar (koşullar, dikkat, son kayıt).
 const UI_HUD_NOTE: Color = Color(0.82, 0.80, 0.72)
 ## Bir yol işareti büyüdüğünde ve oyuncu ona yetiştiğinde ikonun tonu.

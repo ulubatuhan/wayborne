@@ -606,6 +606,23 @@ func _build_top_bar() -> PanelContainer:
 	_progress_bar.show_percentage = false
 	_progress_bar.custom_minimum_size = Vector2(110.0, 14.0)
 	_progress_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Boyanmamış bir ProgressBar zoom düğmeleriyle koşullar metni arasında
+	# koyu, tanımsız bir boşluk gibi okunuyordu ("dark empty gauge slot") -
+	# HUD'un geri kalanı gibi temalanmadığı sürece bu bir kusurdan farksız.
+	var progress_empty := StyleBoxFlat.new()
+	progress_empty.bg_color = ArtPalette.UI_GAUGE_EMPTY
+	progress_empty.corner_radius_top_left = 3
+	progress_empty.corner_radius_top_right = 3
+	progress_empty.corner_radius_bottom_left = 3
+	progress_empty.corner_radius_bottom_right = 3
+	var progress_fill := StyleBoxFlat.new()
+	progress_fill.bg_color = ArtPalette.UI_GAUGE_JOURNEY
+	progress_fill.corner_radius_top_left = 3
+	progress_fill.corner_radius_top_right = 3
+	progress_fill.corner_radius_bottom_left = 3
+	progress_fill.corner_radius_bottom_right = 3
+	_progress_bar.add_theme_stylebox_override("background", progress_empty)
+	_progress_bar.add_theme_stylebox_override("fill", progress_fill)
 	row.add_child(_progress_bar)
 
 	# Arazi, hava ve tempo. Hava yalnızca görsel değil (yolu yavaşlatıyor,
@@ -613,7 +630,6 @@ func _build_top_bar() -> PanelContainer:
 	# görünmeyen bir ceza oyuncu için hatadan ayırt edilemez.
 	_conditions_label = Label.new()
 	_conditions_label.modulate = ArtPalette.UI_HUD_NOTE
-	_conditions_label.clip_text = true
 	# Asgari genişlik olmadan, yanındaki genişleyen etiket bunu sıfıra
 	# sıkıştırıyor ve `clip_text` yüzünden hiç görünmüyordu.
 	# Takat çubuğu eklenince üst şerit taştı ve kervan sayıları
@@ -624,6 +640,10 @@ func _build_top_bar() -> PanelContainer:
 	# asgari genişliğini 1582'ye çıkarıp HUD'u ekranın iki yanından
 	# taşırıyordu - alt şerit de aynı sütunda olduğu için o da kırpılıyordu.
 	# Koşul satırı artık kervan sayılarıyla kalan yeri paylaşıyor.
+	# `clip_text` harfi ortadan kesiyordu ("...Weather: Clear · P") - alt
+	# şeridin `_walk_hint`/`_last_log_label`'ında bulunan aynı düzeltme:
+	# elips + tam metni tooltip'e taşımak.
+	_conditions_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_conditions_label.custom_minimum_size = Vector2(150.0, 0.0)
 	_conditions_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_conditions_label)
@@ -648,11 +668,21 @@ func _build_top_bar() -> PanelContainer:
 
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan
-	# bir döküm HUD'u yeniden metin duvarına çeviriyordu.
+	# bir döküm HUD'u yeniden metin duvarına çeviriyordu. `clip_text` ise
+	# harfi ortadan kesiyordu ("Wagons: 1 (0...") - aynı elips + tooltip
+	# düzeltmesi. Font da 12 px'ten (EB Garamond'un küçük gözü için okunaksız)
+	# güvenlik tabanı 15 px'e çıktı.
+	# Bu satır (altı sayı: altın/erzak/itibar/vagon/tüccar/evrak) komşu koşul
+	# etiketinden çok daha uzun metin taşıyor ("Terrain...Pace" ~50 karakter,
+	# bu satır ~95); eşit 50/50 pay bölüşümü onu neredeyse hep elipse
+	# düşürüyordu. Asgari genişlik ve payı komşusundan büyük - HFlowContainer
+	# geri kalan alanı stretch oranına göre bölüştürüyor.
 	_state_label = Label.new()
 	_state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_state_label.clip_text = true
-	_state_label.add_theme_font_size_override("font_size", 12)
+	_state_label.size_flags_stretch_ratio = 1.6
+	_state_label.custom_minimum_size = Vector2(300.0, 0.0)
+	_state_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_state_label.add_theme_font_size_override("font_size", 15)
 	row.add_child(_state_label)
 
 	# Geliştirici kutusu (tohum + sıfırla) yalnızca F1 sentetik seferinde
@@ -1911,6 +1941,7 @@ func _refresh_time_ui() -> void:
 	var progress := _get_route_progress()
 	_band.set_route_progress(progress, _days_covered)
 	_progress_bar.value = progress
+	_progress_bar.tooltip_text = tr("UI_ROAD_PROGRESS_TOOLTIP") % int(round(progress * 100.0))
 	_position_encounter()
 
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
@@ -1999,6 +2030,7 @@ func _refresh_conditions() -> void:
 		return
 	_last_conditions = text
 	_conditions_label.text = text
+	_conditions_label.tooltip_text = text
 
 ## Oyuncunun ne yaptığını ve neyi yapmadığını tek satırda söyler: duran
 ## kervan "bekliyor" değil, *yol almıyor* - ve bunu görmezse oyuncu ekranın
@@ -3104,6 +3136,7 @@ func _refresh_state() -> void:
 		caravan.merchant_names.size(),
 		caravan.documents,
 	]
+	_state_label.tooltip_text = _state_label.text
 
 ## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
 ## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.
