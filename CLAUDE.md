@@ -1318,7 +1318,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   to alpha (only backdrop *connected* to the border or a named seed, so a
   grey inside the art survives), crops, scales to on-screen size and
   writes `data/assets/ui/waybook/`. The sheets came as JPGs with no alpha;
-  never hand-edit an output PNG - change the pipeline and re-run it.
+  never hand-edit an output PNG - change the pipeline and re-run it. Desk
+  scenes that arrive framed in a cream paper border are cropped by
+  `crop_paper_frame` (walk in while a row is mostly paper, then a margin
+  for the torn edge) - `TextureRect`'s cover mode absorbs the small
+  change of aspect.
 - **One book face for every language.** EB Garamond (OFL,
   `data/assets/fonts/`) with the engine's own font as its fallback, so
   nothing the old font could draw becomes a tofu box. Size 18, because the
