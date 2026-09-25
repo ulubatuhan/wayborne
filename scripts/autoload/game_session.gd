@@ -1260,6 +1260,69 @@ const CREW_HUNGER_MORALE_PER_NIGHT: int = 3
 const MAX_CREW_HUNGER_MORALE_PENALTY: int = -20
 var crew_hungry_nights: int = 0
 
+## --- Kalıcı emirler ---
+## Aynı kararı her gün yeniden sormak bir karar değil, bir angarya: sofra
+## politikası, akşam kampı ve savaş kadrosu bir kez verilip hatırlanıyor,
+## durum değişince (erzak yetmiyor, biri açlıktan ölmek üzere) oyun yine
+## soruyor. Kayda giriyor - yüklemek emri unutturmasın.
+var meal_policy_mode: String = MEAL_MODE_ALL
+## Belirli kişiler kipinde kimlerin yiyeceği, `character_id` ile.
+var meal_policy_ids: Array[String] = []
+var standing_camp_at_dusk: bool = false
+## Son savaşa sırasıyla girenler, `character_id` ile. Boşsa bütün parti.
+var combat_roster_ids: Array[String] = []
+
+func set_meal_policy(mode: String, selected: Array[CharacterData] = []) -> void:
+	meal_policy_mode = mode
+	meal_policy_ids.clear()
+	for character in selected:
+		meal_policy_ids.append(character.character_id)
+
+func get_meal_policy_selected() -> Array[CharacterData]:
+	var selected: Array[CharacterData] = []
+	for character in get_party():
+		if meal_policy_ids.has(character.character_id):
+			selected.append(character)
+	return selected
+
+## Politika bu gece kendi başına uygulanabilir mi, yoksa sofra açılıp
+## sorulmalı mı? Erzak herkese yetmiyorsa, ya da politika birini bu gece
+## açlığın can aldığı eşiğe itecekse, karar yeniden oyuncunun: kalıcı bir
+## emir kimseyi oyuncunun haberi olmadan öldürmemeli.
+func meal_needs_decision() -> bool:
+	if get_provisions() < get_daily_provision_consumption():
+		return true
+	var fed := get_meal_fed_party(meal_policy_mode, get_meal_policy_selected())
+	for character in get_party():
+		if not fed.has(character) and character.consecutive_hungry_days + 1 >= STARVATION_HP_LOSS_START_DAY:
+			return true
+	if not meal_feeds_crew(meal_policy_mode) and crew_hungry_nights + 1 >= STARVATION_HP_LOSS_START_DAY:
+		return true
+	return false
+
+## Savaş kadrosu: son seçilen sıra, hâlâ partide olanlarla. Sonradan
+## katılan biri sona ekleniyor ama dahil değil - hatırlanan emir onu
+## kapsamıyordu, oyuncu kutuyu kendisi işaretlesin.
+func get_remembered_combat_order() -> Array[CharacterData]:
+	var party := get_party()
+	var ordered: Array[CharacterData] = []
+	for id in combat_roster_ids:
+		for character in party:
+			if character.character_id == id and not ordered.has(character):
+				ordered.append(character)
+	for character in party:
+		if not ordered.has(character):
+			ordered.append(character)
+	return ordered
+
+func is_in_remembered_roster(character: CharacterData) -> bool:
+	return combat_roster_ids.is_empty() or combat_roster_ids.has(character.character_id)
+
+func remember_combat_roster(chosen: Array[CharacterData]) -> void:
+	combat_roster_ids.clear()
+	for character in chosen:
+		combat_roster_ids.append(character.character_id)
+
 ## Bu kip seçilirse sofraya kim oturuyor - dağıtımın kendisi ve sofra
 ## ekranının kâseleri aynı cevabı okuyor, iki yerde iki ayrı kural olmasın.
 func get_meal_fed_party(mode: String, selected: Array[CharacterData] = []) -> Array[CharacterData]:
@@ -2582,6 +2645,10 @@ func to_save_dict() -> Dictionary:
 		"crew_names": crew_names.duplicate(),
 		"crew_name_serial": _crew_name_serial,
 		"crew_hungry_nights": crew_hungry_nights,
+		"meal_policy_mode": meal_policy_mode,
+		"meal_policy_ids": meal_policy_ids.duplicate(),
+		"standing_camp_at_dusk": standing_camp_at_dusk,
+		"combat_roster_ids": combat_roster_ids.duplicate(),
 		# Sefer ortası kaydı (bkz. Save & Menu Rules): yalnızca sefer açıkken
 		# yazılır - şehirde alınan bir kayıt bu bloğu hiç taşımaz.
 		"journey": _journey_save_block(),
@@ -2746,6 +2813,14 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	# bir kez eski bir adı tekrar edebilir, hiçbir zaman mevcut birini ezmez.
 	_crew_name_serial = maxi(int(data.get("crew_name_serial", 0)), crew_names.size())
 	crew_hungry_nights = maxi(0, int(data.get("crew_hungry_nights", 0)))
+	meal_policy_mode = String(data.get("meal_policy_mode", MEAL_MODE_ALL))
+	meal_policy_ids.clear()
+	for id in data.get("meal_policy_ids", []):
+		meal_policy_ids.append(String(id))
+	standing_camp_at_dusk = bool(data.get("standing_camp_at_dusk", false))
+	combat_roster_ids.clear()
+	for id in data.get("combat_roster_ids", []):
+		combat_roster_ids.append(String(id))
 	_sync_crew_names()
 
 	_restock_current_location()

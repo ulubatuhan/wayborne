@@ -10,6 +10,8 @@ extends CanvasLayer
 ## başında veriliyor, kararın kendisi kadar önemli bir sahne detayı.
 
 signal confirmed(mode, selected)  # String, Array[CharacterData]
+## Yalnızca emir kipinde: oyuncu vazgeçti, emir değişmedi.
+signal cancelled
 
 const BACKDROP_COLOR: Color = Color(0.0, 0.0, 0.0, 0.55)
 const PANEL_WIDTH: float = 460.0
@@ -28,7 +30,9 @@ var _specific_list: VBoxContainer
 var _bowls: Dictionary = {}  # CharacterData -> TextureRect
 var _crew_bowl: TextureRect
 
-func setup(session: GameSession) -> void:
+## `policy_only`: gece değil, emir ekranı - yemek dağıtılmıyor, yalnızca
+## kalıcı sofra emri değişiyor (yol ekranındaki "Sofra" düğmesi).
+func setup(session: GameSession, policy_only: bool = false) -> void:
 	_session = session
 	layer = 65
 
@@ -93,11 +97,28 @@ func setup(session: GameSession) -> void:
 	vbox.add_child(HSeparator.new())
 
 	var confirm_button := Button.new()
-	confirm_button.text = tr("UI_MEAL_CONFIRM")
+	confirm_button.text = tr("UI_MEAL_SAVE_POLICY" if policy_only else "UI_MEAL_CONFIRM")
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	vbox.add_child(confirm_button)
 
-	_select_mode(GameSession.MEAL_MODE_ALL)
+	if policy_only:
+		var cancel_button := Button.new()
+		cancel_button.text = tr("UI_CANCEL")
+		cancel_button.pressed.connect(_on_cancel_pressed)
+		vbox.add_child(cancel_button)
+
+	# Seçim bir kalıcı emir: oyuncu neden bu ekranı her gece görmediğini ve
+	# ne zaman yeniden göreceğini bilsin.
+	var note := Label.new()
+	note.text = tr("UI_MEAL_STANDING_NOTE")
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD
+	note.add_theme_font_size_override("font_size", 14)
+	note.modulate = ArtPalette.UI_HUD_NOTE
+	vbox.add_child(note)
+
+	for character in _session.get_meal_policy_selected():
+		(_specific_checks[character] as CheckBox).button_pressed = true
+	_select_mode(_session.meal_policy_mode)
 
 func _build_table() -> Control:
 	var table := HFlowContainer.new()
@@ -164,4 +185,8 @@ func _on_confirm_pressed() -> void:
 	if _mode == GameSession.MEAL_MODE_SPECIFIC:
 		selected = _checked()
 	confirmed.emit(_mode, selected)
+	queue_free()
+
+func _on_cancel_pressed() -> void:
+	cancelled.emit()
 	queue_free()

@@ -314,6 +314,8 @@ var _debt_button: Button
 ## Yan kanal açıkken emirler kilitli; her karede tazelenen düğmeler bu
 ## kilidi ezmesin diye ayrı tutuluyor.
 var _orders_enabled: bool = true
+var _meal_policy_button: Button
+var _camp_order_button: Button
 var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
@@ -919,6 +921,14 @@ const COMMANDS: Array[Dictionary] = [
 	{"key": "UI_ROAD_CMD_DEBT", "pace": -3.0, "pace_key": "", "short": "UI_ROAD_CMD_DEBT"},
 ]
 const PACE_COMMAND_COUNT: int = 4
+## Sofra emrinin düğmede ve kayıtta kısa adı.
+const MEAL_POLICY_LABELS: Dictionary = {
+	GameSession.MEAL_MODE_ALL: "UI_MEAL_POLICY_ALL",
+	GameSession.MEAL_MODE_PARTY_ONLY: "UI_MEAL_POLICY_PARTY",
+	GameSession.MEAL_MODE_CREW_ONLY: "UI_MEAL_POLICY_CREW",
+	GameSession.MEAL_MODE_SPECIFIC: "UI_MEAL_POLICY_SPECIFIC",
+	GameSession.MEAL_MODE_SELF_ONLY: "UI_MEAL_POLICY_SELF",
+}
 
 func _build_command_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
@@ -963,6 +973,24 @@ func _build_command_panel() -> PanelContainer:
 	_debt_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT + 1))
 	action_row.add_child(_debt_button)
 
+	# Kalıcı emirler: bir kez verilip hatırlanıyor (bkz. GameSession'daki
+	# "Kalıcı emirler" notu). Sofra düğmesi emri değiştiriyor, yemeği
+	# dağıtmıyor; akşam kampı bir anahtar.
+	var standing_row := HBoxContainer.new()
+	standing_row.add_theme_constant_override("separation", 4)
+	column.add_child(standing_row)
+	_meal_policy_button = Button.new()
+	_meal_policy_button.text = tr("UI_ROAD_ORDER_MEAL")
+	_meal_policy_button.tooltip_text = tr("UI_ROAD_ORDER_MEAL_TOOLTIP")
+	_meal_policy_button.pressed.connect(_open_meal_policy_panel)
+	standing_row.add_child(_meal_policy_button)
+	_camp_order_button = Button.new()
+	_camp_order_button.text = tr("UI_ROAD_ORDER_CAMP_DUSK")
+	_camp_order_button.tooltip_text = tr("UI_ROAD_ORDER_CAMP_DUSK_TOOLTIP")
+	_camp_order_button.toggle_mode = true
+	_camp_order_button.toggled.connect(_on_camp_order_toggled)
+	standing_row.add_child(_camp_order_button)
+
 	return panel
 
 ## Tempo düğmeleri tempoyu *gösteriyor* da: tempo yalnızca düğmeyle
@@ -989,6 +1017,14 @@ func _refresh_command_panel() -> void:
 		"%s (%d)" % [tr("UI_ROAD_CMD_FAST"), PACE_COMMAND_COUNT]
 		if can_push else tr("UI_ROAD_ORDER_FAST_LOCKED")
 	)
+	_meal_policy_button.disabled = not _orders_enabled
+	if _session != null:
+		_meal_policy_button.text = "%s: %s" % [
+			tr("UI_ROAD_ORDER_MEAL"),
+			tr(MEAL_POLICY_LABELS.get(_session.meal_policy_mode, "UI_MEAL_POLICY_ALL")),
+		]
+		if _camp_order_button.button_pressed != _session.standing_camp_at_dusk:
+			_camp_order_button.set_pressed_no_signal(_session.standing_camp_at_dusk)
 	_refresh_talk_merchant_row()
 
 ## Eskort tüccarı yoksa düğme kilitli ama sebebiyle birlikte görünüyor -
@@ -1484,7 +1520,44 @@ func _run_day() -> void:
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 
-	_open_meal_panel()
+	# Kalıcı sofra emri: durum değişmediyse (erzak yetiyor, kimse açlığın
+	# can aldığı eşikte değil) sofra sorulmadan kurulur. Değiştiyse panel
+	# açılır - bir emir kimseyi oyuncunun haberi olmadan öldürmemeli.
+	if _session.meal_needs_decision():
+		_open_meal_panel()
+	else:
+		_add_log(tr("UI_ROAD_MEAL_STANDING") % tr(
+			MEAL_POLICY_LABELS.get(_session.meal_policy_mode, "UI_MEAL_POLICY_ALL")
+		))
+		_serve_meal(_session.meal_policy_mode, _session.get_meal_policy_selected())
+		_after_meal()
+
+## Emir kipi: yemek dağıtılmıyor, yalnızca kalıcı sofra emri değişiyor.
+## Sofra paneliyle aynı ekran - kâseler emrin ne demek olduğunu gösteriyor.
+func _open_meal_policy_panel() -> void:
+	if _meal_panel != null or not _orders_enabled:
+		return
+	_meal_panel = MealDistributionPanel.new()
+	_meal_panel.confirmed.connect(_on_meal_policy_confirmed)
+	_meal_panel.cancelled.connect(_on_meal_policy_cancelled)
+	add_child(_meal_panel)
+	_meal_panel.setup(_session, true)
+
+func _on_meal_policy_confirmed(mode: String, selected: Array) -> void:
+	var typed_selected: Array[CharacterData] = []
+	for character in selected:
+		typed_selected.append(character)
+	_session.set_meal_policy(mode, typed_selected)
+	_meal_panel = null
+	_add_log(tr("UI_ROAD_CMD_ISSUED") % tr(MEAL_POLICY_LABELS.get(mode, "UI_MEAL_POLICY_ALL")), OUTCOME_COLOR)
+	_refresh_command_panel()
+
+func _on_meal_policy_cancelled() -> void:
+	_meal_panel = null
+
+func _on_camp_order_toggled(pressed: bool) -> void:
+	_session.standing_camp_at_dusk = pressed
+	_add_log(tr("UI_ROAD_CAMP_ORDER_ON" if pressed else "UI_ROAD_CAMP_ORDER_OFF"), OUTCOME_COLOR)
 
 ## Akşam sofrası artık `_run_day()`'in sessizce uyguladığı bir formül değil,
 ## oyuncuya sorulan bir karar - `_meal_panel != null` `_has_open_panel()`'e
@@ -1507,7 +1580,16 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 	var typed_selected: Array[CharacterData] = []
 	for character in selected:
 		typed_selected.append(character)
+	# Sofrada verilen karar yeni kalıcı emir olur.
+	_session.set_meal_policy(mode, typed_selected)
+	_serve_meal(mode, typed_selected)
+	_meal_panel = null
+	if not _camping:
+		_band.set_camping(false)
+		_caravan.set_camping(false)
+	_after_meal()
 
+func _serve_meal(mode: String, typed_selected: Array[CharacterData]) -> void:
 	var result := _session.apply_meal_distribution(mode, typed_selected)
 	_hungry = not (result.get("hungry_names", []) as Array).is_empty() or result.get("crew_hungry", false)
 	for name_text in (result.get("hungry_names", []) as Array):
@@ -1520,11 +1602,8 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 	if not (death_outcome.get("dead_names", []) as Array).is_empty():
 		_handle_death_outcome(death_outcome)
 
-	_meal_panel = null
-	if not _camping:
-		_band.set_camping(false)
-		_caravan.set_camping(false)
-
+## Sofradan sonra günün geri kalanı: olay çekimi, kayıt.
+func _after_meal() -> void:
 	var context := _session.build_event_context()
 	# Günün durağı olay bağlamına bayrak olarak giriyor (near_shrine,
 	# near_hamlet, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
@@ -1632,6 +1711,14 @@ func _refresh_time_ui() -> void:
 	_camp_button.disabled = (
 		_camping or not _clock.is_camp_time() or not _can_time_flow()
 	)
+	# Akşam kampı emri: yalnızca akşam evresinde - kamp sekiz saat sürdüğü
+	# için bittiğinde gece olur, yani aynı akşam ikinci kez yakılmaz (bir
+	# kayıt yüklendikten sonra da). Bir kart ya da panel açıksa bekler.
+	if (
+		_session.standing_camp_at_dusk and not _camp_button.disabled
+		and _clock.get_phase() == JourneyClock.Phase.EVENING
+	):
+		_on_camp_pressed()
 
 	_refresh_walk_hint()
 	_refresh_conditions()
@@ -2094,13 +2181,21 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_pre_combat_panel = PreCombatPanel.new()
 	_pre_combat_panel.confirmed.connect(_on_pre_combat_confirmed)
 	add_child(_pre_combat_panel)
-	_pre_combat_panel.setup(_session.get_party())
+	# Son savaşın kadrosu ve sırası hatırlanıyor: değişen bir şey yoksa
+	# tek dokunuşla onaylanır.
+	var ordered := _session.get_remembered_combat_order()
+	var benched: Array[CharacterData] = []
+	for character in ordered:
+		if not _session.is_in_remembered_roster(character):
+			benched.append(character)
+	_pre_combat_panel.setup(ordered, benched)
 
 func _on_pre_combat_confirmed(ordered: Array) -> void:
 	_pre_combat_panel = null
 	_current_combat_party.clear()
 	for character in ordered:
 		_current_combat_party.append(character)
+	_session.remember_combat_roster(_current_combat_party)
 
 	_clock.consume_hours(COMBAT_HOURS)
 	_clear_children(_combat_holder)
