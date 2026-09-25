@@ -56,8 +56,16 @@ func _setup_motion_toggle() -> void:
 func _setup_language_selector() -> void:
 	_locale_codes = UserSettings.get_locale_codes()
 	var locale_names: Array = UserSettings.get_locale_names()
+	var locale_complete: Array = UserSettings.get_locale_completeness()
 	for i in range(_locale_codes.size()):
-		_language_button.add_item(_readable_locale_name(str(locale_names[i]), str(_locale_codes[i])), i)
+		var label := _readable_locale_name(str(locale_names[i]), str(_locale_codes[i]))
+		# Dokuz dilin CSV sütunu hâlâ boş - seçmek sessizce İngilizce
+		# gösteriyordu, oyuncuya hiçbir uyarı vermeden (P0 - bkz. CLAUDE.md'nin
+		# "Localization — Settings language list" maddesi). Eksik olan her
+		# dilin adının yanına bunu söyleyen bir ek geliyor.
+		if i < locale_complete.size() and not bool(locale_complete[i]):
+			label = "%s %s" % [label, tr("UI_LANGUAGE_UNTRANSLATED_SUFFIX")]
+		_language_button.add_item(label, i)
 
 	# Tam kod aranıyor, ilk iki harf değil: pt_BR ile pt aynı şey değil.
 	var selected := _locale_codes.find(TranslationServer.get_locale())

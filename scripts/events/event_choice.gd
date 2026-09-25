@@ -63,9 +63,15 @@ func get_check_preview(stat_value: float, roller_name: String = "") -> String:
 		return ""
 	var stat_label := CharacterStats.kind_name(check.stat)
 	var chance := check.get_chance(stat_value)
+	# Yüzde işaretinin sayının önünde mi arkasında mı durduğu dile göre
+	# değişiyor (Türkçe "%72", İngilizce "72%") - eskiden bu satır Türkçe
+	# sırayı sabit basıyordu, `tr()`'ye hiç uğramadan (İngilizce oyuncu da
+	# "%50" görüyordu). UI_CHECK_PERCENT artık bunu da diğer her metin gibi
+	# çeviriden okuyor.
+	var percent_text := String(TranslationServer.translate("UI_CHECK_PERCENT")) % chance
 	if roller_name.is_empty():
-		return "%s · %%%d" % [stat_label, chance]
-	return String(TranslationServer.translate("UI_CHECK_PREVIEW_NAMED")) % [roller_name, stat_label, chance]
+		return "%s · %s" % [stat_label, percent_text]
+	return String(TranslationServer.translate("UI_CHECK_PREVIEW_NAMED")) % [roller_name, stat_label, percent_text]
 
 func get_hint_text(best_stat_value: float) -> String:
 	if hint_text_key.is_empty() or best_stat_value < hint_threshold:

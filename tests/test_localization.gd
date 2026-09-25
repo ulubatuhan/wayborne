@@ -29,6 +29,7 @@ func run(t) -> void:
 	_test_project_godot_lists_every_translation(t, locales)
 	_test_no_duplicate_keys(t)
 	_test_placeholders_match_across_locales(t)
+	_test_english_never_uses_turkish_percent_order(t)
 	_test_every_referenced_key_exists(t)
 	_test_no_hardcoded_prose_in_screens(t)
 	_test_no_hardcoded_prose_in_scenes(t)
@@ -164,6 +165,39 @@ func _test_placeholders_match_across_locales(t) -> void:
 		mismatches.size(), 0,
 		"her çeviri kaynakla aynı biçim argümanlarını taşıyor (bozuk: %s)"
 			% ", ".join(mismatches.slice(0, 5))
+	)
+
+## Yer tutucu *sayısı* eşleşse bile *sırası* eşleşmeyebilir - `%%%d`
+## (Türkçe "%72") ve `%d%%` (İngilizce "72%") ikisi de tek bir `%d`
+## taşıyor, `_test_placeholders_match_across_locales` bu ikisini birbirinden
+## ayırt edemiyor. Bir İngilizce hücrenin Türkçe yüzde sırasını hiç
+## taşımaması gerektiği tek başına bilinen bir kural - `event_choice.gd`'nin
+## skill-check önizlemesi bunu tam olarak çiğniyordu (bkz. CLAUDE.md'nin
+## Localization Rules'undaki bu bulgunun kaydı).
+func _test_english_never_uses_turkish_percent_order(t) -> void:
+	var offenders: Array[String] = []
+	for csv_name in CSV_NAMES:
+		var rows := _read_csv(csv_name)
+		if rows.size() < 2:
+			continue
+		var header: Array = rows[0]
+		var en_column := -1
+		for column in range(header.size()):
+			if str(header[column]).strip_edges().to_lower() == "en":
+				en_column = column
+				break
+		if en_column < 0:
+			continue
+		for i in range(1, rows.size()):
+			var row: Array = rows[i]
+			if en_column >= row.size():
+				continue
+			if str(row[en_column]).contains("%%%d"):
+				offenders.append("%s[en]" % str(row[0]))
+	t.eq(
+		offenders.size(), 0,
+		"İngilizce hücre Türkçe yüzde sırasını taşıyor (bozuk: %s)"
+			% ", ".join(offenders.slice(0, 5))
 	)
 
 ## "%d", "%s", "%.1f", "%+d" gibi argümanlar; "%%" kaçışı atlanır.
