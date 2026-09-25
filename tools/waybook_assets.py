@@ -16,7 +16,7 @@ import os
 import sys
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 from scipy import ndimage
 
 SRC = "art_source/waybook"
@@ -360,10 +360,14 @@ def crop_paper_frame(rgb: np.ndarray) -> np.ndarray:
     return rgb[top:h - bottom, left:w - right]
 
 
-def background(src: str, name: str) -> None:
+def background(src: str, name: str, width: int = 0) -> None:
     """A full-bleed scene. Some arrived as a torn page on a white sheet;
     the white outside the torn edge is filled with ink-dark so the page
-    reads as lying on a dark desk instead of floating on a white card."""
+    reads as lying on a dark desk instead of floating on a white card.
+
+    `width`: the generator stops at ~1376 px, and the GPU's bilinear stretch
+    to 1920 softens the ink lines. A Lanczos upscale with a light unsharp
+    mask done here keeps them crisper; it adds no detail the source lacks."""
     rgb = crop_paper_frame(_load(src))
     white = rgb.min(axis=2) > 232
     labels, _ = ndimage.label(white)
@@ -373,6 +377,10 @@ def background(src: str, name: str) -> None:
     outside = ndimage.binary_dilation(outside, iterations=2)
     rgb[outside] = (14, 12, 11)
     img = Image.fromarray(rgb.astype(np.uint8), "RGB")
+    if width > img.size[0]:
+        height = round(img.size[1] * width / img.size[0])
+        img = img.resize((width, height), Image.LANCZOS)
+        img = img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=2))
     os.makedirs(OUT, exist_ok=True)
     img.save(os.path.join(OUT, name), quality=86, optimize=True)
     print(f"  {name:28s} {img.size[0]}x{img.size[1]} (outside filled: {int(outside.mean() * 100)}%)")
@@ -422,6 +430,9 @@ def phase2plus() -> None:
                       ("B7_caravan_planner_bg.jpg", "b7_planner.jpg"), ("B8_recruit_bg.jpg", "b8_recruit.jpg"),
                       ("B9_character_party_bg.jpg", "b9_tent.jpg")]:
         background(src, name)
+    # The city's desk: props on both edges, an empty middle for the map and
+    # the brief (the city was the one screen still on flat ink).
+    background("B10_city_desk_bg.jpg", "b10_city.jpg", 1920)
     loose_page("B6_world_map_parchment.jpg", "b6_map.png", 1100)
     icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
 

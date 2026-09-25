@@ -127,7 +127,7 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 	t.eq(theme_script.workspace_side_margin(1280.0, 5000.0), theme_script.WORKSPACE_EDGE_MARGIN, "kenar payı hiç sıfırın altına inmiyor")
 	var screens := [
 		"guild", "tavern", "caravan_yard", "church", "recruit",
-		"character", "party", "caravan_planner", "character_creation",
+		"character", "party", "caravan_planner", "character_creation", "../world/city_map",
 	]
 	for screen in screens:
 		var source := FileAccess.get_file_as_string("res://scripts/ui/%s.gd" % screen)
