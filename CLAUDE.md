@@ -1441,6 +1441,14 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   ships B6 as a torn page with a transparent surround instead of the
   desk-ink fill full-bleed scenes get. A square corner on an icon is a
   pipeline bug, not a styling choice.
+- **A desk scene's props are the picture, not the margin.** Full-width rows
+  ran across the candle, the scales and the tent canvas, and pale canvas
+  under bone text lost its contrast. `WaybookTheme.fit_desk_workspace()`
+  holds the text to a central column (at most `WORKSPACE_WIDTH_RATIO`, 65%)
+  on a dark band, full width below `WORKSPACE_FULL_WIDTH_BELOW`; every desk
+  screen calls it first in `_ready()`. The market is the one exception,
+  on purpose: its stall row and cargo column side by side do not fit 65%,
+  and squeezing them opened a horizontal scrollbar.
 - **Nothing painted ships unread.** The Web build downloads every
   texture, so a sheet the game never draws (G1 page tile, G10 colour
   tile, R2, R5) is not written by the pipeline at all; the reason stays

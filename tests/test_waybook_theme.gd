@@ -19,6 +19,7 @@ func run(t) -> void:
 	_test_no_screen_builds_its_own_panel(t)
 	_test_fx_colours_live_in_the_palette(t)
 	_test_cold_edge_reads_season_and_biome(t)
+	_test_desk_workspace_keeps_the_props(t)
 
 func _test_chrome_is_textured(t, theme: Theme) -> void:
 	var expected := [
@@ -109,3 +110,20 @@ func _test_cold_edge_reads_season_and_biome(t) -> void:
 		"dağ kışı ovadaki kıştan koyu"
 	)
 	t.le(road.cold_level(true, ArtPalette.BIOME_MOUNTAIN), 1.0, "don tavanı aşmıyor")
+
+## Masa ekranlarında metin ortada bir sütunda: geniş ekranda genişliğin en
+## çok %65'i (kenarlardaki nesneler resmin kendisi), dar ekranda tam genişlik.
+func _test_desk_workspace_keeps_the_props(t) -> void:
+	var theme_script = load(THEME_PATH)
+	for width in [1280.0, 1600.0, 1920.0, 2560.0]:
+		var side: int = theme_script.workspace_side_margin(width)
+		var column: float = width - 2.0 * side
+		t.ok(column <= width * theme_script.WORKSPACE_WIDTH_RATIO + 1.0, "geniş ekranda sütun en çok %%65 (%d)" % int(width))
+	t.eq(theme_script.workspace_side_margin(1080.0), theme_script.WORKSPACE_EDGE_MARGIN, "dar ekranda sütun tam genişlik")
+	var screens := [
+		"guild", "tavern", "caravan_yard", "church", "recruit",
+		"character", "party", "caravan_planner", "character_creation",
+	]
+	for screen in screens:
+		var source := FileAccess.get_file_as_string("res://scripts/ui/%s.gd" % screen)
+		t.ok(source.contains("fit_desk_workspace"), "%s masa sütununu kullanıyor" % screen)

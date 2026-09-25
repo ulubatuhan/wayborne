@@ -64,6 +64,8 @@ var _basket_haggle_button: Button
 var _basket_clear_button: Button
 
 func _ready() -> void:
+	# Masa sütunu (%65) burada yok: tezgâh satırı ile kargo sütunu yan yana
+	# o genişliğe sığmıyor, sığdırmak yatay kaydırma çubuğu açıyordu.
 	_session = GameState.get_session()
 	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
 	# metin koddan, anahtarla gelir (bkz. Localization Rules).

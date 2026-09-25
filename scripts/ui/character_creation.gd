@@ -50,6 +50,7 @@ var _outfit_rows: Array[Dictionary] = []
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
 
 func _ready() -> void:
+	WaybookTheme.fit_desk_workspace(self)
 	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_CREATION_TITLE")
 	_rng.randomize()
 	_build_ui()
