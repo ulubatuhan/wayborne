@@ -210,19 +210,8 @@ const SIGNAL_ICONS: Dictionary = {
 }
 const SIGNAL_FLASH_SECONDS: float = 1.6
 const SIGNAL_FADE_SECONDS: float = 0.8
-const EDGE_STRESS_FILE: String = "g11_edge_bleed.png"
 const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
 const EDGE_MAX_ALPHA: float = 0.85
-const EDGE_COLD_FILE: String = "g11_edge_frost.png"
-## Don kenarı soğuktan: kış mevsimi en çok, dağ geçidi kışın dışında da
-## biraz. Hava bir sistem icat etmiyor (Route Terrain & Weather Rules) -
-## don yalnızca görüntü, hiçbir sayıya dokunmuyor.
-const EDGE_COLD_WINTER: float = 0.7
-const EDGE_COLD_MOUNTAIN: float = 0.35
-## Stres kırılma bölgesine yaklaşırken leke başlıyor (Stress Rules'un
-## kavga eşiği 40), dolmuş bir kervanda tam koyulukta.
-const EDGE_STRESS_FROM: float = 35.0
-const EDGE_STRESS_FULL: float = 85.0
 ## Açlıktan can kaybı üçüncü gecede başlıyor (STARVATION_HP_LOSS_START_DAY);
 ## kenar ondan bir gece sonra tamamen kavrulmuş.
 const EDGE_HUNGER_FULL_NIGHTS: int = 4
@@ -471,12 +460,10 @@ var _attention_icon: TextureRect
 var _signal_icon: TextureRect
 var _signal_tween: Tween
 var _time_dial: TimeDial
-## Kenar lekeleri: stres yükseldikçe mürekkep kenardan sızıyor, açlık
-## gecesi uzadıkça sayfanın kenarı kavruluyor. Sayı değil his - sayısı
-## zaten şişede yazılı.
-var _stress_edge: Control
+## Kenar lekesi: açlık gecesi uzadıkça sayfanın kenarı kavruluyor. Sayı
+## değil his - sayısı zaten şişede yazılı. Stres ve don kenar lekeleri
+## (kullanıcı geri bildirimiyle) komple kaldırıldı - bkz. _refresh_edges().
 var _hunger_edge: Control
-var _cold_edge: Control
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -525,11 +512,10 @@ func _build_world_layer() -> void:
 	_combat_holder.visible = false
 	_world.add_child(_combat_holder)
 
-	# Kenar lekeleri dünyanın üstünde, HUD'un altında; savaşta da duruyor,
-	# çünkü yıpranma savaşa girince geçmiyor.
-	_stress_edge = _edge_overlay(EDGE_STRESS_FILE, ArtPalette.UI_EDGE_STRESS)
+	# Kenar lekesi dünyanın üstünde, HUD'un altında; savaşta da duruyor,
+	# çünkü yıpranma savaşa girince geçmiyor. Stres ve don kenar lekeleri
+	# oyuncu geri bildirimiyle kaldırıldı - yalnızca açlık kalıyor.
 	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
-	_cold_edge = _edge_overlay(EDGE_COLD_FILE, ArtPalette.UI_EDGE_COLD)
 
 ## Kenar maskesi tek parça bir resim: ekranın tamamına geriliyor. Bir süre
 ## dokuz dilimliydi (kalınlık en boy oranından bağımsız kalsın diye) ama
@@ -544,13 +530,6 @@ func _edge_overlay(file_name: String, tint: Color) -> Control:
 	frame.modulate = Color(tint, 0.0)
 	_world.add_child(frame)
 	return frame
-
-## Soğuğun koyuluğu (0..1): kış ve dağ toplanıyor, üstü kesiliyor.
-static func cold_level(is_winter: bool, biome: String) -> float:
-	var level := EDGE_COLD_WINTER if is_winter else 0.0
-	if biome == ArtPalette.BIOME_MOUNTAIN:
-		level += EDGE_COLD_MOUNTAIN
-	return clampf(level, 0.0, 1.0)
 
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
@@ -3151,18 +3130,12 @@ func _refresh_state() -> void:
 ## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
 ## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.
 func _refresh_edges() -> void:
-	_stress_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
-		(_session.party_stress - EDGE_STRESS_FROM) / (EDGE_STRESS_FULL - EDGE_STRESS_FROM), 0.0, 1.0
-	)
 	var hungry_nights := 0
 	for character in _session.party:
 		hungry_nights = maxi(hungry_nights, character.consecutive_hungry_days)
 	_hunger_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
 		float(hungry_nights) / float(EDGE_HUNGER_FULL_NIGHTS), 0.0, 1.0
 	)
-	var is_winter := MarketConditions.get_season(_session.total_days_elapsed) == MarketConditions.Season.WINTER
-	var biome := _terrain.biome_at(_days_covered) if _terrain != null else ""
-	_cold_edge.modulate.a = EDGE_MAX_ALPHA * cold_level(is_winter, biome)
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt

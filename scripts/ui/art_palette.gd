@@ -89,12 +89,10 @@ const UI_HUD_NOTE: Color = Color(0.82, 0.80, 0.72)
 ## hâli koyu şeritte görünmüyordu (ölçüldü).
 const UI_SIGNAL_ESCALATED: Color = Color(1.0, 0.46, 0.40)
 const UI_SIGNAL_RESOLVED: Color = Color(0.66, 0.95, 0.58)
-## Yolun kenar lekeleri (g11 maskeleri beyaz; renk burada): stres kanlı bir
-## mürekkep, açlık kavrulmuş bir kahve.
-const UI_EDGE_STRESS: Color = Color(0.16, 0.04, 0.05)
+## Yolun kenar lekesi (g11 maskesi beyaz; renk burada): açlık kavrulmuş
+## bir kahve. Stres ve don kenar lekeleri oyuncu geri bildirimiyle
+## kaldırıldı (bkz. road_journey.gd::_refresh_edges).
 const UI_EDGE_HUNGER: Color = Color(0.20, 0.12, 0.05)
-## Don açık renk: buz karanlığa değil, soluk ışığa çalar.
-const UI_EDGE_COLD: Color = Color(0.80, 0.88, 0.95)
 
 # --- Savaş ve yol efektleri (FX) ---
 # Parlama değerleri bir `modulate` çarpanı: 1.0'ın üstü "parlama" demek,

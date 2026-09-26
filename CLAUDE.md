@@ -1365,24 +1365,27 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and
   moss when it is caught.
-- **Wear shows at the edge of the world, never as a number.** Stress
-  bleeds ink in from the frame (G11 bleed) past `EDGE_STRESS_FROM`, and
-  the longest hungry streak in the party scorches it (G11 scorch). The
-  source sheets were painted on a torn paper card; the pipeline cuts the
-  card off and ships only the ink as a white mask, coloured from
-  `ArtPalette.UI_EDGE_*` - as shipped first, the card's white border and
-  pale wash covered the scene. The stress bleed was later repainted as a
-  square white-ink frame, and a third edge arrived with it: frost, shown
-  in the cold (`cold_level()` - winter adds most, a mountain pass a
-  little even out of season; a picture only, it moves no number). The
+- **Wear shows at the edge of the world, never as a number - but only
+  for hunger now.** Stress used to bleed ink in from the frame (G11
+  bleed) past `EDGE_STRESS_FROM`, and a third edge (G11 frost,
+  `cold_level()` - winter adds most, a mountain pass a little even out
+  of season) shaded the world in the cold. Both were removed outright on
+  direct player feedback - `road_journey.gd` no longer builds
+  `_stress_edge`/`_cold_edge` at all, and `ArtPalette.UI_EDGE_STRESS`/
+  `UI_EDGE_COLD` are gone with them. The hunger scorch (G11 scorch) is
+  the one edge that survives: the longest hungry streak in the party
+  still scorches the frame, coloured from `ArtPalette.UI_EDGE_HUNGER`.
+  The source sheets were painted on a torn paper card; the pipeline cuts
+  the card off and ships only the ink as a white mask - as shipped
+  first, the card's white border and pale wash covered the scene. The
   generator only exports JPG, so transparency arrives as a *baked* grey
   checkerboard - `checker_mask()` keys it by luminance (the ink is far
   brighter than either square) and cuts JPG ringing below
   `CHECKER_ALPHA_CUTOFF`, so a new JPG from the same tool can go straight
-  into `art_source/waybook/`. Each mask is drawn **whole, stretched over
-  the screen** (`STRETCH_SCALE`): for one round they were nine-sliced so
+  into `art_source/waybook/`. The mask is drawn **whole, stretched over
+  the screen** (`STRETCH_SCALE`): for one round it was nine-sliced so
   the thickness would not depend on the aspect ratio, and the player
-  rejected it - the masks are painted as whole frames and slicing
+  rejected it - the mask is painted as a whole frame and slicing
   separated each corner from its sides.
 - **Who eats is one function** (`GameSession.get_meal_fed_party()`/
   `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per

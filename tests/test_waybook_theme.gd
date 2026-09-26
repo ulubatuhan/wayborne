@@ -18,7 +18,6 @@ func run(t) -> void:
 	_test_nine_slice_leaves_a_centre(t, theme)
 	_test_no_screen_builds_its_own_panel(t)
 	_test_fx_colours_live_in_the_palette(t)
-	_test_cold_edge_reads_season_and_biome(t)
 	_test_desk_workspace_keeps_the_props(t)
 	_test_warning_colour_is_readable(t)
 	_test_present_dismiss_is_a_settle_not_a_snap(t)
@@ -126,17 +125,6 @@ func _test_fx_colours_live_in_the_palette(t) -> void:
 
 ## Don kenarı yalnızca soğukta: yaz bozkırında hiç görünmez, kışın görünür,
 ## dağ kışı en koyusu ama tavanı aşmaz.
-func _test_cold_edge_reads_season_and_biome(t) -> void:
-	var road: Script = load("res://scripts/ui/road_journey.gd")
-	t.eq(road.cold_level(false, ArtPalette.BIOME_STEPPE), 0.0, "yaz bozkırında don yok")
-	t.ok(road.cold_level(true, ArtPalette.BIOME_STEPPE) > 0.0, "kışın don var")
-	t.ok(road.cold_level(false, ArtPalette.BIOME_MOUNTAIN) > 0.0, "dağ geçidi kışın dışında da serin")
-	t.ok(
-		road.cold_level(true, ArtPalette.BIOME_MOUNTAIN) > road.cold_level(true, ArtPalette.BIOME_STEPPE),
-		"dağ kışı ovadaki kıştan koyu"
-	)
-	t.le(road.cold_level(true, ArtPalette.BIOME_MOUNTAIN), 1.0, "don tavanı aşmıyor")
-
 ## Uyarı turuncusu (planlayıcı/borç paneli/şehir brifingi) panel zemininde
 ## WCAG AA'yı geçmeli - defect matrix'in ölçtüğü eski `.modulate` hatası
 ## (2.4-3.7:1) bir daha sessizce geri gelmesin diye.
