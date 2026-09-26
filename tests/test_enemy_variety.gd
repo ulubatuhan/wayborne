@@ -10,6 +10,7 @@ func suite_name() -> String:
 
 func run(t) -> void:
 	_test_wildlife_squad_composition(t)
+	_test_wildlife_squad_never_mixes_species(t)
 	_test_wildlife_squad_biome_composition(t)
 	_test_guard_squad_composition(t)
 	_test_bandit_squad_region_reskin(t)
@@ -70,8 +71,14 @@ func _test_wildlife_squad_composition(t) -> void:
 	for unit in calm:
 		t.eq(unit.display_name, "Kurt", "düşük tehlikede yalnızca kurt çıkar")
 
+	# Oyuncunun oynanış testinde bildirdiği hata: bir sürüde kurt ve domuz
+	# birlikte çıkıyordu (bkz. build_wildlife_squad'ın kendi notu - eskiden
+	# domuz mevcut kurt sürüsüne *ekleniyordu*). Artık orta tehlikede tür
+	# tamamen domuza dönüşüyor, kurtla karışmıyor.
 	var mid := EnemyCatalog.build_wildlife_squad(0.4, 4, _seeded_rng(1))
-	t.eq(mid.size(), 3, "orta tehlikede domuz katılır")
+	t.eq(mid.size(), 2, "orta tehlikede iki kişilik bir domuz sürüsü")
+	for unit in mid:
+		t.eq(unit.display_name, "Yaban Domuzu", "orta tehlikede yalnızca domuz çıkar, kurtla karışmaz")
 
 	# Ayı nadir (%35) ve tekil - kırk bağımsız tohumda en az bir kez
 	# çıkması ezici olasılıkla beklenir (bkz. test_traits.gd'nin aynı
@@ -79,27 +86,56 @@ func _test_wildlife_squad_composition(t) -> void:
 	var bear_seen := false
 	for seed_value in 40:
 		var squad := EnemyCatalog.build_wildlife_squad(0.6, 4, _seeded_rng(4000 + seed_value))
+		var has_bear := false
+		var has_other := false
 		for unit in squad:
 			if unit.display_name == "Ayı":
+				has_bear = true
 				bear_seen = true
+			else:
+				has_other = true
+		t.ok(not (has_bear and has_other), "ayı çıktığında sürüde başka tür bulunmaz (seed %d)" % seed_value)
 	t.ok(bear_seen, "kırk denemede en az bir kez ayı çıkar")
+
+## Kadro her zaman tek türden - hiçbir tehlike/parti büyüklüğü
+## kombinasyonu türleri karıştırmaz. Kullanıcının doğrudan bildirdiği
+## "kurt ve yaban domuzu mix bir seri" hatasının regresyon kilidi.
+func _test_wildlife_squad_never_mixes_species(t) -> void:
+	for danger_tenth in range(1, 10):
+		var danger := danger_tenth / 10.0
+		for party_size in range(1, 5):
+			for seed_value in 5:
+				var squad := EnemyCatalog.build_wildlife_squad(
+					danger, party_size, _seeded_rng(9000 + seed_value), 1
+				)
+				var names := {}
+				for unit in squad:
+					names[unit.display_name] = true
+				t.eq(
+					names.size(), 1,
+					"tehlike %.1f, parti %d: sürü tek türden (bulunan: %s)" % [danger, party_size, names.keys()]
+				)
 
 ## Faz 17 PR-6: "vahşi hayvan sürüsü" artık geçtiği araziye bağlı - orman
 ## kurt sürüsünü büyütür, dağ ayı ihtimalini artırır. biome verilmezse
 ## (varsayılan) eski davranış birebir sürmeli - önceki testin kendisi
 ## bunu zaten kilitliyor, burada yalnızca biome verildiğinde değişeni
-## sınıyoruz.
+## sınıyoruz. Düşük tehlike (0.1) kasıtlı: tür karışmasın kuralı (bkz.
+## `_test_wildlife_squad_never_mixes_species`) gereği 0.3 ve üstünde tür
+## artık domuza dönüyor - orman bonusu yalnızca kurt sürüsüne uygulanıyor,
+## o yüzden karşılaştırma türün hâlâ kurt kaldığı bir tehlikede yapılmalı.
 func _test_wildlife_squad_biome_composition(t) -> void:
-	var default_mid := EnemyCatalog.build_wildlife_squad(0.4, 4, _seeded_rng(1))
-	var forest_mid := EnemyCatalog.build_wildlife_squad(0.4, 4, _seeded_rng(1), 1, ArtPalette.BIOME_FOREST)
+	var default_calm := EnemyCatalog.build_wildlife_squad(0.1, 4, _seeded_rng(1))
+	var forest_calm := EnemyCatalog.build_wildlife_squad(0.1, 4, _seeded_rng(1), 1, ArtPalette.BIOME_FOREST)
 	t.ok(
-		forest_mid.size() > default_mid.size(),
+		forest_calm.size() > default_calm.size(),
 		"orman aynı tohumda daha kalabalık bir sürü verir"
 	)
 	var wolf_count := 0
-	for unit in forest_mid:
+	for unit in forest_calm:
 		if unit.display_name == "Kurt":
 			wolf_count += 1
+	t.eq(wolf_count, forest_calm.size(), "orman sürüsü de yalnızca kurttan oluşur")
 	t.ge(wolf_count, 3, "orman sürüsü en az üç kurt taşır")
 
 	# Ayı dağda çok daha olası (bkz. bear_chance) - kırk bağımsız tohumda

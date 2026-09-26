@@ -160,32 +160,54 @@ static func build_bandit_squad(
 	return _build_units(ids, party_size, average_level, danger_level)
 
 ## Doğada karşılaşılan hayvanlar (bkz. evt_wild_animal). Düşük tehlikede
-## bir kurt sürüsü, ortada yaban domuzu katılır, yüksek tehlikede nadiren
-## (%35) sürü yerine tek başına gezen bir ayı çıkar - sayıca az ama tek
+## bir kurt sürüsü, ortada bir yaban domuzu sürüsü, yüksek tehlikede
+## nadiren (%35) tek başına gezen bir ayı çıkar - sayıca az ama tek
 ## başına çok daha tehlikeli, DD'nin "curio canavarı" mantığına yakın.
 ## Faz 17 PR-6: biome artık kompozisyonu da eğiyor - orman kurt sürüsünü
 ## büyütür ("wildlife packs"), dağ ayıyı daha olası kılar. `biome`
 ## verilmezse (varsayılan "") eski davranış birebir sürüyor - fresh-
 ## caller-unchanged, tıpkı region_id'nin bandit tarafındaki rolü gibi.
+##
+## **Kadro tek türden oluşur, hiçbir zaman karışmaz.** Önceki sürüm bir
+## kurt sürüsüne tehlike yükseldikçe bir domuz *ekliyordu* (`ids.insert(0,
+## BOAR)`) ve ayı çıktığında da yanına bir kurt katıyordu
+## (`ids.append(WOLF)`) - oyuncunun oynanış testinde karşısına çıkan
+## kurt+domuz karışık bir sürü buradan geliyordu. Doğada kurtlar sürü,
+## domuzlar sürü, ayılar tek başına gezer - üçü asla aynı karşılaşmada
+## bulunmaz. `species` önce (varsa) ayı zarını, yoksa tehlike eşiğini
+## okuyup **tek bir tür** seçiyor; `ids` yalnızca o türden dolduruluyor.
 static func build_wildlife_squad(
 	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1,
 	biome: String = ""
 ) -> Array[CombatUnit]:
 	_ensure_built()
 
-	var ids: Array[String] = [WOLF, WOLF]
-	if danger_level >= 0.3:
-		ids.insert(0, BOAR)
-	if biome == ArtPalette.BIOME_FOREST:
-		ids.append(WOLF)
-
 	var bear_chance := 0.35
 	if biome == ArtPalette.BIOME_MOUNTAIN:
 		bear_chance = 0.55
+
+	var species := WOLF
 	if danger_level >= 0.55 and rng.randf() < bear_chance:
-		ids = [BEAR]
-		if party_size >= 2:
-			ids.append(WOLF)
+		species = BEAR
+	elif danger_level >= 0.3:
+		species = BOAR
+
+	var ids: Array[String] = []
+	match species:
+		BEAR:
+			# Tek başına gezer; yalnızca kalabalık bir kervana karşı
+			# yanında (aynı türden) bir yavru/eş daha çıkabilir.
+			ids = [BEAR]
+			if party_size >= 3:
+				ids.append(BEAR)
+		BOAR:
+			ids = [BOAR, BOAR]
+			if danger_level >= 0.6:
+				ids.append(BOAR)
+		_:
+			ids = [WOLF, WOLF]
+			if biome == ArtPalette.BIOME_FOREST:
+				ids.append(WOLF)
 
 	return _build_units(ids, party_size, average_level, danger_level)
 
