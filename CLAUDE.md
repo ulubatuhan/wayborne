@@ -1365,24 +1365,27 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and
   moss when it is caught.
-- **Wear shows at the edge of the world, never as a number.** Stress
-  bleeds ink in from the frame (G11 bleed) past `EDGE_STRESS_FROM`, and
-  the longest hungry streak in the party scorches it (G11 scorch). The
-  source sheets were painted on a torn paper card; the pipeline cuts the
-  card off and ships only the ink as a white mask, coloured from
-  `ArtPalette.UI_EDGE_*` - as shipped first, the card's white border and
-  pale wash covered the scene. The stress bleed was later repainted as a
-  square white-ink frame, and a third edge arrived with it: frost, shown
-  in the cold (`cold_level()` - winter adds most, a mountain pass a
-  little even out of season; a picture only, it moves no number). The
+- **Wear shows at the edge of the world, never as a number - but only
+  for hunger now.** Stress used to bleed ink in from the frame (G11
+  bleed) past `EDGE_STRESS_FROM`, and a third edge (G11 frost,
+  `cold_level()` - winter adds most, a mountain pass a little even out
+  of season) shaded the world in the cold. Both were removed outright on
+  direct player feedback - `road_journey.gd` no longer builds
+  `_stress_edge`/`_cold_edge` at all, and `ArtPalette.UI_EDGE_STRESS`/
+  `UI_EDGE_COLD` are gone with them. The hunger scorch (G11 scorch) is
+  the one edge that survives: the longest hungry streak in the party
+  still scorches the frame, coloured from `ArtPalette.UI_EDGE_HUNGER`.
+  The source sheets were painted on a torn paper card; the pipeline cuts
+  the card off and ships only the ink as a white mask - as shipped
+  first, the card's white border and pale wash covered the scene. The
   generator only exports JPG, so transparency arrives as a *baked* grey
   checkerboard - `checker_mask()` keys it by luminance (the ink is far
   brighter than either square) and cuts JPG ringing below
   `CHECKER_ALPHA_CUTOFF`, so a new JPG from the same tool can go straight
-  into `art_source/waybook/`. Each mask is drawn **whole, stretched over
-  the screen** (`STRETCH_SCALE`): for one round they were nine-sliced so
+  into `art_source/waybook/`. The mask is drawn **whole, stretched over
+  the screen** (`STRETCH_SCALE`): for one round it was nine-sliced so
   the thickness would not depend on the aspect ratio, and the player
-  rejected it - the masks are painted as whole frames and slicing
+  rejected it - the mask is painted as a whole frame and slicing
   separated each corner from its sides.
 - **Who eats is one function** (`GameSession.get_meal_fed_party()`/
   `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per
@@ -2452,6 +2455,20 @@ or not the day went well.
   first names the cost, the second commits - the same shape as a
   destructive confirm anywhere else in the UI, and consistent with no
   other screen in the game using a checkbox for this.
+- **Buying the shortfall silently did nothing, because of signal order.**
+  `caravan_planner.gd::_on_buy_provisions_pressed()` called
+  `wallet.spend(cost)` *before* `change_provisions(shortfall)` - but
+  `Wallet.spend()` emits `balance_changed` synchronously, which
+  `_on_wallet_changed()` catches to call `_refresh()` immediately, one
+  statement too early: the screen re-read `get_provisions()` while it was
+  still the pre-purchase count, showed the shortfall as unresolved, and
+  never refreshed again (`change_provisions()` fires no signal the planner
+  listens for). The gold was spent and the provisions *were* added -
+  invisibly - so both the "buy" and "confirm and set out" buttons read as
+  permanently broken. Fixed by adding the provisions **first** (aborting
+  before spending anything if the wagons have no room - `add_to_cargo` is
+  all-or-nothing) and calling `_refresh()` explicitly afterward, instead
+  of leaning on a signal's side effect to happen in the right order.
 
 **The simulator's "net kazanç" is contract income only** - trading profit
 (buy cheap, sell where it's demanded) is not in it, and in real play that is
