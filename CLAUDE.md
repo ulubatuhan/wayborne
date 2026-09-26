@@ -2455,6 +2455,20 @@ or not the day went well.
   first names the cost, the second commits - the same shape as a
   destructive confirm anywhere else in the UI, and consistent with no
   other screen in the game using a checkbox for this.
+- **Buying the shortfall silently did nothing, because of signal order.**
+  `caravan_planner.gd::_on_buy_provisions_pressed()` called
+  `wallet.spend(cost)` *before* `change_provisions(shortfall)` - but
+  `Wallet.spend()` emits `balance_changed` synchronously, which
+  `_on_wallet_changed()` catches to call `_refresh()` immediately, one
+  statement too early: the screen re-read `get_provisions()` while it was
+  still the pre-purchase count, showed the shortfall as unresolved, and
+  never refreshed again (`change_provisions()` fires no signal the planner
+  listens for). The gold was spent and the provisions *were* added -
+  invisibly - so both the "buy" and "confirm and set out" buttons read as
+  permanently broken. Fixed by adding the provisions **first** (aborting
+  before spending anything if the wagons have no room - `add_to_cargo` is
+  all-or-nothing) and calling `_refresh()` explicitly afterward, instead
+  of leaning on a signal's side effect to happen in the right order.
 
 **The simulator's "net kazanç" is contract income only** - trading profit
 (buy cheap, sell where it's demanded) is not in it, and in real play that is

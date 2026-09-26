@@ -331,8 +331,17 @@ func _on_buy_provisions_pressed() -> void:
 	if not _session.wallet.can_afford(cost):
 		return
 
+	# Erzağı önce ekle, parayı sonra düş - ters sırada `wallet.spend()`'in
+	# emit ettiği `balance_changed` senkron olarak `_on_wallet_changed` →
+	# `_refresh()`'i erzak henüz eklenmeden çağırıyordu, yani ekran hâlâ
+	# eksik gösterip orada donuyordu (buton "çalışmıyor" gibi okunuyordu,
+	# oysa arka planda para gitmiş erzak da gelmişti - yalnızca ekran
+	# yenilenmemişti). Kargo tam dolup erzak hiç eklenemezse (`add_to_cargo`
+	# hep-ya-da-hiç) para da hiç harcanmaz.
+	if _session.change_provisions(shortfall) != shortfall:
+		return
 	_session.wallet.spend(cost)
-	_session.change_provisions(shortfall)
+	_refresh()
 
 func _on_borrow_pressed() -> void:
 	Nav.guild_initial_tab = 1
