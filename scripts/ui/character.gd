@@ -15,6 +15,7 @@ const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
 const CAMEO_HEIGHT: float = 120.0
 const EMBLEM_SIZE: float = 26.0
 const TOKEN_SIZE: float = 22.0
+const PREVIEW_SIZE: Vector2 = Vector2(180, 280)
 
 var _session: GameSession
 var _character: CharacterData
@@ -40,6 +41,8 @@ func _ready() -> void:
 func _refresh() -> void:
 	_clear_children(_content)
 	_build_identity_section()
+	_content.add_child(HSeparator.new())
+	_build_appearance_section()
 	_content.add_child(HSeparator.new())
 	_build_traits_section()
 	_content.add_child(HSeparator.new())
@@ -103,6 +106,56 @@ func _build_identity_section() -> void:
 	perk.autowrap_mode = TextServer.AUTOWRAP_WORD
 	perk.modulate = PERK_COLOR
 	_content.add_child(perk)
+
+## Görünüm ve kuşam: iskelet üstünde, duran pozda kişinin kendisi ve
+## kıyafet slotları. Kıyafet yalnızca karakter oluşturmada seçilirdi; artık
+## burada da değişiyor. Ekipman aşağıda kendi bölümünde takılıyor, ama
+## önizleme ikisini birden gösteriyor - kılıç, zırh, ceket aynı figürde.
+func _build_appearance_section() -> void:
+	_content.add_child(_make_section_title(tr("UI_CHAR_APPEARANCE")))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	_content.add_child(row)
+	var preview := FigurePreview.new()
+	preview.custom_minimum_size = PREVIEW_SIZE
+	row.add_child(preview)
+	preview.show_character(_character)
+
+	var slots := VBoxContainer.new()
+	slots.add_theme_constant_override("separation", 4)
+	slots.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_child(slots)
+	for slot in OutfitCatalog.ALL_SLOTS:
+		slots.add_child(_build_outfit_row(slot))
+
+func _build_outfit_row(slot: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var name_label := Label.new()
+	name_label.text = OutfitCatalog.get_slot_display_name(slot)
+	name_label.custom_minimum_size = Vector2(96, 0)
+	row.add_child(name_label)
+	var prev_button := Button.new()
+	prev_button.text = "<"
+	prev_button.pressed.connect(_on_outfit_cycle.bind(slot, -1))
+	row.add_child(prev_button)
+	var value_label := Label.new()
+	value_label.custom_minimum_size = Vector2(170, 0)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var piece := OutfitCatalog.get_piece(_character.get_outfit_piece(slot))
+	value_label.text = piece.display_name if piece != null else tr("UI_CREATE_OUTFIT_NONE")
+	row.add_child(value_label)
+	var next_button := Button.new()
+	next_button.text = ">"
+	next_button.pressed.connect(_on_outfit_cycle.bind(slot, 1))
+	row.add_child(next_button)
+	return row
+
+func _on_outfit_cycle(slot: String, direction: int) -> void:
+	_character.set_outfit_piece(
+		slot, OutfitCatalog.cycle(slot, _character.get_outfit_piece(slot), direction)
+	)
+	_refresh()
 
 func _build_traits_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CHAR_TRAITS")))

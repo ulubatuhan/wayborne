@@ -97,102 +97,19 @@ def scale_to_width(rgba: np.ndarray, width: int) -> tuple[int, int]:
     return width, max(1, round(h * width / w))
 
 
-def make_tile(rgb: np.ndarray, size: int) -> np.ndarray:
-    """Make a texture seamless by cross-fading it with its half-offset copy.
-
-    The generated "tileable" sheets are not actually periodic; blending the
-    image with a copy rolled by half its size, weighted towards the copy at
-    the edges, puts the original seam in the middle of a smooth region.
-    """
-    h, w = rgb.shape[:2]
-    rolled = np.roll(np.roll(rgb, h // 2, axis=0), w // 2, axis=1)
-    yy = np.abs(np.linspace(-1.0, 1.0, h))[:, None]
-    xx = np.abs(np.linspace(-1.0, 1.0, w))[None, :]
-    weight = np.clip(np.maximum(yy, xx) ** 3, 0.0, 1.0)[..., None]
-    out = rgb * (1.0 - weight) + rolled * weight
-    img = Image.fromarray(out.astype(np.uint8), "RGB").resize((size, size), Image.LANCZOS)
-    return np.asarray(img)
-
-
-def declasp(rgba: np.ndarray, corner: int, plain: int) -> np.ndarray:
-    """Rebuild the seal frame as corners + a mirrored plain strip per side.
-
-    The seal frame was painted with a clasp in the middle of every side. A
-    nine-slice edge is stretched or tiled, so a clasp there becomes either a
-    smeared bar or a row of clasps; the brass corners carry the "sealed"
-    read on their own. Each side's edge becomes a strip taken just past the
-    corner plate followed by its mirror image, so the theme can tile it
-    without a visible seam. The output is 2*corner + 2*plain square-ish.
-    """
-    h, w = rgba.shape[:2]
-    def strip_x(block: np.ndarray) -> np.ndarray:
-        s = block[:, corner:corner + plain]
-        return np.concatenate([s, s[:, ::-1]], axis=1)
-    def strip_y(block: np.ndarray) -> np.ndarray:
-        s = block[corner:corner + plain]
-        return np.concatenate([s, s[::-1]], axis=0)
-    top = np.concatenate([rgba[:corner, :corner], strip_x(rgba[:corner]), rgba[:corner, w - corner:]], axis=1)
-    bottom = np.concatenate([rgba[h - corner:, :corner], strip_x(rgba[h - corner:]), rgba[h - corner:, w - corner:]], axis=1)
-    left = strip_y(rgba[:, :corner])
-    right = strip_y(rgba[:, w - corner:])
-    centre = np.zeros((plain * 2, plain * 2, 4), dtype=rgba.dtype)
-    middle = np.concatenate([left, centre, right], axis=1)
-    return np.concatenate([top, middle, bottom], axis=0)
-
-
-def seam_error(rgb: np.ndarray) -> float:
-    """Mean jump across the wrap edges, relative to the mean jump inside."""
-    a = rgb.astype(np.float32)
-    inner = np.abs(np.diff(a, axis=1)).mean() + np.abs(np.diff(a, axis=0)).mean()
-    wrap = np.abs(a[:, 0] - a[:, -1]).mean() + np.abs(a[0] - a[-1]).mean()
-    return float(wrap / max(inner, 1e-6))
-
-
 def phase1() -> None:
     print("Phase 1 - global chrome")
-    # G1 (page surface) and G10 as a full-colour tile are not shipped: the
-    # panels compose their ground from ArtPalette + the grain mask below, so
-    # a baked-colour tile would be ~0.7 MB of Web download nothing reads.
-    # Seam quality of the tiling itself is still reported.
-    for src in ["G1_page_surface.jpg", "G10_grain_stain_overlay.jpg"]:
-        tile = make_tile(_load(src), 512)
-        print(f"  {src}: seam ratio before {seam_error(_load(src)):.2f}, after {seam_error(tile):.2f} (not shipped)")
-
-    # Grain as a *mask*, not a picture: black specks whose alpha is how
-    # dark the stain sheet was. The game lays it over a panel fill whose
-    # colour comes from ArtPalette, so the grain never decides a colour.
-    grain = make_tile(_load("G10_grain_stain_overlay.jpg"), 256).astype(np.float32)
-    luma = grain.mean(axis=2)
-    alpha = np.clip((np.percentile(luma, 97) - luma) / 70.0, 0.0, 1.0) * 150.0
-    mask = np.dstack([np.zeros_like(luma)] * 3 + [alpha]).astype(np.uint8)
-    save(mask, "g10_grain_mask.png")
-
-    # Frames: key the outside *and* the hollow centre.
-    for src, name, width in [("G2_binding_frame.jpg", "g2_binding.png", 256),
-                             ("G3_seal_frame.jpg", "g3_seal.png", 256)]:
-        rgb = _load(src)
-        h, w = rgb.shape[:2]
-        rgba = crop_to_alpha(key(rgb, seeds=[(h // 2, w // 2)]))
-        if name == "g3_seal.png":
-            img = Image.fromarray(rgba, "RGBA").resize(scale_to_width(rgba, width), Image.LANCZOS)
-            rgba = declasp(np.asarray(img).copy(), corner=78, plain=26)
-            save(rgba, name)
-        else:
-            save(rgba, name, scale_to_width(rgba, width))
-
-    rgba = crop_to_alpha(key(_load("G4_button_tab.jpg")))
-    save(rgba, "g4_tab.png", scale_to_width(rgba, 240))
+    # G1 (page), G2 (binding), G3 (seal frame), G4 (tab), G7 (scroll ribbon)
+    # and G10 (grain) are not shipped: the player rejected the leather
+    # chrome, and every panel, button, tab, field and scrollbar is a flat
+    # ArtPalette box now (WaybookTheme). The Web build would download them
+    # for nothing.
 
     # G5 (kilit karalaması) yazılmıyor: oyuncu testinde kilitli düğmenin
     # üstündeki karalama güzel görünmedi, kilit artık yalnızca silik ton.
 
     rgba = crop_to_alpha(key(_load("G6_ink_rule_separator.jpg")))
     save(rgba, "g6_rule.png", scale_to_width(rgba, 420))
-
-    # The ribbon sheet holds both scrollbar parts side by side: the groove
-    # (stitched leather strip) and the ribbon that hangs through it.
-    rgba = crop_to_alpha(key(_load("G7_scrollbar_ribbon.jpg")))
-    save(rgba, "g7_scroll.png", scale_to_width(rgba, 18))
 
     rgba = crop_to_alpha(key(_load("G8_tooltip_slip.jpg")))
     save(rgba, "g8_slip.png", scale_to_width(rgba, 200))
@@ -205,31 +122,9 @@ def phase1() -> None:
     edge_masks()
 
 
-## Checkerboard keying: generators hand back "transparent" PNGs as JPGs with
-## the editor's grey checkerboard baked in as pixels. The ink is white and
-## the checkerboard never rises above ~95 luma, so the alpha is a ramp on
-## brightness alone - no backdrop keying, no card to cut off.
-CHECKER_LUMA_FLOOR = 110.0
-CHECKER_LUMA_RANGE = 110.0
-CHECKER_ALPHA_CUTOFF = 10.0
-
-
-def checker_mask(src: str, name: str) -> None:
-    rgb = _load(src).astype(np.float32)
-    luma = rgb[..., :3].mean(axis=2)
-    alpha = np.clip((luma - CHECKER_LUMA_FLOOR) / CHECKER_LUMA_RANGE, 0.0, 1.0) * 255.0
-    # JPG ringing leaves the lighter checker squares a few levels of alpha:
-    # stretched over the screen that faint grid reads as a pattern.
-    alpha[alpha < CHECKER_ALPHA_CUTOFF] = 0.0
-    mask = np.dstack([np.full_like(luma, 255.0)] * 3 + [alpha]).astype(np.uint8)
-    save(mask, name)
-
-
 def edge_masks() -> None:
-    # Stress bleed and cold frost: square whole-frame sheets, stretched over
-    # the screen as one picture (the player rejected the nine-slice).
-    checker_mask("G11a_edge_bleed_v2.jpg", "g11_edge_bleed.png")
-    checker_mask("G11b_edge_frost_v2.jpg", "g11_edge_frost.png")
+    # Stress bleed (G11a) and cold frost (G11b) are not shipped: both edges
+    # were removed from the road on player feedback. Only hunger scorches.
     for src, name in [("G11c_danger_edge_scorch.jpg", "g11_edge_scorch.png")]:
         rgb = _load(src)
         h, w = rgb.shape[:2]
@@ -437,11 +332,8 @@ def phase2plus() -> None:
     icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
 
     # Road HUD.
-    # Only the top strap ships: the HUD draws one studded belt along each
-    # bar's world-facing edge (text over the rivets did not read), and the
-    # bottom strap's buckle has no place in a tiled belt.
-    rgba = crop_to_alpha(key(_load("R1_hud_top_strap.jpg")))
-    save(rgba, "r1_strap_top.png", scale_to_width(rgba, 640))
+    # R1 (studded strap) is not shipped: the HUD bars are edged by a thin
+    # flat rule now, the leather belt went with the rest of the chrome.
     dial, needle = split_components(crop_to_alpha(key(_load("R3_time_dial_face.jpg"))), 2)
     save(dial, "r3_dial.png", (96, round(dial.shape[0] * 96 / dial.shape[1])))
     save(needle, "r3_needle.png", (round(needle.shape[1] * 90 / needle.shape[0]), 90))

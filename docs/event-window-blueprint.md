@@ -12,6 +12,12 @@ uyarlamak. Mevcut kod (`road_journey.gd::_render_card()` /
 `_build_choice_button()`) `SEAL_PANEL`'i (g3_seal) düz bir çerçeve olarak
 kullanıyor ve hiç illüstrasyon taşımıyor — bu belge o boşluğu dolduruyor.
 
+**Güncelleme:** deri/pirinç krom oyunun tamamından kaldırıldı; kart artık
+kodla çizilen minimal bir çerçeve. §3'ün dört krom varlığı
+(`E_Frame_Master`, `E_Header_Banner`, `E_Choice_Row_*`) **üretilmeyecek**.
+§6'nın 21 illüstrasyonu duruyor; üretime hazır İngilizce promptları
+`docs/gemini-prompts.md` (A bölümü).
+
 ---
 
 ## 1. Mimari

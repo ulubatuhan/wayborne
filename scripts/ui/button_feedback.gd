@@ -5,8 +5,8 @@ extends Node
 ## yalnızca rengi söylüyordu - defterin sayfasındaki mühürlü bir sekme
 ## gibi değil, ekrandaki bir dikdörtgen gibi.
 ##
-## `UiTheme` her düğmeye kendiliğinden bir tane ekliyor (`SceneInk`'in ve
-## `RowButton`'ın deseni: hiçbir ekran hatırlamak zorunda değil). Tween'ler
+## `UiTheme` her düğmeye kendiliğinden bir tane ekliyor (`SceneInk`'in
+## deseni: hiçbir ekran hatırlamak zorunda değil). Tween'ler
 ## düğmenin kendisine ait - düğme silinince onlar da gider, sahipsiz bir
 ## animasyon kalmaz. Kilitli düğme kıpırdamaz: basılamayan bir şeyin
 ## basılıyormuş gibi davranması yalan olur.

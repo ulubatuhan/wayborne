@@ -216,6 +216,10 @@ wayborne/
     character's `equipped` dict - upgrading a slot automatically returns
     the old piece to the locker.
 
+  - `FigureRig` / `Wardrobe`: the skeleton every person is drawn on and the
+    sprite parts (clothes, armour, weapons) hung on its bones - see Wardrobe
+    & Rig Rules.
+
 ### Character & Party Rules
 
 - **Crew size ≠ combat party.** Crew (chosen in character creation) drives the
@@ -875,8 +879,8 @@ way to textures one screen at a time.
   body outline, so the topline itself humps; the small light ellipse that
   remains sits *inside* the body as a volume cue, which is the one place
   an outline-free shape is right.
-- **A figure that moves needs joints.** `WalkFigure` solves hip → knee →
-  foot with two bones; swinging a single-piece leg reads as scissors. The
+- **A figure that moves needs joints.** `FigureRig` (see Wardrobe & Rig
+  Rules) solves hip → knee → foot with two bones; swinging a single-piece leg reads as scissors. The
   foot stays put while it is on the ground, so the figure does not slide.
   Wheels and walk cycles advance with **distance, not time** - a stationary
   wagon whose wheels turn is the vehicle-shaped version of a sliding
@@ -1263,6 +1267,79 @@ way to textures one screen at a time.
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.
 
+### Wardrobe & Rig Rules
+
+People are drawn on a skeleton, and anything a person wears or carries is
+a set of sprite parts hung on its bones. Clothes (`OutfitCatalog`), armour
+and weapons (`EquipmentCatalog`) go through the same door, so a sword
+bought at the Demirci is in the hand on the road, in the hub, in combat and
+in every preview the moment it is equipped.
+
+- **One skeleton, one pose solver: `FigureRig`.** Joints (hip, knee, ankle,
+  toe, shoulder, elbow, hand, fingers, head, weapon tip) come from
+  `FigureRig.pose()` - the walk math `WalkFigure` used to carry inline,
+  moved out so the road figure, the combat figure and the previews cannot
+  disagree about where an elbow is. Fifteen bones, drawn in
+  `FigureRig.DRAW_ORDER` (back arm and back leg behind the torso, front arm
+  in front of it, the held weapon under the front hand so the fingers
+  close over the grip). A seated rider has no back leg.
+- **The knee bends toward the walk.** `_solve_joint` was called with the
+  bend sign reversed for human legs, so every walker had chicken legs - a
+  stick leg hid it, a painted trouser leg would not. `test_wardrobe.gd`
+  asserts the knee side for both facings. The thigh/shin share also came
+  down 0.52 → 0.51, because the rest pose - the pose the art is painted
+  in - read as a crouch.
+- **A part is painted once, at a reference size, in its rest pose.** Each
+  of the nine parts (`FigureRig.PARTS`: head, torso, upper_arm, forearm,
+  hand, thigh, shin, foot, weapon) has a fixed canvas and a pivot pixel at
+  `REF_H` (512) scale. `FigureRig.part_transform()` puts the pivot on the
+  bone's first joint, turns the rest direction onto the bone's current
+  direction and scales by `h / REF_H`; a left-facing figure mirrors the
+  part. Uniform scale, not stretch: the art keeps its proportions and the
+  joints meet because the art was painted on the same mannequin. The back
+  limb reuses the front art darkened (`Wardrobe.BACK_SHADE`) unless a
+  `<part>_back.png` exists.
+- **The held weapon hangs straight at rest and moves a third as far as the
+  forearm** (`WEAPON_SWING_SHARE`). At the full forearm swing the blade
+  swept 60° every step and walking read as fencing (measured on a
+  rendered sheet).
+- **Art is found by path, never listed.**
+  `data/assets/characters/wardrobe/<item_id>/<part>.png`, checked with
+  `ResourceLoader.exists()` (works in the Web export, unlike a directory
+  scan) and falling back to a raw file on disk for art not yet imported.
+  `Wardrobe.loadout_of()` returns the worn items that have art, bottom to
+  top by `Wardrobe.SLOT_LAYERS` (shirt < trousers < shoes < jacket < armour
+  < gloves < amulet < hat < weapon). An item without art stays procedural
+  (colour and head shape through OutfitCatalog's resolvers) - art can land
+  one item at a time. `wardrobe/body/` is the optional skin layer, drawn
+  under everything and tinted by the character's skin tone.
+- **The procedural body is still drawn under the sprites, bone by bone.**
+  `WalkFigure` walks `DRAW_ORDER` and, per bone, draws the procedural limb
+  and then that bone's sprite layers, so depth comes from the skeleton: the
+  back sleeve is behind the torso, the front sleeve in front of it. With
+  no art at all the figure is the one it always was.
+- **Combat switches to the rig only when there is art to show.**
+  `CombatFigure.uses_rig()` is true for a humanoid with a non-empty
+  loadout; it then hosts a standing `WalkFigure` child, driving its
+  position (lunge, shake), rotation (the fall) and a multiplicative state
+  tone (`_state_tone()`: depth, downed, Death's Door, dead). Enemies,
+  beasts and a party with no art keep the silhouette; a unit lying fallen
+  is the procedural pile either way. `CombatUnit` carries `loadout`, `skin`
+  and `height_scale` from the character.
+- **Clothes change after creation too.** The character screen's
+  "Görünüm ve Kuşam" section is a `FigurePreview` (the same `WalkFigure`,
+  standing) beside the six outfit slots; equipment changes below refresh it.
+  Character creation uses the same preview; the block-drawn
+  `OutfitPreview` is gone.
+- **The artist's templates are generated from the rig, not drawn by hand.**
+  `tests/export_rig_spec.gd` writes `docs/wardrobe/rig_spec.json`;
+  `tools/wardrobe_templates.py` draws the per-part templates, the 3×3 part
+  sheet (768×1152) and the rest-pose reference from it;
+  `tools/wardrobe_ingest.py` slices a finished part sheet (or places a lone
+  part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
+  fails if the JSON falls behind the rig, so a template can never describe
+  a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
+
 ### Waybook UI Rules
 
 The management screens, overlays and HUD are dressed as one object: the
@@ -1271,9 +1348,9 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
 
 - **One theme, installed into the engine's default theme.**
   `WaybookTheme` (`scripts/ui/waybook_theme.gd`) builds every chrome style
-  - leather binding (`PanelContainer`/`Panel`), sealed binding
-  (`SealPanel`), index-tab buttons, pinned-slip tooltip (`TooltipPanel`,
-  `SlipPanel`), ink rule (`HSeparator`), ribbon scrollbar - and the
+  - panel (`PanelContainer`/`Panel`), the irreversible-decision panel
+  (`SealPanel`), buttons, tabs, fields, cells, scrollbars, pinned-slip
+  tooltip (`TooltipPanel`, `SlipPanel`), ink rule (`HSeparator`) - and the
   `UiTheme` autoload (first in the autoload list, runs in `_init`)
   merges it into `ThemeDB.get_default_theme()`. Not a project `.tres`: a
   `Control` under a `CanvasLayer` does not inherit its parent's theme, and
@@ -1289,28 +1366,38 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (`WaybookTheme.SEAL_PANEL` for irreversible decisions - the road's event
   card and `SuccessionPanel`; `HUD_BAR` for the road's translucent strips;
   `SLIP_PANEL` + `PAGE_LABEL`/`PAGE_HEADING` for paper with ink text).
-- **Textures are material; colour is still `ArtPalette`.** Leather, brass
-  and paper arrive painted, and that is their only colour. Every decision
-  the UI makes - a panel's inner ground (`UI_PANEL_FILL`), text
-  (`UI_TEXT`/`UI_TEXT_ON_PAGE`), hover/pressed/locked tints, the ink marks
-  (`UI_INK_MARK`, `UI_RULE`) - is a palette role. The panel's inner ground
-  is composed at runtime (fill, then the stain-grain *mask*, then the
-  frame) so no colour is baked into a PNG. Ink marks are recoloured, not
-  modulated: multiplying dark ink can never lighten it, and black ink on
-  dark leather was invisible in the first render.
+- **Controls are one flat family; leather is gone.** Every panel, the
+  sealed panel, button, tab, text/number field, cargo cell and scrollbar
+  is a `StyleBoxFlat` sharing `FRAME_RADIUS` and a thin palette-coloured
+  line - the only difference between tiers is the line's weight and the
+  fill's tone (`SealPanel`: a 2 px `UI_ACCENT` line and a wider pad, so an
+  irreversible choice still reads heavier than a plain panel). The leather
+  chrome (G2 binding, G3 sealed binding, G4 tab, the auto-assigned
+  `RowButton`, `IconTab`, the G7 ribbon scrollbar, R1's studded strap under
+  the HUD) was rejected by the player outright - "deri efektini
+  kullandığın her yer" - after G4 had already been pulled from the default
+  button once. `test_waybook_theme.gd` fails if any control goes back to a
+  texture or if a leather sheet is read or shipped again. Painted material
+  survives only where it is a *picture* (desk scenes, the menu's lineage
+  book, seals, icons), the ink rule and the paper slip.
+- **Colour is still `ArtPalette`.** Every decision the UI makes - a
+  panel's ground (`UI_PANEL_FILL`), text (`UI_TEXT`/`UI_TEXT_ON_PAGE`),
+  hover/pressed/locked fill, the ink marks (`UI_INK_MARK`, `UI_RULE`) - is
+  a palette role. Ink marks are recoloured, not modulated: multiplying dark
+  ink can never lighten it.
+- **A number in a box sits in the middle of the box.** The market's
+  quantity field was left-aligned against its arrows. `SpinBox.alignment`
+  is a node property, not a theme one, so `UiTheme` centres every SpinBox
+  as it enters the tree - the `SceneInk` pattern, no screen remembers.
 - **A locked button is faded, never hidden - and never scratched.** The
-  disabled tab (and row) is the same texture at `UI_TINT_DISABLED`, which
-  carries its own alpha; the reason stays live text beside it (Event
-  Engine Rules). For a while the ledger's scratch-out (G5) was composed
-  over the tab's ear; the player rejected it in playtest ("güzel
-  gözükmüyor, silik olması yeterli"), so it is gone from the theme and
-  from the pipeline's output.
-- **Nine-slice geometry is measured, not guessed.** Slice margins live as
-  constants in `WaybookTheme` and each must contain its corner ornament
-  whole. The sealed frame was painted with a clasp mid-side; stretched it
-  smeared into a bar, tiled it became a row of clasps. The pipeline's
-  `declasp` rebuilds each side from a mirrored plain strip so it tiles
-  seamlessly.
+  disabled button is the same box with a paler fill and line; the reason
+  stays live text beside it (Event Engine Rules). For a while the ledger's
+  scratch-out (G5) was composed over it; the player rejected it in
+  playtest ("güzel gözükmüyor, silik olması yeterli").
+- **Nine-slice geometry is measured, not guessed.** The one nine-slice
+  left in the chrome is the paper slip (`SLIP_SLICE`); its margins must
+  contain the pin and the torn corners whole, and must leave a centre to
+  stretch (`test_waybook_theme.gd` checks it).
 - **Art arrives through one pipeline.** Raw generated sheets live in
   `art_source/waybook/` (a `.gdignore` keeps them out of import and
   export); `python3 tools/waybook_assets.py` keys the flat grey backdrop
@@ -1355,11 +1442,12 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
 - **Goods have one door too** (`WaybookTheme.item_line`/`item_icon`):
   wagon, caravan load and the road's status list all go through it. An
   item without an icon gets a spacer, never a crash or a jagged row.
-- **The road HUD is a dark band edged by a studded belt, never text on
-  leather.** The first pass put the HUD text *on* the R1/R2 straps -
-  measured, the rivets ran through the letters and the vials vanished.
-  The bars stay `HUD_BAR` and `WaybookTheme.strap_rule()` tiles R1's
-  middle between each bar and the world. Gauges are `PulseBar` vials
+- **The road HUD is a dark band edged by a thin rule, never text on
+  a texture.** The first pass put the HUD text *on* the R1/R2 straps -
+  measured, the rivets ran through the letters and the vials vanished;
+  the strap then sat beside the bars until the leather went. The bars stay
+  `HUD_BAR` and `WaybookTheme.hud_rule()` (`HUD_RULE_HEIGHT`, a
+  `GOLD_DIM` line) separates each bar from the world. Gauges are `PulseBar` vials
   (R4 + an R4a-d icon + the number; the name is in the tooltip) whose
   liquid colours are `ArtPalette.UI_GAUGE_*`; the clock has a `TimeDial`
   (R3, sun at noon, stars at midnight); attention and an open road signal
@@ -1375,14 +1463,10 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   `UI_EDGE_COLD` are gone with them. The hunger scorch (G11 scorch) is
   the one edge that survives: the longest hungry streak in the party
   still scorches the frame, coloured from `ArtPalette.UI_EDGE_HUNGER`.
-  The source sheets were painted on a torn paper card; the pipeline cuts
+  The source sheet was painted on a torn paper card; the pipeline cuts
   the card off and ships only the ink as a white mask - as shipped
   first, the card's white border and pale wash covered the scene. The
-  generator only exports JPG, so transparency arrives as a *baked* grey
-  checkerboard - `checker_mask()` keys it by luminance (the ink is far
-  brighter than either square) and cuts JPG ringing below
-  `CHECKER_ALPHA_CUTOFF`, so a new JPG from the same tool can go straight
-  into `art_source/waybook/`. The mask is drawn **whole, stretched over
+  mask is drawn **whole, stretched over
   the screen** (`STRETCH_SCALE`): for one round it was nine-sliced so
   the thickness would not depend on the aspect ratio, and the player
   rejected it - the mask is painted as a whole frame and slicing
@@ -1413,22 +1497,18 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   `SuccessionPanel` shows G9b instead of G9 the moment a non-senior heir
   is selected; confirming stamps the seal (the choice is emitted at once;
   the stamp is only the moment).
-- **A stretched tab is a stripe, not a button.** A `Button` that fills its
-  row (VBox child with `SIZE_FILL`, HBox child with `SIZE_EXPAND`) wears
-  `RowButton` - G2 at `ROW_SCALE` as a nine-slice - and the `UiTheme`
-  autoload assigns it as the node enters the tree (`is_wide_button`), the
-  `SceneInk` pattern: no screen has to remember. Measured: the Caravan
-  Yard's actions and every back button were the G4 tab stretched to
-  1000+ px, its grain turned into horizontal bars. A button that already
-  carries a variation or a stylebox override is left alone. The tab's own
-  middle slice now tiles (`TILE_FIT`) instead of stretching for the same
-  reason. Inputs (`LineEdit`, inside every `SpinBox`) and cargo cells
-  (`CELL_PANEL`) use the same small binding - the engine's black box and
-  the market's green `ColorRect` cells (`PlaceholderHelper`, deleted) were
-  the last unskinned widgets.
+- **A stretched button is still the same button.** For a while a `Button`
+  that filled its row wore `RowButton` (G2 scaled as a nine-slice), because
+  the G4 tab stretched to 1000+ px turned its grain into horizontal bars.
+  With textures gone there is no grain to stretch: a full-width button is
+  the default flat box, and `UiTheme` no longer assigns a variation.
+  Inputs (`LineEdit`, inside every `SpinBox`) are a darker ink well
+  (`field_frame()`), cargo cells (`CELL_PANEL`) the same box a shade
+  lighter - the engine's black box and the market's green `ColorRect` cells
+  (`PlaceholderHelper`, deleted) were the last unskinned widgets.
 - **Bone text always carries a dark halo.** `Label` has a `UI_TEXT_HALO`
   shadow, `Button`/`LineEdit` an outline (`TEXT_OUTLINE_SIZE`), because the
-  scene backgrounds and leather both have pale patches. Paper
+  scene backgrounds have pale patches. Paper
   variations (`PageLabel`, `PageHeading`, tooltips) switch it off - ink on
   paper needs none.
 - **A map is written on, not stuck on.** City markers on the B6 parchment
@@ -1466,9 +1546,10 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   would change art nobody asked to change. Reconcile that drift before
   re-running the whole pipeline.
 - **Nothing painted ships unread.** The Web build downloads every
-  texture, so a sheet the game never draws (G1 page tile, G10 colour
-  tile, R2, R5) is not written by the pipeline at all; the reason stays
-  as a comment in `tools/waybook_assets.py`. Shipped Waybook set: ~7.3 MB.
+  texture, so a sheet the game never draws (G1 page tile, G10 grain, the
+  G2/G3/G4/G7/R1 leather chrome, the G11 bleed and frost edges, R2, R5) is
+  not written by the pipeline at all; the reason stays as a comment in
+  `tools/waybook_assets.py`.
 
 ### Motion Rules
 
@@ -1540,7 +1621,7 @@ gave the game its motion, and every piece of it follows the same few rules.
   hour, not of the palette: the night phase blends toward dawn for nine
   hours, so by 02:00 the palette is already bright (measured).
 - **A button under the cursor answers.** `ButtonFeedback` attaches itself
-  to every button through `UiTheme`'s `node_added` (the `RowButton`
+  to every button through `UiTheme`'s `node_added` (the `SceneInk`
   pattern): hover grows `1+min(3%, 6px/width)` - 3% of a 1000 px row is a
   jump -, press dips to 0.96, release overshoots to 1.02 and settles. It
   only touches `scale` (containers rewrite position, never scale), the

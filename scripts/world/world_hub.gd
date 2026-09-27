@@ -515,6 +515,7 @@ func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
 		not is_leader,
 		character.outfit
 	)
+	body.set_loadout(Wardrobe.loadout_for(character))
 
 	var label := Label.new()
 	label.text = character.character_name if is_leader else character.character_name.split(" ")[0]

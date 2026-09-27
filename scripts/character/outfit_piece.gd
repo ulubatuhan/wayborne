@@ -2,9 +2,9 @@ class_name OutfitPiece
 extends Resource
 
 ## Kıyafet sistemi tamamen dış görünüm için - hiçbir stat/mekanik bonusu
-## yok (bkz. CLAUDE.md Faz 13 hazırlık notu #14). `color` şimdilik önizleme
-## penceresinin tek görsel kaynağı; gerçek doku/sprite gelince bu alanın
-## yerini alacak (bkz. Art Rules'un ColorRect -> _draw() -> doku geçişi).
+## yok (bkz. CLAUDE.md Faz 13 hazırlık notu #14). `color` prosedürel figürün
+## rengi; parçanın sprite'ları varsa (`Wardrobe`, `piece_id` klasörü)
+## iskelete onlar takılıyor, renk sprite'ın kapatmadığı yerde kalıyor.
 
 @export var piece_id: String = ""
 ## OutfitCatalog.SLOT_* değerlerinden biri.

@@ -346,6 +346,7 @@
 "UI_CREATE_HEIGHT_AVERAGE","orta boy, dengeli","average height, balanced","","","","","","","","",""
 "UI_CREATE_OUTFIT","Kıyafet","Outfit","","","","","","","","",""
 "UI_CREATE_OUTFIT_NONE","(hiçbiri)","(none)","","","","","","","","",""
+"UI_CHAR_APPEARANCE","Görünüm ve Kuşam","Appearance and Gear","","","","","","","","",""
 "UI_MEAL_TITLE","Akşam Sofrası","Evening Meal","","","","","","","","",""
 "UI_MEAL_STATUS","Erzak: %d - bu gecenin ihtiyacı: %d","Provisions: %d - tonight's need: %d","","","","","","","","",""
 "UI_MEAL_MODE_ALL","Herkese dağıt","Distribute to everyone","","","","","","","","",""

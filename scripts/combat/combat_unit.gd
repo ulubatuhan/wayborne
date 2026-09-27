@@ -56,6 +56,13 @@ var figure_kind: String = "bandit"
 ## yok, `figure_kind`'ın kendi arketip paleti aynen kullanılır). `CombatFigure`
 ## bunu `figure_kind`'la aynı yerden, `CombatUnitSlot.bind()`'dan okuyor.
 var outfit: Dictionary = {}
+## Üstündeki sprite'lı kalemler (`Wardrobe.loadout_for`), ten rengi ve boy
+## ölçeği - yalnızca oyuncu tarafı. Boş olmayan bir yük, savaş figürünü
+## prosedürel silüetten iskelete geçiriyor (bkz. CombatFigure._sync_rig):
+## kuşanılan kılıç savaşta da elde görünsün diye.
+var loadout: PackedStringArray = PackedStringArray()
+var skin: Color = Color(0.78, 0.65, 0.53)
+var height_scale: float = 1.0
 
 ## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
 ## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
@@ -139,6 +146,11 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.stun_resist = character.get_stun_resist()
 	unit.figure_kind = character.class_id
 	unit.outfit = character.outfit
+	unit.loadout = Wardrobe.loadout_for(character)
+	unit.skin = CharacterData.get_skin_tone_color(character.skin_tone)
+	unit.height_scale = clampf(
+		float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14
+	)
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()

@@ -254,7 +254,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 
 	_leader = _make_figure(
 		WalkFigure.KIND_MOUNTED if mounted_leader else WalkFigure.KIND_PERSON,
-		_archetype_of(player), _height_scale_of(player), _skin_of(player), false
+		_archetype_of(player), _height_scale_of(player), _skin_of(player), false, player
 	)
 	_leader.set_facing(1.0)
 
@@ -265,7 +265,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 			continue
 		_party_figures.append(_make_figure(
 			WalkFigure.KIND_PERSON, _archetype_of(character),
-			_height_scale_of(character), _skin_of(character), true
+			_height_scale_of(character), _skin_of(character), true, character
 		))
 
 
@@ -302,12 +302,17 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 
 	_layout()
 
+## `character` isimli bir kişi için (lider, parti): kıyafeti ve üstündeki
+## sprite'lı kalemler yolda da görünsün. Tayfa ve öküz için null.
 func _make_figure(
-	kind: String, archetype: String, height_scale: float, skin: Color, pack: bool
+	kind: String, archetype: String, height_scale: float, skin: Color, pack: bool,
+	character: CharacterData = null
 ) -> WalkFigure:
 	var figure := WalkFigure.new()
 	add_child(figure)
-	figure.set_kind(kind, archetype, height_scale, skin, pack)
+	var outfit: Dictionary = character.outfit if character != null else {}
+	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit)
+	figure.set_loadout(Wardrobe.loadout_for(character))
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
 	# gibi duruyor.
 	figure.set_phase_offset(float(get_child_count()) * 1.27)
