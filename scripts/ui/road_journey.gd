@@ -190,7 +190,6 @@ const CARD_BODY_MAX_HEIGHT: float = 320.0
 
 ## Yol HUD'unun Waybook parçaları (bkz. Waybook UI Rules).
 const TIME_DIAL_SIZE: float = 34.0
-const STRAP_HEIGHT: float = 14.0
 ## Şehre varışta yeni sahne mürekkepte bu kadar bekliyor (bkz. SceneInk).
 const ARRIVAL_INK_HOLD: float = 0.6
 const HUD_ICON_SIZE: float = 24.0
@@ -536,7 +535,7 @@ func _edge_overlay(file_name: String, tint: Color) -> Control:
 ## yutmuyor - aradaki boşluk `MOUSE_FILTER_IGNORE`.
 func _build_hud_layer() -> void:
 	_hud.add_child(_build_top_bar())
-	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
+	_hud.add_child(WaybookTheme.hud_rule())
 
 	# Boş - dünyanın göründüğü aralığı iki şerit arasında açık tutuyor.
 	# Emir paneli artık burada değil, kendi serbest katmanında (bkz.
@@ -546,7 +545,7 @@ func _build_hud_layer() -> void:
 	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(middle)
 
-	_hud.add_child(WaybookTheme.strap_rule(STRAP_HEIGHT))
+	_hud.add_child(WaybookTheme.hud_rule())
 	_hud.add_child(_build_bottom_bar())
 	_build_orders_panel()
 
@@ -567,20 +566,17 @@ func _build_top_bar() -> PanelContainer:
 	# Zaman artık tuşla değil kendiliğinden akıyor; oyuncunun tek kontrolü
 	# ne kadar hızlı aktığı (bkz. JourneyClock.SPEEDS).
 	_speed_button = Button.new()
-	_speed_button.theme_type_variation = WaybookTheme.ICON_TAB
 	_speed_button.tooltip_text = tr("UI_ROAD_SPEED_TOOLTIP")
 	_speed_button.pressed.connect(_on_speed_pressed)
 	row.add_child(_speed_button)
 
 	for step in [-1, 1]:
 		var zoom_button := Button.new()
-		zoom_button.theme_type_variation = WaybookTheme.ICON_TAB
 		zoom_button.tooltip_text = tr("UI_ROAD_ZOOM_OUT" if step < 0 else "UI_ROAD_ZOOM_IN")
 		zoom_button.pressed.connect(_step_zoom.bind(step))
 		row.add_child(zoom_button)
-		# "–"/"+" font glyph'i değil çizim: kulağın simetrik ICON_TAB'ı bile
-		# tek bir karakterin fontun kendi metrik boşluğuyla ortalanmamasını
-		# düzeltmiyor - UiIcon aynı chevron/check diliyle tam merkezde çiziyor.
+		# "–"/"+" font glyph'i değil çizim: tek bir karakter fontun kendi
+		# metrik boşluğuyla ortalanmıyor - UiIcon tam merkezde çiziyor.
 		var zoom_icon := UiIcon.new()
 		zoom_icon.setup(UiIcon.Kind.MINUS if step < 0 else UiIcon.Kind.PLUS, ArtPalette.UI_TEXT)
 		zoom_button.add_child(zoom_icon)
@@ -1149,12 +1145,12 @@ func _default_orders_position() -> Vector2:
 	var margin := ORDERS_PANEL_SAFE_MARGIN
 	if _orders_layer == null or _command_panel == null:
 		return Vector2(margin, margin)
-	var bottom_height := STRAP_HEIGHT
+	var bottom_height := WaybookTheme.HUD_RULE_HEIGHT
 	if _hud != null and _hud.get_child_count() > 0:
 		var bottom := _hud.get_child(_hud.get_child_count() - 1) as Control
 		if bottom != null:
 			bottom_height = bottom.size.y
-	var y := _orders_layer.size.y - bottom_height - STRAP_HEIGHT - _command_panel.size.y - margin
+	var y := _orders_layer.size.y - bottom_height - WaybookTheme.HUD_RULE_HEIGHT - _command_panel.size.y - margin
 	return Vector2(margin, maxf(margin, y))
 
 ## Emir paneli açılıp kapanır (bkz. `_orders_button`) - sürüklenmiş bir

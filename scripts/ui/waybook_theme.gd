@@ -1,12 +1,13 @@
 class_name WaybookTheme
 extends RefCounted
 
-## Waybook: arayüzün tamamı tek bir kervan hesap defteri gibi giyiniyor. Bu
-## dosya o defterin malzemelerinden tek paylaşılan `Theme`'i kuruyor - her
-## panelin deri cildi, geri alınamaz kararların daha ağır mühürlü cildi, her
-## düğmenin kendisi olan fihrist sekmesi, mürekkep çizgisi, kurdele kaydırma
-## çubuğu, iğneyle tutturulmuş ipucu fişi - ve her yazının dizildiği tek
-## kitap yüzü.
+## Waybook: arayüzün tek paylaşılan `Theme`'i. Denetimler (panel, geri
+## alınamaz kararların paneli, düğme, sekme, giriş alanı, hücre, kaydırma
+## çubuğu) tek bir minimal düz kutu ailesi - ince çizgi, ortak köşe, palet
+## tonlu dolgu. Deri dokular oyuncu tarafından reddedildi; boyanmış
+## malzeme yalnızca resimlerde (masa sahneleri, mühür, ikonlar), mürekkep
+## çizgisinde ve iğneyle tutturulmuş ipucu fişinde kalıyor. Her yazı tek
+## kitap yüzünde dizili.
 ##
 ## **Neden ekran ekran override değil tek tema.** Bundan önce opak bir panel
 ## isteyen her ekran kendi `StyleBoxFlat`'ını kendi iki renk sabitiyle
@@ -14,12 +15,9 @@ extends RefCounted
 ## kahverengi). Ortak bir görünüm ancak tek bir yerden geliyorsa ortaktır -
 ## `ArtPalette` ve `ArtDraw`'ın var olma sebebinin aynısı.
 ##
-## **Renk hâlâ `ArtPalette`'ten geliyor.** Dokular boyanmış malzeme (deri,
-## pirinç, kâğıt); *arayüzün* verdiği her karar - panelin iç zemini, yazının
-## rengi, sekmenin üstüne gelince ne kadar aydınlandığı, kilitliyken ne
-## kadar solduğu - bir palet rolü, burada dolgu ya da ton olarak uygulanıyor.
-## Panelin iç zemini çalışma anında birleştiriliyor (dolgu + leke maskesi +
-## çerçeve), tam da hiçbir renk kararı bir PNG'ye gömülmesin diye.
+## **Renk `ArtPalette`'ten geliyor.** Panelin zemini, çizginin rengi,
+## üstüne gelince dolgunun ne kadar koyulaştığı, kilitliyken ne kadar
+## solduğu - hepsi bir palet rolü.
 ##
 ## **Proje temasına değil motorun varsayılan temasına kuruluyor.** Bir
 ## `CanvasLayer` altındaki `Control` ebeveyninin temasını devralmıyor ve bu
@@ -63,51 +61,37 @@ const PAGE_HEADING: StringName = &"PageHeading"
 ## duruyor, o yüzden Label'ın kendi UI_TEXT/gölge çiftini koruyor.
 const PAGE_TITLE: StringName = &"PageTitle"
 const PAGE_TITLE_FONT_SIZE: int = 24
-## Tam genişlikte duran düğmeler (ekranın asıl eylem sıraları, geri tuşu):
-## sekmenin kulağı ve dikişi 1000 pikselde çizgili bir şeride dönüyordu;
-## bu sıralar ciltli çerçevenin (G2) küçültülmüş dokuz parçası.
-const ROW_BUTTON: StringName = &"RowButton"
 ## Harita parşömeninin üstündeki şehir yazısı: kutu yok, mürekkep yazı ve
 ## kâğıt renginde bir hale - haritacının yazdığı gibi.
 const MAP_LABEL: StringName = &"MapLabel"
-## Kargo/pazar hücresi: aynı küçültülmüş cilt, içinde malın resmi.
+## Kargo/pazar hücresi: minimal çerçeve, içinde malın resmi.
 const CELL_PANEL: StringName = &"CellPanel"
 ## Sürüklenebilir "Kervan Emirleri" paneli yarı saydam bir cam gibi okunuyor
-## (bkz. road_journey.gd::_build_orders_panel) - üstündeki düğmeler G4'ün
-## opak deri dokusunu taşırsa cam zeminin üstünde iki ayrı dil okunur.
-## Dolgu yerine ince bir çerçeve çiziyor; hover/basılıyken dolgu belirir.
+## (bkz. road_journey.gd::_build_orders_panel): dolgu mürekkep tabanlı ve
+## çok düşük alfalı, varsayılan düğmenin altın tonlu dolgusu camda ağır
+## kalırdı. Aynı köşe ve çerçeve - aynı aile, iki zemin.
 const HUD_GHOST_BUTTON: StringName = &"HudGhostButton"
 
-## "1x", "–", "+" gibi 1-2 karakterlik yol HUD düğmeleri için - aynı G4
-## dokusu, yalnızca simetrik dolgu (bkz. ICON_TAB_CONTENT).
-const ICON_TAB: StringName = &"IconTab"
-
-## Dokuz parça geometrisi, doku pikseli cinsinden, işlenmiş PNG'ler
-## üstünde ölçüldü (tools/waybook_assets.py boyutları basıyor). Her pay köşe
-## süsünü bütünüyle içermeli, yoksa esneme onu bulaştırır.
-const BINDING_SLICE: int = 60
-const BINDING_FILL_INSET: int = 20
-const BINDING_CONTENT: int = 40
-const SEAL_SLICE: int = 78
-const SEAL_FILL_INSET: int = 26
-const SEAL_CONTENT: int = 60
-## Sekmenin sol ucu kıvrık bir kulak, o yüzden sol pay daha geniş.
-const TAB_SLICE: Array[int] = [40, 14, 24, 14]
-const TAB_CONTENT: Array[int] = [34, 16, 20, 16]
-## "1x"/"–"/"+" gibi 1-2 karakterlik simge düğmeleri kulağın asimetrisini
-## taşıyamıyor - metin kutunun merkezinden 7px sağa kayıyordu (34/20 payı
-## dengesiz). Aynı toplam dolguyu ([54, 32]) simetrik dağıtıyor.
-const ICON_TAB_CONTENT: Array[int] = [27, 16, 27, 16]
+## Minimal aile: her çerçeve (panel, mühür paneli, düğme, sekme, giriş
+## alanı, hücre) aynı köşe yarıçapını ve aynı ince çizgiyi taşıyor. Deri
+## dokular (G2 cilt, G3 mühürlü cilt, G4 sekme, R1 kayış) oyuncu tarafından
+## reddedildi - "deri efektini kullandığın her yer" - ve hepsi bu tek düz
+## kutu ailesine geçti. Ayrım artık doku değil, çizginin kalınlığı ve
+## dolgunun tonu.
+const FRAME_RADIUS: int = 3
+const PANEL_CONTENT: int = 20
+## Geri alınamaz kararların (olay kartı, veraset) paneli: daha kalın,
+## vurgu renginde bir çizgi ve daha geniş iç pay - ağırlık dokudan değil
+## çerçeveden geliyor.
+const SEAL_BORDER: int = 2
+const SEAL_CONTENT: int = 28
+const FIELD_CONTENT: Array[int] = [10, 4, 10, 4]
+const CELL_CONTENT: Array[int] = [8, 6, 8, 6]
+## Yol HUD'unun şeritleriyle dünya arasındaki çizgi (eski perçinli kayışın
+## yerine): bir kuşak değil, ince bir sınır.
+const HUD_RULE_HEIGHT: float = 2.0
 const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
 const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
-## Kayışın yuvarlak uçları döşenirken her parçada tekrar etmesin diye
-## kırpılan genişlik (doku pikseli).
-const STRAP_END_CROP: int = 30
-## Sıra düğmesinin ve hücrenin cildi G2'nin bu ölçeği: 60 piksellik köşe
-## 21'e iniyor, 50 piksellik bir düğmeye sığıyor.
-const ROW_SCALE: float = 0.35
-const ROW_SLICE: int = 21
-const ROW_CONTENT: Array[int] = [22, 12, 22, 12]
 ## Yazının arkasındaki koyu hale: deri, leke ve karalama üstünde bile
 ## kemik rengi yazı okunsun (bkz. Waybook UI Rules - kontrast).
 const TEXT_OUTLINE_SIZE: int = 4
@@ -227,29 +211,44 @@ static func build() -> Theme:
 
 # --- Paneller ---
 
-static func binding_panel() -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = _filled_frame("g2_binding.png", BINDING_FILL_INSET)
-	box.set_texture_margin_all(BINDING_SLICE)
-	box.set_content_margin_all(BINDING_CONTENT)
+## Oyunun paneli: `UI_PANEL_FILL` zemin, altın tonlu ince çizgi, yumuşak
+## bir gölge - masa resminin üstünde bir kâğıt kadar hafif duruyor.
+static func frame_panel() -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = ArtPalette.UI_PANEL_FILL
+	box.border_color = Color(ArtPalette.GOLD_DIM, 0.8)
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(FRAME_RADIUS)
+	box.shadow_color = Color(ArtPalette.INK, 0.45)
+	box.shadow_size = 6
+	box.set_content_margin_all(PANEL_CONTENT)
 	return box
 
-static func seal_panel() -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = _filled_frame("g3_seal.png", SEAL_FILL_INSET)
-	box.set_texture_margin_all(SEAL_SLICE)
+static func seal_panel() -> StyleBoxFlat:
+	var box := frame_panel()
+	box.border_color = ArtPalette.UI_ACCENT
+	box.set_border_width_all(SEAL_BORDER)
+	box.shadow_size = 10
 	box.set_content_margin_all(SEAL_CONTENT)
-	# Her kenar aynalanmış bir deri şerit (tools/waybook_assets.py
-	# `declasp`), döşenince deri boyandığı ölçekte kalıyor.
-	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
-	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	return box
+
+## Yazı/sayı giriş alanı (SpinBox'ın içindeki LineEdit dahil): zeminden
+## bir ton koyu bir kuyu, ince çizgili - düğmeyle aynı köşe, ama dolgusu
+## altın değil mürekkep: basılacak bir şey değil, yazılacak bir yer.
+static func field_frame(locked: bool = false) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(ArtPalette.INK, 0.3 if locked else 0.6)
+	box.border_color = Color(ArtPalette.UI_RULE, 0.3) if locked else ArtPalette.UI_RULE
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(FRAME_RADIUS)
+	_set_content(box, FIELD_CONTENT)
 	return box
 
 static func _build_panels(theme: Theme) -> void:
-	var binding := binding_panel()
-	theme.set_stylebox("panel", "PanelContainer", binding)
-	theme.set_stylebox("panel", "Panel", binding)
-	theme.set_stylebox("panel", "PopupPanel", binding)
+	var panel := frame_panel()
+	theme.set_stylebox("panel", "PanelContainer", panel)
+	theme.set_stylebox("panel", "Panel", panel)
+	theme.set_stylebox("panel", "PopupPanel", panel)
 
 	theme.set_type_variation(SEAL_PANEL, "PanelContainer")
 	theme.set_stylebox("panel", SEAL_PANEL, seal_panel())
@@ -274,27 +273,6 @@ static func _build_panels(theme: Theme) -> void:
 	theme.set_color("font_color", "PopupMenu", ArtPalette.UI_TEXT)
 	theme.set_color("font_hover_color", "PopupMenu", ArtPalette.UI_ACCENT)
 
-## `ArtPalette` dolgusunun üstüne leke maskesi, onun üstüne çerçeve.
-## Tema kurulurken bir kez birleştiriliyor, panel başına değil.
-static func _filled_frame(frame_file: String, inset: int) -> Texture2D:
-	var frame := texture(frame_file).get_image()
-	frame.decompress()
-	frame.convert(Image.FORMAT_RGBA8)
-	var size := frame.get_size()
-	var composed := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
-	var inner := Rect2i(inset, inset, size.x - inset * 2, size.y - inset * 2)
-	composed.fill_rect(inner, ArtPalette.UI_PANEL_FILL)
-	var grain := texture("g10_grain_mask.png").get_image()
-	grain.decompress()
-	grain.convert(Image.FORMAT_RGBA8)
-	composed.blend_rect(grain, Rect2i(Vector2i.ZERO, inner.size), inner.position)
-	composed.blend_rect(frame, Rect2i(Vector2i.ZERO, size), Vector2i.ZERO)
-	return ImageTexture.create_from_image(composed)
-
-## Yol HUD'unun şeritleriyle dünya arasındaki perçinli kayış (r1): bir
-## kuşak, çerçeve değil. Yazı kayışın üstünde değil - perçinler harflerin
-## arasına giriyor, okunmuyordu (ölçüldü) - kayış yalnızca iki şeridin
-## dünyaya bakan kenarında. Yuvarlak uçları kırpılmış orta parça döşeniyor.
 ## --- Masa çalışma alanı ---
 ## Yönetim ekranlarının arka planı bir masa resmi: kenarlarındaki mum,
 ## mühür, terazi resmin kendisi. Satırlar ekranın bir ucundan öbür ucuna
@@ -398,17 +376,12 @@ static func fit_desk_workspace(root: Control) -> void:
 				(inner as Control).minimum_size_changed.connect(apply)
 	apply.call()
 
-static func strap_rule(height: float) -> TextureRect:
-	var source := texture("r1_strap_top.png").get_image()
-	source.decompress()
-	var middle := source.get_region(Rect2i(STRAP_END_CROP, 0, source.get_width() - STRAP_END_CROP * 2, source.get_height()))
-	var scale := height / float(middle.get_height())
-	middle.resize(maxi(1, int(round(middle.get_width() * scale))), int(round(height)), Image.INTERPOLATE_LANCZOS)
-	var rule := TextureRect.new()
-	rule.texture = ImageTexture.create_from_image(middle)
-	rule.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	rule.stretch_mode = TextureRect.STRETCH_TILE
-	rule.custom_minimum_size = Vector2(0.0, height)
+## Yol HUD'unun şeritleriyle dünya arasındaki ince çizgi. Eski perçinli
+## deri kayışın (R1) yerinde - minimal ailenin çizgisi, panellerle aynı ton.
+static func hud_rule() -> ColorRect:
+	var rule := ColorRect.new()
+	rule.color = Color(ArtPalette.GOLD_DIM, 0.8)
+	rule.custom_minimum_size = Vector2(0.0, HUD_RULE_HEIGHT)
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rule
 
@@ -420,28 +393,10 @@ static func _slip() -> StyleBoxTexture:
 
 # --- Düğmeler ---
 
-## Kilitli düğme aynı sekme, yalnızca silik (`UI_TINT_DISABLED`'ın
-## yarı saydamlığı) - sebep yanında canlı metin olarak kalıyor (Event
-## Engine Rules: *sebebiyle* kilitli, asla gizli değil). Bir süre üstüne
-## defterin karalama işareti de biniyordu; oyuncu testinde güzel
-## görünmediği için kaldırıldı - silik olmak yetiyor.
+## Kilitli düğme aynı kutu, yalnızca silik - sebep yanında canlı metin
+## olarak kalıyor (Event Engine Rules: *sebebiyle* kilitli, asla gizli
+## değil). Karalama yok: oyuncu testinde güzel görünmedi.
 ##
-## **Yalnızca `TabContainer`in kendi sekmelerinde ve `ROW_BUTTON`/
-## `ICON_TAB`'ın taşıdığı ayrı dokularda kalıyor** - oyuncu G4'ün opak deri
-## dokusunu tüm oyunun varsayılan düğmesi (Pazar/Lonca/Taverna/Kervan
-## Avlusu/Kilise/Karakter/Parti/Dünya Haritası - hemen her ekran) olarak
-## reddetti; emir panelinin zaten kurduğu minimal ilkeyi (`_ghost_button`)
-## referans gösterdi. Bkz. `_minimal_button()`.
-static func _tab(tint: Color, content: Array[int] = TAB_CONTENT) -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = texture("g4_tab.png")
-	box.modulate_color = tint
-	_set_margins(box, TAB_SLICE, content)
-	# Orta dilim döşeniyor, gerilmiyor: gerilen deri damarı geniş bir
-	# düğmede yatay çizgilere dönüşüyordu.
-	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
-	return box
-
 ## Oyunun varsayılan düğmesi: çerçeve + hafif dolgu, `_ghost_button()`
 ## (emir paneli) ile aynı ilke - opak bir doku değil, iki çizgi ve bir ton
 ## farkı. `_ghost_button()`'ın kendisi camsı bir HUD şeridinin üstü için
@@ -457,11 +412,8 @@ static func _minimal_button(fill_alpha: float, border: Color) -> StyleBoxFlat:
 	box.bg_color = Color(gold_dim.r, gold_dim.g, gold_dim.b, fill_alpha)
 	box.border_color = border
 	box.set_border_width_all(1)
-	box.set_corner_radius_all(3)
-	# Simetrik dolgu: G4'ün kıvrık kulağının asimetrisi (bkz. TAB_CONTENT'in
-	# kendi notu) burada hiç yok, çünkü doku değil düz bir kutu - "1x"/"–"
-	# gibi tek haneli metinler artık ayrı bir ICON_TAB varyasyonuna muhtaç
-	# kalmadan da merkezde duruyor.
+	box.set_corner_radius_all(FRAME_RADIUS)
+	# Simetrik dolgu: "1x"/"–" gibi tek haneli metinler de merkezde duruyor.
 	box.content_margin_left = 16
 	box.content_margin_right = 16
 	box.content_margin_top = 8
@@ -473,7 +425,7 @@ static func _focus() -> StyleBoxFlat:
 	box.draw_center = false
 	box.border_color = ArtPalette.UI_FOCUS
 	box.set_border_width_all(2)
-	box.set_corner_radius_all(3)
+	box.set_corner_radius_all(FRAME_RADIUS)
 	box.set_expand_margin_all(2)
 	return box
 
@@ -493,32 +445,19 @@ static func _build_buttons(theme: Theme) -> void:
 		theme.set_color("font_disabled_color", type_name, ArtPalette.UI_TEXT_DIM)
 		theme.set_color("font_outline_color", type_name, ArtPalette.UI_TEXT_HALO)
 		theme.set_constant("outline_size", type_name, TEXT_OUTLINE_SIZE)
-	_build_row_buttons(theme)
+	_build_fields(theme)
 	_build_map_labels(theme)
 	_build_hud_ghost_button(theme)
-	_build_icon_tab(theme)
 
-## "1x"/"–"/"+" gibi yol HUD'unun kısa metinli düğmeleri: aynı G4 dokusu,
-## yalnızca `ICON_TAB_CONTENT`in simetrik dolgusuyla - kulağın asimetrisi
-## (bkz. TAB_CONTENT'in kendi yorumu) bir haneli bir metni merkezden 7px
-## kaydırıyordu.
-static func _build_icon_tab(theme: Theme) -> void:
-	theme.set_type_variation(ICON_TAB, "Button")
-	theme.set_stylebox("normal", ICON_TAB, _tab(Color.WHITE, ICON_TAB_CONTENT))
-	theme.set_stylebox("hover", ICON_TAB, _tab(ArtPalette.UI_TINT_HOVER, ICON_TAB_CONTENT))
-	theme.set_stylebox("pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
-	theme.set_stylebox("hover_pressed", ICON_TAB, _tab(ArtPalette.UI_TINT_PRESSED, ICON_TAB_CONTENT))
-	theme.set_stylebox("disabled", ICON_TAB, _tab(ArtPalette.UI_TINT_DISABLED, ICON_TAB_CONTENT))
-
-## Çerçeve + dolgusuz zemin, `_tab()`in opak deri dokusunun aksine - bir
-## cam panelin üstünde okunması gereken tek düğme ailesi. `Button.new()`
-## sonrası `theme_type_variation = HUD_GHOST_BUTTON` ile açılır.
+## Cam bir panelin üstünde okunması gereken düğme ailesi: mürekkep tabanlı,
+## çok düşük alfalı dolgu. `Button.new()` sonrası
+## `theme_type_variation = HUD_GHOST_BUTTON` ile açılır.
 static func _ghost_button(fill_alpha: float, border: Color) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(ArtPalette.INK.r, ArtPalette.INK.g, ArtPalette.INK.b, fill_alpha)
 	box.border_color = border
 	box.set_border_width_all(1)
-	box.set_corner_radius_all(3)
+	box.set_corner_radius_all(FRAME_RADIUS)
 	box.content_margin_left = 10
 	box.content_margin_right = 10
 	box.content_margin_top = 6
@@ -541,56 +480,21 @@ static func _build_hud_ghost_button(theme: Theme) -> void:
 	theme.set_color("font_outline_color", HUD_GHOST_BUTTON, ArtPalette.UI_TEXT_HALO)
 	theme.set_constant("outline_size", HUD_GHOST_BUTTON, TEXT_OUTLINE_SIZE)
 
-static func row_frame(tint: Color) -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = _row_texture()
-	box.modulate_color = tint
-	box.set_texture_margin_all(ROW_SLICE)
-	_set_content(box, ROW_CONTENT)
-	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
-	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
-	return box
-
-static var _row_cache: Texture2D
-
-## Doldurulmuş cilt (G2 + palet zemini + leke maskesi) sıra ölçeğine
-## küçültülmüş. Kilitlisi aynı doku, yalnızca silik tonla.
-static func _row_texture() -> Texture2D:
-	if _row_cache != null:
-		return _row_cache
-	var image := _filled_frame("g2_binding.png", BINDING_FILL_INSET).get_image()
-	image.resize(
-		int(round(image.get_width() * ROW_SCALE)), int(round(image.get_height() * ROW_SCALE)),
-		Image.INTERPOLATE_LANCZOS
-	)
-	_row_cache = ImageTexture.create_from_image(image)
-	return _row_cache
-
-static func _build_row_buttons(theme: Theme) -> void:
-	theme.set_type_variation(ROW_BUTTON, "Button")
-	theme.set_stylebox("normal", ROW_BUTTON, row_frame(Color.WHITE))
-	theme.set_stylebox("hover", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_HOVER))
-	theme.set_stylebox("pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
-	theme.set_stylebox("hover_pressed", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_PRESSED))
-	theme.set_stylebox("disabled", ROW_BUTTON, row_frame(ArtPalette.UI_TINT_DISABLED))
-
-	# Sayı/yazı alanları (SpinBox'ın içindeki LineEdit dahil) aynı küçük cilt:
-	# motorun siyah giriş kutusu defterin hiçbir parçasına benzemiyordu.
-	var field := row_frame(Color.WHITE)
-	_set_content(field, [12, 4, 12, 4])
-	var field_locked := row_frame(ArtPalette.UI_TINT_DISABLED)
-	_set_content(field_locked, [12, 4, 12, 4])
-	theme.set_stylebox("normal", "LineEdit", field)
+static func _build_fields(theme: Theme) -> void:
+	theme.set_stylebox("normal", "LineEdit", field_frame())
 	theme.set_stylebox("focus", "LineEdit", _focus())
-	theme.set_stylebox("read_only", "LineEdit", field_locked)
+	theme.set_stylebox("read_only", "LineEdit", field_frame(true))
 	theme.set_color("font_color", "LineEdit", ArtPalette.UI_TEXT)
+	theme.set_color("font_uneditable_color", "LineEdit", ArtPalette.UI_TEXT_DIM)
 	theme.set_color("font_outline_color", "LineEdit", ArtPalette.UI_TEXT_HALO)
 	theme.set_constant("outline_size", "LineEdit", TEXT_OUTLINE_SIZE)
 	theme.set_color("caret_color", "LineEdit", ArtPalette.UI_ACCENT)
+	theme.set_color("selection_color", "LineEdit", Color(ArtPalette.GOLD_DIM, 0.5))
 
 	theme.set_type_variation(CELL_PANEL, "PanelContainer")
-	var cell := row_frame(Color.WHITE)
-	_set_content(cell, [8, 6, 8, 6])
+	var cell := field_frame()
+	cell.bg_color = Color(ArtPalette.INK, 0.35)
+	_set_content(cell, CELL_CONTENT)
 	theme.set_stylebox("panel", CELL_PANEL, cell)
 
 static func _build_map_labels(theme: Theme) -> void:
@@ -615,13 +519,16 @@ static func _set_content(box: StyleBox, content: Array) -> void:
 
 # --- Sekmeler ---
 
+## Sekmeler de düğme ailesinden: seçili sekme vurgu çizgisini ve en koyu
+## dolguyu taşıyor, seçili olmayan neredeyse boş bir kutu.
 static func _build_tabs(theme: Theme) -> void:
-	theme.set_stylebox("tab_selected", "TabContainer", _tab(ArtPalette.UI_TINT_HOVER))
-	theme.set_stylebox("tab_hovered", "TabContainer", _tab(Color.WHITE))
-	theme.set_stylebox("tab_unselected", "TabContainer", _tab(ArtPalette.UI_TINT_PRESSED))
-	theme.set_stylebox("tab_disabled", "TabContainer", _tab(ArtPalette.UI_TINT_DISABLED))
+	theme.set_stylebox("tab_selected", "TabContainer", _minimal_button(0.34, ArtPalette.UI_ACCENT))
+	theme.set_stylebox("tab_hovered", "TabContainer", _minimal_button(0.24, ArtPalette.GOLD_DIM))
+	theme.set_stylebox("tab_unselected", "TabContainer", _minimal_button(0.10, ArtPalette.UI_RULE))
+	theme.set_stylebox("tab_disabled", "TabContainer", _minimal_button(0.05, Color(ArtPalette.UI_RULE, 0.3)))
 	theme.set_stylebox("tab_focus", "TabContainer", _focus())
-	theme.set_stylebox("panel", "TabContainer", binding_panel())
+	theme.set_stylebox("panel", "TabContainer", frame_panel())
+	theme.set_constant("side_margin", "TabContainer", 0)
 	theme.set_color("font_selected_color", "TabContainer", ArtPalette.UI_ACCENT)
 	theme.set_color("font_hovered_color", "TabContainer", ArtPalette.UI_TEXT)
 	theme.set_color("font_unselected_color", "TabContainer", ArtPalette.UI_TEXT_DIM)
@@ -642,23 +549,24 @@ static func _build_rules_and_scroll(theme: Theme) -> void:
 	theme.set_stylebox("separator", "HSeparator", rule)
 	theme.set_constant("separation", "HSeparator", 20)
 
-	var ribbon := StyleBoxTexture.new()
-	ribbon.texture = texture("g7_scroll.png")
-	ribbon.texture_margin_top = 14.0
-	ribbon.texture_margin_bottom = 14.0
-	ribbon.content_margin_left = 7.0
-	ribbon.content_margin_right = 7.0
-	var ribbon_hot := ribbon.duplicate() as StyleBoxTexture
-	ribbon_hot.modulate_color = ArtPalette.UI_TINT_HOVER
-	var groove := StyleBoxFlat.new()
-	groove.bg_color = Color(ArtPalette.INK, 0.55)
-	groove.content_margin_left = 7.0
-	groove.content_margin_right = 7.0
-	theme.set_stylebox("grabber", "VScrollBar", ribbon)
-	theme.set_stylebox("grabber_highlight", "VScrollBar", ribbon_hot)
-	theme.set_stylebox("grabber_pressed", "VScrollBar", ribbon_hot)
-	theme.set_stylebox("scroll", "VScrollBar", groove)
-	theme.set_stylebox("scroll_focus", "VScrollBar", groove)
+	# Kaydırma çubuğu da minimal aileden: kurdele dokusu yerine yuvarlak
+	# köşeli ince bir tutamak, mürekkep bir oluğun içinde.
+	var grabber := _scroll_box(Color(ArtPalette.GOLD_DIM, 0.75))
+	var grabber_hot := _scroll_box(ArtPalette.UI_ACCENT)
+	var groove := _scroll_box(Color(ArtPalette.INK, 0.55))
+	for bar in ["VScrollBar", "HScrollBar"]:
+		theme.set_stylebox("grabber", bar, grabber)
+		theme.set_stylebox("grabber_highlight", bar, grabber_hot)
+		theme.set_stylebox("grabber_pressed", bar, grabber_hot)
+		theme.set_stylebox("scroll", bar, groove)
+		theme.set_stylebox("scroll_focus", bar, groove)
+
+static func _scroll_box(colour: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = colour
+	box.set_corner_radius_all(FRAME_RADIUS)
+	box.set_content_margin_all(4.0)
+	return box
 
 # --- İpucu ---
 

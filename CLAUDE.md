@@ -1271,9 +1271,9 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
 
 - **One theme, installed into the engine's default theme.**
   `WaybookTheme` (`scripts/ui/waybook_theme.gd`) builds every chrome style
-  - leather binding (`PanelContainer`/`Panel`), sealed binding
-  (`SealPanel`), index-tab buttons, pinned-slip tooltip (`TooltipPanel`,
-  `SlipPanel`), ink rule (`HSeparator`), ribbon scrollbar - and the
+  - panel (`PanelContainer`/`Panel`), the irreversible-decision panel
+  (`SealPanel`), buttons, tabs, fields, cells, scrollbars, pinned-slip
+  tooltip (`TooltipPanel`, `SlipPanel`), ink rule (`HSeparator`) - and the
   `UiTheme` autoload (first in the autoload list, runs in `_init`)
   merges it into `ThemeDB.get_default_theme()`. Not a project `.tres`: a
   `Control` under a `CanvasLayer` does not inherit its parent's theme, and
@@ -1289,28 +1289,38 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (`WaybookTheme.SEAL_PANEL` for irreversible decisions - the road's event
   card and `SuccessionPanel`; `HUD_BAR` for the road's translucent strips;
   `SLIP_PANEL` + `PAGE_LABEL`/`PAGE_HEADING` for paper with ink text).
-- **Textures are material; colour is still `ArtPalette`.** Leather, brass
-  and paper arrive painted, and that is their only colour. Every decision
-  the UI makes - a panel's inner ground (`UI_PANEL_FILL`), text
-  (`UI_TEXT`/`UI_TEXT_ON_PAGE`), hover/pressed/locked tints, the ink marks
-  (`UI_INK_MARK`, `UI_RULE`) - is a palette role. The panel's inner ground
-  is composed at runtime (fill, then the stain-grain *mask*, then the
-  frame) so no colour is baked into a PNG. Ink marks are recoloured, not
-  modulated: multiplying dark ink can never lighten it, and black ink on
-  dark leather was invisible in the first render.
+- **Controls are one flat family; leather is gone.** Every panel, the
+  sealed panel, button, tab, text/number field, cargo cell and scrollbar
+  is a `StyleBoxFlat` sharing `FRAME_RADIUS` and a thin palette-coloured
+  line - the only difference between tiers is the line's weight and the
+  fill's tone (`SealPanel`: a 2 px `UI_ACCENT` line and a wider pad, so an
+  irreversible choice still reads heavier than a plain panel). The leather
+  chrome (G2 binding, G3 sealed binding, G4 tab, the auto-assigned
+  `RowButton`, `IconTab`, the G7 ribbon scrollbar, R1's studded strap under
+  the HUD) was rejected by the player outright - "deri efektini
+  kullandığın her yer" - after G4 had already been pulled from the default
+  button once. `test_waybook_theme.gd` fails if any control goes back to a
+  texture or if a leather sheet is read or shipped again. Painted material
+  survives only where it is a *picture* (desk scenes, the menu's lineage
+  book, seals, icons), the ink rule and the paper slip.
+- **Colour is still `ArtPalette`.** Every decision the UI makes - a
+  panel's ground (`UI_PANEL_FILL`), text (`UI_TEXT`/`UI_TEXT_ON_PAGE`),
+  hover/pressed/locked fill, the ink marks (`UI_INK_MARK`, `UI_RULE`) - is
+  a palette role. Ink marks are recoloured, not modulated: multiplying dark
+  ink can never lighten it.
+- **A number in a box sits in the middle of the box.** The market's
+  quantity field was left-aligned against its arrows. `SpinBox.alignment`
+  is a node property, not a theme one, so `UiTheme` centres every SpinBox
+  as it enters the tree - the `SceneInk` pattern, no screen remembers.
 - **A locked button is faded, never hidden - and never scratched.** The
-  disabled tab (and row) is the same texture at `UI_TINT_DISABLED`, which
-  carries its own alpha; the reason stays live text beside it (Event
-  Engine Rules). For a while the ledger's scratch-out (G5) was composed
-  over the tab's ear; the player rejected it in playtest ("güzel
-  gözükmüyor, silik olması yeterli"), so it is gone from the theme and
-  from the pipeline's output.
-- **Nine-slice geometry is measured, not guessed.** Slice margins live as
-  constants in `WaybookTheme` and each must contain its corner ornament
-  whole. The sealed frame was painted with a clasp mid-side; stretched it
-  smeared into a bar, tiled it became a row of clasps. The pipeline's
-  `declasp` rebuilds each side from a mirrored plain strip so it tiles
-  seamlessly.
+  disabled button is the same box with a paler fill and line; the reason
+  stays live text beside it (Event Engine Rules). For a while the ledger's
+  scratch-out (G5) was composed over it; the player rejected it in
+  playtest ("güzel gözükmüyor, silik olması yeterli").
+- **Nine-slice geometry is measured, not guessed.** The one nine-slice
+  left in the chrome is the paper slip (`SLIP_SLICE`); its margins must
+  contain the pin and the torn corners whole, and must leave a centre to
+  stretch (`test_waybook_theme.gd` checks it).
 - **Art arrives through one pipeline.** Raw generated sheets live in
   `art_source/waybook/` (a `.gdignore` keeps them out of import and
   export); `python3 tools/waybook_assets.py` keys the flat grey backdrop
@@ -1355,11 +1365,12 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
 - **Goods have one door too** (`WaybookTheme.item_line`/`item_icon`):
   wagon, caravan load and the road's status list all go through it. An
   item without an icon gets a spacer, never a crash or a jagged row.
-- **The road HUD is a dark band edged by a studded belt, never text on
-  leather.** The first pass put the HUD text *on* the R1/R2 straps -
-  measured, the rivets ran through the letters and the vials vanished.
-  The bars stay `HUD_BAR` and `WaybookTheme.strap_rule()` tiles R1's
-  middle between each bar and the world. Gauges are `PulseBar` vials
+- **The road HUD is a dark band edged by a thin rule, never text on
+  a texture.** The first pass put the HUD text *on* the R1/R2 straps -
+  measured, the rivets ran through the letters and the vials vanished;
+  the strap then sat beside the bars until the leather went. The bars stay
+  `HUD_BAR` and `WaybookTheme.hud_rule()` (`HUD_RULE_HEIGHT`, a
+  `GOLD_DIM` line) separates each bar from the world. Gauges are `PulseBar` vials
   (R4 + an R4a-d icon + the number; the name is in the tooltip) whose
   liquid colours are `ArtPalette.UI_GAUGE_*`; the clock has a `TimeDial`
   (R3, sun at noon, stars at midnight); attention and an open road signal
@@ -1375,14 +1386,10 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   `UI_EDGE_COLD` are gone with them. The hunger scorch (G11 scorch) is
   the one edge that survives: the longest hungry streak in the party
   still scorches the frame, coloured from `ArtPalette.UI_EDGE_HUNGER`.
-  The source sheets were painted on a torn paper card; the pipeline cuts
+  The source sheet was painted on a torn paper card; the pipeline cuts
   the card off and ships only the ink as a white mask - as shipped
   first, the card's white border and pale wash covered the scene. The
-  generator only exports JPG, so transparency arrives as a *baked* grey
-  checkerboard - `checker_mask()` keys it by luminance (the ink is far
-  brighter than either square) and cuts JPG ringing below
-  `CHECKER_ALPHA_CUTOFF`, so a new JPG from the same tool can go straight
-  into `art_source/waybook/`. The mask is drawn **whole, stretched over
+  mask is drawn **whole, stretched over
   the screen** (`STRETCH_SCALE`): for one round it was nine-sliced so
   the thickness would not depend on the aspect ratio, and the player
   rejected it - the mask is painted as a whole frame and slicing
@@ -1413,22 +1420,18 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   `SuccessionPanel` shows G9b instead of G9 the moment a non-senior heir
   is selected; confirming stamps the seal (the choice is emitted at once;
   the stamp is only the moment).
-- **A stretched tab is a stripe, not a button.** A `Button` that fills its
-  row (VBox child with `SIZE_FILL`, HBox child with `SIZE_EXPAND`) wears
-  `RowButton` - G2 at `ROW_SCALE` as a nine-slice - and the `UiTheme`
-  autoload assigns it as the node enters the tree (`is_wide_button`), the
-  `SceneInk` pattern: no screen has to remember. Measured: the Caravan
-  Yard's actions and every back button were the G4 tab stretched to
-  1000+ px, its grain turned into horizontal bars. A button that already
-  carries a variation or a stylebox override is left alone. The tab's own
-  middle slice now tiles (`TILE_FIT`) instead of stretching for the same
-  reason. Inputs (`LineEdit`, inside every `SpinBox`) and cargo cells
-  (`CELL_PANEL`) use the same small binding - the engine's black box and
-  the market's green `ColorRect` cells (`PlaceholderHelper`, deleted) were
-  the last unskinned widgets.
+- **A stretched button is still the same button.** For a while a `Button`
+  that filled its row wore `RowButton` (G2 scaled as a nine-slice), because
+  the G4 tab stretched to 1000+ px turned its grain into horizontal bars.
+  With textures gone there is no grain to stretch: a full-width button is
+  the default flat box, and `UiTheme` no longer assigns a variation.
+  Inputs (`LineEdit`, inside every `SpinBox`) are a darker ink well
+  (`field_frame()`), cargo cells (`CELL_PANEL`) the same box a shade
+  lighter - the engine's black box and the market's green `ColorRect` cells
+  (`PlaceholderHelper`, deleted) were the last unskinned widgets.
 - **Bone text always carries a dark halo.** `Label` has a `UI_TEXT_HALO`
   shadow, `Button`/`LineEdit` an outline (`TEXT_OUTLINE_SIZE`), because the
-  scene backgrounds and leather both have pale patches. Paper
+  scene backgrounds have pale patches. Paper
   variations (`PageLabel`, `PageHeading`, tooltips) switch it off - ink on
   paper needs none.
 - **A map is written on, not stuck on.** City markers on the B6 parchment
@@ -1466,9 +1469,10 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   would change art nobody asked to change. Reconcile that drift before
   re-running the whole pipeline.
 - **Nothing painted ships unread.** The Web build downloads every
-  texture, so a sheet the game never draws (G1 page tile, G10 colour
-  tile, R2, R5) is not written by the pipeline at all; the reason stays
-  as a comment in `tools/waybook_assets.py`. Shipped Waybook set: ~7.3 MB.
+  texture, so a sheet the game never draws (G1 page tile, G10 grain, the
+  G2/G3/G4/G7/R1 leather chrome, the G11 bleed and frost edges, R2, R5) is
+  not written by the pipeline at all; the reason stays as a comment in
+  `tools/waybook_assets.py`.
 
 ### Motion Rules
 
@@ -1540,7 +1544,7 @@ gave the game its motion, and every piece of it follows the same few rules.
   hour, not of the palette: the night phase blends toward dawn for nine
   hours, so by 02:00 the palette is already bright (measured).
 - **A button under the cursor answers.** `ButtonFeedback` attaches itself
-  to every button through `UiTheme`'s `node_added` (the `RowButton`
+  to every button through `UiTheme`'s `node_added` (the `SceneInk`
   pattern): hover grows `1+min(3%, 6px/width)` - 3% of a 1000 px row is a
   jump -, press dips to 0.96, release overshoots to 1.02 and settles. It
   only touches `scale` (containers rewrite position, never scale), the

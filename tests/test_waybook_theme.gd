@@ -12,10 +12,12 @@ func suite_name() -> String:
 
 func run(t) -> void:
 	var theme: Theme = load(THEME_PATH).build()
-	_test_chrome_is_textured(t, theme)
+	_test_chrome_is_minimal(t, theme)
 	_test_panel_fill_comes_from_palette(t, theme)
 	_test_locked_button_is_marked(t, theme)
 	_test_nine_slice_leaves_a_centre(t, theme)
+	_test_no_leather_texture_is_read(t)
+	_test_spin_box_number_is_centred(t)
 	_test_no_screen_builds_its_own_panel(t)
 	_test_fx_colours_live_in_the_palette(t)
 	_test_desk_workspace_keeps_the_props(t)
@@ -23,30 +25,78 @@ func run(t) -> void:
 	_test_present_dismiss_is_a_settle_not_a_snap(t)
 	_test_default_button_is_minimal(t, theme)
 
-func _test_chrome_is_textured(t, theme: Theme) -> void:
-	var expected := [
-		["panel", "PanelContainer"], ["panel", "SealPanel"], ["panel", "SlipPanel"],
-		["tab_selected", "TabContainer"], ["separator", "HSeparator"],
-		["grabber", "VScrollBar"], ["panel", "TooltipPanel"],
+## Oyuncu deri dokuları reddetti ("deri efektini kullandığın her yer"):
+## panel, mühür paneli, sekme, giriş alanı, hücre, kaydırma çubuğu ve
+## düğme tek bir düz kutu ailesi. Kâğıt (ipucu fişi) ve mürekkep çizgisi
+## deri değil, dokulu kalıyor.
+func _test_chrome_is_minimal(t, theme: Theme) -> void:
+	var theme_script = load(THEME_PATH)
+	var flat := [
+		["panel", "PanelContainer"], ["panel", "Panel"], ["panel", "SealPanel"],
+		["tab_selected", "TabContainer"], ["tab_unselected", "TabContainer"],
+		["panel", "TabContainer"], ["normal", "LineEdit"], ["read_only", "LineEdit"],
+		["panel", "CellPanel"], ["grabber", "VScrollBar"], ["normal", "Button"],
 	]
-	for pair in expected:
+	for pair in flat:
+		var box := theme.get_stylebox(pair[0], pair[1])
+		t.ok(box is StyleBoxFlat, "%s/%s minimal düz kutu" % [pair[1], pair[0]])
+		if box is StyleBoxFlat:
+			t.eq(
+				(box as StyleBoxFlat).corner_radius_top_left, theme_script.FRAME_RADIUS,
+				"%s/%s ailenin köşe yarıçapını taşıyor" % [pair[1], pair[0]]
+			)
+	for pair in [["panel", "SlipPanel"], ["panel", "TooltipPanel"], ["separator", "HSeparator"]]:
 		var box := theme.get_stylebox(pair[0], pair[1])
 		t.ok(
 			box is StyleBoxTexture and (box as StyleBoxTexture).texture != null,
-			"%s/%s dokulu bir çerçeve" % [pair[1], pair[0]]
+			"%s/%s kâğıt/mürekkep - dokulu kalıyor" % [pair[1], pair[0]]
 		)
+	var panel := theme.get_stylebox("panel", "PanelContainer") as StyleBoxFlat
+	var seal := theme.get_stylebox("panel", "SealPanel") as StyleBoxFlat
+	t.ok(seal.border_width_left > panel.border_width_left, "geri alınamaz kararın paneli daha kalın çizgili")
 	t.ok(theme.is_type_variation("SealPanel", "PanelContainer"), "SealPanel bir PanelContainer çeşidi")
-	t.ok(load(THEME_PATH).get_font() != null, "kitap yüzü yükleniyor")
+	t.ok(not theme.has_stylebox("normal", "RowButton"), "tam genişlik düğme ayrı bir deri çeşidi taşımıyor")
+	t.ok(not theme.has_stylebox("normal", "IconTab"), "HUD simge düğmesi ayrı bir deri çeşidi taşımıyor")
+	t.ok(theme_script.get_font() != null, "kitap yüzü yükleniyor")
 
-## Panelin iç zemini bir PNG'ye gömülü değil, paletten boyanıyor: ortadaki
-## piksel UI_PANEL_FILL'e (üstündeki leke tanesi payıyla) eşit olmalı.
+## Panelin zemini paletten: UI_PANEL_FILL.
 func _test_panel_fill_comes_from_palette(t, theme: Theme) -> void:
-	var box := theme.get_stylebox("panel", "PanelContainer") as StyleBoxTexture
-	var image := box.texture.get_image()
-	var centre := image.get_pixel(image.get_width() / 2, image.get_height() / 2)
-	var fill := ArtPalette.UI_PANEL_FILL
-	var distance := absf(centre.r - fill.r) + absf(centre.g - fill.g) + absf(centre.b - fill.b)
-	t.le(distance, 0.12, "panelin iç zemini ArtPalette.UI_PANEL_FILL")
+	var box := theme.get_stylebox("panel", "PanelContainer") as StyleBoxFlat
+	t.eq(box.bg_color, ArtPalette.UI_PANEL_FILL, "panelin zemini ArtPalette.UI_PANEL_FILL")
+
+## Deri sayfaları (G2 cilt, G3 mühürlü cilt, G4 sekme, G7 kurdele, G10
+## leke, R1 kayış) ne tema tarafından okunuyor ne sevk ediliyor - biri geri
+## gelirse Web yüklemesine boşuna bir doku ekler.
+func _test_no_leather_texture_is_read(t) -> void:
+	var leather := ["g2_binding", "g3_seal.png", "g4_tab", "g7_scroll", "g10_grain", "r1_strap"]
+	var sources := [THEME_PATH, "res://scripts/ui/road_journey.gd", "res://scripts/autoload/ui_theme.gd"]
+	for path in sources:
+		var text := FileAccess.get_file_as_string(path)
+		for name in leather:
+			t.ok(not text.contains(name), "%s deri dokusu %s okumuyor" % [path.get_file(), name])
+	for name in leather:
+		var file_name: String = name if name.ends_with(".png") else name + ".png"
+		if name == "g10_grain":
+			file_name = "g10_grain_mask.png"
+		elif name == "r1_strap":
+			file_name = "r1_strap_top.png"
+		t.ok(
+			not FileAccess.file_exists(load(THEME_PATH).ART_DIR + file_name),
+			"%s sevk edilmiyor" % file_name
+		)
+
+## Sayı kutusundaki sayı ortada (pazarın miktar kutusu ilk istekti; aynı
+## kapıdan her SpinBox). `SpinBox.alignment` tema özelliği değil, düğüm
+## ağaca girerken UiTheme veriyor - autoload `--script` kipinde canlı
+## olmadığı için kapı burada elle çağrılıyor.
+func _test_spin_box_number_is_centred(t) -> void:
+	var ui_theme: Node = load("res://scripts/autoload/ui_theme.gd").new()
+	var spin := SpinBox.new()
+	t.ne(spin.alignment, HORIZONTAL_ALIGNMENT_CENTER, "varsayılan SpinBox sola dayalı başlıyor")
+	ui_theme._on_node_added(spin)
+	t.eq(spin.alignment, HORIZONTAL_ALIGNMENT_CENTER, "UiTheme SpinBox'ın sayısını ortalıyor")
+	spin.free()
+	ui_theme.free()
 
 ## "Disabled with its reason": kilitli düğme çerçevesini/köşesini kaybetmiyor
 ## (aynı aile - `_minimal_button`), yalnızca dolgusu ve çerçevesi soluyor -
@@ -87,9 +137,9 @@ func _contrast_ratio(a: Color, b: Color) -> float:
 	return maxf(l1, l2) / minf(l1, l2)
 
 ## Kenar payları dokunun yarısını geçerse ortada esneyecek bir bölge kalmaz
-## ve Godot çerçeveyi bozuk çizer.
+## ve Godot çerçeveyi bozuk çizer. Dokulu kalan tek çerçeve kâğıt fiş.
 func _test_nine_slice_leaves_a_centre(t, theme: Theme) -> void:
-	for pair in [["panel", "PanelContainer"], ["panel", "SealPanel"], ["tab_selected", "TabContainer"], ["panel", "SlipPanel"]]:
+	for pair in [["panel", "SlipPanel"]]:
 		var box := theme.get_stylebox(pair[0], pair[1]) as StyleBoxTexture
 		var size := box.texture.get_size()
 		t.ok(
@@ -123,8 +173,6 @@ func _test_fx_colours_live_in_the_palette(t) -> void:
 	regex.compile("const FLASH_\\w+\\s*:\\s*Color")
 	t.eq(regex.search(file.get_as_text()), null, "parlama rengi yalnızca ArtPalette'te")
 
-## Don kenarı yalnızca soğukta: yaz bozkırında hiç görünmez, kışın görünür,
-## dağ kışı en koyusu ama tavanı aşmaz.
 ## Uyarı turuncusu (planlayıcı/borç paneli/şehir brifingi) panel zemininde
 ## WCAG AA'yı geçmeli - defect matrix'in ölçtüğü eski `.modulate` hatası
 ## (2.4-3.7:1) bir daha sessizce geri gelmesin diye.
@@ -185,32 +233,18 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 		var source := FileAccess.get_file_as_string("res://scripts/ui/%s.gd" % screen)
 		t.ok(source.contains("fit_desk_workspace"), "%s masa sütununu kullanıyor" % screen)
 
-## Oyuncu G4'ün opak deri dokusunu oyunun *varsayılan* düğmesi olarak
-## reddetti (bkz. WaybookTheme._tab()'ın kendi notu) - emir panelinin
-## minimal ilkesi (`_ghost_button`) artık her ekranın düğmesi. Ama sekme
-## (TabContainer), tam genişlikte sıra düğmesi (RowButton) ve HUD simge
-## düğmesi (IconTab) kasıtlı olarak G4'te kaldı - farklı, ayrı üsluplar,
-## bu değişikliğin kapsamı dışında. Bu test her iki ailenin de doğru
-## dokuda kalmasını kilitliyor; biri yanlışlıkla ötekine kayarsa (ya da
-## bir "hepsini minimal yap" refactor'ü sekmeleri de sürüklerse) burada
-## kırılır.
+## Varsayılan düğme minimal: çerçeve + hafif dolgu, üstüne gelince ve
+## basılınca dolgu koyulaşıyor.
 func _test_default_button_is_minimal(t, theme: Theme) -> void:
 	for type_name in ["Button", "OptionButton", "MenuButton"]:
 		var normal := theme.get_stylebox("normal", type_name)
-		t.ok(normal is StyleBoxFlat, "%s artık G4 dokusu değil, düz kutu" % type_name)
+		t.ok(normal is StyleBoxFlat, "%s düz kutu" % type_name)
 	var normal := theme.get_stylebox("normal", "Button") as StyleBoxFlat
 	var hover := theme.get_stylebox("hover", "Button") as StyleBoxFlat
 	var pressed := theme.get_stylebox("pressed", "Button") as StyleBoxFlat
 	t.ok(hover.bg_color.a > normal.bg_color.a, "üstüne gelince dolgu artıyor")
 	t.ok(pressed.bg_color.a > hover.bg_color.a, "basılınca dolgu daha da artıyor")
 	t.ok(normal.border_width_left > 0, "minimal düğme yine de bir çerçeve taşıyor")
-	# Kasıtlı olarak G4'te kalan aileler: sekme, sıra düğmesi, HUD simgesi.
-	t.ok(
-		theme.get_stylebox("tab_selected", "TabContainer") is StyleBoxTexture,
-		"sekmeler kasıtlı olarak G4'te kaldı"
-	)
-	var theme_script = load(THEME_PATH)
-	var row := theme.get_stylebox("normal", theme_script.ROW_BUTTON)
-	t.ok(row is StyleBoxTexture, "tam genişlik sıra düğmesi (RowButton) kasıtlı olarak dokulu kaldı")
-	var icon_tab := theme.get_stylebox("normal", theme_script.ICON_TAB)
-	t.ok(icon_tab is StyleBoxTexture, "HUD simge düğmesi (IconTab) kasıtlı olarak dokulu kaldı")
+	var selected := theme.get_stylebox("tab_selected", "TabContainer") as StyleBoxFlat
+	var unselected := theme.get_stylebox("tab_unselected", "TabContainer") as StyleBoxFlat
+	t.ok(selected.bg_color.a > unselected.bg_color.a, "seçili sekme seçili olmayandan koyu")
