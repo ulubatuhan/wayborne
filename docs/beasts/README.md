@@ -40,8 +40,11 @@ araç resmi pozun kutusuna oturtuyor. Arka planı kaldırıp PNG olarak ver:
 python3 tools/beast_cut.py whole at.png horse
 ```
 
-Takım (eyer, dizgin, boyunduruk) kendi başına oturtulamaz. Hayvanın resmiyle
-**aynı tuvale**, aynı yere çizilmeli (1536×1024):
+Oyundaki her at binicili, her öküz arabaya koşulu. Bu yüzden eyer, dizgin
+ve boyunduruk hayvanın kendi resminde çiziliyor. Hazır promptlar
+`docs/gemini-prompts-animals.md` içinde. Ayrı bir takım katmanı ileride
+gerekirse kendi başına oturtulamaz. Hayvanın resmiyle **aynı tuvale**, aynı
+yere çizilmeli (1536×1024):
 
 ```
 python3 tools/beast_cut.py whole eyer.png horse_tack --species horse --no-fit
