@@ -410,10 +410,15 @@ func _draw_slung_weapon(shoulder: Vector2, h: float, metal: Color, trim: Color) 
 # --- Dört ayaklı ---
 
 ## At ve öküz aynı iskeleti paylaşıyor: dört bacak, gövde, boyun, baş.
-## Fark hacim, renk ve boynuz/yal.
+## Fark hacim, renk ve boynuz/yal. Türün resmi geldiyse (`BeastRig`) hayvan
+## iskeletten sprite'larla çiziliyor; aşağıdaki prosedürel çizim resmi henüz
+## gelmemiş türün.
 ##
 ## Sırtın y'sini döndürüyor: atlı figür biniciyi oraya oturtuyor.
 func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool) -> float:
+	var species := BeastRig.HORSE if is_horse else BeastRig.OX
+	if BeastRig.has_sprites(species):
+		return _draw_beast_sprites(species, figure_h)
 	var h := figure_h
 	var ground_y := size.y
 	var cx := size.x * 0.5
@@ -547,6 +552,16 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 			)
 
 	return back_y + bob
+
+## Resmi gelmiş tür iskeletten (`BeastRig`) çiziliyor; biniciyi eyere
+## oturtan y yine iskeletten geliyor, tahminden değil.
+func _draw_beast_sprites(species: String, h: float) -> float:
+	var ground := Vector2(size.x * 0.5, size.y)
+	var joints := BeastRig.pose(species, ground, h, _phase, _motion, _facing)
+	var span := h * float(BeastRig.spec_of(species).span)
+	ArtDraw.ellipse(self, ground, Vector2(span * 0.75, h * 0.030), Color(0.0, 0.0, 0.0, 0.24))
+	BeastRig.draw_sprites(self, species, joints, h, _facing, _tint)
+	return (joints.saddle as Vector2).y
 
 func _draw_quad_leg(
 	shoulder: Vector2, ground_y: float, h: float, phase: float, color: Color

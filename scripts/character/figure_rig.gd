@@ -224,14 +224,15 @@ static func part_rest_vector(part: String) -> Vector2:
 
 ## Parçanın PNG uzayından dünya uzayına dönüşüm. PNG'deki `pivot` A
 ## eklemine oturuyor, dinlenme yönü (`rest_vector`) kemiğin o anki yönüne
-## dönüyor, ölçek `h / REF_H`. Sola bakan figürde parça aynalanıyor - rig
-## zaten eklemleri aynalıyor, sprite da onunla aynalanmalı.
+## dönüyor, ölçek `h / ref_h` (hayvan iskeleti kendi `REF_H`'ını veriyor).
+## Sola bakan figürde parça aynalanıyor - rig zaten eklemleri aynalıyor,
+## sprite da onunla aynalanmalı.
 static func part_transform(
 	pivot: Vector2, rest_vector: Vector2, a_world: Vector2, b_world: Vector2,
-	h: float, facing: float
+	h: float, facing: float, ref_h: float = REF_H
 ) -> Transform2D:
 	var mirror := 1.0 if facing >= 0.0 else -1.0
-	var scale := h / REF_H
+	var scale := h / ref_h
 	var rest_m := Vector2(rest_vector.x * mirror, rest_vector.y)
 	var theta := 0.0
 	if (b_world - a_world).length() > 0.0001 and rest_m.length() > 0.0001:

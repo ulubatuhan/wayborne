@@ -808,7 +808,7 @@ Each message: `Aspect ratio 16:9.` + the SCENE line.
 ## E. Standalone props
 
 - **Aspect ratio:** 1:1 unless noted. **Generate at:** 1024×1024.
-- **Output:** **PNG with the background removed** (except E-b6, see note).
+- **Output:** **PNG with the background removed** (for E-b6 the torn page edge stays, only the surround goes).
 - Style: paste **STYLE-C** first, but replace its first bullet with
   *"One object, centred, filling about 80% of the square, painted with
   more detail than an icon (it is shown large)."*

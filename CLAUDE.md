@@ -219,6 +219,8 @@ wayborne/
   - `FigureRig` / `Wardrobe`: the skeleton every person is drawn on and the
     sprite parts (clothes, armour, weapons) hung on its bones - see Wardrobe
     & Rig Rules.
+  - `BeastRig`: the four-legged counterpart - horse, ox, wolf, bear, boar on
+    one skeleton, their art found by path the same way.
 
 ### Character & Party Rules
 
@@ -1339,6 +1341,40 @@ in every preview the moment it is equipped.
   part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
   fails if the JSON falls behind the rig, so a template can never describe
   a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
+- **Animals have their own skeleton, and it is one skeleton for five
+  species.** `BeastRig` (horse, ox, wolf, bear, boar) hangs sixteen bones -
+  body, neck, head, tail, and upper/lower/foot for four legs - on the same
+  solver as people (`FigureRig.solve_joint`, `part_transform` with the
+  beast's own `REF_H`); only the `SPECIES` proportions differ, so the artist
+  paints the same nine parts for every animal. The walk is the one
+  `WalkFigure` always had (four beats, same stride and lift), and the
+  forelimb's knee bends forward while the hind hock bends back - bending
+  both forward is the four-legged version of the chicken-knee bug
+  (`test_beast_rig` asserts both, for both facings).
+- **A species switches to art only when its body has art.**
+  `BeastRig.has_sprites()` reads `beasts/<species>/body.png`; without it the
+  animal stays the procedural one (`WalkFigure._draw_quadruped`,
+  `CombatFigure._draw_beast`), so art can land one species at a time and a
+  head alone is never glued onto a procedural body. The rider still sits on
+  the skeleton's own `saddle` joint, never on a guessed height. Layers drawn
+  over a species (`horse_tack`, `ox_yoke`) are listed in `SPECIES.layers`
+  and used only when they have art. A combat beast is fitted into its slot
+  by the rest pose's `extent()` and scaled by the archetype's `bulk`, so a
+  bear still fills the slot and a wolf does not; `CombatFigure` hands its
+  frame's lunge/shake/fall transform in as `base`, so a sprite animal
+  recoils and falls exactly like a procedural one.
+- **An animal is painted whole, then cut.** Nine disjoint parts aligned to
+  joint markers is not something an image model does reliably; one side
+  view is. `BeastRig.PAINT_PHASE` is a mid-stride pose with all four legs
+  apart (in the rest pose the far leg hides exactly behind the near one, so
+  it could never be cut out), `docs/beasts/<species>_pose_reference.jpg` is
+  that pose, and `tools/beast_cut.py whole` fits a painting onto it by its
+  bounding box, gives every pixel to the nearest bone's grown mannequin
+  region (nearer bones win overlaps, the tail beats the rump), keeps
+  `OVERLAP_PX` of each neighbour so a bent joint shows fur rather than a
+  gap, and unrotates each piece into its part canvas - far legs as
+  `<part>_far.png`. The part-sheet route (`beast_cut.py sheet`) stays for
+  precise work. Workflow: `docs/beasts/README.md`.
 
 ### Waybook UI Rules
 
