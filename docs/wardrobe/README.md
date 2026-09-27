@@ -42,6 +42,8 @@ Kurallar: yandan görünüş, sağa bakıyor; kalem mankenin üstünde onun öl�
 ışık sol üstten; çizim tuvalin dışına taşmıyor; arka plan şeffaf (Gemini JPG
 verir - arka planı sen kaldırıyorsun).
 
+Her kalem için hazır Gemini promptu: `docs/gemini-prompts.md`, B bölümü.
+
 ## Ekleme
 
 Parça sayfası (hücreleri doldurulmuş, arka planı kaldırılmış PNG):
