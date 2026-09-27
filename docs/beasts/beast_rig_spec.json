@@ -1,0 +1,1424 @@
+{
+  "bones": {
+    "body": {
+      "a": "hip_top",
+      "b": "shoulder_top",
+      "far": false,
+      "part": "body"
+    },
+    "fore_far_foot": {
+      "a": "fore_far_foot",
+      "b": "fore_far_toe",
+      "far": true,
+      "part": "foot"
+    },
+    "fore_far_lower": {
+      "a": "fore_far_knee",
+      "b": "fore_far_foot",
+      "far": true,
+      "part": "fore_lower"
+    },
+    "fore_far_upper": {
+      "a": "fore_far_root",
+      "b": "fore_far_knee",
+      "far": true,
+      "part": "fore_upper"
+    },
+    "fore_near_foot": {
+      "a": "fore_near_foot",
+      "b": "fore_near_toe",
+      "far": false,
+      "part": "foot"
+    },
+    "fore_near_lower": {
+      "a": "fore_near_knee",
+      "b": "fore_near_foot",
+      "far": false,
+      "part": "fore_lower"
+    },
+    "fore_near_upper": {
+      "a": "fore_near_root",
+      "b": "fore_near_knee",
+      "far": false,
+      "part": "fore_upper"
+    },
+    "head": {
+      "a": "poll",
+      "b": "muzzle",
+      "far": false,
+      "part": "head"
+    },
+    "hind_far_foot": {
+      "a": "hind_far_foot",
+      "b": "hind_far_toe",
+      "far": true,
+      "part": "foot"
+    },
+    "hind_far_lower": {
+      "a": "hind_far_knee",
+      "b": "hind_far_foot",
+      "far": true,
+      "part": "hind_lower"
+    },
+    "hind_far_upper": {
+      "a": "hind_far_root",
+      "b": "hind_far_knee",
+      "far": true,
+      "part": "hind_upper"
+    },
+    "hind_near_foot": {
+      "a": "hind_near_foot",
+      "b": "hind_near_toe",
+      "far": false,
+      "part": "foot"
+    },
+    "hind_near_lower": {
+      "a": "hind_near_knee",
+      "b": "hind_near_foot",
+      "far": false,
+      "part": "hind_lower"
+    },
+    "hind_near_upper": {
+      "a": "hind_near_root",
+      "b": "hind_near_knee",
+      "far": false,
+      "part": "hind_upper"
+    },
+    "neck": {
+      "a": "neck_base",
+      "b": "poll",
+      "far": false,
+      "part": "neck"
+    },
+    "tail": {
+      "a": "tail_root",
+      "b": "tail_tip",
+      "far": false,
+      "part": "tail"
+    }
+  },
+  "cell": [
+    384,
+    256
+  ],
+  "draw_order": [
+    "hind_far_upper",
+    "hind_far_lower",
+    "hind_far_foot",
+    "fore_far_upper",
+    "fore_far_lower",
+    "fore_far_foot",
+    "tail",
+    "body",
+    "hind_near_upper",
+    "hind_near_lower",
+    "hind_near_foot",
+    "fore_near_upper",
+    "fore_near_lower",
+    "fore_near_foot",
+    "neck",
+    "head"
+  ],
+  "part_order": [
+    "body",
+    "neck",
+    "head",
+    "tail",
+    "fore_upper",
+    "fore_lower",
+    "hind_upper",
+    "hind_lower",
+    "foot"
+  ],
+  "parts": {
+    "body": {
+      "canvas": [
+        384,
+        224
+      ],
+      "pivot": [
+        80,
+        72
+      ]
+    },
+    "foot": {
+      "canvas": [
+        128,
+        96
+      ],
+      "pivot": [
+        40,
+        72
+      ]
+    },
+    "fore_lower": {
+      "canvas": [
+        128,
+        192
+      ],
+      "pivot": [
+        64,
+        24
+      ]
+    },
+    "fore_upper": {
+      "canvas": [
+        128,
+        192
+      ],
+      "pivot": [
+        64,
+        32
+      ]
+    },
+    "head": {
+      "canvas": [
+        224,
+        192
+      ],
+      "pivot": [
+        56,
+        72
+      ]
+    },
+    "hind_lower": {
+      "canvas": [
+        128,
+        192
+      ],
+      "pivot": [
+        64,
+        24
+      ]
+    },
+    "hind_upper": {
+      "canvas": [
+        160,
+        192
+      ],
+      "pivot": [
+        80,
+        40
+      ]
+    },
+    "neck": {
+      "canvas": [
+        224,
+        224
+      ],
+      "pivot": [
+        56,
+        150
+      ]
+    },
+    "tail": {
+      "canvas": [
+        192,
+        224
+      ],
+      "pivot": [
+        136,
+        40
+      ]
+    }
+  },
+  "ref_h": 256,
+  "species": {
+    "bear": {
+      "ends": {
+        "body": [
+          238.72,
+          72
+        ],
+        "foot": [
+          60.48,
+          72
+        ],
+        "fore_lower": [
+          43.51,
+          87.33
+        ],
+        "fore_upper": [
+          84.49,
+          96.67
+        ],
+        "head": [
+          96.96,
+          84.8
+        ],
+        "hind_lower": [
+          83.67,
+          84.79
+        ],
+        "hind_upper": [
+          60.33,
+          102.09
+        ],
+        "neck": [
+          91.84,
+          150
+        ],
+        "tail": [
+          123.2,
+          47.68
+        ]
+      },
+      "layers": [],
+      "paint_joints": {
+        "fore_far_foot": [
+          102.89,
+          0
+        ],
+        "fore_far_knee": [
+          107.14,
+          -64.82
+        ],
+        "fore_far_root": [
+          79.36,
+          -124.93
+        ],
+        "fore_far_toe": [
+          123.37,
+          0
+        ],
+        "fore_near_foot": [
+          55.83,
+          -9.96
+        ],
+        "fore_near_knee": [
+          96.16,
+          -60.88
+        ],
+        "fore_near_root": [
+          79.36,
+          -124.93
+        ],
+        "fore_near_toe": [
+          76.31,
+          -9.96
+        ],
+        "hind_far_foot": [
+          -102.89,
+          0
+        ],
+        "hind_far_knee": [
+          -106.11,
+          -62.22
+        ],
+        "hind_far_root": [
+          -79.36,
+          -119.81
+        ],
+        "hind_far_toe": [
+          -82.41,
+          0
+        ],
+        "hind_near_foot": [
+          -55.83,
+          -9.96
+        ],
+        "hind_near_knee": [
+          -95.13,
+          -58.3
+        ],
+        "hind_near_root": [
+          -79.36,
+          -119.81
+        ],
+        "hind_near_toe": [
+          -35.35,
+          -9.96
+        ],
+        "hip_top": [
+          -79.36,
+          -145.41
+        ],
+        "muzzle": [
+          166.4,
+          -127.49
+        ],
+        "neck_base": [
+          89.6,
+          -140.29
+        ],
+        "poll": [
+          125.44,
+          -140.29
+        ],
+        "saddle": [
+          0,
+          -145.41
+        ],
+        "shoulder_top": [
+          79.36,
+          -145.41
+        ],
+        "tail_root": [
+          -102.4,
+          -130.05
+        ],
+        "tail_tip": [
+          -115.2,
+          -118.75
+        ]
+      },
+      "rest_joints": {
+        "fore_far_foot": [
+          79.36,
+          0
+        ],
+        "fore_far_knee": [
+          99.85,
+          -63.33
+        ],
+        "fore_far_root": [
+          79.36,
+          -128
+        ],
+        "fore_far_toe": [
+          99.84,
+          0
+        ],
+        "fore_near_foot": [
+          79.36,
+          0
+        ],
+        "fore_near_knee": [
+          99.85,
+          -63.33
+        ],
+        "fore_near_root": [
+          79.36,
+          -128
+        ],
+        "fore_near_toe": [
+          99.84,
+          0
+        ],
+        "hind_far_foot": [
+          -79.36,
+          0
+        ],
+        "hind_far_knee": [
+          -99.03,
+          -60.79
+        ],
+        "hind_far_root": [
+          -79.36,
+          -122.88
+        ],
+        "hind_far_toe": [
+          -58.88,
+          0
+        ],
+        "hind_near_foot": [
+          -79.36,
+          0
+        ],
+        "hind_near_knee": [
+          -99.03,
+          -60.79
+        ],
+        "hind_near_root": [
+          -79.36,
+          -122.88
+        ],
+        "hind_near_toe": [
+          -58.88,
+          0
+        ],
+        "hip_top": [
+          -79.36,
+          -148.48
+        ],
+        "muzzle": [
+          166.4,
+          -130.56
+        ],
+        "neck_base": [
+          89.6,
+          -143.36
+        ],
+        "poll": [
+          125.44,
+          -143.36
+        ],
+        "saddle": [
+          0,
+          -148.48
+        ],
+        "shoulder_top": [
+          79.36,
+          -148.48
+        ],
+        "tail_root": [
+          -102.4,
+          -133.12
+        ],
+        "tail_tip": [
+          -115.2,
+          -125.44
+        ]
+      }
+    },
+    "boar": {
+      "ends": {
+        "body": [
+          228.48,
+          72
+        ],
+        "foot": [
+          52.8,
+          72
+        ],
+        "fore_lower": [
+          40.54,
+          75.2
+        ],
+        "fore_upper": [
+          87.46,
+          83.2
+        ],
+        "head": [
+          99.52,
+          92.48
+        ],
+        "hind_lower": [
+          86.88,
+          73.92
+        ],
+        "hind_upper": [
+          57.12,
+          89.92
+        ],
+        "neck": [
+          81.6,
+          160.24
+        ],
+        "tail": [
+          120.64,
+          65.6
+        ]
+      },
+      "layers": [],
+      "paint_joints": {
+        "fore_far_foot": [
+          97.77,
+          0
+        ],
+        "fore_far_knee": [
+          104.96,
+          -54.16
+        ],
+        "fore_far_root": [
+          74.24,
+          -99.33
+        ],
+        "fore_far_toe": [
+          110.57,
+          0
+        ],
+        "fore_near_foot": [
+          50.71,
+          -9.96
+        ],
+        "fore_near_knee": [
+          90.65,
+          -47.22
+        ],
+        "fore_near_root": [
+          74.24,
+          -99.33
+        ],
+        "fore_near_toe": [
+          63.51,
+          -9.96
+        ],
+        "hind_far_foot": [
+          -97.77,
+          0
+        ],
+        "hind_far_knee": [
+          -104.27,
+          -52.82
+        ],
+        "hind_far_root": [
+          -74.24,
+          -96.77
+        ],
+        "hind_far_toe": [
+          -84.97,
+          0
+        ],
+        "hind_near_foot": [
+          -50.71,
+          -9.96
+        ],
+        "hind_near_knee": [
+          -89.94,
+          -45.92
+        ],
+        "hind_near_root": [
+          -74.24,
+          -96.77
+        ],
+        "hind_near_toe": [
+          -37.91,
+          -9.96
+        ],
+        "hip_top": [
+          -74.24,
+          -114.69
+        ],
+        "muzzle": [
+          153.6,
+          -78.85
+        ],
+        "neck_base": [
+          84.48,
+          -109.57
+        ],
+        "poll": [
+          110.08,
+          -99.33
+        ],
+        "saddle": [
+          0,
+          -114.69
+        ],
+        "shoulder_top": [
+          74.24,
+          -114.69
+        ],
+        "tail_root": [
+          -97.28,
+          -99.33
+        ],
+        "tail_tip": [
+          -112.64,
+          -70.11
+        ]
+      },
+      "rest_joints": {
+        "fore_far_foot": [
+          74.24,
+          0
+        ],
+        "fore_far_knee": [
+          97.7,
+          -51.2
+        ],
+        "fore_far_root": [
+          74.24,
+          -102.4
+        ],
+        "fore_far_toe": [
+          87.04,
+          0
+        ],
+        "fore_near_foot": [
+          74.24,
+          0
+        ],
+        "fore_near_knee": [
+          97.7,
+          -51.2
+        ],
+        "fore_near_root": [
+          74.24,
+          -102.4
+        ],
+        "fore_near_toe": [
+          87.04,
+          0
+        ],
+        "hind_far_foot": [
+          -74.24,
+          0
+        ],
+        "hind_far_knee": [
+          -97.12,
+          -49.92
+        ],
+        "hind_far_root": [
+          -74.24,
+          -99.84
+        ],
+        "hind_far_toe": [
+          -61.44,
+          0
+        ],
+        "hind_near_foot": [
+          -74.24,
+          0
+        ],
+        "hind_near_knee": [
+          -97.12,
+          -49.92
+        ],
+        "hind_near_root": [
+          -74.24,
+          -99.84
+        ],
+        "hind_near_toe": [
+          -61.44,
+          0
+        ],
+        "hip_top": [
+          -74.24,
+          -117.76
+        ],
+        "muzzle": [
+          153.6,
+          -81.92
+        ],
+        "neck_base": [
+          84.48,
+          -112.64
+        ],
+        "poll": [
+          110.08,
+          -102.4
+        ],
+        "saddle": [
+          0,
+          -117.76
+        ],
+        "shoulder_top": [
+          74.24,
+          -117.76
+        ],
+        "tail_root": [
+          -97.28,
+          -102.4
+        ],
+        "tail_tip": [
+          -112.64,
+          -76.8
+        ]
+      }
+    },
+    "horse": {
+      "ends": {
+        "body": [
+          292.48,
+          72
+        ],
+        "foot": [
+          52.8,
+          72
+        ],
+        "fore_lower": [
+          33.72,
+          98.24
+        ],
+        "fore_upper": [
+          94.28,
+          106.24
+        ],
+        "head": [
+          91.84,
+          105.28
+        ],
+        "hind_lower": [
+          93.24,
+          95.68
+        ],
+        "hind_upper": [
+          50.76,
+          111.68
+        ],
+        "neck": [
+          122.56,
+          93.68
+        ],
+        "tail": [
+          110.4,
+          96.32
+        ]
+      },
+      "layers": [
+        "horse_tack"
+      ],
+      "paint_joints": {
+        "fore_far_foot": [
+          129.77,
+          0
+        ],
+        "fore_far_knee": [
+          144.88,
+          -77.05
+        ],
+        "fore_far_root": [
+          106.24,
+          -145.41
+        ],
+        "fore_far_toe": [
+          142.57,
+          0
+        ],
+        "fore_near_foot": [
+          82.71,
+          -9.96
+        ],
+        "fore_near_knee": [
+          131.86,
+          -71.19
+        ],
+        "fore_near_root": [
+          106.24,
+          -145.41
+        ],
+        "fore_near_toe": [
+          95.51,
+          -9.96
+        ],
+        "hind_far_foot": [
+          -129.77,
+          0
+        ],
+        "hind_far_knee": [
+          -143.73,
+          -74.46
+        ],
+        "hind_far_root": [
+          -106.24,
+          -140.29
+        ],
+        "hind_far_toe": [
+          -116.97,
+          0
+        ],
+        "hind_near_foot": [
+          -82.71,
+          -9.96
+        ],
+        "hind_near_knee": [
+          -130.68,
+          -68.58
+        ],
+        "hind_near_root": [
+          -106.24,
+          -140.29
+        ],
+        "hind_near_toe": [
+          -69.91,
+          -9.96
+        ],
+        "hip_top": [
+          -106.24,
+          -165.89
+        ],
+        "muzzle": [
+          218.88,
+          -183.81
+        ],
+        "neck_base": [
+          116.48,
+          -160.77
+        ],
+        "poll": [
+          183.04,
+          -217.09
+        ],
+        "saddle": [
+          0,
+          -165.89
+        ],
+        "shoulder_top": [
+          106.24,
+          -165.89
+        ],
+        "tail_root": [
+          -129.28,
+          -150.53
+        ],
+        "tail_tip": [
+          -154.88,
+          -90.59
+        ]
+      },
+      "rest_joints": {
+        "fore_far_foot": [
+          106.24,
+          0
+        ],
+        "fore_far_knee": [
+          136.52,
+          -74.24
+        ],
+        "fore_far_root": [
+          106.24,
+          -148.48
+        ],
+        "fore_far_toe": [
+          119.04,
+          0
+        ],
+        "fore_near_foot": [
+          106.24,
+          0
+        ],
+        "fore_near_knee": [
+          136.52,
+          -74.24
+        ],
+        "fore_near_root": [
+          106.24,
+          -148.48
+        ],
+        "fore_near_toe": [
+          119.04,
+          0
+        ],
+        "hind_far_foot": [
+          -106.24,
+          0
+        ],
+        "hind_far_knee": [
+          -135.48,
+          -71.68
+        ],
+        "hind_far_root": [
+          -106.24,
+          -143.36
+        ],
+        "hind_far_toe": [
+          -93.44,
+          0
+        ],
+        "hind_near_foot": [
+          -106.24,
+          0
+        ],
+        "hind_near_knee": [
+          -135.48,
+          -71.68
+        ],
+        "hind_near_root": [
+          -106.24,
+          -143.36
+        ],
+        "hind_near_toe": [
+          -93.44,
+          0
+        ],
+        "hip_top": [
+          -106.24,
+          -168.96
+        ],
+        "muzzle": [
+          218.88,
+          -186.88
+        ],
+        "neck_base": [
+          116.48,
+          -163.84
+        ],
+        "poll": [
+          183.04,
+          -220.16
+        ],
+        "saddle": [
+          0,
+          -168.96
+        ],
+        "shoulder_top": [
+          106.24,
+          -168.96
+        ],
+        "tail_root": [
+          -129.28,
+          -153.6
+        ],
+        "tail_tip": [
+          -154.88,
+          -97.28
+        ]
+      }
+    },
+    "ox": {
+      "ends": {
+        "body": [
+          279.68,
+          72
+        ],
+        "foot": [
+          52.8,
+          72
+        ],
+        "fore_lower": [
+          35.8,
+          93.12
+        ],
+        "fore_upper": [
+          92.2,
+          101.12
+        ],
+        "head": [
+          91.84,
+          105.28
+        ],
+        "hind_lower": [
+          91.15,
+          90.56
+        ],
+        "hind_upper": [
+          52.85,
+          106.56
+        ],
+        "neck": [
+          132.8,
+          180.72
+        ],
+        "tail": [
+          125.76,
+          116.8
+        ]
+      },
+      "layers": [
+        "ox_yoke"
+      ],
+      "paint_joints": {
+        "fore_far_foot": [
+          123.37,
+          0
+        ],
+        "fore_far_knee": [
+          136.17,
+          -71.86
+        ],
+        "fore_far_root": [
+          99.84,
+          -135.17
+        ],
+        "fore_far_toe": [
+          136.17,
+          0
+        ],
+        "fore_near_foot": [
+          76.31,
+          -9.96
+        ],
+        "fore_near_knee": [
+          123.09,
+          -65.98
+        ],
+        "fore_near_root": [
+          99.84,
+          -135.17
+        ],
+        "fore_near_toe": [
+          89.11,
+          -9.96
+        ],
+        "hind_far_foot": [
+          -123.37,
+          0
+        ],
+        "hind_far_knee": [
+          -135,
+          -69.26
+        ],
+        "hind_far_root": [
+          -99.84,
+          -130.05
+        ],
+        "hind_far_toe": [
+          -110.57,
+          0
+        ],
+        "hind_near_foot": [
+          -76.31,
+          -9.96
+        ],
+        "hind_near_knee": [
+          -121.89,
+          -63.37
+        ],
+        "hind_near_root": [
+          -99.84,
+          -130.05
+        ],
+        "hind_near_toe": [
+          -63.51,
+          -9.96
+        ],
+        "hip_top": [
+          -99.84,
+          -155.65
+        ],
+        "muzzle": [
+          222.72,
+          -81.92
+        ],
+        "neck_base": [
+          110.08,
+          -150.53
+        ],
+        "poll": [
+          186.88,
+          -115.2
+        ],
+        "saddle": [
+          0,
+          -155.65
+        ],
+        "shoulder_top": [
+          99.84,
+          -155.65
+        ],
+        "tail_root": [
+          -122.88,
+          -140.29
+        ],
+        "tail_tip": [
+          -133.12,
+          -59.87
+        ]
+      },
+      "rest_joints": {
+        "fore_far_foot": [
+          99.84,
+          0
+        ],
+        "fore_far_knee": [
+          128.04,
+          -69.12
+        ],
+        "fore_far_root": [
+          99.84,
+          -138.24
+        ],
+        "fore_far_toe": [
+          112.64,
+          0
+        ],
+        "fore_near_foot": [
+          99.84,
+          0
+        ],
+        "fore_near_knee": [
+          128.04,
+          -69.12
+        ],
+        "fore_near_root": [
+          99.84,
+          -138.24
+        ],
+        "fore_near_toe": [
+          112.64,
+          0
+        ],
+        "hind_far_foot": [
+          -99.84,
+          0
+        ],
+        "hind_far_knee": [
+          -126.99,
+          -66.56
+        ],
+        "hind_far_root": [
+          -99.84,
+          -133.12
+        ],
+        "hind_far_toe": [
+          -87.04,
+          0
+        ],
+        "hind_near_foot": [
+          -99.84,
+          0
+        ],
+        "hind_near_knee": [
+          -126.99,
+          -66.56
+        ],
+        "hind_near_root": [
+          -99.84,
+          -133.12
+        ],
+        "hind_near_toe": [
+          -87.04,
+          0
+        ],
+        "hip_top": [
+          -99.84,
+          -158.72
+        ],
+        "muzzle": [
+          222.72,
+          -89.6
+        ],
+        "neck_base": [
+          110.08,
+          -153.6
+        ],
+        "poll": [
+          186.88,
+          -122.88
+        ],
+        "saddle": [
+          0,
+          -158.72
+        ],
+        "shoulder_top": [
+          99.84,
+          -158.72
+        ],
+        "tail_root": [
+          -122.88,
+          -143.36
+        ],
+        "tail_tip": [
+          -133.12,
+          -66.56
+        ]
+      }
+    },
+    "wolf": {
+      "ends": {
+        "body": [
+          238.72,
+          72
+        ],
+        "foot": [
+          57.92,
+          72
+        ],
+        "fore_lower": [
+          47.91,
+          80.32
+        ],
+        "fore_upper": [
+          80.09,
+          88.32
+        ],
+        "head": [
+          99.52,
+          79.68
+        ],
+        "hind_lower": [
+          79.36,
+          77.76
+        ],
+        "hind_upper": [
+          64.64,
+          93.76
+        ],
+        "neck": [
+          91.84,
+          134.64
+        ],
+        "tail": [
+          79.68,
+          65.6
+        ]
+      },
+      "layers": [],
+      "paint_joints": {
+        "fore_far_foot": [
+          102.89,
+          0
+        ],
+        "fore_far_knee": [
+          101.21,
+          -56.95
+        ],
+        "fore_far_root": [
+          79.36,
+          -109.57
+        ],
+        "fore_far_toe": [
+          120.81,
+          0
+        ],
+        "fore_near_foot": [
+          55.83,
+          -9.96
+        ],
+        "fore_near_knee": [
+          91.97,
+          -54
+        ],
+        "fore_near_root": [
+          79.36,
+          -109.57
+        ],
+        "fore_near_toe": [
+          73.75,
+          -9.96
+        ],
+        "hind_far_foot": [
+          -102.89,
+          0
+        ],
+        "hind_far_knee": [
+          -100.07,
+          -54.24
+        ],
+        "hind_far_root": [
+          -79.36,
+          -104.45
+        ],
+        "hind_far_toe": [
+          -84.97,
+          0
+        ],
+        "hind_near_foot": [
+          -55.83,
+          -9.96
+        ],
+        "hind_near_knee": [
+          -90.95,
+          -51.39
+        ],
+        "hind_near_root": [
+          -79.36,
+          -104.45
+        ],
+        "hind_near_toe": [
+          -37.91,
+          -9.96
+        ],
+        "hip_top": [
+          -79.36,
+          -124.93
+        ],
+        "muzzle": [
+          168.96,
+          -127.49
+        ],
+        "neck_base": [
+          89.6,
+          -119.81
+        ],
+        "poll": [
+          125.44,
+          -135.17
+        ],
+        "saddle": [
+          0,
+          -124.93
+        ],
+        "shoulder_top": [
+          79.36,
+          -124.93
+        ],
+        "tail_root": [
+          -102.4,
+          -109.57
+        ],
+        "tail_tip": [
+          -158.72,
+          -80.35
+        ]
+      },
+      "rest_joints": {
+        "fore_far_foot": [
+          79.36,
+          0
+        ],
+        "fore_far_knee": [
+          95.45,
+          -56.32
+        ],
+        "fore_far_root": [
+          79.36,
+          -112.64
+        ],
+        "fore_far_toe": [
+          97.28,
+          0
+        ],
+        "fore_near_foot": [
+          79.36,
+          0
+        ],
+        "fore_near_knee": [
+          95.45,
+          -56.32
+        ],
+        "fore_near_root": [
+          79.36,
+          -112.64
+        ],
+        "fore_near_toe": [
+          97.28,
+          0
+        ],
+        "hind_far_foot": [
+          -79.36,
+          0
+        ],
+        "hind_far_knee": [
+          -94.72,
+          -53.76
+        ],
+        "hind_far_root": [
+          -79.36,
+          -107.52
+        ],
+        "hind_far_toe": [
+          -61.44,
+          0
+        ],
+        "hind_near_foot": [
+          -79.36,
+          0
+        ],
+        "hind_near_knee": [
+          -94.72,
+          -53.76
+        ],
+        "hind_near_root": [
+          -79.36,
+          -107.52
+        ],
+        "hind_near_toe": [
+          -61.44,
+          0
+        ],
+        "hip_top": [
+          -79.36,
+          -128
+        ],
+        "muzzle": [
+          168.96,
+          -130.56
+        ],
+        "neck_base": [
+          89.6,
+          -122.88
+        ],
+        "poll": [
+          125.44,
+          -138.24
+        ],
+        "saddle": [
+          0,
+          -128
+        ],
+        "shoulder_top": [
+          79.36,
+          -128
+        ],
+        "tail_root": [
+          -102.4,
+          -112.64
+        ],
+        "tail_tip": [
+          -158.72,
+          -87.04
+        ]
+      }
+    }
+  },
+  "species_order": [
+    "horse",
+    "ox",
+    "wolf",
+    "bear",
+    "boar"
+  ]
+}
