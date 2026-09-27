@@ -216,6 +216,10 @@ wayborne/
     character's `equipped` dict - upgrading a slot automatically returns
     the old piece to the locker.
 
+  - `FigureRig` / `Wardrobe`: the skeleton every person is drawn on and the
+    sprite parts (clothes, armour, weapons) hung on its bones - see Wardrobe
+    & Rig Rules.
+
 ### Character & Party Rules
 
 - **Crew size ≠ combat party.** Crew (chosen in character creation) drives the
@@ -875,8 +879,8 @@ way to textures one screen at a time.
   body outline, so the topline itself humps; the small light ellipse that
   remains sits *inside* the body as a volume cue, which is the one place
   an outline-free shape is right.
-- **A figure that moves needs joints.** `WalkFigure` solves hip → knee →
-  foot with two bones; swinging a single-piece leg reads as scissors. The
+- **A figure that moves needs joints.** `FigureRig` (see Wardrobe & Rig
+  Rules) solves hip → knee → foot with two bones; swinging a single-piece leg reads as scissors. The
   foot stays put while it is on the ground, so the figure does not slide.
   Wheels and walk cycles advance with **distance, not time** - a stationary
   wagon whose wheels turn is the vehicle-shaped version of a sliding
@@ -1262,6 +1266,79 @@ way to textures one screen at a time.
 
 **Structural tests verify layout; they never verify appearance.** That is
 what the screenshot tools are for - see Testing.
+
+### Wardrobe & Rig Rules
+
+People are drawn on a skeleton, and anything a person wears or carries is
+a set of sprite parts hung on its bones. Clothes (`OutfitCatalog`), armour
+and weapons (`EquipmentCatalog`) go through the same door, so a sword
+bought at the Demirci is in the hand on the road, in the hub, in combat and
+in every preview the moment it is equipped.
+
+- **One skeleton, one pose solver: `FigureRig`.** Joints (hip, knee, ankle,
+  toe, shoulder, elbow, hand, fingers, head, weapon tip) come from
+  `FigureRig.pose()` - the walk math `WalkFigure` used to carry inline,
+  moved out so the road figure, the combat figure and the previews cannot
+  disagree about where an elbow is. Fifteen bones, drawn in
+  `FigureRig.DRAW_ORDER` (back arm and back leg behind the torso, front arm
+  in front of it, the held weapon under the front hand so the fingers
+  close over the grip). A seated rider has no back leg.
+- **The knee bends toward the walk.** `_solve_joint` was called with the
+  bend sign reversed for human legs, so every walker had chicken legs - a
+  stick leg hid it, a painted trouser leg would not. `test_wardrobe.gd`
+  asserts the knee side for both facings. The thigh/shin share also came
+  down 0.52 → 0.51, because the rest pose - the pose the art is painted
+  in - read as a crouch.
+- **A part is painted once, at a reference size, in its rest pose.** Each
+  of the nine parts (`FigureRig.PARTS`: head, torso, upper_arm, forearm,
+  hand, thigh, shin, foot, weapon) has a fixed canvas and a pivot pixel at
+  `REF_H` (512) scale. `FigureRig.part_transform()` puts the pivot on the
+  bone's first joint, turns the rest direction onto the bone's current
+  direction and scales by `h / REF_H`; a left-facing figure mirrors the
+  part. Uniform scale, not stretch: the art keeps its proportions and the
+  joints meet because the art was painted on the same mannequin. The back
+  limb reuses the front art darkened (`Wardrobe.BACK_SHADE`) unless a
+  `<part>_back.png` exists.
+- **The held weapon hangs straight at rest and moves a third as far as the
+  forearm** (`WEAPON_SWING_SHARE`). At the full forearm swing the blade
+  swept 60° every step and walking read as fencing (measured on a
+  rendered sheet).
+- **Art is found by path, never listed.**
+  `data/assets/characters/wardrobe/<item_id>/<part>.png`, checked with
+  `ResourceLoader.exists()` (works in the Web export, unlike a directory
+  scan) and falling back to a raw file on disk for art not yet imported.
+  `Wardrobe.loadout_of()` returns the worn items that have art, bottom to
+  top by `Wardrobe.SLOT_LAYERS` (shirt < trousers < shoes < jacket < armour
+  < gloves < amulet < hat < weapon). An item without art stays procedural
+  (colour and head shape through OutfitCatalog's resolvers) - art can land
+  one item at a time. `wardrobe/body/` is the optional skin layer, drawn
+  under everything and tinted by the character's skin tone.
+- **The procedural body is still drawn under the sprites, bone by bone.**
+  `WalkFigure` walks `DRAW_ORDER` and, per bone, draws the procedural limb
+  and then that bone's sprite layers, so depth comes from the skeleton: the
+  back sleeve is behind the torso, the front sleeve in front of it. With
+  no art at all the figure is the one it always was.
+- **Combat switches to the rig only when there is art to show.**
+  `CombatFigure.uses_rig()` is true for a humanoid with a non-empty
+  loadout; it then hosts a standing `WalkFigure` child, driving its
+  position (lunge, shake), rotation (the fall) and a multiplicative state
+  tone (`_state_tone()`: depth, downed, Death's Door, dead). Enemies,
+  beasts and a party with no art keep the silhouette; a unit lying fallen
+  is the procedural pile either way. `CombatUnit` carries `loadout`, `skin`
+  and `height_scale` from the character.
+- **Clothes change after creation too.** The character screen's
+  "Görünüm ve Kuşam" section is a `FigurePreview` (the same `WalkFigure`,
+  standing) beside the six outfit slots; equipment changes below refresh it.
+  Character creation uses the same preview; the block-drawn
+  `OutfitPreview` is gone.
+- **The artist's templates are generated from the rig, not drawn by hand.**
+  `tests/export_rig_spec.gd` writes `docs/wardrobe/rig_spec.json`;
+  `tools/wardrobe_templates.py` draws the per-part templates, the 3×3 part
+  sheet (768×1152) and the rest-pose reference from it;
+  `tools/wardrobe_ingest.py` slices a finished part sheet (or places a lone
+  part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
+  fails if the JSON falls behind the rig, so a template can never describe
+  a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
 
 ### Waybook UI Rules
 

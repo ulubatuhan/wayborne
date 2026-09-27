@@ -1,7 +1,7 @@
 extends RefCounted
 
-## Kıyafet sistemi: OutfitCatalog'un çözümleyicileri (WalkFigure/CombatFigure/
-## OutfitPreview'in üçünün de okuduğu tek mantık) ve kıyafetin karakterden
+## Kıyafet sistemi: OutfitCatalog'un çözümleyicileri (WalkFigure ve
+## CombatFigure'ın ikisinin de okuduğu tek mantık) ve kıyafetin karakterden
 ## savaş birimine doğru taşınması. Bkz. CLAUDE.md Kervan Envanteri Rules'un
 ## yanındaki "kıyafet sisteminin kapsamı" notu - bu paket o notun kapattığı
 ## boşluğu (figürler outfit'e hiç bakmıyordu) kilitliyor.

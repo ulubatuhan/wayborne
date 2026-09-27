@@ -44,7 +44,7 @@ var _start_button: Button
 ## Faz 13 hazırlık notu #14). Her `_refresh()`'te yeni bir önizleme
 ## karakteri kurulduğu için seçimler ekranın kendisinde tutuluyor.
 var _outfit: Dictionary = {}
-var _outfit_preview: OutfitPreview
+var _outfit_preview: FigurePreview
 var _outfit_rows: Array[Dictionary] = []
 
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
@@ -189,8 +189,8 @@ func _build_outfit_section() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
 
-	_outfit_preview = OutfitPreview.new()
-	_outfit_preview.custom_minimum_size = Vector2(120, 220)
+	_outfit_preview = FigurePreview.new()
+	_outfit_preview.custom_minimum_size = Vector2(150, 250)
 	row.add_child(_outfit_preview)
 
 	var slots_column := VBoxContainer.new()
@@ -369,7 +369,12 @@ func _refresh() -> void:
 			value_label.text = tr("UI_CREATE_OUTFIT_NONE")
 		else:
 			value_label.text = OutfitCatalog.get_piece(piece_id).display_name
-	_outfit_preview.setup(preview, _outfit)
+	_outfit_preview.show_look(
+		preview.class_id,
+		clampf(float(preview.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
+		CharacterData.get_skin_tone_color(preview.skin_tone),
+		_outfit, Wardrobe.loadout_of(_outfit, {})
+	)
 
 	_summary_label.text = tr("UI_CREATE_PREVIEW") % [
 		preview.get_summary_line(),

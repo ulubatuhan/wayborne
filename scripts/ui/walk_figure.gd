@@ -9,11 +9,10 @@ extends Control
 ## ama yürürse yalanı hemen anlaşılıyor - hareket eden bir şeyin bacağı
 ## olmalı.
 ##
-## Yürüyüş iki eklemli çözülüyor (kalça → diz → ayak). Tek parça bir bacağı
-## ileri geri sallamak "makas" gibi duruyor, dizi bükmek yürüyüş gibi
-## duruyor; ayak yere basarken geride *kalıyor*, yani figür yerde kaymıyor.
-## Sprite geldiğinde bu dosya bir `AnimatedSprite2D`'ye yer açar, ama
-## arayüz (`set_kind`, `advance`, `set_tint`) aynı kalabilir.
+## İnsan figürünün iskeleti `FigureRig`'de (kalça → diz → ayak iki eklemli
+## çözülüyor; ayak yere basarken geride *kalıyor*, figür yerde kaymıyor).
+## Giysi, zırh ve silah sprite'ları (`Wardrobe`) o iskeletin kemiklerine
+## takılıyor - `set_loadout`. Resmi olmayan kalem prosedürel çizimde kalır.
 ##
 ## Palet `CombatFigure.ARCHETYPES`'ten geliyor: savaşta gördüğün muhafız
 ## yolda da aynı renklerde yürüyor. İki tablo tutmak ikisinin ayrışması
@@ -24,12 +23,6 @@ const KIND_PERSON: String = "person"
 const KIND_MOUNTED: String = "mounted"
 const KIND_HORSE: String = "horse"
 const KIND_OX: String = "ox"
-
-## Adım uzunluğu ve dizin bükülme payı figür yüksekliğine oranlı, yoksa
-## kısa bir figür uzun adım atıyor gibi duruyor.
-const STRIDE_RATIO: float = 0.19
-const LIFT_RATIO: float = 0.075
-const BOB_RATIO: float = 0.018
 
 const HORSE_PHASES: Array[float] = [0.0, PI, PI * 0.5, PI * 1.5]
 
@@ -85,6 +78,8 @@ var _carries_pack: bool = false
 ## karakter oluşturmada seçilen bir parça varsa o slotun rengi/kafa şekli
 ## bunun yerine geçer - bkz. OutfitCatalog'un çözümleyicileri.
 var _outfit: Dictionary = {}
+## Üstündeki, resmi olan kalemler (`Wardrobe.loadout_for`), alttan üste.
+var _loadout: PackedStringArray = PackedStringArray()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -103,6 +98,19 @@ func set_kind(
 	_skin = skin
 	_carries_pack = carries_pack
 	_outfit = outfit
+	queue_redraw()
+
+## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
+## veriyor - figür karakteri tutmuyor, yalnızca ne giydiğini.
+func set_loadout(loadout: PackedStringArray) -> void:
+	_loadout = loadout
+	queue_redraw()
+
+## Durup bekleyen figür (önizleme, portre): yürüyüşün genliği sıfır, ayaklar
+## yan yana - bir kerelik kolaylık, `advance(…, 0)`'ı taklit etmeden.
+func set_standing() -> void:
+	_moving = false
+	_motion = 0.0
 	queue_redraw()
 
 ## Yürüyüş fazını ilerletir. `speed` 0 ise figür duruyor: ayakları yere
@@ -171,36 +179,23 @@ func _draw() -> void:
 
 # --- İki ayaklı ---
 
+## İnsan figürü iskeletten (`FigureRig`) çiziliyor: önce eklemler çözülüyor,
+## sonra `FigureRig.DRAW_ORDER`'daki her kemik için sırayla prosedürel
+## uzuv ve o kemiğe takılan giysi/zırh/silah sprite'ları (`Wardrobe`). Bir
+## kemiğin katmanları o kemikte kalıyor - ön kolun kolluğu gövdenin
+## üstünde, arka kolunki altında - yani sprite'lar derinliği iskeletten
+## miras alıyor.
+##
 ## `ground_y` figürün bastığı çizgi; binicide bu eyerin üstü oluyor, yani
-## aynı gövde çizimi hem yürüyen hem atlı için kullanılıyor.
+## aynı gövde hem yürüyen hem atlı için kullanılıyor.
 func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	var h := figure_h * _scale
 	var cx := size.x * 0.5
-	var base_cloth: Color = _archetype.get("cloth", Color(0.3, 0.25, 0.22))
-	var trim: Color = _tinted(_archetype.get("trim", Color(0.4, 0.3, 0.22)))
-	var metal: Color = _tinted(_archetype.get("metal", ArtPalette.STEEL))
-	var skin := _tinted(_skin)
 	var bulk: float = float(_archetype.get("bulk", 1.0))
-
-	# Kıyafet seçimi (ceket/gömlek/pantolon/ayakkabı/eldiven) burada devreye
-	# giriyor - hiçbiri seçilmemişse (`_outfit` boş, tayfa/düşman gibi) her
-	# çözümleyici verdiği fallback'i olduğu gibi geri döner, yani sistem
-	# hiç var olmadan önceki görünüm birebir korunur.
-	var cloth := _tinted(OutfitCatalog.resolve_torso_color(_outfit, base_cloth))
-	var pants_color := _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_PANTS, base_cloth))
-	var shoes_color := _tinted(
-		OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_SHOES, base_cloth.darkened(0.35))
+	var joints := FigureRig.pose(
+		Vector2(cx, ground_y), h, _phase, _motion, _facing, _lean, seated, bulk
 	)
-	var gloves_color := _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_GLOVES, _skin))
-
-	# Yürüyen figürde `ground_y` ayağın bastığı yer, o yüzden kalça
-	# yukarıda. Oturan figürde `ground_y` **eyerin kendisi**, yani kalça
-	# tam orada: ilk hâlinde ikisi aynı formülü kullanıyordu ve binici
-	# atın kırk piksel üstünde havada duruyordu (ekran görüntüsünde
-	# apaçık, yapısal testte görünmez).
-	var hip := Vector2(cx, ground_y if seated else ground_y - h * 0.46)
-	var bob := sin(_phase * 2.0) * h * BOB_RATIO * _motion
-	hip.y += bob
+	var look := _person_colors()
 
 	if not seated:
 		# Yere düşen gölge figürü zemine oturtuyor; olmayınca hakikaten
@@ -209,20 +204,72 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			self, Vector2(cx, ground_y), Vector2(h * 0.16, h * 0.028),
 			Color(0.0, 0.0, 0.0, 0.26)
 		)
-		_draw_leg(
-			hip, ground_y, h, _phase + PI, pants_color.darkened(0.28), shoes_color.darkened(0.28)
-		)
-		_draw_leg(hip, ground_y, h, _phase, pants_color, shoes_color)
-	else:
-		_draw_seated_legs(hip, h, pants_color, shoes_color)
+	var weapon_sprite := Wardrobe.has_part(_loadout, "weapon")
+	for bone in FigureRig.bones_for(seated):
+		_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
+		_draw_wardrobe(bone, joints, h)
 
-	# Rüzgârda gövde kalçadan öne eğiliyor; baş ve kollar omuza bağlı
-	# olduğu için onlar da kendiliğinden eğiliyor. Oturan binici eyere
-	# bağlı, o yalnızca yarısı kadar.
-	var lean := _lean * (0.5 if seated else 1.0)
-	var shoulder := hip + Vector2(sin(lean) * h * 0.26 * _facing, -cos(lean) * h * 0.26)
-	# Gövde: omuzdan kalçaya doğru daralan bir gövde. Dikdörtgen yerine
-	# çokgen olması silüeti tanınır kılıyor.
+## Kıyafet seçimi (ceket/gömlek/pantolon/ayakkabı/eldiven) burada devreye
+## giriyor - hiçbiri seçilmemişse (`_outfit` boş, tayfa/düşman gibi) her
+## çözümleyici verdiği fallback'i olduğu gibi geri döner, yani sistem
+## hiç var olmadan önceki görünüm birebir korunur.
+func _person_colors() -> Dictionary:
+	var base_cloth: Color = _archetype.get("cloth", Color(0.3, 0.25, 0.22))
+	return {
+		"cloth": _tinted(OutfitCatalog.resolve_torso_color(_outfit, base_cloth)),
+		"trim": _tinted(_archetype.get("trim", Color(0.4, 0.3, 0.22))),
+		"metal": _tinted(_archetype.get("metal", ArtPalette.STEEL)),
+		"skin": _tinted(_skin),
+		"pants": _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_PANTS, base_cloth)),
+		"shoes": _tinted(
+			OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_SHOES, base_cloth.darkened(0.35))
+		),
+		"gloves": _tinted(OutfitCatalog.resolve_color(_outfit, OutfitCatalog.SLOT_GLOVES, _skin)),
+	}
+
+## Bir kemiğin prosedürel uzvu. Sprite'ı olan kalem bunun üstüne biniyor;
+## altta kalan çizgi, sprite'ın kapatmadığı eklem aralığını dolduruyor.
+func _draw_bone(
+	bone: String, joints: Dictionary, h: float, bulk: float, seated: bool,
+	look: Dictionary, weapon_sprite: bool
+) -> void:
+	var spec: Dictionary = FigureRig.BONES[bone]
+	var a: Vector2 = joints[spec.a]
+	var b: Vector2 = joints[spec.b]
+	var back := bool(spec.back)
+	var leg_width := maxf(2.0, h * 0.042)
+	var arm_width := maxf(1.6, h * 0.032)
+	var leg_color: Color = (look.pants as Color).darkened(0.20 if seated else (0.28 if back else 0.0))
+	var foot_color: Color = (look.shoes as Color).darkened(0.15 if seated else (0.28 if back else 0.0))
+	var sleeve: Color = (look.cloth as Color).darkened(0.18) if back else look.cloth
+	match String(spec.part):
+		"thigh":
+			draw_line(a, b, leg_color, leg_width)
+		"shin":
+			draw_line(a, b, leg_color, leg_width * 0.88)
+		"foot":
+			draw_line(a, b, foot_color, maxf(1.5, h * 0.022))
+		"upper_arm":
+			draw_line(a, b, sleeve, arm_width)
+		"forearm":
+			draw_line(a, b, sleeve, arm_width * 0.85)
+		"hand":
+			draw_circle(a, maxf(1.2, h * 0.020), look.gloves)
+		"torso":
+			_draw_torso(a, b, h, bulk, look)
+		"head":
+			var headgear := OutfitCatalog.resolve_headgear(_outfit, String(_archetype.get("head", "bare")))
+			_draw_head(a, h, bulk, look.skin, look.cloth, look.trim, look.metal, headgear)
+		"weapon":
+			# Resmi olan silah elde taşınıyor (sprite'ı `_draw_wardrobe`
+			# çiziyor); yoksa arketipin sırttaki silüeti kalıyor.
+			if not weapon_sprite:
+				_draw_slung_weapon(joints.shoulder, h, look.metal, look.trim)
+
+## Gövde: omuzdan kalçaya daralan bir çokgen - dikdörtgen yerine çokgen
+## olması silüeti tanınır kılıyor. Pelerin/yük sırtta asimetrik bir hacim:
+## kervanı "yüklü" gösteren şey.
+func _draw_torso(shoulder: Vector2, hip: Vector2, h: float, bulk: float, look: Dictionary) -> void:
 	var half_top := h * 0.098 * bulk
 	var half_bottom := h * 0.076 * bulk
 	ArtDraw.inked(self, PackedVector2Array([
@@ -230,9 +277,7 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		shoulder + Vector2(half_top * _facing, 0.0),
 		hip + Vector2(half_bottom * _facing, h * 0.02),
 		hip + Vector2(-half_bottom * _facing, h * 0.02),
-	]), cloth, maxf(1.0, h * 0.012))
-
-	# Pelerin/yük: sırtta asimetrik bir hacim. Kervanı "yüklü" gösteren şey.
+	]), look.cloth, maxf(1.0, h * 0.012))
 	if _carries_pack:
 		var back := shoulder + Vector2(-half_top * 1.1 * _facing, h * 0.02)
 		ArtDraw.inked(self, PackedVector2Array([
@@ -240,70 +285,37 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			back + Vector2(-h * 0.075 * _facing, h * 0.03),
 			back + Vector2(-h * 0.065 * _facing, h * 0.17),
 			back + Vector2(h * 0.01 * _facing, h * 0.15),
-		]), trim.darkened(0.15), maxf(1.0, h * 0.010))
+		]), (look.trim as Color).darkened(0.15), maxf(1.0, h * 0.010))
 
-	var headgear := OutfitCatalog.resolve_headgear(_outfit, String(_archetype.get("head", "bare")))
-	_draw_arm(shoulder, h, _phase, cloth.darkened(0.18), gloves_color)
-	_draw_head(shoulder, h, bulk, skin, cloth, trim, metal, headgear)
-	_draw_arm(shoulder, h, _phase + PI, cloth, gloves_color)
-	_draw_slung_weapon(shoulder, h, metal, trim)
-
-## Kalça → diz → ayak. Ayağın *hedefi* hesaplanıyor, diz ondan çözülüyor;
-## tersi (dizi sallamak) ayağı yerde kaydırıyor. `foot_color` ayakkabı
-## seçimini taşır (bkz. `_draw_person`) - pantolonla aynı renk değil
-## artık, çünkü ayakkabı kendi slotunun rengini taşıyabiliyor.
-func _draw_leg(
-	hip: Vector2, ground_y: float, h: float, phase: float, color: Color, foot_color: Color
-) -> void:
-	var leg_len := ground_y - hip.y
-	var stride := h * STRIDE_RATIO * _motion
-	var lift := h * LIFT_RATIO * _motion
-	var foot := Vector2(
-		hip.x + cos(phase) * stride * _facing,
-		ground_y - maxf(0.0, sin(phase)) * lift
+## Bir kemiğe takılan sprite katmanları, alttan üste: ten (`Wardrobe.BODY_ID`,
+## karakterin ten rengiyle çarpılıyor), sonra üstündeki kalemler.
+func _draw_wardrobe(bone: String, joints: Dictionary, h: float) -> void:
+	var spec: Dictionary = FigureRig.BONES[bone]
+	var a: Vector2 = joints[spec.a]
+	var b: Vector2 = joints[spec.b]
+	var part := String(spec.part)
+	var part_spec: Dictionary = FigureRig.PARTS[part]
+	var xf := FigureRig.part_transform(
+		part_spec.pivot, FigureRig.part_rest_vector(part), a, b, h, _facing
 	)
-	var thigh := leg_len * 0.52
-	var shin := leg_len * 0.52
-	var knee := _solve_joint(hip, foot, thigh, shin, _facing)
-
-	var width := maxf(2.0, h * 0.042)
-	draw_line(hip, knee, color, width)
-	draw_line(knee, foot, color, width * 0.88)
-	# Ayak: yürüyüşün okunmasını sağlayan en küçük detay.
-	draw_line(
-		foot, foot + Vector2(h * 0.048 * _facing, 0.0),
-		foot_color, maxf(1.5, h * 0.022)
-	)
-
-## Atlı oturuyor: bacaklar eyerden aşağı sarkıyor, yürüyüş fazı bacağa
-## değil atın ritmine bağlı.
-func _draw_seated_legs(hip: Vector2, h: float, color: Color, foot_color: Color) -> void:
-	var width := maxf(2.0, h * 0.042)
-	var knee := hip + Vector2(h * 0.10 * _facing, h * 0.14)
-	var foot := knee + Vector2(-h * 0.02 * _facing, h * 0.16)
-	draw_line(hip, knee, color.darkened(0.20), width)
-	draw_line(knee, foot, color.darkened(0.20), width * 0.88)
-	draw_line(
-		foot, foot + Vector2(h * 0.045 * _facing, 0.0),
-		foot_color.darkened(0.15), maxf(1.5, h * 0.022)
-	)
-
-## `hand_color` eldiven seçiliyse onun rengi, değilse ten rengi - bkz.
-## `_draw_person`'ın `gloves_color` çözümü.
-func _draw_arm(shoulder: Vector2, h: float, phase: float, color: Color, hand_color: Color) -> void:
-	var swing := lerpf(0.35, sin(phase), _motion) * 0.55
-	var upper := h * 0.15
-	var lower := h * 0.14
-	var elbow := shoulder + Vector2(
-		sin(swing) * upper * _facing, cos(swing * 0.6) * upper
-	)
-	var hand := elbow + Vector2(
-		sin(swing * 1.5 + 0.4) * lower * _facing, cos(swing * 0.4) * lower
-	)
-	var width := maxf(1.6, h * 0.032)
-	draw_line(shoulder, elbow, color, width)
-	draw_line(elbow, hand, color, width * 0.85)
-	draw_circle(hand, maxf(1.2, h * 0.020), hand_color)
+	var drew := false
+	var layers := PackedStringArray([Wardrobe.BODY_ID])
+	layers.append_array(_loadout)
+	for item_id in layers:
+		var found := Wardrobe.bone_texture(item_id, bone)
+		var texture: Texture2D = found.texture
+		if texture == null:
+			continue
+		var tone := _tint
+		if item_id == Wardrobe.BODY_ID:
+			tone = Color(_skin.r * _tint.r, _skin.g * _tint.g, _skin.b * _tint.b, _tint.a)
+		if found.shade:
+			tone = Color(tone.r * Wardrobe.BACK_SHADE.r, tone.g * Wardrobe.BACK_SHADE.g, tone.b * Wardrobe.BACK_SHADE.b, tone.a)
+		draw_set_transform_matrix(xf)
+		draw_texture(texture, Vector2.ZERO, tone)
+		drew = true
+	if drew:
+		draw_set_transform_matrix(Transform2D.IDENTITY)
 
 ## `headgear` `OutfitCatalog.resolve_headgear()`'ın döndürdüğü
 ## `{kind, color, override}` - `override` false'sa `color` hiç okunmaz,
@@ -562,13 +574,7 @@ func _draw_quad_leg(
 func _solve_joint(
 	root: Vector2, tip: Vector2, bone_a: float, bone_b: float, bend: float
 ) -> Vector2:
-	var to_tip := tip - root
-	var distance := clampf(to_tip.length(), 0.001, bone_a + bone_b - 0.001)
-	var direction := to_tip.normalized() if to_tip.length() > 0.001 else Vector2.DOWN
-	var along := (distance * distance + bone_a * bone_a - bone_b * bone_b) / (2.0 * distance)
-	var across := sqrt(maxf(0.0, bone_a * bone_a - along * along))
-	var normal := Vector2(-direction.y, direction.x) * signf(bend if bend != 0.0 else 1.0)
-	return root + direction * along + normal * across
+	return FigureRig.solve_joint(root, tip, bone_a, bone_b, bend)
 
 ## Işık figürün bütün renklerini çarpıyor: gece kervanı da geceye ait
 ## görünüyor.

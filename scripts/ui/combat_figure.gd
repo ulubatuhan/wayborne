@@ -109,6 +109,14 @@ var _depth: float = 0.0
 ## göndermez (boş sözlük = arketipin kendi paleti, WalkFigure'daki aynı
 ## kural - bkz. OutfitCatalog'un çözümleyicileri).
 var _outfit: Dictionary = {}
+## Sprite'lı kalemler varsa figür iskeletten çiziliyor (`_rig`, bir
+## `WalkFigure` - yoldaki figürün ta kendisi, duran pozda). Böylece kılıç,
+## zırh ve kıyafet yolda nasıl görünüyorsa savaşta da öyle; iki ayrı çizim
+## iki ayrı karakter olurdu.
+var _loadout: PackedStringArray = PackedStringArray()
+var _skin: Color = SKIN_PALE
+var _height_scale: float = 1.0
+var _rig: WalkFigure = null
 
 ## Faz 17 PR-7: savaş animasyon katmanı. İkisi de duruma göre değil - saf
 ## düzeni/durum tıngısı `_tint()`'ten geçiyor, bunlar yalnızca "az önce bir
@@ -130,18 +138,71 @@ var _stunned: bool = false
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	resized.connect(_sync_rig)
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
 func setup(
-	kind: String, face_right: bool, state: String, depth: float, outfit: Dictionary = {}
+	kind: String, face_right: bool, state: String, depth: float, outfit: Dictionary = {},
+	loadout: PackedStringArray = PackedStringArray(), skin: Color = SKIN_PALE,
+	height_scale: float = 1.0
 ) -> void:
 	_kind = kind if ARCHETYPES.has(kind) else FALLBACK_KIND
 	_face_right = face_right
 	_state = state
 	_depth = clampf(depth, 0.0, 1.0)
 	_outfit = outfit
+	_loadout = loadout
+	_skin = skin
+	_height_scale = height_scale
+	_sync_rig()
 	queue_redraw()
+
+## İskelet figürü sprite'lı kalem varken ayakta duran her durumda çiziyor;
+## yerde serili (düşmüş/ölü) figür prosedürel yığın olarak kalıyor. Hamle,
+## sarsıntı ve devrilme çocuğun konumu/dönüşü; durum tonu çarpan renk.
+func uses_rig() -> bool:
+	return not _loadout.is_empty() and String(_archetype().body) != BEAST
+
+func _sync_rig() -> void:
+	var active := uses_rig() and not _draws_fallen()
+	if not active:
+		if _rig != null:
+			_rig.visible = false
+		return
+	if _rig == null:
+		_rig = WalkFigure.new()
+		add_child(_rig)
+	_rig.visible = true
+	_rig.size = size
+	_rig.set_kind(
+		WalkFigure.KIND_PERSON, _kind, _height_scale * (1.0 - _depth * 0.08), _skin,
+		false, _outfit
+	)
+	_rig.set_loadout(_loadout)
+	_rig.set_standing()
+	_rig.set_facing(1.0 if _face_right else -1.0)
+	_rig.set_tint(_state_tone())
+	_rig.position = _offset
+	var pivot := Vector2(size.x * 0.5, size.y * 0.95)
+	_rig.pivot_offset = pivot
+	_rig.rotation = 0.0
+	if _is_falling():
+		var side := 1.0 if _face_right else -1.0
+		_rig.rotation = side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
+
+## `_tint()`'in iskelet figürü için çarpan karşılığı: renk çarpımı gri
+## yapamıyor, ama koyulaşma ve kızıllaşma aynı okunuyor.
+func _state_tone() -> Color:
+	match _state:
+		"dead":
+			return Color(0.22, 0.21, 0.22)
+		"downed":
+			return Color(0.55, 0.55, 0.55)
+		"deaths_door":
+			return Color(1.0, 0.55, 0.55)
+	var shade := 1.0 - _depth * 0.28
+	return Color(shade, shade, shade)
 
 ## Vuruşun/kritiğin/reddin anlık parlaması - `Control.modulate`'in kendisi,
 ## yeni bir çizim yolu gerekmiyor. `bind()`'tan *sonra* çağrılıyor (bkz.
@@ -160,6 +221,8 @@ func set_shift(offset: Vector2) -> void:
 	if _offset == offset:
 		return
 	_offset = offset
+	if _rig != null and _rig.visible:
+		_rig.position = _offset
 	queue_redraw()
 
 func set_fall(progress: float) -> void:
@@ -167,6 +230,7 @@ func set_fall(progress: float) -> void:
 	if is_equal_approx(_fall, clamped):
 		return
 	_fall = clamped
+	_sync_rig()
 	queue_redraw()
 
 func set_ring(color: Color, progress: float) -> void:
@@ -259,6 +323,10 @@ func _draw_ground_shadow(box: Vector2, bulk: float) -> void:
 # --- İki ayaklı ---
 
 func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
+	# Sprite'lı kalem giyen biri iskelet çocuğunda çiziliyor (`_rig`); yerde
+	# serili hâli ise aşağıdaki prosedürel yığın.
+	if uses_rig() and not _draws_fallen():
+		return
 	# Kıyafet burada da WalkFigure'la aynı kuralı okuyor - `_outfit` boşsa
 	# (her düşman, tayfa figürü) her çözümleyici fallback'i aynen geri
 	# döner, görünüm bu sistemden önceki hâliyle birebir aynı kalır.

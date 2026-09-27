@@ -1,0 +1,318 @@
+{
+  "bones": {
+    "foot_back": {
+      "a": "ankle_back",
+      "b": "toe_back",
+      "back": true,
+      "part": "foot"
+    },
+    "foot_front": {
+      "a": "ankle_front",
+      "b": "toe_front",
+      "back": false,
+      "part": "foot"
+    },
+    "forearm_back": {
+      "a": "elbow_back",
+      "b": "hand_back",
+      "back": true,
+      "part": "forearm"
+    },
+    "forearm_front": {
+      "a": "elbow_front",
+      "b": "hand_front",
+      "back": false,
+      "part": "forearm"
+    },
+    "hand_back": {
+      "a": "hand_back",
+      "b": "fingers_back",
+      "back": true,
+      "part": "hand"
+    },
+    "hand_front": {
+      "a": "hand_front",
+      "b": "fingers_front",
+      "back": false,
+      "part": "hand"
+    },
+    "head": {
+      "a": "shoulder",
+      "b": "head",
+      "back": false,
+      "part": "head"
+    },
+    "shin_back": {
+      "a": "knee_back",
+      "b": "ankle_back",
+      "back": true,
+      "part": "shin"
+    },
+    "shin_front": {
+      "a": "knee_front",
+      "b": "ankle_front",
+      "back": false,
+      "part": "shin"
+    },
+    "thigh_back": {
+      "a": "hip",
+      "b": "knee_back",
+      "back": true,
+      "part": "thigh"
+    },
+    "thigh_front": {
+      "a": "hip",
+      "b": "knee_front",
+      "back": false,
+      "part": "thigh"
+    },
+    "torso": {
+      "a": "shoulder",
+      "b": "hip",
+      "back": false,
+      "part": "torso"
+    },
+    "upper_arm_back": {
+      "a": "shoulder",
+      "b": "elbow_back",
+      "back": true,
+      "part": "upper_arm"
+    },
+    "upper_arm_front": {
+      "a": "shoulder",
+      "b": "elbow_front",
+      "back": false,
+      "part": "upper_arm"
+    },
+    "weapon": {
+      "a": "hand_front",
+      "b": "weapon_tip",
+      "back": false,
+      "part": "weapon"
+    }
+  },
+  "draw_order": [
+    "upper_arm_back",
+    "forearm_back",
+    "hand_back",
+    "thigh_back",
+    "shin_back",
+    "foot_back",
+    "thigh_front",
+    "shin_front",
+    "foot_front",
+    "torso",
+    "head",
+    "weapon",
+    "upper_arm_front",
+    "forearm_front",
+    "hand_front"
+  ],
+  "head_radius": 29.7,
+  "part_order": [
+    "head",
+    "torso",
+    "upper_arm",
+    "forearm",
+    "hand",
+    "thigh",
+    "shin",
+    "foot",
+    "weapon"
+  ],
+  "parts": {
+    "foot": {
+      "canvas": [
+        128,
+        64
+      ],
+      "end": [
+        64.58,
+        30
+      ],
+      "pivot": [
+        40,
+        30
+      ]
+    },
+    "forearm": {
+      "canvas": [
+        128,
+        128
+      ],
+      "end": [
+        85.56,
+        91.47
+      ],
+      "pivot": [
+        40,
+        20
+      ]
+    },
+    "hand": {
+      "canvas": [
+        64,
+        64
+      ],
+      "end": [
+        35.01,
+        37.27
+      ],
+      "pivot": [
+        24,
+        20
+      ]
+    },
+    "head": {
+      "canvas": [
+        160,
+        192
+      ],
+      "end": [
+        86.14,
+        123.91
+      ],
+      "pivot": [
+        80,
+        164
+      ]
+    },
+    "shin": {
+      "canvas": [
+        144,
+        176
+      ],
+      "end": [
+        64.33,
+        141.76
+      ],
+      "pivot": [
+        88,
+        24
+      ]
+    },
+    "thigh": {
+      "canvas": [
+        144,
+        176
+      ],
+      "end": [
+        79.67,
+        141.76
+      ],
+      "pivot": [
+        56,
+        24
+      ]
+    },
+    "torso": {
+      "canvas": [
+        192,
+        224
+      ],
+      "end": [
+        96,
+        173.12
+      ],
+      "pivot": [
+        96,
+        40
+      ]
+    },
+    "upper_arm": {
+      "canvas": [
+        112,
+        144
+      ],
+      "end": [
+        62.69,
+        100.29
+      ],
+      "pivot": [
+        48,
+        24
+      ]
+    },
+    "weapon": {
+      "canvas": [
+        128,
+        384
+      ],
+      "end": [
+        64,
+        217.6
+      ],
+      "pivot": [
+        64,
+        64
+      ]
+    }
+  },
+  "ref_h": 512,
+  "rest_joints": {
+    "ankle_back": [
+      0,
+      0
+    ],
+    "ankle_front": [
+      0,
+      0
+    ],
+    "elbow_back": [
+      14.69,
+      -292.35
+    ],
+    "elbow_front": [
+      14.69,
+      -292.35
+    ],
+    "fingers_back": [
+      71.26,
+      -203.61
+    ],
+    "fingers_front": [
+      71.26,
+      -203.61
+    ],
+    "hand_back": [
+      60.25,
+      -220.88
+    ],
+    "hand_front": [
+      60.25,
+      -220.88
+    ],
+    "head": [
+      6.14,
+      -408.73
+    ],
+    "hip": [
+      0,
+      -235.52
+    ],
+    "knee_back": [
+      23.67,
+      -117.76
+    ],
+    "knee_front": [
+      23.67,
+      -117.76
+    ],
+    "shoulder": [
+      0,
+      -368.64
+    ],
+    "toe_back": [
+      24.58,
+      0
+    ],
+    "toe_front": [
+      24.58,
+      0
+    ],
+    "weapon_tip": [
+      60.25,
+      -67.28
+    ]
+  }
+}

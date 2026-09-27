@@ -108,8 +108,8 @@ static func _add(
 
 # --- Figürlerin okuduğu çözümleyiciler ---
 #
-# `OutfitPreview` (karakter oluşturma), `WalkFigure` (yol) ve `CombatFigure`
-# (savaş) kıyafeti aynı kuralla okumalı, yoksa üçü farklı bir "seçilen
+# `WalkFigure` (yol, önizlemeler) ve `CombatFigure` (savaş) kıyafeti aynı
+# kuralla okumalı, yoksa üçü farklı bir "seçilen
 # parçanın rengi nedir" mantığı taşır ve biri diğerinden sessizce sapar -
 # `CaravanPlan.daily_consumption()`'ın "tek formül, tek yer" kuralının
 # kıyafet karşılığı. Hiçbiri kıyafeti *yazmıyor*, sadece okuyor.
@@ -120,8 +120,7 @@ static func resolve_color(outfit: Dictionary, slot: String, fallback: Color) -> 
 	var piece := get_piece(str(outfit.get(slot, NONE_PIECE)))
 	return piece.color if piece != null else fallback
 
-## Gövde rengi: ceket varsa gömleğin üstünü kapatır (ikisi de `OutfitPreview`
-## denen önizlemenin zaten uyguladığı kural, burada tek yere taşındı).
+## Gövde rengi: ceket varsa gömleğin üstünü kapatır.
 static func resolve_torso_color(outfit: Dictionary, fallback: Color) -> Color:
 	if not str(outfit.get(SLOT_JACKET, NONE_PIECE)).is_empty():
 		return resolve_color(outfit, SLOT_JACKET, fallback)

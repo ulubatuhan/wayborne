@@ -173,7 +173,7 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	var depth := float(bound_unit.position - 1) / float(maxi(1, CombatEncounter.MAX_SIDE_SIZE - 1))
 	_figure.setup(
 		bound_unit.figure_kind, bound_unit.is_player_side, _figure_state(bound_unit), depth,
-		bound_unit.outfit
+		bound_unit.outfit, bound_unit.loadout, bound_unit.skin, bound_unit.height_scale
 	)
 	_figure.set_stunned(bound_unit.is_stunned and bound_unit.is_alive())
 	_border.border_color = _border_color(is_active, is_target)

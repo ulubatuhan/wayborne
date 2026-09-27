@@ -36,6 +36,7 @@ func setup(character: CharacterData, height: float) -> PortraitCameo:
 			clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
 			CharacterData.get_skin_tone_color(character.skin_tone), false, character.outfit
 		)
+		_figure.set_loadout(Wardrobe.loadout_for(character))
 	_figure.visible = character != null
 	_layout()
 	return self
