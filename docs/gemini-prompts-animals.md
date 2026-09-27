@@ -34,6 +34,13 @@ combat (mirrored when the animal faces left).
    back a PNG with transparency. Keep soft fur edges. Don't cut hard.
 6. **Then:** `python3 tools/beast_cut.py whole <file>.png <species>`, then
    `godot --headless --import`. That is my step; send me the PNGs.
+7. **Repeat the style line in every single message, not just the first.**
+   STYLE-F is pasted once at the top of the thread, but a model can quietly
+   drop that instruction a few messages in — or even on the very first one.
+   Every F entry below already ends with its own short copy of
+   `Painterly ink-and-wash illustration style, gritty and tactile.` for
+   exactly this reason; keep that line when you paste, don't trim it as
+   redundant.
 
 ### Why horse and ox come with their tack
 
@@ -113,6 +120,7 @@ neck. The saddle sits on the middle of the back, above the ribs. No
 stirrup leathers hanging across the near legs; the stirrup is tucked up
 against the saddle. No saddlebags.
 Matte, worn, travelled - mud on the lower legs.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **F-ox · Draught ox (yoked)** · seed 61102 · REFERENCE `ox_pose_reference.jpg`
@@ -130,6 +138,7 @@ the neck just in front of the hump, with a padded leather collar strap
 under the throat. No pole, no chains, no wagon - only the yoke on the
 ox's neck.
 Matte, dusty, tired working animal.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **F-wolf · Steppe wolf** · seed 61103 · REFERENCE `wolf_pose_reference.jpg`
@@ -142,6 +151,7 @@ and level, ears upright and pointed, long muzzle with the lips slightly
 drawn back (a hint of teeth, no gore). Bushy tail carried low and straight
 back as in the reference. Pale amber eye.
 Wild, hungry, dangerous - but not a monster: a real wolf.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **F-bear · Brown bear** · seed 61104 · REFERENCE `bear_pose_reference.jpg`
@@ -154,6 +164,7 @@ small rounded ears, short muzzle, small dark eye. Thick pillar-like legs,
 broad paws with short dark claws visible on the ground. Tail almost
 invisible (a short stub).
 Heavy, slow, overwhelming weight - the biggest animal in the game.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **F-boar · Wild boar** · seed 61105 · REFERENCE `boar_pose_reference.jpg`
@@ -166,6 +177,7 @@ disc nose, two curved pale tusks (#E1D9C7) curling up from the lower jaw,
 small eye, small pointed ears. Short thin legs with small cloven hooves,
 short thin tail with a tuft.
 Aggressive, compact, low to the ground.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 ---
