@@ -72,23 +72,20 @@ EVERY ANIMAL IN THIS CONVERSATION:
 - Nothing else in the picture: no rider, no people, no second animal, no
   props.
 
-STYLE:
-- Flat illustrative painting with a firm dark ink contour (#0E0D0F, never
-  pure black) around every shape, flat colour areas with one or two soft
-  shade steps, single light source from the top-left. Fur and hair are
-  suggested with a few ink strokes, not rendered strand by strand. Think
-  Darkest Dungeon's ink weight with Kingdom Two Crowns' calm silhouettes.
-- NOT photorealistic, NOT 3D, NOT pixel art, NOT anime, NOT cute.
-- Muted, low-saturation palette: bone #E1D9C7, ink #0E0D0F, pale gold
-  #DCB357 (sparingly), dried blood #A83029, moss #5E6B3A, cold steel
-  #6F7A82, earth browns and ashen greys.
-- Anatomy must read at small size: a clear silhouette, a visible eye,
-  readable ears, legs thick enough to hold the body.
-- No text, letters, numbers, logos, brands, symbols or watermarks.
+Painterly ink-and-wash illustration style, gritty and tactile, with a firm
+dark outline around every shape, flat colour fields and one or two soft
+brushed shade steps, a single light source from the top-left. Fur and
+hair are suggested with a few loose ink strokes, not rendered strand by
+strand. Muted, low-saturation tones — bone-ivory, deep ink-brown, warm
+ochre gold used sparingly, dried-blood red, moss green, cold steel grey,
+earth browns and ashen greys. The anatomy has to read clearly at a small
+size: a clean silhouette, a visible eye, readable ears, legs thick enough
+to carry the body. No text, letters, numbers, logos, brands, symbols or
+watermarks.
 
 AVOID: three-quarter view, front view, rearing, running gallop, sitting,
 lying down, background scenery, ground shadow, rider, harness straps
-crossing the legs, glossy highlights, photorealism, 3D render, cartoon eyes.
+crossing the legs, glossy highlights, cartoon eyes.
 ```
 
 ---
@@ -199,7 +196,7 @@ mannequin, same position, scale and angle, lined up with its red and blue
 dots, about 10-15% longer at the red-dot end so joints overlap. Keep the
 image the same size and the grid the same layout. Flat mid-grey
 (RGB 140,140,140) background, no dots, no mannequin, no cell lines in the
-result. Style: [STYLE-F's STYLE section].
+result. Style: [the painterly ink-and-wash paragraph from STYLE-F].
 ```
 
 ---

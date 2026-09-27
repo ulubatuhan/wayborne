@@ -47,15 +47,25 @@ entry whose background you have to remove yourself.
 
 ### Shared tags
 
-Every prompt already includes these, listed here so you can add them to a
-re-roll by hand:
+Every STYLE block already describes this in plain words — Gemini reads a
+described colour ("warm ochre gold", "dried-blood red") far more reliably
+than a hex code or a named game as a style anchor, both of which it tends
+to quietly drop rather than follow (see the git history for this file: an
+earlier version leaned on hex values and named two specific games as a
+style reference, and the results came back photorealistic, ignoring the
+style instruction entirely). The table below is only for matching a
+finished piece back to the game's own `ArtPalette` afterward — never paste
+hex codes or a game's name into a Gemini prompt itself.
 
-- `#wayborne` `#flat-illustrative` `#ink-contour` `#muted-palette`
-- `#no-text` `#no-logo` `#no-watermark` `#no-frame`
-- Palette (hex, from the game's `ArtPalette`): bone `#E1D9C7`, ink
-  `#0E0D0F` (never pure black), pale gold `#DCB357` (the only accent),
-  dried blood `#A83029`, moss `#5E6B3A`, cold steel `#6F7A82`, torch orange
-  `#D9822B`.
+| Prompt wording | `ArtPalette` hex |
+|---|---|
+| bone-ivory | `#E1D9C7` |
+| deep ink-brown / ink (never pure black) | `#0E0D0F` |
+| warm ochre gold (the one bright accent) | `#DCB357` |
+| dried-blood red | `#A83029` |
+| moss green | `#5E6B3A` |
+| cold steel grey | `#6F7A82` |
+| torch orange | `#D9822B` |
 
 ---
 
@@ -77,45 +87,30 @@ illustrations remain: one vignette per category, 21 in total.
 ### STYLE-A (paste first, once per conversation)
 
 ```
-You are painting illustrations for the event cards of a computer game.
+You are painting a single event illustration for "Wayborne", a caravan
+trading and survival game set on a dangerous medieval Anatolian trade road
+— bandits, wolves, tax officials, storms, landslides, hunger, and the slow
+wearing-down of the people who pull the caravan. The tone is not romantic:
+tired, grounded, human. The subject is endurance, not wealth.
 
-GAME: "Wayborne" — a caravan trading and survival game inspired by medieval
-Anatolia. The player leads a caravan from city to city; the road is
-dangerous: bandits, wolves, tax officials, storms, landslides, hunger, and
-the slow wearing-down of the people who pull the caravan. The caravan can be
-ruined but never wiped out. Tone: not romantic — tired, grounded, human.
-The subject is not wealth but endurance.
+Each picture is one single moment, square in format, the subject sitting
+centred or in the lower third, close to the camera — not a panorama. Depth
+comes from soft haze on distant shapes; everything standing casts a soft
+contact shadow, nothing floats. Where architecture appears it is plain
+trade architecture only — walls, gates, warehouses, sheds — never a
+mosque, church, cross or any real-world religious building. People read as
+simple silhouettes in worn wool, linen and leather, never shiny, with only
+minimal facial detail. The edges and especially the four corners darken
+softly into the deep ink tone; the picture has no frame of its own, it
+will sit inside the game's own card. No text, letters, numbers, symbols,
+logos, UI, signatures or watermarks anywhere in the image. No photographic
+realism, glossy highlights, lens flare, saturated colour or pure black.
 
-ART DIRECTION (identical for every picture in this conversation):
-- Style: flat illustrative painting. NOT pixel art, NOT 3D, NOT
-  photorealistic, NOT anime. Flat colour areas, layered silhouettes, soft
-  gradients, a firm dark ink contour on every shape, a single light source.
-  Think Darkest Dungeon's ink weight crossed with Kingdom Two Crowns' calm
-  layered silhouettes.
-- Palette: bone white #E1D9C7, ink #0E0D0F (never pure black), pale gold
-  #DCB357 as the one accent, dried blood #A83029, moss green #5E6B3A, cold
-  steel grey #6F7A82, torch orange #D9822B. Low saturation; colour never
-  shouts.
-- Depth comes from aerial perspective: distant shapes fade into the sky's
-  haze. Every standing thing has a flat contact shadow under it — nothing
-  floats.
-- Architecture is trade architecture: walls, gates, warehouses, sheds. No
-  mosques, minarets, churches, crosses or any recognisable real-world
-  religious building.
-- People are readable silhouettes with minimal facial detail; clothing is
-  worn wool, linen and leather, never shiny.
-
-FORMAT FOR EVERY PICTURE:
-- Square, 1:1. One single moment — "this is the heart of what just
-  happened", like a grand-strategy game's event picture. Not a panorama.
-- The subject sits in the centre or lower third, close to the camera.
-- Vignette: the edges, especially the four corners, darken softly into ink
-  #0E0D0F. The picture has no frame of its own; it will sit inside the
-  game's card.
-- No text, letters, numbers, symbols, logos, UI, signatures or watermarks.
-
-AVOID: text, frame, border, logo, watermark, photorealism, 3D render,
-glossy highlights, lens flare, saturated colours, pure black, anime faces.
+Painterly ink-and-wash illustration style, gritty and tactile, with a firm
+dark outline on every shape and flat colour fields under soft brushed
+shading from a single light source — muted bone-ivory, deep near-black
+ink-brown, warm ochre gold as the one bright accent, dried-blood red, moss
+green and cold steel grey tones.
 ```
 
 ### A entries
@@ -367,17 +362,14 @@ RULES:
 - Remove the red and blue dots, the grey mannequin and the cell labels from
   your output; only the painted item remains on flat grey.
 
-STYLE (same for every item):
-- Flat illustrative painting with a firm dark ink contour (#0E0D0F, never
-  pure black), flat colour areas, one or two soft shade steps, light from
-  the top-left. NOT pixel art, NOT 3D, NOT photorealistic.
-- Materials are worn and matte: wool, linen, felt, leather, iron, bronze.
-  Nothing shiny or new. Muted, low-saturation colours from this palette:
-  bone #E1D9C7, ink #0E0D0F, pale gold #DCB357, dried blood #A83029,
-  moss #5E6B3A, cold steel #6F7A82, earth browns.
-- Setting: medieval Anatolian-inspired caravan road, 12th-14th century
-  feeling — no fantasy glow, no runes, no religious symbols.
-- No text, letters, logos or watermarks.
+Painterly ink-and-wash illustration style, gritty and tactile, with a firm
+dark outline on every shape, flat colour fields and one or two soft
+brushed shade steps, light from the top-left. Materials are worn and
+matte — wool, linen, felt, leather, iron, bronze — nothing shiny or new,
+in muted, low-saturation bone-ivory, deep ink-brown, warm ochre gold,
+dried-blood red, moss green, cold steel grey and earth-brown tones. The
+setting is a medieval Anatolian-inspired caravan road: no fantasy glow, no
+runes, no religious symbols, no text, letters, logos or watermarks.
 ```
 
 ### B entries
@@ -623,26 +615,20 @@ icon in one single style**: an ink-and-wash token on a transparent ground.
 ### STYLE-C (paste first)
 
 ```
-You are drawing small UI icons for a computer game — one icon per message,
-all in exactly the same style so they read as one family.
+You are painting small UI icons for a computer game — one icon per
+message, all in exactly the same hand so they read as one family. Each
+icon is a single motif, centred, filling about three-quarters of the
+square, painted as a small ink-and-wash token: a firm dark outline, flat
+fills in a muted low-saturation palette — bone-ivory, deep ink-brown, warm
+ochre gold used sparingly as the one bright accent, dried-blood red, moss
+green, cold steel grey, earth browns — with one soft brushed shade step
+under light from the top-left. No badge, no circle, no frame, no card, no
+sticker outline, no drop shadow, no paper behind it — only the motif
+itself, bold and simple enough to read clearly at a very small size, on a
+flat uniform mid-grey background with no gradient, texture or shadow. No
+text, letters, numbers, logos, watermarks or religious symbols.
 
-STYLE (identical for every icon):
-- One single motif, centred, filling about 75% of the square, drawn as an
-  ink-and-wash token: firm dark ink contour (#0E0D0F, never pure black),
-  flat fills in a muted palette, one soft shade step, light from the
-  top-left.
-- NO badge, NO circle, NO frame, NO card, NO sticker outline, NO drop
-  shadow, NO paper behind it — just the motif.
-- Palette: bone #E1D9C7, ink #0E0D0F, pale gold #DCB357 (sparingly, as the
-  one accent), dried blood #A83029, moss #5E6B3A, cold steel #6F7A82, torch
-  orange #D9822B, earth browns. Low saturation.
-- Must stay readable at 48x48 pixels: bold silhouette, few details, thick
-  lines.
-- Background: flat uniform mid-grey RGB 140,140,140, no gradient, no
-  texture, no shadow.
-- No text, letters, numbers, logos or watermarks. No religious symbols.
-AVOID: circle badge, frame, border, sticker edge, paper card, 3D, glossy,
-text.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 Each message: `Aspect ratio 1:1. ICON:` + the motif.
@@ -761,29 +747,29 @@ pipeline upscales to 1920×1080 with Lanczos (`tools/waybook_assets.py`,
 ### STYLE-D (paste first)
 
 ```
-You are painting full-screen background scenes for the menus of a computer
-game, "Wayborne" — a medieval Anatolian-inspired caravan trading and
-survival game. Each scene is a view down onto a worn wooden desk or
-workspace belonging to one place in a caravan city.
+You are painting a single, wide background illustration for the menu
+screens of a computer game, "Wayborne" — a medieval Anatolian-inspired
+caravan trading and survival game. Each scene is a view down onto a worn
+wooden desk or workspace belonging to one place in a caravan city, as if
+you are standing at it.
 
-ART DIRECTION (identical for every scene):
-- Flat illustrative painting, ink-and-wash, firm dark ink contour
-  (#0E0D0F, never pure black), flat colour areas, soft gradients, one warm
-  light source (candle or window) from the left. NOT photorealistic, NOT
-  3D, NOT pixel art.
-- Muted palette: bone #E1D9C7, ink #0E0D0F, pale gold #DCB357 as the one
-  accent, dried blood #A83029, moss #5E6B3A, cold steel #6F7A82, torch
-  orange #D9822B, dark walnut browns.
-- COMPOSITION: 16:9, seen from slightly above. The CENTRE 65% of the width
-  is a calm, dark, mostly empty surface (dark wood or dark cloth) with very
-  little detail — UI text will be laid over it. All props sit at the LEFT
-  and RIGHT edges and along the bottom edge, partly cut off by the frame.
-- Everything worn and used, nothing new or shiny.
-- No readable text, letters or numbers anywhere (papers carry only
-  indistinct ink strokes). No logos, no watermarks, no frame or border,
-  no religious symbols.
-AVOID: text, letters, bright centre, clutter in the middle, frame, border,
-photorealism, 3D, glossy.
+Style: hand-illustrated ink-and-wash painting, aged parchment tones, warm
+sepia, burnished brown and deep burgundy palette, with visible paper grain
+and subtle brush texture — like the weathered pages of an 18th-century
+trade ledger. One warm light source, a candle or a window, from the left,
+with a gentle vignette darkening softly toward the four corners.
+
+Composition: seen from slightly above, 16:9 widescreen. The centre 65% of
+the width stays a calm, dark, mostly empty surface — dark wood or dark
+cloth, very little detail — because the game's own text is laid over it
+afterward. All props sit at the left and right edges and along the bottom
+edge, partly cut off by the frame, everything worn and used, nothing new
+or shiny.
+
+No text, no numbers, no readable symbols, no UI elements, no buttons, no
+icons, no hands, no people, no faces, no logos, no watermarks, no frame or
+border, no religious symbols — pure background environment art only, as
+high resolution as possible.
 ```
 
 ### D entries
@@ -809,9 +795,9 @@ Each message: `Aspect ratio 16:9.` + the SCENE line.
 
 - **Aspect ratio:** 1:1 unless noted. **Generate at:** 1024×1024.
 - **Output:** **PNG with the background removed** (for E-b6 the torn page edge stays, only the surround goes).
-- Style: paste **STYLE-C** first, but replace its first bullet with
-  *"One object, centred, filling about 80% of the square, painted with
-  more detail than an icon (it is shown large)."*
+- Style: paste **STYLE-C** first, but change its opening sentence to
+  *"Each object is centred, filling about 80% of the square, painted with
+  more detail than an icon since it will be shown large."*
 
 | ID | Seed | File | Aspect | Prompt |
 |---|---|---|---|---|
