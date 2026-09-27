@@ -44,6 +44,13 @@ entry whose background you have to remove yourself.
    and E is generated on a **flat, uniform mid-grey (RGB 140,140,140)**
    background so you can remove it cleanly; hand those back as PNG with
    transparency. A and D stay JPG.
+7. **Repeat the style line in every single message, not just the first.**
+   STYLE-X is pasted once at the top of the thread, but a model can quietly
+   drop that instruction a few messages in — or even on the very first one.
+   Every entry's prompt below already ends with its own short copy of
+   `Painterly ink-and-wash illustration style, gritty and tactile.` for
+   exactly this reason; keep that line when you paste, don't trim it as
+   redundant.
 
 ### Shared tags
 
@@ -115,7 +122,8 @@ green and cold steel grey tones.
 
 ### A entries
 
-Each message: `Aspect ratio 1:1.` + the SCENE line + the AVOID line.
+Each message: `Aspect ratio 1:1.` + the SCENE line + the AVOID line + the
+style line (already included at the end of every block below).
 
 **A-a · wildlife_ambush** · seed 41201 · file `e6a_wildlife.jpg`
 ```
@@ -125,6 +133,7 @@ animal is unclear, only the feeling that something is watching. The caravan
 is not in frame; this is what it sees. Cold blue-green shadow, the last
 warm light low on the left.
 AVOID: text, frame, clearly identifiable animal, gore.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-b · wolf_pack** · seed 41202 · file `e6b_wolves.jpg`
@@ -134,6 +143,7 @@ backs, teeth slightly bared, walking parallel to the road and looking
 sideways toward the viewer as if tracking the caravan. Cold blue-grey
 moonlight, their breath visible, paw prints in the snow in front.
 AVOID: text, frame, cartoon wolves, gore.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-c · bandit_ambush** · seed 41203 · file `e6c_bandits.jpg`
@@ -143,6 +153,7 @@ camera, faces wrapped in dull cloth, holding a curved sword, a spear and a
 short bow. Threatening, planted stance. Behind them a steep rocky gorge.
 Late afternoon light from the left, long shadows toward the viewer.
 AVOID: text, frame, heroic poses, shiny armour, gore.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-d · guard_checkpoint** · seed 41204 · file `e6d_guard.jpg`
@@ -153,6 +164,7 @@ wooden road barrier and a plain pennant pole with an unmarked cloth
 banner. A second guard in the background leaning on a post. Overcast
 daylight.
 AVOID: text, frame, heraldry, symbols on the banner, crosses, crescents.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-e · traveler_wanderer** · seed 41205 · file `e6e_traveler.jpg`
@@ -162,6 +174,7 @@ heavy pack and a walking staff, turned toward the viewer, neither friendly
 nor hostile — an uncertain, weighing posture. Open steppe behind, low
 hills in haze, a single leafless tree.
 AVOID: text, frame, detailed face.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-f · merchant_caravan** · seed 41206 · file `e6f_merchant.jpg`
@@ -171,6 +184,7 @@ road: one or two ox carts with arched canvas covers, a few merchants on
 foot, one raising a hand in greeting. The oxen have a visible shoulder hump
 and are yoked to the cart by a draught pole. Warm midday haze.
 AVOID: text, frame, horses pulling carts, camels.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-g · pilgrim** · seed 41207 · file `e6g_pilgrim.jpg`
@@ -180,6 +194,7 @@ holding a tall staff with a few knotted cords hanging from it, walking
 along a ridge path. A sense of quiet devotion, not threat. Soft dawn light,
 a distant snowy peak (the mountain folk's sacred summit) in haze.
 AVOID: text, frame, crosses, prayer beads of a real religion, halos.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-h · roadside_shrine** · seed 41208 · file `e6h_shrine.jpg`
@@ -189,6 +204,7 @@ cairn-like pillar with a flat stone on top. Faded cloth ribbons tied to a
 stick, a few worn coins and a burnt-out candle stub on the stone. No one
 there, only the structure. Grass growing around its base, late evening.
 AVOID: text, frame, carved symbols, crosses, crescents, statues of gods.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-i · mountain_pass** · seed 41209 · file `e6i_pass.jpg`
@@ -197,6 +213,7 @@ SCENE: A narrow mountain pass between two steep cliff walls; the road
 climbs and bends upward out of sight. Loose scree on the slopes, a snowy
 summit far behind in haze, a cold wind carrying snow off the ridge.
 AVOID: text, frame, people, buildings.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-j · hamlet_wounded** · seed 41210 · file `e6j_hamlet.jpg`
@@ -206,6 +223,7 @@ front of one hut a wounded figure sits slumped on the ground against the
 wall, a bloodied cloth around one leg, looking toward the road as if
 waiting for help. Grey overcast light, smoke from one chimney.
 AVOID: text, frame, gore, graphic wounds.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-k · frontier_outpost** · seed 41211 · file `e6k_outpost.jpg`
@@ -215,6 +233,7 @@ simple wooden watchtower, two or three tents, a faded plain flag on a
 pole. A single sentry silhouette on the tower. Dry steppe around it,
 evening light.
 AVOID: text, frame, heraldry or symbols on the flag.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-l · mine_collapse** · seed 41212 · file `e6l_mine.jpg`
@@ -224,6 +243,7 @@ collapsed, dust and smoke still pouring out of the dark opening. An
 abandoned pickaxe and an overturned ore cart near the entrance. Harsh
 flat daylight, dust haze.
 AVOID: text, frame, gore, bodies.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-m · failing_bridge** · seed 41213 · file `e6m_bridge.jpg`
@@ -232,6 +252,7 @@ SCENE: An old wooden plank bridge over a fast stream. One plank is broken
 and hangs down; the whole bridge sags at an uneasy angle; white water
 rushes below. Wet stones on the banks, alder bushes, overcast light.
 AVOID: text, frame, people.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-n · storm_weather** · seed 41214 · file `e6n_storm.jpg`
@@ -241,6 +262,7 @@ open plains; a distant lightning strike; a few trees bent flat by the wind;
 rain curtains in the distance. The caravan is not in frame — only the sky
 waiting for it.
 AVOID: text, frame, people.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-o · landslide** · seed 41215 · file `e6o_landslide.jpg`
@@ -249,6 +271,7 @@ SCENE: A fresh landslide of earth and boulders half blocking a mountain
 road; a fallen pine lies across one lane; dust still hangs in the air.
 Cracked slope above, loose stones mid-fall.
 AVOID: text, frame, people.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-p · broken_wagon** · seed 41216 · file `e6p_wagon.jpg`
@@ -258,6 +281,7 @@ broken with snapped spokes, its canvas cover torn, sacks and jars
 scattered around it. The owner is nowhere to be seen. Late afternoon,
 long shadows.
 AVOID: text, frame, bodies.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-q · camp_night** · seed 41217 · file `e6q_camp.jpg`
@@ -267,6 +291,7 @@ wrapped in blankets and cloaks. The orange firelight lights their faces
 from below; they sit a little apart from each other, faces closed,
 tired or tense. A wagon silhouette behind them, dark sky with a few stars.
 AVOID: text, frame, cheerful mood, detailed faces.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-r · wayside_grave** · seed 41218 · file `e6r_grave.jpg`
@@ -275,6 +300,7 @@ SCENE: A simple grave at the roadside: a low mound of earth with an upright
 rough stone as a marker, a faded strip of cloth tied around the stone, a
 few wilted wildflowers. Silent and abandoned, grey dawn light.
 AVOID: text, frame, crosses, carved letters or symbols.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-s · creditor_rider** · seed 41219 · file `e6s_creditor.jpg`
@@ -284,6 +310,7 @@ blocking the road on a grey horse, holding up a rolled document sealed
 with red wax. Stern posture, looking down at the viewer. Two armed riders
 blurred in the background. Cold morning light.
 AVOID: text, frame, readable writing on the document.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-t · world_news** · seed 41220 · file `e6t_news.jpg`
@@ -293,6 +320,7 @@ its paper curling, a red wax seal at the bottom; the writing is only
 indistinct ink strokes. Behind it, the backs and silhouettes of three or
 four curious travellers gathered to look.
 AVOID: readable text, letters, numbers, frame.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **A-u · forgotten_cache** · seed 41221 · file `e6u_cache.jpg`
@@ -302,6 +330,7 @@ covered with moss and roots, the lid slightly ajar with a glint of pale
 gold inside. It has clearly been there a long time. Forest floor, dappled
 light.
 AVOID: text, frame, piles of treasure.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 ---
@@ -375,7 +404,8 @@ runes, no religious symbols, no text, letters, logos or watermarks.
 ### B entries
 
 Each message: `Aspect ratio 2:3. Use the attached template.` + the ITEM
-block. "Cells" lists what must be painted; everything else stays empty.
+block (already ends with the style line) + the Cells line. "Cells" lists
+what must be painted; everything else stays empty.
 
 #### B0 — skin layer (optional)
 
@@ -389,6 +419,7 @@ red-dot line).
 Paint it in NEUTRAL LIGHT GREY tones only (#D8D8D8 base, #A8A8A8 shade,
 dark ink contour) — the game tints it with each character's skin colour.
 Cells: head, torso, upper_arm, forearm, hand, thigh, shin, foot.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B1 — hats (slot: hat)
@@ -400,6 +431,7 @@ and drovers: rounded crown, a short upturned brim at the front, a stitched
 seam along the side. It sits on top of the head down to the ears; the face
 stays empty.
 Cells: head only.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-02 · hat_hood** · seed 52102 · item_id `hat_hood` · "Travelling Hood"
@@ -409,6 +441,7 @@ drawn slightly forward over the brow, falling to the neck and the top of
 the shoulders. The face opening stays empty. The hood's lower edge may
 spill a little into the top of the torso cell as a short shoulder cape.
 Cells: head (main), torso (only the short shoulder cape, top edge).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B2 — shirts (slot: shirt, under everything)
@@ -419,6 +452,7 @@ ITEM: A plain undyed linen shirt (#D1C7A8), loose and slightly creased,
 collarless with a short slit at the neck, long sleeves ending just above
 the wrist, hem tucked at the waist. Thin, soft fabric.
 Cells: torso, upper_arm, forearm.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-04 · shirt_dyed** · seed 52104 · item_id `shirt_dyed` · "Dyed Shirt"
@@ -428,6 +462,7 @@ washing, a narrow woven band along the collar and cuffs in pale gold
 (#DCB357). Long sleeves to the wrist, belted at the waist with a thin
 cord.
 Cells: torso, upper_arm, forearm.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B3 — jackets (slot: jacket, over shirt and armour)
@@ -440,6 +475,7 @@ wider at the cuff, a darker felt trim along the front edge and hem. Worn
 patches at the elbows.
 Cells: torso (with the coat's skirt hanging below the hip), upper_arm,
 forearm, thigh (only the coat's skirt over the upper thigh).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-06 · jacket_leather** · seed 52106 · item_id `jacket_leather` · "Leather Jerkin"
@@ -448,6 +484,7 @@ ITEM: A dark oiled leather jerkin (#4D3324), sleeveless body with short
 cap sleeves over the shoulder, laced up the front with leather thongs,
 scuffed and creased, a broad belt with a simple iron buckle.
 Cells: torso, upper_arm (cap sleeve only, top third).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B4 — gloves (slot: gloves)
@@ -457,6 +494,7 @@ Cells: torso, upper_arm (cap sleeve only, top third).
 ITEM: Brown work gloves of thick leather (#57402E) with a short flared
 cuff that covers the lower forearm, stitched seams on the back of the hand.
 Cells: hand, forearm (only the cuff, near the blue-dot end).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B5 — trousers (slot: pants)
@@ -466,6 +504,7 @@ Cells: hand, forearm (only the cuff, near the blue-dot end).
 ITEM: Dark grey-brown wool trousers (#47423D), loose at the thigh, wrapped
 tight below the knee with cloth puttee bands up the shin.
 Cells: thigh, shin.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-09 · pants_canvas** · seed 52109 · item_id `pants_canvas` · "Canvas Trousers"
@@ -474,6 +513,7 @@ ITEM: Light sand-coloured canvas trousers (#948A70), baggy in the Anatolian
 şalvar cut — full at the thigh, gathered at the ankle — dusty at the hem,
 a patched knee.
 Cells: thigh, shin.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B6 — footwear (slot: shoes)
@@ -485,6 +525,7 @@ knee, a slightly upturned toe, worn creases at the ankle, a thin sole.
 The sole must sit exactly on the red dot's horizontal line in the foot
 cell (that line is the ground).
 Cells: shin (boot shaft), foot.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-11 · shoes_sandals** · seed 52111 · item_id `shoes_sandals` · "Sandals"
@@ -494,6 +535,7 @@ foot and two thin straps wrapping the lower ankle. The foot itself is NOT
 painted — only the sole and straps (the body layer shows through between
 the straps; leave those gaps empty).
 Cells: foot, shin (only the ankle straps at the lower end).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B7 — armour (slot: armor, over shirt, under jacket)
@@ -506,6 +548,7 @@ the upper thigh, small leather shoulder guards. Brown and dark tan
 (#5A3F2A / #7A5A3C), stitched, scuffed, matte.
 Cells: torso, upper_arm (shoulder guard, top third), thigh (hanging
 strips, top third).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-13 · armor_tier_2** · seed 52113 · item_id `armor_tier_2` · "Chain Shirt"
@@ -515,6 +558,7 @@ reaching mid-thigh, with elbow-length mail sleeves, worn over a quilted
 under-coat whose padded edge shows at the neck and hem. The mail is shown
 as a fine ring texture, not individual shiny rings; dull, slightly rusty.
 Cells: torso, upper_arm, thigh (mail skirt, top half).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-14 · armor_tier_3** · seed 52114 · item_id `armor_tier_3` · "Plate Armor"
@@ -525,6 +569,7 @@ vambrace on the forearm, lamellar tassets over the thigh, a riveted iron
 gorget at the neck. Dull iron (#6F7A82) with dark leather lacing and a thin
 pale-gold (#DCB357) edge on the pauldron — worn, dented, never polished.
 Cells: torso, upper_arm, forearm, thigh.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B8 — weapons (slot: weapon, held in the front hand)
@@ -540,6 +585,7 @@ blade, simple cross guard, leather-wrapped grip, round iron pommel. Grey
 steel, a few nicks on the edge. Grip on the red dot, pommel just above it,
 blade pointing straight DOWN toward the blue dot and beyond.
 Cells: weapon only.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-16 · weapon_tier_2** · seed 52116 · item_id `weapon_tier_2` · "Master's Sword"
@@ -550,6 +596,7 @@ downturned ends, a grip wrapped in dark leather, a brass (#DCB357, dulled)
 cap on the pommel. Grip on the red dot, blade pointing DOWN, the curve
 bending toward the right.
 Cells: weapon only.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-17 · weapon_tier_3** · seed 52117 · item_id `weapon_tier_3` · "Falcon Sword"
@@ -560,6 +607,7 @@ two ends are shaped like folded falcon wings, a grip bound in dark red
 cord (#A83029), a falcon-head pommel. Still worn and matte, not glowing.
 Grip on the red dot, blade pointing DOWN, curve bending toward the right.
 Cells: weapon only.
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B9 — charms (slot: amulet, worn at the chest)
@@ -572,6 +620,7 @@ ITEM: A small folded triangular cloth charm (muska) in faded red wool,
 stitched shut, hanging from a dark cord around the neck; the cord runs up
 toward the neck, the charm rests on the upper chest.
 Cells: torso only (upper chest, near the red dot).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-19 · amulet_wolf_fang** · seed 52119 · item_id `amulet_wolf_fang` · "Wolf Fang Pendant"
@@ -579,6 +628,7 @@ Cells: torso only (upper chest, near the red dot).
 ITEM: A single large yellowed wolf fang bound with a leather thong, hung
 on a braided cord around the neck, resting on the upper chest.
 Cells: torso only (upper chest).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 **B-20 · amulet_courage** · seed 52120 · item_id `amulet_courage` · "Courage Charm"
@@ -587,6 +637,7 @@ ITEM: A flat bronze disc pendant (dull #B08A4A), its face hammered with a
 simple radiating pattern (no letters, no religious sign), on a thin chain
 around the neck, resting on the upper chest.
 Cells: torso only (upper chest).
+Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
 #### B10 — optional back-limb variants
@@ -631,7 +682,8 @@ text, letters, numbers, logos, watermarks or religious symbols.
 Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
-Each message: `Aspect ratio 1:1. ICON:` + the motif.
+Each message: `Aspect ratio 1:1. ICON:` + the motif + `. Painterly
+ink-and-wash illustration style, gritty and tactile.`
 
 ### C1 — stats (P3) · seeds 53101-53108
 
@@ -774,7 +826,8 @@ high resolution as possible.
 
 ### D entries
 
-Each message: `Aspect ratio 16:9.` + the SCENE line.
+Each message: `Aspect ratio 16:9.` + the SCENE line + `Painterly
+ink-and-wash illustration style, gritty and tactile.`
 
 | ID | Seed | File | SCENE |
 |---|---|---|---|
@@ -798,6 +851,8 @@ Each message: `Aspect ratio 16:9.` + the SCENE line.
 - Style: paste **STYLE-C** first, but change its opening sentence to
   *"Each object is centred, filling about 80% of the square, painted with
   more detail than an icon since it will be shown large."*
+- Each message: the Aspect line + the Prompt text + `Painterly ink-and-wash
+  illustration style, gritty and tactile.`
 
 | ID | Seed | File | Aspect | Prompt |
 |---|---|---|---|---|
