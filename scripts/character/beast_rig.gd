@@ -257,7 +257,7 @@ static func part_texture(layer: String, part: String) -> Texture2D:
 ## Tür sprite'la çizilir mi: gövdesinin resmi varsa. Yarım bir hayvanı
 ## (yalnızca baş) prosedürel gövdeye yapıştırmak iki çizim dilini karıştırırdı.
 static func has_sprites(species: String) -> bool:
-	return part_texture(species, "body") != null
+	return skin_of(species) != null or part_texture(species, "body") != null
 
 ## Türün ve resmi olan takımlarının katmanları, alttan üste.
 static func layers_for(species: String) -> PackedStringArray:
@@ -307,3 +307,200 @@ static func draw_sprites(
 
 static func clear_cache() -> void:
 	_cache.clear()
+	_skins.clear()
+
+# --- Deri (tek parça resim + ağırlıklı ağ) ---
+#
+# Parça sprite'ları her kemikte ayrı döndüğü için eklemde ya ayrılıyor ya üst
+# üste biniyor; bir `BeastSkin` varsa tür bunun yerine tek parça resmini
+# kemiklere ağırlıkla bağlı bir ağla büküyor. İskeletin oranları da resmin
+# kendi iskeletinden geliyor: dinlenme pozu resmin çizildiği pozun ta kendisi,
+# kemik boyları hiç değişmiyor - bir eklem yalnızca dönüyor.
+
+const SKIN_FILE: String = "skin.tres"
+static var _skins: Dictionary = {}
+
+static func skin_of(species: String) -> BeastSkin:
+	if _skins.has(species):
+		return _skins[species]
+	var path := "%s%s/%s" % [root_path, species, SKIN_FILE]
+	var skin: BeastSkin = null
+	if ResourceLoader.exists(path):
+		skin = load(path) as BeastSkin
+	_skins[species] = skin
+	return skin
+
+## Çizimde kullanılan poz: derisi olan türde resmin iskeletinden, yoksa
+## `pose()`. `pose()` saf kalıyor - testleri ve şablon araçları onu okuyor.
+static func draw_pose(
+	species: String, ground: Vector2, h: float, phase: float, motion: float, facing: float
+) -> Dictionary:
+	var skin := skin_of(species)
+	if skin == null:
+		return pose(species, ground, h, phase, motion, facing)
+	return skin_pose(skin, species, ground, h, phase, motion, facing)
+
+## Çizimin kapladığı kutu, `h` = 1 için - savaş kutusu hayvanı buna sığdırıyor.
+static func draw_extent(species: String) -> Rect2:
+	var skin := skin_of(species)
+	if skin == null:
+		return extent(species)
+	var box := Rect2(skin.vertices[0], Vector2.ZERO)
+	for v in skin.vertices:
+		box = box.expand(v)
+	return Rect2(box.position / skin.ref_h, box.size / skin.ref_h)
+
+## Gölgenin genişliği için omuz-kalça aralığı, `h` cinsinden.
+static func body_span(species: String) -> float:
+	var skin := skin_of(species)
+	if skin == null:
+		return float(spec_of(species).span)
+	return absf(skin.joint("shoulder_top").x - skin.joint("hip_top").x) / skin.ref_h
+
+static func draw_species(
+	canvas: CanvasItem, species: String, joints: Dictionary, h: float, facing: float, tone: Color,
+	base: Transform2D = Transform2D.IDENTITY
+) -> void:
+	var skin := skin_of(species)
+	if skin == null:
+		draw_sprites(canvas, species, joints, h, facing, tone, base)
+	else:
+		draw_skin(canvas, species, skin, joints, h, facing, tone, base)
+
+static func _placed(skin: BeastSkin, name: String, k: float, facing: float) -> Vector2:
+	var p := skin.joint(name)
+	return Vector2(p.x * facing, p.y) * k
+
+## `pose()`'un aynı yürüyüşü (dört vuruş, adım, kaldırma, sallanma, baş
+## sallama), ama oranlar resmin iskeletinden: `motion` 0'da her eklem resmin
+## çizildiği yerde, yani resim bükülmeden çiziliyor.
+static func skin_pose(
+	skin: BeastSkin, species: String, ground: Vector2, h: float, phase: float, motion: float,
+	facing: float
+) -> Dictionary:
+	var k := h / skin.ref_h
+	var joints := {"ground": ground}
+	var up := Vector2(0.0, sin(phase * 2.0) * h * BOB_RATIO * motion)
+	for name in ["hip_top", "shoulder_top", "saddle"]:
+		joints[name] = ground + _placed(skin, name, k, facing) + up
+	for end in ["fore", "hind"]:
+		for side in ["near", "far"]:
+			var key := "%s_%s_" % [end, side]
+			var root: Vector2 = ground + _placed(skin, key + "root", k, facing) + up
+			var rest_foot: Vector2 = ground + _placed(skin, key + "foot", k, facing)
+			var leg_phase := phase + float(PHASES["%s_%s" % [end, side]])
+			var foot := Vector2(
+				rest_foot.x + cos(leg_phase) * h * STRIDE_RATIO * motion * facing,
+				rest_foot.y - maxf(0.0, sin(leg_phase)) * h * LIFT_RATIO * motion
+			)
+			var upper := (skin.joint(key + "knee") - skin.joint(key + "root")).length() * k
+			var lower := (skin.joint(key + "foot") - skin.joint(key + "knee")).length() * k
+			# Adım bacağın boyunu aşıyorsa ayak kalçaya doğru çekiliyor (biraz
+			# kalkıyor): yere sabitlenirse alt bacak resmi gerilirdi.
+			var reach := upper + lower
+			if root.distance_to(foot) > reach:
+				foot = root + (foot - root).normalized() * reach
+			joints[key + "root"] = root
+			joints[key + "knee"] = FigureRig.solve_joint(root, foot, upper, lower, skin_bend(skin, key) * facing)
+			joints[key + "foot"] = foot
+			joints[key + "toe"] = foot + _placed(skin, key + "toe", k, facing) - _placed(skin, key + "foot", k, facing)
+
+	var shoulder: Vector2 = joints.shoulder_top
+	var neck_base := shoulder + _placed(skin, "neck_base", k, facing) - _placed(skin, "shoulder_top", k, facing)
+	var nod := float(spec_of(species).nod) * h * motion * maxf(0.0, sin(phase * 2.0))
+	var poll := _swung(neck_base, _placed(skin, "poll", k, facing) - _placed(skin, "neck_base", k, facing), nod)
+	joints["neck_base"] = neck_base
+	joints["poll"] = poll
+	joints["muzzle"] = poll + _placed(skin, "muzzle", k, facing) - _placed(skin, "poll", k, facing)
+	var hip: Vector2 = joints.hip_top
+	var tail_root := hip + _placed(skin, "tail_root", k, facing) - _placed(skin, "hip_top", k, facing)
+	var sway := sin(phase) * h * TAIL_SWAY_RATIO * motion
+	joints["tail_root"] = tail_root
+	joints["tail_tip"] = _swung(tail_root, _placed(skin, "tail_tip", k, facing) - _placed(skin, "tail_root", k, facing), sway)
+	return joints
+
+## Baş sallama ve kuyruk salınımı ucu aşağı kaydırıyor ama kemiği uzatmadan:
+## uç, kökün etrafında dönüyor.
+static func _swung(root: Vector2, rest: Vector2, drop: float) -> Vector2:
+	return root + (rest + Vector2(0.0, drop)).normalized() * rest.length()
+
+## Resmin dizini hangi yana kırılıyor. İki çözümden hangisi resmin kendi dizini
+## veriyorsa o; bir kural (ön ileri, arka geri) resim o kurala uymuyorsa
+## dinlenme pozunda bacağı ters çevirirdi.
+static func skin_bend(skin: BeastSkin, key: String) -> float:
+	var root := skin.joint(key + "root")
+	var knee := skin.joint(key + "knee")
+	var foot := skin.joint(key + "foot")
+	var upper := (knee - root).length()
+	var lower := (foot - knee).length()
+	var plus := FigureRig.solve_joint(root, foot, upper, lower, 1.0)
+	var minus := FigureRig.solve_joint(root, foot, upper, lower, -1.0)
+	return 1.0 if plus.distance_to(knee) <= minus.distance_to(knee) else -1.0
+
+## Resmin (`ref_h` ölçeğinde) bir noktasını bu kemiğin şimdiki yerine taşıyan
+## dönüşüm: resmin iskeletindeki kemik, pozdaki kemiğin üstüne döndürülüp
+## kaydırılıyor. Boylar eşit olduğu için ölçek yalnızca `h / ref_h`.
+static func skin_bone_transform(
+	skin: BeastSkin, bone: String, joints: Dictionary, h: float, facing: float
+) -> Transform2D:
+	var spec: Dictionary = BONES[bone]
+	var ground: Vector2 = joints.get("ground", Vector2.ZERO)
+	var k := h / skin.ref_h
+	var a_rest := ground + _placed(skin, spec.a, k, facing)
+	var b_rest := ground + _placed(skin, spec.b, k, facing)
+	var a_now: Vector2 = joints[spec.a]
+	var b_now: Vector2 = joints[spec.b]
+	var theta := 0.0
+	if (b_now - a_now).length() > 0.0001 and (b_rest - a_rest).length() > 0.0001:
+		theta = (b_now - a_now).angle() - (b_rest - a_rest).angle()
+	return Transform2D(
+		Vector2(facing * k, 0.0).rotated(theta),
+		Vector2(0.0, k).rotated(theta),
+		a_now + (ground - a_rest).rotated(theta)
+	)
+
+## Ağın her köşesi, ağırlıklı kemiklerinin dönüşümlerinin karışımı (doğrusal
+## karışımlı deri - linear blend skinning).
+static func skin_deform(skin: BeastSkin, joints: Dictionary, h: float, facing: float) -> PackedVector2Array:
+	var xforms: Array[Transform2D] = []
+	for bone in skin.bone_names:
+		xforms.append(skin_bone_transform(skin, bone, joints, h, facing))
+	var verts := skin.vertices
+	var ids := skin.bone_ids
+	var weights := skin.bone_weights
+	var out := PackedVector2Array()
+	out.resize(verts.size())
+	for i in verts.size():
+		var v := verts[i]
+		var p := Vector2.ZERO
+		for n in BeastSkin.INFLUENCES:
+			var w := weights[i * BeastSkin.INFLUENCES + n]
+			if w > 0.0:
+				p += (xforms[ids[i * BeastSkin.INFLUENCES + n]] * v) * w
+		out[i] = p
+	return out
+
+static func draw_skin(
+	canvas: CanvasItem, species: String, skin: BeastSkin, joints: Dictionary, h: float,
+	facing: float, tone: Color, base: Transform2D = Transform2D.IDENTITY
+) -> void:
+	var points := skin_deform(skin, joints, h, facing)
+	var item := canvas.get_canvas_item()
+	canvas.draw_set_transform_matrix(base)
+	for layer in skin.layer_count():
+		var texture := part_texture(species, skin.layer_textures[layer].get_basename())
+		if texture == null:
+			continue
+		var v0 := skin.layer_vertex_offsets[layer]
+		var v1 := skin.layer_vertex_offsets[layer + 1]
+		var shade := tone
+		if skin.layer_far[layer] == 1:
+			shade = Color(
+				tone.r * Wardrobe.BACK_SHADE.r, tone.g * Wardrobe.BACK_SHADE.g,
+				tone.b * Wardrobe.BACK_SHADE.b, tone.a
+			)
+		RenderingServer.canvas_item_add_triangle_array(
+			item, skin.layer_indices(layer), points.slice(v0, v1), PackedColorArray([shade]),
+			skin.layer_uvs(layer), PackedInt32Array(), PackedFloat32Array(), texture.get_rid()
+		)
+	canvas.draw_set_transform_matrix(base)
