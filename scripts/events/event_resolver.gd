@@ -49,6 +49,20 @@ static func stop_context(stop: String) -> Dictionary:
 		context[STOP_CONTEXT_KEYS[stop_id]] = 1.0 if stop == stop_id else 0.0
 	return context
 
+## `stop_context`in aynı deseni, o günkü arazinin kendisi için - bkz.
+## evt_hunting_trip: erkek geyik/geyik ormanda ve dağda yaşar, bir bozkır
+## gününde avlanma girişiminin ağırlığı taban kalır.
+const BIOME_CONTEXT_KEYS: Dictionary = {
+	ArtPalette.BIOME_FOREST: "near_forest",
+	ArtPalette.BIOME_MOUNTAIN: "near_mountain",
+}
+
+static func biome_context(biome: String) -> Dictionary:
+	var context := {}
+	for biome_id in BIOME_CONTEXT_KEYS:
+		context[BIOME_CONTEXT_KEYS[biome_id]] = 1.0 if biome == biome_id else 0.0
+	return context
+
 ## `apply_effects`: etkileri uygulayan kanca. Boşsa doğrudan
 ## `EventEffectApplier.apply()`; yol ekranı kendi sarmalayıcısını veriyor
 ## (TRAVEL_DAYS'in yolun uzunluğuna yazılması - bkz. road_journey.gd

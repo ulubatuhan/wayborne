@@ -19,6 +19,18 @@ var wallet: Wallet
 ## `add_to_cargo()`/`remove_from_cargo_or_bags()` üzerinden erişir, tek
 ## bir vagonu doğrudan okumaz.
 var wagon_inventories: Array[Inventory] = []
+## Eşeklerin/yarım vagonların taşıdığı ek yük - `wagon_inventories`'in
+## dışında, tek bir `Inventory`. Vagonlardan ayrı tutulmasının sebebi
+## `_sync_wagon_inventories()`'in kendi değişmezi: o dizi her zaman tam
+## `owned_wagon_count` uzunluğunda olmak zorunda (WagonPanel'in vagon
+## indeksiyle açtığı ekran, her vagonun kendi tayfası/öküzü bunun üstüne
+## kurulu) - eşek/yarım vagon sayısını da o diziye eklemek ya onları
+## birer tam vagon gibi (kendi tayfası, parti kapasitesi) davranmaya
+## zorlardı ya da senkronu bozardı. Kişisel çantanın (bkz.
+## CharacterData.personal_inventory) ikinci bir toplama havuzu olması
+## gibi, bu da üçüncü bir havuz - bkz. get_extra_cargo_capacity,
+## _sync_pack_inventory.
+var pack_inventory: Inventory
 var caravan: CaravanState
 
 ## Borç defteri (bkz. DebtLedger). Kervan yok olmaz ama borca batabilir:
@@ -919,6 +931,13 @@ func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
 	for character in get_party():
 		var effective := character.stats.get_effective_value(kind) + character.get_check_modifier(kind)
 		best = maxf(best, effective)
+	# Husky'nin "iz sürme/awareness" faydası (bkz. get_dog_perception_bonus):
+	# kervanın hiçbir kişisine değil, Sezgi'nin kendisine binen küçük ve
+	# tavanlı bir pay - hangi karakterin "en iyi" sayıldığını değiştirmez
+	# (bkz. get_best_stat_holder, bilerek dokunulmadı), yalnızca o statın
+	# check'lere giren sayısını büyütür.
+	if kind == CharacterStats.Kind.PERCEPTION:
+		best += get_dog_perception_bonus()
 	return best
 
 ## `get_best_effective_stat()`'ın sahibi: sayı değil kişi. Bir zar "Sezgi
@@ -950,7 +969,10 @@ func get_leader_effective_stat(kind: CharacterStats.Kind) -> float:
 	var player := get_player_character()
 	if player == null:
 		return 0.0
-	return player.stats.get_effective_value(kind) + player.get_check_modifier(kind)
+	var effective := player.stats.get_effective_value(kind) + player.get_check_modifier(kind)
+	if kind == CharacterStats.Kind.PERCEPTION:
+		effective += get_dog_perception_bonus()
+	return effective
 
 func party_has_trait(trait_id: String) -> bool:
 	for character in get_party():
@@ -1225,7 +1247,8 @@ func get_daily_provision_consumption() -> int:
 		caravan.merchant_names.size(),
 		get_daily_provision_multiplier(),
 		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
-		CaravanPlan.height_adjustment_for(party)
+		CaravanPlan.height_adjustment_for(party),
+		get_pack_animal_provision_mouths()
 	)
 
 ## Akşam sofrası: erzak artık her gün sessizce, herkese eşit dağılmıyor -
@@ -1706,6 +1729,138 @@ func repair_wagons() -> bool:
 	owned_wagon_damaged = 0
 	return true
 
+## --- Husky, eşek ve yarım vagon ---
+## Üçü de Kervan Avlusu'nda satın alınıyor (bkz. caravan_yard.gd), üçü de
+## `owned_wagon_count`'a hiç dokunmuyor - ne biri parti kapasitesi açıyor
+## (bkz. MAX_PARTY_SIZE'ın "savaş alanı dört mevki" gerekçesi: köpek/eşek
+## dördüncü bir savaşçı değil), ne WagonPanel'in vagon-indeksli
+## etkileşimine giriyorlar. Dünyada `world_hub.gd` liderin yakınında
+## yürüyen küçük figürler olarak gösteriyor (bkz. WalkFigure.KIND_DOG/
+## KIND_DONKEY).
+var owned_dogs: int = 0
+var owned_donkeys: int = 0
+var owned_half_wagons: int = 0
+
+## En fazla iki köpek: "iz sürme/awareness" faydası (bkz.
+## get_dog_perception_bonus) taban Sezgi'nin küçük bir payı olmalı, ikiden
+## fazlası bu payı bir stat'ı geçersiz kılacak noktaya taşırdı - "bir stat
+## bir sistemi asla tamamen kapatmaz" kuralının tersi: burada kapatılmaması
+## gereken şey statın kendisinin anlamı.
+const MAX_DOGS: int = 2
+const DOG_ADOPTION_BASE_COST: int = 80
+const DOG_ADOPTION_COST_STEP: int = 40
+
+func get_next_dog_cost() -> int:
+	return DOG_ADOPTION_BASE_COST + owned_dogs * DOG_ADOPTION_COST_STEP
+
+func can_adopt_dog() -> bool:
+	return owned_dogs < MAX_DOGS
+
+## Başarısızsa (kese yetmez ya da limit dolu) hiçbir şey değişmez - vagon
+## satın almanın aynı "hepsi ya da hiçbiri" kuralı.
+func adopt_dog() -> bool:
+	if not can_adopt_dog():
+		return false
+	var cost := get_next_dog_cost()
+	if not wallet.can_afford(cost):
+		return false
+	wallet.spend(cost)
+	owned_dogs += 1
+	return true
+
+## Bir insan gibi besleniyor - CaravanPlan.daily_consumption'ın erzak
+## formülüne tam bir ağız değil, kesirli bir pay olarak giriyor (bkz.
+## get_pack_animal_provision_mouths). Bir köpek bir insan kadar yemiyor.
+const DOG_PROVISION_SHARE: float = 0.4
+## Eşek/yarım vagonun kendi çeken hayvanı da besleniyor, köpekten daha
+## küçük bir payla - kervanın asıl mürettebatı değiller.
+const PACK_ANIMAL_PROVISION_SHARE: float = 0.3
+
+## Sezgi'nin (Perception) taban değerine binen küçük, tavanlı bir pay -
+## huyların check_bonus'uyla aynı "stat + küçük ek" formülü. `get_best_
+## effective_stat`/`get_leader_effective_stat` yalnızca PERCEPTION için
+## bunu ekliyor, o yüzden "iz sürme/awareness" dışındaki hiçbir check
+## etkilenmiyor.
+const DOG_PERCEPTION_BONUS_PER_DOG: float = 0.6
+const MAX_DOG_PERCEPTION_BONUS: float = 1.2
+
+func get_dog_perception_bonus() -> float:
+	return minf(MAX_DOG_PERCEPTION_BONUS, float(owned_dogs) * DOG_PERCEPTION_BONUS_PER_DOG)
+
+## "Küçük ölçüde" moral katkısı - DEPARTURE_TEMPERAMENT_BONUS_CAP'in (6)
+## yarısı büyüklüğünde bir tavan, hardship/stres payını asla ezmesin diye.
+const DOG_MORALE_BONUS_PER_DOG: int = 2
+
+func get_dog_morale_bonus() -> int:
+	return owned_dogs * DOG_MORALE_BONUS_PER_DOG
+
+## Eşek satın almak "ekstradan hacim" - kendi vagonu yok, kervanın ortak
+## yük fazlasına (bkz. pack_inventory) katkı veriyor.
+const MAX_DONKEYS: int = 3
+const DONKEY_PURCHASE_BASE_COST: int = 50
+const DONKEY_PURCHASE_COST_STEP: int = 20
+const CARGO_PER_DONKEY: float = 15.0
+
+func get_next_donkey_cost() -> int:
+	return DONKEY_PURCHASE_BASE_COST + owned_donkeys * DONKEY_PURCHASE_COST_STEP
+
+func can_buy_donkey() -> bool:
+	return owned_donkeys < MAX_DONKEYS
+
+func buy_donkey() -> bool:
+	if not can_buy_donkey():
+		return false
+	var cost := get_next_donkey_cost()
+	if not wallet.can_afford(cost):
+		return false
+	wallet.spend(cost)
+	owned_donkeys += 1
+	_sync_pack_inventory()
+	return true
+
+## "Yarım vagon": eşeğin çektiği tek tekerlekli araba. Tam bir vagondan
+## (owned_wagon_count) bilerek ayrı - kendi tayfası yok (PEOPLE_PER_WAGON
+## eklemiyor), parti kapasitesi açmıyor, yalnızca eşek gibi kervanın ortak
+## yük fazlasına katkı veriyor, biraz daha fazlasıyla (tam bir vagonun
+## yarısı kadar, adından da bu).
+const MAX_HALF_WAGONS: int = 3
+const HALF_WAGON_PURCHASE_BASE_COST: int = 90
+const HALF_WAGON_PURCHASE_COST_STEP: int = 30
+const CARGO_PER_HALF_WAGON: float = 25.0
+
+func get_next_half_wagon_cost() -> int:
+	return HALF_WAGON_PURCHASE_BASE_COST + owned_half_wagons * HALF_WAGON_PURCHASE_COST_STEP
+
+func can_buy_half_wagon() -> bool:
+	return owned_half_wagons < MAX_HALF_WAGONS
+
+func buy_half_wagon() -> bool:
+	if not can_buy_half_wagon():
+		return false
+	var cost := get_next_half_wagon_cost()
+	if not wallet.can_afford(cost):
+		return false
+	wallet.spend(cost)
+	owned_half_wagons += 1
+	_sync_pack_inventory()
+	return true
+
+## CaravanPlan.daily_consumption'ın `animal_mouths` payı - köpek + eşek +
+## yarım vagon toplamı, tek bir sayı olarak (bkz. height_adjustment'ın
+## aynı deseni: planlayıcı ve yol aynı formülü okusun diye tek yerde).
+func get_pack_animal_provision_mouths() -> float:
+	return (
+		float(owned_dogs) * DOG_PROVISION_SHARE
+		+ float(owned_donkeys + owned_half_wagons) * PACK_ANIMAL_PROVISION_SHARE
+	)
+
+func get_extra_cargo_capacity() -> float:
+	return float(owned_donkeys) * CARGO_PER_DONKEY + float(owned_half_wagons) * CARGO_PER_HALF_WAGON
+
+func _sync_pack_inventory() -> void:
+	pack_inventory.weight_limit = get_extra_cargo_capacity()
+	pack_inventory.exempt_item_ids = [PROVISIONS_ITEM_ID]
+
 ## Vagon başına taşınabilecek yük. Yalnızca pazardan alınan mallara
 ## uygulanır; erzak kendi sefer formülüyle sınırlı, kapasiteye dahil değil.
 const CARGO_PER_WAGON: float = 50.0
@@ -1730,6 +1885,8 @@ func _init(starting_gold: int = 250, starting_provisions: int = 20, starting_wag
 	wallet.balance_changed.connect(_on_balance_changed)
 	owned_wagon_count = clampi(starting_wagon_count, CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS)
 	_sync_wagon_inventories()
+	pack_inventory = Inventory.new()
+	_sync_pack_inventory()
 
 	_provisions_item = Item.new()
 	_provisions_item.item_id = PROVISIONS_ITEM_ID
@@ -1988,6 +2145,7 @@ func get_departure_morale() -> int:
 		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
 	)
 	morale += float(get_departure_temperament_bonus())
+	morale += float(get_dog_morale_bonus())
 	return clampi(int(round(morale)), DEPARTURE_MORALE_FLOOR, CaravanState.MAX_MORALE)
 
 ## Çıkış moralini oluşturan kalemler - planlayıcı ekranı oyuncuya bunu
@@ -2017,6 +2175,9 @@ func get_departure_morale_breakdown() -> Array[Dictionary]:
 	var temperament := get_departure_temperament_bonus()
 	if temperament != 0:
 		lines.append({"key": "UI_MORALE_TEMPERAMENT", "amount": temperament})
+	var dog_bonus := get_dog_morale_bonus()
+	if dog_bonus > 0:
+		lines.append({"key": "UI_MORALE_DOGS", "amount": dog_bonus})
 	return lines
 
 ## Planlayıcıda onaylanan kervanı yola çıkarır.
@@ -2348,7 +2509,7 @@ func _sync_wagon_inventories() -> void:
 			add_to_cargo(entry.item, entry.quantity)
 
 func get_cargo_capacity() -> float:
-	return owned_wagon_count * CARGO_PER_WAGON
+	return owned_wagon_count * CARGO_PER_WAGON + get_extra_cargo_capacity()
 
 ## Bir vagonun ne kadar dolu olduğu - bkz. `get_caravan_theoretical_speed()`,
 ## artık yalnızca bilgilendirici değil, yolun gerçek yürüyüş hızını da
@@ -2392,7 +2553,7 @@ func get_caravan_theoretical_speed() -> float:
 	return slowest
 
 func get_cargo_weight() -> float:
-	var total := 0.0
+	var total := pack_inventory.get_total_weight()
 	for wagon_inventory in wagon_inventories:
 		total += wagon_inventory.get_total_weight()
 	return total
@@ -2410,20 +2571,31 @@ func add_to_cargo(item: Item, quantity: int) -> bool:
 		return false
 	var remaining := quantity
 	var plan: Array[Dictionary] = []
-	for wagon_inventory in wagon_inventories:
+	# Eşeklerin/yarım vagonların ortak yük fazlası (pack_inventory) vagonların
+	# hemen ardından, aynı havuzda deneniyor - kişisel çantaların aksine bu
+	# normal kullanılabilir kapasitenin bir parçası, yalnızca taştığında
+	# başvurulan bir son çare değil (bkz. get_cargo_capacity).
+	var sources: Array[Inventory] = wagon_inventories.duplicate()
+	# `Inventory.weight_limit == 0.0` "sınırsız" demek (bkz. Inventory'nin
+	# kendi tanımı) - eşek/yarım vagon yoksa pack_inventory'nin gerçek
+	# kapasitesi sıfır, sınırsız değil. Yalnızca gerçek bir ek kapasite
+	# varken havuza katılıyor.
+	if pack_inventory.weight_limit > 0.0:
+		sources.append(pack_inventory)
+	for inventory in sources:
 		if remaining <= 0:
 			break
-		var addable := wagon_inventory.get_max_addable(item)
+		var addable := inventory.get_max_addable(item)
 		if addable <= 0:
 			continue
 		var take := mini(remaining, addable)
-		plan.append({"wagon": wagon_inventory, "quantity": take})
+		plan.append({"wagon": inventory, "quantity": take})
 		remaining -= take
 	if remaining > 0:
 		return false
 	for step in plan:
-		var wagon_inventory: Inventory = step.wagon
-		wagon_inventory.add_item(item, int(step.quantity))
+		var target_inventory: Inventory = step.wagon
+		target_inventory.add_item(item, int(step.quantity))
 	return true
 
 ## Vagonlara sığmayan küçük bir kazanç (bkz. Faz 13 evt_forgotten_cache gibi
@@ -2443,7 +2615,7 @@ func add_to_cargo_or_bag(item: Item, quantity: int) -> bool:
 ## "şehre gittiğimizde vagonlarımızın ve çantamızın toplamı" sorusunun
 ## tek bir malı için karşılığı.
 func get_total_quantity(item_id: String) -> int:
-	var total := 0
+	var total := pack_inventory.get_quantity(item_id)
 	for wagon_inventory in wagon_inventories:
 		total += wagon_inventory.get_quantity(item_id)
 	for character in get_party():
@@ -2465,6 +2637,11 @@ func remove_from_cargo_or_bags(item_id: String, quantity: int) -> bool:
 		if take > 0:
 			wagon_inventory.remove_item(item_id, take)
 			remaining -= take
+	if remaining > 0:
+		var pack_take := mini(remaining, pack_inventory.get_quantity(item_id))
+		if pack_take > 0:
+			pack_inventory.remove_item(item_id, pack_take)
+			remaining -= pack_take
 	for character in get_party():
 		if remaining <= 0:
 			break
@@ -2479,6 +2656,7 @@ func remove_from_cargo_or_bags(item_id: String, quantity: int) -> bool:
 ## ile aynı şekil: {"item": Item, "quantity": int}).
 func get_total_inventory_entries() -> Array:
 	var totals: Dictionary = {}
+	_merge_entries(totals, pack_inventory.get_all_entries())
 	for wagon_inventory in wagon_inventories:
 		_merge_entries(totals, wagon_inventory.get_all_entries())
 	for character in get_party():
@@ -2620,6 +2798,10 @@ func to_save_dict() -> Dictionary:
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
 		"owned_wagon_damaged": owned_wagon_damaged,
+		"owned_dogs": owned_dogs,
+		"owned_donkeys": owned_donkeys,
+		"owned_half_wagons": owned_half_wagons,
+		"pack_inventory": pack_inventory.to_save_array(),
 		"known_routes": known_routes.duplicate(),
 		"total_days_elapsed": total_days_elapsed,
 		"accepted_contracts": accepted_contracts.duplicate(),
@@ -2752,6 +2934,12 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	reputation = int(data.get("reputation", 0))
 	_flags = (data.get("flags", {}) as Dictionary).duplicate()
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
+	owned_dogs = clampi(int(data.get("owned_dogs", 0)), 0, MAX_DOGS)
+	owned_donkeys = clampi(int(data.get("owned_donkeys", 0)), 0, MAX_DONKEYS)
+	owned_half_wagons = clampi(int(data.get("owned_half_wagons", 0)), 0, MAX_HALF_WAGONS)
+	_sync_pack_inventory()
+	if data.has("pack_inventory"):
+		pack_inventory.load_from_array(data["pack_inventory"] as Array)
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
 

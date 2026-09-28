@@ -23,6 +23,14 @@ const KIND_PERSON: String = "person"
 const KIND_MOUNTED: String = "mounted"
 const KIND_HORSE: String = "horse"
 const KIND_OX: String = "ox"
+## Kervanın sahiplendiği husky (bkz. GameSession.owned_dogs) ve satın
+## alınan/eskortlu tüccarların yük eşekleri (bkz. owned_donkeys,
+## owned_half_wagons) - ikisi de prosedürel silüet taşımıyor, doğrudan
+## `BeastRig`in kendi derisinden çiziliyor (`_draw_beast_sprites`), çünkü
+## sanatları zaten var ve bir prosedürel yedek bu iki tür için hiç
+## kullanılmayacak.
+const KIND_DOG: String = "dog"
+const KIND_DONKEY: String = "donkey"
 
 const HORSE_PHASES: Array[float] = [0.0, PI, PI * 0.5, PI * 1.5]
 
@@ -50,6 +58,16 @@ const HORSE_COAT_DARK: Color = Color(0.24, 0.17, 0.13)
 const HORSE_MANE: Color = Color(0.16, 0.12, 0.10)
 const OX_COAT: Color = Color(0.42, 0.36, 0.30)
 const OX_HORN: Color = Color(0.80, 0.76, 0.66)
+
+## Beyaz at, varsayılan kahve atın bir varyantı - aynı iskelet, aynı poz,
+## `BeastRig.HORSE_WHITE`'ın kendi deri katmanları. "Bazen beyaz bazen
+## kahve" tam bir yazı-tura değil, azınlıkta kalan bir varyant olsun diye
+## %30. Zar `set_kind()`'ta bir kez atılıyor ve `_horse_species`'te
+## saklanıyor - `_draw()` her karede çağrıldığı için zarı orada atmak her
+## kareyi farklı bir ata çevirirdi (titreme). `set_kind()` bir figürün
+## ömründe bir kez çağrılır (bkz. road_caravan.gd/world_hub.gd'nin
+## `configure()`/`_build_*` desenleri), o yüzden seçim kalıcı.
+const WHITE_HORSE_CHANCE: float = 0.3
 
 ## Ten rengi `CharacterData`'dan geliyor, burada ikinci bir tablo yok:
 ## karakter oluşturmada seçilen ten yolda da aynı ten olmalı, yoksa seçim
@@ -82,6 +100,9 @@ var _outfit: Dictionary = {}
 ## reskin'i, oxen) - boşsa ya da o varyantın sanatı henüz yoksa düz
 ## `Wardrobe.BODY_ID`'ye düşülür (bkz. `_effective_body_id`).
 var _body_variant: String = ""
+## Bu figür bir at ise (KIND_HORSE/KIND_MOUNTED) hangi tür çizileceği -
+## `set_kind()`'ta bir kez zarla belirlenir (bkz. WHITE_HORSE_CHANCE).
+var _horse_species: String = ""
 ## Üstündeki, resmi olan kalemler (`Wardrobe.loadout_for`), alttan üste.
 var _loadout: PackedStringArray = PackedStringArray()
 
@@ -104,6 +125,8 @@ func set_kind(
 	_carries_pack = carries_pack
 	_outfit = outfit
 	_body_variant = body_variant
+	if (kind == KIND_HORSE or kind == KIND_MOUNTED) and _horse_species.is_empty():
+		_horse_species = BeastRig.HORSE_WHITE if randf() < WHITE_HORSE_CHANCE else BeastRig.HORSE
 	queue_redraw()
 
 ## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
@@ -171,6 +194,10 @@ func _draw() -> void:
 			_draw_quadruped(height, HORSE_COAT, HORSE_COAT_DARK, true)
 		KIND_OX:
 			_draw_quadruped(height, OX_COAT, OX_COAT.darkened(0.28), false)
+		KIND_DOG:
+			_draw_beast_sprites(BeastRig.HUSKY, height)
+		KIND_DONKEY:
+			_draw_beast_sprites(BeastRig.DONKEY, height)
 		KIND_MOUNTED:
 			# Biniciyi atın *sırtına* oturtuyoruz. İlk hâlinde oturma
 			# yüksekliği elle kestirilmişti (`height - horse_h * 0.86`) ve
@@ -423,7 +450,7 @@ func _draw_slung_weapon(shoulder: Vector2, h: float, metal: Color, trim: Color) 
 ##
 ## Sırtın y'sini döndürüyor: atlı figür biniciyi oraya oturtuyor.
 func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool) -> float:
-	var species := BeastRig.HORSE if is_horse else BeastRig.OX
+	var species := (_horse_species if not _horse_species.is_empty() else BeastRig.HORSE) if is_horse else BeastRig.OX
 	if BeastRig.has_sprites(species):
 		return _draw_beast_sprites(species, figure_h)
 	var h := figure_h

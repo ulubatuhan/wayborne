@@ -62,6 +62,16 @@ const OX_SIZE: Vector2 = Vector2(146.0, 86.0)
 ## etiketsiz, sabit boyda.
 const CREW_BODY_HEIGHT: float = 72.0
 
+## Sahiplenilen köpekler ve satın alınan eşekler/yarım vagonlar
+## (bkz. GameSession.owned_dogs/owned_donkeys/owned_half_wagons) - küçük
+## ve az sayıda oldukları için (en fazla 2+3+3) tam kolon formülü yerine
+## kervanın en arkasında tek sıra bir "sürü" olarak yürüyorlar - `_column_
+## positions()`'ın kendi kuralı burada da geçerli: her biri kendi genişliğini
+## tüketir, araya boşluk girer, çakışma imkânsız.
+const PACK_WIDTH: float = 44.0
+const PACK_HEIGHT: float = 40.0
+const PACK_GAP: float = 18.0
+
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
 const PROMPT_COLOR: Color = Color(1.0, 0.9, 0.5)
@@ -77,6 +87,9 @@ var _crew: Array[WalkFigure] = []
 var _spots: Array[Dictionary] = []
 ## Her vagonun öküzü - vagonla birlikte, onun bir tık önünde yürüyor.
 var _oxen: Array[WalkFigure] = []
+## Köpekler + eşekler/yarım vagonlar, bu sırayla (bkz. PACK_WIDTH) - kolonun
+## en arkasında tek sıra.
+var _pack: Array[WalkFigure] = []
 ## Açık vagon paneli - varsa hareket ve diğer etkileşimler durur (bkz.
 ## _process/_unhandled_input), tıpkı InGameMenu açıkken olduğu gibi.
 var _wagon_panel: WagonPanel = null
@@ -183,12 +196,13 @@ func _move_player(delta: float) -> void:
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
 	var column := _column_positions(
-		_player.position.x, _followers.size(), _wagons.size()
+		_player.position.x, _followers.size(), _wagons.size(), _pack.size()
 	)
 
 	_chase(_followers, column.escorts, weight, delta)
 	_chase(_oxen, column.oxen, weight, delta)
 	_chase(_crew, column.crew, weight, delta)
+	_chase(_pack, column.pack, weight, delta)
 
 	var wagon_targets: Array[float] = column.wagons
 	for index in _wagons.size():
@@ -236,12 +250,13 @@ func _chase(
 ## boyunca ikişerli gruplar hâlinde dağılmış, her vagon biriminde
 ## [öküz] [tayfa] [vagon] sırası.
 func _column_positions(
-	leader_x: float, escort_count: int, wagon_count: int
+	leader_x: float, escort_count: int, wagon_count: int, pack_count: int = 0
 ) -> Dictionary:
 	var escorts: Array[float] = []
 	var wagons: Array[float] = []
 	var oxen: Array[float] = []
 	var crew: Array[float] = []
+	var pack: Array[float] = []
 
 	var cursor := leader_x - LEADER_LEAD
 	var placed := 0
@@ -275,7 +290,15 @@ func _column_positions(
 		cursor = _append_escort_group(escorts, cursor, placed, escort_count)
 		placed += MAX_ABREAST
 
-	return {"escorts": escorts, "wagons": wagons, "oxen": oxen, "crew": crew}
+	# Köpekler ve eşekler/yarım vagonlar kolonun en arkasında, tek sıra bir
+	# "sürü": ayrı bir tayfa değiller, kendi kolon biriminden çok kervanın
+	# peşine takılmış küçük hayvanlar.
+	for _index in pack_count:
+		cursor -= PACK_WIDTH * 0.5
+		pack.append(cursor)
+		cursor -= PACK_WIDTH * 0.5 + PACK_GAP
+
+	return {"escorts": escorts, "wagons": wagons, "oxen": oxen, "crew": crew, "pack": pack}
 
 ## İkişerli bir muhafız grubunun merkezlerini ekler ve imleci grubun
 ## tükettiği kadar geriye alır.
@@ -377,11 +400,14 @@ func _build_caravan() -> void:
 	var party := session.get_party()
 	var escorts := _order_escorts(session, party)
 	var wagon_count := maxi(1, session.owned_wagon_count)
+	# Köpekler önce, sonra eşekler/yarım vagonlar - `_build_pack_animal`
+	# hangi türden çizileceğini bu sıraya göre seçiyor.
+	var pack_count := session.owned_dogs + session.owned_donkeys + session.owned_half_wagons
 	# Lider her zaman x=0'da kuruluyor (bkz. _build_person); kervanın geri
 	# kalanı ilk karede yerine kaymasın diye ilk konumunu her karede
 	# kullanılan *aynı* formülden alıyor. Ekleme sırası çizim sırasıdır -
 	# vagonlar ve tayfa önce, insanlar üstlerine.
-	var column := _column_positions(0.0, escorts.size(), wagon_count)
+	var column := _column_positions(0.0, escorts.size(), wagon_count, pack_count)
 
 	for index in wagon_count:
 		var wagon_x: float = column.wagons[index] - WAGON_SIZE.x * 0.5
@@ -392,6 +418,10 @@ func _build_caravan() -> void:
 		# Vagon başına iki tayfa var (`PEOPLE_PER_WAGON`): biri sürüyor -
 		# `ArtDraw.wagon` onu brandanın önünde çiziyor - biri yürüyor.
 		_crew.append(_build_crew_member(column.crew[index]))
+
+	for index in pack_count:
+		var is_dog := index < session.owned_dogs
+		_pack.append(_build_pack_animal(column.pack[index], is_dog))
 
 	_player = _build_person(party[0], true)
 	for index in escorts.size():
@@ -472,6 +502,17 @@ func _build_ox(centre_x: float) -> WalkFigure:
 	ox.set_kind(WalkFigure.KIND_OX, "bandit")
 	ox.set_phase_offset(centre_x * 0.02)
 	return ox
+
+## Bir köpek (is_dog) ya da bir eşek/yarım vagon - kervanın en arkasındaki
+## küçük sürü (bkz. GameSession.owned_dogs/owned_donkeys/owned_half_wagons).
+func _build_pack_animal(centre_x: float, is_dog: bool) -> WalkFigure:
+	var animal := WalkFigure.new()
+	animal.size = Vector2(PACK_WIDTH, PACK_HEIGHT)
+	animal.position = Vector2(centre_x - PACK_WIDTH * 0.5, GROUND_Y - PACK_HEIGHT)
+	add_child(animal)
+	animal.set_kind(WalkFigure.KIND_DOG if is_dog else WalkFigure.KIND_DONKEY, "bandit")
+	animal.set_phase_offset(centre_x * 0.025)
+	return animal
 
 func _build_crew_member(centre_x: float) -> WalkFigure:
 	var body := WalkFigure.new()

@@ -19,6 +19,16 @@ const WOLF: String = "wolf"
 const BEAR: String = "bear"
 const BOAR: String = "boar"
 
+## Av hayvanları (bkz. build_hunt_squad, evt_hunting_trip). Enemy_id'leri
+## kasıtlı olarak `BeastRig.STAG`/`BeastRig.DEER` ile aynı dize -
+## `CombatUnit.from_enemy()` `figure_kind`'ı doğrudan `enemy_id`'den
+## dolduruyor, `CombatFigure` de o dizeyi hem `ARCHETYPES` anahtarı hem
+## `BeastRig.draw_species` türü olarak okuyor (bkz. Combat Rules'un
+## "Player-facing combat text reads EnemyCatalog.get_kind_label" maddesiyle
+## aynı tek-kapı disiplini).
+const STAG: String = "stag"
+const DEER: String = "deer"
+
 ## Şehir muhafızları (bkz. build_guard_squad, evt_guard_patrol).
 const CITY_GUARD: String = "city_guard"
 const GUARD_SERGEANT: String = "guard_sergeant"
@@ -71,6 +81,7 @@ const POWER_SCALE_PER_PARTY_MEMBER: float = 0.30
 const KIND_BANDIT: String = "bandit"
 const KIND_WILDLIFE: String = "wildlife"
 const KIND_GUARD: String = "guard"
+const KIND_HUNT: String = "hunt"
 
 ## Kadronun oyuncuya görünen adı. Savaş kayıtları ve panel başlığı bunu
 ## okur - kadro türü Faz 8 PR-B'de çeşitlenince metinler sabit "Haydutlar"
@@ -81,6 +92,7 @@ const _KIND_LABELS: Dictionary = {
 	KIND_BANDIT: "ENEMY_KIND_BANDIT",
 	KIND_WILDLIFE: "ENEMY_KIND_WILDLIFE",
 	KIND_GUARD: "ENEMY_KIND_GUARD",
+	KIND_HUNT: "ENEMY_KIND_HUNT",
 }
 
 static var _enemies: Array[EnemyTemplate] = []
@@ -113,6 +125,8 @@ static func build_squad(
 			return build_wildlife_squad(danger_level, party_size, rng, average_level, biome)
 		KIND_GUARD:
 			return build_guard_squad(danger_level, party_size, rng, average_level)
+		KIND_HUNT:
+			return build_hunt_squad(danger_level, party_size, rng, average_level)
 		_:
 			return build_bandit_squad(danger_level, party_size, rng, average_level, region_id)
 
@@ -225,6 +239,23 @@ static func build_guard_squad(
 
 	return _build_units(ids, party_size, average_level, danger_level)
 
+## Avlanma girişimi başarılı olunca çıkan kadro (bkz. evt_hunting_trip).
+## Her zaman tam olarak bir erkek geyik (STAG) taşır - kadronun asıl
+## tehdidi o, geyikler (DEER) yalnızca sayı ve düşük hasar katıyor.
+## Kalabalık bir parti (3+) iki geyikle karşılaşır, daha küçük bir parti
+## tek geyikle - `build_wildlife_squad`'ın parti büyüklüğüne göre
+## kompozisyon eğme deseninin aynısı.
+static func build_hunt_squad(
+	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1
+) -> Array[CombatUnit]:
+	_ensure_built()
+
+	var ids: Array[String] = [STAG, DEER]
+	if party_size >= 3 or rng.randf() < 0.5:
+		ids.append(DEER)
+
+	return _build_units(ids, party_size, average_level, danger_level)
+
 static func _build_units(
 	ids: Array[String], party_size: int, average_level: int, danger_level: float = 0.0
 ) -> Array[CombatUnit]:
@@ -285,6 +316,17 @@ static func _ensure_built() -> void:
 	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 19, 80, 13, 6, 3, 14, [SkillCatalog.WOLF_BITE], 1, 8))
 	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
 	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+
+	# Av hayvanları (bkz. build_hunt_squad, evt_hunting_trip) - geyik (DEER)
+	# neredeyse zararsız, kaçmaya çalışan ürkek bir mevcudiyet; erkek geyik
+	# (STAG) kadronun gerçek tehdidi. damage_bonus 10 + STAG_CHARGE'ın
+	# 13±5'lik hasarı, seviye 5 ortalama bir karakterin (taban can 40,
+	# +Dayanıklılık) yarı canından tek vuruşta indirebiliyor - "rahatlıkla
+	# etkisiz hale getirebilmeli" isteği burada. BEAR'dan (damage_bonus 9)
+	# bilerek biraz daha sert: ayı nadir/tekil bir curio, erkek geyik
+	# kadronun her zaman içinde.
+	_enemies.append(_make(STAG, "ENEMY_STAG_NAME", 58, 80, 6, 8, 10, 9, [SkillCatalog.STAG_CHARGE], 1, 22))
+	_enemies.append(_make(DEER, "ENEMY_DEER_NAME", 30, 74, 14, 4, 2, 13, [SkillCatalog.DEER_KICK], 2, 10))
 
 	# Şehir muhafızları - talimli ve isabetli ama haydutlar kadar sert
 	# vurmuyor, çavuş komuta eder (bkz. build_guard_squad, evt_guard_patrol).

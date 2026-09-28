@@ -26,6 +26,8 @@ func run(t) -> void:
 	_test_city_gold_reserve(t)
 	_test_trait_price_multiplier(t)
 	_test_guild_wagon_quest_rewards(t)
+	_test_dog_adoption(t)
+	_test_donkey_and_half_wagon_cargo(t)
 
 ## change_provisions her iki yönde de gerçekten değişen miktarı dönmeli.
 ## Ekleme tarafı eskiden add_item'ın dönüşünü yok sayıyordu: envanter
@@ -231,6 +233,106 @@ func _test_cargo_capacity(t) -> void:
 		"boş kervanda tüm kapasite serbest"
 	)
 
+## Husky: en fazla iki, maliyet her sahiplenmede artıyor, erzağa küçük bir
+## pay ekliyor (bkz. CaravanPlan.daily_consumption'ın animal_mouths'u),
+## Sezgi'ye tavanlı bir pay biniyor (yalnızca Sezgi'ye - başka bir stat
+## etkilenmemeli) ve çıkış moraline küçük bir katkı veriyor.
+func _test_dog_adoption(t) -> void:
+	var session := GameSession.new(1000, 0, 1)
+
+	t.eq(session.owned_dogs, 0, "taze oturumda köpek yok")
+	var first_cost := session.get_next_dog_cost()
+	t.ok(session.adopt_dog(), "ilk köpek sahiplenilir")
+	t.eq(session.owned_dogs, 1, "sahiplenme sayacı artar")
+	var second_cost := session.get_next_dog_cost()
+	t.ok(second_cost > first_cost, "ikinci köpek daha pahalı")
+
+	t.ok(session.adopt_dog(), "ikinci köpek de sahiplenilir")
+	t.eq(session.owned_dogs, GameSession.MAX_DOGS, "iki köpekte tavana ulaşılır")
+	t.not_ok(session.can_adopt_dog(), "tavandan sonra sahiplenme kapalı")
+	t.not_ok(session.adopt_dog(), "limit dolunca sahiplenme başarısız")
+	t.eq(session.owned_dogs, GameSession.MAX_DOGS, "başarısız sahiplenme sayacı değiştirmez")
+
+	# Erzak: iki köpek tam bir insan ağzından az bir pay ekler.
+	var mouths := session.get_pack_animal_provision_mouths()
+	t.almost(
+		mouths, 2.0 * GameSession.DOG_PROVISION_SHARE,
+		"iki köpeğin erzak payı DOG_PROVISION_SHARE'in iki katı"
+	)
+	t.ok(mouths < 2.0, "iki köpek iki tam insan ağzından daha az yiyor")
+
+	# Sezgi'ye tavanlı bir pay - başka bir stat (Güç) etkilenmemeli.
+	var bare := GameSession.new(100, 0, 1)
+	var with_dogs := GameSession.new(100, 0, 1)
+	with_dogs.owned_dogs = GameSession.MAX_DOGS
+	var perception_delta := (
+		with_dogs.get_best_effective_stat(CharacterStats.Kind.PERCEPTION)
+		- bare.get_best_effective_stat(CharacterStats.Kind.PERCEPTION)
+	)
+	t.almost(
+		perception_delta, GameSession.MAX_DOG_PERCEPTION_BONUS,
+		"iki köpek Sezgi'ye tam tavanlı payı ekler"
+	)
+	t.almost(
+		with_dogs.get_best_effective_stat(CharacterStats.Kind.STRENGTH)
+		- bare.get_best_effective_stat(CharacterStats.Kind.STRENGTH),
+		0.0, "köpek Güç'ü hiç etkilemez"
+	)
+	var leader_delta := (
+		with_dogs.get_leader_effective_stat(CharacterStats.Kind.PERCEPTION)
+		- bare.get_leader_effective_stat(CharacterStats.Kind.PERCEPTION)
+	)
+	t.almost(leader_delta, GameSession.MAX_DOG_PERCEPTION_BONUS, "liderin Sezgi'si de aynı payı alır")
+
+	# Küçük ölçekte moral katkısı.
+	t.eq(with_dogs.get_dog_morale_bonus(), GameSession.MAX_DOGS * GameSession.DOG_MORALE_BONUS_PER_DOG, "moral katkısı köpek sayısıyla orantılı")
+	t.ok(with_dogs.get_departure_morale() >= bare.get_departure_morale(), "köpekli kervanın çıkış morali asla daha düşük değil")
+
+## Eşek/yarım vagon: ikisi de kendi vagon sayısını (owned_wagon_count)
+## hiç etkilemiyor, ortak bir "ek kapasite" havuzuna (pack_inventory)
+## katkı veriyor - vagonlar dolduktan sonra bile alım bu havuzdan
+## sığdığı sürece başarılı olmalı, havuz da dolunca reddedilmeli.
+func _test_donkey_and_half_wagon_cargo(t) -> void:
+	var session := GameSession.new(1000, 0, 1)
+	var base_capacity := session.get_cargo_capacity()
+
+	t.ok(session.buy_donkey(), "eşek satın alınır")
+	t.almost(
+		session.get_cargo_capacity(), base_capacity + GameSession.CARGO_PER_DONKEY,
+		"eşek kapasiteye kendi payını ekler"
+	)
+	t.eq(session.owned_wagon_count, 1, "eşek vagon sayısını hiç değiştirmez")
+
+	t.ok(session.buy_half_wagon(), "yarım vagon satın alınır")
+	t.almost(
+		session.get_cargo_capacity(),
+		base_capacity + GameSession.CARGO_PER_DONKEY + GameSession.CARGO_PER_HALF_WAGON,
+		"yarım vagon da kendi payını ekler"
+	)
+	t.eq(session.owned_wagon_count, 1, "yarım vagon da vagon sayısını hiç değiştirmez")
+
+	# Tavan.
+	for _i in GameSession.MAX_DONKEYS:
+		session.buy_donkey()
+	t.eq(session.owned_donkeys, GameSession.MAX_DONKEYS, "eşek tavanı doluyor")
+	t.not_ok(session.can_buy_donkey(), "tavandan sonra eşek alınamaz")
+
+	# Vagonları tamamen doldur, sonra yalnızca eşeğin/yarım vagonun ek
+	# kapasitesi kadarını ekleyebildiğini doğrula.
+	var fresh := GameSession.new(1000, 0, 1)
+	fresh.buy_donkey()
+	var cloth := ItemCatalog.get_item("test_cloth")
+	var wagon_room := fresh.wagon_inventories[0].get_max_addable(cloth)
+	t.ok(fresh.add_to_cargo(cloth, wagon_room), "vagon tam doluyor")
+	var extra_room := fresh.pack_inventory.get_max_addable(cloth)
+	t.ok(extra_room > 0, "eşeğin ek kapasitesi gerçekten var")
+	t.ok(fresh.add_to_cargo(cloth, extra_room), "vagon dolduktan sonra eşeğin payı kadarı sığar")
+	t.not_ok(fresh.add_to_cargo(cloth, 1), "eşeğin payı da dolunca hiçbir şey sığmaz")
+	t.eq(
+		fresh.get_total_quantity("test_cloth"), wagon_room + extra_room,
+		"toplam miktar vagon + eşeğin payının toplamı"
+	)
+
 func _test_save_round_trip(t) -> void:
 	var original := GameSession.new(300, 15, 2)
 	original.reputation = 7
@@ -239,6 +341,10 @@ func _test_save_round_trip(t) -> void:
 	original.set_flag("deneme_bayragi")
 	original.owned_wagon_damaged = 1
 	original.add_equipment(EquipmentCatalog.RING_MARKSMAN, 2)
+	original.adopt_dog()
+	original.buy_donkey()
+	original.buy_half_wagon()
+	original.pack_inventory.add_item(ItemCatalog.get_item("test_cloth"), 3)
 	original.set_player_character(
 		CharacterData.create("Kayıtlı", CultureCatalog.FISHER, CharacterStats.new(), 188, 3)
 	)
@@ -259,6 +365,14 @@ func _test_save_round_trip(t) -> void:
 	t.ok(restored.is_route_known("test_loc_b", "test_loc_a"), "rota iki yönlü kaydedilir")
 	t.ok(restored.has_flag("deneme_bayragi"), "bayraklar korunur")
 	t.eq(restored.get_equipment_count(EquipmentCatalog.RING_MARKSMAN), 2, "ekipman deposu korunur")
+	t.eq(restored.owned_dogs, original.owned_dogs, "köpek sayısı korunur")
+	t.eq(restored.owned_donkeys, original.owned_donkeys, "eşek sayısı korunur")
+	t.eq(restored.owned_half_wagons, original.owned_half_wagons, "yarım vagon sayısı korunur")
+	t.eq(
+		restored.pack_inventory.get_quantity("test_cloth"),
+		original.pack_inventory.get_quantity("test_cloth"),
+		"eşek/yarım vagonun kendi kargosu korunur"
+	)
 
 	t.eq(restored.get_party().size(), 2, "parti korunur")
 	t.eq(restored.get_player_character().character_name, "Kayıtlı", "oyuncu ilk sırada kalır")

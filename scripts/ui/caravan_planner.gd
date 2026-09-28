@@ -78,6 +78,7 @@ func _ready() -> void:
 	_plan.provision_multiplier = _session.get_daily_provision_multiplier()
 	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 	_plan.height_adjustment = CaravanPlan.height_adjustment_for(_session.get_party())
+	_plan.animal_mouths = _session.get_pack_animal_provision_mouths()
 
 	# Yolun coğrafyası ve havası. İkisi de tohumdan hesaplanıyor, yani
 	# burada gösterilen arazi ve hava payı yolda birebir yaşanacak olan

@@ -40,6 +40,10 @@ const WOLF_BITE: String = "wolf_bite"
 const BEAR_CLAW: String = "bear_claw"
 const BOAR_CHARGE: String = "boar_charge"
 
+# Düşman yetenekleri - av hayvanları (bkz. evt_hunting_trip)
+const STAG_CHARGE: String = "stag_charge"
+const DEER_KICK: String = "deer_kick"
+
 # Düşman yetenekleri - şehir muhafızları
 const GUARD_STRIKE: String = "guard_strike"
 const GUARD_ORDER: String = "guard_order"
@@ -274,6 +278,30 @@ static func _ensure_built() -> void:
 		[1], [1],
 		10, 4, 0, 8
 	), CombatUnit.STATUS_STUN, 0, 1, 55))
+
+	# Erkek geyiğin boynuz hücumu: kadronun tek gerçek tehdidi (bkz.
+	# EnemyCatalog'un STAG notu). 13±5 hasar + damage_bonus 10 seviye 5
+	# ortalama bir karakterin yarı canını tek vuruşta silebiliyor;
+	# sersemletme (domuzunkiyle aynı vokabüler) "etkisiz hale getirme"
+	# isteğinin ikinci yarısı. 1 turluk bekleme, boynuz her tur inmesin diye.
+	_skills.append(CombatSkill.with_status(CombatSkill.make_attack(
+		STAG_CHARGE,
+		"SKILL_STAG_CHARGE_NAME",
+		"SKILL_STAG_CHARGE_DESC",
+		[1], [1],
+		13, 5, 2, 6, 1
+	), CombatUnit.STATUS_STUN, 0, 1, 45))
+
+	# Geyiğin tekmesi ürkek bir hayvanın son çaresi - kadronun neredeyse
+	# zararsız kalan kısmı, sayı katıyor, hasar değil (bkz. EnemyCatalog'un
+	# "deer çok bir damage vurmayacak" notu).
+	_skills.append(CombatSkill.make_attack(
+		DEER_KICK,
+		"SKILL_DEER_KICK_NAME",
+		"SKILL_DEER_KICK_DESC",
+		[1, 2], [1],
+		3, 2, -2, 0
+	))
 
 	_skills.append(CombatSkill.make_attack(
 		GUARD_STRIKE,
