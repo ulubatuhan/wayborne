@@ -134,9 +134,20 @@ signal ground_line_changed(caravan_x: float, ground_y: float)
 
 var _foreground: TravelForeground
 
+## Yakınlaştırmanın gösterdiği dikdörtgen, bu düğümün yerel uzayında. Yol
+## ekranı şeridi 1'in altına ölçekleyince (uzaklaşınca) ekran şeridin
+## kendi dikdörtgeninden **daha fazlasını** görüyor; o fazlası boş kalmasın
+## diye manzara oraya da taşıyor. Yerleşim ve bütün ölçüler hâlâ şeridin
+## kendi boyundan (`size`) - figür boyları şerit yüksekliğine oranlı, yani
+## şeridi büyütmek hiçbir şeyi uzaklaştırmazdı, yalnızca her şeyi büyütürdü.
+## Boşken (varsayılan) görüş şeridin kendisi: 1.0'da çizim birebir eskisi.
+var _view: Rect2 = Rect2()
+
 func _ready() -> void:
 	custom_minimum_size = Vector2(0.0, BAND_HEIGHT)
-	clip_contents = true
+	# Kırpmayı dünya katmanı yapıyor (ekranın kenarı); şeridin kendi
+	# dikdörtgeni kırpsaydı uzaklaşınca taşan manzara kesilirdi.
+	clip_contents = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_announce_ground_line)
 
@@ -154,6 +165,20 @@ func _ready() -> void:
 func add_actor_layer(node: Node) -> void:
 	add_child(node)
 	move_child(_foreground, get_child_count() - 1)
+
+## Ekranın o an gördüğü dikdörtgen (yerel uzayda) - bkz. `_view`.
+func set_view_rect(rect: Rect2) -> void:
+	if _view.is_equal_approx(rect):
+		return
+	_view = rect
+	queue_redraw()
+
+## Çizilmesi gereken alan: şerit ve görüşün birleşimi.
+func cover_rect() -> Rect2:
+	var frame := Rect2(Vector2.ZERO, Vector2(maxf(size.x, 1.0), maxf(size.y, BAND_HEIGHT)))
+	if _view.has_area():
+		return frame.merge(_view)
+	return frame
 
 ## Rotanın coğrafyası. Seferin başında bir kez veriliyor; `null` ise şerit
 ## bozkıra düşer (F1 sentetik seferi ve testler için).
@@ -324,14 +349,15 @@ func _draw() -> void:
 	var width := maxf(size.x, 1.0)
 	var height := maxf(size.y, BAND_HEIGHT)
 	var area := Rect2(Vector2.ZERO, Vector2(width, height))
+	var cover := cover_rect()
 	var horizon := height * HORIZON_RATIO
 
-	_draw_sky(area, horizon)
-	_draw_celestial(area, horizon)
-	_draw_far_ridges(area, horizon)
-	_draw_mid_ridges(area, horizon)
+	_draw_sky(area, cover, horizon)
+	_draw_celestial(area, cover, horizon)
+	_draw_far_ridges(area, cover, horizon)
+	_draw_mid_ridges(area, cover, horizon)
 	if _biome == ArtPalette.BIOME_LAKE:
-		_draw_lake(area, horizon)
+		_draw_lake(area, cover, horizon)
 	# Şehir silüetleri zeminden *önce*: tabanları çayırın ufka değdiği
 	# kenarın altında kalmalı, yoksa uzaktaki şehir de havada durur.
 	_draw_cities(area, horizon)
@@ -340,13 +366,14 @@ func _draw() -> void:
 	# *önce* çiziliyordu, yani gövdelerin dibi zemin gradyanıyla
 	# kapatılıyordu ve ağaç görünen çimenin üstünde değil, arkasında
 	# bitiyordu.
-	_draw_ground_fill(area, horizon)
-	_draw_tree_line(area, horizon)
-	_draw_stops(area, horizon)
-	_draw_ground_props(area, horizon)
-	_draw_road(area)
+	_draw_ground_fill(area, cover, horizon)
+	_draw_tree_line(area, cover, horizon)
+	_draw_stops(area, cover, horizon)
+	_draw_ground_props(area, cover, horizon)
+	_draw_road(area, cover)
 	# Yolun önü ayrı bir katmanda (bkz. TravelForeground): burada
 	# çizilse kervanın arkasında kalırdı.
+	_foreground.cover = cover
 	_foreground.sync_state(
 		_colors, _light, _world_x, _ground_y_at_screen(area.size.x * 0.5),
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
@@ -357,11 +384,13 @@ func _draw() -> void:
 	# aktör katmanının (kervanın) *altında* kalıyor - vagon merkezli
 	# ateşler orada kalırsa hep bir vagonun arkasına düşerdi. `_camping`
 	# burada yalnızca sıcak ışık tonu için yaşıyor (bkz. set_phase).
-	_draw_weather(area, horizon)
-	ArtDraw.vignette(self, area, 0.07)
+	_draw_weather(area, cover, horizon)
+	# Kenar kararması ekranın kenarında, şeridin değil: uzaklaşınca şeridin
+	# kenarı ekranın ortasına düşüyor ve orada koyu bir çerçeve kalırdı.
+	ArtDraw.vignette(self, _view if _view.has_area() else area, 0.07)
 	_announce_ground_line()
 
-func _draw_sky(area: Rect2, horizon: float) -> void:
+func _draw_sky(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var top := Color(_sky.top)
 	var bottom := Color(_sky.bottom)
 	var gloom := float(_weather_visuals.gloom)
@@ -379,12 +408,15 @@ func _draw_sky(area: Rect2, horizon: float) -> void:
 		top = top.lerp(lead.darkened(0.35), gloom * GLOOM_SKY_MIX)
 		bottom = bottom.lerp(lead, gloom * GLOOM_HORIZON_MIX)
 	ArtDraw.gradient_band(
-		self, Rect2(area.position, Vector2(area.size.x, horizon + 2.0)), top, bottom
+		self, Rect2(Vector2(cover.position.x, 0.0), Vector2(cover.size.x, horizon + 2.0)), top, bottom
 	)
+	# Şeridin üstünde kalan gökyüzü: gradyan orada zaten en koyu tonunda.
+	if cover.position.y < 0.0:
+		draw_rect(Rect2(cover.position, Vector2(cover.size.x, -cover.position.y + 1.0)), top, true)
 
 ## Güneş/ay ufuk boyunca bir yay çiziyor. Gökyüzünde sabit bir nokta
 ## olmaması, zamanın aktığını renkten bağımsız olarak söylüyor.
-func _draw_celestial(area: Rect2, horizon: float) -> void:
+func _draw_celestial(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var gloom := float(_weather_visuals.gloom)
 	if gloom > 0.7:
 		return
@@ -399,8 +431,11 @@ func _draw_celestial(area: Rect2, horizon: float) -> void:
 				star, rng.randf_range(0.8, 1.7),
 				Color(1.0, 1.0, 0.95, _night_ratio * twinkle * (1.0 - gloom))
 			)
+		_draw_outer_stars(area, cover, horizon, gloom)
 
 	var arc_x := area.size.x * (0.12 + _sun_ratio * 0.78)
+	# (Güneşin yayı şeridin içinde kalıyor: gökyüzündeki yeri saati söylüyor,
+	# uzaklaşmak onu değiştirmemeli.)
 	var arc_y := horizon - sin(_sun_ratio * PI) * horizon * 0.72 - horizon * 0.06
 	var disc_r := area.size.y * 0.045
 	var is_night := _night_ratio > 0.55
@@ -417,9 +452,39 @@ func _draw_celestial(area: Rect2, horizon: float) -> void:
 			Color(_sky.top)
 		)
 
+## Şeridin dışındaki gökyüzüne düşen yıldızlar - ayrı bir tohumla, yani
+## şeridin içindekiler yerinden oynamıyor.
+func _draw_outer_stars(area: Rect2, cover: Rect2, horizon: float, gloom: float) -> void:
+	var sky_frame := Rect2(Vector2.ZERO, Vector2(area.size.x, horizon * 0.82))
+	var sky_cover := Rect2(cover.position, Vector2(cover.size.x, horizon * 0.82 - cover.position.y))
+	var extra := sky_cover.get_area() - sky_frame.get_area()
+	if extra <= 1.0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 90211
+	var count := int(40.0 * extra / maxf(1.0, sky_frame.get_area()))
+	for _index in count:
+		var star := sky_cover.position + Vector2(rng.randf(), rng.randf()) * sky_cover.size
+		var twinkle := 0.55 + 0.45 * rng.randf()
+		var radius := rng.randf_range(0.8, 1.7)
+		if sky_frame.has_point(star):
+			continue
+		draw_circle(star, radius, Color(1.0, 1.0, 0.95, _night_ratio * twinkle * (1.0 - gloom)))
+
+## Sırtın çizim alanı: kapsama kadar geniş, ama örnek noktaları şeridin
+## kendi örnekleriyle **aynı** yerlerde - `ArtDraw.ridge` örneklemeye
+## alanın sol kenarından başlıyor ve ağaçlar/duraklar sırtın şeridin
+## alanıyla hesaplanan kırık çizgisine (`ridge_y`) oturuyor. Kayan bir
+## örnekleme, uzaklaşınca ağaçları havada bırakırdı.
+func _ridge_cover(area: Rect2, cover: Rect2, wavelength: float) -> Rect2:
+	var step := ArtDraw._ridge_step(wavelength)
+	var left := minf(0.0, -ceilf(-cover.position.x / step) * step)
+	var right := maxf(area.size.x, area.size.x + ceilf((cover.end.x - area.size.x) / step) * step)
+	return Rect2(Vector2(left, 0.0), Vector2(right - left, maxf(area.size.y, cover.end.y)))
+
 ## En uzak sırt: neredeyse pusun içinde. Dağ biyomunda belirgin yükseliyor,
 ## yani "dağa yaklaşıyoruz" hissi renkle değil siluetle geliyor.
-func _draw_far_ridges(area: Rect2, horizon: float) -> void:
+func _draw_far_ridges(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# Pus payı ilk denemede 0.78'di ve sonuç ekranda görüldü: uzak sırt,
 	# orta sırt ve uzak zemin aynı griye çöküyor, orman bile mavi-gri
 	# duruyordu. Hava perspektifi *derinlik* vermeli, rengi silmemeli;
@@ -428,17 +493,18 @@ func _draw_far_ridges(area: Rect2, horizon: float) -> void:
 	var far := ArtPalette.fade_to_haze(Color(_colors.far), haze, 0.55)
 	var amplitude := area.size.y * (0.20 if _biome == ArtPalette.BIOME_MOUNTAIN else 0.10)
 	ArtDraw.ridge(
-		self, area, horizon + area.size.y * 0.01, amplitude,
+		self, _ridge_cover(area, cover, area.size.x * 1.35), horizon + area.size.y * 0.01, amplitude,
 		area.size.x * 1.35, -_world_x * PARALLAX_FAR, far, 3
 	)
 
-func _draw_mid_ridges(area: Rect2, horizon: float) -> void:
+func _draw_mid_ridges(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var haze := Color(_sky.haze)
 	var mid := ArtPalette.fade_to_haze(Color(_colors.far), haze, 0.28)
 	var amplitude := area.size.y * (0.15 if _biome == ArtPalette.BIOME_MOUNTAIN else 0.075)
 	var base_y := horizon + area.size.y * 0.035
 	var wavelength := area.size.x * 0.78
 	var offset := -_world_x * PARALLAX_MID
+	var ridge_area := _ridge_cover(area, cover, wavelength)
 
 	# Karlı tepe. Önce kaya, sonra kar - ama kar `ridge_snow` ile, yani
 	# yalnızca kar çizgisinin üstünde kalan tepelerde. Bu sıra iki eski
@@ -446,24 +512,24 @@ func _draw_mid_ridges(area: Rect2, horizon: float) -> void:
 	# çizip kayayı sonra koymak dağın tamamını beyaza boyuyordu, iki kez
 	# çizilen sırt ise kar yerine ince beyaz bir kontur bırakıyordu.
 	if _biome == ArtPalette.BIOME_MOUNTAIN:
-		ArtDraw.ridge(self, area, base_y, amplitude, wavelength, offset, mid, 11)
+		ArtDraw.ridge(self, ridge_area, base_y, amplitude, wavelength, offset, mid, 11)
 		ArtDraw.ridge_snow(
-			self, area, base_y, amplitude, wavelength, offset,
+			self, ridge_area, base_y, amplitude, wavelength, offset,
 			ArtPalette.fade_to_haze(Color(0.88, 0.90, 0.94), haze, 0.26), 11,
 			base_y - amplitude * 0.42
 		)
 	else:
-		ArtDraw.ridge(self, area, base_y, amplitude, wavelength, offset, mid, 11)
+		ArtDraw.ridge(self, ridge_area, base_y, amplitude, wavelength, offset, mid, 11)
 
 ## Göl: ufkun altında bir su bandı, karşı kıyısı puslu.
-func _draw_lake(area: Rect2, horizon: float) -> void:
+func _draw_lake(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# Su bandı zeminin *üstünde* kalmalı: ilk ölçüde ufkun 0.045'inden
 	# başlayıp 0.16 yükseklikte çiziliyordu, ama zemin 0.075'ten aşağıyı
 	# kaplıyor - yani gölün beş katı suyun içi görünmüyordu. Uzaktaki bir
 	# göl zaten ince bir şerittir.
 	var top := horizon - area.size.y * 0.008
 	var water_rect := Rect2(
-		Vector2(area.position.x, top), Vector2(area.size.x, area.size.y * 0.084)
+		Vector2(cover.position.x, top), Vector2(cover.size.x, area.size.y * 0.084)
 	)
 	ArtDraw.water(
 		self, water_rect,
@@ -479,22 +545,22 @@ func _draw_lake(area: Rect2, horizon: float) -> void:
 ## çizgide, ama boyları rastgele duruyordu: aynı çizgide duran küçük ve
 ## büyük ağaç, birbirine göre uzak/yakın okunamayınca manzaraya değil
 ## camın üstüne yapıştırılmış gibi duruyor.
-func _draw_tree_line(area: Rect2, horizon: float) -> void:
+func _draw_tree_line(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var haze := Color(_sky.haze)
 	var density := _tree_density()
 	if density <= 0.0:
 		return
 
 	var offset := -_world_x * PARALLAX_TREES
-	var first := int(floor((-offset - CELL_TREES) / CELL_TREES))
-	var last := int(ceil((-offset + area.size.x + CELL_TREES) / CELL_TREES))
+	var first := int(floor((cover.position.x - offset - CELL_TREES) / CELL_TREES))
+	var last := int(ceil((cover.end.x - offset + CELL_TREES) / CELL_TREES))
 	for cell in range(first, last + 1):
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash("trees|%d|%s" % [cell, _biome])
 		if rng.randf() > density:
 			continue
 		var x := float(cell) * CELL_TREES + offset + rng.randf_range(-28.0, 28.0)
-		if x < -60.0 or x > area.size.x + 60.0:
+		if x < cover.position.x - 60.0 or x > cover.end.x + 60.0:
 			continue
 
 		var depth := rng.randf()
@@ -530,20 +596,27 @@ func _tree_density() -> float:
 ## Zemin: ufuktan aşağı bir gradyan, üstünde yolun kendisi. Yol eğimli -
 ## eğim `RouteTerrain`'den geliyor, yani dağa tırmanan yol gerçekten
 ## yukarı gidiyor.
-func _draw_ground_fill(area: Rect2, horizon: float) -> void:
+func _draw_ground_fill(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var ground_top := horizon + area.size.y * GROUND_TOP_RATIO
 	var far := ArtPalette.fade_to_haze(Color(_colors.far), Color(_sky.haze), 0.12)
 	ArtDraw.gradient_band(
 		self,
-		Rect2(Vector2(area.position.x, ground_top), Vector2(area.size.x, area.size.y - ground_top + 2.0)),
+		Rect2(Vector2(cover.position.x, ground_top), Vector2(cover.size.x, area.size.y - ground_top + 2.0)),
 		far, Color(_colors.near)
 	)
+	# Şeridin altına taşan zemin gradyanın en yakın tonunda kalıyor.
+	if cover.end.y > area.size.y:
+		draw_rect(Rect2(
+			Vector2(cover.position.x, area.size.y), Vector2(cover.size.x, cover.end.y - area.size.y)
+		), Color(_colors.near), true)
 	# Zeminin üst kenarı düz bir çizgiydi ve ekranı boydan boya kesiyordu -
 	# manzaranın en yapay duran yeri orasıydı. Aynı `ridge` fırçasıyla
 	# kırıyoruz, ama zeminin kendi rengiyle: bu bir tepe değil, çayırın
 	# ufka değdiği kenar.
+	var edge_area := _ridge_cover(area, cover, _ground_edge_wavelength())
+	edge_area.size.y = area.size.y
 	ArtDraw.ridge(
-		self, area, _ground_edge_base(), area.size.y * GROUND_EDGE_AMP_RATIO,
+		self, edge_area, _ground_edge_base(), area.size.y * GROUND_EDGE_AMP_RATIO,
 		_ground_edge_wavelength(), -_world_x * PARALLAX_TREES, far, GROUND_EDGE_SEED
 	)
 
@@ -565,15 +638,17 @@ func _ground_edge_base() -> float:
 func _ground_edge_wavelength() -> float:
 	return maxf(size.x, 1.0) * GROUND_EDGE_WAVE_RATIO
 
-func _draw_road(area: Rect2) -> void:
+func _draw_road(area: Rect2, cover: Rect2) -> void:
 	var near := Color(_colors.near)
 	# Yol şeridi. İlk denemede rengi zeminden yalnızca %42 ayrılıyordu ve
 	# ekran görüntüsünde yol *hiç görünmüyordu* - kervan tek renk bir
 	# kahverengi zeminde yürüyordu. Yol artık hem daha açık hem daha az
 	# doygun, iki yanında da koyu bir bank var: asıl okunurluk o
 	# kenarlardan geliyor, yolun kendi renginden değil.
-	var left_y := _ground_y_at_screen(0.0)
-	var right_y := _ground_y_at_screen(area.size.x)
+	var x0 := cover.position.x
+	var x1 := cover.end.x
+	var left_y := _ground_y_at_screen(x0)
+	var right_y := _ground_y_at_screen(x1)
 	var band := area.size.y * 0.085
 	var road := near.lerp(Color(0.68, 0.60, 0.46), 0.62)
 	var verge := near.darkened(0.30)
@@ -582,36 +657,42 @@ func _draw_road(area: Rect2) -> void:
 		var top := band * (-0.75 if edge < 0.0 else 1.0)
 		var bottom := band * (-0.42 if edge < 0.0 else 1.42)
 		draw_colored_polygon(PackedVector2Array([
-			Vector2(0.0, left_y + top),
-			Vector2(area.size.x, right_y + top),
-			Vector2(area.size.x, right_y + bottom),
-			Vector2(0.0, left_y + bottom),
+			Vector2(x0, left_y + top),
+			Vector2(x1, right_y + top),
+			Vector2(x1, right_y + bottom),
+			Vector2(x0, left_y + bottom),
 		]), verge)
 
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, left_y - band * 0.5),
-		Vector2(area.size.x, right_y - band * 0.5),
-		Vector2(area.size.x, right_y + band),
-		Vector2(0.0, left_y + band),
+		Vector2(x0, left_y - band * 0.5),
+		Vector2(x1, right_y - band * 0.5),
+		Vector2(x1, right_y + band),
+		Vector2(x0, left_y + band),
 	]), road)
 	# Tekerlek izleri: yolun üstünde iki koyu şerit, dünya ile kayıyor.
 	for lane in [-0.16, 0.22]:
 		draw_line(
-			Vector2(0.0, left_y + band * lane), Vector2(area.size.x, right_y + band * lane),
+			Vector2(x0, left_y + band * lane), Vector2(x1, right_y + band * lane),
 			road.darkened(0.26), maxf(1.5, band * 0.12)
 		)
 	# Çakıl: yolun dokusu. Dünya koordinatından üretiliyor, o yüzden
 	# kervan durduğunda taşlar da duruyor.
 	var pebble_rng := RandomNumberGenerator.new()
 	pebble_rng.seed = 4771
+	# Şeridin içindeki taşlar eskisi gibi; kapsama taşan kısma aynı
+	# sıklıkta ek taşlar (şerit genişliğinin katı kadar dönüyor).
+	var copies := int(ceil(cover.size.x / area.size.x)) + 1
 	for _index in 26:
 		var world_slot := pebble_rng.randf() * area.size.x
-		var x := fposmod(world_slot - _world_x * PARALLAX_GROUND, area.size.x)
-		var y := _ground_y_at_screen(x) + band * pebble_rng.randf_range(-0.35, 0.85)
-		draw_circle(
-			Vector2(x, y), pebble_rng.randf_range(0.8, 2.0),
-			road.darkened(pebble_rng.randf_range(0.05, 0.30))
-		)
+		var base_x := fposmod(world_slot - _world_x * PARALLAX_GROUND, area.size.x)
+		var y_jitter := pebble_rng.randf_range(-0.35, 0.85)
+		var radius := pebble_rng.randf_range(0.8, 2.0)
+		var shade := pebble_rng.randf_range(0.05, 0.30)
+		for copy in range(-copies, copies + 1):
+			var x := base_x + float(copy) * area.size.x
+			if x < x0 or x > x1:
+				continue
+			draw_circle(Vector2(x, _ground_y_at_screen(x) + band * y_jitter), radius, road.darkened(shade))
 
 ## Yolun ekrandaki y'si. Eğim yolu döndürüyor; kervan da bu çizgiye
 ## basıyor (bkz. ground_line_changed).
@@ -648,7 +729,7 @@ func _draw_cities(area: Rect2, horizon: float) -> void:
 
 ## Ara duraklar: köy, karakol, maden, geçit, sunak, köprü. Konumları gün
 ## cinsinden; ekranda ancak yakınına gelince görünüyorlar.
-func _draw_stops(area: Rect2, horizon: float) -> void:
+func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	if _terrain == null:
 		return
 	# Duraklar yolun *üstünde* duruyor, ağaç hattında değil: ilk hâlinde
@@ -659,7 +740,7 @@ func _draw_stops(area: Rect2, horizon: float) -> void:
 	for entry in _terrain.get_stops():
 		var day := float(entry.day)
 		var x := caravan_x() + (day * PIXELS_PER_DAY - _world_x)
-		if x < -180.0 or x > area.size.x + 180.0:
+		if x < cover.position.x - 180.0 or x > cover.end.x + 180.0:
 			continue
 		# Yolun biraz gerisine oturuyorlar - kervan önlerinden geçiyor.
 		var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.045)
@@ -782,10 +863,10 @@ func _draw_hut(base: Vector2, height: float, wall: Color, roof: Color) -> void:
 ## kervanın arkasına düşüyor, yani figürler ağaçların üzerinde yürüyor
 ## gibi duruyordu. Aşağıya artık yalnızca alçak şeyler gidiyor ve onları
 ## `TravelForeground` çiziyor - kervandan sonra.
-func _draw_ground_props(area: Rect2, horizon: float) -> void:
+func _draw_ground_props(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var offset := -_world_x * PARALLAX_GROUND
-	var first := int(floor((-offset - CELL_GROUND) / CELL_GROUND))
-	var last := int(ceil((-offset + area.size.x + CELL_GROUND) / CELL_GROUND))
+	var first := int(floor((cover.position.x - offset - CELL_GROUND) / CELL_GROUND))
+	var last := int(ceil((cover.end.x - offset + CELL_GROUND) / CELL_GROUND))
 	var flora := Color(_colors.flora)
 	var near := Color(_colors.near)
 	for cell in range(first, last + 1):
@@ -793,7 +874,7 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 		rng.seed = hash("ground|%d|%s" % [cell, _biome])
 		var roll := rng.randf()
 		var x := float(cell) * CELL_GROUND + offset + rng.randf_range(-50.0, 50.0)
-		if x < -70.0 or x > area.size.x + 70.0:
+		if x < cover.position.x - 70.0 or x > cover.end.x + 70.0:
 			continue
 		# Yalnızca yolun üstü. `depth` 1'e yaklaştıkça yola (kameraya)
 		# yaklaşıyor - taban da boy da pus da ondan türüyor, yani uzaktaki
@@ -835,7 +916,7 @@ func _draw_ground_props(area: Rect2, horizon: float) -> void:
 ## Hava. Üç katman: kasvet gökyüzünde (bkz. _draw_sky), sis ufukta,
 ## yağmur her yerde. Yoğunluklar `RouteWeather.visuals`'tan - ekran kendi
 ## sayısını uydurmuyor.
-func _draw_weather(area: Rect2, horizon: float) -> void:
+func _draw_weather(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var fog := float(_weather_visuals.fog)
 	if fog > 0.0:
 		var haze := Color(_sky.haze)
@@ -847,14 +928,15 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 			var band_h := area.size.y * 0.11
 			var drift := sin(_time * 0.12 + float(index) * 1.3) * area.size.x * 0.02
 			draw_rect(
-				Rect2(Vector2(drift - area.size.x * 0.05, y), Vector2(area.size.x * 1.1, band_h)),
+				Rect2(Vector2(cover.position.x + drift - area.size.x * 0.05, y), Vector2(cover.size.x + area.size.x * 0.1, band_h)),
 				Color(haze.r, haze.g, haze.b, fog * 0.20 * (1.0 - ratio * 0.55)), true
 			)
 
 	var rain := float(_weather_visuals.rain)
 	if rain <= 0.0:
 		return
-	var drops := int(RAIN_MAX_DROPS * rain)
+	# Yağmur ekranın gördüğü her yere yağıyor, damla sıklığı aynı kalarak.
+	var drops := int(RAIN_MAX_DROPS * rain * cover.get_area() / maxf(1.0, area.get_area()))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 31337
 	# Damla ince ve yarı saydam: kalın çizgi yağmur değil tarama gibi
@@ -862,9 +944,9 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 	var color := Color(0.74, 0.80, 0.88, RAIN_ALPHA_BASE + rain * RAIN_ALPHA_PER_RAIN)
 	for _index in drops:
 		var speed := rng.randf_range(0.75, 1.35)
-		var x0 := rng.randf() * area.size.x * 1.3 - area.size.x * 0.15
-		var y0 := fposmod(
-			rng.randf() * area.size.y + _time * RAIN_SPEED * speed, area.size.y
+		var x0 := cover.position.x + rng.randf() * (cover.size.x + area.size.x * 0.3) - area.size.x * 0.15
+		var y0 := cover.position.y + fposmod(
+			rng.randf() * cover.size.y + _time * RAIN_SPEED * speed, cover.size.y
 		)
 		var length := area.size.y * rng.randf_range(0.035, 0.075) * (0.6 + rain * 0.6)
 		draw_line(
@@ -875,7 +957,7 @@ func _draw_weather(area: Rect2, horizon: float) -> void:
 	var splash_rng := RandomNumberGenerator.new()
 	splash_rng.seed = int(_time * 14.0)
 	for _index in int(10.0 * rain):
-		var sx := splash_rng.randf() * area.size.x
+		var sx := cover.position.x + splash_rng.randf() * cover.size.x
 		draw_arc(
 			Vector2(sx, _ground_y_at_screen(sx)), splash_rng.randf_range(2.0, 5.0),
 			PI, TAU, 6, Color(0.80, 0.86, 0.92, 0.35), 1.2

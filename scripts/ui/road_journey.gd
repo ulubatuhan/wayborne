@@ -363,18 +363,21 @@ var _walk_direction: float = 0.0
 var _clock_label: Label
 var _speed_button: Button
 ## --- Yakınlaştırma ---
-## Yolda bir miktar yakınlaşıp uzaklaşılabiliyor: tekerlek, iki parmak ya
-## da HUD'daki +/- düğmeleri (dokunmatik denklik). Alt sınır 1.0, çünkü
-## şerit ekranın tamamını dolduruyor - daha uzağı manzaranın kenarını
-## gösterirdi. Merkez liderin başı ve zemin çizgisi: yakınlaşan göz
-## kervandan kopmasın.
-const ZOOM_MIN: float = 1.0
+## Yolda yakınlaşıp uzaklaşılabiliyor: tekerlek, iki parmak ya da HUD'daki
+## +/- düğmeleri (dokunmatik denklik). 1.0 şeridin kendisi; altına inmek
+## (uzaklaşmak) şeridi küçültüyor ve şerit ekranın gördüğü fazlalığa
+## manzarayı taşıyarak çiziyor (bkz. TravelBand.set_view_rect) - kenar hiç
+## görünmüyor. Alt sınır oyuncunun "biraz daha geri çekilebilmeliyim"
+## isteğine göre: kervan hâlâ okunuyor, ufuk belirgin biçimde açılıyor.
+## Merkez liderin başı ve zemin çizgisi: göz kervandan kopmasın.
+const ZOOM_MIN: float = 0.7
 const ZOOM_MAX: float = 1.6
+const ZOOM_DEFAULT: float = 1.0
 const ZOOM_STEP: float = 0.1
 const ZOOM_EASE: float = 8.0
 ## Süreç boyunca akılda: bir sonraki seferde de oyuncunun seçtiği yakınlık.
-static var _zoom_target: float = ZOOM_MIN
-var _zoom: float = ZOOM_MIN
+static var _zoom_target: float = ZOOM_DEFAULT
+var _zoom: float = ZOOM_DEFAULT
 var _pinch_points: Dictionary = {}  # index -> Vector2
 var _pinch_distance: float = 0.0
 var _progress_bar: ProgressBar
@@ -1610,6 +1613,14 @@ func _apply_zoom(delta: float) -> void:
 		_caravan.get_leader_centre(), _caravan.get_ground_y()
 	)
 	_band.scale = Vector2(_zoom, _zoom)
+	_band.set_view_rect(visible_rect_in(_band, _world.get_global_rect()))
+
+## Ekranın bir dikdörtgeninin (global) bir düğümün yerel uzayındaki karşılığı -
+## ölçeklenmiş şeridin o an gördüğü alan.
+static func visible_rect_in(node: CanvasItem, global_rect: Rect2) -> Rect2:
+	var xf := node.get_global_transform() if node.is_inside_tree() else node.get_transform()
+	var inv := xf.affine_inverse()
+	return Rect2(inv * global_rect.position, Vector2.ZERO).expand(inv * global_rect.end)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _band != null and _band.visible and _handle_zoom_input(event):
