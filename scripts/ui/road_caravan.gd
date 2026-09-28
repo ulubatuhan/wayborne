@@ -53,6 +53,17 @@ const PERSON_HEIGHT_RATIO: float = 0.19
 const MOUNTED_HEIGHT_RATIO: float = 0.27
 const OX_HEIGHT_RATIO: float = 0.15
 
+## Köpek/eşek/yarım vagon kolonun en arkasında, tek sıra bir "sürü" olarak
+## yürüyor - `world_hub.gd`'nin aynı kararının yol ekranındaki karşılığı
+## (bkz. CLAUDE.md'nin "beş yeni tür" notu): tam kolon formülü (muhafız
+## grubu, öküz-vagon birimi) en fazla 2 köpek + 3 eşek/yarım vagon için
+## aşırıydı, sabit genişlikli basit bir kuyruk yeterli. Yarım vagon eşekle
+## aynı hayvanla çiziliyor - ikisi de `GameSession.pack_inventory`'nin aynı
+## kapasite havuzunu paylaşıyor, görsel olarak da ayrışmaları gerekmiyor.
+const DOG_HEIGHT_RATIO: float = 0.10
+const DONKEY_HEIGHT_RATIO: float = 0.13
+const PACK_GAP: float = 18.0
+
 ## Bir vagonu **tek öküz** çeker. Bir süre çift öküzdü (bkz. Faz 10'un
 ## ART-C hattı) - tek hayvanın boyunduruk değil at koşumu gibi okunduğu
 ## gerekçesiyle - ama açıkça istenerek teke geri döndü (bkz. CLAUDE.md
@@ -185,6 +196,12 @@ var _crew_figures: Array[WalkFigure] = []
 var _driver_figures: Array[WalkFigure] = []
 ## Vagon başına tek öküz - koşumun ölçüsünü bunlar belirliyor.
 var _oxen: Array[WalkFigure] = []
+## Köpek/eşek/yarım vagon "sürüsü" - kolonun en arkasında. `_pack_is_dog`
+## aynı indekste hangi hayvanın çizildiğini tutuyor (WalkFigure kendi
+## türünü dışarı vermiyor), sırası `configure()`'daki ekleme sırasıyla
+## birebir aynı: önce köpekler, sonra eşekler/yarım vagonlar.
+var _pack: Array[WalkFigure] = []
+var _pack_is_dog: Array[bool] = []
 
 ## Altında bir şey çizmenin anlamı olmadığı boy. Bunun altında vagonun
 ## bütün ölçüleri piksel altına düşüyor ve çokgenlerin köşeleri aynı
@@ -229,6 +246,8 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_crew_figures.clear()
 	_driver_figures.clear()
 	_oxen.clear()
+	_pack.clear()
+	_pack_is_dog.clear()
 	_leader = null
 
 	# Kamp durumu eski figürlere işaret ediyor olabilir - `queue_free()`
@@ -299,6 +318,20 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 		)
 		driver.visible = false
 		_driver_figures.append(driver)
+
+	# Köpek/eşek/yarım vagon: üçü de kervanın kendi mülkü (bkz. GameSession
+	# owned_dogs/owned_donkeys/owned_half_wagons), tayfa gibi isimsiz -
+	# nötr bir palet yetiyor. Yarım vagon eşekle aynı figürle çiziliyor.
+	for index in session.owned_dogs:
+		_pack.append(_make_figure(
+			WalkFigure.KIND_DOG, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
+		))
+		_pack_is_dog.append(true)
+	for index in session.owned_donkeys + session.owned_half_wagons:
+		_pack.append(_make_figure(
+			WalkFigure.KIND_DONKEY, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
+		))
+		_pack_is_dog.append(false)
 
 	_layout()
 
@@ -605,6 +638,14 @@ func get_ox_centres() -> Array[float]:
 		centres.append(ox.position.x + ox.size.x * 0.5)
 	return centres
 
+## Köpek/eşek/yarım vagon sürüsünün merkezleri - `get_ox_centres()` ile
+## aynı desen, test kendi aritmetiğini yapmadan gerçek konumu okuyor.
+func get_pack_centres() -> Array[float]:
+	var centres: Array[float] = []
+	for figure in _pack:
+		centres.append(figure.position.x + figure.size.x * 0.5)
+	return centres
+
 ## Ateşlerin merkezleri, vagonlarla aynı sırada - `_wagon_centres` gibi
 ## test bunu okuyor, kendi aritmetiğini yapmıyor.
 func get_campfire_positions() -> Array[Vector2]:
@@ -858,6 +899,19 @@ func _walk_column(scale: float, place: bool) -> float:
 			cursor, placed, person_h, person_w, pair_gap, gap_normal, place
 		)
 		placed += MAX_ABREAST
+
+	# Köpek/eşek/yarım vagon sürüsü en arkada, tek sıra - `configure()`'ın
+	# ekleme sırasıyla aynı (önce köpekler, sonra eşekler/yarım vagonlar).
+	var pack_gap := PACK_GAP * scale
+	for index in _pack.size():
+		var is_dog: bool = _pack_is_dog[index] if index < _pack_is_dog.size() else false
+		var pack_h := height * (DOG_HEIGHT_RATIO if is_dog else DONKEY_HEIGHT_RATIO)
+		var pack_w := pack_h * 1.3
+		cursor -= pack_w * 0.5
+		if place:
+			_place(_pack[index], cursor, pack_h, pack_w)
+		cursor -= pack_w * 0.5
+		cursor -= pack_gap
 
 	return start - cursor
 

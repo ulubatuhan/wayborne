@@ -28,8 +28,9 @@ func run(t) -> void:
 		for party in [1, 2, 4]:
 			_check(t, wagons, party)
 	_test_a_small_caravan_is_not_shrunk(t)
+	_test_pack_animals_are_placed(t)
 
-func _build(wagons: int, party: int) -> RoadCaravan:
+func _build(wagons: int, party: int, dogs: int = 0, donkeys: int = 0, half_wagons: int = 0) -> RoadCaravan:
 	var band := TravelBand.new()
 	band.size = BAND
 	var caravan := RoadCaravan.new()
@@ -37,8 +38,16 @@ func _build(wagons: int, party: int) -> RoadCaravan:
 	caravan.size = BAND
 	caravan.column_length_changed.connect(band.set_column_length)
 
-	var session := GameSession.new()
+	# Bol altın: bu paket köpek/eşek/yarım vagon satın alıyor, yerleşimin
+	# kendisiyle ilgisiz bir kese kısıtına takılmamalı.
+	var session := GameSession.new(2000, 20, wagons)
 	session.owned_wagon_count = wagons
+	for _i in dogs:
+		session.adopt_dog()
+	for _i in donkeys:
+		session.buy_donkey()
+	for _i in half_wagons:
+		session.buy_half_wagon()
 	var culture := CultureCatalog.get_cultures()[0]
 	for index in party:
 		var character := CharacterData.create(
@@ -55,6 +64,32 @@ func _build(wagons: int, party: int) -> RoadCaravan:
 	caravan.set_ground_line(band.caravan_x(), BAND.y * 0.84)
 	caravan.set_ground_line(band.caravan_x(), BAND.y * 0.84)
 	return caravan
+
+## Köpek/eşek/yarım vagon yol ekranında da görünmeli - bir süre yalnızca
+## `world_hub.gd`'ye (şehir dışı yürüme alanı) bağlanmışlardı, sefer
+## sırasında (`RoadCaravan`, bu dosyanın test ettiği sınıf) hiç
+## çizilmiyorlardı: oyuncu satın alıyor, yola çıkınca kayboluyorlardı.
+func _test_pack_animals_are_placed(t) -> void:
+	var caravan := _build(2, 1, 2, 1, 1)
+	var pack_centres: Array[float] = caravan.get_pack_centres()
+	t.eq(pack_centres.size(), 4, "2 köpek + 1 eşek + 1 yarım vagon dört hayvan çizer")
+
+	# Sürü kolonun en arkasında: son vagondan da geride.
+	var wagon_centres: Array[float] = caravan.get_wagon_centres()
+	var last_wagon: float = wagon_centres[wagon_centres.size() - 1]
+	for centre in pack_centres:
+		t.ok(centre < last_wagon, "sürü hep son vagonun gerisinde durmalı")
+
+	# Üst üste binmiyorlar: sıradaki merkez bir öncekinden daima geride.
+	for index in range(1, pack_centres.size()):
+		t.ok(
+			pack_centres[index - 1] - pack_centres[index] > 0.0,
+			"%d. ve %d. sürü hayvanı üst üste biniyor" % [index, index + 1]
+		)
+
+	# Hiç hayvan yoksa hiç figür çizilmez - varsayılan davranış bozulmadı.
+	var bare := _build(1, 1)
+	t.eq(bare.get_pack_centres().size(), 0, "hayvan yoksa sürü de yok")
 
 func _check(t, wagons: int, party: int) -> void:
 	var caravan := _build(wagons, party)
