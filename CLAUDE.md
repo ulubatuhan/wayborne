@@ -3945,17 +3945,22 @@ verir.
   (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
   kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
   ayrı bırakıldı, unutulmasın diye burada.
-- **Fazladan hayvan referans geometrisi henüz hiçbir sisteme bağlı değil.**
-  `BeastRig.SPECIES_ORDER` beş türle sabit (horse/ox/wolf/bear/boar); CC0
-  bir paketten (Quaternius) kesilen at/öküz/kurdun ötesinde beyaz at, eşek,
-  geyik (Stag+Deer), husky gibi ek türlerin 3D referans parçaları da
-  çıkarıldı ama bunların oyunda **ne işe yarayacağı ve nerede
-  karşımıza çıkacağı henüz kararlaştırılmadı** - `BeastRig`'e altıncı bir
-  tür olarak mı ekleniyorlar (o zaman hangi mekanik: binek, yeni bir
-  `evt_wild_animal` çeşidi, kervan taşıyıcı hayvanı?), yoksa yalnızca
-  sahne dekoru/flavor mı kalıyorlar? Ayı ve domuz da bu pakette yok, ayrı
-  bir kaynak bekliyor. Sanat işi başlamadan önce bu tasarım kararı
-  netleşmeli, unutulmasın diye burada.
+- **Beş ek hayvanın sanatı bitti, hangi mekanikte kullanılacakları hâlâ
+  kararlaştırılmadı.** `BeastRig.SPECIES_ORDER` artık on tür taşıyor -
+  at/öküz/kurt/ayı/domuz'un yanına beyaz at, eşek, erkek geyik (stag),
+  geyik (deer) ve husky eklendi; ayı ve domuz dışındaki sekizinin hepsi
+  artık gerçek, yürüyen skin sanatına sahip (bkz. Wardrobe & Rig Rules'un
+  "one skin" maddesi ve `tests/screenshot_beast_rig.gd`'nin ikinci
+  karesi). Ama bu beşi **hiçbir oyun mekaniğine bağlı değil** -
+  `WalkFigure`/`CombatFigure` hâlâ yalnızca at/öküz/kurt biliyor, yani
+  sanat kendi başına dursa bile **ne işe yarayacakları ve nerede
+  karşımıza çıkacakları henüz kararlaştırılmadı**: `WalkFigure`'a altıncı/
+  yedinci bir binek/taşıyıcı olarak mı ekleniyorlar (o zaman hangi
+  mekanik: binek, kervan taşıyıcı hayvanı?), `EnemyCatalog`'a yeni bir
+  `evt_wild_animal` çeşidi olarak mı (husky evcil bir köpek, vahşi hayvan
+  değil - bu soruyu daha da keskinleştiriyor), yoksa yalnızca sahne
+  dekoru/flavor mı kalıyorlar? Ayı ve domuz hâlâ bu pakette yok, ayrı bir
+  kaynak bekliyor. Bu tasarım kararı netleşmeli, unutulmasın diye burada.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -5639,9 +5644,50 @@ pozunda duruyor. Yürürken bacak adımı boyunu aşınca kaval kemiği gerilmek
 yerine ayak hafifçe kalkıyor. Baş sallama ve kuyruk salınımı da ucu kaydırmak
 yerine döndürüyor. Kemik boyları yürüyüş boyunca sabit, bunu da test
 kilitliyor. `tests/screenshot_beast_rig.gd` yürüyüşün sekiz fazını basıyor.
-Ayı ve domuz bu pakette yok. Hangi ek türlerin (beyaz at, eşek, geyik, husky;
-aynı pakette referans olarak duruyorlar) oyunda nereye bağlanacağı Ana
-Hedefler'de açık.
+Ayı ve domuz bu pakette yok.
+
+**Aynı pakette referans olarak duran beyaz at, eşek, erkek geyik (stag),
+geyik (deer) ve husky de aynı yöntemle, birebir aynı çalışma yürütülerek
+skin'e kavuştu.** İki gerçek hata bu turda bulundu ve düzeltildi, ikisi de
+`tools/beast_skin.py`'da:
+
+- **`load_model()` "ilk mesh taşıyan node"yu alıyordu, skin taşıyanı değil.**
+  Geyiğin boynuzu (`Stag_Horns`) ayrı, kemiksiz bir mesh - `Head` kemiğine
+  rijit bağlı - ve node sırasında gövdeden (skin taşıyan asıl mesh) önce
+  geliyordu, o yüzden araç boynuzu gövde sanıp çökmüştü. Düzeltme iki parça:
+  skin taşıyan node'u `n.skin != null` ile bulmak (mesh'i değil), ve rijit
+  ekleri (boynuz gibi) ait oldukları kemiğe tam ağırlıkla, kendi dünya
+  dönüşümüyle deriye katmak - `beast_skin.py`'ın kendi "bir hayvan bütün
+  boyanır, sonra kesilir" ilkesinin genellemesi: boynuz da hayvanın bir
+  parçası, ayrı bir sistemi hak etmiyor.
+- **Ölçek bir ölçüm değil, bir tasarım hedefi** - `SPECIES_BACK` her türün
+  gerçek glTF oranlarından değil, oyunda ne kadar iri okunması gerektiğinden
+  geliyor (at .66, kurt .50 zaten böyle seçilmişti). Beş yeni tür için de
+  aynı disiplinle seçildi (donkey .55, stag .60, deer .48, husky .40,
+  horse_white ata özdeş .66) - ham model oranlarını ölçüp ona göre
+  ölçeklemek yanlış soruyu cevaplardı, "bu hayvan oyunda ne kadar büyük
+  görünmeli" sorusunun cevabı asla ham geometriden gelmiyor.
+
+**Üçüncü bir bulgu koddan değil, ekrandan geldi - ve harnessin kendisi
+suçluydu, oyun değil.** Sekiz türü (at/öküz/kurt/beyaz at/eşek/stag/deer/
+husky) tek bir karede, sekiz yürüyüş fazı × üç katman ile basan ilk deneme
+her sütunda **en son çizilen türü, kendinden bir önceki türün resmiyle**
+gösterdi - eşek deer'in, deer stag'in, husky de deer'in (sıralama
+değiştirilince hangisi son sıradaysa o) resmiyle çıktı. Yarım saatlik bir
+ölçüm zinciri (köşe verisi doğru, doku RID'i doğru ve türe özel, doku
+piksel içeriği doğru - hatta husky'nin dokusu tamamen kırmızıya boyanıp
+yeniden denendi, yine de bir önceki türün rengiyle çıktı) her uygulama
+katmanının doğru çalıştığını gösterdi. Beş yeni türü tek başına, at/öküz/
+kurt'suz basan bir deneme sorunu tamamen ortadan kaldırdı - yazılım
+rasterleyicisinin (bu ortamda Vulkan yok, llvmpipe) aynı karede otuzu aşan
+eşsiz `Texture2D` ile karşılaşınca bir dokuyu değil bir öncekini kullanması,
+uygulama kodunun hiçbir yerinde görünmeyen bir render-katmanı sınırıydı.
+`screenshot_beast_rig.gd` artık **iki ayrı kareye** basıyor - at/öküz/kurt
+(gerçek `WalkFigure`/`CombatFigure` yolu, `beast_gait_sweep.png`) ve beş
+yeni tür (`BeastRig`'in kendisinden, `WalkFigure`'a henüz bağlanmadıkları
+için - `beast_gait_sweep_new_species.png`) - aynı "harnessten önce oyundan
+şüphelen" disiplininin (bkz. Testing) bu turdaki karşılığı, ama ters yönde:
+bu kez şüphelenilmesi gereken oyun değil, ekrana basan aracın kendisiydi.
 
 ## Quick Start
 

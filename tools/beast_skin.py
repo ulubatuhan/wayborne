@@ -49,8 +49,15 @@ REF_H = float(SPEC["ref_h"])
 
 # Height of the back at the withers, in figure heights - BeastRig.SPECIES.back.
 # The art is scaled so its withers sit where the procedural animal's did, so
-# riders, wagons and combat slots keep the sizes they were laid out for.
-SPECIES_BACK = {"horse": 0.66, "ox": 0.62, "wolf": 0.50, "bear": 0.58, "boar": 0.46}
+# riders, wagons and combat slots keep the sizes they were laid out for. This
+# is a design target, not a measurement of the source mesh - the scale in
+# skeleton() forces whatever the raw glTF's proportions are onto this ratio,
+# so a value here is "how tall should this read next to the player", chosen
+# to sit inside the family's existing span (wolf .50 .. horse .66).
+SPECIES_BACK = {
+    "horse": 0.66, "ox": 0.62, "wolf": 0.50, "bear": 0.58, "boar": 0.46,
+    "horse_white": 0.66, "donkey": 0.55, "stag": 0.60, "deer": 0.48, "husky": 0.40,
+}
 
 TEXELS_PER_REF = 2.0     # texture resolution: 2 texels per REF_H pixel
 SUPERSAMPLE = 2          # rendered at 2x and filtered down (anti-aliasing)
@@ -118,19 +125,24 @@ def load_model(path):
     g = pygltflib.GLTF2().load(path)
     bufs = [base64.b64decode(b.uri.split(",", 1)[1]) for b in g.buffers]
     worlds = {}
+    parent_of = {}
 
     def walk(i, parent):
         worlds[i] = parent @ _local(g.nodes[i])
         for c in g.nodes[i].children or []:
+            parent_of[c] = i
             walk(c, worlds[i])
 
     for r in g.scenes[g.scene].nodes:
         walk(r, np.eye(4))
     skin = g.skins[0]
     names = [g.nodes[i].name for i in skin.joints]
+    joint_index = {j: k for k, j in enumerate(skin.joints)}
     ibm = _accessor(g, bufs, skin.inverseBindMatrices).reshape(-1, 4, 4).transpose(0, 2, 1)
     skin_mats = np.stack([worlds[j] @ ibm[k] for k, j in enumerate(skin.joints)])
-    mesh_node = next(i for i, n in enumerate(g.nodes) if n.mesh is not None)
+    # The skinned body, never the first mesh node in file order - Stag lists
+    # its antlers (a separate, unskinned mesh) before the body.
+    mesh_node = next(i for i, n in enumerate(g.nodes) if n.skin is not None)
 
     pos, faces, joints, weights, colors = [], [], [], [], []
     base = 0
@@ -148,6 +160,33 @@ def load_model(path):
         pos.append(posed); faces.append(f + base); joints.append(j); weights.append(w)
         colors.append(np.tile(np.r_[_srgb(col[:3]), 1.0], (len(f), 1)))
         base += len(v)
+
+    # A rigid attachment (the stag's antlers): its own mesh, no skin of its
+    # own, hung under one of this skin's bones. It moves as one piece with
+    # that bone, so it is posed by the node's own world transform and folded
+    # in at full weight to that one bone - the weighting pipeline downstream
+    # (rig_weights, hinge_roots) then treats it exactly like skinned geometry.
+    for i, n in enumerate(g.nodes):
+        if n.mesh is None or n.skin is not None or i == mesh_node:
+            continue
+        anc = parent_of.get(i)
+        while anc is not None and anc not in joint_index:
+            anc = parent_of.get(anc)
+        if anc is None:
+            continue
+        bone_k = joint_index[anc]
+        for p in g.meshes[n.mesh].primitives:
+            v = _accessor(g, bufs, p.attributes.POSITION).astype(np.float64)
+            f = _accessor(g, bufs, p.indices).astype(np.int64).reshape(-1, 3)
+            vh = np.c_[v, np.ones(len(v))]
+            posed = (worlds[i] @ vh.T).T[:, :3]
+            col = g.materials[p.material].pbrMetallicRoughness.baseColorFactor
+            pos.append(posed); faces.append(f + base)
+            joints.append(np.full((len(v), 4), bone_k, dtype=np.int64))
+            weights.append(np.c_[np.ones(len(v)), np.zeros((len(v), 3))])
+            colors.append(np.tile(np.r_[_srgb(col[:3]), 1.0], (len(f), 1)))
+            base += len(v)
+
     rest = {g.nodes[j].name: worlds[j][:3, 3].copy() for j in skin.joints}
     return {
         "positions": np.vstack(pos), "faces": np.vstack(faces),
