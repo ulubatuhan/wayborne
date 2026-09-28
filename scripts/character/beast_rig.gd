@@ -1,14 +1,16 @@
 class_name BeastRig
 extends RefCounted
 
-## Dört ayaklıların iskeleti: at, öküz, kurt, ayı, yaban domuzu. İnsan
-## iskeleti (`FigureRig`) ne ise bu da hayvanlar için o - eklemler tek yerde
-## çözülüyor, sprite parçaları kemiklere takılıyor.
+## Dört ayaklıların iskeleti: at, öküz, kurt, ayı, yaban domuzu, beyaz at,
+## eşek, erkek geyik, geyik, husky. İnsan iskeleti (`FigureRig`) ne ise bu da
+## hayvanlar için o - eklemler tek yerde çözülüyor, sprite parçaları
+## kemiklere takılıyor.
 ##
-## Beş tür aynı kemikleri paylaşıyor (gövde, boyun, baş, kuyruk, dört bacağın
+## On tür aynı kemikleri paylaşıyor (gövde, boyun, baş, kuyruk, dört bacağın
 ## her biri üst/alt/ayak); farkı `SPECIES` tablosundaki oranlar yapıyor. Tek
-## bir iskelet olması ressamın beş tür için aynı dokuz parçalık sayfayı
-## boyaması demek.
+## bir iskelet olması ressamın on tür için aynı dokuz parçalık sayfayı
+## boyaması demek - ya da (skin'i olan sekizi için, bkz. `skin_of()`) aynı
+## on altı kemiğin ağırlıklandırıldığı bir deri.
 ##
 ## Resimler yolundan bulunuyor, liste yok:
 ##
@@ -28,6 +30,11 @@ const OX: String = "ox"
 const WOLF: String = "wolf"
 const BEAR: String = "bear"
 const BOAR: String = "boar"
+const HORSE_WHITE: String = "horse_white"
+const DONKEY: String = "donkey"
+const STAG: String = "stag"
+const DEER: String = "deer"
+const HUSKY: String = "husky"
 
 ## Oranlar `h` cinsinden. `span` kalça tepesinden omuz tepesine, `back`
 ## sırtın yerden yüksekliği, `neck`/`head`/`tail` kemik vektörleri (sağa
@@ -64,8 +71,47 @@ const SPECIES: Dictionary = {
 		"head": Vector2(0.17, 0.08), "tail": Vector2(-0.06, 0.10), "foot": 0.05,
 		"nod": 0.0, "layers": [],
 	},
+	# The five below have real skinned art (bkz. Wardrobe & Rig Rules'un "one
+	# skin" maddesi) - these procedural numbers are only the fallback pose,
+	# exercised when the skin is missing and by the canvas-fit tests. Each is
+	# the HORSE (horse_white, donkey, stag, deer) or WOLF (husky) template
+	# scaled by its own `back`/`back` ratio to that template - proportion,
+	# not a species-specific silhouette, since the real silhouette lives in
+	# the skin now.
+	HORSE_WHITE: {
+		"span": 0.83, "back": 0.66, "fore_drop": 0.08, "hind_drop": 0.10,
+		"upper": 0.54, "lower": 0.54, "neck": Vector2(0.26, -0.22),
+		"head": Vector2(0.14, 0.13), "tail": Vector2(-0.10, 0.22), "foot": 0.05,
+		"nod": 0.0, "layers": [],
+	},
+	DONKEY: {
+		"span": 0.69, "back": 0.55, "fore_drop": 0.07, "hind_drop": 0.08,
+		"upper": 0.50, "lower": 0.50, "neck": Vector2(0.22, -0.18),
+		"head": Vector2(0.14, 0.11), "tail": Vector2(-0.08, 0.18), "foot": 0.04,
+		"nod": 0.0, "layers": [],
+	},
+	STAG: {
+		"span": 0.75, "back": 0.60, "fore_drop": 0.07, "hind_drop": 0.09,
+		"upper": 0.54, "lower": 0.54, "neck": Vector2(0.24, -0.20),
+		"head": Vector2(0.13, 0.12), "tail": Vector2(-0.09, 0.20), "foot": 0.05,
+		"nod": 0.0, "layers": [],
+	},
+	DEER: {
+		"span": 0.60, "back": 0.48, "fore_drop": 0.06, "hind_drop": 0.07,
+		"upper": 0.56, "lower": 0.56, "neck": Vector2(0.19, -0.16),
+		"head": Vector2(0.10, 0.10), "tail": Vector2(-0.07, 0.16), "foot": 0.04,
+		"nod": 0.0, "layers": [],
+	},
+	HUSKY: {
+		"span": 0.50, "back": 0.40, "fore_drop": 0.05, "hind_drop": 0.06,
+		"upper": 0.52, "lower": 0.52, "neck": Vector2(0.11, -0.05),
+		"head": Vector2(0.14, 0.02), "tail": Vector2(-0.18, 0.08), "foot": 0.06,
+		"nod": 0.0, "layers": [],
+	},
 }
-const SPECIES_ORDER: Array[String] = [HORSE, OX, WOLF, BEAR, BOAR]
+const SPECIES_ORDER: Array[String] = [
+	HORSE, OX, WOLF, BEAR, BOAR, HORSE_WHITE, DONKEY, STAG, DEER, HUSKY,
+]
 
 ## `WalkFigure`'ın eski dört ayaklı yürüyüşüyle aynı adım: dört vuruşlu
 ## yürüyüş, arka yakın - arka uzak - ön yakın - ön uzak.

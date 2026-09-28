@@ -146,13 +146,17 @@ func _write_fixture(layer: String, parts: Array) -> void:
 		image.fill(Color(0.5, 0.4, 0.3, 1.0))
 		image.save_png(ProjectSettings.globalize_path("%s/%s.png" % [dir, part]))
 
-const SKINNED: Array = ["horse", "ox", "wolf"]
+const SKINNED: Array = ["horse", "ox", "wolf", "horse_white", "donkey", "stag", "deer", "husky"]
 const GAIT_SAMPLES: int = 16
-## Ölçülen değerler (yürüyüşün 16 fazında ters dönen opak üçgen): at 0, öküz
-## 0, kurt birkaç (koltuk altı, 4x yakınlıkta görünmüyor, kurt oyunda zaten
-## yürümüyor). Eşik bunun biraz üstünde - bir ağırlık hatası yüzlercesini
-## çevirir.
-const MAX_FOLDED: Dictionary = {"horse": 4, "ox": 4, "wolf": 16}
+## Ölçülen değerler (yürüyüşün 16 fazında ters dönen opak üçgen): at/öküz/
+## beyaz at/eşek/erkek geyik/geyik 0, kurt/husky birkaç (koltuk altı, 4x
+## yakınlıkta görünmüyor, ikisi de oyunda zaten yürümüyor - kurt savaşta
+## dinlenme pozunda duruyor, husky hiçbir mekaniğe bağlı değil). Eşik
+## bunun biraz üstünde - bir ağırlık hatası yüzlercesini çevirir.
+const MAX_FOLDED: Dictionary = {
+	"horse": 4, "ox": 4, "wolf": 16,
+	"horse_white": 4, "donkey": 4, "stag": 4, "deer": 4, "husky": 4,
+}
 
 ## Her köşenin ağırlığı bir, her kemik adı iskelette var, katman dilimleri
 ## köşe ve üçgen dizileriyle uyuşuyor.
@@ -257,14 +261,20 @@ func _folded_opaque(skin: BeastSkin, layer: int, points: PackedVector2Array, ima
 	var v0 := skin.layer_vertex_offsets[layer]
 	var uvs := skin.layer_uvs(layer)
 	var tris := skin.layer_indices(layer)
-	var size := Vector2(image.get_width() - 1, image.get_height() - 1)
+	var w := image.get_width()
+	var h := image.get_height()
 	var count := 0
 	for i in range(0, tris.size(), 3):
 		var a := tris[i]
 		var b := tris[i + 1]
 		var c := tris[i + 2]
-		var centre := (uvs[a] + uvs[b] + uvs[c]) / 3.0 * size
-		if image.get_pixelv(Vector2i(centre)).a < 0.5:
+		var centre := (uvs[a] + uvs[b] + uvs[c]) / 3.0 * Vector2(w - 1, h - 1)
+		# A triangle centred a hair past the image edge (a thin, near-tangent
+		# tail wisp) would index out of bounds without this - clamp, don't
+		# skip, or that triangle silently never gets checked.
+		var px := clampi(int(centre.x), 0, w - 1)
+		var py := clampi(int(centre.y), 0, h - 1)
+		if image.get_pixel(px, py).a < 0.5:
 			continue
 		var rest := (skin.vertices[v0 + b] - skin.vertices[v0 + a]).cross(skin.vertices[v0 + c] - skin.vertices[v0 + a])
 		var now := (points[v0 + b] - points[v0 + a]).cross(points[v0 + c] - points[v0 + a])

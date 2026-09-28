@@ -1,11 +1,13 @@
-# Hayvan sprite'ları (at, öküz, kurt, ayı, yaban domuzu)
+# Hayvan sprite'ları (at, öküz, kurt, ayı, yaban domuzu, beyaz at, eşek,
+# erkek geyik, geyik, husky)
 
-Hayvanlar da bir iskeletle çiziliyor (`scripts/character/beast_rig.gd`). Beş
+Hayvanlar da bir iskeletle çiziliyor (`scripts/character/beast_rig.gd`). On
 tür aynı on altı kemiği paylaşıyor: gövde, boyun, baş, kuyruk ve dört bacağın
 her birinin üst, alt ve ayak kemiği. Türler arasındaki fark oranlarda. Bir
 türün gövde resmi geldiği an o tür yolda, köyde, savaşta ve yoldaki karşılaşma
 işaretinde resimle çizilmeye başlıyor. Resmi gelmemiş tür eskisi gibi prosedürel
-çizimde kalıyor.
+çizimde kalıyor. Beyaz at, eşek, erkek geyik, geyik ve husky'nin sanatı bitti
+ama hiçbir oyun mekaniğine henüz bağlanmadı - bkz. CLAUDE.md Ana Hedefler.
 
 ## Yürüyen hayvan: deri (skin.tres)
 
@@ -28,15 +30,45 @@ Araç modelin kendi skin ağırlıklarını on altı kemiğe eşliyor. Yeniden
 boyamak için üç katman PNG'sini **aynı siluetin içinde** boyamak yeterli.
 Ağ ve ağırlıklar aynı kalıyor, çünkü köşeler resmin piksellerine bağlı.
 
+**Yeni bir tür eklemenin sırası:** önce `BeastRig.SPECIES`/`SPECIES_ORDER`'a
+bir giriş (prosedürel yedek poz + `godot --headless --script
+res://tests/export_rig_spec.gd` ile `docs/beasts/beast_rig_spec.json`'ı
+tazele), sonra `beast_skin.py`. Araç `--species` seçeneklerini bu JSON'dan
+okuyor - motorun henüz bilmediği bir tür için skin üretilemez, kasıtlı bir
+sıralama.
+
+**`SPECIES_BACK` bir ölçüm değil, bir tasarım kararı.** `skeleton()` ham
+glTF'in withers yüksekliğini bu orana **zorlayarak** ölçekliyor - yani
+"gerçek dünyada bu hayvan ne kadar büyük" sorusuna değil, "oyunda insan
+figürünün yanında ne kadar büyük okunmalı" sorusuna cevap. At/kurt için
+zaten böyle seçilmişti (.66 / .50); yeni bir tür eklerken de ham model
+oranlarını ölçüp uyarlamak yerine ailenin içine (kurt .50 - at .66 arası)
+oturan bir hedef seçilir.
+
+**Bir hayvanın rijit bir eki olabilir** (geyiğin boynuzu gibi) - ayrı,
+skin'siz bir mesh, tek bir kemiğe (`Head`) rijit bağlı. `load_model()` bunu
+otomatik buluyor (o kemiğin ebeveyn zincirinde olan, skin'siz her mesh) ve
+tam ağırlıkla o kemiğe katıyor - ayrı bir sistem gerekmiyor, "bir hayvan
+bütün boyanır, sonra kesilir" ilkesinin bir uzantısı.
+
+**Tek karede çok fazla tür basmayın.** Bu ortamın yazılım rasterleyicisi
+(llvmpipe, Vulkan yok) aynı karede otuzu aşan eşsiz `Texture2D` etkin
+olduğunda bir dokuyu değil bir öncekini çiziyor - veri/kod tarafı tamamen
+doğruyken bile. `screenshot_beast_rig.gd` bu yüzden at/öküz/kurt'u ve beş
+yeni türü **ayrı karelere** basıyor (bkz. o dosyanın başındaki not). Yeni
+bir tür eklerken aynı karede çok fazla eşsiz doku birikmediğinden emin
+olun, ya da kendi ayrı karesine basın.
+
 ## Dosyalar nereye gider
 
 ```
 data/assets/characters/beasts/<katman>/<parça>.png
 ```
 
-- `<katman>`: `horse`, `ox`, `wolf`, `bear`, `boar`. Hayvanın üstüne binen
-  takımlar da ayrı katman: `horse_tack` (eyer, dizgin), `ox_yoke`
-  (boyunduruk yastığı, kayış).
+- `<katman>`: `horse`, `ox`, `wolf`, `bear`, `boar`, `horse_white`,
+  `donkey`, `stag`, `deer`, `husky`. Hayvanın üstüne binen takımlar da ayrı
+  katman: `horse_tack` (eyer, dizgin), `ox_yoke` (boyunduruk yastığı,
+  kayış).
 - `<parça>`: `body`, `neck`, `head`, `tail`, `fore_upper`, `fore_lower`,
   `hind_upper`, `hind_lower`, `foot`.
 - Uzak taraftaki bacaklar yakın bacağın resmini karartılmış kullanıyor.
