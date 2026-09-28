@@ -3917,6 +3917,17 @@ verir.
   (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
   kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
   ayrı bırakıldı, unutulmasın diye burada.
+- **Fazladan hayvan referans geometrisi henüz hiçbir sisteme bağlı değil.**
+  `BeastRig.SPECIES_ORDER` beş türle sabit (horse/ox/wolf/bear/boar); CC0
+  bir paketten (Quaternius) kesilen at/öküz/kurdun ötesinde beyaz at, eşek,
+  geyik (Stag+Deer), husky gibi ek türlerin 3D referans parçaları da
+  çıkarıldı ama bunların oyunda **ne işe yarayacağı ve nerede
+  karşımıza çıkacağı henüz kararlaştırılmadı** - `BeastRig`'e altıncı bir
+  tür olarak mı ekleniyorlar (o zaman hangi mekanik: binek, yeni bir
+  `evt_wild_animal` çeşidi, kervan taşıyıcı hayvanı?), yoksa yalnızca
+  sahne dekoru/flavor mı kalıyorlar? Ayı ve domuz da bu pakette yok, ayrı
+  bir kaynak bekliyor. Sanat işi başlamadan önce bu tasarım kararı
+  netleşmeli, unutulmasın diye burada.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -5581,6 +5592,30 @@ yalnızca kısayoldur. Beş PR, kurallar Road Movement Rules'ta:
   sayıları değişmedi, çünkü normal tempo eski tam tempo yürüyüşünün
   aynısı. Ölçülen tek yeni risk akşam kampı emrinin erzak sözünü
   bozmasıydı; planlayıcıya kamp payı eklendi.
+
+**At/öküz/kurdun ilk gerçek `BeastRig` sanatı geldi.** `data/assets/
+characters/beasts/{horse,ox,wolf}/` artık her biri dokuz parçalık (near+far
+bacaklar dahil on dört dosya) gerçek PNG taşıyor - Faz 16'nın insan
+`Wardrobe` varyantlarında kullanılan aynı yöntem: CC0 bir 3D paketten
+(Quaternius) iskelet-eklem konumları okunup gövde/boyun/baş/kuyruk/bacaklar
+düzlemsel kesilerek ayrıştırıldı, sonra `docs/beasts/beast_rig_spec.json`'ın
+(oyunun kendi `tests/export_rig_spec.gd`'sinin ürettiği) rest-pose eklem ve
+`ends` verisiyle `BeastRig.part_transform()`'ın **tam tersi** hesaplanarak
+her parça doğru pivot/dönüş/ölçekle kendi tuvaline oturtuldu - motora
+paralel bir dönüşüm formülü yazmak yerine, `tools/beast_cut.py`'ın
+`unrotate()`'inin aynı matematiği Python'da tekrarlandı. Kesim kutuları
+gerçek eklemlere değil, motorun kendi `SPECIES.upper`/`lower` oranına göre
+hesaplanan bir orana oturuyor - önce Quaternius'un gerçek dirsek/diz
+eklemleri kullanıldı ve üst bacak parçaları motorun beklediği tuvale göre
+kısa/ezik çıktı (motorun 50/50 oranına karşı gerçek iskeletin çok daha kısa
+üst-bacak/uzun alt-bacak oranı), düzeltme motorun kendi oranını taklit
+etmekti - `has_sprites()` artık üçü için de true, `WalkFigure`/
+`CombatFigure` prosedürelden sprite'a geçti. `tests/screenshot_beast_rig.gd`
+bu üçünü gerçek çizim yoluyla (rest + PAINT_PHASE yakını bir yürüyüş anı,
+kurtta ayna testi) PNG'ye basıyor - `test_beast_rig.gd` yalnızca
+sözleşmeyi doğruluyordu, görüntüyü hiçbir zaman. Ayı ve domuz bu pakette
+yok; hangi ek türlerin (beyaz at, eşek, geyik, husky - aynı pakette kesilip
+referans olarak duran) oyunda nereye bağlanacağı Ana Hedefler'de açık.
 
 ## Quick Start
 
