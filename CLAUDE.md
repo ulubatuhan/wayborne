@@ -5790,6 +5790,26 @@ var olan `CombatFigure.ARCHETYPES` tablosuna birer satır olarak girdi.
   yeni bir eşleme tablosu gerekmedi - `EnemyCatalog.get_kind_label`in zaten
   kurduğu "kadro türü → görünen ad" disiplininin aynısı.
 
+**Düzeltildi: köpek/eşek/yarım vagon sefer sırasında hiç görünmüyordu.**
+Yukarıdaki iş yalnızca `world_hub.gd`'ye (şehir dışı yürüme alanı) bağlanmıştı
+- oyuncunun oynadığı gerçek yol ekranı `scripts/ui/road_caravan.gd`'nin
+(`RoadCaravan`) kendi ayrı, paralaks arka planlı çizim yolu (bkz. bu
+dosyanın kendi "Çizim ikiye ayrılmış durumda" notu), ve o dosyaya hiç
+dokunulmamıştı - tam olarak "aynı şey iki yerde çizilirse iki farklı şey
+olur" kuralının bir örneği daha (bkz. `RoadCaravan`/`menu_backdrop.gd`'nin
+öküz-çifti kaldırımı gibi). Oyuncu köpek sahiplenip eşek satın alıp yola
+çıktığında ikisi de kervanın **hiçbir** görsel temsilinde yoktu.
+`RoadCaravan._walk_column()`'ın kendi "her parça kendi genişliğini tüketir"
+kuralına yeni bir kuyruk eklendi: köpek/eşek/yarım vagon kolonun **en
+arkasında**, tek sıra bir sürü olarak (`DOG_HEIGHT_RATIO`/
+`DONKEY_HEIGHT_RATIO`, `world_hub.gd`'nin aynı "tam kolon formülü bu kadar
+az hayvan için aşırı" kararı) - yarım vagon eşekle aynı figürle çiziliyor,
+ikisi zaten `GameSession.pack_inventory`'nin aynı kapasite havuzunu
+paylaşıyor. `get_pack_centres()` `get_ox_centres()`'le aynı desende test
+okuyor; `tests/test_caravan_layout.gd`'nin yeni testi dört hayvanın da
+çizildiğini ve hepsinin son vagondan geride, üst üste binmeden durduğunu
+doğruluyor.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
