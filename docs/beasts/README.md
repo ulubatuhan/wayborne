@@ -51,6 +51,26 @@ otomatik buluyor (o kemiğin ebeveyn zincirinde olan, skin'siz her mesh) ve
 tam ağırlıkla o kemiğe katıyor - ayrı bir sistem gerekmiyor, "bir hayvan
 bütün boyanır, sonra kesilir" ilkesinin bir uzantısı.
 
+**Quaternius dışından gelen modeller önce normalleştirilir.** Ayı (CC0,
+Phelippeau Rudy - rigsiz bir mesh) ve yaban domuzu (rigli, kemik adları
+`body.001_L.003` tarzı, ters yöne bakıyor) `tools/beast_prep_blend.py` ile
+`bpy` üstünden Quaternius biçimine getiriliyor: kemikler rolüne göre
+yeniden adlandırılıyor, ayıya ayak/sağrı/burun ölçülerinden bir iskelet
+oturtulup kemik ısısıyla ağırlık veriliyor, ikisi de +z'ye döndürülüyor.
+Ayının dokusu kutup ayısıydı; kürk parlaklığı kahveye eşlenerek orman ayısı
+yapıldı (`BEAR_FUR`). Dokulu modeller için `beast_skin.py` dokuyu da
+render ediyor - texel'ler bir kez daha sRGB'ye kodlanıyor, çünkü pyrender
+dokuyu sRGB'den çözüyor ama düz rengi olduğu gibi alıyor (ölçüldü): yoksa
+boyalı hayvan Quaternius sürüsünden bir ton koyu çıkıyor.
+
+```
+pip install bpy
+python3 tools/beast_prep_blend.py bear Bear.blend /tmp/bear.glb
+python3 tools/beast_prep_blend.py boar boar.blend /tmp/boar.glb
+python3 tools/beast_skin.py /tmp/bear.glb bear
+python3 tools/beast_skin.py /tmp/boar.glb boar
+```
+
 **Tek karede çok fazla tür basmayın.** Bu ortamın yazılım rasterleyicisi
 (llvmpipe, Vulkan yok) aynı karede otuzu aşan eşsiz `Texture2D` etkin
 olduğunda bir dokuyu değil bir öncekini çiziyor - veri/kod tarafı tamamen

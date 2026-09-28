@@ -146,15 +146,17 @@ func _write_fixture(layer: String, parts: Array) -> void:
 		image.fill(Color(0.5, 0.4, 0.3, 1.0))
 		image.save_png(ProjectSettings.globalize_path("%s/%s.png" % [dir, part]))
 
-const SKINNED: Array = ["horse", "ox", "wolf", "horse_white", "donkey", "stag", "deer", "husky"]
+const SKINNED: Array = ["horse", "ox", "wolf", "bear", "boar", "horse_white", "donkey", "stag", "deer", "husky"]
 const GAIT_SAMPLES: int = 16
-## Ölçülen değerler (yürüyüşün 16 fazında ters dönen opak üçgen): at/öküz/
+## Ölçülen değerler (yürüyüşün 16 fazında ters dönen opak üçgen): domuz 0,
+## ayı 41 (kemik ısısıyla bizim ağırlıklandırdığımız tek model - kıvrımlar
+## gövdenin içinde, büyük ölçekte bile görünmüyor); at/öküz/
 ## beyaz at/eşek/erkek geyik/geyik 0, kurt/husky birkaç (koltuk altı, 4x
 ## yakınlıkta görünmüyor, ikisi de oyunda zaten yürümüyor - kurt savaşta
 ## dinlenme pozunda duruyor, husky hiçbir mekaniğe bağlı değil). Eşik
 ## bunun biraz üstünde - bir ağırlık hatası yüzlercesini çevirir.
 const MAX_FOLDED: Dictionary = {
-	"horse": 4, "ox": 4, "wolf": 16,
+	"horse": 4, "ox": 4, "wolf": 16, "bear": 48, "boar": 4,
 	"horse_white": 4, "donkey": 4, "stag": 4, "deer": 4, "husky": 4,
 }
 

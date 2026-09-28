@@ -9,7 +9,7 @@ extends RefCounted
 ## On tür aynı kemikleri paylaşıyor (gövde, boyun, baş, kuyruk, dört bacağın
 ## her biri üst/alt/ayak); farkı `SPECIES` tablosundaki oranlar yapıyor. Tek
 ## bir iskelet olması ressamın on tür için aynı dokuz parçalık sayfayı
-## boyaması demek - ya da (skin'i olan sekizi için, bkz. `skin_of()`) aynı
+## boyaması demek - ya da (on türün hepsinde, bkz. `skin_of()`) aynı
 ## on altı kemiğin ağırlıklandırıldığı bir deri.
 ##
 ## Resimler yolundan bulunuyor, liste yok:
