@@ -3909,6 +3909,14 @@ verir.
 - **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
   on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
+- **Cinsiyet ve vücut tipinin stat etkisi.** `CharacterData.gender`/
+  `body_weight` (bkz. Wardrobe body varyant sistemi) şu an tamamen görsel -
+  hiçbir derived formül bunları okumuyor, `test_character_data.gd` bunu
+  doğrudan doğruluyor (aynı statlarla farklı cinsiyet/kilo, aynı can/
+  kaçınma). Boyun HP/dodge'a etkisiyle aynı aile bir mekanik isteniyor
+  (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
+  kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
+  ayrı bırakıldı, unutulmasın diye burada.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
