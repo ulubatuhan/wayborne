@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_loadout_layers_and_discovery(t)
 	_test_back_limb_shading(t)
 	_test_combat_figure_switches_to_rig(t)
+	_test_body_variant_id_falls_back(t)
 
 ## Şablonu çizen ve parça sayfasını dilimleyen Python araçları bu dosyayı
 ## okuyor. İskelet değişip dosya değişmezse ressamın şablonu oyunun
@@ -155,6 +156,34 @@ func _test_loadout_layers_and_discovery(t) -> void:
 	t.eq(Wardrobe.part_texture("fx_jacket", "thigh"), null, "kalemin kapsamadığı parça yok")
 	t.ok(Wardrobe.has_part(loadout, "weapon"), "silah resmi olan yük eldeki silahı gösteriyor")
 	t.ok(not Wardrobe.has_part(PackedStringArray(["fx_shirt"]), "weapon"), "silahsız yük sırttaki silüette kalıyor")
+	Wardrobe.root_path = previous
+	Wardrobe.clear_cache()
+
+## Sanat henüz gelmediği sürece hiçbir cinsiyet/kilo varyantı düz "body"den
+## farklı davranmamalı - CharacterData Faz'ının kendi garantisi (bkz. o
+## dosyanın "fresh character unchanged" notu). Sanat gelince (burada
+## fixture'la taklit ediliyor) doğru varyant seçilmeli.
+func _test_body_variant_id_falls_back(t) -> void:
+	var previous := Wardrobe.root_path
+	Wardrobe.root_path = FIXTURE_ROOT
+	Wardrobe.clear_cache()
+	t.eq(
+		Wardrobe.body_id_for(CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_HEAVY),
+		Wardrobe.BODY_ID,
+		"sanatı olmayan varyant düz body'ye düşer"
+	)
+	_write_fixture("body_male_heavy", ["torso"])
+	Wardrobe.clear_cache()
+	t.eq(
+		Wardrobe.body_id_for(CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_HEAVY),
+		"body_male_heavy",
+		"sanatı eklenen varyant kendi kimliğiyle seçilir"
+	)
+	t.eq(
+		Wardrobe.body_id_for(CharacterData.GENDER_FEMALE, CharacterData.BODY_WEIGHT_LEAN),
+		Wardrobe.BODY_ID,
+		"başka bir varyantın sanatı bu varyantı etkilemez"
+	)
 	Wardrobe.root_path = previous
 	Wardrobe.clear_cache()
 

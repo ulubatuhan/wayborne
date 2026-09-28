@@ -63,6 +63,9 @@ var outfit: Dictionary = {}
 var loadout: PackedStringArray = PackedStringArray()
 var skin: Color = Color(0.78, 0.65, 0.53)
 var height_scale: float = 1.0
+## `CharacterData.get_body_variant_id()` - yalnızca oyuncu tarafı; düşmanlar
+## boş bırakır (WalkFigure/CombatFigure boşu düz "body"ye çevirir).
+var body_variant: String = ""
 
 ## Parti stresi bu karakterin direncini aştıysa true - CombatEncounter
 ## her turunda emirlere kulak asmama ihtimali doğurur (bkz.
@@ -148,6 +151,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.outfit = character.outfit
 	unit.loadout = Wardrobe.loadout_for(character)
 	unit.skin = CharacterData.get_skin_tone_color(character.skin_tone)
+	unit.body_variant = character.get_body_variant_id()
 	unit.height_scale = clampf(
 		float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14
 	)

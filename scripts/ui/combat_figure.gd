@@ -116,6 +116,8 @@ var _outfit: Dictionary = {}
 var _loadout: PackedStringArray = PackedStringArray()
 var _skin: Color = SKIN_PALE
 var _height_scale: float = 1.0
+## `CombatUnit.body_variant` - bkz. WalkFigure._body_variant'ın aynı notu.
+var _body_variant: String = ""
 var _rig: WalkFigure = null
 
 ## Faz 17 PR-7: savaş animasyon katmanı. İkisi de duruma göre değil - saf
@@ -148,7 +150,7 @@ func _init() -> void:
 func setup(
 	kind: String, face_right: bool, state: String, depth: float, outfit: Dictionary = {},
 	loadout: PackedStringArray = PackedStringArray(), skin: Color = SKIN_PALE,
-	height_scale: float = 1.0
+	height_scale: float = 1.0, body_variant: String = ""
 ) -> void:
 	_kind = kind if ARCHETYPES.has(kind) else FALLBACK_KIND
 	_face_right = face_right
@@ -158,6 +160,7 @@ func setup(
 	_loadout = loadout
 	_skin = skin
 	_height_scale = height_scale
+	_body_variant = body_variant
 	_sync_rig()
 	queue_redraw()
 
@@ -180,7 +183,7 @@ func _sync_rig() -> void:
 	_rig.size = size
 	_rig.set_kind(
 		WalkFigure.KIND_PERSON, _kind, _height_scale * (1.0 - _depth * 0.08), _skin,
-		false, _outfit
+		false, _outfit, _body_variant
 	)
 	_rig.set_loadout(_loadout)
 	_rig.set_standing()

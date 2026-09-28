@@ -311,7 +311,8 @@ func _make_figure(
 	var figure := WalkFigure.new()
 	add_child(figure)
 	var outfit: Dictionary = character.outfit if character != null else {}
-	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit)
+	var body_variant := character.get_body_variant_id() if character != null else ""
+	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit, body_variant)
 	figure.set_loadout(Wardrobe.loadout_for(character))
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
 	# gibi duruyor.

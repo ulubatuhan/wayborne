@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_dict_round_trip(t)
 	_test_class_and_skills(t)
 	_test_wisdom_and_faith(t)
+	_test_gender_and_body_weight(t)
 
 ## Faz 17: iki yeni stat, ikisi de tabanda (5) eski davranışı birebir korur -
 ## dosyanın her formülünün kendi kuralı, burada da geçerli.
@@ -86,6 +87,8 @@ func _test_dict_round_trip(t) -> void:
 	t.eq(restored.class_id, original.class_id, "sınıf korunur")
 	t.eq(restored.height_cm, original.height_cm, "boy korunur")
 	t.eq(restored.skin_tone, original.skin_tone, "ten rengi korunur")
+	t.eq(restored.gender, original.gender, "cinsiyet korunur")
+	t.eq(restored.body_weight, original.body_weight, "vücut tipi korunur")
 	t.eq(restored.hire_cost, original.hire_cost, "ücret korunur")
 	t.eq(restored.current_hp, original.current_hp, "anlık can korunur")
 	t.eq(restored.get_max_hp(), original.get_max_hp(), "tavan can yeniden hesaplanır")
@@ -105,3 +108,44 @@ func _test_class_and_skills(t) -> void:
 
 	var height_clamped := CharacterData.create("Dev", CultureCatalog.NOMAD, CharacterStats.new(), 999, 0)
 	t.eq(height_clamped.height_cm, CharacterData.MAX_HEIGHT_CM, "boy tavanda kırpılır")
+
+## Cinsiyet/kilo şimdilik yalnızca görsel - hiçbir derived stat bunları
+## okumamalı (bkz. CharacterData.gd'nin kendi notu, "stat etkisi ayrı bir
+## karar"). Varsayılan (kadın/orta) eski davranışla birebir aynı kalmalı:
+## `get_body_variant_id()` sanat henüz eklenmediği için hep düz "body"ye
+## düşer (bkz. Wardrobe.body_id_for'un has_sprites fallback'ı).
+func _test_gender_and_body_weight(t) -> void:
+	var baseline := CharacterData.create("Taban", CultureCatalog.NOMAD, CharacterStats.new())
+	t.eq(baseline.gender, CharacterData.GENDER_FEMALE, "varsayılan cinsiyet kadın")
+	t.eq(baseline.body_weight, CharacterData.BODY_WEIGHT_AVERAGE, "varsayılan vücut tipi orta")
+	t.eq(baseline.get_body_variant_id(), Wardrobe.BODY_ID,
+		"sanat eklenmeden varyant kimliği düz body'ye düşer")
+
+	var male_heavy := CharacterData.create(
+		"Devasa", CultureCatalog.NOMAD, CharacterStats.new(),
+		CharacterData.DEFAULT_HEIGHT_CM, 0, ClassCatalog.GUARD,
+		CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_HEAVY
+	)
+	t.eq(male_heavy.gender, CharacterData.GENDER_MALE, "erkek seçimi korunur")
+	t.eq(male_heavy.body_weight, CharacterData.BODY_WEIGHT_HEAVY, "iri seçimi korunur")
+	t.eq(male_heavy.get_body_variant_id(), Wardrobe.BODY_ID,
+		"iri erkek varyantının sanatı yoksa yine düz body'ye düşer")
+
+	var clamped := CharacterData.create(
+		"Sınır", CultureCatalog.NOMAD, CharacterStats.new(),
+		CharacterData.DEFAULT_HEIGHT_CM, 0, ClassCatalog.GUARD, 99, -5
+	)
+	t.eq(clamped.gender, CharacterData.GENDER_MALE, "cinsiyet index tavanda kırpılır")
+	t.eq(clamped.body_weight, CharacterData.BODY_WEIGHT_LEAN, "vücut tipi index tabanda kırpılır")
+
+	# get_max_hp/get_dodge gibi hiçbir savaş formülü cinsiyet/kilodan
+	# etkilenmemeli - aynı statlarla, farklı cinsiyet/kilo, aynı sonuç.
+	var female_lean := CharacterData.create(
+		"Kontrol", CultureCatalog.NOMAD, CharacterStats.new(),
+		CharacterData.DEFAULT_HEIGHT_CM, 0, ClassCatalog.GUARD,
+		CharacterData.GENDER_FEMALE, CharacterData.BODY_WEIGHT_LEAN
+	)
+	t.eq(male_heavy.get_max_hp(), female_lean.get_max_hp(),
+		"cinsiyet/kilo can formülüne henüz dokunmuyor")
+	t.eq(male_heavy.get_dodge(), female_lean.get_dodge(),
+		"cinsiyet/kilo kaçınma formülüne henüz dokunmuyor")

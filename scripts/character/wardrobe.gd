@@ -27,6 +27,23 @@ const ROOT: String = "res://data/assets/characters/wardrobe/"
 ## açık gri bir beden çiziyor).
 const BODY_ID: String = "body"
 
+## Cinsiyet/kilo varyantlı ten katmanları: `wardrobe/body_<cinsiyet>_
+## <kilo>/<parça>.png` (bkz. CharacterData.GENDER_*/BODY_WEIGHT_*, aynı
+## index sırası). `body_id_for()` bu ismi kurar; sanat o varyant için
+## henüz yoksa (ResourceLoader.exists false) düz `BODY_ID`'ye düşer -
+## yani varyant sistemi sanat gelmeden hiçbir görünür farkı yaratmaz,
+## tıpkı imzasız bir kuşam kaleminin prosedürel figürde kalması gibi.
+const GENDER_KEYS: Array[String] = ["female", "male"]
+const BODY_WEIGHT_KEYS: Array[String] = ["lean", "average", "heavy"]
+
+static func body_id_for(gender: int, body_weight: int) -> String:
+	var g := GENDER_KEYS[clampi(gender, 0, GENDER_KEYS.size() - 1)]
+	var w := BODY_WEIGHT_KEYS[clampi(body_weight, 0, BODY_WEIGHT_KEYS.size() - 1)]
+	var variant_id := "%s_%s_%s" % [BODY_ID, g, w]
+	if has_sprites(variant_id):
+		return variant_id
+	return BODY_ID
+
 ## Aynı kemikteki katmanların sırası, alttan üste. Gömlek ceketin, ceket
 ## zırhın altında; eldiven kolluğun, şapka her şeyin üstünde. Silah kendi
 ## kemiğinde (`weapon`) ama kolluk/eldiven gibi diğer parçaları da olabilir.

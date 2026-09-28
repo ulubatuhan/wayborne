@@ -45,6 +45,26 @@ var class_id: String = ClassCatalog.GUARD
 var height_cm: int = DEFAULT_HEIGHT_CM
 var skin_tone: int = 1
 
+## Cinsiyet ve vücut kilosu - şimdilik yalnızca görsel (bkz.
+## Wardrobe.body_id_for/get_body_variant_id): hangi "body_<cinsiyet>_
+## <kilo>" sanat katmanının çizileceğini seçer, hiçbir derived stat
+## formülü bunu okumuyor henüz - stat etkisi (bkz. boyun HP/dodge'a
+## etkisiyle aynı aile) ayrı, sonraki bir karar. `skin_tone`'un yanına,
+## aynı index-tabanlı üslupla eklendi.
+const GENDER_FEMALE: int = 0
+const GENDER_MALE: int = 1
+const GENDER_NAMES: Array[String] = ["GENDER_FEMALE", "GENDER_MALE"]
+
+const BODY_WEIGHT_LEAN: int = 0
+const BODY_WEIGHT_AVERAGE: int = 1
+const BODY_WEIGHT_HEAVY: int = 2
+const BODY_WEIGHT_NAMES: Array[String] = [
+	"BODY_WEIGHT_LEAN", "BODY_WEIGHT_AVERAGE", "BODY_WEIGHT_HEAVY",
+]
+
+var gender: int = GENDER_FEMALE
+var body_weight: int = BODY_WEIGHT_AVERAGE
+
 ## Kültür bonusları uygulanmış hâli - taban statlar saklanmaz, karakter
 ## kurulurken bir kez birleştirilir.
 var stats: CharacterStats = CharacterStats.new()
@@ -127,11 +147,27 @@ static func get_skin_tone_name(index: int) -> String:
 	var key := SKIN_TONE_NAMES[clampi(index, 0, SKIN_TONE_NAMES.size() - 1)]
 	return String(TranslationServer.translate(key))
 
+static func get_gender_name(index: int) -> String:
+	var key := GENDER_NAMES[clampi(index, 0, GENDER_NAMES.size() - 1)]
+	return String(TranslationServer.translate(key))
+
+static func get_body_weight_name(index: int) -> String:
+	var key := BODY_WEIGHT_NAMES[clampi(index, 0, BODY_WEIGHT_NAMES.size() - 1)]
+	return String(TranslationServer.translate(key))
+
+## Wardrobe'un çizeceği ten katmanının kimliği (`body_<cinsiyet>_<kilo>`).
+## Sanat henüz o varyant için eklenmediyse Wardrobe kendi içinde düz
+## `"body"`'ye düşüyor (bkz. Wardrobe.body_id_for) - yani bu alan sanat
+## gelene kadar hiçbir görünür değişikliğe yol açmıyor.
+func get_body_variant_id() -> String:
+	return Wardrobe.body_id_for(gender, body_weight)
+
 ## Kültür bonuslarını taban statlara uygulayıp canı dolduran fabrika.
 static func create(
 	character_name: String, culture_id: String, base_stats: CharacterStats,
 	height_cm: int = DEFAULT_HEIGHT_CM, skin_tone: int = 1,
-	class_id: String = ClassCatalog.GUARD
+	class_id: String = ClassCatalog.GUARD,
+	gender: int = GENDER_FEMALE, body_weight: int = BODY_WEIGHT_AVERAGE
 ) -> CharacterData:
 	var character := CharacterData.new()
 	character.character_name = character_name
@@ -139,6 +175,8 @@ static func create(
 	character.class_id = class_id
 	character.height_cm = clampi(height_cm, MIN_HEIGHT_CM, MAX_HEIGHT_CM)
 	character.skin_tone = skin_tone
+	character.gender = clampi(gender, GENDER_FEMALE, GENDER_MALE)
+	character.body_weight = clampi(body_weight, BODY_WEIGHT_LEAN, BODY_WEIGHT_HEAVY)
 	character.stats = CultureCatalog.get_culture_or_default(culture_id).apply_to(base_stats)
 	character.heal_full()
 	return character
@@ -609,6 +647,9 @@ func get_summary_line() -> String:
 func get_appearance_line() -> String:
 	return "%d cm · %s ten" % [height_cm, get_skin_tone_name(skin_tone)]
 
+func get_gender_and_weight_line() -> String:
+	return "%s · %s" % [get_gender_name(gender), get_body_weight_name(body_weight)]
+
 func to_dict() -> Dictionary:
 	return {
 		"name": character_name,
@@ -616,6 +657,8 @@ func to_dict() -> Dictionary:
 		"class_id": class_id,
 		"height_cm": height_cm,
 		"skin_tone": skin_tone,
+		"gender": gender,
+		"body_weight": body_weight,
 		"stats": stats.to_dict(),
 		"current_hp": current_hp,
 		"stress": stress,
@@ -646,6 +689,10 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.class_id = str(data.get("class_id", ClassCatalog.GUARD))
 	character.height_cm = clampi(int(data.get("height_cm", DEFAULT_HEIGHT_CM)), MIN_HEIGHT_CM, MAX_HEIGHT_CM)
 	character.skin_tone = int(data.get("skin_tone", 1))
+	character.gender = clampi(int(data.get("gender", GENDER_FEMALE)), GENDER_FEMALE, GENDER_MALE)
+	character.body_weight = clampi(
+		int(data.get("body_weight", BODY_WEIGHT_AVERAGE)), BODY_WEIGHT_LEAN, BODY_WEIGHT_HEAVY
+	)
 	character.stats = CharacterStats.from_dict(data.get("stats", {}))
 	character.stress = clampi(int(data.get("stress", 0)), 0, MAX_STRESS)
 	character.hire_cost = int(data.get("hire_cost", 0))
