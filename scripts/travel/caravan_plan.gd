@@ -117,21 +117,30 @@ func get_required_documents() -> int:
 ## `test_provisions.gd`'nin doğrudan sabit sayılarla çağırdığı testler
 ## hiç değişmeden geçer; yalnızca gerçek bir parti veren iki canlı çağıran
 ## (planlayıcı, yol) bu payı dolduruyor.
+## `animal_mouths` husky/eşek/yarım vagon toplamı (bkz. GameSession.
+## get_pack_animal_provision_mouths) - `height_adjustment`'ın aynı deseni:
+## varsayılanı 0.0, eski çağıranlar ve sabit sayılarla çağıran testler hiç
+## değişmeden geçer.
 static func daily_consumption(
 	party_size: int, owned_wagons: int, merchant_count: int,
-	multiplier: float = 1.0, flat_reduction: int = 0, height_adjustment: float = 0.0
+	multiplier: float = 1.0, flat_reduction: int = 0, height_adjustment: float = 0.0,
+	animal_mouths: float = 0.0
 ) -> int:
 	var mouths := (
 		float(maxi(1, party_size))
 		+ float(maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON)
 		+ float(maxi(0, merchant_count))
 		+ height_adjustment
+		+ maxf(0.0, animal_mouths)
 	)
 	var eaten := int(round(mouths * float(PROVISIONS_PER_PERSON_PER_DAY) * maxf(0.0, multiplier)))
 	return maxi(1, eaten - maxi(0, flat_reduction))
 
 ## Planlayıcı ekranı doldurmazsa 0.0 - eski, boy-kör davranış.
 var height_adjustment: float = 0.0
+## Planlayıcı ekranı doldurmazsa 0.0 - husky/eşek/yarım vagon yoksa eski
+## davranış (bkz. GameSession.get_pack_animal_provision_mouths).
+var animal_mouths: float = 0.0
 
 ## Gerçek partiden `height_adjustment`'ı hesaplar - planlayıcı ve yol aynı
 ## partiyi okuduğu için burada da aynı sonucu üretirler (bkz. Provision
@@ -149,7 +158,8 @@ func get_daily_consumption() -> int:
 		_selected_offers.size(),
 		provision_multiplier,
 		provision_reduction,
-		height_adjustment
+		height_adjustment,
+		animal_mouths
 	)
 
 ## Yolun *gerçekte* kaç gün süreceği: taban süre + hava/kondisyon payı.

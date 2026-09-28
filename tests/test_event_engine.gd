@@ -18,6 +18,8 @@ func run(t) -> void:
 	_test_shrine_weight_follows_terrain(t)
 	_test_highland_challenge_weight_follows_terrain(t)
 	_test_road_patrol_has_fight_option(t)
+	_test_hunting_trip_weight_follows_terrain(t)
+	_test_hunting_trip_hunt_option_opens_hunt_combat(t)
 	_test_bandit_ambush_toll_scales_with_danger(t)
 
 func _make_event(event_id: String, weight: float = 1.0) -> GameEvent:
@@ -201,6 +203,54 @@ func _test_road_patrol_has_fight_option(t) -> void:
 		if effect.type == EventEffect.Type.TRIGGER_COMBAT and effect.text_value == "bandit":
 			triggers_bandit_combat = true
 	t.ok(triggers_bandit_combat, "seçenek haydut türünde bir savaş açıyor, muhafız değil")
+
+## Avlanma girişimi ormanda/dağda çok daha olası - aynı desen (bkz.
+## _test_highland_challenge_weight_follows_terrain), yeni context
+## anahtarları için (bkz. EventResolver.biome_context).
+func _test_hunting_trip_weight_follows_terrain(t) -> void:
+	var events := EventCatalog.get_road_events()
+	var hunt_event: GameEvent = null
+	for event in events:
+		if event.event_id == "evt_hunting_trip":
+			hunt_event = event
+			break
+	t.ne(hunt_event, null, "evt_hunting_trip katalogda var")
+
+	var away_weight := hunt_event.get_weight({"near_forest": 0.0, "near_mountain": 0.0})
+	var forest_weight := hunt_event.get_weight({"near_forest": 1.0, "near_mountain": 0.0})
+	var mountain_weight := hunt_event.get_weight({"near_forest": 0.0, "near_mountain": 1.0})
+	t.ok(away_weight > 0.0, "ne ormanda ne dağdayken bile küçük bir şans kalır")
+	t.ok(forest_weight > away_weight * 3.0, "ormandayken ağırlık kayda değer büyür")
+	t.ok(mountain_weight > away_weight, "dağdayken de ağırlık büyür")
+	t.ok(forest_weight > mountain_weight, "erkek geyik/geyik ormanda dağdan daha olası")
+
+## Avlanma başarılı olunca "hunt" türünde gerçek bir savaş açmalı -
+## EnemyCatalog.KIND_HUNT'ın deer/stag kadrosu, evt_wild_animal'ın
+## "wildlife" açması gibi ama kendi türünden.
+func _test_hunting_trip_hunt_option_opens_hunt_combat(t) -> void:
+	var events := EventCatalog.get_road_events()
+	var hunt_event: GameEvent = null
+	for event in events:
+		if event.event_id == "evt_hunting_trip":
+			hunt_event = event
+			break
+	t.ne(hunt_event, null, "evt_hunting_trip katalogda var")
+
+	var hunt_choice: EventChoice = null
+	for choice in hunt_event.choices:
+		if choice.text_key == "EVT_HUNTING_TRIP_OPT_HUNT":
+			hunt_choice = choice
+			break
+	t.ne(hunt_choice, null, "avlanma seçeneği var")
+	t.ne(hunt_choice.check, null, "avlanma bir skill-check'e bağlı")
+	t.eq(hunt_choice.check.stat, CharacterStats.Kind.PERCEPTION, "check Sezgi'ye bağlı")
+
+	var triggers_hunt_combat := false
+	for outcome in hunt_choice.outcomes:
+		for effect in outcome.effects:
+			if effect.type == EventEffect.Type.TRIGGER_COMBAT and effect.text_value == EnemyCatalog.KIND_HUNT:
+				triggers_hunt_combat = true
+	t.ok(triggers_hunt_combat, "başarılı yaklaşma \"hunt\" türünde bir savaş açıyor")
 
 ## Faz 17 PR-6 eksiği: fidye artık sabit 120 GG değil, yolun tehlikesine
 ## göre üç banda ölçekleniyor - EnemyCatalog.build_bandit_squad'ın kadroyu

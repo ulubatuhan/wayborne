@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_perks_reach_the_planner(t)
 	_test_consumption_never_free(t)
 	_test_hungry_days_predicts_the_road(t)
+	_test_pack_animals_reach_the_planner(t)
 
 ## Planın istediği = yolun yediği. İkisi ayrı formüllerken planlayıcı
 ## yalnızca tüccarları sayıyor, yol levazımcıyı da düşüyordu.
@@ -109,6 +110,29 @@ func _test_perks_reach_the_planner(t) -> void:
 
 	var with_quartermaster := CaravanPlan.daily_consumption(2, 2, 1, 1.0, 2)
 	t.ok(with_quartermaster < normal, "levazımcı planda da tasarruf ettirir")
+
+## Husky/eşek/yarım vagon erzağa küçük bir pay ekliyor (bkz. GameSession.
+## get_pack_animal_provision_mouths) - varsayılan 0.0 eski davranışı
+## bozmuyor, ama plan bu payı okuduğunda yol da tam olarak aynı sayıyı
+## yemeli (bkz. _test_plan_and_road_agree'nin aynı sözü).
+func _test_pack_animals_reach_the_planner(t) -> void:
+	var session := _session(2, 2, 0)
+	session.adopt_dog()
+	session.adopt_dog()
+	session.buy_donkey()
+	session.buy_half_wagon()
+
+	var without_animals := CaravanPlan.daily_consumption(2, 2, 0)
+	var with_animals := CaravanPlan.daily_consumption(2, 2, 0, 1.0, 0, 0.0, session.get_pack_animal_provision_mouths())
+	t.ok(with_animals >= without_animals, "husky/eşek/yarım vagon hiçbir zaman erzağı azaltmaz")
+
+	var plan := _plan(session, 4, 0)
+	plan.animal_mouths = session.get_pack_animal_provision_mouths()
+	t.eq(
+		plan.get_daily_consumption(),
+		session.get_daily_provision_consumption(),
+		"plan ve yol köpek/eşek/yarım vagonla da aynı günlük tüketimi söyler"
+	)
 
 ## Hiçbir kervan bedavaya yürümez - çarpan ve indirim ne olursa olsun.
 func _test_consumption_never_free(t) -> void:

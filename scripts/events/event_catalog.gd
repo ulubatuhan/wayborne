@@ -92,6 +92,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_wolf_pack())
 	_road_events.append(_creditor_rider())
 	_road_events.append(_bailiffs_at_camp())
+	_road_events.append(_hunting_trip())
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -1199,6 +1200,44 @@ static func _wild_animal() -> GameEvent:
 				EventEffect.make(EventEffect.Type.STRESS, 5),
 			])
 		),
+	])
+	return event
+
+## Ormanda/dağda geçen bir avlanma girişimi (bkz. EnemyCatalog.
+## build_hunt_squad). Yaklaşmak/yakalamak Sezgi meselesi - iz sürmek,
+## rüzgârın yönünü okumak, ürkütmeden sokulmak (bkz. GameSession.
+## get_dog_perception_bonus - husky varsa bu check'i de kolaylaştırıyor,
+## çünkü "iz sürme/awareness" onun kendi vaadi). Ortak bir çaba
+## (PARTY_BEST), tek bir kumarcı değil. Başarı gerçek bir savaş açıyor -
+## erkek geyik yalnız değil, "yaklaşıp yakalamak" onu ürkütüp savunma
+## pozisyonuna itiyor. Başarısızlık cezasız: hayvan sezip kaçıyor, tehlike
+## artmıyor - bu bir tehdit değil bir fırsat, kaçırmak yalnızca hayal
+## kırıklığı.
+static func _hunting_trip() -> GameEvent:
+	var event := _event("evt_hunting_trip", "EVT_HUNTING_TRIP", 1.0)
+	event.cooldown_days = 4
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_forest", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 5.0),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_mountain", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 2.5),
+	])
+	event.choices = _choices([
+		_checked_choice(
+			"EVT_HUNTING_TRIP_OPT_HUNT",
+			SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_HUNTING_TRIP_HUNT_OK", _effects([
+				EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, EnemyCatalog.KIND_HUNT),
+			]),
+			"EVT_HUNTING_TRIP_HUNT_BAD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -1),
+			])
+		),
+		_choice("EVT_HUNTING_TRIP_OPT_SKIP", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
 	])
 	return event
 

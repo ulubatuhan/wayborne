@@ -3945,22 +3945,11 @@ verir.
   (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
   kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
   ayrı bırakıldı, unutulmasın diye burada.
-- **Beş ek hayvanın sanatı bitti, hangi mekanikte kullanılacakları hâlâ
-  kararlaştırılmadı.** `BeastRig.SPECIES_ORDER` artık on tür taşıyor -
-  at/öküz/kurt/ayı/domuz'un yanına beyaz at, eşek, erkek geyik (stag),
-  geyik (deer) ve husky eklendi; ayı ve domuz dışındaki sekizinin hepsi
-  artık gerçek, yürüyen skin sanatına sahip (bkz. Wardrobe & Rig Rules'un
-  "one skin" maddesi ve `tests/screenshot_beast_rig.gd`'nin ikinci
-  karesi). Ama bu beşi **hiçbir oyun mekaniğine bağlı değil** -
-  `WalkFigure`/`CombatFigure` hâlâ yalnızca at/öküz/kurt biliyor, yani
-  sanat kendi başına dursa bile **ne işe yarayacakları ve nerede
-  karşımıza çıkacakları henüz kararlaştırılmadı**: `WalkFigure`'a altıncı/
-  yedinci bir binek/taşıyıcı olarak mı ekleniyorlar (o zaman hangi
-  mekanik: binek, kervan taşıyıcı hayvanı?), `EnemyCatalog`'a yeni bir
-  `evt_wild_animal` çeşidi olarak mı (husky evcil bir köpek, vahşi hayvan
-  değil - bu soruyu daha da keskinleştiriyor), yoksa yalnızca sahne
-  dekoru/flavor mı kalıyorlar? Ayı ve domuz hâlâ bu pakette yok, ayrı bir
-  kaynak bekliyor. Bu tasarım kararı netleşmeli, unutulmasın diye burada.
+- **Ayı ve domuz hâlâ beyaz at/eşek/erkek geyik/geyik/husky'nin aldığı
+  gerçek skin sanatına kavuşmadı** - ayrı bir kaynak paketi bekliyor
+  (bkz. Development Status'un "beş yeni tür" girişi). Bu beşi artık gerçek
+  mekaniklere bağlı (bkz. aşağıdaki "Kapandı" notu); kalan ikisi hâlâ
+  yalnızca prosedürel silüetle çiziliyor.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -5688,6 +5677,118 @@ yeni tür (`BeastRig`'in kendisinden, `WalkFigure`'a henüz bağlanmadıkları
 için - `beast_gait_sweep_new_species.png`) - aynı "harnessten önce oyundan
 şüphelen" disiplininin (bkz. Testing) bu turdaki karşılığı, ama ters yönde:
 bu kez şüphelenilmesi gereken oyun değil, ekrana basan aracın kendisiydi.
+
+**Beş yeni türün dördüne (beyaz at, husky, eşek/yarım vagon, erkek
+geyik/geyik) oyuncunun kendi tarifiyle gerçek mekanik verildi - "ne işe
+yarayacakları henüz kararlaştırılmadı" notu artık dördü için kapandı.**
+Domuz ve ayı hâlâ bekliyor (kendi skin paketleri yok); husky/eşek/at
+tarafında yeni bir çizim yolu icat edilmedi - `WalkFigure`'ın zaten var
+olan `_draw_beast_sprites()` kapısı (bkz. Wardrobe & Rig Rules'un "one
+skin" maddesi) iki yeni `KIND_DOG`/`KIND_DONKEY` sabitiyle doğrudan
+`BeastRig.HUSKY`/`DONKEY`'e açılıyor - üçüncü bir tür (deer/stag) zaten
+var olan `CombatFigure.ARCHETYPES` tablosuna birer satır olarak girdi.
+
+- **Beyaz at, atın kendi bir varyantı - ayrı bir tür değil.** "Bazen
+  beyaz bazen kahve, rastgele" sözü `WalkFigure.set_kind()`'ta bir kez
+  atılan bir zarla karşılanıyor (`WHITE_HORSE_CHANCE`, %30 - "bazen" bir
+  azınlık olsun diye, yarı yarıya değil) ve `_horse_species`'te
+  saklanıyor: `_draw()` her karede çağrıldığı için zarı `_draw_quadruped`
+  içinde atmak her kareyi farklı bir ata çevirirdi (titreme). `set_kind`
+  bir figürün ömründe bir kez çağrıldığı için (bkz. `road_caravan.gd`/
+  `world_hub.gd`'nin `configure()`/`_build_*` desenleri) seçim kalıcı -
+  aynı at seferin başından sonuna aynı renkte kalıyor. `KIND_MOUNTED`
+  (biniciyi taşıyan at) da aynı zarı paylaşıyor, ikinci bir kopya değil.
+- **Husky, kervana katılan bir refakatçi - parti üyesi değil.** Kullanıcı
+  "partiye en fazla iki köpek" dedi, ama proje kendi Character & Party
+  Rules'unda "parti" kelimesini kasıtlı dar tutuyor (savaş alanının dört
+  mevkisi, `MAX_PARTY_SIZE`). Bir köpeği o sisteme sokmak yeni bir
+  mevzilenme/savaş kuralı icat etmek demekti - "iz sürme/awareness ve
+  küçük moral" tarifi zaten destek bir rol, dövüşen biri değil. Bunun
+  yerine `GameSession.owned_dogs` (tavan `MAX_DOGS` 2) kervanın kendi
+  varlığı: Kervan Avlusu'nda "Köpek Sahiplen" (satış tuşunun aynı kod-içi
+  sıra düğmesi deseni), her sahiplenmede artan bir bedel. Bir insan gibi
+  besleniyor - `CaravanPlan.daily_consumption()` `height_adjustment`'ın
+  aynı desenini tekrarlayan yeni bir opsiyonel `animal_mouths` payı aldı
+  (varsayılan 0.0, eski çağıranlar hiç değişmeden geçiyor), köpek bu paya
+  `DOG_PROVISION_SHARE` (0.4 - tam bir insan ağzından az) kadar katkı
+  veriyor. "İz sürme/awareness" `get_best_effective_stat`/
+  `get_leader_effective_stat`'ın yalnızca Sezgi (PERCEPTION) için okuduğu
+  küçük, tavanlı bir pay (`get_dog_perception_bonus`, en fazla 1.2) -
+  huyların `check_bonus`'uyla aynı "stat + küçük ek" formülü, başka
+  hiçbir stat'ı etkilemiyor. "Küçük ölçüde moral" `get_departure_morale()`
+  ve dökümüne (`UI_MORALE_DOGS`) eklenen ayrı, küçük bir terim - kervanın
+  mizacının (`DEPARTURE_TEMPERAMENT_BONUS_CAP`) yarısı büyüklüğünde.
+  Dünyada `world_hub.gd`'nin kolonunun en arkasında, tek sıra bir "sürü"
+  olarak yürüyor - tam kolon formülü yerine (en fazla 2+3+3=8 hayvan için
+  aşırıydı) sabit genişlikli, araya boşluk giren basit bir kuyruk, `_column_
+  positions()`'ın "her parça kendi genişliğini tüketir" kuralının küçük
+  ölçekli bir uygulaması.
+- **Eşek ve "yarım vagon" ikisi de "ek hacim", tek bir havuzu paylaşıyor -
+  `owned_wagon_count`'a hiç dokunmuyorlar.** Kullanıcının eşek tarifi iki
+  parçalıydı: kervana ekstra hacim katan bir satın alma, ve tüccarların
+  vagon yerine tercih edebileceği tek tekerlekli bir "yarım vagon" türü.
+  Gerçek bir ikinci vagon *türü* eklemek (kendi tayfası, kendi WagonPanel
+  etkileşim noktası, `wagon_inventories`'in vagon-indeksli her yerini
+  genelleştirmek) bu turun kapsamını kat kat aşardı - `_sync_wagon_
+  inventories()`'in kendi değişmezi (`wagon_inventories.size() ==
+  owned_wagon_count`) tam da bunun için var, WagonPanel/world_hub'ın vagon
+  etkileşim noktaları bu sayıya kilitli. Bunun yerine ikisi de (`owned_
+  donkeys`, tavan 3; `owned_half_wagons`, tavan 3, biraz daha pahalı ve
+  biraz daha çok kapasiteli - eşekten "yarım vagon"a giden fark tam da bu)
+  `GameSession.pack_inventory` adında **üçüncü bir toplama havuzuna**
+  katkı veriyor - kişisel çantanın (`CharacterData.personal_inventory`)
+  zaten kurduğu ikinci-havuz desenine üçüncü bir örnek. `get_cargo_
+  capacity()`/`get_cargo_weight()`/`add_to_cargo()`/`get_total_quantity()`/
+  `remove_from_cargo_or_bags()`/`get_total_inventory_entries()`'in hepsi
+  `wagon_inventories`'in yanına `pack_inventory`'yi de okuyor -
+  `add_to_cargo()`'da vagonların *hemen ardından*, kişisel çantaların
+  aksine (o bir son çare, bu normal kapasitenin parçası).
+  **Bir tuzak burada yakalandı**: `Inventory.weight_limit == 0.0` "sınırsız"
+  demek (kendi tanımı, boş/testler için) - eşek/yarım vagon hiç yoksa
+  `pack_inventory`'nin gerçek kapasitesi sıfır olmalıydı ama önce yanlışlıkla
+  sınırsız okundu, yani `add_to_cargo` kapasite aşan hiçbir isteği
+  reddetmiyordu (`test_wagon_inventory.gd`/`test_game_session.gd`'nin beş
+  testi bunu hemen yakaladı). Düzeltme `add_to_cargo`'nun `pack_inventory`'yi
+  yalnızca `weight_limit > 0.0` iken havuza katması - "gerçek bir ek
+  kapasite yoksa sınırsız değil, hiç yok" ayrımı. Dünyada eşekler/yarım
+  vagonlar da husky'yle aynı arka sürüde yürüyor (`WalkFigure.KIND_DONKEY`),
+  ayrı bir figür icat edilmedi.
+  **Bilerek kapsam dışı bırakılan:** tüccarların vagon yerine eşekle
+  gelmesi (kullanıcının "1 tüccar 1-2 eşek" tarifi) - `MerchantOffer`'ın
+  28+ kalemlik, her biri kendi rotasına/fiyatına göre ölçülmüş sabit
+  teklif tablosuna dokunmadan bunu eklemek ya yeni, elle yazılmış teklifler
+  ya da mevcut tabloya rastgele bir bayrak demekti; ikisi de bu turun
+  kapsamı ve ölçme disiplini (bkz. Testing'in "bir sistem ölçülmeden
+  değiştirilmez" kuralı) açısından ayrı bir geçiş istiyor. Oyuncunun kendi
+  eşek/yarım vagon satın alması - asıl mekanik istek - kapsam dışı değil.
+- **Erkek geyik (stag) ve geyik (deer) yeni bir "avlanma" eventiyle
+  (`evt_hunting_trip`) geliyor - ikisi de gerçek bir savaş açıyor, yeni
+  bir kombat sistemi değil.** Orman/dağ biyomunda ağırlığı büyüyen bir
+  yol kartı (`EventResolver.biome_context`, `stop_context`'in aynı
+  deseni - `road_journey.gd`'nin `_after_meal()`'ı artık günün biyomunu
+  da bağlama katıyor). Yaklaşmak Sezgi'ye bağlı bir skill-check
+  (`SkillCheck.Source.PARTY_BEST` - "ortak bir çaba", tek bir kumarcı
+  değil, tıpkı fırtınada yol almak gibi); başarı `EnemyCatalog.KIND_HUNT`
+  türünde gerçek bir savaş açıyor, başarısızlık cezasız (hayvan sezip
+  kaçıyor - bu bir tehdit değil bir fırsat, `evt_wild_animal`'ın "kaçmak"
+  seçeneğinin tersine tehlike artırmıyor). `EnemyCatalog.build_hunt_squad()`
+  her zaman tam bir erkek geyik + bir ya da iki geyik veriyor (kalabalık
+  parti iki geyikle karşılaşıyor - `build_wildlife_squad`'ın parti
+  büyüklüğüne göre eğme deseninin aynısı), asla karışık değil. Denge
+  kullanıcının kendi tarifini kelimesi kelimesine karşılıyor: geyik zayıf
+  (`damage_bonus` 2, `DEER_KICK` 3±2 hasar - "çok bir damage vurmayacak"),
+  erkek geyik ağır (`damage_bonus` 10, `STAG_CHARGE` 13±5 hasar + sersemletme
+  - ayıdan (`damage_bonus` 9) bile biraz daha sert, çünkü ayı nadir/tekil
+  bir curio, erkek geyik kadronun her zaman içinde). Gerçek bir savaş
+  karesinde (seviye 5, Dayanıklılık yatırımlı bir karakter, 62 can)
+  ölçüldü: tek bir Boynuz Hücumu 20 hasar verdi, can 35/62'ye indi - "yarım
+  canından tek vuruşta rahatlıkla indirebilmeli" isteği doğrulandı. İkisi
+  de `BeastRig`'in zaten var olan skin sanatını (Faz "beş yeni tür")
+  kullanıyor - `CombatFigure.ARCHETYPES`'a "stag"/"deer" birer satır
+  olarak eklendi, `EnemyTemplate.enemy_id` doğrudan `BeastRig.STAG`/`DEER`
+  ile aynı dize olduğu için (`CombatUnit.figure_kind = template.enemy_id`)
+  yeni bir eşleme tablosu gerekmedi - `EnemyCatalog.get_kind_label`in zaten
+  kurduğu "kadro türü → görünen ad" disiplininin aynısı.
 
 ## Quick Start
 

@@ -22,6 +22,9 @@ var _cargo_panel: CaravanCargoPanel = null
 @onready var _buy_wagon_button: Button = $MarginContainer/VBoxContainer/BuyWagonButton
 var _sell_wagon_button: Button
 var _overview_wagon_button: Button
+var _dog_button: Button
+var _donkey_button: Button
+var _half_wagon_button: Button
 @onready var _equipment_container: VBoxContainer = $MarginContainer/VBoxContainer/EquipmentScroll/EquipmentContainer
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
@@ -39,6 +42,9 @@ func _ready() -> void:
 	_build_sell_wagon_button()
 	_build_overview_button()
 	_build_cargo_button()
+	_build_dog_button()
+	_build_donkey_button()
+	_build_half_wagon_button()
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_equipment_shop()
@@ -97,6 +103,76 @@ func _on_cargo_pressed() -> void:
 
 func _on_cargo_closed() -> void:
 	_cargo_panel = null
+
+## Köpek/eşek/yarım vagon üçlüsünün kendi düğmeleri - satış tuşunun aynı
+## kod-içi sıra düğmesi deseni. Kervanın kadrosuna değil (MAX_PARTY_SIZE),
+## kervanın kendi ağırlığına/moraline/farkındalığına dokunuyorlar - bkz.
+## GameSession'ın "Husky, eşek ve yarım vagon" bölümü.
+func _build_dog_button() -> void:
+	_dog_button = Button.new()
+	_dog_button.pressed.connect(_on_adopt_dog_pressed)
+	var container := _overview_wagon_button.get_parent()
+	container.add_child(_dog_button)
+	container.move_child(_dog_button, _buy_wagon_button.get_index() + 1)
+
+func _build_donkey_button() -> void:
+	_donkey_button = Button.new()
+	_donkey_button.pressed.connect(_on_buy_donkey_pressed)
+	var container := _dog_button.get_parent()
+	container.add_child(_donkey_button)
+	container.move_child(_donkey_button, _dog_button.get_index() + 1)
+
+func _build_half_wagon_button() -> void:
+	_half_wagon_button = Button.new()
+	_half_wagon_button.pressed.connect(_on_buy_half_wagon_pressed)
+	var container := _donkey_button.get_parent()
+	container.add_child(_half_wagon_button)
+	container.move_child(_half_wagon_button, _donkey_button.get_index() + 1)
+
+func _on_adopt_dog_pressed() -> void:
+	if not _session.adopt_dog():
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_DOG"))
+		return
+	_clear_message()
+	_refresh()
+
+func _on_buy_donkey_pressed() -> void:
+	if not _session.buy_donkey():
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_DONKEY"))
+		return
+	_clear_message()
+	_refresh()
+
+func _on_buy_half_wagon_pressed() -> void:
+	if not _session.buy_half_wagon():
+		_show_message(tr("UI_YARD_CANNOT_AFFORD_HALF_WAGON"))
+		return
+	_clear_message()
+	_refresh()
+
+func _refresh_dog_button() -> void:
+	if _session.can_adopt_dog():
+		_dog_button.text = tr("UI_YARD_ADOPT_DOG") % _session.get_next_dog_cost()
+		_dog_button.disabled = not _session.wallet.can_afford(_session.get_next_dog_cost())
+	else:
+		_dog_button.text = tr("UI_YARD_DOG_LIMIT") % GameSession.MAX_DOGS
+		_dog_button.disabled = true
+
+func _refresh_donkey_button() -> void:
+	if _session.can_buy_donkey():
+		_donkey_button.text = tr("UI_YARD_BUY_DONKEY") % _session.get_next_donkey_cost()
+		_donkey_button.disabled = not _session.wallet.can_afford(_session.get_next_donkey_cost())
+	else:
+		_donkey_button.text = tr("UI_YARD_DONKEY_LIMIT") % GameSession.MAX_DONKEYS
+		_donkey_button.disabled = true
+
+func _refresh_half_wagon_button() -> void:
+	if _session.can_buy_half_wagon():
+		_half_wagon_button.text = tr("UI_YARD_BUY_HALF_WAGON") % _session.get_next_half_wagon_cost()
+		_half_wagon_button.disabled = not _session.wallet.can_afford(_session.get_next_half_wagon_cost())
+	else:
+		_half_wagon_button.text = tr("UI_YARD_HALF_WAGON_LIMIT") % GameSession.MAX_HALF_WAGONS
+		_half_wagon_button.disabled = true
 
 ## Silah/Zırh yalnızca burada satılır (price > 0) - Yüzük/Kolye pazarda
 ## yer almaz, yolda EventEffect.Type.GRANT_EQUIPMENT ile bulunur.
@@ -169,6 +245,9 @@ func _refresh() -> void:
 		_buy_wagon_button.disabled = true
 
 	_refresh_sell_wagon()
+	_refresh_dog_button()
+	_refresh_donkey_button()
+	_refresh_half_wagon_button()
 	_refresh_equipment_shop()
 
 ## Satış kapalıysa *sebebiyle birlikte* gösterilir - gizlemek, oyuncuya

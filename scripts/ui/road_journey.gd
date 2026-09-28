@@ -1859,6 +1859,10 @@ func _after_meal() -> void:
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
 	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_days_covered).stop
 	context.merge(EventResolver.stop_context(stop), true)
+	# Aynı desenin arazi hali (bkz. evt_hunting_trip) - o günün biyomu
+	# stop_context'in yanına.
+	var biome := "" if _terrain == null else _terrain.biome_at(_days_covered)
+	context.merge(EventResolver.biome_context(biome), true)
 	# Yolda zaten bir karşılaşma bekliyorsa ikincisi çekilmiyor: iki işaret
 	# aynı anda yola dizilmesin, önceki çözülmeden sıradaki gelmesin.
 	var event: GameEvent = null if _pending_event != null else _engine.roll_for_day(_current_day, context)

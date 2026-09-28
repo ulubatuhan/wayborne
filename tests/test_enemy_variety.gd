@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_wildlife_squad_composition(t)
 	_test_wildlife_squad_never_mixes_species(t)
 	_test_wildlife_squad_biome_composition(t)
+	_test_hunt_squad_composition(t)
 	_test_guard_squad_composition(t)
 	_test_bandit_squad_region_reskin(t)
 	_test_build_squad_dispatches_by_kind(t)
@@ -32,6 +33,7 @@ func _test_kind_labels(t) -> void:
 	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_BANDIT), "Haydutlar", "haydut kadrosunun adı")
 	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_WILDLIFE), "Vahşi hayvanlar", "vahşi hayvan kadrosunun adı")
 	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_GUARD), "Şehir muhafızları", "muhafız kadrosunun adı")
+	t.eq(EnemyCatalog.get_kind_label(EnemyCatalog.KIND_HUNT), "Av hayvanları", "av kadrosunun adı")
 
 	# Boş text_value "bandit" sayılıyor (bkz. event_effect_applier.gd), bu
 	# yüzden bilinmeyen bir tür de haydut etiketine düşmeli.
@@ -158,6 +160,33 @@ func _test_wildlife_squad_biome_composition(t) -> void:
 				break
 	t.ok(mountain_bear_count > plain_bear_count, "dağda ayı düz araziden daha sık çıkar")
 
+## Av kadrosu her zaman tam bir erkek geyik taşır (bkz. build_hunt_squad'ın
+## kendi notu) - o kadronun tek gerçek tehdidi. Geyik sayısı parti
+## büyüklüğüne/zara göre bir ya da iki.
+func _test_hunt_squad_composition(t) -> void:
+	for party_size in [1, 2, 4]:
+		for seed_value in 10:
+			var squad := EnemyCatalog.build_hunt_squad(0.3, party_size, _seeded_rng(6000 + seed_value))
+			var stag_count := 0
+			var deer_count := 0
+			for unit in squad:
+				if unit.display_name == "Erkek Geyik":
+					stag_count += 1
+				elif unit.display_name == "Geyik":
+					deer_count += 1
+			t.eq(stag_count, 1, "av kadrosu tam bir erkek geyik taşır (parti %d)" % party_size)
+			t.ge(deer_count, 1, "av kadrosunda en az bir geyik var (parti %d)" % party_size)
+			t.le(deer_count, 2, "av kadrosunda en fazla iki geyik var (parti %d)" % party_size)
+
+	# Kalabalık bir parti (3+) her zaman iki geyikle karşılaşır - build_
+	# hunt_squad'ın kendi kuralı.
+	var crowded := EnemyCatalog.build_hunt_squad(0.3, 4, _seeded_rng(1))
+	var crowded_deer := 0
+	for unit in crowded:
+		if unit.display_name == "Geyik":
+			crowded_deer += 1
+	t.eq(crowded_deer, 2, "kalabalık parti her zaman iki geyikle karşılaşır")
+
 func _test_guard_squad_composition(t) -> void:
 	var pair := EnemyCatalog.build_guard_squad(0.2, 1, _seeded_rng(1))
 	t.eq(pair.size(), 2, "tek başına yola çıkan iki muhafızla karşılaşır")
@@ -188,11 +217,13 @@ func _test_build_squad_dispatches_by_kind(t) -> void:
 	var bandit := EnemyCatalog.build_squad("bandit", "", 0.6, 4, _seeded_rng(3), 1)
 	var wildlife := EnemyCatalog.build_squad("wildlife", "", 0.1, 4, _seeded_rng(1), 1)
 	var guard := EnemyCatalog.build_squad("guard", "", 0.2, 1, _seeded_rng(1), 1)
+	var hunt := EnemyCatalog.build_squad("hunt", "", 0.3, 4, _seeded_rng(1), 1)
 	var fallback := EnemyCatalog.build_squad("", "", 0.6, 4, _seeded_rng(3), 1)
 
 	t.eq(bandit[0].display_name, "Haydut Kesicisi", "\"bandit\" kadrosu haydut çıkarır")
 	t.eq(wildlife[0].display_name, "Kurt", "\"wildlife\" kadrosu hayvan çıkarır")
 	t.eq(guard[0].display_name, "Şehir Muhafızı", "\"guard\" kadrosu muhafız çıkarır")
+	t.eq(hunt[0].display_name, "Erkek Geyik", "\"hunt\" kadrosu av hayvanı çıkarır")
 	t.eq(fallback[0].display_name, "Haydut Kesicisi", "bilinmeyen/boş kind haydut kadrosuna düşer")
 
 func _test_grant_equipment_effect_still_works_alongside_combat_kind(t) -> void:

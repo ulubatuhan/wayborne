@@ -95,6 +95,20 @@ const ARCHETYPES: Dictionary = {
 		"cloth": Color(0.25, 0.22, 0.20), "trim": Color(0.16, 0.14, 0.13),
 		"metal": Color(0.88, 0.86, 0.80),
 	},
+	# Av hayvanları (bkz. evt_hunting_trip). İkisi de `BeastRig.has_sprites()`
+	# true döndüğü için (gerçek deri sanatı zaten var - bkz. Development
+	# Status) `_draw_beast`nin prosedürel dalına hiç girmiyorlar; cloth/trim/
+	# metal yalnızca o dal hiç çalışmadan önceki güvenlik payı.
+	"stag": {
+		"body": BEAST, "bulk": 1.15, "head": "snout", "weapon": "none",
+		"cloth": Color(0.32, 0.24, 0.16), "trim": Color(0.20, 0.15, 0.10),
+		"metal": Color(0.78, 0.74, 0.62),
+	},
+	"deer": {
+		"body": BEAST, "bulk": 0.85, "head": "snout", "weapon": "none",
+		"cloth": Color(0.42, 0.32, 0.22), "trim": Color(0.26, 0.20, 0.14),
+		"metal": Color(0.80, 0.76, 0.66),
+	},
 }
 
 const FALLBACK_KIND: String = "bandit"
