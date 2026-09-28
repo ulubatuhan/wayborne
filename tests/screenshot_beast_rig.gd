@@ -7,6 +7,13 @@ extends SceneTree
 ## testler (`test_beast_rig.gd`) yalnızca sözleşmeyi doğrular, görüntüyü
 ## değil (bkz. CLAUDE.md Testing bölümü).
 ##
+## Beast'lerin insan rig'inin aksine sprite'ların altında prosedürel bir
+## gövdesi yok (`WalkFigure._draw_quadruped` sprite varsa direkt döner) -
+## yani bir eklem parçaları arasında boşluk bırakırsa hiçbir şey onu
+## kapatmıyor. Bu yüzden at/öküz (yolda gerçekten yürüyen, KIND_HORSE/OX)
+## tam bir yürüyüş çevriminin sekiz fazında da taranıyor - dinlenme pozu
+## şansla hizalı görünüp yürürken açılan bir boşluğu gizleyebilir.
+##
 ##   godot --headless --import
 ##   LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x900x24" \
 ##     godot --path . --rendering-driver opengl3 \
@@ -15,62 +22,50 @@ extends SceneTree
 ## Çıktı user://beast_check/ altına düşer.
 
 const SHOT_DIR: String = "user://beast_check"
-const VIEW_SIZE: Vector2i = Vector2i(1400, 700)
+const CELL: Vector2 = Vector2(190, 160)
+const PHASES: int = 8
 
 func _init() -> void:
 	TranslationServer.set_locale("tr")
 	DirAccess.make_dir_recursive_absolute(SHOT_DIR)
 
+	var cols := PHASES
+	var rows := 3  # horse, ox, wolf (wolf: CombatFigure, always rest pose)
+	var view_size := Vector2i(int(CELL.x * cols), int(CELL.y * rows))
+
 	var root := get_root()
-	root.size = VIEW_SIZE
+	root.size = view_size
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.55, 0.55, 0.55)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(bg)
 
-	var horse := WalkFigure.new()
-	horse.size = Vector2(220, 160)
-	horse.position = Vector2(60, 100)
-	root.add_child(horse)
-	horse.set_kind(WalkFigure.KIND_HORSE, "bandit")
+	for col in range(cols):
+		var phase := TAU * float(col) / float(cols)
 
-	var ox := WalkFigure.new()
-	ox.size = Vector2(220, 160)
-	ox.position = Vector2(340, 100)
-	root.add_child(ox)
-	ox.set_kind(WalkFigure.KIND_OX, "bandit")
+		var horse := WalkFigure.new()
+		horse.size = CELL * 0.9
+		horse.position = Vector2(col * CELL.x + CELL.x * 0.05, 10)
+		root.add_child(horse)
+		horse.set_kind(WalkFigure.KIND_HORSE, "bandit")
+		horse.set_phase_offset(phase)
 
-	var wolf := CombatFigure.new()
-	wolf.size = Vector2(200, 200)
-	wolf.position = Vector2(640, 80)
-	root.add_child(wolf)
-	wolf.setup("wolf", true, "", 0.0)
+		var ox := WalkFigure.new()
+		ox.size = CELL * 0.9
+		ox.position = Vector2(col * CELL.x + CELL.x * 0.05, CELL.y + 10)
+		root.add_child(ox)
+		ox.set_kind(WalkFigure.KIND_OX, "bandit")
+		ox.set_phase_offset(phase)
 
-	# İkinci satır: BeastRig.PAINT_PHASE'e yakın bir yürüyüş anı (bacaklar
-	# ayrık) - kurt ayrıca sola bakıyor, ayna testi.
-	var horse2 := WalkFigure.new()
-	horse2.size = Vector2(220, 160)
-	horse2.position = Vector2(60, 340)
-	root.add_child(horse2)
-	horse2.set_kind(WalkFigure.KIND_HORSE, "bandit")
-	horse2.set_phase_offset(PI * 0.25)
-
-	var ox2 := WalkFigure.new()
-	ox2.size = Vector2(220, 160)
-	ox2.position = Vector2(340, 340)
-	root.add_child(ox2)
-	ox2.set_kind(WalkFigure.KIND_OX, "bandit")
-	ox2.set_phase_offset(PI * 0.25)
-
-	var wolf2 := CombatFigure.new()
-	wolf2.size = Vector2(200, 200)
-	wolf2.position = Vector2(640, 320)
-	root.add_child(wolf2)
-	wolf2.setup("wolf", false, "", 0.0)
+		var wolf := CombatFigure.new()
+		wolf.size = CELL * 0.9
+		wolf.position = Vector2(col * CELL.x + CELL.x * 0.05, CELL.y * 2 + 10)
+		root.add_child(wolf)
+		wolf.setup("wolf", true, "", 0.0)
 
 	await _settle()
-	_save("beasts.png")
+	_save("beast_gait_sweep.png")
 	quit()
 
 func _settle() -> void:
