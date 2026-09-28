@@ -1352,7 +1352,8 @@ in every preview the moment it is equipped.
   both forward is the four-legged version of the chicken-knee bug
   (`test_beast_rig` asserts both, for both facings).
 - **A species switches to art only when its body has art.**
-  `BeastRig.has_sprites()` reads `beasts/<species>/body.png`; without it the
+  `BeastRig.has_sprites()` reads `beasts/<species>/skin.tres` or
+  `beasts/<species>/body.png`; without either the
   animal stays the procedural one (`WalkFigure._draw_quadruped`,
   `CombatFigure._draw_beast`), so art can land one species at a time and a
   head alone is never glued onto a procedural body. The rider still sits on
@@ -1375,6 +1376,33 @@ in every preview the moment it is equipped.
   gap, and unrotates each piece into its part canvas - far legs as
   `<part>_far.png`. The part-sheet route (`beast_cut.py sheet`) stays for
   precise work. Workflow: `docs/beasts/README.md`.
+- **A walking animal is one skin, not nine parts.** Cut parts each turn
+  about their own pivot, so a joint either opens a gap or piles two pieces
+  on top of each other - measured both ways (bare parts gapped at every
+  knee mid-stride; `OVERLAP_PX` margins then stacked fur on fur). Humans
+  hide this under the procedural body; a beast has none. `BeastSkin`
+  (`skin.tres`) is the Spine/DragonBones answer: one continuous picture per
+  depth layer (`far` legs, `tail`, `main`) with a triangle grid over it,
+  every vertex weighted to up to three bones, deformed by linear blend
+  skinning (`BeastRig.skin_deform`) and drawn with
+  `canvas_item_add_triangle_array`. A skin wins over parts in
+  `draw_species`; `pose()`/`extent()`/`draw_sprites()` stay untouched.
+  - **The pose is the art's, not the mannequin's.** `skin_pose` reads the
+    joints the skin was painted on, so at `motion` 0 every vertex is exactly
+    where it was painted (asserted < 0.1 px) - the same gait constants as
+    `pose()`, other proportions.
+  - **A bone only turns, it never stretches.** Knees are solved with the
+    art's own bone lengths and bend side (`skin_bend`); a stride longer than
+    the leg lifts the foot rather than stretching the shin, and the nod and
+    tail sway rotate their tip (`_swung`) instead of sliding it.
+    `test_beast_rig` asserts every bone length across the gait and that no
+    opaque triangle flips (`MAX_FOLDED`, set just above measured).
+  - **`tools/beast_skin.py` builds it from a rigged glTF**: the artist's own
+    skin weights, mapped onto our sixteen bones, sampled per grid vertex,
+    diffused so a joint bends over a band rather than a crease
+    (`SMOOTH_ITERATIONS`, `HINGE_BAND`). Stored as a `.tres`, because the
+    Web export ships resources only - a `.json` would be missing there.
+    Restyling is repainting the three layer PNGs inside the same silhouette.
 
 ### Waybook UI Rules
 
@@ -5593,29 +5621,27 @@ yalnızca kısayoldur. Beş PR, kurallar Road Movement Rules'ta:
   aynısı. Ölçülen tek yeni risk akşam kampı emrinin erzak sözünü
   bozmasıydı; planlayıcıya kamp payı eklendi.
 
-**At/öküz/kurdun ilk gerçek `BeastRig` sanatı geldi.** `data/assets/
-characters/beasts/{horse,ox,wolf}/` artık her biri dokuz parçalık (near+far
-bacaklar dahil on dört dosya) gerçek PNG taşıyor - Faz 16'nın insan
-`Wardrobe` varyantlarında kullanılan aynı yöntem: CC0 bir 3D paketten
-(Quaternius) iskelet-eklem konumları okunup gövde/boyun/baş/kuyruk/bacaklar
-düzlemsel kesilerek ayrıştırıldı, sonra `docs/beasts/beast_rig_spec.json`'ın
-(oyunun kendi `tests/export_rig_spec.gd`'sinin ürettiği) rest-pose eklem ve
-`ends` verisiyle `BeastRig.part_transform()`'ın **tam tersi** hesaplanarak
-her parça doğru pivot/dönüş/ölçekle kendi tuvaline oturtuldu - motora
-paralel bir dönüşüm formülü yazmak yerine, `tools/beast_cut.py`'ın
-`unrotate()`'inin aynı matematiği Python'da tekrarlandı. Kesim kutuları
-gerçek eklemlere değil, motorun kendi `SPECIES.upper`/`lower` oranına göre
-hesaplanan bir orana oturuyor - önce Quaternius'un gerçek dirsek/diz
-eklemleri kullanıldı ve üst bacak parçaları motorun beklediği tuvale göre
-kısa/ezik çıktı (motorun 50/50 oranına karşı gerçek iskeletin çok daha kısa
-üst-bacak/uzun alt-bacak oranı), düzeltme motorun kendi oranını taklit
-etmekti - `has_sprites()` artık üçü için de true, `WalkFigure`/
-`CombatFigure` prosedürelden sprite'a geçti. `tests/screenshot_beast_rig.gd`
-bu üçünü gerçek çizim yoluyla (rest + PAINT_PHASE yakını bir yürüyüş anı,
-kurtta ayna testi) PNG'ye basıyor - `test_beast_rig.gd` yalnızca
-sözleşmeyi doğruluyordu, görüntüyü hiçbir zaman. Ayı ve domuz bu pakette
-yok; hangi ek türlerin (beyaz at, eşek, geyik, husky - aynı pakette kesilip
-referans olarak duran) oyunda nereye bağlanacağı Ana Hedefler'de açık.
+**At/öküz/kurdun ilk gerçek `BeastRig` sanatı geldi - ve parça olarak
+değil, deri olarak.** Kaynak CC0 bir 3D paket (Quaternius); öküz boğa
+modelinden. İlk sürüm her hayvanı dokuz parçaya kesip `part_transform()`'ın
+tersiyle tuvallerine oturttu. Dinlenme pozunda kusursuzdu, yürürken değildi:
+her parça kendi pivotunda döndüğü için diz ve omuzlarda boşluk açıldı.
+Parçalara pay (`OVERLAP_PX`) eklemek boşluğu kapadı ama bu kez parçaları üst
+üste bindirdi. İki sonuç da aynı yöntemin iki yüzüydü, eşikle çözülecek bir
+şey değildi. Çözüm 2D iskelet animasyonunun kendi yöntemi oldu: tek parça
+resim, kemik ağırlıklı ağ, doğrusal karışımlı deri (bkz. Wardrobe & Rig
+Rules'un "one skin" maddesi, `tools/beast_skin.py`). Ağırlıklar modelin
+kendi skin ağırlıklarından geliyor. Eklem kıvrımları ölçülerek giderildi:
+ağırlık yayılımı ve bacak köküne bağlanan menteşe bandı ile, 16 fazda ters
+dönen opak üçgen at ve öküzde sıfır, kurtta birkaç tane. Kurtunkiler koltuk
+altında, dört kat yakınlıkta bile görünmüyor. Kurt zaten savaşta dinlenme
+pozunda duruyor. Yürürken bacak adımı boyunu aşınca kaval kemiği gerilmek
+yerine ayak hafifçe kalkıyor. Baş sallama ve kuyruk salınımı da ucu kaydırmak
+yerine döndürüyor. Kemik boyları yürüyüş boyunca sabit, bunu da test
+kilitliyor. `tests/screenshot_beast_rig.gd` yürüyüşün sekiz fazını basıyor.
+Ayı ve domuz bu pakette yok. Hangi ek türlerin (beyaz at, eşek, geyik, husky;
+aynı pakette referans olarak duruyorlar) oyunda nereye bağlanacağı Ana
+Hedefler'de açık.
 
 ## Quick Start
 

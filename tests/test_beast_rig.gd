@@ -21,6 +21,10 @@ func run(t) -> void:
 	_test_draw_order_is_depth(t)
 	_test_extent_holds_the_pose(t)
 	_test_discovery_layers_and_far_shading(t)
+	_test_skin_is_well_formed(t)
+	_test_skin_rest_is_the_art(t)
+	_test_skin_gait_keeps_bone_lengths(t)
+	_test_skin_does_not_fold(t)
 
 ## Şablonu çizen ve resmi kesen Python araçları bu dosyayı okuyor. İskelet
 ## değişip dosya değişmezse ressamın şablonu oyunun iskeletinden sapar.
@@ -141,3 +145,129 @@ func _write_fixture(layer: String, parts: Array) -> void:
 		var image := Image.create(canvas.x, canvas.y, false, Image.FORMAT_RGBA8)
 		image.fill(Color(0.5, 0.4, 0.3, 1.0))
 		image.save_png(ProjectSettings.globalize_path("%s/%s.png" % [dir, part]))
+
+const SKINNED: Array = ["horse", "ox", "wolf"]
+const GAIT_SAMPLES: int = 16
+## Ölçülen değerler (yürüyüşün 16 fazında ters dönen opak üçgen): at 0, öküz
+## 0, kurt birkaç (koltuk altı, 4x yakınlıkta görünmüyor, kurt oyunda zaten
+## yürümüyor). Eşik bunun biraz üstünde - bir ağırlık hatası yüzlercesini
+## çevirir.
+const MAX_FOLDED: Dictionary = {"horse": 4, "ox": 4, "wolf": 16}
+
+## Her köşenin ağırlığı bir, her kemik adı iskelette var, katman dilimleri
+## köşe ve üçgen dizileriyle uyuşuyor.
+func _test_skin_is_well_formed(t) -> void:
+	BeastRig.clear_cache()
+	for species in SKINNED:
+		var skin := BeastRig.skin_of(species)
+		t.ok(skin != null, "%s derisi yükleniyor" % species)
+		if skin == null:
+			continue
+		t.ok(BeastRig.has_sprites(species), "%s derisiyle sanata geçiyor" % species)
+		for bone in skin.bone_names:
+			t.ok(BeastRig.BONES.has(bone), "%s derisinin kemiği '%s' iskelette" % [species, bone])
+		var count := skin.vertices.size()
+		t.eq(skin.uvs.size(), count, "%s: köşe başına bir UV" % species)
+		t.eq(skin.bone_ids.size(), count * BeastSkin.INFLUENCES, "%s: köşe başına üç kemik" % species)
+		var bad := 0
+		for i in count:
+			var sum := 0.0
+			for n in BeastSkin.INFLUENCES:
+				sum += skin.bone_weights[i * BeastSkin.INFLUENCES + n]
+			if absf(sum - 1.0) > 0.001:
+				bad += 1
+		t.eq(bad, 0, "%s: her köşenin ağırlıkları toplamı 1" % species)
+		t.eq(skin.layer_vertex_offsets[skin.layer_count()], count, "%s: katmanlar bütün köşeleri kapsıyor" % species)
+		t.eq(skin.layer_index_offsets[skin.layer_count()], skin.indices.size(), "%s: katmanlar bütün üçgenleri kapsıyor" % species)
+		for layer in skin.layer_count():
+			var n_verts := skin.layer_vertex_offsets[layer + 1] - skin.layer_vertex_offsets[layer]
+			var worst := 0
+			for index in skin.layer_indices(layer):
+				worst = maxi(worst, index)
+			t.ok(worst < n_verts, "%s katman %d: üçgenler kendi köşelerini gösteriyor" % [species, layer])
+
+## Hareketsizken poz resmin iskeleti, ağ da resmin kendisi: hiçbir köşe
+## kıpırdamıyor. Diz de resmin dizine kırılıyor (`skin_bend`).
+func _test_skin_rest_is_the_art(t) -> void:
+	var ground := Vector2(40.0, 300.0)
+	var h := 180.0
+	for species in SKINNED:
+		var skin := BeastRig.skin_of(species)
+		if skin == null:
+			continue
+		var k := h / skin.ref_h
+		for facing in [1.0, -1.0]:
+			var joints := BeastRig.skin_pose(skin, species, ground, h, 0.0, 0.0, facing)
+			var worst_joint := 0.0
+			for name in skin.joint_names:
+				if joints.has(name):
+					var p := skin.joint(name)
+					var expected := ground + Vector2(p.x * facing, p.y) * k
+					worst_joint = maxf(worst_joint, (joints[name] as Vector2).distance_to(expected))
+			t.ok(worst_joint < 0.01, "%s (yön %d): dinlenme pozu resmin iskeleti (%.4f px)" % [species, facing, worst_joint])
+			var points := BeastRig.skin_deform(skin, joints, h, facing)
+			var worst := 0.0
+			for i in points.size():
+				var v := skin.vertices[i]
+				worst = maxf(worst, points[i].distance_to(ground + Vector2(v.x * facing, v.y) * k))
+			t.ok(worst < 0.1, "%s (yön %d): dinlenmede ağ resmin kendisi (%.4f px)" % [species, facing, worst])
+
+## Yürürken bir kemik yalnızca döner: boyu resmin boyunda kalır. Boy değişseydi
+## resim o kemikte gerilir ya da ezilirdi.
+func _test_skin_gait_keeps_bone_lengths(t) -> void:
+	var h := 180.0
+	for species in SKINNED:
+		var skin := BeastRig.skin_of(species)
+		if skin == null:
+			continue
+		var k := h / skin.ref_h
+		var worst := 0.0
+		for step in GAIT_SAMPLES:
+			var phase := TAU * float(step) / float(GAIT_SAMPLES)
+			var joints := BeastRig.skin_pose(skin, species, Vector2.ZERO, h, phase, 1.0, 1.0)
+			for bone in skin.bone_names:
+				var spec: Dictionary = BeastRig.BONES[bone]
+				var rest := (skin.joint(spec.b) - skin.joint(spec.a)).length() * k
+				var now := (joints[spec.b] as Vector2).distance_to(joints[spec.a])
+				worst = maxf(worst, absf(now - rest))
+		t.ok(worst < 0.05, "%s: yürüyüşte kemik boyları sabit (%.4f px)" % [species, worst])
+
+## Ağırlıklar eklemde bir kıvrım bırakmıyor: opak bir üçgen yürüyüşün hiçbir
+## anında ters dönmüyor (üst üste binme ve yırtılmanın ağdaki adı budur).
+func _test_skin_does_not_fold(t) -> void:
+	var h := 180.0
+	for species in SKINNED:
+		var skin := BeastRig.skin_of(species)
+		if skin == null:
+			continue
+		var images: Array[Image] = []
+		for layer in skin.layer_count():
+			var path := "%s%s/%s" % [BeastRig.ROOT, species, skin.layer_textures[layer]]
+			images.append(Image.load_from_file(ProjectSettings.globalize_path(path)))
+		var folded := 0
+		for step in GAIT_SAMPLES:
+			var phase := TAU * float(step) / float(GAIT_SAMPLES)
+			var joints := BeastRig.skin_pose(skin, species, Vector2.ZERO, h, phase, 1.0, 1.0)
+			var points := BeastRig.skin_deform(skin, joints, h, 1.0)
+			for layer in skin.layer_count():
+				folded += _folded_opaque(skin, layer, points, images[layer])
+		t.ok(folded <= int(MAX_FOLDED[species]), "%s: yürüyüşte ters dönen opak üçgen %d (en çok %d)" % [species, folded, MAX_FOLDED[species]])
+
+func _folded_opaque(skin: BeastSkin, layer: int, points: PackedVector2Array, image: Image) -> int:
+	var v0 := skin.layer_vertex_offsets[layer]
+	var uvs := skin.layer_uvs(layer)
+	var tris := skin.layer_indices(layer)
+	var size := Vector2(image.get_width() - 1, image.get_height() - 1)
+	var count := 0
+	for i in range(0, tris.size(), 3):
+		var a := tris[i]
+		var b := tris[i + 1]
+		var c := tris[i + 2]
+		var centre := (uvs[a] + uvs[b] + uvs[c]) / 3.0 * size
+		if image.get_pixelv(Vector2i(centre)).a < 0.5:
+			continue
+		var rest := (skin.vertices[v0 + b] - skin.vertices[v0 + a]).cross(skin.vertices[v0 + c] - skin.vertices[v0 + a])
+		var now := (points[v0 + b] - points[v0 + a]).cross(points[v0 + c] - points[v0 + a])
+		if absf(rest) > 0.0001 and now / rest < 0.0:
+			count += 1
+	return count

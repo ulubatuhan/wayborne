@@ -564,10 +564,10 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 ## oturtan y yine iskeletten geliyor, tahminden değil.
 func _draw_beast_sprites(species: String, h: float) -> float:
 	var ground := Vector2(size.x * 0.5, size.y)
-	var joints := BeastRig.pose(species, ground, h, _phase, _motion, _facing)
-	var span := h * float(BeastRig.spec_of(species).span)
+	var joints := BeastRig.draw_pose(species, ground, h, _phase, _motion, _facing)
+	var span := h * BeastRig.body_span(species)
 	ArtDraw.ellipse(self, ground, Vector2(span * 0.75, h * 0.030), Color(0.0, 0.0, 0.0, 0.24))
-	BeastRig.draw_sprites(self, species, joints, h, _facing, _tint)
+	BeastRig.draw_species(self, species, joints, h, _facing, _tint)
 	return (joints.saddle as Vector2).y
 
 func _draw_quad_leg(

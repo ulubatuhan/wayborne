@@ -7,6 +7,27 @@ türün gövde resmi geldiği an o tür yolda, köyde, savaşta ve yoldaki karş
 işaretinde resimle çizilmeye başlıyor. Resmi gelmemiş tür eskisi gibi prosedürel
 çizimde kalıyor.
 
+## Yürüyen hayvan: deri (skin.tres)
+
+Parçaya kesilmiş bir hayvan yürürken eklemlerinde ya boşluk açar ya parçaları
+üst üste bindirir. Bu yüzden at, öküz ve kurt tek parça bir **deri** olarak
+çiziliyor. Her derinlik katmanı (`skin_far.png` uzak bacaklar,
+`skin_tail.png` kuyruk, `skin_main.png` geri kalanı) tek bir resim. Üstüne
+kemiklere ağırlıkla bağlı bir üçgen ağı geriliyor (`skin.tres`), eklem
+bükülünce ağ da bükülüyor. Bir türde `skin.tres` varsa aşağıdaki parçalar
+okunmuyor.
+
+Rigli bir glTF'ten üretmek için:
+
+```
+python3 tools/beast_skin.py Wolf.gltf wolf --out data/assets/characters/beasts
+godot --headless --import
+```
+
+Araç modelin kendi skin ağırlıklarını on altı kemiğe eşliyor. Yeniden
+boyamak için üç katman PNG'sini **aynı siluetin içinde** boyamak yeterli.
+Ağ ve ağırlıklar aynı kalıyor, çünkü köşeler resmin piksellerine bağlı.
+
 ## Dosyalar nereye gider
 
 ```

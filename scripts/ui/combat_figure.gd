@@ -138,7 +138,7 @@ var _ring: float = 1.0
 ## sersemlik bir an değil bir durum.
 var _stunned: bool = false
 ## Bu karenin hamle/sarsıntı/devrilme dönüşümü - sprite'lı hayvan onun
-## üstüne çiziliyor (`BeastRig.draw_sprites`).
+## üstüne çiziliyor (`BeastRig.draw_species`).
 var _base: Transform2D = Transform2D.IDENTITY
 
 func _init() -> void:
@@ -626,15 +626,15 @@ func _draw_beast(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 ## arka mevki biraz küçük, durum tonu çarpan renk.
 func _draw_beast_sprites(box: Vector2) -> void:
 	var facing := 1.0 if _face_right else -1.0
-	var ext := BeastRig.extent(_kind)
+	var ext := BeastRig.draw_extent(_kind)
 	# Kutuya sığan en büyük boy, türün iriliğiyle çarpılıyor: ayı kutuyu
 	# dolduruyor, kurt ondan küçük kalıyor (prosedürel silüetin `bulk`'ı).
 	var fit := minf(box.x * 1.05 / ext.size.x, box.y * 0.86 / ext.size.y)
 	var bulk := minf(1.0, float(_archetype().bulk) * 0.85)
 	var h := fit * bulk * (1.0 - _depth * 0.10)
 	var ground := Vector2(box.x * 0.5 - (ext.position.x + ext.size.x * 0.5) * h * facing, box.y * 0.95)
-	var joints := BeastRig.pose(_kind, ground, h, 0.0, 0.0, facing)
-	BeastRig.draw_sprites(self, _kind, joints, h, facing, _state_tone(), _base)
+	var joints := BeastRig.draw_pose(_kind, ground, h, 0.0, 0.0, facing)
+	BeastRig.draw_species(self, _kind, joints, h, facing, _state_tone(), _base)
 
 # --- Çizim yardımcıları ---
 

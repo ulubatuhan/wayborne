@@ -7,12 +7,11 @@ extends SceneTree
 ## testler (`test_beast_rig.gd`) yalnızca sözleşmeyi doğrular, görüntüyü
 ## değil (bkz. CLAUDE.md Testing bölümü).
 ##
-## Beast'lerin insan rig'inin aksine sprite'ların altında prosedürel bir
-## gövdesi yok (`WalkFigure._draw_quadruped` sprite varsa direkt döner) -
-## yani bir eklem parçaları arasında boşluk bırakırsa hiçbir şey onu
-## kapatmıyor. Bu yüzden at/öküz (yolda gerçekten yürüyen, KIND_HORSE/OX)
-## tam bir yürüyüş çevriminin sekiz fazında da taranıyor - dinlenme pozu
-## şansla hizalı görünüp yürürken açılan bir boşluğu gizleyebilir.
+## Hayvanlar parça parça değil, tek parça bir deri (`BeastSkin`) olarak
+## çiziliyor: resim kemiklere ağırlıkla bağlı bir ağa gerili, eklem bükülünce
+## ağ da bükülüyor. At/öküz (yolda gerçekten yürüyen, KIND_HORSE/OX) tam bir
+## yürüyüş çevriminin sekiz fazında taranıyor - dinlenme pozu resmin kendisi,
+## bir kıvrım ya da gerilme ancak yürürken görünür.
 ##
 ##   godot --headless --import
 ##   LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x900x24" \
@@ -22,7 +21,7 @@ extends SceneTree
 ## Çıktı user://beast_check/ altına düşer.
 
 const SHOT_DIR: String = "user://beast_check"
-const CELL: Vector2 = Vector2(190, 160)
+const CELL: Vector2 = Vector2(260, 200)
 const PHASES: int = 8
 
 func _init() -> void:
@@ -45,22 +44,22 @@ func _init() -> void:
 		var phase := TAU * float(col) / float(cols)
 
 		var horse := WalkFigure.new()
-		horse.size = CELL * 0.9
-		horse.position = Vector2(col * CELL.x + CELL.x * 0.05, 10)
+		horse.size = CELL * 0.62
+		horse.position = Vector2(col * CELL.x + CELL.x * 0.19, CELL.y * 0.3)
 		root.add_child(horse)
 		horse.set_kind(WalkFigure.KIND_HORSE, "bandit")
 		horse.set_phase_offset(phase)
 
 		var ox := WalkFigure.new()
-		ox.size = CELL * 0.9
-		ox.position = Vector2(col * CELL.x + CELL.x * 0.05, CELL.y + 10)
+		ox.size = CELL * 0.62
+		ox.position = Vector2(col * CELL.x + CELL.x * 0.19, CELL.y * 1.3)
 		root.add_child(ox)
 		ox.set_kind(WalkFigure.KIND_OX, "bandit")
 		ox.set_phase_offset(phase)
 
 		var wolf := CombatFigure.new()
-		wolf.size = CELL * 0.9
-		wolf.position = Vector2(col * CELL.x + CELL.x * 0.05, CELL.y * 2 + 10)
+		wolf.size = CELL * 0.8
+		wolf.position = Vector2(col * CELL.x + CELL.x * 0.1, CELL.y * 2.1)
 		root.add_child(wolf)
 		wolf.setup("wolf", true, "", 0.0)
 
