@@ -35,6 +35,8 @@ var _height_slider: HSlider
 var _height_label: Label
 var _skin_button: OptionButton
 var _skin_preview: ColorRect
+var _gender_button: OptionButton
+var _weight_button: OptionButton
 var _points_label: Label
 var _stat_rows: Array[Dictionary] = []
 var _summary_label: Label
@@ -181,6 +183,36 @@ func _build_identity_section() -> void:
 	skin_row.add_child(_skin_preview)
 	_content.add_child(skin_row)
 
+	var gender_row := HBoxContainer.new()
+	gender_row.add_theme_constant_override("separation", 8)
+	var gender_title := Label.new()
+	gender_title.text = tr("UI_CREATE_GENDER")
+	gender_title.custom_minimum_size = Vector2(120, 0)
+	gender_row.add_child(gender_title)
+
+	_gender_button = OptionButton.new()
+	for index in CharacterData.GENDER_NAMES.size():
+		_gender_button.add_item(CharacterData.get_gender_name(index))
+	_gender_button.select(CharacterData.GENDER_FEMALE)
+	_gender_button.item_selected.connect(_on_gender_selected)
+	gender_row.add_child(_gender_button)
+	_content.add_child(gender_row)
+
+	var weight_row := HBoxContainer.new()
+	weight_row.add_theme_constant_override("separation", 8)
+	var weight_title := Label.new()
+	weight_title.text = tr("UI_CREATE_WEIGHT")
+	weight_title.custom_minimum_size = Vector2(120, 0)
+	weight_row.add_child(weight_title)
+
+	_weight_button = OptionButton.new()
+	for index in CharacterData.BODY_WEIGHT_NAMES.size():
+		_weight_button.add_item(CharacterData.get_body_weight_name(index))
+	_weight_button.select(CharacterData.BODY_WEIGHT_AVERAGE)
+	_weight_button.item_selected.connect(_on_weight_selected)
+	weight_row.add_child(_weight_button)
+	_content.add_child(weight_row)
+
 ## Karakteri boydan gösteren önizleme + her slotu sağa/sola kaydıran
 ## seçiciler (bkz. OutfitCatalog.cycle). Tamamen dış görünüm için.
 func _build_outfit_section() -> void:
@@ -320,6 +352,12 @@ func _on_skin_selected(index: int) -> void:
 	_skin_preview.color = CharacterData.get_skin_tone_color(index)
 	_refresh()
 
+func _on_gender_selected(_index: int) -> void:
+	_refresh()
+
+func _on_weight_selected(_index: int) -> void:
+	_refresh()
+
 func _on_stat_changed(kind: CharacterStats.Kind, delta: int) -> void:
 	if delta > 0 and _spent_points >= STAT_POINTS:
 		return
@@ -373,7 +411,7 @@ func _refresh() -> void:
 		preview.class_id,
 		clampf(float(preview.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
 		CharacterData.get_skin_tone_color(preview.skin_tone),
-		_outfit, Wardrobe.loadout_of(_outfit, {})
+		_outfit, Wardrobe.loadout_of(_outfit, {}), preview.get_body_variant_id()
 	)
 
 	_summary_label.text = tr("UI_CREATE_PREVIEW") % [
@@ -406,7 +444,9 @@ func _build_character() -> CharacterData:
 		_base_stats,
 		int(_height_slider.value),
 		_skin_button.selected,
-		_selected_class().class_id
+		_selected_class().class_id,
+		_gender_button.selected,
+		_weight_button.selected
 	)
 	character.outfit = _outfit.duplicate()
 	return character

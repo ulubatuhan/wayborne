@@ -337,6 +337,8 @@
 "UI_CREATE_RANDOM","Rastgele","Random","","","","","","","","",""
 "UI_CREATE_HEIGHT","Boy","Height","","","","","","","","",""
 "UI_CREATE_SKIN","Ten Rengi","Skin Tone","","","","","","","","",""
+"UI_CREATE_GENDER","Cinsiyet","Gender","","","","","","","","",""
+"UI_CREATE_WEIGHT","Vücut Tipi","Body Type","","","","","","","","",""
 "UI_CREATE_CULTURE","Kültür","Culture","","","","","","","","",""
 "UI_CREATE_CLASS","Sınıf","Class","","","","","","","","",""
 "UI_CREATE_CULTURE_BONUS","Kültür bonusu: %s","Culture bonus: %s","","","","","","","","",""

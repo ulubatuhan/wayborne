@@ -42,6 +42,8 @@ func _test_old_character_dict_loads_with_defaults(t) -> void:
 	t.eq(character.stats.faith, CharacterStats.BASE_VALUE, "Faz 17 öncesi kayıtta İnanç tabana düşer")
 	t.ok(character.auto_allocate, "otomatik dağıtım varsayılan açık")
 	t.ok(character.equipped.is_empty(), "ekipman sözlüğü boş başlar (Faz 7'den önceki kayıt)")
+	t.eq(character.gender, CharacterData.GENDER_FEMALE, "cinsiyeti olmayan kayıt varsayılana düşer")
+	t.eq(character.body_weight, CharacterData.BODY_WEIGHT_AVERAGE, "vücut tipi olmayan kayıt varsayılana düşer")
 
 	# Yeni sistemler eski kaydı çökertmeden çalışmalı.
 	t.ok(character.get_skills().size() > 0, "yetenekler hâlâ okunabilir")

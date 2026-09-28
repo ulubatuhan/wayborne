@@ -78,6 +78,10 @@ var _carries_pack: bool = false
 ## karakter oluşturmada seçilen bir parça varsa o slotun rengi/kafa şekli
 ## bunun yerine geçer - bkz. OutfitCatalog'un çözümleyicileri.
 var _outfit: Dictionary = {}
+## `CharacterData.get_body_variant_id()`'in sonucu ya da boş (tayfa, düşman
+## reskin'i, oxen) - boşsa ya da o varyantın sanatı henüz yoksa düz
+## `Wardrobe.BODY_ID`'ye düşülür (bkz. `_effective_body_id`).
+var _body_variant: String = ""
 ## Üstündeki, resmi olan kalemler (`Wardrobe.loadout_for`), alttan üste.
 var _loadout: PackedStringArray = PackedStringArray()
 
@@ -88,7 +92,8 @@ func _ready() -> void:
 ## haydut paletine düşer (aynı kural savaş figüründe de var).
 func set_kind(
 	kind: String, archetype_id: String, height_scale: float = 1.0,
-	skin: Color = FALLBACK_SKIN, carries_pack: bool = false, outfit: Dictionary = {}
+	skin: Color = FALLBACK_SKIN, carries_pack: bool = false, outfit: Dictionary = {},
+	body_variant: String = ""
 ) -> void:
 	_kind = kind
 	_archetype = CombatFigure.ARCHETYPES.get(
@@ -98,6 +103,7 @@ func set_kind(
 	_skin = skin
 	_carries_pack = carries_pack
 	_outfit = outfit
+	_body_variant = body_variant
 	queue_redraw()
 
 ## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
@@ -299,7 +305,8 @@ func _draw_wardrobe(bone: String, joints: Dictionary, h: float) -> void:
 		part_spec.pivot, FigureRig.part_rest_vector(part), a, b, h, _facing
 	)
 	var drew := false
-	var layers := PackedStringArray([Wardrobe.BODY_ID])
+	var body_id := _body_variant if not _body_variant.is_empty() else Wardrobe.BODY_ID
+	var layers := PackedStringArray([body_id])
 	layers.append_array(_loadout)
 	for item_id in layers:
 		var found := Wardrobe.bone_texture(item_id, bone)
@@ -307,7 +314,7 @@ func _draw_wardrobe(bone: String, joints: Dictionary, h: float) -> void:
 		if texture == null:
 			continue
 		var tone := _tint
-		if item_id == Wardrobe.BODY_ID:
+		if item_id == body_id:
 			tone = Color(_skin.r * _tint.r, _skin.g * _tint.g, _skin.b * _tint.b, _tint.a)
 		if found.shade:
 			tone = Color(tone.r * Wardrobe.BACK_SHADE.r, tone.g * Wardrobe.BACK_SHADE.g, tone.b * Wardrobe.BACK_SHADE.b, tone.a)

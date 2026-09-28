@@ -513,7 +513,8 @@ func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
 		clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
 		CharacterData.get_skin_tone_color(character.skin_tone),
 		not is_leader,
-		character.outfit
+		character.outfit,
+		character.get_body_variant_id()
 	)
 	body.set_loadout(Wardrobe.loadout_for(character))
 

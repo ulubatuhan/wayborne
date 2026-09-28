@@ -25,15 +25,16 @@ func show_character(character: CharacterData) -> void:
 		character.class_id,
 		clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
 		CharacterData.get_skin_tone_color(character.skin_tone),
-		character.outfit, Wardrobe.loadout_of(character.outfit, character.equipped)
+		character.outfit, Wardrobe.loadout_of(character.outfit, character.equipped),
+		character.get_body_variant_id()
 	)
 
 func show_look(
 	archetype_id: String, height_scale: float, skin: Color, outfit: Dictionary,
-	loadout: PackedStringArray
+	loadout: PackedStringArray, body_variant: String = ""
 ) -> void:
 	_figure.visible = true
-	_figure.set_kind(WalkFigure.KIND_PERSON, archetype_id, height_scale, skin, false, outfit)
+	_figure.set_kind(WalkFigure.KIND_PERSON, archetype_id, height_scale, skin, false, outfit, body_variant)
 	_figure.set_loadout(loadout)
 	_figure.set_standing()
 	_figure.set_facing(1.0)
