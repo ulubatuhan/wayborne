@@ -247,6 +247,7 @@
 "UI_ROAD_REPLAN_WARNING","Bıraktığın hedefe yazılı kontratlar teslim edilemez; faturası varışta kesilir.","Contracts bound for the destination you abandon cannot be delivered; the bill comes due on arrival.","","","","","","","","",""
 "UI_ROAD_REPLAN_CANCEL","Vazgeç, yola devam","Never mind, carry on","","","","","","","","",""
 "UI_ROAD_TURNED_BACK","Kervan geri döndü: %s","The caravan has turned back: %s","","","","","","","","",""
+"UI_ROAD_TURNING","Kervan geri dönüyor: lider öne sürüyor, vagonlar sırayla dönüyor.","The caravan turns about: the leader rides to the new head, the wagons swing round one by one.","","","","","","","","",""
 "UI_ROAD_DIVERTED","Rota değişti: yeni hedef %s","Route changed: now bound for %s","","","","","","","","",""
 "UI_ROAD_JOURNEY_DONE","Sefer tamamlandı. %d gün sürdü.","The journey is over. It took %d days.","","","","","","","","",""
 "UI_ROAD_ARRIVAL_TITLE","Varış: Sefer Kazancı","Arrival: Journey Earnings","","","","","","","","",""

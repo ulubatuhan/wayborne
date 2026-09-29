@@ -38,6 +38,10 @@ const PARALLAX_FAR: float = 0.10
 const PARALLAX_MID: float = 0.26
 const PARALLAX_TREES: float = 0.52
 const PARALLAX_GROUND: float = 1.0
+## Kervan geri döndüğünde kameranın ters çapaya kayma süresi (saniye). Kısa:
+## "kamera merkezi hemen güncellensin" - dönüş kendisi on saniye sürüyor,
+## oyuncu o on saniyeyi kervanın önünde değil arkasında izlememeli.
+const CAMERA_TURN_SECONDS: float = 0.8
 
 ## Hücre aralıkları (dünya pikseli). Bir hücrede en fazla bir nesne var.
 const CELL_TREES: float = 120.0
@@ -119,6 +123,11 @@ var _sun_ratio: float = 0.5
 var _progress: float = 0.0
 var _day_position: float = 0.0
 var _world_x: float = 0.0
+## Kervanın yüzü: +1 hedefe (sağa), -1 geri dönüşte (sola). Kamera buna
+## göre kayıyor - bkz. `caravan_x()`. `_turn_blend` 0'da ileri çapa, 1'de
+## ters çapa; aradaki geçiş bir kamera kaydırması, ışınlanma değil.
+var _heading: float = 1.0
+var _turn_blend: float = 0.0
 var _camping: bool = false
 var _time: float = 0.0
 var _column_length: float = 0.0
@@ -130,7 +139,9 @@ var _safe_left: float = 0.0
 ## Kervan katmanı: figürleri bu şerit değil `RoadCaravan` çiziyor, ama
 ## zemin çizgisini ondan o alıyor - ikisi ayrı hesaplarsa kervan yolun
 ## üstünde ya da altında yürüyor.
-signal ground_line_changed(caravan_x: float, ground_y: float)
+## `forward_x` ileri yöndeki çapa: kolon ölçeğini ondan hesaplıyor, kamera
+## geri dönüşte kayarken figürler büyüyüp küçülmesin diye.
+signal ground_line_changed(caravan_x: float, ground_y: float, forward_x: float)
 
 var _foreground: TravelForeground
 
@@ -300,8 +311,48 @@ func caravan_x_ratio() -> float:
 		min_ratio, CARAVAN_X_MAX_RATIO
 	)
 
+## Kervanın çapası - arazinin "şimdi"si bu x'e düşüyor. İleri giderken
+## kolon çapanın solunda (kuyruk), önü sağda boş; geri dönünce kolon yerinde
+## döndüğü için çapa artık kolonun **arka** ucu ve kervan sola bakıyor - önü
+## boş kalsın diye çapa ekranın sağına kayıyor, ileri görüşün aynası. Arada
+## `_turn_blend` kadar: kamera kayar, kervan zeminin üstünde kaymaz (bkz.
+## `_scroll_x`).
 func caravan_x() -> float:
+	var forward := forward_caravan_x()
+	if is_zero_approx(_turn_blend):
+		return forward
+	var reverse := clampf(
+		size.x - forward + _column_length, forward, size.x - CARAVAN_EDGE_MARGIN
+	)
+	var t := _turn_blend * _turn_blend * (3.0 - 2.0 * _turn_blend)
+	return lerpf(forward, maxf(forward, reverse), t)
+
+## İleri yöndeki çapa - kolonun ölçeği bundan hesaplanıyor, kamera dönerken
+## figürler büyüyüp küçülmesin diye.
+func forward_caravan_x() -> float:
 	return size.x * caravan_x_ratio()
+
+## Kervanın yüzü değişti. `immediate` kayıttan dönüşte: kamera zaten yerinde.
+func set_heading(heading: float, immediate: bool = false) -> void:
+	_heading = -1.0 if heading < 0.0 else 1.0
+	if immediate:
+		_turn_blend = 1.0 if _heading < 0.0 else 0.0
+		_announce_ground_line()
+		queue_redraw()
+
+func get_heading() -> float:
+	return _heading
+
+## Kameranın ters çapaya ne kadar kaydığı (0-1) - test okuyor.
+func get_turn_blend() -> float:
+	return _turn_blend
+
+## Manzaranın kaydırması: dünya konumu eksi çapa. Çapa kayınca manzara da
+## onunla kayıyor, yani çapanın değişmesi bir kamera hareketi - kervanın
+## zemine göre yeri değişmiyor. Yalnızca `_world_x` kullanılsaydı çapa
+## kayarken kervan toprağın üstünde kayardı.
+func _scroll_x() -> float:
+	return _world_x - caravan_x()
 
 func get_caravan_anchor() -> Vector2:
 	var x := caravan_x()
@@ -312,10 +363,15 @@ func get_caravan_anchor() -> Vector2:
 ## RoadEncounter) bunu okuyarak kervanla aynı dünyada duruyor: ikisi de
 ## `_world_x`'ten türediği için biri kayarken öteki geride kalmıyor.
 func screen_position_for_day(day_position: float) -> Vector2:
-	var x := caravan_x() + (day_position * PIXELS_PER_DAY - _world_x)
+	var x := day_position * PIXELS_PER_DAY - _scroll_x()
 	return Vector2(x, _ground_y_at_screen(x))
 
 func _process(delta: float) -> void:
+	var blend_target := 1.0 if _heading < 0.0 else 0.0
+	if not is_equal_approx(_turn_blend, blend_target):
+		_turn_blend = move_toward(_turn_blend, blend_target, delta / CAMERA_TURN_SECONDS)
+		_announce_ground_line()
+		queue_redraw()
 	# Yağmur kendi başına canlanıyor; hava açıksa yeniden çizmeye gerek
 	# yok (oyuncu yürüdükçe set_route_progress zaten çağırıyor). Ateşin
 	# titremesi artık burada değil - bkz. RoadCaravan._draw_campfires.
@@ -375,9 +431,9 @@ func _draw() -> void:
 	# çizilse kervanın arkasında kalırdı.
 	_foreground.cover = cover
 	_foreground.sync_state(
-		_colors, _light, _world_x, _ground_y_at_screen(area.size.x * 0.5),
+		_colors, _light, _scroll_x(), _ground_y_at_screen(area.size.x * 0.5),
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
-		caravan_x_ratio()
+		0.0
 	)
 	# Ateşin kendisi artık burada değil: vagon başına bir tane oldu
 	# (bkz. RoadCaravan._draw_campfires) ve bu şeridin kendi `_draw()`'u
@@ -494,7 +550,7 @@ func _draw_far_ridges(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var amplitude := area.size.y * (0.20 if _biome == ArtPalette.BIOME_MOUNTAIN else 0.10)
 	ArtDraw.ridge(
 		self, _ridge_cover(area, cover, area.size.x * 1.35), horizon + area.size.y * 0.01, amplitude,
-		area.size.x * 1.35, -_world_x * PARALLAX_FAR, far, 3
+		area.size.x * 1.35, -_scroll_x() * PARALLAX_FAR, far, 3
 	)
 
 func _draw_mid_ridges(area: Rect2, cover: Rect2, horizon: float) -> void:
@@ -503,7 +559,7 @@ func _draw_mid_ridges(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var amplitude := area.size.y * (0.15 if _biome == ArtPalette.BIOME_MOUNTAIN else 0.075)
 	var base_y := horizon + area.size.y * 0.035
 	var wavelength := area.size.x * 0.78
-	var offset := -_world_x * PARALLAX_MID
+	var offset := -_scroll_x() * PARALLAX_MID
 	var ridge_area := _ridge_cover(area, cover, wavelength)
 
 	# Karlı tepe. Önce kaya, sonra kar - ama kar `ridge_snow` ile, yani
@@ -535,7 +591,7 @@ func _draw_lake(area: Rect2, cover: Rect2, horizon: float) -> void:
 		self, water_rect,
 		ArtPalette.fade_to_haze(Color(_colors.accent), Color(_sky.haze), 0.35),
 		Color(_colors.far).darkened(0.12), Color(_sky.light),
-		-_world_x * PARALLAX_TREES, 7
+		-_scroll_x() * PARALLAX_TREES, 7
 	)
 
 ## Ağaç hattı: biyomun kimliği. Orman iğne yapraklı, bozkır seyrek ve
@@ -551,7 +607,7 @@ func _draw_tree_line(area: Rect2, cover: Rect2, horizon: float) -> void:
 	if density <= 0.0:
 		return
 
-	var offset := -_world_x * PARALLAX_TREES
+	var offset := -_scroll_x() * PARALLAX_TREES
 	var first := int(floor((cover.position.x - offset - CELL_TREES) / CELL_TREES))
 	var last := int(ceil((cover.end.x - offset + CELL_TREES) / CELL_TREES))
 	for cell in range(first, last + 1):
@@ -617,7 +673,7 @@ func _draw_ground_fill(area: Rect2, cover: Rect2, horizon: float) -> void:
 	edge_area.size.y = area.size.y
 	ArtDraw.ridge(
 		self, edge_area, _ground_edge_base(), area.size.y * GROUND_EDGE_AMP_RATIO,
-		_ground_edge_wavelength(), -_world_x * PARALLAX_TREES, far, GROUND_EDGE_SEED
+		_ground_edge_wavelength(), -_scroll_x() * PARALLAX_TREES, far, GROUND_EDGE_SEED
 	)
 
 ## Çayırın ufka değdiği kenarın x'teki y'si - yani "burada zemin nerede
@@ -628,7 +684,7 @@ func _ground_top_at(x: float) -> float:
 	return ArtDraw.ridge_y(
 		Rect2(Vector2.ZERO, Vector2(maxf(size.x, 1.0), height)),
 		_ground_edge_base(), height * GROUND_EDGE_AMP_RATIO,
-		_ground_edge_wavelength(), -_world_x * PARALLAX_TREES, GROUND_EDGE_SEED, x
+		_ground_edge_wavelength(), -_scroll_x() * PARALLAX_TREES, GROUND_EDGE_SEED, x
 	)
 
 func _ground_edge_base() -> float:
@@ -684,7 +740,7 @@ func _draw_road(area: Rect2, cover: Rect2) -> void:
 	var copies := int(ceil(cover.size.x / area.size.x)) + 1
 	for _index in 26:
 		var world_slot := pebble_rng.randf() * area.size.x
-		var base_x := fposmod(world_slot - _world_x * PARALLAX_GROUND, area.size.x)
+		var base_x := fposmod(world_slot - _scroll_x() * PARALLAX_GROUND, area.size.x)
 		var y_jitter := pebble_rng.randf_range(-0.35, 0.85)
 		var radius := pebble_rng.randf_range(0.8, 2.0)
 		var shade := pebble_rng.randf_range(0.05, 0.30)
@@ -739,7 +795,7 @@ func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# kaydıkça yanlış hızda süzülüyordu.
 	for entry in _terrain.get_stops():
 		var day := float(entry.day)
-		var x := caravan_x() + (day * PIXELS_PER_DAY - _world_x)
+		var x := day * PIXELS_PER_DAY - _scroll_x()
 		if x < cover.position.x - 180.0 or x > cover.end.x + 180.0:
 			continue
 		# Yolun biraz gerisine oturuyorlar - kervan önlerinden geçiyor.
@@ -864,7 +920,7 @@ func _draw_hut(base: Vector2, height: float, wall: Color, roof: Color) -> void:
 ## gibi duruyordu. Aşağıya artık yalnızca alçak şeyler gidiyor ve onları
 ## `TravelForeground` çiziyor - kervandan sonra.
 func _draw_ground_props(area: Rect2, cover: Rect2, horizon: float) -> void:
-	var offset := -_world_x * PARALLAX_GROUND
+	var offset := -_scroll_x() * PARALLAX_GROUND
 	var first := int(floor((cover.position.x - offset - CELL_GROUND) / CELL_GROUND))
 	var last := int(ceil((cover.end.x - offset + CELL_GROUND) / CELL_GROUND))
 	var flora := Color(_colors.flora)
@@ -965,4 +1021,4 @@ func _draw_weather(area: Rect2, cover: Rect2, horizon: float) -> void:
 
 func _announce_ground_line() -> void:
 	var x := caravan_x()
-	ground_line_changed.emit(x, _ground_y_at_screen(x))
+	ground_line_changed.emit(x, _ground_y_at_screen(x), forward_caravan_x())

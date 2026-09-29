@@ -38,6 +38,7 @@ func run(t) -> void:
 	_test_event_resolver_is_the_single_path(t)
 	_test_journey_controller_walk_and_arrival(t)
 	_test_journey_controller_round_trip_keeps_the_dice(t)
+	_test_return_leg_walks_the_same_road_back(t)
 	_test_mid_journey_save_round_trip(t)
 	_test_city_brief_model_without_a_scene(t)
 
@@ -774,6 +775,39 @@ func _test_journey_controller_walk_and_arrival(t) -> void:
 	journey.start_leg(4)
 	t.eq(journey.pending_event, null, "yeni bacak eski işareti bırakır")
 	t.almost(journey.days_covered, 0.0, "yeni bacak sıfırdan")
+
+## Geri dönen kervan aynı araziyi ters yönde yürüyor: arazi günü dönüş
+## anındaki yerden çıkışa (0) iniyor, ve bu kayıttan dönüşte de böyle -
+## geri dönmüş seferin çıkışı ve hedefi aynı şehir, anahtar oradan yeniden
+## türetilemez.
+func _test_return_leg_walks_the_same_road_back(t) -> void:
+	var journey := JourneyController.new()
+	journey.clock = JourneyClock.new()
+	journey.engine = EventEngine.new(EventCatalog.get_road_events(), 7)
+	journey.terrain_key = "a|b"
+	journey.terrain_days = 6
+	journey.journey_length_days = 6
+	journey.walk(1.0, JourneyClock.HOURS_PER_DAY * 2.5)
+	t.almost(journey.terrain_day(), 2.5, "ileri bacakta arazi günü kat edilen yol")
+	journey.start_return_leg(3)
+	t.eq(journey.heading, -1.0, "geri bacak ters yönde")
+	t.almost(journey.terrain_day(), 2.5, "dönüş anında arazide aynı yerde")
+	journey.walk(1.0, JourneyClock.HOURS_PER_DAY)
+	t.almost(journey.terrain_day(), 1.5, "geri yürümek arazide geriye gitmek")
+	t.almost(journey.terrain_day_at(2.5), 0.0, "bacağın sonu çıkış şehri")
+
+	var copy := JourneyController.new()
+	copy.load_from_dict(journey.to_dict(), EventCatalog.get_road_events())
+	t.eq(copy.heading, -1.0, "yön kayıtta")
+	t.almost(copy.leg_origin_day, 2.5, "bacağın arazideki başı kayıtta")
+	t.eq(copy.terrain_key, "a|b", "arazinin anahtarı kayıtta")
+	t.eq(copy.terrain_days, 6, "arazinin boyu kayıtta")
+	t.almost(copy.terrain_day(), 1.5, "kayıttan dönen aynı yerde")
+
+	var old := JourneyController.new()
+	old.load_from_dict({"days_covered": 1.0, "journey_length_days": 4}, EventCatalog.get_road_events())
+	t.eq(old.heading, 1.0, "eski kayıt ileri yönde açılır")
+	t.almost(old.terrain_day(), 1.0, "eski kayıtta arazi günü kat edilen yol")
 
 func _test_journey_controller_round_trip_keeps_the_dice(t) -> void:
 	var events := EventCatalog.get_road_events()

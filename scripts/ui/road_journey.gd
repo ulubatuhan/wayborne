@@ -179,7 +179,12 @@ const PACE_SLOW_MORALE_PER_DAY: int = 2
 ## Lider kolonda gezerken adım hızı (gün/saat cinsinden değil, kolondaki
 ## piksel/saat): kervanın boyu zaten sınırlı, bu yalnızca ne kadar çabuk
 ## arkaya inildiğini belirliyor.
-const LEADER_WALK_SPEED: float = 46.0
+const LEADER_RIDE_SPEED: float = 96.0
+const LEADER_WALK_SPEED: float = 64.0
+## Tutulan yönde liderin en az ekran hızı (oran). Kervan 3x'te liderin
+## kendi hızından hızlı akabiliyor; ileri tutulan tuş lideri yine de
+## kolonun önüne doğru götürmeli, kervanın gerisine düşürmemeli.
+const LEADER_MIN_SCREEN_SHARE: float = 0.35
 
 ## Ortadaki karar kartının genişliği. EU4'ün olay kartı gibi: ekranın
 ## tamamını kaplamıyor, arkasında dünyanın durduğu görünüyor.
@@ -289,6 +294,8 @@ var _pace_key: String:
 var _leader_offset: float = 0.0
 ## Dokunma/tıklama hedefi: lider oraya kendi yürür, klavye girişi iptal eder.
 var _leader_target: float = 0.0
+## Dönüş bitince açılacak kart (tüccarların tepkisi) - bkz. _start_turn_if_needed.
+var _turn_event_after: GameEvent = null
 var _has_leader_target: bool = false
 ## Liderin kolondaki yeri = neye dikkat ettiği (bkz. RoadAttention).
 ## Kolona bağlıyken lider baştadır, yani ön bölgededir.
@@ -508,6 +515,7 @@ func _build_world_layer() -> void:
 	# Kolon uzadıkça çapa sağa kayıyor, yoksa satın alınan her vagon
 	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
 	_caravan.column_length_changed.connect(_band.set_column_length)
+	_caravan.turn_finished.connect(_on_caravan_turn_finished)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -1372,6 +1380,9 @@ func _init_journey() -> void:
 	)
 	_terrain = RouteTerrain.build(_route_key, _journey_length_days)
 	_band.set_route(_terrain)
+	_journey.terrain_key = _route_key
+	_journey.terrain_days = _journey_length_days
+	_band.set_heading(1.0, true)
 	_pace = PACE_STEADY
 	_pace_key = "UI_ROAD_PACE_STEADY"
 	_leader_offset = 0.0
@@ -1390,7 +1401,9 @@ func _init_journey() -> void:
 	# Kervan parti ve vagon sayısından kuruluyor; bu yüzden sefer başında
 	# bir kez (yolda bir yoldaş katılırsa yine) çağrılıyor, karede değil.
 	_caravan.configure(_session)
+	_caravan.set_heading(1.0)
 	_caravan.set_leader_offset(0.0)
+	_turn_event_after = null
 	_clear_children(_card_panel)
 	_clear_children(_haggle_holder)
 	_clear_children(_combat_holder)
@@ -1430,6 +1443,17 @@ func _init_journey() -> void:
 func _restore_journey_snapshot() -> void:
 	_journey.load_from_dict(_session.journey_snapshot, EventCatalog.get_road_events())
 	_session.journey_snapshot = {}
+	# Geri dönmüş bir seferde oturumun çıkışı ve hedefi aynı şehir; arazi
+	# ve hava yolun kendi anahtarından (bkz. JourneyController.terrain_key).
+	if _journey.terrain_key.is_empty():
+		_journey.terrain_key = _route_key
+		_journey.terrain_days = _journey_length_days
+	elif _journey.terrain_key != _route_key or _journey.terrain_days != _terrain.total_days:
+		_route_key = _journey.terrain_key
+		_terrain = RouteTerrain.build(_route_key, maxi(1, _journey.terrain_days))
+		_band.set_route(_terrain)
+	_band.set_heading(_journey.heading, true)
+	_caravan.set_heading(_journey.heading)
 	_sync_days_remaining()
 	_refresh_weather()
 	_band.set_camping(_camping)
@@ -1508,12 +1532,13 @@ func _process(delta: float) -> void:
 
 	if _can_time_flow():
 		var hours := _clock.advance(delta)
-		_advance_position(hours)
+		_advance_position(hours, delta)
 		_tick_signals(hours)
 		_process_elapsed_days()
 		_update_camp_state()
 	else:
 		_walk_direction = 0.0
+		_caravan.set_leader_motion(0.0, false)
 
 	_refresh_time_ui()
 	_refresh_modal()
@@ -1525,18 +1550,23 @@ func _process(delta: float) -> void:
 ## Mesafe geçen oyun saatinden ölçülüyor, gerçek kareden değil: hız tuşu
 ## (0.5x-3x) hem saati hem yolu aynı oranda hızlandırır, yoksa hızlı akışta
 ## günler yola göre daha hızlı akar ve kervan hep aç kalırdı.
-func _advance_position(hours: float) -> void:
+func _advance_position(hours: float, delta: float) -> void:
 	_walk_direction = 0.0
 	if hours <= 0.0:
 		return
-	_move_leader(hours)
-	if _camping:
-		return
-	_walk_at(_pace, hours)
+	var before := _terrain_day()
+	if not _camping:
+		_walk_at(_pace, hours)
+	# Kervanın zemine göre hızı (şerit pikseli/saniye) - lider buna göre
+	# yürüyor, bkz. _move_leader.
+	var column_speed := 0.0
+	if delta > 0.0:
+		column_speed = absf(_terrain_day() - before) * TravelBand.PIXELS_PER_DAY / delta
+	_move_leader(delta, column_speed)
 
 ## Klavye/kumanda yönü dokunma hedefinden önce gelir: ikisi aynı anda
 ## verilirse eldeki tuş kazanır ve hedef unutulur.
-func _move_leader(hours: float) -> void:
+func _move_leader(delta: float, column_speed: float) -> void:
 	var direction := 0.0
 	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
 		direction += 1.0
@@ -1544,20 +1574,60 @@ func _move_leader(hours: float) -> void:
 		direction -= 1.0
 	direction = clampf(direction + GamepadCursor.get_move_axis(), -1.0, 1.0)
 
-	var step := LEADER_WALK_SPEED * hours
-	var target := _leader_offset
+	var heading := _journey.heading
+	var goal_direction := 0.0
 	if not is_zero_approx(direction):
 		_has_leader_target = false
-		target = _leader_offset + direction * step
+		goal_direction = direction
 	elif _has_leader_target:
-		target = move_toward(_leader_offset, _leader_target, step)
+		# Hedef kolonun bir yeri; ekranda hangi yöne düştüğü kervanın
+		# yüzüne bağlı (geri dönüşte kolon aynalı).
+		var gap := _leader_target - _leader_offset
+		if absf(gap) < 0.5:
+			_has_leader_target = false
+		else:
+			goal_direction = signf(gap) * heading
+	var ground := heading * column_speed
+	if is_zero_approx(goal_direction):
+		_caravan.set_leader_motion(ground, false)
+		return
+	var screen := leader_screen_speed(goal_direction, heading, column_speed, _leader_ground_speed())
+	var step := screen * delta * heading
+	var target := _leader_offset + step
+	if _has_leader_target and is_zero_approx(direction):
+		target = move_toward(_leader_offset, _leader_target, absf(step))
 		if is_equal_approx(target, _leader_target):
 			_has_leader_target = false
-	else:
-		return
+	var previous := _leader_offset
 	_leader_offset = clampf(target, -_caravan.get_column_length(), 0.0)
 	_caravan.set_leader_offset(_leader_offset)
+	# Figürün yüzü ve adımı zemine göre hızından: kolonun sonuna varıp duran
+	# lider kervanla birlikte yürür, geriye giden lider arkasını döner.
+	var moved := (_leader_offset - previous) * heading / maxf(delta, 0.0001)
+	_caravan.set_leader_motion(ground + moved, true)
 	_refresh_attention_zone()
+
+## Liderin kolondaki ekran hızı (piksel/saniye, işaretli). Lider **zemine
+## göre** her iki yönde aynı hızla gidiyor: kervanın ters yönüne giderken
+## kolonun akışı buna eklenir, kervanla aynı yöne giderken çıkar. Eskiden
+## ekran hızı sabitti (oyun saati başına), yani geri giden lider zemine
+## göre neredeyse yerinde sayıyor, ileri gelen koşuyordu - "at ile geri
+## dönmek istediğimde yavaşım" şikâyeti tam buydu.
+static func leader_screen_speed(
+	direction: float, heading: float, column_speed: float, ground_speed: float
+) -> float:
+	var screen := direction * ground_speed - heading * column_speed
+	var floor_speed := ground_speed * LEADER_MIN_SCREEN_SHARE
+	if screen * direction < floor_speed:
+		screen = direction * floor_speed
+	return screen
+
+func _leader_ground_speed() -> float:
+	return LEADER_RIDE_SPEED if _caravan.is_leader_mounted() else LEADER_WALK_SPEED
+
+## Kervanın arazideki şimdiki günü (bkz. JourneyController.terrain_day).
+func _terrain_day() -> float:
+	return _journey.terrain_day()
 
 ## Kervana dokunmak/tıklamak lideri oraya yürütür. Dünya katmanları fareyi
 ## yoksaydığı için tıklama buraya ancak hiçbir düğmeye değmediyse düşer.
@@ -1664,7 +1734,7 @@ func _walk_at(rate: float, hours: float) -> void:
 	# yavaşlatıcı/hızlandırıcı - RouteWeather.forecast_extra_days() aynı
 	# çarpanı planlayıcının erzak payına ekliyor, yoksa tırmanışlı bir
 	# rotada "doğru stoklayan asla aç kalmaz" sözü sessizce bozulurdu.
-	var terrain_factor := 1.0 if _terrain == null else _terrain.speed_factor_at(_days_covered)
+	var terrain_factor := 1.0 if _terrain == null else _terrain.speed_factor_at(_terrain_day())
 	var effective := JourneyController.effective_rate(
 		rate, RouteWeather.pace_multiplier(_weather),
 		_session.get_caravan_theoretical_speed(), terrain_factor, _hungry
@@ -1753,7 +1823,10 @@ func _sync_days_remaining() -> void:
 	_journey.sync_days_remaining(_session)
 
 func _can_time_flow() -> bool:
-	return not _journey_finished and _current_event == null and not _has_open_panel()
+	return (
+		not _journey_finished and _current_event == null and not _has_open_panel()
+		and not _caravan.is_turning()
+	)
 
 ## Günler tek tek alınıyor: bir kart ya da sofra paneli açılınca kalan
 ## gün saatte **bekler**, kaybolmaz. Eskiden hepsi birden alınıp açık bir
@@ -1868,11 +1941,11 @@ func _after_meal() -> void:
 	# Günün durağı olay bağlamına bayrak olarak giriyor (near_shrine,
 	# near_hamlet, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
-	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_days_covered).stop
+	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_terrain_day()).stop
 	context.merge(EventResolver.stop_context(stop), true)
 	# Aynı desenin arazi hali (bkz. evt_hunting_trip) - o günün biyomu
 	# stop_context'in yanına.
-	var biome := "" if _terrain == null else _terrain.biome_at(_days_covered)
+	var biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())
 	context.merge(EventResolver.biome_context(biome), true)
 	# Yolda zaten bir karşılaşma bekliyorsa ikincisi çekilmiyor: iki işaret
 	# aynı anda yola dizilmesin, önceki çözülmeden sıradaki gelmesin.
@@ -1916,7 +1989,7 @@ func _update_camp_state() -> void:
 func _refresh_weather() -> void:
 	var biome := ArtPalette.FALLBACK_BIOME
 	if _terrain != null:
-		biome = _terrain.biome_at(_days_covered)
+		biome = _terrain.biome_at(_terrain_day())
 	# Gün numarası **yalnızca** `total_days_elapsed + 1`. İlk yazışta
 	# `+ _current_day` de ekliyordum ve bu sessiz bir hataydı: `advance_day()`
 	# zaten her gün `total_days_elapsed`'i artırıyor, yani ikisini toplamak
@@ -1937,7 +2010,12 @@ func _refresh_time_ui() -> void:
 	_band.set_phase(phase, _clock.get_phase_progress())
 
 	var progress := _get_route_progress()
-	_band.set_route_progress(progress, _days_covered)
+	# Şerit arazinin kendi gününü okuyor, bacağınkini değil: geri dönen
+	# kervan aynı yolu ters yönde yürüyor (bkz. JourneyController.heading).
+	var terrain_day := _terrain_day()
+	_band.set_route_progress(
+		terrain_day / maxf(1.0, float(_journey.terrain_days)), terrain_day
+	)
 	_progress_bar.value = progress
 	_progress_bar.tooltip_text = tr("UI_ROAD_PROGRESS_TOOLTIP") % int(round(progress * 100.0))
 	_position_encounter()
@@ -2018,7 +2096,7 @@ func _sync_orders_panel_safe_left() -> void:
 func _refresh_conditions() -> void:
 	var biome := ArtPalette.FALLBACK_BIOME
 	if _terrain != null:
-		biome = _terrain.biome_at(_days_covered)
+		biome = _terrain.biome_at(_terrain_day())
 	var text := "%s · %s · %s" % [
 		tr("UI_ROAD_TERRAIN_NOW") % tr(RouteTerrain.biome_name_key(biome)),
 		tr("UI_ROAD_WEATHER") % tr(RouteWeather.name_key(_weather)),
@@ -2177,6 +2255,8 @@ func _spawn_encounter(kind: String) -> void:
 	var archetype: String = archetypes[absi(hash("%d|%s" % [_current_day, kind])) % archetypes.size()]
 	_encounter = RoadEncounter.new()
 	_encounter.setup(archetype)
+	# Karşılaşılan şey gelen kervana bakıyor - kervan geri dönmüşse sağa.
+	_encounter.set_facing(-_journey.heading)
 	# `add_child` değil `add_actor_layer`: kervanla aynı kuralı okuyor,
 	# ön plandaki çalıların arkasına düşmesin diye (bkz. yukarıdaki not).
 	_band.add_actor_layer(_encounter)
@@ -2187,7 +2267,9 @@ func _spawn_encounter(kind: String) -> void:
 func _position_encounter() -> void:
 	if _encounter == null:
 		return
-	_encounter.set_screen_position(_band.screen_position_for_day(_pending_event_day_position))
+	_encounter.set_screen_position(_band.screen_position_for_day(
+		_journey.terrain_day_at(_pending_event_day_position)
+	))
 
 ## İşaretin kartı açtığı nokta kervanın **burnu** - tetik çapaya bağlıyken
 ## (çapa liderin arkasında, bkz. RoadCaravan.get_front_offset) görevli önce
@@ -2505,7 +2587,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	# Faz 17 PR-6: o günkü arazi vahşi hayvan kadrosunun kompozisyonunu da
 	# eğiyor (bkz. EnemyCatalog.build_wildlife_squad) - "kurt sürüsü" orman
 	# geçitlerinde, tekil ayı dağ geçitlerinde daha olası.
-	var current_biome := "" if _terrain == null else _terrain.biome_at(_days_covered)
+	var current_biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())
 	panel.start_combat(
 		_current_combat_party, _pending_combat_danger, null,
 		_current_combat_kind, _session.journey_destination_id, current_biome
@@ -2916,12 +2998,26 @@ func _on_turn_back_pressed() -> void:
 	if not _session.turn_back():
 		_close_replan()
 		return
+	# Kervan aynı yolu ters yönde yürüyecek: arazi değişmiyor, yön değişiyor.
+	_journey.start_return_leg(_session.journey_total_days)
 	_apply_replan(tr("UI_ROAD_TURNED_BACK"))
 
 func _on_divert_pressed(destination_id: String) -> void:
 	if not _session.divert_journey(destination_id):
 		_close_replan()
 		return
+	# Sapma başka bir yol: arazisi o yolun kendi anahtarından (planlayıcının
+	# gösterdiği), bacak onun başından ve hedefe doğru.
+	_journey.start_leg(_session.journey_total_days)
+	_journey.heading = 1.0
+	_journey.leg_origin_day = 0.0
+	_route_key = RouteConditions.route_key(
+		_session.journey_origin_id, _session.journey_destination_id
+	)
+	_journey.terrain_key = _route_key
+	_journey.terrain_days = _journey_length_days
+	_terrain = RouteTerrain.build(_route_key, _journey_length_days)
+	_band.set_route(_terrain)
 	_apply_replan(tr("UI_ROAD_DIVERTED"))
 
 func _apply_replan(log_format: String) -> void:
@@ -2933,7 +3029,6 @@ func _apply_replan(log_format: String) -> void:
 	# bir yola saptı, kat edilmiş mesafe o yola ait değil. Eski yolda
 	# beliren bir işaret de o yolla birlikte geride kalıyor - kervan artık
 	# oraya hiç gitmeyecek.
-	_journey.start_leg(_session.journey_total_days)
 	_clear_encounter()
 	_sync_days_remaining()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
@@ -2946,10 +3041,35 @@ func _apply_replan(log_format: String) -> void:
 	# yaptığı sessiz kesintiyi (varışta uygulanan itibar cezası) burada
 	# hikâyeleştiriyoruz. original_merchant_names sefer başından beri
 	# değişmez, yani "aboard tüccar var mı" sorusunun cevabı hâlâ doğru.
+	var diversion_event: GameEvent = null
 	if not _session.caravan.original_merchant_names.is_empty():
-		var diversion_event := EventCatalog.get_event("evt_route_diversion")
-		if diversion_event != null:
-			_present_event(diversion_event)
+		diversion_event = EventCatalog.get_event("evt_route_diversion")
+	_start_turn_if_needed(diversion_event)
+
+## Kervanın yüzü bacağın yönüyle aynı değilse kervan döner: sırayla, on
+## saniyede (bkz. RoadCaravan.begin_turn). Kamera hemen ters çapaya kayıyor,
+## dönüş bitene kadar zaman durur - dönüşün bedeli zaten `REPLAN_HOURS`
+## olarak saatten düşüldü. Tüccarların tepkisi dönüş bittikten sonra: oyuncu
+## dönüşü kartın arkasından değil kendi gözüyle görsün.
+func _start_turn_if_needed(after_event: GameEvent) -> void:
+	if is_equal_approx(_caravan.get_heading(), _journey.heading) and not _caravan.is_turning():
+		if after_event != null:
+			_present_event(after_event)
+		return
+	_turn_event_after = after_event
+	_has_leader_target = false
+	_band.set_heading(_journey.heading)
+	_caravan.begin_turn(_journey.heading)
+	_add_log(tr("UI_ROAD_TURNING"))
+
+func _on_caravan_turn_finished() -> void:
+	_leader_offset = _caravan.get_leader_offset()
+	_refresh_attention_zone()
+	_refresh_state()
+	var event := _turn_event_after
+	_turn_event_after = null
+	if event != null and not _journey_finished:
+		_present_event(event)
 
 func _close_replan() -> void:
 	_clear_children(_replan_holder)

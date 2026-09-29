@@ -126,6 +126,8 @@ const CAMPFIRE_SEATS: Array[Vector2] = [
 ]
 
 var _anchor_x: float = 0.0
+## Ölçeğin hesaplandığı çapa (ileri yöndeki) - negatifse `_anchor_x`.
+var _scale_anchor_x: float = -1.0
 var _ground_y: float = 0.0
 ## HUD katmanının dünyanın üstüne çizdiği bir panel varsa (bkz. "Kervan
 ## Emirleri"), o panelin sağ kenarı - kolon bunun solunda hiç durmuyor,
@@ -223,6 +225,56 @@ const COLUMN_EDGE_MARGIN: float = 20.0
 ## Kolonun çapadan geriye doğru istediği yer (ölçeklenmemiş). Şerit
 ## çapayı buna göre kaydırıyor.
 signal column_length_changed(trailing_px: float)
+## Kervanın geri dönüşü bitti - yol ekranı zamanı yeniden akıtıyor.
+signal turn_finished
+
+## --- Dönüş ---
+## Kervan geri dönünce yerinde, sırayla dönüyor: lider önce atını çeviriyor,
+## sonra kolon boyunca yeni başa sürüyor; her birim (muhafız çifti, tayfa-
+## öküz-vagon, yük hayvanı) emir kendisine ulaşınca kendi merkezinde dönüyor.
+## Sıra yeni bir diziliş değil: gerçek bir kervan yol ortasında sırasını
+## değiştirmez, yerinde döner - arkadaki vagon artık öndedir. Birim, bir
+## kâğıt figür gibi ince bir çizgiye inip öbür yüzüyle açılıyor ve dönerken
+## yolun uzak şeridine doğru biraz yükseliyor: yandan bakışta derinlikte
+## dönen bir şey böyle okunuyor.
+const TURN_SECONDS: float = 10.0
+const LEADER_PIVOT_SECONDS: float = 0.6
+const UNIT_TURN_SECONDS: float = 1.3
+## Dönen birimin uzak şeride kalkışı, şerit yüksekliğine oranlı.
+const TURN_LIFT_RATIO: float = 0.03
+## Dönerken ayaklar: yerinde bir çeyrek tur atmak da yürümektir.
+const TURN_WALK_STEP: float = 1.6
+## En ince hâlinde bile çokgen çökmesin (bkz. MIN_DRAW_HEIGHT'ın notu).
+const MIN_TURN_WIDTH: float = 0.06
+## Liderin zemine göre hızını adım temposuna çeviren ölçü: kervanın 1x
+## normal tempodaki zemin hızı bir `STEP_RATE`'e denk geliyor. Üstü
+## sönümleniyor - dört nala giden atın bacakları dört kat hızlı değil,
+## adımı uzuyor.
+const LEADER_STEP_CAP: float = 2.4
+const LEADER_STEP_GROWTH: float = 0.45
+
+var _heading: float = 1.0
+var _turn_from: float = 1.0
+var _turning: bool = false
+var _turn_time: float = 0.0
+var _turn_leader_from: float = 0.0
+var _turn_leader_to: float = 0.0
+## Kolonun birimleri, önden arkaya, **ileri** yöndeki yerleşimde:
+## {figures: Array[WalkFigure], wagon: int (-1 yok), centre: float}.
+## `_walk_column` her yerleşimde yeniden dolduruyor.
+var _units: Array[Dictionary] = []
+## Her birimin yüzü: +1 ileri, -1 geri, arada dönüşün ortası.
+var _unit_facing: Array[float] = []
+## Birimin dönmeye başladığı an (dönüş saatinde) - emir dalga gibi iniyor.
+var _unit_turn_start: Array[float] = []
+var _unit_lift: Array[float] = []
+var _figure_unit: Dictionary = {}
+var _wagon_unit: Array[int] = []
+## Liderin zemine göre hızı (şerit pikseli/saniye) ve kolonda kendi başına
+## yürüyüp yürümediği - bkz. set_leader_motion.
+var _leader_ground: float = 0.0
+var _leader_walking: bool = false
+var _leader_turn_scale: float = 1.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -259,6 +311,15 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	# vagon karesi basan araçlarda ise `RoadCaravan` yeniden kullanılıyor).
 	_camping = false
 	_gather_progress = 0.0
+	_turning = false
+	_units.clear()
+	_unit_facing.clear()
+	_unit_turn_start.clear()
+	_unit_lift.clear()
+	_figure_unit.clear()
+	_wagon_unit.clear()
+	_leader_walking = false
+	_leader_turn_scale = 1.0
 	_gathering_figures.clear()
 	_gather_homes.clear()
 	_gather_targets.clear()
@@ -371,7 +432,8 @@ func _skin_of(character: CharacterData) -> Color:
 	return CharacterData.get_skin_tone_color(character.skin_tone)
 
 ## `TravelBand`'in bildirdiği zemin çizgisi. Kervanın bastığı yer burası.
-func set_ground_line(anchor_x: float, ground_y: float) -> void:
+func set_ground_line(anchor_x: float, ground_y: float, scale_anchor_x: float = -1.0) -> void:
+	_scale_anchor_x = scale_anchor_x
 	# Çapa ön ayarına güvenmiyoruz. `PRESET_FULL_RECT` boyutu ancak
 	# ebeveyn *yeniden boyutlanınca* çocuğa geçiriyor; manzara şeridi
 	# kendi boyunu biz eklemeden önce aldığı için o bildirim hiç gelmiyor
@@ -455,7 +517,77 @@ func get_column_length() -> float:
 ## yerine düşüyor - dokunarak/tıklayarak yürümenin hedefi. Aynı sınır
 ## `set_leader_offset`'inki: kolonun dışına tıklamak ucuna yürütür.
 func leader_offset_for_x(x: float) -> float:
+	if _heading < 0.0:
+		return clampf(_reverse_head_x() - x, -_column_length(), 0.0)
 	return clampf(x - (_anchor_x + _lead_at(_scale)), -_column_length(), 0.0)
+
+## Geri dönmüş kolonda liderin en öndeki yeri: kolon yerinde döndüğü için
+## eski kuyruk artık baş, lider onun da önünde.
+func _reverse_head_x() -> float:
+	return _anchor_x - _walk_column(_scale, false) - _lead_at(_scale)
+
+## Kervanın yüzü: +1 hedefe, -1 geri. Kayıttan dönüş ve sefer başı için -
+## anında, dönüşsüz. Yolda dönmek `begin_turn`.
+func set_heading(heading: float) -> void:
+	_heading = -1.0 if heading < 0.0 else 1.0
+	_turn_from = _heading
+	_turning = false
+	for index in _unit_facing.size():
+		_unit_facing[index] = _heading
+		_unit_lift[index] = 0.0
+	_leader_turn_scale = 1.0
+	if _leader != null:
+		_leader.set_facing(_heading)
+	_layout()
+	queue_redraw()
+
+func get_heading() -> float:
+	return _heading if not _turning else -_turn_from
+
+func is_turning() -> bool:
+	return _turning
+
+func is_leader_mounted() -> bool:
+	return _leader_mounted
+
+## Birimlerin o anki yüzleri, önden arkaya - test okuyor.
+func get_unit_facings() -> Array[float]:
+	return _unit_facing.duplicate()
+
+## Dönüşü başlatır (bkz. TURN_SECONDS'ın notu). Emir dalgası kolonun o anki
+## başından kuyruğa iniyor: her birim, önündeki boydan oranlı bir anda döner.
+func begin_turn(heading: float) -> void:
+	var target := -1.0 if heading < 0.0 else 1.0
+	if _turning or is_equal_approx(target, _heading):
+		return
+	if _leader == null:
+		_heading = target
+		return
+	_turn_from = _heading
+	_turning = true
+	_turn_time = 0.0
+	_leader_walking = false
+	_turn_leader_from = get_leader_centre() - _anchor_x
+	var trailing := _walk_column(_scale, false)
+	var lead := _lead_at(_scale)
+	# Yeni baş: eski kuyruğun da önü (ileri dönüşte eski yerleşimin başı).
+	_turn_leader_to = -trailing - lead if target < 0.0 else lead
+	var front := lead if _turn_from > 0.0 else -trailing - lead
+	var span := maxf(1.0, trailing + lead)
+	var wave := TURN_SECONDS - LEADER_PIVOT_SECONDS - UNIT_TURN_SECONDS
+	_unit_turn_start.resize(_units.size())
+	for index in _units.size():
+		var centre: float = float(_units[index].centre) - _anchor_x
+		var along := clampf((front - centre) * _turn_from / span, 0.0, 1.0)
+		_unit_turn_start[index] = LEADER_PIVOT_SECONDS + along * wave
+
+## Yol ekranı her karede liderin zemine göre hızını veriyor: kolonda kendi
+## başına yürüyorsa (`walking`) yüzü ve adımı bundan, yoksa kervanla aynı
+## adımı atıyor. Zemine göre: geri giden lider arkasını döner, kervandan
+## yavaş geri çekilen lider hâlâ ileri yürür - ikisi de gördüğün şey.
+func set_leader_motion(ground_px_s: float, walking: bool) -> void:
+	_leader_ground = ground_px_s
+	_leader_walking = walking
 
 ## Kamp kurulunca/kalkınca çağrılır. Ateşler burada değil `_draw()`'da
 ## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
@@ -564,8 +696,10 @@ func _campfire_position(index: int) -> Vector2:
 	if index < 0 or index >= _wagon_centres.size():
 		return Vector2(_anchor_x, _ground_y)
 	var wagon_w := maxf(size.y, 1.0) * _scale * WAGON_WIDTH_RATIO
+	# Kuyruk yönü vagonun yüzüne göre: dönmüş vagonun arkası sağında.
+	var facing := 1.0 if _wagon_turn(index).x >= 0.0 else -1.0
 	return Vector2(
-		_wagon_centres[index] - wagon_w * CAMPFIRE_TRAIL_RATIO,
+		_wagon_centres[index] - facing * wagon_w * CAMPFIRE_TRAIL_RATIO,
 		_ground_y + CAMPFIRE_NEAR_OFFSET * _scale
 	)
 
@@ -578,7 +712,10 @@ func _driver_bench_position(index: int) -> Vector2:
 	var height := maxf(size.y, 1.0) * _scale
 	var wagon_w := height * WAGON_WIDTH_RATIO
 	var wagon_h := height * WAGON_HEIGHT_RATIO
-	return ArtDraw.wagon_driver_seat(Vector2(_wagon_centres[index], _ground_y), wagon_w, wagon_h)
+	var seat := ArtDraw.wagon_driver_seat(Vector2(_wagon_centres[index], _ground_y), wagon_w, wagon_h)
+	var turn := _wagon_turn(index)
+	seat.x = turn.y + turn.x * (seat.x - turn.y)
+	return seat
 
 ## `_layout()`'un sonunda çağrılıyor (bkz. oradaki not): kamp sırasında
 ## bir yeniden boyutlanma vagon merkezlerini kaydırırsa, dönüş yürüyüşü
@@ -623,6 +760,8 @@ func get_column_scale() -> float:
 func get_front_offset() -> float:
 	if _leader == null:
 		return 0.0
+	if _heading < 0.0:
+		return _walk_column(_scale, false) + _lead_at(_scale) + _leader.size.x * 0.5
 	return _lead_at(_scale) + _leader.size.x * 0.5
 
 ## Yerleşimin hesapladığı vagon merkezleri - çizim de test de bunu okuyor,
@@ -703,6 +842,8 @@ func _process(delta: float) -> void:
 	# onların fazını `_advance_gather` kendi adım büyüklüğüyle sürüyor,
 	# çünkü kamp sırasında gerçek `_speed` zaten sıfır (bkz. orası).
 	_anim_time += delta
+	if _turning:
+		_advance_turn(delta)
 	var step := _speed * STEP_RATE
 	var figure_index := 0
 	for child in get_children():
@@ -713,7 +854,21 @@ func _process(delta: float) -> void:
 		figure.set_lean(wind_lean_at(_wind_lean, _anim_time, figure_index))
 		if _gather_homes.has(figure):
 			continue
-		figure.advance(delta, step)
+		if figure == _leader:
+			_advance_leader(delta, step)
+			continue
+		# Her birim kendi yüzüne doğru yürüyor; dönmekte olan yerinde adım
+		# atıyor. Duran bir figürün yüzü `advance` değiştirmiyor, o yüzden
+		# ayrıca veriliyor - yoksa durmuş, dönmüş bir vagonun tayfası eski
+		# yöne bakardı.
+		var unit := int(_figure_unit.get(figure, -1))
+		var facing := _heading
+		var turning_now := false
+		if unit >= 0 and unit < _unit_facing.size():
+			facing = 1.0 if _unit_facing[unit] >= 0.0 else -1.0
+			turning_now = absf(_unit_facing[unit]) < 0.999
+		figure.advance(delta, TURN_WALK_STEP * facing if turning_now else step * facing)
+		figure.set_facing(facing)
 
 	var was_swaying := _wagon_motion > 0.0
 	_wagon_motion = WalkFigure.ease_motion(_wagon_motion, not is_zero_approx(_speed), delta)
@@ -722,8 +877,87 @@ func _process(delta: float) -> void:
 	# Yeniden çizim üç sebepten gerekebilir: tekerlek dönüyor, ateş
 	# titriyor, ya da biri hâlâ ateşe/koluna yürüyor - üçü de kendi
 	# koşuluyla bağımsız.
-	if not is_zero_approx(_speed) or was_swaying or _camping or not _gathering_figures.is_empty():
+	if not is_zero_approx(_speed) or was_swaying or _camping or _turning or not _gathering_figures.is_empty():
 		queue_redraw()
+
+## Lider: dönüşte kendi yolu (çevir, sonra yeni başa sür), yolda kendi
+## zemin hızı, yoksa kervanın adımı.
+func _advance_leader(delta: float, caravan_step: float) -> void:
+	if _turning:
+		var riding := _turn_time > LEADER_PIVOT_SECONDS and absf(_leader_centre_rel() - _turn_leader_to) > 1.0
+		var target := -_turn_from
+		if _turn_time <= LEADER_PIVOT_SECONDS:
+			_leader.advance(delta, 0.0)
+			_leader.set_facing(_turn_from if _leader_turn_scale_sign() > 0.0 else target)
+		else:
+			_leader.advance(delta, (STEP_RATE * LEADER_STEP_CAP * target) if riding else 0.0)
+			_leader.set_facing(target)
+		return
+	if _leader_walking:
+		_leader.advance(delta, leader_step_for(_leader_ground))
+		return
+	_leader.advance(delta, caravan_step * _heading)
+	if is_zero_approx(caravan_step):
+		return
+	_leader.set_facing(_heading)
+
+func _leader_turn_scale_sign() -> float:
+	return signf(_leader_turn_scale) if not is_zero_approx(_leader_turn_scale) else 1.0
+
+func _leader_centre_rel() -> float:
+	return get_leader_centre() - _anchor_x
+
+## Zemin hızından adım temposu (bkz. LEADER_STEP_CAP). Saf fonksiyon.
+static func leader_step_for(ground_px_s: float) -> float:
+	var reference := TravelBand.PIXELS_PER_DAY / JourneyClock.REAL_SECONDS_PER_DAY
+	var ratio := absf(ground_px_s) / reference
+	if ratio < 0.02:
+		return 0.0
+	if ratio > 1.0:
+		ratio = 1.0 + (ratio - 1.0) * LEADER_STEP_GROWTH
+	return signf(ground_px_s) * STEP_RATE * minf(ratio, LEADER_STEP_CAP)
+
+## Dönüşün bir karesi: birimlerin yüzü dalgayla, liderin yeri yoluyla.
+func _advance_turn(delta: float) -> void:
+	_turn_time += delta
+	for index in _units.size():
+		var start := _unit_turn_start[index] if index < _unit_turn_start.size() else 0.0
+		var p := clampf((_turn_time - start) / UNIT_TURN_SECONDS, 0.0, 1.0)
+		var eased := p * p * (3.0 - 2.0 * p)
+		_unit_facing[index] = _turn_from * cos(PI * eased)
+		_unit_lift[index] = sin(PI * eased)
+	var pivot := clampf(_turn_time / LEADER_PIVOT_SECONDS, 0.0, 1.0)
+	_leader_turn_scale = cos(PI * pivot)
+	if _turn_time >= TURN_SECONDS:
+		_finish_turn()
+		return
+	_layout()
+
+func _finish_turn() -> void:
+	_turning = false
+	_heading = -_turn_from
+	_turn_from = _heading
+	for index in _unit_facing.size():
+		_unit_facing[index] = _heading
+		_unit_lift[index] = 0.0
+	_leader_turn_scale = 1.0
+	_leader_offset = 0.0
+	_leader.set_facing(_heading)
+	_layout()
+	queue_redraw()
+	turn_finished.emit()
+
+## Liderin çapaya göre yeri: dönüşte yolunun üstünde, yoksa kolondaki yeri.
+func _leader_rel_x() -> float:
+	var lead := _lead_at(_scale)
+	if _turning:
+		var ride := TURN_SECONDS - LEADER_PIVOT_SECONDS - UNIT_TURN_SECONDS * 0.5
+		var t := clampf((_turn_time - LEADER_PIVOT_SECONDS) / ride, 0.0, 1.0)
+		t = t * t * (3.0 - 2.0 * t)
+		return lerpf(_turn_leader_from, _turn_leader_to, t)
+	if _heading < 0.0:
+		return -_walk_column(_scale, false) - lead - _leader_offset
+	return lead + _leader_offset
 
 ## Toplanma ve dönüş: `_gather_progress` kampa göre 0↔1 arası akıyor,
 ## her toplanan figürün ekrandaki yeri ev-ateş arasında bu oranla
@@ -791,19 +1025,20 @@ func _layout() -> void:
 	# Ölçek önce: kolon çapanın arkasına sığmıyorsa taşmak yerine
 	# küçülüyor. Her terim boşluk ya da yüksekliğe oranlı bir genişlik
 	# olduğu için uzunluk ölçekte doğrusal - yani tek bir çarpan yetiyor.
-	var room := maxf(1.0, _anchor_x - maxf(COLUMN_EDGE_MARGIN, _safe_left))
+	var scale_anchor := _anchor_x if _scale_anchor_x < 0.0 else _scale_anchor_x
+	var room := maxf(1.0, scale_anchor - maxf(COLUMN_EDGE_MARGIN, _safe_left))
 	_scale = clampf(
 		room / maxf(1.0, _walk_column(1.0, false)), MIN_COLUMN_SCALE, 1.0
 	)
 
+	_walk_column(_scale, true)
+	_sync_unit_state()
+	_apply_unit_turns()
 	var leader_h := maxf(size.y, 1.0) * _scale * (
 		MOUNTED_HEIGHT_RATIO if _leader_mounted else PERSON_HEIGHT_RATIO
 	)
-	_place(
-		_leader, _anchor_x + _lead_at(_scale) + _leader_offset,
-		leader_h, leader_h * 1.6
-	)
-	_walk_column(_scale, true)
+	_place(_leader, _anchor_x + _leader_rel_x(), leader_h, leader_h * 1.6)
+	_turn_figure(_leader, _leader_turn_scale if _turning else 1.0)
 	column_length_changed.emit(get_trailing_length())
 
 	# Arabacılar kolonun kendi yerleşiminde yer tutmuyor (koltukları
@@ -820,6 +1055,61 @@ func _layout() -> void:
 	# ateş hedefleri de tazelenmeli, yoksa dönüş yürüyüşü artık doğru
 	# olmayan eski bir noktaya yönelir.
 	_refresh_gather_targets()
+
+## Birim sayısı yerleşimden geliyor; yüz dizileri ona uyuyor. Yeni gelen
+## birim (yolda katılan bir yoldaş) kervanın o anki yüzüyle doğuyor.
+func _sync_unit_state() -> void:
+	var fill := _heading
+	while _unit_facing.size() < _units.size():
+		_unit_facing.append(fill)
+		_unit_lift.append(0.0)
+	while _unit_turn_start.size() < _units.size():
+		_unit_turn_start.append(0.0)
+	_unit_facing.resize(_units.size())
+	_unit_lift.resize(_units.size())
+	_unit_turn_start.resize(_units.size())
+
+## İleri yerleşimin üstüne her birimin yüzü: birim kendi merkezinde
+## aynalanıyor (s = -1 tam dönmüş), dönüşün ortasında incelip uzak şeride
+## kalkıyor.
+func _apply_unit_turns() -> void:
+	var lift_px := maxf(size.y, 1.0) * _scale * TURN_LIFT_RATIO
+	for index in _units.size():
+		var unit: Dictionary = _units[index]
+		var facing := _unit_facing[index]
+		var lift := _unit_lift[index] * lift_px
+		var centre: float = unit.centre
+		for figure in unit.figures:
+			var walker := figure as WalkFigure
+			if _gather_homes.has(walker):
+				var home: Vector2 = _gather_homes[walker]
+				var home_centre := home.x + walker.size.x * 0.5
+				home.x = centre + facing * (home_centre - centre) - walker.size.x * 0.5
+				_gather_homes[walker] = home
+				continue
+			var fx := walker.position.x + walker.size.x * 0.5
+			walker.position.x = centre + facing * (fx - centre) - walker.size.x * 0.5
+			walker.position.y -= lift
+			_turn_figure(walker, facing)
+
+## Figürün kâğıt dönüşü: genişliği |s|, ayaklarının ortasından.
+func _turn_figure(figure: WalkFigure, facing: float) -> void:
+	if figure == null:
+		return
+	figure.pivot_offset = Vector2(figure.size.x * 0.5, figure.size.y)
+	figure.scale = Vector2(maxf(absf(facing), MIN_TURN_WIDTH), 1.0)
+
+## Bir vagon biriminin yüzü ve merkezi - çizim aynayı bundan kuruyor.
+func _wagon_turn(index: int) -> Vector3:
+	if index < 0 or index >= _wagon_unit.size():
+		return Vector3(_heading, 0.0, 0.0)
+	var unit := _wagon_unit[index]
+	if unit < 0 or unit >= _units.size():
+		return Vector3(_heading, 0.0, 0.0)
+	var facing := _unit_facing[unit]
+	var width := maxf(absf(facing), MIN_TURN_WIDTH) * (1.0 if facing >= 0.0 else -1.0)
+	var lift := _unit_lift[unit] * maxf(size.y, 1.0) * _scale * TURN_LIFT_RATIO
+	return Vector3(width, float(_units[unit].centre), lift)
 
 ## Kolonun tek aritmetiği: imleç çapadan geriye yürür, her parça kendi
 ## genişliğini tüketir, araya boşluk girer. `place` yanlışsa hiçbir şey
@@ -847,6 +1137,10 @@ func _walk_column(scale: float, place: bool) -> float:
 	var start := _anchor_x if place else 0.0
 	var cursor := start
 	var placed := 0
+	if place:
+		_units.clear()
+		_figure_unit.clear()
+		_wagon_unit.clear()
 
 	# Parti üyeleri kolon boyunca ikişerli gruplar hâlinde dağılıyor.
 	# Önce liderin hemen arkasındaki muhafız grubu.
@@ -866,7 +1160,10 @@ func _walk_column(scale: float, place: bool) -> float:
 		# çeken hayvan gibi değil başıboş bir hayvan gibi okunuyordu.
 		# Yürüyen tayfa artık öküzün **başında**, onu yederek yürüyor -
 		# öküz arabası zaten böyle sürülür.
+		var unit_start := cursor
+		var unit_figures: Array = []
 		if index < _crew_figures.size():
+			unit_figures.append(_crew_figures[index])
 			if place:
 				_place(
 					_crew_figures[index], cursor - person_w * 0.5,
@@ -875,6 +1172,7 @@ func _walk_column(scale: float, place: bool) -> float:
 			cursor -= person_w + gap_tight
 
 		if index < _oxen.size():
+			unit_figures.append(_oxen[index])
 			cursor -= ox_w * 0.5
 			if place:
 				_place(_oxen[index], cursor, ox_h, ox_w)
@@ -883,6 +1181,8 @@ func _walk_column(scale: float, place: bool) -> float:
 
 		if place:
 			_wagon_centres.append(cursor - wagon_w * 0.5)
+			_wagon_unit.append(_units.size())
+			_register_unit(unit_figures, index, (unit_start + cursor - wagon_w) * 0.5)
 		cursor -= wagon_w + gap_wagons
 
 		# Vagonlar arasına bir parti grubu daha serpiştiriyoruz: parti
@@ -910,10 +1210,16 @@ func _walk_column(scale: float, place: bool) -> float:
 		cursor -= pack_w * 0.5
 		if place:
 			_place(_pack[index], cursor, pack_h, pack_w)
+			_register_unit([_pack[index]], -1, cursor)
 		cursor -= pack_w * 0.5
 		cursor -= pack_gap
 
 	return start - cursor
+
+func _register_unit(figures: Array, wagon: int, centre: float) -> void:
+	for figure in figures:
+		_figure_unit[figure] = _units.size()
+	_units.append({"figures": figures, "wagon": wagon, "centre": centre})
 
 ## İkişerli bir muhafız grubu; imleci grubun tükettiği kadar geriye alır.
 func _walk_escort_group(
@@ -925,11 +1231,14 @@ func _walk_escort_group(
 		return cursor
 	var step := person_w + pair_gap
 	if place:
+		var figures: Array = []
 		for slot in count:
 			_place(
 				_party_figures[from_index + slot],
 				cursor - float(slot) * step, person_h, person_w
 			)
+			figures.append(_party_figures[from_index + slot])
+		_register_unit(figures, -1, cursor - float(count - 1) * step * 0.5)
 	return cursor - float(count - 1) * step - person_w - gap_normal
 
 ## `lift` figürü zemin çizgisinden yukarı alır: yolun karşı tarafında
@@ -963,6 +1272,10 @@ func _draw() -> void:
 		# alanında da çiziliyor ve iki kopya tutulunca aynı kervan iki
 		# ekranda iki farklı şey oluyordu.
 		var centre := _wagon_centres[index]
+		# Dönüş: vagon birimi kendi merkezinde aynalanıyor (bkz.
+		# `_apply_unit_turns`); ok ve gövde aynı dönüşümle, ayrı hesap yok.
+		var turn := _wagon_turn(index)
+		draw_set_transform(Vector2(turn.y * (1.0 - turn.x), -turn.z), 0.0, Vector2(turn.x, 1.0))
 		# Koşum oku vagondan *önce*: kalas gövdenin altından çıkıyor.
 		ArtDraw.draught_pole(
 			self, Vector2(centre + wagon_w * 0.48, _ground_y),
@@ -977,6 +1290,7 @@ func _draw() -> void:
 			_wheel_angle, _light, index == 0, not driver_gone,
 			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion)
 		)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	if _camping:
 		# Ateşler vagonlardan *sonra* çiziliyor (aynı `_draw()` çağrısı,

@@ -36,6 +36,16 @@ var signal_danger_bonus: float = 0.0
 var signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var camping: bool = false
 var camp_ends_at_hours: float = 0.0
+## Bacağın arazideki yeri. Arazi rotanın kendisi (çıkıştan hedefe, gün
+## cinsinden); geri dönen kervan **aynı araziyi** ters yönde yürüyor, yeni
+## bir yol değil. `heading` +1 hedefe, -1 geri; `leg_origin_day` bacağın
+## arazide başladığı gün. Arazinin anahtarı ve boyu da burada, çünkü geri
+## dönüşten sonra oturumun çıkış ve hedefi aynı şehir - anahtar oradan
+## yeniden türetilemez.
+var heading: float = 1.0
+var leg_origin_day: float = 0.0
+var terrain_key: String = ""
+var terrain_days: int = 0
 ## Yolda görünüp kartı henüz açılmamış olay ve yolda durduğu gün konumu.
 var pending_event: GameEvent = null
 var pending_event_day_position: float = 0.0
@@ -75,12 +85,29 @@ func has_reached_pending(front_offset_days: float) -> bool:
 		return false
 	return days_covered + ENCOUNTER_TRIGGER_EPSILON >= pending_event_day_position - front_offset_days
 
+## Bacağın bir noktasının (gün) arazideki karşılığı.
+func terrain_day_at(leg_day: float) -> float:
+	return clampf(leg_origin_day + heading * leg_day, 0.0, float(maxi(terrain_days, journey_length_days)))
+
+## Kervanın şu an arazide durduğu gün - manzara, eğim, biyom, duraklar.
+func terrain_day() -> float:
+	return terrain_day_at(days_covered)
+
 ## Yeni bir bacak (geri dönüş, sapma): mesafe sıfırdan, eski yolda bekleyen
 ## karşılaşma o yolla birlikte geride kalır.
 func start_leg(length_days: int) -> void:
 	journey_length_days = maxi(1, length_days)
 	days_covered = 0.0
 	pending_event = null
+
+## Geri dönüş: kervan aynı yolu ters yönde yürüyor. Bacak arazide şimdi
+## durulan günden başlıyor ve 0'a (çıkış şehrine) doğru iniyor. Sapma bu
+## değil - sapmada kervan başka bir yola çıkıyor, arazi orada çizilmiş değil.
+func start_return_leg(length_days: int) -> void:
+	var here := terrain_day()
+	start_leg(length_days)
+	leg_origin_day = here
+	heading = -heading
 
 func to_dict() -> Dictionary:
 	return {
@@ -95,6 +122,10 @@ func to_dict() -> Dictionary:
 		"signal_rng_seed": str(signal_rng.seed),
 		"camping": camping,
 		"camp_ends_at_hours": camp_ends_at_hours,
+		"heading": heading,
+		"leg_origin_day": leg_origin_day,
+		"terrain_key": terrain_key,
+		"terrain_days": terrain_days,
 		"pending_event_id": "" if pending_event == null else pending_event.event_id,
 		"pending_event_day_position": pending_event_day_position,
 		"clock": {} if clock == null else clock.to_dict(),
@@ -117,6 +148,11 @@ func load_from_dict(data: Dictionary, events: Array[GameEvent]) -> void:
 		signal_rng.state = String(data["signal_rng_state"]).to_int()
 	camping = bool(data.get("camping", false))
 	camp_ends_at_hours = float(data.get("camp_ends_at_hours", 0.0))
+	# Eski kayıtta yok: ileri yöndeki, rotanın başından başlayan bir bacak.
+	heading = -1.0 if float(data.get("heading", 1.0)) < 0.0 else 1.0
+	leg_origin_day = maxf(0.0, float(data.get("leg_origin_day", 0.0)))
+	terrain_key = String(data.get("terrain_key", ""))
+	terrain_days = maxi(0, int(data.get("terrain_days", 0)))
 	var pending_id := String(data.get("pending_event_id", ""))
 	pending_event = EventCatalog.get_event(pending_id) if not pending_id.is_empty() else null
 	pending_event_day_position = float(data.get("pending_event_day_position", 0.0))

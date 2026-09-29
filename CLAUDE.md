@@ -1341,6 +1341,17 @@ in every preview the moment it is equipped.
   part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
   fails if the JSON falls behind the rig, so a template can never describe
   a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
+- **People are a mannequin until their clothes are painted.**
+  `tools/wardrobe_mannequin.py` draws a jointed, faceless body per gender ×
+  body weight (`wardrobe/body_<gender>_<weight>/`, `wardrobe/body/` for the
+  crew and enemies) from `rig_spec.json`'s canvases and pivots, in light
+  grey with the volume in the shading. `WalkFigure._body_tone()` multiplies
+  each part by what that person wears (shirt on torso and arms, trousers on
+  the legs, boots, gloves, skin on head), so the road, the hub and combat
+  already show the new body; a painted item simply lands on top. Combat
+  uses the rig as soon as the body has art (`CombatFigure.uses_rig()`), and
+  a class's weapon is drawn in the hand (`_draw_held_weapon`) until the
+  weapon itself is painted.
 - **Animals have their own skeleton, and it is one skeleton for five
   species.** `BeastRig` (horse, ox, wolf, bear, boar) hangs sixteen bones -
   body, neck, head, tail, and upper/lower/foot for four legs - on the same
@@ -3031,6 +3042,47 @@ every decision has a visible control, and a key is only its shortcut.**
   choice - turning back is `turn_back()`/`divert_journey()` (En-Route Plan
   Rules), which already discards a pending marker. "Detach and walk the
   column" became the default: the leader is always free within the column.
+- **Walking left is walking, not a moonwalk.** `WalkFigure.advance()` used
+  to run the gait phase backwards for a negative speed while the skeleton
+  was already mirrored by `facing` - a figure facing left played its walk
+  in reverse. The phase now always runs forward; the sign only sets the
+  facing. And the leader's facing comes from its **ground** velocity
+  (`RoadCaravan.set_leader_motion`), not from the column's: going back
+  through the column the leader turns round.
+- **The leader rides at the same ground speed both ways, in real time.**
+  The old step was a constant screen speed per game hour, so going back
+  against the column the rider barely moved over the ground (≈4 px/s)
+  and coming forward he ran. `road_journey.gd::leader_screen_speed()` asks
+  for `LEADER_RIDE_SPEED`/`LEADER_WALK_SPEED` *over the ground* in the
+  pressed direction and adds or subtracts the column's own flow;
+  `LEADER_MIN_SCREEN_SHARE` keeps the pressed direction honoured even when
+  3x flow outruns the horse.
+- **Turning back turns the caravan, in place and in order.** `turn_back()`
+  used to reset the leg to zero and keep walking right - the same road
+  scrolled forward to the city behind you. Now `JourneyController`
+  carries `heading` and `leg_origin_day`: the return leg walks **the same
+  terrain** backwards (`terrain_day()`), so the stops, biomes and slope you
+  passed come back in reverse. `RoadCaravan.begin_turn()` plays the turn
+  over `TURN_SECONDS` (10): the leader wheels his horse, then rides to the
+  new head, and the order runs down the column - each unit (escort pair,
+  crew+ox+wagon, pack animal) turns about its **own centre** as the wave
+  reaches it (a paper flip that lifts a little toward the far lane). The
+  order of the column does not change: a real caravan does not re-form on
+  the road, the rear wagon simply becomes the head. Time is stopped while
+  it turns (`_can_time_flow`); the hours were already paid as
+  `REPLAN_HOURS`, and the merchants' reaction card waits until the turn is
+  done. Heading, the leg's place on the terrain and the terrain's own key
+  are saved, because after turning back the session's origin and
+  destination are the same city and the key cannot be re-derived.
+- **The camera moves at once, the caravan never slides.** `TravelBand`
+  anchors a reversed caravan on the right of the frame (the mirror of the
+  forward anchor) over `CAMERA_TURN_SECONDS`, and every layer scrolls by
+  `_scroll_x()` = world position minus anchor: moving the anchor is a
+  camera pan, the ground under the wagons stays put. The column's scale
+  is taken from the forward anchor (`ground_line_changed`'s third
+  argument), or the figures would grow while the camera pans. A diverted
+  journey is a different road: it rebuilds its own terrain and faces
+  forward again. `tests/screenshot_turnaround.gd` photographs the turn.
 - **Days are taken one at a time** (`JourneyClock.take_one_day()`). The old
   loop took every completed day at once and dropped the ones it could not
   process behind an open card - and while an encounter marker was pending
@@ -3058,8 +3110,11 @@ every decision has a visible control, and a key is only its shortcut.**
   fails on one without its on-screen counterpart in the same script.
 - **The road can be zoomed a little, never out past the frame.** Wheel,
   trackpad/two-finger pinch or the HUD's +/– buttons (touch parity) scale
-  `TravelBand` between `ZOOM_MIN` (1.0 - the band already fills the
-  screen, so zooming out would show its edge) and `ZOOM_MAX` (1.6),
+  `TravelBand` between `ZOOM_MIN` (0.7) and `ZOOM_MAX` (1.6). Zooming out
+  used to be impossible because the band's edge would show; the band now
+  draws its landscape over whatever the screen sees (`set_view_rect`,
+  `cover_rect()`), vignette at the screen's edge, not the band's -
+  `test_ui_feel.gd` asserts the scaled band covers the frame,
   eased per frame. The pivot is the leader's head on the ground line
   (`RoadCaravan.get_ground_y()`), so the eye stays on the caravan and the
   ground never slides; `_world.clip_contents` keeps the scaled band under
@@ -3945,11 +4000,10 @@ verir.
   (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
   kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
   ayrı bırakıldı, unutulmasın diye burada.
-- **Ayı ve domuz hâlâ beyaz at/eşek/erkek geyik/geyik/husky'nin aldığı
-  gerçek skin sanatına kavuşmadı** - ayrı bir kaynak paketi bekliyor
-  (bkz. Development Status'un "beş yeni tür" girişi). Bu beşi artık gerçek
-  mekaniklere bağlı (bkz. aşağıdaki "Kapandı" notu); kalan ikisi hâlâ
-  yalnızca prosedürel silüetle çiziliyor.
+- **İnsan mankenlerinin üstüne gerçek kıyafet sanatı.** Beden artık
+  çıplak bir manken (`tools/wardrobe_mannequin.py`, cinsiyet × kilo
+  başına bir set) ve giydiğinin rengine boyanıyor; gömlek/pantolon/çizme
+  resimleri geldikçe mankenin üstüne biniyor (bkz. Wardrobe & Rig Rules).
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),

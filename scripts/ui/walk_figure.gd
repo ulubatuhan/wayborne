@@ -157,7 +157,11 @@ func set_standing() -> void:
 func advance(delta: float, speed: float) -> void:
 	_moving = absf(speed) > 0.01
 	if _moving:
-		_phase = fmod(_phase + delta * speed * TAU, TAU)
+		# Yön işaretten, faz her zaman ileri: iskelet `facing`'e göre
+		# aynalanıyor, yani sola yürüyen figür de fazını ileri sarmalı.
+		# Fazı geri sarmak sola bakıp *geri geri* yürümekti (moonwalk) -
+		# lider kolonda geriye giderken tam olarak bu görünüyordu.
+		_phase = fmod(_phase + delta * absf(speed) * TAU, TAU)
 		_facing = 1.0 if speed >= 0.0 else -1.0
 	_motion = ease_motion(_motion, _moving, delta)
 	queue_redraw()
