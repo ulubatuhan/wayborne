@@ -135,6 +135,63 @@ const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_merchant_caravan": "traveler",
 }
 
+## event_id -> `e6*.jpg` (Faz 22'nin olay kartı illüstrasyonları, bkz.
+## docs/wayborne_gorsel_denetim.xlsx). `EVENT_ROAD_MARKER_KIND`'in
+## kendi kuralı burada da geçerli: eşlemede olmayan bir olay resimsiz
+## açılır, bu sessiz bir eksiklik değil - her yeni olay bir illüstrasyon
+## istemez, kartın kendi metni yeter. Birden çok olay aynı sahneyi
+## paylaşabiliyor (üç haber olayı da "yola çakılı bir haber", üç mezar
+## olayı da aynı yol kenarı mezarı) - `ArtDraw.wagon()`'un "bir şey iki
+## kez çizilirse iki farklı şey olur" kuralının tersten okunuşu: burada
+## aynı şey gerçekten aynı, tek resim yeter.
+const EVENT_CARD_ART: Dictionary = {
+	"evt_wild_animal": "e6a_wildlife.jpg",
+	"evt_wolf_pack": "e6b_wolves.jpg",
+	"evt_wolves_follow": "e6b_wolves.jpg",
+	"evt_bandit_ambush": "e6c_bandits.jpg",
+	"evt_guard_patrol": "e6d_guard.jpg",
+	"evt_customs_checkpoint": "e6d_guard.jpg",
+	"evt_road_patrol": "e6d_guard.jpg",
+	"evt_deserter_search": "e6d_guard.jpg",
+	"evt_road_wanderer": "e6e_traveler.jpg",
+	"evt_deserter_plea": "e6e_traveler.jpg",
+	"evt_stowaway": "e6e_traveler.jpg",
+	"evt_stowaway_repay": "e6e_traveler.jpg",
+	"evt_kin_encounter": "e6e_traveler.jpg",
+	"evt_merchant_caravan": "e6f_merchant.jpg",
+	"evt_pilgrim_encounter": "e6g_pilgrim.jpg",
+	"evt_pilgrim_blessing": "e6g_pilgrim.jpg",
+	"evt_roadside_shrine": "e6h_shrine.jpg",
+	"evt_culture_highland_challenge": "e6i_pass.jpg",
+	"evt_scouted_pass": "e6i_pass.jpg",
+	"evt_leave_the_wounded": "e6j_hamlet.jpg",
+	"evt_frontier_outpost": "e6k_outpost.jpg",
+	"evt_mine_collapse": "e6l_mine.jpg",
+	"evt_failing_bridge": "e6m_bridge.jpg",
+	"evt_storm": "e6n_storm.jpg",
+	"evt_landslide": "e6o_landslide.jpg",
+	"evt_broken_axle": "e6p_wagon.jpg",
+	"evt_abandoned_wagon": "e6p_wagon.jpg",
+	"evt_troubled_night": "e6q_camp.jpg",
+	"evt_grave_on_the_road": "e6r_grave.jpg",
+	"evt_grave_keeper": "e6r_grave.jpg",
+	"evt_grave_offering": "e6r_grave.jpg",
+	"evt_creditor_rider": "e6s_creditor.jpg",
+	"evt_bailiffs_at_camp": "e6s_creditor.jpg",
+	"evt_deserter_debt": "e6s_creditor.jpg",
+	"evt_regional_war_news": "e6t_news.jpg",
+	"evt_plague_outbreak_news": "e6t_news.jpg",
+	"evt_trade_fair_news": "e6t_news.jpg",
+	"evt_bandit_tribute_zone_news": "e6t_news.jpg",
+	"evt_bandit_tribute_toll": "e6t_news.jpg",
+	"evt_route_diversion": "e6t_news.jpg",
+	"evt_forgotten_cache": "e6u_cache.jpg",
+}
+## Kartın içindeki illüstrasyon şeridi - kare resmi genişliğe göre kırpıp
+## geniş bir şerit gösteriyor (bkz. `_build_event_illustration`), kartın
+## kendi metin+seçenek yüksekliğini ezmesin diye.
+const CARD_ILLUSTRATION_HEIGHT: float = 200.0
+
 ## Her kategori birden fazla `CombatFigure` arketipine düşebiliyor (aynı
 ## haydut pususunun kadroda birkaç çeşidi olması gibi) - tekdüzeliği kırıyor
 ## ama günün sayısından türediği için bir kez seçilince karede değişmiyor.
@@ -2323,6 +2380,10 @@ func _render_card(event: GameEvent) -> void:
 	title.modulate = ArtPalette.GOLD
 	_card_panel.add_child(title)
 
+	var illustration := _build_event_illustration(event.event_id)
+	if illustration != null:
+		_card_panel.add_child(illustration)
+
 	# Gövde kaydırma kutusunda, seçenekler **dışında**: uzun bir olay metni
 	# seçenekleri kartın altından taşırmasın (bkz. World Navigation
 	# Rules'un kaydırma maddesi - orada çıkış tuşu, burada karar tuşları).
@@ -2347,6 +2408,32 @@ func _render_card(event: GameEvent) -> void:
 	var context := _session.build_event_context()
 	for choice in event.choices:
 		_card_panel.add_child(_build_choice_button(choice, context))
+
+## Kartın illüstrasyonu - `EVENT_CARD_ART`'ta yoksa `null` (kart resimsiz
+## açılır, aynı `EVENT_ROAD_MARKER_KIND`'in eşlemede olmayan olayı hiç
+## işaretlememesi gibi). Kare resim `STRETCH_KEEP_ASPECT_COVERED` ile
+## kırpılıp `clip_contents` içinde sabit bir yüksekliğe oturuyor - kartın
+## kendi genişliğini dolduran geniş bir şerit, kareyi olduğu gibi basıp
+## kartı ekrandan taşırmıyor.
+func _build_event_illustration(event_id: String) -> Control:
+	var file_name: String = EVENT_CARD_ART.get(event_id, "")
+	if file_name.is_empty():
+		return null
+	var path := "res://data/assets/ui/waybook/" + file_name
+	if not ResourceLoader.exists(path):
+		return null
+	var frame := Control.new()
+	frame.clip_contents = true
+	frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var picture := TextureRect.new()
+	picture.texture = load(path)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	picture.set_anchors_preset(Control.PRESET_FULL_RECT)
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(picture)
+	return frame
 
 func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	# Görünüm WaybookTheme'in düğme sekmesinden geliyor: EU4'ün kartında

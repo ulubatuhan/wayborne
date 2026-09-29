@@ -185,6 +185,18 @@ static func item_icon(item_id: String, height: float) -> Control:
 		return spacer
 	return picture(file_name, height)
 
+## Bir ekipman parçasının ikonu (`eq_<id>.png` - `Equipment.equipment_id`
+## zaten `weapon_tier_1`/`ring_charmed` gibi dosya adıyla aynı, `item_icon`'un
+## deseni burada da geçerli). İkonu olmayan bir parça (ileride eklenen bir
+## tier) boş bir yer tutucu alır, satır hizası bozulmaz.
+static func equipment_icon(equipment_id: String, height: float) -> Control:
+	var file_name := "eq_%s.png" % equipment_id
+	if not ResourceLoader.exists(ART_DIR + file_name):
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(height, height)
+		return spacer
+	return picture(file_name, height)
+
 ## Bir malın satırı: ikonu ve yanında canlı metin. Kargo listelerinin
 ## (vagon, kervan yükü, yol dökümü) hepsi aynı kapıdan geçiyor.
 static func item_line(item_id: String, text: String, icon_height: float) -> HBoxContainer:

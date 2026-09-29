@@ -1483,7 +1483,12 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   scenes that arrive framed in a cream paper border are cropped by
   `crop_paper_frame` (walk in while a row is mostly paper, then a margin
   for the torn edge) - `TextureRect`'s cover mode absorbs the small
-  change of aspect.
+  change of aspect. A second delivery (Faz 22) arrived already keyed to
+  alpha and named by *output* filename rather than prompt id -
+  `tools/waybook_ingest_v2.py` is the sibling tool for that shape: same
+  `crop_to_alpha`/`unpaper`, no `key()` needed. Never guess which tool a
+  new drop needs from its extension alone - check whether the file already
+  carries real alpha (a corner pixel at alpha 0) before reaching for `key()`.
 - **One book face for every language.** EB Garamond (OFL,
   `data/assets/fonts/`) with the engine's own font as its fallback, so
   nothing the old font could draw becomes a tofu box. Size 18, because the
@@ -3977,14 +3982,17 @@ silinir; tarihçesi (nasıl karara bağlandığı, ölçümü) aşağıdaki Faz
 anlatısında kalır - bu liste yalnızca "şu an açık olan ne" sorusuna cevap
 verir.
 
-- **Waybook'un kalan sanat borcu.** Faz 0-8 `dev`'de (bkz. Waybook UI
-  Rules). Açık kalanlar: ikon aileleri üslupça tutarsız (bir kısmı
-  çıkartma kenarlı, bir kısmı yuvarlak rozetli, bir kısmı kare kâğıt
-  kartlı) - aile başına tek üsluba yeniden üretilmeli; yönetim ekranı
-  arka planları 1376x768'de geldi, 1920'de yumuşuyor (üreteç bu boyutta
-  duruyor; B10 hattın Lanczos büyütmesiyle geldi, diğerleri için önce
-  hattın sevk edilen dosyalarla uyuşmazlığı giderilmeli - Waybook UI
-  Rules).
+- **Waybook'un kalan sanat borcu - Faz 22'de büyük ölçüde kapandı.**
+  İkinci sanat turu (bkz. aşağıdaki Faz 22 anlatısı) yönetim ekranı
+  arka planlarını, mal/durum/stat/görev/sınıf ikonlarını, haritayı ve
+  mührü çok daha yüksek çözünürlükte yeniden gönderdi ve hepsi
+  `data/assets/ui/waybook`'a işlendi. Gerçekten açık kalan: beş ikon
+  (`p3_agility`, `p5_scout` - teslim edilen içerik kendi dosya adıyla
+  uyuşmuyor; `p3_intellect`, `p4_passed_over` - prompt'tan sapan ama
+  önceki turdan beri kabul edilmiş bir ikon dili; `eq_ring_charmed` - mavi
+  boncuk detayı eksik) ve wardrobe'un kıyafet parça sayfaları (B kategorisi,
+  hâlâ hiç teslim edilmedi - bkz. `docs/wardrobe/README.md`). Tam liste ve
+  her satırın durumu `docs/wayborne_gorsel_denetim.xlsx`'te.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
@@ -5863,6 +5871,66 @@ paylaşıyor. `get_pack_centres()` `get_ox_centres()`'le aynı desende test
 okuyor; `tests/test_caravan_layout.gd`'nin yeni testi dört hayvanın da
 çizildiğini ve hepsinin son vagondan geride, üst üste binmeden durduğunu
 doğruluyor.
+
+Faz 22 ("İkinci sanat turu") - Gemini'den ikinci bir toplu teslimat geldi:
+91 dosya, üç arşiv halinde (21 olay kartı illüstrasyonu, 10 yönetim ekranı
+arka planı ve harita, 57 ikonun yeniden çekimi, 12 yeni ekipman ikonu).
+Görev sanatı üretmek değildi - elde olanı denetlemek, kendi düzeltebileceğini
+düzeltmek, geri kalanını `docs/wayborne_gorsel_denetim.xlsx`'e (prompt
+listesiyle aynı biçimde, bir "Durum" sütunu eklenmiş) dökmekti.
+
+- **Tam denetim, dosya dosya.** `tools/waybook_ingest_v2.py` yeni teslimatı
+  işleyen araç - `waybook_assets.py`'nin `crop_to_alpha`/`unpaper`'ını
+  yeniden kullanıyor, kendi kırpma fonksiyonunu icat etmiyor (bkz. "Art
+  arrives through one pipeline" kuralı). Eski turdan farklı: bu kez
+  simler zaten kendi alfa kanalını taşıyor (gönderen kendi arka plan
+  kaldırmasını yapmış), yani iş `key()` değil `crop_to_alpha` + boy.
+- **Kompozit bir ızgara kanıt değildir - denetim tek dosya okumakla
+  yapıldı.** Onlarca küçük ikonu tek bir PNG'de yan yana basıp o kompoziti
+  okumak birkaç kez **yanlış** eşleşme gösterdi (bir hücrenin etiketiyle
+  içeriği tutmuyor okundu) - dosyaların kendisi her zaman doğruydu, tek
+  tek okununca doğrulandı. Artık bu dosyanın kendi kuralı: bir dosyanın
+  içeriğini onaylamak o dosyayı tek başına okumakla olur, kompozit bir
+  ızgara yalnızca kabaca göz atmak için.
+- **Üç gerçek kusur bulundu, üçü de otomatik düzeltilebildi.**
+  `item_grain.png`/`k4a_bleed.png`'in arkasında düz, keyleme sırasında
+  atlanmış bir kart kalmıştı (`unpaper`'ın `PAPER_MIN`'inin altında bir
+  gri - açık beyaz değil); `p4_witnessed_death.png`/`p3_endurance.png`'de
+  aynı sınıf kusur ama gradyanlı, tek renk örneklemeyle silinmiyordu.
+  `waybook_ingest_v2.py`'nin `_key_from_seed`'i kartın üstünden birkaç
+  nokta örnekleyip oradan taşkın dolduruyor - dördü de artık temiz.
+- **İki ikon kendi dosya adıyla uyuşmuyordu, düzeltilmedi.** `p3_agility.png`
+  "sıçrayan bir tavşan" yerine `p3_strength`'in neredeyse eşi bir
+  "yumruk + halka" taşıyordu; `p5_scout.png` "eldivenli yumruk üstünde
+  şahin" yerine ufka bakan bir insan portresi taşıyordu (ailenin geri
+  kalanı hep nesne, insan değil). İkisi de **kullanılmadı** - mevcut,
+  doğru konulu eski ikonlar yerinde kaldı. Yanlış bir resim, eksik bir
+  resimden daha kötü: biri boş göze çarpar, öbürü sessizce yanlış
+  öğretir. `p3_intellect` (terazi) ve `p4_passed_over` (kırık mühür)
+  de prompt'tan sapıyor ama önceki turdan beri **aynı** sapmayla
+  zaten oyunda - yeni bir karar değil, daha yüksek çözünürlükte aynı
+  karar, dokunulmadı.
+- **Olay kartları ilk kez bir resim taşıyor.** `EventCatalog`'un 60'tan
+  fazla `evt_*`'i içinden 40'ı `EVENT_CARD_ART` tablosuyla bir `e6*.jpg`'ye
+  eşlendi (`road_journey.gd`) - eşlemede olmayan olay eskisi gibi resimsiz
+  açılıyor, `EVENT_ROAD_MARKER_KIND`'in "her olay bir işaret istemez"
+  kuralının aynısı. Kare resim `STRETCH_KEEP_ASPECT_COVERED` ile
+  `CARD_ILLUSTRATION_HEIGHT` (200px) yüksekliğinde kırpılıp kartın
+  başlığıyla gövdesi arasına giriyor - üç haber olayı (savaş/veba/fuar)
+  ve üç mezar olayı (bkz. Faz 19'un "İşaretsiz Mezar" zinciri) kasıtlı
+  olarak **aynı** resmi paylaşıyor, çünkü kurguda da aynı sahne.
+- **Ekipman ilk kez bir resim taşıyor.** On iki yeni `eq_*.png`
+  (silah/zırh üç tier, yüzük/kolye üçer tılsım) `WaybookTheme.
+  equipment_icon()`'a (`item_icon()`'un birebir deseni -
+  `Equipment.equipment_id` zaten dosya adıyla aynı) bağlandı; karakter
+  ekranının equip satırı hem takılı parçanın hem her seçeneğin ikonunu
+  gösteriyor artık, ikonu olmayan bir parça (henüz gelmemiş bir tier)
+  sessizce boş bir yer tutucuya düşüyor - `item_icon`'un "satır hizası
+  bozulmasın" kuralının aynısı.
+- **Yönetim ekranı arka planları ve harita çok daha yüksek çözünürlükte
+  yeniden geldi** (1376x768 ve 1200x896 asıl piksel, eskisi 220-300 KB'lık
+  ölçeklenmiş kopyalardı) - aynı dosya adlarının üstüne yazıldığı için hiç
+  kod değişmedi, `.tscn`'ler zaten o yolu okuyor.
 
 ## Quick Start
 
