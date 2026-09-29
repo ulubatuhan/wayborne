@@ -15,6 +15,9 @@ const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
 const CAMEO_HEIGHT: float = 120.0
 const EMBLEM_SIZE: float = 26.0
 const TOKEN_SIZE: float = 22.0
+## Ekipman satırının resmi - metin satırıyla aynı yükseklikte dursun diye
+## küçük, `EMBLEM_SIZE`'a yakın.
+const EQUIP_ICON_HEIGHT: float = 28.0
 const PREVIEW_SIZE: Vector2 = Vector2(180, 280)
 
 var _session: GameSession
@@ -368,6 +371,13 @@ func _build_equipment_slot_row(slot: String) -> VBoxContainer:
 	slot_label.custom_minimum_size = Vector2(70, 0)
 	header.add_child(slot_label)
 
+	# Takılı parçanın kendi resmi - boşken bir yer tutucu (bkz.
+	# WaybookTheme.equipment_icon), satır hizası kayıp/dolu arasında oynamasın.
+	header.add_child(
+		WaybookTheme.equipment_icon(equipped.equipment_id, EQUIP_ICON_HEIGHT) if equipped != null
+		else WaybookTheme.equipment_icon("", EQUIP_ICON_HEIGHT)
+	)
+
 	var equipped_label := Label.new()
 	equipped_label.text = _equipment_summary(equipped) if equipped != null else tr("UI_CHAR_EMPTY_SLOT")
 	equipped_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -394,6 +404,7 @@ func _build_equipment_slot_row(slot: String) -> VBoxContainer:
 func _build_equip_option_row(slot: String, candidate: Equipment, available: int) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+	row.add_child(WaybookTheme.equipment_icon(candidate.equipment_id, EQUIP_ICON_HEIGHT))
 
 	var equip_button := Button.new()
 	equip_button.tooltip_text = candidate.description
