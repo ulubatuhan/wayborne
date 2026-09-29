@@ -89,9 +89,21 @@ func _build_identity_section() -> void:
 	appearance.modulate = HINT_COLOR
 	_content.add_child(appearance)
 
+	var hp_row := HBoxContainer.new()
+	hp_row.add_theme_constant_override("separation", 8)
+	_content.add_child(hp_row)
+
 	var hp := Label.new()
 	hp.text = tr("UI_CHAR_HP") % [_character.current_hp, _character.get_max_hp()]
-	_content.add_child(hp)
+	hp_row.add_child(hp)
+
+	# Sayının yanına, sayının yerine değil (bkz. CharacterData.
+	# get_condition_label_key'in kendi yorumu) - bu oyunda sayı şeffaflığı
+	# bilinçli bir tercih.
+	var hp_band := Label.new()
+	hp_band.text = tr(_character.get_condition_label_key())
+	hp_band.modulate = _hp_band_color(_character)
+	hp_row.add_child(hp_band)
 
 	var derived := Label.new()
 	derived.text = tr("UI_STATLINE") % [
@@ -444,6 +456,18 @@ func _equipment_bonus_text(equipment_resource: Equipment) -> String:
 	if equipment_resource.damage_bonus != 0:
 		parts.append(tr("UI_BONUS_DAMAGE") % equipment_resource.damage_bonus)
 	return ", ".join(parts)
+
+## Bant kötüleştikçe renk de kötüleşir - `_severity_color`'ın DebtPanel'de
+## zaten yaptığının aynısı, burada dört ayrık kademede.
+func _hp_band_color(character: CharacterData) -> Color:
+	var key := character.get_condition_label_key()
+	if key == "UI_HP_BAND_CRITICAL":
+		return ArtPalette.UI_WARNING
+	if key == "UI_HP_BAND_BADLY_WOUNDED":
+		return NEGATIVE_COLOR
+	if key == "UI_HP_BAND_WOUNDED":
+		return HINT_COLOR
+	return POSITIVE_COLOR
 
 func _make_section_title(text: String) -> Label:
 	var label := Label.new()

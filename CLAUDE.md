@@ -1551,6 +1551,16 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   the thickness would not depend on the aspect ratio, and the player
   rejected it - the mask is painted as a whole frame and slicing
   separated each corner from its sides.
+- **HP gets a sifat next to the number, never in place of it.** Games like
+  This War of Mine hide the raw number entirely ("Sick"/"Wounded" only) -
+  this project keeps the number, because numeric transparency is a
+  deliberate choice here (the same discipline Haggling Rules states against
+  a hidden formula). `CharacterData.get_condition_label_key()` is a pure,
+  four-band threshold (`UI_HP_BAND_HEALTHY`/`_WOUNDED`/`_BADLY_WOUNDED`/
+  `_CRITICAL`, the last one reusing "Ölümün Kıyısı" rather than inventing a
+  second name for the same idea) that `character.gd` and `party.gd` print
+  as a small colored `Label` right beside the "Can %d/%d" text - a second
+  reading of the same fact, not a replacement for it.
 - **Who eats is one function** (`GameSession.get_meal_fed_party()`/
   `meal_feeds_crew()`): the supper panel's bowls (R8 full/empty, per
   person plus one for the nameless crew) and the distribution itself
@@ -2313,6 +2323,17 @@ can be lost.
   itself didn't need to change at all - it already read the fee percentage
   through a function call, never the constant directly, so plugging in a
   reputation-dependent answer under that call was the entire change.
+- **A loan decision shows two numbers at once, not one.** `DebtPanel`
+  used to show only the credit line's *current* state; the amount you were
+  about to borrow and its effect on next time's line lived in two different
+  places the player had to compute themselves. `get_available_credit_
+  after_loan()`/`get_available_credit_after_repay()` (reads the same
+  `get_loan_principal()`/`get_credit_limit()` formulas, invents nothing new)
+  feed a two-column preview - immediate purse effect on the left, the
+  credit line's permanent narrowing (or a repayment's opening) on the
+  right - updated live as the amount spinner moves. Same principle as a
+  choice showing its danger stripe before it's picked: the whole point is
+  showing both consequences *before* the decision, not after.
 - **A wagon can be sold, and resale never returns its cost.** Otherwise
   buy-then-sell is a free capacity toggle around every journey.
   `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth
@@ -2356,6 +2377,16 @@ vocabulary existed; the game never spoke it.
   `POWER_SCALE_PER_PARTY_MEMBER` answers "is a full caravan untouchable".
   Tuning enemy strength alone balanced the full party and drove the lone
   traveller to 0% - as broken as 100%, because no decision remains.
+- **`POWER_SCALE_PER_PARTY_MEMBER` now has a visual echo, not just a
+  formula.** The world map's "you are here" pin (`world_map.gd`'s
+  `SafeZoneRing`) carries a ring whose radius shrinks as `owned_wagon_count`
+  grows (`safe_zone_ring_radius()`, linear from `SAFE_ZONE_RING_MAX_RADIUS`
+  at one wagon down to `SAFE_ZONE_RING_MIN_RADIUS` at
+  `SAFE_ZONE_RING_WAGONS_FOR_MIN` and clamped there after) - purely
+  decorative, no new number. It's the same mechanical fact this section
+  already states ("kervan büyüdükçe onu durduranlar da güçlenir") finally
+  drawn: growing the caravan should read as *tightening*, not as safety,
+  the inverse of a game whose growth mechanic reads as strength.
 - **Level scaling must stay below the player's own growth.** At 8%/level
   enemies reached 2.12× and the measured curve *inverted* (level 1: 98%,
   level 15: 52%) - the player's HP only grows on ENDURANCE-affinity classes,
@@ -2953,6 +2984,26 @@ Who you are travelling with, and who you meet, changes what an event does.
   outcome can ask "is there a quartermaster who would have caught this
   early?" or "is there anyone here who could talk them down?" - see
   `evt_spoiled_provisions` and `evt_mutiny`'s manipulate option.
+- **The same news reads differently depending on who is listening.** The
+  four `WorldEvents` "haber" cards (`evt_regional_war_news`,
+  `evt_plague_outbreak_news`, `evt_trade_fair_news`,
+  `evt_bandit_tribute_zone_news`) each carry five culture-framed body texts
+  (`EventCatalog.NEWS_EVENT_CULTURE_TEXT_KEYS`, written out key by key -
+  never assembled at runtime, or the undefined-key scan and a translator
+  searching the codebase both go blind, the same trap `OnboardingPanel.
+  TOPIC_KEYS` already warns about). A nomad hears a war as grazing land and
+  herds lost; a valley trader hears it as ledgers in disarray; a highland
+  traveler hears an old blood feud; a port merchant shrugs it off as trade
+  routes shifting; a fisher reads it as a storm to be weathered - pure
+  Lakoff-style framing (`road_journey.gd`'s `_framed_text_key()` swaps only
+  which key `_render_card()` reads, keyed off the leader's own
+  `culture_id`). **The mechanical effect never moves** - the same
+  `WORLD_EVENT_START` danger delta or price shock fires regardless of which
+  text was shown; only the title stays fixed and shared, since the event
+  itself (and what it's called) is the same event no matter who's reading.
+  Any event not in the table, or a culture with no variant, falls back to
+  the base `event.text_key` untouched - old saves and any harness that
+  doesn't build a full party never notice the table exists.
 
 ### Route Rules
 

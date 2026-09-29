@@ -13,6 +13,12 @@ const DEFAULT_HEIGHT_CM: int = 172
 const TALL_THRESHOLD_CM: int = 182
 const SHORT_THRESHOLD_CM: int = 166
 
+## `get_condition_label_key()`'in bantları - doc'un dört sıfatı (Dinç/
+## Yaralı/Ağır Yaralı/Ölümün Kıyısında), oranın kendisiyle.
+const HP_BAND_HEALTHY_RATIO: float = 0.75
+const HP_BAND_WOUNDED_RATIO: float = 0.50
+const HP_BAND_BADLY_WOUNDED_RATIO: float = 0.25
+
 ## Anahtar tutulur, metin okunduğu yerde çözülür - `const` içinde tr()
 ## çağrılamaz (bkz. CLAUDE.md Localization Rules).
 const SKIN_TONE_NAMES: Array[String] = [
@@ -352,6 +358,23 @@ func get_max_hp() -> int:
 		stats.get_max_hp() + get_character_class().bonus_max_hp
 		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
 	)
+
+## Can barının yanına eklenen bir sıfat - sayının **yerine** değil, sayının
+## yanına (bkz. akademik kaynak önerileri A2). Bu oyunda sayı şeffaflığı
+## bilinçli bir tercih (Haggling Rules'un "gizli formül" karşıtı
+## disiplini), o yüzden TWoM'un "sayı hiç görünmesin" felsefesi burada tam
+## kopyalanmıyor - yalnızca ikinci bir okuma katmanı ekleniyor. Dördüncü
+## bant kendi adını "Ölümün Kıyısı"ndan alıyor (bkz. Combat Rules) - yeni
+## bir terim icat etmek yerine oyunun zaten kurduğu vokabüleri paylaşıyor.
+func get_condition_label_key() -> String:
+	var ratio := float(current_hp) / float(get_max_hp())
+	if ratio > HP_BAND_HEALTHY_RATIO:
+		return "UI_HP_BAND_HEALTHY"
+	if ratio > HP_BAND_WOUNDED_RATIO:
+		return "UI_HP_BAND_WOUNDED"
+	if ratio > HP_BAND_BADLY_WOUNDED_RATIO:
+		return "UI_HP_BAND_BADLY_WOUNDED"
+	return "UI_HP_BAND_CRITICAL"
 
 func get_dodge() -> int:
 	return maxi(

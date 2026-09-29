@@ -161,6 +161,19 @@ func get_credit_limit() -> int:
 func get_available_credit() -> int:
 	return maxi(0, get_credit_limit() - get_total_debt())
 
+## Bu tutarda bir borç alınırsa hattan geriye ne kalacağı - `DebtPanel`'in
+## "iki gösterge" önizlemesinin sağ tarafı (bkz. DebtPanel'in kendi
+## yorumu). Nakit etki (`amount`) ile kalıcı etki (kredi hattının
+## daralması) aynı anda görünsün diye ayrı bir fonksiyon: ikisini tek bir
+## metinde birleştirmek oyuncuyu hesabı kendi kafasında yapmaya zorlardı.
+func get_available_credit_after_loan(amount: int) -> int:
+	return maxi(0, get_available_credit() - get_loan_principal(amount))
+
+## Bu tutar ödenirse hattan ne kadar açılacağı - borcun azalması kredi
+## hattını genişletir, `get_available_credit_after_loan`'ın tersi yönü.
+func get_available_credit_after_repay(amount: int) -> int:
+	return mini(get_credit_limit(), get_available_credit() + maxi(0, amount))
+
 ## İtibara göre daralan tahsis ücreti yüzdesi - tam sayı aritmetiğiyle,
 ## aynı gerekçeyle `get_loan_principal` yukarı yuvarlıyor: oyuncunun
 ## gördüğü yüzde ile defterdeki tutar kuruşu kuruşuna aynı kalsın.

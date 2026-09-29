@@ -13,6 +13,7 @@ func run(t) -> void:
 	_test_class_and_skills(t)
 	_test_wisdom_and_faith(t)
 	_test_gender_and_body_weight(t)
+	_test_condition_label_bands(t)
 
 ## Faz 17: iki yeni stat, ikisi de tabanda (5) eski davranışı birebir korur -
 ## dosyanın her formülünün kendi kuralı, burada da geçerli.
@@ -71,6 +72,29 @@ func _test_max_hp_composition(t) -> void:
 
 	character.apply_heal(9999)
 	t.eq(character.current_hp, character.get_max_hp(), "can tavanı aşmaz")
+
+## A2 (bkz. akademik kaynak önerileri): can barının yanına eklenen sıfat -
+## sayının **yerine** değil, sayının yanına (bkz. CharacterData.
+## get_condition_label_key'in kendi yorumu). Dört bant, dört eşik.
+func _test_condition_label_bands(t) -> void:
+	var character := CharacterData.create("Deneme", CultureCatalog.NOMAD, CharacterStats.new(), 174, 1)
+	var max_hp := character.get_max_hp()
+
+	character.current_hp = max_hp
+	t.eq(character.get_condition_label_key(), "UI_HP_BAND_HEALTHY", "tam canda dinç")
+
+	character.current_hp = maxi(1, int(round(max_hp * 0.6)))
+	t.eq(character.get_condition_label_key(), "UI_HP_BAND_WOUNDED", "%60 canda yaralı")
+
+	character.current_hp = maxi(1, int(round(max_hp * 0.4)))
+	t.eq(character.get_condition_label_key(), "UI_HP_BAND_BADLY_WOUNDED", "%40 canda ağır yaralı")
+
+	character.current_hp = maxi(1, int(round(max_hp * 0.1)))
+	t.eq(character.get_condition_label_key(), "UI_HP_BAND_CRITICAL", "%10 canda ölümün kıyısında")
+
+	# Sayı hiçbir zaman silinmiyor - bkz. get_max_hp/current_hp'nin kendisi
+	# hâlâ okunabilir ve sıfatla birlikte gösteriliyor (character.gd).
+	t.eq(character.current_hp, maxi(1, int(round(max_hp * 0.1))), "ham can sayısı hâlâ okunuyor")
 
 func _test_dict_round_trip(t) -> void:
 	var stats := CharacterStats.new()

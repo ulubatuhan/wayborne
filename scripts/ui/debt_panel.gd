@@ -74,6 +74,13 @@ var _amount_spin: SpinBox
 var _borrow_button: Button
 var _refreshing_amount: bool = false
 
+## İki gösterge: solda o anki nakit etkisi, sağda kredi hattının kalıcı
+## etkisi - Frostpunk'ın "bir karar hem bireysel hem toplu bir etki aynı
+## anda görünsün" kuralı (bkz. akademik kaynak önerileri A1). İkisi de
+## zaten hesaplanan sayıları okuyor, yalnızca aynı anda gösteriyor.
+var _cash_effect_label: Label
+var _credit_effect_label: Label
+
 var _header_seal: TextureRect
 
 func setup(session: GameSession) -> void:
@@ -153,6 +160,19 @@ func _build_borrow_row() -> void:
 	_borrow_button.pressed.connect(_on_borrow_pressed)
 	row.add_child(_borrow_button)
 
+	var preview_row := HBoxContainer.new()
+	preview_row.add_theme_constant_override("separation", 16)
+	_body.add_child(preview_row)
+
+	_cash_effect_label = Label.new()
+	_cash_effect_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	preview_row.add_child(_cash_effect_label)
+
+	_credit_effect_label = Label.new()
+	_credit_effect_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_credit_effect_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	preview_row.add_child(_credit_effect_label)
+
 func refresh() -> void:
 	if _session == null:
 		return
@@ -204,6 +224,8 @@ func _do_refresh_borrow_row() -> void:
 		_amount_spin.editable = false
 		_borrow_button.disabled = true
 		_borrow_button.text = tr(reason)
+		_cash_effect_label.text = ""
+		_credit_effect_label.text = ""
 		return
 
 	_amount_spin.editable = true
@@ -215,6 +237,11 @@ func _do_refresh_borrow_row() -> void:
 	_borrow_button.disabled = not _session.can_borrow(amount)
 	_borrow_button.text = tr("UI_GUILD_LOAN_TAKE") % [
 		amount, _session.get_loan_principal(amount), Debt.DEFAULT_TERM_DAYS
+	]
+
+	_cash_effect_label.text = tr("UI_DEBT_LOAN_CASH_EFFECT") % amount
+	_credit_effect_label.text = tr("UI_DEBT_LOAN_CREDIT_EFFECT") % [
+		available, _session.get_available_credit_after_loan(amount)
 	]
 
 func _on_amount_changed(_new_value: float) -> void:
@@ -272,6 +299,13 @@ func _build_row(debt: Debt) -> HBoxContainer:
 	pay_button.text = tr("UI_DEBT_PAY") % payable
 	pay_button.disabled = payable <= 0
 	pay_button.pressed.connect(_on_pay_pressed.bind(debt.debt_id, payable))
+	if payable > 0:
+		# İkinci gösterge burada bir üçüncü label değil bir tooltip -
+		# nakit etkisi zaten düğmenin kendi metninde, yeni gereken tek
+		# şey kredi hattının kalıcı etkisi.
+		pay_button.tooltip_text = tr("UI_DEBT_PAY_CREDIT_EFFECT") % [
+			_session.get_available_credit(), _session.get_available_credit_after_repay(payable)
+		]
 	row.add_child(pay_button)
 
 	var restructure_button := Button.new()

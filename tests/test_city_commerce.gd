@@ -25,6 +25,7 @@ func run(t) -> void:
 	_test_damaged_wagon_goes_first(t)
 	_test_credit_line_scales_with_reputation(t)
 	_test_debt_consumes_the_credit_line(t)
+	_test_loan_preview_shows_both_effects(t)
 	_test_borrowing_to_clear_an_overdraft_is_not_free(t)
 	_test_loan_costs_more_than_it_pays(t)
 	_test_loan_fee_scales_with_reputation(t)
@@ -165,6 +166,34 @@ func _test_debt_consumes_the_credit_line(t) -> void:
 		guard += 1
 	t.ok(guard < 200, "kredi hattı sonsuz değil")
 	t.not_ok(session.can_borrow(GameSession.LOAN_MIN_AMOUNT), "dolu hattan borç alınamaz")
+
+## A1 (bkz. akademik kaynak önerileri): DebtPanel'in "iki gösterge"si -
+## nakit etkisi ve kredi hattının kalıcı daralması/açılması - aynı anda
+## okunabilmeli. `get_available_credit_after_loan` borç alındıktan sonra
+## hattan ne kalacağını, `get_available_credit_after_repay` ödeme sonrası
+## ne kadar açılacağını söylüyor; ikisi de yalnızca zaten var olan
+## formülleri okuyor, yeni bir mekanik icat etmiyor.
+func _test_loan_preview_shows_both_effects(t) -> void:
+	var session := _session(0, 1)
+	session.reputation = 20
+	var before := session.get_available_credit()
+	var amount := GameSession.LOAN_STEP * 2
+	var principal := session.get_loan_principal(amount)
+	t.eq(
+		session.get_available_credit_after_loan(amount), before - principal,
+		"önizleme, alacağın kadar değil anaparanın (ücretiyle) tamamını düşer"
+	)
+	t.ok(session.borrow_from_guild(amount), "borç alınır")
+	t.eq(session.get_available_credit(), before - principal, "gerçek sonuç önizlemeyle aynı")
+
+	var repay_amount := session.get_total_debt()
+	var after_repay := session.get_available_credit_after_repay(repay_amount)
+	t.ok(after_repay >= session.get_available_credit(), "ödeme önizlemesi hattı asla daraltmaz")
+	t.le(float(after_repay), float(session.get_credit_limit()), "önizleme de tavanı aşmaz")
+	t.eq(
+		session.get_available_credit_after_repay(1000000), session.get_credit_limit(),
+		"aşırı bir ödeme hattı yalnızca tavana kadar açar"
+	)
 
 ## En keskin kaçamak: açık hesabın vadesi ilk eksiye düşüşte kurulur.
 ## Borçla kapatmak onu bedava bir yapılandırmaya çevirirdi - oysa

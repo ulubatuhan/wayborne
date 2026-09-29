@@ -1,5 +1,23 @@
 extends Control
 
+## Ruin Rules'un `POWER_SCALE_PER_PARTY_MEMBER`'ı ("kervan büyüdükçe onu
+## durduranlar da güçlenir") ölçülmüş, kayıtlı bir mekanik - ama hiç görsel
+## yankısı yoktu. Bu halka o gerçeği çiziyor: "buradasın" raptiyesinin
+## çevresindeki halka vagon arttıkça küçülüyor - "güçlendim" değil
+## "sıkıştım" hissi (bkz. akademik kaynak önerileri A4). Saf görsel, hiçbir
+## yeni sayı icat etmiyor.
+class SafeZoneRing extends Control:
+	var ring_radius: float = 40.0
+	# Beyaz bir halka B6'nın krem parşömeninde neredeyse görünmezdi
+	# (ölçüldü) - `ArtPalette.BLOOD`, "buradasın" yazısının zaten taşıdığı
+	# ton, hem kâğıt üstünde okunuyor hem de "sıkışma" hissine renkçe
+	# uyuyor (bkz. Art Rules'un `MapLabel`in kan rengini "buradasın"
+	# için kullanması).
+	var ring_color: Color = Color(ArtPalette.BLOOD.r, ArtPalette.BLOOD.g, ArtPalette.BLOOD.b, 0.55)
+
+	func _draw() -> void:
+		draw_arc(size * 0.5, ring_radius, 0.0, TAU, 48, ring_color, 2.5, true)
+
 const POINT_SIZE: Vector2 = Vector2(130, 44)
 const ROUTE_WIDTH: float = 3.0
 const PIN_FILE: String = "k5_pip_filled.png"
@@ -16,6 +34,21 @@ const ROUTE_STATE_COLORS: Array[Color] = [
 	Color(0.62, 0.32, 0.28),
 	Color(0.32, 0.30, 0.30),
 ]
+
+## Bir vagonda (sefere yeni çıkmış bir kervan) halka en geniş; bu sayıda
+## vagona ulaşınca en dar hâline iner - sonrası aynı minimumda kalır,
+## çünkü halka bir uyarı işareti, sonsuza dek küçülen bir çizim değil.
+const SAFE_ZONE_RING_MAX_RADIUS: float = 46.0
+const SAFE_ZONE_RING_MIN_RADIUS: float = 20.0
+const SAFE_ZONE_RING_WAGONS_FOR_MIN: int = 6
+
+## Saf, testable bir eşleme - `owned_wagon_count`'tan halka yarıçapına.
+## Ters orantı doğrusal: yeni bir eğri icat etmenin ölçülecek bir şeyi yok,
+## bu yalnızca zaten var olan mekanik gerçeğin bir görsel etiketi.
+static func safe_zone_ring_radius(owned_wagon_count: int) -> float:
+	var span := maxi(1, SAFE_ZONE_RING_WAGONS_FOR_MIN - 1)
+	var t := clampf(float(owned_wagon_count - 1) / float(span), 0.0, 1.0)
+	return lerpf(SAFE_ZONE_RING_MAX_RADIUS, SAFE_ZONE_RING_MIN_RADIUS, t)
 
 var _session: GameSession
 var _current_location_id: String = WorldMapData.START_LOCATION_ID
@@ -137,6 +170,16 @@ func _build_location_point(location: Location) -> Control:
 		button.disabled = true
 		# Buradasın: dolu raptiye, yazı da tam mürekkep (soluk değil).
 		button.add_theme_color_override("font_disabled_color", ArtPalette.BLOOD)
+
+		var ring := SafeZoneRing.new()
+		ring.ring_radius = safe_zone_ring_radius(_session.owned_wagon_count)
+		var ring_size := (ring.ring_radius + 6.0) * 2.0
+		ring.custom_minimum_size = Vector2(ring_size, ring_size)
+		ring.size = Vector2(ring_size, ring_size)
+		ring.position = POINT_SIZE * 0.5 - ring.size * 0.5
+		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		marker.add_child(ring)
+		marker.move_child(ring, 0)
 	elif route == null or not _session.is_route_open(route):
 		# Kapalı geçit tıklanamaz ama gizlenmez: kilitli olay seçenekleriyle
 		# aynı kural - sebebiyle birlikte gösterilir (bkz. CLAUDE.md).

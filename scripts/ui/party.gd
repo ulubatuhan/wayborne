@@ -173,13 +173,24 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	marks.add_child(WaybookIcons.hunger_tally(character, TOKEN_SIZE))
 	card.add_child(marks)
 
+	var hp_row := HBoxContainer.new()
+	hp_row.add_theme_constant_override("separation", 8)
+	card.add_child(hp_row)
+
 	var hp_label := Label.new()
 	hp_label.text = tr("UI_PARTY_MEMBER") % [
 		character.level, character.current_hp, character.get_max_hp(), character.get_appearance_line()
 	]
 	if character.current_hp < character.get_max_hp():
 		hp_label.modulate = HURT_COLOR
-	card.add_child(hp_label)
+	hp_row.add_child(hp_label)
+
+	# Sayının yanına bir sıfat - bkz. character.gd'nin aynı sisteminin
+	# yorumu (CharacterData.get_condition_label_key).
+	var hp_band := Label.new()
+	hp_band.text = tr(character.get_condition_label_key())
+	hp_band.modulate = HURT_COLOR if character.current_hp < character.get_max_hp() else HINT_COLOR
+	hp_row.add_child(hp_band)
 
 	var stats_label := Label.new()
 	stats_label.text = _stats_line(character)

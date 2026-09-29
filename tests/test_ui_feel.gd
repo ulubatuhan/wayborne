@@ -3,7 +3,9 @@ extends RefCounted
 ## Düğmenin eldeki hissi ve olay seçeneklerinin ayrımı (SENSORY-012/013).
 ## Görünüşü ekran görüntüsü gösterir; burada kilitlenen: büyüme geniş
 ## düğmede zıplamaya dönmüyor, her düğmeye tek bir his takılıyor, ve
-## "neredeyse" yalnızca gerçekten neredeyse olan kilide deniyor.
+## "neredeyse" yalnızca gerçekten neredeyse olan kilide deniyor. Aynı
+## "saf, sınırlı bir görsel değer" ailesinden - dünya haritasının güvenli
+## alan halkası da burada (A4, bkz. akademik kaynak önerileri).
 
 const FEEDBACK_PATH: String = "res://scripts/ui/button_feedback.gd"
 
@@ -15,6 +17,7 @@ func run(t) -> void:
 	_test_feedback_attaches_once(t)
 	_test_near_miss(t)
 	_test_road_zoom_is_bounded(t)
+	_test_safe_zone_ring_shrinks_with_wagons(t)
 
 func _test_hover_growth_is_bounded(t) -> void:
 	var feedback = load(FEEDBACK_PATH)
@@ -86,3 +89,20 @@ func _test_zoomed_out_band_is_covered(t) -> void:
 	t.ok(band.cover_rect().encloses(view), "kapsama ekranın gördüğü alanı içine alıyor")
 	t.ok(view.size.x > band.size.x * 1.3, "en uzakta ekran şeritten belirgin biçimde fazlasını görüyor")
 	band.free()
+
+## A4: `POWER_SCALE_PER_PARTY_MEMBER`'ın (bkz. Ruin Rules) görsel yankısı -
+## halka bir vagonda en geniş, `SAFE_ZONE_RING_WAGONS_FOR_MIN`'de en dar,
+## sonrasında büyümeye devam etmiyor (bir uyarı işareti, sonsuza dek
+## küçülen bir çizim değil).
+func _test_safe_zone_ring_shrinks_with_wagons(t) -> void:
+	var map = load("res://scripts/ui/world_map.gd")
+	var one_wagon: float = map.safe_zone_ring_radius(1)
+	var many_wagons: float = map.safe_zone_ring_radius(map.SAFE_ZONE_RING_WAGONS_FOR_MIN)
+	t.eq(one_wagon, map.SAFE_ZONE_RING_MAX_RADIUS, "bir vagonda halka en geniş")
+	t.eq(many_wagons, map.SAFE_ZONE_RING_MIN_RADIUS, "eşik vagon sayısında halka en dar")
+	t.ok(one_wagon > many_wagons, "vagon arttıkça halka küçülür")
+	t.eq(
+		map.safe_zone_ring_radius(map.SAFE_ZONE_RING_WAGONS_FOR_MIN + 5),
+		map.SAFE_ZONE_RING_MIN_RADIUS,
+		"eşiği aştıktan sonra da minimumda kenetli"
+	)

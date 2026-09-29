@@ -1455,6 +1455,58 @@ static func _merchant_caravan() -> GameEvent:
 ## <= 0) şart koşuyor - yoksa aynı yol/şehir üst üste savaşa/vebaya
 ## girip tehlike ya da fiyat sınırsızca katlanabilirdi.
 
+## Aynı haber, kervanın lideri hangi kültürdense ona göre farklı bir
+## gövde metnine düşer (bkz. akademik kaynak önerileri A5 - Lakoff'un
+## çerçeveleme tezi): göçebe bir savaşı otlaklar/sürüler üzerinden okur,
+## liman şehri ticaret yolları üzerinden - **olayın mekanik etkisi
+## (WORLD_EVENT_START'ın taşıdığı rota tehlikesi/fiyat şoku) hiç
+## değişmiyor**, yalnızca anlatım perspektifi değişiyor. Saf içerik işi:
+## yeni bir mekanik yok, `_render_card`'ın okuduğu anahtar seçiliyor.
+##
+## Anahtarlar burada açık açık yazılıyor - `prefix` ile `suffix`'i çalışma
+## anında birleştiren bir anahtar `test_localization.gd`'nin tanımsız-anahtar
+## taramasına (yalnızca tr çağrısının içindeki literal dizeyi görür) ve bir
+## çevirmenin kod içinde anahtar aramasına görünmez olurdu - Localization
+## Rules'un `OnboardingPanel.TOPIC_KEYS` için zaten koyduğu kuralın aynısı.
+const NEWS_EVENT_CULTURE_TEXT_KEYS: Dictionary = {
+	"evt_regional_war_news": {
+		"nomad": "EVT_WAR_NEWS_NOMAD_TEXT",
+		"valley": "EVT_WAR_NEWS_VALLEY_TEXT",
+		"highland": "EVT_WAR_NEWS_HIGHLAND_TEXT",
+		"port": "EVT_WAR_NEWS_PORT_TEXT",
+		"fisher": "EVT_WAR_NEWS_FISHER_TEXT",
+	},
+	"evt_plague_outbreak_news": {
+		"nomad": "EVT_PLAGUE_NEWS_NOMAD_TEXT",
+		"valley": "EVT_PLAGUE_NEWS_VALLEY_TEXT",
+		"highland": "EVT_PLAGUE_NEWS_HIGHLAND_TEXT",
+		"port": "EVT_PLAGUE_NEWS_PORT_TEXT",
+		"fisher": "EVT_PLAGUE_NEWS_FISHER_TEXT",
+	},
+	"evt_trade_fair_news": {
+		"nomad": "EVT_TRADE_FAIR_NEWS_NOMAD_TEXT",
+		"valley": "EVT_TRADE_FAIR_NEWS_VALLEY_TEXT",
+		"highland": "EVT_TRADE_FAIR_NEWS_HIGHLAND_TEXT",
+		"port": "EVT_TRADE_FAIR_NEWS_PORT_TEXT",
+		"fisher": "EVT_TRADE_FAIR_NEWS_FISHER_TEXT",
+	},
+	"evt_bandit_tribute_zone_news": {
+		"nomad": "EVT_TRIBUTE_NEWS_NOMAD_TEXT",
+		"valley": "EVT_TRIBUTE_NEWS_VALLEY_TEXT",
+		"highland": "EVT_TRIBUTE_NEWS_HIGHLAND_TEXT",
+		"port": "EVT_TRIBUTE_NEWS_PORT_TEXT",
+		"fisher": "EVT_TRIBUTE_NEWS_FISHER_TEXT",
+	},
+}
+
+## `event_id` bir haber olayı değilse ya da kültürün kendi varyantı yoksa
+## boş döner - çağıran (`road_journey.gd`) bu durumda `event.text_key`'e
+## düşüyor, yani beşli kültür kümesinin dışında bir çağıran (simülatörler,
+## eski bir kayıt) hiçbir şey kırmadan eski davranışı görüyor.
+static func get_culture_framed_text_key(event_id: String, culture_id: String) -> String:
+	var by_culture: Dictionary = NEWS_EVENT_CULTURE_TEXT_KEYS.get(event_id, {})
+	return String(by_culture.get(culture_id, ""))
+
 ## Bölgesel savaş: gidilen yolun tehlikesine süreli bir pay ekler
 ## (bkz. WorldEvents.ROUTE_DANGER_DELTA) - yeni bir olay zinciri icat
 ## etmiyor, ambush/wildlife ağırlıkları zaten danger'a bağlı (bkz. Ruin

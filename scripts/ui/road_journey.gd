@@ -2393,7 +2393,7 @@ func _render_card(event: GameEvent) -> void:
 	_card_panel.add_child(body_scroll)
 
 	var body := Label.new()
-	body.text = tr(event.text_key)
+	body.text = tr(_framed_text_key(event))
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, 0.0)
@@ -2408,6 +2408,16 @@ func _render_card(event: GameEvent) -> void:
 	var context := _session.build_event_context()
 	for choice in event.choices:
 		_card_panel.add_child(_build_choice_button(choice, context))
+
+## Aynı haber kartının gövdesini liderin kültürüne göre çerçeveler (bkz.
+## EventCatalog.get_culture_framed_text_key'in kendi yorumu) - haber
+## dışındaki olaylarda ve varyantı olmayan bir kültürde boş döner, çağıran
+## eski `event.text_key`'e düşer, hiçbir davranış kırılmaz.
+func _framed_text_key(event: GameEvent) -> String:
+	var leader := _session.get_player_character()
+	var culture_id := leader.culture_id if leader != null else ""
+	var framed := EventCatalog.get_culture_framed_text_key(event.event_id, culture_id)
+	return framed if not framed.is_empty() else event.text_key
 
 ## Kartın illüstrasyonu - `EVENT_CARD_ART`'ta yoksa `null` (kart resimsiz
 ## açılır, aynı `EVENT_ROAD_MARKER_KIND`'in eşlemede olmayan olayı hiç

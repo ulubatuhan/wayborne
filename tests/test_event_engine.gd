@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_hunting_trip_weight_follows_terrain(t)
 	_test_hunting_trip_hunt_option_opens_hunt_combat(t)
 	_test_bandit_ambush_toll_scales_with_danger(t)
+	_test_news_events_frame_by_culture(t)
 
 func _make_event(event_id: String, weight: float = 1.0) -> GameEvent:
 	var event := GameEvent.new()
@@ -298,3 +299,40 @@ func _test_bandit_ambush_toll_scales_with_danger(t) -> void:
 			if outcome.is_available({"danger": boundary}):
 				available += 1
 		t.eq(available, 1, "sınırda (%s) tam olarak bir bant uygun" % boundary)
+
+## A5 (bkz. akademik kaynak önerileri): aynı haber kartı, kervanın lideri
+## hangi kültürdense ona göre farklı bir gövde anahtarına düşer - olayın
+## mekanik etkisi (WORLD_EVENT_START'ın taşıdığı rota tehlikesi/fiyat
+## şoku) bu seçime hiç bağlı değil, yalnızca çeviri anahtarı değişir.
+func _test_news_events_frame_by_culture(t) -> void:
+	var war_key := EventCatalog.get_culture_framed_text_key("evt_regional_war_news", CultureCatalog.NOMAD)
+	t.eq(war_key, "EVT_WAR_NEWS_NOMAD_TEXT", "göçebe kendi çerçevesini alır")
+	t.ne(
+		EventCatalog.get_culture_framed_text_key("evt_regional_war_news", CultureCatalog.PORT),
+		war_key,
+		"iki farklı kültür iki farklı anahtar okur"
+	)
+	t.eq(
+		EventCatalog.get_culture_framed_text_key("evt_bandit_ambush", CultureCatalog.NOMAD), "",
+		"haber olmayan bir olayın kültür çerçevesi yok - çağıran event.text_key'e düşer"
+	)
+	t.eq(
+		EventCatalog.get_culture_framed_text_key("evt_regional_war_news", "bilinmeyen_kultur"), "",
+		"tanımsız bir kültürde de boş döner"
+	)
+
+	# Dört haber olayının hepsi, beş kültürün hepsi için gerçek bir çevirisi
+	# olan bir anahtar taşımalı - CSV'de eksik bir satır burada yakalanır.
+	var news_ids := [
+		"evt_regional_war_news", "evt_plague_outbreak_news",
+		"evt_trade_fair_news", "evt_bandit_tribute_zone_news",
+	]
+	var cultures := [
+		CultureCatalog.NOMAD, CultureCatalog.VALLEY, CultureCatalog.HIGHLAND,
+		CultureCatalog.PORT, CultureCatalog.FISHER,
+	]
+	for event_id in news_ids:
+		for culture_id in cultures:
+			var key: String = EventCatalog.get_culture_framed_text_key(event_id, culture_id)
+			t.ok(not key.is_empty(), "%s / %s için bir anahtar var" % [event_id, culture_id])
+			t.ne(tr(key), key, "%s çevirisi tanımlı" % key)
