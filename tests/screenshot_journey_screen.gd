@@ -96,6 +96,13 @@ func _init() -> void:
 	screen.set("_zoom", 1.6)
 	await _settle()
 	_save("06_yakin.png")
+
+	# Uzaklaşma: şerit küçülüyor, manzara ekranın gördüğü her yere taşıyor -
+	# kenarında boş bir şerit, ortada kenar kararması kalmamalı.
+	screen.set("_zoom_target", screen.get("ZOOM_MIN"))
+	screen.set("_zoom", screen.get("ZOOM_MIN"))
+	await _settle()
+	_save("07_uzak.png")
 	screen.set("_zoom_target", 1.0)
 
 	quit()

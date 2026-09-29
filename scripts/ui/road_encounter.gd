@@ -39,6 +39,12 @@ func setup(kind: String) -> void:
 	# aynısı (bkz. combat_figure.gd).
 	_figure.setup(kind, false, "normal", 0.0)
 
+## Gelen kervana dönük dursun: kervan geri dönmüşse (sola yürüyorsa)
+## karşılaşılan şey sağa bakıyor. Silüet aynalanıyor, yeniden çizilmiyor.
+func set_facing(facing: float) -> void:
+	_figure.pivot_offset = size * 0.5
+	_figure.scale = Vector2(-1.0 if facing > 0.0 else 1.0, 1.0)
+
 ## Ayaklarının bastığı nokta `target`'a otursun diye - `CombatFigure` kendi
 ## kutusunun tabanına çiziyor (ground ≈ %95.5), kutunun sol üstüne değil.
 func set_screen_position(target: Vector2) -> void:

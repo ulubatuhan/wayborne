@@ -202,12 +202,19 @@ func _test_back_limb_shading(t) -> void:
 	Wardrobe.root_path = previous
 	Wardrobe.clear_cache()
 
-## Sprite'lı kalem giyen biri savaşta da iskeletten çiziliyor - kuşandığı
-## kılıç orada da elinde. Düşman (yük yok) ve canavar prosedürel kalıyor.
+## İnsanlar savaşta da iskeletten (manken + kuşam) çiziliyor - kuşanılan
+## kılıç orada da elinde. Canavar hiçbir zaman insan iskeletine geçmiyor.
 func _test_combat_figure_switches_to_rig(t) -> void:
 	var figure := CombatFigure.new()
 	figure.setup("guard", true, "normal", 0.0)
-	t.ok(not figure.uses_rig(), "sprite'sız birim prosedürel silüette")
+	t.ok(figure.uses_rig(), "mankenin sanatı olduğundan çıplak birim de iskelette")
+	var previous := Wardrobe.root_path
+	Wardrobe.root_path = FIXTURE_ROOT + "no_such_dir/"
+	Wardrobe.clear_cache()
+	figure.setup("guard", true, "normal", 0.0)
+	t.ok(not figure.uses_rig(), "beden sanatı olmayan kurulumda sprite'sız birim prosedürel silüette")
+	Wardrobe.root_path = previous
+	Wardrobe.clear_cache()
 	figure.setup("guard", true, "normal", 0.0, {}, PackedStringArray(["fx_sword"]))
 	t.ok(figure.uses_rig(), "sprite'lı kalem giyen birim iskelete geçiyor")
 	figure.setup("wolf", false, "normal", 0.0, {}, PackedStringArray(["fx_sword"]))

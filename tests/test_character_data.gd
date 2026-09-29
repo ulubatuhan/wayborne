@@ -111,15 +111,15 @@ func _test_class_and_skills(t) -> void:
 
 ## Cinsiyet/kilo şimdilik yalnızca görsel - hiçbir derived stat bunları
 ## okumamalı (bkz. CharacterData.gd'nin kendi notu, "stat etkisi ayrı bir
-## karar"). Varsayılan (kadın/orta) eski davranışla birebir aynı kalmalı:
-## `get_body_variant_id()` sanat henüz eklenmediği için hep düz "body"ye
-## düşer (bkz. Wardrobe.body_id_for'un has_sprites fallback'ı).
+## karar"). Altı mankenin (2 cinsiyet x 3 kilo) sanatı var, yani her
+## karakter kendi varyantını buluyor; sanatı olmayan bir varyant düz
+## "body"ye düşerdi (bkz. test_wardrobe'un fikstürlü testi).
 func _test_gender_and_body_weight(t) -> void:
 	var baseline := CharacterData.create("Taban", CultureCatalog.NOMAD, CharacterStats.new())
 	t.eq(baseline.gender, CharacterData.GENDER_FEMALE, "varsayılan cinsiyet kadın")
 	t.eq(baseline.body_weight, CharacterData.BODY_WEIGHT_AVERAGE, "varsayılan vücut tipi orta")
-	t.eq(baseline.get_body_variant_id(), Wardrobe.BODY_ID,
-		"sanat eklenmeden varyant kimliği düz body'ye düşer")
+	t.eq(baseline.get_body_variant_id(), "body_female_average",
+		"varsayılan karakter kendi mankenini buluyor (tools/wardrobe_mannequin.py)")
 
 	var male_heavy := CharacterData.create(
 		"Devasa", CultureCatalog.NOMAD, CharacterStats.new(),
@@ -128,8 +128,8 @@ func _test_gender_and_body_weight(t) -> void:
 	)
 	t.eq(male_heavy.gender, CharacterData.GENDER_MALE, "erkek seçimi korunur")
 	t.eq(male_heavy.body_weight, CharacterData.BODY_WEIGHT_HEAVY, "iri seçimi korunur")
-	t.eq(male_heavy.get_body_variant_id(), Wardrobe.BODY_ID,
-		"iri erkek varyantının sanatı yoksa yine düz body'ye düşer")
+	t.eq(male_heavy.get_body_variant_id(), "body_male_heavy",
+		"iri erkek kendi mankeniyle çiziliyor")
 
 	var clamped := CharacterData.create(
 		"Sınır", CultureCatalog.NOMAD, CharacterStats.new(),

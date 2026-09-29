@@ -30,6 +30,7 @@ models used so far are Quaternius' "Ultimate Animated Animal Pack" (CC0).
 
 import argparse
 import base64
+import io
 import json
 import math
 import os
@@ -116,6 +117,31 @@ def _srgb(c):
     return np.where(c <= 0.0031308, 12.92 * c, 1.055 * np.power(c, 1 / 2.4) - 0.055)
 
 
+def _buffers(g):
+    """Embedded (data URI) buffers, or a .glb's binary chunk."""
+    if g.buffers and g.buffers[0].uri is None:
+        return [g.binary_blob()]
+    return [base64.b64decode(b.uri.split(",", 1)[1]) for b in g.buffers]
+
+
+def _base_texture(g, bufs, p):
+    """(PIL image, uv) of a primitive's base colour texture, or (None, None).
+    Quaternius paints with flat material colours; the bear and boar are
+    painted in textures, so their pixels have to come from the image."""
+    pbr = g.materials[p.material].pbrMetallicRoughness
+    ref = pbr.baseColorTexture
+    if ref is None:
+        return None, None
+    img = g.images[g.textures[ref.index].source]
+    if img.bufferView is not None:
+        bv = g.bufferViews[img.bufferView]
+        raw = bufs[bv.buffer][(bv.byteOffset or 0):(bv.byteOffset or 0) + bv.byteLength]
+    else:
+        raw = base64.b64decode(img.uri.split(",", 1)[1])
+    uv = _accessor(g, bufs, getattr(p.attributes, "TEXCOORD_%d" % (ref.texCoord or 0))).astype(np.float64)
+    return Image.open(io.BytesIO(raw)).convert("RGBA"), uv
+
+
 def load_model(path):
     """The mesh posed in its authored rest pose (linear blend skinning with
     the scene's own node transforms), rest joint positions and per-vertex
@@ -123,7 +149,7 @@ def load_model(path):
     stored straight and hangs at rest); skinning to rest keeps mesh and
     skeleton in agreement either way."""
     g = pygltflib.GLTF2().load(path)
-    bufs = [base64.b64decode(b.uri.split(",", 1)[1]) for b in g.buffers]
+    bufs = _buffers(g)
     worlds = {}
     parent_of = {}
 
@@ -145,8 +171,10 @@ def load_model(path):
     mesh_node = next(i for i, n in enumerate(g.nodes) if n.skin is not None)
 
     pos, faces, joints, weights, colors = [], [], [], [], []
+    uvs, face_prim, textures = [], [], []
     base = 0
     for p in g.meshes[g.nodes[mesh_node].mesh].primitives:
+        image, uv = _base_texture(g, bufs, p)
         v = _accessor(g, bufs, p.attributes.POSITION).astype(np.float64)
         f = _accessor(g, bufs, p.indices).astype(np.int64).reshape(-1, 3)
         j = _accessor(g, bufs, p.attributes.JOINTS_0).astype(np.int64)
@@ -159,6 +187,9 @@ def load_model(path):
         col = g.materials[p.material].pbrMetallicRoughness.baseColorFactor
         pos.append(posed); faces.append(f + base); joints.append(j); weights.append(w)
         colors.append(np.tile(np.r_[_srgb(col[:3]), 1.0], (len(f), 1)))
+        uvs.append(uv if uv is not None else np.zeros((len(v), 2)))
+        face_prim.append(np.full(len(f), len(textures)))
+        textures.append(image)
         base += len(v)
 
     # A rigid attachment (the stag's antlers): its own mesh, no skin of its
@@ -185,6 +216,9 @@ def load_model(path):
             joints.append(np.full((len(v), 4), bone_k, dtype=np.int64))
             weights.append(np.c_[np.ones(len(v)), np.zeros((len(v), 3))])
             colors.append(np.tile(np.r_[_srgb(col[:3]), 1.0], (len(f), 1)))
+            uvs.append(np.zeros((len(v), 2)))
+            face_prim.append(np.full(len(f), len(textures)))
+            textures.append(None)
             base += len(v)
 
     rest = {g.nodes[j].name: worlds[j][:3, 3].copy() for j in skin.joints}
@@ -192,6 +226,7 @@ def load_model(path):
         "positions": np.vstack(pos), "faces": np.vstack(faces),
         "joints": np.vstack(joints), "weights": np.vstack(weights),
         "face_colors": np.vstack(colors), "joint_names": names, "rest": rest,
+        "uvs": np.vstack(uvs), "face_prim": np.concatenate(face_prim), "textures": textures,
     }
 
 
@@ -203,7 +238,7 @@ def rig_bone(name):
     AND hock); segments are fused so the IK joint is the one BeastRig bends:
     elbow in front, hock behind (BeastRig: 'the hind hock bends back')."""
     side = "near" if name.endswith(".L") else "far" if name.endswith(".R") else ""
-    if name == "Head" or name.startswith("Ear"):
+    if name.startswith(("Head", "Ear")):
         return "head"
     if name.startswith("Neck"):
         return "neck"
@@ -330,17 +365,48 @@ def _look_at(eye, target):
     return m
 
 
-def render_layer(tm, colors, view, texels_per_unit):
+def _layer_meshes(model, mask):
+    """pyrender meshes for the faces in `mask`: flat-coloured faces as one
+    mesh (the Quaternius case, unchanged), each textured primitive as its
+    own mesh carrying its image."""
+    faces, prim = model["faces"][mask], model["face_prim"][mask]
+    flat = np.array([model["textures"][k] is None for k in prim], bool)
+    out = []
+    if flat.any():
+        colored = trimesh.Trimesh(model["positions"], faces[flat],
+                                  face_colors=(model["face_colors"][mask][flat] * 255).astype(np.uint8), process=False)
+        # No custom material: pyrender drops per-face colours when one is given.
+        out.append(pyrender.Mesh.from_trimesh(colored, smooth=False))
+    for k in np.unique(prim[~flat]):
+        # glTF's v runs down the image, trimesh's up.
+        uv = model["uvs"] * [1.0, -1.0] + [0.0, 1.0]
+        visual = trimesh.visual.TextureVisuals(uv=uv, image=model["textures"][k])
+        textured = trimesh.Trimesh(model["positions"], faces[prim == k], visual=visual, process=False)
+        # Matte, like the flat-coloured animals: pyrender's default for a
+        # textured trimesh reads as half-metal and renders the fur near black.
+        # pyrender decodes a texture from sRGB but takes a face colour as it
+        # is - and the flat path feeds it _srgb(colour). Encoding the texels
+        # once more puts both on that same scale (measured on a test quad), or
+        # a painted animal renders a stop darker than its Quaternius herd.
+        texels = np.asarray(model["textures"][k]).astype(np.float64) / 255.0
+        texels[..., :3] = _srgb(texels[..., :3])
+        matte = pyrender.MetallicRoughnessMaterial(
+            baseColorTexture=pyrender.Texture(source=(texels * 255).round().astype(np.uint8), source_channels="RGBA"),
+            metallicFactor=0.0, roughnessFactor=1.0)
+        out.append(pyrender.Mesh.from_trimesh(textured, material=matte, smooth=False))
+    return out
+
+
+def render_layer(model, mask, view, texels_per_unit):
     """Side view from +x, flipped so +z (the animal's front) is +u. `view`
     is (zmin, zmax, ymin, ymax) in world units; one texel is 1/texels_per_unit."""
     zmin, zmax, ymin, ymax = view
     ss = SUPERSAMPLE
     w = int(round((zmax - zmin) * texels_per_unit)) * ss
     h = int(round((ymax - ymin) * texels_per_unit)) * ss
-    colored = trimesh.Trimesh(tm.vertices, tm.faces, face_colors=(colors * 255).astype(np.uint8), process=False)
-    # No custom material: pyrender drops per-face colours when one is given.
     scene = pyrender.Scene(bg_color=[0, 0, 0, 0], ambient_light=[0.42, 0.42, 0.42])
-    scene.add(pyrender.Mesh.from_trimesh(colored, smooth=False))
+    for m in _layer_meshes(model, mask):
+        scene.add(m)
     centre = np.array([0.0, (ymin + ymax) / 2, (zmin + zmax) / 2])
     eye = centre + [30.0, 0, 0]
     scene.add(pyrender.OrthographicCamera(xmag=(zmax - zmin) / 2, ymag=(ymax - ymin) / 2, znear=0.1, zfar=100.0),
@@ -498,7 +564,6 @@ def build(gltf_path, beast_key, out_root):
 
     for layer in LAYERS:
         tm = trimesh.Trimesh(model["positions"], faces[layer_faces[layer]], process=False)
-        colors = model["face_colors"][layer_faces[layer]]
         lo, hi = tm.bounds
         pad = 0.04 * (hi[1] - lo[1])
         zmin, ymax = lo[2] - pad, hi[1] + pad
@@ -507,7 +572,7 @@ def build(gltf_path, beast_key, out_root):
         # The view is fitted to a whole number of texels, so a texel is
         # exactly 1 / TEXELS_PER_REF REF_H pixels - the mesh's UVs rely on it.
         view = (zmin, zmin + tw / texels_per_unit, ymax - th / texels_per_unit, ymax)
-        img = render_layer(tm, colors, view, texels_per_unit)
+        img = render_layer(model, layer_faces[layer], view, texels_per_unit)
         assert img.shape[:2] == (th, tw), (img.shape, th, tw)
         origin_ref = np.array([(zmin - zc) * scale, -(ymax - ground) * scale])
 

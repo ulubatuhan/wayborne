@@ -181,8 +181,15 @@ func setup(
 ## İskelet figürü sprite'lı kalem varken ayakta duran her durumda çiziyor;
 ## yerde serili (düşmüş/ölü) figür prosedürel yığın olarak kalıyor. Hamle,
 ## sarsıntı ve devrilme çocuğun konumu/dönüşü; durum tonu çarpan renk.
+## Mankenin sanatı geldiğinden beri her insan figürü iskeletten çiziliyor -
+## yolda, köyde ve önizlemede nasıl görünüyorsa savaşta da öyle. Yalnızca
+## hayvanlar ve (sanatı henüz olmayan bir kurulumda) sprite'sız bir figür
+## eski prosedürel silüette kalıyor.
 func uses_rig() -> bool:
-	return not _loadout.is_empty() and String(_archetype().body) != BEAST
+	if String(_archetype().body) == BEAST:
+		return false
+	var body_id := _body_variant if not _body_variant.is_empty() else Wardrobe.BODY_ID
+	return not _loadout.is_empty() or Wardrobe.has_sprites(body_id)
 
 func _sync_rig() -> void:
 	var active := uses_rig() and not _draws_fallen()
@@ -195,11 +202,15 @@ func _sync_rig() -> void:
 		add_child(_rig)
 	_rig.visible = true
 	_rig.size = size
+	# Düşmanın ten rengi yok (varsayılan soluk); haydutlar prosedürel
+	# silüette de hep daha esmerdi.
+	var skin := SKIN_WARM if _kind.begins_with("bandit") and _skin == SKIN_PALE else _skin
 	_rig.set_kind(
-		WalkFigure.KIND_PERSON, _kind, _height_scale * (1.0 - _depth * 0.08), _skin,
+		WalkFigure.KIND_PERSON, _kind, _height_scale * (1.0 - _depth * 0.08), skin,
 		false, _outfit, _body_variant
 	)
 	_rig.set_loadout(_loadout)
+	_rig.set_combat_stance(true)
 	_rig.set_standing()
 	_rig.set_facing(1.0 if _face_right else -1.0)
 	_rig.set_tint(_state_tone())

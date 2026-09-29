@@ -105,6 +105,10 @@ var _body_variant: String = ""
 var _horse_species: String = ""
 ## Üstündeki, resmi olan kalemler (`Wardrobe.loadout_for`), alttan üste.
 var _loadout: PackedStringArray = PackedStringArray()
+## Savaşta silah sırtta değil elde (bkz. `_draw_held_weapon`): savaş
+## figürü iskelete geçtiğinde arketipin silahı - kılıç, mızrak ve kalkan,
+## yay - okunmaya devam etmeli, yoksa sınıflar silüetten ayırt edilemez.
+var _combat_stance: bool = false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -129,6 +133,10 @@ func set_kind(
 		_horse_species = BeastRig.HORSE_WHITE if randf() < WHITE_HORSE_CHANCE else BeastRig.HORSE
 	queue_redraw()
 
+func set_combat_stance(on: bool) -> void:
+	_combat_stance = on
+	queue_redraw()
+
 ## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
 ## veriyor - figür karakteri tutmuyor, yalnızca ne giydiğini.
 func set_loadout(loadout: PackedStringArray) -> void:
@@ -149,7 +157,11 @@ func set_standing() -> void:
 func advance(delta: float, speed: float) -> void:
 	_moving = absf(speed) > 0.01
 	if _moving:
-		_phase = fmod(_phase + delta * speed * TAU, TAU)
+		# Yön işaretten, faz her zaman ileri: iskelet `facing`'e göre
+		# aynalanıyor, yani sola yürüyen figür de fazını ileri sarmalı.
+		# Fazı geri sarmak sola bakıp *geri geri* yürümekti (moonwalk) -
+		# lider kolonda geriye giderken tam olarak bu görünüyordu.
+		_phase = fmod(_phase + delta * absf(speed) * TAU, TAU)
 		_facing = 1.0 if speed >= 0.0 else -1.0
 	_motion = ease_motion(_motion, _moving, delta)
 	queue_redraw()
@@ -238,8 +250,15 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			Color(0.0, 0.0, 0.0, 0.26)
 		)
 	var weapon_sprite := Wardrobe.has_part(_loadout, "weapon")
+	var body_id := _body_id()
 	for bone in FigureRig.bones_for(seated):
-		_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
+		# Manken bu kemiği kaplıyorsa prosedürel uzuv çizilmiyor - altında
+		# kalıp kenarından taşan ikinci bir çizgi olurdu. Saç/şapka ve sırt
+		# yükü ise gövdenin *üstünde* kalmalı, o yüzden mankenden sonra.
+		if _draw_body_layer(bone, joints, h, look, body_id):
+			_draw_bone_overlay(bone, joints, h, bulk, look)
+		else:
+			_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
 		_draw_wardrobe(bone, joints, h)
 
 ## Kıyafet seçimi (ceket/gömlek/pantolon/ayakkabı/eldiven) burada devreye
@@ -296,7 +315,11 @@ func _draw_bone(
 		"weapon":
 			# Resmi olan silah elde taşınıyor (sprite'ı `_draw_wardrobe`
 			# çiziyor); yoksa arketipin sırttaki silüeti kalıyor.
-			if not weapon_sprite:
+			if weapon_sprite:
+				pass
+			elif _combat_stance:
+				_draw_held_weapon(joints, h, look)
+			else:
 				_draw_slung_weapon(joints.shoulder, h, look.metal, look.trim)
 
 ## Gövde: omuzdan kalçaya daralan bir çokgen - dikdörtgen yerine çokgen
@@ -311,6 +334,11 @@ func _draw_torso(shoulder: Vector2, hip: Vector2, h: float, bulk: float, look: D
 		hip + Vector2(half_bottom * _facing, h * 0.02),
 		hip + Vector2(-half_bottom * _facing, h * 0.02),
 	]), look.cloth, maxf(1.0, h * 0.012))
+	_draw_pack(shoulder, h, bulk, look)
+
+## Sırttaki yük: gövdenin üstünde, mankenin de üstünde.
+func _draw_pack(shoulder: Vector2, h: float, bulk: float, look: Dictionary) -> void:
+	var half_top := h * 0.098 * bulk
 	if _carries_pack:
 		var back := shoulder + Vector2(-half_top * 1.1 * _facing, h * 0.02)
 		ArtDraw.inked(self, PackedVector2Array([
@@ -320,29 +348,75 @@ func _draw_torso(shoulder: Vector2, hip: Vector2, h: float, bulk: float, look: D
 			back + Vector2(h * 0.01 * _facing, h * 0.15),
 		]), (look.trim as Color).darkened(0.15), maxf(1.0, h * 0.010))
 
-## Bir kemiğe takılan sprite katmanları, alttan üste: ten (`Wardrobe.BODY_ID`,
-## karakterin ten rengiyle çarpılıyor), sonra üstündeki kalemler.
-func _draw_wardrobe(bone: String, joints: Dictionary, h: float) -> void:
+## Mankenin kimliği: karakterin cinsiyet/kilo varyantı, yoksa düz beden.
+func _body_id() -> String:
+	return _body_variant if not _body_variant.is_empty() else Wardrobe.BODY_ID
+
+## Mankenin bu kemiğe düşen parçası, üstünde ne giyiliyorsa onun rengiyle
+## çarpılarak. Beden açık gri boyalı (hacim gölgede), yani gömlek gövdeye ve
+## kollara, pantolon bacaklara, ayakkabı ayağa, ten baş ve ele düşüyor - bir
+## giysinin kendi resmi geldiğinde onun altında doğru biçimde bir beden
+## zaten var. Çizdiyse true.
+func _draw_body_layer(bone: String, joints: Dictionary, h: float, look: Dictionary, body_id: String) -> bool:
+	var found := Wardrobe.bone_texture(body_id, bone)
+	var texture: Texture2D = found.texture
+	if texture == null:
+		return false
 	var spec: Dictionary = FigureRig.BONES[bone]
-	var a: Vector2 = joints[spec.a]
-	var b: Vector2 = joints[spec.b]
 	var part := String(spec.part)
-	var part_spec: Dictionary = FigureRig.PARTS[part]
-	var xf := FigureRig.part_transform(
-		part_spec.pivot, FigureRig.part_rest_vector(part), a, b, h, _facing
+	var tone := _body_tone(part, look)
+	if found.shade:
+		tone = Color(tone.r * Wardrobe.BACK_SHADE.r, tone.g * Wardrobe.BACK_SHADE.g, tone.b * Wardrobe.BACK_SHADE.b, tone.a)
+	draw_set_transform_matrix(_part_xf(bone, joints, h))
+	draw_texture(texture, Vector2.ZERO, tone)
+	draw_set_transform_matrix(Transform2D.IDENTITY)
+	return true
+
+## Bir beden parçasının rengi. `look`'taki renkler `_tinted` - günün ışığı
+## zaten içinde.
+static func _body_tone(part: String, look: Dictionary) -> Color:
+	match part:
+		"torso", "upper_arm", "forearm":
+			return look.cloth
+		"thigh", "shin":
+			return look.pants
+		"foot":
+			return look.shoes
+		"hand":
+			return look.gloves
+	return look.skin
+
+## Mankenin üstüne binen prosedürel izler: saç ya da başlık, sırt yükü.
+func _draw_bone_overlay(bone: String, joints: Dictionary, h: float, bulk: float, look: Dictionary) -> void:
+	match String(FigureRig.BONES[bone].part):
+		"head":
+			var radius := h * 0.058 * (0.92 + bulk * 0.08)
+			var centre: Vector2 = joints.shoulder + Vector2(h * 0.012 * _facing, -radius * 1.35)
+			var headgear := OutfitCatalog.resolve_headgear(_outfit, String(_archetype.get("head", "bare")))
+			_draw_headgear(centre, radius, h, look.cloth, look.trim, look.metal, headgear)
+		"torso":
+			_draw_pack(joints.shoulder, h, bulk, look)
+
+func _part_xf(bone: String, joints: Dictionary, h: float) -> Transform2D:
+	var spec: Dictionary = FigureRig.BONES[bone]
+	var part := String(spec.part)
+	return FigureRig.part_transform(
+		FigureRig.PARTS[part].pivot, FigureRig.part_rest_vector(part),
+		joints[spec.a], joints[spec.b], h, _facing
 	)
+
+## Üstteki kalemlerin sprite katmanları, alttan üste (beden `_draw_body_layer`).
+func _draw_wardrobe(bone: String, joints: Dictionary, h: float) -> void:
+	if _loadout.is_empty():
+		return
+	var xf := _part_xf(bone, joints, h)
 	var drew := false
-	var body_id := _body_variant if not _body_variant.is_empty() else Wardrobe.BODY_ID
-	var layers := PackedStringArray([body_id])
-	layers.append_array(_loadout)
-	for item_id in layers:
+	for item_id in _loadout:
 		var found := Wardrobe.bone_texture(item_id, bone)
 		var texture: Texture2D = found.texture
 		if texture == null:
 			continue
 		var tone := _tint
-		if item_id == body_id:
-			tone = Color(_skin.r * _tint.r, _skin.g * _tint.g, _skin.b * _tint.b, _tint.a)
 		if found.shade:
 			tone = Color(tone.r * Wardrobe.BACK_SHADE.r, tone.g * Wardrobe.BACK_SHADE.g, tone.b * Wardrobe.BACK_SHADE.b, tone.a)
 		draw_set_transform_matrix(xf)
@@ -368,7 +442,13 @@ func _draw_head(
 	)
 	ArtDraw.ellipse(self, centre, Vector2(radius * 0.92, radius), skin)
 	draw_arc(centre, radius, 0.0, TAU, 18, ArtPalette.INK, maxf(1.0, h * 0.010))
+	_draw_headgear(centre, radius, h, cloth, trim, metal, headgear)
 
+## Saç ya da başlık - prosedürel başın da mankenin başının da üstünde.
+func _draw_headgear(
+	centre: Vector2, radius: float, h: float, cloth: Color, trim: Color, metal: Color,
+	headgear: Dictionary
+) -> void:
 	var override: bool = headgear.get("override", false)
 	var head_color: Color = _tinted(headgear.get("color", Color.WHITE))
 	match String(headgear.get("kind", "bare")):
@@ -405,6 +485,57 @@ func _draw_head(
 				self, centre + Vector2(0.0, -radius * 0.45),
 				Vector2(radius * 0.95, radius * 0.62), ArtPalette.INK_SOFT
 			)
+
+## Savaşta arketipin silahı elde, kabzası ön elde (bu kemik ön koldan önce
+## çiziliyor, parmaklar kabzanın üstüne kapanıyor). Biçimler savaş
+## silüetinin eski prosedürel silahlarıyla aynı - kılıç yukarı-ileri, mızrak
+## dik, kalkan göğsün ön kenarında - yalnızca iskeletin eline bağlı.
+func _draw_held_weapon(joints: Dictionary, h: float, look: Dictionary) -> void:
+	var hand: Vector2 = joints.hand_front
+	var f := _facing
+	var metal: Color = look.metal
+	var trim: Color = look.trim
+	var ink_w := maxf(1.0, h * 0.008)
+	match String(_archetype.get("weapon", "none")):
+		"sword":
+			var tip := hand + Vector2(0.10 * f, -0.30) * h
+			draw_line(hand, tip, ArtPalette.INK, maxf(2.6, h * 0.022))
+			draw_line(hand, tip, metal, maxf(1.6, h * 0.014))
+			draw_line(hand + Vector2(-0.035 * f, 0.012) * h, hand + Vector2(0.035 * f, -0.012) * h, trim, maxf(2.0, h * 0.016))
+		"cleaver":
+			ArtDraw.inked(self, PackedVector2Array([
+				hand + Vector2(0.0, -0.05) * h, hand + Vector2(0.13 * f, -0.19) * h,
+				hand + Vector2(0.17 * f, -0.08) * h, hand + Vector2(0.03 * f, 0.01) * h,
+			]), metal, ink_w)
+		"maul":
+			var head := hand + Vector2(0.08 * f, -0.30) * h
+			draw_line(hand + Vector2(-0.01 * f, 0.05) * h, head, trim.darkened(0.25), maxf(2.4, h * 0.020))
+			ArtDraw.inked(self, PackedVector2Array([
+				head + Vector2(-0.06, -0.035) * h, head + Vector2(0.06, -0.045) * h,
+				head + Vector2(0.065, 0.025) * h, head + Vector2(-0.055, 0.035) * h,
+			]), metal, ink_w)
+		"spear_shield":
+			var top := hand + Vector2(0.02 * f, -0.52) * h
+			draw_line(hand + Vector2(0.0, 0.16) * h, top, trim.darkened(0.2), maxf(2.0, h * 0.016))
+			ArtDraw.inked(self, PackedVector2Array([
+				top, top + Vector2(0.025 * f, 0.06) * h, top + Vector2(0.0, 0.10) * h,
+				top + Vector2(-0.025 * f, 0.06) * h,
+			]), metal, ink_w)
+			var shield: Vector2 = joints.shoulder.lerp(joints.hip, 0.55) + Vector2(0.075 * f, 0.0) * h
+			ArtDraw.ellipse(self, shield, Vector2(0.055, 0.105) * h, metal.darkened(0.30))
+			draw_arc(shield, 0.105 * h, 0.0, TAU, 20, ArtPalette.INK, ink_w)
+		"bow":
+			var centre := hand + Vector2(0.02 * f, -0.05) * h
+			var facing_angle := 0.0 if f > 0.0 else PI
+			draw_arc(centre, 0.20 * h, facing_angle - PI * 0.42, facing_angle + PI * 0.42, 18, trim.darkened(0.15), maxf(2.0, h * 0.016))
+			var string_top := centre + Vector2(cos(facing_angle - PI * 0.42), sin(facing_angle - PI * 0.42)) * 0.20 * h
+			var string_bottom := centre + Vector2(cos(facing_angle + PI * 0.42), sin(facing_angle + PI * 0.42)) * 0.20 * h
+			draw_line(string_top, string_bottom, Color(0.85, 0.82, 0.74, 0.8), maxf(1.0, h * 0.004))
+		"staff":
+			var staff_top := hand + Vector2(0.01 * f, -0.46) * h
+			draw_line(hand + Vector2(0.0, 0.20) * h, staff_top, trim.darkened(0.2), maxf(2.2, h * 0.018))
+			draw_circle(staff_top, 0.03 * h, metal)
+			draw_arc(staff_top, 0.03 * h, 0.0, TAU, 12, ArtPalette.INK, ink_w)
 
 ## Yolda silah kullanılmıyor ama taşınıyor: sırttaki mızrak/yay silüeti
 ## kervanın korumalı olduğunu tek bakışta söylüyor.

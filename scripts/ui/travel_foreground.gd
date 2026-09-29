@@ -72,6 +72,9 @@ var _slope: float = 0.0
 var _wetness: float = 0.0
 var _route_days: int = 1
 var _caravan_x_ratio: float = 0.34
+## Çizilmesi gereken alan (şeridin yerel uzayında) - uzaklaşınca şeridin
+## dışına taşıyor, bkz. TravelBand.cover_rect. Boşsa katmanın kendisi.
+var cover: Rect2 = Rect2()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -108,31 +111,37 @@ func _draw() -> void:
 	if size.y <= 1.0 or _ground_y <= 0.0:
 		return
 	var area := Rect2(Vector2.ZERO, size)
+	var reach := cover if cover.has_area() else area
 	# Önlük en altta ve **ilk**: üstündeki her şey ona basıyor.
-	_draw_apron(area)
-	_draw_low_props(area)
-	_draw_milestones(area)
+	_draw_apron(area, reach)
+	_draw_low_props(area, reach)
+	_draw_milestones(area, reach)
 
 ## Yolun hemen altından karenin dibine kadar inen koyu toprak bandı.
 ## Eğimi yolun kendi eğimi - ayrı hesaplanırsa yol bir yere, önlük başka
 ## bir yere bakar.
-func _draw_apron(area: Rect2) -> void:
+func _draw_apron(area: Rect2, reach: Rect2) -> void:
 	var top_offset := area.size.y * APRON_TOP_RATIO
-	var left := _road_y(0.0) + top_offset
-	var right := _road_y(area.size.x) + top_offset
+	var x0 := reach.position.x
+	var x1 := reach.end.x
+	var left := _road_y(x0) + top_offset
+	var right := _road_y(x1) + top_offset
 	var bottom := area.size.y
 
 	var earth := _apron_color()
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, left), Vector2(area.size.x, right),
-		Vector2(area.size.x, bottom), Vector2(0.0, bottom),
+		Vector2(x0, left), Vector2(x1, right),
+		Vector2(x1, bottom), Vector2(x0, bottom),
 	]), earth)
 
-	var foot := lerpf(left, bottom, APRON_FOOT_RATIO)
-	var foot_right := lerpf(right, bottom, APRON_FOOT_RATIO)
+	# Koyu ayak diliminin eğimi şeridin kendi kenarlarından ölçülüyor, yani
+	# kapsama büyüse de şeridin içindeki çizgi olduğu yerde kalıyor.
+	var foot_at := func(x: float) -> float:
+		return lerpf(_road_y(x) + top_offset, bottom, APRON_FOOT_RATIO)
+	var foot_bottom := maxf(bottom, reach.end.y)
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, foot), Vector2(area.size.x, foot_right),
-		Vector2(area.size.x, bottom), Vector2(0.0, bottom),
+		Vector2(x0, foot_at.call(x0)), Vector2(x1, foot_at.call(x1)),
+		Vector2(x1, foot_bottom), Vector2(x0, foot_bottom),
 	]), earth.darkened(APRON_FOOT_DARKEN))
 
 ## Önlüğün rengi - biyomun kendi toprağından türüyor, yani bozkırda başka
@@ -154,12 +163,12 @@ func _road_y(x: float) -> float:
 ## iki tanesi bir kütle gibi okunuyor ve ekranda tam olarak bu görüldü
 ## (otlar ve su birikintileri üst üste binmişti - birikinti otun *üstüne*
 ## çiziliyordu, çünkü ikisi tek bir sırada karışıktı).
-func _draw_low_props(area: Rect2) -> void:
+func _draw_low_props(area: Rect2, reach: Rect2) -> void:
 	var offset := -_world_x * PARALLAX
 	var ceiling := area.size.y * MAX_PROP_HEIGHT_RATIO
 	var cell_size := ceiling * CELL_PER_CEILING
-	var first := int(floor((-offset - cell_size) / cell_size))
-	var last := int(ceil((-offset + area.size.x + cell_size) / cell_size))
+	var first := int(floor((reach.position.x - offset - cell_size) / cell_size))
+	var last := int(ceil((reach.end.x - offset + cell_size) / cell_size))
 	# **Önlüğe göre açık.** Eskiden hepsi zeminden koyuydu ve zemin de
 	# açıktı; önlük gelince aynı renkler koyu üstünde koyu kaldı, yani
 	# yolun altı yine boş göründü. Referans nokta artık önlüğün kendisi.
@@ -178,7 +187,7 @@ func _draw_low_props(area: Rect2) -> void:
 			var x := float(cell) * cell_size + offset + rng.randf_range(
 				-cell_size * 0.54, cell_size * 0.54
 			)
-			if x < -cell_size or x > area.size.x + cell_size:
+			if x < reach.position.x - cell_size or x > reach.end.x + cell_size:
 				continue
 			# Yalnızca yolun *altı*: en yakın şerit. Üstü uzak, oraya
 			# yüksek nesneler gidiyor (bkz. TravelBand._draw_ground_props).
@@ -242,10 +251,10 @@ func _draw_low_props(area: Rect2) -> void:
 
 ## Yolda her gün bir taş: oyuncu ilerleme çubuğuna bakmadan da kaç gün
 ## kaldığını okuyor.
-func _draw_milestones(area: Rect2) -> void:
+func _draw_milestones(area: Rect2, reach: Rect2) -> void:
 	for day in range(1, _route_days + 1):
 		var x := area.size.x * _caravan_x_ratio + (float(day) * PIXELS_PER_DAY - _world_x)
-		if x < -40.0 or x > area.size.x + 40.0:
+		if x < reach.position.x - 40.0 or x > reach.end.x + 40.0:
 			continue
 		var base := Vector2(x, _road_y(x) + area.size.y * 0.085)
 		var h := MILESTONE_HEIGHT

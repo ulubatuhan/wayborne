@@ -66,4 +66,23 @@ func _test_road_zoom_is_bounded(t) -> void:
 	for _i in 20:
 		z = road.step_zoom_value(z, 1)
 	t.ok(is_equal_approx(z, road.ZOOM_MAX), "en yakında kenetli")
-	t.ok(road.ZOOM_MIN >= 1.0, "şerit ekranı hep dolduruyor")
+	t.ok(road.ZOOM_MIN < 1.0, "şeridin kendisinden daha uzağa çekilinebiliyor")
+	t.ok(is_equal_approx(road.ZOOM_DEFAULT, 1.0), "varsayılan görünüm şeridin kendisi")
+	_test_zoomed_out_band_is_covered(t)
+
+## Uzaklaşınca şerit küçülüyor ama ekranın gördüğü her yer boyanmalı: şerit
+## kapsamasını görüş dikdörtgenine kadar genişletiyor. Görüş yokken kapsama
+## şeridin kendisi - 1.0'daki çizim birebir eski.
+func _test_zoomed_out_band_is_covered(t) -> void:
+	var road = load("res://scripts/ui/road_journey.gd")
+	var band := TravelBand.new()
+	band.size = Vector2(1920.0, 900.0)
+	t.eq(band.cover_rect(), Rect2(Vector2.ZERO, band.size), "görüş verilmeden kapsama şeridin kendisi")
+	band.scale = Vector2(road.ZOOM_MIN, road.ZOOM_MIN)
+	band.pivot_offset = Vector2(1200.0, 760.0)
+	var screen := Rect2(Vector2.ZERO, band.size)
+	var view: Rect2 = road.visible_rect_in(band, screen)
+	band.set_view_rect(view)
+	t.ok(band.cover_rect().encloses(view), "kapsama ekranın gördüğü alanı içine alıyor")
+	t.ok(view.size.x > band.size.x * 1.3, "en uzakta ekran şeritten belirgin biçimde fazlasını görüyor")
+	band.free()

@@ -69,6 +69,7 @@ func _init() -> void:
 
 	await _shoot_original_three()
 	await _shoot_new_five()
+	await _shoot_wild_two()
 	quit()
 
 ## At, öküz, kurt - `WalkFigure`/`CombatFigure` üzerinden, gerçek oyun
@@ -133,6 +134,28 @@ func _shoot_new_five() -> void:
 
 	await _settle()
 	_save("beast_gait_sweep_new_species.png")
+	_clear_root()
+
+## Ayı ve yaban domuzu - başka kaynaklardan gelen iki model (bkz.
+## tools/beast_prep_blend.py). İki yönde de: yolda ve savaşta ikisi de sola
+## bakarak duruyor, deri aynalanınca da bükülmemeli.
+func _shoot_wild_two() -> void:
+	var cols := PHASES
+	var rows := [["bear", 1.0], ["boar", 1.0], ["bear", -1.0], ["boar", -1.0]]
+	_resize(Vector2i(int(CELL.x * cols), int(CELL.y * rows.size())))
+	var root := get_root()
+	root.add_child(_backdrop())
+	for col in range(cols):
+		for row in rows.size():
+			var probe := BeastProbe.new()
+			probe.species = rows[row][0]
+			probe.facing = rows[row][1]
+			probe.phase = TAU * float(col) / float(cols)
+			probe.size = CELL * 0.62
+			probe.position = Vector2(col * CELL.x + CELL.x * 0.19, CELL.y * row + CELL.y * 0.16)
+			root.add_child(probe)
+	await _settle()
+	_save("beast_gait_sweep_wild.png")
 	_clear_root()
 
 func _resize(view_size: Vector2i) -> void:
