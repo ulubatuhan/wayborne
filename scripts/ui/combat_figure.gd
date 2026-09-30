@@ -80,8 +80,10 @@ const ARCHETYPES: Dictionary = {
 		"metal": Color(0.70, 0.72, 0.74),
 	},
 	# --- Hayvanlar ---
+	# bulk 1.425: kullanıcının kendi isteği (mevcut halinin 1.5 katı, bkz.
+	# WOLF_ALPHA_WHITE/_BLACK'in kendi notu - reisler bunun katı).
 	"wolf": {
-		"body": BEAST, "bulk": 0.95, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 1.425, "head": "snout", "weapon": "none",
 		"cloth": Color(0.34, 0.33, 0.32), "trim": Color(0.22, 0.21, 0.21),
 		"metal": Color(0.80, 0.80, 0.78),
 	},
@@ -118,15 +120,16 @@ const ARCHETYPES: Dictionary = {
 	# (`bulk`) ve bir renk çarpanıyla (`sprite_tint`, `_draw_beast_sprites`'ın
 	# dokuya çarptığı ek ton) beyaz/kara okunuyor - yeni bir tür/sanat değil.
 	# cloth/trim/metal yalnızca `_draw_fallen`in prosedürel silüetinde (bkz.
-	# "stag"/"deer"'in kendi notu) ve sprite hiç yoksa kullanılıyor.
+	# "stag"/"deer"'in kendi notu) ve sprite hiç yoksa kullanılıyor. bulk
+	# 4.275 = sıradan kurdun (1.425) tam üç katı - kullanıcının kendi ölçüsü.
 	"wolf_alpha_white": {
-		"body": BEAST, "bulk": 1.20, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 4.275, "head": "snout", "weapon": "none",
 		"cloth": Color(0.86, 0.87, 0.90), "trim": Color(0.62, 0.64, 0.68),
 		"metal": Color(0.95, 0.95, 0.92),
 		"sprite_kind": "wolf", "sprite_tint": Color(1.55, 1.60, 1.75),
 	},
 	"wolf_alpha_black": {
-		"body": BEAST, "bulk": 1.20, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 4.275, "head": "snout", "weapon": "none",
 		"cloth": Color(0.10, 0.09, 0.10), "trim": Color(0.05, 0.05, 0.06),
 		"metal": Color(0.55, 0.54, 0.56),
 		"sprite_kind": "wolf", "sprite_tint": Color(0.28, 0.27, 0.30),

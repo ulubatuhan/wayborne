@@ -232,7 +232,12 @@ func _build_field() -> void:
 	field.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	_player_row = HBoxContainer.new()
-	_player_row.add_theme_constant_override("separation", 4)
+	# Hayvan portreleri artık kutularını bilerek aşıyor (bkz. CombatFigure'ın
+	# kendi notu - ayı/domuz/kurt reisleri gerçek boylarında çiziliyor).
+	# Eski 4px ayraç bitişik mevkilerdeki iki büyük hayvanı üst üste
+	# bindiriyordu (domuz sürüsü - kullanıcının kendi bildirdiği hata);
+	# 4 → 56 taşan gövdelere gerçek bir boşluk bırakıyor.
+	_player_row.add_theme_constant_override("separation", 56)
 	_player_row.alignment = BoxContainer.ALIGNMENT_END
 	_player_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_player_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -245,7 +250,7 @@ func _build_field() -> void:
 	field.add_child(gap)
 
 	_enemy_row = HBoxContainer.new()
-	_enemy_row.add_theme_constant_override("separation", 4)
+	_enemy_row.add_theme_constant_override("separation", 56)
 	_enemy_row.alignment = BoxContainer.ALIGNMENT_BEGIN
 	_enemy_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_enemy_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL

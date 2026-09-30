@@ -19,13 +19,15 @@ const WOLF: String = "wolf"
 const BEAR: String = "bear"
 const BOAR: String = "boar"
 
-## Kurt sürüsünün reisi - beyaz bir direwolf ya da kara bir börü (bkz.
-## build_wildlife_squad). Aynı türden sayılır (kurt ailesi, bkz.
-## test_enemy_variety.gd'nin "tek türden" kuralı) - `display_name_key`
-## bilerek WOLF'unkiyle aynı ("ENEMY_WOLF_NAME"), çünkü bu bir ayrı tür
-## değil, sürünün öndeki, daha güçlü ve göze çarpan örneği. Görsel ayrımı
-## `CombatFigure.ARCHETYPES`'ın `sprite_kind`/`sprite_tint` alanları taşır -
-## aynı `BeastRig.WOLF` iskeleti/derisi, farklı ton.
+## Kurt sürüsünün reisi - biri "Kırağı Kurdu" (beyaz), biri "Zifir Kurdu"
+## (kara), ikisi de kullanıcının kendi isteğiyle kendi adını taşıyor (bkz.
+## build_wildlife_squad). Ayrı bir tür değiller - sürünün öndeki, daha
+## güçlü ve göze çarpan örneği - ama artık kendi `display_name_key`'leri
+## var, o yüzden `test_enemy_variety.gd`'nin "tek türden" kuralı kurt
+## ailesini (Kurt/Kırağı Kurdu/Zifir Kurdu) tek bir *aile* sayacak şekilde
+## genişletildi, tek bir *ad* değil. Görsel ayrımı `CombatFigure.
+## ARCHETYPES`'ın `sprite_kind`/`sprite_tint` alanları taşır - aynı
+## `BeastRig.WOLF` iskeleti/derisi, farklı ton ve boy (`bulk`).
 const WOLF_ALPHA_WHITE: String = "wolf_alpha_white"
 const WOLF_ALPHA_BLACK: String = "wolf_alpha_black"
 
@@ -341,16 +343,14 @@ static func _ensure_built() -> void:
 	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
 	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
 
-	# Sürü reisi - beyaz direwolf/kara börü, kullanıcının kendi isteği
-	# ("statları buna göre daha yüksek olmalı"). display_name_key bilerek
-	# WOLF'unkiyle aynı (bkz. WOLF_ALPHA_WHITE'ın kendi yorumu) - ikisi
-	# yalnızca görsel/güç bakımından ayrışır, aynı tek/isim çekirdeği
-	# `test_enemy_variety.gd`'nin "kadro hiçbir zaman tür karıştırmaz"
-	# kilidini hiç bozmadan geçer. Kurdun ~1.8 katı can, biraz daha
-	# isabetli/kaçıngan/kritikli - bir sıradan kurdun yanında gerçekten
-	# "reis" okunsun diye.
-	_enemies.append(_make(WOLF_ALPHA_WHITE, "ENEMY_WOLF_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
-	_enemies.append(_make(WOLF_ALPHA_BLACK, "ENEMY_WOLF_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
+	# Sürü reisi - "Kırağı Kurdu" (beyaz) / "Zifir Kurdu" (kara), kullanıcının
+	# kendi isteği ("statları buna göre daha yüksek olmalı", ve ikisinin de
+	# kendi adı olsun - "kara börü" demeyin, uygun farklı bir isim bulun").
+	# Kurdun ~1.8 katı can, biraz daha isabetli/kaçıngan/kritikli - bir
+	# sıradan kurdun yanında gerçekten "reis" okunsun diye. Boyları da
+	# (bkz. CombatFigure.ARCHETYPES'ın `bulk`'ı) sıradan kurdun tam üç katı.
+	_enemies.append(_make(WOLF_ALPHA_WHITE, "ENEMY_WOLF_ALPHA_WHITE_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
+	_enemies.append(_make(WOLF_ALPHA_BLACK, "ENEMY_WOLF_ALPHA_BLACK_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
 
 	# Av hayvanları (bkz. build_hunt_squad, evt_hunting_trip) - geyik (DEER)
 	# neredeyse zararsız, kaçmaya çalışan ürkek bir mevcudiyet; erkek geyik

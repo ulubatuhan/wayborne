@@ -22,19 +22,18 @@ const SLOT_WIDTH: float = 136.0
 const FIGURE_HEIGHT: float = 208.0
 
 
-const ACTIVE_BORDER: Color = Color(0.95, 0.82, 0.45)
-const TARGET_BORDER: Color = Color(0.90, 0.35, 0.30)
+const ACTIVE_BORDER: Color = ArtPalette.GOLD
+const TARGET_BORDER: Color = ArtPalette.BLOOD
 const IDLE_BORDER: Color = Color(0.0, 0.0, 0.0, 0.0)
 
-## Mevkinin Waybook çerçevesi (K1) ve Ölümün Kıyısı'ndaki çatlak hâli (K2).
-## Doku yarı ölçekte dokuz parça: tam ölçekte 30 piksellik kenar 136'lık
-## mevkide figürü sıkıştırıyordu.
-const FRAME_FILE: String = "k1_slot.png"
-const DOOR_FRAME_FILE: String = "k2_door.png"
-const FRAME_SCALE: float = 0.5
-const FRAME_SLICE: int = 16
-const DOOR_FRAME_SLICE: int = 22
-const FRAME_CONTENT: int = 12
+## Mevki artık kutulanmış değil - kullanıcının kendi isteği ("çerçeve
+## olmasın"). Woodgrain K1/K2 dokuları tamamen kaldırıldı; `_frame` yalnızca
+## eski çerçevenin içerik boşluğunu (figür/isim/can barının kenara
+## yapışmaması) korumak için boş bir kutu. Ölümün Kıyısı artık yalnızca
+## kendi rengiyle (`DEATHS_DOOR_FIGURE`, figürün tonuna zaten karışıyor) ve
+## durum satırındaki rozetle okunuyor - çatlak çerçeve hiçbir zaman tek
+## sinyal değildi, o yüzden kaldırılması bir bilgi kaybı değil.
+const FRAME_CONTENT: int = 10
 ## Can çubuğunun demir çerçevesi (K3) - dolgu çerçevenin içinde kalsın diye
 ## dolgunun saydam bir kenarı var.
 const HP_FRAME_FILE: String = "k3_bar.png"
@@ -48,6 +47,18 @@ const EMBLEM_SIZE: float = 18.0
 ## karakterini kaybedebileceğini *görmeden* anlaması mümkün değil.
 const DEATHS_DOOR_FIGURE: Color = Color(0.62, 0.16, 0.16)
 
+## Seçim/sıra artık bir çerçeve çizgisi değil, yumuşak bir parıltı -
+## kullanıcının kendi isteği ("seçildiğinde hafif bir glow olsun, temaya
+## uygun"). Renkler zaten temanın kendi vurgu paleti: sıra `ArtPalette.GOLD`
+## (`UI_ACCENT`'le aynı aile), hedef `ArtPalette.BLOOD` (can çubuğu
+## dolgusu/`UI_CHOICE_COMBAT` şeridiyle aynı) - yeni bir renk icat edilmedi.
+## Gerçek bir blur shader'ı yerine birkaç katman, dıştan içe azalan alfa ve
+## genişleyen kenar - ucuz ama yeterli bir bulanıklık yaklaşımı.
+const GLOW_LAYERS: int = 4
+const GLOW_STEP: float = 5.0
+const GLOW_BASE_ALPHA: float = 0.30
+const GLOW_CORE_ALPHA: float = 0.55
+
 var unit: CombatUnit
 
 var _figure: CombatFigure
@@ -57,9 +68,10 @@ var _name_label: Label
 var _rank_label: Label
 var _status_row: HBoxContainer
 var _bark_label: Label
-var _frame: StyleBoxTexture
-var _door_frame: StyleBoxTexture
+var _frame: StyleBoxEmpty
 var _border: StyleBoxFlat
+var _glow_layers: Array[StyleBoxFlat] = []
+var _glow_core: StyleBoxFlat
 var _emblem: TextureRect
 var _selectable: bool = false
 
@@ -67,18 +79,29 @@ func _init() -> void:
 	custom_minimum_size = Vector2(SLOT_WIDTH, 0.0)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-	# Çerçeve içi boş: arkadaki zemin görünmeli, mevki bir çerçeve
-	# olmalı, bir pencere değil.
-	_frame = _frame_box(FRAME_FILE, FRAME_SLICE)
-	_door_frame = _frame_box(DOOR_FRAME_FILE, DOOR_FRAME_SLICE)
+	# Çerçeve yok - yalnızca eski çerçevenin içerik boşluğu korunuyor.
+	_frame = StyleBoxEmpty.new()
+	_frame.set_content_margin_all(FRAME_CONTENT)
 	add_theme_stylebox_override("panel", _frame)
-	# Sıra/hedef vurgusu çerçevenin *üstünde* ayrı bir kenar (bkz. _draw):
-	# koyu ahşabı altına boyamak onu okunur kılmıyordu.
+	# Sıra/hedef vurgusu ayrı katmanlarda çizilen bir glow (bkz. _draw_glow) -
+	# `_border` yalnızca hangi rengin/varsa aktif olduğunu taşıyor.
 	_border = StyleBoxFlat.new()
 	_border.draw_center = false
 	_border.border_color = IDLE_BORDER
-	_border.set_border_width_all(3)
-	_border.set_corner_radius_all(3)
+
+	for i in GLOW_LAYERS:
+		var layer := StyleBoxFlat.new()
+		layer.draw_center = false
+		layer.anti_aliasing = true
+		layer.set_border_width_all(2)
+		layer.set_corner_radius_all(14)
+		layer.set_expand_margin_all(GLOW_STEP * float(GLOW_LAYERS - i))
+		_glow_layers.append(layer)
+	_glow_core = StyleBoxFlat.new()
+	_glow_core.draw_center = false
+	_glow_core.anti_aliasing = true
+	_glow_core.set_border_width_all(2)
+	_glow_core.set_corner_radius_all(10)
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
@@ -178,7 +201,6 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	)
 	_figure.set_stunned(bound_unit.is_stunned and bound_unit.is_alive())
 	_border.border_color = _border_color(is_active, is_target)
-	add_theme_stylebox_override("panel", _door_frame if bound_unit.on_deaths_door else _frame)
 	queue_redraw()
 	var emblem_file := String(WaybookIcons.CLASS_EMBLEMS.get(bound_unit.figure_kind, "")) if bound_unit.is_player_side else ""
 	# `visible = false` bir Container'da düğümü yerleşimden tamamen
@@ -209,19 +231,24 @@ static func _field_alpha(bound_unit: CombatUnit) -> float:
 		return ArtPalette.UI_FALLEN_ALPHA
 	return 1.0
 
-## Silüetin duruşunu ve paletini belirleyen durum. Düşen bir figür
-## ayakta soluk durmuyor, yere çöküyor - "düşmüş" ancak duruş değişince
-## okunuyor.
-func _frame_box(file_name: String, slice: int) -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = WaybookTheme.scaled_texture(file_name, FRAME_SCALE)
-	box.set_texture_margin_all(slice)
-	box.set_content_margin_all(FRAME_CONTENT)
-	return box
-
 func _draw() -> void:
 	if _border.border_color.a > 0.0:
-		draw_style_box(_border, Rect2(Vector2.ZERO, size))
+		_draw_glow(_border.border_color)
+
+## Katman katman, dıştan içe: en dıştaki en soluk/en geniş, en içteki
+## (`_glow_core`) en net. `expand_margin` slotun kendi sınırlarının dışına
+## taşıyor - artık taşan hayvan portrelerinin (bkz. CombatFigure'ın kendi
+## notu) etrafında bile "hafif" kalması için tek katmanlık eski çizgi değil,
+## yumuşak birkaç kat.
+func _draw_glow(color: Color) -> void:
+	var rect := Rect2(Vector2.ZERO, size)
+	for i in _glow_layers.size():
+		var layer := _glow_layers[i]
+		var strength := float(i + 1) / float(_glow_layers.size())
+		layer.border_color = Color(color.r, color.g, color.b, color.a * GLOW_BASE_ALPHA * strength)
+		draw_style_box(layer, rect)
+	_glow_core.border_color = Color(color.r, color.g, color.b, color.a * GLOW_CORE_ALPHA)
+	draw_style_box(_glow_core, rect)
 
 func _figure_state(bound_unit: CombatUnit) -> String:
 	if bound_unit.is_dead:

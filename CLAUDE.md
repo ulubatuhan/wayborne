@@ -6052,42 +6052,66 @@ küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küç
   (kullanıcının kendi ölçüsü: "ayı iki insan genişliğinde, domuz bir buçuk"
   - ekran görüntüsüyle doğrulandı, bkz. `tests/screenshot_beast_rig.gd`'nin
   kardeşi olan tek seferlik doğrulama scripti, commit'e girmedi).
-- **Kurt sürüsüne bir reis eklendi - beyaz bir direwolf ya da kara bir
-  börü, kullanıcının kendi isteği.** `EnemyCatalog.WOLF_ALPHA_WHITE`/
-  `_BLACK` sıradan kurdun (~1.8 katı can, biraz daha isabetli/kaçıngan/
-  kritikli) iki yeni `EnemyTemplate`'i; `build_wildlife_squad()`'ın kurt
-  kolu artık `WOLF_PACK_LEADER_CHANCE` (%40) ile sürünün ilk kurdunu bir
-  reisle değiştiriyor - tek bir zar, tek bir yerine koyma, yani beyaz ve
-  kara **hiçbir zaman** aynı sürüde birlikte çıkamaz (yapının kendisi
-  garanti ediyor, `test_enemy_variety.gd`'nin `_test_wolf_pack_leader`'ı
-  kırk bağımsız tohumda regresyon kilidi).
-- **Reis ayrı bir tür değil - aynı türün daha güçlü, göze çarpan bir
-  örneği, ve bu kasıtlı bir tasarım seçimi.** `display_name_key` bilerek
-  WOLF'unkiyle aynı ("ENEMY_WOLF_NAME") - ikisi de savaş kaydında "Kurt"
-  diye anons ediliyor, oyuncuya reis olduğunu gösteren şey adı değil
-  rengi/boyu. Bunun tek sebebi estetik değil: `test_enemy_variety.gd`'nin
-  `_test_wildlife_squad_never_mixes_species`'i **her** tehlike/parti/tohum
-  kombinasyonunda bir sürünün tam olarak tek bir `display_name` taşıdığını
-  kilitliyor (Faz 8 PR-A'nın kurt+domuz karışık sürü hatasının regresyon
-  testi) - reise ayrı bir isim vermek bu kilidi kırardı. Aynı türden
-  sayılınca o test hiç değişmeden geçiyor; oyunun kendi disiplini burada
-  da işledi: bir sistemi genişletirken zaten var olan, ölçülmüş bir
-  garantiyi bozmadan genişlet.
-- **Görsel ayrım yeni bir sanat değil, bir renk çarpanı.** Ne "beyaz
-  direwolf" ne "kara börü" için ayrı bir 3D model/skin var - ikisi de aynı
-  `BeastRig.WOLF` iskeletini/derisini kullanıyor. `CombatFigure.
-  ARCHETYPES`'a `sprite_kind`/`sprite_tint` alanları eklendi: `_kind`
-  (arketip anahtarı, palet/güç) artık her zaman doğrudan bir `BeastRig`
-  türüne eşlenmek zorunda değil - `_sprite_species()` varsa `sprite_kind`'ı,
-  yoksa `_kind`'ın kendisini döner (eski her tür için no-op). `_draw_beast_
-  sprites()` `BeastRig.draw_species()`'e tonu `_state_tone() * _sprite_tint()`
-  olarak geçiyor - beyaz reis için parlaklığı 1'in üstüne çıkaran bir çarpan
-  (`Color(1.55,1.60,1.75)`, dokuyu aydınlığa yıkıyor), kara reis için
-  koyulaştıran bir çarpan (`Color(0.28,0.27,0.30)`). Varsayılan (1,1,1,1) -
-  her eski tür (kurt/ayı/domuz/geyik/at...) hiç değişmeden aynı kalıyor.
-  `bulk` da 0.95 → 1.20: sıradan kurttan biraz daha iri, ama ayının aksine
-  ölçüsüz değil - sürünün geri kalanıyla aynı mevki sırasında görünür
-  kalması gerekiyor.
+- **Kurt sürüsüne bir reis eklendi - "Kırağı Kurdu" (beyaz) ya da "Zifir
+  Kurdu" (kara), kullanıcının kendi isteği.** `EnemyCatalog.
+  WOLF_ALPHA_WHITE`/`_BLACK` sıradan kurdun (~1.8 katı can, biraz daha
+  isabetli/kaçıngan/kritikli) iki yeni `EnemyTemplate`'i; `build_wildlife_
+  squad()`'ın kurt kolu artık `WOLF_PACK_LEADER_CHANCE` (%40) ile sürünün
+  ilk kurdunu bir reisle değiştiriyor - tek bir zar, tek bir yerine koyma,
+  yani beyaz ve kara **hiçbir zaman** aynı sürüde birlikte çıkamaz
+  (yapının kendisi garanti ediyor, `test_enemy_variety.gd`'nin
+  `_test_wolf_pack_leader`'ı altmış bağımsız tohumda regresyon kilidi).
+- **İsimler ayrı bir turda gerçek ada kavuştu - "kara börü" değil.**
+  İlk sürüm ikisine de `display_name_key`'i bilerek WOLF'unkiyle aynı
+  vermişti ("tek türden" testinin kolay yolu); kullanıcı bunu reddetti
+  ("kara börü demeyin, uygun farklı bir isim bulun") ve her ikisinin kendi
+  adını istedi. Çözüm ikinci bir isim sistemi değil, mevcut testin kendi
+  varsayımını genişletmek oldu: `test_enemy_variety.gd`'ye
+  `_species_family()` eklendi - "Kurt"/"Kırağı Kurdu"/"Zifir Kurdu" üçü de
+  aynı aileye ("wolf") düşüyor, `_test_wildlife_squad_never_mixes_species`
+  artık tek bir *ad* değil tek bir *aile* arıyor (ayı/domuz/kurt üçü yine
+  asla karışmıyor - bu kural hiç gevşemedi). `ENEMY_WOLF_ALPHA_WHITE_NAME`/
+  `_BLACK_NAME` `game.csv`'ye eklendi (tr/en dolu, diğer diller
+  `ENEMY_WOLF_NAME` gibi boş - fallback zaten İngilizce).
+- **Boy da ayrı bir turda büyüdü: sıradan kurt 1.5 kat, reisler sıradan
+  kurdun tam üç katı - kullanıcının kendi ölçüsü.** `CombatFigure.
+  ARCHETYPES`'ın `bulk`'ı: kurt 0.95 → 1.425, iki reis de 1.20 → 4.275
+  (1.425 × 3). Bear/boar'ın kendi turundaki aynı formül (`_draw_beast_
+  sprites()`'ın artık kırpmadığı `bulk`) burada da işliyor - reis artık
+  sıradan kurdu tamamen gölgede bırakan, insan mevkisini de büyük ölçüde
+  kaplayan bir silüet (ekran görüntüsüyle doğrulandı).
+- **Görsel ayrım yeni bir sanat değil, bir renk çarpanı - bu karar
+  değişmedi.** Ne "Kırağı Kurdu" ne "Zifir Kurdu" için ayrı bir 3D model/
+  skin var - ikisi de aynı `BeastRig.WOLF` iskeletini/derisini kullanıyor.
+  `CombatFigure.ARCHETYPES`'a `sprite_kind`/`sprite_tint` alanları
+  eklendi: `_kind` (arketip anahtarı, palet/güç) artık her zaman doğrudan
+  bir `BeastRig` türüne eşlenmek zorunda değil - `_sprite_species()` varsa
+  `sprite_kind`'ı, yoksa `_kind`'ın kendisini döner (eski her tür için
+  no-op). `_draw_beast_sprites()` `BeastRig.draw_species()`'e tonu
+  `_state_tone() * _sprite_tint()` olarak geçiyor - beyaz reis için
+  parlaklığı 1'in üstüne çıkaran bir çarpan (`Color(1.55,1.60,1.75)`,
+  dokuyu aydınlığa yıkıyor), kara reis için koyulaştıran bir çarpan
+  (`Color(0.28,0.27,0.30)`). Varsayılan (1,1,1,1) - her eski tür (kurt/ayı/
+  domuz/geyik/at...) hiç değişmeden aynı kalıyor.
+- **Mevki çerçevesi kaldırıldı, sıra/hedef bir çizgi değil bir parıltı
+  oldu - kullanıcının kendi isteği ("çerçeve olmasın... hafif bir glow,
+  temaya uygun").** `CombatUnitSlot`'un woodgrain K1/K2 dokuları
+  (`k1_slot.png`/`k2_door.png`) tamamen kaldırıldı; panel artık yalnızca
+  eski çerçevenin içerik boşluğunu koruyan boş bir `StyleBoxEmpty`. Ölümün
+  Kıyısı'nın çatlak çerçevesi hiçbir zaman tek sinyal değildi (figürün
+  kendi kırmızı tonu ve durum satırındaki rozet zaten var), o yüzden
+  kaldırılması bir bilgi kaybı değil. Sıra/hedef vurgusu artık `_draw_
+  glow()` - dıştan içe azalan alfalı, genişleyen kenarlı birkaç `StyleBoxFlat`
+  katmanı (gerçek bir blur shader'ı yerine ucuz ama yeterli bir yaklaşım),
+  renkler zaten temanın kendi paleti (`ArtPalette.GOLD` sıra, `ArtPalette.
+  BLOOD` hedef - `UI_ACCENT`/can çubuğu dolgusuyla aynı aile, yeni bir renk
+  icat edilmedi).
+- **Mevkiler arası boşluk büyütüldü - domuzlar birbirine giriyordu.**
+  Hayvan portrelerinin artık kutularını bilerek aşması (bkz. yukarısı)
+  eski 4px'lik `_player_row`/`_enemy_row` ayracını anlamsız kıldı - iki
+  büyük hayvan yan yana geldiğinde üst üste biniyordu, kullanıcının kendi
+  bildirdiği hata. Ayraç 4 → 56'ya çıktı; iki domuzluk bir sürü artık
+  ekran görüntüsünde net biçimde ayrışıyor.
 
 ## Quick Start
 

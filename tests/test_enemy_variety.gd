@@ -27,6 +27,18 @@ func _seeded_rng(seed_value: int) -> RandomNumberGenerator:
 	rng.seed = seed_value
 	return rng
 
+## Kurt ailesi: sıradan kurt ve iki sürü reisi (bkz. EnemyCatalog.
+## WOLF_ALPHA_WHITE/_BLACK) artık kendi adlarını taşıyor, ama genetik
+## olarak aynı hayvan - "tek türden" kuralı burada "tek görünen ad" değil
+## "tek aile" anlamına geliyor. Ayı/domuz/kurt üçü yine asla karışmıyor,
+## bu yalnızca kurdun kendi ailesini bir bütün sayıyor.
+const _WOLF_FAMILY_NAMES: Array[String] = ["Kurt", "Kırağı Kurdu", "Zifir Kurdu"]
+
+func _species_family(display_name: String) -> String:
+	if display_name in _WOLF_FAMILY_NAMES:
+		return "wolf"
+	return display_name
+
 ## Kadro türü çeşitlendiği hâlde savaş kayıtları/panel başlığı sabit
 ## "Haydutlar" diyordu - bir ayı sürüsü de muhafız devriyesi de haydut
 ## diye anılıyordu. Etiket artık kadro türünden geliyor.
@@ -72,7 +84,7 @@ func _test_wildlife_squad_composition(t) -> void:
 	var calm := EnemyCatalog.build_wildlife_squad(0.1, 4, _seeded_rng(1))
 	t.eq(calm.size(), 2, "düşük tehlikede iki kişilik bir sürü")
 	for unit in calm:
-		t.eq(unit.display_name, "Kurt", "düşük tehlikede yalnızca kurt çıkar")
+		t.eq(_species_family(unit.display_name), "wolf", "düşük tehlikede yalnızca kurt ailesi çıkar")
 
 	# Oyuncunun oynanış testinde bildirdiği hata: bir sürüde kurt ve domuz
 	# birlikte çıkıyordu (bkz. build_wildlife_squad'ın kendi notu - eskiden
@@ -111,12 +123,12 @@ func _test_wildlife_squad_never_mixes_species(t) -> void:
 				var squad := EnemyCatalog.build_wildlife_squad(
 					danger, party_size, _seeded_rng(9000 + seed_value), 1
 				)
-				var names := {}
+				var families := {}
 				for unit in squad:
-					names[unit.display_name] = true
+					families[_species_family(unit.display_name)] = true
 				t.eq(
-					names.size(), 1,
-					"tehlike %.1f, parti %d: sürü tek türden (bulunan: %s)" % [danger, party_size, names.keys()]
+					families.size(), 1,
+					"tehlike %.1f, parti %d: sürü tek türden (bulunan: %s)" % [danger, party_size, families.keys()]
 				)
 
 ## Faz 17 PR-6: "vahşi hayvan sürüsü" artık geçtiği araziye bağlı - orman
@@ -136,9 +148,9 @@ func _test_wildlife_squad_biome_composition(t) -> void:
 	)
 	var wolf_count := 0
 	for unit in forest_calm:
-		if unit.display_name == "Kurt":
+		if _species_family(unit.display_name) == "wolf":
 			wolf_count += 1
-	t.eq(wolf_count, forest_calm.size(), "orman sürüsü de yalnızca kurttan oluşur")
+	t.eq(wolf_count, forest_calm.size(), "orman sürüsü de yalnızca kurt ailesinden oluşur")
 	t.ge(wolf_count, 3, "orman sürüsü en az üç kurt taşır")
 
 	# Ayı dağda çok daha olası (bkz. bear_chance) - kırk bağımsız tohumda
@@ -222,7 +234,7 @@ func _test_build_squad_dispatches_by_kind(t) -> void:
 	var fallback := EnemyCatalog.build_squad("", "", 0.6, 4, _seeded_rng(3), 1)
 
 	t.eq(bandit[0].display_name, "Haydut Kesicisi", "\"bandit\" kadrosu haydut çıkarır")
-	t.eq(wildlife[0].display_name, "Kurt", "\"wildlife\" kadrosu hayvan çıkarır")
+	t.eq(_species_family(wildlife[0].display_name), "wolf", "\"wildlife\" kadrosu hayvan çıkarır")
 	t.eq(guard[0].display_name, "Şehir Muhafızı", "\"guard\" kadrosu muhafız çıkarır")
 	t.eq(hunt[0].display_name, "Erkek Geyik", "\"hunt\" kadrosu av hayvanı çıkarır")
 	t.eq(fallback[0].display_name, "Haydut Kesicisi", "bilinmeyen/boş kind haydut kadrosuna düşer")
@@ -252,10 +264,11 @@ func _test_trigger_combat_carries_kind(t) -> void:
 	t.eq(wildlife_result.combat_kinds, ["wildlife"], "text_value combat_kinds'e taşınır")
 
 ## Kurt sürüsü reisi (bkz. EnemyCatalog.WOLF_ALPHA_WHITE/_BLACK, kullanıcının
-## kendi isteği - "sürü lideri gibi", statları daha yüksek, beyaz/kara asla
-## birlikte çıkmaz). Aynı tür sayılır (`display_name_key` bilerek WOLF'unkiyle
-## aynı) - o yüzden `_test_wildlife_squad_never_mixes_species` hiç
-## değişmeden geçiyor; bu test üç iddiayı doğrudan sınıyor.
+## kendi isteği - "sürü lideri gibi", statları daha yüksek, kendi adları,
+## beyaz/kara asla birlikte çıkmaz). Genetik olarak aynı tür sayılır ama
+## artık kendi `display_name_key`'leri var - `_species_family()` bu ikisini
+## "Kurt"la aynı aileye koyduğu için `_test_wildlife_squad_never_mixes_
+## species` hiç kırılmadan geçiyor; bu test dört iddiayı doğrudan sınıyor.
 func _test_wolf_pack_leader(t) -> void:
 	var wolf := EnemyCatalog.get_enemy(EnemyCatalog.WOLF)
 	var white := EnemyCatalog.get_enemy(EnemyCatalog.WOLF_ALPHA_WHITE)
@@ -269,10 +282,18 @@ func _test_wolf_pack_leader(t) -> void:
 	t.ok(black.max_hp > wolf.max_hp, "kara reisin canı sıradan kurttan yüksek")
 	t.ok(black.damage_bonus > wolf.damage_bonus, "kara reisin hasarı sıradan kurttan yüksek")
 
-	# İkisi aynı tür sayıldığı için (bkz. yukarısı) yine "Kurt" adını taşır -
-	# oyuncuya reis olduklarını gösteren şey figürün rengi/boyu, ada değil.
-	t.eq(white.display_name, wolf.display_name, "beyaz reis de \"Kurt\" olarak anons edilir")
-	t.eq(black.display_name, wolf.display_name, "kara reis de \"Kurt\" olarak anons edilir")
+	# "İsimlerini de düzenle, 'kara börü' demeyin" - artık kendi adları var,
+	# sıradan kurttan farklı, ve "kara börü" değil.
+	t.eq(white.display_name, "Kırağı Kurdu", "beyaz reis kendi adıyla anons edilir")
+	t.eq(black.display_name, "Zifir Kurdu", "kara reis kendi adıyla anons edilir")
+	t.ne(white.display_name, wolf.display_name, "beyaz reisin adı sıradan kurttan farklı")
+	t.ne(black.display_name, wolf.display_name, "kara reisin adı sıradan kurttan farklı")
+	t.not_ok("kara börü" in black.display_name.to_lower(), "kara reis \"kara börü\" diye anılmaz")
+
+	# Genetik olarak yine kurt ailesi - "tek türden" kuralı bunları
+	# birbirinden ya da sıradan kurttan ayırmıyor, yalnızca ayı/domuzdan.
+	t.eq(_species_family(white.display_name), _species_family(wolf.display_name), "beyaz reis kurt ailesinden sayılır")
+	t.eq(_species_family(black.display_name), _species_family(wolf.display_name), "kara reis kurt ailesinden sayılır")
 
 	# Kırk bağımsız tohumda hem beyaz hem kara en az bir kez çıkmalı
 	# (overwhelming-margin deseni, bkz. test_traits.gd'nin seed dağıtımı),
