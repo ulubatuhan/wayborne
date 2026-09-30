@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_trigger_combat_carries_kind(t)
 	_test_kind_labels(t)
 	_test_encounter_log_uses_enemy_label(t)
+	_test_wolf_pack_leader(t)
 
 func _seeded_rng(seed_value: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
@@ -249,3 +250,47 @@ func _test_trigger_combat_carries_kind(t) -> void:
 		EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "wildlife"),
 	], session)
 	t.eq(wildlife_result.combat_kinds, ["wildlife"], "text_value combat_kinds'e taşınır")
+
+## Kurt sürüsü reisi (bkz. EnemyCatalog.WOLF_ALPHA_WHITE/_BLACK, kullanıcının
+## kendi isteği - "sürü lideri gibi", statları daha yüksek, beyaz/kara asla
+## birlikte çıkmaz). Aynı tür sayılır (`display_name_key` bilerek WOLF'unkiyle
+## aynı) - o yüzden `_test_wildlife_squad_never_mixes_species` hiç
+## değişmeden geçiyor; bu test üç iddiayı doğrudan sınıyor.
+func _test_wolf_pack_leader(t) -> void:
+	var wolf := EnemyCatalog.get_enemy(EnemyCatalog.WOLF)
+	var white := EnemyCatalog.get_enemy(EnemyCatalog.WOLF_ALPHA_WHITE)
+	var black := EnemyCatalog.get_enemy(EnemyCatalog.WOLF_ALPHA_BLACK)
+	t.ne(white, null, "beyaz sürü reisi katalogda var")
+	t.ne(black, null, "kara sürü reisi katalogda var")
+
+	# "Statları buna göre daha yüksek olmalı" - sıradan kurdun katına.
+	t.ok(white.max_hp > wolf.max_hp, "beyaz reisin canı sıradan kurttan yüksek")
+	t.ok(white.damage_bonus > wolf.damage_bonus, "beyaz reisin hasarı sıradan kurttan yüksek")
+	t.ok(black.max_hp > wolf.max_hp, "kara reisin canı sıradan kurttan yüksek")
+	t.ok(black.damage_bonus > wolf.damage_bonus, "kara reisin hasarı sıradan kurttan yüksek")
+
+	# İkisi aynı tür sayıldığı için (bkz. yukarısı) yine "Kurt" adını taşır -
+	# oyuncuya reis olduklarını gösteren şey figürün rengi/boyu, ada değil.
+	t.eq(white.display_name, wolf.display_name, "beyaz reis de \"Kurt\" olarak anons edilir")
+	t.eq(black.display_name, wolf.display_name, "kara reis de \"Kurt\" olarak anons edilir")
+
+	# Kırk bağımsız tohumda hem beyaz hem kara en az bir kez çıkmalı
+	# (overwhelming-margin deseni, bkz. test_traits.gd'nin seed dağıtımı),
+	# ve hiçbir sürüde ikisi birlikte bulunmamalı - tek bir zar, tek bir
+	# yerine koyma (bkz. build_wildlife_squad'ın kendi yorumu).
+	var white_seen := false
+	var black_seen := false
+	for seed_value in 60:
+		var squad := EnemyCatalog.build_wildlife_squad(0.1, 4, _seeded_rng(7000 + seed_value))
+		var has_white := false
+		var has_black := false
+		for unit in squad:
+			if unit.figure_kind == EnemyCatalog.WOLF_ALPHA_WHITE:
+				has_white = true
+				white_seen = true
+			elif unit.figure_kind == EnemyCatalog.WOLF_ALPHA_BLACK:
+				has_black = true
+				black_seen = true
+		t.not_ok(has_white and has_black, "beyaz ve kara reis aynı sürüde birlikte çıkmaz (seed %d)" % seed_value)
+	t.ok(white_seen, "altmış denemede en az bir kez beyaz reis çıkar")
+	t.ok(black_seen, "altmış denemede en az bir kez kara reis çıkar")

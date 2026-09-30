@@ -85,13 +85,17 @@ const ARCHETYPES: Dictionary = {
 		"cloth": Color(0.34, 0.33, 0.32), "trim": Color(0.22, 0.21, 0.21),
 		"metal": Color(0.80, 0.80, 0.78),
 	},
+	# bulk 2.6/1.75: kullanıcının kendi ölçüsü ("ayı iki insan genişliğinde,
+	# domuz bir buçuk") - bkz. `_draw_beast_sprites`'ın kendi notu, eskiden
+	# bu alanın hiçbir değeri `minf(1.0, ...)` kırpması yüzünden kutunun
+	# ötesine geçemiyordu.
 	"bear": {
-		"body": BEAST, "bulk": 1.35, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 2.6, "head": "snout", "weapon": "none",
 		"cloth": Color(0.28, 0.21, 0.16), "trim": Color(0.18, 0.14, 0.11),
 		"metal": Color(0.84, 0.82, 0.78),
 	},
 	"boar": {
-		"body": BEAST, "bulk": 1.10, "head": "tusks", "weapon": "none",
+		"body": BEAST, "bulk": 1.75, "head": "tusks", "weapon": "none",
 		"cloth": Color(0.25, 0.22, 0.20), "trim": Color(0.16, 0.14, 0.13),
 		"metal": Color(0.88, 0.86, 0.80),
 	},
@@ -108,6 +112,24 @@ const ARCHETYPES: Dictionary = {
 		"body": BEAST, "bulk": 0.85, "head": "snout", "weapon": "none",
 		"cloth": Color(0.42, 0.32, 0.22), "trim": Color(0.26, 0.20, 0.14),
 		"metal": Color(0.80, 0.76, 0.66),
+	},
+	# Kurt sürüsü reisleri (bkz. EnemyCatalog.WOLF_ALPHA_WHITE/_BLACK) - aynı
+	# `BeastRig.WOLF` iskeleti/derisi (`sprite_kind`), yalnızca daha iri
+	# (`bulk`) ve bir renk çarpanıyla (`sprite_tint`, `_draw_beast_sprites`'ın
+	# dokuya çarptığı ek ton) beyaz/kara okunuyor - yeni bir tür/sanat değil.
+	# cloth/trim/metal yalnızca `_draw_fallen`in prosedürel silüetinde (bkz.
+	# "stag"/"deer"'in kendi notu) ve sprite hiç yoksa kullanılıyor.
+	"wolf_alpha_white": {
+		"body": BEAST, "bulk": 1.20, "head": "snout", "weapon": "none",
+		"cloth": Color(0.86, 0.87, 0.90), "trim": Color(0.62, 0.64, 0.68),
+		"metal": Color(0.95, 0.95, 0.92),
+		"sprite_kind": "wolf", "sprite_tint": Color(1.55, 1.60, 1.75),
+	},
+	"wolf_alpha_black": {
+		"body": BEAST, "bulk": 1.20, "head": "snout", "weapon": "none",
+		"cloth": Color(0.10, 0.09, 0.10), "trim": Color(0.05, 0.05, 0.06),
+		"metal": Color(0.55, 0.54, 0.56),
+		"sprite_kind": "wolf", "sprite_tint": Color(0.28, 0.27, 0.30),
 	},
 }
 
@@ -573,7 +595,7 @@ func _draw_beast(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	if _draws_fallen():
 		_draw_fallen(box, fur, dark, fur, bulk)
 		return
-	if BeastRig.has_sprites(_kind):
+	if BeastRig.has_sprites(_sprite_species()):
 		_draw_beast_sprites(box)
 		return
 
@@ -645,21 +667,48 @@ func _draw_beast(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 			tooth, 2.0
 		)
 
+## `_kind` (ARCHETYPES anahtarı, palet/güç) her zaman bir `BeastRig` türüyle
+## bire bir eşleşmiyor artık - kurt sürüsü reisleri (bkz. WOLF_ALPHA_WHITE/
+## _BLACK) aynı `BeastRig.WOLF` iskeletini/derisini kullanıp yalnızca ton
+## değiştiriyor. `sprite_kind` yoksa (her eski tür) `_kind`'ın kendisi
+## dönüyor - eski davranış birebir korunuyor.
+func _sprite_species() -> String:
+	return String(_archetype().get("sprite_kind", _kind))
+
+## Aynı gerekçeyle: bir tür kendi dokusunu değil, ödünç aldığı türün
+## dokusunu bir renk çarpanıyla giyer. Varsayılan (1,1,1,1) - çarpımda
+## no-op, tıpkı `sprite_kind` yoksayılması gibi.
+func _sprite_tint() -> Color:
+	return _archetype().get("sprite_tint", Color(1.0, 1.0, 1.0, 1.0))
+
 ## Resmi gelmiş hayvan iskeletten (`BeastRig`) çiziliyor - yolda kervanın
 ## önüne çıkan kurt da (`RoadEncounter` bu figürü taşıyor) savaştaki kurtla
 ## aynı resim. Hayvan kutuya dinlenme pozunun kapladığı alana göre sığıyor;
 ## arka mevki biraz küçük, durum tonu çarpan renk.
+##
+## `bulk` eskiden burada `minf(1.0, ...)` ile üstten kırpılıyordu - yani
+## `ARCHETYPES`'a ne yazılırsa yazılsın, hiçbir tür kutuya *tam sığan*
+## boyu aşamıyordu. Ayı/domuz gibi tek başına ya da az sayıda karşılaşılan,
+## gerçekte bir insandan kat kat büyük hayvanlar bu yüzden kutunun
+## boyutuna kilitlenip küçük okunuyordu - gerçek oranları hiç bozmadan
+## (tek bir `h` çarpanı hem eni hem boyu birlikte büyütüyor), ama insan
+## figürüyle aynı mevki kutusuna sıkıştırılınca "kocaman bir hayvan"
+## hissini veremiyordu. Kırpma kaldırıldı: artık `bulk` gerçekten ne
+## kadar büyükse hayvan o kadar büyük çiziliyor, kutuyu (ve komşu mevkiyi)
+## bilerek aşarak - `CombatUnitSlot` hiçbir çocuğunda `clip_contents` açık
+## değil, taşma zaten görsel olarak destekleniyor.
 func _draw_beast_sprites(box: Vector2) -> void:
 	var facing := 1.0 if _face_right else -1.0
-	var ext := BeastRig.draw_extent(_kind)
+	var species := _sprite_species()
+	var ext := BeastRig.draw_extent(species)
 	# Kutuya sığan en büyük boy, türün iriliğiyle çarpılıyor: ayı kutuyu
 	# dolduruyor, kurt ondan küçük kalıyor (prosedürel silüetin `bulk`'ı).
 	var fit := minf(box.x * 1.05 / ext.size.x, box.y * 0.86 / ext.size.y)
-	var bulk := minf(1.0, float(_archetype().bulk) * 0.85)
+	var bulk := float(_archetype().bulk) * 0.85
 	var h := fit * bulk * (1.0 - _depth * 0.10)
 	var ground := Vector2(box.x * 0.5 - (ext.position.x + ext.size.x * 0.5) * h * facing, box.y * 0.95)
-	var joints := BeastRig.draw_pose(_kind, ground, h, 0.0, 0.0, facing)
-	BeastRig.draw_species(self, _kind, joints, h, facing, _state_tone(), _base)
+	var joints := BeastRig.draw_pose(species, ground, h, 0.0, 0.0, facing)
+	BeastRig.draw_species(self, species, joints, h, facing, _state_tone() * _sprite_tint(), _base)
 
 # --- Çizim yardımcıları ---
 

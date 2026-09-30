@@ -19,6 +19,22 @@ const WOLF: String = "wolf"
 const BEAR: String = "bear"
 const BOAR: String = "boar"
 
+## Kurt sürüsünün reisi - beyaz bir direwolf ya da kara bir börü (bkz.
+## build_wildlife_squad). Aynı türden sayılır (kurt ailesi, bkz.
+## test_enemy_variety.gd'nin "tek türden" kuralı) - `display_name_key`
+## bilerek WOLF'unkiyle aynı ("ENEMY_WOLF_NAME"), çünkü bu bir ayrı tür
+## değil, sürünün öndeki, daha güçlü ve göze çarpan örneği. Görsel ayrımı
+## `CombatFigure.ARCHETYPES`'ın `sprite_kind`/`sprite_tint` alanları taşır -
+## aynı `BeastRig.WOLF` iskeleti/derisi, farklı ton.
+const WOLF_ALPHA_WHITE: String = "wolf_alpha_white"
+const WOLF_ALPHA_BLACK: String = "wolf_alpha_black"
+
+## Bir kurt sürüsünün önde gelen kurdunun sürü reisine dönüşme ihtimali
+## (bkz. build_wildlife_squad). Her sürüde en fazla bir tane - zar tek,
+## beyaz/kara seçimi de tek, o yüzden ikisi hiçbir zaman aynı sürüde
+## birlikte çıkamaz.
+const WOLF_PACK_LEADER_CHANCE: float = 0.4
+
 ## Av hayvanları (bkz. build_hunt_squad, evt_hunting_trip). Enemy_id'leri
 ## kasıtlı olarak `BeastRig.STAG`/`BeastRig.DEER` ile aynı dize -
 ## `CombatUnit.from_enemy()` `figure_kind`'ı doğrudan `enemy_id`'den
@@ -222,6 +238,14 @@ static func build_wildlife_squad(
 			ids = [WOLF, WOLF]
 			if biome == ArtPalette.BIOME_FOREST:
 				ids.append(WOLF)
+			# Sürü reisi: seyrek, sürünün en öndeki kurdu yerine geçer -
+			# beyaz bir direwolf ya da kara bir börü, kullanıcının kendi
+			# isteği. Tek bir zar, tek bir yerine koyma: ikisi asla aynı
+			# sürüde birlikte çıkamaz (bkz. WOLF_ALPHA_WHITE/_BLACK'in
+			# kendi yorumu - aynı tür sayılır, `ids[0]` dışındakiler hâlâ
+			# sıradan kurt).
+			if rng.randf() < WOLF_PACK_LEADER_CHANCE:
+				ids[0] = WOLF_ALPHA_WHITE if rng.randf() < 0.5 else WOLF_ALPHA_BLACK
 
 	return _build_units(ids, party_size, average_level, danger_level)
 
@@ -316,6 +340,17 @@ static func _ensure_built() -> void:
 	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 19, 80, 13, 6, 3, 14, [SkillCatalog.WOLF_BITE], 1, 8))
 	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
 	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+
+	# Sürü reisi - beyaz direwolf/kara börü, kullanıcının kendi isteği
+	# ("statları buna göre daha yüksek olmalı"). display_name_key bilerek
+	# WOLF'unkiyle aynı (bkz. WOLF_ALPHA_WHITE'ın kendi yorumu) - ikisi
+	# yalnızca görsel/güç bakımından ayrışır, aynı tek/isim çekirdeği
+	# `test_enemy_variety.gd`'nin "kadro hiçbir zaman tür karıştırmaz"
+	# kilidini hiç bozmadan geçer. Kurdun ~1.8 katı can, biraz daha
+	# isabetli/kaçıngan/kritikli - bir sıradan kurdun yanında gerçekten
+	# "reis" okunsun diye.
+	_enemies.append(_make(WOLF_ALPHA_WHITE, "ENEMY_WOLF_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
+	_enemies.append(_make(WOLF_ALPHA_BLACK, "ENEMY_WOLF_NAME", 34, 84, 16, 12, 7, 15, [SkillCatalog.WOLF_BITE], 1, 22))
 
 	# Av hayvanları (bkz. build_hunt_squad, evt_hunting_trip) - geyik (DEER)
 	# neredeyse zararsız, kaçmaya çalışan ürkek bir mevcudiyet; erkek geyik

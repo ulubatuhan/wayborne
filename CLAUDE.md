@@ -6022,6 +6022,73 @@ listesiyle aynı biçimde, bir "Durum" sütunu eklenmiş) dökmekti.
   ölçeklenmiş kopyalardı) - aynı dosya adlarının üstüne yazıldığı için hiç
   kod değişmedi, `.tscn`'ler zaten o yolu okuyor.
 
+Faz 23 ("Ayı gerçekten büyük, kurt sürüsünün bir reisi var") - kullanıcının
+kendi ekran görüntüsüne ("bear_check.png") verdiği doğrudan geri bildirim:
+ayı ve yaban domuzu Faz 21'in beast-skin sanatıyla artık *çiziliyordu* ama
+savaş mevkisinin kutusuna sığdırılırken bir insanla neredeyse aynı boyuta
+küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küçültüyor."
+
+- **Kök neden bir ölçek değil, bir kırpmaydı.** `CombatFigure.
+  _draw_beast_sprites()` her zaman iki adım atıyordu: `fit` (hayvanın kutuya
+  tam sığan en büyük boyu) ve ardından `archetype.bulk * 0.85`'i bununla
+  çarpan bir ikinci pay. O ikinci pay `minf(1.0, ...)` ile üstten
+  kırpılıyordu - yani `bulk` ne yazılırsa yazılsın (ayı zaten 1.35'ti),
+  1.18'in üstündeki hiçbir değerin sprite çiziminde **hiçbir etkisi**
+  yoktu, hayvan her zaman "kutuya tam sığan" boyda kalıyordu. Ayının
+  arketip `bulk`'ı zemin gölgesini (`_draw_ground_shadow`) ve resmi
+  olmayan prosedürel yedek çizimi (`_draw_beast`'in kendi dalı) zaten
+  doğru okuyordu - kırpma yalnızca gerçek deri sanatının çizildiği tek
+  yoldaydı, ki oyuncunun gördüğü tam olarak oydu.
+- **Düzeltme kırpmayı kaldırmak, ikinci bir sistem eklemek değil.**
+  `bulk := float(_archetype().bulk) * 0.85` artık kırpılmadan `h`'ye
+  giriyor - `ARCHETYPES`'a yazılan sayı gerçekten o kadar büyük çiziliyor,
+  kutuyu (ve komşu mevkiyi) bilerek aşarak. `CombatUnitSlot`'un hiçbir
+  çocuğunda `clip_contents` açık değil, yani taşma zaten görsel olarak
+  destekleniyordu - yalnızca hiçbir `bulk` değeri onu tetikleyecek kadar
+  büyük olamıyordu. `bulk` tek bir çarpan olduğu için (`h` hem eni hem
+  boyu birlikte büyütüyor) gerçek oran hiç bozulmuyor - kullanıcının
+  "gerçekçi görünümleri olsun" isteği tam olarak bu: hayvan büyüyor,
+  eğilmiyor/gerilmiyor. Ayının `bulk`'ı 1.35 → 2.6, domuzunki 1.10 → 1.75
+  (kullanıcının kendi ölçüsü: "ayı iki insan genişliğinde, domuz bir buçuk"
+  - ekran görüntüsüyle doğrulandı, bkz. `tests/screenshot_beast_rig.gd`'nin
+  kardeşi olan tek seferlik doğrulama scripti, commit'e girmedi).
+- **Kurt sürüsüne bir reis eklendi - beyaz bir direwolf ya da kara bir
+  börü, kullanıcının kendi isteği.** `EnemyCatalog.WOLF_ALPHA_WHITE`/
+  `_BLACK` sıradan kurdun (~1.8 katı can, biraz daha isabetli/kaçıngan/
+  kritikli) iki yeni `EnemyTemplate`'i; `build_wildlife_squad()`'ın kurt
+  kolu artık `WOLF_PACK_LEADER_CHANCE` (%40) ile sürünün ilk kurdunu bir
+  reisle değiştiriyor - tek bir zar, tek bir yerine koyma, yani beyaz ve
+  kara **hiçbir zaman** aynı sürüde birlikte çıkamaz (yapının kendisi
+  garanti ediyor, `test_enemy_variety.gd`'nin `_test_wolf_pack_leader`'ı
+  kırk bağımsız tohumda regresyon kilidi).
+- **Reis ayrı bir tür değil - aynı türün daha güçlü, göze çarpan bir
+  örneği, ve bu kasıtlı bir tasarım seçimi.** `display_name_key` bilerek
+  WOLF'unkiyle aynı ("ENEMY_WOLF_NAME") - ikisi de savaş kaydında "Kurt"
+  diye anons ediliyor, oyuncuya reis olduğunu gösteren şey adı değil
+  rengi/boyu. Bunun tek sebebi estetik değil: `test_enemy_variety.gd`'nin
+  `_test_wildlife_squad_never_mixes_species`'i **her** tehlike/parti/tohum
+  kombinasyonunda bir sürünün tam olarak tek bir `display_name` taşıdığını
+  kilitliyor (Faz 8 PR-A'nın kurt+domuz karışık sürü hatasının regresyon
+  testi) - reise ayrı bir isim vermek bu kilidi kırardı. Aynı türden
+  sayılınca o test hiç değişmeden geçiyor; oyunun kendi disiplini burada
+  da işledi: bir sistemi genişletirken zaten var olan, ölçülmüş bir
+  garantiyi bozmadan genişlet.
+- **Görsel ayrım yeni bir sanat değil, bir renk çarpanı.** Ne "beyaz
+  direwolf" ne "kara börü" için ayrı bir 3D model/skin var - ikisi de aynı
+  `BeastRig.WOLF` iskeletini/derisini kullanıyor. `CombatFigure.
+  ARCHETYPES`'a `sprite_kind`/`sprite_tint` alanları eklendi: `_kind`
+  (arketip anahtarı, palet/güç) artık her zaman doğrudan bir `BeastRig`
+  türüne eşlenmek zorunda değil - `_sprite_species()` varsa `sprite_kind`'ı,
+  yoksa `_kind`'ın kendisini döner (eski her tür için no-op). `_draw_beast_
+  sprites()` `BeastRig.draw_species()`'e tonu `_state_tone() * _sprite_tint()`
+  olarak geçiyor - beyaz reis için parlaklığı 1'in üstüne çıkaran bir çarpan
+  (`Color(1.55,1.60,1.75)`, dokuyu aydınlığa yıkıyor), kara reis için
+  koyulaştıran bir çarpan (`Color(0.28,0.27,0.30)`). Varsayılan (1,1,1,1) -
+  her eski tür (kurt/ayı/domuz/geyik/at...) hiç değişmeden aynı kalıyor.
+  `bulk` da 0.95 → 1.20: sıradan kurttan biraz daha iri, ama ayının aksine
+  ölçüsüz değil - sürünün geri kalanıyla aynı mevki sırasında görünür
+  kalması gerekiyor.
+
 ## Quick Start
 
 1. Open `project.godot` in Godot 4.2+
