@@ -166,6 +166,17 @@ func _test_loadout_layers_and_discovery(t) -> void:
 func _test_body_variant_id_falls_back(t) -> void:
 	var previous := Wardrobe.root_path
 	Wardrobe.root_path = FIXTURE_ROOT
+	# `_write_fixture` yazdığı PNG'yi hiçbir yerde silmiyor - bu testin
+	# kendisi de dahil. `user://wardrobe_test/` gerçek bir disk yolu
+	# olduğu için bir önceki koşudan kalan "body_male_heavy" fixture'ı
+	# bu satırdan önce zaten diskte durabiliyordu, ki bu da "sanat yokken
+	# fallback'e düşer" iddiasını -sanat aslında hep vardı diye- kalıcı
+	# olarak yanlış çıkarıyordu. Fallback'i sınamadan önce kendi fixture'ını
+	# kesin olarak temizlemek, testin kendi geçmiş koşularından bağımsız
+	# olmasını sağlıyor - `simulate_journeys.gd`'nin "seed her zaman
+	# tohumlanır" disipliniyle aynı aile: bir test kendi önceki koşusuna
+	# bağımlıysa flake'ten farksızdır.
+	_remove_fixture("body_male_heavy")
 	Wardrobe.clear_cache()
 	t.eq(
 		Wardrobe.body_id_for(CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_HEAVY),
@@ -184,6 +195,10 @@ func _test_body_variant_id_falls_back(t) -> void:
 		Wardrobe.BODY_ID,
 		"başka bir varyantın sanatı bu varyantı etkilemez"
 	)
+	# Bir sonraki koşunun aynı tuzağa düşmemesi için kendi fixture'ını
+	# temizleyerek çıkıyor - yazdığı şeyi silen tek test bu dosyada, çünkü
+	# yalnızca bu test "önce yok, sonra var" sırasına bağımlı.
+	_remove_fixture("body_male_heavy")
 	Wardrobe.root_path = previous
 	Wardrobe.clear_cache()
 
@@ -230,3 +245,19 @@ func _write_fixture(item_id: String, parts: Array) -> void:
 		var image := Image.create(canvas.x, canvas.y, false, Image.FORMAT_RGBA8)
 		image.fill(Color(0.6, 0.4, 0.3, 1.0))
 		image.save_png(ProjectSettings.globalize_path("%s/%s.png" % [dir, part]))
+
+## `_write_fixture`'ın tersi: dizindeki tüm dosyaları, sonra dizinin
+## kendisini siler. Dizin hiç yoksa (ilk koşu, ya da zaten temiz) no-op.
+func _remove_fixture(item_id: String) -> void:
+	var dir_path := ProjectSettings.globalize_path(FIXTURE_ROOT + item_id)
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if not dir.current_is_dir():
+			DirAccess.remove_absolute(dir_path.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	DirAccess.remove_absolute(dir_path)

@@ -243,10 +243,16 @@ func _build_field() -> void:
 	_player_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	field.add_child(_player_row)
 
-	# İki tarafın arasında ince bir boşluk yeter: zemin ve ışık havuzu
-	# ayrımı zaten taşıyor, ek bir çizgi sahneyi ikiye biçiyordu.
+	# İki tarafın en önü tam burada karşı karşıya duruyor - ve en öndeki
+	# mevkiler taşan hayvan portrelerinin (bkz. CombatFigure'ın kendi notu)
+	# kaçamayacağı tek yer, çünkü ikisi de bu boşluğa bakan tarafa hizalı
+	# (`_player_row` ALIGNMENT_END, `_enemy_row` ALIGNMENT_BEGIN). Eski 26px
+	# ince çizgi ayrımı için yeterliydi ama bir ayının/kurt reisinin gövdesi
+	# önündeki mevkiyi kolayca aşıyor - kullanıcının kendi bildirdiği "parti
+	# ile düşman arası boşluk da ezilmiş" hatası. 26 → 160, satır içi
+	# ayraçtan (56) da geniş: en riskli sınır en geniş boşluğu alıyor.
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(26.0, 0.0)
+	gap.custom_minimum_size = Vector2(160.0, 0.0)
 	field.add_child(gap)
 
 	_enemy_row = HBoxContainer.new()

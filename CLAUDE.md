@@ -6112,6 +6112,32 @@ küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küç
   büyük hayvan yan yana geldiğinde üst üste biniyordu, kullanıcının kendi
   bildirdiği hata. Ayraç 4 → 56'ya çıktı; iki domuzluk bir sürü artık
   ekran görüntüsünde net biçimde ayrışıyor.
+- **İlk tur boşluğu yalnızca satır içinde çözdü - ölçülmeden bırakılan tek
+  sınır patladı.** `_player_row`/`_enemy_row` arasındaki `gap` Control'ü
+  (iki tarafın en önünün karşı karşıya durduğu, `_player_row`
+  `ALIGNMENT_END`/`_enemy_row` `ALIGNMENT_BEGIN` olduğu için) hâlâ eski
+  26px'te kalmıştı - kullanıcının kendi bildirdiği ikinci hata: "parti ile
+  düşman arası boşluk da ezilmiş." En riskli sınır en dar boşluktaydı; 26 →
+  160 (satır içi ayraçtan - 56 - da geniş, çünkü taşan bir ayı/kurt reisi
+  tam bu noktada karşı safa bakıyor).
+- **Kurt sürüsü reisi ayıdan büyük çıkmıştı - ölçüsüz bir "üç kat" hesabı
+  yüzünden.** İlk turun `bulk`'ı (4.275 = sıradan kurdun üç katı,
+  kullanıcının kendi ilk isteği) sıradan kurdun taze büyütülmüş boyu
+  (1.425) üstüne bindirilince ayının kendi `bulk`'ını (2.6) geçti -
+  kullanıcı ekran görüntüsünde gördü ve düzeltti: "direwolf çok büyük
+  olmuş, bear ile aynı boyutta olmalı." `wolf_alpha_white`/`_black`'in
+  `bulk`'ı artık bilerek "bear"la birebir aynı sayı (2.6) - iki büyük,
+  nadir/tekil karşılaşılan hayvan aynı görsel ağırlığı taşıyor.
+- **Wardrobe testinin tek başarısız satırı, oyunun kendi hatası değildi.**
+  `_test_body_variant_id_falls_back` gerçek diske (`user://wardrobe_test/`)
+  bir `body_male_heavy` fixture'ı yazıyordu ama hiçbir yerde silmiyordu -
+  bu container'da testin daha önce en az bir kez çalışmış olması, "sanat
+  yokken düz body'ye düşer" iddiasını her sonraki koşuda kalıcı olarak
+  yanlış çıkarıyordu (fixture disk üstünde zaten duruyordu). `_remove_
+  fixture()` eklendi ve test artık fallback'i sınamadan önce **ve** sonra
+  kendi fixture'ını temizliyor - `simulate_journeys.gd`'nin "her RNG
+  tohumlanır" disipliniyle aynı aile: bir testin sonucu kendi önceki
+  koşusuna bağımlıysa flake'ten farksızdır.
 
 ## Quick Start
 

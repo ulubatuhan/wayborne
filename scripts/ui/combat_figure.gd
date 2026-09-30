@@ -121,15 +121,17 @@ const ARCHETYPES: Dictionary = {
 	# dokuya çarptığı ek ton) beyaz/kara okunuyor - yeni bir tür/sanat değil.
 	# cloth/trim/metal yalnızca `_draw_fallen`in prosedürel silüetinde (bkz.
 	# "stag"/"deer"'in kendi notu) ve sprite hiç yoksa kullanılıyor. bulk
-	# 4.275 = sıradan kurdun (1.425) tam üç katı - kullanıcının kendi ölçüsü.
+	# bilerek "bear"la birebir aynı (2.6) - kullanıcının kendi düzeltmesi:
+	# ilk turda sıradan kurdun üç katı (4.275) ayının kendisinden de büyük
+	# çıkmıştı, "ayıyla aynı boyda olmalı" diye geri çekildi.
 	"wolf_alpha_white": {
-		"body": BEAST, "bulk": 4.275, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 2.6, "head": "snout", "weapon": "none",
 		"cloth": Color(0.86, 0.87, 0.90), "trim": Color(0.62, 0.64, 0.68),
 		"metal": Color(0.95, 0.95, 0.92),
 		"sprite_kind": "wolf", "sprite_tint": Color(1.55, 1.60, 1.75),
 	},
 	"wolf_alpha_black": {
-		"body": BEAST, "bulk": 4.275, "head": "snout", "weapon": "none",
+		"body": BEAST, "bulk": 2.6, "head": "snout", "weapon": "none",
 		"cloth": Color(0.10, 0.09, 0.10), "trim": Color(0.05, 0.05, 0.06),
 		"metal": Color(0.55, 0.54, 0.56),
 		"sprite_kind": "wolf", "sprite_tint": Color(0.28, 0.27, 0.30),
