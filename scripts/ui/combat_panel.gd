@@ -236,8 +236,14 @@ func _build_field() -> void:
 	# kendi notu - ayı/domuz/kurt reisleri gerçek boylarında çiziliyor).
 	# Eski 4px ayraç bitişik mevkilerdeki iki büyük hayvanı üst üste
 	# bindiriyordu (domuz sürüsü - kullanıcının kendi bildirdiği hata);
-	# 4 → 56 taşan gövdelere gerçek bir boşluk bırakıyor.
-	_player_row.add_theme_constant_override("separation", 56)
+	# 4 → 56 taşan gövdelere gerçek bir boşluk bıraktı, ama kurt sürüsü
+	# reisinin (bulk 2.6, sıradan kurdun kendi uzun kuyruk vektörüyle
+	# çarpılınca ~2.3x genişlik taşması) kuyruğu 56px'i de aşıp arkasındaki
+	# sıradan kurdun üstüne biniyordu - kullanıcının kendi ekran görüntüsüyle
+	# bildirdiği hata. 56 → 160: merkez boşluğuyla (aşağıdaki `gap`) aynı
+	# değer, çünkü ikisi de aynı riski taşıyor - taşan bir ayı/kurt reisinin
+	# gövdesi komşu mevkiye bakıyor.
+	_player_row.add_theme_constant_override("separation", 160)
 	_player_row.alignment = BoxContainer.ALIGNMENT_END
 	_player_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_player_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -256,7 +262,8 @@ func _build_field() -> void:
 	field.add_child(gap)
 
 	_enemy_row = HBoxContainer.new()
-	_enemy_row.add_theme_constant_override("separation", 56)
+	# bkz. `_player_row`'un kendi yorumu - aynı 160px, aynı sebep.
+	_enemy_row.add_theme_constant_override("separation", 160)
 	_enemy_row.alignment = BoxContainer.ALIGNMENT_BEGIN
 	_enemy_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	_enemy_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -6138,6 +6138,23 @@ küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küç
   kendi fixture'ını temizliyor - `simulate_journeys.gd`'nin "her RNG
   tohumlanır" disipliniyle aynı aile: bir testin sonucu kendi önceki
   koşusuna bağımlıysa flake'ten farksızdır.
+- **160px'lik merkez boşluğu tek riskli sınır değilmiş - kurt sürüsü
+  reisinin kuyruğu sıra içinde de aynı hatayı yaptı.** Kullanıcı kendi
+  ekran görüntüsünü gönderdi: "Kırağı Kurdu"nun (bulk 2.6) kuyruğu
+  arkasındaki sıradan kurdun (bulk 1.425) üstüne biniyordu - `_player_row`/
+  `_enemy_row`'un kendi ayracı hâlâ 56px'teydi, yalnızca iki safın karşı
+  karşıya geldiği merkez boşluk (`gap`) 160'a çıkarılmıştı (bkz. yukarısı).
+  Ölçüm: `CombatFigure._draw_beast_sprites()`'ın `fit`/`bulk` formülü yan
+  görünümlü bir kurdun çizilen genişliğini `box.x * 1.05 * bulk * 0.85`'e
+  çıkarıyor - alpha'da (bulk 2.6) bu `SLOT_WIDTH`'in (136) neredeyse iki
+  katı, sıradan kurttan (bulk 1.425) çok daha fazla taşıyor. Aynı riskin
+  ikinci bir örneği olduğu için aynı çözüm: `_player_row`/`_enemy_row`'un
+  ayracı da 56 → 160, merkez boşlukla birebir aynı değer - "taşan bir ayı/
+  kurt reisinin gövdesi komşu mevkiye bakıyor" gerekçesi satır içi komşular
+  için de eşit derecede geçerli. Yeniden çekilen ekran görüntüsü kuyruğun
+  artık komşu kurda değmediğini doğruluyor; `test_combat_dd.gd` bu sabiti
+  sınamıyor (yalnızca mevki sayısını sayıyor), o yüzden regresyon tam
+  test paketiyle (12839/12839) doğrulandı.
 
 ## Quick Start
 
