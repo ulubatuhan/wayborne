@@ -27,3 +27,16 @@ extends Resource
 @export var grants_wagon_on_delivery: bool = false
 @export var cargo_reward_item_id: String = ""
 @export var cargo_reward_quantity: int = 0
+
+## Bazı tüccarlar vagon yerine kendi eşekleriyle gelir - kervanın paylaşılan
+## vagon havuzuna (bkz. CaravanPlan.max_wagons, Campaign Rules'un "buying
+## wagons crowds out contracts" bulgusu) hiç dokunmazlar. Varsayılan 0 -
+## mevcut hiçbir kontrat bunu doldurmuyor, yani eski davranış birebir
+## korunuyor. `wagon_count` bu tür bir teklifte kasıtlı olarak 0: hem
+## `CaravanPlan.get_used_wagon_count()`'un yeni bir dal gerektirmeden
+## doğru sonucu vermesini sağlıyor hem de "bir vagonu yok" gerçeğinin
+## kendisi.
+@export var donkey_count: int = 0
+
+func uses_donkey_escort() -> bool:
+	return donkey_count > 0

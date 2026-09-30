@@ -5794,12 +5794,28 @@ bu kez şüphelenilmesi gereken oyun değil, ekrana basan aracın kendisiydi.
 **Beş yeni türün dördüne (beyaz at, husky, eşek/yarım vagon, erkek
 geyik/geyik) oyuncunun kendi tarifiyle gerçek mekanik verildi - "ne işe
 yarayacakları henüz kararlaştırılmadı" notu artık dördü için kapandı.**
-Domuz ve ayı hâlâ bekliyor (kendi skin paketleri yok); husky/eşek/at
+Domuz ve ayı o sırada bekliyordu (kendi skin paketleri yoktu); husky/eşek/at
 tarafında yeni bir çizim yolu icat edilmedi - `WalkFigure`'ın zaten var
 olan `_draw_beast_sprites()` kapısı (bkz. Wardrobe & Rig Rules'un "one
 skin" maddesi) iki yeni `KIND_DOG`/`KIND_DONKEY` sabitiyle doğrudan
 `BeastRig.HUSKY`/`DONKEY`'e açılıyor - üçüncü bir tür (deer/stag) zaten
 var olan `CombatFigure.ARCHETYPES` tablosuna birer satır olarak girdi.
+
+**Sonradan tamamlandı: ayı ve yaban domuzu da gerçek deri sanatına
+kavuştu.** Ayı rigsiz bir meshti - ölçülen ayak/sağrı/burun noktalarından
+bir iskelet oturtulup kemik ısısıyla ağırlıklandırıldı, kutup ayısı
+dokusu orman ayısı kahvesine çevrildi; domuzun kemikleri Quaternius
+adlarına eşlendi. `beast_skin.py` bunun için GLB ve dokulu malzeme okumayı
+öğrendi (kurt çıktısı bayt bayt aynı kaldı - üçüncü bir tür eklemek ilk
+ikisinin skin'ini bozmadı). `data/assets/characters/beasts/bear/` ve
+`.../boar/` artık `horse`/`ox`/`wolf` ile birebir aynı üçlü dosya setini
+(`skin.tres`, `skin_main/tail/far.png`) taşıyor, `BeastRig.has_sprites()`
+bunu otomatik görüp savaşta skinli çiziyor - `enemy_id` doğrudan
+`figure_kind`'a aktığı için (`"bear"`/`"boar"`, `BeastRig.BEAR`/`BOAR` ile
+birebir) hiçbir ek kod gerekmedi, tam olarak "bir tür yalnızca gövdesinin
+resmi varsa sprite'a geçer" kuralının vaat ettiği şey. `test_beast_rig.gd`'nin
+`SKINNED` dizisi ikisini de kapsıyor. Domuz ve ayı artık bu paragrafın
+üstündeki "hâlâ bekliyor" notuna dahil değil.
 
 - **Beyaz at, atın kendi bir varyantı - ayrı bir tür değil.** "Bazen
   beyaz bazen kahve, rastgele" sözü `WalkFigure.set_kind()`'ta bir kez
@@ -5866,14 +5882,37 @@ var olan `CombatFigure.ARCHETYPES` tablosuna birer satır olarak girdi.
   kapasite yoksa sınırsız değil, hiç yok" ayrımı. Dünyada eşekler/yarım
   vagonlar da husky'yle aynı arka sürüde yürüyor (`WalkFigure.KIND_DONKEY`),
   ayrı bir figür icat edilmedi.
-  **Bilerek kapsam dışı bırakılan:** tüccarların vagon yerine eşekle
-  gelmesi (kullanıcının "1 tüccar 1-2 eşek" tarifi) - `MerchantOffer`'ın
-  28+ kalemlik, her biri kendi rotasına/fiyatına göre ölçülmüş sabit
-  teklif tablosuna dokunmadan bunu eklemek ya yeni, elle yazılmış teklifler
-  ya da mevcut tabloya rastgele bir bayrak demekti; ikisi de bu turun
-  kapsamı ve ölçme disiplini (bkz. Testing'in "bir sistem ölçülmeden
-  değiştirilmez" kuralı) açısından ayrı bir geçiş istiyor. Oyuncunun kendi
-  eşek/yarım vagon satın alması - asıl mekanik istek - kapsam dışı değil.
+  **Sonradan tamamlandı: tüccarların vagon yerine eşekle gelmesi**
+  (kullanıcının "1 tüccar 1-2 eşek" tarifi). Çözüm `MerchantOffer`'ın 28+
+  kalemlik sabit teklif tablosunu elle genişletmek ya da rastgele bir
+  bayrak eklemek değil - üçüncü bir **profil**: `WorldMapData.
+  _offers_for_direction()` her yönde zaten iki profil üretiyordu
+  ("1 vagon", "2 vagon"); artık üçüncüyü de üretiyor - `MerchantOffer.
+  donkey_count` (varsayılan 0, `uses_donkey_escort()` bunu okuyan tek
+  yer) dolu, `wagon_count` kasıtlı olarak 0. Kısa/güvenli bir yol tek
+  eşekle yürünür, uzun bir yol yükünü ikiye böler (`travel_days <= 4` ->
+  1, değilse 2) - vagon tekliflerinin uzunluğa göre büyüyen kârıyla aynı
+  mantık. `CaravanPlan.get_used_wagon_count()`'a hiç dokunulmadı: zaten
+  yalnızca `wagon_count`'u topluyordu, sıfır olan bir teklif kendiliğinden
+  havuza hiç girmiyor - Campaign Rules'un "buying wagons crowds out
+  contracts" çelişkisine hiç girmeyen, yalın (az vagonlu) bir kervanın da
+  alabileceği tek kontrat türü budur. Kâr da bilerek en küçük vagonlu
+  teklikften az (`18 + gün*5` vs `30 + gün*8`) - eşekle taşınan yük gerçekten
+  daha az, bedava bir üstünlük değil. Üç ekranın gösterdiği metin
+  (`caravan_planner.gd`, `guild.gd`, `world_map.gd`) `uses_donkey_escort()`
+  doğruysa "vagon" yerine "eşek" okuyor (`UI_PLANNER_DONKEYS`/
+  `UI_GUILD_OFFER_DONKEY`/`UI_MAP_CONTRACT_LINE_DONKEY`) - kilitli bir
+  seçeneğin sebebiyle gösterilmesiyle aynı "gizli bir davranış farkı bir
+  hatadan farksızdır" disiplini. Bilerek dokunulmayan: kervanın kendi
+  vagon/eşek/yarım-vagon sürüsünün aksine (bkz. yukarısı), eşekli bir
+  tüccar yolda **ayrı bir figür olarak çizilmiyor** - bugün hiçbir
+  escort-vagonlu tüccar da (1 ya da 2 vagonluk olsun) kendi ox+wagon
+  birimiyle ayrıca çizilmiyor, `RoadCaravan._wagon_count` yalnızca
+  oyuncunun **kendi** `owned_wagon_count`'unu okuyor. Eşekli tüccara özel
+  bir görsel eklemek, görünmez kalan vagonlu tüccarların yanında haksız
+  bir asimetri yaratırdı - `test_world_map_data.gd`'nin
+  `_test_donkey_escorted_offers`'ı vagon tüketmediğini, doğru sayıda
+  eşek taşıdığını ve doğru miktarda kazandırdığını kilitliyor.
 - **Erkek geyik (stag) ve geyik (deer) yeni bir "avlanma" eventiyle
   (`evt_hunting_trip`) geliyor - ikisi de gerçek bir savaş açıyor, yeni
   bir kombat sistemi değil.** Orman/dağ biyomunda ağırlığı büyüyen bir

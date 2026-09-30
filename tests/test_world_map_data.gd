@@ -16,6 +16,7 @@ func run(t) -> void:
 	_test_trade_goods_have_real_names(t)
 	_test_second_trade_loop_is_closed(t)
 	_test_guild_wagon_quests(t)
+	_test_donkey_escorted_offers(t)
 
 func _test_locations_have_real_names(t) -> void:
 	var locations := WorldMapData.get_locations()
@@ -146,3 +147,65 @@ func _test_guild_wagon_quests(t) -> void:
 		for offer in WorldMapData.get_offers_from_origin(location.location_id):
 			t.not_ok(seen_ids.has(offer.merchant_id), "merchant_id tekil: %s" % offer.merchant_id)
 			seen_ids[offer.merchant_id] = true
+
+## Eşekli tüccar - vagon havuzuna hiç dokunmayan üçüncü bir kontrat türü
+## (bkz. MerchantOffer.uses_donkey_escort): kullanıcının kendi isteği,
+## "tüccarların vagon yerine eşekle gelmesi." Her *yönde* (origin,
+## destination çifti - bir şehrin birden çok komşusu olduğu için bir
+## şehrin toplam teklifi birden çok olabilir) tam bir tane olmalı, vagon
+## tüketmemeli ve o yönün en küçük vagonlu teklikften daha az kazandırmalı
+## - taşıdığı yük de daha az, ama karşılığında vagon almaya/almamaya hiç
+## dokunmuyor. Karşılaştırma yalnızca sistematik (`_offers_for_direction`)
+## tekliflere bakıyor - loncanın elle yazılmış vagon bağışı görevleri
+## `wagon_count`/`potential_profit`'i hiç doldurmadığı (0 kâr, varsayılan
+## 1 vagon) için aynı kıyasa karışırsa "en küçük kâr" sıfıra düşerdi.
+func _test_donkey_escorted_offers(t) -> void:
+	var by_direction: Dictionary = {}
+	for location in WorldMapData.get_locations():
+		for offer in WorldMapData.get_offers_from_origin(location.location_id):
+			var key := "%s|%s" % [location.location_id, offer.destination_location_id]
+			if not by_direction.has(key):
+				by_direction[key] = {"donkeys": [], "smallest_wagon_profit": 999999}
+			var entry: Dictionary = by_direction[key]
+			if offer.uses_donkey_escort():
+				entry.donkeys.append(offer)
+			elif (
+				offer.wagon_count == 1
+				and not offer.grants_wagon_on_delivery
+				and offer.cargo_reward_quantity == 0
+			):
+				entry.smallest_wagon_profit = mini(entry.smallest_wagon_profit, offer.potential_profit)
+
+	for key in by_direction:
+		var entry: Dictionary = by_direction[key]
+		var donkey_offers: Array = entry.donkeys
+		if donkey_offers.is_empty():
+			continue
+		t.eq(donkey_offers.size(), 1, "%s yönünde tam bir eşekli teklif var" % key)
+
+		var donkey: MerchantOffer = donkey_offers[0]
+		t.eq(donkey.wagon_count, 0, "eşekli teklif vagon havuzuna dokunmaz")
+		t.ok(donkey.donkey_count == 1 or donkey.donkey_count == 2, "1 ya da 2 eşek taşır")
+		t.eq(donkey.required_reputation, 0, "eşekli teklif en küçük vagonlu teklifle aynı erişilebilirlikte")
+		t.ok(
+			donkey.potential_profit < int(entry.smallest_wagon_profit),
+			"%s: eşekli teklif (%d) en küçük vagonlu teklikften (%d) az kazandırır" % [
+				key, donkey.potential_profit, entry.smallest_wagon_profit
+			]
+		)
+
+	# Vagon havuzu tamamen doluyken bile eşekli bir teklif kabul
+	# edilebilmeli - bu teklifin bütün amacı tam olarak bu (Campaign
+	# Rules'un "buying wagons crowds out contracts" çelişkisine girmeyen
+	# tek kontrat türü).
+	var plan := CaravanPlan.new(WorldMapData.get_locations()[0], 3, 1, 1)
+	var full_wagon_offer := MerchantOffer.new()
+	full_wagon_offer.wagon_count = 1
+	t.not_ok(plan.can_add_offer(full_wagon_offer), "hat doluyken vagonlu teklif kabul edilmez")
+
+	var donkey_offer := MerchantOffer.new()
+	donkey_offer.wagon_count = 0
+	donkey_offer.donkey_count = 2
+	t.ok(plan.can_add_offer(donkey_offer), "hat doluyken bile eşekli teklif kabul edilir")
+	t.ok(plan.toggle_merchant(donkey_offer), "eşekli teklif gerçekten eklenir")
+	t.eq(plan.get_total_wagon_count(), 1, "eşekli teklif toplam vagon sayısını değiştirmez")

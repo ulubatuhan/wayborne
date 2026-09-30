@@ -192,6 +192,11 @@ func _offer_line_text(offer: MerchantOffer, destination_name: String) -> String:
 			tr(offer.merchant_name), destination_name,
 			offer.cargo_reward_quantity, item_name, offer.contract_deadline_days,
 		]
+	if offer.uses_donkey_escort():
+		return tr("UI_GUILD_OFFER_DONKEY") % [
+			offer.merchant_name, destination_name, offer.donkey_count,
+			offer.potential_profit, offer.contract_deadline_days,
+		]
 	return tr("UI_GUILD_OFFER") % [
 		offer.merchant_name, destination_name, offer.wagon_count,
 		offer.potential_profit, offer.contract_deadline_days,

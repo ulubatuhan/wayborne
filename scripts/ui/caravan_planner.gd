@@ -302,7 +302,13 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	row.add_child(name_label)
 
 	var wagon_label := Label.new()
-	wagon_label.text = tr("UI_PLANNER_WAGONS") % offer.wagon_count
+	# Eşekli bir tüccar vagon slotu tüketmiyor (bkz. MerchantOffer.
+	# uses_donkey_escort) - etiket de bunu söylemeli, yoksa "0 vagon"
+	# okunurdu ki bu ne kervanın gerçekte taşıdığı şey ne de doğru bir sayı.
+	if offer.uses_donkey_escort():
+		wagon_label.text = tr("UI_PLANNER_DONKEYS") % offer.donkey_count
+	else:
+		wagon_label.text = tr("UI_PLANNER_WAGONS") % offer.wagon_count
 	wagon_label.custom_minimum_size = Vector2(90, 0)
 	row.add_child(wagon_label)
 

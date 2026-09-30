@@ -285,7 +285,12 @@ func _refresh_info_panel() -> void:
 		var total_profit := 0
 		for offer in offers:
 			total_profit += offer.potential_profit
-			_add_info_label(tr("UI_MAP_CONTRACT_LINE") % [tr(offer.merchant_name), offer.wagon_count, offer.potential_profit])
+			if offer.uses_donkey_escort():
+				_add_info_label(tr("UI_MAP_CONTRACT_LINE_DONKEY") % [
+					tr(offer.merchant_name), offer.donkey_count, offer.potential_profit
+				])
+			else:
+				_add_info_label(tr("UI_MAP_CONTRACT_LINE") % [tr(offer.merchant_name), offer.wagon_count, offer.potential_profit])
 		_add_info_label(tr("UI_TOTAL_POTENTIAL") % total_profit)
 
 	var plan_button := Button.new()

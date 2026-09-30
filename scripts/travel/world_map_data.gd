@@ -151,17 +151,27 @@ static func _add_direction(
 		_offers_by_origin[from_id].append(offer)
 		_offer_by_merchant_id[offer.merchant_id] = offer
 
-## Her yön için iki teklif: küçük/ucuz bir vagon ve büyük/kârlı bir vagon.
-## Kâr, yolun uzunluğuna göre ölçekleniyor - uzun ve tehlikeli rotalar
-## daha çok ödüyor, riski anlamlı kılan da bu.
+## Her yön için üç teklif: küçük/ucuz bir vagon, büyük/kârlı bir vagon ve
+## kendi eşekleriyle gelen bağımsız bir tüccar. Kâr, yolun uzunluğuna göre
+## ölçekleniyor - uzun ve tehlikeli rotalar daha çok ödüyor, riski anlamlı
+## kılan da bu. Eşekli tüccar en küçük vagonlu tekliften bilerek daha az
+## kazandırıyor - taşıdığı yük de daha az - ama karşılığında vagon
+## almaya/almamaya hiç dokunmuyor: yalın (az vagonlu, kontrat ağırlıklı)
+## bir kervanın Campaign Rules'un "buying wagons crowds out contracts"
+## çelişkisine hiç girmeden alabileceği tek kontrat türü.
 static func _offers_for_direction(
 	origin_id: String, destination_id: String, travel_days: int, id_base: int
 ) -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
 	var deadline := travel_days + CONTRACT_DEADLINE_BUFFER_DAYS
+	# Kısa/güvenli bir yol tek eşekle yürünür, uzun bir yol yükünü iki
+	# eşeğe böler - vagon tekliflerinin uzunluğa göre büyüyen kârıyla aynı
+	# mantık, burada hayvan sayısında.
+	var donkeys := 1 if travel_days <= 4 else 2
 	var profiles := [
-		{"wagons": 1, "profit": 30 + travel_days * 8, "reputation": 0},
-		{"wagons": 2, "profit": 70 + travel_days * 14, "reputation": CONTRACT_REPUTATION_FOR_LARGE},
+		{"wagons": 1, "donkeys": 0, "profit": 30 + travel_days * 8, "reputation": 0},
+		{"wagons": 2, "donkeys": 0, "profit": 70 + travel_days * 14, "reputation": CONTRACT_REPUTATION_FOR_LARGE},
+		{"wagons": 0, "donkeys": donkeys, "profit": 18 + travel_days * 5, "reputation": 0},
 	]
 	for i in range(profiles.size()):
 		var profile: Dictionary = profiles[i]
@@ -174,7 +184,8 @@ static func _offers_for_direction(
 			profile.profit,
 			profile.wagons,
 			deadline,
-			profile.reputation
+			profile.reputation,
+			profile.donkeys
 		))
 	return offers
 
@@ -221,7 +232,7 @@ static func _make_route(from_location_id: String, to_location_id: String, travel
 static func _make_offer(
 	merchant_id: String, merchant_name: String, origin_location_id: String,
 	destination_location_id: String, potential_profit: int, wagon_count: int,
-	contract_deadline_days: int, required_reputation: int
+	contract_deadline_days: int, required_reputation: int, donkey_count: int = 0
 ) -> MerchantOffer:
 	var offer := MerchantOffer.new()
 	offer.merchant_id = merchant_id
@@ -232,6 +243,7 @@ static func _make_offer(
 	offer.wagon_count = wagon_count
 	offer.contract_deadline_days = contract_deadline_days
 	offer.required_reputation = required_reputation
+	offer.donkey_count = donkey_count
 	return offer
 
 ## Loncanın özel vagon görevleri - normal kontrat panosuyla **aynı**
