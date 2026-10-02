@@ -26,6 +26,7 @@ func run(t) -> void:
 	_test_city_gold_reserve(t)
 	_test_trait_price_multiplier(t)
 	_test_guild_wagon_quest_rewards(t)
+	_test_earned_wagons(t)
 	_test_dog_adoption(t)
 	_test_donkey_and_half_wagon_cargo(t)
 
@@ -759,13 +760,15 @@ func _test_guild_wagon_quest_rewards(t) -> void:
 	# _deliver_wagon_quest bir vagonla (GameSession.new(..., 1)) başlıyor -
 	# teslimat kalıcı ikinci bir vagon eklemeli.
 	var session := _deliver_wagon_quest(grant, 50)
-	t.eq(session.owned_wagon_count, 2, "vagon bağışı teslim edilince kalıcı bir vagon kazandırır")
+	t.eq(session.owned_wagon_count, 2 + session.get_earned_wagon_count(),
+		"vagon bağışı teslim edilince kalıcı bir vagon kazandırır")
 	t.ok(session.is_guild_wagon_quest_delivered(grant.merchant_id), "görev teslim edildi diye işaretlenir")
 
 	# İkinci vagon bağışı da aynı şekilde çalışır - havuzun tek bir göreve
 	# sıkışmadığını doğrular.
 	var session2 := _deliver_wagon_quest(grant2, 40)
-	t.eq(session2.owned_wagon_count, 2, "ikinci vagon bağışı da kalıcı bir vagon kazandırır")
+	t.eq(session2.owned_wagon_count, 2 + session2.get_earned_wagon_count(),
+		"ikinci vagon bağışı da kalıcı bir vagon kazandırır")
 	t.ok(session2.is_guild_wagon_quest_delivered(grant2.merchant_id), "ikinci görev de teslim edildi diye işaretlenir")
 
 	# Kayıt round-trip: teslim edilmiş bir vagon bağışı bir daha hiç açılmaz.
@@ -839,8 +842,16 @@ func _test_guild_wagon_quest_rewards(t) -> void:
 	lost_session.depart_with_contracts([grant])
 	lost_session.caravan.merchant_names.erase(grant.merchant_name)
 	var wagons_before_loss := lost_session.owned_wagon_count
+	# Varış ayrıca seviye/itibar kilometre taşlarını da ödüyor (bkz.
+	# GameSession.grant_earned_wagons) - iddia *görevin* ödül vermediği,
+	# o yüzden o payın dışı sayılıyor.
+	var earned_before := lost_session.get_earned_wagon_count()
 	lost_session.finish_journey()
-	t.eq(lost_session.owned_wagon_count, wagons_before_loss, "yolda kaybedilen görev ödül vermez")
+	t.eq(
+		lost_session.owned_wagon_count,
+		wagons_before_loss + lost_session.get_earned_wagon_count() - earned_before,
+		"yolda kaybedilen görev ödül vermez"
+	)
 	t.not_ok(
 		lost_session.is_guild_wagon_quest_delivered(grant.merchant_id),
 		"kaybedilen görev teslim edilmiş sayılmaz"
@@ -862,3 +873,60 @@ func _deliver_wagon_quest(offer: MerchantOffer, reputation: int) -> GameSession:
 	session.depart_with_contracts([offer])
 	session.finish_journey()
 	return session
+
+## Büyüyen kervan vagon kazanıyor (bkz. GameSession.grant_earned_wagons).
+## Kilitlenen dört iddia, hepsi bir sömürü ya da bir kuralın karşılığı:
+## eşik aşılınca ödenir, **ikinci kez ödenmez**, kayıttan sonra da ödenmez
+## (yoksa kaydet-yükle bir vagon basma düğmesi olurdu), ve ödenen her
+## vagon tavanı da büyüttüğü için eskort yuvası daralmaz - bu sonuncusu
+## bütün mekaniğin varlık sebebi (bkz. Campaign Rules'un "vagon almak
+## kontratı dışlıyor" bulgusu).
+func _test_earned_wagons(t) -> void:
+	var session := GameSession.new(0, 0, 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	session.start_playthrough(
+		CharacterData.create("Ölçüm", CultureCatalog.NOMAD, CharacterStats.new()), rng
+	)
+	session.owned_wagon_count = 1
+	session._sync_wagon_inventories()
+	session.reputation = 0
+
+	var escort_slots_before := session.get_wagon_capacity() - session.owned_wagon_count
+	t.eq(session.get_earned_wagon_count(), 0, "taze kervan hiçbir taşı aşmamıştır")
+	t.eq(session.grant_earned_wagons(), 0, "eşik aşılmadan vagon verilmez")
+
+	session.reputation = GameSession.WAGON_REPUTATION_MILESTONES[0]
+	t.eq(session.grant_earned_wagons(), 1, "ilk itibar eşiği bir vagon kazandırır")
+	t.eq(session.owned_wagon_count, 2, "kazanılan vagon gerçekten eklenir")
+	t.eq(session.grant_earned_wagons(), 0, "aynı eşik ikinci kez ödenmez")
+
+	# Mekaniğin varlık sebebi: hediye vagon kendi kolon yuvasını getiriyor,
+	# yani tüccara ayrılan boşluk hiç daralmıyor.
+	t.eq(
+		session.get_wagon_capacity() - session.owned_wagon_count, escort_slots_before,
+		"kazanılan vagon eskort yuvası yemez"
+	)
+
+	# Kayıt round-trip: ödenmiş taş kilitli kalır, yoksa her yükleme
+	# yeni bir vagon basardı - fulfill_commission'ın kapattığı sömürüyle
+	# aynı sınıf.
+	var reloaded := GameSession.new()
+	reloaded.load_from_dict(session.to_save_dict())
+	t.eq(reloaded.owned_wagon_count, 2, "kazanılan vagon kayıtta korunur (tavan kırpmıyor)")
+	t.eq(reloaded.get_earned_wagon_count(), 1, "ödenmiş taş kayıttan sonra da ödenmiş")
+	t.eq(reloaded.grant_earned_wagons(), 0, "kaydet-yükle ikinci bir vagon basmaz")
+
+	# Yolda kaybedilen bir vagon geri gelmez: taş yalnızca *yeni* bir
+	# vagon verir, sahipliği bir hedefe tamamlamaz (bkz. Ruin Rules).
+	reloaded.owned_wagon_count = 1
+	reloaded._sync_wagon_inventories()
+	t.eq(reloaded.grant_earned_wagons(), 0, "ödenmiş taş kaybedilen vagonu geri getirmez")
+	t.eq(reloaded.owned_wagon_count, 1, "kayıp kalıcıdır")
+
+	# Seviye kolu da aynı şekilde çalışıyor ve itibar kolundan bağımsız.
+	var leader := reloaded.get_player_character()
+	t.ne(leader, null, "lider var")
+	while leader.level < GameSession.WAGON_LEVEL_MILESTONES[0]:
+		leader.gain_xp(CharacterData.xp_required_for_level(leader.level + 1))
+	t.eq(reloaded.grant_earned_wagons(), 1, "seviye eşiği de bir vagon kazandırır")

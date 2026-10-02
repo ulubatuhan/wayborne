@@ -69,7 +69,7 @@ func _ready() -> void:
 		_route_state = _session.get_route_state(route)
 
 	_plan = CaravanPlan.new(
-		_destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, _session.owned_wagon_count
+		_destination, travel_days, _session.get_wagon_capacity(), _session.owned_wagon_count
 	)
 	# Erzak hesabının kervana bağlı parçaları: kimi besleyeceğimiz, kültürün
 	# iştahı ve levazımcının tasarrufu. Bunlar verilmezse plan yolun gerçekte

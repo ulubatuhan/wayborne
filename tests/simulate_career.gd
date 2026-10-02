@@ -151,7 +151,7 @@ func _snapshot(session: GameSession) -> Dictionary:
 ## bunu istiyor, ve bir oyuncu da bunu yapar - biriken parayı kesede
 ## tutmak hiçbir şeye yaramaz.
 func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -> void:
-	var wagon_cap := CaravanPlan.DEFAULT_MAX_WAGONS
+	var wagon_cap := session.get_wagon_capacity()
 	if policy == POLICY_CONTRACTS:
 		wagon_cap = CONTRACT_POLICY_WAGON_CAP
 	elif policy == POLICY_CAMPAIGN and session.campaign_chapter_index < CAMPAIGN_EXPAND_AFTER_CHAPTER:
@@ -247,7 +247,7 @@ func _buy_trade_goods(session: GameSession, origin: Location) -> void:
 ## kapanır - ölçüm düzeneğinin ilk denemede düştüğü tuzak buydu.
 func _build_plan(session: GameSession, destination: Location, travel_days: int) -> CaravanPlan:
 	var plan := CaravanPlan.new(
-		destination, travel_days, CaravanPlan.DEFAULT_MAX_WAGONS, session.owned_wagon_count
+		destination, travel_days, session.get_wagon_capacity(), session.owned_wagon_count
 	)
 	plan.caravan_party_size = session.get_party().size()
 	plan.provision_multiplier = session.get_daily_provision_multiplier()

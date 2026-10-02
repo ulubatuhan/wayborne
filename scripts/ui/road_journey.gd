@@ -3240,6 +3240,15 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		reputation_label.modulate = OUTCOME_COLOR
 		_arrival_panel.add_child(reputation_label)
 
+	# Büyüyen kervanın kazandığı vagon (bkz. GameSession.
+	# grant_earned_wagons). Teslimat satırıyla aynı gerekçe: sessizce
+	# olan bir ödül, olmayan bir ödülden ayırt edilemez.
+	var wagons_earned: int = payout.get("wagons_earned", 0)
+	if wagons_earned > 0:
+		var wagon_label := _make_summary_label(tr("UI_ROAD_WAGON_EARNED") % wagons_earned)
+		wagon_label.modulate = OUTCOME_COLOR
+		_arrival_panel.add_child(wagon_label)
+
 	var xp_awarded: int = payout.get("xp_awarded", 0)
 	if xp_awarded > 0:
 		var xp_label := _make_summary_label(tr("UI_ROAD_JOURNEY_XP") % xp_awarded)

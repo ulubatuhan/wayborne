@@ -51,11 +51,10 @@ var class_id: String = ClassCatalog.GUARD
 var height_cm: int = DEFAULT_HEIGHT_CM
 var skin_tone: int = 1
 
-## Cinsiyet ve vücut kilosu - şimdilik yalnızca görsel (bkz.
-## Wardrobe.body_id_for/get_body_variant_id): hangi "body_<cinsiyet>_
-## <kilo>" sanat katmanının çizileceğini seçer, hiçbir derived stat
-## formülü bunu okumuyor henüz - stat etkisi (bkz. boyun HP/dodge'a
-## etkisiyle aynı aile) ayrı, sonraki bir karar. `skin_tone`'un yanına,
+## Cinsiyet ve vücut kilosu. Hangi "body_<cinsiyet>_<kilo>" sanat
+## katmanının çizileceğini seçer (bkz. Wardrobe.body_id_for) **ve** boyun
+## zaten yaptığı gibi birkaç türetilmiş sayıyı büker - bkz. aşağıdaki
+## `get_gender_*_bonus`/`get_body_weight_*_bonus`. `skin_tone`'un yanına,
 ## aynı index-tabanlı üslupla eklendi.
 const GENDER_FEMALE: int = 0
 const GENDER_MALE: int = 1
@@ -340,23 +339,124 @@ func get_height_dodge_bonus() -> int:
 		return -2
 	return 0
 
+# --- Cinsiyet ve vücut tipi: boyun kurduğu ailenin aynısı ---
+#
+# Boy `get_height_hp_bonus`/`get_height_dodge_bonus` ile zaten iki
+# türetilmiş sayıyı büküyordu; cinsiyet ve kilo o aileye katılıyor, yeni
+# bir sistem icat etmeden - huy ve ekipmanın da kullandığı aynı beş alan
+# (hp/dodge/accuracy/crit/damage) üstünden. Taban stat **hiç
+# değişmiyor**: bir karakterin `stats`'ı yalnızca oyuncunun dağıttığı
+# puanlar + kültür bonusudur, cinsiyet orayı kirletmez - aksi halde sekiz
+# puanlık dağıtım ekonomisi ve otomatik dağıtım sessizce kayardı.
+#
+# Yön oyuncunun kendi tarifi: kadın esnek ve "rogue" tarafta (kaçınma,
+# kritik), erkek dayanıklı ve güçlü (can, hasar). Değerler kasıtlı küçük
+# ve birbirinin aynası - karışık bir parti ortalamada hiçbir şey
+# kazanmaz/kaybetmez, fark yalnızca *kimin* ne yaptığında.
+#
+# Büyüklükler **ölçülerek** indi: ilk denemede (kaçınma ±3, kritik +2) bu
+# motorda kaçınma candan daha değerli çıktı ve varsayılan `create()`
+# kadın olduğu için bütün savaş tablosu 2-7 puan yukarı kaydı. Bir
+# cinsiyetin diğerinden açıkça iyi olması tasarım değil kaza olurdu -
+# bkz. Ruin Rules'un cinsiyet A/B'si.
+const GENDER_HP_BONUS: Array[int] = [-2, 2]  # kadın, erkek
+const GENDER_DODGE_BONUS: Array[int] = [3, -3]
+const GENDER_CRIT_BONUS: Array[int] = [2, 0]
+const GENDER_DAMAGE_BONUS: Array[int] = [0, 1]
+
+# Kilo üçlüsünün **ortası tam nötr** (hepsi sıfır, erzak payı 1.0): bu
+# dosyanın her yerde uyguladığı "taze karakter bu sistem hiç yokmuş gibi
+# davranır" kuralı - varsayılan `BODY_WEIGHT_AVERAGE` hiçbir sayıyı
+# kıpırdatmaz, sapma yalnızca oyuncunun uca gitmesiyle doğar. İnce çevik
+# ama hafif vuruyor ve az dayanıyor; iri bunun tersi, üstelik daha çok
+# yiyor - kilonun en doğal sonucu.
+const WEIGHT_HP_BONUS: Array[int] = [-2, 0, 4]  # ince, orta, iri
+const WEIGHT_DODGE_BONUS: Array[int] = [3, 0, -4]
+const WEIGHT_DAMAGE_BONUS: Array[int] = [-1, 0, 2]
+const WEIGHT_PROVISION_FACTOR: Array[float] = [0.9, 1.0, 1.15]
+
+## Beceri kontrolü tarafındaki karşılığı. "Rogue benzeri skillere meyilli"
+## bir savaş sayısı değil, bir *check* eğilimidir - huyların zaten
+## kullandığı `check_bonus` vokabülerini (bkz. get_check_modifier) ikinci
+## bir kaynak olarak paylaşıyor, büyüklüğü de huylarınkiyle aynı
+## (TraitCatalog.CHECK_BONUS_MAGNITUDE, 0.5) tutuldu ki iki kaynak aynı
+## ölçekte okunsun. `SkillCheck`'in kendisi hiç değişmiyor.
+const CHECK_LEAN: float = 0.5
+
+func get_gender_hp_bonus() -> int:
+	return GENDER_HP_BONUS[clampi(gender, 0, GENDER_HP_BONUS.size() - 1)]
+
+func get_gender_dodge_bonus() -> int:
+	return GENDER_DODGE_BONUS[clampi(gender, 0, GENDER_DODGE_BONUS.size() - 1)]
+
+func get_gender_crit_bonus() -> int:
+	return GENDER_CRIT_BONUS[clampi(gender, 0, GENDER_CRIT_BONUS.size() - 1)]
+
+func get_gender_damage_bonus() -> int:
+	return GENDER_DAMAGE_BONUS[clampi(gender, 0, GENDER_DAMAGE_BONUS.size() - 1)]
+
+func get_body_weight_hp_bonus() -> int:
+	return WEIGHT_HP_BONUS[clampi(body_weight, 0, WEIGHT_HP_BONUS.size() - 1)]
+
+func get_body_weight_dodge_bonus() -> int:
+	return WEIGHT_DODGE_BONUS[clampi(body_weight, 0, WEIGHT_DODGE_BONUS.size() - 1)]
+
+func get_body_weight_damage_bonus() -> int:
+	return WEIGHT_DAMAGE_BONUS[clampi(body_weight, 0, WEIGHT_DAMAGE_BONUS.size() - 1)]
+
+## Bir statın check'ine cinsiyet ve kilonun kattığı pay. Kadın çeviklik/
+## sezgi, erkek güç/dayanıklılık tarafına yatkın; ince biraz daha çevik,
+## iri güçlü ama hantal. Diğer dört stat (Zeka/Karizma/Bilgelik/İnanç)
+## kasıtlı olarak **hiç** etkilenmiyor - bunlar bedene değil kişiye ait,
+## ve bir stat eğilimini bedenden türetmek orada hem yanlış hem gereksiz
+## olurdu.
+func get_body_check_modifier(kind: CharacterStats.Kind) -> float:
+	var total := 0.0
+	match kind:
+		CharacterStats.Kind.AGILITY:
+			total += CHECK_LEAN if gender == GENDER_FEMALE else -CHECK_LEAN
+			if body_weight == BODY_WEIGHT_LEAN:
+				total += CHECK_LEAN
+			elif body_weight == BODY_WEIGHT_HEAVY:
+				total -= CHECK_LEAN
+		CharacterStats.Kind.PERCEPTION:
+			total += CHECK_LEAN if gender == GENDER_FEMALE else 0.0
+		CharacterStats.Kind.STRENGTH:
+			total += -CHECK_LEAN if gender == GENDER_FEMALE else CHECK_LEAN
+			if body_weight == BODY_WEIGHT_HEAVY:
+				total += CHECK_LEAN
+			elif body_weight == BODY_WEIGHT_LEAN:
+				total -= CHECK_LEAN
+		CharacterStats.Kind.ENDURANCE:
+			total += 0.0 if gender == GENDER_FEMALE else CHECK_LEAN
+	return total
+
 ## Bir 1.90 boylu erkekle bir 1.60 boylu kadının açlığı aynı olmamalı -
 ## boy zaten can/kaçınma bonusunu bu eşiklerle veriyor, erzak tüketimi de
 ## aynı eşiklerden okuyor (tek boy sistemi, iki sonuç). Varsayılan (eşikler
 ## arası) 1.0 - `CaravanPlan.daily_consumption()`'ın eski, boy-kör tek
 ## kişilik payı aynen kalıyor, yalnızca uçlardaki karakterler sapıyor.
+## Kilonun payı buraya **çarpan** olarak biniyor, toplam olarak değil -
+## iki etki de "bu beden ne kadar yiyor" sorusunun aynı cevabının parçası,
+## ayrı ayrı toplamak uzun-ve-iri bir karakteri hafife alırdı (aynı
+## gerekçe: hava × kondisyon çarpımı, bkz. RouteWeather.forecast_extra_days).
 func get_provision_weight() -> float:
+	var height_factor := 1.0
 	if height_cm >= TALL_THRESHOLD_CM:
-		return 1.15
-	if height_cm <= SHORT_THRESHOLD_CM:
-		return 0.85
-	return 1.0
+		height_factor = 1.15
+	elif height_cm <= SHORT_THRESHOLD_CM:
+		height_factor = 0.85
+	var weight_factor: float = WEIGHT_PROVISION_FACTOR[
+		clampi(body_weight, 0, WEIGHT_PROVISION_FACTOR.size() - 1)
+	]
+	return height_factor * weight_factor
 
 func get_max_hp() -> int:
 	return maxi(
 		1,
 		stats.get_max_hp() + get_character_class().bonus_max_hp
-		+ get_height_hp_bonus() + _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
+		+ get_height_hp_bonus() + get_gender_hp_bonus() + get_body_weight_hp_bonus()
+		+ _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
 	)
 
 ## Can barının yanına eklenen bir sıfat - sayının **yerine** değil, sayının
@@ -380,6 +480,7 @@ func get_dodge() -> int:
 	return maxi(
 		0,
 		stats.get_dodge() + get_height_dodge_bonus()
+		+ get_gender_dodge_bonus() + get_body_weight_dodge_bonus()
 		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus")
 	)
 
@@ -389,10 +490,13 @@ func get_accuracy() -> int:
 	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus")
 
 func get_crit_chance() -> int:
-	return stats.get_crit_chance() + _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus")
+	return stats.get_crit_chance() + get_gender_crit_bonus() \
+		+ _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus")
 
 func get_damage_bonus() -> int:
-	return stats.get_damage_bonus() + _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
+	return stats.get_damage_bonus() \
+		+ get_gender_damage_bonus() + get_body_weight_damage_bonus() \
+		+ _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
 
 ## Savaş bu sarmalayıcıyı okur, stats.get_composure()'ı değil - huy ve
 ## ekipmanın da buraya girebilmesi için (bkz. CLAUDE.md'nin sarmalayıcı

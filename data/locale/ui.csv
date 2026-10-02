@@ -285,6 +285,7 @@
 "UI_ROAD_NET","Net kazanç: %d GG","Net earnings: %d GP","","","","","","","","",""
 "UI_ROAD_JOURNEY_XP","Sefer tecrübesi: %d XP","Journey experience: %d XP","","","","","","","","",""
 "UI_ROAD_REPUTATION_GAINED","İtibar: +%d","Reputation: +%d","","","","","","","","",""
+"UI_ROAD_WAGON_EARNED","Kervan büyüdü: +%d vagon","The caravan has grown: +%d wagon","","","","","","","","",""
 "UI_ROAD_LOST_CONTRACTS","Teslim edilemeyen kontrat: %d (itibar -%d)","Undelivered contracts: %d (reputation -%d)","","","","","","","","",""
 "UI_ROAD_DELIVERED","Teslim edilen kontrat: %d — mal sahibine ulaştı","Contracts delivered: %d — the goods reached their owner","","","","","","","","",""
 "UI_ROAD_STATE","Gün %d · Kalan yol: %d gün · Tehlike: %d%%\nAltın: %d GG · Erzak: %d · İtibar: %d\nVagon: %d (%d hasarlı) · Tüccar: %d · Evrak: %d · Moral: %d · Stres: %d","Day %d · Road left: %d days · Danger: %d%%\nGold: %d GP · Provisions: %d · Reputation: %d\nWagons: %d (%d damaged) · Merchants: %d · Papers: %d · Morale: %d · Stress: %d","","","","","","","","",""

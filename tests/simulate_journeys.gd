@@ -65,6 +65,10 @@ func _initialize() -> void:
 	_report_equipment_impact()
 
 	print("")
+	print("── Beden etkisi (tehlike %50) - cinsiyet ve kilo birbirini yemeli")
+	_report_body_impact()
+
+	print("")
 	print("── İlerleme merdiveni (seviye teçhizatın kapısını açar, tehlike %65)")
 	_report_progression_ladder()
 
@@ -564,6 +568,43 @@ func _report_equipment_impact() -> void:
 	print("    tam donanımlı (T3+yüzük+kolye) %d kişi  %%%d kazanıyor (%d/%d)" % [
 		EQUIPMENT_TEST_PARTY_SIZE, int(round(100.0 * float(geared_wins) / float(battles))), geared_wins, battles
 	])
+
+## Cinsiyet ve kilo savaşa girdiği anda sorulması gereken tek soru: biri
+## diğerinden açıkça iyi mi? Tasarım "kadın kaçar, erkek dayanır" diyor -
+## ikisi *farklı* olmalı ama biri diğerini domine ederse oyuncunun seçimi
+## bir seçim değil doğru cevap olur. Ekipman A/B'siyle aynı iskelet,
+## aynı tohum dizisi, yalnızca bedeni değişen bir parti.
+func _report_body_impact() -> void:
+	var battles := 60
+	var rows := [
+		["kadın · orta", CharacterData.GENDER_FEMALE, CharacterData.BODY_WEIGHT_AVERAGE],
+		["erkek · orta", CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_AVERAGE],
+		["kadın · ince", CharacterData.GENDER_FEMALE, CharacterData.BODY_WEIGHT_LEAN],
+		["erkek · iri ", CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_HEAVY],
+	]
+	for row in rows:
+		var wins := _body_battle_batch(battles, int(row[1]), int(row[2]))
+		print("    %s  %%%d kazanıyor (%d/%d)" % [
+			String(row[0]), int(round(100.0 * float(wins) / float(battles))), wins, battles
+		])
+
+func _body_battle_batch(battles: int, gender: int, body_weight: int) -> int:
+	var wins := 0
+	for index in battles:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 1300 + index
+
+		var party: Array[CharacterData] = []
+		for slot in EQUIPMENT_TEST_PARTY_SIZE:
+			var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+			party.append(CharacterData.create(
+				"Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new(),
+				CharacterData.DEFAULT_HEIGHT_CM, 1, ClassCatalog.GUARD, gender, body_weight
+			))
+
+		if bool(_simulate_combat(party, 0.5, rng).victory):
+			wins += 1
+	return wins
 
 func _battle_batch(battles: int, geared: bool) -> int:
 	var wins := 0

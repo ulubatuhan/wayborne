@@ -62,8 +62,10 @@ func _test_max_hp_composition(t) -> void:
 		character.stats.get_max_hp()
 		+ character.get_character_class().bonus_max_hp
 		+ character.get_height_hp_bonus()
+		+ character.get_gender_hp_bonus()
+		+ character.get_body_weight_hp_bonus()
 	)
-	t.eq(character.get_max_hp(), expected, "can = stat + sınıf + boy")
+	t.eq(character.get_max_hp(), expected, "can = stat + sınıf + boy + beden")
 	t.eq(character.current_hp, character.get_max_hp(), "yeni karakter tam canla başlar")
 
 	character.apply_damage(9999)
@@ -133,11 +135,13 @@ func _test_class_and_skills(t) -> void:
 	var height_clamped := CharacterData.create("Dev", CultureCatalog.NOMAD, CharacterStats.new(), 999, 0)
 	t.eq(height_clamped.height_cm, CharacterData.MAX_HEIGHT_CM, "boy tavanda kırpılır")
 
-## Cinsiyet/kilo şimdilik yalnızca görsel - hiçbir derived stat bunları
-## okumamalı (bkz. CharacterData.gd'nin kendi notu, "stat etkisi ayrı bir
-## karar"). Altı mankenin (2 cinsiyet x 3 kilo) sanatı var, yani her
-## karakter kendi varyantını buluyor; sanatı olmayan bir varyant düz
-## "body"ye düşerdi (bkz. test_wardrobe'un fikstürlü testi).
+## Cinsiyet/kilo hem görsel (altı mankenin - 2 cinsiyet x 3 kilo - sanatı
+## var, yani her karakter kendi varyantını buluyor; sanatı olmayan bir
+## varyant düz "body"ye düşerdi, bkz. test_wardrobe'un fikstürlü testi)
+## hem de mekanik: boyun kurduğu aileye katılıyor. Kilitlenen iddia
+## "şu kadar bonus var" değil, **yönü**: kadın kaçınır/kritik vurur, erkek
+## dayanır/sert vurur, iri yavaşlar ve çok yer, ince tersi - ve ortanın
+## tam nötr olduğu.
 func _test_gender_and_body_weight(t) -> void:
 	var baseline := CharacterData.create("Taban", CultureCatalog.NOMAD, CharacterStats.new())
 	t.eq(baseline.gender, CharacterData.GENDER_FEMALE, "varsayılan cinsiyet kadın")
@@ -162,14 +166,62 @@ func _test_gender_and_body_weight(t) -> void:
 	t.eq(clamped.gender, CharacterData.GENDER_MALE, "cinsiyet index tavanda kırpılır")
 	t.eq(clamped.body_weight, CharacterData.BODY_WEIGHT_LEAN, "vücut tipi index tabanda kırpılır")
 
-	# get_max_hp/get_dodge gibi hiçbir savaş formülü cinsiyet/kilodan
-	# etkilenmemeli - aynı statlarla, farklı cinsiyet/kilo, aynı sonuç.
+	# Aynı statlar, iki uç beden: iri erkek dayanır ve sert vurur, ince
+	# kadın kaçar ve kritik yapar. Sayıya değil **yöne** bakılıyor, ki
+	# büyüklükler ölçümle ayarlanabilsin ama yön kazara ters çevrilemesin.
 	var female_lean := CharacterData.create(
 		"Kontrol", CultureCatalog.NOMAD, CharacterStats.new(),
 		CharacterData.DEFAULT_HEIGHT_CM, 0, ClassCatalog.GUARD,
 		CharacterData.GENDER_FEMALE, CharacterData.BODY_WEIGHT_LEAN
 	)
-	t.eq(male_heavy.get_max_hp(), female_lean.get_max_hp(),
-		"cinsiyet/kilo can formülüne henüz dokunmuyor")
-	t.eq(male_heavy.get_dodge(), female_lean.get_dodge(),
-		"cinsiyet/kilo kaçınma formülüne henüz dokunmuyor")
+	t.ok(male_heavy.get_max_hp() > female_lean.get_max_hp(),
+		"iri erkek daha çok can taşır (%d > %d)" % [
+			male_heavy.get_max_hp(), female_lean.get_max_hp()])
+	t.ok(female_lean.get_dodge() > male_heavy.get_dodge(),
+		"ince kadın daha iyi kaçınır (%d > %d)" % [
+			female_lean.get_dodge(), male_heavy.get_dodge()])
+	t.ok(female_lean.get_crit_chance() > male_heavy.get_crit_chance(),
+		"kadının kritik şansı daha yüksek")
+	t.ok(male_heavy.get_damage_bonus() > female_lean.get_damage_bonus(),
+		"iri erkek daha sert vurur")
+	t.ok(male_heavy.get_provision_weight() > female_lean.get_provision_weight(),
+		"iri bir beden daha çok yer")
+
+	# Ortanın tam nötr olması bu dosyanın her yerde uyguladığı kural:
+	# varsayılan bir karakter bu sistem hiç yokmuş gibi davranır. Kilonun
+	# payı sıfır, yani yalnızca cinsiyet kalır.
+	t.eq(baseline.get_body_weight_hp_bonus(), 0, "orta kilo cana dokunmaz")
+	t.eq(baseline.get_body_weight_dodge_bonus(), 0, "orta kilo kaçınmaya dokunmaz")
+	t.eq(baseline.get_body_weight_damage_bonus(), 0, "orta kilo hasara dokunmaz")
+	t.almost(baseline.get_provision_weight(), 1.0, "orta kilo + orta boy tam bir pay", 0.001)
+
+	# Cinsiyetin iki kolu birbirinin aynası - karışık bir parti ortalamada
+	# ne kazanır ne kaybeder, fark yalnızca kimin ne yaptığında.
+	var male := CharacterData.create(
+		"Erkek", CultureCatalog.NOMAD, CharacterStats.new(),
+		CharacterData.DEFAULT_HEIGHT_CM, 0, ClassCatalog.GUARD,
+		CharacterData.GENDER_MALE, CharacterData.BODY_WEIGHT_AVERAGE
+	)
+	t.eq(baseline.get_gender_hp_bonus() + male.get_gender_hp_bonus(), 0,
+		"cinsiyetin can payı toplamda sıfır")
+	t.eq(baseline.get_gender_dodge_bonus() + male.get_gender_dodge_bonus(), 0,
+		"cinsiyetin kaçınma payı toplamda sıfır")
+
+	# Check eğilimi: "rogue benzeri" bir savaş sayısı değil, bir zar
+	# eğilimi - huyların zaten kullandığı vokabüler (bkz.
+	# GameSession.get_best_effective_stat). Bedene ait olmayan dört stat
+	# (Zeka/Karizma/Bilgelik/İnanç) kasıtlı olarak hiç etkilenmiyor.
+	t.ok(female_lean.get_body_check_modifier(CharacterStats.Kind.AGILITY)
+		> male_heavy.get_body_check_modifier(CharacterStats.Kind.AGILITY),
+		"ince kadın çeviklik check'inde önde")
+	t.ok(male_heavy.get_body_check_modifier(CharacterStats.Kind.STRENGTH)
+		> female_lean.get_body_check_modifier(CharacterStats.Kind.STRENGTH),
+		"iri erkek güç check'inde önde")
+	for kind in [
+		CharacterStats.Kind.INTELLECT, CharacterStats.Kind.CHARISMA,
+		CharacterStats.Kind.WISDOM, CharacterStats.Kind.FAITH,
+	]:
+		t.almost(male_heavy.get_body_check_modifier(kind), 0.0,
+			"beden %s check'ine karışmaz" % CharacterStats.kind_name(kind), 0.001)
+		t.almost(female_lean.get_body_check_modifier(kind), 0.0,
+			"beden %s check'ine karışmaz" % CharacterStats.kind_name(kind), 0.001)

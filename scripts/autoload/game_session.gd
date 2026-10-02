@@ -942,7 +942,8 @@ func get_duty_flat_reduction(duty_id: String) -> int:
 func get_best_effective_stat(kind: CharacterStats.Kind) -> float:
 	var best := 0.0
 	for character in get_party():
-		var effective := character.stats.get_effective_value(kind) + character.get_check_modifier(kind)
+		var effective := character.stats.get_effective_value(kind) \
+			+ character.get_check_modifier(kind) + character.get_body_check_modifier(kind)
 		best = maxf(best, effective)
 	# Husky'nin "iz sürme/awareness" faydası (bkz. get_dog_perception_bonus):
 	# kervanın hiçbir kişisine değil, Sezgi'nin kendisine binen küçük ve
@@ -960,7 +961,8 @@ func get_best_stat_holder(kind: CharacterStats.Kind) -> CharacterData:
 	var best_character: CharacterData = null
 	var best := -INF
 	for character in get_party():
-		var effective := character.stats.get_effective_value(kind) + character.get_check_modifier(kind)
+		var effective := character.stats.get_effective_value(kind) \
+			+ character.get_check_modifier(kind) + character.get_body_check_modifier(kind)
 		if effective > best:
 			best = effective
 			best_character = character
@@ -982,7 +984,8 @@ func get_leader_effective_stat(kind: CharacterStats.Kind) -> float:
 	var player := get_player_character()
 	if player == null:
 		return 0.0
-	var effective := player.stats.get_effective_value(kind) + player.get_check_modifier(kind)
+	var effective := player.stats.get_effective_value(kind) \
+		+ player.get_check_modifier(kind) + player.get_body_check_modifier(kind)
 	if kind == CharacterStats.Kind.PERCEPTION:
 		effective += get_dog_perception_bonus()
 	return effective
@@ -1653,8 +1656,24 @@ const WAGON_REPAIR_COST_PER_WAGON: int = 30
 func get_next_wagon_cost() -> int:
 	return WAGON_PURCHASE_BASE_COST + (owned_wagon_count - CaravanState.MIN_WAGONS) * WAGON_PURCHASE_COST_STEP
 
+## Kervan büyüdükçe lonca ona daha uzun bir kolon hakkı tanır: her
+## kazanılmış kilometre taşı (bkz. WAGON_LEVEL_MILESTONES/
+## WAGON_REPUTATION_MILESTONES) tavanı bir arttırır.
+##
+## **Bu, Campaign Rules'un "vagon almak kontratı dışlıyor" bulgusunun asıl
+## çözümü.** `CaravanPlan.DEFAULT_MAX_WAGONS` kervanın *toplam* tavanı -
+## oyuncunun kendi vagonları eskort yuvalarını yiyordu, yani ikinci ve
+## dördüncü bölüm birbirinin tersine çekiyordu. Hediye bir vagon kendi
+## kolon yuvasını da getirdiği için eskort kapasitesi hiç daralmıyor:
+## tavan = 6 + kazanılan, sahip olunan = satın alınan + kazanılan, yani
+## boş yuva = 6 - satın alınan. Satın alınan vagon hâlâ bir kontrat
+## yuvası yiyor - o gerçek bir ödünleşim ve kasıtlı duruyor; yalnızca
+## *büyümek* artık o ödünleşimi dayatmıyor.
+func get_wagon_capacity() -> int:
+	return CaravanPlan.DEFAULT_MAX_WAGONS + get_earned_wagon_count()
+
 func can_buy_wagon() -> bool:
-	return owned_wagon_count < CaravanPlan.DEFAULT_MAX_WAGONS
+	return owned_wagon_count < get_wagon_capacity()
 
 ## Başarısızsa (kese yetmez ya da limit dolu) false döner, hiçbir şey
 ## değişmez.
@@ -2323,6 +2342,13 @@ func finish_journey() -> Dictionary:
 	_restock_current_location()
 	heal_party()
 
+	# Kazanılmış vagonlar kampanyadan **önce**: bölüm hedefleri
+	# `owned_wagons`'ı okuyor, taş bu varışta aşıldıysa bölüm de bu
+	# varışta kapanmalı - yoksa hep bir sefer geriden gelirdi, tıpkı
+	# kampanyanın kendisinin payout'tan sonraya alınma gerekçesi gibi.
+	# Seviye (grant_party_xp) ve itibar (teslimat) bu noktada güncel.
+	payout["wagons_earned"] = grant_earned_wagons()
+
 	# Kampanya en sona bırakılıyor: bölüm hedefleri varışın *sonucunu*
 	# okumalı (ödeme yatmış, teslimat sayılmış, şehir görülmüş olmalı),
 	# yoksa bir bölüm hep bir sefer geriden kapanırdı.
@@ -2376,6 +2402,61 @@ func _apply_wagon_losses_to_ownership() -> void:
 ## piyasada zaten alınıp satılan bir malın sınırını `MarketConditions`
 ## zaten taşıyor.
 var _delivered_wagon_quest_ids: Dictionary = {}  # merchant_id -> true
+
+# --- Büyüyen kervan: seviye ve itibar vagon kazandırır ---
+#
+# Vagon sahipliği uzun süre tek bir kapıdan geçiyordu: parayla satın
+# almak, üstelik her seferinde biraz daha pahalı. Sonuç ölçülmüştü
+# (bkz. Campaign Rules) - kontratla yaşayan bir kervan üç vagonda
+# donuyor ve finalin `owned_wagons >= 4` kapısını hiç geçemiyordu, yani
+# "iyi oynamak" bir yol için kapalıydı.
+#
+# Artık büyümenin kendisi vagon kazandırıyor: liderin seviyesi ve
+# kervanın itibarı birer eşik dizisi, her eşik **ömürde bir kez** +1
+# vagon. Taşı `_earned_wagon_milestones`'ta kayıtlı tutmak (bkz.
+# `_delivered_wagon_quest_ids`'in aynı deseni) Ruin Rules'un en sert
+# kuralını korumak için şart: yolda kaybedilen bir vagon gerçekten
+# kaybedilir, bir sonraki eşikte sessizce geri gelmez - eşik yalnızca
+# *yeni* bir vagon verir, sahipliği bir hedefe doğru tamamlamaz.
+#
+# Bedava da değil: her vagon `PEOPLE_PER_WAGON` ağız daha demek (bkz.
+# Provision Rules), yani büyüyen kervan daha çok yiyor.
+const WAGON_LEVEL_MILESTONES: Array[int] = [4, 8]
+const WAGON_REPUTATION_MILESTONES: Array[int] = [20, 45]
+
+var _earned_wagon_milestones: Dictionary = {}  # "level:4" / "rep:20" -> true
+
+func get_earned_wagon_count() -> int:
+	return _earned_wagon_milestones.size()
+
+func has_earned_wagon_milestone(key: String) -> bool:
+	return _earned_wagon_milestones.has(key)
+
+## Aşılmış ama henüz ödenmemiş eşikleri öder. Kaç vagon verdiğini döner -
+## `finish_journey()` bunu varış özetine yazıyor, çünkü görünmeyen bir
+## ödül oynamayı iyi hissettirmiyor (bkz. Reputation Rules'un aynı
+## gerekçesi).
+func grant_earned_wagons() -> int:
+	var leader := get_player_character()
+	var leader_level: int = leader.level if leader != null else 0
+	var granted := 0
+	for level in WAGON_LEVEL_MILESTONES:
+		if leader_level >= level:
+			granted += _claim_wagon_milestone("level:%d" % level)
+	for threshold in WAGON_REPUTATION_MILESTONES:
+		if reputation >= threshold:
+			granted += _claim_wagon_milestone("rep:%d" % threshold)
+	return granted
+
+func _claim_wagon_milestone(key: String) -> int:
+	if _earned_wagon_milestones.has(key):
+		return 0
+	# Taş önce işaretlenir: `get_wagon_capacity()` kazanılmış taş sayısını
+	# okuyor, yani vagonu eklemeden önce tavanın büyümüş olması gerekiyor.
+	_earned_wagon_milestones[key] = true
+	owned_wagon_count += 1
+	_sync_wagon_inventories()
+	return 1
 
 func is_guild_wagon_quest_delivered(merchant_id: String) -> bool:
 	return _delivered_wagon_quest_ids.has(merchant_id)
@@ -2827,6 +2908,7 @@ func to_save_dict() -> Dictionary:
 		"last_clock_hour": last_clock_hour,
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
+		"earned_wagon_milestones": _earned_wagon_milestones.duplicate(),
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
@@ -2925,8 +3007,16 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	# taze bir GameSession'a üç vagonluk bir kargoyu yüklemek o an fazla
 	# olan kısmı sessizce düşürüyordu - vagon sayısını önce okumak bunu da
 	# düzeltiyor.
+	#
+	# Kazanılmış kilometre taşları vagon sayısından **önce** okunuyor:
+	# tavan (`get_wagon_capacity()`) onların sayısına bağlı, yani ters
+	# sırada yedi vagonlu bir kayıt sessizce altıya kırpılır ve oyuncu
+	# kazandığı vagonu her yüklemede bir kez daha kaybederdi.
+	_earned_wagon_milestones = {}
+	for milestone_key in (data.get("earned_wagon_milestones", {}) as Dictionary):
+		_earned_wagon_milestones[str(milestone_key)] = true
 	owned_wagon_count = clampi(
-		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, CaravanPlan.DEFAULT_MAX_WAGONS
+		int(data.get("owned_wagon_count", 1)), CaravanState.MIN_WAGONS, get_wagon_capacity()
 	)
 	_sync_wagon_inventories()
 

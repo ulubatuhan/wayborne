@@ -167,6 +167,7 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"_next_character_serial": "next_character_serial",
 	"_crew_name_serial": "crew_name_serial",
 	"_delivered_wagon_quest_ids": "delivered_wagon_quest_ids",
+	"_earned_wagon_milestones": "earned_wagon_milestones",
 	"_fulfilled_commission_starts": "fulfilled_commission_starts",
 	"caravan": "journey",
 	"journey_origin_id": "journey",

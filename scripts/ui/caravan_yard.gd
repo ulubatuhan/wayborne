@@ -222,7 +222,7 @@ func _refresh() -> void:
 	# (bkz. GameSession.get_party_capacity) - oyuncu bunu burada görsün.
 	_status_label.text = tr("UI_YARD_SUMMARY") % [
 		_session.owned_wagon_count,
-		CaravanPlan.DEFAULT_MAX_WAGONS,
+		_session.get_wagon_capacity(),
 		_session.owned_wagon_damaged,
 		_session.get_party().size(),
 		_session.get_party_capacity(),
@@ -241,7 +241,7 @@ func _refresh() -> void:
 		_buy_wagon_button.text = tr("UI_YARD_BUY_WAGON") % next_cost
 		_buy_wagon_button.disabled = not _session.wallet.can_afford(next_cost)
 	else:
-		_buy_wagon_button.text = tr("UI_YARD_WAGON_LIMIT") % CaravanPlan.DEFAULT_MAX_WAGONS
+		_buy_wagon_button.text = tr("UI_YARD_WAGON_LIMIT") % _session.get_wagon_capacity()
 		_buy_wagon_button.disabled = true
 
 	_refresh_sell_wagon()

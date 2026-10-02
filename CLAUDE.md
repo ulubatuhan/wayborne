@@ -291,6 +291,36 @@ wayborne/
   combat party).
 - Party order **is** combat rank order (1 = front). `party.tscn` is where the
   player reads and reorders it (reachable from the road HUD and the city map).
+- **A body is three dials, not one, and none of them touches `stats`.**
+  Height already bent HP and dodge; gender and body weight joined that
+  same family rather than inventing a system. All three write into the
+  five fields traits and equipment already use
+  (`hp`/`dodge`/`accuracy`/`crit`/`damage`), so `CombatUnit.from_character`
+  saw them with no new wiring. **The base stats stay clean**: a
+  character's `stats` is the points the player spent plus the culture
+  bonus, and nothing else - putting gender there would have silently
+  moved the eight-point allocation economy and auto-allocate with it.
+  - Direction is the player's own brief: a woman bends toward evasion and
+    the critical hit, a man toward toughness and the heavy blow; heavy
+    carries more and hits harder but is slow and **eats more**, lean the
+    reverse. **The middle weight is exactly neutral** (every bonus zero,
+    provision share 1.0), the same guarantee this file demands
+    everywhere: a default character behaves as if the system did not
+    exist.
+  - **The "rogue" half is a check lean, not a combat number.**
+    `get_body_check_modifier()` nudges only AGILITY/PERCEPTION/STRENGTH/
+    ENDURANCE, at the same magnitude a trait's `check_bonus` uses, read
+    by `GameSession.get_best_effective_stat()` beside it. The four stats
+    that belong to the person rather than the body (Zeka/Karizma/
+    Bilgelik/İnanç) are deliberately untouched - deriving a mind from a
+    body would be both wrong and unnecessary.
+  - **The first numbers were measured and cut.** At dodge ±3 / crit +2
+    the whole win-rate table rose 2-7 points, because `create()`'s
+    default is female and dodge is worth more than HP in this engine - a
+    gender reading as plainly better would be an accident, not a design.
+    See Ruin Rules' body A/B for what the numbers measure now, including
+    the part combat cannot see: lean eats 22% less than heavy over a
+    long road, which is a real counterweight in a game about attrition.
 - Characters heal to full on city arrival (`finish_journey()`); the road is
   where damage accumulates.
 
@@ -2241,6 +2271,31 @@ policy's caravans stop at three wagons and never meet the finale's
 existing `owned_wagons >= 4`, which is the "buying wagons crowds out
 contracts" finding above, unchanged.
 
+**Faz 24 closed the wagon/contract conflict, and the measurement is the
+clearest this table has ever produced.** Growing now earns wagons (see
+Caravan Ruin Rules), so the caravan no longer has to choose between
+hauling its own goods and escorting someone else's. Re-measured,
+`simulate_career.gd`, all three policies, 8×40:
+
+| policy | finale | earliest | median | latest | wagons @40 | delivered @40 |
+|---|---|---|---|---|---|---|
+| kontratçı (before) | **0/8** | — | — | — | 3 | 41 |
+| kontratçı (after) | **8/8** | 9 | 15 | 25 | 7 | 120 |
+| genişleyen (after) | 8/8 | 9 | 13 | 22 | 10 | 61 |
+| kampanyacı (after) | 8/8 | 9 | 13 | 22 | 10 | 60 |
+
+The contract policy's 0/8 was never the loss gate - Faz 18 said so
+explicitly: those caravans stopped at three wagons and never met
+`owned_wagons >= 4`. Four earned wagons carry them to seven, and the
+finale opens for every policy. Deliveries rise across the board
+(41 → 120 for the contract policy, 11 → 61 for the expanding one)
+because escort room no longer shrinks as the caravan grows - the
+"buying wagons crowds out contracts" finding is the thing that was
+fixed, not a number that drifted. **Every chapter now closes 8/8 under
+every policy**, which is the same question Faz 17 PR-8 already answered
+and deliberately did not suppress: a threshold the player crosses, not a
+wall tuned to resist crossing.
+
 ### City Hub Rules
 
 The city is where the player decides; the road is where the decision is
@@ -2381,6 +2436,33 @@ can be lost.
   right - updated live as the amount spinner moves. Same principle as a
   choice showing its danger stripe before it's picked: the whole point is
   showing both consequences *before* the decision, not after.
+- **Growing earns wagons; buying them still costs a contract slot.**
+  Wagon ownership had exactly one door - gold, at a price that climbed
+  with every purchase - and Campaign Rules had already measured where
+  that led: a caravan that lives on contracts freezes at three wagons
+  and can never pass the finale's `owned_wagons >= 4`, so one honest way
+  of playing was simply locked out. `GameSession.grant_earned_wagons()`
+  opens a second door: the leader's level and the caravan's reputation
+  are two threshold lists (`WAGON_LEVEL_MILESTONES`,
+  `WAGON_REPUTATION_MILESTONES`) and each threshold pays **+1 wagon,
+  once in a lifetime**.
+  - **The milestone is recorded, not compared against a target**
+    (`_earned_wagon_milestones`, saved - `_delivered_wagon_quest_ids`'s
+    pattern). That is what keeps Ruin Rules intact: a wagon lost on the
+    road is really lost, and does not quietly return at the next
+    threshold. A threshold grants a *new* wagon; it never tops ownership
+    up to a number.
+  - **The gift brings its own column slot.** `get_wagon_capacity()` is
+    `DEFAULT_MAX_WAGONS + earned`, so escort room is `6 - bought`
+    regardless of how much the caravan has grown. A *bought* wagon still
+    eats a merchant slot - that trade-off is real and stays; what is
+    gone is growth forcing it. Every screen reads the function now, and
+    `load_from_dict` reads the milestones **before** it clamps
+    `owned_wagon_count`, or a seven-wagon save would be clipped back to
+    six on every load.
+  - Not free either: each wagon is `PEOPLE_PER_WAGON` more mouths (see
+    Provision Rules), so a grown caravan eats more. Measured results are
+    in Campaign Rules.
 - **A wagon can be sold, and resale never returns its cost.** Otherwise
   buy-then-sell is a free capacity toggle around every journey.
   `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth
@@ -2584,6 +2666,46 @@ attack rate and crashed every cell (party 4 at 65% → 52%) - it measured
 its own rule, not the kits. The level table moved 45/62/70/75 →
 42/53/68/70 (mixed pairs lost the Guard's heal) and the progression
 ladder's first rung 57% → 70%.
+
+**The body pass (gender and body weight) moved the table, and the cause
+is the harness's default, not a balance change.** The matrix builds its
+party with `CharacterData.create()`, whose default is female - and female
+now carries dodge +3 / crit +2 against HP −2, so the table below is an
+all-female company rather than a neutral one:
+
+| parti | 20% | 40% | 65% | 90% |
+|---|---|---|---|---|
+| 1 | 57% | 57% | 25% | 25% |
+| 2 | 100% | 67% | 53% | 53% |
+| 3 | 100% | 100% | 77% | 77% |
+| 4 | 100% | 100% | 92% | 92% |
+
+Against the T-04 table that is +2/+4 on the lone traveller, −3/+1 on the
+pair, and **+7 on party 3 at the two dangerous tiers**. Party 2 at
+65%/90% - this file's long-standing tightest square - is unmoved at 53%.
+The numbers were cut once already for this reason (see Character & Party
+Rules); cutting them further until the *all-female* table reproduced the
+old one would be tuning a design to preserve a harness artifact, so the
+table is restated instead.
+
+**The honest per-body measurement is its own A/B** (`_report_body_impact`,
+the equipment A/B's skeleton: one character, 50% danger, 60 battles):
+
+| beden | kazanma |
+|---|---|
+| kadın · orta | 55% |
+| erkek · orta | 70% |
+| kadın · ince | 47% |
+| erkek · iri | 83% |
+
+A male combat edge is the brief, not a bug ("erkekler daha dayanıklı ve
+güçlü"), and a solo fight at 50% danger is the most exaggerated place to
+read it - in a mixed party the whole table moved ~2pp. Two counterweights
+sit outside this table by construction: the agility/perception check lean,
+and provisions, where lean eats 0.9 against heavy's 1.15. **Neither is
+measurable in a win rate**, which is exactly why the A/B is reported next
+to them rather than instead of them. Male damage was already cut 2 → 1
+when the first A/B read a 22pp gap at `orta`.
 
 ### Progression Rules
 
@@ -4162,14 +4284,17 @@ verir.
 - **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
   on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
-- **Cinsiyet ve vücut tipinin stat etkisi.** `CharacterData.gender`/
-  `body_weight` (bkz. Wardrobe body varyant sistemi) şu an tamamen görsel -
-  hiçbir derived formül bunları okumuyor, `test_character_data.gd` bunu
-  doğrudan doğruluyor (aynı statlarla farklı cinsiyet/kilo, aynı can/
-  kaçınma). Boyun HP/dodge'a etkisiyle aynı aile bir mekanik isteniyor
-  (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
-  kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
-  ayrı bırakıldı, unutulmasın diye burada.
+- **Şehir menüsü Darkest Dungeon düzenine geçsin** - arkaplanda
+  animasyonlu bir şehir sahnesi, üstünde butonlar, mekânlar ayrı sahne
+  yerine popup/overlay olarak açılsın. Üretim yolu kararlaştırıldı
+  (prosedürel `CityView` + `_process`/`queue_redraw`, `MenuBackdrop`'un
+  deseni; mekânlar `WagonPanel`/`DebtPanel`'in sahnesiz `CanvasLayer`
+  desenine tek tek taşınır, `test_navigation.gd`'nin ekran grafiği
+  onlarla birlikte güncellenir) ama **nasıl yapılacağına karar
+  verilmedi** - oyuncunun kendi isteğiyle ertelendi. Bilinen çatışma:
+  Faz 22 şehri B10 masa sahnesine yeni taşımıştı, çizilmiş animasyonlu
+  bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
+  "iki ayrı prodüksiyon" tuzağı).
 - **Yirmi kuşam kalemi (B-01..B-20) hâlâ çizilmedi - ama artık isteme
   biçimi değişti ve boru hattı hazır.** Üç turluk 3×3 parça sayfası
   mücadelesi terk edildi; her kalem tek bir bütün figür olarak isteniyor
