@@ -52,7 +52,13 @@ const MOUNTED_WIDTH: float = 150.0
 
 ## Yürüyüş fazının ilerleme hızı. Mesafeye bağlı, zamana değil: duran bir
 ## figürün ayakları oynarsa yerde kayıyor gibi duruyor.
-const STEP_PER_UNIT: float = 0.034
+##
+## Değeri ölçüldü, seçilmedi: bir tam çevrimde gövde `4 * STRIDE_RATIO *
+## boy` kadar ilerler, yani ayağın kaymadığı oran `1 / (4 * 0.19 * boy)`.
+## Ortalama gövde 74 piksel -> 0.0178. Eski 0.034 bunun iki katıydı;
+## yol ekranının altı katlık sapması kadar değil (orada kervan ağır,
+## burada oyuncu hızlı koşuyor) ama aynı cinsten bir hata.
+const STEP_PER_UNIT: float = 0.0178
 
 ## Öküz ölçüsü. Konumu artık `_column_positions` veriyor.
 const OX_SIZE: Vector2 = Vector2(146.0, 86.0)
@@ -68,9 +74,67 @@ const CREW_BODY_HEIGHT: float = 72.0
 ## kervanın en arkasında tek sıra bir "sürü" olarak yürüyorlar - `_column_
 ## positions()`'ın kendi kuralı burada da geçerli: her biri kendi genişliğini
 ## tüketir, araya boşluk girer, çakışma imkânsız.
-const PACK_WIDTH: float = 44.0
-const PACK_HEIGHT: float = 40.0
+## Köpek ve eşek ayrı ölçülerde - bir süre ikisi de tek bir 44x40 kutuyu
+## paylaşıyordu ve ikisi de olması gerekenden küçük çiziliyordu. Sebep
+## kutunun kendisi değil, `BeastRig`'in `h`'sinin **nominal** olması: bir
+## dörtayaklının sırtı `SPECIES.back * h`'de durur, gerçek siluet
+## `extent(species).size.y * h` kadardır (husky 0.57, eşek 0.85). 40'lık
+## ortak kutu bu yüzden ekranda köpeği insanın %32'si, eşeği %47'si olarak
+## çiziyordu. Hedef oyuncunun kendi ölçüsü: eşeğin kafası (kulaklarıyla)
+## insanın **omzunda** (~%82), köpek **diz ile bel arasında** (~%45).
+##
+## Sayılar `extent()`ten hesaplanıp sonra **gerçek karede ölçülerek**
+## düzeltildi, ve düzeltme küçük değildi: ilk hesap insanın *kutusunu*
+## (`CREW_BODY_HEIGHT`) boyu sanmıştı, oysa `FigureRig` bir insanı
+## kutusunun ancak ~%86'sına çiziyor (kalça .46 + gövde .26 + kafa).
+## Kutuya göre doğru olan sayı ekranda ikisini de %10 iri bırakıyordu -
+## bu dosyanın kendi disiplini: hesap başlatır, ölçüm bitirir. Ölçen araç
+## `tests/screenshot_hub_motion.gd` - diz/bel/omuz kılavuzlu kare.
+const DOG_HEIGHT: float = 51.0
+const DOG_WIDTH: float = 61.0
+const DONKEY_HEIGHT: float = 61.0
+const DONKEY_WIDTH: float = 86.0
 const PACK_GAP: float = 18.0
+
+## Kervan burada da **sırayla** dönüyor. Yol ekranı bunu Faz 21'de aldı
+## (`RoadCaravan.begin_turn()`), hub hiç almadı: `_chase` her figürün
+## `advance()`'ını çağırıyor, o da yüzü hızın işaretinden *anında*
+## belirliyordu - oyuncu yön değiştirdiği karede bütün kervan tek karede
+## arkasını dönüyordu. Emir artık baştan kuyruğa iniyor ve her figür,
+## yol ekranındaki gibi, kâğıt bir figür gibi ince bir çizgiye inip öbür
+## yüzüyle açılıyor.
+##
+## Süre bilerek yolunkinden çok kısa (orada 10 sn): yolda dönmek verilen
+## bir emir, kervan o sırada duruyor ve tören bir kez yaşanıyor. Hub'da
+## oyuncu sürekli yön değiştiriyor - on saniyelik bir tören her A/D
+## basışında kervanı felç ederdi.
+const TURN_SECONDS: float = 0.40
+const TURN_WAVE_SECONDS: float = 0.85
+## En ince hâlinde bile çizim çökmesin - `RoadCaravan.MIN_TURN_WIDTH`.
+const MIN_TURN_WIDTH: float = 0.06
+
+## Sürüdeki bir hayvanın kutusu. `is_dog` `_build_caravan`'ın kendi sırası
+## (önce köpekler) ile aynı kuralı okur, yani kolon hesabı ile çizim aynı
+## hayvanı aynı ölçüde görür.
+static func pack_box(is_dog: bool) -> Vector2:
+	return Vector2(DOG_WIDTH, DOG_HEIGHT) if is_dog else Vector2(DONKEY_WIDTH, DONKEY_HEIGHT)
+
+## Dönüş dalgasının eğrisi. Saf fonksiyon - Motion Rules'un kendi kuralı:
+## bir `_process` içine gömülü eğriyi hiçbir test göremez. `along` figürün
+## kolondaki yeri (0 baş, 1 kuyruk).
+##
+## Parametre **hedef** yön, dönülen yön değil - ilk hâli dönüleni alıyordu
+## ve o hâlde dinlenme durumu (dalga çoktan bitmiş, `elapsed` kocaman)
+## `-from` veriyordu: hub'a girildiği anda lider sağa, bütün kervan sola
+## bakıyordu. Yüzler yalnızca ±1 olduğu ve dönüş ancak ikisi farklıyken
+## başladığı için başlangıç zaten her zaman `-target`; hedefi alıp
+## başlangıcı türetmek o hatayı yapılamaz kılıyor.
+static func turn_facing(target: float, elapsed: float, along: float) -> float:
+	var progress := clampf(
+		(elapsed - clampf(along, 0.0, 1.0) * TURN_WAVE_SECONDS) / TURN_SECONDS, 0.0, 1.0
+	)
+	var eased := progress * progress * (3.0 - 2.0 * progress)
+	return -target * cos(PI * eased)
 
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
@@ -87,9 +151,18 @@ var _crew: Array[WalkFigure] = []
 var _spots: Array[Dictionary] = []
 ## Her vagonun öküzü - vagonla birlikte, onun bir tık önünde yürüyor.
 var _oxen: Array[WalkFigure] = []
-## Köpekler + eşekler/yarım vagonlar, bu sırayla (bkz. PACK_WIDTH) - kolonun
-## en arkasında tek sıra.
+## Köpekler + eşekler/yarım vagonlar, bu sırayla (bkz. pack_box) - kolonun
+## en arkasında tek sıra. Köpek sayısı ayrıca saklanıyor, çünkü her kare
+## koşan `_column_positions` kutu enini türe göre seçiyor ve bu sıranın
+## nerede köpekten eşeğe döndüğünü bilmek zorunda.
 var _pack: Array[WalkFigure] = []
+var _pack_dog_count: int = 0
+## Kolonun dönüşü (bkz. TURN_SECONDS): `_column_facing` emrin hedefi,
+## zaman ise dalganın başlangıcından beri geçen süre. Büyük başlıyor -
+## yani ilk karede dalga çoktan bitmiş sayılıyor ve herkes hedefte duruyor,
+## kimse sahneye dönerken girmiyor.
+var _column_facing: float = 1.0
+var _column_turn_time: float = 999.0
 ## Açık vagon paneli - varsa hareket ve diğer etkileşimler durur (bkz.
 ## _process/_unhandled_input), tıpkı InGameMenu açıkken olduğu gibi.
 var _wagon_panel: WagonPanel = null
@@ -196,13 +269,16 @@ func _move_player(delta: float) -> void:
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
 	var column := _column_positions(
-		_player.position.x, _followers.size(), _wagons.size(), _pack.size()
+		_player.position.x, _followers.size(), _wagons.size(), _pack.size(), _pack_dog_count
 	)
 
 	_chase(_followers, column.escorts, weight, delta)
 	_chase(_oxen, column.oxen, weight, delta)
 	_chase(_crew, column.crew, weight, delta)
 	_chase(_pack, column.pack, weight, delta)
+	# `_chase`'in içindeki `advance()` yüzü hızın işaretinden yazıyor, o
+	# yüzden dönüş dalgası *sonra* geliyor: emri o yazının üstüne koyuyor.
+	_advance_column_turn(delta)
 
 	var wagon_targets: Array[float] = column.wagons
 	for index in _wagons.size():
@@ -217,6 +293,44 @@ func _follow_with_wagon(delta: float) -> void:
 ## ettiği mesafeyle** yürütür: lidere yetişmeye çalışan hızlı adım atar,
 ## yerinde duran hiç atmaz. Tek bir yerde durması, üç ayrı döngünün
 ## adım hesabının birbirinden kaymasını engelliyor.
+## Dönüş dalgasının bir karesi. Gecikme figürün kolondaki *yerinden*
+## geliyor, dizi indisinden değil - lidere ne kadar uzaksa emri o kadar
+## geç alıyor, ve bu kuyruğun neyden oluştuğunu (muhafız, tayfa, öküz,
+## köpek) bilmeyi hiç gerektirmiyor.
+func _advance_column_turn(delta: float) -> void:
+	var figures := _turning_figures()
+	if figures.is_empty():
+		return
+	if not is_zero_approx(_walk_direction):
+		var heading := signf(_walk_direction)
+		if not is_equal_approx(heading, _column_facing):
+			_column_facing = heading
+			_column_turn_time = 0.0
+	_column_turn_time += delta
+
+	var head := _player.position.x + _player.size.x * 0.5
+	var tail := head
+	for figure in figures:
+		tail = minf(tail, figure.position.x + figure.size.x * 0.5)
+	var span := maxf(1.0, head - tail)
+	for figure in figures:
+		var centre := figure.position.x + figure.size.x * 0.5
+		var along := clampf((head - centre) / span, 0.0, 1.0)
+		var facing := turn_facing(_column_facing, _column_turn_time, along)
+		figure.pivot_offset = Vector2(figure.size.x * 0.5, figure.size.y)
+		figure.scale = Vector2(maxf(absf(facing), MIN_TURN_WIDTH), 1.0)
+		figure.set_facing(1.0 if facing >= 0.0 else -1.0)
+
+## Dalganın döndürdüğü figürler: lider hariç kolonun tamamı. Lider kendi
+## yönünü anında alıyor - emri veren o, beklemesi tuhaf olurdu.
+func _turning_figures() -> Array[WalkFigure]:
+	var figures: Array[WalkFigure] = []
+	figures.append_array(_followers)
+	figures.append_array(_oxen)
+	figures.append_array(_crew)
+	figures.append_array(_pack)
+	return figures
+
 func _chase(
 	figures: Array[WalkFigure], targets: Array[float], weight: float, delta: float
 ) -> void:
@@ -250,7 +364,8 @@ func _chase(
 ## boyunca ikişerli gruplar hâlinde dağılmış, her vagon biriminde
 ## [öküz] [tayfa] [vagon] sırası.
 func _column_positions(
-	leader_x: float, escort_count: int, wagon_count: int, pack_count: int = 0
+	leader_x: float, escort_count: int, wagon_count: int, pack_count: int = 0,
+	dog_count: int = 0
 ) -> Dictionary:
 	var escorts: Array[float] = []
 	var wagons: Array[float] = []
@@ -293,10 +408,11 @@ func _column_positions(
 	# Köpekler ve eşekler/yarım vagonlar kolonun en arkasında, tek sıra bir
 	# "sürü": ayrı bir tayfa değiller, kendi kolon biriminden çok kervanın
 	# peşine takılmış küçük hayvanlar.
-	for _index in pack_count:
-		cursor -= PACK_WIDTH * 0.5
+	for index in pack_count:
+		var width := pack_box(index < dog_count).x
+		cursor -= width * 0.5
 		pack.append(cursor)
-		cursor -= PACK_WIDTH * 0.5 + PACK_GAP
+		cursor -= width * 0.5 + PACK_GAP
 
 	return {"escorts": escorts, "wagons": wagons, "oxen": oxen, "crew": crew, "pack": pack}
 
@@ -407,7 +523,8 @@ func _build_caravan() -> void:
 	# kalanı ilk karede yerine kaymasın diye ilk konumunu her karede
 	# kullanılan *aynı* formülden alıyor. Ekleme sırası çizim sırasıdır -
 	# vagonlar ve tayfa önce, insanlar üstlerine.
-	var column := _column_positions(0.0, escorts.size(), wagon_count, pack_count)
+	_pack_dog_count = session.owned_dogs
+	var column := _column_positions(0.0, escorts.size(), wagon_count, pack_count, _pack_dog_count)
 
 	for index in wagon_count:
 		var wagon_x: float = column.wagons[index] - WAGON_SIZE.x * 0.5
@@ -507,8 +624,9 @@ func _build_ox(centre_x: float) -> WalkFigure:
 ## küçük sürü (bkz. GameSession.owned_dogs/owned_donkeys/owned_half_wagons).
 func _build_pack_animal(centre_x: float, is_dog: bool) -> WalkFigure:
 	var animal := WalkFigure.new()
-	animal.size = Vector2(PACK_WIDTH, PACK_HEIGHT)
-	animal.position = Vector2(centre_x - PACK_WIDTH * 0.5, GROUND_Y - PACK_HEIGHT)
+	var box := pack_box(is_dog)
+	animal.size = box
+	animal.position = Vector2(centre_x - box.x * 0.5, GROUND_Y - box.y)
 	add_child(animal)
 	animal.set_kind(WalkFigure.KIND_DOG if is_dog else WalkFigure.KIND_DONKEY, "bandit")
 	animal.set_phase_offset(centre_x * 0.025)

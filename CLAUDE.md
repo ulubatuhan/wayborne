@@ -3186,6 +3186,51 @@ every decision has a visible control, and a key is only its shortcut.**
   argument), or the figures would grow while the camera pans. A diverted
   journey is a different road: it rebuilds its own terrain and faces
   forward again. `tests/screenshot_turnaround.gd` photographs the turn.
+- **The hub turns in order too, and it never had.** The wave above is the
+  *road's*; `world_hub.gd` had nothing - `_chase` calls each figure's
+  `advance()`, which takes facing from the sign of its velocity, so the
+  instant the player reversed the whole caravan mirrored in one frame.
+  Reported as exactly that ("anında herkes arkaya dönebiliyor"). The hub
+  now runs its own wave (`_advance_column_turn`), and the delay comes from
+  a figure's **place in the column**, not its index in an array - so the
+  escorts, the crew, the oxen and the pack tail are ordered by where they
+  actually stand, and nothing has to know what the tail is made of.
+  - **Its clock is deliberately a tenth of the road's.** Turning on the
+    road is an order: the caravan is stopped, the hours are already paid
+    (`REPLAN_HOURS`), and the ceremony happens once, so ten seconds is
+    right there. In the hub the player reverses constantly - a ten-second
+    ceremony would paralyse the caravan on every A/D press. The wave is
+    `TURN_WAVE_SECONDS` (0.85) and each figure takes `TURN_SECONDS` (0.40).
+  - **The leader turns at once.** It gives the order; waiting for itself
+    would read as lag, not as ceremony.
+  - **The curve is a static function** (`WorldHub.turn_facing`), per Motion
+    Rules: a curve written inside `_process` is a curve no test can see.
+    `test_caravan_layout.gd` asserts the head leads the tail, that everyone
+    lands exactly on the target, and - the actual bug - that nobody has
+    finished turning on the first frame.
+- **The walk cadence was six times the ground speed, and nobody had
+  measured it.** `RoadCaravan.STEP_RATE` was 2.6 with a comment saying
+  "the number itself is visual". Measured: at 1x the ground moves
+  `PIXELS_PER_DAY / REAL_SECONDS_PER_DAY` = 20 px/s, a person on a 320
+  band is 60.8 px, and a gait cycle carries the body `4 * STRIDE_RATIO *
+  height` = 46.2 px - so the non-skating cadence is 0.43 cycles/s. At 2.6
+  the legs ran two and a half cycles a second while the caravan covered a
+  third of its own height: running legs under a walking caravan. The hub's
+  own `STEP_PER_UNIT` was the same mistake at half the size (0.034 against
+  an ideal 0.0178) - there the player really does move fast, so the error
+  was 2x rather than 6x. Both are derived now, and
+  `tests/screenshot_walk_cadence.gd` prints the two seconds as a strip,
+  because a single frame cannot show a cadence at all.
+- **A figure fills about 86% of its box, and forgetting that sized two
+  animals wrong.** The dog and donkey were reported as far too small
+  against the caravan. The first correction computed their heights from
+  `BeastRig.extent()` against the person's *box* - and landed both ~10%
+  oversized, because `FigureRig` draws a person to only
+  `HIP_RATIO + TORSO_RATIO + head` of that box. The numbers that ship were
+  measured off a rendered frame with knee/waist/shoulder guides
+  (`tests/screenshot_hub_motion.gd`), against the player's own spec: the
+  donkey's ears at a human's shoulder (81% measured), the dog between knee
+  and waist (45%). Calculation starts the job here; measurement ends it.
 - **Days are taken one at a time** (`JourneyClock.take_one_day()`). The old
   loop took every completed day at once and dropped the ones it could not
   process behind an open card - and while an encounter marker was pending
@@ -4137,36 +4182,17 @@ verir.
   bir deri render'ına kolay ayrışmıyor - ama `wardrobe_cut.py` resmin
   nereden geldiğini bilmiyor, yani boyama pozunda render edilmiş CC0 bir
   3B giysi de aynı komuttan geçer.
-- **Yön çevirme sırasında bazı figürler anında arkaya dönüyor, dalga
-  animasyonunu atlıyor.** Road Movement Rules'un `RoadCaravan.
-  begin_turn()`'ü sütunu `TURN_SECONDS` (10) boyunca sırayla çeviriyor
-  olması gerekiyordu ("her birim kendi merkezi etrafında, dalga ona
-  ulaştıkça döner") - ekran görüntüsünde kervanın arkasına eklenen eşek/
-  köpek kuyruğu (Faz "husky/eşek sürüsü" - `world_hub.gd`'nin "tam kolon
-  formülü bu kadar az hayvan için aşırı" diye kasıtlı basitleştirdiği
-  kuyruk) bu dalgaya hiç girmeden anında ters yöne dönmüş görünüyor.
-  Şüphelenilmesi gereken yer: basit kuyruğun `begin_turn()`'ün dönüş
-  sırasına hiç dahil edilmemiş olması.
-- **Yürüyüş animasyonu kadansı oyunun akışına göre çok hızlı duruyor.**
-  Road Layer Rules'un "a speed lever has to move everything it looks
-  like it's moving" maddesi `_caravan.set_speed()`'i `JourneyClock.
-  get_speed()`'e (tempo çarpanı) bağlamıştı, ama normal (1x) tempoda bile
-  bacak sallama kadansı sahnenin genel hissine göre fazla hızlı okunuyor -
-  senkron var ama taban değerin kendisi yeniden ölçülüp ayarlanmalı.
-- **Şehir kapısı hâlâ düz bir renkli dikdörtgen - gerçek bir kapı/duvar
-  resmi yok.** `Kurtboğazı Kapısı` etkileşim noktası ekran görüntüsünde
-  yalnızca mor bir `ColorRect` olarak duruyor, Art Rules'un her ekranın
-  "bir yerde durması" disiplinine aykırı (bkz. "Every screen stands
-  somewhere, or it is a model on a table" maddesi - şehrin kendisi için
-  zaten çözülmüştü, kapı için hiç çözülmemiş). Gerçek bir kapı/duvar
-  illüstrasyonu (ya da en azından `ArtDraw` ile çizilen bir siluet)
-  gerekiyor.
-- **Eşek ve köpek kervana göre çok küçük - oransız.** Kullanıcının kendi
-  ölçüsü: eşeğin kulaklarıyla beraber başı bir insanın omzuna kadar
-  gelmeli, köpek diz ile bel arasında bir hizada olmalı. Ekran
-  görüntüsünde ikisi de bundan belirgin küçük - `world_hub.gd`'nin
-  `DOG_HEIGHT_RATIO`/`DONKEY_HEIGHT_RATIO` sabitleri (ve `RoadCaravan`'ın
-  aynı kuyruğu çizen eşleniği) yeniden ölçülüp büyütülmeli.
+- **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
+  `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
+  (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.
+  Prompt dosyası, şablonu ve paleti hazır (`docs/gemini-prompts-gate.md`,
+  `docs/gate/`, `tools/gate_template.py`); resim gelince
+  `_build_spots()`'un `ColorRect`'i bir `TextureRect` olacak, etkileşim
+  dikdörtgeni aynı kalacak. **Bilinen risk, prompt'un ilk kuralı olarak
+  yazıldı:** hub'ın manzarası prosedürel çiziliyor, fotoğrafik ya da 3B
+  render bir illüstrasyon Art Rules'un "iki ayrı prodüksiyon" tuzağına
+  düşer. Teslimat dile oturmazsa ikinci yol aynı kapıyı `ArtDraw` ile
+  çizmek - asıl kusur kapının çirkin olması değil, bir dikdörtgen olması.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),

@@ -60,8 +60,24 @@ const OX_HEIGHT_RATIO: float = 0.15
 ## aşırıydı, sabit genişlikli basit bir kuyruk yeterli. Yarım vagon eşekle
 ## aynı hayvanla çiziliyor - ikisi de `GameSession.pack_inventory`'nin aynı
 ## kapasite havuzunu paylaşıyor, görsel olarak da ayrışmaları gerekmiyor.
-const DOG_HEIGHT_RATIO: float = 0.10
-const DONKEY_HEIGHT_RATIO: float = 0.13
+## Bu iki oran `BeastRig`'in **nominal** `h`'si, çizilen yükseklik değil:
+## bir dörtayaklının sırtı `SPECIES.back * h`'de durur, kafa daha yukarı
+## çıkar, yani gerçek siluet `extent(species).size.y * h` kadardır (husky
+## 0.57, eşek 0.85). İlk değerler (0.10/0.13) bu farkı atladığı için
+## kutudan okunduğunda makul görünüp ekranda köpeği insanın %32'si,
+## eşeği %47'si olarak çiziyordu - oyuncunun "ikisi de çok küçük"
+## raporu buydu. Hedef oyuncunun kendi ölçüsü: eşeğin kafası
+## (kulaklarıyla) bir insanın **omzu** hizasında (~%82), köpek **diz ile
+## bel arasında** (~%45). Oranlar o hedeften geri hesaplanıp sonra gerçek
+## karede ölçülerek düzeltildi - hesap `PERSON_HEIGHT_RATIO`'yu insanın
+## boyu sanıyor, oysa o kutunun boyu: `FigureRig` bir insanı kutusunun
+## ancak ~%86'sına çiziyor, yani yalnız hesapla kalmak ikisini de %10 iri
+## bırakıyordu (bkz. world_hub.gd'nin aynı notu).
+const DOG_HEIGHT_RATIO: float = 0.135
+const DONKEY_HEIGHT_RATIO: float = 0.163
+## Kutu eni / nominal `h` - `BeastRig.extent(species).size.x`'in kendisi.
+const DOG_WIDTH_RATIO: float = 1.20
+const DONKEY_WIDTH_RATIO: float = 1.40
 const PACK_GAP: float = 18.0
 
 ## Bir vagonu **tek öküz** çeker. Bir süre çift öküzdü (bkz. Faz 10'un
@@ -71,9 +87,18 @@ const PACK_GAP: float = 18.0
 ## `DEPTH`/`SHADE`) bu yüzden kalkı: tek hayvan artık kendi tam boyutunda
 ## ve tam tonunda, koşumun tam ortasında duruyor.
 
-## Yürüyüş temposu: bir "gün/saniye"lik hız kaç adım. Sayının kendisi
-## görsel; yolun gerçek hızı road_journey'de.
-const STEP_RATE: float = 2.6
+## Yürüyüş temposu: 1x tempoda saniyede kaç tam yürüyüş çevrimi.
+##
+## Uzun süre 2.6'ydı ve "sayının kendisi görsel" diye not düşülmüştü -
+## ölçülmemişti. Ölçüldüğünde altı kat hızlı çıktı: 1x'te zemin saniyede
+## `PIXELS_PER_DAY / REAL_SECONDS_PER_DAY` = 20 piksel kayıyor, 320'lik
+## bir şeritte insan 60.8 piksel, ve bir çevrimde gövde `4 * STRIDE_RATIO
+## * boy` = 46.2 piksel ilerliyor - yani ayağın yere göre kaymadığı kadans
+## 20 / 46.2 = 0.43 çevrim/s. 2.6'da bacaklar saniyede iki buçuk tur
+## atarken kervan kendi boyunun üçte biri kadar yol alıyordu: koşan bacak,
+## yürüyen kervan. Oyuncunun "yürüme animasyonu çok hızlı, oyunun akışı
+## ile arasında denge kurulmalı" raporu buydu.
+const STEP_RATE: float = 0.43
 
 ## Vagon ölçüleri. Genişlik yükseklikten biraz fazla: bir kervan vagonu
 ## kareye yakındır, ilk ölçüde 1.6 katıydı ve balon gibi duruyordu.
@@ -1206,7 +1231,12 @@ func _walk_column(scale: float, place: bool) -> float:
 	for index in _pack.size():
 		var is_dog: bool = _pack_is_dog[index] if index < _pack_is_dog.size() else false
 		var pack_h := height * (DOG_HEIGHT_RATIO if is_dog else DONKEY_HEIGHT_RATIO)
-		var pack_w := pack_h * 1.3
+		# Kutu eni türün kendi `extent()`'inden: köpek 1.2, eşek 1.4 kat
+		# nominal `h`. Tek bir 1.3 ikisine birden uyduğu için seçilmişti,
+		# ama eşeğinkini %7 dar bırakıyordu - kolon aralığı o kadar sıkışık
+		# hesaplanıyordu (çizim taşmıyor, `Control` kırpmıyor; sıkışan şey
+		# yanındaki hayvana kalan boşluk).
+		var pack_w := pack_h * (DOG_WIDTH_RATIO if is_dog else DONKEY_WIDTH_RATIO)
 		cursor -= pack_w * 0.5
 		if place:
 			_place(_pack[index], cursor, pack_h, pack_w)

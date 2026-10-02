@@ -23,6 +23,13 @@ const BAND: Vector2 = Vector2(1920.0, 320.0)
 ## görememesi değil.
 const FULLY_VISIBLE_WAGONS: int = 4
 
+## Bir insan `WalkFigure` kutusunun ne kadarını gerçekten dolduruyor:
+## `FigureRig` kalçayı `HIP_RATIO` (.46), omzu onun `TORSO_RATIO` (.26)
+## üstüne, kafayı da omzun bir kafa yarıçapı kadar üstüne koyuyor - yani
+## çizilen siluet kutunun tamamı değil. Ölçülen değer (ekran görüntüsü
+## aracı, 72 piksellik kutuda 62 piksel figür).
+const DRAWN_PERSON_SHARE: float = 0.86
+
 func run(t) -> void:
 	for wagons in [1, 2, 3, 4, 6]:
 		for party in [1, 2, 4]:
@@ -32,6 +39,79 @@ func run(t) -> void:
 	_test_turnaround(t)
 	_test_leader_speed_is_symmetric(t)
 	_test_walking_left_is_not_a_moonwalk(t)
+	_test_walk_cadence_matches_ground_speed(t)
+	_test_pack_animals_read_against_a_person(t)
+	_test_hub_turn_is_a_wave(t)
+
+## Bacak kadansı zemin hızıyla uyumlu: bir tam çevrimde gövde `4 *
+## STRIDE_RATIO * boy` kadar ilerler, o yüzden kaymayan kadans
+## `zemin_hızı / çevrim_mesafesi`. Uzun süre 2.6'ydı - altı kat hızlı,
+## yani koşan bacak / yürüyen kervan (bkz. STEP_RATE'in kendi notu).
+func _test_walk_cadence_matches_ground_speed(t) -> void:
+	var ground := TravelBand.PIXELS_PER_DAY / JourneyClock.REAL_SECONDS_PER_DAY
+	var person_h := BAND.y * RoadCaravan.PERSON_HEIGHT_RATIO
+	var per_cycle := 4.0 * FigureRig.STRIDE_RATIO * person_h
+	var ideal := ground / per_cycle
+	t.ok(
+		absf(RoadCaravan.STEP_RATE - ideal) < 0.15 * ideal,
+		"1x kadans zemin hızından sapıyor (%.2f ≠ %.2f çevrim/s)" % [
+			RoadCaravan.STEP_RATE, ideal]
+	)
+
+## Hayvanlar insana göre okunuyor. `BeastRig`in `h`'si nominal - gerçek
+## siluet `extent().size.y * h` - ve bu atlandığı sürece kutudan makul
+## görünen bir sayı ekranda çok küçük çiziyordu.
+func _test_pack_animals_read_against_a_person(t) -> void:
+	# İnsanın *kutusu* değil, çizilen boyu: `FigureRig` kalça (.46) +
+	# gövde (.26) + kafa kadar çiziyor, kutunun tamamını değil. İlk
+	# hesapta bu atlanmıştı ve iki hayvan da %10 iri çıkmıştı.
+	var person := BAND.y * RoadCaravan.PERSON_HEIGHT_RATIO * DRAWN_PERSON_SHARE
+	var dog := BAND.y * RoadCaravan.DOG_HEIGHT_RATIO * BeastRig.extent(BeastRig.HUSKY).size.y
+	var donkey := BAND.y * RoadCaravan.DONKEY_HEIGHT_RATIO * BeastRig.extent(BeastRig.DONKEY).size.y
+	# Köpek diz (%28) ile bel (%60) arasında, eşeğin kafası omuzda (%82).
+	t.ok(dog / person > 0.33 and dog / person < 0.58,
+		"köpek diz-bel bandının dışında (insanın %%%.0f'i)" % [100.0 * dog / person])
+	t.ok(donkey / person > 0.72 and donkey / person < 0.92,
+		"eşeğin kafası omuz hizasında değil (insanın %%%.0f'i)" % [100.0 * donkey / person])
+	t.ok(donkey > dog, "eşek köpekten büyük olmalı")
+
+## Hub'ın dönüşü bir dalga: baş kuyruktan önce dönüyor, herkes tam
+## hedefte bitiriyor, ve hiçbir an atlanmıyor (anında dönüş yok).
+func _test_hub_turn_is_a_wave(t) -> void:
+	# `world_hub.gd`'nin `class_name`i yok (bir ekran betiği, global sınıf
+	# önbelleğine girmesi gerekmiyor), o yüzden betik olarak yükleniyor.
+	# `load()`'un dönüşü tipsiz - `:=` burada ayrıştırılamaz, bkz.
+	# CLAUDE.md'nin `:=`/Variant tuzağı.
+	var hub: GDScript = load("res://scripts/world/world_hub.gd")
+	var turn_seconds: float = hub.TURN_SECONDS
+	var wave_seconds: float = hub.TURN_WAVE_SECONDS
+
+	# Parametre **hedef** yön: dalga `-target`'tan başlar, `target`'ta biter.
+	var start: float = hub.turn_facing(-1.0, 0.0, 0.0)
+	t.almost(start, 1.0, "dalga eski yönden başlar", 0.001)
+	var head_mid: float = hub.turn_facing(-1.0, turn_seconds * 0.5, 0.0)
+	t.ok(absf(head_mid) < 0.9, "baş yarı yolda dönüyor olmalı (%.2f)" % head_mid)
+	# Kuyruk aynı anda daha erken bir evrede: emir ona henüz ulaşmadı.
+	var tail_same: float = hub.turn_facing(-1.0, turn_seconds * 0.5, 1.0)
+	t.ok(tail_same > head_mid, "kuyruk baştan önce dönüyor - dalga yok")
+	for along in [0.0, 0.5, 1.0]:
+		var done: float = hub.turn_facing(-1.0, wave_seconds + turn_seconds, along)
+		t.almost(done, -1.0, "dalga bitince her figür tam dönmüş olmalı", 0.001)
+	# Dönüş *bir süre* alıyor: tek karede bitmiyor.
+	var first_frame: float = hub.turn_facing(-1.0, 1.0 / 60.0, 0.0)
+	t.ok(first_frame > 0.9, "ilk karede zaten dönmüş - dönüş anlık, dalga değil")
+
+	# Dinlenme durumu: sahneye girildiğinde hiçbir dönüş olmamıştır, yani
+	# `elapsed` kocamandır ve herkes **hedefte** durmalıdır. İlk sürüm
+	# parametreyi "dönülen yön" diye aldığı için burada tam tersini
+	# veriyordu - hub'a girince lider sağa, bütün kervan sola bakıyordu.
+	for target in [1.0, -1.0]:
+		for along in [0.0, 1.0]:
+			var resting: float = hub.turn_facing(float(target), 999.0, float(along))
+			t.almost(
+				resting, float(target),
+				"dönüş yokken kervan hedefe değil tersine bakıyor", 0.001
+			)
 
 func _build(wagons: int, party: int, dogs: int = 0, donkeys: int = 0, half_wagons: int = 0) -> RoadCaravan:
 	var band := TravelBand.new()
