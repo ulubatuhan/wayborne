@@ -51,7 +51,18 @@ const MAX_ABREAST: int = 2
 ## gibi duruyorlar).
 const PERSON_HEIGHT_RATIO: float = 0.19
 const MOUNTED_HEIGHT_RATIO: float = 0.27
-const OX_HEIGHT_RATIO: float = 0.15
+## Öküz de köpek/eşekle aynı tuzağa düşmüştü, bir kat daha derinden: 0.15
+## kutu oranı ekranda öküzü bir insanın **%57'si** olarak çiziyordu, yani
+## bir dana. Sebep iki payın üst üste binmesi - `FigureRig` insanı
+## kutusunun %86'sına çiziyor, `BeastRig`'in öküz derisi ise kendi
+## kutusunun yalnızca **%62'sine** (ölçüldü: 60/86/120 piksellik üç kutu,
+## çizilen 37/53/75 - pay sabit, yani ölçek doğrusal). Hedef oyuncunun
+## kendi ölçüsü: boynuzun ucu bir insanın **omzunda** (~%82), eşeğin
+## kafasıyla aynı hiza. Hesap 0.82 * 0.86 * 0.19 / 0.617 = 0.217 diyor;
+## ölçüm 0.222'de durdu (çizilen %84.6), çünkü hub'ın zaten doğru olan
+## öküzü %85.5'te ve iki ekranın aynı hayvanı aynı oranda görmesi gerek -
+## üstelik eşek %82.7'de, ve bir öküz bir eşekten iridir.
+const OX_HEIGHT_RATIO: float = 0.222
 
 ## Köpek/eşek/yarım vagon kolonun en arkasında, tek sıra bir "sürü" olarak
 ## yürüyor - `world_hub.gd`'nin aynı kararının yol ekranındaki karşılığı

@@ -3231,6 +3231,25 @@ every decision has a visible control, and a key is only its shortcut.**
   (`tests/screenshot_hub_motion.gd`), against the player's own spec: the
   donkey's ears at a human's shoulder (81% measured), the dog between knee
   and waist (45%). Calculation starts the job here; measurement ends it.
+- **The ox was the same mistake one layer deeper, and `extent()` is why
+  it hid.** Reported as "the ox looks shrunk - the tip of its horn should
+  reach a human's shoulder", and measured at **57%** of a person on the
+  road screen: a calf, not an ox. Two shrink factors stacked, and only
+  the first was known - a person fills 86% of its box, and the ox's
+  *painted skin* fills only **62%** of its own box. The second one is
+  invisible to the obvious check: `BeastRig.extent()` (the part rig's
+  rest-pose bounding box) says 76%, because the skin was painted on its
+  own proportions, not the mannequin's - the same split Wardrobe & Rig
+  Rules already states as "the pose is the art's, not the mannequin's".
+  `extent()` is within 4% for the husky and the donkey and 23% out for
+  the ox, so trusting it looks safe right up until it isn't.
+  `RoadCaravan.OX_HEIGHT_RATIO` went 0.15 → 0.222 against a rendered,
+  pixel-measured frame (84.6%, just above the donkey's 82.7%, because an
+  ox is bigger than a donkey). `tests/test_caravan_layout.gd` therefore
+  locks all three animals against **measured** drawn shares
+  (`DRAWN_BEAST_SHARE`), never `extent()`. The hub's own ox was measured
+  in the same pass and was already right (85.5%) - the constant was never
+  shared between the two screens, only the mistake.
 - **Days are taken one at a time** (`JourneyClock.take_one_day()`). The old
   loop took every completed day at once and dropped the ones it could not
   process behind an open card - and while an encounter marker was pending

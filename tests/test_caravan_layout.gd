@@ -30,6 +30,21 @@ const FULLY_VISIBLE_WAGONS: int = 4
 ## aracı, 72 piksellik kutuda 62 piksel figür).
 const DRAWN_PERSON_SHARE: float = 0.86
 
+## Bir hayvanın kutusunun ne kadarını gerçekten dolduruyor. `BeastRig.
+## extent()` (parça iskeletinin dinlenme kutusu) husky ve eşek için buna
+## %4 içinde yaklaşıyor ama **öküz için yaklaşmıyor**: extent 0.76 derken
+## boyanmış deri kutusunun yalnızca 0.62'sini dolduruyor, çünkü deri
+## kendi oranlarıyla boyandı (bkz. Wardrobe & Rig Rules'un "pozu derinin,
+## mankenin değil" maddesi). extent'e güvenmek öküzü %23 iri sanmak
+## demek, ki tam olarak bu yanlış hesap öküzü ekranda bir insanın %57'si
+## olarak bırakmıştı. Üçü de aynı yoldan - gerçek karede piksel ölçerek -
+## alındı: 60/86/120 piksellik üç kutuda çizilen 37/53/75, pay sabit.
+const DRAWN_BEAST_SHARE: Dictionary = {
+	BeastRig.OX: 0.617,
+	BeastRig.HUSKY: 0.549,
+	BeastRig.DONKEY: 0.820,
+}
+
 func run(t) -> void:
 	for wagons in [1, 2, 3, 4, 6]:
 		for party in [1, 2, 4]:
@@ -66,14 +81,20 @@ func _test_pack_animals_read_against_a_person(t) -> void:
 	# gövde (.26) + kafa kadar çiziyor, kutunun tamamını değil. İlk
 	# hesapta bu atlanmıştı ve iki hayvan da %10 iri çıkmıştı.
 	var person := BAND.y * RoadCaravan.PERSON_HEIGHT_RATIO * DRAWN_PERSON_SHARE
-	var dog := BAND.y * RoadCaravan.DOG_HEIGHT_RATIO * BeastRig.extent(BeastRig.HUSKY).size.y
-	var donkey := BAND.y * RoadCaravan.DONKEY_HEIGHT_RATIO * BeastRig.extent(BeastRig.DONKEY).size.y
+	var dog := BAND.y * RoadCaravan.DOG_HEIGHT_RATIO * float(DRAWN_BEAST_SHARE[BeastRig.HUSKY])
+	var donkey := BAND.y * RoadCaravan.DONKEY_HEIGHT_RATIO * float(DRAWN_BEAST_SHARE[BeastRig.DONKEY])
+	var ox := BAND.y * RoadCaravan.OX_HEIGHT_RATIO * float(DRAWN_BEAST_SHARE[BeastRig.OX])
 	# Köpek diz (%28) ile bel (%60) arasında, eşeğin kafası omuzda (%82).
 	t.ok(dog / person > 0.33 and dog / person < 0.58,
 		"köpek diz-bel bandının dışında (insanın %%%.0f'i)" % [100.0 * dog / person])
 	t.ok(donkey / person > 0.72 and donkey / person < 0.92,
 		"eşeğin kafası omuz hizasında değil (insanın %%%.0f'i)" % [100.0 * donkey / person])
 	t.ok(donkey > dog, "eşek köpekten büyük olmalı")
+	# Öküzün boynuzunun ucu da omuzda - oyuncunun kendi ölçüsü. 0.15
+	# oranıyla %57'ydi, yani bir dana.
+	t.ok(ox / person > 0.76 and ox / person < 0.92,
+		"öküzün boynuzu omuz hizasında değil (insanın %%%.0f'i)" % [100.0 * ox / person])
+	t.ok(ox > donkey, "öküz eşekten iri olmalı")
 
 ## Hub'ın dönüşü bir dalga: baş kuyruktan önce dönüyor, herkes tam
 ## hedefte bitiriyor, ve hiçbir an atlanmıyor (anında dönüş yok).

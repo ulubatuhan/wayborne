@@ -61,6 +61,14 @@ const MOUNTED_WIDTH: float = 150.0
 const STEP_PER_UNIT: float = 0.0178
 
 ## Öküz ölçüsü. Konumu artık `_column_positions` veriyor.
+##
+## Yol ekranının öküzü bir insanın %57'si olarak çizilirken (bkz.
+## `RoadCaravan.OX_HEIGHT_RATIO`'nun notu) buradaki ölçüldü ve zaten
+## doğruydu: 86'lık kutu ekranda 53 piksel çiziyor, insanın 62'sinin
+## %85'i - yani boynuzun ucu omuz hizasında, eşeğin kafasından (%81) bir
+## parça yukarıda, ki bir öküz bir eşekten iridir. Kutu oranının kendisi
+## (%62) yol ekranıyla aynı, çünkü deri aynı: fark yalnızca o oranın
+## iki ekranda farklı sayılara çarpılmasıydı.
 const OX_SIZE: Vector2 = Vector2(146.0, 86.0)
 
 ## Vagonu süren isimsiz tayfa (bkz. GameSession.PEOPLE_PER_WAGON) - adı
