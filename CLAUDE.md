@@ -4063,6 +4063,53 @@ verir.
   çıplak bir manken (`tools/wardrobe_mannequin.py`, cinsiyet × kilo
   başına bir set) ve giydiğinin rengine boyanıyor; gömlek/pantolon/çizme
   resimleri geldikçe mankenin üstüne biniyor (bkz. Wardrobe & Rig Rules).
+- **Çıplak beden (B-00) AI-prompt yerine 3D model render'ından
+  üretilecek - `beast_skin.py`'nin aynısı yoldan.** Yedi turluk bir
+  prompt mücadelesi (saç/ten rengi/weapon hücresi sızmaları, STYLE-B'nin
+  çizgifilm konturunun sızması, "forearm'ı upper_arm'la aynı detayda
+  işle" talimatının hücre sınırlarını karıştırması) aynı sınıf hatayı
+  tekrar tekrar üretti - tıpkı hayvanların "dokuz parçaya kes" denemesinin
+  (bkz. Wardrobe & Rig Rules'un "one skin" maddesi) başarısız olup
+  `BeastSkin`'e geçilmesi gibi, buradaki kök sebep de "her seferinde
+  yeniden yorumlanan bir dil talimatı" olması. Karar: CC0 rigli bir insan
+  modeli (Quaternius - aynı kaynak, aynı pipeline; gerekirse MakeHuman
+  cinsiyet/kilo varyantları için) bulunup `beast_skin.py`'nin yaptığı
+  gibi `FigureRig`'in dokuz parçasına (ya da BeastSkin benzeri tek bir
+  deriye) eşlenip deterministik render edilecek - yalnızca B-00 için;
+  kıyafetler (B-01..B-19) mevcut AI-prompt + 2D kesit yolunda kalıyor,
+  çünkü `Wardrobe`'un takılıp-çıkarılabilir giysi-katmanı mimarisi
+  (`SLOT_LAYERS`) sürekli tek bir deri render'ına kolay ayrışmıyor.
+  Henüz model seçilmedi/indirilmedi.
+- **Yön çevirme sırasında bazı figürler anında arkaya dönüyor, dalga
+  animasyonunu atlıyor.** Road Movement Rules'un `RoadCaravan.
+  begin_turn()`'ü sütunu `TURN_SECONDS` (10) boyunca sırayla çeviriyor
+  olması gerekiyordu ("her birim kendi merkezi etrafında, dalga ona
+  ulaştıkça döner") - ekran görüntüsünde kervanın arkasına eklenen eşek/
+  köpek kuyruğu (Faz "husky/eşek sürüsü" - `world_hub.gd`'nin "tam kolon
+  formülü bu kadar az hayvan için aşırı" diye kasıtlı basitleştirdiği
+  kuyruk) bu dalgaya hiç girmeden anında ters yöne dönmüş görünüyor.
+  Şüphelenilmesi gereken yer: basit kuyruğun `begin_turn()`'ün dönüş
+  sırasına hiç dahil edilmemiş olması.
+- **Yürüyüş animasyonu kadansı oyunun akışına göre çok hızlı duruyor.**
+  Road Layer Rules'un "a speed lever has to move everything it looks
+  like it's moving" maddesi `_caravan.set_speed()`'i `JourneyClock.
+  get_speed()`'e (tempo çarpanı) bağlamıştı, ama normal (1x) tempoda bile
+  bacak sallama kadansı sahnenin genel hissine göre fazla hızlı okunuyor -
+  senkron var ama taban değerin kendisi yeniden ölçülüp ayarlanmalı.
+- **Şehir kapısı hâlâ düz bir renkli dikdörtgen - gerçek bir kapı/duvar
+  resmi yok.** `Kurtboğazı Kapısı` etkileşim noktası ekran görüntüsünde
+  yalnızca mor bir `ColorRect` olarak duruyor, Art Rules'un her ekranın
+  "bir yerde durması" disiplinine aykırı (bkz. "Every screen stands
+  somewhere, or it is a model on a table" maddesi - şehrin kendisi için
+  zaten çözülmüştü, kapı için hiç çözülmemiş). Gerçek bir kapı/duvar
+  illüstrasyonu (ya da en azından `ArtDraw` ile çizilen bir siluet)
+  gerekiyor.
+- **Eşek ve köpek kervana göre çok küçük - oransız.** Kullanıcının kendi
+  ölçüsü: eşeğin kulaklarıyla beraber başı bir insanın omzuna kadar
+  gelmeli, köpek diz ile bel arasında bir hizada olmalı. Ekran
+  görüntüsünde ikisi de bundan belirgin küçük - `world_hub.gd`'nin
+  `DOG_HEIGHT_RATIO`/`DONKEY_HEIGHT_RATIO` sabitleri (ve `RoadCaravan`'ın
+  aynı kuyruğu çizen eşleniği) yeniden ölçülüp büyütülmeli.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
