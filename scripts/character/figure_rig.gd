@@ -212,6 +212,30 @@ static func solve_joint(
 static func rest_pose() -> Dictionary:
 	return pose(Vector2.ZERO, REF_H, 0.0, 0.0, 1.0)
 
+## Boyama pozu: bütün olarak çizilen bir kuşamın (bkz. tools/wardrobe_cut.py)
+## üstüne oturduğu poz. Dinlenme pozunda arka uzuv tam olarak ön uzvun
+## arkasına gizleniyor, yani oradan kesilen bir ceketin arka kolu diye bir
+## şey yok - `BeastRig.PAINT_PHASE` de aynı sebeple var.
+##
+## Ama hayvandan farklı olarak burada tek bir faz yetmiyor: bacaklar
+## `cos(phase)` ile, kollar `sin(phase)` ile açılıyor, yani ikisi **zıt**
+## fazlarda en geniş. Tek bir ara faz (hayvanın `PI*0.25`'i) ikisine de
+## azamisinin ~%70'ini verir, ve ölçüldüğünde o %30 gerçek bir kayıp:
+## üst üste binen uzuvdan kesilen parça delikli çıkıyor. O yüzden bu poz
+## bir yürüyüş karesi değil - bacaklar kendi en geniş fazından (0),
+## kollar kendininkinden (PI/2) alınıp birleştiriliyor. İkisinin gövdesi
+## birebir aynı: kalça zıplaması `sin(phase*2)`, her iki fazda da sıfır.
+const PAINT_LEG_PHASE: float = 0.0
+const PAINT_ARM_PHASE: float = PI * 0.5
+
+static func paint_pose() -> Dictionary:
+	var joints := pose(Vector2.ZERO, REF_H, PAINT_LEG_PHASE, 1.0, 1.0)
+	var arms := pose(Vector2.ZERO, REF_H, PAINT_ARM_PHASE, 1.0, 1.0)
+	for joint in ["elbow_back", "hand_back", "fingers_back",
+			"elbow_front", "hand_front", "fingers_front", "weapon_tip"]:
+		joints[joint] = arms[joint]
+	return joints
+
 ## Bir parçanın PNG'sinde A'dan B'ye vektör (piksel). Arka ve ön uzvun
 ## dinlenme yönü aynı olduğu için ön kemikten okunuyor.
 static func part_rest_vector(part: String) -> Vector2:

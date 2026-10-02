@@ -26,46 +26,69 @@ data/assets/characters/wardrobe/<kalem_id>/<parça>.png
 - Ten katmanı isteğe bağlı: `wardrobe/body/<parça>.png` açık gri çizilir,
   oyun karakterin ten rengiyle boyar.
 
-## Şablonlar
+## Bir kalem nasıl çizdirilir: bütün figür, sonra kesilir
+
+**Dokuz ayrı hücreyi eklem işaretlerine hizalı istemek yedi tur üst üste
+başarısız oldu** - hayvanların çarptığı duvarın aynısı (bkz. CLAUDE.md'nin
+"An animal is painted whole, then cut" maddesi). Tek, bütün bir yandan
+görünüş bir ressamın da, bir görüntü modelinin de, bir 3B render'ın da
+güvenilir biçimde verebildiği şey; dokuz hizalı hücre değil.
+
+O yüzden kalem **bir kez, giyilmiş hâlde**, `docs/wardrobe/paint_pose_reference.png`
+üstüne çiziliyor; `tools/wardrobe_cut.py` her boyalı pikseli altındaki kemiğe
+verip parça tuvallerine döndürüyor.
 
 | Dosya | Ne işe yarar |
 |---|---|
-| `part_sheet_template.png` | 768×1152, 3×3 hücre (256×384). Her hücrede bir parçanın tuvali, gri manken ve eklem işaretleri. Gemini'ye referans görsel olarak ver, giysiyi mankenin üstüne boyat. |
-| `templates/<parça>.png` | Tek bir parçanın tuvali (şeffaf). |
-| `rig_reference.png` | Mankenin dinlenme pozu, yandan, sağa bakıyor. |
-| `rig_spec.json` | Tuval boyutları, pivotlar, kemik yönleri. Araçların tek kaynağı. |
+| `paint_pose_reference.png` | **768×1152. Ressama verilen şablon budur.** Gerçek manken, boyama pozunda, yandan, sağa bakıyor. Üstüne boyanır, yeniden boyutlandırılmaz. |
+| `paint_pose_<cinsiyet>_<kilo>.png` | Aynı poz, altı beden varyantı, eklem işaretleriyle - bizim içindir, ressama verilmez. |
+| `rig_spec.json` | Tuval boyutları, pivotlar, `rest_joints`, `paint_joints`. Araçların tek kaynağı. |
+| `rig_reference.png` | Dinlenme pozu: her parça PNG'sinin *içinde* durduğu poz. Boyamak için değil - orada arka uzuv tam olarak ön uzvun arkasında. |
+| `part_sheet_template.png`, `templates/<parça>.png` | Eski 3×3 yolu. Duruyor, ama yeni kalem için kullanılmıyor. |
 
-Kırmızı nokta: parçanın asıldığı eklem (pivot). Mavi nokta: kemiğin öbür
-ucu. İşaretler ve gri manken son resimde **kalmamalı**.
+Kurallar: yandan görünüş, sağa bakıyor; kalem mankenin üstünde, onun
+ölçüsünde, pozunda; ışık sol üstten; **yalnızca kalemin kendisi çizilir,
+altındaki beden değil** - her kalem `Wardrobe.SLOT_LAYERS`'da kendi
+katmanı, gövdenin bir kopyasını taşıyan bir ceket altındaki gömleği boyar;
+tuval boyutu değişmez.
 
-Kurallar: yandan görünüş, sağa bakıyor; kalem mankenin üstünde onun ölçüsünde;
-ışık sol üstten; çizim tuvalin dışına taşmıyor; arka plan şeffaf (Gemini JPG
-verir - arka planı sen kaldırıyorsun).
-
-Her kalem için hazır Gemini promptu: `docs/gemini-prompts.md`, B bölümü. Hayvanlar: `docs/gemini-prompts-animals.md`.
+Her kalem için hazır prompt: `docs/gemini-prompts-wardrobe.md`.
+Hayvanlar: `docs/gemini-prompts-animals.md`.
 
 ## Ekleme
 
-Parça sayfası (hücreleri doldurulmuş, arka planı kaldırılmış PNG):
-
 ```
-python3 tools/wardrobe_ingest.py sheet ceket_sayfasi.png jacket_wool
-```
-
-Tek parça (ör. yalnız bir kılıç resmi):
-
-```
-python3 tools/wardrobe_ingest.py part kilic.png weapon_tier_2 weapon
+python3 tools/wardrobe_cut.py ceket.png jacket_wool
+python3 tools/wardrobe_cut.py kilic.png weapon_tier_2 --only weapon
+python3 tools/wardrobe_cut.py kukulete.jpg hat_hood --key      # düz arka planlı JPG
 ```
 
-Arka planı kaldırılmamış, düz renkli bir resim için `--key` ekle. Sonra
-`godot --headless --import`.
+Sonra `godot --headless --import`.
 
-## İskelet değişirse
+Araç bir arka uzvu (`<parça>_back.png`) ancak resimde gerçekten göründüyse
+yazıyor; görünmediyse atlıyor ve oyun kendi kuralıyla ön resmi karartarak
+kullanıyor (`Wardrobe.BACK_SHADE`) - yarım bir kol resmi, doğru karartılmış
+bir kopyadan daha kötü.
+
+Pozun kendisi uzuvları açmak için seçildi: dinlenme pozunda arka uzuv tam
+olarak ön uzvun arkasına gizlenir, oradan kesilen bir ceketin arka kolu diye
+bir şey olmaz. Bacaklar `cos(faz)` ile, kollar `sin(faz)` ile açıldığı için
+tek bir yürüyüş karesi ikisini birden açamıyor - `FigureRig.paint_pose()`
+bacakları kendi en geniş fazından, kolları kendininkinden alıp birleştiriyor.
+
+Eski 3×3 yolu hâlâ çalışıyor (`tools/wardrobe_ingest.py sheet|part`), ama
+yeni kalem için kullanılmıyor.
+
+## İskelet ya da manken değişirse
 
 ```
 godot --headless --script res://tests/export_rig_spec.gd
-python3 tools/wardrobe_templates.py
+python3 tools/wardrobe_mannequin.py
+python3 tools/wardrobe_paint_reference.py
+python3 tools/wardrobe_templates.py          # yalnızca eski 3×3 yolu için
 ```
 
-`tests/test_wardrobe.gd` `rig_spec.json` güncel değilse kırılıyor.
+`tests/test_wardrobe.gd` `rig_spec.json` güncel değilse kırılıyor. Boyama
+pozu değişirse **o pozda çizilmiş her teslimat geçersiz olur** - kesme aracı
+pikselleri pozun kendi kemik bölgelerine göre dağıtıyor, yani eski bir
+resim yeni bir poza göre kesilirse parçalar kayar.

@@ -109,6 +109,72 @@
     "hand_front"
   ],
   "head_radius": 29.7,
+  "paint_joints": {
+    "ankle_back": [
+      -97.28,
+      0
+    ],
+    "ankle_front": [
+      97.28,
+      0
+    ],
+    "elbow_back": [
+      40.14,
+      -295.98
+    ],
+    "elbow_front": [
+      -40.14,
+      -295.98
+    ],
+    "fingers_back": [
+      121.79,
+      -211.29
+    ],
+    "fingers_front": [
+      -77.67,
+      -207.17
+    ],
+    "hand_back": [
+      107.58,
+      -226.03
+    ],
+    "hand_front": [
+      -69.7,
+      -226.03
+    ],
+    "head": [
+      6.14,
+      -408.73
+    ],
+    "hip": [
+      0,
+      -235.52
+    ],
+    "knee_back": [
+      -45.53,
+      -124.37
+    ],
+    "knee_front": [
+      46.18,
+      -124.63
+    ],
+    "shoulder": [
+      0,
+      -368.64
+    ],
+    "toe_back": [
+      -72.7,
+      0
+    ],
+    "toe_front": [
+      121.86,
+      0
+    ],
+    "weapon_tip": [
+      -120.71,
+      -81.15
+    ]
+  },
   "part_order": [
     "head",
     "torso",

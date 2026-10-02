@@ -41,6 +41,10 @@ static func spec() -> Dictionary:
 	for joint in rest.keys():
 		var point: Vector2 = rest[joint]
 		joints[joint] = [snappedf(point.x, 0.01), snappedf(point.y, 0.01)]
+	var painted := {}
+	var paint := FigureRig.paint_pose()
+	for joint in paint.keys():
+		painted[joint] = _point(paint[joint])
 	return {
 		"ref_h": FigureRig.REF_H,
 		"part_order": FigureRig.PART_ORDER,
@@ -48,6 +52,7 @@ static func spec() -> Dictionary:
 		"bones": FigureRig.BONES,
 		"draw_order": FigureRig.DRAW_ORDER,
 		"rest_joints": joints,
+		"paint_joints": painted,
 		"head_radius": snappedf(FigureRig.head_radius(FigureRig.REF_H), 0.01),
 	}
 

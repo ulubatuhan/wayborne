@@ -337,6 +337,13 @@ Painterly ink-and-wash illustration style, gritty and tactile.
 
 ## B. Wardrobe part sheets (clothes, armour, weapons, charms)
 
+> **SUPERSEDED — use `docs/gemini-prompts-wardrobe.md` instead.**
+> This 3×3 part-sheet format failed seven rounds running; a garment is now
+> painted once as a whole worn figure and cut by `tools/wardrobe_cut.py`.
+> The section is kept because the item descriptions below (colours,
+> materials, cut) were carried over verbatim and are still the source of
+> truth for what each item looks like.
+
 This is the category the skeleton system reads. Every sheet is painted
 **over the part sheet template**, and the tool slices it into the
 per-bone pieces (`python3 tools/wardrobe_ingest.py sheet <file> <item_id>`).

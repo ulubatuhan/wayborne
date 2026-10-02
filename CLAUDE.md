@@ -1352,6 +1352,53 @@ in every preview the moment it is equipped.
   uses the rig as soon as the body has art (`CombatFigure.uses_rig()`), and
   a class's weapon is drawn in the hand (`_draw_held_weapon`) until the
   weapon itself is painted.
+- **A garment is painted whole, worn, then cut - the same lesson the animals
+  already taught, finally applied to people.** The part-sheet route
+  (`wardrobe_ingest.py sheet`: nine cells, each with a grey stand-in and
+  joint markers) failed seven rounds running - hair, skin tone and the
+  weapon cell leaking across boundaries, the style drifting, "match the
+  forearm's detail to the upper arm" re-read as "merge the two cells". That
+  is not seven bad prompts, it is this file's own sentence about beasts
+  (*"Nine disjoint parts aligned to joint markers is not something an image
+  model does reliably; one side view is"*) coming true a second time, for
+  the same reason. So a garment is now painted **once, worn, on one side
+  view**, and `tools/wardrobe_cut.py` gives every painted pixel to the bone
+  whose body region it sits on and unrotates each piece into its part canvas
+  - `beast_cut.py whole`, for humans.
+  - **A human side view self-occludes far more than a quadruped's**, so the
+    pose had to be built rather than picked. `FigureRig.paint_pose()` is
+    deliberately **not** a walk frame: legs open with `cos(phase)` and arms
+    with `sin(phase)`, so they are widest at *opposite* phases and no single
+    frame opens both - the beast's one `PAINT_PHASE` compromise left the far
+    limb half-buried. The pose takes the legs from their own widest phase
+    and the arms from theirs and merges them; the two share a torso exactly,
+    because the hip bob is `sin(phase*2)`, zero in both.
+  - **Per-part recovery is the wrong thing to measure.** The cut thigh
+    matches its mannequin original at IoU 0.43, which reads as a disaster
+    until you notice `DRAW_ORDER` paints the torso *over* the thighs: the
+    pixels the cut "lost" are the pixels nothing ever draws. The honest
+    measurement is to rebuild the figure from its own cut parts and redraw
+    it - **0.04%** of the silhouette lost in the pose it was painted in,
+    **4.2%** in the rest pose, the furthest pose from it. `OVERLAP_PX` was
+    then swept against that number rather than guessed (the table is in the
+    tool), reading a hole as worse than an overlap: a hole shows background
+    through cloth, an overlap only lays cloth on matching cloth.
+  - **A back limb gets its own file only if the painting really showed it.**
+    The far upper arm hides behind the torso in any side view and comes back
+    a sliver (73 px against the front arm's 3447). Writing it would be worse
+    than writing nothing, because `Wardrobe` *prefers* a `<part>_back.png`
+    over its own `BACK_SHADE` fallback - so a scrap of sleeve would replace
+    a correct darkened one. `BACK_MIN_SHARE` drops it.
+  - **The reference is the real mannequin, not a stand-in.**
+    `tools/wardrobe_paint_reference.py` hangs the shipped body art on the
+    paint pose through the very same transform `part_transform()` uses, so
+    the body the painter dresses and the regions the cutter assigns by are
+    the same shape by construction. Only the garment is painted on it, never
+    the body under it: each item is its own layer in `SLOT_LAYERS`, and a
+    jacket carrying a copy of the torso would paint over the shirt beneath.
+  - **The pose is now part of the contract.** Changing it invalidates every
+    delivery painted against it, because the cut assigns pixels by that
+    pose's own bone regions. `rig_spec.json` carries it as `paint_joints`.
 - **Animals have their own skeleton, and it is one skeleton for five
   species.** `BeastRig` (horse, ox, wolf, bear, boar) hangs sixteen bones -
   body, neck, head, tail, and upper/lower/foot for four legs - on the same
@@ -4059,10 +4106,16 @@ verir.
   (bkz. `get_height_hp_bonus`/`get_height_dodge_bonus`) ama hangi stata ne
   kadar etki edeceği henüz ölçülüp karara bağlanmadı - kasıtlı olarak
   ayrı bırakıldı, unutulmasın diye burada.
-- **İnsan mankenlerinin üstüne gerçek kıyafet sanatı.** Beden artık
-  çıplak bir manken (`tools/wardrobe_mannequin.py`, cinsiyet × kilo
-  başına bir set) ve giydiğinin rengine boyanıyor; gömlek/pantolon/çizme
-  resimleri geldikçe mankenin üstüne biniyor (bkz. Wardrobe & Rig Rules).
+- **Yirmi kuşam kalemi (B-01..B-20) hâlâ çizilmedi - ama artık isteme
+  biçimi değişti ve boru hattı hazır.** Üç turluk 3×3 parça sayfası
+  mücadelesi terk edildi; her kalem tek bir bütün figür olarak isteniyor
+  ve `tools/wardrobe_cut.py` dokuz parçaya kesiyor (gerekçe ve ölçüm:
+  Wardrobe & Rig Rules'un "A garment is painted whole" maddesi). Hazır
+  promptlar `docs/gemini-prompts-wardrobe.md`'de, şablon
+  `docs/wardrobe/paint_pose_reference.png`, kalem kalem liste
+  `docs/wayborne_gorsel_denetim.xlsx`'in "Kalan Görsel İşler" sayfasında.
+  Beden gelene kadar herkes mankenin kendisiyle (giydiğinin rengine
+  boyanarak) çiziliyor, yani eksiklik bir boşluk değil bir yer tutucu.
 - **Çıplak beden (B-00) AI-prompt yerine 3D model render'ından
   üretilecek - `beast_skin.py`'nin aynısı yoldan.** Yedi turluk bir
   prompt mücadelesi (saç/ten rengi/weapon hücresi sızmaları, STYLE-B'nin
@@ -4072,14 +4125,18 @@ verir.
   (bkz. Wardrobe & Rig Rules'un "one skin" maddesi) başarısız olup
   `BeastSkin`'e geçilmesi gibi, buradaki kök sebep de "her seferinde
   yeniden yorumlanan bir dil talimatı" olması. Karar: CC0 rigli bir insan
-  modeli (Quaternius - aynı kaynak, aynı pipeline; gerekirse MakeHuman
-  cinsiyet/kilo varyantları için) bulunup `beast_skin.py`'nin yaptığı
-  gibi `FigureRig`'in dokuz parçasına (ya da BeastSkin benzeri tek bir
-  deriye) eşlenip deterministik render edilecek - yalnızca B-00 için;
-  kıyafetler (B-01..B-19) mevcut AI-prompt + 2D kesit yolunda kalıyor,
-  çünkü `Wardrobe`'un takılıp-çıkarılabilir giysi-katmanı mimarisi
-  (`SLOT_LAYERS`) sürekli tek bir deri render'ına kolay ayrışmıyor.
-  Henüz model seçilmedi/indirilmedi.
+  modeli bulunup `beast_skin.py`'nin yaptığı gibi `FigureRig`'in dokuz
+  parçasına eşlenip deterministik render edilecek. Aday seçildi (Blender
+  Studio'nun CC0 "Human Base Meshes" paketi - Quaternius "çok köşeli",
+  Mixamo Y/X Bot "skin olarak kullanılamaz" diye elendi) ama **dosya hâlâ
+  elde değil**: archive.org bu ortamda ağ politikasıyla kapalı, GitHub'ın
+  web yükleyicisi 25 MB sınırlı olduğu için main'e düşen zip 22 baytlık
+  boş bir arşiv. Modelin rigli gelip gelmediği de doğrulanmadı.
+  Kıyafetler (B-01..B-20) 2B yolda kalıyor, çünkü `Wardrobe`'un
+  takılıp-çıkarılabilir giysi-katmanı mimarisi (`SLOT_LAYERS`) sürekli tek
+  bir deri render'ına kolay ayrışmıyor - ama `wardrobe_cut.py` resmin
+  nereden geldiğini bilmiyor, yani boyama pozunda render edilmiş CC0 bir
+  3B giysi de aynı komuttan geçer.
 - **Yön çevirme sırasında bazı figürler anında arkaya dönüyor, dalga
   animasyonunu atlıyor.** Road Movement Rules'un `RoadCaravan.
   begin_turn()`'ü sütunu `TURN_SECONDS` (10) boyunca sırayla çeviriyor
