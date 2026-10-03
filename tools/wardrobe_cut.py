@@ -65,6 +65,15 @@ REGION_GROW = 14
 # recorded. In the pose the garment is actually painted in, 14/12 loses
 # 0.04% of the silhouette.
 OVERLAP_PX = 12
+# The contour drawn round each cut part. Not a styling flourish: the whole
+# game is flat shapes with a dark outline, and the mannequin this replaced
+# rimmed every limb separately so the joints read as joints. A body cut out
+# of one render and left un-inked reads as a soft blob with cracks at the
+# seams - measured on a real frame, it nearly vanished on the combat ground
+# and the hip seam showed as a split. Drawn per PART, after unrotating, so
+# the line is the same weight in the space the game actually draws in.
+INK = (0.13, 0.11, 0.10)
+INK_PX = 4
 # A back limb's piece is kept only if it recovered at least this share of its
 # front counterpart's area; below it, the game's own darkened-front fallback
 # is the better picture. See where it is applied for the measurement.
@@ -139,6 +148,38 @@ def unrotate(piece, spec, bone):
     return piece.transform(canvas, Image.AFFINE, data, resample=Image.BICUBIC)
 
 
+def ink_edges(pixels, own, under, width):
+    """A hard dark edge round the part's OWN territory, never round its margin.
+
+    Hard, not a gradient: a soft rim is a blur, and the figure is drawn at a
+    tenth of REF size on the road where a gradient disappears entirely.
+
+    The source is `own` - the pixels this bone actually won - and not the
+    piece's alpha, which also covers the OVERLAP_PX margin of its neighbour.
+    Inking that margin outlines a flap that is only ever meant to sit hidden
+    behind the next part, and a first pass that did exactly that drew a black
+    wedge at every joint: the hip came out as a shattered pile rather than a
+    hip.
+
+    `under` is what this part is drawn ON TOP of - the background and every
+    bone earlier in DRAW_ORDER. Only the boundary facing that is inked. The
+    rest of the boundary faces a part drawn LATER, which will cover it, and
+    inking it drew a straight black slash across the chest and the hip: a cut
+    line where the body is supposed to be continuous. It is the same rule the
+    scene already follows - whatever is in front is drawn after, so whatever
+    is in front is what carries the outline.
+
+    Drawn in paint-canvas space, so the width is scaled by ref.SCALE and comes
+    out the same weight in every part canvas after unrotating.
+    """
+    reach = ndimage.distance_transform_edt(~under)
+    edge = own & (reach <= float(width))
+    edge &= pixels[..., 3] >= MIN_ALPHA
+    for channel, value in enumerate(INK):
+        pixels[edge, channel] = int(round(value * 255))
+    return pixels
+
+
 def key_backdrop(image):
     """Drop a flat backdrop a painter delivered as JPG, sampled at the corners."""
     pixels = np.asarray(image).astype(int)
@@ -154,7 +195,7 @@ def key_backdrop(image):
     return Image.fromarray(out.astype(np.uint8), "RGBA")
 
 
-def cut(spec, image_path, item_id, key, only, overlap=None, grow=None):
+def cut(spec, image_path, item_id, key, only, overlap=None, ink=0):
     image = Image.open(image_path).convert("RGBA")
     if image.size != ref.CANVAS:
         raise SystemExit(
@@ -187,6 +228,8 @@ def cut(spec, image_path, item_id, key, only, overlap=None, grow=None):
         keep = ndimage.binary_dilation(own, iterations=margin) & (labels > 0)
         piece = pixels.copy()
         piece[~keep, 3] = 0
+        if ink:
+            piece = ink_edges(piece, own, labels < index, round(ink * ref.SCALE))
         cut_piece = unrotate(Image.fromarray(piece, "RGBA"), spec, bone)
         area = int((np.asarray(cut_piece)[..., 3] >= MIN_ALPHA).sum())
         if area:
@@ -221,6 +264,8 @@ def main():
     parser.add_argument("image", help="the whole-figure painting, on the paint canvas")
     parser.add_argument("item_id", help="OutfitCatalog / EquipmentCatalog id, e.g. jacket_wool")
     parser.add_argument("--key", action="store_true", help="drop a flat backdrop first (JPG delivery)")
+    parser.add_argument("--ink", type=int, nargs="?", const=INK_PX, default=0,
+                        help="draw a contour round every part (the body wants one)")
     parser.add_argument("--overlap", type=int, default=None,
                         help="override OVERLAP_PX (the body wants more than a garment)")
     parser.add_argument("--only", nargs="+", metavar="PART",
@@ -229,7 +274,7 @@ def main():
 
     spec = ref.load_spec()
     out_dir, written, dropped = cut(spec, args.image, args.item_id, args.key,
-                                    set(args.only or []), args.overlap)
+                                    set(args.only or []), args.overlap, args.ink)
     if not written:
         raise SystemExit("  ! nothing written - no painted pixels landed on any bone")
     print("  ->", os.path.relpath(out_dir, ROOT))

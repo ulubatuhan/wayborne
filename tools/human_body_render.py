@@ -77,8 +77,10 @@ GROUND_Y = CANVAS[1] - 80
 
 ALBEDO = 0.86          # the game multiplies a colour in - see the docstring
 AMBIENT = 0.50
-INK = (0.13, 0.11, 0.10)
-INK_PX = 3.0           # REF px; thinner than the mannequin's 5, see ink()
+# The flat tones the render is posterised into, over the mannequin's own
+# range (ALBEDO * (AMBIENT .. AMBIENT+DIFFUSE)). Few bands on purpose: this
+# is a flat-ink game, not a shaded one.
+FLAT_TONES = (0.50, 0.68, 0.84, 0.96)
 
 # Anthropometric fractions of the shoulder->fingertip line. The elbow and the
 # wrist sit inside the band where an A-pose deltoid touches the torso, so no
@@ -547,27 +549,33 @@ def render_to(path):
     bpy.ops.render.render(write_still=True)
 
 
-def ink(path):
-    """Draw the project's ink rim round the silhouette.
+def flatten(path):
+    """Posterise the render into a few flat tones.
 
-    Only the outer silhouette, unlike the mannequin, which rims every part
-    separately to read as a jointed dummy. Here the parts are cut out of one
-    body afterwards, so an inner rim would ink the cut seam and put a line
-    across a thigh that is supposed to be continuous with its hip.
+    A smooth render is the wrong language for this game: everything else is
+    drawn as flat ink (`ArtDraw.inked`), and a softly shaded body dropped
+    into that reads as a different production - measured on a real frame, it
+    nearly vanished against the combat ground. Quantising to a handful of
+    bands, over the mannequin's own tonal range, keeps the form the 3D model
+    gives while speaking the flat language the rest of the screen speaks.
+
+    The contour is NOT drawn here. It belongs on each cut part, so that the
+    joints read as joints - see wardrobe_cut.py's --ink.
     """
     from PIL import Image
-    from scipy import ndimage
 
     img = np.asarray(Image.open(path).convert("RGBA")).astype(np.float32) / 255.0
-    alpha = img[..., 3] > 0.35
-    width = max(1, int(round(INK_PX * SCALE)))
-    inner = ndimage.binary_erosion(alpha, iterations=width)
-    rim = alpha & ~inner
-    dist = ndimage.distance_transform_edt(~inner)
-    t = np.clip(dist / float(width), 0.0, 1.0)[..., None]
-    tint = np.array(INK, dtype=np.float32)[None, None, :]
+    body = img[..., 3] > 0.35
+    if not body.any():
+        return
+    lum = img[..., 0]
+    lo, hi = np.percentile(lum[body], [2.0, 98.0])
+    span = max(float(hi - lo), 1e-4)
+    level = np.clip((lum - lo) / span, 0.0, 1.0)
+    index = np.clip((level * len(FLAT_TONES)).astype(int), 0, len(FLAT_TONES) - 1)
+    tone = np.array(FLAT_TONES, dtype=np.float32)[index]
     out = img.copy()
-    out[..., :3] = np.where(rim[..., None], img[..., :3] * (1 - t) + tint * t, img[..., :3])
+    out[..., :3] = np.where(body[..., None], tone[..., None], img[..., :3])
     Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(path)
 
 
@@ -632,7 +640,7 @@ def build(gender, weight, spec, out_dir):
             other.hide_render = other.type in {"MESH", "CURVE", "SURFACE", "META", "FONT"}
     path = os.path.join(out_dir, "body_render_%s_%s.png" % (gender, weight))
     render_to(path)
-    ink(path)
+    flatten(path)
     return path, joints
 
 
