@@ -154,7 +154,7 @@ def key_backdrop(image):
     return Image.fromarray(out.astype(np.uint8), "RGBA")
 
 
-def cut(spec, image_path, item_id, key, only):
+def cut(spec, image_path, item_id, key, only, overlap=None, grow=None):
     image = Image.open(image_path).convert("RGBA")
     if image.size != ref.CANVAS:
         raise SystemExit(
@@ -169,6 +169,7 @@ def cut(spec, image_path, item_id, key, only):
     if not alpha.any():
         raise SystemExit("  ! no opaque pixels - is the backdrop still there? (--key)")
 
+    margin = OVERLAP_PX if overlap is None else overlap
     order = bone_order(spec)
     masks = region_masks(spec)
     labels = label_pixels(alpha, masks, order)
@@ -183,7 +184,7 @@ def cut(spec, image_path, item_id, key, only):
         if not own.any():
             continue
         # Keep a margin of each neighbour, so a bent joint shows cloth.
-        keep = ndimage.binary_dilation(own, iterations=OVERLAP_PX) & (labels > 0)
+        keep = ndimage.binary_dilation(own, iterations=margin) & (labels > 0)
         piece = pixels.copy()
         piece[~keep, 3] = 0
         cut_piece = unrotate(Image.fromarray(piece, "RGBA"), spec, bone)
@@ -220,13 +221,15 @@ def main():
     parser.add_argument("image", help="the whole-figure painting, on the paint canvas")
     parser.add_argument("item_id", help="OutfitCatalog / EquipmentCatalog id, e.g. jacket_wool")
     parser.add_argument("--key", action="store_true", help="drop a flat backdrop first (JPG delivery)")
+    parser.add_argument("--overlap", type=int, default=None,
+                        help="override OVERLAP_PX (the body wants more than a garment)")
     parser.add_argument("--only", nargs="+", metavar="PART",
                         help="write only these parts (e.g. --only weapon)")
     args = parser.parse_args()
 
     spec = ref.load_spec()
     out_dir, written, dropped = cut(spec, args.image, args.item_id, args.key,
-                                    set(args.only or []))
+                                    set(args.only or []), args.overlap)
     if not written:
         raise SystemExit("  ! nothing written - no painted pixels landed on any bone")
     print("  ->", os.path.relpath(out_dir, ROOT))

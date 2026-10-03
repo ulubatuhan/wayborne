@@ -1382,6 +1382,92 @@ in every preview the moment it is equipped.
   uses the rig as soon as the body has art (`CombatFigure.uses_rig()`), and
   a class's weapon is drawn in the hand (`_draw_held_weapon`) until the
   weapon itself is painted.
+- **The mannequin is gone from the shipped art: the body is a render of a
+  real human now** (`tools/human_body_render.py`). Seven rounds of asking
+  an image model for the nine parts had already failed, and the answer was
+  the one the animals reached first - stop prompting, render. The source is
+  Blender Studio's CC0 "Human Base Meshes"; `GEO-body_male_realistic` and
+  its female counterpart are posed into `FigureRig.paint_pose()` and cut by
+  `wardrobe_cut.py` exactly like a garment, because to that tool a render
+  and a painting are the same thing.
+  - **An unrigged mesh is not a blocker, it is the bear again.** The bundle
+    carries no armature at all (measured: zero `AR` datablocks), and
+    `tools/beast_prep_blend.py` had already fitted a skeleton to an unrigged
+    CC0 bear and bone-heat weighted it. Here it is easier, because the
+    target skeleton is not guessed - `FigureRig` owns it and `rig_spec.json`
+    exports it.
+  - **The joints are measured off the mesh, and three measurements were
+    wrong before they were right.** The crotch is the floor of the mesh's
+    mid-sagittal strip, after two island-counting versions each returned the
+    top of their own search range (the arms hang past the crotch in an
+    A-pose, and the quad grid's ring spacing in the groin reads as a split).
+    The shoulder is a ratio of height, because only the forearm and hand can
+    be seen by a cross-section and two attempts to recover the joint from
+    that stretch extrapolated 2.5x past their own data. The elbow and wrist
+    are read off the arm's own measured centres, which is how the female
+    model's bent A-pose arm stopped being forced onto a straight line.
+    The fit it produces matches the rig it is retargeted to: hip 0.533H
+    against the rig's 0.537, shoulder 0.832H against 0.841.
+  - **A bone turns, it does not get a new roll.** Building a pose basis from
+    scratch has to invent the bone's spin about its own axis, and inventing
+    it rotated the torso far enough that the head rendered nearly front-on
+    in what is supposed to be a side view - the bug hid for several rounds
+    because the figure still looked like a figure. The rotation is the
+    minimal one from the bone's rest direction to the target, applied to the
+    bone's own rest matrix.
+  - **The retarget stretches bones on purpose**, which `BeastRig` forbids
+    for exactly the opposite reason: a stretched bone is wrong for an
+    animation and right for one still frame that has to line up with a
+    fixed template. `wardrobe_cut.py` builds each bone's region from the
+    mannequin drawn in that same pose, so a limb left at the model's own
+    proportions would drift out of its own region. Measured, 95.4% of the
+    render's pixels land inside a bone region before the nearest-region
+    fallback is reached at all.
+  - **Linear blend skinning, with a clavicle, beat the clever options.**
+    Dual-quaternion (`use_deform_preserve_volume`) was tried for the
+    shoulder's ~90 degree swing and measured worse on both counts -
+    ballooned upper back, chest and waist torn into self-intersecting
+    shards, clenched feet, region coverage 98.6% -> 95.9%. A clavicle bone
+    catches the chest instead, so it stops following the arm.
+  - **The sole is this rig's ankle.** The rig puts the ankle ON the ground
+    and runs the foot bone flat along it, so the leg's whole length is knee
+    to ground. Fitting the 3D ankle at its measured anatomical height
+    (0.094H) and then retargeting it to the ground stretched the shin by a
+    third and sank the sole 65 px below the ground line.
+  - **Body weight is a front-to-back thickness, not an all-axis scale.**
+    The camera looks along X, so widening X is invisible; only Y reads in a
+    side view. Thickness is scaled about the body's own Y centreline per
+    height, so the silhouette grows without the figure drifting off its
+    feet, and it reuses the mannequin's own `WEIGHT_SCALE` so a body weight
+    means the same thing before and after. Measured, lean -> heavy is
+    124k -> 157k px (female) and 134k -> 170k (male).
+  - **The body is rendered light neutral grey**, the mannequin's ALBEDO
+    contract unchanged: `WalkFigure._body_tone` multiplies a colour into
+    every part, so a body painted with a skin tone could never be re-tinted
+    and the player's skin-tone choice would silently stop working.
+  - **The cut now yields real back limbs.** `forearm_back`, `thigh_back`,
+    `shin_back` and `foot_back` all clear `BACK_MIN_SHARE`, so the game
+    stops darkening the front art for them. `upper_arm_back` does not, and
+    should not - the far upper arm hides behind the torso in any side view,
+    the same measurement a garment produces.
+  - **Measured where it matters, not where it flatters.** In the pose it
+    was cut in: holes 1.6-1.8%, overlap 5-8%. In the rest pose - the
+    furthest pose from it, and the one the game actually draws - against a
+    second render posed to `rest_joints` as ground truth: holes 7.4%, spill
+    19.6% at the shipped `OVERLAP_PX`. The sweep (2/4/6/8/12/20/28/36/44)
+    moves IoU by less than 0.01 across the whole range, so there is no
+    measured reason to deviate from the garment default; `--overlap` exists
+    on the cut tool so the sweep can be re-run rather than re-derived.
+    `iterations=0` is not "no margin" in scipy, it is "dilate until it stops
+    changing", which is why 0 reports a nonsense 78% spill. The residual
+    error is systematic, not noise: spill and hole come in offset pairs
+    along the back contour, which is a rigid 2D piece turning about its
+    pivot where the mesh deforms smoothly - 4-7 REF px, sub-pixel on the
+    road's 45 px figure, and not something a threshold closes.
+  - **`wardrobe_mannequin.py` stays, and re-running it undoes all of this.**
+    It is the only thing that can regenerate a body for a rig that changed
+    shape, and the regions `wardrobe_cut.py` assigns by were first built
+    from it - but it writes to the same six folders.
 - **A garment is painted whole, worn, then cut - the same lesson the animals
   already taught, finally applied to people.** The part-sheet route
   (`wardrobe_ingest.py sheet`: nine cells, each with a grey stand-in and
@@ -4305,27 +4391,11 @@ verir.
   `docs/wayborne_gorsel_denetim.xlsx`'in "Kalan Görsel İşler" sayfasında.
   Beden gelene kadar herkes mankenin kendisiyle (giydiğinin rengine
   boyanarak) çiziliyor, yani eksiklik bir boşluk değil bir yer tutucu.
-- **Çıplak beden (B-00) AI-prompt yerine 3D model render'ından
-  üretilecek - `beast_skin.py`'nin aynısı yoldan.** Yedi turluk bir
-  prompt mücadelesi (saç/ten rengi/weapon hücresi sızmaları, STYLE-B'nin
-  çizgifilm konturunun sızması, "forearm'ı upper_arm'la aynı detayda
-  işle" talimatının hücre sınırlarını karıştırması) aynı sınıf hatayı
-  tekrar tekrar üretti - tıpkı hayvanların "dokuz parçaya kes" denemesinin
-  (bkz. Wardrobe & Rig Rules'un "one skin" maddesi) başarısız olup
-  `BeastSkin`'e geçilmesi gibi, buradaki kök sebep de "her seferinde
-  yeniden yorumlanan bir dil talimatı" olması. Karar: CC0 rigli bir insan
-  modeli bulunup `beast_skin.py`'nin yaptığı gibi `FigureRig`'in dokuz
-  parçasına eşlenip deterministik render edilecek. Aday seçildi (Blender
-  Studio'nun CC0 "Human Base Meshes" paketi - Quaternius "çok köşeli",
-  Mixamo Y/X Bot "skin olarak kullanılamaz" diye elendi) ama **dosya hâlâ
-  elde değil**: archive.org bu ortamda ağ politikasıyla kapalı, GitHub'ın
-  web yükleyicisi 25 MB sınırlı olduğu için main'e düşen zip 22 baytlık
-  boş bir arşiv. Modelin rigli gelip gelmediği de doğrulanmadı.
-  Kıyafetler (B-01..B-20) 2B yolda kalıyor, çünkü `Wardrobe`'un
+- **Kıyafetler (B-01..B-20) 2B yolda kalıyor**, çünkü `Wardrobe`'un
   takılıp-çıkarılabilir giysi-katmanı mimarisi (`SLOT_LAYERS`) sürekli tek
   bir deri render'ına kolay ayrışmıyor - ama `wardrobe_cut.py` resmin
   nereden geldiğini bilmiyor, yani boyama pozunda render edilmiş CC0 bir
-  3B giysi de aynı komuttan geçer.
+  3B giysi de artık çıplak bedenle aynı komuttan geçer.
 - **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
   `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
   (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.

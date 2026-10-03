@@ -1,6 +1,13 @@
 """The bare body every person is drawn on: a jointed mannequin, one set of
 parts per gender x body weight.
 
+SUPERSEDED, and re-running it overwrites what replaced it. The shipped body
+is now rendered from a real CC0 human mesh - `tools/human_body_render.py`
+plus `tools/wardrobe_cut.py` - so running this tool puts the procedural
+mannequin back over six real bodies. It stays because it is the only thing
+that can regenerate a body for a rig that has changed shape, and because the
+regions `wardrobe_cut.py` assigns by were first built from it.
+
 Wardrobe looks for `wardrobe/body_<gender>_<weight>/<part>.png` and falls
 back to `wardrobe/body/`. Until clothing is painted, this mannequin *is* the
 figure: the game tints each part by what that person wears (shirt on the
