@@ -1383,13 +1383,75 @@ in every preview the moment it is equipped.
   a class's weapon is drawn in the hand (`_draw_held_weapon`) until the
   weapon itself is painted.
 - **The mannequin is gone from the shipped art: the body is a render of a
-  real human now** (`tools/human_body_render.py`). Seven rounds of asking
-  an image model for the nine parts had already failed, and the answer was
-  the one the animals reached first - stop prompting, render. The source is
+  real human now** (`tools/human_body_render.py` fits and poses it,
+  `tools/human_body_parts.py` writes the parts). Seven rounds of asking an
+  image model for the nine parts had already failed, and the answer was the
+  one the animals reached first - stop prompting, render. The source is
   Blender Studio's CC0 "Human Base Meshes"; `GEO-body_male_realistic` and
-  its female counterpart are posed into `FigureRig.paint_pose()` and cut by
-  `wardrobe_cut.py` exactly like a garment, because to that tool a render
-  and a painting are the same thing.
+  its female counterpart are fitted with `FigureRig`'s own skeleton, posed,
+  and rendered.
+- **A body is NOT cut, and that is the one decision this whole section turns
+  on.** The first version went through `wardrobe_cut.py` exactly like a
+  garment, "because to that tool a render and a painting are the same
+  thing". It was rejected on sight, and the mannequin was put back before
+  it reached `main`. The measurement that
+  settled it was an A/B against the mannequin in the *rest* pose: every
+  joint showed its cut. Pulling the ink inward turned the seam into a black
+  notch, leaving it outward into a white one - two faces of the same thing,
+  and no threshold closes it, because a piece cut in one pose and then
+  turned about its own pivot stops meeting its neighbour the moment the
+  pose changes. A garment has no choice: it arrives as one painting. A body
+  does, because it has a 3D source. So **each part is its own closed mesh,
+  rendered alone in its own canvas** - the parts simply overlap, exactly
+  like the mannequin's tubes, but with a real body's silhouette.
+  - **It is the same wall the animals hit** ("A walking animal is one skin,
+    not nine parts"). They answered it with one continuous skin; a person
+    cannot, because `Wardrobe` hangs removable garment layers on the same
+    bones and so the body has to stay separate part canvases. Rendering
+    each part on its own is the other answer, and it is the one the
+    mannequin was already using.
+  - **A part's two ends are different problems, and one weight threshold
+    cannot answer both.** With a single 0.16 share, `upper_arm` ran to
+    x=-0.084 against a shoulder joint at -0.171 - half the chest swung with
+    the arm and read as a pauldron - and `thigh` carried the pelvis from
+    0.619H down against a hip joint at 0.533H, so the seat split between two
+    swinging legs and the hips read as nothing at all. Raising the share to
+    0.45 fixed both and opened every joint instead: with no overlap left, a
+    bent knee and elbow showed daylight. All three were one player report
+    ("omzu kötü, boynu çok önde, kalçası zayıf") and one cause.
+    `human_body_parts.py` therefore answers the ends separately: a part
+    takes everything its own bones touch at all (`PART_MIN`) - the reach
+    past the far joint, where the neighbour is the next limb and the overlap
+    is wanted - and gives back whatever the girdle strongly owns
+    (`GIRDLE_MAX`), the near end, where the neighbour is the torso. The
+    torso claims the girdle at the same permissive share, so a limb's
+    trimmed root always lands inside mass the torso already carries: the
+    overlap is guaranteed by construction, not by a number. `DRAW_ORDER` is
+    what makes it read - the torso is drawn over both thighs and under the
+    front arm.
+  - **The head's forward lean was the skeleton sitting outside the neck.**
+    Every joint was pinned to Y=0, which is the *mesh's* origin and not the
+    body's own centre line, and nobody had checked the difference. Measured,
+    the chest sits +0.9 REF px off that origin and the hip +3.9, so pinning
+    them there costs nothing - but the neck sits +9.8 and the skull +11.0
+    (female: +17.4 and +13.0). A neck bone on Y=0 runs outside the neck it
+    drives, and the retarget, which puts that bone on the figure's own
+    vertical axis, carried the whole head forward by the difference: on the
+    part itself the skull centred +16..+20 px forward of the shoulder pivot
+    against the rig's own +6. `measure()` now gives the neck and the skull
+    their own axis (`neck_base`, and `head`/`head_top` on the skull's
+    centre, which is exactly what the rig's head joint means - the paint
+    pose puts the crown `head_radius` above it); measured again, +7..+10.
+    Nothing else moved, on purpose: the spine, the clavicles and the arms
+    keep the chest's axis.
+  - **The hand is closed in 2D, not posed in 3D.** The mesh's hand is an
+    A-pose hand and at the 45 px figure the road draws, five separate
+    fingers read as a claw - which is why the mannequin drew a mitten with a
+    thumb in the first place ("hands grip, they do not wave"). A binary
+    closing fuses them and the new pixels take the nearest painted one's
+    tone, so the fill is the hand's own shading. Posing the fingers would
+    mean inventing finger bones the rig does not have and cannot drive, for
+    a shape three pixels wide on screen.
   - **An unrigged mesh is not a blocker, it is the bear again.** The bundle
     carries no armature at all (measured: zero `AR` datablocks), and
     `tools/beast_prep_blend.py` had already fitted a skeleton to an unrigged
@@ -1417,12 +1479,13 @@ in every preview the moment it is equipped.
     bone's own rest matrix.
   - **The retarget stretches bones on purpose**, which `BeastRig` forbids
     for exactly the opposite reason: a stretched bone is wrong for an
-    animation and right for one still frame that has to line up with a
-    fixed template. `wardrobe_cut.py` builds each bone's region from the
-    mannequin drawn in that same pose, so a limb left at the model's own
-    proportions would drift out of its own region. Measured, 95.4% of the
-    render's pixels land inside a bone region before the nearest-region
-    fallback is reached at all.
+    animation and right for one still frame that has to land on a fixed
+    template. Every bone's head and tail go onto their `rig_spec` joint,
+    length included, so a part's pivot and its bone end are the rig's own
+    and not the model's - which is what lets a part hang on `FigureRig`
+    with no fitting at all. (It is also what the cut route needed, back
+    when the figure was divided by regions built from the mannequin; that
+    reason is gone, this one is not.)
   - **Linear blend skinning, with a clavicle, beat the clever options.**
     Dual-quaternion (`use_deform_preserve_volume`) was tried for the
     shoulder's ~90 degree swing and measured worse on both counts -
@@ -1445,29 +1508,40 @@ in every preview the moment it is equipped.
     contract unchanged: `WalkFigure._body_tone` multiplies a colour into
     every part, so a body painted with a skin tone could never be re-tinted
     and the player's skin-tone choice would silently stop working.
-  - **The cut now yields real back limbs.** `forearm_back`, `thigh_back`,
-    `shin_back` and `foot_back` all clear `BACK_MIN_SHARE`, so the game
-    stops darkening the front art for them. `upper_arm_back` does not, and
-    should not - the far upper arm hides behind the torso in any side view,
-    the same measurement a garment produces.
-  - **Measured where it matters, not where it flatters.** In the pose it
-    was cut in: holes 1.6-1.8%, overlap 5-8%. In the rest pose - the
-    furthest pose from it, and the one the game actually draws - against a
-    second render posed to `rest_joints` as ground truth: holes 7.4%, spill
-    19.6% at the shipped `OVERLAP_PX`. The sweep (2/4/6/8/12/20/28/36/44)
-    moves IoU by less than 0.01 across the whole range, so there is no
-    measured reason to deviate from the garment default; `--overlap` exists
-    on the cut tool so the sweep can be re-run rather than re-derived.
-    `iterations=0` is not "no margin" in scipy, it is "dilate until it stops
-    changing", which is why 0 reports a nonsense 78% spill. The residual
-    error is systematic, not noise: spill and hole come in offset pairs
-    along the back contour, which is a rigid 2D piece turning about its
-    pivot where the mesh deforms smoothly - 4-7 REF px, sub-pixel on the
-    road's 45 px figure, and not something a threshold closes.
+  - **A rendered body writes no back limbs at all**, which is the opposite
+    of what a garment does. `wardrobe_cut.py`'s `BACK_MIN_SHARE` exists
+    because a far sleeve cut out of one painting can genuinely differ; two
+    renders cannot, because both sides are posed to the same `rest_joints`
+    (the spec stores one value for `elbow_front` and `elbow_back`) on a
+    symmetric mesh. Measured on the full set: area ratio 1.00 and mean tone
+    within 2/255 on every limb. Writing them is not merely redundant, it is
+    a loss - `Wardrobe` *prefers* a `<part>_back.png` over its own
+    `BACK_SHADE`, so the far limb would be drawn at full brightness and the
+    only thing separating it from the near one would be gone. It shipped
+    that way for one round, because `BACK_MIN_SHARE` was inherited from the
+    cut route and never re-asked.
+  - **The body carries no contour, and that is a reversal.** The first
+    version inked every part's whole perimeter on the general rule that
+    this is a flat-ink game. But a part is a closed shape, so its perimeter
+    includes the end buried inside the body, and the ink landed there too:
+    a hard arc over the deltoid (read as a pauldron), a line under the seat
+    (read as shorts), a ring at the neck (read as a collar). The ends are
+    the one place a line is wrong and also the only place the parts have to
+    meet, so there is no width that fixes it - rejected by the player on
+    sight, the same family as the leather chrome and the G5 scratch-out.
+    `--ink` keeps the switch rather than the argument.
+  - **A part is rendered alone, so the body's parts are checked by walking
+    it, not by an IoU.** The cut route's own numbers (holes, spill, an
+    `OVERLAP_PX` sweep) measured how faithfully a division reproduced a
+    picture - a question that no longer exists. What can go wrong now is a
+    joint that opens or a girdle that swings, and neither is visible in a
+    still: `tests/screenshot_mannequin_walk.gd` prints one figure across
+    eight gait phases, any number of body folders as rows, which is how all
+    three of the reported defects were found and how each fix was checked.
   - **`wardrobe_mannequin.py` stays, and re-running it undoes all of this.**
     It is the only thing that can regenerate a body for a rig that changed
-    shape, and the regions `wardrobe_cut.py` assigns by were first built
-    from it - but it writes to the same six folders.
+    shape, and the bone regions `wardrobe_cut.py` assigns a *garment* by are
+    still built from it - but it writes to the same six folders.
 - **A garment is painted whole, worn, then cut - the same lesson the animals
   already taught, finally applied to people.** The part-sheet route
   (`wardrobe_ingest.py sheet`: nine cells, each with a grey stand-in and
@@ -4181,9 +4255,12 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   `screenshot_road_encounter`, `screenshot_waybook` (ledger, succession,
   the closed book), `screenshot_screens` (every management screen with a
   live session; takes an optional `-- width height`, as does
-  `screenshot_journey_screen`), `screenshot_menu` — the last one exists
-  because the main menu was the only screen never drawn at all, four
-  buttons on flat grey, and no assertion anywhere could say so). They
+  `screenshot_journey_screen`), `screenshot_menu` (the main menu was the
+  only screen never drawn at all, four buttons on flat grey, and no
+  assertion anywhere could say so), `screenshot_mannequin_walk` (one figure
+  across eight gait phases, one row per body folder given as an argument —
+  a body's defects are joints that open and girdles that swing, and a still
+  frame shows neither)). They
   exist because a structural test
   verifies *layout* and never *appearance*, and this repository ships
   headless: an interface change went unseen for a long time. Run them with a

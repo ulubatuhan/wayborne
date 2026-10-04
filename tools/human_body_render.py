@@ -19,7 +19,17 @@ it, and `docs/wardrobe/rig_spec.json` exports it.
     python3 tools/human_body_render.py                    # render all six
 
 Writes `docs/wardrobe/body_render_<gender>_<weight>.png` on the paint canvas
-(768x1152), which `tools/wardrobe_cut.py` then cuts into the nine parts.
+(768x1152): the whole figure, in one piece.
+
+**The shipped body is not cut out of this picture.** `tools/wardrobe_cut.py`
+divides a GARMENT, which arrives as one painting and can only be divided
+after the fact; the body has a 3D source and does not have to be. Measured,
+cutting it showed every joint, because a piece cut in one pose and then
+turned about its own pivot stops meeting its neighbour the moment the pose
+changes - see `tools/human_body_parts.py`, which renders each part on its
+own and is what writes `data/assets/characters/wardrobe/body*/`. This file
+stays as the source of the mesh, the fit, the pose and the camera - that
+half is shared - and as the one whole-figure picture to look at.
 
 Three decisions are worth their reasons:
 
@@ -215,6 +225,12 @@ def arm_line(v, h, z0, armpit):
     return shoulder, elbow, wrist, tip, max(e_err, w_err)
 
 
+def axis_y(v, h, z, z_half, x_half):
+    """The body's own front-to-back centre at a height, on the centre plane."""
+    band = v[(np.abs(v[:, 2] - z) < z_half * h) & (np.abs(v[:, 0]) < x_half * h)]
+    return float(0.5 * (band[:, 1].min() + band[:, 1].max())) if len(band) else 0.0
+
+
 def measure(v):
     """A-pose 3D joints of a standing human mesh, X across, -Y forward, Z up."""
     v = v.copy()
@@ -223,6 +239,10 @@ def measure(v):
     h = float(v[:, 2].max() - z0)
     armpit = armpit_z(v, h, z0)
     crotch = crotch_z(v, h, z0)
+    # The skull's own centre, which is what the rig's `head` joint means: the
+    # paint pose puts the crown exactly `head_radius` above it.
+    skull = v[v[:, 2] > armpit + 0.145 * h]
+    skull_y = float(0.5 * (skull[:, 1].min() + skull[:, 1].max())) if len(skull) else 0.0
 
     legs = leg_track(v, h, z0, crotch)
     knee = width_dip(legs, h, z0, 0.22, 0.36)
@@ -240,8 +260,20 @@ def measure(v):
         "arm_error": arm_error,
         "hip": np.array([0.0, 0.0, crotch + 0.055 * h]),
         "shoulder": np.array([0.0, 0.0, armpit + 0.055 * h]),
-        "head": np.array([0.0, 0.0, armpit + 0.125 * h]),
-        "head_top": np.array([0.0, 0.0, float(v[:, 2].max())]),
+        # The neck and the skull get their own front-to-back axis, and that is
+        # the whole of the "head sits too far forward" fix. Every other joint
+        # here is pinned to Y=0, which is the MESH's origin - not the body's
+        # own centre line, and nobody had checked the difference. Measured, the
+        # chest sits +0.9 REF px off that origin and the hip +3.9, so pinning
+        # them there costs nothing; the neck sits +9.8 and the skull +11.0
+        # (female: +17.4 and +13.0), so a neck bone on Y=0 runs outside the
+        # neck it is supposed to drive, and the retarget - which puts that bone
+        # on the figure's own vertical axis - carried the whole head forward by
+        # the difference. Measured on the part itself, the skull centred +16..
+        # +20 px forward of the shoulder pivot against the rig's own +6.
+        "neck_base": np.array([0.0, axis_y(v, h, armpit + 0.085 * h, 0.015, 0.05), armpit + 0.055 * h]),
+        "head": np.array([0.0, skull_y, armpit + 0.125 * h]),
+        "head_top": np.array([0.0, skull_y, float(v[:, 2].max())]),
         "thigh": np.array([HIP_HALF * h, 0.0, crotch + 0.045 * h]),
         "knee": np.array([knee[1], 0.0, knee[0]]),
         # The rig puts the ankle ON the ground and runs the foot bone flat
@@ -269,7 +301,9 @@ def measure(v):
 # with mirrored X, so the front limb is simply the one nearer the camera.
 CHAIN = [
     ("spine", "hip", "shoulder", None, False),
-    ("neck", "shoulder", "head", "spine", False),
+    # `neck_base`, not `shoulder`: see measure(). The two are the same point in
+    # the 2D rig and ten pixels apart on a real body.
+    ("neck", "neck_base", "head", "spine", False),
     ("skull", "head", "head_top", "neck", False),
     ("clavicle", "shoulder", "arm", "spine", True),
     ("upper_arm", "arm", "elbow", "clavicle", True),
