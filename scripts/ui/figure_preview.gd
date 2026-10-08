@@ -23,7 +23,7 @@ func show_character(character: CharacterData) -> void:
 		return
 	show_look(
 		character.class_id,
-		clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
+		character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone),
 		character.outfit, Wardrobe.loadout_of(character.outfit, character.equipped),
 		character.get_body_variant_id()

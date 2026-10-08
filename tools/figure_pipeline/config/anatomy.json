@@ -1,0 +1,26 @@
+{
+ "_comment": "proportions testi araliklari. Kaynak: Drillis & Contini (1966) segment uzunluklari, Winter, Biomechanics and Motor Control of Human Movement (4. bs., 2009) Sekil 4.1: boy H'nin kesri olarak el 0.108H, bas (cene-tepe) 0.130H, ust kol 0.186H, onkol 0.146H, uyluk 0.245H, bacak (diz-ayak bilegi) 0.246H. Tolerans (+-~15%) benim onerim: nufus farki (brakial indeks ~0.73-0.84) ve olcum belirsizligi icin. Esik degisikligi kullanici kararidir.",
+ "ratios": {
+  "hand_over_head": {
+   "nominal": 0.831,
+   "min": 0.7,
+   "max": 0.95,
+   "definition": "el: bilek eklemi -> en uzak parmak ucu pikseli; bas: tepe pikseli -> cene pikseli (profilden)"
+  },
+  "forearm_over_upper_arm": {
+   "nominal": 0.785,
+   "min": 0.7,
+   "max": 0.9,
+   "definition": "dirsek->bilek / omuz->dirsek, ayni karede basilan eklem isaretleri"
+  },
+  "shank_over_thigh": {
+   "nominal": 1.004,
+   "min": 0.88,
+   "max": 1.12,
+   "definition": "diz->ayak bilegi / kalca->diz, ayni karede basilan eklem isaretleri"
+  }
+ },
+ "marker_rules": {
+  "inside_silhouette": "her eklem isareti kendi katmaninin alfa>0.5 bolgesinde olmali (isaret anatomiyle cakismali; iskelet verisinin tek basina guvenilmedigi yer)"
+ }
+}

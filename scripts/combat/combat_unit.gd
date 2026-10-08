@@ -152,9 +152,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.loadout = Wardrobe.loadout_for(character)
 	unit.skin = CharacterData.get_skin_tone_color(character.skin_tone)
 	unit.body_variant = character.get_body_variant_id()
-	unit.height_scale = clampf(
-		float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14
-	)
+	unit.height_scale = character.get_height_scale()
 	unit.damage_multiplier = character.get_culture().combat_damage_multiplier
 	unit.skills = character.get_skills()
 	unit.skill_proficiency = character.skill_proficiency.duplicate()

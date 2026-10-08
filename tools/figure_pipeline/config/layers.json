@@ -1,0 +1,85 @@
+{
+ "_comment": "Faz 1 yapisal karari. qa/check_config.py her calistirmanin basinda dogrular. Sira = ressam sirasi (arkadan one).",
+ "layers": [
+  "back_arm",
+  "back_leg",
+  "torso_head",
+  "front_leg",
+  "front_arm"
+ ],
+ "front_side": "r",
+ "back_side": "l",
+ "front_side_evidence": "config/evidence/side_check_camera_minusX.png: kamera -X'te, gorunen yakin uzuvlar _r (mavi). Eski bone_map.json on=_l saymisti (yanlis).",
+ "core_threshold": 0.5,
+ "root_threshold": 0.02,
+ "membership": {
+  "limb": "w_K >= root_threshold (cekirdek w_K>=0.5 + kok uzantisi 0.02<=w_K<0.5). w_K = K'deki MPFB kemiklerinin normalize agirlik toplami.",
+  "torso_head": "tum uzuv katmanlari icin w_K < core_threshold olan her nokta (uzuv cekirdekleri disinda kalan her sey)",
+  "evaluation": "nokta basina (enterpole edilmis agirlik), yuz basina degil - Mask modifier kullanilmaz"
+ },
+ "limb_bones": {
+  "back_arm": [
+   "upperarm_l",
+   "lowerarm_l",
+   "hand_l",
+   "index_01_l",
+   "index_02_l",
+   "index_03_l",
+   "middle_01_l",
+   "middle_02_l",
+   "middle_03_l",
+   "pinky_01_l",
+   "pinky_02_l",
+   "pinky_03_l",
+   "ring_01_l",
+   "ring_02_l",
+   "ring_03_l",
+   "thumb_01_l",
+   "thumb_02_l",
+   "thumb_03_l"
+  ],
+  "back_leg": [
+   "thigh_l",
+   "calf_l",
+   "foot_l",
+   "ball_l"
+  ],
+  "front_leg": [
+   "thigh_r",
+   "calf_r",
+   "foot_r",
+   "ball_r"
+  ],
+  "front_arm": [
+   "upperarm_r",
+   "lowerarm_r",
+   "hand_r",
+   "index_01_r",
+   "index_02_r",
+   "index_03_r",
+   "middle_01_r",
+   "middle_02_r",
+   "middle_03_r",
+   "pinky_01_r",
+   "pinky_02_r",
+   "pinky_03_r",
+   "ring_01_r",
+   "ring_02_r",
+   "ring_03_r",
+   "thumb_01_r",
+   "thumb_02_r",
+   "thumb_03_r"
+  ]
+ },
+ "torso_head_bones": [
+  "Root",
+  "pelvis",
+  "spine_01",
+  "spine_02",
+  "spine_03",
+  "clavicle_l",
+  "clavicle_r",
+  "neck_01",
+  "head"
+ ]
+}

@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_wisdom_and_faith(t)
 	_test_gender_and_body_weight(t)
 	_test_condition_label_bands(t)
+	_test_height_scale_is_proportional(t)
 
 ## Faz 17: iki yeni stat, ikisi de tabanda (5) eski davranışı birebir korur -
 ## dosyanın her formülünün kendi kuralı, burada da geçerli.
@@ -225,3 +226,19 @@ func _test_gender_and_body_weight(t) -> void:
 			"beden %s check'ine karışmaz" % CharacterStats.kind_name(kind), 0.001)
 		t.almost(female_lean.get_body_check_modifier(kind), 0.0,
 			"beden %s check'ine karışmaz" % CharacterStats.kind_name(kind), 0.001)
+
+## Boy bedenin tamamını tek ölçekle büyütür (kullanıcı kararı: en çok 2,5 m).
+## Önceden her ekran 0,86-1,14'e kırpıyordu; 200 cm'nin üstü görünmüyordu.
+func _test_height_scale_is_proportional(t) -> void:
+	t.eq(CharacterData.MAX_HEIGHT_CM, 250, "boy tavanı 2,5 m")
+	var mid := CharacterData.create("Orta", CultureCatalog.NOMAD, CharacterStats.new())
+	t.almost(mid.get_height_scale(), 1.0, "ortalama boy ölçeği 1")
+	var giant := CharacterData.create("Dev", CultureCatalog.NOMAD, CharacterStats.new(), 250, 0)
+	t.eq(giant.height_cm, 250, "2,5 m seçilebilir")
+	t.almost(giant.get_height_scale(), 250.0 / 172.0, "ölçek boyla doğru orantılı")
+	var tall := CharacterData.create("Uzun", CultureCatalog.NOMAD, CharacterStats.new(), 215, 0)
+	t.ok(giant.get_height_scale() > tall.get_height_scale(), "200 cm üstünde de büyümeye devam eder")
+	var fig := WalkFigure.new()
+	fig.set_kind(WalkFigure.KIND_PERSON, "guard", giant.get_height_scale())
+	t.almost(fig._scale, giant.get_height_scale(), "figür 2,5 m'yi kırpmadan çizer")
+	fig.free()

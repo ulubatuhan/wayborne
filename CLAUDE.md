@@ -1331,6 +1331,22 @@ in every preview the moment it is equipped.
   joints meet because the art was painted on the same mannequin. The back
   limb reuses the front art darkened (`Wardrobe.BACK_SHADE`) unless a
   `<part>_back.png` exists.
+- **The planted foot goes back, and the arm swings with the opposite leg.**
+  The phase only ever increases (`WalkFigure.advance`) while the world
+  scrolls under a figure that stays put, so the foot on the ground must
+  travel backward against the hip. `_leg` used `cos(phase)` for x, which
+  slid the planted foot *forward* - every person in the game moonwalked,
+  and no test saw it because a gait only reads across time, never in one
+  frame. It was found when the 3D figure pipeline printed frames side by
+  side. The arm had a second bug of the same kind: it swung with
+  `sin(phase)`, a quarter cycle off the legs, so the arms opened widest
+  while the feet passed each other instead of at the step. Both are
+  `-cos(phase)` now; `tests/test_gait.gd` asserts the direction for both
+  facings and the arm/leg correlation, and failed 16 times on the old code.
+  `paint_pose()` moved both phases to `PI` and its joints are identical to
+  0.01 px, so `rig_spec.json` and every painted delivery stay valid.
+  `BeastRig` and the procedural `_draw_quad_leg` use the same `cos` stride
+  and are **not** fixed yet - the animals still moonwalk.
 - **The held weapon hangs straight at rest and moves a third as far as the
   forearm** (`WEAPON_SWING_SHARE`). At the full forearm swing the blade
   swept 60° every step and walking read as fencing (measured on a
@@ -1382,6 +1398,44 @@ in every preview the moment it is equipped.
   uses the rig as soon as the body has art (`CombatFigure.uses_rig()`), and
   a class's weapon is drawn in the hand (`_draw_held_weapon`) until the
   weapon itself is painted.
+- **A named person is now a pre-rendered frame, not a rotated part.**
+  Every part approach below (painted, mannequin, cut render) turned each
+  bone's picture about its own pivot, and the player photographed what
+  that costs: claw hands, wedge feet, a kink at every knee. No threshold
+  fixes it, because a joint between two separately rotated pictures is a
+  seam by construction. `tools/figure_pipeline/` (rules: its `RULES.md`,
+  history: `POSTMORTEM.md`) poses the MPFB body in Blender with
+  `FigureRig`'s own clips (exported by `godot/export_clips.gd`) and renders
+  **whole frames** in five depth layers (back arm, back leg, torso+head,
+  front leg, front arm); `BodyFrames` (`data/assets/characters/frames/
+  body_<gender>_<weight>/frames.tres` + atlas pages) holds them and
+  `WalkFigure._draw_person_frames` plays them. One command rebuilds it all,
+  incrementally: `python3 -I tools/figure_pipeline/build.py --all`.
+  - **The pure mannequin wears only the base kit**: a tank top (male) or a
+    bra (female) and shorts, both recoloured by the outfit's colours. No
+    helmet, no archetype clothes, **no hair or brows** - those are modules
+    added later at character creation (`BodyFrames.KIND_HAIR` is the slot;
+    `render_frames.py --hair` renders one). The kit is painted onto the
+    body's own surface from rest-pose bone heights, with a signed-distance
+    ramp so the hem is a true plane section, not a jagged vertex edge.
+  - **Skin and height stay player choices.** The body is rendered grey and
+    multiplied by the skin tone, like the mannequin's ALBEDO contract.
+    Height is one uniform scale over the whole frame
+    (`CharacterData.get_height_scale()`, 155-250 cm, user's call) - six
+    screens used to clamp it to 0.86-1.14 each, so nothing over 200 cm
+    showed. Random recruits stay under `NATURAL_MAX_HEIGHT_CM`.
+  - Crew use `BodyFrames.CREW_BODY`; enemies still draw on the old part
+    rig until clothing modules exist (open: `QUESTIONS.md` #13-15 - the
+    nude body pokes past a garment's edge where MPFB's delete group would
+    hide it in 3D, and `qa/garment_tests.py` measures exactly that).
+  - Atlas pages get runtime mipmaps (`BodyFrames._with_mipmaps`): frames
+    are drawn ~5x smaller than rendered, and `.import` files are not in the
+    repo, so an import setting could not carry it.
+  - `tests/test_body_frames.gd` locks the contract: all six variants exist,
+    entry counts agree, feet touch the ground line, garments stay inside
+    the body. `tests/screenshot_body_range.gd` prints every variant across
+    heights and skin tones; `tools/figure_pipeline/godot/perf_50.gd` times
+    fifty walking figures.
 - **The mannequin is gone from the shipped art: the body is a render of a
   real human now** (`tools/human_body_render.py` fits and poses it,
   `tools/human_body_parts.py` writes the parts). Seven rounds of asking an
@@ -1579,6 +1633,25 @@ in every preview the moment it is equipped.
     than writing nothing, because `Wardrobe` *prefers* a `<part>_back.png`
     over its own `BACK_SHADE` fallback - so a scrap of sleeve would replace
     a correct darkened one. `BACK_MIN_SHARE` drops it.
+  - **A cut piece has to be proven across the pose it will actually move
+    through, not the one pose it was cut in - and this file already said
+    so before it was ignored once.** The "per-part recovery" measurement two
+    bullets up exists *because* a cut that looks perfect in `paint_pose()`
+    can fail everywhere else - that is its entire point. A Quaternius-sourced
+    garment delivery (Faz "ikinci sanat turu" follow-up) was checked only in
+    a frozen standing pose, which is exactly `paint_pose()` again by another
+    name, and called done. It shipped with a visible bare-skin gap at the
+    elbow (the stock `OVERLAP_PX`, tuned against loose hand-painted cloth,
+    wasn't enough for a tight-fitted 3D-sourced sleeve) and a `hand_back.png`
+    that floated disconnected from its own arm through most of the gait -
+    both invisible in the one pose checked, both obvious the moment a real
+    `screenshot_mannequin_walk.gd`-style sweep ran across several phases.
+    The fix was cheap (`--overlap 26` instead of the default 12, and
+    dropping a `_back.png` that technically cleared `BACK_MIN_SHARE` but
+    wasn't actually tracking its arm) - the mistake was never running that
+    sweep before calling the work finished. Any new cut content, from
+    anywhere, gets the gait sweep before it is shown as done, not after
+    someone else finds the gap.
   - **The reference is the real mannequin, not a stand-in.**
     `tools/wardrobe_paint_reference.py` hangs the shipped body art on the
     paint pose through the very same transform `part_transform()` uses, so

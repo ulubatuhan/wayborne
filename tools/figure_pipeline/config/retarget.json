@@ -1,0 +1,66 @@
+{
+ "_comment": "Godot (FigureRig) acilarini MPFB iskeletine aktarma kurallari.",
+ "bone_scale_allowed": false,
+ "rotation_only": true,
+ "pose_from_rest_each_frame": true,
+ "driven": {
+  "torso": {
+   "mpfb": "pelvis",
+   "measure": [
+    "pelvis.head",
+    "neck_01.head"
+   ],
+   "figure": [
+    "hip",
+    "shoulder"
+   ]
+  },
+  "upper_arm": {
+   "mpfb": "upperarm_{s}",
+   "figure": [
+    "shoulder",
+    "elbow_{side}"
+   ]
+  },
+  "forearm": {
+   "mpfb": "lowerarm_{s}",
+   "figure": [
+    "elbow_{side}",
+    "hand_{side}"
+   ]
+  },
+  "thigh": {
+   "mpfb": "thigh_{s}",
+   "figure": [
+    "hip",
+    "knee_{side}"
+   ]
+  },
+  "shin": {
+   "mpfb": "calf_{s}",
+   "figure": [
+    "knee_{side}",
+    "ankle_{side}"
+   ]
+  }
+ },
+ "plane": "sagital (dunya YZ). Bacak/govde yanal bileseni 0; kollar arm_abduction_deg kadar disa acik.",
+ "not_driven": {
+  "head": "govdeyi izler; FigureRig'de bas omuza sabit ofset (yurumede degismez)",
+  "hand": "onkolu dinlenme goreli yonuyle izler; FigureRig'de el onkolla ayni dogrultuda",
+  "foot": "dunya yonelimi dinlenme pozundaki gibi (taban duz); FigureRig'de ayak hep yatay",
+  "fingers": "MPFB varsayilan eli (Faz 1); el pozu A/B/C sonra kullaniciya"
+ },
+ "root_translation": {
+  "horizontal": "kalca dunya y=0'da sabit (FigureRig: hip.x = ground.x)",
+  "vertical": "her karede en alcak taban noktasi zemine (z=0) degecek kadar oteleme - OLCEK DEGIL. Acik soru: QUESTIONS.md #5."
+ },
+ "arm_abduction_deg": 8.0,
+ "_arm_abduction_note": "Kok neden duzeltmesi: ilk surum kollari yanal bilesen 0 ile omuz hizasindan dik indirdi; el kalca/uyluk hacminin icine girdi (f00, tek parca render'da parmaklar uyluga gomuk; AA-siz birlesik testinde 13 px). Kol (ust kol + onkol) disa 8 derece acilir: yuruyen insanin kollari kalcayi gecmek icin hafif acik durur. Yan gorunuste kol boyu cos(8)=0.990 kisalir, onkol/ust kol orani degismez.",
+ "finger_curl_deg": [
+  20,
+  30,
+  20
+ ],
+ "_finger_curl_note": "Gevsek el (POSTMORTEM A secenegi): MCP/PIP/DIP bukumu, basparmak dokunulmaz. MPFB A-poz eli acik/yayik ve oyun olceginde pence gibi okunuyordu (kullanici geri bildirimi). Kullanici B/C (yari kapali/yumruk) isterse yalniz bu dizi degisir."
+}

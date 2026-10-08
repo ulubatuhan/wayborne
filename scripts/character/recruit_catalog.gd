@@ -126,7 +126,7 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 		"%s %s" % [first_name, epithet],
 		culture.culture_id,
 		base_stats,
-		rng.randi_range(CharacterData.MIN_HEIGHT_CM, CharacterData.MAX_HEIGHT_CM),
+		rng.randi_range(CharacterData.MIN_HEIGHT_CM, CharacterData.NATURAL_MAX_HEIGHT_CM),
 		rng.randi_range(0, CharacterData.SKIN_TONE_NAMES.size() - 1),
 		class_id,
 		rng.randi_range(0, CharacterData.GENDER_NAMES.size() - 1),

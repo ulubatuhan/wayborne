@@ -1,0 +1,16 @@
+{
+  "_provisional": "Kesin varyant listesi bolum 5'in acik kararlarindan biri - kullaniciya sorulacak. Bu dosya, hatti ucdan uca kanitlamak icin secilen GECICI bir baslangic noktasi (2 varyantlik minimum: erkek+kadin, orta govde). Kullanici farkli sayida/ayarda varyant isterse degisir.",
+  "id": "male_medium",
+  "rig": "game_engine",
+  "macros": {
+    "gender": 1.0,
+    "age": 0.5,
+    "muscle": 0.5,
+    "weight": 0.5,
+    "proportions": 0.5,
+    "height": 0.5,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {"asian": 0.33, "caucasian": 0.34, "african": 0.33}
+  }
+}

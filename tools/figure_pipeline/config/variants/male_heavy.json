@@ -1,0 +1,22 @@
+{
+  "_comment": "Oyunun beden varyanti body_male_heavy (Wardrobe.variant_id). weight makrosu: lean 0.2 / average 0.5 / heavy 0.85; geri kalan male/female_medium ile ayni.",
+  "id": "male_heavy",
+  "rig": "game_engine",
+  "macros": {
+    "gender": 1.0,
+    "age": 0.5,
+    "muscle": 0.5,
+    "weight": 0.85,
+    "proportions": 0.5,
+    "height": 0.5,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {
+      "asian": 0.33,
+      "caucasian": 0.34,
+      "african": 0.33
+    }
+  },
+  "thickness": 1.16,
+  "_thickness_note": "Kilo yan gorunuste on-arka kalinliktir (CLAUDE.md, Wardrobe & Rig Rules; mankenin WEIGHT_SCALE'i). MPFB'nin weight makrosu tek basina zayif->kilolu siluet alanini yalniz +%3 (erkek) / +%7 (kadin) degistiriyordu; uclari (0/1) bile +%5'i gecmedi (olculdu). Dinlenme pozunda, her yukseklik diliminde govdenin kendi Y merkezine gore."
+}

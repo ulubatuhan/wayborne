@@ -1,0 +1,58 @@
+{
+ "_comment": "Tek olcek, tek kamera, sabit isik. Tum katman, tam ve test render'lari bunu okur.",
+ "type": "ORTHO",
+ "camera_axis": "-X",
+ "camera_location_x": -4.0,
+ "rotation_euler_deg": [
+  90.0,
+  0.0,
+  -90.0
+ ],
+ "screen_right_world": "-Y",
+ "screen_up_world": "+Z",
+ "model_faces_world": "-Y",
+ "px_per_meter": 118.0,
+ "_px_per_meter_note": "male_medium 1.730 m -> ~204 px = oyun 1x kutusunun (119 px, olculdu) 2 kati figur boyu (FigureRig figur ~0.857h). 2x render GECICI: QUESTIONS.md #3.",
+ "canvas": [
+  320,
+  320
+ ],
+ "ground_px": [
+  160,
+  300
+ ],
+ "_ground_px_note": "dunya (y=0, z=0) noktasi bu piksele duser; kalca dunya y=0'da sabit.",
+ "film_transparent": true,
+ "samples": 256,
+ "seed": 0,
+ "pixel_filter": "BLACKMAN_HARRIS",
+ "filter_width": 1.5,
+ "max_bounces": 0,
+ "transparent_max_bounces": 64,
+ "backface_culling": true,
+ "holdout": false,
+ "lighting": {
+  "sun_rotation_euler_deg": [
+   58.0,
+   0.0,
+   -128.0
+  ],
+  "sun_energy": 2.0,
+  "sun_angle_deg": 0.0,
+  "ambient_as_emission": 0.5,
+  "albedo": 0.86,
+  "_note": "Yon ve guc tools/human_body_render.py ile ayni (oyundaki govde). Ortam isigi dunya yerine emisyon terimi: her render'da deterministik (gurultu yok), boylece katman == tam karsilastirmasi isik gurultusuyle bozulmaz."
+ },
+ "posterize": {
+  "tones": [
+   0.5,
+   0.68,
+   0.84,
+   0.96
+  ],
+  "display_lo": 0.688,
+  "display_hi": 0.99,
+  "_note": "human_body_render.FLAT_TONES ile ayni ton seti. Sinirlar resim basina yuzdelik DEGIL, isik modelinden turetilmis sabit: lineer min = albedo*ortam = 0.86*0.5 = 0.43 (golgede), max = 0.43 + albedo*gunes/pi = 0.43 + 0.86*2/pi = 0.9775; sRGB'de 0.688 / 0.990. Katman ve tam render ayni pikselde ayni tonu alir."
+ },
+ "_samples_note": "16 ornekle golge sinirlarinda piksel gurultusu vardi; duz tona (posterize) indirince kumlu benek oldu (f06 ortalama |laplacian| 10.95). 256 ornekte 6.34 ve tonlar temiz bant. Kok neden ornek azligi; gurultu filtreyle gizlenmedi."
+}

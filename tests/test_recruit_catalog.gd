@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_candidates_use_all_classes(t)
 	_test_higher_level_costs_more(t)
 	_test_granted_levels_are_spent(t)
+	_test_recruit_heights_stay_natural(t)
 
 func _seeded_rng(seed_value: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
@@ -66,3 +67,11 @@ func _test_granted_levels_are_spent(t) -> void:
 			for skill_id in candidate.skill_proficiency:
 				total_proficiency += int(candidate.skill_proficiency[skill_id])
 			t.ok(total_proficiency > 0, "seviyeli aday biraz yetkinlik biriktirmiş olur")
+
+## Oyuncu 2,5 m'ye kadar seçebilir; rastgele adaylar doğal tavanda kalır.
+func _test_recruit_heights_stay_natural(t) -> void:
+	var tallest := 0
+	for seed_value in 40:
+		for c in RecruitCatalog.build_candidates(RecruitCatalog.VENUE_MARKET, _seeded_rng(seed_value)):
+			tallest = maxi(tallest, c.height_cm)
+	t.le(float(tallest), float(CharacterData.NATURAL_MAX_HEIGHT_CM), "aday boyu doğal tavanı aşmaz")

@@ -124,11 +124,21 @@ func set_kind(
 	_archetype = CombatFigure.ARCHETYPES.get(
 		archetype_id, CombatFigure.ARCHETYPES["bandit"]
 	)
-	_scale = clampf(height_scale, 0.82, 1.18)
+	_scale = clampf(
+		height_scale,
+		CharacterData.height_scale_for(CharacterData.MIN_HEIGHT_CM) * 0.95,
+		CharacterData.height_scale_for(CharacterData.MAX_HEIGHT_CM)
+	)
 	_skin = skin
 	_carries_pack = carries_pack
 	_outfit = outfit
 	_body_variant = body_variant
+	# Kare kümesi ~5 kat küçültülerek çiziliyor; mipmap'siz kenarlar kumlu.
+	texture_filter = (
+		CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		if not body_variant.is_empty() and BodyFrames.for_body(body_variant) != null
+		else CanvasItem.TEXTURE_FILTER_PARENT_NODE
+	)
 	if (kind == KIND_HORSE or kind == KIND_MOUNTED) and _horse_species.is_empty():
 		_horse_species = BeastRig.HORSE_WHITE if randf() < WHITE_HORSE_CHANCE else BeastRig.HORSE
 	queue_redraw()
@@ -234,6 +244,10 @@ func _draw() -> void:
 ## `ground_y` figürün bastığı çizgi; binicide bu eyerin üstü oluyor, yani
 ## aynı gövde hem yürüyen hem atlı için kullanılıyor.
 func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
+	var frames := BodyFrames.for_body(_body_variant) if not _body_variant.is_empty() else null
+	if frames != null:
+		_draw_person_frames(frames, figure_h * _scale, ground_y, seated)
+		return
 	var h := figure_h * _scale
 	var cx := size.x * 0.5
 	var bulk: float = float(_archetype.get("bulk", 1.0))
@@ -260,6 +274,86 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		else:
 			_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
 		_draw_wardrobe(bone, joints, h)
+
+## Önceden render edilmiş beden (`BodyFrames`, 3B'den): beş derinlik katmanı
+## arkadan öne, her katmanda beden tenle, üstüne şort ve atlet/bra kendi
+## renkleriyle. Eski parça mankeni her kemiği ayrı resim olarak döndürüyordu;
+## dizde kırık, el pençe, ayak kama gibi duruyordu. Burada her kare tek bir
+## 3B pozun render'ı, eklem kendiliğinden bütün.
+##
+## Saf manken: kask, arketip giysisi, saç yok (kullanıcı kararı - bunlar
+## karakter yaratımında modül olarak eklenecek). Oyuncunun seçtiği kıyafetin
+## rengi temel kuşamı boyar; seçilmiş bir başlık ve silah/sırt yükü
+## render'ın kendi eklemlerine bağlanır.
+const UNDERSHIRT_COLOR: Color = Color(0.78, 0.74, 0.64)
+const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
+const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
+
+func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
+	var clip := "ride" if seated else ("walk" if _motion >= 0.5 else "idle")
+	if not frames.has_clip(clip):
+		clip = "idle"
+	var frame := frames.frame_for_phase(clip, _phase)
+	var k := frames.scale_for(h)
+	var origin := Vector2(size.x * 0.5, ground_y)
+	var xf := Transform2D(_lean * _facing, Vector2(k * _facing, k), 0.0, origin)
+	if not seated:
+		ArtDraw.ellipse(self, origin, Vector2(h * 0.16, h * 0.028), FRAME_SHADOW)
+	var tones := frame_tones(_tinted(_skin), _outfit, _tint)
+	var joints := {}
+	var raw := frames.frame_joints(clip, frame)
+	for name in raw:
+		joints[name] = xf * Vector2(raw[name])
+	var look := _person_colors()
+	for layer in BodyFrames.LAYERS.size():
+		if seated and BodyFrames.LAYERS[layer] == "back_leg":
+			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
+		if BodyFrames.LAYERS[layer] == "front_arm" and _combat_stance:
+			_draw_held_weapon(joints, h, look)
+		if BodyFrames.LAYERS[layer] == "torso_head":
+			_draw_frame_back_items(joints, h, look)
+		draw_set_transform_matrix(xf)
+		for kind in [BodyFrames.KIND_BODY, BodyFrames.KIND_BOTTOM, BodyFrames.KIND_TOP]:
+			var e := frames.entry(clip, frame, layer, kind)
+			if e.is_empty():
+				continue
+			var region: Rect2 = e.region
+			draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tones[kind])
+		draw_set_transform_matrix(Transform2D.IDENTITY)
+		if BodyFrames.LAYERS[layer] == "torso_head":
+			_draw_frame_extras(joints, h, look)
+
+## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Seçilmiş
+## pantolon/gömlek-ceket rengi temel kuşamın yerine geçer (OutfitCatalog'un
+## aynı çözümleyicileri). Saf fonksiyon - test sahnesiz okuyabilsin.
+static func frame_tones(skin: Color, outfit: Dictionary, light: Color) -> Dictionary:
+	var top := OutfitCatalog.resolve_torso_color(outfit, UNDERSHIRT_COLOR)
+	var bottom := OutfitCatalog.resolve_color(outfit, OutfitCatalog.SLOT_PANTS, SHORTS_COLOR)
+	return {
+		BodyFrames.KIND_BODY: skin,
+		BodyFrames.KIND_TOP: top * light,
+		BodyFrames.KIND_BOTTOM: bottom * light,
+	}
+
+## Sırtta taşınanlar gövde katmanından ÖNCE: gövdenin arkasında kalırlar.
+## Önce sonra çiziliyordu ve sırttaki mızrak göğsün önünden geçiyordu.
+func _draw_frame_back_items(joints: Dictionary, h: float, look: Dictionary) -> void:
+	if not joints.has("shoulder"):
+		return
+	_draw_pack(joints.shoulder, h, 1.0, look)
+	if not _combat_stance and not Wardrobe.has_part(_loadout, "weapon"):
+		_draw_slung_weapon(joints.shoulder, h, look.metal, look.trim)
+
+## Gövdenin üstüne binen tek şey: oyuncu seçtiyse başlık. Arketipin kaskı YOK.
+func _draw_frame_extras(joints: Dictionary, h: float, look: Dictionary) -> void:
+	if not joints.has("head_top"):
+		return
+	var headgear := OutfitCatalog.resolve_headgear(_outfit, "none")
+	if bool(headgear.override):
+		var top: Vector2 = joints.head_top
+		var radius := FigureRig.head_radius(h)
+		var centre := top + (Vector2(joints.neck) - top).normalized() * radius
+		_draw_headgear(centre, radius, h, look.cloth, look.trim, look.metal, headgear)
 
 ## Kıyafet seçimi (ceket/gömlek/pantolon/ayakkabı/eldiven) burada devreye
 ## giriyor - hiçbiri seçilmemişse (`_outfit` boş, tayfa/düşman gibi) her

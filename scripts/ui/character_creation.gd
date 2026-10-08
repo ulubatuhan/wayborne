@@ -409,7 +409,7 @@ func _refresh() -> void:
 			value_label.text = OutfitCatalog.get_piece(piece_id).display_name
 	_outfit_preview.show_look(
 		preview.class_id,
-		clampf(float(preview.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
+		preview.get_height_scale(),
 		CharacterData.get_skin_tone_color(preview.skin_tone),
 		_outfit, Wardrobe.loadout_of(_outfit, {}), preview.get_body_variant_id()
 	)
