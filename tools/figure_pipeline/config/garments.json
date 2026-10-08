@@ -1,0 +1,31 @@
+{
+ "_comment": "Temel kusam (kullanici istegi: kask yok, dis giysi yok; erkekte atlet, kadinda bra, ikisinde de kisa pantolon) + sac. Atlet/bra/sort bedenin YUZEYINE boyanir (dar giysi: ic camasiri icin dogru); sac MakeHuman CC0 proxy agidir. Bolgeler DINLENME pozundaki kemik yuksekliklerinden turetilir, boylece her varyanta oturur: T = boyun_z - pelvis_z.",
+ "id_channels": {
+  "top": 0,
+  "bottom": 1,
+  "hair": 2
+ },
+ "regions": {
+  "waist_t": 0.18,
+  "tank_top_t": 0.8,
+  "bra_bottom_t": 0.5,
+  "bra_top_t": 0.74,
+  "overlap_t": 0.03,
+  "hem_knee_share": 0.45,
+  "strap_x_share": 0.5,
+  "strap_half_width_m": 0.022,
+  "_note": "waist = pelvis + waist_t*T; atlet waist-overlap..tank_top; bra bra_bottom..bra_top; sort paca = diz + hem_knee_share*(kalca-diz); askilar omuz eklem x'inin strap_x_share'i kadar iceride."
+ },
+ "by_gender": {
+  "male": {
+   "top": "tank",
+   "hair": "short02"
+  },
+  "female": {
+   "top": "bra",
+   "hair": "braid01"
+  }
+ },
+ "hair_alpha_cutoff": 0.5,
+ "_modules_note": "Saf manken sac/kas/sakal tasimaz (kullanici: bunlar karakter yaratiminda modul olarak eklenecek). by_gender.hair yalniz ileride modul render etmek icin bir varsayilan; render_frames.py --hair verilmedikce kullanilmaz."
+}

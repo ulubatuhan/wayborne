@@ -38,10 +38,10 @@ const MAX_ABREAST: int = 2
 ## Liderin kolonun ne kadar önünde gittiği.
 const LEADER_LEAD: float = 150.0
 
-## Karakterin boyu görünürde de fark etsin diye gövde yüksekliği bu
-## aralıkta ölçeklenir (bkz. CharacterData.MIN/MAX_HEIGHT_CM).
-const BODY_MIN_HEIGHT: float = 62.0
-const BODY_MAX_HEIGHT: float = 86.0
+## Ortalama boylu (DEFAULT_HEIGHT_CM) birinin gövde kutusu. Boy kutuyu
+## değil figürün ölçeğini değiştirir (`CharacterData.get_height_scale`):
+## kutu da boyla büyüyordu ve boy iki kez sayılıyordu.
+const BODY_HEIGHT: float = 72.0
 const BODY_WIDTH: float = 46.0
 
 ## Lider at üstünde: kervanın önünde gidiyor ve vagonlara bağlı değil
@@ -648,7 +648,8 @@ func _build_crew_member(centre_x: float) -> WalkFigure:
 	# Tayfa isimsiz: sınıfı yok, nötr bir silüet paleti taşıyor.
 	body.set_kind(
 		WalkFigure.KIND_PERSON, "bandit", 0.95,
-		CharacterData.get_skin_tone_color(int(absf(centre_x)) % 4), true
+		CharacterData.get_skin_tone_color(int(absf(centre_x)) % 4), true, {},
+		BodyFrames.CREW_BODY
 	)
 	body.set_phase_offset(centre_x * 0.03)
 	return body
@@ -657,12 +658,7 @@ func _build_crew_member(centre_x: float) -> WalkFigure:
 ## oluşturma ekranında seçilenler yolda da görünsün diye. Lider at
 ## üstünde: kervanın önünde gidiyor ve vagonlara bağlı değil.
 func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
-	var height_ratio := inverse_lerp(
-		float(CharacterData.MIN_HEIGHT_CM),
-		float(CharacterData.MAX_HEIGHT_CM),
-		float(character.height_cm)
-	)
-	var body_height := lerpf(BODY_MIN_HEIGHT, BODY_MAX_HEIGHT, clampf(height_ratio, 0.0, 1.0))
+	var body_height := BODY_HEIGHT
 	var body_width := BODY_WIDTH
 	if is_leader:
 		body_height = MOUNTED_HEIGHT
@@ -677,7 +673,7 @@ func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
 	body.set_kind(
 		WalkFigure.KIND_MOUNTED if is_leader else WalkFigure.KIND_PERSON,
 		character.class_id,
-		clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
+		character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone),
 		not is_leader,
 		character.outfit,

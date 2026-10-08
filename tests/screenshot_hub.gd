@@ -126,7 +126,10 @@ func _figure(
 	get_root().add_child(figure)
 	figure.set_kind(
 		kind, archetype, 1.0, CharacterData.get_skin_tone_color(1),
-		kind == WalkFigure.KIND_PERSON
+		kind == WalkFigure.KIND_PERSON, {},
+		# Oyun isimsiz tayfaya bu bedeni veriyor (world_hub._build_crew_member);
+		# vermeyen araç eski parça mankenini basıyordu.
+		BodyFrames.CREW_BODY if kind in [WalkFigure.KIND_PERSON, WalkFigure.KIND_MOUNTED] else ""
 	)
 	figure.set_phase_offset(at.x * 0.03)
 	return figure

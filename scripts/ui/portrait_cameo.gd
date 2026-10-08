@@ -33,7 +33,7 @@ func setup(character: CharacterData, height: float) -> PortraitCameo:
 	if character != null:
 		_figure.set_kind(
 			WalkFigure.KIND_PERSON, character.class_id,
-			clampf(float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14),
+			character.get_height_scale(),
 			CharacterData.get_skin_tone_color(character.skin_tone), false, character.outfit,
 			character.get_body_variant_id()
 		)

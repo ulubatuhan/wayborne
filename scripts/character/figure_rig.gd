@@ -157,6 +157,11 @@ static func bones_for(seated: bool) -> Array[String]:
 
 ## Kalça → diz → ayak. Ayağın hedefi hesaplanıyor, diz ondan çözülüyor; diz
 ## yürüme yönüne doğru bükülüyor (insan dizi öne kırılır).
+##
+## Faz zamanla artıyor (`WalkFigure.advance`) ve figür yerinde durup dünya
+## altından kayıyor; yani havadaki ayak (`sin(phase) > 0`) öne, yere basan
+## ayak geriye gitmeli. `x` bu yüzden `-cos(phase)`: `cos` ile yere basan ayak
+## öne kayıyordu, figür ay yürüyüşü yapıyordu (bkz. tests/test_gait.gd).
 static func _leg(
 	joints: Dictionary, side: String, hip: Vector2, ground_y: float, h: float,
 	phase: float, motion: float, facing: float
@@ -165,7 +170,7 @@ static func _leg(
 	var stride := h * STRIDE_RATIO * motion
 	var lift := h * LIFT_RATIO * motion
 	var ankle := Vector2(
-		hip.x + cos(phase) * stride * facing,
+		hip.x - cos(phase) * stride * facing,
 		ground_y - maxf(0.0, sin(phase)) * lift
 	)
 	joints["knee_" + side] = solve_joint(
@@ -175,11 +180,14 @@ static func _leg(
 	joints["toe_" + side] = ankle + Vector2(h * FOOT_RATIO * facing, 0.0)
 
 ## Omuz → dirsek → el. Salınımı döndürüyor: elde tutulan silah onu okuyor.
+## Salınım `-cos(phase)`: bacak `-cos` ile gidiyor, kol karşı bacakla aynı
+## anda öne geliyor ve en açık anı adım anına (iki ayak yerde) düşüyor. `sin`
+## iken kollar en açık hâline bacaklar yan yana geçerken varıyordu.
 static func _arm(
 	joints: Dictionary, side: String, shoulder: Vector2, h: float,
 	phase: float, motion: float, facing: float
 ) -> float:
-	var swing := lerpf(0.35, sin(phase), motion) * 0.55
+	var swing := lerpf(0.35, -cos(phase), motion) * 0.55
 	var upper := h * UPPER_ARM_RATIO
 	var lower := h * FOREARM_RATIO
 	var elbow := shoulder + Vector2(sin(swing) * upper * facing, cos(swing * 0.6) * upper)
@@ -217,16 +225,14 @@ static func rest_pose() -> Dictionary:
 ## arkasına gizleniyor, yani oradan kesilen bir ceketin arka kolu diye bir
 ## şey yok - `BeastRig.PAINT_PHASE` de aynı sebeple var.
 ##
-## Ama hayvandan farklı olarak burada tek bir faz yetmiyor: bacaklar
-## `cos(phase)` ile, kollar `sin(phase)` ile açılıyor, yani ikisi **zıt**
-## fazlarda en geniş. Tek bir ara faz (hayvanın `PI*0.25`'i) ikisine de
-## azamisinin ~%70'ini verir, ve ölçüldüğünde o %30 gerçek bir kayıp:
-## üst üste binen uzuvdan kesilen parça delikli çıkıyor. O yüzden bu poz
-## bir yürüyüş karesi değil - bacaklar kendi en geniş fazından (0),
-## kollar kendininkinden (PI/2) alınıp birleştiriliyor. İkisinin gövdesi
-## birebir aynı: kalça zıplaması `sin(phase*2)`, her iki fazda da sıfır.
-const PAINT_LEG_PHASE: float = 0.0
-const PAINT_ARM_PHASE: float = PI * 0.5
+## Bacaklar ve kollar ikisi de `-cos(phase)` ile salınıyor, yani en geniş
+## anları aynı faz: `PI`, ön ayak öne basarken (adım anı). Eskiden kollar
+## `sin` ile gidiyordu ve bu poz iki ayrı fazdan birleştiriliyordu; yürüyüş
+## düzeltilince (bkz. `_leg`) iki faz da `PI` oldu ve eklemler 0,01 px'e
+## kadar eskisiyle aynı kaldı - poz ressamlarla olan sözleşme
+## (`rig_spec.json` `paint_joints`), değişirse çizilmiş her kuşam geçersiz.
+const PAINT_LEG_PHASE: float = PI
+const PAINT_ARM_PHASE: float = PI
 
 static func paint_pose() -> Dictionary:
 	var joints := pose(Vector2.ZERO, REF_H, PAINT_LEG_PHASE, 1.0, 1.0)

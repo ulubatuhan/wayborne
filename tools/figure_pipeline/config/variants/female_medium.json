@@ -1,0 +1,16 @@
+{
+  "_provisional": "Bkz. male_medium.json - ayni gerekce.",
+  "id": "female_medium",
+  "rig": "game_engine",
+  "macros": {
+    "gender": 0.0,
+    "age": 0.5,
+    "muscle": 0.5,
+    "weight": 0.5,
+    "proportions": 0.5,
+    "height": 0.5,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {"asian": 0.33, "caucasian": 0.34, "african": 0.33}
+  }
+}

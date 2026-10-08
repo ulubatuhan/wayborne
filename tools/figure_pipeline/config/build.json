@@ -1,0 +1,48 @@
+{
+ "_comment": "Faz 2+: hangi varyant x klip render edilir. Klipler FigureRig.pose()'un girdileri; kare sayisi gecici (QUESTIONS #3).",
+ "variants": [
+  "male_average",
+  "female_average",
+  "male_lean",
+  "male_heavy",
+  "female_lean",
+  "female_heavy"
+ ],
+ "clips": {
+  "walk": {
+   "frames": 24,
+   "motion": 1.0,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "idle": {
+   "frames": 1,
+   "motion": 0.0,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "_note": "Savas durusu da bu poz: set_combat_stance yalniz silah cizimini degistirir (walk_figure.gd:320), iskeleti degil."
+  },
+  "ride": {
+   "frames": 24,
+   "motion": 1.0,
+   "seated": true,
+   "root": "pelvis",
+   "anchor_px": [
+    160,
+    220
+   ],
+   "_note": "FigureRig.pose seated: ground = eyer = kalca (figure_rig.gd:121). Arka bacak oyunda cizilmiyor (bones_for(true)); burada on bacagin acilariyla render edilir, oynatici atlayabilir."
+  }
+ },
+ "facing": 1.0,
+ "lean": 0.0,
+ "bulk": 1.0
+}

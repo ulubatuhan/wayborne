@@ -1,0 +1,12 @@
+{
+ "_comment": "Faz 1 kapsami: 1 klip (yurume), yan gorunus, male_medium, kiyafetsiz.",
+ "variant": "male_medium",
+ "clip": "walk",
+ "frames_per_cycle": 24,
+ "_frames_note": "GECICI (QUESTIONS.md #3: 24/32/48). Faz = 2*pi*i/N.",
+ "motion": 1.0,
+ "facing": 1.0,
+ "lean": 0.0,
+ "seated": false,
+ "bulk": 1.0
+}

@@ -442,6 +442,8 @@ func _make_figure(
 	add_child(figure)
 	var outfit: Dictionary = character.outfit if character != null else {}
 	var body_variant := character.get_body_variant_id() if character != null else ""
+	if character == null and kind == WalkFigure.KIND_PERSON:
+		body_variant = BodyFrames.CREW_BODY
 	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit, body_variant)
 	figure.set_loadout(Wardrobe.loadout_for(character))
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
@@ -458,9 +460,7 @@ func _archetype_of(character: CharacterData) -> String:
 func _height_scale_of(character: CharacterData) -> float:
 	if character == null:
 		return 1.0
-	return clampf(
-		float(character.height_cm) / float(CharacterData.DEFAULT_HEIGHT_CM), 0.86, 1.14
-	)
+	return character.get_height_scale()
 
 func _skin_of(character: CharacterData) -> Color:
 	if character == null:

@@ -6,7 +6,11 @@ extends RefCounted
 ## doğrudan okur. Sahne ağacı gerektirmez, testte doğrudan örneklenebilir.
 
 const MIN_HEIGHT_CM: int = 155
-const MAX_HEIGHT_CM: int = 200
+## Oyuncunun seçebileceği tavan (kullanıcı kararı: 2,5 m). Doğal tavan
+## `NATURAL_MAX_HEIGHT_CM`: rastgele çekilen adaylar onu aşmaz, yoksa her
+## meydanda devler dolaşırdı.
+const MAX_HEIGHT_CM: int = 250
+const NATURAL_MAX_HEIGHT_CM: int = 200
 const DEFAULT_HEIGHT_CM: int = 172
 
 ## Boyun eşiği: bunun üstü "uzun", altı "kısa" sayılır.
@@ -324,6 +328,16 @@ func _auto_allocate_skills() -> void:
 			break
 
 # --- Boy: uzun daha çok can taşır, kısa daha iyi kaçınır ---
+
+## Figürün boyu, ortalama insana göre: çizim bunu bedenin tamamına tek bir
+## ölçek olarak uygular (orantılı büyüme - eni, boyu, eli, ayağı birlikte).
+## Her ekran bunu okur; önceden altı yerde ayrı ayrı 0,86-1,14'e kırpılıyordu
+## ve 200 cm'nin üstü hiç görünmüyordu.
+func get_height_scale() -> float:
+	return height_scale_for(height_cm)
+
+static func height_scale_for(cm: int) -> float:
+	return float(clampi(cm, MIN_HEIGHT_CM, MAX_HEIGHT_CM)) / float(DEFAULT_HEIGHT_CM)
 
 func get_height_hp_bonus() -> int:
 	if height_cm >= TALL_THRESHOLD_CM:
