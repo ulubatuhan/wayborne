@@ -33,11 +33,19 @@ import fig_shading  # noqa: E402
 import fig_weights  # noqa: E402
 import render_clip as rc  # noqa: E402
 import render_frames as rf  # noqa: E402
+import fit_garment  # noqa: E402
 
 MPFB_DATA = rf.MPFB_DATA
+CLOTHES = os.path.join(ROOT, "art_source", "models", "clothes", "quaternius_fantasy")
 
 
-def add_garment(basemesh, gid):
+def add_garment(basemesh, gid, rig=None, eps=0.006):
+    """gid: MPFB giysisi (MakeClothes .mhclo) ya da "q:<parca>" - Quaternius
+    parcasi, fit_garment ile bedene giydirilir."""
+    if gid.startswith("q:"):
+        obj, pushed = fit_garment.fit(os.path.join(CLOTHES, gid[2:] + ".gltf"), basemesh, rig, eps)
+        print("giydirildi", gid, "itilen nokta", pushed, flush=True)
+        return obj
     from bl_ext.user_default.mpfb.services.humanservice import HumanService
     path = os.path.join(MPFB_DATA, "clothes", gid, gid + ".mhclo")
     return HumanService.add_mhclo_asset(path, basemesh, asset_type="Clothes", subdiv_levels=0)
@@ -68,7 +76,7 @@ def main():
     rig = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     body = bpy.data.objects["Human"]
     rf.thicken(body, rf.variant_thickness(variant))
-    clothes = [add_garment(body, gid) for gid in gids]
+    clothes = [add_garment(body, gid, rig) for gid in gids]
     for obj in [body] + clothes:
         for m in obj.modifiers:
             if m.type == "MASK":

@@ -134,11 +134,36 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 	)
 	_grant_levels(candidate, level)
 	candidate.grant_trait(TraitCatalog.roll_seed_trait(candidate.stats, rng), 0)
+	_dress(candidate)
 	candidate.heal_full()
 	candidate.hire_cost = (
 		profile[2] + _stat_surplus(candidate) * profile[3] + (level - 1) * HIRE_COST_PER_LEVEL
 	)
 	return candidate
+
+## Yolda kazanılmış kıyafetler: çoğunlukla köylü takımı, arada bir korucu
+## parçası. Kendi tohumuyla (adaydan türetilen) - adayı üreten zarın
+## sırasına dokunmasın, aynı aday her açılışta aynı giyinsin.
+const DRESS_CHANCES: Dictionary = {
+	OutfitCatalog.SLOT_PANTS: 0.9, OutfitCatalog.SLOT_SHOES: 0.75,
+	OutfitCatalog.SLOT_SHIRT: 0.8, OutfitCatalog.SLOT_JACKET: 0.12,
+	OutfitCatalog.SLOT_HAT: 0.08,
+}
+const DRESS_RANGER_SHARE: float = 0.2
+
+static func _dress(candidate: CharacterData) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|%d|%d" % [candidate.character_name, candidate.height_cm, candidate.skin_tone])
+	for slot in OutfitCatalog.ALL_SLOTS:
+		if rng.randf() >= float(DRESS_CHANCES.get(slot, 0.0)):
+			continue
+		var pieces := OutfitCatalog.get_pieces_for_slot(slot)
+		if pieces.is_empty():
+			continue
+		var pick := pieces[0]
+		if pieces.size() > 1 and rng.randf() < DRESS_RANGER_SHARE:
+			pick = pieces[1]
+		candidate.set_outfit_piece(slot, pick.piece_id)
 
 ## auto_allocate açık geldiği için (CharacterData varsayılanı) puanlar
 ## kendi sınıfının yatkın olduğu statlara ve yeteneklerine gider - elle

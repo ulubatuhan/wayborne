@@ -53,6 +53,10 @@ static func beast_walk_cycle(species: String) -> float:
 ## `shoulder_px`'in figür boyundaki payı. 0: insan (`SHOULDER_SHARE`);
 ## hayvanda türün `BeastRig.SPECIES.back`'i (pack_beasts.py yazıyor).
 @export var ref_share: float = 0.0
+## Bir doku pikselinin render pikseli karşılığı. Beden 1 (tam çözünürlük);
+## giysi kümeleri yarım çözünürlükte paketleniyor (pack_outfits.py), çizilen
+## boyut `entry().size`'da bunu taşıyor - ofsetler hep render pikselinde.
+@export var texel_scale: float = 1.0
 ## Kayıt başına 5 tamsayı: sayfa, x, y, w, h (w = 0: o katmanda o tür yok).
 @export var rects: PackedInt32Array
 ## Kayıt başına resmin sol üst köşesi, klip çapasına göre (render pikseli).
@@ -114,7 +118,7 @@ func draw_all(ci: CanvasItem, clip: String, frame: int, xf: Transform2D, tone: C
 		if e.is_empty():
 			continue
 		var region: Rect2 = e.region
-		ci.draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tone)
+		ci.draw_texture_rect_region(e.texture, Rect2(e.offset, e.size), region, tone)
 	ci.draw_set_transform_matrix(Transform2D.IDENTITY)
 	var out := {}
 	var raw := frame_joints(clip, frame)
@@ -154,7 +158,8 @@ static func _with_mipmaps(tex: Texture2D) -> Texture2D:
 		image.generate_mipmaps()
 	return ImageTexture.create_from_image(image)
 
-## {texture, region: Rect2, offset: Vector2} ya da boş sözlük.
+## {texture, region: Rect2, offset: Vector2, size: Vector2} ya da boş
+## sözlük. `size` çizilecek boyut, render pikselinde (bkz. texel_scale).
 func entry(clip: String, frame: int, layer: int, kind: int) -> Dictionary:
 	_index_clips()
 	if not _clip_base.has(clip):
@@ -167,6 +172,7 @@ func entry(clip: String, frame: int, layer: int, kind: int) -> Dictionary:
 		"texture": texture(rects[r]),
 		"region": Rect2(rects[r + 1], rects[r + 2], rects[r + 3], rects[r + 4]),
 		"offset": offsets[i],
+		"size": Vector2(rects[r + 3], rects[r + 4]) * texel_scale,
 	}
 
 ## Karenin eklemleri, çapaya göre render pikselinde.

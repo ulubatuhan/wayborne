@@ -1,0 +1,22 @@
+{
+ "_comment": "Giyilip cikarilabilen kiyafetler (OutfitCatalog'un art_id'si). Her kalem bir ya da birkac Quaternius parcasi (CC0, art_source/models/clothes/quaternius_fantasy), cinsiyete gore ayri kaynak; fit_garment.py ile MPFB bedene giydirilir. eps: giysinin bedenin yuzeyinden en az uzakligi (m) - ust uste giyilen kalemler cizim sirasina gore artar, dis giysi ic giysiyi sarsin diye. draw_order oyundaki bindirme sirasi (kucuk once).",
+ "items": {
+  "peasant_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10,
+   "pieces": {"male": ["Male_Peasant_Legs"], "female": ["Female_Peasant_Legs"]}},
+  "ranger_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10,
+   "pieces": {"male": ["Male_Ranger_Legs"], "female": ["Female_Ranger_Legs"]}},
+  "peasant_shoes": {"slot": "shoes", "eps": 0.007, "draw_order": 20, "boots": true,
+   "pieces": {"male": ["Male_Peasant_Feet"], "female": ["Female_Peasant_Feet"]}},
+  "ranger_boots": {"slot": "shoes", "eps": 0.007, "draw_order": 20, "boots": true,
+   "pieces": {"male": ["Male_Ranger_Feet_Boots"], "female": ["Female_Ranger_Feet"]}},
+  "peasant_shirt": {"slot": "shirt", "eps": 0.009, "draw_order": 30,
+   "pieces": {"male": ["Male_Peasant_Body", "Male_Peasant_Arms"], "female": ["Female_Peasant_Body", "Female_Peasant_Arms"]}},
+  "ranger_jacket": {"slot": "jacket", "eps": 0.013, "draw_order": 40,
+   "pieces": {"male": ["Male_Ranger_Body", "Male_Ranger_Arms", "Male_Ranger_Acc_Pauldron"],
+              "female": ["Female_Ranger_Body", "Female_Ranger_Arms", "Female_Ranger_Acc_Pauldrons"]}},
+  "ranger_hood": {"slot": "hat", "eps": 0.008, "draw_order": 50,
+   "pieces": {"male": ["Male_Ranger_Head_Hood"], "female": ["Female_Ranger_Head_Hood"]}}
+ },
+ "samples_shade": 64,
+ "samples_albedo": 8
+}
