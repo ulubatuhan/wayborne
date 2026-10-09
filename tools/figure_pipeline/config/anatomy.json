@@ -10,8 +10,9 @@
   "forearm_over_upper_arm": {
    "nominal": 0.785,
    "min": 0.7,
-   "max": 0.9,
-   "definition": "dirsek->bilek / omuz->dirsek, ayni karede basilan eklem isaretleri"
+   "max": 1.1,
+   "definition": "dirsek->bilek / omuz->dirsek, ayni karede basilan eklem isaretleri",
+   "decision": "Kullanici karari (QUESTIONS #9, kabul): MPFB'nin kendi govdesinde on kol ust koldan uzun (ust kol 0.146H). Olculen 216 karede 0.907-1.061; ust sinir 1.10. Alt sinir korunuyor - kisalan on kol hala hata."
   },
   "shank_over_thigh": {
    "nominal": 1.004,

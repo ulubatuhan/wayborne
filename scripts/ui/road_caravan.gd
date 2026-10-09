@@ -103,13 +103,14 @@ const PACK_GAP: float = 18.0
 ## Uzun süre 2.6'ydı ve "sayının kendisi görsel" diye not düşülmüştü -
 ## ölçülmemişti. Ölçüldüğünde altı kat hızlı çıktı: 1x'te zemin saniyede
 ## `PIXELS_PER_DAY / REAL_SECONDS_PER_DAY` = 20 piksel kayıyor, 320'lik
-## bir şeritte insan 60.8 piksel, ve bir çevrimde gövde `4 * STRIDE_RATIO
-## * boy` = 46.2 piksel ilerliyor - yani ayağın yere göre kaymadığı kadans
-## 20 / 46.2 = 0.43 çevrim/s. 2.6'da bacaklar saniyede iki buçuk tur
+## bir şeritte insan 60.8 piksel, ve bir çevrimde gövde
+## `FigureRig.CYCLE_DISTANCE_RATIO * boy` = 38.5 piksel ilerliyor - yani
+## ayağın yere göre kaymadığı kadans 20 / 38.5 = 0.52 çevrim/s (yürüyüş
+## %60 basışa geçince 0.43'ten çıktı: çevrimin yolu 4 adımdan 3.33'e indi). 2.6'da bacaklar saniyede iki buçuk tur
 ## atarken kervan kendi boyunun üçte biri kadar yol alıyordu: koşan bacak,
 ## yürüyen kervan. Oyuncunun "yürüme animasyonu çok hızlı, oyunun akışı
 ## ile arasında denge kurulmalı" raporu buydu.
-const STEP_RATE: float = 0.43
+const STEP_RATE: float = 0.52
 
 ## Vagon ölçüleri. Genişlik yükseklikten biraz fazla: bir kervan vagonu
 ## kareye yakındır, ilk ölçüde 1.6 katıydı ve balon gibi duruyordu.

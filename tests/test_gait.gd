@@ -38,13 +38,15 @@ func _test_planted_foot_moves_back(t) -> void:
 				var a := FigureRig.pose(Vector2.ZERO, H, p0, 1.0, facing)
 				var b := FigureRig.pose(Vector2.ZERO, H, p1, 1.0, facing)
 				var dx := _rel(b, "ankle_" + side, "hip", facing).x - _rel(a, "ankle_" + side, "hip", facing).x
-				var on_ground: bool = absf((a["ankle_" + side] as Vector2).y) < EPS \
-					and absf((b["ankle_" + side] as Vector2).y) < EPS
-				if on_ground:
+				var a_down: bool = absf((a["ankle_" + side] as Vector2).y) < EPS
+				var b_down: bool = absf((b["ankle_" + side] as Vector2).y) < EPS
+				# Basıştan salınıma (ya da tersine) geçen adım ikisi de değil:
+				# itişin son anında ayak hâlâ geri gidiyor, bu doğru.
+				if a_down and b_down:
 					planted += 1
 					if dx > EPS:
 						wrong_planted += 1
-				else:
+				elif not a_down and not b_down:
 					swing += 1
 					if dx < -EPS:
 						wrong_swing += 1

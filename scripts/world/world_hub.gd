@@ -53,12 +53,13 @@ const MOUNTED_WIDTH: float = 150.0
 ## Yürüyüş fazının ilerleme hızı. Mesafeye bağlı, zamana değil: duran bir
 ## figürün ayakları oynarsa yerde kayıyor gibi duruyor.
 ##
-## Değeri ölçüldü, seçilmedi: bir tam çevrimde gövde `4 * STRIDE_RATIO *
-## boy` kadar ilerler, yani ayağın kaymadığı oran `1 / (4 * 0.19 * boy)`.
-## Ortalama gövde 74 piksel -> 0.0178. Eski 0.034 bunun iki katıydı;
+## Değeri ölçüldü, seçilmedi: bir tam çevrimde gövde
+## `FigureRig.CYCLE_DISTANCE_RATIO * boy` kadar ilerler, yani ayağın
+## kaymadığı oran `1 / (0.633 * boy)`. Ortalama gövde 74 piksel -> 0.0213
+## (yürüyüş %60 basışa geçmeden 0.0178'di). Eski 0.034 bunun iki katıydı;
 ## yol ekranının altı katlık sapması kadar değil (orada kervan ağır,
 ## burada oyuncu hızlı koşuyor) ama aynı cinsten bir hata.
-const STEP_PER_UNIT: float = 0.0178
+const STEP_PER_UNIT: float = 0.0213
 
 ## Öküz ölçüsü. Konumu artık `_column_positions` veriyor.
 ##

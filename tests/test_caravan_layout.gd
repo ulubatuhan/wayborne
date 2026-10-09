@@ -58,14 +58,14 @@ func run(t) -> void:
 	_test_pack_animals_read_against_a_person(t)
 	_test_hub_turn_is_a_wave(t)
 
-## Bacak kadansı zemin hızıyla uyumlu: bir tam çevrimde gövde `4 *
-## STRIDE_RATIO * boy` kadar ilerler, o yüzden kaymayan kadans
+## Bacak kadansı zemin hızıyla uyumlu: bir tam çevrimde gövde
+## `FigureRig.CYCLE_DISTANCE_RATIO * boy` kadar ilerler, o yüzden kaymayan kadans
 ## `zemin_hızı / çevrim_mesafesi`. Uzun süre 2.6'ydı - altı kat hızlı,
 ## yani koşan bacak / yürüyen kervan (bkz. STEP_RATE'in kendi notu).
 func _test_walk_cadence_matches_ground_speed(t) -> void:
 	var ground := TravelBand.PIXELS_PER_DAY / JourneyClock.REAL_SECONDS_PER_DAY
 	var person_h := BAND.y * RoadCaravan.PERSON_HEIGHT_RATIO
-	var per_cycle := 4.0 * FigureRig.STRIDE_RATIO * person_h
+	var per_cycle := FigureRig.CYCLE_DISTANCE_RATIO * person_h
 	var ideal := ground / per_cycle
 	t.ok(
 		absf(RoadCaravan.STEP_RATE - ideal) < 0.15 * ideal,
