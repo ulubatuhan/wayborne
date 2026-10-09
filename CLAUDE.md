@@ -1567,6 +1567,15 @@ in every preview the moment it is equipped.
       below the waist must hit the pants (≥ 95%; 100% on all six bodies).
       Counting vertex heights per angle could not be used: the waist ring is
       sparse, and a slice that held only a lower vertex read as "low".
+    - **Repacked atlas pages keep their names, so check the import, not just
+      the PNG.** After a full re-render the game drew every garment as
+      scattered fragments. The new region table was being read against the
+      old page, because `.godot/imported` still held the first pack.
+      `--headless --editor --quit` had exited before it rescanned changed
+      files; `--quit-after 3000` reimports. A local cache only (`.import`
+      is not in the repo, CI imports fresh), but the in-game screenshot is
+      the step that caught it. The Python composite was right the whole
+      time.
     - **Test the fit before rendering, against the real thing.**
       `qa/outfit_check.py` fits everything exactly as the render does
       (`render_outfits.setup`), poses a few frames per clip, and for each
