@@ -37,7 +37,7 @@ func _init() -> void:
 	session.caravan.wagon_count = 2
 	session.party = [CharacterData.create("Deneme", CultureCatalog.NOMAD, CharacterStats.new())]
 	_caravan.configure(session)
-	_caravan.set_speed(1.0)
+	_caravan.set_ground_speed(_caravan.get_walk_ground_speed())
 
 	_band.set_route(RouteTerrain.build("test|route", 6))
 	_band.set_weather(RouteWeather.CLEAR)

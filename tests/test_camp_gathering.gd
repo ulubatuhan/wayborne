@@ -64,6 +64,12 @@ func _build(wagons: int, party: int) -> RoadCaravan:
 	caravan.set_ground_line(band.caravan_x(), BAND.y * 0.84)
 	return caravan
 
+## Toplanmanın kesin bittiği kare sayısı. Süre artık sabit değil: en
+## uzağa yürüyen tempolu yürüyüşü aşmasın diye mesafeden türüyor
+## (`RoadCaravan.gather_seconds`) - 1.3 saniyede ateşe koşuyorlardı.
+func _full_gather(caravan: RoadCaravan) -> int:
+	return int(ceil(caravan.gather_seconds() * 30.0 * 1.2)) + 10
+
 func _walk_frames(caravan: RoadCaravan, frames: int, dt: float = 1.0 / 30.0) -> void:
 	for _frame in frames:
 		caravan._process(dt)
@@ -114,9 +120,9 @@ func _test_humans_gather_and_return(t) -> void:
 	var crew_home := caravan.get_crew_centres()
 
 	caravan.set_camping(true)
-	# CAMP_GATHER_SECONDS'ten fazlası: toplanmanın kesin bittiğinden
+	# Toplanma süresinden fazlası: toplanmanın kesin bittiğinden
 	# emin olmak için.
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 
 	var fires := caravan.get_campfire_positions()
 	var tolerance := _fire_tolerance(caravan)
@@ -134,7 +140,7 @@ func _test_humans_gather_and_return(t) -> void:
 		)
 
 	caravan.set_camping(false)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 
 	t.not_ok(caravan.is_gathering(), "dönüş bitince kimse yürümüyor olmalı")
 	var party_after := caravan.get_party_centres()
@@ -162,7 +168,7 @@ func _test_drivers_join_the_gathering(t) -> void:
 	)
 
 	caravan.set_camping(true)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 
 	var fires := caravan.get_campfire_positions()
 	var tolerance := _fire_tolerance(caravan)
@@ -174,7 +180,7 @@ func _test_drivers_join_the_gathering(t) -> void:
 		)
 
 	caravan.set_camping(false)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 	t.not_ok(caravan.is_gathering(), "arabacılar da dönünce toplanma bitmeli")
 
 ## Erken bir sürümde `_campfire_target` yalnızca ateş indeksine bakıyordu,
@@ -186,7 +192,7 @@ func _test_shared_fire_seats_do_not_stack(t) -> void:
 	# gidiyor (fire_count == 1), yani en az ikisinin ayrışması zorunlu.
 	var caravan := _build(1, 3)
 	caravan.set_camping(true)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 
 	var seat_positions: Array[float] = []
 	seat_positions.append_array(caravan.get_party_centres())
@@ -230,14 +236,14 @@ func _test_returning_is_interrupted_cleanly_by_a_new_camp(t) -> void:
 	var party_home := caravan.get_party_centres()
 
 	caravan.set_camping(true)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 	caravan.set_camping(false)
 	# Dönüşün tam ortasında yakala.
-	_walk_frames(caravan, 15)
+	_walk_frames(caravan, int(caravan.gather_seconds() * 30.0 * 0.4))
 	var mid_return := caravan.get_party_centres()
 
 	caravan.set_camping(true)
-	_walk_frames(caravan, 120)
+	_walk_frames(caravan, _full_gather(caravan))
 
 	var fires := caravan.get_campfire_positions()
 	var tolerance := _fire_tolerance(caravan)

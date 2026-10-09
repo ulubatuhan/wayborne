@@ -98,7 +98,7 @@ func _init() -> void:
 		var day: float = found.day
 		_band.set_route_progress(day / float(found.terrain.total_days), day)
 		_caravan.set_light(_band.get_light())
-		_caravan.set_speed(1.0)
+		_caravan.set_ground_speed(_caravan.get_walk_ground_speed())
 		await _settle()
 		_save("%s.png" % String(shot.file))
 
@@ -108,7 +108,7 @@ func _init() -> void:
 	_band.set_phase(JourneyClock.Phase.NIGHT, 0.3)
 	_band.set_camping(true)
 	_caravan.set_light(_band.get_light())
-	_caravan.set_speed(0.0)
+	_caravan.set_ground_speed(0.0)
 	_caravan.set_camping(true)
 	for _frame in 100:
 		await process_frame
@@ -119,7 +119,7 @@ func _init() -> void:
 	_caravan.set_camping(false)
 	_band.set_phase(JourneyClock.Phase.NOON, 0.5)
 	_caravan.set_light(_band.get_light())
-	_caravan.set_speed(1.0)
+	_caravan.set_ground_speed(_caravan.get_walk_ground_speed())
 	_caravan.set_leader_offset(-320.0)
 	await _settle()
 	_save("11_lider_kolonda.png")
@@ -133,7 +133,7 @@ func _init() -> void:
 	for wagons in [1, 4, 6]:
 		_caravan.configure(_build_session(wagons))
 		_caravan.set_light(_band.get_light())
-		_caravan.set_speed(1.0)
+		_caravan.set_ground_speed(_caravan.get_walk_ground_speed())
 		await _settle()
 		_save("12_vagon_%d.png" % wagons)
 

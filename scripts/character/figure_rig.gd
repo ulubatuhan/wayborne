@@ -219,7 +219,7 @@ const HEEL_FREE_PITCH: float = -0.12
 const STANCE_SHARE: float = 0.6
 ## Bir tam çevrimde gövdenin yere göre ilerlediği yol (boyun kesri): basan
 ## ayak basış boyunca 2·adım geri gidiyor, basış da çevrimin STANCE_SHARE'i.
-## Kadanslar (`RoadCaravan.STEP_RATE`, `WorldHub.STEP_PER_UNIT`) bundan.
+## Kadans bundan türüyor (`WalkFigure.cycle_distance`, `advance_ground`).
 const CYCLE_DISTANCE_RATIO: float = 2.0 * STRIDE_RATIO / STANCE_SHARE
 
 ## Çift destek aralığının ortası (topuk vuruşundan sonra): kalça en alçakta.

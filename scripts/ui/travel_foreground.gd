@@ -71,7 +71,10 @@ var _ground_y: float = 0.0
 var _slope: float = 0.0
 var _wetness: float = 0.0
 var _route_days: int = 1
-var _caravan_x_ratio: float = 0.34
+## Günün ekran x'i `_day_zero_x + gün * _pixels_per_day` - şeridin
+## `screen_x_for_day`'iyle aynı ölçü (ölçek değişebiliyor).
+var _day_zero_x: float = 0.0
+var _pixels_per_day: float = PIXELS_PER_DAY
 ## Çizilmesi gereken alan (şeridin yerel uzayında) - uzaklaşınca şeridin
 ## dışına taşıyor, bkz. TravelBand.cover_rect. Boşsa katmanın kendisi.
 var cover: Rect2 = Rect2()
@@ -85,7 +88,8 @@ func _ready() -> void:
 ## sınıf hata.
 func sync_state(
 	colors: Dictionary, light: Color, world_x: float, ground_y: float,
-	slope: float, wetness: float, route_days: int, caravan_x_ratio: float
+	slope: float, wetness: float, route_days: int, day_zero_x: float,
+	pixels_per_day: float = PIXELS_PER_DAY
 ) -> void:
 	# Çapa ön ayarına güvenmiyoruz - **bu tuzak bu depoda üçüncü kez**
 	# çıktı (OnboardingPanel, RoadCaravan, şimdi burası). `PRESET_FULL_RECT`
@@ -104,7 +108,8 @@ func sync_state(
 	_slope = slope
 	_wetness = wetness
 	_route_days = maxi(1, route_days)
-	_caravan_x_ratio = caravan_x_ratio
+	_day_zero_x = day_zero_x
+	_pixels_per_day = pixels_per_day
 	queue_redraw()
 
 func _draw() -> void:
@@ -253,7 +258,7 @@ func _draw_low_props(area: Rect2, reach: Rect2) -> void:
 ## kaldığını okuyor.
 func _draw_milestones(area: Rect2, reach: Rect2) -> void:
 	for day in range(1, _route_days + 1):
-		var x := area.size.x * _caravan_x_ratio + (float(day) * PIXELS_PER_DAY - _world_x)
+		var x := _day_zero_x + float(day) * _pixels_per_day
 		if x < reach.position.x - 40.0 or x > reach.end.x + 40.0:
 			continue
 		var base := Vector2(x, _road_y(x) + area.size.y * 0.085)

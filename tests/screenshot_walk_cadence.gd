@@ -16,10 +16,15 @@ extends SceneTree
 ##     --script res://tests/screenshot_walk_cadence.gd
 
 const SHOT_DIR: String = "user://cadence_shots"
-const BAND: Vector2i = Vector2i(900, 320)
-const SECONDS: float = 2.0
+const DEFAULT_BAND: Vector2i = Vector2i(1920, 1080)
+const SECONDS: float = 1.2
 const FRAMES: int = 8
 const STEP: float = 1.0 / 60.0
+## Zemine çakılı işaretler (piksel aralığı): basan ayak her karede aynı
+## işaretin üstünde kalmalı - kayan ayak işaretten uzaklaşır.
+const TICK_SPACING: float = 48.0
+
+var BAND: Vector2i = DEFAULT_BAND
 
 var _band: TravelBand
 var _caravan: RoadCaravan
@@ -27,6 +32,9 @@ var _caravan: RoadCaravan
 func _init() -> void:
 	TranslationServer.set_locale("tr")
 	DirAccess.make_dir_recursive_absolute(SHOT_DIR)
+	var args := OS.get_cmdline_user_args()
+	if args.size() >= 2:
+		BAND = Vector2i(int(args[0]), int(args[1]))
 	var root := get_root()
 	root.size = BAND
 
@@ -38,7 +46,12 @@ func _init() -> void:
 	_band.ground_line_changed.connect(_caravan.set_ground_line)
 	_caravan.column_length_changed.connect(_band.set_column_length)
 	_caravan.configure(_build_session())
-	_caravan.set_speed(1.0)
+	# Ölçek yerleşimden geliyor (figür boyu): önce bir kare otursun.
+	await _settle()
+	_caravan.set_ground_speed(_caravan.get_walk_ground_speed())
+	# Manzara da aynı hızla: yol ekranının ölçeği (bkz. road_journey
+	# `_update_world_scale`) normal tempoda tam bu.
+	_band.set_pixels_per_day(_caravan.get_walk_ground_speed() * JourneyClock.REAL_SECONDS_PER_DAY)
 	# Kervan ağacın içinde, yani Godot da her karede `_process` çağırıyor.
 	# İlk hâlinde bu açıktı ve kareler arasında *gerçek* kare süresi kadar
 	# daha yürüyorlardı - üstelik yazılım rasterleyicisinde o süre uzun.
@@ -55,16 +68,32 @@ func _init() -> void:
 	while frames.size() < FRAMES:
 		if elapsed >= next:
 			await _settle()
-			frames.append(get_root().get_texture().get_image())
+			frames.append(_with_ticks(get_root().get_texture().get_image()))
 			next += SECONDS / float(FRAMES)
 		_band.set_route_progress(0.0, elapsed / JourneyClock.REAL_SECONDS_PER_DAY)
 		_caravan._process(STEP)
 		elapsed += STEP
 
-	_save_strip(frames, "yurume_%.2f.png" % RoadCaravan.STEP_RATE)
-	print("STEP_RATE = %.2f, %d kare, %.1f sn" % [RoadCaravan.STEP_RATE, FRAMES, SECONDS])
+	_save_strip(frames, "yurume_%dpx.png" % BAND.y)
+	print("zemin %.1f px/s, %d kare, %.1f sn" % [_caravan.get_ground_speed(), FRAMES, SECONDS])
 	print("Görüntüler: ", ProjectSettings.globalize_path(SHOT_DIR))
 	quit(0)
+
+## Kervanın durduğu bant (zemin çizgisinin üstünde bir figür boyu, altında
+## biraz) ve zemine çakılı kırmızı işaretler.
+func _with_ticks(image: Image) -> Image:
+	var ground := _caravan.get_ground_y()
+	var person := _caravan.get_person_height()
+	var top := int(maxf(0.0, ground - person * 1.9))
+	var bottom := int(minf(float(image.get_height()), ground + person * 0.25))
+	var ppd := _band.get_pixels_per_day()
+	var day0: float = _band.get("_day_position")
+	var first := floorf((day0 * ppd - float(image.get_width())) / TICK_SPACING)
+	for k in int(float(image.get_width()) * 2.0 / TICK_SPACING) + 2:
+		var x := _band.screen_x_for_day((first + k) * TICK_SPACING / ppd)
+		if x >= 0.0 and x < image.get_width() - 2:
+			image.fill_rect(Rect2i(int(x), int(ground) + 2, 2, int(person * 0.12)), Color(0.9, 0.1, 0.1))
+	return image.get_region(Rect2i(0, top, image.get_width(), bottom - top))
 
 ## Kareleri alt alta tek bir şeride diziyor - göz iki kareyi yan yana
 ## görmeden hareketi okuyamıyor.
