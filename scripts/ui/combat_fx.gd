@@ -21,6 +21,11 @@ const RING_MSEC: int = 250
 const SHAKE_MSEC: int = 250
 const SHAKE_DECAY_SECONDS: float = 0.12
 const NUMBER_MSEC: int = 900
+## Kare kümesi olan figürün savaş klipleri: saldırı (kalkış-vuruş-dönüş)
+## ve darbe/sıyrılma tepkisi. Hamleden (RECOIL_MSEC) uzun, çünkü klip bir
+## kayma değil bir hareket; düşüşten (FALL_MSEC) bağımsız.
+const ATTACK_MSEC: int = 520
+const REACT_MSEC: int = 420
 const NUMBER_RISE: float = 28.0
 ## Sayı sonuna kadar tam görünür, son %40'ta sönüyor.
 const NUMBER_FADE_FROM: float = 0.6
@@ -87,6 +92,17 @@ static func number_alpha(u: float) -> float:
 	if u <= NUMBER_FADE_FROM:
 		return 1.0
 	return 1.0 - (u - NUMBER_FADE_FROM) / (1.0 - NUMBER_FADE_FROM)
+
+## Bir anın hedefte oynattığı klip rolü: isabet darbe, kaçırma sıyrılma
+## (kalkanı/silahı kaldırıp geri çekilme). Sonuç anları (Kıyı, ölüm, düşüş)
+## rol değil - onları düşüş ve yatan kare taşıyor.
+static func reaction_role(kind: String) -> String:
+	match kind:
+		CombatEncounter.BARK_HIT, CombatEncounter.BARK_CRIT:
+			return "hit"
+		CombatEncounter.BARK_MISS:
+			return "defend"
+	return ""
 
 static func recoil_magnitude(kind: String) -> float:
 	match kind:

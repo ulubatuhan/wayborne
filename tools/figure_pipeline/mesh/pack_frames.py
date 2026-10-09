@@ -34,6 +34,7 @@ JOINTS = {  # oyun adi <- render isareti
     "fingers_front": "front_fingertip", "elbow_back": "back_elbow", "hand_back": "back_wrist",
     "hip": "pelvis", "neck": "neck", "head_top": "head_top_hint", "chin": "chin",
     "knee_front": "front_knee", "ankle_front": "front_ankle",
+    "back_upper": "back_upper", "back_lower": "back_lower",
 }
 
 
@@ -94,6 +95,7 @@ def pack_variant(variant, build, layers, post):
     os.makedirs(dest, exist_ok=True)
     shelf = Shelf()
     rects, offsets, joints, clip_names, clip_frames = [], [], [], [], []
+    weapons, draws = [], []
     shoulder_px = None
     for clip, ccfg in build["clips"].items():
         cdir = os.path.join(OUT, variant, clip)
@@ -101,15 +103,25 @@ def pack_variant(variant, build, layers, post):
         ax, ay = ccfg["anchor_px"]
         clip_names.append(clip)
         clip_frames.append(n)
+        own = ccfg.get("layers", layers)
         for i in range(n):
             fdir = os.path.join(cdir, "f%02d" % i)
+            # Yalniz bazi katmanlari render edilen klip (walk_boots: bacaklar)
+            # kalanini temel klibin ayni karesinden alir; kok ayni (render_frames).
+            if ccfg.get("base"):
+                nb = int(build["clips"][ccfg["base"]]["frames"])
+                bdir = os.path.join(OUT, variant, ccfg["base"], "f%02d" % (round(i * nb / n) % nb))
+            else:
+                bdir = fdir
             j = json.load(open(os.path.join(fdir, "joints.json")))
             for name, src in JOINTS.items():
                 joints.append((j[src][0] - ax, j[src][1] - ay))
+            weapons.append(float(j.get("weapon", 0.0)))
+            draws.append(float(j.get("draw", 0.0)))
             if clip == "idle":
                 shoulder_px = ay - j["front_shoulder"][1]
             for layer in layers:
-                for img in images_for(fdir, layer, post):
+                for img in images_for(fdir if layer in own else bdir, layer, post):
                     piece, (x0, y0) = crop(img)
                     if piece is None:
                         rects.append((0, 0, 0, 0, 0))
@@ -138,6 +150,8 @@ def pack_variant(variant, build, layers, post):
         "offsets = " + packed("PackedVector2Array", [v for o in offsets for v in o], "%.2f"),
         "joint_names = " + packed("PackedStringArray", list(JOINTS), '"%s"'),
         "joints = " + packed("PackedVector2Array", [v for p in joints for v in p], "%.2f"),
+        "weapon_angles = " + packed("PackedFloat32Array", weapons, "%.4f"),
+        "draws = " + packed("PackedFloat32Array", draws, "%.3f"),
         "",
     ]
     open(os.path.join(dest, "frames.tres"), "w").write("\n".join(lines))

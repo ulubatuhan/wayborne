@@ -1,0 +1,44 @@
+{
+ "_comment": "Hayvan kare hatti (beasts/render_beast.py). Her tur kendi 3B modelinin KENDI animasyonlarindan render edilir; ayi ve domuzun animasyonu yok, onlarin klipleri beasts/synth_actions.py'de kemik donusleriyle uretilir. back = BeastRig.SPECIES'in sagri/cidago yuksekligi (figur boyu cinsinden, tools/beast_skin.py SPECIES_BACK ile ayni) - render olcegi oradan: cidago pikseli = back * fig_px.",
+ "fig_px": 238.0,
+ "_fig_px_note": "Insan render'inda figur boyu 204 px = 0.857 h (FigureRig), yani h = 238 render pikseli. Hayvan ayni h'ye gore olceklenince insanla ayni karede ayni oranda durur.",
+ "canvas": [512, 448],
+ "anchor_px": [256, 420],
+ "samples": 128,
+ "albedo_samples": 16,
+ "clips": {
+  "walk": {"frames": 16, "cycle": true},
+  "idle": {"frames": 1},
+  "attack": {"frames": 8},
+  "hit": {"frames": 4},
+  "dead": {"frames": 1},
+  "downed": {"frames": 1}
+ },
+ "actions": {
+  "_comment": "klip -> [aksiyon adi, baslangic orani, bitis orani]. Tek kareli klipte yalniz baslangic. dead = olumun son karesi, downed = yigilip yere dustugu an.",
+  "quaternius_hoofed": {
+   "walk": ["Walk", 0.0, 1.0], "idle": ["Idle", 0.0, 0.0], "attack": ["Attack_Headbutt", 0.0, 1.0],
+   "hit": ["Idle_HitReact1", 0.0, 1.0], "dead": ["Death", 1.0, 1.0], "downed": ["Death", 0.55, 0.55]
+  },
+  "quaternius_canine": {
+   "walk": ["Walk", 0.0, 1.0], "idle": ["Idle", 0.0, 0.0], "attack": ["Attack", 0.0, 1.0],
+   "hit": ["Idle_HitReact1", 0.0, 1.0], "dead": ["Death", 1.0, 1.0], "downed": ["Death", 0.55, 0.55]
+  },
+  "synth": {
+   "walk": ["synth_walk", 0.0, 1.0], "idle": ["synth_idle", 0.0, 0.0], "attack": ["synth_attack", 0.0, 1.0],
+   "hit": ["synth_hit", 0.0, 1.0], "dead": ["synth_dead", 1.0, 1.0], "downed": ["synth_downed", 1.0, 1.0]
+  }
+ },
+ "species": {
+  "horse": {"model": "quaternius_gltf/glTF/Horse.gltf", "back": 0.66, "actions": "quaternius_hoofed"},
+  "horse_white": {"model": "quaternius_gltf/glTF/Horse_White.gltf", "back": 0.66, "actions": "quaternius_hoofed"},
+  "ox": {"model": "quaternius_gltf/glTF/Bull.gltf", "back": 0.62, "actions": "quaternius_hoofed"},
+  "donkey": {"model": "quaternius_gltf/glTF/Donkey.gltf", "back": 0.55, "actions": "quaternius_hoofed"},
+  "stag": {"model": "quaternius_gltf/glTF/Stag.gltf", "back": 0.60, "actions": "quaternius_hoofed"},
+  "deer": {"model": "quaternius_gltf/glTF/Deer.gltf", "back": 0.48, "actions": "quaternius_hoofed"},
+  "wolf": {"model": "quaternius_gltf/glTF/Wolf.gltf", "back": 0.50, "actions": "quaternius_canine"},
+  "husky": {"model": "quaternius_gltf/glTF/Husky.gltf", "back": 0.40, "actions": "quaternius_canine"},
+  "bear": {"model": "bear_prep.glb", "back": 0.58, "actions": "synth"},
+  "boar": {"model": "boar_prep.glb", "back": 0.46, "actions": "synth"}
+ }
+}

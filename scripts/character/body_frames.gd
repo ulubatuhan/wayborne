@@ -30,8 +30,12 @@ const CREW_BODY: String = "body_male_average"
 @export var pages: PackedStringArray
 @export var clip_names: PackedStringArray
 @export var clip_frames: PackedInt32Array
-## Duruş karesinde omzun çapadan yüksekliği (render pikseli).
+## Duruş karesinde omzun çapadan yüksekliği (render pikseli). Hayvan
+## kümesinde (beast_<tür>) cidağonun yüksekliği.
 @export var shoulder_px: float = 1.0
+## `shoulder_px`'in figür boyundaki payı. 0: insan (`SHOULDER_SHARE`);
+## hayvanda türün `BeastRig.SPECIES.back`'i (pack_beasts.py yazıyor).
+@export var ref_share: float = 0.0
 ## Kayıt başına 5 tamsayı: sayfa, x, y, w, h (w = 0: o katmanda o tür yok).
 @export var rects: PackedInt32Array
 ## Kayıt başına resmin sol üst köşesi, klip çapasına göre (render pikseli).
@@ -39,6 +43,11 @@ const CREW_BODY: String = "body_male_average"
 @export var joint_names: PackedStringArray
 ## Kare başına joint_names sırasıyla eklemler, çapaya göre.
 @export var joints: PackedVector2Array
+## Kare başına elden silah ucuna yön (render ekranında, figür sağa bakarken;
+## radyan) ve yay kirişinin çekilmişliği (0..1). FigureActions'tan gelir:
+## kılıç savuruşta dönüyor, yay nişanda dik duruyor.
+@export var weapon_angles: PackedFloat32Array
+@export var draws: PackedFloat32Array
 
 var _textures: Array[Texture2D] = []
 var _clip_base: Dictionary = {}
@@ -72,7 +81,41 @@ func frame_for_phase(clip: String, phase: float) -> int:
 	return posmod(int(round(phase / TAU * float(n))), n)
 
 func scale_for(h: float) -> float:
-	return SHOULDER_SHARE * h / maxf(shoulder_px, 1.0)
+	var share := ref_share if ref_share > 0.0 else SHOULDER_SHARE
+	return share * h / maxf(shoulder_px, 1.0)
+
+## Hayvan kare kümesi (`beast_<tür>`), yoksa null.
+static func for_beast(species: String) -> BodyFrames:
+	return for_body("beast_" + species)
+
+## Bütün katmanları arkadan öne, tek tonla çizer (hayvan: renk resimde,
+## ton yalnızca durum/ışık çarpanı). Döner: karenin eklemleri, `xf` ile.
+func draw_all(ci: CanvasItem, clip: String, frame: int, xf: Transform2D, tone: Color) -> Dictionary:
+	ci.draw_set_transform_matrix(xf)
+	for layer in LAYERS.size():
+		var e := entry(clip, frame, layer, KIND_BODY)
+		if e.is_empty():
+			continue
+		var region: Rect2 = e.region
+		ci.draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tone)
+	ci.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var out := {}
+	var raw := frame_joints(clip, frame)
+	for name in raw:
+		out[name] = xf * Vector2(raw[name])
+	return out
+
+## Hayvanın savaş/yürüyüş klibi: kare kümesinin adları (walk, idle, attack,
+## hit, dead, downed). Savunma hayvanda darbe klibiyle oynar.
+static func beast_clip(state: String, fall: float, role: String, motion: float) -> String:
+	if state == "dead" or state == "downed":
+		return state if fall >= 1.0 else "hit"
+	match role:
+		"attack":
+			return "attack"
+		"hit", "defend":
+			return "hit"
+	return "walk" if motion >= 0.5 else "idle"
 
 ## Sayfalar mipmap'li yükleniyor: render ~5 kat küçültülerek çiziliyor ve
 ## mipmap'siz küçültme kenarları kumlu yapıyor. Mipmap içe aktarma ayarıyla
@@ -119,6 +162,25 @@ func frame_joints(clip: String, frame: int) -> Dictionary:
 	for k in joint_names.size():
 		out[joint_names[k]] = joints[base + k]
 	return out
+
+## Karenin silah yönü ve kiriş çekilmişliği; eski paketlerde (alan yok)
+## silah dik yukarı, kiriş gevşek.
+func frame_weapon(clip: String, frame: int) -> Dictionary:
+	_index_clips()
+	var out := {"angle": -PI * 0.5, "draw": 0.0}
+	if not _clip_base.has(clip):
+		return out
+	var i := int(_clip_base[clip]) + frame
+	if i < weapon_angles.size():
+		out.angle = weapon_angles[i]
+	if i < draws.size():
+		out.draw = draws[i]
+	return out
+
+## Normalize zamandan (0..1) aksiyon klibinin karesi.
+func frame_for_time(clip: String, u: float) -> int:
+	var n := frame_count(clip)
+	return clampi(int(round(clampf(u, 0.0, 1.0) * float(n - 1))), 0, maxi(0, n - 1))
 
 func _index_clips() -> void:
 	if not _clip_base.is_empty():

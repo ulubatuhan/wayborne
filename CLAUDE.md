@@ -1436,6 +1436,56 @@ in every preview the moment it is equipped.
     the body. `tests/screenshot_body_range.gd` prints every variant across
     heights and skin tones; `tools/figure_pipeline/godot/perf_50.gd` times
     fifty walking figures.
+- **What a person holds or wears bends the pose, so the pose comes from
+  one library: `FigureActions`.** Walking is `FigureRig.pose()`; every
+  other stance is a keyframed clip there (`stance_melee`, `stance_bow`,
+  `aim_bow`, `attack_swing`/`_thrust`/`_bow`, `hit`, `defend`, `dead`,
+  `downed`), and the 3D pipeline exports the same dictionaries
+  (`godot/export_clips.gd`), so a stick-figure check
+  (`tests/screenshot_poses.gd`, seconds) and the render (hours) cannot
+  disagree. `clips_for_weapon()` picks a family's stance and attack; the
+  frame set carries each frame's weapon angle and bowstring draw, so a
+  sword turns through the swing and the string reaches the back hand at
+  full draw.
+  - **A leg does not stretch: an open stance lowers the hip.** The first
+    library pulled an out-of-reach foot up to the hip instead, and the
+    bow stances stood two pixels off the ground - `test_figure_actions`
+    caught it, along with a dead body with one knee in the air and a
+    propping hand below the ground.
+  - **A lying pose is centred on its ground point**, or rotating about the
+    hip puts the head half a body away and off the render canvas (it did;
+    `qa/run_build.py`'s `inside_canvas` now fails on it).
+  - **The ankle articulates, and a boot limits it.** `FigureRig.foot_pitch`
+    rolls the foot through heel strike and toe-off; `ankle_range` scales it
+    (bare 1.0, `BOOT_ANKLE_RANGE` 0.35 for `shoes_boots` - sandals walk
+    barefoot). `walk_boots` renders only the leg layers and takes the rest
+    from `walk`'s same-phase frame, rooted on that frame (`base`).
+  - **Carried things sit on the back the render measured.** Two markers on
+    the 3D back surface (`back_upper`/`back_lower`, at the spine bones'
+    rest heights) travel with every frame; the slung bow, spear, sword and
+    the pack are laid along that line (`WalkFigure.back_frame`/
+    `slung_points`). The bow used to hang from a fixed offset off the
+    shoulder and floated behind the back - reported from a screenshot,
+    now `test_action_frames` measures that it touches the back.
+  - **Combat plays clips, not just shoves.** `CombatPanel` stamps a role on
+    the attacker (`attack`, `CombatFx.ATTACK_MSEC`) and the target (`hit`
+    on a hit, `defend` on a miss); a fall plays `hit` and lands on the
+    `dead`/`downed` frame instead of tipping the standing figure over and
+    swapping to the procedural pile.
+  - **The ground is the body, not the arm.** Rooting a frame on its lowest
+    vertex lifted a propped-up figure onto its hand (the hip floated 43 px
+    in `downed`); the arms are excluded from the support set.
+- **Animals render through the same five layers.** `beasts/render_beast.py`
+  poses each Quaternius model with its own `Walk`/`Idle`/`Attack*`/
+  `Idle_HitReact1`/`Death` and renders far fore leg, far hind leg, body,
+  near hind leg, near fore leg into the human slots - `BodyFrames` plays
+  them unchanged (`beast_<species>`, `ref_share` = the species' withers
+  ratio). Colour is the model's own: each layer is rendered as the human
+  grey shade and as unlit albedo and the two are multiplied
+  (`pack_beasts.py`), so an animal sits in the same four tone bands as a
+  person. Bear and boar ship without animation; `synth_actions.py` keys
+  sagittal bone rotations for them. Lying them on their side was tried and
+  dropped - the side camera then shows the animal from above, a box.
 - **The mannequin is gone from the shipped art: the body is a render of a
   real human now** (`tools/human_body_render.py` fits and poses it,
   `tools/human_body_parts.py` writes the parts). Seven rounds of asking an

@@ -181,6 +181,14 @@ var _stunned: bool = false
 ## Bu karenin hamle/sarsıntı/devrilme dönüşümü - sprite'lı hayvan onun
 ## üstüne çiziliyor (`BeastRig.draw_species`).
 var _base: Transform2D = Transform2D.IDENTITY
+## Savaş anı: "attack" (saldıran), "hit" (vurulan), "defend" (sıyrılan) ya
+## da boş; `_action_u` o anın 0..1 ilerlemesi. Panel her karede damgalıyor.
+var _action_role: String = ""
+var _action_u: float = 0.0
+
+const ROLE_ATTACK: String = "attack"
+const ROLE_HIT: String = "hit"
+const ROLE_DEFEND: String = "defend"
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -218,8 +226,48 @@ func uses_rig() -> bool:
 	var body_id := _body_variant if not _body_variant.is_empty() else Wardrobe.BODY_ID
 	return not _loadout.is_empty() or Wardrobe.has_sprites(body_id)
 
+## Bedenin 3B kare kümesinde yatan pozlar var mı: varsa yerdeki figür
+## prosedürel yığın değil, gerçek ölü/yerde karesi.
+func has_lying_frames() -> bool:
+	if not uses_rig():
+		return false
+	var frames := BodyFrames.for_body(_body_variant) if not _body_variant.is_empty() else null
+	return frames != null and frames.has_clip("dead") and frames.has_clip("downed")
+
+## Hayvanın 3B kare kümesi var mı: varsa düşüş bir devrilme dönüşümü değil,
+## darbe klibinden yatan kareye geçiş.
+func _beast_has_frames() -> bool:
+	if String(_archetype().body) != BEAST:
+		return false
+	var frames := BodyFrames.for_beast(_sprite_species())
+	return frames != null and frames.has_clip("dead")
+
+## Rolden (ve düşüş hâlinden) oynatılacak klip ve zamanı. Saf: test okuyor.
+static func action_for(state: String, fall: float, role: String, u: float, weapon: String) -> Dictionary:
+	if state == "dead" or state == "downed":
+		if fall >= 1.0:
+			return {"clip": state, "u": 0.0}
+		return {"clip": "hit", "u": clampf(fall, 0.0, 1.0)}
+	match role:
+		ROLE_ATTACK:
+			return {"clip": String(FigureActions.clips_for_weapon(weapon).attack), "u": u}
+		ROLE_HIT:
+			return {"clip": "hit", "u": u}
+		ROLE_DEFEND:
+			return {"clip": "defend", "u": u}
+	return {"clip": "", "u": 0.0}
+
+func set_action(role: String, u: float) -> void:
+	if _action_role == role and is_equal_approx(_action_u, u):
+		return
+	_action_role = role
+	_action_u = u
+	_sync_rig()
+	queue_redraw()
+
 func _sync_rig() -> void:
-	var active := uses_rig() and not _draws_fallen()
+	var lying := has_lying_frames()
+	var active := uses_rig() and (lying or not _draws_fallen())
 	if not active:
 		if _rig != null:
 			_rig.visible = false
@@ -245,7 +293,9 @@ func _sync_rig() -> void:
 	var pivot := Vector2(size.x * 0.5, size.y * 0.95)
 	_rig.pivot_offset = pivot
 	_rig.rotation = 0.0
-	if _is_falling():
+	var act := action_for(_state, _fall, _action_role, _action_u, _rig.weapon_kind())
+	_rig.set_action(String(act.clip), float(act.u))
+	if _is_falling() and not lying:
 		var side := 1.0 if _face_right else -1.0
 		_rig.rotation = side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
 
@@ -335,7 +385,7 @@ func _draw() -> void:
 	# no-op, tüm çizim aynen eskisi gibi kalır. Devrilme ayak ucunun
 	# etrafında - figür yerinden kaymadan yere iniyor.
 	_base = Transform2D.IDENTITY
-	if _is_falling():
+	if _is_falling() and not has_lying_frames() and not _beast_has_frames():
 		var side := 1.0 if _face_right else -1.0
 		var angle := side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
 		var pivot := Vector2(box.x * 0.5, box.y * 0.95)
@@ -386,7 +436,7 @@ func _draw_ground_shadow(box: Vector2, bulk: float) -> void:
 func _draw_humanoid(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	# Sprite'lı kalem giyen biri iskelet çocuğunda çiziliyor (`_rig`); yerde
 	# serili hâli ise aşağıdaki prosedürel yığın.
-	if uses_rig() and not _draws_fallen():
+	if uses_rig() and (has_lying_frames() or not _draws_fallen()):
 		return
 	# Kıyafet burada da WalkFigure'la aynı kuralı okuyor - `_outfit` boşsa
 	# (her düşman, tayfa figürü) her çözümleyici fallback'i aynen geri
@@ -597,10 +647,10 @@ func _draw_beast(box: Vector2, archetype: Dictionary, bulk: float) -> void:
 	var dark := _tint(archetype.trim)
 	var tooth := _tint(archetype.metal)
 
-	if _draws_fallen():
+	if _draws_fallen() and not _beast_has_frames():
 		_draw_fallen(box, fur, dark, fur, bulk)
 		return
-	if BeastRig.has_sprites(_sprite_species()):
+	if BeastRig.has_sprites(_sprite_species()) or _beast_has_frames():
 		_draw_beast_sprites(box)
 		return
 
@@ -706,6 +756,19 @@ func _draw_beast_sprites(box: Vector2) -> void:
 	var facing := 1.0 if _face_right else -1.0
 	var species := _sprite_species()
 	var ext := BeastRig.draw_extent(species)
+	var frames := BodyFrames.for_beast(species)
+	if frames != null:
+		# Aynı boy hesabı, çizim 3B karelerden: saldırı/darbe/ölü klipleri.
+		var fit_f := minf(box.x * 1.05 / ext.size.x, box.y * 0.86 / ext.size.y)
+		var h_f := fit_f * float(_archetype().bulk) * 0.85 * (1.0 - _depth * 0.10)
+		var clip := BodyFrames.beast_clip(_state, _fall, _action_role, 0.0)
+		var u := _action_u if _state != "dead" and _state != "downed" else clampf(_fall, 0.0, 1.0)
+		var frame := frames.frame_for_time(clip, u)
+		var k := frames.scale_for(h_f)
+		var origin := Vector2(box.x * 0.5, box.y * 0.95)
+		frames.draw_all(self, clip, frame, _base * Transform2D(0.0, Vector2(k * facing, k), 0.0, origin),
+			_state_tone() * _sprite_tint())
+		return
 	# Kutuya sığan en büyük boy, türün iriliğiyle çarpılıyor: ayı kutuyu
 	# dolduruyor, kurt ondan küçük kalıyor (prosedürel silüetin `bulk`'ı).
 	var fit := minf(box.x * 1.05 / ext.size.x, box.y * 0.86 / ext.size.y)

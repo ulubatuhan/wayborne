@@ -53,7 +53,8 @@ def stale_frames(variant, clip, n, magenta):
     for i in range(n):
         d = os.path.join(OUT, variant, clip, "f%02d" % i)
         done = mtime(os.path.join(d, "joints.json")) > newest
-        if magenta and not os.path.exists(os.path.join(d, "magenta.png")):
+        if magenta and not os.path.exists(os.path.join(d, "magenta_front_arm.png")) \
+                and not os.path.exists(os.path.join(d, "magenta_front_leg.png")):
             done = False
         if not done:
             out.append(i)
@@ -68,12 +69,16 @@ def main():
     magenta = "--no-magenta" not in sys.argv
     export_clips()
     todo = []
+    mags = {}
     for v in variants:
         if not os.path.exists(os.path.join(ROOT, "build", "figures", "variants", v, v + ".blend")):
             subprocess.run([sys.executable, os.path.join(PIPE, "blender", "make_variant.py"),
                             os.path.join(PIPE, "config", "variants", v + ".json")], check=True)
         for c in clips:
-            frames = stale_frames(v, c, int(build["clips"][c]["frames"]), magenta)
+            want_mag = magenta and build["clips"][c].get("magenta", True) \
+                and v in build.get("magenta_variants", [v])
+            frames = stale_frames(v, c, int(build["clips"][c]["frames"]), want_mag)
+            mags[(v, c)] = want_mag
             if frames:
                 todo.append((v, c, frames))
     print("render edilecek:", sum(len(f) for _, _, f in todo), "kare", [(v, c, len(f)) for v, c, f in todo],
@@ -87,7 +92,7 @@ def main():
             v, c, frames = todo.pop(0)
             cmd = [sys.executable, "-I", os.path.join(PIPE, "blender", "render_frames.py"),
                    "--variant", v, "--clip", c, "--frames", ",".join(map(str, frames))]
-            if magenta:
+            if mags[(v, c)]:
                 cmd.append("--magenta")
             log = open(os.path.join(logdir, "%s_%s.log" % (v, c)), "w")
             running.append(((v, c), subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)))
