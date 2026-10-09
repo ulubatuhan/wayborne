@@ -52,11 +52,33 @@ def image_diff(a_premul, b_premul, diff_path=None):
             "pass": mean < MEAN_LIMIT and n_over == 0}
 
 
+def aa_edge_mask(images):
+    """Herhangi bir goruntunun kismi kapsamali (0<alfa<1) pikselleri, 1 px
+    genisletilmis. Ust uste binen iki katmanin kenarinda kapsama 2a-a^2 olur;
+    tek parca render a verir - fark yalniz bu bantta olusur (QUESTIONS #8)."""
+    from scipy import ndimage
+    edge = np.zeros(images[0].shape[:2], bool)
+    for img in images:
+        a = img[..., 3]
+        edge |= (a > 0) & (a < 1)
+    return ndimage.binary_dilation(edge, iterations=1)
+
+
 def composite_equals_full(layer_paths, full_path, diff_path=None):
+    """Kullanici karari (QUESTIONS #8, b): kenar yumusatma bandindaki fazla
+    kabul edilir, bandin disinda tek piksel bile 8/255'i asamaz. Olculdu:
+    576 karede bant disi fark tam 0, butun asim bantta."""
     layers = [load_rgba(p) for p in layer_paths]
+    full_raw = load_rgba(full_path)
     comp = over(layers)
-    full = premul(load_rgba(full_path))
-    return image_diff(comp, full, diff_path)
+    full = premul(full_raw)
+    res = image_diff(comp, full, diff_path)
+    edge = aa_edge_mask(layers + [full_raw])
+    over_px = np.abs(comp - full).max(axis=2) > PIXEL_LIMIT + 1e-9
+    res["pixels_over_8_edge"] = int((over_px & edge).sum())
+    res["pixels_over_8_interior"] = int((over_px & ~edge).sum())
+    res["pass"] = res["mean_abs"] < MEAN_LIMIT and res["pixels_over_8_interior"] == 0
+    return res
 
 
 def godot_equals_blender(godot_path, blender_layer_paths, diff_path=None):

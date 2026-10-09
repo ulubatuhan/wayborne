@@ -1347,6 +1347,38 @@ in every preview the moment it is equipped.
   0.01 px, so `rig_spec.json` and every painted delivery stay valid.
   `BeastRig` and the procedural `_draw_quad_leg` use the same `cos` stride
   and are **not** fixed yet - the animals still moonwalk.
+- **A walk is checked against a real walk cycle, not against itself.** The
+  player put a rendered frame next to a reference walk sheet, and it read
+  as a kneeling figure: the trailing foot lifted flat behind a bent knee.
+  Measured on the stick figure (`FigureRig.pose`, twelve phases), four
+  things were wrong, and they are four rules now:
+  - **60% of a step is on the ground** (`STANCE_SHARE`, Winter's gait
+    data). At 50% there was no double support, so the moment the front
+    heel struck the rear foot was already in the air, and the rear knee
+    folded on every step.
+  - **The swing foot rises while it is still behind** (`SWING_PEAK`,
+    `SWING_X_EASE`) and only then reaches forward low to the heel strike.
+    It used to peak exactly under the hip, which lifted the knee to the
+    chest. Early in the swing the toe stays down (`foot_pitch`); a foot
+    that flattened as it left the ground was the "kneeling" frame.
+  - **The hip is lowest in double support and highest in mid-stance**
+    (`cos(2·phase)` about the double-support middle). It was `sin`, a
+    quarter cycle off.
+  - **A leg does not stretch.** The limb length is the rest leg
+    (`HIP_RATIO`), not the frame's hip height, and the hip drops until the
+    planted heels are within reach (`REACH_SHARE`) - the same rule as
+    FigureActions' open stances. A foot already on its toes does not pull
+    the hip down; its heel rises instead (`HEEL_FREE_PITCH`). Measured:
+    stance knees 9°, swing peak 60°, toe-off ~30°, which is the textbook
+    curve; the old cycle stood on knees bent 25-35°.
+  The cadence followed: with 60% stance a cycle carries the body
+  `2·stride/0.6` (`FigureRig.CYCLE_DISTANCE_RATIO`), not `4·stride`, so the
+  road's non-skating `STEP_RATE` is 0.52 (was 0.43) and the hub's
+  `STEP_PER_UNIT` 0.0213 (was 0.0178) - both now derived from the constant.
+  `paint_pose()` keeps the old leg path (`classic`) because its joints are
+  the painters' contract (`rig_spec.json`); `test_wardrobe` confirms they
+  did not move. The gait test now skips the one sample that straddles
+  toe-off: the foot is still pushing back there, which is correct.
 - **The held weapon hangs straight at rest and moves a third as far as the
   forearm** (`WEAPON_SWING_SHARE`). At the full forearm swing the blade
   swept 60° every step and walking read as fencing (measured on a

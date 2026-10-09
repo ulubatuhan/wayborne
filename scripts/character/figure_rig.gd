@@ -111,22 +111,56 @@ const PART_ORDER: Array[String] = [
 ## sağa, -1 sola. `bulk` başın hacmi (arketip).
 static func pose(
 	ground: Vector2, h: float, phase: float, motion: float, facing: float,
-	lean: float = 0.0, seated: bool = false, bulk: float = 1.0, ankle_range: float = 0.0
+	lean: float = 0.0, seated: bool = false, bulk: float = 1.0, ankle_range: float = 0.0,
+	classic: bool = false
 ) -> Dictionary:
 	var joints := {}
 	var hip := Vector2(ground.x, ground.y if seated else ground.y - h * HIP_RATIO)
-	hip.y += sin(phase * 2.0) * h * BOB_RATIO * motion
-	joints["hip"] = hip
 
 	if seated:
+		hip.y += sin(phase * 2.0) * h * BOB_RATIO * motion
+		joints["hip"] = hip
 		var knee := hip + Vector2(h * 0.10 * facing, h * 0.14)
 		var ankle := knee + Vector2(-h * 0.02 * facing, h * 0.16)
 		joints["knee_front"] = knee
 		joints["ankle_front"] = ankle
 		joints["toe_front"] = ankle + Vector2(h * SEATED_FOOT_RATIO * facing, 0.0)
+	elif classic:
+		hip.y += sin(phase * 2.0) * h * BOB_RATIO * motion
+		joints["hip"] = hip
+		_classic_leg(joints, "back", hip, ground.y, h, phase + PI, motion, facing)
+		_classic_leg(joints, "front", hip, ground.y, h, phase, motion, facing)
 	else:
-		_leg(joints, "back", hip, ground.y, h, phase + PI, motion, facing, ankle_range)
-		_leg(joints, "front", hip, ground.y, h, phase, motion, facing, ankle_range)
+		# Kalça bir bacak dik basarken (geçiş) yükselir, iki ayak yerdeyken
+		# (çift destek) iner - `cos(2·faz)`, çift desteğin ortasında en
+		# alçak. `sin` iken en alçak an çeyrek faz kaymıştı. Yükselme basan
+		# bacağın boyuyla sınırlı (aşağıdaki erişim): dinlenme yüksekliğinde
+		# diz ~20° kırık duruyor, geçişte kalça kalkmasa yürüyen çömelir.
+		hip.y -= (1.0 - cos((phase - _double_support_mid()) * 2.0)) * 0.5 * h * BOB_RATIO * motion
+		var back := _ankle_target(hip, ground.y, h, phase + PI, motion, facing, ankle_range)
+		var front := _ankle_target(hip, ground.y, h, phase, motion, facing, ankle_range)
+		# Bacak uzamaz: adım anında açık duran iki ayağa ancak kalça inerek
+		# ulaşılır (FigureActions'ın açık duruşla aynı kuralı).
+		var reach := h * HIP_RATIO * (THIGH_SHARE + SHIN_SHARE) * REACH_SHARE
+		# Topuğu kalkmış (parmak ucunda) ayak kalçayı indirmez: ona yetişmek
+		# için topuk biraz daha kalkar. Yoksa itişteki arka ayak öndeki dizi
+		# kırdırıp bütün bedeni çömeltiyordu.
+		for target in [back, front]:
+			if float(target.pitch) < HEEL_FREE_PITCH:
+				continue
+			var ankle: Vector2 = target.ankle
+			var dx := minf(absf(ankle.x - hip.x), reach * 0.999)
+			hip.y = maxf(hip.y, ankle.y - sqrt(reach * reach - dx * dx))
+		for target in [back, front]:
+			if float(target.pitch) >= HEEL_FREE_PITCH:
+				continue
+			var ankle: Vector2 = target.ankle
+			var dx := minf(absf(ankle.x - hip.x), reach * 0.999)
+			ankle.y = minf(ankle.y, hip.y + sqrt(reach * reach - dx * dx))
+			target.ankle = ankle
+		joints["hip"] = hip
+		_place_leg(joints, "back", hip, h, back, facing)
+		_place_leg(joints, "front", hip, h, front, facing)
 
 	var body_lean := lean * (0.5 if seated else 1.0)
 	var shoulder := hip + Vector2(
@@ -136,8 +170,11 @@ static func pose(
 	var radius := head_radius(h, bulk)
 	joints["head"] = shoulder + Vector2(h * 0.012 * facing, -radius * 1.35)
 
-	_arm(joints, "back", shoulder, h, phase, motion, facing)
-	var front_swing := _arm(joints, "front", shoulder, h, phase + PI, motion, facing)
+	# Kollar çift desteğin ortasında en açık: bacaklar %60 basışla yürüyor,
+	# adım anı topuk vuruşundan biraz sonra.
+	var arm_phase := phase if classic or seated else phase - _double_support_mid()
+	_arm(joints, "back", shoulder, h, arm_phase, motion, facing)
+	var front_swing := _arm(joints, "front", shoulder, h, arm_phase + PI, motion, facing)
 	var turn := (_forearm_offset(front_swing).angle() - _forearm_offset(REST_SWING).angle()) * WEAPON_SWING_SHARE
 	var hang := Vector2.DOWN.rotated(turn)
 	joints["weapon_tip"] = joints["hand_front"] + Vector2(hang.x * facing, hang.y) * h * WEAPON_RATIO
@@ -159,12 +196,92 @@ static func bones_for(seated: bool) -> Array[String]:
 ## yürüme yönüne doğru bükülüyor (insan dizi öne kırılır).
 ##
 ## Faz zamanla artıyor (`WalkFigure.advance`) ve figür yerinde durup dünya
-## altından kayıyor; yani havadaki ayak (`sin(phase) > 0`) öne, yere basan
-## ayak geriye gitmeli. `x` bu yüzden `-cos(phase)`: `cos` ile yere basan ayak
-## öne kayıyordu, figür ay yürüyüşü yapıyordu (bkz. tests/test_gait.gd).
-static func _leg(
+## altından kayıyor; yani havadaki ayak öne, yere basan ayak geriye gitmeli
+## (ay yürüyüşü bunun tersiydi, bkz. tests/test_gait.gd). Faz [0, PI) havada,
+## [PI, TAU) yerde.
+##
+## Yerde ayak sabit hızla geriye gider (zemin sabit hızla kayıyor; `cos`
+## ile gidince basan ayak hızlanıp yavaşlıyor, kayıyordu). Havada ise ayak
+## önce ARKADA kalkar - diz kırılır, topuk kalçaya doğru yükselir - ve en
+## yükseğe hâlâ arkadayken çıkar (`SWING_PEAK`); sonra alçaktan öne uzanıp
+## topuğuyla basar. Eski yolda ayak en yükseğe tam kalçanın altında çıkıyor,
+## diz göğse kadar kalkıyordu (oyuncunun kare dizisiyle karşılaştırması).
+const SWING_PEAK: float = 0.35
+const SWING_X_EASE: float = 1.35
+const REACH_SHARE: float = 0.997
+## Topuğu bundan fazla kalkmış ayak kalçayı tutmaz, kalçaya göre kalkar.
+const HEEL_FREE_PITCH: float = -0.12
+## Bir adımın ne kadarı yerde (Winter: yürümede basış %60, salınım %40). Tam
+## %50 iken çift destek anı yoktu: öndeki topuk değdiği anda arkadaki ayak
+## parmak ucundan kalkmış oluyordu ve arka bacak her adım anında diz kırıp
+## çömelmiş görünüyordu. Topuk vuruşu fazı yine PI (kollar ve boyama pozu ona
+## bağlı).
+const STANCE_SHARE: float = 0.6
+## Bir tam çevrimde gövdenin yere göre ilerlediği yol (boyun kesri): basan
+## ayak basış boyunca 2·adım geri gidiyor, basış da çevrimin STANCE_SHARE'i.
+## Kadanslar (`RoadCaravan.STEP_RATE`, `WorldHub.STEP_PER_UNIT`) bundan.
+const CYCLE_DISTANCE_RATIO: float = 2.0 * STRIDE_RATIO / STANCE_SHARE
+
+## Çift destek aralığının ortası (topuk vuruşundan sonra): kalça en alçakta.
+static func _double_support_mid() -> float:
+	return TAU * (STANCE_SHARE - 0.5) * 0.5
+
+## Bacağın o anki evresi: salınımda mı, ve evrenin içindeki ilerleme (0..1).
+## Basış PI'da başlıyor ve TAU*STANCE_SHARE sürüyor; kalan salınım.
+static func gait_stage(phase: float) -> Dictionary:
+	var stance_len := TAU * STANCE_SHARE
+	var since_strike := fposmod(phase - PI, TAU)
+	if since_strike < stance_len:
+		return {"swing": false, "t": since_strike / stance_len}
+	return {"swing": true, "t": (since_strike - stance_len) / (TAU - stance_len)}
+
+static func _ankle_target(
+	hip: Vector2, ground_y: float, h: float, phase: float, motion: float,
+	facing: float, ankle_range: float
+) -> Dictionary:
+	var stride := h * STRIDE_RATIO * motion
+	var lift := h * LIFT_RATIO * motion
+	var stage := gait_stage(phase)
+	var t := float(stage.t)
+	# Basan ayak +stride'dan -stride'a sabit hızla geri gider; havadaki ayak
+	# geri döner. Bütün iz `_stance_center` kadar kaydırılıyor.
+	var x: float
+	var y := ground_y
+	if stage.swing:
+		x = lerpf(-1.0, 1.0, (1.0 - cos(PI * pow(t, SWING_X_EASE))) * 0.5) * stride
+		y -= sin(PI * pow(t, log(0.5) / log(SWING_PEAK))) * lift
+	else:
+		x = (1.0 - 2.0 * t) * stride
+	x += _stance_center(stride)
+	var ankle := Vector2(hip.x + x * facing, y)
+	var pitch := foot_pitch(phase) * ankle_range * motion
+	if pitch < 0.0:
+		# Topuk kalkıyor, parmak yerde kalıyor: ayak bileği parmağın etrafında
+		# yükselir. Aksi halde parmak zemine gömülür ve render tüm bedeni iter.
+		ankle.y = minf(ankle.y, ground_y - h * FOOT_RATIO * sin(-pitch))
+	return {"ankle": ankle, "pitch": pitch}
+
+## Karşı topuk değdiği anda (basışın 0.5/STANCE_SHARE'i) arkadaki ayak
+## +stride·(1-1/STANCE_SHARE)'de; iki ayağın ortası kalçanın altına gelsin
+## diye iz bu kadar kaydırılıyor.
+static func _stance_center(stride: float) -> float:
+	var trailing := 1.0 - 2.0 * (0.5 / STANCE_SHARE)
+	return -(1.0 + trailing) * 0.5 * stride
+
+static func _place_leg(joints: Dictionary, side: String, hip: Vector2, h: float, target: Dictionary, facing: float) -> void:
+	var leg := h * HIP_RATIO
+	var ankle: Vector2 = target.ankle
+	var pitch := float(target.pitch)
+	joints["knee_" + side] = solve_joint(hip, ankle, leg * THIGH_SHARE, leg * SHIN_SHARE, -facing)
+	joints["ankle_" + side] = ankle
+	joints["toe_" + side] = ankle + Vector2(cos(pitch) * facing, -sin(pitch)) * h * FOOT_RATIO
+
+## Eski yürüyüş: yalnız boyama pozu (`paint_pose`) için. O poz ressamlarla
+## sözleşme (`rig_spec.json` `paint_joints`); değişirse çizilmiş her kuşam
+## geçersiz olur, o yüzden yürüyüş düzeltildiğinde o eklemler yerinde kaldı.
+static func _classic_leg(
 	joints: Dictionary, side: String, hip: Vector2, ground_y: float, h: float,
-	phase: float, motion: float, facing: float, ankle_range: float = 0.0
+	phase: float, motion: float, facing: float
 ) -> void:
 	var leg_len := ground_y - hip.y
 	var stride := h * STRIDE_RATIO * motion
@@ -173,16 +290,11 @@ static func _leg(
 		hip.x - cos(phase) * stride * facing,
 		ground_y - maxf(0.0, sin(phase)) * lift
 	)
-	var pitch := foot_pitch(phase) * ankle_range * motion
-	if pitch < 0.0:
-		# Topuk kalkıyor, parmak yerde kalıyor: ayak bileği parmağın etrafında
-		# yükselir. Aksi halde parmak zemine gömülür ve render tüm bedeni iter.
-		ankle.y = minf(ankle.y, ground_y - h * FOOT_RATIO * sin(-pitch))
 	joints["knee_" + side] = solve_joint(
 		hip, ankle, leg_len * THIGH_SHARE, leg_len * SHIN_SHARE, -facing
 	)
 	joints["ankle_" + side] = ankle
-	joints["toe_" + side] = ankle + Vector2(cos(pitch) * facing, -sin(pitch)) * h * FOOT_RATIO
+	joints["toe_" + side] = ankle + Vector2(facing, 0.0) * h * FOOT_RATIO
 
 ## Yürürken ayağın eğimi (radyan, + = parmak yukarı), bir adım boyunca:
 ## topuk vuruşunda parmak yukarıda, basışta düz, itişte topuk kalkık (parmak
@@ -190,23 +302,25 @@ static func _leg(
 ## aynı: [0, PI) havada, [PI, TAU) yerde. Çarpan `ankle_range`: yalın ayak 1,
 ## bot bileği tuttuğu için daha az (`BOOT_ANKLE_RANGE`); 0 eski düz ayak -
 ## boyama pozu (`paint_pose`) ve parça sanatı bu yüzden değişmiyor.
-const TOE_OFF_PITCH: float = -0.42
+const TOE_OFF_PITCH: float = -0.55
 const HEEL_STRIKE_PITCH: float = 0.26
 const SWING_PITCH: float = 0.08
 const BOOT_ANKLE_RANGE: float = 0.35
 
 static func foot_pitch(phase: float) -> float:
-	var p := fposmod(phase, TAU)
-	if p < PI:
-		var u := p / PI
-		if u < 0.5:
-			return lerpf(TOE_OFF_PITCH, SWING_PITCH, smoothstep(0.0, 1.0, u * 2.0))
-		return lerpf(SWING_PITCH, HEEL_STRIKE_PITCH, smoothstep(0.0, 1.0, (u - 0.5) * 2.0))
-	var v := (p - PI) / PI
-	if v < 0.2:
-		return lerpf(HEEL_STRIKE_PITCH, 0.0, smoothstep(0.0, 1.0, v / 0.2))
-	if v > 0.7:
-		return lerpf(0.0, TOE_OFF_PITCH, smoothstep(0.0, 1.0, (v - 0.7) / 0.3))
+	var stage := gait_stage(phase)
+	var t := float(stage.t)
+	if stage.swing:
+		# Ayak arkada kalkarken parmak hâlâ aşağıda (itişin devamı); ancak
+		# öne uzanırken kalkar. Erken düzleşen ayak, arkada havadaki topukla
+		# "diz çökmüş" bir figür çiziyordu.
+		if t < 0.6:
+			return lerpf(TOE_OFF_PITCH, SWING_PITCH, smoothstep(0.1, 0.6, t))
+		return lerpf(SWING_PITCH, HEEL_STRIKE_PITCH, smoothstep(0.6, 1.0, t))
+	if t < 0.15:
+		return lerpf(HEEL_STRIKE_PITCH, 0.0, smoothstep(0.0, 1.0, t / 0.15))
+	if t > 0.65:
+		return lerpf(0.0, TOE_OFF_PITCH, smoothstep(0.65, 1.0, t))
 	return 0.0
 
 ## Omuz → dirsek → el. Salınımı döndürüyor: elde tutulan silah onu okuyor.
@@ -265,8 +379,8 @@ const PAINT_LEG_PHASE: float = PI
 const PAINT_ARM_PHASE: float = PI
 
 static func paint_pose() -> Dictionary:
-	var joints := pose(Vector2.ZERO, REF_H, PAINT_LEG_PHASE, 1.0, 1.0)
-	var arms := pose(Vector2.ZERO, REF_H, PAINT_ARM_PHASE, 1.0, 1.0)
+	var joints := pose(Vector2.ZERO, REF_H, PAINT_LEG_PHASE, 1.0, 1.0, 0.0, false, 1.0, 0.0, true)
+	var arms := pose(Vector2.ZERO, REF_H, PAINT_ARM_PHASE, 1.0, 1.0, 0.0, false, 1.0, 0.0, true)
 	for joint in ["elbow_back", "hand_back", "fingers_back",
 			"elbow_front", "hand_front", "fingers_front", "weapon_tip"]:
 		joints[joint] = arms[joint]
