@@ -24,10 +24,13 @@ modellenmis; bizimki MPFB, A-poz, varyanta gore boy ve kilo. Uc adim:
 Giysinin ten malzemeli yuzleri (Quaternius parcalari bazen ciplak el/bilek
 tasiyor, MI_Regular_*) silinir: ten bizim bedenimizden gelir.
 """
+import os
+
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
+from mathutils.kdtree import KDTree
 
 import fig_weights  # noqa: F401  (ayni dizinde; cagiranlar zaten yukluyor)
 
@@ -180,6 +183,218 @@ def wrap(mesh, tree, eps):
     return pushed
 
 
+def mesh_bvh(obj):
+    """Nesnenin degerlendirilmis (pozlanmis) agi, dunyada."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = obj.evaluated_get(dg)
+    me = ev.to_mesh()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.transform(obj.matrix_world)
+    tree = BVHTree.FromBMesh(bm)
+    ev.to_mesh_clear()
+    bm.free()
+    return tree
+
+
+REACH = 0.08  # bir giysinin bedenden en fazla bu kadar uzakta bir alt katmani olabilir
+
+
+def heights_over(p, n, trees, reach=REACH):
+    """Beden yuzeyindeki p noktasindan normal boyunca, alt giysilerin en dis
+    yuzeyinin yuksekligi (yoksa None). Ince kabuk iki kez kesilebilir; en
+    uzaktaki sayilir."""
+    best = None
+    for tree in trees:
+        t0 = 0.0
+        while t0 < reach:
+            hit, _nrm, _f, d = tree.ray_cast(p + n * (t0 + 1e-4), n, reach - t0)
+            if hit is None:
+                break
+            t0 += 1e-4 + d
+            best = t0 if best is None else max(best, t0)
+    return best
+
+
+def inner_heights(body_tree, inner):
+    """Alt giysilerin her noktasi icin (altindaki beden noktasi, yuksekligi).
+    KD-agaci beden noktalari uzerinde: ust giysinin bir noktasi kendi altindaki
+    beden noktasinin cevresindeki alt giysi noktalarini bulabilsin."""
+    pts, hs = [], []
+    for obj in inner:
+        for co in rc_evaluated(obj):
+            loc, nrm, _f, _d = body_tree.find_nearest(co)
+            if loc is None:
+                continue
+            pts.append(loc)
+            hs.append((co - loc).dot(nrm))
+    kd = KDTree(len(pts))
+    for k, p in enumerate(pts):
+        kd.insert(p, k)
+    kd.balance()
+    return kd, hs
+
+
+def rc_evaluated(obj):
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = obj.evaluated_get(dg)
+    me = ev.to_mesh()
+    out = [obj.matrix_world @ v.co for v in me.vertices]
+    ev.to_mesh_clear()
+    return out
+
+
+def layer_over(mesh, body_tree, inner, gap):
+    """Dis giysiyi alt giysilerin ustune oturtur: her noktasi, altindaki beden
+    noktasinin `radius` cevresindeki her alt giysi noktasindan en az `gap`
+    daha disarida olmali. Yalniz bedene gore sarmak yetmiyordu - her kalem
+    bedeni sariyordu ama pantolonun beli gomlegin icinden disari tasiyordu.
+    Tek noktadan olcmek de yetmedi: yelegin agi gomleginkinden seyrek, iki
+    kosesi gomlegin ustunde olsa da aradaki yuzden gomlegin ince detayi
+    cikiyordu (qa/outfit_check.py, %4.8). Yaricap bu yuzden dis giysinin kendi
+    kenar boyunda. Itme wrap() gibi agda yumusatilir. Doner: itilen."""
+    if not inner:
+        return 0
+    kd, hs = inner_heights(body_tree, inner)
+    verts = mesh.data.vertices
+    n = len(verts)
+    nbr = [[] for _ in range(n)]
+    lens = []
+    for e in mesh.data.edges:
+        a, b = e.vertices
+        nbr[a].append(b)
+        nbr[b].append(a)
+        lens.append((verts[a].co - verts[b].co).length)
+    lens.sort()
+    radius = max(0.01, lens[int(len(lens) * 0.9)] if lens else 0.01)
+
+    def needed():
+        d = [Vector() for _ in range(n)]
+        hit = 0
+        for i, v in enumerate(verts):
+            loc, normal, _f, _dist = body_tree.find_nearest(v.co)
+            if loc is None:
+                continue
+            near = kd.find_range(loc, radius)
+            if not near:
+                continue
+            under = max(hs[k] for _co, k, _d in near)
+            s = (v.co - loc).dot(normal)
+            if s < under + gap:
+                d[i] = normal * (under + gap - s)
+                hit += 1
+        return d, hit
+
+    disp, pushed = needed()
+    for _ in range(SMOOTH_ITERATIONS):
+        nxt = []
+        for i in range(n):
+            if not nbr[i]:
+                nxt.append(disp[i])
+                continue
+            avg = sum((disp[j] for j in nbr[i]), Vector()) / len(nbr[i])
+            nxt.append(avg if avg.length > disp[i].length else disp[i])
+        disp = nxt
+    for i, v in enumerate(verts):
+        v.co += disp[i]
+    disp, _ = needed()
+    for i, v in enumerate(verts):
+        v.co += disp[i]
+    mesh.data.update()
+    return pushed
+
+
+RESOLVE_ROUNDS = 6
+MIN_FLOOR = 0.004  # m; alt giysi geri cekilirken bedenin bu kadar ustunde kalir
+RESOLVE_REACH = 0.03
+
+
+def _pokes(mesh, body_tree, inner):
+    """(alt giysi, kose indeksi, dunya konumu, normal, dis giysiye uzaklik)
+    - dis giysinin disinda kalan alt giysi koseleri (qa/outfit_check.poke'un
+    kurali: bedene dogru gidince bedenden once dis giysiye carpiyor)."""
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    bm.transform(mesh.matrix_world)
+    bm.faces.ensure_lookup_table()
+    otree = BVHTree.FromBMesh(bm)
+    out = []
+    for obj in inner:
+        for k, co in enumerate(rc_evaluated(obj)):
+            loc, nrm, _f, _d = body_tree.find_nearest(co)
+            if loc is None:
+                continue
+            start = co + nrm * 1e-4
+            bhit, _n, _i, bd = body_tree.ray_cast(start, -nrm, 1.0)
+            ohit, _n2, fi, od = otree.ray_cast(start, -nrm, RESOLVE_REACH)
+            if ohit is not None and (bhit is None or od < bd):
+                out.append((obj, k, co, nrm, od, [v.index for v in bm.faces[fi].verts], loc))
+    bm.free()
+    return out
+
+
+def resolve_pokes(mesh, body_tree, inner, gap, floor):
+    """Ikinci asama, qa/outfit_check.poke ile AYNI kural. Once dis giysi
+    itilir: carpilan yuzun koseleri alt giysi noktasinin `gap` disina. Bu
+    birkac turda cogunu cozuyor ama her seyi degil - kukuletanin boyun kismi
+    yelegin yakasinin altina giren bir astar tasiyor; astari disari itmek
+    onu dis kabuga carptiriyor ve tur tur yakinsamiyordu (dinlenmede 141
+    ortulen yaka noktasinin 22'si disarida kaldi). Kalanlar icin ters yon:
+    alt giysi noktasi dis giysinin `gap` altina cekilir, ama bedenden `floor`
+    kadar yukarida kalir. Doner: tasinan kose sayisi."""
+    if not inner:
+        return 0
+    total = 0
+    for _ in range(RESOLVE_ROUNDS):
+        found = _pokes(mesh, body_tree, inner)
+        if not found:
+            return total
+        push = {}
+        inv = mesh.matrix_world.inverted().to_3x3()
+        for _obj, _k, _co, nrm, od, fverts, _loc in found:
+            need = inv @ (nrm * (od + gap + 1e-4))
+            for i in fverts:
+                cur = push.get(i)
+                if cur is None or need.length > cur.length:
+                    push[i] = need
+        for i, d in push.items():
+            mesh.data.vertices[i].co += d
+        mesh.data.update()
+        total += len(push)
+    for _ in range(RESOLVE_ROUNDS):
+        moved = _pull_or_hide(mesh, body_tree, inner, gap, floor)
+        if not moved:
+            break
+        total += moved
+    return total
+
+
+def _pull_or_hide(mesh, body_tree, inner, gap, floor):
+    total = 0
+    hidden = set()
+    for obj, k, co, nrm, od, fverts, loc in _pokes(mesh, body_tree, inner):
+        target = co - nrm * (od + gap)
+        if (target - loc).dot(nrm) < floor:
+            # Alt giysi bedene yapisik, daha iceri inemez: dis giysinin
+            # buradaki yuzu (kukuletanin boyun astari) alt giysinin altinda
+            # kaliyor - o yuz siliniyor, zaten hep ortulu.
+            hidden.add(tuple(sorted(fverts)))
+            continue
+        obj.data.vertices[k].co = obj.matrix_world.inverted() @ target
+        obj.data.update()
+        total += 1
+    if hidden:
+        bm = bmesh.new()
+        bm.from_mesh(mesh.data)
+        kill = [f for f in bm.faces if tuple(sorted(v.index for v in f.verts)) in hidden]
+        bmesh.ops.delete(bm, geom=kill, context="FACES")
+        bm.to_mesh(mesh.data)
+        bm.free()
+        mesh.data.update()
+        total += len(kill)
+    return total
+
+
 def transfer_weights(mesh, body, rig):
     for vg in body.vertex_groups:
         if vg.name not in mesh.vertex_groups:
@@ -199,6 +414,46 @@ def transfer_weights(mesh, body, rig):
     am.object = rig
 
 
+INHERIT_REACH = 0.04  # m; alt giysi bundan uzaksa agirlik bedenden kalir
+
+
+def inherit_weights(mesh, inner):
+    """Dis giysinin altinda bir alt giysi varsa agirliklarini ondan alir.
+    Bedenden aktarmak dinlenmede dogruydu ama yururken degil: kivrimli
+    yerlerde (omuz, koltuk alti) dis giysinin en yakin beden noktasi alttaki
+    giysininkinden farkli, iki giysi farkli bukuluyor ve gomlek yelegin
+    icinden cikiyordu (olculdu: dinlenmede 9 nokta, yuruyuste %4.8)."""
+    if not inner:
+        return 0
+    src = []
+    for obj in inner:
+        names = {g.index: g.name for g in obj.vertex_groups}
+        coords = rc_evaluated(obj)
+        for v, co in zip(obj.data.vertices, coords):
+            src.append((co, [(names[g.group], g.weight) for g in v.groups if g.weight > 0.0]))
+    kd = KDTree(len(src))
+    for k, (co, _w) in enumerate(src):
+        kd.insert(co, k)
+    kd.balance()
+    groups = {}
+    taken = 0
+    for v in mesh.data.vertices:
+        co, k, dist = kd.find(mesh.matrix_world @ v.co)
+        if co is None or dist > INHERIT_REACH:
+            continue
+        # Once indeksler: kaldirmak v.groups'u yerinde degistiriyor ve eleman
+        # referanslari kayiyordu - eski govde agirligi yarim kaliyordu
+        # (omuzda upperarm 0.99 + spine_03 0.78, olculdu).
+        for gi in [g.group for g in v.groups]:
+            mesh.vertex_groups[gi].remove([v.index])
+        for name, w in src[k][1]:
+            if name not in groups:
+                groups[name] = mesh.vertex_groups.get(name) or mesh.vertex_groups.new(name=name)
+            groups[name].add([v.index], w, "REPLACE")
+        taken += 1
+    return taken
+
+
 def _masks(body, on):
     """MPFB bedeni yardimci aglar tasiyor (etek, tayt, eklem yardimcilari) ve
     MASK degistiricisiyle gizliyor; render betikleri olcum icin bu maskeyi
@@ -214,9 +469,11 @@ def _masks(body, on):
     return prev
 
 
-def fit(path, body, rig, eps):
+def fit(path, body, rig, eps, inner=(), gap=0.003):
     """Doner: MPFB rig'ine bagli tek giysi agi (parcanin aglari birlestirilir)
-    ve itilen nokta sayisi. Beden dinlenme pozunda olmali."""
+    ve itilen nokta sayisi. Beden dinlenme pozunda olmali. `inner`: bu giysinin
+    altina giyilebilecek, zaten giydirilmis giysiler (cizim sirasi kucuk olan
+    her kalem, her varyant) - giysi hepsinin ustune oturtulur."""
     arm, meshes = import_piece(path)
     align_skeleton(arm, rig)
     prev = _masks(body, True)
@@ -226,7 +483,12 @@ def fit(path, body, rig, eps):
         bake_pose(mesh)
         drop_skin_faces(mesh)
         pushed += wrap(mesh, tree, eps)
+        if not os.environ.get("WAYBORNE_NO_LAYERING"):  # qa: eski davranisi yeniden uretmek icin
+            pushed += layer_over(mesh, tree, inner, gap)
+            pushed += resolve_pokes(mesh, tree, inner, gap, MIN_FLOOR)
         transfer_weights(mesh, body, rig)
+        if not os.environ.get("WAYBORNE_NO_LAYERING"):
+            inherit_weights(mesh, inner)
     bm.free()
     for m, v in prev:
         m.show_viewport = v

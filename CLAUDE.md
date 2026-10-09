@@ -1476,11 +1476,57 @@ in every preview the moment it is equipped.
     frame through `render_frames.pose_clip_frame` - the body's own pose
     and root, one function, so a garment cannot drift from its body. The
     body is invisible to the camera but casts the shadow.
-    - **The eps order is the layering.** Outer garments get a larger eps
-      (pants .004 < shoes .007 < hood .008 < shirt .009 < jacket .013), so
-      a jacket encloses the shirt it is drawn over and nothing below
-      pokes through. That replaces MPFB's delete groups (`QUESTIONS.md`
-      #13): a garment enclosing the body needs no hidden skin.
+    - **Each garment is fitted over everything that can be worn under
+      it, not just over the body - and that was a reported bug, not a
+      refinement.** The first version wrapped each item to the body alone
+      (eps .004 pants < .009 shirt < .013 jacket) and assumed the eps order
+      was the layering. It is not: Quaternius geometry already stands off
+      the body by more than eps in places, so the pants' waistband came out
+      *through* the shirt and the shirt through the jacket (measured: 36%
+      of covered shirt points outside the jacket). The player saw it on the
+      first pilot render. `render_outfits.fit_all()` now fits items in
+      `draw_order`; each one gets every lower-order item of another slot,
+      every variant, as `inner`, and `fit_garment.fit()` runs three more
+      steps after the body wrap:
+      - `layer_over`: each point stands `gap` above the highest inner point
+        within one edge length of the body point beneath it (one point was
+        not enough - the jacket mesh is coarser than the shirt's and shirt
+        detail rose between jacket vertices);
+      - `resolve_pokes`: the same rule the QA uses (going from an inner point
+        toward the body, you must reach the body before the outer garment).
+        The outer face that is hit is pushed out. Where that does not
+        converge, the inner point is pulled under it, and an outer face
+        trapped beneath an inner one that already hugs the body is deleted.
+        That is the hood's neck lining, which sits under the jacket collar;
+      - `inherit_weights`: an outer point within 4 cm of an inner one takes
+        that point's bone weights. Weights transferred from the body diverge
+        in curved places (shoulder, armpit), and the two garments bent
+        apart. A removal-while-iterating bug left half the old weights in
+        place the first time.
+      `render_outfits.layer_weights_all` then lets an outer garment inherit
+      the limb layers of what lies beneath it (channel-wise max). Otherwise
+      a jacket shoulder in the front-arm layer is drawn over a hood hem in
+      the torso layer.
+    - **Test the fit before rendering, against the real thing.**
+      `qa/outfit_check.py` fits everything exactly as the render does
+      (`render_outfits.setup`), poses a few frames per clip, and for each
+      combination compares the game's composite (the packed body layers,
+      then each garment's layer masks in draw order) with one
+      true-occlusion render of the whole outfit. It reports three numbers:
+      - pixels that differ, ≤ 2%;
+      - garment-for-garment swaps in either direction, ≤ 1.5%. This includes
+        3D pass-through, which is what the player saw;
+      - "bleed", the game drawing an inner garment over an outer one, ≤ 0.3%.
+      The 3D poke count is reported for information only. The old,
+      unlayered fit fails: composite 8.9%, swaps 8.8%. All six bodies pass
+      with the layered fit. The worst remaining case is the hood's cape
+      over a fully raised arm, where the game draws the hood on top. The
+      QA's own first versions measured the wrong thing twice: the body
+      helpers (MPFB's tights/skirt masks) were visible in the QA but hidden
+      in the fit, and the poke ray ran outward, so a sleeve on an arm swung
+      close to the torso counted as "outside the jacket". Both now use the
+      fit's own rule. `WAYBORNE_NO_LAYERING=1` reproduces the old fit, so
+      the gate can be shown to fail on it.
     - **Colour is the texture's, shade is the body's tones.** Two passes
       per layer like the animals (shade + unlit albedo, multiplied and
       posterised in `mesh/pack_outfits.py`). Quaternius feeds Base Color
