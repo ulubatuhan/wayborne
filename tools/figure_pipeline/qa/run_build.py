@@ -34,6 +34,20 @@ def arg(name):
 
 def frame_tests(d, layers, clip_cfg, anatomy):
     r = {}
+    layers = clip_cfg.get("layers", layers)
+    if not os.path.exists(os.path.join(d, "full.png")):
+        # Katman alt kumesi (walk_boots): tek parca yok, yalniz katman testleri.
+        worst = 0.0
+        for n in layers:
+            a = T.load_rgba(os.path.join(d, n + ".png"))[..., 3]
+            idimg = T.load_rgba(os.path.join(d, "id_" + n + ".png"))
+            worst = max(worst, float((idimg[..., :3].max(axis=2) * idimg[..., 3] - a).max()))
+        r["garment_inside"] = {"worst_excess_x255": worst * 255.0, "pass": worst <= 1.0 / 255.0 + 1e-9}
+        ay = clip_cfg["anchor_px"][1]
+        lowest = max(int(np.nonzero(T.load_rgba(os.path.join(d, n + ".png"))[..., 3].any(axis=1))[0].max())
+                     for n in LEGS)
+        r["grounded"] = {"lowest_minus_ground": lowest + 1 - ay, "pass": abs(lowest + 1 - ay) <= GROUND_PX}
+        return r
     r["composite_equals_full"] = T.composite_equals_full(
         [os.path.join(d, n + ".png") for n in layers], os.path.join(d, "full.png"))
     if os.path.exists(os.path.join(d, "magenta.png")):
@@ -58,6 +72,10 @@ def frame_tests(d, layers, clip_cfg, anatomy):
         lowest = max(int(np.nonzero(T.load_rgba(os.path.join(d, n + ".png"))[..., 3].any(axis=1))[0].max())
                      for n in LEGS)
         r["grounded"] = {"lowest_minus_ground": lowest + 1 - ay, "pass": abs(lowest + 1 - ay) <= GROUND_PX}
+    full_a = T.load_rgba(os.path.join(d, "full.png"))[..., 3]
+    edge = max(full_a[0].max(), full_a[-1].max(), full_a[:, 0].max(), full_a[:, -1].max())
+    # Tuvalden tasan kare kirpilir: yatan pozda bas bir kez kesik cikti.
+    r["inside_canvas"] = {"edge_alpha": float(edge), "pass": float(edge) <= 1.0 / 255.0}
     worst = 0.0
     for n in layers:
         a = T.load_rgba(os.path.join(d, n + ".png"))[..., 3]
@@ -86,7 +104,7 @@ def main():
                     rows["f%02d" % i] = frame_tests(d, layers, build["clips"][c], anatomy)
             res["%s/%s" % (v, c)] = rows
     json.dump(res, open(os.path.join(REP, "results.json"), "w"), indent=1, default=float)
-    tests = ("composite_equals_full", "no_backfaces", "proportions", "grounded", "garment_inside")
+    tests = ("composite_equals_full", "no_backfaces", "proportions", "grounded", "garment_inside", "inside_canvas")
     lines = ["| varyant/klip | kare | " + " | ".join(tests) + " |", "|---|---|" + "---|" * len(tests)]
     for key, rows in res.items():
         cells = []

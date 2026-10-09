@@ -323,6 +323,10 @@ func apply_fx(flash: Color, offset: Vector2, fall: float, ring_color: Color, rin
 	_figure.set_fall(fall)
 	_figure.set_ring(ring_color, ring)
 
+## Savaş klibi rolü ve ilerlemesi (bkz. CombatFigure.set_action).
+func apply_action(role: String, u: float) -> void:
+	_figure.set_action(role, u)
+
 ## Figürün yatay ekseni (hamlenin ölçüsü). Yerleşim henüz yapılmadıysa
 ## slotun sabit genişliği.
 func get_figure_width() -> float:

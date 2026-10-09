@@ -17,7 +17,10 @@
    "anchor_px": [
     160,
     300
-   ]
+   ],
+   "kind": "walk",
+   "ankle_range": 1.0,
+   "_note": "yalin ayak: bilek eklemi tam (FigureRig.foot_pitch)"
   },
   "idle": {
    "frames": 1,
@@ -28,7 +31,8 @@
     160,
     300
    ],
-   "_note": "Savas durusu da bu poz: set_combat_stance yalniz silah cizimini degistirir (walk_figure.gd:320), iskeleti degil."
+   "_note": "Savas durusu da bu poz: set_combat_stance yalniz silah cizimini degistirir (walk_figure.gd:320), iskeleti degil.",
+   "kind": "walk"
   },
   "ride": {
    "frames": 24,
@@ -37,12 +41,162 @@
    "root": "pelvis",
    "anchor_px": [
     160,
-    220
+    200
    ],
-   "_note": "FigureRig.pose seated: ground = eyer = kalca (figure_rig.gd:121). Arka bacak oyunda cizilmiyor (bones_for(true)); burada on bacagin acilariyla render edilir, oynatici atlayabilir."
+   "_note": "FigureRig.pose seated: ground = eyer = kalca (figure_rig.gd:121). Arka bacak oyunda cizilmiyor (bones_for(true)); burada on bacagin acilariyla render edilir, oynatici atlayabilir. Capa 220 -> 200: bilek donunce erkek binicinin ayak ucu 320 px tuvalin altina degiyordu (inside_canvas).",
+   "kind": "walk",
+   "magenta": false
+  },
+  "walk_boots": {
+   "kind": "walk",
+   "frames": 12,
+   "motion": 1.0,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "ankle_range": 0.35,
+   "layers": [
+    "back_leg",
+    "front_leg"
+   ],
+   "base": "walk",
+   "_note": "bot bilegi tutar (FigureRig.BOOT_ANKLE_RANGE); yalniz bacak katmanlari, digerleri walk'tan",
+   "magenta": false
+  },
+  "walk_laden": {
+   "kind": "walk",
+   "frames": 12,
+   "motion": 1.0,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "ankle_range": 1.0,
+   "laden": true,
+   "_note": "heybe: govde one egik, on el askida (FigureActions.LADEN_*); ic yuz testi walk'ta yapiliyor (ayni bacak pozu), burada tekrar edilmiyor",
+   "magenta": false
+  },
+  "stance_melee": {
+   "kind": "action",
+   "action": "stance_melee",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "stance_bow": {
+   "kind": "action",
+   "action": "stance_bow",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "aim_bow": {
+   "kind": "action",
+   "action": "aim_bow",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "attack_swing": {
+   "kind": "action",
+   "action": "attack_swing",
+   "frames": 8,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "attack_thrust": {
+   "kind": "action",
+   "action": "attack_thrust",
+   "frames": 6,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "attack_bow": {
+   "kind": "action",
+   "action": "attack_bow",
+   "frames": 8,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "hit": {
+   "kind": "action",
+   "action": "hit",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "defend": {
+   "kind": "action",
+   "action": "defend",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "dead": {
+   "kind": "action",
+   "action": "dead",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "downed": {
+   "kind": "action",
+   "action": "downed",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
   }
  },
  "facing": 1.0,
  "lean": 0.0,
- "bulk": 1.0
+ "bulk": 1.0,
+ "magenta_variants": [
+  "male_average"
+ ],
+ "_magenta_note": "Ic yuz testi poza bagli, bedene degil: yalniz bir varyantta render ediliyor (alti varyantta 18 mod x 132 kare ~20 saat suruyordu)."
 }

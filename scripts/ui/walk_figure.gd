@@ -109,6 +109,17 @@ var _loadout: PackedStringArray = PackedStringArray()
 ## figürü iskelete geçtiğinde arketipin silahı - kılıç, mızrak ve kalkan,
 ## yay - okunmaya devam etmeli, yoksa sınıflar silüetten ayırt edilemez.
 var _combat_stance: bool = false
+## Oynatılan aksiyon klibi (`FigureActions` adları: attack_swing, hit, dead…)
+## ve klibin içindeki normalize zaman. Boşsa yürüyüş/duruş/savaş duruşu.
+## Savaş paneli her karede damgalıyor (`CombatFigure.set_action`).
+var _action_clip: String = ""
+## Hayvan figürünün türü, verilmişse türün kendi tanımını ezer (yol
+## karşılaşmasındaki kurt, ekran görüntüsü araçları).
+var _beast_species: String = ""
+var _action_u: float = 0.0
+
+## Botun bileği tuttuğu kalem: yalnız çizme. Sandalet yalın ayak gibi yürür.
+const ANKLE_LIMITING_SHOES: Array[String] = ["shoes_boots"]
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -146,6 +157,49 @@ func set_kind(
 func set_combat_stance(on: bool) -> void:
 	_combat_stance = on
 	queue_redraw()
+
+func set_action(clip: String, u: float = 0.0) -> void:
+	if _action_clip == clip and is_equal_approx(_action_u, u):
+		return
+	_action_clip = clip
+	_action_u = u
+	queue_redraw()
+
+func set_beast_species(species: String) -> void:
+	_beast_species = species
+	queue_redraw()
+
+func get_action() -> String:
+	return _action_clip
+
+## Arketipin silah ailesi (`CombatFigure.ARCHETYPES[...].weapon`).
+func weapon_kind() -> String:
+	return String(_archetype.get("weapon", "none"))
+
+## Hangi kare klibi çizilecek. Saf fonksiyon: test sahnesiz okuyabilsin.
+## Sıra: binici > aksiyon > savaş duruşu (silah ailesine göre) > yürüyüş
+## (heybeli, botlu, yalın) > duruş. Elde olmayan klip bir alttakine düşer.
+static func pick_clip(
+	available: PackedStringArray, seated: bool, motion: float, action: String,
+	combat_stance: bool, weapon: String, carries_pack: bool, boots: bool
+) -> String:
+	if seated and available.has("ride"):
+		return "ride"
+	if not action.is_empty() and available.has(action):
+		return action
+	if combat_stance:
+		var stance := String(FigureActions.clips_for_weapon(weapon).stance)
+		return stance if available.has(stance) else "idle"
+	if motion >= 0.5:
+		if carries_pack and available.has("walk_laden"):
+			return "walk_laden"
+		if boots and available.has("walk_boots"):
+			return "walk_boots"
+		return "walk"
+	return "idle"
+
+func _wears_boots() -> bool:
+	return str(_outfit.get(OutfitCatalog.SLOT_SHOES, "")) in ANKLE_LIMITING_SHOES
 
 ## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
 ## veriyor - figür karakteri tutmuyor, yalnızca ne giydiğini.
@@ -210,6 +264,9 @@ func set_tint(tint: Color) -> void:
 func _draw() -> void:
 	var height := size.y
 	if height <= 1.0:
+		return
+	if not _beast_species.is_empty() and _kind != KIND_PERSON and _kind != KIND_MOUNTED:
+		_draw_beast_sprites(_beast_species, height)
 		return
 	match _kind:
 		KIND_HORSE:
@@ -290,10 +347,12 @@ const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
 const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
 
 func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
-	var clip := "ride" if seated else ("walk" if _motion >= 0.5 else "idle")
+	var clip := pick_clip(frames.clip_names, seated, _motion, _action_clip, _combat_stance,
+		weapon_kind(), _carries_pack, _wears_boots())
 	if not frames.has_clip(clip):
 		clip = "idle"
-	var frame := frames.frame_for_phase(clip, _phase)
+	var cycles := clip in ["walk", "walk_boots", "walk_laden", "ride"]
+	var frame := frames.frame_for_phase(clip, _phase) if cycles else frames.frame_for_time(clip, _action_u)
 	var k := frames.scale_for(h)
 	var origin := Vector2(size.x * 0.5, ground_y)
 	var xf := Transform2D(_lean * _facing, Vector2(k * _facing, k), 0.0, origin)
@@ -305,13 +364,19 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	for name in raw:
 		joints[name] = xf * Vector2(raw[name])
 	var look := _person_colors()
+	var wdata := frames.frame_weapon(clip, frame)
+	# Silah yönü render uzayında (figür sağa bakıyor); ayna ve eğim xf'te.
+	var wdir := xf.basis_xform(Vector2.from_angle(float(wdata.angle))).normalized()
+	# Ölü ve yerdeki el silahı bırakmış: kalkan ve mızrak havada kalıyordu.
+	var fallen := _action_clip in ["dead", "downed"]
+	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
-		if BodyFrames.LAYERS[layer] == "front_arm" and _combat_stance:
-			_draw_held_weapon(joints, h, look)
-		if BodyFrames.LAYERS[layer] == "torso_head":
-			_draw_frame_back_items(joints, h, look)
+		if BodyFrames.LAYERS[layer] == "front_arm" and held:
+			_draw_frame_weapon(joints, h, look, wdir, float(wdata.draw))
+		if BodyFrames.LAYERS[layer] == "torso_head" and not fallen:
+			_draw_frame_back_items(joints, h, look, held)
 		draw_set_transform_matrix(xf)
 		for kind in [BodyFrames.KIND_BODY, BodyFrames.KIND_BOTTOM, BodyFrames.KIND_TOP]:
 			var e := frames.entry(clip, frame, layer, kind)
@@ -337,15 +402,184 @@ static func frame_tones(skin: Color, outfit: Dictionary, light: Color) -> Dictio
 
 ## Sırtta taşınanlar gövde katmanından ÖNCE: gövdenin arkasında kalırlar.
 ## Önce sonra çiziliyordu ve sırttaki mızrak göğsün önünden geçiyordu.
-func _draw_frame_back_items(joints: Dictionary, h: float, look: Dictionary) -> void:
+func _draw_frame_back_items(joints: Dictionary, h: float, look: Dictionary, held: bool) -> void:
 	if not joints.has("shoulder"):
 		return
-	_draw_pack(joints.shoulder, h, 1.0, look)
-	if not _combat_stance and not Wardrobe.has_part(_loadout, "weapon"):
-		_draw_slung_weapon(joints.shoulder, h, look.metal, look.trim)
+	if not joints.has("back_upper"):
+		# Sırt işareti olmayan eski paket: omuzdan tahmin.
+		_draw_pack(joints.shoulder, h, 1.0, look)
+		if not held and not Wardrobe.has_part(_loadout, "weapon"):
+			_draw_slung_weapon(joints.shoulder, h, look.metal, look.trim)
+		return
+	var spine := back_frame(joints.back_upper, joints.back_lower, _facing)
+	if _carries_pack:
+		ArtDraw.inked(self, pack_outline(spine, h), (look.trim as Color).darkened(0.15), maxf(1.0, h * 0.010))
+	if not held and not Wardrobe.has_part(_loadout, "weapon"):
+		_draw_slung_on_back(spine, h, look)
+
+## Sırt çizgisi: 3B render'ın sırt yüzeyinden iki nokta (kürek ve bel
+## hizası). Döner: üst, alt, yukarı (bele -> küreğe) ve dışa (sırttan
+## arkaya) birim vektörler. Sırtta taşınan her şey bu çerçeveye oturur -
+## eskiden omuzdan sabit ofsetle çiziliyordu ve yay sırtın arkasında havada
+## asılı duruyordu.
+static func back_frame(upper: Vector2, lower: Vector2, facing: float) -> Dictionary:
+	var up := (upper - lower).normalized()
+	if up == Vector2.ZERO:
+		up = Vector2.UP
+	var out := Vector2(-up.y, up.x)
+	if out.x * facing > 0.0:
+		out = -out
+	return {"upper": upper, "lower": lower, "up": up, "out": out}
+
+## Heybe: sırta yaslanan, küreğin biraz üstünden belin altına inen torba.
+static func pack_outline(spine: Dictionary, h: float) -> PackedVector2Array:
+	var up: Vector2 = spine.up
+	var out: Vector2 = spine.out
+	var top: Vector2 = spine.upper + up * h * 0.06
+	var bottom: Vector2 = spine.lower - up * h * 0.03
+	return PackedVector2Array([
+		top + out * h * 0.004,
+		top + out * h * 0.085,
+		bottom + out * h * 0.095,
+		bottom + out * h * 0.004,
+	])
+
+## Yolda taşınan silah sırtın kendisine oturur: yay sırt boyunca (gövdeye
+## değerek, kirişi dışta), mızrak/asa/gürz sırta çapraz, kılıç belde.
+## Uçlar `slung_points()`'ten - test aynı sayıları okuyor.
+func _draw_slung_on_back(spine: Dictionary, h: float, look: Dictionary) -> void:
+	var metal: Color = look.metal
+	var trim: Color = look.trim
+	var pts := slung_points(weapon_kind(), spine, h)
+	if pts.is_empty():
+		return
+	match weapon_kind():
+		"bow":
+			var stave := _bezier(pts.top, pts.bulge, pts.bottom, 12)
+			draw_polyline(stave, ArtPalette.INK, maxf(2.2, h * 0.020))
+			draw_polyline(stave, trim.darkened(0.2), maxf(1.4, h * 0.013))
+			draw_line(pts.top, pts.bottom, Color(0.85, 0.82, 0.74, 0.8), maxf(1.0, h * 0.004))
+		"spear_shield", "staff":
+			draw_line(pts.top, pts.bottom, trim.darkened(0.25), maxf(1.6, h * 0.018))
+			if weapon_kind() == "spear_shield":
+				draw_line(pts.top, pts.top + (pts.top - pts.bottom).normalized() * h * 0.045, metal, maxf(1.4, h * 0.016))
+		"maul":
+			draw_line(pts.top, pts.bottom, trim.darkened(0.3), maxf(1.8, h * 0.020))
+			var head_dir: Vector2 = (pts.top - pts.bottom).normalized()
+			var side := Vector2(-head_dir.y, head_dir.x) * h * 0.035
+			draw_colored_polygon(PackedVector2Array([
+				pts.top - side, pts.top + side, pts.top + side + head_dir * h * 0.06, pts.top - side + head_dir * h * 0.06,
+			]), metal)
+		"sword", "cleaver":
+			draw_line(pts.top, pts.bottom, ArtPalette.INK, maxf(2.4, h * 0.022))
+			draw_line(pts.top, pts.bottom, metal.darkened(0.15), maxf(1.4, h * 0.016))
+
+## Sırttaki silahın uç noktaları, sırt çerçevesinde. Boş: taşınan silah yok.
+static func slung_points(weapon: String, spine: Dictionary, h: float) -> Dictionary:
+	var up: Vector2 = spine.up
+	var out: Vector2 = spine.out
+	var mid: Vector2 = (Vector2(spine.upper) + Vector2(spine.lower)) * 0.5
+	match weapon:
+		"bow":
+			# Yay sırta değiyor: orta noktası sırt yüzeyinde, kollar sırt boyunca.
+			var c := mid + out * h * 0.012
+			return {"top": c + up * h * 0.20 + out * h * 0.012, "bottom": c - up * h * 0.20 + out * h * 0.012,
+				"bulge": c - out * h * 0.004 + out * h * 0.05}
+		"spear_shield", "staff", "maul":
+			var tilt := up.rotated(0.35 * signf(out.x))
+			var c2 := mid + out * h * 0.02
+			return {"top": c2 + tilt * h * 0.32, "bottom": c2 - tilt * h * 0.26}
+		"sword", "cleaver":
+			var hilt: Vector2 = Vector2(spine.lower) + out * h * 0.015
+			return {"top": hilt, "bottom": hilt + (-up + out * 0.55).normalized() * h * 0.18}
+	return {}
+
+static func _bezier(a: Vector2, c: Vector2, b: Vector2, steps: int) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in steps + 1:
+		var t := float(i) / float(steps)
+		pts.append(a.lerp(c, t).lerp(c.lerp(b, t), t))
+	return pts
+
+## Kare kümesinin elindeki silah: yönü karenin kendi verisinden (`wdir`,
+## FigureActions'ın `weapon` açısı), kiriş çekilmişliği `draw`. Kılıç
+## savuruşta döner, yay nişanda dik durup kirişi arka ele gelir.
+func _draw_frame_weapon(joints: Dictionary, h: float, look: Dictionary, wdir: Vector2, draw_amount: float) -> void:
+	if not joints.has("hand_front"):
+		return
+	var hand: Vector2 = joints.hand_front
+	var metal: Color = look.metal
+	var trim: Color = look.trim
+	var ink_w := maxf(1.0, h * 0.008)
+	var side := Vector2(-wdir.y, wdir.x)
+	match weapon_kind():
+		"sword":
+			var tip := hand + wdir * h * FigureRig.WEAPON_RATIO
+			draw_line(hand, tip, ArtPalette.INK, maxf(2.6, h * 0.022))
+			draw_line(hand, tip, metal, maxf(1.6, h * 0.014))
+			draw_line(hand + wdir * h * 0.02 - side * h * 0.035, hand + wdir * h * 0.02 + side * h * 0.035, trim, maxf(2.0, h * 0.016))
+		"cleaver":
+			var front := side if side.x * _facing > 0.0 else -side
+			ArtDraw.inked(self, PackedVector2Array([
+				hand + wdir * h * 0.05, hand + wdir * h * 0.21 + front * h * 0.03,
+				hand + wdir * h * 0.17 + front * h * 0.10, hand + wdir * h * 0.04 + front * h * 0.05,
+			]), metal, ink_w)
+		"maul":
+			var head := hand + wdir * h * FigureRig.WEAPON_RATIO
+			draw_line(hand - wdir * h * 0.05, head, trim.darkened(0.25), maxf(2.4, h * 0.020))
+			ArtDraw.inked(self, PackedVector2Array([
+				head - side * h * 0.06 - wdir * h * 0.02, head + side * h * 0.06 - wdir * h * 0.02,
+				head + side * h * 0.06 + wdir * h * 0.05, head - side * h * 0.06 + wdir * h * 0.05,
+			]), metal, ink_w)
+		"spear_shield":
+			var top := hand + wdir * h * 0.52
+			draw_line(hand - wdir * h * 0.16, top, trim.darkened(0.2), maxf(2.0, h * 0.016))
+			ArtDraw.inked(self, PackedVector2Array([
+				top, top + wdir * h * 0.06 + side * h * 0.025, top + wdir * h * 0.10,
+				top + wdir * h * 0.06 - side * h * 0.025,
+			]), metal, ink_w)
+			if joints.has("hip"):
+				var shield: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, 0.55) + Vector2(0.075 * _facing, 0.0) * h
+				ArtDraw.ellipse(self, shield, Vector2(0.055, 0.105) * h, metal.darkened(0.30))
+				draw_arc(shield, 0.105 * h, 0.0, TAU, 20, ArtPalette.INK, ink_w)
+		"bow":
+			var pts := bow_points(hand, wdir, h, _facing, joints.get("hand_back", hand), draw_amount)
+			var stave := _bezier(pts.top, pts.bulge, pts.bottom, 14)
+			draw_polyline(stave, ArtPalette.INK, maxf(2.6, h * 0.022))
+			draw_polyline(stave, trim.darkened(0.15), maxf(1.6, h * 0.015))
+			var string_col := Color(0.85, 0.82, 0.74, 0.85)
+			draw_line(pts.top, pts.nock, string_col, maxf(1.0, h * 0.004))
+			draw_line(pts.nock, pts.bottom, string_col, maxf(1.0, h * 0.004))
+			if draw_amount > 0.3:
+				var shaft_end: Vector2 = pts.nock + (hand - pts.nock).normalized() * ((hand - pts.nock).length() + h * 0.05)
+				draw_line(pts.nock, shaft_end, trim.lightened(0.2), maxf(1.0, h * 0.006))
+				draw_line(shaft_end, shaft_end + (shaft_end - pts.nock).normalized() * h * 0.025, metal, maxf(1.4, h * 0.010))
+		"staff":
+			var staff_top := hand + wdir * h * 0.46
+			draw_line(hand - wdir * h * 0.20, staff_top, trim.darkened(0.2), maxf(2.2, h * 0.018))
+			draw_circle(staff_top, 0.03 * h, metal)
+			draw_arc(staff_top, 0.03 * h, 0.0, TAU, 12, ArtPalette.INK, ink_w)
+
+## Yay: gövde `wdir` boyunca elin iki yanında, hedefe doğru kavisli; kiriş
+## çekilmişken orta noktası (gez) arka ele gelir.
+static func bow_points(hand: Vector2, wdir: Vector2, h: float, facing: float, hand_back: Vector2, draw_amount: float) -> Dictionary:
+	var fwd := Vector2(-wdir.y, wdir.x)
+	if fwd.x * facing < 0.0:
+		fwd = -fwd
+	var top := hand + wdir * h * 0.20 - fwd * h * 0.02
+	var bottom := hand - wdir * h * 0.20 - fwd * h * 0.02
+	var rest_nock := (top + bottom) * 0.5
+	return {"top": top, "bottom": bottom, "bulge": hand + fwd * h * 0.07,
+		"nock": rest_nock.lerp(hand_back, clampf(draw_amount, 0.0, 1.0))}
 
 ## Gövdenin üstüne binen tek şey: oyuncu seçtiyse başlık. Arketipin kaskı YOK.
 func _draw_frame_extras(joints: Dictionary, h: float, look: Dictionary) -> void:
+	if _carries_pack and joints.has("back_upper") and joints.has("hand_front"):
+		# Heybenin askısı omzun önünden ön ele: yük taşıyan yürüyüşte el askıyı tutuyor.
+		var spine := back_frame(joints.back_upper, joints.back_lower, _facing)
+		var strap_top: Vector2 = Vector2(spine.upper) + Vector2(spine.up) * h * 0.03 + Vector2(spine.out) * h * 0.01
+		draw_polyline(PackedVector2Array([strap_top, joints.shoulder, joints.hand_front]),
+			(look.trim as Color).darkened(0.35), maxf(1.0, h * 0.008))
 	if not joints.has("head_top"):
 		return
 	var headgear := OutfitCatalog.resolve_headgear(_outfit, "none")
@@ -815,12 +1049,30 @@ func _draw_quadruped(figure_h: float, coat: Color, shade: Color, is_horse: bool)
 ## Resmi gelmiş tür iskeletten (`BeastRig`) çiziliyor; biniciyi eyere
 ## oturtan y yine iskeletten geliyor, tahminden değil.
 func _draw_beast_sprites(species: String, h: float) -> float:
+	var frames := BodyFrames.for_beast(species)
+	if frames != null:
+		return _draw_beast_frames(frames, h)
 	var ground := Vector2(size.x * 0.5, size.y)
 	var joints := BeastRig.draw_pose(species, ground, h, _phase, _motion, _facing)
 	var span := h * BeastRig.body_span(species)
 	ArtDraw.ellipse(self, ground, Vector2(span * 0.75, h * 0.030), Color(0.0, 0.0, 0.0, 0.24))
 	BeastRig.draw_species(self, species, joints, h, _facing, _tint)
 	return (joints.saddle as Vector2).y
+
+## Hayvanın 3B'den render edilmiş kareleri (`BodyFrames`, beast_<tür>):
+## insanla aynı beş katman - uzak bacaklar, gövde, yakın bacaklar - ve aynı
+## ışık; yürüyüş/duruş/saldırı/darbe/ölü modelin kendi animasyonundan.
+## Döner: eyerin y'si (binici oraya oturuyor).
+func _draw_beast_frames(frames: BodyFrames, h: float) -> float:
+	var clip := BodyFrames.beast_clip("", 1.0, "", _motion)
+	if not _action_clip.is_empty() and frames.has_clip(_action_clip):
+		clip = _action_clip
+	var frame := frames.frame_for_phase(clip, _phase) if clip == "walk" else frames.frame_for_time(clip, _action_u)
+	var k := frames.scale_for(h)
+	var origin := Vector2(size.x * 0.5, size.y)
+	ArtDraw.ellipse(self, origin, Vector2(h * 0.5, h * 0.030), Color(0.0, 0.0, 0.0, 0.24))
+	var joints := frames.draw_all(self, clip, frame, Transform2D(0.0, Vector2(k * _facing, k), 0.0, origin), _tint)
+	return (joints.get("saddle", origin - Vector2(0.0, h * 0.6)) as Vector2).y
 
 func _draw_quad_leg(
 	shoulder: Vector2, ground_y: float, h: float, phase: float, color: Color

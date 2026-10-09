@@ -85,6 +85,7 @@ var _bark_texts: Dictionary = {}  # CombatUnit -> {"text": String, "expires_at":
 var _flash_states: Dictionary = {}  # CombatUnit -> {"color": Color, "start": int, "duration": int}
 var _lunge_states: Dictionary = {}  # CombatUnit -> {"direction": float, "magnitude": float, "start": int}
 var _fall_states: Dictionary = {}  # CombatUnit -> {"start": int}
+var _action_states: Dictionary = {}  # CombatUnit -> {"role": String, "start": int, "duration": int}
 var _ring_states: Dictionary = {}  # CombatUnit -> {"color": Color, "start": int}
 var _shake: Dictionary = {}  # {"amplitude": float, "start": int}
 ## Yüzen hasar/iyileşme sayıları: {"unit", "label", "start", "slot_index"}.
@@ -437,6 +438,10 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 				"direction": 1.0 if attacker.is_player_side else -1.0,
 				"magnitude": magnitude, "start": now,
 			}
+			_action_states[attacker] = {"role": CombatFigure.ROLE_ATTACK, "start": now, "duration": CombatFx.ATTACK_MSEC}
+	var reaction := CombatFx.reaction_role(kind)
+	if not reaction.is_empty():
+		_action_states[unit] = {"role": reaction, "start": now, "duration": CombatFx.REACT_MSEC}
 
 	var amplitude := CombatFx.shake_amplitude(kind)
 	if amplitude > 0.0 and not _reduce_motion():
@@ -521,7 +526,19 @@ func _apply_fx(slot: CombatUnitSlot, unit: CombatUnit, now: int) -> bool:
 			ring_color = ring_data.get("color", ring_color)
 			active = true
 
+	var role := ""
+	var role_u := 0.0
+	var action_data: Dictionary = _action_states.get(unit, {})
+	if not action_data.is_empty():
+		role_u = CombatFx.progress(int(action_data.get("start", 0)), int(action_data.get("duration", 1)), now)
+		if role_u >= 1.0:
+			_action_states.erase(unit)
+		else:
+			role = String(action_data.get("role", ""))
+			active = true
+
 	slot.apply_fx(flash, offset, fall, ring_color, ring)
+	slot.apply_action(role, role_u)
 	return active
 
 ## Sarsıntı her figürde aynı zarf, ama birim başına kaydırılmış bir faz:
@@ -541,6 +558,7 @@ func _reduce_motion() -> bool:
 func _reset_fx() -> void:
 	_flash_states.clear()
 	_lunge_states.clear()
+	_action_states.clear()
 	_fall_states.clear()
 	_ring_states.clear()
 	_shake = {}
