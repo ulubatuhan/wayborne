@@ -1415,12 +1415,11 @@ in every preview the moment it is equipped.
   `OutfitPreview` is gone.
 - **The artist's templates are generated from the rig, not drawn by hand.**
   `tests/export_rig_spec.gd` writes `docs/wardrobe/rig_spec.json`;
-  `tools/wardrobe_templates.py` draws the per-part templates, the 3×3 part
-  sheet (768×1152) and the rest-pose reference from it;
-  `tools/wardrobe_ingest.py` slices a finished part sheet (or places a lone
-  part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
-  fails if the JSON falls behind the rig, so a template can never describe
-  a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
+  `test_wardrobe` fails if the JSON falls behind the rig. The painting
+  route that read it (`wardrobe_templates.py`, `wardrobe_ingest.py`, the
+  templates and `docs/wardrobe/README.md`) was deleted once clothes moved to
+  3D renders; `rig_spec.json` stays because the figure pipeline, the
+  mannequin and `wardrobe_cut.py` still read it.
 - **People are a mannequin until their clothes are painted.**
   `tools/wardrobe_mannequin.py` draws a jointed, faceless body per gender ×
   body weight (`wardrobe/body_<gender>_<weight>/`, `wardrobe/body/` for the
@@ -1461,7 +1460,7 @@ in every preview the moment it is equipped.
   - Crew use `BodyFrames.CREW_BODY`; enemies still draw on the old part
     rig until clothing modules exist (open: `QUESTIONS.md` #13-15 - the
     nude body pokes past a garment's edge where MPFB's delete group would
-    hide it in 3D, and `qa/garment_tests.py` measures exactly that).
+    hide it in 3D; the MakeClothes-era `qa/garment_tests.py` that measured it was deleted with that route).
   - **Clothes are worn, not painted on: each garment is its own frame
     set, rendered on the same body in the same pose.** The CC0 Quaternius
     "Modular Character Outfits" (`art_source/models/clothes/
@@ -1984,14 +1983,14 @@ in every preview the moment it is equipped.
   joint markers is not something an image model does reliably; one side
   view is. `BeastRig.PAINT_PHASE` is a mid-stride pose with all four legs
   apart (in the rest pose the far leg hides exactly behind the near one, so
-  it could never be cut out), `docs/beasts/<species>_pose_reference.jpg` is
-  that pose, and `tools/beast_cut.py whole` fits a painting onto it by its
+  it could never be cut out), and `tools/beast_cut.py whole` (deleted -
+  the skin route below replaced it) fitted a painting onto it by its
   bounding box, gives every pixel to the nearest bone's grown mannequin
   region (nearer bones win overlaps, the tail beats the rump), keeps
   `OVERLAP_PX` of each neighbour so a bent joint shows fur rather than a
   gap, and unrotates each piece into its part canvas - far legs as
-  `<part>_far.png`. The part-sheet route (`beast_cut.py sheet`) stays for
-  precise work. Workflow: `docs/beasts/README.md`.
+  `<part>_far.png`. Only `docs/beasts/beast_rig_spec.json` survives, read
+  by `tools/beast_skin.py` and `test_beast_rig`.
 - **A walking animal is one skin, not nine parts.** Cut parts each turn
   about their own pivot, so a joint either opens a gap or piles two pieces
   on top of each other - measured both ways (bare parts gapped at every
@@ -4844,7 +4843,7 @@ verir.
   uyuşmuyor; `p3_intellect`, `p4_passed_over` - prompt'tan sapan ama
   önceki turdan beri kabul edilmiş bir ikon dili; `eq_ring_charmed` - mavi
   boncuk detayı eksik) ve wardrobe'un kıyafet parça sayfaları (B kategorisi,
-  hâlâ hiç teslim edilmedi - bkz. `docs/wardrobe/README.md`). Tam liste ve
+  artık istenmiyor, giysiler 3B render). Tam liste ve
   her satırın durumu `docs/wayborne_gorsel_denetim.xlsx`'te.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
@@ -4877,8 +4876,8 @@ verir.
   `pack_outfits.py`, `OutfitCatalog._ensure_built()`'e bir satır.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
-  `docs/gemini-prompts-wardrobe.md` ve şablonları kayıt olarak duruyor ama
-  yeni kalemler CC0 3B paketlerden giydirilip render ediliyor.
+  `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
+  CC0 3B paketlerden giydirilip render ediliyor.
 - **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
   `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
   (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.
