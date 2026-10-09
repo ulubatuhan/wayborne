@@ -120,9 +120,13 @@ def pack_variant(variant, build, layers, post):
             draws.append(float(j.get("draw", 0.0)))
             if clip == "idle":
                 shoulder_px = ay - j["front_shoulder"][1]
+            # Temelden alinan katmanlar bot karesinin kendi zeminine iner.
+            dy = float(j.get("base_dy_px", 0.0))
             for layer in layers:
                 for img in images_for(fdir if layer in own else bdir, layer, post):
                     piece, (x0, y0) = crop(img)
+                    if layer not in own:
+                        y0 += dy
                     if piece is None:
                         rects.append((0, 0, 0, 0, 0))
                         offsets.append((0.0, 0.0))
