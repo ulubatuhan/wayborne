@@ -470,7 +470,7 @@ func get_max_hp() -> int:
 		1,
 		stats.get_max_hp() + get_character_class().bonus_max_hp
 		+ get_height_hp_bonus() + get_gender_hp_bonus() + get_body_weight_hp_bonus()
-		+ _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus")
+		+ _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus") + _outfit_bonus_sum("hp_bonus")
 	)
 
 ## Can barının yanına eklenen bir sıfat - sayının **yerine** değil, sayının
@@ -495,22 +495,22 @@ func get_dodge() -> int:
 		0,
 		stats.get_dodge() + get_height_dodge_bonus()
 		+ get_gender_dodge_bonus() + get_body_weight_dodge_bonus()
-		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus")
+		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus") + _outfit_bonus_sum("dodge_bonus")
 	)
 
 ## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy ve
 ## ekipman bonusları burada eklenir (bkz. CombatUnit.from_character).
 func get_accuracy() -> int:
-	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus")
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus") + _outfit_bonus_sum("accuracy_bonus")
 
 func get_crit_chance() -> int:
 	return stats.get_crit_chance() + get_gender_crit_bonus() \
-		+ _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus")
+		+ _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus") + _outfit_bonus_sum("crit_bonus")
 
 func get_damage_bonus() -> int:
 	return stats.get_damage_bonus() \
 		+ get_gender_damage_bonus() + get_body_weight_damage_bonus() \
-		+ _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus")
+		+ _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus") + _outfit_bonus_sum("damage_bonus")
 
 ## Savaş bu sarmalayıcıyı okur, stats.get_composure()'ı değil - huy ve
 ## ekipmanın da buraya girebilmesi için (bkz. CLAUDE.md'nin sarmalayıcı
@@ -763,6 +763,19 @@ func _equipment_bonus_sum(field: String) -> int:
 		var equipment_resource := EquipmentCatalog.get_equipment(str(equipped[slot]))
 		if equipment_resource != null:
 			total += int(equipment_resource.get(field))
+	return total
+
+## Giyilen kıyafetlerin katkısı - huy ve ekipmanla aynı alan adları, aynı
+## sarmalayıcılar (savaş bunları okuyor, `stats`'ı değil).
+func get_outfit_bonus(field: String) -> int:
+	return _outfit_bonus_sum(field)
+
+func _outfit_bonus_sum(field: String) -> int:
+	var total := 0
+	for slot in outfit:
+		var piece := OutfitCatalog.get_piece(str(outfit[slot]))
+		if piece != null:
+			total += int(piece.get(field))
 	return total
 
 func is_alive() -> bool:

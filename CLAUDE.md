@@ -1415,12 +1415,11 @@ in every preview the moment it is equipped.
   `OutfitPreview` is gone.
 - **The artist's templates are generated from the rig, not drawn by hand.**
   `tests/export_rig_spec.gd` writes `docs/wardrobe/rig_spec.json`;
-  `tools/wardrobe_templates.py` draws the per-part templates, the 3×3 part
-  sheet (768×1152) and the rest-pose reference from it;
-  `tools/wardrobe_ingest.py` slices a finished part sheet (or places a lone
-  part image, a weapon on its grip) into the per-part PNGs. `test_wardrobe`
-  fails if the JSON falls behind the rig, so a template can never describe
-  a skeleton the game no longer has. Workflow: `docs/wardrobe/README.md`.
+  `test_wardrobe` fails if the JSON falls behind the rig. The painting
+  route that read it (`wardrobe_templates.py`, `wardrobe_ingest.py`, the
+  templates and `docs/wardrobe/README.md`) was deleted once clothes moved to
+  3D renders; `rig_spec.json` stays because the figure pipeline, the
+  mannequin and `wardrobe_cut.py` still read it.
 - **People are a mannequin until their clothes are painted.**
   `tools/wardrobe_mannequin.py` draws a jointed, faceless body per gender ×
   body weight (`wardrobe/body_<gender>_<weight>/`, `wardrobe/body/` for the
@@ -1461,7 +1460,7 @@ in every preview the moment it is equipped.
   - Crew use `BodyFrames.CREW_BODY`; enemies still draw on the old part
     rig until clothing modules exist (open: `QUESTIONS.md` #13-15 - the
     nude body pokes past a garment's edge where MPFB's delete group would
-    hide it in 3D, and `qa/garment_tests.py` measures exactly that).
+    hide it in 3D; the MakeClothes-era `qa/garment_tests.py` that measured it was deleted with that route).
   - **Clothes are worn, not painted on: each garment is its own frame
     set, rendered on the same body in the same pose.** The CC0 Quaternius
     "Modular Character Outfits" (`art_source/models/clothes/
@@ -1476,11 +1475,160 @@ in every preview the moment it is equipped.
     frame through `render_frames.pose_clip_frame` - the body's own pose
     and root, one function, so a garment cannot drift from its body. The
     body is invisible to the camera but casts the shadow.
-    - **The eps order is the layering.** Outer garments get a larger eps
-      (pants .004 < shoes .007 < hood .008 < shirt .009 < jacket .013), so
-      a jacket encloses the shirt it is drawn over and nothing below
-      pokes through. That replaces MPFB's delete groups (`QUESTIONS.md`
-      #13): a garment enclosing the body needs no hidden skin.
+    - **Each garment is fitted over everything that can be worn under
+      it, not just over the body - and that was a reported bug, not a
+      refinement.** The first version wrapped each item to the body alone
+      (eps .004 pants < .009 shirt < .013 jacket) and assumed the eps order
+      was the layering. It is not: Quaternius geometry already stands off
+      the body by more than eps in places, so the pants' waistband came out
+      *through* the shirt and the shirt through the jacket (measured: 36%
+      of covered shirt points outside the jacket). The player saw it on the
+      first pilot render. `render_outfits.fit_all()` now fits items in
+      `draw_order`; each one gets every lower-order item of another slot,
+      every variant, as `inner`, and `fit_garment.fit()` runs three more
+      steps after the body wrap:
+      - `layer_over`: each point stands `gap` above the highest inner point
+        within one edge length of the body point beneath it (one point was
+        not enough - the jacket mesh is coarser than the shirt's and shirt
+        detail rose between jacket vertices);
+      - `resolve_pokes`: the same rule the QA uses (going from an inner point
+        toward the body, you must reach the body before the outer garment).
+        The outer face that is hit is pushed out. Where that does not
+        converge, the inner point is pulled under it, and an outer face
+        trapped beneath an inner one that already hugs the body is deleted.
+        That is the hood's neck lining, which sits under the jacket collar;
+      - `inherit_weights`: an outer point within 4 cm of an inner one takes
+        that point's bone weights. Weights transferred from the body diverge
+        in curved places (shoulder, armpit), and the two garments bent
+        apart. A removal-while-iterating bug left half the old weights in
+        place the first time.
+      `render_outfits.layer_weights_all` then lets an outer garment inherit
+      the limb layers of what lies beneath it (channel-wise max). Otherwise
+      a jacket shoulder in the front-arm layer is drawn over a hood hem in
+      the torso layer.
+    - **A garment must keep its shape, and a stylised source has a
+      stylised head.** The ranger hood shipped standing almost a head's
+      height above the skull. Every QA number was green, and the player
+      caught it from a screenshot. Two causes:
+      - `align_skeleton` stretched every bone to its MPFB twin's length.
+        Quaternius's `head` bone is 8.3 cm and MPFB's 15.6, so the hood grew
+        1.88× vertically. End bones (head, hands, toes) only mark where a
+        bone is drawn, so `NO_STRETCH` rotates them without stretching.
+      - The Quaternius characters have big, stylised heads. Even unstretched,
+        the hood's head part measured 30×33×38 cm against MPFB's 17×22×23.
+        `snug_head` scales whatever sits on the head down to our head plus a
+        margin, each side of each axis separately (the excess is on top).
+        Each point is scaled by the head weight of the body point beneath
+        it, so the cape stays on the shoulders. It is a soft blend.
+      Tried and reverted: moving the cape's arm weights onto `spine_03` so it
+      would not droop with the T-to-A arm drop. That bone is the one
+      shortened most (0.73×), so the cape dropped further (height ratio
+      1.26 → 1.91).
+      The QA now measures shape, not just overlap: every garment's height is
+      checked against its source height scaled by body size (0.85-1.15),
+      and nothing may rise more than 6 cm above the skull. Snugged items are
+      judged by the second rule only. Re-enabling the stretch fails it (hood
+      2.19×). A QA that only compares the game against the 3D scene cannot
+      see a garment that is wrong in both: it was faithfully reproducing a
+      ridiculous hood.
+    - **Pants close at the waist, the body never shows through, seams stay
+      shut - the player saw all three, looking at the model rather than the
+      game.** Every one of these was invisible in the game composite,
+      because a garment is drawn over the body. The model view, the one
+      the player asked to see, showed them:
+      - *The waist.* Quaternius pants are low-rise. On our body the top edge
+        stopped at 1.04 m against a waist (`spine_02`) at 1.09, so the top of
+        the hips stayed bare. Stretching the pants up was tried and dropped,
+        twice:
+        - scaling per angular slice turned the waistband into a crown of
+          spikes;
+        - the ranger pants' back is a tight band over a seat panel, and
+          lifting the band tore a hole between the two.
+        `waist_sleeve` instead lifts the body's own surface, from hip to
+        waist plus 1 cm, as a strip at half the cloth distance, joined into
+        the pants mesh. Where the pants exist the strip is under them; where
+        they do not, it closes the waist. It takes one cloth UV per face,
+        from the pants body rather than its edge details: per-corner UVs
+        landed on seam and belt islands and left pale patches. Its top is
+        levelled to the waist line.
+      - *Pass-through.* `wrap` kept the garment's vertices outside the body,
+        but a body curve (thigh, crotch, chest) came out through the middle
+        of a sparse cloth face. `cover_body` looks outward from inside the
+        body under every nearby point; cloth reached before the skin is
+        pushed out. The push is smoothed like `wrap` and capped per vertex
+        (`COVER_MAX_PUSH`). Uncapped, it pushed the ranger pants' folded
+        waistband out round after round into a flap.
+      - *Seams.* Quaternius splits vertices along UV seams. Every later
+        displacement moved the two copies apart and opened a white line down
+        the side of the leg. `weld_seams` merges them first; UVs live on
+        loops, so the texture survives.
+      The QA checks the waist too: rays outward from the body strip just
+      below the waist must hit the pants (≥ 95%; 100% on all six bodies).
+      Counting vertex heights per angle could not be used: the waist ring is
+      sparse, and a slice that held only a lower vertex read as "low".
+    - **A boot has a sole, and the sole was lost before anyone looked
+      underneath.** Reported from the approval sheet as "bot gibi değil":
+      the soles came out 0-3 mm thick. Three causes, found by looking from
+      the side and from below, not from the game's one camera:
+      - *The two feet disagree about the ground.* Quaternius' sole sits
+        ~1.9 cm under its ball bone with the toe sprung up; MPFB's foot is
+        flat and deeper. Aligned bone to bone, the shoe's sole landed inside
+        the body. `wrap` then pushed it out to `eps`, so the sole hugged the
+        foot like a sock. The forefoot sat 1-2 cm above the body's toes.
+        `add_sole` (before `wrap`; `sole`/`heel` in `outfits.json`, boots
+        only) moves the bottom under a flat ground plane, `sole` below it
+        and `heel` more at the heel. It works station by station from heel
+        to toe (`SOLE_STATION`). The drop shears: full at the ground, zero
+        at the ankle. Nothing folds and the shaft stays put. Two simpler
+        measures failed. With a single lowest vertex, a sagging rim made the
+        middle read "low enough" and the toes broke through. With a single
+        highest point, one spot drove the whole forefoot down into clown
+        shoes. Bottoms are found by casting rays up from the footprint
+        against faces: the sole's corners are more than 2 cm apart, so a
+        vertex search measured air.
+      - *`cover_body` looked from outside the body.* It starts 3 cm inside
+        the skin. Toes are thinner than that, so the start point was below
+        the sole, the first cloth it met was the sole, and it pushed the
+        sole up into the foot. The depth is now capped at half the body's
+        local thickness. Sole corners below the ground are never pushed up
+        (`keep_below`): the toe cap's large faces carried them up as they
+        were pushed over the toes.
+      - *Big heels.* On heavy bodies the heel sits ~3 cm behind the
+        source shoe's heel, beyond `COVER_MAX_PUSH`, so it came out of the
+        back. The heel cup is stretched back to the body's heel first.
+      The QA checks the sole too: from every point of the body's sole,
+      looking down must hit the shoe at least 0.6 × `sole` lower (≥ 95%).
+    - **Repacked atlas pages keep their names, so check the import, not just
+      the PNG.** After a full re-render the game drew every garment as
+      scattered fragments. The new region table was being read against the
+      old page, because `.godot/imported` still held the first pack.
+      `--headless --editor --quit` had exited before it rescanned changed
+      files; `--quit-after 3000` reimports. A local cache only (`.import`
+      is not in the repo, CI imports fresh), but the in-game screenshot is
+      the step that caught it. The Python composite was right the whole
+      time.
+    - **Test the fit before rendering, against the real thing.**
+      `qa/outfit_check.py` fits everything exactly as the render does
+      (`render_outfits.setup`), poses a few frames per clip, and for each
+      combination compares the game's composite (the packed body layers,
+      then each garment's layer masks in draw order) with one
+      true-occlusion render of the whole outfit. It reports three numbers:
+      - pixels that differ, ≤ 2%;
+      - garment-for-garment swaps in either direction, ≤ 2%. This includes
+        3D pass-through, which is what the player saw. The worst case left
+        is one frame (attack 3, arm fully raised) at 1.6%, where the jacket
+        shoulder passes through the hood's cape;
+      - "bleed", the game drawing an inner garment over an outer one, ≤ 0.3%.
+      The 3D poke count is reported for information only. The old,
+      unlayered fit fails: composite 9.1%, swaps 9.1%. All six bodies pass
+      with the layered fit. The worst remaining case is the hood's cape
+      over a fully raised arm, where the game draws the hood on top. The
+      QA's own first versions measured the wrong thing twice: the body
+      helpers (MPFB's tights/skirt masks) were visible in the QA but hidden
+      in the fit, and the poke ray ran outward, so a sleeve on an arm swung
+      close to the torso counted as "outside the jacket". Both now use the
+      fit's own rule. `WAYBORNE_NO_LAYERING=1` reproduces the old fit, so
+      the gate can be shown to fail on it.
     - **Colour is the texture's, shade is the body's tones.** Two passes
       per layer like the animals (shade + unlit albedo, multiplied and
       posterised in `mesh/pack_outfits.py`). Quaternius feeds Base Color
@@ -1511,10 +1659,46 @@ in every preview the moment it is equipped.
       puts it back, and the character screen's arrows walk only
       `get_outfit_choices()` - what that person wears plus what the locker
       holds for the slot, disabled with its reason when there is nothing
-      else. Character creation still picks the starting clothes from the
-      whole catalogue; recruits arrive dressed from their own seed
-      (`RecruitCatalog._dress`, never the candidate roll's RNG). Old colour
-      ids migrate on load (`OutfitCatalog.LEGACY_IDS`).
+      else. Character creation picks the starting clothes from the
+      `starter` pieces only (the peasant kit): better clothes cost money,
+      and a free pick at creation would make the tailor pointless. Recruits
+      arrive dressed from their own seed (`RecruitCatalog._dress`, never
+      the candidate roll's RNG), each slot weighted by the inverse of the
+      price, so a guild hire in silk is rare. Old colour ids migrate on
+      load (`OutfitCatalog.LEGACY_IDS`).
+    - **Clothes are a small combat axis, priced by what they give.**
+      `OutfitPiece` carries the same five bonus fields as `Trait` and
+      `Equipment`, read by the same `CharacterData` getters
+      (`_outfit_bonus_sum` beside `_equipment_bonus_sum`), so combat sees
+      them through `CombatUnit.from_character` with no new wiring.
+      Bonuses stay small: a whole ranger kit (+5 HP, +4 dodge, +2 accuracy,
+      +2 crit) sits near one armour tier, not above it. The price is one
+      formula, `OutfitCatalog.price_for(base, bonuses)`: the cloth and
+      work (`base`) plus `STAT_PRICE` per point. Damage costs most and HP
+      least, because dodge and damage swing a fight more than HP does (Ruin
+      Rules' body A/B). A negative stat lowers the price, never below half
+      the base. Pieces without a render (`art_id` empty) are real items
+      too; the figure carries them in their `color` until they are drawn.
+    - **The tailor never has everything.** `GameSession.get_tailor_stock()`
+      rolls the stall from `location + day`, the recruits' pattern. A piece
+      is on it with chance `40 / (40 + price)`, so silk is rare and linen
+      common, and a bare stall is topped up to `TAILOR_MIN_PIECES` from the
+      cheapest. Purchases are `tailor_sold` (saved, cleared on arrival), so
+      a reload cannot restock what was bought. The buy price runs through
+      `get_buy_price_multiplier()`, the same culture and trait discount the
+      market reads. The tailor buys back at `OUTFIT_RESALE_FACTOR` (40%),
+      far below the buy price, so buy-and-sell is not a money printer. A
+      locked purchase shows its reason (sold out, not enough gold, on the
+      road).
+    - **The wardrobe is a city screen, and dragging is a shortcut.**
+      `wardrobe.tscn` (the city's "Kıyafet Dolabı" button) shows the chosen
+      person standing beside the six slot boxes, with the caravan locker
+      and the day's tailor stall next to them. Drag a locker card onto
+      its slot box to wear it, a slot back onto the locker to take it off,
+      a card onto the tailor to sell it. Each drop calls
+      `set_drag_forwarding` and accepts only what fits (a shirt never lands
+      on a shoe box). Every drag has a button (Wear / Take off / Sell / Buy),
+      because a decision needs a visible control (Road Movement Rules).
     - Checked across the cycle, not in one pose: `tests/screenshot_outfits.gd`
       prints eight walk phases plus idle/attack/hit/dead per body x outfit;
       `test_outfit.gd` asserts every item has a frame set for all six
@@ -1835,14 +2019,14 @@ in every preview the moment it is equipped.
   joint markers is not something an image model does reliably; one side
   view is. `BeastRig.PAINT_PHASE` is a mid-stride pose with all four legs
   apart (in the rest pose the far leg hides exactly behind the near one, so
-  it could never be cut out), `docs/beasts/<species>_pose_reference.jpg` is
-  that pose, and `tools/beast_cut.py whole` fits a painting onto it by its
+  it could never be cut out), and `tools/beast_cut.py whole` (deleted -
+  the skin route below replaced it) fitted a painting onto it by its
   bounding box, gives every pixel to the nearest bone's grown mannequin
   region (nearer bones win overlaps, the tail beats the rump), keeps
   `OVERLAP_PX` of each neighbour so a bent joint shows fur rather than a
   gap, and unrotates each piece into its part canvas - far legs as
-  `<part>_far.png`. The part-sheet route (`beast_cut.py sheet`) stays for
-  precise work. Workflow: `docs/beasts/README.md`.
+  `<part>_far.png`. Only `docs/beasts/beast_rig_spec.json` survives, read
+  by `tools/beast_skin.py` and `test_beast_rig`.
 - **A walking animal is one skin, not nine parts.** Cut parts each turn
   about their own pivot, so a joint either opens a gap or piles two pieces
   on top of each other - measured both ways (bare parts gapped at every
@@ -4695,7 +4879,7 @@ verir.
   uyuşmuyor; `p3_intellect`, `p4_passed_over` - prompt'tan sapan ama
   önceki turdan beri kabul edilmiş bir ikon dili; `eq_ring_charmed` - mavi
   boncuk detayı eksik) ve wardrobe'un kıyafet parça sayfaları (B kategorisi,
-  hâlâ hiç teslim edilmedi - bkz. `docs/wardrobe/README.md`). Tam liste ve
+  artık istenmiyor, giysiler 3B render). Tam liste ve
   her satırın durumu `docs/wayborne_gorsel_denetim.xlsx`'te.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
@@ -4715,21 +4899,18 @@ verir.
   Faz 22 şehri B10 masa sahnesine yeni taşımıştı, çizilmiş animasyonlu
   bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
   "iki ayrı prodüksiyon" tuzağı).
-- **Kıyafetler ticarete ve ganimete bağlanacak.** Giysiler artık gerçek,
-  giyilip çıkarılabilen parçalar ve kervanın bir kıyafet dolabı var
-  (`GameSession.outfit_inventory`, bkz. Wardrobe & Rig Rules'un "Clothes
-  are worn, not painted on" maddesi) - ama dolaba bugün yalnızca iki kapı
-  açılıyor: karakter oluşturmada seçilen başlangıç kıyafeti ve birinin
-  çıkardığı. Sıradaki iş: pazarda/bir terzide satın alma (`add_outfit` +
-  fiyat; kalemlere fiyat alanı eklenecek) ve yolda bulma (`EventEffect`'e
-  `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle - parça önce dolaba
-  düşer, kime giydirileceği sonra seçilir). Yeni kalemler aynı boru
-  hattından geçer: `config/outfits.json`'a bir satır, `render_outfits.py`,
-  `pack_outfits.py`, `OutfitCatalog._ensure_built()`'e bir satır.
+- **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
+  Dolabı ekranı, statlı ve statına göre fiyatlı 16 giysi, her ziyarette
+  başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
+  `EventEffect`'e `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle (parça
+  önce dolaba düşer, kime giydirileceği sonra seçilir). Dokuz giysinin
+  henüz görseli yok (`art_id` boş, kendi rengiyle çiziliyor): yeni bir
+  render `config/outfits.json`'a bir satır, `render_outfits.py`,
+  `pack_outfits.py` ve `OutfitCatalog`'da `has_art` true demek.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
-  `docs/gemini-prompts-wardrobe.md` ve şablonları kayıt olarak duruyor ama
-  yeni kalemler CC0 3B paketlerden giydirilip render ediliyor.
+  `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
+  CC0 3B paketlerden giydirilip render ediliyor.
 - **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
   `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
   (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.

@@ -283,8 +283,93 @@ func unequip_from_character(character: CharacterData, slot: String) -> bool:
 ## Kervanın kıyafet dolabı: kimsenin üstünde olmayan giysiler, piece_id ->
 ## adet (OutfitCatalog). Ekipman deposunun karşılığı: giymek buradan alır,
 ## çıkarmak buraya koyar, bir kişinin çıkardığını bir başkası giyebilir.
-## Satın alma ve ganimet ileride buraya düşecek (bkz. CLAUDE.md Ana Hedefler).
+## Terziden alınan buraya düşer; ganimet ileride (bkz. CLAUDE.md Ana Hedefler).
 var outfit_inventory: Dictionary = {}
+
+# --- Terzi ---
+#
+# Şehrin terzisi her varışta başka bir tezgâh açar: hiçbir şehir her giysiyi
+# her zaman satmaz. Stok `şehir + gün`ün tohumundan yeniden üretiliyor
+# (tayfa adaylarıyla aynı desen) - aynı ziyarette ekranı kapatıp açmak
+# tezgâhı değiştirmez, satın alınanlar `tailor_sold`'da tutulur ve kayda
+# yazılır, yoksa yeniden yükleme aynı giysiyi ikinci kez sattırırdı.
+# Pahalı parça nadir: bir giysinin tezgâhta olma ihtimali fiyatıyla düşer.
+
+## Bu varışta terziden satın alınanlar (piece_id -> adet); varışta temizlenir.
+var tailor_sold: Dictionary = {}
+
+const TAILOR_MIN_PIECES: int = 3
+## Fiyatı bu kadar olan bir giysinin tezgâhta bulunma ihtimali yarı yarıya.
+const TAILOR_HALF_CHANCE_PRICE: float = 40.0
+## Satış: terzi ikinci el giysiyi fiyatının bu payına alır - al-sat bir
+## para kapısı olmasın diye satış her zaman alıştan çok aşağıda.
+const OUTFIT_RESALE_FACTOR: float = 0.4
+
+## Bu ziyarette tezgâhta ne var (piece_id -> kalan adet), katalog sırasıyla.
+func get_tailor_stock() -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("tailor|%s|%d" % [current_location_id, total_days_elapsed])
+	var rolled: Dictionary = {}
+	var pieces := OutfitCatalog.get_all_pieces()
+	for piece in pieces:
+		var chance := TAILOR_HALF_CHANCE_PRICE / (TAILOR_HALF_CHANCE_PRICE + float(piece.price))
+		if rng.randf() < chance:
+			rolled[piece.piece_id] = 1 + (rng.randi_range(0, 2) if piece.price < 20 else 0)
+	# Boş tezgâh yok: en ucuzlardan tamamlanır.
+	var by_price := pieces.duplicate()
+	by_price.sort_custom(func(a: OutfitPiece, b: OutfitPiece) -> bool: return a.price < b.price)
+	for piece in by_price:
+		if rolled.size() >= TAILOR_MIN_PIECES:
+			break
+		if not rolled.has(piece.piece_id):
+			rolled[piece.piece_id] = 1
+	var stock: Dictionary = {}
+	for piece in pieces:
+		var left := int(rolled.get(piece.piece_id, 0)) - int(tailor_sold.get(piece.piece_id, 0))
+		if left > 0:
+			stock[piece.piece_id] = left
+	return stock
+
+## Terzinin istediği: giysinin fiyatı, kervanın alış çarpanıyla (kültür ve
+## Zeka huyları - pazarın okuduğu aynı sayı).
+func get_outfit_buy_price(piece_id: String) -> int:
+	var piece := OutfitCatalog.get_piece(piece_id)
+	if piece == null:
+		return 0
+	return maxi(1, int(round(piece.price * get_buy_price_multiplier())))
+
+func get_outfit_sell_price(piece_id: String) -> int:
+	var piece := OutfitCatalog.get_piece(piece_id)
+	if piece == null:
+		return 0
+	return maxi(1, int(floor(piece.price * OUTFIT_RESALE_FACTOR)))
+
+## Satın alınamıyorsa nedeni (çeviri anahtarı), alınabiliyorsa "".
+func get_outfit_buy_block_reason(piece_id: String) -> String:
+	if is_journey_active():
+		return "UI_TAILOR_ON_ROAD"
+	if int(get_tailor_stock().get(piece_id, 0)) <= 0:
+		return "UI_TAILOR_SOLD_OUT"
+	if not wallet.can_afford(get_outfit_buy_price(piece_id)):
+		return "UI_TAILOR_NO_GOLD"
+	return ""
+
+func buy_outfit(piece_id: String) -> bool:
+	if not get_outfit_buy_block_reason(piece_id).is_empty():
+		return false
+	var cost := get_outfit_buy_price(piece_id)
+	if not wallet.spend(cost):
+		return false
+	tailor_sold[piece_id] = int(tailor_sold.get(piece_id, 0)) + 1
+	add_outfit(piece_id, 1)
+	return true
+
+## Dolaptaki bir giysiyi terziye satar (üstte olan satılmaz - önce çıkarılır).
+func sell_outfit(piece_id: String) -> bool:
+	if is_journey_active() or not remove_outfit(piece_id, 1):
+		return false
+	wallet.earn(get_outfit_sell_price(piece_id))
+	return true
 
 func add_outfit(piece_id: String, quantity: int = 1) -> void:
 	if quantity <= 0 or OutfitCatalog.get_piece(piece_id) == null:
@@ -2396,6 +2481,7 @@ func finish_journey() -> Dictionary:
 	danger_level = 0.0
 	caravan = CaravanState.new()
 	hired_recruit_indices = {}
+	tailor_sold = {}
 	_restock_current_location()
 	heal_party()
 
@@ -2968,6 +3054,7 @@ func to_save_dict() -> Dictionary:
 		"earned_wagon_milestones": _earned_wagon_milestones.duplicate(),
 		"equipment_inventory": equipment_inventory.duplicate(),
 		"outfit_inventory": outfit_inventory.duplicate(),
+		"tailor_sold": tailor_sold.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
@@ -3142,6 +3229,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	var outfit_data: Dictionary = data.get("outfit_inventory", {})
 	for piece_id in outfit_data:
 		add_outfit(OutfitCatalog.migrate_piece_id(str(piece_id)), int(outfit_data[piece_id]))
+	tailor_sold = {}
+	var sold_data: Dictionary = data.get("tailor_sold", {})
+	for piece_id in sold_data:
+		tailor_sold[str(piece_id)] = int(sold_data[piece_id])
 	equipment_inventory = {}
 	var equipment_data: Dictionary = data.get("equipment_inventory", {})
 	for equipment_id in equipment_data:

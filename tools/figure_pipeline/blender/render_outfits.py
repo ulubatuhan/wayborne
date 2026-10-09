@@ -40,11 +40,19 @@ CLOTHES = os.path.join(ROOT, "art_source", "models", "clothes", "quaternius_fant
 OUT = os.path.join(ROOT, "build", "figures", "outfits")
 
 
-def fit_item(spec, gender, body, rig):
+def fit_item(spec, gender, body, rig, inner=()):
     meshes = []
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    snugged = False
     for piece in spec["pieces"][gender]:
-        obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig, float(spec["eps"]))
+        obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig,
+                                      float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
+                                      spec.get("waist_bone"), int(spec.get("openings", 0)),
+                                      float(spec.get("sole", 0.0)), float(spec.get("heel", 0.0)))
         print("giydirildi", piece, "itilen", pushed, flush=True)
+        lo = [min(a, b) for a, b in zip(lo, obj["native_min"])]
+        hi = [max(a, b) for a, b in zip(hi, obj["native_max"])]
+        snugged = snugged or bool(obj["snugged"])
         meshes.append(obj)
     if len(meshes) > 1:
         bpy.ops.object.select_all(action="DESELECT")
@@ -52,7 +60,65 @@ def fit_item(spec, gender, body, rig):
             m.select_set(True)
         bpy.context.view_layer.objects.active = meshes[0]
         bpy.ops.object.join()
+    meshes[0]["native_min"], meshes[0]["native_max"] = lo, hi
+    meshes[0]["snugged"] = snugged
+    meshes[0]["waist_bone"] = spec.get("waist_bone") or ""
+    meshes[0]["sole"] = float(spec.get("sole", 0.0))
     return meshes[0]
+
+
+def fit_all(ocfg, gender, body, rig):
+    """Butun kalemleri cizim sirasiyla giydirir; her kalem, altina giyilebilecek
+    her kalemin (daha kucuk sira, baska yuva - butun varyantlariyla) ustune
+    oturtulur. Hep hepsi giydirilir: yalniz bir kismi render edilse bile bir
+    kalemin sekli, altinda ne olabilecegine bagli ve her render'da ayni olmali.
+    Doner: ad -> nesne, cizim sirasiyla."""
+    fitted = {}
+    order = sorted(ocfg["items"], key=lambda k: ocfg["items"][k]["draw_order"])
+    for name in order:
+        spec = ocfg["items"][name]
+        inner = [fitted[o] for o in fitted
+                 if ocfg["items"][o]["draw_order"] < spec["draw_order"] and ocfg["items"][o]["slot"] != spec["slot"]]
+        rc.reset_pose(rig, rig)
+        fitted[name] = fit_item(spec, gender, body, rig, inner)
+    return fitted
+
+
+LAYER_REACH = 0.04  # m; fit_garment.INHERIT_REACH ile ayni (0.06-0.08 olculdu: kotulesti)
+
+
+def layer_weights_all(fitted, ocfg, rig, layers):
+    """Her kalemin katman agirliklari, dis giysi altindakinin uzuv katmanini
+    devralarak (kanal kanal en buyugu). Oyun her katmanda bedeni sonra
+    giysileri ciziyor; yelegin omzu on kol katmaninda, kukuletanin eteginin
+    ucu govde katmanindaysa on kol katmani sonra cizildigi icin yelek
+    kukuletanin ustune cikiyordu (qa/outfit_check.py, giysi karismasi).
+    Ustteki giysi alttakinin katmanina da girerse ayni katmanda cizim sirasi
+    onu ustte tutar. Dinlenme pozunda olculur; nitelikleri ("lw", "gw")
+    yazar. Doner: ad -> agirliklar."""
+    from mathutils.kdtree import KDTree
+    rc.reset_pose(rig, rig)
+    lws, coords = {}, {}
+    for name, obj in fitted.items():  # fit_all cizim sirasiyla dondurur
+        lw = [list(w) for w in fig_weights.layer_weights(obj, rig, layers)]
+        coords[name] = rc.evaluated_coords(obj)
+        spec = ocfg["items"][name]
+        inner = [o for o in lws if ocfg["items"][o]["draw_order"] < spec["draw_order"]
+                 and ocfg["items"][o]["slot"] != spec["slot"]]
+        src = [(co, lws[o][k]) for o in inner for k, co in enumerate(coords[o])]
+        if src:
+            kd = KDTree(len(src))
+            for k, (co, _w) in enumerate(src):
+                kd.insert(co, k)
+            kd.balance()
+            for k, co in enumerate(coords[name]):
+                _c, j, dist = kd.find(co)
+                if dist is not None and dist <= LAYER_REACH:
+                    lw[k] = [max(a, b) for a, b in zip(lw[k], src[j][1])]
+        lws[name] = lw
+        fig_weights.write_attr(obj, lw)
+        fig_weights.write_color(obj, [(0.0, 0.0, 1.0, 1.0)] * len(obj.data.vertices), "gw")
+    return lws
 
 
 def member_layers(lw, layers_cfg):
@@ -129,17 +195,11 @@ def set_slots(obj, mats):
         obj.material_slots[k].material = mats[k] if isinstance(mats, list) else mats
 
 
-def main():
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
-    variant = rf.arg(argv, "--variant")
+def setup(variant):
+    """Varyantin sahnesi, bedenin katman agirliklari ve butun kalemler
+    giydirilmis halde (render ve qa/outfit_check.py ayni kurulumu kullanir)."""
     ocfg = json.load(open(os.path.join(PIPE, "config", "outfits.json")))
-    items = rf.arg(argv, "--items").split(",") if "--items" in argv else list(ocfg["items"])
-    build = rf.cfg("build.json")
-    clips = rf.arg(argv, "--clips").split(",") if "--clips" in argv else list(build["clips"])
-    only = [int(x) for x in rf.arg(argv, "--frames").split(",")] if "--frames" in argv else None
     layers, retarget = rf.cfg("layers.json"), rf.cfg("retarget.json")
-    gender = rf.gender_of(variant)
-
     bpy.ops.wm.open_mainfile(filepath=os.path.join(ROOT, "build/figures/variants", variant, variant + ".blend"))
     rf.enable_mpfb()
     rig = next(o for o in bpy.data.objects if o.type == "ARMATURE")
@@ -156,15 +216,33 @@ def main():
     body_idx = rc.body_vertex_set(body)
     arm_k = [fig_weights.ORDER.index(n) for n in ("back_arm", "front_arm")]
     support_idx = [k for k in body_idx if max(lw[k][a] for a in arm_k) < layers["core_threshold"]]
+    fitted = fit_all(ocfg, rf.gender_of(variant), body, rig)
+    return dict(ocfg=ocfg, layers=layers, retarget=retarget, rig=rig, body=body,
+                rest_foot_rot=rest_foot_rot, support_idx=support_idx, fitted=fitted)
+
+
+def main():
+    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
+    variant = rf.arg(argv, "--variant")
+    ocfg = json.load(open(os.path.join(PIPE, "config", "outfits.json")))
+    items = rf.arg(argv, "--items").split(",") if "--items" in argv else list(ocfg["items"])
+    build = rf.cfg("build.json")
+    clips = rf.arg(argv, "--clips").split(",") if "--clips" in argv else list(build["clips"])
+    only = [int(x) for x in rf.arg(argv, "--frames").split(",")] if "--frames" in argv else None
+
+    sc = setup(variant)
+    rig, body, layers, retarget = sc["rig"], sc["body"], sc["layers"], sc["retarget"]
+    rest_foot_rot, support_idx = sc["rest_foot_rot"], sc["support_idx"]
     m_per_h = None
 
     objs = {}
-    for name in items:
-        rc.reset_pose(rig, rig)
-        obj = fit_item(ocfg["items"][name], gender, body, rig)
-        olw = fig_weights.layer_weights(obj, rig, layers)
-        fig_weights.write_attr(obj, olw)
-        fig_weights.write_color(obj, [(0.0, 0.0, 1.0, 1.0)] * len(obj.data.vertices), "gw")
+    fitted = sc["fitted"]
+    lws = layer_weights_all(fitted, sc["ocfg"], rig, layers)
+    for name, obj in fitted.items():
+        if name not in items:
+            obj.hide_render = True
+            continue
+        olw = lws[name]
         objs[name] = (obj, member_layers(olw, layers), [s.material for s in obj.material_slots])
         print("kalem", name, "katmanlar", objs[name][1], flush=True)
 
@@ -191,7 +269,7 @@ def main():
         m_per_h = (rig.matrix_world @ rig.data.bones["pelvis"].head_local).z / float(clip.get("hip_ratio", 0.46))
         own = clip_cfg.get("layers", layers["layers"])
         for name, (obj, mlayers, src) in objs.items():
-            for other, (o2, _l, _s) in objs.items():
+            for other, o2 in fitted.items():
                 o2.hide_render = other != name
             alb = {n: [albedo_material(camcfg, n, s, kw["core"], kw["root"]) for s in src]
                    for n in layers["layers"]}

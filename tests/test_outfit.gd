@@ -28,6 +28,12 @@ func run(t) -> void:
 	_test_legacy_ids_migrate(t)
 	_test_recruits_come_dressed_deterministically(t)
 	_test_boots_switch_the_walk(t)
+	_test_outfit_bonuses_reach_combat_getters(t)
+	_test_price_follows_stats(t)
+	_test_creation_offers_only_starters(t)
+	_test_tailor_stock_is_a_seeded_subset(t)
+	_test_tailor_buy_and_sell(t)
+	_test_tailor_purchases_survive_reload(t)
 
 func _test_resolve_color_falls_back_when_empty(t) -> void:
 	var fallback := Color(0.1, 0.2, 0.3)
@@ -130,13 +136,19 @@ func _all_pieces() -> Array[OutfitPiece]:
 		out.append_array(OutfitCatalog.get_pieces_for_slot(slot))
 	return out
 
-## Giysi giyilip çıkarılabiliyorsa her bedende render'ı olmalı - yoksa bir
-## bedende görünür, ötekinde görünmez olur ve kimse sebebini bilmez.
+## Görseli olan bir giysinin her bedende render'ı olmalı - yoksa bir bedende
+## görünür, ötekinde görünmez olur ve kimse sebebini bilmez. Görseli henüz
+## olmayan (art_id boş) parça kendi rengiyle çiziliyor, kümesi aranmaz.
 func _test_every_piece_has_art_for_every_body(t) -> void:
+	var with_art := 0
 	for piece in _all_pieces():
+		if piece.art_id.is_empty():
+			continue
+		with_art += 1
 		for body in BODIES:
 			var id := OutfitCatalog.frames_id(piece, body)
 			t.ok(BodyFrames.for_body(id) != null, "%s kare kümesi var" % id)
+	t.eq(with_art, 7, "render edilmiş yedi giysi")
 
 ## Giysi bedenin karesine binecek: klip adları ve kare sayıları birebir.
 func _test_garment_frames_match_body_layout(t) -> void:
@@ -208,7 +220,9 @@ func _test_legacy_ids_migrate(t) -> void:
 	var back := CharacterData.from_dict(data)
 	t.eq(back.get_outfit_piece(OutfitCatalog.SLOT_SHIRT), "peasant_shirt", "eski gömlek gerçek gömleğe")
 	t.eq(back.get_outfit_piece(OutfitCatalog.SLOT_SHOES), "ranger_boots", "eski çizme gerçek çizmeye")
-	t.eq(back.get_outfit_piece(OutfitCatalog.SLOT_HAT), "", "karşılığı olmayan düşer")
+	t.eq(back.get_outfit_piece(OutfitCatalog.SLOT_HAT), "felt_cap", "eski keçe şapka keçe külaha")
+	data["outfit"] = {"hat": "no_such_hat"}
+	t.eq(CharacterData.from_dict(data).get_outfit_piece(OutfitCatalog.SLOT_HAT), "", "karşılığı olmayan düşer")
 
 func _test_recruits_come_dressed_deterministically(t) -> void:
 	var dressed := 0
@@ -229,3 +243,106 @@ func _test_recruits_come_dressed_deterministically(t) -> void:
 func _test_boots_switch_the_walk(t) -> void:
 	t.ok(OutfitCatalog.wears_boots({OutfitCatalog.SLOT_SHOES: "ranger_boots"}), "çizme bileği tutar")
 	t.not_ok(OutfitCatalog.wears_boots({}), "yalın ayak walk klibi")
+
+## Giyilen giysi savaşın okuduğu sarmalayıcılara giriyor - ekipman ve huyla
+## aynı yol (CombatUnit.from_character bunları okuyor).
+func _test_outfit_bonuses_reach_combat_getters(t) -> void:
+	var bare := _person()
+	var dressed := _person()
+	dressed.set_outfit_piece(OutfitCatalog.SLOT_JACKET, "ranger_jacket")
+	dressed.set_outfit_piece(OutfitCatalog.SLOT_SHOES, "hobnail_boots")
+	t.eq(dressed.get_max_hp() - bare.get_max_hp(), 2 + 3, "can: yelek +2, çizme +3")
+	t.eq(dressed.get_dodge() - bare.get_dodge(), 1 - 1, "kaçınma: yelek +1, nalçalı -1")
+	t.eq(dressed.get_accuracy() - bare.get_accuracy(), 1, "isabet: yelek +1")
+	t.eq(dressed.get_damage_bonus() - bare.get_damage_bonus(), 1, "hasar: nalçalı +1")
+	var unit := CombatUnit.from_character(dressed, 1)
+	t.eq(unit.max_hp, dressed.get_max_hp(), "savaş birimi giysili canı taşıyor")
+
+## Fiyat statın fonksiyonu: her parça taban + stat değeri, daha çok vereni
+## daha pahalı; köylü takımı en ucuzlar arasında.
+func _test_price_follows_stats(t) -> void:
+	for piece in _all_pieces():
+		t.ok(piece.price > 0, "%s fiyatlı" % piece.piece_id)
+		var stat_value := 0
+		for field in OutfitCatalog.BONUS_FIELDS:
+			stat_value += int(OutfitCatalog.STAT_PRICE[field]) * int(piece.get(field))
+		t.ok(piece.price >= stat_value, "%s statının değerinden ucuz değil" % piece.piece_id)
+	t.ok(OutfitCatalog.price_for(10, {"hp_bonus": 3}) > OutfitCatalog.price_for(10, {"hp_bonus": 1}),
+		"aynı kumaşta daha çok can daha pahalı")
+	t.ok(OutfitCatalog.price_for(10, {"damage_bonus": 1}) > OutfitCatalog.price_for(10, {"hp_bonus": 1}),
+		"bir puan hasar bir puan candan pahalı")
+	t.eq(OutfitCatalog.price_for(10, {"dodge_bonus": -5}), 5, "eksi stat tabanın yarısının altına indirmez")
+	var peasant := OutfitCatalog.get_piece("peasant_shirt")
+	var silk := OutfitCatalog.get_piece("silk_shirt")
+	t.ok(silk.price > peasant.price * 3, "ipek gömlek keten gömleğin kat kat üstü")
+
+func _test_creation_offers_only_starters(t) -> void:
+	for slot in OutfitCatalog.ALL_SLOTS:
+		var current := ""
+		for i in 8:
+			current = OutfitCatalog.cycle(slot, current, 1, true)
+			if not current.is_empty():
+				t.ok(OutfitCatalog.get_piece(current).starter, "oluşturmada yalnızca köylü takımı: %s" % current)
+
+func _tailor_session() -> GameSession:
+	var session := GameSession.new()
+	session.wallet.earn(1000)
+	return session
+
+func _test_tailor_stock_is_a_seeded_subset(t) -> void:
+	var session := _tailor_session()
+	var first := session.get_tailor_stock()
+	t.eq(session.get_tailor_stock(), first, "aynı ziyarette aynı tezgâh")
+	t.ok(first.size() >= GameSession.TAILOR_MIN_PIECES, "tezgâh hiçbir zaman boş değil")
+	var never_all := true
+	var seen: Dictionary = {}
+	for day in 40:
+		session.total_days_elapsed = day
+		var stock := session.get_tailor_stock()
+		if stock.size() == OutfitCatalog.get_all_pieces().size():
+			never_all = false
+		for piece_id in stock:
+			seen[piece_id] = int(seen.get(piece_id, 0)) + 1
+	t.ok(never_all, "terzi hiçbir gün her giysiyi birden satmıyor")
+	t.eq(seen.size(), OutfitCatalog.get_all_pieces().size(), "her giysi bir gün tezgâha çıkıyor")
+	t.ok(int(seen.get("peasant_shirt", 0)) > int(seen.get("silk_shirt", 0)),
+		"ucuz giysi pahalısından sık bulunuyor")
+
+func _test_tailor_buy_and_sell(t) -> void:
+	var session := _tailor_session()
+	var stock := session.get_tailor_stock()
+	var piece_id := str(stock.keys()[0])
+	var price := session.get_outfit_buy_price(piece_id)
+	var before := session.wallet.balance
+	t.ok(session.buy_outfit(piece_id), "tezgâhtakini alır")
+	t.eq(session.wallet.balance, before - price, "fiyatı keseden düşer")
+	t.eq(session.get_outfit_count(piece_id), 1, "alınan dolaba düşer")
+	t.eq(int(session.get_tailor_stock().get(piece_id, 0)), int(stock[piece_id]) - 1, "tezgâhtan eksilir")
+	for i in 5:
+		session.buy_outfit(piece_id)
+	t.eq(session.get_outfit_buy_block_reason(piece_id), "UI_TAILOR_SOLD_OUT", "tükenince nedeniyle kilitli")
+	var missing := ""
+	for piece in OutfitCatalog.get_all_pieces():
+		if not session.get_tailor_stock().has(piece.piece_id):
+			missing = piece.piece_id
+	t.not_ok(session.buy_outfit(missing), "tezgâhta olmayan alınamaz")
+	var sell_price := session.get_outfit_sell_price(piece_id)
+	t.ok(sell_price < price, "satış alıştan aşağıda - al-sat para basmıyor")
+	var mid := session.wallet.balance
+	t.ok(session.sell_outfit(piece_id), "dolaptakini satar")
+	t.eq(session.wallet.balance, mid + sell_price, "satış keseye")
+	var poor := GameSession.new()
+	poor.wallet.spend(poor.wallet.balance)
+	var cheap := str(poor.get_tailor_stock().keys()[0])
+	t.eq(poor.get_outfit_buy_block_reason(cheap), "UI_TAILOR_NO_GOLD", "altın yetmezse nedeniyle kilitli")
+	t.not_ok(poor.buy_outfit(cheap), "borçla giysi alınmaz")
+
+func _test_tailor_purchases_survive_reload(t) -> void:
+	var session := _tailor_session()
+	var piece_id := str(session.get_tailor_stock().keys()[0])
+	var left := int(session.get_tailor_stock()[piece_id])
+	session.buy_outfit(piece_id)
+	var loaded := GameSession.new()
+	loaded.load_from_dict(session.to_save_dict())
+	t.eq(int(loaded.get_tailor_stock().get(piece_id, 0)), left - 1,
+		"yeniden yükleme satılanı tezgâha geri koymuyor")

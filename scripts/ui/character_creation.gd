@@ -261,7 +261,7 @@ func _build_outfit_row(slot: String) -> HBoxContainer:
 
 func _on_outfit_cycle(slot: String, direction: int) -> void:
 	var current: String = _outfit.get(slot, OutfitCatalog.NONE_PIECE)
-	_outfit[slot] = OutfitCatalog.cycle(slot, current, direction)
+	_outfit[slot] = OutfitCatalog.cycle(slot, current, direction, true)
 	_refresh()
 
 func _build_stats_section() -> void:
