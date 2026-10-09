@@ -14,6 +14,7 @@ extends Control
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
 @onready var _party_button: Button = $MarginContainer/VBoxContainer/BottomRow/PartyButton
+@onready var _wardrobe_button: Button = $MarginContainer/VBoxContainer/BottomRow/WardrobeButton
 @onready var _gate_button: Button = $MarginContainer/VBoxContainer/BottomRow/GateButton
 @onready var _help_button: Button = $MarginContainer/VBoxContainer/BottomRow/HelpButton
 
@@ -44,7 +45,9 @@ func _ready() -> void:
 	_gate_button.text = tr("UI_CITY_LEAVE_BY_GATE")
 	_help_button.text = tr("UI_HELP_OPEN")
 	_help_button.tooltip_text = tr("UI_HELP_TOOLTIP")
+	_wardrobe_button.text = tr("UI_CITY_WARDROBE")
 	_party_button.pressed.connect(_on_party_pressed)
+	_wardrobe_button.pressed.connect(_on_wardrobe_pressed)
 	_gate_button.pressed.connect(_on_gate_pressed)
 	_help_button.pressed.connect(_show_help)
 	var waybook_button := Button.new()
@@ -173,6 +176,9 @@ func _on_spot_pressed(scene_path: String) -> void:
 
 func _on_party_pressed() -> void:
 	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.PARTY))
+
+func _on_wardrobe_pressed() -> void:
+	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.WARDROBE))
 
 func _on_gate_pressed() -> void:
 	SceneInk.go(Nav.go_root(Nav.WORLD_HUB))

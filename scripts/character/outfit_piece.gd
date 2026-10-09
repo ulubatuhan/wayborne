@@ -1,11 +1,13 @@
 class_name OutfitPiece
 extends Resource
 
-## Kıyafet sistemi tamamen dış görünüm için - hiçbir stat/mekanik bonusu
-## yok (bkz. CLAUDE.md Faz 13 hazırlık notu #14). Parçanın kendisi render
-## edilmiş bir giysi (`art_id`, beden başına bir kare kümesi - bkz.
-## OutfitCatalog.frames_id); `color` kare kümesi olmayan çizimlerin (savaş
-## silüeti, eski parça mankeni) onu taşıdığı ton.
+## Bir giysi: görünüşü (`art_id` - beden başına bir kare kümesi, bkz.
+## OutfitCatalog.frames_id; `color` - kare kümesi olmayan çizimlerin
+## taşıdığı ton) ve küçük bir savaş katkısı. Bonus alanları `Trait`'in ve
+## `Equipment`'ın alanlarıyla aynı adda, aynı `CharacterData` sarmalayıcıları
+## okuyor - savaş giyileni `CombatUnit.from_character` üstünden kendiliğinden
+## görüyor. Görseli henüz render edilmemiş bir giysi (`art_id` boş) de
+## giyilebilir; figür onu kendi rengiyle taşır.
 
 @export var piece_id: String = ""
 ## OutfitCatalog.SLOT_* değerlerinden biri.
@@ -29,6 +31,20 @@ extends Resource
 ## Bileği tutan ayakkabı: yürüyüş `walk_boots` klibine geçer (FigureRig'in
 ## BOOT_ANKLE_RANGE'i - bileği sert bir yürüyüş).
 @export var boots: bool = false
+
+## Kırk-elli parçalık bir zırhın yanında küçük: bir giysi kat kattır, bir
+## korucu takımının hepsi bir zırh kademesine yakın durur (bkz. OutfitCatalog).
+@export var hp_bonus: int = 0
+@export var dodge_bonus: int = 0
+@export var accuracy_bonus: int = 0
+@export var crit_bonus: int = 0
+@export var damage_bonus: int = 0
+## Terzide satış fiyatı: kumaşın ve işçiliğin tabanı + verdiği her statın
+## değeri (OutfitCatalog.price_for) - fiyat statla büyüyor, hepsi aynı formül.
+@export var price: int = 0
+## Karakter oluşturmada seçilebilir mi - yalnızca köylü takımı. Daha iyisi
+## para ister; bedava seçilebilseydi terzi anlamsızlaşırdı.
+@export var starter: bool = false
 
 var display_name: String:
 	get: return tr(display_name_key)

@@ -25,6 +25,7 @@ const SCREENS: Array[String] = [
 	"res://scenes/game/recruit.tscn",
 	"res://scenes/game/character.tscn",
 	"res://scenes/game/party.tscn",
+	"res://scenes/game/wardrobe.tscn",
 	"res://scenes/ui/character_creation.tscn",
 	"res://scenes/world/city_map.tscn",
 ]
@@ -64,6 +65,10 @@ func _prepare_session() -> void:
 	session.owned_wagon_count = 2
 	session.add_to_cargo(ItemCatalog.get_item("test_grain"), 12)
 	session.add_to_cargo(ItemCatalog.get_item("silk"), 3)
+	# Dolapta birkaç giysi: kıyafet dolabının kartları ve satış düğmeleri.
+	session.add_outfit("ranger_jacket")
+	session.add_outfit("hobnail_boots")
+	session.add_outfit("felt_cap", 2)
 	session.spend_or_owe(400)
 	session.total_days_elapsed = 60
 	# Kenar notları görünsün: bir kırgınlık, bir açlık çetelesi, bir huy.

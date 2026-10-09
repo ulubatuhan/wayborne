@@ -141,15 +141,15 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 	)
 	return candidate
 
-## Yolda kazanılmış kıyafetler: çoğunlukla köylü takımı, arada bir korucu
-## parçası. Kendi tohumuyla (adaydan türetilen) - adayı üreten zarın
-## sırasına dokunmasın, aynı aday her açılışta aynı giyinsin.
+## Yolda kazanılmış kıyafetler: çoğunlukla ucuz parçalar, arada bir pahalısı -
+## parçanın seçilme ağırlığı fiyatının tersi. Kendi tohumuyla (adaydan
+## türetilen) - adayı üreten zarın sırasına dokunmasın, aynı aday her
+## açılışta aynı giyinsin.
 const DRESS_CHANCES: Dictionary = {
 	OutfitCatalog.SLOT_PANTS: 0.9, OutfitCatalog.SLOT_SHOES: 0.75,
 	OutfitCatalog.SLOT_SHIRT: 0.8, OutfitCatalog.SLOT_JACKET: 0.12,
-	OutfitCatalog.SLOT_HAT: 0.08,
+	OutfitCatalog.SLOT_GLOVES: 0.06, OutfitCatalog.SLOT_HAT: 0.08,
 }
-const DRESS_RANGER_SHARE: float = 0.2
 
 static func _dress(candidate: CharacterData) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -160,9 +160,16 @@ static func _dress(candidate: CharacterData) -> void:
 		var pieces := OutfitCatalog.get_pieces_for_slot(slot)
 		if pieces.is_empty():
 			continue
-		var pick := pieces[0]
-		if pieces.size() > 1 and rng.randf() < DRESS_RANGER_SHARE:
-			pick = pieces[1]
+		var total := 0.0
+		for piece in pieces:
+			total += 1.0 / float(maxi(1, piece.price))
+		var roll := rng.randf() * total
+		var pick := pieces[pieces.size() - 1]
+		for piece in pieces:
+			roll -= 1.0 / float(maxi(1, piece.price))
+			if roll <= 0.0:
+				pick = piece
+				break
 		candidate.set_outfit_piece(slot, pick.piece_id)
 
 ## auto_allocate açık geldiği için (CharacterData varsayılanı) puanlar

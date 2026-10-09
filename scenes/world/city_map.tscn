@@ -123,6 +123,10 @@ theme_override_constants/separation = 12
 layout_mode = 2
 text = "UI_CITY_VIEW_PARTY"
 
+[node name="WardrobeButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+text = "UI_CITY_WARDROBE"
+
 [node name="GateButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
 layout_mode = 2
 text = "UI_CITY_LEAVE_BY_GATE"

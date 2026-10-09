@@ -1659,10 +1659,46 @@ in every preview the moment it is equipped.
       puts it back, and the character screen's arrows walk only
       `get_outfit_choices()` - what that person wears plus what the locker
       holds for the slot, disabled with its reason when there is nothing
-      else. Character creation still picks the starting clothes from the
-      whole catalogue; recruits arrive dressed from their own seed
-      (`RecruitCatalog._dress`, never the candidate roll's RNG). Old colour
-      ids migrate on load (`OutfitCatalog.LEGACY_IDS`).
+      else. Character creation picks the starting clothes from the
+      `starter` pieces only (the peasant kit): better clothes cost money,
+      and a free pick at creation would make the tailor pointless. Recruits
+      arrive dressed from their own seed (`RecruitCatalog._dress`, never
+      the candidate roll's RNG), each slot weighted by the inverse of the
+      price, so a guild hire in silk is rare. Old colour ids migrate on
+      load (`OutfitCatalog.LEGACY_IDS`).
+    - **Clothes are a small combat axis, priced by what they give.**
+      `OutfitPiece` carries the same five bonus fields as `Trait` and
+      `Equipment`, read by the same `CharacterData` getters
+      (`_outfit_bonus_sum` beside `_equipment_bonus_sum`), so combat sees
+      them through `CombatUnit.from_character` with no new wiring.
+      Bonuses stay small: a whole ranger kit (+5 HP, +4 dodge, +2 accuracy,
+      +2 crit) sits near one armour tier, not above it. The price is one
+      formula, `OutfitCatalog.price_for(base, bonuses)`: the cloth and
+      work (`base`) plus `STAT_PRICE` per point. Damage costs most and HP
+      least, because dodge and damage swing a fight more than HP does (Ruin
+      Rules' body A/B). A negative stat lowers the price, never below half
+      the base. Pieces without a render (`art_id` empty) are real items
+      too; the figure carries them in their `color` until they are drawn.
+    - **The tailor never has everything.** `GameSession.get_tailor_stock()`
+      rolls the stall from `location + day`, the recruits' pattern. A piece
+      is on it with chance `40 / (40 + price)`, so silk is rare and linen
+      common, and a bare stall is topped up to `TAILOR_MIN_PIECES` from the
+      cheapest. Purchases are `tailor_sold` (saved, cleared on arrival), so
+      a reload cannot restock what was bought. The buy price runs through
+      `get_buy_price_multiplier()`, the same culture and trait discount the
+      market reads. The tailor buys back at `OUTFIT_RESALE_FACTOR` (40%),
+      far below the buy price, so buy-and-sell is not a money printer. A
+      locked purchase shows its reason (sold out, not enough gold, on the
+      road).
+    - **The wardrobe is a city screen, and dragging is a shortcut.**
+      `wardrobe.tscn` (the city's "Kıyafet Dolabı" button) shows the chosen
+      person standing beside the six slot boxes, with the caravan locker
+      and the day's tailor stall next to them. Drag a locker card onto
+      its slot box to wear it, a slot back onto the locker to take it off,
+      a card onto the tailor to sell it. Each drop calls
+      `set_drag_forwarding` and accepts only what fits (a shirt never lands
+      on a shoe box). Every drag has a button (Wear / Take off / Sell / Buy),
+      because a decision needs a visible control (Road Movement Rules).
     - Checked across the cycle, not in one pose: `tests/screenshot_outfits.gd`
       prints eight walk phases plus idle/attack/hit/dead per body x outfit;
       `test_outfit.gd` asserts every item has a frame set for all six
@@ -4863,17 +4899,14 @@ verir.
   Faz 22 şehri B10 masa sahnesine yeni taşımıştı, çizilmiş animasyonlu
   bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
   "iki ayrı prodüksiyon" tuzağı).
-- **Kıyafetler ticarete ve ganimete bağlanacak.** Giysiler artık gerçek,
-  giyilip çıkarılabilen parçalar ve kervanın bir kıyafet dolabı var
-  (`GameSession.outfit_inventory`, bkz. Wardrobe & Rig Rules'un "Clothes
-  are worn, not painted on" maddesi) - ama dolaba bugün yalnızca iki kapı
-  açılıyor: karakter oluşturmada seçilen başlangıç kıyafeti ve birinin
-  çıkardığı. Sıradaki iş: pazarda/bir terzide satın alma (`add_outfit` +
-  fiyat; kalemlere fiyat alanı eklenecek) ve yolda bulma (`EventEffect`'e
-  `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle - parça önce dolaba
-  düşer, kime giydirileceği sonra seçilir). Yeni kalemler aynı boru
-  hattından geçer: `config/outfits.json`'a bir satır, `render_outfits.py`,
-  `pack_outfits.py`, `OutfitCatalog._ensure_built()`'e bir satır.
+- **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
+  Dolabı ekranı, statlı ve statına göre fiyatlı 16 giysi, her ziyarette
+  başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
+  `EventEffect`'e `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle (parça
+  önce dolaba düşer, kime giydirileceği sonra seçilir). Dokuz giysinin
+  henüz görseli yok (`art_id` boş, kendi rengiyle çiziliyor): yeni bir
+  render `config/outfits.json`'a bir satır, `render_outfits.py`,
+  `pack_outfits.py` ve `OutfitCatalog`'da `has_art` true demek.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler

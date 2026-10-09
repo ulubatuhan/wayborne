@@ -40,6 +40,7 @@ const RECRUIT: String = "res://scenes/game/recruit.tscn"
 const COMBAT: String = "res://scenes/game/combat.tscn"
 const PARTY: String = "res://scenes/game/party.tscn"
 const CHARACTER: String = "res://scenes/game/character.tscn"
+const WARDROBE: String = "res://scenes/game/wardrobe.tscn"
 
 ## Kök ekranlar: geri tuşları yoktur, kendi çıkışlarını kendileri taşır
 ## (şehir kapıdan yola, yol menüye). Bir köke varmak yığını temizler -
