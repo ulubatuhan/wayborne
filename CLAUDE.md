@@ -1462,6 +1462,63 @@ in every preview the moment it is equipped.
     rig until clothing modules exist (open: `QUESTIONS.md` #13-15 - the
     nude body pokes past a garment's edge where MPFB's delete group would
     hide it in 3D, and `qa/garment_tests.py` measures exactly that).
+  - **Clothes are worn, not painted on: each garment is its own frame
+    set, rendered on the same body in the same pose.** The CC0 Quaternius
+    "Modular Character Outfits" (`art_source/models/clothes/
+    quaternius_fantasy/`) are fitted to the MPFB body by
+    `blender/fit_garment.py`: their skeleton is aligned bone by bone to the
+    MPFB rest pose (`inherit_scale NONE`, or the parts explode), the
+    pose is baked, the skin faces are dropped, every vertex is pushed at
+    least `eps` outside the body (BVH, smoothed, with MPFB's helper masks
+    *on* - otherwise the tights/skirt helpers inflate the pants), and the
+    weights are transferred from the body so the garment follows the same
+    rig. `render_outfits.py` renders each item alone per variant x clip x
+    frame through `render_frames.pose_clip_frame` - the body's own pose
+    and root, one function, so a garment cannot drift from its body. The
+    body is invisible to the camera but casts the shadow.
+    - **The eps order is the layering.** Outer garments get a larger eps
+      (pants .004 < shoes .007 < hood .008 < shirt .009 < jacket .013), so
+      a jacket encloses the shirt it is drawn over and nothing below
+      pokes through. That replaces MPFB's delete groups (`QUESTIONS.md`
+      #13): a garment enclosing the body needs no hidden skin.
+    - **Colour is the texture's, shade is the body's tones.** Two passes
+      per layer like the animals (shade + unlit albedo, multiplied and
+      posterised in `mesh/pack_outfits.py`). Quaternius feeds Base Color
+      through texture x colour attribute (MIX/MULTIPLY), not a bare
+      texture; `render_beast.albedo_material` only read a bare texture and
+      the first renders came out white - `render_outfits._copy_upstream`
+      copies the whole upstream node tree.
+    - **One frame set per item x body** (`outfit_<item>_<variant>`, same
+      clip/frame/layer layout as the body, only `KIND_BODY`). `walk_boots`
+      takes the non-leg layers from `walk` shifted by the body's
+      `base_dy_px`, exactly as `pack_frames.py` does for the body.
+      Packed at half resolution (`BodyFrames.texel_scale` 2): the figure
+      is drawn ~5x smaller than rendered, and full resolution was ~55 MB
+      across 42 sets against ~16 MB now.
+    - **The game draws them inside the body's layer loop**
+      (`WalkFigure._draw_person_frames`): per layer the body, then each worn
+      garment by `OutfitPiece.draw_order` (`OutfitCatalog.worn_frames`).
+      The base kit (tank/bra + shorts) stays its own colour - tinting it
+      with the jacket's colour showed green through an open collar. A hat
+      with frames suppresses its procedural headgear; boots
+      (`OutfitPiece.boots`) switch the walk to `walk_boots`. A piece
+      without frames for that body falls back to its `color`, as do the
+      combat silhouette and the old part rig.
+    - **A garment comes out of the locker and goes back into it.**
+      `GameSession.outfit_inventory` is the clothes counterpart of
+      `equipment_inventory`: `wear_outfit()` takes the piece from the
+      locker and returns whatever was in that slot, `take_off_outfit()`
+      puts it back, and the character screen's arrows walk only
+      `get_outfit_choices()` - what that person wears plus what the locker
+      holds for the slot, disabled with its reason when there is nothing
+      else. Character creation still picks the starting clothes from the
+      whole catalogue; recruits arrive dressed from their own seed
+      (`RecruitCatalog._dress`, never the candidate roll's RNG). Old colour
+      ids migrate on load (`OutfitCatalog.LEGACY_IDS`).
+    - Checked across the cycle, not in one pose: `tests/screenshot_outfits.gd`
+      prints eight walk phases plus idle/attack/hit/dead per body x outfit;
+      `test_outfit.gd` asserts every item has a frame set for all six
+      bodies with the body's exact clip layout.
   - Atlas pages get runtime mipmaps (`BodyFrames._with_mipmaps`): frames
     are drawn ~5x smaller than rendered, and `.import` files are not in the
     repo, so an import setting could not carry it.
@@ -4658,21 +4715,21 @@ verir.
   Faz 22 şehri B10 masa sahnesine yeni taşımıştı, çizilmiş animasyonlu
   bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
   "iki ayrı prodüksiyon" tuzağı).
-- **Yirmi kuşam kalemi (B-01..B-20) hâlâ çizilmedi - ama artık isteme
-  biçimi değişti ve boru hattı hazır.** Üç turluk 3×3 parça sayfası
-  mücadelesi terk edildi; her kalem tek bir bütün figür olarak isteniyor
-  ve `tools/wardrobe_cut.py` dokuz parçaya kesiyor (gerekçe ve ölçüm:
-  Wardrobe & Rig Rules'un "A garment is painted whole" maddesi). Hazır
-  promptlar `docs/gemini-prompts-wardrobe.md`'de, şablon
-  `docs/wardrobe/paint_pose_reference.png`, kalem kalem liste
-  `docs/wayborne_gorsel_denetim.xlsx`'in "Kalan Görsel İşler" sayfasında.
-  Beden gelene kadar herkes mankenin kendisiyle (giydiğinin rengine
-  boyanarak) çiziliyor, yani eksiklik bir boşluk değil bir yer tutucu.
-- **Kıyafetler (B-01..B-20) 2B yolda kalıyor**, çünkü `Wardrobe`'un
-  takılıp-çıkarılabilir giysi-katmanı mimarisi (`SLOT_LAYERS`) sürekli tek
-  bir deri render'ına kolay ayrışmıyor - ama `wardrobe_cut.py` resmin
-  nereden geldiğini bilmiyor, yani boyama pozunda render edilmiş CC0 bir
-  3B giysi de artık çıplak bedenle aynı komuttan geçer.
+- **Kıyafetler ticarete ve ganimete bağlanacak.** Giysiler artık gerçek,
+  giyilip çıkarılabilen parçalar ve kervanın bir kıyafet dolabı var
+  (`GameSession.outfit_inventory`, bkz. Wardrobe & Rig Rules'un "Clothes
+  are worn, not painted on" maddesi) - ama dolaba bugün yalnızca iki kapı
+  açılıyor: karakter oluşturmada seçilen başlangıç kıyafeti ve birinin
+  çıkardığı. Sıradaki iş: pazarda/bir terzide satın alma (`add_outfit` +
+  fiyat; kalemlere fiyat alanı eklenecek) ve yolda bulma (`EventEffect`'e
+  `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle - parça önce dolaba
+  düşer, kime giydirileceği sonra seçilir). Yeni kalemler aynı boru
+  hattından geçer: `config/outfits.json`'a bir satır, `render_outfits.py`,
+  `pack_outfits.py`, `OutfitCatalog._ensure_built()`'e bir satır.
+- **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
+  yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
+  `docs/gemini-prompts-wardrobe.md` ve şablonları kayıt olarak duruyor ama
+  yeni kalemler CC0 3B paketlerden giydirilip render ediliyor.
 - **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
   `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
   (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.

@@ -25,7 +25,7 @@ const HUMAN_ROWS: Array = [
 	 ["yolda kılıç belde", "bandit", "", 0.0, false, false, {}, 1.0],
 	 ["yolda mızrak", "guard", "", 0.0, false, false, {}, 1.0],
 	 ["heybe", "clerk", "", 0.0, false, true, {}, 1.0],
-	 ["çizme", "clerk", "", 0.0, false, false, {"shoes": "shoes_boots"}, 1.0],
+	 ["çizme", "clerk", "", 0.0, false, false, {"shoes": "ranger_boots"}, 1.0],
 	 ["ölü", "guard", "dead", 0.0, true, false, {}, 0.0],
 	 ["yerde", "guard", "downed", 0.0, true, false, {}, 0.0]],
 ]

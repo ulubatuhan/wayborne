@@ -280,6 +280,63 @@ func unequip_from_character(character: CharacterData, slot: String) -> bool:
 	add_equipment(previous_id, 1)
 	return true
 
+## Kervanın kıyafet dolabı: kimsenin üstünde olmayan giysiler, piece_id ->
+## adet (OutfitCatalog). Ekipman deposunun karşılığı: giymek buradan alır,
+## çıkarmak buraya koyar, bir kişinin çıkardığını bir başkası giyebilir.
+## Satın alma ve ganimet ileride buraya düşecek (bkz. CLAUDE.md Ana Hedefler).
+var outfit_inventory: Dictionary = {}
+
+func add_outfit(piece_id: String, quantity: int = 1) -> void:
+	if quantity <= 0 or OutfitCatalog.get_piece(piece_id) == null:
+		return
+	outfit_inventory[piece_id] = get_outfit_count(piece_id) + quantity
+
+func get_outfit_count(piece_id: String) -> int:
+	return int(outfit_inventory.get(piece_id, 0))
+
+func remove_outfit(piece_id: String, quantity: int = 1) -> bool:
+	var current := get_outfit_count(piece_id)
+	if quantity <= 0 or current < quantity:
+		return false
+	if current - quantity > 0:
+		outfit_inventory[piece_id] = current - quantity
+	else:
+		outfit_inventory.erase(piece_id)
+	return true
+
+## Dolaptaki bir giysiyi giydirir; o slotta giyilen (varsa) dolaba döner.
+## Dolapta yoksa hiçbir şey değişmez.
+func wear_outfit(character: CharacterData, piece_id: String) -> bool:
+	var piece := OutfitCatalog.get_piece(piece_id)
+	if character == null or piece == null or not remove_outfit(piece_id, 1):
+		return false
+	var previous := character.get_outfit_piece(piece.slot)
+	character.set_outfit_piece(piece.slot, piece_id)
+	if not previous.is_empty():
+		add_outfit(previous, 1)
+	return true
+
+## Bir slottaki giysiyi çıkarıp dolaba koyar.
+func take_off_outfit(character: CharacterData, slot: String) -> bool:
+	if character == null:
+		return false
+	var previous := character.get_outfit_piece(slot)
+	if previous.is_empty():
+		return false
+	character.set_outfit_piece(slot, OutfitCatalog.NONE_PIECE)
+	add_outfit(previous, 1)
+	return true
+
+## Bir slotta seçilebilecekler: giyilen (varsa) ve dolapta o slota ait olan
+## her parça, katalog sırasıyla - karakter ekranının kaydırıcısı bunu okuyor.
+func get_outfit_choices(character: CharacterData, slot: String) -> Array[String]:
+	var out: Array[String] = [OutfitCatalog.NONE_PIECE]
+	var worn := character.get_outfit_piece(slot) if character != null else ""
+	for piece in OutfitCatalog.get_pieces_for_slot(slot):
+		if piece.piece_id == worn or get_outfit_count(piece.piece_id) > 0:
+			out.append(piece.piece_id)
+	return out
+
 ## Kervanın şu an bulunduğu şehir.
 var current_location_id: String = WorldMapData.START_LOCATION_ID
 
@@ -2910,6 +2967,7 @@ func to_save_dict() -> Dictionary:
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
 		"earned_wagon_milestones": _earned_wagon_milestones.duplicate(),
 		"equipment_inventory": equipment_inventory.duplicate(),
+		"outfit_inventory": outfit_inventory.duplicate(),
 		"debts": debts.to_save_array(),
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
@@ -3080,6 +3138,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	for merchant_id in (data.get("delivered_wagon_quest_ids", {}) as Dictionary):
 		_delivered_wagon_quest_ids[str(merchant_id)] = true
 
+	outfit_inventory = {}
+	var outfit_data: Dictionary = data.get("outfit_inventory", {})
+	for piece_id in outfit_data:
+		add_outfit(OutfitCatalog.migrate_piece_id(str(piece_id)), int(outfit_data[piece_id]))
 	equipment_inventory = {}
 	var equipment_data: Dictionary = data.get("equipment_inventory", {})
 	for equipment_id in equipment_data:

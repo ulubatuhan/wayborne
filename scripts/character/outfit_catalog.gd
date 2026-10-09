@@ -1,15 +1,16 @@
 class_name OutfitCatalog
 extends RefCounted
 
-## Kıyafet sistemi: altı slot, tamamen dış görünüm için - hiçbir stat ya da
-## mekanik etkisi yok (bkz. CLAUDE.md Faz 13 hazırlık notu #14). Karakter
-## oluşturma ekranında her slot sağa/sola kaydırılarak (bkz. `cycle()`) bir
-## seçenekten diğerine geçilir, "hiçbiri" de bir seçenektir.
+## Kıyafet sistemi: tamamen dış görünüm için - hiçbir stat ya da mekanik
+## etkisi yok (bkz. CLAUDE.md Faz 13 hazırlık notu #14). Her parça gerçek,
+## 3B'den render edilmiş bir giysi (`art_id`, bkz. CLAUDE.md "Clothes are
+## worn, not painted on"): bedenin aynı pozunda, aynı katmanlarda çiziliyor
+## ve çıkarılabiliyor. Bir parça bir kişinin üstünde ya da kervanın kıyafet
+## dolabında (`GameSession.outfit_inventory`) durur; giymek dolaptan alır,
+## çıkarmak geri koyar - ekipmanın deposuyla aynı desen.
 ##
-## Şimdilik her slotun küçük, hep-açık bir havuzu var - ekonomik kilit ya
-## da edinim mekaniği (Equipment'ınki gibi) sonraki bir iş, sistemin
-## kendisi burada kuruluyor. Tablo bir kez kurulup statik önbelleğe alınır
-## (bkz. TraitCatalog/EquipmentCatalog deseni).
+## Tablo bir kez kurulup statik önbelleğe alınır (bkz. TraitCatalog/
+## EquipmentCatalog deseni).
 
 const SLOT_HAT: String = "hat"
 const SLOT_SHIRT: String = "shirt"
@@ -19,10 +20,23 @@ const SLOT_PANTS: String = "pants"
 const SLOT_SHOES: String = "shoes"
 
 ## Baştan ayağa doğru sıra - önizleme penceresi ve slot listesi bu sırayla
-## döner.
+## döner. Eldiven slotu sabit olarak duruyor (Wardrobe katman sırası onu
+## okuyor) ama listede yok: elimizdeki giysilerin eldiveni gömlekle/yelekle
+## birlikte geliyor, tek başına bir eldiven parçası yok.
 const ALL_SLOTS: Array[String] = [
-	SLOT_HAT, SLOT_SHIRT, SLOT_JACKET, SLOT_GLOVES, SLOT_PANTS, SLOT_SHOES,
+	SLOT_HAT, SLOT_SHIRT, SLOT_JACKET, SLOT_PANTS, SLOT_SHOES,
 ]
+
+## Kıyafetler render'a geçmeden önceki renk-kalemleri. Eski bir kayıttaki
+## kimlik en yakın gerçek giysiye çevriliyor (`migrate_piece_id`); karşılığı
+## olmayan (fötr şapka, tek eldiven) düşüyor - yeni dünyada öyle bir parça yok.
+const LEGACY_IDS: Dictionary = {
+	"shirt_linen": "peasant_shirt", "shirt_dyed": "peasant_shirt",
+	"jacket_wool": "ranger_jacket", "jacket_leather": "ranger_jacket",
+	"pants_wool": "peasant_pants", "pants_canvas": "ranger_pants",
+	"shoes_boots": "ranger_boots", "shoes_sandals": "peasant_shoes",
+	"hat_hood": "ranger_hood", "hat_felt": "", "gloves_leather": "",
+}
 
 ## Bir slotun boş bırakılması - herkesin varsayılanı.
 const NONE_PIECE: String = ""
@@ -70,32 +84,65 @@ static func cycle(slot: String, current_id: String, direction: int) -> String:
 	index = wrapi(index + direction, 0, ids.size())
 	return ids[index]
 
+## Eski ya da bilinmeyen bir kimliğin bugünkü karşılığı ("" = yok).
+static func migrate_piece_id(piece_id: String) -> String:
+	if get_piece(piece_id) != null:
+		return piece_id
+	return str(LEGACY_IDS.get(piece_id, ""))
+
+## Bir bedenin (CharacterData.get_body_variant_id) üstündeki parçanın kare
+## kümesinin kimliği: `outfit_<art_id>_<cinsiyet>_<kilo>`.
+static func frames_id(piece: OutfitPiece, body_variant: String) -> String:
+	if piece == null or piece.art_id.is_empty() or not body_variant.begins_with("body_"):
+		return ""
+	return "outfit_%s_%s" % [piece.art_id, body_variant.trim_prefix("body_")]
+
+## Giyilen parçaların kare kümeleri, çizim sırasıyla (alttan üste). Kare
+## kümesi henüz olmayan parça (o beden için render edilmemiş) atlanıyor:
+## figür o parçayı prosedürel rengiyle taşımaya devam ediyor.
+static func worn_frames(outfit: Dictionary, body_variant: String) -> Array[BodyFrames]:
+	var worn: Array[OutfitPiece] = []
+	for slot in outfit:
+		var piece := get_piece(str(outfit[slot]))
+		if piece != null:
+			worn.append(piece)
+	worn.sort_custom(func(a: OutfitPiece, b: OutfitPiece) -> bool: return a.draw_order < b.draw_order)
+	var out: Array[BodyFrames] = []
+	for piece in worn:
+		var frames := BodyFrames.for_body(frames_id(piece, body_variant))
+		if frames != null:
+			out.append(frames)
+	return out
+
+## O slottaki parçanın bu beden için kare kümesi var mı - varsa onun
+## prosedürel karşılığı (kukuletanın çizilmiş silüeti) çizilmiyor.
+static func has_frames_for(outfit: Dictionary, slot: String, body_variant: String) -> bool:
+	var piece := get_piece(str(outfit.get(slot, NONE_PIECE)))
+	return BodyFrames.for_body(frames_id(piece, body_variant)) != null
+
+## Bileği tutan bir ayakkabı giyiliyor mu (yürüyüş `walk_boots` klibine geçer).
+static func wears_boots(outfit: Dictionary) -> bool:
+	var piece := get_piece(str(outfit.get(SLOT_SHOES, NONE_PIECE)))
+	return piece != null and piece.boots
+
 static func _ensure_built() -> void:
 	if not _pieces.is_empty():
 		return
-
-	# Kukulete/keçe şapka, WalkFigure/CombatFigure'ın zaten çizdiği "hood"/
-	# "cap" kafa şekillerine eşleniyor (bkz. `head_shape`) - şapka seçimi
-	# artık gerçekten farklı bir silüet, sadece farklı bir renk değil.
-	_add(SLOT_HAT, "hat_felt", "OUTFIT_HAT_FELT", Color(0.42, 0.32, 0.22), "cap")
-	_add(SLOT_HAT, "hat_hood", "OUTFIT_HAT_HOOD", Color(0.30, 0.30, 0.34), "hood")
-
-	_add(SLOT_SHIRT, "shirt_linen", "OUTFIT_SHIRT_LINEN", Color(0.82, 0.78, 0.66))
-	_add(SLOT_SHIRT, "shirt_dyed", "OUTFIT_SHIRT_DYED", Color(0.36, 0.46, 0.58))
-
-	_add(SLOT_JACKET, "jacket_wool", "OUTFIT_JACKET_WOOL", Color(0.38, 0.28, 0.20))
-	_add(SLOT_JACKET, "jacket_leather", "OUTFIT_JACKET_LEATHER", Color(0.30, 0.20, 0.14))
-
-	_add(SLOT_GLOVES, "gloves_leather", "OUTFIT_GLOVES_LEATHER", Color(0.34, 0.24, 0.18))
-
-	_add(SLOT_PANTS, "pants_wool", "OUTFIT_PANTS_WOOL", Color(0.28, 0.26, 0.24))
-	_add(SLOT_PANTS, "pants_canvas", "OUTFIT_PANTS_CANVAS", Color(0.58, 0.54, 0.44))
-
-	_add(SLOT_SHOES, "shoes_boots", "OUTFIT_SHOES_BOOTS", Color(0.22, 0.16, 0.12))
-	_add(SLOT_SHOES, "shoes_sandals", "OUTFIT_SHOES_SANDALS", Color(0.50, 0.40, 0.30))
+	# Renk: parçanın dokusunun ortalama tonu - kare kümesi olmayan çizimler
+	# (savaş silüeti, eski parça mankeni) parçayı bu renkle taşıyor.
+	# draw_order tools/figure_pipeline/config/outfits.json ile aynı: dış giysi
+	# iç giysinin üstüne çiziliyor, render'da da onu sarıyor (eps).
+	_add(SLOT_PANTS, "peasant_pants", "OUTFIT_PEASANT_PANTS", Color(0.27, 0.18, 0.12), 10)
+	_add(SLOT_PANTS, "ranger_pants", "OUTFIT_RANGER_PANTS", Color(0.10, 0.22, 0.14), 10)
+	_add(SLOT_SHOES, "peasant_shoes", "OUTFIT_PEASANT_SHOES", Color(0.50, 0.44, 0.24), 20, "", true)
+	_add(SLOT_SHOES, "ranger_boots", "OUTFIT_RANGER_BOOTS", Color(0.45, 0.28, 0.16), 20, "", true)
+	_add(SLOT_SHIRT, "peasant_shirt", "OUTFIT_PEASANT_SHIRT", Color(0.62, 0.60, 0.46), 30)
+	_add(SLOT_JACKET, "ranger_jacket", "OUTFIT_RANGER_JACKET", Color(0.24, 0.42, 0.20), 40)
+	_add(SLOT_HAT, "ranger_hood", "OUTFIT_RANGER_HOOD", Color(0.25, 0.45, 0.18), 50, "hood")
 
 static func _add(
-	slot: String, piece_id: String, name_key: String, color: Color, head_shape: String = ""
+	slot: String, piece_id: String, name_key: String, color: Color, draw_order: int,
+	head_shape: String = "", boots: bool = false
 ) -> void:
 	var piece := OutfitPiece.new()
 	piece.piece_id = piece_id
@@ -103,6 +150,9 @@ static func _add(
 	piece.display_name_key = name_key
 	piece.color = color
 	piece.head_shape = head_shape
+	piece.art_id = piece_id
+	piece.draw_order = draw_order
+	piece.boots = boots
 	_pieces.append(piece)
 	_by_id[piece_id] = piece
 

@@ -140,9 +140,6 @@ var _action_clip: String = ""
 var _beast_species: String = ""
 var _action_u: float = 0.0
 
-## Botun bileği tuttuğu kalem: yalnız çizme. Sandalet yalın ayak gibi yürür.
-const ANKLE_LIMITING_SHOES: Array[String] = ["shoes_boots"]
-
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -221,7 +218,7 @@ static func pick_clip(
 	return "idle"
 
 func _wears_boots() -> bool:
-	return str(_outfit.get(OutfitCatalog.SLOT_SHOES, "")) in ANKLE_LIMITING_SHOES
+	return OutfitCatalog.wears_boots(_outfit)
 
 ## Giyilen sprite'lı kalemler. Kıyafet/ekipman değişince çağıran yeniden
 ## veriyor - figür karakteri tutmuyor, yalnızca ne giydiğini.
@@ -460,6 +457,9 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	# Ölü ve yerdeki el silahı bırakmış: kalkan ve mızrak havada kalıyordu.
 	var fallen := _action_clip in ["dead", "downed"]
 	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen
+	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
+	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
+	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
@@ -474,16 +474,23 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 				continue
 			var region: Rect2 = e.region
 			draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tones[kind])
+		for garment in garments:
+			var g := garment.entry(clip, frame, layer, BodyFrames.KIND_BODY)
+			if g.is_empty():
+				continue
+			var gregion: Rect2 = g.region
+			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, _tint)
 		draw_set_transform_matrix(Transform2D.IDENTITY)
 		if BodyFrames.LAYERS[layer] == "torso_head":
 			_draw_frame_extras(joints, h, look)
 
-## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Seçilmiş
-## pantolon/gömlek-ceket rengi temel kuşamın yerine geçer (OutfitCatalog'un
-## aynı çözümleyicileri). Saf fonksiyon - test sahnesiz okuyabilsin.
-static func frame_tones(skin: Color, outfit: Dictionary, light: Color) -> Dictionary:
-	var top := OutfitCatalog.resolve_torso_color(outfit, UNDERSHIRT_COLOR)
-	var bottom := OutfitCatalog.resolve_color(outfit, OutfitCatalog.SLOT_PANTS, SHORTS_COLOR)
+## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Temel kuşam
+## giysinin altındaki iç çamaşırı; giyilen parça kendi render'ıyla üstüne
+## biniyor, rengi onu boyamıyor (yeleğin yeşili atleti yeşile boyardı ve
+## açık yakada görünürdü). Saf fonksiyon - test sahnesiz okuyabilsin.
+static func frame_tones(skin: Color, _outfit_unused: Dictionary, light: Color) -> Dictionary:
+	var top := UNDERSHIRT_COLOR
+	var bottom := SHORTS_COLOR
 	return {
 		BodyFrames.KIND_BODY: skin,
 		BodyFrames.KIND_TOP: top * light,
@@ -673,7 +680,9 @@ func _draw_frame_extras(joints: Dictionary, h: float, look: Dictionary) -> void:
 	if not joints.has("head_top"):
 		return
 	var headgear := OutfitCatalog.resolve_headgear(_outfit, "none")
-	if bool(headgear.override):
+	if bool(headgear.override) and not OutfitCatalog.has_frames_for(
+		_outfit, OutfitCatalog.SLOT_HAT, _body_variant
+	):
 		var top: Vector2 = joints.head_top
 		var radius := FigureRig.head_radius(h)
 		var centre := top + (Vector2(joints.neck) - top).normalized() * radius

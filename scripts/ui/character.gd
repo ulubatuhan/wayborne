@@ -160,16 +160,36 @@ func _build_outfit_row(slot: String) -> HBoxContainer:
 	var piece := OutfitCatalog.get_piece(_character.get_outfit_piece(slot))
 	value_label.text = piece.display_name if piece != null else tr("UI_CREATE_OUTFIT_NONE")
 	row.add_child(value_label)
+	# Dolapta bu slota ait başka bir şey yoksa oklar bir yere götürmüyor:
+	# kapalı, nedeni yanda (kilitli seçim gizlenmez, nedeniyle gösterilir).
+	var choices := _session.get_outfit_choices(_character, slot)
+	var stuck := choices.size() <= 1
+	prev_button.disabled = stuck
+	if stuck:
+		prev_button.tooltip_text = tr("UI_CHAR_OUTFIT_LOCKER_EMPTY")
 	var next_button := Button.new()
 	next_button.text = ">"
 	next_button.pressed.connect(_on_outfit_cycle.bind(slot, 1))
+	next_button.disabled = stuck
 	row.add_child(next_button)
+	if stuck:
+		var reason := Label.new()
+		reason.text = tr("UI_CHAR_OUTFIT_LOCKER_EMPTY")
+		reason.modulate = HINT_COLOR
+		row.add_child(reason)
 	return row
 
+## Kaydırıcı yalnızca elde olanları dolaşır: üstündeki ve dolapta o slota
+## ait olanlar (GameSession.get_outfit_choices). Seçmek giydirmek, "hiçbiri"
+## çıkarmak - ikisi de dolaptan geçiyor, giysi yoktan var olmuyor.
 func _on_outfit_cycle(slot: String, direction: int) -> void:
-	_character.set_outfit_piece(
-		slot, OutfitCatalog.cycle(slot, _character.get_outfit_piece(slot), direction)
-	)
+	var choices := _session.get_outfit_choices(_character, slot)
+	var index := maxi(0, choices.find(_character.get_outfit_piece(slot)))
+	var next := choices[wrapi(index + direction, 0, choices.size())]
+	if next.is_empty():
+		_session.take_off_outfit(_character, slot)
+	else:
+		_session.wear_outfit(_character, next)
 	_refresh()
 
 func _build_traits_section() -> void:

@@ -860,7 +860,10 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	var outfit_data: Dictionary = data.get("outfit", {})
 	character.outfit.clear()
 	for slot in outfit_data:
-		character.outfit[str(slot)] = str(outfit_data[slot])
+		# Renk-kalemi dönemindeki kimlikler gerçek giysiye çevriliyor.
+		var piece_id := OutfitCatalog.migrate_piece_id(str(outfit_data[slot]))
+		if not piece_id.is_empty():
+			character.outfit[str(slot)] = piece_id
 
 	# Kayıt dosyası dış sınır: kayıt alındıktan sonra ekipman çıkarılmış ya
 	# da huy silinmişse saklanan can artık ulaşılamayacak kadar yüksek
