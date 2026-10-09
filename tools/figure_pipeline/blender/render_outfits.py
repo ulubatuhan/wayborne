@@ -42,10 +42,15 @@ OUT = os.path.join(ROOT, "build", "figures", "outfits")
 
 def fit_item(spec, gender, body, rig, inner=()):
     meshes = []
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    snugged = False
     for piece in spec["pieces"][gender]:
         obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig,
                                       float(spec["eps"]), inner, float(spec.get("gap", 0.003)))
         print("giydirildi", piece, "itilen", pushed, flush=True)
+        lo = [min(a, b) for a, b in zip(lo, obj["native_min"])]
+        hi = [max(a, b) for a, b in zip(hi, obj["native_max"])]
+        snugged = snugged or bool(obj["snugged"])
         meshes.append(obj)
     if len(meshes) > 1:
         bpy.ops.object.select_all(action="DESELECT")
@@ -53,6 +58,8 @@ def fit_item(spec, gender, body, rig, inner=()):
             m.select_set(True)
         bpy.context.view_layer.objects.active = meshes[0]
         bpy.ops.object.join()
+    meshes[0]["native_min"], meshes[0]["native_max"] = lo, hi
+    meshes[0]["snugged"] = snugged
     return meshes[0]
 
 

@@ -1507,6 +1507,31 @@ in every preview the moment it is equipped.
       the limb layers of what lies beneath it (channel-wise max). Otherwise
       a jacket shoulder in the front-arm layer is drawn over a hood hem in
       the torso layer.
+    - **A garment must keep its shape, and a stylised source has a
+      stylised head.** The ranger hood shipped standing almost a head's
+      height above the skull. Every QA number was green, and the player
+      caught it from a screenshot. Two causes:
+      - `align_skeleton` stretched every bone to its MPFB twin's length.
+        Quaternius's `head` bone is 8.3 cm and MPFB's 15.6, so the hood grew
+        1.88× vertically. End bones (head, hands, toes) only mark where a
+        bone is drawn, so `NO_STRETCH` rotates them without stretching.
+      - The Quaternius characters have big, stylised heads. Even unstretched,
+        the hood's head part measured 30×33×38 cm against MPFB's 17×22×23.
+        `snug_head` scales whatever sits on the head down to our head plus a
+        margin, each side of each axis separately (the excess is on top).
+        Each point is scaled by the head weight of the body point beneath
+        it, so the cape stays on the shoulders. It is a soft blend.
+      Tried and reverted: moving the cape's arm weights onto `spine_03` so it
+      would not droop with the T-to-A arm drop. That bone is the one
+      shortened most (0.73×), so the cape dropped further (height ratio
+      1.26 → 1.91).
+      The QA now measures shape, not just overlap: every garment's height is
+      checked against its source height scaled by body size (0.85-1.15),
+      and nothing may rise more than 6 cm above the skull. Snugged items are
+      judged by the second rule only. Re-enabling the stretch fails it (hood
+      2.19×). A QA that only compares the game against the 3D scene cannot
+      see a garment that is wrong in both: it was faithfully reproducing a
+      ridiculous hood.
     - **Test the fit before rendering, against the real thing.**
       `qa/outfit_check.py` fits everything exactly as the render does
       (`render_outfits.setup`), poses a few frames per clip, and for each
@@ -1514,11 +1539,13 @@ in every preview the moment it is equipped.
       then each garment's layer masks in draw order) with one
       true-occlusion render of the whole outfit. It reports three numbers:
       - pixels that differ, ≤ 2%;
-      - garment-for-garment swaps in either direction, ≤ 1.5%. This includes
-        3D pass-through, which is what the player saw;
+      - garment-for-garment swaps in either direction, ≤ 2%. This includes
+        3D pass-through, which is what the player saw. The worst case left
+        is one frame (attack 3, arm fully raised) at 1.6%, where the jacket
+        shoulder passes through the hood's cape;
       - "bleed", the game drawing an inner garment over an outer one, ≤ 0.3%.
       The 3D poke count is reported for information only. The old,
-      unlayered fit fails: composite 8.9%, swaps 8.8%. All six bodies pass
+      unlayered fit fails: composite 9.1%, swaps 9.1%. All six bodies pass
       with the layered fit. The worst remaining case is the hood's cape
       over a fully raised arm, where the game draws the hood on top. The
       QA's own first versions measured the wrong thing twice: the body

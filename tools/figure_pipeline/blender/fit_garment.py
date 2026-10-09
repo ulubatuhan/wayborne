@@ -38,15 +38,23 @@ SKIN_MATERIAL_PREFIX = "MI_Regular"
 SMOOTH_ITERATIONS = 12
 
 
-def bone_matrix(pose_bone, head, tail):
-    """tools/human_body_render.py ile ayni: en kucuk donus + eksen boyu olcek."""
+# Uc kemikler: boylari bir sey olcmuyor, yalniz kemigin nereye cizildigi.
+# Quaternius'un kafa kemigi 8.3 cm, MPFB'ninki 15.6 cm - gerilince kukuleta
+# dikeyde 1.88 kat uzadi (kafanin iki kati yukseklikte sivri bir kule). Bu
+# kemikler yalniz dondurulur, boyuna gerilmez.
+NO_STRETCH = {"head", "hand_l", "hand_r", "ball_l", "ball_r"}
+
+
+def bone_matrix(pose_bone, head, tail, stretch=True):
+    """tools/human_body_render.py ile ayni: en kucuk donus + eksen boyu olcek
+    (stretch False: yalniz donus)."""
     direction = tail - head
     rest_dir = pose_bone.bone.tail_local - pose_bone.bone.head_local
     if direction.length < 1e-6 or rest_dir.length < 1e-6:
         return pose_bone.matrix
     rotation = rest_dir.normalized().rotation_difference(direction.normalized())
     basis = rotation.to_matrix() @ pose_bone.bone.matrix_local.to_3x3()
-    k = direction.length / pose_bone.bone.length if pose_bone.bone.length > 1e-6 else 1.0
+    k = direction.length / pose_bone.bone.length if stretch and pose_bone.bone.length > 1e-6 else 1.0
     basis = (basis @ Matrix.Diagonal((1.0, k, 1.0))).to_4x4()
     basis.translation = head
     return basis
@@ -62,6 +70,23 @@ def import_piece(path):
         if o.type == "MESH" and not o.vertex_groups:  # Quaternius'un bos Icosphere'i
             bpy.data.objects.remove(o, do_unlink=True)
     return arm, meshes
+
+
+def native_box(arm, meshes, rig):
+    """Parcanin kendi bedenindeki sinir kutusu, iki iskeletin kalca yuksekligi
+    oraninda olceklenmis - giydirilmis giysinin olmasi gereken boyut. Orani
+    bozulmus bir giysiyi (gerilmis kafa kemigi kukuletayi 1.88 kat uzatmisti,
+    kimse olcmedigi icin gorulmedi) qa/outfit_check.py bununla yakalar."""
+    q = (arm.matrix_world @ next(b for b in arm.data.bones if b.name.lower() == "pelvis").head_local).z
+    m = (rig.matrix_world @ rig.data.bones["pelvis"].head_local).z
+    k = m / q if q > 1e-6 else 1.0
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    for obj in meshes:
+        for co in rc_evaluated(obj):
+            for a in range(3):
+                lo[a] = min(lo[a], co[a] * k)
+                hi[a] = max(hi[a], co[a] * k)
+    return lo, hi
 
 
 def align_skeleton(arm, rig):
@@ -93,7 +118,7 @@ def align_skeleton(arm, rig):
         pb = arm.pose.bones[name]
         head, tail = target[key]
         bpy.context.view_layer.update()
-        pb.matrix = bone_matrix(pb, inv @ head, inv @ tail)
+        pb.matrix = bone_matrix(pb, inv @ head, inv @ tail, key not in NO_STRETCH)
     bpy.context.view_layer.update()
     bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -181,6 +206,64 @@ def wrap(mesh, tree, eps):
         v.co += disp[i]
     mesh.data.update()
     return pushed
+
+
+HEAD_MARGIN = (0.025, 0.03, 0.035)  # m; kafa ile kukuleta arasi pay (yan, on-arka, tepe)
+
+
+def snug_head(mesh, body, eps):
+    """Kafaya giyilen kismi bizim kafanin olcusune indirir. Quaternius'un
+    karakterleri stilize, kafalari buyuk: kukuletanin kafa kismi 30x33x38 cm,
+    MPFB'nin kafasi 17x22x23 - kukuleta kafanin 10 cm ustune bir kule gibi
+    cikiyordu (oyuncu gordu, hicbir olcu gormedi). Her nokta, altindaki beden
+    noktasinin kafa agirligi kadar (yumusak gecis: pelerin yerinde kalir)
+    kafanin merkezine dogru, eksen eksen olceklenir; sonra beden yeniden
+    sarilir. Kafaya degmeyen giysiye dokunmaz. Doner: oynayan nokta sayisi."""
+    gi = body.vertex_groups.get("head")
+    if gi is None:
+        return 0
+    # Degerlendirilmis ag (maskeler yardimcilari dusuruyor): konum ve agirlik
+    # ayni agdan, yoksa indeksler kayar.
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bco = [body.matrix_world @ v.co for v in me.vertices]
+    hw = [sum(g.weight for g in v.groups if g.group == gi.index) for v in me.vertices]
+    ev.to_mesh_clear()
+    head = [c for c, w in zip(bco, hw) if w >= 0.5]
+    kd = KDTree(len(bco))
+    for k, c in enumerate(bco):
+        kd.insert(c, k)
+    kd.balance()
+    wts = []
+    for v in mesh.data.vertices:
+        _c, k, _d = kd.find(v.co)
+        wts.append(hw[k])
+    cap = [v.co.copy() for v, w in zip(mesh.data.vertices, wts) if w >= 0.5]
+    if not head or len(cap) < 20:
+        return 0
+    lo = [min(c[a] for c in head) for a in range(3)]
+    hi = [max(c[a] for c in head) for a in range(3)]
+    centre = Vector([(lo[a] + hi[a]) * 0.5 for a in range(3)])
+    glo = [min(c[a] for c in cap) for a in range(3)]
+    ghi = [max(c[a] for c in cap) for a in range(3)]
+    # Her eksenin iki yonu ayri: kukuletanin fazlasi tepede, altta degil -
+    # merkeze gore simetrik olcek tepeyi ancak %4 indiriyordu.
+    pos, neg = [], []
+    for a in range(3):
+        c = centre[a]
+        pos.append(min(1.0, (hi[a] - c + HEAD_MARGIN[a]) / (ghi[a] - c)) if ghi[a] - c > 1e-6 else 1.0)
+        neg.append(min(1.0, (c - lo[a] + HEAD_MARGIN[a]) / (c - glo[a])) if c - glo[a] > 1e-6 else 1.0)
+    moved = 0
+    for v, w in zip(mesh.data.vertices, wts):
+        if w <= 0.0:
+            continue
+        d = v.co - centre
+        k = [pos[a] if d[a] > 0 else neg[a] for a in range(3)]
+        v.co = centre + Vector([d[a] * (1.0 + (k[a] - 1.0) * w) for a in range(3)])
+        moved += 1
+    mesh.data.update()
+    return moved
 
 
 def mesh_bvh(obj):
@@ -475,14 +558,19 @@ def fit(path, body, rig, eps, inner=(), gap=0.003):
     altina giyilebilecek, zaten giydirilmis giysiler (cizim sirasi kucuk olan
     her kalem, her varyant) - giysi hepsinin ustune oturtulur."""
     arm, meshes = import_piece(path)
+    native = native_box(arm, meshes, rig)
     align_skeleton(arm, rig)
     prev = _masks(body, True)
     tree, bm = body_bvh(body)
     pushed = 0
+    snugged = False
     for mesh in meshes:
         bake_pose(mesh)
         drop_skin_faces(mesh)
         pushed += wrap(mesh, tree, eps)
+        if snug_head(mesh, body, eps):
+            snugged = True
+            pushed += wrap(mesh, tree, eps)
         if not os.environ.get("WAYBORNE_NO_LAYERING"):  # qa: eski davranisi yeniden uretmek icin
             pushed += layer_over(mesh, tree, inner, gap)
             pushed += resolve_pokes(mesh, tree, inner, gap, MIN_FLOOR)
@@ -500,4 +588,6 @@ def fit(path, body, rig, eps, inner=(), gap=0.003):
             m.select_set(True)
         bpy.context.view_layer.objects.active = meshes[0]
         bpy.ops.object.join()
+    meshes[0]["native_min"], meshes[0]["native_max"] = native
+    meshes[0]["snugged"] = snugged
     return meshes[0], pushed

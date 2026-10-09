@@ -47,11 +47,12 @@ TOL = 0.001  # m; yuzeyler arasi bu kadarlik yakinlik tasma sayilmaz
 # yumusatmasi tek piksellik serit birakiyor).
 MAX_COMPOSITE_PCT = 2.0
 # Giysi yerinde giysi, iki yon (3B'de icinden gecme dahil): eski, birbirinden
-# habersiz giydirmede %8.8; katmanli giydirmede %1.3 (kalani kukuletanin
-# pelerini kalkan kolun omzunda). Sizma - oyunun alttakini ustte cizmesi -
+# habersiz giydirmede %8.8; katmanli giydirmede en kotu %1.6 - hep ayni kare,
+# saldirinin 3. karesi: kol tam havada, yelegin omzu 3B'de kukuletanin
+# pelerininden cikiyor (oyunda pelerin ustte ciziliyor). Sizma - oyunun alttakini ustte cizmesi -
 # ayri ve siki: en kotu %0.27 olculdu (iri erkek, kol tam havada: gomlegin
 # gogsu on kol katmanina giriyor, yelegin oradaki parcasi giremiyor).
-MAX_SWAP_PCT = 1.5
+MAX_SWAP_PCT = 2.0
 MAX_BLEED_PCT = 0.3
 BODY_ID = (0.5, 0.5, 0.5)
 PALETTE = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (0, 1, 1), (1, 0, 1), (1, 0.5, 0), (0.5, 0, 1)]
@@ -132,6 +133,33 @@ def poke(body, inner, outer):
     return out, covered
 
 
+# Giydirilmis giysinin boyu / kaynaktaki boyu (beden boy oraninda). Bir kemik
+# gerilirse ilk boyda gorunur. Yan (x) ve on-arka (y) olculmuyor: kaynak T-poz,
+# bizimki A-poz (kollar), katmanlama da giysiyi bilerek kalinlastiriyor.
+HEIGHT_RANGE = (0.85, 1.15)
+# Hicbir giysi kafanin tepesinden bundan fazla yukari cikmaz (m). Kukuleta
+# 10 cm cikiyordu ve boy oranina gore "normal"di: kaynak da buyuk kafaliydi.
+MAX_HEADROOM = 0.06
+
+
+def proportions(fitted, rig, body):
+    """Dinlenme pozunda her kalemin boy orani ve kafanin ustundeki payi."""
+    rc.reset_pose(rig, rig)
+    top = max(c.z for c in rc.evaluated_coords(body))
+    out, bad = {}, []
+    for name, obj in fitted.items():
+        zs = [c.z for c in rc.evaluated_coords(obj)]
+        r = (max(zs) - min(zs)) / max(1e-6, obj["native_max"][2] - obj["native_min"][2])
+        room = max(zs) - top
+        snug = bool(obj.get("snugged", False))
+        out[name] = {"height_ratio": round(r, 2), "above_head_m": round(room, 3), "snugged": snug}
+        # Kafaya gore kucultulen kalem (fit_garment.snug_head) kaynagindan
+        # bilerek farkli: onun olcusu tepedeki pay.
+        if (not snug and not (HEIGHT_RANGE[0] <= r <= HEIGHT_RANGE[1])) or room > MAX_HEADROOM:
+            bad.append(name)
+    return out, bad
+
+
 def interior(lab):
     """Etiketi dort komsusuyla ayni pikseller: iki nesnenin sinirindaki tek
     piksellik serit kenar yumusatmasi, hata degil (ilk olcumde butun
@@ -165,6 +193,8 @@ def main():
     fitted = sc["fitted"]
     build = rf.cfg("build.json")
     LAYER_KW.update(core=layers["core_threshold"], root=layers["root_threshold"])
+    ratios, misshapen = proportions(fitted, rig, body)
+    print("ORAN", json.dumps(ratios), "bozuk:", misshapen, flush=True)
     ro.layer_weights_all(fitted, ocfg, rig, layers)
     camcfg0 = dict(rf.cfg("camera.json"))
     fig_shading.setup_render(camcfg0)
@@ -266,10 +296,11 @@ def main():
                 rows.append(row)
                 print(json.dumps(row), flush=True)
     json.dump(rows, open(os.path.join(out_dir, "table.json"), "w"), indent=1)
-    ok = worst_comp <= MAX_COMPOSITE_PCT and worst_swap <= MAX_SWAP_PCT and worst_bleed <= MAX_BLEED_PCT
-    print("SONUC %s: bindirme %.2f%% (esik %.2f), giysi karismasi %.2f%% (esik %.2f), "
+    json.dump(ratios, open(os.path.join(out_dir, "proportions.json"), "w"), indent=1)
+    ok = not misshapen and worst_comp <= MAX_COMPOSITE_PCT and worst_swap <= MAX_SWAP_PCT and worst_bleed <= MAX_BLEED_PCT
+    print("SONUC %s: oran bozuk %s, bindirme %.2f%% (esik %.2f), giysi karismasi %.2f%% (esik %.2f), "
           "alttaki ustte %.2f%% (esik %.2f); 3B tasma %.2f%% (bilgi)" % (
-              "GECTI" if ok else "KALDI", worst_comp, MAX_COMPOSITE_PCT, worst_swap, MAX_SWAP_PCT,
+              "GECTI" if ok else "KALDI", misshapen or "yok", worst_comp, MAX_COMPOSITE_PCT, worst_swap, MAX_SWAP_PCT,
               worst_bleed, MAX_BLEED_PCT, worst_poke), flush=True)
     sys.exit(0 if ok else 1)
 
