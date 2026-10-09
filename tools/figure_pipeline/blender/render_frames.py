@@ -260,6 +260,7 @@ def main():
         if only is not None and i not in only:
             continue
         shift = float(fr.get("root_x", 0.0)) * m_per_h
+        base_dy_px = 0.0
         if base is not None:
             # Temel klibin ayni fazdaki karesi (kare sayilari farkli olabilir).
             bi = round(i * len(base["frames"]) / len(clip["frames"])) % len(base["frames"])
@@ -271,6 +272,16 @@ def main():
             pose_frame(rig, fr, layers, rest_foot_rot, retarget, curl)
             rig.location = loc
             bpy.context.view_layer.update()
+            # Kendi zeminine indir: botun sinirli bilegi ayagi temel karedeki
+            # kadar asagi uzatamiyor ve ayak havada kaliyordu (male_heavy 4 px).
+            # Yalniz dusey; temelden alinan katmanlar paketlemede ayni kadar
+            # kaydirilir (base_dy_px), yani kalca ile govde ayrilmaz.
+            own = rc.evaluated_coords(body)
+            dz = -min(own[k].z for k in support_idx)
+            rig.location = (loc[0], loc[1], loc[2] + dz)
+            bpy.context.view_layer.update()
+            base_dy_px = rc.project(camcfg, Vector((0.0, 0.0, dz)), 0.0)[1] - \
+                rc.project(camcfg, Vector((0.0, 0.0, 0.0)), 0.0)[1]
         else:
             pose_frame(rig, fr, layers, rest_foot_rot, retarget, curl)
             posed = rc.evaluated_coords(body)
@@ -292,6 +303,7 @@ def main():
         j["weapon"] = float(fr.get("weapon", 0.0))
         j["draw"] = float(fr.get("draw", 0.0))
         j["layers"] = rlayers
+        j["base_dy_px"] = base_dy_px
         json.dump(j, open(os.path.join(d, "joints.json"), "w"), indent=1)
         print("kare", variant, clip_name, i, "tamam",
               {k: round(sum(v) / len(v), 1) for k, v in timings.items()}, flush=True)

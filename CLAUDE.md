@@ -1459,7 +1459,12 @@ in every preview the moment it is equipped.
     rolls the foot through heel strike and toe-off; `ankle_range` scales it
     (bare 1.0, `BOOT_ANKLE_RANGE` 0.35 for `shoes_boots` - sandals walk
     barefoot). `walk_boots` renders only the leg layers and takes the rest
-    from `walk`'s same-phase frame, rooted on that frame (`base`).
+    from `walk`'s same-phase frame, rooted on that frame (`base`). A stiff
+    ankle cannot reach as far down, so rooting on `walk` alone left the
+    heel-strike feet up to 4 px in the air; the boot pose is lowered onto
+    its own ground and the borrowed layers move by the same amount
+    (`base_dy_px` in `joints.json`, applied at packing), so the hip drops
+    with the legs instead of tearing away from them.
   - **Carried things sit on the back the render measured.** Two markers on
     the 3D back surface (`back_upper`/`back_lower`, at the spine bones'
     rest heights) travel with every frame; the slung bow, spear, sword and
