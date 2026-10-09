@@ -649,7 +649,7 @@ BODY_DEPTH = 0.03  # m; bedenin icinden bu kadar asagidan bakilir
 COVER_MAX_PUSH = 0.03  # m; bir kosenin toplam en fazla itilmesi
 
 
-def cover_body(mesh, body, body_tree, eps):
+def cover_body(mesh, body, body_tree, eps, keep_below=None):
     """Bedenin kumasin icinden cikmasini kapatir. wrap() kumasin KOSELERINI
     bedenin disinda tutuyor, ama seyrek bir kumas yuzunun ortasindan bedenin
     bir kivrimi (uyluk, kasik, gogus) disari cikabiliyordu - onden bakinca
@@ -660,7 +660,8 @@ def cover_body(mesh, body, body_tree, eps):
     disari itilir. Itme wrap() gibi agda yumusatilir ve kose basina
     COVER_MAX_PUSH ile sinirli: ilk surum yuzun koselerini tur tur
     sinirsiz itiyordu ve korucu pantolonunun ice kivrik bel bandi kanat
-    gibi acilip arkada delik birakti. Doner: itilen kose sayisi."""
+    gibi acilip arkada delik birakti. keep_below: bu yukseklikten asagidaki
+    koseler yukari itilmez (ayakkabi tabani). Doner: itilen kose sayisi."""
     dg = bpy.context.evaluated_depsgraph_get()
     ev = body.evaluated_get(dg)
     me = ev.to_mesh()
@@ -689,11 +690,17 @@ def cover_body(mesh, body, body_tree, eps):
             loc, nrm, _f, _d = body_tree.find_nearest(co)
             if loc is None:
                 continue
-            start = loc - nrm * BODY_DEPTH
-            hit, _n, fi, gd = gtree.ray_cast(start, nrm, BODY_DEPTH + BODY_REACH)
-            if hit is None or gd >= BODY_DEPTH + eps:
+            # Bedenin icinde kal: ince bir yerde (parmaklar) 3 cm asagisi
+            # bedenin obur yuzunun disina, tabanin altina dusuyordu; oradan
+            # bakinca ilk carpilan ayakkabinin tabaniydi ve taban yukari,
+            # ayagin icine itiliyordu - beden alttan cikti.
+            back = body_tree.ray_cast(loc - nrm * 1e-4, -nrm, BODY_DEPTH * 2.0)
+            depth = BODY_DEPTH if back[0] is None else min(BODY_DEPTH, back[3] * 0.5)
+            start = loc - nrm * depth
+            hit, _n, fi, gd = gtree.ray_cast(start, nrm, depth + BODY_REACH)
+            if hit is None or gd >= depth + eps:
                 continue
-            need = nrm * (BODY_DEPTH + eps - gd + 1e-4)
+            need = nrm * (depth + eps - gd + 1e-4)
             for v in bm.faces[fi].verts:
                 if need.length > disp[v.index].length:
                     disp[v.index] = need
@@ -716,6 +723,10 @@ def cover_body(mesh, body, body_tree, eps):
             if room <= 0.0 or disp[i].length < 1e-7:
                 continue
             d = disp[i] if disp[i].length <= room else disp[i].normalized() * room
+            if keep_below is not None and verts[i].co.z < keep_below and d.z > 0.0:
+                # tabanin alti: burun kapaginin buyuk yuzleri parmaklarin ustune
+                # itilirken alt koseleri de kaldiriyordu, taban delindi.
+                d = Vector((d.x, d.y, 0.0))
             verts[i].co += d
             spent[i] += d.length
             moved += 1
@@ -800,7 +811,111 @@ def _masks(body, on):
     return prev
 
 
-def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0):
+SOLE_REACH = 0.07  # m; bir koseyi o ayaga sayan yan uzaklik
+HEEL_ROOM = 0.01  # m; ayakkabinin topugu bedenin topugunun bu kadar arkasina kadar uzar
+SOLE_STATION = 0.02  # m; taban inisi topuktan buruna bu araliklarla olculur
+SOLE_MAX_RISE = 0.03  # m; zeminin bundan yukarisindaki alt yuz taban sayilmaz
+
+
+def _smooth(t):
+    t = min(1.0, max(0.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
+def add_sole(mesh, body, rig, sole, heel):
+    """Ayakkabiya duz, kalin bir taban verir; wrap'tan once calisir.
+    Hizalanan kaynak ayakkabinin alti MPFB ayaginin altina oturmuyordu:
+    kaynagin burnu yukari kalkik, MPFB'nin ayagi duz - burunda beden alttan
+    cikiyor, wrap da burnu disari itip buruşturuyordu; taban corap gibi
+    okunuyordu. Her ayakta zemin duz bir duzlem (bedenin tabani). Ayak izinin
+    her noktasindan alttan yukari bakilip ayakkabinin alt yuzu bulunur
+    (kose degil yuz: dusuk poligonlu tabanda koseler 2 cm'den seyrek);
+    topuktan buruna her SOLE_STATION'da bunlarin en yuksegi, o duzlemin
+    `sole` kadar (topukta bir de `heel` kadar) altina inecek kadar asagi
+    kaydirilir. Istasyonlar arasi dogrusal ve yumusatilmis: tek bir uc
+    burnu sisirip palyaco ayakkabisi yapiyordu, tek bir en alt kose de
+    ortayi "yeterince asagida" gosterip parmaklari tabandan cikariyordu.
+    Kayma ayak bileginde sifir, zeminde tam: ayakkabi bukulmeden kesilir,
+    konc yerinde kalir; hicbir kose yukari cekilmez. Topuk da bedenin
+    topugunun arkasina kadar uzar. Doner: islenen kose sayisi."""
+    body_pts = rc_evaluated(body)
+    verts = mesh.data.vertices
+    feet = []
+    for side in ("l", "r"):
+        ankle = rig.matrix_world @ rig.data.bones["foot_" + side].head_local
+        zs = sorted(c.z for c in body_pts if c.z < 0.06 and abs(c.x - ankle.x) < SOLE_REACH)
+        feet.append((ankle, zs[len(zs) // 50] if zs else 0.0))
+
+    def foot_of(co):
+        return min(range(len(feet)), key=lambda i: abs(feet[i][0].x - co.x))
+
+    # 1) Topuk boyu: iri bedenlerde bedenin topugu kaynak ayakkabinin
+    # topugundan ~3 cm geride, cover_body'nin itme siniri bunu kapatamiyor ve
+    # topuk arkadan cikiyordu. Bilegin arkasi gerekirse uzatilir.
+    for i, (ankle, floor) in enumerate(feet):
+        mine = [v for v in verts if foot_of(v.co) == i and v.co.z < ankle.z
+                and abs(v.co.x - ankle.x) < SOLE_REACH]
+        body_back = max((c.y for c in body_pts if ankle.z > c.z > floor + 0.005
+                         and abs(c.x - ankle.x) < SOLE_REACH), default=ankle.y)
+        shoe_back = max((v.co.y for v in mine), default=ankle.y)
+        if shoe_back - ankle.y < 1e-3:
+            continue
+        stretch = max(1.0, (body_back + HEEL_ROOM - ankle.y) / (shoe_back - ankle.y))
+        for v in verts:
+            if foot_of(v.co) != i or v.co.y <= ankle.y or abs(v.co.x - ankle.x) > SOLE_REACH * 1.5:
+                continue
+            # topuk duvari bilegin hemen altina kadar butun uzar, ustunde soner
+            ws = _smooth((ankle.z + 0.02 - v.co.z) / 0.04)
+            v.co.y = ankle.y + (v.co.y - ankle.y) * (1.0 + (stretch - 1.0) * ws)
+    mesh.data.update()
+
+    # 2) Taban: istasyon istasyon alt yuz, zeminin altina.
+    tree = mesh_bvh(mesh)
+    profiles = []
+    for ankle, floor in feet:
+        prints = [c for c in body_pts if c.z < floor + 0.006 and abs(c.x - ankle.x) < SOLE_REACH]
+        stations = {}
+        for c in prints:
+            hit = tree.ray_cast(Vector((c.x, c.y, floor - 0.2)), Vector((0.0, 0.0, 1.0)), 0.2 + SOLE_MAX_RISE)
+            if hit[0] is None:  # alt yuz zeminin SOLE_MAX_RISE ustunde degil: konc ya da delik
+                continue
+            k = round(c.y / SOLE_STATION)
+            stations[k] = max(stations.get(k, -1.0), hit[0].z)
+        need = {}
+        for k, bottom in stations.items():
+            h = _smooth((k * SOLE_STATION - (ankle.y - 0.02)) / 0.04)
+            need[k] = max(0.0, bottom - (floor - sole - heel * h))
+        keys = sorted(need)
+        profiles.append((keys, {k: max(need[k], 0.5 * (need.get(k - 1, need[k]) + need.get(k + 1, need[k])))
+                                for k in keys}))
+
+    def drop_at(y, keys, prof):
+        if not keys:
+            return 0.0
+        f = y / SOLE_STATION
+        if f <= keys[0]:
+            return prof[keys[0]]
+        if f >= keys[-1]:
+            return prof[keys[-1]]
+        lo = max(k for k in keys if k <= f)
+        hi = min(k for k in keys if k >= f)
+        return prof[lo] if hi == lo else prof[lo] + (prof[hi] - prof[lo]) * (f - lo) / (hi - lo)
+
+    moved = 0
+    for v in verts:
+        i = foot_of(v.co)
+        ankle, floor = feet[i]
+        if abs(v.co.x - ankle.x) > SOLE_REACH * 1.5 or v.co.z >= ankle.z:
+            continue
+        w = _smooth((ankle.z - v.co.z) / (ankle.z - floor))
+        v.co.z -= w * drop_at(v.co.y, *profiles[i])
+        moved += 1
+    mesh.data.update()
+    return moved
+
+
+def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0,
+        sole=0.0, heel=0.0):
     """Doner: MPFB rig'ine bagli tek giysi agi (parcanin aglari birlestirilir)
     ve itilen nokta sayisi. Beden dinlenme pozunda olmali. `inner`: bu giysinin
     altina giyilebilecek, zaten giydirilmis giysiler (cizim sirasi kucuk olan
@@ -818,11 +933,14 @@ def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0):
         weld_seams(mesh)
         if openings:
             fill_holes(mesh, openings)
+        if sole > 0.0:
+            add_sole(mesh, body, rig, sole, heel)
         pushed += wrap(mesh, tree, eps)
         if snug_head(mesh, body, eps):
             snugged = True
             pushed += wrap(mesh, tree, eps)
-        pushed += cover_body(mesh, body, tree, eps)
+        pushed += cover_body(mesh, body, tree, eps,
+                             min(c.z for c in rc_evaluated(body)) if sole > 0.0 else None)
         if waist_bone and waist_sleeve(mesh, body, rig, waist_bone, eps):
             snugged = True
         if not os.environ.get("WAYBORNE_NO_LAYERING"):  # qa: eski davranisi yeniden uretmek icin
@@ -845,4 +963,5 @@ def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0):
     meshes[0]["native_min"], meshes[0]["native_max"] = native
     meshes[0]["snugged"] = snugged  # kaynaktan bilerek farkli: kafaya oturtuldu ya da beli uzatildi
     meshes[0]["waist_bone"] = waist_bone or ""
+    meshes[0]["sole"] = sole
     return meshes[0], pushed

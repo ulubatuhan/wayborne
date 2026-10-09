@@ -47,7 +47,8 @@ def fit_item(spec, gender, body, rig, inner=()):
     for piece in spec["pieces"][gender]:
         obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig,
                                       float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
-                                      spec.get("waist_bone"), int(spec.get("openings", 0)))
+                                      spec.get("waist_bone"), int(spec.get("openings", 0)),
+                                      float(spec.get("sole", 0.0)), float(spec.get("heel", 0.0)))
         print("giydirildi", piece, "itilen", pushed, flush=True)
         lo = [min(a, b) for a, b in zip(lo, obj["native_min"])]
         hi = [max(a, b) for a, b in zip(hi, obj["native_max"])]
@@ -62,6 +63,7 @@ def fit_item(spec, gender, body, rig, inner=()):
     meshes[0]["native_min"], meshes[0]["native_max"] = lo, hi
     meshes[0]["snugged"] = snugged
     meshes[0]["waist_bone"] = spec.get("waist_bone") or ""
+    meshes[0]["sole"] = float(spec.get("sole", 0.0))
     return meshes[0]
 
 

@@ -174,6 +174,33 @@ def waist_cover(body, obj, rig, waist_bone):
     return hit / max(tot, 1)
 
 
+# Tabanli ayakkabi (fit_garment.add_sole): bedenin tabanindaki noktalarin en
+# az bu payindan asagi bakinca ayakkabiya, en az tabanin bu kadarinin altinda
+# carpilir. Eski taban bedene yapisikti (1-3 mm), burunda beden alttan
+# cikiyordu - "bot gibi degil".
+MIN_SOLE_COVER = 0.95
+MIN_SOLE_SHARE = 0.6
+
+
+def sole_cover(body, obj, sole):
+    prev = fit_garment._masks(body, True)
+    coords = fit_garment.rc_evaluated(body)
+    for m, v in prev:
+        m.show_viewport = v
+    bpy.context.view_layer.update()
+    otree = fit_garment.mesh_bvh(obj)
+    floor = min(c.z for c in coords)
+    hit = tot = 0
+    for c in coords:
+        if c.z > floor + 0.006:
+            continue
+        tot += 1
+        h = otree.ray_cast(c, Vector((0.0, 0.0, -1.0)), 0.1)
+        if h[0] is not None and h[3] >= sole * MIN_SOLE_SHARE:
+            hit += 1
+    return hit / max(tot, 1)
+
+
 def proportions(fitted, rig, body):
     """Dinlenme pozunda her kalemin boy orani ve kafanin ustundeki payi."""
     rc.reset_pose(rig, rig)
@@ -190,6 +217,12 @@ def proportions(fitted, rig, body):
             cov = waist_cover(body, obj, rig, wb)
             out[name]["waist_cover"] = round(cov, 3)
             if cov < MIN_WAIST_COVER:
+                bad.append(name)
+        sole = float(obj.get("sole", 0.0))
+        if sole > 0.0:
+            cov = sole_cover(body, obj, sole)
+            out[name]["sole_cover"] = round(cov, 3)
+            if cov < MIN_SOLE_COVER:
                 bad.append(name)
         # Kafaya gore kucultulen kalem (fit_garment.snug_head) kaynagindan
         # bilerek farkli: onun olcusu tepedeki pay.

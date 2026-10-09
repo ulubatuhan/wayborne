@@ -1567,6 +1567,38 @@ in every preview the moment it is equipped.
       below the waist must hit the pants (≥ 95%; 100% on all six bodies).
       Counting vertex heights per angle could not be used: the waist ring is
       sparse, and a slice that held only a lower vertex read as "low".
+    - **A boot has a sole, and the sole was lost before anyone looked
+      underneath.** Reported from the approval sheet as "bot gibi değil":
+      the soles came out 0-3 mm thick. Three causes, found by looking from
+      the side and from below, not from the game's one camera:
+      - *The two feet disagree about the ground.* Quaternius' sole sits
+        ~1.9 cm under its ball bone with the toe sprung up; MPFB's foot is
+        flat and deeper. Aligned bone to bone, the shoe's sole landed inside
+        the body. `wrap` then pushed it out to `eps`, so the sole hugged the
+        foot like a sock. The forefoot sat 1-2 cm above the body's toes.
+        `add_sole` (before `wrap`; `sole`/`heel` in `outfits.json`, boots
+        only) moves the bottom under a flat ground plane, `sole` below it
+        and `heel` more at the heel. It works station by station from heel
+        to toe (`SOLE_STATION`). The drop shears: full at the ground, zero
+        at the ankle. Nothing folds and the shaft stays put. Two simpler
+        measures failed. With a single lowest vertex, a sagging rim made the
+        middle read "low enough" and the toes broke through. With a single
+        highest point, one spot drove the whole forefoot down into clown
+        shoes. Bottoms are found by casting rays up from the footprint
+        against faces: the sole's corners are more than 2 cm apart, so a
+        vertex search measured air.
+      - *`cover_body` looked from outside the body.* It starts 3 cm inside
+        the skin. Toes are thinner than that, so the start point was below
+        the sole, the first cloth it met was the sole, and it pushed the
+        sole up into the foot. The depth is now capped at half the body's
+        local thickness. Sole corners below the ground are never pushed up
+        (`keep_below`): the toe cap's large faces carried them up as they
+        were pushed over the toes.
+      - *Big heels.* On heavy bodies the heel sits ~3 cm behind the
+        source shoe's heel, beyond `COVER_MAX_PUSH`, so it came out of the
+        back. The heel cup is stretched back to the body's heel first.
+      The QA checks the sole too: from every point of the body's sole,
+      looking down must hit the shoe at least 0.6 × `sole` lower (≥ 95%).
     - **Repacked atlas pages keep their names, so check the import, not just
       the PNG.** After a full re-render the game drew every garment as
       scattered fragments. The new region table was being read against the
