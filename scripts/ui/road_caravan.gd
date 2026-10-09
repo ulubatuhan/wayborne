@@ -98,19 +98,13 @@ const PACK_GAP: float = 18.0
 ## `DEPTH`/`SHADE`) bu yüzden kalkı: tek hayvan artık kendi tam boyutunda
 ## ve tam tonunda, koşumun tam ortasında duruyor.
 
-## Yürüyüş temposu: 1x tempoda saniyede kaç tam yürüyüş çevrimi.
-##
-## Uzun süre 2.6'ydı ve "sayının kendisi görsel" diye not düşülmüştü -
-## ölçülmemişti. Ölçüldüğünde altı kat hızlı çıktı: 1x'te zemin saniyede
-## `PIXELS_PER_DAY / REAL_SECONDS_PER_DAY` = 20 piksel kayıyor, 320'lik
-## bir şeritte insan 60.8 piksel, ve bir çevrimde gövde
-## `FigureRig.CYCLE_DISTANCE_RATIO * boy` = 38.5 piksel ilerliyor - yani
-## ayağın yere göre kaymadığı kadans 20 / 38.5 = 0.52 çevrim/s (yürüyüş
-## %60 basışa geçince 0.43'ten çıktı: çevrimin yolu 4 adımdan 3.33'e indi). 2.6'da bacaklar saniyede iki buçuk tur
-## atarken kervan kendi boyunun üçte biri kadar yol alıyordu: koşan bacak,
-## yürüyen kervan. Oyuncunun "yürüme animasyonu çok hızlı, oyunun akışı
-## ile arasında denge kurulmalı" raporu buydu.
-const STEP_RATE: float = 0.52
+## Yürüyüş temposu artık sabit bir sayı değil: her figür adımını zeminin
+## kendi hızından alıyor (`WalkFigure.advance_ground`) - kadans = zemin
+## hızı / o figürün çevrim başına yolu. Bunun öncesinde `STEP_RATE` (0.52
+## çevrim/s) vardı ve 320 piksellik bir şeride göre ölçülmüştü; tam ekran
+## 1080p'de insan 119 piksel olunca aynı 0.52 bacaklara zeminin iki katı
+## yol yürütüyordu: yere basan ayak geriye kayıyordu (ay yürüyüşü). Hayvanlar
+## da aynı sayıyı paylaşıyordu, oysa öküzün adımı insanınkinin yarısı.
 
 ## Vagon ölçüleri. Genişlik yükseklikten biraz fazla: bir kervan vagonu
 ## kareye yakındır, ilk ölçüde 1.6 katıydı ve balon gibi duruyordu.
@@ -142,10 +136,6 @@ const FIRE_FLICKER_SPEED: float = 9.0
 ## `CAMP_HOURS` (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı
 ## ama oyuncunun sabrını da sınamamalı.
 const CAMP_GATHER_SECONDS: float = 1.3
-## Toplanma/dönüş sırasında bacakların oynaması için figüre verilen
-## görsel adım - `_speed * STEP_RATE`'in büyüklüğüyle aynı mertebede,
-## kamp sırasında gerçek `_speed` sıfır olduğu için ayrıca besleniyor.
-const CAMP_WALK_STEP: float = 1.8
 
 ## Aynı ateşe birden fazla kişi geliyor (sürücü + yürüyen tayfa + sırayla
 ## dağılan parti). Hedefleri tek noktaya kenetlemek tek bir figür gibi
@@ -173,7 +163,11 @@ var _ground_y: float = 0.0
 ## `COLUMN_EDGE_MARGIN` hiç değişmeden kullanılır.
 var _safe_left: float = 0.0
 var _light: Color = Color.WHITE
-var _speed: float = 0.0
+## Kervanın zemine göre hızı (bu düğümün pikseli/saniye). Bacaklar,
+## tekerlek ve branda bundan; yol ekranı manzarayı aynı hızla kaydırıyor.
+var _ground_speed: float = 0.0
+## Dönüşte lider kendi yolunu sürüyor; adımı o yoldan (bkz. _advance_leader).
+var _leader_last_x: float = 0.0
 
 ## İkincil hareket (bkz. WalkFigure'ın OX_NOD_RATIO'su): vagonun brandası
 ## tekerleğin ritmiyle salınıyor, yağmurda ve fırtınada insanlar rüzgâra
@@ -279,16 +273,11 @@ const LEADER_PIVOT_SECONDS: float = 0.6
 const UNIT_TURN_SECONDS: float = 1.3
 ## Dönen birimin uzak şeride kalkışı, şerit yüksekliğine oranlı.
 const TURN_LIFT_RATIO: float = 0.03
-## Dönerken ayaklar: yerinde bir çeyrek tur atmak da yürümektir.
-const TURN_WALK_STEP: float = 1.6
+## Dönerken ayaklar: yerinde bir çeyrek tur atmak da yürümektir - sakin
+## bir yürüyüşün temposunda (1.6 çevrim/s'ydi: yerinde koşu).
+const TURN_WALK_STEP: float = WalkFigure.WALK_CADENCE
 ## En ince hâlinde bile çokgen çökmesin (bkz. MIN_DRAW_HEIGHT'ın notu).
 const MIN_TURN_WIDTH: float = 0.06
-## Liderin zemine göre hızını adım temposuna çeviren ölçü: kervanın 1x
-## normal tempodaki zemin hızı bir `STEP_RATE`'e denk geliyor. Üstü
-## sönümleniyor - dört nala giden atın bacakları dört kat hızlı değil,
-## adımı uzuyor.
-const LEADER_STEP_CAP: float = 2.4
-const LEADER_STEP_GROWTH: float = 0.45
 
 var _heading: float = 1.0
 var _turn_from: float = 1.0
@@ -518,10 +507,46 @@ func set_light(light: Color) -> void:
 			figure.set_tint(light)
 	queue_redraw()
 
-## Kervanın o anki yürüyüş hızı (gün/saat cinsinden değil, görsel tempo:
-## 0 durgun, 1 normal). Yürüyüş fazı ve tekerlek dönüşü bundan.
-func set_speed(speed: float) -> void:
-	_speed = speed
+## Kervanın zemine göre hızı (piksel/s, büyüklük). Yürüyüş fazı ve
+## tekerlek dönüşü bundan; manzara da aynı sayıyla kaymalı, yoksa ayak
+## zeminde kayar.
+func set_ground_speed(px_per_second: float) -> void:
+	_ground_speed = absf(px_per_second)
+
+func get_ground_speed() -> float:
+	return _ground_speed
+
+## Yayan bir insanın boyu (bu düğümün pikseli) - kolon ölçeği dahil.
+func get_person_height() -> float:
+	return maxf(size.y, 1.0) * _scale * PERSON_HEIGHT_RATIO
+
+## Liderin (at ya da yaya) tempolu yürüyüşü: kolonda gezerken zemine göre
+## hızı - dörtnal yok, koşu yok.
+func get_leader_brisk_speed() -> float:
+	return 0.0 if _leader == null else _leader.brisk_ground_speed()
+
+## Normal tempoda (sakin kervan yürüyüşü) zeminin hızı: insanın kadansı
+## `WalkFigure.WALK_CADENCE` olacak kadar.
+func get_walk_ground_speed() -> float:
+	return WalkFigure.WALK_CADENCE * FigureRig.CYCLE_DISTANCE_RATIO * get_person_height()
+
+## Kolonun hiçbir üyesinin tempolu yürüyüşü aşmadığı en yüksek zemin hızı:
+## en yavaş yürüyen üyenin tavanı. Öküz vagonu koşturamaz.
+func get_brisk_ground_speed() -> float:
+	var limit := WalkFigure.BRISK_CADENCE * FigureRig.CYCLE_DISTANCE_RATIO * get_person_height()
+	for child in get_children():
+		var figure := child as WalkFigure
+		if figure == null or not figure.visible or _gather_homes.has(figure):
+			continue
+		var brisk := figure.brisk_ground_speed()
+		if brisk > 0.0:
+			limit = minf(limit, brisk)
+	return limit
+
+## En ağır yürüyüşün (kadansın alt sınırı) zemin hızı: en hızlı adım atan
+## üyenin tabanı - bunun altında herkes yerinde sürünür gibi.
+func get_amble_ground_speed() -> float:
+	return WalkFigure.AMBLE_CADENCE * FigureRig.CYCLE_DISTANCE_RATIO * get_person_height()
 
 func set_weather(weather: String) -> void:
 	_wind_lean = float(WIND_LEAN.get(weather, 0.0))
@@ -876,12 +901,11 @@ func _process(delta: float) -> void:
 
 	# Faz herkeste ilerliyor; duran bir figür de `advance(0)` alıyor ki
 	# ayaklarını yan yana toplasın. Toplanan figürler burada atlanıyor -
-	# onların fazını `_advance_gather` kendi adım büyüklüğüyle sürüyor,
-	# çünkü kamp sırasında gerçek `_speed` zaten sıfır (bkz. orası).
+	# onların fazını `_advance_gather` kendi yollarından sürüyor, çünkü
+	# kamp sırasında kervanın zemin hızı zaten sıfır (bkz. orası).
 	_anim_time += delta
 	if _turning:
 		_advance_turn(delta)
-	var step := _speed * STEP_RATE
 	var figure_index := 0
 	for child in get_children():
 		var figure := child as WalkFigure
@@ -892,7 +916,7 @@ func _process(delta: float) -> void:
 		if _gather_homes.has(figure):
 			continue
 		if figure == _leader:
-			_advance_leader(delta, step)
+			_advance_leader(delta)
 			continue
 		# Her birim kendi yüzüne doğru yürüyor; dönmekte olan yerinde adım
 		# atıyor. Duran bir figürün yüzü `advance` değiştirmiyor, o yüzden
@@ -904,37 +928,49 @@ func _process(delta: float) -> void:
 		if unit >= 0 and unit < _unit_facing.size():
 			facing = 1.0 if _unit_facing[unit] >= 0.0 else -1.0
 			turning_now = absf(_unit_facing[unit]) < 0.999
-		figure.advance(delta, TURN_WALK_STEP * facing if turning_now else step * facing)
+		if turning_now:
+			figure.advance(delta, TURN_WALK_STEP * facing)
+		else:
+			figure.advance_ground(delta, _ground_speed * facing)
 		figure.set_facing(facing)
 
 	var was_swaying := _wagon_motion > 0.0
-	_wagon_motion = WalkFigure.ease_motion(_wagon_motion, not is_zero_approx(_speed), delta)
-	if not is_zero_approx(_speed):
-		_wheel_angle = fmod(_wheel_angle + delta * _speed * 4.2, TAU)
+	var rolling := _ground_speed > 0.5
+	_wagon_motion = WalkFigure.ease_motion(_wagon_motion, rolling, delta)
+	if rolling:
+		# Tekerlek yolda kaymadan dönüyor: açı = yol / yarıçap (bkz.
+		# ArtDraw.wagon'un wheel_r'si). Sabit bir çarpandı ve tekerlek de
+		# ayaklar gibi zemin hızından bağımsız dönüyordu.
+		var wheel_r := maxf(size.y, 1.0) * _scale * WAGON_HEIGHT_RATIO * ArtDraw.WAGON_WHEEL_RATIO
+		_wheel_angle = fmod(_wheel_angle + delta * _ground_speed / maxf(wheel_r, 1.0), TAU)
 	# Yeniden çizim üç sebepten gerekebilir: tekerlek dönüyor, ateş
 	# titriyor, ya da biri hâlâ ateşe/koluna yürüyor - üçü de kendi
 	# koşuluyla bağımsız.
-	if not is_zero_approx(_speed) or was_swaying or _camping or _turning or not _gathering_figures.is_empty():
+	if rolling or was_swaying or _camping or _turning or not _gathering_figures.is_empty():
 		queue_redraw()
 
 ## Lider: dönüşte kendi yolu (çevir, sonra yeni başa sür), yolda kendi
-## zemin hızı, yoksa kervanın adımı.
-func _advance_leader(delta: float, caravan_step: float) -> void:
+## zemin hızı, yoksa kervanın adımı. Üçünde de adım zeminden - at da insan
+## da yerde kaymıyor.
+func _advance_leader(delta: float) -> void:
+	var x := _leader.position.x
+	var moved := (x - _leader_last_x) / maxf(delta, 0.0001)
+	_leader_last_x = x
 	if _turning:
-		var riding := _turn_time > LEADER_PIVOT_SECONDS and absf(_leader_centre_rel() - _turn_leader_to) > 1.0
 		var target := -_turn_from
 		if _turn_time <= LEADER_PIVOT_SECONDS:
 			_leader.advance(delta, 0.0)
 			_leader.set_facing(_turn_from if _leader_turn_scale_sign() > 0.0 else target)
 		else:
-			_leader.advance(delta, (STEP_RATE * LEADER_STEP_CAP * target) if riding else 0.0)
+			# Dönüşte zaman durmuş, manzara kaymıyor: ekrandaki yol zemindeki yol.
+			_leader.advance_ground(delta, absf(moved) * target)
 			_leader.set_facing(target)
 		return
 	if _leader_walking:
-		_leader.advance(delta, leader_step_for(_leader_ground))
+		_leader.advance_ground(delta, _leader_ground)
 		return
-	_leader.advance(delta, caravan_step * _heading)
-	if is_zero_approx(caravan_step):
+	_leader.advance_ground(delta, _ground_speed * _heading)
+	if _ground_speed <= 0.5:
 		return
 	_leader.set_facing(_heading)
 
@@ -943,16 +979,6 @@ func _leader_turn_scale_sign() -> float:
 
 func _leader_centre_rel() -> float:
 	return get_leader_centre() - _anchor_x
-
-## Zemin hızından adım temposu (bkz. LEADER_STEP_CAP). Saf fonksiyon.
-static func leader_step_for(ground_px_s: float) -> float:
-	var reference := TravelBand.PIXELS_PER_DAY / JourneyClock.REAL_SECONDS_PER_DAY
-	var ratio := absf(ground_px_s) / reference
-	if ratio < 0.02:
-		return 0.0
-	if ratio > 1.0:
-		ratio = 1.0 + (ratio - 1.0) * LEADER_STEP_GROWTH
-	return signf(ground_px_s) * STEP_RATE * minf(ratio, LEADER_STEP_CAP)
 
 ## Dönüşün bir karesi: birimlerin yüzü dalgayla, liderin yeri yoluyla.
 func _advance_turn(delta: float) -> void:
@@ -999,14 +1025,15 @@ func _leader_rel_x() -> float:
 ## Toplanma ve dönüş: `_gather_progress` kampa göre 0↔1 arası akıyor,
 ## her toplanan figürün ekrandaki yeri ev-ateş arasında bu oranla
 ## enterpole ediliyor. Figürün kendi yürüyüş fazı da burada sürülüyor -
-## `_speed`'den değil, çünkü kamp sırasında gerçek `_speed` sıfır.
+## Zemin hızından değil, çünkü kamp sırasında kervan duruyor: adım her
+## figürün kendi yolundan.
 func _advance_gather(delta: float) -> void:
 	if _gathering_figures.is_empty():
 		return
 	var target := 1.0 if _camping else 0.0
 	var moving := not is_equal_approx(_gather_progress, target)
 	if moving:
-		var step := delta / CAMP_GATHER_SECONDS
+		var step := delta / gather_seconds()
 		_gather_progress = clampf(
 			_gather_progress + (step if _camping else -step), 0.0, 1.0
 		)
@@ -1015,11 +1042,9 @@ func _advance_gather(delta: float) -> void:
 		var home: Vector2 = _gather_homes.get(figure, figure.position)
 		var dest: Vector2 = _gather_targets.get(figure, home)
 		var new_position: Vector2 = home.lerp(dest, eased)
-		var walk_step := 0.0
-		if moving:
-			walk_step = CAMP_WALK_STEP if new_position.x >= figure.position.x else -CAMP_WALK_STEP
+		var ground := (new_position.x - figure.position.x) / maxf(delta, 0.0001) if moving else 0.0
 		figure.position = new_position
-		figure.advance(delta, walk_step)
+		figure.advance_ground(delta, ground)
 
 	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor,
 	# yoksa bir sonraki kampa kadar boşuna taşınırlar. Sürücüler ayrıca
@@ -1034,6 +1059,21 @@ func _advance_gather(delta: float) -> void:
 		_gather_targets.clear()
 		_gather_fire_index.clear()
 		_gather_seat_index.clear()
+
+## Ateşe yürüyüşün süresi: en uzağa yürüyenin en hızlı anı (smoothstep'in
+## tepesi ortalamanın 1.5 katı) tempolu yürüyüşü aşmasın. 1.3 saniyede
+## kapanan bir vagon aralığı insanı ateşe koşturuyordu.
+func gather_seconds() -> float:
+	var farthest := 0.0
+	var brisk := INF
+	for figure in _gathering_figures:
+		var home: Vector2 = _gather_homes.get(figure, figure.position)
+		var dest: Vector2 = _gather_targets.get(figure, home)
+		farthest = maxf(farthest, absf(dest.x - home.x))
+		brisk = minf(brisk, figure.brisk_ground_speed())
+	if farthest <= 0.0 or brisk == INF or brisk <= 0.0:
+		return CAMP_GATHER_SECONDS
+	return maxf(CAMP_GATHER_SECONDS, 1.5 * farthest / brisk)
 
 ## Yumuşak geçiş (smoothstep): doğrusal enterpolasyon yürüyüşü başta ve
 ## sonda aniden kesiyor, figür ateşin dibinde fren yapmış gibi duruyordu.

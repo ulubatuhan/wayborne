@@ -99,6 +99,8 @@ const ROAD_RECRUIT_COST_MULTIPLIER: float = 1.25
 ## Küçük tutulmalı: büyürse oyuncu günün geri kalanını bir şeye doğru
 ## yürüyerek geçirir, bu bir onay adımı olmalı, ikinci bir yolculuk değil.
 const ENCOUNTER_APPROACH_DAYS: float = 0.35
+## İşaretin doğduğu yer ile görüşün kenarı arasında bırakılan pay (piksel).
+const ENCOUNTER_EDGE_MARGIN: float = 90.0
 
 ## "Kervan Emirleri" paneli manzaranın üstünde, sol altta duruyor (bkz.
 ## _build_hud_layer) ve dile/genişliğe göre kendi boyunu değiştiriyor.
@@ -233,11 +235,16 @@ const PACE_FAST_STRESS_PER_DAY: int = 3
 const PACE_FAST_MORALE_PER_DAY: int = -2
 const PACE_SLOW_MORALE_PER_DAY: int = 2
 
-## Lider kolonda gezerken adım hızı (gün/saat cinsinden değil, kolondaki
-## piksel/saat): kervanın boyu zaten sınırlı, bu yalnızca ne kadar çabuk
-## arkaya inildiğini belirliyor.
-const LEADER_RIDE_SPEED: float = 96.0
-const LEADER_WALK_SPEED: float = 64.0
+## Liderin kolonda gezerken zemine göre hızı artık sabit piksel değil:
+## figürünün (at ya da yaya) tempolu yürüyüşü - `RoadCaravan.
+## get_leader_brisk_speed()`. 96/64 piksel 320'lik şeride göreydi; tam
+## ekranda at yürüyüş kareleriyle dörtnala hızında kayıyordu.
+## Manzaranın gün->piksel ölçeğinin yeni değere yumuşak geçiş süresi
+## (saniye): tempo ya da saat hızı değişince manzara sıçramasın.
+const WORLD_SCALE_EASE_SECONDS: float = 0.6
+## Kervanın gün/saniye hızının yumuşatma süresi - kare kare oynayan
+## mesafe ölçeği oynatmasın.
+const DAY_RATE_EASE_SECONDS: float = 0.4
 ## Tutulan yönde liderin en az ekran hızı (oran). Kervan 3x'te liderin
 ## kendi hızından hızlı akabiliyor; ileri tutulan tuş lideri yine de
 ## kolonun önüne doğru götürmeli, kervanın gerisine düşürmemeli.
@@ -423,6 +430,10 @@ var _days_covered: float:
 		_journey.days_covered = value
 ## Son karede hangi yöne yürüdüğümüz - ipucu satırı bunu gösteriyor.
 var _walk_direction: float = 0.0
+## Kervanın yumuşatılmış gün/saniye hızı ve manzara ölçeğinin kurulup
+## kurulmadığı (bkz. _update_world_scale).
+var _day_rate: float = 0.0
+var _world_scale_set: bool = false
 
 var _clock_label: Label
 var _speed_button: Button
@@ -1595,6 +1606,7 @@ func _process(delta: float) -> void:
 		_update_camp_state()
 	else:
 		_walk_direction = 0.0
+		_caravan.set_ground_speed(0.0)
 		_caravan.set_leader_motion(0.0, false)
 
 	_refresh_time_ui()
@@ -1610,16 +1622,57 @@ func _process(delta: float) -> void:
 func _advance_position(hours: float, delta: float) -> void:
 	_walk_direction = 0.0
 	if hours <= 0.0:
+		_caravan.set_ground_speed(0.0)
 		return
 	var before := _terrain_day()
 	if not _camping:
 		_walk_at(_pace, hours)
-	# Kervanın zemine göre hızı (şerit pikseli/saniye) - lider buna göre
-	# yürüyor, bkz. _move_leader.
+	var day_step := absf(_terrain_day() - before)
+	if delta > 0.0:
+		_update_world_scale(delta, day_step / delta)
+	# Kervanın zemine göre hızı (şerit pikseli/saniye) - manzara bununla
+	# kayıyor, bacaklar ve tekerlek bununla adım atıyor, lider buna göre
+	# yürüyor (bkz. _move_leader). Üçü aynı sayı: ayak zeminde kaymaz.
 	var column_speed := 0.0
 	if delta > 0.0:
-		column_speed = absf(_terrain_day() - before) * TravelBand.PIXELS_PER_DAY / delta
+		column_speed = day_step * _band.get_pixels_per_day() / delta
+	_caravan.set_ground_speed(column_speed)
 	_move_leader(delta, column_speed)
+
+## Manzaranın gün->piksel ölçeği. Kervan normal tempoda sakin bir
+## yürüyüşle (`WalkFigure.WALK_CADENCE`) ilerleyecek kadar: zemin
+## figürün boyuna göre ölçülüyor, ekranın boyuna göre değil. Hızlı tempoda
+## ya da hızlandırılmış saatte gerçek mesafe (gün) aynen birikiyor ama
+## manzara en yavaş yürüyenin (genelde öküz) tempolu yürüyüşünü
+## aşmıyor - ölçek küçülüyor. Bacak hızlansaydı kervan koşardı, manzara
+## hızlansa bacak yetişmezdi ve ayak kayardı. Yavaş ucunda da tersi:
+## ağır bir yürüyüşün altına inmiyor.
+## Manzaranın ekranda kayacağı hız: doğal hız, ağır yürüyüş ile en yavaş
+## yürüyenin tempolu yürüyüşü arasına kenetli. Saf fonksiyon - test okuyor.
+static func scenic_ground_speed(natural_px_s: float, amble_px_s: float, brisk_px_s: float) -> float:
+	if natural_px_s <= 0.0:
+		return 0.0
+	return clampf(natural_px_s, minf(amble_px_s, brisk_px_s), brisk_px_s)
+
+func _update_world_scale(delta: float, day_rate: float) -> void:
+	var blend := 1.0 - exp(-delta / DAY_RATE_EASE_SECONDS)
+	_day_rate = lerpf(_day_rate, day_rate, blend)
+	var natural := _caravan.get_walk_ground_speed() * JourneyClock.REAL_SECONDS_PER_DAY
+	if natural <= 0.0:
+		return
+	var target := _band.get_pixels_per_day() if _world_scale_set else natural
+	if _day_rate > 1e-5:
+		var ground := scenic_ground_speed(
+			_day_rate * natural,
+			_caravan.get_amble_ground_speed(), _caravan.get_brisk_ground_speed()
+		)
+		target = ground / _day_rate
+	if not _world_scale_set:
+		_world_scale_set = true
+		_band.set_pixels_per_day(target)
+		return
+	var current := _band.get_pixels_per_day()
+	_band.set_pixels_per_day(lerpf(current, target, 1.0 - exp(-delta / WORLD_SCALE_EASE_SECONDS)))
 
 ## Klavye/kumanda yönü dokunma hedefinden önce gelir: ikisi aynı anda
 ## verilirse eldeki tuş kazanır ve hedef unutulur.
@@ -1680,7 +1733,7 @@ static func leader_screen_speed(
 	return screen
 
 func _leader_ground_speed() -> float:
-	return LEADER_RIDE_SPEED if _caravan.is_leader_mounted() else LEADER_WALK_SPEED
+	return _caravan.get_leader_brisk_speed()
 
 ## Kervanın arazideki şimdiki günü (bkz. JourneyController.terrain_day).
 func _terrain_day() -> float:
@@ -2080,13 +2133,8 @@ func _refresh_time_ui() -> void:
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
 	# hesaplanırsa gece kervanı gündüz aydınlatılmış görünür.
 	_caravan.set_light(_band.get_light())
-	# Bacak fazı da saatin hız çarpanını taşımalı - taşımadığı sürece
-	# `_days_covered` (dolayısıyla arka planın `_world_x`'i) 3x'te üç kat
-	# hızlı akarken bacaklar hep aynı, sabit hızda sallanıyordu: kervan
-	# ekranda kayıyormuş gibi görünüyordu, tempo değişse de değişmese de.
-	# `_clock.get_speed()` 1x'te 1.0 olduğu için varsayılan davranış
-	# hiç değişmiyor.
-	_caravan.set_speed(0.0 if _camping else absf(_walk_direction) * _pace * _clock.get_speed())
+	# Bacak hızı burada verilmiyor: `_advance_position` kervanın gerçek
+	# zemin hızını (manzaranın kaydığı pikseli) doğrudan veriyor.
 
 	# Metin yalnızca *gösterilen değer* değişince kuruluyor. Buradaki yorum
 	# uzun süre bunu vaat ediyordu ama kod her karede string biçimliyor,
@@ -2299,9 +2347,16 @@ func _queue_event(event: GameEvent) -> void:
 	# konur, yani oyuncunun hazırlanacak (ya da geri dönecek) yolu olur.
 	# Savaşın sıklaşmasının dengesi bu - sıklaştırılmış ama kaçınılamayan
 	# bir savaş mekanik değil vergidir.
+	# İşaret görüşün içinde doğuyor: manzaranın ölçeği figür boyuna bağlı
+	# olduğu için (bkz. _update_world_scale) büyük ekranda yarım gün
+	# ekranın dışına düşebilir - görülmeyen bir uyarı uyarı değil.
+	var room := _band.visible_room_ahead() - ENCOUNTER_EDGE_MARGIN
+	var visible_days := maxf(0.05, room / _band.get_pixels_per_day())
 	_pending_event_day_position = minf(
-		_days_covered + ENCOUNTER_APPROACH_DAYS
-			+ RoadAttention.spot_bonus_days(_attention_zone),
+		_days_covered + minf(
+			ENCOUNTER_APPROACH_DAYS + RoadAttention.spot_bonus_days(_attention_zone),
+			visible_days
+		),
 		float(_journey_length_days)
 	)
 	_spawn_encounter(kind)
@@ -2345,7 +2400,7 @@ func _clear_encounter() -> void:
 ## kervan işaretten uzaklaşır ve hiçbir şey tetiklenmez; tekrar yaklaşınca
 ## aynı kontrol yine çalışır.
 func _check_pending_event_reached() -> void:
-	var front_days := 0.0 if _caravan == null else _caravan.get_front_offset() / TravelBand.PIXELS_PER_DAY
+	var front_days := 0.0 if _caravan == null else _caravan.get_front_offset() / _band.get_pixels_per_day()
 	if not _journey.has_reached_pending(front_days):
 		return
 	var event := _pending_event

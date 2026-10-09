@@ -46,6 +46,28 @@ const START_EASE_SECONDS: float = 0.12
 ## heykelden ayıran şey (ikincil hareket). Figür boyuna oranlı.
 const OX_NOD_RATIO: float = 0.018
 
+## Yürüyüşün hız payları (çevrim/s; bir çevrim = iki adım). Kervan koşmaz:
+## en hızlısı tempolu yürüyüş. İnsan için 0.70 sakin bir kervan yürüyüşü
+## (dakikada 84 adım), 0.95 tempolu yürüyüş (114) - bunun üstü koşudur ve
+## yürüyüş kareleriyle oynatılınca bacaklar fırıl fırıl döner. Altı ağır
+## aksak bir yürüyüş. Ekran bu bantta kalsın diye kervanın zemin hızı
+## (yani manzara) kısılıyor, bacaklar hızlandırılmıyor - bkz. road_journey.
+const WALK_CADENCE: float = 0.70
+const BRISK_CADENCE: float = 0.95
+const AMBLE_CADENCE: float = 0.40
+## Hayvanların tempolu yürüyüş tavanı. Küçük hayvan sık adımlar; öküz ağır
+## yürür. Kervanın zemin hızı içindeki en yavaş hayvanın tavanına da
+## takılıyor: öküz vagonu koşturamaz.
+const BEAST_BRISK_CADENCE: Dictionary = {
+	"ox": 1.15, "horse": 1.25, "horse_white": 1.25, "donkey": 1.35,
+	"husky": 2.00, "wolf": 1.60, "bear": 1.10, "boar": 1.50,
+	"stag": 1.30, "deer": 1.45,
+}
+## Prosedürel dörtayaklının (`_draw_quad_leg`, `BeastRig.pose`) bir
+## çevrimde katettiği yol: toynak yarım çevrimde `2 * stride` geri gidiyor,
+## yani gövde çevrim başına `4 * stride` ilerliyor.
+const QUAD_CYCLE_RATIO: float = 4.0 * 0.13
+
 ## Atlı figürün iki parçasının payı. At, figür kutusunun yarısından biraz
 ## fazlası; binici at sırtından yukarıya kalan pay. Toplamı 1'i geçiyor,
 ## çünkü binicinin bacakları atın gövdesiyle örtüşüyor - örtüşmeyince
@@ -229,6 +251,74 @@ func advance(delta: float, speed: float) -> void:
 		_facing = 1.0 if speed >= 0.0 else -1.0
 	_motion = ease_motion(_motion, _moving, delta)
 	queue_redraw()
+
+## Zemine göre hızdan yürüyüş: kadans = zemin hızı / çevrim başına yol.
+## Ayak böylece hiçbir hızda zeminde kaymıyor - ne öne (koşu bandı) ne
+## geriye (moonwalk). `ground_px_s` figürün kendi pikselinde, işaret yön.
+func advance_ground(delta: float, ground_px_s: float) -> void:
+	advance(delta, cadence_for_ground(ground_px_s))
+
+func cadence_for_ground(ground_px_s: float) -> float:
+	var cycle := cycle_distance()
+	if cycle <= 0.0 or absf(ground_px_s) < 0.5:
+		return 0.0
+	return ground_px_s / cycle
+
+## Bir yürüyüş çevriminde gövdenin zemine göre katettiği yol (piksel).
+## İnsan `FigureRig`in kendi adımından; hayvan, kareleri varsa karelerden
+## ölçülen adımından (`BodyFrames.BEAST_WALK_CYCLE`).
+func cycle_distance() -> float:
+	var h := size.y
+	if not _beast_species.is_empty() and _kind != KIND_PERSON and _kind != KIND_MOUNTED:
+		return beast_cycle_distance(_beast_species, h)
+	match _kind:
+		KIND_MOUNTED:
+			return beast_cycle_distance(_horse_species_or_default(), h * MOUNT_HORSE_RATIO)
+		KIND_HORSE:
+			return beast_cycle_distance(_horse_species_or_default(), h)
+		KIND_OX:
+			return beast_cycle_distance(BeastRig.OX, h)
+		KIND_DOG:
+			return beast_cycle_distance(BeastRig.HUSKY, h)
+		KIND_DONKEY:
+			return beast_cycle_distance(BeastRig.DONKEY, h)
+	return FigureRig.CYCLE_DISTANCE_RATIO * h * _scale
+
+## Bu figürün tempolu yürüyüşte zemine göre hızı (piksel/s): kervanın
+## zemin hızının tavanı bunların en küçüğü.
+func brisk_ground_speed() -> float:
+	return brisk_cadence() * cycle_distance()
+
+func brisk_cadence() -> float:
+	var species := _walking_species()
+	if species.is_empty():
+		return BRISK_CADENCE
+	return float(BEAST_BRISK_CADENCE.get(species, BRISK_CADENCE))
+
+## Yürüyen bacakların türü; insan (yaya) için boş.
+func _walking_species() -> String:
+	if not _beast_species.is_empty() and _kind != KIND_PERSON and _kind != KIND_MOUNTED:
+		return _beast_species
+	match _kind:
+		KIND_MOUNTED, KIND_HORSE:
+			return _horse_species_or_default()
+		KIND_OX:
+			return BeastRig.OX
+		KIND_DOG:
+			return BeastRig.HUSKY
+		KIND_DONKEY:
+			return BeastRig.DONKEY
+	return ""
+
+func _horse_species_or_default() -> String:
+	return _horse_species if not _horse_species.is_empty() else BeastRig.HORSE
+
+## Türün çizildiği yola göre çevrim başına yolu. Kareler varsa onların
+## ölçülmüş adımı, yoksa iskeletin (`BeastRig`) ya da prosedürel bacağın.
+static func beast_cycle_distance(species: String, h: float) -> float:
+	if BodyFrames.for_beast(species) != null:
+		return BodyFrames.beast_walk_cycle(species) * h
+	return QUAD_CYCLE_RATIO * h
 
 ## Genliğin bir karelik adımı. Saf fonksiyon - test sahnesiz okuyabilsin.
 ## Durunca faz donuyor ama adımın boyu sönüyor, yani ayak yarım adımda
@@ -1079,8 +1169,10 @@ func _draw_quad_leg(
 ) -> void:
 	var stride := h * 0.13 * _motion
 	var lift := h * 0.055 * _motion
+	# -cos: yerdeki toynak (sin < 0) geriye gidiyor. cos ile öne gidiyordu -
+	# insanların uzun süre yaptığı ay yürüyüşünün aynısı (bkz. test_gait).
 	var hoof := Vector2(
-		shoulder.x + cos(phase) * stride * _facing,
+		shoulder.x - cos(phase) * stride * _facing,
 		ground_y - maxf(0.0, sin(phase)) * lift
 	)
 	var leg_len := ground_y - shoulder.y

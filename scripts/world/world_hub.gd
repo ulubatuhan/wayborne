@@ -12,7 +12,6 @@ const ARRIVAL_INK_HOLD: float = 0.6
 const GROUND_Y: float = 430.0
 const WORLD_MIN_X: float = -160.0
 const WORLD_MAX_X: float = 2100.0
-const WALK_SPEED: float = 280.0
 const INTERACT_RANGE: float = 150.0
 
 ## Vagon ölçüsü. İlk değeri (76x50) tayfa figürlerinden *kısaydı* - ekran
@@ -50,16 +49,12 @@ const BODY_WIDTH: float = 46.0
 const MOUNTED_HEIGHT: float = 128.0
 const MOUNTED_WIDTH: float = 150.0
 
-## Yürüyüş fazının ilerleme hızı. Mesafeye bağlı, zamana değil: duran bir
-## figürün ayakları oynarsa yerde kayıyor gibi duruyor.
-##
-## Değeri ölçüldü, seçilmedi: bir tam çevrimde gövde
-## `FigureRig.CYCLE_DISTANCE_RATIO * boy` kadar ilerler, yani ayağın
-## kaymadığı oran `1 / (0.633 * boy)`. Ortalama gövde 74 piksel -> 0.0213
-## (yürüyüş %60 basışa geçmeden 0.0178'di). Eski 0.034 bunun iki katıydı;
-## yol ekranının altı katlık sapması kadar değil (orada kervan ağır,
-## burada oyuncu hızlı koşuyor) ama aynı cinsten bir hata.
-const STEP_PER_UNIT: float = 0.0213
+## Yürüyüş hızı sabit bir sayı değil: kolonun en yavaş yürüyeninin (genelde
+## öküz) tempolu yürüyüşü (`_walk_speed`). 280 piksel/s'ydi - 72 piksellik
+## bir insanın saniyede dört boyu, yani koşu; at ve öküz de aynı hızla
+## sürükleniyordu. Kervan koşmaz. Adımlar da sabit bir orandan değil, her
+## figürün kendi çevrim yolundan (`WalkFigure.advance_ground`): öküzün adımı
+## insanınkinin yarısı, aynı oranı paylaşınca biri hep kayıyordu.
 
 ## Öküz ölçüsü. Konumu artık `_column_positions` veriyor.
 ##
@@ -253,7 +248,7 @@ func _move_player(delta: float) -> void:
 	elif _has_walk_target:
 		var centre := _player.position.x + _player.size.x * 0.5
 		var gap := _walk_target_x - centre
-		if absf(gap) <= WALK_SPEED * delta or (not _pending_spot.is_empty() and _is_in_range(_pending_spot)):
+		if absf(gap) <= _walk_speed() * delta or (not _pending_spot.is_empty() and _is_in_range(_pending_spot)):
 			var spot := _pending_spot
 			_clear_walk_target()
 			if not spot.is_empty():
@@ -265,15 +260,25 @@ func _move_player(delta: float) -> void:
 	_walk_direction = direction
 	# Faz mesafeden sürülüyor: duran bir figürün ayakları oynamıyor,
 	# yürüyeninki adım atıyor.
-	_player.advance(delta, direction * WALK_SPEED * STEP_PER_UNIT)
+	var speed := _walk_speed()
+	_player.advance_ground(delta, direction * speed)
 	if is_zero_approx(direction):
 		return
 
 	_player.position.x = clampf(
-		_player.position.x + direction * WALK_SPEED * delta,
+		_player.position.x + direction * speed * delta,
 		WORLD_MIN_X,
 		WORLD_MAX_X
 	)
+
+## Kolonun hiçbir üyesinin tempolu yürüyüşü aşmadığı hız: liderin ve
+## herkesin `brisk_ground_speed()`'inin en küçüğü.
+func _walk_speed() -> float:
+	var speed := _player.brisk_ground_speed()
+	for figure in _turning_figures():
+		if figure.visible:
+			speed = minf(speed, figure.brisk_ground_speed())
+	return speed
 
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
@@ -350,9 +355,7 @@ func _chase(
 		var before := figure.position.x
 		var centred := targets[index] - figure.size.x * 0.5
 		figure.position.x = lerpf(before, centred, weight)
-		figure.advance(
-			delta, (figure.position.x - before) * STEP_PER_UNIT / maxf(delta, 0.0001)
-		)
+		figure.advance_ground(delta, (figure.position.x - before) / maxf(delta, 0.0001))
 
 ## Kolonun tamamı tek bir yerde hesaplanıyor: her parça kendi
 ## *genişliği* kadar yer tüketiyor ve araya bir boşluk giriyor, yani

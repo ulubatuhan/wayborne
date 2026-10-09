@@ -55,23 +55,82 @@ func run(t) -> void:
 	_test_leader_speed_is_symmetric(t)
 	_test_walking_left_is_not_a_moonwalk(t)
 	_test_walk_cadence_matches_ground_speed(t)
+	_test_every_beast_has_a_measured_stride(t)
+	_test_beast_rig_planted_feet_move_back(t)
 	_test_pack_animals_read_against_a_person(t)
 	_test_hub_turn_is_a_wave(t)
 
-## Bacak kadansı zemin hızıyla uyumlu: bir tam çevrimde gövde
-## `FigureRig.CYCLE_DISTANCE_RATIO * boy` kadar ilerler, o yüzden kaymayan kadans
-## `zemin_hızı / çevrim_mesafesi`. Uzun süre 2.6'ydı - altı kat hızlı,
-## yani koşan bacak / yürüyen kervan (bkz. STEP_RATE'in kendi notu).
+## Kadans zeminden: her figür adımını zeminin hızından ve kendi çevrim
+## yolundan alıyor. `STEP_RATE` (0.52 çevrim/s) 320'lik şeride göreydi ve
+## tam ekranda yere basan ayağı zeminin iki katı hızla geriye kaydırıyordu;
+## öküz, at, eşek ve köpek de aynı sayıyı paylaşıyordu.
 func _test_walk_cadence_matches_ground_speed(t) -> void:
-	var ground := TravelBand.PIXELS_PER_DAY / JourneyClock.REAL_SECONDS_PER_DAY
-	var person_h := BAND.y * RoadCaravan.PERSON_HEIGHT_RATIO
-	var per_cycle := FigureRig.CYCLE_DISTANCE_RATIO * person_h
-	var ideal := ground / per_cycle
-	t.ok(
-		absf(RoadCaravan.STEP_RATE - ideal) < 0.15 * ideal,
-		"1x kadans zemin hızından sapıyor (%.2f ≠ %.2f çevrim/s)" % [
-			RoadCaravan.STEP_RATE, ideal]
-	)
+	for band_h in [320.0, 1080.0]:
+		var caravan := _build(3, 3, 1, 1, 1)
+		caravan.size = Vector2(1920.0, band_h)
+		caravan.set_ground_line(600.0, band_h * 0.84)
+		var road := load("res://scripts/ui/road_journey.gd")
+		var walk := caravan.get_walk_ground_speed()
+		var brisk := caravan.get_brisk_ground_speed()
+		var amble := caravan.get_amble_ground_speed()
+		t.ok(amble < walk and walk < brisk, "ağır < normal < tempolu (%dpx şerit)" % int(band_h))
+		# Her tempo x her saat hızı: manzara (zemin) hiçbir yürüyeni tempolu
+		# yürüyüşün üstüne çıkarmıyor - kervan koşmuyor.
+		for pace in [0.70, 1.0, 1.35]:
+			for clock in [0.5, 1.0, 1.5, 3.0]:
+				for condition in [0.6, 1.0]:
+					var natural: float = walk * pace * clock * condition
+					var ground: float = road.scenic_ground_speed(natural, amble, brisk)
+					for child in caravan.get_children():
+						var figure := child as WalkFigure
+						if figure == null or not figure.visible:
+							continue
+						var cadence := figure.cadence_for_ground(ground)
+						t.ok(cadence <= figure.brisk_cadence() + 1e-4,
+							"%s koşuyor: %.2f > %.2f çevrim/s (tempo %.2f, saat %.1fx)" % [
+								figure.get("_kind"), cadence, figure.brisk_cadence(), pace, clock])
+						# Ayak zeminde kaymıyor: kadans x çevrim yolu = zemin.
+						t.ok(absf(cadence * figure.cycle_distance() - ground) < 0.01,
+							"%s ayağı zeminde kayıyor" % figure.get("_kind"))
+		# Normal tempoda, tam kondisyonda, 1x'te insan sakin yürüyüşte.
+		var person := caravan.get_children().filter(func(c): return c is WalkFigure and c.get("_kind") == WalkFigure.KIND_PERSON)[0] as WalkFigure
+		var normal: float = road.scenic_ground_speed(walk, amble, brisk)
+		t.ok(absf(person.cadence_for_ground(normal) - WalkFigure.WALK_CADENCE) < 0.01,
+			"normal tempoda insan %.2f çevrim/s yürüyor" % WalkFigure.WALK_CADENCE)
+		caravan.get_parent().free()
+
+## Her hayvan kare kümesinin ölçülmüş bir adımı var - tablo eksikse o tür
+## varsayılan 0.5'le yürür ve ayağı kayar.
+func _test_every_beast_has_a_measured_stride(t) -> void:
+	var dir := DirAccess.open("res://data/assets/characters/frames")
+	for name in dir.get_directories():
+		if not name.begins_with("beast_"):
+			continue
+		var species := name.trim_prefix("beast_")
+		t.ok(BodyFrames.BEAST_WALK_CYCLE.has(species), "%s için ölçülmüş adım yok" % species)
+
+## Dört ayaklı iskeletin (kareleri olmayan tür) yere basan ayağı geriye
+## gidiyor. `cos(phase)` ile öne gidiyordu: insanların uzun süre yaptığı
+## ay yürüyüşünün hayvandaki aynısı.
+func _test_beast_rig_planted_feet_move_back(t) -> void:
+	for facing in [1.0, -1.0]:
+		var wrong := 0
+		var planted := 0
+		var steps := 64
+		for i in steps:
+			var a := BeastRig.pose(BeastRig.OX, Vector2.ZERO, 100.0, TAU * i / steps, 1.0, facing)
+			var b := BeastRig.pose(BeastRig.OX, Vector2.ZERO, 100.0, TAU * (i + 1) / steps, 1.0, facing)
+			for key in a:
+				if not String(key).ends_with("_foot"):
+					continue
+				var fa: Vector2 = a[key]
+				var fb: Vector2 = b[key]
+				if absf(fa.y) < 1e-3 and absf(fb.y) < 1e-3:
+					planted += 1
+					if (fb.x - fa.x) * facing > 1e-4:
+						wrong += 1
+		t.ok(planted > 0, "öküzün ayakları basıyor (facing %d)" % int(facing))
+		t.eq(wrong, 0, "öküzün basan ayağı öne kaymıyor (facing %d)" % int(facing))
 
 ## Hayvanlar insana göre okunuyor. `BeastRig`in `h`'si nominal - gerçek
 ## siluet `extent().size.y * h` - ve bu atlandığı sürece kutudan makul
@@ -340,8 +399,11 @@ func _test_leader_speed_is_symmetric(t) -> void:
 	# Kervan attan hızlı aksa da ileri tutulan tuş lideri öne götürür.
 	var fast: float = road.leader_screen_speed(1.0, 1.0, 300.0, ride)
 	t.ok(fast > 0.0, "hızlı akışta bile lider tuşun yönüne gidiyor")
-	t.eq(RoadCaravan.leader_step_for(0.0), 0.0, "duran lider adım atmıyor")
-	t.ok(RoadCaravan.leader_step_for(-50.0) < 0.0, "sola giden liderin adımı sola")
+	var figure := WalkFigure.new()
+	figure.size = Vector2(80.0, 100.0)
+	t.eq(figure.cadence_for_ground(0.0), 0.0, "duran lider adım atmıyor")
+	t.ok(figure.cadence_for_ground(-50.0) < 0.0, "sola giden liderin adımı sola")
+	figure.free()
 
 ## Sola yürüyen figür fazını ileri sarıyor: iskelet aynalandığı için fazı
 ## geri sarmak geri geri yürümekti.

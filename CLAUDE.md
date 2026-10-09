@@ -1345,8 +1345,10 @@ in every preview the moment it is equipped.
   facings and the arm/leg correlation, and failed 16 times on the old code.
   `paint_pose()` moved both phases to `PI` and its joints are identical to
   0.01 px, so `rig_spec.json` and every painted delivery stay valid.
-  `BeastRig` and the procedural `_draw_quad_leg` use the same `cos` stride
-  and are **not** fixed yet - the animals still moonwalk.
+  `BeastRig` and the procedural `_draw_quad_leg` had the same `cos` stride
+  and moonwalked too; both are `-cos` now (`BeastRig.paint_pose()` keeps
+  the old path through `classic`, the same contract reason), and
+  `test_caravan_layout` asserts the ox's planted feet go back.
 - **A walk is checked against a real walk cycle, not against itself.** The
   player put a rendered frame next to a reference walk sheet, and it read
   as a kneeling figure: the trailing foot lifted flat behind a bent knee.
@@ -1372,9 +1374,9 @@ in every preview the moment it is equipped.
     stance knees 9°, swing peak 60°, toe-off ~30°, which is the textbook
     curve; the old cycle stood on knees bent 25-35°.
   The cadence followed: with 60% stance a cycle carries the body
-  `2·stride/0.6` (`FigureRig.CYCLE_DISTANCE_RATIO`), not `4·stride`, so the
-  road's non-skating `STEP_RATE` is 0.52 (was 0.43) and the hub's
-  `STEP_PER_UNIT` 0.0213 (was 0.0178) - both now derived from the constant.
+  `2·stride/0.6` (`FigureRig.CYCLE_DISTANCE_RATIO`), not `4·stride` - and
+  every cadence in the game is now derived from it per figure (see Road
+  Movement Rules' "the ground and the step are one measure").
   `paint_pose()` keeps the old leg path (`classic`) because its joints are
   the painters' contract (`rig_spec.json`); `test_wardrobe` confirms they
   did not move. The gait test now skips the one sample that straddles
@@ -3652,17 +3654,55 @@ every decision has a visible control, and a key is only its shortcut.**
     finished turning on the first frame.
 - **The walk cadence was six times the ground speed, and nobody had
   measured it.** `RoadCaravan.STEP_RATE` was 2.6 with a comment saying
-  "the number itself is visual". Measured: at 1x the ground moves
-  `PIXELS_PER_DAY / REAL_SECONDS_PER_DAY` = 20 px/s, a person on a 320
-  band is 60.8 px, and a gait cycle carries the body `4 * STRIDE_RATIO *
-  height` = 46.2 px - so the non-skating cadence is 0.43 cycles/s. At 2.6
-  the legs ran two and a half cycles a second while the caravan covered a
-  third of its own height: running legs under a walking caravan. The hub's
-  own `STEP_PER_UNIT` was the same mistake at half the size (0.034 against
-  an ideal 0.0178) - there the player really does move fast, so the error
-  was 2x rather than 6x. Both are derived now, and
-  `tests/screenshot_walk_cadence.gd` prints the two seconds as a strip,
-  because a single frame cannot show a cadence at all.
+  "the number itself is visual" - running legs under a walking caravan.
+  It was measured down to 0.52, and that fixed number was still wrong,
+  which is the next bullet.
+- **The ground and the step are one measure, per figure, at every screen
+  size.** A fixed cadence was measured on a 320 px band; the road is full
+  frame now, and at 1080p a person is 119 px tall while `PIXELS_PER_DAY`
+  (900) moved the ground 20 px/s - the legs covered 39 px/s, so every
+  planted foot slid *backward* over the ground at twice its speed. That
+  was the moonwalk the player kept feeling, and no test saw it because
+  every test used the 320 band. The oxen, horse, donkey and dog shared the
+  same cadence although their strides differ by half. The rule now:
+  - **A figure's cadence is ground speed / its own cycle distance**
+    (`WalkFigure.advance_ground`, `cycle_distance()`): a person's from
+    `FigureRig.CYCLE_DISTANCE_RATIO`, an animal's from its render frames
+    (`BodyFrames.BEAST_WALK_CYCLE`, **measured** by
+    `tools/figure_pipeline/qa/beast_stride.py`, which reads 0.607 on the
+    human frames against the rig's true 0.633). Wheels roll by the same
+    ground speed over their radius (`ArtDraw.WAGON_WHEEL_RATIO`). A foot
+    cannot slip by construction.
+  - **The ground is scaled to the figure, not the screen.**
+    `road_journey._update_world_scale` sets `TravelBand.set_pixels_per_day`
+    so normal pace walks a person at `WalkFigure.WALK_CADENCE` (0.70
+    cycles/s). Day-anchored things (stops, milestones, the encounter
+    marker) are placed *relative to the caravan*
+    (`TravelBand.screen_x_for_day`) and `_world_x` accumulates, because the
+    scale is allowed to change.
+  - **The caravan never runs.** Fast pace, 1.5x and 3x clocks still cover
+    the real distance in days, but the scenery is clamped
+    (`scenic_ground_speed`) between an amble and the brisk walk of the
+    slowest walker in the column (`RoadCaravan.get_brisk_ground_speed`:
+    person 0.95, ox 1.15, horse 1.25, donkey 1.35, dog 2.0 cycles/s). Legs
+    speeding up would be running; scenery speeding up without the legs
+    would be skating; shrinking the world's scale is neither. Measured in
+    the live scene with oxen, dog and donkey: normal 1x ≈ person 0.57,
+    fast 3x ≈ person 0.79 / ox at its 1.15 cap. The encounter marker is
+    clamped to spawn inside the view (`ENCOUNTER_EDGE_MARGIN`), since a
+    larger scale could push half a day off-screen.
+  - **Everything else that walked on a constant follows the same rule.**
+    The leader rides/walks at its figure's brisk speed (was 96/64 px, a
+    gallop at 1080p); the camp gathering lasts long enough that the
+    farthest walker's peak stays brisk (`gather_seconds`; 1.3 s made them
+    sprint to the fire); turning in place steps at `WALK_CADENCE` (was
+    1.6). The hub's 280 px/s was four body heights a second - it is now
+    the column's slowest brisk walk (`WorldHub._walk_speed`), which makes
+    crossing the hub slower, on purpose: the ox sets the pace.
+  `test_caravan_layout`'s cadence test sweeps pace × clock × condition on
+  both band sizes and fails if any figure exceeds its brisk cadence or
+  its foot slips; `tests/screenshot_walk_cadence.gd` (now 1080p by
+  default) prints a strip with red ticks fixed to the ground.
 - **A figure fills about 86% of its box, and forgetting that sized two
   animals wrong.** The dog and donkey were reported as far too small
   against the caravan. The first correction computed their heights from

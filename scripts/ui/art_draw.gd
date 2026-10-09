@@ -469,7 +469,7 @@ static func ellipse_points(centre: Vector2, radii: Vector2, steps: int = 24) -> 
 ## buradan okuyor, `RoadCaravan` da kamp sırasında o silüetin yerini
 ## alan gerçek figürün "ev"ini (döndüğü nokta) buradan.
 static func wagon_driver_seat(base: Vector2, w: float, h: float) -> Vector2:
-	var wheel_r := h * 0.34
+	var wheel_r := h * WAGON_WHEEL_RATIO
 	var bed_y := base.y - wheel_r * 1.35
 	var hoop_top := bed_y - h * 0.16
 	return Vector2(base.x + w * 0.34, hoop_top - h * 0.04)
@@ -480,6 +480,10 @@ static func wagon_driver_seat(base: Vector2, w: float, h: float) -> Vector2:
 ## `canopy_sway` brandanın tepesinin yana kayması (piksel): yolda giden
 ## bir vagonun kumaşı tekerleğin ritmiyle hafifçe salınıyor. Taban
 ## kasaya çakılı, kayma yükseklikle orantılı - kemer eğiliyor, kaymıyor.
+## Tekerleğin yarıçapı vagon yüksekliğinin payı - `RoadCaravan` tekerleği
+## yol / yarıçap kadar döndürüyor, ikisi aynı sayıyı okumalı.
+const WAGON_WHEEL_RATIO: float = 0.34
+
 static func wagon(
 	canvas: CanvasItem, base: Vector2, w: float, h: float,
 	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true,

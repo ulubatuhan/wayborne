@@ -28,8 +28,12 @@ extends Control
 const BAND_HEIGHT: float = 320.0
 const HORIZON_RATIO: float = 0.58
 
-## Bir günlük yol kaç piksel. İlerleme hissinin ölçeği bu: küçük olursa
-## yol akmıyor, büyük olursa manzara savruluyor.
+## Bir günlük yol kaç piksel - yalnızca varsayılan. Yol ekranı ölçeği her
+## karede kendisi veriyor (`set_pixels_per_day`), çünkü doğru ölçek figürün
+## boyuna bağlı: zemin insanın adımıyla aynı hızda kaymalı. Sabit 900'de
+## 1080p bir ekranda insan 119 piksel boyundaydı, zemin saniyede 20 piksel
+## kayarken bacaklar 39 piksellik adım atıyordu - yere basan ayak zeminin
+## iki katı hızla geriye kayıyordu (bkz. `RoadCaravan.set_ground_speed`).
 const PIXELS_PER_DAY: float = 900.0
 
 ## Katman paralaks oranları. Uzak katman yavaş kayar - derinliğin tamamı
@@ -123,6 +127,13 @@ var _sun_ratio: float = 0.5
 var _progress: float = 0.0
 var _day_position: float = 0.0
 var _world_x: float = 0.0
+## Şu anki gün->piksel ölçeği. Değişebiliyor (hızlı saatte manzara hızlı
+## yürüyüş hızının üstüne çıkmasın diye küçülüyor), o yüzden `_world_x`
+## günden hesaplanmıyor, biriktiriliyor: ölçek değiştiği karede manzara
+## sıçramasın. Güne bağlı her şey (durak, işaret, kilometre taşı) kervana
+## göre **göreli** yerleşiyor - `screen_x_for_day`.
+var _pixels_per_day: float = PIXELS_PER_DAY
+var _has_position: bool = false
 ## Kervanın yüzü: +1 hedefe (sağa), -1 geri dönüşte (sola). Kamera buna
 ## göre kayıyor - bkz. `caravan_x()`. `_turn_blend` 0'da ileri çapa, 1'de
 ## ters çapa; aradaki geçiş bir kamera kaydırması, ışınlanma değil.
@@ -212,8 +223,13 @@ func get_weather() -> String:
 ## şehir ufukta ona göre büyüyor.
 func set_route_progress(progress: float, day_position: float = -1.0) -> void:
 	_progress = clampf(progress, 0.0, 1.0)
-	_day_position = day_position if day_position >= 0.0 else _progress * _route_days()
-	_world_x = _day_position * PIXELS_PER_DAY
+	var next := day_position if day_position >= 0.0 else _progress * _route_days()
+	if _has_position:
+		_world_x += (next - _day_position) * _pixels_per_day
+	else:
+		_world_x = next * _pixels_per_day
+		_has_position = true
+	_day_position = next
 	_refresh_terrain()
 	queue_redraw()
 
@@ -363,8 +379,26 @@ func get_caravan_anchor() -> Vector2:
 ## RoadEncounter) bunu okuyarak kervanla aynı dünyada duruyor: ikisi de
 ## `_world_x`'ten türediği için biri kayarken öteki geride kalmıyor.
 func screen_position_for_day(day_position: float) -> Vector2:
-	var x := day_position * PIXELS_PER_DAY - _scroll_x()
+	var x := screen_x_for_day(day_position)
 	return Vector2(x, _ground_y_at_screen(x))
+
+## Günün ekran x'i: kervanın çapası artı aradaki gün farkı, şimdiki ölçekle.
+func screen_x_for_day(day_position: float) -> float:
+	return caravan_x() + (day_position - _day_position) * _pixels_per_day
+
+## Kervanın çapasından yürüdüğü yöndeki görüş kenarına kalan yol (piksel):
+## yaklaşan bir işaret bunun içinde doğmalı, yoksa ekranın dışında belirir.
+func visible_room_ahead() -> float:
+	var view := _view if _view.has_area() else Rect2(Vector2.ZERO, size)
+	if _heading < 0.0:
+		return caravan_x() - view.position.x
+	return view.end.x - caravan_x()
+
+func set_pixels_per_day(pixels: float) -> void:
+	_pixels_per_day = maxf(1.0, pixels)
+
+func get_pixels_per_day() -> float:
+	return _pixels_per_day
 
 func _process(delta: float) -> void:
 	var blend_target := 1.0 if _heading < 0.0 else 0.0
@@ -433,7 +467,7 @@ func _draw() -> void:
 	_foreground.sync_state(
 		_colors, _light, _scroll_x(), _ground_y_at_screen(area.size.x * 0.5),
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
-		0.0
+		screen_x_for_day(0.0), _pixels_per_day
 	)
 	# Ateşin kendisi artık burada değil: vagon başına bir tane oldu
 	# (bkz. RoadCaravan._draw_campfires) ve bu şeridin kendi `_draw()`'u
@@ -795,7 +829,7 @@ func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# kaydıkça yanlış hızda süzülüyordu.
 	for entry in _terrain.get_stops():
 		var day := float(entry.day)
-		var x := day * PIXELS_PER_DAY - _scroll_x()
+		var x := screen_x_for_day(day)
 		if x < cover.position.x - 180.0 or x > cover.end.x + 180.0:
 			continue
 		# Yolun biraz gerisine oturuyorlar - kervan önlerinden geçiyor.

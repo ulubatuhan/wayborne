@@ -189,8 +189,11 @@ static func spec_of(species: String) -> Dictionary:
 ## Bir pozun eklemleri. `ground` gövde ortasının altındaki yer noktası, `h`
 ## figür ölçüsü, `phase`/`motion` yürüyüşün fazı ve genliği (0 duruyor),
 ## `facing` +1 sağa.
+## `classic`: boyama pozunun eski bacak yolu (`cos`, basan ayak öne) -
+## `rig_spec.json` ve boyanmış teslimatlar o pozla yapıldı, yürüyüş değil.
 static func pose(
-	species: String, ground: Vector2, h: float, phase: float, motion: float, facing: float
+	species: String, ground: Vector2, h: float, phase: float, motion: float, facing: float,
+	classic: bool = false
 ) -> Dictionary:
 	var s := spec_of(species)
 	var joints := {}
@@ -201,8 +204,8 @@ static func pose(
 	joints["shoulder_top"] = Vector2(ground.x + half * facing, back_y)
 	joints["saddle"] = Vector2(ground.x, back_y)
 	for side in ["near", "far"]:
-		_leg(joints, s, "fore", side, ground.y, h, phase, motion, facing)
-		_leg(joints, s, "hind", side, ground.y, h, phase, motion, facing)
+		_leg(joints, s, "fore", side, ground.y, h, phase, motion, facing, classic)
+		_leg(joints, s, "hind", side, ground.y, h, phase, motion, facing, classic)
 
 	var neck_base: Vector2 = joints.shoulder_top + Vector2(h * 0.04 * facing, h * 0.02)
 	var nod := float(s.nod) * h * motion * maxf(0.0, sin(phase * 2.0))
@@ -225,14 +228,14 @@ static func pose(
 ## bacaklı gösterirdi - insandaki tavuk bacağı hatasının dört ayaklısı.
 static func _leg(
 	joints: Dictionary, s: Dictionary, end: String, side: String, ground_y: float,
-	h: float, phase: float, motion: float, facing: float
+	h: float, phase: float, motion: float, facing: float, classic: bool = false
 ) -> void:
 	var fore := end == "fore"
 	var top: Vector2 = joints.shoulder_top if fore else joints.hip_top
 	var root := top + Vector2(0.0, h * float(s.fore_drop if fore else s.hind_drop))
 	var leg_phase := phase + float(PHASES["%s_%s" % [end, side]])
 	var foot := Vector2(
-		root.x + cos(leg_phase) * h * STRIDE_RATIO * motion * facing,
+		root.x + (1.0 if classic else -1.0) * cos(leg_phase) * h * STRIDE_RATIO * motion * facing,
 		ground_y - maxf(0.0, sin(leg_phase)) * h * LIFT_RATIO * motion
 	)
 	var leg_len := ground_y - root.y
@@ -251,7 +254,7 @@ static func _leg(
 const PAINT_PHASE: float = PI * 0.25
 
 static func paint_pose(species: String) -> Dictionary:
-	return pose(species, Vector2.ZERO, REF_H, PAINT_PHASE, 1.0, 1.0)
+	return pose(species, Vector2.ZERO, REF_H, PAINT_PHASE, 1.0, 1.0, true)
 
 ## Dinlenme pozu: `REF_H` ölçeğinde duran, sağa bakan hayvan.
 static func rest_pose(species: String) -> Dictionary:
@@ -436,7 +439,7 @@ static func skin_pose(
 			var rest_foot: Vector2 = ground + _placed(skin, key + "foot", k, facing)
 			var leg_phase := phase + float(PHASES["%s_%s" % [end, side]])
 			var foot := Vector2(
-				rest_foot.x + cos(leg_phase) * h * STRIDE_RATIO * motion * facing,
+				rest_foot.x - cos(leg_phase) * h * STRIDE_RATIO * motion * facing,
 				rest_foot.y - maxf(0.0, sin(leg_phase)) * h * LIFT_RATIO * motion
 			)
 			var upper := (skin.joint(key + "knee") - skin.joint(key + "root")).length() * k

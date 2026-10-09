@@ -27,6 +27,23 @@ const SHOULDER_SHARE: float = FigureRig.HIP_RATIO + FigureRig.TORSO_RATIO
 ## İsimsiz tayfanın bedeni: karakter verisi yok, varsayılan erkek/orta.
 const CREW_BODY: String = "body_male_average"
 
+## Hayvan yürüyüş karelerinde bir çevrimde gövdenin katettiği yol, türün
+## figür boyu (`h`) cinsinden. Kaynak animasyonların kendi adımı, render'dan
+## **ölçüldü** (tools/figure_pipeline/qa/beast_stride.py: yere basan
+## toynağın alt bandı kareden kareye ilintiyle izleniyor). Aynı araç
+## insanın karelerinde 0.607 okuyor, rig'in kendi değeri 0.633 - ölçüm %4
+## içinde. Ön ve arka bacak kaynak animasyonda aynı hızda gitmiyor (atın
+## ön ayağı 0.47, arkası 0.59): dört bacağın ortalaması, kaymanın en az
+## olduğu değer. Kadans bundan türüyor; tablo tahminle doldurulmamalı.
+const BEAST_WALK_CYCLE: Dictionary = {
+	"ox": 0.380, "horse": 0.531, "horse_white": 0.531, "donkey": 0.610,
+	"husky": 0.390, "wolf": 0.545, "stag": 0.532, "deer": 0.462,
+	"bear": 0.450, "boar": 0.445,
+}
+
+static func beast_walk_cycle(species: String) -> float:
+	return float(BEAST_WALK_CYCLE.get(species, 0.5))
+
 @export var pages: PackedStringArray
 @export var clip_names: PackedStringArray
 @export var clip_frames: PackedInt32Array
