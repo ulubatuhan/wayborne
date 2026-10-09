@@ -1532,6 +1532,41 @@ in every preview the moment it is equipped.
       2.19×). A QA that only compares the game against the 3D scene cannot
       see a garment that is wrong in both: it was faithfully reproducing a
       ridiculous hood.
+    - **Pants close at the waist, the body never shows through, seams stay
+      shut - the player saw all three, looking at the model rather than the
+      game.** Every one of these was invisible in the game composite,
+      because a garment is drawn over the body. The model view, the one
+      the player asked to see, showed them:
+      - *The waist.* Quaternius pants are low-rise. On our body the top edge
+        stopped at 1.04 m against a waist (`spine_02`) at 1.09, so the top of
+        the hips stayed bare. Stretching the pants up was tried and dropped,
+        twice:
+        - scaling per angular slice turned the waistband into a crown of
+          spikes;
+        - the ranger pants' back is a tight band over a seat panel, and
+          lifting the band tore a hole between the two.
+        `waist_sleeve` instead lifts the body's own surface, from hip to
+        waist plus 1 cm, as a strip at half the cloth distance, joined into
+        the pants mesh. Where the pants exist the strip is under them; where
+        they do not, it closes the waist. It takes one cloth UV per face,
+        from the pants body rather than its edge details: per-corner UVs
+        landed on seam and belt islands and left pale patches. Its top is
+        levelled to the waist line.
+      - *Pass-through.* `wrap` kept the garment's vertices outside the body,
+        but a body curve (thigh, crotch, chest) came out through the middle
+        of a sparse cloth face. `cover_body` looks outward from inside the
+        body under every nearby point; cloth reached before the skin is
+        pushed out. The push is smoothed like `wrap` and capped per vertex
+        (`COVER_MAX_PUSH`). Uncapped, it pushed the ranger pants' folded
+        waistband out round after round into a flap.
+      - *Seams.* Quaternius splits vertices along UV seams. Every later
+        displacement moved the two copies apart and opened a white line down
+        the side of the leg. `weld_seams` merges them first; UVs live on
+        loops, so the texture survives.
+      The QA checks the waist too: rays outward from the body strip just
+      below the waist must hit the pants (≥ 95%; 100% on all six bodies).
+      Counting vertex heights per angle could not be used: the waist ring is
+      sparse, and a slice that held only a lower vertex read as "low".
     - **Test the fit before rendering, against the real thing.**
       `qa/outfit_check.py` fits everything exactly as the render does
       (`render_outfits.setup`), poses a few frames per clip, and for each

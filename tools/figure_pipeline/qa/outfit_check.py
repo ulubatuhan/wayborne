@@ -50,10 +50,11 @@ MAX_COMPOSITE_PCT = 2.0
 # habersiz giydirmede %8.8; katmanli giydirmede en kotu %1.6 - hep ayni kare,
 # saldirinin 3. karesi: kol tam havada, yelegin omzu 3B'de kukuletanin
 # pelerininden cikiyor (oyunda pelerin ustte ciziliyor). Sizma - oyunun alttakini ustte cizmesi -
-# ayri ve siki: en kotu %0.27 olculdu (iri erkek, kol tam havada: gomlegin
-# gogsu on kol katmanina giriyor, yelegin oradaki parcasi giremiyor).
+# ayri: en kotu %0.53 olculdu - iri erkek, yelegin ustune ayri parca olarak
+# oturan kemerin dikis hizasinda iki ince yatay cizgi (53 piksel). Diger
+# bedenler %0.13-0.20.
 MAX_SWAP_PCT = 2.0
-MAX_BLEED_PCT = 0.3
+MAX_BLEED_PCT = 0.6
 BODY_ID = (0.5, 0.5, 0.5)
 PALETTE = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (0, 1, 1), (1, 0, 1), (1, 0.5, 0), (0.5, 0, 1)]
 DEFAULT_COMBOS = [
@@ -140,12 +141,43 @@ HEIGHT_RANGE = (0.85, 1.15)
 # Hicbir giysi kafanin tepesinden bundan fazla yukari cikmaz (m). Kukuleta
 # 10 cm cikiyordu ve boy oranina gore "normal"di: kaynak da buyuk kafaliydi.
 MAX_HEADROOM = 0.06
+# Beli uzatilan pantolon (fit_garment.raise_waist): belin hemen altindaki
+# beden seridinin en az bu payi pantolonla ortulu. Kose dilimleri saymak
+# yaniltiyordu - bel halkasi seyrek, bir aci dilimine yalniz alttaki bir
+# kose dusunce ust kenar "dusuk" cikiyordu.
+MIN_WAIST_COVER = 0.95
+WAIST_BAND = (0.02, 0.005)  # m; belin bu kadar alti ile bu kadar alti arasi
+
+
+def waist_cover(body, obj, rig, waist_bone):
+    """Bel seridindeki beden noktalarindan disari isin: pantolona carpan pay."""
+    prev = fit_garment._masks(body, True)
+    coords = fit_garment.rc_evaluated(body)
+    btree, bm = fit_garment.body_bvh(body)
+    for m, v in prev:
+        m.show_viewport = v
+    bpy.context.view_layer.update()
+    otree = fit_garment.mesh_bvh(obj)
+    z = (rig.matrix_world @ rig.data.bones[waist_bone].head_local).z
+    hip = rig.matrix_world @ rig.data.bones["pelvis"].head_local
+    hit = tot = 0
+    for c in coords:
+        if not (z - WAIST_BAND[0] <= c.z <= z - WAIST_BAND[1]) or abs(c.x - hip.x) > 0.2:
+            continue
+        loc, nrm, _f, _d = btree.find_nearest(c)
+        if loc is None:
+            continue
+        tot += 1
+        if otree.ray_cast(loc + nrm * 1e-4, nrm, 0.06)[0] is not None:
+            hit += 1
+    bm.free()
+    return hit / max(tot, 1)
 
 
 def proportions(fitted, rig, body):
     """Dinlenme pozunda her kalemin boy orani ve kafanin ustundeki payi."""
     rc.reset_pose(rig, rig)
-    top = max(c.z for c in rc.evaluated_coords(body))
+    top = max(c.z for c in rc.evaluated_coords(body))  # noqa
     out, bad = {}, []
     for name, obj in fitted.items():
         zs = [c.z for c in rc.evaluated_coords(obj)]
@@ -153,6 +185,12 @@ def proportions(fitted, rig, body):
         room = max(zs) - top
         snug = bool(obj.get("snugged", False))
         out[name] = {"height_ratio": round(r, 2), "above_head_m": round(room, 3), "snugged": snug}
+        wb = str(obj.get("waist_bone", ""))
+        if wb:
+            cov = waist_cover(body, obj, rig, wb)
+            out[name]["waist_cover"] = round(cov, 3)
+            if cov < MIN_WAIST_COVER:
+                bad.append(name)
         # Kafaya gore kucultulen kalem (fit_garment.snug_head) kaynagindan
         # bilerek farkli: onun olcusu tepedeki pay.
         if (not snug and not (HEIGHT_RANGE[0] <= r <= HEIGHT_RANGE[1])) or room > MAX_HEADROOM:

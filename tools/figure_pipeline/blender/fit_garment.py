@@ -137,6 +137,87 @@ def bake_pose(mesh):
     mesh.vertex_groups.clear()
 
 
+def weld_seams(mesh, dist=1e-5):
+    """UV dikisinde ikiye bolunmus koseleri birlestirir. Kaynak her dikiste
+    ayni konumda iki kose tasiyor; sarma ve itme onlari ayri ayri oynatinca
+    dikis aciliyordu (pantolonun yaninda bacak boyu beyaz bir cizgi). UV
+    kose-yuz (loop) duzeyinde tutuldugu icin doku bozulmuyor."""
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    before = len(bm.verts)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=dist)
+    after = len(bm.verts)
+    bm.to_mesh(mesh.data)
+    bm.free()
+    mesh.data.update()
+    return before - after
+
+
+def _boundary_loops(bm):
+    """Agin acik kenar halkalari: kenar listesi, cevre uzunlugu."""
+    edges = [e for e in bm.edges if e.is_boundary]
+    seen, loops = set(), []
+    for e in edges:
+        if e.index in seen:
+            continue
+        stack, loop = [e], []
+        seen.add(e.index)
+        while stack:
+            cur = stack.pop()
+            loop.append(cur)
+            for v in cur.verts:
+                for nb in v.link_edges:
+                    if nb.is_boundary and nb.index not in seen:
+                        seen.add(nb.index)
+                        stack.append(nb)
+        loops.append((loop, sum(x.calc_length() for x in loop)))
+    return loops
+
+
+def fill_holes(mesh, openings):
+    """Kaynagin kesip attigi yuzeyleri kapatir. Quaternius ust giysinin
+    altinda kalan kumasi silmis: korucu pantolonunun arkasinda belin
+    altinda buyuk bir delik var (ceketin altinda kalsin diye), koylu
+    pantolonunun kasiginda kucuk delikler. Bizde her kalem tek basina da
+    giyilebilir. En uzun `openings` halka giysinin gercek agizlaridir (bel,
+    iki paca; gomlekte boyun, bel, iki kol); gerisi kapatilir, yeni yuz
+    bedenin kivrimina oturabilsin diye bolunur, UV'si kenardaki koselerin
+    kendi UV'sinden alinir. Doner: kapatilan delik sayisi."""
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    bm.edges.ensure_lookup_table()
+    loops = sorted(_boundary_loops(bm), key=lambda x: -x[1])
+    holes = loops[openings:]
+    if not holes:
+        bm.free()
+        return 0
+    uv = bm.loops.layers.uv.active
+    before = set(bm.faces)
+    for loop, _len in holes:
+        bmesh.ops.holes_fill(bm, edges=loop, sides=0)
+    new = [f for f in bm.faces if f not in before]
+    tri = bmesh.ops.triangulate(bm, faces=new)["faces"]
+    sub = bmesh.ops.subdivide_edges(bm, edges=list({e for f in tri for e in f.edges}), cuts=2,
+                                    use_grid_fill=True)
+    new = [f for f in bm.faces if f not in before]
+    if uv is not None:
+        for f in new:
+            for lp in f.loops:
+                src = [o for o in lp.vert.link_loops if o.face in before]
+                if src:
+                    lp[uv].uv = src[0][uv].uv
+                else:
+                    # ic kose: en yakin eski kosenin UV'si
+                    best = min((o for o in bm.verts if o.link_loops and any(x.face in before for x in o.link_loops)),
+                               key=lambda o: (o.co - lp.vert.co).length_squared, default=None)
+                    if best is not None:
+                        lp[uv].uv = next(x for x in best.link_loops if x.face in before)[uv].uv
+    bm.to_mesh(mesh.data)
+    bm.free()
+    mesh.data.update()
+    return len(holes)
+
+
 def drop_skin_faces(mesh):
     skin = {i for i, m in enumerate(mesh.data.materials) if m and m.name.startswith(SKIN_MATERIAL_PREFIX)}
     if not skin:
@@ -206,6 +287,89 @@ def wrap(mesh, tree, eps):
         v.co += disp[i]
     mesh.data.update()
     return pushed
+
+
+SLEEVE_OVER = 0.01  # m; bel seridi belin bu kadar ustune cikar
+SLEEVE_ARM_LIMIT = 0.05  # kol/el agirligi bundan fazla olan beden yuzu alinmaz
+
+
+def waist_sleeve(mesh, body, rig, waist_bone, eps, hip_bone="pelvis"):
+    """Pantolona kalcadan bele kadar bir bel seridi ekler. Quaternius'un
+    pantolonlari dusuk belli; bizim bedende ust kenar 1.04 m'de, belin en
+    dar yeri (spine_02) 1.09 m'de - kalcanin ustu acik kaliyordu (oyuncu
+    gordu). Pantolonu yukari germek denendi ve birakildi: korucu
+    pantolonunun arkasi bele sarilan ince bir bant ile kalcayi saran bir
+    panelden olusuyor, germek ikisini ayirip arada oyuk birakti; her yeni
+    pantolon baska bir topoloji getirir. Bunun yerine bedenin kendi yuzeyi,
+    kalcadan bele kadar, kumasin yarim mesafesinde bir serit olarak
+    cikariliyor: pantolon olan yerde onun altinda kaliyor, olmayan yerde
+    (bel, arka) beli dolduruyor. UV'si en yakin pantolon kosesinden: serit
+    pantolonun kendi dokusunu tasir. Doner: eklenen yuz sayisi."""
+    mw = rig.matrix_world
+    z0 = (mw @ rig.data.bones[hip_bone].head_local).z
+    z1 = (mw @ rig.data.bones[waist_bone].head_local).z + SLEEVE_OVER
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    arm_groups = {g.index for g in body.vertex_groups
+                  if g.name.lower().startswith(("upperarm", "lowerarm", "hand", "thumb", "index",
+                                                "middle", "ring", "pinky"))}
+    co = [body.matrix_world @ v.co for v in me.vertices]
+    nrm = [(body.matrix_world.to_3x3() @ v.normal).normalized() for v in me.vertices]
+    armw = [sum(g.weight for g in v.groups if g.group in arm_groups) for v in me.vertices]
+    faces = [list(p.vertices) for p in me.polygons
+             if all(z0 <= co[i].z <= z1 and armw[i] <= SLEEVE_ARM_LIMIT for i in p.vertices)]
+    ev.to_mesh_clear()
+    if not faces:
+        return 0
+    # Doku: serit yuz basina TEK bir kumas noktasinin UV'sini alir - kose
+    # kose en yakin UV dikis/kemer adalarina dusup acik renkli yamalar
+    # birakiyordu. Kumas noktasi pantolonun govdesinden (ust kenarin en az
+    # 3 cm alti), kenar detaylarindan degil.
+    uvl = mesh.data.uv_layers.active
+    puv = {}
+    if uvl is not None:
+        for poly in mesh.data.polygons:
+            for li in poly.loop_indices:
+                puv.setdefault(mesh.data.loops[li].vertex_index, uvl.data[li].uv.copy())
+    ptop = max((mesh.matrix_world @ v.co).z for v in mesh.data.vertices)
+    cloth = [v for v in mesh.data.vertices if z0 - 0.08 <= (mesh.matrix_world @ v.co).z <= ptop - 0.03]
+    kd = KDTree(max(1, len(cloth)))
+    for v in cloth:
+        kd.insert(mesh.matrix_world @ v.co, v.index)
+    kd.balance()
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    uv = bm.loops.layers.uv.active
+    inv = mesh.matrix_world.inverted()
+    made = {}
+    # Ust kenar belin hizasina duzlenir: govdenin ag satirlarini izleyen
+    # kenar basamakliydi. Ust satirdaki kose z1'e cekilir (yuzeyde kalir).
+    top_band = z1 - 0.02
+    for f in faces:
+        for i in f:
+            if i not in made:
+                p = co[i] + nrm[i] * (eps * 0.5)
+                if co[i].z >= top_band:
+                    p.z = z1
+                made[i] = bm.verts.new(inv @ p)
+    bm.verts.ensure_lookup_table()
+    added = 0
+    for f in faces:
+        try:
+            nf = bm.faces.new([made[i] for i in f])
+        except ValueError:
+            continue
+        added += 1
+        if uv is not None and cloth:
+            _c, k, _d = kd.find(mesh.matrix_world @ nf.calc_center_median())
+            if k in puv:
+                for lp in nf.loops:
+                    lp[uv].uv = puv[k]
+    bm.to_mesh(mesh.data)
+    bm.free()
+    mesh.data.update()
+    return added
 
 
 HEAD_MARGIN = (0.025, 0.03, 0.035)  # m; kafa ile kukuleta arasi pay (yan, on-arka, tepe)
@@ -478,6 +642,90 @@ def _pull_or_hide(mesh, body_tree, inner, gap, floor):
     return total
 
 
+BODY_REACH = 0.05  # m; bu kadar yakindaki kumas bedeni ortmeli
+BODY_DEPTH = 0.03  # m; bedenin icinden bu kadar asagidan bakilir
+
+
+COVER_MAX_PUSH = 0.03  # m; bir kosenin toplam en fazla itilmesi
+
+
+def cover_body(mesh, body, body_tree, eps):
+    """Bedenin kumasin icinden cikmasini kapatir. wrap() kumasin KOSELERINI
+    bedenin disinda tutuyor, ama seyrek bir kumas yuzunun ortasindan bedenin
+    bir kivrimi (uyluk, kasik, gogus) disari cikabiliyordu - onden bakinca
+    pantolonda ve gomlekte beyaz delikler vardi (oyunda giysi bedenin ustune
+    cizildigi icin gorunmuyordu). Kural: kumasa yakin her beden noktasinin
+    altindan (bedenin icinden) disari bakilinca once beden yuzeyine, sonra
+    kumasa varilmali; kumasa once variliyorsa carpilan yuzun koseleri
+    disari itilir. Itme wrap() gibi agda yumusatilir ve kose basina
+    COVER_MAX_PUSH ile sinirli: ilk surum yuzun koselerini tur tur
+    sinirsiz itiyordu ve korucu pantolonunun ice kivrik bel bandi kanat
+    gibi acilip arkada delik birakti. Doner: itilen kose sayisi."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    pts = [body.matrix_world @ v.co for v in me.vertices]
+    ev.to_mesh_clear()
+    verts = mesh.data.vertices
+    n = len(verts)
+    nbr = [[] for _ in range(n)]
+    for e in mesh.data.edges:
+        a, b = e.vertices
+        nbr[a].append(b)
+        nbr[b].append(a)
+    spent = [0.0] * n
+    total = 0
+    for _ in range(RESOLVE_ROUNDS):
+        bm = bmesh.new()
+        bm.from_mesh(mesh.data)
+        bm.faces.ensure_lookup_table()
+        gtree = BVHTree.FromBMesh(bm)
+        disp = [Vector() for _ in range(n)]
+        hit_any = False
+        for co in pts:
+            g = gtree.find_nearest(co)
+            if g[0] is None or g[3] > BODY_REACH:
+                continue
+            loc, nrm, _f, _d = body_tree.find_nearest(co)
+            if loc is None:
+                continue
+            start = loc - nrm * BODY_DEPTH
+            hit, _n, fi, gd = gtree.ray_cast(start, nrm, BODY_DEPTH + BODY_REACH)
+            if hit is None or gd >= BODY_DEPTH + eps:
+                continue
+            need = nrm * (BODY_DEPTH + eps - gd + 1e-4)
+            for v in bm.faces[fi].verts:
+                if need.length > disp[v.index].length:
+                    disp[v.index] = need
+                    hit_any = True
+        bm.free()
+        if not hit_any:
+            break
+        for _s in range(SMOOTH_ITERATIONS // 2):
+            nxt = []
+            for i in range(n):
+                if not nbr[i]:
+                    nxt.append(disp[i])
+                    continue
+                avg = sum((disp[j] for j in nbr[i]), Vector()) / len(nbr[i])
+                nxt.append(avg if avg.length > disp[i].length else disp[i])
+            disp = nxt
+        moved = 0
+        for i in range(n):
+            room = COVER_MAX_PUSH - spent[i]
+            if room <= 0.0 or disp[i].length < 1e-7:
+                continue
+            d = disp[i] if disp[i].length <= room else disp[i].normalized() * room
+            verts[i].co += d
+            spent[i] += d.length
+            moved += 1
+        mesh.data.update()
+        total += moved
+        if not moved:
+            break
+    return total
+
+
 def transfer_weights(mesh, body, rig):
     for vg in body.vertex_groups:
         if vg.name not in mesh.vertex_groups:
@@ -552,7 +800,7 @@ def _masks(body, on):
     return prev
 
 
-def fit(path, body, rig, eps, inner=(), gap=0.003):
+def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0):
     """Doner: MPFB rig'ine bagli tek giysi agi (parcanin aglari birlestirilir)
     ve itilen nokta sayisi. Beden dinlenme pozunda olmali. `inner`: bu giysinin
     altina giyilebilecek, zaten giydirilmis giysiler (cizim sirasi kucuk olan
@@ -567,10 +815,16 @@ def fit(path, body, rig, eps, inner=(), gap=0.003):
     for mesh in meshes:
         bake_pose(mesh)
         drop_skin_faces(mesh)
+        weld_seams(mesh)
+        if openings:
+            fill_holes(mesh, openings)
         pushed += wrap(mesh, tree, eps)
         if snug_head(mesh, body, eps):
             snugged = True
             pushed += wrap(mesh, tree, eps)
+        pushed += cover_body(mesh, body, tree, eps)
+        if waist_bone and waist_sleeve(mesh, body, rig, waist_bone, eps):
+            snugged = True
         if not os.environ.get("WAYBORNE_NO_LAYERING"):  # qa: eski davranisi yeniden uretmek icin
             pushed += layer_over(mesh, tree, inner, gap)
             pushed += resolve_pokes(mesh, tree, inner, gap, MIN_FLOOR)
@@ -589,5 +843,6 @@ def fit(path, body, rig, eps, inner=(), gap=0.003):
         bpy.context.view_layer.objects.active = meshes[0]
         bpy.ops.object.join()
     meshes[0]["native_min"], meshes[0]["native_max"] = native
-    meshes[0]["snugged"] = snugged
+    meshes[0]["snugged"] = snugged  # kaynaktan bilerek farkli: kafaya oturtuldu ya da beli uzatildi
+    meshes[0]["waist_bone"] = waist_bone or ""
     return meshes[0], pushed

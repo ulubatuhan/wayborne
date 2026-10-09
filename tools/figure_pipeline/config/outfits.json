@@ -1,9 +1,9 @@
 {
- "_comment": "Giyilip cikarilabilen kiyafetler (OutfitCatalog'un art_id'si). Her kalem bir ya da birkac Quaternius parcasi (CC0, art_source/models/clothes/quaternius_fantasy), cinsiyete gore ayri kaynak; fit_garment.py ile MPFB bedene giydirilir. eps: giysinin bedenin yuzeyinden en az uzakligi (m) - ust uste giyilen kalemler cizim sirasina gore artar, dis giysi ic giysiyi sarsin diye. draw_order oyundaki bindirme sirasi (kucuk once).",
+ "_comment": "Giyilip cikarilabilen kiyafetler (OutfitCatalog'un art_id'si). Her kalem bir ya da birkac Quaternius parcasi (CC0, art_source/models/clothes/quaternius_fantasy), cinsiyete gore ayri kaynak; fit_garment.py ile MPFB bedene giydirilir. eps: giysinin bedenin yuzeyinden en az uzakligi (m) - ust uste giyilen kalemler cizim sirasina gore artar, dis giysi ic giysiyi sarsin diye. draw_order oyundaki bindirme sirasi (kucuk once). waist_bone: pantolonun beli bu kemigin basina kadar uzatilir (kaynak dusuk belli, kalcanin ustu acik kaliyordu). openings: giysinin gercek agiz sayisi (pantolon: bel + iki paca); kaynagin kesip attigi diger delikler kapatilir.",
  "items": {
-  "peasant_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10,
+  "peasant_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10, "waist_bone": "spine_02", "openings": 3,
    "pieces": {"male": ["Male_Peasant_Legs"], "female": ["Female_Peasant_Legs"]}},
-  "ranger_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10,
+  "ranger_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10, "waist_bone": "spine_02", "openings": 3,
    "pieces": {"male": ["Male_Ranger_Legs"], "female": ["Female_Ranger_Legs"]}},
   "peasant_shoes": {"slot": "shoes", "eps": 0.007, "draw_order": 20, "boots": true,
    "pieces": {"male": ["Male_Peasant_Feet"], "female": ["Female_Peasant_Feet"]}},

@@ -46,7 +46,8 @@ def fit_item(spec, gender, body, rig, inner=()):
     snugged = False
     for piece in spec["pieces"][gender]:
         obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig,
-                                      float(spec["eps"]), inner, float(spec.get("gap", 0.003)))
+                                      float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
+                                      spec.get("waist_bone"), int(spec.get("openings", 0)))
         print("giydirildi", piece, "itilen", pushed, flush=True)
         lo = [min(a, b) for a, b in zip(lo, obj["native_min"])]
         hi = [max(a, b) for a, b in zip(hi, obj["native_max"])]
@@ -60,6 +61,7 @@ def fit_item(spec, gender, body, rig, inner=()):
         bpy.ops.object.join()
     meshes[0]["native_min"], meshes[0]["native_max"] = lo, hi
     meshes[0]["snugged"] = snugged
+    meshes[0]["waist_bone"] = spec.get("waist_bone") or ""
     return meshes[0]
 
 
