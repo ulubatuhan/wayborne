@@ -1,108 +1,130 @@
 # Wayborne — Evrenin Tarihi (Tarihçe)
 
-Bu belge evrenin **zaman çizelgesidir**: oyunun bugün söylediği ya da ima ettiği
-her geçmiş olayın sırayla dökümü. Evrenin kendisi (coğrafya, halklar, kurumlar)
-[LORE.md](LORE.md)'de.
+Bu belge [LORE.md](LORE.md) ile tek bir çalışmanın iki yarısıdır: orada dünyanın
+ne olduğu, burada ne zaman ne olduğu. İşaretler aynı:
 
-Oyunun bir "resmî tarih" metni yok. Geçmiş, olay kartlarının ve kurumların
-arkasında örtük duruyor. Aşağıdaki çizelge o örtük geçmişi sıraya koyuyor; her
-satırın işareti LORE.md'dekiyle aynı:
+| işaret | anlamı |
+|---|---|
+| **[Oyun]** | Bugün oyunda yazılı. |
+| **[Yazar]** | Senin cevabın (C1–C16). Kanon. |
+| **[Türetme]** | Cevabından çıkardığım sonuç ya da sıra. Onayını bekliyor. |
+| **[Çelişki]** | İki kaynak tutmuyor. |
+| **[Boş]** | Henüz yazılmadı. |
 
-- **[Kanon]** Oyunda yazılı.
-- **[İma]** Oyunun metinleri gerektiriyor ama tarih/sıra verilmemiş.
-- **[Boş]** Senin dolduracağın yer. Bu satırlar bilerek boş bırakıldı; uydurulmadı.
+**Takvim.** [Oyun] Oyun gün sayıyor, mevsimler var, yıl yok. [Boş] Takvimin adı,
+yılın başı, çağların adları.
 
-Takvim: **[Kanon]** oyun gün sayıyor (`total_days_elapsed`), mevsimler var, yıl
-yok. **[Boş]** Takvimin adı, yılın başlangıcı, bir çağ adlandırması.
+**Tarihin nasıl bilindiği [Yazar, C4, C6].** Oyunda anlatıcı yok. Aşağıdaki çizelge
+yazarın bildiği sıradır; Sideria'da hiç kimse bunun tamamını bilmez. Oyuncu
+geçmişi NPC'lerin anlattıklarından, kitaplardan ve yazıtlardan, çoğu zaman eksik
+ya da yanlış biçimde öğrenir.
+
+**Ölçek [Yazar, C3].** En az on bin yıl görünüyor, gerçekte yüz binlerce yıl.
+Aşağıdaki çağların süreleri bu yüzden kasıtlı olarak boş.
 
 ---
 
-## I. Efsane çağı — dünyanın doğuşu
-
-İki halk, aynı başlangıcı iki uçtan anlatıyor. Kilise ikisini birlikte okutuyor.
+## I. Derin zaman
 
 | | olay | işaret |
 |---|---|---|
-| I.1 | **Dağın İlk Nefesi.** Dünya ilk soluğunu dağların doruğunda alır; o nefes rüzgârda ve ayinde kalır. Dağ kabilesinin güç sınavı bu ana yaklaşma çabasıdır. | [Kanon] |
-| I.2 | **Denizin İlk Gözyaşı.** İlk tanrının gözyaşından deniz doğar ve hâlâ ağlar. Balıkçılar denize açılmadan bu kederi dindirmek için dua eder. | [Kanon] |
-| I.3 | "İlk tanrı" ifadesi başka tanrıların da olduğunu, balıkçıların "deniz tanrıları" demesi bir panteonu ima ediyor. | [İma] |
-| I.4 | Göçebe, Vadi ve Liman halklarının yaratılış anlatısı. | [Boş] |
-| I.5 | İki efsanenin birbirine göre sırası: nefes mi önce, gözyaşı mı? Yoksa aynı anın iki adı mı? | [Boş] |
+| I.1 | Dünya, insanların hiçbir zaman ölçemediği kadar eski. Binlerce yıllık ağaçlar ve buzun içinde donmuş, eşi görülmemiş hayvanlar bunun tek tanığı. | [Yazar, C3] |
+| I.2 | **Öbürküler** hep vardı: insanlarla aynı dünyada, başka bir boyutta yaşayan, yaşamdan beslenen ama onu dönüştüren varlıklar. Bir tarihleri, kültürleri, kayıtları yok. | [Yazar, C6] |
+| I.3 | Vahşi hayvanların daha ilkel, daha vahşi atalarının çağı. | [Yazar, C6] |
 
-## II. Halkların yerleşmesi
+## II. Kadim uygarlık
 
 | | olay | işaret |
 |---|---|---|
-| II.1 | Beş halk ortaya çıkar ve yurtlarını tutar: bozkırda göçebe boyları, vadilerde taş köprüler kuran loncalar, geçitleri koruyan dağ kabilesi, beş dilli rıhtımıyla liman şehri, ağ ve tuzla yaşayan balıkçı kasabası. | [Kanon — halklar] / [Boş — ne zaman, nerede] |
-| II.2 | Dağ kabilesinin "geçitleri koruması" geçitlerin bir zaman fethedildiğini ya da kabileye emanet edildiğini ima ediyor. | [İma] |
-| II.3 | Dağ halkının hafızasında **eski kan davaları** var; beylikler arası savaşları bunların "yeniden alevlenmesi" olarak okuyorlar. Davanın kökeni yok. | [İma] |
-| II.4 | Göçebelerin "atalarının otlakları" var; haydut kralının haraç kestiği yollar bu otlakların üstünden geçiyor — bozkır bir zaman göçebelerindi. | [İma] |
-| II.5 | Halkların ilk teması, ortak dilleri, birbirleriyle savaşları. | [Boş] |
+| II.1 | Bugünkü insanlıktan önce bir uygarlık yaşadı. Gündelik hayatı basitti; teknolojisi yoktu. | [Yazar, C6] |
+| II.2 | Yaşam enerjisini bugünkü büyücülerden çok daha güçlü, serbest ve radikal kullanmayı buldular. | [Yazar, C6] |
+| II.3 | Bu güçle nesneleri tılsımladılar (öldüren, geleceği gösteren, güç ya da zaaf veren, bela getiren nesneler) ve hayvanları mutasyona uğrattılar: eski yaratıklar. | [Yazar, C6] |
+| II.4 | Tapınaklarının duvarlarına gündelik hayatlarını resmettiler. Bugün onlardan kalan bilginin neredeyse tamamı bu tasvirler. | [Yazar, C6] |
+| II.5 | **Son.** Kontrol edemedikleri güç uygarlıklarının sonunu getirdi. Nasıl olduğu bilinmiyor. | [Yazar, C6] / [Boş — nasıl] |
+| II.6 | [Türetme] Buzullardan çıkan yaratık kalıntıları bu çağdan ya da öncesinden. | [Türetme] |
+| II.7 | Uygarlığın yurdu haritanın neresiydi, kalıntıları nerede yoğun? | [Boş — Faz G, G4.1] |
 
-## III. Şehirlerin ve yolların kuruluşu
-
-| | olay | işaret |
-|---|---|---|
-| III.1 | Şehirler **ticaretten** doğar: sur, kapı, ambar. Silüetlerinde tapınak yok, depo var. | [Kanon — tasarım kuralı] |
-| III.2 | **Karakonak** kervan kavşağı olarak büyür; dört şehre de yolu olan tek yer. Adı "kervan konağı"nı çağrıştırıyor — bir han ya da konaklama yeri olarak başlamış olabilir. | [Kanon — kavşak] / [İma — köken] |
-| III.3 | **Kurtboğazı** bir dağ geçidinin ağzında kurulur; kürk ve dağ balı. Adı kurtlardan geliyor; bugün de yolda kurt sürüleri var. | [Kanon] / [İma] |
-| III.4 | **İpekevi** ipek ve kumaş üzerine kurulur. | [Kanon] |
-| III.5 | **Demirkapı** demir ve ince işçilik üzerine; bölgesi bugün garnizon bölgesi (silahlı eşkıya, karakollar). Adı bir zamanlar gerçek bir "demir kapı" — bir sınır kapısı ya da kale — olduğunu ima ediyor. | [Kanon] / [İma] |
-| III.6 | **Yeşilova** verimli kıyı ovasında; balık, şarap, şifalı otlar. | [Kanon] |
-| III.7 | Yedi yol açılır. En uzunu ve en tehlikelisi Karakonak – Yeşilova (8 gün). | [Kanon — bugünkü durum] / [Boş — kim, ne zaman açtı] |
-| III.8 | Yol kenarı sunakları dikilir; yosun tutmuş olmaları onları yolların kendisi kadar eski kılıyor. | [İma] |
-| III.9 | Şehirlerin kuruluş sırası ve kurucuları. | [Boş] |
-
-## IV. Beylikler ve lonca çağı
+## III. Kayıp çağ
 
 | | olay | işaret |
 |---|---|---|
-| IV.1 | Dünya **beyliklere** bölünür; beylikler otlak, su ve yol için birbirleriyle savaşır. | [Kanon — beylikler var] / [Boş — adları, sayısı] |
-| IV.2 | **Tüccar Loncası** kurulur ve şehirden şehre aynı defteri tutan, haberi taşıyan, borç veren bir güce dönüşür. Vadi loncaları onun kökü olabilir ("lonca defterleri arasında büyüdün"). | [Kanon — lonca] / [İma — köken] |
-| IV.3 | Yollar gümrük bariyerleri, sınır karakolları ve muhafız devriyeleriyle düzene sokulur; beylikler yoldan vergi alır. | [Kanon] |
-| IV.4 | Şehir muhafızları kurulur. Onlarla dövüşmek itibar kaybettirir: yasa, haydut değildir. | [Kanon] |
-| IV.5 | Kilise, iki halkın efsanesini aynı çatı altında anlatan kurum olarak ortaya çıkar; ruhu "temizleyen" (huy arındırma) bir ritüeli var. | [Kanon — bugünkü işlev] / [Boş — kuruluşu] |
-| IV.6 | Hangi beyliğin hangi şehri tuttuğu, beylikler arası anlaşmalar, loncanın beyliklerle ilişkisi. | [Boş] |
+| III.1 | Hayatta kalanlar yaşam mücadelesini sürdürdü ama kültürlerini yitirdi. | [Yazar, C6] |
+| III.2 | Zamanla yeni bir medeniyet kurdular: bugünkü insanlık. | [Yazar, C6] |
+| III.3 | Bu çağın uzunluğu, ne kadarının hatırlandığı. | [Boş] |
 
-## V. Yakın geçmiş — oyunun başlamasından hemen önce
-
-Bunlar her oyunda yaşanmış sayılan şeyler.
+## IV. Eski inançlar çağı
 
 | | olay | işaret |
 |---|---|---|
-| V.1 | **Haydut krallarının yükselişi.** Bir kişi bir yolu ele geçirip her geçen kervandan haraç ister; tahsildarları silahlı. | [Kanon — olgu] / [Boş — kim] |
-| V.2 | **Savaşlar ve mülteciler.** Evlerini bırakmış mülteci kolonları, cepheden kaçıp asılmaktan korkan genç askerler. | [Kanon] |
-| V.3 | **Kıtlık günleri.** Mülteciler, kıtlıkta mallarını pahalı satan kervanları adıyla hatırlıyor. | [Kanon] |
-| V.4 | **Kurucu.** Bir kişi bir vagon ve bir adla yola çıkar. Ad onunla başlar. Ölür ya da adı bırakır; defterin ilk satırı onundur ("adı sana bıraktı"). Kampanyada bu kişi oyuncunun babasıdır. | [Kanon] |
-| V.5 | Yol kenarındaki **işaretsiz mezarlar**; onları sayan yaşlı bekçi kadın "kimin durduğunu, kimin geçip gittiğini" biliyor. Yollar ölülerle dolu. | [Kanon] |
+| IV.1 | İnsanlar anlamlandıramadıklarını tanrılara bağladı (C2). Pek çok pagan inanç doğdu. | [Yazar, C2, C5] |
+| IV.2 | **Dağın İlk Nefesi**: dünya ilk soluğunu dağın doruğunda aldı. Dağ halkının inancı. | [Oyun] |
+| IV.3 | **Denizin İlk Gözyaşı**: deniz ilk tanrının gözyaşından doğdu. Kıyı halkının inancı; "deniz tanrıları" bir panteon ima ediyor. | [Oyun] / [Çelişki — kimin? bkz. LORE §4.1] |
+| IV.4 | **Baikhan yolu** doğar: bir din değil, yaşama, göğe, toprağa saygı. | [Yazar, C7] |
+| IV.5 | Yollar ve yol kenarı sunakları, tapınaklar, katakomblar bu inançlar için yapılır. | [Yazar, C9] |
+| IV.6 | Yol kutsallaşır; yolda ölen yola ait sayılır, mezarına ad konmaz. Bekçi Kadın inancı. Hangi inançtan doğdu, kaç inanca yayıldı? | [Yazar, C10] / [Boş — köken] |
 
-## VI. Oyunun zamanı — kervanın kendi tarihi
+## V. İmparatorluk
 
-Oyun tarihi her oyunda yeniden yazılıyor ve kervanın defterine kaydediliyor. Sabit
-olan, hikâyenin iskeleti (kampanya bölümleri) ve her kuşağın nasıl el değiştirdiği.
+| | olay | işaret |
+|---|---|---|
+| V.1 | Sideria'da (ya da bir kısmında) bir **imparatorluk** vardı. Adı, merkezi, süresi bilinmiyor. | [Yazar, C6, C7] / [Boş — ad, merkez, süre] |
+| V.2 | [Türetme] Ana yollar imparatorluk yolları olabilir; yolların üstündeki pagan sunakları ise ondan eski. | [Türetme — Faz G, G3.4] |
+| V.3 | **Deli kral** büyücüleri katletti. Bu katliam büyücülerin bugün bile Sideria'dan uzak durmasının sebebi. | [Yazar, C6] |
+| V.4 | [Türetme] Büyücüler katliamdan önce Sideria'da vardı; demek ki Raviellon'la temas imparatorluk çağından eski. | [Türetme] |
+| V.5 | **Göçebe birliği** imparatorluğu dize getirdi ve parçalanmasına sebep oldu. Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemedi. | [Yazar, C7] |
+| V.6 | Kilise imparatorluktan önce mi, onunla mı, ondan sonra mı doğdu? | [Boş — Faz T] |
+
+## VI. Parçalanma ve Kilise çağı
+
+| | olay | işaret |
+|---|---|---|
+| VI.1 | İmparatorluğun yerinde **binbir prenslik**; dinî kaos ve iç savaşlar. | [Yazar, C1] / [Türetme — sıra] |
+| VI.2 | **El'in Kilisesi** pagan inançları asimile ederek yayılır, tarihlerini siler. | [Yazar, C5] |
+| VI.3 | Dağın Nefesi ve Denizin Gözyaşı silinemez; kilise onları adlarını değiştirerek benimser: artık "El'in sayfaları". Gerçek takipçileri taşraya ve gizliliğe çekilir. | [Yazar, C5] |
+| VI.4 | Pek çok eski tapınak terk edilir, yıkılır ya da başka amaçla kullanılır; inananlar cevap alamayınca merkezi inanca teslim olur. | [Yazar, C9] |
+| VI.5 | Vadi halkı kilise inancını rasyonel bir uzlaşıyla kabul eder; kalbinde ne olduğu ayrı mesele. | [Yazar, C8] |
+| VI.6 | **Güney ticaret kentleri** zenginleşir; uzak kıtalarla ve Raviellon'la deniz ticaretini tutarlar; baharat, nadir ipek ve üst kalite mallar onların limanlarından girer. | [Yazar, C1, C15] |
+| VI.7 | Büyücüler Raviellon'da eğitim alıp geri dönmeye ve krallara hizmet etmeye başlar; yalnızca güney kentlerinde ve sayılı krallıkların konseylerinde yer bulurlar. Karşılarında tılsımlı giysili büyücü avcıları yetişir. | [Yazar, C6] |
+| VI.8 | Krallıklar, prenslikler ve beylikler arasındaki ilişki (oyun "beylik" diyor). | [Çelişki — Faz Ş] |
+| VI.9 | Tüccar Loncası şehirler arası bir güce dönüşür: aynı defter, haber, borç. Kökeni (vadi loncaları?) ve kuruluşu. | [Oyun] / [Boş — Faz T] |
+
+## VII. Yakın geçmiş
+
+Her oyunda yaşanmış sayılan şeyler.
+
+| | olay | işaret |
+|---|---|---|
+| VII.1 | **Haydut kralları**: bir yolu ele geçirip her kervandan haraç alan, silahlı tahsildarları olan güçler. | [Oyun] / [Boş — kim] |
+| VII.2 | **Savaşlar ve mülteciler**: evini bırakmış kolonlar, cepheden kaçıp asılmaktan korkan askerler. | [Oyun] |
+| VII.3 | **Kıtlık günleri**: mülteciler kıtlıkta pahalı satan kervanları adıyla hatırlıyor. | [Oyun] |
+| VII.4 | **Kurucu**: bir kişi bir vagon ve bir adla yola çıkar; defterin ilk satırı onundur. Kampanyada oyuncunun babası. | [Oyun] |
+| VII.5 | Yol kenarında **işaretsiz mezarlar**; onları sayan yaşlı bekçi kadın. [Türetme: halk onu Bekçi Kadın'ın kılıklarından biri sayar; oyun bunu asla doğrulamaz.] | [Oyun] / [Yazar, C10] |
+
+## VIII. Oyunun zamanı
+
+Her oyunda yeniden yazılır ve kervanın defterine kaydedilir.
 
 | | bölüm | oyundaki metin | işaret |
 |---|---|---|---|
-| VI.1 | **İlk Yol** | "Babandan kalan tek vagon ve bir yol arkadaşı. Loncanın defterinde adın bile yok; önce birinin sana bir yük emanet etmesi gerek." | [Kanon] |
-| VI.2 | **Bir Kadro** | "Tek vagonla yol alınır ama yol seni bulduğunda yalnız kalırsın. Bir vagon daha, bir kişi daha - kervan bir kadro olmadan kervan değildir." | [Kanon] |
-| VI.3 | **Ağ** | "Tek bir hattı gidip gelmek para kazandırır, isim kazandırmaz. İsim, seni dört ayrı şehirde tanıyan insanların işidir." | [Kanon] |
-| VI.4 | **Temiz Defter** | "Borçla yola çıkan kervan, kendi yükünü değil alacaklısının yükünü taşır. Defteri kapat - bundan sonrası senin." | [Kanon] |
-| VI.5 | **Kendi Hanın** (final) | "Loncanın defterindeki bir satır olmaktan çıkıp kendi hanını kurmak: dört vagon, dolu bir kese ve seni tanıyan bir yol." Final ayrıca defterde iki üstü çizili ad ve bu adı en az 60 gün taşımış olmayı istiyor: kayıpsız bir son yok. | [Kanon] |
-| VI.6 | **Sonrası.** Final bir durak değil bir eşik; yollar açık kalır, kervan sürebildiği kadar sürer. | [Kanon] |
-| VI.7 | **Kuşaklar.** Lider düşünce ad devredilir ("LİDERLİK EL DEĞİŞTİRDİ", "%d. Kuşak"). Kıdemliyi geçmek bir kırgınlık bırakır. | [Kanon] |
-| VI.8 | **Son.** Adı taşıyacak kimse kalmadığında kitap kapanır. | [Kanon] |
-
-**[Boş]** Bir oyunun bitişinden sonra dünyada ne kaldığı: kervanın adı başka
-oyunlarda (yeni kurucuların hikâyesinde) anılacak mı?
+| VIII.1 | **İlk Yol** | "Babandan kalan tek vagon ve bir yol arkadaşı. Loncanın defterinde adın bile yok; önce birinin sana bir yük emanet etmesi gerek." | [Oyun] |
+| VIII.2 | **Bir Kadro** | "Tek vagonla yol alınır ama yol seni bulduğunda yalnız kalırsın…" | [Oyun] |
+| VIII.3 | **Ağ** | "Tek bir hattı gidip gelmek para kazandırır, isim kazandırmaz…" | [Oyun] |
+| VIII.4 | **Temiz Defter** | "Borçla yola çıkan kervan, kendi yükünü değil alacaklısının yükünü taşır…" | [Oyun] |
+| VIII.5 | **Kendi Hanın** (final) | Dört vagon, dolu bir kese, seni tanıyan bir yol; defterde iki üstü çizili ad, adı en az 60 gün taşımak. Kayıpsız son yok. | [Oyun] |
+| VIII.6 | **Kuşaklar** | Lider düşünce ad devredilir; kıdemliyi geçmek kırgınlık bırakır. | [Oyun] |
+| VIII.7 | **Son** | Adı taşıyacak kimse kalmadığında kitap kapanır. | [Oyun] |
+| VIII.8 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Kuşak sisteminde kim olduğu açık. | [Yazar, C12] / [Çelişki — Faz Ş] |
 
 ---
 
 ## Tutarlılık notları
 
-Tarihi tamamlarken mevcut kurallarla çelişmemesi gereken yerler:
-
-- **İbadet mimarisi:** Şehir silüetlerine tapınak/kubbe eklenmesi bir kez denenip geri alındı. Tarihte büyük bir dini kurum yazılırsa önce bunun görsel karşılığına karar verilmeli (bugün yalnızca çan kulesi var).
-- **Beş şehir sabit kimliklere bağlı** (`test_loc_a`…`e`); adları ve hikâyeleri değişebilir, kimlikleri kayıt uyumluluğu için değişmez.
-- **Haritaya yeni şehir ya da yol eklemek** ekonomiyi (üretim/talep döngüsü), kontrat tablosunu ve rota testlerini etkiliyor; tarihte yeni bir şehir yazılırsa bu mekanik bir iş demek.
-- **Kültürler ve şehirler bugün bağımsız:** bir şehre bir halk yerleştirmek ad havuzlarına, tüccar adlarına ve belki ayrıcalıklara dokunur.
-- **Olaylar öldürmez** kuralı (ölüm yalnız savaş, açlık ve vagon kaybından) tarihî bir felaket yazarken de geçerli: geçmişte olabilir, yolda bir kartla birini öldüremez.
+- **İbadet mimarisi:** Kubbe ve minare bir kez denenip geri alındı; kilise binası
+  çan kulesi. El'in kilisesinin mimarisi de bu çizgide kalmalı.
+- **Olaylar öldürmez:** Tarihte felaket olabilir (veba, katliam, uygarlığın sonu),
+  ama yolda bir kart kimseyi öldüremez. Ölüm yalnızca savaş, açlık ve vagon kaybı.
+- **Şehir kimlikleri:** Beş şehrin kod kimlikleri kayıt uyumluluğu için sabit;
+  adları, yerleri ve sayıları değişebilir, ama şehir eklemek ekonomi, kontrat ve
+  denge ölçümü işi demek.
+- **Anlatıcı yok:** Bu çizelgedeki hiçbir satır oyunda bu biçimde, yazarın ağzından
+  yazılmaz. Oyuna her zaman birinin anlatımı olarak girer.
