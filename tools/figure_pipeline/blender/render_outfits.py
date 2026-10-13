@@ -112,6 +112,11 @@ def worn_under(inner_spec, spec):
     sisirilmez)."""
     if spec["slot"] == "hat":  # baslik yalniz basa oturur; yakalar onu itip bozuyordu
         return False
+    if inner_spec.get("skirt"):
+        # Etegin kabarikligi kalcadan disari acilir; ustune oturtulan gomlek,
+        # zirh ve ceket o kabariklik kadar sisiyordu (kalca dev gorunuyordu).
+        # Ust giysi bedene/pantolona oturur, etek altindan tasar.
+        return False
     return (inner_spec["draw_order"] < spec["draw_order"] and inner_spec["slot"] != spec["slot"]
             and inner_spec["slot"] not in spec.get("hides", ()))
 

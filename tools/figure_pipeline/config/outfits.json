@@ -178,7 +178,8 @@
    ],
    "genders": [
     "female"
-   ]
+   ],
+   "skirt": true
   },
   "tiered_skirt": {
    "slot": "pants",
@@ -193,7 +194,8 @@
    ],
    "genders": [
     "female"
-   ]
+   ],
+   "skirt": true
   },
   "leather_gloves": {
    "slot": "gloves",
