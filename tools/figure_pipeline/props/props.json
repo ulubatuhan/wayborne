@@ -417,7 +417,7 @@
    "file": "art_source/models/props/quaternius_weapons/Shield_Round.blend",
    "size": 0.7,
    "measure": "long",
-   "yaw": 90,
+   "yaw": -90,
    "ppm": 240
   },
   {
@@ -425,7 +425,7 @@
    "file": "art_source/models/props/quaternius_weapons/Shield_Heater.blend",
    "size": 0.85,
    "measure": "long",
-   "yaw": 90,
+   "yaw": -90,
    "ppm": 240
   },
   {
