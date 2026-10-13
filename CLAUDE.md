@@ -1699,6 +1699,47 @@ in every preview the moment it is equipped.
       `set_drag_forwarding` and accepts only what fits (a shirt never lands
       on a shoe box). Every drag has a button (Wear / Take off / Sell / Buy),
       because a decision needs a visible control (Road Movement Rules).
+    - **The second source is MakeHuman, and it is what made 48 garments
+      possible.** Quaternius ships two free outfits; the MakeHuman community
+      packs fit our body without alignment, because our body *is* an MPFB
+      (MakeHuman) body. `fit_garment.fit_mhclo` loads a `.mhclo` proxy
+      through MPFB, strips what MPFB added to the body, and runs the same
+      wrap → cover → layer → poke → weights chain. Licences per item in
+      `art_source/models/clothes/makehuman/LICENSES.md`; the CC-BY authors
+      are credited in-game (Settings → Credits, `Credits`) and in CREDITS.md.
+    - **A garment has a thickness shell, or ten of them stack into a
+      balloon.** Each item is fitted over every lower item it could be worn
+      over; with ~10 candidates under a coat the union envelope swelled the
+      coat. `clamp_shell` pulls each inner garment to at most `shell` metres
+      off the body (pants 3 cm, shirts 4.5, armour 4), so the outer one sits
+      on a bounded layer.
+    - **`hides` and `genders` are one list each, read by both sides.**
+      A dress hides pants, a robe hides shirt and pants: the fit does not
+      inflate over the hidden slot and `OutfitCatalog.worn_frames` does not
+      draw it (its stats still count). A gendered item is rendered only for
+      those bodies and `OutfitPiece.fits()` keeps it out of the other
+      gender's choices, the tailor wear button (disabled with its reason),
+      character creation and recruit dressing.
+    - **Armour is fitted cloth, not a rigid model.** The approved Quaternius
+      cuirasses were tried rigidly (scaled to the torso, then shelled) and
+      came out as shells floating round the chest. Leather and plate are now
+      the quilted tunic in dark leather and bright steel, mail the knit
+      sweater in steel (the knit reads as rings). `CharacterData.
+      get_appearance_outfit()` adds the equipped armour tier
+      (`OutfitCatalog.ARMOR_ART`) at draw order 36 - figures read that, the
+      saved outfit never contains it.
+    - **The apron was cut.** Fitted over every skirt it could cover, it was
+      pushed out to the widest flare and hung off the body as a ribbon; a
+      broken garment is worse than a missing one.
+    - **Leather is leather-coloured.** Tints are palette colour × texture
+      luminance (`TINT_LUM`); the leather family sits at
+      (0.52,0.30,0.14)…(0.36,0.20,0.10) after the first pass read pale.
+    - **Frame first, item second.** The render loop used to pose the body
+      per item per frame, and every pose re-evaluated all ~45 hidden
+      garments - posing cost more than rendering. Posing once per frame and
+      rendering each item under it is 2.5x faster; renders are at half
+      resolution (`resolution_percentage` 50), which `pack_outfits.py`
+      reads from the image width (coordinates ×2, no shrink).
     - Checked across the cycle, not in one pose: `tests/screenshot_outfits.gd`
       prints eight walk phases plus idle/attack/hit/dead per body x outfit;
       `test_outfit.gd` asserts every item has a frame set for all six
@@ -2054,6 +2095,53 @@ in every preview the moment it is equipped.
     (`SMOOTH_ITERATIONS`, `HINGE_BAND`). Stored as a `.tres`, because the
     Web export ships resources only - a `.json` would be missing there.
     Restyling is repainting the three layer PNGs inside the same silhouette.
+
+### Prop Rules
+
+Vagon, kapı, değirmen, binalar, kamp, silahlar: dünyanın prosedürel çizilen
+nesneleri artık figürlerle **aynı hattan** gelen render'lar - aynı güneş, aynı
+dört ton, gölge × albedo. Kaynaklar CC0 paketler (Quaternius, Kenney,
+KayKit; `art_source/models/props/LICENSES.md`).
+
+- **Tek kapı: `PropArt`** (`scripts/ui/prop_art.gd`). Paket
+  `data/assets/props/<id>/<katman>.png` + `props.tres` (`PropSheet`: ppm,
+  katman konumları ve milleri, metre boyu). Konumlar eşyanın yere bastığı
+  orta noktaya göre; ölçek çağıranın: `k = (oyun pikseli/metre) / ppm`. Bir
+  eşyanın resmi yoksa `has()` yanlış döner ve çağıran prosedürel çizimine
+  düşer - Wardrobe'un "sanat parça parça gelebilir" kuralı.
+- **Döndürme ve eğme köşeleri hesaplanmış bir çokgenle, `draw_set_transform`
+  ile değil.** RoadCaravan dönüş aynalaması için kendi dönüşümünü kuruyor ve
+  tuvalin o anki dönüşümü okunamıyor; üstüne yazmak onu bozardı.
+- **Hareket eden her parça kendi katmanı.** Tekerlek döner (`wheel`,
+  `wheel_front` - ön tekerlek küçük, yarıçap oranıyla daha hızlı), branda
+  salınır (`canopy`, tabanı sabit eğme), değirmen kanadı döner (`blades`),
+  kapı kanadı lider yaklaşınca kalkar (`gate`, duvarın arkasında çizilir).
+  Bir katman render edilirken diğerleri kameraya görünmez ama gölge düşürür.
+- **Brandalı vagon sıfırdan kuruldu, `ArtDraw.wagon`'un oranlarıyla**
+  (`tools/figure_pipeline/props/wagon_builder.py`): h = 1.6 m, tekerlek
+  0.34h, tekerlekler ±0.30w, branda tepesi ~1.24h. Aynı `base`/`h` aynı
+  kutuya düşüyor; kolon, koşum oku ve arabacı koltuğu hiçbir sayı
+  değişmeden yerinde kaldı. `test_props.gd` kutuyu kilitliyor. Paketlerde
+  hazır brandalı vagon yoktu; MegaKit'in arabası tek akslı ve gevşek
+  parçalı. Yarım vagon (eşek arabası) aynı kurucudan.
+- **Ölçek gerçek boy.** Model `size` (metre) ya da paketin kendi birimi ×
+  katsayı (Medieval Village ×2.3, Modular ×2.9 - insan boyuna göre ölçüldü)
+  ile oturtuluyor; yolda kişi ~0.094 × şerit / 1.73 m, hub'da ~36 px/m.
+  Şehir haritasında **bütün binalar tek ölçekte** (bir karo `TILE_METRES`
+  5 m): ilk sürüm her binayı ayak izinin genişliğine sığdırdı ve dar-uzun
+  lonca kulesi devleşip pazarı örttü.
+- **Silahlar dik render edildi, sap altta.** `PropArt.draw_between` resmi
+  sap ucundan uca gerer; `WalkFigure.WEAPON_PROPS` aileyi silaha ve
+  tutuşa (sapın payı) bağlıyor. Yay (kiriş çekiliyor) ve asa prosedürel.
+- **Modüler paketin malzemeleri düğümsüz** (`diffuse_color` beyaz); taş/
+  ahşap tonları `props.json`'daki `tints` kurallarıyla veriliyor. Kenney
+  modelleri `Textures/colormap.png`'yi göreli yoldan arıyor - doku dosyası
+  modelin yanında durmalı.
+- **Kenney/Quaternius sahnesinde ibadet yeri yok** (Art Rules): kilise
+  izometrik haritada bir çan kulesi.
+- Ekran görüntüsü: `tests/screenshot_hub_scene.gd` gerçek `world_hub`'ı
+  açıyor (kapı, yerleşim, araba); `screenshot_hub.gd` sahneyi elle kurduğu
+  için bunları göstermez.
 
 ### Waybook UI Rules
 
@@ -4900,28 +4988,23 @@ verir.
   bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
   "iki ayrı prodüksiyon" tuzağı).
 - **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
-  Dolabı ekranı, statlı ve statına göre fiyatlı 16 giysi, her ziyarette
+  Dolabı ekranı, statlı ve statına göre fiyatlı 48 giysi, her ziyarette
   başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
   `EventEffect`'e `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle (parça
-  önce dolaba düşer, kime giydirileceği sonra seçilir). Dokuz giysinin
-  henüz görseli yok (`art_id` boş, kendi rengiyle çiziliyor): yeni bir
-  render `config/outfits.json`'a bir satır, `render_outfits.py`,
-  `pack_outfits.py` ve `OutfitCatalog`'da `has_art` true demek.
+  önce dolaba düşer, kime giydirileceği sonra seçilir).
+- **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
+  `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
+  [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
+  [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
+  kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
   CC0 3B paketlerden giydirilip render ediliyor.
-- **Şehir kapısı hâlâ düz bir renkli dikdörtgen - resim bekleniyor.**
-  `Kurtboğazı Kapısı` etkileşim noktası `world_hub.gd`'de bir `ColorRect`
-  (`GATE_COLOR`, zeminde duran 150x230 kutu), dosyadaki son yer tutucu.
-  Prompt dosyası, şablonu ve paleti hazır (`docs/gemini-prompts-gate.md`,
-  `docs/gate/`, `tools/gate_template.py`); resim gelince
-  `_build_spots()`'un `ColorRect`'i bir `TextureRect` olacak, etkileşim
-  dikdörtgeni aynı kalacak. **Bilinen risk, prompt'un ilk kuralı olarak
-  yazıldı:** hub'ın manzarası prosedürel çiziliyor, fotoğrafik ya da 3B
-  render bir illüstrasyon Art Rules'un "iki ayrı prodüksiyon" tuzağına
-  düşer. Teslimat dile oturmazsa ikinci yol aynı kapıyı `ArtDraw` ile
-  çizmek - asıl kusur kapının çirkin olması değil, bir dikdörtgen olması.
+
+**Kapandı (Faz 25):** şehir kapısı artık render edilmiş bir sur geçidi
+(bkz. Prop Rules) - `ColorRect` yer tutucusu yalnızca eşya paketi yoksa
+çiziliyor. Gemini kapı prompt'u (`docs/gemini-prompts-gate.md`) kullanılmadı.
 
 **Kapandı (Faz 16):** kıyafet seçiminin `WalkFigure`/`CombatFigure`'a
 bağlanması, genel kervan yönetimi ekranı (`CaravanOverviewPanel`),
@@ -7014,6 +7097,23 @@ küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küç
   artık komşu kurda değmediğini doğruluyor; `test_combat_dd.gd` bu sabiti
   sınamıyor (yalnızca mevki sayısını sayıyor), o yüzden regresyon tam
   test paketiyle (12839/12839) doğrulandı.
+
+Faz 25 ("Eşya ve kuşam turu") - oyunun prosedürel çizdiği nesnelerin
+ücretsiz, ticari kullanıma açık paketlerden render edilmesi; seçki önce bir
+onay sayfasında sunuldu, oyuncu onayladı ve geri bildirim verdi (keçe külah
+yedeği silindi, binici pantolonunun yedeği seçildi, diğer yedekler çeşit için
+eklendi, deri tonları koyulaştırıldı, kombinlerin iç içe geçmemesi istendi):
+
+- **Eşyalar** (bkz. Prop Rules): brandalı vagon (temel unsur, oyunun kendi
+  oranlarıyla sıfırdan) ve eşek arabası, sur geçidi, iki değirmen, köy
+  evleri, karakol, maden, çadır, kamp ateşi, sandık/fıçı/çuval, izometrik
+  şehir binaları, on üç silah ve kalkan.
+- **Kuşam**: 16 giysiden 48'e (cinsiyete özel kalemler, elbiseler, cübbeler,
+  miğferler), üç zırh kademesinin görünüşü, `hides`/`genders` kuralları,
+  kalınlık kabuğu. Önlük kesildi, rijit zırh yerine kumaş zırh - ikisi de
+  kombin QA'sında görüldü (Wardrobe & Rig Rules).
+- **Lore**: `docs/lore/LORE.md` ve `docs/lore/TARIHCE.md` - oyunun bugün
+  bildiği evren ve tarih, boş satırlarıyla.
 
 ## Quick Start
 
