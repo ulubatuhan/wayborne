@@ -12,6 +12,16 @@ const SETS: Array[Dictionary] = [
 	{"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "peasant_shoes"},
 	{"shirt": "peasant_shirt", "jacket": "ranger_jacket", "pants": "ranger_pants",
 		"shoes": "ranger_boots", "hat": "ranger_hood"},
+	{"shirt": "quilted_shirt", "pants": "riding_breeches", "shoes": "hobnail_boots",
+		"jacket": "leather_jerkin", "gloves": "leather_gloves", "hat": "leather_cap"},
+	{"shirt": "linen_tunic", "pants": "viking_pants", "shoes": "riding_boots",
+		"armor": "armor_mail", "hat": "guard_helmet"},
+	{"shirt": "fisherman_sweater", "pants": "cloth_trousers", "shoes": "leather_boots",
+		"armor": "armor_plate", "jacket": "wool_coat", "hat": "spiked_helmet"},
+	{"shirt": "laced_shirt", "pants": "harem_pants", "shoes": "strap_sandals",
+		"armor": "armor_leather", "hat": "fur_hat"},
+	{"jacket": "pilgrim_robe", "hat": "pilgrim_hood", "shoes": "felt_shoes"},
+	{"shirt": "silk_shirt", "jacket": "scribe_robe", "shoes": "short_boots", "hat": "wide_hat"},
 ]
 const PHASES: int = 8
 const ACTIONS: Array[String] = ["idle", "attack_swing", "hit", "dead"]

@@ -340,6 +340,9 @@ func set_phase_offset(offset: float) -> void:
 func set_facing(facing: float) -> void:
 	_facing = 1.0 if facing >= 0.0 else -1.0
 
+func get_facing() -> float:
+	return _facing
+
 ## Günün ışığı. Bütün figürler aynı ışığı yiyor, yoksa gece yürüyen kervan
 ## gündüz aydınlatılmış gibi duruyor.
 func set_tint(tint: Color) -> void:
@@ -550,6 +553,8 @@ func _draw_slung_on_back(spine: Dictionary, h: float, look: Dictionary) -> void:
 	var pts := slung_points(weapon_kind(), spine, h)
 	if pts.is_empty():
 		return
+	if _draw_slung_sprite(pts, h):
+		return
 	match weapon_kind():
 		"bow":
 			var stave := _bezier(pts.top, pts.bulge, pts.bottom, 12)
@@ -605,6 +610,12 @@ func _draw_frame_weapon(joints: Dictionary, h: float, look: Dictionary, wdir: Ve
 	if not joints.has("hand_front"):
 		return
 	var hand: Vector2 = joints.hand_front
+	if _draw_weapon_sprite(hand, wdir, h):
+		if weapon_kind() == "spear_shield" and joints.has("hip"):
+			var centre: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, 0.55) + Vector2(0.075 * _facing, 0.0) * h
+			var r := PropArt.long_side_m(SHIELD_PROP) * _px_per_m(h) * 0.5
+			PropArt.draw_between(self, SHIELD_PROP, "body", centre + Vector2(0.0, r), centre - Vector2(0.0, r), _tint, _facing < 0.0)
+		return
 	var metal: Color = look.metal
 	var trim: Color = look.trim
 	var ink_w := maxf(1.0, h * 0.008)
@@ -656,6 +667,55 @@ func _draw_frame_weapon(joints: Dictionary, h: float, look: Dictionary, wdir: Ve
 			draw_line(hand - wdir * h * 0.20, staff_top, trim.darkened(0.2), maxf(2.2, h * 0.018))
 			draw_circle(staff_top, 0.03 * h, metal)
 			draw_arc(staff_top, 0.03 * h, 0.0, TAU, 12, ArtPalette.INK, ink_w)
+
+## Silah ailesi -> render edilmiş silah (PropArt) ve tutuş: sapın alt
+## ucundan elin kavradığı yere, boyun payı olarak. Silahlar gerçek
+## boylarıyla (metre) çiziliyor, figürün boyuna göre. Yay (kiriş çekiliyor)
+## ve asa prosedürel kalıyor.
+const WEAPON_PROPS := {
+	"sword": ["weapon_sword_2", 0.08],
+	"cleaver": ["weapon_axe_small", 0.15],
+	"maul": ["weapon_hammer", 0.20],
+	"spear_shield": ["weapon_spear", 0.38],
+}
+const SHIELD_PROP: String = "weapon_shield_round"
+
+## Figürün piksel/metresi: kişi boyu ~0.84h, 1.73 m'lik biri için.
+static func _px_per_m(h: float) -> float:
+	return h * 0.84 / 1.73
+
+func _weapon_prop() -> Array:
+	var spec: Array = WEAPON_PROPS.get(weapon_kind(), [])
+	if spec.is_empty() or not PropArt.has(String(spec[0])):
+		return []
+	return spec
+
+func _draw_weapon_sprite(hand: Vector2, wdir: Vector2, h: float) -> bool:
+	var spec := _weapon_prop()
+	if spec.is_empty():
+		return false
+	var length := PropArt.long_side_m(spec[0]) * _px_per_m(h)
+	var butt := hand - wdir * length * float(spec[1])
+	PropArt.draw_between(self, spec[0], "body", butt, butt + wdir * length, _tint, _facing < 0.0)
+	return true
+
+## Sırttaki silah: uçlar `slung_points()`'ten, boy gerçek boy. Kılıç belden
+## aşağı (kabza yukarıda), mızrak ve balyoz sırta çapraz (uç yukarıda).
+func _draw_slung_sprite(pts: Dictionary, h: float) -> bool:
+	var spec := _weapon_prop()
+	if spec.is_empty():
+		return false
+	var length := PropArt.long_side_m(spec[0]) * _px_per_m(h)
+	var from: Vector2
+	var dir: Vector2
+	if weapon_kind() in ["sword", "cleaver"]:
+		dir = (Vector2(pts.bottom) - Vector2(pts.top)).normalized()
+		from = Vector2(pts.top) - dir * length * float(spec[1])
+	else:
+		dir = (Vector2(pts.top) - Vector2(pts.bottom)).normalized()
+		from = (Vector2(pts.top) + Vector2(pts.bottom)) * 0.5 - dir * length * 0.5
+	PropArt.draw_between(self, spec[0], "body", from, from + dir * length, _tint, _facing < 0.0)
+	return true
 
 ## Yay: gövde `wdir` boyunca elin iki yanında, hedefe doğru kavisli; kiriş
 ## çekilmişken orta noktası (gez) arka ele gelir.

@@ -915,7 +915,7 @@ def add_sole(mesh, body, rig, sole, heel):
 
 
 def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0,
-        sole=0.0, heel=0.0):
+        sole=0.0, heel=0.0, shell=None):
     """Doner: MPFB rig'ine bagli tek giysi agi (parcanin aglari birlestirilir)
     ve itilen nokta sayisi. Beden dinlenme pozunda olmali. `inner`: bu giysinin
     altina giyilebilecek, zaten giydirilmis giysiler (cizim sirasi kucuk olan
@@ -943,6 +943,9 @@ def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0,
                              min(c.z for c in rc_evaluated(body)) if sole > 0.0 else None)
         if waist_bone and waist_sleeve(mesh, body, rig, waist_bone, eps):
             snugged = True
+        if shell:
+            clamp_shell(mesh, tree, shell)
+            pushed += wrap(mesh, tree, eps)
         if not os.environ.get("WAYBORNE_NO_LAYERING"):  # qa: eski davranisi yeniden uretmek icin
             pushed += layer_over(mesh, tree, inner, gap)
             pushed += resolve_pokes(mesh, tree, inner, gap, MIN_FLOOR)
@@ -965,3 +968,194 @@ def fit(path, body, rig, eps, inner=(), gap=0.003, waist_bone=None, openings=0,
     meshes[0]["waist_bone"] = waist_bone or ""
     meshes[0]["sole"] = sole
     return meshes[0], pushed
+
+
+def clamp_shell(mesh, tree, shell):
+    """Kalinlik kabugu: noktayi bedenin yuzeyinden en fazla `shell` uzakta
+    tutar (iceri ceker, cekmeyi agda yumusatir). Ic giysiler (pantolon,
+    gomlek, zirh) kabugunu asmazsa dis giysi alttakilerin hepsinin ustune bu
+    kabuk kadar oturur - en kalin kazak, en bol bluz baska bir giysinin
+    seklini bozmaz. 49 kalemle "hepsinin ustune" kurali dis giysileri cuvala
+    ceviriyordu (olculdu: cubbe ve kaban iki kati genislemisti)."""
+    verts = mesh.data.vertices
+    n = len(verts)
+    nbr = [[] for _ in range(n)]
+    for e in mesh.data.edges:
+        a, b = e.vertices
+        nbr[a].append(b)
+        nbr[b].append(a)
+    disp = [Vector() for _ in range(n)]
+    hit = 0
+    for i, v in enumerate(verts):
+        loc, normal, _f, _d = tree.find_nearest(v.co)
+        if loc is None:
+            continue
+        sd = (v.co - loc).dot(normal)
+        if sd > shell:
+            disp[i] = -normal * (sd - shell)
+            hit += 1
+    for _ in range(SMOOTH_ITERATIONS):
+        nxt = []
+        for i in range(n):
+            if not nbr[i]:
+                nxt.append(disp[i])
+                continue
+            avg = sum((disp[j] for j in nbr[i]), Vector()) / len(nbr[i])
+            nxt.append(avg if avg.length > disp[i].length else disp[i])
+        disp = nxt
+    for i, v in enumerate(verts):
+        v.co += disp[i]
+    mesh.data.update()
+    return hit
+
+
+def _clean_mesh(mesh):
+    """Degistiricileri uygular, ebeveyni birakir, donusumu aga yazar,
+    agirliklari siler: giysi artik dunyada duran duz bir ag."""
+    bpy.context.view_layer.objects.active = mesh
+    for m in list(mesh.modifiers):
+        try:
+            bpy.ops.object.modifier_apply(modifier=m.name)
+        except RuntimeError:
+            mesh.modifiers.remove(m)
+    mw = mesh.matrix_world.copy()
+    mesh.parent = None
+    mesh.matrix_world = mw
+    mesh.data.transform(mesh.matrix_world)
+    mesh.matrix_world = Matrix.Identity(4)
+    mesh.vertex_groups.clear()
+    if mesh.data.shape_keys:
+        mesh.shape_key_clear()
+    # Normaller disa: render arka yuzleri kamera isininda saydam ciziyor
+    # (fig_shading); ters yuzlu bir kaynak (MakeHuman yelegi, Quaternius
+    # zirhlari) ortasi delik gibi gorunuyordu.
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(mesh.data)
+    bm.free()
+
+
+def _finish(mesh, body, rig, tree, eps, inner, gap, cover=True, shell=None):
+    """Iki kaynagin ortak sonu (Quaternius fit() ile ayni sira): sar, bedeni
+    ort, kabuga sigdir, alt giysilerin ustune oturt, cakismalari coz,
+    agirliklari al."""
+    pushed = wrap(mesh, tree, eps)
+    if cover:
+        pushed += cover_body(mesh, body, tree, eps, None)
+    if shell:
+        clamp_shell(mesh, tree, shell)
+        pushed += wrap(mesh, tree, eps)
+    if not os.environ.get("WAYBORNE_NO_LAYERING"):
+        pushed += layer_over(mesh, tree, inner, gap)
+        pushed += resolve_pokes(mesh, tree, inner, gap, MIN_FLOOR)
+    transfer_weights(mesh, body, rig)
+    if not os.environ.get("WAYBORNE_NO_LAYERING"):
+        inherit_weights(mesh, inner)
+    return pushed
+
+
+def _box(coords):
+    lo = [min(c[a] for c in coords) for a in range(3)]
+    hi = [max(c[a] for c in coords) for a in range(3)]
+    return lo, hi
+
+
+def fit_mhclo(path, body, rig, eps, inner=(), gap=0.003, shell=None):
+    """MakeHuman giysisi (.mhclo): bedenimiz zaten MakeHuman, MPFB giysiyi
+    bedenin kendi noktalarina gore yerlestiriyor - iskelet hizalama yok.
+    MPFB bedene bir silme maskesi ve gruplari ekliyor; ten 2B bindirmede her
+    zaman cizildigi icin (QUESTIONS #13) bunlar geri aliniyor, kalani Quaternius
+    giysileriyle ayni: sarma, ortme, katmanlama, agirlik."""
+    from bl_ext.user_default.mpfb.services.humanservice import HumanService
+    mods = {m.name for m in body.modifiers}
+    groups = {g.name for g in body.vertex_groups}
+    obj = HumanService.add_mhclo_asset(path, body, asset_type="Clothes", subdiv_levels=0,
+                                       set_up_rigging=False, interpolate_weights=False,
+                                       import_subrig=False, import_weights=False)
+    for m in list(body.modifiers):
+        if m.name not in mods:
+            body.modifiers.remove(m)
+    for g in list(body.vertex_groups):
+        if g.name not in groups:
+            body.vertex_groups.remove(g)
+    _clean_mesh(obj)
+    native = _box(rc_evaluated(obj))
+    prev = _masks(body, True)
+    tree, bm = body_bvh(body)
+    pushed = _finish(obj, body, rig, tree, eps, inner, gap, shell=shell)
+    bm.free()
+    for m, v in prev:
+        m.show_viewport = v
+    obj["native_min"], obj["native_max"] = native
+    obj["snugged"] = False
+    obj["waist_bone"] = ""
+    obj["sole"] = 0.0
+    return obj, pushed
+
+
+ARM_GROUPS = ("clavicle", "upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky")
+
+
+def _torso_coords(body, lo_z, hi_z):
+    """Gogus dilimi, kollar haric: A-pozda kollar govdenin yaninda ayni
+    yukseklikte sarkiyor ve dilime girince zirh omuzdan omuza degil
+    bilekten bilege olceklenip kutu gibi sisiyordu."""
+    arm = {g.index for g in body.vertex_groups if any(k in g.name for k in ARM_GROUPS)}
+    coords = rc_evaluated(body)
+    out = []
+    for v, c in zip(body.data.vertices, coords):
+        if not (lo_z <= c.z <= hi_z):
+            continue
+        if sum(g.weight for g in v.groups if g.group in arm) >= 0.3:
+            continue
+        out.append(c)
+    return out
+
+
+def fit_rigid(path, body, rig, eps, inner=(), gap=0.003, region=("spine_01", "neck_01"), margin=(1.06, 1.12, 1.0),
+              yaw=90.0, shell=None):
+    """Iskeletsiz tek parca (Quaternius'un gogus zirhlari): gogsun sinir
+    kutusuna olceklenip yerlestirilir, sonra bir giysi gibi sarilir ve agirligini
+    bedenden alir - gogusle birlikte egilir, kollar disinda kalir."""
+    with bpy.data.libraries.load(path, link=False) as (src, dst):
+        dst.objects = [n for n in src.objects]
+    objs = [o for o in dst.objects if o is not None and o.type == "MESH"]
+    for o in objs:
+        bpy.context.scene.collection.objects.link(o)
+    bpy.context.view_layer.update()
+    if len(objs) > 1:
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in objs:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = objs[0]
+        bpy.ops.object.join()
+    obj = objs[0]
+    _clean_mesh(obj)
+    import math
+    obj.data.transform(Matrix.Rotation(math.radians(yaw), 4, "Z"))  # Quaternius zirhi +-X'e bakiyor
+    obj.data.update()
+    lo_z = (rig.matrix_world @ rig.data.bones[region[0]].head_local).z
+    hi_z = (rig.matrix_world @ rig.data.bones[region[1]].head_local).z
+    slab = _torso_coords(body, lo_z, hi_z)
+    blo, bhi = _box(slab)
+    alo, ahi = _box([v.co for v in obj.data.vertices])
+    s = [margin[a] * (bhi[a] - blo[a]) / max(ahi[a] - alo[a], 1e-6) for a in range(2)]
+    s.append(margin[2] * (hi_z - lo_z) / max(ahi[2] - alo[2], 1e-6))
+    ac = [(alo[a] + ahi[a]) / 2 for a in range(3)]
+    bc = [(blo[0] + bhi[0]) / 2, (blo[1] + bhi[1]) / 2, (lo_z + hi_z) / 2]
+    for v in obj.data.vertices:
+        v.co = Vector([(v.co[a] - ac[a]) * s[a] + bc[a] for a in range(3)])
+    obj.data.update()
+    native = _box([v.co for v in obj.data.vertices])
+    prev = _masks(body, True)
+    tree, bm = body_bvh(body)
+    pushed = _finish(obj, body, rig, tree, eps, inner, gap, cover=False, shell=shell)
+    bm.free()
+    for m, v in prev:
+        m.show_viewport = v
+    obj["native_min"], obj["native_max"] = native
+    obj["snugged"] = True  # kaynaktan bilerek farkli: gogse olceklendi
+    obj["waist_bone"] = ""
+    obj["sole"] = 0.0
+    return obj, pushed

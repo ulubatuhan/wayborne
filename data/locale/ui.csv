@@ -721,3 +721,6 @@
 "UI_OUTFIT_STAT_ACCURACY","isabet","accuracy","","","","","","","","",""
 "UI_OUTFIT_STAT_CRIT","kritik","crit","","","","","","","","",""
 "UI_OUTFIT_STAT_DAMAGE","hasar","damage","","","","","","","","",""
+"UI_CREDITS","Emeği Geçenler","Credits","","","","","","","","",""
+"UI_CREDITS_CC_BY","Giysiler (CC-BY 4.0, MakeHuman topluluğu):","Clothing (CC-BY 4.0, MakeHuman community):","","","","","","","","",""
+"UI_CREDITS_CC0","Modeller (CC0):","Models (CC0):","","","","","","","","",""

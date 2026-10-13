@@ -1,0 +1,38 @@
+# Material definition for elvs_charity_veil_m1a_over
+
+name elvs_charity_veil_m1a_over
+description Elvs_charity_veil_m1a_over material
+ambientColor 1.0 1.0 1.0
+diffuseColor 0.5 0.5 0.5
+specularColor 0.5 0.5 0.5
+shininess 0.5
+emissiveColor 0.0 0.0 0.0
+opacity 1.0
+translucency 0.0
+
+shadeless False
+wireframe False
+transparent False
+alphaToCoverage True
+backfaceCull False
+depthless False
+
+castShadows True
+
+receiveShadows True
+
+diffuseTexture veiltexture1.png
+
+shader shaders/glsl/litsphere
+
+shaderParam litsphereTexture litspheres/lit_refl_sharp_aniso.png
+shaderParam AdditiveShading 0.1
+
+shaderConfig diffuse True
+shaderConfig bump True
+shaderConfig normal True
+shaderConfig displacement True
+shaderConfig spec True
+shaderConfig vertexColors True
+shaderConfig transparency True
+shaderConfig ambientOcclusion True

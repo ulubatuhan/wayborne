@@ -34,13 +34,22 @@ BODY = os.path.join(ROOT, "build", "figures", "out")
 # figur ekranda render'in ~5'te biri boyunda, yarim cozunurluk hala fazlasi.
 # Tam cozunurlukte 42 kume ~55 MB tutuyordu, Web her birini indiriyor.
 DOWNSCALE = 0.5
+CANVAS_W = json.load(open(os.path.join(PIPE, "config", "camera.json")))["canvas"][0]
 
 
-def shrink(piece, x0, y0):
-    """Kirpilmis parcayi kucultur; kose (x0, y0) render pikselinde kalir,
-    yarim piksellik hizayi kaybetmemek icin tabana yuvarlanmiyor."""
+def shrink(piece, x0, y0, rendered=1.0):
+    """Kirpilmis parcayi kucultur; kose (x0, y0) tam tuval pikseline cevrilir,
+    yarim piksellik hizayi kaybetmemek icin tabana yuvarlanmiyor.
+    `rendered`: render'in tuvale orani. outfits.json resolution_percentage 50
+    ile render zaten paket olcusunde geliyor (kucultme yok, yalniz koordinat
+    iki katina) - yarim cozunurlukte render etmek kucultulecek pikseli hic
+    hesaplamamak demek."""
+    x0, y0 = x0 / rendered, y0 / rendered
+    k = DOWNSCALE / rendered
+    if abs(k - 1.0) < 1e-6:
+        return piece, (x0, y0)
     h, w = piece.shape[:2]
-    nw, nh = max(1, round(w * DOWNSCALE)), max(1, round(h * DOWNSCALE))
+    nw, nh = max(1, round(w * k)), max(1, round(h * k))
     img = Image.fromarray(piece).resize((nw, nh), Image.LANCZOS)
     return np.asarray(img), (x0, y0)
 
@@ -77,15 +86,15 @@ def pack(variant, item, build, layers, post):
                 d = fdir if layer in own else bdir
                 have = os.path.exists(os.path.join(d, "shade_%s.png" % layer))
                 for kind in range(len(P.KINDS)):
-                    piece, (x0, y0) = (P.crop(pack_beasts.compose(d, layer, post))
-                                       if kind == 0 and have else (None, (0, 0)))
+                    full = pack_beasts.compose(d, layer, post) if kind == 0 and have else None
+                    piece, (x0, y0) = P.crop(full) if full is not None else (None, (0, 0))
                     if piece is None:
                         rects.append((0, 0, 0, 0, 0))
                         offsets.append((0.0, 0.0))
                         continue
+                    piece, (x0, y0) = shrink(piece, x0, y0, full.shape[1] / float(CANVAS_W))
                     if layer not in own:
                         y0 += dy
-                    piece, (x0, y0) = shrink(piece, x0, y0)
                     rects.append(shelf.put(piece))
                     offsets.append((x0 - ax, y0 - ay))
     pages = []

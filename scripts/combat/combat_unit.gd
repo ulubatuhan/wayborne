@@ -148,7 +148,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.blight_resist = character.get_blight_resist()
 	unit.stun_resist = character.get_stun_resist()
 	unit.figure_kind = character.class_id
-	unit.outfit = character.outfit
+	unit.outfit = character.get_appearance_outfit()
 	unit.loadout = Wardrobe.loadout_for(character)
 	unit.skin = CharacterData.get_skin_tone_color(character.skin_tone)
 	unit.body_variant = character.get_body_variant_id()

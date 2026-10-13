@@ -42,9 +42,23 @@ extends Resource
 ## Terzide satış fiyatı: kumaşın ve işçiliğin tabanı + verdiği her statın
 ## değeri (OutfitCatalog.price_for) - fiyat statla büyüyor, hepsi aynı formül.
 @export var price: int = 0
+## Yalnızca bu cinsiyete göre dikilmiş (CharacterData.GENDER_*); -1 herkes.
+## Render da yalnız o bedenlere yapılıyor (outfits.json `genders`), yani
+## öbür cinsiyete giydirilecek bir kare kümesi zaten yok.
+@export var gender_only: int = -1
+## Giyilince bu slotlar çizilmez (elbise pantolonu, cübbe gömleği ve
+## pantolonu örter). Render da örtülen slotun üstüne şişirilmiyor - iki
+## kural aynı listeden (outfits.json `hides`).
+@export var hides: Array[String] = []
+## Terzide satılmayan, başka bir sistemin giydirdiği parça (zırh: demirciden
+## alınan Equipment'ın görünüşü).
+@export var sold: bool = true
 ## Karakter oluşturmada seçilebilir mi - yalnızca köylü takımı. Daha iyisi
 ## para ister; bedava seçilebilseydi terzi anlamsızlaşırdı.
 @export var starter: bool = false
+
+func fits(gender: int) -> bool:
+	return gender_only < 0 or gender_only == gender
 
 var display_name: String:
 	get: return tr(display_name_key)

@@ -1,0 +1,558 @@
+{
+ "_comment": "Esya render listesi (render_props.py). size: metre, measure hangi olcunun oturacagi (z|x|y|long); scale verilirse paketin kendi birimi o katsayiyla buyutulur (MVP x2.3, modular x2.9 - insan boyuna gore olculdu). yaw: kameraya donen yuz. ppm: piksel/metre. view: side (yol, hub) | iso (sehir haritasi). parts: bir esyayi birkac dosyadan kurar; split ile ayni dosyadaki bir nesne (kanat) ayri katmana. pivots: dondurulecek parcanin mili.",
+ "props": [
+  {
+   "id": "covered_wagon",
+   "builder": "covered_wagon",
+   "ppm": 160
+  },
+  {
+   "id": "half_cart",
+   "builder": "half_cart",
+   "ppm": 160
+  },
+  {
+   "id": "market_cart",
+   "file": "art_source/models/props/quaternius_medieval_village/Cart.blend",
+   "scale": 2.3,
+   "yaw": 0,
+   "ppm": 120
+  },
+  {
+   "id": "stall_cart",
+   "file": "art_source/models/props/quaternius_fantasy_props/Stall_Cart_Empty.gltf",
+   "yaw": 90,
+   "size": 2.6,
+   "ppm": 120
+  },
+  {
+   "id": "city_gate",
+   "yaw": 90,
+   "scale": 2.9,
+   "ppm": 80,
+   "parts": [
+    {
+     "file": "art_source/models/props/quaternius_modular_medieval/TallWallEntrance.blend",
+     "layer": "body"
+    },
+    {
+     "file": "art_source/models/props/quaternius_modular_medieval/Tower.blend",
+     "offset": [
+      -1.32,
+      0,
+      0
+     ],
+     "layer": "body"
+    },
+    {
+     "file": "art_source/models/props/quaternius_modular_medieval/Tower.blend",
+     "offset": [
+      1.32,
+      0,
+      0
+     ],
+     "layer": "body"
+    },
+    {
+     "file": "art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+     "offset": [
+      -2.64,
+      0,
+      0
+     ],
+     "layer": "body"
+    },
+    {
+     "file": "art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+     "offset": [
+      2.64,
+      0,
+      0
+     ],
+     "layer": "body"
+    },
+    {
+     "file": "art_source/models/props/kenney_castle/metal-gate.glb",
+     "offset": [
+      0,
+      -0.03,
+      0
+     ],
+     "part_yaw": 90,
+     "part_scale": 1.3,
+     "layer": "gate"
+    }
+   ],
+   "tints": [
+    {
+     "match": "DarkRock",
+     "color": [
+      0.45,
+      0.43,
+      0.41
+     ]
+    },
+    {
+     "match": "LightRock",
+     "color": [
+      0.66,
+      0.63,
+      0.57
+     ]
+    },
+    {
+     "match": "LightWood",
+     "color": [
+      0.56,
+      0.41,
+      0.26
+     ]
+    },
+    {
+     "match": "Celing",
+     "color": [
+      0.42,
+      0.31,
+      0.21
+     ]
+    },
+    {
+     "match": "Black",
+     "color": [
+      0.13,
+      0.12,
+      0.13
+     ]
+    },
+    {
+     "match": "Material.006",
+     "color": [
+      0.5,
+      0.42,
+      0.3
+     ]
+    },
+    {
+     "match": "metal-gate",
+     "color": [
+      0.3,
+      0.29,
+      0.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": "windmill",
+   "file": "art_source/models/props/quaternius_farm/TowerWindmill.blend",
+   "yaw": -90,
+   "size": 12,
+   "ppm": 70,
+   "parts": [
+    {
+     "file": "art_source/models/props/quaternius_farm/TowerWindmill.blend",
+     "split": "Blades",
+     "split_layer": "blades",
+     "layer": "body"
+    }
+   ],
+   "pivots": {
+    "hub": "Blades"
+   }
+  },
+  {
+   "id": "mill_wooden",
+   "yaw": -90,
+   "scale": 2.3,
+   "ppm": 80,
+   "parts": [
+    {
+     "file": "art_source/models/props/quaternius_medieval_village/Mill.blend",
+     "split": "Blades",
+     "split_layer": "blades",
+     "layer": "body"
+    }
+   ],
+   "pivots": {
+    "hub": "Blades"
+   }
+  },
+  {
+   "id": "house_1",
+   "file": "art_source/models/props/quaternius_medieval_village/House_1.blend",
+   "scale": 2.3,
+   "ppm": 80
+  },
+  {
+   "id": "house_2",
+   "file": "art_source/models/props/quaternius_medieval_village/House_2.blend",
+   "scale": 2.3,
+   "ppm": 80
+  },
+  {
+   "id": "sawmill",
+   "file": "art_source/models/props/quaternius_medieval_village/Sawmill.blend",
+   "scale": 2.3,
+   "ppm": 80
+  },
+  {
+   "id": "well",
+   "file": "art_source/models/props/quaternius_medieval_village/Well.blend",
+   "scale": 2.3,
+   "ppm": 120
+  },
+  {
+   "id": "fence",
+   "file": "art_source/models/props/quaternius_medieval_village/Fence.blend",
+   "scale": 2.3,
+   "yaw": 90,
+   "ppm": 120
+  },
+  {
+   "id": "hay",
+   "file": "art_source/models/props/quaternius_medieval_village/Hay.blend",
+   "scale": 2.3,
+   "ppm": 120
+  },
+  {
+   "id": "outpost",
+   "file": "art_source/models/props/quaternius_modular_medieval/WatchTowerWRoof.blend",
+   "size": 7,
+   "ppm": 80,
+   "tints": [
+    {
+     "match": "DarkRock",
+     "color": [
+      0.45,
+      0.43,
+      0.41
+     ]
+    },
+    {
+     "match": "LightRock",
+     "color": [
+      0.66,
+      0.63,
+      0.57
+     ]
+    },
+    {
+     "match": "LightWood",
+     "color": [
+      0.56,
+      0.41,
+      0.26
+     ]
+    },
+    {
+     "match": "Celing",
+     "color": [
+      0.42,
+      0.31,
+      0.21
+     ]
+    },
+    {
+     "match": "Black",
+     "color": [
+      0.13,
+      0.12,
+      0.13
+     ]
+    },
+    {
+     "match": "Material.006",
+     "color": [
+      0.5,
+      0.42,
+      0.3
+     ]
+    },
+    {
+     "match": "metal-gate",
+     "color": [
+      0.3,
+      0.29,
+      0.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mine",
+   "file": "art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+   "size": 5,
+   "ppm": 80
+  },
+  {
+   "id": "tent",
+   "file": "art_source/models/props/quaternius_survival/Tent.blend",
+   "size": 2.2,
+   "ppm": 120
+  },
+  {
+   "id": "bonfire",
+   "file": "art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
+   "size": 1.2,
+   "ppm": 120
+  },
+  {
+   "id": "bonfire_stones",
+   "file": "art_source/models/props/quaternius_medieval_village/Bonfire_Lit.blend",
+   "scale": 2.3,
+   "ppm": 120
+  },
+  {
+   "id": "torch",
+   "file": "art_source/models/props/quaternius_survival/WoodenTorch_Fire.blend",
+   "size": 1.8,
+   "ppm": 120
+  },
+  {
+   "id": "signpost",
+   "file": "art_source/models/props/kenney_survival/signpost.glb",
+   "size": 2.0,
+   "yaw": 90,
+   "ppm": 120
+  },
+  {
+   "id": "signpost_single",
+   "file": "art_source/models/props/kenney_survival/signpost-single.glb",
+   "size": 2.0,
+   "yaw": 90,
+   "ppm": 120
+  },
+  {
+   "id": "barrel",
+   "file": "art_source/models/props/quaternius_fantasy_props/Barrel.gltf",
+   "size": 0.9,
+   "ppm": 140
+  },
+  {
+   "id": "crate",
+   "file": "art_source/models/props/quaternius_fantasy_props/Crate_Wooden.gltf",
+   "size": 0.8,
+   "ppm": 140
+  },
+  {
+   "id": "sack",
+   "file": "art_source/models/props/quaternius_fantasy_props/Bag.gltf",
+   "size": 0.7,
+   "ppm": 140
+  },
+  {
+   "id": "crate_carrot",
+   "file": "art_source/models/props/quaternius_fantasy_props/FarmCrate_Carrot.gltf",
+   "size": 0.6,
+   "ppm": 140
+  },
+  {
+   "id": "barrels_mv",
+   "file": "art_source/models/props/quaternius_medieval_village/Barrel.blend",
+   "scale": 2.3,
+   "ppm": 140
+  },
+  {
+   "id": "bags_mv",
+   "file": "art_source/models/props/quaternius_medieval_village/Bags.blend",
+   "scale": 2.3,
+   "ppm": 140
+  },
+  {
+   "id": "crate_mv",
+   "file": "art_source/models/props/quaternius_medieval_village/Crate.blend",
+   "scale": 2.3,
+   "ppm": 140
+  },
+  {
+   "id": "backpack",
+   "file": "art_source/models/props/quaternius_rpg_items/Backpack.blend",
+   "size": 0.6,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 200
+  },
+  {
+   "id": "saddlebag",
+   "file": "art_source/models/props/quaternius_rpg_items/Bag.blend",
+   "size": 0.45,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 200
+  },
+  {
+   "id": "weapon_sword_1",
+   "file": "art_source/models/props/quaternius_weapons/Sword_2.blend",
+   "size": 0.95,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_sword_2",
+   "file": "art_source/models/props/quaternius_weapons/Sword.blend",
+   "size": 1.0,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_sword_3",
+   "file": "art_source/models/props/quaternius_weapons/Sword_Big.blend",
+   "size": 1.25,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_spear",
+   "file": "art_source/models/props/quaternius_weapons/Spear.blend",
+   "size": 2.2,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_shield_round",
+   "file": "art_source/models/props/quaternius_weapons/Shield_Round.blend",
+   "size": 0.7,
+   "measure": "long",
+   "yaw": -90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_shield_heater",
+   "file": "art_source/models/props/quaternius_weapons/Shield_Heater.blend",
+   "size": 0.85,
+   "measure": "long",
+   "yaw": -90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_bow",
+   "file": "art_source/models/props/quaternius_weapons/Bow_Wooden.blend",
+   "size": 1.5,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_hammer",
+   "file": "art_source/models/props/quaternius_weapons/Hammer_Double.blend",
+   "size": 1.3,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_axe",
+   "file": "art_source/models/props/quaternius_weapons/Axe.blend",
+   "size": 1.0,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_axe_small",
+   "file": "art_source/models/props/quaternius_weapons/Axe_Small.blend",
+   "size": 0.6,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_arrow",
+   "file": "art_source/models/props/quaternius_weapons/Arrow.blend",
+   "size": 0.75,
+   "measure": "long",
+   "yaw": 0,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_club",
+   "file": "art_source/models/props/quaternius_knight/Club.blend",
+   "size": 0.9,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "weapon_dagger",
+   "file": "art_source/models/props/quaternius_rpg_items/Dagger.blend",
+   "size": 0.4,
+   "measure": "long",
+   "yaw": 90,
+   "ppm": 240
+  },
+  {
+   "id": "iso_inn",
+   "file": "art_source/models/props/quaternius_medieval_village/Inn.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_market_stand_1",
+   "file": "art_source/models/props/quaternius_medieval_village/MarketStand_1.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_market_stand_2",
+   "file": "art_source/models/props/quaternius_medieval_village/MarketStand_2.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_stable",
+   "file": "art_source/models/props/quaternius_medieval_village/Stable.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_blacksmith",
+   "file": "art_source/models/props/quaternius_medieval_village/Blacksmith.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_house_3",
+   "file": "art_source/models/props/quaternius_medieval_village/House_3.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_bell_tower",
+   "file": "art_source/models/props/quaternius_medieval_village/Bell_Tower.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_house_1",
+   "file": "art_source/models/props/quaternius_medieval_village/House_1.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_house_2",
+   "file": "art_source/models/props/quaternius_medieval_village/House_2.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  },
+  {
+   "id": "iso_well",
+   "file": "art_source/models/props/quaternius_medieval_village/Well.blend",
+   "scale": 2.3,
+   "view": "iso",
+   "ppm": 32
+  }
+ ]
+}

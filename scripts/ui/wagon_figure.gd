@@ -11,6 +11,14 @@ extends Control
 
 const WHEEL_TURNS_PER_UNIT: float = 0.055
 
+## Yarım vagonun render'ı ve eşeğe koşum ölçüsü - yol (RoadCaravan) ve hub
+## aynı sayıyı okuyor. Çapa (arabanın ortası) eşek merkezinin bu kadar
+## metre gerisinde: oklar çapadan 1.67 m önde biter, eşeğin göğsü merkezin
+## ~0.3 m önünde.
+const CART_PROP: String = "half_cart"
+const CART_HITCH_M: float = 1.37
+const CART_TAIL_M: float = 0.85
+
 ## Koşum okunun boyu - önündeki öküze uzanıyor. `world_hub`'ın
 ## `HITCH_GAP`'inden biraz uzun, çünkü öküzün *çizilen* gövdesi düğüm
 ## genişliğinden dar: boşluğu düğüme göre ölçmek boyunduruğu havada

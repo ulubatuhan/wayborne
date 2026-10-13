@@ -24,6 +24,7 @@ func _ready() -> void:
 	_setup_language_selector()
 	_setup_music_slider()
 	_setup_motion_toggle()
+	_setup_credits()
 
 ## Ses seviyesi **anında** uygulanıyor, "Uygula" tuşu yok: oyuncu sesi
 ## ayarlarken duyduğu şeyi ayarlıyor olmalı. `AudioManager` değeri
@@ -52,6 +53,27 @@ func _setup_motion_toggle() -> void:
 	column.add_child(_motion_toggle)
 	column.move_child(_motion_toggle, _back_button.get_index())
 	_refresh_texts()
+
+## Emeği Geçenler: CC-BY giysilerin yazarları oyunda anılmak zorunda
+## (bkz. Credits). Uzun liste kendi kaydırma kutusunda - geri tuşu
+## dışarıda kalıyor (World Navigation Rules).
+func _setup_credits() -> void:
+	var column := _back_button.get_parent()
+	var title := Label.new()
+	title.text = tr("UI_CREDITS")
+	column.add_child(title)
+	column.move_child(title, _back_button.get_index())
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 180)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var body := Label.new()
+	body.text = Credits.text()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.modulate = ArtPalette.UI_TEXT_DIM
+	scroll.add_child(body)
+	column.add_child(scroll)
+	column.move_child(scroll, _back_button.get_index())
 
 func _setup_language_selector() -> void:
 	_locale_codes = UserSettings.get_locale_codes()

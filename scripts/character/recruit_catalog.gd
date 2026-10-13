@@ -157,7 +157,10 @@ static func _dress(candidate: CharacterData) -> void:
 	for slot in OutfitCatalog.ALL_SLOTS:
 		if rng.randf() >= float(DRESS_CHANCES.get(slot, 0.0)):
 			continue
-		var pieces := OutfitCatalog.get_pieces_for_slot(slot)
+		var pieces: Array[OutfitPiece] = []
+		for piece in OutfitCatalog.get_pieces_for_slot(slot):
+			if piece.fits(candidate.gender):
+				pieces.append(piece)
 		if pieces.is_empty():
 			continue
 		var total := 0.0

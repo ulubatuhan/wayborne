@@ -838,7 +838,35 @@ func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 		ArtDraw.contact_shadow(self, base, stop_height * 1.9, 0.15)
 		_draw_stop(String(entry.stop), base, stop_height)
 
+## Render edilmiş duraklar (PropArt): mezra evleri, karakol kulesi, maden
+## ağzı. Ölçek yoldaki insandan: kişi şeridin `PERSON_HEIGHT_RATIO`'su,
+## figür onun ~%86'sı, yani 1.73 m'lik biri ~0.094 x şerit; durak yolun
+## gerisinde duruyor, o yüzden bunun ~%60'ı. `height` şeridin 0.15'i.
+const STOP_PX_PER_M_OF_HEIGHT: float = 0.37
+const STOP_SPRITES := {
+	RouteTerrain.STOP_HAMLET: [["house_2", -1.05, false], ["hay", -0.25, false], ["house_1", 0.45, true], ["well", 1.25, false]],
+	RouteTerrain.STOP_OUTPOST: [["tent", -0.85, false], ["outpost", 0.35, false], ["torch", 1.05, false]],
+	RouteTerrain.STOP_MINE: [["mine", 0.0, false], ["crate_mv", 1.15, false]],
+}
+
+func _draw_stop_sprites(stop: String, base: Vector2, height: float) -> bool:
+	if not STOP_SPRITES.has(stop):
+		return false
+	var parts: Array = STOP_SPRITES[stop]
+	for part in parts:
+		if not PropArt.has(String(part[0])):
+			return false
+	var tint := Color.WHITE.lerp(Color(_sky.haze), 0.30)
+	var px_per_m := height * STOP_PX_PER_M_OF_HEIGHT
+	for part in parts:
+		var id := String(part[0])
+		PropArt.draw_all(self, id, base + Vector2(height * float(part[1]), 0.0),
+			px_per_m / PropArt.ppm(id), tint, bool(part[2]))
+	return true
+
 func _draw_stop(stop: String, base: Vector2, height: float) -> void:
+	if _draw_stop_sprites(stop, base, height):
+		return
 	var haze := Color(_sky.haze)
 	var wall := ArtPalette.fade_to_haze(Color(0.48, 0.43, 0.36), haze, 0.30)
 	var roof := ArtPalette.fade_to_haze(Color(0.38, 0.24, 0.20), haze, 0.30)

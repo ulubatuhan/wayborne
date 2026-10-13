@@ -110,6 +110,8 @@ const PACK_GAP: float = 18.0
 ## kareye yakındır, ilk ölçüde 1.6 katıydı ve balon gibi duruyordu.
 const WAGON_WIDTH_RATIO: float = 0.21
 const WAGON_HEIGHT_RATIO: float = 0.17
+## Kamp ateşinin taş çemberi ve odunları (render, gerçek boy).
+const CAMPFIRE_PROP: String = "bonfire"
 
 ## Çizilen yürüyen tayfa sayısı tavanlı: altı vagonlu bir kervanda on iki
 ## tayfa var ama her biri kendi poligonlarını çiziyor ve Web hedefinde
@@ -235,6 +237,14 @@ var _oxen: Array[WalkFigure] = []
 ## birebir aynı: önce köpekler, sonra eşekler/yarım vagonlar.
 var _pack: Array[WalkFigure] = []
 var _pack_is_dog: Array[bool] = []
+## Yarım vagon: eşeğin arkasında render edilmiş tek akslı araba (PropArt
+## "half_cart"). Eşekle araba tek birim - dönüşte birlikte aynalanıyor.
+var _pack_has_cart: Array[bool] = []
+## Her araba için {"x": çapa x, "unit": birim}.
+var _carts: Array[Dictionary] = []
+const CART_PROP: String = WagonFigure.CART_PROP
+const CART_HITCH_M: float = WagonFigure.CART_HITCH_M
+const CART_TAIL_M: float = WagonFigure.CART_TAIL_M
 
 ## Altında bir şey çizmenin anlamı olmadığı boy. Bunun altında vagonun
 ## bütün ölçüleri piksel altına düşüyor ve çokgenlerin köşeleri aynı
@@ -326,6 +336,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_oxen.clear()
 	_pack.clear()
 	_pack_is_dog.clear()
+	_pack_has_cart.clear()
 	_leader = null
 
 	# Kamp durumu eski figürlere işaret ediyor olabilir - `queue_free()`
@@ -414,11 +425,13 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 			WalkFigure.KIND_DOG, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
 		))
 		_pack_is_dog.append(true)
+		_pack_has_cart.append(false)
 	for index in session.owned_donkeys + session.owned_half_wagons:
 		_pack.append(_make_figure(
 			WalkFigure.KIND_DONKEY, "bandit", 1.0, WalkFigure.FALLBACK_SKIN, false
 		))
 		_pack_is_dog.append(false)
+		_pack_has_cart.append(index >= session.owned_donkeys and PropArt.has(CART_PROP))
 
 	_layout()
 
@@ -430,7 +443,7 @@ func _make_figure(
 ) -> WalkFigure:
 	var figure := WalkFigure.new()
 	add_child(figure)
-	var outfit: Dictionary = character.outfit if character != null else {}
+	var outfit: Dictionary = character.get_appearance_outfit() if character != null else {}
 	var body_variant := character.get_body_variant_id() if character != null else ""
 	if character == null and kind == WalkFigure.KIND_PERSON:
 		body_variant = BodyFrames.CREW_BODY
@@ -1180,7 +1193,10 @@ func _turn_figure(figure: WalkFigure, facing: float) -> void:
 func _wagon_turn(index: int) -> Vector3:
 	if index < 0 or index >= _wagon_unit.size():
 		return Vector3(_heading, 0.0, 0.0)
-	var unit := _wagon_unit[index]
+	return _unit_turn(_wagon_unit[index])
+
+## Bir birimin kâğıt dönüşü: (genişlik işaretli, birim merkezi, kalkış).
+func _unit_turn(unit: int) -> Vector3:
 	if unit < 0 or unit >= _units.size():
 		return Vector3(_heading, 0.0, 0.0)
 	var facing := _unit_facing[unit]
@@ -1280,6 +1296,9 @@ func _walk_column(scale: float, place: bool) -> float:
 	# Köpek/eşek/yarım vagon sürüsü en arkada, tek sıra - `configure()`'ın
 	# ekleme sırasıyla aynı (önce köpekler, sonra eşekler/yarım vagonlar).
 	var pack_gap := PACK_GAP * scale
+	if place:
+		_carts.clear()
+	var px_per_m := height * PERSON_HEIGHT_RATIO * 0.86 / 1.73
 	for index in _pack.size():
 		var is_dog: bool = _pack_is_dog[index] if index < _pack_is_dog.size() else false
 		var pack_h := height * (DOG_HEIGHT_RATIO if is_dog else DONKEY_HEIGHT_RATIO)
@@ -1290,10 +1309,19 @@ func _walk_column(scale: float, place: bool) -> float:
 		# yanındaki hayvana kalan boşluk).
 		var pack_w := pack_h * (DOG_WIDTH_RATIO if is_dog else DONKEY_WIDTH_RATIO)
 		cursor -= pack_w * 0.5
-		if place:
-			_place(_pack[index], cursor, pack_h, pack_w)
-			_register_unit([_pack[index]], -1, cursor)
+		var donkey_x := cursor
+		var with_cart: bool = _pack_has_cart[index] if index < _pack_has_cart.size() else false
 		cursor -= pack_w * 0.5
+		if with_cart:
+			var cart_x := donkey_x - CART_HITCH_M * px_per_m
+			cursor = minf(cursor, cart_x - CART_TAIL_M * px_per_m)
+			if place:
+				_place(_pack[index], donkey_x, pack_h, pack_w)
+				_carts.append({"x": cart_x, "unit": _units.size()})
+				_register_unit([_pack[index]], -1, (donkey_x + pack_w * 0.5 + cursor) * 0.5)
+		elif place:
+			_place(_pack[index], donkey_x, pack_h, pack_w)
+			_register_unit([_pack[index]], -1, donkey_x)
 		cursor -= pack_gap
 
 	return start - cursor
@@ -1373,6 +1401,7 @@ func _draw() -> void:
 			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion)
 		)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_draw_carts(height)
 
 	if _camping:
 		# Ateşler vagonlardan *sonra* çiziliyor (aynı `_draw()` çağrısı,
@@ -1392,6 +1421,28 @@ func _draw() -> void:
 		marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
 	]), Color(ArtPalette.GOLD, 0.85))
 
+## Yarım vagonlar: eşeğin (çocuk düğüm, sonra çiziliyor) altında kalıyor,
+## yani oklar eşeğin iki yanından geçiyor gibi okunuyor.
+func _draw_carts(height: float) -> void:
+	if _carts.is_empty():
+		return
+	var px_per_m := height * PERSON_HEIGHT_RATIO * 0.86 / 1.73
+	var k := px_per_m / PropArt.ppm(CART_PROP)
+	# Tekerlek yolu vagonunkiyle aynı hızda katediyor; açı yarıçapların oranıyla.
+	var wheel_tex := PropArt.texture(CART_PROP, "wheel")
+	var wheel_r := maxf(wheel_tex.get_width() * k * 0.5, 1.0) if wheel_tex != null else 1.0
+	var spin := _wheel_angle * height * WAGON_HEIGHT_RATIO * ArtDraw.WAGON_WHEEL_RATIO / wheel_r
+	for cart in _carts:
+		var turn := _unit_turn(int(cart.unit))
+		draw_set_transform(Vector2(turn.y * (1.0 - turn.x), -turn.z), 0.0, Vector2(turn.x, 1.0))
+		var base := Vector2(float(cart.x), _ground_y)
+		ArtDraw.ellipse(self, base, Vector2(px_per_m * 0.9, px_per_m * 0.12), Color(0.0, 0.0, 0.0, 0.2))
+		PropArt.draw_layer(self, CART_PROP, "body", base, k, _light)
+		PropArt.draw_layer(self, CART_PROP, "canopy", base, k, _light)
+		PropArt.draw_layer(self, CART_PROP, "load", base, k, _light)
+		PropArt.draw_layer_rotated(self, CART_PROP, "wheel", base, k, "wheel_front", spin, _light)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 ## Kamp ateşi vagon başına bir tane (bkz. `_campfire_position`'ın notu).
 ## Önceden yolun tamamı tek bir ateşi paylaşıyordu ve o ateş kolonun
 ## önünde, boş alanda duruyordu - hiçbir silüetin arkasına düşmeden.
@@ -1410,7 +1461,15 @@ func _draw_campfires() -> void:
 		# dar ve parlak olan ateşin hemen dibini.
 		ArtDraw.light_pool(self, fire, glow_radius * 2.1, ArtPalette.TORCH, 0.05 * flicker, 0.60)
 		ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.11 * flicker, 0.48)
-		# Odun + alev: alev üç dilim, en içi en açık.
+		# Odun + alev: alev üç dilim, en içi en açık. Taş çember ve odunlar
+		# render (PropArt); alev titrediği için çizilmeye devam ediyor.
+		if PropArt.has(CAMPFIRE_PROP):
+			# Odun ve alev render (PropArt); titreme alevin parlaklığında.
+			var px_per_m := size.y * _scale * PERSON_HEIGHT_RATIO * 0.86 / 1.73
+			var glow := Color(0.86 + 0.14 * flicker, 0.84 + 0.12 * flicker, 0.80 + 0.10 * flicker)
+			PropArt.draw_all(self, CAMPFIRE_PROP, fire + Vector2(0.0, 3.0 * _scale),
+				px_per_m / PropArt.ppm(CAMPFIRE_PROP), glow)
+			continue
 		for side in [-1.0, 1.0]:
 			draw_line(
 				fire + Vector2(-14.0 * side, 2.0) * _scale, fire + Vector2(9.0 * side, -7.0) * _scale,

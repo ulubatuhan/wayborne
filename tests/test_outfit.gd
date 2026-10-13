@@ -24,6 +24,7 @@ func run(t) -> void:
 	_test_garment_frames_match_body_layout(t)
 	_test_wear_and_take_off_go_through_the_locker(t)
 	_test_choices_are_only_what_is_owned(t)
+	_test_fit_hides_and_armor(t)
 	_test_locker_survives_save(t)
 	_test_legacy_ids_migrate(t)
 	_test_recruits_come_dressed_deterministically(t)
@@ -141,14 +142,20 @@ func _all_pieces() -> Array[OutfitPiece]:
 ## olmayan (art_id boş) parça kendi rengiyle çiziliyor, kümesi aranmaz.
 func _test_every_piece_has_art_for_every_body(t) -> void:
 	var with_art := 0
-	for piece in _all_pieces():
+	var pieces := _all_pieces()
+	pieces.append_array(OutfitCatalog.get_pieces_for_slot(OutfitCatalog.SLOT_ARMOR))
+	for piece in pieces:
 		if piece.art_id.is_empty():
 			continue
 		with_art += 1
 		for body in BODIES:
+			# Bir cinsiyete dikilmiş giysi yalnız o bedenlere render ediliyor.
+			var gender := CharacterData.GENDER_MALE if body.begins_with("body_male") else CharacterData.GENDER_FEMALE
+			if not piece.fits(gender):
+				continue
 			var id := OutfitCatalog.frames_id(piece, body)
 			t.ok(BodyFrames.for_body(id) != null, "%s kare kümesi var" % id)
-	t.eq(with_art, 7, "render edilmiş yedi giysi")
+	t.eq(with_art, 48, "render edilmiş kırk sekiz giysi (üç zırh dahil)")
 
 ## Giysi bedenin karesine binecek: klip adları ve kare sayıları birebir.
 func _test_garment_frames_match_body_layout(t) -> void:
@@ -169,6 +176,34 @@ func _test_garment_frames_match_body_layout(t) -> void:
 			if not g.entry("walk", 0, layer, BodyFrames.KIND_BODY).is_empty():
 				found = true
 		t.ok(found, "%s: yürüyüşün ilk karesinde en az bir katman dolu" % piece.piece_id)
+
+## Kural: bir cinsiyete dikilmiş giysi öbürüne giydirilemez, seçeneklerde
+## görünmez; elbise pantolonu, cübbe gömleği ve pantolonu örter (çizilmez,
+## statı yine sayılır); zırh demircinin kademesinden giyim katmanına girer.
+func _test_fit_hides_and_armor(t) -> void:
+	var session := GameSession.new()
+	var man := _person()
+	man.gender = CharacterData.GENDER_MALE
+	session.add_outfit("long_skirt")
+	t.not_ok(session.wear_outfit(man, "long_skirt"), "erkeğe etek giydirilmez")
+	t.eq(session.get_outfit_count("long_skirt"), 1, "giydirilemeyen dolapta kalır")
+	t.eq(session.get_outfit_choices(man, OutfitCatalog.SLOT_PANTS), [""] as Array[String],
+		"uymayan parça seçeneklerde yok")
+	var woman := _person()
+	woman.gender = CharacterData.GENDER_FEMALE
+	t.ok(session.wear_outfit(woman, "long_skirt"), "kadına olur")
+	woman.set_outfit_piece(OutfitCatalog.SLOT_SHIRT, "shift_dress")
+	t.ok(OutfitCatalog.hidden_slots(woman.outfit).has(OutfitCatalog.SLOT_PANTS), "elbise eteği örter")
+	var drawn := OutfitCatalog.worn_frames(woman.outfit, "body_female_average")
+	for frames in drawn:
+		t.ok(not String(frames.resource_path).contains("long_skirt"), "örtülen etek çizilmiyor")
+	t.ok(woman.get_outfit_bonus("hp_bonus") >= 3, "örtülen eteğin statı yine sayılıyor")
+	t.not_ok(OutfitCatalog.get_all_pieces().any(func(p: OutfitPiece) -> bool: return p.slot == OutfitCatalog.SLOT_ARMOR),
+		"zırhın görünüşü terzide satılmıyor")
+	man.equipped[EquipmentCatalog.SLOT_ARMOR] = EquipmentCatalog.ARMOR_TIER_2
+	t.eq(str(man.get_appearance_outfit().get(OutfitCatalog.SLOT_ARMOR, "")), "armor_mail",
+		"ikinci kademe zırh zincir olarak giyiliyor")
+	t.not_ok(man.outfit.has(OutfitCatalog.SLOT_ARMOR), "kaydedilen kıyafete zırh yazılmıyor")
 
 func _person() -> CharacterData:
 	return CharacterData.create(
