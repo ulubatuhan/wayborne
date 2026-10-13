@@ -489,6 +489,9 @@ static func wagon(
 	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true,
 	canopy_sway: float = 0.0
 ) -> void:
+	if PropArt.has(WAGON_PROP):
+		_wagon_sprite(canvas, base, h, wheel_angle, tint, with_load, draw_driver, canopy_sway)
+		return
 	var body := _tint(ArtPalette.WAGON_BODY, tint)
 	var dark := _tint(ArtPalette.WAGON_BODY_DARK, tint)
 	var cover := _tint(ArtPalette.WAGON_CANVAS, tint)
@@ -554,6 +557,47 @@ static func wagon(
 		canvas.draw_rect(Rect2(
 			Vector2(base.x - w * 0.54, bed_y - h * 0.34), Vector2(w * 0.16, h * 0.20)
 		), _tint(ArtPalette.WAGON_LOAD, tint), true)
+
+## Render edilmiş brandalı vagon (`tools/figure_pipeline/props/wagon_builder.py`).
+## Model `ArtDraw.wagon`'un kendi oranlarıyla kuruldu - h = WAGON_MODEL_H
+## metre - yani aynı `base`/`h` aynı kutuya düşüyor ve kolon, ok, arabacı
+## koltuğu hiçbir sayıyı değiştirmeden yerinde kalıyor.
+const WAGON_PROP := "covered_wagon"
+const WAGON_MODEL_H: float = 1.6
+
+static func _wagon_sprite(
+	canvas: CanvasItem, base: Vector2, h: float, wheel_angle: float, tint: Color,
+	with_load: bool, draw_driver: bool, canopy_sway: float
+) -> void:
+	var k := PropArt.scale_for_height(WAGON_PROP, h, WAGON_MODEL_H)
+	var w := h * 1.235
+	ellipse(canvas, base, Vector2(w * 0.55, h * 0.07), Color(0.0, 0.0, 0.0, 0.22))
+	PropArt.draw_layer(canvas, WAGON_PROP, "body", base, k, tint)
+	PropArt.draw_layer_skewed(canvas, WAGON_PROP, "canopy", base, k, canopy_sway, tint)
+	if with_load:
+		PropArt.draw_layer(canvas, WAGON_PROP, "load", base, k, tint)
+	if draw_driver:
+		var bench := wagon_driver_seat(base, w, h)
+		canvas.draw_circle(
+			bench + Vector2(0.0, -h * 0.26), h * 0.075, _tint(Color(0.74, 0.60, 0.46), tint)
+		)
+		canvas.draw_colored_polygon(PackedVector2Array([
+			bench + Vector2(-h * 0.09, -h * 0.20),
+			bench + Vector2(h * 0.09, -h * 0.20),
+			bench + Vector2(h * 0.07, 0.0),
+			bench + Vector2(-h * 0.07, 0.0),
+		]), _tint(Color(0.36, 0.32, 0.26), tint))
+	# Ön tekerlek küçük (gerçek vagon onu kasanın altında döndürür), yani
+	# aynı yolda daha çok dönüyor: açı yarıçapların oranıyla.
+	var back := PropArt.texture(WAGON_PROP, "wheel")
+	var front := PropArt.texture(WAGON_PROP, "wheel_front")
+	var ratio := 1.0
+	if back != null and front != null:
+		ratio = float(back.get_width()) / maxf(float(front.get_width()), 1.0)
+	PropArt.draw_layer_rotated(canvas, WAGON_PROP, "wheel", base, k, "wheel_back", wheel_angle, tint)
+	PropArt.draw_layer_rotated(
+		canvas, WAGON_PROP, "wheel_front", base, k, "wheel_front", wheel_angle * ratio, tint
+	)
 
 ## Koşum oku: öküzü vagona bağlayan kalas ve boyunduruk. Kısa ama
 ## vazgeçilmez - onsuz öküz vagonun önünde *duran* bir hayvan, çeken

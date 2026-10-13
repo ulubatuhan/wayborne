@@ -120,6 +120,17 @@ var outfit: Dictionary = {}
 func get_outfit_piece(slot: String) -> String:
 	return str(outfit.get(slot, OutfitCatalog.NONE_PIECE))
 
+## Çizimin okuduğu giyim: kıyafet + takılı zırhın görünüşü. Zırh bir
+## Equipment (demirciden, statını CharacterData'nın sarmalayıcıları okur);
+## burada yalnızca resmi, giysilerle aynı katman döngüsünde (draw_order 36:
+## gömleğin üstü, ceketin altı) çizilsin diye.
+func get_appearance_outfit() -> Dictionary:
+	var out := outfit.duplicate()
+	var armor_art := str(OutfitCatalog.ARMOR_ART.get(get_equipped_id(EquipmentCatalog.SLOT_ARMOR), ""))
+	if not armor_art.is_empty():
+		out[OutfitCatalog.SLOT_ARMOR] = armor_art
+	return out
+
 func set_outfit_piece(slot: String, piece_id: String) -> void:
 	if piece_id.is_empty():
 		outfit.erase(slot)

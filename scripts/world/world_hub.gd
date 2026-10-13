@@ -99,6 +99,9 @@ const DOG_WIDTH: float = 61.0
 const DONKEY_HEIGHT: float = 61.0
 const DONKEY_WIDTH: float = 86.0
 const PACK_GAP: float = 18.0
+## Bir yarım vagonun arabası eşeğin arkasında bu kadar yer kaplıyor
+## (model: oklar eşeğin göğsünden, araba 2.2 m geride biter).
+const CART_EXTRA: float = 44.0
 
 ## Kervan burada da **sırayla** dönüyor. Yol ekranı bunu Faz 21'de aldı
 ## (`RoadCaravan.begin_turn()`), hub hiç almadı: `_chase` her figürün
@@ -142,6 +145,16 @@ static func turn_facing(target: float, elapsed: float, along: float) -> float:
 
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
+const GATE_PROP: String = "city_gate"
+const GATE_X: float = 1795.0
+## Kapının ekrandaki boyu: kulelerin tepesi. Geçit bununla bir vagonun
+## (WAGON_SIZE) geçebileceği kadar açık oluyor - gerçek ölçekte (kişi
+## ~36 px/m) on iki metrelik sur bir vagona dar bir kapı bırakıyordu.
+const GATE_HEIGHT: float = 520.0
+## Yerleşimin ölçeği: kişi kutusu BODY_HEIGHT 72 px, figür onun ~%86'sı,
+## 1.73 m'lik bir insan ~36 px/m. Binalar biraz büyük (40), uzaktakiler küçük.
+const HUB_PX_PER_M: float = 40.0
+const HUB_HAZE: Color = Color(0.80, 0.84, 0.90)
 const PROMPT_COLOR: Color = Color(1.0, 0.9, 0.5)
 
 var _player: WalkFigure
@@ -153,6 +166,9 @@ var _followers: Array[WalkFigure] = []
 ## GameSession.PEOPLE_PER_WAGON üzerinden hesaplanır (bkz. _follow_with_wagon).
 var _crew: Array[WalkFigure] = []
 var _spots: Array[Dictionary] = []
+var _gate_node: PropNode = null
+var _pack_cart_count: int = 0
+var _cart_pivots: Array = []
 ## Her vagonun öküzü - vagonla birlikte, onun bir tık önünde yürüyor.
 var _oxen: Array[WalkFigure] = []
 ## Köpekler + eşekler/yarım vagonlar, bu sırayla (bkz. pack_box) - kolonun
@@ -201,6 +217,7 @@ func _ready() -> void:
 	_build_status_bars()
 
 	_build_scenery()
+	_build_settlement()
 	_build_spots()
 	_build_caravan()
 
@@ -283,13 +300,15 @@ func _walk_speed() -> float:
 func _follow_with_wagon(delta: float) -> void:
 	var weight := minf(1.0, WAGON_FOLLOW_SPEED * delta)
 	var column := _column_positions(
-		_player.position.x, _followers.size(), _wagons.size(), _pack.size(), _pack_dog_count
+		_player.position.x, _followers.size(), _wagons.size(), _pack.size(), _pack_dog_count,
+		_pack_cart_count
 	)
 
 	_chase(_followers, column.escorts, weight, delta)
 	_chase(_oxen, column.oxen, weight, delta)
 	_chase(_crew, column.crew, weight, delta)
 	_chase(_pack, column.pack, weight, delta)
+	_face_carts()
 	# `_chase`'in içindeki `advance()` yüzü hızın işaretinden yazıyor, o
 	# yüzden dönüş dalgası *sonra* geliyor: emri o yazının üstüne koyuyor.
 	_advance_column_turn(delta)
@@ -377,7 +396,7 @@ func _chase(
 ## [öküz] [tayfa] [vagon] sırası.
 func _column_positions(
 	leader_x: float, escort_count: int, wagon_count: int, pack_count: int = 0,
-	dog_count: int = 0
+	dog_count: int = 0, cart_count: int = 0
 ) -> Dictionary:
 	var escorts: Array[float] = []
 	var wagons: Array[float] = []
@@ -425,6 +444,9 @@ func _column_positions(
 		cursor -= width * 0.5
 		pack.append(cursor)
 		cursor -= width * 0.5 + PACK_GAP
+		# Yarım vagonlar sürünün sonunda; arabaları eşeğin arkasına taşıyor.
+		if index >= pack_count - cart_count:
+			cursor -= CART_EXTRA
 
 	return {"escorts": escorts, "wagons": wagons, "oxen": oxen, "crew": crew, "pack": pack}
 
@@ -463,6 +485,9 @@ func _build_scenery() -> void:
 	front.setup(span, GROUND_Y, city_id, HubScenery.LAYER_FRONT, hour)
 
 func _build_spots() -> void:
+	if PropArt.has(GATE_PROP):
+		_build_gate()
+		return
 	_add_spot(
 		_gate_label(),
 		Vector2(1720.0, GROUND_Y - 230.0),
@@ -470,6 +495,57 @@ func _build_spots() -> void:
 		GATE_COLOR,
 		Nav.CITY_MAP
 	)
+
+## Şehir kapısı: sur geçidi, iki kule ve parmaklıklı kanat (render, bkz.
+## PropArt). Etkileşim dikdörtgeni kanadın kendisi - oyuncu duvarın
+## herhangi bir yerine değil, geçide yürüyor. Lider yaklaşınca kanat
+## kalkıyor; uzaklaşınca iniyor.
+func _build_gate() -> void:
+	var gate := PropNode.new()
+	gate.position = Vector2(GATE_X, GROUND_Y - 6.0)
+	gate.z_index = -10
+	add_child(gate)
+	gate.setup(GATE_PROP, PropArt.scale_for_height(GATE_PROP, GATE_HEIGHT, PropArt.size_m(GATE_PROP).z),
+		_night_tint())
+	_gate_node = gate
+	var opening := gate.layer_bounds("gate")
+	_add_spot(_gate_label(), opening.position, opening.size, Color.TRANSPARENT, Nav.CITY_MAP)
+
+## Kapının dışındaki yerleşim: değirmen, evler, kuyu, araba, tabela. Hepsi
+## yolun uzak kenarında (ağaçlarla aynı kural, bkz. HubScenery), yakın
+## olan büyük ve net, uzak olan küçük ve pusta. Hangi değirmenin döndüğü
+## şehirden şehre değişiyor - aynı kapıya her seferinde aynı köyden
+## giriliyor.
+func _build_settlement() -> void:
+	var city_id: String = GameState.get_session().current_location_id
+	var city_seed := hash("hub_settlement|%s" % city_id)
+	var mill := "windmill" if city_seed % 2 == 0 else "mill_wooden"
+	var night := _night_tint()
+	for entry in [
+		[mill, 140.0, 0.15, false], ["house_1", 470.0, 0.55, false], ["hay", 610.0, 0.85, false],
+		["well", 760.0, 0.9, false], ["house_2", 1010.0, 0.45, true], ["sawmill", 1290.0, 0.25, false],
+		["market_cart", 1460.0, 0.95, true], ["signpost", 1590.0, 1.0, false],
+		["barrels_mv", 1655.0, 1.0, false], ["crate_mv", 1940.0, 1.0, false],
+	]:
+		var id: String = entry[0]
+		if not PropArt.has(id):
+			continue
+		var depth: float = entry[2]
+		var node := PropNode.new()
+		node.position = Vector2(float(entry[1]), lerpf(GROUND_Y - 64.0, GROUND_Y - 14.0, depth))
+		node.z_index = -19
+		add_child(node)
+		var px_per_m := lerpf(HUB_PX_PER_M * 0.62, HUB_PX_PER_M, depth)
+		var haze := Color.WHITE.lerp(HUB_HAZE, (1.0 - depth) * 0.45)
+		node.setup(id, px_per_m / PropArt.ppm(id), haze * night, bool(entry[3]))
+		if PropArt.has_layer(id, "blades"):
+			node.set_spin("blades", "hub", -0.45, float(city_seed % 7))
+
+## Gece örtüsü HubScenery'nin arka katmanında çiziliyor; eşyalar ayrı
+## düğümler olduğu için aynı kararmayı çarpan olarak alıyor.
+func _night_tint() -> Color:
+	var wash := TravelBand.night_wash_for_hour(GameState.get_session().last_clock_hour)
+	return Color.WHITE.lerp(Color(wash.r, wash.g, wash.b), wash.a)
 
 ## Kapının üstünde jenerik bir "Şehir Kapısı" değil, girilecek şehrin adı
 ## yazar - oyuncu yolda dururken nerede olduğunu okumak için HUD'a bakmak
@@ -536,7 +612,10 @@ func _build_caravan() -> void:
 	# kullanılan *aynı* formülden alıyor. Ekleme sırası çizim sırasıdır -
 	# vagonlar ve tayfa önce, insanlar üstlerine.
 	_pack_dog_count = session.owned_dogs
-	var column := _column_positions(0.0, escorts.size(), wagon_count, pack_count, _pack_dog_count)
+	_pack_cart_count = session.owned_half_wagons if PropArt.has(WagonFigure.CART_PROP) else 0
+	var column := _column_positions(
+		0.0, escorts.size(), wagon_count, pack_count, _pack_dog_count, _pack_cart_count
+	)
 
 	for index in wagon_count:
 		var wagon_x: float = column.wagons[index] - WAGON_SIZE.x * 0.5
@@ -550,7 +629,10 @@ func _build_caravan() -> void:
 
 	for index in pack_count:
 		var is_dog := index < session.owned_dogs
-		_pack.append(_build_pack_animal(column.pack[index], is_dog))
+		var animal := _build_pack_animal(column.pack[index], is_dog)
+		if index >= pack_count - _pack_cart_count:
+			_hitch_cart(animal)
+		_pack.append(animal)
 
 	_player = _build_person(party[0], true)
 	for index in escorts.size():
@@ -644,6 +726,29 @@ func _build_pack_animal(centre_x: float, is_dog: bool) -> WalkFigure:
 	animal.set_phase_offset(centre_x * 0.025)
 	return animal
 
+## Yarım vagon: eşeğin çocuğu olarak arkasında duran araba, yani eşek
+## dönünce (ölçeği aynalanınca) araba da onunla dönüyor. Eşeğin altında
+## çiziliyor - oklar eşeğin iki yanından geçiyor.
+## Eşek kendi yönünü çiziminde tutuyor (düğümü aynalanmıyor), o yüzden
+## araba eşeğin ayak ortasındaki bir mile asılı ve mil her karede eşeğin
+## baktığı yöne çevriliyor (`_face_carts`).
+func _hitch_cart(animal: WalkFigure) -> void:
+	var box := animal.size
+	var pivot := Node2D.new()
+	pivot.show_behind_parent = true
+	pivot.position = Vector2(box.x * 0.5, box.y)
+	animal.add_child(pivot)
+	var cart := PropNode.new()
+	var px_per_m := BODY_HEIGHT * 0.86 / 1.73
+	cart.position = Vector2(-WagonFigure.CART_HITCH_M * px_per_m, 0.0)
+	pivot.add_child(cart)
+	cart.setup(WagonFigure.CART_PROP, px_per_m / PropArt.ppm(WagonFigure.CART_PROP), _night_tint())
+	_cart_pivots.append([animal, pivot])
+
+func _face_carts() -> void:
+	for pair in _cart_pivots:
+		(pair[1] as Node2D).scale.x = (pair[0] as WalkFigure).get_facing()
+
 func _build_crew_member(centre_x: float) -> WalkFigure:
 	var body := WalkFigure.new()
 	body.size = Vector2(BODY_WIDTH, CREW_BODY_HEIGHT)
@@ -680,7 +785,7 @@ func _build_person(character: CharacterData, is_leader: bool) -> WalkFigure:
 		character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone),
 		not is_leader,
-		character.outfit,
+		character.get_appearance_outfit(),
 		character.get_body_variant_id()
 	)
 	body.set_loadout(Wardrobe.loadout_for(character))
@@ -704,6 +809,8 @@ func _get_spot_rect(spot: Dictionary) -> Rect2:
 func _update_prompts() -> void:
 	for spot in _spots:
 		spot.prompt.visible = _is_in_range(spot)
+		if _gate_node != null and spot.scene == Nav.CITY_MAP:
+			_gate_node.set_open_target(1.0 if spot.prompt.visible else 0.0)
 
 func _is_in_range(spot: Dictionary) -> bool:
 	var rect := _get_spot_rect(spot)

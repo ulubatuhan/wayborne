@@ -365,7 +365,7 @@ func _draw() -> void:
 	_draw_slab_shadow()
 	_draw_ground()
 	_draw_walls()
-	for index in _buildings.size():
+	for index in _draw_order():
 		_draw_building(index, index == _hovered)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
@@ -583,8 +583,10 @@ func _draw_building(index: int, hovered: bool) -> void:
 	var d := float(building.d)
 	var kind := String(building.kind)
 
-	var bounds := Rect2()
-	match kind:
+	var bounds := _draw_sprite_building(kind, gx, gy, w, d)
+	match kind if bounds.size == Vector2.ZERO else "":
+		"":
+			pass
 		VENUE_MARKET:
 			bounds = _draw_market(gx, gy, w, d)
 		VENUE_CHURCH:
@@ -610,6 +612,60 @@ func _draw_building(index: int, hovered: bool) -> void:
 		var closed := quad.duplicate()
 		closed.append(quad[0])
 		draw_polyline(closed, ArtPalette.GOLD, 2.4)
+
+## Ressamın sırası: arkadaki (gx+gy küçük) önce. Kutular kendi
+## ayak izinden taşmıyordu, sıra önemsizdi; render edilmiş binalar
+## (saçak, sundurma) komşunun üstüne taşıyor.
+func _draw_order() -> Array:
+	var order := range(_buildings.size())
+	order.sort_custom(func(a: int, b: int) -> bool:
+		var da := float(_buildings[a].gx) + float(_buildings[a].gy) + float(_buildings[a].w) + float(_buildings[a].d)
+		var db := float(_buildings[b].gx) + float(_buildings[b].gy) + float(_buildings[b].w) + float(_buildings[b].d)
+		return da < db)
+	return order
+
+## Mekân -> render edilmiş izometrik bina (PropArt, Quaternius Medieval
+## Village). Pazar iki tezgâh, kilise çan kulesi (dinî bir silüet değil -
+## bkz. Art Rules'un cami/minare geri alımı), lonca taş ev.
+const VENUE_SPRITES := {
+	VENUE_TAVERN: ["iso_inn"],
+	VENUE_CHURCH: ["iso_bell_tower"],
+	VENUE_GUILD: ["iso_house_3"],
+	VENUE_YARD: ["iso_stable"],
+	VENUE_MARKET: ["iso_market_stand_1", "iso_market_stand_2"],
+}
+const HOUSE_SPRITES := ["iso_house_1", "iso_house_2"]
+## Bir karonun gerçek kenarı (metre): Quaternius köy evi (x2.3) ~4.9 m,
+## bir karoya oturuyor.
+const TILE_METRES: float = 5.0
+
+func _draw_sprite_building(kind: String, gx: float, gy: float, w: float, d: float) -> Rect2:
+	var ids: Array = VENUE_SPRITES.get(kind, [])
+	if ids.is_empty():
+		if kind != "house":
+			return Rect2()
+		ids = [HOUSE_SPRITES[int(gx + gy * 3.0) % HOUSE_SPRITES.size()]]
+	for id in ids:
+		if not PropArt.has(String(id)):
+			return Rect2()
+	var quad := _tile_quad(gx, gy, w, d)
+	var centre := (quad[0] + quad[2]) * 0.5
+	var out := Rect2()
+	var n := ids.size()
+	for i in n:
+		var id := String(ids[i])
+		# Bütün binalar tek gerçek ölçekte: bir karo TILE_METRES, yani
+		# dar-uzun bir kule ayak izine sığdırılırken devleşmiyor.
+		var k := TILE_W / (TILE_METRES * sqrt(2.0) * PropArt.ppm(id))
+		# Birden çok parça (pazar): ayak izinin köşegeni boyunca dizilir.
+		var at := centre
+		if n > 1:
+			var t := (float(i) + 0.5) / float(n) - 0.5
+			at = centre + (quad[1] - quad[3]) * t * 0.5
+		PropArt.draw_all(self, id, at, k)
+		var r := PropArt.bounds(id, at, k)
+		out = r if out.size == Vector2.ZERO else out.merge(r)
+	return out
 
 ## Gövde + beşik çatı. Bütün binaların iskeleti bu; mekânlar üstüne
 ## kendi ayrıntısını ekliyor.

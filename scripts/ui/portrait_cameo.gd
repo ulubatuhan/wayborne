@@ -34,7 +34,7 @@ func setup(character: CharacterData, height: float) -> PortraitCameo:
 		_figure.set_kind(
 			WalkFigure.KIND_PERSON, character.class_id,
 			character.get_height_scale(),
-			CharacterData.get_skin_tone_color(character.skin_tone), false, character.outfit,
+			CharacterData.get_skin_tone_color(character.skin_tone), false, character.get_appearance_outfit(),
 			character.get_body_variant_id()
 		)
 		_figure.set_loadout(Wardrobe.loadout_for(character))

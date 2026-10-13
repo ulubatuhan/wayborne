@@ -19,6 +19,12 @@ const SLOT_JACKET: String = "jacket"
 const SLOT_GLOVES: String = "gloves"
 const SLOT_PANTS: String = "pants"
 const SLOT_SHOES: String = "shoes"
+## Zırhın görünüş slotu: oyuncu bunu terzide seçmiyor, demircinin zırh
+## kademesi (Equipment) giydiriyor - `CharacterData.get_appearance_outfit`.
+const SLOT_ARMOR: String = "armor"
+const ARMOR_ART: Dictionary = {
+	"armor_tier_1": "armor_leather", "armor_tier_2": "armor_mail", "armor_tier_3": "armor_plate",
+}
 
 ## Baştan ayağa doğru sıra - önizleme penceresi ve slot listesi bu sırayla
 ## döner.
@@ -67,9 +73,14 @@ static func get_pieces_for_slot(slot: String) -> Array[OutfitPiece]:
 			result.append(piece)
 	return result
 
+## Satılan/giyilen giysiler (zırhın görünüşü hariç).
 static func get_all_pieces() -> Array[OutfitPiece]:
 	_ensure_built()
-	return _pieces.duplicate()
+	var out: Array[OutfitPiece] = []
+	for piece in _pieces:
+		if piece.sold:
+			out.append(piece)
+	return out
 
 static func get_piece(piece_id: String) -> OutfitPiece:
 	_ensure_built()
@@ -94,10 +105,12 @@ static func get_slot_display_name(slot: String) -> String:
 ## geçer. "Hiçbiri" listenin başında durur, yani her slot en az bu kadar
 ## seçenek taşır ve kaydırma hiçbir zaman tıkanmaz.
 ## `starter_only`: karakter oluşturma yalnızca köylü takımını dolaşır.
-static func cycle(slot: String, current_id: String, direction: int, starter_only: bool = false) -> String:
+static func cycle(
+	slot: String, current_id: String, direction: int, starter_only: bool = false, gender: int = -1
+) -> String:
 	var ids: Array[String] = [NONE_PIECE]
 	for piece in get_pieces_for_slot(slot):
-		if piece.starter or not starter_only:
+		if (piece.starter or not starter_only) and (gender < 0 or piece.fits(gender)):
 			ids.append(piece.piece_id)
 	var index := ids.find(current_id)
 	if index < 0:
@@ -123,9 +136,10 @@ static func frames_id(piece: OutfitPiece, body_variant: String) -> String:
 ## figür o parçayı prosedürel rengiyle taşımaya devam ediyor.
 static func worn_frames(outfit: Dictionary, body_variant: String) -> Array[BodyFrames]:
 	var worn: Array[OutfitPiece] = []
+	var hidden := hidden_slots(outfit)
 	for slot in outfit:
 		var piece := get_piece(str(outfit[slot]))
-		if piece != null:
+		if piece != null and not hidden.has(piece.slot):
 			worn.append(piece)
 	worn.sort_custom(func(a: OutfitPiece, b: OutfitPiece) -> bool: return a.draw_order < b.draw_order)
 	var out: Array[BodyFrames] = []
@@ -133,6 +147,19 @@ static func worn_frames(outfit: Dictionary, body_variant: String) -> Array[BodyF
 		var frames := BodyFrames.for_body(frames_id(piece, body_variant))
 		if frames != null:
 			out.append(frames)
+	return out
+
+## Giyilen bir parçanın örttüğü slotlar (elbise -> pantolon, cübbe ->
+## gömlek ve pantolon). Örtülen giysi giyili kalıyor (statı da), yalnız
+## çizilmiyor - render da onun üstüne şişirilmedi, yani çizilse içinden
+## taşardı.
+static func hidden_slots(outfit: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for slot in outfit:
+		var piece := get_piece(str(outfit[slot]))
+		if piece != null:
+			for hidden in piece.hides:
+				out[hidden] = true
 	return out
 
 ## O slottaki parçanın bu beden için kare kümesi var mı - varsa onun
@@ -188,43 +215,116 @@ static func _ensure_built() -> void:
 	# pahalı. Statlar bilerek küçük: bütün bir korucu takımı (+5 can, +4
 	# kaçınma, +2 isabet, +2 kritik) bir zırh kademesine yakın, üstünü değil.
 	var art := true
+	var F := CharacterData.GENDER_FEMALE
+	var M := CharacterData.GENDER_MALE
+	# --- pantolon ve etek ---
 	_add(SLOT_PANTS, "peasant_pants", "OUTFIT_PEASANT_PANTS", Color(0.27, 0.18, 0.12), 10,
 		5, {"hp_bonus": 1}, art, true)
 	_add(SLOT_PANTS, "ranger_pants", "OUTFIT_RANGER_PANTS", Color(0.10, 0.22, 0.14), 10,
 		16, {"hp_bonus": 1, "dodge_bonus": 1}, art)
-	_add(SLOT_PANTS, "riding_breeches", "OUTFIT_RIDING_BREECHES", Color(0.36, 0.30, 0.22), 10,
-		18, {"accuracy_bonus": 2}, false)
+	_add(SLOT_PANTS, "riding_breeches", "OUTFIT_RIDING_BREECHES", Color(0.44, 0.38, 0.30), 10,
+		18, {"accuracy_bonus": 2}, art, false, "", false, {"art": "wool_pants"})
+	_add(SLOT_PANTS, "viking_pants", "OUTFIT_VIKING_PANTS", Color(0.40, 0.33, 0.25), 10,
+		14, {"hp_bonus": 2}, art)
+	_add(SLOT_PANTS, "harem_pants", "OUTFIT_HAREM_PANTS", Color(0.60, 0.30, 0.22), 10,
+		10, {"dodge_bonus": 1}, art)
+	_add(SLOT_PANTS, "cloth_trousers", "OUTFIT_CLOTH_TROUSERS", Color(0.34, 0.31, 0.27), 10,
+		16, {"hp_bonus": 1, "accuracy_bonus": 1}, art)
+	_add(SLOT_PANTS, "long_skirt", "OUTFIT_LONG_SKIRT", Color(0.44, 0.30, 0.22), 25,
+		6, {"hp_bonus": 1}, art, true, "", false, {"gender": F})
+	_add(SLOT_PANTS, "tiered_skirt", "OUTFIT_TIERED_SKIRT", Color(0.56, 0.38, 0.24), 25,
+		14, {"dodge_bonus": 1}, art, false, "", false, {"gender": F})
+	# --- ayakkabı ---
 	_add(SLOT_SHOES, "peasant_shoes", "OUTFIT_PEASANT_SHOES", Color(0.50, 0.44, 0.24), 20,
 		4, {"dodge_bonus": 1}, art, true, "", true)
 	_add(SLOT_SHOES, "ranger_boots", "OUTFIT_RANGER_BOOTS", Color(0.45, 0.28, 0.16), 20,
 		20, {"hp_bonus": 2, "dodge_bonus": 1}, art, false, "", true)
-	_add(SLOT_SHOES, "hobnail_boots", "OUTFIT_HOBNAIL_BOOTS", Color(0.22, 0.17, 0.13), 20,
-		22, {"hp_bonus": 3, "damage_bonus": 1, "dodge_bonus": -1}, false, false, "", true)
+	_add(SLOT_SHOES, "hobnail_boots", "OUTFIT_HOBNAIL_BOOTS", Color(0.52, 0.30, 0.14), 20,
+		22, {"hp_bonus": 3, "damage_bonus": 1, "dodge_bonus": -1}, art, false, "", true)
+	_add(SLOT_SHOES, "short_boots", "OUTFIT_SHORT_BOOTS", Color(0.42, 0.24, 0.12), 20,
+		14, {"hp_bonus": 1, "dodge_bonus": 1}, art)
+	_add(SLOT_SHOES, "riding_boots", "OUTFIT_RIDING_BOOTS", Color(0.36, 0.20, 0.10), 20,
+		24, {"hp_bonus": 1, "accuracy_bonus": 1}, art, false, "", true)
+	_add(SLOT_SHOES, "leather_boots", "OUTFIT_LEATHER_BOOTS", Color(0.54, 0.33, 0.16), 20,
+		18, {"hp_bonus": 2}, art, false, "", true)
+	_add(SLOT_SHOES, "ankle_boots", "OUTFIT_ANKLE_BOOTS", Color(0.44, 0.26, 0.13), 20,
+		14, {"hp_bonus": 1, "dodge_bonus": 1}, art, false, "", false, {"gender": M})
+	_add(SLOT_SHOES, "womens_ankle_boots", "OUTFIT_WOMENS_ANKLE_BOOTS", Color(0.48, 0.28, 0.15), 20,
+		14, {"hp_bonus": 1, "dodge_bonus": 1}, art, false, "", false, {"gender": F})
+	_add(SLOT_SHOES, "womens_knee_boots", "OUTFIT_WOMENS_KNEE_BOOTS", Color(0.36, 0.20, 0.10), 20,
+		24, {"hp_bonus": 2, "dodge_bonus": 1}, art, false, "", true, {"gender": F})
+	_add(SLOT_SHOES, "strap_sandals", "OUTFIT_STRAP_SANDALS", Color(0.56, 0.36, 0.18), 20,
+		8, {"dodge_bonus": 2, "hp_bonus": -1}, art)
+	_add(SLOT_SHOES, "felt_shoes", "OUTFIT_FELT_SHOES", Color(0.40, 0.34, 0.26), 20,
+		5, {"dodge_bonus": 1}, art, true)
+	# --- gömlek, bluz, elbise ---
 	_add(SLOT_SHIRT, "peasant_shirt", "OUTFIT_PEASANT_SHIRT", Color(0.62, 0.60, 0.46), 30,
 		6, {"hp_bonus": 1}, art, true)
-	_add(SLOT_SHIRT, "quilted_shirt", "OUTFIT_QUILTED_SHIRT", Color(0.55, 0.50, 0.40), 30,
-		14, {"hp_bonus": 3}, false)
-	_add(SLOT_SHIRT, "silk_shirt", "OUTFIT_SILK_SHIRT", Color(0.62, 0.20, 0.22), 30,
-		40, {"dodge_bonus": 1, "crit_bonus": 1}, false)
+	_add(SLOT_SHIRT, "quilted_shirt", "OUTFIT_QUILTED_SHIRT", Color(0.58, 0.50, 0.36), 30,
+		14, {"hp_bonus": 3}, art, false, "", false, {"art": "quilted_tunic"})
+	_add(SLOT_SHIRT, "silk_shirt", "OUTFIT_SILK_SHIRT", Color(0.90, 0.86, 0.74), 30,
+		40, {"dodge_bonus": 1, "crit_bonus": 1}, art, false, "", false, {"art": "silk_blouse"})
+	_add(SLOT_SHIRT, "laced_shirt", "OUTFIT_LACED_SHIRT", Color(0.72, 0.64, 0.50), 30,
+		12, {"hp_bonus": 1, "dodge_bonus": 1}, art)
+	_add(SLOT_SHIRT, "fisherman_sweater", "OUTFIT_FISHERMAN_SWEATER", Color(0.60, 0.55, 0.45), 30,
+		14, {"hp_bonus": 3, "dodge_bonus": -1}, art)
+	_add(SLOT_SHIRT, "linen_tunic", "OUTFIT_LINEN_TUNIC", Color(0.80, 0.74, 0.60), 30,
+		6, {"hp_bonus": 1}, art, true)
+	_add(SLOT_SHIRT, "bodice_top", "OUTFIT_BODICE_TOP", Color(0.42, 0.28, 0.20), 30,
+		24, {"crit_bonus": 1, "dodge_bonus": 1}, art, false, "", false, {"gender": F})
+	_add(SLOT_SHIRT, "peasant_blouse", "OUTFIT_PEASANT_BLOUSE", Color(0.86, 0.82, 0.72), 30,
+		6, {"hp_bonus": 1}, art, true, "", false, {"gender": F})
+	_add(SLOT_SHIRT, "shift_dress", "OUTFIT_SHIFT_DRESS", Color(0.52, 0.30, 0.28), 32,
+		18, {"hp_bonus": 2, "dodge_bonus": 1}, art, false, "", false, {"gender": F, "hides": [SLOT_PANTS]})
+	_add(SLOT_SHIRT, "pinafore_dress", "OUTFIT_PINAFORE_DRESS", Color(0.36, 0.42, 0.30), 32,
+		14, {"hp_bonus": 2}, art, false, "", false, {"gender": F, "hides": [SLOT_PANTS]})
+	# --- ceket, yelek, cübbe ---
 	_add(SLOT_JACKET, "ranger_jacket", "OUTFIT_RANGER_JACKET", Color(0.24, 0.42, 0.20), 40,
 		30, {"hp_bonus": 2, "dodge_bonus": 1, "accuracy_bonus": 1}, art)
-	_add(SLOT_JACKET, "wool_coat", "OUTFIT_WOOL_COAT", Color(0.38, 0.34, 0.30), 40,
-		18, {"hp_bonus": 4, "dodge_bonus": -1}, false)
-	_add(SLOT_JACKET, "leather_jerkin", "OUTFIT_LEATHER_JERKIN", Color(0.40, 0.24, 0.12), 40,
-		28, {"hp_bonus": 3, "damage_bonus": 1}, false)
-	_add(SLOT_GLOVES, "leather_gloves", "OUTFIT_LEATHER_GLOVES", Color(0.35, 0.22, 0.12), 45,
-		12, {"accuracy_bonus": 1, "crit_bonus": 1}, false)
-	_add(SLOT_HAT, "felt_cap", "OUTFIT_FELT_CAP", Color(0.42, 0.20, 0.14), 50,
-		6, {"hp_bonus": 1}, false, true, "cap")
-	_add(SLOT_HAT, "leather_cap", "OUTFIT_LEATHER_CAP", Color(0.33, 0.22, 0.14), 50,
-		14, {"hp_bonus": 3, "dodge_bonus": -1}, false, false, "helmet")
+	_add(SLOT_JACKET, "leather_jerkin", "OUTFIT_LEATHER_JERKIN", Color(0.52, 0.30, 0.14), 40,
+		28, {"hp_bonus": 3, "damage_bonus": 1}, art, false, "", false, {"art": "leather_vest"})
+	_add(SLOT_JACKET, "wool_coat", "OUTFIT_WOOL_COAT", Color(0.40, 0.30, 0.22), 42,
+		18, {"hp_bonus": 4, "dodge_bonus": -1}, art)
+	_add(SLOT_JACKET, "pilgrim_robe", "OUTFIT_PILGRIM_ROBE", Color(0.42, 0.33, 0.24), 44,
+		22, {"hp_bonus": 3, "dodge_bonus": 1}, art, false, "", false, {"hides": [SLOT_SHIRT, SLOT_PANTS]})
+	_add(SLOT_JACKET, "scribe_robe", "OUTFIT_SCRIBE_ROBE", Color(0.24, 0.27, 0.40), 44,
+		34, {"accuracy_bonus": 2, "crit_bonus": 1, "dodge_bonus": -1}, art, false, "", false,
+		{"hides": [SLOT_SHIRT, SLOT_PANTS]})
+	# --- eldiven ---
+	_add(SLOT_GLOVES, "leather_gloves", "OUTFIT_LEATHER_GLOVES", Color(0.52, 0.30, 0.14), 15,
+		12, {"accuracy_bonus": 1, "crit_bonus": 1}, art)
+	# --- başlık ---
+	_add(SLOT_HAT, "felt_cap", "OUTFIT_FELT_CAP", Color(0.40, 0.30, 0.22), 50,
+		6, {"hp_bonus": 1}, art, true, "cap", false, {"art": "felt_hat"})
+	_add(SLOT_HAT, "leather_cap", "OUTFIT_LEATHER_CAP", Color(0.52, 0.30, 0.14), 50,
+		14, {"hp_bonus": 3, "dodge_bonus": -1}, art, false, "helmet", false, {"art": "leather_helmet"})
 	_add(SLOT_HAT, "ranger_hood", "OUTFIT_RANGER_HOOD", Color(0.25, 0.45, 0.18), 50,
 		18, {"dodge_bonus": 1, "crit_bonus": 1}, art, false, "hood")
+	_add(SLOT_HAT, "pilgrim_hood", "OUTFIT_PILGRIM_HOOD", Color(0.42, 0.33, 0.24), 50,
+		8, {"dodge_bonus": 1}, art, false, "hood")
+	_add(SLOT_HAT, "head_veil", "OUTFIT_HEAD_VEIL", Color(0.80, 0.76, 0.66), 50,
+		5, {"hp_bonus": 1}, art, true, "wrap", false, {"gender": F})
+	_add(SLOT_HAT, "wide_hat", "OUTFIT_WIDE_HAT", Color(0.38, 0.30, 0.22), 50,
+		12, {"accuracy_bonus": 1}, art, false, "cap")
+	_add(SLOT_HAT, "fur_hat", "OUTFIT_FUR_HAT", Color(0.48, 0.36, 0.24), 50,
+		14, {"hp_bonus": 2}, art, false, "cap")
+	_add(SLOT_HAT, "knit_cap", "OUTFIT_KNIT_CAP", Color(0.50, 0.44, 0.36), 50,
+		5, {"hp_bonus": 1}, art, true, "cap")
+	_add(SLOT_HAT, "guard_helmet", "OUTFIT_GUARD_HELMET", Color(0.64, 0.64, 0.68), 50,
+		40, {"hp_bonus": 4, "dodge_bonus": -1}, art, false, "helmet")
+	_add(SLOT_HAT, "spiked_helmet", "OUTFIT_SPIKED_HELMET", Color(0.55, 0.52, 0.50), 50,
+		46, {"hp_bonus": 3, "damage_bonus": 1, "dodge_bonus": -1}, art, false, "helmet")
+	# --- zırhın görünüşü (satılmaz; Equipment'ın zırh kademesinden) ---
+	for tier in ARMOR_ART:
+		_add(SLOT_ARMOR, ARMOR_ART[tier], "", Color(0.45, 0.40, 0.34), 36, 0, {}, art, false, "", false,
+			{"sold": false})
 
+## `extra`: "art" (kare kümesi başka adla render edildiyse - eski kimlik
+## korunuyor, kayıtlar bozulmasın), "gender", "hides", "sold".
 static func _add(
 	slot: String, piece_id: String, name_key: String, color: Color, draw_order: int,
 	base_price: int, bonuses: Dictionary, has_art: bool, starter: bool = false,
-	head_shape: String = "", boots: bool = false
+	head_shape: String = "", boots: bool = false, extra: Dictionary = {}
 ) -> void:
 	var piece := OutfitPiece.new()
 	piece.piece_id = piece_id
@@ -232,7 +332,11 @@ static func _add(
 	piece.display_name_key = name_key
 	piece.color = color
 	piece.head_shape = head_shape
-	piece.art_id = piece_id if has_art else ""
+	piece.art_id = str(extra.get("art", piece_id)) if has_art else ""
+	piece.gender_only = int(extra.get("gender", -1))
+	for hidden in extra.get("hides", []):
+		piece.hides.append(String(hidden))
+	piece.sold = bool(extra.get("sold", true))
 	piece.draw_order = draw_order
 	piece.boots = boots
 	piece.starter = starter

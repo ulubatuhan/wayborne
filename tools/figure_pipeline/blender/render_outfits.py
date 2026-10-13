@@ -37,10 +37,25 @@ import render_frames as rf  # noqa: E402
 import render_beast  # noqa: E402
 
 CLOTHES = os.path.join(ROOT, "art_source", "models", "clothes", "quaternius_fantasy")
+MAKEHUMAN = os.path.join(ROOT, "art_source", "models", "clothes", "makehuman")
 OUT = os.path.join(ROOT, "build", "figures", "outfits")
 
 
 def fit_item(spec, gender, body, rig, inner=()):
+    src = spec.get("source", "quaternius")
+    if src == "mhclo":
+        obj, pushed = fit_garment.fit_mhclo(os.path.join(MAKEHUMAN, spec["mhclo"], spec["mhclo"] + ".mhclo"),
+                                            body, rig, float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
+                                            shell=spec.get("shell"))
+        print("giydirildi", spec["mhclo"], "itilen", pushed, flush=True)
+        return obj
+    if src == "rigid":
+        obj, pushed = fit_garment.fit_rigid(os.path.join(ROOT, spec["blend"]), body, rig, float(spec["eps"]),
+                                            inner, float(spec.get("gap", 0.003)),
+                                            margin=tuple(spec.get("margin", (1.06, 1.12, 1.0))),
+                                            yaw=float(spec.get("yaw", 90.0)), shell=spec.get("shell"))
+        print("giydirildi", spec["blend"], "itilen", pushed, flush=True)
+        return obj
     meshes = []
     lo, hi = [1e9] * 3, [-1e9] * 3
     snugged = False
@@ -48,7 +63,8 @@ def fit_item(spec, gender, body, rig, inner=()):
         obj, pushed = fit_garment.fit(os.path.join(CLOTHES, piece + ".gltf"), body, rig,
                                       float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
                                       spec.get("waist_bone"), int(spec.get("openings", 0)),
-                                      float(spec.get("sole", 0.0)), float(spec.get("heel", 0.0)))
+                                      float(spec.get("sole", 0.0)), float(spec.get("heel", 0.0)),
+                                      shell=spec.get("shell"))
         print("giydirildi", piece, "itilen", pushed, flush=True)
         lo = [min(a, b) for a, b in zip(lo, obj["native_min"])]
         hi = [max(a, b) for a, b in zip(hi, obj["native_max"])]
@@ -77,11 +93,27 @@ def fit_all(ocfg, gender, body, rig):
     order = sorted(ocfg["items"], key=lambda k: ocfg["items"][k]["draw_order"])
     for name in order:
         spec = ocfg["items"][name]
-        inner = [fitted[o] for o in fitted
-                 if ocfg["items"][o]["draw_order"] < spec["draw_order"] and ocfg["items"][o]["slot"] != spec["slot"]]
+        if not wearable(spec, gender):
+            continue
+        inner = [fitted[o] for o in fitted if worn_under(ocfg["items"][o], spec)]
         rc.reset_pose(rig, rig)
         fitted[name] = fit_item(spec, gender, body, rig, inner)
     return fitted
+
+
+def wearable(spec, gender):
+    return gender in spec.get("genders", ("male", "female"))
+
+
+def worn_under(inner_spec, spec):
+    """Bir kalem baskasinin altina giyilebilir mi: daha kucuk cizim sirasi,
+    baska yuva, ve dis kalem o yuvayi gizlemiyor (elbise pantolonu gizler:
+    elbise giyilince pantolon cizilmez, o yuzden elbise pantolonlarin ustune
+    sisirilmez)."""
+    if spec["slot"] == "hat":  # baslik yalniz basa oturur; yakalar onu itip bozuyordu
+        return False
+    return (inner_spec["draw_order"] < spec["draw_order"] and inner_spec["slot"] != spec["slot"]
+            and inner_spec["slot"] not in spec.get("hides", ()))
 
 
 LAYER_REACH = 0.04  # m; fit_garment.INHERIT_REACH ile ayni (0.06-0.08 olculdu: kotulesti)
@@ -103,8 +135,7 @@ def layer_weights_all(fitted, ocfg, rig, layers):
         lw = [list(w) for w in fig_weights.layer_weights(obj, rig, layers)]
         coords[name] = rc.evaluated_coords(obj)
         spec = ocfg["items"][name]
-        inner = [o for o in lws if ocfg["items"][o]["draw_order"] < spec["draw_order"]
-                 and ocfg["items"][o]["slot"] != spec["slot"]]
+        inner = [o for o in lws if worn_under(ocfg["items"][o], spec)]
         src = [(co, lws[o][k]) for o in inner for k, co in enumerate(coords[o])]
         if src:
             kd = KDTree(len(src))
@@ -189,6 +220,49 @@ def albedo_material(cfg, layer, src_mat, core, root):
     return mat
 
 
+def tint_material(cfg, layer, src_mat, tint, core, root):
+    """Oyunun dili (onay sayfasinda kabul edilen): rengi paletten, dokudan yalniz
+    acik-koyu deseni. MakeHuman dokulari fotografik baski tasiyor (cicekli
+    etek, kot deseni); dort tona inince gurultu oluyor ve dunyaya uymuyordu."""
+    mat = fig_shading.body_material(cfg, "id:" + layer, core=core, root=root,
+                                    name_suffix="_tint_%s" % (src_mat.name if src_mat else "none"))
+    nt = mat.node_tree
+    em = next(n for n in nt.nodes if n.type == "EMISSION" and n.inputs["Color"].is_linked
+              and n.inputs["Color"].links[0].from_node.type == "COMBINE_COLOR")
+    nt.links.remove(em.inputs["Color"].links[0])
+    img = None
+    if src_mat is not None and src_mat.use_nodes:
+        for n in src_mat.node_tree.nodes:
+            if (n.type == "TEX_IMAGE" and n.image is not None and n.image.size[0] > 0
+                    and "normal" not in n.image.name.lower()):
+                img = n.image
+                break
+    col = nt.nodes.new("ShaderNodeRGB")
+    col.outputs[0].default_value = (tint[0], tint[1], tint[2], 1.0)
+    if img is None:
+        nt.links.new(col.outputs[0], em.inputs["Color"])
+        return mat
+    t = nt.nodes.new("ShaderNodeTexImage")
+    t.image = img
+    bw = nt.nodes.new("ShaderNodeRGBToBW")
+    nt.links.new(t.outputs["Color"], bw.inputs[0])
+    rng = nt.nodes.new("ShaderNodeMapRange")
+    rng.inputs["To Min"].default_value = TINT_LUM[0]
+    rng.inputs["To Max"].default_value = TINT_LUM[1]
+    nt.links.new(bw.outputs[0], rng.inputs["Value"])
+    mul = nt.nodes.new("ShaderNodeMix")
+    mul.data_type = "RGBA"
+    mul.blend_type = "MULTIPLY"
+    mul.inputs["Factor"].default_value = 1.0
+    nt.links.new(col.outputs[0], mul.inputs[6])
+    nt.links.new(rng.outputs[0], mul.inputs[7])
+    nt.links.new(mul.outputs[2], em.inputs["Color"])
+    return mat
+
+
+TINT_LUM = (0.72, 1.12)  # dokunun parlakligi bu araliga; desen kalir, renk paletten
+
+
 def set_slots(obj, mats):
     """Malzeme yuvalari korunur (yuz indeksleri bozulmasin), icerik degisir."""
     for k in range(len(obj.material_slots)):
@@ -226,6 +300,7 @@ def main():
     variant = rf.arg(argv, "--variant")
     ocfg = json.load(open(os.path.join(PIPE, "config", "outfits.json")))
     items = rf.arg(argv, "--items").split(",") if "--items" in argv else list(ocfg["items"])
+    items = [i for i in items if wearable(ocfg["items"][i], rf.gender_of(variant))]
     build = rf.cfg("build.json")
     clips = rf.arg(argv, "--clips").split(",") if "--clips" in argv else list(build["clips"])
     only = [int(x) for x in rf.arg(argv, "--frames").split(",")] if "--frames" in argv else None
@@ -248,6 +323,9 @@ def main():
 
     camcfg0 = dict(rf.cfg("camera.json"))
     fig_shading.setup_render(camcfg0)
+    # Yarim cozunurluk: paketleyici zaten yariya indiriyordu (pack_outfits.DOWNSCALE);
+    # dogrudan yarim render ayni pikselleri dortte bir surede uretiyor.
+    bpy.context.scene.render.resolution_percentage = int(ocfg.get("resolution_percentage", 100))
     bpy.context.scene.render.use_persistent_data = True
     kw = dict(core=layers["core_threshold"], root=layers["root_threshold"])
     shade = {n: fig_shading.body_material(camcfg0, "layer:" + n, **kw) for n in layers["layers"]}
@@ -268,19 +346,37 @@ def main():
         rc.reset_pose(rig, rig)
         m_per_h = (rig.matrix_world @ rig.data.bones["pelvis"].head_local).z / float(clip.get("hip_ratio", 0.46))
         own = clip_cfg.get("layers", layers["layers"])
+        # Kare once, kalem sonra: poz bir karede bir kez kuruluyor. Kalem
+        # once dongusunde her kalem her kareyi yeniden pozluyordu ve her
+        # pozlama gizli olanlar dahil butun giysileri yeniden degerlendiriyordu
+        # (kare basina ~2 sn, render'in kendisinden uzun).
+        mats = {}
         for name, (obj, mlayers, src) in objs.items():
-            for other, o2 in fitted.items():
-                o2.hide_render = other != name
-            alb = {n: [albedo_material(camcfg, n, s, kw["core"], kw["root"]) for s in src]
-                   for n in layers["layers"]}
-            todo = [n for n in mlayers if n in own]
-            for fr in clip["frames"]:
-                i = fr["index"]
-                if only is not None and i not in only:
-                    continue
-                t0 = time.time()
-                rf.pose_clip_frame(rig, body, fr, base, clip, clip_cfg, layers, rest_foot_rot,
-                                   retarget, curl, support_idx, m_per_h, camcfg)
+            tint = sc["ocfg"]["items"][name].get("tint")
+            if tint:
+                alb = {n: [tint_material(camcfg, n, s_, tint, kw["core"], kw["root"]) for s_ in src]
+                       for n in layers["layers"]}
+            else:
+                alb = {n: [albedo_material(camcfg, n, s_, kw["core"], kw["root"]) for s_ in src]
+                       for n in layers["layers"]}
+            mats[name] = (alb, [n for n in mlayers if n in own])
+        for fr in clip["frames"]:
+            i = fr["index"]
+            if only is not None and i not in only:
+                continue
+            pending = [name for name in objs
+                       if not ("--resume" in argv and os.path.exists(
+                           os.path.join(OUT, variant, name, clip_name, "f%02d" % i, "meta.json")))]
+            if not pending:
+                continue
+            t0 = time.time()
+            rf.pose_clip_frame(rig, body, fr, base, clip, clip_cfg, layers, rest_foot_rot,
+                               retarget, curl, support_idx, m_per_h, camcfg)
+            for name in pending:
+                obj = objs[name][0]
+                for other, o2 in fitted.items():
+                    o2.hide_render = other != name
+                alb, todo = mats[name]
                 d = os.path.join(OUT, variant, name, clip_name, "f%02d" % i)
                 os.makedirs(d, exist_ok=True)
                 for n in todo:
@@ -291,7 +387,7 @@ def main():
                     set_slots(obj, alb[n])
                     rc.render(os.path.join(d, "albedo_%s.png" % n))
                 json.dump({"layers": todo}, open(os.path.join(d, "meta.json"), "w"))
-                print("kare", variant, name, clip_name, i, "%.1f sn" % (time.time() - t0), flush=True)
+            print("kare", variant, clip_name, i, len(pending), "kalem", "%.1f sn" % (time.time() - t0), flush=True)
 
 
 if __name__ == "__main__":

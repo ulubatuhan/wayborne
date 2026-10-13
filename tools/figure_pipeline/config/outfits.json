@@ -1,22 +1,684 @@
 {
- "_comment": "Giyilip cikarilabilen kiyafetler (OutfitCatalog'un art_id'si). Her kalem bir ya da birkac Quaternius parcasi (CC0, art_source/models/clothes/quaternius_fantasy), cinsiyete gore ayri kaynak; fit_garment.py ile MPFB bedene giydirilir. eps: giysinin bedenin yuzeyinden en az uzakligi (m) - ust uste giyilen kalemler cizim sirasina gore artar, dis giysi ic giysiyi sarsin diye. draw_order oyundaki bindirme sirasi (kucuk once). waist_bone: pantolonun beli bu kemigin basina kadar uzatilir (kaynak dusuk belli, kalcanin ustu acik kaliyordu). openings: giysinin gercek agiz sayisi (pantolon: bel + iki paca); kaynagin kesip attigi diger delikler kapatilir.",
+ "_comment": "Giyilip cikarilabilen kiyafetler (OutfitCatalog'un art_id'si). Her kalem bir ya da birkac Quaternius parcasi (CC0, art_source/models/clothes/quaternius_fantasy), cinsiyete gore ayri kaynak; fit_garment.py ile MPFB bedene giydirilir. eps: giysinin bedenin yuzeyinden en az uzakligi (m) - ust uste giyilen kalemler cizim sirasina gore artar, dis giysi ic giysiyi sarsin diye. draw_order oyundaki bindirme sirasi (kucuk once). waist_bone: pantolonun beli bu kemigin basina kadar uzatilir (kaynak dusuk belli, kalcanin ustu acik kaliyordu). openings: giysinin gercek agiz sayisi (pantolon: bel + iki paca); kaynagin kesip attigi diger delikler kapatilir. source: quaternius (varsayilan, pieces), mhclo (MakeHuman, art_source/models/clothes/makehuman/<ad>) ya da rigid (iskeletsiz tek parca, gogse olceklenir). tint: albedo rengi paletten, dokudan yalniz desen. genders: yalniz bu bedenlere render edilir. hides: giyilince bu yuvalar cizilmez ve kalem onlarin ustune sisirilmez. shell: ic giysilerin bedenden en fazla uzakligi (kalinlik kabugu); dis giysi alttakilerin kabugunun ustune oturur. Zirhlar (armor) rijit modelden degil, bedene giydirilen kumastan: Quaternius'un rijit zirhlari govdenin etrafinda yuzen kabuklar olarak cikti; deri ve levha kapitone tunik (koyu deri / parlak celik), zincir orgu kazak (doku zincir gibi okunuyor).",
  "items": {
-  "peasant_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10, "waist_bone": "spine_02", "openings": 3,
-   "pieces": {"male": ["Male_Peasant_Legs"], "female": ["Female_Peasant_Legs"]}},
-  "ranger_pants": {"slot": "pants", "eps": 0.004, "draw_order": 10, "waist_bone": "spine_02", "openings": 3,
-   "pieces": {"male": ["Male_Ranger_Legs"], "female": ["Female_Ranger_Legs"]}},
-  "peasant_shoes": {"slot": "shoes", "eps": 0.007, "draw_order": 20, "boots": true, "sole": 0.012, "heel": 0.004,
-   "pieces": {"male": ["Male_Peasant_Feet"], "female": ["Female_Peasant_Feet"]}},
-  "ranger_boots": {"slot": "shoes", "eps": 0.007, "draw_order": 20, "boots": true, "sole": 0.018, "heel": 0.012,
-   "pieces": {"male": ["Male_Ranger_Feet_Boots"], "female": ["Female_Ranger_Feet"]}},
-  "peasant_shirt": {"slot": "shirt", "eps": 0.009, "draw_order": 30,
-   "pieces": {"male": ["Male_Peasant_Body", "Male_Peasant_Arms"], "female": ["Female_Peasant_Body", "Female_Peasant_Arms"]}},
-  "ranger_jacket": {"slot": "jacket", "eps": 0.013, "draw_order": 40,
-   "pieces": {"male": ["Male_Ranger_Body", "Male_Ranger_Arms", "Male_Ranger_Acc_Pauldron"],
-              "female": ["Female_Ranger_Body", "Female_Ranger_Arms", "Female_Ranger_Acc_Pauldrons"]}},
-  "ranger_hood": {"slot": "hat", "eps": 0.008, "draw_order": 50,
-   "pieces": {"male": ["Male_Ranger_Head_Hood"], "female": ["Female_Ranger_Head_Hood"]}}
+  "peasant_pants": {
+   "slot": "pants",
+   "eps": 0.004,
+   "draw_order": 10,
+   "waist_bone": "spine_02",
+   "openings": 3,
+   "pieces": {
+    "male": [
+     "Male_Peasant_Legs"
+    ],
+    "female": [
+     "Female_Peasant_Legs"
+    ]
+   },
+   "shell": 0.03
+  },
+  "ranger_pants": {
+   "slot": "pants",
+   "eps": 0.004,
+   "draw_order": 10,
+   "waist_bone": "spine_02",
+   "openings": 3,
+   "pieces": {
+    "male": [
+     "Male_Ranger_Legs"
+    ],
+    "female": [
+     "Female_Ranger_Legs"
+    ]
+   },
+   "shell": 0.03
+  },
+  "peasant_shoes": {
+   "slot": "shoes",
+   "eps": 0.007,
+   "draw_order": 20,
+   "boots": true,
+   "sole": 0.012,
+   "heel": 0.004,
+   "pieces": {
+    "male": [
+     "Male_Peasant_Feet"
+    ],
+    "female": [
+     "Female_Peasant_Feet"
+    ]
+   },
+   "shell": 0.04
+  },
+  "ranger_boots": {
+   "slot": "shoes",
+   "eps": 0.007,
+   "draw_order": 20,
+   "boots": true,
+   "sole": 0.018,
+   "heel": 0.012,
+   "pieces": {
+    "male": [
+     "Male_Ranger_Feet_Boots"
+    ],
+    "female": [
+     "Female_Ranger_Feet"
+    ]
+   },
+   "shell": 0.04
+  },
+  "peasant_shirt": {
+   "slot": "shirt",
+   "eps": 0.009,
+   "draw_order": 30,
+   "pieces": {
+    "male": [
+     "Male_Peasant_Body",
+     "Male_Peasant_Arms"
+    ],
+    "female": [
+     "Female_Peasant_Body",
+     "Female_Peasant_Arms"
+    ]
+   },
+   "shell": 0.045
+  },
+  "ranger_jacket": {
+   "slot": "jacket",
+   "eps": 0.013,
+   "draw_order": 40,
+   "pieces": {
+    "male": [
+     "Male_Ranger_Body",
+     "Male_Ranger_Arms",
+     "Male_Ranger_Acc_Pauldron"
+    ],
+    "female": [
+     "Female_Ranger_Body",
+     "Female_Ranger_Arms",
+     "Female_Ranger_Acc_Pauldrons"
+    ]
+   }
+  },
+  "ranger_hood": {
+   "slot": "hat",
+   "eps": 0.008,
+   "draw_order": 50,
+   "pieces": {
+    "male": [
+     "Male_Ranger_Head_Hood"
+    ],
+    "female": [
+     "Female_Ranger_Head_Hood"
+    ]
+   }
+  },
+  "wool_pants": {
+   "slot": "pants",
+   "draw_order": 10,
+   "eps": 0.004,
+   "source": "mhclo",
+   "mhclo": "toigo_wool_pants",
+   "tint": [
+    0.44,
+    0.38,
+    0.3
+   ],
+   "shell": 0.03
+  },
+  "viking_pants": {
+   "slot": "pants",
+   "draw_order": 10,
+   "eps": 0.004,
+   "source": "mhclo",
+   "mhclo": "rehmanpolanski_viking_pants",
+   "tint": [
+    0.4,
+    0.33,
+    0.25
+   ],
+   "shell": 0.03
+  },
+  "harem_pants": {
+   "slot": "pants",
+   "draw_order": 10,
+   "eps": 0.004,
+   "source": "mhclo",
+   "mhclo": "toigo_harem_pants",
+   "tint": [
+    0.6,
+    0.3,
+    0.22
+   ],
+   "shell": 0.03
+  },
+  "cloth_trousers": {
+   "slot": "pants",
+   "draw_order": 10,
+   "eps": 0.004,
+   "source": "mhclo",
+   "mhclo": "elvs_male_trouser",
+   "tint": [
+    0.34,
+    0.31,
+    0.27
+   ],
+   "shell": 0.03
+  },
+  "long_skirt": {
+   "slot": "pants",
+   "draw_order": 25,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "toigo_long_full_skirt",
+   "tint": [
+    0.44,
+    0.3,
+    0.22
+   ],
+   "genders": [
+    "female"
+   ]
+  },
+  "tiered_skirt": {
+   "slot": "pants",
+   "draw_order": 25,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "toigo_tiered_skirt",
+   "tint": [
+    0.56,
+    0.38,
+    0.24
+   ],
+   "genders": [
+    "female"
+   ]
+  },
+  "leather_gloves": {
+   "slot": "gloves",
+   "draw_order": 15,
+   "eps": 0.004,
+   "source": "mhclo",
+   "mhclo": "toigo_gloves_short",
+   "tint": [
+    0.52,
+    0.3,
+    0.14
+   ],
+   "shell": 0.018
+  },
+  "hobnail_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "culturalibre_male_boots",
+   "tint": [
+    0.52,
+    0.3,
+    0.14
+   ],
+   "boots": true,
+   "shell": 0.04
+  },
+  "short_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "punkduck_medieval_boots",
+   "tint": [
+    0.42,
+    0.24,
+    0.12
+   ],
+   "shell": 0.04
+  },
+  "riding_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "punkduck_riding_boots",
+   "tint": [
+    0.36,
+    0.2,
+    0.1
+   ],
+   "boots": true,
+   "shell": 0.04
+  },
+  "leather_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "maciekg_leather_boots",
+   "tint": [
+    0.54,
+    0.33,
+    0.16
+   ],
+   "boots": true,
+   "shell": 0.04
+  },
+  "ankle_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "toigo_ankle_boots_male",
+   "tint": [
+    0.44,
+    0.26,
+    0.13
+   ],
+   "genders": [
+    "male"
+   ],
+   "shell": 0.04
+  },
+  "womens_ankle_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "toigo_ankle_boots_female",
+   "tint": [
+    0.48,
+    0.28,
+    0.15
+   ],
+   "genders": [
+    "female"
+   ],
+   "shell": 0.04
+  },
+  "womens_knee_boots": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.007,
+   "source": "mhclo",
+   "mhclo": "punkduck_female_knee_boots",
+   "tint": [
+    0.36,
+    0.2,
+    0.1
+   ],
+   "genders": [
+    "female"
+   ],
+   "boots": true,
+   "shell": 0.04
+  },
+  "strap_sandals": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.006,
+   "source": "mhclo",
+   "mhclo": "elvs_caesar_sandals1",
+   "tint": [
+    0.56,
+    0.36,
+    0.18
+   ],
+   "shell": 0.04
+  },
+  "felt_shoes": {
+   "slot": "shoes",
+   "draw_order": 20,
+   "eps": 0.006,
+   "source": "mhclo",
+   "mhclo": "elvs_basic_felt_elf_shoes",
+   "tint": [
+    0.4,
+    0.34,
+    0.26
+   ],
+   "shell": 0.04
+  },
+  "quilted_tunic": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "rehmanpolanski_viking_tunic",
+   "tint": [
+    0.58,
+    0.5,
+    0.36
+   ],
+   "shell": 0.045
+  },
+  "silk_blouse": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "punkduck_lace_up_blouse",
+   "tint": [
+    0.9,
+    0.86,
+    0.74
+   ],
+   "shell": 0.045
+  },
+  "laced_shirt": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "elvs_male_boho_top1",
+   "tint": [
+    0.72,
+    0.64,
+    0.5
+   ],
+   "shell": 0.045
+  },
+  "fisherman_sweater": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "toigo_fisherman_sweater",
+   "tint": [
+    0.6,
+    0.55,
+    0.45
+   ],
+   "shell": 0.045
+  },
+  "linen_tunic": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "wdg_mycenaean_tunic",
+   "tint": [
+    0.8,
+    0.74,
+    0.6
+   ],
+   "shell": 0.045
+  },
+  "bodice_top": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "toigo_bodice-style_top",
+   "tint": [
+    0.42,
+    0.28,
+    0.2
+   ],
+   "genders": [
+    "female"
+   ],
+   "shell": 0.045
+  },
+  "peasant_blouse": {
+   "slot": "shirt",
+   "draw_order": 30,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "elvs_ruffle_sleeve_peasant_blouse_1",
+   "tint": [
+    0.86,
+    0.82,
+    0.72
+   ],
+   "genders": [
+    "female"
+   ],
+   "shell": 0.045
+  },
+  "shift_dress": {
+   "slot": "shirt",
+   "draw_order": 32,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "toigo_shift_dress",
+   "tint": [
+    0.52,
+    0.3,
+    0.28
+   ],
+   "genders": [
+    "female"
+   ],
+   "hides": [
+    "pants"
+   ]
+  },
+  "pinafore_dress": {
+   "slot": "shirt",
+   "draw_order": 32,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "toigo_camisole_dress_with_full_skirt",
+   "tint": [
+    0.36,
+    0.42,
+    0.3
+   ],
+   "genders": [
+    "female"
+   ],
+   "hides": [
+    "pants"
+   ]
+  },
+  "armor_leather": {
+   "slot": "armor",
+   "draw_order": 36,
+   "eps": 0.011,
+   "source": "mhclo",
+   "mhclo": "rehmanpolanski_viking_tunic",
+   "tint": [
+    0.42,
+    0.24,
+    0.11
+   ],
+   "shell": 0.04
+  },
+  "armor_mail": {
+   "slot": "armor",
+   "draw_order": 36,
+   "eps": 0.011,
+   "source": "mhclo",
+   "mhclo": "toigo_fisherman_sweater",
+   "tint": [
+    0.56,
+    0.57,
+    0.6
+   ],
+   "shell": 0.04
+  },
+  "armor_plate": {
+   "slot": "armor",
+   "draw_order": 36,
+   "eps": 0.011,
+   "source": "mhclo",
+   "mhclo": "rehmanpolanski_viking_tunic",
+   "tint": [
+    0.74,
+    0.75,
+    0.8
+   ],
+   "shell": 0.04
+  },
+  "leather_vest": {
+   "slot": "jacket",
+   "draw_order": 40,
+   "eps": 0.013,
+   "source": "mhclo",
+   "mhclo": "drednicolson_asymmetric_tunic_and_sash",
+   "tint": [
+    0.52,
+    0.3,
+    0.14
+   ]
+  },
+  "wool_coat": {
+   "slot": "jacket",
+   "draw_order": 42,
+   "eps": 0.014,
+   "source": "mhclo",
+   "mhclo": "mindfront_cardigan_long_open_front",
+   "tint": [
+    0.4,
+    0.3,
+    0.22
+   ]
+  },
+  "pilgrim_robe": {
+   "slot": "jacket",
+   "draw_order": 44,
+   "eps": 0.015,
+   "source": "mhclo",
+   "mhclo": "donitz_monk_robe",
+   "tint": [
+    0.42,
+    0.33,
+    0.24
+   ],
+   "hides": [
+    "shirt",
+    "pants"
+   ]
+  },
+  "scribe_robe": {
+   "slot": "jacket",
+   "draw_order": 44,
+   "eps": 0.015,
+   "source": "mhclo",
+   "mhclo": "maciekg_wizard_robe",
+   "tint": [
+    0.24,
+    0.27,
+    0.4
+   ],
+   "hides": [
+    "shirt",
+    "pants"
+   ]
+  },
+  "felt_hat": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.008,
+   "source": "mhclo",
+   "mhclo": "elvs_slouchy_beanie1",
+   "tint": [
+    0.4,
+    0.3,
+    0.22
+   ]
+  },
+  "leather_helmet": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "maciekg_leather_helmet",
+   "tint": [
+    0.52,
+    0.3,
+    0.14
+   ]
+  },
+  "pilgrim_hood": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "donitz_monk_robe_hood",
+   "tint": [
+    0.42,
+    0.33,
+    0.24
+   ]
+  },
+  "head_veil": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.008,
+   "source": "mhclo",
+   "mhclo": "elvs_charity_veil1",
+   "tint": [
+    0.8,
+    0.76,
+    0.66
+   ],
+   "genders": [
+    "female"
+   ]
+  },
+  "wide_hat": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.008,
+   "source": "mhclo",
+   "mhclo": "culturalibre_cl_don_quixote_hat",
+   "tint": [
+    0.38,
+    0.3,
+    0.22
+   ]
+  },
+  "fur_hat": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.009,
+   "source": "mhclo",
+   "mhclo": "mindfront_sherpa_hat",
+   "tint": [
+    0.48,
+    0.36,
+    0.24
+   ]
+  },
+  "knit_cap": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.008,
+   "source": "mhclo",
+   "mhclo": "mindfront_knitted_hat_01",
+   "tint": [
+    0.5,
+    0.44,
+    0.36
+   ]
+  },
+  "guard_helmet": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "javherre_casco_caballero_templario_templar_knight_helmet",
+   "tint": [
+    0.64,
+    0.64,
+    0.68
+   ]
+  },
+  "spiked_helmet": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.01,
+   "source": "mhclo",
+   "mhclo": "culturalibre_warrior_helmet",
+   "tint": [
+    0.55,
+    0.52,
+    0.5
+   ]
+  }
  },
  "samples_shade": 64,
- "samples_albedo": 8
+ "samples_albedo": 8,
+ "resolution_percentage": 50
 }

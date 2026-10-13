@@ -25,7 +25,7 @@ func show_character(character: CharacterData) -> void:
 		character.class_id,
 		character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone),
-		character.outfit, Wardrobe.loadout_of(character.outfit, character.equipped),
+		character.get_appearance_outfit(), Wardrobe.loadout_of(character.outfit, character.equipped),
 		character.get_body_variant_id()
 	)
 

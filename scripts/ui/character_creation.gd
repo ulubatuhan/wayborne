@@ -261,7 +261,7 @@ func _build_outfit_row(slot: String) -> HBoxContainer:
 
 func _on_outfit_cycle(slot: String, direction: int) -> void:
 	var current: String = _outfit.get(slot, OutfitCatalog.NONE_PIECE)
-	_outfit[slot] = OutfitCatalog.cycle(slot, current, direction, true)
+	_outfit[slot] = OutfitCatalog.cycle(slot, current, direction, true, _gender_button.selected)
 	_refresh()
 
 func _build_stats_section() -> void:
@@ -352,7 +352,12 @@ func _on_skin_selected(index: int) -> void:
 	_skin_preview.color = CharacterData.get_skin_tone_color(index)
 	_refresh()
 
-func _on_gender_selected(_index: int) -> void:
+func _on_gender_selected(index: int) -> void:
+	# Öbür cinsiyete dikilmiş bir giysi (etek, başörtüsü) seçimde kalmasın.
+	for slot in _outfit.keys():
+		var piece := OutfitCatalog.get_piece(str(_outfit[slot]))
+		if piece != null and not piece.fits(index):
+			_outfit.erase(slot)
 	_refresh()
 
 func _on_weight_selected(_index: int) -> void:

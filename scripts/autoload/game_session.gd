@@ -393,7 +393,9 @@ func remove_outfit(piece_id: String, quantity: int = 1) -> bool:
 ## Dolapta yoksa hiçbir şey değişmez.
 func wear_outfit(character: CharacterData, piece_id: String) -> bool:
 	var piece := OutfitCatalog.get_piece(piece_id)
-	if character == null or piece == null or not remove_outfit(piece_id, 1):
+	if character == null or piece == null or not piece.fits(character.gender):
+		return false
+	if not remove_outfit(piece_id, 1):
 		return false
 	var previous := character.get_outfit_piece(piece.slot)
 	character.set_outfit_piece(piece.slot, piece_id)
@@ -418,7 +420,7 @@ func get_outfit_choices(character: CharacterData, slot: String) -> Array[String]
 	var out: Array[String] = [OutfitCatalog.NONE_PIECE]
 	var worn := character.get_outfit_piece(slot) if character != null else ""
 	for piece in OutfitCatalog.get_pieces_for_slot(slot):
-		if piece.piece_id == worn or get_outfit_count(piece.piece_id) > 0:
+		if piece.piece_id == worn or (get_outfit_count(piece.piece_id) > 0 and piece.fits(character.gender)):
 			out.append(piece.piece_id)
 	return out
 

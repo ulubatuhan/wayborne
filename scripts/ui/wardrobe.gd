@@ -213,9 +213,16 @@ func _build_locker_card(piece_id: String) -> PanelContainer:
 	column.add_child(buttons)
 	var wear := Button.new()
 	wear.text = tr("UI_WARDROBE_WEAR")
-	wear.disabled = _character() == null
+	var fits := _character() != null and piece.fits(_character().gender)
+	wear.disabled = not fits
 	wear.pressed.connect(_wear.bind(piece_id))
 	buttons.add_child(wear)
+	if _character() != null and not fits:
+		# Kilitli ama gizli değil: neden giyilemediği yanında yazıyor.
+		var reason := Label.new()
+		reason.text = tr("UI_OUTFIT_WRONG_FIT")
+		reason.modulate = ArtPalette.UI_TEXT_DIM
+		column.add_child(reason)
 	var sell := Button.new()
 	sell.text = tr("UI_WARDROBE_SELL") % _session.get_outfit_sell_price(piece_id)
 	sell.pressed.connect(_sell.bind(piece_id))
@@ -316,7 +323,7 @@ func _slot_can_drop(_at_position: Vector2, data: Variant, slot: String) -> bool:
 	if not _is_outfit_drag(data) or str(data["source"]) != "locker" or _character() == null:
 		return false
 	var piece := OutfitCatalog.get_piece(str(data["piece_id"]))
-	return piece != null and piece.slot == slot
+	return piece != null and piece.slot == slot and piece.fits(_character().gender)
 
 func _slot_drop(_at_position: Vector2, data: Variant, _slot: String) -> void:
 	_wear(str(data["piece_id"]))
