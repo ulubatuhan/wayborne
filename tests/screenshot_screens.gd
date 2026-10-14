@@ -69,6 +69,11 @@ func _prepare_session() -> void:
 	session.add_outfit("ranger_jacket")
 	session.add_outfit("hobnail_boots")
 	session.add_outfit("felt_cap", 2)
+	# Depoda ve üstte birer ekipman: dolabın silah/zırh bölümü ve resimleri.
+	session.add_equipment("weapon_tier_1")
+	session.equip_to_character(player, EquipmentCatalog.SLOT_WEAPON, "weapon_tier_1")
+	session.add_equipment("armor_tier_2")
+	session.add_equipment("ring_charmed")
 	session.spend_or_owe(400)
 	session.total_days_elapsed = 60
 	# Kenar notları görünsün: bir kırgınlık, bir açlık çetelesi, bir huy.

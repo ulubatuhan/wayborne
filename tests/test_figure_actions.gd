@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_bone_lengths_constant(t)
 	_test_standing_clips_stand(t)
 	_test_lying_poses_lie(t)
+	_test_transitions_end_standing(t)
 	_test_bow_draw(t)
 	_test_weapon_families(t)
 	_test_boot_limits_ankle(t)
@@ -58,9 +59,13 @@ func _test_standing_clips_stand(t) -> void:
 			continue
 		for i in FigureActions.frame_count(clip):
 			var j := FigureActions.pose(clip, i, ground, H, 1.0)
+			t.le(_lowest(j), ground.y + GROUND_EPS, "%s/%d hiçbir eklem zeminin altında değil" % [clip, i])
+			# İniş/biniş klipleri eyerden ve koltuktan başlıyor: ayak yere ancak
+			# klibin sonunda basıyor (kök kalça, bkz. WalkFigure.TRANSITION_CLIPS).
+			if WalkFigure.TRANSITION_CLIPS.has(clip):
+				continue
 			var feet := maxf(j["ankle_front"].y, j["ankle_back"].y)
 			t.almost(feet, ground.y, "%s/%d bir ayak zeminde" % [clip, i], GROUND_EPS)
-			t.le(_lowest(j), ground.y + GROUND_EPS, "%s/%d hiçbir eklem zeminin altında değil" % [clip, i])
 			t.le(j["hip"].y, ground.y - H * 0.3, "%s/%d kalça ayakta yüksekliğinde" % [clip, i])
 
 func _test_lying_poses_lie(t) -> void:
@@ -122,3 +127,19 @@ func _test_laden_walk_holds_strap(t) -> void:
 		t.le(laden["hand_front"].y, laden["shoulder"].y + H * 0.1, "heybe: ön el askıda, göğüs hizasında")
 		t.ge(laden["shoulder"].x - laden["hip"].x, free["shoulder"].x - free["hip"].x, "heybe: gövde öne eğik")
 		t.almost(float(laden["draw"].x), 0.0, "yürüyüşte kiriş yok")
+
+## İniş/biniş klipleri oturuştan ayakta duruşa: ilk karede ayaklar yerde
+## değil (eyer ya da koltuk), son karede iki ayak da yerde ve kalça ayakta
+## yüksekliğinde - yoksa yürüyüşe geçerken figür sıçrar.
+func _test_transitions_end_standing(t) -> void:
+	var ground := Vector2(0, 500)
+	for clip in WalkFigure.TRANSITION_CLIPS:
+		var n := FigureActions.frame_count(clip)
+		var first := FigureActions.pose(clip, 0, ground, H, 1.0)
+		var last := FigureActions.pose(clip, n - 1, ground, H, 1.0)
+		t.ok(maxf(first["ankle_front"].y, first["ankle_back"].y) < ground.y - H * 0.1,
+			"%s ilk karede oturuyor, ayağı yerde değil" % clip)
+		t.almost(last["ankle_front"].y, ground.y, "%s son karede ön ayak yerde" % clip, GROUND_EPS)
+		t.almost(last["ankle_back"].y, ground.y, "%s son karede arka ayak yerde" % clip, GROUND_EPS)
+		t.ok(WalkFigure.transition_hip_height(clip, 0.0, H) > WalkFigure.transition_hip_height(clip, 1.0, H) * 0.9,
+			"%s ilk karede kalça (oturuş) ayakta duruşun altına düşmemeli" % clip)

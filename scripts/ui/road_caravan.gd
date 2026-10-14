@@ -138,6 +138,13 @@ const FIRE_FLICKER_SPEED: float = 9.0
 ## `CAMP_HOURS` (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı
 ## ama oyuncunun sabrını da sınamamalı.
 const CAMP_GATHER_SECONDS: float = 1.3
+## Attan inmenin/koltuktan inmenin süresi (gerçek saniye): sekiz karelik
+## klip (FigureActions `dismount`/`climb_down`). Binmek aynı süre, tersten.
+const TRANSITION_SECONDS: float = 1.5
+## Klip gerçek zemine göre yazıldı, eyer/koltuk ise o atın ve vagonun kendi
+## ölçüsünde: aradaki fark kalçaya eklenip ilk ayak yere değene kadar
+## sönüyor (bkz. `_transition_hip`).
+const SEAT_BLEND_U: Dictionary = {"dismount": 0.72, "climb_down": 0.62}
 
 ## Aynı ateşe birden fazla kişi geliyor (sürücü + yürüyen tayfa + sırayla
 ## dağılan parti). Hedefleri tek noktaya kenetlemek tek bir figür gibi
@@ -200,15 +207,22 @@ var _scale: float = 1.0
 ## vagonun içine girmesine yol açan şeydi.
 var _wagon_centres: Array[float] = []
 
-## Kamp durumu. `_gather_progress` 0 = herkes kendi kolon yerinde, 1 =
-## herkes kendi ateşinde; kamp başlayınca 0→1'e, bitince 1→0'a akıyor.
-## Ayrı bir yön değişkeni yok - `_camping`'in kendisi yön: doğru
-## yöne akmayı `_process` karar veriyor.
+## Kamp durumu. Ayrı bir yön değişkeni yok - `_camping`'in kendisi yön:
+## herkesin sayacı (`_gather_walk`/`_gather_trans`) ona doğru akıyor.
 var _camping: bool = false
-var _gather_progress: float = 0.0
 var _camp_time: float = 0.0
+## Her toplanan figürün kendi ilerleyişi: `_gather_walk` 0 kolonda, 1
+## ateşte; inip binenlerin (`_gather_trans`) önce inişi bitiyor, sonra
+## yürüyor, dönüşte önce yürüyüp sonra biniyor. Herkesin kendi sayacı var,
+## çünkü sıra kişiye göre değişiyor - tek bir paylaşılan sayaç arabacıyı
+## koltuktan doğrudan ateşe kaydırıyordu (kullanıcı raporu: "önce vagondan
+## inmeli"). Yön yine `_camping`: kamp yarıda bozulursa herkes kaldığı
+## yerden geri döner.
+var _gather_walk: Dictionary = {}
+var _gather_trans: Dictionary = {}
+var _gather_clip: Dictionary = {}
 ## Toplanan her figürün kolondaki "ev" konumu ve ateşteki hedefi - ikisi
-## arasında `_gather_progress` kadar ilerliyor. `_layout()` her çalıştığında
+## arasında kendi `_gather_walk`'ı kadar ilerliyor. `_layout()` her çalıştığında
 ## tazeleniyor (bkz. `_layout`), o yüzden ekran yeniden boyutlanırsa bile
 ## bayat bir eve dönmüyor.
 var _gather_homes: Dictionary = {}
@@ -224,6 +238,9 @@ var _gathering_figures: Array[WalkFigure] = []
 
 var _leader: WalkFigure
 var _leader_mounted: bool = false
+## Atlı liderin inen hâli: kampta at yerinde kalıyor (binicisiz), lider bu
+## figürle inip ateşe yürüyor. Kamp dışında görünmez.
+var _leader_rider: WalkFigure
 var _party_figures: Array[WalkFigure] = []
 var _crew_figures: Array[WalkFigure] = []
 ## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
@@ -338,6 +355,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_pack_is_dog.clear()
 	_pack_has_cart.clear()
 	_leader = null
+	_leader_rider = null
 
 	# Kamp durumu eski figürlere işaret ediyor olabilir - `queue_free()`
 	# bu kareyi bitirene kadar onları serbest bırakmıyor, ama kamp/kayıt
@@ -347,7 +365,6 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	# yol ekranında hep tek bir `configure()` çağrısı vardır, çoklu şehir/
 	# vagon karesi basan araçlarda ise `RoadCaravan` yeniden kullanılıyor).
 	_camping = false
-	_gather_progress = 0.0
 	_turning = false
 	_units.clear()
 	_unit_facing.clear()
@@ -362,6 +379,9 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_gather_targets.clear()
 	_gather_fire_index.clear()
 	_gather_seat_index.clear()
+	_gather_walk.clear()
+	_gather_trans.clear()
+	_gather_clip.clear()
 
 	_wagon_count = maxi(1, session.owned_wagon_count)
 	_leader_mounted = mounted_leader
@@ -374,6 +394,12 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 		_archetype_of(player), _height_scale_of(player), _skin_of(player), false, player
 	)
 	_leader.set_facing(1.0)
+	if mounted_leader:
+		_leader_rider = _make_figure(
+			WalkFigure.KIND_PERSON, _archetype_of(player), _height_scale_of(player), _skin_of(player),
+			false, player
+		)
+		_leader_rider.visible = false
 
 	# Parti lideri takip ediyor; sıra savaş sırası (bkz. Character & Party
 	# Rules), o yüzden kolonda gördüğün diziliş savaşta göreceğin diziliş.
@@ -666,16 +692,19 @@ func set_leader_motion(ground_px_s: float, walking: bool) -> void:
 
 ## Kamp kurulunca/kalkınca çağrılır. Ateşler burada değil `_draw()`'da
 ## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
-## yürüyeceğini belirliyor. Yön ayrı bir bayrak değil - `_gather_progress`
+## yürüyeceğini belirliyor. Yön ayrı bir bayrak değil - sayaçlar
 ## `_camping`'e doğru akıyor, `_advance_gather` kararı orada veriyor.
 func set_camping(camping: bool) -> void:
 	if _camping == camping:
 		return
 	_camping = camping
-	if camping:
+	# Dönüş yarıdayken yeniden kurulan kamp toplanmayı baştan kurmuyor:
+	# herkes kendi sayacıyla kaldığı yerden ateşe döner.
+	if camping and _gathering_figures.is_empty():
 		_begin_gathering()
 
-## Ateşe kimin gideceği: tayfanın **ikisi de** - sürücü ve yürüyen -
+## Ateşe kimin gideceği: lider (atlıysa önce attan iniyor), tayfanın
+## **ikisi de** - sürücü (önce koltuktan iniyor) ve yürüyen -
 ## kendi vagonunun ateşine gidiyor (bkz. `_driver_figures`'ın notu, ikisi
 ## de vagon `i`'nin adamı). Parti üyeleri ateşler arasında sırayla
 ## dağıtılıyor - hepsi aynı ateşte toplanmak kalabalık, hiçbiri gitmemek
@@ -687,6 +716,9 @@ func _begin_gathering() -> void:
 	_gather_targets.clear()
 	_gather_fire_index.clear()
 	_gather_seat_index.clear()
+	_gather_walk.clear()
+	_gather_trans.clear()
+	_gather_clip.clear()
 	if _wagon_centres.is_empty():
 		return
 	var fire_count := _wagon_centres.size()
@@ -694,10 +726,19 @@ func _begin_gathering() -> void:
 	# CAMPFIRE_SEATS'in notu).
 	var seats_taken: Dictionary = {}
 
+	# Lider kervanın başında; en yakın ateş baştaki vagonunki.
+	if _leader_mounted and _leader_rider != null:
+		var rider_h := _leader.size.y * WalkFigure.MOUNT_RIDER_RATIO
+		_leader_rider.size = Vector2(rider_h * 0.6, rider_h)
+		_leader_rider.set_facing(_leader.get_facing())
+		_assign_transition(_leader_rider, "dismount", 0, seats_taken)
+		_leader.set_riderless(true)
+	elif _leader != null:
+		_assign_gather(_leader, 0, seats_taken)
 	for index in _driver_figures.size():
 		if index >= fire_count:
 			break
-		_assign_driver_gather(_driver_figures[index], index, seats_taken)
+		_assign_transition(_driver_figures[index], "climb_down", index, seats_taken)
 	for index in _crew_figures.size():
 		if index >= fire_count:
 			break
@@ -719,29 +760,55 @@ func _assign_gather(figure: WalkFigure, fire_index: int, seats_taken: Dictionary
 	_gather_seat_index[figure] = seat
 	_gather_homes[figure] = figure.position
 	_gather_targets[figure] = _campfire_target(figure, fire_index, seat)
+	_gather_walk[figure] = 0.0
 
-## Sürücü normalde koltuğu hiç terk etmiyor (bkz. ArtDraw.wagon()'un
-## sabit silüeti) - kamp onu ilk kez sahneye çıkarıyor, o yüzden "ev"i
-## mevcut bir konum değil, oturduğu koltuğun kendisi (bkz.
-## `_driver_bench_position`). Aynı çağrı figürü görünür de yapıyor -
-## `configure()` onu gizli kurmuştu, sahneye ilk kez burada giriyor.
-func _assign_driver_gather(figure: WalkFigure, wagon_index: int, seats_taken: Dictionary) -> void:
+## Oturduğu yerden inen biri: arabacı koltuktan (`climb_down`), lider attan
+## (`dismount`). "Ev"i oturduğu yerin hemen yanında, yerde duran hâli; iniş
+## o noktada oynuyor, sonra yürüyüş oradan ateşe. Sürücü ve inen lider
+## normalde sahnede değil (koltuğu `ArtDraw.wagon()`'un sabit silüeti,
+## eyeri atlı figür tutuyor) - görünür olmaları burada.
+func _assign_transition(figure: WalkFigure, clip: String, fire_index: int, seats_taken: Dictionary) -> void:
 	if figure == null:
 		return
 	figure.visible = true
-	var bench := _driver_bench_position(wagon_index)
-	# `bench` koltuğun kendisi (gövde hizası), figürün *ayağının bastığı*
-	# nokta değil - `_place()`'in `ground_y - height` deseninin aynısı,
-	# yoksa figür koltuğun tepesinden başlayıp gerçek zeminin altına
-	# gömülür.
-	var home := Vector2(bench.x - figure.size.x * 0.5, bench.y - figure.size.y)
+	_gather_clip[figure] = clip
+	_gather_trans[figure] = 0.0
+	var home := _transition_home(figure)
 	figure.position = home
-	var seat := _take_seat(wagon_index, seats_taken)
+	var seat := _take_seat(fire_index, seats_taken)
 	_gathering_figures.append(figure)
-	_gather_fire_index[figure] = wagon_index
+	_gather_fire_index[figure] = fire_index
 	_gather_seat_index[figure] = seat
 	_gather_homes[figure] = home
-	_gather_targets[figure] = _campfire_target(figure, wagon_index, seat)
+	_gather_targets[figure] = _campfire_target(figure, fire_index, seat)
+	_gather_walk[figure] = 0.0
+	figure.set_transition(clip, 0.0, _transition_hip(figure, 0.0))
+
+## Oturulan yer, bu düğümün uzayında: kalçanın oturduğu nokta.
+func _transition_seat(figure: WalkFigure) -> Vector2:
+	if figure == _leader_rider and _leader != null:
+		return _leader.position + Vector2(_leader.size.x * 0.5, _leader.get_saddle_y())
+	return _driver_bench_position(int(_gather_fire_index.get(figure, _driver_figures.find(figure))))
+
+## İnen kişinin yerde durduğu yer: oturduğu yerin hizasında, ayağı zeminde
+## (`_place()`'in `ground_y - height` deseni).
+func _transition_home(figure: WalkFigure) -> Vector2:
+	var seat := _transition_seat(figure)
+	return Vector2(seat.x - figure.size.x * 0.5, _ground_y - figure.size.y)
+
+## Klibin `u` anında kalça, figürün kendi uzayında. Klip gerçek zeminde
+## yazılmış (kalça yerden `transition_hip_height` yukarıda); başta kalça
+## tam eyerde/koltukta olsun diye aradaki fark ekleniyor ve ayak yere
+## değerken (`SEAT_BLEND_U`) sönüyor - bitişte kişi tam zeminde ayakta.
+func _transition_hip(figure: WalkFigure, u: float) -> float:
+	var clip := String(_gather_clip.get(figure, ""))
+	var h := figure.person_height()
+	var ground := figure.size.y
+	var hip := ground - WalkFigure.transition_hip_height(clip, u, h)
+	var seat_local := _transition_seat(figure).y - figure.position.y
+	var start := ground - WalkFigure.transition_hip_height(clip, 0.0, h)
+	var fade := smoothstep(0.0, float(SEAT_BLEND_U.get(clip, 0.7)), u)
+	return hip + (seat_local - start) * (1.0 - fade)
 
 ## Figürün ateşteki hedefi. Taban çizgisi her zaman **gerçek zemin**
 ## (`_ground_y - height`), figürün o an durduğu yer değil - tayfa ve
@@ -799,6 +866,8 @@ func _refresh_gather_targets() -> void:
 	if _gathering_figures.is_empty():
 		return
 	for figure in _gathering_figures:
+		if _gather_trans.has(figure):
+			_gather_homes[figure] = _transition_home(figure)
 		if _gather_fire_index.has(figure):
 			_gather_targets[figure] = _campfire_target(
 				figure, int(_gather_fire_index[figure]), int(_gather_seat_index.get(figure, 0))
@@ -872,6 +941,31 @@ func get_campfire_positions() -> Array[Vector2]:
 ## herkes yerine döndü" iddiasını doğrulaması için.
 func is_gathering() -> bool:
 	return not _gathering_figures.is_empty()
+
+## Kamp kalktı ama herkes daha yerine dönmedi, binmedi: kervan bu sürede
+## yürümüyor (bkz. road_journey `_advance_position`). Yürüseydi dönenler
+## kayan bir zeminin üstünde ekran konumlarına akardı.
+func is_breaking_camp() -> bool:
+	return not _camping and not _gathering_figures.is_empty()
+
+## Lider ateşte ya da inip biniyor: kolonda gezdirilemez.
+func is_leader_at_camp() -> bool:
+	return _gather_homes.has(_leader_rider) or _gather_homes.has(_leader)
+
+## İnen liderin merkezi (kamp dışında anlamsız, görünmez).
+func get_leader_rider_centre() -> float:
+	if _leader_rider == null:
+		return 0.0
+	return _leader_rider.position.x + _leader_rider.size.x * 0.5
+
+func get_leader_rider() -> WalkFigure:
+	return _leader_rider
+
+func get_leader_figure() -> WalkFigure:
+	return _leader
+
+func get_driver_figures() -> Array[WalkFigure]:
+	return _driver_figures
 
 ## Parti/tayfa/liderin merkezleri - `get_wagon_centres()`/`get_ox_centres()`
 ## ile aynı desen: test kendi aritmetiğini yapmadan gerçek konumu okuyor.
@@ -1035,43 +1129,69 @@ func _leader_rel_x() -> float:
 		return -_walk_column(_scale, false) - lead - _leader_offset
 	return lead + _leader_offset
 
-## Toplanma ve dönüş: `_gather_progress` kampa göre 0↔1 arası akıyor,
-## her toplanan figürün ekrandaki yeri ev-ateş arasında bu oranla
-## enterpole ediliyor. Figürün kendi yürüyüş fazı da burada sürülüyor -
+## Toplanma ve dönüş: her figürün `_gather_walk`'ı kampa göre 0↔1 arası
+## akıyor, ekrandaki yeri ev-ateş arasında bu oranla enterpole ediliyor;
+## inip binenlerin önce/sonra kendi klibi var (`_gather_trans`). Figürün kendi yürüyüş fazı da burada sürülüyor -
 ## Zemin hızından değil, çünkü kamp sırasında kervan duruyor: adım her
 ## figürün kendi yolundan.
 func _advance_gather(delta: float) -> void:
 	if _gathering_figures.is_empty():
 		return
-	var target := 1.0 if _camping else 0.0
-	var moving := not is_equal_approx(_gather_progress, target)
-	if moving:
-		var step := delta / gather_seconds()
-		_gather_progress = clampf(
-			_gather_progress + (step if _camping else -step), 0.0, 1.0
-		)
-	var eased := _ease_gather(_gather_progress)
+	var walk_rate := 1.0 / gather_seconds()
+	var trans_rate := 1.0 / TRANSITION_SECONDS
+	var settled := true
 	for figure in _gathering_figures:
+		var has_trans := _gather_trans.has(figure)
+		var walk := float(_gather_walk.get(figure, 0.0))
+		var trans := float(_gather_trans.get(figure, 1.0))
+		# Gidişte önce iniş, sonra yürüyüş; dönüşte önce yürüyüş, sonra biniş.
+		if _camping:
+			if has_trans and trans < 1.0:
+				trans = minf(1.0, trans + delta * trans_rate)
+			else:
+				walk = minf(1.0, walk + delta * walk_rate)
+		elif walk > 0.0:
+			walk = maxf(0.0, walk - delta * walk_rate)
+		elif has_trans:
+			trans = maxf(0.0, trans - delta * trans_rate)
+		_gather_walk[figure] = walk
+		if has_trans:
+			_gather_trans[figure] = trans
 		var home: Vector2 = _gather_homes.get(figure, figure.position)
 		var dest: Vector2 = _gather_targets.get(figure, home)
-		var new_position: Vector2 = home.lerp(dest, eased)
-		var ground := (new_position.x - figure.position.x) / maxf(delta, 0.0001) if moving else 0.0
-		figure.position = new_position
-		figure.advance_ground(delta, ground)
+		var before := figure.position
+		figure.position = home.lerp(dest, _ease_gather(walk))
+		if has_trans and walk <= 0.0 and trans < 1.0:
+			figure.set_transition(String(_gather_clip[figure]), trans, _transition_hip(figure, trans))
+			figure.advance(delta, 0.0)
+		else:
+			if figure.is_in_transition():
+				figure.set_transition("", 0.0, 0.0)
+			figure.advance_ground(delta, (figure.position.x - before.x) / maxf(delta, 0.0001))
+		if walk > 0.0 or (has_trans and trans > 0.0):
+			settled = false
 
-	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor,
-	# yoksa bir sonraki kampa kadar boşuna taşınırlar. Sürücüler ayrıca
-	# gizleniyor: koltuğu artık yeniden `ArtDraw.wagon()`'un sabit
-	# silüeti tutuyor (bkz. `_draw()`'daki `driver_gone`), ikisi aynı
-	# anda görünürse aynı kişi iki kez sahnede olur.
-	if not _camping and is_zero_approx(_gather_progress):
+	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor.
+	# Sürücüler ve inen lider gizleniyor: koltuğu yeniden `ArtDraw.wagon()`'un
+	# sabit silüeti, eyeri atlı figür tutuyor (bkz. `_draw()`'daki
+	# `driver_gone`); ikisi aynı anda görünürse aynı kişi iki kez sahnede olur.
+	if not _camping and settled:
+		for figure in _gather_trans:
+			(figure as WalkFigure).set_transition("", 0.0, 0.0)
 		for figure in _driver_figures:
 			figure.visible = false
+		if _leader_rider != null:
+			_leader_rider.visible = false
+		if _leader != null:
+			_leader.set_riderless(false)
 		_gathering_figures.clear()
 		_gather_homes.clear()
 		_gather_targets.clear()
 		_gather_fire_index.clear()
 		_gather_seat_index.clear()
+		_gather_walk.clear()
+		_gather_trans.clear()
+		_gather_clip.clear()
 
 ## Ateşe yürüyüşün süresi: en uzağa yürüyenin en hızlı anı (smoothstep'in
 ## tepesi ortalamanın 1.5 katı) tempolu yürüyüşü aşmasın. 1.3 saniyede
@@ -1087,6 +1207,11 @@ func gather_seconds() -> float:
 	if farthest <= 0.0 or brisk == INF or brisk <= 0.0:
 		return CAMP_GATHER_SECONDS
 	return maxf(CAMP_GATHER_SECONDS, 1.5 * farthest / brisk)
+
+## Toplanmanın (ya da dönüşün) tamamı: inip binenler yürüyüşten önce/sonra
+## kendi klibini oynuyor.
+func settle_seconds() -> float:
+	return gather_seconds() + (TRANSITION_SECONDS if not _gather_trans.is_empty() else 0.0)
 
 ## Yumuşak geçiş (smoothstep): doğrusal enterpolasyon yürüyüşü başta ve
 ## sonda aniden kesiyor, figür ateşin dibinde fren yapmış gibi duruyordu.
@@ -1392,7 +1517,7 @@ func _draw() -> void:
 			HITCH_GAP * _scale * 1.7, wagon_h, _light
 		)
 		# Sürücü koltuğu boş çizilir yalnızca gerçek bir figür onu
-		# devralmışsa (bkz. `_assign_driver_gather`) - ikisi aynı anda
+		# devralmışsa (bkz. `_assign_transition`) - ikisi aynı anda
 		# çizilirse aynı kişi iki kez görünür.
 		var driver_gone := index < _driver_figures.size() and _driver_figures[index].visible
 		ArtDraw.wagon(

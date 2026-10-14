@@ -1,6 +1,9 @@
 extends Control
 
-## Kıyafet dolabı ve terzi: şehirde, kervanın giysileriyle uğraşılan tek yer.
+## Kıyafet dolabı ve terzi: şehirde, kervanın giysileriyle ve silahlarıyla
+## uğraşılan yer. Silah, zırh, yüzük ve kolye de burada (bkz. GameSession.
+## equip_to_character): üstündekiler bir kişinin üstündekilerin tamamı,
+## yalnız giysileri değil.
 ## Ortada seçili kişi boydan, yanında altı yerin (başlık, gömlek, ceket,
 ## eldiven, pantolon, ayakkabı) kutusu; solda kervanın dolabı, sağda o günkü
 ## terzi tezgâhı. Dolaptaki bir giysi kişinin üstündeki yerine sürüklenir,
@@ -20,6 +23,8 @@ const COLUMN_WIDTH: float = 300.0
 const HINT_COLOR: Color = Color(0.78, 0.74, 0.66)
 const DROP_OK_COLOR: Color = Color(0.86, 0.72, 0.36)
 const DRAG_KIND: String = "wayborne_outfit"
+const GEAR_DRAG_KIND: String = "wayborne_gear"
+const ICON_SIDE: float = 46.0
 
 var _session: GameSession
 var _index: int = 0
@@ -101,6 +106,14 @@ func _build_person_column() -> VBoxContainer:
 	row.add_child(slots)
 	for slot in OutfitCatalog.ALL_SLOTS:
 		slots.add_child(_build_slot_box(character, slot))
+	column.add_child(_heading(tr("UI_WARDROBE_GEAR")))
+	var gear := GridContainer.new()
+	gear.columns = 2
+	gear.add_theme_constant_override("h_separation", 6)
+	gear.add_theme_constant_override("v_separation", 6)
+	column.add_child(gear)
+	for slot in EquipmentCatalog.ALL_SLOTS:
+		gear.add_child(_build_gear_box(character, slot))
 	column.add_child(_build_stats_label(character))
 	return column
 
@@ -113,6 +126,8 @@ func _build_slot_box(character: CharacterData, slot: String) -> PanelContainer:
 	var inner := HBoxContainer.new()
 	inner.add_theme_constant_override("separation", 6)
 	box.add_child(inner)
+	var piece := OutfitCatalog.get_piece(character.get_outfit_piece(slot))
+	inner.add_child(_outfit_icon(piece))
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -122,7 +137,6 @@ func _build_slot_box(character: CharacterData, slot: String) -> PanelContainer:
 	slot_label.modulate = HINT_COLOR
 	slot_label.add_theme_font_size_override("font_size", 13)
 	text.add_child(slot_label)
-	var piece := OutfitCatalog.get_piece(character.get_outfit_piece(slot))
 	var name_label := Label.new()
 	name_label.text = piece.display_name if piece != null else tr("UI_WARDROBE_SLOT_EMPTY")
 	text.add_child(name_label)
@@ -185,10 +199,13 @@ func _build_locker_column() -> PanelContainer:
 	panel.add_child(column)
 	column.add_child(_heading(tr("UI_WARDROBE_LOCKER")))
 	var ids := _locker_ids()
-	if ids.is_empty():
+	var gear_ids := _gear_locker_ids()
+	if ids.is_empty() and gear_ids.is_empty():
 		column.add_child(_hint(tr("UI_WARDROBE_LOCKER_EMPTY")))
 	for piece_id in ids:
 		column.add_child(_build_locker_card(piece_id))
+	for equipment_id in gear_ids:
+		column.add_child(_build_gear_card(equipment_id))
 	# Üstteki bir giysi buraya bırakılınca çıkar.
 	panel.set_drag_forwarding(Callable(), _locker_can_drop, _locker_drop)
 	return panel
@@ -204,9 +221,7 @@ func _build_locker_card(piece_id: String) -> PanelContainer:
 	var piece := OutfitCatalog.get_piece(piece_id)
 	var card := PanelContainer.new()
 	card.theme_type_variation = WaybookTheme.CELL_PANEL
-	var column := VBoxContainer.new()
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(column)
+	var column := _card_body(card, _outfit_icon(piece))
 	column.add_child(_piece_title(piece, _session.get_outfit_count(piece_id)))
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 6)
@@ -271,8 +286,7 @@ func _build_tailor_row(piece_id: String, left: int) -> PanelContainer:
 	var piece := OutfitCatalog.get_piece(piece_id)
 	var card := PanelContainer.new()
 	card.theme_type_variation = WaybookTheme.CELL_PANEL
-	var column := VBoxContainer.new()
-	card.add_child(column)
+	var column := _card_body(card, _outfit_icon(piece))
 	column.add_child(_piece_title(piece, left))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
@@ -319,6 +333,31 @@ func _slot_drag(_at_position: Vector2, slot: String, _box: Control) -> Variant:
 	set_drag_preview(_make_preview(piece_id))
 	return _drag_data(piece_id, "slot", slot)
 
+func _gear_drag(_at_position: Vector2, equipment_id: String, source: String, slot: String) -> Variant:
+	if equipment_id.is_empty():
+		return null
+	var equipment := EquipmentCatalog.get_equipment(equipment_id)
+	var preview := PanelContainer.new()
+	preview.theme_type_variation = WaybookTheme.CELL_PANEL
+	var label := Label.new()
+	label.text = equipment.display_name if equipment != null else equipment_id
+	preview.add_child(label)
+	set_drag_preview(preview)
+	return {"kind": GEAR_DRAG_KIND, "equipment_id": equipment_id, "source": source, "slot": slot}
+
+func _is_gear_drag(data: Variant) -> bool:
+	return data is Dictionary and str((data as Dictionary).get("kind", "")) == GEAR_DRAG_KIND
+
+func _gear_slot_can_drop(_at_position: Vector2, data: Variant, slot: String) -> bool:
+	if not _is_gear_drag(data) or str(data["source"]) != "locker" or _character() == null:
+		return false
+	var equipment := EquipmentCatalog.get_equipment(str(data["equipment_id"]))
+	return equipment != null and equipment.slot == slot \
+		and _session.can_equip(_character(), equipment.equipment_id)
+
+func _gear_slot_drop(_at_position: Vector2, data: Variant, slot: String) -> void:
+	_equip(slot, str(data["equipment_id"]))
+
 func _slot_can_drop(_at_position: Vector2, data: Variant, slot: String) -> bool:
 	if not _is_outfit_drag(data) or str(data["source"]) != "locker" or _character() == null:
 		return false
@@ -329,10 +368,13 @@ func _slot_drop(_at_position: Vector2, data: Variant, _slot: String) -> void:
 	_wear(str(data["piece_id"]))
 
 func _locker_can_drop(_at_position: Vector2, data: Variant) -> bool:
-	return _is_outfit_drag(data) and str(data["source"]) == "slot"
+	return (_is_outfit_drag(data) or _is_gear_drag(data)) and str(data["source"]) == "slot"
 
 func _locker_drop(_at_position: Vector2, data: Variant) -> void:
-	_take_off(str(data["slot"]))
+	if _is_gear_drag(data):
+		_unequip(str(data["slot"]))
+	else:
+		_take_off(str(data["slot"]))
 
 func _tailor_can_drop(_at_position: Vector2, data: Variant) -> bool:
 	return _is_outfit_drag(data) and str(data["source"]) == "locker"
@@ -360,7 +402,133 @@ func _buy(piece_id: String) -> void:
 	_session.buy_outfit(piece_id)
 	call_deferred("_refresh")
 
+func _equip(slot: String, equipment_id: String) -> void:
+	_session.equip_to_character(_character(), slot, equipment_id)
+	call_deferred("_refresh")
+
+func _unequip(slot: String) -> void:
+	_session.unequip_from_character(_character(), slot)
+	call_deferred("_refresh")
+
+# --- Silah, zırh, yüzük, kolye ---
+# Giysilerle aynı desen: kişinin üstündeki yer kutusu, dolapta (kervanın
+# ortak deposu, equipment_inventory) bekleyen parça kartı. Satılmıyor -
+# silah ve zırh demircinin işi, yüzük ve kolye bulunur.
+
+## Bir ekipman yerinin kutusu: takılı parçanın resmi, adı, katkısı.
+func _build_gear_box(character: CharacterData, slot: String) -> PanelContainer:
+	var box := PanelContainer.new()
+	box.theme_type_variation = WaybookTheme.CELL_PANEL
+	box.custom_minimum_size = Vector2(SLOT_BOX_SIZE.x, SLOT_BOX_SIZE.y)
+	var equipped := character.get_equipped(slot)
+	var inner := HBoxContainer.new()
+	inner.add_theme_constant_override("separation", 6)
+	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(inner)
+	inner.add_child(WaybookTheme.equipment_icon(equipped.equipment_id if equipped != null else "", ICON_SIDE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inner.add_child(text)
+	var slot_label := Label.new()
+	slot_label.text = EquipmentCatalog.get_slot_display_name(slot)
+	slot_label.modulate = HINT_COLOR
+	slot_label.add_theme_font_size_override("font_size", 13)
+	text.add_child(slot_label)
+	var name_label := Label.new()
+	name_label.text = equipped.display_name if equipped != null else tr("UI_WARDROBE_SLOT_EMPTY")
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_child(name_label)
+	if equipped != null:
+		var bonus := Label.new()
+		bonus.text = gear_bonus_text(equipped)
+		bonus.add_theme_font_size_override("font_size", 13)
+		bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.add_child(bonus)
+		var off := Button.new()
+		off.text = tr("UI_WARDROBE_TAKE_OFF")
+		off.pressed.connect(_unequip.bind(slot))
+		inner.add_child(off)
+	box.set_drag_forwarding(
+		_gear_drag.bind(equipped.equipment_id if equipped != null else "", "slot", slot),
+		_gear_slot_can_drop.bind(slot),
+		_gear_slot_drop.bind(slot)
+	)
+	return box
+
+func _gear_locker_ids() -> Array[String]:
+	var out: Array[String] = []
+	for slot in EquipmentCatalog.ALL_SLOTS:
+		for equipment in EquipmentCatalog.get_equipment_for_slot(slot):
+			if _session.get_equipment_count(equipment.equipment_id) > 0:
+				out.append(equipment.equipment_id)
+	return out
+
+## Depodaki bir ekipman: resmi, adı (yeri ve adedi), katkısı, Kuşan. Seviye
+## yetmiyorsa düğme kilitli, nedeni yanında (Progression Rules).
+func _build_gear_card(equipment_id: String) -> PanelContainer:
+	var equipment := EquipmentCatalog.get_equipment(equipment_id)
+	var card := PanelContainer.new()
+	card.theme_type_variation = WaybookTheme.CELL_PANEL
+	var column := _card_body(card, WaybookTheme.equipment_icon(equipment_id, ICON_SIDE))
+	var count := _session.get_equipment_count(equipment_id)
+	var name_label := Label.new()
+	name_label.text = "%s (%s)%s" % [
+		equipment.display_name, EquipmentCatalog.get_slot_display_name(equipment.slot),
+		(" ×%d" % count) if count > 1 else "",
+	]
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(name_label)
+	var bonus := Label.new()
+	bonus.text = gear_bonus_text(equipment)
+	bonus.add_theme_font_size_override("font_size", 13)
+	bonus.modulate = HINT_COLOR
+	column.add_child(bonus)
+	var equip := Button.new()
+	equip.text = tr("UI_WARDROBE_EQUIP")
+	var allowed := _character() != null and _session.can_equip(_character(), equipment_id)
+	equip.disabled = not allowed
+	equip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	equip.pressed.connect(_equip.bind(equipment.slot, equipment_id))
+	column.add_child(equip)
+	if _character() != null and not allowed:
+		column.add_child(_hint(tr("UI_WARDROBE_NEEDS_LEVEL") % equipment.required_level))
+	card.set_drag_forwarding(_gear_drag.bind(equipment_id, "locker", ""), Callable(), Callable())
+	return card
+
+## Bir ekipmanın katkısı, giysininkiyle aynı biçimde ("+2 can, +1 isabet").
+static func gear_bonus_text(equipment: Equipment) -> String:
+	var parts: PackedStringArray = []
+	for field in OutfitCatalog.BONUS_FIELDS:
+		var value := int(equipment.get(field))
+		if value != 0:
+			parts.append("%+d %s" % [value, String(TranslationServer.translate(OutfitCatalog._stat_key(field)))])
+	return ", ".join(parts)
+
 # --- Yardımcılar ---
+
+## Kartın içi: solda resim, sağda metin sütunu (döner).
+func _card_body(card: PanelContainer, icon: Control) -> VBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(row)
+	row.add_child(icon)
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(column)
+	return column
+
+func _outfit_icon(piece: OutfitPiece) -> Control:
+	if piece == null:
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(ICON_SIDE, ICON_SIDE)
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return spacer
+	var character := _character()
+	var body := character.get_body_variant_id() if character != null else ""
+	return OutfitIcon.new().setup(piece, body, ICON_SIDE)
 
 func _heading(text: String) -> Label:
 	var label := Label.new()

@@ -143,6 +143,20 @@ var _action_u: float = 0.0
 var _stuck: Array = []
 var _last_joints: Dictionary = {}
 
+## İniş/biniş: attan (`dismount`) ve vagon koltuğundan (`climb_down`). İki
+## klibin de kökü kalça (`build.json` root pelvis), yani figür bu klipte
+## yere değil kalçasından asılır; kalçanın yeri (`_transition_hip`, figürün
+## kendi uzayında y) RoadCaravan'ın: eyerden ya da koltuktan ayakta duruşa.
+## Binmek ve vagona çıkmak aynı klip, `u` tersine akıyor. Negatif = geçiş yok.
+const TRANSITION_CLIPS: Array[String] = ["dismount", "climb_down"]
+var _transition_hip: float = -1.0
+## Atlı figür binicisiz çizilebiliyor: binici inince at yerinde kalıyor,
+## binici ayrı bir figür olarak yürüyor (RoadCaravan._leader_rider).
+var _riderless: bool = false
+## Son çizilen eyerin y'si, figürün kendi uzayında - inen binicinin
+## kalçası tam buradan başlıyor.
+var _saddle_y: float = -1.0
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -186,6 +200,43 @@ func set_action(clip: String, u: float = 0.0) -> void:
 	_action_clip = clip
 	_action_u = u
 	queue_redraw()
+
+## Geçiş klibinin `u` anı, kalça `hip_y`'de. `clip` boşsa geçiş biter.
+func set_transition(clip: String, u: float, hip_y: float) -> void:
+	_transition_hip = hip_y if not clip.is_empty() else -1.0
+	set_action(clip, u)
+	queue_redraw()
+
+## Çizilen kişinin boyu (piksel): kutunun boyu kişinin kendi boy çarpanıyla.
+func person_height() -> float:
+	return size.y * _scale
+
+func is_in_transition() -> bool:
+	return _transition_hip >= 0.0 and not _action_clip.is_empty()
+
+func set_riderless(on: bool) -> void:
+	if _riderless == on:
+		return
+	_riderless = on
+	queue_redraw()
+
+## Eyerin üstü, figürün kendi uzayında (atlı figür çizildiyse). Çizilmeden
+## önce atın boyundan kestirilen yer.
+func get_saddle_y() -> float:
+	if _saddle_y >= 0.0:
+		return _saddle_y
+	return size.y - size.y * MOUNT_HORSE_RATIO * 0.66
+
+## Geçiş klibinin `u` anında kalçanın yerden yüksekliği (piksel, `h` boyunda
+## bir kişi için). Klip gerçek zemine göre yazıldı (bkz. FigureActions
+## `dismount`/`climb_down`); oyunun çizdiği kare aynı kare sayısından.
+static func transition_hip_height(clip: String, u: float, h: float) -> float:
+	var n := FigureActions.frame_count(clip)
+	if n <= 0:
+		return h * FigureRig.HIP_RATIO
+	var i := clampi(int(round(clampf(u, 0.0, 1.0) * float(n - 1))), 0, n - 1)
+	var j := FigureActions.pose(clip, i, Vector2.ZERO, h, 1.0)
+	return -(j["hip"] as Vector2).y
 
 func set_beast_species(species: String) -> void:
 	_beast_species = species
@@ -414,11 +465,36 @@ func _draw() -> void:
 			# atı çizen fonksiyondan geliyor, tahminden değil.
 			var horse_h := height * MOUNT_HORSE_RATIO
 			var back_y := _draw_quadruped(horse_h, HORSE_COAT, HORSE_COAT_DARK, true)
-			_draw_person(height * MOUNT_RIDER_RATIO, back_y, true)
+			_saddle_y = back_y
+			if not _riderless:
+				_draw_person(height * MOUNT_RIDER_RATIO, back_y, true)
 		_:
-			_draw_person(height, height, false)
+			if is_in_transition():
+				_draw_transition(height)
+			else:
+				_draw_person(height, height, false)
 
 # --- İki ayaklı ---
+
+## İniş/biniş karesi. Kare kümesinde (ve giyilen her giyside) klip varsa
+## kalçadan asılı çiziliyor; yoksa (henüz render edilmemiş bir giysi, eski
+## parça mankeni) ilk yarıda oturan duruş koltukta, ikinci yarıda ayakta
+## duruş - figür hiçbir zaman çıplak ya da havada kalmıyor.
+func _draw_transition(height: float) -> void:
+	var frames := BodyFrames.for_body(_body_variant) if not _body_variant.is_empty() else null
+	if frames != null:
+		var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+		if shared_clips(frames, garments).has(_action_clip):
+			_draw_person_frames(frames, height * _scale, _transition_hip, false)
+			return
+	var clip := _action_clip
+	var u := _action_u
+	_action_clip = ""
+	if u < 0.5:
+		_draw_person(height, _transition_hip, true)
+	else:
+		_draw_person(height, height, false)
+	_action_clip = clip
 
 ## İnsan figürü iskeletten (`FigureRig`) çiziliyor: önce eklemler çözülüyor,
 ## sonra `FigureRig.DRAW_ORDER`'daki her kemik için sırayla prosedürel
@@ -483,6 +559,9 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 ## karakter yaratımında modül olarak eklenecek). Oyuncunun seçtiği kıyafetin
 ## rengi temel kuşamı boyar; seçilmiş bir başlık ve silah/sırt yükü
 ## render'ın kendi eklemlerine bağlanır.
+## Uzak bacağın atın arkasından çıktığı an (FigureActions `dismount`'un
+## ikinci anahtarı 0.28'de bacağı sağrının üstüne kaldırıyor).
+const DISMOUNT_FAR_LEG_U: float = 0.26
 const UNDERSHIRT_COLOR: Color = Color(0.78, 0.74, 0.64)
 const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
 const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
@@ -498,7 +577,15 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var k := frames.scale_for(h)
 	var origin := Vector2(size.x * 0.5, ground_y)
 	var xf := Transform2D(_lean * _facing, Vector2(k * _facing, k), 0.0, origin)
-	if not seated:
+	# İniş/biniş klibi kalçadan asılı: gölge yerde, ayak yere yaklaştıkça
+	# koyulaşıyor.
+	var hip_rooted := clip == _action_clip and TRANSITION_CLIPS.has(clip)
+	if hip_rooted:
+		var lift := clampf((size.y - ground_y) / maxf(h * 0.6, 1.0), 0.0, 1.0)
+		var shade := FRAME_SHADOW
+		shade.a *= lerpf(1.0, 0.35, lift)
+		ArtDraw.ellipse(self, Vector2(origin.x, size.y), Vector2(h * 0.16, h * 0.028), shade)
+	elif not seated:
 		ArtDraw.ellipse(self, origin, Vector2(h * 0.16, h * 0.028), FRAME_SHADOW)
 	var tones := frame_tones(_tinted(_skin), _outfit, _tint)
 	var joints := {}
@@ -511,7 +598,8 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var wdir := xf.basis_xform(Vector2.from_angle(float(wdata.angle))).normalized()
 	# Ölü ve yerdeki el silahı bırakmış: kalkan ve mızrak havada kalıyordu.
 	var fallen := _action_clip in ["dead", "downed"]
-	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen
+	# İnen/binen kişi silahı elinde taşımıyor: sırtta kalıyor.
+	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen and not hip_rooted
 	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
 	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
 	_last_joints = joints
@@ -521,6 +609,11 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
+		# Attan inerken uzak bacak sağrının üstünden aşana kadar atın öbür
+		# yanında: çizilse atın gövdesinin üstünde görünürdü.
+		if hip_rooted and clip == "dismount" and _action_u < DISMOUNT_FAR_LEG_U \
+				and BodyFrames.LAYERS[layer] == "back_leg":
+			continue
 		var weapon_layer := "front_arm" if weapon_in_front(_facing, weapon_kind()) else "torso_head"
 		if BodyFrames.LAYERS[layer] == weapon_layer and held:
 			_draw_frame_weapon(joints, h, look, wdir, float(wdata.draw))
