@@ -225,6 +225,21 @@ static func pick_clip(
 		return "walk"
 	return "idle"
 
+## Bedenin ve giyilen her giysinin ortak klipleri. Bir klip yalnız bedende
+## render edilmişse (giysiler sonra gelir) figür o anda çıplak görünürdü;
+## ortak olmayan klip seçilmiyor, genel karşılığına düşüyor.
+static func shared_clips(body: BodyFrames, garments: Array[BodyFrames]) -> PackedStringArray:
+	var out := PackedStringArray()
+	for clip in body.clip_names:
+		var everywhere := true
+		for garment in garments:
+			if not garment.has_clip(clip):
+				everywhere = false
+				break
+		if everywhere:
+			out.append(clip)
+	return out
+
 const ACTION_FALLBACK: Dictionary = {
 	"hit_pierce": "hit", "hit_slash": "hit", "react_burn": "hit",
 	"react_freeze": "hit", "react_poison": "hit", "dodge": "defend",
@@ -473,7 +488,8 @@ const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
 const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
 
 func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
-	var clip := pick_clip(frames.clip_names, seated, _motion, _action_clip, _combat_stance,
+	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+	var clip := pick_clip(shared_clips(frames, garments), seated, _motion, _action_clip, _combat_stance,
 		weapon_kind(), _carries_pack, _wears_boots())
 	if not frames.has_clip(clip):
 		clip = "idle"
@@ -499,7 +515,6 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
 	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
 	_last_joints = joints
-	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
 	var shield := held and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)

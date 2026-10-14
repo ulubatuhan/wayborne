@@ -43,6 +43,18 @@ func _test_hit_style_picks_the_reaction(t) -> void:
 			false, 0.0, clip, true, "sword", false, false)
 		t.ok(picked != "stance_melee" and picked != "idle", "%s render edilmemişse genel karşılığına düşer (%s)" % [clip, picked])
 	t.eq(CombatFigure.action_for("ok", 1.0, "hit_pierce", 0.4, "sword").clip, "hit_pierce", "özel tepki rolü bir klip")
+	# Klip bedende render edilip giyside henüz yoksa seçilmiyor - yoksa
+	# figür o an çıplak görünürdü.
+	var body := BodyFrames.new()
+	body.clip_names = PackedStringArray(["idle", "hit", "hit_pierce"])
+	body.clip_frames = PackedInt32Array([1, 4, 4])
+	var shirt := BodyFrames.new()
+	shirt.clip_names = PackedStringArray(["idle", "hit"])
+	shirt.clip_frames = PackedInt32Array([1, 4])
+	var garments: Array[BodyFrames] = [shirt]
+	var shared := WalkFigure.shared_clips(body, garments)
+	t.ok(not shared.has("hit_pierce"), "giysisi olmayan klip ortak değil")
+	t.eq(WalkFigure.pick_clip(shared, false, 0.0, "hit_pierce", true, "sword", false, false), "hit", "genel darbeye düşer")
 	t.eq(CombatFigure.action_for("ok", 1.0, CombatFigure.ROLE_CAST, 0.4, "staff").clip, "attack_cast", "büyü yapma klibi")
 
 ## Ok ve fırlatılan bıçak saplı kalır; taş, şişe, büyü kalmaz. En fazla
