@@ -168,17 +168,28 @@ olmak zorunda değiller; bazıları çektiği acı yüzünden kötülüğe meyle
 
 ## 4. İnançlar
 
-### 4.1 Kilise ve El [Yazar, C5]
+**[Yazar]** Sideria'nın temel aldığı **iki güçlü inanç** var: **The Hand** (El) ve
+**Baikhan**. Diğer bütün inançlar küçük, yerel ya da bu ikisinin içinde erimiş
+inanışlardır.
 
-- Kilisenin tanrısı ya da kutsal adı **El**. [Türetme: "El'in yazdığı sayfa"
-  ifadesinden. El bir tanrı adı mı, bir unvan mı? Şimdiki zaman sorularında.]
+### 4.1 The Hand (El) ve Kilise [Yazar, C5]
+
+- Kilisenin inancı **The Hand**; Türkçe metinlerde **El**. "El'in yazdığı sayfa"
+  bu inancın dilidir.
+  [Türetme: El yaratan, yazan, çizen, nakşeden eldir; dünyayı ve kaderi bir el
+  işi olarak görür. Kilisenin imgesi bir el olabilir (açık el, mühür basan el).
+  Mimari kuralı bozmadan, kubbesiz bir sembol. Onay bekliyor.]
 - Kilise karşılaştığı pagan dinleri **asimile ederek** büyüdü ve onların tarihini
   sildi.
-- **Dağın İlk Nefesi** ve **Denizin İlk Gözyaşı** silinmedi, çünkü ikisinin de işe
-  yarayan yanları ve güçlü taraftarları vardı. Kilise **adlarını değiştirerek**
-  benimsedi, zamanla sönmelerini ve güç kaybetmelerini sağladı. Bugün bunlar **El'in
-  yazdığı bir sayfa, çizdiği bir figür, nakşettiği bir imge**dir. Kilise ikisini
-  birlikte okutur [Oyun].
+- **Denizin İlk Gözyaşı** ve **Dağın İlk Nefesi** silinmedi; kilise **adlarını
+  değiştirerek** benimsedi, zamanla sönmelerini ve güç kaybetmelerini sağladı.
+  Bugün bunlar **El'in yazdığı bir sayfa, çizdiği bir figür, nakşettiği bir
+  imge**dir. Kilise ikisini birlikte okutur [Oyun].
+- **[Yazar]** Dağın İlk Nefesi bugün **küçük (minor) bir inanış**: dağ halkının
+  arasında yaşayan bir gelenek, büyük inançlardan biri değil.
+  [Çelişki, hafif] Oyunda kilise bu efsaneyi Denizin İlk Gözyaşı ile eşit ağırlıkta
+  okutuyor (Kilise ekranı, iki efsane yan yana). Küçük bir inanış olarak kalacaksa
+  Kilise ekranındaki metnin ağırlığı değişebilir. (Şimdiki zaman sorularında.)
 - İki inancın az sayıda gerçek takipçisi hâlâ var; kilise bu kalıntıları hor görür.
   **Kilise merkezli şehirlerde barınmazlar**; taşrada ya da gizlice yaşarlar.
 - Kilisenin bir arınma ritüeli var: huy arındırma [Oyun]. [Türetme: C2 gereği bu
@@ -191,8 +202,9 @@ Deniz efsanesi kimin? (Şimdiki zaman sorularında.)
 
 ### 4.2 Eski efsaneler [Oyun]
 
-- **Dağın İlk Nefesi** (Dağ Kabilesi): dünya ilk soluğunu dağların doruğunda aldı;
-  o nefes rüzgârda, ayinde, gücün kendisinde. Güç sınavı o nefese yaklaşma çabası.
+- **Dağın İlk Nefesi** (Dağ Kabilesi, küçük bir inanış): dünya ilk soluğunu
+  dağların doruğunda aldı; o nefes rüzgârda, ayinde, gücün kendisinde. Güç sınavı
+  o nefese yaklaşma çabası.
 - **Denizin İlk Gözyaşı** (Balıkçılar): deniz ilk tanrının gözyaşından doğdu ve
   hâlâ ağlar. Denize açılmadan dua edilir; sakinleştirilebilen tek şey tanrının
   kederi. Balıkçılar "deniz tanrılarından" söz eder.
@@ -202,7 +214,8 @@ Deniz efsanesi kimin? (Şimdiki zaman sorularında.)
 
 ### 4.3 Baikhan yolu [Yazar, C7, C10]
 
-- Göçebe boylarının inancı; kilisenin asimilasyonundan kaçabilen **tek** inanç.
+- Göçebe boylarının inancı; Sideria'nın iki büyük inancından biri ve kilisenin
+  asimilasyonundan kaçabilen **tek** inanç.
 - Bir dinden çok bir **yaşam tarzı, bakış açısı, felsefe**. Temeli özgürlük ve
   bağımsızlık; doğaya, göğe ve toprağa saygı.
 - Tek ibadeti: su içerken, toprağa basarken, avlanırken, yaşama dokunulan her an
@@ -358,7 +371,7 @@ yüzden coğrafyanın en pahalı kararı.
 | güç | durum | kaynak |
 |---|---|---|
 | **Tüccar Loncası** | Kontrat, borç, haber; her şehirde aynı defter. Kampanyanın amacı loncanın defterinde bir satır olmaktan çıkıp kendi hanını kurmak. | Oyun |
-| **Kilise** | El'in kilisesi; pagan inançları asimile etmiş; kilise merkezli şehirler var; arınma ritüeli. | Yazar C5, Oyun |
+| **Kilise** | The Hand (El) inancının kilisesi; Sideria'nın iki büyük inancından biri; pagan inançları asimile etmiş; kilise merkezli şehirler var; arınma ritüeli. | Yazar C5, Oyun |
 | **Krallar ve konseyleri** | Büyücüler krallara hizmet eder, sayılı krallıkların konseylerinde oturur. | Yazar C6 |
 | **Prenslikler** | Ortada binbir prenslik, iç savaş. | Yazar C1 |
 | **Beylikler** | Oyunun haber kartlarında "iki beyliğin savaşı". | Oyun, Geçici? |

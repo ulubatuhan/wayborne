@@ -678,6 +678,34 @@
     0.52,
     0.5
    ]
+  },
+  "mage_robe": {
+   "slot": "jacket",
+   "draw_order": 44,
+   "eps": 0.015,
+   "source": "mhclo",
+   "mhclo": "maciekg_wizard_robe",
+   "tint": [
+    0.3,
+    0.17,
+    0.4
+   ],
+   "hides": [
+    "shirt",
+    "pants"
+   ]
+  },
+  "wizard_hat": {
+   "slot": "hat",
+   "draw_order": 50,
+   "eps": 0.008,
+   "source": "mhclo",
+   "mhclo": "maciekg_wizard_hat",
+   "tint": [
+    0.28,
+    0.16,
+    0.38
+   ]
   }
  },
  "samples_shade": 64,

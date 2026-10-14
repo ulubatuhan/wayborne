@@ -23,6 +23,7 @@ Dokular 512 px'e kucultuldu, normal haritalari alinmadi. CC-BY olanlar oyunun CR
 | javherre_casco_caballero_templario_templar_knight_helmet | javherre | CC0 | http://www.makehumancommunity.org/node/2014 |
 | maciekg_leather_boots | MaciekG | CC-BY | http://www.makehumancommunity.org/node/1461 |
 | maciekg_leather_helmet | MaciekG | CC-BY | http://www.makehumancommunity.org/node/1457 |
+| maciekg_wizard_hat | MaciekG | CC-BY | https://static.makehumancommunity.org/assets/assetpacks/hats03.html |
 | maciekg_wizard_robe | MaciekG | CC-BY | http://www.makehumancommunity.org/node/1482 |
 | mindfront_cardigan_long_open_front | Mindfront | CC-BY | http://www.makehumancommunity.org/node/1528 |
 | mindfront_knitted_hat_01 | Mindfront | CC-BY | http://www.makehumancommunity.org/node/745 |
