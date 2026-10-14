@@ -412,6 +412,9 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		)
 	var weapon_sprite := Wardrobe.has_part(_loadout, "weapon")
 	var body_id := _body_id()
+	var shield := _combat_stance and weapon_kind() == "spear_shield"
+	if shield and not shield_in_front(_facing):
+		_draw_shield(joints, h, look)
 	for bone in FigureRig.bones_for(seated):
 		# Manken bu kemiği kaplıyorsa prosedürel uzuv çizilmiyor - altında
 		# kalıp kenarından taşan ikinci bir çizgi olurdu. Saç/şapka ve sırt
@@ -421,6 +424,8 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		else:
 			_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
 		_draw_wardrobe(bone, joints, h)
+	if shield and shield_in_front(_facing):
+		_draw_shield(joints, h, look)
 
 ## Önceden render edilmiş beden (`BodyFrames`, 3B'den): beş derinlik katmanı
 ## arkadan öne, her katmanda beden tenle, üstüne şort ve atlet/bra kendi
@@ -463,6 +468,9 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
 	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
 	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+	var shield := held and weapon_kind() == "spear_shield"
+	if shield and not shield_in_front(_facing):
+		_draw_shield(joints, h, look)
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
@@ -486,6 +494,8 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 		draw_set_transform_matrix(Transform2D.IDENTITY)
 		if BodyFrames.LAYERS[layer] == "torso_head":
 			_draw_frame_extras(joints, h, look)
+	if shield and shield_in_front(_facing):
+		_draw_shield(joints, h, look)
 
 ## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Temel kuşam
 ## giysinin altındaki iç çamaşırı; giyilen parça kendi render'ıyla üstüne
@@ -611,10 +621,6 @@ func _draw_frame_weapon(joints: Dictionary, h: float, look: Dictionary, wdir: Ve
 		return
 	var hand: Vector2 = joints.hand_front
 	if _draw_weapon_sprite(hand, wdir, h):
-		if weapon_kind() == "spear_shield" and joints.has("hip"):
-			var centre: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, 0.55) + Vector2(0.075 * _facing, 0.0) * h
-			var r := PropArt.long_side_m(SHIELD_PROP) * _px_per_m(h) * 0.5
-			PropArt.draw_between(self, SHIELD_PROP, "body", centre + Vector2(0.0, r), centre - Vector2(0.0, r), _tint, _facing < 0.0)
 		return
 	var metal: Color = look.metal
 	var trim: Color = look.trim
@@ -646,10 +652,6 @@ func _draw_frame_weapon(joints: Dictionary, h: float, look: Dictionary, wdir: Ve
 				top, top + wdir * h * 0.06 + side * h * 0.025, top + wdir * h * 0.10,
 				top + wdir * h * 0.06 - side * h * 0.025,
 			]), metal, ink_w)
-			if joints.has("hip"):
-				var shield: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, 0.55) + Vector2(0.075 * _facing, 0.0) * h
-				ArtDraw.ellipse(self, shield, Vector2(0.055, 0.105) * h, metal.darkened(0.30))
-				draw_arc(shield, 0.105 * h, 0.0, TAU, 20, ArtPalette.INK, ink_w)
 		"bow":
 			var pts := bow_points(hand, wdir, h, _facing, joints.get("hand_back", hand), draw_amount)
 			var stave := _bezier(pts.top, pts.bulge, pts.bottom, 14)
@@ -679,6 +681,26 @@ const WEAPON_PROPS := {
 	"spear_shield": ["weapon_spear", 0.38],
 }
 const SHIELD_PROP: String = "weapon_shield_round"
+
+## Kalkan sol kolda. Figür yön değiştirirken aynalandığı için sağa bakanda
+## sol kol uzak taraftadır ve kalkan bedenin arkasında kalır; sola bakanda
+## yakın taraftadır ve önde çizilir. Saf fonksiyon - test sahnesiz okuyabilsin.
+static func shield_in_front(facing: float) -> bool:
+	return facing < 0.0
+
+## Kalkan göğsün ön kenarında, gövdeye göre; sırası çağıranda (önde ya da
+## arkada, `shield_in_front`).
+func _draw_shield(joints: Dictionary, h: float, look: Dictionary) -> void:
+	if not joints.has("shoulder") or not joints.has("hip"):
+		return
+	var centre: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, 0.55) + Vector2(0.075 * _facing, 0.0) * h
+	if PropArt.has(SHIELD_PROP):
+		var r := PropArt.long_side_m(SHIELD_PROP) * _px_per_m(h) * 0.5
+		PropArt.draw_between(self, SHIELD_PROP, "body", centre + Vector2(0.0, r), centre - Vector2(0.0, r), _tint, _facing < 0.0)
+		return
+	var metal: Color = look.metal
+	ArtDraw.ellipse(self, centre, Vector2(0.055, 0.105) * h, metal.darkened(0.30))
+	draw_arc(centre, 0.105 * h, 0.0, TAU, 20, ArtPalette.INK, maxf(1.0, h * 0.008))
 
 ## Figürün piksel/metresi: kişi boyu ~0.84h, 1.73 m'lik biri için.
 static func _px_per_m(h: float) -> float:
@@ -1008,9 +1030,6 @@ func _draw_held_weapon(joints: Dictionary, h: float, look: Dictionary) -> void:
 				top, top + Vector2(0.025 * f, 0.06) * h, top + Vector2(0.0, 0.10) * h,
 				top + Vector2(-0.025 * f, 0.06) * h,
 			]), metal, ink_w)
-			var shield: Vector2 = joints.shoulder.lerp(joints.hip, 0.55) + Vector2(0.075 * f, 0.0) * h
-			ArtDraw.ellipse(self, shield, Vector2(0.055, 0.105) * h, metal.darkened(0.30))
-			draw_arc(shield, 0.105 * h, 0.0, TAU, 20, ArtPalette.INK, ink_w)
 		"bow":
 			var centre := hand + Vector2(0.02 * f, -0.05) * h
 			var facing_angle := 0.0 if f > 0.0 else PI

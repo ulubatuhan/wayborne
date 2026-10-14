@@ -98,6 +98,8 @@ func _test_combat_action_roles(t) -> void:
 	t.eq(a.clip, "attack_bow", "okçu saldırıda yay gerer")
 	t.eq(CombatFigure.action_for("ok", 1.0, CombatFigure.ROLE_ATTACK, 0.4, "spear_shield").clip, "attack_thrust", "mızrak saplar")
 	t.eq(CombatFigure.action_for("ok", 1.0, CombatFigure.ROLE_ATTACK, 0.4, "cleaver").clip, "attack_swing", "satır savurur")
+	t.ok(not WalkFigure.shield_in_front(1.0), "sağa bakarken kalkan (sol kol) bedenin arkasında")
+	t.ok(WalkFigure.shield_in_front(-1.0), "sola bakarken kalkan önde")
 	t.eq(CombatFigure.action_for("ok", 1.0, "", 0.0, "bow").clip, "", "rol yoksa duruş")
 	t.eq(CombatFigure.action_for("dead", 1.0, "", 0.0, "sword").clip, "dead", "ölü yatıyor")
 	t.eq(CombatFigure.action_for("downed", 1.0, CombatFigure.ROLE_HIT, 0.5, "sword").clip, "downed", "yerdeki rol oynamaz")
