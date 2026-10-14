@@ -415,7 +415,11 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	var shield := _combat_stance and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
-	for bone in FigureRig.bones_for(seated):
+	var order := FigureRig.bones_for(seated)
+	if _combat_stance and not weapon_in_front(_facing, weapon_kind()):
+		order.erase(FigureRig.WEAPON)
+		order.insert(order.find(FigureRig.TORSO), FigureRig.WEAPON)
+	for bone in order:
 		# Manken bu kemiği kaplıyorsa prosedürel uzuv çizilmiyor - altında
 		# kalıp kenarından taşan ikinci bir çizgi olurdu. Saç/şapka ve sırt
 		# yükü ise gövdenin *üstünde* kalmalı, o yüzden mankenden sonra.
@@ -474,7 +478,8 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
-		if BodyFrames.LAYERS[layer] == "front_arm" and held:
+		var weapon_layer := "front_arm" if weapon_in_front(_facing, weapon_kind()) else "torso_head"
+		if BodyFrames.LAYERS[layer] == weapon_layer and held:
 			_draw_frame_weapon(joints, h, look, wdir, float(wdata.draw))
 		if BodyFrames.LAYERS[layer] == "torso_head" and not fallen:
 			_draw_frame_back_items(joints, h, look, held)
@@ -687,6 +692,13 @@ const SHIELD_PROP: String = "weapon_shield_round"
 ## yakın taraftadır ve önde çizilir. Saf fonksiyon - test sahnesiz okuyabilsin.
 static func shield_in_front(facing: float) -> bool:
 	return facing < 0.0
+
+## Silah sağ elde, kalkanın tersi: sağa bakarken önde, sola bakarken
+## bedenin arkasında (yakın kol çizimde onu kavramaya devam eder). Yay
+## istisna: sol elde tutulur ama kirişi çeken el render'da hep yakın kol,
+## yayı arkaya almak kirişi gövdenin içinden geçirirdi.
+static func weapon_in_front(facing: float, weapon: String) -> bool:
+	return weapon == "bow" or facing > 0.0
 
 ## Kalkan göğsün ön kenarında, gövdeye göre; sırası çağıranda (önde ya da
 ## arkada, `shield_in_front`).
