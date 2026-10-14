@@ -736,6 +736,9 @@ const SHIELD_PROP: String = "weapon_shield_round"
 ## siperiyle görünür - ucu bedende.
 const STUCK_ARROW_LEN: float = 0.16
 const STUCK_DAGGER_LEN: float = 0.07
+## Göğsün ön yüzü, omurga hattından: sap buradan çıkıyor, gövdenin içinden
+## geçerek çizilmiyor.
+const STUCK_SURFACE: float = 0.062
 
 func _draw_stuck(joints: Dictionary, h: float) -> void:
 	if _stuck.is_empty() or not joints.has("shoulder") or not joints.has("hip"):
@@ -746,7 +749,7 @@ func _draw_stuck(joints: Dictionary, h: float) -> void:
 		# Ok uçarken henüz saplanmadı: mermi hedefe varınca beliriyor.
 		if int(item.get("at", 0)) > now:
 			continue
-		var base: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, float(item.t)) + Vector2(0.040 * _facing, 0.0) * h
+		var base: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, float(item.t)) + Vector2(STUCK_SURFACE * _facing, 0.0) * h
 		var out := Vector2(_facing, 0.0).rotated(deg_to_rad(-18.0 + float(item.tilt)) * _facing)
 		if String(item.kind) == "dagger":
 			var end := base + out * h * STUCK_DAGGER_LEN
@@ -758,11 +761,14 @@ func _draw_stuck(joints: Dictionary, h: float) -> void:
 		var tail := base + out * h * STUCK_ARROW_LEN
 		draw_line(base, tail, ink, maxf(1.8, h * 0.012))
 		draw_line(base, tail, Color(0.50, 0.36, 0.20), maxf(1.0, h * 0.007))
+		# Tüyler okun ucuyla aynı yöne, bedene doğru sivrilir; geniş ucu
+		# gezde. Ters çizilince (sivri uç dışarıda) ok bedenden çıkıyor gibi
+		# okunuyordu.
 		var side := Vector2(-out.y, out.x) * h * 0.018
 		for k in 2:
-			var a := tail - out * h * (0.012 + 0.020 * k)
-			draw_colored_polygon(PackedVector2Array([a, a - out * h * 0.03 + side, a - out * h * 0.012]), Color(0.86, 0.82, 0.74))
-			draw_colored_polygon(PackedVector2Array([a, a - out * h * 0.03 - side, a - out * h * 0.012]), Color(0.78, 0.74, 0.66))
+			var a := tail - out * h * (0.042 + 0.020 * k)
+			draw_colored_polygon(PackedVector2Array([a, a + out * h * 0.03 + side, a + out * h * 0.018]), Color(0.86, 0.82, 0.74))
+			draw_colored_polygon(PackedVector2Array([a, a + out * h * 0.03 - side, a + out * h * 0.018]), Color(0.78, 0.74, 0.66))
 
 ## Kalkan sol kolda. Figür yön değiştirirken aynalandığı için sağa bakanda
 ## sol kol uzak taraftadır ve kalkan bedenin arkasında kalır; sola bakanda
