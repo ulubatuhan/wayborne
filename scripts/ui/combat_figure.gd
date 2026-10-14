@@ -52,6 +52,12 @@ const ARCHETYPES: Dictionary = {
 		"cloth": Color(0.24, 0.26, 0.34), "trim": Color(0.52, 0.44, 0.24),
 		"metal": Color(0.58, 0.52, 0.34),
 	},
+	# --- Büyücü ---
+	"rogue_mage": {
+		"body": HUMANOID, "bulk": 0.86, "head": "cap", "weapon": "staff",
+		"cloth": Color(0.30, 0.17, 0.40), "trim": Color(0.62, 0.52, 0.30),
+		"metal": Color(0.72, 0.66, 0.88),
+	},
 	# --- Haydutlar ---
 	"bandit": {
 		"body": HUMANOID, "bulk": 1.0, "head": "wrap", "weapon": "sword",
@@ -160,6 +166,9 @@ var _height_scale: float = 1.0
 ## `CombatUnit.body_variant` - bkz. WalkFigure._body_variant'ın aynı notu.
 var _body_variant: String = ""
 var _rig: WalkFigure = null
+var _status_fx: StatusFx = null
+var _status_kinds: PackedStringArray = PackedStringArray()
+var _stuck: Array = []
 
 ## Faz 17 PR-7: savaş animasyon katmanı. İkisi de duruma göre değil - saf
 ## düzeni/durum tıngısı `_tint()`'ten geçiyor, bunlar yalnızca "az önce bir
@@ -189,10 +198,30 @@ var _action_u: float = 0.0
 const ROLE_ATTACK: String = "attack"
 const ROLE_HIT: String = "hit"
 const ROLE_DEFEND: String = "defend"
+const ROLE_CAST: String = "cast"
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_sync_rig)
+	_status_fx = StatusFx.new()
+	add_child(_status_fx)
+
+## Süren durumlar (bkz. CombatUnit.get_active_status_kinds) ve üstte saplı
+## kalanlar (CombatUnit.stuck). Ölü bir figürde alev ve damla durmuyor.
+func set_conditions(kinds: PackedStringArray, stuck: Array) -> void:
+	_status_kinds = kinds
+	_stuck = stuck
+	_sync_conditions()
+
+func _sync_conditions() -> void:
+	var alive := _state != "dead"
+	var shown := _status_kinds if alive else PackedStringArray()
+	_status_fx.size = size
+	_status_fx.setup(shown, {}, size.y * 0.82, 1.0 if _face_right else -1.0)
+	_status_fx.follow(_rig if _rig != null and _rig.visible else null)
+	if _rig != null:
+		_rig.set_stuck(_stuck)
+	move_child(_status_fx, get_child_count() - 1)
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
@@ -255,6 +284,13 @@ static func action_for(state: String, fall: float, role: String, u: float, weapo
 			return {"clip": "hit", "u": u}
 		ROLE_DEFEND:
 			return {"clip": "defend", "u": u}
+		ROLE_CAST:
+			return {"clip": "attack_cast", "u": u}
+	# Özel tepkiler (ok darbesi, kesik, kaçınma, yanma...) rolün kendisi
+	# bir klip adı; o bedende render edilmemişse WalkFigure genel darbeye
+	# düşüyor (bkz. WalkFigure.ACTION_FALLBACK).
+	if FigureActions.has_clip(role):
+		return {"clip": role, "u": u}
 	return {"clip": "", "u": 0.0}
 
 func set_action(role: String, u: float) -> void:
@@ -288,7 +324,7 @@ func _sync_rig() -> void:
 	_rig.set_combat_stance(true)
 	_rig.set_standing()
 	_rig.set_facing(1.0 if _face_right else -1.0)
-	_rig.set_tint(_state_tone())
+	_rig.set_tint(_state_tone() * condition_tone(_status_kinds))
 	_rig.position = _offset
 	var pivot := Vector2(size.x * 0.5, size.y * 0.95)
 	_rig.pivot_offset = pivot
@@ -298,6 +334,20 @@ func _sync_rig() -> void:
 	if _is_falling() and not lying:
 		var side := 1.0 if _face_right else -1.0
 		_rig.rotation = side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
+	if _status_fx != null:
+		_sync_conditions()
+
+## Durumun bedene vurduğu ton (çarpan): yanan isli ve kızıl, zehirlenen
+## yeşilimsi, üşüyen mavimsi. Hiç durum yoksa tam beyaz - eski görünüm.
+static func condition_tone(kinds: PackedStringArray) -> Color:
+	var tone := Color(1, 1, 1)
+	if kinds.has(CombatUnit.STATUS_BURN):
+		tone *= Color(0.92, 0.80, 0.70)
+	if kinds.has(CombatUnit.STATUS_BLIGHT):
+		tone *= Color(0.84, 1.0, 0.76)
+	if kinds.has(CombatUnit.STATUS_CHILL):
+		tone *= Color(0.80, 0.92, 1.10)
+	return tone
 
 ## `_tint()`'in iskelet figürü için çarpan karşılığı: renk çarpımı gri
 ## yapamıyor, ama koyulaşma ve kızıllaşma aynı okunuyor.

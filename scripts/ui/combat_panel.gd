@@ -71,6 +71,7 @@ var _built: bool = false
 
 var _round_label: Label
 var _order_strip: HBoxContainer
+var _fx_layer: CombatFxLayer
 var _player_row: HBoxContainer
 var _enemy_row: HBoxContainer
 var _active_label: Label
@@ -141,6 +142,7 @@ func start_combat(
 	_encounter.log_added.connect(_on_log_added)
 	_encounter.state_changed.connect(_on_state_changed)
 	_encounter.unit_barked.connect(_on_unit_barked)
+	_encounter.skill_resolving.connect(_on_skill_resolving)
 
 	_selected_skill = null
 	_result_label.text = ""
@@ -278,6 +280,10 @@ func _build_field() -> void:
 	_fx_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(_fx_overlay)
+
+	_fx_layer = CombatFxLayer.new()
+	_fx_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	stage.add_child(_fx_layer)
 
 func _build_action_area() -> void:
 	_active_label = Label.new()
@@ -431,17 +437,27 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 	# yalnızca değmedi. HIT/CRIT'in "bu bir vuruş girişimiydi" ailesinde,
 	# DEATHS_DOOR/SURVIVED/KILLED/DOWNED'ın "bu bir sonuç" ailesinde değil.
 	var magnitude := CombatFx.recoil_magnitude(kind)
+	var skill := _encounter.last_skill
+	var style := ""
+	var delay := 0
 	if magnitude > 0.0:
 		var attacker := _encounter.get_active_unit()
 		if attacker != null and attacker != unit:
-			_lunge_states[attacker] = {
-				"direction": 1.0 if attacker.is_player_side else -1.0,
-				"magnitude": magnitude, "start": now,
-			}
-			_action_states[attacker] = {"role": CombatFigure.ROLE_ATTACK, "start": now, "duration": CombatFx.ATTACK_MSEC}
-	var reaction := CombatFx.reaction_role(kind)
+			var ranged := skill != null and not skill.delivery.is_empty()
+			if not ranged:
+				_lunge_states[attacker] = {
+					"direction": 1.0 if attacker.is_player_side else -1.0,
+					"magnitude": magnitude, "start": now,
+				}
+			if skill != null:
+				style = CombatFx.hit_style(skill.element, skill.delivery, _weapon_of(attacker))
+				delay = CombatFxLayer.travel_msec(skill.delivery)
+				_play_attack_fx(attacker, unit, skill, style, kind != CombatEncounter.BARK_MISS, now)
+				if kind != CombatEncounter.BARK_MISS:
+					unit.add_stuck(CombatFx.leaves_stuck(skill.delivery), now + delay)
+	var reaction := CombatFx.reaction_clip(kind, style, _weapon_of(unit))
 	if not reaction.is_empty():
-		_action_states[unit] = {"role": reaction, "start": now, "duration": CombatFx.REACT_MSEC}
+		_action_states[unit] = {"role": reaction, "start": now + delay, "duration": CombatFx.REACT_MSEC}
 
 	var amplitude := CombatFx.shake_amplitude(kind)
 	if amplitude > 0.0 and not _reduce_motion():
@@ -452,6 +468,38 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 	if CombatFx.starts_fall(kind):
 		_fall_states[unit] = {"start": now}
 	set_process(true)
+
+## Saldıranın klibi ve kendine yapılan büyü: bark'ı olmayan yarısı.
+func _on_skill_resolving(unit: CombatUnit, skill: CombatSkill) -> void:
+	var now := Time.get_ticks_msec()
+	if skill.target_kind == CombatSkill.Target.ENEMY or skill.is_heal() or skill.base_damage > 0 or CombatFx.is_cast(skill.element, skill.delivery):
+		var role := CombatFigure.ROLE_CAST if CombatFx.is_cast(skill.element, skill.delivery) else CombatFigure.ROLE_ATTACK
+		_action_states[unit] = {"role": role, "start": now, "duration": CombatFx.ATTACK_MSEC}
+	if skill.delivery == "aura":
+		var at := _chest(unit)
+		if at != Vector2.INF:
+			_fx_layer.play_attack(at, at, "aura", skill.element, true, now)
+	set_process(true)
+
+func _weapon_of(unit: CombatUnit) -> String:
+	return String(CombatFigure.ARCHETYPES.get(unit.figure_kind, {}).get("weapon", "none"))
+
+## Figürün göğsü, efekt katmanının uzayında. Slotu henüz yoksa INF.
+func _chest(unit: CombatUnit) -> Vector2:
+	var slot: CombatUnitSlot = _slot_by_unit.get(unit)
+	if slot == null or not is_instance_valid(slot) or _fx_layer == null:
+		return Vector2.INF
+	var rect := slot.get_figure_global_rect()
+	return rect.position + Vector2(rect.size.x * 0.5, rect.size.y * 0.48) - _fx_layer.get_global_rect().position
+
+func _play_attack_fx(attacker: CombatUnit, target: CombatUnit, skill: CombatSkill, style: String, hit: bool, now: int) -> void:
+	var from := _chest(attacker)
+	var to := _chest(target)
+	if from == Vector2.INF or to == Vector2.INF:
+		return
+	# Mermi elden çıkıyor: göğsün biraz önünden.
+	from += Vector2(24.0 * signf(to.x - from.x), -10.0)
+	_fx_layer.play_attack(from, to, skill.delivery, style, hit, now)
 
 func _flash_for_kind(kind: String) -> Color:
 	match kind:
@@ -465,6 +513,7 @@ func _flash_for_kind(kind: String) -> Color:
 		CombatEncounter.BARK_DOWNED: return ArtPalette.FX_FLASH_DOWNED
 		CombatEncounter.BARK_BLEED_TICK: return ArtPalette.FX_BLEED
 		CombatEncounter.BARK_BLIGHT_TICK: return ArtPalette.FX_BLIGHT
+		CombatEncounter.BARK_BURN_TICK: return ArtPalette.FX_BURN
 		CombatEncounter.BARK_STUN_SKIP: return ArtPalette.FX_STUN
 		_: return ArtPalette.FX_FLASH_NEUTRAL
 

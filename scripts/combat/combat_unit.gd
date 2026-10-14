@@ -147,6 +147,8 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.bleed_resist = character.get_bleed_resist()
 	unit.blight_resist = character.get_blight_resist()
 	unit.stun_resist = character.get_stun_resist()
+	unit.burn_resist = character.get_burn_resist()
+	unit.chill_resist = character.get_chill_resist()
 	unit.figure_kind = character.class_id
 	unit.outfit = character.get_appearance_outfit()
 	unit.loadout = Wardrobe.loadout_for(character)
@@ -185,6 +187,10 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	unit.bleed_resist = template.bleed_resist
 	unit.blight_resist = template.blight_resist
 	unit.stun_resist = template.stun_resist
+	unit.burn_resist = template.burn_resist
+	unit.outfit = template.outfit
+	unit.body_variant = template.body_variant
+	unit.chill_resist = template.chill_resist
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
 	unit.figure_kind = template.enemy_id
 	unit.xp_value = template.xp_value
@@ -285,6 +291,15 @@ func get_proficiency_multiplier(skill_id: String) -> float:
 const STATUS_BLEED: String = "bleed"
 const STATUS_BLIGHT: String = "blight"
 const STATUS_STUN: String = "stun"
+## Büyünün iki durumu. Yanma kanama gibi tur başında hasar veriyor; üşüme
+## hasar vermiyor, `amount`'u kaçınmadan düşülen pay (soğuk bedeni
+## ağırlaştırıyor) - bu yüzden `drain_status_damage` onu saymıyor.
+const STATUS_BURN: String = "burn"
+const STATUS_CHILL: String = "chill"
+## Hasar vermeyen durumlar: tur başında hiçbir şey akıtmazlar.
+const NON_DAMAGING_STATUSES: Array[String] = [STATUS_STUN, STATUS_CHILL]
+## Üşümenin isabeti de biraz düşürmesi: titreyen el.
+const CHILL_ACCURACY_PENALTY: int = 5
 
 ## Sersemletmeden çıkan savaşçı bir süre tekrar sersemletilemiyor -
 ## Darkest Dungeon'ın "stun resist buff"ı. Bu olmadan sersemletme tek
@@ -303,6 +318,8 @@ const MAX_STATUS_CHANCE: int = 95
 var bleed_resist: int = DEFAULT_STATUS_RESIST
 var blight_resist: int = DEFAULT_STATUS_RESIST
 var stun_resist: int = DEFAULT_STATUS_RESIST
+var burn_resist: int = DEFAULT_STATUS_RESIST
+var chill_resist: int = DEFAULT_STATUS_RESIST
 
 ## Her biri {"kind", "amount", "rounds_left"}.
 var _statuses: Array = []
@@ -313,6 +330,8 @@ func get_status_resist(kind: String) -> int:
 	match kind:
 		STATUS_BLEED: return bleed_resist
 		STATUS_BLIGHT: return blight_resist
+		STATUS_BURN: return burn_resist
+		STATUS_CHILL: return chill_resist
 		STATUS_STUN:
 			# Sersemletmeden yeni çıkmış birine ikinci kez vurmak zor.
 			return stun_resist + (STUN_RECOVERY_RESIST if _stun_recovery_rounds > 0 else 0)
@@ -363,9 +382,36 @@ func get_status_rounds(kind: String) -> int:
 func drain_status_damage() -> int:
 	var total := 0
 	for status in _statuses:
-		if String(status.kind) != STATUS_STUN:
+		if not NON_DAMAGING_STATUSES.has(String(status.kind)):
 			total += int(status.amount)
 	return total
+
+## Savaş boyunca üstte saplı kalan oklar ve bıçaklar: {kind, t, tilt}.
+## `t` gövde boyunca yer (0 omuz, 1 kalça), `tilt` açısal sapma. Görsel bir
+## iz - hasarı zaten verildi; savaş bitince birim de bitiyor, iz de gidiyor.
+## Yerleşim sırayla, zar atmadan: motorun RNG'sine dokunmak savaşın
+## sonucunu değiştirirdi.
+const MAX_STUCK: int = 4
+var stuck: Array = []
+
+func add_stuck(kind: String, appear_msec: int = 0) -> void:
+	if kind.is_empty() or stuck.size() >= MAX_STUCK:
+		return
+	var n := stuck.size()
+	stuck.append({
+		"kind": kind, "at": appear_msec,
+		"t": 0.18 + fposmod(0.41 * float(n) + 0.07, 0.62),
+		"tilt": [-14.0, 9.0, -4.0, 16.0][n % 4],
+	})
+
+## Ekranın çizdiği süren durumlar (sersemlik dahil).
+func get_active_status_kinds() -> PackedStringArray:
+	var kinds := PackedStringArray()
+	for status in _statuses:
+		kinds.append(String(status.kind))
+	if is_stunned:
+		kinds.append(STATUS_STUN)
+	return kinds
 
 ## Turların sayılması. `tick_modifiers` ile aynı anda çağrılıyor ama ayrı
 ## bir fonksiyon: değiştiriciler tur *sayısıyla* eriyor, durumlar
@@ -430,12 +476,20 @@ func _modifier_sum(stat: String) -> int:
 ## *durum*, iyileşince kendiliğinden kalkması gerekiyor.
 func get_effective_accuracy() -> int:
 	var total := accuracy + _modifier_sum("accuracy")
+	if has_status(STATUS_CHILL):
+		total -= CHILL_ACCURACY_PENALTY
 	if on_deaths_door:
 		total -= DEATHS_DOOR_ACCURACY_PENALTY
 	return total
 
 func get_effective_dodge() -> int:
-	return maxi(0, dodge + _modifier_sum("dodge"))
+	return maxi(0, dodge + _modifier_sum("dodge") - _status_amount(STATUS_CHILL))
+
+func _status_amount(kind: String) -> int:
+	for status in _statuses:
+		if String(status.kind) == kind:
+			return int(status.amount)
+	return 0
 
 ## Zırh da süreli bir değiştiriciyle bükülebilir (zırh kırma, siper). Tek
 ## hasar kapısı `reduce_by_protection` bunu okuyor, yani kanama ve zehir de

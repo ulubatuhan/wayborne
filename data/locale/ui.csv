@@ -724,3 +724,5 @@
 "UI_CREDITS","Emeği Geçenler","Credits","","","","","","","","",""
 "UI_CREDITS_CC_BY","Giysiler (CC-BY 4.0, MakeHuman topluluğu):","Clothing (CC-BY 4.0, MakeHuman community):","","","","","","","","",""
 "UI_CREDITS_CC0","Modeller (CC0):","Models (CC0):","","","","","","","","",""
+"UI_COMBAT_BADGE_BURN","YANMA %d","BURN %d","","","","","","","","",""
+"UI_COMBAT_BADGE_CHILL","ÜŞÜME %d","CHILL %d","","","","","","","","",""

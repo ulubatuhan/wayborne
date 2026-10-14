@@ -734,6 +734,15 @@ func get_blight_resist() -> int:
 func get_stun_resist() -> int:
 	return mini(MAX_STATUS_RESIST, stats.get_stun_resist() + _level_resist_bonus())
 
+## Yanma ve üşüme yeni bir stat ekseni açmıyor: yanık deriyi kanamayla aynı
+## beden direnci karşılıyor, üşümeyi zehirle aynı iç direnç. Yeni bir eksen
+## sekiz statlık bütçeyi ve otomatik dağıtımı sessizce kaydırırdı.
+func get_burn_resist() -> int:
+	return get_bleed_resist()
+
+func get_chill_resist() -> int:
+	return get_blight_resist()
+
 func _trait_bonus_sum(field: String) -> int:
 	var total := 0
 	for trait_id in trait_ids:

@@ -48,6 +48,27 @@ const DEER_KICK: String = "deer_kick"
 const GUARD_STRIKE: String = "guard_strike"
 const GUARD_ORDER: String = "guard_order"
 
+# Büyüler (temel büyücü seti; bkz. EnemyCatalog.ROGUE_MAGE). Kervana bir
+# büyücü katılırsa aynı tablo okunur - sayılar tek yerde.
+const FIRE_BOLT: String = "fire_bolt"
+const RAY_OF_FROST: String = "ray_of_frost"
+const MAGIC_MISSILE: String = "magic_missile"
+const POISON_SPRAY: String = "poison_spray"
+const BURNING_HANDS: String = "burning_hands"
+const SLEEP: String = "sleep_spell"
+const ARCANE_SHIELD: String = "arcane_shield"
+
+## Var olan yeteneklerin görsel kimliği: hangisi ok atar, hangisi taş, hangisi
+## şişe fırlatır. Yakın dövüş yeteneği listede yok - biçimi kullananın
+## silahından geliyor (bkz. CombatFx.hit_style).
+const STYLES: Dictionary = {
+	"arrow_shot": ["", "arrow"],
+	"aimed_shot": ["", "arrow"],
+	"bandit_arrow": ["", "arrow"],
+	"sling_shot": ["", "sling"],
+	"blight_flask": ["poison", "flask"],
+}
+
 static var _skills: Array[CombatSkill] = []
 static var _skill_by_id: Dictionary = {}
 
@@ -303,6 +324,8 @@ static func _ensure_built() -> void:
 		3, 2, -2, 0
 	))
 
+	_build_spells()
+
 	_skills.append(CombatSkill.make_attack(
 		GUARD_STRIKE,
 		"SKILL_GUARD_STRIKE_NAME",
@@ -321,3 +344,56 @@ static func _ensure_built() -> void:
 
 	for skill in _skills:
 		_skill_by_id[skill.skill_id] = skill
+		if STYLES.has(skill.skill_id):
+			CombatSkill.with_style(skill, String(STYLES[skill.skill_id][0]), String(STYLES[skill.skill_id][1]))
+
+## Temel büyüler, D&D'nin ilk kademe setinden: her biri var olan bir
+## mekaniğe oturuyor - yanma kanamanın, üşüme kaçınma cezasının, uyku
+## sersemletmenin, kalkan zırh değiştiricisinin karşılığı. Yeni bir sistem
+## yok, yalnızca yeni bir görünüş ve iki durum (yanma, üşüme).
+## Alan büyüsü (Yakıcı Eller) tek hedefli Ateş Okundan zayıf - alan kuralı.
+static func _build_spells() -> void:
+	_skills.append(CombatSkill.with_style(CombatSkill.with_status(CombatSkill.make_attack(
+		FIRE_BOLT, "SKILL_FIRE_BOLT_NAME", "SKILL_FIRE_BOLT_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		8, 3, 0, 3, 1
+	), CombatUnit.STATUS_BURN, 3, 2, 55), "fire", "bolt"))
+
+	# Üşüme hasar vermiyor: miktarı kaçınmadan düşülen pay.
+	_skills.append(CombatSkill.with_style(CombatSkill.with_status(CombatSkill.make_attack(
+		RAY_OF_FROST, "SKILL_RAY_OF_FROST_NAME", "SKILL_RAY_OF_FROST_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		5, 2, 5, 0, 1
+	), CombatUnit.STATUS_CHILL, 12, 2, 65), "frost", "ray"))
+
+	# Büyülü Füze neredeyse hiç kaçmıyor (D&D'de hiç kaçmaz) ama tavan
+	# kuralı kalıyor: isabet en fazla MAX_HIT_CHANCE.
+	_skills.append(CombatSkill.with_style(CombatSkill.make_attack(
+		MAGIC_MISSILE, "SKILL_MAGIC_MISSILE_NAME", "SKILL_MAGIC_MISSILE_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		6, 1, 40, 0, 1
+	), "arcane", "missiles"))
+
+	_skills.append(CombatSkill.with_style(CombatSkill.with_status(CombatSkill.make_attack(
+		POISON_SPRAY, "SKILL_POISON_SPRAY_NAME", "SKILL_POISON_SPRAY_DESC",
+		[1, 2, 3], [1, 2],
+		3, 1, 5, 0
+	), CombatUnit.STATUS_BLIGHT, 4, 3, 70), "poison", "spray"))
+
+	_skills.append(CombatSkill.with_style(CombatSkill.with_area(CombatSkill.with_status(CombatSkill.make_attack(
+		BURNING_HANDS, "SKILL_BURNING_HANDS_NAME", "SKILL_BURNING_HANDS_DESC",
+		[1, 2], [1, 2],
+		5, 2, 0, 0, 2
+	), CombatUnit.STATUS_BURN, 2, 2, 45), CombatSkill.Area.ADJACENT), "fire", "cone"))
+
+	_skills.append(CombatSkill.with_style(CombatSkill.with_status(CombatSkill.make_attack(
+		SLEEP, "SKILL_SLEEP_NAME", "SKILL_SLEEP_DESC",
+		[2, 3, 4], [1, 2, 3, 4],
+		1, 0, 10, 0, 2
+	), CombatUnit.STATUS_STUN, 0, 1, 60), "sleep", "ray"))
+
+	_skills.append(CombatSkill.with_style(CombatSkill.make_buff(
+		ARCANE_SHIELD, "SKILL_ARCANE_SHIELD_NAME", "SKILL_ARCANE_SHIELD_DESC",
+		CombatSkill.Target.SELF, [1, 2, 3, 4], [1, 2, 3, 4],
+		"prot", 20, 2, 3
+	), "arcane", "aura"))

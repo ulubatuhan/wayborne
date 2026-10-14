@@ -200,6 +200,7 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 		bound_unit.body_variant
 	)
 	_figure.set_stunned(bound_unit.is_stunned and bound_unit.is_alive())
+	_figure.set_conditions(bound_unit.get_active_status_kinds(), bound_unit.stuck)
 	_border.border_color = _border_color(is_active, is_target)
 	queue_redraw()
 	var emblem_file := String(WaybookIcons.CLASS_EMBLEMS.get(bound_unit.figure_kind, "")) if bound_unit.is_player_side else ""
@@ -292,6 +293,12 @@ func _refresh_status(bound_unit: CombatUnit) -> void:
 	if bound_unit.has_status(CombatUnit.STATUS_BLIGHT):
 		var rounds := bound_unit.get_status_rounds(CombatUnit.STATUS_BLIGHT)
 		_add_status_icon("k4b_blight.png", str(rounds), tr("UI_COMBAT_BADGE_BLIGHT") % rounds)
+	if bound_unit.has_status(CombatUnit.STATUS_BURN):
+		var rounds := bound_unit.get_status_rounds(CombatUnit.STATUS_BURN)
+		_add_status_icon("k4g_burn.png", str(rounds), tr("UI_COMBAT_BADGE_BURN") % rounds)
+	if bound_unit.has_status(CombatUnit.STATUS_CHILL):
+		var rounds := bound_unit.get_status_rounds(CombatUnit.STATUS_CHILL)
+		_add_status_icon("k4h_chill.png", str(rounds), tr("UI_COMBAT_BADGE_CHILL") % rounds)
 	if bound_unit.is_stunned:
 		_add_status_icon("k4c_stun.png", "", tr("UI_COMBAT_BADGE_STUN"))
 	elif bound_unit.has_stun_recovery():
@@ -326,6 +333,11 @@ func apply_fx(flash: Color, offset: Vector2, fall: float, ring_color: Color, rin
 ## Savaş klibi rolü ve ilerlemesi (bkz. CombatFigure.set_action).
 func apply_action(role: String, u: float) -> void:
 	_figure.set_action(role, u)
+
+## Figürün ekrandaki dikdörtgeni: efekt katmanı mermiyi buradan buraya
+## uçuruyor.
+func get_figure_global_rect() -> Rect2:
+	return _figure.get_global_rect()
 
 ## Figürün yatay ekseni (hamlenin ölçüsü). Yerleşim henüz yapılmadıysa
 ## slotun sabit genişliği.

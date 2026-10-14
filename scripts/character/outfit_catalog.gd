@@ -290,6 +290,11 @@ static func _ensure_built() -> void:
 	_add(SLOT_JACKET, "scribe_robe", "OUTFIT_SCRIBE_ROBE", Color(0.24, 0.27, 0.40), 44,
 		34, {"accuracy_bonus": 2, "crit_bonus": 1, "dodge_bonus": -1}, art, false, "", false,
 		{"hides": [SLOT_SHIRT, SLOT_PANTS]})
+	# Büyücü cüppesi: terzide satılmaz - büyücüler nadir ve hoş
+	# karşılanmıyor (docs/lore/LORE.md §3.3), cüppe ancak bir büyücüden kalır.
+	_add(SLOT_JACKET, "mage_robe", "OUTFIT_MAGE_ROBE", Color(0.30, 0.17, 0.40), 44,
+		40, {"accuracy_bonus": 2, "crit_bonus": 2, "dodge_bonus": -1}, art, false, "", false,
+		{"hides": [SLOT_SHIRT, SLOT_PANTS], "sold": false})
 	# --- eldiven ---
 	_add(SLOT_GLOVES, "leather_gloves", "OUTFIT_LEATHER_GLOVES", Color(0.52, 0.30, 0.14), 15,
 		12, {"accuracy_bonus": 1, "crit_bonus": 1}, art)
@@ -304,6 +309,8 @@ static func _ensure_built() -> void:
 		8, {"dodge_bonus": 1}, art, false, "hood")
 	_add(SLOT_HAT, "head_veil", "OUTFIT_HEAD_VEIL", Color(0.80, 0.76, 0.66), 50,
 		5, {"hp_bonus": 1}, art, true, "wrap", false, {"gender": F})
+	_add(SLOT_HAT, "wizard_hat", "OUTFIT_WIZARD_HAT", Color(0.28, 0.16, 0.38), 50,
+		12, {"crit_bonus": 1}, art, false, "cap", false, {"sold": false})
 	_add(SLOT_HAT, "wide_hat", "OUTFIT_WIDE_HAT", Color(0.38, 0.30, 0.22), 50,
 		12, {"accuracy_bonus": 1}, art, false, "cap")
 	_add(SLOT_HAT, "fur_hat", "OUTFIT_FUR_HAT", Color(0.48, 0.36, 0.24), 50,

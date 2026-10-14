@@ -104,6 +104,59 @@ static func reaction_role(kind: String) -> String:
 			return "defend"
 	return ""
 
+## Vuruşun biçimi: büyüde öğe, okta/fırlatmada delici, yakın dövüşte
+## kullananın silahı (mızrak deler, kılıç/satır keser, gürz/asa ezer;
+## hayvanın dişi ve pençesi keser). Mekanik değil - hedefin tepkisini ve
+## çarpma efektini seçiyor.
+static func hit_style(element: String, delivery: String, attacker_weapon: String) -> String:
+	if not element.is_empty():
+		return element
+	match delivery:
+		"arrow", "thrown":
+			return "pierce"
+		"sling", "flask":
+			return "blunt"
+	match attacker_weapon:
+		"spear_shield", "bow":
+			return "pierce"
+		"sword", "cleaver", "none":
+			return "slash"
+	return "blunt"
+
+## Hedefin oynadığı klip: isabette vuruşun biçimine göre, ıskalamada
+## kalkanı olan karşılar (savunma), olmayan sıyrılır (kaçınma). Klip o
+## bedende render edilmemişse `WalkFigure.pick_clip` genel darbeye düşüyor.
+static func reaction_clip(kind: String, style: String, target_weapon: String) -> String:
+	match kind:
+		CombatEncounter.BARK_MISS:
+			return "defend" if target_weapon == "spear_shield" else "dodge"
+		CombatEncounter.BARK_HIT, CombatEncounter.BARK_CRIT:
+			match style:
+				"pierce": return "hit_pierce"
+				"slash": return "hit_slash"
+				"fire": return "react_burn"
+				"frost": return "react_freeze"
+				"poison": return "react_poison"
+			return "hit"
+		CombatEncounter.BARK_BURN_TICK:
+			return "react_burn"
+		CombatEncounter.BARK_BLIGHT_TICK:
+			return "react_poison"
+	return ""
+
+## Bir isabetin üstte saplı kalacak bir şey bırakıp bırakmadığı: ok ve
+## fırlatılan bıçak. Taş, şişe, büyü bırakmaz.
+static func leaves_stuck(delivery: String) -> String:
+	match delivery:
+		"arrow": return "arrow"
+		"thrown": return "dagger"
+	return ""
+
+## Saldıranın klibi: büyü yapan "attack_cast", silahlı olan silahının
+## saldırısı (bkz. CombatFigure.action_for).
+static func is_cast(element: String, delivery: String) -> bool:
+	return not element.is_empty() and delivery in ["bolt", "ray", "missiles", "spray", "cone", "aura"]
+
 static func recoil_magnitude(kind: String) -> float:
 	match kind:
 		CombatEncounter.BARK_CRIT: return RECOIL_CRIT
@@ -130,6 +183,10 @@ static func status_color(kind: String) -> Color:
 			return ArtPalette.FX_BLIGHT
 		CombatEncounter.BARK_STATUS_STUN, CombatEncounter.BARK_STUN_SKIP:
 			return ArtPalette.FX_STUN
+		CombatEncounter.BARK_STATUS_BURN, CombatEncounter.BARK_BURN_TICK:
+			return ArtPalette.FX_BURN
+		CombatEncounter.BARK_STATUS_CHILL:
+			return ArtPalette.FX_CHILL
 	return Color(0, 0, 0, 0)
 
 static func is_status_application(kind: String) -> bool:
@@ -137,6 +194,8 @@ static func is_status_application(kind: String) -> bool:
 		kind == CombatEncounter.BARK_STATUS_BLEED
 		or kind == CombatEncounter.BARK_STATUS_BLIGHT
 		or kind == CombatEncounter.BARK_STATUS_STUN
+		or kind == CombatEncounter.BARK_STATUS_BURN
+		or kind == CombatEncounter.BARK_STATUS_CHILL
 	)
 
 static func starts_fall(kind: String) -> bool:
