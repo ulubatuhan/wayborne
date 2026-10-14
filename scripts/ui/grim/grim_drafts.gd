@@ -159,12 +159,8 @@ static func town(model: Dictionary, hovered: int = -1) -> Control:
 	root.add_child(top_bar(model))
 	root.add_child(bottom_bar(["UI_GRIM_NAV_PARTY", "UI_GRIM_NAV_LEDGER", "UI_GRIM_NAV_MAP", "UI_GRIM_NAV_CARAVAN"],
 		"UI_GRIM_NAV_LEAVE"))
-	var notices := Control.new()
-	notices.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	notices.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(notices)
+	_add_notice_host(root)
 	root.set_meta("view", view)
-	root.set_meta("notices", notices)
 	view.venue_menu_requested.connect(func(i, at): show_venue_menu(root, model, i, at))
 	if hovered >= 0:
 		view.set_hovered(hovered)
@@ -219,6 +215,14 @@ static func menu_position(screen: Vector2, building: Rect2, menu_size: Vector2) 
 		x = building.position.x - gap - menu_size.x
 	var y := clampf(building.position.y + 20.0, BAR_HEIGHT + 12.0, screen.y - BAR_HEIGHT - 12.0 - menu_size.y)
 	return Vector2(maxf(16.0, x), y)
+
+## Haber kartlarının sağ üst köşedeki yuvası.
+static func _add_notice_host(root: Control) -> void:
+	var notices := Control.new()
+	notices.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	notices.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(notices)
+	root.set_meta("notices", notices)
 
 ## Bir haber kartını sağ üst köşeye bırakır; kartlar birbirinin altına
 ## hafif farklı eğimlerle dizilir (masaya atılmış gibi, hizalı değil).
@@ -427,7 +431,7 @@ static func hud(model: Dictionary) -> Control:
 	root.add_child(_full(shade))
 	_finish(root, 1.0)
 	root.add_child(top_bar(model))
-	root.set_meta("notices", root)
+	_add_notice_host(root)
 	var plate := PanelContainer.new()
 	var plate_box := GrimTheme.iron_panel(0.82)
 	plate_box.set_content_margin_all(12)
