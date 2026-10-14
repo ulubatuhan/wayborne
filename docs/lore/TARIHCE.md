@@ -57,7 +57,7 @@ Aşağıdaki çağların süreleri bu yüzden kasıtlı olarak boş.
 | | olay | işaret |
 |---|---|---|
 | IV.1 | İnsanlar anlamlandıramadıklarını tanrılara bağladı (C2). Pek çok pagan inanç doğdu. | [Yazar, C2, C5] |
-| IV.2 | **Dağın İlk Nefesi**: dünya ilk soluğunu dağın doruğunda aldı. Dağ halkının inancı. | [Oyun] |
+| IV.2 | **Dağın İlk Nefesi**: dünya ilk soluğunu dağın doruğunda aldı. Dağ halkının inancı; bugün küçük bir inanış. | [Oyun] / [Yazar] |
 | IV.3 | **Denizin İlk Gözyaşı**: deniz ilk tanrının gözyaşından doğdu. Kıyı halkının inancı; "deniz tanrıları" bir panteon ima ediyor. | [Oyun] / [Çelişki — kimin? bkz. LORE §4.1] |
 | IV.4 | **Baikhan yolu** doğar: bir din değil, yaşama, göğe, toprağa saygı. | [Yazar, C7] |
 | IV.5 | Yollar ve yol kenarı sunakları, tapınaklar, katakomblar bu inançlar için yapılır. | [Yazar, C9] |
@@ -79,7 +79,7 @@ Aşağıdaki çağların süreleri bu yüzden kasıtlı olarak boş.
 | | olay | işaret |
 |---|---|---|
 | VI.1 | İmparatorluğun yerinde **binbir prenslik**; dinî kaos ve iç savaşlar. | [Yazar, C1] / [Türetme — sıra] |
-| VI.2 | **El'in Kilisesi** pagan inançları asimile ederek yayılır, tarihlerini siler. | [Yazar, C5] |
+| VI.2 | **The Hand (El) Kilisesi** pagan inançları asimile ederek yayılır, tarihlerini siler. Baikhan ile birlikte Sideria'nın iki büyük inancından biri olur. | [Yazar, C5] |
 | VI.3 | Dağın Nefesi ve Denizin Gözyaşı silinemez; kilise onları adlarını değiştirerek benimser: artık "El'in sayfaları". Gerçek takipçileri taşraya ve gizliliğe çekilir. | [Yazar, C5] |
 | VI.4 | Pek çok eski tapınak terk edilir, yıkılır ya da başka amaçla kullanılır; inananlar cevap alamayınca merkezi inanca teslim olur. | [Yazar, C9] |
 | VI.5 | Vadi halkı kilise inancını rasyonel bir uzlaşıyla kabul eder; kalbinde ne olduğu ayrı mesele. | [Yazar, C8] |

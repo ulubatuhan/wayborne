@@ -47,6 +47,12 @@ const WOLF_PACK_LEADER_CHANCE: float = 0.4
 const STAG: String = "stag"
 const DEER: String = "deer"
 
+## Kaçak büyücü: büyücüler nadir ve Kilise'nin/göçebelerin gözünde
+## istenmeyen (bkz. docs/lore/LORE.md §3.3), o yüzden hiçbir kadro onu
+## kendiliğinden kurmuyor - şablon hazır, hangi olayın açacağı lore'un
+## kararı. Arka mevkiden büyü yapar, canı az; kalkan büyüsüyle kendini korur.
+const ROGUE_MAGE: String = "rogue_mage"
+
 ## Şehir muhafızları (bkz. build_guard_squad, evt_guard_patrol).
 const CITY_GUARD: String = "city_guard"
 const GUARD_SERGEANT: String = "guard_sergeant"
@@ -370,6 +376,20 @@ static func _ensure_built() -> void:
 		GUARD_SERGEANT, "ENEMY_GUARD_SERGEANT_NAME", 43, 84, 8, 6, 7, 10,
 		[SkillCatalog.GUARD_ORDER, SkillCatalog.GUARD_STRIKE], 2, 26
 	))
+
+	_enemies.append(_make(
+		ROGUE_MAGE, "ENEMY_ROGUE_MAGE_NAME", 24, 84, 10, 6, 3, 9,
+		# Sıra düşman yapay zekâsının sırası: ilk kullanılabilen yetenek
+		# seçiliyor, bekleme süreleri büyüleri döndürüyor.
+		[SkillCatalog.FIRE_BOLT, SkillCatalog.RAY_OF_FROST, SkillCatalog.MAGIC_MISSILE,
+			SkillCatalog.SLEEP, SkillCatalog.POISON_SPRAY, SkillCatalog.BURNING_HANDS,
+			SkillCatalog.ARCANE_SHIELD], 3, 30
+	))
+
+	var mage: EnemyTemplate = _enemies[_enemies.size() - 1]
+	mage.outfit = {"jacket": "mage_robe", "hat": "wizard_hat", "shoes": "felt_shoes"}
+	mage.body_variant = "body_male_lean"
+	mage.burn_resist = 35
 
 	for enemy in _enemies:
 		_enemy_by_id[enemy.enemy_id] = enemy

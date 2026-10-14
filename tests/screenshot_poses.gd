@@ -2,7 +2,7 @@
 ## saatler sürüyor, bir pozun yanlışlığı burada saniyede görünür. Her satır
 ## bir klip, her hücre bir kare; zemin çizgisi, silah ve yay kirişi dahil.
 ##
-##   godot --path . --rendering-driver opengl3 --script res://tests/screenshot_poses.gd
+##   godot --path . --rendering-driver opengl3 --script res://tests/screenshot_poses.gd [-- klip ...]
 extends SceneTree
 
 const CELL: Vector2 = Vector2(118.0, 205.0)
@@ -46,6 +46,9 @@ class Sheet extends Control:
 func _init() -> void:
 	var sheet := Sheet.new()
 	sheet.rows = FigureActions.CLIPS.keys()
+	var picked := OS.get_cmdline_user_args()
+	if not picked.is_empty():
+		sheet.rows = Array(picked)
 	sheet.size = Vector2(1920, 1080)
 	get_root().add_child(sheet)
 	get_root().content_scale_size = Vector2i(sheet.size)

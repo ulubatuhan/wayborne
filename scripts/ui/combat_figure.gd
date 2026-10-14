@@ -52,6 +52,12 @@ const ARCHETYPES: Dictionary = {
 		"cloth": Color(0.24, 0.26, 0.34), "trim": Color(0.52, 0.44, 0.24),
 		"metal": Color(0.58, 0.52, 0.34),
 	},
+	# --- Büyücü ---
+	"rogue_mage": {
+		"body": HUMANOID, "bulk": 0.86, "head": "cap", "weapon": "staff",
+		"cloth": Color(0.30, 0.17, 0.40), "trim": Color(0.62, 0.52, 0.30),
+		"metal": Color(0.72, 0.66, 0.88),
+	},
 	# --- Haydutlar ---
 	"bandit": {
 		"body": HUMANOID, "bulk": 1.0, "head": "wrap", "weapon": "sword",
@@ -160,6 +166,12 @@ var _height_scale: float = 1.0
 ## `CombatUnit.body_variant` - bkz. WalkFigure._body_variant'ın aynı notu.
 var _body_variant: String = ""
 var _rig: WalkFigure = null
+var _status_fx: StatusFx = null
+var _status_glow: StatusFx = null
+var _condition_mat: ShaderMaterial = null
+const CONDITION_SHADER: Shader = preload("res://scripts/ui/condition.gdshader")
+var _status_kinds: PackedStringArray = PackedStringArray()
+var _stuck: Array = []
 
 ## Faz 17 PR-7: savaş animasyon katmanı. İkisi de duruma göre değil - saf
 ## düzeni/durum tıngısı `_tint()`'ten geçiyor, bunlar yalnızca "az önce bir
@@ -189,10 +201,84 @@ var _action_u: float = 0.0
 const ROLE_ATTACK: String = "attack"
 const ROLE_HIT: String = "hit"
 const ROLE_DEFEND: String = "defend"
+const ROLE_CAST: String = "cast"
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_sync_rig)
+	_status_fx = StatusFx.new()
+	add_child(_status_fx)
+	_status_glow = StatusFx.new()
+	_status_glow.set_mode(StatusFx.MODE_ADD)
+	add_child(_status_glow)
+
+## Süren durumlar (bkz. CombatUnit.get_active_status_kinds) ve üstte saplı
+## kalanlar (CombatUnit.stuck). Ölü bir figürde alev ve damla durmuyor.
+func set_conditions(kinds: PackedStringArray, stuck: Array) -> void:
+	_status_kinds = kinds
+	_stuck = stuck
+	_sync_conditions()
+
+func _sync_conditions() -> void:
+	var alive := _state != "dead"
+	var shown := _status_kinds if alive else PackedStringArray()
+	var facing := 1.0 if _face_right else -1.0
+	var source: WalkFigure = _rig if _rig != null and _rig.visible else null
+	for layer in [_status_fx, _status_glow]:
+		layer.size = size
+		layer.setup(shown, figure_height(), facing)
+		layer.follow(source)
+		move_child(layer, get_child_count() - 1)
+	if _rig != null:
+		_rig.set_stuck(_stuck)
+	_apply_condition_shader(shown, source)
+	set_process(not shown.is_empty())
+
+## Bedenin kendisindeki iz (`condition.gdshader`): iskeletli figürde
+## figürün kendisine, hayvanda bu düğüme takılıyor. Hiç durum yoksa
+## materyal kalkıyor - görünüm eskisinin aynısı.
+func _apply_condition_shader(kinds: PackedStringArray, source: WalkFigure) -> void:
+	var target: CanvasItem = source if source != null else self
+	if source != null:
+		material = null
+	elif _rig != null:
+		_rig.material = null
+	if kinds.is_empty():
+		target.material = null
+		return
+	if _condition_mat == null:
+		_condition_mat = ShaderMaterial.new()
+		_condition_mat.shader = CONDITION_SHADER
+	_condition_mat.set_shader_parameter("burn", 1.0 if kinds.has(CombatUnit.STATUS_BURN) else 0.0)
+	_condition_mat.set_shader_parameter("frost", 1.0 if kinds.has(CombatUnit.STATUS_CHILL) else 0.0)
+	_condition_mat.set_shader_parameter("poison", 1.0 if kinds.has(CombatUnit.STATUS_BLIGHT) else 0.0)
+	_condition_mat.set_shader_parameter("bleed", 1.0 if kinds.has(CombatUnit.STATUS_BLEED) else 0.0)
+	_condition_mat.set_shader_parameter("figure_h", figure_height())
+	_condition_mat.set_shader_parameter("seed", float(hash(_kind) % 97))
+	_update_wound()
+	target.material = _condition_mat
+
+## Yara figür oynadıkça yer değiştiriyor (darbe, çırpınma): kan izinin
+## başladığı nokta her karede eklemlerden.
+func _update_wound() -> void:
+	if _condition_mat == null:
+		return
+	var facing := 1.0 if _face_right else -1.0
+	var rigged := _rig != null and _rig.visible
+	var anchors := _rig.get_body_anchors() if rigged else {}
+	var wound := Vector2(size.x * 0.5 + facing * size.x * 0.08, size.y * 0.5)
+	var to_canvas := get_global_transform()
+	if anchors.has("shoulder") and anchors.has("hip"):
+		wound = StatusFx.wound_point(anchors, figure_height(), facing)
+		to_canvas = _rig.get_global_transform()
+	_condition_mat.set_shader_parameter("wound", to_canvas * wound)
+
+func _process(_delta: float) -> void:
+	_update_wound()
+
+## Figürün piksel boyu: efektlerin ölçüsü.
+func figure_height() -> float:
+	return size.y * 0.82
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
@@ -255,6 +341,13 @@ static func action_for(state: String, fall: float, role: String, u: float, weapo
 			return {"clip": "hit", "u": u}
 		ROLE_DEFEND:
 			return {"clip": "defend", "u": u}
+		ROLE_CAST:
+			return {"clip": "attack_cast", "u": u}
+	# Özel tepkiler (ok darbesi, kesik, kaçınma, yanma...) rolün kendisi
+	# bir klip adı; o bedende render edilmemişse WalkFigure genel darbeye
+	# düşüyor (bkz. WalkFigure.ACTION_FALLBACK).
+	if FigureActions.has_clip(role):
+		return {"clip": role, "u": u}
 	return {"clip": "", "u": 0.0}
 
 func set_action(role: String, u: float) -> void:
@@ -298,6 +391,9 @@ func _sync_rig() -> void:
 	if _is_falling() and not lying:
 		var side := 1.0 if _face_right else -1.0
 		_rig.rotation = side * CombatFx.FALL_ANGLE * CombatFx.fall_at(_fall)
+	if _status_fx != null:
+		_sync_conditions()
+
 
 ## `_tint()`'in iskelet figürü için çarpan karşılığı: renk çarpımı gri
 ## yapamıyor, ama koyulaşma ve kızıllaşma aynı okunuyor.

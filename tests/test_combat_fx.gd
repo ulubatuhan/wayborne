@@ -16,6 +16,63 @@ func run(t) -> void:
 	_test_panel_drives_every_moment(t)
 	_test_numbers_follow_real_hp(t)
 	_test_fall_holds_the_continue_button(t)
+	_test_hit_style_picks_the_reaction(t)
+	_test_stuck_projectiles(t)
+
+## Vuruşun biçimi hedefin tepkisini seçiyor: ok delip büker, kılıç keser,
+## ateş çırpındırır, buz büzer, zehir iki büklüm eder; ıskalamada kalkanlı
+## karşılar, kalkansız kaçınır. Klip render edilmemişse genel darbeye düşer.
+func _test_hit_style_picks_the_reaction(t) -> void:
+	t.eq(CombatFx.hit_style("", "arrow", "sword"), "pierce", "ok delici")
+	t.eq(CombatFx.hit_style("", "", "spear_shield"), "pierce", "mızrak delici")
+	t.eq(CombatFx.hit_style("", "", "cleaver"), "slash", "satır kesici")
+	t.eq(CombatFx.hit_style("", "", "maul"), "blunt", "gürz ezici")
+	t.eq(CombatFx.hit_style("", "", "none"), "slash", "diş ve pençe kesici")
+	t.eq(CombatFx.hit_style("fire", "bolt", "staff"), "fire", "büyüde öğe kazanır")
+	var hit := CombatEncounter.BARK_HIT
+	t.eq(CombatFx.reaction_clip(hit, "pierce", "sword"), "hit_pierce", "ok darbesi")
+	t.eq(CombatFx.reaction_clip(hit, "slash", "sword"), "hit_slash", "kesik darbesi")
+	t.eq(CombatFx.reaction_clip(hit, "fire", "sword"), "react_burn", "yanma")
+	t.eq(CombatFx.reaction_clip(hit, "frost", "sword"), "react_freeze", "donma")
+	t.eq(CombatFx.reaction_clip(hit, "poison", "sword"), "react_poison", "zehir")
+	t.eq(CombatFx.reaction_clip(CombatEncounter.BARK_MISS, "pierce", "sword"), "dodge", "kalkansız kaçınır")
+	t.eq(CombatFx.reaction_clip(CombatEncounter.BARK_MISS, "pierce", "spear_shield"), "defend", "kalkanlı karşılar")
+	for clip in ["hit_pierce", "hit_slash", "dodge", "react_burn", "react_freeze", "react_poison", "attack_cast"]:
+		t.ok(FigureActions.has_clip(clip), "%s poz kütüphanesinde" % clip)
+		var picked := WalkFigure.pick_clip(PackedStringArray(["idle", "hit", "defend", "attack_swing", "stance_melee"]),
+			false, 0.0, clip, true, "sword", false, false)
+		t.ok(picked != "stance_melee" and picked != "idle", "%s render edilmemişse genel karşılığına düşer (%s)" % [clip, picked])
+	t.eq(CombatFigure.action_for("ok", 1.0, "hit_pierce", 0.4, "sword").clip, "hit_pierce", "özel tepki rolü bir klip")
+	# Klip bedende render edilip giyside henüz yoksa seçilmiyor - yoksa
+	# figür o an çıplak görünürdü.
+	var body := BodyFrames.new()
+	body.clip_names = PackedStringArray(["idle", "hit", "hit_pierce"])
+	body.clip_frames = PackedInt32Array([1, 4, 4])
+	var shirt := BodyFrames.new()
+	shirt.clip_names = PackedStringArray(["idle", "hit"])
+	shirt.clip_frames = PackedInt32Array([1, 4])
+	var garments: Array[BodyFrames] = [shirt]
+	var shared := WalkFigure.shared_clips(body, garments)
+	t.ok(not shared.has("hit_pierce"), "giysisi olmayan klip ortak değil")
+	t.eq(WalkFigure.pick_clip(shared, false, 0.0, "hit_pierce", true, "sword", false, false), "hit", "genel darbeye düşer")
+	t.eq(CombatFigure.action_for("ok", 1.0, CombatFigure.ROLE_CAST, 0.4, "staff").clip, "attack_cast", "büyü yapma klibi")
+
+## Ok ve fırlatılan bıçak saplı kalır; taş, şişe, büyü kalmaz. En fazla
+## dört, ve yerleşim zarsız: motorun RNG'sine dokunmak sonucu değiştirirdi.
+func _test_stuck_projectiles(t) -> void:
+	t.eq(CombatFx.leaves_stuck("arrow"), "arrow", "ok saplanır")
+	t.eq(CombatFx.leaves_stuck("thrown"), "dagger", "bıçak saplanır")
+	t.eq(CombatFx.leaves_stuck("sling"), "", "taş saplanmaz")
+	t.eq(CombatFx.leaves_stuck("bolt"), "", "büyü saplanmaz")
+	var a := CombatUnit.new()
+	var b := CombatUnit.new()
+	for i in 6:
+		a.add_stuck("arrow")
+		b.add_stuck("arrow")
+	t.eq(a.stuck.size(), CombatUnit.MAX_STUCK, "en fazla dört")
+	t.eq(a.stuck, b.stuck, "yerleşim zarsız ve tekrarlanabilir")
+	for item in a.stuck:
+		t.ok(float(item.t) >= 0.0 and float(item.t) <= 1.0, "gövdenin üstünde (omuz ile kalça arası)")
 
 func _test_curves_start_and_end_at_rest(t) -> void:
 	t.eq(CombatFx.recoil(0.0), 0.0, "hamle yerinden başlıyor")

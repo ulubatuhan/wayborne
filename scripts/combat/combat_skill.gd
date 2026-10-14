@@ -64,6 +64,14 @@ var description: String:
 ## `status_chance` ham şans; hedefin direnci düşülüyor, yani zırhlı bir
 ## düşmana kanama açmak zor. Direnç olmasa kanama her vuruşta binen bir
 ## ek hasara dönüşürdü ve tek doğru strateji "her zaman kanat" olurdu.
+## Büyünün öğesi: "" (fiziksel), "fire", "frost", "poison", "arcane",
+## "sleep". Mekanik değil, ekran okuyor: büyünün rengi, hedefin tepkisi.
+@export var element: String = ""
+## Vuruşun yolu: "" (silahla yakın dövüş - biçimi kullananın silahından),
+## "arrow", "thrown", "bolt", "ray", "missiles", "spray", "cone". Ekran
+## mermiyi ve saplanıp kalacak şeyi buradan seçiyor.
+@export var delivery: String = ""
+
 @export var status_kind: String = ""
 @export var status_amount: int = 0
 @export var status_rounds: int = 0
@@ -176,6 +184,12 @@ static func with_status(
 	skill.status_amount = amount
 	skill.status_rounds = rounds
 	skill.status_chance = chance
+	return skill
+
+## Görsel kimliği (öğe + yol) bir yeteneğe ekler - `with_status` zinciri.
+static func with_style(skill: CombatSkill, element_kind: String, delivery_kind: String) -> CombatSkill:
+	skill.element = element_kind
+	skill.delivery = delivery_kind
 	return skill
 
 ## Hasarsız/iyileştirmesiz bir süreli değiştirici: kendine ya da bir

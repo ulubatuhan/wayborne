@@ -155,7 +155,7 @@ func _test_every_piece_has_art_for_every_body(t) -> void:
 				continue
 			var id := OutfitCatalog.frames_id(piece, body)
 			t.ok(BodyFrames.for_body(id) != null, "%s kare kümesi var" % id)
-	t.eq(with_art, 48, "render edilmiş kırk sekiz giysi (üç zırh dahil)")
+	t.eq(with_art, 50, "render edilmiş elli giysi (üç zırh ve büyücü takımı dahil)")
 
 ## Giysi bedenin karesine binecek: klip adları ve kare sayıları birebir.
 func _test_garment_frames_match_body_layout(t) -> void:

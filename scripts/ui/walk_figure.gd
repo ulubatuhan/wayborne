@@ -140,6 +140,9 @@ var _action_clip: String = ""
 var _beast_species: String = ""
 var _action_u: float = 0.0
 
+var _stuck: Array = []
+var _last_joints: Dictionary = {}
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -206,6 +209,11 @@ static func pick_clip(
 		return "ride"
 	if not action.is_empty() and available.has(action):
 		return action
+	# Bu bedende henüz render edilmemiş bir tepki klibi genel karşılığına
+	# düşüyor: ok darbesi "hit"e, kaçınma "defend"e - duruşa değil.
+	var fallback := String(ACTION_FALLBACK.get(action, ""))
+	if not fallback.is_empty() and available.has(fallback):
+		return fallback
 	if combat_stance:
 		var stance := String(FigureActions.clips_for_weapon(weapon).stance)
 		return stance if available.has(stance) else "idle"
@@ -216,6 +224,37 @@ static func pick_clip(
 			return "walk_boots"
 		return "walk"
 	return "idle"
+
+## Bedenin ve giyilen her giysinin ortak klipleri. Bir klip yalnız bedende
+## render edilmişse (giysiler sonra gelir) figür o anda çıplak görünürdü;
+## ortak olmayan klip seçilmiyor, genel karşılığına düşüyor.
+static func shared_clips(body: BodyFrames, garments: Array[BodyFrames]) -> PackedStringArray:
+	var out := PackedStringArray()
+	for clip in body.clip_names:
+		var everywhere := true
+		for garment in garments:
+			if not garment.has_clip(clip):
+				everywhere = false
+				break
+		if everywhere:
+			out.append(clip)
+	return out
+
+const ACTION_FALLBACK: Dictionary = {
+	"hit_pierce": "hit", "hit_slash": "hit", "react_burn": "hit",
+	"react_freeze": "hit", "react_poison": "hit", "dodge": "defend",
+	"attack_cast": "attack_swing",
+}
+
+## Üstte saplı kalan oklar/bıçaklar (`CombatUnit.stuck`).
+func set_stuck(items: Array) -> void:
+	_stuck = items
+	queue_redraw()
+
+## Son çizilen pozun eklemleri, figürün kendi uzayında - durum efektleri
+## (alev, zehir dumanı, kırağı) bedenin üstüne buradan oturuyor.
+func get_body_anchors() -> Dictionary:
+	return _last_joints
 
 func _wears_boots() -> bool:
 	return OutfitCatalog.wears_boots(_outfit)
@@ -412,6 +451,7 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		)
 	var weapon_sprite := Wardrobe.has_part(_loadout, "weapon")
 	var body_id := _body_id()
+	_last_joints = joints
 	var shield := _combat_stance and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
@@ -428,6 +468,8 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		else:
 			_draw_bone(bone, joints, h, bulk, seated, look, weapon_sprite)
 		_draw_wardrobe(bone, joints, h)
+		if bone == FigureRig.TORSO:
+			_draw_stuck(joints, h)
 	if shield and shield_in_front(_facing):
 		_draw_shield(joints, h, look)
 
@@ -446,7 +488,8 @@ const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
 const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
 
 func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
-	var clip := pick_clip(frames.clip_names, seated, _motion, _action_clip, _combat_stance,
+	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+	var clip := pick_clip(shared_clips(frames, garments), seated, _motion, _action_clip, _combat_stance,
 		weapon_kind(), _carries_pack, _wears_boots())
 	if not frames.has_clip(clip):
 		clip = "idle"
@@ -471,7 +514,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen
 	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
 	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
-	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+	_last_joints = joints
 	var shield := held and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
@@ -499,6 +542,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 		draw_set_transform_matrix(Transform2D.IDENTITY)
 		if BodyFrames.LAYERS[layer] == "torso_head":
 			_draw_frame_extras(joints, h, look)
+			_draw_stuck(joints, h)
 	if shield and shield_in_front(_facing):
 		_draw_shield(joints, h, look)
 
@@ -686,6 +730,39 @@ const WEAPON_PROPS := {
 	"spear_shield": ["weapon_spear", 0.38],
 }
 const SHIELD_PROP: String = "weapon_shield_round"
+
+## Saplı ok/bıçak: gövdenin ön yüzünde, atanın geldiği tarafa (figürün
+## baktığı yöne) doğru dışarı. Ok tüyleriyle, bıçak yalnızca sapı ve
+## siperiyle görünür - ucu bedende.
+const STUCK_ARROW_LEN: float = 0.16
+const STUCK_DAGGER_LEN: float = 0.07
+
+func _draw_stuck(joints: Dictionary, h: float) -> void:
+	if _stuck.is_empty() or not joints.has("shoulder") or not joints.has("hip"):
+		return
+	var ink := ArtPalette.INK
+	var now := Time.get_ticks_msec()
+	for item in _stuck:
+		# Ok uçarken henüz saplanmadı: mermi hedefe varınca beliriyor.
+		if int(item.get("at", 0)) > now:
+			continue
+		var base: Vector2 = Vector2(joints.shoulder).lerp(joints.hip, float(item.t)) + Vector2(0.040 * _facing, 0.0) * h
+		var out := Vector2(_facing, 0.0).rotated(deg_to_rad(-18.0 + float(item.tilt)) * _facing)
+		if String(item.kind) == "dagger":
+			var end := base + out * h * STUCK_DAGGER_LEN
+			var guard := Vector2(-out.y, out.x) * h * 0.022
+			draw_line(base, end, ink, maxf(2.4, h * 0.020))
+			draw_line(base, end, Color(0.36, 0.24, 0.14), maxf(1.4, h * 0.013))
+			draw_line(base + out * h * 0.012 - guard, base + out * h * 0.012 + guard, ArtPalette.STEEL, maxf(1.4, h * 0.010))
+			continue
+		var tail := base + out * h * STUCK_ARROW_LEN
+		draw_line(base, tail, ink, maxf(1.8, h * 0.012))
+		draw_line(base, tail, Color(0.50, 0.36, 0.20), maxf(1.0, h * 0.007))
+		var side := Vector2(-out.y, out.x) * h * 0.018
+		for k in 2:
+			var a := tail - out * h * (0.012 + 0.020 * k)
+			draw_colored_polygon(PackedVector2Array([a, a - out * h * 0.03 + side, a - out * h * 0.012]), Color(0.86, 0.82, 0.74))
+			draw_colored_polygon(PackedVector2Array([a, a - out * h * 0.03 - side, a - out * h * 0.012]), Color(0.78, 0.74, 0.66))
 
 ## Kalkan sol kolda. Figür yön değiştirirken aynalandığı için sağa bakanda
 ## sol kol uzak taraftadır ve kalkan bedenin arkasında kalır; sola bakanda

@@ -190,6 +190,83 @@
     160,
     300
    ]
+  },
+  "hit_pierce": {
+   "kind": "action",
+   "action": "hit_pierce",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "hit_slash": {
+   "kind": "action",
+   "action": "hit_slash",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "dodge": {
+   "kind": "action",
+   "action": "dodge",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "react_burn": {
+   "kind": "action",
+   "action": "react_burn",
+   "frames": 6,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "react_freeze": {
+   "kind": "action",
+   "action": "react_freeze",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "react_poison": {
+   "kind": "action",
+   "action": "react_poison",
+   "frames": 4,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
+  },
+  "attack_cast": {
+   "kind": "action",
+   "action": "attack_cast",
+   "frames": 6,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ]
   }
  },
  "facing": 1.0,

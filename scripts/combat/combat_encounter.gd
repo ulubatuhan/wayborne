@@ -24,6 +24,9 @@ signal turn_started(unit)  # CombatUnit
 ## karşılaştırması gerekmiyor (`EnemyCatalog.KIND_WILDLIFE` gibi diğer
 ## "tür" sabitleriyle aynı disiplin).
 signal unit_barked(unit, text, kind)  # CombatUnit, String, String
+## Bir yetenek çözülmeye başladı: ekran saldıranın klibini ve kendine
+## yapılan büyüleri (kalkan) buradan oynatıyor - bunlar bark üretmiyor.
+signal skill_resolving(unit, skill)  # CombatUnit, CombatSkill
 
 const BARK_HIT: String = "hit"
 const BARK_CRIT: String = "crit"
@@ -46,6 +49,16 @@ const BARK_STATUS_STUN: String = "status_stun"
 const BARK_BLEED_TICK: String = "bleed_tick"
 const BARK_BLIGHT_TICK: String = "blight_tick"
 const BARK_STUN_SKIP: String = "stun_skip"
+const BARK_STATUS_BURN: String = "status_burn"
+const BARK_STATUS_CHILL: String = "status_chill"
+const BARK_BURN_TICK: String = "burn_tick"
+
+## Son çözülen yetenek ve onu kullanan: ekran bir vuruşun *nasıl* geldiğini
+## (ok mu, kılıç mı, ateş mi) buradan okuyor - bark'lar hedefe gidiyor ve
+## yeteneği taşımıyor. Senkron okunuyor: `_resolve_skill` bark'ları kendi
+## içinde emitliyor.
+var last_skill: CombatSkill = null
+var last_actor: CombatUnit = null
 
 enum State {
 	ONGOING,
@@ -284,9 +297,13 @@ func _begin_unit_turn(unit: CombatUnit) -> bool:
 		var taken := unit.reduce_by_protection(drained)
 		var key := "CBT_LOG_BLEED_TICK"
 		var bark := BARK_BLEED_TICK
-		if unit.has_status(CombatUnit.STATUS_BLIGHT) and not unit.has_status(CombatUnit.STATUS_BLEED):
-			key = "CBT_LOG_BLIGHT_TICK"
-			bark = BARK_BLIGHT_TICK
+		if not unit.has_status(CombatUnit.STATUS_BLEED):
+			if unit.has_status(CombatUnit.STATUS_BURN):
+				key = "CBT_LOG_BURN_TICK"
+				bark = BARK_BURN_TICK
+			elif unit.has_status(CombatUnit.STATUS_BLIGHT):
+				key = "CBT_LOG_BLIGHT_TICK"
+				bark = BARK_BLIGHT_TICK
 		_emit_log(tr(key) % [unit.display_name, taken])
 		unit_barked.emit(unit, "", bark)
 		_report_damage_outcome(unit, outcome)
@@ -360,6 +377,9 @@ func _shuffle_forward(unit: CombatUnit) -> void:
 ## hedeflik yol hiç değişmedi - `SINGLE` varsayılan olduğu için alan
 ## sistemi eklenmeden önce yazılmış her yetenek aynen çalışıyor.
 func _resolve_skill(unit: CombatUnit, skill: CombatSkill, target: CombatUnit) -> void:
+	last_skill = skill
+	last_actor = unit
+	skill_resolving.emit(unit, skill)
 	var affected := _affected_targets(unit, skill, target)
 	if affected.is_empty():
 		_emit_log(tr("CBT_LOG_NO_TARGET") % [unit.display_name, skill.display_name])
@@ -493,6 +513,8 @@ static func status_bark(kind: String) -> String:
 	match kind:
 		CombatUnit.STATUS_BLIGHT: return BARK_STATUS_BLIGHT
 		CombatUnit.STATUS_STUN: return BARK_STATUS_STUN
+		CombatUnit.STATUS_BURN: return BARK_STATUS_BURN
+		CombatUnit.STATUS_CHILL: return BARK_STATUS_CHILL
 	return BARK_STATUS_BLEED
 
 func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
@@ -544,6 +566,8 @@ func _status_name_key(kind: String) -> String:
 	match kind:
 		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
 		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
+		CombatUnit.STATUS_BURN: return "CBT_STATUS_BURN"
+		CombatUnit.STATUS_CHILL: return "CBT_STATUS_CHILL"
 		_: return "CBT_STATUS_BLEED"
 
 func _roll_damage(unit: CombatUnit, skill: CombatSkill, is_crit: bool) -> int:

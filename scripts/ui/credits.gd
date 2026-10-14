@@ -22,6 +22,7 @@ const CC_BY: Array = [
 	["maciekg_leather_boots", "MaciekG", "http://www.makehumancommunity.org/node/1461"],
 	["maciekg_leather_helmet", "MaciekG", "http://www.makehumancommunity.org/node/1457"],
 	["maciekg_wizard_robe", "MaciekG", "http://www.makehumancommunity.org/node/1482"],
+	["maciekg_wizard_hat", "MaciekG", "https://static.makehumancommunity.org/assets/assetpacks/hats03.html"],
 	["mindfront_cardigan_long_open_front", "Mindfront", "http://www.makehumancommunity.org/node/1528"],
 	["mindfront_knitted_hat_01", "Mindfront", "http://www.makehumancommunity.org/node/745"],
 	["mindfront_sherpa_hat", "Mindfront", "http://www.makehumancommunity.org/node/3172"],
@@ -34,7 +35,7 @@ const CC_BY: Array = [
 ## CC0 paketler (atıf gerekmez).
 const CC0_PACKS: Array = [
 	"Quaternius - Medieval Village Pack, Medieval Village MegaKit, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits (quaternius.com)",
-	"Kenney - Castle Kit, Survival Kit (kenney.nl)",
+	"Kenney - Castle Kit, Survival Kit, Particle Pack (kenney.nl)",
 	"Kay Lousberg - KayKit Medieval Hexagon (kaylousberg.com)",
 	"MakeHuman community - CC0 clothes by culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg",
 	"Blender Studio - Human Base Meshes; MPFB2 (MakeHuman)",

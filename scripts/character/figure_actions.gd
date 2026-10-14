@@ -102,6 +102,80 @@ const CLIPS: Dictionary = {
 			"arm_f": [15.0, 50.0], "arm_b": [20.0, 50.0], "weapon": 185.0}],
 		[1.0, _MELEE_STANCE],
 	]},
+	# Delici darbe (ok, mızrak, hançer): göğse saplanan şey gövdeyi öne
+	# büker, ön el yaraya gider; geri savrulma `hit`'ten az, sarsıntı içe doğru.
+	"hit_pierce": {"frames": 4, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.33, {"hip_x": -0.025, "hip_y": -0.03, "lean": 14.0, "foot_f": [0.09, 0.0, 0.0], "foot_b": [-0.16, 0.0, 0.0],
+			"arm_f": [32.0, 222.0], "arm_b": [30.0, 75.0], "weapon": 150.0}],
+		[0.66, {"hip_x": -0.04, "hip_y": -0.045, "lean": 20.0, "foot_f": [0.08, 0.0, 0.0], "foot_b": [-0.18, 0.0, 0.0],
+			"arm_f": [28.0, 228.0], "arm_b": [22.0, 60.0], "weapon": 140.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Kesik darbe (kılıç, balta): vuruş yandan gelir, gövde dönerek geriye
+	# atılır, kollar savrulur, baş geride.
+	"hit_slash": {"frames": 4, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.33, {"hip_x": -0.04, "hip_y": -0.015, "lean": -26.0, "foot_f": [0.15, 0.0, 15.0], "foot_b": [-0.10, 0.0, 0.0],
+			"arm_f": [-40.0, 5.0], "arm_b": [70.0, 125.0], "weapon": 215.0}],
+		[0.66, {"hip_x": -0.07, "hip_y": -0.04, "lean": -12.0, "foot_f": [0.10, 0.0, 0.0], "foot_b": [-0.20, 0.0, 0.0],
+			"arm_f": [5.0, 45.0], "arm_b": [40.0, 80.0], "weapon": 190.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Kaçınma: darbe gelmeden geri sıçrama, gövde geriye çekik, ağırlık arka
+	# ayakta; sonra duruşa dönüş.
+	"dodge": {"frames": 4, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.4, {"hip_x": -0.10, "hip_y": -0.035, "lean": -16.0, "foot_f": [0.05, 0.0, 10.0], "foot_b": [-0.24, 0.0, 0.0],
+			"arm_f": [60.0, 120.0], "arm_b": [-20.0, 30.0], "weapon": 150.0}],
+		[0.7, {"hip_x": -0.09, "hip_y": -0.04, "lean": -10.0, "foot_f": [0.06, 0.0, 0.0], "foot_b": [-0.22, 0.0, 0.0],
+			"arm_f": [50.0, 105.0], "arm_b": [-10.0, 35.0], "weapon": 155.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Yanma: alevi söndürmeye çalışan çırpınma - kollar sırayla gövdeye
+	# vuruyor, ayaklar yerinde sekiyor.
+	"react_burn": {"frames": 6, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.2, {"hip_x": -0.03, "hip_y": -0.02, "lean": -12.0, "foot_f": [0.10, 0.0, 0.0], "foot_b": [-0.12, 0.0, 0.0],
+			"arm_f": [150.0, 205.0], "arm_b": [40.0, 140.0], "weapon": 220.0}],
+		[0.45, {"hip_x": -0.02, "hip_y": -0.05, "lean": 14.0, "foot_f": [0.08, 0.0, 0.0], "foot_b": [-0.14, 0.0, 0.0],
+			"arm_f": [45.0, 150.0], "arm_b": [130.0, 190.0], "weapon": 160.0}],
+		[0.7, {"hip_x": -0.04, "hip_y": -0.02, "lean": -6.0, "foot_f": [0.11, 0.0, 0.0], "foot_b": [-0.13, 0.0, 0.0],
+			"arm_f": [140.0, 195.0], "arm_b": [35.0, 145.0], "weapon": 215.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Donma: soğuk gövdeyi büzüyor - omuzlar düşük, kollar göğüste
+	# kavuşmuş, dizler kırık. Titreme kalçanın küçük gidip gelmesi.
+	"react_freeze": {"frames": 4, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.35, {"hip_x": 0.005, "hip_y": -0.05, "lean": 18.0, "foot_f": [0.06, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
+			"arm_f": [22.0, 232.0], "arm_b": [30.0, 225.0], "weapon": 120.0}],
+		[0.7, {"hip_x": -0.005, "hip_y": -0.055, "lean": 20.0, "foot_f": [0.06, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
+			"arm_f": [24.0, 236.0], "arm_b": [28.0, 222.0], "weapon": 120.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Zehirlenme: iki büklüm - gövde öne çökük, ön el karında, arka kol
+	# dizine dayanmış.
+	"react_poison": {"frames": 4, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.35, {"hip_x": -0.02, "hip_y": -0.06, "lean": 32.0, "foot_f": [0.10, 0.0, 0.0], "foot_b": [-0.14, 0.0, 0.0],
+			"arm_f": [12.0, 208.0], "arm_b": [45.0, 30.0], "weapon": 110.0}],
+		[0.7, {"hip_x": -0.03, "hip_y": -0.08, "lean": 40.0, "foot_f": [0.11, 0.0, 0.0], "foot_b": [-0.15, 0.0, 0.0],
+			"arm_f": [8.0, 212.0], "arm_b": [50.0, 25.0], "weapon": 100.0}],
+		[1.0, _MELEE_STANCE],
+	]},
+	# Büyü yapma: kol göğe kalkar, sonra avuç (ya da asa) hedefe doğru
+	# uzanır; arka el göğüste büyüyü "örüyor".
+	"attack_cast": {"frames": 6, "keys": [
+		[0.0, _MELEE_STANCE],
+		[0.3, {"hip_y": -0.02, "lean": -8.0, "foot_f": [0.10, 0.0, 0.0], "foot_b": [-0.12, 0.0, 0.0],
+			"arm_f": [160.0, 175.0], "arm_b": [55.0, 120.0], "weapon": 180.0}],
+		[0.6, {"hip_x": 0.04, "hip_y": -0.035, "lean": 10.0, "foot_f": [0.18, 0.0, 0.0], "foot_b": [-0.12, 0.0, 0.0],
+			"arm_f": [88.0, 92.0], "arm_b": [60.0, 115.0], "weapon": 100.0}],
+		[0.8, {"hip_x": 0.04, "hip_y": -0.035, "lean": 10.0, "foot_f": [0.18, 0.0, 0.0], "foot_b": [-0.12, 0.0, 0.0],
+			"arm_f": [90.0, 92.0], "arm_b": [55.0, 110.0], "weapon": 100.0}],
+		[1.0, _MELEE_STANCE],
+	]},
 	# Savunma: çömel, ön kol yüzün önünde, silah yatay.
 	"defend": {"frames": 4, "keys": [
 		[0.0, _MELEE_STANCE],

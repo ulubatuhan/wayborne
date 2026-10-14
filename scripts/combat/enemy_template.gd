@@ -34,6 +34,13 @@ var display_name: String:
 ## şey ölçeklenince tavanı zorlar ve sistemi kapatır.
 @export var bleed_resist: int = 20
 @export var blight_resist: int = 20
+@export var burn_resist: int = 20
+## Görünüş: boşsa düşman eski parça iskeletinde arketip renkleriyle
+## çizilir; doluysa oyuncu tarafı gibi 3B kare bedeni ve giysileriyle
+## (`CombatUnit.outfit`/`body_variant`).
+@export var outfit: Dictionary = {}
+@export var body_variant: String = ""
+@export var chill_resist: int = 20
 @export var stun_resist: int = 20
 ## Ölümcül vuruş direnci düşmanlarda kullanılmıyor: Ölümün Kıyısı yalnızca
 ## ana karaktere ait (bkz. CombatUnit.can_enter_deaths_door). Düşman canı

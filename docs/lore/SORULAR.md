@@ -101,7 +101,7 @@ cevaplamak zorunda değilsin; ad vermediğin yapıya oyun içinde de ad koymayı
 - **G2.3** Kuzey dağları (**3**) ve kuzeybatı tepeleri (**2**).
 - **G2.4** Batı ovasının güneyindeki tepe hattı (**17**) ve güney kıyı dağları (**20**).
 - **G2.5** Batı ovası ile orta kuşak arasındaki sırt (**24**).
-- **G2.6** "Dağın İlk Nefesi" efsanesinin doruğu belirli bir dağ mı? Hangisi?
+- **G2.6** "Dağın İlk Nefesi" (artık küçük bir inanış) belirli bir dağa bağlı mı? Hangisi?
 
 **Sular**
 - **G2.7** İç deniz (**10**) ve doğu körfezi (**11**): ikisi tuzlu deniz mi, tatlı
@@ -216,8 +216,11 @@ Bunlar şimdi sorulmuyor; Faz G'nin cevaplarıyla yeniden yazılıp sorulacak.
 - Siyasi hiyerarşi: krallık, prenslik, beylik. Oyunun haber kartları "beylik"
   diyor; C1 "prenslik", C6 "kral" ve "konsey" diyor. Üçü birlikte nasıl duruyor?
 - Kaç krallık/prenslik var, hangi şehir kime bağlı?
-- **El** bir tanrının adı mı, bir unvan mı? Kilisenin yapısı (başkanı, rahipleri,
-  bekçi kadınla ilişkisi).
+- **The Hand (El)**: El bir tanrı mı, tanrının bir sıfatı mı, yoksa tanrının
+  kendisi bilinmeyen bir "el" mi? Kilisenin yapısı (başkanı, rahipleri, bekçi
+  kadınla ilişkisi), sembolü.
+- Dağın İlk Nefesi küçük bir inanışa indi: Kilise ekranı onu hâlâ Denizin İlk
+  Gözyaşı ile eşit okutuyor; metin değişsin mi?
 - **Deniz efsanesi kimin?** Soru metni (S5) "Denizin İlk Gözyaşı"nı Baikanlara
   bağlıyor, oyunda Balıkçılarınki, C7'de Baikhan göçebe inancı.
 - Baikhan ve Gokana: inancın adı mı, varlıklar mı, yer mi (gök ve toprak)?

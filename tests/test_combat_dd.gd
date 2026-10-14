@@ -14,6 +14,8 @@ func suite_name() -> String:
 	return "CombatDD"
 
 func run(t) -> void:
+	_test_burn_and_chill(t)
+	_test_rogue_mage_is_ready_but_never_spawned(t)
 	_test_protection_reduces_but_never_erases(t)
 	_test_fresh_character_has_no_protection(t)
 	_test_turn_order_is_rerolled_each_round(t)
@@ -653,7 +655,8 @@ func _test_endurance_buys_status_resistance(t) -> void:
 ## (WAGON_LOSE hiç kullanılmıyordu).
 func _test_every_status_a_skill_can_apply_is_handled(t) -> void:
 	var known := [
-		CombatUnit.STATUS_BLEED, CombatUnit.STATUS_BLIGHT, CombatUnit.STATUS_STUN
+		CombatUnit.STATUS_BLEED, CombatUnit.STATUS_BLIGHT, CombatUnit.STATUS_STUN,
+		CombatUnit.STATUS_BURN, CombatUnit.STATUS_CHILL,
 	]
 	var used := {}
 	for skill in SkillCatalog.get_all_skills():
@@ -667,7 +670,7 @@ func _test_every_status_a_skill_can_apply_is_handled(t) -> void:
 		if skill.status_kind != CombatUnit.STATUS_STUN:
 			t.ok(
 				skill.status_amount > 0,
-				"%s: hasar veren durumun miktarı sıfır olamaz" % skill.skill_id
+				"%s: durumun miktarı sıfır olamaz (hasar ya da üşümede kaçınma cezası)" % skill.skill_id
 			)
 		used[skill.status_kind] = true
 	# Üçünün de en az bir kaynağı olmalı: kullanılmayan bir durum, ölü
@@ -901,3 +904,45 @@ func _test_self_shift_moves_the_user(t) -> void:
 	var alone := lone.player_units[0]
 	lone._resolve_on_target(alone, step, alone)
 	t.eq(alone.position, 1, "tek kişilik saf yer değiştirmez")
+
+## Yanma kanama gibi tur başında yakar; üşüme hiç hasar vermez, kaçınmayı
+## miktarı kadar, isabeti biraz düşürür. İkisi de dirençli (beden ve iç
+## direnç - yeni bir stat ekseni yok).
+func _test_burn_and_chill(t) -> void:
+	var unit := CombatUnit.new()
+	unit.dodge = 30
+	unit.accuracy = 80
+	unit.apply_status(CombatUnit.STATUS_CHILL, 12, 2)
+	t.eq(unit.drain_status_damage(), 0, "üşüme hasar vermez")
+	t.eq(unit.get_effective_dodge(), 18, "üşüme kaçınmayı miktarı kadar düşürür")
+	t.eq(unit.get_effective_accuracy(), 80 - CombatUnit.CHILL_ACCURACY_PENALTY, "titreyen el isabeti düşürür")
+	unit.apply_status(CombatUnit.STATUS_BURN, 3, 2)
+	t.eq(unit.drain_status_damage(), 3, "yanma tur başında yakar")
+	t.eq(CombatEncounter.status_bark(CombatUnit.STATUS_BURN), CombatEncounter.BARK_STATUS_BURN, "yanma barkı")
+	t.eq(CombatEncounter.status_bark(CombatUnit.STATUS_CHILL), CombatEncounter.BARK_STATUS_CHILL, "üşüme barkı")
+	unit.tick_statuses()
+	unit.tick_statuses()
+	t.eq(unit.get_effective_dodge(), 30, "üşüme geçince kaçınma geri gelir")
+	var hero := CharacterData.create("Ayaz", CultureCatalog.NOMAD, CharacterStats.new())
+	t.eq(hero.get_burn_resist(), hero.get_bleed_resist(), "yanık direnci beden direnci")
+	t.eq(hero.get_chill_resist(), hero.get_blight_resist(), "üşüme direnci iç direnç")
+
+## Büyücü şablonu ve yedi büyü hazır, ama hiçbir kadro onu kendiliğinden
+## kurmuyor: hangi olayın açacağı lore'un kararı (bkz. LORE.md §3.3).
+func _test_rogue_mage_is_ready_but_never_spawned(t) -> void:
+	var mage := EnemyCatalog.get_enemy(EnemyCatalog.ROGUE_MAGE)
+	t.ok(mage != null, "büyücü şablonu var")
+	if mage == null:
+		return
+	t.eq(mage.skill_ids.size(), 7, "yedi temel büyü")
+	for id in mage.skill_ids:
+		var skill := SkillCatalog.get_skill(id)
+		t.ok(skill != null and not skill.element.is_empty(), "%s bir büyü (öğesi var)" % id)
+	t.eq(String(mage.outfit.get("hat", "")), "wizard_hat", "büyücü külahıyla çiziliyor")
+	var rng := RandomNumberGenerator.new()
+	for seed_value in 40:
+		rng.seed = seed_value
+		for kind in [EnemyCatalog.KIND_BANDIT, EnemyCatalog.KIND_WILDLIFE, EnemyCatalog.KIND_GUARD, EnemyCatalog.KIND_HUNT]:
+			var squad := EnemyCatalog.build_squad(kind, "test_loc_b", 0.9, 4, rng)
+			for unit in squad:
+				t.ok(unit.figure_kind != EnemyCatalog.ROGUE_MAGE, "büyücü kadroya kendiliğinden girmez")
