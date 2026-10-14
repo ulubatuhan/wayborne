@@ -167,6 +167,9 @@ var _height_scale: float = 1.0
 var _body_variant: String = ""
 var _rig: WalkFigure = null
 var _status_fx: StatusFx = null
+var _status_glow: StatusFx = null
+var _condition_mat: ShaderMaterial = null
+const CONDITION_SHADER: Shader = preload("res://scripts/ui/condition.gdshader")
 var _status_kinds: PackedStringArray = PackedStringArray()
 var _stuck: Array = []
 
@@ -205,6 +208,9 @@ func _init() -> void:
 	resized.connect(_sync_rig)
 	_status_fx = StatusFx.new()
 	add_child(_status_fx)
+	_status_glow = StatusFx.new()
+	_status_glow.set_mode(StatusFx.MODE_ADD)
+	add_child(_status_glow)
 
 ## Süren durumlar (bkz. CombatUnit.get_active_status_kinds) ve üstte saplı
 ## kalanlar (CombatUnit.stuck). Ölü bir figürde alev ve damla durmuyor.
@@ -216,12 +222,60 @@ func set_conditions(kinds: PackedStringArray, stuck: Array) -> void:
 func _sync_conditions() -> void:
 	var alive := _state != "dead"
 	var shown := _status_kinds if alive else PackedStringArray()
-	_status_fx.size = size
-	_status_fx.setup(shown, {}, size.y * 0.82, 1.0 if _face_right else -1.0)
-	_status_fx.follow(_rig if _rig != null and _rig.visible else null)
+	var facing := 1.0 if _face_right else -1.0
+	var source: WalkFigure = _rig if _rig != null and _rig.visible else null
+	for layer in [_status_fx, _status_glow]:
+		layer.size = size
+		layer.setup(shown, figure_height(), facing)
+		layer.follow(source)
+		move_child(layer, get_child_count() - 1)
 	if _rig != null:
 		_rig.set_stuck(_stuck)
-	move_child(_status_fx, get_child_count() - 1)
+	_apply_condition_shader(shown, source)
+	set_process(not shown.is_empty())
+
+## Bedenin kendisindeki iz (`condition.gdshader`): iskeletli figürde
+## figürün kendisine, hayvanda bu düğüme takılıyor. Hiç durum yoksa
+## materyal kalkıyor - görünüm eskisinin aynısı.
+func _apply_condition_shader(kinds: PackedStringArray, source: WalkFigure) -> void:
+	var target: CanvasItem = source if source != null else self
+	if source != null:
+		material = null
+	elif _rig != null:
+		_rig.material = null
+	if kinds.is_empty():
+		target.material = null
+		return
+	if _condition_mat == null:
+		_condition_mat = ShaderMaterial.new()
+		_condition_mat.shader = CONDITION_SHADER
+	_condition_mat.set_shader_parameter("burn", 1.0 if kinds.has(CombatUnit.STATUS_BURN) else 0.0)
+	_condition_mat.set_shader_parameter("frost", 1.0 if kinds.has(CombatUnit.STATUS_CHILL) else 0.0)
+	_condition_mat.set_shader_parameter("poison", 1.0 if kinds.has(CombatUnit.STATUS_BLIGHT) else 0.0)
+	_condition_mat.set_shader_parameter("bleed", 1.0 if kinds.has(CombatUnit.STATUS_BLEED) else 0.0)
+	_condition_mat.set_shader_parameter("figure_h", figure_height())
+	_condition_mat.set_shader_parameter("seed", float(hash(_kind) % 97))
+	_update_wound()
+	target.material = _condition_mat
+
+## Yara figür oynadıkça yer değiştiriyor (darbe, çırpınma): kan izinin
+## başladığı nokta her karede eklemlerden.
+func _update_wound() -> void:
+	if _condition_mat == null:
+		return
+	var facing := 1.0 if _face_right else -1.0
+	var anchors := _rig.get_body_anchors() if _rig != null and _rig.visible else {}
+	var wound := Vector2(size.x * 0.5 + facing * size.x * 0.08, size.y * 0.5)
+	if anchors.has("shoulder") and anchors.has("hip"):
+		wound = StatusFx.wound_point(anchors, figure_height(), facing)
+	_condition_mat.set_shader_parameter("wound", wound)
+
+func _process(_delta: float) -> void:
+	_update_wound()
+
+## Figürün piksel boyu: efektlerin ölçüsü.
+func figure_height() -> float:
+	return size.y * 0.82
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
@@ -324,7 +378,7 @@ func _sync_rig() -> void:
 	_rig.set_combat_stance(true)
 	_rig.set_standing()
 	_rig.set_facing(1.0 if _face_right else -1.0)
-	_rig.set_tint(_state_tone() * condition_tone(_status_kinds))
+	_rig.set_tint(_state_tone())
 	_rig.position = _offset
 	var pivot := Vector2(size.x * 0.5, size.y * 0.95)
 	_rig.pivot_offset = pivot
@@ -337,17 +391,6 @@ func _sync_rig() -> void:
 	if _status_fx != null:
 		_sync_conditions()
 
-## Durumun bedene vurduğu ton (çarpan): yanan isli ve kızıl, zehirlenen
-## yeşilimsi, üşüyen mavimsi. Hiç durum yoksa tam beyaz - eski görünüm.
-static func condition_tone(kinds: PackedStringArray) -> Color:
-	var tone := Color(1, 1, 1)
-	if kinds.has(CombatUnit.STATUS_BURN):
-		tone *= Color(0.92, 0.80, 0.70)
-	if kinds.has(CombatUnit.STATUS_BLIGHT):
-		tone *= Color(0.84, 1.0, 0.76)
-	if kinds.has(CombatUnit.STATUS_CHILL):
-		tone *= Color(0.80, 0.92, 1.10)
-	return tone
 
 ## `_tint()`'in iskelet figürü için çarpan karşılığı: renk çarpımı gri
 ## yapamıyor, ama koyulaşma ve kızıllaşma aynı okunuyor.
