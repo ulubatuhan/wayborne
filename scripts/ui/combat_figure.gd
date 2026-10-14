@@ -264,11 +264,14 @@ func _update_wound() -> void:
 	if _condition_mat == null:
 		return
 	var facing := 1.0 if _face_right else -1.0
-	var anchors := _rig.get_body_anchors() if _rig != null and _rig.visible else {}
+	var rigged := _rig != null and _rig.visible
+	var anchors := _rig.get_body_anchors() if rigged else {}
 	var wound := Vector2(size.x * 0.5 + facing * size.x * 0.08, size.y * 0.5)
+	var to_canvas := get_global_transform()
 	if anchors.has("shoulder") and anchors.has("hip"):
 		wound = StatusFx.wound_point(anchors, figure_height(), facing)
-	_condition_mat.set_shader_parameter("wound", wound)
+		to_canvas = _rig.get_global_transform()
+	_condition_mat.set_shader_parameter("wound", to_canvas * wound)
 
 func _process(_delta: float) -> void:
 	_update_wound()

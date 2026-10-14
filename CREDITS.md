@@ -22,6 +22,7 @@ MakeHuman topluluk giysileri — https://static.makehumancommunity.org/assets/as
 | maciekg_leather_boots | MaciekG | http://www.makehumancommunity.org/node/1461 |
 | maciekg_leather_helmet | MaciekG | http://www.makehumancommunity.org/node/1457 |
 | maciekg_wizard_robe | MaciekG | http://www.makehumancommunity.org/node/1482 |
+| maciekg_wizard_hat | MaciekG | https://static.makehumancommunity.org/assets/assetpacks/hats03.html |
 | mindfront_cardigan_long_open_front | Mindfront | http://www.makehumancommunity.org/node/1528 |
 | mindfront_knitted_hat_01 | Mindfront | http://www.makehumancommunity.org/node/745 |
 | mindfront_sherpa_hat | Mindfront | http://www.makehumancommunity.org/node/3172 |
@@ -35,7 +36,7 @@ Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenin
 ## CC0 (atıf gerekmez)
 
 - Quaternius — Medieval Village Pack, Medieval Village MegaKit, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals
-- Kenney — Castle Kit, Survival Kit
+- Kenney — Castle Kit, Survival Kit, Particle Pack
 - Kay Lousberg — KayKit Medieval Hexagon
 - MakeHuman topluluğu — culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg'nin CC0 giysileri
 - Blender Studio — Human Base Meshes; MPFB2

@@ -126,7 +126,7 @@ func _phase(period: float, offset: float) -> float:
 
 func _draw() -> void:
 	var anchors := _anchors()
-	var pts := body_points(anchors, size, 2)
+	var pts := body_points(anchors, size, 3)
 	for kind in _kinds:
 		match kind:
 			CombatUnit.STATUS_BURN:
@@ -156,7 +156,7 @@ func _draw_flames(pts: Array) -> void:
 		var p: Vector2 = pts[i].pos
 		var j := jitter(i, 1.0)
 		var flick := 0.75 + 0.25 * sin(_time * (10.0 + 6.0 * j) + j * 9.0)
-		var size_px := _h * (0.09 + 0.07 * j) * flick
+		var size_px := _h * (0.13 + 0.09 * j) * flick
 		var name: String = flames[(i + int(_time * (8.0 + 4.0 * j))) % flames.size()]
 		var lean := sin(_time * 3.0 + j * 6.0) * 0.18
 		var base := p - Vector2(0.0, size_px * 0.35)
@@ -178,13 +178,13 @@ func _draw_smoke(anchors: Dictionary) -> void:
 
 # --- Zehir: bedeni saran, yavaşça kalkan yeşil hastalık sisi; ağızda köpük.
 func _draw_sickness(pts: Array, anchors: Dictionary) -> void:
-	var sick := Color(0.42, 0.62, 0.16)
+	var sick := Color(0.40, 0.58, 0.14)
 	for i in pts.size():
 		var j := jitter(i, 2.0)
 		var u := _phase(3.0 + 2.0 * j, j)
 		var p: Vector2 = pts[i].pos + Vector2(sin(_time * 0.8 + j * 6.0) * _h * 0.02, -u * _h * 0.10)
-		var a := 0.30 * sin(u * PI)
-		_sprite("smoke_0%d" % (4 + i % 5), p, _h * (0.10 + 0.06 * j), Color(sick, a), j * 6.0 + _time * 0.3)
+		var a := 0.42 * sin(u * PI)
+		_sprite("smoke_0%d" % (4 + i % 5), p, _h * (0.16 + 0.08 * j), Color(sick, a), j * 6.0 + _time * 0.3)
 	var mouth := _head(anchors) + Vector2(_facing * _h * 0.05, _h * 0.03)
 	for i in 4:
 		var u := _phase(1.4, float(i) / 4.0)

@@ -426,6 +426,38 @@ wayborne/
     not zero either, or a fresh character bleeds on every hit and bleed
     stops being a choice and becomes a tax on every attack.
 
+- **Magic is the existing vocabulary in a new colour.** Seven first-tier
+  D&D spells (`SkillCatalog._build_spells`) each sit on a mechanic that
+  already existed: Fire Bolt and Burning Hands (an `ADJACENT` area, weaker
+  than the bolt - the area rule) apply **burn**, a DoT through the one
+  damage door like bleed; Ray of Frost applies **chill**, which deals no
+  damage - its `amount` is the dodge it takes away, plus
+  `CHILL_ACCURACY_PENALTY`, and `NON_DAMAGING_STATUSES` keeps it out of
+  `drain_status_damage`; Sleep is a stun; Arcane Shield a `prot` buff;
+  Magic Missile a +40 accuracy hit (still capped by `MAX_HIT_CHANCE`).
+  Burn and chill resist reuse the body's bleed and blight resist
+  (`CharacterData.get_burn_resist`/`get_chill_resist`) - a new resist axis
+  would have shifted the eight-stat budget. `EnemyCatalog.ROGUE_MAGE` is
+  ready and **never spawned by any squad builder** (`test_combat_dd`
+  asserts it): which event opens a wizard is a lore decision (LORE.md
+  §3.3: wizards are rare and unwelcome).
+- **A skill says how it looks, not only what it does.** `CombatSkill.element`
+  ("" or fire/frost/poison/arcane/sleep) and `delivery` (arrow, thrown,
+  sling, flask, bolt, ray, missiles, spray, cone, aura; "" = melee, styled
+  by the attacker's weapon) are read only by the screen.
+  `CombatFx.hit_style()` turns them into the target's reaction
+  (`reaction_clip`: pierce → `hit_pierce`, slash → `hit_slash`, fire →
+  `react_burn`, frost → `react_freeze`, poison → `react_poison`; a miss is
+  `defend` with a shield, `dodge` without) and `CombatFxLayer` flies the
+  projectile and plays the impact. The engine exposes `last_skill`/
+  `last_actor` and `skill_resolving`, because barks go to the target and
+  carry no skill.
+- **What hits stays.** An arrow or thrown blade that lands is added to
+  `CombatUnit.stuck` (at most `MAX_STUCK`, placed in order - never with the
+  encounter's RNG, which would change the fight) and drawn on the torso
+  until the fight ends; it appears when the projectile arrives, not when
+  it is loosed.
+
 - **Level buys resistance, not stats** - `CharacterData.get_bleed_resist()`
   and its siblings add `RESIST_PER_LEVEL` per level on top of the
   Dayanıklılık-derived base, capped by `MAX_STATUS_RESIST`. This is not an
@@ -2446,6 +2478,23 @@ gave the game its motion, and every piece of it follows the same few rules.
   tweens belong to the button, a locked button does not move, and it has
   no `class_name`: the autoload loads it, and a script that names itself
   could not compile there (measured).
+- **A condition lives on the body, not around it.** The first pass drew
+  burn, poison and frost as glows centred on the figure; the player
+  rejected them with reference shots of a man actually on fire, ice
+  crusting a body, a sick green skin. `condition.gdshader` now colours only
+  the figure's own pixels (body and garments): charred patches with
+  breathing embers, an ice crust with cracks, a sickly skin with lesions,
+  blood running down from the wound. `StatusFx` adds only what leaves the
+  body - flames, embers, green fog, ice shards, breath, drips - from points
+  sampled along the bones (`body_points`), in two layers (normal and
+  additive). The pattern and the wound are in canvas space: a frame
+  texture's own space changes scale and mirror per frame, and the first
+  wound landed off the body (measured).
+- **A reaction clip is only chosen when every worn garment has it.**
+  `WalkFigure.shared_clips()`: a clip rendered for the body before the
+  clothes would show the figure naked for that moment; until then it
+  falls back (`ACTION_FALLBACK`: reactions to `hit`, dodge to `defend`,
+  cast to `attack_swing`).
 - **A choice says what kind of risk it is before it is read.** Choices
   that can open combat carry a blood stripe (`UI_CHOICE_COMBAT`), checked
   choices the stat emblem of their roller, and a locked choice whose one
@@ -7114,6 +7163,15 @@ eklendi, deri tonları koyulaştırıldı, kombinlerin iç içe geçmemesi isten
   kombin QA'sında görüldü (Wardrobe & Rig Rules).
 - **Lore**: `docs/lore/LORE.md` ve `docs/lore/TARIHCE.md` - oyunun bugün
   bildiği evren ve tarih, boş satırlarıyla.
+
+Faz 26 ("Büyü ve yara") - silahların ele göre önde/arkada çizilmesi
+(kılıç sağ elde, kalkan sol kolda), büyücü cüppesi ve külahı (MakeHuman,
+CC-BY), yedi temel büyü ve iki durum (yanma, üşüme), vuruşun biçimine göre
+yedi yeni klip (ok/kesik darbesi, kaçınma, yanma/donma/zehir tepkisi, büyü
+yapma; 6 beden × 50 giysi yeniden render), savaş boyunca saplı kalan ok ve
+bıçak, Kenney Particle Pack (CC0) üzerinden mermi/çarpma katmanı ve bedenin
+kendisinde süren durum izi (bkz. Combat Rules, Motion Rules). Lore: iki
+büyük inanç Baikhan ve The Hand; coğrafya soruları `docs/lore/SORULAR.md`.
 
 ## Quick Start
 
