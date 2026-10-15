@@ -5151,6 +5151,18 @@ verir.
   Kilise/Taverna'nın `PurificationPanel` deseninde bir hizmet. Kıtlık
   hizmeti **sebebiyle kilitli** gösterir ("ilaç yok - X'e sevkiyat
   gelmedi"), gizlemez.
+- **Yoldaş bulmak zor olmalı; iyi biri çok nadir.** Savaş zamanında kimse
+  yollara düşmek istemez - kervana yalnızca **mecbur olanlar** katılır
+  (borçlu, sürgün, dul, kaçak, aç). Bugün `RecruitCatalog` her varışta her
+  mekânda dolu bir pano atıyor ve seviyeleri oyuncunun etrafına yayıyor
+  (`get_venue_level_spread`); hedef: pano çoğu zaman boş ya da bir-iki kişi,
+  yüksek seviyeli aday nadirin de nadiri (seviye arttıkça ağırlık hızla
+  düşer), loncanın itibar kapısı daha sert. Dünyanın hali sayıya bağlı:
+  bölgesel savaş/veba haberi (`WorldEvents`) panoyu daha da boşaltır,
+  kıtlık ve borç ise çaresizleri çoğaltır. Her adayın **neden** geldiği bir
+  satırla söylenir (mecburiyeti), ve bu sebep huyuna/sadakatine yansır -
+  `NpcDisposition`'ın kervan içi karşılığı. Ölçü `simulate_career.gd` ile
+  yeniden alınmalı: kadro bölümü (Bir Kadro) bugün 6. seferde kapanıyor.
 - **Sıcaklık, Celsius derecesiyle.** Yol HUD'unun alev göstergesi gerçek bir
   sayıya bağlanacak: mevsim + biyom + saat + hava (+ kamp ateşi) bir °C
   üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik
