@@ -2175,6 +2175,43 @@ in every preview the moment it is equipped.
     Web export ships resources only - a `.json` would be missing there.
     Restyling is repainting the three layer PNGs inside the same silhouette.
 
+### Rendered Road Rules
+
+Yolun manzarası (Faz 27) kasabalarla aynı hattan render ediliyor ve düzeni
+Oregon Trail'den (2021) uyarlandı, paleti kasvetli: alçak kamera, yol
+ekranın ortasında (`TravelBand.RENDERED_ROAD_RATIO` 0.72), önde kameraya
+yakın koyu ve bulanık bir ot tarlası, arkada diz boyu ot ve prosedürel
+ağaçlar, uzakta puslu sırtlar. Ayrıntı ve görüntüler
+`docs/ui/REDESIGN.md` §2b'de.
+
+- **Dört katman, biyom başına, tek kapı: `RoadStrips`.** `far`/`mid`/
+  `ground` `TravelBand`'de, `fore` `TravelForeground`'da çiziliyor;
+  `tools/ui_scenes/road_scene.py` (Blender) + `road_post.py` üretiyor,
+  çıktı `data/assets/ui/road/<biyom>/`. Bir biyomun dört katmanı yoksa
+  şerit eski prosedürel çizime düşer (`RoadStrips.has_biome`) - yarım bir
+  set prosedürelle karışırsa iki prodüksiyon görünür.
+- **Dikişsiz olmak bir kural, bir sonuç değil.** Sahne x'te periyotlu,
+  doku tekrarı şeride tam sayı kez sığıyor, kar gürültüsü x'i bir çembere
+  sarıp okuyor, mürekkep türevi ve bulanıklık yatayda sarmalı. Kar
+  gürültüsünün düz dünya koordinatından okunduğu ilk sürüm her döşemede
+  dikey bir dikiş bıraktı; `test_grim_ui` zeminin iki kenarını
+  karşılaştırıyor.
+- **Bağlantı noktaları render'ın kendisinden.** `RoadStrips.SPEC` (alttan
+  piksel) `road_scene.py`'nin `LAYERS`'ından türüyor ve test her biyomun
+  `layout.json`'ıyla karşılaştırıyor; kırpma yalnızca üstten yapıldığı
+  için alttan ölçü değişmez.
+- **Resim nötr gün ışığında; saat ve hava sistemin kendisi.** Katmanlar
+  `_light` ile çarpılıyor, kapalı hava griye çekiyor; pus (uzak sırt ve
+  ağaç hattı) ve yolun tozu oyunda gökyüzünün ve ışığın renginden
+  çiziliyor, resme gömülmüyor. Gökyüzü, güneş/ay, uzak şehirler ve yol
+  durakları prosedürel kalıyor.
+- **Mürekkep yalnızca kervanın düzleminde.** Uzak katman mürekkepsiz ve
+  bulanık, ön tarla koyu ve bulanık: derinlik pustan ve alan
+  derinliğinden geliyor, göz yola düşüyor.
+- **Biyom geçişi rengin geçişiyle aynı oranda**
+  (`RouteTerrain.biome_blend_at`); zemin opak olduğu için eskisi tam,
+  yenisi üstünde beliriyor, saydam katmanlarda eskisi de sönüyor.
+
 ### Prop Rules
 
 Vagon, kapı, değirmen, binalar, kamp, silahlar: dünyanın prosedürel çizilen
@@ -2223,6 +2260,13 @@ KayKit; `art_source/models/props/LICENSES.md`).
   için bunları göstermez.
 
 ### Waybook UI Rules
+
+> **Faz 27'de oyuncu karanlık arayüzü onayladı** (`docs/ui/REDESIGN.md`):
+> kontrollere malzeme dokusu (tahta şerit, taş levha, kumaş sancak, pas
+> demir kenar - deri değil) ve üçüncü bir yüz (Grenze Gotisch, yalnızca
+> vitrin) geliyor. Aşağıdaki "tek düz aile" ve "iki yüz" kuralları, ekranlar
+> `scripts/ui/grim/`'e bağlandıkça bu tasarıma göre yeniden yazılacak;
+> bağlanana kadar oyun hâlâ onları izliyor.
 
 The management screens, overlays and HUD are dressed as one object: the
 caravan's own account book (the "Waybook"). The world scenes (road, city,
@@ -5072,17 +5116,13 @@ verir.
 - **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
   on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
-- **Şehir menüsü Darkest Dungeon düzenine geçsin** - arkaplanda
-  animasyonlu bir şehir sahnesi, üstünde butonlar, mekânlar ayrı sahne
-  yerine popup/overlay olarak açılsın. Üretim yolu kararlaştırıldı
-  (prosedürel `CityView` + `_process`/`queue_redraw`, `MenuBackdrop`'un
-  deseni; mekânlar `WagonPanel`/`DebtPanel`'in sahnesiz `CanvasLayer`
-  desenine tek tek taşınır, `test_navigation.gd`'nin ekran grafiği
-  onlarla birlikte güncellenir) ama **nasıl yapılacağına karar
-  verilmedi** - oyuncunun kendi isteğiyle ertelendi. Bilinen çatışma:
-  Faz 22 şehri B10 masa sahnesine yeni taşımıştı, çizilmiş animasyonlu
-  bir şehir o kararı geri alır; ikisi aynı anda yaşayamaz (Art Rules'un
-  "iki ayrı prodüksiyon" tuzağı).
+- **Karanlık arayüzü ekranlara bağla (Faz 27'de onaylandı, bağlanmadı).**
+  Şehir B10 masa sahnesinden render edilmiş, şehre özgü DD kasabasına
+  geçiyor (`GrimHamlet`), menü gece kampına, yol HUD'u `SurvivalGauge`'a;
+  bileşenler `scripts/ui/grim/` altında hazır ama `city_map.tscn`,
+  `main_menu.tscn` ve yol HUD'u hâlâ eski bileşenleri kullanıyor. Sıra ve
+  ayrıntı `docs/ui/REDESIGN.md` §7'de. Mekânların popup olarak açılması
+  bundan ayrı bir iş olarak duruyor.
 - **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
   Dolabı ekranı, statlı ve statına göre fiyatlı 48 giysi, her ziyarette
   başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
@@ -7233,6 +7273,14 @@ yapma; 6 beden × 50 giysi yeniden render), savaş boyunca saplı kalan ok ve
 bıçak, Kenney Particle Pack (CC0) üzerinden mermi/çarpma katmanı ve bedenin
 kendisinde süren durum izi (bkz. Combat Rules, Motion Rules). Lore: iki
 büyük inanç Baikhan ve The Hand; coğrafya soruları `docs/lore/SORULAR.md`.
+
+**Faz 27 ("Karanlık arayüz ve render edilmiş yol") birleştirildi.**
+`ui-hud-redesign` dalındaki taslak üç turda onaylandı: şehre özgü önden
+kasabalar (beş şehir), gece kampı menüsü, CC0 dokulu şeritler ve ikonlu
+düğmeler, Celsius göstergesi, gotik vitrin yüzü - ve yolun render edilmiş
+paralaks katmanları (bkz. Rendered Road Rules), ki bu oyunda zaten
+çalışıyor. Kasaba, menü ve HUD bileşenleri hazır ama ekranlara bağlanmadı
+(Ana Hedefler).
 
 ## Quick Start
 
