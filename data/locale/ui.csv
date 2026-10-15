@@ -804,3 +804,4 @@
 "UI_GRIM_L_GUILD_BOARD","Panoda %d kontrat var.","%d contracts on the board.","","","","","","","","",""
 "UI_GRIM_L_CHURCH_FRESH","Taze bir huy arındırılabilir.","A fresh trait can still be cleansed.","","","","","","","","",""
 "UI_GRIM_L_TAILOR_STOCK","Tezgâhta %d parça var.","%d pieces on the stall.","","","","","","","","",""
+"UI_GRIM_LINEAGE_LINE","%s kervanı · %d. kuşak · %d. gün","The %s caravan · generation %d · day %d","","","","","","","","",""

@@ -17,6 +17,9 @@ func run(t) -> void:
 	_test_motion_is_pure(t)
 	_test_menu_beside_building(t)
 	_test_assets_exist(t)
+	_test_celsius(t)
+	_test_hamlet_mapping(t)
+	_test_town_assets(t)
 
 func _test_gauge_curves(t) -> void:
 	t.eq(SurvivalGauge.fill_fraction(150, 100), 1.0, "dolum tavanda kalıyor")
@@ -109,3 +112,44 @@ func _test_assets_exist(t) -> void:
 		var path := GrimTheme.SFX_DIR + String(GrimTheme.SOUND_CUES[cue])
 		t.ok(FileAccess.file_exists(path) or ResourceLoader.exists(path), "ses imi var: %s" % cue)
 	t.ok(GrimTheme.title_font() != null, "başlık yazı yüzü yükleniyor")
+
+func _test_celsius(t) -> void:
+	t.eq(SurvivalGauge.celsius_fraction(SurvivalGauge.CELSIUS_MIN), 0.0, "en soğukta alev dibe yakın")
+	t.eq(SurvivalGauge.celsius_fraction(SurvivalGauge.CELSIUS_MAX), 1.0, "en sıcakta alev tam")
+	t.eq(SurvivalGauge.celsius_fraction(-80.0), 0.0, "derece tabanda kalıyor")
+	t.eq(SurvivalGauge.celsius_text(-4.2), "−4 °C", "eksi derece gerçek eksi işaretiyle")
+	t.eq(SurvivalGauge.celsius_text(12.0), "12 °C", "artı derece işaretsiz")
+
+## Maske resimle aynı "kapla" dönüşümüyle okunmalı, yoksa üstüne gelinen
+## bina ile aydınlanan bina başka binalar olur.
+func _test_hamlet_mapping(t) -> void:
+	t.eq(GrimHamlet.cover_to_image(Vector2(100, 50), Vector2(1920, 1080), Vector2(1920, 1080)), Vector2(100, 50),
+		"aynı oran: dönüşüm birim")
+	t.eq(GrimHamlet.cover_to_image(Vector2(0, 0), Vector2(1000, 1000), Vector2(2000, 1000)), Vector2(500, 0),
+		"dar ekran: resmin iki yanı eşit kırpılıyor")
+	t.eq(GrimHamlet.cover_to_image(Vector2(960, 540), Vector2(960, 540), Vector2(1920, 1080)), Vector2(1920, 1080),
+		"küçük ekran: ölçek resme göre")
+	var ids := {}
+	for v in GrimHamlet.VENUES:
+		ids[int(v["id"])] = true
+	t.eq(ids.size(), GrimHamlet.VENUES.size(), "her levhanın kendi maske numarası var")
+	t.ok(not ids.has(GrimHamlet.GATE_ID), "kapı levha değil, Yola Çık düğmesi")
+
+## Her şehrin resmi ve maskesi var; maskenin mekân sırası levhalarınkiyle aynı
+## (town_post.py VENUE_IDS -> GrimHamlet.VENUES, numara = sıra + 1).
+func _test_town_assets(t) -> void:
+	for city in ["karakonak", "kurtbogazi", "ipekevi", "demirkapi", "yesilova", "camp"]:
+		var dir: String = GrimHamlet.TOWNS_DIR + String(city) + "/"
+		t.ok(FileAccess.file_exists(dir + "background.jpg"), "%s: resim var" % city)
+		t.ok(FileAccess.file_exists(dir + "mask.png"), "%s: maske var" % city)
+	var meta = JSON.parse_string(FileAccess.get_file_as_string(GrimHamlet.TOWNS_DIR + "karakonak/mask.json"))
+	t.ok(meta is Dictionary, "maske tanımı okunuyor")
+	if meta is Dictionary:
+		var names: Array = meta["venues"]
+		for v in GrimHamlet.VENUES:
+			t.eq(String(names[int(v["id"]) - 1]), String(v["icon"]), "maske sırası: %s" % v["icon"])
+		t.eq(String(names[GrimHamlet.GATE_ID - 1]), "gate", "maske sırası: kapı")
+	for name in ["strip_wood.png", "plate.png", "plate_hover.png", "banner.png", "crest.png", "card.png"]:
+		t.ok(GrimHamlet.kit(name) != null, "takım: %s" % name)
+	for v in GrimHamlet.VENUES:
+		t.ok(GrimHamlet.kit("icon_%s.png" % v["icon"]) != null, "ikon: %s" % v["icon"])

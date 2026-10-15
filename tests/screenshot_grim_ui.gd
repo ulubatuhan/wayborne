@@ -30,7 +30,7 @@ func _init() -> void:
 		await _shot("1_town_%s" % city, GrimHamlet.new().setup(city, model))
 		var lit := GrimHamlet.new().setup(city, model)
 		await _shot("2_town_%s_hover" % city, lit, func(): lit.set_hovered(4))
-	await _shot("3_title", GrimDrafts.title(1))
+	await _shot("3_title", GrimDrafts.title(1, {"name": "Demirtaş", "generation": 3, "day": 214}))
 	await _shot("4_trade", GrimDrafts.trade(model))
 	await _shot("5_inventory", GrimDrafts.inventory(model))
 	var hud := GrimDrafts.hud(model)
@@ -139,7 +139,7 @@ func _sample_model() -> Dictionary:
 			{"name": "Doruk", "hp": 40, "max_hp": 40, "stress": 15, "class": "clerk", "class_key": "CLASS_CLERK_NAME", "level": 2},
 		],
 		"venue_lines": town_lines,
-		"gauges": {"morale": 54, "hunger": 28, "fatigue": 62, "danger": 71, "warmth": 22},
+		"gauges": {"morale": 54, "hunger": 28, "fatigue": 62, "danger": 71, "warmth": 22, "celsius": -4},
 		"market": [
 			{"item": "test_grain", "qty": 4, "price": 19, "stock": 0.1, "mult": 1.6, "shocked": true},
 			{"item": "honey", "qty": 18, "price": 24, "stock": 0.7, "mult": 0.85},

@@ -531,5 +531,2466 @@
    "exposure": 1.55,
    "glow": 1.0
   }
+ },
+ "kurtbogazi": {
+  "seed": 23,
+  "plaza": [
+   0.0,
+   6.0,
+   6.5
+  ],
+  "sky": {
+   "horizon": [
+    0.2,
+    0.24,
+    0.3
+   ],
+   "zenith": [
+    0.01,
+    0.012,
+    0.02
+   ],
+   "height": 0.2,
+   "strength": 1.0
+  },
+  "moon": 1.3,
+  "backlight": 1.4,
+  "window": [
+   1.0,
+   0.52,
+   0.2
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -8.5,
+    2.0
+   ],
+   "look": [
+    0.0,
+    14.0,
+    6.2
+   ],
+   "lens": 24
+  },
+  "hill": {
+   "at": [
+    2.0,
+    46.0,
+    -2.0
+   ],
+   "scale": [
+    44.0,
+    12.0,
+    26.0
+   ],
+   "snow": 0.7,
+   "tint": [
+    0.75,
+    0.8,
+    0.9
+   ],
+   "rough": 0.45,
+   "rough_scale": 0.3
+  },
+  "lamps": [
+   [
+    -3.0,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    3.2,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    0.0,
+    6.0,
+    1.4,
+    120
+   ],
+   [
+    7.0,
+    7.0,
+    2.2,
+    240
+   ],
+   [
+    -7.5,
+    6.0,
+    1.8,
+    120
+   ],
+   [
+    -2.0,
+    13.0,
+    4.5,
+    120
+   ],
+   [
+    -7.0,
+    12.0,
+    3.0,
+    120
+   ],
+   [
+    8.5,
+    13.0,
+    3.0,
+    120
+   ],
+   [
+    0.0,
+    1.0,
+    3.5,
+    90
+   ]
+  ],
+  "buildings": [
+   {
+    "venue": "yard",
+    "kind": "Stable",
+    "at": [
+     8.0,
+     11.0
+    ],
+    "rot": -38,
+    "scale": 1.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Blacksmith",
+    "at": [
+     12.0,
+     16.5
+    ],
+    "rot": -30,
+    "scale": 1.2
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     4.7,
+     4.6
+    ],
+    "rot": -22,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_2",
+    "at": [
+     6.7,
+     7.2
+    ],
+    "rot": -30,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     2.5,
+     5.0
+    ],
+    "rot": 20,
+    "scale": 1.6
+   },
+   {
+    "venue": "guild",
+    "kind": "House_2",
+    "at": [
+     2.6,
+     15.0
+    ],
+    "rot": -6,
+    "scale": 1.85,
+    "terrace": [
+     7,
+     5,
+     2.5
+    ],
+    "spires": [
+     {
+      "at": [
+       3.2,
+       0.8,
+       3.6
+      ],
+      "floors": 2,
+      "size": 1.1
+     },
+     {
+      "at": [
+       -3.4,
+       0.8,
+       3.2
+      ],
+      "floors": 1,
+      "size": 1.0
+     }
+    ]
+   },
+   {
+    "venue": "church",
+    "kind": "Bell_Tower",
+    "at": [
+     -4.5,
+     20.0
+    ],
+    "rot": 10,
+    "scale": 2.2,
+    "terrace": [
+     6,
+     5,
+     6.5
+    ],
+    "spires": [
+     {
+      "at": [
+       -2.6,
+       1.2,
+       0.0
+      ],
+      "floors": 5,
+      "size": 1.15
+     },
+     {
+      "at": [
+       2.8,
+       1.2,
+       0.0
+      ],
+      "floors": 3,
+      "size": 1.0
+     }
+    ]
+   },
+   {
+    "venue": "tavern",
+    "kind": "Inn",
+    "at": [
+     -7.4,
+     10.5
+    ],
+    "rot": 32,
+    "scale": 1.5
+   },
+   {
+    "venue": "tailor",
+    "kind": "House_1",
+    "at": [
+     -11.0,
+     16.0
+    ],
+    "rot": 40,
+    "scale": 1.45
+   }
+  ],
+  "props": [
+   {
+    "kind": "ftk:fountain-round",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.6
+   },
+   {
+    "kind": "Well",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "venue": "yard",
+    "kind": "Cart",
+    "at": [
+     6.0,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 1.2
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     10.5,
+     9.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "venue": "tailor",
+    "kind": "MarketStand_2",
+    "at": [
+     -4.6,
+     4.2
+    ],
+    "rot": 30,
+    "scale": 1.6
+   },
+   {
+    "venue": "tavern",
+    "kind": "Barrel",
+    "at": [
+     -4.8,
+     8.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -3.0,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     3.2,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     -12.5,
+     0.5
+    ],
+    "scale": 3.2
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     13.0,
+     4.0
+    ],
+    "rot": 90,
+    "scale": 2.8
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -6.5,
+     4.8
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     3.5,
+     3.0
+    ],
+    "scale": 1.1
+   },
+   {
+    "kind": "ftk:rock-large",
+    "at": [
+     -14.0,
+     6.0
+    ],
+    "rot": 20,
+    "scale": 3.5
+   },
+   {
+    "kind": "ftk:rock-large",
+    "at": [
+     14.5,
+     7.0
+    ],
+    "rot": -40,
+    "scale": 3.0
+   },
+   {
+    "kind": "ftk:rock-wide",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "scale": 4.0
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -13.5,
+     12.0
+    ],
+    "scale": 3.0
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     13.5,
+     20.0
+    ],
+    "scale": 3.4
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -9.0,
+     22.0
+    ],
+    "scale": 2.8
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -12.0,
+     3.0
+    ],
+    "rot": 70,
+    "scale": 1.5
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     12.0,
+     3.5
+    ],
+    "rot": -70,
+    "scale": 1.5
+   },
+   {
+    "kind": "wallrow",
+    "from": [
+     -10.0,
+     40.0
+    ],
+    "to": [
+     12.0,
+     40.0
+    ],
+    "z": 14.0,
+    "size": 2.2,
+    "floors": 2,
+    "towers": 3
+   },
+   {
+    "kind": "spire",
+    "at": [
+     1.0,
+     42.0
+    ],
+    "z": 14.0,
+    "floors": 6,
+    "size": 2.4
+   },
+   {
+    "kind": "spire",
+    "at": [
+     -7.5,
+     42.0
+    ],
+    "z": 14.0,
+    "floors": 4,
+    "size": 2.0
+   },
+   {
+    "kind": "spire",
+    "at": [
+     9.0,
+     42.0
+    ],
+    "z": 14.0,
+    "floors": 5,
+    "size": 2.0
+   }
+  ],
+  "post": {
+   "zenith": [
+    8,
+    10,
+    18
+   ],
+   "horizon": [
+    64,
+    78,
+    96
+   ],
+   "cloud": [
+    36,
+    42,
+    54
+   ],
+   "moon": [
+    0.22,
+    0.15
+   ],
+   "fog": [
+    84,
+    94,
+    112
+   ],
+   "fog_amount": 0.42,
+   "exposure": 1.6,
+   "glow": 1.1,
+   "shadow": [
+    18,
+    22,
+    32
+   ]
+  },
+  "moon_color": [
+   0.6,
+   0.7,
+   0.95
+  ],
+  "backlight_color": [
+   0.55,
+   0.65,
+   0.9
+  ],
+  "snow": 0.3,
+  "ground_tint": [
+   0.8,
+   0.85,
+   0.95
+  ]
+ },
+ "ipekevi": {
+  "seed": 37,
+  "plaza": [
+   0.0,
+   6.0,
+   6.5
+  ],
+  "sky": {
+   "horizon": [
+    0.6,
+    0.32,
+    0.12
+   ],
+   "zenith": [
+    0.03,
+    0.015,
+    0.04
+   ],
+   "height": 0.22,
+   "strength": 1.1
+  },
+  "moon": 0.9,
+  "backlight": 3.0,
+  "window": [
+   1.0,
+   0.52,
+   0.2
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -8.5,
+    2.0
+   ],
+   "look": [
+    0.0,
+    14.0,
+    6.2
+   ],
+   "lens": 24
+  },
+  "hill": {
+   "at": [
+    0.0,
+    60.0,
+    -8.0
+   ],
+   "scale": [
+    60.0,
+    10.0,
+    14.0
+   ],
+   "tint": [
+    0.85,
+    0.7,
+    0.6
+   ]
+  },
+  "lamps": [
+   [
+    -3.0,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    3.2,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    0.0,
+    6.0,
+    1.4,
+    120
+   ],
+   [
+    7.0,
+    7.0,
+    2.2,
+    240
+   ],
+   [
+    -7.5,
+    6.0,
+    1.8,
+    120
+   ],
+   [
+    -2.0,
+    13.0,
+    4.5,
+    120
+   ],
+   [
+    -7.0,
+    12.0,
+    3.0,
+    120
+   ],
+   [
+    8.5,
+    13.0,
+    3.0,
+    120
+   ],
+   [
+    0.0,
+    1.0,
+    3.5,
+    90
+   ],
+   [
+    -4.0,
+    4.5,
+    2.5,
+    140
+   ],
+   [
+    2.0,
+    4.0,
+    2.5,
+    140
+   ]
+  ],
+  "buildings": [
+   {
+    "venue": "yard",
+    "kind": "Stable",
+    "at": [
+     -8.2,
+     11.0
+    ],
+    "rot": 38,
+    "scale": 1.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Blacksmith",
+    "at": [
+     -12.0,
+     16.5
+    ],
+    "rot": 30,
+    "scale": 1.2
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -4.2,
+     4.6
+    ],
+    "rot": 22,
+    "scale": 1.9
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_2",
+    "at": [
+     -6.2,
+     7.2
+    ],
+    "rot": 30,
+    "scale": 1.9
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -2.0,
+     5.0
+    ],
+    "rot": -20,
+    "scale": 1.9
+   },
+   {
+    "venue": "guild",
+    "kind": "House_2",
+    "at": [
+     -2.4,
+     15.5
+    ],
+    "rot": 5,
+    "scale": 2.1,
+    "terrace": [
+     8,
+     6,
+     3.0
+    ],
+    "spires": [
+     {
+      "at": [
+       3.6,
+       0.6,
+       0.0
+      ],
+      "floors": 5,
+      "size": 1.2
+     },
+     {
+      "at": [
+       -3.8,
+       0.6,
+       0.0
+      ],
+      "floors": 5,
+      "size": 1.2
+     }
+    ]
+   },
+   {
+    "venue": "church",
+    "kind": "Bell_Tower",
+    "at": [
+     9.0,
+     22.0
+    ],
+    "rot": -20,
+    "scale": 2.2,
+    "terrace": [
+     5,
+     5,
+     4.5
+    ],
+    "spires": [
+     {
+      "at": [
+       -2.6,
+       1.2,
+       0.0
+      ],
+      "floors": 5,
+      "size": 1.15
+     },
+     {
+      "at": [
+       2.8,
+       1.2,
+       0.0
+      ],
+      "floors": 3,
+      "size": 1.0
+     }
+    ]
+   },
+   {
+    "venue": "tavern",
+    "kind": "Inn",
+    "at": [
+     7.2,
+     10.5
+    ],
+    "rot": -30,
+    "scale": 1.5
+   },
+   {
+    "venue": "tailor",
+    "kind": "House_1",
+    "at": [
+     11.0,
+     16.0
+    ],
+    "rot": -40,
+    "scale": 1.45
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     1.8,
+     4.2
+    ],
+    "rot": -15,
+    "scale": 1.8
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_2",
+    "at": [
+     -0.2,
+     3.0
+    ],
+    "rot": 5,
+    "scale": 1.7
+   }
+  ],
+  "props": [
+   {
+    "kind": "ftk:fountain-round",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.6
+   },
+   {
+    "venue": "yard",
+    "kind": "Cart",
+    "at": [
+     -6.0,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 1.2
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -10.5,
+     9.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "venue": "tailor",
+    "kind": "MarketStand_2",
+    "at": [
+     4.6,
+     4.2
+    ],
+    "rot": -35,
+    "scale": 1.6
+   },
+   {
+    "venue": "tavern",
+    "kind": "Barrel",
+    "at": [
+     4.8,
+     8.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -3.0,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     3.2,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     -12.5,
+     0.5
+    ],
+    "scale": 3.2
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     13.0,
+     4.0
+    ],
+    "rot": 90,
+    "scale": 2.8
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -6.5,
+     4.8
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -8.5,
+     18.5
+    ],
+    "rot": 15,
+    "scale": 1.6,
+    "terrace": [
+     4,
+     4,
+     3
+    ]
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     -13.0,
+     21.0
+    ],
+    "rot": 35,
+    "scale": 1.7,
+    "terrace": [
+     4,
+     4,
+     4.5
+    ]
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     12.5,
+     19.0
+    ],
+    "rot": -28,
+    "scale": 1.7,
+    "terrace": [
+     4,
+     4,
+     3.5
+    ]
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     13.5,
+     12.0
+    ],
+    "rot": -65,
+    "scale": 1.4
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     9.5,
+     26.0
+    ],
+    "rot": -10,
+    "scale": 1.7,
+    "terrace": [
+     4,
+     4,
+     6
+    ]
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -4.0,
+     27.0
+    ],
+    "rot": 5,
+    "scale": 1.8,
+    "terrace": [
+     4,
+     4,
+     7
+    ]
+   },
+   {
+    "kind": "spire",
+    "at": [
+     -7.5,
+     26.0
+    ],
+    "z": 7.0,
+    "floors": 4,
+    "size": 1.4
+   },
+   {
+    "kind": "spire",
+    "at": [
+     13.5,
+     27.0
+    ],
+    "z": 6.0,
+    "floors": 3,
+    "size": 1.4
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -11.5,
+     3.0
+    ],
+    "rot": 70,
+    "scale": 1.5
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     11.8,
+     3.5
+    ],
+    "rot": -70,
+    "scale": 1.5
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     3.5,
+     3.0
+    ],
+    "scale": 1.1
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -6,
+     1.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -2,
+     1.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     2,
+     1.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     6,
+     1.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "Bags",
+    "at": [
+     -3.5,
+     3.5
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     3.8,
+     6.0
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "ftk:cart",
+    "at": [
+     -8.0,
+     6.5
+    ],
+    "rot": 40,
+    "scale": 1.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     -4.5,
+     8.0
+    ],
+    "scale": 3.6
+   },
+   {
+    "kind": "ftk:banner-green",
+    "at": [
+     4.5,
+     8.0
+    ],
+    "scale": 3.6
+   },
+   {
+    "kind": "ftk:banner-green",
+    "at": [
+     -8.5,
+     11.0
+    ],
+    "scale": 3.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     9.0,
+     11.0
+    ],
+    "scale": 3.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     0.0,
+     10.5
+    ],
+    "scale": 3.6
+   }
+  ],
+  "post": {
+   "zenith": [
+    18,
+    10,
+    24
+   ],
+   "horizon": [
+    140,
+    76,
+    40
+   ],
+   "cloud": [
+    62,
+    36,
+    42
+   ],
+   "moon": [
+    0.85,
+    0.2
+   ],
+   "fog": [
+    104,
+    66,
+    58
+   ],
+   "fog_amount": 0.35,
+   "exposure": 1.7,
+   "glow": 1.2,
+   "shadow": [
+    30,
+    18,
+    28
+   ]
+  },
+  "backlight_color": [
+   1.0,
+   0.5,
+   0.25
+  ]
+ },
+ "demirkapi": {
+  "seed": 41,
+  "plaza": [
+   0.0,
+   6.0,
+   6.5
+  ],
+  "sky": {
+   "horizon": [
+    0.42,
+    0.11,
+    0.05
+   ],
+   "zenith": [
+    0.02,
+    0.008,
+    0.008
+   ],
+   "height": 0.2,
+   "strength": 1.0
+  },
+  "moon": 0.9,
+  "backlight": 3.4,
+  "window": [
+   1.0,
+   0.42,
+   0.12
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -8.5,
+    2.0
+   ],
+   "look": [
+    0.0,
+    14.0,
+    6.2
+   ],
+   "lens": 24
+  },
+  "hill": {
+   "at": [
+    0.0,
+    64.0,
+    -10.0
+   ],
+   "scale": [
+    60.0,
+    10.0,
+    16.0
+   ],
+   "tint": [
+    0.55,
+    0.45,
+    0.42
+   ]
+  },
+  "lamps": [
+   [
+    -3.0,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    3.2,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    0.0,
+    6.0,
+    1.4,
+    120
+   ],
+   [
+    7.0,
+    7.0,
+    2.2,
+    240
+   ],
+   [
+    -7.5,
+    6.0,
+    1.8,
+    120
+   ],
+   [
+    -2.0,
+    13.0,
+    4.5,
+    120
+   ],
+   [
+    -7.0,
+    12.0,
+    3.0,
+    120
+   ],
+   [
+    8.5,
+    13.0,
+    3.0,
+    120
+   ],
+   [
+    0.0,
+    1.0,
+    3.5,
+    90
+   ],
+   [
+    -7.0,
+    7.0,
+    1.5,
+    260
+   ],
+   [
+    -6.0,
+    11.0,
+    4.0,
+    160
+   ],
+   [
+    0.0,
+    24.0,
+    4.0,
+    200
+   ]
+  ],
+  "buildings": [
+   {
+    "venue": "yard",
+    "kind": "Stable",
+    "at": [
+     -12.0,
+     15.0
+    ],
+    "rot": 30,
+    "scale": 1.3
+   },
+   {
+    "venue": "yard",
+    "kind": "Blacksmith",
+    "at": [
+     -7.5,
+     9.0
+    ],
+    "rot": 35,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -4.2,
+     4.6
+    ],
+    "rot": 22,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_2",
+    "at": [
+     -6.2,
+     7.2
+    ],
+    "rot": 30,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -2.0,
+     5.0
+    ],
+    "rot": -20,
+    "scale": 1.6
+   },
+   {
+    "venue": "guild",
+    "kind": "House_2",
+    "at": [
+     -9.0,
+     16.0
+    ],
+    "rot": 25,
+    "scale": 1.85,
+    "terrace": [
+     7,
+     5,
+     2.0
+    ],
+    "spires": [
+     {
+      "at": [
+       3.2,
+       0.8,
+       3.6
+      ],
+      "floors": 2,
+      "size": 1.1
+     },
+     {
+      "at": [
+       -3.4,
+       0.8,
+       3.2
+      ],
+      "floors": 1,
+      "size": 1.0
+     }
+    ]
+   },
+   {
+    "venue": "church",
+    "kind": "Bell_Tower",
+    "at": [
+     7.0,
+     17.0
+    ],
+    "rot": -12,
+    "scale": 2.2,
+    "terrace": [
+     5,
+     5,
+     3.0
+    ]
+   },
+   {
+    "venue": "tavern",
+    "kind": "Inn",
+    "at": [
+     7.2,
+     10.5
+    ],
+    "rot": -30,
+    "scale": 1.5
+   },
+   {
+    "venue": "tailor",
+    "kind": "House_1",
+    "at": [
+     11.0,
+     16.0
+    ],
+    "rot": -40,
+    "scale": 1.45
+   }
+  ],
+  "props": [
+   {
+    "kind": "ftk:fountain-round",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.6
+   },
+   {
+    "kind": "Well",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "venue": "yard",
+    "kind": "Cart",
+    "at": [
+     -6.0,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 1.2
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -10.5,
+     9.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "venue": "tailor",
+    "kind": "MarketStand_2",
+    "at": [
+     4.6,
+     4.2
+    ],
+    "rot": -35,
+    "scale": 1.6
+   },
+   {
+    "venue": "tavern",
+    "kind": "Barrel",
+    "at": [
+     4.8,
+     8.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -3.0,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     3.2,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     -12.5,
+     0.5
+    ],
+    "scale": 3.2
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     13.0,
+     4.0
+    ],
+    "rot": 90,
+    "scale": 2.8
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -6.5,
+     4.8
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     13.5,
+     12.0
+    ],
+    "rot": -65,
+    "scale": 1.4
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -11.5,
+     3.0
+    ],
+    "rot": 70,
+    "scale": 1.5
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     11.8,
+     3.5
+    ],
+    "rot": -70,
+    "scale": 1.5
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     3.5,
+     3.0
+    ],
+    "scale": 1.1
+   },
+   {
+    "kind": "wallrow",
+    "from": [
+     -24.0,
+     21.0
+    ],
+    "to": [
+     24.0,
+     21.0
+    ],
+    "size": 2.6,
+    "floors": 3,
+    "towers": 4,
+    "gate": 0.5,
+    "venue": "gate"
+   },
+   {
+    "kind": "spire",
+    "at": [
+     -3.6,
+     21.6
+    ],
+    "floors": 6,
+    "size": 2.6,
+    "venue": "gate",
+    "dark": true
+   },
+   {
+    "kind": "spire",
+    "at": [
+     3.6,
+     21.6
+    ],
+    "floors": 6,
+    "size": 2.6,
+    "venue": "gate",
+    "dark": true
+   },
+   {
+    "kind": "ftk:chimney",
+    "at": [
+     -6.4,
+     9.8
+    ],
+    "z": 4.5,
+    "scale": 1.6
+   },
+   {
+    "kind": "Barrel",
+    "at": [
+     -5.5,
+     5.5
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "Barrel",
+    "at": [
+     -5.0,
+     6.3
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -9.5,
+     6.0
+    ],
+    "scale": 1.3
+   }
+  ],
+  "post": {
+   "zenith": [
+    14,
+    8,
+    8
+   ],
+   "horizon": [
+    124,
+    40,
+    20
+   ],
+   "cloud": [
+    34,
+    22,
+    22
+   ],
+   "moon": [
+    0.15,
+    0.12
+   ],
+   "fog": [
+    76,
+    40,
+    32
+   ],
+   "fog_amount": 0.4,
+   "exposure": 1.7,
+   "glow": 1.4,
+   "shadow": [
+    28,
+    16,
+    16
+   ]
+  },
+  "backlight_color": [
+   1.0,
+   0.35,
+   0.12
+  ],
+  "ground_tint": [
+   0.6,
+   0.55,
+   0.52
+  ]
+ },
+ "yesilova": {
+  "seed": 53,
+  "plaza": [
+   0.0,
+   6.0,
+   6.5
+  ],
+  "sky": {
+   "horizon": [
+    0.3,
+    0.3,
+    0.18
+   ],
+   "zenith": [
+    0.012,
+    0.018,
+    0.024
+   ],
+   "height": 0.24,
+   "strength": 1.0
+  },
+  "moon": 1.0,
+  "backlight": 2.6,
+  "window": [
+   1.0,
+   0.52,
+   0.2
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -8.5,
+    2.0
+   ],
+   "look": [
+    0.0,
+    14.0,
+    6.2
+   ],
+   "lens": 24
+  },
+  "hill": {
+   "at": [
+    -6.0,
+    52.0,
+    -9.0
+   ],
+   "scale": [
+    50.0,
+    10.0,
+    13.0
+   ],
+   "tint": [
+    0.6,
+    0.8,
+    0.5
+   ]
+  },
+  "lamps": [
+   [
+    -3.0,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    3.2,
+    2.5,
+    2.0,
+    150
+   ],
+   [
+    0.0,
+    6.0,
+    1.4,
+    120
+   ],
+   [
+    7.0,
+    7.0,
+    2.2,
+    240
+   ],
+   [
+    -7.5,
+    6.0,
+    1.8,
+    120
+   ],
+   [
+    -2.0,
+    13.0,
+    4.5,
+    120
+   ],
+   [
+    -7.0,
+    12.0,
+    3.0,
+    120
+   ],
+   [
+    8.5,
+    13.0,
+    3.0,
+    120
+   ],
+   [
+    0.0,
+    1.0,
+    3.5,
+    90
+   ]
+  ],
+  "buildings": [
+   {
+    "venue": "yard",
+    "kind": "Stable",
+    "at": [
+     -8.2,
+     11.0
+    ],
+    "rot": 38,
+    "scale": 1.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Blacksmith",
+    "at": [
+     -12.0,
+     16.5
+    ],
+    "rot": 30,
+    "scale": 1.2
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -4.2,
+     4.6
+    ],
+    "rot": 22,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_2",
+    "at": [
+     -6.2,
+     7.2
+    ],
+    "rot": 30,
+    "scale": 1.7
+   },
+   {
+    "venue": "market",
+    "kind": "MarketStand_1",
+    "at": [
+     -2.0,
+     5.0
+    ],
+    "rot": -20,
+    "scale": 1.6
+   },
+   {
+    "venue": "guild",
+    "kind": "House_2",
+    "at": [
+     -2.4,
+     15.0
+    ],
+    "rot": 5,
+    "scale": 1.85,
+    "spires": []
+   },
+   {
+    "venue": "church",
+    "kind": "Bell_Tower",
+    "at": [
+     3.0,
+     19.0
+    ],
+    "rot": -8,
+    "scale": 2.2,
+    "terrace": [
+     5,
+     5,
+     1.5
+    ],
+    "spires": []
+   },
+   {
+    "venue": "tavern",
+    "kind": "Inn",
+    "at": [
+     7.2,
+     10.5
+    ],
+    "rot": -30,
+    "scale": 1.5
+   },
+   {
+    "venue": "tailor",
+    "kind": "House_1",
+    "at": [
+     11.0,
+     16.0
+    ],
+    "rot": -40,
+    "scale": 1.45
+   }
+  ],
+  "props": [
+   {
+    "kind": "ftk:fountain-round",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.6
+   },
+   {
+    "kind": "Well",
+    "at": [
+     0.0,
+     6.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "venue": "yard",
+    "kind": "Cart",
+    "at": [
+     -6.0,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 1.2
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -10.5,
+     9.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "venue": "tailor",
+    "kind": "MarketStand_2",
+    "at": [
+     4.6,
+     4.2
+    ],
+    "rot": -35,
+    "scale": 1.6
+   },
+   {
+    "venue": "tavern",
+    "kind": "Barrel",
+    "at": [
+     4.8,
+     8.0
+    ],
+    "scale": 1.3
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     -3.0,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:lantern",
+    "at": [
+     3.2,
+     2.5
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     -12.5,
+     0.5
+    ],
+    "scale": 3.2
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     13.0,
+     4.0
+    ],
+    "rot": 90,
+    "scale": 2.8
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -6.5,
+     4.8
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     13.5,
+     12.0
+    ],
+    "rot": -65,
+    "scale": 1.4
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -11.5,
+     3.0
+    ],
+    "rot": 70,
+    "scale": 1.5
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     11.8,
+     3.5
+    ],
+    "rot": -70,
+    "scale": 1.5
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     3.5,
+     3.0
+    ],
+    "scale": 1.1
+   },
+   {
+    "kind": "ftk:windmill",
+    "at": [
+     -7.0,
+     28.0
+    ],
+    "z": 0.0,
+    "rot": 20,
+    "scale": 7.0,
+    "terrace": [
+     4,
+     4,
+     2.0
+    ]
+   },
+   {
+    "kind": "Mill",
+    "at": [
+     14.5,
+     22.0
+    ],
+    "rot": -30,
+    "scale": 1.5
+   },
+   {
+    "kind": "ftk:watermill",
+    "at": [
+     11.0,
+     12.0
+    ],
+    "rot": -60,
+    "scale": 3.0
+   },
+   {
+    "kind": "Hay",
+    "at": [
+     9.0,
+     8.0
+    ],
+    "scale": 1.4
+   },
+   {
+    "kind": "Hay",
+    "at": [
+     10.3,
+     9.2
+    ],
+    "scale": 1.2
+   },
+   {
+    "kind": "ftk:hedge-large",
+    "at": [
+     -5.0,
+     22.0
+    ],
+    "scale": 2.5
+   },
+   {
+    "kind": "ftk:hedge-large",
+    "at": [
+     8.0,
+     24.0
+    ],
+    "scale": 2.5
+   },
+   {
+    "kind": "ftk:tree-high-round",
+    "at": [
+     -14.0,
+     26.0
+    ],
+    "scale": 3.4
+   },
+   {
+    "kind": "ftk:tree-high-round",
+    "at": [
+     15.0,
+     25.0
+    ],
+    "scale": 3.6
+   },
+   {
+    "kind": "ftk:tree",
+    "at": [
+     0.0,
+     28.0
+    ],
+    "scale": 3.0
+   },
+   {
+    "kind": "ftk:tree-high-round",
+    "at": [
+     -16.0,
+     14.0
+    ],
+    "scale": 3.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -4.0,
+     1.5
+    ],
+    "rot": 10,
+    "scale": 2.0
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     4.5,
+     1.5
+    ],
+    "rot": -10,
+    "scale": 2.0
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     -6.0,
+     30.0
+    ],
+    "rot": 10,
+    "scale": 1.4
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     9.0,
+     32.0
+    ],
+    "rot": -15,
+    "scale": 1.4
+   }
+  ],
+  "post": {
+   "zenith": [
+    10,
+    16,
+    18
+   ],
+   "horizon": [
+    96,
+    98,
+    66
+   ],
+   "cloud": [
+    42,
+    50,
+    46
+   ],
+   "moon": [
+    0.7,
+    0.14
+   ],
+   "fog": [
+    78,
+    90,
+    76
+   ],
+   "fog_amount": 0.38,
+   "exposure": 1.85,
+   "glow": 1.0,
+   "shadow": [
+    18,
+    24,
+    22
+   ]
+  },
+  "backlight_color": [
+   0.9,
+   0.7,
+   0.4
+  ],
+  "ground_tint": [
+   0.75,
+   0.9,
+   0.62
+  ]
+ },
+ "camp": {
+  "seed": 7,
+  "plaza": [
+   0.0,
+   -50.0,
+   1.0
+  ],
+  "sky": {
+   "horizon": [
+    0.12,
+    0.1,
+    0.13
+   ],
+   "zenith": [
+    0.008,
+    0.008,
+    0.014
+   ],
+   "height": 0.22,
+   "strength": 1.0
+  },
+  "moon": 0.55,
+  "moon_color": [
+   0.55,
+   0.62,
+   0.85
+  ],
+  "backlight": 0.9,
+  "backlight_color": [
+   0.6,
+   0.4,
+   0.35
+  ],
+  "window": [
+   1.0,
+   0.5,
+   0.2
+  ],
+  "ground_tint": [
+   0.55,
+   0.6,
+   0.45
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -6.0,
+    1.3
+   ],
+   "look": [
+    0.5,
+    10.0,
+    2.0
+   ],
+   "lens": 30
+  },
+  "hill": {
+   "at": [
+    2.0,
+    70.0,
+    -6.0
+   ],
+   "scale": [
+    40.0,
+    12.0,
+    13.0
+   ],
+   "rough": 0.4,
+   "tint": [
+    0.4,
+    0.42,
+    0.45
+   ]
+  },
+  "lamps": [
+   [
+    -2.0,
+    3.2,
+    0.5,
+    70,
+    [
+     1.0,
+     0.45,
+     0.16
+    ]
+   ],
+   [
+    -2.0,
+    3.2,
+    1.3,
+    30,
+    [
+     1.0,
+     0.6,
+     0.25
+    ]
+   ]
+  ],
+  "buildings": [],
+  "props": [
+   {
+    "kind": "builder:covered_wagon",
+    "at": [
+     -4.0,
+     6.4
+    ],
+    "rot": 78,
+    "scale": 1.0
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_survival/Tent.blend",
+    "at": [
+     -8.0,
+     9.5
+    ],
+    "rot": -15,
+    "scale": 0.25
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
+    "at": [
+     -2.0,
+     3.2
+    ],
+    "scale": 0.42
+   },
+   {
+    "kind": "Bags",
+    "at": [
+     -3.4,
+     2.6
+    ],
+    "scale": 2.3
+   },
+   {
+    "kind": "Barrel",
+    "at": [
+     -6.2,
+     3.6
+    ],
+    "scale": 2.3
+   },
+   {
+    "kind": "Crate",
+    "at": [
+     -0.4,
+     4.4
+    ],
+    "rot": 20,
+    "scale": 2.3
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     -11.0,
+     7.0
+    ],
+    "scale": 2.6
+   },
+   {
+    "kind": "ftk:tree-crooked",
+    "at": [
+     7.5,
+     5.0
+    ],
+    "rot": 60,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:rock-large",
+    "at": [
+     4.5,
+     2.0
+    ],
+    "rot": 30,
+    "scale": 0.9
+   },
+   {
+    "kind": "ftk:rock-wide",
+    "at": [
+     -6.5,
+     1.6
+    ],
+    "scale": 0.9
+   },
+   {
+    "kind": "spire",
+    "at": [
+     2.0,
+     66.0
+    ],
+    "z": 4.5,
+    "floors": 3,
+    "size": 2.4,
+    "dark": true
+   },
+   {
+    "kind": "spire",
+    "at": [
+     6.0,
+     67.0
+    ],
+    "z": 5.5,
+    "floors": 5,
+    "size": 2.6,
+    "dark": true
+   },
+   {
+    "kind": "spire",
+    "at": [
+     10.0,
+     66.0
+    ],
+    "z": 4.5,
+    "floors": 2,
+    "size": 2.4,
+    "dark": true
+   },
+   {
+    "kind": "wallrow",
+    "from": [
+     -1.0,
+     65.0
+    ],
+    "to": [
+     13.0,
+     65.0
+    ],
+    "z": 3.5,
+    "size": 2.2,
+    "floors": 1,
+    "value": 0.25
+   }
+  ],
+  "post": {
+   "zenith": [
+    6,
+    6,
+    12
+   ],
+   "horizon": [
+    44,
+    38,
+    52
+   ],
+   "cloud": [
+    22,
+    22,
+    30
+   ],
+   "moon": [
+    0.62,
+    0.16
+   ],
+   "fog": [
+    40,
+    40,
+    54
+   ],
+   "fog_amount": 0.45,
+   "exposure": 1.35,
+   "glow": 0.7,
+   "shadow": [
+    14,
+    12,
+    20
+   ]
+  }
  }
 }

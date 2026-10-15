@@ -162,8 +162,8 @@ static func _sliced(tex: Texture2D, margin: int, content: Vector4) -> StyleBoxTe
 	box.content_margin_bottom = content.w
 	return box
 
-func _plate_box(lit: bool) -> StyleBoxTexture:
-	return _sliced(kit("plate_hover.png" if lit else "plate.png"), 12, Vector4(10, 6, 14, 6))
+func _plate_box(lit: bool) -> StyleBox:
+	return GrimTheme.plate_box(lit, Vector4(10, 6, 14, 6))
 
 ## Sol üst: kervanın arması ve şehrin adını taşıyan yırtık sancak.
 func _crest_and_banner() -> Control:
@@ -179,7 +179,7 @@ func _crest_and_banner() -> Control:
 	col.position = Vector2(150, 22)
 	col.add_theme_constant_override("separation", -6)
 	host.add_child(col)
-	col.add_child(GrimTheme.label(String(_model.get("city_name", "")), 40, ArtPalette.BONE, true))
+	col.add_child(GrimTheme.display_label(String(_model.get("city_name", "")), 50, ArtPalette.BONE))
 	col.add_child(GrimTheme.label(GrimDrafts.tr_key("UI_GRIM_DAY_SEASON") % [int(_model.get("day", 1)),
 		GrimDrafts.tr_key(String(_model.get("season_key", "UI_GRIM_SEASON_AUTUMN")))] + "  ·  " +
 		GrimDrafts.tr_key(String(_model.get("weather_key", "UI_GRIM_WEATHER_ASH"))),
@@ -299,7 +299,7 @@ func _strip() -> Control:
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bar.offset_top = -STRIP_HEIGHT
 	bar.custom_minimum_size = Vector2(0, STRIP_HEIGHT)
-	bar.add_theme_stylebox_override("panel", _sliced(kit("strip_wood.png"), 12, Vector4(28, 14, 28, 12)))
+	bar.add_theme_stylebox_override("panel", GrimTheme.bar_panel())
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 26)
 	bar.add_child(row)
@@ -329,51 +329,17 @@ static func _resource(caption_key: String, value: String, colour: Color) -> VBox
 	v.add_child(GrimTheme.label(value, 30, colour, true))
 	return v
 
-## İkonlu düğme: madalyon resmi, altında ad. Kutusuz - DD'nin alt
-## şeridindeki gibi resmin kendisi düğme; üstüne gelince kehribar.
 func _icon_button(key: String, icon_name: String) -> Button:
-	var b := Button.new()
-	b.flat = true
-	b.custom_minimum_size = Vector2(92, 80)
-	b.icon = kit("icon_%s.png" % icon_name)
-	b.expand_icon = true
-	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-	b.text = GrimDrafts.tr_key(key)
-	b.add_theme_font_override("font", GrimTheme.title_font())
-	b.add_theme_font_size_override("font_size", GrimTheme.SMALL_SIZE + 1)
-	b.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)
-	b.add_theme_color_override("font_hover_color", ArtPalette.GRIM_AMBER)
-	b.add_theme_color_override("icon_hover_color", Color(1.25, 1.1, 0.9))
-	b.add_theme_constant_override("icon_max_width", 54)
+	var b := GrimTheme.icon_button(GrimDrafts.tr_key(key), icon_name)
 	b.tooltip_text = b.text
 	b.pressed.connect(func(): nav_pressed.emit(key))
 	return b
 
-## Yola Çık: tek kızıl düğme, sağda. Kapının ikonu ve ağır yazı.
+## Yola Çık: tek kızıl düğme, sağda. Kapının ikonu ve ağır yazı. Üstüne
+## gelmek resimdeki kapıyı (varsa) aydınlatır.
 func _embark() -> Button:
-	var b := Button.new()
-	b.text = GrimDrafts.tr_key("UI_GRIM_EMBARK")
-	b.icon = kit("icon_gate.png")
-	b.expand_icon = true
-	b.add_theme_constant_override("icon_max_width", 52)
+	var b := GrimTheme.crimson_button(GrimDrafts.tr_key("UI_GRIM_EMBARK"), "gate")
 	b.custom_minimum_size = Vector2(250, 70)
-	b.add_theme_font_override("font", GrimTheme.title_font())
-	b.add_theme_font_size_override("font_size", 28)
-	b.add_theme_color_override("font_color", ArtPalette.BONE)
-	b.add_theme_color_override("font_hover_color", ArtPalette.GRIM_AMBER)
-	for state in ["normal", "hover", "pressed", "focus"]:
-		var box := StyleBoxFlat.new()
-		box.bg_color = ArtPalette.GRIM_CRIMSON.darkened(0.25 if state == "normal" else (0.0 if state == "hover" else 0.45))
-		box.border_color = ArtPalette.GRIM_AMBER if state == "hover" else ArtPalette.GRIM_RUST.darkened(0.3)
-		box.set_border_width_all(2)
-		box.set_corner_radius_all(2)
-		box.shadow_color = Color(0, 0, 0, 0.6)
-		box.shadow_size = 8
-		box.set_content_margin_all(10)
-		if state == "focus":
-			box.bg_color = Color(0, 0, 0, 0)
-		b.add_theme_stylebox_override(state, box)
 	b.pressed.connect(func(): nav_pressed.emit("UI_GRIM_EMBARK"))
 	b.mouse_entered.connect(func(): set_hovered(GATE_ID))
 	b.mouse_exited.connect(func(): set_hovered(0))

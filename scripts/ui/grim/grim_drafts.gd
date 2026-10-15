@@ -10,7 +10,8 @@ extends RefCounted
 ## Bunlar onay için çizilmiş taslaklar: hiçbir mevcut ekranın yerine
 ## geçmiyor, Nav'a bağlı değil.
 
-const BAR_HEIGHT: float = 58.0
+const BAR_HEIGHT: float = 64.0
+const STRIP_HEIGHT: float = 100.0
 
 # ------------------------------------------------------------------ ortak
 
@@ -98,8 +99,7 @@ static func top_bar(model: Dictionary) -> PanelContainer:
 	mods.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for m in model.get("modifiers", []):
 		var bad := String(m.get("kind", "bad")) == "bad"
-		mods.add_child(_chip(tr_key(String(m["key"])) % m.get("args", []),
-			ArtPalette.GRIM_CRIMSON if bad else ArtPalette.MOSS))
+		mods.add_child(GrimTheme.banner_tag(tr_key(String(m["key"])) % m.get("args", []), not bad))
 	row.add_child(mods)
 	row.add_child(_party_strip(model.get("party", [])))
 	return bar
@@ -109,14 +109,19 @@ static func _party_strip(party: Array) -> HBoxContainer:
 	var strip := HBoxContainer.new()
 	strip.add_theme_constant_override("separation", 10)
 	for p in party:
+		var cell := HBoxContainer.new()
+		cell.add_theme_constant_override("separation", 4)
+		if p.has("class"):
+			cell.add_child(WaybookIcons.picture(WaybookIcons.CLASS_EMBLEMS, String(p["class"]), 34))
 		var v := VBoxContainer.new()
 		v.add_theme_constant_override("separation", 1)
 		v.custom_minimum_size = Vector2(70, 0)
+		cell.add_child(v)
 		v.add_child(GrimTheme.label(String(p["name"]), GrimTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT))
 		v.add_child(_thin_bar(float(p["hp"]) / maxf(1.0, float(p["max_hp"])), ArtPalette.GRIM_CRIMSON.lightened(0.15)))
 		v.add_child(_thin_bar(float(p["stress"]) / 100.0, ArtPalette.GRIM_SLATE_LIGHT))
-		v.tooltip_text = "%d/%d · %d" % [int(p["hp"]), int(p["max_hp"]), int(p["stress"])]
-		strip.add_child(v)
+		cell.tooltip_text = "%d/%d · %d" % [int(p["hp"]), int(p["max_hp"]), int(p["stress"])]
+		strip.add_child(cell)
 	return strip
 
 static func _thin_bar(share: float, colour: Color) -> ColorRect:
@@ -129,23 +134,38 @@ static func _thin_bar(share: float, colour: Color) -> ColorRect:
 	back.add_child(fill)
 	return back
 
-## Alt şerit: gezinme. Her düğme bir tuşun karşılığı (dokunmatik denkliği).
+## Alt şerit: gezinme. İkonu olan eylem madalyon düğme, olmayan taş levha;
+## geri alınamayan çıkış sağda kızıl. Her düğme bir tuşun karşılığı.
+const ACTION_ICONS: Dictionary = {
+	"UI_GRIM_NAV_PARTY": "party", "UI_GRIM_NAV_LEDGER": "ledger", "UI_GRIM_NAV_MAP": "map",
+	"UI_GRIM_NAV_CARAVAN": "caravan", "UI_GRIM_HUD_CAMP": "camp", "UI_GRIM_TRADE_BASKET": "market",
+	"UI_GRIM_INV_MOVE": "caravan", "UI_GRIM_INV_CRAFT": "wardrobe",
+}
+
 static func bottom_bar(keys: Array, exit_key: String) -> PanelContainer:
 	var bar := PanelContainer.new()
 	bar.add_theme_stylebox_override("panel", GrimTheme.bar_panel())
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	bar.custom_minimum_size = Vector2(0, BAR_HEIGHT)
+	bar.offset_top = -STRIP_HEIGHT
+	bar.custom_minimum_size = Vector2(0, STRIP_HEIGHT)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	row.add_theme_constant_override("separation", 18)
 	bar.add_child(row)
 	for k in keys:
-		row.add_child(GrimTheme.button(tr_key(String(k))))
+		var key := String(k)
+		var b: Button
+		if ACTION_ICONS.has(key):
+			b = GrimTheme.icon_button(tr_key(key), String(ACTION_ICONS[key]))
+		else:
+			b = GrimTheme.button(tr_key(key))
+			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(b)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(gap)
-	var exit := GrimTheme.button(tr_key(exit_key))
-	exit.add_theme_color_override("font_color", ArtPalette.GRIM_CRIMSON.lightened(0.35))
+	var exit := GrimTheme.crimson_button(tr_key(exit_key))
+	exit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(exit)
 	return bar
 
@@ -239,38 +259,77 @@ static func push_notice(root: Control, title: String, body: String, kind: GrimNo
 
 # ------------------------------------------------------------------ başlık
 
-static func title(hovered: int = 0) -> Control:
+static func title(hovered: int = 0, lineage: Dictionary = {}) -> Control:
 	var root := _root()
-	var backdrop := MenuBackdrop.new()
-	root.add_child(backdrop)
-	var shade := ColorRect.new()
-	shade.color = Color(ArtPalette.GRIM_CHARCOAL, 0.55)
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(_full(shade))
-	var glow := LanternGlow.new().setup(330.0, 0.85, 1.3)
-	glow.set_anchors_preset(Control.PRESET_CENTER_LEFT)
-	glow.position = Vector2(140, -60)
+	# Arka plan: gece kampı (vagon, çadır, kamp ateşi, tepede uzak bir şehir),
+	# şehirlerle aynı hattan render (tools/ui_scenes, "camp"). Işık yalnızca
+	# ateşten: kısık, titrek, küçük - ekranı aydınlatmıyor.
+	var bg := TextureRect.new()
+	bg.texture = GrimHamlet._load_texture(GrimHamlet.TOWNS_DIR + "camp/background.jpg")
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_full(bg))
+	var glow := LanternGlow.new().setup(150.0, 0.22, 1.3)
+	glow.set_meta("image_point", FIRE_POINT)
 	root.add_child(glow)
-	var smoke := SmokeWisps.new()
-	root.add_child(smoke)
-	_finish(root, 1.2)
+	root.resized.connect(func(): _place_on_image(glow, bg, root.size))
+	_finish(root, 0.5)
+	root.add_child(_title_strip(hovered, lineage))
+	return root
+
+## Kamp ateşinin resimdeki yeri (payı). Işık bu noktaya oturur.
+const FIRE_POINT: Vector2 = Vector2(0.285, 0.735)
+
+static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> void:
+	if bg.texture == null:
+		return
+	var img := Vector2(bg.texture.get_size())
+	var k := maxf(view.x / img.x, view.y / img.y)
+	var offset := (view - img * k) * 0.5
+	var p: Vector2 = node.get_meta("image_point")
+	node.position = offset + p * img * k - node.size * 0.5
+
+## Sağ şerit (Wartales'in menü şeridi): koyu, sol kenarında pas demir bir
+## çizgi. Başlık, kervanın soy satırı (kitap animasyonunun yerine: adı ve
+## kaçıncı kuşak olduğu - oyunun asıl kaydı bu), sonra kutusuz menü.
+static func _title_strip(hovered: int, lineage: Dictionary) -> Control:
+	var strip := PanelContainer.new()
+	strip.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	strip.offset_left = -560
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.86)
+	box.border_color = Color(ArtPalette.GRIM_RUST, 0.9)
+	box.border_width_left = 2
+	box.content_margin_left = 64
+	box.content_margin_right = 40
+	box.content_margin_top = 120
+	box.shadow_color = Color(0, 0, 0, 0.7)
+	box.shadow_size = 40
+	strip.add_theme_stylebox_override("panel", box)
 	var col := VBoxContainer.new()
-	col.set_anchors_preset(Control.PRESET_CENTER_LEFT)
-	col.position = Vector2(120, -260)
 	col.add_theme_constant_override("separation", 6)
-	root.add_child(col)
-	col.add_child(GrimTheme.label("WAYBORNE", 92, ArtPalette.GRIM_PARCHMENT, true))
-	var sub := GrimTheme.label(tr_key("UI_GRIM_TITLE_SUB"), GrimTheme.BODY_SIZE + 2, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.9))
+	strip.add_child(col)
+	col.add_child(GrimTheme.display_label("Wayborne", 96, ArtPalette.GRIM_PARCHMENT))
+	var sub := GrimTheme.label(tr_key("UI_GRIM_TITLE_SUB"), GrimTheme.BODY_SIZE + 1, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.95))
+	sub.autowrap_mode = TextServer.AUTOWRAP_WORD
 	col.add_child(sub)
+	if not lineage.is_empty():
+		var rule := ColorRect.new()
+		rule.color = Color(ArtPalette.GRIM_RUST, 0.8)
+		rule.custom_minimum_size = Vector2(0, 1)
+		col.add_child(rule)
+		col.add_child(GrimTheme.label(tr_key("UI_GRIM_LINEAGE_LINE") % [String(lineage.get("name", "")),
+			int(lineage.get("generation", 1)), int(lineage.get("day", 1))], GrimTheme.BODY_SIZE, ArtPalette.GRIM_AMBER, true))
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 30)
+	gap.custom_minimum_size = Vector2(0, 40)
 	col.add_child(gap)
 	var menu := InkMenu.new().setup([tr_key("UI_CONTINUE"), tr_key("UI_GRIM_NEW_LINEAGE"),
 		tr_key("UI_MAIN_MENU_SAVES"), tr_key("UI_SETTINGS"), tr_key("UI_QUIT")])
 	col.add_child(menu)
 	menu.force_hover(hovered)
-	root.set_meta("menu", menu)
-	return root
+	strip.set_meta("menu", menu)
+	return strip
 
 # ------------------------------------------------------------------ ticaret
 
@@ -290,7 +349,7 @@ static func trade(model: Dictionary) -> Control:
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 40)
 	margin.add_theme_constant_override("margin_top", int(BAR_HEIGHT) + 26)
-	margin.add_theme_constant_override("margin_bottom", int(BAR_HEIGHT) + 26)
+	margin.add_theme_constant_override("margin_bottom", int(STRIP_HEIGHT) + 20)
 	root.add_child(margin)
 	var split := HBoxContainer.new()
 	split.add_theme_constant_override("separation", 22)
@@ -361,6 +420,14 @@ static func _scales_column(model: Dictionary) -> VBoxContainer:
 
 static func inventory(model: Dictionary) -> Control:
 	var root := _root()
+	# Yük vagonun içinde sayılır: arkada avlunun masası (B4), loş.
+	var bg := TextureRect.new()
+	bg.texture = WaybookTheme.texture("b4_yard.jpg")
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg.modulate = Color(0.32, 0.30, 0.28)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_full(bg))
 	_finish(root, 0.25)
 	root.add_child(top_bar(model))
 	var margin := MarginContainer.new()
@@ -368,10 +435,12 @@ static func inventory(model: Dictionary) -> Control:
 	margin.add_theme_constant_override("margin_left", 40)
 	margin.add_theme_constant_override("margin_right", 40)
 	margin.add_theme_constant_override("margin_top", int(BAR_HEIGHT) + 24)
-	margin.add_theme_constant_override("margin_bottom", int(BAR_HEIGHT) + 24)
+	margin.add_theme_constant_override("margin_bottom", int(STRIP_HEIGHT) + 20)
 	root.add_child(margin)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 22)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	margin.add_child(row)
 	var wagons: Array = model.get("wagons", [])
 	for i in wagons.size():
@@ -433,13 +502,11 @@ static func hud(model: Dictionary) -> Control:
 	root.add_child(top_bar(model))
 	_add_notice_host(root)
 	var plate := PanelContainer.new()
-	var plate_box := GrimTheme.iron_panel(0.82)
-	plate_box.set_content_margin_all(12)
-	plate.add_theme_stylebox_override("panel", plate_box)
+	plate.add_theme_stylebox_override("panel", GrimTheme.plate_box(false, Vector4(18, 12, 18, 10)))
 	root.add_child(plate)
 	plate.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	plate.offset_left = 24
-	plate.offset_bottom = -BAR_HEIGHT - 14
+	plate.offset_bottom = -STRIP_HEIGHT - 14
 	plate.offset_top = plate.offset_bottom - SurvivalGauge.SIZE.y - SurvivalGauge.NUMBER_HEIGHT * 2.0 - 28.0
 	var gauges := HBoxContainer.new()
 	gauges.add_theme_constant_override("separation", 18)
@@ -453,7 +520,10 @@ static func hud(model: Dictionary) -> Control:
 		[SurvivalGauge.Kind.FLAME, ArtPalette.GRIM_AMBER, "UI_GRIM_G_WARMTH", "warmth", true],
 	]:
 		var gauge := SurvivalGauge.new().setup(spec[0], spec[1], tr_key(String(spec[2])), bool(spec[4]))
-		gauge.set_value(float(g.get(String(spec[3]), 50)))
+		if String(spec[3]) == "warmth" and g.has("celsius"):
+			gauge.set_celsius(float(g["celsius"]))
+		else:
+			gauge.set_value(float(g.get(String(spec[3]), 50)))
 		gauge.set_time(1.7)
 		gauges.add_child(gauge)
 	root.add_child(bottom_bar(["UI_GRIM_HUD_CAMP", "UI_GRIM_NAV_LEDGER", "UI_GRIM_NAV_MAP"], "UI_GRIM_HUD_TURN_BACK"))

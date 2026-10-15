@@ -1,163 +1,143 @@
 # Karanlık Arayüz Taslağı (ui-hud-redesign)
 
-**Durum: onay bekliyor. Bu dal `main`'e birleştirilmedi.** Hiçbir mevcut
-ekranın yerine geçmiyor; taslak bileşenler `scripts/ui/grim/` altında duruyor,
-taslak ekranlar `tests/screenshot_grim_ui.gd` ile çiziliyor.
+**Durum: ikinci tur, onay bekliyor. Bu dal `main`'e birleştirilmedi.** Hiçbir
+mevcut ekranın yerine geçmiyor; taslak bileşenler `scripts/ui/grim/` altında,
+taslak ekranlar `tests/screenshot_grim_ui.gd` ile çiziliyor
+(`-- karakonak kurtbogazi ...` ile şehir seçilir).
 
-## 1. Referans analizi
+## 0. İkinci turda neyin değiştiği (oyuncunun geri bildirimi)
 
-`UI-HUD.rar` 45 görüntü taşıyordu: Darkest Dungeon (hamlet, savaş, envanter),
-Frostpunk (üst kaynak şeridi, ısı haritası), This War of Mine (kişi kartları,
-gece ekranı), The Banner Saga (kervan yürüyüşü, karar kartları), Kingdom Come:
-Deliverance (envanter, parşömen menüler), Wartales (kamp ve ticaret).
+| Geri bildirim | Cevap |
+|---|---|
+| Şehir yan görünüm olmasın, birebir Darkest Dungeon gibi, gidilen yere göre | Her şehir önden bakılan, boyalı bir kasaba resmi (`GrimHamlet`). Beş şehir, beş ayrı sahne. Solda mekân levhaları, sağda kadro kartları, sol üstte arma + sancak, altta tahta şerit ve kızıl "Yola Çık". Binanın üstüne gelmek levhayı, levhanın üstüne gelmek binayı aydınlatıyor. |
+| HUD düğmeleri alakasız | Düz kutular gitti. İkonu olan eylem madalyon düğme (oyunun kendi eşya render'larından), olmayan taş levha, geri alınamayan çıkış kızıl. Şeritler perçinli demir kenarlı koyu tahta. |
+| Menüdeki fener çok parlak, arka plan hoş değil | Arka plan artık render edilmiş bir gece kampı: brandalı vagon, kamp ateşi, tepede uzak bir şehir. Tek ışık ateş; küçük, kısık, titrek. Menü sağda koyu bir şerit (Wartales). |
+| Kitap animasyonu kötü | Kaldırıldı. Yerine soy satırı: "Demirtaş kervanı · 3. kuşak · 214. gün" - kitabın söylemek istediği tek şey buydu. |
+| Doku kararı oyun geliştirme estetiğine göre | Doku, malzemenin ne olduğunu söylediği yerde: şerit tahta, levha taş, sancak kumaş, kenar pas demir. Okunacak metin hep düz koyu bir zeminde - dokunun üstüne yazı yazılmıyor. Kaynak ambientCG (CC0). |
+| Gerekirse font değiştir, yerine göre farklı font | Üç yüz, üç görev: Grenze Gotisch (gotik vitrin; yalnızca oyunun adı ve şehrin sancağı), IM Fell English SC (başlık, levha, düğme), EB Garamond (gövde). Üçü de OFL, üçü de bütün Türkçe harfleri taşıyor (ölçüldü). |
+| Eşya bozulması ve Celsius sıcaklık hedeflere | `main`'deki CLAUDE.md Ana Hedefler'e eklendi. Sıcaklık göstergesi taslakta derece okuyor ("−4 °C"; alev −25 °C'de sönmeye yakın, 30 °C'de tam). |
+| Referanslar yeterince işlenmemiş | Aşağıda §1: her referanstan neyin alındığı tek tek. |
+| Diğer ekranlar onaylı, iyileştirilebilirse iyileştir | Ticaret ve envanter yeni şeritleri, ikonlu düğmeleri ve sancak etiketlerini aldı; envanter boş siyah alan yerine loş avlu masasının üstünde, ızgaralar ortada. Kadro şeridine sınıf amblemi eklendi. |
 
-**Telif kararı: referansların hiçbir pikseli oyuna girmedi.** İstem
-"referans grafiklerden modüler atlas kesin" diyordu; bu görüntüler ticari
-oyunlardan ekran görüntüleri, kesip oyunla dağıtmak telif ihlali olurdu.
-Onlardan yalnızca **ölçüm** alındı (palet, yerleşim, oran) ve her doku
-`tools/grim_ui_assets.py` ile tohumlu gürültüden sıfırdan üretildi. Yazı
-yüzü IM Fell English SC (Igino Marini, OFL 1.1), binalar zaten oyunda olan
-CC0 render'lar (PropArt).
+## 1. Referans analizi - neyin alındığı
 
-Ölçülen ortak paydalar (k-means, her oyunun 6-10 karesi):
+`UI-HUD.rar`'ın 45 görüntüsü ticari oyunlardan ekran görüntüsü. **Hiçbir
+pikseli oyuna girmedi**; alınan şey düzen, oran, palet ve kural.
 
-| Oyun | Baskın tonlar | Vurgu | Ders |
-|---|---|---|---|
-| Darkest Dungeon | `#020202` `#0d0a09` `#1e1412` `#322523` | kan `#a02b19` (%2) | Kırmızı neredeyse hiç yok; değerli olduğu için okunuyor. |
-| Frostpunk | arduvaz `#505c66` `#738490` | buz `#cdd2d5` | Soğuk bir sistem soğuk renkte gösterilir. |
-| KCD | parşömen `#c2ae90` `#d4c4aa` | kahve `#52413b` | Kâğıt yalnızca *belge* olan yerde. |
-| Banner Saga | mor-gri `#302d34` | kızıl `#932a13` (%12) | Düz renk + tek vurgu. |
-| This War of Mine | neredeyse siyah | — | Karanlık zemin, kurşun kalem çizgi. |
-
-Sonuç: ekranın %60-80'i kömür; kırmızı yalnızca kayıp ve tehlike için;
-kehribar yalnızca ışık kaynağı (fener, alev, üstüne gelinen şey).
-
-## 2. Palet (ArtPalette.GRIM_*)
-
-| Belirteç | Renk | Rol |
+| Referans | Aldığımız | Nerede |
 |---|---|---|
-| `GRIM_CHARCOAL` | `#121010` | Zemin, çubuklar |
-| `GRIM_CHARCOAL_SOFT` | `#201c1a` | Hücre, düğme zemini |
-| `GRIM_PARCHMENT` / `_DIM` | `#c4b08f` / `#8c785c` | Metin, kâğıt |
-| `GRIM_CRIMSON` | `#992917` | Kayıp, tehlike, açlık uyarısı |
-| `GRIM_RUST` | `#734024` | Kenar, çerçeve (demir pası) |
-| `GRIM_IRON` | `#454242` | Terazi, boş hücre |
-| `GRIM_SLATE` / `_LIGHT` | `#4f5c66` / `#788a94` | Gökyüzü, cam, stres |
-| `GRIM_AMBER` | `#eda852` | Işık: hover, fener, alev |
-| `GRIM_ASH` / `GRIM_FROST` / `GRIM_BILE` | | Kül, kırağı, açlık sıvısı |
+| Darkest Dungeon - hamlet | Önden, mürekkepli, sıcak pencereli kasaba; arkada tepede kale; sol üstte arma ve sancak; binanın üstüne gelince kontur ve aydınlanma; altta koyu şerit, kaynaklar solda, kızıl gömme düğme sağda | `GrimHamlet`, `town_scene.py` + `town_post.py` |
+| Darkest Dungeon - kadro | Sağda dikey kişi kartları: amblem, ad, sınıf/seviye, can çubuğu, on boncuklu stres | `GrimHamlet._card` |
+| Darkest Dungeon - ikonlar | Alt şeritte kutusuz, resmin kendisi olan düğmeler | `GrimTheme.icon_button`, `ui_kit.py` madalyonları |
+| Frostpunk | Sıcaklık bir derece; soğuk bir sistem soğuk renkte | `SurvivalGauge.set_celsius` |
+| Wartales | Manzaranın üstünde sağda koyu bir menü şeridi | Başlık ekranı |
+| Banner Saga | Yırtık kızıl sancak - haber ve uyarı bir kumaş parçası | `GrimTheme.banner_tag`, şehir sancağı |
+| KCD | Parşömen yalnızca belge olan yerde | Haber kartı (`GrimNotice`) |
+| This War of Mine | Karanlık zemin, kurşun kalem çizgi | Render'ın mürekkep geçişi |
 
-ArtPalette tek renk otoritesi olarak kalıyor (Art Rules); taslak kendi
-renk sabiti tanımlamıyor.
+Ölçülen ortak payda değişmedi: ekranın %60-80'i kömür, kırmızı yalnızca
+kayıp ve tehlike, kehribar yalnızca ışık.
 
-## 3. Tipografi
+## 2. Kasaba resimleri nasıl üretiliyor
 
-- **Başlık:** IM Fell English SC - 1600'lerin Fell dökümünün yıpranmış,
-  mürekkep yayılmış serifi. Yalnızca başlık, tabela, düğme ve büyük sayı.
-  bütün Türkçe harfleri taşıyor (ğ ı İ ş ç ö ü â ölçüldü); taşımadığı her şey EB Garamond'a
-  düşüyor (`GrimTheme.title_font()` fallback).
-- **Gövde:** EB Garamond (oyunun mevcut kitap yüzü) - okunurluk başlığa
-  feda edilmiyor.
+1. `tools/ui_scenes/town_scene.py --city <ad>`: Blender'da (bpy) şehir
+   başına bir sahne, `towns.json`'dan. Quaternius Medieval Village (CC0)
+   binaları, Kenney Fantasy Town Kit (CC0) duvarlarından kurulan gotik
+   kuleler, surlar ve sancaklar, ambientCG (CC0) dokuları. Cycles + Freestyle
+   mürekkep çizgisi. Üç geçiş: resim (gök saydam), mekân kimlikleri, derinlik.
+2. `tools/ui_scenes/town_post.py <ad>`: boyalı gök (bulut, ay), derinliğe
+   bağlı sis, ton (doygunluk kırılır, sıcak ışık doygun kalır, gölgeler
+   mor-kömüre), ışık taşması, kalınlığı yakınlığa bağlı mürekkep, kâğıt
+   dokusu, kir, kenar kararması. Çıktı `data/assets/ui/towns/<ad>/`:
+   `background.jpg` ve `mask.png` (piksel başına mekân numarası).
+3. `GrimHamlet` resmi "kapla" kipinde çiziyor, maskeyi aynı dönüşümle okuyor;
+   `hamlet_highlight.gdshader` seçilen mekânı aydınlatıp kehribar kontur
+   çiziyor, kalanı karartıyor.
+
+| Şehir | Kimliği |
+|---|---|
+| Karakonak | Kavşak: kızıl alacakaranlık, tepede kale, taş setler üstünde lonca ve kilise |
+| Kurtboğazı | Dağ geçidi: soğuk mavi gece, karlı sarp kaya, kayanın tepesinde sur, köknarlar |
+| İpekevi | İpek ve fuar şehri: altın-mor akşam, kalabalık pazar, sancaklar, sivri kuleli lonca |
+| Demirkapı | Demir surlar: is ve ocak kızılı, arkada kemerli kapısıyla sur ve kuleler, önde demirci ateşi |
+| Yeşilova | Ova: yeşilimsi gece, yel ve su değirmeni, çit, saman, yuvarlak ağaçlar |
+
+Ana menü aynı hattan bir "kamp" sahnesi (`towns.json` → `camp`).
+
+## 3. Palet ve tipografi
+
+ArtPalette tek renk otoritesi (GRIM_*). Yazı yüzleri:
+
+| Yüz | Lisans | Görev |
+|---|---|---|
+| Grenze Gotisch | OFL 1.1 | Vitrin: oyunun adı, şehrin sancağı. Ekranda en fazla bir kez; okunacak hiçbir şey. |
+| IM Fell English SC | OFL 1.1 | Başlık, levha, düğme, büyük sayı |
+| EB Garamond | OFL 1.1 | Gövde (oyunun mevcut kitap yüzü) |
+
+CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 
 ## 4. Bileşenler (`scripts/ui/grim/`)
 
-| Bileşen | Ne yapar | Oyunda neyi okur |
-|---|---|---|
-| `GrimTheme` | Yazı yüzü, dokular, düz kutular, ses imi tablosu | — |
-| `GrimTownView` | DD tarzı yan görünüm şehir; hover'da fenerle aydınlanan bina, tabela, sis | `venue_pressed(scene_path)` - CityView ile aynı sinyal |
-| `SurvivalGauge` | Şişe (sıvı çekilir, cam çatlar), alev (küçülür, mavileşir), kan lekesi (yayılır) - **sayı yanında kalıyor** | Moral, açlık, derman (stamina), tehlike, sıcaklık |
-| `GrimNotice` | Masaya atılmış yırtık parşömen kart; düşer, oturur, solar; ALAMET / KAYIP / KAZANÇ damgası | Defter satırları, olay sonuçları |
-| `TradeScales` | Terazi: kol, istenen ile teklif arasındaki *göreli* farka eğilir | `HagglingSession` |
-| `MarketMeter` | Stok çentikleri + fiyat baskısı oku + şok noktası | `MarketConditions` (stok, çarpan, `is_shocked`) |
-| `WornCell` + `item_wear.gdshader` | Envanter hücresi; yırtık / kırağı / kir aynı gölgelendiricide | **Henüz veri yok** (bkz. §8) |
-| `AshFall`, `SmokeWisps`, `LanternGlow` | Atmosfer; hepsi saf zaman fonksiyonu | — |
-| `InkMenu` | Kutusuz menü: hover'da mürekkep darbesi + kan çentiği | Ana menü |
-| `GrimDrafts` | Beş taslak ekranı kurar; `from_session()` modeli GameSession'dan doldurur | — |
+| Bileşen | Ne yapar |
+|---|---|
+| `GrimHamlet` | DD düzenli şehir ekranı; `venue_pressed(scene_path)` CityView ile aynı sinyal, `nav_pressed(key)` alt şerit |
+| `hamlet_highlight.gdshader` | Maskeye göre mekân vurgusu |
+| `GrimTheme` | Yazı yüzleri, şerit/levha/sancak kutuları, madalyon ve kızıl düğme |
+| `SurvivalGauge` | Şişe, alev (Celsius), leke - sayı yanında |
+| `GrimNotice`, `TradeScales`, `MarketMeter`, `WornCell` | İlk turda onaylandı |
+| `AshFall`, `SmokeWisps`, `LanternGlow`, `InkMenu` | Atmosfer ve kutusuz menü |
+| `GrimDrafts` | Taslak ekranları kurar; `from_session()` modeli doldurur |
 
-## 5. Taslak ekranlar
+Üreteçler: `tools/ui_scenes/town_scene.py`, `town_post.py`, `ui_kit.py`
+(şerit, levha, sancak, arma, kart, madalyon ikonlar), `tools/grim_ui_assets.py`
+(ilk turun dokuları ve sesleri). İlk turun yan görünüm sokağı
+(`GrimTownView`) artık hiçbir taslak ekranda kullanılmıyor; onaydan sonra
+silinecek.
 
-1. **Şehir merkezi** - yan görünüm sokak, altı mekân bir bina. Üst şerit:
-   şehir, kese, borç, erzak (+kaç gün), saat kadranı, tarih/mevsim, hava,
-   etkin değiştiriciler (veba, kıtlık, fuar), kişi başına can/stres.
-   Alt şerit: Kadro, Defter, Harita, Kervan, Kapıdan Çık. Tıklanan bina
-   sahne değiştirmez; yanında bağlam menüsü açılır (o mekânın bugünkü
-   durumu + Gir/Kapat). Haberler sağ üste kart olarak düşer.
-2. **Başlık** - mevcut MenuBackdrop karartılmış; kül, duman, fener ışığı;
-   IM Fell başlık; kutusuz mürekkep menüsü.
-3. **Ticaret** - üç sütun: tezgâh (stok/baskı ölçeğiyle), ortada terazi,
-   senin yükün. Kıtlık ve şok her satırda görünüyor.
-4. **Envanter** - her vagon kendi ızgarası + ceplerin ızgarası; ağırlık /
-   kapasite başlıkta; hücrede miktar, ağırlık, durum çubuğu, bozulabilir
-   malda kalan gün.
-5. **Yol göstergeleri** - beş organik gösterge sol altta bir plakada,
-   haberler sağ üstte.
-
-## 6. Etkileşim durumları
+## 5. Etkileşim durumları
 
 | Durum | Görsel | Ses imi |
 |---|---|---|
-| Normal | Pas kenar, parşömen yazı | — |
-| Hover | Kehribar kenar/yazı; bina fenerle aydınlanır, öbürleri kararır; menüde mürekkep darbesi | `ui_hover` (kumaş fısıltısı) |
-| Basılı | Kan kenarı, koyu zemin | `ui_press` (demir mandal) |
-| Kilitli | Soluk, **sebebi yanında** (Event Engine Rules) | — |
-| Sayfa/ekran geçişi | SceneInk (mevcut) | `ui_page` |
-| Para hareketi | Terazi oturur | `ui_coin` |
-| Kayıp kartı | Kart düşer, damga | `ui_stamp` |
-| Alamet kartı | Kart düşer | `ui_alert` (iki vuruşlu kalp atışı) |
+| Hover (bina/levha) | Bina aydınlanır + kehribar kontur, öbürleri kararır; levha kehribar kenar | `ui_hover` |
+| Hover (ikon) | İkon ısınır, ad kehribar | `ui_hover` |
+| Basılı | Kan kenarı | `ui_press` |
+| Kilitli | Soluk, sebebi yanında | - |
+| Para | Terazi oturur | `ui_coin` |
+| Kayıp / alamet kartı | Kart düşer, damga | `ui_stamp` / `ui_alert` |
 
-Sesler `tools/grim_ui_assets.py` ile sentezlenmiş yer tutucular (mevcut
-rüzgâr/kapı seslerinin yöntemi); AudioManager'a henüz bağlı değil.
+## 6. Projenin kurallarıyla çatışmalar - onayınız gereken yerler
 
-**Hareket kuralları korunuyor (Motion Rules):** her eğri statik ve saf,
-dinlenmede başlayıp dinlenmede bitiyor (`test_grim_ui.gd`); "Hareketi
-Azalt" açıkken kül/duman/titreme dondurulabilir (`set_time`), bilgi taşıyan
-hareket (kartın düşüşü) kalır.
+1. **Şehir B10 masa sahnesinden render edilmiş kasabaya geçiyor**, Ana
+   Hedefler'deki "DD tarzı şehir" maddesini karşılıyor; ikisi aynı anda
+   yaşayamaz.
+2. **Doku geri geliyor, ama deri değil.** Tahta şerit, taş levha, kumaş
+   sancak, pas demir kenar - hepsi CC0 fotoğraf dokusundan, karartılmış.
+   Waybook UI Rules'un "kontroller tek düz aile" kuralı bu tasarımla
+   değişir; onaylanırsa kural yeniden yazılır.
+3. **Üçüncü bir yazı yüzü** (Grenze Gotisch), yalnızca vitrin.
+4. **Mekânlar sahne değiştirmeden mi açılsın?** Taslakta levhaya tıklamak
+   doğrudan mekâna gidiyor (bugünkü davranış). Ana Hedefler'deki "mekânlar
+   popup olarak" maddesi ayrı bir iş.
 
-## 7. Projenin kurallarıyla çatışmalar - onayınız gereken yerler
+## 7. Onaydan sonra uygulama sırası
 
-1. **Şehir menüsü masa sahnesinden (B10) çizilmiş sokağa geçiyor.** Ana
-   Hedefler'deki "DD tarzı şehir" maddesi bunu istiyordu ama Faz 22 şehri
-   B10'a yeni taşımıştı; ikisi aynı anda yaşayamaz. Taslak sokağı öneriyor.
-2. **Deri yok, ama doku geri geliyor - yalnızca resim olan yerde.**
-   Oyuncu deri ve doku kaplı kontrolleri reddetmişti. Taslakta bütün
-   kontroller hâlâ düz kutu (StyleBoxFlat); doku yalnızca haber kartının
-   kâğıdı, mürekkep lekesi ve envanter yıpranma katmanlarında.
-3. **Yeni bir yazı yüzü.** "One book face for every language" kuralı
-   gövde için korunuyor; IM Fell yalnızca başlıkta. CJK dillerinde başlık
-   da kitap yüzüne düşer.
-4. **HUD çubuğundan organik göstergeye.** PulseBar şişeleri zaten vardı;
-   SurvivalGauge onların büyük, çatlayan/sönen hâli. Sayı korunuyor.
-
-## 8. Açık tasarım kararları (veri yok)
-
-- **Eşya durumu ve bozulma.** `Item` yalnızca fiyat ve ağırlık taşıyor.
-  Hücre yıpranmayı çizebiliyor ama oyun onu hesaplamıyor. Seçenekler:
-  (a) yalnızca bozulabilir mallar (balık, erzak) gün sayar; (b) her yığın
-  bir durum taşır, satış fiyatını düşürür; (c) yalnızca görsel - yolda
-  geçen gün kadar kir, kışın kırağı. Önerim (a) + (c).
-- **Sıcaklık.** Soğuk kenarı (G11 frost) oyuncunun isteğiyle kaldırılmıştı.
-  Alev göstergesi bir sıcaklık sayısı istiyor; mevsim + biyom + kamp
-  ateşinden türetilebilir ama yeni bir sistem. Onay olmadan bağlanmaz.
-- **Açlık.** Oyunda "tokluk" sayısı yok, aç geçen gece sayısı var
-  (`consecutive_hungry_days`). Şişe gece sayısını ters orantıyla
-  gösterebilir.
-
-## 9. Onaydan sonra uygulama sırası
-
-1. GrimTheme'in kalıcı parçalarını WaybookTheme'e taşı (başlık yüzü,
-   GRIM paleti), `test_waybook_theme.gd`'yi güncelle.
-2. Ses imlerini AudioManager.SFX_PATHS'e ekle; ButtonFeedback hover/press'e bağla.
-3. Şehir: `city_map.tscn`'de CityView yerine GrimTownView; CityBriefPanel
-   bağlam menüsüne ve üst şeride dağılır. `test_navigation.gd` grafiği.
-4. Yol HUD'u: PulseBar → SurvivalGauge; defter olayları → GrimNotice.
-5. Pazar: TradeScales HagglingPanel'e, MarketMeter satırlara.
-6. Envanter: §8'deki karar verildikten sonra.
-7. Ana menü: InkMenu + kül/duman.
+1. GrimTheme'in kalıcı parçaları WaybookTheme'e (yüzler, şerit/levha/sancak,
+   GRIM paleti); `test_waybook_theme.gd` yeni kuralla güncellenir.
+2. Şehir: `city_map.tscn`'de CityView yerine `GrimHamlet`; CityBriefPanel
+   satırları levhalara ve kartlara dağılır; `test_navigation.gd` grafiği.
+3. Ana menü: kamp arka planı, soy satırı, sağ şerit; kitap (M1/M2) kalkar.
+4. Yol HUD'u: PulseBar → SurvivalGauge; alt şerit ikonlu; defter olayları →
+   GrimNotice.
+5. Pazar ve envanter.
+6. Sıcaklık ve bozulma mekanikleri (Ana Hedefler) bağlanınca gösterge ve
+   hücre gerçek veriyle.
 
 ## Dosyalar
 
-- `tools/grim_ui_assets.py` - bütün dokular ve ses imleri (tohumlu, yeniden üretilebilir)
-- `data/assets/ui/grim/*.png`, `data/assets/audio/ui_*.wav`
-- `data/assets/fonts/IMFellEnglishSC.ttf` + `IMFell-OFL.txt`
-- `scripts/ui/grim/*` - bileşenler ve taslak ekranlar
-- `tests/test_grim_ui.gd` - sözleşmeler (62 doğrulama)
-- `tests/screenshot_grim_ui.gd` - taslak ekran görüntüleri
+- `tools/ui_scenes/` - kasaba/kamp render'ı, son işleme, arayüz takımı, `towns.json`
+- `data/assets/ui/towns/<şehir>/` - `background.jpg`, `mask.png`
+- `data/assets/ui/grim/kit/` - şerit, levha, sancak, arma, kart, ikonlar
+- `data/assets/fonts/GrenzeGotisch.ttf` + OFL
+- `art_source/models/ui_scenes/kenney_fantasy_town/` (CC0),
+  `art_source/textures/ambientcg/` (CC0, `LICENSES.md`)
+- `scripts/ui/grim/*`, `tests/test_grim_ui.gd`, `tests/screenshot_grim_ui.gd`

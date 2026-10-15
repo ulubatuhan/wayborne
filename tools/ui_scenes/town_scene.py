@@ -98,6 +98,10 @@ def place(path, loc, rot_z=0.0, scale=1.0, tag="", mats=None):
         c.scale = Vector(r.scale) * scale
     for c in out:
         c["venue"] = tag
+        if mats is not None and c.type == "MESH":
+            for slot in c.material_slots:
+                slot.link = "OBJECT"
+                slot.material = mats
     return out
 
 
@@ -111,7 +115,7 @@ def ftk(name):
 
 # ---------------------------------------------------------------- yapılar
 
-def spire_tower(x, y, z0, floors, size, tag="", wood=False, roof="roof-high-point"):
+def spire_tower(x, y, z0, floors, size, tag="", wood=False, roof="roof-high-point", mats=None):
     """Kenney duvarlarından kare gövdeli, sivri çatılı bir kule."""
     wall_kinds = ["wall-wood-window-shutters", "wall-wood", "wall-wood-window-small"] if wood else \
         ["wall-window-stone", "wall", "wall-window-small"]
@@ -119,7 +123,7 @@ def spire_tower(x, y, z0, floors, size, tag="", wood=False, roof="roof-high-poin
     for f in range(floors):
         for k in range(4):
             kind = wall_kinds[0 if f == floors - 1 else rng.randrange(len(wall_kinds))]
-            place(ftk(kind), (x, y, z0 + f * size), k * 90.0, size, tag)
+            place(ftk(kind), (x, y, z0 + f * size), k * 90.0, size, tag, mats)
     place(ftk(roof), (x, y, z0 + floors * size), 0.0, size * 1.05, tag)
 
 
@@ -134,11 +138,11 @@ def terrace(x, y, w, d, h, tag=""):
     b.data.materials.append(_stone_material())
 
 
-def _stone_material():
-    m = bpy.data.materials.get("terrace_stone")
+def _stone_material(name="terrace_stone", value=0.55):
+    m = bpy.data.materials.get(name)
     if m is not None:
         return m
-    m = bpy.data.materials.new("terrace_stone")
+    m = bpy.data.materials.new(name)
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     tc = nt.nodes.new("ShaderNodeTexCoord")
@@ -148,14 +152,38 @@ def _stone_material():
     t = _tex_node(nt, os.path.join(TEX, "Bricks097/Bricks097_1K-JPG_Color.jpg"), mp)
     hsv = nt.nodes.new("ShaderNodeHueSaturation")
     hsv.inputs["Saturation"].default_value = 0.25
-    hsv.inputs["Value"].default_value = 0.55
+    hsv.inputs["Value"].default_value = value
     nt.links.new(t.outputs["Color"], hsv.inputs["Color"])
     nt.links.new(hsv.outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = 0.95
     return m
 
 
+def _built(name, loc, rot_z, scale, tag):
+    """Eşya hattının kurucusundan (brandalı vagon) bir model: oyunun yolda
+    çizdiği vagonun aynısı, bir boşluk nesnesine bağlanıp yerleştirilir."""
+    sys.path.insert(0, os.path.join(ROOT, "tools/figure_pipeline/props"))
+    import wagon_builder
+    before = set(bpy.data.objects)
+    wagon_builder.BUILDERS[name]()
+    new = [o for o in bpy.data.objects if o not in before]
+    pivot = bpy.data.objects.new(name + "_pivot", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for o in new:
+        if o.name not in bpy.context.scene.collection.objects and not o.users_collection:
+            bpy.context.scene.collection.objects.link(o)
+        if o.parent is None:
+            o.parent = pivot
+        o["venue"] = tag
+    pivot.location = loc
+    pivot.rotation_euler = (0.0, 0.0, math.radians(rot_z))
+    pivot.scale = (scale, scale, scale)
+
+
 def building(spec):
+    if spec["kind"] == "wallrow":
+        wall_row(spec)
+        return
     tag = spec.get("venue", "")
     x, y = spec["at"]
     z = spec.get("z", 0.0)
@@ -165,7 +193,12 @@ def building(spec):
         z = th
     kind = spec["kind"]
     if kind == "spire":
-        spire_tower(x, y, z, spec.get("floors", 3), spec.get("size", 1.2), tag, spec.get("wood", False))
+        spire_tower(x, y, z, spec.get("floors", 3), spec.get("size", 1.2), tag, spec.get("wood", False),
+            mats=_stone_material("wall_dark", 0.3) if spec.get("dark") else None)
+    elif kind.startswith("builder:"):
+        _built(kind[8:], (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
+    elif kind.startswith("file:"):
+        place(os.path.join(ROOT, kind[5:]), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
     elif kind.startswith("ftk:"):
         place(ftk(kind[4:]), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
     else:
@@ -262,7 +295,8 @@ def ground(cfg):
     nt.links.new(ramp.outputs["Result"], mix.inputs["Factor"])
     nt.links.new(cob.outputs["Color"], mix.inputs["A"])
     nt.links.new(dirt.outputs["Color"], mix.inputs["B"])
-    nt.links.new(mix.outputs["Result"], bsdf.inputs["Base Color"])
+    out = _tint_and_snow(nt, mix.outputs["Result"], tc, cfg.get("ground_tint"), cfg.get("snow", 0.0), 0.15)
+    nt.links.new(out, bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = 0.95
     g.data.materials.append(m)
     # Arka tepe: kasabanın arkasında yükselen, kalenin oturduğu sırt.
@@ -271,6 +305,17 @@ def ground(cfg):
         bpy.ops.mesh.primitive_uv_sphere_add(radius=1.0, location=hill["at"])
         h = bpy.context.object
         h.scale = hill["scale"]
+        # Pürüzsüz kubbe yapay okunuyor: alçak frekanslı gürültüyle sırt
+        # kırılır, tepe sivrilir - DD'nin kayalık sırtı gibi.
+        bpy.ops.object.modifier_add(type="SUBSURF")
+        h.modifiers[-1].levels = 2
+        h.modifiers[-1].render_levels = 3
+        tx = bpy.data.textures.new("hill_noise", "CLOUDS")
+        tx.noise_scale = hill.get("rough_scale", 0.35)
+        tx.noise_depth = 3
+        bpy.ops.object.modifier_add(type="DISPLACE")
+        h.modifiers[-1].texture = tx
+        h.modifiers[-1].strength = hill.get("rough", 0.35)
         rm = bpy.data.materials.new("hill_mat")
         rn = rm.node_tree
         rb = rn.nodes["Principled BSDF"]
@@ -278,8 +323,73 @@ def ground(cfg):
         mp2.inputs["Scale"].default_value = (0.08, 0.08, 0.08)
         rn.links.new(tc2.outputs["Object"], mp2.inputs["Vector"])
         rt = _tex_node(rn, os.path.join(TEX, "Rock064/Rock064_1K-JPG_Color.jpg"), mp2)
-        rn.links.new(rt.outputs["Color"], rb.inputs["Base Color"])
+        rout = _tint_and_snow(rn, rt.outputs["Color"], tc2, hill.get("tint"), hill.get("snow", 0.0), 0.08, True)
+        rn.links.new(rout, rb.inputs["Base Color"])
         h.data.materials.append(rm)
+
+
+def _tint_and_snow(nt, colour, tc, tint, snow, scale, cap=False):
+    """Bir doku rengini şehrin tonuna çarpar; `snow` > 0 ise gürültüyle
+    (tepede yüksekliğe göre de) beyaza çeker - Kurtboğazı'nın karı."""
+    out = colour
+    if tint:
+        mul = nt.nodes.new("ShaderNodeMix"); mul.data_type = "RGBA"; mul.blend_type = "MULTIPLY"
+        mul.inputs["Factor"].default_value = 1.0
+        nt.links.new(out, mul.inputs["A"])
+        mul.inputs["B"].default_value = list(tint) + [1.0]
+        out = mul.outputs["Result"]
+    if snow > 0.0:
+        noise = nt.nodes.new("ShaderNodeTexNoise")
+        noise.inputs["Scale"].default_value = 1.0 / max(scale, 1e-3) * 0.08
+        nt.links.new(tc.outputs["Object"], noise.inputs["Vector"])
+        fac = nt.nodes.new("ShaderNodeMapRange")
+        fac.inputs["From Min"].default_value = 0.55 - snow * 0.35
+        fac.inputs["From Max"].default_value = 0.62 - snow * 0.25
+        nt.links.new(noise.outputs["Fac"], fac.inputs["Value"])
+        last = fac.outputs["Result"]
+        if cap:
+            sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+            nt.links.new(tc.outputs["Object"], sep.inputs["Vector"])
+            hz = nt.nodes.new("ShaderNodeMapRange")
+            hz.inputs["From Min"].default_value = 0.1
+            hz.inputs["From Max"].default_value = 0.45
+            nt.links.new(sep.outputs["Z"], hz.inputs["Value"])
+            mx = nt.nodes.new("ShaderNodeMath"); mx.operation = "MAXIMUM"
+            nt.links.new(last, mx.inputs[0]); nt.links.new(hz.outputs["Result"], mx.inputs[1])
+            last = mx.outputs[0]
+        soft = nt.nodes.new("ShaderNodeMath"); soft.operation = "MULTIPLY"
+        soft.inputs[1].default_value = 0.8
+        nt.links.new(last, soft.inputs[0])
+        mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "RGBA"
+        nt.links.new(soft.outputs[0], mix.inputs["Factor"])
+        nt.links.new(out, mix.inputs["A"])
+        mix.inputs["B"].default_value = (0.72, 0.75, 0.8, 1.0)
+        out = mix.outputs["Result"]
+    return out
+
+
+def wall_row(spec):
+    """Sur: `from`-`to` arasında Kenney taş duvar parçaları, aralıklı
+    burçlar; `gate` payındaki parça kemer olur (Demirkapı'nın kapısı)."""
+    (x0, y0), (x1, y1) = spec["from"], spec["to"]
+    size = spec.get("size", 2.0)
+    z = spec.get("z", 0.0)
+    tag = spec.get("venue", "")
+    length = math.hypot(x1 - x0, y1 - y0)
+    n = max(1, int(length / size))
+    ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
+    gate = spec.get("gate", -1.0)
+    for i in range(n):
+        t = (i + 0.5) / n
+        x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+        kind = "wall-arch" if gate >= 0 and abs(t - gate) < 0.5 / n else spec.get("piece", "wall")
+        for f in range(spec.get("floors", 2)):
+            k = kind if f == 0 else "wall-block"
+            dark = _stone_material("wall_dark", spec.get("value", 0.3))
+            place(ftk(k), (x, y, z + f * size), ang + spec.get("rot", 0.0), size, tag if kind == "wall-arch" else spec.get("wall_tag", ""), dark)
+        if spec.get("towers") and i % spec["towers"] == 0:
+            spire_tower(x, y + 0.2, z, spec.get("floors", 2) + 2, size * 0.9, spec.get("wall_tag", ""),
+                mats=_stone_material("wall_dark", spec.get("value", 0.3)))
 
 
 def sky(cfg):
@@ -318,10 +428,11 @@ def lights(cfg):
     bo = bpy.data.objects.new("back", back)
     bo.rotation_euler = Euler((math.radians(100), 0, math.radians(180)))
     sc.collection.objects.link(bo)
-    for lx, ly, lz, e in cfg.get("lamps", []):
+    for entry in cfg.get("lamps", []):
+        lx, ly, lz, e = entry[:4]
         lamp = bpy.data.lights.new("lamp", "POINT")
         lamp.energy = e
-        lamp.color = (1.0, 0.62, 0.3)
+        lamp.color = entry[4] if len(entry) > 4 else (1.0, 0.62, 0.3)
         lamp.shadow_soft_size = 0.3
         lo = bpy.data.objects.new("lamp", lamp)
         lo.location = (lx, ly, lz)

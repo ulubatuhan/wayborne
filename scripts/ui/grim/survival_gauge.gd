@@ -28,6 +28,8 @@ var label_text: String = ""
 ## true: düşük değer kötü (moral, sıcaklık). false: yüksek değer kötü (tehlike).
 var bad_when_low: bool = true
 var value: float = 100.0
+## Doluluk yerine yazılacak sayı ("−4 °C" gibi). Boşsa değerin kendisi.
+var number_text: String = ""
 var max_value: float = 100.0
 var _time: float = 0.0
 var _seed: float = 0.0
@@ -57,6 +59,24 @@ func set_time(t: float) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	queue_redraw()
+
+## Sıcaklık göstergesi Celsius okur: alev −25 °C'de sönmeye yakın, 30 °C'de
+## tam. Sayı derecenin kendisi (Ana Hedefler: sıcaklık mekaniği).
+const CELSIUS_MIN: float = -25.0
+const CELSIUS_MAX: float = 30.0
+
+static func celsius_fraction(c: float) -> float:
+	return clampf((c - CELSIUS_MIN) / (CELSIUS_MAX - CELSIUS_MIN), 0.0, 1.0)
+
+static func celsius_text(c: float) -> String:
+	var n := roundi(c)
+	return ("−%d" % absi(n) if n < 0 else "%d" % n) + " °C"
+
+func set_celsius(c: float) -> void:
+	value = celsius_fraction(c) * 100.0
+	max_value = 100.0
+	number_text = celsius_text(c)
 	queue_redraw()
 
 static func fill_fraction(v: float, max_v: float) -> float:
@@ -193,7 +213,7 @@ func _draw_number(box: Rect2, sev: float) -> void:
 	var font := WaybookTheme.get_font()
 	var y := box.end.y + NUMBER_HEIGHT - 2
 	var col := ArtPalette.GRIM_PARCHMENT if sev < 0.6 else ArtPalette.GRIM_CRIMSON.lightened(0.25)
-	var number := "%d" % roundi(value)
+	var number := number_text if number_text != "" else "%d" % roundi(value)
 	var nw := font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	draw_string(font, Vector2(box.get_center().x - nw * 0.5, y), number,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 16, col)
