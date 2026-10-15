@@ -60,15 +60,21 @@ func _init() -> void:
 	TranslationServer.set_locale("tr")
 	DirAccess.make_dir_recursive_absolute(SHOT_DIR)
 
+	# `-- genişlik yükseklik`: yol ekranı tam kareye geçtiğinden beri şerit
+	# oyunda ~990 piksel; varsayılan 320 eski ölçüyü basıyor.
+	var view := VIEW_SIZE
+	var args := OS.get_cmdline_user_args()
+	if args.size() >= 2:
+		view = Vector2i(int(args[0]), int(args[1]))
 	var root := get_root()
-	root.size = VIEW_SIZE
+	root.size = view
 
 	# Şeridin boyu elle veriliyor: headless pencere proje varsayılanında
 	# açılıyor ve tam-dikdörtgen bir çapa şeridi 1080 piksele geriyordu -
 	# oyunda hiç görülmeyecek bir oran.
 	_band = TravelBand.new()
 	_band.position = Vector2.ZERO
-	_band.size = Vector2(VIEW_SIZE)
+	_band.size = Vector2(view)
 	root.add_child(_band)
 
 	# `add_child` değil `add_actor_layer` - oyunun yaptığının aynısı.
@@ -181,7 +187,7 @@ func _save(file_name: String) -> void:
 	# Yalnızca şeridin durduğu bölge: pencerenin kalanı boş ve karenin
 	# oranını bozuyor.
 	var region := Rect2i(Vector2i.ZERO, Vector2i(
-		mini(VIEW_SIZE.x, image.get_width()), mini(VIEW_SIZE.y, image.get_height())
+		mini(int(_band.size.x), image.get_width()), mini(int(_band.size.y), image.get_height())
 	))
 	image = image.get_region(region)
 	image.save_png("%s/%s" % [SHOT_DIR, file_name])

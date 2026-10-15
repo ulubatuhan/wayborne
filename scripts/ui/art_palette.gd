@@ -139,6 +139,24 @@ const UI_DEAD_ALPHA: float = 0.35
 # kehribarından (UI_GAUGE_DANGER) bilerek ayrı: kan.
 const UI_CHOICE_COMBAT: Color = Color(0.66, 0.19, 0.17)
 
+# --- Karanlık arayüz taslağı (ui-hud-redesign, onay bekliyor) ---
+# Referanslardan ölçülen dağılım: ekranın %60-80'i neredeyse siyah, kan
+# kırmızısı yalnızca %2-12 (DD #a02b19, Banner Saga #932a13). Bu yüzden
+# kırmızı vurgu, zemin değil; kehribar yalnızca ışık kaynağı.
+const GRIM_CHARCOAL: Color = Color(0.072, 0.064, 0.062)
+const GRIM_CHARCOAL_SOFT: Color = Color(0.125, 0.110, 0.100)
+const GRIM_PARCHMENT: Color = Color(0.77, 0.69, 0.56)
+const GRIM_PARCHMENT_DIM: Color = Color(0.55, 0.47, 0.36)
+const GRIM_CRIMSON: Color = Color(0.60, 0.16, 0.09)
+const GRIM_RUST: Color = Color(0.45, 0.25, 0.14)
+const GRIM_IRON: Color = Color(0.27, 0.26, 0.26)
+const GRIM_SLATE: Color = Color(0.31, 0.36, 0.40)
+const GRIM_SLATE_LIGHT: Color = Color(0.47, 0.54, 0.58)
+const GRIM_AMBER: Color = Color(0.93, 0.66, 0.32)
+const GRIM_ASH: Color = Color(0.67, 0.65, 0.62)
+const GRIM_FROST: Color = Color(0.80, 0.88, 0.93)
+const GRIM_BILE: Color = Color(0.55, 0.58, 0.25)
+
 # --- Gün evreleri: gökyüzü üstü/altı ve ışığın rengi ---
 ## Yol ve şehir aynı tabloyu okuyor, o yüzden bir sefer akşamüstü
 ## çıkıldığında şehir de aynı akşamüstünde görünüyor.
