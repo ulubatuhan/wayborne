@@ -5139,6 +5139,18 @@ verir.
   gün sayar ve tazeliği satış fiyatını düşürür, süresi dolan yığın çürür;
   kalıcı mallar yalnızca görsel kir/kırağı alır. Yeni bir sistem değil,
   `Inventory` yığınına bir yaş alanı ve `MarketPricing`'e bir çarpan.
+- **Hastalık, doktor ve şehrin ilacı.** Karakterler hastalanabilir (yolda,
+  açlıkta, soğukta, kirli suda); iyileşmek için şehirde bir doktor/hemşire
+  bulmak, iğne yaptırmak, ilaç almak gerekir. Ama şehrin **ilaç stoğu**
+  vardır: kıtlıkta doktor iğneyi yapamaz. Kıtlığın sebebi oyuncunun kendi
+  geçmişi olabilir - o şehre zamanında üstlenilen ilaç sevkiyatını teslim
+  etmemek (bkz. Veba İlacı görevi, `fulfill_commission`), ya da bir veba
+  haberi. Yeni bir sistem değil: hastalık bir `Trait` benzeri süreli durum
+  (stat cezası, kötüleşirse `resolve_deaths`'in kapısı), ilaç bir `Item`,
+  şehrin stoğu `MarketConditions`'ın şehir başına bir sayacı, iğne
+  Kilise/Taverna'nın `PurificationPanel` deseninde bir hizmet. Kıtlık
+  hizmeti **sebebiyle kilitli** gösterir ("ilaç yok - X'e sevkiyat
+  gelmedi"), gizlemez.
 - **Sıcaklık, Celsius derecesiyle.** Yol HUD'unun alev göstergesi gerçek bir
   sayıya bağlanacak: mevsim + biyom + saat + hava (+ kamp ateşi) bir °C
   üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik
