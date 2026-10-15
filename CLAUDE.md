@@ -5093,6 +5093,20 @@ verir.
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
+- **Eşya bozulması mekaniği.** `Item` bugün yalnızca fiyat ve ağırlık
+  taşıyor; arayüz taslağının yıpranmış hücresi (ui-hud-redesign) çizebiliyor
+  ama oyun hesaplamıyor. Hedef: bozulabilir mallar (balık, erzak, bal) yolda
+  gün sayar ve tazeliği satış fiyatını düşürür, süresi dolan yığın çürür;
+  kalıcı mallar yalnızca görsel kir/kırağı alır. Yeni bir sistem değil,
+  `Inventory` yığınına bir yaş alanı ve `MarketPricing`'e bir çarpan.
+- **Sıcaklık, Celsius derecesiyle.** Yol HUD'unun alev göstergesi gerçek bir
+  sayıya bağlanacak: mevsim + biyom + saat + hava (+ kamp ateşi) bir °C
+  üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik
+  bağlantılar mevcut kollarla: soğukta günlük erzak payı ve stres artar,
+  giysilerin bir ısı değeri olur; planlayıcı bunu erzak rezervine katmak
+  zorunda (Provision Rules'un sözü bozulmasın). G11 kırağı kenarı oyuncunun
+  isteğiyle kaldırılmıştı; sıcaklık kenarla değil sayı ve göstergeyle
+  gösterilir.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
