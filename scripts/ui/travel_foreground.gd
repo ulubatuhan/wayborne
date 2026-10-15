@@ -58,6 +58,12 @@ const APRON_FOOT_DARKEN: float = 0.34
 ## diye kaydırılmasını zorlaştırıyor.
 const MAX_PROP_HEIGHT_RATIO: float = 0.085
 
+## Render edilmiş ön plan: otların yolun ne kadar altında durduğu ve alt
+## kenara doğru kararan gölgenin nerede başladığı, ne kadar koyulaştığı.
+const RENDERED_FORE_DROP_RATIO: float = 0.075
+const RENDERED_SHADE_TOP_RATIO: float = 0.16
+const RENDERED_SHADE_ALPHA: float = 0.55
+
 ## Yan yana iki nesne arasındaki en az boşluk. Kolon yerleşimiyle aynı
 ## kural (bkz. RoadCaravan._walk_column): **her nesne kendi genişliğini
 ## tüketir**, bir sonraki ancak ondan sonra başlar - yoksa hücre başına
@@ -78,6 +84,14 @@ var _pixels_per_day: float = PIXELS_PER_DAY
 ## Çizilmesi gereken alan (şeridin yerel uzayında) - uzaklaşınca şeridin
 ## dışına taşıyor, bkz. TravelBand.cover_rect. Boşsa katmanın kendisi.
 var cover: Rect2 = Rect2()
+## Render edilmiş ön plan katmanının biyom karışımı (bkz. RoadStrips);
+## boşsa prosedürel önlük ve çalılar.
+var _strips: Dictionary = {}
+
+## Ön plan için yolun render edilmiş katmanları. Boş sözlük prosedürele
+## döndürür.
+func set_strips(blend: Dictionary) -> void:
+	_strips = blend
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -117,10 +131,36 @@ func _draw() -> void:
 		return
 	var area := Rect2(Vector2.ZERO, size)
 	var reach := cover if cover.has_area() else area
+	if not _strips.is_empty():
+		_draw_rendered(area, reach)
+		_draw_milestones(area, reach)
+		return
 	# Önlük en altta ve **ilk**: üstündeki her şey ona basıyor.
 	_draw_apron(area, reach)
 	_draw_low_props(area, reach)
 	_draw_milestones(area, reach)
+
+## Render edilmiş ön plan: kameraya en yakın ot tarlası, üstünde alta doğru
+## koyulaşan bir gölge.
+func _draw_rendered(area: Rect2, reach: Rect2) -> void:
+	var shear := -_slope * size.y * 0.16 / maxf(1.0, size.x)
+	RoadStrips.draw_blend(
+		self, _strips, RoadStrips.FORE, area.size.y, _world_x * PARALLAX, reach,
+		_road_y(0.0) + area.size.y * RENDERED_FORE_DROP_RATIO, _light, shear
+	)
+	# Tarlanın üstüne, alta doğru koyulaşan bir gölge: çerçeve alttan
+	# kapanıyor (bkz. önlük) ve göz yola dönüyor.
+	var x0 := reach.position.x
+	var x1 := reach.end.x
+	var top := func(x: float) -> float:
+		return _road_y(x) + area.size.y * RENDERED_SHADE_TOP_RATIO
+	var bottom := maxf(area.size.y, reach.end.y)
+	var clear := Color(_apron_color(), 0.0)
+	var deep := Color(_apron_color(), RENDERED_SHADE_ALPHA)
+	draw_polygon(PackedVector2Array([
+		Vector2(x0, top.call(x0)), Vector2(x1, top.call(x1)),
+		Vector2(x1, bottom), Vector2(x0, bottom),
+	]), PackedColorArray([clear, clear, deep, deep]))
 
 ## Yolun hemen altından karenin dibine kadar inen koyu toprak bandı.
 ## Eğimi yolun kendi eğimi - ayrı hesaplanırsa yol bir yere, önlük başka

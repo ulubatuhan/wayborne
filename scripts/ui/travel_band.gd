@@ -59,6 +59,20 @@ const GROUND_EDGE_DROP_RATIO: float = 0.012
 const GROUND_EDGE_AMP_RATIO: float = 0.022
 const GROUND_EDGE_WAVE_RATIO: float = 0.42
 const GROUND_EDGE_SEED: int = 29
+## Render edilmiş katmanların zemin noktaları ufkun ne kadar altında
+## (bkz. RoadStrips). Uzak sırtın ayağı zemin gradyanının altında kalıyor,
+## ağaçların ayağı zeminin yırtık kenarının arkasında.
+const STRIP_FAR_DROP_RATIO: float = 0.02
+const STRIP_MID_DROP_RATIO: float = 0.035
+## Render edilmiş yolda kervanın bastığı çizgi. Alçak kamera (Oregon Trail
+## düzeni): yol ekranın ortasında, altında kameraya yakın bir ot tarlası.
+## Prosedürel yol 0.84'te kalıyor - orada altı boş bir önlüktü.
+const RENDERED_ROAD_RATIO: float = 0.72
+## Hava perspektifi: uzak sırtın ve ağaç hattının üstüne gökyüzünün pusu.
+const HAZE_FAR_ALPHA: float = 0.42
+const HAZE_MID_ALPHA: float = 0.12
+## Yolun üstünde kalkan toz: tekerleğin ve ayağın kaldırdığı ince bir perde.
+const DUST_ALPHA: float = 0.16
 
 ## Kervanın durduğu yer, şeridin genişliğine oranla. **Sabit değil, bir
 ## aralık**: kolonun arkasına sığması gereken uzunluk kadar sağa kayıyor.
@@ -120,6 +134,9 @@ var _sky: Dictionary = ArtPalette.sky(ArtPalette.PHASE_DAY)
 var _light: Color = Color.WHITE
 var _colors: Dictionary = ArtPalette.terrain(ArtPalette.BIOME_STEPPE)
 var _biome: String = ArtPalette.BIOME_STEPPE
+## Render edilmiş katmanların biyom karışımı (bkz. RoadStrips); boşsa ya da
+## biyomun resmi yoksa şerit prosedürel çizer.
+var _blend: Dictionary = {"from": ArtPalette.BIOME_STEPPE, "to": ArtPalette.BIOME_STEPPE, "ratio": 0.0}
 var _slope: float = 0.0
 var _night_ratio: float = 0.0
 var _sun_ratio: float = 0.5
@@ -421,8 +438,10 @@ func _refresh_terrain() -> void:
 	if _terrain == null:
 		_colors = ArtPalette.terrain(ArtPalette.BIOME_STEPPE)
 		_biome = ArtPalette.BIOME_STEPPE
+		_blend = {"from": _biome, "to": _biome, "ratio": 0.0}
 		_slope = 0.0
 		return
+	_blend = _terrain.biome_blend_at(_day_position)
 	_colors = _terrain.terrain_colors_at(_day_position)
 	_biome = _terrain.biome_at(_day_position)
 	_slope = _terrain.slope_at(_day_position)
@@ -444,10 +463,15 @@ func _draw() -> void:
 
 	_draw_sky(area, cover, horizon)
 	_draw_celestial(area, cover, horizon)
-	_draw_far_ridges(area, cover, horizon)
-	_draw_mid_ridges(area, cover, horizon)
-	if _biome == ArtPalette.BIOME_LAKE:
-		_draw_lake(area, cover, horizon)
+	var rendered := uses_rendered_strips()
+	if rendered:
+		_draw_strip(RoadStrips.FAR, area, cover, horizon)
+		_draw_haze(cover, horizon - h_of(area) * 0.30, horizon + h_of(area) * 0.06, HAZE_FAR_ALPHA)
+	else:
+		_draw_far_ridges(area, cover, horizon)
+		_draw_mid_ridges(area, cover, horizon)
+		if _biome == ArtPalette.BIOME_LAKE:
+			_draw_lake(area, cover, horizon)
 	# Şehir silüetleri zeminden *önce*: tabanları çayırın ufka değdiği
 	# kenarın altında kalmalı, yoksa uzaktaki şehir de havada durur.
 	_draw_cities(area, horizon)
@@ -457,10 +481,20 @@ func _draw() -> void:
 	# kapatılıyordu ve ağaç görünen çimenin üstünde değil, arkasında
 	# bitiyordu.
 	_draw_ground_fill(area, cover, horizon)
-	_draw_tree_line(area, cover, horizon)
-	_draw_stops(area, cover, horizon)
-	_draw_ground_props(area, cover, horizon)
-	_draw_road(area, cover)
+	if rendered:
+		# Ağaç hattı, sonra duraklar, sonra zemin ve yolun kendisi: render
+		# edilmiş zeminin yırtık uzak kenarı ağaçların ayağını örtüyor.
+		_draw_strip(RoadStrips.MID, area, cover, horizon)
+		_draw_haze(cover, horizon - h_of(area) * 0.25, horizon + h_of(area) * 0.06, HAZE_MID_ALPHA)
+		_draw_stops(area, cover, horizon)
+		_draw_strip(RoadStrips.GROUND, area, cover, horizon)
+		_draw_dust(cover)
+	else:
+		_draw_tree_line(area, cover, horizon)
+		_draw_stops(area, cover, horizon)
+		_draw_ground_props(area, cover, horizon)
+		_draw_road(area, cover)
+	_foreground.set_strips(_blend if rendered else {})
 	# Yolun önü ayrı bir katmanda (bkz. TravelForeground): burada
 	# çizilse kervanın arkasında kalırdı.
 	_foreground.cover = cover
@@ -479,6 +513,78 @@ func _draw() -> void:
 	# kenarı ekranın ortasına düşüyor ve orada koyu bir çerçeve kalırdı.
 	ArtDraw.vignette(self, _view if _view.has_area() else area, 0.07)
 	_announce_ground_line()
+
+## Bu biyomun (ve geçilen biyomun) render edilmiş katmanları var mı.
+func uses_rendered_strips() -> bool:
+	if not RoadStrips.has_biome(String(_blend.from)):
+		return false
+	return float(_blend.ratio) <= 0.0 or RoadStrips.has_biome(String(_blend.to))
+
+## Render edilmiş bir katman: paralaksı ve yeri prosedürel karşılığından.
+## Uzak sırt pusun içinde: ışığın yanına gökyüzünün pusu da çarpılıyor.
+func _draw_strip(layer: String, area: Rect2, cover: Rect2, horizon: float) -> void:
+	var h := area.size.y
+	var light := _light
+	var parallax := PARALLAX_GROUND
+	var anchor := 0.0
+	var shear := 0.0
+	match layer:
+		RoadStrips.FAR:
+			parallax = PARALLAX_FAR
+			anchor = horizon + h * STRIP_FAR_DROP_RATIO
+			light = _light * Color(_sky.haze).lerp(Color.WHITE, 0.55)
+		RoadStrips.MID:
+			parallax = PARALLAX_TREES
+			anchor = horizon + h * STRIP_MID_DROP_RATIO
+		RoadStrips.GROUND:
+			# Yol merkezi kervanın bastığı çizgide, eğimle birlikte.
+			shear = -_slope * h * 0.16 / maxf(1.0, size.x)
+			anchor = _ground_y_at_screen(0.0)
+	RoadStrips.draw_blend(self, _blend, layer, h, _scroll_x() * parallax, cover, anchor,
+		_apply_gloom(light), shear)
+
+func h_of(area: Rect2) -> float:
+	return area.size.y
+
+## Pus: üstte saydam, altta gökyüzünün pus rengi - uzaklık rengi siler.
+func _draw_haze(cover: Rect2, top: float, bottom: float, alpha: float) -> void:
+	var haze := Color(_sky.haze)
+	var clear := Color(haze, 0.0)
+	var thick := Color(haze, alpha * (1.0 + float(_weather_visuals.gloom)))
+	var mid := lerpf(top, bottom, 0.7)
+	draw_polygon(PackedVector2Array([
+		Vector2(cover.position.x, top), Vector2(cover.end.x, top),
+		Vector2(cover.end.x, mid), Vector2(cover.position.x, mid),
+	]), PackedColorArray([clear, clear, thick, thick]))
+	draw_rect(Rect2(Vector2(cover.position.x, mid), Vector2(cover.size.x, bottom - mid)), thick, true)
+
+## Toz: yol çizgisinin biraz üstünde en yoğun, iki yana sönen bir perde;
+## ışığın rengini alıyor (akşam toz da altın).
+func _draw_dust(cover: Rect2) -> void:
+	if float(_weather_visuals.rain) > 0.0:
+		return
+	var h := maxf(size.y, BAND_HEIGHT)
+	var dust := Color(0.74, 0.66, 0.54) * _light
+	var clear := Color(dust, 0.0)
+	var thick := Color(dust, DUST_ALPHA)
+	var x0 := cover.position.x
+	var x1 := cover.end.x
+	var y0 := _ground_y_at_screen(x0)
+	var y1 := _ground_y_at_screen(x1)
+	for band in [[-0.10, -0.02, clear, thick], [-0.02, 0.03, thick, clear]]:
+		draw_polygon(PackedVector2Array([
+			Vector2(x0, y0 + h * band[0]), Vector2(x1, y1 + h * band[0]),
+			Vector2(x1, y1 + h * band[1]), Vector2(x0, y0 + h * band[1]),
+		]), PackedColorArray([band[2], band[2], band[3], band[3]]))
+
+## Kapalı havada render edilmiş katman da griye çekiliyor - prosedürel
+## renkler zaten `_colors` üstünden çekiliyordu.
+func _apply_gloom(light: Color) -> Color:
+	var gloom := float(_weather_visuals.gloom)
+	if gloom <= 0.0:
+		return light
+	var grey := light.get_luminance()
+	return light.lerp(Color(grey, grey, grey, light.a), gloom * 0.5)
 
 func _draw_sky(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var top := Color(_sky.top)
@@ -689,6 +795,10 @@ func _tree_density() -> float:
 func _draw_ground_fill(area: Rect2, cover: Rect2, horizon: float) -> void:
 	var ground_top := horizon + area.size.y * GROUND_TOP_RATIO
 	var far := ArtPalette.fade_to_haze(Color(_colors.far), Color(_sky.haze), 0.12)
+	if uses_rendered_strips():
+		# Render edilmiş ağaçların ayağı bu dolgunun üstünde duruyor; uzak
+		# sırtın kurşuni rengi orada bir göl şeridi gibi okunuyordu.
+		far = Color(_colors.near).darkened(0.25) * _light
 	ArtDraw.gradient_band(
 		self,
 		Rect2(Vector2(cover.position.x, ground_top), Vector2(cover.size.x, area.size.y - ground_top + 2.0)),
@@ -788,7 +898,7 @@ func _draw_road(area: Rect2, cover: Rect2) -> void:
 ## basıyor (bkz. ground_line_changed).
 func _ground_y_at_screen(x: float) -> float:
 	var height := maxf(size.y, BAND_HEIGHT)
-	var base := height * HORIZON_RATIO + height * 0.26
+	var base := height * (RENDERED_ROAD_RATIO if uses_rendered_strips() else HORIZON_RATIO + 0.26)
 	var centred := (x - size.x * 0.5) / maxf(1.0, size.x)
 	return base - centred * _slope * height * 0.16
 

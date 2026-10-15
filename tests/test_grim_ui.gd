@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_celsius(t)
 	_test_hamlet_mapping(t)
 	_test_town_assets(t)
+	_test_road_strips(t)
 
 func _test_gauge_curves(t) -> void:
 	t.eq(SurvivalGauge.fill_fraction(150, 100), 1.0, "dolum tavanda kalıyor")
@@ -153,3 +154,46 @@ func _test_town_assets(t) -> void:
 		t.ok(GrimHamlet.kit(name) != null, "takım: %s" % name)
 	for v in GrimHamlet.VENUES:
 		t.ok(GrimHamlet.kit("icon_%s.png" % v["icon"]) != null, "ikon: %s" % v["icon"])
+
+
+## Yolun render edilmiş katmanları: her biyomda dördü de var, render'ın
+## bağlantı noktaları kodun bildiğiyle aynı, döşeme dikişsiz ve biyom
+## geçişi rengin geçişiyle aynı oranı okuyor.
+func _test_road_strips(t) -> void:
+	for biome in ["steppe", "forest", "lake", "mountain", "marsh"]:
+		t.ok(RoadStrips.has_biome(biome), "yol katmanları var: %s" % biome)
+		var layout = JSON.parse_string(FileAccess.get_file_as_string(
+			RoadStrips.DIR + biome + "/layout.json"))
+		t.ok(layout is Dictionary, "%s: layout okunuyor" % biome)
+		if not layout is Dictionary:
+			continue
+		for layer in RoadStrips.LAYERS:
+			var spec: Dictionary = RoadStrips.SPEC[layer]
+			t.ok(absf(float(layout[layer]["anchor_px"]) - float(spec["anchor_px"])) < 0.5,
+				"%s/%s: bağlantı noktası render'la aynı" % [biome, layer])
+		t.ok(absf(float(layout["ground"]["road_px"]) - float(RoadStrips.SPEC["ground"]["road_px"])) < 0.5,
+			"%s: yol merkezi render'la aynı" % biome)
+		var img := RoadStrips.texture(biome, RoadStrips.GROUND).get_image()
+		if img.is_compressed():
+			img.decompress()
+		t.ok(_seam_error(img) < 0.08, "%s: zemin dikişsiz döşeniyor" % biome)
+	var terrain := RouteTerrain.build("karakonak|ipekevi", 12)
+	for day in [0.0, 1.3, 2.9, 5.5, 8.2, 11.9]:
+		var blend := terrain.biome_blend_at(day)
+		t.ok(float(blend.ratio) >= 0.0 and float(blend.ratio) <= 1.0, "geçiş oranı 0-1")
+		t.eq(String(blend.from), terrain.biome_at(day), "geçiş bugünün biyomundan başlıyor")
+
+## Sol ve sağ kenar sütunlarının ortalama farkı: döşeme dikişsizse sağ
+## kenarın komşusu sol kenar, fark komşu iki sütunun farkı kadar küçük.
+func _seam_error(img: Image) -> float:
+	var w := img.get_width()
+	var total := 0.0
+	var n := 0
+	for y in range(0, img.get_height(), 4):
+		var a := img.get_pixel(0, y)
+		var b := img.get_pixel(w - 1, y)
+		if a.a < 0.5 or b.a < 0.5:
+			continue
+		total += absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b)
+		n += 3
+	return total / float(maxi(1, n))

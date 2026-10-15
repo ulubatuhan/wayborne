@@ -64,6 +64,41 @@ kayıp ve tehlike, kehribar yalnızca ışık.
 
 Ana menü aynı hattan bir "kamp" sahnesi (`towns.json` → `camp`).
 
+## 2b. Yol: render edilmiş paralaks katmanları (üçüncü tur)
+
+Kasabaların onaylanan üslubu yola taşındı, düzen Oregon Trail'den (2021)
+uyarlandı - kasvetli paletle. Alçak kamera: yol ekranın ortasında bir bant
+(`RENDERED_ROAD_RATIO` 0.72), arkasında diz boyu ot ve ağaçlar, önünde
+kameraya yakın, koyu ve bulanık bir ot tarlası. Derinlik çizgiden değil
+pustan ve alan derinliğinden geliyor; mürekkep yalnızca kervanın
+düzleminde.
+
+| Katman | Ne | Son işleme | Paralaks | Döşeme |
+|---|---|---|---|---|
+| `far` | sırtlar, dağlar (kar yalnızca tepede), uzak orman | mürekkepsiz, pus %50, bulanık | 0.10 | 1.5 × şerit |
+| `mid` | prosedürel ağaçlar: yapraklı, iğne yapraklı, kurumuş | ince mürekkep, hafif bulanık | 0.52 | 3.4 × şerit |
+| `ground` | zemin, yol, tekerlek izi, yol kenarı ot bandı | keskin, mürekkepli | 1.0 | 2.17 × şerit (40 m) |
+| `fore` | yakın tarla: uzun ot, pas ve kemik renkli çiçek, sazlık | koyu, çok bulanık | 1.45 | 1.3 × şerit |
+
+Oyunda üstlerine: uzak sırta ve ağaç hattına gökyüzünün pusu, yolun üstünde
+ışığın rengini alan ince bir toz perdesi (yağmurda yok), tarlanın dibine
+doğru koyulaşan bir gölge.
+
+- **Üretim:** `tools/ui_scenes/road_scene.py --biome <ad>` (Blender, CC0
+  dokular, ağaçlar prosedürel - paket ağaçları oyuncak gibi katmanlıydı),
+  `road_post.py` (ton, pus, mürekkep, alan derinliği). Çıktı
+  `data/assets/ui/road/<biyom>/`.
+- **Dikişsiz:** sahne x'te periyotlu, doku tekrarı şeride tam sayı kez
+  sığıyor, kar gürültüsü x'i bir çembere sarıp okuyor, mürekkep ve
+  bulanıklık yatayda sarmalı. Test zeminin iki kenarını karşılaştırıyor.
+- **Saat ve hava sistemin kendisi:** katmanlar nötr gün ışığında; oyun
+  onları evrenin ışığıyla çarpıyor. Gökyüzü, güneş/ay, uzak şehirler, yol
+  durakları, yağmur prosedürel kalıyor.
+- **Biyom geçişi:** `RouteTerrain.biome_blend_at()` - rengin karışımıyla aynı
+  oran.
+- **Geri dönüş:** dört katmanı olmayan biyom eski prosedürel çizime düşer.
+- Referanslardan hiçbir piksel alınmadı; alınan düzen ve derinlik dili.
+
 ## 3. Palet ve tipografi
 
 ArtPalette tek renk otoritesi (GRIM_*). Yazı yüzleri:

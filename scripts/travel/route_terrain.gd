@@ -191,19 +191,29 @@ func speed_factor_at(day: float) -> float:
 const BLEND_DAYS: float = 0.55
 
 func terrain_colors_at(day: float) -> Dictionary:
-	var segment := segment_at(day)
-	var to_day := float(segment.to_day)
-	var current := String(segment.biome)
-	var remaining := to_day - clampf(day, 0.0, float(total_days))
-	if remaining >= BLEND_DAYS:
-		return ArtPalette.terrain(current)
+	var blend := biome_blend_at(day)
+	if float(blend.ratio) <= 0.0:
+		return ArtPalette.terrain(String(blend.from))
+	return ArtPalette.blend_terrain(String(blend.from), String(blend.to), float(blend.ratio) * 0.85)
 
+## Renk karışımının kendisi: hangi biyomdan hangisine, ne kadar (0-1). Yolun
+## render edilmiş katmanları (RoadStrips) iki biyomun resmini bu oranla
+## üst üste koyuyor - renk ile resim ayrı hesaplansa biri ormana girmişken
+## öteki hâlâ bozkırda kalırdı.
+func biome_blend_at(day: float) -> Dictionary:
+	var segment := segment_at(day)
+	var current := String(segment.biome)
+	var still := {"from": current, "to": current, "ratio": 0.0}
+	var remaining := float(segment.to_day) - clampf(day, 0.0, float(total_days))
+	if remaining >= BLEND_DAYS:
+		return still
 	var next_index := segments.find(segment) + 1
-	if next_index >= segments.size():
-		return ArtPalette.terrain(current)
-	var next_biome := String(segments[next_index].biome)
-	var ratio := 1.0 - clampf(remaining / BLEND_DAYS, 0.0, 1.0)
-	return ArtPalette.blend_terrain(current, next_biome, ratio * 0.85)
+	if next_index <= 0 or next_index >= segments.size():
+		return still
+	return {
+		"from": current, "to": String(segments[next_index].biome),
+		"ratio": 1.0 - clampf(remaining / BLEND_DAYS, 0.0, 1.0),
+	}
 
 ## Yolda görünecek duraklar, gün cinsinden konumlarıyla. Yol ekranı
 ## bunları ilerleme oranına göre ekrana yerleştiriyor.
