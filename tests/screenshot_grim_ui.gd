@@ -10,6 +10,10 @@ extends SceneTree
 
 const SIZE: Vector2i = Vector2i(1920, 1080)
 const OUT_DIR: String = "user://grim_ui/"
+const CITY_KEYS: Dictionary = {
+	"karakonak": "CITY_A_NAME", "kurtbogazi": "CITY_B_NAME", "ipekevi": "CITY_C_NAME",
+	"demirkapi": "CITY_D_NAME", "yesilova": "CITY_E_NAME",
+}
 
 func _init() -> void:
 	TranslationServer.set_locale("tr")
@@ -20,13 +24,12 @@ func _init() -> void:
 	await process_frame
 	TranslationServer.set_locale("tr")
 	var model := _sample_model()
-	await _shot("1_town_idle", GrimDrafts.town(model))
-	var town := GrimDrafts.town(model, 3)
-	await _shot("2_town_menu", town, func():
-		var view: GrimTownView = town.get_meta("view")
-		GrimDrafts.show_venue_menu(town, model, 3, Vector2(view.venue_rect(3).get_center().x, view.venue_rect(3).position.y))
-		GrimDrafts.push_notice(town, tr("UI_GRIM_N_PLAGUE_TITLE"), tr("UI_GRIM_N_PLAGUE_BODY"), GrimNotice.Severity.OMEN)
-		GrimDrafts.push_notice(town, tr("UI_GRIM_N_DEATH_TITLE"), tr("UI_GRIM_N_DEATH_BODY"), GrimNotice.Severity.LOSS))
+	var cities: Array = OS.get_cmdline_user_args() if not OS.get_cmdline_user_args().is_empty() else ["karakonak"]
+	for city in cities:
+		model["city_name"] = tr(String(CITY_KEYS.get(city, city)))
+		await _shot("1_town_%s" % city, GrimHamlet.new().setup(city, model))
+		var lit := GrimHamlet.new().setup(city, model)
+		await _shot("2_town_%s_hover" % city, lit, func(): lit.set_hovered(4))
 	await _shot("3_title", GrimDrafts.title(1))
 	await _shot("4_trade", GrimDrafts.trade(model))
 	await _shot("5_inventory", GrimDrafts.inventory(model))
@@ -109,6 +112,11 @@ func _states_sheet() -> Control:
 
 func _sample_model() -> Dictionary:
 	var town_lines := {
+		"UI_GRIM_VENUE_YARD": [{"key": "UI_GRIM_L_YARD_REPAIR", "args": [1], "kind": "bad"}],
+		"UI_GRIM_VENUE_MARKET": [{"key": "UI_GRIM_L_MARKET_SCARCE", "args": [tr("ITEM_GRAIN_NAME")], "kind": "bad"}],
+		"UI_GRIM_VENUE_GUILD": [{"key": "UI_GRIM_L_GUILD_BOARD", "args": [4]}],
+		"UI_GRIM_VENUE_CHURCH": [{"key": "UI_GRIM_L_CHURCH_FRESH", "args": []}],
+		"UI_GRIM_VENUE_WARDROBE": [{"key": "UI_GRIM_L_TAILOR_STOCK", "args": [7]}],
 		"UI_GRIM_VENUE_TAVERN": [
 			{"key": "UI_GRIM_L_RECRUITS", "args": [3]},
 			{"key": "UI_GRIM_L_RUMOR", "args": []},
@@ -126,9 +134,9 @@ func _sample_model() -> Dictionary:
 			{"key": "UI_GRIM_MOD_FAIR", "args": ["İpekevi"], "kind": "good"},
 		],
 		"party": [
-			{"name": "Arslan", "hp": 31, "max_hp": 44, "stress": 38},
-			{"name": "Elif", "hp": 12, "max_hp": 36, "stress": 71},
-			{"name": "Doruk", "hp": 40, "max_hp": 40, "stress": 15},
+			{"name": "Arslan", "hp": 31, "max_hp": 44, "stress": 38, "class": "guard", "class_key": "CLASS_GUARD_NAME", "level": 4},
+			{"name": "Elif", "hp": 12, "max_hp": 36, "stress": 71, "class": "hunter", "class_key": "CLASS_HUNTER_NAME", "level": 3},
+			{"name": "Doruk", "hp": 40, "max_hp": 40, "stress": 15, "class": "clerk", "class_key": "CLASS_CLERK_NAME", "level": 2},
 		],
 		"venue_lines": town_lines,
 		"gauges": {"morale": 54, "hunger": 28, "fatigue": 62, "danger": 71, "warmth": 22},
