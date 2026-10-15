@@ -93,7 +93,7 @@ func _test_walk_cadence_matches_ground_speed(t) -> void:
 						t.ok(absf(cadence * figure.cycle_distance() - ground) < 0.01,
 							"%s ayağı zeminde kayıyor" % figure.get("_kind"))
 		# Normal tempoda, tam kondisyonda, 1x'te insan sakin yürüyüşte.
-		var person := caravan.get_children().filter(func(c): return c is WalkFigure and c.get("_kind") == WalkFigure.KIND_PERSON)[0] as WalkFigure
+		var person := caravan.get_children().filter(func(c): return c is WalkFigure and c.visible and c.get("_kind") == WalkFigure.KIND_PERSON)[0] as WalkFigure
 		var normal: float = road.scenic_ground_speed(walk, amble, brisk)
 		t.ok(absf(person.cadence_for_ground(normal) - WalkFigure.WALK_CADENCE) < 0.01,
 			"normal tempoda insan %.2f çevrim/s yürüyor" % WalkFigure.WALK_CADENCE)

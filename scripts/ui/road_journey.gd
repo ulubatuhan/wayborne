@@ -1625,7 +1625,11 @@ func _advance_position(hours: float, delta: float) -> void:
 		_caravan.set_ground_speed(0.0)
 		return
 	var before := _terrain_day()
-	if not _camping:
+	# Kamp kalkınca kervan herkes yerine dönüp binene kadar beklemiyordu:
+	# dönenler kayan zeminin üstünde ekrandaki yerlerine akıyor, manzara
+	# bir anda hızlanıyor gibi görünüyordu (kullanıcı raporu). Saat akıyor,
+	# yol beklemekte.
+	if not _camping and not _caravan.is_breaking_camp():
 		_walk_at(_pace, hours)
 	var day_step := absf(_terrain_day() - before)
 	if delta > 0.0:
@@ -1677,6 +1681,11 @@ func _update_world_scale(delta: float, day_rate: float) -> void:
 ## Klavye/kumanda yönü dokunma hedefinden önce gelir: ikisi aynı anda
 ## verilirse eldeki tuş kazanır ve hedef unutulur.
 func _move_leader(delta: float, column_speed: float) -> void:
+	# Lider ateşte (ya da atından inip biniyor): kolonda gezdirilecek biri yok.
+	if _caravan.is_leader_at_camp():
+		_has_leader_target = false
+		_caravan.set_leader_motion(_journey.heading * column_speed, false)
+		return
 	var direction := 0.0
 	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
 		direction += 1.0

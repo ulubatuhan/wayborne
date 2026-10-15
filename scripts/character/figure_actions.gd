@@ -176,6 +176,36 @@ const CLIPS: Dictionary = {
 			"arm_f": [90.0, 92.0], "arm_b": [55.0, 110.0], "weapon": 100.0}],
 		[1.0, _MELEE_STANCE],
 	]},
+	# Attan iniş (tersten oynatılınca biniş). Zemin gerçek zemin: eyer
+	# boyun ~0.64'ünde (`MOUNT_SADDLE_HIP`). Öne eğilip arka bacağı sağrının
+	# üstünden aşırıyor, üzengide ayağa kalkıyor, arka ayak yere iniyor,
+	# öndeki üzengiden çıkıyor. Kök kalça (`build.json` root pelvis):
+	# oyun kalçayı eyerden ayakta durana taşıyor.
+	"dismount": {"frames": 8, "keys": [
+		[0.0, {"hip_y": 0.10, "lean": 4.0, "foot_f": [0.10, 0.36, 0.0], "foot_b": [0.06, 0.36, 0.0],
+			"arm_f": [40.0, 75.0], "arm_b": [35.0, 70.0]}],
+		[0.28, {"hip_y": 0.12, "lean": 30.0, "foot_f": [0.06, 0.36, 0.0], "foot_b": [-0.26, 0.58, -10.0],
+			"arm_f": [75.0, 40.0], "arm_b": [70.0, 35.0]}],
+		[0.52, {"hip_y": 0.16, "lean": 10.0, "foot_f": [0.02, 0.36, 0.0], "foot_b": [-0.03, 0.14, -35.0],
+			"arm_f": [115.0, 70.0], "arm_b": [105.0, 60.0]}],
+		[0.76, {"hip_y": -0.02, "lean": 6.0, "foot_f": [0.13, 0.16, 10.0], "foot_b": [-0.04, 0.0, 0.0],
+			"arm_f": [60.0, 40.0], "arm_b": [40.0, 30.0]}],
+		[1.0, {}],
+	]},
+	# Vagon koltuğundan iniş (tersten: çıkış). Koltuk boyun ~0.5'inde
+	# (`BENCH_HIP`), ayaklar basamakta; arka el koltuğu tutarken ön ayak
+	# tekerlek göbeğine iniyor, sonra yere.
+	"climb_down": {"frames": 8, "keys": [
+		[0.0, {"hip_y": -0.04, "lean": 3.0, "foot_f": [0.20, 0.24, 0.0], "foot_b": [0.16, 0.24, 0.0],
+			"arm_f": [35.0, 80.0], "arm_b": [30.0, 75.0]}],
+		[0.3, {"hip_y": -0.03, "lean": 22.0, "foot_f": [0.15, 0.10, -15.0], "foot_b": [0.12, 0.24, 0.0],
+			"arm_f": [60.0, 30.0], "arm_b": [-25.0, 0.0]}],
+		[0.6, {"hip_y": 0.05, "lean": 8.0, "foot_f": [0.04, 0.10, 0.0], "foot_b": [-0.07, 0.03, -20.0],
+			"arm_f": [130.0, 100.0], "arm_b": [120.0, 90.0]}],
+		[0.85, {"hip_y": -0.04, "lean": 8.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
+			"arm_f": [30.0, 40.0], "arm_b": [25.0, 35.0]}],
+		[1.0, {}],
+	]},
 	# Savunma: çömel, ön kol yüzün önünde, silah yatay.
 	"defend": {"frames": 4, "keys": [
 		[0.0, _MELEE_STANCE],

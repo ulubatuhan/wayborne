@@ -9,8 +9,8 @@ extends RefCounted
 ##    "vagonun içinde değil" de bir sözdü.
 ## 2. Toplanan herkes gerçekten yürüyüp gerçekten dönüyor: kamp bitince
 ##    kalan biri, dönüşü hiç başlamamış biri kadar bir kusur.
-## 3. Lider ve öküzler hiç kıpırdamıyor - nöbet/koşum kuralı görsel
-##    olarak da geçerli.
+## 3. Öküzler ve at hiç kıpırdamıyor (koşum); atlı lider attan inip
+##    ateşe yürüyor, dönüşte yeniden biniyor.
 ## 4. Arabacı da ateşe geliyor - yürüyen tayfayla birlikte vagonun
 ##    **ikisi de** insanı toplanıyor, "kervandakiler" tek kişi değil.
 ## 5. Aynı ateşe gelen birden fazla kişi üst üste binmiyor - erken bir
@@ -35,6 +35,9 @@ func run(t) -> void:
 	_test_shared_fire_seats_do_not_stack(t)
 	_test_leader_and_oxen_never_move(t)
 	_test_returning_is_interrupted_cleanly_by_a_new_camp(t)
+	_test_drivers_climb_down_before_walking(t)
+	_test_leader_dismounts_and_remounts(t)
+	_test_caravan_waits_until_everyone_is_back(t)
 
 func _build(wagons: int, party: int) -> RoadCaravan:
 	var band := TravelBand.new()
@@ -68,7 +71,7 @@ func _build(wagons: int, party: int) -> RoadCaravan:
 ## uzağa yürüyen tempolu yürüyüşü aşmasın diye mesafeden türüyor
 ## (`RoadCaravan.gather_seconds`) - 1.3 saniyede ateşe koşuyorlardı.
 func _full_gather(caravan: RoadCaravan) -> int:
-	return int(ceil(caravan.gather_seconds() * 30.0 * 1.2)) + 10
+	return int(ceil(caravan.settle_seconds() * 30.0 * 1.2)) + 10
 
 func _walk_frames(caravan: RoadCaravan, frames: int, dt: float = 1.0 / 30.0) -> void:
 	for _frame in frames:
@@ -209,8 +212,8 @@ func _test_shared_fire_seats_do_not_stack(t) -> void:
 		"aynı ateşteki iki figür üst üste biniyor (en yakın çift %.1f piksel arayla)" % min_gap
 	)
 
-## Lider nöbette, öküzler koşumda - "kervandakiler ateşe gelsin" isteği
-## ikisini kapsamıyor (bkz. `_begin_gathering`'in notu).
+## Öküzler koşumda, at yerinde - ikisi ateşe gelmiyor; lider attan inip
+## geliyor (bkz. `_test_leader_dismounts_and_remounts`).
 func _test_leader_and_oxen_never_move(t) -> void:
 	var caravan := _build(2, 2)
 	var leader_home := caravan.get_leader_centre()
@@ -221,7 +224,7 @@ func _test_leader_and_oxen_never_move(t) -> void:
 
 	t.eq(
 		caravan.get_leader_centre(), leader_home,
-		"lider kampta yerinden kımıldamamalı"
+		"liderin atı kampta yerinden kımıldamamalı"
 	)
 	var ox_now := caravan.get_ox_centres()
 	for index in ox_home.size():
@@ -259,3 +262,73 @@ func _test_returning_is_interrupted_cleanly_by_a_new_camp(t) -> void:
 			absf(mid_return[index] - party_home[index]) > 0.5,
 			"%d. parti üyesi dönüşün ortasında hâlâ ateşteydi" % (index + 1)
 		)
+
+## Arabacı koltuktan ateşe kaymıyor: önce koltukta oturuyor, iner, sonra
+## yürür; dönüşte önce yürüyüp sonra koltuğa çıkar. Ölçülen: inişin başında
+## kalça koltukta ve figür hiç yürümemiş; inişin sonunda kalça ayakta
+## duranınki ve figür hâlâ vagonun yanında.
+func _test_drivers_climb_down_before_walking(t) -> void:
+	var caravan := _build(1, 1)
+	var driver: WalkFigure = caravan.get_driver_figures()[0]
+	caravan.set_camping(true)
+	_walk_frames(caravan, 1)
+	t.ok(driver.is_in_transition(), "arabacı kamp kurulunca önce koltuktan inmeli")
+	var bench := caravan.get_wagon_centres()[0]
+	var start_x := driver.position.x + driver.size.x * 0.5
+	var seat_y := caravan._driver_bench_position(0).y - driver.position.y
+	t.ok(absf(driver._transition_hip - seat_y) < driver.size.y * 0.05,
+		"inişin başında arabacının kalçası koltukta değil (%.1f / %.1f)" % [driver._transition_hip, seat_y])
+	_walk_frames(caravan, int(RoadCaravan.TRANSITION_SECONDS * 30.0 * 0.8))
+	t.ok(driver.is_in_transition(), "iniş bitmeden arabacı yürümeye başlamamalı")
+	t.ok(absf(driver.position.x + driver.size.x * 0.5 - start_x) < 0.5,
+		"arabacı inerken yerinden kaymamalı")
+	_walk_frames(caravan, _full_gather(caravan))
+	t.not_ok(driver.is_in_transition(), "ateşte arabacı ayakta durmalı")
+	t.ok(absf(driver.position.x + driver.size.x * 0.5 - start_x) > 1.0, "arabacı ateşe yürümedi")
+	caravan.set_camping(false)
+	_walk_frames(caravan, int(caravan.gather_seconds() * 30.0) + 4)
+	t.ok(driver.visible and driver.is_in_transition(),
+		"arabacı dönüşte yürüyüş bitince koltuğa çıkmalı (görünür, klipte)")
+	t.ok(absf(driver.position.x + driver.size.x * 0.5 - start_x) < 1.0,
+		"arabacı koltuğa çıkmadan önce vagonunun yanına dönmeli")
+	_walk_frames(caravan, _full_gather(caravan))
+	t.not_ok(driver.visible, "koltuğa çıkınca figür gizlenmeli, koltuğu silüet tutuyor")
+	t.ok(bench > 0.0, "vagon yerleşmedi")
+
+## Atlı lider: at yerinde, binicisi iner ve ateşe yürür; dönüşte biner.
+func _test_leader_dismounts_and_remounts(t) -> void:
+	var caravan := _build(1, 2)
+	var horse := caravan.get_leader_figure()
+	var rider := caravan.get_leader_rider()
+	t.ok(rider != null and not rider.visible, "atlı liderin inen hâli kamp dışında görünmemeli")
+	var horse_home := caravan.get_leader_centre()
+	caravan.set_camping(true)
+	_walk_frames(caravan, 2)
+	t.ok(horse._riderless, "binici inerken at binicisiz çizilmeli (aynı kişi iki kez görünmez)")
+	t.ok(rider.visible and rider.is_in_transition(), "lider önce attan inmeli")
+	t.ok(caravan.is_leader_at_camp(), "lider ateşteyken kolonda gezdirilmemeli")
+	_walk_frames(caravan, _full_gather(caravan))
+	var fire := caravan.get_campfire_positions()[0]
+	t.ok(absf(caravan.get_leader_rider_centre() - fire.x) < _fire_tolerance(caravan) + 4.0,
+		"inen lider ateşe varmadı")
+	t.eq(caravan.get_leader_centre(), horse_home, "at yerinde beklemeli")
+	caravan.set_camping(false)
+	_walk_frames(caravan, _full_gather(caravan))
+	t.not_ok(rider.visible, "lider bindikten sonra inen hâli gizlenmeli")
+	t.not_ok(horse._riderless, "lider bindikten sonra at yeniden binicili çizilmeli")
+	t.not_ok(caravan.is_leader_at_camp(), "binen lider yeniden kolonda gezebilmeli")
+
+## Kamp kalkınca kervan, herkes yerine dönüp binene kadar "kamp bozuluyor"
+## hâlinde - yol ekranı bu sürede yürümüyor (kullanıcı raporu: dönenler
+## kayan zeminde akıyordu).
+func _test_caravan_waits_until_everyone_is_back(t) -> void:
+	var caravan := _build(2, 2)
+	t.not_ok(caravan.is_breaking_camp(), "kamp yokken kervan beklememeli")
+	caravan.set_camping(true)
+	_walk_frames(caravan, _full_gather(caravan))
+	t.not_ok(caravan.is_breaking_camp(), "kamp sürerken 'bozuluyor' denmemeli")
+	caravan.set_camping(false)
+	_walk_frames(caravan, 3)
+	t.ok(caravan.is_breaking_camp(), "dönüş sürerken kervan beklemeli")
+	_walk_frames(caravan, _full_gather(caravan))
+	t.not_ok(caravan.is_breaking_camp(), "herkes yerine dönünce kervan yürüyebilmeli")

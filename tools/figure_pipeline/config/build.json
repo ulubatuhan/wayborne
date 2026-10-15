@@ -267,6 +267,30 @@
     160,
     300
    ]
+  },
+  "dismount": {
+   "kind": "action",
+   "action": "dismount",
+   "frames": 8,
+   "seated": false,
+   "root": "pelvis",
+   "anchor_px": [
+    160,
+    150
+   ],
+   "_note": "kok kalca: oyun kalcayi eyerden ayakta durana tasir (RoadCaravan); tersten oynatilinca binis"
+  },
+  "climb_down": {
+   "kind": "action",
+   "action": "climb_down",
+   "frames": 8,
+   "seated": false,
+   "root": "pelvis",
+   "anchor_px": [
+    160,
+    150
+   ],
+   "_note": "kok kalca: oyun kalcayi vagon koltugundan ayakta durana tasir; tersten oynatilinca cikis"
   }
  },
  "facing": 1.0,

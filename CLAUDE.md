@@ -612,7 +612,9 @@ the walking figures are the game's strongest asset) but to deepen it.
   A/D, a click or a tap still moves `_leader_offset` within the
   stationary column. Since the control redesign the leader is always free
   in the column (see Road Movement Rules), so camp ending leaves them
-  where they stand.
+  where they stand. **Superseded for the leader at camp:** the leader now
+  dismounts and walks to the fire too (below), and is not walkable while
+  away from the horse (`RoadCaravan.is_leader_at_camp()`).
 - **A speed lever has to move everything it looks like it's moving.**
   `JourneyClock`'s speed multiplier already scaled `_days_covered` (hence
   the background's `_world_x`) through `hours`, but `RoadCaravan`'s own
@@ -672,8 +674,9 @@ the walking figures are the game's strongest asset) but to deepen it.
   assigned fire (crew tied 1:1 to their own wagon's fire; party split
   round-robin across the fires) and drives the same `WalkFigure.advance()`
   the normal column walk uses, so gathering isn't a different kind of
-  motion, only a different target. The leader (on watch) and the oxen
-  (still in harness) never join - the mechanic is about the *people*.
+  motion, only a different target. The oxen (still in harness) and the
+  horse never join - the mechanic is about the *people*; since the
+  dismount pass the leader does (see "Off the seat first" below).
   Two things this had to get right or the illusion breaks the moment
   anything else touches the scene: `_place()` (the formation layout that
   normally snaps every figure to its slot) redirects a gathering figure's
@@ -730,6 +733,39 @@ the walking figures are the game's strongest asset) but to deepen it.
   ratios keep the exact values and the exact separation the stacking test
   already verified; only `y` is new, so a fix aimed at "surround the
   fire" could not quietly reopen "don't stand on top of each other."
+
+- **Off the seat first, then to the fire - and back on before anyone
+  moves.** Reported as "önce vagondan inip sonra ateşe gitmeli; lider de
+  attan inmeli": the driver used to slide straight from the bench to the
+  fire on one shared progress value, and the leader stayed mounted.
+  - **Each person has their own progress** (`_gather_walk`, and
+    `_gather_trans` for those who sit). Going: transition first, then the
+    walk; returning: the walk, then the transition reversed. A shared
+    counter cannot express "the driver is still climbing down while the
+    walker is already halfway". `set_camping(true)` mid-return no longer
+    rebuilds the gathering: everyone turns round from where they are.
+  - **Two clips, played both ways** (`FigureActions` `dismount`,
+    `climb_down`; reversed they are mounting and climbing up). They are
+    the only **hip-rooted** clips (`build.json` root `pelvis`,
+    `WalkFigure.TRANSITION_CLIPS`): the figure hangs from its hip, which
+    `RoadCaravan._transition_hip` moves from the saddle/bench to standing
+    height. The clip is written against the real ground; the gap between
+    its seated hip and this horse's saddle or this wagon's bench is added
+    and fades out by the time the first foot lands (`SEAT_BLEND_U`).
+  - **The horse stays; a second figure is the rider on foot.**
+    `_leader_rider` is the player drawn as a person, hidden outside camp;
+    while it is out the mounted figure is drawn `riderless` - one person
+    is never on screen twice, the same rule as the driver's bench
+    silhouette.
+  - **The caravan waits until everyone is back.** The other half of the
+    report ("kamp bitince oyun hızlanıyor, mankenler akıyor"): the column
+    started walking the instant camp ended, so the returning people
+    slid to their screen slots over a scrolling world. `is_breaking_camp()`
+    now holds `_walk_at()` until the last person has walked back and
+    climbed on; the clock still runs.
+  - A clip not yet rendered for a garment someone wears falls back to the
+    seated pose in the first half and standing in the second
+    (`WalkFigure._draw_transition`) - never naked, never floating.
 
 ### Audio Rules
 
@@ -1722,6 +1758,17 @@ in every preview the moment it is equipped.
       far below the buy price, so buy-and-sell is not a money printer. A
       locked purchase shows its reason (sold out, not enough gold, on the
       road).
+    - **The wardrobe shows things, not just names, and it is the whole
+      person.** Asked for after a screenshot: pictures in the inventory
+      and weapons beside the clothes. A garment's picture is its own
+      rendered idle frame (`OutfitIcon`, bodiless, fitted to the box) -
+      a second, painted icon would drift from what is worn; a piece
+      without a render is a swatch of its colour in its slot's shape.
+      Weapon, armour, ring and amulet sit below the clothes, read the
+      same `equipment_inventory` locker as the character screen
+      (`equip_to_character`), and show the level gate as a reason, never
+      hidden. Equipment is not sold here: the smith sells, trinkets are
+      found.
     - **The wardrobe is a city screen, and dragging is a shortcut.**
       `wardrobe.tscn` (the city's "Kıyafet Dolabı" button) shows the chosen
       person standing beside the six slot boxes, with the caravan locker
@@ -5046,6 +5093,20 @@ verir.
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
+- **Eşya bozulması mekaniği.** `Item` bugün yalnızca fiyat ve ağırlık
+  taşıyor; arayüz taslağının yıpranmış hücresi (ui-hud-redesign) çizebiliyor
+  ama oyun hesaplamıyor. Hedef: bozulabilir mallar (balık, erzak, bal) yolda
+  gün sayar ve tazeliği satış fiyatını düşürür, süresi dolan yığın çürür;
+  kalıcı mallar yalnızca görsel kir/kırağı alır. Yeni bir sistem değil,
+  `Inventory` yığınına bir yaş alanı ve `MarketPricing`'e bir çarpan.
+- **Sıcaklık, Celsius derecesiyle.** Yol HUD'unun alev göstergesi gerçek bir
+  sayıya bağlanacak: mevsim + biyom + saat + hava (+ kamp ateşi) bir °C
+  üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik
+  bağlantılar mevcut kollarla: soğukta günlük erzak payı ve stres artar,
+  giysilerin bir ısı değeri olur; planlayıcı bunu erzak rezervine katmak
+  zorunda (Provision Rules'un sözü bozulmasın). G11 kırağı kenarı oyuncunun
+  isteğiyle kaldırılmıştı; sıcaklık kenarla değil sayı ve göstergeyle
+  gösterilir.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
