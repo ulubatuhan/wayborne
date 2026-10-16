@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_city_front_mapping(t)
 	_test_town_assets(t)
 	_test_road_strips(t)
+	_test_title_menu(t)
 
 func _test_gauge_curves(t) -> void:
 	t.eq(SurvivalGauge.fill_fraction(150, 100), 1.0, "dolum tavanda kalıyor")
@@ -197,3 +198,18 @@ func _seam_error(img: Image) -> float:
 		total += absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b)
 		n += 3
 	return total / float(maxi(1, n))
+
+## Ana menü: kayıt yoksa "Devam Et" ve "Kayıtlar" yok; klavye vurgusu
+## satırlar arasında dönüyor, aynı anda tek satır vurgulu.
+func _test_title_menu(t) -> void:
+	var menu_script: GDScript = load("res://scripts/ui/main_menu.gd")
+	var fresh: Array = menu_script.menu_entries(false, false)
+	t.ok(not fresh.has("UI_CONTINUE") and not fresh.has("UI_MAIN_MENU_SAVES"), "kayıtsız menüde devam/kayıtlar yok")
+	t.eq(menu_script.menu_entries(true, true).size(), 5, "kayıtlı menüde beş girdi")
+	var menu := InkMenu.new().setup(["a", "b", "c"])
+	t.eq(menu.focused_index(), -1, "başta vurgu yok")
+	menu.move_focus(1)
+	t.eq(menu.focused_index(), 0, "ilk adım ilk satıra")
+	menu.move_focus(-1)
+	t.eq(menu.focused_index(), 2, "yukarı baştan sona dönüyor")
+	menu.free()

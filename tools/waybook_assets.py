@@ -306,9 +306,9 @@ def loose_page(src: str, name: str, width: int) -> None:
 
 def phase2plus() -> None:
     print("Phase 2+ - moments, screens, HUD, combat, people, goods")
-    # Book objects (menu, run over) and the ledger.
-    icon("M1_waybook_cover_closed.jpg", "m1_cover.png", 560)
-    icon("M2_waybook_open_spread.jpg", "m2_spread.png", 900)
+    # Book objects (run over) and the ledger. M1/M2 (the menu's closed cover
+    # and open spread) are not written: the main menu is a night camp now
+    # and nothing draws them.
     icon("M3_run_over_screen.jpg", "m3_closed.png", 560)
     background("L1_ledger_spread.jpg", "l1_ledger.jpg")
     rgba = crop_to_alpha(key(_load("L2_generation_divider.jpg")))

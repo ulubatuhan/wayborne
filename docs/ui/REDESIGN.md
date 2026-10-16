@@ -156,9 +156,9 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 
 1. GrimTheme'in kalıcı parçaları WaybookTheme'e (yüzler, şerit/levha/sancak,
    GRIM paleti); `test_waybook_theme.gd` yeni kuralla güncellenir.
-2. Şehir: `city_map.tscn`'de CityView yerine `CityFront`; CityBriefPanel
+2. ✓ Şehir: `city_map.tscn`'de CityView yerine `CityFront`; CityBriefPanel
    satırları levhalara ve kartlara dağılır; `test_navigation.gd` grafiği.
-3. Ana menü: kamp arka planı, soy satırı, sağ şerit; kitap (M1/M2) kalkar.
+3. ✓ Ana menü: kamp arka planı, soy satırı, sağ şerit; kitap (M1/M2) kalkar.
 4. Yol HUD'u: PulseBar → SurvivalGauge; alt şerit ikonlu; defter olayları →
    GrimNotice.
 5. Pazar ve envanter.

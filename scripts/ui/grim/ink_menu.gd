@@ -31,6 +31,19 @@ static func blot_reveal(u: float) -> float:
 	var k := clampf(u, 0.0, 1.0)
 	return 1.0 - pow(1.0 - k, 3.0)
 
+## Klavye/kol: yukarı-aşağı vurguyu gezdirir, onay seçer. Fareyle aynı
+## leke - vurgulu satır her zaman tek.
+func move_focus(step: int) -> void:
+	if _rows.is_empty():
+		return
+	var current := _target.find(1.0)
+	var next := 0 if current < 0 else wrapi(current + step, 0, _rows.size())
+	for i in _target.size():
+		_target[i] = 1.0 if i == next else 0.0
+
+func focused_index() -> int:
+	return _target.find(1.0)
+
 ## Ekran görüntüsü için bir girdiyi üstüne gelinmiş göstermek.
 func force_hover(index: int) -> void:
 	for i in _hover.size():
@@ -49,7 +62,9 @@ func _make_row(text: String, index: int) -> Control:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(label)
 	row.set_meta("label", label)
-	row.mouse_entered.connect(func(): _target[index] = 1.0)
+	row.mouse_entered.connect(func():
+		for i in _target.size():
+			_target[i] = 1.0 if i == index else 0.0)
 	row.mouse_exited.connect(func(): _target[index] = 0.0)
 	row.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:

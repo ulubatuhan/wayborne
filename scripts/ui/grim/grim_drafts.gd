@@ -7,8 +7,9 @@ extends RefCounted
 ## tuttuğu kısmını GameSession'dan dolduruyor, gerisi (durum/bozulma,
 ## sıcaklık) bir tasarım kararı bekliyor (docs/ui/REDESIGN.md).
 ##
-## Bunlar onay için çizilmiş taslaklar: hiçbir mevcut ekranın yerine
-## geçmiyor, Nav'a bağlı değil.
+## Onay için çizilmiş taslaklar olarak başladılar; bağlananlar ekranların
+## kendisi tarafından kuruluyor (başlık: main_menu.gd). Gezinmeyi hiçbiri
+## yapmıyor - neye basıldığını ekran okuyor.
 
 const BAR_HEIGHT: float = 64.0
 const STRIP_HEIGHT: float = 100.0
@@ -202,7 +203,9 @@ static func push_notice(root: Control, title: String, body: String, kind: GrimNo
 
 # ------------------------------------------------------------------ başlık
 
-static func title(hovered: int = 0, lineage: Dictionary = {}) -> Control:
+const TITLE_ENTRIES: Array = ["UI_CONTINUE", "UI_GRIM_NEW_LINEAGE", "UI_MAIN_MENU_SAVES", "UI_SETTINGS", "UI_QUIT"]
+
+static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array = TITLE_ENTRIES) -> Control:
 	var root := _root()
 	# Arka plan: gece kampı (vagon, çadır, kamp ateşi, tepede uzak bir şehir),
 	# şehirlerle aynı hattan render (tools/ui_scenes, "camp"). Işık yalnızca
@@ -218,7 +221,9 @@ static func title(hovered: int = 0, lineage: Dictionary = {}) -> Control:
 	root.add_child(glow)
 	root.resized.connect(func(): _place_on_image(glow, bg, root.size))
 	_finish(root, 0.5)
-	root.add_child(_title_strip(hovered, lineage))
+	var strip := _title_strip(hovered, lineage, entry_keys)
+	root.add_child(strip)
+	root.set_meta("strip", strip)
 	return root
 
 ## Kamp ateşinin resimdeki yeri (payı). Işık bu noktaya oturur.
@@ -236,7 +241,7 @@ static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> vo
 ## Sağ şerit (Wartales'in menü şeridi): koyu, sol kenarında pas demir bir
 ## çizgi. Başlık, kervanın soy satırı (kitap animasyonunun yerine: adı ve
 ## kaçıncı kuşak olduğu - oyunun asıl kaydı bu), sonra kutusuz menü.
-static func _title_strip(hovered: int, lineage: Dictionary) -> Control:
+static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -> Control:
 	var strip := PanelContainer.new()
 	strip.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
 	strip.offset_left = -560
@@ -267,8 +272,10 @@ static func _title_strip(hovered: int, lineage: Dictionary) -> Control:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 40)
 	col.add_child(gap)
-	var menu := InkMenu.new().setup([tr_key("UI_CONTINUE"), tr_key("UI_GRIM_NEW_LINEAGE"),
-		tr_key("UI_MAIN_MENU_SAVES"), tr_key("UI_SETTINGS"), tr_key("UI_QUIT")])
+	var entries: Array = []
+	for key in entry_keys:
+		entries.append(tr_key(String(key)))
+	var menu := InkMenu.new().setup(entries)
 	col.add_child(menu)
 	menu.force_hover(hovered)
 	strip.set_meta("menu", menu)

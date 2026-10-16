@@ -816,9 +816,14 @@ the walking figures are the game's strongest asset) but to deepen it.
 
 The opening screen used to be the main menu itself, buttons and all, the
 instant the game launched - "a simple technical step" rather than the
-first beat of the game's own tone. It now opens on the same dusk vista
-with nothing on it but a slowly pulsing invitation, and only turns into
-the menu once the player does something.
+first beat of the game's own tone. It now opens on a night camp (the
+rendered `camp` scene, one fire, the town on the far hill) with nothing on
+it but a slowly pulsing invitation, and only turns into the menu once the
+player does something: a dark strip slides in from the right with the
+title, the caravan's lineage line (name, generation, day - read from the
+autosave summary) and the box-less `InkMenu`. The procedural dusk vista
+(`MenuBackdrop`) and the leather book (M1/M2) it replaced are deleted; the
+bullets below that name them are history.
 
 - **It's a phase of `MainMenu`, not a separate scene.** The whole point was
   a transition that doesn't cut - "the screen must not go black and
@@ -2353,9 +2358,9 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   18 MB whole); re-run it when the zh_CN/ja columns are filled. Each face
   refuses the other's language (`set_language_support_override`), because
   the same Han character is drawn differently in Chinese and Japanese.
-- **The book is the lineage, not a decoration of it.** The main menu is
-  a closed leather cover that opens into a spread (M1/M2) - the cover
-  names the caravan and its generation from the save; the run-over screen
+- **The book is the lineage, not a decoration of it.** The main menu
+  names the caravan and its generation from the save (once a leather
+  cover, M1/M2; now the lineage line on the camp screen); the run-over screen
   closes the book (M3). `WaybookPanel` (L to open, road and city) is the
   whole `CaravanLedger` as a two-page book, generations divided by a
   ribbon (L2), struck lines drawn with `StruckLine` - the ink stroke R9,
@@ -5116,13 +5121,14 @@ verir.
 - **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
   on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
-- **Karanlık arayüzü ekranlara bağla (Faz 27'de onaylandı, bağlanmadı).**
-  Şehir B10 masa sahnesinden render edilmiş, şehre özgü DD kasabasına
-  geçiyor (`CityFront`), menü gece kampına, yol HUD'u `SurvivalGauge`'a;
-  bileşenler `scripts/ui/grim/` altında hazır ama `city_map.tscn`,
-  `main_menu.tscn` ve yol HUD'u hâlâ eski bileşenleri kullanıyor. Sıra ve
-  ayrıntı `docs/ui/REDESIGN.md` §7'de. Mekânların popup olarak açılması
-  bundan ayrı bir iş olarak duruyor.
+- **Karanlık arayüzü ekranlara bağla (Faz 27'de onaylandı, yarısı bağlı).**
+  Şehir artık render edilmiş, şehre özgü önden kasaba (`CityFront`:
+  levhalar brifingin ihtiyaçlarını taşıyor, kadro kartları, alt şerit,
+  yanında koyu brifing sütunu); ana menü gece kampı ve sağ şerit. Kalan:
+  yol HUD'u (`PulseBar` → `SurvivalGauge`, ikonlu alt şerit, `GrimNotice`),
+  pazar/envanter, ve GrimTheme'in kalıcı parçalarının WaybookTheme'e
+  taşınması. Sıra ve ayrıntı `docs/ui/REDESIGN.md` §7'de. Dosya ve sınıf
+  adları oyuna özgü kalır (başka bir oyunun terimi değil).
 - **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
   Dolabı ekranı, statlı ve statına göre fiyatlı 48 giysi, her ziyarette
   başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
