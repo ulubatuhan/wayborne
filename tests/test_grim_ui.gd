@@ -18,7 +18,7 @@ func run(t) -> void:
 	_test_menu_beside_building(t)
 	_test_assets_exist(t)
 	_test_celsius(t)
-	_test_hamlet_mapping(t)
+	_test_city_front_mapping(t)
 	_test_town_assets(t)
 	_test_road_strips(t)
 
@@ -123,37 +123,37 @@ func _test_celsius(t) -> void:
 
 ## Maske resimle aynı "kapla" dönüşümüyle okunmalı, yoksa üstüne gelinen
 ## bina ile aydınlanan bina başka binalar olur.
-func _test_hamlet_mapping(t) -> void:
-	t.eq(GrimHamlet.cover_to_image(Vector2(100, 50), Vector2(1920, 1080), Vector2(1920, 1080)), Vector2(100, 50),
+func _test_city_front_mapping(t) -> void:
+	t.eq(CityFront.cover_to_image(Vector2(100, 50), Vector2(1920, 1080), Vector2(1920, 1080)), Vector2(100, 50),
 		"aynı oran: dönüşüm birim")
-	t.eq(GrimHamlet.cover_to_image(Vector2(0, 0), Vector2(1000, 1000), Vector2(2000, 1000)), Vector2(500, 0),
+	t.eq(CityFront.cover_to_image(Vector2(0, 0), Vector2(1000, 1000), Vector2(2000, 1000)), Vector2(500, 0),
 		"dar ekran: resmin iki yanı eşit kırpılıyor")
-	t.eq(GrimHamlet.cover_to_image(Vector2(960, 540), Vector2(960, 540), Vector2(1920, 1080)), Vector2(1920, 1080),
+	t.eq(CityFront.cover_to_image(Vector2(960, 540), Vector2(960, 540), Vector2(1920, 1080)), Vector2(1920, 1080),
 		"küçük ekran: ölçek resme göre")
 	var ids := {}
-	for v in GrimHamlet.VENUES:
+	for v in CityFront.VENUES:
 		ids[int(v["id"])] = true
-	t.eq(ids.size(), GrimHamlet.VENUES.size(), "her levhanın kendi maske numarası var")
-	t.ok(not ids.has(GrimHamlet.GATE_ID), "kapı levha değil, Yola Çık düğmesi")
+	t.eq(ids.size(), CityFront.VENUES.size(), "her levhanın kendi maske numarası var")
+	t.ok(not ids.has(CityFront.GATE_ID), "kapı levha değil, Yola Çık düğmesi")
 
 ## Her şehrin resmi ve maskesi var; maskenin mekân sırası levhalarınkiyle aynı
-## (town_post.py VENUE_IDS -> GrimHamlet.VENUES, numara = sıra + 1).
+## (town_post.py VENUE_IDS -> CityFront.VENUES, numara = sıra + 1).
 func _test_town_assets(t) -> void:
 	for city in ["karakonak", "kurtbogazi", "ipekevi", "demirkapi", "yesilova", "camp"]:
-		var dir: String = GrimHamlet.TOWNS_DIR + String(city) + "/"
+		var dir: String = CityFront.TOWNS_DIR + String(city) + "/"
 		t.ok(FileAccess.file_exists(dir + "background.jpg"), "%s: resim var" % city)
 		t.ok(FileAccess.file_exists(dir + "mask.png"), "%s: maske var" % city)
-	var meta = JSON.parse_string(FileAccess.get_file_as_string(GrimHamlet.TOWNS_DIR + "karakonak/mask.json"))
+	var meta = JSON.parse_string(FileAccess.get_file_as_string(CityFront.TOWNS_DIR + "karakonak/mask.json"))
 	t.ok(meta is Dictionary, "maske tanımı okunuyor")
 	if meta is Dictionary:
 		var names: Array = meta["venues"]
-		for v in GrimHamlet.VENUES:
+		for v in CityFront.VENUES:
 			t.eq(String(names[int(v["id"]) - 1]), String(v["icon"]), "maske sırası: %s" % v["icon"])
-		t.eq(String(names[GrimHamlet.GATE_ID - 1]), "gate", "maske sırası: kapı")
+		t.eq(String(names[CityFront.GATE_ID - 1]), "gate", "maske sırası: kapı")
 	for name in ["strip_wood.png", "plate.png", "plate_hover.png", "banner.png", "crest.png", "card.png"]:
-		t.ok(GrimHamlet.kit(name) != null, "takım: %s" % name)
-	for v in GrimHamlet.VENUES:
-		t.ok(GrimHamlet.kit("icon_%s.png" % v["icon"]) != null, "ikon: %s" % v["icon"])
+		t.ok(CityFront.kit(name) != null, "takım: %s" % name)
+	for v in CityFront.VENUES:
+		t.ok(CityFront.kit("icon_%s.png" % v["icon"]) != null, "ikon: %s" % v["icon"])
 
 
 ## Yolun render edilmiş katmanları: her biyomda dördü de var, render'ın

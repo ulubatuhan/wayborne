@@ -119,7 +119,7 @@ static func iron_panel(alpha: float = 0.94) -> StyleBoxFlat:
 ## Kenar şeridi: perçinli pas demir kenarlı koyu tahta (ambientCG CC0,
 ## tools/ui_scenes/ui_kit.py). Metin şeridin düz, koyu orta kısmında kalır.
 static func bar_panel() -> StyleBox:
-	var tex := GrimHamlet.kit("strip_wood.png")
+	var tex := CityFront.kit("strip_wood.png")
 	if tex == null:
 		return flat_bar_panel()
 	var box := StyleBoxTexture.new()
@@ -136,7 +136,7 @@ static func bar_panel() -> StyleBox:
 
 ## Taş levha (mekân levhası, gösterge plakası, metin düğmesi).
 static func plate_box(lit: bool = false, pad: Vector4 = Vector4(14, 6, 14, 6)) -> StyleBox:
-	var tex := GrimHamlet.kit("plate_hover.png" if lit else "plate.png")
+	var tex := CityFront.kit("plate_hover.png" if lit else "plate.png")
 	if tex == null:
 		return iron_panel()
 	var box := StyleBoxTexture.new()
@@ -154,7 +154,7 @@ static func plate_box(lit: bool = false, pad: Vector4 = Vector4(14, 6, 14, 6)) -
 ## Yırtık sancak etiketi: kötü haber kızıl, iyi haber yosun.
 static func banner_tag(text: String, good: bool) -> PanelContainer:
 	var p := PanelContainer.new()
-	var tex := GrimHamlet.kit("banner.png")
+	var tex := CityFront.kit("banner.png")
 	var box := StyleBoxTexture.new()
 	box.texture = tex
 	box.texture_margin_left = 16
@@ -171,13 +171,13 @@ static func banner_tag(text: String, good: bool) -> PanelContainer:
 	p.add_child(label(text, SMALL_SIZE, ArtPalette.BONE))
 	return p
 
-## İkonlu düğme: madalyon resmi, altında ad. Kutusuz - DD'nin alt
-## şeridindeki gibi resmin kendisi düğme; üstüne gelince kehribar.
+## İkonlu düğme: madalyon resmi, altında ad. Kutusuz - resmin kendisi
+## düğme; üstüne gelince kehribar.
 static func icon_button(text: String, icon_name: String) -> Button:
 	var b := Button.new()
 	b.flat = true
 	b.custom_minimum_size = Vector2(92, 78)
-	b.icon = GrimHamlet.kit("icon_%s.png" % icon_name)
+	b.icon = CityFront.kit("icon_%s.png" % icon_name)
 	b.expand_icon = true
 	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
@@ -198,7 +198,7 @@ static func crimson_button(text: String, icon_name: String = "") -> Button:
 	var b := Button.new()
 	b.text = text
 	if icon_name != "":
-		b.icon = GrimHamlet.kit("icon_%s.png" % icon_name)
+		b.icon = CityFront.kit("icon_%s.png" % icon_name)
 		b.expand_icon = true
 		b.add_theme_constant_override("icon_max_width", 48)
 	b.custom_minimum_size = Vector2(220, 64)
@@ -261,7 +261,7 @@ static func button(text: String) -> Button:
 	b.add_theme_font_size_override("font_size", BODY_SIZE + 1)
 	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
 		b.add_theme_stylebox_override(state, _button_box(state))
-	if GrimHamlet.kit("plate.png") != null:
+	if CityFront.kit("plate.png") != null:
 		b.add_theme_stylebox_override("normal", plate_box(false))
 		b.add_theme_stylebox_override("hover", plate_box(true))
 	b.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)

@@ -444,13 +444,20 @@ func _component_sources(source: String) -> String:
 			joined += "\n" + component
 	return joined
 
+## Alt klasörler dahil: şehrin mekân tablosu `scripts/ui/grim/city_front.gd`'de
+## duruyor ve yalnızca üst klasörü taramak beş mekânı grafikten düşürürdü.
 func _all_screen_scripts() -> Array[String]:
 	var scripts: Array[String] = []
 	for directory in ["res://scripts/ui", "res://scripts/world"]:
-		for file_name in DirAccess.get_files_at(directory):
-			if file_name.ends_with(".gd"):
-				scripts.append("%s/%s" % [directory, file_name])
+		_collect_scripts(directory, scripts)
 	return scripts
+
+func _collect_scripts(directory: String, scripts: Array[String]) -> void:
+	for file_name in DirAccess.get_files_at(directory):
+		if file_name.ends_with(".gd"):
+			scripts.append("%s/%s" % [directory, file_name])
+	for sub in DirAccess.get_directories_at(directory):
+		_collect_scripts("%s/%s" % [directory, sub], scripts)
 
 ## Kaynak taramaları yorum satırlarını görmemeli - kuralı anlatan bir
 ## açıklama, kuralı çiğneyen bir çağrı değildir.

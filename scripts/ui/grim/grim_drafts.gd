@@ -171,63 +171,6 @@ static func bottom_bar(keys: Array, exit_key: String) -> PanelContainer:
 
 # ------------------------------------------------------------------ şehir
 
-static func town(model: Dictionary, hovered: int = -1) -> Control:
-	var root := _root()
-	var view := GrimTownView.new()
-	root.add_child(view)
-	_finish(root, 0.8)
-	root.add_child(top_bar(model))
-	root.add_child(bottom_bar(["UI_GRIM_NAV_PARTY", "UI_GRIM_NAV_LEDGER", "UI_GRIM_NAV_MAP", "UI_GRIM_NAV_CARAVAN"],
-		"UI_GRIM_NAV_LEAVE"))
-	_add_notice_host(root)
-	root.set_meta("view", view)
-	view.venue_menu_requested.connect(func(i, at): show_venue_menu(root, model, i, at))
-	if hovered >= 0:
-		view.set_hovered(hovered)
-	return root
-
-## Bağlam menüsü: mekânın adı, bugünkü durumu ve eylemler. Sahne değişmez -
-## karar menüde, kapı ancak "Gir" ile açılır.
-static func show_venue_menu(root: Control, model: Dictionary, index: int, anchor: Vector2) -> PanelContainer:
-	if root.has_meta("menu") and is_instance_valid(root.get_meta("menu")):
-		(root.get_meta("menu") as Node).queue_free()
-	var spec: Dictionary = GrimTownView.VENUES[index]
-	var menu := PanelContainer.new()
-	menu.add_theme_stylebox_override("panel", GrimTheme.iron_panel())
-	menu.custom_minimum_size = Vector2(330, 0)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 6)
-	menu.add_child(col)
-	col.add_child(GrimTheme.label(tr_key(String(spec["key"])), GrimTheme.HEADING_SIZE + 2, ArtPalette.GRIM_AMBER, true))
-	var rule := ColorRect.new()
-	rule.color = Color(ArtPalette.GRIM_RUST, 0.8)
-	rule.custom_minimum_size = Vector2(0, 1)
-	col.add_child(rule)
-	var lines: Dictionary = model.get("venue_lines", {})
-	for line in lines.get(String(spec["key"]), []):
-		var l := GrimTheme.label(tr_key(String(line["key"])) % line.get("args", []), GrimTheme.BODY_SIZE - 1,
-			ArtPalette.GRIM_CRIMSON.lightened(0.3) if String(line.get("kind", "")) == "bad" else ArtPalette.GRIM_PARCHMENT)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD
-		l.custom_minimum_size = Vector2(300, 0)
-		col.add_child(l)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 8)
-	col.add_child(buttons)
-	var enter := GrimTheme.button(tr_key("UI_GRIM_ENTER"))
-	enter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	enter.pressed.connect(func(): (root.get_meta("view") as GrimTownView).venue_pressed.emit(String(spec["scene"])))
-	buttons.add_child(enter)
-	var close := GrimTheme.button(tr_key("UI_GRIM_CLOSE"))
-	close.pressed.connect(menu.queue_free)
-	buttons.add_child(close)
-	root.add_child(menu)
-	root.set_meta("menu", menu)
-	menu.reset_size()
-	menu.position = menu_position(root.size, (root.get_meta("view") as GrimTownView).venue_rect(index), menu.size)
-	return menu
-
-## Menü binanın yanına açılır, üstüne değil: seçilen bina ve tabelası
-## görünür kalmalı. Sağda yer yoksa sola.
 static func menu_position(screen: Vector2, building: Rect2, menu_size: Vector2) -> Vector2:
 	var gap := 18.0
 	var x := building.end.x + gap
@@ -265,7 +208,7 @@ static func title(hovered: int = 0, lineage: Dictionary = {}) -> Control:
 	# şehirlerle aynı hattan render (tools/ui_scenes, "camp"). Işık yalnızca
 	# ateşten: kısık, titrek, küçük - ekranı aydınlatmıyor.
 	var bg := TextureRect.new()
-	bg.texture = GrimHamlet._load_texture(GrimHamlet.TOWNS_DIR + "camp/background.jpg")
+	bg.texture = CityFront._load_texture(CityFront.TOWNS_DIR + "camp/background.jpg")
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -540,7 +483,7 @@ static func from_session(session: GameSession) -> Dictionary:
 		party.append({"name": c.character_name, "hp": c.current_hp, "max_hp": c.get_max_hp(), "stress": c.stress})
 	var daily := maxi(1, session.get_daily_provision_consumption())
 	return {
-		"city_name": location.display_name if location != null else "",
+		"city_name": location.location_name if location != null else "",
 		"gold": session.wallet.balance,
 		"debt": session.get_total_debt(),
 		"provisions": session.get_provisions(),

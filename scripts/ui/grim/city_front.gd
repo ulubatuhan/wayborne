@@ -1,7 +1,7 @@
-class_name GrimHamlet
+class_name CityFront
 extends Control
 
-## Şehir merkezi, Darkest Dungeon'ın hamlet düzeninde: önden bakılan, boyalı
+## Şehir merkezi: önden bakılan, boyalı
 ## bir kasaba resmi (her şehrin kendi resmi), solda mekân levhaları, sağda
 ## kadro kartları, sol üstte arma ve sancak, altta tahta şerit.
 ##
@@ -10,14 +10,14 @@ extends Control
 ## taşıyor: binanın üstüne gelmek levhayı, levhanın üstüne gelmek binayı
 ## aydınlatıyor - ikisi aynı `hovered` durumunu okuyor.
 ##
-## `venue_pressed(scene_path)` CityView/GrimTownView ile aynı sinyal.
+## `venue_pressed(scene_path)` CityView ile aynı sinyal.
 
 signal venue_pressed(scene_path: String)
 signal nav_pressed(key: String)
 
 const TOWNS_DIR: String = "res://data/assets/ui/towns/"
 const KIT_DIR: String = "res://data/assets/ui/grim/kit/"
-const SHADER_PATH: String = "res://scripts/ui/grim/hamlet_highlight.gdshader"
+const SHADER_PATH: String = "res://scripts/ui/grim/venue_highlight.gdshader"
 
 ## Maske numarası sırası town_post.py'nin VENUE_IDS sırasıyla aynı (1'den).
 ## `gate` levha değil, alt şeritteki "Yola Çık" düğmesi.
@@ -46,9 +46,15 @@ var _mask_img: Image
 var _plates: Dictionary = {}
 var _model: Dictionary = {}
 
-func setup(city_id: String, model: Dictionary) -> GrimHamlet:
+func setup(city_id: String, model: Dictionary) -> CityFront:
 	_model = model
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Anchor-preset tuzağı (bkz. CLAUDE.md Art Rules): ebeveyn zaten
+	# boyutlanmışsa çapa tek başına boyut vermiyor; ofsetler de sıfırlanmalı
+	# ve boyut bir kez açıkça alınmalı.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var parent := get_parent_control()
+	if parent != null:
+		size = parent.size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var back := ColorRect.new()
 	back.color = ArtPalette.GRIM_CHARCOAL
@@ -180,10 +186,11 @@ func _crest_and_banner() -> Control:
 	col.add_theme_constant_override("separation", -6)
 	host.add_child(col)
 	col.add_child(GrimTheme.display_label(String(_model.get("city_name", "")), 50, ArtPalette.BONE))
-	col.add_child(GrimTheme.label(GrimDrafts.tr_key("UI_GRIM_DAY_SEASON") % [int(_model.get("day", 1)),
-		GrimDrafts.tr_key(String(_model.get("season_key", "UI_GRIM_SEASON_AUTUMN")))] + "  ·  " +
-		GrimDrafts.tr_key(String(_model.get("weather_key", "UI_GRIM_WEATHER_ASH"))),
-		GrimTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
+	var when: String = GrimDrafts.tr_key("UI_GRIM_DAY_SEASON") % [int(_model.get("day", 1)),
+		GrimDrafts.tr_key(String(_model.get("season_key", "UI_GRIM_SEASON_AUTUMN")))]
+	if _model.has("weather_key"):
+		when += "  ·  " + GrimDrafts.tr_key(String(_model["weather_key"]))
+	col.add_child(GrimTheme.label(when, GrimTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
 	return host
 
 ## Sol sütun: her mekân bir levha - ikon, ad, bugünkü tek satır durumu.
@@ -213,7 +220,9 @@ func _venue_column() -> Control:
 		if not first.is_empty():
 			var line: Dictionary = first[0]
 			var bad := String(line.get("kind", "")) == "bad"
-			var l := GrimTheme.label(GrimDrafts.tr_key(String(line["key"])) % line.get("args", []), GrimTheme.SMALL_SIZE,
+			# Satır ya çevrilmiş metin (brifingin ihtiyacı) ya da anahtar + argüman taşır.
+			var text_line: String = String(line["text"]) if line.has("text") else GrimDrafts.tr_key(String(line["key"])) % line.get("args", [])
+			var l := GrimTheme.label(text_line, GrimTheme.SMALL_SIZE,
 				ArtPalette.GRIM_CRIMSON.lightened(0.35) if bad else ArtPalette.GRIM_PARCHMENT_DIM)
 			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			l.custom_minimum_size = Vector2(230, 0)

@@ -28,7 +28,7 @@ TEX = os.path.join(ROOT, "art_source/textures/ambientcg")
 OUT = os.path.join(ROOT, "build/ui_scenes")
 CFG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "towns.json")
 
-# Mekân -> maske rengi (ids.png). Sıra GrimHamlet.VENUES ile aynı.
+# Mekân -> maske rengi (ids.png). Sıra CityFront.VENUES ile aynı.
 VENUE_IDS = {
     "yard": (1.0, 0.0, 0.0), "market": (0.0, 1.0, 0.0), "guild": (0.0, 0.0, 1.0),
     "tavern": (1.0, 1.0, 0.0), "church": (1.0, 0.0, 1.0), "tailor": (0.0, 1.0, 1.0),

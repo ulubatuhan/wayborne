@@ -2,8 +2,7 @@ shader_type canvas_item;
 
 // Kasaba resminin üstünde mekân vurgusu. Maske her pikselde mekânın
 // numarasını taşıyor (0 = hiçbiri); seçilen mekân fenerle aydınlanır ve
-// kehribar bir kontur alır, kalanı karanlığa çekilir - Darkest Dungeon'ın
-// hamlet'inde binanın üstüne gelmenin karşılığı.
+// kehribar bir kontur alır, kalanı karanlığa çekilir.
 
 uniform sampler2D mask : filter_nearest;
 uniform int hovered = 0;

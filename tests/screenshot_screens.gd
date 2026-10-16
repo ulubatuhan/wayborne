@@ -11,7 +11,8 @@ extends SceneTree
 ##   godot --headless --import
 ##   LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1920x1080x24" \
 ##     godot --path . --rendering-driver opengl3 \
-##     --script res://tests/screenshot_screens.gd -- [genişlik yükseklik]
+##     --script res://tests/screenshot_screens.gd -- [genişlik yükseklik [ekran]]
+## Üçüncü argüman verilirse yalnızca adında o geçen ekranlar çekilir.
 
 const SHOT_DIR: String = "user://screen_shots"
 const SCREENS: Array[String] = [
@@ -43,7 +44,10 @@ func _init() -> void:
 	await _settle()
 	_prepare_session()
 
+	var only := String(args[2]) if args.size() >= 3 else ""
 	for path in SCREENS:
+		if not only.is_empty() and not path.contains(only):
+			continue
 		var screen: Node = load(path).instantiate()
 		get_root().add_child(screen)
 		await _settle()

@@ -5118,7 +5118,7 @@ verir.
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
 - **Karanlık arayüzü ekranlara bağla (Faz 27'de onaylandı, bağlanmadı).**
   Şehir B10 masa sahnesinden render edilmiş, şehre özgü DD kasabasına
-  geçiyor (`GrimHamlet`), menü gece kampına, yol HUD'u `SurvivalGauge`'a;
+  geçiyor (`CityFront`), menü gece kampına, yol HUD'u `SurvivalGauge`'a;
   bileşenler `scripts/ui/grim/` altında hazır ama `city_map.tscn`,
   `main_menu.tscn` ve yol HUD'u hâlâ eski bileşenleri kullanıyor. Sıra ve
   ayrıntı `docs/ui/REDESIGN.md` §7'de. Mekânların popup olarak açılması

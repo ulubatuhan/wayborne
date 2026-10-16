@@ -3,27 +3,30 @@ extends Control
 ## Şehir ekranı. Şehir kart tabanlı değil: her lokasyon kendi ekranını
 ## açar, oyuncu neyle etkileşime gireceğini kendisi seçer.
 ##
-## Haritanın kendisi artık beş buton değil, üstten bakışlı izometrik bir
-## kasaba (bkz. CityView). Bu ekranın işi kasabayı kurmak, başlığı basmak
-## ve **gezinmeyi yapmak**: `CityView` yalnızca hangi mekâna basıldığını
-## bildiriyor, sahne değiştirmeyi burası yapıyor - gezinme yığınını iten
-## taraf her zaman gönderen ekrandır (bkz. Nav).
+## Ekranın tamamı şehrin kendi resmi (bkz. CityFront): önden bakılan,
+## render edilmiş bir kasaba, solda mekân levhaları, sağda kadro kartları,
+## altta kaynak şeridi. Bu ekranın işi resmi kurmak, brifingi yanına koymak
+## ve **gezinmeyi yapmak**: CityFront yalnızca neye basıldığını bildiriyor,
+## sahne değiştirmeyi burası yapıyor - gezinme yığınını iten taraf her
+## zaman gönderen ekrandır (bkz. Nav).
 
-@onready var _map_panel: Control = $MarginContainer/VBoxContainer/MainRow/MapFrame/MapPanel
-@onready var _brief_container: VBoxContainer = $MarginContainer/VBoxContainer/MainRow/BriefScroll/BriefContainer
-@onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
-@onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _party_button: Button = $MarginContainer/VBoxContainer/BottomRow/PartyButton
-@onready var _wardrobe_button: Button = $MarginContainer/VBoxContainer/BottomRow/WardrobeButton
-@onready var _gate_button: Button = $MarginContainer/VBoxContainer/BottomRow/GateButton
-@onready var _help_button: Button = $MarginContainer/VBoxContainer/BottomRow/HelpButton
+## Şehir kimliği -> data/assets/ui/towns/ altındaki resim klasörü.
+const TOWN_DIRS: Dictionary = {
+	"test_loc_a": "karakonak",
+	"test_loc_b": "kurtbogazi",
+	"test_loc_c": "ipekevi",
+	"test_loc_d": "demirkapi",
+	"test_loc_e": "yesilova",
+}
+const SEASON_KEYS: Array = ["SEASON_SPRING", "SEASON_SUMMER", "SEASON_AUTUMN", "SEASON_WINTER"]
+const BRIEF_WIDTH: float = 380.0
+const EDGE: float = 26.0
 
 var _session: GameSession
+var _front: CityFront
 var _brief_panel: CityBriefPanel
-var _city_view: CityView
 
 func _ready() -> void:
-	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
 	Nav.go_root(Nav.CITY_MAP)
 	# Şehrin kendi parçası: varış hissi. Şehir içindeki ekranlar
@@ -37,35 +40,96 @@ func _ready() -> void:
 	if Nav.city_gate_opening:
 		Nav.city_gate_opening = false
 		AudioManager.play_sfx(AudioManager.SFX_GATE)
-	# Sahne dosyasındaki yazı yalnızca editörde ne olduğunu görmek için;
-	# oyuncunun gördüğü metin her zaman koddan, anahtarla gelir - yoksa
-	# ekran hangi dile geçilirse geçilsin Türkçe kalır.
-	_info_label.text = tr("UI_CITY_INFO")
-	_party_button.text = tr("UI_CITY_VIEW_PARTY")
-	_gate_button.text = tr("UI_CITY_LEAVE_BY_GATE")
-	_help_button.text = tr("UI_HELP_OPEN")
-	_help_button.tooltip_text = tr("UI_HELP_TOOLTIP")
-	_wardrobe_button.text = tr("UI_CITY_WARDROBE")
-	_party_button.pressed.connect(_on_party_pressed)
-	_wardrobe_button.pressed.connect(_on_wardrobe_pressed)
-	_gate_button.pressed.connect(_on_gate_pressed)
-	_help_button.pressed.connect(_show_help)
-	var waybook_button := Button.new()
-	waybook_button.text = tr("UI_WAYBOOK_OPEN")
-	waybook_button.pressed.connect(_show_waybook)
-	_help_button.get_parent().add_child(waybook_button)
-	_refresh_title()
-	_build_spots()
+	_build_front()
 	_build_brief()
 	_maybe_show_onboarding()
 
+func _build_front() -> void:
+	_front = CityFront.new()
+	add_child(_front)
+	_front.setup(town_dir(_session.current_location_id), build_model(_session))
+	_front.venue_pressed.connect(_on_spot_pressed)
+	_front.nav_pressed.connect(_on_nav_pressed)
+
+static func town_dir(location_id: String) -> String:
+	return String(TOWN_DIRS.get(location_id, "karakonak"))
+
+## CityFront'un okuduğu tek sözlük. Sayıların hepsi oturumun zaten
+## yayınladığı değerler - ekran hiçbir şeyi kendisi hesaplamıyor.
+static func build_model(session: GameSession) -> Dictionary:
+	var location := WorldMapData.get_location_by_id(session.current_location_id)
+	var party: Array = []
+	for c in session.get_party():
+		var cls := c.get_character_class()
+		party.append({
+			"name": c.character_name, "hp": c.current_hp, "max_hp": c.get_max_hp(), "stress": c.stress,
+			"class": c.class_id, "class_key": cls.display_name_key if cls != null else "", "level": c.level,
+		})
+	var daily := maxi(1, session.get_daily_provision_consumption())
+	var day := session.total_days_elapsed
+	return {
+		"city_name": location.location_name if location != null else TranslationServer.translate("UI_CITY_FALLBACK_NAME"),
+		"day": day + 1,
+		"season_key": SEASON_KEYS[int(MarketConditions.get_season(day))],
+		"gold": session.wallet.balance,
+		"debt": session.get_total_debt(),
+		"provisions": session.get_provisions(),
+		"provisions_days": session.get_provisions() / daily,
+		"party": party,
+		"venue_lines": venue_lines(session),
+	}
+
+## Brifingin ihtiyaçları, hangi mekân çözüyorsa o mekânın levhasına da
+## yazılır: "erzak az" pazarın, "vagon hasarlı" avlunun altında.
+static func venue_lines(session: GameSession) -> Dictionary:
+	var by_scene := {}
+	for v in CityFront.VENUES:
+		by_scene[String(v["scene"])] = String(v["key"])
+	var lines := {}
+	for need in CityBriefModel.build_needs(session):
+		var key := String(by_scene.get(String(need.get("scene", "")), ""))
+		if key.is_empty():
+			continue
+		if not lines.has(key):
+			lines[key] = []
+		(lines[key] as Array).append({"text": String(need.get("text", "")),
+			"kind": "bad" if bool(need.get("urgent", false)) else ""})
+	return lines
+
 ## Şehir artık bir kapı listesi değil, kararın verildiği yer: kervanın
 ## neye ihtiyacı olduğu ve bugün nereye gidilebileceği burada okunuyor
-## (bkz. CityBriefPanel). Ekran değiştirmeyi panel değil bu ekran yapıyor -
-## gezinme yığınını iten taraf her zaman gönderen ekrandır (bkz. Nav).
+## (bkz. CityBriefPanel). Resmin üstünde, kadronun yanında koyu bir sütun.
 func _build_brief() -> void:
+	var holder := PanelContainer.new()
+	holder.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	holder.offset_left = -(CityFront.CARD_SIZE.x + EDGE * 2.0 + BRIEF_WIDTH)
+	holder.offset_right = -(CityFront.CARD_SIZE.x + EDGE * 2.0)
+	holder.offset_top = 30.0
+	holder.offset_bottom = -(CityFront.STRIP_HEIGHT + 18.0)
+	# Okunacak metin düz koyu zeminde (dokunun üstüne yazı yazılmaz).
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.86)
+	box.border_color = Color(ArtPalette.GRIM_AMBER, 0.35)
+	box.set_border_width_all(1)
+	box.set_content_margin_all(14)
+	holder.add_theme_stylebox_override("panel", box)
+	add_child(holder)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	holder.add_child(col)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(scroll)
+	# Yardım düğmesi kaydırmanın dışında: brifing uzasa da hep görünür.
+	var help := Button.new()
+	help.text = tr("UI_HELP_OPEN")
+	help.tooltip_text = tr("UI_HELP_TOOLTIP")
+	help.pressed.connect(_show_help)
+	col.add_child(help)
 	_brief_panel = CityBriefPanel.new()
-	_brief_container.add_child(_brief_panel)
+	_brief_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_brief_panel)
 	_brief_panel.screen_requested.connect(_on_spot_pressed)
 	_brief_panel.planner_requested.connect(_on_planner_requested)
 	_brief_panel.setup(_session)
@@ -73,6 +137,21 @@ func _build_brief() -> void:
 func _on_planner_requested(destination_id: String) -> void:
 	TravelContext.selected_destination_id = destination_id
 	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.CARAVAN_PLANNER))
+
+## Alt şeridin düğmeleri. "Yola Çık" kapıya, yani dış alana gider -
+## yola çıkış kararını planlayıcı veriyor, bu yalnızca kapıdan çıkmak.
+func _on_nav_pressed(key: String) -> void:
+	match key:
+		"UI_GRIM_NAV_PARTY":
+			SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.PARTY))
+		"UI_GRIM_NAV_LEDGER":
+			_show_waybook()
+		"UI_GRIM_NAV_MAP":
+			SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.TRAVEL))
+		"UI_GRIM_NAV_CARAVAN":
+			_show_caravan()
+		"UI_GRIM_EMBARK":
+			SceneInk.go(Nav.go_root(Nav.WORLD_HUB))
 
 ## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
 ## mahsus, atlanabilir bir ipucu katmanı gösterir (bkz. OnboardingPanel,
@@ -83,28 +162,29 @@ func _maybe_show_onboarding() -> void:
 	_session.set_flag(GameSession.ONBOARDING_FLAG)
 	add_child(OnboardingPanel.new())
 
-## Onboarding'i **isteğe bağlı yeniden açan** kapı. Panel bir kereye
-## mahsus otomatik açılıyordu ve bir playtest tam bunu sordu: *"info
-## pop-up'ları eklenmeli kesinlikle, bir kısayol tuşuyla aktive
-## olabilir"* - stres/görev/huy/ekipman anlatımını bir kez görüp
-## unutan oyuncunun onu yeniden bulabileceği bir yer yoktu. Bayrağa hiç
-## dokunmuyor: otomatik gösterimin "bir kereliğine" sözü burada da
-## geçerli, bu yalnızca elle açılan ikinci bir kapı.
+## Onboarding'i isteğe bağlı yeniden açan kapı: F3 ya da brifingin
+## altındaki yardım düğmesi. Bayrağa dokunmuyor.
 func _show_help() -> void:
-	# F3'e basılı tutmak ya da art arda basmak yığın üstüne yığın açmasın -
-	# panel kendi kendini `queue_free()` ile kapatıyor, yeni bir tanesi
-	# ancak öncekinin gerçekten gittiğinde açılmalı.
 	for child in get_children():
 		if child is OnboardingPanel:
 			return
 	add_child(OnboardingPanel.new())
 
-## Defterin tamamı (bkz. WaybookPanel) - yolda da aynı panel, aynı tuş.
+## Defterin tamamı (bkz. WaybookPanel) - yolda da aynı panel, aynı tuş;
+## ekrandaki karşılığı şeridin "Defter" düğmesi (UI_WAYBOOK_OPEN).
 func _show_waybook() -> void:
 	for child in get_children():
 		if child is WaybookPanel:
 			return
 	add_child(WaybookPanel.new().setup(_session))
+
+func _show_caravan() -> void:
+	for child in get_children():
+		if child is CaravanOverviewPanel:
+			return
+	var panel := CaravanOverviewPanel.new()
+	add_child(panel)
+	panel.setup(_session)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -130,55 +210,5 @@ func _open_in_game_menu() -> void:
 	add_child(menu)
 	menu.setup(true)
 
-func _refresh_title() -> void:
-	var location := WorldMapData.get_location_by_id(_session.current_location_id)
-	var city_name := tr("UI_CITY_FALLBACK_NAME") if location == null else location.location_name
-	var wagon_note := tr("UI_PLANNER_WAGONS") % _session.owned_wagon_count
-	if _session.owned_wagon_damaged > 0:
-		wagon_note += tr("UI_CITY_DAMAGED_SUFFIX") % _session.owned_wagon_damaged
-	# Borç görünmezse oyuncu batmakta olduğunu ancak lonca ekranına
-	# girdiğinde fark eder (bkz. DebtPanel).
-	var debt_note := ""
-	if _session.get_total_debt() > 0:
-		debt_note = tr("UI_HUD_DEBT") % _session.get_total_debt()
-	_title_label.text = (tr("UI_CITY_HUD") + debt_note) % [
-		city_name,
-		_session.wallet.balance,
-		_session.get_provisions(),
-		wagon_note,
-		_session.get_party().size(),
-		_session.get_party_capacity(),
-	]
-
-## Kasabayı kurar. Mekânların *yeri* artık burada yazmıyor: yerleşim
-## şehrin kendi tohumundan çıkıyor (bkz. CityView), yani Karakonak ile
-## Demirkapı aynı kasaba değil. Elle konmuş beş koordinat hem her şehri
-## aynı gösteriyordu hem de yeni bir mekân eklemek altıncı bir koordinat
-## uydurmak anlamına geliyordu.
-func _build_spots() -> void:
-	_city_view = CityView.new()
-	# Çapayı FULL_RECT'e sabitleme: `CityView._adopt_parent_size()` boyutu
-	# ve konumu doğrudan `size`/`position` ile yazıyor (`FRAME_INSET`
-	# kadar içeri çekiyor) - anchor'lar hâlâ (0,0,1,1) ise Godot her
-	# yeniden düzenlemede dikdörtgeni çapadan yeniden hesaplıyor ve bu iki
-	# yazım birbiriyle çelişiyor ("If you want to set size, change the
-	# anchors..." uyarısı). Sonuç: CityView'in kendi çiziminin sağ kenarı
-	# çerçevenin gerçek sınırının dışına, `MapPanel`/`BriefScroll` arasındaki
-	# boşluğa taşıyordu - iki kez "düzeltildi" denen gri şerit aslında bu
-	# taşmaydı. Varsayılan (0,0,0,0) çapa serbest konumlandırma anlamına
-	# geliyor, tam olarak `_adopt_parent_size()`'ın beklediği şey.
-	_map_panel.add_child(_city_view)
-	_city_view.venue_pressed.connect(_on_spot_pressed)
-	_city_view.setup(_session)
-
 func _on_spot_pressed(scene_path: String) -> void:
 	SceneInk.go(Nav.open(Nav.CITY_MAP, scene_path))
-
-func _on_party_pressed() -> void:
-	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.PARTY))
-
-func _on_wardrobe_pressed() -> void:
-	SceneInk.go(Nav.open(Nav.CITY_MAP, Nav.WARDROBE))
-
-func _on_gate_pressed() -> void:
-	SceneInk.go(Nav.go_root(Nav.WORLD_HUB))

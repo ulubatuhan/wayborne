@@ -9,7 +9,7 @@ taslak ekranlar `tests/screenshot_grim_ui.gd` ile çiziliyor
 
 | Geri bildirim | Cevap |
 |---|---|
-| Şehir yan görünüm olmasın, birebir Darkest Dungeon gibi, gidilen yere göre | Her şehir önden bakılan, boyalı bir kasaba resmi (`GrimHamlet`). Beş şehir, beş ayrı sahne. Solda mekân levhaları, sağda kadro kartları, sol üstte arma + sancak, altta tahta şerit ve kızıl "Yola Çık". Binanın üstüne gelmek levhayı, levhanın üstüne gelmek binayı aydınlatıyor. |
+| Şehir yan görünüm olmasın, birebir Darkest Dungeon gibi, gidilen yere göre | Her şehir önden bakılan, boyalı bir kasaba resmi (`CityFront`). Beş şehir, beş ayrı sahne. Solda mekân levhaları, sağda kadro kartları, sol üstte arma + sancak, altta tahta şerit ve kızıl "Yola Çık". Binanın üstüne gelmek levhayı, levhanın üstüne gelmek binayı aydınlatıyor. |
 | HUD düğmeleri alakasız | Düz kutular gitti. İkonu olan eylem madalyon düğme (oyunun kendi eşya render'larından), olmayan taş levha, geri alınamayan çıkış kızıl. Şeritler perçinli demir kenarlı koyu tahta. |
 | Menüdeki fener çok parlak, arka plan hoş değil | Arka plan artık render edilmiş bir gece kampı: brandalı vagon, kamp ateşi, tepede uzak bir şehir. Tek ışık ateş; küçük, kısık, titrek. Menü sağda koyu bir şerit (Wartales). |
 | Kitap animasyonu kötü | Kaldırıldı. Yerine soy satırı: "Demirtaş kervanı · 3. kuşak · 214. gün" - kitabın söylemek istediği tek şey buydu. |
@@ -26,8 +26,8 @@ pikseli oyuna girmedi**; alınan şey düzen, oran, palet ve kural.
 
 | Referans | Aldığımız | Nerede |
 |---|---|---|
-| Darkest Dungeon - hamlet | Önden, mürekkepli, sıcak pencereli kasaba; arkada tepede kale; sol üstte arma ve sancak; binanın üstüne gelince kontur ve aydınlanma; altta koyu şerit, kaynaklar solda, kızıl gömme düğme sağda | `GrimHamlet`, `town_scene.py` + `town_post.py` |
-| Darkest Dungeon - kadro | Sağda dikey kişi kartları: amblem, ad, sınıf/seviye, can çubuğu, on boncuklu stres | `GrimHamlet._card` |
+| Darkest Dungeon - hamlet | Önden, mürekkepli, sıcak pencereli kasaba; arkada tepede kale; sol üstte arma ve sancak; binanın üstüne gelince kontur ve aydınlanma; altta koyu şerit, kaynaklar solda, kızıl gömme düğme sağda | `CityFront`, `town_scene.py` + `town_post.py` |
+| Darkest Dungeon - kadro | Sağda dikey kişi kartları: amblem, ad, sınıf/seviye, can çubuğu, on boncuklu stres | `CityFront._card` |
 | Darkest Dungeon - ikonlar | Alt şeritte kutusuz, resmin kendisi olan düğmeler | `GrimTheme.icon_button`, `ui_kit.py` madalyonları |
 | Frostpunk | Sıcaklık bir derece; soğuk bir sistem soğuk renkte | `SurvivalGauge.set_celsius` |
 | Wartales | Manzaranın üstünde sağda koyu bir menü şeridi | Başlık ekranı |
@@ -50,8 +50,8 @@ kayıp ve tehlike, kehribar yalnızca ışık.
    mor-kömüre), ışık taşması, kalınlığı yakınlığa bağlı mürekkep, kâğıt
    dokusu, kir, kenar kararması. Çıktı `data/assets/ui/towns/<ad>/`:
    `background.jpg` ve `mask.png` (piksel başına mekân numarası).
-3. `GrimHamlet` resmi "kapla" kipinde çiziyor, maskeyi aynı dönüşümle okuyor;
-   `hamlet_highlight.gdshader` seçilen mekânı aydınlatıp kehribar kontur
+3. `CityFront` resmi "kapla" kipinde çiziyor, maskeyi aynı dönüşümle okuyor;
+   `venue_highlight.gdshader` seçilen mekânı aydınlatıp kehribar kontur
    çiziyor, kalanı karartıyor.
 
 | Şehir | Kimliği |
@@ -115,8 +115,8 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 
 | Bileşen | Ne yapar |
 |---|---|
-| `GrimHamlet` | DD düzenli şehir ekranı; `venue_pressed(scene_path)` CityView ile aynı sinyal, `nav_pressed(key)` alt şerit |
-| `hamlet_highlight.gdshader` | Maskeye göre mekân vurgusu |
+| `CityFront` | DD düzenli şehir ekranı; `venue_pressed(scene_path)` CityView ile aynı sinyal, `nav_pressed(key)` alt şerit |
+| `venue_highlight.gdshader` | Maskeye göre mekân vurgusu |
 | `GrimTheme` | Yazı yüzleri, şerit/levha/sancak kutuları, madalyon ve kızıl düğme |
 | `SurvivalGauge` | Şişe, alev (Celsius), leke - sayı yanında |
 | `GrimNotice`, `TradeScales`, `MarketMeter`, `WornCell` | İlk turda onaylandı |
@@ -125,9 +125,7 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 
 Üreteçler: `tools/ui_scenes/town_scene.py`, `town_post.py`, `ui_kit.py`
 (şerit, levha, sancak, arma, kart, madalyon ikonlar), `tools/grim_ui_assets.py`
-(ilk turun dokuları ve sesleri). İlk turun yan görünüm sokağı
-(`GrimTownView`) artık hiçbir taslak ekranda kullanılmıyor; onaydan sonra
-silinecek.
+(ilk turun dokuları ve sesleri). İlk turun yan görünüm sokağı silindi.
 
 ## 5. Etkileşim durumları
 
@@ -158,7 +156,7 @@ silinecek.
 
 1. GrimTheme'in kalıcı parçaları WaybookTheme'e (yüzler, şerit/levha/sancak,
    GRIM paleti); `test_waybook_theme.gd` yeni kuralla güncellenir.
-2. Şehir: `city_map.tscn`'de CityView yerine `GrimHamlet`; CityBriefPanel
+2. Şehir: `city_map.tscn`'de CityView yerine `CityFront`; CityBriefPanel
    satırları levhalara ve kartlara dağılır; `test_navigation.gd` grafiği.
 3. Ana menü: kamp arka planı, soy satırı, sağ şerit; kitap (M1/M2) kalkar.
 4. Yol HUD'u: PulseBar → SurvivalGauge; alt şerit ikonlu; defter olayları →

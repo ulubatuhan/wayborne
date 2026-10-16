@@ -27,8 +27,8 @@ func _init() -> void:
 	var cities: Array = OS.get_cmdline_user_args() if not OS.get_cmdline_user_args().is_empty() else ["karakonak"]
 	for city in cities:
 		model["city_name"] = tr(String(CITY_KEYS.get(city, city)))
-		await _shot("1_town_%s" % city, GrimHamlet.new().setup(city, model))
-		var lit := GrimHamlet.new().setup(city, model)
+		await _shot("1_town_%s" % city, CityFront.new().setup(city, model))
+		var lit := CityFront.new().setup(city, model)
 		await _shot("2_town_%s_hover" % city, lit, func(): lit.set_hovered(4))
 	await _shot("3_title", GrimDrafts.title(1, {"name": "Demirtaş", "generation": 3, "day": 214}))
 	await _shot("4_trade", GrimDrafts.trade(model))
