@@ -2026,6 +2026,101 @@
     "en": "Field of the Seal War",
     "zh_CN": "封印之战原"
    }
+  },
+  {
+   "id": 200,
+   "kind": "ik_caravanserai",
+   "type_tr": "Kervansaray",
+   "group": "yapi",
+   "culture": "nomad",
+   "x": 1014.6,
+   "y": 859.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tarvessa Kervansarayı",
+    "en": "Tarvessa Caravanserai",
+    "zh_CN": "塔尔维萨商队驿站"
+   },
+   "proper_name": "Tarvessa",
+   "proper_name_zh_CN": "塔尔维萨",
+   "notes": "Kuzey krallığından güneye uzanan kervan yolu üzerinde"
+  },
+  {
+   "id": 201,
+   "kind": "ik_caravanserai",
+   "type_tr": "Kervansaray",
+   "group": "yapi",
+   "culture": "nomad",
+   "x": 364.7,
+   "y": 1249.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ombrakal Kervansarayı",
+    "en": "Ombrakal Caravanserai",
+    "zh_CN": "翁布拉卡尔商队驿站"
+   },
+   "proper_name": "Ombrakal",
+   "proper_name_zh_CN": "翁布拉卡尔",
+   "notes": "Kuzey krallığından güneye uzanan kervan yolu üzerinde"
+  },
+  {
+   "id": 202,
+   "kind": "ik_caravanserai",
+   "type_tr": "Kervansaray",
+   "group": "yapi",
+   "culture": "nomad",
+   "x": 1184.9,
+   "y": 1632.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Orbeyan Kervansarayı",
+    "en": "Orbeyan Caravanserai",
+    "zh_CN": "奥尔贝扬商队驿站"
+   },
+   "proper_name": "Orbeyan",
+   "proper_name_zh_CN": "奥尔贝扬",
+   "notes": "Kuzey krallığından güneye uzanan kervan yolu üzerinde"
+  },
+  {
+   "id": 203,
+   "kind": "ik_caravanserai",
+   "type_tr": "Kervansaray",
+   "group": "yapi",
+   "culture": "valley",
+   "x": 2292.9,
+   "y": 2320.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Duvenmor Kervansarayı",
+    "en": "Duvenmor Caravanserai",
+    "zh_CN": "杜文莫尔商队驿站"
+   },
+   "proper_name": "Duvenmor",
+   "proper_name_zh_CN": "杜文莫尔",
+   "notes": "Kuzey krallığından güneye uzanan kervan yolu üzerinde"
+  },
+  {
+   "id": 204,
+   "kind": "ik_caravanserai",
+   "type_tr": "Kervansaray",
+   "group": "yapi",
+   "culture": "southern",
+   "x": 2438.9,
+   "y": 3603.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Seyvan Kervansarayı",
+    "en": "Seyvan Caravanserai",
+    "zh_CN": "塞伊万商队驿站"
+   },
+   "proper_name": "Seyvan",
+   "proper_name_zh_CN": "塞伊万",
+   "notes": "Kuzey krallığından güneye uzanan kervan yolu üzerinde"
   }
- ]
+ ],
+ "caravan_route": {
+  "from": "Vastrevar",
+  "to": "Orsolune",
+  "note": "Kuzey krallığının başkentinden en güneydeki limana, mevcut yolları izleyen kervan yolu; üzerinde beş kervansaray."
+ }
 }
