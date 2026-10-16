@@ -518,17 +518,15 @@ var _log_button: Button
 var _status_button: Button
 var _status_panel: CaravanStatusPanel
 var _help_button: Button
-## Moral/stres/tehlike sayı değil **çubuk**: bir orandan ibaret olan üç
-## değeri rakam olarak okumak, oyuncuyu her karede metin okumaya zorluyor.
-## `PulseBar` şehir dışı HUD'da zaten bunu yapıyor (bkz. world_hub.gd) -
-## aynı çubuk burada da kullanılıyor, yol ekranı kendi göstergesini icat
-## etmiyor.
-var _morale_bar: PulseBar
-var _stress_bar: PulseBar
-var _danger_bar: PulseBar
+## Moral/stres/tehlike sayı değil **nesne** (şişe, leke): bir orandan
+## ibaret olan değeri rakam olarak okumak oyuncuyu her karede metin okumaya
+## zorluyor. Sayı yine altında yazılı (bkz. SurvivalGauge).
+var _morale_bar: SurvivalGauge
+var _stress_bar: SurvivalGauge
+var _danger_bar: SurvivalGauge
 ## Takat: temponun harcanan kaynağı. Görünmeyen bir kaynak kaynak
 ## değildir - oyuncu neyi harcadığını görmeden harcama kararı veremez.
-var _stamina_bar: PulseBar
+var _stamina_bar: SurvivalGauge
 ## Liderin o an neye dikkat ettiği. Mekanik görünmezse hata gibi okunur.
 var _attention_label: Label
 ## Dikkatin yeri bir ikon da taşıyor (baş/vagonlar/art) - etiket okunmadan
@@ -623,10 +621,42 @@ func _build_hud_layer() -> void:
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(middle)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	middle.add_child(spacer)
+	middle.add_child(_build_gauge_plate())
 
 	_hud.add_child(WaybookTheme.hud_rule())
 	_hud.add_child(_build_bottom_bar())
 	_build_orders_panel()
+
+## Kervanın hali: dört nesne, sağ üstte, gökyüzünün önünde - kervanın ve
+## yolun üstüne binmiyor. Şişe (moral, stres, takat) ve leke (tehlike);
+## sayı her birinin altında yazılı (bkz. SurvivalGauge). Üst şeritteki
+## metin şişelerinin yerini aldılar: şerit artık yalnızca zaman ve sayılar.
+const GAUGE_PLATE_MARGIN: int = 14
+
+func _build_gauge_plate() -> Control:
+	var holder := MarginContainer.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	holder.add_theme_constant_override("margin_top", GAUGE_PLATE_MARGIN)
+	holder.add_theme_constant_override("margin_right", GAUGE_PLATE_MARGIN + 6)
+	var plate := PanelContainer.new()
+	plate.add_theme_stylebox_override("panel", GrimTheme.plate_box(false, Vector4(14, 8, 14, 4)))
+	plate.mouse_filter = Control.MOUSE_FILTER_PASS
+	holder.add_child(plate)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	plate.add_child(row)
+	_morale_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_MORALE, tr("UI_HUB_MORALE"))
+	_stress_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STRESS, tr("UI_HUB_STRESS"), false)
+	_danger_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.STAIN, ArtPalette.GRIM_CRIMSON, tr("UI_HUB_DANGER"), false)
+	_stamina_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STAMINA, tr("UI_ROAD_STAMINA"))
+	for gauge in [_morale_bar, _stress_bar, _danger_bar, _stamina_bar]:
+		row.add_child(gauge)
+	return holder
 
 func _build_top_bar() -> PanelContainer:
 	var bar := _make_bar()
@@ -710,23 +740,6 @@ func _build_top_bar() -> PanelContainer:
 	_conditions_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_conditions_label)
 
-	_morale_bar = PulseBar.new()
-	row.add_child(_morale_bar)
-	_morale_bar.setup(tr("UI_HUB_MORALE"), ArtPalette.UI_GAUGE_MORALE, "r4a_morale.png")
-
-	_stress_bar = PulseBar.new()
-	row.add_child(_stress_bar)
-	_stress_bar.setup(tr("UI_HUB_STRESS"), ArtPalette.UI_GAUGE_STRESS, "r4b_stress.png")
-
-	# Tehlike de bir oran, o yüzden o da çubuk - ve yolun tehlikesi
-	# oyuncunun en sık baktığı sayı olduğu için metin içinde kaybolmamalı.
-	_danger_bar = PulseBar.new()
-	row.add_child(_danger_bar)
-	_danger_bar.setup(tr("UI_HUB_DANGER"), ArtPalette.UI_GAUGE_DANGER, "r4c_danger.png")
-
-	_stamina_bar = PulseBar.new()
-	row.add_child(_stamina_bar)
-	_stamina_bar.setup(tr("UI_ROAD_STAMINA"), ArtPalette.UI_GAUGE_STAMINA, "r4d_stamina.png")
 
 
 	# Kervanın sayıları tek satır: sarılmıyor, taşarsa kırpılıyor. Sarılan

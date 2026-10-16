@@ -31,6 +31,10 @@ var value: float = 100.0
 ## Doluluk yerine yazılacak sayı ("−4 °C" gibi). Boşsa değerin kendisi.
 var number_text: String = ""
 var max_value: float = 100.0
+## Ortalamanın yanında tek bir kişinin değeri (bkz. Stress Rules: şişede en
+## yıpranmış kişinin çentiği). Negatifse çentik yok.
+var marker_value: float = -1.0
+var _marker_note: String = ""
 var _time: float = 0.0
 var _seed: float = 0.0
 
@@ -51,6 +55,15 @@ func set_value(new_value: float, new_max: float = 100.0) -> void:
 	value = new_value
 	max_value = new_max
 	queue_redraw()
+
+func set_marker(new_value: float, note: String = "") -> void:
+	marker_value = new_value
+	_marker_note = note if new_value >= 0.0 else ""
+	tooltip_text = label_text if _marker_note.is_empty() else label_text + "\n" + _marker_note
+	queue_redraw()
+
+func is_marker_visible() -> bool:
+	return marker_value >= 0.0
 
 ## Ekran görüntüsü ve test için zamanı elle sürmek.
 func set_time(t: float) -> void:
@@ -159,6 +172,9 @@ func _draw_vial(box: Rect2, frac: float, sev: float) -> void:
 	glass.append(shape[0])
 	draw_polyline(glass, Color(ArtPalette.GRIM_SLATE_LIGHT, 0.85), 1.6, true)
 	draw_line(Vector2(left + 3, top + 10), Vector2(left + 3, bottom - 10), Color(1, 1, 1, 0.12), 2.0)
+	if marker_value >= 0.0:
+		var mark_y := lerpf(bottom, top, fill_fraction(marker_value, max_value))
+		draw_line(Vector2(left - 5, mark_y), Vector2(right + 5, mark_y), ArtPalette.UI_SIGNAL_ESCALATED, 2.0)
 	var crack := crack_amount(sev)
 	if crack > 0.0:
 		var tex := GrimTheme.texture("crack_overlay.png")

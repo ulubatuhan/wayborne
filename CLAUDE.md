@@ -2383,9 +2383,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   measured, the rivets ran through the letters and the vials vanished;
   the strap then sat beside the bars until the leather went. The bars stay
   `HUD_BAR` and `WaybookTheme.hud_rule()` (`HUD_RULE_HEIGHT`, a
-  `GOLD_DIM` line) separates each bar from the world. Gauges are `PulseBar` vials
-  (R4 + an R4a-d icon + the number; the name is in the tooltip) whose
-  liquid colours are `ArtPalette.UI_GAUGE_*`; the clock has a `TimeDial`
+  `GOLD_DIM` line) separates each bar from the world. The road's gauges
+  left the top bar: a plate in the top-right of the world holds four
+  `SurvivalGauge`s (vials for morale, stress and stamina, a blood stain for
+  danger), each with its number and name written under it and liquid
+  colours from `ArtPalette.UI_GAUGE_*` (the hub still uses `PulseBar`); the clock has a `TimeDial`
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and
   moss when it is caught.
@@ -2719,7 +2721,8 @@ re-roll the rain away.
   average is the right answer to "what shape is the company in", the wrong
   one to "who is about to break" - so when someone sits 5+ above it, the
   vial carries a notch at their value and the tooltip names them
-  (`GameSession.get_max_stress_character()`, `PulseBar.set_marker()`).
+  (`GameSession.get_max_stress_character()`, `set_marker()` on both
+  `PulseBar` and the road's `SurvivalGauge`).
   Darkest Dungeon never shows a party-level bar at all; this keeps the bar
   and adds the person.
 - **`_migrate_save` earned its keep here.** `SAVE_VERSION` 2 spreads a v1
@@ -5125,7 +5128,8 @@ verir.
   Şehir artık render edilmiş, şehre özgü önden kasaba (`CityFront`:
   levhalar brifingin ihtiyaçlarını taşıyor, kadro kartları, alt şerit,
   yanında koyu brifing sütunu); ana menü gece kampı ve sağ şerit. Kalan:
-  yol HUD'u (`PulseBar` → `SurvivalGauge`, ikonlu alt şerit, `GrimNotice`),
+  yol HUD'unun kalanı (göstergeler `SurvivalGauge`'a geçti; ikonlu alt
+  şerit, `GrimNotice`),
   pazar/envanter, ve GrimTheme'in kalıcı parçalarının WaybookTheme'e
   taşınması. Sıra ve ayrıntı `docs/ui/REDESIGN.md` §7'de. Dosya ve sınıf
   adları oyuna özgü kalır (başka bir oyunun terimi değil).

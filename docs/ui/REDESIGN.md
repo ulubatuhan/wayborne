@@ -159,7 +159,7 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 2. ✓ Şehir: `city_map.tscn`'de CityView yerine `CityFront`; CityBriefPanel
    satırları levhalara ve kartlara dağılır; `test_navigation.gd` grafiği.
 3. ✓ Ana menü: kamp arka planı, soy satırı, sağ şerit; kitap (M1/M2) kalkar.
-4. Yol HUD'u: PulseBar → SurvivalGauge; alt şerit ikonlu; defter olayları →
+4. Yol HUD'u: ✓ PulseBar → SurvivalGauge (sağ üst levha); alt şerit ikonlu; defter olayları →
    GrimNotice.
 5. Pazar ve envanter.
 6. Sıcaklık ve bozulma mekanikleri (Ana Hedefler) bağlanınca gösterge ve
