@@ -1,0 +1,2031 @@
+{
+ "_doc": "Sideria haritasındaki yerler ve adları. Koordinatlar 4096x4096 harita pikselinde (sol üst 0,0; y aşağı). Adlar kültür bölgelerine göre verildi; özel adlar her dilde aynı (yalnızca İngiliz alfabesi), tür sözcüğü ve anlamlı adlar dile göre çevrilir. Atlas: https://claude.ai/artifact/RyU3awtqN5hVFK1yzuzdeC",
+ "map_size": 4096,
+ "cultures": {
+  "nomad": "Göçebe boyları",
+  "highland": "Dağ kabileleri",
+  "highland_mines": "Dağ kabileleri, maden bölgesi",
+  "old_empire": "Kuzey, eski imparatorluk",
+  "borderland": "Sınır halkları",
+  "valley": "Vadi",
+  "old_covenant": "Eski Ahit şehri",
+  "southern": "Güney kentleri"
+ },
+ "places": [
+  {
+   "id": 0,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 268.9,
+   "y": 1332.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kaynurak Obası",
+    "en": "Kaynurak Camp",
+    "zh_CN": "凯努拉克营地"
+   },
+   "proper_name": "Kaynurak",
+   "proper_name_zh_CN": "凯努拉克"
+  },
+  {
+   "id": 1,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 616.8,
+   "y": 1484.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ebrusun Obası",
+    "en": "Ebrusun Camp",
+    "zh_CN": "埃布鲁松营地"
+   },
+   "proper_name": "Ebrusun",
+   "proper_name_zh_CN": "埃布鲁松"
+  },
+  {
+   "id": 2,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 743.6,
+   "y": 1778.8,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sadirim Obası",
+    "en": "Sadirim Camp",
+    "zh_CN": "萨迪里姆营地"
+   },
+   "proper_name": "Sadirim",
+   "proper_name_zh_CN": "萨迪里姆"
+  },
+  {
+   "id": 3,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 1017.8,
+   "y": 1480.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ilkatay Obası",
+    "en": "Ilkatay Camp",
+    "zh_CN": "伊尔卡泰营地"
+   },
+   "proper_name": "Ilkatay",
+   "proper_name_zh_CN": "伊尔卡泰"
+  },
+  {
+   "id": 4,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 1036.1,
+   "y": 995.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Burkasan Obası",
+    "en": "Burkasan Camp",
+    "zh_CN": "布尔卡桑营地"
+   },
+   "proper_name": "Burkasan",
+   "proper_name_zh_CN": "布尔卡桑"
+  },
+  {
+   "id": 5,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 927.6,
+   "y": 786.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Otekur Obası",
+    "en": "Otekur Camp",
+    "zh_CN": "奥特库尔营地"
+   },
+   "proper_name": "Otekur",
+   "proper_name_zh_CN": "奥特库尔"
+  },
+  {
+   "id": 6,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 701.1,
+   "y": 514.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Taragun Obası",
+    "en": "Taragun Camp",
+    "zh_CN": "塔拉贡营地"
+   },
+   "proper_name": "Taragun",
+   "proper_name_zh_CN": "塔拉贡"
+  },
+  {
+   "id": 7,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 652.6,
+   "y": 731.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Arsalkan Obası",
+    "en": "Arsalkan Camp",
+    "zh_CN": "阿尔萨尔坎营地"
+   },
+   "proper_name": "Arsalkan",
+   "proper_name_zh_CN": "阿尔萨尔坎",
+   "note": "Han çadırı ve çevresindeki sekiz yurt tek bir oba."
+  },
+  {
+   "id": 16,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "highland",
+   "x": 892.9,
+   "y": 422.8,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Harvek",
+    "en": "Harvek",
+    "zh_CN": "哈尔维克"
+   },
+   "proper_name": "Harvek",
+   "proper_name_zh_CN": "哈尔维克"
+  },
+  {
+   "id": 17,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "old_empire",
+   "x": 1304.4,
+   "y": 657.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kovrast",
+    "en": "Kovrast",
+    "zh_CN": "科夫拉斯特"
+   },
+   "proper_name": "Kovrast",
+   "proper_name_zh_CN": "科夫拉斯特"
+  },
+  {
+   "id": 18,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 1291.5,
+   "y": 1073.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kemersal",
+    "en": "Kemersal",
+    "zh_CN": "凯默萨尔"
+   },
+   "proper_name": "Kemersal",
+   "proper_name_zh_CN": "凯默萨尔"
+  },
+  {
+   "id": 19,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "old_empire",
+   "x": 2674.5,
+   "y": 1004.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ulmarec",
+    "en": "Ulmarec",
+    "zh_CN": "乌尔马雷克"
+   },
+   "proper_name": "Ulmarec",
+   "proper_name_zh_CN": "乌尔马雷克"
+  },
+  {
+   "id": 20,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "highland",
+   "x": 2909.8,
+   "y": 744.6,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Droskal",
+    "en": "Droskal",
+    "zh_CN": "德罗斯卡尔"
+   },
+   "proper_name": "Droskal",
+   "proper_name_zh_CN": "德罗斯卡尔"
+  },
+  {
+   "id": 21,
+   "kind": "ix_mountaintribe",
+   "type_tr": "Dağ Kabilesi",
+   "group": "gocebe",
+   "culture": "highland",
+   "x": 3261.8,
+   "y": 834.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ulgras",
+    "en": "Ulgras",
+    "zh_CN": "乌尔格拉斯"
+   },
+   "proper_name": "Ulgras",
+   "proper_name_zh_CN": "乌尔格拉斯"
+  },
+  {
+   "id": 22,
+   "kind": "it_minetown",
+   "type_tr": "Maden Kasabası",
+   "group": "kasaba",
+   "culture": "highland",
+   "x": 3065.3,
+   "y": 777.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Brazdun",
+    "en": "Brazdun",
+    "zh_CN": "布拉兹敦"
+   },
+   "proper_name": "Brazdun",
+   "proper_name_zh_CN": "布拉兹敦"
+  },
+  {
+   "id": 23,
+   "kind": "it_minetown",
+   "type_tr": "Maden Kasabası",
+   "group": "kasaba",
+   "culture": "highland",
+   "x": 3069.4,
+   "y": 1025.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kesgrav",
+    "en": "Kesgrav",
+    "zh_CN": "凯斯格拉夫"
+   },
+   "proper_name": "Kesgrav",
+   "proper_name_zh_CN": "凯斯格拉夫"
+  },
+  {
+   "id": 24,
+   "kind": "ie_deepmine",
+   "type_tr": "Derin Maden",
+   "group": "yapi",
+   "culture": "highland",
+   "x": 2899.6,
+   "y": 971.8,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kazrun Ocağı",
+    "en": "Kazrun Pits",
+    "zh_CN": "卡兹伦矿坑"
+   },
+   "proper_name": "Kazrun",
+   "proper_name_zh_CN": "卡兹伦"
+  },
+  {
+   "id": 25,
+   "kind": "ie_saltmine",
+   "type_tr": "Tuz Madeni",
+   "group": "yapi",
+   "culture": "highland",
+   "x": 3339.5,
+   "y": 709.9,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Saldrek Tuzlası",
+    "en": "Saldrek Saltworks",
+    "zh_CN": "萨尔德雷克盐场"
+   },
+   "proper_name": "Saldrek",
+   "proper_name_zh_CN": "萨尔德雷克"
+  },
+  {
+   "id": 26,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "highland",
+   "x": 3185.0,
+   "y": 523.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Reskel",
+    "en": "Reskel",
+    "zh_CN": "雷斯克尔"
+   },
+   "proper_name": "Reskel",
+   "proper_name_zh_CN": "雷斯克尔"
+  },
+  {
+   "id": 27,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 2679.4,
+   "y": 1445.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sallenz",
+    "en": "Sallenz",
+    "zh_CN": "萨伦茨"
+   },
+   "proper_name": "Sallenz",
+   "proper_name_zh_CN": "萨伦茨"
+  },
+  {
+   "id": 28,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 1764.7,
+   "y": 1472.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Calvenna",
+    "en": "Calvenna",
+    "zh_CN": "卡尔维娜"
+   },
+   "proper_name": "Calvenna",
+   "proper_name_zh_CN": "卡尔维娜"
+  },
+  {
+   "id": 29,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "nomad",
+   "x": 461.3,
+   "y": 1605.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sugalik",
+    "en": "Sugalik",
+    "zh_CN": "苏加利克"
+   },
+   "proper_name": "Sugalik",
+   "proper_name_zh_CN": "苏加利克"
+  },
+  {
+   "id": 30,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "borderland",
+   "x": 539.1,
+   "y": 2219.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tuzyali",
+    "en": "Tuzyali",
+    "zh_CN": "图兹亚利"
+   },
+   "proper_name": "Tuzyali",
+   "proper_name_zh_CN": "图兹亚利"
+  },
+  {
+   "id": 31,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "borderland",
+   "x": 1091.5,
+   "y": 2753.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Neminsu",
+    "en": "Neminsu",
+    "zh_CN": "内明苏"
+   },
+   "proper_name": "Neminsu",
+   "proper_name_zh_CN": "内明苏"
+  },
+  {
+   "id": 32,
+   "kind": "iv_fishvillage",
+   "type_tr": "Balıkçı Kasabası",
+   "group": "koy",
+   "culture": "southern",
+   "x": 1558.1,
+   "y": 3203.6,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Brezzane",
+    "en": "Brezzane",
+    "zh_CN": "布雷扎内"
+   },
+   "proper_name": "Brezzane",
+   "proper_name_zh_CN": "布雷扎内"
+  },
+  {
+   "id": 33,
+   "kind": "it_town",
+   "type_tr": "Kasaba",
+   "group": "kasaba",
+   "culture": "borderland",
+   "x": 1126.9,
+   "y": 2029.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kirsavel",
+    "en": "Kirsavel",
+    "zh_CN": "基尔萨维尔"
+   },
+   "proper_name": "Kirsavel",
+   "proper_name_zh_CN": "基尔萨维尔"
+  },
+  {
+   "id": 34,
+   "kind": "it_town",
+   "type_tr": "Kasaba",
+   "group": "kasaba",
+   "culture": "old_empire",
+   "x": 1514.5,
+   "y": 1128.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Selvicar",
+    "en": "Selvicar",
+    "zh_CN": "塞尔维卡"
+   },
+   "proper_name": "Selvicar",
+   "proper_name_zh_CN": "塞尔维卡"
+  },
+  {
+   "id": 35,
+   "kind": "it_town",
+   "type_tr": "Kasaba",
+   "group": "kasaba",
+   "culture": "old_empire",
+   "x": 1565.8,
+   "y": 543.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Auderin",
+    "en": "Auderin",
+    "zh_CN": "奥德林"
+   },
+   "proper_name": "Auderin",
+   "proper_name_zh_CN": "奥德林"
+  },
+  {
+   "id": 36,
+   "kind": "it_town",
+   "type_tr": "Kasaba",
+   "group": "kasaba",
+   "culture": "borderland",
+   "x": 1837.9,
+   "y": 2227.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Akavan",
+    "en": "Akavan",
+    "zh_CN": "阿卡万"
+   },
+   "proper_name": "Akavan",
+   "proper_name_zh_CN": "阿卡万"
+  },
+  {
+   "id": 37,
+   "kind": "it_town",
+   "type_tr": "Kasaba",
+   "group": "kasaba",
+   "culture": "valley",
+   "x": 2631.0,
+   "y": 3325.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Caramine",
+    "en": "Caramine",
+    "zh_CN": "卡拉明"
+   },
+   "proper_name": "Caramine",
+   "proper_name_zh_CN": "卡拉明"
+  },
+  {
+   "id": 38,
+   "kind": "it_rivertown",
+   "type_tr": "Nehir Kasabası",
+   "group": "kasaba",
+   "culture": "highland_mines",
+   "x": 3632.1,
+   "y": 2316.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Vorgat",
+    "en": "Vorgat",
+    "zh_CN": "沃尔加特"
+   },
+   "proper_name": "Vorgat",
+   "proper_name_zh_CN": "沃尔加特"
+  },
+  {
+   "id": 39,
+   "kind": "it_swamptown",
+   "type_tr": "Bataklık Kasabası",
+   "group": "kasaba",
+   "culture": "valley",
+   "x": 1917.5,
+   "y": 2666.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Liraven",
+    "en": "Liraven",
+    "zh_CN": "利拉文"
+   },
+   "proper_name": "Liraven",
+   "proper_name_zh_CN": "利拉文"
+  },
+  {
+   "id": 40,
+   "kind": "it_swamptown",
+   "type_tr": "Bataklık Kasabası",
+   "group": "kasaba",
+   "culture": "borderland",
+   "x": 1540.1,
+   "y": 2653.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Samuran",
+    "en": "Samuran",
+    "zh_CN": "萨穆兰"
+   },
+   "proper_name": "Samuran",
+   "proper_name_zh_CN": "萨穆兰"
+  },
+  {
+   "id": 41,
+   "kind": "it_swamptown",
+   "type_tr": "Bataklık Kasabası",
+   "group": "kasaba",
+   "culture": "borderland",
+   "x": 2767.1,
+   "y": 1839.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Golcavar",
+    "en": "Golcavar",
+    "zh_CN": "戈尔贾瓦尔"
+   },
+   "proper_name": "Golcavar",
+   "proper_name_zh_CN": "戈尔贾瓦尔"
+  },
+  {
+   "id": 42,
+   "kind": "it_markettown",
+   "type_tr": "Pazar Kasabası",
+   "group": "kasaba",
+   "culture": "southern",
+   "x": 1663.3,
+   "y": 3374.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Mirsana",
+    "en": "Mirsana",
+    "zh_CN": "米尔萨娜"
+   },
+   "proper_name": "Mirsana",
+   "proper_name_zh_CN": "米尔萨娜"
+  },
+  {
+   "id": 45,
+   "kind": "ic_portcity",
+   "type_tr": "Liman Şehri",
+   "group": "sehir",
+   "culture": "southern",
+   "x": 3465.2,
+   "y": 3377.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Zelmarin",
+    "en": "Zelmarin",
+    "zh_CN": "泽尔马林"
+   },
+   "proper_name": "Zelmarin",
+   "proper_name_zh_CN": "泽尔马林"
+  },
+  {
+   "id": 46,
+   "kind": "ic_portcity",
+   "type_tr": "Liman Şehri",
+   "group": "sehir",
+   "culture": "old_empire",
+   "x": 2521.9,
+   "y": 1489.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Rivecande",
+    "en": "Rivecande",
+    "zh_CN": "里维坎德"
+   },
+   "proper_name": "Rivecande",
+   "proper_name_zh_CN": "里维坎德"
+  },
+  {
+   "id": 47,
+   "kind": "ic_city",
+   "type_tr": "Şehir",
+   "group": "sehir",
+   "culture": "old_empire",
+   "x": 1654.8,
+   "y": 930.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Vastrevar",
+    "en": "Vastrevar",
+    "zh_CN": "瓦斯特雷瓦"
+   },
+   "proper_name": "Vastrevar",
+   "proper_name_zh_CN": "瓦斯特雷瓦"
+  },
+  {
+   "id": 48,
+   "kind": "ic_city",
+   "type_tr": "Şehir",
+   "group": "sehir",
+   "culture": "old_empire",
+   "x": 1774.6,
+   "y": 1322.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Dravoss",
+    "en": "Dravoss",
+    "zh_CN": "德拉沃斯"
+   },
+   "proper_name": "Dravoss",
+   "proper_name_zh_CN": "德拉沃斯"
+  },
+  {
+   "id": 49,
+   "kind": "ic_city",
+   "type_tr": "Şehir",
+   "group": "sehir",
+   "culture": "borderland",
+   "x": 1355.3,
+   "y": 2114.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tolvarin",
+    "en": "Tolvarin",
+    "zh_CN": "托尔瓦林"
+   },
+   "proper_name": "Tolvarin",
+   "proper_name_zh_CN": "托尔瓦林"
+  },
+  {
+   "id": 50,
+   "kind": "ic_city",
+   "type_tr": "Şehir",
+   "group": "sehir",
+   "culture": "borderland",
+   "x": 3000.6,
+   "y": 1831.8,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ezmerak",
+    "en": "Ezmerak",
+    "zh_CN": "埃兹梅拉克"
+   },
+   "proper_name": "Ezmerak",
+   "proper_name_zh_CN": "埃兹梅拉克"
+  },
+  {
+   "id": 51,
+   "kind": "ic_city",
+   "type_tr": "Şehir",
+   "group": "sehir",
+   "culture": "valley",
+   "x": 2196.0,
+   "y": 2489.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Merigaud",
+    "en": "Merigaud",
+    "zh_CN": "梅里戈"
+   },
+   "proper_name": "Merigaud",
+   "proper_name_zh_CN": "梅里戈"
+  },
+  {
+   "id": 52,
+   "kind": "ic_freecity",
+   "type_tr": "Serbest Şehir",
+   "group": "sehir",
+   "culture": "valley",
+   "x": 2515.5,
+   "y": 2653.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Belvanor",
+    "en": "Belvanor",
+    "zh_CN": "贝尔瓦诺"
+   },
+   "proper_name": "Belvanor",
+   "proper_name_zh_CN": "贝尔瓦诺"
+  },
+  {
+   "id": 53,
+   "kind": "ic_freecity",
+   "type_tr": "Serbest Şehir",
+   "group": "sehir",
+   "culture": "valley",
+   "x": 2400.0,
+   "y": 3246.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ilsande",
+    "en": "Ilsande",
+    "zh_CN": "伊尔桑德"
+   },
+   "proper_name": "Ilsande",
+   "proper_name_zh_CN": "伊尔桑德"
+  },
+  {
+   "id": 54,
+   "kind": "ic_portcity",
+   "type_tr": "Liman Şehri",
+   "group": "sehir",
+   "culture": "southern",
+   "x": 2092.0,
+   "y": 3759.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Orsolune",
+    "en": "Orsolune",
+    "zh_CN": "奥尔索伦"
+   },
+   "proper_name": "Orsolune",
+   "proper_name_zh_CN": "奥尔索伦",
+   "note": "Altı kıyı kentinin birleştiği büyük güney limanı."
+  },
+  {
+   "id": 58,
+   "kind": "ic_freecity",
+   "type_tr": "Serbest Şehir",
+   "group": "sehir",
+   "culture": "valley",
+   "x": 2381.7,
+   "y": 2175.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ondrelle",
+    "en": "Ondrelle",
+    "zh_CN": "翁德蕾尔"
+   },
+   "proper_name": "Ondrelle",
+   "proper_name_zh_CN": "翁德蕾尔"
+  },
+  {
+   "id": 59,
+   "kind": "ic_freecity",
+   "type_tr": "Serbest Şehir",
+   "group": "sehir",
+   "culture": "old_covenant",
+   "x": 3136.2,
+   "y": 2259.8,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Orvahel",
+    "en": "Orvahel",
+    "zh_CN": "奥尔瓦赫尔"
+   },
+   "proper_name": "Orvahel",
+   "proper_name_zh_CN": "奥尔瓦赫尔"
+  },
+  {
+   "id": 60,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 2035.6,
+   "y": 1500.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Vintaro Çiftliği",
+    "en": "Vintaro Farm",
+    "zh_CN": "文塔罗农庄"
+   },
+   "proper_name": "Vintaro",
+   "proper_name_zh_CN": "文塔罗"
+  },
+  {
+   "id": 61,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "highland",
+   "x": 3585.5,
+   "y": 900.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Morvask Değirmeni",
+    "en": "Morvask Mill",
+    "zh_CN": "莫尔瓦斯克磨坊"
+   },
+   "proper_name": "Morvask",
+   "proper_name_zh_CN": "莫尔瓦斯克"
+  },
+  {
+   "id": 62,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "southern",
+   "x": 1688.7,
+   "y": 3910.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Limeral Bahçeleri",
+    "en": "Limeral Gardens",
+    "zh_CN": "利梅拉尔园"
+   },
+   "proper_name": "Limeral",
+   "proper_name_zh_CN": "利梅拉尔"
+  },
+  {
+   "id": 63,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "highland_mines",
+   "x": 3865.3,
+   "y": 2624.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tuhrem Çiftliği",
+    "en": "Tuhrem Farm",
+    "zh_CN": "图赫雷姆农庄"
+   },
+   "proper_name": "Tuhrem",
+   "proper_name_zh_CN": "图赫雷姆"
+  },
+  {
+   "id": 64,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "borderland",
+   "x": 817.5,
+   "y": 2409.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Hasırlı Çiftlik",
+    "en": "Reedmat Farm",
+    "zh_CN": "苇席农庄"
+   }
+  },
+  {
+   "id": 65,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "southern",
+   "x": 3892.2,
+   "y": 3693.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Vesperra Bağları",
+    "en": "Vesperra Vineyards",
+    "zh_CN": "维斯佩拉葡萄园"
+   },
+   "proper_name": "Vesperra",
+   "proper_name_zh_CN": "维斯佩拉"
+  },
+  {
+   "id": 66,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "highland",
+   "x": 3662.0,
+   "y": 196.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Gezar Çiftliği",
+    "en": "Gezar Farm",
+    "zh_CN": "盖扎尔农庄"
+   },
+   "proper_name": "Gezar",
+   "proper_name_zh_CN": "盖扎尔"
+  },
+  {
+   "id": 67,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "valley",
+   "x": 2904.6,
+   "y": 3397.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Aubrenne Bağları",
+    "en": "Aubrenne Vineyards",
+    "zh_CN": "奥布雷娜葡萄园"
+   },
+   "proper_name": "Aubrenne",
+   "proper_name_zh_CN": "奥布雷娜"
+  },
+  {
+   "id": 68,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "borderland",
+   "x": 1255.7,
+   "y": 2542.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kumbag Değirmeni",
+    "en": "Kumbag Mill",
+    "zh_CN": "库姆巴格磨坊"
+   },
+   "proper_name": "Kumbag",
+   "proper_name_zh_CN": "库姆巴格"
+  },
+  {
+   "id": 69,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "highland",
+   "x": 2960.9,
+   "y": 219.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Hulvad Değirmeni",
+    "en": "Hulvad Mill",
+    "zh_CN": "胡尔瓦德磨坊"
+   },
+   "proper_name": "Hulvad",
+   "proper_name_zh_CN": "胡尔瓦德"
+  },
+  {
+   "id": 70,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 1481.7,
+   "y": 290.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Hasdren Değirmeni",
+    "en": "Hasdren Mill",
+    "zh_CN": "哈斯德伦磨坊"
+   },
+   "proper_name": "Hasdren",
+   "proper_name_zh_CN": "哈斯德伦"
+  },
+  {
+   "id": 71,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "borderland",
+   "x": 607.8,
+   "y": 2638.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Taşgözü Değirmeni",
+    "en": "Stone-Eye Mill",
+    "zh_CN": "石眼磨坊"
+   }
+  },
+  {
+   "id": 72,
+   "kind": "iv_farm",
+   "type_tr": "Çiftlik ve Değirmen",
+   "group": "koy",
+   "culture": "valley",
+   "x": 2103.3,
+   "y": 2134.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sorrelay Bağları",
+    "en": "Sorrelay Vineyards",
+    "zh_CN": "索雷莱葡萄园"
+   },
+   "proper_name": "Sorrelay",
+   "proper_name_zh_CN": "索雷莱"
+  },
+  {
+   "id": 73,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "highland_mines",
+   "x": 3445.9,
+   "y": 3023.5,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kemrug",
+    "en": "Kemrug",
+    "zh_CN": "凯姆鲁格"
+   },
+   "proper_name": "Kemrug",
+   "proper_name_zh_CN": "凯姆鲁格"
+  },
+  {
+   "id": 74,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 2671.3,
+   "y": 529.6,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Hestemar",
+    "en": "Hestemar",
+    "zh_CN": "赫斯特马"
+   },
+   "proper_name": "Hestemar",
+   "proper_name_zh_CN": "赫斯特马"
+  },
+  {
+   "id": 75,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "southern",
+   "x": 3889.4,
+   "y": 3275.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ambrisal",
+    "en": "Ambrisal",
+    "zh_CN": "安布里萨尔"
+   },
+   "proper_name": "Ambrisal",
+   "proper_name_zh_CN": "安布里萨尔"
+  },
+  {
+   "id": 76,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 2292.6,
+   "y": 1145.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ostiven",
+    "en": "Ostiven",
+    "zh_CN": "奥斯蒂文"
+   },
+   "proper_name": "Ostiven",
+   "proper_name_zh_CN": "奥斯蒂文"
+  },
+  {
+   "id": 77,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "southern",
+   "x": 1226.9,
+   "y": 3703.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Quellara",
+    "en": "Quellara",
+    "zh_CN": "奎拉拉"
+   },
+   "proper_name": "Quellara",
+   "proper_name_zh_CN": "奎拉拉"
+  },
+  {
+   "id": 78,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 1961.1,
+   "y": 784.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Callorde",
+    "en": "Callorde",
+    "zh_CN": "卡洛德"
+   },
+   "proper_name": "Callorde",
+   "proper_name_zh_CN": "卡洛德"
+  },
+  {
+   "id": 79,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 2314.6,
+   "y": 368.0,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Pelhaut",
+    "en": "Pelhaut",
+    "zh_CN": "佩尔奥"
+   },
+   "proper_name": "Pelhaut",
+   "proper_name_zh_CN": "佩尔奥"
+  },
+  {
+   "id": 80,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 445.0,
+   "y": 987.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Yelbarik Obası",
+    "en": "Yelbarik Camp",
+    "zh_CN": "耶尔巴里克营地"
+   },
+   "proper_name": "Yelbarik",
+   "proper_name_zh_CN": "耶尔巴里克"
+  },
+  {
+   "id": 81,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 1963.5,
+   "y": 390.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Nostrel",
+    "en": "Nostrel",
+    "zh_CN": "诺斯特雷尔"
+   },
+   "proper_name": "Nostrel",
+   "proper_name_zh_CN": "诺斯特雷尔"
+  },
+  {
+   "id": 82,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "nomad",
+   "x": 312.2,
+   "y": 572.8,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tuylum",
+    "en": "Tuylum",
+    "zh_CN": "图伊卢姆"
+   },
+   "proper_name": "Tuylum",
+   "proper_name_zh_CN": "图伊卢姆"
+  },
+  {
+   "id": 83,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "highland",
+   "x": 323.5,
+   "y": 151.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Dornak",
+    "en": "Dornak",
+    "zh_CN": "多尔纳克"
+   },
+   "proper_name": "Dornak",
+   "proper_name_zh_CN": "多尔纳克"
+  },
+  {
+   "id": 84,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "highland",
+   "x": 626.2,
+   "y": 169.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Zurek",
+    "en": "Zurek",
+    "zh_CN": "祖雷克"
+   },
+   "proper_name": "Zurek",
+   "proper_name_zh_CN": "祖雷克"
+  },
+  {
+   "id": 85,
+   "kind": "ih_hamlet",
+   "type_tr": "Mezra",
+   "group": "koy",
+   "culture": "valley",
+   "x": 2122.5,
+   "y": 1854.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sennabel",
+    "en": "Sennabel",
+    "zh_CN": "森娜贝尔"
+   },
+   "proper_name": "Sennabel",
+   "proper_name_zh_CN": "森娜贝尔"
+  },
+  {
+   "id": 86,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "valley",
+   "x": 2143.9,
+   "y": 2779.6,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Erguvan Kesimliği",
+    "en": "Redbud Logging Camp",
+    "zh_CN": "紫荆伐木场"
+   }
+  },
+  {
+   "id": 87,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "old_empire",
+   "x": 1936.6,
+   "y": 1128.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kordel Kesimliği",
+    "en": "Kordel Logging Camp",
+    "zh_CN": "科德尔伐木场"
+   },
+   "proper_name": "Kordel",
+   "proper_name_zh_CN": "科德尔"
+  },
+  {
+   "id": 88,
+   "kind": "in_yurtcamp",
+   "type_tr": "Yurt Kampı",
+   "group": "gocebe",
+   "culture": "nomad",
+   "x": 743.0,
+   "y": 1072.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sogurtay Obası",
+    "en": "Sogurtay Camp",
+    "zh_CN": "索古尔泰营地"
+   },
+   "proper_name": "Sogurtay",
+   "proper_name_zh_CN": "索古尔泰"
+  },
+  {
+   "id": 89,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "highland_mines",
+   "x": 3189.0,
+   "y": 3701.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Grodan Kesimliği",
+    "en": "Grodan Logging Camp",
+    "zh_CN": "格罗丹伐木场"
+   },
+   "proper_name": "Grodan",
+   "proper_name_zh_CN": "格罗丹"
+  },
+  {
+   "id": 90,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "valley",
+   "x": 2742.5,
+   "y": 2511.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Celvane Kesimliği",
+    "en": "Celvane Logging Camp",
+    "zh_CN": "塞尔瓦内伐木场"
+   },
+   "proper_name": "Celvane",
+   "proper_name_zh_CN": "塞尔瓦内"
+  },
+  {
+   "id": 91,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "highland_mines",
+   "x": 3139.8,
+   "y": 2961.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Gurzan Bıçkıhanesi",
+    "en": "Gurzan Sawmill",
+    "zh_CN": "古尔赞锯木坊"
+   },
+   "proper_name": "Gurzan",
+   "proper_name_zh_CN": "古尔赞"
+  },
+  {
+   "id": 92,
+   "kind": "il_lumber",
+   "type_tr": "Kereste Kampı",
+   "group": "koy",
+   "culture": "southern",
+   "x": 2933.7,
+   "y": 3649.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Tersane Kesimliği",
+    "en": "Shipwrights' Logging Camp",
+    "zh_CN": "船坞伐木场"
+   }
+  },
+  {
+   "id": 93,
+   "kind": "ia_abbey",
+   "type_tr": "Manastır",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 3522.7,
+   "y": 1374.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sessiz El Manastırı",
+    "en": "Monastery of the Silent Hand",
+    "zh_CN": "静手修道院"
+   }
+  },
+  {
+   "id": 94,
+   "kind": "ia_abbey",
+   "type_tr": "Manastır",
+   "group": "yapi",
+   "culture": "old_covenant",
+   "x": 3113.8,
+   "y": 2604.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "İlk Sayfa Manastırı",
+    "en": "Monastery of the First Page",
+    "zh_CN": "首页修道院"
+   }
+  },
+  {
+   "id": 95,
+   "kind": "ia_abbey",
+   "type_tr": "Manastır",
+   "group": "yapi",
+   "culture": "southern",
+   "x": 2547.2,
+   "y": 3878.4,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Açık Kapı Manastırı",
+    "en": "Open Door Monastery",
+    "zh_CN": "开门修道院"
+   }
+  },
+  {
+   "id": 96,
+   "kind": "ia_abbey",
+   "type_tr": "Manastır",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 1357.3,
+   "y": 1746.7,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Yamalı Çatı Manastırı",
+    "en": "Patched Roof Monastery",
+    "zh_CN": "补顶修道院"
+   }
+  },
+  {
+   "id": 97,
+   "kind": "ia_abbey",
+   "type_tr": "Manastır",
+   "group": "yapi",
+   "culture": "highland_mines",
+   "x": 3619.4,
+   "y": 1914.1,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Taşsoluk Manastırı",
+    "en": "Stonebreath Monastery",
+    "zh_CN": "石息修道院"
+   }
+  },
+  {
+   "id": 98,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "southern",
+   "x": 2429.4,
+   "y": 3659.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Kıyıgözü Kulesi",
+    "en": "Shore-Eye Tower",
+    "zh_CN": "岸眼塔"
+   }
+  },
+  {
+   "id": 99,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 1125.8,
+   "y": 2325.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Geribakan Kulesi",
+    "en": "Lookback Tower",
+    "zh_CN": "回望塔"
+   }
+  },
+  {
+   "id": 100,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "old_empire",
+   "x": 2552.9,
+   "y": 1747.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Sentinara Kulesi",
+    "en": "Sentinara Tower",
+    "zh_CN": "森蒂纳拉塔"
+   },
+   "proper_name": "Sentinara",
+   "proper_name_zh_CN": "森蒂纳拉"
+  },
+  {
+   "id": 101,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "old_empire",
+   "x": 2309.9,
+   "y": 1663.2,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Ferrant Kulesi",
+    "en": "Ferrant Tower",
+    "zh_CN": "费兰特塔"
+   },
+   "proper_name": "Ferrant",
+   "proper_name_zh_CN": "费兰特"
+  },
+  {
+   "id": 102,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 3274.7,
+   "y": 1945.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "İki Bayrak Kulesi",
+    "en": "Two Banners Tower",
+    "zh_CN": "双旗塔"
+   }
+  },
+  {
+   "id": 103,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "highland_mines",
+   "x": 3639.5,
+   "y": 2818.3,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Öksüz Göz Kulesi",
+    "en": "Orphan Eye Tower",
+    "zh_CN": "孤眼塔"
+   }
+  },
+  {
+   "id": 104,
+   "kind": "iw_tower",
+   "type_tr": "Gözcü Kulesi",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 853.0,
+   "y": 2040.9,
+   "drawn_on_map": true,
+   "name": {
+    "tr": "Vardas Kulesi",
+    "en": "Vardas Tower",
+    "zh_CN": "瓦尔达斯塔"
+   },
+   "proper_name": "Vardas",
+   "proper_name_zh_CN": "瓦尔达斯"
+  },
+  {
+   "id": 105,
+   "kind": "ig_gallows",
+   "type_tr": "Darağacı",
+   "group": "iz",
+   "culture": "valley",
+   "x": 2527.3,
+   "y": 3247.1,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Sarmaşıklı Darağacı",
+    "en": "Ivy Gallows",
+    "zh_CN": "常春藤绞架"
+   }
+  },
+  {
+   "id": 106,
+   "kind": "ig_gallows",
+   "type_tr": "Darağacı",
+   "group": "iz",
+   "culture": "highland_mines",
+   "x": 3477.4,
+   "y": 3187.8,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kuru Halat Darağacı",
+    "en": "Dry Rope Gallows",
+    "zh_CN": "枯绳绞架"
+   }
+  },
+  {
+   "id": 107,
+   "kind": "ig_gallows",
+   "type_tr": "Darağacı",
+   "group": "iz",
+   "culture": "old_empire",
+   "x": 1676.7,
+   "y": 1115.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kızıl Ferman Darağacı",
+    "en": "Red Edict Gallows",
+    "zh_CN": "赤诏绞架"
+   }
+  },
+  {
+   "id": 108,
+   "kind": "ig_gallows",
+   "type_tr": "Darağacı",
+   "group": "iz",
+   "culture": "old_covenant",
+   "x": 3265.3,
+   "y": 2250.3,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kefaret Darağacı",
+    "en": "Atonement Gallows",
+    "zh_CN": "赎罪绞架"
+   }
+  },
+  {
+   "id": 109,
+   "kind": "ig_gallows",
+   "type_tr": "Darağacı",
+   "group": "iz",
+   "culture": "borderland",
+   "x": 1294.0,
+   "y": 2226.3,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Dönek Darağacı",
+    "en": "Turncoat Gallows",
+    "zh_CN": "叛徒绞架"
+   }
+  },
+  {
+   "id": 110,
+   "kind": "ig_graveyard",
+   "type_tr": "Mezarlık",
+   "group": "iz",
+   "culture": "southern",
+   "x": 1574.2,
+   "y": 3080.6,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Yabancılar Mezarlığı",
+    "en": "Strangers' Graveyard",
+    "zh_CN": "异乡人墓地"
+   }
+  },
+  {
+   "id": 111,
+   "kind": "ig_graveyard",
+   "type_tr": "Mezarlık",
+   "group": "iz",
+   "culture": "valley",
+   "x": 1819.0,
+   "y": 2548.4,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Leylak Mezarlığı",
+    "en": "Lilac Graveyard",
+    "zh_CN": "丁香墓地"
+   }
+  },
+  {
+   "id": 112,
+   "kind": "ig_graveyard",
+   "type_tr": "Mezarlık",
+   "group": "iz",
+   "culture": "southern",
+   "x": 1742.1,
+   "y": 3240.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Tuzlu Çardak Mezarlığı",
+    "en": "Salt Arbor Graveyard",
+    "zh_CN": "盐棚墓地"
+   }
+  },
+  {
+   "id": 113,
+   "kind": "ig_graveyard",
+   "type_tr": "Mezarlık",
+   "group": "iz",
+   "culture": "highland_mines",
+   "x": 3486.1,
+   "y": 2281.4,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kör Kazmalar Mezarlığı",
+    "en": "Graveyard of the Blind Picks",
+    "zh_CN": "盲镐墓地"
+   }
+  },
+  {
+   "id": 114,
+   "kind": "ig_graveyard",
+   "type_tr": "Mezarlık",
+   "group": "iz",
+   "culture": "old_empire",
+   "x": 1896.7,
+   "y": 1472.9,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Sancaksız Mezarlık",
+    "en": "Bannerless Graveyard",
+    "zh_CN": "无旗墓地"
+   }
+  },
+  {
+   "id": 115,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "borderland",
+   "x": 3500.0,
+   "y": 1644.6,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Tozkapı Yıkıntısı",
+    "en": "Dustgate Ruins",
+    "zh_CN": "尘门遗迹"
+   }
+  },
+  {
+   "id": 116,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "highland",
+   "x": 1079.4,
+   "y": 211.7,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Velkrun Yıkıntısı",
+    "en": "Velkrun Ruins",
+    "zh_CN": "维尔克伦遗迹"
+   },
+   "proper_name": "Velkrun",
+   "proper_name_zh_CN": "维尔克伦"
+  },
+  {
+   "id": 117,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "southern",
+   "x": 1278.1,
+   "y": 3160.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Eski Darphane Yıkıntısı",
+    "en": "Old Mint Ruins",
+    "zh_CN": "旧铸币厂遗迹"
+   }
+  },
+  {
+   "id": 118,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "nomad",
+   "x": 1322.4,
+   "y": 1450.1,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Sargalak Yıkıntısı",
+    "en": "Sargalak Ruins",
+    "zh_CN": "萨尔加拉克遗迹"
+   },
+   "proper_name": "Sargalak",
+   "proper_name_zh_CN": "萨尔加拉克"
+  },
+  {
+   "id": 119,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "old_empire",
+   "x": 2241.4,
+   "y": 699.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Deli Kral Sarayı Yıkıntısı",
+    "en": "Ruins of the Mad King's Palace",
+    "zh_CN": "疯王宫殿遗迹"
+   }
+  },
+  {
+   "id": 120,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "valley",
+   "x": 2083.5,
+   "y": 3090.3,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Solgun Bahçe Yıkıntısı",
+    "en": "Ruins of the Faded Garden",
+    "zh_CN": "凋园遗迹"
+   }
+  },
+  {
+   "id": 121,
+   "kind": "ir_ruins",
+   "type_tr": "Harabe",
+   "group": "iz",
+   "culture": "old_empire",
+   "x": 1769.4,
+   "y": 211.8,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Hallecort Yıkıntısı",
+    "en": "Hallecort Ruins",
+    "zh_CN": "哈勒科特遗迹"
+   },
+   "proper_name": "Hallecort",
+   "proper_name_zh_CN": "哈勒科特"
+  },
+  {
+   "id": 122,
+   "kind": "is_stones",
+   "type_tr": "Dikili Taşlar",
+   "group": "iz",
+   "culture": "nomad",
+   "x": 182.9,
+   "y": 2113.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Altıkuşak Taşları",
+    "en": "Six-Belt Stones",
+    "zh_CN": "六带石阵"
+   }
+  },
+  {
+   "id": 123,
+   "kind": "is_stones",
+   "type_tr": "Dikili Taşlar",
+   "group": "iz",
+   "culture": "valley",
+   "x": 2784.1,
+   "y": 2893.0,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Bahçıvan Taşları",
+    "en": "Gardener's Stones",
+    "zh_CN": "园丁石阵"
+   }
+  },
+  {
+   "id": 124,
+   "kind": "is_stones",
+   "type_tr": "Dikili Taşlar",
+   "group": "iz",
+   "culture": "southern",
+   "x": 941.9,
+   "y": 3935.3,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Yıldızölçer Taşları",
+    "en": "Starmeasurer Stones",
+    "zh_CN": "量星石阵"
+   }
+  },
+  {
+   "id": 125,
+   "kind": "is_stones",
+   "type_tr": "Dikili Taşlar",
+   "group": "iz",
+   "culture": "highland",
+   "x": 3904.8,
+   "y": 1372.9,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "İlk Nefes Taşları",
+    "en": "First Breath Stones",
+    "zh_CN": "初息石阵"
+   }
+  },
+  {
+   "id": 126,
+   "kind": "is_stones",
+   "type_tr": "Dikili Taşlar",
+   "group": "iz",
+   "culture": "southern",
+   "x": 3449.7,
+   "y": 3950.4,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Gelgit Taşları",
+    "en": "Tide Stones",
+    "zh_CN": "潮汐石阵"
+   }
+  },
+  {
+   "id": 127,
+   "kind": "ip_lighthouse",
+   "type_tr": "Fener",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 814.2,
+   "y": 2898.1,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Yalaz Feneri",
+    "en": "Yalaz Lighthouse",
+    "zh_CN": "亚拉兹灯塔"
+   },
+   "proper_name": "Yalaz",
+   "proper_name_zh_CN": "亚拉兹"
+  },
+  {
+   "id": 128,
+   "kind": "ip_lighthouse",
+   "type_tr": "Fener",
+   "group": "yapi",
+   "culture": "borderland",
+   "x": 3126.3,
+   "y": 1554.1,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Yaşlı Martı Feneri",
+    "en": "Old Gull Lighthouse",
+    "zh_CN": "老鸥灯塔"
+   }
+  },
+  {
+   "id": 129,
+   "kind": "ip_lighthouse",
+   "type_tr": "Fener",
+   "group": "yapi",
+   "culture": "highland",
+   "x": 2616.7,
+   "y": 155.2,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Grauth Feneri",
+    "en": "Grauth Lighthouse",
+    "zh_CN": "格劳斯灯塔"
+   },
+   "proper_name": "Grauth",
+   "proper_name_zh_CN": "格劳斯"
+  },
+  {
+   "id": 130,
+   "kind": "ix_wreck",
+   "type_tr": "Batık Gemi",
+   "group": "iz",
+   "culture": "borderland",
+   "x": 191.0,
+   "y": 2858.8,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Sessiz Kadırga Batığı",
+    "en": "Silent Galley Wreck",
+    "zh_CN": "静默桨帆船沉骸"
+   }
+  },
+  {
+   "id": 131,
+   "kind": "ix_wreck",
+   "type_tr": "Batık Gemi",
+   "group": "iz",
+   "culture": "highland",
+   "x": 3912.3,
+   "y": 689.7,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kanlı Direk Batığı",
+    "en": "Bloody Mast Wreck",
+    "zh_CN": "血桅沉船"
+   }
+  },
+  {
+   "id": 132,
+   "kind": "ib_battle",
+   "type_tr": "Savaş Alanı",
+   "group": "iz",
+   "culture": "valley",
+   "x": 2443.4,
+   "y": 1995.7,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kırık Mızrak Çayırı",
+    "en": "Broken Spear Meadow",
+    "zh_CN": "断矛草甸"
+   }
+  },
+  {
+   "id": 133,
+   "kind": "ib_battle",
+   "type_tr": "Savaş Alanı",
+   "group": "iz",
+   "culture": "borderland",
+   "x": 987.3,
+   "y": 2523.9,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Bölünmüş Sancak Ovası",
+    "en": "Field of the Split Banner",
+    "zh_CN": "裂旗原"
+   }
+  },
+  {
+   "id": 134,
+   "kind": "ib_battle",
+   "type_tr": "Savaş Alanı",
+   "group": "iz",
+   "culture": "southern",
+   "x": 1717.2,
+   "y": 3545.0,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Kiralık Kılıçlar Ovası",
+    "en": "Field of Hired Swords",
+    "zh_CN": "佣剑原"
+   }
+  },
+  {
+   "id": 135,
+   "kind": "ib_battle",
+   "type_tr": "Savaş Alanı",
+   "group": "iz",
+   "culture": "old_covenant",
+   "x": 3041.2,
+   "y": 2071.3,
+   "drawn_on_map": false,
+   "name": {
+    "tr": "Mühür Savaşı Ovası",
+    "en": "Field of the Seal War",
+    "zh_CN": "封印之战原"
+   }
+  }
+ ]
+}
