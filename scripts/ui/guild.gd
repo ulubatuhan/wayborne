@@ -33,7 +33,7 @@ func _ready() -> void:
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
-	_add_recruit_button(RecruitCatalog.VENUE_GUILD, Nav.GUILD)
+	RecruitButton.add_before(_back_button, RecruitCatalog.VENUE_GUILD, Nav.GUILD)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_GUILD_TITLE") if location == null else tr("UI_GUILD_TITLE_CITY") % location.location_name
@@ -90,9 +90,9 @@ const COMMISSION_DESC_KEYS: Dictionary = {
 func _rebuild() -> void:
 	if _debt_panel != null:
 		_debt_panel.refresh()
-	_clear_children(_contract_list)
-	_clear_children(_accepted_list)
-	_clear_children(_commission_container)
+	NodeUtil.clear_children(_contract_list)
+	NodeUtil.clear_children(_accepted_list)
+	NodeUtil.clear_children(_commission_container)
 	_rows.clear()
 
 	for offer in _available_offers():
@@ -265,23 +265,5 @@ func _on_accept_pressed(offer: MerchantOffer) -> void:
 	_session.accept_contract(offer)
 	_rebuild()
 
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
-
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())
-
-## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
-func _add_recruit_button(venue: String, own_scene: String) -> void:
-	var button := Button.new()
-	button.text = tr("UI_LOOK_FOR_CREW")
-	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
-	var container := _back_button.get_parent()
-	container.add_child(button)
-	container.move_child(button, _back_button.get_index())
-
-func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	SceneInk.go(Nav.open_recruit(venue, own_scene))

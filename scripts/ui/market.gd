@@ -80,7 +80,7 @@ func _ready() -> void:
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
-	_add_recruit_button(RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
+	RecruitButton.add_before(_back_button, RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
 
 	_location_note_label.text = _build_trade_note()
 	_location_note_label.modulate = TRADE_NOTE_COLOR
@@ -251,7 +251,7 @@ func _on_basket_haggle_pressed() -> void:
 		return
 
 	_set_shop_controls_enabled(false)
-	_clear_children(_haggle_holder)
+	NodeUtil.clear_children(_haggle_holder)
 
 	var base_price := _basket_total_sticker_price()
 	var item_count := 0
@@ -304,7 +304,7 @@ func _refresh_basket_panel() -> void:
 	_with_preserved_scroll(_rebuild_basket_panel)
 
 func _rebuild_basket_panel() -> void:
-	_clear_children(_basket_list)
+	NodeUtil.clear_children(_basket_list)
 
 	if _basket.is_empty():
 		var empty_label := Label.new()
@@ -528,7 +528,7 @@ func _on_haggle_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	_pending_purchase_item = item
 	_pending_purchase_quantity = quantity
 	_set_shop_controls_enabled(false)
-	_clear_children(_haggle_holder)
+	NodeUtil.clear_children(_haggle_holder)
 
 	var base_price := _get_buy_price(item) * quantity
 
@@ -585,7 +585,7 @@ func _on_haggle_failed(reputation_penalty: int) -> void:
 	_close_haggling()
 
 func _close_haggling() -> void:
-	_clear_children(_haggle_holder)
+	NodeUtil.clear_children(_haggle_holder)
 	_pending_purchase_item = null
 	_pending_purchase_quantity = 0
 	_set_shop_controls_enabled(true)
@@ -746,23 +746,5 @@ func _cargo_cell(item: Item, quantity: int) -> Control:
 	column.add_child(amount)
 	return cell
 
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
-
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())
-
-## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
-func _add_recruit_button(venue: String, own_scene: String) -> void:
-	var button := Button.new()
-	button.text = tr("UI_LOOK_FOR_CREW")
-	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
-	var container := _back_button.get_parent()
-	container.add_child(button)
-	container.move_child(button, _back_button.get_index())
-
-func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	SceneInk.go(Nav.open_recruit(venue, own_scene))

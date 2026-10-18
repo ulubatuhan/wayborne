@@ -42,7 +42,7 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	_clear_children(_content)
+	NodeUtil.clear_children(_content)
 	_build_identity_section()
 	_content.add_child(HSeparator.new())
 	_build_appearance_section()
@@ -534,11 +534,6 @@ func _on_equip_pressed(slot: String, equipment_id: String) -> void:
 func _on_unequip_pressed(slot: String) -> void:
 	_session.unequip_from_character(_character, slot)
 	_refresh()
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
 
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())

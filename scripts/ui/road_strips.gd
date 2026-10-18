@@ -58,15 +58,7 @@ static func texture(biome: String, layer: String) -> Texture2D:
 	var key := biome + "/" + layer
 	if _cache.has(key):
 		return _cache[key]
-	var tex: Texture2D = null
-	var path := path_of(biome, layer)
-	if ResourceLoader.exists(path):
-		tex = load(path) as Texture2D
-	elif FileAccess.file_exists(path):
-		# Henüz içe aktarılmamış (yeni render) - diskten oku.
-		var img := Image.load_from_file(ProjectSettings.globalize_path(path))
-		if img != null and not img.is_empty():
-			tex = ImageTexture.create_from_image(img)
+	var tex: Texture2D = TextureLoader.load_any(path_of(biome, layer))
 	_cache[key] = tex
 	return tex
 

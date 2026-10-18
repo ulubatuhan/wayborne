@@ -37,13 +37,13 @@ func refresh() -> void:
 	if _session == null:
 		return
 
-	_clear_children(_party_list)
+	NodeUtil.clear_children(_party_list)
 	var slot := 1
 	for character in _session.get_party():
 		_party_list.add_child(_build_party_row(character, slot))
 		slot += 1
 
-	_clear_children(_candidate_list)
+	NodeUtil.clear_children(_candidate_list)
 	var required_reputation := RecruitCatalog.get_venue_required_reputation(_venue)
 	if _session.reputation < required_reputation:
 		_info_label.text = tr("UI_RECRUIT_REPUTATION_GATE") % [
@@ -176,8 +176,3 @@ func _on_move_up_pressed(index: int) -> void:
 	if _session.swap_party_positions(index, index - 1):
 		refresh()
 		party_changed.emit()
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()

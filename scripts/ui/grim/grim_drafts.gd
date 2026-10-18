@@ -197,7 +197,7 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 	# şehirlerle aynı hattan render (tools/ui_scenes, "camp"). Işık yalnızca
 	# ateşten: kısık, titrek, küçük - ekranı aydınlatmıyor.
 	var bg := TextureRect.new()
-	bg.texture = CityFront._load_texture(CityFront.TOWNS_DIR + "camp/background.jpg")
+	bg.texture = TextureLoader.load_any(CityFront.TOWNS_DIR + "camp/background.jpg")
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE

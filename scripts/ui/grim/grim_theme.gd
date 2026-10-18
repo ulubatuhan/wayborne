@@ -43,13 +43,7 @@ static func texture(file_name: String) -> Texture2D:
 	var path := DIR + file_name
 	if _cache.has(path):
 		return _cache[path]
-	var tex: Texture2D = null
-	if ResourceLoader.exists(path):
-		tex = load(path)
-	else:
-		var img := Image.load_from_file(ProjectSettings.globalize_path(path))
-		if img != null and not img.is_empty():
-			tex = ImageTexture.create_from_image(img)
+	var tex: Texture2D = TextureLoader.load_any(path)
 	_cache[path] = tex
 	return tex
 

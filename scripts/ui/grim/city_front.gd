@@ -66,8 +66,8 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 	_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg.texture = _load_texture(TOWNS_DIR + city_id + "/background.jpg")
-	var mask_tex := _load_texture(TOWNS_DIR + city_id + "/mask.png")
+	_bg.texture = TextureLoader.load_any(TOWNS_DIR + city_id + "/background.jpg")
+	var mask_tex := TextureLoader.load_any(TOWNS_DIR + city_id + "/mask.png")
 	if mask_tex != null:
 		_mask_img = mask_tex.get_image()
 		var mat := ShaderMaterial.new()
@@ -135,16 +135,8 @@ func _gui_input(event: InputEvent) -> void:
 
 # ------------------------------------------------------------------ parçalar
 
-static func _load_texture(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		return load(path)
-	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
-	if img == null or img.is_empty():
-		return null
-	return ImageTexture.create_from_image(img)
-
 static func kit(name: String) -> Texture2D:
-	return _load_texture(KIT_DIR + name)
+	return TextureLoader.load_any(KIT_DIR + name)
 
 static func _picture(tex: Texture2D, box: Vector2) -> TextureRect:
 	var r := TextureRect.new()

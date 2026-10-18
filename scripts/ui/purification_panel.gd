@@ -35,7 +35,7 @@ func setup(session: GameSession, title: String, cost: int) -> void:
 func refresh() -> void:
 	if _session == null:
 		return
-	_clear_children(_list)
+	NodeUtil.clear_children(_list)
 
 	var any_fresh := false
 	for character in _session.get_party():
@@ -105,8 +105,3 @@ func _ensure_built() -> void:
 
 	_list = VBoxContainer.new()
 	add_child(_list)
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()

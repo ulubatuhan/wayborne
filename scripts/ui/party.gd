@@ -41,7 +41,7 @@ func _refresh() -> void:
 		_session.owned_wagon_count,
 	]
 
-	_clear_children(_content)
+	NodeUtil.clear_children(_content)
 	_content.add_child(_build_ledger())
 	for index in party.size():
 		_content.add_child(_build_member_card(party[index], index, party.size()))
@@ -271,11 +271,6 @@ func _on_dismiss_pressed(character: CharacterData) -> void:
 func _on_character_pressed(index: int) -> void:
 	Nav.character_target_index = index
 	SceneInk.go(Nav.open(Nav.PARTY, Nav.CHARACTER))
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
 
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())

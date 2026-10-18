@@ -145,18 +145,8 @@ static func beast_clip(state: String, fall: float, role: String, motion: float) 
 func texture(page: int) -> Texture2D:
 	if _textures.is_empty():
 		for p in pages:
-			_textures.append(_with_mipmaps(load(p) as Texture2D))
+			_textures.append(TextureLoader.with_mipmaps(load(p) as Texture2D))
 	return _textures[page]
-
-static func _with_mipmaps(tex: Texture2D) -> Texture2D:
-	if tex == null:
-		return null
-	var image := tex.get_image()
-	if image == null or image.is_compressed():
-		return tex
-	if not image.has_mipmaps():
-		image.generate_mipmaps()
-	return ImageTexture.create_from_image(image)
 
 ## {texture, region: Rect2, offset: Vector2, size: Vector2} ya da boş
 ## sözlük. `size` çizilecek boyut, render pikselinde (bkz. texel_scale).

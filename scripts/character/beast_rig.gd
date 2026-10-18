@@ -293,13 +293,7 @@ static func part_texture(layer: String, part: String) -> Texture2D:
 	if _cache.has(key):
 		return _cache[key]
 	var path := "%s%s.png" % [root_path, key]
-	var texture: Texture2D = null
-	if ResourceLoader.exists(path):
-		texture = load(path)
-	elif FileAccess.file_exists(path):
-		var image := Image.load_from_file(path)
-		if image != null and not image.is_empty():
-			texture = ImageTexture.create_from_image(image)
+	var texture: Texture2D = TextureLoader.load_any(path)
 	_cache[key] = texture
 	return texture
 

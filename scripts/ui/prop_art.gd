@@ -58,22 +58,9 @@ static func texture(id: String, layer: String) -> Texture2D:
 	var path := DIR + key + ".png"
 	var tex: Texture2D = null
 	if ResourceLoader.exists(path):
-		tex = _with_mipmaps(load(path) as Texture2D)
+		tex = TextureLoader.with_mipmaps(load(path) as Texture2D)
 	_textures[key] = tex
 	return tex
-
-## Eşyalar ekranda render boyunun yarısı-dörtte biri çiziliyor; mipmap
-## olmadan küçültme kumlanıyor. `.import` depoda değil, o yüzden içe aktarma
-## ayarı taşıyamaz (BodyFrames'in aynı sebebi).
-static func _with_mipmaps(tex: Texture2D) -> Texture2D:
-	if tex == null:
-		return null
-	var image := tex.get_image()
-	if image == null or image.is_compressed():
-		return tex
-	if not image.has_mipmaps():
-		image.generate_mipmaps()
-	return ImageTexture.create_from_image(image)
 
 static func ppm(id: String) -> float:
 	return float(info(id).get("ppm", 100.0))

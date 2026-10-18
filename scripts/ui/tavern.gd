@@ -36,7 +36,7 @@ func _ready() -> void:
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_map_button.pressed.connect(_on_map_pressed)
-	_add_recruit_button(RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
+	RecruitButton.add_before(_back_button, RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
 
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_TAVERN_TITLE") if location == null else tr("UI_TAVERN_TITLE_CITY") % location.location_name
@@ -159,16 +159,3 @@ func _on_map_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())
-
-## Tayfa ekranı ortak; hangi mekândan girildiğini gönderen ekran bildirir
-## (bkz. Nav.recruit_venue). Geri tuşu gezinme yığınından döner.
-func _add_recruit_button(venue: String, own_scene: String) -> void:
-	var button := Button.new()
-	button.text = tr("UI_LOOK_FOR_CREW")
-	button.pressed.connect(_on_recruit_button_pressed.bind(venue, own_scene))
-	var container := _back_button.get_parent()
-	container.add_child(button)
-	container.move_child(button, _back_button.get_index())
-
-func _on_recruit_button_pressed(venue: String, own_scene: String) -> void:
-	SceneInk.go(Nav.open_recruit(venue, own_scene))

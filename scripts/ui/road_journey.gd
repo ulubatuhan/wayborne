@@ -1485,13 +1485,13 @@ func _init_journey() -> void:
 	_caravan.set_heading(1.0)
 	_caravan.set_leader_offset(0.0)
 	_turn_event_after = null
-	_clear_children(_card_panel)
-	_clear_children(_haggle_holder)
-	_clear_children(_combat_holder)
+	NodeUtil.clear_children(_card_panel)
+	NodeUtil.clear_children(_haggle_holder)
+	NodeUtil.clear_children(_combat_holder)
 	_combat_holder.visible = false
 	_band.visible = true
-	_clear_children(_recruit_holder)
-	_clear_children(_arrival_panel)
+	NodeUtil.clear_children(_recruit_holder)
+	NodeUtil.clear_children(_arrival_panel)
 	_pending_event = null
 	_clear_encounter()
 	_arrive_button.visible = false
@@ -1597,7 +1597,7 @@ func _start_synthetic_journey() -> void:
 func _on_reset_pressed() -> void:
 	if _is_live_journey:
 		return
-	_clear_children(_log_list)
+	NodeUtil.clear_children(_log_list)
 	_init_journey()
 
 ## Zaman akıyor: her karede saat ilerler, dolan her gün için günlük mekanik
@@ -2449,7 +2449,7 @@ func _present_event(event: GameEvent) -> void:
 	_refresh_state()
 
 func _render_card(event: GameEvent) -> void:
-	_clear_children(_card_panel)
+	NodeUtil.clear_children(_card_panel)
 
 	var title := Label.new()
 	title.text = tr(event.title_key)
@@ -2606,7 +2606,7 @@ func _choice_triggers_combat(choice: EventChoice) -> bool:
 func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event
 	_current_event = null
-	_clear_children(_card_panel)
+	NodeUtil.clear_children(_card_panel)
 
 	_add_log("   » %s" % tr(choice.text_key))
 
@@ -2669,7 +2669,7 @@ func _open_recruit_offer() -> void:
 	candidate.hire_cost = int(round(candidate.hire_cost * ROAD_RECRUIT_COST_MULTIPLIER))
 
 	_set_journey_controls_enabled(false)
-	_clear_children(_recruit_holder)
+	NodeUtil.clear_children(_recruit_holder)
 
 	var info := Label.new()
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -2708,7 +2708,7 @@ func _on_road_recruit_declined() -> void:
 	_close_recruit_offer()
 
 func _close_recruit_offer() -> void:
-	_clear_children(_recruit_holder)
+	NodeUtil.clear_children(_recruit_holder)
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
@@ -2747,7 +2747,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	_session.remember_combat_roster(_current_combat_party)
 
 	_clock.consume_hours(COMBAT_HOURS)
-	_clear_children(_combat_holder)
+	NodeUtil.clear_children(_combat_holder)
 
 	# Savaş yolun *yerine* açılıyor: şerit gizlenip savaş sahnesi onun
 	# çerçevesinde beliriyor - önceden savaş, şerit görünür kalırken
@@ -2822,7 +2822,7 @@ func _on_combat_finished(
 	for line in result.lines:
 		_add_log("      %s" % line, OUTCOME_COLOR if victory else LOCKED_COLOR)
 
-	_clear_children(_combat_holder)
+	NodeUtil.clear_children(_combat_holder)
 	_combat_holder.visible = false
 	_band.visible = true
 	_set_journey_controls_enabled(true)
@@ -2920,7 +2920,7 @@ func _fallen_leader_line(fallen_name: String) -> String:
 const RUN_OVER_BOOK_HEIGHT: float = 220.0
 
 func _show_run_over() -> void:
-	_clear_children(_arrival_panel)
+	NodeUtil.clear_children(_arrival_panel)
 	# Defter kapandı ve bağlandı: adı taşıyacak kimse kalmadı. Görselde yazı
 	# yok, son söz aşağıdaki canlı metin.
 	var book := WaybookTheme.picture("m3_closed.png", RUN_OVER_BOOK_HEIGHT)
@@ -2945,7 +2945,7 @@ func _open_haggling(max_price: int) -> void:
 	_pending_haggle_max = max_price
 	_clock.consume_hours(HAGGLE_HOURS)
 	_set_journey_controls_enabled(false)
-	_clear_children(_haggle_holder)
+	NodeUtil.clear_children(_haggle_holder)
 
 	var intro := Label.new()
 	intro.text = tr("UI_ROAD_HAGGLE_INTRO") % max_price
@@ -2983,7 +2983,7 @@ func _on_haggle_failed(_reputation_penalty: int) -> void:
 	_close_haggling()
 
 func _close_haggling() -> void:
-	_clear_children(_haggle_holder)
+	NodeUtil.clear_children(_haggle_holder)
 	_pending_haggle_max = 0
 	_set_journey_controls_enabled(true)
 	_refresh_state()
@@ -3063,7 +3063,7 @@ func _on_merchant_dialogue_closed() -> void:
 func _open_debt_panel() -> void:
 	if _debt_panel != null:
 		return
-	_clear_children(_debt_holder)
+	NodeUtil.clear_children(_debt_holder)
 
 	var title := Label.new()
 	title.text = tr("UI_ROAD_DEBT_TITLE")
@@ -3080,7 +3080,7 @@ func _open_debt_panel() -> void:
 	_debt_holder.add_child(close_button)
 
 func _close_debt_panel() -> void:
-	_clear_children(_debt_holder)
+	NodeUtil.clear_children(_debt_holder)
 	_debt_panel = null
 
 ## Liderlik devrinin töreni (bkz. SuccessionPanel) - `_has_open_panel()`'e
@@ -3122,7 +3122,7 @@ func _on_replan_pressed() -> void:
 	_build_replan_panel()
 
 func _build_replan_panel() -> void:
-	_clear_children(_replan_holder)
+	NodeUtil.clear_children(_replan_holder)
 
 	var title := Label.new()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
@@ -3247,7 +3247,7 @@ func _on_caravan_turn_finished() -> void:
 		_present_event(event)
 
 func _close_replan() -> void:
-	_clear_children(_replan_holder)
+	NodeUtil.clear_children(_replan_holder)
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
@@ -3277,7 +3277,7 @@ func _on_arrive_pressed() -> void:
 	_enter_city_button.visible = true
 
 func _render_arrival_summary(payout: Dictionary) -> void:
-	_clear_children(_arrival_panel)
+	NodeUtil.clear_children(_arrival_panel)
 
 	var title := Label.new()
 	title.text = tr("UI_ROAD_ARRIVAL_TITLE")
@@ -3466,11 +3466,6 @@ func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	if color != Color.WHITE:
 		label.modulate = color
 	_log_list.add_child(label)
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
 
 ## Yol bir kök ekrandır: sefer başlayınca yığın temizlenir, çünkü yoldan
 ## "geri" diye bir şey yok - varılır, dönülür ya da rota değiştirilir.

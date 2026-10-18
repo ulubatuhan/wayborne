@@ -138,7 +138,7 @@ func start_combat(
 	_selected_skill = null
 	_result_label.text = ""
 	_continue_button.visible = false
-	_clear_children(_log_list)
+	NodeUtil.clear_children(_log_list)
 	_bark_texts.clear()
 	_reset_fx()
 
@@ -352,7 +352,7 @@ func _refresh() -> void:
 
 func _refresh_header() -> void:
 	_round_label.text = tr("UI_COMBAT_ROUND") % _encounter.round_number
-	_clear_children(_order_strip)
+	NodeUtil.clear_children(_order_strip)
 	if _encounter.is_over():
 		return
 	var active := _encounter.get_active_unit()
@@ -381,7 +381,7 @@ func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order:
 		var old := child as CombatUnitSlot
 		if old != null and _slot_by_unit.get(old.unit) == old:
 			_slot_by_unit.erase(old.unit)
-	_clear_children(row)
+	NodeUtil.clear_children(row)
 
 	var ordered: Array[CombatUnit] = units.duplicate()
 	ordered.sort_custom(func(a, b): return a.position < b.position)
@@ -717,8 +717,8 @@ func _current_targets() -> Array[CombatUnit]:
 	return _encounter.get_valid_targets(_encounter.get_active_unit(), _selected_skill)
 
 func _refresh_actions() -> void:
-	_clear_children(_skill_row)
-	_clear_children(_extra_row)
+	NodeUtil.clear_children(_skill_row)
+	NodeUtil.clear_children(_extra_row)
 
 	if _encounter.is_over() or not _encounter.is_player_turn():
 		_active_label.text = ""
@@ -950,8 +950,3 @@ func _on_continue_pressed() -> void:
 	_encounter.write_back_party()
 	_continue_button.visible = false
 	combat_finished.emit(victory, xp_awarded, downed_count, dead)
-
-func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
