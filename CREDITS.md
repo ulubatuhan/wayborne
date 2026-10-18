@@ -32,12 +32,20 @@ MakeHuman topluluk giysileri — https://static.makehumancommunity.org/assets/as
 
 Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenine uyarlandı (sığdırma, katmanlama, renk), render edilip 2B karelere çevrildi.
 
-## CC0 (atıf gerekmez)
+## CC0 (atıf gerekmez, yine de anılıyor)
 
-- Quaternius — Medieval Village Pack, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals
-- Kenney — Castle Kit, Survival Kit, Particle Pack
-- Kay Lousberg — KayKit Medieval Hexagon
-- MakeHuman topluluğu — culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg'nin CC0 giysileri
-- Blender Studio — Human Base Meshes; MPFB2
+| üretici | paket | bağlantı |
+|---|---|---|
+| Quaternius | Medieval Village Pack, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals | https://quaternius.com |
+| Kenney | Castle Kit, Survival Kit, Particle Pack | https://kenney.nl |
+| Kay Lousberg | KayKit Medieval Hexagon | https://kaylousberg.com |
+| MakeHuman topluluğu | culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg'nin CC0 giysileri | https://static.makehumancommunity.org/assets/assetpacks.html |
+| Blender Studio | Human Base Meshes | https://studio.blender.org |
+| MPFB2 (MakeHuman) | gövde ve giysi üreteci | https://github.com/makehumancommunity/mpfb2 |
+| ambientCG | Bricks097, Fabric085, Ground106, Metal041B, Metal063, Paper005, PavingStones119, Planks037A, Plaster001, Rock064 (yalnızca renk haritaları) | https://ambientcg.com |
 
-Ayrıntılı tablolar: `art_source/models/clothes/makehuman/LICENSES.md`, `art_source/models/props/LICENSES.md`.
+## Yazı tipleri (SIL OFL 1.1)
+
+EB Garamond, IM Fell English SC, Grenze Gotisch, Noto Serif SC ve Noto Serif JP (alt kümeler). Lisans metinleri `data/assets/fonts/*-OFL.txt`.
+
+Ayrıntılı tablolar: `art_source/models/clothes/makehuman/LICENSES.md`, `art_source/models/props/LICENSES.md`, `art_source/textures/ambientcg/LICENSES.md`.

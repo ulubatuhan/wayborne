@@ -38,6 +38,8 @@ const CC0_PACKS: Array = [
 	"Kay Lousberg - KayKit Medieval Hexagon (kaylousberg.com)",
 	"MakeHuman community - CC0 clothes by culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg",
 	"Blender Studio - Human Base Meshes; MPFB2 (MakeHuman)",
+	"ambientCG - Bricks097, Fabric085, Ground106, Metal041B, Metal063, Paper005, PavingStones119, Planks037A, Plaster001, Rock064 (ambientcg.com)",
+	"Fonts (SIL OFL) - EB Garamond, IM Fell English SC, Grenze Gotisch, Noto Serif SC, Noto Serif JP",
 ]
 
 ## Ekranda gösterilen metin: önce CC-BY yazarlar (yazar başına kalemleri),
