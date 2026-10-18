@@ -54,6 +54,9 @@ func _ready() -> void:
 	add_child(_ink)
 	var scene := get_tree().current_scene
 	_last_scene_id = scene.get_instance_id() if scene != null else 0
+	# Her kare sahne kimliği yoklamak yerine yalnızca kökte bir şey eklenince
+	# ve go() çağrılınca işliyor (görev 5.1, O-7); ilk sahne gelene kadar açık.
+	get_tree().node_added.connect(_on_node_added)
 
 ## Bir sonraki sahne mürekkepte bu kadar daha beklesin (şehre varış).
 func hold_next(seconds: float) -> void:
@@ -81,6 +84,7 @@ func go(path: String) -> void:
 		# Sayfa hemen görünür oluyor - aşağıdaki bekleme boyunca ekranda
 		# duran şey bu kare, yeni sahnenin henüz bitmemiş inşası değil.
 		_show_snapshot(snapshot)
+	set_process(true)
 	var error := get_tree().change_scene_to_file(path)
 	if error != OK:
 		_hide_page()
@@ -164,6 +168,10 @@ func _kill_tween() -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 
+func _on_node_added(node: Node) -> void:
+	if node.get_parent() == get_tree().root:
+		set_process(true)
+
 func _process(_delta: float) -> void:
 	var scene := get_tree().current_scene
 	var scene_id := scene.get_instance_id() if scene != null else 0
@@ -171,9 +179,14 @@ func _process(_delta: float) -> void:
 	# `current_scene` null. O ara kare bir "geliş" değil - bayrak ancak yeni
 	# sahne gerçekten gelince tüketiliyor, yoksa geliş go()'nun kendi
 	# geçişini öldürüp üstüne mürekkep basıyordu (ölçüldü).
-	if scene_id == _last_scene_id or scene_id == 0:
+	if scene_id == 0:
+		return
+	if scene_id == _last_scene_id:
+		# Değişiklik yok: bir sonraki kök eklemesine ya da go()'ya kadar dinlen.
+		set_process(false)
 		return
 	_last_scene_id = scene_id
+	set_process(false)
 	if _handled_change:
 		_handled_change = false
 		return

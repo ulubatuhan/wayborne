@@ -45,6 +45,7 @@ func run(t) -> void:
 	_test_every_screen_is_reachable(t, nav, edges)
 	_test_every_screen_has_an_exit(t, nav)
 	_test_labels_never_blank(t, nav)
+	_test_escape_goes_back_from_every_sub_screen(t, nav)
 	_test_titles_use_page_title_variation(t, nav)
 	_test_exit_buttons_outside_scroll(t)
 	_test_node_paths_resolve(t, nav)
@@ -184,6 +185,29 @@ func _test_every_screen_has_an_exit(t, nav) -> void:
 			or source.contains("get_tree().quit()")
 		)
 		t.ok(has_exit, "ekranın çıkışı var: %s" % script_path)
+
+## Esc her alt ekranda bir üst ekrana döner (görev Y-H04): kök olmayan,
+## yolun kendisi olmayan ve yığını dolu her Nav ekranı için karar "evet";
+## kökler, yol ve boş yığın için "hayır".
+func _test_escape_goes_back_from_every_sub_screen(t, nav) -> void:
+	var ui_theme = load("res://scripts/autoload/ui_theme.gd")
+	var screens := 0
+	var all_scenes: Array[String] = []
+	var constants: Dictionary = nav.get_script_constant_map()
+	for property in constants:
+		var value = constants[property]
+		if value is String and String(value).begins_with("res://scenes/") and String(value).ends_with(".tscn"):
+			all_scenes.append(String(value))
+	for scene_path in all_scenes:
+		var is_root: bool = nav.is_root(scene_path)
+		var exits: bool = ui_theme.esc_exits(scene_path, is_root, 1, nav.JOURNEY)
+		if is_root or scene_path == nav.JOURNEY:
+			t.not_ok(exits, "Esc bu ekranda geri götürmez (kendi çıkışı var): %s" % scene_path)
+		else:
+			screens += 1
+			t.ok(exits, "Esc bu alt ekrandan geri götürür: %s" % scene_path)
+			t.not_ok(ui_theme.esc_exits(scene_path, false, 0, nav.JOURNEY), "boş yığında Esc ekranı terk etmez: %s" % scene_path)
+	t.ok(screens >= 10, "Esc kontrolü en az on alt ekranı kapsıyor (%d)" % screens)
 
 func _test_labels_never_blank(t, nav) -> void:
 	for path in _scene_paths(nav):

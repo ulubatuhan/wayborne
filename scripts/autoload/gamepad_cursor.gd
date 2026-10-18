@@ -59,6 +59,15 @@ func _ready() -> void:
 	_icon = load(ICON_SCRIPT).new()
 	add_child(_icon)
 	_icon.visible = false
+	# Kumanda yokken her kare yoklamak gereksiz (görev 5.1, O-6): takılıp
+	# çıkarılınca açılıp kapanıyor.
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
+	set_process(not Input.get_connected_joypads().is_empty())
+
+func _on_joy_connection_changed(_device_id: int, _connected: bool) -> void:
+	if Input.get_connected_joypads().is_empty() and _active:
+		_deactivate()
+	set_process(not Input.get_connected_joypads().is_empty())
 
 func _input(event: InputEvent) -> void:
 	if _synthetic or not _active:

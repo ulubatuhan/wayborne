@@ -21,8 +21,33 @@ var _feedback_script: Script
 func _init() -> void:
 	load(THEME_SCRIPT_PATH).install()
 
+const NAV_PATH: String = "res://scripts/world/nav.gd"
+
 func _ready() -> void:
 	get_tree().node_added.connect(_on_node_added)
+
+## Esc her alt ekrandan bir üst ekrana döner (görev Y-H04): ekranların
+## çoğunun yalnızca bir geri düğmesi vardı, klavyede sıkışılıyordu. Kendi Esc'ini
+## işleyen ekran ve paneller (`_input`) olayı zaten tüketiyor, buraya düşen
+## yalnızca sahipsiz olan. Kökler (şehir, merkez, menü) ve yol kendi çıkışını taşır.
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	var nav = load(NAV_PATH)
+	if not esc_exits(scene.scene_file_path, nav.is_root(scene.scene_file_path), nav.depth(), nav.JOURNEY):
+		return
+	get_viewport().set_input_as_handled()
+	var ink := get_node_or_null("/root/SceneInk")
+	if ink != null:
+		ink.go(nav.back())
+
+## Saf karar: Esc bu ekranda geri götürür mü. Kök olmayan, yolun kendisi
+## olmayan ve geri dönülecek bir yığını olan her ekranda evet.
+static func esc_exits(scene_path: String, is_root: bool, depth: int, journey_path: String) -> bool:
+	return not scene_path.is_empty() and not is_root and scene_path != journey_path and depth > 0
 
 ## Her düğme aynı minimal kutuyu varsayılan temadan giyiyor; burada
 ## yalnızca temanın ulaşamadığı iki şey veriliyor: düğmenin eldeki hissi
