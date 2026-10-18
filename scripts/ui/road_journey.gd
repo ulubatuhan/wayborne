@@ -471,6 +471,12 @@ var _dev_row: HBoxContainer
 var _walk_hint: Label
 var _conditions_label: Label
 var _last_conditions: String = ""
+## Metin kurmadan önce karşılaştırılan girdiler (görev 2.2): yalnızca gösterilen
+## değer değişince tr() ve biçimleme çalışsın.
+var _last_conditions_key: Array = []
+var _last_progress_percent: int = -1
+var _last_command_key: Array = []
+var _last_talk_key: Array = []
 var _state_label: Label
 var _card_panel: VBoxContainer
 var _haggle_holder: VBoxContainer
@@ -1283,16 +1289,22 @@ func _refresh_command_panel() -> void:
 	fast.disabled = not can_push or not _orders_enabled
 	if _debt_button != null:
 		_debt_button.disabled = not _orders_enabled
-	fast.tooltip_text = (
-		"%s (%d)" % [tr("UI_ROAD_CMD_FAST"), PACE_COMMAND_COUNT]
-		if can_push else tr("UI_ROAD_ORDER_FAST_LOCKED")
-	)
 	_meal_policy_button.disabled = not _orders_enabled
+	var command_key := [
+		can_push, "" if _session == null else _session.meal_policy_mode, TranslationServer.get_locale()
+	]
+	if command_key != _last_command_key:
+		_last_command_key = command_key
+		fast.tooltip_text = (
+			"%s (%d)" % [tr("UI_ROAD_CMD_FAST"), PACE_COMMAND_COUNT]
+			if can_push else tr("UI_ROAD_ORDER_FAST_LOCKED")
+		)
+		if _session != null:
+			_meal_policy_button.text = "%s: %s" % [
+				tr("UI_ROAD_ORDER_MEAL"),
+				tr(MEAL_POLICY_LABELS.get(_session.meal_policy_mode, "UI_MEAL_POLICY_ALL")),
+			]
 	if _session != null:
-		_meal_policy_button.text = "%s: %s" % [
-			tr("UI_ROAD_ORDER_MEAL"),
-			tr(MEAL_POLICY_LABELS.get(_session.meal_policy_mode, "UI_MEAL_POLICY_ALL")),
-		]
 		if _camp_order_button.button_pressed != _session.standing_camp_at_dusk:
 			_camp_order_button.set_pressed_no_signal(_session.standing_camp_at_dusk)
 	_refresh_talk_merchant_row()
@@ -1304,6 +1316,10 @@ func _refresh_talk_merchant_row() -> void:
 		return
 	var locked := _session.caravan.merchant_names.is_empty()
 	_talk_merchant_button.disabled = locked or not _orders_enabled
+	var key := [locked, TranslationServer.get_locale()]
+	if key == _last_talk_key:
+		return
+	_last_talk_key = key
 	_talk_merchant_button.tooltip_text = (
 		tr("UI_ROAD_CMD_TALK_MERCHANT_LOCKED") if locked
 		else "%s (%d)" % [tr("UI_ROAD_CMD_TALK_MERCHANT"), PACE_COMMAND_COUNT + 1]
@@ -2177,7 +2193,10 @@ func _refresh_time_ui() -> void:
 		terrain_day / maxf(1.0, float(_journey.terrain_days)), terrain_day
 	)
 	_progress_bar.value = progress
-	_progress_bar.tooltip_text = tr("UI_ROAD_PROGRESS_TOOLTIP") % int(round(progress * 100.0))
+	var percent := int(round(progress * 100.0))
+	if percent != _last_progress_percent:
+		_last_progress_percent = percent
+		_progress_bar.tooltip_text = tr("UI_ROAD_PROGRESS_TOOLTIP") % percent
 	_position_encounter()
 
 	# Kervan şeritten ışığı ve yürüme hızını alıyor: iki ayrı yerde
@@ -2252,13 +2271,15 @@ func _refresh_conditions() -> void:
 	var biome := ArtPalette.FALLBACK_BIOME
 	if _terrain != null:
 		biome = _terrain.biome_at(_terrain_day())
+	var key := [biome, _weather, _pace_key, TranslationServer.get_locale()]
+	if key == _last_conditions_key:
+		return
+	_last_conditions_key = key
 	var text := "%s · %s · %s" % [
 		tr("UI_ROAD_TERRAIN_NOW") % tr(RouteTerrain.biome_name_key(biome)),
 		tr("UI_ROAD_WEATHER") % tr(RouteWeather.name_key(_weather)),
 		tr("UI_ROAD_PACE_LABEL") % tr(_pace_key),
 	]
-	if text == _last_conditions:
-		return
 	_last_conditions = text
 	_conditions_label.text = text
 	_conditions_label.tooltip_text = text
