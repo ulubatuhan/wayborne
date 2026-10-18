@@ -788,6 +788,19 @@ the walking figures are the game's strongest asset) but to deepen it.
     seated pose in the first half and standing in the second
     (`WalkFigure._draw_transition`) - never naked, never floating.
 
+- **Camp walking has a ceiling, and the camp clock starts when everyone is at the fire (task 12.2c).** Gathering used to
+  last 30-60 real seconds (the farthest figure's brisk speed bound everyone; party members were dealt to fires in turn
+  and walked twenty body-heights) and `CAMP_HOURS` started at the press, so the walk ate the camp. Now each figure walks
+  its own way (`_figure_gather_seconds`), capped at `MAX_GATHER_SECONDS` (3 s at 1x) and at twice its brisk speed; party
+  members go to the *nearest* fire. The game-speed multiplier scales the walk (`set_gather_time_scale`, never below 1x).
+  A fire lights when its first figure arrives (`_update_fires`; wood only before). `JourneyController.camp_ends_at`
+  starts the `CAMP_HOURS` counter when `is_camp_settled()`; while people walk (`is_camp_transitioning()`) the clock runs at
+  normal speed, not the camp's 0.5x. The task text asked both for <= 3 s and for <= 0.5 game hours; those disagree
+  (0.5 h is under one real second at 1x), the seconds were kept.
+- **The world scale holds while the caravan is not walking (task 12.2b).** `pixels_per_day` was re-derived as ground speed
+  over day rate; at camp the day rate fell toward zero and the scale blew up, so road stops flew out of frame. See
+  `RoadJourney.world_scale_holds`.
+
 ### Audio Rules
 
 - **One place knows which screen plays what.** `AudioManager` maps screens
