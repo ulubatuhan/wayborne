@@ -87,7 +87,15 @@ var _shocks: Array = []
 var _city_gold: Dictionary = {}
 
 func get_city_gold(location_id: String) -> int:
-	return int(round(float(_city_gold.get(location_id, CITY_GOLD_DEFAULT))))
+	return int(round(float(_city_gold.get(location_id, default_city_gold(location_id)))))
+
+## Hazinenin dinlenme noktası: kasabanın ve kervansarayın ticaret payı
+## şehrinkinden düşük (bkz. SettlementRules.TRADE_SHARE).
+static func default_city_gold(location_id: String) -> float:
+	var location := WorldMapData.get_location_by_id(location_id)
+	if location == null:
+		return CITY_GOLD_DEFAULT
+	return CITY_GOLD_DEFAULT * SettlementRules.trade_share(location.settlement_type)
 
 ## Oyuncu alım yaptıkça şehrin kesesi dolar - MAX'ta kenetlenir.
 func earn_city_gold(location_id: String, amount: int) -> void:
@@ -216,8 +224,9 @@ func advance_day(day: int) -> void:
 	var updated_gold: Dictionary = {}
 	for location_id in _city_gold:
 		var current := float(_city_gold[location_id])
-		var next_value := current + (CITY_GOLD_DEFAULT - current) * CITY_GOLD_REGEN_RATE
-		if absf(next_value - CITY_GOLD_DEFAULT) > 1.0:
+		var rest := default_city_gold(location_id)
+		var next_value := current + (rest - current) * CITY_GOLD_REGEN_RATE
+		if absf(next_value - rest) > 1.0:
 			updated_gold[location_id] = next_value
 	_city_gold = updated_gold
 

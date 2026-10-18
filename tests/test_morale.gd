@@ -24,7 +24,7 @@ func run(t) -> void:
 	_test_start_journey_uses_departure_morale(t)
 
 func _plan() -> CaravanPlan:
-	return CaravanPlan.new(WorldMapData.get_location_by_id("test_loc_b"), 5)
+	return CaravanPlan.new(WorldMapData.get_location_by_id("zelmarin"), 5)
 
 ## Yolda geçen her günün bedeli var - ama yalnızca yürümek kervanı isyana
 ## sürüklemesin diye bir tabanda duruyor.
@@ -56,7 +56,7 @@ func _test_drift_only_on_the_road(t) -> void:
 	session.advance_day()
 	t.eq(session.caravan.morale, before, "şehirdeyken gün geçmesi morali yemez")
 
-	session.start_journey("test_loc_b", 5, 0.2, _plan())
+	session.start_journey("zelmarin", 5, 0.2, _plan())
 	var on_the_road := session.caravan.morale
 	session.advance_day()
 	t.ok(session.caravan.morale < on_the_road, "yoldayken her gün moral aşınır")
@@ -203,7 +203,7 @@ func _test_mutiny_threshold_is_reachable(t) -> void:
 	var grim := GameSession.new(200, 200)
 	grim.change_stress(GameSession.MAX_STRESS)
 	grim.market.add_shock(grim.current_location_id, "", 2.0, 400)
-	grim.start_journey("test_loc_b", 20, 0.6, _plan())
+	grim.start_journey("zelmarin", 20, 0.6, _plan())
 	for _day in 20:
 		grim.advance_day()
 	t.ok(
@@ -221,7 +221,7 @@ func _test_mutiny_threshold_is_reachable(t) -> void:
 
 	# İyi bir dünyadan çıkan kısa sefer inmemeli.
 	var good := GameSession.new(500, 200)
-	good.start_journey("test_loc_b", 5, 0.2, _plan())
+	good.start_journey("zelmarin", 5, 0.2, _plan())
 	for _day in 5:
 		good.advance_day()
 	t.ok(
@@ -233,7 +233,7 @@ func _test_start_journey_uses_departure_morale(t) -> void:
 	var session := GameSession.new(500, 60)
 	session.change_stress(GameSession.MAX_STRESS)
 	var expected := session.get_departure_morale()
-	session.start_journey("test_loc_b", 5, 0.2, _plan())
+	session.start_journey("zelmarin", 5, 0.2, _plan())
 	t.eq(session.caravan.morale, expected, "sefer hesaplanan moralle başlar")
 	t.ok(session.caravan.morale < CaravanState.MAX_MORALE, "ve bu dolu moral değil")
 

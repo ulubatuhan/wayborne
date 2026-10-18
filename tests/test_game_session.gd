@@ -338,7 +338,7 @@ func _test_save_round_trip(t) -> void:
 	var original := GameSession.new(300, 15, 2)
 	original.reputation = 7
 	original.total_days_elapsed = 12
-	original.learn_route("test_loc_a", "test_loc_b")
+	original.learn_route("orvahel", "zelmarin")
 	original.set_flag("deneme_bayragi")
 	original.owned_wagon_damaged = 1
 	original.add_equipment(EquipmentCatalog.RING_MARKSMAN, 2)
@@ -362,8 +362,8 @@ func _test_save_round_trip(t) -> void:
 	t.eq(restored.total_days_elapsed, original.total_days_elapsed, "gün sayacı korunur")
 	t.eq(restored.owned_wagon_count, original.owned_wagon_count, "vagon sayısı korunur")
 	t.eq(restored.owned_wagon_damaged, original.owned_wagon_damaged, "hasar korunur")
-	t.ok(restored.is_route_known("test_loc_a", "test_loc_b"), "öğrenilen rota korunur")
-	t.ok(restored.is_route_known("test_loc_b", "test_loc_a"), "rota iki yönlü kaydedilir")
+	t.ok(restored.is_route_known("orvahel", "zelmarin"), "öğrenilen rota korunur")
+	t.ok(restored.is_route_known("zelmarin", "orvahel"), "rota iki yönlü kaydedilir")
 	t.ok(restored.has_flag("deneme_bayragi"), "bayraklar korunur")
 	t.eq(restored.get_equipment_count(EquipmentCatalog.RING_MARKSMAN), 2, "ekipman deposu korunur")
 	t.eq(restored.owned_dogs, original.owned_dogs, "köpek sayısı korunur")

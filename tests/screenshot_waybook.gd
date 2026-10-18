@@ -73,7 +73,7 @@ func _lineage_session() -> GameSession:
 	session.resolve_deaths(first, "LEDGER_CAUSE_STARVED", WorldMapData.START_LOCATION_ID)
 	session.total_days_elapsed = 43
 	var leader: Array[CharacterData] = [session.get_player_character()]
-	var result := session.resolve_deaths(leader, "LEDGER_CAUSE_COMBAT_WILDLIFE", "test_loc_b")
+	var result := session.resolve_deaths(leader, "LEDGER_CAUSE_COMBAT_WILDLIFE", "zelmarin")
 	if bool(result.get("awaiting_heir", false)):
 		session.appoint_heir(result["heir_candidates"][0])
 	return session

@@ -10,9 +10,10 @@ extends SceneTree
 
 const SIZE: Vector2i = Vector2i(1920, 1080)
 const OUT_DIR: String = "user://grim_ui/"
+## Eski taslak kasaba resimleri (görev P17'ye kadar geçici); ad yalnızca etiket.
 const CITY_KEYS: Dictionary = {
-	"karakonak": "CITY_A_NAME", "kurtbogazi": "CITY_B_NAME", "ipekevi": "CITY_C_NAME",
-	"demirkapi": "CITY_D_NAME", "yesilova": "CITY_E_NAME",
+	"karakonak": "Karakonak", "kurtbogazi": "Kurtbogazi", "ipekevi": "Ipekevi",
+	"demirkapi": "Demirkapi", "yesilova": "Yesilova",
 }
 
 func _init() -> void:

@@ -22,6 +22,9 @@ static func get_buy_price(
 	var multiplier := 1.0
 	if location != null and location.produces.has(item.item_id):
 		multiplier = PRODUCE_BUY_MULTIPLIER
+	if location != null:
+		# Yerleşim türü: kasabada temel mal ucuz, kervansarayda her şey pahalı.
+		multiplier *= SettlementRules.buy_multiplier(location.settlement_type, item.item_id)
 	multiplier *= _dynamic_multiplier(item, location, conditions, day)
 	return maxi(1, int(round(item.base_price * multiplier)))
 
@@ -31,6 +34,9 @@ static func get_sell_price(
 	var multiplier := BASE_SELL_MULTIPLIER
 	if location != null and location.demands.has(item.item_id):
 		multiplier = DEMAND_SELL_MULTIPLIER
+	if location != null:
+		# Kervansaray yolcudan ucuza alır.
+		multiplier *= SettlementRules.sell_multiplier(location.settlement_type, item.item_id)
 	multiplier *= _dynamic_multiplier(item, location, conditions, day)
 	return maxi(1, int(round(item.base_price * multiplier)))
 

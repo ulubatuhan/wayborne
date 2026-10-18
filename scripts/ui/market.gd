@@ -75,7 +75,12 @@ func _ready() -> void:
 	_content.get_node("ContentRow/InventoryPanel/InventoryTitle").text = tr("UI_MARKET_INVENTORY")
 	_current_location = WorldMapData.get_location_by_id(_session.current_location_id)
 	_inventory_grid.columns = GRID_COLUMNS
-	_shop_items = ItemCatalog.get_trade_goods()
+	# Kasaba ve kervansarayda her mal bulunmaz (bkz. Location.available);
+	# bulunmayan mal ne alınır ne satılır.
+	_shop_items = []
+	for item in ItemCatalog.get_trade_goods():
+		if _current_location == null or _current_location.sells(item.item_id):
+			_shop_items.append(item)
 
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_back_button.text = Nav.back_label()

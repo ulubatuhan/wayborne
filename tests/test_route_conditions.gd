@@ -34,8 +34,8 @@ func _test_key_is_undirected(t) -> void:
 		"çığ tek yönlü düşmez - anahtar yönsüz"
 	)
 
-	var forward := _route("test_loc_a", "test_loc_b")
-	var backward := _route("test_loc_b", "test_loc_a")
+	var forward := _route("orvahel", "zelmarin")
+	var backward := _route("zelmarin", "orvahel")
 	var conditions := RouteConditions.new()
 	for day in [0, 7, 19, 44, 91]:
 		t.eq(
@@ -46,7 +46,7 @@ func _test_key_is_undirected(t) -> void:
 ## Doğal durum saklanmıyor, tohumlanıp hesaplanıyor: kaydı yeniden yüklemek
 ## dünyayı yeniden atmamalı, yoksa kapalı geçit kayıt yükleyerek açtırılırdı.
 func _test_natural_state_is_reproducible(t) -> void:
-	var route := _route("test_loc_a", "test_loc_d")
+	var route := _route("orvahel", "vorgat")
 	var first := RouteConditions.new()
 	var second := RouteConditions.new()
 	for day in range(0, 90):
@@ -88,17 +88,17 @@ func _test_states_actually_occur(t) -> void:
 	t.ok(counts[RouteConditions.State.CLOSED] > 0, "kapanan geçitler oluyor")
 
 func _test_state_modifiers(t) -> void:
-	var route := _route("test_loc_a", "test_loc_b")
+	var route := _route("orvahel", "zelmarin")
 	var conditions := RouteConditions.new()
 
-	conditions.add_override("test_loc_a", "test_loc_b", RouteConditions.State.SLOW, 100)
+	conditions.add_override("orvahel", "zelmarin", RouteConditions.State.SLOW, 100)
 	t.ok(
 		conditions.get_travel_days(route, 0) > route.travel_days,
 		"çamur yolu uzatır"
 	)
 	t.ok(conditions.is_open(route, 0), "çamurlu yol kapalı değil, sadece yavaş")
 
-	conditions.add_override("test_loc_a", "test_loc_b", RouteConditions.State.PERILOUS, 100)
+	conditions.add_override("orvahel", "zelmarin", RouteConditions.State.PERILOUS, 100)
 	t.eq(
 		conditions.get_travel_days(route, 0), route.travel_days,
 		"eşkıya yolu uzatmaz - lojistik değil askerî sorun"
@@ -108,17 +108,17 @@ func _test_state_modifiers(t) -> void:
 		"eşkıya tehlikeyi yükseltir"
 	)
 
-	conditions.add_override("test_loc_a", "test_loc_b", RouteConditions.State.CLOSED, 100)
+	conditions.add_override("orvahel", "zelmarin", RouteConditions.State.CLOSED, 100)
 	# Kapalı geçit ancak şehri dünyadan koparmıyorsa gerçekten kapalı -
 	# o yüzden Kurtboğazı'nın diğer çıkışı açık sabitleniyor (bkz.
 	# _test_last_exit_stays_open).
-	conditions.add_override("test_loc_b", "test_loc_d", RouteConditions.State.OPEN, 100)
+	conditions.add_override("zelmarin", "vorgat", RouteConditions.State.OPEN, 100)
 	t.eq(conditions.get_state(route, 0), RouteConditions.State.CLOSED, "geçit kapandı")
 	t.ok(not conditions.is_open(route, 0), "kapalı geçitten geçilmez")
 
 	# Süre asla sıfıra inmez, tehlike asla taşmaz.
 	t.ok(conditions.get_travel_days(route, 0) >= 1, "yol en az bir gün sürer")
-	var deadly := _route("test_loc_a", "test_loc_e")
+	var deadly := _route("orvahel", "serai_seyvan")
 	var perilous := RouteConditions.new()
 	perilous.add_override(
 		deadly.from_location_id, deadly.to_location_id, RouteConditions.State.PERILOUS, 100
@@ -126,39 +126,39 @@ func _test_state_modifiers(t) -> void:
 	t.ok(perilous.get_danger(deadly, 0) <= 1.0, "tehlike 1.0'ı aşmaz")
 
 func _test_overrides_win_and_expire(t) -> void:
-	var route := _route("test_loc_d", "test_loc_e")
+	var route := _route("vorgat", "serai_seyvan")
 	var conditions := RouteConditions.new()
 
 	# İki ucun da başka açık çıkışı olsun, yoksa emniyet kuralı (son çıkış
 	# kapanmaz) ölçülmek isteneni gizler.
-	conditions.add_override("test_loc_d", "test_loc_b", RouteConditions.State.OPEN, 999)
-	conditions.add_override("test_loc_e", "test_loc_c", RouteConditions.State.OPEN, 999)
-	conditions.add_override("test_loc_d", "test_loc_e", RouteConditions.State.CLOSED, 10)
-	t.ok(conditions.has_override("test_loc_d", "test_loc_e", 10), "müdahale son güne kadar geçerli")
+	conditions.add_override("vorgat", "zelmarin", RouteConditions.State.OPEN, 999)
+	conditions.add_override("serai_seyvan", "orsolune", RouteConditions.State.OPEN, 999)
+	conditions.add_override("vorgat", "serai_seyvan", RouteConditions.State.CLOSED, 10)
+	t.ok(conditions.has_override("vorgat", "serai_seyvan", 10), "müdahale son güne kadar geçerli")
 	t.eq(
 		conditions.get_state(route, 5), RouteConditions.State.CLOSED,
 		"olayın açtığı hal doğal zarın önüne geçer"
 	)
 	# Ters yönden sorulunca da aynı - çığ iki yönü birden kapatır.
 	t.eq(
-		conditions.get_state(_route("test_loc_e", "test_loc_d"), 5),
+		conditions.get_state(_route("serai_seyvan", "vorgat"), 5),
 		RouteConditions.State.CLOSED, "müdahale iki yöne birden işler"
 	)
 
-	t.ok(not conditions.has_override("test_loc_d", "test_loc_e", 11), "süresi dolan müdahale geçmez")
+	t.ok(not conditions.has_override("vorgat", "serai_seyvan", 11), "süresi dolan müdahale geçmez")
 	conditions.advance_day(11)
 	t.eq(
 		conditions.get_state(route, 11),
 		RouteConditions.natural_state(
-			RouteConditions.route_key("test_loc_d", "test_loc_e"), route.danger_level, 11
+			RouteConditions.route_key("vorgat", "serai_seyvan"), route.danger_level, 11
 		),
 		"süresi dolunca yol doğal haline döner"
 	)
 
-	conditions.add_override("test_loc_d", "test_loc_e", RouteConditions.State.CLOSED, 50)
-	conditions.clear_override("test_loc_d", "test_loc_e")
+	conditions.add_override("vorgat", "serai_seyvan", RouteConditions.State.CLOSED, 50)
+	conditions.clear_override("vorgat", "serai_seyvan")
 	t.ok(
-		not conditions.has_override("test_loc_d", "test_loc_e", 20),
+		not conditions.has_override("vorgat", "serai_seyvan", 20),
 		"müdahale elle de kaldırılabilir - devriye yolu temizler"
 	)
 
@@ -183,13 +183,13 @@ func _test_detour_path(t) -> void:
 	# Doğrudan yolu kapat, dolambaçlı yol hâlâ bulunmalı. Kurtboğazı'nın
 	# öbür çıkışı açık sabitleniyor - kapanan yol o şehrin son çıkışı
 	# olsaydı emniyet kuralı onu zaten açık tutardı.
-	conditions.add_override("test_loc_b", "test_loc_d", RouteConditions.State.OPEN, 100)
-	conditions.add_override("test_loc_a", "test_loc_b", RouteConditions.State.CLOSED, 100)
-	var path := conditions.find_open_path("test_loc_a", "test_loc_b", 0)
+	conditions.add_override("zelmarin", "vorgat", RouteConditions.State.OPEN, 100)
+	conditions.add_override("orvahel", "zelmarin", RouteConditions.State.CLOSED, 100)
+	var path := conditions.find_open_path("orvahel", "zelmarin", 0)
 	t.ok(path.size() >= 3, "kapalı yola dolambaçlı alternatif bulunur")
-	t.eq(path[0], "test_loc_a", "yol nerede olduğunla başlar")
-	t.eq(path[path.size() - 1], "test_loc_b", "yol hedefte biter")
-	t.ok(not path.has("test_loc_b") or path.count("test_loc_b") == 1, "hedef bir kez geçer")
+	t.eq(path[0], "orvahel", "yol nerede olduğunla başlar")
+	t.eq(path[path.size() - 1], "zelmarin", "yol hedefte biter")
+	t.ok(not path.has("zelmarin") or path.count("zelmarin") == 1, "hedef bir kez geçer")
 
 	# Ardışık her adım gerçek ve açık bir rota olmalı.
 	for index in range(path.size() - 1):
@@ -198,11 +198,11 @@ func _test_detour_path(t) -> void:
 		t.ok(conditions.is_open(leg, 0), "yolun her adımı açık")
 
 	t.ok(
-		conditions.find_open_path("test_loc_a", "test_loc_a", 0).is_empty(),
+		conditions.find_open_path("orvahel", "orvahel", 0).is_empty(),
 		"bulunduğun şehre yol aranmaz"
 	)
 	t.ok(
-		conditions.find_open_path("test_loc_a", "yok_boyle_sehir", 0).is_empty(),
+		conditions.find_open_path("orvahel", "yok_boyle_sehir", 0).is_empty(),
 		"olmayan şehre yol yok"
 	)
 
@@ -211,13 +211,13 @@ func _test_detour_path(t) -> void:
 ## ama vardır.
 func _test_last_exit_stays_open(t) -> void:
 	var sealed := RouteConditions.new()
-	for route in WorldMapData.get_routes_from("test_loc_a"):
+	for route in WorldMapData.get_routes_from("orvahel"):
 		sealed.add_override(
 			route.from_location_id, route.to_location_id, RouteConditions.State.CLOSED, 100
 		)
 
 	var open_exits := 0
-	for route in WorldMapData.get_routes_from("test_loc_a"):
+	for route in WorldMapData.get_routes_from("orvahel"):
 		t.eq(
 			sealed.get_raw_state(route, 0), RouteConditions.State.CLOSED,
 			"zarın/olayın söylediği ham hal hâlâ kapalı"
@@ -234,7 +234,7 @@ func _test_last_exit_stays_open(t) -> void:
 			)
 	t.ok(open_exits > 0, "son çıkış açık kalır, şehir dünyadan kopmaz")
 	t.ok(
-		not sealed.find_open_path("test_loc_a", "test_loc_b", 0).is_empty(),
+		not sealed.find_open_path("orvahel", "zelmarin", 0).is_empty(),
 		"mahsur kalınan şehir yok"
 	)
 
@@ -242,10 +242,10 @@ func _test_last_exit_stays_open(t) -> void:
 ## kervanın deneyim eğrisi. GameSession bunları toplayan tek yer.
 func _test_session_layers_stack(t) -> void:
 	var session := GameSession.new(100, 0)
-	var route := _route("test_loc_a", "test_loc_c")
+	var route := _route("orvahel", "orsolune")
 
 	session.route_conditions.add_override(
-		"test_loc_a", "test_loc_c", RouteConditions.State.OPEN, 999
+		"orvahel", "orsolune", RouteConditions.State.OPEN, 999
 	)
 	t.eq(session.get_route_travel_days(route), route.travel_days, "açık yolda süre tablodaki gibi")
 	t.almost(
@@ -254,7 +254,7 @@ func _test_session_layers_stack(t) -> void:
 	)
 
 	session.route_conditions.add_override(
-		"test_loc_a", "test_loc_c", RouteConditions.State.PERILOUS, 999
+		"orvahel", "orsolune", RouteConditions.State.PERILOUS, 999
 	)
 	t.ok(
 		session.get_route_danger(route) > session.get_effective_danger(route.danger_level),
@@ -262,26 +262,26 @@ func _test_session_layers_stack(t) -> void:
 	)
 
 	session.route_conditions.add_override(
-		"test_loc_a", "test_loc_c", RouteConditions.State.CLOSED, 999
+		"orvahel", "orsolune", RouteConditions.State.CLOSED, 999
 	)
 	# İpekevi'nin diğer çıkışı açık sabitleniyor, yoksa emniyet kuralı
 	# (son çıkış hep açıktır) ölçülmek isteneni gizlerdi.
 	session.route_conditions.add_override(
-		"test_loc_c", "test_loc_e", RouteConditions.State.OPEN, 999
+		"orsolune", "serai_seyvan", RouteConditions.State.OPEN, 999
 	)
 	t.ok(not session.is_route_open(route), "oturum kapalı yolu kapalı görür")
-	t.ok(session.find_open_path("test_loc_c").size() >= 3, "oturum dolambaçlı yolu bulur")
+	t.ok(session.find_open_path("orsolune").size() >= 3, "oturum dolambaçlı yolu bulur")
 
 	# ROUTE_CHANGE etkisi aynı katmandan geçmeli.
 	var closer := GameSession.new(100, 0)
 	closer.route_conditions.add_override(
-		"test_loc_b", "test_loc_d", RouteConditions.State.OPEN, 999
+		"zelmarin", "vorgat", RouteConditions.State.OPEN, 999
 	)
 	EventEffectApplier.apply([
-		EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 6, "test_loc_a|test_loc_b|closed"),
+		EventEffect.make(EventEffect.Type.ROUTE_CHANGE, 6, "orvahel|zelmarin|closed"),
 	], closer)
 	t.ok(
-		not closer.is_route_open(_route("test_loc_a", "test_loc_b")),
+		not closer.is_route_open(_route("orvahel", "zelmarin")),
 		"ROUTE_CHANGE yolu gerçekten kapatır"
 	)
 
@@ -296,68 +296,68 @@ func _test_session_layers_stack(t) -> void:
 ## geri dönebilir. Değişen bacak yeni bir sefer gibi davranmalı.
 func _test_divert_and_turn_back(t) -> void:
 	var session := GameSession.new(300, 40)
-	session.current_location_id = "test_loc_a"
-	var route := _route("test_loc_a", "test_loc_e")
+	session.current_location_id = "orvahel"
+	var route := _route("orvahel", "serai_seyvan")
 	var plan := CaravanPlan.new(
-		WorldMapData.get_location_by_id("test_loc_e"), route.travel_days
+		WorldMapData.get_location_by_id("serai_seyvan"), route.travel_days
 	)
-	session.start_journey("test_loc_e", route.travel_days, route.danger_level, plan)
+	session.start_journey("serai_seyvan", route.travel_days, route.danger_level, plan)
 
-	t.ok(not session.can_divert_to("test_loc_e"), "gittiğin yere sapılmaz")
-	t.ok(not session.can_divert_to("test_loc_a"), "çıktığın şehre sapmak sapma değil, dönüştür")
+	t.ok(not session.can_divert_to("serai_seyvan"), "gittiğin yere sapılmaz")
+	t.ok(not session.can_divert_to("orvahel"), "çıktığın şehre sapmak sapma değil, dönüştür")
 
 	session.journey_days_remaining = session.journey_total_days - 2
 	t.eq(session.get_days_travelled(), 2, "yürünen gün sayısı doğru")
 
-	t.ok(session.can_divert_to("test_loc_b"), "çıkış şehrinden ulaşılabilen hedefe sapılır")
-	t.ok(session.divert_journey("test_loc_b"), "sapma uygulanır")
-	t.eq(session.journey_destination_id, "test_loc_b", "hedef değişti")
+	t.ok(session.can_divert_to("zelmarin"), "çıkış şehrinden ulaşılabilen hedefe sapılır")
+	t.ok(session.divert_journey("zelmarin"), "sapma uygulanır")
+	t.eq(session.journey_destination_id, "zelmarin", "hedef değişti")
 	t.eq(
 		session.journey_days_remaining, session.journey_total_days,
 		"yeni bacak baştan başlar - ilerleme çubuğu dolu kalmaz"
 	)
 	t.ok(
-		session.journey_total_days >= _route("test_loc_a", "test_loc_b").travel_days,
+		session.journey_total_days >= _route("orvahel", "zelmarin").travel_days,
 		"sapan kervan geri yürüdüğü yolu da öder"
 	)
 
 	# Kapalı yola sapılamaz.
 	session.route_conditions.add_override(
-		"test_loc_c", "test_loc_e", RouteConditions.State.OPEN, 999
+		"orsolune", "serai_seyvan", RouteConditions.State.OPEN, 999
 	)
 	session.route_conditions.add_override(
-		"test_loc_a", "test_loc_c", RouteConditions.State.CLOSED, 999
+		"orvahel", "orsolune", RouteConditions.State.CLOSED, 999
 	)
-	t.ok(not session.can_divert_to("test_loc_c"), "kapalı yola sapılamaz")
+	t.ok(not session.can_divert_to("orsolune"), "kapalı yola sapılamaz")
 
 	var back := GameSession.new(300, 40)
-	back.current_location_id = "test_loc_a"
-	back.start_journey("test_loc_e", route.travel_days, route.danger_level, plan)
+	back.current_location_id = "orvahel"
+	back.start_journey("serai_seyvan", route.travel_days, route.danger_level, plan)
 	back.journey_days_remaining = back.journey_total_days - 3
 	t.ok(back.turn_back(), "geri dönmek her zaman mümkün")
-	t.eq(back.journey_destination_id, "test_loc_a", "hedef çıkış şehri oldu")
+	t.eq(back.journey_destination_id, "orvahel", "hedef çıkış şehri oldu")
 	t.eq(back.journey_total_days, 3, "geri dönüş yürünen yol kadar sürer")
 
 	# Yolda değilken ikisi de sessizce reddedilmeli.
 	var idle := GameSession.new(100, 0)
 	t.ok(not idle.turn_back(), "yolda olmayan kervan geri dönemez")
-	t.ok(not idle.can_divert_to("test_loc_b"), "yolda olmayan kervan sapamaz")
+	t.ok(not idle.can_divert_to("zelmarin"), "yolda olmayan kervan sapamaz")
 
 func _test_save_round_trip(t) -> void:
 	var session := GameSession.new(100, 0)
 	session.total_days_elapsed = 20
 	session.route_conditions.add_override(
-		"test_loc_b", "test_loc_d", RouteConditions.State.CLOSED, 40
+		"zelmarin", "vorgat", RouteConditions.State.CLOSED, 40
 	)
 
 	var restored := GameSession.new(0, 0)
 	restored.load_from_dict(session.to_save_dict())
 	t.ok(
-		restored.has_route_override("test_loc_b", "test_loc_d"),
+		restored.has_route_override("zelmarin", "vorgat"),
 		"kapalı geçit kayıttan döner - kaydı yeniden yüklemek yolu açmaz"
 	)
 	t.eq(
-		restored.get_route_state(_route("test_loc_b", "test_loc_d")),
+		restored.get_route_state(_route("zelmarin", "vorgat")),
 		RouteConditions.State.CLOSED, "kayıttan dönen yol hâlâ kapalı"
 	)
 
@@ -365,6 +365,6 @@ func _test_save_round_trip(t) -> void:
 	var legacy := RouteConditions.new()
 	legacy.load_from_dict({})
 	t.ok(
-		not legacy.has_override("test_loc_b", "test_loc_d", 0),
+		not legacy.has_override("zelmarin", "vorgat", 0),
 		"eski kayıtta yol müdahalesi yok"
 	)

@@ -1037,7 +1037,7 @@ static func _port_gossip_listen_choice() -> EventChoice:
 			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 1.0),
 		]), _effects([
 			EventEffect.make(EventEffect.Type.REPUTATION, 6),
-			EventEffect.make(EventEffect.Type.MARKET_SHOCK, -25, "test_loc_c|test_cloth|18"),
+			EventEffect.make(EventEffect.Type.MARKET_SHOCK, -25, "orsolune|test_cloth|18"),
 		]), 1.0),
 		_outcome_if("EVT_PORT_GOSSIP_NOTHING", _conditions([
 			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 0.0),

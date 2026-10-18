@@ -57,11 +57,14 @@ const ROGUE_MAGE: String = "rogue_mage"
 const CITY_GUARD: String = "city_guard"
 const GUARD_SERGEANT: String = "guard_sergeant"
 
-## Bölge kimlikleri WorldMapData'nın location_id'leriyle eşleşir. Id'ler
-## kalıcı kayıt uyumluluğu için "test_loc_x" kalsa da isimler artık
-## Kurtboğazı/Demirkapı (bkz. Faz 7 PR-D).
-const MOUNTAIN_REGION_ID: String = "test_loc_b"  # Kurtboğazı
-const GARRISON_REGION_ID: String = "test_loc_d"  # Demirkapı
+## Haydut kadrosu yolun gittiği yerin bölgesine göre değişir (bkz.
+## Location.region): dağ kabilelerinin ve madenlerin yolunda ağır vuran Dağ
+## Haydutu, kuzeyin eski imparatorluğunda (garnizonlar, asker kaçakları)
+## daha isabetli Silahlı Eşkıya. Örnek yerler testler için.
+const MOUNTAIN_REGIONS: Array[String] = ["dag", "dag_maden"]
+const GARRISON_REGIONS: Array[String] = ["imparatorluk"]
+const MOUNTAIN_REGION_ID: String = "kesgrav"
+const GARRISON_REGION_ID: String = "dravoss"
 
 ## Pusu kadrosu bu kadar savaşçıyı geçemez (savaş alanı 4 mevki).
 const MAX_SQUAD_SIZE: int = 4
@@ -178,9 +181,11 @@ static func build_bandit_squad(
 
 	var melee_id := CUTTER
 	var ranged_id := ARCHER
-	if region_id == MOUNTAIN_REGION_ID:
+	var place := WorldMapData.get_location_by_id(region_id) if not region_id.is_empty() else null
+	var region := place.region if place != null else ""
+	if MOUNTAIN_REGIONS.has(region):
 		melee_id = MOUNTAIN_BANDIT
-	elif region_id == GARRISON_REGION_ID:
+	elif GARRISON_REGIONS.has(region):
 		ranged_id = ARMED_BRIGAND
 
 	# Sıra = önem sırası. Küçük bir parti kadroyu kırptığında baştakiler

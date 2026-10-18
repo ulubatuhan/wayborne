@@ -10,13 +10,18 @@ extends Control
 ## sahne değiştirmeyi burası yapıyor - gezinme yığınını iten taraf her
 ## zaman gönderen ekrandır (bkz. Nav).
 
-## Şehir kimliği -> data/assets/ui/towns/ altındaki resim klasörü.
-const TOWN_DIRS: Dictionary = {
-	"test_loc_a": "karakonak",
-	"test_loc_b": "kurtbogazi",
-	"test_loc_c": "ipekevi",
-	"test_loc_d": "demirkapi",
-	"test_loc_e": "yesilova",
+## Yerleşimin kendi resim klasörü (data/assets/ui/towns/<kimlik>/, görev
+## P17). Henüz kendi resmi olmayan yer, bölgesine en yakın eski kasaba
+## resmine düşer - geçici.
+const REGION_FALLBACK_DIRS: Dictionary = {
+	"imparatorluk": "demirkapi",
+	"dag": "kurtbogazi",
+	"dag_maden": "kurtbogazi",
+	"vadi": "ipekevi",
+	"guney": "yesilova",
+	"ahit": "ipekevi",
+	"sinir": "karakonak",
+	"gocebe": "karakonak",
 }
 const SEASON_KEYS: Array = ["SEASON_SPRING", "SEASON_SUMMER", "SEASON_AUTUMN", "SEASON_WINTER"]
 const BRIEF_WIDTH: float = 380.0
@@ -52,7 +57,11 @@ func _build_front() -> void:
 	_front.nav_pressed.connect(_on_nav_pressed)
 
 static func town_dir(location_id: String) -> String:
-	return String(TOWN_DIRS.get(location_id, "karakonak"))
+	if ResourceLoader.exists(CityFront.TOWNS_DIR + location_id + "/background.jpg") or FileAccess.file_exists(CityFront.TOWNS_DIR + location_id + "/background.jpg"):
+		return location_id
+	var location := WorldMapData.get_location_by_id(location_id)
+	var region := location.region if location != null else ""
+	return String(REGION_FALLBACK_DIRS.get(region, "karakonak"))
 
 ## CityFront'un okuduğu tek sözlük. Sayıların hepsi oturumun zaten
 ## yayınladığı değerler - ekran hiçbir şeyi kendisi hesaplamıyor.
@@ -77,6 +86,7 @@ static func build_model(session: GameSession) -> Dictionary:
 		"provisions_days": session.get_provisions() / daily,
 		"party": party,
 		"venue_lines": venue_lines(session),
+		"facilities": SettlementRules.facilities(location.settlement_type) if location != null else [],
 	}
 
 ## Brifingin ihtiyaçları, hangi mekân çözüyorsa o mekânın levhasına da

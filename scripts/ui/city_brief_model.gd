@@ -79,7 +79,22 @@ static func build_needs(session: GameSession) -> Array[Dictionary]:
 			_t("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
 		))
 
+	# Bu yerde olmayan mekâna (kasabada lonca ya da avlu) giden düğme yok:
+	# ihtiyaç yine yazılır, ama burada çözülemeyeceği söylenir.
+	var here := WorldMapData.get_location_by_id(session.current_location_id)
+	if here != null:
+		for need in needs:
+			var facility := _facility_for_scene(String(need.get("scene", "")))
+			if not facility.is_empty() and not here.has_facility(facility):
+				need["scene"] = ""
+				need["action"] = _t("UI_BRIEF_NOT_HERE")
 	return needs
+
+static func _facility_for_scene(scene_path: String) -> String:
+	for v in CityFront.VENUES:
+		if String(v["scene"]) == scene_path:
+			return String(v.get("facility", ""))
+	return ""
 
 ## Defterin en son üstü çizili satırı: {"text", "detail"}. `detail`, satırın
 ## sebebi ve yeri varsa onun okunur hali; yoksa boş. Hiç üstü çizili satır

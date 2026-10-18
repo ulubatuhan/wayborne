@@ -1,19 +1,34 @@
 class_name WorldMapData
 extends RefCounted
 
-## Beş şehirlik dünya verisi. Şema oturduğunda buradaki tablolar veri
-## dosyalarından (data/config/) okunacak şekilde değiştirilecek -
-## location_id'ler ("test_loc_a" vb.) o yüzden kalıcı kayıtlarla uyumlu
-## kalmak için bilerek değiştirilmedi, yalnızca location_name'ler ve
-## tüccar isimleri Faz 7 PR-D'de gerçek lore'a döndü.
+## Dünya verisi: harita v3'ün oynanabilir yerleşimleri (12 şehir, 12 kasaba,
+## 3 kervansaray) ve aralarındaki yollar `data/config/settlements.json`'dan
+## okunuyor (üreten: tools/worldmap/build_settlements.py; görev N1-N6). Eski
+## beş yer tutucu şehir (test_loc_a..e) kalktı; eski kayıtlar
+## GameSession._migrate_save ile yeni yerlere taşınıyor.
 ##
 ## Tüm tablolar bir kez kurulup statik önbelleğe alınıyor (bkz. ItemCatalog
-## ile aynı desen): içerik büyüdükçe her çağrıda sıfırdan yeniden inşa
-## etmek (önceki hali) veri arttıkça donmaya dönüşürdü. Location/TravelRoute/
-## MerchantOffer nesneleri hep okunuyor, hiçbir çağıran onları mutate
-## etmiyor - bu yüzden aynı örneği paylaşmak güvenli.
+## ile aynı desen). Location/TravelRoute/MerchantOffer nesneleri hep
+## okunuyor, hiçbir çağıran onları mutate etmiyor - aynı örneği paylaşmak
+## güvenli.
 
-const START_LOCATION_ID: String = "test_loc_a"
+const DATA_PATH: String = "res://data/config/settlements.json"
+
+## Eski yer tutucu şehirlerin yeni karşılıkları (kayıt göçü ve testler).
+## Coğrafi ve ekonomik karakterine en yakın yer: merkez kavşak -> bozkır kapısı
+## Tolvarin, dağ geçidi -> maden kasabası Kesgrav, ipek -> Ilsande, demir ->
+## garnizon kenti Dravoss, kıyı ova -> güney limanı Orsolune.
+const LEGACY_IDS: Dictionary = {
+	"test_loc_a": "tolvarin",
+	"test_loc_b": "kesgrav",
+	"test_loc_c": "ilsande",
+	"test_loc_d": "dravoss",
+	"test_loc_e": "orsolune",
+}
+
+## Sentetik seferler ve "hiçbir şey yoksa" yedeği. Gerçek oyun kültüre göre
+## başlar (bkz. GameSession.roll_starting_location).
+const START_LOCATION_ID: String = "vastrevar"
 
 ## Bir şehrin ürettiği malın pazardaki başlangıç/varış stoğu.
 const PRODUCED_GOOD_STOCK: int = 30
@@ -31,6 +46,9 @@ static var _routes_by_from: Dictionary = {}
 static var _route_by_pair: Dictionary = {}
 static var _offers_by_origin: Dictionary = {}
 static var _offer_by_merchant_id: Dictionary = {}
+static var _start_candidates: Dictionary = {}
+static var _route_paths: Dictionary = {}
+static var _route_meta: Dictionary = {}
 
 static func get_locations() -> Array[Location]:
 	_ensure_built()
@@ -68,72 +86,97 @@ static func _ensure_built() -> void:
 	if _built:
 		return
 	_built = true
-	_build_locations()
-	_build_routes_and_offers()
+	var data := _load_data()
+	_build_locations(data)
+	_build_routes_and_offers(data)
 	_build_guild_wagon_quests()
 
-## Şehirler arası ticaret zinciri: her şehir bir malı ucuza üretir ve
-## başka birinin ürettiği malı pahalıya arar. Karakonak (merkez) →
-## Demirkapı → Kurtboğazı → Karakonak ve İpekevi ↔ Yeşilova iki kapalı
-## döngü oluşturur, ikisi de gerçek rotalarla (bkz. _get_edges) bağlı.
-##
-## Faz 17 PR-5: ikinci bir ticaret katmanı - altı yeni mal (bkz.
-## ItemCatalog) beş şehri tek bir beşgen halkada (a→b→c→d→e→a) birbirine
-## bağlıyor, ilk katmanın üç-üçgen+ikili döngüsünden bağımsız ama onunla
-## çakışmıyor. Her şehir kendi coğrafyasına uyan bir mal üretir - İpekevi
-## adından dolayı ipek, Demirkapı (demir kapı) mücevher (ince işçilik),
-## Kurtboğazı (dağ geçidi) bal (dağ arıcılığı), Karakonak (kervan
-## kavşağı) baharat, Yeşilova (verimli/kıyı ova) hem balık hem şarap -
-## ikinci mal aynı şehrin ikinci ihracatı, yeni bir kural gerektirmiyor.
-static func _build_locations() -> void:
-	_locations.append(_make_location(
-		"test_loc_a", "CITY_A_NAME", Vector2(110, 210),
-		["test_grain", "spice"], ["test_furs", "fish", "wine"]
-	))
-	_locations.append(_make_location(
-		"test_loc_b", "CITY_B_NAME", Vector2(330, 90),
-		["test_furs", "honey"], ["test_weapon", "spice"]
-	))
-	_locations.append(_make_location(
-		"test_loc_c", "CITY_C_NAME", Vector2(360, 330),
-		["test_cloth", "silk"], ["test_potion", "honey"]
-	))
-	_locations.append(_make_location(
-		"test_loc_d", "CITY_D_NAME", Vector2(560, 180),
-		["test_weapon", "jewelry"], ["test_grain", "silk"]
-	))
-	_locations.append(_make_location(
-		"test_loc_e", "CITY_E_NAME", Vector2(590, 370),
-		["test_potion", "fish", "wine"], ["test_cloth", "jewelry"]
-	))
-	for location in _locations:
-		_location_by_id[location.location_id] = location
+static func _load_data() -> Dictionary:
+	var text := FileAccess.get_file_as_string(DATA_PATH)
+	var parsed = JSON.parse_string(text)
+	if not (parsed is Dictionary):
+		push_error("WorldMapData: cannot read %s" % DATA_PATH)
+		return {"settlements": [], "routes": []}
+	return parsed
+
+## Kültürün başlangıç adayları (bkz. GameSession.roll_starting_location).
+static func get_start_candidates(culture_id: String) -> Array[String]:
+	_ensure_built()
+	var result: Array[String] = []
+	for location_id in _start_candidates.get(culture_id, []):
+		result.append(String(location_id))
+	return result
+
+## İki yer arasındaki yolun harita üzerindeki çizgisi (harita pikseli).
+static func get_route_path(from_location_id: String, to_location_id: String) -> PackedVector2Array:
+	_ensure_built()
+	var key := _pair_key(from_location_id, to_location_id)
+	if _route_paths.has(key):
+		return _route_paths[key]
+	var reverse: PackedVector2Array = _route_paths.get(_pair_key(to_location_id, from_location_id), PackedVector2Array())
+	var out := PackedVector2Array()
+	for i in range(reverse.size() - 1, -1, -1):
+		out.append(reverse[i])
+	return out
+
+## Yolun ek bilgisi: orman ve dağ payı, kervan yolu payı, duraklar.
+static func get_route_meta(from_location_id: String, to_location_id: String) -> Dictionary:
+	_ensure_built()
+	return _route_meta.get(RouteConditions.route_key(from_location_id, to_location_id), {})
+
+static func _build_locations(data: Dictionary) -> void:
+	for entry in data.get("settlements", []):
+		var s: Dictionary = entry
+		var location := Location.new()
+		location.location_id = String(s["id"])
+		location.names = (s.get("name", {}) as Dictionary).duplicate()
+		var pos: Array = s.get("pos", [0, 0])
+		location.map_position = Vector2(float(pos[0]), float(pos[1]))
+		location.settlement_type = String(s.get("type", SettlementRules.CITY))
+		location.region = String(s.get("region", ""))
+		location.culture = String(s.get("culture", ""))
+		location.produces = _typed(s.get("produces", []))
+		location.demands = _typed(s.get("demands", []))
+		location.available = _typed(s.get("available", []))
+		var share := SettlementRules.trade_share(location.settlement_type)
 		for item_id in location.produces:
-			location.stock_per_item[item_id] = PRODUCED_GOOD_STOCK
+			location.stock_per_item[item_id] = maxi(1, int(round(PRODUCED_GOOD_STOCK * share)))
+		_locations.append(location)
+		_location_by_id[location.location_id] = location
+	for culture_id in (data.get("start_candidates", {}) as Dictionary):
+		_start_candidates[culture_id] = data["start_candidates"][culture_id]
 
-## Kenarlar iki yönlü rota ve teklif üretimi için tek kaynak: her kenar
-## [şehir_a, şehir_b, gün, tehlike] olarak tanımlanır, iki yöne de aynı
-## değerlerle uygulanır. Her şehrin en az iki komşusu olacak şekilde
-## kurulmuş (Karakonak merkez, Kurtboğazı-Demirkapı-Yeşilova arasında
-## ayrıca kısayollar var).
-static func _build_routes_and_offers() -> void:
+static func _typed(values: Array) -> Array[String]:
+	var out: Array[String] = []
+	for v in values:
+		out.append(String(v))
+	return out
+
+## Her yol iki yönlü; kontrat teklifi yalnızca loncası olan yerden (şehir)
+## kontrat kabul eden yere (şehir ya da kasaba) çıkar - kervansaray ne
+## kontrat verir ne kontratın varış yeri olur (kullanıcı kararı).
+static func _build_routes_and_offers(data: Dictionary) -> void:
 	var id_counter := 1
-	for edge in _get_edges():
-		_add_direction(edge[0], edge[1], edge[2], edge[3], id_counter)
+	for entry in data.get("routes", []):
+		var r: Dictionary = entry
+		var a := String(r["a"])
+		var b := String(r["b"])
+		var days := int(r.get("days", 1))
+		var danger := float(r.get("danger", 0.3))
+		var path := PackedVector2Array()
+		for point in r.get("path", []):
+			path.append(Vector2(float(point[0]), float(point[1])))
+		_route_paths[_pair_key(a, b)] = path
+		_route_meta[RouteConditions.route_key(a, b)] = {
+			"forest_share": float(r.get("forest_share", 0.0)),
+			"mountain_share": float(r.get("mountain_share", 0.0)),
+			"caravan_road_share": float(r.get("caravan_road_share", 0.0)),
+			"via": r.get("via", []),
+		}
+		_add_direction(a, b, days, danger, id_counter)
 		id_counter += 10
-		_add_direction(edge[1], edge[0], edge[2], edge[3], id_counter)
+		_add_direction(b, a, days, danger, id_counter)
 		id_counter += 10
-
-static func _get_edges() -> Array:
-	return [
-		["test_loc_a", "test_loc_b", 3, 0.20],
-		["test_loc_a", "test_loc_c", 4, 0.35],
-		["test_loc_a", "test_loc_d", 6, 0.50],
-		["test_loc_a", "test_loc_e", 8, 0.65],
-		["test_loc_b", "test_loc_d", 4, 0.30],
-		["test_loc_c", "test_loc_e", 5, 0.40],
-		["test_loc_d", "test_loc_e", 3, 0.25],
-	]
 
 static func _add_direction(
 	from_id: String, to_id: String, travel_days: int, danger_level: float, id_base: int
@@ -144,6 +187,14 @@ static func _add_direction(
 	_routes_by_from[from_id].append(route)
 	_route_by_pair[_pair_key(from_id, to_id)] = route
 
+	var origin: Location = _location_by_id.get(from_id)
+	var destination: Location = _location_by_id.get(to_id)
+	if origin == null or destination == null:
+		return
+	if not SettlementRules.offers_contracts(origin.settlement_type):
+		return
+	if not SettlementRules.accepts_contracts(destination.settlement_type):
+		return
 	var offers := _offers_for_direction(from_id, to_id, travel_days, id_base)
 	if not _offers_by_origin.has(from_id):
 		_offers_by_origin[from_id] = []
@@ -202,24 +253,6 @@ static func _merchant_name(merchant_number: int) -> String:
 
 static func _pair_key(a: String, b: String) -> String:
 	return "%s|%s" % [a, b]
-
-static func _make_location(
-	location_id: String, location_name: String, map_position: Vector2,
-	produces: Array, demands: Array
-) -> Location:
-	var location := Location.new()
-	location.location_id = location_id
-	location.location_name_key = location_name
-	location.map_position = map_position
-	var produces_typed: Array[String] = []
-	for item_id in produces:
-		produces_typed.append(item_id)
-	var demands_typed: Array[String] = []
-	for item_id in demands:
-		demands_typed.append(item_id)
-	location.produces = produces_typed
-	location.demands = demands_typed
-	return location
 
 static func _make_route(from_location_id: String, to_location_id: String, travel_days: int, danger_level: float) -> TravelRoute:
 	var route := TravelRoute.new()
@@ -306,64 +339,57 @@ static func get_guild_wagon_quests() -> Array[MerchantOffer]:
 	return quests
 
 static func _build_guild_wagon_quests() -> void:
-	# Vagon Bağışı - Karakonak (kervan kavşağı, lonca merkezi) çıkışlı,
-	# haritanın en uzun/tehlikeli tek kenarına (a→e, 8 gün, %65 tehlike):
-	# loncanın kendi vagonunu ancak gerçekten güvendiği bir kervana emanet
-	# etmesi, kredi limitinin itibara göre ölçeklenmesiyle aynı gerekçe
-	# (bkz. Ruin Rules'un borç güven bandı).
+	# Vagon Bağışı - Vastrevar'ın (kuzeyin başkenti, en büyük lonca) kuzey
+	# körfezi limanı Rivecande'ye uzun ve tekinsiz yolu (17 gün, %38): lonca
+	# vagonunu ancak gerçekten güvendiği bir kervana emanet eder.
 	var grant := _make_offer(
 		GUILD_WAGON_GRANT_QUEST_ID, "UI_GUILD_WAGON_GRANT_NAME",
-		"test_loc_a", "test_loc_e", 0, 1, 28, 25
+		"vastrevar", "rivecande", 0, 1, 17 + CONTRACT_DEADLINE_BUFFER_DAYS, 25
 	)
 	grant.grants_wagon_on_delivery = true
 	_register_offer(grant)
 
-	# Sınır Karakolu Vagonu - Karakonak'tan Demirkapı'nın sınır karakoluna
-	# (a→d, 6 gün, %50 tehlike): ilkinden daha kısa ama yine de haritanın
-	# üst-orta tehlike bandında, ikinci bir kalıcı vagonu tek bir rotaya
-	# bağımlı bırakmamak için.
+	# Sınır Karakolu Vagonu - doğu sınırındaki Ezmerak'tan Eski Ahit'in kutsal
+	# kenti Orvahel'e (8 gün, %33): ikinci kalıcı vagon başka bir bölgede.
 	var grant2 := _make_offer(
 		GUILD_WAGON_GRANT_2_QUEST_ID, "UI_GUILD_WAGON_GRANT2_NAME",
-		"test_loc_a", "test_loc_d", 0, 1, 22, 20
+		"ezmerak", "orvahel", 0, 1, 8 + CONTRACT_DEADLINE_BUFFER_DAYS, 20
 	)
 	grant2.grants_wagon_on_delivery = true
 	_register_offer(grant2)
 
-	# Fazla Yük Sevkiyatı - Demirkapı'nın (mücevher üreten şehir) fazla
-	# stoğunu kısa/güvenli bir kenardan (d→e, 3 gün, %25 tehlike) taşımak.
+	# Fazla Yük Sevkiyatı - Zelmarin kuyumcularının fazlası Orvahel'e (27 gün).
 	var freight_jewelry := _make_offer(
 		GUILD_WAGON_FREIGHT_QUEST_ID, "UI_GUILD_WAGON_FREIGHT_NAME",
-		"test_loc_d", "test_loc_e", 0, 1, 18, 10
+		"zelmarin", "orvahel", 0, 1, 27 + CONTRACT_DEADLINE_BUFFER_DAYS, 10
 	)
 	freight_jewelry.cargo_reward_item_id = "jewelry"
 	freight_jewelry.cargo_reward_quantity = 5
 	_register_offer(freight_jewelry)
 
-	# Baharat Taşımacılığı - Karakonak'ın kendi baharatı, en kısa/güvenli
-	# kenardan (a→b, 3 gün, %20 tehlike): itibar istemiyor, havuzun
-	# yeni oyuncuya açık girişi.
+	# Baharat Taşımacılığı - Orsolune limanının baharatı Zelmarin'e (33 gün).
 	var freight_spice := _make_offer(
 		GUILD_WAGON_FREIGHT_SPICE_QUEST_ID, "UI_GUILD_WAGON_FREIGHT_SPICE_NAME",
-		"test_loc_a", "test_loc_b", 0, 1, 15, 0
+		"orsolune", "zelmarin", 0, 1, 33 + CONTRACT_DEADLINE_BUFFER_DAYS, 8
 	)
 	freight_spice.cargo_reward_item_id = "spice"
 	freight_spice.cargo_reward_quantity = 8
 	_register_offer(freight_spice)
 
-	# Bal Taşımacılığı - Kurtboğazı'nın dağ balı, b→d (4 gün, %30 tehlike).
+	# Bal Taşımacılığı - Ezmerak arıcılarının balı bataklık kasabası Golcavar'a
+	# (2 gün): itibar istemiyor, havuzun yeni oyuncuya açık girişi.
 	var freight_honey := _make_offer(
 		GUILD_WAGON_FREIGHT_HONEY_QUEST_ID, "UI_GUILD_WAGON_FREIGHT_HONEY_NAME",
-		"test_loc_b", "test_loc_d", 0, 1, 16, 5
+		"ezmerak", "golcavar", 0, 1, 2 + CONTRACT_DEADLINE_BUFFER_DAYS, 0
 	)
 	freight_honey.cargo_reward_item_id = "honey"
 	freight_honey.cargo_reward_quantity = 10
 	_register_offer(freight_honey)
 
-	# İpek Taşımacılığı - İpekevi'nin kendi adını taşıyan malı, c→e
-	# (5 gün, %40 tehlike).
+	# İpek Taşımacılığı - Ilsande atölyelerinin ipeği bağ kasabası Caramine'e (3 gün).
 	var freight_silk := _make_offer(
 		GUILD_WAGON_FREIGHT_SILK_QUEST_ID, "UI_GUILD_WAGON_FREIGHT_SILK_NAME",
-		"test_loc_c", "test_loc_e", 0, 1, 18, 8
+		"ilsande", "caramine", 0, 1, 3 + CONTRACT_DEADLINE_BUFFER_DAYS, 5
 	)
 	freight_silk.cargo_reward_item_id = "silk"
 	freight_silk.cargo_reward_quantity = 6

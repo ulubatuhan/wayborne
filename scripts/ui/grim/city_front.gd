@@ -22,12 +22,12 @@ const SHADER_PATH: String = "res://scripts/ui/grim/venue_highlight.gdshader"
 ## Maske numarası sırası town_post.py'nin VENUE_IDS sırasıyla aynı (1'den).
 ## `gate` levha değil, alt şeritteki "Yola Çık" düğmesi.
 const VENUES: Array = [
-	{"id": 1, "key": "UI_GRIM_VENUE_YARD", "icon": "yard", "scene": Nav.CARAVAN_YARD},
-	{"id": 2, "key": "UI_GRIM_VENUE_MARKET", "icon": "market", "scene": Nav.ECONOMY},
-	{"id": 3, "key": "UI_GRIM_VENUE_GUILD", "icon": "guild", "scene": Nav.GUILD},
-	{"id": 4, "key": "UI_GRIM_VENUE_TAVERN", "icon": "tavern", "scene": Nav.TAVERN},
-	{"id": 5, "key": "UI_GRIM_VENUE_CHURCH", "icon": "church", "scene": Nav.CHURCH},
-	{"id": 6, "key": "UI_GRIM_VENUE_WARDROBE", "icon": "tailor", "scene": Nav.WARDROBE},
+	{"id": 1, "key": "UI_GRIM_VENUE_YARD", "icon": "yard", "scene": Nav.CARAVAN_YARD, "facility": SettlementRules.CARAVAN_YARD},
+	{"id": 2, "key": "UI_GRIM_VENUE_MARKET", "icon": "market", "scene": Nav.ECONOMY, "facility": SettlementRules.MARKET},
+	{"id": 3, "key": "UI_GRIM_VENUE_GUILD", "icon": "guild", "scene": Nav.GUILD, "facility": SettlementRules.GUILD},
+	{"id": 4, "key": "UI_GRIM_VENUE_TAVERN", "icon": "tavern", "scene": Nav.TAVERN, "facility": SettlementRules.TAVERN},
+	{"id": 5, "key": "UI_GRIM_VENUE_CHURCH", "icon": "church", "scene": Nav.CHURCH, "facility": SettlementRules.CHURCH},
+	{"id": 6, "key": "UI_GRIM_VENUE_WARDROBE", "icon": "tailor", "scene": Nav.WARDROBE, "facility": SettlementRules.WARDROBE},
 ]
 const GATE_ID: int = 7
 const NAV: Array = [
@@ -128,10 +128,16 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var id := venue_at(event.position)
 		for v in VENUES:
-			if int(v["id"]) == id:
+			if int(v["id"]) == id and has_venue(v):
 				venue_pressed.emit(String(v["scene"]))
 		if id == GATE_ID:
 			nav_pressed.emit("UI_GRIM_EMBARK")
+
+## Yerleşimde bu mekân var mı (bkz. SettlementRules): kasabada lonca ve
+## kervan avlusu, kervansarayda lonca yok. Modelde liste yoksa hepsi var.
+func has_venue(v: Dictionary) -> bool:
+	var allowed: Array = _model.get("facilities", [])
+	return allowed.is_empty() or allowed.has(String(v.get("facility", "")))
 
 # ------------------------------------------------------------------ parçalar
 
@@ -192,6 +198,8 @@ func _venue_column() -> Control:
 	col.add_theme_constant_override("separation", 10)
 	var lines: Dictionary = _model.get("venue_lines", {})
 	for v in VENUES:
+		if not has_venue(v):
+			continue
 		var plate := PanelContainer.new()
 		plate.custom_minimum_size = PLATE_SIZE
 		plate.add_theme_stylebox_override("panel", _plate_box(false))

@@ -35,6 +35,7 @@
 "UI_CITY_YARD","Kervan Avlusu","Caravan Yard","","","","","","","","",""
 "UI_CITY_GUILD_LEDGER","Lonca Kayıt Defteri","Guild Ledger","","","","","","","","",""
 "UI_CITY_CHURCH","Kilise","Church","","","","","","","","",""
+"UI_BRIEF_NOT_HERE","Burada yapılamaz","Not possible here","","","","","","","","",""
 "UI_BRIEF_NEEDS_TITLE","Kervanın Durumu","The Caravan's Standing","","","","","","","","",""
 "UI_BRIEF_ROUTES_TITLE","Nereye Gidilir?","Where To Next?","","","","","","","","",""
 "UI_BRIEF_READY","Kervan yola hazır. Bir hedef seç.","The caravan is ready. Choose a destination.","","","","","","","","",""

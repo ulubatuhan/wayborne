@@ -226,7 +226,11 @@ func _build_need_row(need: Dictionary) -> HBoxContainer:
 
 	var button := Button.new()
 	button.text = String(need.action)
-	button.pressed.connect(_on_screen_requested.bind(String(need.scene)))
+	if String(need.scene).is_empty():
+		# Bu yerde o mekân yok (bkz. CityBriefModel): kilitli, sebebi yazılı.
+		button.disabled = true
+	else:
+		button.pressed.connect(_on_screen_requested.bind(String(need.scene)))
 	row.add_child(button)
 	return row
 

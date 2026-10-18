@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Dünya verisi (WorldMapData): şehir/rota/teklif tablosunun tutarlılığı
-## ve Faz 7 PR-D'nin isim geçişinin kalıcılığı - location_id'ler ("test_loc_a"
+## ve Faz 7 PR-D'nin isim geçişinin kalıcılığı - location_id'ler ("orvahel"
 ## vb.) kayıt uyumluluğu için sabit kalırken location_name/tüccar isimleri
 ## artık gerçek lore, "Test Şehir"/"Tüccar 12" gibi çıplak placeholder değil.
 
@@ -20,7 +20,7 @@ func run(t) -> void:
 
 func _test_locations_have_real_names(t) -> void:
 	var locations := WorldMapData.get_locations()
-	t.eq(locations.size(), 5, "beş şehir var")
+	t.eq(locations.size(), 27, "27 oynanabilir yerleşim (12 şehir, 12 kasaba, 3 kervansaray)")
 
 	var seen_ids: Dictionary = {}
 	for location in locations:
@@ -66,13 +66,15 @@ func _test_trade_goods_have_real_names(t) -> void:
 ## yoksa "ikinci döngü" yalnızca isim - hiçbir kervan o malı taşımaya
 ## teşvik edilmez.
 func _test_second_trade_loop_is_closed(t) -> void:
-	var new_goods := ["spice", "honey", "silk", "jewelry", "fish", "wine"]
+	# Her mal en az bir yerde üretilir ve en az bir yerde aranır; kimse aynı
+	# malı hem üretip hem aramaz (yoksa kendi içinde kâr döngüsü olur).
+	var goods := ["test_grain", "test_cloth", "test_weapon", "test_potion", "test_furs",
+		"spice", "honey", "silk", "jewelry", "fish", "wine"]
 	var producer_count: Dictionary = {}
 	var demander_count: Dictionary = {}
-	for item_id in new_goods:
+	for item_id in goods:
 		producer_count[item_id] = 0
 		demander_count[item_id] = 0
-
 	for location in WorldMapData.get_locations():
 		for item_id in location.produces:
 			if producer_count.has(item_id):
@@ -84,10 +86,9 @@ func _test_second_trade_loop_is_closed(t) -> void:
 		for item_id in location.demands:
 			if demander_count.has(item_id):
 				demander_count[item_id] += 1
-
-	for item_id in new_goods:
-		t.eq(producer_count[item_id], 1, "%s tam olarak bir şehir tarafından üretilir" % item_id)
-		t.ok(demander_count[item_id] >= 1, "%s en az bir şehir tarafından aranır" % item_id)
+	for item_id in goods:
+		t.ok(producer_count[item_id] >= 1, "%s en az bir yerde üretilir" % item_id)
+		t.ok(demander_count[item_id] >= 1, "%s en az bir yerde aranır" % item_id)
 
 ## Loncanın vagon görev havuzu - normal kontrat panosuyla aynı akışı
 ## kullanan ama ayni ödül veren MerchantOffer'lar (bkz. GameSession.

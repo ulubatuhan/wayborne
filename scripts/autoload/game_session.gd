@@ -764,7 +764,7 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	crew_hungry_nights = 0
 	_sync_crew_names()
 
-	current_location_id = roll_starting_location(rng)
+	current_location_id = roll_starting_location(rng, player_character.culture_id)
 	_restock_current_location()
 
 	campaign_chapter_index = 0
@@ -787,11 +787,18 @@ static func _roll_founder_name(player_character: CharacterData, rng: RandomNumbe
 ## Başlangıç şehri rastgele - her playthrough haritanın başka bir
 ## köşesinden başlasın, ticaret zinciri (bkz. WorldMapData) farklı bir
 ## yönden çözülsün diye.
-static func roll_starting_location(rng: RandomNumberGenerator) -> String:
-	var locations := WorldMapData.get_locations()
-	if locations.is_empty():
+## Yeni oyun, karakter oluşturmada seçilen kültürün bölgesindeki (ya da o
+## bölgede şehir yoksa en yakın bölgedeki) rastgele bir şehir ya da kasabada
+## başlar (kullanıcı kararı, görev N9). Adaylar settlements.json'da.
+static func roll_starting_location(rng: RandomNumberGenerator, culture_id: String = "") -> String:
+	var candidates := WorldMapData.get_start_candidates(culture_id)
+	if candidates.is_empty():
+		for location in WorldMapData.get_locations():
+			if location.settlement_type != SettlementRules.CARAVANSERAI:
+				candidates.append(location.location_id)
+	if candidates.is_empty():
 		return WorldMapData.START_LOCATION_ID
-	return locations[rng.randi_range(0, locations.size() - 1)].location_id
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
 
 func can_recruit() -> bool:
 	_ensure_party()
@@ -3006,7 +3013,7 @@ func move_cargo_between_wagons(from_index: int, item_id: String, to_index: int, 
 ## hâlâ okunuyor (bkz. load_from_dict) - `_migrate_save`de değil, orada
 ## çünkü dönüşüm vagonların senkron edilmiş olmasını gerektiriyor ve o
 ## sıra load_from_dict'in kendi akışında.
-const SAVE_VERSION: int = 3
+const SAVE_VERSION: int = 4
 
 func to_save_dict() -> Dictionary:
 	var wagon_inventory_data: Array = []
@@ -3125,7 +3132,51 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 		for entry in data.get("party", []):
 			if entry is Dictionary and not entry.has("stress"):
 				entry["stress"] = legacy_stress
+	# v3 -> v4: dünya yer tutucu beş şehirden harita v3'ün 27 yerleşimine geçti
+	# (görev N6). Eski yer kimlikleri karşılıklarına çevrilir; eski kontrat
+	# teklifleri artık var olmayan yolları anlattığı için düşer; yarım kalmış
+	# sefer, yeni dünyada o iki yer komşu değilse çıkış yerinde biter.
+	if version < 4:
+		data = _migrate_legacy_world(data)
 	return data
+
+static func _migrate_legacy_world(data: Dictionary) -> Dictionary:
+	var migrated: Dictionary = _replace_legacy_ids(data)
+	migrated["accepted_contracts"] = {}
+	var journey: Dictionary = migrated.get("journey", {})
+	if not journey.is_empty():
+		var origin := String(journey.get("origin_id", ""))
+		var destination := String(journey.get("destination_id", ""))
+		if WorldMapData.get_route(origin, destination) == null:
+			migrated["journey"] = {}
+			if not origin.is_empty():
+				migrated["current_location_id"] = origin
+	return migrated
+
+## Sözlük ve dizileri gezip eski kimlikleri (değer olarak ya da "a|b" gibi
+## anahtarların içinde) yenileriyle değiştirir.
+static func _replace_legacy_ids(value):
+	if value is Dictionary:
+		var out := {}
+		for key in value:
+			out[_replace_legacy_text(key) if key is String else key] = _replace_legacy_ids(value[key])
+		return out
+	if value is Array:
+		var arr := []
+		for item in value:
+			arr.append(_replace_legacy_ids(item))
+		return arr
+	if value is String:
+		return _replace_legacy_text(value)
+	return value
+
+static func _replace_legacy_text(text: String) -> String:
+	if not text.contains("test_loc_"):
+		return text
+	var out := text
+	for old_id in WorldMapData.LEGACY_IDS:
+		out = out.replace(old_id, String(WorldMapData.LEGACY_IDS[old_id]))
+	return out
 
 func load_from_dict(raw_data: Dictionary) -> void:
 	var data := _migrate_save(raw_data)

@@ -33,19 +33,19 @@ func _test_add_and_expire(t) -> void:
 
 func _test_route_vs_city_matching(t) -> void:
 	var events := WorldEvents.new()
-	var route_key := RouteConditions.route_key("test_loc_a", "test_loc_b")
+	var route_key := RouteConditions.route_key("orvahel", "zelmarin")
 	events.add_event(WorldEvents.Kind.REGIONAL_WAR, route_key, 5, 20)
-	events.add_event(WorldEvents.Kind.PLAGUE, "test_loc_c", 5, 20)
+	events.add_event(WorldEvents.Kind.PLAGUE, "orsolune", 5, 20)
 
 	t.ok(events.has_kind_on_route(WorldEvents.Kind.REGIONAL_WAR, route_key, 5), "rota olayı rotada bulunur")
 	t.not_ok(events.has_kind_on_city(WorldEvents.Kind.REGIONAL_WAR, route_key, 5), "rota olayı şehir sorgusunda çıkmaz")
-	t.ok(events.has_kind_on_city(WorldEvents.Kind.PLAGUE, "test_loc_c", 5), "şehir olayı şehirde bulunur")
-	t.not_ok(events.has_kind_on_route(WorldEvents.Kind.PLAGUE, "test_loc_c", 5), "şehir olayı rota sorgusunda çıkmaz")
-	t.not_ok(events.has_kind_on_city(WorldEvents.Kind.PLAGUE, "test_loc_d", 5), "başka bir şehirde bulunmaz")
+	t.ok(events.has_kind_on_city(WorldEvents.Kind.PLAGUE, "orsolune", 5), "şehir olayı şehirde bulunur")
+	t.not_ok(events.has_kind_on_route(WorldEvents.Kind.PLAGUE, "orsolune", 5), "şehir olayı rota sorgusunda çıkmaz")
+	t.not_ok(events.has_kind_on_city(WorldEvents.Kind.PLAGUE, "vorgat", 5), "başka bir şehirde bulunmaz")
 
 func _test_route_danger_delta_stacks(t) -> void:
 	var events := WorldEvents.new()
-	var route_key := RouteConditions.route_key("test_loc_a", "test_loc_b")
+	var route_key := RouteConditions.route_key("orvahel", "zelmarin")
 	t.almost(events.get_route_danger_delta(route_key, 5), 0.0, "olay yokken pay sıfır")
 
 	events.add_event(WorldEvents.Kind.REGIONAL_WAR, route_key, 5, 20)
@@ -58,9 +58,9 @@ func _test_route_danger_delta_stacks(t) -> void:
 
 func _test_save_round_trip(t) -> void:
 	var events := WorldEvents.new()
-	var route_key := RouteConditions.route_key("test_loc_a", "test_loc_b")
+	var route_key := RouteConditions.route_key("orvahel", "zelmarin")
 	events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, route_key, 3, 12)
-	events.add_event(WorldEvents.Kind.TRADE_FAIR, "test_loc_c", 3, 10)
+	events.add_event(WorldEvents.Kind.TRADE_FAIR, "orsolune", 3, 10)
 
 	var restored := WorldEvents.new()
 	restored.load_from_dict(events.to_save_dict())
@@ -71,7 +71,7 @@ func _test_save_round_trip(t) -> void:
 		"rota olayı gidiş-dönüşten sonra da doğru okunur"
 	)
 	t.ok(
-		restored.has_kind_on_city(WorldEvents.Kind.TRADE_FAIR, "test_loc_c", 3),
+		restored.has_kind_on_city(WorldEvents.Kind.TRADE_FAIR, "orsolune", 3),
 		"şehir olayı gidiş-dönüşten sonra da doğru okunur"
 	)
 
@@ -88,16 +88,16 @@ func _test_game_session_route_danger_reads_world_events(t) -> void:
 
 func _test_event_context_flags(t) -> void:
 	var session := GameSession.new(100, 20, 1)
-	session.journey_origin_id = "test_loc_a"
-	session.journey_destination_id = "test_loc_b"
+	session.journey_origin_id = "orvahel"
+	session.journey_destination_id = "zelmarin"
 
 	var context := session.build_event_context()
 	t.eq(context.get("route_has_regional_war"), 0.0, "olay yokken bayrak sıfır")
 	t.eq(context.get("destination_has_plague"), 0.0, "olay yokken bayrak sıfır")
 
-	var route_key := RouteConditions.route_key("test_loc_a", "test_loc_b")
+	var route_key := RouteConditions.route_key("orvahel", "zelmarin")
 	session.world_events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, route_key, 0, 20)
-	session.world_events.add_event(WorldEvents.Kind.PLAGUE, "test_loc_b", 0, 20)
+	session.world_events.add_event(WorldEvents.Kind.PLAGUE, "zelmarin", 0, 20)
 
 	var updated_context := session.build_event_context()
 	t.eq(updated_context.get("route_has_bandit_tribute"), 1.0, "aktif haraç bayrağa yansır")
@@ -116,7 +116,7 @@ func _test_commission_blocked_without_active_event(t) -> void:
 
 func _test_commission_blocked_without_resources(t) -> void:
 	var session := GameSession.new(500, 5, 1)
-	session.world_events.add_event(WorldEvents.Kind.REGIONAL_WAR, "test_loc_a|test_loc_b", 0, 20)
+	session.world_events.add_event(WorldEvents.Kind.REGIONAL_WAR, "orvahel|zelmarin", 0, 20)
 	t.eq(
 		session.get_commission_block_reason(WorldEvents.Kind.REGIONAL_WAR),
 		"UI_COMMISSION_NEED_PROVISIONS",
@@ -126,7 +126,7 @@ func _test_commission_blocked_without_resources(t) -> void:
 
 func _test_commission_fulfillment_war_supply(t) -> void:
 	var session := GameSession.new(500, 50, 1)
-	session.world_events.add_event(WorldEvents.Kind.REGIONAL_WAR, "test_loc_a|test_loc_b", 0, 20)
+	session.world_events.add_event(WorldEvents.Kind.REGIONAL_WAR, "orvahel|zelmarin", 0, 20)
 	var before_gold := session.wallet.balance
 	var before_reputation := session.reputation
 	var before_provisions := session.get_provisions()
@@ -147,7 +147,7 @@ func _test_commission_fulfillment_war_supply(t) -> void:
 
 func _test_commission_fulfillment_plague_relief(t) -> void:
 	var session := GameSession.new(500, 50, 1)
-	session.world_events.add_event(WorldEvents.Kind.PLAGUE, "test_loc_b", 0, 20)
+	session.world_events.add_event(WorldEvents.Kind.PLAGUE, "zelmarin", 0, 20)
 	t.not_ok(
 		session.get_commission_block_reason(WorldEvents.Kind.PLAGUE).is_empty(),
 		"iksir yokken görev kilitli"
@@ -175,7 +175,7 @@ func _test_commission_fulfillment_plague_relief(t) -> void:
 ## started_day) sürerken ikinci bir tamamlama parayı/itibarı değiştirmemeli.
 func _test_commission_cannot_be_repeated_while_same_event_is_active(t) -> void:
 	var session := GameSession.new(500, 50, 1)
-	session.world_events.add_event(WorldEvents.Kind.TRADE_FAIR, "test_loc_a", 0, 20)
+	session.world_events.add_event(WorldEvents.Kind.TRADE_FAIR, "orvahel", 0, 20)
 
 	t.ok(session.fulfill_commission(WorldEvents.Kind.TRADE_FAIR), "ilk katkı başarılı")
 	var gold_after_first := session.wallet.balance
@@ -198,7 +198,7 @@ func _test_commission_cannot_be_repeated_while_same_event_is_active(t) -> void:
 ## dünyanın bir daha hiç aynı türden olay yaşamaması değil.
 func _test_commission_reopens_for_a_new_event_instance(t) -> void:
 	var session := GameSession.new(500, 50, 1)
-	session.world_events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, "test_loc_a", 0, 8)
+	session.world_events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, "orvahel", 0, 8)
 	t.ok(session.fulfill_commission(WorldEvents.Kind.BANDIT_TRIBUTE), "ilk katkı başarılı")
 
 	session.total_days_elapsed = 9
@@ -208,7 +208,7 @@ func _test_commission_reopens_for_a_new_event_instance(t) -> void:
 		"eski olay süresi dolunca düşer"
 	)
 
-	session.world_events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, "test_loc_b", 9, 8)
+	session.world_events.add_event(WorldEvents.Kind.BANDIT_TRIBUTE, "zelmarin", 9, 8)
 	t.ok(
 		session.get_commission_block_reason(WorldEvents.Kind.BANDIT_TRIBUTE).is_empty(),
 		"yeni bir olay örneği görevi tekrar açar"

@@ -943,6 +943,6 @@ func _test_rogue_mage_is_ready_but_never_spawned(t) -> void:
 	for seed_value in 40:
 		rng.seed = seed_value
 		for kind in [EnemyCatalog.KIND_BANDIT, EnemyCatalog.KIND_WILDLIFE, EnemyCatalog.KIND_GUARD, EnemyCatalog.KIND_HUNT]:
-			var squad := EnemyCatalog.build_squad(kind, "test_loc_b", 0.9, 4, rng)
+			var squad := EnemyCatalog.build_squad(kind, "zelmarin", 0.9, 4, rng)
 			for unit in squad:
 				t.ok(unit.figure_kind != EnemyCatalog.ROGUE_MAGE, "büyücü kadroya kendiliğinden girmez")
