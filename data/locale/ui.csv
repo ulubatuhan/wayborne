@@ -230,6 +230,8 @@
 "UI_ROAD_DAY_LINE","Gün %d: %s","Day %d: %s","","","","","","","","",""
 "UI_ROAD_CAMP_LIT","Ateş yakıldı, kervan mola verdi.","The fire is lit; the caravan rests.","","","","","","","","",""
 "UI_ROAD_CAMP_STRUCK","Kamp söküldü (erzak -%d), kadro soluklandı (stres -%d).","Camp is struck (provisions -%d); the company breathes easier (stress -%d).","","","","","","","","",""
+"UI_ROAD_CAMP_SETTLED","Herkes ateşin başında (saat %s).","Everyone is at the fire (%s).","","","","","","","","",""
+"UI_ROAD_CAMP_BREAK","Kamp kalkıyor (saat %s).","Breaking camp (%s).","","","","","","","","",""
 "UI_ROAD_CONTRACT_EXPIRED","Loncadaki bir kontratın süresi doldu, itibarın düştü.","A contract at the guild has expired; your reputation suffers.","","","","","","","","",""
 "UI_ROAD_RECRUIT_OFFER","%s — can %d · isabet %d · kaçınma %d — %d GG istiyor.","%s — HP %d · accuracy %d · dodge %d — asks %d GP.","","","","","","","","",""
 "UI_ROAD_RECRUIT_ACCEPT","Partiye Kat (%d GG)","Take Them On (%d GP)","","","","","","","","",""

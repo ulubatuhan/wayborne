@@ -1614,8 +1614,12 @@ func _process(delta: float) -> void:
 		return
 	_apply_zoom(delta)
 
+	# Kamp kurulurken ve sökülürken insanlar yürürken saat kampın yavaş
+	# akışında değil normal hızda akıyor; yürüyüş de oyun hızıyla hızlanıyor.
+	_caravan.set_gather_time_scale(_clock.get_speed())
 	if _can_time_flow():
-		var hours := _clock.advance(delta)
+		var transitioning := _caravan.is_camp_transitioning()
+		var hours := _clock.advance(delta, maxf(1.0, _clock.get_speed()) if transitioning else -1.0)
 		_advance_position(hours, delta)
 		_tick_signals(hours)
 		_process_elapsed_days()
@@ -2103,7 +2107,18 @@ func _on_speed_pressed() -> void:
 ## Kamp bir tuş değil bir durum: ateş yanar, zaman akmaya devam eder,
 ## süre dolunca kendiliğinden kalkar ve faydası o an uygulanır.
 func _update_camp_state() -> void:
-	if not _camping or _clock.total_hours < _camp_ends_at_hours:
+	if not _camping:
+		return
+	if _camp_ends_at_hours == JourneyController.CAMP_PENDING:
+		# Herkes ateşe varınca kamp sayacı başlıyor.
+		_camp_ends_at_hours = JourneyController.camp_ends_at(
+			_camp_ends_at_hours, _clock.total_hours, _caravan.is_camp_settled(), CAMP_HOURS
+		)
+		if _camp_ends_at_hours == JourneyController.CAMP_PENDING:
+			return
+		_add_log(tr("UI_ROAD_CAMP_SETTLED") % _clock.get_clock_text(), OUTCOME_COLOR)
+		return
+	if _clock.total_hours < _camp_ends_at_hours:
 		return
 
 	var camp_result := _session.make_camp()
@@ -2113,6 +2128,7 @@ func _update_camp_state() -> void:
 		],
 		OUTCOME_COLOR
 	)
+	_add_log(tr("UI_ROAD_CAMP_BREAK") % _clock.get_clock_text(), OUTCOME_COLOR)
 	_camping = false
 	_band.set_camping(false)
 	_caravan.set_camping(false)
@@ -2279,7 +2295,7 @@ func _on_camp_pressed() -> void:
 	# _update_camp_state faydayı uygular. Gün ilerlemesi kendiliğinden
 	# olur - saat gece yarısını geçince günlük mekanik zaten işler.
 	_camping = true
-	_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS
+	_camp_ends_at_hours = JourneyController.CAMP_PENDING
 	# Kamp kendi hızını öneriyor: 8 saatlik bir mola 1x'te dakikalarca
 	# beklemek demek, oysa kampın kendi görüntüsü (ateş, dinlenen kervan)
 	# bu kadar uzun izlenecek bir şey değil. Oyuncu isterse yine

@@ -38,6 +38,19 @@ var signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var signals: RoadSignals = RoadSignals.new()
 var camping: bool = false
 var camp_ends_at_hours: float = 0.0
+## Kamp kuruldu ama herkes henüz ateşe varmadı: `camp_ends_at_hours` bu
+## değerde bekler, sayaç herkes vardığında başlar (bkz. camp_ends_at).
+const CAMP_PENDING: float = -1.0
+
+## Kampın bitiş saatini günceller. Kamp sayacı yürüyüş bitince başlar:
+## eskiden `kamp saati + CAMP_HOURS` kurulduğu anda yazılıyordu ve ateşe
+## yürüyüş bu sürenin içinden yiyordu (görev 12.2c). Bekleyen bir kamp
+## herkes ateşe varınca `toplam saat + camp_hours`'a döner; başka her durumda
+## değer olduğu gibi kalır.
+static func camp_ends_at(current_ends: float, total_hours: float, settled: bool, camp_hours: float) -> float:
+	if current_ends == CAMP_PENDING and settled:
+		return total_hours + camp_hours
+	return current_ends
 ## Bacağın arazideki yeri. Arazi rotanın kendisi (çıkıştan hedefe, gün
 ## cinsinden); geri dönen kervan **aynı araziyi** ters yönde yürüyor, yeni
 ## bir yol değil. `heading` +1 hedefe, -1 geri; `leg_origin_day` bacağın

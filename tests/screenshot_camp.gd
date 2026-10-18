@@ -16,12 +16,13 @@ const MOMENTS: Array = [
 	["0.2 sn: iniş başlıyor", true, 0.2],
 	["0.8 sn: iniş ortası", true, 0.8],
 	["1.4 sn: yere iniyor", true, 1.4],
-	["ateşe yürüyüş", true, 2.6],
-	["ateşte", true, 7.0],
-	["kamp kalktı: dönüş", false, 1.2],
-	["binmeden önce", false, 4.0],
-	["biniş ortası", false, 5.2],
-	["yerinde, yürümeye hazır", false, 9.0],
+	["ateşe yürüyüş", true, 2.0],
+	["ateşe varmadan: yalnızca odun", true, 2.6],
+	["ilk figür vardı: tutuşuyor", true, 2.85],
+	["ateş oturdu", true, 4.2],
+	["kamp kalktı: dönüş", false, 1.0],
+	["binmeden önce", false, 3.0],
+	["yerinde, yürümeye hazır", false, 6.0],
 ]
 
 var _band: TravelBand
@@ -50,6 +51,7 @@ func _init() -> void:
 	var labels: Array[String] = []
 	var elapsed := 0.0
 	var camping := false
+	var arrival := -1.0
 	for moment in MOMENTS:
 		if bool(moment[1]) != camping:
 			camping = bool(moment[1])
@@ -59,6 +61,9 @@ func _init() -> void:
 		while elapsed < float(moment[2]):
 			_caravan._process(DT)
 			elapsed += DT
+			if camping and arrival < 0.0 and _caravan.get_fire_ignite(0) > 0.0:
+				arrival = elapsed
+				print("ilk ateş tutuştu: ", snapped(elapsed, 0.01), " sn")
 		_caravan.queue_redraw()
 		for child in _caravan.get_children():
 			(child as CanvasItem).queue_redraw()
@@ -109,7 +114,7 @@ func _closeup() -> void:
 
 ## Kervanın ön yarısı (lider, ilk vagon, ateşi) her an için bir satır.
 func _compose(shots: Array[Image], labels: Array[String]) -> void:
-	var crop := Rect2i(int(BAND.x * 0.30), int(BAND.y * 0.35), int(BAND.x * 0.70), int(BAND.y * 0.62))
+	var crop := Rect2i(0, int(BAND.y * 0.35), int(BAND.x * 0.62), int(BAND.y * 0.62))
 	var sheet := Image.create(crop.size.x, crop.size.y * shots.size(), false, Image.FORMAT_RGBA8)
 	for i in shots.size():
 		var img := shots[i]

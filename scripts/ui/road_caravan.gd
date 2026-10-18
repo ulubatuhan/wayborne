@@ -137,7 +137,25 @@ const FIRE_FLICKER_SPEED: float = 9.0
 ## tek kişilik bir ateş "kervandakiler toplandı" demiyordu. Süre
 ## `CAMP_HOURS` (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı
 ## ama oyuncunun sabrını da sınamamalı.
-const CAMP_GATHER_SECONDS: float = 1.3
+##
+## Süre figür başına: herkes kendi yoluna göre yürür (`_figure_gather_seconds`),
+## ne en yavaşa ne en uzağa göre beklenir. Üst sınır `MAX_GATHER_SECONDS`:
+## eskiden en uzak figürün tempolu hızı herkesi 30-60 saniyeye bağlıyordu ve
+## sayaç yürüyüş bitmeden başlıyordu - ateşe varana kadar sabah oluyordu
+## (görev 12.2c). Oyun hızı çarpanı yürüyüşe de uygulanıyor
+## (`set_gather_time_scale`).
+const CAMP_GATHER_SECONDS: float = 1.0
+const MAX_GATHER_SECONDS: float = 3.0
+## Üst sınır yüzünden tempolu hızın kaç katına çıkılabileceği: uzak bir figür
+## 3 saniyeye sığmak için biraz koşar, ama kendi yürüyüşünden iki katından
+## fazla değil (ondan sonrası yola ateşi yaklaştırarak, bkz. `_nearest_fire`).
+const GATHER_JOG_FACTOR: float = 2.0
+## Ateşin tutuşma süresi (gerçek saniye, oyun hızıyla ölçekli).
+const IGNITE_SECONDS: float = 0.7
+## Ateş resminin (bonfire/body.png) alt kısmı odun, üstü alev. Tutuşmadan
+## önce yalnızca odun görünür; oran resmin yüksekliğinden (145 satırın
+## ~100'ünden aşağısı).
+const CAMPFIRE_LOGS_FROM: float = 0.72
 ## Attan inmenin/koltuktan inmenin süresi (gerçek saniye): sekiz karelik
 ## klip (FigureActions `dismount`/`climb_down`). Binmek aynı süre, tersten.
 const TRANSITION_SECONDS: float = 1.5
@@ -220,6 +238,12 @@ var _camp_time: float = 0.0
 ## yerden geri döner.
 var _gather_walk: Dictionary = {}
 var _gather_trans: Dictionary = {}
+## Oyun hızı çarpanı: toplanma ve dönüş animasyonları gerçek saniyeyle değil
+## bununla ölçekli akıyor (3x'te üç kat hızlı). Yol ekranı her karede yazar.
+var _gather_time_scale: float = 1.0
+## Ateş başına tutuşma ilerlemesi 0-1. Anahtar yoksa ateş yanmamıştır; ilk
+## varan figürle ateşin kendisi tutuşuyor (görev 12.2c).
+var _fire_ignite: Dictionary = {}
 var _gather_clip: Dictionary = {}
 ## Toplanan her figürün kolondaki "ev" konumu ve ateşteki hedefi - ikisi
 ## arasında kendi `_gather_walk`'ı kadar ilerliyor. `_layout()` her çalıştığında
@@ -382,6 +406,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	_gather_walk.clear()
 	_gather_trans.clear()
 	_gather_clip.clear()
+	_fire_ignite.clear()
 
 	_wagon_count = maxi(1, session.owned_wagon_count)
 	_leader_mounted = mounted_leader
@@ -687,6 +712,12 @@ func set_leader_motion(ground_px_s: float, walking: bool) -> void:
 	_leader_ground = ground_px_s
 	_leader_walking = walking
 
+## Oyun hızı çarpanı (yol ekranı her karede yazar): toplanma ve dönüş
+## yürüyüşü bununla hızlanıyor. 1'in altı yok - ağır çekimde insanlar
+## sürünmesin, kamp zaten yavaş akışta kurulabiliyor.
+func set_gather_time_scale(scale: float) -> void:
+	_gather_time_scale = maxf(1.0, scale)
+
 ## Kamp kurulunca/kalkınca çağrılır. Ateşler burada değil `_draw()`'da
 ## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
 ## yürüyeceğini belirliyor. Yön ayrı bir bayrak değil - sayaçlar
@@ -716,6 +747,7 @@ func _begin_gathering() -> void:
 	_gather_walk.clear()
 	_gather_trans.clear()
 	_gather_clip.clear()
+	_fire_ignite.clear()
 	if _wagon_centres.is_empty():
 		return
 	var fire_count := _wagon_centres.size()
@@ -741,7 +773,28 @@ func _begin_gathering() -> void:
 			break
 		_assign_gather(_crew_figures[index], index, seats_taken)
 	for index in _party_figures.size():
-		_assign_gather(_party_figures[index], index % fire_count, seats_taken)
+		var figure := _party_figures[index]
+		_assign_gather(figure, _nearest_fire(figure, seats_taken), seats_taken)
+
+## Parti üyesinin en yakın ateşi (yer olanlar arasında). Eskiden üyeler
+## ateşler arasında sırayla dağıtılıyordu: 20 vücut boyu öteye yürüyen biri
+## oluyordu (görev 12.2c). Her ateşin koltuğu sınırlı, dolanı atlıyoruz.
+func _nearest_fire(figure: WalkFigure, seats_taken: Dictionary) -> int:
+	var centre := figure.position.x + figure.size.x * 0.5
+	var best := 0
+	var best_dist := INF
+	var any_free := false
+	for index in _wagon_centres.size():
+		if int(seats_taken.get(index, 0)) < CAMPFIRE_SEATS.size():
+			any_free = true
+	for index in _wagon_centres.size():
+		if any_free and int(seats_taken.get(index, 0)) >= CAMPFIRE_SEATS.size():
+			continue
+		var dist := absf(_campfire_position(index).x - centre)
+		if dist < best_dist:
+			best_dist = dist
+			best = index
+	return best
 
 func _take_seat(fire_index: int, seats_taken: Dictionary) -> int:
 	var seat := int(seats_taken.get(fire_index, 0))
@@ -1128,13 +1181,14 @@ func _leader_rel_x() -> float:
 ## inip binenlerin önce/sonra kendi klibi var (`_gather_trans`). Figürün kendi yürüyüş fazı da burada sürülüyor -
 ## Zemin hızından değil, çünkü kamp sırasında kervan duruyor: adım her
 ## figürün kendi yolundan.
-func _advance_gather(delta: float) -> void:
+func _advance_gather(real_delta: float) -> void:
 	if _gathering_figures.is_empty():
 		return
-	var walk_rate := 1.0 / gather_seconds()
+	var delta := real_delta * _gather_time_scale
 	var trans_rate := 1.0 / TRANSITION_SECONDS
 	var settled := true
 	for figure in _gathering_figures:
+		var walk_rate := 1.0 / _figure_gather_seconds(figure)
 		var has_trans := _gather_trans.has(figure)
 		var walk := float(_gather_walk.get(figure, 0.0))
 		var trans := float(_gather_trans.get(figure, 1.0))
@@ -1165,6 +1219,8 @@ func _advance_gather(delta: float) -> void:
 		if walk > 0.0 or (has_trans and trans > 0.0):
 			settled = false
 
+	_update_fires(delta)
+
 	# Dönüş bittiyse toplanma tamamen bitmiştir - kayıtlar temizleniyor.
 	# Sürücüler ve inen lider gizleniyor: koltuğu yeniden `ArtDraw.wagon()`'un
 	# sabit silüeti, eyeri atlı figür tutuyor (bkz. `_draw()`'daki
@@ -1186,21 +1242,66 @@ func _advance_gather(delta: float) -> void:
 		_gather_walk.clear()
 		_gather_trans.clear()
 		_gather_clip.clear()
+		_fire_ignite.clear()
 
-## Ateşe yürüyüşün süresi: en uzağa yürüyenin en hızlı anı (smoothstep'in
-## tepesi ortalamanın 1.5 katı) tempolu yürüyüşü aşmasın. 1.3 saniyede
-## kapanan bir vagon aralığı insanı ateşe koşturuyordu.
-func gather_seconds() -> float:
-	var farthest := 0.0
-	var brisk := INF
+## Bir ateş, ilk kendi figürü ona vardığında tutuşuyor; hiç figürü atanmamış
+## bir ateş (vagonu boş) ilk varan herhangi biriyle. Tutuşan ateş kamp
+## sökülene kadar yanıyor.
+func _update_fires(delta: float) -> void:
+	if not _camping:
+		return
+	var arrived_at: Dictionary = {}
+	var assigned_to: Dictionary = {}
+	var anyone := false
 	for figure in _gathering_figures:
-		var home: Vector2 = _gather_homes.get(figure, figure.position)
-		var dest: Vector2 = _gather_targets.get(figure, home)
-		farthest = maxf(farthest, absf(dest.x - home.x))
-		brisk = minf(brisk, figure.brisk_ground_speed())
-	if farthest <= 0.0 or brisk == INF or brisk <= 0.0:
+		var fire_index := int(_gather_fire_index.get(figure, -1))
+		assigned_to[fire_index] = true
+		if float(_gather_walk.get(figure, 0.0)) >= 1.0:
+			arrived_at[fire_index] = true
+			anyone = true
+	for index in _wagon_centres.size():
+		var lit := arrived_at.has(index) or (anyone and not assigned_to.has(index))
+		if lit or _fire_ignite.has(index):
+			_fire_ignite[index] = minf(1.0, float(_fire_ignite.get(index, 0.0)) + delta / IGNITE_SECONDS)
+
+## Ateşin tutuşma ilerlemesi: 0 yanmıyor (yalnızca odun), 1 tam alev.
+func get_fire_ignite(index: int) -> float:
+	return float(_fire_ignite.get(index, 0.0))
+
+## Kamp kuruldu mu: herkes kendi ateşine vardı (kamp sayacı bundan sonra
+## başlıyor - görev 12.2c). Toplanacak kimse yoksa kamp kurulu sayılır.
+func is_camp_settled() -> bool:
+	if not _camping:
+		return false
+	for figure in _gathering_figures:
+		if float(_gather_walk.get(figure, 0.0)) < 1.0:
+			return false
+	return true
+
+## Kamp kurulurken ya da sökülürken yürüyüş sürüyor mu (saat bu sırada
+## kampın yavaş akışında değil, normal hızda akıyor).
+func is_camp_transitioning() -> bool:
+	return (_camping and not is_camp_settled()) or is_breaking_camp()
+
+## Bir figürün ateşe yürüyüş süresi: kendi yolu ve kendi tempolu hızı. En
+## uzağa yürüyenin en hızlı anı (smoothstep'in tepesi ortalamanın 1.5 katı)
+## tempolu yürüyüşün `GATHER_JOG_FACTOR` katını geçmesin; ama hiçbir yürüyüş
+## `MAX_GATHER_SECONDS`'ı aşmasın.
+func _figure_gather_seconds(figure: WalkFigure) -> float:
+	var home: Vector2 = _gather_homes.get(figure, figure.position)
+	var dest: Vector2 = _gather_targets.get(figure, home)
+	var dist := absf(dest.x - home.x)
+	var brisk := figure.brisk_ground_speed()
+	if dist <= 0.0 or brisk <= 0.0:
 		return CAMP_GATHER_SECONDS
-	return maxf(CAMP_GATHER_SECONDS, 1.5 * farthest / brisk)
+	return clampf(1.5 * dist / (brisk * GATHER_JOG_FACTOR), CAMP_GATHER_SECONDS, MAX_GATHER_SECONDS)
+
+## Toplanmanın en uzun yürüyüşü (gerçek saniye, oyun hızı çarpanından önce).
+func gather_seconds() -> float:
+	var longest := CAMP_GATHER_SECONDS
+	for figure in _gathering_figures:
+		longest = maxf(longest, _figure_gather_seconds(figure))
+	return longest
 
 ## Toplanmanın (ya da dönüşün) tamamı: inip binenler yürüyüşten önce/sonra
 ## kendi klibini oynuyor.
@@ -1522,7 +1623,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_carts(height)
 
-	if _camping:
+	if _camping or is_breaking_camp():
 		# Ateşler vagonlardan *sonra* çiziliyor (aynı `_draw()` çağrısı,
 		# yani üstlerine biner) ama figürlerden *önce*: figürler bu
 		# fonksiyondan sonra, ayrı çocuklar olarak çiziliyor, yani ateşin
@@ -1571,29 +1672,36 @@ func _draw_carts(height: float) -> void:
 func _draw_campfires() -> void:
 	var glow_radius := size.y * 0.24
 	var flicker := 0.88 + 0.12 * sin(_camp_time * FIRE_FLICKER_SPEED)
-	var flame_h := 22.0 * flicker * _scale
 	for index in _wagon_centres.size():
 		var fire := _campfire_position(index)
-		# İki katman: geniş ve soluk bir haleyle sahnenin geneli ısınıyor
-		# (bkz. "sıcak bir ortam" - tek dar bir ışık çemberi yalnızca
-		# ateşin kendisini aydınlatıyordu, etrafındaki toplanmayı değil),
-		# dar ve parlak olan ateşin hemen dibini.
-		ArtDraw.light_pool(self, fire, glow_radius * 2.1, ArtPalette.TORCH, 0.05 * flicker, 0.60)
-		ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.11 * flicker, 0.48)
-		# Odun + alev: alev üç dilim, en içi en açık. Taş çember ve odunlar
-		# render (PropArt); alev titrediği için çizilmeye devam ediyor.
+		# Tutuşma: 0'da yalnızca odun yığını, 1'de tam alev (ilk figür varınca
+		# başlıyor, bkz. `_update_fires`).
+		var lit := get_fire_ignite(index)
+		var flame_h := 22.0 * flicker * _scale * lit
+		if lit > 0.0:
+			# İki katman: geniş ve soluk bir haleyle sahnenin geneli ısınıyor
+			# (bkz. "sıcak bir ortam" - tek dar bir ışık çemberi yalnızca
+			# ateşin kendisini aydınlatıyordu, etrafındaki toplanmayı değil),
+			# dar ve parlak olan ateşin hemen dibini.
+			ArtDraw.light_pool(self, fire, glow_radius * 2.1, ArtPalette.TORCH, 0.05 * flicker * lit, 0.60)
+			ArtDraw.light_pool(self, fire, glow_radius, ArtPalette.TORCH, 0.11 * flicker * lit, 0.48)
+		# Odun + alev: taş çember ve odunlar render (PropArt); alev titrediği
+		# için parlaklığı oynuyor.
 		if PropArt.has(CAMPFIRE_PROP):
-			# Odun ve alev render (PropArt); titreme alevin parlaklığında.
 			var px_per_m := size.y * _scale * PERSON_HEIGHT_RATIO * 0.86 / 1.73
 			var glow := Color(0.86 + 0.14 * flicker, 0.84 + 0.12 * flicker, 0.80 + 0.10 * flicker)
-			PropArt.draw_all(self, CAMPFIRE_PROP, fire + Vector2(0.0, 3.0 * _scale),
-				px_per_m / PropArt.ppm(CAMPFIRE_PROP), glow)
+			_draw_bonfire(fire + Vector2(0.0, 3.0 * _scale),
+				px_per_m / PropArt.ppm(CAMPFIRE_PROP), glow, lit)
+			if lit > 0.0:
+				_draw_sparks(fire, lit)
 			continue
 		for side in [-1.0, 1.0]:
 			draw_line(
 				fire + Vector2(-14.0 * side, 2.0) * _scale, fire + Vector2(9.0 * side, -7.0) * _scale,
 				Color(0.32, 0.24, 0.18), 3.5 * _scale
 			)
+		if lit <= 0.0:
+			continue
 		draw_colored_polygon(PackedVector2Array([
 			fire + Vector2(-8.0, 0.0) * _scale, fire + Vector2(0.0, -flame_h),
 			fire + Vector2(8.0, 0.0) * _scale,
@@ -1602,3 +1710,40 @@ func _draw_campfires() -> void:
 			fire + Vector2(-4.5, 0.0) * _scale, fire + Vector2(0.5, -flame_h * 0.66),
 			fire + Vector2(4.5, 0.0) * _scale,
 		]), Color(1.0, 0.82, 0.40, 0.95))
+		_draw_sparks(fire, lit)
+
+## Ateş resmi (odun altta, alev üstte tek resim): odun her zaman, alev
+## tutuşma ilerlemesi kadar boyuyla ve opaklığıyla - alevin tabanı odunda
+## sabit, tepesi yükseliyor.
+func _draw_bonfire(base: Vector2, k: float, tint: Color, lit: float) -> void:
+	var tex := PropArt.texture(CAMPFIRE_PROP, "body")
+	var r := PropArt.layer_rect(CAMPFIRE_PROP, "body", base, k)
+	if tex == null or r.size == Vector2.ZERO:
+		return
+	var w := float(tex.get_width())
+	var h := float(tex.get_height())
+	var split := r.position.y + r.size.y * CAMPFIRE_LOGS_FROM
+	draw_texture_rect_region(
+		tex, Rect2(r.position.x, split, r.size.x, r.end.y - split),
+		Rect2(0.0, h * CAMPFIRE_LOGS_FROM, w, h * (1.0 - CAMPFIRE_LOGS_FROM)), tint
+	)
+	if lit <= 0.0:
+		return
+	var flame_full := split - r.position.y
+	var flame_h := flame_full * lit
+	draw_texture_rect_region(
+		tex, Rect2(r.position.x, split - flame_h, r.size.x, flame_h),
+		Rect2(0.0, 0.0, w, h * CAMPFIRE_LOGS_FROM), Color(tint.r, tint.g, tint.b, lit)
+	)
+
+## Tutuşurken yükselen birkaç kıvılcım: yalnızca ilk anlarda, alev
+## oturunca kesiliyor. Konumları ilerlemeye ve sıraya bağlı, rastgele değil
+## (her karede aynı kıvılcım aynı yerde yürüsün).
+func _draw_sparks(fire: Vector2, lit: float) -> void:
+	if lit >= 1.0:
+		return
+	for i in 5:
+		var phase := fmod(lit * 2.2 + float(i) * 0.19, 1.0)
+		var x := (float(i) - 2.0) * 5.0 * _scale + sin(phase * 6.0 + float(i)) * 4.0 * _scale
+		var y := -phase * 38.0 * _scale
+		draw_circle(fire + Vector2(x, y), 1.6 * _scale, Color(1.0, 0.78, 0.35, 1.0 - phase))
