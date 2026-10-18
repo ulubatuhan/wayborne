@@ -1,0 +1,41 @@
+# Satır sonları: depoda ve çalışma dizininde her zaman LF.
+# Windows'ta core.autocrlf=true olan bir klonda, çalışma anında üretilip
+# depodakiyle bayt bayt karşılaştırılan dosyalar (docs/*/rig_spec.json gibi)
+# CRLF'ye dönüşüp testleri kırıyordu; bu satır o ayarı yoldan bazında ezer.
+* text=auto eol=lf
+
+# Metin dosyaları
+*.gd text eol=lf
+*.gdshader text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.godot text eol=lf
+*.cfg text eol=lf
+*.csv text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+*.gltf text eol=lf
+
+# İkili dosyalar: dönüştürülmesin, farkı gösterilmesin
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.glb binary
+*.blend binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.pck binary
+
+# Büyük ikili dosyaların Git LFS'e taşınması (6.1) geçmişin yeniden yazılmasını
+# gerektirir (`git lfs migrate`) ve kullanıcı onayına bağlı; onay gelene kadar
+# buraya `filter=lfs` satırı eklenmedi.
