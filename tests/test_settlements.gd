@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_prices(t)
 	_test_start_location(t)
 	_test_legacy_save(t)
+	_test_town_art(t)
 
 func _count(type: String) -> int:
 	var n := 0
@@ -145,3 +146,15 @@ func _test_legacy_save(t) -> void:
 	t.ok(fresh.visited_location_ids.has("dravoss"), "ziyaret edilen yerler çevrildi")
 	t.ok(fresh.accepted_contracts.is_empty(), "eski kontrat teklifleri düşer")
 	t.ok(WorldMapData.get_location_by_id(fresh.current_location_id) != null, "kayıt geçerli bir yerde açılır")
+
+## P17: her yerleşimin kendi şehir resmi ve tıklama maskesi var; eski beş
+## kasabanın yedeğine düşen yer kalmadı (`city_map.town_dir`).
+func _test_town_art(t) -> void:
+	var city_map: Script = load("res://scripts/world/city_map.gd")
+	var towns = JSON.parse_string(FileAccess.get_file_as_string("res://tools/ui_scenes/towns.json"))
+	for location in WorldMapData.get_locations():
+		var id := location.location_id
+		t.ok(towns is Dictionary and (towns as Dictionary).has(id), "sahne tanımı var: %s" % id)
+		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/background.jpg"), "şehir resmi var: %s" % id)
+		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/mask.png"), "tıklama maskesi var: %s" % id)
+		t.eq(city_map.town_dir(id), id, "kendi resmini okur: %s" % id)

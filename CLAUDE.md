@@ -3170,6 +3170,14 @@ paid for. A new game starts in a city (`character_creation.gd` →
 - **Setting out from the brief is the same handoff the map uses**
   (`TravelContext.selected_destination_id` then the planner), so there is
   one path into a journey, not two.
+- **Every settlement has its own picture, generated, never hand-placed (P17).** `tools/ui_scenes/settlement_towns.py`
+  writes one `towns.json` entry per settlement from its culture (architecture, light, colour), latitude (snow and cold
+  light in the north), type (city: wall, gate, guild, castle; town: palisade, no guild or yard; caravanserai: walled
+  courtyard, no guild or church), map kind (port, free city, mine, swamp, river, market town) and goods; Blender renders
+  it (`town_scene.py`) and `town_post.py` inks it into `data/assets/ui/towns/<id>/`. A building is tagged with a venue
+  only where `SettlementRules` gives that facility, so the click mask never offers a venue the place lacks. The camera
+  sits 2 m right because the brief column covers the picture's right third. `test_settlements` fails if any settlement
+  falls back to another's picture; the style rules are `docs/ui/STIL_REHBERI.md`.
 
 ### Caravan Ruin Rules
 

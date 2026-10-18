@@ -195,6 +195,7 @@ def building(spec):
     kind = spec["kind"]
     if kind == "spire":
         spire_tower(x, y, z, spec.get("floors", 3), spec.get("size", 1.2), tag, spec.get("wood", False),
+            roof=spec.get("roof", "roof-high-point"),
             mats=_stone_material("wall_dark", 0.3) if spec.get("dark") else None)
     elif kind.startswith("builder:"):
         _built(kind[8:], (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
@@ -268,6 +269,7 @@ def ground(cfg):
     g = bpy.context.object
     g.name = "ground"
     m = bpy.data.materials.new("ground_mat")
+    m.use_nodes = True
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     tc = nt.nodes.new("ShaderNodeTexCoord")
@@ -318,6 +320,7 @@ def ground(cfg):
         h.modifiers[-1].texture = tx
         h.modifiers[-1].strength = hill.get("rough", 0.35)
         rm = bpy.data.materials.new("hill_mat")
+        rm.use_nodes = True
         rn = rm.node_tree
         rb = rn.nodes["Principled BSDF"]
         tc2 = rn.nodes.new("ShaderNodeTexCoord"); mp2 = rn.nodes.new("ShaderNodeMapping")
@@ -371,11 +374,16 @@ def _tint_and_snow(nt, colour, tc, tint, snow, scale, cap=False):
 
 def wall_row(spec):
     """Sur: `from`-`to` arasında Kenney taş duvar parçaları, aralıklı
-    burçlar; `gate` payındaki parça kemer olur (Demirkapı'nın kapısı)."""
+    burçlar; `gate` payındaki parça kemer olur (Demirkapı'nın kapısı).
+    `wood`: kasabanın ahşap çiti - ahşap parçalar, ahşap kemer, ahşap
+    gözcü kuleleri, taş boyası yok."""
     (x0, y0), (x1, y1) = spec["from"], spec["to"]
     size = spec.get("size", 2.0)
     z = spec.get("z", 0.0)
     tag = spec.get("venue", "")
+    wood = spec.get("wood", False)
+    arch = "wall-wood-arch" if wood else "wall-arch"
+    upper = "wall-wood-block" if wood else "wall-block"
     length = math.hypot(x1 - x0, y1 - y0)
     n = max(1, int(length / size))
     ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
@@ -383,19 +391,20 @@ def wall_row(spec):
     for i in range(n):
         t = (i + 0.5) / n
         x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
-        kind = "wall-arch" if gate >= 0 and abs(t - gate) < 0.5 / n else spec.get("piece", "wall")
+        kind = arch if gate >= 0 and abs(t - gate) < 0.5 / n else spec.get("piece", "wall-wood" if wood else "wall")
         for f in range(spec.get("floors", 2)):
-            k = kind if f == 0 else "wall-block"
-            dark = _stone_material("wall_dark", spec.get("value", 0.3))
-            place(ftk(k), (x, y, z + f * size), ang + spec.get("rot", 0.0), size, tag if kind == "wall-arch" else spec.get("wall_tag", ""), dark)
+            k = kind if f == 0 else upper
+            dark = None if wood else _stone_material("wall_dark", spec.get("value", 0.3))
+            place(ftk(k), (x, y, z + f * size), ang + spec.get("rot", 0.0), size, tag if kind == arch else spec.get("wall_tag", ""), dark)
         if spec.get("towers") and i % spec["towers"] == 0:
-            spire_tower(x, y + 0.2, z, spec.get("floors", 2) + 2, size * 0.9, spec.get("wall_tag", ""),
-                mats=_stone_material("wall_dark", spec.get("value", 0.3)))
+            spire_tower(x, y + 0.2, z, spec.get("floors", 2) + 2, size * 0.9, spec.get("wall_tag", ""), wood,
+                mats=None if wood else _stone_material("wall_dark", spec.get("value", 0.3)))
 
 
 def sky(cfg):
     """Gökyüzü: tepede neredeyse siyah, ufukta boğuk bir ışık bandı."""
     w = bpy.data.worlds.new("sky")
+    w.use_nodes = True  # Blender 4.2: varsayılan kapalı
     bpy.context.scene.world = w
     nt = w.node_tree
     bg = nt.nodes["Background"]
@@ -499,6 +508,7 @@ def render_ids(path, pct):
     sc.view_settings.look = "None"
     sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
     m = bpy.data.materials.new("id_mat")
+    m.use_nodes = True
     nt = m.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
@@ -525,6 +535,7 @@ def render_depth(path, pct, far):
     mürekkep için. Kimlik geçişinin aynı yolu (emisyon, ışıksız)."""
     sc = bpy.context.scene
     m = bpy.data.materials.new("depth_mat")
+    m.use_nodes = True
     nt = m.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
