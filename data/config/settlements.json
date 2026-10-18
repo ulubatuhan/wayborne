@@ -32,6 +32,19 @@
    "neighbours": [
     "serai_duvenmor",
     "tolvarin"
+   ],
+   "produces": [
+    "honey",
+    "test_grain"
+   ],
+   "demands": [
+    "test_cloth",
+    "fish"
+   ],
+   "available": [
+    "honey",
+    "test_furs",
+    "test_grain"
    ]
   },
   {
@@ -53,6 +66,18 @@
    ],
    "neighbours": [
     "vastrevar"
+   ],
+   "produces": [
+    "test_furs"
+   ],
+   "demands": [
+    "test_grain",
+    "wine"
+   ],
+   "available": [
+    "fish",
+    "test_furs",
+    "test_grain"
    ]
   },
   {
@@ -76,6 +101,15 @@
     "ilsande",
     "merigaud",
     "mirsana"
+   ],
+   "produces": [
+    "wine",
+    "test_cloth"
+   ],
+   "demands": [
+    "test_weapon",
+    "jewelry",
+    "spice"
    ]
   },
   {
@@ -97,6 +131,19 @@
    ],
    "neighbours": [
     "kesgrav"
+   ],
+   "produces": [
+    "test_weapon",
+    "jewelry"
+   ],
+   "demands": [
+    "test_grain",
+    "test_cloth"
+   ],
+   "available": [
+    "jewelry",
+    "test_grain",
+    "test_weapon"
    ]
   },
   {
@@ -119,6 +166,19 @@
    "neighbours": [
     "ilsande",
     "serai_seyvan"
+   ],
+   "produces": [
+    "wine",
+    "test_grain"
+   ],
+   "demands": [
+    "fish",
+    "test_furs"
+   ],
+   "available": [
+    "test_cloth",
+    "test_grain",
+    "wine"
    ]
   },
   {
@@ -140,6 +200,15 @@
    ],
    "neighbours": [
     "selvicar"
+   ],
+   "produces": [
+    "test_weapon",
+    "test_grain"
+   ],
+   "demands": [
+    "wine",
+    "honey",
+    "test_potion"
    ]
   },
   {
@@ -163,6 +232,15 @@
     "golcavar",
     "ondrelle",
     "orvahel"
+   ],
+   "produces": [
+    "honey",
+    "test_furs"
+   ],
+   "demands": [
+    "test_grain",
+    "test_cloth",
+    "spice"
    ]
   },
   {
@@ -185,6 +263,19 @@
    "neighbours": [
     "ezmerak",
     "rivecande"
+   ],
+   "produces": [
+    "test_potion",
+    "fish"
+   ],
+   "demands": [
+    "test_grain",
+    "test_weapon"
+   ],
+   "available": [
+    "fish",
+    "test_furs",
+    "test_potion"
    ]
   },
   {
@@ -209,6 +300,15 @@
     "caramine",
     "mirsana",
     "serai_seyvan"
+   ],
+   "produces": [
+    "silk",
+    "wine"
+   ],
+   "demands": [
+    "test_furs",
+    "test_weapon",
+    "honey"
    ]
   },
   {
@@ -231,6 +331,18 @@
    "neighbours": [
     "brazdun",
     "rivecande"
+   ],
+   "produces": [
+    "test_weapon"
+   ],
+   "demands": [
+    "test_grain",
+    "wine"
+   ],
+   "available": [
+    "test_furs",
+    "test_grain",
+    "test_weapon"
    ]
   },
   {
@@ -254,6 +366,18 @@
     "samuran",
     "serai_orbeyan",
     "tolvarin"
+   ],
+   "produces": [
+    "test_grain"
+   ],
+   "demands": [
+    "test_weapon",
+    "test_potion"
+   ],
+   "available": [
+    "test_cloth",
+    "test_furs",
+    "test_grain"
    ]
   },
   {
@@ -277,6 +401,19 @@
     "merigaud",
     "mirsana",
     "samuran"
+   ],
+   "produces": [
+    "fish",
+    "test_potion"
+   ],
+   "demands": [
+    "test_grain",
+    "test_cloth"
+   ],
+   "available": [
+    "fish",
+    "test_grain",
+    "test_potion"
    ]
   },
   {
@@ -300,6 +437,15 @@
     "belvanor",
     "liraven",
     "serai_duvenmor"
+   ],
+   "produces": [
+    "test_grain",
+    "wine"
+   ],
+   "demands": [
+    "test_weapon",
+    "test_furs",
+    "fish"
    ]
   },
   {
@@ -324,6 +470,20 @@
     "ilsande",
     "liraven",
     "samuran"
+   ],
+   "produces": [
+    "spice",
+    "test_cloth"
+   ],
+   "demands": [
+    "test_grain",
+    "fish"
+   ],
+   "available": [
+    "fish",
+    "spice",
+    "test_cloth",
+    "test_grain"
    ]
   },
   {
@@ -347,6 +507,15 @@
     "ezmerak",
     "orvahel",
     "serai_duvenmor"
+   ],
+   "produces": [
+    "test_grain",
+    "honey"
+   ],
+   "demands": [
+    "test_weapon",
+    "fish",
+    "test_cloth"
    ]
   },
   {
@@ -371,6 +540,15 @@
     "serai_seyvan",
     "vorgat",
     "zelmarin"
+   ],
+   "produces": [
+    "spice",
+    "fish"
+   ],
+   "demands": [
+    "test_furs",
+    "test_weapon",
+    "test_grain"
    ]
   },
   {
@@ -397,6 +575,15 @@
     "serai_seyvan",
     "vorgat",
     "zelmarin"
+   ],
+   "produces": [
+    "test_potion",
+    "test_cloth"
+   ],
+   "demands": [
+    "wine",
+    "honey",
+    "jewelry"
    ]
   },
   {
@@ -420,6 +607,15 @@
     "golcavar",
     "kesgrav",
     "vastrevar"
+   ],
+   "produces": [
+    "fish",
+    "test_furs"
+   ],
+   "demands": [
+    "test_grain",
+    "wine",
+    "spice"
    ]
   },
   {
@@ -443,6 +639,19 @@
     "kirsavel",
     "liraven",
     "mirsana"
+   ],
+   "produces": [
+    "test_potion",
+    "fish"
+   ],
+   "demands": [
+    "test_grain",
+    "test_cloth"
+   ],
+   "available": [
+    "fish",
+    "test_grain",
+    "test_potion"
    ]
   },
   {
@@ -466,6 +675,18 @@
     "dravoss",
     "serai_orbeyan",
     "vastrevar"
+   ],
+   "produces": [
+    "test_grain"
+   ],
+   "demands": [
+    "test_cloth",
+    "wine"
+   ],
+   "available": [
+    "fish",
+    "test_furs",
+    "test_grain"
    ]
   },
   {
@@ -489,6 +710,21 @@
     "akavan",
     "merigaud",
     "ondrelle"
+   ],
+   "produces": [
+    "silk",
+    "wine"
+   ],
+   "demands": [
+    "spice",
+    "test_furs"
+   ],
+   "available": [
+    "jewelry",
+    "silk",
+    "spice",
+    "test_potion",
+    "wine"
    ]
   },
   {
@@ -512,6 +748,21 @@
     "kirsavel",
     "selvicar",
     "tolvarin"
+   ],
+   "produces": [
+    "test_furs",
+    "spice"
+   ],
+   "demands": [
+    "test_cloth",
+    "test_weapon"
+   ],
+   "available": [
+    "honey",
+    "jewelry",
+    "silk",
+    "spice",
+    "test_furs"
    ]
   },
   {
@@ -538,6 +789,21 @@
     "orvahel",
     "vorgat",
     "zelmarin"
+   ],
+   "produces": [
+    "spice",
+    "jewelry"
+   ],
+   "demands": [
+    "wine",
+    "test_grain"
+   ],
+   "available": [
+    "honey",
+    "jewelry",
+    "silk",
+    "spice",
+    "test_potion"
    ]
   },
   {
@@ -561,6 +827,15 @@
     "akavan",
     "kirsavel",
     "serai_orbeyan"
+   ],
+   "produces": [
+    "test_furs",
+    "test_grain"
+   ],
+   "demands": [
+    "test_weapon",
+    "test_cloth",
+    "wine"
    ]
   },
   {
@@ -584,6 +859,16 @@
     "auderin",
     "rivecande",
     "selvicar"
+   ],
+   "produces": [
+    "test_weapon",
+    "test_cloth"
+   ],
+   "demands": [
+    "spice",
+    "wine",
+    "silk",
+    "jewelry"
    ]
   },
   {
@@ -608,6 +893,19 @@
     "orvahel",
     "serai_seyvan",
     "zelmarin"
+   ],
+   "produces": [
+    "jewelry",
+    "fish"
+   ],
+   "demands": [
+    "test_grain",
+    "test_cloth"
+   ],
+   "available": [
+    "fish",
+    "jewelry",
+    "test_weapon"
    ]
   },
   {
@@ -632,6 +930,15 @@
     "orvahel",
     "serai_seyvan",
     "vorgat"
+   ],
+   "produces": [
+    "jewelry",
+    "spice"
+   ],
+   "demands": [
+    "test_grain",
+    "wine",
+    "test_furs"
    ]
   }
  ],
@@ -7507,5 +7814,38 @@
     ]
    ]
   }
- ]
+ ],
+ "start_candidates": {
+  "nomad": [
+   "kirsavel",
+   "selvicar",
+   "vastrevar"
+  ],
+  "valley": [
+   "belvanor",
+   "caramine",
+   "ilsande",
+   "liraven",
+   "merigaud",
+   "ondrelle"
+  ],
+  "highland": [
+   "brazdun",
+   "kesgrav",
+   "vorgat"
+  ],
+  "port": [
+   "mirsana",
+   "orsolune",
+   "zelmarin"
+  ],
+  "fisher": [
+   "brazdun",
+   "dravoss",
+   "kirsavel",
+   "mirsana",
+   "rivecande",
+   "samuran"
+  ]
+ }
 }

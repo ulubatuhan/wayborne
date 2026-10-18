@@ -420,6 +420,39 @@ def main(argv):
                     stack.append(m)
         comps.append(sorted(comp))
 
+    economy = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "economy.json"), encoding="utf-8"))
+    for s in settlements:
+        g = economy["goods"].get(s["id"])
+        if g is None:
+            raise SystemExit("economy.json'da mal yok: %s" % s["id"])
+        s["produces"] = g["produces"]
+        s["demands"] = g["demands"]
+        if s["type"] != "city":
+            s["available"] = sorted(set(g.get("available", [])) | set(g["produces"]))
+    by_id = {s["id"]: s for s in settlements}
+    starts = {}
+    fish_villages = [p["pos"] for p in places.values() if p.get("kind") == "iv_fishvillage"]
+    for culture, regions in economy["start_cultures"].items():
+        if culture.startswith("_"):
+            continue
+        homes = [s for s in settlements if s["type"] != "caravanserai"]
+        if regions == ["@fishvillage"]:
+            # Balıkçı kültürü: her balıkçı köyüne en yakın şehir ya da kasaba.
+            picked = set()
+            for fv in fish_villages:
+                picked.add(min(homes, key=lambda h: math.dist(h["pos"], fv))["id"])
+            starts[culture] = sorted(picked)
+            continue
+        inside = [h["id"] for h in homes if h["region"] in regions]
+        if not inside:
+            # Bölgede şehir/kasaba yok (göçebe boyları): bölgedeki yerlerin
+            # ortasına en yakın üç şehir ya da kasaba.
+            pts = [p["pos"] for p in places.values() if p.get("culture") in regions]
+            cx = sum(x for x, _ in pts) / len(pts)
+            cy = sum(y for _, y in pts) / len(pts)
+            inside = [h["id"] for h in sorted(homes, key=lambda h: math.dist(h["pos"], (cx, cy)))[:3]]
+        starts[culture] = sorted(inside)
+
     doc = {
         "_doc": "Oynanabilir yerleşimler ve aralarındaki yollar (tools/worldmap/build_settlements.py ile harita v3 GeoJSON'undan; elle düzenleme yok). Koordinat: harita görüntüsü pikseli (16012x16013).",
         "map_size": size,
@@ -427,8 +460,9 @@ def main(argv):
                   "north_south_days": NORTH_SOUTH_DAYS, "days_per_1000px": round(days_per_px * 1000, 3)},
         "settlements": settlements,
         "routes": routes,
+        "start_candidates": starts,
     }
-    with open(out_path, "w", encoding="utf-8") as fh:
+    with open(out_path, "w", encoding="utf-8", newline=chr(10)) as fh:
         json.dump(doc, fh, ensure_ascii=False, indent=1)
 
     days = sorted(r["days"] for r in routes)
@@ -441,10 +475,12 @@ def main(argv):
             playable[north]["id"], playable[south]["id"], ns_px, NORTH_SOUTH_DAYS, days_per_px * 1000),
         "Kenar günleri: en az %d, ortanca %d, en çok %d." % (days[0], days[len(days) // 2], days[-1]),
         "Bağlı bileşen: %d %s" % (len(comps), "" if len(comps) == 1 else "- AYRIK: " + "; ".join(", ".join(c) for c in comps if len(c) < len(settlements))),
-        "", "| Yer | Tür | Kültür | Komşular |", "|---|---|---|---|",
+        "", "| Yer | Tür | Kültür | Üretir | Arar | Komşular |", "|---|---|---|---|---|---|",
     ]
     for s in settlements:
-        lines.append("| %s | %s | %s | %s |" % (s["name"]["tr"], s["type"], s["culture"], ", ".join(s["neighbours"]) or "**yok**"))
+        lines.append("| %s | %s | %s | %s | %s | %s |" % (s["name"]["tr"], s["type"], s["culture"], ", ".join(s["produces"]),
+                     ", ".join(s["demands"]), ", ".join(s["neighbours"]) or "**yok**"))
+    lines += ["", "Başlangıç adayları (kültür → yer): " + "; ".join("%s: %s" % (k, ", ".join(v)) for k, v in starts.items())]
     lines += ["", "| Yol | Gün | Tehlike | Orman | Dağ | Kervan yolu | Duraklar |", "|---|---|---|---|---|---|---|"]
     for r in routes:
         lines.append("| %s – %s | %d | %.2f | %.0f%% | %.0f%% | %.0f%% | %s |" % (
@@ -452,7 +488,7 @@ def main(argv):
             r["caravan_road_share"] * 100, ", ".join(r["via"])))
     text = "\n".join(lines) + "\n"
     if report_path:
-        open(report_path, "w", encoding="utf-8").write(text)
+        open(report_path, "w", encoding="utf-8", newline=chr(10)).write(text)
     print(text)
 
 

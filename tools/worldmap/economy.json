@@ -1,0 +1,40 @@
+{
+ "_doc": "Yerleşim başına mallar (görev N5). Elle yazıldı: coğrafya önce (kıyı balık, dağ demir ve mücevher, bozkır kürk ve deri, verimli vadi tahıl ve şarap, bataklık şifalı ot), sonra kültür (kuzeyin eski imparatorluğu: silah ve demir, askeri; Vadi: bolluk, şarap, ipek; güney kentleri: baharat, liman, ticaret; Eski Ahit: şifa ve dokuma; sınır halkları: kürk, bal, karışık). 'available' yalnızca kasaba ve kervansarayda: o pazarda bulunan mallar (kasabada her şey yok). Şehirde bütün mallar bulunur. build_settlements.py bunu settlements.json'a katar.",
+ "goods": {
+  "vastrevar": {"produces": ["test_weapon", "test_cloth"], "demands": ["spice", "wine", "silk", "jewelry"], "why": "Kuzeyin başkenti: ordunun demirhaneleri ve dokuma loncaları; lüksü güneyden ister."},
+  "dravoss": {"produces": ["test_weapon", "test_grain"], "demands": ["wine", "honey", "test_potion"], "why": "Göl kıyısında garnizon kenti; çevresi tarla."},
+  "rivecande": {"produces": ["fish", "test_furs"], "demands": ["test_grain", "wine", "spice"], "why": "Kuzey körfezinin limanı: balıkçılar ve kuzey ormanlarından kürk."},
+  "tolvarin": {"produces": ["test_furs", "test_grain"], "demands": ["test_weapon", "test_cloth", "wine"], "why": "Bozkırın kapısı: göçebelerle kürk ve tahıl ticareti."},
+  "ezmerak": {"produces": ["honey", "test_furs"], "demands": ["test_grain", "test_cloth", "spice"], "why": "Doğu ormanlarının kenti: arıcılık ve avcılık."},
+  "merigaud": {"produces": ["test_grain", "wine"], "demands": ["test_weapon", "test_furs", "fish"], "why": "Vadi'nin ambarı: geniş tarlalar ve bağlar."},
+  "belvanor": {"produces": ["wine", "test_cloth"], "demands": ["test_weapon", "jewelry", "spice"], "why": "Özgür kent: bağ evleri ve dokumacılar."},
+  "ilsande": {"produces": ["silk", "wine"], "demands": ["test_furs", "test_weapon", "honey"], "why": "Güneydeki özgür kent: ipek atölyeleri."},
+  "ondrelle": {"produces": ["test_grain", "honey"], "demands": ["test_weapon", "fish", "test_cloth"], "why": "Vadi'nin kuzey kapısı: tarla ve kovan."},
+  "orsolune": {"produces": ["spice", "fish"], "demands": ["test_furs", "test_weapon", "test_grain"], "why": "En güneydeki liman: denizaşırı baharat ve balık."},
+  "zelmarin": {"produces": ["jewelry", "spice"], "demands": ["test_grain", "wine", "test_furs"], "why": "Güneydoğu limanı: kuyumcular ve denizaşırı tüccarlar."},
+  "orvahel": {"produces": ["test_potion", "test_cloth"], "demands": ["wine", "honey", "jewelry"], "why": "Eski Ahit'in kutsal kenti: şifahaneler ve kutsal dokuma; adak için lüks ister."},
+  "selvicar": {"produces": ["test_grain"], "demands": ["test_cloth", "wine"], "available": ["test_grain", "test_furs", "fish"], "why": "Başkentin tarla kasabası."},
+  "auderin": {"produces": ["test_furs"], "demands": ["test_grain", "wine"], "available": ["test_furs", "test_grain", "fish"], "why": "En kuzeydeki kasaba: soğuk ve ormanlık."},
+  "brazdun": {"produces": ["test_weapon", "jewelry"], "demands": ["test_grain", "test_cloth"], "available": ["test_weapon", "jewelry", "test_grain"], "why": "Dağ madeni: demir ve değerli taş."},
+  "kesgrav": {"produces": ["test_weapon"], "demands": ["test_grain", "wine"], "available": ["test_weapon", "test_grain", "test_furs"], "why": "Boğaz üstünde maden kasabası."},
+  "vorgat": {"produces": ["jewelry", "fish"], "demands": ["test_grain", "test_cloth"], "available": ["jewelry", "fish", "test_weapon"], "why": "Doğu dağlarının ırmak kasabası: maden ve ırmak balığı."},
+  "kirsavel": {"produces": ["test_grain"], "demands": ["test_weapon", "test_potion"], "available": ["test_grain", "test_furs", "test_cloth"], "why": "Batı sınırında tarla kasabası."},
+  "akavan": {"produces": ["honey", "test_grain"], "demands": ["test_cloth", "fish"], "available": ["honey", "test_grain", "test_furs"], "why": "Yol üstünde arıcı kasabası."},
+  "samuran": {"produces": ["test_potion", "fish"], "demands": ["test_grain", "test_cloth"], "available": ["test_potion", "fish", "test_grain"], "why": "Bataklık kasabası: şifalı ot ve balık."},
+  "golcavar": {"produces": ["test_potion", "fish"], "demands": ["test_grain", "test_weapon"], "available": ["test_potion", "fish", "test_furs"], "why": "Doğu bataklığı: ot ve balık."},
+  "caramine": {"produces": ["wine", "test_grain"], "demands": ["fish", "test_furs"], "available": ["wine", "test_grain", "test_cloth"], "why": "Vadi'nin güney bağ kasabası."},
+  "liraven": {"produces": ["fish", "test_potion"], "demands": ["test_grain", "test_cloth"], "available": ["fish", "test_potion", "test_grain"], "why": "Vadi bataklığının balıkçı kasabası."},
+  "mirsana": {"produces": ["spice", "test_cloth"], "demands": ["test_grain", "fish"], "available": ["spice", "test_cloth", "test_grain", "fish"], "why": "Güneyin pazar kasabası: kıyıdan gelen baharat."},
+  "serai_orbeyan": {"produces": ["test_furs", "spice"], "demands": ["test_cloth", "test_weapon"], "available": ["test_furs", "spice", "silk", "honey", "jewelry"], "why": "Bozkırdaki kervansaray: göçebe kürkü ve uzaktan gelen baharat."},
+  "serai_duvenmor": {"produces": ["silk", "wine"], "demands": ["spice", "test_furs"], "available": ["silk", "wine", "spice", "jewelry", "test_potion"], "why": "Vadi'nin kavşağındaki kervansaray: dört yönden mal."},
+  "serai_seyvan": {"produces": ["spice", "jewelry"], "demands": ["wine", "test_grain"], "available": ["spice", "jewelry", "silk", "test_potion", "honey"], "why": "Güney yolundaki kervansaray: denizaşırı lüks."}
+ },
+ "start_cultures": {
+  "_doc": "Karakter oluşturmadaki kültürün başlangıç bölgeleri (görev N9). Bölgede şehir ya da kasaba yoksa en yakın olanlar.",
+  "nomad": ["gocebe"],
+  "valley": ["vadi"],
+  "highland": ["dag", "dag_maden"],
+  "port": ["guney"],
+  "fisher": ["@fishvillage"]
+ }
+}

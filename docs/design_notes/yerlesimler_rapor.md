@@ -5,35 +5,37 @@ Oynanabilir yer: 27 (şehir 12, kasaba 12, kervansaray 3). Yol (komşuluk): 41.
 Kenar günleri: en az 2, ortanca 8, en çok 38.
 Bağlı bileşen: 1 
 
-| Yer | Tür | Kültür | Komşular |
-|---|---|---|---|
-| Akavan | town | sinir | serai_duvenmor, tolvarin |
-| Auderin | town | imparatorluk | vastrevar |
-| Belvanor | city | vadi | ilsande, merigaud, mirsana |
-| Brazdun | town | dag | kesgrav |
-| Caramine | town | vadi | ilsande, serai_seyvan |
-| Dravoss | city | imparatorluk | selvicar |
-| Ezmerak | city | sinir | golcavar, ondrelle, orvahel |
-| Golcavar | town | sinir | ezmerak, rivecande |
-| Ilsande | city | vadi | belvanor, caramine, mirsana, serai_seyvan |
-| Kesgrav | town | dag | brazdun, rivecande |
-| Kirsavel | town | sinir | samuran, serai_orbeyan, tolvarin |
-| Liraven | town | vadi | merigaud, mirsana, samuran |
-| Merigaud | city | vadi | belvanor, liraven, serai_duvenmor |
-| Mirsana | town | guney | belvanor, ilsande, liraven, samuran |
-| Ondrelle | city | vadi | ezmerak, orvahel, serai_duvenmor |
-| Orsolune | city | guney | orvahel, serai_seyvan, vorgat, zelmarin |
-| Orvahel | city | ahit | ezmerak, ondrelle, orsolune, serai_seyvan, vorgat, zelmarin |
-| Rivecande | city | imparatorluk | golcavar, kesgrav, vastrevar |
-| Samuran | town | sinir | kirsavel, liraven, mirsana |
-| Selvicar | town | imparatorluk | dravoss, serai_orbeyan, vastrevar |
-| Duvenmor Kervansarayı | caravanserai | vadi | akavan, merigaud, ondrelle |
-| Orbeyan Kervansarayı | caravanserai | gocebe | kirsavel, selvicar, tolvarin |
-| Seyvan Kervansarayı | caravanserai | guney | caramine, ilsande, orsolune, orvahel, vorgat, zelmarin |
-| Tolvarin | city | sinir | akavan, kirsavel, serai_orbeyan |
-| Vastrevar | city | imparatorluk | auderin, rivecande, selvicar |
-| Vorgat | town | dag_maden | orsolune, orvahel, serai_seyvan, zelmarin |
-| Zelmarin | city | guney | orsolune, orvahel, serai_seyvan, vorgat |
+| Yer | Tür | Kültür | Üretir | Arar | Komşular |
+|---|---|---|---|---|---|
+| Akavan | town | sinir | honey, test_grain | test_cloth, fish | serai_duvenmor, tolvarin |
+| Auderin | town | imparatorluk | test_furs | test_grain, wine | vastrevar |
+| Belvanor | city | vadi | wine, test_cloth | test_weapon, jewelry, spice | ilsande, merigaud, mirsana |
+| Brazdun | town | dag | test_weapon, jewelry | test_grain, test_cloth | kesgrav |
+| Caramine | town | vadi | wine, test_grain | fish, test_furs | ilsande, serai_seyvan |
+| Dravoss | city | imparatorluk | test_weapon, test_grain | wine, honey, test_potion | selvicar |
+| Ezmerak | city | sinir | honey, test_furs | test_grain, test_cloth, spice | golcavar, ondrelle, orvahel |
+| Golcavar | town | sinir | test_potion, fish | test_grain, test_weapon | ezmerak, rivecande |
+| Ilsande | city | vadi | silk, wine | test_furs, test_weapon, honey | belvanor, caramine, mirsana, serai_seyvan |
+| Kesgrav | town | dag | test_weapon | test_grain, wine | brazdun, rivecande |
+| Kirsavel | town | sinir | test_grain | test_weapon, test_potion | samuran, serai_orbeyan, tolvarin |
+| Liraven | town | vadi | fish, test_potion | test_grain, test_cloth | merigaud, mirsana, samuran |
+| Merigaud | city | vadi | test_grain, wine | test_weapon, test_furs, fish | belvanor, liraven, serai_duvenmor |
+| Mirsana | town | guney | spice, test_cloth | test_grain, fish | belvanor, ilsande, liraven, samuran |
+| Ondrelle | city | vadi | test_grain, honey | test_weapon, fish, test_cloth | ezmerak, orvahel, serai_duvenmor |
+| Orsolune | city | guney | spice, fish | test_furs, test_weapon, test_grain | orvahel, serai_seyvan, vorgat, zelmarin |
+| Orvahel | city | ahit | test_potion, test_cloth | wine, honey, jewelry | ezmerak, ondrelle, orsolune, serai_seyvan, vorgat, zelmarin |
+| Rivecande | city | imparatorluk | fish, test_furs | test_grain, wine, spice | golcavar, kesgrav, vastrevar |
+| Samuran | town | sinir | test_potion, fish | test_grain, test_cloth | kirsavel, liraven, mirsana |
+| Selvicar | town | imparatorluk | test_grain | test_cloth, wine | dravoss, serai_orbeyan, vastrevar |
+| Duvenmor Kervansarayı | caravanserai | vadi | silk, wine | spice, test_furs | akavan, merigaud, ondrelle |
+| Orbeyan Kervansarayı | caravanserai | gocebe | test_furs, spice | test_cloth, test_weapon | kirsavel, selvicar, tolvarin |
+| Seyvan Kervansarayı | caravanserai | guney | spice, jewelry | wine, test_grain | caramine, ilsande, orsolune, orvahel, vorgat, zelmarin |
+| Tolvarin | city | sinir | test_furs, test_grain | test_weapon, test_cloth, wine | akavan, kirsavel, serai_orbeyan |
+| Vastrevar | city | imparatorluk | test_weapon, test_cloth | spice, wine, silk, jewelry | auderin, rivecande, selvicar |
+| Vorgat | town | dag_maden | jewelry, fish | test_grain, test_cloth | orsolune, orvahel, serai_seyvan, zelmarin |
+| Zelmarin | city | guney | jewelry, spice | test_grain, wine, test_furs | orsolune, orvahel, serai_seyvan, vorgat |
+
+Başlangıç adayları (kültür → yer): nomad: kirsavel, selvicar, vastrevar; valley: belvanor, caramine, ilsande, liraven, merigaud, ondrelle; highland: brazdun, kesgrav, vorgat; port: mirsana, orsolune, zelmarin; fisher: brazdun, dravoss, kirsavel, mirsana, rivecande, samuran
 
 | Yol | Gün | Tehlike | Orman | Dağ | Kervan yolu | Duraklar |
 |---|---|---|---|---|---|---|
