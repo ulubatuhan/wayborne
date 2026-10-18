@@ -18,7 +18,6 @@ export_credentials.cfg
 
 # Mono-specific ignores
 .mono/
-data_*/
 mono_crash.*.json
 
 # Build exports
@@ -31,3 +30,11 @@ build/
 # Codex üretecinin Python artıkları (docs/codex/)
 __pycache__/
 *.pyc
+
+# Blender yedekleri, işletim sistemi ve araç artıkları
+*.blend1
+*.blend@
+Thumbs.db
+.DS_Store
+*.log
+*.orig
