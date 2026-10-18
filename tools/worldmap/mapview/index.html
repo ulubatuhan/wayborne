@@ -1,0 +1,66 @@
+<title>Wayborne Haritası</title>
+<style>
+  :root {
+    --ink: #2b1f16;
+    --ground: #1b1612;
+    --chip: rgba(27, 22, 18, 0.82);
+    --chip-line: rgba(214, 196, 158, 0.35);
+    --chip-text: #eadfc6;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--chip-text);
+         font: 14px/1.4 Georgia, "Times New Roman", serif; overflow: hidden; }
+  #map { position: fixed; inset: 0; }
+  .bar { position: fixed; z-index: 5; display: flex; gap: 8px;
+         right: max(12px, env(safe-area-inset-right, 0px));
+         bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .bar button { width: 46px; height: 46px; border-radius: 23px; border: 1px solid var(--chip-line);
+                background: var(--chip); color: var(--chip-text); font: 24px/1 Georgia, serif; cursor: pointer; }
+  .bar button:focus-visible { outline: 2px solid #c9a96a; outline-offset: 2px; }
+  .hint { position: fixed; z-index: 5; left: 12px; top: calc(12px + env(safe-area-inset-top, 0px));
+          padding: 6px 12px; border-radius: 16px; background: var(--chip); border: 1px solid var(--chip-line);
+          font-size: 13px; transition: opacity .6s; }
+  .hint.gone { opacity: 0; pointer-events: none; }
+  #err { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
+</style>
+
+<div id="map"></div>
+<div class="hint" id="hint">İki parmakla yaklaştır · sürükleyerek gez</div>
+<div class="bar">
+  <button id="zin" aria-label="Yaklaştır">+</button>
+  <button id="zout" aria-label="Uzaklaştır">−</button>
+  <button id="home" aria-label="Tüm harita">⌂</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+<script>
+(function () {
+  var SIZE = 16384, TILE = 1024, MAXLEVEL = 4; // seviye 0: 1024 px, seviye 4: 16384 px
+  if (!window.OpenSeadragon) {
+    document.getElementById('map').innerHTML = '<div id="err">Harita görüntüleyicisi yüklenemedi.</div>';
+    return;
+  }
+  var viewer = OpenSeadragon({
+    element: document.getElementById('map'),
+    showNavigationControl: false,
+    gestureSettingsTouch: { pinchRotate: false, flickEnabled: true },
+    maxZoomPixelRatio: 2.5,
+    visibilityRatio: 0.6,
+    immediateRender: false,
+    smoothTileEdgesMinZoom: Infinity,
+    tileSources: {
+      width: SIZE, height: SIZE, tileSize: TILE, tileOverlap: 0,
+      minLevel: 0, maxLevel: MAXLEVEL,
+      getLevelScale: function (level) { return Math.pow(2, level - MAXLEVEL); },
+      getNumTiles: function (level) { var n = Math.pow(2, level); return new OpenSeadragon.Point(n, n); },
+      getTileUrl: function (level, x, y) { return 't/' + level + '/' + x + '_' + y + '.jpg'; }
+    }
+  });
+  document.getElementById('zin').onclick = function () { viewer.viewport.zoomBy(1.6); };
+  document.getElementById('zout').onclick = function () { viewer.viewport.zoomBy(1 / 1.6); };
+  document.getElementById('home').onclick = function () { viewer.viewport.goHome(); };
+  var hint = document.getElementById('hint');
+  viewer.addOnceHandler('canvas-drag', function () { hint.classList.add('gone'); });
+  setTimeout(function () { hint.classList.add('gone'); }, 6000);
+})();
+</script>

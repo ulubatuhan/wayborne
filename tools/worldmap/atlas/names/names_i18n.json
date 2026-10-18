@@ -1,0 +1,785 @@
+{
+ "7": {
+  "tr": "Arsalkan Obası",
+  "en": "Arsalkan Camp",
+  "zh": "阿尔萨尔坎营地",
+  "proper": "Arsalkan",
+  "proper_zh": "阿尔萨尔坎"
+ },
+ "0": {
+  "tr": "Kaynurak Obası",
+  "en": "Kaynurak Camp",
+  "zh": "凯努拉克营地",
+  "proper": "Kaynurak",
+  "proper_zh": "凯努拉克"
+ },
+ "1": {
+  "tr": "Ebrusun Obası",
+  "en": "Ebrusun Camp",
+  "zh": "埃布鲁松营地",
+  "proper": "Ebrusun",
+  "proper_zh": "埃布鲁松"
+ },
+ "2": {
+  "tr": "Sadirim Obası",
+  "en": "Sadirim Camp",
+  "zh": "萨迪里姆营地",
+  "proper": "Sadirim",
+  "proper_zh": "萨迪里姆"
+ },
+ "3": {
+  "tr": "Ilkatay Obası",
+  "en": "Ilkatay Camp",
+  "zh": "伊尔卡泰营地",
+  "proper": "Ilkatay",
+  "proper_zh": "伊尔卡泰"
+ },
+ "4": {
+  "tr": "Burkasan Obası",
+  "en": "Burkasan Camp",
+  "zh": "布尔卡桑营地",
+  "proper": "Burkasan",
+  "proper_zh": "布尔卡桑"
+ },
+ "5": {
+  "tr": "Otekur Obası",
+  "en": "Otekur Camp",
+  "zh": "奥特库尔营地",
+  "proper": "Otekur",
+  "proper_zh": "奥特库尔"
+ },
+ "6": {
+  "tr": "Taragun Obası",
+  "en": "Taragun Camp",
+  "zh": "塔拉贡营地",
+  "proper": "Taragun",
+  "proper_zh": "塔拉贡"
+ },
+ "80": {
+  "tr": "Yelbarik Obası",
+  "en": "Yelbarik Camp",
+  "zh": "耶尔巴里克营地",
+  "proper": "Yelbarik",
+  "proper_zh": "耶尔巴里克"
+ },
+ "88": {
+  "tr": "Sogurtay Obası",
+  "en": "Sogurtay Camp",
+  "zh": "索古尔泰营地",
+  "proper": "Sogurtay",
+  "proper_zh": "索古尔泰"
+ },
+ "29": {
+  "tr": "Sugalik",
+  "en": "Sugalik",
+  "zh": "苏加利克",
+  "proper": "Sugalik",
+  "proper_zh": "苏加利克"
+ },
+ "18": {
+  "tr": "Kemersal",
+  "en": "Kemersal",
+  "zh": "凯默萨尔",
+  "proper": "Kemersal",
+  "proper_zh": "凯默萨尔"
+ },
+ "82": {
+  "tr": "Tuylum",
+  "en": "Tuylum",
+  "zh": "图伊卢姆",
+  "proper": "Tuylum",
+  "proper_zh": "图伊卢姆"
+ },
+ "118": {
+  "tr": "Sargalak Yıkıntısı",
+  "en": "Sargalak Ruins",
+  "zh": "萨尔加拉克遗迹",
+  "proper": "Sargalak",
+  "proper_zh": "萨尔加拉克"
+ },
+ "16": {
+  "tr": "Harvek",
+  "en": "Harvek",
+  "zh": "哈尔维克",
+  "proper": "Harvek",
+  "proper_zh": "哈尔维克"
+ },
+ "20": {
+  "tr": "Droskal",
+  "en": "Droskal",
+  "zh": "德罗斯卡尔",
+  "proper": "Droskal",
+  "proper_zh": "德罗斯卡尔"
+ },
+ "21": {
+  "tr": "Ulgras",
+  "en": "Ulgras",
+  "zh": "乌尔格拉斯",
+  "proper": "Ulgras",
+  "proper_zh": "乌尔格拉斯"
+ },
+ "24": {
+  "tr": "Kazrun Ocağı",
+  "en": "Kazrun Pits",
+  "zh": "卡兹伦矿坑",
+  "proper": "Kazrun",
+  "proper_zh": "卡兹伦"
+ },
+ "25": {
+  "tr": "Saldrek Tuzlası",
+  "en": "Saldrek Saltworks",
+  "zh": "萨尔德雷克盐场",
+  "proper": "Saldrek",
+  "proper_zh": "萨尔德雷克"
+ },
+ "22": {
+  "tr": "Brazdun",
+  "en": "Brazdun",
+  "zh": "布拉兹敦",
+  "proper": "Brazdun",
+  "proper_zh": "布拉兹敦"
+ },
+ "23": {
+  "tr": "Kesgrav",
+  "en": "Kesgrav",
+  "zh": "凯斯格拉夫",
+  "proper": "Kesgrav",
+  "proper_zh": "凯斯格拉夫"
+ },
+ "26": {
+  "tr": "Reskel",
+  "en": "Reskel",
+  "zh": "雷斯克尔",
+  "proper": "Reskel",
+  "proper_zh": "雷斯克尔"
+ },
+ "129": {
+  "tr": "Grauth Feneri",
+  "en": "Grauth Lighthouse",
+  "zh": "格劳斯灯塔",
+  "proper": "Grauth",
+  "proper_zh": "格劳斯"
+ },
+ "116": {
+  "tr": "Velkrun Yıkıntısı",
+  "en": "Velkrun Ruins",
+  "zh": "维尔克伦遗迹",
+  "proper": "Velkrun",
+  "proper_zh": "维尔克伦"
+ },
+ "83": {
+  "tr": "Dornak",
+  "en": "Dornak",
+  "zh": "多尔纳克",
+  "proper": "Dornak",
+  "proper_zh": "多尔纳克"
+ },
+ "84": {
+  "tr": "Zurek",
+  "en": "Zurek",
+  "zh": "祖雷克",
+  "proper": "Zurek",
+  "proper_zh": "祖雷克"
+ },
+ "61": {
+  "tr": "Morvask Değirmeni",
+  "en": "Morvask Mill",
+  "zh": "莫尔瓦斯克磨坊",
+  "proper": "Morvask",
+  "proper_zh": "莫尔瓦斯克"
+ },
+ "66": {
+  "tr": "Gezar Çiftliği",
+  "en": "Gezar Farm",
+  "zh": "盖扎尔农庄",
+  "proper": "Gezar",
+  "proper_zh": "盖扎尔"
+ },
+ "69": {
+  "tr": "Hulvad Değirmeni",
+  "en": "Hulvad Mill",
+  "zh": "胡尔瓦德磨坊",
+  "proper": "Hulvad",
+  "proper_zh": "胡尔瓦德"
+ },
+ "38": {
+  "tr": "Vorgat",
+  "en": "Vorgat",
+  "zh": "沃尔加特",
+  "proper": "Vorgat",
+  "proper_zh": "沃尔加特"
+ },
+ "73": {
+  "tr": "Kemrug",
+  "en": "Kemrug",
+  "zh": "凯姆鲁格",
+  "proper": "Kemrug",
+  "proper_zh": "凯姆鲁格"
+ },
+ "63": {
+  "tr": "Tuhrem Çiftliği",
+  "en": "Tuhrem Farm",
+  "zh": "图赫雷姆农庄",
+  "proper": "Tuhrem",
+  "proper_zh": "图赫雷姆"
+ },
+ "89": {
+  "tr": "Grodan Kesimliği",
+  "en": "Grodan Logging Camp",
+  "zh": "格罗丹伐木场",
+  "proper": "Grodan",
+  "proper_zh": "格罗丹"
+ },
+ "91": {
+  "tr": "Gurzan Bıçkıhanesi",
+  "en": "Gurzan Sawmill",
+  "zh": "古尔赞锯木坊",
+  "proper": "Gurzan",
+  "proper_zh": "古尔赞"
+ },
+ "47": {
+  "tr": "Vastrevar",
+  "en": "Vastrevar",
+  "zh": "瓦斯特雷瓦",
+  "proper": "Vastrevar",
+  "proper_zh": "瓦斯特雷瓦"
+ },
+ "48": {
+  "tr": "Dravoss",
+  "en": "Dravoss",
+  "zh": "德拉沃斯",
+  "proper": "Dravoss",
+  "proper_zh": "德拉沃斯"
+ },
+ "34": {
+  "tr": "Selvicar",
+  "en": "Selvicar",
+  "zh": "塞尔维卡",
+  "proper": "Selvicar",
+  "proper_zh": "塞尔维卡"
+ },
+ "35": {
+  "tr": "Auderin",
+  "en": "Auderin",
+  "zh": "奥德林",
+  "proper": "Auderin",
+  "proper_zh": "奥德林"
+ },
+ "46": {
+  "tr": "Rivecande",
+  "en": "Rivecande",
+  "zh": "里维坎德",
+  "proper": "Rivecande",
+  "proper_zh": "里维坎德"
+ },
+ "27": {
+  "tr": "Sallenz",
+  "en": "Sallenz",
+  "zh": "萨伦茨",
+  "proper": "Sallenz",
+  "proper_zh": "萨伦茨"
+ },
+ "28": {
+  "tr": "Calvenna",
+  "en": "Calvenna",
+  "zh": "卡尔维娜",
+  "proper": "Calvenna",
+  "proper_zh": "卡尔维娜"
+ },
+ "17": {
+  "tr": "Kovrast",
+  "en": "Kovrast",
+  "zh": "科夫拉斯特",
+  "proper": "Kovrast",
+  "proper_zh": "科夫拉斯特"
+ },
+ "19": {
+  "tr": "Ulmarec",
+  "en": "Ulmarec",
+  "zh": "乌尔马雷克",
+  "proper": "Ulmarec",
+  "proper_zh": "乌尔马雷克"
+ },
+ "100": {
+  "tr": "Sentinara Kulesi",
+  "en": "Sentinara Tower",
+  "zh": "森蒂纳拉塔",
+  "proper": "Sentinara",
+  "proper_zh": "森蒂纳拉"
+ },
+ "101": {
+  "tr": "Ferrant Kulesi",
+  "en": "Ferrant Tower",
+  "zh": "费兰特塔",
+  "proper": "Ferrant",
+  "proper_zh": "费兰特"
+ },
+ "121": {
+  "tr": "Hallecort Yıkıntısı",
+  "en": "Hallecort Ruins",
+  "zh": "哈勒科特遗迹",
+  "proper": "Hallecort",
+  "proper_zh": "哈勒科特"
+ },
+ "74": {
+  "tr": "Hestemar",
+  "en": "Hestemar",
+  "zh": "赫斯特马",
+  "proper": "Hestemar",
+  "proper_zh": "赫斯特马"
+ },
+ "76": {
+  "tr": "Ostiven",
+  "en": "Ostiven",
+  "zh": "奥斯蒂文",
+  "proper": "Ostiven",
+  "proper_zh": "奥斯蒂文"
+ },
+ "78": {
+  "tr": "Callorde",
+  "en": "Callorde",
+  "zh": "卡洛德",
+  "proper": "Callorde",
+  "proper_zh": "卡洛德"
+ },
+ "79": {
+  "tr": "Pelhaut",
+  "en": "Pelhaut",
+  "zh": "佩尔奥",
+  "proper": "Pelhaut",
+  "proper_zh": "佩尔奥"
+ },
+ "81": {
+  "tr": "Nostrel",
+  "en": "Nostrel",
+  "zh": "诺斯特雷尔",
+  "proper": "Nostrel",
+  "proper_zh": "诺斯特雷尔"
+ },
+ "87": {
+  "tr": "Kordel Kesimliği",
+  "en": "Kordel Logging Camp",
+  "zh": "科德尔伐木场",
+  "proper": "Kordel",
+  "proper_zh": "科德尔"
+ },
+ "60": {
+  "tr": "Vintaro Çiftliği",
+  "en": "Vintaro Farm",
+  "zh": "文塔罗农庄",
+  "proper": "Vintaro",
+  "proper_zh": "文塔罗"
+ },
+ "70": {
+  "tr": "Hasdren Değirmeni",
+  "en": "Hasdren Mill",
+  "zh": "哈斯德伦磨坊",
+  "proper": "Hasdren",
+  "proper_zh": "哈斯德伦"
+ },
+ "49": {
+  "tr": "Tolvarin",
+  "en": "Tolvarin",
+  "zh": "托尔瓦林",
+  "proper": "Tolvarin",
+  "proper_zh": "托尔瓦林"
+ },
+ "50": {
+  "tr": "Ezmerak",
+  "en": "Ezmerak",
+  "zh": "埃兹梅拉克",
+  "proper": "Ezmerak",
+  "proper_zh": "埃兹梅拉克"
+ },
+ "33": {
+  "tr": "Kirsavel",
+  "en": "Kirsavel",
+  "zh": "基尔萨维尔",
+  "proper": "Kirsavel",
+  "proper_zh": "基尔萨维尔"
+ },
+ "36": {
+  "tr": "Akavan",
+  "en": "Akavan",
+  "zh": "阿卡万",
+  "proper": "Akavan",
+  "proper_zh": "阿卡万"
+ },
+ "30": {
+  "tr": "Tuzyali",
+  "en": "Tuzyali",
+  "zh": "图兹亚利",
+  "proper": "Tuzyali",
+  "proper_zh": "图兹亚利"
+ },
+ "31": {
+  "tr": "Neminsu",
+  "en": "Neminsu",
+  "zh": "内明苏",
+  "proper": "Neminsu",
+  "proper_zh": "内明苏"
+ },
+ "40": {
+  "tr": "Samuran",
+  "en": "Samuran",
+  "zh": "萨穆兰",
+  "proper": "Samuran",
+  "proper_zh": "萨穆兰"
+ },
+ "41": {
+  "tr": "Golcavar",
+  "en": "Golcavar",
+  "zh": "戈尔贾瓦尔",
+  "proper": "Golcavar",
+  "proper_zh": "戈尔贾瓦尔"
+ },
+ "127": {
+  "tr": "Yalaz Feneri",
+  "en": "Yalaz Lighthouse",
+  "zh": "亚拉兹灯塔",
+  "proper": "Yalaz",
+  "proper_zh": "亚拉兹"
+ },
+ "104": {
+  "tr": "Vardas Kulesi",
+  "en": "Vardas Tower",
+  "zh": "瓦尔达斯塔",
+  "proper": "Vardas",
+  "proper_zh": "瓦尔达斯"
+ },
+ "68": {
+  "tr": "Kumbag Değirmeni",
+  "en": "Kumbag Mill",
+  "zh": "库姆巴格磨坊",
+  "proper": "Kumbag",
+  "proper_zh": "库姆巴格"
+ },
+ "51": {
+  "tr": "Merigaud",
+  "en": "Merigaud",
+  "zh": "梅里戈",
+  "proper": "Merigaud",
+  "proper_zh": "梅里戈"
+ },
+ "52": {
+  "tr": "Belvanor",
+  "en": "Belvanor",
+  "zh": "贝尔瓦诺",
+  "proper": "Belvanor",
+  "proper_zh": "贝尔瓦诺"
+ },
+ "53": {
+  "tr": "Ilsande",
+  "en": "Ilsande",
+  "zh": "伊尔桑德",
+  "proper": "Ilsande",
+  "proper_zh": "伊尔桑德"
+ },
+ "58": {
+  "tr": "Ondrelle",
+  "en": "Ondrelle",
+  "zh": "翁德蕾尔",
+  "proper": "Ondrelle",
+  "proper_zh": "翁德蕾尔"
+ },
+ "37": {
+  "tr": "Caramine",
+  "en": "Caramine",
+  "zh": "卡拉明",
+  "proper": "Caramine",
+  "proper_zh": "卡拉明"
+ },
+ "39": {
+  "tr": "Liraven",
+  "en": "Liraven",
+  "zh": "利拉文",
+  "proper": "Liraven",
+  "proper_zh": "利拉文"
+ },
+ "90": {
+  "tr": "Celvane Kesimliği",
+  "en": "Celvane Logging Camp",
+  "zh": "塞尔瓦内伐木场",
+  "proper": "Celvane",
+  "proper_zh": "塞尔瓦内"
+ },
+ "85": {
+  "tr": "Sennabel",
+  "en": "Sennabel",
+  "zh": "森娜贝尔",
+  "proper": "Sennabel",
+  "proper_zh": "森娜贝尔"
+ },
+ "67": {
+  "tr": "Aubrenne Bağları",
+  "en": "Aubrenne Vineyards",
+  "zh": "奥布雷娜葡萄园",
+  "proper": "Aubrenne",
+  "proper_zh": "奥布雷娜"
+ },
+ "72": {
+  "tr": "Sorrelay Bağları",
+  "en": "Sorrelay Vineyards",
+  "zh": "索雷莱葡萄园",
+  "proper": "Sorrelay",
+  "proper_zh": "索雷莱"
+ },
+ "54": {
+  "tr": "Orsolune",
+  "en": "Orsolune",
+  "zh": "奥尔索伦",
+  "proper": "Orsolune",
+  "proper_zh": "奥尔索伦"
+ },
+ "45": {
+  "tr": "Zelmarin",
+  "en": "Zelmarin",
+  "zh": "泽尔马林",
+  "proper": "Zelmarin",
+  "proper_zh": "泽尔马林"
+ },
+ "42": {
+  "tr": "Mirsana",
+  "en": "Mirsana",
+  "zh": "米尔萨娜",
+  "proper": "Mirsana",
+  "proper_zh": "米尔萨娜"
+ },
+ "32": {
+  "tr": "Brezzane",
+  "en": "Brezzane",
+  "zh": "布雷扎内",
+  "proper": "Brezzane",
+  "proper_zh": "布雷扎内"
+ },
+ "75": {
+  "tr": "Ambrisal",
+  "en": "Ambrisal",
+  "zh": "安布里萨尔",
+  "proper": "Ambrisal",
+  "proper_zh": "安布里萨尔"
+ },
+ "77": {
+  "tr": "Quellara",
+  "en": "Quellara",
+  "zh": "奎拉拉",
+  "proper": "Quellara",
+  "proper_zh": "奎拉拉"
+ },
+ "62": {
+  "tr": "Limeral Bahçeleri",
+  "en": "Limeral Gardens",
+  "zh": "利梅拉尔园",
+  "proper": "Limeral",
+  "proper_zh": "利梅拉尔"
+ },
+ "65": {
+  "tr": "Vesperra Bağları",
+  "en": "Vesperra Vineyards",
+  "zh": "维斯佩拉葡萄园",
+  "proper": "Vesperra",
+  "proper_zh": "维斯佩拉"
+ },
+ "59": {
+  "tr": "Orvahel",
+  "en": "Orvahel",
+  "zh": "奥尔瓦赫尔",
+  "proper": "Orvahel",
+  "proper_zh": "奥尔瓦赫尔"
+ },
+ "122": {
+  "tr": "Altıkuşak Taşları",
+  "en": "Six-Belt Stones",
+  "zh": "六带石阵"
+ },
+ "131": {
+  "tr": "Kanlı Direk Batığı",
+  "en": "Bloody Mast Wreck",
+  "zh": "血桅沉船"
+ },
+ "125": {
+  "tr": "İlk Nefes Taşları",
+  "en": "First Breath Stones",
+  "zh": "初息石阵"
+ },
+ "113": {
+  "tr": "Kör Kazmalar Mezarlığı",
+  "en": "Graveyard of the Blind Picks",
+  "zh": "盲镐墓地"
+ },
+ "97": {
+  "tr": "Taşsoluk Manastırı",
+  "en": "Stonebreath Monastery",
+  "zh": "石息修道院"
+ },
+ "103": {
+  "tr": "Öksüz Göz Kulesi",
+  "en": "Orphan Eye Tower",
+  "zh": "孤眼塔"
+ },
+ "106": {
+  "tr": "Kuru Halat Darağacı",
+  "en": "Dry Rope Gallows",
+  "zh": "枯绳绞架"
+ },
+ "107": {
+  "tr": "Kızıl Ferman Darağacı",
+  "en": "Red Edict Gallows",
+  "zh": "赤诏绞架"
+ },
+ "119": {
+  "tr": "Deli Kral Sarayı Yıkıntısı",
+  "en": "Ruins of the Mad King's Palace",
+  "zh": "疯王宫殿遗迹"
+ },
+ "114": {
+  "tr": "Sancaksız Mezarlık",
+  "en": "Bannerless Graveyard",
+  "zh": "无旗墓地"
+ },
+ "130": {
+  "tr": "Sessiz Kadırga Batığı",
+  "en": "Silent Galley Wreck",
+  "zh": "静默桨帆船沉骸"
+ },
+ "109": {
+  "tr": "Dönek Darağacı",
+  "en": "Turncoat Gallows",
+  "zh": "叛徒绞架"
+ },
+ "128": {
+  "tr": "Yaşlı Martı Feneri",
+  "en": "Old Gull Lighthouse",
+  "zh": "老鸥灯塔"
+ },
+ "99": {
+  "tr": "Geribakan Kulesi",
+  "en": "Lookback Tower",
+  "zh": "回望塔"
+ },
+ "102": {
+  "tr": "İki Bayrak Kulesi",
+  "en": "Two Banners Tower",
+  "zh": "双旗塔"
+ },
+ "115": {
+  "tr": "Tozkapı Yıkıntısı",
+  "en": "Dustgate Ruins",
+  "zh": "尘门遗迹"
+ },
+ "93": {
+  "tr": "Sessiz El Manastırı",
+  "en": "Monastery of the Silent Hand",
+  "zh": "静手修道院"
+ },
+ "96": {
+  "tr": "Yamalı Çatı Manastırı",
+  "en": "Patched Roof Monastery",
+  "zh": "补顶修道院"
+ },
+ "133": {
+  "tr": "Bölünmüş Sancak Ovası",
+  "en": "Field of the Split Banner",
+  "zh": "裂旗原"
+ },
+ "64": {
+  "tr": "Hasırlı Çiftlik",
+  "en": "Reedmat Farm",
+  "zh": "苇席农庄"
+ },
+ "71": {
+  "tr": "Taşgözü Değirmeni",
+  "en": "Stone-Eye Mill",
+  "zh": "石眼磨坊"
+ },
+ "105": {
+  "tr": "Sarmaşıklı Darağacı",
+  "en": "Ivy Gallows",
+  "zh": "常春藤绞架"
+ },
+ "123": {
+  "tr": "Bahçıvan Taşları",
+  "en": "Gardener's Stones",
+  "zh": "园丁石阵"
+ },
+ "120": {
+  "tr": "Solgun Bahçe Yıkıntısı",
+  "en": "Ruins of the Faded Garden",
+  "zh": "凋园遗迹"
+ },
+ "86": {
+  "tr": "Erguvan Kesimliği",
+  "en": "Redbud Logging Camp",
+  "zh": "紫荆伐木场"
+ },
+ "111": {
+  "tr": "Leylak Mezarlığı",
+  "en": "Lilac Graveyard",
+  "zh": "丁香墓地"
+ },
+ "132": {
+  "tr": "Kırık Mızrak Çayırı",
+  "en": "Broken Spear Meadow",
+  "zh": "断矛草甸"
+ },
+ "124": {
+  "tr": "Yıldızölçer Taşları",
+  "en": "Starmeasurer Stones",
+  "zh": "量星石阵"
+ },
+ "126": {
+  "tr": "Gelgit Taşları",
+  "en": "Tide Stones",
+  "zh": "潮汐石阵"
+ },
+ "98": {
+  "tr": "Kıyıgözü Kulesi",
+  "en": "Shore-Eye Tower",
+  "zh": "岸眼塔"
+ },
+ "117": {
+  "tr": "Eski Darphane Yıkıntısı",
+  "en": "Old Mint Ruins",
+  "zh": "旧铸币厂遗迹"
+ },
+ "92": {
+  "tr": "Tersane Kesimliği",
+  "en": "Shipwrights' Logging Camp",
+  "zh": "船坞伐木场"
+ },
+ "95": {
+  "tr": "Açık Kapı Manastırı",
+  "en": "Open Door Monastery",
+  "zh": "开门修道院"
+ },
+ "110": {
+  "tr": "Yabancılar Mezarlığı",
+  "en": "Strangers' Graveyard",
+  "zh": "异乡人墓地"
+ },
+ "112": {
+  "tr": "Tuzlu Çardak Mezarlığı",
+  "en": "Salt Arbor Graveyard",
+  "zh": "盐棚墓地"
+ },
+ "134": {
+  "tr": "Kiralık Kılıçlar Ovası",
+  "en": "Field of Hired Swords",
+  "zh": "佣剑原"
+ },
+ "108": {
+  "tr": "Kefaret Darağacı",
+  "en": "Atonement Gallows",
+  "zh": "赎罪绞架"
+ },
+ "94": {
+  "tr": "İlk Sayfa Manastırı",
+  "en": "Monastery of the First Page",
+  "zh": "首页修道院"
+ },
+ "135": {
+  "tr": "Mühür Savaşı Ovası",
+  "en": "Field of the Seal War",
+  "zh": "封印之战原"
+ }
+}
