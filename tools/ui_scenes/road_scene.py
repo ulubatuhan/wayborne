@@ -129,6 +129,7 @@ def material(name, rgb, rough=0.95, tex=None, scale=0.25, tint=None, snow=0.0, L
     kar gürültüsü de x'i bir çembere sarıp okuyor - yoksa şeridin iki kenarı
     birbirini tutmaz ve oyunda her döşemede bir dikiş görünür."""
     m = bpy.data.materials.new(name)
+    m.use_nodes = True  # Blender 4.2: varsayılan kapalı
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     bsdf.inputs["Roughness"].default_value = rough
@@ -272,6 +273,7 @@ def shadow_catcher(L, y0, y1):
 
 def light_rig():
     w = bpy.data.worlds.new("road_sky")
+    w.use_nodes = True  # Blender 4.2: varsayılan kapalı
     bpy.context.scene.world = w
     w.node_tree.nodes["Background"].inputs["Color"].default_value = (0.55, 0.58, 0.64, 1.0)
     w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.55
@@ -481,7 +483,7 @@ def build_mid(b, spec, rng):
         h = rng.uniform(lo, hi) * (1.0 - y / 60.0)
         place_tree_wrapped(pick(b["trees"], rng), x, y, h, rng, mats, L, "t%d" % i)
     for _ in range(int(4 * b["rocks"] * L / 72.0)):
-        kind = rng.choice(["rock-large", "rock-wide", "rock-small"])
+        kind = rng.choice(["rock-large", "rock-wide", "rock-wide"])
         place_wrapped(T.ftk(kind), rng.uniform(0, L), rng.uniform(0.0, 10.0), 0.0,
                       rng.uniform(0, 360), rng.uniform(1.2, 2.6), L, mats=rock_material(b))
 
@@ -535,10 +537,9 @@ def build_ground(b, spec, rng):
         for xx in wrapped(x, L):
             tuft("gf%d" % n, xx, rng.uniform(-6.0, 2.8), rng.uniform(0.3, 0.6), b["grass"], cache, rng)
         n += 1
-    for _ in range(int(6 * b["rocks"]) + 1):
-        y = rng.choice([rng.uniform(-3.0, 2.2), rng.uniform(9.0, 12.0)])
-        place_wrapped(T.ftk("rock-small"), rng.uniform(0, L), y, 0.0, rng.uniform(0, 360),
-                      rng.uniform(0.4, 0.9), L, mats=rock_material(b))
+    # Zemin katmanında taş yok (görev 12.2d): Kenney kayaları dik ve yosunlu
+    # çıkıyor, kervanın hemen altında ağaç kütüğü gibi okunuyordu. Taş
+    # çeşitliliği orta katmanda (build_mid) kalıyor; yakın planda yalnızca ot.
 
 
 def flower(name, x, y, h, colour, mat_cache, stem_mat):

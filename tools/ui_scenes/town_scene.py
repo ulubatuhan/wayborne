@@ -20,7 +20,7 @@ import sys
 import bpy
 from mathutils import Euler, Matrix, Vector
 
-ROOT = "/home/user/wayborne-ui"
+ROOT = os.environ.get("WAYBORNE_ROOT", "/home/user/wayborne-ui")
 QV = os.path.join(ROOT, "art_source/models/props/quaternius_medieval_village")
 QM = os.path.join(ROOT, "art_source/models/props/quaternius_modular_medieval")
 FTK = os.path.join(ROOT, "art_source/models/ui_scenes/kenney_fantasy_town/GLB format")
@@ -143,6 +143,7 @@ def _stone_material(name="terrace_stone", value=0.55):
     if m is not None:
         return m
     m = bpy.data.materials.new(name)
+    m.use_nodes = True  # Blender 4.2: varsayılan kapalı
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     tc = nt.nodes.new("ShaderNodeTexCoord")
