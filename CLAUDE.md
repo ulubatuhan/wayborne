@@ -4468,6 +4468,14 @@ box inside the text, so the text was the screen.
   real session exists (`_build_ui()` runs before `_init_journey()`
   assigns `_session`) - `set_session()` is the second call that actually
   fills it, once the session is real.
+- **The sky strip gave its height to a control panel (P18).** The road's top fifth was empty sky; `road_journey.gd`
+  shifts `World` up by `SKY_CROP_SHARE` and `RoadControlPanel` fills the freed bottom (`CONTROL_PANEL_SHARE`) with five
+  tabs - Kadro (person cards plus the caravan's pulse: morale, stamina, danger, provisions), Durum (the `SurvivalGauge`
+  plate, the facts and the troubles in words), Yük, Harita (a small `WorldMapView`), Defter. It reads a state dictionary
+  the road hands it (`_panel_state()`) and never decides anything, the `CaravanStatusPanel` rule. A `ScrollContainer`
+  page stretches its child only when the child is `SIZE_EXPAND_FILL`; without it every autowrapped goods label shrank to
+  one word per line (seen in the first screenshot, `RoadControlPanel._fill`). `M` or the bottom bar's "Harita" opens the
+  full map (`MapPopup`), counted as an open panel so time stops.
 
 ### Encounter Timing Rules
 

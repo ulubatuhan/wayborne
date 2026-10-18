@@ -42,6 +42,15 @@ func _init() -> void:
 	await _settle()
 	_save("01_yol_%dx%d.png" % [view.x, view.y])
 
+	# Alt kontrol paneli (P18): her sekme bir kare.
+	var panel: RoadControlPanel = screen.get("_control_panel")
+	for tab in [RoadControlPanel.TAB_STATUS, RoadControlPanel.TAB_CARGO, RoadControlPanel.TAB_MAP, RoadControlPanel.TAB_LOG]:
+		panel.select_tab(tab)
+		for _frame in 40:
+			await process_frame
+		_save("01_panel_%d.png" % tab)
+	panel.select_tab(RoadControlPanel.TAB_PARTY)
+
 	# Olay kartı: EU4 yerleşiminin asıl sınandığı kare.
 	screen.call("_present_event", EventCatalog.get_road_events()[0])
 	await _settle()
@@ -50,7 +59,7 @@ func _init() -> void:
 	# Zara bağlı seçenekler: başında zarı atan statın amblemi.
 	for event in EventCatalog.get_road_events():
 		if event.event_id == "evt_landslide":
-			screen.call("_clear_children", screen.get("_card_panel"))
+			NodeUtil.clear_children(screen.get("_card_panel"))
 			screen.call("_present_event", event)
 	await _settle()
 	_save("02b_olay_karti_zar.png")
@@ -60,7 +69,7 @@ func _init() -> void:
 	await _settle()
 	_save("03_durum.png")
 	screen.call("_on_status_toggled", false)
-	screen.call("_clear_children", screen.get("_card_panel"))
+	NodeUtil.clear_children(screen.get("_card_panel"))
 	screen.set("_current_event", null)
 
 	# Yıpranmış bir kervan: stres ve açlık kenar lekeleri, açık bir yol
@@ -115,10 +124,13 @@ func _start_journey() -> void:
 	var player := CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new())
 	session.start_playthrough(player, rng)
 	session.owned_wagon_count = 2
+	session.current_location_id = "rivecande"
+	session.add_to_cargo(ItemCatalog.get_item("fish"), 12)
+	session.add_to_cargo(ItemCatalog.get_item("test_furs"), 4)
 
 	var destination := WorldMapData.get_location_by_id(WorldMapData.START_LOCATION_ID)
-	var plan := CaravanPlan.new(destination, 6)
-	session.start_journey(WorldMapData.START_LOCATION_ID, 6, 0.4, plan)
+	var plan := CaravanPlan.new(destination, 17)
+	session.start_journey(WorldMapData.START_LOCATION_ID, 17, 0.38, plan)
 
 func _settle() -> void:
 	for _frame in 8:

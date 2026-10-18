@@ -407,6 +407,8 @@ var _meal_panel: MealDistributionPanel = null
 var _merchant_dialogue_panel: MerchantDialoguePanel = null
 ## Yolda açılır dünya haritası (bkz. MapPopup); açıkken zaman durur.
 var _map_popup: MapPopup = null
+## Alt kontrol paneli (bkz. RoadControlPanel, _layout_panel).
+var _control_panel: RoadControlPanel = null
 var _camping: bool:
 	get:
 		return _journey.camping
@@ -557,6 +559,60 @@ func _ready() -> void:
 	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_ui()
 	_init_journey()
+	get_viewport().size_changed.connect(_layout_panel)
+	_layout_panel()
+
+## Kullanıcı kararı (2026-10-18, işaretli ekran görüntüsü): sahnenin üstündeki
+## boş gökyüzü şeridi kalkar, sahne o kadar yukarı kayar; altta açılan yer
+## kontrol panelinin (RoadControlPanel). Şerit aynı boyda kalır: figürler
+## ve manzara küçülmez, yalnızca kadraj kayar.
+const SKY_CROP_SHARE: float = 0.19
+const CONTROL_PANEL_SHARE: float = 0.27
+
+func _layout_panel() -> void:
+	var h := get_viewport_rect().size.y
+	_world.offset_top = -h * SKY_CROP_SHARE
+	_world.offset_bottom = -h * SKY_CROP_SHARE
+	if _control_panel != null:
+		_control_panel.custom_minimum_size = Vector2(0, h * CONTROL_PANEL_SHARE)
+
+## Panelin okuduğu yol hâli (bkz. RoadControlPanel). Yalnızca okunur.
+func _panel_state() -> Dictionary:
+	if _session == null or _clock == null:
+		return {}
+	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	var biome := ArtPalette.FALLBACK_BIOME if _terrain == null else _terrain.biome_at(_terrain_day())
+	var signals: Array = []
+	for kind in _signals.get_open_kinds():
+		signals.append(tr(RoadSignals.get_notice_key(kind)))
+	var lines: Array = []
+	for child in _log_list.get_children():
+		if child is Label:
+			lines.append((child as Label).text)
+	var orders: Array = [
+		"%s: %s" % [tr("UI_ROAD_ORDER_MEAL"), tr(MEAL_POLICY_LABELS.get(_session.meal_policy_mode, "UI_MEAL_POLICY_ALL"))],
+		tr("UI_ROAD_CAMP_ORDER_ON" if _session.standing_camp_at_dusk else "UI_ROAD_CAMP_ORDER_OFF"),
+	]
+	var path := PackedVector2Array()
+	var origin := _session.journey_origin_id
+	var parts := _journey.terrain_key.split("|")
+	if parts.size() == 2:
+		path = WorldMapData.get_route_path(origin, String(parts[1] if String(parts[0]) == origin else parts[0]))
+	return {
+		"clock": tr("UI_ROAD_CLOCK") % [_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(_clock.get_phase()))],
+		"destination": destination.location_name if destination != null else "",
+		"days_left": _session.journey_days_remaining,
+		"weather": tr(RouteWeather.name_key(_weather)),
+		"terrain": tr(RouteTerrain.biome_name_key(biome)),
+		"pace": tr(_pace_key),
+		"signals": signals,
+		"log": lines,
+		"orders": orders,
+		"origin": origin,
+		"path": path,
+		"progress": clampf(_terrain_day() / float(maxi(1, _journey.terrain_days)), 0.0, 1.0),
+		"danger": _weathered_danger(),
+	}
 
 func _build_ui() -> void:
 	_build_world_layer()
@@ -631,13 +687,12 @@ func _build_hud_layer() -> void:
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(middle)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	middle.add_child(spacer)
-	middle.add_child(_build_gauge_plate())
 
-	_hud.add_child(WaybookTheme.hud_rule())
+	# Kontrol paneli (P18): göstergeler artık sağ üstte değil, panelin Durum
+	# sekmesinde.
+	_control_panel = RoadControlPanel.new().setup(_session, _panel_state, _build_gauge_plate())
+	_control_panel.map_requested.connect(_open_map_popup)
+	_hud.add_child(_control_panel)
 	_hud.add_child(_build_bottom_bar())
 	_build_orders_panel()
 
@@ -1497,6 +1552,8 @@ func _init_journey() -> void:
 	# oturum yoktu (`_session` burada ilk kez atanıyor) - panel de sessizce
 	# boş kaldı. Gerçek oturum eldeyken şimdi dolduruluyor.
 	_status_panel.set_session(_session)
+	if _control_panel != null:
+		_control_panel.set_session(_session)
 
 	# Saat sefer başına sıfırlanır: gün sayısı ve evre buradan akar.
 	_clock = JourneyClock.new()
