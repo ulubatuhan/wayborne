@@ -1,9 +1,6 @@
 class_name Inventory
 extends RefCounted
 
-signal item_added(item: Item, quantity: int)
-signal item_removed(item: Item, quantity: int)
-
 var max_slots: int = 20
 
 ## Ağırlık, slot sayısından ayrı ve bağlayıcı bir kısıt: bir vagon çok
@@ -66,7 +63,6 @@ func add_item(item: Item, quantity: int = 1) -> bool:
 	else:
 		_entries[item.item_id] = {"item": item, "quantity": quantity}
 
-	item_added.emit(item, quantity)
 	return true
 
 func remove_item(item_id: String, quantity: int = 1) -> bool:
@@ -78,12 +74,10 @@ func remove_item(item_id: String, quantity: int = 1) -> bool:
 		return false
 
 	entry.quantity -= quantity
-	var item: Item = entry.item
 
 	if entry.quantity <= 0:
 		_entries.erase(item_id)
 
-	item_removed.emit(item, quantity)
 	return true
 
 func get_quantity(item_id: String) -> int:

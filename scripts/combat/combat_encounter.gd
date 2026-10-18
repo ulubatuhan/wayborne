@@ -11,7 +11,6 @@ extends RefCounted
 
 signal log_added(line)  # String
 signal state_changed(new_state)  # State
-signal turn_started(unit)  # CombatUnit
 ## Sessiz yorum balonu: log satırından ayrı, çünkü log tüm satırı yazıyor
 ## ("X, Y'ye Z zarar verdi"), balon ise sahnede birimin üstünde tek kelimelik
 ## bir tepki - seslendirme değil, yalnızca metin (bkz. UiIcon/log satırı
@@ -280,9 +279,6 @@ func _run_until_player_turn() -> void:
 		if _check_end():
 			return
 		_advance_turn()
-
-	if not is_over():
-		turn_started.emit(get_active_unit())
 
 ## Sırası gelen birimin turunu açar. `false` dönerse tur zaten tüketildi
 ## (birim sersemlemiş ya da kanamadan düştü) ve çağıran `_advance_turn()`'e

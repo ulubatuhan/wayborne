@@ -8,8 +8,6 @@ const PROVISIONS_PER_PERSON_PER_DAY: int = 1
 const DEFAULT_MAX_WAGONS: int = 6
 const DEFAULT_PLAYER_WAGON_COUNT: int = 1
 
-signal selection_changed()
-
 var destination: Location
 var travel_days: int
 var max_wagons: int
@@ -80,14 +78,12 @@ func can_add_offer(offer: MerchantOffer) -> bool:
 func toggle_merchant(offer: MerchantOffer) -> bool:
 	if is_selected(offer):
 		_selected_offers.erase(offer)
-		selection_changed.emit()
 		return true
 
 	if not can_add_offer(offer):
 		return false
 
 	_selected_offers.append(offer)
-	selection_changed.emit()
 	return true
 
 func get_selected_offers() -> Array[MerchantOffer]:

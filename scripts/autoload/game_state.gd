@@ -13,8 +13,6 @@ extends Node
 
 const GAME_SESSION_PATH: String = "res://scripts/autoload/game_session.gd"
 
-signal session_reset()
-
 var _session = null
 
 ## Oturumu ilk erişimde oluşturur.
@@ -26,9 +24,7 @@ func get_session():
 func start_new_game(starting_gold: int = 250, starting_provisions: int = 20, starting_wagon_count: int = 1) -> void:
 	var session_script := load(GAME_SESSION_PATH)
 	_session = session_script.new(starting_gold, starting_provisions, starting_wagon_count)
-	session_reset.emit()
 
 ## SaveManager'ın yüklediği bir oturumu kalıcı hale getirir.
 func set_session(session) -> void:
 	_session = session
-	session_reset.emit()

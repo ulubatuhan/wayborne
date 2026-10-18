@@ -20,7 +20,6 @@ extends VBoxContainer
 ## bu bileşen `change_scene_to_file` çağırmıyor, çünkü aynı bileşen bir
 ## overlay'in içinde de yaşıyor olabilir.
 signal loaded(session)
-signal changed
 
 const ROW_SEPARATION: float = 6.0
 
@@ -121,7 +120,6 @@ func _row_text(slot: int, summary: Dictionary) -> String:
 func _on_save_pressed(slot: int) -> void:
 	SaveManager.save_session(GameState.get_session(), slot)
 	refresh()
-	changed.emit()
 
 func _on_load_pressed(slot: int) -> void:
 	var session = SaveManager.load_session(slot)
@@ -132,4 +130,3 @@ func _on_load_pressed(slot: int) -> void:
 func _on_delete_pressed(slot: int) -> void:
 	SaveManager.delete_save(slot)
 	refresh()
-	changed.emit()
