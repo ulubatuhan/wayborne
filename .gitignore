@@ -39,3 +39,6 @@ Thumbs.db
 *.log
 *.orig
 build/ui_scenes/
+# Harita karoları: LFS kararı (görev 6.1) verilene kadar depoya girmiyor.
+# Kurulum: python tools/worldmap/install_tiles.py <karo klasörü>
+data/assets/map/tiles/
