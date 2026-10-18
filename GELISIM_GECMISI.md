@@ -49,7 +49,7 @@ Bu belge, projenin 2026-08-28 - 2026-09-23 tarihleri arasındaki geliştirme sü
 - Faz 3.3: Kervansaray - vagon onarımı ve alımı
 - Faz 3.4: Tüccar Loncası - kontrat panosu
 - CLAUDE.md: Faz 3 tamamlandı notu
-- Karakter oluşturma, kültürler ve Darkest Dungeon tarzı çarpışma
+- Karakter oluşturma, kültürler ve sıra tabanlı çarpışma
 - city_map: _session'ı tipli yap, şehir ekranının ayrıştırma hatasını gider
 - ClassCatalog.get_class() Object'in metoduyla çakışıyordu
 
@@ -136,7 +136,7 @@ Bu belge, projenin 2026-08-28 - 2026-09-23 tarihleri arasındaki geliştirme sü
 
 - Yolu oyuncu yürüsün: kervan artık kendi kendine varmıyor
 - Onboarding katmanı oyuncuyu kilitliyordu: taşma, ortalama, saydamlık
-- Savaşa DD omurgası: zırh, hız zarı, Ölümün Kıyısı
+- Savaşa derinlik omurgası: zırh, hız zarı, Ölümün Kıyısı
 - Savaş bir liste değil, bir alan
 - Savaşçılar çizildi: silüetler, silahlar ve bir ortam
 - Yolu yeniden çiz: arazi, hava, katmanlı manzara ve yürüyen kervan

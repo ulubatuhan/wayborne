@@ -1,6 +1,6 @@
 # Wayborne
 
-Ortaçağ temalı, 2D, kervan ticareti ve Darkest Dungeon tarzı taktiksel
+Ortaçağ temalı, 2D, kervan ticareti ve sıra tabanlı taktiksel
 savaş içeren bir Godot 4 oyunu. Oyuncu bir kervan lideri; şehirler arası
 mal taşıyor, tüccarlara refakat ediyor, yolda EU4 tarzı olay kartlarıyla
 karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
@@ -25,7 +25,7 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
    rotadan gideceğine karar ver.
 4. **Yola çık** — her gün olay çıkma ihtimali var; EU4 tarzı kartlar
    kilitli seçenekleri sebepleriyle gösterir. Bazı seçenekler gerçek bir
-   çarpışma açar (Darkest Dungeon tarzı, mevki kilitli yetenekler, 4
+   çarpışma açar (sıra tabanlı, mevki kilitli yetenekler, 4
    mevkilik iki saf). Olaylar ve seferler XP verir; karakterler seviye
    atlayınca stat ve yetkinlik puanı kazanır (otomatik ya da elle
    dağıtılır — parti ekranındaki karakter sayfası). Savaş, kayıp ve açlık
@@ -60,7 +60,7 @@ wayborne/
 │   ├── travel/             # Harita, rotalar, kervan/vagon mantığı
 │   ├── events/             # EU4 tarzı olay motoru
 │   ├── character/          # Statlar, kültürler, sınıflar, tayfa toplama
-│   ├── combat/             # Darkest Dungeon tarzı çarpışma motoru
+│   ├── combat/             # Sıra tabanlı çarpışma motoru
 │   ├── world/              # 2D dünya, sahne navigasyonu
 │   ├── ui/                 # Ekranlar ve yeniden kullanılabilir paneller
 │   ├── campaign/           # Kampanya bölümleri + kervan defteri

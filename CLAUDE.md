@@ -165,7 +165,7 @@ wayborne/
     level scaled off the player's own (`get_venue_level_spread` - meydan
     always below the player, lonca always at or above), granted as real XP
     so `auto_allocate` spends it the same way a levelling companion would.
-  - `Trait` / `TraitCatalog`: sixteen Darkest-Dungeon-style huy (Faz 17: one
+  - `Trait` / `TraitCatalog`: sixteen huy (Faz 17: one
     virtue and one affliction per stat, now eight stats), each a small
     permanent modifier (`hp_bonus`/`dodge_bonus`/`accuracy_bonus`/
     `crit_bonus`/`damage_bonus`) read by `CharacterData.get_max_hp()/
@@ -200,7 +200,7 @@ wayborne/
   - `Equipment` / `EquipmentCatalog`: four slots (`SLOT_WEAPON`/`SLOT_ARMOR`/
     `SLOT_RING`/`SLOT_AMULET`), twelve pieces total - Weapon/Armor are three
     permanent tiers each (positive bonus only, bought with gold at the
-    Caravan Yard's "Demirci" section), Ring/Amulet are DD-trinket-style
+    Caravan Yard's "Demirci" section), Ring/Amulet are trinket-style
     finds (one stat up, another down, `price` 0 - never sold, only granted
     by `EventEffect.Type.GRANT_EQUIPMENT`). Bonus fields
     (`hp_bonus`/`dodge_bonus`/`accuracy_bonus`/`crit_bonus`/`damage_bonus`)
@@ -324,7 +324,7 @@ wayborne/
 - Characters heal to full on city arrival (`finish_journey()`); the road is
   where damage accumulates.
 
-- **scripts/combat/**: Darkest Dungeon style turn-based combat
+- **scripts/combat/**: Turn-based combat
   - `CombatSkill` / `SkillCatalog`: position-gated skills. Every skill carries
     both `usable_positions` (where the user must stand) and `target_positions`
     (what it can reach). Numbers live in the catalog, never in the UI.
@@ -385,7 +385,7 @@ wayborne/
   heal and a non-enemy target (SELF/ALLY) applies its modifier without an
   accuracy roll - see `CombatSkill.make_buff()`. "prot" is read by the one
   damage door (`reduce_by_protection` → `get_effective_protection()`), so
-  bleed and blight see broken armour too; `test_combat_dd` fails on any
+  bleed and blight see broken armour too; `test_combat_core` fails on any
   modifier name outside the list, the same trap as an unknown status. Such a
   skill also applies its `shift_amount` to itself (a real "Step Back") -
   shifts used to run only on the attack path.
@@ -394,7 +394,7 @@ wayborne/
   Breaker damage and *breaks armour* (`shield_break`, −25 PROT), Clerk
   accuracy (`keep_ledger`) and the only heal (`rousing_speech`). Three
   classes had carried the same dodge buff and the Guard out-healed the
-  healer. `test_combat_dd::_test_each_class_owns_its_axes` locks it; the
+  healer. `test_combat_core::_test_each_class_owns_its_axes` locks it; the
   re-measured win-rate table and its one out-of-band cell are in Ruin Rules.
 - **Status effects are the second sanctioned reach beyond a hit**, and they
   are a separate field group from timed modifiers because they are a
@@ -403,7 +403,7 @@ wayborne/
   (`bleed`/`blight`/`stun`), `status_amount`, `status_rounds` and
   `status_chance`; a kind the engine does not know silently does nothing,
   the same trap as an unhandled `EventEffect.Type`, so
-  `test_combat_dd.gd` scans the whole catalogue for it.
+  `test_combat_core.gd` scans the whole catalogue for it.
   - **Damage-over-time goes through the one damage door** (`apply_damage`):
     PROT, Death's Door and the deathblow roll all live there. A second door
     would mean bleed does not know about armour, and could kill a character
@@ -438,7 +438,7 @@ wayborne/
   Burn and chill resist reuse the body's bleed and blight resist
   (`CharacterData.get_burn_resist`/`get_chill_resist`) - a new resist axis
   would have shifted the eight-stat budget. `EnemyCatalog.ROGUE_MAGE` is
-  ready and **never spawned by any squad builder** (`test_combat_dd`
+  ready and **never spawned by any squad builder** (`test_combat_core`
   asserts it): which event opens a wizard is a lore decision (LORE.md
   §3.3: wizards are rare and unwelcome).
 - **A skill says how it looks, not only what it does.** `CombatSkill.element`
@@ -462,7 +462,7 @@ wayborne/
   and its siblings add `RESIST_PER_LEVEL` per level on top of the
   Dayanıklılık-derived base, capped by `MAX_STATUS_RESIST`. This is not an
   invention: it is exactly what the Progression Rules research already found
-  Darkest Dungeon does (a resolve level grants *only* resist growth), and
+  the genre's reference game does (a resolve level grants *only* resist growth), and
   measurement said it was needed - with resistance coming from Dayanıklılık
   alone, levelling bought nothing defensively for the classes that do not
   invest there. Combat reads the `CharacterData` wrapper, never
@@ -472,7 +472,7 @@ wayborne/
   `CombatSkill.Area` is `SINGLE` (default, so every pre-existing skill is
   untouched), `ADJACENT`, `ALL` or `RANDOM`. The damage difference is set in
   the **catalogue, not the engine**: a global "area skills do 60%" multiplier
-  would mean a skill's number is read from two places. `test_combat_dd.gd`
+  would mean a skill's number is read from two places. `test_combat_core.gd`
   compares per side and caught the bear on the first run - it swiped two
   ranks for more than the strongest single-target skill. A bear is dangerous
   through *breadth* now, not through a bigger number.
@@ -1220,7 +1220,7 @@ way to textures one screen at a time.
   strip below the road used to be the road's own light tone, so the
   picture *opened* downward and the caravan never separated from the
   ground. `TravelForeground`'s apron is a near-black earth band, and it
-  is a depth rule, not a fill: the nearest strip is the darkest one.
+  is a depth rule, not a fill: the nearest strip is the blackest one.
   Which flips the props on it — shrub, stone and mud are now chosen
   **lighter than the apron**, because a dark shrub on dark ground is no
   shrub at all.
@@ -2610,7 +2610,7 @@ cities are always joined by the same terrain, and reloading a save cannot
 re-roll the rain away.
 
 - **Terrain is data before it is a picture.** Segments, their biomes, the
-  roadside stops (hamlet, outpost, mine, pass, shrine, bridge) and the
+  roadside stops (mezra, outpost, mine, pass, shrine, bridge) and the
   slope all come from `RouteTerrain`; the road screen draws them and the
   planner prints them in one line, so choosing a route is no longer blind.
   Biomes step at most two places along `BIOME_CHAIN`, because steppe
@@ -2627,7 +2627,7 @@ re-roll the rain away.
   the caravan actually passes one. Every stop kind has a card now, each on
   the same wiring (`EventResolver.stop_context()` → `near_<stop>` flag, low
   base weight, ×6-×8 modifier): pass → `evt_culture_highland_challenge`,
-  hamlet → `evt_leave_the_wounded`, outpost → `evt_frontier_outpost`
+  mezra → `evt_leave_the_wounded`, outpost → `evt_frontier_outpost`
   (Zeka), mine → `evt_mine_collapse` (Dayanıklılık), bridge →
   `evt_failing_bridge` (Bilgelik). Each also carries one option whose cost
   lands on a *named* person (`PARTY_HP` on the best holder of a stat).
@@ -2669,7 +2669,7 @@ re-roll the rain away.
   composed while a low-resistance one has already broken.
 - **Breaking (`GameSession.resolve_stress_breaks`) happens once per city
   arrival**, for every currently-stressed character: mostly (85%) an
-  affliction, rarely (15%) the DD-style inverse where hardship forges a
+  affliction, rarely (15%) the inverse where hardship forges a
   virtue instead - both go through `TraitCatalog.roll_break_trait()`, which
   is `roll_seed_trait()`'s weighting with the polarity pre-decided. An
   afflicted companion (never the player) may also leave the caravan outright
@@ -2723,7 +2723,7 @@ re-roll the rain away.
   vial carries a notch at their value and the tooltip names them
   (`GameSession.get_max_stress_character()`, `set_marker()` on both
   `PulseBar` and the road's `SurvivalGauge`).
-  Darkest Dungeon never shows a party-level bar at all; this keeps the bar
+  The genre's reference game never shows a party-level bar at all; this keeps the bar
   and adds the person.
 - **`_migrate_save` earned its keep here.** `SAVE_VERSION` 2 spreads a v1
   save's single average across every party member. Inventing who was worn
@@ -3330,7 +3330,7 @@ vocabulary existed; the game never spoke it.
   erasing the rank design.
 
 Measured win rate (party size × road danger, level 1), **re-measured after
-the Darkest Dungeon pass** (PROT, the per-round speed die, Death's Door,
+the combat-depth pass** (PROT, the per-round speed die, Death's Door,
 status effects, area skills):
 
 | party | 20% | 40% | 65% | 90% |
@@ -3346,7 +3346,7 @@ people, and party 1 only exists if you dismiss someone. Losing a fight used
 to cost only attrition; since Faz 14 it can cost a real, permanent death to
 anyone on the field, not only the leader (see the Faz 14 note below).
 
-**The whole table moved down, and the cause is DD-1, not the content added
+**The whole table moved down, and the cause is CMB-1, not the content added
 after it.** Enemy PROT and the re-rolled speed die were never re-measured
 when they landed; DoT and area skills were added later and, when tempered,
 moved these numbers **not at all** (the table's squad is bandits, whose only
@@ -3513,7 +3513,7 @@ pass, and the answer came from looking at what comparable games actually do
 rather than from instinct. The instinct - *give every stat a combat
 derivation* - is **not** what the genre does:
 
-- **Darkest Dungeon**, the game this one names as its model, gives a resolve
+- **The genre's reference game**, the one this game took as its model, gives a resolve
   level **no stat growth at all** - only +10% per level to trap disarm and
   the stun/blight/bleed/move/debuff resists. HP, damage, accuracy and dodge
   come from equipment bought at the Blacksmith and skill ranks bought at the
@@ -3527,14 +3527,14 @@ derivation* - is **not** what the genre does:
   talent stars, cap 11, then veteran levels at +1 and no perk point), but
   its own guidance is "never spend on a stat the brother will not use" - it
   accepts role-specific stats rather than making all six universal.
-- **Darkest Dungeon 2** removed hero levelling outright, moving growth to
+- **Its sequel** removed hero levelling outright, moving growth to
   meta-progression unlocks at the Altar of Hope.
 - The **dump-stat literature** is blunt about Charisma: it became a dump
   stat *because* morale, reaction rolls and hirelings stopped mattering to
   how people played. The prescribed fix is to make the systems it feeds
   matter - not to bolt combat numbers onto the stat.
 
-Wayborne already had the Darkest Dungeon equipment axis, and it measurably
+Wayborne already had that reference game's equipment axis, and it measurably
 works (bare 52% vs fully geared 70%). What it lacked was a link between the
 level and that axis, and any combat consequence for Karizma at all.
 
@@ -3542,7 +3542,7 @@ level and that axis, and any combat consequence for Karizma at all.
   by gold alone, so a level-1 party could wear tier 3 the moment it could
   pay - the level meant nothing on the strongest axis in the game. Tier 2
   needs level 3, tier 3 needs level 6. Trinkets (ring/amulet) stay
-  ungated: they are found, not bought, and a DD curio you cannot use is a
+  ungated: they are found, not bought, and a curio you cannot use is a
   non-reward. The gate lives in `GameSession.can_equip()`, checked by
   `equip_to_character()`, and the character screen shows the locked piece
   **disabled with its reason** - the same rule as locked event choices and
@@ -4894,7 +4894,7 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   biomes never jumping, stops never landing on the destination city, clear
   weather exactly neutral, every lever inside its range, the biome bias
   actually biasing (the overwhelming-margin pattern again), the visuals
-  agreeing with the mechanics (the slowest weather is also the darkest), and
+  agreeing with the mechanics (the slowest weather is also the dimmest), and
   - the suite's most important claim - the provision promise surviving
   weather.
 - `test_route_conditions.gd` locks the two properties the route layer would
@@ -5232,7 +5232,7 @@ Faz 4 (karakter + combat) tamamlandı. Oyuna artık bir "sen" girdi:
   6 stata dağıtılan puan ve tayfa büyüklüğü. Ana menüdeki "Yeni Oyun"
   artık doğrudan oyunu başlatmıyor, buraya getiriyor; kayıt yalnızca
   bu ekran tamamlanınca siliniyor.
-- **Combat** (`scripts/combat/`, `CombatPanel`): Darkest Dungeon tarzı,
+- **Combat** (`scripts/combat/`, `CombatPanel`): sıra tabanlı,
   4 mevkilik iki saf, inisiyatif sırası, mevki kilitli yetenekler.
   Haydut pususunun "Direnç göster" seçeneği artık zar atmıyor, gerçek
   savaşı açıyor (`TRIGGER_COMBAT`). F1 panelindeki "combat" girişi de
@@ -5281,7 +5281,7 @@ Faz 7 ("Kervanın Donanımı") tamamlandı - dört PR'lık bir hat:
 - **PR-A (equipment veri katmanı)** dört slotu (Silah/Zırh/Yüzük/Kolye,
   `EquipmentCatalog.SLOT_*`) ve on iki parçayı getirdi: Silah/Zırh üçer
   tier'lik kalıcı yükseltme (yalnızca pozitif bonus), Yüzük/Kolye üçer
-  DD trinket'i tarzı ödünlü tılsım (bir stat artar, biri düşer). Bonus
+  ödünlü tılsım (bir stat artar, biri düşer). Bonus
   alanları `Trait`'inkiyle birebir aynı isimlerde - `CharacterData.
   get_max_hp()/get_dodge()/get_accuracy()/get_crit_chance()/
   get_damage_bonus()` huy bonusunun yanına `_equipment_bonus_sum`'ı da
@@ -5303,8 +5303,8 @@ Faz 7 ("Kervanın Donanımı") tamamlandı - dört PR'lık bir hat:
   Olay havuzu 13'ten 22'ye çıktı - ekipman bulma/edinme (`evt_forgotten_
   cache`, `evt_traveling_tinker`), İzci (`evt_scouted_pass`), beş
   kültürün her birine bir sahne (`evt_culture_*` - kültürlerin mekanik
-  perki dışında ilk kez olay tarafında da göründüğü yer) ve bir DD
-  curio'su (`evt_roadside_shrine`). `GameSession.build_event_context()`'e
+  perki dışında ilk kez olay tarafında da göründüğü yer) ve bir
+  curio (`evt_roadside_shrine`). `GameSession.build_event_context()`'e
   `has_izci` ve beş `is_*_culture` bayrağı eklendi.
 - **PR-D (placeholder → lore)** `item_catalog.gd`'deki `test_` önekli
   id'ler (kayıt uyumluluğu için sabit) artık gerçek isimler taşıyor
@@ -5315,7 +5315,7 @@ Faz 7 ("Kervanın Donanımı") tamamlandı - dört PR'lık bir hat:
   numaralar yerine kültürlerin kendi isim havuzlarından deterministik
   seçiliyor.
 
-Faz 8 ("Vizyon ve Denge") sürüyor - rakip oyunların (Darkest Dungeon,
+Faz 8 ("Vizyon ve Denge") sürüyor - rakip oyunların (kadro yıpratan sıra tabanlı oyunlar,
 Oregon Trail tarzı kervan yönetimi) vizyonu doğrultusunda içerik/denge
 boşluklarını dolduran bir hat:
 
@@ -5342,7 +5342,7 @@ boşluklarını dolduran bir hat:
   `total_days_elapsed`'e göre büyütüyor (`DANGER_GROWTH_PER_DAY`,
   `DANGER_GROWTH_CAP` tavanlı) - erken oyunun kolaylığı geç oyunda
   sürmesin diye; caravan_planner.gd/world_map.gd/tavern.gd artık rotanın
-  ham değeri yerine bunu okuyor. Oyunun DD tarzı felsefesinde yenilgi
+  ham değeri yerine bunu okuyor. Oyunun kendi felsefesinde yenilgi
   yok, bu yüzden "hedef ekranı" bir game-over değil: kese `GameSession.
   GOAL_GOLD`'a ulaşınca (`has_reached_goal()`, bir kereye mahsus -
   `GOAL_FLAG`) şehre varışta `goal_reached.tscn` açılıyor, "Devam Et" ile
@@ -5390,12 +5390,12 @@ bir katman, ve katmanın sömürülemeyeceğini kanıtlayan bir test paketi.
 Faz 10 ("Oyun bir şeye benzesin") tamamlandı - iki hat, biri savaşın
 derinliği biri oyunun görüntüsü.
 
-**Darkest Dungeon hattı (DD-1..DD-5).** Zırh (PROT), her round yeniden
+**Savaş derinliği hattı (CMB-1..CMB-5).** Zırh (PROT), her round yeniden
 atılan hız zarı ve Ölümün Kıyısı (yalnızca lider ölür, kıdemliye devir,
 varis yoksa oyun biter); savaş alanı görünümü (liste değil saf düzeni);
 durum efektleri (kanama/zehir/sersemletme, dirençler, zincirlenemeyen
 sersemletme, üst üste binmeyen DoT); alan hedefleme ve mevki kaydırma.
-Denge yeniden ölçüldü ve tablo düştü - sebebi hiç ölçülmemiş olan DD-1
+Denge yeniden ölçüldü ve tablo düştü - sebebi hiç ölçülmemiş olan CMB-1
 çıktı (bkz. Ruin Rules).
 
 **Sanat hattı (ART-A..ART-D).** Oyunun tamamı `ColorRect`'ten çizilmiş
@@ -5480,8 +5480,8 @@ notun triyajı. Her not mevcut sistemlere karşı üç kefeye ayrıldı:
 stresle dağılması (bkz. Stress Rules'un `resolve_stress_breaks`/
 `evt_stress_brawl`/`evt_mutiny` üçlüsü), kararların gecikmeli sonuç
 doğurması (bkz. Event Character Rules'un `evt_wanderer_revenge` zinciri -
-mevcut bayrak/tetikleme vokabülerinin kendisi bu), Darkest Dungeon tarzı
-kombat (bkz. Combat Rules/DD-1..DD-5), göç sırasında bölgeye göre değişen,
+mevcut bayrak/tetikleme vokabülerinin kendisi bu), sıra tabanlı
+kombat (bkz. Combat Rules/CMB-1..CMB-5), göç sırasında bölgeye göre değişen,
 tükenmeyen arkaplan çeşitliliği (bkz. Art Rules'un `hash(cell index)`
 maddesi ve Route Terrain & Weather Rules), karizmaya bağlı pazar fiyatı +
 partideki ticaret gücünden faydalanma (bkz. Haggling Rules ve Tellal
@@ -6099,7 +6099,7 @@ sonuç mimarisinin (`EventOutcome`/`EventCondition`) üstüne oturuyor.
 
 **PR-3 (huy sistemi ultra genişleme) tamamlandı.** Oyuncunun kendi sözleriyle:
 *"Kervan görevleri/huylar, üstüne ekle ama ayrı bir kefeye koyma, mevcut
-kefeyi genişlet, ultra geliştir"* ve *"Project Zomboid gibi olmalı, DD'de
+kefeyi genişlet, ultra geliştir"* ve *"Project Zomboid gibi olmalı, [başka bir oyunda]
 olduğu gibi psikolojik etkileri olan trait/perkler de olmalı."* İki iş
 birlikte: on iki huyluk katalog on altıya çıktı (Bilgelik/İnanç'ın kendi
 huyları), ve her huy - eski on iki dahil - artık savaşın dışına da taşan
@@ -6121,7 +6121,7 @@ küçük bir davranışsal kanca taşıyor.
   `get_leader_effective_stat()` artık `stats.get_effective_value(kind)`'a
   `character.get_check_modifier(kind)`'ı ekliyor - `SkillCheck`'in kendisi
   hiç değişmedi, yalnızca ona giden sayı huyu da taşıyor.
-- **`refusal_bonus` - DD'nin "irrasyonel davranış" katmanı.** Aynı jenerik
+- **`refusal_bonus` - "irrasyonel davranış" katmanı.** Aynı jenerik
   türetme (`REFUSAL_BONUS_MAGNITUDE`, ±2): bir virtue zaten kırılmış
   (`CombatUnit.is_stressed`) bir birimi biraz sakinleştirir, bir affliction
   biraz tetikler. **Kasıtlı olarak yalnızca zaten kırılmış bir birimde
@@ -6611,7 +6611,7 @@ icat etmeden aynı sinyali görsel bir tepkiye çeviriyor.
   kayıt `_apply_pending_animation` tarafından nötre (`FLASH_NEUTRAL`,
   kayma 0) döndürülüp sözlükten siliniyor - `_apply_pending_bark`'ın süre
   dolunca unutma kuralının aynısı.
-- **`tests/test_combat_dd.gd`'nin `_test_bark_drives_flash_and_lunge`'ı**
+- **`tests/test_combat_core.gd`'nin `_test_bark_drives_flash_and_lunge`'ı**
   bunu `_test_battlefield_is_a_field_not_a_list`'in kurduğu sahnesiz panel
   üstünde doğruluyor - motoru koşturmaya gerek yok, `_on_unit_barked`/
   `_flash_for_kind`/`_apply_pending_animation` saf birer eşleme:
@@ -6639,7 +6639,7 @@ icat etmeden aynı sinyali görsel bir tepkiye çeviriyor.
   _DOOR'un "sonuç" kategorisi değil. O yüzden `BARK_MISS` de `BARK_HIT`/
   `BARK_CRIT`'in yanına, kayma üreten kümeye eklendi - kuralın kendisi
   değişmedi, kapsamı doğru genişledi.
-  `tests/test_combat_dd.gd`'nin `_test_bark_drives_flash_and_lunge`'ı
+  `tests/test_combat_core.gd`'nin `_test_bark_drives_flash_and_lunge`'ı
   genişletildi: kaçırmanın kendi rengini döndüğü ve isabetle aynı şekilde
   saldıranda kayma bıraktığı, ikisi de saf eşleme üstünden (motoru
   koşturmadan) doğrulanıyor.
@@ -6781,8 +6781,8 @@ hafızaya, zorluktan trajediye:
 - **Finalin hafıza kapısı.** Ölçüldü, bkz. Campaign Rules.
 
 **Faz 19 ("Sistem mimarisi incelemesi") tamamlandı.** Dört aşamalı bir
-inceleme (Bogost'un prosedürel retoriği; Frostpunk, This War of Mine,
-Darkest Dungeon karşılaştırması) sistemlerin ne *söylediğini* denetledi ve
+inceleme (Bogost'un prosedürel retoriği; Frostpunk, This War of Mine ve
+benzerlerinin karşılaştırması) sistemlerin ne *söylediğini* denetledi ve
 on beş biletlik bir backlog çıkardı; her bilet kendi PR'ıyla, sırayla
 birleştirildi:
 
@@ -7278,7 +7278,7 @@ küçülüyordu - "portreler hayvanları küçültüp gerçek oranlarını küç
   ayracı da 56 → 160, merkez boşlukla birebir aynı değer - "taşan bir ayı/
   kurt reisinin gövdesi komşu mevkiye bakıyor" gerekçesi satır içi komşular
   için de eşit derecede geçerli. Yeniden çekilen ekran görüntüsü kuyruğun
-  artık komşu kurda değmediğini doğruluyor; `test_combat_dd.gd` bu sabiti
+  artık komşu kurda değmediğini doğruluyor; `test_combat_core.gd` bu sabiti
   sınamıyor (yalnızca mevki sayısını sayıyor), o yüzden regresyon tam
   test paketiyle (12839/12839) doğrulandı.
 

@@ -223,7 +223,7 @@ G-serisinin 1024→256 küçültme oranıyla aynı disiplin).
 | g | pilgrim | `E6g_illus_pilgrim.jpg` / `e6g_pilgrim.jpg` | `SAHNE: Sade kumaş cübbeli, elinde bir asa/tespih olan yalnız bir hacı, başı hafif eğik, yürüyor - kutsal bir sükûnet hissi, tehdit değil.` |
 | h | roadside_shrine | `E6h_illus_shrine.jpg` / `e6h_shrine.jpg` | `SAHNE: Yol kenarında küçük, taştan yapılmış eski bir sunak/adak yeri - üstünde soluk kurdeleler, birkaç bozuk para, yanmış bir mum kalıntısı. Kimse yok, yalnızca yapı.` |
 | i | mountain_pass | `E6i_illus_pass.jpg` / `e6i_pass.jpg` | `SAHNE: İki dik kayalığın arasından geçen dar bir dağ geçidi, yol yukarı doğru kıvrılıyor, uzakta karlı bir zirve.` |
-| j | hamlet_wounded | `E6j_illus_hamlet.jpg` / `e6j_hamlet.jpg` | `SAHNE: Küçük, birkaç kulübeden oluşan bir yol köyü (hamlet) - bir kulübenin önünde yere çökmüş, yaralı görünen bir figür, yardım bekler gibi.` |
+| j | village_wounded | `E6j_illus_village.jpg` / `e6j_village.jpg` | `SAHNE: Küçük, birkaç kulübeden oluşan bir yol köyü (mezra) - bir kulübenin önünde yere çökmüş, yaralı görünen bir figür, yardım bekler gibi.` |
 | k | frontier_outpost | `E6k_illus_outpost.jpg` / `e6k_outpost.jpg` | `SAHNE: Ahşap çitlerle çevrili küçük bir sınır karakolu - basit bir gözetleme kulesi, birkaç çadır, üstünde soluk bir bayrak.` |
 | l | mine_collapse | `E6l_illus_mine.jpg` / `e6l_mine.jpg` | `SAHNE: Dağ yamacına açılmış bir maden girişi - ahşap destekler yarı çökmüş, girişten toz/duman çıkıyor, yakında terk edilmiş bir kazma.` |
 | m | failing_bridge | `E6m_illus_bridge.jpg` / `e6m_bridge.jpg` | `SAHNE: Bir dereyi geçen eski ahşap köprü - tahtalardan biri kırık, sallanıyor gibi bir açıyla çizilmiş, altında hızlı akan su.` |
@@ -260,7 +260,7 @@ dosyayı okur — bir olayın birden fazla kategoriyle eşleşmesi kasıtlı
 
 **i — mountain_pass:** `evt_culture_highland_challenge`†
 
-**j — hamlet_wounded:** `evt_leave_the_wounded`
+**j — village_wounded:** `evt_leave_the_wounded`
 
 **k — frontier_outpost:** `evt_frontier_outpost`
 

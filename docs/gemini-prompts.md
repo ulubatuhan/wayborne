@@ -216,9 +216,9 @@ AVOID: text, frame, people, buildings.
 Painterly ink-and-wash illustration style, gritty and tactile.
 ```
 
-**A-j · hamlet_wounded** · seed 41210 · file `e6j_hamlet.jpg`
+**A-j · village_wounded** · seed 41210 · file `e6j_village.jpg`
 ```
-SCENE: A tiny roadside hamlet of three low mud-brick and timber huts. In
+SCENE: A tiny roadside village of three low mud-brick and timber huts. In
 front of one hut a wounded figure sits slumped on the ground against the
 wall, a bloodied cloth around one leg, looking toward the road as if
 waiting for help. Grey overcast light, smoke from one chimney.

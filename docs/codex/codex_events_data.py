@@ -433,7 +433,7 @@ EVENTS = [
       "effects": [("MORALE", -12), ("STRESS", 10), ("GOLD", -30)]},
    ]},
  ],
- "note": "Stresin kendi olayı - Darkest Dungeon'daki gibi tükenmiş bir kadro birbirine düşer. "
+ "note": "Stresin kendi olayı - tükenmiş bir kadro birbirine düşer. "
          "Eşik 70'ten 40'a indi çünkü ölçüm varış stresinin ortalama ~25 olduğunu ve 70'in "
          "hiçbir zaman görülmediğini gösterdi. Müdahale etmek garantili iyi (-15 stres), "
          "bırakmak beklenen değeri negatif bir kumar.",
@@ -495,7 +495,7 @@ EVENTS = [
       "effects": [("STRESS", 15), ("REPUTATION", -4)]},
    ]},
  ],
- "note": "Darkest Dungeon'ın curio'su: güvenli kullanım (dua) mütevazı ve garantili, "
+ "note": "Bir curio: güvenli kullanım (dua) mütevazı ve garantili, "
          "açgözlü kullanım (adakları almak) beklenen değeri negatif bir kumar. "
          "Stresin ücretsiz düştüğü az sayıdaki yerden biri - kamp ve ziyafetin yanında "
          "üçüncü kol.",

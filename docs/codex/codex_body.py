@@ -38,7 +38,7 @@ def ch1():
         table(
             ["Kaynak", "Ne aldık", "Nerede görünür"],
             [
-                ["<b>Darkest Dungeon</b>",
+                ["<b>Kadro yıpratan sıra tabanlı oyunlar</b>",
                  "Kadro kalıcı olarak yıpranır. İnsanlar kırılır, huy edinir, emir reddeder. "
                  "Dört mevkilik saf düzeni ve mevki-kilitli yetenekler.",
                  "Stres, huylar, kırılma, savaş sahası"],
@@ -355,7 +355,7 @@ def ch2():
 
         para("On iki huy", "h1"),
         para(
-            "Darkest Dungeon tarzı kalıcı kişilik izleri. Her stat için bir <b>erdem</b> ve bir "
+            "Kalıcı kişilik izleri. Her stat için bir <b>erdem</b> ve bir "
             "<b>illet</b>. Bir karakter en fazla <b>3 huy</b> taşır."
         ),
         sp(2),
@@ -382,7 +382,7 @@ def ch2():
                 ["<b>Olaydan</b>", "GRANT_TRAIT etkisi (Sıkıntılı Gece, Gömülü Stok). "
                  "Her zaman oyuncu karakterini hedefler."],
                 ["<b>Kırılmadan</b>", "Şehre varışta stresli her karakter için zar atılır: "
-                 "%85 illet, <b>%15 erdem</b> - Darkest Dungeon'daki gibi zorluk bazen "
+                 "%85 illet, <b>%15 erdem</b> - zorluk bazen "
                  "insanı sağlamlaştırır."],
                 ["<b>Arındırma</b>", "Yalnızca <b>5 gün içinde</b> kazanılmış “taze” huy silinebilir. "
                  "Kilise'de ucuz, Tavernada pahalı (60 GG). Köklenmiş bir huy kalıcıdır."],
@@ -429,17 +429,17 @@ def ch2():
         ),
         sp(4),
         callout(
-            "Seviye kapısı neden var? (Darkest Dungeon modeli)",
+            "Seviye kapısı neden var?",
             "Tier'lar bir süre <b>yalnızca parayla</b> kapalıydı: seviye 1 bir parti, parayı "
             "denkleştirdiği an tier 3 kuşanabiliyordu. Yani seviye, oyunun en güçlü ekseni "
             "üzerinde hiçbir anlam taşımıyordu.<br/><br/>"
-            "Çözüm rakip oyunlardan geldi ve <b>ilk sezgiyi tersine çevirdi</b>. Darkest "
-            "Dungeon'da resolve seviyesi <i>hiç stat büyütmez</i> - yalnızca Demirci'den "
+            "Çözüm rakip oyunlardan geldi ve <b>ilk sezgiyi tersine çevirdi</b>. Türün "
+            "klasik modelinde seviye <i>hiç stat büyütmez</i> - yalnızca Demirci'den "
             "alınacak teçhizatın ve Lonca'dan alınacak yetenek seviyelerinin <b>kapısıdır</b>. "
             "Seviye gücün kendisi değil, gücün anahtarıdır. Wayborne'da da öyle oldu: "
             "tier 2 → seviye 3, tier 3 → seviye 6.<br/><br/>"
             "Trinket'ler (Yüzük/Kolye) kapısız kaldı: onlar bulunur, satın alınmaz - "
-            "kullanamadığın bir DD curio'su ödül sayılmaz.",
+            "kullanamadığın bir curio ödül sayılmaz.",
         ),
         sp(4),
         para("Ölçülen merdiven", "h2"),

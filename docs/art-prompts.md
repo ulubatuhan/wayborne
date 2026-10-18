@@ -34,7 +34,7 @@ SANAT YÖNÜ (hepsinde aynı):
 - Stil: "yassı-resimsel" (flat illustrative) — piksel sanat DEĞİL, 3D
   DEĞİL, fotogerçekçi DEĞİL. Düz renk alanları, katmanlı siluetler,
   yumuşak gradyanlar, koyu ve kararlı bir kontur ("mürekkep" hissi),
-  tek yönden gelen ışık. Darkest Dungeon'ın mürekkep hissi + Kingdom Two
+  tek yönden gelen ışık. Elle mürekkeplenmiş bir his + Kingdom Two
   Crowns'ın sakin katmanlı siluetleri.
 - Palet: kırık beyaz kemik tonu, koyu mürekkep siyahı (saf siyah değil),
   soluk altın sarısı (tek vurgu rengi), kurumuş kan kırmızısı, yosun
