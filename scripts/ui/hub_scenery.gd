@@ -68,7 +68,7 @@ var _area: Rect2 = Rect2()
 var _ground_y: float = 0.0
 var _seed: int = 0
 var _layer: String = LAYER_BACK
-## Şehir dışı yürüyüş alanının gökyüzü de varış saatinden (bkz. CityView).
+## Şehir dışı yürüyüş alanının gökyüzü de varış saatinden (bkz. TravelBand.sky_for_hour).
 var _hour: float = 12.0
 
 func setup(

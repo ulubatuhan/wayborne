@@ -10,7 +10,7 @@ extends Control
 ## taşıyor: binanın üstüne gelmek levhayı, levhanın üstüne gelmek binayı
 ## aydınlatıyor - ikisi aynı `hovered` durumunu okuyor.
 ##
-## `venue_pressed(scene_path)` CityView ile aynı sinyal.
+## `venue_pressed(scene_path)` şehir haritasının mekân sinyali: `city_map.gd` bağlıyor.
 
 signal venue_pressed(scene_path: String)
 signal nav_pressed(key: String)

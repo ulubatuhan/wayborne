@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 ## Kumandayla oynanan bir oturumda fareyi sağ çubuğa taşıyan sanal imleç.
-## Xbox tarayıcısından oynanabilirlik isteğiyle geldi: `city_view.gd`,
+## Xbox tarayıcısından oynanabilirlik isteğiyle geldi: `city_front.gd`,
 ## `combat_unit_slot.gd` gibi ekranların çoğu gerçek `Button` değil,
 ## fare koordinatına bakan `_gui_input` ile çalışıyor - bunları teker
 ## teker "kumandayla da çalışsın" diye yeniden yazmak yerine, gerçek

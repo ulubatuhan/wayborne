@@ -292,7 +292,7 @@ func _add_table_driven_edges(edges: Array, seen: Dictionary, constants: Dictiona
 		if sources.is_empty():
 			continue
 		# Tablo bazen ekranın kendi dosyasında değil, kurduğu bileşenin
-		# içinde duruyor: şehir haritası mekânları artık `CityView`'dan
+		# içinde duruyor: şehir haritası mekânları `CityFront.VENUES`'ten
 		# alıyor. Ekranın *kurduğu* sınıfların kaynağını da tarıyoruz,
 		# yoksa beş mekân grafikten düşüyor - ki tam bu oldu, ve test
 		# haklı olarak "yetim ekran" dedi. Bahsedilen her `Nav` sabitini
