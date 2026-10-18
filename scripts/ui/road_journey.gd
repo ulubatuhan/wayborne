@@ -405,6 +405,8 @@ var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
 var _merchant_dialogue_panel: MerchantDialoguePanel = null
+## Yolda açılır dünya haritası (bkz. MapPopup); açıkken zaman durur.
+var _map_popup: MapPopup = null
 var _camping: bool:
 	get:
 		return _journey.camping
@@ -911,6 +913,13 @@ func _build_bottom_bar() -> PanelContainer:
 	waybook_button.pressed.connect(_show_waybook)
 	row.add_child(waybook_button)
 
+	# Açılır dünya haritası (görev N24); kısayolu M.
+	var map_button := Button.new()
+	map_button.text = tr("UI_ROAD_MAP_OPEN")
+	map_button.tooltip_text = tr("UI_ROAD_MAP_TOOLTIP")
+	map_button.pressed.connect(_open_map_popup)
+	row.add_child(map_button)
+
 	_log_button = Button.new()
 	_log_button.text = tr("EVT_TEST_LOG")
 	_log_button.toggle_mode = true
@@ -1048,6 +1057,28 @@ func _on_status_closed() -> void:
 ## açılıyor. Zamanı durdurmuyor - bu bir okuma, bir karar değil, log ve
 ## durum katmanlarıyla aynı muamele (bkz. `_can_time_flow`).
 const WAYBOOK_KEY: Key = KEY_L
+const MAP_KEY: Key = KEY_M
+
+## Kervan yolun neresindeyse haritada orada, gittiği yöne bakarak. Arazi
+## seferin çıkışından ölçülüyor (bkz. JourneyController.terrain_day), yolun
+## harita çizgisi de çıkıştan hedefe.
+func _open_map_popup() -> void:
+	if _map_popup != null or _session == null:
+		return
+	var origin := _session.journey_origin_id
+	var destination := _session.journey_destination_id
+	var path := PackedVector2Array()
+	var parts := _journey.terrain_key.split("|")
+	if parts.size() == 2:
+		path = WorldMapData.get_route_path(origin, String(parts[1] if String(parts[0]) == origin else parts[0]))
+	if path.is_empty() and origin != destination:
+		path = WorldMapData.get_route_path(origin, destination)
+	var progress := 0.0
+	if _journey.terrain_days > 0:
+		progress = clampf(_terrain_day() / float(_journey.terrain_days), 0.0, 1.0)
+	_map_popup = MapPopup.new().setup(origin, destination, path, progress)
+	_map_popup.closed.connect(func(): _map_popup = null)
+	add_child(_map_popup)
 
 func _show_waybook() -> void:
 	for child in get_children():
@@ -1367,6 +1398,11 @@ func _input(event: InputEvent) -> void:
 
 	if key_event.keycode == WAYBOOK_KEY:
 		_show_waybook()
+		accept_event()
+		return
+
+	if key_event.keycode == MAP_KEY:
+		_open_map_popup()
 		accept_event()
 		return
 
@@ -3069,6 +3105,7 @@ func _has_open_panel() -> bool:
 		or _meal_panel != null
 		or _pre_combat_panel != null
 		or _merchant_dialogue_panel != null
+		or _map_popup != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),

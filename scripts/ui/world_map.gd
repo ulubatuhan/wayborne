@@ -1,30 +1,13 @@
 extends Control
 
-## Ruin Rules'un `POWER_SCALE_PER_PARTY_MEMBER`'ı ("kervan büyüdükçe onu
-## durduranlar da güçlenir") ölçülmüş, kayıtlı bir mekanik - ama hiç görsel
-## yankısı yoktu. Bu halka o gerçeği çiziyor: "buradasın" raptiyesinin
-## çevresindeki halka vagon arttıkça küçülüyor - "güçlendim" değil
-## "sıkıştım" hissi (bkz. akademik kaynak önerileri A4). Saf görsel, hiçbir
-## yeni sayı icat etmiyor.
-class SafeZoneRing extends Control:
-	var ring_radius: float = 40.0
-	# Beyaz bir halka B6'nın krem parşömeninde neredeyse görünmezdi
-	# (ölçüldü) - `ArtPalette.BLOOD`, "buradasın" yazısının zaten taşıdığı
-	# ton, hem kâğıt üstünde okunuyor hem de "sıkışma" hissine renkçe
-	# uyuyor (bkz. Art Rules'un `MapLabel`in kan rengini "buradasın"
-	# için kullanması).
-	var ring_color: Color = Color(ArtPalette.BLOOD.r, ArtPalette.BLOOD.g, ArtPalette.BLOOD.b, 0.55)
+## Dünya haritası ekranı (görev N7): harita v3, karo katmanıyla (WorldMapView,
+## MapTileView). Yerleşimler ve buradan çıkan yollar haritanın üstüne çizilir;
+## sağ sütun seçilen hedefin bilgisini ve "Bu rotayı planla" düğmesini taşır.
+##
+## "Buradasın" işaretinin çevresindeki halka Ruin Rules'un
+## `POWER_SCALE_PER_PARTY_MEMBER`'ının görsel yankısı: vagon arttıkça daralır
+## ("güçlendim" değil "sıkıştım").
 
-	func _draw() -> void:
-		draw_arc(size * 0.5, ring_radius, 0.0, TAU, 48, ring_color, 2.5, true)
-
-const POINT_SIZE: Vector2 = Vector2(130, 44)
-const ROUTE_WIDTH: float = 3.0
-const PIN_FILE: String = "k5_pip_filled.png"
-const PIN_CLOSED_FILE: String = "k5_pip_hollow.png"
-const PIN_SIZE: float = 22.0
-## Uzun şehir adı raptiyenin iki yanına taşabilsin (yazı kutuya sığdırılmıyor).
-const LABEL_OVERHANG: float = 40.0
 ## Yolun o günkü hali (bkz. RouteConditions) çizgiye de vuruyor: harita
 ## tek bakışta hangi geçidin kapalı, hangisinin eşkıya kaynadığını
 ## söylemezse dinamik rota diye bir şey oyuncu için yok demektir.
@@ -66,137 +49,46 @@ func _ready() -> void:
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_map()
 	_select_default_destination()
-	var row: Control = _map_panel.get_parent()
-	row.resized.connect(_fit_map)
-	_fit_map()
 
-## Harita, yazısız bir arazi parşömeni (B6): şehirler ve yollar görselde
-## yok, `Location.map_position`'dan canlı çiziliyor - isim, yol durumu ve
-## dil ne olursa olsun resim doğru kalıyor (Localization Rules).
-const MAP_ART_FILE: String = "b6_map.png"
-## Şehir düğümleri en fazla ~(650, 400)'e uzanıyor; parşömen biraz taşsın ki
-## kenardaki şehir de kâğıdın üstünde dursun.
-const MAP_ART_MARGIN: Vector2 = Vector2(30.0, 30.0)
-## Şehirlerin konumları 700x420'lik sabit bir tuvalde; 1920 genişlikte bu
-## ekranın köşesinde küçük bir kâğıt kalıyordu (ölçüldü). Tuval, satırın
-## bu oranına kadar büyüyor - bilgi paneline yer bırakarak.
-const MAP_BASE_SIZE: Vector2 = Vector2(700.0, 420.0)
-const MAP_ROW_SHARE: float = 0.58
-const MAP_MAX_SCALE: float = 1.8
+var _map_view: WorldMapView
 
-var _map_canvas: Control
-
-## Haritanın ölçeği: satırın genişliğinin MAP_ROW_SHARE'i ve yüksekliği
-## içinde kalan en büyük değer, asla 1'in altında değil.
-static func map_scale(row_size: Vector2) -> float:
-	var padded := MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0
-	var by_width := row_size.x * MAP_ROW_SHARE / padded.x
-	var by_height := row_size.y / padded.y
-	return clampf(minf(by_width, by_height), 1.0, MAP_MAX_SCALE)
+## Harita ekranın büyük kısmını alır; karo katmanı ve işaretler bir arada.
+## Boyut çapayla değil, panelin `resized`'ıyla (bkz. Art Rules'un çapa tuzağı).
+func _build_map() -> void:
+	_map_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_map_panel.size_flags_stretch_ratio = 2.2
+	_map_panel.custom_minimum_size = Vector2(640, 420)
+	_map_panel.clip_contents = true
+	_map_view = WorldMapView.new()
+	_map_view.tiles.mouse_filter = Control.MOUSE_FILTER_PASS
+	_map_panel.add_child(_map_view)
+	_map_panel.resized.connect(_fit_map)
+	_map_view.current_location_id = _current_location_id
+	_map_view.safe_ring_radius = safe_zone_ring_radius(_session.owned_wagon_count)
+	var routes: Array = []
+	for route in WorldMapData.get_routes_from(_current_location_id):
+		routes.append({"to": route.to_location_id, "color": ROUTE_STATE_COLORS[int(_session.get_route_state(route))]})
+	_map_view.routes = routes
+	_map_view.location_pressed.connect(func(id): _on_location_pressed(WorldMapData.get_location_by_id(id)))
+	_map_view.location_hovered.connect(func(id): _on_location_hovered(WorldMapData.get_location_by_id(id)))
+	var bar := HBoxContainer.new()
+	bar.position = Vector2(12, 12)
+	bar.add_theme_constant_override("separation", 6)
+	_map_panel.add_child(bar)
+	for spec in [["UI_MAP_GO_CARAVAN", func(): _map_view.focus_caravan(0.3)], ["+", func(): _map_view.tiles.zoom_by(1.4, _map_view.size * 0.5)], ["-", func(): _map_view.tiles.zoom_by(1.0 / 1.4, _map_view.size * 0.5)], ["UI_MAP_WHOLE", func(): _map_view.tiles.reset_view()]]:
+		var b := Button.new()
+		b.text = tr(String(spec[0])) if String(spec[0]).begins_with("UI_") else String(spec[0])
+		b.pressed.connect(spec[1])
+		bar.add_child(b)
+	_fit_map.call_deferred()
 
 func _fit_map() -> void:
-	var row: Control = _map_panel.get_parent()
-	var factor := map_scale(row.size)
-	_map_canvas.scale = Vector2(factor, factor)
-	_map_canvas.position = MAP_ART_MARGIN * factor
-	_map_panel.custom_minimum_size = (MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0) * factor
-
-func _build_map() -> void:
-	# Bütün harita tek bir tuvalde, tek bir ölçekle - düğmeler de ölçekle
-	# birlikte tıklanıyor, konumlar Location.map_position olarak kalıyor.
-	_map_canvas = Control.new()
-	_map_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_map_panel.add_child(_map_canvas)
-	var art := TextureRect.new()
-	art.texture = WaybookTheme.texture(MAP_ART_FILE)
-	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.stretch_mode = TextureRect.STRETCH_SCALE
-	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art.position = -MAP_ART_MARGIN
-	art.size = MAP_BASE_SIZE + MAP_ART_MARGIN * 2.0
-	_map_canvas.add_child(art)
-
-	for route in WorldMapData.get_routes_from(_current_location_id):
-		var from_location := WorldMapData.get_location_by_id(route.from_location_id)
-		var to_location := WorldMapData.get_location_by_id(route.to_location_id)
-		if from_location == null or to_location == null:
-			continue
-		_map_canvas.add_child(_build_route_line(
-			from_location.map_position, to_location.map_position, _session.get_route_state(route)
-		))
-
-	for location in WorldMapData.get_locations():
-		_map_canvas.add_child(_build_location_point(location))
-
-func _build_route_line(
-	from_position: Vector2, to_position: Vector2, state: RouteConditions.State
-) -> Line2D:
-	var line := Line2D.new()
-	line.points = PackedVector2Array([from_position, to_position])
-	line.width = ROUTE_WIDTH
-	line.default_color = ROUTE_STATE_COLORS[int(state)]
-	return line
-
-## Şehir, parşömene mürekkeple yazılmış bir ad ve altında pirinç bir raptiye:
-## kutu yok. Düz bir düğme kutusu (ve kapalı yolun karalanmış sekmesi)
-## haritanın taramasının üstünde gri bir yama gibi duruyordu (ölçüldü).
-## Kilitli şehir yine gizlenmiyor: soluk mürekkep ve sebebi yazıda.
-func _build_location_point(location: Location) -> Control:
-	var marker := Control.new()
-	marker.position = location.map_position - (POINT_SIZE / 2.0)
-	marker.size = POINT_SIZE
-	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var pin := WaybookTheme.picture(PIN_FILE, PIN_SIZE)
-	pin.position = Vector2((POINT_SIZE.x - PIN_SIZE) * 0.5, (POINT_SIZE.y - PIN_SIZE) * 0.5)
-	pin.size = Vector2(PIN_SIZE, PIN_SIZE)
-	marker.add_child(pin)
-
-	var button := Button.new()
-	button.theme_type_variation = WaybookTheme.MAP_LABEL
-	button.position = Vector2(-LABEL_OVERHANG, POINT_SIZE.y * 0.5 + PIN_SIZE * 0.3)
-	# Ölçüldü: metinle taşınan yükseklik 27-38 px'e düşüyordu - dokunma/
-	# tıklama hedefi olarak dar. POINT_SIZE.y (44) zaten bu işaretin kendi
-	# tasarlanmış boyu, tabanı da ondan alıyor.
-	button.custom_minimum_size = Vector2(POINT_SIZE.x + LABEL_OVERHANG * 2.0, POINT_SIZE.y)
-	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	marker.add_child(button)
-
-	var is_current := location.location_id == _current_location_id
-	var route := WorldMapData.get_route(_current_location_id, location.location_id)
-
-	if is_current:
-		button.text = tr("UI_MAP_YOU_ARE_HERE") % location.location_name
-		button.disabled = true
-		# Buradasın: dolu raptiye, yazı da tam mürekkep (soluk değil).
-		button.add_theme_color_override("font_disabled_color", ArtPalette.BLOOD)
-
-		var ring := SafeZoneRing.new()
-		ring.ring_radius = safe_zone_ring_radius(_session.owned_wagon_count)
-		var ring_size := (ring.ring_radius + 6.0) * 2.0
-		ring.custom_minimum_size = Vector2(ring_size, ring_size)
-		ring.size = Vector2(ring_size, ring_size)
-		ring.position = POINT_SIZE * 0.5 - ring.size * 0.5
-		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		marker.add_child(ring)
-		marker.move_child(ring, 0)
-	elif route == null or not _session.is_route_open(route):
-		# Kapalı geçit tıklanamaz ama gizlenmez: kilitli olay seçenekleriyle
-		# aynı kural - sebebiyle birlikte gösterilir (bkz. CLAUDE.md).
-		button.text = location.location_name
-		if route != null:
-			button.text += "\n(%s)" % RouteConditions.get_state_label(RouteConditions.State.CLOSED)
-		button.disabled = true
-		pin.texture = WaybookTheme.texture(PIN_CLOSED_FILE)
-		pin.modulate = Color(1, 1, 1, 0.6)
-		button.mouse_entered.connect(_on_location_hovered.bind(location))
-	else:
-		button.text = location.location_name
-		button.mouse_entered.connect(_on_location_hovered.bind(location))
-		button.pressed.connect(_on_location_pressed.bind(location))
-
-	button.text += _city_event_suffix(location.location_id)
-	return marker
+	if _map_view == null:
+		return
+	_map_view.size = _map_panel.size
+	if not _map_view.has_meta("focused_once") and _map_panel.size.x > 10.0:
+		_map_view.set_meta("focused_once", true)
+		_map_view.focus_caravan(0.12)
 
 ## Faz 17: haritanın büyük, adlı olayları (bkz. WorldEvents) burada da
 ## görünür olmalı - "her hidden penalty bir bug'dır" kuralının aynısı
@@ -249,6 +141,8 @@ func _select_default_destination() -> void:
 	_show_hint()
 
 func _on_location_hovered(location: Location) -> void:
+	if location == null:
+		return
 	_focused_location = location
 	_refresh_info_panel()
 
@@ -256,11 +150,16 @@ func _on_location_hovered(location: Location) -> void:
 ## aynı yol), "Bu rotayı planla" düğmesi kararı tamamlıyor. Fareyle gezinme
 ## deneyimini dokunmatikte de tek tıkla eşitliyor.
 func _on_location_pressed(location: Location) -> void:
+	if location == null:
+		return
 	_focused_location = location
 	_refresh_info_panel()
 
 func _refresh_info_panel() -> void:
 	_clear_info_panel()
+	if _map_view != null:
+		_map_view.focused_location_id = _focused_location.location_id
+	_add_info_label(_settlement_line(_focused_location))
 
 	var route := WorldMapData.get_route(_current_location_id, _focused_location.location_id)
 	if route == null:
@@ -341,6 +240,11 @@ func _add_detour_hint() -> void:
 		String(TranslationServer.translate("ROUTE_DETOUR_AVAILABLE")), " » ".join(names)
 	])
 	_add_info_label(tr("UI_MAP_FIRST_STOP") % names[1])
+
+## Yerin türü ve bölgesi; burada yapılabilecekler (kasabada lonca yok...).
+func _settlement_line(location: Location) -> String:
+	var type_key := {"city": "UI_SETTLEMENT_CITY", "town": "UI_SETTLEMENT_TOWN", "caravanserai": "UI_SETTLEMENT_CARAVANSERAI"}
+	return "%s · %s" % [location.location_name, tr(String(type_key.get(location.settlement_type, "UI_SETTLEMENT_CITY")))]
 
 func _danger_band(danger: float) -> String:
 	if danger < 0.3:

@@ -3,7 +3,6 @@
 # depodakiyle bayt bayt karşılaştırılan dosyalar (docs/*/rig_spec.json gibi)
 # CRLF'ye dönüşüp testleri kırıyordu; bu satır o ayarı yoldan bazında ezer.
 * text=auto eol=lf
-
 # Metin dosyaları
 *.gd text eol=lf
 *.gdshader text eol=lf
@@ -20,7 +19,6 @@
 *.sh text eol=lf
 *.txt text eol=lf
 *.gltf text eol=lf
-
 # İkili dosyalar: dönüştürülmesin, farkı gösterilmesin
 *.png binary
 *.jpg binary
@@ -35,7 +33,7 @@
 *.otf binary
 *.zip binary
 *.pck binary
-
-# Büyük ikili dosyaların Git LFS'e taşınması (6.1) geçmişin yeniden yazılmasını
-# gerektirir (`git lfs migrate`) ve kullanıcı onayına bağlı; onay gelene kadar
-# buraya `filter=lfs` satırı eklenmedi.
+# Git LFS: yalnızca yeni büyük dosyalar (dünya haritası karoları, 49 MB; kullanıcı
+# kararı 2026-10-18). Geçmişteki büyük dosyaları taşımak (`git lfs migrate`) geçmişi
+# yeniden yazar, yapılmadı (6.1).
+data/assets/map/tiles/**/*.jpg filter=lfs diff=lfs merge=lfs -text
