@@ -34,6 +34,8 @@ var pace_key: String = "UI_ROAD_PACE_STEADY"
 ## Görmezden gelinen dumanın yolun tehlikesine eklediği pay.
 var signal_danger_bonus: float = 0.0
 var signal_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Açık yol işaretleri (bkz. RoadSignals). Seferin parçası: kayıtta yazılır.
+var signals: RoadSignals = RoadSignals.new()
 var camping: bool = false
 var camp_ends_at_hours: float = 0.0
 ## Bacağın arazideki yeri. Arazi rotanın kendisi (çıkıştan hedefe, gün
@@ -120,6 +122,7 @@ func to_dict() -> Dictionary:
 		"signal_danger_bonus": signal_danger_bonus,
 		"signal_rng_state": str(signal_rng.state),
 		"signal_rng_seed": str(signal_rng.seed),
+		"signals": signals.to_dict(),
 		"camping": camping,
 		"camp_ends_at_hours": camp_ends_at_hours,
 		"heading": heading,
@@ -146,6 +149,7 @@ func load_from_dict(data: Dictionary, events: Array[GameEvent]) -> void:
 		signal_rng.seed = String(data["signal_rng_seed"]).to_int()
 	if data.has("signal_rng_state"):
 		signal_rng.state = String(data["signal_rng_state"]).to_int()
+	signals.from_dict(data.get("signals", {}) as Dictionary)
 	camping = bool(data.get("camping", false))
 	camp_ends_at_hours = float(data.get("camp_ends_at_hours", 0.0))
 	# Eski kayıtta yok: ileri yöndeki, rotanın başından başlayan bir bacak.

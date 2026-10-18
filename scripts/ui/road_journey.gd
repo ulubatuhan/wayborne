@@ -366,7 +366,9 @@ var _has_leader_target: bool = false
 var _attention_zone: String = RoadAttention.ZONE_FRONT
 ## Yolun sürekli konuşan katmanı (bkz. RoadSignals) - modal değil,
 ## kart açmıyor, zamanı durdurmuyor.
-var _signals: RoadSignals = RoadSignals.new()
+var _signals: RoadSignals:
+	get:
+		return _journey.signals
 var _signal_rng: RandomNumberGenerator:
 	get:
 		return _journey.signal_rng
@@ -1547,6 +1549,7 @@ func _restore_journey_snapshot() -> void:
 			_present_event(event)
 		else:
 			_spawn_encounter(kind)
+	_refresh_signal_icon()
 	_refresh_state()
 	var destination := WorldMapData.get_location_by_id(_session.journey_destination_id)
 	_add_log(tr("UI_ROAD_RESUMED") % [

@@ -150,6 +150,32 @@ func tick(
 func clear() -> void:
 	open_signals.clear()
 
+## Sefer ortası kaydı için (bkz. JourneyController.to_dict). Açık işaretlerin
+## tür ve yaşı yazılır; zar durumu işaretlerin değil seferin (signal_rng).
+func to_dict() -> Dictionary:
+	var entries: Array = []
+	for entry in open_signals:
+		entries.append({"kind": String(entry["kind"]), "age_hours": float(entry["age_hours"])})
+	return {"open": entries}
+
+## Eski kayıtta alan yok: boş liste. Bilinmeyen tür, eksi ya da sayı olmayan
+## yaş ve MAX_OPEN üstü girdiler atılır; bozuk bir kayıt işaret katmanını
+## bozmasın.
+func from_dict(data: Dictionary) -> void:
+	open_signals.clear()
+	for raw in data.get("open", []) as Array:
+		if not (raw is Dictionary):
+			continue
+		var kind := String((raw as Dictionary).get("kind", ""))
+		if not ALL_KINDS.has(kind) or get_open_kinds().has(kind):
+			continue
+		var age := float((raw as Dictionary).get("age_hours", 0.0))
+		if is_nan(age) or is_inf(age):
+			age = 0.0
+		if open_signals.size() >= MAX_OPEN:
+			break
+		open_signals.append({"kind": kind, "age_hours": maxf(0.0, age)})
+
 ## Türler eşit ağırlıkta: biri ötekinden sık çıksaydı oyuncu tek bir
 ## bölgede durmayı öğrenir ve dikkat kararı ölürdü.
 func _roll_kind(rng: RandomNumberGenerator) -> String:
