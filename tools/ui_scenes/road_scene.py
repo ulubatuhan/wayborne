@@ -75,6 +75,10 @@ BIOMES = {
     },
     "mountain": {
         "far": {"amp": 70.0, "base": 18.0, "freqs": [2, 3, 5, 9], "tint": [0.52, 0.53, 0.56], "snow": 0.7},
+        # Zirveler 512'lik karenin üstünü aşıyordu; yol ekranı gökyüzü
+        # şeridini kırpıp sahneyi yukarı alınca kesik görünür oldu. Kare
+        # uzuyor, zemin noktası alttan aynı pikselde kalıyor (anchor_px 61.4).
+        "frames": {"far": {"h": 768, "anchor_v": 61.44 / 768.0}},
         "ground_tex": "Ground106", "ground_tint": [0.62, 0.60, 0.56], "rock_tint": [0.55, 0.55, 0.57],
         "grass": [0.38, 0.40, 0.32],
         "trees": [("conifer", 0.8), ("dead", 0.2)], "tree_count": 14, "tree_h": (8.0, 13.0),
@@ -648,7 +652,7 @@ def main(argv):
     layout_path = os.path.join(out, "layout.json")
     layout = json.load(open(layout_path)) if os.path.exists(layout_path) else {}
     for name in layers:
-        spec = LAYERS[name]
+        spec = dict(LAYERS[name], **BIOMES[biome].get("frames", {}).get(name, {}))
         T.reset()
         rng = random.Random(zlib.crc32(("%s|%s" % (biome, name)).encode()))
         BUILDERS[name](BIOMES[biome], spec, rng)

@@ -787,6 +787,12 @@ the walking figures are the game's strongest asset) but to deepen it.
   - A clip not yet rendered for a garment someone wears falls back to the
     seated pose in the first half and standing in the second
     (`WalkFigure._draw_transition`) - never naked, never floating.
+  - **On the road the bench holds the real figure too.** The driver used to
+    be `ArtDraw.wagon()`'s flat silhouette (a disc and a quad) outside camp,
+    and the player read it as the old mannequin. `RoadCaravan._seat_driver`
+    keeps each driver figure visible on its bench in the first frame of
+    `climb_down` (hip on the seat, facing the wagon), so the silhouette is
+    never drawn while the caravan has its drivers.
 
 - **Camp walking has a ceiling, and the camp clock starts when everyone is at the fire (task 12.2c).** Gathering used to
   last 30-60 real seconds (the farthest figure's brisk speed bound everyone; party members were dealt to fires in turn

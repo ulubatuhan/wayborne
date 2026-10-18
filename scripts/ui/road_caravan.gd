@@ -895,6 +895,24 @@ func _campfire_position(index: int) -> Vector2:
 		_ground_y + CAMPFIRE_NEAR_OFFSET * _scale
 	)
 
+## Yolda arabacı koltuğunda oturan gerçek figür: inip binme klibinin
+## (`climb_down`) ilk karesi, kalça koltukta, yüzü vagonun yüzü. Eskiden
+## koltukta `ArtDraw.wagon()`'un düz bir silüeti (bir daire ve bir dörtgen)
+## duruyordu; kamp kurulunca yerine bu figür geçiyordu, yani yolda eski
+## manken görünüyordu (oyuncu bildirdi). Kamp toplanması sırasında figür
+## `_advance_gather`'ındır; burası onu yalnızca toplanma dışında tutar.
+func _seat_driver(index: int, delta: float) -> void:
+	var figure := _driver_figures[index]
+	if index >= _wagon_centres.size():
+		figure.visible = false
+		return
+	figure.visible = true
+	var seat := _driver_bench_position(index)
+	figure.position = Vector2(seat.x - figure.size.x * 0.5, _ground_y - figure.size.y)
+	figure.set_facing(1.0 if _wagon_turn(index).x >= 0.0 else -1.0)
+	figure.set_transition("climb_down", 0.0, seat.y - figure.position.y)
+	figure.advance(delta, 0.0)
+
 ## Arabacının normalde oturduğu koltuk - `ArtDraw.wagon_driver_seat()`'in
 ## aynısı, aynı yerde iki kez hesaplanmasın diye oradan okunuyor. Kamp
 ## kurulunca gerçek figür tam bu noktadan "kalkıp" ateşe yürüyor.
@@ -1074,6 +1092,10 @@ func _process(delta: float) -> void:
 			continue
 		if figure == _leader:
 			_advance_leader(delta)
+			continue
+		var driver_index := _driver_figures.find(figure)
+		if driver_index >= 0:
+			_seat_driver(driver_index, delta)
 			continue
 		# Her birim kendi yüzüne doğru yürüyor; dönmekte olan yerinde adım
 		# atıyor. Duran bir figürün yüzü `advance` değiştirmiyor, o yüzden

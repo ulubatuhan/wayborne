@@ -279,6 +279,10 @@ func _test_returning_is_interrupted_cleanly_by_a_new_camp(t) -> void:
 func _test_drivers_climb_down_before_walking(t) -> void:
 	var caravan := _build(1, 1)
 	var driver: WalkFigure = caravan.get_driver_figures()[0]
+	_walk_frames(caravan, 2)
+	var road_seat := caravan._driver_bench_position(0).y - driver.position.y
+	t.ok(driver.visible and driver.is_in_transition() and absf(driver._transition_hip - road_seat) < 0.5,
+		"yolda koltukta gerçek figür oturmalı (eski silüet değil)")
 	caravan.set_camping(true)
 	_walk_frames(caravan, 1)
 	t.ok(driver.is_in_transition(), "arabacı kamp kurulunca önce koltuktan inmeli")
@@ -301,7 +305,9 @@ func _test_drivers_climb_down_before_walking(t) -> void:
 	t.ok(absf(driver.position.x + driver.size.x * 0.5 - start_x) < 1.0,
 		"arabacı koltuğa çıkmadan önce vagonunun yanına dönmeli")
 	_walk_frames(caravan, _full_gather(caravan))
-	t.not_ok(driver.visible, "koltuğa çıkınca figür gizlenmeli, koltuğu silüet tutuyor")
+	var seat_back := caravan._driver_bench_position(0).y - driver.position.y
+	t.ok(driver.visible and driver.is_in_transition() and absf(driver._transition_hip - seat_back) < 0.5,
+		"koltuğa çıkınca figür koltukta oturur kalmalı")
 	t.ok(bench > 0.0, "vagon yerleşmedi")
 
 ## Atlı lider: at yerinde, binicisi iner ve ateşe yürür; dönüşte biner.

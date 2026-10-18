@@ -35,7 +35,12 @@ func _init() -> void:
 	# yolundan, adıyla anılmadan alınıyor (aynı gerekçe autoload
 	# kuralında da yazılı).
 	await _settle()
-	_start_journey()
+	# İsteğe bağlı üçüncü ve dördüncü argüman: çıkış ve varış (başka bir
+	# biyomu görmek için, ör. dağla başlayan belvanor ilsande).
+	if args.size() >= 4:
+		_start_journey(String(args[2]), String(args[3]))
+	else:
+		_start_journey()
 
 	var screen: Control = load("res://scenes/game/road_journey.tscn").instantiate()
 	root.add_child(screen)
@@ -116,7 +121,7 @@ func _init() -> void:
 
 	quit()
 
-func _start_journey() -> void:
+func _start_journey(origin: String = "rivecande", destination_id: String = WorldMapData.START_LOCATION_ID) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4242
 	var state := get_root().get_node_or_null("GameState")
@@ -124,13 +129,14 @@ func _start_journey() -> void:
 	var player := CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new())
 	session.start_playthrough(player, rng)
 	session.owned_wagon_count = 2
-	session.current_location_id = "rivecande"
+	session.current_location_id = origin
 	session.add_to_cargo(ItemCatalog.get_item("fish"), 12)
 	session.add_to_cargo(ItemCatalog.get_item("test_furs"), 4)
 
-	var destination := WorldMapData.get_location_by_id(WorldMapData.START_LOCATION_ID)
-	var plan := CaravanPlan.new(destination, 17)
-	session.start_journey(WorldMapData.START_LOCATION_ID, 17, 0.38, plan)
+	var destination := WorldMapData.get_location_by_id(destination_id)
+	var days := WorldMapData.get_route(origin, destination_id).travel_days
+	var plan := CaravanPlan.new(destination, days)
+	session.start_journey(destination_id, days, 0.38, plan)
 
 func _settle() -> void:
 	for _frame in 8:

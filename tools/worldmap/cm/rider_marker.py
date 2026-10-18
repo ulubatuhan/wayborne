@@ -209,13 +209,17 @@ def render(V, F, K, heading_deg):
     # tırnak (yer) noktası: atın en alt noktalarının ortası
     lw = LANTERN @ R.T
     lp = (np.array([lw[0], -(lw @ up)]) - c) / span * RES + RES / 2
+    # Dört toynağın ekrandaki kutusu: eğik bakışta arka toynaklar öndekilerden
+    # yukarıda görünür. Gölge ve bağlantı noktası bu kutunun ortasında; ilk
+    # sürüm en alttaki (en yakın) toynağı aldı, arka ayaklar havada kaldı.
     feet = P[np.asarray(W[:, 1] < W[:, 1].min() + 0.08)]
-    anchor = (float(feet[:, 0].mean()), float(feet[:, 1].max()))
-    return zb, nrm, kid, fid, (anchor, (float(lp[0]), float(lp[1])), float(lw @ toward))
+    box = (float(feet[:, 0].min()), float(feet[:, 1].min()), float(feet[:, 0].max()), float(feet[:, 1].max()))
+    anchor = ((box[0] + box[2]) / 2.0, (box[1] + box[3]) / 2.0)
+    return zb, nrm, kid, fid, (anchor, (float(lp[0]), float(lp[1])), float(lw @ toward), box)
 
 
 def ink(zb, nrm, kid, fid, info):
-    anchor, lpos, ldepth = info
+    anchor, lpos, ldepth = info[:3]
     mask = kid >= 0
     light = np.array([-0.75, 0.75, -0.25])
     light /= np.linalg.norm(light)
@@ -264,7 +268,10 @@ def ink(zb, nrm, kid, fid, info):
     alpha[outg] = 0.85 * glow[outg]
     # yer gölgesi: tırnakların altında yassı elips
     ax, ay = anchor
-    ell = (((xx - ax) / (RES * 0.26)) ** 2 + ((yy - ay) / (RES * 0.05)) ** 2) < 1
+    box = info[3]
+    rx = max(RES * 0.06, (box[2] - box[0]) / 2.0 + RES * 0.05)
+    ry = max(RES * 0.025, (box[3] - box[1]) / 2.0 + RES * 0.02)
+    ell = (((xx - ax) / rx) ** 2 + ((yy - ay) / ry) ** 2) < 1
     sh = ell & ~(mask | outline)
     img[sh] = img[sh] * 0 + INK
     alpha[sh] = 0.22
