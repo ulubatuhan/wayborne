@@ -90,7 +90,7 @@ func has_status() -> bool:
 ## çarpan koymak, bir yeteneğin sayısını iki yerden okumak demekti
 ## (bkz. CaravanPlan.daily_consumption'ın aynı gerekçesi). Alan
 ## yeteneği tek hedefe vurandan zayıf olmalı, yoksa tek doğru seçim o
-## olur - `test_combat_dd.gd` bunu doğruluyor.
+## olur - `test_combat_core.gd` bunu doğruluyor.
 enum Area { SINGLE, ADJACENT, ALL, RANDOM }
 
 @export var area: Area = Area.SINGLE

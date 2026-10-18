@@ -91,7 +91,7 @@ const MAX_PROT: int = 80
 
 ## Süreli değiştiricilerin bükebileceği sayılar. Bir yetenek bunların dışında
 ## bir ad yazarsa değiştirici sessizce hiçbir şey yapmaz - bilinmeyen bir
-## durum türüyle aynı tuzak, o yüzden test_combat_dd katalogu bu listeye
+## durum türüyle aynı tuzak, o yüzden test_combat_core katalogu bu listeye
 ## karşı tarıyor. "prot" Kırıkçı'nın zırh kırmasının ve Sıra Neferi'nin
 ## siper almasının tek kapısı.
 const MODIFIER_STATS: Array[String] = ["accuracy", "dodge", "damage", "prot"]

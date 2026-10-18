@@ -78,7 +78,7 @@ static func get_skill(skill_id: String) -> CombatSkill:
 
 ## Bütün yetenekler. Test tarafı bunu okuyor: bir yeteneğin tanınmayan
 ## bir durum efekti yazması sessizce hiçbir şey yapar, o yüzden katalog
-## bir bütün olarak taranabilmeli (bkz. test_combat_dd.gd).
+## bir bütün olarak taranabilmeli (bkz. test_combat_core.gd).
 static func get_all_skills() -> Array[CombatSkill]:
 	_ensure_built()
 	return _skills

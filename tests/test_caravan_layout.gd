@@ -294,7 +294,7 @@ func _check(t, wagons: int, party: int) -> void:
 	# ("ölçek tabana dayanmadıysa") tam olarak korumak istediği şeyi
 	# kapatıyordu: çapayı eski sabitine geri çeken bir mutasyonda ölçek
 	# tabana iniyor, iddia da kendini kapatıp sessizce geçiyordu -
-	# `test_combat_dd.gd`'nin sersemletme iddiasında da yaşanan hata,
+	# `test_combat_core.gd`'nin sersemletme iddiasında da yaşanan hata,
 	# korunan sabitin kendisiyle ölçmek.
 	for index in mini(centres.size(), FULLY_VISIBLE_WAGONS):
 		t.ok(

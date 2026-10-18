@@ -11,7 +11,7 @@ extends RefCounted
 ## (bkz. CLAUDE.md'nin "sömürüyü doğrula, formülü değil" maddesi).
 
 func suite_name() -> String:
-	return "CombatDD"
+	return "CombatCore"
 
 func run(t) -> void:
 	_test_burn_and_chill(t)
