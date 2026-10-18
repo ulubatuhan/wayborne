@@ -38,6 +38,8 @@ DEFAULT_OUT = os.path.join(ROOT, "data", "config", "settlements.json")
 NORTH_SOUTH_DAYS = 61
 ## Komşu iki yer arası en az bu kadar gün: bir günlük yol "hemen biten" yol (kullanıcı).
 MIN_DAYS = 2
+## Başlangıç yerinin en az bir komşusu bu kadar gün içinde olmalı.
+START_MAX_FIRST_LEG = 10
 ## Kervan yolunun bir köşesi, bu kadar yakın bir yol düğümüne bağlanır (kervan
 ## yolu mevcut yolları izliyor; aynı kavşakta buluşuyorlar).
 ROUTE_SNAP_PX = 48.0
@@ -451,7 +453,12 @@ def main(argv):
             cx = sum(x for x, _ in pts) / len(pts)
             cy = sum(y for _, y in pts) / len(pts)
             inside = [h["id"] for h in sorted(homes, key=lambda h: math.dist(h["pos"], (cx, cy)))[:3]]
-        starts[culture] = sorted(inside)
+        # İlk sefer 15-38 günlük bir yol olmasın: yeni kervanın 250 altını ve
+        # erzağı ancak kısa bir ilk yola yeter (görev N8 ölçümü: Vorgat'ta
+        # başlayan kervan hiç kontrat teslim edemeden battı). Yakın komşusu
+        # olan aday varsa yalnızca onlar.
+        near = [i for i in inside if any(r["days"] <= START_MAX_FIRST_LEG and i in (r["a"], r["b"]) for r in routes)]
+        starts[culture] = sorted(near or inside)
 
     doc = {
         "_doc": "Oynanabilir yerleşimler ve aralarındaki yollar (tools/worldmap/build_settlements.py ile harita v3 GeoJSON'undan; elle düzenleme yok). Koordinat: harita görüntüsü pikseli (16012x16013).",

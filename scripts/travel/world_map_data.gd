@@ -38,6 +38,10 @@ const PRODUCED_GOOD_STOCK: int = 30
 ## süresi dolar. Büyük (2 vagonluk) kontratlar bir miktar itibar ister.
 const CONTRACT_DEADLINE_BUFFER_DAYS: int = 10
 const CONTRACT_REPUTATION_FOR_LARGE: int = 5
+## Kontratın günlük ücreti (bkz. _offers_for_direction).
+const CONTRACT_DAY_PAY_SMALL: int = 14
+const CONTRACT_DAY_PAY_LARGE: int = 24
+const CONTRACT_DAY_PAY_DONKEY: int = 9
 
 static var _built: bool = false
 static var _locations: Array[Location] = []
@@ -219,10 +223,13 @@ static func _offers_for_direction(
 	# eşeğe böler - vagon tekliflerinin uzunluğa göre büyüyen kârıyla aynı
 	# mantık, burada hayvan sayısında.
 	var donkeys := 1 if travel_days <= 4 else 2
+	# Günlük ücret, kontratın kervana kattığı ağzın erzağını (tüccar başına
+	# günde ~4 GG) karşılayıp üstüne kâr bırakır: yeni dünyada yollar uzun
+	# (2-38 gün, görev N8), günlük ücret düşük kalsaydı uzun yol zararına olurdu.
 	var profiles := [
-		{"wagons": 1, "donkeys": 0, "profit": 30 + travel_days * 8, "reputation": 0},
-		{"wagons": 2, "donkeys": 0, "profit": 70 + travel_days * 14, "reputation": CONTRACT_REPUTATION_FOR_LARGE},
-		{"wagons": 0, "donkeys": donkeys, "profit": 18 + travel_days * 5, "reputation": 0},
+		{"wagons": 1, "donkeys": 0, "profit": 30 + travel_days * CONTRACT_DAY_PAY_SMALL, "reputation": 0},
+		{"wagons": 2, "donkeys": 0, "profit": 70 + travel_days * CONTRACT_DAY_PAY_LARGE, "reputation": CONTRACT_REPUTATION_FOR_LARGE},
+		{"wagons": 0, "donkeys": donkeys, "profit": 18 + travel_days * CONTRACT_DAY_PAY_DONKEY, "reputation": 0},
 	]
 	for i in range(profiles.size()):
 		var profile: Dictionary = profiles[i]

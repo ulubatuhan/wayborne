@@ -35,7 +35,7 @@ Bağlı bileşen: 1
 | Vorgat | town | dag_maden | jewelry, fish | test_grain, test_cloth | orsolune, orvahel, serai_seyvan, zelmarin |
 | Zelmarin | city | guney | jewelry, spice | test_grain, wine, test_furs | orsolune, orvahel, serai_seyvan, vorgat |
 
-Başlangıç adayları (kültür → yer): nomad: kirsavel, selvicar, vastrevar; valley: belvanor, caramine, ilsande, liraven, merigaud, ondrelle; highland: brazdun, kesgrav, vorgat; port: mirsana, orsolune, zelmarin; fisher: brazdun, dravoss, kirsavel, mirsana, rivecande, samuran
+Başlangıç adayları (kültür → yer): nomad: kirsavel, selvicar, vastrevar; valley: belvanor, caramine, ilsande, liraven, merigaud, ondrelle; highland: brazdun, kesgrav; port: orsolune; fisher: brazdun, dravoss, kirsavel, mirsana, rivecande, samuran
 
 | Yol | Gün | Tehlike | Orman | Dağ | Kervan yolu | Duraklar |
 |---|---|---|---|---|---|---|
