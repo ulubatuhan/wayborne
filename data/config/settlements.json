@@ -1,0 +1,7511 @@
+{
+ "_doc": "Oynanabilir yerleşimler ve aralarındaki yollar (tools/worldmap/build_settlements.py ile harita v3 GeoJSON'undan; elle düzenleme yok). Koordinat: harita görüntüsü pikseli (16012x16013).",
+ "map_size": [
+  16012,
+  16013
+ ],
+ "scale": {
+  "north": "auderin",
+  "south": "orsolune",
+  "north_south_px": 19727.0,
+  "north_south_days": 61,
+  "days_per_1000px": 3.092
+ },
+ "settlements": [
+  {
+   "id": "akavan",
+   "type": "town",
+   "map_kind": "it_town",
+   "map_place_id": "place_36",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Akavan",
+    "en": "Akavan",
+    "zh_CN": "阿卡万"
+   },
+   "proper_name": "Akavan",
+   "pos": [
+    7165.6,
+    8743.4
+   ],
+   "neighbours": [
+    "serai_duvenmor",
+    "tolvarin"
+   ]
+  },
+  {
+   "id": "auderin",
+   "type": "town",
+   "map_kind": "it_town",
+   "map_place_id": "place_35",
+   "culture": "imparatorluk",
+   "region": "imparatorluk",
+   "name": {
+    "tr": "Auderin",
+    "en": "Auderin",
+    "zh_CN": "奥德林"
+   },
+   "proper_name": "Auderin",
+   "pos": [
+    6077.2,
+    2008.2
+   ],
+   "neighbours": [
+    "vastrevar"
+   ]
+  },
+  {
+   "id": "belvanor",
+   "type": "city",
+   "map_kind": "ic_freecity",
+   "map_place_id": "place_52",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Belvanor",
+    "en": "Belvanor",
+    "zh_CN": "贝尔瓦诺"
+   },
+   "proper_name": "Belvanor",
+   "pos": [
+    9876.0,
+    10447.8
+   ],
+   "neighbours": [
+    "ilsande",
+    "merigaud",
+    "mirsana"
+   ]
+  },
+  {
+   "id": "brazdun",
+   "type": "town",
+   "map_kind": "it_minetown",
+   "map_place_id": "place_22",
+   "culture": "dag",
+   "region": "dag",
+   "name": {
+    "tr": "Brazdun",
+    "en": "Brazdun",
+    "zh_CN": "布拉兹敦"
+   },
+   "proper_name": "Brazdun",
+   "pos": [
+    12075.2,
+    2944.6
+   ],
+   "neighbours": [
+    "kesgrav"
+   ]
+  },
+  {
+   "id": "caramine",
+   "type": "town",
+   "map_kind": "it_town",
+   "map_place_id": "place_37",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Caramine",
+    "en": "Caramine",
+    "zh_CN": "卡拉明"
+   },
+   "proper_name": "Caramine",
+   "pos": [
+    10338.0,
+    13137.8
+   ],
+   "neighbours": [
+    "ilsande",
+    "serai_seyvan"
+   ]
+  },
+  {
+   "id": "dravoss",
+   "type": "city",
+   "map_kind": "ic_city",
+   "map_place_id": "place_48",
+   "culture": "imparatorluk",
+   "region": "imparatorluk",
+   "name": {
+    "tr": "Dravoss",
+    "en": "Dravoss",
+    "zh_CN": "德拉沃斯"
+   },
+   "proper_name": "Dravoss",
+   "pos": [
+    6912.4,
+    5123.4
+   ],
+   "neighbours": [
+    "selvicar"
+   ]
+  },
+  {
+   "id": "ezmerak",
+   "type": "city",
+   "map_kind": "ic_city",
+   "map_place_id": "place_50",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Ezmerak",
+    "en": "Ezmerak",
+    "zh_CN": "埃兹梅拉克"
+   },
+   "proper_name": "Ezmerak",
+   "pos": [
+    11816.4,
+    7162.2
+   ],
+   "neighbours": [
+    "golcavar",
+    "ondrelle",
+    "orvahel"
+   ]
+  },
+  {
+   "id": "golcavar",
+   "type": "town",
+   "map_kind": "it_swamptown",
+   "map_place_id": "place_41",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Golcavar",
+    "en": "Golcavar",
+    "zh_CN": "戈尔贾瓦尔"
+   },
+   "proper_name": "Golcavar",
+   "pos": [
+    10882.4,
+    7193.0
+   ],
+   "neighbours": [
+    "ezmerak",
+    "rivecande"
+   ]
+  },
+  {
+   "id": "ilsande",
+   "type": "city",
+   "map_kind": "ic_freecity",
+   "map_place_id": "place_53",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Ilsande",
+    "en": "Ilsande",
+    "zh_CN": "伊尔桑德"
+   },
+   "proper_name": "Ilsande",
+   "pos": [
+    9414.0,
+    12819.4
+   ],
+   "neighbours": [
+    "belvanor",
+    "caramine",
+    "mirsana",
+    "serai_seyvan"
+   ]
+  },
+  {
+   "id": "kesgrav",
+   "type": "town",
+   "map_kind": "it_minetown",
+   "map_place_id": "place_23",
+   "culture": "dag",
+   "region": "dag",
+   "name": {
+    "tr": "Kesgrav",
+    "en": "Kesgrav",
+    "zh_CN": "凯斯格拉夫"
+   },
+   "proper_name": "Kesgrav",
+   "pos": [
+    12091.6,
+    3935.0
+   ],
+   "neighbours": [
+    "brazdun",
+    "rivecande"
+   ]
+  },
+  {
+   "id": "kirsavel",
+   "type": "town",
+   "map_kind": "it_town",
+   "map_place_id": "place_33",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Kirsavel",
+    "en": "Kirsavel",
+    "zh_CN": "基尔萨维尔"
+   },
+   "proper_name": "Kirsavel",
+   "pos": [
+    4321.6,
+    7953.0
+   ],
+   "neighbours": [
+    "samuran",
+    "serai_orbeyan",
+    "tolvarin"
+   ]
+  },
+  {
+   "id": "liraven",
+   "type": "town",
+   "map_kind": "it_swamptown",
+   "map_place_id": "place_39",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Liraven",
+    "en": "Liraven",
+    "zh_CN": "利拉文"
+   },
+   "proper_name": "Liraven",
+   "pos": [
+    7484.0,
+    10499.0
+   ],
+   "neighbours": [
+    "merigaud",
+    "mirsana",
+    "samuran"
+   ]
+  },
+  {
+   "id": "merigaud",
+   "type": "city",
+   "map_kind": "ic_city",
+   "map_place_id": "place_51",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Merigaud",
+    "en": "Merigaud",
+    "zh_CN": "梅里戈"
+   },
+   "proper_name": "Merigaud",
+   "pos": [
+    8598.0,
+    9794.6
+   ],
+   "neighbours": [
+    "belvanor",
+    "liraven",
+    "serai_duvenmor"
+   ]
+  },
+  {
+   "id": "mirsana",
+   "type": "town",
+   "map_kind": "it_markettown",
+   "map_place_id": "place_42",
+   "culture": "guney",
+   "region": "guney",
+   "name": {
+    "tr": "Mirsana",
+    "en": "Mirsana",
+    "zh_CN": "米尔萨娜"
+   },
+   "proper_name": "Mirsana",
+   "pos": [
+    6467.2,
+    13332.6
+   ],
+   "neighbours": [
+    "belvanor",
+    "ilsande",
+    "liraven",
+    "samuran"
+   ]
+  },
+  {
+   "id": "ondrelle",
+   "type": "city",
+   "map_kind": "ic_freecity",
+   "map_place_id": "place_58",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Ondrelle",
+    "en": "Ondrelle",
+    "zh_CN": "翁德蕾尔"
+   },
+   "proper_name": "Ondrelle",
+   "pos": [
+    9340.8,
+    8537.0
+   ],
+   "neighbours": [
+    "ezmerak",
+    "orvahel",
+    "serai_duvenmor"
+   ]
+  },
+  {
+   "id": "orsolune",
+   "type": "city",
+   "map_kind": "ic_portcity",
+   "map_place_id": "place_54",
+   "culture": "guney",
+   "region": "guney",
+   "name": {
+    "tr": "Orsolune",
+    "en": "Orsolune",
+    "zh_CN": "奥尔索伦"
+   },
+   "proper_name": "Orsolune",
+   "pos": [
+    8182.0,
+    14872.6
+   ],
+   "neighbours": [
+    "orvahel",
+    "serai_seyvan",
+    "vorgat",
+    "zelmarin"
+   ]
+  },
+  {
+   "id": "orvahel",
+   "type": "city",
+   "map_kind": "ic_freecity",
+   "map_place_id": "place_59",
+   "culture": "ahit",
+   "region": "ahit",
+   "name": {
+    "tr": "Orvahel",
+    "en": "Orvahel",
+    "zh_CN": "奥尔瓦赫尔"
+   },
+   "proper_name": "Orvahel",
+   "pos": [
+    12358.8,
+    8874.2
+   ],
+   "neighbours": [
+    "ezmerak",
+    "ondrelle",
+    "orsolune",
+    "serai_seyvan",
+    "vorgat",
+    "zelmarin"
+   ]
+  },
+  {
+   "id": "rivecande",
+   "type": "city",
+   "map_kind": "ic_portcity",
+   "map_place_id": "place_46",
+   "culture": "imparatorluk",
+   "region": "imparatorluk",
+   "name": {
+    "tr": "Rivecande",
+    "en": "Rivecande",
+    "zh_CN": "里维坎德"
+   },
+   "proper_name": "Rivecande",
+   "pos": [
+    9901.6,
+    5794.6
+   ],
+   "neighbours": [
+    "golcavar",
+    "kesgrav",
+    "vastrevar"
+   ]
+  },
+  {
+   "id": "samuran",
+   "type": "town",
+   "map_kind": "it_swamptown",
+   "map_place_id": "place_40",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Samuran",
+    "en": "Samuran",
+    "zh_CN": "萨穆兰"
+   },
+   "proper_name": "Samuran",
+   "pos": [
+    5974.4,
+    10447.8
+   ],
+   "neighbours": [
+    "kirsavel",
+    "liraven",
+    "mirsana"
+   ]
+  },
+  {
+   "id": "selvicar",
+   "type": "town",
+   "map_kind": "it_town",
+   "map_place_id": "place_34",
+   "culture": "imparatorluk",
+   "region": "imparatorluk",
+   "name": {
+    "tr": "Selvicar",
+    "en": "Selvicar",
+    "zh_CN": "塞尔维卡"
+   },
+   "proper_name": "Selvicar",
+   "pos": [
+    5872.0,
+    4349.0
+   ],
+   "neighbours": [
+    "dravoss",
+    "serai_orbeyan",
+    "vastrevar"
+   ]
+  },
+  {
+   "id": "serai_duvenmor",
+   "type": "caravanserai",
+   "map_kind": "ik_caravanserai",
+   "map_place_id": "serai_duvenmor",
+   "culture": "vadi",
+   "region": "vadi",
+   "name": {
+    "tr": "Duvenmor Kervansarayı",
+    "en": "Duvenmor Caravanserai",
+    "zh_CN": "Duvenmor Caravanserai"
+   },
+   "proper_name": "Duvenmor",
+   "pos": [
+    8985.6,
+    9118.6
+   ],
+   "neighbours": [
+    "akavan",
+    "merigaud",
+    "ondrelle"
+   ]
+  },
+  {
+   "id": "serai_orbeyan",
+   "type": "caravanserai",
+   "map_kind": "ik_caravanserai",
+   "map_place_id": "serai_orbeyan",
+   "culture": "gocebe",
+   "region": "gocebe",
+   "name": {
+    "tr": "Orbeyan Kervansarayı",
+    "en": "Orbeyan Caravanserai",
+    "zh_CN": "Orbeyan Caravanserai"
+   },
+   "proper_name": "Orbeyan",
+   "pos": [
+    4553.7,
+    6366.7
+   ],
+   "neighbours": [
+    "kirsavel",
+    "selvicar",
+    "tolvarin"
+   ]
+  },
+  {
+   "id": "serai_seyvan",
+   "type": "caravanserai",
+   "map_kind": "ik_caravanserai",
+   "map_place_id": "serai_seyvan",
+   "culture": "guney",
+   "region": "guney",
+   "name": {
+    "tr": "Seyvan Kervansarayı",
+    "en": "Seyvan Caravanserai",
+    "zh_CN": "Seyvan Caravanserai"
+   },
+   "proper_name": "Seyvan",
+   "pos": [
+    9569.6,
+    14247.4
+   ],
+   "neighbours": [
+    "caramine",
+    "ilsande",
+    "orsolune",
+    "orvahel",
+    "vorgat",
+    "zelmarin"
+   ]
+  },
+  {
+   "id": "tolvarin",
+   "type": "city",
+   "map_kind": "ic_city",
+   "map_place_id": "place_49",
+   "culture": "sinir",
+   "region": "sinir",
+   "name": {
+    "tr": "Tolvarin",
+    "en": "Tolvarin",
+    "zh_CN": "托尔瓦林"
+   },
+   "proper_name": "Tolvarin",
+   "pos": [
+    5235.2,
+    8291.8
+   ],
+   "neighbours": [
+    "akavan",
+    "kirsavel",
+    "serai_orbeyan"
+   ]
+  },
+  {
+   "id": "vastrevar",
+   "type": "city",
+   "map_kind": "ic_city",
+   "map_place_id": "place_47",
+   "culture": "imparatorluk",
+   "region": "imparatorluk",
+   "name": {
+    "tr": "Vastrevar",
+    "en": "Vastrevar",
+    "zh_CN": "瓦斯特雷瓦"
+   },
+   "proper_name": "Vastrevar",
+   "pos": [
+    6433.2,
+    3556.2
+   ],
+   "neighbours": [
+    "auderin",
+    "rivecande",
+    "selvicar"
+   ]
+  },
+  {
+   "id": "vorgat",
+   "type": "town",
+   "map_kind": "it_rivertown",
+   "map_place_id": "place_38",
+   "culture": "dag_maden",
+   "region": "dag_maden",
+   "name": {
+    "tr": "Vorgat",
+    "en": "Vorgat",
+    "zh_CN": "沃尔加特"
+   },
+   "proper_name": "Vorgat",
+   "pos": [
+    14342.4,
+    9102.6
+   ],
+   "neighbours": [
+    "orsolune",
+    "orvahel",
+    "serai_seyvan",
+    "zelmarin"
+   ]
+  },
+  {
+   "id": "zelmarin",
+   "type": "city",
+   "map_kind": "ic_portcity",
+   "map_place_id": "place_45",
+   "culture": "guney",
+   "region": "guney",
+   "name": {
+    "tr": "Zelmarin",
+    "en": "Zelmarin",
+    "zh_CN": "泽尔马林"
+   },
+   "proper_name": "Zelmarin",
+   "pos": [
+    13674.8,
+    13343.0
+   ],
+   "neighbours": [
+    "orsolune",
+    "orvahel",
+    "serai_seyvan",
+    "vorgat"
+   ]
+  }
+ ],
+ "routes": [
+  {
+   "a": "akavan",
+   "b": "serai_duvenmor",
+   "length_px": 1713.9,
+   "days": 5,
+   "danger": 0.12,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     7422,
+     8606
+    ],
+    [
+     7486,
+     8590
+    ],
+    [
+     7550,
+     8568
+    ],
+    [
+     7614,
+     8552
+    ],
+    [
+     7678,
+     8536
+    ],
+    [
+     7742,
+     8520
+    ],
+    [
+     7806,
+     8510
+    ],
+    [
+     7870,
+     8499
+    ],
+    [
+     7934,
+     8488
+    ],
+    [
+     7998,
+     8483
+    ],
+    [
+     8062,
+     8483
+    ],
+    [
+     8126,
+     8456
+    ],
+    [
+     8190,
+     8409
+    ],
+    [
+     8238,
+     8420
+    ],
+    [
+     8286,
+     8483
+    ],
+    [
+     8344,
+     8547
+    ],
+    [
+     8398,
+     8611
+    ],
+    [
+     8462,
+     8675
+    ],
+    [
+     8526,
+     8739
+    ],
+    [
+     8590,
+     8803
+    ],
+    [
+     8654,
+     8865
+    ],
+    [
+     8716,
+     8915
+    ],
+    [
+     8766,
+     8979
+    ],
+    [
+     8830,
+     9043
+    ]
+   ]
+  },
+  {
+   "a": "akavan",
+   "b": "tolvarin",
+   "length_px": 1373.9,
+   "days": 4,
+   "danger": 0.25,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     6910,
+     8723
+    ],
+    [
+     6846,
+     8712
+    ],
+    [
+     6782,
+     8705
+    ],
+    [
+     6718,
+     8691
+    ],
+    [
+     6654,
+     8680
+    ],
+    [
+     6590,
+     8653
+    ],
+    [
+     6526,
+     8595
+    ],
+    [
+     6462,
+     8531
+    ],
+    [
+     6398,
+     8473
+    ],
+    [
+     6334,
+     8451
+    ],
+    [
+     6270,
+     8451
+    ],
+    [
+     6206,
+     8451
+    ],
+    [
+     6142,
+     8451
+    ],
+    [
+     6078,
+     8451
+    ],
+    [
+     6014,
+     8451
+    ],
+    [
+     5950,
+     8451
+    ],
+    [
+     5886,
+     8451
+    ],
+    [
+     5822,
+     8451
+    ],
+    [
+     5758,
+     8437
+    ],
+    [
+     5694,
+     8428
+    ],
+    [
+     5630,
+     8396
+    ]
+   ]
+  },
+  {
+   "a": "auderin",
+   "b": "vastrevar",
+   "length_px": 1664.9,
+   "days": 5,
+   "danger": 0.24,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     6074,
+     2013
+    ],
+    [
+     6056,
+     2365
+    ],
+    [
+     6038,
+     2487
+    ],
+    [
+     6022,
+     2535
+    ],
+    [
+     6020,
+     2753
+    ],
+    [
+     6020,
+     2933
+    ],
+    [
+     6030,
+     3017
+    ],
+    [
+     6054,
+     3071
+    ],
+    [
+     6112,
+     3135
+    ],
+    [
+     6134,
+     3195
+    ],
+    [
+     6160,
+     3257
+    ],
+    [
+     6206,
+     3307
+    ],
+    [
+     6218,
+     3369
+    ],
+    [
+     6324,
+     3477
+    ],
+    [
+     6398,
+     3537
+    ]
+   ]
+  },
+  {
+   "a": "belvanor",
+   "b": "ilsande",
+   "length_px": 1960.8,
+   "days": 6,
+   "danger": 0.12,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     9886,
+     10835
+    ],
+    [
+     9886,
+     10899
+    ],
+    [
+     9888,
+     10963
+    ],
+    [
+     9902,
+     11027
+    ],
+    [
+     9902,
+     11091
+    ],
+    [
+     9904,
+     11155
+    ],
+    [
+     9936,
+     11219
+    ],
+    [
+     9992,
+     11283
+    ],
+    [
+     10044,
+     11347
+    ],
+    [
+     10072,
+     11411
+    ],
+    [
+     10084,
+     11475
+    ],
+    [
+     10094,
+     11539
+    ],
+    [
+     10094,
+     11603
+    ],
+    [
+     10094,
+     11667
+    ],
+    [
+     10094,
+     11731
+    ],
+    [
+     10108,
+     11795
+    ],
+    [
+     10108,
+     11859
+    ],
+    [
+     10080,
+     11923
+    ],
+    [
+     10064,
+     11987
+    ],
+    [
+     10062,
+     12051
+    ],
+    [
+     10048,
+     12115
+    ],
+    [
+     10035,
+     12179
+    ],
+    [
+     10016,
+     12243
+    ],
+    [
+     10006,
+     12307
+    ],
+    [
+     9956,
+     12371
+    ],
+    [
+     9902,
+     12435
+    ],
+    [
+     9848,
+     12499
+    ],
+    [
+     9790,
+     12563
+    ],
+    [
+     9726,
+     12613
+    ]
+   ]
+  },
+  {
+   "a": "brazdun",
+   "b": "kesgrav",
+   "length_px": 752.2,
+   "days": 2,
+   "danger": 0.48,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     12086,
+     3037
+    ],
+    [
+     12058,
+     3297
+    ],
+    [
+     12042,
+     3375
+    ],
+    [
+     12012,
+     3443
+    ],
+    [
+     12004,
+     3505
+    ],
+    [
+     11990,
+     3561
+    ],
+    [
+     11990,
+     3677
+    ],
+    [
+     12000,
+     3777
+    ]
+   ]
+  },
+  {
+   "a": "caramine",
+   "b": "ilsande",
+   "length_px": 889.8,
+   "days": 3,
+   "danger": 0.25,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     10332,
+     13137
+    ],
+    [
+     10010,
+     13143
+    ],
+    [
+     9940,
+     13097
+    ],
+    [
+     9862,
+     13049
+    ],
+    [
+     9722,
+     13023
+    ],
+    [
+     9544,
+     12857
+    ]
+   ]
+  },
+  {
+   "a": "caramine",
+   "b": "serai_seyvan",
+   "length_px": 1558.6,
+   "days": 5,
+   "danger": 0.37,
+   "forest_share": 0.0,
+   "mountain_share": 0.45,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     10332,
+     13137
+    ],
+    [
+     10010,
+     13143
+    ],
+    [
+     9960,
+     13205
+    ],
+    [
+     9714,
+     13447
+    ],
+    [
+     9690,
+     13501
+    ],
+    [
+     9676,
+     13559
+    ],
+    [
+     9670,
+     13747
+    ],
+    [
+     9656,
+     13897
+    ],
+    [
+     9638,
+     14025
+    ],
+    [
+     9578,
+     14165
+    ],
+    [
+     9542,
+     14227
+    ]
+   ]
+  },
+  {
+   "a": "ezmerak",
+   "b": "ondrelle",
+   "length_px": 3161.8,
+   "days": 10,
+   "danger": 0.28,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     11820,
+     7263
+    ],
+    [
+     11820,
+     7371
+    ],
+    [
+     11810,
+     7437
+    ],
+    [
+     11594,
+     7675
+    ],
+    [
+     11392,
+     7885
+    ],
+    [
+     11372,
+     7937
+    ],
+    [
+     11358,
+     8063
+    ],
+    [
+     11356,
+     8149
+    ],
+    [
+     11272,
+     8203
+    ],
+    [
+     11048,
+     8223
+    ],
+    [
+     10966,
+     8255
+    ],
+    [
+     10862,
+     8267
+    ],
+    [
+     10778,
+     8339
+    ],
+    [
+     10684,
+     8387
+    ],
+    [
+     10608,
+     8401
+    ],
+    [
+     10458,
+     8419
+    ],
+    [
+     10388,
+     8439
+    ],
+    [
+     10340,
+     8465
+    ],
+    [
+     10284,
+     8477
+    ],
+    [
+     10210,
+     8487
+    ],
+    [
+     10018,
+     8499
+    ],
+    [
+     9870,
+     8499
+    ],
+    [
+     9594,
+     8485
+    ],
+    [
+     9424,
+     8485
+    ],
+    [
+     9362,
+     8497
+    ],
+    [
+     9342,
+     8515
+    ]
+   ]
+  },
+  {
+   "a": "ezmerak",
+   "b": "orvahel",
+   "length_px": 2439.0,
+   "days": 8,
+   "danger": 0.33,
+   "forest_share": 0.0,
+   "mountain_share": 0.09,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     11820,
+     7263
+    ],
+    [
+     11820,
+     7371
+    ],
+    [
+     11810,
+     7437
+    ],
+    [
+     11594,
+     7675
+    ],
+    [
+     11392,
+     7885
+    ],
+    [
+     11372,
+     7937
+    ],
+    [
+     11358,
+     8063
+    ],
+    [
+     11356,
+     8149
+    ],
+    [
+     11358,
+     8193
+    ],
+    [
+     11538,
+     8369
+    ],
+    [
+     11584,
+     8411
+    ],
+    [
+     11612,
+     8455
+    ],
+    [
+     11640,
+     8541
+    ],
+    [
+     11650,
+     8617
+    ],
+    [
+     11712,
+     8693
+    ],
+    [
+     11794,
+     8707
+    ],
+    [
+     11866,
+     8701
+    ],
+    [
+     11998,
+     8681
+    ],
+    [
+     12096,
+     8693
+    ],
+    [
+     12162,
+     8765
+    ],
+    [
+     12252,
+     8791
+    ],
+    [
+     12342,
+     8867
+    ]
+   ]
+  },
+  {
+   "a": "golcavar",
+   "b": "ezmerak",
+   "length_px": 763.7,
+   "days": 2,
+   "danger": 0.38,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     10936,
+     7147
+    ],
+    [
+     10976,
+     7185
+    ],
+    [
+     11388,
+     7209
+    ],
+    [
+     11616,
+     7211
+    ],
+    [
+     11682,
+     7217
+    ]
+   ]
+  },
+  {
+   "a": "golcavar",
+   "b": "rivecande",
+   "length_px": 2431.7,
+   "days": 8,
+   "danger": 0.27,
+   "forest_share": 0.0,
+   "mountain_share": 0.14,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     10882,
+     7093
+    ],
+    [
+     10848,
+     7059
+    ],
+    [
+     10730,
+     7005
+    ],
+    [
+     10692,
+     6969
+    ],
+    [
+     10644,
+     6955
+    ],
+    [
+     10544,
+     6947
+    ],
+    [
+     10488,
+     6937
+    ],
+    [
+     10416,
+     6913
+    ],
+    [
+     10314,
+     6813
+    ],
+    [
+     10256,
+     6783
+    ],
+    [
+     10122,
+     6763
+    ],
+    [
+     10020,
+     6763
+    ],
+    [
+     9856,
+     6759
+    ],
+    [
+     9770,
+     6723
+    ],
+    [
+     9622,
+     6571
+    ],
+    [
+     9456,
+     6549
+    ],
+    [
+     9406,
+     6537
+    ],
+    [
+     9354,
+     6477
+    ],
+    [
+     9348,
+     6415
+    ],
+    [
+     9304,
+     6355
+    ],
+    [
+     9282,
+     6313
+    ],
+    [
+     9244,
+     6277
+    ],
+    [
+     9238,
+     6231
+    ],
+    [
+     9270,
+     6193
+    ],
+    [
+     9338,
+     6165
+    ],
+    [
+     9440,
+     6139
+    ],
+    [
+     9472,
+     6097
+    ],
+    [
+     9532,
+     6065
+    ],
+    [
+     9604,
+     6055
+    ]
+   ]
+  },
+  {
+   "a": "ilsande",
+   "b": "serai_seyvan",
+   "length_px": 1310.4,
+   "days": 4,
+   "danger": 0.23,
+   "forest_share": 0.0,
+   "mountain_share": 0.42,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     9774,
+     13011
+    ],
+    [
+     9838,
+     13022
+    ],
+    [
+     9902,
+     13054
+    ],
+    [
+     9966,
+     13107
+    ],
+    [
+     9966,
+     13171
+    ],
+    [
+     9902,
+     13235
+    ],
+    [
+     9838,
+     13299
+    ],
+    [
+     9774,
+     13363
+    ],
+    [
+     9710,
+     13427
+    ],
+    [
+     9654,
+     13491
+    ],
+    [
+     9646,
+     13555
+    ],
+    [
+     9646,
+     13619
+    ],
+    [
+     9646,
+     13683
+    ],
+    [
+     9646,
+     13747
+    ],
+    [
+     9646,
+     13811
+    ],
+    [
+     9646,
+     13875
+    ],
+    [
+     9646,
+     13939
+    ],
+    [
+     9640,
+     14003
+    ],
+    [
+     9620,
+     14067
+    ]
+   ]
+  },
+  {
+   "a": "kesgrav",
+   "b": "rivecande",
+   "length_px": 3446.3,
+   "days": 11,
+   "danger": 0.43,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     11986,
+     3791
+    ],
+    [
+     11860,
+     3761
+    ],
+    [
+     11708,
+     3737
+    ],
+    [
+     11470,
+     3721
+    ],
+    [
+     11418,
+     3725
+    ],
+    [
+     11416,
+     4235
+    ],
+    [
+     11406,
+     4423
+    ],
+    [
+     11386,
+     4605
+    ],
+    [
+     11344,
+     4871
+    ],
+    [
+     11328,
+     4919
+    ],
+    [
+     11180,
+     5071
+    ],
+    [
+     11018,
+     5251
+    ],
+    [
+     10920,
+     5281
+    ],
+    [
+     10818,
+     5299
+    ],
+    [
+     10686,
+     5317
+    ],
+    [
+     10420,
+     5343
+    ],
+    [
+     10358,
+     5355
+    ],
+    [
+     10254,
+     5437
+    ],
+    [
+     10082,
+     5613
+    ],
+    [
+     9974,
+     5737
+    ]
+   ]
+  },
+  {
+   "a": "kirsavel",
+   "b": "samuran",
+   "length_px": 6452.0,
+   "days": 20,
+   "danger": 0.43,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [
+    "Kumbag Mill",
+    "Field of the Split Banner"
+   ],
+   "path": [
+    [
+     4366,
+     7857
+    ],
+    [
+     4158,
+     7841
+    ],
+    [
+     3516,
+     7855
+    ],
+    [
+     3460,
+     7861
+    ],
+    [
+     3284,
+     7859
+    ],
+    [
+     3096,
+     7855
+    ],
+    [
+     3008,
+     7861
+    ],
+    [
+     2962,
+     7883
+    ],
+    [
+     2784,
+     8049
+    ],
+    [
+     2738,
+     8101
+    ],
+    [
+     2726,
+     8311
+    ],
+    [
+     2736,
+     8419
+    ],
+    [
+     2750,
+     8471
+    ],
+    [
+     2984,
+     8677
+    ],
+    [
+     3144,
+     8839
+    ],
+    [
+     3304,
+     9023
+    ],
+    [
+     3324,
+     9081
+    ],
+    [
+     3360,
+     9121
+    ],
+    [
+     3378,
+     9197
+    ],
+    [
+     3402,
+     9265
+    ],
+    [
+     3450,
+     9377
+    ],
+    [
+     3476,
+     9517
+    ],
+    [
+     3478,
+     9579
+    ],
+    [
+     3520,
+     9681
+    ],
+    [
+     3528,
+     9753
+    ],
+    [
+     3554,
+     9801
+    ],
+    [
+     3622,
+     9857
+    ],
+    [
+     3662,
+     9915
+    ],
+    [
+     3698,
+     9947
+    ],
+    [
+     4102,
+     9991
+    ],
+    [
+     4604,
+     9995
+    ],
+    [
+     4702,
+     10001
+    ],
+    [
+     4698,
+     10067
+    ],
+    [
+     4908,
+     10331
+    ],
+    [
+     5026,
+     10449
+    ],
+    [
+     5144,
+     10469
+    ],
+    [
+     5252,
+     10469
+    ],
+    [
+     5322,
+     10481
+    ],
+    [
+     5496,
+     10653
+    ],
+    [
+     5576,
+     10685
+    ],
+    [
+     5682,
+     10721
+    ],
+    [
+     5794,
+     10735
+    ],
+    [
+     5878,
+     10723
+    ]
+   ]
+  },
+  {
+   "a": "kirsavel",
+   "b": "serai_orbeyan",
+   "length_px": 2101.5,
+   "days": 6,
+   "danger": 0.27,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.83,
+   "via": [],
+   "path": [
+    [
+     4372,
+     7863
+    ],
+    [
+     4730,
+     7869
+    ],
+    [
+     4784,
+     7795
+    ],
+    [
+     4844,
+     7731
+    ],
+    [
+     4872,
+     7667
+    ],
+    [
+     4889,
+     7603
+    ],
+    [
+     4908,
+     7539
+    ],
+    [
+     4924,
+     7475
+    ],
+    [
+     4936,
+     7411
+    ],
+    [
+     4948,
+     7347
+    ],
+    [
+     4958,
+     7283
+    ],
+    [
+     4972,
+     7219
+    ],
+    [
+     4976,
+     7155
+    ],
+    [
+     4990,
+     7091
+    ],
+    [
+     4990,
+     7027
+    ],
+    [
+     5008,
+     6963
+    ],
+    [
+     5056,
+     6899
+    ],
+    [
+     5089,
+     6835
+    ],
+    [
+     5054,
+     6784
+    ],
+    [
+     4990,
+     6771
+    ],
+    [
+     4926,
+     6766
+    ],
+    [
+     4862,
+     6737
+    ],
+    [
+     4798,
+     6689
+    ],
+    [
+     4734,
+     6627
+    ],
+    [
+     4670,
+     6563
+    ],
+    [
+     4606,
+     6499
+    ]
+   ]
+  },
+  {
+   "a": "kirsavel",
+   "b": "tolvarin",
+   "length_px": 635.5,
+   "days": 2,
+   "danger": 0.32,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.44,
+   "via": [],
+   "path": [
+    [
+     4372,
+     7863
+    ],
+    [
+     4730,
+     7869
+    ],
+    [
+     4798,
+     7923
+    ],
+    [
+     4862,
+     7987
+    ],
+    [
+     4926,
+     8035
+    ]
+   ]
+  },
+  {
+   "a": "liraven",
+   "b": "merigaud",
+   "length_px": 913.9,
+   "days": 3,
+   "danger": 0.25,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     7504,
+     10491
+    ],
+    [
+     7644,
+     10355
+    ],
+    [
+     7744,
+     10237
+    ],
+    [
+     7826,
+     10203
+    ],
+    [
+     8044,
+     10161
+    ],
+    [
+     8160,
+     10059
+    ],
+    [
+     8220,
+     10039
+    ],
+    [
+     8242,
+     10013
+    ]
+   ]
+  },
+  {
+   "a": "liraven",
+   "b": "mirsana",
+   "length_px": 4880.0,
+   "days": 15,
+   "danger": 0.47,
+   "forest_share": 0.0,
+   "mountain_share": 0.23,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     7458,
+     10517
+    ],
+    [
+     7408,
+     10547
+    ],
+    [
+     7364,
+     10591
+    ],
+    [
+     7262,
+     10679
+    ],
+    [
+     7102,
+     10695
+    ],
+    [
+     6974,
+     10717
+    ],
+    [
+     6848,
+     10835
+    ],
+    [
+     6638,
+     10879
+    ],
+    [
+     6510,
+     10893
+    ],
+    [
+     6294,
+     10901
+    ],
+    [
+     6052,
+     10893
+    ],
+    [
+     6074,
+     11083
+    ],
+    [
+     6098,
+     11349
+    ],
+    [
+     6114,
+     11457
+    ],
+    [
+     6118,
+     11607
+    ],
+    [
+     6064,
+     11687
+    ],
+    [
+     6010,
+     11717
+    ],
+    [
+     5920,
+     11729
+    ],
+    [
+     5798,
+     11739
+    ],
+    [
+     5744,
+     11755
+    ],
+    [
+     5672,
+     11831
+    ],
+    [
+     5508,
+     11979
+    ],
+    [
+     5482,
+     12225
+    ],
+    [
+     5484,
+     12291
+    ],
+    [
+     5524,
+     12379
+    ],
+    [
+     5636,
+     12485
+    ],
+    [
+     5744,
+     12523
+    ],
+    [
+     5944,
+     12577
+    ],
+    [
+     5990,
+     12597
+    ],
+    [
+     6050,
+     12647
+    ],
+    [
+     6140,
+     12667
+    ],
+    [
+     6258,
+     12707
+    ],
+    [
+     6300,
+     12743
+    ],
+    [
+     6346,
+     12817
+    ],
+    [
+     6360,
+     12885
+    ],
+    [
+     6352,
+     12973
+    ],
+    [
+     6312,
+     13097
+    ],
+    [
+     6310,
+     13175
+    ],
+    [
+     6368,
+     13259
+    ],
+    [
+     6426,
+     13307
+    ]
+   ]
+  },
+  {
+   "a": "liraven",
+   "b": "samuran",
+   "length_px": 1765.5,
+   "days": 5,
+   "danger": 0.42,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     7458,
+     10517
+    ],
+    [
+     7408,
+     10547
+    ],
+    [
+     7364,
+     10591
+    ],
+    [
+     7262,
+     10679
+    ],
+    [
+     7102,
+     10695
+    ],
+    [
+     6974,
+     10717
+    ],
+    [
+     6848,
+     10835
+    ],
+    [
+     6638,
+     10879
+    ],
+    [
+     6510,
+     10893
+    ],
+    [
+     6294,
+     10901
+    ],
+    [
+     6052,
+     10893
+    ],
+    [
+     5956,
+     10789
+    ],
+    [
+     5910,
+     10743
+    ],
+    [
+     5880,
+     10723
+    ]
+   ]
+  },
+  {
+   "a": "merigaud",
+   "b": "belvanor",
+   "length_px": 775.2,
+   "days": 2,
+   "danger": 0.12,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     8894,
+     9984
+    ],
+    [
+     8958,
+     10035
+    ],
+    [
+     9022,
+     10099
+    ],
+    [
+     9086,
+     10163
+    ],
+    [
+     9150,
+     10227
+    ],
+    [
+     9204,
+     10291
+    ],
+    [
+     9262,
+     10342
+    ],
+    [
+     9326,
+     10357
+    ],
+    [
+     9390,
+     10371
+    ],
+    [
+     9454,
+     10376
+    ],
+    [
+     9518,
+     10387
+    ]
+   ]
+  },
+  {
+   "a": "merigaud",
+   "b": "serai_duvenmor",
+   "length_px": 325.3,
+   "days": 2,
+   "danger": 0.12,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     8878,
+     9555
+    ],
+    [
+     8942,
+     9491
+    ],
+    [
+     8996,
+     9427
+    ],
+    [
+     9052,
+     9363
+    ],
+    [
+     9068,
+     9299
+    ]
+   ]
+  },
+  {
+   "a": "mirsana",
+   "b": "belvanor",
+   "length_px": 6332.7,
+   "days": 20,
+   "danger": 0.26,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     6476,
+     13343
+    ],
+    [
+     6532,
+     13399
+    ],
+    [
+     6586,
+     13427
+    ],
+    [
+     6672,
+     13439
+    ],
+    [
+     6776,
+     13443
+    ],
+    [
+     6866,
+     13439
+    ],
+    [
+     6950,
+     13369
+    ],
+    [
+     6976,
+     13311
+    ],
+    [
+     7218,
+     13081
+    ],
+    [
+     7360,
+     12939
+    ],
+    [
+     7744,
+     12531
+    ],
+    [
+     7852,
+     12511
+    ],
+    [
+     7988,
+     12447
+    ],
+    [
+     8158,
+     12427
+    ],
+    [
+     8276,
+     12347
+    ],
+    [
+     8322,
+     12331
+    ],
+    [
+     8380,
+     12303
+    ],
+    [
+     8448,
+     12269
+    ],
+    [
+     8512,
+     12235
+    ],
+    [
+     8578,
+     12207
+    ],
+    [
+     8722,
+     12171
+    ],
+    [
+     8768,
+     12153
+    ],
+    [
+     8810,
+     12109
+    ],
+    [
+     8862,
+     12085
+    ],
+    [
+     8930,
+     12015
+    ],
+    [
+     9016,
+     11997
+    ],
+    [
+     9146,
+     11987
+    ],
+    [
+     9270,
+     11983
+    ],
+    [
+     9368,
+     11987
+    ],
+    [
+     9416,
+     12005
+    ],
+    [
+     9490,
+     12083
+    ],
+    [
+     9564,
+     12107
+    ],
+    [
+     9658,
+     12115
+    ],
+    [
+     9714,
+     12125
+    ],
+    [
+     9792,
+     12191
+    ],
+    [
+     9810,
+     12253
+    ],
+    [
+     9822,
+     12401
+    ],
+    [
+     9844,
+     12445
+    ],
+    [
+     9896,
+     12425
+    ],
+    [
+     9948,
+     12373
+    ],
+    [
+     10010,
+     12299
+    ],
+    [
+     10062,
+     12201
+    ],
+    [
+     10076,
+     12151
+    ],
+    [
+     10084,
+     12065
+    ],
+    [
+     10086,
+     11915
+    ],
+    [
+     10092,
+     11831
+    ],
+    [
+     10092,
+     11541
+    ],
+    [
+     10086,
+     11445
+    ],
+    [
+     10072,
+     11363
+    ],
+    [
+     9924,
+     11191
+    ],
+    [
+     9910,
+     11103
+    ],
+    [
+     9912,
+     10971
+    ],
+    [
+     9904,
+     10901
+    ],
+    [
+     9904,
+     10753
+    ],
+    [
+     9892,
+     10673
+    ],
+    [
+     9884,
+     10509
+    ],
+    [
+     9880,
+     10483
+    ]
+   ]
+  },
+  {
+   "a": "mirsana",
+   "b": "ilsande",
+   "length_px": 4668.6,
+   "days": 14,
+   "danger": 0.26,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     6476,
+     13343
+    ],
+    [
+     6532,
+     13399
+    ],
+    [
+     6586,
+     13427
+    ],
+    [
+     6672,
+     13439
+    ],
+    [
+     6776,
+     13443
+    ],
+    [
+     6866,
+     13439
+    ],
+    [
+     6950,
+     13369
+    ],
+    [
+     6976,
+     13311
+    ],
+    [
+     7218,
+     13081
+    ],
+    [
+     7360,
+     12939
+    ],
+    [
+     7744,
+     12531
+    ],
+    [
+     7852,
+     12511
+    ],
+    [
+     7988,
+     12447
+    ],
+    [
+     8158,
+     12427
+    ],
+    [
+     8276,
+     12347
+    ],
+    [
+     8322,
+     12331
+    ],
+    [
+     8380,
+     12303
+    ],
+    [
+     8448,
+     12269
+    ],
+    [
+     8512,
+     12235
+    ],
+    [
+     8578,
+     12207
+    ],
+    [
+     8722,
+     12171
+    ],
+    [
+     8768,
+     12153
+    ],
+    [
+     8810,
+     12109
+    ],
+    [
+     8862,
+     12085
+    ],
+    [
+     8930,
+     12015
+    ],
+    [
+     9016,
+     11997
+    ],
+    [
+     9146,
+     11987
+    ],
+    [
+     9270,
+     11983
+    ],
+    [
+     9368,
+     11987
+    ],
+    [
+     9416,
+     12005
+    ],
+    [
+     9490,
+     12083
+    ],
+    [
+     9564,
+     12107
+    ],
+    [
+     9658,
+     12115
+    ],
+    [
+     9714,
+     12125
+    ],
+    [
+     9792,
+     12191
+    ],
+    [
+     9810,
+     12253
+    ],
+    [
+     9822,
+     12401
+    ],
+    [
+     9844,
+     12445
+    ],
+    [
+     9832,
+     12493
+    ],
+    [
+     9648,
+     12667
+    ],
+    [
+     9614,
+     12709
+    ],
+    [
+     9546,
+     12779
+    ]
+   ]
+  },
+  {
+   "a": "ondrelle",
+   "b": "orvahel",
+   "length_px": 3424.1,
+   "days": 11,
+   "danger": 0.27,
+   "forest_share": 0.0,
+   "mountain_share": 0.06,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     9342,
+     8515
+    ],
+    [
+     9424,
+     8485
+    ],
+    [
+     9594,
+     8485
+    ],
+    [
+     9870,
+     8499
+    ],
+    [
+     10018,
+     8499
+    ],
+    [
+     10210,
+     8487
+    ],
+    [
+     10284,
+     8477
+    ],
+    [
+     10340,
+     8465
+    ],
+    [
+     10388,
+     8439
+    ],
+    [
+     10458,
+     8419
+    ],
+    [
+     10608,
+     8401
+    ],
+    [
+     10684,
+     8387
+    ],
+    [
+     10778,
+     8339
+    ],
+    [
+     10840,
+     8279
+    ],
+    [
+     10966,
+     8255
+    ],
+    [
+     11048,
+     8223
+    ],
+    [
+     11226,
+     8211
+    ],
+    [
+     11342,
+     8181
+    ],
+    [
+     11388,
+     8207
+    ],
+    [
+     11538,
+     8369
+    ],
+    [
+     11584,
+     8411
+    ],
+    [
+     11612,
+     8455
+    ],
+    [
+     11640,
+     8541
+    ],
+    [
+     11650,
+     8617
+    ],
+    [
+     11712,
+     8693
+    ],
+    [
+     11794,
+     8707
+    ],
+    [
+     11866,
+     8701
+    ],
+    [
+     11998,
+     8681
+    ],
+    [
+     12096,
+     8693
+    ],
+    [
+     12162,
+     8765
+    ],
+    [
+     12252,
+     8791
+    ],
+    [
+     12342,
+     8867
+    ]
+   ]
+  },
+  {
+   "a": "ondrelle",
+   "b": "serai_duvenmor",
+   "length_px": 858.7,
+   "days": 3,
+   "danger": 0.25,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     9342,
+     8515
+    ],
+    [
+     9334,
+     8563
+    ],
+    [
+     9330,
+     8685
+    ],
+    [
+     9302,
+     8993
+    ],
+    [
+     9292,
+     9041
+    ],
+    [
+     9256,
+     9119
+    ],
+    [
+     9210,
+     9201
+    ],
+    [
+     9142,
+     9265
+    ],
+    [
+     9088,
+     9281
+    ]
+   ]
+  },
+  {
+   "a": "orsolune",
+   "b": "orvahel",
+   "length_px": 11312.4,
+   "days": 35,
+   "danger": 0.37,
+   "forest_share": 0.0,
+   "mountain_share": 0.04,
+   "caravan_road_share": 0.02,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     8574,
+     14995
+    ],
+    [
+     8638,
+     14989
+    ],
+    [
+     8702,
+     14947
+    ],
+    [
+     8766,
+     14883
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9226,
+     15269
+    ],
+    [
+     9276,
+     15337
+    ],
+    [
+     9242,
+     15395
+    ],
+    [
+     9186,
+     15439
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9108,
+     15593
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     10082,
+     15485
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10228,
+     15469
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10392,
+     15327
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10604,
+     15023
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11548,
+     14411
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11634,
+     14265
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11658,
+     13939
+    ],
+    [
+     11772,
+     13797
+    ],
+    [
+     11780,
+     13691
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11442,
+     13421
+    ],
+    [
+     11446,
+     13293
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     12016,
+     12665
+    ],
+    [
+     11950,
+     12577
+    ],
+    [
+     11910,
+     12545
+    ],
+    [
+     11778,
+     12407
+    ],
+    [
+     11750,
+     12357
+    ],
+    [
+     11736,
+     12285
+    ],
+    [
+     11732,
+     11989
+    ],
+    [
+     11696,
+     11845
+    ],
+    [
+     11578,
+     11701
+    ],
+    [
+     11404,
+     11515
+    ],
+    [
+     11376,
+     11455
+    ],
+    [
+     11358,
+     11321
+    ],
+    [
+     11354,
+     11209
+    ],
+    [
+     11352,
+     10945
+    ],
+    [
+     11358,
+     10897
+    ],
+    [
+     11390,
+     10811
+    ],
+    [
+     11464,
+     10735
+    ],
+    [
+     11684,
+     10521
+    ],
+    [
+     11750,
+     10491
+    ],
+    [
+     11900,
+     10349
+    ],
+    [
+     12136,
+     10107
+    ],
+    [
+     12176,
+     10065
+    ],
+    [
+     12380,
+     9853
+    ],
+    [
+     12428,
+     9801
+    ],
+    [
+     12500,
+     9725
+    ],
+    [
+     12512,
+     9665
+    ],
+    [
+     12540,
+     9581
+    ],
+    [
+     12532,
+     9519
+    ],
+    [
+     12468,
+     9479
+    ],
+    [
+     12428,
+     9421
+    ],
+    [
+     12416,
+     9339
+    ],
+    [
+     12416,
+     9153
+    ],
+    [
+     12408,
+     9065
+    ],
+    [
+     12406,
+     8971
+    ],
+    [
+     12388,
+     8891
+    ],
+    [
+     12342,
+     8867
+    ]
+   ]
+  },
+  {
+   "a": "orsolune",
+   "b": "serai_seyvan",
+   "length_px": 1107.4,
+   "days": 3,
+   "danger": 0.15,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     8574,
+     14995
+    ],
+    [
+     8638,
+     14989
+    ],
+    [
+     8702,
+     14947
+    ],
+    [
+     8766,
+     14883
+    ],
+    [
+     8830,
+     14826
+    ],
+    [
+     8894,
+     14819
+    ],
+    [
+     8958,
+     14805
+    ],
+    [
+     9022,
+     14801
+    ],
+    [
+     9086,
+     14755
+    ],
+    [
+     9150,
+     14722
+    ],
+    [
+     9214,
+     14691
+    ],
+    [
+     9278,
+     14643
+    ],
+    [
+     9340,
+     14579
+    ],
+    [
+     9374,
+     14515
+    ],
+    [
+     9390,
+     14451
+    ],
+    [
+     9410,
+     14387
+    ]
+   ]
+  },
+  {
+   "a": "orvahel",
+   "b": "serai_seyvan",
+   "length_px": 11957.0,
+   "days": 37,
+   "danger": 0.36,
+   "forest_share": 0.0,
+   "mountain_share": 0.06,
+   "caravan_road_share": 0.07,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     12342,
+     8867
+    ],
+    [
+     12388,
+     8891
+    ],
+    [
+     12406,
+     8971
+    ],
+    [
+     12408,
+     9065
+    ],
+    [
+     12416,
+     9153
+    ],
+    [
+     12416,
+     9339
+    ],
+    [
+     12420,
+     9387
+    ],
+    [
+     12444,
+     9455
+    ],
+    [
+     12512,
+     9499
+    ],
+    [
+     12544,
+     9563
+    ],
+    [
+     12514,
+     9625
+    ],
+    [
+     12512,
+     9693
+    ],
+    [
+     12450,
+     9767
+    ],
+    [
+     12402,
+     9839
+    ],
+    [
+     12176,
+     10065
+    ],
+    [
+     12136,
+     10107
+    ],
+    [
+     11900,
+     10349
+    ],
+    [
+     11750,
+     10491
+    ],
+    [
+     11684,
+     10521
+    ],
+    [
+     11496,
+     10709
+    ],
+    [
+     11390,
+     10811
+    ],
+    [
+     11358,
+     10897
+    ],
+    [
+     11352,
+     10945
+    ],
+    [
+     11354,
+     11209
+    ],
+    [
+     11358,
+     11321
+    ],
+    [
+     11376,
+     11455
+    ],
+    [
+     11404,
+     11515
+    ],
+    [
+     11578,
+     11701
+    ],
+    [
+     11684,
+     11807
+    ],
+    [
+     11712,
+     11971
+    ],
+    [
+     11736,
+     12285
+    ],
+    [
+     11750,
+     12357
+    ],
+    [
+     11778,
+     12407
+    ],
+    [
+     11910,
+     12545
+    ],
+    [
+     11950,
+     12577
+    ],
+    [
+     12006,
+     12635
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11458,
+     13273
+    ],
+    [
+     11436,
+     13391
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11774,
+     13669
+    ],
+    [
+     11778,
+     13777
+    ],
+    [
+     11672,
+     13907
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11642,
+     14247
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11574,
+     14381
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10646,
+     15005
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10400,
+     15313
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10248,
+     15461
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10104,
+     15457
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9120,
+     15619
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9178,
+     15441
+    ],
+    [
+     9216,
+     15409
+    ],
+    [
+     9266,
+     15367
+    ],
+    [
+     9260,
+     15297
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     8766,
+     14881
+    ],
+    [
+     8830,
+     14826
+    ],
+    [
+     8894,
+     14819
+    ],
+    [
+     8958,
+     14805
+    ],
+    [
+     9022,
+     14801
+    ],
+    [
+     9086,
+     14755
+    ],
+    [
+     9150,
+     14722
+    ],
+    [
+     9214,
+     14691
+    ],
+    [
+     9278,
+     14643
+    ],
+    [
+     9340,
+     14579
+    ],
+    [
+     9374,
+     14515
+    ],
+    [
+     9390,
+     14451
+    ],
+    [
+     9410,
+     14387
+    ]
+   ]
+  },
+  {
+   "a": "rivecande",
+   "b": "vastrevar",
+   "length_px": 5367.1,
+   "days": 17,
+   "danger": 0.38,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [
+    "Callorde",
+    "Ostiven"
+   ],
+   "path": [
+    [
+     9768,
+     5779
+    ],
+    [
+     9624,
+     5631
+    ],
+    [
+     9570,
+     5603
+    ],
+    [
+     9390,
+     5393
+    ],
+    [
+     9374,
+     5343
+    ],
+    [
+     9294,
+     5257
+    ],
+    [
+     9214,
+     5207
+    ],
+    [
+     9034,
+     5175
+    ],
+    [
+     8974,
+     5151
+    ],
+    [
+     8828,
+     5025
+    ],
+    [
+     8814,
+     4979
+    ],
+    [
+     8806,
+     4879
+    ],
+    [
+     8806,
+     4741
+    ],
+    [
+     8812,
+     4663
+    ],
+    [
+     8826,
+     4585
+    ],
+    [
+     8932,
+     4481
+    ],
+    [
+     8996,
+     4413
+    ],
+    [
+     9036,
+     4381
+    ],
+    [
+     8956,
+     4267
+    ],
+    [
+     8692,
+     4035
+    ],
+    [
+     8586,
+     3929
+    ],
+    [
+     8306,
+     3601
+    ],
+    [
+     8138,
+     3429
+    ],
+    [
+     7856,
+     3183
+    ],
+    [
+     7756,
+     3087
+    ],
+    [
+     7680,
+     3005
+    ],
+    [
+     7616,
+     3021
+    ],
+    [
+     7474,
+     3059
+    ],
+    [
+     7292,
+     3091
+    ],
+    [
+     6992,
+     3131
+    ],
+    [
+     6918,
+     3149
+    ],
+    [
+     6852,
+     3203
+    ],
+    [
+     6744,
+     3311
+    ],
+    [
+     6680,
+     3383
+    ],
+    [
+     6600,
+     3401
+    ],
+    [
+     6498,
+     3497
+    ],
+    [
+     6452,
+     3543
+    ],
+    [
+     6432,
+     3549
+    ]
+   ]
+  },
+  {
+   "a": "samuran",
+   "b": "mirsana",
+   "length_px": 3598.4,
+   "days": 11,
+   "danger": 0.48,
+   "forest_share": 0.0,
+   "mountain_share": 0.28,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     5880,
+     10723
+    ],
+    [
+     5956,
+     10789
+    ],
+    [
+     6050,
+     10895
+    ],
+    [
+     6074,
+     11083
+    ],
+    [
+     6098,
+     11349
+    ],
+    [
+     6114,
+     11457
+    ],
+    [
+     6118,
+     11607
+    ],
+    [
+     6064,
+     11687
+    ],
+    [
+     6010,
+     11717
+    ],
+    [
+     5920,
+     11729
+    ],
+    [
+     5798,
+     11739
+    ],
+    [
+     5744,
+     11755
+    ],
+    [
+     5672,
+     11831
+    ],
+    [
+     5508,
+     11979
+    ],
+    [
+     5482,
+     12225
+    ],
+    [
+     5484,
+     12291
+    ],
+    [
+     5524,
+     12379
+    ],
+    [
+     5636,
+     12485
+    ],
+    [
+     5744,
+     12523
+    ],
+    [
+     5944,
+     12577
+    ],
+    [
+     5990,
+     12597
+    ],
+    [
+     6050,
+     12647
+    ],
+    [
+     6140,
+     12667
+    ],
+    [
+     6258,
+     12707
+    ],
+    [
+     6300,
+     12743
+    ],
+    [
+     6346,
+     12817
+    ],
+    [
+     6360,
+     12885
+    ],
+    [
+     6352,
+     12975
+    ],
+    [
+     6338,
+     13061
+    ],
+    [
+     6310,
+     13175
+    ],
+    [
+     6368,
+     13259
+    ],
+    [
+     6426,
+     13307
+    ]
+   ]
+  },
+  {
+   "a": "selvicar",
+   "b": "dravoss",
+   "length_px": 1362.2,
+   "days": 4,
+   "danger": 0.24,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     6112,
+     4415
+    ],
+    [
+     6156,
+     4569
+    ],
+    [
+     6186,
+     4651
+    ],
+    [
+     6192,
+     4747
+    ],
+    [
+     6284,
+     4865
+    ],
+    [
+     6306,
+     4947
+    ],
+    [
+     6346,
+     4991
+    ],
+    [
+     6372,
+     5051
+    ],
+    [
+     6456,
+     5137
+    ],
+    [
+     6530,
+     5203
+    ],
+    [
+     6564,
+     5265
+    ],
+    [
+     6618,
+     5291
+    ],
+    [
+     6658,
+     5255
+    ],
+    [
+     6706,
+     5221
+    ],
+    [
+     6798,
+     5143
+    ],
+    [
+     6862,
+     5135
+    ]
+   ]
+  },
+  {
+   "a": "selvicar",
+   "b": "serai_orbeyan",
+   "length_px": 11476.5,
+   "days": 35,
+   "danger": 0.21,
+   "forest_share": 0.01,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [
+    "Ilkatay Camp",
+    "Otekur Camp",
+    "Burkasan Camp"
+   ],
+   "path": [
+    [
+     5694,
+     4163
+    ],
+    [
+     5630,
+     4112
+    ],
+    [
+     5566,
+     4099
+    ],
+    [
+     5502,
+     4099
+    ],
+    [
+     5438,
+     4099
+    ],
+    [
+     5374,
+     4110
+    ],
+    [
+     5310,
+     4115
+    ],
+    [
+     5246,
+     4115
+    ],
+    [
+     5182,
+     4115
+    ],
+    [
+     5118,
+     4113
+    ],
+    [
+     5056,
+     4067
+    ],
+    [
+     5054,
+     4003
+    ],
+    [
+     5070,
+     3939
+    ],
+    [
+     5076,
+     3875
+    ],
+    [
+     5080,
+     3811
+    ],
+    [
+     5070,
+     3747
+    ],
+    [
+     5070,
+     3683
+    ],
+    [
+     5059,
+     3619
+    ],
+    [
+     5032,
+     3555
+    ],
+    [
+     4974,
+     3491
+    ],
+    [
+     4910,
+     3427
+    ],
+    [
+     4846,
+     3363
+    ],
+    [
+     4782,
+     3331
+    ],
+    [
+     4718,
+     3317
+    ],
+    [
+     4654,
+     3320
+    ],
+    [
+     4590,
+     3331
+    ],
+    [
+     4526,
+     3353
+    ],
+    [
+     4462,
+     3411
+    ],
+    [
+     4398,
+     3461
+    ],
+    [
+     4334,
+     3521
+    ],
+    [
+     4270,
+     3571
+    ],
+    [
+     4206,
+     3635
+    ],
+    [
+     4142,
+     3699
+    ],
+    [
+     4078,
+     3763
+    ],
+    [
+     4014,
+     3809
+    ],
+    [
+     3958,
+     3793
+    ],
+    [
+     3940,
+     3731
+    ],
+    [
+     3924,
+     3667
+    ],
+    [
+     3908,
+     3603
+    ],
+    [
+     3891,
+     3539
+    ],
+    [
+     3872,
+     3475
+    ],
+    [
+     3856,
+     3411
+    ],
+    [
+     3838,
+     3347
+    ],
+    [
+     3804,
+     3283
+    ],
+    [
+     3742,
+     3219
+    ],
+    [
+     3678,
+     3155
+    ],
+    [
+     3614,
+     3091
+    ],
+    [
+     3550,
+     3027
+    ],
+    [
+     3486,
+     2974
+    ],
+    [
+     3422,
+     2917
+    ],
+    [
+     3358,
+     2888
+    ],
+    [
+     3294,
+     2868
+    ],
+    [
+     3230,
+     2851
+    ],
+    [
+     3166,
+     2834
+    ],
+    [
+     3102,
+     2819
+    ],
+    [
+     3038,
+     2805
+    ],
+    [
+     2974,
+     2801
+    ],
+    [
+     2910,
+     2787
+    ],
+    [
+     2846,
+     2787
+    ],
+    [
+     2782,
+     2782
+    ],
+    [
+     2718,
+     2771
+    ],
+    [
+     2654,
+     2771
+    ],
+    [
+     2590,
+     2771
+    ],
+    [
+     2526,
+     2771
+    ],
+    [
+     2462,
+     2771
+    ],
+    [
+     2398,
+     2778
+    ],
+    [
+     2334,
+     2835
+    ],
+    [
+     2270,
+     2899
+    ],
+    [
+     2206,
+     2963
+    ],
+    [
+     2144,
+     3027
+    ],
+    [
+     2094,
+     3091
+    ],
+    [
+     2032,
+     3155
+    ],
+    [
+     1982,
+     3219
+    ],
+    [
+     1928,
+     3283
+    ],
+    [
+     1870,
+     3347
+    ],
+    [
+     1806,
+     3411
+    ],
+    [
+     1742,
+     3475
+    ],
+    [
+     1680,
+     3539
+    ],
+    [
+     1656,
+     3603
+    ],
+    [
+     1644,
+     3667
+    ],
+    [
+     1628,
+     3731
+    ],
+    [
+     1582,
+     3795
+    ],
+    [
+     1518,
+     3859
+    ],
+    [
+     1486,
+     3923
+    ],
+    [
+     1472,
+     3987
+    ],
+    [
+     1464,
+     4051
+    ],
+    [
+     1454,
+     4115
+    ],
+    [
+     1454,
+     4179
+    ],
+    [
+     1454,
+     4243
+    ],
+    [
+     1454,
+     4307
+    ],
+    [
+     1440,
+     4371
+    ],
+    [
+     1438,
+     4435
+    ],
+    [
+     1438,
+     4499
+    ],
+    [
+     1428,
+     4563
+    ],
+    [
+     1420,
+     4627
+    ],
+    [
+     1374,
+     4691
+    ],
+    [
+     1310,
+     4755
+    ],
+    [
+     1246,
+     4819
+    ],
+    [
+     1182,
+     4883
+    ],
+    [
+     1118,
+     4933
+    ],
+    [
+     1054,
+     4995
+    ],
+    [
+     990,
+     5059
+    ],
+    [
+     926,
+     5123
+    ],
+    [
+     990,
+     5182
+    ],
+    [
+     1054,
+     5202
+    ],
+    [
+     1118,
+     5218
+    ],
+    [
+     1182,
+     5234
+    ],
+    [
+     1246,
+     5255
+    ],
+    [
+     1310,
+     5272
+    ],
+    [
+     1374,
+     5294
+    ],
+    [
+     1438,
+     5314
+    ],
+    [
+     1502,
+     5331
+    ],
+    [
+     1566,
+     5348
+    ],
+    [
+     1630,
+     5370
+    ],
+    [
+     1694,
+     5427
+    ],
+    [
+     1758,
+     5489
+    ],
+    [
+     1822,
+     5525
+    ],
+    [
+     1886,
+     5585
+    ],
+    [
+     1950,
+     5635
+    ],
+    [
+     2014,
+     5686
+    ],
+    [
+     2078,
+     5699
+    ],
+    [
+     2142,
+     5713
+    ],
+    [
+     2206,
+     5717
+    ],
+    [
+     2270,
+     5738
+    ],
+    [
+     2334,
+     5763
+    ],
+    [
+     2398,
+     5763
+    ],
+    [
+     2462,
+     5777
+    ],
+    [
+     2526,
+     5779
+    ],
+    [
+     2590,
+     5779
+    ],
+    [
+     2654,
+     5779
+    ],
+    [
+     2718,
+     5779
+    ],
+    [
+     2782,
+     5779
+    ],
+    [
+     2846,
+     5779
+    ],
+    [
+     2910,
+     5779
+    ],
+    [
+     2974,
+     5779
+    ],
+    [
+     3038,
+     5779
+    ],
+    [
+     3102,
+     5774
+    ],
+    [
+     3166,
+     5763
+    ],
+    [
+     3230,
+     5763
+    ],
+    [
+     3294,
+     5763
+    ],
+    [
+     3358,
+     5763
+    ],
+    [
+     3422,
+     5763
+    ],
+    [
+     3486,
+     5763
+    ],
+    [
+     3550,
+     5763
+    ],
+    [
+     3614,
+     5763
+    ],
+    [
+     3678,
+     5763
+    ],
+    [
+     3742,
+     5763
+    ],
+    [
+     3806,
+     5763
+    ],
+    [
+     3870,
+     5763
+    ],
+    [
+     3934,
+     5795
+    ],
+    [
+     3998,
+     5859
+    ],
+    [
+     4062,
+     5923
+    ],
+    [
+     4126,
+     5987
+    ],
+    [
+     4190,
+     6051
+    ],
+    [
+     4254,
+     6115
+    ],
+    [
+     4316,
+     6179
+    ],
+    [
+     4366,
+     6243
+    ],
+    [
+     4424,
+     6307
+    ]
+   ]
+  },
+  {
+   "a": "selvicar",
+   "b": "vastrevar",
+   "length_px": 558.9,
+   "days": 2,
+   "danger": 0.11,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     6142,
+     4323
+    ],
+    [
+     6206,
+     4323
+    ],
+    [
+     6270,
+     4310
+    ],
+    [
+     6334,
+     4259
+    ],
+    [
+     6392,
+     4195
+    ],
+    [
+     6414,
+     4131
+    ],
+    [
+     6414,
+     4067
+    ],
+    [
+     6428,
+     4003
+    ],
+    [
+     6430,
+     3939
+    ]
+   ]
+  },
+  {
+   "a": "tolvarin",
+   "b": "serai_orbeyan",
+   "length_px": 1949.6,
+   "days": 6,
+   "danger": 0.25,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 1.0,
+   "via": [],
+   "path": [
+    [
+     4926,
+     8035
+    ],
+    [
+     4862,
+     7987
+    ],
+    [
+     4798,
+     7923
+    ],
+    [
+     4766,
+     7859
+    ],
+    [
+     4784,
+     7795
+    ],
+    [
+     4844,
+     7731
+    ],
+    [
+     4872,
+     7667
+    ],
+    [
+     4889,
+     7603
+    ],
+    [
+     4908,
+     7539
+    ],
+    [
+     4924,
+     7475
+    ],
+    [
+     4936,
+     7411
+    ],
+    [
+     4948,
+     7347
+    ],
+    [
+     4958,
+     7283
+    ],
+    [
+     4972,
+     7219
+    ],
+    [
+     4976,
+     7155
+    ],
+    [
+     4990,
+     7091
+    ],
+    [
+     4990,
+     7027
+    ],
+    [
+     5008,
+     6963
+    ],
+    [
+     5056,
+     6899
+    ],
+    [
+     5089,
+     6835
+    ],
+    [
+     5054,
+     6784
+    ],
+    [
+     4990,
+     6771
+    ],
+    [
+     4926,
+     6766
+    ],
+    [
+     4862,
+     6737
+    ],
+    [
+     4798,
+     6689
+    ],
+    [
+     4734,
+     6627
+    ],
+    [
+     4670,
+     6563
+    ],
+    [
+     4606,
+     6499
+    ]
+   ]
+  },
+  {
+   "a": "vorgat",
+   "b": "orsolune",
+   "length_px": 11643.1,
+   "days": 36,
+   "danger": 0.4,
+   "forest_share": 0.0,
+   "mountain_share": 0.06,
+   "caravan_road_share": 0.02,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     14338,
+     9099
+    ],
+    [
+     13826,
+     9633
+    ],
+    [
+     13802,
+     9705
+    ],
+    [
+     13696,
+     9791
+    ],
+    [
+     13670,
+     9843
+    ],
+    [
+     13650,
+     9907
+    ],
+    [
+     13624,
+     10093
+    ],
+    [
+     13612,
+     10157
+    ],
+    [
+     13548,
+     10295
+    ],
+    [
+     13508,
+     10339
+    ],
+    [
+     13490,
+     10397
+    ],
+    [
+     13468,
+     10463
+    ],
+    [
+     13468,
+     10523
+    ],
+    [
+     13462,
+     10579
+    ],
+    [
+     13438,
+     10653
+    ],
+    [
+     13428,
+     10731
+    ],
+    [
+     13408,
+     10779
+    ],
+    [
+     13384,
+     10863
+    ],
+    [
+     13350,
+     11165
+    ],
+    [
+     13318,
+     11251
+    ],
+    [
+     13280,
+     11535
+    ],
+    [
+     13274,
+     11633
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11458,
+     13273
+    ],
+    [
+     11436,
+     13391
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11774,
+     13669
+    ],
+    [
+     11778,
+     13777
+    ],
+    [
+     11672,
+     13907
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11642,
+     14247
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11574,
+     14381
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10646,
+     15005
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10400,
+     15313
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10248,
+     15461
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10104,
+     15457
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9120,
+     15619
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9178,
+     15441
+    ],
+    [
+     9216,
+     15409
+    ],
+    [
+     9266,
+     15367
+    ],
+    [
+     9260,
+     15297
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     8766,
+     14881
+    ],
+    [
+     8702,
+     14947
+    ],
+    [
+     8638,
+     14989
+    ],
+    [
+     8574,
+     14995
+    ]
+   ]
+  },
+  {
+   "a": "vorgat",
+   "b": "orvahel",
+   "length_px": 9547.4,
+   "days": 30,
+   "danger": 0.33,
+   "forest_share": 0.0,
+   "mountain_share": 0.07,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     14338,
+     9099
+    ],
+    [
+     13826,
+     9633
+    ],
+    [
+     13802,
+     9705
+    ],
+    [
+     13696,
+     9791
+    ],
+    [
+     13670,
+     9843
+    ],
+    [
+     13650,
+     9907
+    ],
+    [
+     13624,
+     10093
+    ],
+    [
+     13612,
+     10157
+    ],
+    [
+     13548,
+     10295
+    ],
+    [
+     13508,
+     10339
+    ],
+    [
+     13490,
+     10397
+    ],
+    [
+     13468,
+     10463
+    ],
+    [
+     13468,
+     10523
+    ],
+    [
+     13462,
+     10579
+    ],
+    [
+     13438,
+     10653
+    ],
+    [
+     13428,
+     10731
+    ],
+    [
+     13408,
+     10779
+    ],
+    [
+     13384,
+     10863
+    ],
+    [
+     13350,
+     11165
+    ],
+    [
+     13318,
+     11251
+    ],
+    [
+     13280,
+     11535
+    ],
+    [
+     13274,
+     11633
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11950,
+     12577
+    ],
+    [
+     11910,
+     12545
+    ],
+    [
+     11778,
+     12407
+    ],
+    [
+     11750,
+     12357
+    ],
+    [
+     11736,
+     12285
+    ],
+    [
+     11732,
+     11991
+    ],
+    [
+     11696,
+     11845
+    ],
+    [
+     11578,
+     11701
+    ],
+    [
+     11404,
+     11515
+    ],
+    [
+     11376,
+     11455
+    ],
+    [
+     11358,
+     11321
+    ],
+    [
+     11354,
+     11209
+    ],
+    [
+     11352,
+     10945
+    ],
+    [
+     11358,
+     10897
+    ],
+    [
+     11390,
+     10811
+    ],
+    [
+     11464,
+     10735
+    ],
+    [
+     11684,
+     10521
+    ],
+    [
+     11750,
+     10491
+    ],
+    [
+     11900,
+     10349
+    ],
+    [
+     12136,
+     10107
+    ],
+    [
+     12176,
+     10065
+    ],
+    [
+     12380,
+     9853
+    ],
+    [
+     12428,
+     9801
+    ],
+    [
+     12500,
+     9725
+    ],
+    [
+     12512,
+     9667
+    ],
+    [
+     12540,
+     9581
+    ],
+    [
+     12532,
+     9519
+    ],
+    [
+     12468,
+     9479
+    ],
+    [
+     12428,
+     9421
+    ],
+    [
+     12416,
+     9339
+    ],
+    [
+     12416,
+     9153
+    ],
+    [
+     12408,
+     9065
+    ],
+    [
+     12406,
+     8971
+    ],
+    [
+     12388,
+     8891
+    ],
+    [
+     12342,
+     8867
+    ]
+   ]
+  },
+  {
+   "a": "vorgat",
+   "b": "serai_seyvan",
+   "length_px": 12287.7,
+   "days": 38,
+   "danger": 0.38,
+   "forest_share": 0.0,
+   "mountain_share": 0.06,
+   "caravan_road_share": 0.07,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     14338,
+     9099
+    ],
+    [
+     13826,
+     9633
+    ],
+    [
+     13802,
+     9705
+    ],
+    [
+     13696,
+     9791
+    ],
+    [
+     13670,
+     9843
+    ],
+    [
+     13650,
+     9907
+    ],
+    [
+     13624,
+     10093
+    ],
+    [
+     13612,
+     10157
+    ],
+    [
+     13548,
+     10295
+    ],
+    [
+     13508,
+     10339
+    ],
+    [
+     13490,
+     10397
+    ],
+    [
+     13468,
+     10463
+    ],
+    [
+     13468,
+     10523
+    ],
+    [
+     13462,
+     10579
+    ],
+    [
+     13438,
+     10653
+    ],
+    [
+     13428,
+     10731
+    ],
+    [
+     13408,
+     10779
+    ],
+    [
+     13384,
+     10863
+    ],
+    [
+     13350,
+     11165
+    ],
+    [
+     13318,
+     11251
+    ],
+    [
+     13280,
+     11535
+    ],
+    [
+     13274,
+     11633
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11458,
+     13273
+    ],
+    [
+     11436,
+     13391
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11774,
+     13669
+    ],
+    [
+     11778,
+     13777
+    ],
+    [
+     11672,
+     13907
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11642,
+     14247
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11574,
+     14381
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10646,
+     15005
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10400,
+     15313
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10248,
+     15461
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10104,
+     15457
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9120,
+     15619
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9178,
+     15441
+    ],
+    [
+     9216,
+     15409
+    ],
+    [
+     9266,
+     15367
+    ],
+    [
+     9260,
+     15297
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     8766,
+     14881
+    ],
+    [
+     8830,
+     14826
+    ],
+    [
+     8894,
+     14819
+    ],
+    [
+     8958,
+     14805
+    ],
+    [
+     9022,
+     14801
+    ],
+    [
+     9086,
+     14755
+    ],
+    [
+     9150,
+     14722
+    ],
+    [
+     9214,
+     14691
+    ],
+    [
+     9278,
+     14643
+    ],
+    [
+     9340,
+     14579
+    ],
+    [
+     9374,
+     14515
+    ],
+    [
+     9390,
+     14451
+    ],
+    [
+     9410,
+     14387
+    ]
+   ]
+  },
+  {
+   "a": "vorgat",
+   "b": "zelmarin",
+   "length_px": 4866.2,
+   "days": 15,
+   "danger": 0.4,
+   "forest_share": 0.0,
+   "mountain_share": 0.0,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     14338,
+     9099
+    ],
+    [
+     13826,
+     9633
+    ],
+    [
+     13802,
+     9705
+    ],
+    [
+     13696,
+     9791
+    ],
+    [
+     13670,
+     9843
+    ],
+    [
+     13650,
+     9907
+    ],
+    [
+     13624,
+     10093
+    ],
+    [
+     13612,
+     10157
+    ],
+    [
+     13548,
+     10295
+    ],
+    [
+     13508,
+     10339
+    ],
+    [
+     13490,
+     10397
+    ],
+    [
+     13468,
+     10463
+    ],
+    [
+     13468,
+     10523
+    ],
+    [
+     13462,
+     10579
+    ],
+    [
+     13438,
+     10653
+    ],
+    [
+     13428,
+     10731
+    ],
+    [
+     13408,
+     10779
+    ],
+    [
+     13384,
+     10863
+    ],
+    [
+     13350,
+     11165
+    ],
+    [
+     13318,
+     11251
+    ],
+    [
+     13280,
+     11535
+    ],
+    [
+     13274,
+     11633
+    ],
+    [
+     13418,
+     11659
+    ],
+    [
+     13552,
+     11681
+    ],
+    [
+     13604,
+     11699
+    ],
+    [
+     13656,
+     11735
+    ],
+    [
+     13652,
+     11821
+    ],
+    [
+     13604,
+     11909
+    ],
+    [
+     13602,
+     11957
+    ],
+    [
+     13618,
+     12269
+    ],
+    [
+     13674,
+     12755
+    ],
+    [
+     13678,
+     13013
+    ],
+    [
+     13668,
+     13209
+    ],
+    [
+     13668,
+     13309
+    ]
+   ]
+  },
+  {
+   "a": "zelmarin",
+   "b": "orsolune",
+   "length_px": 10765.4,
+   "days": 33,
+   "danger": 0.42,
+   "forest_share": 0.0,
+   "mountain_share": 0.07,
+   "caravan_road_share": 0.02,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     13668,
+     13309
+    ],
+    [
+     13668,
+     13209
+    ],
+    [
+     13678,
+     13013
+    ],
+    [
+     13674,
+     12755
+    ],
+    [
+     13618,
+     12269
+    ],
+    [
+     13602,
+     11957
+    ],
+    [
+     13604,
+     11909
+    ],
+    [
+     13638,
+     11857
+    ],
+    [
+     13656,
+     11737
+    ],
+    [
+     13604,
+     11699
+    ],
+    [
+     13552,
+     11681
+    ],
+    [
+     13418,
+     11659
+    ],
+    [
+     13288,
+     11649
+    ],
+    [
+     13256,
+     11675
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11458,
+     13273
+    ],
+    [
+     11436,
+     13391
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11774,
+     13669
+    ],
+    [
+     11778,
+     13777
+    ],
+    [
+     11672,
+     13907
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11642,
+     14247
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11574,
+     14381
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10646,
+     15005
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10400,
+     15313
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10248,
+     15461
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10104,
+     15457
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9120,
+     15619
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9178,
+     15441
+    ],
+    [
+     9216,
+     15409
+    ],
+    [
+     9266,
+     15367
+    ],
+    [
+     9260,
+     15297
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     8766,
+     14881
+    ],
+    [
+     8702,
+     14947
+    ],
+    [
+     8638,
+     14989
+    ],
+    [
+     8574,
+     14995
+    ]
+   ]
+  },
+  {
+   "a": "zelmarin",
+   "b": "orvahel",
+   "length_px": 8669.6,
+   "days": 27,
+   "danger": 0.35,
+   "forest_share": 0.0,
+   "mountain_share": 0.08,
+   "caravan_road_share": 0.0,
+   "via": [],
+   "path": [
+    [
+     13668,
+     13309
+    ],
+    [
+     13668,
+     13209
+    ],
+    [
+     13678,
+     13013
+    ],
+    [
+     13674,
+     12755
+    ],
+    [
+     13618,
+     12269
+    ],
+    [
+     13602,
+     11957
+    ],
+    [
+     13604,
+     11909
+    ],
+    [
+     13638,
+     11857
+    ],
+    [
+     13656,
+     11737
+    ],
+    [
+     13604,
+     11699
+    ],
+    [
+     13552,
+     11681
+    ],
+    [
+     13418,
+     11659
+    ],
+    [
+     13288,
+     11649
+    ],
+    [
+     13256,
+     11675
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11950,
+     12577
+    ],
+    [
+     11910,
+     12545
+    ],
+    [
+     11778,
+     12407
+    ],
+    [
+     11750,
+     12357
+    ],
+    [
+     11736,
+     12285
+    ],
+    [
+     11732,
+     11991
+    ],
+    [
+     11696,
+     11845
+    ],
+    [
+     11578,
+     11701
+    ],
+    [
+     11404,
+     11515
+    ],
+    [
+     11376,
+     11455
+    ],
+    [
+     11358,
+     11321
+    ],
+    [
+     11354,
+     11209
+    ],
+    [
+     11352,
+     10945
+    ],
+    [
+     11358,
+     10897
+    ],
+    [
+     11390,
+     10811
+    ],
+    [
+     11464,
+     10735
+    ],
+    [
+     11684,
+     10521
+    ],
+    [
+     11750,
+     10491
+    ],
+    [
+     11900,
+     10349
+    ],
+    [
+     12136,
+     10107
+    ],
+    [
+     12176,
+     10065
+    ],
+    [
+     12380,
+     9853
+    ],
+    [
+     12428,
+     9801
+    ],
+    [
+     12500,
+     9725
+    ],
+    [
+     12512,
+     9667
+    ],
+    [
+     12540,
+     9581
+    ],
+    [
+     12532,
+     9519
+    ],
+    [
+     12468,
+     9479
+    ],
+    [
+     12428,
+     9421
+    ],
+    [
+     12416,
+     9339
+    ],
+    [
+     12416,
+     9153
+    ],
+    [
+     12408,
+     9065
+    ],
+    [
+     12406,
+     8971
+    ],
+    [
+     12388,
+     8891
+    ],
+    [
+     12342,
+     8867
+    ]
+   ]
+  },
+  {
+   "a": "zelmarin",
+   "b": "serai_seyvan",
+   "length_px": 11410.0,
+   "days": 35,
+   "danger": 0.4,
+   "forest_share": 0.0,
+   "mountain_share": 0.06,
+   "caravan_road_share": 0.08,
+   "via": [
+    "Shipwrights' Logging Camp"
+   ],
+   "path": [
+    [
+     13668,
+     13309
+    ],
+    [
+     13668,
+     13209
+    ],
+    [
+     13678,
+     13013
+    ],
+    [
+     13674,
+     12755
+    ],
+    [
+     13618,
+     12269
+    ],
+    [
+     13602,
+     11957
+    ],
+    [
+     13604,
+     11909
+    ],
+    [
+     13638,
+     11857
+    ],
+    [
+     13656,
+     11737
+    ],
+    [
+     13604,
+     11699
+    ],
+    [
+     13552,
+     11681
+    ],
+    [
+     13418,
+     11659
+    ],
+    [
+     13288,
+     11649
+    ],
+    [
+     13256,
+     11675
+    ],
+    [
+     13164,
+     11763
+    ],
+    [
+     13126,
+     11809
+    ],
+    [
+     13030,
+     11903
+    ],
+    [
+     13008,
+     11953
+    ],
+    [
+     12988,
+     12031
+    ],
+    [
+     12978,
+     12099
+    ],
+    [
+     12946,
+     12417
+    ],
+    [
+     12942,
+     12503
+    ],
+    [
+     12926,
+     12595
+    ],
+    [
+     12810,
+     12725
+    ],
+    [
+     12756,
+     12761
+    ],
+    [
+     12660,
+     12779
+    ],
+    [
+     12564,
+     12777
+    ],
+    [
+     12494,
+     12747
+    ],
+    [
+     12434,
+     12717
+    ],
+    [
+     12164,
+     12693
+    ],
+    [
+     12018,
+     12667
+    ],
+    [
+     11882,
+     12809
+    ],
+    [
+     11654,
+     13029
+    ],
+    [
+     11626,
+     13113
+    ],
+    [
+     11458,
+     13273
+    ],
+    [
+     11436,
+     13391
+    ],
+    [
+     11578,
+     13461
+    ],
+    [
+     11646,
+     13491
+    ],
+    [
+     11686,
+     13533
+    ],
+    [
+     11694,
+     13583
+    ],
+    [
+     11774,
+     13669
+    ],
+    [
+     11778,
+     13777
+    ],
+    [
+     11672,
+     13907
+    ],
+    [
+     11646,
+     14001
+    ],
+    [
+     11638,
+     14091
+    ],
+    [
+     11644,
+     14187
+    ],
+    [
+     11642,
+     14247
+    ],
+    [
+     11586,
+     14317
+    ],
+    [
+     11574,
+     14381
+    ],
+    [
+     11482,
+     14389
+    ],
+    [
+     11376,
+     14387
+    ],
+    [
+     11326,
+     14393
+    ],
+    [
+     11250,
+     14429
+    ],
+    [
+     11144,
+     14531
+    ],
+    [
+     10886,
+     14753
+    ],
+    [
+     10732,
+     14907
+    ],
+    [
+     10646,
+     15005
+    ],
+    [
+     10500,
+     15147
+    ],
+    [
+     10416,
+     15239
+    ],
+    [
+     10400,
+     15313
+    ],
+    [
+     10290,
+     15425
+    ],
+    [
+     10248,
+     15461
+    ],
+    [
+     10174,
+     15471
+    ],
+    [
+     10104,
+     15457
+    ],
+    [
+     10016,
+     15543
+    ],
+    [
+     9960,
+     15563
+    ],
+    [
+     9894,
+     15621
+    ],
+    [
+     9760,
+     15755
+    ],
+    [
+     9662,
+     15865
+    ],
+    [
+     9612,
+     15879
+    ],
+    [
+     9532,
+     15889
+    ],
+    [
+     9414,
+     15891
+    ],
+    [
+     9346,
+     15857
+    ],
+    [
+     9198,
+     15709
+    ],
+    [
+     9120,
+     15619
+    ],
+    [
+     9106,
+     15539
+    ],
+    [
+     9124,
+     15487
+    ],
+    [
+     9178,
+     15441
+    ],
+    [
+     9216,
+     15409
+    ],
+    [
+     9266,
+     15367
+    ],
+    [
+     9260,
+     15297
+    ],
+    [
+     9174,
+     15249
+    ],
+    [
+     9084,
+     15163
+    ],
+    [
+     8886,
+     14993
+    ],
+    [
+     8766,
+     14881
+    ],
+    [
+     8830,
+     14826
+    ],
+    [
+     8894,
+     14819
+    ],
+    [
+     8958,
+     14805
+    ],
+    [
+     9022,
+     14801
+    ],
+    [
+     9086,
+     14755
+    ],
+    [
+     9150,
+     14722
+    ],
+    [
+     9214,
+     14691
+    ],
+    [
+     9278,
+     14643
+    ],
+    [
+     9340,
+     14579
+    ],
+    [
+     9374,
+     14515
+    ],
+    [
+     9390,
+     14451
+    ],
+    [
+     9410,
+     14387
+    ]
+   ]
+  }
+ ]
+}
