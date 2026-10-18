@@ -30,14 +30,14 @@
   }
  },
  "species": {
-  "horse": {"model": "quaternius_gltf/glTF/Horse.gltf", "back": 0.66, "actions": "quaternius_hoofed"},
-  "horse_white": {"model": "quaternius_gltf/glTF/Horse_White.gltf", "back": 0.66, "actions": "quaternius_hoofed"},
-  "ox": {"model": "quaternius_gltf/glTF/Bull.gltf", "back": 0.62, "actions": "quaternius_hoofed"},
-  "donkey": {"model": "quaternius_gltf/glTF/Donkey.gltf", "back": 0.55, "actions": "quaternius_hoofed"},
-  "stag": {"model": "quaternius_gltf/glTF/Stag.gltf", "back": 0.60, "actions": "quaternius_hoofed"},
-  "deer": {"model": "quaternius_gltf/glTF/Deer.gltf", "back": 0.48, "actions": "quaternius_hoofed"},
-  "wolf": {"model": "quaternius_gltf/glTF/Wolf.gltf", "back": 0.50, "actions": "quaternius_canine"},
-  "husky": {"model": "quaternius_gltf/glTF/Husky.gltf", "back": 0.40, "actions": "quaternius_canine"},
+  "horse": {"model": "quaternius_gltf/glTF/Horse.glb", "back": 0.66, "actions": "quaternius_hoofed"},
+  "horse_white": {"model": "quaternius_gltf/glTF/Horse_White.glb", "back": 0.66, "actions": "quaternius_hoofed"},
+  "ox": {"model": "quaternius_gltf/glTF/Bull.glb", "back": 0.62, "actions": "quaternius_hoofed"},
+  "donkey": {"model": "quaternius_gltf/glTF/Donkey.glb", "back": 0.55, "actions": "quaternius_hoofed"},
+  "stag": {"model": "quaternius_gltf/glTF/Stag.glb", "back": 0.60, "actions": "quaternius_hoofed"},
+  "deer": {"model": "quaternius_gltf/glTF/Deer.glb", "back": 0.48, "actions": "quaternius_hoofed"},
+  "wolf": {"model": "quaternius_gltf/glTF/Wolf.glb", "back": 0.50, "actions": "quaternius_canine"},
+  "husky": {"model": "quaternius_gltf/glTF/Husky.glb", "back": 0.40, "actions": "quaternius_canine"},
   "bear": {"model": "bear_prep.glb", "back": 0.58, "actions": "synth"},
   "boar": {"model": "boar_prep.glb", "back": 0.46, "actions": "synth"}
  }

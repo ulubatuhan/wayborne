@@ -18,9 +18,9 @@ it: `far` (the two far legs, drawn first, darkened), `tail` (it hangs
 behind the near thigh) and `main` (everything else). Each is rendered on its
 own, so whatever swings out from behind something else has pixels to show.
 
-    python3 tools/beast_skin.py Horse.gltf horse
-    python3 tools/beast_skin.py Bull.gltf ox
-    python3 tools/beast_skin.py Wolf.gltf wolf
+    python3 tools/beast_skin.py Horse.glb horse
+    python3 tools/beast_skin.py Bull.glb ox
+    python3 tools/beast_skin.py Wolf.glb wolf
 
 Writes data/assets/characters/beasts/<species>/skin.tres and one
 skin_<layer>.png per layer. Needs numpy, scipy, pillow, pygltflib, trimesh (+rtree) and
