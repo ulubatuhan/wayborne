@@ -1,7 +1,7 @@
 extends Node
 
 ## Autoload: oyuncunun oyun durumundan bağımsız tercihleri. Şimdilik tek
-## tercih dil; kayıt dosyasından (user://save.json) ayrı tutuluyor çünkü
+## tercih dil; kayıt dosyalarından (user://saves/slot_N.json) ayrı tutuluyor çünkü
 ## dil "Yeni Oyun" dendiğinde sıfırlanmamalı.
 ##
 ## Desteklenen dillerin tek doğruluk kaynağı burası. Yeni bir dil eklemek

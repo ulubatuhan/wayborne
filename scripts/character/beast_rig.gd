@@ -247,8 +247,8 @@ static func _leg(
 	joints[key + "foot"] = foot
 	joints[key + "toe"] = foot + Vector2(h * float(s.foot) * facing, 0.0)
 
-## Bütün bir hayvan resmi bu pozda boyanıyor (`tools/beast_cut.py` onu
-## kemiklere kesiyor): yarım adımda, dört bacak birbirinden ayrı. Dinlenme
+## Bütün bir hayvan resmi bu pozda boyanıyor (`tools/beast_skin.py` onu
+## kemik ağırlıklı bir deriye çeviriyor): yarım adımda, dört bacak birbirinden ayrı. Dinlenme
 ## pozunda uzak bacak yakın bacağın tam arkasında kalıyor - öyle boyanmış
 ## bir resimden uzak bacak çıkarılamaz.
 const PAINT_PHASE: float = PI * 0.25

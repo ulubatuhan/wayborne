@@ -11,8 +11,9 @@ extends RefCounted
 ## çizilmiş kabul ediliyor: her parçanın PNG'sinde A ekleminin durduğu
 ## piksel (`pivot`) ve kemiğin dinlenme pozundaki yönü sabit. Çizim anında
 ## parça A eklemine oturuyor, kemiğin o anki yönüne dönüyor ve figürün boyu
-## kadar ölçekleniyor - bkz. `part_transform`. Şablon PNG'leri
-## `tests/render_wardrobe_templates.gd` aynı tablodan üretiyor.
+## kadar ölçekleniyor - bkz. `part_transform`. Sanatçı için
+## `tests/export_rig_spec.gd` aynı tablodan `docs/wardrobe/rig_spec.json`
+## üretiyor.
 
 ## Sprite pikselinin figür yüksekliğine oranı: `h == REF_H` iken bir sprite
 ## pikseli bir ekran pikseli.

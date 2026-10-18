@@ -3022,10 +3022,11 @@ func _has_open_panel() -> bool:
 		or _merchant_dialogue_panel != null
 	)
 
-## Sefer sürerken kayıt hiç yapılamaz - `SaveManager`in başındaki not:
-## `to_save_dict()` sefer alanlarını hiç taşımıyor, yazmak sefer bilgisini
-## sessizce kaybettirir. F1'in sentetik seferi de aynı ekranı paylaştığı
-## için aynı kural geçerli.
+## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),
+## çünkü bir kararın hemen önüne alınan elle kayıt, sonucu beğenmeyince
+## yeniden denemenin kapısı olurdu - bkz. `SaveManager`in başındaki not.
+## Otomatik kayıt ayrı: sakin anlarda yuva 0'a yazılıyor. F1'in sentetik
+## seferi de aynı ekranı paylaştığı için aynı kural geçerli.
 func _open_in_game_menu() -> void:
 	if _in_game_menu != null:
 		return

@@ -2,9 +2,9 @@ extends Node
 
 ## F1 ile açılıp kapanan geliştirici menüsü. Autoload olduğu için sahne
 ## değişimlerinde kaybolmaz ve her ekranın üstünde açılabilir. Oyunu
-## duraklatmaz; yalnızca CanvasLayer'ı gizler/gösterir. Nav.return_scene'e
-## hiç dokunmadığı için bir hedefe geçince o ekranın geri tuşu, paneli
-## açtığın yere (oyunun kendisine) döner.
+## duraklatmaz; yalnızca CanvasLayer'ı gizler/gösterir. Bir hedefe geçerken
+## test_selector.gd gezinme yığınına (`Nav.open`) o anki sahneyi ittiği için
+## hedef ekranın geri tuşu, paneli açtığın yere (oyunun kendisine) döner.
 ##
 ## Bir sistemi test edilebilir hale getirmek için test_selector.gd'deki
 ## boş stringi ilgili sahnenin yoluyla değiştirmek yeterli.
