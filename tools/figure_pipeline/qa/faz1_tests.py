@@ -1,5 +1,5 @@
 """Faz 1 hakemleri. Icerik uretilmeden ONCE yazildi; her biri bilinen hatali bir
-ornekte basarisiz olmali (bkz. qa/validate_tests_on_old.py).
+ornekte basarisiz olmali (bu dogrulama betigi kaldirildi; gecmiste: validate_tests_on_old.py).
 
 Esik (prompt): ortalama mutlak fark < 1/255 VE 8/255'ten buyuk fark olan piksel 0.
 Karsilastirma 8 bit, onceden carpilmis (premultiplied) RGBA uzerinde, kanal basina.
