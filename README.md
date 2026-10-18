@@ -11,8 +11,8 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
 ## Oyun döngüsü
 
 1. **Karakter oluştur** — kültür, sınıf (dördü var: Sıra Neferi/Sekban/
-   Kırıkçı/Kalem Efendisi), isim, boy, ten rengi, 6 temel stata dağıtılan
-   puan ve tayfa büyüklüğü seçilir. Tayfa vagonları sürer ve kargo
+   Kırıkçı/Kalem Efendisi), isim, boy, ten rengi, 8 temel stata (altısı savaş, ikisi sivil: Bilgelik ve İnanç)
+   dağıtılan puan ve tayfa büyüklüğü seçilir. Tayfa vagonları sürer ve kargo
    kapasitesini belirler (her vagonda 2 kişi, en fazla 6 vagon); savaşa
    giren **parti** ise ayrı bir kavramdır ve en fazla 4 kişidir.
 2. **Şehirde hazırlan** — Pazar Meydanı'ndan mal al/sat, Tüccar
@@ -47,8 +47,10 @@ belirler (ön / vagonlar / arka), yol sürekli küçük işaretler verir ve
 ihmal edilen işaret büyür, tempoyu zorlamak takat yakar.
 
 Diğer değişmez kural: **kervan ağır kayıp yaşayabilir ama asla yok
-olmaz.** Altın negatife düşmez, erzak sıfırın altına inmez, oyuncunun son
-vagonu kaybedilmez, savaşta düşen biri ölmez — 1 canla ayağa kalkar.
+olmaz.** Altın eksiye düşebilir (borç defteri vade ve faiz işletir), erzak
+sıfırın altına inmez, oyuncunun son vagonu kaybedilmez. İnsanlar ölebilir:
+savaşta Ölümün Kıyısı'na giren herkes bir zara tabidir, bilerek aç bırakılan
+ölebilir; olaylar ise asla öldürmez (en fazla 1 cana indirir).
 
 ## Kod tabanı
 
@@ -64,11 +66,12 @@ wayborne/
 │   ├── world/              # 2D dünya, sahne navigasyonu
 │   ├── ui/                 # Ekranlar ve yeniden kullanılabilir paneller
 │   ├── campaign/           # Kampanya bölümleri + kervan defteri
+│   ├── util/               # Ortak yardımcılar (NodeUtil, TextureLoader)
 │   └── autoload/           # GameState, DevPanel, SaveManager, AudioManager
 ├── data/
 │   ├── assets/audio/       # Müzik (ana menü+yol, şehir)
 │   ├── locale/             # Çeviri metinleri (tr/en)
-│   └── config/             # (henüz kullanılmıyor)
+│   └── config/             # JSON yapılandırma (harita yerleri vb.)
 └── tests/                  # Headless GDScript testleri + denge simülatörü
 ```
 
@@ -101,8 +104,8 @@ godot --headless --script res://tests/run_tests.gd        # exit 1 hata varsa
 godot --headless --script res://tests/simulate_journeys.gd  # denge raporu
 ```
 
-`run_tests.gd` eklenti gerektirmeyen düz bir `SceneTree` koşucusu; yedi
-paket ve 300'den fazla doğrulama, çekirdek sistemlerin (statlar,
+`run_tests.gd` eklenti gerektirmeyen düz bir `SceneTree` koşucusu; elli
+altı paket ve 18.000'den fazla doğrulama, çekirdek sistemlerin (statlar,
 kültürler, savaş, olay motoru, oturum) sözleşmelerini kilitliyor.
 `simulate_journeys.gd` test değil — yüzlerce tohumla sefer koşturup net
 kazanç/moral/açlık/savaş kazanma oranı dağılımı basıyor; oyunu
@@ -123,10 +126,9 @@ tarafında bu başlıkları enjekte ediyor.
 
 ## Yol haritası
 
-Geliştirme fazlar hâlinde ilerliyor; her fazın kapsamı ve gerekçesi
-oturumun konuşma geçmişinde ve proje CLAUDE.md'sinin
-"Development Status" bölümünde. Faz 0-7 tamam: temel oyun döngüsü,
-karakter/savaş sistemi, ilerleme (seviye/huy/stres), CI güvenlik ağı ve
-ekipman (Silah/Zırh/Yüzük/Kolye) kuruldu; İzci son göreve bağlandı, yol
-olayı havuzu 22'ye çıktı, placeholder isimler gerçek lore'a döndü.
-Sıradaki faz kapsamı CLAUDE.md'de.
+Geliştirme fazlar hâlinde ilerliyor. Kapanmış fazların kapsamı, gerekçesi ve
+ölçümleri `docs/history/FAZ_ANLATILARI.md`'de; geçerli kurallar ve açık hedefler
+`CLAUDE.md`'de. Faz 27'ye kadar tamam: oyun döngüsü, karakter ve savaş, ilerleme,
+ekipman ve kuşam, borç ve hafıza, hareket katmanı, render edilmiş yol, karanlık
+arayüz (yarısı ekranlara bağlı). Sıradaki iş listesi depo dışında tutulan
+yapılacaklar klasöründe; açık hedefler `CLAUDE.md`'nin "Ana Hedefler" bölümünde.

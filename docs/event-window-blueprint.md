@@ -1,8 +1,9 @@
 # Olay Penceresi Yeniden Tasarımı — Mimari + Varlık Üretim Planı
 
-**Durum:** Mimari ve varlık listesi onaylandı (§2, §8). Henüz hiçbir
-Godot kodu yazılmadı ve ham görseller üretilmedi — sıradaki adım için
-bkz. §8. `docs/art-prompts.md`'nin kardeşi: o dünya sahneleri
+**Durum:** Mimari ve varlık listesi onaylandı (§2, §8). Uygulandı: olay kartı
+illüstrasyonları (`e6*.jpg`) Faz 22'de geldi ve `road_journey.gd`'de bağlı
+(`EVENT_CARD_ART`); kart kodla çizilen minimal bir çerçeve. Aşağıdaki "henüz
+yazılmadı" ifadeleri tarihtir. `docs/art-prompts.md`'nin kardeşi: o dünya sahneleri
 (yol/şehir/menü) için, bu **olay kartı arayüz kromu ve olay
 illüstrasyonları** için.
 

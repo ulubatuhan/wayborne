@@ -1,7 +1,7 @@
 # Karanlık Arayüz Taslağı (ui-hud-redesign)
 
-**Durum: ikinci tur, onay bekliyor. Bu dal `main`'e birleştirilmedi.** Hiçbir
-mevcut ekranın yerine geçmiyor; taslak bileşenler `scripts/ui/grim/` altında,
+**Durum: onaylandı ve `main`'e birleşti (Faz 27); şehir ve ana menü bağlı, kalan ekranlar §7'de.**
+Aşağıdaki "taslak" ifadeleri tarihtir. Taslak bileşenler `scripts/ui/grim/` altında,
 taslak ekranlar `tests/screenshot_grim_ui.gd` ile çiziliyor
 (`-- karakonak kurtbogazi ...` ile şehir seçilir).
 
