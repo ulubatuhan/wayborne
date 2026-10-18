@@ -325,9 +325,7 @@ def phase2plus() -> None:
                       ("B7_caravan_planner_bg.jpg", "b7_planner.jpg"), ("B8_recruit_bg.jpg", "b8_recruit.jpg"),
                       ("B9_character_party_bg.jpg", "b9_tent.jpg")]:
         background(src, name)
-    # The city's desk: props on both edges, an empty middle for the map and
-    # the brief (the city was the one screen still on flat ink).
-    background("B10_city_desk_bg.jpg", "b10_city.jpg", 1920)
+    # B10 (city desk) is not shipped: the city screen is CityFront now.
     loose_page("B6_world_map_parchment.jpg", "b6_map.png", 1100)
     icon("B2b_profiteering_thumbprint.jpg", "b2b_thumb.png", 96)
 
@@ -340,7 +338,6 @@ def phase2plus() -> None:
     rgba = crop_to_alpha(key(_load("R4_pulsebar_vial_frame.jpg")))
     save(rgba, "r4_vial.png", scale_to_width(rgba, 240))
     for src, name in [("R4a_pulsebar_icon_morale.jpg", "r4a_morale.png"), ("R4b_pulsebar_icon_stress.jpg", "r4b_stress.png"),
-                      ("R4c_pulsebar_icon_danger.jpg", "r4c_danger.png"), ("R4d_pulsebar_icon_stamina.jpg", "r4d_stamina.png"),
                       ("R6a_attention_icon_front.jpg", "r6a_front.png"), ("R6b_attention_icon_wagons.jpg", "r6b_wagons.png"),
                       ("R6c_attention_icon_rear.jpg", "r6c_rear.png"), ("R7a_road_signal_wheel.jpg", "r7a_wheel.png"),
                       ("R7b_road_signal_straggler.jpg", "r7b_straggler.png"), ("R7c_road_signal_smoke.jpg", "r7c_smoke.png"),
@@ -351,10 +348,8 @@ def phase2plus() -> None:
     # every card line recoloured and fought the seal frame.
 
     # Combat.
-    rgba = crop_to_alpha(key(_load("K1_combat_slot_frame.jpg"), seeds=[(728, 360)]))
-    save(rgba, "k1_slot.png", scale_to_width(rgba, 150))
-    rgba = crop_to_alpha(key(_load("K2_deaths_door_overlay.jpg"), seeds=[(728, 360)]))
-    save(rgba, "k2_door.png", scale_to_width(rgba, 150))
+    # K1 (slot frame) and K2 (Death's Door overlay) are not shipped: the slot
+    # is drawn with a glow instead of a frame (CombatUnitSlot).
     rgba = crop_to_alpha(key(_load("K3_hp_stress_bar_frame.jpg"), seeds=[(176, 1464)]))
     save(rgba, "k3_bar.png", scale_to_width(rgba, 240))
     for src, name in [("K4a_status_bleed.jpg", "k4a_bleed.png"), ("K4b_status_blight.jpg", "k4b_blight.png"),

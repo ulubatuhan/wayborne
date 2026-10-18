@@ -106,7 +106,7 @@ CUSTOM_SIZE = {
 
 BACKGROUNDS = [
     "b1_guild.jpg", "b2_market.jpg", "b3_tavern.jpg", "b4_yard.jpg", "b5_church.jpg",
-    "b7_planner.jpg", "b8_recruit.jpg", "b9_tent.jpg", "b10_city.jpg", "l1_ledger.jpg",
+    "b7_planner.jpg", "b8_recruit.jpg", "b9_tent.jpg", "l1_ledger.jpg",
 ]
 
 # Event card illustrations (Faz 22's new category A): full bleed, no

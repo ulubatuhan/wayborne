@@ -26,9 +26,18 @@ SIZE = 128
 ICON_SIZE = (93, 96)
 INK = (38, 28, 22)
 
-# Oyunun kullandığı aileler; geri kalan pakette dursun, Web build'e girmesin.
-FAMILIES = ("fire", "flame", "smoke", "spark", "star", "magic", "trace", "twirl",
-            "circle", "slash", "scorch", "light", "scratch", "dirt", "muzzle")
+# Oyunun kodda gerçekten çizdiği sprite'lar (status_fx.gd, combat_fx_layer.gd;
+# flame_01-06 ve smoke_04-08 dinamik adlandırılıyor). Aile adıyla süzmek
+# kullanılmayan numaraları da geri getiriyordu; geri kalan pakette dursun,
+# oyuna girmesin. Yeni bir sprite kullanılacaksa buraya eklenir.
+SPRITES = (
+    "circle_02", "circle_05", "dirt_01", "fire_01", "fire_02", "flame_01",
+    "flame_02", "flame_03", "flame_04", "flame_05", "flame_06", "light_01",
+    "light_02", "light_03", "magic_03", "magic_04", "slash_02", "smoke_02",
+    "smoke_03", "smoke_04", "smoke_05", "smoke_06", "smoke_07", "smoke_08",
+    "spark_05", "spark_06", "star_04", "star_06", "trace_03", "twirl_01",
+    "twirl_02",
+)
 
 
 def sprites() -> int:
@@ -36,7 +45,7 @@ def sprites() -> int:
     count = 0
     for name in sorted(os.listdir(SRC)):
         stem, ext = os.path.splitext(name)
-        if ext != ".png" or stem.rsplit("_", 1)[0] not in FAMILIES:
+        if ext != ".png" or stem not in SPRITES:
             continue
         lum = Image.open(os.path.join(SRC, name)).convert("L")
         im = Image.new("RGBA", lum.size, (255, 255, 255, 0))
