@@ -94,6 +94,9 @@ func _test_walk_cadence_matches_ground_speed(t) -> void:
 							"%s ayağı zeminde kayıyor" % figure.get("_kind"))
 		# Normal tempoda, tam kondisyonda, 1x'te insan sakin yürüyüşte.
 		var person := caravan.get_children().filter(func(c): return c is WalkFigure and c.visible and c.get("_kind") == WalkFigure.KIND_PERSON)[0] as WalkFigure
+		t.ok(road.world_scale_holds(0.0, 0.02), "duran kervanda manzara ölçeği yerinde kalır (kamp, Dur)")
+		t.ok(road.world_scale_holds(0.02, 0.002), "yürüyüş yeni başlarken ölçek yerinde kalır")
+		t.not_ok(road.world_scale_holds(0.02, 0.019), "oturmuş yürüyüşte ölçek uyum sağlar")
 		var normal: float = road.scenic_ground_speed(walk, amble, brisk)
 		t.ok(absf(person.cadence_for_ground(normal) - WalkFigure.WALK_CADENCE) < 0.01,
 			"normal tempoda insan %.2f çevrim/s yürüyor" % WalkFigure.WALK_CADENCE)

@@ -1678,9 +1678,18 @@ static func scenic_ground_speed(natural_px_s: float, amble_px_s: float, brisk_px
 		return 0.0
 	return clampf(natural_px_s, minf(amble_px_s, brisk_px_s), brisk_px_s)
 
+## Manzara ölçeği kervan yürümüyorken (kamp, "Dur" emri) ya da yürüyüş yeni
+## başlarken değişmemeli: `hedef = zemin hızı / gün hızı` ve gün hızı sıfıra
+## yaklaşırken hedef sonsuza gidiyordu - ölçek patlıyor, duraklar (kule)
+## kamp kurulunca kadrajdan bir anda kaçıyordu (görev 12.2b). Saf fonksiyon.
+static func world_scale_holds(day_rate: float, eased_day_rate: float) -> bool:
+	return day_rate <= 1e-5 or eased_day_rate < day_rate * 0.5
+
 func _update_world_scale(delta: float, day_rate: float) -> void:
 	var blend := 1.0 - exp(-delta / DAY_RATE_EASE_SECONDS)
 	_day_rate = lerpf(_day_rate, day_rate, blend)
+	if _world_scale_set and world_scale_holds(day_rate, _day_rate):
+		return
 	var natural := _caravan.get_walk_ground_speed() * JourneyClock.REAL_SECONDS_PER_DAY
 	if natural <= 0.0:
 		return
