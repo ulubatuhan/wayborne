@@ -15,7 +15,6 @@ Dokular 512 px'e kucultuldu, normal haritalari alinmadi. CC-BY olanlar oyunun CR
 | elvs_basic_felt_elf_shoes | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1279 |
 | elvs_caesar_sandals1 | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1915 |
 | elvs_charity_veil1 | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/2610 |
-| elvs_ladies_apron | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1446 |
 | elvs_male_boho_top1 | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1808 |
 | elvs_male_trouser | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1796 |
 | elvs_ruffle_sleeve_peasant_blouse_1 | Elvaerwyn | CC-BY | http://www.makehumancommunity.org/node/1256 |

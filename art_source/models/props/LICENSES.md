@@ -5,7 +5,6 @@ Hepsi CC0 (atıf gerekmez, ticari kullanım serbest). Kaynaklar:
 | klasör | paket | kaynak |
 |---|---|---|
 | quaternius_medieval_village | Quaternius · Medieval Village Pack | https://opengameart.org/content/lowpoly-medieval-village-pack |
-| quaternius_megakit_village | Quaternius · Medieval Village MegaKit (Standard) | https://quaternius.itch.io/medieval-village-megakit |
 | quaternius_fantasy_props | Quaternius · Fantasy Props MegaKit (Standard) | https://quaternius.itch.io/fantasy-props-megakit |
 | quaternius_modular_medieval | Quaternius · Modular Medieval Pack | https://opengameart.org/content/lowpoly-medieval-buildings |
 | quaternius_farm | Quaternius · Farm Buildings | https://quaternius.itch.io/lowpoly-farm-buildings |

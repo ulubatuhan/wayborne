@@ -14,7 +14,6 @@ const CC_BY: Array = [
 	["elvs_basic_felt_elf_shoes", "Elvaerwyn", "http://www.makehumancommunity.org/node/1279"],
 	["elvs_caesar_sandals1", "Elvaerwyn", "http://www.makehumancommunity.org/node/1915"],
 	["elvs_charity_veil1", "Elvaerwyn", "http://www.makehumancommunity.org/node/2610"],
-	["elvs_ladies_apron", "Elvaerwyn", "http://www.makehumancommunity.org/node/1446"],
 	["elvs_male_boho_top1", "Elvaerwyn", "http://www.makehumancommunity.org/node/1808"],
 	["elvs_male_trouser", "Elvaerwyn", "http://www.makehumancommunity.org/node/1796"],
 	["elvs_ruffle_sleeve_peasant_blouse_1", "Elvaerwyn", "http://www.makehumancommunity.org/node/1256"],

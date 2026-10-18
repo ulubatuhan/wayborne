@@ -14,7 +14,6 @@ MakeHuman topluluk giysileri — https://static.makehumancommunity.org/assets/as
 | elvs_basic_felt_elf_shoes | Elvaerwyn | http://www.makehumancommunity.org/node/1279 |
 | elvs_caesar_sandals1 | Elvaerwyn | http://www.makehumancommunity.org/node/1915 |
 | elvs_charity_veil1 | Elvaerwyn | http://www.makehumancommunity.org/node/2610 |
-| elvs_ladies_apron | Elvaerwyn | http://www.makehumancommunity.org/node/1446 |
 | elvs_male_boho_top1 | Elvaerwyn | http://www.makehumancommunity.org/node/1808 |
 | elvs_male_trouser | Elvaerwyn | http://www.makehumancommunity.org/node/1796 |
 | elvs_ruffle_sleeve_peasant_blouse_1 | Elvaerwyn | http://www.makehumancommunity.org/node/1256 |
@@ -35,7 +34,7 @@ Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenin
 
 ## CC0 (atıf gerekmez)
 
-- Quaternius — Medieval Village Pack, Medieval Village MegaKit, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals
+- Quaternius — Medieval Village Pack, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals
 - Kenney — Castle Kit, Survival Kit, Particle Pack
 - Kay Lousberg — KayKit Medieval Hexagon
 - MakeHuman topluluğu — culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg'nin CC0 giysileri
