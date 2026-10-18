@@ -22,7 +22,7 @@ extends RefCounted
 
 ## Bir ara durak: yolun ortasında görünen ve okunan bir şey.
 const STOP_NONE: String = ""
-const STOP_HAMLET: String = "hamlet"
+const STOP_MEZRA: String = "mezra"
 const STOP_OUTPOST: String = "outpost"
 const STOP_MINE: String = "mine"
 const STOP_PASS: String = "pass"
@@ -131,13 +131,13 @@ func _pick_stop(biome: String, rng: RandomNumberGenerator) -> String:
 		ArtPalette.BIOME_MOUNTAIN:
 			pool = [STOP_PASS, STOP_MINE, STOP_OUTPOST]
 		ArtPalette.BIOME_LAKE:
-			pool = [STOP_BRIDGE, STOP_HAMLET]
+			pool = [STOP_BRIDGE, STOP_MEZRA]
 		ArtPalette.BIOME_FOREST:
-			pool = [STOP_SHRINE, STOP_HAMLET, STOP_OUTPOST]
+			pool = [STOP_SHRINE, STOP_MEZRA, STOP_OUTPOST]
 		ArtPalette.BIOME_MARSH:
 			pool = [STOP_BRIDGE, STOP_SHRINE]
 		_:
-			pool = [STOP_HAMLET, STOP_OUTPOST]
+			pool = [STOP_MEZRA, STOP_OUTPOST]
 	return pool[rng.randi_range(0, pool.size() - 1)]
 
 ## Eğim: dağ tırmanış, göl iniş, gerisi düze yakın. Görsel yol çizgisini
@@ -246,10 +246,10 @@ static func biome_name_key(biome: String) -> String:
 
 static func stop_name_key(stop: String) -> String:
 	match stop:
-		STOP_HAMLET: return "STOP_HAMLET"
+		STOP_MEZRA: return "STOP_MEZRA"
 		STOP_OUTPOST: return "STOP_OUTPOST"
 		STOP_MINE: return "STOP_MINE"
 		STOP_PASS: return "STOP_PASS"
 		STOP_SHRINE: return "STOP_SHRINE"
 		STOP_BRIDGE: return "STOP_BRIDGE"
-		_: return "STOP_HAMLET"
+		_: return "STOP_MEZRA"

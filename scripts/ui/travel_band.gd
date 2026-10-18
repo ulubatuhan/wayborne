@@ -954,7 +954,7 @@ func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 ## gerisinde duruyor, o yüzden bunun ~%60'ı. `height` şeridin 0.15'i.
 const STOP_PX_PER_M_OF_HEIGHT: float = 0.37
 const STOP_SPRITES := {
-	RouteTerrain.STOP_HAMLET: [["house_2", -1.05, false], ["hay", -0.25, false], ["house_1", 0.45, true], ["well", 1.25, false]],
+	RouteTerrain.STOP_MEZRA: [["house_2", -1.05, false], ["hay", -0.25, false], ["house_1", 0.45, true], ["well", 1.25, false]],
 	RouteTerrain.STOP_OUTPOST: [["tent", -0.85, false], ["outpost", 0.35, false], ["torch", 1.05, false]],
 	RouteTerrain.STOP_MINE: [["mine", 0.0, false], ["crate_mv", 1.15, false]],
 }
@@ -984,7 +984,7 @@ func _draw_stop(stop: String, base: Vector2, height: float) -> void:
 	var stone := ArtPalette.fade_to_haze(Color(0.46, 0.46, 0.48), haze, 0.30)
 
 	match stop:
-		RouteTerrain.STOP_HAMLET:
+		RouteTerrain.STOP_MEZRA:
 			for offset in [-0.7, 0.0, 0.75]:
 				var h := height * (0.62 if is_zero_approx(offset) else 0.46)
 				_draw_hut(base + Vector2(height * offset, 0.0), h, wall, roof)

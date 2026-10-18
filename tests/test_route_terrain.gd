@@ -168,7 +168,7 @@ func _test_every_biome_and_stop_is_named(t) -> void:
 		var key := RouteTerrain.biome_name_key(String(biome))
 		t.ne(tr(key), key, "biyom adı çeviride tanımlı olmalı (%s)" % biome)
 	var stops: Array[String] = [
-		RouteTerrain.STOP_HAMLET, RouteTerrain.STOP_OUTPOST, RouteTerrain.STOP_MINE,
+		RouteTerrain.STOP_MEZRA, RouteTerrain.STOP_OUTPOST, RouteTerrain.STOP_MINE,
 		RouteTerrain.STOP_PASS, RouteTerrain.STOP_SHRINE, RouteTerrain.STOP_BRIDGE,
 	]
 	for stop in stops:

@@ -37,7 +37,7 @@ class Resolution extends RefCounted:
 const STOP_CONTEXT_KEYS: Dictionary = {
 	RouteTerrain.STOP_SHRINE: "near_shrine",
 	RouteTerrain.STOP_PASS: "near_mountain_pass",
-	RouteTerrain.STOP_HAMLET: "near_hamlet",
+	RouteTerrain.STOP_MEZRA: "near_mezra",
 	RouteTerrain.STOP_OUTPOST: "near_outpost",
 	RouteTerrain.STOP_MINE: "near_mine",
 	RouteTerrain.STOP_BRIDGE: "near_bridge",

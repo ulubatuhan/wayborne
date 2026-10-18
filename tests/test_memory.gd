@@ -626,8 +626,8 @@ func _test_leave_behind_and_party_hp(t) -> void:
 	companion.current_hp = 1
 	t.ok(event.is_eligible(session.build_event_context()), "ağır yaralı yoldaş varken çıkar")
 	t.ok(
-		event.get_weight(_with(session.build_event_context(), {"near_hamlet": 1.0}))
-			> event.get_weight(_with(session.build_event_context(), {"near_hamlet": 0.0})),
+		event.get_weight(_with(session.build_event_context(), {"near_mezra": 1.0}))
+			> event.get_weight(_with(session.build_event_context(), {"near_mezra": 0.0})),
 		"köyün önünde çok daha olası"
 	)
 

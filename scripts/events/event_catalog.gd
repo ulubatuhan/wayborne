@@ -1626,7 +1626,7 @@ static func _bandit_tribute_toll() -> GameEvent:
 ## Bir köyün önünden geçerken ağır yaralı bir yoldaş: onu köylülere
 ## bırakmak kervanı hızlandırır ve erzak kazandırır, taşımak yavaşlatır,
 ## iyileştirmek pahalıdır. Aynı zamanda konak durağının ilk mekanik
-## karşılığı (bkz. near_hamlet).
+## karşılığı (bkz. near_mezra).
 static func _leave_the_wounded() -> GameEvent:
 	var event := _event("evt_leave_the_wounded", "EVT_LEAVE_WOUNDED", 0.3)
 	event.cooldown_days = 10
@@ -1636,7 +1636,7 @@ static func _leave_the_wounded() -> GameEvent:
 	])
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
-			EventCondition.make("near_hamlet", EventCondition.Op.GREATER_EQUAL, 1),
+			EventCondition.make("near_mezra", EventCondition.Op.GREATER_EQUAL, 1),
 		]), 6.0),
 	])
 	event.choices = _choices([

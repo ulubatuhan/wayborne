@@ -166,7 +166,7 @@ const EVENT_CARD_ART: Dictionary = {
 	"evt_roadside_shrine": "e6h_shrine.jpg",
 	"evt_culture_highland_challenge": "e6i_pass.jpg",
 	"evt_scouted_pass": "e6i_pass.jpg",
-	"evt_leave_the_wounded": "e6j_hamlet.jpg",
+	"evt_leave_the_wounded": "e6j_village.jpg",
 	"evt_frontier_outpost": "e6k_outpost.jpg",
 	"evt_mine_collapse": "e6l_mine.jpg",
 	"evt_failing_bridge": "e6m_bridge.jpg",
@@ -2071,7 +2071,7 @@ func _serve_meal(mode: String, typed_selected: Array[CharacterData]) -> void:
 func _after_meal() -> void:
 	var context := _session.build_event_context()
 	# Günün durağı olay bağlamına bayrak olarak giriyor (near_shrine,
-	# near_hamlet, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
+	# near_mezra, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
 	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_terrain_day()).stop
 	context.merge(EventResolver.stop_context(stop), true)

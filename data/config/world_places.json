@@ -1032,7 +1032,7 @@
   },
   {
    "id": 73,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "highland_mines",
@@ -1049,7 +1049,7 @@
   },
   {
    "id": 74,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "old_empire",
@@ -1066,7 +1066,7 @@
   },
   {
    "id": 75,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "southern",
@@ -1083,7 +1083,7 @@
   },
   {
    "id": 76,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "old_empire",
@@ -1100,7 +1100,7 @@
   },
   {
    "id": 77,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "southern",
@@ -1117,7 +1117,7 @@
   },
   {
    "id": 78,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "old_empire",
@@ -1134,7 +1134,7 @@
   },
   {
    "id": 79,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "old_empire",
@@ -1168,7 +1168,7 @@
   },
   {
    "id": 81,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "old_empire",
@@ -1185,7 +1185,7 @@
   },
   {
    "id": 82,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "nomad",
@@ -1202,7 +1202,7 @@
   },
   {
    "id": 83,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "highland",
@@ -1219,7 +1219,7 @@
   },
   {
    "id": 84,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "highland",
@@ -1236,7 +1236,7 @@
   },
   {
    "id": 85,
-   "kind": "ih_hamlet",
+   "kind": "ih_mezra",
    "type_tr": "Mezra",
    "group": "koy",
    "culture": "valley",
