@@ -1,0 +1,170 @@
+name: Screenshots
+
+# Görsel bozulmayı yakalamak için: kritik ekranların fotoğrafını çeker,
+# main'deki son başarılı koşunun fotoğraflarıyla karşılaştırır ve raporu
+# iş özetine yazar. Yapısal testler yerleşimi doğrular, görünümü değil;
+# birkaç kez bozulmayı kullanıcı yakaladı (bkz. CLAUDE.md, Testing).
+#
+# Kapı DEĞİL: birleştirmeyi engellemez, yalnızca rapor eder. Karşılaştırma
+# kendi eşiklerini yerel ölçümden aldı (iki ardışık çekim arasında piksellerin
+# yalnızca %0,014-0,049'u değişiyor, eşik %1). Yazılım rasterleyicisinin
+# GPU'dan farklı çizdiği için baz görüntüler hep bu iş akışının kendi
+# çıktısından gelir, yerelden değil.
+#
+# main'e push: fotoğraflar önbelleğe baz olarak yazılır.
+# Pull request ve elle çalıştırma: önbellekteki baz ile karşılaştırılır.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/**"
+      - "scenes/**"
+      - "data/assets/**"
+      - "data/locale/**"
+      - "tests/screenshot_*.gd"
+      - "tools/ci/**"
+      - "project.godot"
+      - ".github/workflows/screenshots.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "scenes/**"
+      - "data/assets/**"
+      - "data/locale/**"
+      - "tests/screenshot_*.gd"
+      - "tools/ci/**"
+      - "project.godot"
+      - ".github/workflows/screenshots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "screenshots-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  # Ekran görüntüsü araçları (tests/screenshot_*.gd) bu klasörlere yazıyor.
+  GODOT_USER_DIR: ~/.local/share/godot/app_userdata/Wayborne
+  SHOT_SCRIPTS: "screenshot_menu screenshot_city screenshot_journey_screen screenshot_combat"
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.2.2
+          use-dotnet: false
+          include-templates: false
+
+      - name: Install display libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libglu1-mesa
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --quiet pillow numpy
+
+      - name: Test the comparison tool
+        run: python3 -m unittest discover -s tools/ci -p "test_*.py"
+
+      - name: Cache Godot import
+        uses: actions/cache@v4
+        with:
+          path: |
+            .godot
+            **/*.import
+            **/*.translation
+          key: godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-${{ github.sha }}
+          restore-keys: |
+            godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-
+
+      - name: Import project
+        run: |
+          set -o pipefail
+          if ! godot --headless --import 2>&1 | tee import.log; then
+            echo "Import çöktü; bir kez daha deneniyor."
+            godot --headless --import 2>&1 | tee import.log
+          fi
+
+      - name: Capture screenshots
+        run: |
+          set -o pipefail
+          mkdir -p shots/current
+          for name in $SHOT_SCRIPTS; do
+            echo "── $name"
+            LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1920x1080x24" \
+              godot --path . --rendering-driver opengl3 --script "res://tests/$name.gd" 2>&1 \
+              | tee -a screens.log
+          done
+          # Araçların hepsi user://<ad>_shots/ altına yazıyor.
+          for dir in $(eval echo "$GODOT_USER_DIR")/*_shots; do
+            [ -d "$dir" ] && cp -r "$dir" shots/current/
+          done
+          find shots/current -name '*.png' | wc -l
+
+      - name: Fail on script errors
+        if: always()
+        run: |
+          [ -f screens.log ] || exit 0
+          if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' screens.log; then
+            echo "::error file=screens.log::screens.log içinde betik hatası var"
+            exit 1
+          fi
+
+      - name: Restore baseline
+        if: github.event_name != 'push'
+        uses: actions/cache/restore@v4
+        with:
+          path: shots/baseline
+          key: screens-baseline-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            screens-baseline-${{ runner.os }}-
+
+      - name: Compare with baseline
+        if: github.event_name != 'push'
+        run: |
+          if [ ! -d shots/baseline ]; then
+            echo "### Ekran görüntüsü karşılaştırması" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Henüz baz görüntü yok (main'e ilk push bunu üretir); karşılaştırma atlandı." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python3 tools/ci/screenshot_diff.py shots/baseline shots/current \
+            --tolerance 12 --max-percent 1.0 \
+            --report shots/report.md --diff-dir shots/diff
+          cat shots/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.sha }}
+          path: |
+            shots/current
+            shots/diff
+            shots/report.md
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Prepare baseline
+        if: github.event_name == 'push'
+        run: |
+          rm -rf shots/baseline
+          cp -r shots/current shots/baseline
+
+      - name: Save baseline
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: shots/baseline
+          key: screens-baseline-${{ runner.os }}-${{ github.sha }}
