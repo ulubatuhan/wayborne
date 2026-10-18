@@ -28,16 +28,6 @@ func _test_gauge_curves(t) -> void:
 	t.eq(SurvivalGauge.fill_fraction(-5, 100), 0.0, "dolum tabanda kalıyor")
 	t.eq(SurvivalGauge.severity(1.0, true), 0.0, "dolu moral: kötülük yok")
 	t.eq(SurvivalGauge.severity(1.0, false), 1.0, "tam tehlike: en kötü")
-	t.eq(SurvivalGauge.crack_amount(0.0), 0.0, "sağlam şişe çatlamıyor")
-	t.eq(SurvivalGauge.crack_amount(SurvivalGauge.CRACK_FROM), 0.0, "çatlak eşikte başlıyor")
-	t.eq(SurvivalGauge.crack_amount(1.0), 1.0, "en kötüde tam çatlak")
-	var last := -1.0
-	var monotone := true
-	for i in 21:
-		var c := SurvivalGauge.crack_amount(i / 20.0)
-		monotone = monotone and c >= last
-		last = c
-	t.ok(monotone, "çatlak kötüleştikçe yalnızca artıyor")
 	var low_max := 0.0
 	var high_min := 2.0
 	for k in 60:
@@ -108,7 +98,7 @@ func _test_menu_beside_building(t) -> void:
 
 func _test_assets_exist(t) -> void:
 	for name in ["ash_flake.png", "vignette.png", "grime_overlay.png", "frost_overlay.png", "tatter_mask.png",
-			"crack_overlay.png", "notice_card.png", "ink_blot.png", "lantern_glow.png"]:
+			"notice_card.png", "ink_blot.png", "lantern_glow.png"]:
 		t.ok(GrimTheme.texture(name) != null, "doku var: %s" % name)
 	for cue in GrimTheme.SOUND_CUES:
 		var path := GrimTheme.SFX_DIR + String(GrimTheme.SOUND_CUES[cue])

@@ -4,7 +4,9 @@ extends Control
 ## Hayati gösterge: bir sayı çubuğu değil, organik bir nesne. Üç biçim:
 ##
 ## - VIAL: cam şişede sıvı. Değer düştükçe sıvı çekilir, durum kötüleştikçe
-##   cam çatlar (moral, açlık, yorgunluk).
+##   sıvı çekilir ve çalkalanır (moral, açlık, yorgunluk). Cam çatlağı
+##   kullanıcı isteğiyle kaldırıldı (görev 2.5): yıpranma sayıda ve sıvı
+##   seviyesinde okunuyor.
 ## - FLAME: fitil. Değer düştükçe alev küçülür, mavileşir ve titrer
 ##   (sıcaklık/soğuk).
 ## - STAIN: kan lekesi. Değer büyüdükçe leke yayılır (tehlike).
@@ -18,8 +20,6 @@ enum Kind { VIAL, FLAME, STAIN }
 
 const SIZE: Vector2 = Vector2(64, 92)
 const NUMBER_HEIGHT: float = 18.0
-## Çatlak bu kötülükten sonra görünmeye başlar ve tamda tam görünür.
-const CRACK_FROM: float = 0.45
 const FLAME_MIN_SHARE: float = 0.12
 
 var kind: Kind = Kind.VIAL
@@ -99,9 +99,6 @@ static func fill_fraction(v: float, max_v: float) -> float:
 static func severity(fraction: float, low_is_bad: bool) -> float:
 	return 1.0 - fraction if low_is_bad else fraction
 
-static func crack_amount(sev: float) -> float:
-	return clampf((sev - CRACK_FROM) / (1.0 - CRACK_FROM), 0.0, 1.0)
-
 ## Sıvı yüzeyinin dalgası: dolu şişe sakin, boşalan şişe çalkalanır.
 static func meniscus(x_share: float, t: float, sev: float) -> float:
 	return sin(x_share * TAU * 1.5 + t * 2.4) * (0.8 + 2.4 * sev)
@@ -175,12 +172,6 @@ func _draw_vial(box: Rect2, frac: float, sev: float) -> void:
 	if marker_value >= 0.0:
 		var mark_y := lerpf(bottom, top, fill_fraction(marker_value, max_value))
 		draw_line(Vector2(left - 5, mark_y), Vector2(right + 5, mark_y), ArtPalette.UI_SIGNAL_ESCALATED, 2.0)
-	var crack := crack_amount(sev)
-	if crack > 0.0:
-		var tex := GrimTheme.texture("crack_overlay.png")
-		if tex != null:
-			draw_texture_rect(tex, Rect2(box.position + Vector2(4, box.size.y * 0.26),
-				Vector2(box.size.x - 8, box.size.y * 0.72)), false, Color(1, 1, 1, crack))
 
 func _draw_flame(box: Rect2, frac: float) -> void:
 	var base := Vector2(box.get_center().x, box.end.y - 10)

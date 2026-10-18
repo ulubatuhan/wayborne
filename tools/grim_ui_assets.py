@@ -159,34 +159,6 @@ def tatter_mask():
     save_rgba("tatter_mask.png", solid(s, s, (255, 255, 255)) * v[..., None], np.ones((s, s)))
 
 
-def crack_overlay():
-    """Kırık cam: bir çarpma noktasından dallanan çatlaklar."""
-    s = 256
-    img = Image.new("L", (s, s), 0)
-    draw = ImageDraw.Draw(img)
-    r = rng(51)
-    cx, cy = s * 0.38, s * 0.30
-    for i in range(9):
-        ang = i / 9 * math.tau + r.random() * 0.4
-        x, y = cx, cy
-        for _ in range(7):
-            step = 14 + r.random() * 22
-            ang += (r.random() - 0.5) * 0.7
-            nx, ny = x + math.cos(ang) * step, y + math.sin(ang) * step
-            draw.line([(x, y), (nx, ny)], fill=230, width=1)
-            if r.random() < 0.35:
-                b = ang + (r.random() - 0.5) * 2.2
-                draw.line([(nx, ny), (nx + math.cos(b) * step * 0.6, ny + math.sin(b) * step * 0.6)],
-                          fill=160, width=1)
-            x, y = nx, ny
-    for k in range(3):  # çarpma halkaları
-        rad = 6 + k * 9
-        draw.arc([cx - rad, cy - rad, cx + rad, cy + rad], r.random() * 90, 280 + r.random() * 70,
-                 fill=140, width=1)
-    a = np.asarray(img.filter(ImageFilter.GaussianBlur(0.45)), dtype=float) / 255.0
-    save_rgba("crack_overlay.png", solid(s, s, (235, 238, 240)), a)
-
-
 def torn_edge_alpha(w, h, salt, depth):
     """Kenarları yırtık bir kâğıdın alfası."""
     yy, xx = np.mgrid[0:h, 0:w].astype(float)
@@ -310,7 +282,7 @@ def main():
     os.makedirs(OUT_TEX, exist_ok=True)
     os.makedirs(OUT_SND, exist_ok=True)
     for fn in (ash_flake, vignette, grime_overlay, frost_overlay, tatter_mask,
-               crack_overlay, notice_card, ink_blot, lantern_glow):
+               notice_card, ink_blot, lantern_glow):
         fn()
     sounds()
 
