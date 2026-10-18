@@ -596,14 +596,6 @@ func get_affliction_count() -> int:
 				total += 1
 	return total
 
-## Kadroda kırılma noktasını aşmış olanlar (bkz. CharacterData.is_stressed).
-func get_stressed_characters() -> Array[CharacterData]:
-	var stressed: Array[CharacterData] = []
-	for character in party:
-		if character.is_stressed():
-			stressed.append(character)
-	return stressed
-
 ## Yeni gelen sıfırla gelmiyor: batmış bir kervana katılan biri anlatılanları
 ## duyar, kadronun havasının bir kısmını üstlenir. Sıfırla gelseydi "birini
 ## gönder, yenisini tut" stresi tek hamlede düşüren bedava bir düğmeye
@@ -2573,9 +2565,6 @@ var _earned_wagon_milestones: Dictionary = {}  # "level:4" / "rep:20" -> true
 
 func get_earned_wagon_count() -> int:
 	return _earned_wagon_milestones.size()
-
-func has_earned_wagon_milestone(key: String) -> bool:
-	return _earned_wagon_milestones.has(key)
 
 ## Aşılmış ama henüz ödenmemiş eşikleri öder. Kaç vagon verdiğini döner -
 ## `finish_journey()` bunu varış özetine yazıyor, çünkü görünmeyen bir

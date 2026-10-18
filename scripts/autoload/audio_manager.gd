@@ -116,15 +116,6 @@ func play_track(track_id: String) -> void:
 	_standby.play()
 	_crossfade()
 
-func stop_music() -> void:
-	_current_track = ""
-	_kill_fade()
-	_active.stop()
-	_standby.stop()
-
-func get_current_track() -> String:
-	return _current_track
-
 ## Tek kerelik bir ses çalar (bkz. `SFX_*`). Dosya eksikse sessizce hiçbir
 ## şey yapmıyor - `_load_stream` ile aynı gerekçe: bir ses efekti asset'i
 ## henüz gelmemişse oyun onsuz da çalışmalı, çökmemeli.

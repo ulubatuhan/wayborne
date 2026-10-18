@@ -37,20 +37,6 @@ static func _finish(root: Control, ash: float) -> void:
 		root.add_child(a)
 	root.add_child(GrimTheme.overlay("vignette.png", 0.95))
 
-static func _chip(text: String, colour: Color) -> PanelContainer:
-	var p := PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(colour.darkened(0.6), 0.75)
-	box.border_color = colour
-	box.border_width_left = 3
-	box.content_margin_left = 8
-	box.content_margin_right = 8
-	box.content_margin_top = 2
-	box.content_margin_bottom = 2
-	p.add_theme_stylebox_override("panel", box)
-	p.add_child(GrimTheme.label(text, GrimTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT))
-	return p
-
 static func _stat(caption_key: String, value: String, colour: Color) -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", -4)

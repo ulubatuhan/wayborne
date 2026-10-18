@@ -68,12 +68,6 @@ static func get_chapter(index: int) -> CampaignChapter:
 		return null
 	return _chapters[index]
 
-static func get_chapter_by_id(chapter_id: String) -> CampaignChapter:
-	for chapter in get_chapters():
-		if chapter.chapter_id == chapter_id:
-			return chapter
-	return null
-
 static func chapter_count() -> int:
 	return get_chapters().size()
 

@@ -821,9 +821,6 @@ func get_summary_line() -> String:
 func get_appearance_line() -> String:
 	return "%d cm · %s ten" % [height_cm, get_skin_tone_name(skin_tone)]
 
-func get_gender_and_weight_line() -> String:
-	return "%s · %s" % [get_gender_name(gender), get_body_weight_name(body_weight)]
-
 func to_dict() -> Dictionary:
 	return {
 		"name": character_name,

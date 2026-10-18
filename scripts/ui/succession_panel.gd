@@ -194,9 +194,6 @@ static func grievance_label_key(grievance: String) -> String:
 			return "UI_GRIEVANCE_PASSED_OVER"
 	return grievance
 
-func get_selected() -> CharacterData:
-	return _selected
-
 func select(candidate: CharacterData) -> void:
 	if _candidates.has(candidate):
 		_selected = candidate

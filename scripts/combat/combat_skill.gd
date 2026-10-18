@@ -101,9 +101,6 @@ enum Area { SINGLE, ADJACENT, ALL, RANDOM }
 ## çıkarıyor, bu da hasar vermeden kazanılan bir tur.
 @export var shift_amount: int = 0
 
-func is_area() -> bool:
-	return area != Area.SINGLE
-
 func shifts() -> bool:
 	return shift_amount != 0
 

@@ -242,9 +242,6 @@ func set_beast_species(species: String) -> void:
 	_beast_species = species
 	queue_redraw()
 
-func get_action() -> String:
-	return _action_clip
-
 ## Arketipin silah ailesi (`CombatFigure.ARCHETYPES[...].weapon`).
 func weapon_kind() -> String:
 	return String(_archetype.get("weapon", "none"))

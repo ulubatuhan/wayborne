@@ -40,10 +40,6 @@ func joint(name: String) -> Vector2:
 			_joints[joint_names[i]] = joint_points[i]
 	return _joints.get(name, Vector2.ZERO)
 
-func has_joint(name: String) -> bool:
-	joint("")
-	return _joints.has(name)
-
 func layer_count() -> int:
 	return layer_textures.size()
 

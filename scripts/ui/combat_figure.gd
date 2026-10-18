@@ -414,12 +414,6 @@ func _state_tone() -> Color:
 func set_flash(color: Color) -> void:
 	modulate = color
 
-## Saldıran figür hedefine doğru kısa bir hamle yapar - `_draw()`'ın en
-## başında uygulanan yatay bir dönüşüm, silüetin kendi çizimi hiç
-## değişmeden kayıyor.
-func set_lunge(offset: float) -> void:
-	set_shift(Vector2(offset, 0.0))
-
 ## Hamle ve sarsıntının toplamı - silüetin tamamı kayıyor.
 func set_shift(offset: Vector2) -> void:
 	if _offset == offset:

@@ -91,9 +91,6 @@ func get_quantity(item_id: String) -> int:
 		return _entries[item_id].quantity
 	return 0
 
-func has_item(item_id: String, quantity: int = 1) -> bool:
-	return get_quantity(item_id) >= quantity
-
 func get_all_entries() -> Array:
 	return _entries.values()
 

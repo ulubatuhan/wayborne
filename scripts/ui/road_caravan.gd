@@ -648,9 +648,6 @@ func get_heading() -> float:
 func is_turning() -> bool:
 	return _turning
 
-func is_leader_mounted() -> bool:
-	return _leader_mounted
-
 ## Birimlerin o anki yüzleri, önden arkaya - test okuyor.
 func get_unit_facings() -> Array[float]:
 	return _unit_facing.duplicate()
@@ -1083,9 +1080,6 @@ func _advance_leader(delta: float) -> void:
 
 func _leader_turn_scale_sign() -> float:
 	return signf(_leader_turn_scale) if not is_zero_approx(_leader_turn_scale) else 1.0
-
-func _leader_centre_rel() -> float:
-	return get_leader_centre() - _anchor_x
 
 ## Dönüşün bir karesi: birimlerin yüzü dalgayla, liderin yeri yoluyla.
 func _advance_turn(delta: float) -> void:

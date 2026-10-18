@@ -232,9 +232,6 @@ func set_weather(weather: String) -> void:
 	_weather_visuals = RouteWeather.visuals(weather)
 	queue_redraw()
 
-func get_weather() -> String:
-	return _weather
-
 ## Yolun ne kadarının katedildiği (0-1) *ve* bunun gün cinsinden karşılığı.
 ## Gün gerekiyor çünkü arazi günle tanımlı; oran gerekiyor çünkü hedef
 ## şehir ufukta ona göre büyüyor.
@@ -376,20 +373,12 @@ func set_heading(heading: float, immediate: bool = false) -> void:
 func get_heading() -> float:
 	return _heading
 
-## Kameranın ters çapaya ne kadar kaydığı (0-1) - test okuyor.
-func get_turn_blend() -> float:
-	return _turn_blend
-
 ## Manzaranın kaydırması: dünya konumu eksi çapa. Çapa kayınca manzara da
 ## onunla kayıyor, yani çapanın değişmesi bir kamera hareketi - kervanın
 ## zemine göre yeri değişmiyor. Yalnızca `_world_x` kullanılsaydı çapa
 ## kayarken kervan toprağın üstünde kayardı.
 func _scroll_x() -> float:
 	return _world_x - caravan_x()
-
-func get_caravan_anchor() -> Vector2:
-	var x := caravan_x()
-	return Vector2(x, _ground_y_at_screen(x))
 
 ## Bir "gün" konumunun şerit üzerindeki ekran koordinatı - `_draw_stops()`'un
 ## konum hesabıyla birebir aynı formül. Yaklaşan bir olay işareti (bkz.

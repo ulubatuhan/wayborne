@@ -315,13 +315,6 @@ func show_bark(text: String) -> void:
 	_bark_label.text = text
 	_bark_label.visible = true
 
-## Faz 17 PR-7: savaş animasyon katmanı. `bind()`'tan *sonra* çağrılır,
-## `show_bark()` ile aynı sırada (bkz. CombatPanel._apply_pending_animation) -
-## figürün kendi state/depth/outfit'ini yeniden hesaplamadan yalnızca
-## parlama ve kayma uyguluyor.
-func apply_action_animation(flash: Color, lunge: float) -> void:
-	apply_fx(flash, Vector2(lunge, 0.0), 1.0, Color(0, 0, 0, 0), 1.0)
-
 ## Panelin her karede bastığı anlık durum (bkz. CombatFx): parlama, kayma
 ## (hamle + sarsıntı), düşüşün ilerlemesi, durum halkası.
 func apply_fx(flash: Color, offset: Vector2, fall: float, ring_color: Color, ring: float) -> void:
