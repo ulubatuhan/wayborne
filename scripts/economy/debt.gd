@@ -11,7 +11,6 @@ extends RefCounted
 ## Borcun nereden geldiği - alacaklının baskı biçimi buna göre değişir.
 const SOURCE_OVERDRAFT: String = "overdraft"
 const SOURCE_LOAN: String = "loan"
-const SOURCE_PENALTY: String = "penalty"
 
 ## Vade: "bir ay içinde ödemeli".
 const DEFAULT_TERM_DAYS: int = 30

@@ -21,7 +21,6 @@ const PREVIEW_SIZE: Vector2 = Vector2(220, 360)
 const SLOT_BOX_SIZE: Vector2 = Vector2(230, 54)
 const COLUMN_WIDTH: float = 300.0
 const HINT_COLOR: Color = Color(0.78, 0.74, 0.66)
-const DROP_OK_COLOR: Color = Color(0.86, 0.72, 0.36)
 const DRAG_KIND: String = "wayborne_outfit"
 const GEAR_DRAG_KIND: String = "wayborne_gear"
 const ICON_SIDE: float = 46.0

@@ -34,7 +34,6 @@ extends Node2D
 ## ekilebilir toprağın olduğu yere kurulur.
 const BIOME: String = ArtPalette.BIOME_STEPPE
 
-const SKY_TOP_RATIO: float = 0.0
 const HORIZON_RATIO: float = 0.62
 
 ## Ağaç/kaya/çalı aralıkları (dünya pikseli).

@@ -29,14 +29,6 @@ const MAX_LOG_LINES: int = 40
 ## `bind()`'tan sonra süresi geçmemişse yeniden basılıyor.
 const BARK_DURATION_MSEC: int = 2200
 
-## Savaş animasyon katmanı. Slotlar her `_refresh()`'te yeniden kurulduğu
-## için (bkz. `_refresh_side`) bir Tween figüre bağlanamıyor; durum panelde
-## gerçek zaman damgasıyla tutuluyor ve `_process` her karede canlı
-## slotlara `CombatFx` eğrilerinden okunan değeri basıyor. Önceki katman
-## bunu yalnızca `bind()` anında yapıyordu: parlama bir sonraki tazelemeye
-## kadar donuk bir renk olarak kalıp tek karede kayboluyordu. Eğriler ve
-## süreler `CombatFx`'te - tek yerde.
-const LUNGE_DISTANCE: float = 14.0
 ## Hasar sayılarının yazı boyu.
 const NUMBER_FONT_SIZE: int = 20
 
@@ -618,6 +610,13 @@ func _reset_fx() -> void:
 			label.queue_free()
 	_numbers.clear()
 
+## Savaş animasyon katmanı. Slotlar her `_refresh()`'te yeniden kurulduğu
+## için (bkz. `_refresh_side`) bir Tween figüre bağlanamıyor; durum panelde
+## gerçek zaman damgasıyla tutuluyor ve `_process` her karede canlı
+## slotlara `CombatFx` eğrilerinden okunan değeri basıyor. Önceki katman
+## bunu yalnızca `bind()` anında yapıyordu: parlama bir sonraki tazelemeye
+## kadar donuk bir renk olarak kalıp tek karede kayboluyordu. Eğriler ve
+## süreler `CombatFx`'te - tek yerde.
 func _process(_delta: float) -> void:
 	if not _animate(Time.get_ticks_msec()):
 		set_process(false)

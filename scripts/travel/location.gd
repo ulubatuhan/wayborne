@@ -12,7 +12,6 @@ var location_name: String:
 	get: return tr(location_name_key)
 
 @export var map_position: Vector2 = Vector2.ZERO
-@export var connections: Array[String] = []
 
 ## Burada ucuza üretilen / burada aranıp pahalıya alınan mal id'leri.
 ## Aradaki fark ticaretin kâr kaynağı (bkz. MarketPricing).

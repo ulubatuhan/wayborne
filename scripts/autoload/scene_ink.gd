@@ -23,7 +23,6 @@ extends CanvasLayer
 
 const PALETTE_PATH: String = "res://scripts/ui/art_palette.gd"
 const NAV_PATH: String = "res://scripts/world/nav.gd"
-const SETTINGS_PATH: String = "res://scripts/autoload/user_settings.gd"
 const FADE_SECONDS: float = 0.45
 const DARKEN_SECONDS: float = 0.2
 const SLIDE_SECONDS: float = 0.28

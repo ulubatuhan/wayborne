@@ -48,8 +48,6 @@ func _init() -> void:
 	_save("04_geri_yolda_2.png")
 	quit()
 
-var _turn_clock: float = 0.0
-
 func _wait_until(caravan: RoadCaravan, moment: float) -> void:
 	while caravan.is_turning() and float(caravan.get("_turn_time")) < moment:
 		await process_frame
