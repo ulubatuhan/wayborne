@@ -34,6 +34,24 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      # İçe aktarma çıktıları depoda yok (.gitignore'da): .godot/imported,
+      # her kaynağın yanındaki .import dosyaları ve CSV'lerin .translation
+      # çıktıları. Üçü birlikte saklanmazsa Godot hepsini yeniden üretir,
+      # önbellek hiçbir şey kazandırmaz. Ölçüm (yerel, 2026-10-18): soğuk
+      # içe aktarma ~100 sn, sıcak ~13 sn; testler ise ~34 sn. Yalnızca
+      # tests.yml'de: deploy.yml'in Web çıktısı bayat bir önbelleğe
+      # güvenmesin diye her seferinde sıfırdan içe aktarmaya devam ediyor.
+      - name: Cache Godot import
+        uses: actions/cache@v4
+        with:
+          path: |
+            .godot
+            **/*.import
+            **/*.translation
+          key: godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-${{ github.sha }}
+          restore-keys: |
+            godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-
+
       - name: Import project
         run: |
           set -o pipefail

@@ -76,6 +76,8 @@ const SUITE_PATHS: Array[String] = [
 ## verirdi - kaynak dil Türkçe olduğu için ona sabitliyoruz.
 const TEST_LOCALE: String = "tr"
 
+const SLOWEST_SUITES_SHOWN: int = 10
+
 func _initialize() -> void:
 	TranslationServer.set_locale(TEST_LOCALE)
 	print("── Wayborne test koşusu")
@@ -83,6 +85,9 @@ func _initialize() -> void:
 	var reporter = load(REPORTER_PATH).new()
 	var missing: Array[String] = []
 	var broken: Array[String] = []
+	# [süre_ms, paket_adı] - CI önbelleğine ve yavaş pakete karar vermek için
+	# önce ölçmek gerekiyordu (bkz. TODO görev 2.4).
+	var timings: Array = []
 
 	for suite_path in SUITE_PATHS:
 		if not ResourceLoader.exists(suite_path):
@@ -101,7 +106,9 @@ func _initialize() -> void:
 
 		var suite = script.new()
 		reporter.begin_suite(suite.suite_name())
+		var started_msec: int = Time.get_ticks_msec()
 		suite.run(reporter)
+		timings.append([Time.get_ticks_msec() - started_msec, suite.suite_name()])
 		print(reporter.end_suite())
 
 	for suite_path in missing:
@@ -116,6 +123,8 @@ func _initialize() -> void:
 		for failure in reporter.failures:
 			print("  ✗ %s" % failure)
 
+	_print_timings(timings)
+
 	print("")
 	print("── %d geçti, %d kaldı" % [reporter.passed, reporter.failed])
 
@@ -123,6 +132,20 @@ func _initialize() -> void:
 	# türeyen ifadede `:=` çıkarım yapamaz (bkz. city_map.gd hatası).
 	var has_error: bool = reporter.failed > 0 or not missing.is_empty() or not broken.is_empty()
 	quit(1 if has_error else 0)
+
+## Yalnızca bilgi: başarısızlık ya da çıkış koduyla ilgisi yok.
+func _print_timings(timings: Array) -> void:
+	if timings.is_empty():
+		return
+	var total_msec: int = 0
+	for entry in timings:
+		total_msec += int(entry[0])
+	timings.sort_custom(func(a, b): return a[0] > b[0])
+	print("")
+	print("── En yavaş paketler")
+	for i in mini(SLOWEST_SUITES_SHOWN, timings.size()):
+		print("  %-22s %6d ms" % [timings[i][1], timings[i][0]])
+	print("  toplam (paketler)      %6d ms" % total_msec)
 
 ## quit() ana döngüyü bir sonraki karede kapatır; işi _initialize'da
 ## bitirdiğimiz için burada beklemeye gerek yok. true dönmek döngüyü
