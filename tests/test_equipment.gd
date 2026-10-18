@@ -83,7 +83,7 @@ func _test_dict_round_trip(t) -> void:
 	t.eq(restored.get_equipped_id(EquipmentCatalog.SLOT_AMULET), EquipmentCatalog.AMULET_WARD, "kolye korunur")
 	t.eq(restored.get_max_hp(), original.get_max_hp(), "gidiş-dönüşten sonra türetilen değerler eşleşir")
 
-## Seviye kapısı: Darkest Dungeon'ın modeli - seviye stat vermez, teçhizatın
+## Seviye kapısı: seviye stat vermez, teçhizatın
 ## kapısını açar. Kapı olmadığında tek engel paraydı ve seviye ekipman
 ## ekseninde hiçbir şey ifade etmiyordu.
 func _test_level_gate(t) -> void:
@@ -135,7 +135,7 @@ func _test_level_gate(t) -> void:
 	t.ok(tier_2.required_level < tier_3.required_level, "üçüncü kademe en yüksek şartı taşır")
 
 	# Tılsımlar (yüzük/kolye) olaylardan geliyor ve seviye istemiyor: bulunan
-	# bir şeyi kuşanamamak DD trinket mantığına ters olurdu.
+	# bir şeyi kuşanamamak bulgu mantığına ters olurdu.
 	for equipment_id in [EquipmentCatalog.RING_MARKSMAN, EquipmentCatalog.AMULET_WOLF_FANG]:
 		t.eq(
 			EquipmentCatalog.get_equipment(equipment_id).required_level, 1,

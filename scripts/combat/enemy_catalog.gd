@@ -200,7 +200,7 @@ static func build_bandit_squad(
 ## Doğada karşılaşılan hayvanlar (bkz. evt_wild_animal). Düşük tehlikede
 ## bir kurt sürüsü, ortada bir yaban domuzu sürüsü, yüksek tehlikede
 ## nadiren (%35) tek başına gezen bir ayı çıkar - sayıca az ama tek
-## başına çok daha tehlikeli, DD'nin "curio canavarı" mantığına yakın.
+## başına çok daha tehlikeli: nadir, tekil bir karşılaşma.
 ## Faz 17 PR-6: biome artık kompozisyonu da eğiyor - orman kurt sürüsünü
 ## büyütür ("wildlife packs"), dağ ayıyı daha olası kılar. `biome`
 ## verilmezse (varsayılan "") eski davranış birebir sürüyor - fresh-

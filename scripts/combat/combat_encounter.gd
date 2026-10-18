@@ -1,7 +1,7 @@
 class_name CombatEncounter
 extends RefCounted
 
-## Darkest Dungeon tarzı sıra tabanlı çarpışma. Dört mevkilik iki saf,
+## Sıra tabanlı çarpışma. Dört mevkilik iki saf,
 ## inisiyatif sırasına göre tek tek hamle. UI'dan bağımsız: sinyalleri
 ## dinleyen herhangi bir panel bunu sürebilir, testte de doğrudan
 ## örneklenebilir.
@@ -74,12 +74,12 @@ const MAX_HIT_CHANCE: int = 95
 ## Tur sırası her round yeniden atılır: taban hız + 1..SPEED_DIE. Eskiden
 ## inisiyatif savaş başında bir kez okunuyordu, yani sıra bütün savaş
 ## boyunca sabitti - hızlı olan her round önce vuruyor, yavaş olan hiç
-## öne geçemiyordu. Zar, DD'de olduğu gibi sıralamayı her round oynatıyor
+## öne geçemiyordu. Zar sıralamayı her round oynatıyor
 ## ve "bu round kim önce davranacak" belirsizliğini geri getiriyor.
 const SPEED_DIE: int = 8
 
 ## Kırılma noktasını aşmış (CombatUnit.is_stressed) bir savaşçının, sırası
-## geldiğinde emirlere kulak asmama ihtimali - DD'deki "irrasyonel"
+## geldiğinde emirlere kulak asmama ihtimali - "irrasyonel"
 ## davranışın en sade hâli: hamle yapamaz, sırası boşa gider.
 const STRESS_REFUSAL_CHANCE: int = 20
 
@@ -177,12 +177,12 @@ func use_skill(skill: CombatSkill, target: CombatUnit) -> bool:
 	return true
 
 ## O round'un tur sırası, hız zarı atılmış haliyle. Savaş alanı görünümü
-## bunu üstte gösteriyor (DD'de olduğu gibi), test de sıranın gerçekten
+## bunu üstte gösteriyor, test de sıranın gerçekten
 ## round başına değiştiğini bununla okuyor.
 func get_turn_order() -> Array[CombatUnit]:
 	return _order.duplicate()
 
-## Turu harcamadan geçmek. DD'de de var ve motorun kendisi için de gerekli:
+## Turu harcamadan geçmek. Motorun kendisi için gerekli:
 ## elinde kullanılabilir yeteneği kalmamış bir savaşçı (hepsi beklemede ya
 ## da mevki kilitli) yoksa sırayı hiç bırakamaz ve savaş kilitlenirdi.
 func pass_turn() -> bool:

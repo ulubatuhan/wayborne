@@ -114,8 +114,7 @@ const DEATHS_DOOR_DAMAGE_PENALTY: int = 3
 ## karakter girebiliyordu, "yoldaş kalıcı ölümü seviye/huy/ekipman kaybı
 ## demek, bu da stres-kadro dengesini değiştirir" gerekçesiyle. Kural
 ## bilerek tersine çevrildi: kervan hâlâ mahvolabilir ama yok olamaz -
-## fakat içindeki insanlar artık gerçekten ölebilir, tıpkı Darkest
-## Dungeon'ın kendi kahramanlarının öldüğü gibi. Herkes önce bu zarı
+## fakat içindeki insanlar artık gerçekten ölebilir. Herkes önce bu zarı
 ## görür (`deathblow_resist`), tutmazsa ölür - risk artık lidere değil,
 ## her isme ait. Düşman tarafı hâlâ girmiyor: `is_player_side` bunu
 ## doğal olarak dışlıyor, düşmanın Kıyı'ya ihtiyacı yok.
@@ -226,8 +225,8 @@ func apply_damage(amount: int, rng: RandomNumberGenerator = null) -> String:
 		return "hit"
 
 	if on_deaths_door:
-		# Kıyıdayken gelen her vuruş bir ölümcül vuruş zarı - DD'nin
-		# asıl gerilimi bu tekrarlanan zarda.
+		# Kıyıdayken gelen her vuruş bir ölümcül vuruş zarı - asıl
+		# gerilim bu tekrarlanan zarda.
 		if rng != null and rng.randi_range(1, 100) > deathblow_resist:
 			is_dead = true
 			return "killed"
@@ -244,8 +243,8 @@ func apply_damage(amount: int, rng: RandomNumberGenerator = null) -> String:
 func can_enter_deaths_door() -> bool:
 	return is_player_side and not is_dead
 
-## İyileştirme Kıyı'dan çıkarır: bir puan can bile ayağa kaldırır, ki DD'de
-## de böyle - Kıyı bir eşik, bir hapis değil.
+## İyileştirme Kıyı'dan çıkarır: bir puan can bile ayağa kaldırır -
+## Kıyı bir eşik, bir hapis değil.
 func apply_heal(amount: int) -> void:
 	if is_dead:
 		return
@@ -302,7 +301,7 @@ const NON_DAMAGING_STATUSES: Array[String] = [STATUS_STUN, STATUS_CHILL]
 const CHILL_ACCURACY_PENALTY: int = 5
 
 ## Sersemletmeden çıkan savaşçı bir süre tekrar sersemletilemiyor -
-## Darkest Dungeon'ın "stun resist buff"ı. Bu olmadan sersemletme tek
+## Sersemletme direnci bonusu. Bu olmadan sersemletme tek
 ## başına kazanan strateji: her turda aynı hedefi sersemletip hiç sıra
 ## vermemek. Kapanan sömürü, formülden önce gelir.
 const STUN_RECOVERY_RESIST: int = 55

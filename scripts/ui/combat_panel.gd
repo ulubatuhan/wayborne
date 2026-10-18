@@ -43,8 +43,7 @@ const NUMBER_FONT_SIZE: int = 20
 ## Parlama renkleri ArtPalette.FX_FLASH_* - renk tek yerden gelir.
 
 ## Mevki belirteçleri: dolu nokta "burada durabilir" / "buraya vurabilir",
-## boş nokta duramaz/vuramaz. DD'nin yetenek ikonundaki nokta dizisinin
-## karşılığı - sayı yerine şekil, çünkü oyuncunun bunu okumak için durup
+## boş nokta duramaz/vuramaz. Sayı yerine şekil, çünkü oyuncunun bunu okumak için durup
 ## düşünmemesi gerekiyor.
 ##
 ## Bir süre `●`/`○` karakterleriyle yazılıyordu ve ekranda **boş kutu**
@@ -61,7 +60,7 @@ const AREA_GLYPH_HEIGHT: float = 16.0
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
 const SKILL_CARD_WIDTH: float = 156.0
 ## Savaş alanının en az yüksekliği. İlk denemede alan 900 pikselin
-## üst 200'ünde ince bir şeritti; DD'de savaş alanı ekranın kendisidir.
+## üst 200'ünde ince bir şeritti; savaş alanı ekranın kendisi olmalı.
 const STAGE_HEIGHT: float = 380.0
 const TARGET_MARK_COLOR: Color = Color(0.90, 0.45, 0.40)
 

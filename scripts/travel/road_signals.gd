@@ -73,8 +73,8 @@ const MAX_OPEN: int = 2
 const SMOKE_DANGER_DELTA: float = 0.18
 
 ## Kadrodaki her olumsuz huy işaret sıklığını bu kadar artırıyor. Huy
-## uzun süre yalnızca savaşta bir sayıyı bükeyordu; Darkest Dungeon'da
-## ise affliction *görülür*. Dağılmış bir kadro yolda daha çok aksatıyor,
+## uzun süre yalnızca savaşta bir sayıyı bükeyordu; oysa olumsuz huy
+## *görülür* olmalı. Dağılmış bir kadro yolda daha çok aksatıyor,
 ## daha çok geride kalıyor - yeni bir sistem değil, var olan katmanın
 ## çarpanı.
 const AFFLICTION_SPAWN_BONUS: float = 0.35

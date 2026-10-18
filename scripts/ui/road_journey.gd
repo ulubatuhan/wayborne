@@ -2713,7 +2713,7 @@ func _close_recruit_offer() -> void:
 	_refresh_state()
 	_check_journey_end()
 
-## Bir olay savaş istediğinde Darkest Dungeon tarzı panel açılır; sonuç
+## Bir olay savaş istediğinde savaş paneli açılır; sonuç
 ## kervana etkilerle yansır. Panel açıkken gün ilerletilemez.
 ## enemy_kind EnemyCatalog.build_squad'ın kadro türü (bkz. EventEffect.Type.
 ## TRIGGER_COMBAT'in text_value'su); bölge (bkz. EnemyCatalog.build_bandit_squad'ın

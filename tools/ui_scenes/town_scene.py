@@ -1,4 +1,4 @@
-"""Şehir merkezi arka planı: Darkest Dungeon düzeninde önden bakılan bir
+"""Şehir merkezi arka planı: önden bakılan bir
 kasaba meydanı, şehir başına bir tane.
 
     python3 -I tools/ui_scenes/town_scene.py --city karakonak [--samples 64] [--scale 100]
@@ -128,7 +128,7 @@ def spire_tower(x, y, z0, floors, size, tag="", wood=False, roof="roof-high-poin
 
 
 def terrace(x, y, w, d, h, tag=""):
-    """Bir binayı yükselten taş set: dokulu tek bir blok (DD'nin istinat
+    """Bir binayı yükselten taş set: dokulu tek bir blok (istinat
     duvarları gibi)."""
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, y, h / 2.0))
     b = bpy.context.object
@@ -306,7 +306,7 @@ def ground(cfg):
         h = bpy.context.object
         h.scale = hill["scale"]
         # Pürüzsüz kubbe yapay okunuyor: alçak frekanslı gürültüyle sırt
-        # kırılır, tepe sivrilir - DD'nin kayalık sırtı gibi.
+        # kırılır, tepe sivrilir - kayalık bir sırt gibi.
         bpy.ops.object.modifier_add(type="SUBSURF")
         h.modifiers[-1].levels = 2
         h.modifiers[-1].render_levels = 3

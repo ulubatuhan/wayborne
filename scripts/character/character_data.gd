@@ -552,7 +552,7 @@ func get_check_modifier(kind: CharacterStats.Kind) -> float:
 			total += trait_resource.check_bonus
 	return total
 
-## Faz 17: DD'nin "irrasyonel davranış" katmanı - yalnızca zaten kırılmış
+## Faz 17: "irrasyonel davranış" katmanı - yalnızca zaten kırılmış
 ## (CombatUnit.is_stressed) bir birimde CombatEncounter._try_refuse_order()'ın
 ## okuduğu, emir reddetme ihtimaline eklenen küçük bir pay. Sağlam huylar
 ## sakinleştirir, sarsılmış huylar tetikler - kırılma eşiğinin kendisini
@@ -604,7 +604,7 @@ func get_traits() -> Array[Trait]:
 ## `party_stress` sayısı tutuyordu ve bu, oyunun kendi tezini siliyordu:
 ## "asıl konu kervanı çeken insanların yıpranması" diyen bir oyunda kimin
 ## yıprandığı sorusunun cevabı yoktu. Ortalama, dayanıklı olanla kırılmak
-## üzere olanı aynı sayıya indiriyor - yani Darkest Dungeon'ın bütün
+## üzere olanı aynı sayıya indiriyor - yani bu türün bütün
 ## dramının kaynağını (şu adam bitti, öteki hâlâ ayakta) baştan yok
 ## ediyordu.
 ##
@@ -706,8 +706,8 @@ func is_stressed() -> bool:
 ## Durum efekti dirençleri: stat payı + **seviye payı**.
 ##
 ## Seviye payı, bu depoda zaten yapılmış bir araştırmanın doğrudan
-## sonucu (bkz. CLAUDE.md, Progression Rules): Darkest Dungeon'ın
-## resolve seviyesi hiç stat vermez, yalnızca sersemletme/kanama/zehir
+## sonucu (bkz. CLAUDE.md, Progression Rules): türün klasik modelinde
+## karakter seviyesi hiç stat vermez, yalnızca sersemletme/kanama/zehir
 ## dirençlerini büyütür. Seviye orada gücün kendisi değil, gücün
 ## *anahtarı*.
 ##

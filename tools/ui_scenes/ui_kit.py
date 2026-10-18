@@ -225,7 +225,7 @@ def icon(name, src, share):
     a = np.asarray(img, np.float32) / 255.0
     rgb, al = a[..., :3], a[..., 3:]
     lum = rgb.mean(-1, keepdims=True)
-    rgb = lum + (rgb - lum) * 0.35  # DD ikonları: neredeyse tek renk, ışık sıcak
+    rgb = lum + (rgb - lum) * 0.35  # ikonlar: neredeyse tek renk, ışık sıcak
     rgb = np.clip(rgb * (0.55 + 0.6 * AMBER), 0, 1)
     fig = Image.fromarray((np.concatenate([rgb, al], -1) * 255).astype(np.uint8), "RGBA")
     # mürekkep: alfayı genişlet, siyaha boya, altına koy

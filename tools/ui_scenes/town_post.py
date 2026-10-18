@@ -1,4 +1,4 @@
-"""Kasaba render'ını Darkest Dungeon'ın elle mürekkeplenmiş görünüşüne çeker.
+"""Kasaba render'ını elle mürekkeplenmiş bir görünüşe çeker.
 
 Girdi: town_scene.py'nin beauty.png (gökyüzü saydam), ids.png, depth.png.
 Çıktı: data/assets/ui/towns/<şehir>/background.jpg ve mask.png.
@@ -8,7 +8,7 @@ Adımlar, sırasıyla:
      çünkü Cycles'ın düz rengi resim gibi değil, ekran gibi okunuyordu);
   2. sis: derinlikle artan, gökyüzü renginde - uzaktaki kale siluete döner;
   3. renk: doygunluğu kır, gölgeleri mor-kömüre it, S eğrisi; sıcak ışık
-     (pencereler, fenerler) doygun kalır - DD'de rengin tek kaynağı ışıktır;
+     (pencereler, fenerler) doygun kalır - rengin tek kaynağı ışıktır;
   4. mürekkep: parlaklık + derinlik + maske kenarlarından Sobel, yakında
      kalın uzakta ince;
   5. kâğıt dokusu (ambientCG Paper005, çarp), kir ve kenar kararması.

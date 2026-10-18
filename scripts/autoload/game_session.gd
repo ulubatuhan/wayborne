@@ -584,8 +584,8 @@ func change_character_stress(character: CharacterData, delta: int) -> void:
 	character.change_stress(delta)
 
 ## Kadrodaki olumsuz huy sayısı. Huy uzun süre yalnızca savaşta bir
-## sayıyı bükeyordu - Darkest Dungeon'da ise affliction *görülür ve
-## duyulur*. Yol katmanı bunu okuyup işaret sıklığını artırıyor:
+## sayıyı bükeyordu - oysa olumsuz huy *görülür ve
+## duyulur* olmalı. Yol katmanı bunu okuyup işaret sıklığını artırıyor:
 ## dağılmış bir kadro daha çok aksatır, daha çok geride kalır. Yeni bir
 ## sistem değil, var olan işaret katmanının çarpanı (bkz. RoadSignals).
 func get_affliction_count() -> int:
@@ -1259,7 +1259,7 @@ func grant_party_xp(amount: int, targets: Array[CharacterData] = []) -> Dictiona
 			levels_gained[character.character_name] = gained
 	return levels_gained
 
-## DD tarzı kırılma zarı: her kırılabilir (bkz. CharacterData.is_stressed)
+## Stres kırılma zarı: her kırılabilir (bkz. CharacterData.is_stressed)
 ## karakter için bir kez atılır, çoğunlukla olumsuz bir huy bırakır,
 ## nadiren tam tersine olumlu bir huy verir. Ağır kırılan bir yoldaş
 ## (oyuncu hariç) kervandan ayrılabilir - kırılma huy vermeyi başaramasa

@@ -17,7 +17,7 @@ signal clicked(unit)  # CombatUnit
 ## İlk denemede 104x108'di ve sanal ekranda alınan görüntüde savaş alanı
 ## 900 piksel yüksekliğin yalnızca üst 200'ünde ince bir şerit olarak
 ## duruyordu - mekân hissi vermiyordu. Figür artık ekranın gövdesini
-## dolduruyor; DD'de de savaş alanı ekranın kendisidir.
+## dolduruyor; savaş alanı ekranın kendisi olmalı.
 const SLOT_WIDTH: float = 136.0
 const FIGURE_HEIGHT: float = 208.0
 

@@ -20,7 +20,7 @@ extends Control
 const HUMANOID: String = "humanoid"
 const BEAST: String = "beast"
 
-## Kıyafet/deri paletleri koyu ve doygunluğu düşük - DD'nin mürekkep
+## Kıyafet/deri paletleri koyu ve doygunluğu düşük - mürekkep
 ## hissine yaklaşmanın en ucuz yolu tonu kısmak.
 const OUTLINE: Color = Color(0.06, 0.05, 0.06)
 const SHADOW: Color = Color(0.0, 0.0, 0.0, 0.35)

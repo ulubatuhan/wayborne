@@ -1,7 +1,7 @@
 class_name Trait
 extends Resource
 
-## Darkest Dungeon tarzı huy: karakterin savaş dışı da taşıdığı küçük bir
+## Huy: karakterin savaş dışı da taşıdığı küçük bir
 ## eğilim. "Basic seviyede" kalması bilinçli - kleptomanyaklık gibi
 ## olay-özel, dramatik huylar burada değil, ileride olay sonuçlarıyla
 ## (bkz. EventEffect.Type.GRANT_TRAIT) eklenir.
@@ -34,7 +34,7 @@ var description: String:
 @export var crit_bonus: int = 0
 @export var damage_bonus: int = 0
 
-## --- Faz 17: davranışsal kancalar (Project Zomboid/DD tarzı psikolojik
+## --- Faz 17: davranışsal kancalar (Project Zomboid tarzı psikolojik
 ## etkiler) ---
 ## Her huy kendi affinity_stat'ının check'lerine küçük bir pay ekler/çıkarır
 ## - `_build_skill_check_context()`'in okuduğu `best_<stat>`/`leader_<stat>`

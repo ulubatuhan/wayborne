@@ -1,6 +1,6 @@
 extends RefCounted
 
-## Darkest Dungeon hattının motor tarafı: zırh (PROT), her round yeniden
+## Savaş motorunun derinleşme hattı: zırh (PROT), her round yeniden
 ## atılan hız zarı, Ölümün Kıyısı ve liderliğin devri.
 ##
 ## Buradaki doğrulamaların çoğu formül değil **kural** kilitliyor: "Ölümün

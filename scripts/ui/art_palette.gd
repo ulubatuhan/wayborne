@@ -141,7 +141,7 @@ const UI_CHOICE_COMBAT: Color = Color(0.66, 0.19, 0.17)
 
 # --- Karanlık arayüz taslağı (ui-hud-redesign, onay bekliyor) ---
 # Referanslardan ölçülen dağılım: ekranın %60-80'i neredeyse siyah, kan
-# kırmızısı yalnızca %2-12 (DD #a02b19, Banner Saga #932a13). Bu yüzden
+# kırmızısı yalnızca %2-12 (ölçülen #a02b19, Banner Saga #932a13). Bu yüzden
 # kırmızı vurgu, zemin değil; kehribar yalnızca ışık kaynağı.
 const GRIM_CHARCOAL: Color = Color(0.072, 0.064, 0.062)
 const GRIM_CHARCOAL_SOFT: Color = Color(0.125, 0.110, 0.100)

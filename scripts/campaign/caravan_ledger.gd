@@ -8,7 +8,7 @@ extends RefCounted
 ## kaydı listeden çıkmıyor, *üstü çiziliyor* (`is_struck`). Sebebi mekanik
 ## değil: kaybın kaydı, kaybın kendisinden daha çok bağ kuruyor. Silinen
 ## bir isim hiç var olmamış gibi olur; çizili bir isim, oyuncunun kendi
-## geçmişidir. Darkest Dungeon'ın mezarlığı ve This War of Mine'ın
+## geçmişidir. This War of Mine'ın
 ## "hatırlıyoruz" ekranı aynı işi yapıyor.
 ##
 ## Defter iki iş görüyor:

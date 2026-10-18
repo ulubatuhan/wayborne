@@ -1,7 +1,7 @@
 class_name CombatSkill
 extends Resource
 
-## Darkest Dungeon tarzı mevki kilitli yetenek: hem kullanıcının hangi
+## Mevki kilitli yetenek: hem kullanıcının hangi
 ## sırada durması gerektiğini hem de hangi sıradaki hedefe ulaşabildiğini
 ## taşır. Mevkiler 1..4 arasıdır; 1 en önde, 4 en arkada.
 
@@ -55,7 +55,7 @@ var description: String:
 @export var modifier_rounds: int = 0
 
 ## --- Durum efektleri (kanama / zehir / sersemletme) ---
-## Darkest Dungeon'ın "hasarın hepsi anında değil" katmanı. Süreli stat
+## "Hasarın hepsi anında değil" katmanı. Süreli stat
 ## değiştiricinin (`modifier_*`) yanına ayrı bir alan grubu olarak
 ## geliyor çünkü ikisi başka şey: değiştirici bir sayıyı büküyor, durum
 ## efekti *tur başında kendi başına iş yapıyor* (bkz. CombatUnit'in

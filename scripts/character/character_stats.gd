@@ -198,7 +198,7 @@ func get_composure() -> int:
 	return int(round(1.5 * get_effective_value(Kind.CHARISMA)))
 
 ## Zırh (PROT): gelen hasarı yüzde olarak düşürür (bkz.
-## CombatUnit.apply_damage). Darkest Dungeon'daki PROT'un karşılığı.
+## CombatUnit.apply_damage). Sıra tabanlı savaşlardaki zırh değerinin karşılığı.
 ##
 ## Taban 0, yani statı 5'te duran taze bir karakter bu sistem yokmuş gibi
 ## davranır - dosyadaki bütün türetilmiş formüllerin kuralı bu ve ölçülmüş
@@ -219,7 +219,7 @@ func get_protection() -> int:
 ## ama aynı gerekçeyi taşıyor: sıfır direnç her vuruşta kanamak demek,
 ## yani kanama bir seçenek olmaktan çıkıp her saldırıya binen bir ek
 ## hasara dönüşür. Katsayılar farklı, çünkü zehir kanamadan daha zor
-## dirençlenir (DD'de de öyle) ve sersemletmeye direnç en değerlisi -
+## dirençlenir ve sersemletmeye direnç en değerlisi -
 ## kaybedilen bir tur, alınan hasardan pahalıdır.
 func get_bleed_resist() -> int:
 	return 20 + int(round(2.2 * get_effective_value(Kind.ENDURANCE)))

@@ -15,7 +15,7 @@ const SLOT_AMULET: String = "amulet"
 
 const ALL_SLOTS: Array[String] = [SLOT_WEAPON, SLOT_ARMOR, SLOT_RING, SLOT_AMULET]
 
-## Tier'lerin seviye eşikleri. DD'de üç teçhizat kademesi resolve seviyesine
+## Tier'lerin seviye eşikleri. Üç teçhizat kademesi karakter seviyesine
 ## bağlı açılır; buradaki üçüncü eşik multiclass kilidiyle (7) aynı bölgede
 ## duruyor ki oyuncunun "artık kıdemliyim" hissi tek yerden gelsin.
 const TIER_2_LEVEL: int = 3

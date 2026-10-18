@@ -1,10 +1,10 @@
 class_name Equipment
 extends Resource
 
-## Darkest Dungeon tarzı ekipman parçası. Silah/Zırh, Kervan Avlusu'nda
+## Kademeli ekipman parçası. Silah/Zırh, Kervan Avlusu'nda
 ## parayla alınan kalıcı tier yükseltmeleridir (yalnızca pozitif bonus,
-## bkz. EquipmentCatalog). Yüzük/Kolye ise yolda bulunan, DD trinket'i
-## gibi ödünlü tılsımlardır - bir stat artarken başka biri düşer.
+## bkz. EquipmentCatalog). Yüzük/Kolye ise yolda bulunan,
+## ödünlü tılsımlardır - bir stat artarken başka biri düşer.
 ##
 ## Bonus alanları Trait'inkiyle birebir aynı isimlerde: CharacterData'nın
 ## türetilmiş değerleri huy ve ekipman bonusunu aynı yerde toplar (bkz.
@@ -32,7 +32,7 @@ var description: String:
 ## (pazarda satılmaz, yalnızca EventEffect.Type.GRANT_EQUIPMENT verir).
 @export var price: int = 0
 
-## Bu parçayı kuşanabilmek için gereken seviye. Darkest Dungeon'ın modeli:
+## Bu parçayı kuşanabilmek için gereken seviye. Seviye modeli:
 ## seviye atlamak *stat vermez*, daha iyi teçhizatın kapısını açar - can,
 ## hasar ve isabet Demirci'den gelir, seviyeden değil. Wayborne'da tier'lerin
 ## tek kapısı paraydı, yani seviye ekipman ekseninde hiçbir şey ifade

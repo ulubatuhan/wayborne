@@ -286,7 +286,7 @@ static func _bar(share: float, colour: Color, caption: String) -> Control:
 	back.add_child(l)
 	return back
 
-## Stres, DD'deki gibi on boncuk: dolu boncuk arduvaz, eşik üstü kan.
+## Stres, on boncuk: dolu boncuk arduvaz, eşik üstü kan.
 static func _stress_pips(stress: int) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 3)

@@ -642,7 +642,7 @@ static func _troubled_night() -> GameEvent:
 	])
 	return event
 
-## Yüksek parti stresi kendi agresif olayını açıyor - DD'deki gibi,
+## Yüksek parti stresi kendi agresif olayını açıyor:
 ## tükenmiş bir kadro birbirine düşebilir. `stress` bağlamı
 ## GameSession.build_event_context()'ten geliyor.
 static func _stress_brawl() -> GameEvent:
@@ -1065,7 +1065,7 @@ static func _culture_fisher_catch() -> GameEvent:
 	])
 	return event
 
-## DD tarzı bir "curio": kültürden bağımsız, dua etmek güvenli bir stres
+## Bir "curio" (yol kenarı bulgusu): kültürden bağımsız, dua etmek güvenli bir stres
 ## azaltıcı, adakları almaksa kumarlı bir kazanç.
 ##
 ## `RouteTerrain` yolun bazı parçalarını biyoma uygun bir "sunak" durağıyla

@@ -2,7 +2,7 @@ class_name CombatBackdrop
 extends Control
 
 ## Savaşın geçtiği yer. Arkasında hiçbir şey yoktu - figürler boşlukta
-## duruyordu ve bu, savaşı bir tabloya benzetiyordu. Darkest Dungeon'ın
+## duruyordu ve bu, savaşı bir tabloya benzetiyordu. Karanlık bir savaşın
 ## havası büyük ölçüde *ortamdan* gelir: karanlık bir kuyu, altta bir
 ## zemin çizgisi, ortadan gelen meşale ışığı ve kenarlara doğru kararan
 ## bir vinyet.

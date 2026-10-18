@@ -641,7 +641,7 @@ func _equip_best_gear(character: CharacterData) -> void:
 			character.equip(equipment_resource.slot, equipment_id)
 
 ## Oyuncunun gerçekten yürüdüğü ilerleme merdiveni: seviye tek başına stat
-## vermiyor, daha iyi teçhizatın kapısını açıyor (Darkest Dungeon'ın modeli).
+## vermiyor, daha iyi teçhizatın kapısını açıyor.
 ## Bu rapor "seviye atlamak ilerleme gibi hissettiriyor mu" sorusunun tek
 ## dürüst cevabı - seviye ve teçhizatı ayrı ayrı ölçmek o bağı gizliyordu.
 func _report_progression_ladder() -> void:

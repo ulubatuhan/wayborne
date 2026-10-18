@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Karanlık arayüz taslağının dokuları ve ses imleri - tamamen özgün, koddan.
 
-Referans görüntüler (Darkest Dungeon, Frostpunk, This War of Mine, Banner
+Referans görüntüler (Frostpunk, This War of Mine, Banner
 Saga, KCD, Wartales) yalnızca palet ve yerleşim için okundu; hiçbir pikseli
 kesilip buraya taşınmadı. Her şey tohumlu gürültüden üretiliyor, yani aynı
 komut her seferinde bayt bayt aynı dosyaları yazar.
