@@ -636,7 +636,7 @@ const PRESENT_CARD_START_SCALE: float = 0.97
 static func present(root: Control, backdrop: CanvasItem, context: Node) -> void:
 	if root == null or not root.is_inside_tree():
 		return
-	var reduce := _reduce_motion(context)
+	var reduce := NodeUtil.reduce_motion(context)
 	root.modulate.a = 0.0
 	if not reduce:
 		root.pivot_offset = root.size * 0.5
@@ -662,7 +662,7 @@ static func dismiss(root: Control, backdrop: CanvasItem, context: Node, on_compl
 	if root == null or not root.is_inside_tree():
 		on_complete.call()
 		return
-	var reduce := _reduce_motion(context)
+	var reduce := NodeUtil.reduce_motion(context)
 	var tween := root.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(root, "modulate:a", 0.0, DISMISS_SECONDS) \
@@ -675,11 +675,3 @@ static func dismiss(root: Control, backdrop: CanvasItem, context: Node, on_compl
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(on_complete)
 
-## `combat_panel.gd`/`button_feedback.gd`'nin zaten kurduğu korumalı okuma -
-## `WaybookTheme`'in kendisi bir düğüm değil, `context`'in ağaçta olup
-## olmadığını önce sormak gerekiyor.
-static func _reduce_motion(context: Node) -> bool:
-	if context == null or not context.is_inside_tree():
-		return false
-	var settings := context.get_node_or_null("/root/UserSettings")
-	return settings != null and bool(settings.get("reduce_motion"))

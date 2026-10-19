@@ -451,7 +451,7 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 		_action_states[unit] = {"role": reaction, "start": now + delay, "duration": CombatFx.REACT_MSEC}
 
 	var amplitude := CombatFx.shake_amplitude(kind)
-	if amplitude > 0.0 and not _reduce_motion():
+	if amplitude > 0.0 and not NodeUtil.reduce_motion(self):
 		if _shake.is_empty() or amplitude >= float(_shake.get("amplitude", 0.0)) \
 				or now - int(_shake.get("start", 0)) >= CombatFx.SHAKE_MSEC:
 			_shake = {"amplitude": amplitude, "start": now}
@@ -588,12 +588,6 @@ func _shake_offset(now: int, unit: CombatUnit) -> Vector2:
 		return Vector2.ZERO
 	var elapsed := float(now - int(_shake.get("start", 0))) / 1000.0
 	return CombatFx.shake_at(float(_shake.get("amplitude", 0.0)), elapsed, float(unit.position) * 1.9)
-
-func _reduce_motion() -> bool:
-	if not is_inside_tree():
-		return false
-	var settings := get_node_or_null("/root/UserSettings")
-	return settings != null and bool(settings.get("reduce_motion"))
 
 func _reset_fx() -> void:
 	_flash_states.clear()

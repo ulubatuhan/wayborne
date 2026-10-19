@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_clear_children(t)
 	_test_load_any(t)
 	_test_with_mipmaps(t)
+	_test_reduce_motion(t)
 
 func _test_clear_children(t) -> void:
 	var parent := Node.new()
@@ -66,3 +67,11 @@ func _test_with_mipmaps(t) -> void:
 	if result != null:
 		t.ok(result.get_image().has_mipmaps(), "kopyada mipmap var")
 		t.eq(result.get_size(), plain.get_size(), "boyut değişmez")
+
+## Ağaçta olmayan bir düğüm (ya da hiç düğüm) "hareketi azalt" demez:
+## ayarlar okunamıyorsa hareket açık kalır (görev 4.3).
+func _test_reduce_motion(t) -> void:
+	t.not_ok(NodeUtil.reduce_motion(null), "düğüm yoksa hareket azaltılmaz")
+	var loose := Node.new()
+	t.not_ok(NodeUtil.reduce_motion(loose), "ağaçta olmayan düğüm hareketi azaltmaz")
+	loose.free()
