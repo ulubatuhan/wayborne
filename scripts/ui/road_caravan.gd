@@ -666,7 +666,9 @@ func set_leader_offset(offset: float) -> void:
 func get_leader_offset() -> float:
 	return _leader_offset
 
-func get_leader_figure() -> WalkFigure:
+## Işık halesinin durduğu figür: kamptaysa yürüyen binici, değilse atlı lider
+## (Y-C20; `get_leader_figure()` her zaman at).
+func get_visible_leader_figure() -> WalkFigure:
 	return _leader_rider if _leader_rider != null and _leader_rider.visible else _leader
 
 func get_character_of(figure: WalkFigure) -> CharacterData:

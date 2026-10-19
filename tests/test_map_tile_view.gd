@@ -166,13 +166,13 @@ func _test_hour_tint(t) -> void:
 	var dusk := WorldMapView.map_tint_for_hour(19.5)
 	t.ok(dusk.r > dusk.b, "akşam ılık (kırmızı mavinin üstünde)")
 	var worst := 100.0
-	var darkest := 1.0
+	var dimmest := 1.0
 	for i in range(96):
 		var tint := WorldMapView.map_tint_for_hour(i * 0.25)
 		worst = minf(worst, _contrast(_times(WorldMapView.INK_ON_MAP, tint), _times(WorldMapView.PAPER_ON_MAP, tint)))
-		darkest = minf(darkest, _luminance(tint))
+		dimmest = minf(dimmest, _luminance(tint))
 	t.ok(worst >= 4.5, "mürekkep kâğıda karşı her saatte en az 4.5:1 (en kötü %.2f)" % worst)
-	t.ok(darkest > 0.2, "gece haritası kapkara değil")
+	t.ok(dimmest > 0.2, "gece haritası kapkara değil")
 
 func _test_map_lights(t) -> void:
 	t.eq(WorldMapView.light_strength_for_hour(12.0), 0.0, "gündüz ışık yok")

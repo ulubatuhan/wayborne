@@ -106,6 +106,13 @@ func _test_hired_recruit_does_not_return_after_reload(t) -> void:
 	session.wallet.earn(10000)
 	var venue := RecruitCatalog.VENUE_MARKET
 	var before := session.get_recruit_candidates(venue)
+	# Pano artık bir-iki kişi (Y-C16): iki kişilik bir pano çıkan güne kadar bak.
+	var day := 0
+	while before.size() < 2 and day < 120:
+		day += 1
+		session.total_days_elapsed = day
+		session._restock_current_location()
+		before = session.get_recruit_candidates(venue)
 	t.ok(before.size() >= 2, "meydanda aday var")
 	var hired := before[1]
 	var hired_name := hired.character_name
@@ -824,6 +831,8 @@ func _test_journey_controller_round_trip_keeps_the_dice(t) -> void:
 	var journey := JourneyController.new()
 	journey.clock = JourneyClock.new()
 	journey.engine = EventEngine.new(events, 12345)
+	# Yol ekranı seferle birlikte yönetmeni de kurar (Y-B02); yüklenen sefer de.
+	journey.engine.director = RoadDirector.new()
 	journey.journey_length_days = 6
 	journey.days_covered = 2.4
 	journey.current_day = 2

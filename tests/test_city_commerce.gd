@@ -412,6 +412,8 @@ func _test_price_book(t) -> void:
 	t.not_ok(session.is_price_stale(here), "taze bilgi eskimiş değil")
 	var target := WorldMapData.get_routes_from(here)[0].to_location_id
 	t.eq(session.get_price_age(target), -1, "komşunun fiyatı bilinmiyor")
+	# Gün 0'da "birkaç gün eski" tarih 0'a kenetlenir; söylentinin yaşı ölçülsün diye ilerlet.
+	session.total_days_elapsed = GameSession.PRICE_RUMOR_MAX_AGE + 4
 	var cost := session.get_price_rumor_cost(target)
 	var gold := session.wallet.balance
 	t.ok(session.buy_price_rumor(target), "söylenti satın alınır")
@@ -526,7 +528,7 @@ func _test_buy_then_sell_back_never_profits(t) -> void:
 				var unit := MarketPricing.get_buy_price(item, location, session.market, session.total_days_elapsed)
 				var paid := MarketPricing.bulk_total(unit, quantity)
 				session.consume_stock(item.item_id, quantity, paid)
-				var back := session.capped_sell_price(item.item_id, MarketPricing.get_sell_price(item, location, session.market, session.total_days_elapsed)) * quantity
+				var back: int = session.capped_sell_price(item.item_id, MarketPricing.get_sell_price(item, location, session.market, session.total_days_elapsed)) * quantity
 				if back > paid:
 					profitable.append("%s/%s/%d" % [location.location_id, item.item_id, quantity])
 	t.eq(profitable.size(), 0, "aynı ziyarette al-sat hiçbir yerde kâr etmez %s" % str(profitable.slice(0, 3)))

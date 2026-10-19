@@ -66,6 +66,11 @@ func _ready() -> void:
 	if is_inside_tree():
 		get_tree().create_timer(SHOW_SECONDS).timeout.connect(_close)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_close()
+
 func _on_slip_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		_close()

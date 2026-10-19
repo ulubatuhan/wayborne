@@ -1632,7 +1632,9 @@ static func _village_provisions() -> GameEvent:
 		), "EVT_VILLAGE_FOOD_OPT_LOCKED", _conditions([
 			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 64),
 		])),
-		_choice("EVT_VILLAGE_FOOD_OPT_PASS", _effects([])),
+		_choice("EVT_VILLAGE_FOOD_OPT_PASS", _effects([
+			EventEffect.make(EventEffect.Type.STRESS, 1),
+		])),
 	])
 	return event
 

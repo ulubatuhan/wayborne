@@ -62,8 +62,8 @@ static func reasons(session: GameSession, kind: String) -> Array[String]:
 
 ## İpucu: önce söz ("Moral düşük: 2 gündür aç"), sonra sayı.
 static func gauge_tooltip(label: String, kind: String, value: float, max_value: float, why: Array[String]) -> String:
-	var word := TranslationServer.translate(level_key(kind, value, max_value))
-	var head := word if why.is_empty() else "%s: %s" % [word, ", ".join(why)]
+	var word: String = String(TranslationServer.translate(level_key(kind, value, max_value)))
+	var head: String = word if why.is_empty() else "%s: %s" % [word, ", ".join(why)]
 	return "%s\n%s %d/%d" % [head, label, int(round(value)), int(round(max_value))]
 
 ## Anahtarlar tam yazılı (Localization Rules: çalışırken birleştirilmez):

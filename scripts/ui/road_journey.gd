@@ -1848,7 +1848,7 @@ func _apply_retreat_cost(kind: String) -> void:
 
 ## Yoldaş notu: günlüğe satır, kişisi varsa başının üstünde baloncuk (R1 #4).
 func _add_companion_note(note: Dictionary) -> void:
-	var line := tr(String(note["key"])) % note["args"]
+	var line: String = tr(String(note["key"])) % note["args"]
 	_add_log(line, OUTCOME_COLOR)
 	var who_id := String(note.get("who", ""))
 	if who_id.is_empty() or _clock.get_speed() >= CHAT_BALLOON_MAX_SPEED or _balloon_layer.get_child_count() >= MAX_BALLOONS:
@@ -2479,7 +2479,7 @@ func _update_light_glow() -> void:
 				_light_glow.draw_circle(Vector2.ZERO, radius * share, Color(colour, 0.06 + 0.05 * float(i))))
 		_balloon_layer.add_child(_light_glow)
 		_balloon_layer.move_child(_light_glow, 0)
-	var leader := _caravan.get_leader_figure()
+	var leader := _caravan.get_visible_leader_figure()
 	var show := _light_lit and _is_dark() and leader != null and _caravan.visible
 	_light_glow.visible = show
 	if not show:

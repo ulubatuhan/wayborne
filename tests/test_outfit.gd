@@ -93,7 +93,10 @@ func _test_combat_unit_carries_outfit_from_character(t) -> void:
 	)
 	character.set_outfit_piece(OutfitCatalog.SLOT_JACKET, "ranger_jacket")
 	var unit := CombatUnit.from_character(character, 1)
-	t.eq(unit.outfit, character.outfit, "CombatUnit karakterin outfit'ini aynen taşımalı")
+	# Boş yuvalar köylü takımıyla görünür (Y-G12): seçilen parça korunur.
+	t.eq(String(unit.outfit.get(OutfitCatalog.SLOT_JACKET, "")), "ranger_jacket", "CombatUnit karakterin seçtiği parçayı taşımalı")
+	for slot in character.outfit:
+		t.eq(unit.outfit.get(slot), character.outfit[slot], "CombatUnit karakterin %s parçasını aynen taşımalı" % slot)
 	t.ok(
 		unit.outfit.get(OutfitCatalog.SLOT_JACKET, "") == "ranger_jacket",
 		"taşınan sözlükte seçilen parça gerçekten var"

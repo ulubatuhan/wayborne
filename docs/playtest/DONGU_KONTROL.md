@@ -1,7 +1,7 @@
 # İki haftalık döngü: kontrol listesi (Y-K01)
 
 Her döngü oynanabilir bir derleme ve beş dakikalık bir video ile biter. "Bitti" yalnızca gerçek ekranın görüntüsüyle
-doğrulanınca denir (CLAUDE.md, Testing). Bu dosya her döngüde kopyalanır: `docs/playtest/dongu_YYYY-MM-DD.md`.
+doğrulanınca denir (CLAUDE.md, Testing). Bu dosya her döngüde kopyalanır: `docs/playtest/dongu_<tarih>.md`.
 
 ## 1. Derleme
 
