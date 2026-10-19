@@ -9,8 +9,8 @@ extends Control
 ## saf bir fonksiyon (Motion Rules): test aynı sayıyı okur. Reduce Motion
 ## açıkken her şey anında yerine oturur.
 
-const MAX_ITEMS: int = 14
-const MAX_COINS: int = 36
+const MAX_ITEMS: int = 12
+const MAX_COINS: int = 28
 ## Kaç altın bir sikke çizer; 186 altın ~19 sikke.
 const COIN_UNIT: int = 10
 ## Kolun en çok eğimi (radyan) ve farkın kaç katında doyduğu.
@@ -20,7 +20,7 @@ const SPRING_STIFFNESS: float = 90.0
 const SPRING_DAMPING: float = 12.0
 const DROP_SECONDS: float = 0.45
 const DROP_HEIGHT: float = 90.0
-const ITEM_SIZE: float = 46.0
+const ITEM_SIZE: float = 40.0
 
 const BRASS: Color = Color(0.62, 0.46, 0.22)
 const BRASS_DARK: Color = Color(0.30, 0.21, 0.10)
@@ -40,7 +40,7 @@ var _coin_born: Array[float] = []
 var _clock: float = 0.0
 
 func _init() -> void:
-	custom_minimum_size = Vector2(520, 430)
+	custom_minimum_size = Vector2(520, 500)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 # --- saf fonksiyonlar (testin okuduğu sayılar) ---
@@ -183,7 +183,7 @@ func _draw() -> void:
 	var w := size.x
 	var pivot := Vector2(w * 0.5, size.y * 0.16)
 	var arm := w * 0.40
-	var hang := size.y * 0.30
+	var hang := size.y * 0.34
 	# Direk ve ayak
 	draw_rect(Rect2(pivot.x - 5, pivot.y, 10, size.y * 0.74), BRASS_DARK)
 	draw_rect(Rect2(pivot.x - 5, pivot.y, 10, size.y * 0.74), INK, false, 2.0)
@@ -248,7 +248,7 @@ func _draw_goods(centre: Vector2, radius: float) -> void:
 
 func _draw_coins(centre: Vector2, radius: float) -> void:
 	var count := coin_count(_gold)
-	var spots := pyramid(count, 24.0)
+	var spots := pyramid(count, 21.0)
 	for i in count:
 		var age := _clock - (_coin_born[i] if i < _coin_born.size() else -1000.0)
 		var at := centre + spots[i] * Vector2(1.0, 0.6) + Vector2(0.0, -9.0 + drop_offset(age))

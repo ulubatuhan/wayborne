@@ -189,7 +189,7 @@ def anchors():
     names = {
         # İnsanlar: ayak noktası
         "bartender": (-9.0, 9.1, 0.0), "waitress_left": (-4.5, 10.2, 0.0), "waitress_right": (7.5, 11.2, 0.0),
-        "bard": (0.6, 12.0, 0.0),
+        "bard": (-3.4, 12.3, 0.0),
         "seat_a1": (-3.7, 5.0, 0.0), "seat_a2": (-1.5, 5.0, 0.0),
         "seat_b1": (3.1, 4.4, 0.0), "seat_b2": (5.3, 4.4, 0.0),
         "seat_c1": (7.7, 9.4, 0.0), "seat_c2": (9.5, 9.4, 0.0),

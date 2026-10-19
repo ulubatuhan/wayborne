@@ -47,6 +47,12 @@ const ARCHETYPES: Dictionary = {
 		"cloth": Color(0.40, 0.26, 0.22), "trim": Color(0.30, 0.22, 0.18),
 		"metal": Color(0.50, 0.48, 0.46),
 	},
+	# Silahsız sivil (taverna, şehir insanları): sınıf silahı çizilmez.
+	"villager": {
+		"body": HUMANOID, "bulk": 1.0, "head": "bare", "weapon": "none",
+		"cloth": Color(0.40, 0.36, 0.30), "trim": Color(0.45, 0.38, 0.26),
+		"metal": Color(0.50, 0.48, 0.44),
+	},
 	"clerk": {
 		"body": HUMANOID, "bulk": 0.88, "head": "cap", "weapon": "staff",
 		"cloth": Color(0.24, 0.26, 0.34), "trim": Color(0.52, 0.44, 0.24),

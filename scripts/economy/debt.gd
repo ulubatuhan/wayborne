@@ -46,6 +46,12 @@ var restructure_count: int = 0
 ## faiz işlememesi için tutuluyor.
 var overdue_periods_applied: int = 0
 
+## Gecikmede dönem başına faiz oranı ve itibar cezası. Varsayılan loncaya olan
+## borcun sertliği; aile borcu (babadan kalan, Y-C14) yumuşak: alacaklı akraba,
+## simülatörde sert oran kariyeri kilitledi (bkz. docs/design_notes/denge_baba_borcu.md).
+var interest_rate: float = OVERDUE_INTEREST_RATE
+var reputation_penalty: int = OVERDUE_REPUTATION_PENALTY
+
 static func create(
 	debt_id: String, creditor_name: String, principal: int, due_day: int,
 	source: String = SOURCE_LOAN
@@ -81,7 +87,7 @@ func apply_overdue_interest(current_day: int) -> int:
 	if pending <= 0:
 		return 0
 	for _index in pending:
-		principal += maxi(1, int(round(float(principal) * OVERDUE_INTEREST_RATE)))
+		principal += maxi(1, int(round(float(principal) * interest_rate)))
 	overdue_periods_applied = periods
 	return pending
 
@@ -113,6 +119,8 @@ func to_dict() -> Dictionary:
 		"due_day": due_day,
 		"restructure_count": restructure_count,
 		"overdue_periods_applied": overdue_periods_applied,
+		"interest_rate": interest_rate,
+		"reputation_penalty": reputation_penalty,
 	}
 
 static func from_dict(data: Dictionary) -> Debt:
@@ -124,4 +132,6 @@ static func from_dict(data: Dictionary) -> Debt:
 	debt.due_day = int(data.get("due_day", 0))
 	debt.restructure_count = maxi(0, int(data.get("restructure_count", 0)))
 	debt.overdue_periods_applied = maxi(0, int(data.get("overdue_periods_applied", 0)))
+	debt.interest_rate = float(data.get("interest_rate", OVERDUE_INTEREST_RATE))
+	debt.reputation_penalty = int(data.get("reputation_penalty", OVERDUE_REPUTATION_PENALTY))
 	return debt

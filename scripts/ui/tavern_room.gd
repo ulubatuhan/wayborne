@@ -27,6 +27,7 @@ const ROLE_BARTENDER: String = "bartender"
 const ROLE_WAITRESS: String = "waitress"
 const ROLE_BARD: String = "bard"
 const ROLE_PATRON: String = "patron"
+const VILLAGER: String = "villager"
 
 ## Giysi takımları: [gömlek, pantolon, ayakkabı, ceket, şapka]; var olmayan
 ## parça atlanır (OutfitCatalog.get_piece).
@@ -145,12 +146,14 @@ func _add_actor(role: String, anchor: String, gender: int, weight: int, rng: Ran
 	figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip.add_child(figure)
 	figure.set_kind(
-		WalkFigure.KIND_PERSON, character.class_id, character.get_height_scale(),
+		WalkFigure.KIND_PERSON, VILLAGER, character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone), false, character.get_appearance_outfit(),
 		character.get_body_variant_id()
 	)
 	figure.set_loadout(Wardrobe.loadout_of(character.outfit, character.equipped))
 	figure.set_standing()
+	# Odanın sıcak ışığına uysun: figürler hafifçe kehribara çekilir.
+	figure.set_tint(Color(0.92, 0.80, 0.68))
 	_actors.append({
 		"role": role, "anchor": anchor, "cut_at": cut_at, "character": character, "figure": figure, "clip": clip,
 		"phase": rng.randf() * 10.0, "facing": 1.0, "rect": Rect2(), "walk_u": rng.randf(),
@@ -312,23 +315,18 @@ func _draw_back(c: Control) -> void:
 	for i in 4:
 		var r := unit * (0.10 + 0.07 * float(i)) * (0.9 + 0.2 * glow)
 		c.draw_circle(fire + Vector2(0, -unit * 0.02), r, Color(1.0, 0.55, 0.2, 0.05 + 0.02 * float(3 - i)))
-	# Alevler: üç dil, her biri kendi hızında dalgalanır.
-	for k in 5:
+	# Alevler: yedi dil, her biri kendi hızında dalgalanan eğri kenarlı damla.
+	var phase_t := t if moving else 0.0
+	for k in 7:
 		var seed_offset := float(k) * 1.9
-		var w := unit * (0.030 + 0.006 * float(k % 3))
-		var h := unit * (0.075 + 0.030 * flicker(t if moving else 0.0, seed_offset))
-		var x := fire.x + (float(k) - 2.0) * unit * 0.017
-		var sway := sin((t if moving else 0.0) * 5.0 + seed_offset) * unit * 0.006
-		var base := fire + Vector2(x - fire.x, unit * 0.012)
-		var pts := PackedVector2Array([
-			base + Vector2(-w, 0), base + Vector2(-w * 0.5 + sway, -h * 0.55),
-			base + Vector2(sway * 2.0, -h), base + Vector2(w * 0.5 + sway, -h * 0.55), base + Vector2(w, 0),
-		])
-		c.draw_colored_polygon(pts, Color(1.0, 0.45 + 0.1 * float(k % 2), 0.12, 0.9))
-		var inner := PackedVector2Array([
-			base + Vector2(-w * 0.45, 0), base + Vector2(sway, -h * 0.62), base + Vector2(w * 0.45, 0),
-		])
-		c.draw_colored_polygon(inner, Color(1.0, 0.86, 0.45, 0.95))
+		var w := unit * (0.026 + 0.007 * float(k % 3))
+		var h := unit * (0.070 + 0.034 * flicker(phase_t, seed_offset)) * (1.0 - 0.18 * absf(float(k) - 3.0) / 3.0)
+		var x := fire.x + (float(k) - 3.0) * unit * 0.0135
+		var sway := sin(phase_t * 5.0 + seed_offset) * unit * 0.007
+		var base := Vector2(x, fire.y + unit * 0.014)
+		c.draw_colored_polygon(_flame_shape(base, w, h, sway), Color(1.0, 0.42 + 0.12 * float(k % 2), 0.10, 0.92))
+		c.draw_colored_polygon(_flame_shape(base, w * 0.62, h * 0.72, sway * 0.7), Color(1.0, 0.72, 0.28, 0.95))
+		c.draw_colored_polygon(_flame_shape(base, w * 0.30, h * 0.42, sway * 0.4), Color(1.0, 0.94, 0.66, 0.95))
 	# Kıvılcımlar: yukarı süzülür, söner.
 	if moving:
 		for s in 7:
@@ -344,6 +342,18 @@ func _draw_back(c: Control) -> void:
 		var f := flicker(t if moving else 0.0, float(key.hash() % 5))
 		for i in 3:
 			c.draw_circle(p, unit * (0.05 + 0.035 * float(i)) * f, Color(1.0, 0.7, 0.35, 0.05 + 0.025 * float(2 - i)))
+
+## Alev damlası: tabanda geniş, uca doğru eğri daralır; uç `sway` kadar yana kayar.
+static func _flame_shape(base: Vector2, w: float, h: float, sway: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	var steps := 8
+	for i in range(steps + 1):
+		var u := float(i) / float(steps)
+		pts.append(base + Vector2(-w * (1.0 - pow(u, 1.6)) * (0.35 + 0.65 * sin(u * PI * 0.5 + 0.8)) + sway * u * u, -h * u))
+	for i in range(steps, -1, -1):
+		var u := float(i) / float(steps)
+		pts.append(base + Vector2(w * (1.0 - pow(u, 1.6)) * (0.35 + 0.65 * sin(u * PI * 0.5 + 0.8)) + sway * u * u, -h * u))
+	return pts
 
 func _draw_flame(c: Control, p: Vector2, size_px: float, t: float, seed_offset: int) -> void:
 	var f := flicker(t if not NodeUtil.reduce_motion(self) else 0.0, float(seed_offset))
@@ -397,7 +407,7 @@ func _draw_lute(c: Control, actor: Dictionary, unit: float, t: float) -> void:
 	var centre := Vector2(rect.position.x + rect.size.x * 0.52, rect.position.y + rect.size.y * 0.52)
 	var strum := sin(t * 5.0) * 0.06
 	c.draw_set_transform(centre, -0.5 + strum, Vector2.ONE)
-	var s := unit * 0.045
+	var s := unit * 0.021
 	c.draw_circle(Vector2.ZERO, s, Color(0.55, 0.36, 0.18))
 	c.draw_arc(Vector2.ZERO, s, 0.0, TAU, 20, Color(0.05, 0.04, 0.04), 2.0)
 	c.draw_circle(Vector2.ZERO, s * 0.28, Color(0.08, 0.05, 0.03))

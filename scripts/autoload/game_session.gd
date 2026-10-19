@@ -848,8 +848,11 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 ## başlangıç isteyen testler çağırmaz. Tutar ve vade ölçülecek (akşam testi,
 ## simulate_career) - onay paketinde kullanıcıya soruluyor.
 const FATHER_DEBT_ID: String = "father_debt"
-const FATHER_DEBT_PRINCIPAL: int = 240
-const FATHER_DEBT_TERM_DAYS: int = 60
+const FATHER_DEBT_PRINCIPAL: int = 180
+const FATHER_DEBT_TERM_DAYS: int = 120
+## Aile borcunun gecikme faizi ve itibar bedeli yumuşak (Debt.interest_rate).
+const FATHER_DEBT_INTEREST_RATE: float = 0.04
+const FATHER_DEBT_REPUTATION_PENALTY: int = 1
 const FATHER_CREDITOR_KEY: String = "DEBT_CREDITOR_FATHER"
 const FATHER_CAUSE_KEY: String = "LEDGER_CAUSE_FATHER"
 
@@ -858,6 +861,8 @@ func inherit_father_caravan() -> void:
 		return
 	var debt := debts.borrow(FATHER_CREDITOR_KEY, FATHER_DEBT_PRINCIPAL, total_days_elapsed, Debt.SOURCE_LOAN, FATHER_DEBT_ID)
 	debt.due_day = total_days_elapsed + FATHER_DEBT_TERM_DAYS
+	debt.interest_rate = FATHER_DEBT_INTEREST_RATE
+	debt.reputation_penalty = FATHER_DEBT_REPUTATION_PENALTY
 	for entry in ledger.entries:
 		if String(entry.get("kind", "")) == CaravanLedger.KIND_FOUNDER:
 			entry["cause"] = FATHER_CAUSE_KEY

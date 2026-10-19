@@ -11,7 +11,7 @@ func run(t) -> void:
 	var start := TavernRoom.walk_progress(0.0)
 	t.eq(start.x, 0.0, "garson sol uçtan başlar")
 	t.eq(start.y, 1.0, "önce sağa yürür")
-	var halfway := TavernRoom.walk_progress(0.25)
+	var halfway := TavernRoom.walk_progress(0.45)
 	t.eq(halfway.z, 1.0, "sağ uçta durur")
 	t.eq(halfway.x, 1.0, "durduğu yer sağ uç")
 	var back := TavernRoom.walk_progress(0.6)

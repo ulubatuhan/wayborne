@@ -125,7 +125,7 @@ func advance_to_day(current_day: int) -> int:
 	var reputation_penalty := 0
 	for debt in debts:
 		var periods := debt.apply_overdue_interest(current_day)
-		reputation_penalty += periods * Debt.OVERDUE_REPUTATION_PENALTY
+		reputation_penalty += periods * debt.reputation_penalty
 	return reputation_penalty
 
 func _prune_settled() -> void:

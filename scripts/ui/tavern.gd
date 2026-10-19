@@ -94,7 +94,7 @@ func _build_room() -> void:
 	_room = TavernRoom.new()
 	_room.custom_minimum_size = Vector2(0, 420)
 	_room.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_room.size_flags_stretch_ratio = 2.2
+	_room.size_flags_stretch_ratio = 3.0
 	column.add_child(_room)
 	column.move_child(_room, _title_label.get_index() + 1)
 	_room.populate(_session.current_location_id, _session.total_days_elapsed)
@@ -109,9 +109,11 @@ func _build_room() -> void:
 	_chat_button.toggled.connect(_on_chat_toggled)
 	bar.add_child(_chat_button)
 	_watch_button = Button.new()
-	_watch_button.text = tr("UI_TAVERN_WATCH")
+	_watch_button.text = tr("UI_TAVERN_SERVICES")
 	_watch_button.toggle_mode = true
 	_watch_button.toggled.connect(_on_watch_toggled)
+	# Oda ekranın asıl sahnesi: hizmetler (arınma, ziyafet, rota bilgisi) düğmeyle açılır.
+	_scroll.visible = false
 	bar.add_child(_watch_button)
 	column.add_child(bar)
 	column.move_child(bar, _room.get_index() + 1)
@@ -121,8 +123,8 @@ func _on_chat_toggled(on: bool) -> void:
 	_chat_button.text = tr("UI_TAVERN_CHAT_END") if on else tr("UI_TAVERN_CHAT")
 
 func _on_watch_toggled(on: bool) -> void:
-	_scroll.visible = not on
-	_watch_button.text = tr("UI_TAVERN_SERVICES") if on else tr("UI_TAVERN_WATCH")
+	_scroll.visible = on
+	_watch_button.text = tr("UI_TAVERN_WATCH") if on else tr("UI_TAVERN_SERVICES")
 
 ## Bir kişiye tıklanınca: kendi derdinden bir söz (RoadChatter'ın seçimi) baloncukta.
 ## Bilgi edinme ve sohbet sistemi N34'ün işi; bu, kapının ilk hâli.
