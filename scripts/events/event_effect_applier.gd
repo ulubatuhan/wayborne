@@ -172,7 +172,20 @@ static func _apply_party_hp(effect: EventEffect, session: GameSession, result: R
 ## sorumluluğunu oyuncudan alıyordu. Önizleme ve uygulama aynı seçiciyi
 ## okuyor - iki yerde hesaplanan hedef iki ayrı hedeftir.
 static func get_choice_target(choice: EventChoice, session: GameSession) -> CharacterData:
-	for effect in choice.effects:
+	var found := _target_in(choice.effects, session)
+	if found != null:
+		return found
+	# Bedel bir sonucun içindeyse de (zarlı seçenek, görev Y-E03) kimin
+	# başına gelebileceği seçimden önce yazılır - savaş uyarısının sonuçları
+	# da taraması gibi (bkz. road_journey `_choice_triggers_combat`).
+	for outcome in choice.outcomes:
+		found = _target_in(outcome.effects, session)
+		if found != null:
+			return found
+	return null
+
+static func _target_in(effects: Array[EventEffect], session: GameSession) -> CharacterData:
+	for effect in effects:
 		match effect.type:
 			EventEffect.Type.LEAVE_BEHIND:
 				return _weakest_companion(session)

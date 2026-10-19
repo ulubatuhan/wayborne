@@ -500,6 +500,24 @@ static func _sick_merchant() -> GameEvent:
 			EventEffect.make(EventEffect.Type.MORALE, -18),
 			EventEffect.make(EventEffect.Type.REPUTATION, -6),
 		])),
+		# Y-E03: hekime para vermeden kendi bilginle bakmak cazip; ateş
+		# düşmezse tüccar gider ve kadro hastalıktan korkar.
+		_check_choice(
+			"EVT_SICK_OPT_OWN_CARE", CharacterStats.Kind.WISDOM, SkillCheck.Source.PARTY_BEST,
+			"EVT_SICK_OWN_CARE_OK", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 8),
+				EventEffect.make(EventEffect.Type.REPUTATION, 4),
+			]),
+			"EVT_SICK_OWN_CARE_MID", _effects([
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+				EventEffect.make(EventEffect.Type.MORALE, 2),
+			]),
+			"EVT_SICK_OWN_CARE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1),
+				EventEffect.make(EventEffect.Type.STRESS, 6),
+				EventEffect.make(EventEffect.Type.REPUTATION, -4),
+			])
+		),
 	])
 	return event
 
@@ -779,6 +797,23 @@ static func _traveling_tinker() -> GameEvent:
 				EventEffect.make(EventEffect.Type.MORALE, 2),
 			])
 		),
+		# Y-E03: yarı fiyatına damgasız bir kılıç - iyi çelik de olabilir,
+		# boyanmış bir hurda da. Zeka sahteyi sezer.
+		_check_choice(
+			"EVT_TINKER_OPT_UNMARKED", CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST,
+			"EVT_TINKER_UNMARKED_OK", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_2),
+			]),
+			"EVT_TINKER_UNMARKED_MID", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.WEAPON_TIER_1),
+			]),
+			"EVT_TINKER_UNMARKED_BAD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+			])
+		),
 		_choice("EVT_TINKER_OPT_IGNORE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
@@ -801,6 +836,24 @@ static func _scouted_pass() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, -1),
 				EventEffect.make(EventEffect.Type.DANGER, 5),
+			])
+		),
+		# Y-E03: izci yokken de patikaya sapmak cazip - iki gün kazandırabilir,
+		# ama yolunu şaşıran kervan kazandığından fazlasını kaybeder.
+		_check_choice(
+			"EVT_SCOUT_OPT_BLIND", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.LEADER,
+			"EVT_SCOUT_BLIND_OK", _effects([
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, -2),
+				EventEffect.make(EventEffect.Type.DANGER, 5),
+			]),
+			"EVT_SCOUT_BLIND_MID", _effects([
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, -1),
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+			]),
+			"EVT_SCOUT_BLIND_BAD", _effects([
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+				EventEffect.make(EventEffect.Type.DANGER, 10),
+				EventEffect.make(EventEffect.Type.MORALE, -6),
 			])
 		),
 		_choice("EVT_SCOUT_OPT_MAIN_ROAD", _effects([
@@ -1059,6 +1112,23 @@ static func _culture_fisher_catch() -> GameEvent:
 			EventEffect.make(EventEffect.Type.PROVISIONS, 5),
 			EventEffect.make(EventEffect.Type.MORALE, 2),
 		])),
+		# Y-E03: derin kolda ağ dolu çıkar - akıntı da güçlü. Bedeli en
+		# dayanıklı olanın bedeninden ödenir (adı seçmeden önce görünür).
+		_check_choice(
+			"EVT_FISHER_CATCH_OPT_DEEP", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_FISHER_DEEP_OK", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, 12),
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+			]),
+			"EVT_FISHER_DEEP_MID", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, 6),
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			]),
+			"EVT_FISHER_DEEP_BAD", _effects([
+				EventEffect.make(EventEffect.Type.PARTY_HP, -8, "endurance"),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+			])
+		),
 		_choice("EVT_FISHER_CATCH_OPT_SKIP", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -1),
 		])),
@@ -1319,6 +1389,23 @@ static func _forage() -> GameEvent:
 		_choice("EVT_FORAGE_OPT_GATHER", _effects([
 			EventEffect.make(EventEffect.Type.PROVISIONS, 6),
 		])),
+		# Y-E03: ormanın derininde daha çok var - ve tanınmayan meyveler.
+		_check_choice(
+			"EVT_FORAGE_OPT_DEEP", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_FORAGE_DEEP_OK", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, 14),
+				EventEffect.make(EventEffect.Type.MORALE, 3),
+			]),
+			"EVT_FORAGE_DEEP_MID", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, 8),
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			]),
+			"EVT_FORAGE_DEEP_BAD", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, 2),
+				EventEffect.make(EventEffect.Type.PARTY_HP, -6, "perception"),
+				EventEffect.make(EventEffect.Type.MORALE, -6),
+			])
+		),
 		_choice("EVT_FORAGE_OPT_SKIP", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
@@ -1399,6 +1486,22 @@ static func _military_convoy() -> GameEvent:
 				EventEffect.make(EventEffect.Type.GOLD, 40),
 			])
 		),
+		# Y-E03: konvoyun artçısından düşen bir sandık. Yakalanırsan
+		# muhafızlarla savaşırsın - kanunu dövmek zaferde bile itibar yer.
+		_check_choice(
+			"EVT_MILITARY_CONVOY_OPT_CRATE", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_MILITARY_CONVOY_CRATE_OK", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 70),
+			]),
+			"EVT_MILITARY_CONVOY_CRATE_MID", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, 30),
+				EventEffect.make(EventEffect.Type.REPUTATION, -4),
+			]),
+			"EVT_MILITARY_CONVOY_CRATE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.REPUTATION, -4),
+				EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
+			])
+		),
 	])
 	return event
 
@@ -1417,6 +1520,28 @@ static func _refugee_column() -> GameEvent:
 				EventEffect.make(EventEffect.Type.REPUTATION, 2),
 			])
 		),
+		# Y-E03: kaçanlar yanlarında taşıyabildiklerini yok pahasına satıyor.
+		# Fırsat gerçek olabilir; sahte de olabilir, ve kim bakıyorsa
+		# kervanın darda olanı soyduğunu görür.
+		_requires(_check_choice(
+			"EVT_REFUGEE_COLUMN_OPT_BUY", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_REFUGEE_BUY_OK", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -30),
+				EventEffect.make(EventEffect.Type.ITEM_ADD, 2, "jewelry"),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+			]),
+			"EVT_REFUGEE_BUY_MID", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -30),
+				EventEffect.make(EventEffect.Type.ITEM_ADD, 1, "jewelry"),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+			]),
+			"EVT_REFUGEE_BUY_BAD", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -30),
+				EventEffect.make(EventEffect.Type.REPUTATION, -4),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+			])
+		), "EVT_REFUGEE_COLUMN_OPT_BUY_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 30)])),
 		_choice("EVT_REFUGEE_COLUMN_OPT_PASS", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -2),
 		])),
@@ -2185,6 +2310,29 @@ static func _gated_choice(
 	effects: Array[EventEffect]
 ) -> EventChoice:
 	var choice := EventChoice.make(text_key, effects)
+	choice.requirements = requirements
+	choice.unavailable_text_key = locked_key
+	return choice
+
+## Cazip ama riskli seçenek (görev Y-E03): bir beceri zarı, üç kademe.
+## `check_tier` 2 tam başarı, 1 kıl payı, 0 başarısızlık (bkz. SkillCheck).
+static func _check_choice(
+	text_key: String, stat: CharacterStats.Kind, source: SkillCheck.Source,
+	ok_key: String, ok: Array[EventEffect], mid_key: String, mid: Array[EventEffect],
+	bad_key: String, bad: Array[EventEffect]
+) -> EventChoice:
+	var choice := EventChoice.new()
+	choice.text_key = text_key
+	choice.check = SkillCheck.make(stat, source, 0.0)
+	choice.outcomes = _outcomes([
+		_outcome_if(ok_key, _conditions([EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 2.0)]), ok, 1.0),
+		_outcome_if(mid_key, _conditions([EventCondition.make("check_tier", EventCondition.Op.EQUAL, 1.0)]), mid, 1.0),
+		_outcome_if(bad_key, _conditions([EventCondition.make("check_tier", EventCondition.Op.EQUAL, 0.0)]), bad, 1.0),
+	])
+	return choice
+
+## Bir seçeneğe kilit koşulu ekler (kilitliyken nedeniyle gösterilir).
+static func _requires(choice: EventChoice, locked_key: String, requirements: Array[EventCondition]) -> EventChoice:
 	choice.requirements = requirements
 	choice.unavailable_text_key = locked_key
 	return choice

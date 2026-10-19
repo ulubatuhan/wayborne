@@ -27,7 +27,9 @@ ve onayı altında çalışmıştır:
   tahta tıkırtısı) gerçek kayıt yerine matematiksel olarak (sinüs/gürültü
   dalgaları) üretilmiştir. Müzik: **[iki parçanın (`copper_for_the_traveler`,
   `high_noon_in_the_square`) kaynağı depoda kayıtlı değil; geliştirici
-  doldurmalı - yayından önce bu satır kesinleşmeli]**.
+  doldurmalı - yayından önce bu satır kesinleşmeli]**. Her ses dosyasının
+  kaynağı ve lisansı `data/assets/audio/KUNYE.tsv`'de; `test_audio_credits.gd`
+  ticari kullanımı yasaklayan bir lisansı ve künyesiz bir dosyayı yakalar.
 
 **Oyun içinde, oynanış sırasında dinamik olarak içerik üreten (canlı /
 "live-generated") herhangi bir yapay zeka sistemi bulunmamaktadır.** Tüm
