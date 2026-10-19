@@ -41,6 +41,10 @@ func run(t) -> void:
 	_test_slope_speed_factor_stays_in_range(t)
 	_test_terrain_reserve_keeps_the_provision_promise(t)
 	_test_camp_order_reserve_keeps_the_provision_promise(t)
+	_test_map_terrain_covers_every_route(t)
+	_test_map_terrain_mirrors_by_direction(t)
+	_test_map_terrain_follows_geography(t)
+	_test_map_routes_keep_the_provision_promise(t)
 
 func _test_terrain_is_reproducible(t) -> void:
 	for key in SAMPLE_KEYS:
@@ -519,3 +523,99 @@ func _test_camp_order_reserve_keeps_the_provision_promise(t) -> void:
 				)
 				day += 1
 	t.eq(starved, 0, "kamp emrini bilen planlayıcıyla stoklayan kervan aç kalmaz")
+
+# --- Haritadan gelen arazi (yol biyomları haritaya bağlı) -----------------
+
+## Haritanın her yolu, iki yönden. `[çıkış, varış, gün, anahtar]`.
+func _map_legs() -> Array:
+	var legs: Array = []
+	for location in WorldMapData.get_locations():
+		for route in WorldMapData.get_routes_from(location.location_id):
+			legs.append([location.location_id, route.to_location_id, route.travel_days,
+				RouteConditions.route_key(location.location_id, route.to_location_id)])
+	return legs
+
+func _test_map_terrain_covers_every_route(t) -> void:
+	var legs := _map_legs()
+	t.ge(float(legs.size()), 80.0, "haritanın 41 yolu iki yönden okunmalı")
+	for leg in legs:
+		var terrain := RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[0]))
+		t.ok(not WorldMapData.get_route_terrain(String(leg[3])).is_empty(),
+			"yolun haritadan arazisi var: %s" % leg[3])
+		var cursor := 0.0
+		for segment in terrain.segments:
+			t.almost(float(segment.from_day), cursor, "parçalar boşluksuz: %s>%s" % [leg[0], leg[1]])
+			t.ok(float(segment.to_day) >= float(segment.from_day), "parça geri gitmiyor: %s>%s" % [leg[0], leg[1]])
+			cursor = float(segment.to_day)
+		t.almost(cursor, float(leg[2]), "arazi yolun sonuna kadar: %s>%s" % [leg[0], leg[1]])
+		t.eq(String(terrain.segments[-1].stop), RouteTerrain.STOP_NONE,
+			"son parçanın sonu şehir, durak değil: %s>%s" % [leg[0], leg[1]])
+
+## Aynı yol öbür yönden: biyomlar ters sırada, duraklar aynı yerlerde
+## (günü yolun öbür ucundan sayılarak), eğimler aynı.
+func _test_map_terrain_mirrors_by_direction(t) -> void:
+	for leg in _map_legs():
+		var key := String(leg[3])
+		var days := int(leg[2])
+		var forth := RouteTerrain.build(key, days, String(leg[0]))
+		var back := RouteTerrain.build(key, days, String(leg[1]))
+		var n := forth.segments.size()
+		t.eq(back.segments.size(), n, "iki yön aynı sayıda parça: %s" % key)
+		for k in n:
+			var a: Dictionary = forth.segments[k]
+			var b: Dictionary = back.segments[n - 1 - k]
+			t.eq(String(a.biome), String(b.biome), "ters yönde biyom aynı yerde: %s" % key)
+			t.almost(float(a.to_day), float(days) - float(b.from_day), "sınır aynada: %s" % key)
+			t.almost(float(a.slope), float(b.slope), "eğim iki yönde aynı: %s" % key)
+		var forth_stops := forth.get_stops()
+		var back_stops := back.get_stops()
+		t.eq(back_stops.size(), forth_stops.size(), "iki yönde aynı sayıda durak: %s" % key)
+		if back_stops.size() == forth_stops.size():
+			var m := forth_stops.size()
+			for j in m:
+				var there: Dictionary = forth_stops[j]
+				var here: Dictionary = back_stops[m - 1 - j]
+				t.eq(String(here.stop), String(there.stop), "durak iki yönde aynı: %s" % key)
+				t.almost(float(days) - float(here.day), float(there.day), "durak iki yönde aynı yerde: %s" % key)
+
+## Coğrafya: kullanıcının kuralı "coğrafya gerçeklerini düşünmeden
+## ilerleme". İlk sürümde vadideki Belvanor-İlsande yolu dağ yolu çıkıyordu.
+func _test_map_terrain_follows_geography(t) -> void:
+	var vale := RouteTerrain.build(RouteConditions.route_key("belvanor", "ilsande"), 6, "belvanor")
+	for segment in vale.segments:
+		t.ne(String(segment.biome), ArtPalette.BIOME_MOUNTAIN, "vadi yolu dağ değil")
+	var peaks := RouteTerrain.build(RouteConditions.route_key("brazdun", "kesgrav"), 2, "brazdun")
+	t.eq(peaks.biome_at(1.0), ArtPalette.BIOME_MOUNTAIN, "dağ kabilelerinin yolu dağ")
+	var swamp := RouteTerrain.build(RouteConditions.route_key("golcavar", "ezmerak"), 2, "golcavar")
+	t.eq(swamp.biome_at(0.5), ArtPalette.BIOME_MARSH, "bataklık kasabasının çıkışı bataklık")
+	var seen := {}
+	for leg in _map_legs():
+		for segment in RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[0])).segments:
+			seen[String(segment.biome)] = true
+	t.eq(seen.size(), RouteTerrain.BIOME_CHAIN.size(), "haritada beş biyomun hepsi var")
+
+## Erzak vaadi haritanın gerçek yollarında da: planlayıcının eğim ve hava
+## payını alan kervan yolun sonuna aç varmaz (uzun yollar dahil, 38 güne dek).
+func _test_map_routes_keep_the_provision_promise(t) -> void:
+	var destination := WorldMapData.get_locations()[0]
+	var starved := 0
+	for leg in _map_legs():
+		var key := String(leg[3])
+		var travel_days := int(leg[2])
+		var terrain := RouteTerrain.build(key, travel_days, String(leg[0]))
+		var plan := CaravanPlan.new(destination, travel_days, 6, 2)
+		plan.caravan_party_size = 3
+		plan.travel_reserve_days = int(ceil(RouteWeather.forecast_extra_days(key, 1, terrain, travel_days)))
+		var provisions := plan.get_required_provisions()
+		var daily := plan.get_daily_consumption()
+		var walked := 0.0
+		var day := 0
+		while walked < float(travel_days) and day < travel_days * 8 + 16:
+			var weather := RouteWeather.at(key, 1 + day, terrain.biome_at(walked))
+			provisions -= daily
+			if provisions < 0:
+				starved += 1
+				break
+			walked += RouteWeather.pace_multiplier(weather) * terrain.speed_factor_at(walked)
+			day += 1
+	t.eq(starved, 0, "haritanın hiçbir yolunda payıyla stoklayan kervan aç kalmamalı")

@@ -90,7 +90,7 @@ func _ready() -> void:
 	var route_key := RouteConditions.route_key(
 		origin.location_id, _destination.location_id
 	)
-	_terrain = RouteTerrain.build(route_key, travel_days)
+	_terrain = RouteTerrain.build(route_key, travel_days, origin.location_id)
 	# Kondisyon payı hava payıyla aynı hesaba giriyor (bkz. RouteWeather.
 	# forecast_extra_days'in condition_factor notu) - vagon yükü ve parti
 	# kondisyonunun bugünkü (yola çıkış anındaki) en yavaşı, seferin

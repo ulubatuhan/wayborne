@@ -18,6 +18,14 @@ Varsayılan çıktı `data/config/settlements.json`.
 - **Tehlike:** yol sınıfı (kervan yolu < ana yol < patika), güzergâhın orman ve
   dağ payı ve bölge (sınır halkları daha tekin değil). Formül aşağıda; sayılar
   denge ölçümünde (N8) yeniden ayarlanır.
+- **Arazi:** yol ekranının biyomları güzergâhın kendisinden: her nokta dağ
+  (dağlık alan içinde), bataklık (bataklık kasabasının yakını), göl (göl ya da
+  deniz kıyısı), orman (orman içinde ya da kıyısında) ya da bozkır (açık
+  arazi). Etiketler yumuşatılıp en az `TERRAIN_MIN_SEG_DAYS` günlük parçalara
+  birleşir. Parça sınırında durak: dağa girişte geçit, suda köprü, yakında
+  bir harita noktası (kule, manastır, maden, mezra...) varsa onun karşılığı.
+  Oyun bunu `RouteTerrain.build` ile okur; yol `terrain_from` şehrinden
+  okunacak sırada yazılır, ters yönde oyun diziyi çevirir.
 
 Koordinatlar teslim edilen harita görüntüsünün pikseli (16012x16013, x sağa,
 y aşağı) - MapTileView ile aynı.
@@ -61,6 +69,26 @@ REGION_DANGER = {"sinir": 0.10, "gocebe": 0.06, "dag": 0.06, "dag_maden": 0.04,
                  "imparatorluk": -0.04, "vadi": -0.03, "guney": 0.0, "ahit": 0.0}
 MASK_SCALE = 8  # tehlike maskeleri 1/8 çözünürlükte
 PATH_POINT_SPACING = 48.0
+# Arazi (yol ekranı biyomları)
+WATER_NEAR_PX = 260.0     # göl/deniz kıyısı sayılan uzaklık
+FOREST_NEAR_PX = 80.0     # yol ormanın kıyısından geçiyorsa da orman
+# Haritanın yolları dağ çokgenlerinin içinden değil vadilerden geçiyor: dağın
+# yakını ve dağ halklarının bölgesi de dağ yolu (ilk sürümde Brazdun-Kesgrav
+# bozkır çıktı).
+MOUNTAIN_NEAR_PX = 40.0  # dağ çokgenleri haritanın %22si; geniş bir kıyı her yeri dağ yapıyordu
+MOUNTAIN_REGIONS = ("dag", "dag_maden")
+STOP_MIN_GAP_DAYS = 3.0   # iki harita noktası durağı arası en az
+MARSH_RADIUS_PX = 1100.0  # bataklık kasabasının çevresi
+TERRAIN_SMOOTH = 7        # çoğunluk süzgeci (nokta)
+TERRAIN_MIN_SEG_DAYS = 1.2
+TERRAIN_MAX_SEGMENTS = 8
+STOP_POI_PX = 650.0       # durağa dönüşecek harita noktasının yola uzaklığı
+POI_STOPS = {
+    "iw_tower": "outpost", "ir_ruins": "outpost", "ib_battle": "outpost", "ig_gallows": "outpost",
+    "ip_lighthouse": "outpost", "ia_abbey": "shrine", "is_stones": "shrine", "ig_graveyard": "shrine",
+    "ie_deepmine": "mine", "ie_saltmine": "mine", "ih_hamlet": "mezra", "iv_farm": "mezra",
+    "iv_fishvillage": "mezra", "in_yurtcamp": "mezra", "ix_mountaintribe": "mezra", "il_lumber": "mezra",
+}
 TYPE_BY_PREFIX = {"ic_": "city", "it_": "town"}
 
 
@@ -349,6 +377,132 @@ def shortest(graph, a, b):
     return math.inf
 
 
+def near_mask(mask, px):
+    """Maskenin `px` piksel yakınındaki her yer (uzaklık dönüşümüyle)."""
+    from scipy import ndimage
+    dist = ndimage.distance_transform_edt(mask == 0) * MASK_SCALE
+    return (dist <= px).astype(np.uint8) * 255
+
+
+def classify_terrain(pts, forest, mountain, water, swamp_towns, region_codes, mountain_codes):
+    """Her güzergâh noktasının biyomu. Öncelik: dağ, bataklık, göl, orman, bozkır."""
+    out = []
+    m, f, w = sample(mountain, pts), sample(forest, pts), sample(water, pts)
+    r = sample(region_codes, pts)
+    for i, pt in enumerate(pts):
+        if m[i] or r[i] in mountain_codes:
+            out.append("mountain")
+        elif any(math.dist(pt, t) <= MARSH_RADIUS_PX for t in swamp_towns):
+            out.append("marsh")
+        elif w[i]:
+            out.append("lake")
+        elif f[i]:
+            out.append("forest")
+        else:
+            out.append("steppe")
+    # Çoğunluk süzgeci: tek tük noktalar (bir orman kıyısı) parça açmasın.
+    half = TERRAIN_SMOOTH // 2
+    smooth = []
+    for i in range(len(out)):
+        win = out[max(0, i - half):i + half + 1]
+        smooth.append(max(sorted(set(win)), key=lambda b: (win.count(b), b == out[i])))
+    return smooth
+
+
+def _merge_short(runs, min_pts):
+    """En kısa parçayı uzun komşusuna katar; her parça en az `min_pts` olana dek."""
+    while len(runs) > 1:
+        k = min(range(len(runs)), key=lambda j: runs[j][2] - runs[j][1])
+        if runs[k][2] - runs[k][1] >= min_pts:
+            return
+        left = runs[k - 1] if k > 0 else None
+        right = runs[k + 1] if k + 1 < len(runs) else None
+        if right is None or (left is not None and left[2] - left[1] >= right[2] - right[1]):
+            left[2] = runs[k][2]
+        else:
+            right[1] = runs[k][1]
+        del runs[k]
+        j = 1
+        while j < len(runs):
+            if runs[j][0] == runs[j - 1][0]:
+                runs[j - 1][2] = runs[j][2]
+                del runs[j]
+            else:
+                j += 1
+
+
+def terrain_segments(labels, pts, days, pois):
+    """Etiket dizisini parçalara böler: [{"biome", "to", "stop"}], `to` yolun payı (0-1)."""
+    n = len(labels)
+    if n == 0:
+        return [{"biome": "steppe", "to": 1.0, "stop": ""}]
+    runs = []  # [biyom, başlangıç, bitiş (hariç)]
+    for i, b in enumerate(labels):
+        if runs and runs[-1][0] == b:
+            runs[-1][2] = i + 1
+        else:
+            runs.append([b, i, i + 1])
+    min_pts = max(1, int(math.ceil(TERRAIN_MIN_SEG_DAYS / max(days, 1) * n)))
+    gap_pts = max(min_pts, int(math.ceil(STOP_MIN_GAP_DAYS / max(days, 1) * n)))
+    _merge_short(runs, min_pts)
+    grow = min_pts
+    while len(runs) > TERRAIN_MAX_SEGMENTS:
+        grow += 1
+        _merge_short(runs, grow)
+
+    # Uzun, tek biyomlu parçalar yolun yanındaki harita noktalarında bölünür:
+    # durak bir sınırda durur (RouteTerrain), aynı biyom iki yanında da sürer.
+    used = set()
+    split = []
+    for b, lo, hi in runs:
+        cuts = []
+        for kind, pos, pid in pois:
+            best_i, best_d = None, None
+            for i in range(lo + min_pts, hi - min_pts):
+                d = math.dist(pts[i], pos)
+                if d <= STOP_POI_PX and (best_d is None or d < best_d):
+                    best_i, best_d = i, d
+            if best_i is not None:
+                cuts.append((best_i, POI_STOPS[kind], pid))
+        cuts.sort()
+        start = lo
+        for i, stop, pid in cuts:
+            if pid in used or i - start < gap_pts or hi - i < gap_pts:
+                continue
+            split.append([b, start, i, stop])
+            used.add(pid)
+            start = i
+        split.append([b, start, hi, ""])
+    while len(split) > TERRAIN_MAX_SEGMENTS:
+        cands = [j for j in range(len(split) - 1) if split[j][0] == split[j + 1][0]]
+        if not cands:
+            break
+        j = min(cands, key=lambda j: split[j][2] - split[j][1])
+        split[j + 1][1] = split[j][1]
+        del split[j]
+
+    segs = []
+    for j, (b, lo, hi, stop) in enumerate(split):
+        last = j == len(split) - 1
+        if not last and not stop:
+            other = split[j + 1][0]
+            # Geçit dağa girişte, köprü suya girişte: çıkışa da koymak her
+            # göl parçasını iki köprüyle çevreliyordu.
+            if b != other and other == "mountain":
+                stop = "pass"
+            elif b != other and other in ("lake", "marsh"):
+                stop = "bridge"
+            else:
+                pt = pts[min(hi, n - 1)]
+                near = sorted((math.dist(pt, pos), POI_STOPS[kind], pid) for kind, pos, pid in pois
+                              if pid not in used and math.dist(pt, pos) <= STOP_POI_PX)
+                if near:
+                    stop = near[0][1]
+                    used.add(near[0][2])
+        segs.append({"biome": b, "to": 1.0 if last else round(hi / n, 3), "stop": "" if last else stop})
+    return segs
+
+
 def main(argv):
     geojson = argv[1]
     out_path = argv[2] if len(argv) > 2 else DEFAULT_OUT
@@ -357,6 +511,12 @@ def main(argv):
 
     forest = raster(features, "orman", size)
     mountain = raster(features, "dağ", size)
+    water = np.maximum(raster(features, "göl", size), raster(features, "deniz", size))
+    water_near = near_mask(water, WATER_NEAR_PX)
+    forest_near = near_mask(forest, FOREST_NEAR_PX)
+    mountain_near = near_mask(mountain, MOUNTAIN_NEAR_PX)
+    swamp_towns = [p["pos"] for p in places.values() if p.get("kind") == "it_swamptown"]
+    pois = [(p["kind"], p["pos"], pid) for pid, p in places.items() if p.get("kind") in POI_STOPS]
     culture_codes = sorted({f["properties"].get("culture") for f in features
                             if f["properties"].get("layer") == "bölge"})
     region = raster(features, "bölge", size, lambda p: 1 + culture_codes.index(p.get("culture")))
@@ -396,14 +556,20 @@ def main(argv):
         reg_bonus = float(np.mean([REGION_DANGER.get(r, 0.0) for r in regs])) if regs else 0.0
         danger = base + FOREST_DANGER * f_share + MOUNTAIN_DANGER * m_share + reg_bonus
         caravan_share = sum(l for c, l in e["classes"] if c == "kervan yolu") / total
+        days = max(MIN_DAYS, int(round(e["length_px"] * days_per_px)))
+        labels = classify_terrain(pts, forest_near, mountain_near, water_near, swamp_towns, region,
+                                  {1 + culture_codes.index(c) for c in MOUNTAIN_REGIONS if c in culture_codes})
+        terrain = terrain_segments(labels, pts, days, pois)
         routes.append({
             "a": playable[a]["id"], "b": playable[b]["id"],
             "length_px": round(e["length_px"], 1),
-            "days": max(MIN_DAYS, int(round(e["length_px"] * days_per_px))),
+            "days": days,
             "danger": round(min(0.85, max(0.08, danger)), 2),
             "forest_share": round(f_share, 2), "mountain_share": round(m_share, 2),
             "caravan_road_share": round(caravan_share, 2),
             "via": [places[v]["name_en"] for v in e["via"] if v in places],
+            "terrain_from": playable[a]["id"],
+            "terrain": terrain,
             "path": [[round(x), round(y)] for x, y in pts],
         })
 

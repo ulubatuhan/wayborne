@@ -14,11 +14,19 @@ extends RefCounted
 ##   RouteConditions-> haftalık değişen durum
 ##
 ## **Hesaplanıyor, saklanmıyor.** Aynı iki şehir arası her zaman aynı
-## araziden geçiyor, çünkü tohum `route_key`'den geliyor - kaydı yeniden
-## yükleyen oyuncu aynı yolu buluyor (aynı gerekçe
-## `RouteConditions`'ın doğal durumlarında da var). Yol iki günlük bozkır
-## sonra ormansa, o yol hep öyledir; "bugün nasıl" sorusunun cevabı
+## araziden geçiyor - kaydı yeniden yükleyen oyuncu aynı yolu buluyor (aynı
+## gerekçe `RouteConditions`'ın doğal durumlarında da var). Yol iki günlük
+## bozkır sonra ormansa, o yol hep öyledir; "bugün nasıl" sorusunun cevabı
 ## hava ve rota durumu.
+##
+## **Arazi haritadan gelir.** Harita v3'ün yollarında biyom dizisi ve
+## duraklar güzergâhın kendisinden ölçüldü (`build_settlements.py`:
+## dağlık alan, bataklık kasabasının çevresi, göl/deniz kıyısı, orman, açık
+## arazi; duraklar dağa girişte geçit, suya girişte köprü, yoldaki kule,
+## manastır, maden, mezra). İlk sürüm araziyi yalnızca yolun adından
+## tohumluyordu: vadideki Belvanor-İlsande yolu dağ yolu çıkıyordu.
+## Haritada olmayan bir anahtar (test, sentetik sefer) eski tohumlu yoldan
+## kurulur. Eğim yine tohumdan, biyoma göre.
 
 ## Bir ara durak: yolun ortasında görünen ve okunan bir şey.
 const STOP_NONE: String = ""
@@ -71,13 +79,20 @@ var segments: Array[Dictionary] = []
 
 ## Belirli bir yol için coğrafyayı kurar. `total_days` rotanın taban
 ## süresi; parça sayısı ondan çıkıyor, yani uzun yol daha çeşitli.
-static func build(key: String, days: int) -> RouteTerrain:
+## `from_id` kervanın çıktığı şehir: harita arazisi bir yönde yazılı, öbür
+## yönde dizi ters okunur (dönüşte ve sapmada da seferin asıl çıkışı).
+static func build(key: String, days: int, from_id: String = "") -> RouteTerrain:
 	var terrain := RouteTerrain.new()
 	terrain.route_key = key
 	terrain.total_days = maxi(1, days)
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("terrain|%s" % key)
+
+	var mapped := WorldMapData.get_route_terrain(key)
+	if not mapped.is_empty():
+		terrain._build_from_map(mapped, from_id, rng)
+		return terrain
 
 	var segment_count := clampi(
 		int(round(float(terrain.total_days) / 1.6)), 1, 5
@@ -110,6 +125,40 @@ static func build(key: String, days: int) -> RouteTerrain:
 		biome = terrain._pick_next_biome(biome, rng)
 
 	return terrain
+
+## Haritanın dizisi: payları güne çevirir, gerekirse ters çevirir. Durak
+## bir parçanın *sonunda* (sınırda) durur; ters yönde aynı sınırın durağı
+## öbür parçaya geçer. Eğim haritanın yazıldığı sırada atılır ki iki yön
+## aynı zarları görsün.
+func _build_from_map(mapped: Dictionary, from_id: String, rng: RandomNumberGenerator) -> void:
+	var source: Array = mapped["segments"]
+	var slopes: Array[float] = []
+	for entry in source:
+		slopes.append(_slope_for(String(entry["biome"]), rng))
+	var n := source.size()
+	var reverse := not from_id.is_empty() and from_id != String(mapped["from"])
+	var days := float(total_days)
+	var from_day := 0.0
+	for k in n:
+		var i := n - 1 - k if reverse else k
+		var to_share := 1.0
+		var stop := STOP_NONE
+		if k < n - 1:
+			if reverse:
+				to_share = 1.0 - float(source[i - 1]["to"])
+				stop = String(source[i - 1]["stop"])
+			else:
+				to_share = float(source[i]["to"])
+				stop = String(source[i]["stop"])
+		var to_day := days if k == n - 1 else clampf(to_share * days, from_day, days)
+		segments.append({
+			"biome": String(source[i]["biome"]),
+			"from_day": from_day,
+			"to_day": to_day,
+			"stop": stop,
+			"slope": slopes[i],
+		})
+		from_day = to_day
 
 ## Komşu biyom: zincirde en fazla iki adım uzağa gidiyor. Bozkırdan
 ## doğrudan dağa çıkmak coğrafya gibi durmuyor.

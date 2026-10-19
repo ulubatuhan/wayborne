@@ -1570,7 +1570,7 @@ func _init_journey() -> void:
 	_route_key = RouteConditions.route_key(
 		_session.journey_origin_id, _session.journey_destination_id
 	)
-	_terrain = RouteTerrain.build(_route_key, _journey_length_days)
+	_terrain = RouteTerrain.build(_route_key, _journey_length_days, _session.journey_origin_id)
 	_band.set_route(_terrain)
 	_journey.terrain_key = _route_key
 	_journey.terrain_days = _journey_length_days
@@ -1642,7 +1642,7 @@ func _restore_journey_snapshot() -> void:
 		_journey.terrain_days = _journey_length_days
 	elif _journey.terrain_key != _route_key or _journey.terrain_days != _terrain.total_days:
 		_route_key = _journey.terrain_key
-		_terrain = RouteTerrain.build(_route_key, maxi(1, _journey.terrain_days))
+		_terrain = RouteTerrain.build(_route_key, maxi(1, _journey.terrain_days), _session.journey_origin_id)
 		_band.set_route(_terrain)
 	_band.set_heading(_journey.heading, true)
 	_caravan.set_heading(_journey.heading)
@@ -3334,7 +3334,7 @@ func _on_divert_pressed(destination_id: String) -> void:
 	)
 	_journey.terrain_key = _route_key
 	_journey.terrain_days = _journey_length_days
-	_terrain = RouteTerrain.build(_route_key, _journey_length_days)
+	_terrain = RouteTerrain.build(_route_key, _journey_length_days, _session.journey_origin_id)
 	_band.set_route(_terrain)
 	_apply_replan(tr("UI_ROAD_DIVERTED"))
 

@@ -128,6 +128,17 @@ static func get_route_meta(from_location_id: String, to_location_id: String) -> 
 	_ensure_built()
 	return _route_meta.get(RouteConditions.route_key(from_location_id, to_location_id), {})
 
+## Yolun haritadan gelen arazisi, yönsüz anahtarla (`RouteConditions.route_key`):
+## {"from": çıkış şehri, "segments": [{"biome", "to" (0-1), "stop"}]}; haritada
+## olmayan bir anahtar (test, sentetik sefer) için boş sözlük.
+static func get_route_terrain(key: String) -> Dictionary:
+	_ensure_built()
+	var meta: Dictionary = _route_meta.get(key, {})
+	var segments: Array = meta.get("terrain", [])
+	if segments.is_empty():
+		return {}
+	return {"from": String(meta.get("terrain_from", "")), "segments": segments}
+
 static func _build_locations(data: Dictionary) -> void:
 	for entry in data.get("settlements", []):
 		var s: Dictionary = entry
@@ -176,6 +187,10 @@ static func _build_routes_and_offers(data: Dictionary) -> void:
 			"mountain_share": float(r.get("mountain_share", 0.0)),
 			"caravan_road_share": float(r.get("caravan_road_share", 0.0)),
 			"via": r.get("via", []),
+			# Yol ekranının arazisi, `terrain_from` şehrinden okunacak sırada
+			# (bkz. RouteTerrain.build, build_settlements.py terrain_segments).
+			"terrain_from": String(r.get("terrain_from", a)),
+			"terrain": r.get("terrain", []),
 		}
 		_add_direction(a, b, days, danger, id_counter)
 		id_counter += 10

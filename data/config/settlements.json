@@ -953,6 +953,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "akavan",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      7422,
@@ -1062,6 +1070,19 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "akavan",
+   "terrain": [
+    {
+     "biome": "forest",
+     "to": 0.619,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6910,
@@ -1159,6 +1180,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "auderin",
+   "terrain": [
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6074,
@@ -1232,6 +1261,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "belvanor",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      9886,
@@ -1361,6 +1398,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "brazdun",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      12086,
@@ -1406,6 +1451,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "caramine",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      10332,
@@ -1443,6 +1496,19 @@
    "mountain_share": 0.45,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "caramine",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.455,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      10332,
@@ -1500,6 +1566,19 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "ezmerak",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 0.462,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      11820,
@@ -1617,6 +1696,19 @@
    "mountain_share": 0.09,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "ezmerak",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 0.364,
+     "stop": "outpost"
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      11820,
@@ -1718,6 +1810,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "golcavar",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      10936,
@@ -1751,6 +1851,24 @@
    "mountain_share": 0.14,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "golcavar",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 0.414,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.759,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      10882,
@@ -1880,6 +1998,19 @@
    "mountain_share": 0.42,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "ilsande",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.579,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      9774,
@@ -1969,6 +2100,24 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "kesgrav",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.25,
+     "stop": "mine"
+    },
+    {
+     "biome": "forest",
+     "to": 0.5,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      11986,
@@ -2064,6 +2213,24 @@
    "via": [
     "Kumbag Mill",
     "Field of the Split Banner"
+   ],
+   "terrain_from": "kirsavel",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.465,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.767,
+     "stop": "bridge"
+    },
+    {
+     "biome": "marsh",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -2250,6 +2417,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.83,
    "via": [],
+   "terrain_from": "kirsavel",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      4372,
@@ -2367,6 +2542,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.44,
    "via": [],
+   "terrain_from": "kirsavel",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      4372,
@@ -2400,6 +2583,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "liraven",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      7504,
@@ -2445,6 +2636,24 @@
    "mountain_share": 0.23,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "liraven",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 0.35,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.675,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      7458,
@@ -2618,6 +2827,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "liraven",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      7458,
@@ -2687,6 +2904,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "merigaud",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      8894,
@@ -2744,6 +2969,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "merigaud",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      8878,
@@ -2777,6 +3010,29 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "mirsana",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.211,
+     "stop": "outpost"
+    },
+    {
+     "biome": "forest",
+     "to": 0.298,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 0.649,
+     "stop": "outpost"
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6476,
@@ -3018,6 +3274,24 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "mirsana",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.286,
+     "stop": "outpost"
+    },
+    {
+     "biome": "forest",
+     "to": 0.405,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6476,
@@ -3199,6 +3473,24 @@
    "mountain_share": 0.06,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "ondrelle",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.406,
+     "stop": "bridge"
+    },
+    {
+     "biome": "marsh",
+     "to": 0.562,
+     "stop": "outpost"
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      9342,
@@ -3340,6 +3632,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "ondrelle",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      9342,
@@ -3390,6 +3690,44 @@
    "caravan_road_share": 0.02,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "orsolune",
+   "terrain": [
+    {
+     "biome": "lake",
+     "to": 0.151,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 0.226,
+     "stop": "shrine"
+    },
+    {
+     "biome": "forest",
+     "to": 0.462,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.548,
+     "stop": "mezra"
+    },
+    {
+     "biome": "forest",
+     "to": 0.71,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.828,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -3776,6 +4114,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "orsolune",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      8574,
@@ -3854,6 +4200,49 @@
    "caravan_road_share": 0.07,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "orvahel",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.265,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.324,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.48,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.549,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.706,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.775,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.863,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -4279,6 +4668,24 @@
     "Callorde",
     "Ostiven"
    ],
+   "terrain_from": "rivecande",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.132,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.553,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      9768,
@@ -4444,6 +4851,24 @@
    "mountain_share": 0.28,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "samuran",
+   "terrain": [
+    {
+     "biome": "marsh",
+     "to": 0.188,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.594,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      5880,
@@ -4585,6 +5010,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "selvicar",
+   "terrain": [
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6112,
@@ -4665,6 +5098,39 @@
     "Ilkatay Camp",
     "Otekur Camp",
     "Burkasan Camp"
+   ],
+   "terrain_from": "selvicar",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 0.222,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.411,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.513,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.646,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.778,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -5311,6 +5777,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "selvicar",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      6142,
@@ -5360,6 +5834,14 @@
    "mountain_share": 0.0,
    "caravan_road_share": 1.0,
    "via": [],
+   "terrain_from": "tolvarin",
+   "terrain": [
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      4926,
@@ -5486,6 +5968,49 @@
    "caravan_road_share": 0.02,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "vorgat",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.354,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.427,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.542,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.615,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.781,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.854,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.948,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -5884,6 +6409,49 @@
    "mountain_share": 0.07,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "vorgat",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.459,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.5,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 0.554,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.635,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.811,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.851,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.919,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      14338,
@@ -6194,6 +6762,49 @@
    "caravan_road_share": 0.07,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "vorgat",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.324,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.39,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.495,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.562,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.714,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.781,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.867,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -6628,6 +7239,19 @@
    "mountain_share": 0.0,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "vorgat",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.882,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      14338,
@@ -6778,6 +7402,49 @@
    "caravan_road_share": 0.02,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "zelmarin",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.295,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.375,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.5,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.58,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.761,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.841,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.943,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [
@@ -7144,6 +7811,44 @@
    "mountain_share": 0.08,
    "caravan_road_share": 0.0,
    "via": [],
+   "terrain_from": "zelmarin",
+   "terrain": [
+    {
+     "biome": "lake",
+     "to": 0.061,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.439,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 0.5,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.591,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.833,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.909,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
+   ],
    "path": [
     [
      13668,
@@ -7422,6 +8127,49 @@
    "caravan_road_share": 0.08,
    "via": [
     "Shipwrights' Logging Camp"
+   ],
+   "terrain_from": "zelmarin",
+   "terrain": [
+    {
+     "biome": "mountain",
+     "to": 0.268,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.34,
+     "stop": "pass"
+    },
+    {
+     "biome": "mountain",
+     "to": 0.454,
+     "stop": "mezra"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.526,
+     "stop": ""
+    },
+    {
+     "biome": "forest",
+     "to": 0.691,
+     "stop": "shrine"
+    },
+    {
+     "biome": "steppe",
+     "to": 0.763,
+     "stop": "bridge"
+    },
+    {
+     "biome": "lake",
+     "to": 0.856,
+     "stop": ""
+    },
+    {
+     "biome": "steppe",
+     "to": 1.0,
+     "stop": ""
+    }
    ],
    "path": [
     [

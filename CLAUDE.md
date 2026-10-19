@@ -2656,8 +2656,26 @@ re-roll the rain away.
   roadside stops (mezra, outpost, mine, pass, shrine, bridge) and the
   slope all come from `RouteTerrain`; the road screen draws them and the
   planner prints them in one line, so choosing a route is no longer blind.
-  Biomes step at most two places along `BIOME_CHAIN`, because steppe
-  straight into mountains does not read as geography.
+- **The map decides the terrain, not the route's name.** Every road of the
+  map v3 carries its own biome sequence and stops, measured along the real
+  path by `tools/worldmap/build_settlements.py`:
+  - **Biomes:** mountain polygon or a mountain people's region, then
+    within reach of a swamp town, then lake or sea shore, then forest
+    (inside or at the edge), otherwise steppe. The labels are smoothed and
+    merged into parts of at least 1.2 days.
+  - **Stops:** a pass entering mountains, a bridge entering water, else
+    the nearest map point on the way (tower, abbey, mine, hamlet...),
+    spaced at least three days apart.
+
+  It is written in the direction of `terrain_from`, and
+  `RouteTerrain.build(key, days, from_id)` reads it backwards from the
+  other end, slopes included. Every caller passes the journey's own origin;
+  turning back and diverting keep it. Seeded only from the key, the valley
+  road Belvanor-Ilsande had come out as a mountain road. Keys that are not
+  on the map (tests, the synthetic journey) still use the seeded chain,
+  where biomes step at most two places along `BIOME_CHAIN`.
+  `test_route_terrain` checks every map road in both directions: coverage,
+  the mirror, the geography and the provision promise.
 - **A drawn stop that no event ever reads is scenery with a name on it,
   not a feature.** `evt_roadside_shrine` fired from the general pool with
   no idea whether a shrine stop was actually on screen that day - the
