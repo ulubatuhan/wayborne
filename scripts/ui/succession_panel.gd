@@ -244,3 +244,9 @@ func _on_continue_pressed() -> void:
 func _finish() -> void:
 	dismissed.emit()
 	queue_free()
+
+## Bu bir karar paneli: Esc kararı atlatmaz, ama altındaki ekranı da
+## kapatmamalı (görev Y-H04). Girdi burada tüketilir.
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()

@@ -268,3 +268,10 @@ func _on_close_pressed() -> void:
 		closed.emit()
 		queue_free()
 	)
+
+## Esc paneli kapatır, altındaki ekranı değil (görev Y-H04): girdi burada
+## tüketilir, UiTheme'in "alt ekrandan geri" kuralına ulaşmaz.
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_on_close_pressed()
