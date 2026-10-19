@@ -836,3 +836,6 @@
 "UI_DANGER_PART_STATE","%s %+d","%s %+d","","","","","","","","",""
 "UI_DANGER_PART_WORLD","dünya olayı %+d","world event %+d","","","","","","","","",""
 "UI_DANGER_PART_GROWTH","zamanla azgınlaşan eşkıya %+d","brigands bolder with time %+d","","","","","","","","",""
+"UI_PLANNER_SHORTCUT_OFF","Kestirme var: %d gün kısa, zor araziden, tehlike +%d. Kestirmeden git","A shortcut exists: %d days shorter, over rough ground, danger +%d. Take it","","","","","","","","",""
+"UI_PLANNER_SHORTCUT_ON","Kestirmeden: %d gün kısa, tehlike +%d. Ana yola dön","By the shortcut: %d days shorter, danger +%d. Back to the main road","","","","","","","","",""
+"UI_DANGER_PART_SHORTCUT","kestirme %+d","shortcut %+d","","","","","","","","",""

@@ -45,6 +45,7 @@ func run(t) -> void:
 	_test_map_terrain_mirrors_by_direction(t)
 	_test_map_terrain_follows_geography(t)
 	_test_map_routes_keep_the_provision_promise(t)
+	_test_seasons_and_shortcuts(t)
 
 func _test_terrain_is_reproducible(t) -> void:
 	for key in SAMPLE_KEYS:
@@ -620,3 +621,74 @@ func _test_map_routes_keep_the_provision_promise(t) -> void:
 			walked += RouteWeather.pace_multiplier(weather) * terrain.speed_factor_at(walked)
 			day += 1
 	t.eq(starved, 0, "haritanın hiçbir yolunda payıyla stoklayan kervan aç kalmamalı")
+
+## Aynı rotada farklı yol (görev Y-B13): her mevsim ve kestirme arazisi yolu
+## boşluksuz kaplar, şehirde durmaz, erzak sözünü tutar; mevsim gerçekten
+## araziyi değiştirir, kestirme gerçekten kısalır ve zor araziden geçer.
+func _biomes(terrain: RouteTerrain) -> Array:
+	var out: Array = []
+	for segment in terrain.segments:
+		out.append(String(segment.biome))
+	return out
+
+func _test_seasons_and_shortcuts(t) -> void:
+	var destination := WorldMapData.get_locations()[0]
+	var gaps := 0
+	var starved := 0
+	var seasonal := 0
+	var shortcuts := 0
+	var rough_middle := true
+	var winter_slower := true
+	for leg in _map_legs():
+		var key := String(leg[3])
+		var base_days := int(leg[2])
+		var spring := RouteTerrain.build(key, base_days, String(leg[0]), MarketConditions.Season.SPRING)
+		var summer := RouteTerrain.build(key, base_days, String(leg[0]), MarketConditions.Season.SUMMER)
+		if _biomes(spring) != _biomes(summer):
+			seasonal += 1
+		var winter := RouteTerrain.build(key, base_days, String(leg[0]), MarketConditions.Season.WINTER)
+		var autumn := RouteTerrain.build(key, base_days, String(leg[0]), MarketConditions.Season.AUTUMN)
+		for i in winter.segments.size():
+			if winter.speed_factor_at(float(winter.segments[i].from_day) + 0.01) > autumn.speed_factor_at(float(autumn.segments[i].from_day) + 0.01) + 1e-6:
+				winter_slower = false
+		for season in 4:
+			for shortcut in [false, true]:
+				if shortcut and not RouteTerrain.shortcut_available(base_days):
+					continue
+				var days := RouteTerrain.shortcut_days(base_days) if shortcut else base_days
+				var terrain := RouteTerrain.build(key, days, String(leg[0]), season, shortcut)
+				var cursor := 0.0
+				for segment in terrain.segments:
+					if absf(float(segment.from_day) - cursor) > 1e-4 or float(segment.to_day) < float(segment.from_day):
+						gaps += 1
+					cursor = float(segment.to_day)
+				if absf(cursor - float(days)) > 1e-4 or String(terrain.segments[-1].stop) != RouteTerrain.STOP_NONE:
+					gaps += 1
+				if shortcut:
+					shortcuts += 1
+					if not (terrain.biome_at(days * 0.5) in [ArtPalette.BIOME_MOUNTAIN, ArtPalette.BIOME_FOREST]):
+						rough_middle = false
+				var plan := CaravanPlan.new(destination, days, 6, 2)
+				plan.caravan_party_size = 3
+				plan.travel_reserve_days = int(ceil(RouteWeather.forecast_extra_days(key, 1, terrain, days)))
+				var provisions := plan.get_required_provisions()
+				var daily := plan.get_daily_consumption()
+				var walked := 0.0
+				var day := 0
+				while walked < float(days) and day < days * 8 + 16:
+					var weather := RouteWeather.at(key, 1 + day, terrain.biome_at(walked))
+					provisions -= daily
+					if provisions < 0:
+						starved += 1
+						break
+					walked += RouteWeather.pace_multiplier(weather) * terrain.speed_factor_at(walked)
+					day += 1
+	t.eq(gaps, 0, "her mevsimde ve kestirmede arazi yolu boşluksuz kaplar, şehirde durmaz")
+	t.eq(starved, 0, "mevsimli ve kestirmeli yolda da payıyla stoklayan aç kalmaz")
+	t.ge(float(seasonal), 5.0, "ilkbahar ve yaz en az beş yolda farklı arazi verir (%d)" % seasonal)
+	t.ok(shortcuts > 0, "haritada kestirmesi olan yol var")
+	t.ok(rough_middle, "kestirmenin ortası dağ ya da orman")
+	t.ok(winter_slower, "kış hiçbir parçayı hızlandırmaz (dağ karla yavaşlar)")
+	t.ok(RouteTerrain.shortcut_days(10) < 10, "kestirme yolu kısaltır")
+	t.ok(RouteTerrain.shortcut_danger(0.3) > 0.3 and RouteTerrain.shortcut_danger(0.95) <= 1.0, "kestirme tehlikeyi boş paya artırır")
+	t.ok(not RouteTerrain.shortcut_available(RouteTerrain.SHORTCUT_MIN_DAYS - 1), "kısa yolda kestirme yok")

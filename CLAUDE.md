@@ -2452,6 +2452,13 @@ re-roll the rain away.
   where biomes step at most two places along `BIOME_CHAIN`.
   `test_route_terrain` checks every map road in both directions: coverage,
   the mirror, the geography and the provision promise.
+- **The same road differs by season and by choice (task Y-B13).** Two deterministic passes over the map's terrain,
+  never stored: spring floods steppe or meadow beside water into marsh, summer dries an inland marsh to meadow, winter
+  steepens mountains (slower). A shortcut (`RouteTerrain.shortcut_available`, roads of 5+ days) cuts 20% of the days
+  and sends the middle third over mountain or forest, with danger raised on the headroom. The season is the
+  departure day's (`GameSession.journey_start_day`, saved with the shortcut flag in the journey block); the planner and
+  the road build with the same arguments, and `test_route_terrain` re-runs the provision promise for every season and
+  shortcut. A diversion drops the shortcut.
 - **A drawn stop that no event ever reads is scenery with a name on it,
   not a feature.** `evt_roadside_shrine` fired from the general pool with
   no idea whether a shrine stop was actually on screen that day - the

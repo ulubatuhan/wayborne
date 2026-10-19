@@ -73,6 +73,23 @@ const SLOPE_SPEED_PER_UNIT: float = 0.25
 const MIN_SLOPE_SPEED_FACTOR: float = 0.75
 const MAX_SLOPE_SPEED_FACTOR: float = 1.15
 
+## Aynı rotada farklı yol (görev Y-B13). Arazi tohumdan gelir ve haritadan
+## okunur; mevsim ve kestirme onun üstünde iki deterministik dönüşüm:
+## - İlkbahar: göl ya da bataklığa komşu bozkır/çayır parçası su basar (bataklık).
+## - Yaz: iki ucu da kuru olan bataklık parçası kurur (çayır).
+## - Kış: dağ parçaları karla dikleşir (eğim, yani yavaşlık).
+## - Kestirme: yolun ortası (pay `SHORTCUT_FROM`..`SHORTCUT_TO`) zor araziden,
+##   dağdan ya da ormandan geçer; yol `SHORTCUT_DAY_SHARE` kadar kısalır,
+##   tehlike `SHORTCUT_DANGER_DELTA` kadar (boş paya) artar.
+## Planlayıcı ve yol aynı parametrelerle kurar; erzak sözü bozulmaz.
+const NO_SEASON: int = -1
+const WINTER_MOUNTAIN_SLOPE: float = 0.2
+const SHORTCUT_MIN_DAYS: int = 5
+const SHORTCUT_DAY_SHARE: float = 0.8
+const SHORTCUT_DANGER_DELTA: float = 0.15
+const SHORTCUT_FROM: float = 0.35
+const SHORTCUT_TO: float = 0.65
+
 var route_key: String = ""
 var total_days: int = 1
 ## Her biri {"biome", "from_day", "to_day", "stop", "slope"}.
@@ -82,7 +99,26 @@ var segments: Array[Dictionary] = []
 ## süresi; parça sayısı ondan çıkıyor, yani uzun yol daha çeşitli.
 ## `from_id` kervanın çıktığı şehir: harita arazisi bir yönde yazılı, öbür
 ## yönde dizi ters okunur (dönüşte ve sapmada da seferin asıl çıkışı).
-static func build(key: String, days: int, from_id: String = "") -> RouteTerrain:
+static func build(key: String, days: int, from_id: String = "", season: int = NO_SEASON, shortcut: bool = false) -> RouteTerrain:
+	var terrain := _build_base(key, days, from_id)
+	if shortcut:
+		terrain._apply_shortcut()
+	if season != NO_SEASON:
+		terrain._apply_season(season)
+	return terrain
+
+## Kestirme bu yol için var mı: kısa yolda kesilecek bir orta yok.
+static func shortcut_available(days: int) -> bool:
+	return days >= SHORTCUT_MIN_DAYS
+
+static func shortcut_days(days: int) -> int:
+	return maxi(1, int(round(float(days) * SHORTCUT_DAY_SHARE)))
+
+## Kestirmenin tehlikesi, rotanın kendi delta kuralıyla (boş paya).
+static func shortcut_danger(danger: float) -> float:
+	return clampf(danger + SHORTCUT_DANGER_DELTA * (1.0 - danger), 0.0, 1.0)
+
+static func _build_base(key: String, days: int, from_id: String) -> RouteTerrain:
 	var terrain := RouteTerrain.new()
 	terrain.route_key = key
 	terrain.total_days = maxi(1, days)
@@ -160,6 +196,57 @@ func _build_from_map(mapped: Dictionary, from_id: String, rng: RandomNumberGener
 			"slope": slopes[i],
 		})
 		from_day = to_day
+
+func _apply_season(season: int) -> void:
+	var source := segments.duplicate(true)
+	for i in segments.size():
+		var biome := String(source[i]["biome"])
+		var before := String(source[i - 1]["biome"]) if i > 0 else ""
+		var after := String(source[i + 1]["biome"]) if i < source.size() - 1 else ""
+		var wet := [ArtPalette.BIOME_LAKE, ArtPalette.BIOME_MARSH]
+		var inner := i > 0 and i < source.size() - 1
+		if season == MarketConditions.Season.SPRING:
+			if biome in [ArtPalette.BIOME_STEPPE, ArtPalette.BIOME_MEADOW] and (before in wet or after in wet):
+				segments[i]["biome"] = ArtPalette.BIOME_MARSH
+				segments[i]["slope"] = minf(float(segments[i]["slope"]), 0.0)
+		elif season == MarketConditions.Season.SUMMER:
+			if biome == ArtPalette.BIOME_MARSH and inner and not (before in wet) and not (after in wet):
+				segments[i]["biome"] = ArtPalette.BIOME_MEADOW
+		elif season == MarketConditions.Season.WINTER:
+			if biome == ArtPalette.BIOME_MOUNTAIN:
+				segments[i]["slope"] = minf(0.7, float(segments[i]["slope"]) + WINTER_MOUNTAIN_SLOPE)
+
+## Yolun ortası zor araziden: yolda dağ varsa dağ (girişte geçit), yoksa orman.
+func _apply_shortcut() -> void:
+	var days := float(total_days)
+	var a := SHORTCUT_FROM * days
+	var b := SHORTCUT_TO * days
+	var rough := ArtPalette.BIOME_FOREST
+	for segment in segments:
+		if String(segment["biome"]) == ArtPalette.BIOME_MOUNTAIN:
+			rough = ArtPalette.BIOME_MOUNTAIN
+	var out: Array[Dictionary] = []
+	for segment in segments:
+		var from_day := float(segment["from_day"])
+		var to_day := float(segment["to_day"])
+		if from_day < a:
+			var head := segment.duplicate()
+			head["to_day"] = minf(to_day, a)
+			if to_day > a:
+				head["stop"] = STOP_PASS if rough == ArtPalette.BIOME_MOUNTAIN else STOP_NONE
+			out.append(head)
+		if from_day < b and to_day > a and (out.is_empty() or String(out[-1]["biome"]) != "shortcut"):
+			if out.is_empty() or float(out[-1]["to_day"]) <= a:
+				out.append({"biome": "shortcut", "from_day": a, "to_day": b, "stop": STOP_NONE,
+					"slope": 0.5 if rough == ArtPalette.BIOME_MOUNTAIN else 0.1})
+		if to_day > b:
+			var tail := segment.duplicate()
+			tail["from_day"] = maxf(from_day, b)
+			out.append(tail)
+	for segment in out:
+		if String(segment["biome"]) == "shortcut":
+			segment["biome"] = rough
+	segments = out
 
 ## Komşu biyom: zincirde en fazla iki adım uzağa gidiyor. Bozkırdan
 ## doğrudan dağa çıkmak coğrafya gibi durmuyor.

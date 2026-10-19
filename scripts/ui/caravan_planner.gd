@@ -54,7 +54,21 @@ func _ready() -> void:
 	if _destination == null or origin == null:
 		_build_missing_context_ui()
 		return
+	var none: Array[MerchantOffer] = []
+	_setup(origin, none)
 
+## Kestirme açılıp kapanınca plan yeniden kurulur (süre, tehlike, arazi,
+## erzak payı hep birlikte değişir); seçili kontratlar korunur.
+func _rebuild() -> void:
+	var chosen: Array[MerchantOffer] = []
+	chosen.append_array(_plan.get_selected_offers())
+	for child in _content.get_children():
+		_content.remove_child(child)
+		child.queue_free()
+	_departure_armed = false
+	_setup(WorldMapData.get_location_by_id(_session.current_location_id), chosen)
+
+func _setup(origin: Location, chosen: Array[MerchantOffer]) -> void:
 	var route := WorldMapData.get_route(origin.location_id, _destination.location_id)
 	var travel_days: int = 1
 	if route != null:
@@ -67,6 +81,10 @@ func _ready() -> void:
 		travel_days = maxi(1, _session.get_route_travel_days(route) - izci_reduction)
 		_route_danger = _session.get_route_danger(route)
 		_route_state = _session.get_route_state(route)
+	_base_travel_days = travel_days
+	if _use_shortcut and RouteTerrain.shortcut_available(travel_days):
+		travel_days = RouteTerrain.shortcut_days(travel_days)
+		_route_danger = RouteTerrain.shortcut_danger(_route_danger)
 
 	_plan = CaravanPlan.new(
 		_destination, travel_days, _session.get_wagon_capacity(), _session.owned_wagon_count
@@ -79,6 +97,8 @@ func _ready() -> void:
 	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 	_plan.height_adjustment = CaravanPlan.height_adjustment_for(_session.get_party())
 	_plan.animal_mouths = _session.get_pack_animal_provision_mouths()
+	for offer in chosen:
+		_plan.toggle_merchant(offer)
 
 	# Yolun coğrafyası ve havası. İkisi de tohumdan hesaplanıyor, yani
 	# burada gösterilen arazi ve hava payı yolda birebir yaşanacak olan
@@ -90,7 +110,7 @@ func _ready() -> void:
 	var route_key := RouteConditions.route_key(
 		origin.location_id, _destination.location_id
 	)
-	_terrain = RouteTerrain.build(route_key, travel_days, origin.location_id)
+	_terrain = RouteTerrain.build(route_key, travel_days, origin.location_id, _session.departure_season(), _is_shortcut())
 	# Kondisyon payı hava payıyla aynı hesaba giriyor (bkz. RouteWeather.
 	# forecast_extra_days'in condition_factor notu) - vagon yükü ve parti
 	# kondisyonunun bugünkü (yola çıkış anındaki) en yavaşı, seferin
@@ -109,7 +129,8 @@ func _ready() -> void:
 	if _session.standing_camp_at_dusk:
 		_plan.camp_provisions = GameSession.CAMP_PROVISIONS_COST * _plan.get_provisioned_days()
 
-	_session.wallet.balance_changed.connect(_on_wallet_changed)
+	if not _session.wallet.balance_changed.is_connected(_on_wallet_changed):
+		_session.wallet.balance_changed.connect(_on_wallet_changed)
 
 	_build_ui(origin, _destination, travel_days)
 	_refresh()
@@ -132,10 +153,32 @@ const DANGER_PART_KEYS: Dictionary = {
 	"growth": "UI_DANGER_PART_GROWTH",
 }
 
+## Kestirme (görev Y-B13): yol kısalır, ortası zor araziden geçer, tehlike artar.
+var _use_shortcut: bool = false
+var _base_travel_days: int = 1
+
+func _is_shortcut() -> bool:
+	return _use_shortcut and RouteTerrain.shortcut_available(_base_travel_days)
+
+func _add_shortcut_choice() -> void:
+	if not RouteTerrain.shortcut_available(_base_travel_days):
+		return
+	var saved := _base_travel_days - RouteTerrain.shortcut_days(_base_travel_days)
+	var button := Button.new()
+	button.toggle_mode = true
+	button.button_pressed = _use_shortcut
+	button.text = tr("UI_PLANNER_SHORTCUT_ON" if _use_shortcut else "UI_PLANNER_SHORTCUT_OFF") % [
+		saved, int(round(RouteTerrain.SHORTCUT_DANGER_DELTA * 100.0)),
+	]
+	button.toggled.connect(func(on: bool):
+		_use_shortcut = on
+		_rebuild.call_deferred())
+	_content.add_child(button)
+
 func _add_danger_breakdown() -> void:
 	var route := WorldMapData.get_route(_session.current_location_id, _destination.location_id)
 	var parts := _session.get_route_danger_breakdown(route)
-	if parts.size() < 2:
+	if parts.size() < 2 and not _is_shortcut():
 		return
 	var words: Array[String] = []
 	for part in parts:
@@ -145,6 +188,9 @@ func _add_danger_breakdown() -> void:
 			words.append(tr(key) % [String(part["arg"]), percent])
 		else:
 			words.append(tr(key) % percent)
+	if _is_shortcut():
+		var before := float(parts[-1]["value"])
+		words.append(tr("UI_DANGER_PART_SHORTCUT") % int(round((RouteTerrain.shortcut_danger(before) - before) * 100.0)))
 	var label := Label.new()
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	label.text = tr("UI_PLANNER_DANGER_BREAKDOWN") % " · ".join(words)
@@ -171,6 +217,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	]
 	_content.add_child(route_label)
 	_add_danger_breakdown()
+	_add_shortcut_choice()
 
 	# Arazi: rota seçimi kör bir karar olmasın. "İki gün bozkır, sonra
 	# orman" cümlesi oyuncuya neyle karşılaşacağını söylüyor ve yol
@@ -316,6 +363,7 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 8)
 
 	var checkbox := CheckBox.new()
+	checkbox.set_pressed_no_signal(_plan.is_selected(offer))
 	checkbox.toggled.connect(_on_offer_toggled.bind(offer, checkbox))
 	row.add_child(checkbox)
 
@@ -460,7 +508,8 @@ func _on_confirm_pressed() -> void:
 		_destination.location_id,
 		_plan.travel_days,
 		_route_danger,
-		_plan
+		_plan,
+		_is_shortcut()
 	)
 	SceneInk.go(Nav.go_root(Nav.JOURNEY))
 

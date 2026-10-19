@@ -431,6 +431,10 @@ var current_location_id: String = WorldMapData.START_LOCATION_ID
 var journey_origin_id: String = ""
 var journey_destination_id: String = ""
 var journey_total_days: int = 0
+## Seferin çıktığı gün (mevsimi araziyi değiştirir, görev Y-B13) ve kestirmeden
+## gidip gitmediği. -1: bilinmiyor (eski kayıt, sentetik sefer) - arazi mevsimsiz.
+var journey_start_day: int = -1
+var journey_shortcut: bool = false
 var journey_days_remaining: int = 0
 
 var danger_level: float = 0.0
@@ -2405,10 +2409,12 @@ func get_departure_morale_breakdown() -> Array[Dictionary]:
 	return lines
 
 ## Planlayıcıda onaylanan kervanı yola çıkarır.
-func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan) -> void:
+func start_journey(destination_id: String, days: int, danger: float, plan: CaravanPlan, shortcut: bool = false) -> void:
 	if get_phase() == Phase.RUN_OVER:
 		push_error("start_journey: run is over, cannot open a new journey")
 		return
+	journey_start_day = total_days_elapsed
+	journey_shortcut = shortcut
 	journey_origin_id = current_location_id
 	journey_destination_id = destination_id
 	journey_total_days = maxi(1, days)
@@ -2427,6 +2433,16 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 ## günle temsil ediyoruz: dönüş/sapma süresi hedefin çıkış şehrine olan
 ## mesafesi ile o ana kadar yürünen mesafenin toplamı.
 const MIN_DIVERT_DAYS: int = 1
+
+## Yola bugün çıkılsa arazinin mevsimi (planlayıcı) ve süren seferin mevsimi
+## (yol ekranı); ikisi aynı günü okur ki planlayıcının gösterdiği yol yaşansın.
+func departure_season() -> int:
+	return MarketConditions.get_season(total_days_elapsed)
+
+func journey_season() -> int:
+	if journey_start_day < 0:
+		return RouteTerrain.NO_SEASON
+	return MarketConditions.get_season(journey_start_day)
 
 func get_days_travelled() -> int:
 	return maxi(0, journey_total_days - journey_days_remaining)
@@ -2458,6 +2474,8 @@ func divert_journey(destination_id: String) -> bool:
 		return false
 	var route := WorldMapData.get_route(journey_origin_id, destination_id)
 	var total := maxi(MIN_DIVERT_DAYS, get_days_travelled() + get_route_travel_days(route))
+	# Sapılan yol yeni bir yol: kestirme eski yolundu.
+	journey_shortcut = false
 	journey_destination_id = destination_id
 	journey_total_days = total
 	journey_days_remaining = total
@@ -2528,6 +2546,8 @@ func finish_journey() -> Dictionary:
 	journey_origin_id = ""
 	journey_destination_id = ""
 	journey_total_days = 0
+	journey_start_day = -1
+	journey_shortcut = false
 	journey_days_remaining = 0
 	danger_level = 0.0
 	caravan = CaravanState.new()
@@ -3138,6 +3158,8 @@ func _journey_save_block() -> Dictionary:
 		"total_days": journey_total_days,
 		"days_remaining": journey_days_remaining,
 		"danger_level": danger_level,
+		"start_day": journey_start_day,
+		"shortcut": journey_shortcut,
 		"caravan": caravan.to_dict(),
 		"controller": journey_snapshot.duplicate(true),
 	}
@@ -3150,6 +3172,8 @@ func _load_journey_block(block: Dictionary) -> void:
 	journey_total_days = maxi(1, int(block.get("total_days", 1)))
 	journey_days_remaining = clampi(int(block.get("days_remaining", journey_total_days)), 0, journey_total_days)
 	danger_level = clampf(float(block.get("danger_level", 0.0)), 0.0, 1.0)
+	journey_start_day = int(block.get("start_day", -1))
+	journey_shortcut = bool(block.get("shortcut", false))
 	caravan = CaravanState.from_dict(block.get("caravan", {}) as Dictionary)
 	journey_snapshot = (block.get("controller", {}) as Dictionary).duplicate(true)
 

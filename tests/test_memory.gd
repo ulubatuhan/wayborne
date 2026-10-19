@@ -176,6 +176,8 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"journey_days_remaining": "journey",
 	"danger_level": "journey",
 	"journey_snapshot": "journey",
+	"journey_start_day": "journey",
+	"journey_shortcut": "journey",
 }
 
 func _test_every_persistent_field_is_saved(t) -> void:
