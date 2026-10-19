@@ -648,6 +648,10 @@ func _build_world_layer() -> void:
 	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
 	_caravan.column_length_changed.connect(_band.set_column_length)
 	_caravan.turn_finished.connect(_on_caravan_turn_finished)
+	# Kamp ateşinin sesi (görev 12.2c): tutuşma ilk varanla, çıtırtı kamp
+	# boyunca, kamp kalkıp herkes binince söner.
+	_caravan.fire_lit.connect(_on_fire_lit)
+	_caravan.fires_out.connect(AudioManager.stop_ambience)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -2251,6 +2255,15 @@ func _update_camp_state() -> void:
 	_band.set_camping(false)
 	_caravan.set_camping(false)
 	_refresh_state()
+
+## Yol ekranından çıkılınca (varış, menü, yükleme) kamp ateşinin sesi
+## yanında gitmesin: şehirde çıtırtı duyuluyordu.
+func _exit_tree() -> void:
+	AudioManager.stop_ambience()
+
+func _on_fire_lit(_index: int) -> void:
+	AudioManager.play_sfx(AudioManager.SFX_FIRE_IGNITE)
+	AudioManager.play_ambience(AudioManager.AMBIENCE_FIRE)
 
 ## Hava günden ve rotadan hesaplanıyor, saklanmıyor: aynı kaydı yeniden
 ## yükleyen oyuncu aynı havayı buluyor (bkz. RouteWeather). Biyom da

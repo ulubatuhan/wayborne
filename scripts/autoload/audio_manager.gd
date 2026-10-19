@@ -57,9 +57,12 @@ const SILENT_DB: float = -60.0
 ## kendi geçici `AudioStreamPlayer`'ını kurup bitince kendini siliyor.
 const SFX_THUD: String = "thud"
 const SFX_GATE: String = "gate"
+## Kamp ateşinin tutuşması (görev 12.2c): ilk figür ateşe varınca.
+const SFX_FIRE_IGNITE: String = "fire_ignite"
 const SFX_PATHS: Dictionary = {
 	SFX_THUD: "res://data/assets/audio/wooden_thud.wav",
 	SFX_GATE: "res://data/assets/audio/gate_creak.wav",
+	SFX_FIRE_IGNITE: "res://data/assets/audio/fire_ignite.wav",
 }
 
 ## Ortam sesi (bkz. `play_ambience`) - müziğin *altında* değil, müziğin
@@ -67,8 +70,11 @@ const SFX_PATHS: Dictionary = {
 ## rüzgar var. Kendi çalıcısı ve kendi solması var, müzikten bağımsız -
 ## ikisi aynı anda solabilmeli (rüzgar sönerken yol müziği yükseliyor).
 const AMBIENCE_WIND: String = "wind"
+## Kamp ateşinin çıtırtısı, kamp boyunca (görev 12.2c).
+const AMBIENCE_FIRE: String = "fire"
 const AMBIENCE_PATHS: Dictionary = {
 	AMBIENCE_WIND: "res://data/assets/audio/wind_ambience.wav",
+	AMBIENCE_FIRE: "res://data/assets/audio/fire_crackle.wav",
 }
 const AMBIENCE_FADE_SECONDS: float = 1.6
 

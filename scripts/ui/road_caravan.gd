@@ -309,6 +309,10 @@ const COLUMN_EDGE_MARGIN: float = 20.0
 signal column_length_changed(trailing_px: float)
 ## Kervanın geri dönüşü bitti - yol ekranı zamanı yeniden akıtıyor.
 signal turn_finished
+## Bir kamp ateşi tutuştu (ilk figür vardı) - ses için (görev 12.2c).
+signal fire_lit(index: int)
+## Kamp kalktı, bütün ateşler söndü.
+signal fires_out
 
 ## --- Dönüş ---
 ## Kervan geri dönünce yerinde, sırayla dönüyor: lider önce atını çeviriyor,
@@ -1265,6 +1269,7 @@ func _advance_gather(real_delta: float) -> void:
 		_gather_trans.clear()
 		_gather_clip.clear()
 		_fire_ignite.clear()
+		fires_out.emit()
 
 ## Bir ateş, ilk kendi figürü ona vardığında tutuşuyor; hiç figürü atanmamış
 ## bir ateş (vagonu boş) ilk varan herhangi biriyle. Tutuşan ateş kamp
@@ -1284,7 +1289,10 @@ func _update_fires(delta: float) -> void:
 	for index in _wagon_centres.size():
 		var lit := arrived_at.has(index) or (anyone and not assigned_to.has(index))
 		if lit or _fire_ignite.has(index):
+			var was_lit := _fire_ignite.has(index)
 			_fire_ignite[index] = minf(1.0, float(_fire_ignite.get(index, 0.0)) + delta / IGNITE_SECONDS)
+			if not was_lit:
+				fire_lit.emit(index)
 
 ## Ateşin tutuşma ilerlemesi: 0 yanmıyor (yalnızca odun), 1 tam alev.
 func get_fire_ignite(index: int) -> float:
