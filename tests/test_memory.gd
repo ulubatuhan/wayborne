@@ -159,6 +159,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"recruit_candidates": "tohumdan yeniden üretiliyor; tutulanlar hired_recruit_indices'te",
 	"_provisions_item": "katalogdan okunan sabit kaynak",
 	"last_spoiled": "yalnızca son yol gününün çürüme raporu; günlük yazıldıktan sonra anlamı yok",
+	"companion_notes": "yalnızca son yol gününün yoldaş notları; günlük yazıldıktan sonra anlamı yok",
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
 }
 

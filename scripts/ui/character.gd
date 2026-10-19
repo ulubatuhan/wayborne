@@ -89,6 +89,22 @@ func _build_identity_section() -> void:
 	appearance.modulate = HINT_COLOR
 	_content.add_child(appearance)
 
+	# Geçmiş, hedef ve liderle bağ (görev Y-C17): yanında yürüyüp konuştukça
+	# öğrenilir; ilk sohbetten önce yalnızca "henüz tanımıyorsun".
+	if not _character.is_player and not _character.backstory_id.is_empty():
+		var person := Label.new()
+		person.autowrap_mode = TextServer.AUTOWRAP_WORD
+		person.modulate = HINT_COLOR
+		if _character.rapport <= 0:
+			person.text = tr("UI_CHAR_STRANGER")
+		else:
+			person.text = tr("UI_CHAR_PERSON") % [
+				tr(String(CharacterData.BACKSTORY_LABEL_KEYS.get(_character.backstory_id, ""))),
+				tr(String(CampStory.GOAL_KEYS.get(_character.backstory_id, ""))),
+				_character.rapport, CharacterData.MAX_RAPPORT,
+			]
+		_content.add_child(person)
+
 	var hp_row := HBoxContainer.new()
 	hp_row.add_theme_constant_override("separation", 8)
 	_content.add_child(hp_row)

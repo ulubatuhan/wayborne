@@ -1607,6 +1607,7 @@ func _init_journey() -> void:
 	# Kervan parti ve vagon sayısından kuruluyor; bu yüzden sefer başında
 	# bir kez (yolda bir yoldaş katılırsa yine) çağrılıyor, karede değil.
 	_caravan.configure(_session)
+	_refresh_pair_spacing()
 	_caravan.set_heading(1.0)
 	_caravan.set_leader_offset(0.0)
 	_turn_event_after = null
@@ -1755,6 +1756,47 @@ func _process(delta: float) -> void:
 	_update_chatter(delta)
 	_refresh_time_ui()
 	_refresh_modal()
+
+## Kamp ateşi hikâyesi (R1 #3, Y-C17): bir karar anı, zaman durur.
+var _story_panel: CampStoryPanel = null
+
+func _open_story_panel(teller: CharacterData) -> void:
+	_story_panel = CampStoryPanel.new().setup(teller)
+	_story_panel.chosen.connect(func(choice: String):
+		_session.resolve_camp_story(teller, choice)
+		var key := "UI_ROAD_STORY_LISTENED" if choice == CampStory.CHOICE_LISTEN else ("UI_ROAD_STORY_OWN" if choice == CampStory.CHOICE_OWN_TALE else "UI_ROAD_STORY_SLEPT")
+		_add_log(tr(key) % teller.character_name, OUTCOME_COLOR)
+		_story_panel = null)
+	add_child(_story_panel)
+
+## Yoldaş notu: günlüğe satır, kişisi varsa başının üstünde baloncuk (R1 #4).
+func _add_companion_note(note: Dictionary) -> void:
+	var line := tr(String(note["key"])) % note["args"]
+	_add_log(line, OUTCOME_COLOR)
+	var who_id := String(note.get("who", ""))
+	if who_id.is_empty() or _clock.get_speed() >= CHAT_BALLOON_MAX_SPEED or _balloon_layer.get_child_count() >= MAX_BALLOONS:
+		return
+	for character in _session.get_party():
+		if character.character_id == who_id:
+			var figure := _caravan.get_figure_of(character)
+			if figure != null:
+				_balloon_layer.add_child(RoadBalloon.new().setup(figure, line))
+
+## Kolondaki çiftlerin aralığı bağlarından (R1 #2). Sıra oyuncusuz parti sırası.
+func _refresh_pair_spacing() -> void:
+	var walkers: Array[CharacterData] = []
+	for character in _session.get_party():
+		if not character.is_player:
+			walkers.append(character)
+	var scales: Array[float] = []
+	var index := 0
+	while index < walkers.size():
+		if index + 1 < walkers.size():
+			scales.append(CompanionLife.pair_gap_scale(_session.get_bond(walkers[index], walkers[index + 1])))
+		else:
+			scales.append(1.0)
+		index += RoadCaravan.MAX_ABREAST
+	_caravan.set_pair_gap_scales(scales)
 
 ## --- Yanına yürü, konuş (görev R1 #1, Y-B01) ---
 ## Lider bir yoldaşın yanında `CHAT_DWELL_SECONDS` gerçek saniye kalırsa yoldaş
@@ -2172,6 +2214,8 @@ func _run_day() -> void:
 	var expired_contracts := _session.advance_day()
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
+	for note in _session.companion_notes:
+		_add_companion_note(note)
 	for item_id in _session.last_spoiled:
 		var spoiled := ItemCatalog.get_item(String(item_id))
 		_add_log(tr("UI_ROAD_GOODS_SPOILED") % [int(_session.last_spoiled[item_id]), spoiled.item_name if spoiled != null else String(item_id)])
@@ -2306,6 +2350,14 @@ func _update_camp_state() -> void:
 			return
 		_add_log(tr("UI_ROAD_CAMP_SETTLED") % _clock.get_clock_text(), OUTCOME_COLOR)
 		_record_camp_on_map()
+		_session.companion_notes = []
+		_session.bond_group(_session.get_party(), CompanionLife.SHARED_CAMP)
+		for note in _session.companion_notes:
+			_add_companion_note(note)
+		_refresh_pair_spacing()
+		var teller := _session.roll_camp_story()
+		if teller != null:
+			_open_story_panel(teller)
 		return
 	if _clock.total_hours < _camp_ends_at_hours:
 		return
@@ -3004,6 +3056,16 @@ func _on_combat_finished(
 		# deneyim de kazanmaz.
 		_session.grant_party_xp(xp_awarded, _current_combat_party)
 		_add_log(tr("UI_ROAD_PARTY_XP") % xp_awarded, OUTCOME_COLOR)
+	# Birlikte sağ çıkan bağlanır (R1 #2).
+	if victory and dead_characters.is_empty():
+		# Ortak savaştan sağ çıkmak liderle bağı da artırır (R0 4.4).
+		for fighter in _current_combat_party:
+			fighter.change_rapport(1)
+		_session.companion_notes = []
+		_session.bond_group(_current_combat_party, CompanionLife.SHARED_FIGHT)
+		for note in _session.companion_notes:
+			_add_companion_note(note)
+		_refresh_pair_spacing()
 
 	# Ölüm artık savaşta herkesi bulabilir, lideri de yoldaşı da - kural
 	# tersine çevrildi (bkz. CombatUnit.can_enter_deaths_door). Sonucunu
@@ -3254,6 +3316,7 @@ func _has_open_panel() -> bool:
 		or _pre_combat_panel != null
 		or _merchant_dialogue_panel != null
 		or _map_popup != null
+		or _story_panel != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),

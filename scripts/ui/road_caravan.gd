@@ -269,6 +269,13 @@ var _party_figures: Array[WalkFigure] = []
 ## Figür -> kişi (görev R0): sohbet, bağ ve baloncuk kimin kim olduğunu bilmeli.
 ## Tayfa figürleri burada yok (isimsiz yürürler, v2).
 var _figure_character: Dictionary = {}
+## İkişerli yürüyen her çiftin aralık çarpanı (R1 #2): dostlar sıkı, düşmanlar
+## açık. Sıra savaş sırası olduğu için değişmez, yalnızca aralık.
+var _pair_gap_scales: Array[float] = []
+
+func set_pair_gap_scales(scales: Array[float]) -> void:
+	_pair_gap_scales = scales
+	_layout()
 var _crew_figures: Array[WalkFigure] = []
 ## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
 ## sırasında gerçek birer figüre dönüşüyor (bkz. `configure`'daki not).
@@ -1682,6 +1689,9 @@ func _walk_escort_group(
 	var count := mini(MAX_ABREAST, _party_figures.size() - from_index)
 	if count <= 0:
 		return cursor
+	var group := from_index / MAX_ABREAST
+	if group < _pair_gap_scales.size():
+		pair_gap *= _pair_gap_scales[group]
 	var step := person_w + pair_gap
 	if place:
 		var figures: Array = []

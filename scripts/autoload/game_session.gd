@@ -1104,6 +1104,8 @@ func appoint_heir(heir: CharacterData) -> int:
 	if senior != heir:
 		senior.add_grievance(CharacterData.GRIEVANCE_PASSED_OVER)
 		change_character_stress(senior, PASSED_OVER_STRESS)
+		# Ad kavgası ikisinin arasını açar (R1 #2).
+		CompanionLife.change_bond(bonds, senior, heir, CompanionLife.PASSED_OVER_SPLIT)
 	# Dönem sayacı sıfırlanıyor ki kampanya "bu liderin dönemi" diye sorabilsin.
 	lineage_generation += 1
 	leader_since_day = total_days_elapsed
@@ -1975,10 +1977,12 @@ func advance_day() -> Array[String]:
 	# uzun bir sefer kısa bir seferden yorucu olmalı ve bu yıpranma olay
 	# zarına bağlı olmamalı.
 	last_spoiled = {}
+	companion_notes = []
 	if is_journey_active():
 		caravan.apply_daily_drift()
 		_apply_road_stress_day()
 		last_spoiled = spoil_perishables()
+		_companion_day()
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -2355,6 +2359,80 @@ func get_city_gold_reserve() -> int:
 ## Kervan Envanteri Rules'un add_to_cargo'daki "hep ya da hiç" ilkesi).
 func can_city_afford_sale(total_price: int) -> bool:
 	return get_city_gold_reserve() >= total_price
+
+## --- Yoldaşların bağları ve kendi kararları (görev R1 #2, #4; Y-C17) ---
+## Bağlar kayıtta ("idA|idB" -> -3..3, bkz. CompanionLife). Ayrılan ya da
+## ölen kişinin satırı silinmez (defterin ruhu), yalnızca artık kimseyi etkilemez.
+var bonds: Dictionary = {}
+## Son yol gününün yoldaş notları ([{"key", "args"}]); yol günlüğü okur.
+var companion_notes: Array = []
+
+func get_bond(a: CharacterData, b: CharacterData) -> float:
+	return CompanionLife.get_bond(bonds, a, b)
+
+func bond_group(group: Array, delta: float) -> void:
+	for crossed in CompanionLife.bond_group(bonds, group, delta):
+		var key := "UI_ROAD_BOND_FRIENDS" if String(crossed[2]) == "friends" else "UI_ROAD_BOND_RIVALS"
+		companion_notes.append({"key": key, "args": [crossed[0].character_name, crossed[1].character_name]})
+
+## --- Kamp ateşi hikâyesi (görev R1 #3, Y-C17) ---
+var last_story_day: int = -99
+
+## Bu kamp birinin anlatıp anlatmayacağı: günde en fazla bir, zar günden.
+func roll_camp_story() -> CharacterData:
+	if last_story_day == total_days_elapsed:
+		return null
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("camp_story|%s|%d" % [caravan_name, total_days_elapsed])
+	return CampStory.pick_teller(get_party(), rng)
+
+func resolve_camp_story(teller: CharacterData, choice: String) -> void:
+	last_story_day = total_days_elapsed
+	if choice == CampStory.CHOICE_LISTEN:
+		var key := CampStory.next_key(teller)
+		teller.change_rapport(CampStory.LISTEN_RAPPORT)
+		ledger.record(CaravanLedger.KIND_STORY, teller.character_name, total_days_elapsed,
+			lineage_generation, teller.character_id, key)
+		teller.story_chapter += 1
+		if teller.story_chapter >= 3:
+			# Sırrını söyleyen hafifler: en ağır şikâyeti silinir.
+			var top := teller.get_top_grievance()
+			if not top.is_empty():
+				teller.grievances.erase(top)
+			change_character_stress(teller, CampStory.SECRET_STRESS)
+	elif choice == CampStory.CHOICE_OWN_TALE:
+		change_stress(CampStory.OWN_TALE_STRESS)
+
+func _companion_day() -> void:
+	var members := get_party()
+	for i in members.size():
+		for j in range(i + 1, members.size()):
+			var bond := get_bond(members[i], members[j])
+			if bond >= CompanionLife.FRIENDS_AT:
+				change_character_stress(members[i], CompanionLife.FRIEND_DAILY_STRESS)
+				change_character_stress(members[j], CompanionLife.FRIEND_DAILY_STRESS)
+			elif bond <= CompanionLife.RIVALS_AT:
+				change_character_stress(members[i], CompanionLife.RIVAL_DAILY_STRESS)
+				change_character_stress(members[j], CompanionLife.RIVAL_DAILY_STRESS)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("companion_action|%s|%d" % [caravan_name, total_days_elapsed])
+	var acted := CompanionLife.roll_action(members, total_days_elapsed, rng)
+	if acted.is_empty():
+		return
+	var who: CharacterData = acted[0]
+	var action := String(acted[1])
+	who.last_action_day = total_days_elapsed
+	if action == CompanionLife.ACTION_SHARES_RATION:
+		if change_provisions(-1) != 0:
+			caravan.change_morale(2)
+	elif action == CompanionLife.ACTION_PRAYS:
+		change_character_stress(who, -3)
+		caravan.change_morale(1)
+	elif action == CompanionLife.ACTION_SINGS:
+		caravan.change_morale(2)
+	elif action == CompanionLife.ACTION_SULKS:
+		who.change_rapport(-1)
+	companion_notes.append({"key": String(CompanionLife.ACTION_LINE_KEYS[action]), "args": [who.character_name], "who": who.character_id})
 
 ## --- Mal çeşitliliği (görev Y-C19) ---
 ## Bozulan mal yolda gün sayar: `perishable_days` item_id -> taşınan stoğun
@@ -3455,6 +3533,8 @@ func to_save_dict() -> Dictionary:
 		"last_feast_day": last_feast_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
+		"bonds": bonds.duplicate(),
+		"last_story_day": last_story_day,
 		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
 		"bought_here": bought_here.duplicate(),
@@ -3678,6 +3758,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
+	last_story_day = int(data.get("last_story_day", -99))
+	bonds = {}
+	for key in (data.get("bonds", {}) as Dictionary):
+		bonds[String(key)] = clampf(float(data["bonds"][key]), CompanionLife.MIN_BOND, CompanionLife.MAX_BOND)
 	perishable_days = {}
 	for item_id in (data.get("perishable_days", {}) as Dictionary):
 		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])

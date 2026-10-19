@@ -4126,6 +4126,15 @@ every decision has a visible control, and a key is only its shortcut.**
   faster; the line always reaches the log). A topic rests `TOPIC_COOLDOWN_DAYS`; `rapport` (0-5) rises at most once a
   day. Every person has a `backstory_id` seeded from their id, so a reload never rerolls it; the first conversation
   says it. No click is needed: walking there is the decision, and it moves the leader into that attention zone.
+- **Companions have bonds, moods and stories of their own (tasks R1 #2-#4, Y-C17).** `CompanionLife` keeps bonds
+  between people (`GameSession.bonds`, -3..3; same culture starts at +1; surviving a fight together +1, a camp +0.5,
+  being passed over for the name -2). Friends (+2) walk closer in the column and ease each other's stress daily;
+  rivals (-2) walk apart and chafe. Only a troubled companion (stressed, two grievances, a bad trait) sometimes acts
+  on their own - shares their ration, prays, sings, sulks - visible as a balloon and a log line, never deadly. At camp,
+  someone whose bond with the leader opens the next chapter may tell their story (`CampStory`, three chapters per
+  backstory gated at bond 1/3/5): listening writes a `KIND_STORY` ledger line, and the third chapter, the secret,
+  lifts their heaviest grievance. Each backstory carries a personal goal, shown on the character screen once you
+  know them.
 - **Every key has an on-screen control** (touch parity). The hub walks to
   a tapped point and opens a tapped gate or wagon on arrival;
   `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and

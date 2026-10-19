@@ -644,6 +644,10 @@ var backstory_id: String = ""
 var rapport: int = 0
 var last_chat_day: int = -99
 var last_chat_topic: String = ""
+## Kendi kararının son günü (CompanionLife) ve anlattığı kamp hikâyesinin
+## bölümü (0 hiç, 3 sırrını açtı; bkz. CampStory).
+var last_action_day: int = -99
+var story_chapter: int = 0
 
 static func backstory_for_id(id: String) -> String:
 	return BACKSTORY_KEYS[absi(hash("backstory|" + id)) % BACKSTORY_KEYS.size()]
@@ -882,6 +886,8 @@ func to_dict() -> Dictionary:
 		"rapport": rapport,
 		"last_chat_day": last_chat_day,
 		"last_chat_topic": last_chat_topic,
+		"last_action_day": last_action_day,
+		"story_chapter": story_chapter,
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -911,6 +917,8 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
 	character.last_chat_day = int(data.get("last_chat_day", -99))
 	character.last_chat_topic = str(data.get("last_chat_topic", ""))
+	character.last_action_day = int(data.get("last_action_day", -99))
+	character.story_chapter = clampi(int(data.get("story_chapter", 0)), 0, 3)
 
 	character.trait_ids.clear()
 	for trait_id in (data.get("trait_ids", []) as Array):
