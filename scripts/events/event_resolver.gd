@@ -73,6 +73,8 @@ static func resolve_choice(
 	apply_effects: Callable = Callable()
 ) -> Resolution:
 	var resolution := Resolution.new()
+	# Y-H02: ilk anlamlı karar bir olay kartındaki seçimdir.
+	session.mark_first(GameSession.FIRST_DECISION)
 	if not choice.effects.is_empty():
 		resolution.choice_result = _apply(choice.effects, session, apply_effects)
 

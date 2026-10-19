@@ -125,6 +125,7 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.haggling_requests.append(effect.amount)
 			result.lines.append(_t("EFF_HAGGLE_OPENING"))
 		EventEffect.Type.TRIGGER_COMBAT:
+			session.mark_first(GameSession.FIRST_THREAT)
 			result.combat_requests.append(effect.amount)
 			result.combat_kinds.append(effect.text_value if not effect.text_value.is_empty() else "bandit")
 			result.lines.append(_t("EFF_COMBAT_OPENING"))

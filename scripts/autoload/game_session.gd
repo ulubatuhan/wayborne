@@ -1808,6 +1808,7 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		character.change_stress(PERSONAL_HUNGER_STRESS)
 		hungry_names.append(character.character_name)
 		character.consecutive_hungry_days += 1
+		mark_first(FIRST_LOSS_RISK)
 		# Kırgınlık yalnızca bir *seçimin* bedeli: erzak gerçekten bittiyse
 		# kimse kimseyi aç bırakmadı, herkes birlikte aç kaldı.
 		if not starved:
@@ -2672,6 +2673,42 @@ func _build_chain_context() -> Dictionary:
 		out["chain_%s_ripe" % chain_id] = stage if is_chain_ripe(chain_id) else 0
 	return out
 
+## İlk dakikaların çizelgesi (görev Y-H02): gerçek oyun süresi (saniye,
+## GameState her karede ekler) ve dört ilkin ne zaman yaşandığı. Dış oyuncu
+## testlerinde ölçmek için; ilk kez işaretlenince user://playtest_times.json'a
+## da bir satır düşer. Kayıtta.
+const FIRST_DECISION: String = "first_decision"
+const FIRST_THREAT: String = "first_threat"
+const FIRST_LOSS_RISK: String = "first_loss_risk"
+const FIRST_PROFIT: String = "first_profit"
+## Çizelgenin hedefi (saniye): ilk karar 3 dk, ilk tehdit 10 dk, ilk kayıp tehlikesi ve ilk kârlı varış 30 dk.
+const FIRST_TARGETS: Dictionary = {
+	FIRST_DECISION: 180.0, FIRST_THREAT: 600.0, FIRST_LOSS_RISK: 1800.0, FIRST_PROFIT: 1800.0,
+}
+const PLAYTEST_LOG: String = "user://playtest_times.json"
+var play_seconds: float = 0.0
+var first_times: Dictionary = {}
+## Dosyaya yalnızca gerçek oyun yazar: GameState açar; testler ve
+## simülatörler binlerce oturum kurduğu için varsayılan kapalı (geçici).
+var log_first_times: bool = false
+
+func mark_first(mark: String) -> bool:
+	if first_times.has(mark):
+		return false
+	first_times[mark] = snappedf(play_seconds, 0.1)
+	if log_first_times:
+		var lines: Array = []
+		if FileAccess.file_exists(PLAYTEST_LOG):
+			var parsed = JSON.parse_string(FileAccess.get_file_as_string(PLAYTEST_LOG))
+			if parsed is Array:
+				lines = parsed
+		lines.append({"caravan": caravan_name, "mark": mark, "seconds": first_times[mark],
+			"target": float(FIRST_TARGETS.get(mark, 0.0))})
+		var file := FileAccess.open(PLAYTEST_LOG, FileAccess.WRITE)
+		if file != null:
+			file.store_string(JSON.stringify(lines))
+	return true
+
 ## Başlangıç kökeni (Y-D05, StartOrigins); kayıtta.
 var origin_id: String = "father"
 
@@ -3253,6 +3290,8 @@ func finish_journey() -> Dictionary:
 	# Görünmeyen bir teslimat, olmayan bir teslimattan ayırt edilemez -
 	# aynı kural görünmeyen ceza için de yazılıydı (bkz. DebtPanel).
 	payout["delivered_contracts"] = delivered
+	if int(payout.net) > 0:
+		mark_first(FIRST_PROFIT)
 
 	# Teslim edilen her kontrat itibar kazandırır. Bu, kaybettiren kolun
 	# (bkz. REPUTATION_PENALTY_PER_LOST_CONTRACT) eksik olan karşılığı:
@@ -3900,6 +3939,8 @@ func to_save_dict() -> Dictionary:
 		"fate_mode": fate_mode,
 		"legacy": legacy.duplicate(true),
 		"origin_id": origin_id,
+		"play_seconds": play_seconds,
+		"first_times": first_times.duplicate(),
 		"event_chains": event_chains.duplicate(true),
 		"difficulty": difficulty.duplicate(),
 		"road_memorials": road_memorials.duplicate(true),
@@ -4133,6 +4174,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	fate_mode = bool(data.get("fate_mode", false))
 	legacy = (data.get("legacy", {}) as Dictionary).duplicate(true)
 	origin_id = String(data.get("origin_id", "father"))
+	play_seconds = float(data.get("play_seconds", 0.0))
+	first_times = (data.get("first_times", {}) as Dictionary).duplicate()
 	event_chains = (data.get("event_chains", {}) as Dictionary).duplicate(true)
 	difficulty = {}
 	for key in DIFFICULTY_KEYS:

@@ -155,6 +155,7 @@ func _test_market_stock_survives_reload(t) -> void:
 ## Kayda girmeyen, bilerek geçici alanlar. Her biri neden geçici olduğunu
 ## söylüyor - listeye yeni bir alan eklemek bir karar olmalı, unutkanlık değil.
 const TRANSIENT_FIELDS: Dictionary = {
+	"log_first_times": "Y-H02: ilk dakikaların dosyaya yazılması; GameState açar, kayıtla gelmez",
 	"party_stress": "partinin ortalamasına bakan bir mercek, sahibi CharacterData.stress",
 	"recruit_candidates": "tohumdan yeniden üretiliyor; tutulanlar hired_recruit_indices'te",
 	"_provisions_item": "katalogdan okunan sabit kaynak",

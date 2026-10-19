@@ -24,7 +24,15 @@ func get_session():
 func start_new_game(starting_gold: int = 250, starting_provisions: int = 20, starting_wagon_count: int = 1) -> void:
 	var session_script := load(GAME_SESSION_PATH)
 	_session = session_script.new(starting_gold, starting_provisions, starting_wagon_count)
+	_session.log_first_times = true
+
+## Gerçek oyun süresi (görev Y-H02): oyun duraklatılmadıkça her kare eklenir.
+func _process(delta: float) -> void:
+	if _session != null and not get_tree().paused:
+		_session.play_seconds += delta
 
 ## SaveManager'ın yüklediği bir oturumu kalıcı hale getirir.
 func set_session(session) -> void:
 	_session = session
+	if _session != null:
+		_session.log_first_times = true
