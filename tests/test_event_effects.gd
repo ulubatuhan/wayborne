@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_deserter_chain(t)
 	_test_wolf_year_chain(t)
 	_test_road_food_sources(t)
+	_test_merchant_temper_on_the_road(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -473,3 +474,30 @@ func _test_road_food_sources(t) -> void:
 		if choice.text_key == "EVT_FORAGE_OPT_GATHER":
 			gather = choice
 	t.ok(gather != null and _effect_amount(gather.effects, EventEffect.Type.TRAVEL_DAYS) >= 1, "toplayıcılık zaman yer")
+
+## Tüccar mizacı yolda (görev Y-F05): her mizacın bir kartı var, kart yalnız o
+## mizaçta bir tüccar yürürken çekilir, ayrılan tüccar o mizaçtaki tüccardır.
+func _test_merchant_temper_on_the_road(t) -> void:
+	var keys := {}
+	for event_id in ["evt_merchant_night_flight", "evt_merchant_cold_feet", "evt_merchant_grudge", "evt_merchant_shares_bread"]:
+		var event := EventCatalog.get_event(event_id)
+		t.ok(event != null, "%s katalogda" % event_id)
+		for condition in event.conditions:
+			if condition.key.begins_with("merchant_"):
+				keys[condition.key] = true
+	for disposition in NpcDisposition.ALL:
+		t.ok(keys.has("merchant_%s" % disposition), "%s mizacının yol kartı var" % disposition)
+	var session := GameSession.new(500, 50, 1)
+	var caravan := CaravanState.new()
+	for pair in [["Ada", NpcDisposition.LOYAL], ["Bora", NpcDisposition.THIEF], ["Cem", NpcDisposition.LOYAL]]:
+		caravan.merchant_names.append(String(pair[0]))
+		caravan.merchant_disposition_by_name[String(pair[0])] = String(pair[1])
+	session.caravan = caravan
+	var context := session.build_event_context()
+	t.eq(int(context["merchant_thief"]), 1, "bağlam hırsızı sayar")
+	t.eq(int(context["merchant_loyal"]), 2, "bağlam sadıkları sayar")
+	var effects: Array[EventEffect] = [EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.THIEF)]
+	EventEffectApplier.apply(effects, session)
+	t.ok(not caravan.merchant_names.has("Bora") and caravan.merchant_names.size() == 2, "kaçan, sondaki değil hırsız tüccar")
+	caravan.mouths_by_name["Ada"] = 0
+	t.eq(caravan.count_merchants_with(NpcDisposition.LOYAL), 1, "yolda olmayan (teslimat) müşterisinin mizacı sayılmaz")

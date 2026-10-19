@@ -82,7 +82,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			if repaired > 0:
 				result.lines.append(_t("EFF_WAGON_REPAIR") % repaired)
 		EventEffect.Type.MERCHANT_LEAVE:
-			var left := session.caravan.remove_merchants(effect.amount)
+			# text_value bir mizaçsa o mizaçtaki tüccar ayrılır (görev Y-F05).
+			var left := session.caravan.remove_merchants(effect.amount, effect.text_value)
 			for merchant_name in left:
 				# _t() sıradan bir tüccar ismini (CSV'de tanımlı değil)
 				# olduğu gibi bırakır - loncanın özel vagon görevlerinin

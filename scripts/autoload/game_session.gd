@@ -3773,6 +3773,12 @@ func build_event_context() -> Dictionary:
 		"provisions": get_provisions(),
 		# Kaçak mal (Y-C19): gümrük onu arar.
 		"contraband": get_total_quantity(ItemCatalog.CONTRABAND_SALT),
+		# Yoldaki tüccarların mizacı (Y-F05): hırsız gece kaçar, çaresiz
+		# korkudan döner, kinci kavga çıkarır, sadık darda yardım eder.
+		"merchant_thief": caravan.count_merchants_with(NpcDisposition.THIEF),
+		"merchant_desperate": caravan.count_merchants_with(NpcDisposition.DESPERATE),
+		"merchant_vengeful": caravan.count_merchants_with(NpcDisposition.VENGEFUL),
+		"merchant_loyal": caravan.count_merchants_with(NpcDisposition.LOYAL),
 		"wagons": caravan.wagon_count,
 		"healthy_wagons": caravan.get_healthy_wagon_count(),
 		"damaged_wagons": caravan.damaged_wagons,

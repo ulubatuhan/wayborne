@@ -3808,6 +3808,11 @@ Who you are travelling with, and who you meet, changes what an event does.
   rolls it into a flag and outcomes branch on that flag with
   `EventCondition.HAS_FLAG`. The player is not told which - a party member
   with strong Sezgi only gets a *hint*.
+- **A merchant's temper shows on the road (task Y-F05).** The event context counts walking merchants per disposition
+  (`merchant_thief`, `merchant_desperate`, `merchant_vengeful`, `merchant_loyal`; a delivery client is not on the road
+  and does not count). Each has a card: the thief slips away at night, the desperate one wants to turn back when the
+  road gets dangerous, the vengeful one starts a fight, the loyal one shares bread when stores run low. `MERCHANT_LEAVE`
+  with a disposition as its text value removes a merchant of that temper, not the last in line.
 - **The bill need not come due immediately.** Turning away a vengeful
   traveller sets a flag and unlocks a `triggered_only` chain event that
   fires days later (`evt_wanderer_revenge`). This is the pattern for any

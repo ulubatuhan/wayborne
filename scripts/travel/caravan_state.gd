@@ -279,11 +279,30 @@ func damage_wagons(count: int) -> int:
 	damaged_wagons += actually_damaged
 	return actually_damaged
 
-func remove_merchants(count: int) -> Array[String]:
+func remove_merchants(count: int, disposition: String = "") -> Array[String]:
 	var removed: Array[String] = []
+	if not disposition.is_empty():
+		# Mizaca göre (görev Y-F05): kaçan hırsız, dönen korkak - sondaki değil o.
+		for merchant_name in merchant_names.duplicate():
+			if removed.size() >= count:
+				break
+			if String(merchant_disposition_by_name.get(merchant_name, "")) == disposition:
+				merchant_names.erase(merchant_name)
+				removed.append(merchant_name)
+		return removed
 	for i in range(mini(count, merchant_names.size())):
 		removed.append(merchant_names.pop_back())
 	return removed
+
+## Yolda yürüyen (ağız katan) ve şu mizaçta olan tüccar sayısı (görev Y-F05).
+## Teslimat müşterisi yolda değil; onun mizacı yola karışmaz.
+func count_merchants_with(disposition: String) -> int:
+	var count := 0
+	for merchant_name in merchant_names:
+		if int(mouths_by_name.get(merchant_name, 1)) > 0 \
+				and String(merchant_disposition_by_name.get(merchant_name, "")) == disposition:
+			count += 1
+	return count
 
 func change_morale(delta: int) -> void:
 	morale = clampi(morale + delta, 0, MAX_MORALE)

@@ -66,6 +66,10 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_route_diversion())
 	_road_events.append(_forage())
 	_road_events.append(_village_provisions())
+	_road_events.append(_merchant_night_flight())
+	_road_events.append(_merchant_cold_feet())
+	_road_events.append(_merchant_grudge())
+	_road_events.append(_merchant_shares_bread())
 	_road_events.append(_party_theft())
 	_road_events.append(_party_investigation())
 	_road_events.append(_military_convoy())
@@ -1436,6 +1440,112 @@ static func _forage() -> GameEvent:
 		),
 		_choice("EVT_FORAGE_OPT_SKIP", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## --- Tüccar mizacı yolda (görev Y-F05) ---
+## Diyalogla öğrenilen mizaç (NpcDisposition) yolda karşılık bulur. Her kart
+## yalnız o mizaçta bir tüccar kervanla yürürken çekilebilir; ayrılan tüccar
+## o mizaçtaki tüccardır (MERCHANT_LEAVE'in text_value'su).
+
+static func _merchant_night_flight() -> GameEvent:
+	var event := _event("evt_merchant_night_flight", "EVT_MERCHANT_FLIGHT", 0.7)
+	event.cooldown_days = 6
+	event.conditions = _conditions([
+		EventCondition.make("merchant_thief", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_check_choice(
+			"EVT_MERCHANT_FLIGHT_OPT_CHASE", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_MERCHANT_FLIGHT_CAUGHT", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, 4),
+			]),
+			"EVT_MERCHANT_FLIGHT_HALF", _effects([
+				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.THIEF),
+				EventEffect.make(EventEffect.Type.PROVISIONS, -4),
+			]),
+			"EVT_MERCHANT_FLIGHT_GONE", _effects([
+				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.THIEF),
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+				EventEffect.make(EventEffect.Type.STRESS, 5),
+			])
+		),
+		_choice("EVT_MERCHANT_FLIGHT_OPT_LET", _effects([
+			EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.THIEF),
+			EventEffect.make(EventEffect.Type.PROVISIONS, -4),
+		])),
+	])
+	return event
+
+static func _merchant_cold_feet() -> GameEvent:
+	var event := _event("evt_merchant_cold_feet", "EVT_MERCHANT_FEET", 0.8)
+	event.cooldown_days = 6
+	event.conditions = _conditions([
+		EventCondition.make("merchant_desperate", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.4),
+	])
+	event.choices = _choices([
+		_check_choice(
+			"EVT_MERCHANT_FEET_OPT_TALK", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_MERCHANT_FEET_STAYS", _effects([EventEffect.make(EventEffect.Type.MORALE, 3)]),
+			"EVT_MERCHANT_FEET_SULKS", _effects([EventEffect.make(EventEffect.Type.MORALE, -3)]),
+			"EVT_MERCHANT_FEET_LEAVES", _effects([
+				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.DESPERATE),
+			])
+		),
+		_gated_choice(
+			"EVT_MERCHANT_FEET_OPT_PAY", "EVT_MERCHANT_FEET_OPT_PAY_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 30)]),
+			_effects([EventEffect.make(EventEffect.Type.GOLD, -30)])
+		),
+		_choice("EVT_MERCHANT_FEET_OPT_LET", _effects([
+			EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.DESPERATE),
+		])),
+	])
+	return event
+
+static func _merchant_grudge() -> GameEvent:
+	var event := _event("evt_merchant_grudge", "EVT_MERCHANT_GRUDGE", 0.6)
+	event.cooldown_days = 8
+	event.conditions = _conditions([
+		EventCondition.make("merchant_vengeful", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_choice("EVT_MERCHANT_GRUDGE_OPT_SIDE_CREW", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 3),
+			EventEffect.make(EventEffect.Type.REPUTATION, -2),
+		])),
+		_choice("EVT_MERCHANT_GRUDGE_OPT_SIDE_MERCHANT", _effects([
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+		])),
+		_check_choice(
+			"EVT_MERCHANT_GRUDGE_OPT_JUDGE", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_MERCHANT_GRUDGE_SETTLED", _effects([EventEffect.make(EventEffect.Type.STRESS, -4)]),
+			"EVT_MERCHANT_GRUDGE_SIMMERS", _effects([EventEffect.make(EventEffect.Type.STRESS, 3)]),
+			"EVT_MERCHANT_GRUDGE_BLOWS", _effects([
+				EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1, NpcDisposition.VENGEFUL),
+				EventEffect.make(EventEffect.Type.REPUTATION, -3),
+			])
+		),
+	])
+	return event
+
+static func _merchant_shares_bread() -> GameEvent:
+	var event := _event("evt_merchant_shares_bread", "EVT_MERCHANT_BREAD", 0.9)
+	event.cooldown_days = 8
+	event.conditions = _conditions([
+		EventCondition.make("merchant_loyal", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("provisions", EventCondition.Op.LESS_EQUAL, 12),
+	])
+	event.choices = _choices([
+		_choice("EVT_MERCHANT_BREAD_OPT_ACCEPT", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, 8),
+			EventEffect.make(EventEffect.Type.MORALE, 2),
+		])),
+		_choice("EVT_MERCHANT_BREAD_OPT_REFUSE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 4),
+			EventEffect.make(EventEffect.Type.REPUTATION, 1),
 		])),
 	])
 	return event
