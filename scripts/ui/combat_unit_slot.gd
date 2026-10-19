@@ -39,7 +39,11 @@ const FRAME_CONTENT: int = 10
 const HP_FRAME_FILE: String = "k3_bar.png"
 const HP_FRAME_SLICE_X: int = 8
 const HP_FRAME_SLICE_Y: int = 4
-const HP_BAR_HEIGHT: float = 12.0
+## Figürün altındaki can çubuğu (kullanıcı notu: türün oyunlarındaki gibi
+## stilize, can sağdaki panelden izlenmez): kalın, demir çerçeveli, kanlı
+## dolgu, sayısı içinde; kadrodakilerin altında ince bir stres çubuğu.
+const HP_BAR_HEIGHT: float = 18.0
+const STRESS_BAR_HEIGHT: float = 6.0
 const STATUS_ICON_SIZE: float = 18.0
 const EMBLEM_SIZE: float = 18.0
 
@@ -64,6 +68,7 @@ var unit: CombatUnit
 var _figure: CombatFigure
 var _hp_bar: ProgressBar
 var _hp_label: Label
+var _stress_bar: ProgressBar
 var _name_label: Label
 var _rank_label: Label
 var _status_row: HBoxContainer
@@ -157,18 +162,39 @@ func _init() -> void:
 	_hp_bar.add_theme_stylebox_override("background", track)
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = ArtPalette.BLOOD
-	fill.border_color = Color(0, 0, 0, 0)
+	fill.border_color = ArtPalette.BLOOD.darkened(0.45)
 	fill.border_width_left = 3
 	fill.border_width_right = 3
 	fill.border_width_top = 3
-	fill.border_width_bottom = 3
+	fill.border_width_bottom = 5
+	fill.set_corner_radius_all(2)
 	_hp_bar.add_theme_stylebox_override("fill", fill)
 	column.add_child(_hp_bar)
 
+	# Sayı çubuğun içinde: çubuk ve sayı tek bir okuma.
 	_hp_label = Label.new()
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hp_label.add_theme_font_size_override("font_size", WaybookTheme.FONT_NUMBER)
-	column.add_child(_hp_label)
+	_hp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_hp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hp_label.add_theme_font_size_override("font_size", 13)
+	_hp_label.add_theme_color_override("font_color", Color(1.0, 0.94, 0.86))
+	_hp_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_hp_label.add_theme_constant_override("outline_size", 4)
+	_hp_bar.add_child(_hp_label)
+
+	_stress_bar = ProgressBar.new()
+	_stress_bar.show_percentage = false
+	_stress_bar.custom_minimum_size = Vector2(0.0, STRESS_BAR_HEIGHT)
+	_stress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var stress_bg := StyleBoxFlat.new()
+	stress_bg.bg_color = Color(0.05, 0.04, 0.04, 0.85)
+	stress_bg.border_color = Color(0.22, 0.19, 0.16)
+	stress_bg.set_border_width_all(1)
+	_stress_bar.add_theme_stylebox_override("background", stress_bg)
+	var stress_fill := StyleBoxFlat.new()
+	stress_fill.bg_color = ArtPalette.UI_GAUGE_STRESS
+	_stress_bar.add_theme_stylebox_override("fill", stress_fill)
+	column.add_child(_stress_bar)
 
 	_status_row = HBoxContainer.new()
 	_status_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -190,6 +216,12 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 	_hp_bar.max_value = maxf(1.0, float(bound_unit.max_hp))
 	_hp_bar.value = clampf(float(bound_unit.current_hp), 0.0, _hp_bar.max_value)
 	_hp_label.text = "%d/%d" % [bound_unit.current_hp, bound_unit.max_hp]
+	# Stres yalnızca kadroda: düşmanın stresi yok. Yer tutsun diye saydam.
+	var person := bound_unit.source_character
+	_stress_bar.max_value = float(CharacterData.MAX_STRESS)
+	_stress_bar.value = float(person.stress) if person != null else 0.0
+	_stress_bar.modulate.a = 1.0 if person != null else 0.0
+	_stress_bar.tooltip_text = tr("UI_PANEL_STRESS") + " %d/%d" % [person.stress, CharacterData.MAX_STRESS] if person != null else ""
 
 	# Silüet: oyuncu sağa, düşman sola bakar. Derinlik arka mevkileri
 	# hafifçe küçültüp karartıyor - dört mevkinin sıralı durduğu hissi.

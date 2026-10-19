@@ -52,7 +52,7 @@ func _init() -> void:
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SEED_VALUE
-	panel.start_combat(_build_party(), 0.65, rng, "bandit", "")
+	panel.start_combat(_build_party(), 0.65, rng, "bandit", "", "forest")
 
 	await _settle()
 	_save("01_acilis.png")

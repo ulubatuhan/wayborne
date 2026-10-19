@@ -44,6 +44,11 @@ var _timer: float = 0.0
 var _map_view: WorldMapView
 var _tab_box: HBoxContainer
 var _stack: Control
+## Panelin sağında hep açık küçük harita (görev 9.9, kullanıcı notu: "harita ve
+## envanter ile beraber görmeliyim"): sekme değişse de kervanın yeri görünür.
+var _side_map: WorldMapView
+const SIDE_MAP_WIDTH: float = 430.0
+const SIDE_MAP_ZOOM: float = 0.16
 
 func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadControlPanel:
 	_session = session
@@ -51,9 +56,14 @@ func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadCon
 	_gauges = gauges
 	add_theme_stylebox_override("panel", _panel_box())
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	var outer := HBoxContainer.new()
+	outer.add_theme_constant_override("separation", 12)
+	add_child(outer)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
-	add_child(col)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_child(col)
+	outer.add_child(_build_side_map())
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 4)
 	col.add_child(tabs)
@@ -89,6 +99,25 @@ func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadCon
 			p.size = stack.size)
 	select_tab(TAB_PARTY)
 	return self
+
+func _build_side_map() -> Control:
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(SIDE_MAP_WIDTH, 0)
+	holder.clip_contents = true
+	holder.mouse_filter = Control.MOUSE_FILTER_STOP
+	_side_map = WorldMapView.new()
+	holder.add_child(_side_map)
+	# Her boyut değişiminde kervana yeniden odaklanır: ilk boyut geçici olabilir.
+	holder.resized.connect(func():
+		_side_map.size = holder.size
+		if holder.size.x > 10.0 and holder.size.y > 10.0:
+			_side_map.focus_caravan(SIDE_MAP_ZOOM))
+	# Küçük haritaya tıklamak büyük haritayı açar.
+	holder.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			map_requested.emit())
+	holder.tooltip_text = tr("UI_PANEL_MAP_OPEN")
+	return holder
 
 func set_session(session: GameSession) -> void:
 	_session = session
@@ -137,6 +166,7 @@ func refresh() -> void:
 	if _session == null or _pages.is_empty():
 		return
 	var state: Dictionary = _provider.call() if _provider.is_valid() else {}
+	_refresh_map_view(_side_map, state)
 	match _active:
 		TAB_PARTY:
 			_fill(_pages[TAB_PARTY], _party_content(state))
@@ -166,7 +196,37 @@ func _party_content(state: Dictionary) -> Control:
 		row.add_child(_card(party[index], index))
 	row.add_child(VSeparator.new())
 	row.add_child(_caravan_summary(state))
+	row.add_child(VSeparator.new())
+	row.add_child(_cargo_summary())
 	return row
+
+## Yükün özeti: vagon başına ağırlık çubuğu ve en çok taşınan mallar ikonla.
+func _cargo_summary() -> Control:
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(300, 0)
+	col.add_theme_constant_override("separation", 3)
+	col.add_child(_heading(tr("UI_PANEL_TAB_CARGO")))
+	for index in _session.wagon_inventories.size():
+		var inv: Inventory = _session.wagon_inventories[index]
+		col.add_child(_bar(tr("UI_PANEL_WAGON_N") % (index + 1), int(round(inv.get_total_weight())), int(round(inv.weight_limit)), ArtPalette.GRIM_AMBER))
+	var goods := GridContainer.new()
+	goods.columns = 4
+	goods.add_theme_constant_override("h_separation", 14)
+	var shown := 0
+	for entry in _session.get_total_inventory_entries():
+		var item: Item = (entry as Dictionary)["item"]
+		if item == null or shown >= 8:
+			continue
+		var line := WaybookTheme.item_line(item.item_id, "×%d" % int(entry["quantity"]), 22)
+		line.custom_minimum_size = Vector2(64, 0)
+		line.tooltip_text = item.item_name
+		goods.add_child(line)
+		shown += 1
+	if shown == 0:
+		col.add_child(_dim_line(tr("UI_PANEL_NO_GOODS")))
+	else:
+		col.add_child(goods)
+	return col
 
 ## Kadronun yanında kervanın nabzı: moral, takat, tehlike, erzak ve tayfa.
 ## Kişiler soldaki kartlarda; bu sütun bütün kervanı söyler.
@@ -479,16 +539,19 @@ func _build_map_page() -> Control:
 	return row
 
 func _refresh_map(state: Dictionary) -> void:
-	if _map_view == null:
+	_refresh_map_view(_map_view, state)
+
+func _refresh_map_view(view: WorldMapView, state: Dictionary) -> void:
+	if view == null:
 		return
-	_map_view.current_location_id = String(state.get("origin", _session.journey_origin_id))
-	_map_view.focused_location_id = _session.journey_destination_id
-	_map_view.journey_path = state.get("path", PackedVector2Array())
-	_map_view.journey_progress = float(state.get("progress", 0.0))
-	_map_view.hour = float(state.get("hour", 12.0))
-	_map_view.trail = _session.map_trail
-	_map_view.camps = _session.journey_camps
-	_map_view.graves = _session.map_graves()
+	view.current_location_id = String(state.get("origin", _session.journey_origin_id))
+	view.focused_location_id = _session.journey_destination_id
+	view.journey_path = state.get("path", PackedVector2Array())
+	view.journey_progress = float(state.get("progress", 0.0))
+	view.hour = float(state.get("hour", 12.0))
+	view.trail = _session.map_trail
+	view.camps = _session.journey_camps
+	view.graves = _session.map_graves()
 
 # --- Defter ------------------------------------------------------------------
 

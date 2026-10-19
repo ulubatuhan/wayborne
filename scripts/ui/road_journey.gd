@@ -3187,11 +3187,18 @@ func _framed_text_key(event: GameEvent) -> String:
 ## kartı ekrandan taşırmıyor.
 func _build_event_illustration(event_id: String) -> Control:
 	var file_name: String = EVENT_CARD_ART.get(event_id, "")
-	if file_name.is_empty():
-		return null
 	var path := "res://data/assets/ui/waybook/" + file_name
-	if not ResourceLoader.exists(path):
-		return null
+	if file_name.is_empty() or not ResourceLoader.exists(path):
+		# Kendi resmi olmayan olay da resimsiz açılmaz: kervanın yürüdüğü yolun
+		# manzarası (kullanıcı notu: olaya ait görsel kartın içinde, EU4 gibi).
+		var biome := String(_terrain.segment_at(_terrain_day()).biome) if _terrain != null else ""
+		if not EventVignette.available(biome):
+			return null
+		var vignette := EventVignette.new()
+		vignette.biome = biome
+		vignette.darkness = JourneyClock.darkness_for_hour(_clock.get_hour_of_day())
+		vignette.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
+		return vignette
 	var frame := Control.new()
 	frame.clip_contents = true
 	frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)

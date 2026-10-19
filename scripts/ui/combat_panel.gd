@@ -97,6 +97,7 @@ var _numbers: Array = []
 ## ne kadar değiştiğinden çıkıyor (zırh, Kıyı, iyileşme tavanı hepsi
 ## zaten içinde).
 var _hp_seen: Dictionary = {}  # CombatUnit -> int
+var _backdrop: CombatBackdrop
 ## Son vuruşu kritik olan birimler: sayısı kritik renginde çıkıyor.
 var _crit_marks: Dictionary = {}  # CombatUnit -> true
 ## Kritik yakınlaşması (Y-H05): {"start": int, "pivot": Vector2} ya da boş.
@@ -119,6 +120,7 @@ func start_combat(
 	enemy_kind: String = "bandit", region_id: String = "", biome: String = ""
 ) -> void:
 	_ensure_built()
+	_backdrop.biome = biome
 
 	var combat_rng := rng
 	if combat_rng == null:
@@ -234,6 +236,7 @@ func _build_field() -> void:
 	var backdrop := CombatBackdrop.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(backdrop)
+	_backdrop = backdrop
 
 	var field := HBoxContainer.new()
 	field.set_anchors_preset(Control.PRESET_FULL_RECT)

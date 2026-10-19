@@ -32,12 +32,33 @@ const POOL_RADIUS: float = 0.85
 ## binince ortası düpedüz turuncuydu.
 const POOL_STRENGTH: float = 0.035
 
+## Savaş yolda olur, o yolun manzarasında (kullanıcı notu 2026-10-19:
+## "savaş ekranları savaşın olduğu yere göre şekillenmeli"). Biyomun render
+## edilmiş yol katmanları varsa (RoadStrips) arka plan onlardan: uzak sırt, orta
+## ağaç hattı, zemin; meşale ışığı ve vinyet üstüne. Yoksa prosedürel kuyu.
+var biome: String = "":
+	set(value):
+		biome = value
+		queue_redraw()
+
+## Ayakların bastığı çizgi (yüksekliğin payı): saflar sahnenin dibine yakın.
+const FEET_LINE: float = 0.80
+## Yol katmanlarının ölçeği: şerit yüksekliği sahne yüksekliğinin katı.
+const BAND_SCALE: float = 1.5
+## Manzara savaşın gerisinde kalsın: kararır ve soğur.
+const SCENERY_TINT: Color = Color(0.55, 0.52, 0.50)
+const SCENERY_SKY_TOP: Color = Color(0.10, 0.11, 0.14)
+const SCENERY_SKY_BOTTOM: Color = Color(0.30, 0.26, 0.22)
+
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _draw() -> void:
 	var box := size
 	if box.x <= 8.0 or box.y <= 8.0:
+		return
+	if not biome.is_empty() and RoadStrips.has_biome(biome):
+		_draw_scenery(box)
 		return
 
 	_draw_vertical_band(Rect2(Vector2.ZERO, Vector2(box.x, box.y * HORIZON)), SKY_TOP, SKY_BOTTOM)
@@ -48,6 +69,18 @@ func _draw() -> void:
 	_draw_horizon_line(box)
 	_draw_torch_pool(box)
 	_draw_floor_seams(box)
+	_draw_vignette(box)
+
+func _draw_scenery(box: Vector2) -> void:
+	var feet := box.y * FEET_LINE
+	_draw_vertical_band(Rect2(Vector2.ZERO, Vector2(box.x, feet)), SCENERY_SKY_TOP, SCENERY_SKY_BOTTOM)
+	var band := box.y * BAND_SCALE
+	var cover := Rect2(Vector2.ZERO, box)
+	# Uzak ve orta katman ufka, zemin ayak çizgisine oturur.
+	RoadStrips.draw_layer(self, biome, RoadStrips.FAR, band, 0.0, cover, feet - box.y * 0.10, SCENERY_TINT.darkened(0.15))
+	RoadStrips.draw_layer(self, biome, RoadStrips.MID, band, 0.0, cover, feet - box.y * 0.04, SCENERY_TINT)
+	RoadStrips.draw_layer(self, biome, RoadStrips.GROUND, band, 0.0, cover, feet, SCENERY_TINT)
+	_draw_torch_pool(box)
 	_draw_vignette(box)
 
 ## Godot'un `_draw()`'unda hazır gradyan yok; ince şeritlerle kuruyoruz.
