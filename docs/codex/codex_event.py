@@ -21,6 +21,9 @@ EFFECT_LABEL = {
     "GRANT_TRAIT": "Huy verir", "GRANT_EQUIPMENT": "Ekipman verir",
     "MARKET_SHOCK": "Fiyat şoku", "ROUTE_CHANGE": "Yol durumu",
     "ROLL_ENCOUNTER": "Mizaç yuvarlanır",
+    "WORLD_EVENT_START": "Dünya haberi", "LEAVE_BEHIND": "BİRİ GERİDE KALIR",
+    "PARTY_HP": "Can", "DEBT_SETTLE": "Borçtan düşer", "GRANT_OUTFIT": "Kıyafet verir",
+    "CHAIN_ADVANCE": "Uzun zincir",
 }
 
 # Etkinin oyuncu için iyi mi kötü mü olduğu - renklendirme için

@@ -33,6 +33,10 @@ var _right: VBoxContainer
 var _root: Control
 var _backdrop: ColorRect
 var _dismissing: bool = false
+var _entries: VBoxContainer
+var _share: Button
+var _close_button: Button
+var _share_note: Label
 
 func setup(session: GameSession) -> WaybookPanel:
 	_session = session
@@ -66,6 +70,7 @@ func _ready() -> void:
 	entries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	entries.add_theme_constant_override("separation", 4)
 	_left.add_child(entries)
+	_entries = entries
 	_fill_entries(entries)
 
 	_right = VBoxContainer.new()
@@ -142,10 +147,58 @@ func _fill_summary(box: VBoxContainer) -> void:
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)
+	# Paylaşılabilir sayfa (Y-E07): sol sayfa soyun özetine döner, kitap PNG
+	# olarak kaydedilir, sonra defter geri gelir.
+	_share_note = _page_label("")
+	_share_note.visible = false
+	box.add_child(_share_note)
+	_share = Button.new()
+	_share.text = tr("UI_WAYBOOK_SHARE")
+	_share.disabled = _session == null
+	_share.pressed.connect(_on_share_pressed)
+	box.add_child(_share)
 	var close := Button.new()
 	close.text = tr("UI_WAYBOOK_CLOSE")
 	close.pressed.connect(_close)
 	box.add_child(close)
+	_close_button = close
+
+func _on_share_pressed() -> void:
+	_share.disabled = true
+	for child in _entries.get_children():
+		child.queue_free()
+	for line in LedgerPage.lines(_session):
+		_entries.add_child(_page_label(line))
+	_share.visible = false
+	_close_button.visible = false
+	_share_note.visible = false
+	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var path := _save_book_image()
+	for child in _entries.get_children():
+		child.queue_free()
+	_fill_entries(_entries)
+	_share.visible = true
+	_close_button.visible = true
+	_share.disabled = false
+	_share_note.visible = true
+	_share_note.text = tr("UI_WAYBOOK_SHARED") % ProjectSettings.globalize_path(path) if not path.is_empty() else tr("UI_WAYBOOK_SHARE_FAILED")
+
+## Kitabın ekrandaki dikdörtgeni PNG olarak; görüntü alanı ölçeklenmişse
+## pencere pikseline çevrilir.
+func _save_book_image() -> String:
+	var image := get_viewport().get_texture().get_image()
+	if image == null:
+		return ""
+	var view := get_viewport().get_visible_rect().size
+	var factor := Vector2(image.get_size()) / view
+	var rect := Rect2i(Vector2i(_book.global_position * factor), Vector2i(_book.size * factor))
+	rect = rect.intersection(Rect2i(Vector2i.ZERO, image.get_size()))
+	if rect.size.x <= 0 or rect.size.y <= 0:
+		return ""
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(LedgerPage.DIR))
+	var path := LedgerPage.file_path(_session)
+	return path if image.get_region(rect).save_png(path) == OK else ""
 
 func _page_label(text: String) -> Label:
 	var label := Label.new()

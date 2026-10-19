@@ -612,6 +612,9 @@ carry a caravan *name* down the road.
   `CaravanLedger.describe()` is the one formatter every screen uses ("… fell
   to wild beasts, near Kurtboğazı (day 43)"). Lines without a cause (old
   saves, joins, successions) keep the old "name — kind" shape.
+- **The ledger can be shared as one page (task Y-E07).** The waybook's "save the page" button turns the left page into
+  the lineage's summary (`LedgerPage.lines`: name, generation, day, journeys, who carried the name, who the road kept,
+  graves) and saves the book as a PNG under `user://defter_sayfalari/`, then restores the ledger.
 - **The ledger never starts empty.** `start_playthrough()` writes a
   `KIND_FOUNDER` line first: the name the player inherits was already
   someone's struck-through name. It is struck but counted by nothing -
@@ -5232,16 +5235,18 @@ verir.
 ## Codex
 
 `docs/Wayborne-Codex.pdf` is the game's design document — covering
-every mechanic in prose, plus a one-page decision tree for each road event it documents (29 of the live catalog's 41 at the
-time of writing; the PDF has not been rebuilt since the naming cleanup, task 1.4) (trigger, options, weighted outcomes, effects). It is
+every mechanic in prose, plus a one-page decision tree for each road event it documents (29 written by hand, the rest generated from the
+catalog export since task Y-E07; rebuild the PDF after the export) (trigger, options, weighted outcomes, effects). It is
 **generated**, not written: `docs/codex/` holds the reportlab source and
 `python3 docs/codex/codex_main.py` rebuilds the PDF in place. This file
 (CLAUDE.md) stays the rule book — what must never be broken and why; the
 codex is the explanation, for a reader who has not read the code.
 
-Its event chapter mirrors `scripts/events/event_catalog.gd` by hand, so a
-new or retuned event needs a matching edit in `docs/codex/codex_events_data.py`
-— see that folder's README for why it is not derived automatically.
+Its event chapter has two layers (task Y-E07). Hand-written pages with design notes live in
+`docs/codex/codex_events_data.py`; every catalog event without one gets a generated decision tree from
+`docs/codex/events_export.json`, which Godot itself writes (`godot --headless --script res://tests/export_codex_events.gd`),
+so nothing parses GDScript from Python and the codex stays equal to the catalog. Re-run the export, then
+`codex_main.py`, after changing events.
 
 ## Useful Links
 

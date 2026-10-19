@@ -18,6 +18,7 @@ from codex_base import (
 )
 from codex_event import event_page, EFFECT_LABEL
 from codex_events_data import EVENTS
+from codex_events_auto import auto_events, catalog_ids
 from codex_body import ch1, ch2, ch3, part
 from codex_body2 import ch4, ch5, ch6, ch7
 
@@ -274,7 +275,9 @@ def ch8_tree():
         ),
     ]
 
-    for ev in EVENTS:
+    # Y-E07: elle yazılmamış her katalog olayı için otomatik sayfa.
+    pages = list(EVENTS) + auto_events({ev["id"] for ev in EVENTS})
+    for ev in pages:
         f.append(PageBreak())
         f += event_page(ev)
     return f

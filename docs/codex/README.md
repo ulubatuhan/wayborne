@@ -39,3 +39,10 @@ gliflerin (ş ğ ı İ ç ö ü â) tamamını taşıyor.
 değiştiğinde buradaki karşılığı elle güncellenmeli. Bu bilinçli bir seçim -
 GDScript kaynağını Python'dan ayrıştırmak, codex'in anlatmak istediği
 "bu olay neden böyle tasarlandı" notlarını zaten üretemezdi.
+
+## Otomatik sayfalar (Y-E07)
+
+Elle yazılmış sayfası olmayan her katalog olayı `codex_events_auto.py` ile üretilir. Kaynağı
+`events_export.json`; onu Godot yazar (`godot --headless --script res://tests/export_codex_events.gd`), yani
+GDScript Python'dan ayrıştırılmaz. Elle yazılmış sayfa her zaman önceliklidir. Olay değişince: önce dışa aktarım,
+sonra `python3 docs/codex/codex_main.py`.

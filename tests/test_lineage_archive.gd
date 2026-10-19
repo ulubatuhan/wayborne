@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_apply(t)
 	_test_cap(t)
 	_test_origins(t)
+	_test_ledger_page(t)
 	if FileAccess.file_exists(TEST_PATH):
 		DirAccess.remove_absolute(TEST_PATH)
 	LineageArchive.path = saved_path
@@ -60,6 +61,19 @@ func _test_cap(t) -> void:
 	for i in LineageArchive.MAX_LINEAGES + 3:
 		LineageArchive.record(_ended_session())
 	t.eq(LineageArchive.load_all().size(), LineageArchive.MAX_LINEAGES, "arşiv tavanlı, en eski düşer")
+
+## Y-E07: paylaşılabilir sayfa defterden okunur; dosya adı güvenli.
+func _test_ledger_page(t) -> void:
+	var session := _ended_session()
+	session.ledger.record(CaravanLedger.KIND_LED, "Kerem", 0, 1)
+	session.ledger.record(CaravanLedger.KIND_DIED, "Ayşe", 12, 1, "", "LEDGER_CAUSE_STARVED")
+	var lines := LedgerPage.lines(session)
+	t.ok(lines[0].contains("Eski Kervan"), "sayfa soyun adıyla açılır")
+	t.ok("\n".join(lines).contains("Kerem"), "adı taşıyanlar sayfada")
+	t.ok("\n".join(lines).contains("Ayşe"), "yolda kalanlar sayfada")
+	session.caravan_name = "Kara/Yol: Kervanı"
+	var path := LedgerPage.file_path(session)
+	t.ok(path.begins_with(LedgerPage.DIR) and not path.get_file().contains("/") and not path.get_file().contains(":"), "dosya adı güvenli")
 
 ## Y-D05: en az beş açılabilir köken, açılımlar meta kayıtta, her köken bir
 ## takas (borçsuz olan yoksul, ünlü olan daha borçlu).
