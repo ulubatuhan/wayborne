@@ -3874,6 +3874,12 @@ Who you are travelling with, and who you meet, changes what an event does.
   chain. `test_event_effects.gd` exercises the chain end to end instead -
   when a report says an event never fires, check whether anything in the
   harness could ever reach it before treating it as dead content.
+- **A new card passes the quality list before it ships (task Y-E01).** `EventQuality.problems()` reads the card's own
+  data: at least two choices (chain continuations exempt), a tempting-but-risky choice (a check or several weighted
+  outcomes), a skill check, and at least one effect beyond gold/provisions/morale/stress/reputation. Cards are written
+  region by region in batches of ten, each batch approved; `tests/report_event_quality.gd` lists failing cards and the
+  drawable count against `TARGET_DRAWABLE` (120), and `simulate_career` prints the repeat rate up to the finale.
+  Production order: `docs/design_notes/olay_uretim_duzeni.md`.
 - **A long chain outlives the journey (task Y-E02).** `UNLOCK_EVENT` chains live in the journey's engine and end with
   it. A chain whose answer comes in another city or in the heir's era uses `CHAIN_ADVANCE` ("chain|stage|where", amount
   = minimum days): `GameSession.event_chains` (saved) holds the stage, where it started, the earliest day and the

@@ -96,6 +96,15 @@ func _initialize() -> void:
 			int(_threats_by_stage.get(0, 0)), int(_threats_by_stage.get(1, 0)), int(_threats_by_stage.get(2, 0)),
 		])
 		_threats_by_stage = {}
+		# Y-E01: finale kadar çekilen kartların tekrar oranı (çekiliş / farklı kart).
+		var unique := _finale_draws.keys().size()
+		var draws := 0
+		for id in _finale_draws:
+			draws += int(_finale_draws[id])
+		print("   finale kadar: %d çekiliş, %d farklı kart, tekrar oranı %.2f" % [
+			draws, unique, float(draws) / float(maxi(1, unique)),
+		])
+		_finale_draws = {}
 	quit()
 
 # --- Bir kervanın ömrü ---
@@ -321,12 +330,16 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 
 	# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver).
 	EventResolver.resolve_choice(session, engine, event, chosen)
+	if not session.has_flag(CampaignCatalog.FLAG_HOUSE):
+		_finale_draws[event.event_id] = int(_finale_draws.get(event.event_id, 0)) + 1
 	# Y-C15: evreye göre tehdit kartı sayacı.
 	if EventCatalog.CAREER_THREATS.has(event.event_id):
 		var stage := session.get_career_stage()
 		_threats_by_stage[stage] = int(_threats_by_stage.get(stage, 0)) + 1
 
 var _threats_by_stage: Dictionary = {}
+## Y-E01: finaleden önce hangi kart kaç kez çekildi (politika başına).
+var _finale_draws: Dictionary = {}
 
 # --- Rapor ---
 
