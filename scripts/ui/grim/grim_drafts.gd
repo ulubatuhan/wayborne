@@ -227,6 +227,8 @@ static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> vo
 ## Sağ şerit (Wartales'in menü şeridi): koyu, sol kenarında pas demir bir
 ## çizgi. Başlık, kervanın soy satırı (kitap animasyonunun yerine: adı ve
 ## kaçıncı kuşak olduğu - oyunun asıl kaydı bu), sonra kutusuz menü.
+const LANTERN_EMBLEM: String = "res://data/assets/ui/grim/lantern_emblem.png"
+
 static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -> Control:
 	var strip := PanelContainer.new()
 	strip.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
@@ -244,7 +246,19 @@ static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
 	strip.add_child(col)
-	col.add_child(GrimTheme.display_label("Wayborne", 96, ArtPalette.GRIM_PARCHMENT))
+	# Fener motifi (Y-G08): başlığın yanında küçük amblem; resim yoksa yalnız başlık.
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	var emblem_tex := TextureLoader.load_any(LANTERN_EMBLEM)
+	if emblem_tex != null:
+		var emblem := TextureRect.new()
+		emblem.texture = emblem_tex
+		emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		emblem.custom_minimum_size = Vector2(72, 96)
+		head.add_child(emblem)
+	head.add_child(GrimTheme.display_label("Wayborne", 96, ArtPalette.GRIM_PARCHMENT))
+	col.add_child(head)
 	var sub := GrimTheme.label(tr_key("UI_GRIM_TITLE_SUB"), GrimTheme.BODY_SIZE + 1, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.95))
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD
 	col.add_child(sub)

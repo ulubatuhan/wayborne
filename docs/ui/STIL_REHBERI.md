@@ -108,7 +108,7 @@ başka bir sıcak vurgu icat edilmez.
 | Yoldaki kervan feneri: gece lider figürde ışık halesi (Y-C20, `light_for_night`) | var |
 | Menünün ışık kaynağı: kamp ateşi, fener ışığı kısılır (Y-G16 taslağı) | taslak |
 | Arayüzün kehribar vurgusu (`UI_ACCENT`: seçili, ana eylem, başlık) | var |
-| Logo yanında küçük fener amblemi | Poly Haven `Lantern_01` (CC0) render + mürekkep; indirme izni bekliyor |
+| Logo yanında küçük fener amblemi (ana menü başlığı) | var: Poly Haven `Lantern_01` (CC0), `tools/ui_scenes/lantern_emblem.py` + `lantern_emblem_post.py` -> `data/assets/ui/grim/lantern_emblem.png` |
 
 ## Ne yapılmaz
 
