@@ -1,7 +1,24 @@
 class_name MerchantOffer
 extends Resource
 
+## Kontrat türü (görev Y-C02, bkz. ContractBoard). Eski statik teklifler
+## eşlik türündedir; varsayılan bu.
+const KIND_ESCORT: String = "escort"
+const KIND_DELIVERY: String = "delivery"
+const KIND_WAGONLESS: String = "wagonless"
+const KIND_PASSENGER: String = "passenger"
+const KIND_CONTRABAND: String = "contraband"
+
 @export var merchant_id: String = ""
+@export var kind: String = KIND_ESCORT
+## Bizim vagonlarımızın taşıdığı emanet yük (ağırlık birimi) ve malı.
+@export var cargo_weight: int = 0
+@export var cargo_item_id: String = ""
+@export var passengers: int = 0
+## Ücretin vagon kirası payı (yalnız gösterim; potential_profit'e dahil).
+@export var wagon_rent: int = 0
+## Süre baskılı: geç varışta ücretin yarısı.
+@export var rush: bool = false
 @export var merchant_name: String = ""
 @export var origin_location_id: String = ""
 @export var destination_location_id: String = ""
@@ -40,3 +57,18 @@ extends Resource
 
 func uses_donkey_escort() -> bool:
 	return donkey_count > 0
+
+## Kervana katılan ağız: eşlik ve vagonsuz tüccar kendisi, yolcu sayısı kadar,
+## teslimatta kimse gelmez.
+func mouths() -> int:
+	if kind == KIND_DELIVERY or kind == KIND_CONTRABAND:
+		return 0
+	if kind == KIND_PASSENGER:
+		return maxi(1, passengers)
+	return 1
+
+func cargo_load() -> float:
+	if cargo_weight <= 0:
+		return 0.0
+	var item := ItemCatalog.get_item(cargo_item_id)
+	return float(cargo_weight) * (item.unit_weight if item != null else 1.0)

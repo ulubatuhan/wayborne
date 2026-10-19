@@ -119,7 +119,8 @@ func _rebuild() -> void:
 
 func _available_offers() -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
-	for offer in WorldMapData.get_offers_from_origin(_session.current_location_id):
+	# Pano her varışta yeniden kurulur (görev Y-C02, ContractBoard).
+	for offer in _session.get_contract_board():
 		if _session.is_contract_accepted(offer.merchant_id):
 			continue
 		# Loncanın vagon-bağışı görevleri teslim edilince bir daha hiç
@@ -134,26 +135,51 @@ func _available_offers() -> Array[MerchantOffer]:
 func _accepted_offers() -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
 	for merchant_id in _session.accepted_contracts:
-		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
+		var offer := _session.find_offer(merchant_id)
 		if offer != null and offer.origin_location_id == _session.current_location_id:
 			offers.append(offer)
 	return offers
 
-func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
+## Pano bir ilan tahtası (görev Y-C02): her kontrat kendi kâğıdında - üstte
+## türü (ve acele damgası), altta ayrıntısı, yanda kabul.
+func _build_offer_row(offer: MerchantOffer) -> Control:
 	var destination := WorldMapData.get_location_by_id(offer.destination_location_id)
 	var destination_name := destination.location_name if destination != null else offer.destination_location_id
+	var notice := PanelContainer.new()
+	notice.theme_type_variation = WaybookTheme.CELL_PANEL
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+	notice.add_child(row)
 
-	var info_label := _row_label(_offer_line_text(offer, destination_name))
-	row.add_child(info_label)
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var kind_label := Label.new()
+	kind_label.text = kind_heading(offer)
+	kind_label.modulate = ArtPalette.UI_ACCENT if offer.rush else HINT_COLOR
+	text.add_child(kind_label)
+	text.add_child(_row_label(_offer_line_text(offer, destination_name)))
 
 	var accept_button := _row_action()
 	accept_button.pressed.connect(_on_accept_pressed.bind(offer))
 	row.add_child(accept_button)
 
 	_rows.append({"offer": offer, "accept_button": accept_button})
-	return row
+	return notice
+
+const KIND_KEYS: Dictionary = {
+	"escort": "UI_CONTRACT_KIND_ESCORT", "delivery": "UI_CONTRACT_KIND_DELIVERY",
+	"wagonless": "UI_CONTRACT_KIND_WAGONLESS", "passenger": "UI_CONTRACT_KIND_PASSENGER",
+	"contraband": "UI_CONTRACT_KIND_CONTRABAND",
+}
+
+static func kind_heading(offer: MerchantOffer) -> String:
+	var heading := String(TranslationServer.translate(String(KIND_KEYS.get(offer.kind, "UI_CONTRACT_KIND_ESCORT"))))
+	if offer.merchant_id.begins_with("guild_"):
+		heading = String(TranslationServer.translate("UI_CONTRACT_KIND_GUILD"))
+	if offer.rush:
+		heading += " · " + String(TranslationServer.translate("UI_CONTRACT_RUSH"))
+	return heading
 
 func _refresh_offer_rows() -> void:
 	for row in _rows:
@@ -191,6 +217,21 @@ func _offer_line_text(offer: MerchantOffer, destination_name: String) -> String:
 		return tr("UI_GUILD_FREIGHT_OFFER") % [
 			tr(offer.merchant_name), destination_name,
 			offer.cargo_reward_quantity, item_name, offer.contract_deadline_days,
+		]
+	if offer.kind == MerchantOffer.KIND_DELIVERY or offer.kind == MerchantOffer.KIND_CONTRABAND:
+		return tr("UI_CONTRACT_OFFER_DELIVERY") % [
+			offer.merchant_name, destination_name, offer.cargo_weight,
+			offer.potential_profit, offer.contract_deadline_days,
+		]
+	if offer.kind == MerchantOffer.KIND_WAGONLESS:
+		return tr("UI_CONTRACT_OFFER_WAGONLESS") % [
+			offer.merchant_name, destination_name, offer.cargo_weight,
+			offer.potential_profit, offer.wagon_rent, offer.contract_deadline_days,
+		]
+	if offer.kind == MerchantOffer.KIND_PASSENGER:
+		return tr("UI_CONTRACT_OFFER_PASSENGER") % [
+			offer.merchant_name, destination_name, offer.passengers,
+			offer.potential_profit, offer.contract_deadline_days,
 		]
 	if offer.uses_donkey_escort():
 		return tr("UI_GUILD_OFFER_DONKEY") % [

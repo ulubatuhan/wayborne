@@ -12,6 +12,8 @@ extends RefCounted
 static var _cache: Dictionary = {}
 
 const CONTRABAND_SALT: String = "contraband_salt"
+## Teslimat kontratının emanet yükü (görev Y-C02): pazarda satılmaz.
+const CONTRACT_GOODS: String = "contract_goods"
 const RARE_RELIC: String = "rare_relic"
 const FISH_SHELF_DAYS: int = 6
 
@@ -75,6 +77,7 @@ static func _build_cache() -> void:
 	_add(CONTRABAND_SALT, "ITEM_CONTRABAND_SALT_NAME", 22, 0.8)
 	_cache[CONTRABAND_SALT].contraband = true
 	_add(RARE_RELIC, "ITEM_RARE_RELIC_NAME", 90, 0.2)
+	_add(CONTRACT_GOODS, "ITEM_CONTRACT_GOODS_NAME", 0, 1.0)
 	_cache[RARE_RELIC].rare = true
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:

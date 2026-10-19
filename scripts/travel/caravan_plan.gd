@@ -69,8 +69,26 @@ func get_total_wagon_count() -> int:
 func is_selected(offer: MerchantOffer) -> bool:
 	return _selected_offers.has(offer)
 
+## Emanet yük için vagonlardaki boş yer (planlayıcı doldurur; -1 = sınırsız,
+## eski çağıranlar). Teslimat ve vagonsuz tüccarın yükü buna sığmalı.
+var cargo_room: float = -1.0
+
+func get_contract_cargo_load() -> float:
+	var total := 0.0
+	for offer in _selected_offers:
+		total += offer.cargo_load()
+	return total
+
+func get_contract_mouths() -> int:
+	var total := 0
+	for offer in _selected_offers:
+		total += offer.mouths()
+	return total
+
 func can_add_offer(offer: MerchantOffer) -> bool:
 	if is_selected(offer):
+		return false
+	if cargo_room >= 0.0 and get_contract_cargo_load() + offer.cargo_load() > cargo_room + 0.001:
 		return false
 	return get_used_wagon_count() + offer.wagon_count <= get_available_wagon_slots()
 
@@ -151,7 +169,7 @@ func get_daily_consumption() -> int:
 	return daily_consumption(
 		caravan_party_size,
 		player_wagon_count,
-		_selected_offers.size(),
+		get_contract_mouths(),
 		provision_multiplier,
 		provision_reduction,
 		height_adjustment,

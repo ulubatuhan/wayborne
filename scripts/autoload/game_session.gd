@@ -1493,7 +1493,7 @@ func get_daily_provision_consumption() -> int:
 	return CaravanPlan.daily_consumption(
 		party.size(),
 		owned_wagon_count,
-		caravan.merchant_names.size(),
+		caravan.get_contract_mouths(),
 		get_daily_provision_multiplier(),
 		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
 		CaravanPlan.height_adjustment_for(party),
@@ -1603,7 +1603,7 @@ const MEAL_EXTRAS: Array[Dictionary] = [
 var last_feast_evening_day: int = 0
 
 func get_meal_mouths() -> int:
-	return maxi(1, get_party().size() + owned_wagon_count * PEOPLE_PER_WAGON + caravan.merchant_names.size())
+	return maxi(1, get_party().size() + owned_wagon_count * PEOPLE_PER_WAGON + caravan.get_contract_mouths())
 
 ## Bu akşam sofraya çıkabilecek çeşniler: yeterli mal varsa listede.
 func get_meal_extras() -> Array[Dictionary]:
@@ -1695,7 +1695,7 @@ func meal_feeds_crew(mode: String) -> bool:
 func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) -> Dictionary:
 	var named_party := get_party()
 	var party_mouths := named_party.size()
-	var other_mouths := owned_wagon_count * PEOPLE_PER_WAGON + caravan.merchant_names.size()
+	var other_mouths := owned_wagon_count * PEOPLE_PER_WAGON + caravan.get_contract_mouths()
 	var total_mouths := maxi(1, party_mouths + other_mouths)
 	var full_total := get_daily_provision_consumption()
 	var party_share := int(round(float(full_total) * float(party_mouths) / float(total_mouths)))
@@ -1877,6 +1877,44 @@ func change_reputation(delta: int) -> int:
 func accept_contract(offer: MerchantOffer) -> void:
 	accepted_contracts[offer.merchant_id] = total_days_elapsed
 
+## --- Dinamik kontrat panosu (görev Y-C02) ---
+## Pano şehir + günden kurulur (bkz. ContractBoard); loncanın özel vagon ve
+## kargo görevleri (statik, `guild_` kimlikli) panoda kalır. Aynı (şehir,
+## gün) için kurulan pano önbellekte: planlayıcı ve lonca aynı nesneleri görür.
+var _board_cache: Dictionary = {}
+
+func get_contract_board(location_id: String = "") -> Array[MerchantOffer]:
+	var origin := current_location_id if location_id.is_empty() else location_id
+	var board := _board_for(origin, total_days_elapsed)
+	var out: Array[MerchantOffer] = []
+	out.append_array(board)
+	for offer in WorldMapData.get_offers_from_origin(origin):
+		if offer.merchant_id.begins_with("guild_"):
+			out.append(offer)
+	return out
+
+func _board_for(origin: String, day: int) -> Array[MerchantOffer]:
+	var key := "%s|%d" % [origin, day]
+	if not _board_cache.has(key):
+		_board_cache[key] = ContractBoard.roll(origin, day)
+	var board: Array[MerchantOffer] = []
+	board.append_array(_board_cache[key])
+	return board
+
+## Kontratı kimliğinden bulur: statik (lonca görevi, eski kayıt) ya da
+## panodan (kimlik panonun şehrini ve gününü taşır).
+func find_offer(merchant_id: String) -> MerchantOffer:
+	var fixed := WorldMapData.get_offer_by_merchant_id(merchant_id)
+	if fixed != null:
+		return fixed
+	var origin_day := ContractBoard.parse_id(merchant_id)
+	if origin_day.is_empty():
+		return null
+	for offer in _board_for(String(origin_day[0]), int(origin_day[1])):
+		if offer.merchant_id == merchant_id:
+			return offer
+	return null
+
 func is_contract_accepted(merchant_id: String) -> bool:
 	return accepted_contracts.has(merchant_id)
 
@@ -1886,7 +1924,7 @@ func is_contract_accepted(merchant_id: String) -> bool:
 func get_accepted_offers_for_destination(destination_location_id: String) -> Array[MerchantOffer]:
 	var offers: Array[MerchantOffer] = []
 	for merchant_id in accepted_contracts:
-		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
+		var offer := find_offer(merchant_id)
 		if offer == null:
 			continue
 		if offer.destination_location_id != destination_location_id:
@@ -1901,6 +1939,12 @@ func get_accepted_offers_for_destination(destination_location_id: String) -> Arr
 func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 	for offer in offers:
 		accepted_contracts.erase(offer.merchant_id)
+		# Emanet yük bizim vagonlarımıza yüklenir (Y-C02); planlayıcı yerini
+		# ayırdı. Kaçak yük kaçak tuz olarak biner - gümrük onu da görür.
+		if offer.cargo_weight > 0:
+			var goods := ItemCatalog.get_item(offer.cargo_item_id)
+			if goods != null:
+				add_to_cargo(goods, offer.cargo_weight)
 
 ## Sefer gününü ilerletir, süresi geçen kontratları panodan düşürüp
 ## itibar cezası uygular. Süresi geçenlerin merchant_id listesini döner
@@ -1930,7 +1974,7 @@ func advance_day() -> Array[String]:
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
-		var offer := WorldMapData.get_offer_by_merchant_id(merchant_id)
+		var offer := find_offer(merchant_id)
 		if offer == null:
 			continue
 		var accepted_at: int = accepted_contracts[merchant_id]
@@ -2741,7 +2785,10 @@ func divert_journey(destination_id: String) -> bool:
 func finish_journey() -> Dictionary:
 	# Şehirde herkes yer - tayfanın aç gece sayacı burada kapanır.
 	crew_hungry_nights = 0
+	var settled := _settle_contract_cargo()
 	var payout := _calculate_arrival_payout()
+	payout["late_contracts"] = settled["late"]
+	payout["lost_goods_contracts"] = settled["lost"]
 	wallet.earn(payout.net)
 	_apply_wagon_losses_to_ownership()
 	_apply_guild_wagon_quest_rewards()
@@ -2975,6 +3022,34 @@ func _calculate_journey_xp(days: int, danger: float, morale_ratio: float, lost_c
 	var succeeded := morale_ratio >= JOURNEY_SUCCESS_MORALE_RATIO and lost_contracts == 0
 	var factor := 1.0 if succeeded else JOURNEY_XP_FAILURE_FACTOR
 	return maxi(0, int(round(base * factor)))
+
+## Varışta emanet yük teslim edilir (görev Y-C02): yükü eksik olan kontrat
+## teslim edilmemiş sayılır (kervandan düşer, cezası olağan yoldan); acele
+## kontrat geç kaldıysa ücretin yarısı. Kalan emanet yük kervandan iner.
+const LATE_RUSH_PAY_SHARE: float = 0.5
+
+func _settle_contract_cargo() -> Dictionary:
+	var late := 0
+	var lost := 0
+	for merchant_name in caravan.merchant_names.duplicate():
+		if caravan.due_day_by_name.has(merchant_name) and total_days_elapsed > int(caravan.due_day_by_name[merchant_name]):
+			late += 1
+			caravan.merchant_profit_by_name[merchant_name] = int(round(
+				float(caravan.merchant_profit_by_name.get(merchant_name, 0)) * LATE_RUSH_PAY_SHARE))
+		if not caravan.cargo_by_name.has(merchant_name):
+			continue
+		var need: Dictionary = caravan.cargo_by_name[merchant_name]
+		var item_id := String(need["item"])
+		var qty := int(need["qty"])
+		if get_total_quantity(item_id) >= qty:
+			remove_from_cargo_or_bags(item_id, qty)
+		else:
+			lost += 1
+			caravan.merchant_names.erase(merchant_name)
+	var leftover := get_total_quantity(ItemCatalog.CONTRACT_GOODS)
+	if leftover > 0:
+		remove_from_cargo_or_bags(ItemCatalog.CONTRACT_GOODS, leftover)
+	return {"late": late, "lost": lost}
 
 func _calculate_arrival_payout() -> Dictionary:
 	var gross := 0

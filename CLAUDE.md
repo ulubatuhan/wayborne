@@ -2955,6 +2955,15 @@ paid for. A new game starts in a city (`character_creation.gd` →
   you had to walk tavern → world map → planner, and to learn what the
   caravan lacked you had to visit all five doors. `CityBriefPanel` answers
   *what does the caravan need* and *where can it go today* beside the map.
+- **The contract board is new at every arrival (task Y-C02).** `ContractBoard.roll(city, day)` seeds four to seven
+  notices: delivery (most common - the merchant stays home, our wagons carry his goods as `contract_goods`), escort
+  (his wagon or donkeys), a wagonless merchant (he rides, his goods ride in ours, the fee carries wagon hire),
+  passengers (mouths, no cargo) and a contraband load (unsealed salt - customs can seize it). A quarter are rush jobs:
+  short deadline, higher pay, half pay if late. A notice's id carries its city and day, so `GameSession.find_offer`
+  rebuilds an accepted contract after a reload; `_board_cache` only keeps object identity within a session. The guild's
+  own wagon and freight commissions stay static. Consigned goods take real cargo room (`CaravanPlan.cargo_room`); a
+  contract whose goods are short on arrival is undelivered and pays the usual penalty. Mouths come from each contract
+  (`MerchantOffer.mouths`), so a delivery eats nothing and passengers eat as many as they are.
 - **Every warning names the screen that fixes it, and pressing it goes
   there.** A warning that only worries the player is worse than no warning.
   `tests/test_city_commerce.gd` asserts every produced need points at a

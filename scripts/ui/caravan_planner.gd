@@ -97,6 +97,8 @@ func _setup(origin: Location, chosen: Array[MerchantOffer]) -> void:
 	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 	_plan.height_adjustment = CaravanPlan.height_adjustment_for(_session.get_party())
 	_plan.animal_mouths = _session.get_pack_animal_provision_mouths()
+	# Emanet yük (Y-C02) vagonlardaki boş yere sığmalı.
+	_plan.cargo_room = _session.get_cargo_space_remaining()
 	for offer in chosen:
 		_plan.toggle_merchant(offer)
 
@@ -383,6 +385,11 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	# okunurdu ki bu ne kervanın gerçekte taşıdığı şey ne de doğru bir sayı.
 	if offer.uses_donkey_escort():
 		wagon_label.text = tr("UI_PLANNER_DONKEYS") % offer.donkey_count
+	elif offer.kind == MerchantOffer.KIND_PASSENGER:
+		wagon_label.text = tr("UI_PLANNER_PASSENGERS") % offer.passengers
+	elif offer.cargo_weight > 0:
+		# Emanet yük bizim vagonlarımızda yer kaplar (Y-C02).
+		wagon_label.text = tr("UI_PLANNER_CARGO") % offer.cargo_weight
 	else:
 		wagon_label.text = tr("UI_PLANNER_WAGONS") % offer.wagon_count
 	wagon_label.custom_minimum_size = Vector2(90, 0)

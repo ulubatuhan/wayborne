@@ -33,6 +33,18 @@ var documents: int = 0
 ## Sefer sonunda ödenecek escort ücreti burada tutulur; bir tüccar
 ## kervandan ayrılırsa merchant_names'ten düşer ve ücreti ödenmez.
 var merchant_profit_by_name: Dictionary = {}
+## Kontrat ayrıntıları (görev Y-C02), ada göre: kervana kaç ağız kattığı,
+## taşınan emanet yük ({"item", "qty"}) ve acele kontratın son günü.
+var mouths_by_name: Dictionary = {}
+var cargo_by_name: Dictionary = {}
+var due_day_by_name: Dictionary = {}
+
+## Yolda kervanla yürüyen kontrat ağızları (eski kayıtta tüccar başına bir).
+func get_contract_mouths() -> int:
+	var total := 0
+	for merchant_name in merchant_names:
+		total += int(mouths_by_name.get(merchant_name, 1))
+	return total
 
 ## Sefer başındaki tüccar listesinin değişmez kopyası: finish_journey()
 ## bunu merchant_names ile karşılaştırıp yolda kimin kaybedildiğini
@@ -133,6 +145,11 @@ static func from_plan(
 	for offer in plan.get_selected_offers():
 		state.merchant_names.append(offer.merchant_name)
 		state.merchant_profit_by_name[offer.merchant_name] = offer.potential_profit
+		state.mouths_by_name[offer.merchant_name] = offer.mouths()
+		if offer.cargo_weight > 0:
+			state.cargo_by_name[offer.merchant_name] = {"item": offer.cargo_item_id, "qty": offer.cargo_weight}
+		if offer.rush:
+			state.due_day_by_name[offer.merchant_name] = journey_start_day + offer.contract_deadline_days
 		var disposition_rng := RandomNumberGenerator.new()
 		disposition_rng.seed = hash("merchant_disposition|%s" % offer.merchant_name)
 		state.merchant_disposition_by_name[offer.merchant_name] = NpcDisposition.roll(disposition_rng)
@@ -188,6 +205,9 @@ func to_dict() -> Dictionary:
 		"wagons_at_start": wagons_at_start,
 		"player_wagon_count_at_start": player_wagon_count_at_start,
 		"merchant_profit_by_name": merchant_profit_by_name.duplicate(),
+		"mouths_by_name": mouths_by_name.duplicate(),
+		"cargo_by_name": cargo_by_name.duplicate(true),
+		"due_day_by_name": due_day_by_name.duplicate(),
 		"merchant_disposition_by_name": dispositions,
 		"merchant_cargo_by_name": cargo,
 		"merchant_known_by_name": merchant_known_by_name.duplicate(),
@@ -211,6 +231,16 @@ static func from_dict(data: Dictionary) -> CaravanState:
 	var profits: Dictionary = data.get("merchant_profit_by_name", {})
 	for merchant_name in profits:
 		state.merchant_profit_by_name[String(merchant_name)] = int(profits[merchant_name])
+	var mouths: Dictionary = data.get("mouths_by_name", {})
+	for merchant_name in mouths:
+		state.mouths_by_name[String(merchant_name)] = int(mouths[merchant_name])
+	var loads: Dictionary = data.get("cargo_by_name", {})
+	for merchant_name in loads:
+		var entry: Dictionary = loads[merchant_name]
+		state.cargo_by_name[String(merchant_name)] = {"item": String(entry.get("item", "")), "qty": int(entry.get("qty", 0))}
+	var dues: Dictionary = data.get("due_day_by_name", {})
+	for merchant_name in dues:
+		state.due_day_by_name[String(merchant_name)] = int(dues[merchant_name])
 	var dispositions: Dictionary = data.get("merchant_disposition_by_name", {})
 	for merchant_name in dispositions:
 		state.merchant_disposition_by_name[String(merchant_name)] = String(dispositions[merchant_name])

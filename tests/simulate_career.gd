@@ -259,7 +259,7 @@ func _build_plan(session: GameSession, destination: Location, travel_days: int) 
 	plan.provision_multiplier = session.get_daily_provision_multiplier()
 	plan.provision_reduction = session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 
-	for offer in WorldMapData.get_offers_from_origin(session.current_location_id):
+	for offer in session.get_contract_board():
 		if offer.destination_location_id != destination.location_id:
 			continue
 		if session.reputation < offer.required_reputation:
