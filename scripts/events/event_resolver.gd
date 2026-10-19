@@ -41,6 +41,7 @@ const STOP_CONTEXT_KEYS: Dictionary = {
 	RouteTerrain.STOP_OUTPOST: "near_outpost",
 	RouteTerrain.STOP_MINE: "near_mine",
 	RouteTerrain.STOP_BRIDGE: "near_bridge",
+	RouteTerrain.STOP_FORD: "near_ford",
 }
 
 static func stop_context(stop: String) -> Dictionary:

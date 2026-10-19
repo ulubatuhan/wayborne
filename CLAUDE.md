@@ -2470,6 +2470,12 @@ re-roll the rain away.
   where biomes step at most two places along `BIOME_CHAIN`.
   `test_route_terrain` checks every map road in both directions: coverage,
   the mirror, the geography and the provision promise.
+- **Some crossings have no bridge (task R4 #16).** A seeded third of the map's bridge stops are fords
+  (`RouteTerrain.STOP_FORD`; seeded by route and boundary so both directions agree). The water level is read from the
+  last three days' weather (`RouteFord`, low/moderate/high, marsh one step higher), never stored; the front of the
+  column reads it on approach. `evt_river_ford` opens the right crossing for the level - wade when it is low, risk the
+  flood when it is high, each locked with its reason otherwise - or lighten the load, or wait a day. Nobody dies and
+  no wagon is lost there.
 - **The same road differs by season and by choice (task Y-B13).** Two deterministic passes over the map's terrain,
   never stored: spring floods steppe or meadow beside water into marsh, summer dries an inland marsh to meadow, winter
   steepens mountains (slower). A shortcut (`RouteTerrain.shortcut_available`, roads of 5+ days) cuts 20% of the days

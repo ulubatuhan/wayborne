@@ -2649,6 +2649,14 @@ func _after_meal() -> void:
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
 	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_terrain_day()).stop
 	context.merge(EventResolver.stop_context(stop), true)
+	# Irmak geçidi (R4 #16): su seviyesi bağlama girer; ön bölgede olan onu
+	# önceden okur.
+	if stop == RouteTerrain.STOP_FORD:
+		var water_biome := _terrain.biome_at(minf(float(_journey.terrain_days), _terrain_day() + 0.5))
+		var level := RouteFord.water_level(_route_key, _session.total_days_elapsed + 1, water_biome)
+		context["water_level"] = float(level)
+		if _attention_zone == RoadAttention.ZONE_FRONT:
+			_add_log(tr("UI_FORD_SEEN") % tr(RouteFord.LEVEL_KEYS[level]))
 	# Aynı desenin arazi hali (bkz. evt_hunting_trip) - o günün biyomu
 	# stop_context'in yanına.
 	var biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())

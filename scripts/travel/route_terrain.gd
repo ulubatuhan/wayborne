@@ -36,6 +36,11 @@ const STOP_MINE: String = "mine"
 const STOP_PASS: String = "pass"
 const STOP_SHRINE: String = "shrine"
 const STOP_BRIDGE: String = "bridge"
+## Irmak geçidi (görev R4 #16): köprüsüz kısa bir su parçası. Su seviyesi
+## son üç günün yağışından (RouteFord), kervan okuyarak karar verir.
+const STOP_FORD: String = "ford"
+## Haritadaki her üç köprüden biri geçit.
+const FORD_SHARE_OF_BRIDGES: int = 3
 
 ## Biyom sırası bilinçli: komşu biyomlar birbirine benziyor, o yüzden
 ## rastgele seçim bile "bozkırdan sonra dağ, sonra göl" gibi sıçramalar
@@ -187,6 +192,12 @@ func _build_from_map(mapped: Dictionary, from_id: String, rng: RandomNumberGener
 			else:
 				to_share = float(source[i]["to"])
 				stop = String(source[i]["stop"])
+		# Haritanın köprülerinin bir kısmı köprüsüz geçit (R4 #16): sınır
+		# kaynaktaki sırasıyla tohumlanır, iki yönden aynı yer seçilir.
+		if stop == STOP_BRIDGE:
+			var boundary := i - 1 if reverse else i
+			if absi(hash("ford|%s|%d" % [route_key, boundary])) % FORD_SHARE_OF_BRIDGES == 0:
+				stop = STOP_FORD
 		var to_day := days if k == n - 1 else clampf(to_share * days, from_day, days)
 		segments.append({
 			"biome": String(source[i]["biome"]),
@@ -268,11 +279,11 @@ func _pick_stop(biome: String, rng: RandomNumberGenerator) -> String:
 		ArtPalette.BIOME_MOUNTAIN:
 			pool = [STOP_PASS, STOP_MINE, STOP_OUTPOST]
 		ArtPalette.BIOME_LAKE:
-			pool = [STOP_BRIDGE, STOP_MEZRA]
+			pool = [STOP_BRIDGE, STOP_MEZRA, STOP_FORD]
 		ArtPalette.BIOME_FOREST:
 			pool = [STOP_SHRINE, STOP_MEZRA, STOP_OUTPOST]
 		ArtPalette.BIOME_MARSH:
-			pool = [STOP_BRIDGE, STOP_SHRINE]
+			pool = [STOP_BRIDGE, STOP_SHRINE, STOP_FORD]
 		ArtPalette.BIOME_MEADOW:
 			pool = [STOP_MEZRA, STOP_SHRINE, STOP_OUTPOST]
 		_:
@@ -392,4 +403,5 @@ static func stop_name_key(stop: String) -> String:
 		STOP_PASS: return "STOP_PASS"
 		STOP_SHRINE: return "STOP_SHRINE"
 		STOP_BRIDGE: return "STOP_BRIDGE"
+		STOP_FORD: return "STOP_FORD"
 		_: return "STOP_MEZRA"

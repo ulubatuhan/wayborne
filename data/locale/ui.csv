@@ -1047,3 +1047,7 @@
 "UI_MEM_ROUTE_GRAVES","Bu yolda %d kişiniz yatıyor.","%d of yours lie on this road.","","","","","","","","",""
 "UI_PLANNER_ROUTE_MEMORY","Bu yolu %d kez yürüdünüz. Orada yatanlar: %s.","You have walked this road %d times. Lying there: %s.","","","","","","","","",""
 "UI_PLANNER_ROUTE_NO_GRAVES","kimse","no one","","","","","","","","",""
+"UI_FORD_LOW","alçak","low","","","","","","","","",""
+"UI_FORD_NORMAL","orta","moderate","","","","","","","","",""
+"UI_FORD_HIGH","yüksek ve bulanık","high and muddy","","","","","","","","",""
+"UI_FORD_SEEN","Öndekiler ırmağa baktı: sular %s.","Those at the front looked at the river: the water is %s.","","","","","","","","",""

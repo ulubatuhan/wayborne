@@ -46,6 +46,7 @@ func run(t) -> void:
 	_test_map_terrain_follows_geography(t)
 	_test_map_routes_keep_the_provision_promise(t)
 	_test_seasons_and_shortcuts(t)
+	_test_river_fords(t)
 
 func _test_terrain_is_reproducible(t) -> void:
 	for key in SAMPLE_KEYS:
@@ -692,3 +693,29 @@ func _test_seasons_and_shortcuts(t) -> void:
 	t.ok(RouteTerrain.shortcut_days(10) < 10, "kestirme yolu kısaltır")
 	t.ok(RouteTerrain.shortcut_danger(0.3) > 0.3 and RouteTerrain.shortcut_danger(0.95) <= 1.0, "kestirme tehlikeyi boş paya artırır")
 	t.ok(not RouteTerrain.shortcut_available(RouteTerrain.SHORTCUT_MIN_DAYS - 1), "kısa yolda kestirme yok")
+
+## Irmak geçidi (görev R4 #16): haritanın bazı köprüleri geçittir (iki yönden
+## aynı yerde - ayna testi kapsar), su seviyesi tohumdan ve sınırlı, kart
+## seviyeye göre doğru seçeneği açar.
+func _test_river_fords(t) -> void:
+	var fords := 0
+	for leg in _map_legs():
+		for segment in RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[0])).segments:
+			if String(segment.stop) == RouteTerrain.STOP_FORD:
+				fords += 1
+	t.ok(fords > 0, "haritada ırmak geçidi var (%d)" % fords)
+	var levels := {}
+	for day in range(1, 200):
+		var level := RouteFord.water_level("a|b", day, ArtPalette.BIOME_LAKE)
+		t.eq(level, RouteFord.water_level("a|b", day, ArtPalette.BIOME_LAKE), "su seviyesi tohumlu")
+		levels[level] = true
+		t.ok(RouteFord.water_level("a|b", day, ArtPalette.BIOME_MARSH) >= level, "bataklık daha yüksek")
+	t.eq(levels.size(), 3, "üç seviye de görülür")
+	var ford := EventCatalog.get_event("evt_river_ford")
+	t.ok(ford != null, "geçit kartı katalogda")
+	var low := {"near_ford": 1.0, "water_level": 0.0, "gold": 100.0, "provisions": 50.0}
+	var high := {"near_ford": 1.0, "water_level": 2.0, "gold": 100.0, "provisions": 50.0}
+	t.ok(ford.choices[0].is_available(low) and not ford.choices[0].is_available(high), "alçak suda geçilir, yüksekte kilitli")
+	t.ok(ford.choices[1].is_available(high) and not ford.choices[1].is_available(low), "selde geçmek yalnız yüksek suda")
+	t.ok(ford.is_eligible(low) and not ford.is_eligible({"near_ford": 0.0}), "kart yalnız geçitte")
+	t.ok(String(TranslationServer.translate(RouteTerrain.stop_name_key(RouteTerrain.STOP_FORD))) != "STOP_FORD", "geçidin adı var")

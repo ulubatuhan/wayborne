@@ -70,6 +70,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_merchant_cold_feet())
 	_road_events.append(_merchant_grudge())
 	_road_events.append(_merchant_shares_bread())
+	_road_events.append(_river_ford())
 	_road_events.append(_convoy_repaid())
 	_road_events.append(_convoy_search())
 	_road_events.append(_refugee_gratitude())
@@ -1776,6 +1777,59 @@ static func _merchant_caravan() -> GameEvent:
 		),
 		_choice("EVT_MERCHANT_CARAVAN_OPT_WAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## --- Irmak geçidi (görev R4 #16) ---
+## Okunabilir bir risk: su seviyesi seçeneklerin kilidinde yazar; geçmek bir
+## zar (Dayanıklılık, ekipten en iyisi), yükü hafifletmek güvenli ama erzak
+## bırakır, beklemek ve köprü aramak gün yer (gönüllü uzatma). Kimse ölmez,
+## hiçbir vagon yok olmaz.
+static func _river_ford() -> GameEvent:
+	var event := _event("evt_river_ford", "EVT_FORD", 0.2)
+	event.cooldown_days = 2
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_ford", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 30.0),
+	])
+	event.conditions = _conditions([
+		EventCondition.make("near_ford", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_requires(_check_choice(
+			"EVT_FORD_OPT_CROSS", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_FORD_CROSS_OK", _effects([EventEffect.make(EventEffect.Type.MORALE, 2)]),
+			"EVT_FORD_CROSS_MID", _effects([EventEffect.make(EventEffect.Type.PROVISIONS, -3)]),
+			"EVT_FORD_CROSS_BAD", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+				EventEffect.make(EventEffect.Type.PROVISIONS, -5),
+			])
+		), "EVT_FORD_OPT_CROSS_LOCKED", _conditions([
+			EventCondition.make("water_level", EventCondition.Op.LESS_EQUAL, 1),
+		])),
+		_requires(_check_choice(
+			"EVT_FORD_OPT_SWIM", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_FORD_SWIM_OK", _effects([EventEffect.make(EventEffect.Type.STRESS, 4)]),
+			"EVT_FORD_SWIM_MID", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+				EventEffect.make(EventEffect.Type.STRESS, 6),
+			]),
+			"EVT_FORD_SWIM_BAD", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 2),
+				EventEffect.make(EventEffect.Type.PROVISIONS, -8),
+				EventEffect.make(EventEffect.Type.PARTY_HP, -6, "endurance"),
+			])
+		), "EVT_FORD_OPT_SWIM_LOCKED", _conditions([
+			EventCondition.make("water_level", EventCondition.Op.GREATER_EQUAL, 2),
+		])),
+		_choice("EVT_FORD_OPT_LIGHTEN", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, -4),
+		])),
+		_choice("EVT_FORD_OPT_WAIT", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.MORALE, -1),
 		])),
 	])
 	return event

@@ -1018,6 +1018,19 @@ func _draw_stop(stop: String, base: Vector2, height: float) -> void:
 	var stone := ArtPalette.fade_to_haze(Color(0.46, 0.46, 0.48), haze, 0.30)
 
 	match stop:
+		RouteTerrain.STOP_FORD:
+			# Irmak geçidi: yolu kesen bir su şeridi, basamak taşları, derinlik direği.
+			var water := ArtPalette.fade_to_haze(Color(0.30, 0.38, 0.42), haze, 0.25)
+			draw_colored_polygon(PackedVector2Array([
+				base + Vector2(-height * 1.4, height * 0.05), base + Vector2(-height * 1.1, -height * 0.12),
+				base + Vector2(height * 1.1, -height * 0.12), base + Vector2(height * 1.4, height * 0.05),
+			]), water)
+			for offset in [-0.6, -0.15, 0.3, 0.75]:
+				draw_circle(base + Vector2(height * offset, -height * 0.04), height * 0.08, stone)
+			draw_line(base + Vector2(height * 1.2, 0.0), base + Vector2(height * 1.2, -height * 0.9), timber, maxf(1.2, height * 0.04))
+			for notch in 3:
+				var y := -height * (0.25 + 0.2 * float(notch))
+				draw_line(base + Vector2(height * 1.12, y), base + Vector2(height * 1.28, y), timber, 1.0)
 		RouteTerrain.STOP_MEZRA:
 			for offset in [-0.7, 0.0, 0.75]:
 				var h := height * (0.62 if is_zero_approx(offset) else 0.46)
