@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_second_trade_loop_is_closed(t)
 	_test_guild_wagon_quests(t)
 	_test_donkey_escorted_offers(t)
+	_test_danger_breakdown_matches_engine(t)
 
 func _test_locations_have_real_names(t) -> void:
 	var locations := WorldMapData.get_locations()
@@ -210,3 +211,36 @@ func _test_donkey_escorted_offers(t) -> void:
 	t.ok(plan.can_add_offer(donkey_offer), "hat doluyken bile eşekli teklif kabul edilir")
 	t.ok(plan.toggle_merchant(donkey_offer), "eşekli teklif gerçekten eklenir")
 	t.eq(plan.get_total_wagon_count(), 1, "eşekli teklif toplam vagon sayısını değiştirmez")
+
+## Tehlike dökümü (görev Y-F10): son adım motorun sayısıyla birebir, her yolda,
+## yılın her mevsiminde, dünya olayı varken de.
+func _test_danger_breakdown_matches_engine(t) -> void:
+	var session := GameSession.new(500, 0, 1)
+	var routes: Array[TravelRoute] = []
+	for location in WorldMapData.get_locations():
+		routes.append_array(WorldMapData.get_routes_from(location.location_id))
+	var first := routes[0]
+	session.world_events.add_event(
+		WorldEvents.Kind.REGIONAL_WAR, RouteConditions.route_key(first.from_location_id, first.to_location_id), 0, 400
+	)
+	var exact := true
+	var ordered := true
+	var saw := {}
+	for day in range(0, 400, 9):
+		session.total_days_elapsed = day
+		for route in routes:
+			var parts := session.get_route_danger_breakdown(route)
+			if not is_equal_approx(float(parts[-1]["value"]), session.get_route_danger(route)):
+				exact = false
+			if String(parts[0]["part"]) != GameSession.DANGER_PART_BASE:
+				ordered = false
+			var running := 0.0
+			for part in parts:
+				running += float(part["delta"])
+				saw[String(part["part"])] = true
+			if not is_equal_approx(running, float(parts[-1]["value"])):
+				ordered = false
+	t.ok(exact, "dökümün son adımı get_route_danger ile birebir")
+	t.ok(ordered, "döküm tabanla başlar, adımların toplamı sonuç")
+	for part in [GameSession.DANGER_PART_STATE, GameSession.DANGER_PART_WORLD, GameSession.DANGER_PART_GROWTH]:
+		t.ok(saw.has(part), "taramada '%s' adımı görüldü" % part)

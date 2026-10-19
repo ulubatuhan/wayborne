@@ -124,6 +124,33 @@ func _build_missing_context_ui() -> void:
 	back_button.pressed.connect(_on_map_pressed)
 	$MarginContainer/VBoxContainer.add_child(back_button)
 
+## Tehlike yüzdesinin kaynakları (görev Y-F10), motorun kendi adımlarından.
+const DANGER_PART_KEYS: Dictionary = {
+	"base": "UI_DANGER_PART_BASE",
+	"state": "UI_DANGER_PART_STATE",
+	"world": "UI_DANGER_PART_WORLD",
+	"growth": "UI_DANGER_PART_GROWTH",
+}
+
+func _add_danger_breakdown() -> void:
+	var route := WorldMapData.get_route(_session.current_location_id, _destination.location_id)
+	var parts := _session.get_route_danger_breakdown(route)
+	if parts.size() < 2:
+		return
+	var words: Array[String] = []
+	for part in parts:
+		var key := String(DANGER_PART_KEYS.get(String(part["part"]), ""))
+		var percent := int(round(float(part["delta"]) * 100.0))
+		if String(part["part"]) == "state":
+			words.append(tr(key) % [String(part["arg"]), percent])
+		else:
+			words.append(tr(key) % percent)
+	var label := Label.new()
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label.text = tr("UI_PLANNER_DANGER_BREAKDOWN") % " · ".join(words)
+	label.modulate = Color(0.78, 0.80, 0.74)
+	_content.add_child(label)
+
 func _build_ui(origin: Location, destination: Location, travel_days: int) -> void:
 	var title := Label.new()
 	title.text = tr("UI_PLANNER_TITLE") % [origin.location_name, destination.location_name]
@@ -143,6 +170,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		_plan.player_wagon_count,
 	]
 	_content.add_child(route_label)
+	_add_danger_breakdown()
 
 	# Arazi: rota seçimi kör bir karar olmasın. "İki gün bozkır, sonra
 	# orman" cümlesi oyuncuya neyle karşılaşacağını söylüyor ve yol

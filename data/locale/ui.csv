@@ -831,3 +831,8 @@
 "UI_GRIM_L_CHURCH_FRESH","Taze bir huy arındırılabilir.","A fresh trait can still be cleansed.","","","","","","","","",""
 "UI_GRIM_L_TAILOR_STOCK","Tezgâhta %d parça var.","%d pieces on the stall.","","","","","","","","",""
 "UI_GRIM_LINEAGE_LINE","%s kervanı · %d. kuşak · %d. gün","The %s caravan · generation %d · day %d","","","","","","","","",""
+"UI_PLANNER_DANGER_BREAKDOWN","Tehlikenin kaynağı: %s","Where the danger comes from: %s","","","","","","","","",""
+"UI_DANGER_PART_BASE","yolun kendisi %d","the road itself %d","","","","","","","","",""
+"UI_DANGER_PART_STATE","%s %+d","%s %+d","","","","","","","","",""
+"UI_DANGER_PART_WORLD","dünya olayı %+d","world event %+d","","","","","","","","",""
+"UI_DANGER_PART_GROWTH","zamanla azgınlaşan eşkıya %+d","brigands bolder with time %+d","","","","","","","","",""

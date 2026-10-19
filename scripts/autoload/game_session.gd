@@ -478,6 +478,35 @@ func get_route_danger(route: TravelRoute) -> float:
 	var with_world_events := clampf(base + world_delta * (1.0 - base), 0.0, 1.0)
 	return get_effective_danger(with_world_events)
 
+## Tehlikenin dökümü (görev Y-F10): get_route_danger'ın adımları sırayla,
+## her biri {"part", "value" (adımdan sonraki tehlike), "delta", "arg"}.
+## Son adımın değeri get_route_danger ile birebir (test_world_map_data);
+## planlayıcı bunu yazar, bir gizli ceza hatadan ayırt edilemez.
+const DANGER_PART_BASE: String = "base"
+const DANGER_PART_STATE: String = "state"
+const DANGER_PART_WORLD: String = "world"
+const DANGER_PART_GROWTH: String = "growth"
+
+func get_route_danger_breakdown(route: TravelRoute) -> Array[Dictionary]:
+	var parts: Array[Dictionary] = []
+	if route == null:
+		return parts
+	var base := clampf(route.danger_level, 0.0, 1.0)
+	parts.append({"part": DANGER_PART_BASE, "value": base, "delta": base, "arg": ""})
+	var state := get_route_state(route)
+	var with_state := route_conditions.get_danger(route, total_days_elapsed)
+	if not is_equal_approx(with_state, base):
+		parts.append({"part": DANGER_PART_STATE, "value": with_state, "delta": with_state - base, "arg": RouteConditions.get_state_label(state)})
+	var route_key := RouteConditions.route_key(route.from_location_id, route.to_location_id)
+	var world_delta := world_events.get_route_danger_delta(route_key, total_days_elapsed)
+	var with_world := clampf(with_state + world_delta * (1.0 - with_state), 0.0, 1.0)
+	if not is_equal_approx(with_world, with_state):
+		parts.append({"part": DANGER_PART_WORLD, "value": with_world, "delta": with_world - with_state, "arg": ""})
+	var final := get_effective_danger(with_world)
+	if not is_equal_approx(final, with_world):
+		parts.append({"part": DANGER_PART_GROWTH, "value": final, "delta": final - with_world, "arg": ""})
+	return parts
+
 ## Bir olayın o yol üstünde hâlâ süren müdahalesi var mı (bkz. ROUTE_CHANGE).
 func has_route_override(from_id: String, to_id: String) -> bool:
 	return route_conditions.has_override(from_id, to_id, total_days_elapsed)
