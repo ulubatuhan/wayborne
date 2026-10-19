@@ -64,6 +64,9 @@ func _build_map() -> void:
 	_map_panel.add_child(_map_view)
 	_map_panel.resized.connect(_fit_map)
 	_map_view.current_location_id = _current_location_id
+	_map_view.hour = _session.last_clock_hour
+	_map_view.trail = _session.map_trail
+	_map_view.camps = _session.journey_camps
 	_map_view.safe_ring_radius = safe_zone_ring_radius(_session.owned_wagon_count)
 	var routes: Array = []
 	for route in WorldMapData.get_routes_from(_current_location_id):

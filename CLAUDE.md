@@ -2380,6 +2380,11 @@ gave the game its motion, and every piece of it follows the same few rules.
   from `JourneyClock.darkness_for_hour`. The darkness is a curve of the
   hour, not of the palette: the night phase blends toward dawn for nine
   hours, so by 02:00 the palette is already bright (measured).
+- **The world map keeps the hour too (tasks 8.10, 8.11, Y-G09).** `WorldMapView` multiplies the tiles by
+  `map_tint_for_hour` (the same darkness curve; warm at dusk, blue-grey at night) and its test holds the map's ink at
+  4.5:1 against its paper at every hour. Settlement lights (`settlements.json` `lights`, generated per kind by
+  `build_settlements.py`, none on ruins) fade in at evening at a screen-constant size. Finished routes and camp sites
+  stay as a thin ink trail (`GameSession.map_trail`/`journey_camps`, saved, capped).
 - **A button under the cursor answers.** `ButtonFeedback` attaches itself
   to every button through `UiTheme`'s `node_added` (the `SceneInk`
   pattern): hover grows `1+min(3%, 6px/width)` - 3% of a 1000 px row is a

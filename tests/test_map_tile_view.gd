@@ -18,6 +18,9 @@ func run(t) -> void:
 	_test_grid_and_visible_tiles(t)
 	_test_view_geometry(t)
 	_test_cache_and_loading(t)
+	_test_hour_tint(t)
+	_test_map_lights(t)
+	_test_trail_memory(t)
 
 func _test_level_choice(t) -> void:
 	t.eq(MapTileView.level_for_zoom(1.0, MAX_LEVEL), 4, "tam çözünürlükte en ince seviye")
@@ -140,3 +143,89 @@ func _test_cache_and_loading(t) -> void:
 	for level in 3:
 		DirAccess.remove_absolute("%s%d" % [FIXTURE_DIR, level])
 	DirAccess.remove_absolute(FIXTURE_DIR)
+
+# --- Saat, ışık ve iz (görevler 8.10, 8.11, Y-G09) ---------------------------
+
+static func _linear(c: float) -> float:
+	return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)
+
+static func _luminance(c: Color) -> float:
+	return 0.2126 * _linear(c.r) + 0.7152 * _linear(c.g) + 0.0722 * _linear(c.b)
+
+static func _contrast(a: Color, b: Color) -> float:
+	var la := _luminance(a)
+	var lb := _luminance(b)
+	return (maxf(la, lb) + 0.05) / (minf(la, lb) + 0.05)
+
+static func _times(a: Color, b: Color) -> Color:
+	return Color(a.r * b.r, a.g * b.g, a.b * b.b)
+
+func _test_hour_tint(t) -> void:
+	t.ok(WorldMapView.map_tint_for_hour(12.0).is_equal_approx(Color.WHITE), "öğlen harita nötr")
+	t.ok(WorldMapView.map_tint_for_hour(0.0).is_equal_approx(WorldMapView.NIGHT_TINT), "gece yarısı gece tonu")
+	var dusk := WorldMapView.map_tint_for_hour(19.5)
+	t.ok(dusk.r > dusk.b, "akşam ılık (kırmızı mavinin üstünde)")
+	var worst := 100.0
+	var darkest := 1.0
+	for i in range(96):
+		var tint := WorldMapView.map_tint_for_hour(i * 0.25)
+		worst = minf(worst, _contrast(_times(WorldMapView.INK_ON_MAP, tint), _times(WorldMapView.PAPER_ON_MAP, tint)))
+		darkest = minf(darkest, _luminance(tint))
+	t.ok(worst >= 4.5, "mürekkep kâğıda karşı her saatte en az 4.5:1 (en kötü %.2f)" % worst)
+	t.ok(darkest > 0.2, "gece haritası kapkara değil")
+
+func _test_map_lights(t) -> void:
+	t.eq(WorldMapView.light_strength_for_hour(12.0), 0.0, "gündüz ışık yok")
+	t.eq(WorldMapView.light_strength_for_hour(0.0), 1.0, "gece ışıklar tam")
+	var low := 1.0
+	var high := 0.0
+	for i in range(400):
+		var f := WorldMapView.light_flicker(i * 0.05, 1.3)
+		low = minf(low, f)
+		high = maxf(high, f)
+	t.ok(low >= 1.0 - WorldMapView.LIGHT_FLICKER - 1e-4 and high <= 1.0 + 1e-4, "titreme sınırlı")
+	t.ok(high - low > 0.05, "ışık gerçekten titriyor")
+	var lights := WorldMapData.get_map_lights()
+	t.ok(lights.size() >= 100 and lights.size() <= 800, "haritada yüzlerce ışık (%d)" % lights.size())
+	var inside := true
+	for light in lights:
+		if light.x < 0.0 or light.y < 0.0 or light.x > MAP.x or light.y > MAP.y:
+			inside = false
+	t.ok(inside, "her ışık haritanın içinde")
+	# Her şehrin çevresinde en az altı ışık var.
+	var lit_cities := true
+	for location in WorldMapData.get_locations():
+		if location.settlement_type != SettlementRules.CITY:
+			continue
+		var near := 0
+		for light in lights:
+			if Vector2(light.x, light.y).distance_to(location.map_position) <= 160.0:
+				near += 1
+		if near < 6:
+			lit_cities = false
+	t.ok(lit_cities, "her şehrin çevresinde en az altı ışık")
+
+func _test_trail_memory(t) -> void:
+	var session := GameSession.new(500, 0, 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	session.start_playthrough(CharacterData.create("Kurucu", CultureCatalog.VALLEY, CharacterStats.new()), rng)
+	var a := WorldMapData.get_locations()[0]
+	var route: TravelRoute = WorldMapData.get_routes_from(a.location_id)[0]
+	session.current_location_id = a.location_id
+	session.start_journey(route.to_location_id, 4, 0.2, CaravanPlan.new(WorldMapData.get_location_by_id(route.to_location_id), 4))
+	session.record_journey_camp(Vector2(1234.56, 789.01))
+	session.finish_journey()
+	t.eq(session.map_trail.size(), 1, "biten sefer haritada iz bırakır")
+	t.eq(String(session.map_trail[0]["from"]), a.location_id, "izin başı çıkış şehri")
+	t.eq(String(session.map_trail[0]["to"]), route.to_location_id, "izin sonu varış şehri")
+	t.eq(session.journey_camps.size(), 1, "kamp yeri tutulur")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	t.eq(copy.map_trail.size(), 1, "iz kayıttan döner")
+	t.eq(String(copy.map_trail[0]["to"]), route.to_location_id, "izin hedefi kayıttan döner")
+	t.ok(Vector2(float(copy.journey_camps[0][0]), float(copy.journey_camps[0][1])).distance_to(Vector2(1234.6, 789.0)) < 0.01, "kamp yeri kayıttan döner")
+	for i in range(GameSession.MAX_JOURNEY_CAMPS + 20):
+		session.record_journey_camp(Vector2(i, i))
+	t.eq(session.journey_camps.size(), GameSession.MAX_JOURNEY_CAMPS, "kamp listesi sınırlı")
+	t.eq(float(session.journey_camps[-1][0]), float(GameSession.MAX_JOURNEY_CAMPS + 19), "sınırda en yeniler kalır")

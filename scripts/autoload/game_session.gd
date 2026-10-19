@@ -653,6 +653,26 @@ var last_feast_day: int = -1
 ## varsayılanı seferin başladığı şafak.
 var last_clock_hour: float = JourneyClock.START_HOUR
 
+## Kervanın haritadaki izi (görev Y-G09): biten seferlerin yolları ve kamp
+## kurulan yerler. Defterin haritadaki karşılığı - kayda yazılıyor, sınırlı.
+const MAX_MAP_TRAIL: int = 120
+const MAX_JOURNEY_CAMPS: int = 300
+var map_trail: Array = []
+var journey_camps: Array = []
+
+## Herkes ateşe varınca yol ekranı kampın harita konumunu yazar.
+func record_journey_camp(at: Vector2) -> void:
+	journey_camps.append([snappedf(at.x, 0.1), snappedf(at.y, 0.1)])
+	if journey_camps.size() > MAX_JOURNEY_CAMPS:
+		journey_camps = journey_camps.slice(journey_camps.size() - MAX_JOURNEY_CAMPS)
+
+func _record_map_trail(from_id: String, to_id: String) -> void:
+	if from_id.is_empty() or to_id.is_empty() or from_id == to_id:
+		return
+	map_trail.append({"from": from_id, "to": to_id})
+	if map_trail.size() > MAX_MAP_TRAIL:
+		map_trail = map_trail.slice(map_trail.size() - MAX_MAP_TRAIL)
+
 func has_feasted_today() -> bool:
 	return last_feast_day == total_days_elapsed
 
@@ -2471,6 +2491,7 @@ func finish_journey() -> Dictionary:
 	payout["stress_breaks"] = resolve_stress_breaks(stress_rng)
 	change_stress(-get_city_rest_relief())
 
+	_record_map_trail(journey_origin_id, journey_destination_id)
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	visited_location_ids[current_location_id] = true
@@ -3047,6 +3068,8 @@ func to_save_dict() -> Dictionary:
 		"ledger": ledger.to_array(),
 		"last_feast_day": last_feast_day,
 		"last_clock_hour": last_clock_hour,
+		"map_trail": map_trail.duplicate(true),
+		"journey_camps": journey_camps.duplicate(true),
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
 		"earned_wagon_milestones": _earned_wagon_milestones.duplicate(),
@@ -3260,6 +3283,14 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
+	map_trail = []
+	for entry in data.get("map_trail", []):
+		if entry is Dictionary:
+			map_trail.append({"from": String(entry.get("from", "")), "to": String(entry.get("to", ""))})
+	journey_camps = []
+	for camp in data.get("journey_camps", []):
+		if camp is Array and (camp as Array).size() >= 2:
+			journey_camps.append([float(camp[0]), float(camp[1])])
 	_fulfilled_commission_starts = {}
 	for kind_id in (data.get("fulfilled_commission_starts", {}) as Dictionary):
 		_fulfilled_commission_starts[int(kind_id)] = int(data["fulfilled_commission_starts"][kind_id])

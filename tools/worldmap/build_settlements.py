@@ -395,6 +395,36 @@ def shortest(graph, a, b):
     return math.inf
 
 
+# Haritadaki yerleşim ışıkları (görev 8.11): akşam yanar, gece mum gibi titrer.
+# Tür önekine göre (sayı aralığı, dağılım yarıçapı px). Harabe, mezarlık,
+# taşlar, savaş alanı, darağacı ve batık ışıksız.
+LIGHTS_BY_PREFIX = [
+    ("ic_", (6, 12, 150.0)), ("it_", (3, 5, 80.0)), ("ik_", (3, 4, 50.0)),
+    ("ia_", (2, 2, 30.0)), ("ip_", (1, 1, 6.0)), ("iw_", (1, 1, 8.0)),
+    ("ih_", (1, 2, 30.0)), ("iv_", (1, 2, 30.0)), ("in_", (1, 2, 30.0)),
+    ("il_", (1, 1, 20.0)), ("ix_mountaintribe", (1, 2, 30.0)), ("ie_", (1, 2, 30.0)),
+]
+
+
+def map_lights(places):
+    """[[x, y, faz], ...]: her ışık tohumlu, yerleşimin kimliğinden."""
+    import random
+    out = []
+    for pid, p in sorted(places.items()):
+        kind = p.get("kind") or ""
+        spec = next((v for k, v in LIGHTS_BY_PREFIX if kind.startswith(k)), None)
+        if spec is None:
+            continue
+        rng = random.Random(pid)
+        lo, hi, radius = spec
+        for _ in range(rng.randint(lo, hi)):
+            a = rng.uniform(0, 2 * math.pi)
+            r = radius * math.sqrt(rng.random())
+            out.append([round(p["pos"][0] + r * math.cos(a), 1), round(p["pos"][1] + r * math.sin(a), 1),
+                        round(rng.uniform(0, 2 * math.pi), 2)])
+    return out
+
+
 def near_mask(mask, px):
     """Maskenin `px` piksel yakınındaki her yer (uzaklık dönüşümüyle)."""
     from scipy import ndimage
@@ -658,6 +688,7 @@ def main(argv):
         "settlements": settlements,
         "routes": routes,
         "start_candidates": starts,
+        "lights": map_lights(places),
     }
     with open(out_path, "w", encoding="utf-8", newline=chr(10)) as fh:
         json.dump(doc, fh, ensure_ascii=False, indent=1)

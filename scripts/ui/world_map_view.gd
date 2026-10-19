@@ -7,6 +7,11 @@ extends Control
 ##
 ## Adlar haritanın kendi resminde yazılı (her dilde aynı özel ad); bu katman
 ## yalnızca işaret, yol ve kervan çizer, üstüne gelince adı ipucu olarak verir.
+##
+## Harita da saati tutar (görev 8.10): karoların üstünde çarpan bir ton katmanı
+## gündüz nötr, akşam ılık, gece mavi-gri. Gece yerleşimlerin ışıkları yanar
+## (8.11) ve kervanın geçmiş yolları ile kamp yerleri ince mürekkeple kalır
+## (Y-G09). Katman sırası: karo, ton, işaret.
 
 signal location_pressed(location_id: String)
 signal location_hovered(location_id: String)
@@ -20,6 +25,24 @@ const MARKER_RADIUS: Dictionary = {
 }
 const HIT_RADIUS: float = 18.0
 const ROUTE_WIDTH: float = 4.0
+
+## Gece tonu (çarpan). Mürekkep (`INK_ON_MAP`) kâğıda (`PAPER_ON_MAP`) karşı en
+## koyu saatte de 4.5:1'in üstünde okunur (test_map_tile_view ölçüyor).
+const NIGHT_TINT: Color = Color(0.60, 0.64, 0.75)
+## Akşam ve şafak ılıklığı: kararmanın yarısında en çok.
+const DUSK_TINT: Color = Color(1.0, 0.86, 0.70)
+const DUSK_WARMTH: float = 0.6
+const INK_ON_MAP: Color = Color(0.17, 0.12, 0.09)
+const PAPER_ON_MAP: Color = Color(0.94, 0.89, 0.77)
+## Yerleşim ışığı: ekranda sabit boy (yakınlaştırmayla büyümez), yavaş titrer.
+const LIGHT_COLOR: Color = Color(1.0, 0.72, 0.36)
+const LIGHT_CORE_RADIUS: float = 1.6
+const LIGHT_GLOW_RADIUS: float = 6.0
+const LIGHT_FLICKER: float = 0.18
+## Geçmiş yollar ve kamp işaretleri.
+const TRAIL_COLOR: Color = Color(0.17, 0.12, 0.09, 0.55)
+const TRAIL_WIDTH: float = 1.5
+const CAMP_MARK_SIZE: float = 4.0
 
 var tiles: MapTileView
 var _overlay: Control
@@ -35,6 +58,18 @@ var journey_path: PackedVector2Array = PackedVector2Array()
 var journey_progress: float = 0.0
 ## "Buradasın" halkasının yarıçapı (bkz. world_map.gd SafeZoneRing).
 var safe_ring_radius: float = 0.0
+## Haritanın saati (0-24): şehirde son varış saati, yolda seferin saati.
+var hour: float = 12.0:
+	set(value):
+		hour = fposmod(value, 24.0)
+		if _tint != null:
+			_tint.queue_redraw()
+## Kervanın geçmiş yolları ([{"from", "to"}]) ve kamp yerleri ([[x, y]]),
+## bkz. GameSession.map_trail / journey_camps.
+var trail: Array = []
+var camps: Array = []
+
+var _tint: Control
 
 var _rider_textures: Dictionary = {}
 var _rider_anchor: Dictionary = {}
@@ -44,6 +79,13 @@ func _init() -> void:
 	clip_contents = true
 	tiles = MapTileView.new()
 	add_child(tiles)
+	_tint = Control.new()
+	_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var multiply := CanvasItemMaterial.new()
+	multiply.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+	_tint.material = multiply
+	_tint.draw.connect(_draw_tint)
+	add_child(_tint)
 	_overlay = Control.new()
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.draw.connect(_draw_overlay)
@@ -57,6 +99,7 @@ func _ready() -> void:
 func _on_resized() -> void:
 	# Çapa değil doğrudan boyut (bkz. Art Rules: anchor-preset tuzağı).
 	tiles.size = size
+	_tint.size = size
 	_overlay.size = size
 
 func _process(_delta: float) -> void:
@@ -66,7 +109,7 @@ func _process(_delta: float) -> void:
 ## Kervanın şu anki harita konumu.
 func caravan_position() -> Vector2:
 	if journey_path.size() >= 2:
-		return _point_along(journey_path, journey_progress)
+		return point_along(journey_path, journey_progress)
 	var here := WorldMapData.get_location_by_id(current_location_id)
 	return here.map_position if here != null else Vector2(tiles.map_size) * 0.5
 
@@ -108,7 +151,68 @@ func location_at(screen_point: Vector2) -> String:
 
 # --- Çizim --------------------------------------------------------------------
 
+## Saatin haritaya düşen tonu: gündüz beyaz (nötr), gece NIGHT_TINT, arada
+## kararma eğrisi (`JourneyClock.darkness_for_hour`, yolun gökyüzüyle aynı).
+static func map_tint_for_hour(hour_of_day: float) -> Color:
+	var d := JourneyClock.darkness_for_hour(hour_of_day)
+	var night := Color.WHITE.lerp(NIGHT_TINT, d)
+	var warm := Color.WHITE.lerp(DUSK_TINT, 4.0 * d * (1.0 - d) * DUSK_WARMTH)
+	return Color(night.r * warm.r, night.g * warm.g, night.b * warm.b, 1.0)
+
+## Yerleşim ışıklarının gücü (0-1): gündüz sönük, akşam yanmaya başlar.
+static func light_strength_for_hour(hour_of_day: float) -> float:
+	return smoothstep(0.15, 0.7, JourneyClock.darkness_for_hour(hour_of_day))
+
+## Mum titremesi: iki yavaş dalganın çarpımı, ışık başına kendi fazıyla.
+static func light_flicker(seconds: float, phase: float) -> float:
+	return 1.0 - LIGHT_FLICKER * (0.5 + 0.5 * sin(seconds * 1.3 + phase) * sin(seconds * 0.71 + phase * 2.0))
+
+func _draw_tint() -> void:
+	var tint := map_tint_for_hour(hour)
+	if tint.is_equal_approx(Color.WHITE):
+		return
+	_tint.draw_rect(Rect2(Vector2.ZERO, _tint.size), tint)
+
+func _draw_lights() -> void:
+	var strength := light_strength_for_hour(hour)
+	if strength <= 0.01:
+		return
+	var view := Rect2(Vector2(-10, -10), size + Vector2(20, 20))
+	var seconds := Time.get_ticks_msec() / 1000.0
+	for light in WorldMapData.get_map_lights():
+		var at := tiles.map_to_screen(Vector2(light.x, light.y))
+		if not view.has_point(at):
+			continue
+		var a := strength * light_flicker(seconds, light.z)
+		_overlay.draw_circle(at, LIGHT_GLOW_RADIUS, Color(LIGHT_COLOR, 0.10 * a))
+		_overlay.draw_circle(at, LIGHT_GLOW_RADIUS * 0.55, Color(LIGHT_COLOR, 0.22 * a))
+		_overlay.draw_circle(at, LIGHT_CORE_RADIUS, Color(LIGHT_COLOR.lightened(0.4), 0.9 * a))
+
+func _draw_trail() -> void:
+	for entry in trail:
+		var path := WorldMapData.get_route_path(String(entry.get("from", "")), String(entry.get("to", "")))
+		if path.size() < 2:
+			continue
+		var pts := PackedVector2Array()
+		for p in path:
+			pts.append(tiles.map_to_screen(p))
+		_overlay.draw_polyline(pts, TRAIL_COLOR, TRAIL_WIDTH, true)
+	var s := CAMP_MARK_SIZE
+	for camp in camps:
+		var c: Array = camp
+		if c.size() < 2:
+			continue
+		var at := tiles.map_to_screen(Vector2(float(c[0]), float(c[1])))
+		if not Rect2(Vector2.ZERO, size).grow(s).has_point(at):
+			continue
+		var flame := PackedVector2Array([at + Vector2(-s * 0.6, s * 0.5), at + Vector2(0, -s), at + Vector2(s * 0.6, s * 0.5)])
+		_overlay.draw_colored_polygon(flame, Color(ArtPalette.GRIM_AMBER, 0.85))
+		flame.append(flame[0])
+		_overlay.draw_polyline(flame, TRAIL_COLOR, 1.0, true)
+
 func _draw_overlay() -> void:
+	_draw_lights()
+	_draw_trail()
 	for entry in routes:
 		var path := WorldMapData.get_route_path(current_location_id, String(entry["to"]))
 		if path.size() < 2:
@@ -158,8 +262,8 @@ func _draw_rider() -> void:
 	var at := tiles.map_to_screen(caravan_position())
 	var dir := "G"
 	if journey_path.size() >= 2:
-		var ahead := _point_along(journey_path, minf(1.0, journey_progress + 0.02))
-		var behind := _point_along(journey_path, maxf(0.0, journey_progress - 0.02))
+		var ahead := point_along(journey_path, minf(1.0, journey_progress + 0.02))
+		var behind := point_along(journey_path, maxf(0.0, journey_progress - 0.02))
 		dir = rider_direction(ahead - behind)
 	var tex: Texture2D = _rider_textures.get(dir)
 	if tex == null:
@@ -178,7 +282,7 @@ static func rider_direction(delta: Vector2) -> String:
 	return RIDER_ORDER[index]
 
 ## Çizgi boyunca, uzunluk payı kadar ilerideki nokta.
-static func _point_along(path: PackedVector2Array, share: float) -> Vector2:
+static func point_along(path: PackedVector2Array, share: float) -> Vector2:
 	var total := 0.0
 	for i in range(path.size() - 1):
 		total += path[i].distance_to(path[i + 1])

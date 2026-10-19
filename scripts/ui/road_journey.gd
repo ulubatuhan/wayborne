@@ -612,6 +612,7 @@ func _panel_state() -> Dictionary:
 		"path": path,
 		"progress": clampf(_terrain_day() / float(maxi(1, _journey.terrain_days)), 0.0, 1.0),
 		"danger": _weathered_danger(),
+		"hour": _clock.get_hour_of_day(),
 	}
 
 func _build_ui() -> void:
@@ -1136,6 +1137,9 @@ func _open_map_popup() -> void:
 	if _journey.terrain_days > 0:
 		progress = clampf(_terrain_day() / float(_journey.terrain_days), 0.0, 1.0)
 	_map_popup = MapPopup.new().setup(origin, destination, path, progress)
+	_map_popup.view.hour = _clock.get_hour_of_day()
+	_map_popup.view.trail = _session.map_trail
+	_map_popup.view.camps = _session.journey_camps
 	_map_popup.closed.connect(func(): _map_popup = null)
 	add_child(_map_popup)
 
@@ -2239,6 +2243,7 @@ func _update_camp_state() -> void:
 		if _camp_ends_at_hours == JourneyController.CAMP_PENDING:
 			return
 		_add_log(tr("UI_ROAD_CAMP_SETTLED") % _clock.get_clock_text(), OUTCOME_COLOR)
+		_record_camp_on_map()
 		return
 	if _clock.total_hours < _camp_ends_at_hours:
 		return
@@ -2260,6 +2265,13 @@ func _update_camp_state() -> void:
 ## yanında gitmesin: şehirde çıtırtı duyuluyordu.
 func _exit_tree() -> void:
 	AudioManager.stop_ambience()
+
+## Kampın haritadaki yeri (görev Y-G09): yolun çizgisinde kervanın durduğu nokta.
+func _record_camp_on_map() -> void:
+	var state := _panel_state()
+	var path: PackedVector2Array = state.get("path", PackedVector2Array())
+	if path.size() >= 2:
+		_session.record_journey_camp(WorldMapView.point_along(path, float(state.get("progress", 0.0))))
 
 func _on_fire_lit(_index: int) -> void:
 	AudioManager.play_sfx(AudioManager.SFX_FIRE_IGNITE)

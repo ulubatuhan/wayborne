@@ -53,6 +53,7 @@ static var _offer_by_merchant_id: Dictionary = {}
 static var _start_candidates: Dictionary = {}
 static var _route_paths: Dictionary = {}
 static var _route_meta: Dictionary = {}
+static var _map_lights: PackedVector3Array = PackedVector3Array()
 
 static func get_locations() -> Array[Location]:
 	_ensure_built()
@@ -111,6 +112,12 @@ static func get_start_candidates(culture_id: String) -> Array[String]:
 		result.append(String(location_id))
 	return result
 
+## Haritadaki yerleşim ışıkları (görev 8.11): (x, y, titreme fazı), harita
+## pikseli. `build_settlements.py` yerleşim türüne göre üretir; harabe ışıksız.
+static func get_map_lights() -> PackedVector3Array:
+	_ensure_built()
+	return _map_lights
+
 ## İki yer arasındaki yolun harita üzerindeki çizgisi (harita pikseli).
 static func get_route_path(from_location_id: String, to_location_id: String) -> PackedVector2Array:
 	_ensure_built()
@@ -160,6 +167,9 @@ static func _build_locations(data: Dictionary) -> void:
 		_location_by_id[location.location_id] = location
 	for culture_id in (data.get("start_candidates", {}) as Dictionary):
 		_start_candidates[culture_id] = data["start_candidates"][culture_id]
+	for light in data.get("lights", []):
+		var l: Array = light
+		_map_lights.append(Vector3(float(l[0]), float(l[1]), float(l[2])))
 
 static func _typed(values: Array) -> Array[String]:
 	var out: Array[String] = []

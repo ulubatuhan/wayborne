@@ -453,6 +453,9 @@ func _refresh_map(state: Dictionary) -> void:
 	_map_view.focused_location_id = _session.journey_destination_id
 	_map_view.journey_path = state.get("path", PackedVector2Array())
 	_map_view.journey_progress = float(state.get("progress", 0.0))
+	_map_view.hour = float(state.get("hour", 12.0))
+	_map_view.trail = _session.map_trail
+	_map_view.camps = _session.journey_camps
 
 # --- Defter ------------------------------------------------------------------
 
