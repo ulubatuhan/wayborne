@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_bandit_ambush_toll_scales_with_danger(t)
 	_test_news_events_frame_by_culture(t)
 	_test_road_director(t)
+	_test_career_threats(t)
 
 func _make_event(event_id: String, weight: float = 1.0) -> GameEvent:
 	var event := GameEvent.new()
@@ -372,3 +373,20 @@ func _test_road_director(t) -> void:
 	engine.director.note_quiet()
 	restored.load_from_dict(JSON.parse_string(JSON.stringify(engine.to_dict())))
 	t.eq(restored.director.quiet_streak, 1, "motor kaydı yönetmeni taşır")
+
+## Orta ve geç oyunun tehditleri (görev Y-C15): evre ilerledikçe tehdit
+## kartlarının ağırlığı artar, diğerleri değişmez.
+func _test_career_threats(t) -> void:
+	for event_id in EventCatalog.CAREER_THREATS:
+		var event := EventCatalog.get_event(String(event_id))
+		t.ok(event != null, "%s katalogda" % event_id)
+		var early := event.get_weight({"career_stage": 0.0})
+		var mid := event.get_weight({"career_stage": 1.0})
+		var late := event.get_weight({"career_stage": 2.0})
+		t.ok(late > mid and mid > early, "%s evreyle sıklaşır" % event_id)
+	var forage := EventCatalog.get_event("evt_forage")
+	t.almost(forage.get_weight({"career_stage": 2.0}), forage.get_weight({"career_stage": 0.0}), "tehdit olmayan kart değişmez")
+	var session := GameSession.new(0, 0)
+	t.eq(session.get_career_stage(), 0, "taze kervan erken evrede")
+	session.journeys_completed = GameSession.CAREER_LATE_JOURNEYS
+	t.eq(session.get_career_stage(), 2, "uzun kariyer geç evrede")

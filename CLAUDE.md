@@ -4194,6 +4194,9 @@ every decision has a visible control, and a key is only its shortcut.**
   for gold and one unit of the town's medicine stock (`MarketConditions` per town, slow refill); potions the caravan
   sells there go into that stock - the user's note: what we supply changes what they can treat. No stock: locked with
   its reason.
+- **The world hardens as the career goes on (task Y-C15).** `career_stage` (0 before `CAREER_MID_JOURNEYS`, 1, then
+  2 from `CAREER_LATE_JOURNEYS`) is in the event context, and `EventCatalog.CAREER_THREATS` multiplies ambushes,
+  world-crisis news, rival caravans and customs by stage. `simulate_career` counts those cards per stage.
 - **Fights pay in kind, and kits are used (tasks Y-C03, Y-C04, Y-F03).** A won fight rolls its kind's table in
   `data/config/loot.json` (`LootTable`, seeded from the fight); the victory screen lists the spoils and the road loads
   them - goods into cargo (or a bag), clothes and gear into the lockers. Events can hand out clothes too

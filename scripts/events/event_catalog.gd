@@ -30,6 +30,31 @@ const STRESS_BRAWL_THRESHOLD: int = 40
 
 static var _road_events: Array[GameEvent] = []
 
+## Orta ve geç oyunun tehditleri (görev Y-C15): kariyer ilerledikçe pusu,
+## dünya krizleri (savaş, veba, haraç bölgesi), rakip kervan ve gümrük daha
+## sık. Bağlamın `career_stage`'i (GameSession.CAREER_MID/LATE_JOURNEYS):
+## [orta çarpanı, geç çarpanı].
+const CAREER_THREATS: Dictionary = {
+	"evt_bandit_ambush": [1.25, 1.5],
+	"evt_regional_war_news": [1.5, 2.0],
+	"evt_plague_outbreak_news": [1.5, 2.0],
+	"evt_bandit_tribute_zone_news": [1.5, 2.2],
+	"evt_merchant_caravan": [1.3, 1.6],
+	"evt_customs_checkpoint": [1.2, 1.4],
+}
+
+static func _apply_career_threats() -> void:
+	for event in _road_events:
+		if not CAREER_THREATS.has(event.event_id):
+			continue
+		var mults: Array = CAREER_THREATS[event.event_id]
+		event.weight_modifiers.append(EventWeightModifier.make(_conditions([
+			EventCondition.make("career_stage", EventCondition.Op.GREATER_EQUAL, 1),
+		]), float(mults[0])))
+		event.weight_modifiers.append(EventWeightModifier.make(_conditions([
+			EventCondition.make("career_stage", EventCondition.Op.GREATER_EQUAL, 2),
+		]), float(mults[1]) / float(mults[0])))
+
 static func get_road_events() -> Array[GameEvent]:
 	if not _road_events.is_empty():
 		return _road_events
@@ -104,6 +129,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_creditor_rider())
 	_road_events.append(_bailiffs_at_camp())
 	_road_events.append(_hunting_trip())
+	_apply_career_threats()
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan

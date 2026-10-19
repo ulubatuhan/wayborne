@@ -2504,6 +2504,16 @@ func _companion_day() -> void:
 		who.change_rapport(-1)
 	companion_notes.append({"key": String(CompanionLife.ACTION_LINE_KEYS[action]), "args": [who.character_name], "who": who.character_id})
 
+const CAREER_MID_JOURNEYS: int = 10
+const CAREER_LATE_JOURNEYS: int = 25
+
+func get_career_stage() -> int:
+	if journeys_completed >= CAREER_LATE_JOURNEYS:
+		return 2
+	if journeys_completed >= CAREER_MID_JOURNEYS:
+		return 1
+	return 0
+
 func _broken_count() -> int:
 	var count := 0
 	for character in get_party():
@@ -4135,6 +4145,8 @@ func build_event_context() -> Dictionary:
 		# "borcun varken ne yaparsın" kararları bunlara bakar.
 		"debt": get_total_debt(),
 		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
+		# Kariyer evresi (Y-C15): orta ve geç oyunda tehditler sıklaşır.
+		"career_stage": get_career_stage(),
 		# Kırılmış kişi sayısı (Y-D06): kırılma yolda da bir olay.
 		"broken_count": _broken_count(),
 		# Yol yönetmeni (Y-B02) açlığı zorluk sayar.

@@ -92,6 +92,10 @@ func _initialize() -> void:
 			arcs.append(_run_arc(BASE_SEED + arc_index * 977, policy))
 		_report_curve(arcs, policy)
 		_report_chapters(arcs, policy)
+		print("   tehdit kartı (Y-C15) evreye göre: erken %d · orta %d · geç %d" % [
+			int(_threats_by_stage.get(0, 0)), int(_threats_by_stage.get(1, 0)), int(_threats_by_stage.get(2, 0)),
+		])
+		_threats_by_stage = {}
 	quit()
 
 # --- Bir kervanın ömrü ---
@@ -317,6 +321,12 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 
 	# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver).
 	EventResolver.resolve_choice(session, engine, event, chosen)
+	# Y-C15: evreye göre tehdit kartı sayacı.
+	if EventCatalog.CAREER_THREATS.has(event.event_id):
+		var stage := session.get_career_stage()
+		_threats_by_stage[stage] = int(_threats_by_stage.get(stage, 0)) + 1
+
+var _threats_by_stage: Dictionary = {}
 
 # --- Rapor ---
 
