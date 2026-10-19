@@ -32,8 +32,8 @@ PHASES = {
         "backlight": 0.35, "backlight_color": [1.0, 0.75, 0.55], "window_strength": 1.2, "lamp_scale": 0.12,
         "post": {"zenith": [70, 86, 118], "horizon": [226, 186, 160], "cloud": [212, 194, 188],
                  "fog": [188, 178, 184], "fog_amount": 0.42, "exposure": 1.05, "glow": 0.15,
-                 "shadow": [58, 50, 62], "moon": [0.16, 0.56], "disc_r": 0.05,
-                 "disc_color": [1.0, 0.90, 0.78], "halo": 0.35, "halo_r": 0.22},
+                 "shadow": [58, 50, 62], "moon": [0.16, 0.56], "disc_r": 0.045,
+                 "disc_color": [0.48, 0.40, 0.32], "disc_soft": 0.55, "halo": 0.5, "halo_r": 0.3},
         "mix": 0.25,
     },
     "day": {
@@ -49,10 +49,12 @@ PHASES = {
         "sky": {"horizon": [0.82, 0.42, 0.22], "zenith": [0.10, 0.09, 0.18], "height": 0.22, "strength": 1.6},
         "moon": 1.9, "moon_color": [1.0, 0.56, 0.30], "moon_rot": [81, 250],
         "backlight": 1.4, "backlight_color": [1.0, 0.5, 0.28], "window_strength": 6.0, "lamp_scale": 1.0,
-        "post": {"zenith": [34, 28, 56], "horizon": [212, 116, 62], "cloud": [108, 70, 78],
-                 "fog": [120, 82, 90], "fog_amount": 0.44, "exposure": 1.22, "glow": 0.8,
-                 "shadow": [40, 26, 40], "moon": [0.82, 0.58], "disc_r": 0.06,
-                 "disc_color": [1.0, 0.62, 0.30], "halo": 0.45, "halo_r": 0.25},
+        # Akşam göğü mor değil (stil kuralı: doygun mor yok): tepe nötr koyu
+        # taş, bulut ve pus sıcak kahve; renk ufuktaki turuncu banttan gelir.
+        "post": {"zenith": [36, 33, 38], "horizon": [212, 116, 62], "cloud": [104, 80, 70],
+                 "fog": [122, 94, 84], "fog_amount": 0.44, "exposure": 1.22, "glow": 0.8,
+                 "shadow": [40, 31, 32], "moon": [0.82, 0.58], "disc_r": 0.055,
+                 "disc_color": [0.78, 0.48, 0.24], "disc_soft": 0.7, "halo": 0.55, "halo_r": 0.28},
         "mix": 0.3,
     },
 }

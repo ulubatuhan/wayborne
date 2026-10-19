@@ -24,16 +24,16 @@ const ANCHORS: Dictionary = {
 	"aisle_b1": {"x": 0.7068, "y": 0.7422, "person_h": 0.2682},
 	"aisle_b2": {"x": 0.8102, "y": 0.7422, "person_h": 0.2682},
 	"door": {"x": 1.2798, "y": 0.7322, "person_h": 0.2581},
-	"table_a": {"x": 0.3113, "y": 0.5906, "person_h": 0.3102},
-	"table_b": {"x": 0.8168, "y": 0.5979, "person_h": 0.3299},
-	"table_c": {"x": 0.8864, "y": 0.555, "person_h": 0.2152},
+	"table_a": {"x": 0.3115, "y": 0.6504, "person_h": 0.3095},
+	"table_b": {"x": 0.8164, "y": 0.6616, "person_h": 0.3291},
+	"table_c": {"x": 0.8861, "y": 0.5966, "person_h": 0.2149},
 	"counter_top": {"x": 0.0407, "y": 0.5461, "person_h": 0.2389},
 	"fire": {"x": 0.5, "y": 0.6077, "person_h": 0.1801},
 	"lantern_l": {"x": 0.1601, "y": 0.2063, "person_h": 0.3054},
 	"lantern_r": {"x": 0.8399, "y": 0.2063, "person_h": 0.3054},
-	"candle_a": {"x": 0.296, "y": 0.579, "person_h": 0.3355},
-	"candle_b": {"x": 0.8442, "y": 0.5862, "person_h": 0.3587},
-	"candle_c": {"x": 0.9054, "y": 0.5448, "person_h": 0.2259},
+	"candle_a": {"x": 0.2963, "y": 0.6437, "person_h": 0.3347},
+	"candle_b": {"x": 0.8438, "y": 0.6554, "person_h": 0.3577},
+	"candle_c": {"x": 0.905, "y": 0.5885, "person_h": 0.2255},
 }
 
 ## Zemindeki kişinin boyu: h0 + (ayak_y - y0) * slope (ekran payı).

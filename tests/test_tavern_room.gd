@@ -31,9 +31,12 @@ func _test_pure_curves(t) -> void:
 	for k in 100:
 		var f := TavernRoom.flicker(float(k) * 0.37, 1.3)
 		t.ok(f > 0.45 and f < 1.05, "titreme sınırlı")
-	t.eq(TavernRoom.drink_lift(TavernRoom.DRINK_SECONDS + 0.5, 0.0), 0.0, "içiş dışında bardak masada")
-	t.eq(TavernRoom.drink_lift(TavernRoom.DRINK_SECONDS * 0.5, 0.0), 1.0, "içişin ortasında bardak ağız hizasında")
-	t.eq(TavernRoom.drink_lift(0.0, 0.0), 0.0, "içiş başında bardak masada")
+	# Masadaki konuk gerçek oturuş klibiyle oturur ve klip her bedende render
+	# edilmiş olmalı, yoksa figür ayakta kalıp masaya gömülür (9.4 denetimi).
+	t.ok(FigureActions.SEATED_CLIPS.has(TavernRoom.SEATED_CLIP), "taverna oturuş klibi oturuş listesinde")
+	for variant in ["body_male_average", "body_female_heavy"]:
+		var frames := BodyFrames.for_body(variant)
+		t.ok(frames != null and frames.has_clip(TavernRoom.SEATED_CLIP), "%s oturuş karesi var" % variant)
 
 func _test_anchors(t) -> void:
 	for key in ["bartender", "bar_pour", "pickup", "serve_a", "serve_b", "bard", "bard_right", "door",

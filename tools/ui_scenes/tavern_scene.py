@@ -123,25 +123,31 @@ def lantern_material():
     return m
 
 
+# Gerçek ölçüler (9.4 denetimi): masa 0.75 m, bank ve tabure 0.46 m. Masa
+# 1.09 m iken oturan birinin masanın üstünde yalnızca başı kalıyordu.
+TABLE_TOP = 0.75
+SEAT_TOP = 0.46
+
+
 def table(x, y, w=3.0, d=1.3):
     top = wood("table", 0.62)
-    box(x, y, 0.95, w, d, 0.14, top)
+    box(x, y, TABLE_TOP - 0.12, w, d, 0.12, top)
     for dx in (-w / 2 + 0.2, w / 2 - 0.2):
         for dy in (-d / 2 + 0.2, d / 2 - 0.2):
-            box(x + dx, y + dy, 0.0, 0.16, 0.16, 0.95, wood("leg", 0.45))
-    # Tezgâh üstü: mum
-    ts.place(os.path.join(GY, "candle.glb"), (x, y, 1.09), 0.0, 1.5)
+            box(x + dx, y + dy, 0.0, 0.16, 0.16, TABLE_TOP - 0.12, wood("leg", 0.45))
+    # Masa üstü: mum
+    ts.place(os.path.join(GY, "candle.glb"), (x, y, TABLE_TOP), 0.0, 1.5)
 
 
 def stool(x, y):
-    cyl(x, y, 0.0, 0.3, 0.62, wood("stool", 0.5), 10)
-    cyl(x, y, 0.62, 0.36, 0.08, wood("stool_top", 0.58), 10)
+    cyl(x, y, 0.0, 0.3, SEAT_TOP - 0.08, wood("stool", 0.5), 10)
+    cyl(x, y, SEAT_TOP - 0.08, 0.36, 0.08, wood("stool_top", 0.58), 10)
 
 
 def bench(x, y, w=2.8):
-    box(x, y, 0.5, w, 0.45, 0.1, wood("bench", 0.55))
-    box(x - w / 2 + 0.2, y, 0.0, 0.14, 0.4, 0.5, wood("bleg", 0.45))
-    box(x + w / 2 - 0.2, y, 0.0, 0.14, 0.4, 0.5, wood("bleg", 0.45))
+    box(x, y, SEAT_TOP - 0.1, w, 0.45, 0.1, wood("bench", 0.55))
+    box(x - w / 2 + 0.2, y, 0.0, 0.14, 0.4, SEAT_TOP - 0.1, wood("bleg", 0.45))
+    box(x + w / 2 - 0.2, y, 0.0, 0.14, 0.4, SEAT_TOP - 0.1, wood("bleg", 0.45))
 
 
 def build():
@@ -249,11 +255,12 @@ def anchors():
         "aisle_a1": (-2.5, 5.6, 0.0), "aisle_a2": (-1.3, 5.6, 0.0),
         "aisle_b1": (2.4, 5.3, 0.0), "aisle_b2": (3.6, 5.3, 0.0), "door": (9.4, 5.6, 0.0),
         # Kesim noktaları: masanın ve tezgâhın arka kenarının üstü
-        "table_a": (-1.9, 4.3, 1.09), "table_b": (3.0, 3.9, 1.09), "table_c": (5.6, 7.25, 1.09),
+        "table_a": (-1.9, 4.3, TABLE_TOP), "table_b": (3.0, 3.9, TABLE_TOP), "table_c": (5.6, 7.25, TABLE_TOP),
         "counter_top": (-6.0, 6.3, 1.22),
         # Işıklar ve ateş
         "fire": (0.0, 9.1, 0.45), "lantern_l": (-3.5, 4.5, 3.3), "lantern_r": (3.5, 4.5, 3.3),
-        "candle_a": (-1.9, 3.8, 1.2), "candle_b": (3.0, 3.4, 1.2), "candle_c": (5.6, 6.8, 1.2),
+        "candle_a": (-1.9, 3.8, TABLE_TOP + 0.11), "candle_b": (3.0, 3.4, TABLE_TOP + 0.11),
+        "candle_c": (5.6, 6.8, TABLE_TOP + 0.11),
     }
     out = {}
     for key, (x, y, z) in names.items():

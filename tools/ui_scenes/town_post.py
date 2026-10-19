@@ -75,7 +75,9 @@ def sky(h, w, p, seed):
     yy, xx = np.mgrid[0:h, 0:w]
     d = np.hypot(xx - mx * w, (yy - my * h)) / h
     r = p.get("disc_r", 0.038)
-    disc = smoothstep(r, r * 0.92, d) * (1 - c * 0.7)
+    # disc_soft: kenarın ne kadar yumuşadığı (1 sert); alçak sabah güneşi pusun
+    # içinde yumuşak kenarlı, ay ve gece diski keskin kalır.
+    disc = smoothstep(r, r * p.get("disc_soft", 0.92), d) * (1 - c * 0.7)
     halo = np.exp(-(d / p.get("halo_r", 0.16)) ** 2) * p.get("halo", 0.22) * (1 - c * 0.5)
     moon = np.array(p.get("disc_color", [0.86, 0.82, 0.70]), np.float32)
     col = col + moon * (disc[..., None] * 0.75 + halo[..., None])

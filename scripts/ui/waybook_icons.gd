@@ -139,6 +139,7 @@ static func hunger_tally(character: CharacterData, height: float) -> Control:
 
 const TALLY_LENGTH_RATIO: float = 4.0
 const TALLY_MAX_NOTCHES: int = 7
+const TALLY_TINT: Color = Color(0.66, 0.58, 0.48)
 
 class TallyStick extends Control:
 	var notches: int = 0
@@ -147,7 +148,9 @@ class TallyStick extends Control:
 		mouse_filter = Control.MOUSE_FILTER_PASS
 
 	func _draw() -> void:
-		draw_texture_rect(WaybookTheme.texture(HUNGER_TALLY), Rect2(Vector2.ZERO, size), false)
+		# Çubuk kemik rengi boyanmış; koyu panelde bembeyaz bir şerit gibi
+		# parlamasın diye soluk tonla çiziliyor.
+		draw_texture_rect(WaybookTheme.texture(HUNGER_TALLY), Rect2(Vector2.ZERO, size), false, TALLY_TINT)
 		var shown := mini(notches, TALLY_MAX_NOTCHES)
 		var step := size.x / float(TALLY_MAX_NOTCHES + 1)
 		for index in shown:

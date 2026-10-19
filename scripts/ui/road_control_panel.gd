@@ -288,8 +288,8 @@ func _card(character: CharacterData, index: int) -> Control:
 	col.add_child(head)
 	if WaybookIcons.CLASS_EMBLEMS.has(character.class_id):
 		head.add_child(WaybookIcons.picture(WaybookIcons.CLASS_EMBLEMS, character.class_id, 26))
-	if character.consecutive_hungry_days > 0:
-		head.add_child(WaybookIcons.hunger_tally(character, 22))
+	# Açlık çetelesi başlıkta değil: kartın durum satırı "N gecedir aç" diyor,
+	# başlıktaki çubuk ismi kesiyordu (9.6/9.7 denetimi).
 	var name := Label.new()
 	name.text = "%d. %s" % [index + 1, character.character_name]
 	name.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)

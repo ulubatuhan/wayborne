@@ -31,12 +31,15 @@ const PERSON_SHARE: float = 0.86
 const FOCUS_Y: float = 0.47
 ## Yürüme hızı: saniyede boyunun bu payı kadar yol (sakin bir iç mekân yürüyüşü).
 const WALK_BODIES_PER_SECOND: float = 0.55
-const DRINK_PERIOD: float = 6.0
-const DRINK_SECONDS: float = 1.6
 const NOTE_PERIOD: float = 1.1
-## Oturan kişi bankta: ayakta duran figür boyunun bu payı kadar aşağı iner,
-## masa alt yarısını örttüğü için baş ve omuz oturan birinin yerinde kalır.
-const SIT_DROP: float = 0.26
+## Masadaki konuk gerçekten oturur: MPFB'den render edilen oturuş klibi
+## (FigureActions.SEATED_CLIPS; kalça diz hizasında, ayaklar yerde, eller
+## dizlerde). Eskiden ayakta duran figür aşağı kaydırılıp masanın arkasına
+## gömülüyordu; kullanıcı "bu oturmak mı" diye sordu.
+const SEATED_CLIP: String = "sit_box"
+## Oturan birinin başı ayaktakinden bu pay kadar aşağıda (klibin kalça inişi):
+## yalnızca adın ve seçim halkasının dikdörtgeni için.
+const SEATED_HEAD_DROP: float = 0.24
 ## Ozanın çalma duruşu ve o duruşta ellerin yeri (boyun yüzdesi, FigureActions).
 const BARD_CLIP: String = "stance_melee"
 
@@ -316,8 +319,6 @@ func _place_actors() -> void:
 	for actor in _actors:
 		var foot := share_px(actor.pos)
 		var h := person_share_at(actor.pos.y) * _plate_rect.size.y / PERSON_SHARE
-		if String(actor.act) == "drink":
-			foot.y += SIT_DROP * h * PERSON_SHARE
 		var figure: WalkFigure = actor.figure
 		figure.size = Vector2(h * 0.9, h)
 		figure.position = Vector2.ZERO
@@ -332,7 +333,8 @@ func _place_actors() -> void:
 			clip.clip_contents = true
 			clip.size = Vector2(h * 0.9, maxf(1.0, at(cut).y - (foot.y - h)))
 		clip.visible = String(actor.act) != "gone"
-		actor.rect = Rect2(Vector2(foot.x - h * 0.3, foot.y - h * PERSON_SHARE), Vector2(h * 0.6, h * PERSON_SHARE))
+		var person_h := h * PERSON_SHARE * (1.0 - SEATED_HEAD_DROP if String(actor.act) == "drink" else 1.0)
+		actor.rect = Rect2(Vector2(foot.x - h * 0.3, foot.y - person_h), Vector2(h * 0.6, person_h))
 	# Öndeki (ayağı aşağıda olan) sonra çizilir.
 	var order := _actors.duplicate()
 	order.sort_custom(func(a, b): return float(a.pos.y) < float(b.pos.y))
@@ -414,9 +416,10 @@ func _arrive(actor: Dictionary, leg: Dictionary) -> void:
 		# duruşunun kolları; elinde silah yok, villager arketipi).
 		figure.set_action(BARD_CLIP if String(actor.act) == "play" else "")
 	elif not String(actor.cut).is_empty() and actor.role != ROLE_BARTENDER:
-		# Masada oturan masaya döner.
+		# Masada oturan masaya döner ve oturur.
 		var table_x := at_table_x(actor)
 		figure.set_facing(1.0 if Vector2(actor.pos).x < table_x else -1.0)
+		figure.set_action(SEATED_CLIP if String(actor.act) == "drink" else "")
 
 func at_table_x(actor: Dictionary) -> float:
 	return anchor_share(String(actor.cut)).x
@@ -431,15 +434,6 @@ func _redress_visitor(actor: Dictionary) -> void:
 ## Ateş, mum ve fener için: titremenin saf fonksiyonu.
 static func flicker(t: float, seed_offset: float) -> float:
 	return 0.78 + 0.14 * sin(t * 7.3 + seed_offset) + 0.08 * sin(t * 13.1 + seed_offset * 1.7)
-
-## Bardağın yüksekliği (0 masada, 1 ağız hizasında): bir içiş döngüsü.
-static func drink_lift(t: float, phase: float) -> float:
-	var local := fposmod(t + phase, DRINK_PERIOD)
-	if local >= DRINK_SECONDS:
-		return 0.0
-	var u := local / DRINK_SECONDS
-	# Kalk, ağız hizasında bekle, in: yumuşak bir zarf.
-	return smoothstep(0.0, 1.0, minf(1.0, minf(u / 0.35, (1.0 - u) / 0.35)))
 
 # --- girdi ---
 
@@ -576,12 +570,11 @@ func _draw_front(c: Control) -> void:
 					_draw_lute(c, actor, t if moving else 0.0)
 			ROLE_PATRON, ROLE_VISITOR:
 				if String(actor.act) == "drink":
+					# Bardak masada, oturanın önünde. Ağza kalkmıyor: oturuş klibinde
+					# eller dizde, el kalkmadan kalkan bardak havada uçardı.
 					var table := at(String(actor.cut))
-					var lift := drink_lift(t, float(actor.phase)) if moving else 0.0
 					var facing := float((actor.figure as WalkFigure).get_facing())
-					var rest := Vector2(rect.position.x + rect.size.x * (0.5 + 0.55 * facing), table.y + unit * 0.004)
-					var mouth := Vector2(rect.position.x + rect.size.x * (0.5 + 0.2 * facing), rect.position.y + rect.size.y * 0.16)
-					_draw_mug(c, rest.lerp(mouth, lift), s)
+					_draw_mug(c, Vector2(rect.position.x + rect.size.x * (0.5 + 0.55 * facing), table.y + unit * 0.004), s)
 		if _hovered == i:
 			_draw_name(c, actor, rect)
 	if _chat_mode:
