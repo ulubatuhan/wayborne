@@ -71,6 +71,8 @@ func _build_ui() -> void:
 	_content.add_child(HSeparator.new())
 	_build_fate_section()
 	_content.add_child(HSeparator.new())
+	_build_origin_section()
+	_content.add_child(HSeparator.new())
 
 	_summary_label = Label.new()
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -97,6 +99,32 @@ var _difficulty: Dictionary = {"deathblow": GameSession.DIFFICULTY_STANDARD, "hu
 const DIFFICULTY_LABEL_KEYS: Dictionary = {
 	"deathblow": "UI_DIFF_DEATHBLOW", "hunger": "UI_DIFF_HUNGER", "events": "UI_DIFF_EVENTS",
 }
+
+## Başlangıç kökeni (Y-D05): kilitliler sebebiyle görünür, seçilemez.
+var _origin: String = StartOrigins.FATHER
+
+func _build_origin_section() -> void:
+	_content.add_child(_make_section_title(tr("UI_CREATE_ORIGIN")))
+	var unlocked := LineageArchive.unlocked_origins()
+	var picker := OptionButton.new()
+	var desc := Label.new()
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	for i in StartOrigins.ORDER.size():
+		var origin := StartOrigins.ORDER[i]
+		var open := StartOrigins.is_unlocked(origin, unlocked)
+		var label := tr(String(StartOrigins.NAME_KEYS[origin]))
+		if not open:
+			label = tr("UI_ORIGIN_LOCKED") % [label, tr(String(StartOrigins.UNLOCK_KEYS[origin]))]
+		picker.add_item(label)
+		picker.set_item_disabled(i, not open)
+		picker.set_item_tooltip(i, tr(String(StartOrigins.DESC_KEYS[origin])))
+	picker.select(0)
+	desc.text = tr(String(StartOrigins.DESC_KEYS[StartOrigins.FATHER]))
+	picker.item_selected.connect(func(index: int) -> void:
+		_origin = StartOrigins.ORDER[index]
+		desc.text = tr(String(StartOrigins.DESC_KEYS[_origin])))
+	_content.add_child(picker)
+	_content.add_child(desc)
 
 func _build_fate_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CREATE_FATE")))
@@ -513,6 +541,7 @@ func _on_start_pressed() -> void:
 	session.inherit_father_caravan()
 	session.fate_mode = _fate_mode
 	session.difficulty = _difficulty.duplicate()
+	StartOrigins.apply(session, _origin)
 	# Eski soy varsa yeni kervan onu okur (Y-D03).
 	LineageArchive.apply_to(session, LineageArchive.latest())
 

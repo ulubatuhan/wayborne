@@ -2627,6 +2627,8 @@ func _note_route_trip(origin_id: String, destination_id: String) -> void:
 ## Soy mirası (görev Y-D03): yeni oyunun eski soydan aldığı (bkz.
 ## LineageArchive.apply_to). Kayıtta; boşsa eski soy yok.
 var legacy: Dictionary = {}
+## Başlangıç kökeni (Y-D05, StartOrigins); kayıtta.
+var origin_id: String = "father"
 
 ## --- Kader Modu ve açık zorluk (görev Y-D01) ---
 ## Kader Modu: tek kayıt, elle kayıt yok (şehirde de). Ayarlar açık, gizli
@@ -3852,6 +3854,7 @@ func to_save_dict() -> Dictionary:
 		"bonds": bonds.duplicate(),
 		"fate_mode": fate_mode,
 		"legacy": legacy.duplicate(true),
+		"origin_id": origin_id,
 		"difficulty": difficulty.duplicate(),
 		"road_memorials": road_memorials.duplicate(true),
 		"route_memory": route_memory.duplicate(true),
@@ -4083,6 +4086,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_story_day = int(data.get("last_story_day", -99))
 	fate_mode = bool(data.get("fate_mode", false))
 	legacy = (data.get("legacy", {}) as Dictionary).duplicate(true)
+	origin_id = String(data.get("origin_id", "father"))
 	difficulty = {}
 	for key in DIFFICULTY_KEYS:
 		difficulty[key] = clampi(int((data.get("difficulty", {}) as Dictionary).get(key, DIFFICULTY_STANDARD)), DIFFICULTY_EASY, DIFFICULTY_HARD)

@@ -35,22 +35,34 @@ static func build_record(session: GameSession) -> Dictionary:
 		"ledger": lines,
 	}
 
+## Soyu yazar ve açtığı başlangıç kökenlerini (Y-D05) meta kayda ekler.
 static func record(session: GameSession) -> void:
-	var all := load_all()
-	all.append(build_record(session))
+	var data := _read()
+	var all: Array = data.get("lineages", [])
+	var lineage := build_record(session)
+	all.append(lineage)
 	while all.size() > MAX_LINEAGES:
 		all.pop_front()
+	var unlocked: Array = data.get("unlocked", [])
+	for origin in StartOrigins.unlocks_for(lineage):
+		if not unlocked.has(origin):
+			unlocked.append(origin)
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file != null:
-		file.store_string(JSON.stringify({"lineages": all}))
+		file.store_string(JSON.stringify({"lineages": all, "unlocked": unlocked}))
+
+static func _read() -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return parsed if parsed is Dictionary else {}
 
 static func load_all() -> Array:
-	if not FileAccess.file_exists(path):
-		return []
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not (parsed is Dictionary):
-		return []
-	return (parsed as Dictionary).get("lineages", []) as Array
+	return _read().get("lineages", []) as Array
+
+## Açılmış başlangıç kökenleri (Y-D05); arşivden soy düşse de kalır.
+static func unlocked_origins() -> Array:
+	return _read().get("unlocked", []) as Array
 
 static func latest() -> Dictionary:
 	var all := load_all()

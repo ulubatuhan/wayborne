@@ -633,6 +633,12 @@ carry a caravan *name* down the road.
   the latest one: the old graves return to the roads (drawn faint on the road and the world map, `map_graves`), a share
   of the old reputation (capped), an old seal as an heirloom, and a ledger line naming the old lineage. What was
   inherited is the saved `GameSession.legacy`.
+- **Ended lineages open new starts, never new power (task Y-D05).** `StartOrigins` holds the father's caravan (always
+  open) and five origins a finished lineage unlocks (exile, guild ward, salt runner, drovers, the widow's ledger). Each
+  is a trade: no debt but a light purse, a known name but a doubled debt. Unlocks are kept in the archive file
+  (`LineageArchive.unlocked_origins`), so they survive a lineage dropping off the archive's cap. Locked origins are
+  shown on the new-game screen with their unlock condition; the chosen one is the saved `GameSession.origin_id` and
+  rewrites the founder's ledger cause.
 - **The finale's gold gate became `days_as_leader`.** A pure money gate
   closed the story with "you got rich enough". The measurement survives:
   with a leader who never dies, tenure equals elapsed days and the finale's
