@@ -23,6 +23,7 @@ func run(t) -> void:
 	_test_city_gold_earn_spend_and_clamp(t)
 	_test_city_gold_decays_toward_default(t)
 	_test_city_gold_save_round_trip(t)
+	_test_price_layers_are_visible(t)
 
 func _test_inflation_grows_and_caps(t) -> void:
 	t.ok(
@@ -321,3 +322,53 @@ func _test_city_gold_save_round_trip(t) -> void:
 		legacy.get_city_gold("loc_a"), int(round(MarketConditions.CITY_GOLD_DEFAULT)),
 		"eski (city_gold alanı olmayan) kayıt varsayılan hazineyle açılır"
 	)
+
+## Gizli fiyat katmanları görünür (görev Y-C11): yedi katmanın çarpımı fiyatın
+## kendisi, ve her katman sapınca pazar satırında kendi işaretiyle görünür.
+func _tag(key: String) -> String:
+	return String(TranslationServer.translate(key))
+
+func _test_price_layers_are_visible(t) -> void:
+	var conditions := MarketConditions.new()
+	var exact := true
+	for location in WorldMapData.get_locations():
+		for item in ItemCatalog.get_trade_goods():
+			for day in [0, 47, 133, 260]:
+				for selling in [false, true]:
+					var product := float(item.base_price)
+					for layer in MarketPricing.price_layers(item, location, conditions, day, selling):
+						product *= float(layer["multiplier"])
+					var price := MarketPricing.get_sell_price(item, location, conditions, day) if selling else MarketPricing.get_buy_price(item, location, conditions, day)
+					if absi(maxi(1, int(round(product))) - price) > 1:
+						exact = false
+	t.ok(exact, "yedi katmanın çarpımı fiyatın kendisi")
+	t.eq(MarketPricing.LAYERS.size(), 7, "yedi katman")
+
+	var city: Location = null
+	var serai: Location = null
+	for location in WorldMapData.get_locations():
+		if city == null and location.settlement_type == SettlementRules.CITY and not location.produces.is_empty():
+			city = location
+		if serai == null and location.settlement_type == SettlementRules.CARAVANSERAI:
+			serai = location
+	var made := ItemCatalog.get_item(city.produces[0])
+	var furs := ItemCatalog.get_item("test_furs")
+	var winter_day := MarketConditions.SEASON_LENGTH_DAYS * 3 + 1
+	var quiet := MarketConditions.new()
+	t.ok(PriceLayerText.marks(made, city, quiet, 0)[0].contains(_tag("UI_PRICE_TAG_PLACE")), "üretilen mal: yerel işaret")
+	t.ok(PriceLayerText.marks(furs, serai, quiet, 0)[0].contains(_tag("UI_PRICE_TAG_SETTLEMENT")), "kervansaray: yerleşim işareti")
+	t.ok(PriceLayerText.marks(furs, city, quiet, 400)[0].contains(_tag("UI_PRICE_TAG_INFLATION")), "yıllar sonra: pahalılık işareti")
+	t.ok(PriceLayerText.marks(furs, city, quiet, winter_day)[0].contains(_tag("UI_PRICE_TAG_SEASON")), "kışın kürk: mevsim işareti")
+	var busy := MarketConditions.new()
+	busy.record_purchase(city.location_id, furs.item_id, 30)
+	t.ok(PriceLayerText.marks(furs, city, busy, 0)[0].contains(_tag("UI_PRICE_TAG_PRESSURE")), "çok alınan mal: arz işareti")
+	var shaken := MarketConditions.new()
+	shaken.add_shock(city.location_id, furs.item_id, 1.5, 20, "")
+	t.ok(PriceLayerText.marks(furs, city, shaken, 0)[0].contains(_tag("UI_PRICE_TAG_EVENT")), "olay şoku: olay işareti")
+	t.not_ok(PriceLayerText.marks(furs, city, shaken, 0)[0].contains(_tag("UI_PRICE_TAG_WORLD")), "olay şoku dünya sayılmaz")
+	var war := MarketConditions.new()
+	war.add_shock(city.location_id, "", 1.6, 20, WorldEvents.get_label_key(WorldEvents.Kind.PLAGUE))
+	var war_marks := PriceLayerText.marks(furs, city, war, 0)
+	t.ok(war_marks[0].contains(_tag("UI_PRICE_TAG_WORLD")), "dünya olayı: dünya işareti")
+	t.ok(war_marks[1].contains(_tag(WorldEvents.get_label_key(WorldEvents.Kind.PLAGUE))), "ipucu dünya olayının adını söyler")
+	t.eq(PriceLayerText.marks(furs, city, quiet, 1)[0].contains(_tag("UI_PRICE_TAG_EVENT")), false, "sakin günde olay işareti yok")

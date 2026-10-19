@@ -3560,6 +3560,14 @@ the report said exactly 100.0 every run.
   refreshed alongside the price on every buy/sell/haggle), same rule as
   weather being shown because a hidden penalty is indistinguishable from a
   bug.
+- **Every price layer shows itself (task Y-C11).** `MarketPricing.price_layers()` lists the seven factors (place,
+  settlement type, inflation, season, supply pressure, event shock, world-event shock - the last told apart by its
+  `WorldEvents` label); their product is the price, which the test checks. `PriceLayerText.marks()` puts a short tag on
+  the market row for each layer more than 2% off neutral and a sentence per layer in its tooltip.
+- **Seen prices are dated; rumours can lie (task Y-C10).** `GameSession.price_book` records a city's list prices on
+  arrival; past `PRICE_STALE_DAYS` the entry is stale. The tavern sells a neighbour's prices a few days old, and one
+  rumour in four exaggerates (seeded by city, target and day, so a reload cannot buy the truth). The book only informs:
+  the market always trades at today's price.
 - **Weight binds, not just slots.** The limit lives in `Inventory.add_item`
   itself, so an event reward obeys it exactly like a market purchase - when
   only the market screen checked it, everything else leaked through.

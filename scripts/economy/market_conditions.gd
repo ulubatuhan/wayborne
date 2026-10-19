@@ -202,6 +202,22 @@ func is_shocked(location_id: String, item_id: String, day: int) -> bool:
 			return true
 	return false
 
+## Şok çarpanı ikiye ayrılmış (görev Y-C11): dünya olayının şehir çapındaki
+## şoku (etiketi WorldEvents'in) ve geri kalan olay şokları.
+func get_shock_parts(location_id: String, item_id: String, day: int) -> Dictionary:
+	var world_labels: Array = WorldEvents.KIND_LABEL_KEYS.values()
+	var parts := {"event": 1.0, "world": 1.0, "world_label": ""}
+	for shock in _shocks:
+		if not _shock_matches(shock, location_id, item_id, day):
+			continue
+		var label := String(shock.get("label_key", ""))
+		if world_labels.has(label):
+			parts["world"] = float(parts["world"]) * float(shock["multiplier"])
+			parts["world_label"] = label
+		else:
+			parts["event"] = float(parts["event"]) * float(shock["multiplier"])
+	return parts
+
 ## Günlük işleyiş: baskı tabana doğru çekilir, süresi dolan şoklar düşer.
 func advance_day(day: int) -> void:
 	var decayed: Dictionary = {}

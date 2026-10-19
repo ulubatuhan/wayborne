@@ -401,10 +401,15 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 	## ekran nedenini söylemiyordu (bkz. MarketConditions.is_shocked).
 	## Küçük, ayrı bir etiket - fiyatın kendisine karışmıyor, yalnızca
 	## "bu fiyat şu an geçici bir olayın etkisinde" diyor.
+	# Görev Y-C11: şok tek işaret değil, fiyatın yedi katmanının sapanları
+	# kısa adlarla; üstüne gelince her biri bir cümleyle açıklanır.
 	var shock_label := Label.new()
-	shock_label.custom_minimum_size = Vector2(90, 0)
+	shock_label.custom_minimum_size = Vector2(150, 0)
+	shock_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	shock_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	shock_label.add_theme_font_size_override("font_size", 13)
 	shock_label.modulate = ArtPalette.TORCH
-	shock_label.tooltip_text = tr("UI_MARKET_SHOCK_TOOLTIP")
+	shock_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(shock_label)
 
 	var stock_label := Label.new()
@@ -484,10 +489,9 @@ func _refresh_shop_rows() -> void:
 		price_label.text = tr("UI_MARKET_PRICES") % [_get_buy_price(item), _get_sell_price(item)]
 
 		var shock_label: Label = row.shock_label
-		var shocked := _session.market.is_shocked(
-			_session.current_location_id, item.item_id, _session.total_days_elapsed
-		)
-		shock_label.text = tr("UI_MARKET_SHOCK_MARK") if shocked else ""
+		var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed)
+		shock_label.text = layer_text[0]
+		shock_label.tooltip_text = layer_text[1]
 		# Görünmez değil saydam: satır hizası mal mal kaymasın.
 		var mark: Control = row.profiteer_mark
 		var profiteering := _session.is_profiteering_sale(item.item_id)
