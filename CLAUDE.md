@@ -2401,6 +2401,12 @@ gave the game its motion, and every piece of it follows the same few rules.
 - **The last blow is seen before the result.** A kill or a downing starts
   a 300 ms fall around the figure's feet, and `CombatPanel.falls_pending()`
   keeps Continue disabled until every fall lands.
+- **A crit is felt, a kill is seen (task Y-H05).** A crit zooms the stage toward its target for `CRIT_ZOOM_MSEC`
+  (`CombatFx.crit_zoom`, at rest at both ends; skipped under Reduce Motion) and writes a narrator line to the log,
+  chosen from round and rank (no dice). A killing blow holds `KILL_PAUSE_MSEC` before the body falls
+  (`CombatFx.fall_start`). Hit, crit and kill each have a sound id (`AudioManager.SFX_HIT/CRIT/KILL`); until the
+  recordings land the files are missing and `play_sfx` stays silent. The ink splash waits for the engraved effects
+  (Y-G06).
 - **Only figures shake; text never does.** Shake (3/6/8 px for hit/crit/
   kill) moves figure drawings, never labels, bars or buttons - what is
   read must not tremble.

@@ -198,5 +198,39 @@ static func is_status_application(kind: String) -> bool:
 		or kind == CombatEncounter.BARK_STATUS_CHILL
 	)
 
+## Vuruş hissi (görev Y-H05): kritikte sahne hedefe doğru kısa bir an
+## yakınlaşır; ölümde düşüş bir anlık duraklamadan sonra başlar (vuruş
+## görülsün, sonra beden düşsün). İkisi de başta ve sonda tam dinlenmede.
+const CRIT_ZOOM_MSEC: int = 420
+const CRIT_ZOOM_AMOUNT: float = 0.06
+const KILL_PAUSE_MSEC: int = 160
+
+static func crit_zoom(u: float) -> float:
+	if u <= 0.0 or u >= 1.0:
+		return 1.0
+	return 1.0 + CRIT_ZOOM_AMOUNT * sin(PI * u)
+
+## Düşüşün başladığı an: öldürücü darbede kısa bir duraklama, yere yığılmada yok.
+static func fall_start(kind: String, now: int) -> int:
+	return now + KILL_PAUSE_MSEC if kind == CombatEncounter.BARK_KILLED else now
+
+## Anlatıcının kritik satırı: tur ve hedefin sırasından seçilir, zar yok
+## (aynı savaş yeniden oynanınca aynı satır).
+const CRIT_NARRATION_KEYS: Array[String] = [
+	"UI_CRIT_NARRATE_1", "UI_CRIT_NARRATE_2", "UI_CRIT_NARRATE_3", "UI_CRIT_NARRATE_4",
+]
+
+static func crit_narration_key(round_number: int, position: int) -> String:
+	return CRIT_NARRATION_KEYS[posmod(round_number * 3 + position, CRIT_NARRATION_KEYS.size())]
+
+## Vuruşun sesi: tür başına bir ses kimliği (AudioManager.SFX_HIT/CRIT/KILL ile aynı);
+## dosya yoksa AudioManager sessizce geçer.
+static func hit_sfx(kind: String) -> String:
+	match kind:
+		CombatEncounter.BARK_HIT: return "hit"
+		CombatEncounter.BARK_CRIT: return "hit_crit"
+		CombatEncounter.BARK_KILLED: return "hit_kill"
+	return ""
+
 static func starts_fall(kind: String) -> bool:
 	return kind == CombatEncounter.BARK_KILLED or kind == CombatEncounter.BARK_DOWNED

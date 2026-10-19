@@ -99,6 +99,9 @@ var _numbers: Array = []
 var _hp_seen: Dictionary = {}  # CombatUnit -> int
 ## Son vuruşu kritik olan birimler: sayısı kritik renginde çıkıyor.
 var _crit_marks: Dictionary = {}  # CombatUnit -> true
+## Kritik yakınlaşması (Y-H05): {"start": int, "pivot": Vector2} ya da boş.
+var _zoom: Dictionary = {}
+var _stage: Control
 var _slot_by_unit: Dictionary = {}  # CombatUnit -> CombatUnitSlot
 var _fx_overlay: Control
 
@@ -226,6 +229,7 @@ func _build_field() -> void:
 	stage.custom_minimum_size = Vector2(0.0, STAGE_HEIGHT)
 	stage.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	add_child(stage)
+	_stage = stage
 
 	var backdrop := CombatBackdrop.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -431,6 +435,20 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 		}
 	if kind == CombatEncounter.BARK_CRIT:
 		_crit_marks[unit] = true
+		# Y-H05: kısa yakınlaşma hedefin üstüne, anlatıcı satırı deftere.
+		if not NodeUtil.reduce_motion(self) and _stage != null:
+			var slot: CombatUnitSlot = _slot_by_unit.get(unit)
+			var pivot := _stage.size * 0.5
+			if slot != null and is_instance_valid(slot):
+				pivot = slot.get_global_rect().get_center() - _stage.get_global_rect().position
+			_zoom = {"start": now, "pivot": pivot}
+		_on_log_added(tr(CombatFx.crit_narration_key(_encounter.round_number, unit.position)) % unit.display_name)
+	var sfx := CombatFx.hit_sfx(kind)
+	if not sfx.is_empty() and is_inside_tree():
+		# Autoload'a ağaçtan ulaşılıyor: panel testlerde ağaç dışında kuruluyor.
+		var audio := get_tree().root.get_node_or_null("AudioManager")
+		if audio != null:
+			audio.play_sfx(sfx)
 
 	if CombatFx.is_status_application(kind):
 		_ring_states[unit] = {"color": CombatFx.status_color(kind), "start": now}
@@ -468,7 +486,7 @@ func _on_unit_barked(unit: CombatUnit, text: String, kind: String) -> void:
 			_shake = {"amplitude": amplitude, "start": now}
 
 	if CombatFx.starts_fall(kind):
-		_fall_states[unit] = {"start": now}
+		_fall_states[unit] = {"start": CombatFx.fall_start(kind, now)}
 	set_process(true)
 
 ## Saldıranın klibi ve kendine yapılan büyü: bark'ı olmayan yarısı.
@@ -641,6 +659,14 @@ func _animate(now: int) -> bool:
 	if not _shake.is_empty():
 		if now - int(_shake.get("start", 0)) >= CombatFx.SHAKE_MSEC:
 			_shake = {}
+		else:
+			active = true
+	if not _zoom.is_empty() and _stage != null:
+		var u := CombatFx.progress(int(_zoom.get("start", 0)), CombatFx.CRIT_ZOOM_MSEC, now)
+		_stage.pivot_offset = _zoom.get("pivot", _stage.size * 0.5)
+		_stage.scale = Vector2.ONE * CombatFx.crit_zoom(u)
+		if u >= 1.0:
+			_zoom = {}
 		else:
 			active = true
 	if _animate_numbers(now):

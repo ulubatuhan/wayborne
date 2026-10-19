@@ -1136,3 +1136,7 @@
 "UI_LEDGER_PAGE_LEADERS","Adı taşıyanlar: %s","Those who carried the name: %s","","","","","","","","",""
 "UI_LEDGER_PAGE_LOST","Yolda kalanlar:","Those the road kept:","","","","","","","","",""
 "UI_LEDGER_PAGE_GRAVES","Yollarda %d mezar","%d graves on the roads","","","","","","","","",""
+"UI_CRIT_NARRATE_1","Darbe kemiğe kadar indi: %s sendeledi.","The blow went to the bone: %s staggered.","","","","","","","","",""
+"UI_CRIT_NARRATE_2","Tam aradığı yer. %s bunu unutmayacak.","Right where it was meant. %s won't forget it.","","","","","","","","",""
+"UI_CRIT_NARRATE_3","Bir an her şey durdu; sonra %s yere eğildi.","For a moment everything stopped; then %s bent to the ground.","","","","","","","","",""
+"UI_CRIT_NARRATE_4","Çelik sesi vadide yankılandı; %s kanıyor.","The ring of steel echoed down the valley; %s is bleeding.","","","","","","","","",""

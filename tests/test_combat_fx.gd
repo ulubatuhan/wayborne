@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_fall_holds_the_continue_button(t)
 	_test_hit_style_picks_the_reaction(t)
 	_test_stuck_projectiles(t)
+	_test_hit_feel(t)
 
 ## Vuruşun biçimi hedefin tepkisini seçiyor: ok delip büker, kılıç keser,
 ## ateş çırpındırır, buz büzer, zehir iki büklüm eder; ıskalamada kalkanlı
@@ -209,6 +210,28 @@ func _test_fall_holds_the_continue_button(t) -> void:
 	panel._animate(start + CombatFx.FALL_MSEC + 10)
 	t.not_ok(panel.falls_pending(), "düşüş bitti")
 	t.not_ok(panel._continue_button.disabled, "düşüş bitince Devam açılıyor")
+	panel.free()
+
+## Y-H05: kritik yakınlaşması dinlenmede başlar ve biter, ölümde düşüş kısa
+## bir duraklamadan sonra başlar, anlatıcı satırı ve vuruş sesi tanımlı.
+func _test_hit_feel(t) -> void:
+	t.eq(CombatFx.crit_zoom(0.0), 1.0, "yakınlaşma başta dinlenmede")
+	t.eq(CombatFx.crit_zoom(1.0), 1.0, "yakınlaşma sonda dinlenmede")
+	t.ok(CombatFx.crit_zoom(0.5) > 1.0 and CombatFx.crit_zoom(0.5) <= 1.0 + CombatFx.CRIT_ZOOM_AMOUNT, "yakınlaşma küçük")
+	t.eq(CombatFx.fall_start(CombatEncounter.BARK_KILLED, 1000), 1000 + CombatFx.KILL_PAUSE_MSEC, "ölümde duraklama")
+	t.eq(CombatFx.fall_start(CombatEncounter.BARK_DOWNED, 1000), 1000, "yığılmada duraklama yok")
+	for key in CombatFx.CRIT_NARRATION_KEYS:
+		t.ok(String(TranslationServer.translate(key)) != key, "anlatıcı satırı yazılı: %s" % key)
+	t.eq(CombatFx.crit_narration_key(2, 1), CombatFx.crit_narration_key(2, 1), "aynı an aynı satır")
+	for kind in [CombatEncounter.BARK_HIT, CombatEncounter.BARK_CRIT, CombatEncounter.BARK_KILLED]:
+		t.ok(load("res://scripts/autoload/audio_manager.gd").SFX_PATHS.has(CombatFx.hit_sfx(kind)), "vuruş sesi tanımlı: %s" % kind)
+	var panel = _panel()
+	var unit: CombatUnit = panel._encounter.enemy_units[0]
+	panel._on_unit_barked(unit, "", CombatEncounter.BARK_CRIT)
+	t.ok(not panel._zoom.is_empty(), "kritik yakınlaşmayı başlatır")
+	var start: int = int(panel._zoom["start"])
+	panel._animate(start + CombatFx.CRIT_ZOOM_MSEC + 10)
+	t.eq(panel._stage.scale, Vector2.ONE, "yakınlaşma bitince sahne tam ölçekte")
 	panel.free()
 
 # --- yardımcılar ---

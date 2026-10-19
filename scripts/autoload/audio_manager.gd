@@ -59,10 +59,18 @@ const SFX_THUD: String = "thud"
 const SFX_GATE: String = "gate"
 ## Kamp ateşinin tutuşması (görev 12.2c): ilk figür ateşe varınca.
 const SFX_FIRE_IGNITE: String = "fire_ignite"
+## Savaş vuruşları (görev Y-H05). Kayıtlar gelene kadar dosya yok; play_sfx
+## eksik dosyada sessizce geçer (Audio Rules).
+const SFX_HIT: String = "hit"
+const SFX_CRIT: String = "hit_crit"
+const SFX_KILL: String = "hit_kill"
 const SFX_PATHS: Dictionary = {
 	SFX_THUD: "res://data/assets/audio/wooden_thud.wav",
 	SFX_GATE: "res://data/assets/audio/gate_creak.wav",
 	SFX_FIRE_IGNITE: "res://data/assets/audio/fire_ignite.wav",
+	SFX_HIT: "res://data/assets/audio/hit.wav",
+	SFX_CRIT: "res://data/assets/audio/hit_crit.wav",
+	SFX_KILL: "res://data/assets/audio/hit_kill.wav",
 }
 
 ## Ortam sesi (bkz. `play_ambience`) - müziğin *altında* değil, müziğin
