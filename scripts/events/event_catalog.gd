@@ -259,6 +259,12 @@ static func _bandit_ambush() -> GameEvent:
 
 static func _customs_checkpoint() -> GameEvent:
 	var event := _event("evt_customs_checkpoint", "EVT_CUSTOMS", 1.2)
+	# Kaçak taşıyan kervan gümrüğe daha sık takılır (görev Y-C19).
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("contraband", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 3.0),
+	])
 	event.choices = _choices([
 		_gated_choice(
 			"EVT_CUSTOMS_OPT_PAPERS", "EVT_CUSTOMS_OPT_PAPERS_LOCKED",
@@ -266,8 +272,26 @@ static func _customs_checkpoint() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.REPUTATION, 3),
 				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+				# Kâğıdı gösteren yükünü de açar: kaçağa el konur.
+				EventEffect.make(EventEffect.Type.ITEM_REMOVE, -1, ItemCatalog.CONTRABAND_SALT),
 			])
 		),
+		# Cazip ama riskli (Y-E03): kaçağı balyaların altına sakla.
+		_requires(_check_choice(
+			"EVT_CUSTOMS_OPT_HIDE", CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST,
+			"EVT_CUSTOMS_HIDE_OK", _effects([EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1)]),
+			"EVT_CUSTOMS_HIDE_MID", _effects([
+				EventEffect.make(EventEffect.Type.ITEM_REMOVE, -1, ItemCatalog.CONTRABAND_SALT),
+				EventEffect.make(EventEffect.Type.GOLD, -40),
+			]),
+			"EVT_CUSTOMS_HIDE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.ITEM_REMOVE, -1, ItemCatalog.CONTRABAND_SALT),
+				EventEffect.make(EventEffect.Type.GOLD, -120),
+				EventEffect.make(EventEffect.Type.REPUTATION, -6),
+			])
+		), "EVT_CUSTOMS_OPT_HIDE_LOCKED", _conditions([
+			EventCondition.make("contraband", EventCondition.Op.GREATER_EQUAL, 1),
+		])),
 		_gated_choice(
 			"EVT_CUSTOMS_OPT_BRIBE", "EVT_CUSTOMS_OPT_BRIBE_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80)]),
@@ -289,6 +313,7 @@ static func _customs_checkpoint() -> GameEvent:
 				EventEffect.make(EventEffect.Type.DOCUMENT_LOSE, 2),
 				EventEffect.make(EventEffect.Type.GOLD, -150),
 				EventEffect.make(EventEffect.Type.REPUTATION, -8),
+				EventEffect.make(EventEffect.Type.ITEM_REMOVE, -1, ItemCatalog.CONTRABAND_SALT),
 			])
 		),
 	])

@@ -11,6 +11,10 @@ extends RefCounted
 
 static var _cache: Dictionary = {}
 
+const CONTRABAND_SALT: String = "contraband_salt"
+const RARE_RELIC: String = "rare_relic"
+const FISH_SHELF_DAYS: int = 6
+
 static func get_item(item_id: String) -> Item:
 	if _cache.is_empty():
 		_build_cache()
@@ -34,6 +38,7 @@ static func get_trade_goods() -> Array[Item]:
 		"jewelry",
 		"fish",
 		"wine",
+		CONTRABAND_SALT,
 	]
 	var items: Array[Item] = []
 	for item_id in ids:
@@ -64,6 +69,13 @@ static func _build_cache() -> void:
 	_add("jewelry", "ITEM_JEWELRY_NAME", 60, 0.2)
 	_add("fish", "ITEM_FISH_NAME", 8, 1.0)
 	_add("wine", "ITEM_WINE_NAME", 18, 1.8)
+	# Görev Y-C19: balık bozulur; mühürsüz tuz kaçaktır; eski mühür nadirdir
+	# (yalnızca bulunur - ganimet ve olaylar, Y-C03).
+	_cache["fish"].shelf_days = FISH_SHELF_DAYS
+	_add(CONTRABAND_SALT, "ITEM_CONTRABAND_SALT_NAME", 22, 0.8)
+	_cache[CONTRABAND_SALT].contraband = true
+	_add(RARE_RELIC, "ITEM_RARE_RELIC_NAME", 90, 0.2)
+	_cache[RARE_RELIC].rare = true
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()

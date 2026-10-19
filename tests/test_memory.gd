@@ -158,6 +158,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"party_stress": "partinin ortalamasına bakan bir mercek, sahibi CharacterData.stress",
 	"recruit_candidates": "tohumdan yeniden üretiliyor; tutulanlar hired_recruit_indices'te",
 	"_provisions_item": "katalogdan okunan sabit kaynak",
+	"last_spoiled": "yalnızca son yol gününün çürüme raporu; günlük yazıldıktan sonra anlamı yok",
 }
 
 ## Kayıtta farklı bir anahtarla duran alanlar: alan -> anahtar.

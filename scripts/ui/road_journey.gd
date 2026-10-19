@@ -2117,6 +2117,9 @@ func _run_day() -> void:
 	var expired_contracts := _session.advance_day()
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
+	for item_id in _session.last_spoiled:
+		var spoiled := ItemCatalog.get_item(String(item_id))
+		_add_log(tr("UI_ROAD_GOODS_SPOILED") % [int(_session.last_spoiled[item_id]), spoiled.item_name if spoiled != null else String(item_id)])
 
 	# Kalıcı sofra emri: durum değişmediyse (erzak yetiyor, kimse açlığın
 	# can aldığı eşikte değil) sofra sorulmadan kurulur. Değiştiyse panel

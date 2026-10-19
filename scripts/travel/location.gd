@@ -47,6 +47,8 @@ var location_name: String:
 
 ## Bu pazarda bu mal alınıp satılabilir mi.
 func sells(item_id: String) -> bool:
+	if item_id == ItemCatalog.CONTRABAND_SALT:
+		return true
 	return available.is_empty() or available.has(item_id) or item_id == GameSession.PROVISIONS_ITEM_ID
 
 func has_facility(facility: String) -> bool:

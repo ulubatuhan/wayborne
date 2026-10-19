@@ -3560,6 +3560,13 @@ the report said exactly 100.0 every run.
   refreshed alongside the price on every buy/sell/haggle), same rule as
   weather being shown because a hidden penalty is indistinguishable from a
   bug.
+- **Goods differ in kind (task Y-C19), each through an existing door.** Fish rots after `FISH_SHELF_DAYS` on the road
+  (`spoil_perishables`, a quarter a day; a fresh purchase averages the age down, never resets it). Unsealed salt is
+  contraband: bought only at a caravanserai, sold high elsewhere, and the customs card (weighted x3 while it is carried)
+  confiscates it (`ITEM_REMOVE` with a negative amount = all of it) unless a hide check succeeds. The old seal is rare:
+  never on a stall, sold only in a city. Buying 20+ at once is 6% cheaper. **Selling back what you bought in the same
+  visit is capped at 90% of what you paid** (`capped_sell_price`), because your own purchase raises the market's price
+  and selling into that raise was a money printer; every purchase path reaches it through `consume_stock`.
 - **Every price layer shows itself (task Y-C11).** `MarketPricing.price_layers()` lists the seven factors (place,
   settlement type, inflation, season, supply pressure, event shock, world-event shock - the last told apart by its
   `WorldEvents` label); their product is the price, which the test checks. `PriceLayerText.marks()` puts a short tag on

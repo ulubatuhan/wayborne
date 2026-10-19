@@ -81,6 +81,10 @@ func _ready() -> void:
 	for item in ItemCatalog.get_trade_goods():
 		if _current_location == null or _current_location.sells(item.item_id):
 			_shop_items.append(item)
+	# Nadir mal tezgâhta yok; kervanda varsa satırı açılır (Y-C19).
+	var relic := ItemCatalog.get_item(ItemCatalog.RARE_RELIC)
+	if relic != null and _session.get_total_quantity(relic.item_id) > 0:
+		_shop_items.append(relic)
 
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_back_button.text = Nav.back_label()
@@ -392,6 +396,8 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 
 	var price_label := Label.new()
 	price_label.text = tr("UI_MARKET_PRICES") % [_get_buy_price(item), _get_sell_price(item)]
+	price_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	price_label.tooltip_text = tr("UI_MARKET_BULK_HINT") % [MarketPricing.BULK_MIN_QUANTITY, int(round(MarketPricing.BULK_DISCOUNT * 100.0))]
 	price_label.custom_minimum_size = Vector2(PRICE_COLUMN_WIDTH, 0)
 	price_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	price_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -460,6 +466,7 @@ func _build_shop_row(item: Item) -> HBoxContainer:
 		"shock_label": shock_label,
 		"stock_label": stock_label,
 		"buy_button": buy_button,
+		"sell_button": sell_button,
 		"haggle_button": haggle_button,
 		"basket_button": basket_button,
 		"profiteer_mark": profiteer_mark,
@@ -478,9 +485,12 @@ func _refresh_shop_rows() -> void:
 			stock_label.text = tr("UI_MARKET_STOCK") % remaining
 
 		var out_of_stock := remaining == 0
-		row.buy_button.disabled = out_of_stock
-		row.haggle_button.disabled = out_of_stock
-		row.basket_button.disabled = out_of_stock
+		var buy_reason := MarketPricing.buy_block_reason(item, _current_location)
+		var sell_reason := MarketPricing.sell_block_reason(item, _current_location)
+		row.buy_button.disabled = out_of_stock or not buy_reason.is_empty()
+		row.haggle_button.disabled = out_of_stock or not buy_reason.is_empty()
+		row.basket_button.disabled = out_of_stock or not buy_reason.is_empty()
+		row.sell_button.disabled = not sell_reason.is_empty()
 
 		# Fiyat alım-satımla (arz-talep baskısı) değişiyor, o yüzden burada
 		# da tazeleniyor - yoksa şok işareti güncel kalsa bile yanındaki
@@ -490,7 +500,13 @@ func _refresh_shop_rows() -> void:
 
 		var shock_label: Label = row.shock_label
 		var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed)
-		shock_label.text = layer_text[0]
+		var reasons: Array[String] = []
+		for reason in [buy_reason, sell_reason]:
+			if not reason.is_empty():
+				reasons.append(tr(reason))
+		if not layer_text[0].is_empty():
+			reasons.append(layer_text[0])
+		shock_label.text = " · ".join(reasons)
 		shock_label.tooltip_text = layer_text[1]
 		# Görünmez değil saydam: satır hizası mal mal kaymasın.
 		var mark: Control = row.profiteer_mark
@@ -503,7 +519,9 @@ func _on_buy_pressed(item: Item, quantity_spin: SpinBox) -> void:
 	if quantity <= 0:
 		return
 
-	var price := _get_buy_price(item) * quantity
+	if not MarketPricing.buy_block_reason(item, _current_location).is_empty():
+		return
+	var price := MarketPricing.bulk_total(_get_buy_price(item), quantity)
 	if not _session.wallet.can_afford(price):
 		_show_message(tr("UI_MARKET_NEED_GOLD") % price)
 		return
@@ -629,6 +647,8 @@ func _on_sell_pressed(item: Item, quantity_spin: SpinBox) -> void:
 		_show_message(tr("UI_MARKET_NOT_ENOUGH_ITEM") % item.item_name)
 		return
 
+	if not MarketPricing.sell_block_reason(item, _current_location).is_empty():
+		return
 	var total_price := _get_sell_price(item) * quantity
 	# Faz 17 PR-5: tüccarın kendi kesesi var, bedava para değil. Hazine
 	# yetmiyorsa satış hiç başlamaz (hep ya da hiç - bkz. add_to_cargo'nun
@@ -674,9 +694,9 @@ func _get_buy_price(item: Item) -> int:
 	return maxi(1, int(round(price)))
 
 func _get_sell_price(item: Item) -> int:
-	return MarketPricing.get_sell_price(
+	return _session.capped_sell_price(item.item_id, MarketPricing.get_sell_price(
 		item, _current_location, _session.market, _session.total_days_elapsed
-	)
+	))
 
 func _show_message(text: String) -> void:
 	_message_label.text = text

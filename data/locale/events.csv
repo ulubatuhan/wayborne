@@ -411,3 +411,8 @@
 "EVT_REFUGEE_BUY_OK","Bir kadının boynundaki zincir gerçek gümüş. Size teşekkür ediyor; arkanızdan bakanlar etmiyor.","The chain from a woman's neck is true silver. She thanks you; those watching you leave do not.","","","","","","","","",""
 "EVT_REFUGEE_BUY_MID","Yarısı sahte, yarısı gerçek. Darda olanla pazarlık etmenin tadı ağızda kaldı.","Half is false, half is real. The taste of haggling with the desperate lingers.","","","","","","","","",""
 "EVT_REFUGEE_BUY_BAD","Hepsi boyalı tunç. Kandırılan sizsiniz, ama yolda anlatılan hikâye kervanın açları soyduğu.","All of it painted bronze. You were the ones fooled, but the story on the road is that the caravan robbed the hungry.","","","","","","","","",""
+"EVT_CUSTOMS_OPT_HIDE","Mühürsüz tuzu balyaların altına sakla","Hide the unsealed salt under the bales","","","","","","","","",""
+"EVT_CUSTOMS_OPT_HIDE_LOCKED","Saklanacak kaçak yok","There is nothing to hide","","","","","","","","",""
+"EVT_CUSTOMS_HIDE_OK","Gümrükçü balyaları sayar, altına bakmaz. Bir gün kaybedersiniz, tuz sizinle kalır.","The customs man counts the bales and never looks under them. You lose a day; the salt stays with you.","","","","","","","","",""
+"EVT_CUSTOMS_HIDE_MID","Bir çuval yırtılır, tuz yere akar. Gümrükçü hepsine el koyar, sessiz kalması için de bir kese ister.","A sack splits and salt runs onto the ground. The customs man takes all of it, and a purse for his silence.","","","","","","","","",""
+"EVT_CUSTOMS_HIDE_BAD","Köpek tuzun kokusunu alır. El konur, ceza kesilir, adınız deftere kaçakçı diye yazılır.","The dog smells the salt. It is seized, you are fined, and your name goes in their book as smugglers.","","","","","","","","",""

@@ -35,6 +35,8 @@ func run(t) -> void:
 	_test_brief_shows_debt_even_when_the_term_is_far_off(t)
 	_test_brief_offers_every_open_route(t)
 	_test_price_book(t)
+	_test_goods_variety(t)
+	_test_buy_then_sell_back_never_profits(t)
 
 func _session(gold: int = 500, wagons: int = 1) -> GameSession:
 	return GameSession.new(gold, 10, wagons)
@@ -455,3 +457,76 @@ func _test_price_book(t) -> void:
 	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
 	t.eq(copy.price_book.size(), session.price_book.size(), "defter kayıttan döner")
 	t.eq(copy.price_book[target]["source"], GameSession.PRICE_SOURCE_RUMOR, "kaynak kayıttan döner")
+
+## Mal çeşitliliği (görev Y-C19): balık bozulur, kaçak yalnız kervansarayda
+## alınır ve gümrükte el konur, nadir mal yalnız şehrin alıcısına, toplu alım
+## indirimlidir.
+func _first_of(type: String) -> Location:
+	for location in WorldMapData.get_locations():
+		if location.settlement_type == type:
+			return location
+	return null
+
+func _test_goods_variety(t) -> void:
+	var session := _brief_session(2000, 20)
+	var fish := ItemCatalog.get_item("fish")
+	t.ok(session.add_to_cargo(fish, 20), "balık yüklenir")
+	for day in ItemCatalog.FISH_SHELF_DAYS:
+		session.spoil_perishables()
+	t.eq(session.get_total_quantity("fish"), 20, "raf ömrü içinde balık çürümez")
+	var rotted := session.spoil_perishables()
+	t.eq(int(rotted.get("fish", 0)), 5, "ömrü geçince dörtte biri çürür")
+	t.eq(session.get_total_quantity("fish"), 15, "çürüyen kargodan düşer")
+	session.add_to_cargo(fish, 15)
+	session.note_purchase(fish, 15, 5)
+	t.ok(float(session.perishable_days["fish"]) < float(ItemCatalog.FISH_SHELF_DAYS), "taze alım yaşı ortalamayla düşürür, sıfırlamaz")
+	t.ok(float(session.perishable_days["fish"]) > 0.0, "eski stok tazelenmiş sayılmaz")
+
+	var salt := ItemCatalog.get_item(ItemCatalog.CONTRABAND_SALT)
+	var city := _first_of(SettlementRules.CITY)
+	var serai := _first_of(SettlementRules.CARAVANSERAI)
+	t.eq(MarketPricing.buy_block_reason(salt, city), "UI_MARKET_CONTRABAND_NO_SELLER", "şehirde kaçak satılmaz")
+	t.eq(MarketPricing.buy_block_reason(salt, serai), "", "kervansarayda kaçak alınır")
+	t.eq(MarketPricing.sell_block_reason(salt, serai), "UI_MARKET_CONTRABAND_NO_BUYER", "kaçakçı geri almaz")
+	t.ok(MarketPricing.get_sell_price(salt, city) > MarketPricing.get_buy_price(salt, serai) * 2, "kaçak kârı yüksek")
+	session.add_to_cargo(salt, 12)
+	t.eq(int(session.build_event_context()["contraband"]), 12, "gümrük kaçağı bağlamdan görür")
+	var effects: Array[EventEffect] = [EventEffect.make(EventEffect.Type.ITEM_REMOVE, -1, ItemCatalog.CONTRABAND_SALT)]
+	EventEffectApplier.apply(effects, session)
+	t.eq(session.get_total_quantity(ItemCatalog.CONTRABAND_SALT), 0, "el koyma kaçağın hepsini alır")
+	var customs := EventCatalog.get_event("evt_customs_checkpoint")
+	var hides := false
+	for choice in customs.choices:
+		if choice.text_key == "EVT_CUSTOMS_OPT_HIDE":
+			hides = not choice.requirements.is_empty()
+	t.ok(hides, "gümrükte saklama seçeneği yalnız kaçak varken")
+
+	var relic := ItemCatalog.get_item(ItemCatalog.RARE_RELIC)
+	t.eq(MarketPricing.buy_block_reason(relic, city), "UI_MARKET_RARE_NO_SELLER", "nadir mal tezgâhta yok")
+	t.eq(MarketPricing.sell_block_reason(relic, city), "", "şehrin koleksiyoncusu alır")
+	t.eq(MarketPricing.sell_block_reason(relic, _first_of(SettlementRules.TOWN)), "UI_MARKET_RARE_NO_BUYER", "kasabada alıcısı yok")
+	t.not_ok(ItemCatalog.get_trade_goods().has(relic), "nadir mal ticaret listesinde değil")
+
+	t.eq(MarketPricing.bulk_total(10, MarketPricing.BULK_MIN_QUANTITY - 1), 10 * (MarketPricing.BULK_MIN_QUANTITY - 1), "eşiğin altında indirim yok")
+	t.ok(MarketPricing.bulk_total(10, MarketPricing.BULK_MIN_QUANTITY) < 10 * MarketPricing.BULK_MIN_QUANTITY, "toplu alım indirimli")
+
+## Sömürü kapısı: bir şehirden alıp aynı ziyarette aynı tezgâha geri satmak,
+## her yerde, her malda, her miktarda (toplu indirim dahil) para kaybettirir.
+func _test_buy_then_sell_back_never_profits(t) -> void:
+	var session := _brief_session(100000, 0)
+	var profitable := []
+	for location in WorldMapData.get_locations():
+		for item in ItemCatalog.get_trade_goods():
+			if not MarketPricing.buy_block_reason(item, location).is_empty() or not MarketPricing.sell_block_reason(item, location).is_empty():
+				continue
+			for quantity in [1, 5, 20, 40]:
+				session.market = MarketConditions.new()
+				session.bought_here = {}
+				session.current_location_id = location.location_id
+				var unit := MarketPricing.get_buy_price(item, location, session.market, session.total_days_elapsed)
+				var paid := MarketPricing.bulk_total(unit, quantity)
+				session.consume_stock(item.item_id, quantity, paid)
+				var back := session.capped_sell_price(item.item_id, MarketPricing.get_sell_price(item, location, session.market, session.total_days_elapsed)) * quantity
+				if back > paid:
+					profitable.append("%s/%s/%d" % [location.location_id, item.item_id, quantity])
+	t.eq(profitable.size(), 0, "aynı ziyarette al-sat hiçbir yerde kâr etmez %s" % str(profitable.slice(0, 3)))

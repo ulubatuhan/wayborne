@@ -15,13 +15,51 @@ extends RefCounted
 const PRODUCE_BUY_MULTIPLIER: float = 0.6
 const DEMAND_SELL_MULTIPLIER: float = 1.7
 const BASE_SELL_MULTIPLIER: float = 0.5
+## Kaçak mal (Y-C19): kervansarayda kaçakçıdan ucuz, şehirde ve kasabada
+## pahalı satılır - kâr yüksek, bedeli gümrük. Nadir mal yalnız şehirde.
+const CONTRABAND_BUY_MULTIPLIER: float = 0.55
+const CONTRABAND_SELL_MULTIPLIER: float = 1.9
+const RARE_SELL_MULTIPLIER: float = 1.6
+## Toplu alım: bir seferde BULK_MIN_QUANTITY ve üstü alana indirim.
+const BULK_MIN_QUANTITY: int = 20
+const BULK_DISCOUNT: float = 0.06
+
+static func bulk_total(unit_price: int, quantity: int) -> int:
+	var total := unit_price * quantity
+	if quantity >= BULK_MIN_QUANTITY:
+		total = int(round(float(total) * (1.0 - BULK_DISCOUNT)))
+	return maxi(quantity, total)
+
+## Alış kapalıysa sebebi (çeviri anahtarı), açıksa "".
+static func buy_block_reason(item: Item, location: Location) -> String:
+	if item.rare:
+		return "UI_MARKET_RARE_NO_SELLER"
+	if item.contraband and (location == null or location.settlement_type != SettlementRules.CARAVANSERAI):
+		return "UI_MARKET_CONTRABAND_NO_SELLER"
+	return ""
+
+static func sell_block_reason(item: Item, location: Location) -> String:
+	if item.rare and (location == null or location.settlement_type != SettlementRules.CITY):
+		return "UI_MARKET_RARE_NO_BUYER"
+	if item.contraband and location != null and location.settlement_type == SettlementRules.CARAVANSERAI:
+		return "UI_MARKET_CONTRABAND_NO_BUYER"
+	return ""
+
+static func _place_multiplier(item: Item, location: Location, selling: bool) -> float:
+	if selling:
+		if item.rare:
+			return RARE_SELL_MULTIPLIER
+		if item.contraband:
+			return CONTRABAND_SELL_MULTIPLIER
+		return DEMAND_SELL_MULTIPLIER if location != null and location.demands.has(item.item_id) else BASE_SELL_MULTIPLIER
+	if item.contraband:
+		return CONTRABAND_BUY_MULTIPLIER
+	return PRODUCE_BUY_MULTIPLIER if location != null and location.produces.has(item.item_id) else 1.0
 
 static func get_buy_price(
 	item: Item, location: Location, conditions: MarketConditions = null, day: int = 0
 ) -> int:
-	var multiplier := 1.0
-	if location != null and location.produces.has(item.item_id):
-		multiplier = PRODUCE_BUY_MULTIPLIER
+	var multiplier := _place_multiplier(item, location, false)
 	if location != null:
 		# Yerleşim türü: kasabada temel mal ucuz, kervansarayda her şey pahalı.
 		multiplier *= SettlementRules.buy_multiplier(location.settlement_type, item.item_id)
@@ -31,9 +69,7 @@ static func get_buy_price(
 static func get_sell_price(
 	item: Item, location: Location, conditions: MarketConditions = null, day: int = 0
 ) -> int:
-	var multiplier := BASE_SELL_MULTIPLIER
-	if location != null and location.demands.has(item.item_id):
-		multiplier = DEMAND_SELL_MULTIPLIER
+	var multiplier := _place_multiplier(item, location, true)
 	if location != null:
 		# Kervansaray yolcudan ucuza alır.
 		multiplier *= SettlementRules.sell_multiplier(location.settlement_type, item.item_id)
@@ -59,14 +95,12 @@ const LAYERS: Array[String] = [
 static func price_layers(
 	item: Item, location: Location, conditions: MarketConditions, day: int, selling: bool
 ) -> Array[Dictionary]:
-	var place := 1.0
+	var place := _place_multiplier(item, location, selling)
 	var settlement := 1.0
 	if location != null:
 		if selling:
-			place = DEMAND_SELL_MULTIPLIER if location.demands.has(item.item_id) else BASE_SELL_MULTIPLIER
 			settlement = SettlementRules.sell_multiplier(location.settlement_type, item.item_id)
 		else:
-			place = PRODUCE_BUY_MULTIPLIER if location.produces.has(item.item_id) else 1.0
 			settlement = SettlementRules.buy_multiplier(location.settlement_type, item.item_id)
 	var inflation := 1.0
 	var season := 1.0

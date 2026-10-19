@@ -61,9 +61,12 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			if item != null and session.add_to_cargo_or_bag(item, effect.amount):
 				result.lines.append(_t("EFF_ITEM_ADD") % [item.item_name, effect.amount])
 		EventEffect.Type.ITEM_REMOVE:
-			var removed := session.remove_from_cargo_or_bags(effect.text_value, effect.amount)
+			# amount < 0: taşınanın hepsi (gümrüğün el koyması, Y-C19).
+			var quantity := effect.amount if effect.amount > 0 else session.get_total_quantity(effect.text_value)
+			var removed := quantity > 0 and session.remove_from_cargo_or_bags(effect.text_value, quantity)
 			if removed:
-				result.lines.append(_t("EFF_ITEM_REMOVE") % [effect.text_value, effect.amount])
+				var item := ItemCatalog.get_item(effect.text_value)
+				result.lines.append(_t("EFF_ITEM_REMOVE") % [item.item_name if item != null else effect.text_value, quantity])
 		EventEffect.Type.WAGON_DAMAGE:
 			# Arabacı elinden geldiğince hasarı azaltır ama tamamen sıfırlamaz.
 			var reduced := maxi(0, effect.amount - session.get_duty_flat_reduction(DutyCatalog.ARABACI))

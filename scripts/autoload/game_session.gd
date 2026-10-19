@@ -1854,9 +1854,11 @@ func advance_day() -> Array[String]:
 	# CaravanState.apply_daily_drift). Stres de aynı yerden, aynı gerekçeyle:
 	# uzun bir sefer kısa bir seferden yorucu olmalı ve bu yıpranma olay
 	# zarına bağlı olmamalı.
+	last_spoiled = {}
 	if is_journey_active():
 		caravan.apply_daily_drift()
 		_apply_road_stress_day()
+		last_spoiled = spoil_perishables()
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -2182,6 +2184,12 @@ func get_market_stock(item_id: String) -> int:
 ## akar, tek doğru kaynak burası olduğu için ayrı bir "settle" çağrısına
 ## gerek yok - consume_stock zaten alışın tek kapısı.
 func consume_stock(item_id: String, quantity: int, total_price: int = 0) -> void:
+	# Her alım yolu (tek satır, pazarlık, sepet) buradan geçer: geri satış
+	# tavanı ve bozulan malın yaşı burada tutulur (Y-C19). Mal kervana
+	# eklendikten sonra çağrılır.
+	var bought := ItemCatalog.get_item(item_id)
+	if bought != null and quantity > 0 and total_price > 0:
+		note_purchase(bought, quantity, int(floor(float(total_price) / float(quantity))))
 	if market_stock.has(item_id):
 		market_stock[item_id] = maxi(0, market_stock[item_id] - quantity)
 	market.record_purchase(current_location_id, item_id, quantity)
@@ -2227,6 +2235,54 @@ func get_city_gold_reserve() -> int:
 ## Kervan Envanteri Rules'un add_to_cargo'daki "hep ya da hiç" ilkesi).
 func can_city_afford_sale(total_price: int) -> bool:
 	return get_city_gold_reserve() >= total_price
+
+## --- Mal çeşitliliği (görev Y-C19) ---
+## Bozulan mal yolda gün sayar: `perishable_days` item_id -> taşınan stoğun
+## ortalama yaşı (gün). Raf ömrünü geçince her yol günü stoğun ROT_SHARE'i
+## çürür (en az bir birim). Taze alım yaşı ağırlıklı ortalamayla düşürür -
+## bir tane taze balık bütün eski stoğu tazelemez.
+const ROT_SHARE: float = 0.25
+var perishable_days: Dictionary = {}
+## Son yol gününün çürüyen malları (item_id -> adet); yol günlüğü okur.
+var last_spoiled: Dictionary = {}
+## Aynı ziyarette alınıp geri satılan mal alış fiyatının üstünden satılmaz
+## (görev Y-C19 sömürü kapısı): kendi alımın pazarın fiyatını şişirir, o şişkin
+## fiyattan aynı tezgâha geri satmak para basmak olurdu. item_id -> birim alış.
+const BUYBACK_SHARE: float = 0.9
+var bought_here: Dictionary = {}
+
+func note_purchase(item: Item, quantity: int, unit_price: int) -> void:
+	if quantity <= 0:
+		return
+	bought_here[item.item_id] = mini(int(bought_here.get(item.item_id, unit_price)), unit_price)
+	if item.shelf_days > 0:
+		var held := maxi(0, get_total_quantity(item.item_id) - quantity)
+		var age := float(perishable_days.get(item.item_id, 0.0))
+		perishable_days[item.item_id] = age * float(held) / float(held + quantity)
+
+## Satış birim fiyatı, aynı ziyarette alınan mal için tavanlı.
+func capped_sell_price(item_id: String, market_price: int) -> int:
+	if not bought_here.has(item_id):
+		return market_price
+	return mini(market_price, maxi(1, int(floor(float(bought_here[item_id]) * BUYBACK_SHARE))))
+
+## Yolun bir günü: bozulan mal yaşlanır, raf ömrünü aşan çürür.
+func spoil_perishables() -> Dictionary:
+	var rotted := {}
+	for item in ItemCatalog.get_trade_goods():
+		if item.shelf_days <= 0:
+			continue
+		var held := get_total_quantity(item.item_id)
+		if held <= 0:
+			perishable_days.erase(item.item_id)
+			continue
+		var age := float(perishable_days.get(item.item_id, 0.0)) + 1.0
+		perishable_days[item.item_id] = age
+		if age > float(item.shelf_days):
+			var lost := mini(held, maxi(1, int(ceil(float(held) * ROT_SHARE))))
+			if remove_from_cargo_or_bags(item.item_id, lost):
+				rotted[item.item_id] = lost
+	return rotted
 
 ## --- Fiyat defteri (görev Y-C10) ---
 ## Görülen fiyatlar tarihiyle yazılır ve eskir; taverna başka şehrin fiyatını
@@ -2681,6 +2737,7 @@ func finish_journey() -> Dictionary:
 	caravan = CaravanState.new()
 	hired_recruit_indices = {}
 	tailor_sold = {}
+	bought_here = {}
 	_restock_current_location()
 	record_seen_prices(current_location_id)
 	heal_party()
@@ -3247,6 +3304,8 @@ func to_save_dict() -> Dictionary:
 		"last_feast_day": last_feast_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
+		"perishable_days": perishable_days.duplicate(),
+		"bought_here": bought_here.duplicate(),
 		"price_book": price_book.duplicate(true),
 		"journey_camps": journey_camps.duplicate(true),
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
@@ -3466,6 +3525,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
+	perishable_days = {}
+	for item_id in (data.get("perishable_days", {}) as Dictionary):
+		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])
+	bought_here = _int_values(data.get("bought_here", {}))
 	price_book = {}
 	var book: Dictionary = data.get("price_book", {})
 	for location_id in book:
@@ -3563,6 +3626,8 @@ func build_event_context() -> Dictionary:
 		"debt": get_total_debt(),
 		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
 		"provisions": get_provisions(),
+		# Kaçak mal (Y-C19): gümrük onu arar.
+		"contraband": get_total_quantity(ItemCatalog.CONTRABAND_SALT),
 		"wagons": caravan.wagon_count,
 		"healthy_wagons": caravan.get_healthy_wagon_count(),
 		"damaged_wagons": caravan.damaged_wagons,
