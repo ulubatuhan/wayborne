@@ -64,13 +64,16 @@ const SFX_FIRE_IGNITE: String = "fire_ignite"
 const SFX_HIT: String = "hit"
 const SFX_CRIT: String = "hit_crit"
 const SFX_KILL: String = "hit_kill"
+const SFX_VARIANTS: int = 5
+const SFX_PITCH_JITTER: float = 0.06
 const SFX_PATHS: Dictionary = {
 	SFX_THUD: "res://data/assets/audio/wooden_thud.wav",
 	SFX_GATE: "res://data/assets/audio/gate_creak.wav",
 	SFX_FIRE_IGNITE: "res://data/assets/audio/fire_ignite.wav",
-	SFX_HIT: "res://data/assets/audio/hit.wav",
-	SFX_CRIT: "res://data/assets/audio/hit_crit.wav",
-	SFX_KILL: "res://data/assets/audio/hit_kill.wav",
+	# Kenney Impact Sounds (CC0): beşer çeşit, rastgele biri, perde oynar.
+	SFX_HIT: "res://data/assets/audio/combat/hit_%d.ogg",
+	SFX_CRIT: "res://data/assets/audio/combat/hit_crit_%d.ogg",
+	SFX_KILL: "res://data/assets/audio/combat/hit_kill_%d.ogg",
 }
 
 ## Ortam sesi (bkz. `play_ambience`) - müziğin *altında* değil, müziğin
@@ -135,6 +138,11 @@ func play_track(track_id: String) -> void:
 ## henüz gelmemişse oyun onsuz da çalışmalı, çökmemeli.
 func play_sfx(sfx_id: String) -> void:
 	var path: String = SFX_PATHS.get(sfx_id, "")
+	# Çeşitli sesler (`%d` taşıyan yol): SFX_VARIANTS tanesinden biri,
+	# perdesi ±SFX_PITCH_JITTER - aynı vuruş iki kez aynı duyulmasın.
+	var varied := path.contains("%d")
+	if varied:
+		path = path % randi_range(0, SFX_VARIANTS - 1)
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
 	var stream: AudioStream = load(path)
@@ -143,6 +151,8 @@ func play_sfx(sfx_id: String) -> void:
 	var player := AudioStreamPlayer.new()
 	player.stream = stream
 	player.volume_db = _target_db()
+	if varied:
+		player.pitch_scale = randf_range(1.0 - SFX_PITCH_JITTER, 1.0 + SFX_PITCH_JITTER)
 	add_child(player)
 	player.finished.connect(player.queue_free)
 	player.play()
