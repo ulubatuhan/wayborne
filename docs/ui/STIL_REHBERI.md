@@ -97,6 +97,19 @@ Oyunun her yüzeyinde (harita, arayüz, defter, kart) aynı üç yazı yüzü; b
 Sans-serif hiçbir yerde yok; motorun kendi yazısı yalnızca son yedek. `test_waybook_theme` yazı klasöründe bu üçü ve
 CJK yedekleri dışında yüz bırakmaz.
 
+## Fener motifi (görev Y-G08)
+
+Fener oyunun görsel motifi: karanlıkta taşınan tek sıcak ışık. Rengi `ArtPalette.UI_ACCENT` (kehribar) ailesinden;
+başka bir sıcak vurgu icat edilmez.
+
+| Yer | Durum |
+|---|---|
+| Haritadaki atlı işaretin feneri (8.11, `belgeler/ATLI_ISARET.md`) | var |
+| Yoldaki kervan feneri: gece lider figürde ışık halesi (Y-C20, `light_for_night`) | var |
+| Menünün ışık kaynağı: kamp ateşi, fener ışığı kısılır (Y-G16 taslağı) | taslak |
+| Arayüzün kehribar vurgusu (`UI_ACCENT`: seçili, ana eylem, başlık) | var |
+| Logo yanında küçük fener amblemi | Poly Haven `Lantern_01` (CC0) render + mürekkep; indirme izni bekliyor |
+
 ## Ne yapılmaz
 
 - Dünyanın kendi kurumu olmayan bir şey (cami, minare, kubbe) ufka konmaz (bkz. CLAUDE.md, Art Rules).
