@@ -432,3 +432,6 @@
 "DUTY_MIDDLE_DESC","Vagonların arasında yürür: tekerleğe, yüke ve erzağa bakar (arabacı, levazımcı).","Walks among the wagons: minds the wheels, the load and the stores (wagoner, quartermaster).","","","","","","","","",""
 "DUTY_REAR_NAME","Artçı","Rear","","","","","","","","",""
 "DUTY_REAR_DESC","Kervanın ardında yürür: yaralıya, geride kalana ve peşinden geleni fark etmeye bakar (otacı).","Walks at the tail: tends the wounded, the stragglers, and notices who follows (herbalist).","","","","","","","","",""
+"ITEM_LANTERN_NAME","Fener","Lantern","","","","","","","","",""
+"ITEM_LANTERN_OIL_NAME","Fener yağı","Lamp oil","","","","","","","","",""
+"ITEM_TORCH_NAME","Meşale","Torch","","","","","","","","",""

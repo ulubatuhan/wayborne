@@ -1313,6 +1313,15 @@ func _build_orders_panel() -> void:
 	_camp_order_button.toggled.connect(_on_camp_order_toggled)
 	standing_row.add_child(_camp_order_button)
 
+	# Havaya karşı küçük kararlar (Y-B05) ve gece ışığı (Y-C20): günün havasına
+	# ve saate göre yeniden kurulur.
+	_weather_row = HBoxContainer.new()
+	_weather_row.add_theme_constant_override("separation", 4)
+	column.add_child(_weather_row)
+	_light_row = HBoxContainer.new()
+	_light_row.add_theme_constant_override("separation", 4)
+	column.add_child(_light_row)
+
 	_orders_layer.add_child(_command_panel)
 
 ## Başlığa basılı tutmak paneli sürüklemeye başlatır/bitirir - gerçek hareket
@@ -1749,6 +1758,7 @@ func _process(delta: float) -> void:
 		var hours := _clock.advance(delta, maxf(1.0, _clock.get_speed()) if transitioning else -1.0)
 		_advance_position(hours, delta)
 		_tick_signals(hours)
+		_tick_night(hours)
 		_process_elapsed_days()
 		_update_camp_state()
 	else:
@@ -1757,6 +1767,7 @@ func _process(delta: float) -> void:
 		_caravan.set_leader_motion(0.0, false)
 
 	_update_chatter(delta)
+	_update_light_glow()
 	_refresh_time_ui()
 	_refresh_modal()
 
@@ -2121,8 +2132,12 @@ func _walk_at(rate: float, hours: float) -> void:
 	# çarpanı planlayıcının erzak payına ekliyor, yoksa tırmanışlı bir
 	# rotada "doğru stoklayan asla aç kalmaz" sözü sessizce bozulurdu.
 	var terrain_factor := 1.0 if _terrain == null else _terrain.speed_factor_at(_terrain_day())
+	# Fırtınada sığınan kervan beklerken yürümez (Y-B05).
+	if _clock.total_hours < _shelter_until_hours:
+		return
+	var weather_multiplier := RouteWeather.pace_multiplier(_weather) * _weather_call_rate()
 	var effective := JourneyController.effective_rate(
-		rate, RouteWeather.pace_multiplier(_weather),
+		rate, weather_multiplier,
 		_session.get_caravan_theoretical_speed(), terrain_factor, _hungry
 	)
 	_journey.walk(effective, hours)
@@ -2233,6 +2248,159 @@ func _role_cover() -> Dictionary:
 		if holder != null:
 			cover[String(DutyCatalog.ROLE_ZONES[role])] = RoadSignals.ROLE_RESOLVE_PER_HOUR * DutyCatalog.get_duty_power(holder, role)
 	return cover
+
+## --- Havaya karşı küçük kararlar (görev Y-B05) ---
+var _weather_row: HBoxContainer
+var _light_row: HBoxContainer
+var _weather_call: String = ""
+var _weather_call_day: int = -99
+var _shelter_until_hours: float = -1.0
+
+func _weather_call_rate() -> float:
+	if _weather_call_day != _session.total_days_elapsed:
+		return 1.0
+	if _weather_call == WeatherCalls.LIGHT_IN_FOG:
+		# Işık sisin yavaşlığını kaldırır.
+		return 1.0 / maxf(0.01, RouteWeather.pace_multiplier(_weather))
+	return WeatherCalls.rate_multiplier(_weather_call)
+
+func _refresh_weather_calls() -> void:
+	if _weather_row == null:
+		return
+	NodeUtil.clear_children(_weather_row)
+	if _weather_call_day == _session.total_days_elapsed:
+		var chosen := Label.new()
+		chosen.text = tr(String(WeatherCalls.LABEL_KEYS.get(_weather_call, "")))
+		chosen.modulate = ArtPalette.UI_HUD_NOTE
+		_weather_row.add_child(chosen)
+		return
+	for call in WeatherCalls.options_for(_weather):
+		var button := Button.new()
+		button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
+		button.text = tr(String(WeatherCalls.LABEL_KEYS[call]))
+		if call == WeatherCalls.LIGHT_IN_FOG:
+			var reason := _best_light_reason()
+			button.disabled = not reason.is_empty()
+			button.tooltip_text = tr(reason) if not reason.is_empty() else ""
+		button.pressed.connect(_on_weather_call.bind(call))
+		_weather_row.add_child(button)
+
+func _on_weather_call(call: String) -> void:
+	_weather_call = call
+	_weather_call_day = _session.total_days_elapsed
+	if call == WeatherCalls.EARLY_START:
+		_session.caravan.stamina = clampi(_session.caravan.stamina + WeatherCalls.EARLY_START_STAMINA, 0, CaravanState.MAX_STAMINA)
+	elif call == WeatherCalls.BEAT_THE_RAIN:
+		_session.change_stress(WeatherCalls.BEAT_THE_RAIN_STRESS)
+	elif call == WeatherCalls.SLOW_IN_FOG:
+		_signal_danger_bonus = maxf(_signal_danger_bonus - WeatherCalls.SLOW_FOG_DANGER, -SIGNAL_DANGER_CAP)
+	elif call == WeatherCalls.LIGHT_IN_FOG:
+		_light(_best_light_kind())
+	elif call == WeatherCalls.SHELTER:
+		_shelter_until_hours = _clock.total_hours + WeatherCalls.SHELTER_HOURS
+		# Sığınan kervan fırtınanın moral ısırığını yemez.
+		_session.caravan.change_morale(-RouteWeather.morale_bite(_weather))
+	if WeatherCalls.damages_wagon(call, _session.total_days_elapsed, _route_key):
+		_session.caravan.damage_wagons(1)
+		_add_log(tr("UI_WX_WAGON_HURT"), LOCKED_COLOR)
+	_add_log(tr("UI_WX_CHOSEN") % tr(String(WeatherCalls.LABEL_KEYS[call])), OUTCOME_COLOR)
+	_refresh_weather_calls()
+	_refresh_state()
+
+## --- Gece yürüyüşü ve ışık (görev Y-C20) ---
+## Kervan gece de yürür (kamp kurmadıkça); karanlıkta yürümek takat yer ve yolu
+## tekinsizleştirir. Fener (yağ) ya da meşale (iki tane) o geceyi aydınlatır:
+## risk kalkar, ışık yolda görünür. Meşale daha parlak ve hayvanı ürkütür.
+const NIGHT_STAMINA_PER_HOUR: float = 0.6
+const DARK_DANGER: float = 0.05
+const TORCH_BEAST_DANGER: float = -0.03
+var _light_kind: String = ""
+var _light_night: int = -99
+var _night_stamina_debt: float = 0.0
+var _light_glow: Control
+
+func _is_dark() -> bool:
+	return JourneyClock.darkness_for_hour(_clock.get_hour_of_day()) >= 0.5
+
+func _best_light_kind() -> String:
+	if _session.get_light_block_reason(GameSession.LIGHT_LANTERN).is_empty():
+		return GameSession.LIGHT_LANTERN
+	return GameSession.LIGHT_TORCH
+
+func _best_light_reason() -> String:
+	return _session.get_light_block_reason(_best_light_kind())
+
+func _light(kind: String) -> void:
+	if _session.light_for_night(kind):
+		_light_kind = kind
+		_light_night = _session.total_days_elapsed
+		_light_lit = true
+		_add_log(tr("UI_LIGHT_LIT_LANTERN" if kind == GameSession.LIGHT_LANTERN else "UI_LIGHT_LIT_TORCH"), OUTCOME_COLOR)
+	_refresh_light_row()
+
+func _refresh_light_row() -> void:
+	if _light_row == null:
+		return
+	NodeUtil.clear_children(_light_row)
+	if not _is_dark() or _camping or _light_lit:
+		return
+	for kind in [GameSession.LIGHT_LANTERN, GameSession.LIGHT_TORCH]:
+		var button := Button.new()
+		button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
+		button.text = tr("UI_LIGHT_LANTERN" if kind == GameSession.LIGHT_LANTERN else "UI_LIGHT_TORCH")
+		var reason := _session.get_light_block_reason(kind)
+		button.disabled = not reason.is_empty()
+		button.tooltip_text = tr(reason) if not reason.is_empty() else tr("UI_LIGHT_TOOLTIP")
+		button.pressed.connect(_light.bind(kind))
+		_light_row.add_child(button)
+
+## Saat başı: karanlıkta ışıksız yürümek takat yer; şafakta ışık söner.
+func _tick_night(hours: float) -> void:
+	if _light_lit and not _is_dark():
+		_light_lit = false
+		_light_kind = ""
+		_refresh_light_row()
+	if _is_dark() and not _camping and not _light_lit and _light_row != null and _light_row.get_child_count() == 0:
+		_refresh_light_row()
+	if _is_dark() and not _camping and not _light_lit:
+		_night_stamina_debt += NIGHT_STAMINA_PER_HOUR * hours
+		var whole := int(_night_stamina_debt)
+		if whole > 0:
+			_night_stamina_debt -= whole
+			_session.caravan.stamina = maxi(0, _session.caravan.stamina - whole)
+
+## Yanan ışık yolda görünür: liderin başı hizasında yumuşak bir hale.
+func _update_light_glow() -> void:
+	if _balloon_layer == null or _caravan == null:
+		return
+	if _light_glow == null:
+		_light_glow = Control.new()
+		_light_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_light_glow.draw.connect(func():
+			var torch := _light_kind == GameSession.LIGHT_TORCH
+			var radius := (90.0 if torch else 64.0)
+			var colour := Color(1.0, 0.62, 0.25) if torch else Color(1.0, 0.82, 0.5)
+			for i in 5:
+				var share := 1.0 - float(i) / 5.0
+				_light_glow.draw_circle(Vector2.ZERO, radius * share, Color(colour, 0.06 + 0.05 * float(i))))
+		_balloon_layer.add_child(_light_glow)
+		_balloon_layer.move_child(_light_glow, 0)
+	var leader := _caravan.get_leader_figure()
+	var show := _light_lit and _is_dark() and leader != null and _caravan.visible
+	_light_glow.visible = show
+	if not show:
+		return
+	var head := leader.get_global_transform_with_canvas() * Vector2(leader.size.x * 0.75, leader.size.y * 0.2)
+	_light_glow.position = _balloon_layer.get_global_transform_with_canvas().affine_inverse() * head
+	_light_glow.queue_redraw()
+
+## Gecenin tehlike payı: ışıksız karanlık biraz tekinsiz, meşale hayvanı ürkütür.
+func _night_danger_delta() -> float:
+	if not _is_dark() or _camping:
+		return 0.0
+	if not _light_lit:
+		return DARK_DANGER
+	return TORCH_BEAST_DANGER if _light_kind == GameSession.LIGHT_TORCH else 0.0
 
 ## Akşam ve gece yol daha çok konuşur (Y-B02, kullanıcı notu); önlem alınmışsa
 ## (ateş yanıyor, nöbet kuruldu, fener ya da meşale yanıyor) artış düşer.
@@ -2514,6 +2682,7 @@ func _refresh_weather() -> void:
 	_band.set_weather(_weather)
 	if _caravan != null:
 		_caravan.set_weather(_weather)
+	_refresh_weather_calls()
 
 func _refresh_time_ui() -> void:
 	if _clock == null:
@@ -2724,7 +2893,7 @@ func _weathered_danger() -> float:
 	var weathered := clampf(
 		base + RouteWeather.danger_delta(_weather) * (1.0 - base), 0.0, 1.0
 	)
-	return clampf(weathered + _signal_danger_bonus * (1.0 - weathered), 0.0, 1.0)
+	return clampf(weathered + (_signal_danger_bonus + _night_danger_delta()) * (1.0 - weathered), 0.0, 1.0)
 
 ## Olayların etkileri hep buradan geçer. Sebebi tek bir tip: TRAVEL_DAYS
 ## (`yol +1 gün`) `journey_days_remaining`'e yazıyor, ama o alan artık kat

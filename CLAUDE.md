@@ -4148,6 +4148,13 @@ every decision has a visible control, and a key is only its shortcut.**
   backstory gated at bond 1/3/5): listening writes a `KIND_STORY` ledger line, and the third chapter, the secret,
   lifts their heaviest grievance. Each backstory carries a personal goal, shown on the character screen once you
   know them.
+- **Weather offers small calls; night walking has a price (tasks Y-B05, Y-C20).** Each weather shows one or two
+  one-click choices in the orders panel (`WeatherCalls`): start early in clear weather, push before the rain, take
+  the muddy shortcut, slow down or light a lamp in fog, shelter from or press through a storm. Each turns an existing
+  lever (pace, stamina, stress, a seeded wagon-damage roll, danger); the slower ones are voluntary, so the planner's
+  promise does not rest on them. The caravan walks at night as before; in the dark it pays stamina and a little danger
+  unless a lantern (one oil a night) or torches (two a night, brighter, keep beasts back) are lit - a glow shows at
+  the leader.
 - **The road has a director (task Y-B02).** `RoadDirector` bends `EventEngine`'s daily chance and weights - it
   invents no event. Quiet days build tension (the chance rises from the second quiet day, capped); the day after a
   heavy card (combat, a lost wagon, someone left behind) is a relief (heavy cards rarer, the chance a little lower);

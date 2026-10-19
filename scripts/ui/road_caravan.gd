@@ -666,6 +666,9 @@ func set_leader_offset(offset: float) -> void:
 func get_leader_offset() -> float:
 	return _leader_offset
 
+func get_leader_figure() -> WalkFigure:
+	return _leader_rider if _leader_rider != null and _leader_rider.visible else _leader
+
 func get_character_of(figure: WalkFigure) -> CharacterData:
 	return _figure_character.get(figure)
 

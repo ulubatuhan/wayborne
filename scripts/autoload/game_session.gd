@@ -2499,6 +2499,32 @@ func _anyone_hungry() -> bool:
 			return true
 	return false
 
+## --- Gece ışığı (görev Y-C20) ---
+## Fener: fener + bir yağ; meşale: iki meşale. Bir gece yanar. Hangisi yanacak
+## oyuncunun seçimi; ikisi de yoksa düğme sebebiyle kilitli.
+const LIGHT_LANTERN: String = "lantern"
+const LIGHT_TORCH: String = "torch"
+const TORCHES_PER_NIGHT: int = 2
+
+func get_light_block_reason(kind: String) -> String:
+	if kind == LIGHT_LANTERN:
+		if get_total_quantity(ItemCatalog.LANTERN) <= 0:
+			return "UI_LIGHT_NO_LANTERN"
+		if get_total_quantity(ItemCatalog.LANTERN_OIL) <= 0:
+			return "UI_LIGHT_NO_OIL"
+		return ""
+	if kind == LIGHT_TORCH:
+		return "" if get_total_quantity(ItemCatalog.TORCH) >= TORCHES_PER_NIGHT else "UI_LIGHT_NO_TORCH"
+	return "UI_LIGHT_NO_TORCH"
+
+## Işığı yakar (yakıtı harcar); yanmadıysa false.
+func light_for_night(kind: String) -> bool:
+	if not get_light_block_reason(kind).is_empty():
+		return false
+	if kind == LIGHT_LANTERN:
+		return remove_from_cargo_or_bags(ItemCatalog.LANTERN_OIL, 1)
+	return remove_from_cargo_or_bags(ItemCatalog.TORCH, TORCHES_PER_NIGHT)
+
 ## --- Mal çeşitliliği (görev Y-C19) ---
 ## Bozulan mal yolda gün sayar: `perishable_days` item_id -> taşınan stoğun
 ## ortalama yaşı (gün). Raf ömrünü geçince her yol günü stoğun ROT_SHARE'i
