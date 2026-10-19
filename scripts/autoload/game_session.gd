@@ -2627,6 +2627,51 @@ func _note_route_trip(origin_id: String, destination_id: String) -> void:
 ## Soy mirası (görev Y-D03): yeni oyunun eski soydan aldığı (bkz.
 ## LineageArchive.apply_to). Kayıtta; boşsa eski soy yok.
 var legacy: Dictionary = {}
+## Uzun zincirler (görev Y-E02): zincir -> {"stage", "where", "from_city",
+## "after_day", "generation"}. Bir kararın karşılığı başka bir şehirde ya da
+## varisin döneminde gelir; kart `chain_<id>_ripe` bağlamına bakar. Kayıtta.
+var event_chains: Dictionary = {}
+const CHAIN_DONE: int = -1
+
+## Zinciri bir aşamaya taşır (CHAIN_ADVANCE). aşama CHAIN_DONE ise kapanır.
+func advance_chain(chain_id: String, stage: int, where: String = "", delay_days: int = 0) -> void:
+	if chain_id.is_empty():
+		return
+	event_chains[chain_id] = {
+		"stage": stage, "where": where,
+		"from_city": journey_origin_id if is_journey_active() else current_location_id,
+		"after_day": total_days_elapsed + maxi(0, delay_days),
+		"generation": lineage_generation,
+	}
+
+func get_chain_stage(chain_id: String) -> int:
+	return int((event_chains.get(chain_id, {}) as Dictionary).get("stage", 0))
+
+## Zincirin şimdiki aşaması kartını açabilir mi: gün geldi mi, yer ve kuşak tutuyor mu.
+func is_chain_ripe(chain_id: String) -> bool:
+	var chain: Dictionary = event_chains.get(chain_id, {})
+	if chain.is_empty() or int(chain["stage"]) <= 0:
+		return false
+	if total_days_elapsed < int(chain["after_day"]):
+		return false
+	var where := String(chain["where"])
+	if where == "heir":
+		return lineage_generation > int(chain["generation"])
+	var heading := journey_destination_id if is_journey_active() else ""
+	if where == "other_city":
+		return not heading.is_empty() and heading != String(chain["from_city"])
+	if where.begins_with("city:"):
+		return heading == where.substr(5)
+	return true
+
+func _build_chain_context() -> Dictionary:
+	var out := {}
+	for chain_id in event_chains:
+		var stage := get_chain_stage(chain_id)
+		out["chain_%s" % chain_id] = stage
+		out["chain_%s_ripe" % chain_id] = stage if is_chain_ripe(chain_id) else 0
+	return out
+
 ## Başlangıç kökeni (Y-D05, StartOrigins); kayıtta.
 var origin_id: String = "father"
 
@@ -3855,6 +3900,7 @@ func to_save_dict() -> Dictionary:
 		"fate_mode": fate_mode,
 		"legacy": legacy.duplicate(true),
 		"origin_id": origin_id,
+		"event_chains": event_chains.duplicate(true),
 		"difficulty": difficulty.duplicate(),
 		"road_memorials": road_memorials.duplicate(true),
 		"route_memory": route_memory.duplicate(true),
@@ -4087,6 +4133,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	fate_mode = bool(data.get("fate_mode", false))
 	legacy = (data.get("legacy", {}) as Dictionary).duplicate(true)
 	origin_id = String(data.get("origin_id", "father"))
+	event_chains = (data.get("event_chains", {}) as Dictionary).duplicate(true)
 	difficulty = {}
 	for key in DIFFICULTY_KEYS:
 		difficulty[key] = clampi(int((data.get("difficulty", {}) as Dictionary).get(key, DIFFICULTY_STANDARD)), DIFFICULTY_EASY, DIFFICULTY_HARD)
@@ -4270,6 +4317,7 @@ func build_event_context() -> Dictionary:
 	context.merge(_build_world_event_context())
 	# Godot 4.2'de Dictionary.merged() yok (4.3+), o yüzden in-place merge().
 	context.merge(_build_skill_check_context())
+	context.merge(_build_chain_context())
 	return context
 
 ## --- Lonca özel görevleri (bkz. Faz 17 PR-4) ---

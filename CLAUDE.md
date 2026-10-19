@@ -3874,6 +3874,13 @@ Who you are travelling with, and who you meet, changes what an event does.
   chain. `test_event_effects.gd` exercises the chain end to end instead -
   when a report says an event never fires, check whether anything in the
   harness could ever reach it before treating it as dead content.
+- **A long chain outlives the journey (task Y-E02).** `UNLOCK_EVENT` chains live in the journey's engine and end with
+  it. A chain whose answer comes in another city or in the heir's era uses `CHAIN_ADVANCE` ("chain|stage|where", amount
+  = minimum days): `GameSession.event_chains` (saved) holds the stage, where it started, the earliest day and the
+  generation. The context carries `chain_<id>` (the stage) and `chain_<id>_ripe` (the stage only when the day has come
+  and the place fits: `other_city` = on the road to a city other than where it began, `city:<id>` = on the road to
+  that city, `heir` = a later generation). A stage of `CHAIN_DONE` (-1) closes it. The ten chains' content waits for
+  the lore (Y-E06).
 - **Culture kinship is not one culture's privilege.** `ROLL_ENCOUNTER` also
   rolls the met group's culture and sets a `<prefix>_kin` flag when it
   matches the *leader's* culture, so meeting your own people works whichever

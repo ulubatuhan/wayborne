@@ -155,6 +155,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
+		EventEffect.Type.CHAIN_ADVANCE:
+			var parts := effect.text_value.split("|")
+			if parts.size() >= 2:
+				session.advance_chain(parts[0], int(parts[1]), parts[2] if parts.size() > 2 else "", effect.amount)
 
 ## En yaralı yoldaş kervandan ayrılır - ölüm değil, geride bırakılma.
 ## Lider asla bırakılmaz, tek kişilik bir parti hiç kimseyi bırakamaz.

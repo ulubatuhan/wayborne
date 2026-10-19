@@ -72,6 +72,11 @@ enum Type {
 	# Kıyafet ganimeti (görev Y-C03): text_value = parça kimliği, amount = adet;
 	# GRANT_EQUIPMENT gibi önce dolaba düşer, kime giydirileceği sonra seçilir.
 	GRANT_OUTFIT,
+	# Uzun zincir (görev Y-E02): text_value = "zincir|aşama|nerede", amount =
+	# en az kaç gün sonra. nerede: "other_city" (başladığı şehirden başka bir
+	# şehre giden yolda), "city:<id>" (o şehre giden yolda), "heir" (sonraki
+	# kuşakta), boş = her yerde. Karşılık kartı `chain_<id>_ripe`'a bakar.
+	CHAIN_ADVANCE,
 }
 
 @export var type: Type = Type.GOLD
