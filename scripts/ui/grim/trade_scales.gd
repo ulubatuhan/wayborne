@@ -18,11 +18,14 @@ func _init() -> void:
 	custom_minimum_size = Vector2(320, 300)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+const SETTLED_EPSILON: float = 0.0005
+
 func set_values(ask: float, offer: float, snap: bool = false) -> void:
 	asking = ask
 	offered = offer
 	if snap:
 		_angle = beam_angle(asking, offered)
+	set_process(true)
 	queue_redraw()
 
 ## Kolun açısı (radyan). Pozitif: sağ kefe (teklif) ağır basıyor. Fark
@@ -35,6 +38,11 @@ func _process(delta: float) -> void:
 	var target := beam_angle(asking, offered)
 	_angle = lerpf(_angle, target, clampf(delta * SETTLE_SPEED, 0.0, 1.0))
 	queue_redraw()
+	# Kol dengeye oturunca kimse kıpırdatmıyor: yeni bir teklif gelene kadar
+	# işleme durur (görev 5.1, O-8).
+	if absf(_angle - target) < SETTLED_EPSILON:
+		_angle = target
+		set_process(false)
 
 func _draw() -> void:
 	var c := Vector2(size.x * 0.5, size.y * 0.28)

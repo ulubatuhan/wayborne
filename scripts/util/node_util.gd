@@ -15,6 +15,21 @@ static func reduce_motion(context: Node) -> bool:
 	var settings := context.get_node_or_null("/root/UserSettings")
 	return settings != null and bool(settings.get("reduce_motion"))
 
+## Ortam animasyonlarının (kül, duman, fener, sıvı göstergesi) çizim temposu:
+## görünmeyen bir düğüm çizilmez, görünen en çok saniyede bu kadar çizilir.
+## Zamanı çağıran yürütür; burası yalnızca "şimdi çiz mi" der (görev 5.1, O-8).
+const AMBIENT_REDRAW_HZ: float = 30.0
+
+## `wait` bir önceki çizimden beri geçen süre; dönen değer yeni `wait`.
+static func ambient_redraw(item: CanvasItem, wait: float, delta: float) -> float:
+	if not item.is_visible_in_tree():
+		return wait
+	wait += delta
+	if wait < 1.0 / AMBIENT_REDRAW_HZ:
+		return wait
+	item.queue_redraw()
+	return 0.0
+
 static func clear_children(container: Node) -> void:
 	for child in container.get_children():
 		container.remove_child(child)

@@ -8,6 +8,7 @@ extends Control
 var radius: float = 260.0
 var strength: float = 0.75
 var _time: float = 0.0
+var _redraw_wait: float = 0.0
 var _seed: float = 0.0
 var _tex: Texture2D
 
@@ -29,9 +30,11 @@ func set_time(t: float) -> void:
 	_time = t
 	queue_redraw()
 
+## Ortam animasyonu: zaman hep akar, ama görünmezken çizilmez ve en çok
+## `NodeUtil.AMBIENT_REDRAW_HZ` kez çizilir (görev 5.1, O-8).
 func _process(delta: float) -> void:
 	_time += delta
-	queue_redraw()
+	_redraw_wait = NodeUtil.ambient_redraw(self, _redraw_wait, delta)
 
 ## Alev titremesi: iki yavaş, bir hızlı dalga; asla sıfıra inmiyor.
 static func flicker(t: float, seed_value: float) -> float:

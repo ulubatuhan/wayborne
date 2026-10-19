@@ -13,6 +13,7 @@ func run(t) -> void:
 	_test_load_any(t)
 	_test_with_mipmaps(t)
 	_test_reduce_motion(t)
+	_test_ambient_redraw(t)
 
 func _test_clear_children(t) -> void:
 	var parent := Node.new()
@@ -75,3 +76,11 @@ func _test_reduce_motion(t) -> void:
 	var loose := Node.new()
 	t.not_ok(NodeUtil.reduce_motion(loose), "ağaçta olmayan düğüm hareketi azaltmaz")
 	loose.free()
+
+## Ortam animasyonu çizim temposu (görev 5.1, O-8): ağaçta olmayan (görünmeyen)
+## düğüm için sayaç ilerlemez; görünende sayaç birikir ve eşikte sıfırlanır.
+func _test_ambient_redraw(t) -> void:
+	var item := Control.new()
+	t.almost(NodeUtil.ambient_redraw(item, 0.0, 0.5), 0.0, "görünmeyen düğümde sayaç ilerlemez")
+	item.free()
+	t.ok(1.0 / NodeUtil.AMBIENT_REDRAW_HZ <= 0.05, "ortam animasyonu en az 20 Hz")

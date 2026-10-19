@@ -8,6 +8,7 @@ const COUNT: int = 16
 const RISE_SECONDS: float = 14.0
 
 var _time: float = 0.0
+var _redraw_wait: float = 0.0
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -17,9 +18,11 @@ func set_time(t: float) -> void:
 	_time = t
 	queue_redraw()
 
+## Ortam animasyonu: zaman hep akar, ama görünmezken çizilmez ve en çok
+## `NodeUtil.AMBIENT_REDRAW_HZ` kez çizilir (görev 5.1, O-8).
 func _process(delta: float) -> void:
 	_time += delta
-	queue_redraw()
+	_redraw_wait = NodeUtil.ambient_redraw(self, _redraw_wait, delta)
 
 ## Bir duman topağının ömür payı 0..1 (0 doğar, 1 söner).
 static func puff_age(i: int, t: float) -> float:
