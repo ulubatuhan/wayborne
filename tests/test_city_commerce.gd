@@ -34,6 +34,7 @@ func run(t) -> void:
 	_test_brief_needs_point_at_real_screens(t)
 	_test_brief_shows_debt_even_when_the_term_is_far_off(t)
 	_test_brief_offers_every_open_route(t)
+	_test_price_book(t)
 
 func _session(gold: int = 500, wagons: int = 1) -> GameSession:
 	return GameSession.new(gold, 10, wagons)
@@ -397,3 +398,60 @@ func _collect_buttons(node: Node) -> Array[Button]:
 		for button in _collect_buttons(child):
 			found.append(button)
 	return found
+
+## Fiyat defteri (görev Y-C10): görülen fiyat tarihli ve eskir, söylenti
+## bazen yanlış ama aynı gün hep aynı, defter kayıttan döner.
+func _test_price_book(t) -> void:
+	var session := _brief_session(500, 20)
+	var here := session.current_location_id
+	t.ok(session.price_book.has(here), "başlangıç şehrinin fiyatı deftere yazılı")
+	t.eq(session.get_price_age(here), 0, "bugün görülen fiyat taze")
+	t.eq(String(session.price_book[here]["source"]), GameSession.PRICE_SOURCE_SEEN, "kaynak: göz")
+	t.not_ok(session.is_price_stale(here), "taze bilgi eskimiş değil")
+	var target := WorldMapData.get_routes_from(here)[0].to_location_id
+	t.eq(session.get_price_age(target), -1, "komşunun fiyatı bilinmiyor")
+	var cost := session.get_price_rumor_cost(target)
+	var gold := session.wallet.balance
+	t.ok(session.buy_price_rumor(target), "söylenti satın alınır")
+	t.eq(session.wallet.balance, gold - cost, "bedeli keseden düşer")
+	var age := session.get_price_age(target)
+	t.ok(age >= GameSession.PRICE_RUMOR_MIN_AGE and age <= GameSession.PRICE_RUMOR_MAX_AGE, "söylenti birkaç gün eski gelir (%d)" % age)
+	t.eq(session.get_price_rumor_block_reason(target), "UI_PRICE_RUMOR_FRESH", "taze bilgi varken yeniden satılmaz")
+	t.eq(session.get_price_rumor_block_reason(here), "UI_PRICE_RUMOR_INVALID", "bulunulan şehrin söylentisi satılmaz")
+	session.total_days_elapsed += GameSession.PRICE_STALE_DAYS + 1
+	t.ok(session.is_price_stale(here), "%d günden eski bilgi eskimiş" % GameSession.PRICE_STALE_DAYS)
+	var stale_line := false
+	for line in PriceBookPanel.lines_for(session):
+		if bool(line.get("stale", false)):
+			stale_line = true
+	t.ok(stale_line, "defter ekranı eskimiş satırı işaretler")
+	# Yanlış söylenti: ölçülü bir pay, her mal en az %25 sapar; doğrusu birebir.
+	var wrong := 0
+	var total := 0
+	var wrong_far := true
+	var right_exact := true
+	for day in range(0, 400, 3):
+		session.total_days_elapsed = day
+		var rumor := session.roll_price_rumor(target)
+		var truth := session.current_price_sheet(target)
+		total += 1
+		if not bool(rumor["accurate"]):
+			wrong += 1
+		for side in ["buy", "sell"]:
+			for item_id in truth[side]:
+				var real := float(truth[side][item_id])
+				var said := float(rumor[side][item_id])
+				if bool(rumor["accurate"]) and int(said) != int(real):
+					right_exact = false
+				if not bool(rumor["accurate"]) and real >= 8.0 and absf(said - real) / real < 0.2:
+					wrong_far = false
+		if day == 0:
+			t.eq(session.roll_price_rumor(target), rumor, "aynı gün aynı söylenti")
+	var share := float(wrong) / float(total)
+	t.ok(share > 0.12 and share < 0.40, "söylentilerin bir kısmı yanlış (%.2f)" % share)
+	t.ok(wrong_far, "yanlış söylenti fark edilir ölçüde sapar")
+	t.ok(right_exact, "doğru söylenti bugünkü fiyatı söyler")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	t.eq(copy.price_book.size(), session.price_book.size(), "defter kayıttan döner")
+	t.eq(copy.price_book[target]["source"], GameSession.PRICE_SOURCE_RUMOR, "kaynak kayıttan döner")

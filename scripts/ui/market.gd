@@ -85,6 +85,11 @@ func _ready() -> void:
 	_session.wallet.balance_changed.connect(_on_wallet_balance_changed)
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
+	# Fiyat defteri (görev Y-C10): bilinen şehir fiyatları, tarihiyle.
+	var book_button := Button.new()
+	book_button.text = tr("UI_PRICE_BOOK_OPEN")
+	book_button.pressed.connect(func(): add_child(PriceBookPanel.new().setup(_session)))
+	_balance_row.add_child(book_button)
 	RecruitButton.add_before(_back_button, RecruitCatalog.VENUE_MARKET, Nav.ECONOMY)
 
 	_location_note_label.text = _build_trade_note()

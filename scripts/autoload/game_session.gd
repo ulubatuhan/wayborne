@@ -693,6 +693,12 @@ const MAX_JOURNEY_CAMPS: int = 300
 var map_trail: Array = []
 var journey_camps: Array = []
 
+static func _int_values(source: Dictionary) -> Dictionary:
+	var out := {}
+	for key in source:
+		out[String(key)] = int(source[key])
+	return out
+
 ## Herkes ateşe varınca yol ekranı kampın harita konumunu yazar.
 func record_journey_camp(at: Vector2) -> void:
 	journey_camps.append([snappedf(at.x, 0.1), snappedf(at.y, 0.1)])
@@ -819,6 +825,8 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 
 	current_location_id = roll_starting_location(rng, player_character.culture_id)
 	_restock_current_location()
+	price_book = {}
+	record_seen_prices(current_location_id)
 
 	campaign_chapter_index = 0
 	journeys_completed = 0
@@ -2220,6 +2228,97 @@ func get_city_gold_reserve() -> int:
 func can_city_afford_sale(total_price: int) -> bool:
 	return get_city_gold_reserve() >= total_price
 
+## --- Fiyat defteri (görev Y-C10) ---
+## Görülen fiyatlar tarihiyle yazılır ve eskir; taverna başka şehrin fiyatını
+## söylenti olarak satar, söylenti bazen yanlıştır. Defter yalnızca bilgi:
+## pazar hep gerçek fiyattan alır satar. Her giriş:
+## {"day", "source" ("seen"/"rumor"), "accurate", "buy": {id: fiyat}, "sell": {id: fiyat}}.
+## "accurate" ekranda gösterilmez - yanlış söylentiyi oyuncu pazarda öğrenir.
+const PRICE_SOURCE_SEEN: String = "seen"
+const PRICE_SOURCE_RUMOR: String = "rumor"
+const PRICE_STALE_DAYS: int = 20
+const PRICE_RUMOR_BASE_COST: int = 8
+const PRICE_RUMOR_PER_DAY_COST: int = 2
+const PRICE_RUMOR_FALSE_CHANCE: float = 0.25
+## Söylenti taze gelmez: kulaktan kulağa geçene kadar birkaç gün eskir.
+const PRICE_RUMOR_MIN_AGE: int = 2
+const PRICE_RUMOR_MAX_AGE: int = 6
+var price_book: Dictionary = {}
+
+## Şehrin bugünkü liste fiyatları: ürettiği mal alış, aradığı mal satış.
+func current_price_sheet(location_id: String) -> Dictionary:
+	var location := WorldMapData.get_location_by_id(location_id)
+	var sheet := {"buy": {}, "sell": {}}
+	if location == null:
+		return sheet
+	for item_id in location.produces:
+		var item := ItemCatalog.get_item(item_id)
+		if item != null:
+			sheet["buy"][item_id] = MarketPricing.get_buy_price(item, location, market, total_days_elapsed)
+	for item_id in location.demands:
+		var item := ItemCatalog.get_item(item_id)
+		if item != null:
+			sheet["sell"][item_id] = MarketPricing.get_sell_price(item, location, market, total_days_elapsed)
+	return sheet
+
+func record_seen_prices(location_id: String) -> void:
+	var sheet := current_price_sheet(location_id)
+	price_book[location_id] = {
+		"day": total_days_elapsed, "source": PRICE_SOURCE_SEEN, "accurate": true,
+		"buy": sheet["buy"], "sell": sheet["sell"],
+	}
+
+func get_price_age(location_id: String) -> int:
+	if not price_book.has(location_id):
+		return -1
+	return total_days_elapsed - int(price_book[location_id].get("day", total_days_elapsed))
+
+func is_price_stale(location_id: String) -> bool:
+	return get_price_age(location_id) > PRICE_STALE_DAYS
+
+func get_price_rumor_cost(location_id: String) -> int:
+	var route := WorldMapData.get_route(current_location_id, location_id)
+	var days := route.travel_days if route != null else 6
+	var cost := float(PRICE_RUMOR_BASE_COST + days * PRICE_RUMOR_PER_DAY_COST) * get_rumor_cost_multiplier()
+	cost *= 1.0 - get_duty_discount(DutyCatalog.TELLAL)
+	return maxi(1, int(round(cost)))
+
+## Satın alınamıyorsa sebebi (anahtar), alınabiliyorsa "".
+func get_price_rumor_block_reason(location_id: String) -> String:
+	if location_id == current_location_id or WorldMapData.get_location_by_id(location_id) == null:
+		return "UI_PRICE_RUMOR_INVALID"
+	var age := get_price_age(location_id)
+	if age >= 0 and age <= PRICE_RUMOR_MAX_AGE:
+		return "UI_PRICE_RUMOR_FRESH"
+	if not wallet.can_afford(get_price_rumor_cost(location_id)):
+		return "UI_PRICE_RUMOR_NO_GOLD"
+	return ""
+
+## Tavernada başka şehrin fiyatını dinle. Zar şehir + hedef + günden: aynı
+## gün aynı söylenti (yeniden yükleme bir doğruyu satın alamaz).
+func buy_price_rumor(location_id: String) -> bool:
+	if not get_price_rumor_block_reason(location_id).is_empty():
+		return false
+	wallet.spend(get_price_rumor_cost(location_id))
+	price_book[location_id] = roll_price_rumor(location_id)
+	return true
+
+func roll_price_rumor(location_id: String) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("price_rumor|%s|%s|%d" % [current_location_id, location_id, total_days_elapsed])
+	var accurate := rng.randf() >= PRICE_RUMOR_FALSE_CHANCE
+	var sheet := current_price_sheet(location_id)
+	var out := {"day": maxi(0, total_days_elapsed - rng.randi_range(PRICE_RUMOR_MIN_AGE, PRICE_RUMOR_MAX_AGE)),
+		"source": PRICE_SOURCE_RUMOR, "accurate": accurate, "buy": {}, "sell": {}}
+	for side in ["buy", "sell"]:
+		for item_id in sheet[side]:
+			var price := float(sheet[side][item_id])
+			if not accurate:
+				# Yanlış söylenti abartır: ya çok ucuz ya çok pahalı.
+				price *= rng.randf_range(0.55, 0.75) if rng.randf() < 0.5 else rng.randf_range(1.35, 1.6)
+			out[side][item_id] = maxi(1, int(round(price)))
+	return out
+
 func _restock_current_location() -> void:
 	market_stock.clear()
 	var location := WorldMapData.get_location_by_id(current_location_id)
@@ -2583,6 +2682,7 @@ func finish_journey() -> Dictionary:
 	hired_recruit_indices = {}
 	tailor_sold = {}
 	_restock_current_location()
+	record_seen_prices(current_location_id)
 	heal_party()
 
 	# Kazanılmış vagonlar kampanyadan **önce**: bölüm hedefleri
@@ -3147,6 +3247,7 @@ func to_save_dict() -> Dictionary:
 		"last_feast_day": last_feast_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
+		"price_book": price_book.duplicate(true),
 		"journey_camps": journey_camps.duplicate(true),
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
@@ -3365,6 +3466,15 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
+	price_book = {}
+	var book: Dictionary = data.get("price_book", {})
+	for location_id in book:
+		var entry: Dictionary = book[location_id]
+		price_book[String(location_id)] = {
+			"day": int(entry.get("day", 0)), "source": String(entry.get("source", PRICE_SOURCE_SEEN)),
+			"accurate": bool(entry.get("accurate", true)),
+			"buy": _int_values(entry.get("buy", {})), "sell": _int_values(entry.get("sell", {})),
+		}
 	map_trail = []
 	for entry in data.get("map_trail", []):
 		if entry is Dictionary:

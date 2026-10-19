@@ -17,6 +17,8 @@ var _rows: Array[Dictionary] = []
 var _purification_panel: PurificationPanel
 var _feast_label: Label
 var _feast_button: Button
+## Fiyat söylentisi (görev Y-C10): komşu şehirlerin fiyatı, bazen yanlış.
+var _price_rumor_list: VBoxContainer
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
@@ -59,10 +61,23 @@ func _ready() -> void:
 	_feast_button.pressed.connect(_on_feast_pressed)
 	_content.add_child(_feast_button)
 
+	_content.add_child(HSeparator.new())
+	var price_heading := Label.new()
+	price_heading.autowrap_mode = TextServer.AUTOWRAP_WORD
+	price_heading.text = tr("UI_PRICE_RUMOR_HEADING") % int(round(GameSession.PRICE_RUMOR_FALSE_CHANCE * 100.0))
+	_content.add_child(price_heading)
+	_price_rumor_list = VBoxContainer.new()
+	_content.add_child(_price_rumor_list)
+	var book_button := Button.new()
+	book_button.text = tr("UI_PRICE_BOOK_OPEN")
+	book_button.pressed.connect(func(): add_child(PriceBookPanel.new().setup(_session)))
+	_content.add_child(book_button)
+
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 	_build_rows()
 	_refresh_rows()
 	_refresh_feast()
+	_refresh_price_rumors()
 
 func _refresh_feast() -> void:
 	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [
@@ -149,7 +164,42 @@ func _on_buy_pressed(route: TravelRoute) -> void:
 	_session.learn_route(_session.current_location_id, route.to_location_id)
 	_refresh_rows()
 
+## Komşu her şehir için bir satır: bildiğimizin yaşı, söylentinin bedeli ya
+## da neden alınamadığı (kilitli düğme sebebiyle, gizlenmez).
+func _refresh_price_rumors() -> void:
+	for child in _price_rumor_list.get_children():
+		child.queue_free()
+	for route in WorldMapData.get_routes_from(_session.current_location_id):
+		var target := route.to_location_id
+		var destination := WorldMapData.get_location_by_id(target)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var name_label := Label.new()
+		name_label.text = destination.location_name if destination != null else target
+		name_label.custom_minimum_size = Vector2(160, 0)
+		row.add_child(name_label)
+		var age := _session.get_price_age(target)
+		var known := Label.new()
+		known.custom_minimum_size = Vector2(200, 0)
+		known.text = tr("UI_PRICE_RUMOR_UNKNOWN") if age < 0 else tr("UI_PRICE_RUMOR_KNOWN") % age
+		row.add_child(known)
+		var button := Button.new()
+		button.text = tr("UI_PRICE_RUMOR_BUY") % _session.get_price_rumor_cost(target)
+		var reason := _session.get_price_rumor_block_reason(target)
+		button.disabled = not reason.is_empty()
+		button.pressed.connect(func():
+			if _session.buy_price_rumor(target):
+				_refresh_price_rumors())
+		row.add_child(button)
+		if not reason.is_empty():
+			var why := Label.new()
+			why.text = tr(reason)
+			why.modulate = Color(0.75, 0.72, 0.66)
+			row.add_child(why)
+		_price_rumor_list.add_child(row)
+
 func _on_wallet_changed(_new_balance: int) -> void:
+	_refresh_price_rumors()
 	_refresh_rows()
 	_refresh_feast()
 	_purification_panel.refresh()
