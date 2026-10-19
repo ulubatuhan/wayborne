@@ -109,9 +109,18 @@ static func install() -> void:
 	var target := ThemeDB.get_default_theme()
 	target.merge_with(build())
 	target.default_font = get_font()
-	target.default_font_size = FONT_SIZE
 	ThemeDB.fallback_font = get_font()
-	ThemeDB.fallback_font_size = FONT_SIZE
+	apply_text_scale(1.0)
+
+## Metin boyu ayarı (Y-H07): temanın taban yazı boyunu ölçekler. Ayar
+## ekranı değişince yeniden çağırır; elle verilmiş boylar sabit kalır.
+static func apply_text_scale(scale: float) -> void:
+	var size := text_size_for(scale)
+	ThemeDB.get_default_theme().default_font_size = size
+	ThemeDB.fallback_font_size = size
+
+static func text_size_for(scale: float) -> int:
+	return maxi(10, int(round(float(FONT_SIZE) * scale)))
 
 ## Oyunun yüzü: EB Garamond Latin (Türkçe dahil) ve Kiril'i taşıyor, Han
 ## ve kana tırnaklı CJK yedeklerine düşüyor, kalan her şey motorun kendi

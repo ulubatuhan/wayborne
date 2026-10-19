@@ -1447,6 +1447,7 @@ func _refresh_talk_merchant_row() -> void:
 ## Kısayollar: 1-6 emirler, F2 tempoyu bir üst kademeye çeviriyor (kumandada
 ## LB). Hepsinin ekranda bir düğmesi var - tuş yalnızca kestirme.
 func _input(event: InputEvent) -> void:
+	_release_auto_pause(event)
 	if _orders_dragging:
 		# Fare sürüklenirken tutamacın (başlığın) sınırlarını kolayca aşar -
 		# `gui_input` orada artık tetiklenmediği için hareketi burada, tüm
@@ -2208,6 +2209,7 @@ func _tick_signals(hours: float) -> void:
 	)
 	for kind in outcome["appeared"]:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
+		_auto_pause()
 	for i in (outcome["resolved"] as Array).size():
 		var kind := String(outcome["resolved"][i])
 		var by_zone := String(outcome["resolved_by_role"][i])
@@ -2555,8 +2557,24 @@ func _sync_days_remaining() -> void:
 func _can_time_flow() -> bool:
 	return (
 		not _journey_finished and _current_event == null and not _has_open_panel()
-		and not _caravan.is_turning()
+		and not _caravan.is_turning() and not _auto_paused
 	)
+
+## Y-H07: yolda bir işaret ya da karşılaşma belirince zaman (ayar açıksa)
+## oyuncu bir tuşa ya da tıklamaya basana kadar bekler.
+var _auto_paused: bool = false
+
+func _auto_pause() -> void:
+	if not UserSettings.auto_pause_events or _auto_paused or not _is_live_journey:
+		return
+	_auto_paused = true
+	_add_log(tr("UI_ROAD_AUTO_PAUSED"))
+
+func _release_auto_pause(event: InputEvent) -> void:
+	if not _auto_paused:
+		return
+	if (event is InputEventKey and event.pressed) or (event is InputEventMouseButton and event.pressed):
+		_auto_paused = false
 
 ## Günler tek tek alınıyor: bir kart ya da sofra paneli açılınca kalan
 ## gün saatte **bekler**, kaybolmaz. Eskiden hepsi birden alınıp açık bir
@@ -3027,6 +3045,7 @@ func _queue_event(event: GameEvent) -> void:
 		return
 
 	_pending_event = event
+	_auto_pause()
 	# Öndeyken karşılaşma daha uzaktan görünür: işaret daha ileriye
 	# konur, yani oyuncunun hazırlanacak (ya da geri dönecek) yolu olur.
 	# Savaşın sıklaşmasının dengesi bu - sıklaştırılmış ama kaçınılamayan
@@ -3239,8 +3258,10 @@ func _mark_choice(button: Button, choice: EventChoice) -> void:
 			button.icon = WaybookTheme.texture(emblem)
 			button.add_theme_constant_override("icon_max_width", CHOICE_ICON_SIZE)
 	if _choice_triggers_combat(choice):
-		var stripe := ColorRect.new()
-		stripe.color = ArtPalette.UI_CHOICE_COMBAT
+		# Y-H07: renk körlüğü ayarında şerit desenli (kesik kesik).
+		var stripe := PatternStripe.new()
+		stripe.colour = ArtPalette.UI_CHOICE_COMBAT
+		stripe.patterned = UserSettings.pattern_stripes
 		stripe.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stripe.anchor_top = 0.0
 		stripe.anchor_bottom = 1.0

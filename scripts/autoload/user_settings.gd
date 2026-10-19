@@ -61,9 +61,42 @@ const SUPPORTED: Array[Dictionary] = [
 
 var reduce_motion: bool = false
 
+## Erişilebilirlik ve oynanış (görev Y-H07): metin boyu, desenli şeritler,
+## yolda bir şey belirince otomatik duraklama. Hepsi settings.cfg'de.
+const ACCESS_SECTION: String = "access"
+const TEXT_SCALES: Array[float] = [0.9, 1.0, 1.15, 1.3]
+const DEFAULT_TEXT_SCALE_INDEX: int = 1
+var text_scale_index: int = DEFAULT_TEXT_SCALE_INDEX
+var pattern_stripes: bool = false
+var auto_pause_events: bool = false
+
 func _ready() -> void:
 	apply_saved_locale()
 	reduce_motion = load_reduce_motion()
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) == OK:
+		text_scale_index = clampi(int(config.get_value(ACCESS_SECTION, "text_scale", DEFAULT_TEXT_SCALE_INDEX)), 0, TEXT_SCALES.size() - 1)
+		pattern_stripes = bool(config.get_value(ACCESS_SECTION, "pattern_stripes", false))
+		auto_pause_events = bool(config.get_value(ACCESS_SECTION, "auto_pause_events", false))
+	# Kayıtlı metin boyu temaya: autoload class_name anamaz, betik çalışırken yüklenir.
+	if text_scale_index != DEFAULT_TEXT_SCALE_INDEX:
+		load("res://scripts/ui/waybook_theme.gd").apply_text_scale(get_text_scale())
+
+func get_text_scale() -> float:
+	return TEXT_SCALES[clampi(text_scale_index, 0, TEXT_SCALES.size() - 1)]
+
+func set_access(key: String, value) -> void:
+	match key:
+		"text_scale":
+			text_scale_index = clampi(int(value), 0, TEXT_SCALES.size() - 1)
+		"pattern_stripes":
+			pattern_stripes = bool(value)
+		"auto_pause_events":
+			auto_pause_events = bool(value)
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	config.set_value(ACCESS_SECTION, key, value)
+	config.save(CONFIG_PATH)
 
 func load_reduce_motion() -> bool:
 	var config := ConfigFile.new()

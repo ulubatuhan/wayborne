@@ -52,7 +52,37 @@ func _setup_motion_toggle() -> void:
 	var column := _back_button.get_parent()
 	column.add_child(_motion_toggle)
 	column.move_child(_motion_toggle, _back_button.get_index())
+	_setup_access(column)
 	_refresh_texts()
+
+## Erişilebilirlik ve oynanış (görev Y-H07): metin boyu, desenli şeritler,
+## otomatik duraklama. Geri tuşunun üstünde, hareket ayarının altında.
+var _text_size: OptionButton
+var _text_size_label: Label
+var _pattern_toggle: CheckButton
+var _pause_toggle: CheckButton
+
+func _setup_access(column: Node) -> void:
+	var row := HBoxContainer.new()
+	_text_size_label = Label.new()
+	row.add_child(_text_size_label)
+	_text_size = OptionButton.new()
+	for scale in UserSettings.TEXT_SCALES:
+		_text_size.add_item("%d%%" % roundi(scale * 100.0))
+	_text_size.select(UserSettings.text_scale_index)
+	_text_size.item_selected.connect(func(index: int) -> void:
+		UserSettings.set_access("text_scale", index)
+		WaybookTheme.apply_text_scale(UserSettings.get_text_scale()))
+	row.add_child(_text_size)
+	_pattern_toggle = CheckButton.new()
+	_pattern_toggle.button_pressed = UserSettings.pattern_stripes
+	_pattern_toggle.toggled.connect(func(on: bool) -> void: UserSettings.set_access("pattern_stripes", on))
+	_pause_toggle = CheckButton.new()
+	_pause_toggle.button_pressed = UserSettings.auto_pause_events
+	_pause_toggle.toggled.connect(func(on: bool) -> void: UserSettings.set_access("auto_pause_events", on))
+	for node in [row, _pattern_toggle, _pause_toggle]:
+		column.add_child(node)
+		column.move_child(node, _back_button.get_index())
 
 ## Emeği Geçenler: CC-BY giysilerin yazarları oyunda anılmak zorunda
 ## (bkz. Credits). Uzun liste kendi kaydırma kutusunda - geri tuşu
@@ -142,6 +172,10 @@ func _refresh_texts() -> void:
 	_music_label.text = tr("UI_MUSIC_VOLUME")
 	if _motion_toggle != null:
 		_motion_toggle.text = tr("UI_SETTINGS_REDUCE_MOTION")
+	if _pattern_toggle != null:
+		_text_size_label.text = tr("UI_SETTINGS_TEXT_SIZE")
+		_pattern_toggle.text = tr("UI_SETTINGS_PATTERN_STRIPES")
+		_pause_toggle.text = tr("UI_SETTINGS_AUTO_PAUSE")
 	_back_button.text = tr("UI_BACK_TO_MENU")
 
 func _on_back_pressed() -> void:

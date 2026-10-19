@@ -2424,6 +2424,11 @@ gave the game its motion, and every piece of it follows the same few rules.
   where `current_scene` is null (treating that frame as an arrival killed
   the slide), and a back move to a root empties the stack (so depth
   comparison called it a root change - hence `last_move`).
+- **Accessibility and play settings live beside Reduce Motion (task Y-H07).** Text size has four steps
+  (`UserSettings.TEXT_SCALES`) that scale the theme's base size (`WaybookTheme.apply_text_scale`; sizes set by hand
+  stay fixed). With patterned stripes on, the combat choice's blood stripe is drawn in segments (`PatternStripe`) so it
+  reads without colour. With auto-pause on, a road signal or an encounter marker holds time until a key or click
+  (`_auto_paused`, part of `_can_time_flow`). All three are in `settings.cfg`, not the save.
 - **Reduce Motion is honoured everywhere motion is decoration.**
   `UserSettings.reduce_motion` (saved, Settings screen) turns page slides
   into the ink fade, stops the combat shake and freezes button scale.
