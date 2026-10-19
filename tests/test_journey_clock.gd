@@ -28,17 +28,15 @@ func _test_speed_selection(t) -> void:
 	# 0.5x kampın kendi hızı: dizinin başında duruyor, varsayılan seçim
 	# yine 1x (bkz. DEFAULT_SPEED_INDEX) - 0.5 eklenmesi normal yürüyüşün
 	# varsayılanını değiştirmemeli.
+	# Hızlandırma kalktı (Y-B09): yalnızca yavaş ve normal.
+	t.ok(not JourneyClock.SPEEDS.has(1.5) and not JourneyClock.SPEEDS.has(3.0), "hızlandırma yok")
 	clock.cycle_speed()
-	t.eq(clock.get_speed(), 1.5, "sonraki hız 1.5x")
-	clock.cycle_speed()
-	t.eq(clock.get_speed(), 3.0, "sonraki hız 3x")
-	clock.cycle_speed()
-	t.eq(clock.get_speed(), 0.5, "3x'ten sonraki hız 0.5x - dizi başa dönmeden önce en yavaşa uğrar")
+	t.eq(clock.get_speed(), 0.5, "sonraki hız 0.5x")
 	clock.cycle_speed()
 	t.eq(clock.get_speed(), 1.0, "hız başa döner")
 
 	clock.set_speed_index(99)
-	t.eq(clock.get_speed(), 3.0, "aralık dışı indeks son hıza kenetlenir")
+	t.eq(clock.get_speed(), 1.0, "aralık dışı indeks son hıza kenetlenir")
 	clock.set_speed_index(-5)
 	t.eq(clock.get_speed(), 0.5, "negatif indeks ilk hıza kenetlenir")
 
@@ -60,12 +58,12 @@ func _test_advance_converts_real_time(t) -> void:
 		"1x'te bir gün gerçek süre bir oyun günü eder"
 	)
 
-	var fast := JourneyClock.new()
-	fast.set_speed_index(JourneyClock.SPEEDS.find(3.0))
-	fast.advance(JourneyClock.REAL_SECONDS_PER_DAY)
+	var slow := JourneyClock.new()
+	slow.set_speed_index(JourneyClock.SPEEDS.find(0.5))
+	slow.advance(JourneyClock.REAL_SECONDS_PER_DAY)
 	t.ok(
-		is_equal_approx(fast.total_hours - JourneyClock.START_HOUR, JourneyClock.HOURS_PER_DAY * 3.0),
-		"3x'te aynı süre üç oyun günü eder"
+		is_equal_approx(slow.total_hours - JourneyClock.START_HOUR, JourneyClock.HOURS_PER_DAY * 0.5),
+		"0.5x'te aynı süre yarım oyun günü eder"
 	)
 
 	t.eq(clock.advance(0.0), 0.0, "sıfır delta zamanı ilerletmez")

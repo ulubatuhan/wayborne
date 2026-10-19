@@ -4242,6 +4242,11 @@ day *mechanics* are unchanged.
   lets time keep flowing until `CAMP_HOURS` pass; the benefit (provisions
   cost, stress relief) is applied when it ends. It is only offered when
   `is_camp_time()` - evening or night.
+- **There is no fast-forward any more (task Y-B09, the user's decision).** `JourneyClock.SPEEDS` is `[0.5, 1.0]`:
+  the road should be full enough that nobody wants to hurry it. `tests/simulate_road_beats.gd` measures decision and
+  information beats per real minute at 1x (target: one every 60-90 s; a game day is `REAL_SECONDS_PER_DAY` = 45 s).
+  Slowing down and the "Dur" pace stay. Bullets below that mention 1.5x/3x describe the code paths that still scale
+  with the clock speed; they are kept because the multiplier itself remains.
 - **The clock's own speed is one of its levers, and camp reaches for it.**
   `JourneyClock.SPEEDS` gained `0.5` - eight in-game hours at 1x is minutes
   of real time nobody wants to sit through *and* too fast to read the

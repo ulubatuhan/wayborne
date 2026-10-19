@@ -21,7 +21,11 @@ const HOURS_PER_DAY: float = 24.0
 ## road_journey.gd'nin `_on_camp_pressed`'i): kamp saatlerce sürüyor,
 ## normal 1x'te oturup beklemek can sıkıcı, oysa kampın kendi görsel
 ## keyfi (ateş, dinlenen kervan) hızlı geçince kayboluyor.
-const SPEEDS: Array[float] = [0.5, 1.0, 1.5, 3.0]
+##
+## Hızlandırma kalktı (görev Y-B09, kullanıcı kararı): yol hızlandırmak
+## istenmeyecek kadar dolu olmalı. Ölçüm: tests/simulate_road_beats.gd (1x'te
+## dakika başına karar/bilgi anı). Yavaşlatma ve duraklatma (Dur temposu) kalır.
+const SPEEDS: Array[float] = [0.5, 1.0]
 const DEFAULT_SPEED_INDEX: int = 1
 
 ## Sefer sabahın erken saatinde başlar - ilk gün baştan gece olmasın diye.
