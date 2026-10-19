@@ -21,6 +21,8 @@ extends VBoxContainer
 ## CombatUnit'in Ölümün Kıyısı bölümü). Panel bunu *uygulamaz* - partiden
 ## çıkarma ve liderliğin devri oturumun işi, ekranın değil.
 signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bool, int, int, Array[CharacterData]
+## Bedelli geri çekilmenin türü (Y-C07); combat_finished'ten önce gelir.
+signal retreated(kind)  # String
 
 const MAX_LOG_LINES: int = 40
 ## Yorum balonu ne kadar sürsün. Slotlar her `_refresh()`'te yeniden
@@ -732,6 +734,35 @@ func _refresh_actions() -> void:
 		_skill_row.add_child(_build_skill_card(unit, skill))
 
 	_build_extra_actions()
+	_build_retreat_actions(unit)
+
+## Geri çekilme (Y-C07): zorda kalınca açılır, kapalıyken sebebiyle kilitli.
+## Ayıya karşı tek bir bedelsiz düğme: ayı kaçanı kovalamaz.
+func _build_retreat_actions(unit: CombatUnit) -> void:
+	if not _encounter.can_retreat():
+		var locked := Button.new()
+		locked.text = tr("UI_COMBAT_RETREAT")
+		locked.disabled = true
+		locked.tooltip_text = tr("UI_COMBAT_RETREAT_LOCKED")
+		_extra_row.add_child(locked)
+		return
+	if _encounter.retreat_is_free():
+		_extra_row.add_child(_retreat_button("UI_COMBAT_RETREAT_FREE", CombatEncounter.RETREAT_CARGO, unit))
+		return
+	_extra_row.add_child(_retreat_button("UI_COMBAT_RETREAT_CARGO", CombatEncounter.RETREAT_CARGO, unit))
+	_extra_row.add_child(_retreat_button("UI_COMBAT_RETREAT_WAGON", CombatEncounter.RETREAT_WAGON, unit))
+	var rear := _retreat_button("UI_COMBAT_RETREAT_REARGUARD", CombatEncounter.RETREAT_REARGUARD, unit)
+	rear.text = tr("UI_COMBAT_RETREAT_REARGUARD") % unit.display_name
+	_extra_row.add_child(rear)
+
+func _retreat_button(key: String, kind: String, unit: CombatUnit) -> Button:
+	var button := Button.new()
+	button.text = tr(key)
+	button.pressed.connect(func():
+		if _encounter.retreat(kind, unit):
+			retreated.emit(_encounter.retreat_kind)
+			_refresh())
+	return button
 
 ## Bir yetenek kartı: adı, iki mevki belirteci satırı ve kilitliyse
 ## sebebi. Kilitli yetenek gizlenmez - oyuncu mevki kilidini böyle
@@ -923,6 +954,8 @@ func _scroll_log_to_bottom() -> void:
 func _on_state_changed(new_state: CombatEncounter.State) -> void:
 	if new_state == CombatEncounter.State.VICTORY:
 		_result_label.text = tr("UI_COMBAT_VICTORY") % _encounter.enemy_label
+	elif new_state == CombatEncounter.State.RETREAT:
+		_result_label.text = tr("UI_COMBAT_RETREATED") % _encounter.enemy_label
 	else:
 		_result_label.text = tr("UI_COMBAT_DEFEAT") % _encounter.enemy_label
 	_continue_button.visible = true

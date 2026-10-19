@@ -2494,6 +2494,13 @@ func _companion_day() -> void:
 		who.change_rapport(-1)
 	companion_notes.append({"key": String(CompanionLife.ACTION_LINE_KEYS[action]), "args": [who.character_name], "who": who.character_id})
 
+func _broken_count() -> int:
+	var count := 0
+	for character in get_party():
+		if not character.is_player and character.is_stressed():
+			count += 1
+	return count
+
 func _anyone_hungry() -> bool:
 	if crew_hungry_nights > 0:
 		return true
@@ -4045,6 +4052,8 @@ func build_event_context() -> Dictionary:
 		# "borcun varken ne yaparsın" kararları bunlara bakar.
 		"debt": get_total_debt(),
 		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
+		# Kırılmış kişi sayısı (Y-D06): kırılma yolda da bir olay.
+		"broken_count": _broken_count(),
 		# Yol yönetmeni (Y-B02) açlığı zorluk sayar.
 		"hungry": 1.0 if _anyone_hungry() else 0.0,
 		"provisions": get_provisions(),

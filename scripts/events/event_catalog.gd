@@ -71,6 +71,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_merchant_grudge())
 	_road_events.append(_merchant_shares_bread())
 	_road_events.append(_river_ford())
+	_road_events.append(_broken_outburst())
 	_road_events.append(_convoy_repaid())
 	_road_events.append(_convoy_search())
 	_road_events.append(_refugee_gratitude())
@@ -1776,6 +1777,35 @@ static func _merchant_caravan() -> GameEvent:
 			])
 		),
 		_choice("EVT_MERCHANT_CARAVAN_OPT_WAVE", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## Kırılma yolda (görev Y-D06): ekran efekti değil, bir olay. Kırılmış biri
+## gece kervanın ortasında patlar; lider ne yapacağını seçer.
+static func _broken_outburst() -> GameEvent:
+	var event := _event("evt_broken_outburst", "EVT_BROKEN", 0.9)
+	event.cooldown_days = 5
+	event.conditions = _conditions([
+		EventCondition.make("broken_count", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_check_choice(
+			"EVT_BROKEN_OPT_CALM", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_BROKEN_CALM_OK", _effects([EventEffect.make(EventEffect.Type.STRESS, -6)]),
+			"EVT_BROKEN_CALM_MID", _effects([EventEffect.make(EventEffect.Type.STRESS, -2)]),
+			"EVT_BROKEN_CALM_BAD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -4),
+				EventEffect.make(EventEffect.Type.STRESS, 3),
+			])
+		),
+		_choice("EVT_BROKEN_OPT_LET", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+			EventEffect.make(EventEffect.Type.STRESS, -3),
+		])),
+		_choice("EVT_BROKEN_OPT_APART", _effects([
+			EventEffect.make(EventEffect.Type.STRESS, 2),
 			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
 	])

@@ -1812,6 +1812,33 @@ func _open_story_panel(teller: CharacterData) -> void:
 		_story_panel = null)
 	add_child(_story_panel)
 
+## --- Bedelli geri çekilme (Y-C07) ---
+const RETREAT_MORALE: int = -3
+const RETREAT_CARGO_SHARE: float = 0.34
+var _combat_retreat_kind: String = ""
+
+## Yük: her ticaret malının üçte biri bırakılır. Vagon: bir vagon feda edilir
+## (enkazı yolda kalır). Artçı: bedeli savaşta ödendi. Bedava: ayı kovalamadı.
+func _apply_retreat_cost(kind: String) -> void:
+	if kind == CombatEncounter.RETREAT_CARGO:
+		for item in ItemCatalog.get_trade_goods():
+			if item.item_id == GameSession.PROVISIONS_ITEM_ID:
+				continue
+			var have := _session.get_total_quantity(item.item_id)
+			if have > 0:
+				_session.remove_from_cargo_or_bags(item.item_id, maxi(1, int(ceil(float(have) * RETREAT_CARGO_SHARE))))
+		_add_log(tr("UI_ROAD_RETREAT_CARGO"), LOCKED_COLOR)
+	elif kind == CombatEncounter.RETREAT_WAGON:
+		if _session.caravan.lose_wagons(1) > 0:
+			_session.add_memorial(GameSession.MEMORIAL_WRECK)
+			_add_log(tr("UI_ROAD_RETREAT_WAGON"), LOCKED_COLOR)
+		else:
+			_add_log(tr("UI_ROAD_RETREAT_NO_WAGON"), LOCKED_COLOR)
+	elif kind == CombatEncounter.RETREAT_REARGUARD:
+		_add_log(tr("UI_ROAD_RETREAT_REARGUARD"), LOCKED_COLOR)
+	else:
+		_add_log(tr("UI_ROAD_RETREAT_FREE"), OUTCOME_COLOR)
+
 ## Yoldaş notu: günlüğe satır, kişisi varsa başının üstünde baloncuk (R1 #4).
 func _add_companion_note(note: Dictionary) -> void:
 	var line := tr(String(note["key"])) % note["args"]
@@ -3385,6 +3412,8 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
+	_combat_retreat_kind = ""
+	panel.retreated.connect(func(kind): _combat_retreat_kind = String(kind))
 	# Faz 17 PR-6: o günkü arazi vahşi hayvan kadrosunun kompozisyonunu da
 	# eğiyor (bkz. EnemyCatalog.build_wildlife_squad) - "kurt sürüsü" orman
 	# geçitlerinde, tekil ayı dağ geçitlerinde daha olası.
@@ -3442,7 +3471,11 @@ func _on_combat_finished(
 	var effects: Array[EventEffect] = [
 		EventEffect.make(EventEffect.Type.STRESS, stress_delta),
 	]
-	if victory:
+	if not _combat_retreat_kind.is_empty():
+		# Bedelli geri çekilme (Y-C07): yenilginin bedeli yerine seçilen bedel.
+		_apply_retreat_cost(_combat_retreat_kind)
+		effects.append(EventEffect.make(EventEffect.Type.MORALE, RETREAT_MORALE))
+	elif victory:
 		var loot := COMBAT_LOOT_BASE + int(round(_session.danger_level * COMBAT_LOOT_DANGER_BONUS))
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, loot))
 		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_VICTORY_MORALE))

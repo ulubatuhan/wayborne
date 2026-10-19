@@ -82,6 +82,14 @@ var refusal_bonus: int = 0
 
 ## Yalnızca oyuncu tarafında dolu; savaş sonunda canı buraya yazarız.
 var source_character: CharacterData = null
+## Kervanın başı mı (eşkıya reisi onu hedefler, Y-C08).
+var is_leader: bool = false
+## Kırılma kipi (Y-D06): kırılmışsa davranışı (CharacterData.get_break_mode).
+var break_mode: String = ""
+## Kışkırtma: düşman ulaşabiliyorsa bu birimi vurmak zorunda (kırılmış şehit).
+var taunt_rounds: int = 0
+## Düşmanın huyu (Y-C08): "leader_hunter", "pack", "guard", "beast", "".
+var behavior: String = ""
 
 ## --- Ölümün Kıyısı ---
 ## Zırh hiçbir zaman hasarı tamamen kesmez: bir statın bütün bir sistemi
@@ -130,6 +138,8 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.is_player_side = true
 	unit.position = position
 	unit.is_stressed = is_stressed
+	unit.is_leader = character.is_player
+	unit.break_mode = character.get_break_mode() if is_stressed else ""
 	unit.max_hp = character.get_max_hp()
 	unit.current_hp = clampi(character.current_hp, 0, unit.max_hp)
 	unit.accuracy = character.get_accuracy()
@@ -193,7 +203,21 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 	unit.skills = SkillCatalog.get_skills(template.skill_ids)
 	unit.figure_kind = template.enemy_id
 	unit.xp_value = template.xp_value
+	unit.behavior = behavior_for(template.enemy_id)
 	return unit
+
+## Düşman türünün huyu (görev Y-C08).
+static func behavior_for(enemy_id: String) -> String:
+	match enemy_id:
+		"bandit_leader", "mountain_bandit":
+			return "leader_hunter"
+		"wolf", "wolf_alpha_white", "wolf_alpha_black":
+			return "pack"
+		"city_guard", "guard_sergeant":
+			return "guard"
+		"bear", "boar":
+			return "beast"
+	return ""
 
 ## Kıyıdaki bir karakter 0 canla hâlâ ayaktadır, o yüzden bu `current_hp`
 ## değil `is_dead` okur. Aksi halde ana karakter Kıyı'ya girdiği anda

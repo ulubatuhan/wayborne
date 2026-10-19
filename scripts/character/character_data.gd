@@ -649,6 +649,29 @@ var last_chat_topic: String = ""
 var last_action_day: int = -99
 var story_chapter: int = 0
 
+## Kırılma kipi (görev Y-D06): kırılan biri davranışıyla gösterir, ekran
+## efektiyle değil. Kip son kötü huyunun statından: güç/çeviklik öne atılır,
+## dayanıklılık/inanç bütün darbeyi üstüne çeker, zeka/bilgelik emre uymaz,
+## sezgi/karizma arkadaşına saldırır. Kötü huyu yoksa emre uymaz.
+const BREAK_RECKLESS: String = "reckless"
+const BREAK_MARTYR: String = "martyr"
+const BREAK_DEFIANT: String = "defiant"
+const BREAK_LASHES_OUT: String = "lashes_out"
+
+func get_break_mode() -> String:
+	for i in range(trait_ids.size() - 1, -1, -1):
+		var t := TraitCatalog.get_trait(trait_ids[i])
+		if t == null or t.is_positive:
+			continue
+		var stat := t.affinity_stat
+		if stat == CharacterStats.Kind.STRENGTH or stat == CharacterStats.Kind.AGILITY:
+			return BREAK_RECKLESS
+		if stat == CharacterStats.Kind.ENDURANCE or stat == CharacterStats.Kind.FAITH:
+			return BREAK_MARTYR
+		if stat == CharacterStats.Kind.PERCEPTION or stat == CharacterStats.Kind.CHARISMA:
+			return BREAK_LASHES_OUT
+	return BREAK_DEFIANT
+
 static func backstory_for_id(id: String) -> String:
 	return BACKSTORY_KEYS[absi(hash("backstory|" + id)) % BACKSTORY_KEYS.size()]
 

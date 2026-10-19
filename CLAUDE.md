@@ -497,6 +497,16 @@ wayborne/
   invest there. Combat reads the `CharacterData` wrapper, never
   `character.stats`, for the same reason trait and equipment bonuses do.
 
+- **Enemies have temperaments; the broken act, not glow; a hard-pressed caravan can fall back (tasks Y-C08,
+  Y-D06, Y-C07).** `CombatEncounter.pick_target` reads `CombatUnit.behavior`: the bandit leader goes for the caravan's
+  leader, wolves chase the lowest health share, guards do not finish anyone at Death's Door, and a taunting unit is
+  everyone's target. A broken companion who "refuses" now acts by their break mode
+  (`CharacterData.get_break_mode`, from their latest affliction): charges to the front, taunts (draws every blow),
+  refuses, or lashes out at the nearest ally (never below 1 HP). No screen effect - the road has
+  `evt_broken_outburst` too. When the company is down to `RETREAT_PRESSED_SHARE` health or someone is at the Door,
+  the panel offers retreat: drop a third of the load, sacrifice a wagon (its wreck stays on the road), or leave the
+  active fighter as rearguard (the enemy's front takes one swing each at them). Against beasts that do not chase
+  (bear, boar) retreat is free. A retreat skips the defeat penalties and costs a little morale.
 - **Area skills must never beat single-target skills on the same side.**
   `CombatSkill.Area` is `SINGLE` (default, so every pre-existing skill is
   untouched), `ADJACENT`, `ALL` or `RANDOM`. The damage difference is set in

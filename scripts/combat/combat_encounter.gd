@@ -63,6 +63,8 @@ enum State {
 	ONGOING,
 	VICTORY,
 	DEFEAT,
+	## Bedelli geri çekilme (Y-C07): savaş biter, ne zafer ne yenilgi.
+	RETREAT,
 }
 
 const MAX_SIDE_SIZE: int = 4
@@ -272,6 +274,8 @@ func _run_until_player_turn() -> void:
 		if is_player_turn():
 			if not _try_refuse_order(unit):
 				break
+			if _check_end():
+				return
 			_advance_turn()
 			continue
 
@@ -328,9 +332,48 @@ func _try_refuse_order(unit: CombatUnit) -> bool:
 	)
 	if _rng.randi_range(1, 100) > chance:
 		return false
-	_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
-	unit_barked.emit(unit, tr("CBT_BARK_REFUSE"), BARK_REFUSE)
+	# Kırılma davranışla yaşanır (Y-D06): kipine göre kendi başına davranır.
+	if unit.break_mode == CharacterData.BREAK_RECKLESS:
+		_break_reckless(unit)
+	elif unit.break_mode == CharacterData.BREAK_MARTYR:
+		unit.taunt_rounds = TAUNT_ROUNDS
+		_emit_log(tr("CBT_LOG_BREAK_MARTYR") % unit.display_name)
+		unit_barked.emit(unit, tr("CBT_BARK_BREAK_MARTYR"), BARK_REFUSE)
+	elif unit.break_mode == CharacterData.BREAK_LASHES_OUT:
+		_break_lash_out(unit)
+	else:
+		_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
+		unit_barked.emit(unit, tr("CBT_BARK_REFUSE"), BARK_REFUSE)
 	return true
+
+## Kırılma: öne atılmak. En öndekiyle yer değiştirir ve tur gider.
+const TAUNT_ROUNDS: int = 2
+const LASH_OUT_DAMAGE: int = 3
+
+func _break_reckless(unit: CombatUnit) -> void:
+	var side := _side_of(unit)
+	if not side.is_empty() and side[0] != unit:
+		var front := side[0]
+		var temp := unit.position
+		unit.position = front.position
+		front.position = temp
+		side.sort_custom(func(a, b): return a.position < b.position)
+	_emit_log(tr("CBT_LOG_BREAK_RECKLESS") % unit.display_name)
+	unit_barked.emit(unit, tr("CBT_BARK_BREAK_RECKLESS"), BARK_REFUSE)
+
+## Kırılma: arkadaşına saldırmak. Yanındakine küçük bir darbe, asla öldürmez.
+func _break_lash_out(unit: CombatUnit) -> void:
+	var victim: CombatUnit = null
+	for other in _side_of(unit):
+		if other != unit and other.is_alive() and other.current_hp > 1:
+			if victim == null or absi(other.position - unit.position) < absi(victim.position - unit.position):
+				victim = other
+	if victim == null:
+		_emit_log(tr("CBT_LOG_REFUSE") % unit.display_name)
+		return
+	victim.current_hp = maxi(1, victim.current_hp - LASH_OUT_DAMAGE)
+	_emit_log(tr("CBT_LOG_BREAK_LASH") % [unit.display_name, victim.display_name])
+	unit_barked.emit(unit, tr("CBT_BARK_BREAK_LASH"), BARK_REFUSE)
 
 func _run_enemy_turn(unit: CombatUnit) -> void:
 	var choice := _pick_enemy_action(unit)
@@ -344,17 +387,90 @@ func _run_enemy_turn(unit: CombatUnit) -> void:
 	unit.start_cooldown(skill)
 
 ## En zayıf ulaşılabilir hedefi seçer - haydutlar yaralıyı bitirmeye çalışır.
+##
+## Görev Y-C08: düşmanın huyu hedefi değiştirir. Eşkıya reisi kervanın başına
+## gider; kurt sürüsü canı en az oranda olanı kovalar; muhafız Ölümün
+## Kıyısı'ndakini bitirmez (teslim al, öldürme); kışkırtan (kırılmış şehit)
+## ulaşılabilirse her düşmanın hedefi.
 func _pick_enemy_action(unit: CombatUnit) -> Dictionary:
 	for skill in unit.skills:
 		var targets := get_valid_targets(unit, skill)
 		if targets.is_empty():
 			continue
-		var best: CombatUnit = targets[0]
-		for candidate in targets:
-			if candidate.current_hp < best.current_hp:
-				best = candidate
-		return {"skill": skill, "target": best}
+		return {"skill": skill, "target": pick_target(unit, targets)}
 	return {}
+
+static func pick_target(unit: CombatUnit, targets: Array[CombatUnit]) -> CombatUnit:
+	for candidate in targets:
+		if candidate.taunt_rounds > 0:
+			return candidate
+	var pool: Array[CombatUnit] = targets
+	if unit.behavior == "guard":
+		var standing: Array[CombatUnit] = []
+		for candidate in targets:
+			if not candidate.on_deaths_door:
+				standing.append(candidate)
+		if not standing.is_empty():
+			pool = standing
+	if unit.behavior == "leader_hunter":
+		for candidate in pool:
+			if candidate.is_leader:
+				return candidate
+	var best: CombatUnit = pool[0]
+	for candidate in pool:
+		if unit.behavior == "pack":
+			if float(candidate.current_hp) / float(maxi(1, candidate.max_hp)) < float(best.current_hp) / float(maxi(1, best.max_hp)):
+				best = candidate
+		elif candidate.current_hp < best.current_hp:
+			best = candidate
+	return best
+
+## --- Bedelli geri çekilme (görev Y-C07) ---
+## Zorda kalınca kaçılabilir: yük bırakmak, bir vagon feda etmek ya da birini
+## artçı bırakmak. Bedeli yol ekranı uygular (yük, vagon); artçı burada
+## öndeki düşmanların birer darbesini yer (savaşın kendi hasar kapısından,
+## Ölümün Kıyısı dahil). Ayıya karşı kaçmak bedavadır: ayı kaçanı kovalamaz.
+const RETREAT_CARGO: String = "cargo"
+const RETREAT_WAGON: String = "wagon"
+const RETREAT_REARGUARD: String = "rearguard"
+const RETREAT_PRESSED_SHARE: float = 0.6
+var retreat_kind: String = ""
+
+## Kaçış açık mı: kadronun canı yarıdan fazla erimişse ya da biri Kıyı'daysa.
+func can_retreat() -> bool:
+	if is_over():
+		return false
+	var hp := 0
+	var max_hp := 0
+	for unit in player_units:
+		if unit.on_deaths_door:
+			return true
+		hp += unit.current_hp
+		max_hp += unit.max_hp
+	return max_hp > 0 and float(hp) / float(max_hp) <= RETREAT_PRESSED_SHARE
+
+## Düşman kaçanı kovalamıyorsa (ayı, domuz) kaçış bedavadır.
+func retreat_is_free() -> bool:
+	for unit in enemy_units:
+		if unit.is_alive() and unit.behavior != "beast":
+			return false
+	return true
+
+func retreat(kind: String, rearguard: CombatUnit = null) -> bool:
+	if not can_retreat() or not is_player_turn():
+		return false
+	if kind == RETREAT_REARGUARD and not retreat_is_free():
+		if rearguard == null or not player_units.has(rearguard) or not rearguard.is_alive():
+			return false
+		for enemy in enemy_units:
+			if enemy.is_alive() and not enemy.skills.is_empty():
+				_resolve_on_target(enemy, enemy.skills[0], rearguard)
+		_emit_log(tr("CBT_LOG_REARGUARD") % rearguard.display_name)
+	retreat_kind = "free" if retreat_is_free() else kind
+	state = State.RETREAT
+	_emit_log(tr("CBT_LOG_RETREAT") % enemy_label)
+	state_changed.emit(state)
+	return true
 
 ## Mevki kilidine takılan düşman bir sıra öne geçer.
 func _shuffle_forward(unit: CombatUnit) -> void:
@@ -605,6 +721,11 @@ func _compare_turn_speed(a: CombatUnit, b: CombatUnit) -> bool:
 ## Sıradaki ayakta olan savaşçıya geçer. Round dolduğunda bekleme süreleri
 ## ve süreli değiştiriciler işler, **sonra sıra yeniden atılır** - zarın
 ## round başında atılması gerekiyor, ortasında değil.
+func _tick_taunts() -> void:
+	for unit in player_units:
+		if unit.taunt_rounds > 0:
+			unit.taunt_rounds -= 1
+
 func _advance_turn() -> void:
 	if _order.is_empty():
 		return
@@ -614,6 +735,7 @@ func _advance_turn() -> void:
 		_order_index += 1
 		if _order_index >= _order.size():
 			round_number += 1
+			_tick_taunts()
 			for unit in _order:
 				unit.tick_cooldowns()
 				unit.tick_modifiers()
