@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_with_mipmaps(t)
 	_test_reduce_motion(t)
 	_test_ambient_redraw(t)
+	_test_frames_cache_is_bounded(t)
 
 func _test_clear_children(t) -> void:
 	var parent := Node.new()
@@ -84,3 +85,17 @@ func _test_ambient_redraw(t) -> void:
 	t.almost(NodeUtil.ambient_redraw(item, 0.0, 0.5), 0.0, "görünmeyen düğümde sayaç ilerlemez")
 	item.free()
 	t.ok(1.0 / NodeUtil.AMBIENT_REDRAW_HZ <= 0.05, "ortam animasyonu en az 20 Hz")
+
+## Kare kümesi önbelleği sınırlı (görev 5.3): bütün kümeler istense de
+## yüklü küme sayısı sınırı aşmaz, en son istenen hep önbellekte.
+func _test_frames_cache_is_bounded(t) -> void:
+	var dir := DirAccess.open("res://data/assets/characters/frames")
+	if dir == null:
+		return
+	var last := ""
+	for name in dir.get_directories():
+		if BodyFrames.for_body(name) != null:
+			last = name
+	t.le(float(BodyFrames.cached_set_count()), float(BodyFrames.MAX_CACHED_SETS), "kare önbelleği sınırı aşmıyor")
+	if not last.is_empty():
+		t.ok(BodyFrames._cache.has(last) and BodyFrames._cache[last] != null, "en son istenen küme önbellekte")

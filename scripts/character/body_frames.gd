@@ -74,9 +74,21 @@ var _textures: Array[Texture2D] = []
 var _clip_base: Dictionary = {}
 
 static var _cache: Dictionary = {}
+## Önbellek çıkarma (görev 5.3, O-9): 286 kare kümesi (beden x giysi) var ve
+## bir oturumda dokunulan her biri bellekte kalıyordu. En uzun süredir
+## istenmeyen küme, sınır aşılınca önbellekten düşer. Figürler kümeyi her
+## çizimde yeniden istediği için ekrandaki bir küme hiç düşmez; düşen biri
+## gerekirse diskten (ya da hâlâ başka biri tutuyorsa motorun önbelleğinden)
+## geri gelir. Sınır yolda aynı anda görünen kümelerin rahat üstünde
+## (lider + 4 kişilik kadro + 12 tayfa, her biri 4-5 giysi).
+const MAX_CACHED_SETS: int = 96
+static var _last_used: Dictionary = {}
+static var _use_clock: int = 0
 
 ## Varyantın kare kümesi; yoksa null (çağıran eski parça mankenine düşer).
 static func for_body(body_id: String) -> BodyFrames:
+	_use_clock += 1
+	_last_used[body_id] = _use_clock
 	if _cache.has(body_id):
 		return _cache[body_id]
 	var path := "res://data/assets/characters/frames/%s/frames.tres" % body_id
@@ -84,7 +96,44 @@ static func for_body(body_id: String) -> BodyFrames:
 	if ResourceLoader.exists(path):
 		found = load(path) as BodyFrames
 	_cache[body_id] = found
+	if found != null:
+		_trim(MAX_CACHED_SETS)
 	return found
+
+## Yüklü küme sayısı (yoklar sayılmaz).
+static func cached_set_count() -> int:
+	var n := 0
+	for value in _cache.values():
+		if value != null:
+			n += 1
+	return n
+
+## En uzun süredir istenmeyen kümeleri `limit`'e inene dek düşürür.
+static func _trim(limit: int) -> void:
+	while cached_set_count() > limit:
+		var oldest := ""
+		var oldest_use := 1 << 62
+		for key in _cache:
+			if _cache[key] != null and int(_last_used.get(key, 0)) < oldest_use:
+				oldest = key
+				oldest_use = int(_last_used.get(key, 0))
+		if oldest.is_empty():
+			return
+		_cache.erase(oldest)
+		_last_used.erase(oldest)
+
+## Ölçüm için (akşam testi, görev 5.3): yüklü küme sayısı ve sayfa dokularının
+## toplam boyutu (bayt, sıkıştırılmamış RGBA8 tahmini).
+static func cache_report() -> Dictionary:
+	var bytes := 0
+	for value in _cache.values():
+		var frames := value as BodyFrames
+		if frames == null:
+			continue
+		for tex in frames._textures:
+			if tex != null:
+				bytes += tex.get_width() * tex.get_height() * 4
+	return {"sets": cached_set_count(), "bytes": bytes}
 
 func has_clip(clip: String) -> bool:
 	_index_clips()
