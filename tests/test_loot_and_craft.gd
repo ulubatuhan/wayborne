@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_loot_tables(t)
 	_test_consumables(t)
 	_test_recipes_have_consumers(t)
+	_test_ailments_and_doctor(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(500, 30, 1)
@@ -99,3 +100,36 @@ func _test_recipes_have_consumers(t) -> void:
 	wagon.add_item(ItemCatalog.get_item("test_cloth"), 1)
 	t.ok(session.craft_in_wagon(0, RecipeCatalog.MAKE_TORCHES), "meşale sarılır")
 	t.ok(session.light_for_night(GameSession.LIGHT_TORCH), "meşale gecede yanar")
+
+## Sakatlık, hastalık ve hekim (Y-C05): dert statı büker ve gün sayıp geçer,
+## kayıttan döner; hekim ilaç stoğu ve altınla iyileştirir, stok yoksa kilitli;
+## şehre satılan iksir stoğu artırır.
+func _test_ailments_and_doctor(t) -> void:
+	var c := CharacterData.create("Hasta", CultureCatalog.VALLEY, CharacterStats.new())
+	var dodge := c.get_dodge()
+	t.ok(c.add_ailment("twisted_ankle"), "dert eklenir")
+	t.eq(c.get_dodge(), dodge - 4, "burkulan bilek kaçınmayı düşürür")
+	t.not_ok(c.add_ailment("twisted_ankle"), "aynı dert ikilenmez")
+	var copy := CharacterData.from_dict(JSON.parse_string(JSON.stringify(c.to_dict())))
+	t.ok(copy.ailments.has("twisted_ankle"), "dert kayıttan döner")
+	for day in 8:
+		c.tick_ailments()
+	t.not_ok(c.ailments.has("twisted_ankle"), "süresi dolan dert geçer")
+	c.add_ailment("fever")
+	t.ok(c.tick_ailments() > 0, "hastalık stres yazar")
+	var session := _session()
+	var patient := session.get_party()[0]
+	patient.add_ailment("broken_arm")
+	var stock := session.market.get_medicine(session.current_location_id)
+	t.ok(stock > 0, "şehrin ilaç stoğu var")
+	t.ok(session.treat_ailment(patient, "broken_arm"), "hekim iyileştirir")
+	t.eq(session.market.get_medicine(session.current_location_id), stock - 1, "stoktan ilaç gider")
+	t.not_ok(patient.ailments.has("broken_arm"), "dert kalktı")
+	patient.add_ailment("deep_cut")
+	session.market.change_medicine(session.current_location_id, -99)
+	t.eq(session.get_doctor_block_reason(patient, "deep_cut"), "UI_DOCTOR_NO_MEDICINE", "ilaç yoksa sebebiyle kilitli")
+	session.record_sale(MarketConditions.MEDICINE_ITEM, 3, 30)
+	t.eq(session.market.get_medicine(session.current_location_id), 3, "satılan iksir şehrin stoğunu artırır")
+	var restored := GameSession.new(0, 0)
+	restored.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	t.eq(restored.market.get_medicine(session.current_location_id), 3, "stok kayıttan döner")

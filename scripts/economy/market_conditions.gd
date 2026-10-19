@@ -299,14 +299,50 @@ func get_hardship(location_id: String, day: int) -> float:
 
 	return clampf(hardship, 0.0, 1.0)
 
+## --- Şehrin ilaç stoğu (görev Y-C05) ---
+## Hekim stoktan ilaç harcar. Stok yavaş dolar (MEDICINE_REGEN_DAYS'te bir);
+## kervanın şehre sattığı iksir (ilaç) stoğu artırır; veba onu eritir.
+const MEDICINE_ITEM: String = "test_potion"
+const MEDICINE_CITY: int = 4
+const MEDICINE_TOWN: int = 2
+const MEDICINE_REGEN_DAYS: int = 10
+var _medicine: Dictionary = {}
+
+static func default_medicine(location_id: String) -> int:
+	var location := WorldMapData.get_location_by_id(location_id)
+	if location == null:
+		return 0
+	if location.settlement_type == SettlementRules.CITY:
+		return MEDICINE_CITY
+	if location.settlement_type == SettlementRules.TOWN:
+		return MEDICINE_TOWN
+	return 0
+
+func get_medicine(location_id: String) -> int:
+	return int(_medicine.get(location_id, default_medicine(location_id)))
+
+func change_medicine(location_id: String, delta: int) -> void:
+	_medicine[location_id] = clampi(get_medicine(location_id) + delta, 0, default_medicine(location_id) * 4 + 8)
+
+func regen_medicine(day: int) -> void:
+	if day % MEDICINE_REGEN_DAYS != 0:
+		return
+	for location_id in _medicine.keys():
+		if get_medicine(location_id) < default_medicine(location_id):
+			change_medicine(location_id, 1)
+
 func to_save_dict() -> Dictionary:
 	return {
 		"pressure": _pressure.duplicate(),
 		"shocks": _shocks.duplicate(true),
 		"city_gold": _city_gold.duplicate(),
+		"medicine": _medicine.duplicate(),
 	}
 
 func load_from_dict(data: Dictionary) -> void:
+	_medicine = {}
+	for location_id in (data.get("medicine", {}) as Dictionary):
+		_medicine[str(location_id)] = int(data["medicine"][location_id])
 	_pressure = {}
 	var stored: Dictionary = data.get("pressure", {})
 	for key in stored:

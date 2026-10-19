@@ -4183,6 +4183,13 @@ every decision has a visible control, and a key is only its shortcut.**
   travels with the engine's save. Evenings and nights raise the signal rate by `NIGHT_SIGNAL_SCALE` unless there is a
   precaution: the camp fire, a watch set at camp, or a lit lantern/torch. `simulate_journeys` reports quiet triples
   and back-to-back heavy cards with the director on and off.
+- **Bodies carry wounds and fevers; towns ration medicine (task Y-C05).** `CharacterData.ailments` are timed
+  (injuries: broken arm, twisted ankle, deep wound; sicknesses: fever, plague) and bend the same derived getters as
+  traits and gear; sicknesses add stress each road day. Someone left at 1 HP by a fight may be injured; hunger raises
+  the daily fever chance; arriving in a plague city may infect and drains its medicine. The church's physician cures
+  for gold and one unit of the town's medicine stock (`MarketConditions` per town, slow refill); potions the caravan
+  sells there go into that stock - the user's note: what we supply changes what they can treat. No stock: locked with
+  its reason.
 - **Fights pay in kind, and kits are used (tasks Y-C03, Y-C04, Y-F03).** A won fight rolls its kind's table in
   `data/config/loot.json` (`LootTable`, seeded from the fight); the victory screen lists the spoils and the road loads
   them - goods into cargo (or a bag), clothes and gear into the lockers. Events can hand out clothes too

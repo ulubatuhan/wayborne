@@ -481,7 +481,7 @@ func get_max_hp() -> int:
 		1,
 		stats.get_max_hp() + get_character_class().bonus_max_hp
 		+ get_height_hp_bonus() + get_gender_hp_bonus() + get_body_weight_hp_bonus()
-		+ _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus") + _outfit_bonus_sum("hp_bonus")
+		+ _trait_bonus_sum("hp_bonus") + _equipment_bonus_sum("hp_bonus") + _outfit_bonus_sum("hp_bonus") + _ailment_bonus_sum("hp_bonus")
 	)
 
 ## Can barının yanına eklenen bir sıfat - sayının **yerine** değil, sayının
@@ -506,22 +506,22 @@ func get_dodge() -> int:
 		0,
 		stats.get_dodge() + get_height_dodge_bonus()
 		+ get_gender_dodge_bonus() + get_body_weight_dodge_bonus()
-		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus") + _outfit_bonus_sum("dodge_bonus")
+		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus") + _outfit_bonus_sum("dodge_bonus") + _ailment_bonus_sum("dodge_bonus")
 	)
 
 ## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy ve
 ## ekipman bonusları burada eklenir (bkz. CombatUnit.from_character).
 func get_accuracy() -> int:
-	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus") + _outfit_bonus_sum("accuracy_bonus")
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus") + _outfit_bonus_sum("accuracy_bonus") + _ailment_bonus_sum("accuracy_bonus")
 
 func get_crit_chance() -> int:
 	return stats.get_crit_chance() + get_gender_crit_bonus() \
-		+ _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus") + _outfit_bonus_sum("crit_bonus")
+		+ _trait_bonus_sum("crit_bonus") + _equipment_bonus_sum("crit_bonus") + _outfit_bonus_sum("crit_bonus") + _ailment_bonus_sum("crit_bonus")
 
 func get_damage_bonus() -> int:
 	return stats.get_damage_bonus() \
 		+ get_gender_damage_bonus() + get_body_weight_damage_bonus() \
-		+ _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus") + _outfit_bonus_sum("damage_bonus")
+		+ _trait_bonus_sum("damage_bonus") + _equipment_bonus_sum("damage_bonus") + _outfit_bonus_sum("damage_bonus") + _ailment_bonus_sum("damage_bonus")
 
 ## Savaş bu sarmalayıcıyı okur, stats.get_composure()'ı değil - huy ve
 ## ekipmanın da buraya girebilmesi için (bkz. CLAUDE.md'nin sarmalayıcı
@@ -844,6 +844,46 @@ func _equipment_bonus_sum(field: String) -> int:
 func get_outfit_bonus(field: String) -> int:
 	return _outfit_bonus_sum(field)
 
+## --- Sakatlık ve hastalık (görev Y-C05) ---
+## Yarı kalıcı dert: gün sayar, kendi kendine geçer ya da hekimde iyileşir.
+## Etkisi huy, ekipman ve kıyafetle aynı alanlardan (savaş aynı sarmalayıcıları
+## okur). Hastalık her yol günü stres de yazar. Kayıtta.
+const AILMENTS: Dictionary = {
+	"broken_arm": {"kind": "injury", "days": 14, "damage_bonus": -2, "accuracy_bonus": -3, "key": "AILMENT_BROKEN_ARM"},
+	"twisted_ankle": {"kind": "injury", "days": 8, "dodge_bonus": -4, "key": "AILMENT_TWISTED_ANKLE"},
+	"deep_cut": {"kind": "injury", "days": 10, "hp_bonus": -5, "key": "AILMENT_DEEP_CUT"},
+	"fever": {"kind": "sickness", "days": 6, "hp_bonus": -3, "accuracy_bonus": -2, "daily_stress": 1, "key": "AILMENT_FEVER"},
+	"plague": {"kind": "sickness", "days": 12, "hp_bonus": -6, "damage_bonus": -1, "daily_stress": 2, "key": "AILMENT_PLAGUE"},
+}
+const INJURIES: Array[String] = ["broken_arm", "twisted_ankle", "deep_cut"]
+var ailments: Dictionary = {}
+
+func add_ailment(id: String) -> bool:
+	if not AILMENTS.has(id) or ailments.has(id):
+		return false
+	ailments[id] = int(AILMENTS[id]["days"])
+	current_hp = mini(current_hp, get_max_hp())
+	return true
+
+func cure_ailment(id: String) -> bool:
+	return ailments.erase(id)
+
+## Bir gün geçer: süresi dolan dert kalkar; hastalığın stresi döner.
+func tick_ailments() -> int:
+	var stress_from_sickness := 0
+	for id in ailments.keys():
+		stress_from_sickness += int(AILMENTS[id].get("daily_stress", 0))
+		ailments[id] = int(ailments[id]) - 1
+		if int(ailments[id]) <= 0:
+			ailments.erase(id)
+	return stress_from_sickness
+
+func _ailment_bonus_sum(field: String) -> int:
+	var total := 0
+	for id in ailments:
+		total += int((AILMENTS.get(id, {}) as Dictionary).get(field, 0))
+	return total
+
 func _outfit_bonus_sum(field: String) -> int:
 	var total := 0
 	for slot in outfit:
@@ -911,6 +951,7 @@ func to_dict() -> Dictionary:
 		"last_chat_topic": last_chat_topic,
 		"last_action_day": last_action_day,
 		"story_chapter": story_chapter,
+		"ailments": ailments.duplicate(),
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -943,6 +984,10 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.last_chat_topic = str(data.get("last_chat_topic", ""))
 	character.last_action_day = int(data.get("last_action_day", -99))
 	character.story_chapter = clampi(int(data.get("story_chapter", 0)), 0, 3)
+	character.ailments = {}
+	for id in (data.get("ailments", {}) as Dictionary):
+		if AILMENTS.has(String(id)):
+			character.ailments[String(id)] = maxi(1, int(data["ailments"][id]))
 
 	character.trait_ids.clear()
 	for trait_id in (data.get("trait_ids", []) as Array):

@@ -443,3 +443,8 @@
 "RECIPE_FISH_OIL_DESC","İki balıktan bir fener yağı.","Two fish make one measure of lamp oil.","","","","","","","","",""
 "RECIPE_TORCHES_NAME","Meşale sar","Wind torches","","","","","","","","",""
 "RECIPE_TORCHES_DESC","Bir top bezden iki meşale.","One bolt of cloth makes two torches.","","","","","","","","",""
+"AILMENT_BROKEN_ARM","kırık kol","broken arm","","","","","","","","",""
+"AILMENT_TWISTED_ANKLE","burkulmuş bilek","twisted ankle","","","","","","","","",""
+"AILMENT_DEEP_CUT","derin yara","deep wound","","","","","","","","",""
+"AILMENT_FEVER","sıtma ateşi","marsh fever","","","","","","","","",""
+"AILMENT_PLAGUE","veba","plague","","","","","","","","",""

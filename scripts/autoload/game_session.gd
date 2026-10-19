@@ -2039,7 +2039,10 @@ func advance_day() -> Array[String]:
 	# zarına bağlı olmamalı.
 	last_spoiled = {}
 	companion_notes = []
+	ailment_notes = []
+	market.regen_medicine(total_days_elapsed)
 	if is_journey_active():
+		_ailment_day()
 		caravan.apply_daily_drift()
 		_apply_road_stress_day()
 		last_spoiled = spoil_perishables()
@@ -2393,6 +2396,9 @@ func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
 	if is_profiteering_sale(item_id):
 		profiteering_sales += 1
 	market.record_sale(current_location_id, item_id, quantity)
+	# Şehre satılan ilaç hekimin stoğuna girer (Y-C05, kullanıcı notu).
+	if item_id == MarketConditions.MEDICINE_ITEM:
+		market.change_medicine(current_location_id, quantity)
 	if total_price > 0:
 		market.spend_city_gold(current_location_id, total_price)
 
@@ -2590,6 +2596,68 @@ func _note_route_trip(origin_id: String, destination_id: String) -> void:
 	memory["trips"] = int(memory.get("trips", 0)) + 1
 	memory["last_day"] = total_days_elapsed
 	route_memory[route] = memory
+
+## --- Sakatlık, hastalık ve hekim (görev Y-C05) ---
+const FEVER_CHANCE_PER_DAY: float = 0.01
+const FEVER_HUNGRY_BONUS: float = 0.03
+const PLAGUE_ARRIVAL_CHANCE: float = 0.25
+const INJURY_CHANCE: float = 0.5
+const DOCTOR_FEE_INJURY: int = 25
+const DOCTOR_FEE_SICKNESS: int = 40
+const PLAGUE_MEDICINE_DRAIN: int = 2
+## Son günün dert notları (yol günlüğü okur): [{"key", "args"}].
+var ailment_notes: Array = []
+
+## Savaşta Kıyı'ya düşüp kalkan biri sakatlanabilir (zar savaştan sonra).
+func roll_injury(character: CharacterData, rng: RandomNumberGenerator) -> String:
+	if rng.randf() >= INJURY_CHANCE:
+		return ""
+	var id := CharacterData.INJURIES[rng.randi_range(0, CharacterData.INJURIES.size() - 1)]
+	return id if character.add_ailment(id) else ""
+
+func _ailment_day() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("ailment|%s|%d" % [caravan_name, total_days_elapsed])
+	for character in get_party():
+		var stress := character.tick_ailments()
+		if stress > 0:
+			change_character_stress(character, stress)
+		var chance := FEVER_CHANCE_PER_DAY + (FEVER_HUNGRY_BONUS if character.consecutive_hungry_days > 0 else 0.0)
+		if rng.randf() < chance and character.add_ailment("fever"):
+			ailment_notes.append({"key": "UI_AILMENT_FEVER_CAUGHT", "args": [character.character_name]})
+
+func _plague_on_arrival() -> void:
+	if not world_events.has_kind_on_city(WorldEvents.Kind.PLAGUE, current_location_id, total_days_elapsed):
+		return
+	market.change_medicine(current_location_id, -PLAGUE_MEDICINE_DRAIN)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("plague|%s|%d" % [current_location_id, total_days_elapsed])
+	for character in get_party():
+		if rng.randf() < PLAGUE_ARRIVAL_CHANCE:
+			character.add_ailment("plague")
+
+func doctor_fee(id: String) -> int:
+	return DOCTOR_FEE_SICKNESS if String(CharacterData.AILMENTS.get(id, {}).get("kind", "")) == "sickness" else DOCTOR_FEE_INJURY
+
+## Hekim: kilitliyse sebebi, açıksa "".
+func get_doctor_block_reason(character: CharacterData, id: String) -> String:
+	if is_journey_active():
+		return "UI_DOCTOR_ON_ROAD"
+	if not character.ailments.has(id):
+		return "UI_DOCTOR_NOTHING"
+	if market.get_medicine(current_location_id) <= 0:
+		return "UI_DOCTOR_NO_MEDICINE"
+	if not wallet.can_afford(doctor_fee(id)):
+		return "UI_DOCTOR_NO_GOLD"
+	return ""
+
+func treat_ailment(character: CharacterData, id: String) -> bool:
+	if not get_doctor_block_reason(character, id).is_empty():
+		return false
+	wallet.spend(doctor_fee(id))
+	market.change_medicine(current_location_id, -1)
+	character.cure_ailment(id)
+	return true
 
 ## --- Gece ışığı (görev Y-C20) ---
 ## Fener: fener + bir yağ; meşale: iki meşale. Bir gece yanar. Hangisi yanacak
@@ -3126,6 +3194,7 @@ func finish_journey() -> Dictionary:
 	bought_here = {}
 	_restock_current_location()
 	record_seen_prices(current_location_id)
+	_plague_on_arrival()
 	heal_party()
 
 	# Kazanılmış vagonlar kampanyadan **önce**: bölüm hedefleri

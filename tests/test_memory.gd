@@ -160,6 +160,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"_provisions_item": "katalogdan okunan sabit kaynak",
 	"last_spoiled": "yalnızca son yol gününün çürüme raporu; günlük yazıldıktan sonra anlamı yok",
 	"road_position": "kervanın o anki yeri; yol ekranı her adımda yeniden yazar",
+	"ailment_notes": "yalnızca son yol gününün hastalık notları; günlük yazıldıktan sonra anlamı yok",
 	"companion_notes": "yalnızca son yol gününün yoldaş notları; günlük yazıldıktan sonra anlamı yok",
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
 }

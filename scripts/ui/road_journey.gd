@@ -2578,6 +2578,8 @@ func _run_day() -> void:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 	for note in _session.companion_notes:
 		_add_companion_note(note)
+	for note in _session.ailment_notes:
+		_add_log(tr(String(note["key"])) % note["args"], LOCKED_COLOR)
 	for item_id in _session.last_spoiled:
 		var spoiled := ItemCatalog.get_item(String(item_id))
 		_add_log(tr("UI_ROAD_GOODS_SPOILED") % [int(_session.last_spoiled[item_id]), spoiled.item_name if spoiled != null else String(item_id)])
@@ -3462,6 +3464,15 @@ func _on_combat_finished(
 	# davranış aynen sürüyor.
 	if not dead_characters.is_empty():
 		_report_combat_deaths(dead_characters)
+
+	# Kıyı'ya kadar düşüp kalkan sakatlanabilir (Y-C05).
+	var injury_rng := RandomNumberGenerator.new()
+	injury_rng.seed = hash("injury|%s|%d" % [_route_key, _session.total_days_elapsed])
+	for fighter in _current_combat_party:
+		if _session.get_party().has(fighter) and fighter.current_hp <= 1:
+			var injury := _session.roll_injury(fighter, injury_rng)
+			if not injury.is_empty():
+				_add_log(tr("UI_AILMENT_INJURED") % [fighter.character_name, tr(String(CharacterData.AILMENTS[injury]["key"]))], LOCKED_COLOR)
 
 	# Savaşın dışında tutulan biri, kaybı ya da bir ölümü uzaktan izledi -
 	# bunu unutmaz (bkz. CharacterData.GRIEVANCE_BENCHED).
