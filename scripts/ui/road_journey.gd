@@ -135,6 +135,12 @@ const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_military_convoy": "guard",
 	"evt_refugee_column": "traveler",
 	"evt_merchant_caravan": "traveler",
+	# Başka kervanlar (Y-B10): uzaktan görünür, zincirin devamı da.
+	"evt_pilgrim_encounter": "traveler",
+	"evt_convoy_search": "guard",
+	"evt_convoy_repaid": "guard",
+	"evt_refugee_gratitude": "traveler",
+	"evt_rival_slander": "traveler",
 }
 
 ## event_id -> `e6*.jpg` (Faz 22'nin olay kartı illüstrasyonları, bkz.

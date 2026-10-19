@@ -24,6 +24,7 @@ func run(t) -> void:
 	_test_wolf_year_chain(t)
 	_test_road_food_sources(t)
 	_test_merchant_temper_on_the_road(t)
+	_test_other_caravans(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -501,3 +502,31 @@ func _test_merchant_temper_on_the_road(t) -> void:
 	t.ok(not caravan.merchant_names.has("Bora") and caravan.merchant_names.size() == 2, "kaçan, sondaki değil hırsız tüccar")
 	caravan.mouths_by_name["Ada"] = 0
 	t.eq(caravan.count_merchants_with(NpcDisposition.LOYAL), 1, "yolda olmayan (teslimat) müşterisinin mizacı sayılmaz")
+
+## Başka kervanlar (görev Y-B10): dört tür, her biri yolda işaretle görünür
+## (EVENT_ROAD_MARKER_KIND) ve kararın günler sonra dönen bir devamı var.
+func _test_other_caravans(t) -> void:
+	var markers: Dictionary = load("res://scripts/ui/road_journey.gd").get_script_constant_map()["EVENT_ROAD_MARKER_KIND"]
+	var chains := {
+		"evt_military_convoy": ["evt_convoy_repaid", "evt_convoy_search"],
+		"evt_refugee_column": ["evt_refugee_gratitude"],
+		"evt_pilgrim_encounter": ["evt_pilgrim_blessing"],
+		"evt_merchant_caravan": ["evt_rival_slander"],
+	}
+	for event_id in chains:
+		var event := EventCatalog.get_event(event_id)
+		t.ok(event != null, "%s katalogda" % event_id)
+		t.ok(markers.has(event_id), "%s yolda uzaktan görünür" % event_id)
+		var unlocked := {}
+		for choice in event.choices:
+			for effect in choice.effects:
+				if effect.type == EventEffect.Type.UNLOCK_EVENT:
+					unlocked[effect.text_value] = true
+			for outcome in choice.outcomes:
+				for effect in outcome.effects:
+					if effect.type == EventEffect.Type.UNLOCK_EVENT:
+						unlocked[effect.text_value] = true
+		for follow in chains[event_id]:
+			t.ok(unlocked.has(follow), "%s kararı %s zincirini açar" % [event_id, follow])
+			var next := EventCatalog.get_event(follow)
+			t.ok(next != null and next.triggered_only, "%s yalnız tetiklenince gelir" % follow)

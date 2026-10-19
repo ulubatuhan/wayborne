@@ -70,6 +70,10 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_merchant_cold_feet())
 	_road_events.append(_merchant_grudge())
 	_road_events.append(_merchant_shares_bread())
+	_road_events.append(_convoy_repaid())
+	_road_events.append(_convoy_search())
+	_road_events.append(_refugee_gratitude())
+	_road_events.append(_rival_slander())
 	_road_events.append(_party_theft())
 	_road_events.append(_party_investigation())
 	_road_events.append(_military_convoy())
@@ -1675,6 +1679,7 @@ static func _military_convoy() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.REPUTATION, 3),
 				EventEffect.make(EventEffect.Type.GOLD, 40),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_convoy_repaid"),
 			])
 		),
 		# Y-E03: konvoyun artçısından düşen bir sandık. Yakalanırsan
@@ -1683,6 +1688,7 @@ static func _military_convoy() -> GameEvent:
 			"EVT_MILITARY_CONVOY_OPT_CRATE", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
 			"EVT_MILITARY_CONVOY_CRATE_OK", _effects([
 				EventEffect.make(EventEffect.Type.GOLD, 70),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_convoy_search"),
 			]),
 			"EVT_MILITARY_CONVOY_CRATE_MID", _effects([
 				EventEffect.make(EventEffect.Type.GOLD, 30),
@@ -1709,6 +1715,7 @@ static func _refugee_column() -> GameEvent:
 				EventEffect.make(EventEffect.Type.PROVISIONS, -6),
 				EventEffect.make(EventEffect.Type.MORALE, 6),
 				EventEffect.make(EventEffect.Type.REPUTATION, 2),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_refugee_gratitude"),
 			])
 		),
 		# Y-E03: kaçanlar yanlarında taşıyabildiklerini yok pahasına satıyor.
@@ -1752,13 +1759,101 @@ static func _merchant_caravan() -> GameEvent:
 			SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST, 0.0),
 			"EVT_MERCHANT_CARAVAN_TRADE_GOOD", _effects([
 				EventEffect.make(EventEffect.Type.GOLD, 30),
+				EventEffect.make(EventEffect.Type.UNLOCK_EVENT, 0, "evt_rival_slander"),
 			]),
 			"EVT_MERCHANT_CARAVAN_TRADE_FLAT", _effects([
 				EventEffect.make(EventEffect.Type.GOLD, -10),
 			])
 		),
+		# Bilgi (Y-B10): karşı yönden gelen kervan yolu bilir.
+		_gated_choice(
+			"EVT_MERCHANT_CARAVAN_OPT_NEWS", "EVT_MERCHANT_CARAVAN_OPT_NEWS_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 10)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -10),
+				EventEffect.make(EventEffect.Type.DANGER, -8),
+			])
+		),
 		_choice("EVT_MERCHANT_CARAVAN_OPT_WAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
+		])),
+	])
+	return event
+
+## --- Başka kervanların zincirleri (görev Y-B10) ---
+## Her kervan türünün bir devamı var: verdiğin karar günler sonra geri gelir
+## (evt_wanderer_revenge deseni: UNLOCK_EVENT ile açılan, yalnız tetiklenen kart).
+
+static func _convoy_repaid() -> GameEvent:
+	var event := _event("evt_convoy_repaid", "EVT_CONVOY_REPAID", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.choices = _choices([
+		_choice("EVT_CONVOY_REPAID_OPT_LISTEN", _effects([
+			EventEffect.make(EventEffect.Type.DANGER, -12),
+			EventEffect.make(EventEffect.Type.MORALE, 3),
+		])),
+	])
+	return event
+
+static func _convoy_search() -> GameEvent:
+	var event := _event("evt_convoy_search", "EVT_CONVOY_SEARCH", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.choices = _choices([
+		_check_choice(
+			"EVT_CONVOY_SEARCH_OPT_HIDE", CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST,
+			"EVT_CONVOY_SEARCH_HIDDEN", _effects([EventEffect.make(EventEffect.Type.STRESS, 3)]),
+			"EVT_CONVOY_SEARCH_FINED", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -50),
+				EventEffect.make(EventEffect.Type.REPUTATION, -2),
+			]),
+			"EVT_CONVOY_SEARCH_CAUGHT", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -90),
+				EventEffect.make(EventEffect.Type.REPUTATION, -6),
+			])
+		),
+		_choice("EVT_CONVOY_SEARCH_OPT_CONFESS", _effects([
+			EventEffect.make(EventEffect.Type.GOLD, -70),
+			EventEffect.make(EventEffect.Type.REPUTATION, -1),
+		])),
+		_choice("EVT_CONVOY_SEARCH_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -4),
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"),
+		])),
+	])
+	return event
+
+static func _refugee_gratitude() -> GameEvent:
+	var event := _event("evt_refugee_gratitude", "EVT_REFUGEE_GRATITUDE", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_REFUGEE_GRATITUDE_OPT_TAKE", "EVT_REFUGEE_GRATITUDE_OPT_TAKE_LOCKED",
+			_conditions([EventCondition.make("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([EventEffect.make(EventEffect.Type.TRIGGER_RECRUIT)])
+		),
+		_choice("EVT_REFUGEE_GRATITUDE_OPT_THANK", _effects([
+			EventEffect.make(EventEffect.Type.PROVISIONS, 4),
+			EventEffect.make(EventEffect.Type.MORALE, 4),
+		])),
+	])
+	return event
+
+static func _rival_slander() -> GameEvent:
+	var event := _event("evt_rival_slander", "EVT_RIVAL_SLANDER", 3.0)
+	event.triggered_only = true
+	event.fire_only_once = true
+	event.choices = _choices([
+		_check_choice(
+			"EVT_RIVAL_SLANDER_OPT_ANSWER", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
+			"EVT_RIVAL_SLANDER_WON", _effects([EventEffect.make(EventEffect.Type.REPUTATION, 2)]),
+			"EVT_RIVAL_SLANDER_DRAW", _effects([EventEffect.make(EventEffect.Type.REPUTATION, -1)]),
+			"EVT_RIVAL_SLANDER_LOST", _effects([EventEffect.make(EventEffect.Type.REPUTATION, -4)])
+		),
+		_choice("EVT_RIVAL_SLANDER_OPT_IGNORE", _effects([
+			EventEffect.make(EventEffect.Type.REPUTATION, -2),
 		])),
 	])
 	return event
