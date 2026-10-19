@@ -59,6 +59,7 @@ func run(t) -> void:
 	_test_beast_rig_planted_feet_move_back(t)
 	_test_pack_animals_read_against_a_person(t)
 	_test_hub_turn_is_a_wave(t)
+	_test_pole_reaches_the_ox(t)
 
 ## Kadans zeminden: her figür adımını zeminin hızından ve kendi çevrim
 ## yolundan alıyor. `STEP_RATE` (0.52 çevrim/s) 320'lik şeride göreydi ve
@@ -418,3 +419,23 @@ func _test_walking_left_is_not_a_moonwalk(t) -> void:
 	t.ok(figure._phase > 1.0, "sola yürürken faz ileri akıyor")
 	t.eq(figure._facing, -1.0, "sola yürüyen sola bakıyor")
 	figure.free()
+
+## Koşum öküze bağlı (görev 10.4): okun bir ucu vagonun önünde, öteki
+## öküzün boynunda - öküzün kutusunun içinde ve vagonun gidiş yönünde.
+func _test_pole_reaches_the_ox(t) -> void:
+	for wagons in [1, 3]:
+		var caravan := _build(wagons, 2)
+		var height := caravan.size.y * caravan._scale
+		var wagon_w := height * RoadCaravan.WAGON_WIDTH_RATIO
+		var wagon_h := height * RoadCaravan.WAGON_HEIGHT_RATIO
+		for index in wagons:
+			var hitch: Dictionary = caravan._hitch_points(index, wagon_w, wagon_h)
+			t.ok(not hitch.is_empty(), "vagon %d koşulu" % index)
+			if hitch.is_empty():
+				continue
+			var ox: WalkFigure = caravan._oxen[index]
+			var neck: Vector2 = hitch.neck
+			t.ok(neck.x > ox.position.x and neck.x < ox.position.x + ox.size.x, "boyun öküzün kutusunda (vagon %d)" % index)
+			t.ok((neck.x - (hitch.start as Vector2).x) * float(hitch.dir) > 0.0, "ok vagondan öküze doğru (vagon %d)" % index)
+			t.ok(neck.y < ox.position.y + ox.size.y and neck.y > ox.position.y, "boyun yerden yukarıda (vagon %d)" % index)
+		caravan.get_parent().free()

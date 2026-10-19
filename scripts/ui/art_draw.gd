@@ -621,6 +621,28 @@ static func draught_pole(
 		timber, maxf(1.4, h * 0.045)
 	)
 
+## Koşum oku: vagonun ön dingilinden öküzün boynuna, tek kalas (görev 10.4).
+## Öküzden önce çizilir, gövdesinin arkasından geçip boyunda biter.
+static func hitch_pole(canvas: CanvasItem, start: Vector2, neck: Vector2, h: float, tint: Color) -> void:
+	if h <= 0.0:
+		return
+	var timber := _tint(ArtPalette.WAGON_BODY_DARK, tint)
+	canvas.draw_line(start, neck, timber, maxf(1.6, h * 0.05))
+
+## Boyunduruk: öküzün boynunun önünde dikey kalas ve boyna dolanan kayış.
+## Öküzden *sonra* çizilir (RoadCaravan'ın boyunduruk katmanı).
+static func yoke(canvas: CanvasItem, neck: Vector2, ox_h: float, dir: float, tint: Color) -> void:
+	if ox_h <= 0.0:
+		return
+	var timber := _tint(ArtPalette.WAGON_BODY_DARK, tint)
+	var strap := _tint(ArtPalette.WAGON_WHEEL, tint)
+	var w := maxf(1.4, ox_h * 0.035)
+	var top := neck + Vector2(dir * ox_h * 0.02, -ox_h * 0.16)
+	var bottom := neck + Vector2(-dir * ox_h * 0.01, ox_h * 0.10)
+	canvas.draw_line(top, bottom, timber, w)
+	canvas.draw_line(top + Vector2(-dir * ox_h * 0.05, 0.0), top + Vector2(dir * ox_h * 0.05, 0.0), timber, w)
+	canvas.draw_arc(neck + Vector2(0.0, -ox_h * 0.03), ox_h * 0.07, -PI * 0.5, PI * 0.5, 8, strap, maxf(1.0, w * 0.6))
+
 static func _wheel(
 	canvas: CanvasItem, centre: Vector2, radius: float, color: Color, angle: float
 ) -> void:

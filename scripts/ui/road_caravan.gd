@@ -272,6 +272,10 @@ var _crew_figures: Array[WalkFigure] = []
 var _driver_figures: Array[WalkFigure] = []
 ## Vagon başına tek öküz - koşumun ölçüsünü bunlar belirliyor.
 var _oxen: Array[WalkFigure] = []
+## Boyunduruğun çizildiği katman: figürlerin *üstünde* (son çocuk), çünkü
+## boyunduruk öküzün boynunun önünden geçer. Ok ise `_draw()`'da, öküzün
+## arkasında kalır (görev 10.4).
+var _harness: Control
 ## Köpek/eşek/yarım vagon "sürüsü" - kolonun en arkasında. `_pack_is_dog`
 ## aynı indekste hangi hayvanın çizildiğini tutuyor (WalkFigure kendi
 ## türünü dışarı vermiyor), sırası `configure()`'daki ekleme sırasıyla
@@ -369,6 +373,8 @@ func _ready() -> void:
 func _on_resized() -> void:
 	_layout()
 	queue_redraw()
+	if _harness != null:
+		_harness.size = size
 
 ## Kervanı oturumdan kurar. Her çağrı figürleri yeniden yaratıyor, o yüzden
 ## sefer başında (ve parti değişince) çağrılmalı, karede değil.
@@ -488,6 +494,11 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 		_pack_is_dog.append(false)
 		_pack_has_cart.append(index >= session.owned_donkeys and PropArt.has(CART_PROP))
 
+	_harness = Control.new()
+	_harness.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_harness.draw.connect(_draw_yokes)
+	add_child(_harness)
+	_harness.size = size
 	_layout()
 
 ## `character` isimli bir kişi için (lider, parti): kıyafeti ve üstündeki
@@ -574,6 +585,8 @@ func set_light(light: Color) -> void:
 		if figure != null:
 			figure.set_tint(light)
 	queue_redraw()
+	if _harness != null:
+		_harness.queue_redraw()
 
 ## Kervanın zemine göre hızı (piksel/s, büyüklük). Yürüyüş fazı ve
 ## tekerlek dönüşü bundan; manzara da aynı sayıyla kaymalı, yoksa ayak
@@ -841,7 +854,7 @@ func _assign_transition(figure: WalkFigure, clip: String, fire_index: int, seats
 ## Oturulan yer, bu düğümün uzayında: kalçanın oturduğu nokta.
 func _transition_seat(figure: WalkFigure) -> Vector2:
 	if figure == _leader_rider and _leader != null:
-		return _leader.position + Vector2(_leader.size.x * 0.5, _leader.get_saddle_y())
+		return _leader.position + Vector2(_leader.get_saddle_x(), _leader.get_saddle_y())
 	return _driver_bench_position(int(_gather_fire_index.get(figure, _driver_figures.find(figure))))
 
 ## İnen kişinin yerde durduğu yer: oturduğu yerin hizasında, ayağı zeminde
@@ -1131,6 +1144,8 @@ func _process(delta: float) -> void:
 	# koşuluyla bağımsız.
 	if rolling or was_swaying or _camping or _turning or not _gathering_figures.is_empty():
 		queue_redraw()
+		if _harness != null:
+			_harness.queue_redraw()
 
 ## Lider: dönüşte kendi yolu (çevir, sonra yeni başa sür), yolda kendi
 ## zemin hızı, yoksa kervanın adımı. Üçünde de adım zeminden - at da insan
@@ -1361,6 +1376,12 @@ func _ease_gather(t: float) -> float:
 func _layout() -> void:
 	if _leader == null or _ground_y <= 0.0 or size.y < MIN_DRAW_HEIGHT:
 		return
+	# Yolda katılan bir yoldaş boyunduruk katmanından sonra eklenebilir:
+	# katman her zaman en üstte (son çocuk) kalır.
+	if _harness != null:
+		move_child(_harness, -1)
+		_harness.size = size
+		_harness.queue_redraw()
 	_wagon_centres.clear()
 	# Ölçek önce: kolon çapanın arkasına sığmıyorsa taşmak yerine
 	# küçülüyor. Her terim boşluk ya da yüksekliğe oranlı bir genişlik
@@ -1438,6 +1459,42 @@ func _turn_figure(figure: WalkFigure, facing: float) -> void:
 		return
 	figure.pivot_offset = Vector2(figure.size.x * 0.5, figure.size.y)
 	figure.scale = Vector2(maxf(absf(facing), MIN_TURN_WIDTH), 1.0)
+
+## Okun iki ucu, ekranda (dönüş ve kalkış uygulanmış): vagonun ön dingili ve
+## öküzün boynu. Öküzün çizimi kutusunun yaklaşık %62'sini dolduruyor
+## (bkz. `DRAWN_BEAST_SHARE`): boyun gidiş yönünde kutunun `OX_NECK_SHARE`
+## payı ilerde, yerden `OX_NECK_HEIGHT_SHARE` yukarıda.
+const OX_NECK_SHARE: float = 0.30
+const OX_NECK_HEIGHT_SHARE: float = 0.46
+
+func _hitch_points(index: int, wagon_w: float, wagon_h: float) -> Dictionary:
+	if index >= _oxen.size() or index >= _wagon_centres.size() or _oxen[index] == null:
+		return {}
+	var ox := _oxen[index]
+	var turn := _wagon_turn(index)
+	var dir := 1.0 if turn.x >= 0.0 else -1.0
+	var front_local := _wagon_centres[index] + wagon_w * 0.48
+	var front_x := turn.y + turn.x * (front_local - turn.y)
+	var ox_cx := ox.position.x + ox.size.x * 0.5
+	var ground := ox.position.y + ox.size.y
+	return {
+		"start": Vector2(front_x, _ground_y - turn.z - wagon_h * 0.34),
+		"neck": Vector2(ox_cx + dir * absf(turn.x) * ox.size.x * OX_NECK_SHARE,
+			ground - ox.size.y * OX_NECK_HEIGHT_SHARE),
+		"dir": dir,
+		"h": ox.size.y,
+	}
+
+func _draw_yokes() -> void:
+	if _ground_y <= 0.0 or size.y < MIN_DRAW_HEIGHT:
+		return
+	var height := size.y * _scale
+	var wagon_w := height * WAGON_WIDTH_RATIO
+	var wagon_h := height * WAGON_HEIGHT_RATIO
+	for index in _wagon_centres.size():
+		var hitch := _hitch_points(index, wagon_w, wagon_h)
+		if not hitch.is_empty():
+			ArtDraw.yoke(_harness, hitch.neck, float(hitch.h), float(hitch.dir), _light)
 
 ## Bir vagon biriminin yüzü ve merkezi - çizim aynayı bundan kuruyor.
 func _wagon_turn(index: int) -> Vector3:
@@ -1637,10 +1694,13 @@ func _draw() -> void:
 		var turn := _wagon_turn(index)
 		draw_set_transform(Vector2(turn.y * (1.0 - turn.x), -turn.z), 0.0, Vector2(turn.x, 1.0))
 		# Koşum oku vagondan *önce*: kalas gövdenin altından çıkıyor.
-		ArtDraw.draught_pole(
-			self, Vector2(centre + wagon_w * 0.48, _ground_y),
-			HITCH_GAP * _scale * 1.7, wagon_h, _light
-		)
+		# Okun ucu öküzün boynunda (görev 10.4): sabit boylu ok büyüyen
+		# öküzün ancak sağrısına yetişiyordu, boyunduruk da oradaydı.
+		var hitch := _hitch_points(index, wagon_w, wagon_h)
+		if not hitch.is_empty():
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			ArtDraw.hitch_pole(self, hitch.start, hitch.neck, wagon_h, _light)
+			draw_set_transform(Vector2(turn.y * (1.0 - turn.x), -turn.z), 0.0, Vector2(turn.x, 1.0))
 		# Sürücü koltuğu boş çizilir yalnızca gerçek bir figür onu
 		# devralmışsa (bkz. `_assign_transition`) - ikisi aynı anda
 		# çizilirse aynı kişi iki kez görünür.

@@ -174,8 +174,11 @@ static func pose(
 	# Kollar çift desteğin ortasında en açık: bacaklar %60 basışla yürüyor,
 	# adım anı topuk vuruşundan biraz sonra.
 	var arm_phase := phase if classic or seated else phase - _double_support_mid()
-	_arm(joints, "back", shoulder, h, arm_phase, motion, facing)
-	var front_swing := _arm(joints, "front", shoulder, h, arm_phase + PI, motion, facing)
+	# Atta oturan kol sallamaz, dizgini tutar (görev 10.2): kollar dinlenme
+	# duruşunda, yalnızca bacaklar ve kalça atın adımını taşır.
+	var arm_motion := 0.0 if seated else motion
+	_arm(joints, "back", shoulder, h, arm_phase, arm_motion, facing)
+	var front_swing := _arm(joints, "front", shoulder, h, arm_phase + PI, arm_motion, facing)
 	var turn := (_forearm_offset(front_swing).angle() - _forearm_offset(REST_SWING).angle()) * WEAPON_SWING_SHARE
 	var hang := Vector2.DOWN.rotated(turn)
 	joints["weapon_tip"] = joints["hand_front"] + Vector2(hang.x * facing, hang.y) * h * WEAPON_RATIO

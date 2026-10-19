@@ -19,6 +19,7 @@ func suite_name() -> String:
 func run(t) -> void:
 	_test_planted_foot_moves_back(t)
 	_test_arms_oppose_legs(t)
+	_test_rider_arms_rest(t)
 
 func _rel(joints: Dictionary, joint: String, origin: String, facing: float) -> Vector2:
 	var d: Vector2 = joints[joint] - joints[origin]
@@ -87,3 +88,17 @@ func _corr(a: Array[float], b: Array[float]) -> float:
 		saa += (a[i] - ma) * (a[i] - ma)
 		sbb += (b[i] - mb) * (b[i] - mb)
 	return sab / sqrt(maxf(saa * sbb, 1e-12))
+
+## Atta oturan kol sallamaz (görev 10.2): oturuşta elin omuza göre yeri
+## fazdan bağımsız, yürüyüşte değil (kontrol).
+func _test_rider_arms_rest(t) -> void:
+	for facing in [1.0, -1.0]:
+		var a := FigureRig.pose(Vector2.ZERO, H, 0.0, 1.0, facing, 0.0, true)
+		var b := FigureRig.pose(Vector2.ZERO, H, PI, 1.0, facing, 0.0, true)
+		var da := _rel(a, "hand_front", "shoulder", facing)
+		var db := _rel(b, "hand_front", "shoulder", facing)
+		t.ok(da.distance_to(db) < 0.01, "binicinin eli fazla oynamıyor (yön %d)" % facing)
+	var w0 := FigureRig.pose(Vector2.ZERO, H, 0.0, 1.0, 1.0)
+	var w1 := FigureRig.pose(Vector2.ZERO, H, PI, 1.0, 1.0)
+	t.ok(_rel(w0, "hand_front", "shoulder", 1.0).distance_to(_rel(w1, "hand_front", "shoulder", 1.0)) > 1.0,
+		"yürüyende kol sallanıyor (kontrol)")

@@ -74,6 +74,14 @@ const QUAD_CYCLE_RATIO: float = 4.0 * 0.13
 ## eyerde oturmuyor, atın üstüne konmuş gibi duruyor.
 const MOUNT_HORSE_RATIO: float = 0.66
 const MOUNT_RIDER_RATIO: float = 0.62
+## Binici atın biraz fazla önünde oturuyordu (görev 10.1): gidişin tersine,
+## at boyunun bu payı kadar geri, eyerin orta-arka kısmına.
+const MOUNT_SEAT_BACK_RATIO: float = 0.05
+## Binici klibi (`ride`) kare kümelerinde kollar sallanarak render edildi;
+## atta kol sallanmaz (görev 10.2). Kollar `-cos(faz)` ile salındığı için
+## π/2 fazındaki kare kolların dinlendiği karedir - binici o karede kalır,
+## at altında yürür.
+const RIDE_REST_PHASE: float = PI * 0.5
 
 const HORSE_COAT: Color = Color(0.36, 0.26, 0.19)
 const HORSE_COAT_DARK: Color = Color(0.24, 0.17, 0.13)
@@ -156,6 +164,8 @@ var _riderless: bool = false
 ## Son çizilen eyerin y'si, figürün kendi uzayında - inen binicinin
 ## kalçası tam buradan başlıyor.
 var _saddle_y: float = -1.0
+## Binicinin geri kaydırması (piksel), yalnızca biniciyi çizerken dolu.
+var _seat_back: float = 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -226,6 +236,11 @@ func get_saddle_y() -> float:
 	if _saddle_y >= 0.0:
 		return _saddle_y
 	return size.y - size.y * MOUNT_HORSE_RATIO * 0.66
+
+## Eyerin x'i, figürün kendi uzayında: binicinin oturduğu yer (görev 10.1),
+## atından inen biniciyle aynı nokta.
+func get_saddle_x() -> float:
+	return size.x * 0.5 - size.y * MOUNT_HORSE_RATIO * MOUNT_SEAT_BACK_RATIO * _facing
 
 ## Geçiş klibinin `u` anında kalçanın yerden yüksekliği (piksel, `h` boyunda
 ## bir kişi için). Klip gerçek zemine göre yazıldı (bkz. FigureActions
@@ -464,7 +479,9 @@ func _draw() -> void:
 			var back_y := _draw_quadruped(horse_h, HORSE_COAT, HORSE_COAT_DARK, true)
 			_saddle_y = back_y
 			if not _riderless:
+				_seat_back = horse_h * MOUNT_SEAT_BACK_RATIO
 				_draw_person(height * MOUNT_RIDER_RATIO, back_y, true)
+				_seat_back = 0.0
 		_:
 			if is_in_transition():
 				_draw_transition(height)
@@ -508,7 +525,7 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 		_draw_person_frames(frames, figure_h * _scale, ground_y, seated)
 		return
 	var h := figure_h * _scale
-	var cx := size.x * 0.5
+	var cx := size.x * 0.5 - _seat_back * _facing
 	var bulk: float = float(_archetype.get("bulk", 1.0))
 	var joints := FigureRig.pose(
 		Vector2(cx, ground_y), h, _phase, _motion, _facing, _lean, seated, bulk
@@ -571,8 +588,10 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 		clip = "idle"
 	var cycles := clip in ["walk", "walk_boots", "walk_laden", "ride"]
 	var frame := frames.frame_for_phase(clip, _phase) if cycles else frames.frame_for_time(clip, _action_u)
+	if clip == "ride":
+		frame = frames.frame_for_phase(clip, RIDE_REST_PHASE)
 	var k := frames.scale_for(h)
-	var origin := Vector2(size.x * 0.5, ground_y)
+	var origin := Vector2(size.x * 0.5 - _seat_back * _facing, ground_y)
 	var xf := Transform2D(_lean * _facing, Vector2(k * _facing, k), 0.0, origin)
 	# İniş/biniş klibi kalçadan asılı: gölge yerde, ayak yere yaklaştıkça
 	# koyulaşıyor.
