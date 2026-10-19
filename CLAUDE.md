@@ -2661,11 +2661,13 @@ re-roll the rain away.
   path by `tools/worldmap/build_settlements.py`:
   - **Biomes:** mountain polygon or a mountain people's region, then
     within reach of a swamp town, then lake or sea shore, then forest
-    (inside or at the edge), otherwise steppe. The labels are smoothed and
-    merged into parts of at least 1.2 days.
+    (inside or at the edge), then meadow for the valley's open land (task
+    N29: the Tyrell-like valley is green, not dry grass), otherwise steppe.
+    The labels are smoothed and merged into parts of at least 1.2 days.
   - **Stops:** a pass entering mountains, a bridge entering water, else
     the nearest map point on the way (tower, abbey, mine, hamlet...),
-    spaced at least three days apart.
+    spaced at least three days apart (six on the steppe, where yurts and
+    hamlets otherwise stopped a 35-day road five times, task N30).
 
   It is written in the direction of `terrain_from`, and
   `RouteTerrain.build(key, days, from_id)` reads it backwards from the

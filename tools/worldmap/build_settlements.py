@@ -77,7 +77,12 @@ FOREST_NEAR_PX = 80.0     # yol ormanın kıyısından geçiyorsa da orman
 # bozkır çıktı).
 MOUNTAIN_NEAR_PX = 40.0  # dağ çokgenleri haritanın %22si; geniş bir kıyı her yeri dağ yapıyordu
 MOUNTAIN_REGIONS = ("dag", "dag_maden")
+# Vadinin açık arazisi bozkır değil çayır (görev N29): bereketli, yeşil.
+MEADOW_REGIONS = ("vadi",)
 STOP_MIN_GAP_DAYS = 3.0   # iki harita noktası durağı arası en az
+# Bozkırda yurtlar ve mezralar sık: 35 günlük göçebe yolu beş yurtta duruyordu
+# (görev N30, kullanıcı "arasını biraz aç" dedi). Açık arazide aralık geniş.
+STOP_MIN_GAP_DAYS_BY_BIOME = {"steppe": 6.0}
 MARSH_RADIUS_PX = 1100.0  # bataklık kasabasının çevresi
 TERRAIN_SMOOTH = 7        # çoğunluk süzgeci (nokta)
 TERRAIN_MIN_SEG_DAYS = 1.2
@@ -384,8 +389,8 @@ def near_mask(mask, px):
     return (dist <= px).astype(np.uint8) * 255
 
 
-def classify_terrain(pts, forest, mountain, water, swamp_towns, region_codes, mountain_codes):
-    """Her güzergâh noktasının biyomu. Öncelik: dağ, bataklık, göl, orman, bozkır."""
+def classify_terrain(pts, forest, mountain, water, swamp_towns, region_codes, mountain_codes, meadow_codes=()):
+    """Her güzergâh noktasının biyomu. Öncelik: dağ, bataklık, göl, orman, çayır (vadide), bozkır."""
     out = []
     m, f, w = sample(mountain, pts), sample(forest, pts), sample(water, pts)
     r = sample(region_codes, pts)
@@ -398,6 +403,8 @@ def classify_terrain(pts, forest, mountain, water, swamp_towns, region_codes, mo
             out.append("lake")
         elif f[i]:
             out.append("forest")
+        elif r[i] in meadow_codes:
+            out.append("meadow")
         else:
             out.append("steppe")
     # Çoğunluk süzgeci: tek tük noktalar (bir orman kıyısı) parça açmasın.
@@ -443,7 +450,10 @@ def terrain_segments(labels, pts, days, pois):
         else:
             runs.append([b, i, i + 1])
     min_pts = max(1, int(math.ceil(TERRAIN_MIN_SEG_DAYS / max(days, 1) * n)))
-    gap_pts = max(min_pts, int(math.ceil(STOP_MIN_GAP_DAYS / max(days, 1) * n)))
+
+    def gap_pts(biome):
+        gap = STOP_MIN_GAP_DAYS_BY_BIOME.get(biome, STOP_MIN_GAP_DAYS)
+        return max(min_pts, int(math.ceil(gap / max(days, 1) * n)))
     _merge_short(runs, min_pts)
     grow = min_pts
     while len(runs) > TERRAIN_MAX_SEGMENTS:
@@ -467,7 +477,7 @@ def terrain_segments(labels, pts, days, pois):
         cuts.sort()
         start = lo
         for i, stop, pid in cuts:
-            if pid in used or i - start < gap_pts or hi - i < gap_pts:
+            if pid in used or i - start < gap_pts(b) or hi - i < gap_pts(b):
                 continue
             split.append([b, start, i, stop])
             used.add(pid)
@@ -558,7 +568,8 @@ def main(argv):
         caravan_share = sum(l for c, l in e["classes"] if c == "kervan yolu") / total
         days = max(MIN_DAYS, int(round(e["length_px"] * days_per_px)))
         labels = classify_terrain(pts, forest_near, mountain_near, water_near, swamp_towns, region,
-                                  {1 + culture_codes.index(c) for c in MOUNTAIN_REGIONS if c in culture_codes})
+                                  {1 + culture_codes.index(c) for c in MOUNTAIN_REGIONS if c in culture_codes},
+                                  {1 + culture_codes.index(c) for c in MEADOW_REGIONS if c in culture_codes})
         terrain = terrain_segments(labels, pts, days, pois)
         routes.append({
             "a": playable[a]["id"], "b": playable[b]["id"],

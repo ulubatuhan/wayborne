@@ -186,6 +186,9 @@ const BIOME_FOREST: String = "forest"
 const BIOME_LAKE: String = "lake"
 const BIOME_MOUNTAIN: String = "mountain"
 const BIOME_MARSH: String = "marsh"
+## Vadinin bereketli açık arazisi (görev N29): bozkırın kuru sarısı değil,
+## yeşil çayır ve ekin. Kasvetli paletin içinde kalır - yeşil zeytine çekik.
+const BIOME_MEADOW: String = "meadow"
 
 const TERRAIN: Dictionary = {
 	BIOME_STEPPE: {
@@ -207,6 +210,10 @@ const TERRAIN: Dictionary = {
 	BIOME_MARSH: {
 		"near": Color(0.26, 0.27, 0.21), "far": Color(0.18, 0.20, 0.18),
 		"flora": Color(0.30, 0.36, 0.22), "accent": Color(0.40, 0.42, 0.30),
+	},
+	BIOME_MEADOW: {
+		"near": Color(0.31, 0.36, 0.21), "far": Color(0.22, 0.27, 0.18),
+		"flora": Color(0.32, 0.45, 0.24), "accent": Color(0.56, 0.54, 0.30),
 	},
 }
 

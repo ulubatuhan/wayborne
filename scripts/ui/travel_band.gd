@@ -774,6 +774,7 @@ func _tree_density() -> float:
 	match _biome:
 		ArtPalette.BIOME_FOREST: return 0.92
 		ArtPalette.BIOME_MARSH: return 0.45
+		ArtPalette.BIOME_MEADOW: return 0.40
 		ArtPalette.BIOME_LAKE: return 0.38
 		ArtPalette.BIOME_MOUNTAIN: return 0.30
 		_: return 0.26

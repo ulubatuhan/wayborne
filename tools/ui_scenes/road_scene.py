@@ -92,6 +92,17 @@ BIOMES = {
         "rocks": 0.5, "tufts": 16, "water": False, "snow": 0.0,
         "flowers": [(0.54, 0.50, 0.62), (0.64, 0.36, 0.22)],
     },
+    # Vadi (görev N29): yumuşak yeşil tepeler, uzakta ağaç sıraları, yaprak
+    # döken ağaçlar, gür ot, sarı ve kızıl çiçek. Bozkırın kuru sarısının
+    # yerine bereket; yine de zeytine çekik, kasvetli paletin içinde.
+    "meadow": {
+        "far": {"amp": 12.0, "base": 3.0, "freqs": [2, 3, 5], "tint": [0.40, 0.47, 0.34], "trees": 70,
+                "tree_model": "tree-high-round"},
+        "ground_tex": "Ground106", "ground_tint": [0.50, 0.58, 0.40], "grass": [0.36, 0.47, 0.26],
+        "trees": [("leafy", 0.85), ("dead", 0.15)], "tree_count": 14, "tree_h": (7.0, 11.0),
+        "rocks": 0.2, "tufts": 18, "water": False, "snow": 0.0,
+        "flowers": [(0.70, 0.62, 0.30), (0.62, 0.32, 0.24), (0.70, 0.68, 0.62)],
+    },
     "marsh": {
         "far": {"amp": 9.0, "base": 2.0, "freqs": [3, 4], "tint": [0.38, 0.40, 0.34], "water": True, "trees": 25},
         "ground_tex": "Ground106", "ground_tint": [0.42, 0.42, 0.32], "grass": [0.34, 0.36, 0.22],
@@ -356,7 +367,7 @@ def build_far(b, spec, rng):
         x = rng.uniform(0, L)
         y = rng.uniform(10.0, 26.0)
         z = base * 0.35 + amp * 0.25 * (0.6 + 0.6 * f2(x)) * math.sin(math.pi * (y - 8.0) / 22.0)
-        place_wrapped(T.ftk("tree-high"), x, y, z - 0.5, rng.uniform(0, 360), rng.uniform(5.0, 8.0), L)
+        place_wrapped(T.ftk(cfg.get("tree_model", "tree-high")), x, y, z - 0.5, rng.uniform(0, 360), rng.uniform(5.0, 8.0), L)
 
 
 def _mesh_object(name, me, mat):

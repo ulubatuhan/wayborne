@@ -43,6 +43,7 @@ const STOP_BRIDGE: String = "bridge"
 ## (bkz. _pick_next_biome).
 const BIOME_CHAIN: Array[String] = [
 	ArtPalette.BIOME_STEPPE,
+	ArtPalette.BIOME_MEADOW,
 	ArtPalette.BIOME_MARSH,
 	ArtPalette.BIOME_FOREST,
 	ArtPalette.BIOME_LAKE,
@@ -185,6 +186,8 @@ func _pick_stop(biome: String, rng: RandomNumberGenerator) -> String:
 			pool = [STOP_SHRINE, STOP_MEZRA, STOP_OUTPOST]
 		ArtPalette.BIOME_MARSH:
 			pool = [STOP_BRIDGE, STOP_SHRINE]
+		ArtPalette.BIOME_MEADOW:
+			pool = [STOP_MEZRA, STOP_SHRINE, STOP_OUTPOST]
 		_:
 			pool = [STOP_MEZRA, STOP_OUTPOST]
 	return pool[rng.randi_range(0, pool.size() - 1)]
@@ -291,6 +294,7 @@ static func biome_name_key(biome: String) -> String:
 		ArtPalette.BIOME_LAKE: return "TERRAIN_LAKE"
 		ArtPalette.BIOME_MOUNTAIN: return "TERRAIN_MOUNTAIN"
 		ArtPalette.BIOME_MARSH: return "TERRAIN_MARSH"
+		ArtPalette.BIOME_MEADOW: return "TERRAIN_MEADOW"
 		_: return "TERRAIN_STEPPE"
 
 static func stop_name_key(stop: String) -> String:

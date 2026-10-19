@@ -584,6 +584,7 @@ func _test_map_terrain_follows_geography(t) -> void:
 	var vale := RouteTerrain.build(RouteConditions.route_key("belvanor", "ilsande"), 6, "belvanor")
 	for segment in vale.segments:
 		t.ne(String(segment.biome), ArtPalette.BIOME_MOUNTAIN, "vadi yolu dağ değil")
+	t.eq(vale.biome_at(3.0), ArtPalette.BIOME_MEADOW, "vadinin açık arazisi çayır (N29)")
 	var peaks := RouteTerrain.build(RouteConditions.route_key("brazdun", "kesgrav"), 2, "brazdun")
 	t.eq(peaks.biome_at(1.0), ArtPalette.BIOME_MOUNTAIN, "dağ kabilelerinin yolu dağ")
 	var swamp := RouteTerrain.build(RouteConditions.route_key("golcavar", "ezmerak"), 2, "golcavar")
@@ -592,7 +593,7 @@ func _test_map_terrain_follows_geography(t) -> void:
 	for leg in _map_legs():
 		for segment in RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[0])).segments:
 			seen[String(segment.biome)] = true
-	t.eq(seen.size(), RouteTerrain.BIOME_CHAIN.size(), "haritada beş biyomun hepsi var")
+	t.eq(seen.size(), RouteTerrain.BIOME_CHAIN.size(), "haritada altı biyomun hepsi var")
 
 ## Erzak vaadi haritanın gerçek yollarında da: planlayıcının eğim ve hava
 ## payını alan kervan yolun sonuna aç varmaz (uzun yollar dahil, 38 güne dek).

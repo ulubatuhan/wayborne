@@ -39,6 +39,7 @@ const BIOME_BIAS: Dictionary = {
 	ArtPalette.BIOME_MOUNTAIN: {STORM: 2.6, FOG: 1.4, CLEAR: 0.7},
 	ArtPalette.BIOME_FOREST: {RAIN: 1.3},
 	ArtPalette.BIOME_STEPPE: {CLEAR: 1.5, FOG: 0.5},
+	ArtPalette.BIOME_MEADOW: {RAIN: 1.2, CLEAR: 1.2},
 }
 
 ## Yürüme temposu çarpanı: çamurda kervan yavaşlar. Yol ekranı bunu

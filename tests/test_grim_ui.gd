@@ -151,7 +151,7 @@ func _test_town_assets(t) -> void:
 ## bağlantı noktaları kodun bildiğiyle aynı, döşeme dikişsiz ve biyom
 ## geçişi rengin geçişiyle aynı oranı okuyor.
 func _test_road_strips(t) -> void:
-	for biome in ["steppe", "forest", "lake", "mountain", "marsh"]:
+	for biome in ["steppe", "meadow", "forest", "lake", "mountain", "marsh"]:
 		t.ok(RoadStrips.has_biome(biome), "yol katmanları var: %s" % biome)
 		var layout = JSON.parse_string(FileAccess.get_file_as_string(
 			RoadStrips.DIR + biome + "/layout.json"))

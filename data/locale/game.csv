@@ -318,6 +318,7 @@
 "CAMPAIGN_HOUSE_OBJECTIVE","2500 GG biriktir, dört vagona ulaş ve itibarını 15'e çıkar.","Amass 2500 GP, reach four wagons, and raise your standing to 15.","","","","","","","","",""
 "TERRAIN_SPAN","%d günlük %s","%d days of %s","","","","","","","","",""
 "TERRAIN_STEPPE","bozkır","steppe","","","","","","","","",""
+"TERRAIN_MEADOW","çayır","meadow","","","","","","","","",""
 "TERRAIN_FOREST","orman","forest","","","","","","","","",""
 "TERRAIN_LAKE","göl kıyısı","lakeshore","","","","","","","","",""
 "TERRAIN_MOUNTAIN","dağ yolu","mountain road","","","","","","","","",""

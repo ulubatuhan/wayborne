@@ -957,6 +957,11 @@
    "terrain": [
     {
      "biome": "steppe",
+     "to": 0.583,
+     "stop": "mezra"
+    },
+    {
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -1264,7 +1269,7 @@
    "terrain_from": "belvanor",
    "terrain": [
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -1454,7 +1459,7 @@
    "terrain_from": "caramine",
    "terrain": [
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -1499,8 +1504,8 @@
    "terrain_from": "caramine",
    "terrain": [
     {
-     "biome": "steppe",
-     "to": 0.455,
+     "biome": "meadow",
+     "to": 0.364,
      "stop": "pass"
     },
     {
@@ -1570,11 +1575,11 @@
    "terrain": [
     {
      "biome": "marsh",
-     "to": 0.462,
+     "to": 0.5,
      "stop": ""
     },
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -2001,8 +2006,8 @@
    "terrain_from": "ilsande",
    "terrain": [
     {
-     "biome": "steppe",
-     "to": 0.579,
+     "biome": "meadow",
+     "to": 0.316,
      "stop": "pass"
     },
     {
@@ -2907,7 +2912,7 @@
    "terrain_from": "merigaud",
    "terrain": [
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -2972,7 +2977,7 @@
    "terrain_from": "merigaud",
    "terrain": [
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -3023,12 +3028,12 @@
      "stop": ""
     },
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 0.649,
      "stop": "outpost"
     },
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -3287,7 +3292,7 @@
      "stop": ""
     },
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -3476,8 +3481,8 @@
    "terrain_from": "ondrelle",
    "terrain": [
     {
-     "biome": "steppe",
-     "to": 0.406,
+     "biome": "meadow",
+     "to": 0.375,
      "stop": "bridge"
     },
     {
@@ -3635,7 +3640,7 @@
    "terrain_from": "ondrelle",
    "terrain": [
     {
-     "biome": "steppe",
+     "biome": "meadow",
      "to": 1.0,
      "stop": ""
     }
@@ -3715,12 +3720,7 @@
     },
     {
      "biome": "forest",
-     "to": 0.71,
-     "stop": "shrine"
-    },
-    {
-     "biome": "steppe",
-     "to": 0.828,
+     "to": 0.72,
      "stop": "shrine"
     },
     {
@@ -4205,8 +4205,8 @@
    "terrain": [
     {
      "biome": "steppe",
-     "to": 0.265,
-     "stop": ""
+     "to": 0.255,
+     "stop": "shrine"
     },
     {
      "biome": "forest",
@@ -5113,17 +5113,7 @@
     },
     {
      "biome": "steppe",
-     "to": 0.513,
-     "stop": "mezra"
-    },
-    {
-     "biome": "steppe",
      "to": 0.646,
-     "stop": "mezra"
-    },
-    {
-     "biome": "steppe",
-     "to": 0.778,
      "stop": "mezra"
     },
     {
@@ -6428,7 +6418,7 @@
     },
     {
      "biome": "forest",
-     "to": 0.635,
+     "to": 0.649,
      "stop": "shrine"
     },
     {
@@ -7830,7 +7820,7 @@
     },
     {
      "biome": "forest",
-     "to": 0.591,
+     "to": 0.606,
      "stop": "shrine"
     },
     {
