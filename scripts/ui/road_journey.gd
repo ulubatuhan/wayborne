@@ -1607,6 +1607,8 @@ func _init_journey() -> void:
 	_journey.terrain_key = _route_key
 	_journey.terrain_days = _journey_length_days
 	_band.set_heading(1.0, true)
+	_refresh_memorials()
+	_announce_route_memory()
 	_pace = PACE_STEADY
 	_pace_key = "UI_ROAD_PACE_STEADY"
 	_leader_offset = 0.0
@@ -2148,6 +2150,8 @@ func _walk_at(rate: float, hours: float) -> void:
 	)
 	_journey.walk(effective, hours)
 	_sync_days_remaining()
+	_session.set_road_position(_route_key, _session.journey_origin_id, _terrain_day(), maxi(1, _journey.terrain_days))
+	_read_nearby_memorials()
 	_check_pending_event_reached()
 	# Varış mesafeyle olur, günle değil - ve **o anda** olmalı. Eskiden
 	# yalnızca gün dönerken sınanıyordu: mesafe kapandıktan sonra kervan
@@ -2254,6 +2258,55 @@ func _role_cover() -> Dictionary:
 		if holder != null:
 			cover[String(DutyCatalog.ROLE_ZONES[role])] = RoadSignals.ROLE_RESOLVE_PER_HOUR * DutyCatalog.get_duty_power(holder, role)
 	return cover
+
+## --- Yolun hafızası (görevler Y-B11, R2) ---
+const MEMORIAL_READ_DAYS: float = 0.08
+var _read_memorial_ids: Dictionary = {}
+
+func _refresh_memorials() -> void:
+	if _band == null or _session == null:
+		return
+	var list: Array = []
+	for m in _session.memorials_on(_route_key):
+		list.append({"day": GameSession.day_for_share(_route_key, _session.journey_origin_id, float(m["share"]), maxi(1, _journey.terrain_days)), "kind": String(m["kind"])})
+	_band.set_memorials(list)
+
+## Yanından geçilen anıt bir kez okunur; ön bölgede olan adını ve sebebini
+## okur, başka yerde olan yalnızca bir taş görür (dikkat sonludur).
+func _read_nearby_memorials() -> void:
+	var here := _terrain_day()
+	for m in _session.memorials_on(_route_key):
+		var id := String(m["id"])
+		if _read_memorial_ids.has(id) or String(m["kind"]) == GameSession.MEMORIAL_ASH:
+			continue
+		var day := GameSession.day_for_share(_route_key, _session.journey_origin_id, float(m["share"]), maxi(1, _journey.terrain_days))
+		if absf(day - here) > MEMORIAL_READ_DAYS:
+			continue
+		_read_memorial_ids[id] = true
+		if _attention_zone != RoadAttention.ZONE_FRONT:
+			_add_log(tr("UI_MEM_GLIMPSE"))
+			continue
+		var kind := String(m["kind"])
+		if kind == GameSession.MEMORIAL_WRECK:
+			_add_log(tr("UI_MEM_WRECK_READ") % (_session.total_days_elapsed - int(m["day"])), OUTCOME_COLOR)
+		else:
+			var cause := String(m.get("cause", ""))
+			var key := "UI_MEM_CAIRN_READ" if kind == GameSession.MEMORIAL_CAIRN else "UI_MEM_GRAVE_READ"
+			_add_log(tr(key) % [String(m["name"]), tr(cause) if not cause.is_empty() else "", int(m.get("generation", 1))], OUTCOME_COLOR)
+
+## Yolun seni hatırlaması (R2 #19): sefer başında bir satır.
+func _announce_route_memory() -> void:
+	var memory: Dictionary = _session.route_memory.get(_route_key, {})
+	var trips := int(memory.get("trips", 0))
+	if trips <= 0:
+		return
+	var graves := 0
+	for m in _session.memorials_on(_route_key):
+		if String(m["kind"]) == GameSession.MEMORIAL_GRAVE or String(m["kind"]) == GameSession.MEMORIAL_CAIRN:
+			graves += 1
+	_add_log(tr("UI_MEM_ROUTE_KNOWN") % [trips, _session.total_days_elapsed - int(memory.get("last_day", 0))])
+	if graves > 0:
+		_add_log(tr("UI_MEM_ROUTE_GRAVES") % graves, OUTCOME_COLOR)
 
 ## --- Havaya karşı küçük kararlar (görev Y-B05) ---
 var _weather_row: HBoxContainer
@@ -2632,6 +2685,10 @@ func _update_camp_state() -> void:
 			return
 		_add_log(tr("UI_ROAD_CAMP_SETTLED") % _clock.get_clock_text(), OUTCOME_COLOR)
 		_record_camp_on_map()
+		# Kampın külü yolda kalır (Y-B11).
+		_session.set_road_position(_route_key, _session.journey_origin_id, _terrain_day(), maxi(1, _journey.terrain_days))
+		_session.add_memorial(GameSession.MEMORIAL_ASH)
+		_refresh_memorials()
 		_session.companion_notes = []
 		_session.bond_group(_session.get_party(), CompanionLife.SHARED_CAMP)
 		for note in _session.companion_notes:
@@ -3772,6 +3829,7 @@ func _on_divert_pressed(destination_id: String) -> void:
 	_journey.terrain_days = _journey_length_days
 	_terrain = RouteTerrain.build(_route_key, _journey_length_days, _session.journey_origin_id, _session.journey_season(), _session.journey_shortcut)
 	_band.set_route(_terrain)
+	_refresh_memorials()
 	_apply_replan(tr("UI_ROAD_DIVERTED"))
 
 func _apply_replan(log_format: String) -> void:

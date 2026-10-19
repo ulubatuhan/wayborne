@@ -663,6 +663,11 @@ the walking figures are the game's strongest asset) but to deepen it.
   wagon damage, stress, route danger applied to the headroom — never a
   new punishment system. A signal that could be ignored for free would be
   scenery.
+- **The road remembers (tasks Y-B11, R2).** Whoever dies on the road leaves a grave there, a fallen leader a cairn,
+  a lost wagon its wreck, a camp its ash (`GameSession.road_memorials`, capped per road - ash goes first, graves stay).
+  Positions are stored as a share of the road from its key's first city, so the same spot is found from either
+  direction. `TravelBand` draws them (no religious symbols); passing one writes a line - the name and cause only if
+  the leader is at the front. `route_memory` counts trips and deaths per road; the road screen and the planner say it.
 - **A signal's kind is not its answer (task Y-B03).** Every road signal draws a hidden truth when it appears
   (`RoadSignals.TRUTHS`: smoke may be a bandit camp, a farmstead burning or herders; a creak an axle, a loose load or
   nothing; a straggler tired, sick or a stranger; a raven at the rear a true or an empty omen). Walking to its zone

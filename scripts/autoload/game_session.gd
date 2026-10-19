@@ -1062,6 +1062,9 @@ func resolve_deaths(
 			total_days_elapsed, lineage_generation, character.character_id,
 			cause_key, location_id
 		)
+		# Yolda ölen yolda kalır (Y-B11); düşen liderin yeri bir taş (R2 #6).
+		if is_journey_active():
+			add_memorial(MEMORIAL_CAIRN if character.is_player else MEMORIAL_GRAVE, character.character_name, cause_key)
 		if character.is_player:
 			leader_died = true
 			character.is_player = false
@@ -2499,6 +2502,84 @@ func _anyone_hungry() -> bool:
 			return true
 	return false
 
+## --- Yolun hafızası (görevler Y-B11, R2) ---
+## Ölenin mezarı, düşen liderin taşı, kaybedilen vagonun enkazı, eski kampın
+## külü yolda kalır ve kayda yazılır. Konum yönsüz: yol anahtarının ilk
+## şehrinden ölçülen pay (0-1) - öbür yönden gelen aynı yerde görür.
+## Yol başına MEMORIALS_PER_ROUTE; taşarsa önce en eski kül, sonra enkaz düşer.
+const MEMORIAL_GRAVE: String = "grave"
+const MEMORIAL_CAIRN: String = "cairn"
+const MEMORIAL_WRECK: String = "wreck"
+const MEMORIAL_ASH: String = "ash"
+const MEMORIALS_PER_ROUTE: int = 8
+var road_memorials: Array = []
+## Yolun seni hatırlaması (R2 #19): anahtar -> {"trips", "last_day", "deaths"}.
+var route_memory: Dictionary = {}
+## Kervanın yoldaki yeri (yol ekranı yazar; geçici): {"route", "share"}.
+var road_position: Dictionary = {}
+var _memorial_serial: int = 0
+
+static func canonical_share(route_key: String, origin_id: String, terrain_day: float, total_days: int) -> float:
+	var share := clampf(terrain_day / float(maxi(1, total_days)), 0.0, 1.0)
+	var first := route_key.split("|")[0] if not route_key.is_empty() else ""
+	return share if origin_id == first or origin_id.is_empty() else 1.0 - share
+
+static func day_for_share(route_key: String, origin_id: String, share: float, total_days: int) -> float:
+	var first := route_key.split("|")[0] if not route_key.is_empty() else ""
+	var own := share if origin_id == first or origin_id.is_empty() else 1.0 - share
+	return own * float(maxi(1, total_days))
+
+func set_road_position(route_key: String, origin_id: String, terrain_day: float, total_days: int) -> void:
+	road_position = {"route": route_key, "share": canonical_share(route_key, origin_id, terrain_day, total_days)}
+
+func add_memorial(kind: String, name: String = "", cause: String = "") -> bool:
+	if road_position.is_empty() or String(road_position.get("route", "")).is_empty():
+		return false
+	var route := String(road_position["route"])
+	_memorial_serial += 1
+	road_memorials.append({
+		"id": "mem_%d" % _memorial_serial, "kind": kind, "route": route,
+		"share": snappedf(float(road_position["share"]), 0.001), "name": name,
+		"cause": cause, "day": total_days_elapsed, "generation": lineage_generation,
+	})
+	if kind == MEMORIAL_GRAVE or kind == MEMORIAL_CAIRN:
+		var memory: Dictionary = route_memory.get(route, {"trips": 0, "last_day": -1, "deaths": 0})
+		memory["deaths"] = int(memory.get("deaths", 0)) + 1
+		route_memory[route] = memory
+	_trim_memorials(route)
+	return true
+
+func _trim_memorials(route: String) -> void:
+	while memorials_on(route).size() > MEMORIALS_PER_ROUTE:
+		var dropped := false
+		for kind in [MEMORIAL_ASH, MEMORIAL_WRECK, MEMORIAL_GRAVE, MEMORIAL_CAIRN]:
+			for i in road_memorials.size():
+				var m: Dictionary = road_memorials[i]
+				if String(m["route"]) == route and String(m["kind"]) == kind:
+					road_memorials.remove_at(i)
+					dropped = true
+					break
+			if dropped:
+				break
+		if not dropped:
+			return
+
+func memorials_on(route: String) -> Array:
+	var out: Array = []
+	for m in road_memorials:
+		if String(m["route"]) == route:
+			out.append(m)
+	return out
+
+func _note_route_trip(origin_id: String, destination_id: String) -> void:
+	if origin_id.is_empty() or destination_id.is_empty() or origin_id == destination_id:
+		return
+	var route := RouteConditions.route_key(origin_id, destination_id)
+	var memory: Dictionary = route_memory.get(route, {"trips": 0, "last_day": -1, "deaths": 0})
+	memory["trips"] = int(memory.get("trips", 0)) + 1
+	memory["last_day"] = total_days_elapsed
+	route_memory[route] = memory
+
 ## --- Gece ışığı (görev Y-C20) ---
 ## Fener: fener + bir yağ; meşale: iki meşale. Bir gece yanar. Hangisi yanacak
 ## oyuncunun seçimi; ikisi de yoksa düğme sebebiyle kilitli.
@@ -3015,6 +3096,8 @@ func finish_journey() -> Dictionary:
 	change_stress(-get_city_rest_relief())
 
 	_record_map_trail(journey_origin_id, journey_destination_id)
+	_note_route_trip(journey_origin_id, journey_destination_id)
+	road_position = {}
 	if not journey_destination_id.is_empty():
 		current_location_id = journey_destination_id
 	visited_location_ids[current_location_id] = true
@@ -3625,6 +3708,9 @@ func to_save_dict() -> Dictionary:
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
 		"bonds": bonds.duplicate(),
+		"road_memorials": road_memorials.duplicate(true),
+		"route_memory": route_memory.duplicate(true),
+		"memorial_serial": _memorial_serial,
 		"last_story_day": last_story_day,
 		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
@@ -3850,6 +3936,12 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
+	road_memorials = []
+	for m in data.get("road_memorials", []):
+		if m is Dictionary and String((m as Dictionary).get("route", "")).contains("|"):
+			road_memorials.append((m as Dictionary).duplicate())
+	route_memory = (data.get("route_memory", {}) as Dictionary).duplicate(true)
+	_memorial_serial = int(data.get("memorial_serial", road_memorials.size()))
 	bonds = {}
 	for key in (data.get("bonds", {}) as Dictionary):
 		bonds[String(key)] = clampf(float(data["bonds"][key]), CompanionLife.MIN_BOND, CompanionLife.MAX_BOND)

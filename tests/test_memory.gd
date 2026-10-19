@@ -159,6 +159,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"recruit_candidates": "tohumdan yeniden üretiliyor; tutulanlar hired_recruit_indices'te",
 	"_provisions_item": "katalogdan okunan sabit kaynak",
 	"last_spoiled": "yalnızca son yol gününün çürüme raporu; günlük yazıldıktan sonra anlamı yok",
+	"road_position": "kervanın o anki yeri; yol ekranı her adımda yeniden yazar",
 	"companion_notes": "yalnızca son yol gününün yoldaş notları; günlük yazıldıktan sonra anlamı yok",
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
 }
@@ -171,6 +172,7 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"_crew_name_serial": "crew_name_serial",
 	"_delivered_wagon_quest_ids": "delivered_wagon_quest_ids",
 	"_earned_wagon_milestones": "earned_wagon_milestones",
+	"_memorial_serial": "memorial_serial",
 	"_fulfilled_commission_starts": "fulfilled_commission_starts",
 	"caravan": "journey",
 	"journey_origin_id": "journey",

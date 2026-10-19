@@ -177,6 +177,22 @@ func _add_shortcut_choice() -> void:
 		_rebuild.call_deferred())
 	_content.add_child(button)
 
+## Yolun hafızası planlayıcıda (Y-B11): kaç kez yürüdün, kimler orada yatıyor.
+func _add_route_memory() -> void:
+	var key := RouteConditions.route_key(_session.current_location_id, _destination.location_id)
+	var names: Array[String] = []
+	for m in _session.memorials_on(key):
+		if String(m["kind"]) == GameSession.MEMORIAL_GRAVE or String(m["kind"]) == GameSession.MEMORIAL_CAIRN:
+			names.append(String(m["name"]))
+	var trips := int((_session.route_memory.get(key, {}) as Dictionary).get("trips", 0))
+	if names.is_empty() and trips <= 0:
+		return
+	var label := Label.new()
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label.modulate = Color(0.78, 0.80, 0.74)
+	label.text = tr("UI_PLANNER_ROUTE_MEMORY") % [trips, ", ".join(names) if not names.is_empty() else tr("UI_PLANNER_ROUTE_NO_GRAVES")]
+	_content.add_child(label)
+
 func _add_danger_breakdown() -> void:
 	var route := WorldMapData.get_route(_session.current_location_id, _destination.location_id)
 	var parts := _session.get_route_danger_breakdown(route)
@@ -220,6 +236,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(route_label)
 	_add_danger_breakdown()
 	_add_shortcut_choice()
+	_add_route_memory()
 
 	# Arazi: rota seçimi kör bir karar olmasın. "İki gün bozkır, sonra
 	# orman" cümlesi oyuncuya neyle karşılaşacağını söylüyor ve yol

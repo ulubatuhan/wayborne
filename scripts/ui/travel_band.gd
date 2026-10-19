@@ -919,7 +919,51 @@ func _draw_cities(area: Rect2, horizon: float) -> void:
 
 ## Ara duraklar: köy, karakol, maden, geçit, sunak, köprü. Konumları gün
 ## cinsinden; ekranda ancak yakınına gelince görünüyorlar.
+## Yolun hafızası (Y-B11): [{"day", "kind"}] - yol ekranı verir. Dinî simge
+## yok: mezar toprak tümsek ve dik bir taş, lider taşı üst üste taşlar, enkaz
+## kırık bir tekerlek, kül koyu bir leke.
+var _memorials: Array = []
+
+func set_memorials(list: Array) -> void:
+	_memorials = list
+	queue_redraw()
+
+func _draw_memorials(area: Rect2, cover: Rect2) -> void:
+	var ink := Color(0.14, 0.11, 0.09, 0.85)
+	var stone := Color(0.52, 0.49, 0.44).lerp(Color(_sky.haze), 0.25)
+	for m in _memorials:
+		var x := screen_x_for_day(float(m["day"]))
+		if x < cover.position.x - 60.0 or x > cover.end.x + 60.0:
+			continue
+		var h := area.size.y * 0.045
+		var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.03)
+		match String(m["kind"]):
+			"grave":
+				ArtDraw.contact_shadow(self, base, h * 2.2, 0.12)
+				draw_colored_polygon(PackedVector2Array([base + Vector2(-h * 1.1, 0), base + Vector2(0, -h * 0.45), base + Vector2(h * 1.1, 0)]), Color(0.30, 0.24, 0.18))
+				draw_rect(Rect2(base + Vector2(-h * 0.18, -h * 1.25), Vector2(h * 0.36, h * 1.0)), stone)
+				draw_rect(Rect2(base + Vector2(-h * 0.18, -h * 1.25), Vector2(h * 0.36, h * 1.0)), ink, false, 1.0)
+			"cairn":
+				ArtDraw.contact_shadow(self, base, h * 2.4, 0.14)
+				for i in 4:
+					var r := h * (0.55 - float(i) * 0.1)
+					var c := base + Vector2(0, -h * 0.35 - float(i) * h * 0.55)
+					draw_circle(c, r, stone.darkened(float(i) * 0.06))
+					draw_arc(c, r, 0.0, TAU, 12, ink, 1.0)
+			"wreck":
+				ArtDraw.contact_shadow(self, base, h * 2.6, 0.12)
+				var hub := base + Vector2(0, -h * 0.7)
+				draw_arc(hub, h * 0.7, 0.4, TAU - 1.2, 14, Color(0.32, 0.22, 0.14), 2.5)
+				for i in 4:
+					var a := 0.6 + float(i) * 1.1
+					draw_line(hub, hub + Vector2(cos(a), sin(a)) * h * 0.7, Color(0.32, 0.22, 0.14), 2.0)
+				draw_line(base + Vector2(h * 0.5, -h * 0.1), base + Vector2(h * 1.6, -h * 0.5), Color(0.36, 0.25, 0.15), 3.0)
+			_:
+				draw_circle(base + Vector2(0, -h * 0.05), h * 0.7, Color(0.12, 0.11, 0.10, 0.55))
+				draw_circle(base + Vector2(h * 0.2, -h * 0.1), h * 0.3, Color(0.35, 0.33, 0.30, 0.6))
+
 func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
+	_draw_memorials(area, cover)
 	if _terrain == null:
 		return
 	# Duraklar yolun *üstünde* duruyor, ağaç hattında değil: ilk hâlinde

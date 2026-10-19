@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_ledger_never_deletes(t)
 	_test_lineage_survives_a_save(t)
 	_test_inherited_from_father(t)
+	_test_road_memory(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(500, 0, 1)
@@ -160,3 +161,48 @@ func _test_inherited_from_father(t) -> void:
 	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
 	var loaded := copy.debts.get_debt(GameSession.FATHER_DEBT_ID)
 	t.ok(loaded != null and loaded.due_day == GameSession.FATHER_DEBT_TERM_DAYS, "borç ve vadesi kayıttan döner")
+
+## Yolun hafızası (Y-B11, R2): yolda ölen mezar, düşen lider taş, kaybedilen
+## vagon enkaz, kamp kül bırakır; konum yönsüzdür (öbür yönden aynı yer),
+## yol başına sınırlıdır, kayıttan döner; yol kaç kez yüründüğünü hatırlar.
+func _test_road_memory(t) -> void:
+	var session := GameSession.new(400, 60, 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 8
+	session.start_playthrough(CharacterData.create("Kurucu", CultureCatalog.VALLEY, CharacterStats.new()), rng)
+	var origin := session.current_location_id
+	var destination := WorldMapData.get_routes_from(origin)[0].to_location_id
+	var key := RouteConditions.route_key(origin, destination)
+	t.not_ok(session.add_memorial(GameSession.MEMORIAL_ASH), "yolda değilken anıt olmaz")
+	session.start_journey(destination, 10, 0.2, CaravanPlan.new(WorldMapData.get_location_by_id(destination), 10))
+	session.set_road_position(key, origin, 3.0, 10)
+	var companion: CharacterData = null
+	for c in session.get_party():
+		if not c.is_player:
+			companion = c
+	var dead: Array[CharacterData] = [companion]
+	session.resolve_deaths(dead, "LEDGER_CAUSE_STARVED")
+	var graves := session.memorials_on(key)
+	t.eq(graves.size(), 1, "yolda ölen yolda kalır")
+	t.eq(String(graves[0]["kind"]), GameSession.MEMORIAL_GRAVE, "mezar")
+	var share := float(graves[0]["share"])
+	t.almost(GameSession.day_for_share(key, origin, share, 10), 3.0, "gidiş yönünde aynı gün")
+	t.almost(GameSession.day_for_share(key, destination, share, 10), 7.0, "dönüş yönünde aynı yer, öbür uçtan sayılır")
+	session.caravan.wagon_count = 3
+	var lose: Array[EventEffect] = [EventEffect.make(EventEffect.Type.WAGON_LOSE, 1)]
+	EventEffectApplier.apply(lose, session)
+	t.eq(session.memorials_on(key).size(), 2, "kaybedilen vagon enkaz bırakır")
+	for i in GameSession.MEMORIALS_PER_ROUTE + 4:
+		session.add_memorial(GameSession.MEMORIAL_ASH)
+	t.eq(session.memorials_on(key).size(), GameSession.MEMORIALS_PER_ROUTE, "yol başına sınırlı")
+	var kinds := {}
+	for m in session.memorials_on(key):
+		kinds[String(m["kind"])] = true
+	t.ok(kinds.has(GameSession.MEMORIAL_GRAVE), "taşınca önce kül düşer, mezar kalır")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	t.eq(copy.memorials_on(key).size(), session.memorials_on(key).size(), "anıtlar kayıttan döner")
+	session.finish_journey()
+	t.eq(int(session.route_memory[key]["trips"]), 1, "yol kaç kez yüründüğünü hatırlar")
+	t.eq(int(session.route_memory[key]["deaths"]), 1, "yol ölümü hatırlar")
+	t.ok(session.road_position.is_empty(), "varışta kervan yoldan çıkar")
