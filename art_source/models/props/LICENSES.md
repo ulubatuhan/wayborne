@@ -12,8 +12,10 @@ Hepsi CC0 (atıf gerekmez, ticari kullanım serbest). Kaynaklar:
 | quaternius_survival | Quaternius · Survival Pack | https://opengameart.org/content/lowpoly-survival-pack |
 | quaternius_weapons | Quaternius · Medieval Weapons | https://quaternius.itch.io/lowpoly-medieval-weapons |
 | quaternius_knight | Quaternius · Animated Knight | https://quaternius.itch.io/lowpoly-animated-knight |
-| kenney_castle | Kenney · Castle Kit | https://kenney.nl/assets/castle-kit |
+| kenney_castle | Kenney · Castle Kit (tam kit, 2026-10-19) | https://kenney.nl/assets/castle-kit |
 | kenney_survival | Kenney · Survival Kit | https://kenney.nl/assets/survival-kit |
+| kenney_graveyard | Kenney · Graveyard Kit 5.0 (haç, haçlı taş ve korku figürleri alınmadı: Art Rules) | https://kenney.nl/assets/graveyard-kit |
+| polyhaven_lantern_01 | Poly Haven · Lantern 01 (Rajil Jose Macatangay), 1k glTF | https://polyhaven.com/a/Lantern_01 |
 | kaykit_medieval_hexagon | KayKit · Medieval Hexagon (Kay Lousberg) | https://kaylousberg.itch.io/kaykit-medieval-hexagon |
 
 Yalnız oyunda kullanılan modeller kopyalandı; normal/pürüzlülük dokuları alınmadı

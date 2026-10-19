@@ -37,7 +37,8 @@ Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenin
 | üretici | paket | bağlantı |
 |---|---|---|
 | Quaternius | Medieval Village Pack, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits, Ultimate Animated Animals | https://quaternius.com |
-| Kenney | Castle Kit, Survival Kit, Particle Pack | https://kenney.nl |
+| Kenney | Castle Kit, Survival Kit, Particle Pack, Graveyard Kit, Impact Sounds, UI Pack RPG Expansion, Fantasy UI Borders | https://kenney.nl |
+| Poly Haven | Lantern 01 (Rajil Jose Macatangay) | https://polyhaven.com |
 | Kay Lousberg | KayKit Medieval Hexagon | https://kaylousberg.com |
 | MakeHuman topluluğu | culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg'nin CC0 giysileri | https://static.makehumancommunity.org/assets/assetpacks.html |
 | Blender Studio | Human Base Meshes | https://studio.blender.org |
