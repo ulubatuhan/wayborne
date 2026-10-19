@@ -616,6 +616,97 @@ func change_character_stress(character: CharacterData, delta: int) -> void:
 		return
 	character.change_stress(delta)
 
+## --- Yorgunluk ve kervanın takati (görev Y-F01) ---
+## Kişinin yorgunluğu (`CharacterData.fatigue`) bedenin hâli; kervanın takati
+## en yorgun yürüyenden türer: kervan en yorgun kişinin hızında yürür.
+## `caravan.stamina` sayacı (tempo, gece, kamp) yerinde duruyor; okuyan her
+## yer `get_caravan_stamina()`'yı okur = min(sayaç, 100 - en yüksek yorgunluk).
+##
+## **Planlayıcı sözü:** yorgunluk yürüyüş hızına hiç girmez
+## (`get_caravan_theoretical_speed`, `JourneyController.effective_rate`).
+## Yalnızca gönüllü hızlı tempoyu kilitler ve kilit kervanı normale indirir -
+## normal tempoda "doğru stoklayan asla aç kalmaz" aynen durur.
+const FATIGUE_PUSH_PER_DAY: int = 8
+const FATIGUE_VANGUARD_PER_DAY: int = 4
+## Kervanın ortasında (ortancı) yürüyen günü dinlenerek geçirir.
+const FATIGUE_MIDDLE_RELIEF_PER_DAY: int = 4
+const FATIGUE_COMBAT: int = 8
+const FATIGUE_EARLY_START: int = 4
+## Işıksız gece yürüyüşü: saat başı pay birikir, 4'lük dilimlerle yazılır
+## (iri bedenin %25'i yuvarlamada kaybolmasın diye).
+const FATIGUE_NIGHT_PER_HOUR: float = 0.5
+const FATIGUE_NIGHT_CHUNK: int = 4
+## Kamp ateşi başındakileri dinlendirir; kampta herkes ateşe varır.
+const FATIGUE_CAMP_RELIEF: int = 30
+## Şehirde bir gece: yorgunluğun çoğu gider, tamamı değil - çok zorlanan
+## öncü bir sonraki sefere biraz yorgun çıkar.
+const FATIGUE_CITY_RELIEF: int = 60
+
+func change_party_fatigue(delta: int) -> void:
+	for character in party:
+		character.change_fatigue(delta)
+
+func change_character_fatigue(character: CharacterData, delta: int) -> void:
+	if character == null:
+		return
+	character.change_fatigue(delta)
+
+## En yorgun kişi; boş partide null. Eşitlikte partide önce gelen.
+func get_most_fatigued_character() -> CharacterData:
+	var worst: CharacterData = null
+	for character in get_party():
+		if worst == null or character.fatigue > worst.fatigue:
+			worst = character
+	return worst
+
+## Kervanın takati: sayaç ile en yorgun bedenin bıraktığı pay arasından küçüğü.
+func get_caravan_stamina() -> int:
+	var stamina := caravan.stamina
+	var worst := get_most_fatigued_character()
+	if worst != null:
+		stamina = mini(stamina, CaravanState.MAX_STAMINA - worst.fatigue)
+	return clampi(stamina, 0, CaravanState.MAX_STAMINA)
+
+## Takati o an bir kişinin yorgunluğu bağlıyorsa o kişi, değilse null
+## (sayacın kendisi daha düşükse bağlayan beden değil tempodur).
+func get_stamina_binder() -> CharacterData:
+	var worst := get_most_fatigued_character()
+	if worst == null or worst.fatigue <= 0:
+		return null
+	if CaravanState.MAX_STAMINA - worst.fatigue < caravan.stamina:
+		return worst
+	return null
+
+## Hızlı tempo açılabilir mi: eşik `CaravanState.STAMINA_PUSH_FLOOR`, ama
+## kervanın takatine (en yorgun kişiye) bakarak.
+func can_push_pace() -> bool:
+	return get_caravan_stamina() >= CaravanState.STAMINA_PUSH_FLOOR
+
+## Temponun günlük bedeli kişilere: zorlanan günde herkes yorulur.
+func apply_pace_fatigue_day(pushing: bool) -> void:
+	if pushing:
+		change_party_fatigue(FATIGUE_PUSH_PER_DAY)
+
+## Işıksız gece saatlerinin birikmiş payını yazar; kalan küsuru döndürür
+## (yol ekranı bir sonraki saate taşır).
+func accrue_night_fatigue(debt: float) -> float:
+	var chunks := int(floor(debt / float(FATIGUE_NIGHT_CHUNK)))
+	if chunks > 0:
+		change_party_fatigue(chunks * FATIGUE_NIGHT_CHUNK)
+		return debt - float(chunks * FATIGUE_NIGHT_CHUNK)
+	return debt
+
+## Savaşa gerçekten girenler yorulur (dışarıda tutulan değil).
+func apply_combat_fatigue(fighters: Array[CharacterData]) -> void:
+	for fighter in fighters:
+		if party.has(fighter):
+			fighter.change_fatigue(FATIGUE_COMBAT)
+
+## Dizilişin günlük bedeli ve payı: öncü yorulur, ortancı dinlenir.
+func _apply_formation_fatigue_day() -> void:
+	change_character_fatigue(get_duty_holder(DutyCatalog.VANGUARD), FATIGUE_VANGUARD_PER_DAY)
+	change_character_fatigue(get_duty_holder(DutyCatalog.MIDDLE), -FATIGUE_MIDDLE_RELIEF_PER_DAY)
+
 ## Kadrodaki olumsuz huy sayısı. Huy uzun süre yalnızca savaşta bir
 ## sayıyı bükeyordu - oysa olumsuz huy *görülür ve
 ## duyulur* olmalı. Yol katmanı bunu okuyup işaret sıklığını artırıyor:
@@ -1065,7 +1156,7 @@ func resolve_deaths(
 		ledger.record(
 			CaravanLedger.KIND_DIED, character.character_name,
 			total_days_elapsed, lineage_generation, character.character_id,
-			cause_key, location_id
+			cause_key, location_id, character.class_id
 		)
 		# Yolda ölen yolda kalır (Y-B11); düşen liderin yeri bir taş (R2 #6).
 		if is_journey_active():
@@ -1535,7 +1626,9 @@ func make_camp() -> Dictionary:
 	# yoksa bir kez zorlayan kervan seferin geri kalanını sürünerek
 	# bitirirdi (bkz. CaravanState'in tempo bölümü).
 	caravan.rest_at_camp()
-	return {"provisions_spent": paid, "stress_relief": relief}
+	# Ateş başındakiler bedenen de dinlenir (Y-F01).
+	change_party_fatigue(-FATIGUE_CAMP_RELIEF)
+	return {"provisions_spent": paid, "stress_relief": relief, "fatigue_relief": FATIGUE_CAMP_RELIEF}
 
 func heal_party() -> void:
 	for character in party:
@@ -2056,6 +2149,7 @@ func advance_day() -> Array[String]:
 		var vanguard := get_duty_holder(DutyCatalog.VANGUARD)
 		if vanguard != null:
 			change_character_stress(vanguard, VANGUARD_DAILY_STRESS)
+		_apply_formation_fatigue_day()
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
@@ -3324,6 +3418,7 @@ func finish_journey() -> Dictionary:
 	stress_rng.seed = hash("%s|%d|stress" % [current_location_id, total_days_elapsed])
 	payout["stress_breaks"] = resolve_stress_breaks(stress_rng)
 	change_stress(-get_city_rest_relief())
+	change_party_fatigue(-FATIGUE_CITY_RELIEF)
 
 	_record_map_trail(journey_origin_id, journey_destination_id)
 	_note_route_trip(journey_origin_id, journey_destination_id)

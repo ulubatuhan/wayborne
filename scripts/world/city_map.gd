@@ -42,12 +42,16 @@ func _ready() -> void:
 	# notu. Bayrak tüketiliyor (hemen false'a dönüyor), yoksa pazar/lonca
 	# gibi bir alt ekrandan geri dönmek de aynı sahneyi yeniden yükler ve
 	# kapı her seferinde bir daha "açılırdı".
+	var arriving := Nav.city_gate_opening
 	if Nav.city_gate_opening:
 		Nav.city_gate_opening = false
 		AudioManager.play_sfx(AudioManager.SFX_GATE)
 	_build_front()
 	_build_brief()
 	_maybe_show_onboarding()
+	# Kapının resmi bir an ekranı kaplar, şehir arkasından belirir (12.2a).
+	if arriving and GateArrival.available(_session.current_location_id):
+		add_child(GateArrival.new().setup(_session.current_location_id, _session.last_clock_hour))
 
 func _build_front() -> void:
 	_front = CityFront.new()
@@ -79,6 +83,7 @@ static func build_model(session: GameSession) -> Dictionary:
 	return {
 		"city_name": location.location_name if location != null else TranslationServer.translate("UI_CITY_FALLBACK_NAME"),
 		"day": day + 1,
+		"hour": session.last_clock_hour,
 		"season_key": SEASON_KEYS[int(MarketConditions.get_season(day))],
 		"gold": session.wallet.balance,
 		"debt": session.get_total_debt(),

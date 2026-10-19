@@ -1404,7 +1404,7 @@ func _refresh_command_panel() -> void:
 		if _pace_buttons[index].button_pressed != selected:
 			_pace_buttons[index].set_pressed_no_signal(selected)
 	var fast := _pace_buttons[PACE_COMMAND_COUNT - 1]
-	var can_push := _session == null or _session.caravan.can_push() or is_equal_approx(_pace, PACE_FAST)
+	var can_push := _session == null or _session.can_push_pace() or is_equal_approx(_pace, PACE_FAST)
 	for index in PACE_COMMAND_COUNT - 1:
 		_pace_buttons[index].disabled = not _orders_enabled
 	fast.disabled = not can_push or not _orders_enabled
@@ -2386,6 +2386,7 @@ func _on_weather_call(call: String) -> void:
 	_weather_call_day = _session.total_days_elapsed
 	if call == WeatherCalls.EARLY_START:
 		_session.caravan.stamina = clampi(_session.caravan.stamina + WeatherCalls.EARLY_START_STAMINA, 0, CaravanState.MAX_STAMINA)
+		_session.change_party_fatigue(GameSession.FATIGUE_EARLY_START)
 	elif call == WeatherCalls.BEAT_THE_RAIN:
 		_session.change_stress(WeatherCalls.BEAT_THE_RAIN_STRESS)
 	elif call == WeatherCalls.SLOW_IN_FOG:
@@ -2413,6 +2414,7 @@ const TORCH_BEAST_DANGER: float = -0.03
 var _light_kind: String = ""
 var _light_night: int = -99
 var _night_stamina_debt: float = 0.0
+var _night_fatigue_debt: float = 0.0
 var _light_glow: Control
 
 func _is_dark() -> bool:
@@ -2464,6 +2466,10 @@ func _tick_night(hours: float) -> void:
 		if whole > 0:
 			_night_stamina_debt -= whole
 			_session.caravan.stamina = maxi(0, _session.caravan.stamina - whole)
+		# Karanlıkta yürüyen beden de yorulur (Y-F01).
+		_night_fatigue_debt = _session.accrue_night_fatigue(
+			_night_fatigue_debt + GameSession.FATIGUE_NIGHT_PER_HOUR * hours
+		)
 
 ## Yanan ışık yolda görünür: liderin başı hizasında yumuşak bir hale.
 func _update_light_glow() -> void:
@@ -2987,10 +2993,17 @@ func _apply_daily_pace_and_weather() -> void:
 	# gitmek de bedava değil - takvim yiyor (kontrat, borç, mevsim).
 	var pushing := is_equal_approx(_pace, PACE_FAST)
 	_session.caravan.apply_stamina_drift(pushing)
-	if pushing and not _session.caravan.can_push():
+	# Zorlanan gün kişileri de yorar; kervanın takati en yorgunun (Y-F01).
+	# Kilit yalnızca hızlı tempoyu indirir, normal tempoyu asla yavaşlatmaz.
+	_session.apply_pace_fatigue_day(pushing)
+	if pushing and not _session.can_push_pace():
 		_pace = PACE_STEADY
 		_pace_key = "UI_ROAD_PACE_STEADY"
-		_add_log(tr("UI_ROAD_PACE_EXHAUSTED"), LOCKED_COLOR)
+		var binder := _session.get_stamina_binder()
+		if binder != null:
+			_add_log(tr("UI_ROAD_PACE_EXHAUSTED_BY") % binder.character_name, LOCKED_COLOR)
+		else:
+			_add_log(tr("UI_ROAD_PACE_EXHAUSTED"), LOCKED_COLOR)
 
 	if pushing:
 		_session.change_stress(PACE_FAST_STRESS_PER_DAY)
@@ -3506,6 +3519,9 @@ func _on_combat_finished(
 	# davranış aynen sürüyor.
 	if not dead_characters.is_empty():
 		_report_combat_deaths(dead_characters)
+
+	# Savaşa girenler yorulur (Y-F01).
+	_session.apply_combat_fatigue(_current_combat_party)
 
 	# Kıyı'ya kadar düşüp kalkan sakatlanabilir (Y-C05).
 	var injury_rng := RandomNumberGenerator.new()
@@ -4166,7 +4182,10 @@ func _refresh_state() -> void:
 	_stress_bar.set_value(_session.party_stress, GameSession.MAX_STRESS)
 	_refresh_stress_marker()
 	_danger_bar.set_value(_weathered_danger() * 100.0, 100.0)
-	_stamina_bar.set_value(caravan.stamina, CaravanState.MAX_STAMINA)
+	# Kervanın takati en yorgun kişiye bağlı (Y-F01): çubuk sayacı değil
+	# türetilmiş değeri gösterir, ipucu bağlayanın adını söyler.
+	var stamina := _session.get_caravan_stamina()
+	_stamina_bar.set_value(stamina, CaravanState.MAX_STAMINA)
 	# Y-H03: göstergenin ipucu önce söz, sonra sayı.
 	_morale_bar.set_reason(Wording.gauge_tooltip(tr("UI_HUB_MORALE"), Wording.MORALE, caravan.morale,
 		CaravanState.MAX_MORALE, Wording.reasons(_session, Wording.MORALE)))
@@ -4175,8 +4194,12 @@ func _refresh_state() -> void:
 	var no_reasons: Array[String] = []
 	_danger_bar.set_reason(Wording.gauge_tooltip(tr("UI_HUB_DANGER"), Wording.DANGER, _weathered_danger() * 100.0,
 		100.0, no_reasons))
-	_stamina_bar.set_reason(Wording.gauge_tooltip(tr("UI_ROAD_STAMINA"), Wording.STAMINA, caravan.stamina,
-		CaravanState.MAX_STAMINA, no_reasons))
+	var stamina_reasons: Array[String] = []
+	var binder := _session.get_stamina_binder()
+	if binder != null:
+		stamina_reasons.append(tr("UI_FATIGUE_MOST_TIRED") % [binder.character_name, binder.fatigue])
+	_stamina_bar.set_reason(Wording.gauge_tooltip(tr("UI_ROAD_STAMINA"), Wording.STAMINA, stamina,
+		CaravanState.MAX_STAMINA, stamina_reasons))
 	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
 		_attention_zone
 	)

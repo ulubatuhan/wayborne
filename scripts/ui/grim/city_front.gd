@@ -66,7 +66,7 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 	_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg.texture = TextureLoader.load_any(TOWNS_DIR + city_id + "/background.jpg")
+	_bg.texture = TextureLoader.load_any(background_path(city_id, float(model.get("hour", 22.0))))
 	var mask_tex := TextureLoader.load_any(TOWNS_DIR + city_id + "/mask.png")
 	if mask_tex != null:
 		_mask_img = mask_tex.get_image()
@@ -86,6 +86,22 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 	add_child(_roster())
 	add_child(_strip())
 	return self
+
+## Gün evresinin resmi (görevler 9.3, N33): şafak sabah, öğle ve ikindi gündüz,
+## akşam akşam, gece taban resim. Evre resmi yoksa taban resim (gece) kalır.
+## Resimler aynı kamerayla render edilir, maske hepsinde aynı.
+const PHASE_FILES: Dictionary = {
+	JourneyClock.Phase.DAWN: "morning", JourneyClock.Phase.MORNING: "day", JourneyClock.Phase.NOON: "day",
+	JourneyClock.Phase.AFTERNOON: "day", JourneyClock.Phase.EVENING: "evening",
+}
+
+static func background_path(city_id: String, hour: float) -> String:
+	var phase := JourneyClock.phase_for_hour(hour)
+	if PHASE_FILES.has(phase):
+		var path := TOWNS_DIR + city_id + "/background_%s.jpg" % String(PHASE_FILES[phase])
+		if ResourceLoader.exists(path) or FileAccess.file_exists(path):
+			return path
+	return TOWNS_DIR + city_id + "/background.jpg"
 
 func set_time(t: float) -> void:
 	for c in get_children():

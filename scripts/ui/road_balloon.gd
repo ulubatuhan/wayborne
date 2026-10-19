@@ -8,6 +8,7 @@ extends Control
 const LIFETIME: float = 4.0
 const FADE: float = 0.4
 const MAX_WIDTH: float = 300.0
+const MIN_WIDTH: float = 60.0
 const PAD: Vector2 = Vector2(10, 6)
 
 var _target: WeakRef
@@ -25,7 +26,11 @@ func setup(figure: Control, text: String) -> RoadBalloon:
 	_label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_label)
-	var width := minf(MAX_WIDTH, _label.get_minimum_size().x + 4.0)
+	# Kırılan bir etiketin en küçük genişliği tek harf: genişlik metnin kendisinden
+	# ölçülür (yoksa balon harf harf dikey bir şeride dönüyordu, uzak görünümde görüldü).
+	var font := _label.get_theme_font("font")
+	var natural := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 15).x if font != null else MAX_WIDTH
+	var width := clampf(natural + 4.0, MIN_WIDTH, MAX_WIDTH)
 	_label.size = Vector2(width, 0)
 	_label.position = PAD
 	return self

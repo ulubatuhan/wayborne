@@ -2663,6 +2663,25 @@ re-roll the rain away.
 - **A stress lever that resets on reload is not a lever.** Same reasoning as
   `RouteConditions`' computed states: anything a player could re-roll by
   loading a save has to live in the save file.
+- **Fatigue is the body, stamina is the caravan walking at its most tired
+  member's pace (Y-F01).** `CharacterData.fatigue` (0-100, saved, old saves
+  load at 0) is a person's physical state, kept apart from stress: stress is
+  wear that accumulates across journeys, fatigue is mostly slept off. Fast
+  pace (+8/day), unlit night walking (0.5/hour in chunks of 4), the vanguard
+  role (+4/day), an early start (+4) and fighting (+8 per fighter) raise it,
+  and a heavy body takes 25% more of every gain. The camp fire (-30), a city
+  arrival (-60) and walking in the middle role (-4/day) lower it.
+  `CaravanState.stamina` stays as the counter, but everything that *reads*
+  stamina reads `GameSession.get_caravan_stamina()` = min(counter, 100 - the
+  highest fatigue), and the UI names whoever binds it (`get_stamina_binder()`).
+  **Fatigue never touches walking speed or the provision formula**: it only
+  locks the voluntary fast pace (`can_push_pace()`), and the lock drops the
+  caravan to steady, so "correct stocking never starves" holds -
+  `test_fatigue.gd` asserts a fully exhausted party covers exactly the same
+  ground at steady pace. In combat it is a small penalty through the same
+  derived-getter wrapper as ailments (`_fatigue_bonus_sum`): -2 accuracy and
+  dodge from 60, -4 from 85, so `CombatUnit.from_character` sees it without
+  knowing it exists.
 
 Camp is the free-but-slow lever, the feast the paid-and-rationed one, and
 stress-relieving events the lucky one. Measured over twelve consecutive

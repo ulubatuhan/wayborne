@@ -507,12 +507,14 @@ func get_dodge() -> int:
 		stats.get_dodge() + get_height_dodge_bonus()
 		+ get_gender_dodge_bonus() + get_body_weight_dodge_bonus()
 		+ _trait_bonus_sum("dodge_bonus") + _equipment_bonus_sum("dodge_bonus") + _outfit_bonus_sum("dodge_bonus") + _ailment_bonus_sum("dodge_bonus")
+		+ _fatigue_bonus_sum("dodge_bonus")
 	)
 
 ## Statın ham değeri değil, savaşın gerçekten okuduğu isabet - huy ve
 ## ekipman bonusları burada eklenir (bkz. CombatUnit.from_character).
 func get_accuracy() -> int:
-	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus") + _outfit_bonus_sum("accuracy_bonus") + _ailment_bonus_sum("accuracy_bonus")
+	return stats.get_accuracy() + _trait_bonus_sum("accuracy_bonus") + _equipment_bonus_sum("accuracy_bonus") + _outfit_bonus_sum("accuracy_bonus") + _ailment_bonus_sum("accuracy_bonus") \
+		+ _fatigue_bonus_sum("accuracy_bonus")
 
 func get_crit_chance() -> int:
 	return stats.get_crit_chance() + get_gender_crit_bonus() \
@@ -757,6 +759,49 @@ func get_daily_stress_gain_multiplier() -> float:
 func is_stressed() -> bool:
 	return stress >= get_stress_resistance()
 
+## --- Yorgunluk (görev Y-F01) ---
+## Takat kervanın bir sayısıydı; oysa yorulan bir beden. `fatigue` kişinin
+## fiziksel hâli (0-100, kayıtlı): hızlı tempo, ışıksız gece yürüyüşü,
+## öncülük, erken yola düşmek ve savaş artırır; kamp, şehir ve kervanın
+## ortasında yürümek indirir (kaynakların hepsi GameSession'da). Stresle
+## karışmaz: stres seferler boyu biriken yıpranma, yorgunluk bir uykuda
+## büyük ölçüde geçen beden.
+const MAX_FATIGUE: int = 100
+## İri beden zaten çok yiyor (WEIGHT_PROVISION_FACTOR); yorgunluk aynı
+## eksende: artışlar %25 fazla yazılır. Kaynakların hepsi 4'ün katı, yani
+## yuvarlama payı yutmaz (4 -> 5, 8 -> 10).
+const FATIGUE_HEAVY_GAIN_MULT: float = 1.25
+## Savaş cezası (kullanıcı kararı: küçük, yalnızca yüksek yorgunlukta):
+## eşikte isabet ve kaçınma -2, ağır eşikte -4. Dertlerin -2..-4'üyle aynı
+## ölçek; savaşı yorgunluk değil karar belirlesin.
+const FATIGUE_COMBAT_THRESHOLD: int = 60
+const FATIGUE_COMBAT_SEVERE: int = 85
+const FATIGUE_COMBAT_PENALTY: int = 2
+
+var fatigue: int = 0
+
+func change_fatigue(delta: int) -> void:
+	var applied := delta
+	if delta > 0 and body_weight == BODY_WEIGHT_HEAVY:
+		applied = int(round(float(delta) * FATIGUE_HEAVY_GAIN_MULT))
+	fatigue = clampi(fatigue + applied, 0, MAX_FATIGUE)
+
+## İsabet ve kaçınmadan düşülen pay (pozitif sayı; eşiğin altında 0).
+func get_fatigue_combat_penalty() -> int:
+	if fatigue >= FATIGUE_COMBAT_SEVERE:
+		return FATIGUE_COMBAT_PENALTY * 2
+	if fatigue >= FATIGUE_COMBAT_THRESHOLD:
+		return FATIGUE_COMBAT_PENALTY
+	return 0
+
+## Huy/ekipman/dert sarmalayıcılarının yorgunluk karşılığı: savaş
+## `get_accuracy()`/`get_dodge()`'u okuduğu için CombatUnit.from_character
+## cezayı ayrıca bilmeden görür.
+func _fatigue_bonus_sum(field: String) -> int:
+	if field == "accuracy_bonus" or field == "dodge_bonus":
+		return -get_fatigue_combat_penalty()
+	return 0
+
 ## Durum efekti dirençleri: stat payı + **seviye payı**.
 ##
 ## Seviye payı, bu depoda zaten yapılmış bir araştırmanın doğrudan
@@ -927,6 +972,7 @@ func to_dict() -> Dictionary:
 		"stats": stats.to_dict(),
 		"current_hp": current_hp,
 		"stress": stress,
+		"fatigue": fatigue,
 		"hire_cost": hire_cost,
 		"is_player": is_player,
 		"level": level,
@@ -967,6 +1013,8 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	)
 	character.stats = CharacterStats.from_dict(data.get("stats", {}))
 	character.stress = clampi(int(data.get("stress", 0)), 0, MAX_STRESS)
+	# Y-F01'den önceki kayıtta alan yok: herkes dinlenmiş başlar.
+	character.fatigue = clampi(int(data.get("fatigue", 0)), 0, MAX_FATIGUE)
 	character.hire_cost = int(data.get("hire_cost", 0))
 	character.is_player = bool(data.get("is_player", false))
 	character.level = maxi(1, int(data.get("level", 1)))

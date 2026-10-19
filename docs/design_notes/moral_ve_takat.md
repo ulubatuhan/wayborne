@@ -1,6 +1,6 @@
 # Moral ve takat: kervanın nefesi, kişinin bedeni (Y-F01)
 
-Durum: tasarım notu, kullanıcı onayı bekliyor. Kod henüz değişmedi.
+Durum: uygulandı (Y-F01). Onay soruları kullanıcı kararıyla kapandı: (1) yorgunluk savaşta küçük bir ceza, (2) kervanın takati en yorgun kişiye bağlı.
 
 ## Kullanıcı notu
 
@@ -47,3 +47,11 @@ Yorgunluk yürüme hızını kişi başına değil kervan için (en yorgun) beli
 
 1. Yorgunluk savaşta ceza olsun mu, yoksa yalnızca yolda mı?
 2. Kervan takati "en yorgun kişi" mi, "ortalama" mı?
+
+## Ne yapıldı
+
+- `CharacterData.fatigue` (0-100, kayıtlı; eski kayıt `.get("fatigue", 0)` ile dinlenmiş yüklenir). İri beden artışları %25 fazla yazar (`FATIGUE_HEAVY_GAIN_MULT`; kaynaklar 4'ün katı: 4 -> 5, 8 -> 10).
+- Artıranlar (`GameSession`): hızlı tempo günü herkese +8, ışıksız gece saatte 0,5 (4'lük dilimlerle), öncü günde +4, erken yola düşmek +4, savaşa giren +8. İndirenler: kamp ateşi -30, şehir varışı -60, ortancı (kervanın ortasında yürüyen) günde -4.
+- Kervanın takati `GameSession.get_caravan_stamina()` = min(`caravan.stamina`, 100 - en yüksek yorgunluk). Hızlı tempo kilidi ve tükenince normale dönüş `can_push_pace()` ile buna bakar; bağlayan kişi `get_stamina_binder()`. Yürüyüş hızına ve erzak formülüne yorgunluk hiç girmez: normal tempo yavaşlamaz (planlayıcı sözü, `tests/test_fatigue.gd`).
+- Savaş cezası `_fatigue_bonus_sum` sarmalayıcısıyla `get_accuracy()`/`get_dodge()`'da: 60'tan itibaren -2, 85'ten itibaren -4; hasar ve can etkilenmez.
+- Yol paneli: Kadro kartında Can ve Stres'in altında "Yorgunluk" çubuğu (sayı yanında), cezalıysa notta "Yorgun: isabet/kaçınma -N", başlıkta kırgınlık işaretleri. Kervanın hâli sütununda Takat türetilmiş değeri gösterir; bir beden bağlıyorsa altında "Takat en yorgun kişiye bağlı: <ad> (N)". Üst şeridin takat şişesinin ipucu da adı söyler.

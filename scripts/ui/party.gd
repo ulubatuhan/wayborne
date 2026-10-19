@@ -6,6 +6,11 @@ extends Control
 ##
 ## Tayfa toplama burada değil - o mekâna bağlı (bkz. RecruitPanel). Burası
 ## eldekini görüp düzenlediğin yer.
+##
+## Kadro kartları (taslak 9.7, `RosterCard`) bir sırada: soldan sağa
+## savaştaki mevki sırası. Kartın altındaki ayrıntı satırı seçili kişinin:
+## sıra tuşları, karakter ekranı, yol verme, işaretleri, statları,
+## yetenekleri - eski kişi kartının tamamı. Defter en altta.
 
 const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 const PERK_COLOR: Color = Color(0.75, 0.85, 1.0)
@@ -14,14 +19,19 @@ const HURT_COLOR: Color = Color(0.9, 0.55, 0.45)
 ## genişliği metin belirlemiyor - kendi yerini istemesi gerekiyor.
 const MOVE_BUTTON_SIZE: float = 34.0
 ## Waybook işaretleri (bkz. WaybookIcons).
-const CAMEO_HEIGHT: float = 64.0
 const EMBLEM_SIZE: float = 24.0
 const TOKEN_SIZE: float = 20.0
 
 var _session: GameSession
+## Seçili kişi sıra değişince de seçili kalsın diye indeks değil kişi.
+var _selected: CharacterData = null
+var _cards: Array[RosterCard] = []
 
 @onready var _info_label: Label = $MarginContainer/VBoxContainer/InfoLabel
-@onready var _content: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer
+@onready var _card_row: HBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/CardRow
+@onready var _detail_panel: PanelContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/DetailPanel
+@onready var _detail: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/DetailPanel/DetailBox
+@onready var _ledger_box: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/LedgerBox
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
@@ -31,6 +41,10 @@ func _ready() -> void:
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
+	# Karakter ekranından dönünce o ekranda bakılan kişi seçili gelsin.
+	var party := _session.get_party()
+	if not party.is_empty():
+		_selected = party[clampi(Nav.character_target_index, 0, party.size() - 1)]
 	_refresh()
 
 func _refresh() -> void:
@@ -40,18 +54,43 @@ func _refresh() -> void:
 		_session.get_party_capacity(),
 		_session.owned_wagon_count,
 	]
+	if party.is_empty():
+		_selected = null
+	elif not party.has(_selected):
+		_selected = party[0]
 
-	NodeUtil.clear_children(_content)
-	_content.add_child(_build_ledger())
+	NodeUtil.clear_children(_card_row)
+	_cards.clear()
 	for index in party.size():
-		_content.add_child(_build_member_card(party[index], index, party.size()))
+		var card := RosterCard.new().setup(party[index], index + 1)
+		card.selected = party[index] == _selected
+		card.pressed.connect(_select.bind(party[index]))
+		# Klavyede odak seçimi taşıyor: ok tuşuyla karta gelmek onu seçmek.
+		card.focus_entered.connect(_select.bind(party[index]))
+		_card_row.add_child(card)
+		_cards.append(card)
+	_build_detail()
+
+	NodeUtil.clear_children(_ledger_box)
+	_ledger_box.add_child(_build_ledger())
+
+func _select(character: CharacterData) -> void:
+	if character == _selected:
+		return
+	_selected = character
+	for card in _cards:
+		card.selected = card.character == _selected
+	_build_detail()
+
+func _selected_index() -> int:
+	return _session.get_party().find(_selected)
 
 ## Kervan defteri: kim geldi, kim gitti, kim öldü, liderlik kime geçti.
 ##
 ## **Ayrılan bir isim silinmiyor, üstü çiziliyor** (bkz. CaravanLedger).
-## Parti listesinin üstünde duruyor çünkü kervanın kim olduğu sorusunun
-## cevabı yalnızca şu an yanında yürüyenler değil - buraya kadar kimlerle
-## geldiğin de o cevabın parçası.
+## Kartlarla aynı kaydırma alanında duruyor çünkü kervanın kim olduğu
+## sorusunun cevabı yalnızca şu an yanında yürüyenler değil - buraya kadar
+## kimlerle geldiğin de o cevabın parçası.
 const LEDGER_RECENT_LIMIT: int = 8
 
 func _build_ledger() -> VBoxContainer:
@@ -109,14 +148,21 @@ func _build_ledger() -> VBoxContainer:
 
 	return box
 
-func _build_member_card(character: CharacterData, index: int, party_size: int) -> VBoxContainer:
-	var card := VBoxContainer.new()
-	card.add_theme_constant_override("separation", 4)
+## Seçili kişinin ayrıntısı ve eylemleri - eski kişi kartının tamamı,
+## kadro kartının altına taşındı; hiçbir özellik kartın küçüklüğüne feda
+## edilmedi.
+func _build_detail() -> void:
+	NodeUtil.clear_children(_detail)
+	var index := _selected_index()
+	_detail_panel.visible = index >= 0
+	if index < 0:
+		return
+	var character := _selected
+	var party_size := _session.get_party().size()
 
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
 
-	header.add_child(PortraitCameo.new().setup(character, CAMEO_HEIGHT))
 	header.add_child(WaybookIcons.picture(
 		WaybookIcons.CLASS_EMBLEMS, character.class_id, EMBLEM_SIZE, character.get_character_class().display_name
 	))
@@ -124,15 +170,18 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	var name_label := Label.new()
 	name_label.text = "%d. %s" % [index + 1, character.get_summary_line()]
 	name_label.add_theme_font_size_override("font_size", 18)
-	name_label.custom_minimum_size = Vector2(460, 0)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.custom_minimum_size = Vector2(240, 0)
 	header.add_child(name_label)
 
 	# Oyuncunun kendisi çıkarılamaz ama her mevkiye geçebilir; bu yüzden
-	# kontrol sıraya değil is_player bayrağına bakıyor.
+	# kontrol sıraya değil is_player bayrağına bakıyor. Kartlar soldan sağa
+	# mevki sırası: sol ok bir mevki öne, sağ ok bir mevki geriye.
 	if index > 0:
-		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_UP, index, index - 1))
+		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_LEFT, index, index - 1))
 	if index < party_size - 1:
-		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_DOWN, index, index + 1))
+		header.add_child(_build_move_button(UiIcon.Kind.CHEVRON_RIGHT, index, index + 1))
 
 	var character_button := Button.new()
 	character_button.text = tr("UI_PARTY_OPEN_CHARACTER")
@@ -153,7 +202,7 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 		dismiss_button.pressed.connect(_on_dismiss_pressed.bind(character))
 		header.add_child(dismiss_button)
 
-	card.add_child(header)
+	_detail.add_child(header)
 
 	# Kişinin işaretleri tek satırda: görevi, huyları, kırgınlıkları, açlığı.
 	var marks := HBoxContainer.new()
@@ -171,11 +220,11 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 		marks.add_child(token)
 	marks.add_child(WaybookIcons.grievance_row(character, TOKEN_SIZE))
 	marks.add_child(WaybookIcons.hunger_tally(character, TOKEN_SIZE))
-	card.add_child(marks)
+	_detail.add_child(marks)
 
 	var hp_row := HBoxContainer.new()
 	hp_row.add_theme_constant_override("separation", 8)
-	card.add_child(hp_row)
+	_detail.add_child(hp_row)
 
 	var hp_label := Label.new()
 	hp_label.text = tr("UI_PARTY_MEMBER") % [
@@ -192,10 +241,16 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 	hp_band.modulate = HURT_COLOR if character.current_hp < character.get_max_hp() else HINT_COLOR
 	hp_row.add_child(hp_band)
 
+	# Kartın kehribar çizgisinin sayısı.
+	var stress_label := Label.new()
+	stress_label.text = "· " + tr("UI_PARTY_CARD_STRESS") % [character.stress, CharacterData.MAX_STRESS]
+	stress_label.modulate = HINT_COLOR
+	hp_row.add_child(stress_label)
+
 	var stats_label := Label.new()
 	stats_label.text = _stats_line(character)
 	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	card.add_child(stats_label)
+	_detail.add_child(stats_label)
 
 	var derived_label := Label.new()
 	derived_label.text = tr("UI_STATLINE") % [
@@ -206,19 +261,16 @@ func _build_member_card(character: CharacterData, index: int, party_size: int) -
 		character.get_damage_bonus(),
 	]
 	derived_label.modulate = HINT_COLOR
-	card.add_child(derived_label)
+	_detail.add_child(derived_label)
 
 	var perk_label := Label.new()
 	perk_label.text = character.get_culture().perk_text
 	perk_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	perk_label.modulate = PERK_COLOR
-	card.add_child(perk_label)
+	_detail.add_child(perk_label)
 
 	for skill in character.get_skills():
-		card.add_child(_build_skill_label(skill, index + 1))
-
-	card.add_child(HSeparator.new())
-	return card
+		_detail.add_child(_build_skill_label(skill, index + 1))
 
 ## Yön oku bir *karakter* değil, çizim: `↑`/`↓` varsayılan fontta yok ve
 ## bu iki tuş ekranda boş kutu olarak duruyordu (bkz. `UiIcon`). İkon
@@ -229,7 +281,7 @@ func _build_move_button(icon_kind: int, from_index: int, to_index: int) -> Butto
 	button.custom_minimum_size = Vector2(MOVE_BUTTON_SIZE, 0.0)
 	button.pressed.connect(_on_move_pressed.bind(from_index, to_index))
 	button.tooltip_text = tr(
-		"UI_PARTY_MOVE_UP" if icon_kind == UiIcon.Kind.CHEVRON_UP else "UI_PARTY_MOVE_DOWN"
+		"UI_PARTY_MOVE_UP" if to_index < from_index else "UI_PARTY_MOVE_DOWN"
 	)
 
 	var icon := UiIcon.new()
@@ -259,13 +311,31 @@ func _stats_line(character: CharacterData) -> String:
 		])
 	return " · ".join(parts)
 
+## Seçim taşınan kişiyle gidiyor; klavye odağı da yeniden kurulan satırda
+## aynı yöndeki tuşa, o tuş artık yoksa (en öne/en arkaya varıldı) kişinin
+## kartına dönüyor - tuş silinince odak boşa düşmesin.
 func _on_move_pressed(from_index: int, to_index: int) -> void:
-	if _session.swap_party_positions(from_index, to_index):
-		_refresh()
+	if not _session.swap_party_positions(from_index, to_index):
+		return
+	var wanted := tr("UI_PARTY_MOVE_UP" if to_index < from_index else "UI_PARTY_MOVE_DOWN")
+	_refresh()
+	var target: Control = null
+	for node in _detail.find_children("*", "Button", true, false):
+		var button := node as Button
+		if button.tooltip_text == wanted:
+			target = button
+	if target == null and to_index < _cards.size():
+		target = _cards[to_index]
+	if target != null:
+		target.grab_focus.call_deferred()
 
 func _on_dismiss_pressed(character: CharacterData) -> void:
 	if _session.dismiss(character):
 		_refresh()
+		# Tuş kişiyle birlikte gitti; odak yeni seçili karta düşsün.
+		var index := _selected_index()
+		if index >= 0 and index < _cards.size():
+			_cards[index].grab_focus.call_deferred()
 
 ## Karakter ekranı yalnızca buradan açılıyor ve buraya dönüyor - dönüş
 func _on_character_pressed(index: int) -> void:

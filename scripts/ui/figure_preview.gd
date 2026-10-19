@@ -45,8 +45,15 @@ func show_look(
 func set_tint(tint: Color) -> void:
 	_figure.set_tint(tint)
 
+## Figür kareleri 320 px tuvalde render ediliyor, giysiler yarı çözünürlükte
+## paketli; bundan çok büyütülen figür bulanıklaşıyor (9.6 denetimi: 620 px'te
+## giysiler lekeye döndü). Pencere ne kadar uzun olursa olsun figür bu boyu
+## aşmaz, altta durur.
+const MAX_FIGURE_HEIGHT: float = 400.0
+
 ## Figür pencerenin alt kenarına basıyor; boyu pencerenin yüksekliğinin bir
 ## payı, en uzun boy bile şapkasıyla sığsın diye.
 func _layout() -> void:
-	_figure.size = Vector2(size.x, size.y * 0.86)
-	_figure.position = Vector2(0.0, size.y - _figure.size.y)
+	var height := minf(size.y * 0.86, MAX_FIGURE_HEIGHT)
+	_figure.size = Vector2(size.x, height)
+	_figure.position = Vector2(0.0, size.y - height)

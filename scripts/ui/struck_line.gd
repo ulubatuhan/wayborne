@@ -19,6 +19,11 @@ const STRIKE_OVERHANG: float = 6.0
 ## İnce: yazıyı örtmemeli, üstünden geçmeli - kalın bir darbe ismi
 ## okunmaz bir kutuya çeviriyordu (ilk ekran görüntüsü tam bunu gösterdi).
 const STRIKE_HEIGHT_RATIO: float = 0.15
+## Kâğıt üstünde daha da ince ve kan kırmızısı mürekkep (görev 9.11 denetimi):
+## siyah ve kalın darbe defterde adı tamamen örtüyordu; onaylı taslakta ad
+## çizginin altından okunuyor.
+const PAGE_STRIKE_HEIGHT_RATIO: float = 0.085
+const PAGE_STRIKE_TINT: Color = Color(0.46, 0.11, 0.10, 0.9)
 
 var label: Label
 var progress: float = 1.0:
@@ -28,6 +33,7 @@ var progress: float = 1.0:
 			_ink.queue_redraw()
 var _ink: Control
 var _tint: Color = ArtPalette.UI_INK_MARK
+var _height_ratio: float = STRIKE_HEIGHT_RATIO
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -47,7 +53,8 @@ func setup(text: String, animate: bool) -> StruckLine:
 	return self
 
 func set_on_page(on_page: bool) -> StruckLine:
-	_tint = ArtPalette.INK if on_page else ArtPalette.UI_INK_MARK
+	_tint = PAGE_STRIKE_TINT if on_page else ArtPalette.UI_INK_MARK
+	_height_ratio = PAGE_STRIKE_HEIGHT_RATIO if on_page else STRIKE_HEIGHT_RATIO
 	label.theme_type_variation = WaybookTheme.PAGE_LABEL if on_page else &""
 	_ink.queue_redraw()
 	return self
@@ -70,7 +77,7 @@ func _draw_strike() -> void:
 	var line_height := font.get_height(font_size)
 	var x0 := _text_left(text_width) - STRIKE_OVERHANG
 	var full := text_width + STRIKE_OVERHANG * 2.0
-	var height := line_height * STRIKE_HEIGHT_RATIO
+	var height := line_height * _height_ratio
 	var y := minf(size.y, line_height) * 0.55 - height * 0.5
 	var tex_size := texture.get_size()
 	var shown := full * progress

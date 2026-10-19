@@ -157,7 +157,7 @@ func _build_wagons() -> void:
 	])
 	if caravan.damaged_wagons > 0:
 		row.modulate = HURT_COLOR
-	_line(tr("UI_STATUS_STAMINA") % [caravan.stamina, CaravanState.MAX_STAMINA])
+	_line(tr("UI_STATUS_STAMINA") % [_session.get_caravan_stamina(), CaravanState.MAX_STAMINA])
 	_line(tr("UI_STATUS_MORALE") % [caravan.morale, CaravanState.MAX_MORALE])
 
 func _build_cargo() -> void:

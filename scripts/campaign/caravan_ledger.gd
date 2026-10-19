@@ -70,9 +70,12 @@ static func get_kind_label(kind: String) -> String:
 ## `cause_key` ve `location_id` bir satırı istatistikten hatıraya çeviren
 ## iki alan: "öldü" değil, "Kurtboğazı yolunda kurtlara düştü". İkisi de
 ## boş bırakılabilir (eski kayıtlar, sebebin anlamsız olduğu `joined`/`led`).
+## `role` düşenin sınıf kimliği (görev 9.11: Düşenler sayfası "sekban" diye
+## anar); boşsa sayfa onu yoldaş ya da tayfa diye anar.
 func record(
 	kind: String, character_name: String, day: int, generation: int = 1,
-	character_id: String = "", cause_key: String = "", location_id: String = ""
+	character_id: String = "", cause_key: String = "", location_id: String = "",
+	role: String = ""
 ) -> void:
 	entries.append({
 		"kind": kind,
@@ -82,6 +85,7 @@ func record(
 		"id": character_id,
 		"cause": cause_key,
 		"location": location_id,
+		"role": role,
 	})
 
 func is_struck(entry: Dictionary) -> bool:
@@ -147,6 +151,55 @@ static func describe(entry: Dictionary) -> String:
 		]
 	return String(TranslationServer.translate("LEDGER_LINE")) % [name, cause_text, day]
 
+## Satırın kişisiz hali: "sebep, yer yakınlarında (gün N)". Düşenler sayfası
+## adı ayrıca, çizili yazıyor (görev 9.11). Sebebi olmayan satırda boş.
+static func describe_cause(entry: Dictionary) -> String:
+	var cause := String(entry.get("cause", ""))
+	if cause.is_empty():
+		return ""
+	var cause_text := String(TranslationServer.translate(cause))
+	var day := int(entry.get("day", 0))
+	var location_id := String(entry.get("location", ""))
+	var location := WorldMapData.get_location_by_id(location_id) if not location_id.is_empty() else null
+	if location != null:
+		return String(TranslationServer.translate("LEDGER_CAUSE_WITH_PLACE")) % [cause_text, location.location_name, day]
+	if day <= 0:
+		return cause_text
+	return String(TranslationServer.translate("LEDGER_CAUSE_DAY")) % [cause_text, day]
+
+## Düşenler: adı senden önce taşıyan kurucu ve ölen herkes, defterin sırasıyla.
+## Ayrılanlar burada değil - onlar yaşıyor, yalnızca kervanda değiller.
+func fallen() -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for entry in entries:
+		var kind := String(entry.get("kind", ""))
+		if kind == KIND_FOUNDER or kind == KIND_DIED:
+			found.append(entry)
+	return found
+
+## Adı taşımış olanlar: kimlik (yoksa isim) -> taşıdığı kuşak.
+func leader_generations() -> Dictionary:
+	var leaders := {}
+	for entry in entries:
+		if String(entry.get("kind", "")) != KIND_LED:
+			continue
+		var key := String(entry.get("id", ""))
+		if key.is_empty():
+			key = "name:" + String(entry.get("name", ""))
+		leaders[key] = int(entry.get("generation", 1))
+	return leaders
+
+## Ateş başı hikâyeleri, günün cümleleri, töre, karar ve anıtlar: düşmeyen,
+## çizilmeyen hatıralar (Düşenler sayfasının sağı).
+const STORY_PAGE_KINDS: Array[String] = [KIND_STORY, KIND_DIARY, KIND_CODE, KIND_VERDICT, KIND_MEMORIAL]
+
+func story_lines() -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for entry in entries:
+		if STORY_PAGE_KINDS.has(String(entry.get("kind", ""))):
+			found.append(entry)
+	return found
+
 ## En yeniden eskiye. Ekran her zaman son olanı önce gösteriyor: defteri
 ## açan oyuncunun sorusu "en son ne oldu".
 func recent(limit: int = 0) -> Array[Dictionary]:
@@ -177,4 +230,5 @@ func load_from_array(data: Array) -> void:
 			"id": String(entry.get("id", "")),
 			"cause": String(entry.get("cause", "")),
 			"location": String(entry.get("location", "")),
+			"role": String(entry.get("role", "")),
 		})

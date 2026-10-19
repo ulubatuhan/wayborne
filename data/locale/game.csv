@@ -477,3 +477,7 @@
 "WORD_STRESS_UP_BIG","Kadro derinden sarsıldı","The company was badly shaken","","","","","","","","",""
 "WORD_STRESS_DOWN_SMALL","Biraz soluklandılar","They caught their breath","","","","","","","","",""
 "WORD_STRESS_DOWN_BIG","Omuzlardan yük kalktı","A weight lifted from their shoulders","","","","","","","","",""
+"UI_PARTY_CARD_LEADER","Lider","Leader","","","","","","","","",""
+"UI_PARTY_CARD_RANK","%d. mevki","Rank %d","","","","","","","","",""
+"UI_PARTY_CARD_TOOLTIP","Can %d/%d · Stres %d/%d","HP %d/%d · Stress %d/%d","","","","","","","","",""
+"UI_PARTY_CARD_STRESS","Stres %d/%d","Stress %d/%d","","","","","","","","",""

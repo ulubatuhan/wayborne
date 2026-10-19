@@ -622,14 +622,22 @@ func _draw_celestial(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# (Güneşin yayı şeridin içinde kalıyor: gökyüzündeki yeri saati söylüyor,
 	# uzaklaşmak onu değiştirmemeli.)
 	var arc_y := horizon - sin(_sun_ratio * PI) * horizon * 0.72 - horizon * 0.06
-	var disc_r := area.size.y * 0.045
 	var is_night := _night_ratio > 0.55
 	var disc := Color(0.72, 0.78, 0.92) if is_night else Color(1.0, 0.93, 0.74)
+	# Ufukta sıcak bant (12.2e): güneş alçaktayken ufkun güneş tarafı ısınır.
+	var low := clampf(1.0 - sin(_sun_ratio * PI) * 1.6, 0.0, 1.0)
+	if low > 0.0 and not is_night:
+		ArtDraw.light_pool(self, Vector2(arc_x, horizon), area.size.x * 0.42, Color(_sky.band),
+			0.30 * low * (1.0 - gloom), 0.32, 48)
+	# Güneş bir disk değil ışık: geniş hale, küçük parlak çekirdek (12.2e).
+	var disc_r := area.size.y * (0.034 if is_night else 0.022)
+	# Geniş hale çok halkayla: 16 halkada halka halka bant görünüyordu.
 	ArtDraw.light_pool(
-		self, Vector2(arc_x, arc_y), disc_r * 5.0, disc,
-		(0.16 if is_night else 0.30) * (1.0 - gloom), 1.0
+		self, Vector2(arc_x, arc_y), area.size.y * 0.30, disc,
+		(0.16 if is_night else 0.34) * (1.0 - gloom), 1.0, 64
 	)
-	draw_circle(Vector2(arc_x, arc_y), disc_r, Color(disc, (1.0 - gloom * 0.6)))
+	ArtDraw.light_pool(self, Vector2(arc_x, arc_y), disc_r * 3.0, disc, 0.55 * (1.0 - gloom), 1.0)
+	draw_circle(Vector2(arc_x, arc_y), disc_r, Color(disc.lightened(0.25), (1.0 - gloom * 0.6)))
 	if is_night:
 		# Ay: diskin bir kenarını gökyüzü rengiyle kesip hilal yapıyoruz.
 		draw_circle(

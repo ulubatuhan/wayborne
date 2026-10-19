@@ -67,14 +67,17 @@ def sky(h, w, p, seed):
     c = smoothstep(0.45, 0.75, 0.6 * clouds + 0.4 * streak) * (0.35 + 0.65 * (1 - t))
     cl = np.array(p["cloud"], np.float32) / 255.0
     col = col * (1 - c[..., None] * 0.85) + cl * c[..., None] * 0.85
-    # ay: soluk disk + hale, bulutun arkasında kalır
+    # ay ya da güneş: soluk disk + hale, bulutun arkasında kalır. Gündüz evresinde
+    # disk yok (güneş kadrajın üstünde), akşam ufka yakın iri bir turuncu disk.
+    if p.get("moon", [0.78, 0.16]) is None:
+        return np.clip(col, 0, 1)
     mx, my = p.get("moon", [0.78, 0.16])
     yy, xx = np.mgrid[0:h, 0:w]
     d = np.hypot(xx - mx * w, (yy - my * h)) / h
-    r = 0.038
+    r = p.get("disc_r", 0.038)
     disc = smoothstep(r, r * 0.92, d) * (1 - c * 0.7)
-    halo = np.exp(-(d / 0.16) ** 2) * 0.22 * (1 - c * 0.5)
-    moon = np.array([0.86, 0.82, 0.70], np.float32)
+    halo = np.exp(-(d / p.get("halo_r", 0.16)) ** 2) * p.get("halo", 0.22) * (1 - c * 0.5)
+    moon = np.array(p.get("disc_color", [0.86, 0.82, 0.70]), np.float32)
     col = col + moon * (disc[..., None] * 0.75 + halo[..., None])
     return np.clip(col, 0, 1)
 
@@ -95,6 +98,16 @@ def grade(rgb, p):
     warm = np.clip((rgb[..., :1] - rgb[..., 2:3]) * 2.2, 0, 1) * smoothstep(0.25, 0.6, lum)
     keep = 0.38 + 0.62 * warm  # sıcak ışık doygun kalır, gerisi solar
     rgb = lum + (rgb - lum) * keep
+    # Yeşil (çam, çatı yosunu) stile aykırı parlak kalıyordu (kullanıcı notu:
+    # yeşil/parlak renk yok): yeşilin baskın olduğu yer koyu zeytine çekilir.
+    r, g, bl = rgb[..., :1], rgb[..., 1:2], rgb[..., 2:3]
+    green = smoothstep(0.0, 0.08, g - r)
+    olive = lum * np.array([0.74, 0.76, 0.62], np.float32) * 0.85
+    rgb = rgb * (1 - green) + olive * green
+    # Pembe çatı uçları (paket rengi) da tuğlaya çekilir.
+    pink = smoothstep(0.0, 0.06, bl - g) * smoothstep(0.05, 0.2, r - g)
+    brick = lum * np.array([1.05, 0.66, 0.52], np.float32)
+    rgb = rgb * (1 - pink) + brick * pink
     # gölgeler mor-kömüre, S eğrisi
     shadow = np.array(p.get("shadow", [26, 20, 30]), np.float32) / 255.0
     s = smoothstep(0.0, 0.35, lum)
@@ -175,12 +188,17 @@ def process(city):
     rng = np.random.default_rng(cfg.get("seed", 1) + 7)
     img = img + (rng.random((h, w, 1)).astype(np.float32) - 0.5) * 0.035
 
-    dst = os.path.join(OUT, city)
+    # Evre varyantı ("yer@evre", N33): aynı klasöre background_<evre>.jpg; maske
+    # tabandaki gibi kalır (kamera ve yapılar aynı, piksel hizalı).
+    base, _, phase = city.partition("@")
+    dst = os.path.join(OUT, base)
     os.makedirs(dst, exist_ok=True)
-    Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(os.path.join(dst, "background.jpg"), quality=88)
-    Image.fromarray(mask_from_ids(ids)).save(os.path.join(dst, "mask.png"))
-    json.dump({"venues": list(VENUE_IDS)}, open(os.path.join(dst, "mask.json"), "w"))
-    print("YAZILDI", dst)
+    name = "background_%s.jpg" % phase if phase else "background.jpg"
+    Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(os.path.join(dst, name), quality=88)
+    if not phase:
+        Image.fromarray(mask_from_ids(ids)).save(os.path.join(dst, "mask.png"))
+        json.dump({"venues": list(VENUE_IDS)}, open(os.path.join(dst, "mask.json"), "w"))
+    print("YAZILDI", os.path.join(dst, name))
 
 
 if __name__ == "__main__":

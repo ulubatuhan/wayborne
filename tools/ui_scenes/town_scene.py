@@ -224,7 +224,7 @@ def _tex_node(nt, path, mapping):
     return t
 
 
-def texture_materials(window_glow):
+def texture_materials(window_glow, window_strength=6.0):
     """Düz renkli Quaternius malzemelerine doku ve pencerelere ışık."""
     detail = {
         "Stone": "Rock064", "Stone_Dark": "Rock064", "Stone_Light": "Rock064",
@@ -241,7 +241,7 @@ def texture_materials(window_glow):
         base = m.name.split(".")[0]
         if base == "Windows":
             bsdf.inputs["Emission Color"].default_value = window_glow
-            bsdf.inputs["Emission Strength"].default_value = 6.0
+            bsdf.inputs["Emission Strength"].default_value = window_strength
             continue
         if base in detail:
             tc = nt.nodes.new("ShaderNodeTexCoord")
@@ -432,7 +432,8 @@ def lights(cfg):
     moon.color = cfg.get("moon_color", (0.62, 0.66, 0.9))
     moon.angle = math.radians(4)
     mo = bpy.data.objects.new("moon", moon)
-    mo.rotation_euler = Euler((math.radians(55), 0, math.radians(200)))
+    rot = cfg.get("moon_rot", [55, 200])  # evre varyantları güneşi başka açıya koyar (N33)
+    mo.rotation_euler = Euler((math.radians(rot[0]), 0, math.radians(rot[1])))
     sc.collection.objects.link(mo)
     # Arka ışık: tepenin arkasından, siluetleri ayıran boğuk kor.
     back = bpy.data.lights.new("back", "SUN")
@@ -444,7 +445,7 @@ def lights(cfg):
     for entry in cfg.get("lamps", []):
         lx, ly, lz, e = entry[:4]
         lamp = bpy.data.lights.new("lamp", "POINT")
-        lamp.energy = e
+        lamp.energy = e * cfg.get("lamp_scale", 1.0)
         lamp.color = entry[4] if len(entry) > 4 else (1.0, 0.62, 0.3)
         lamp.shadow_soft_size = 0.3
         lo = bpy.data.objects.new("lamp", lamp)
@@ -571,7 +572,7 @@ def build(city):
         building(spec)
     for spec in cfg.get("props", []):
         building(spec)
-    texture_materials(tuple(cfg.get("window", [1.0, 0.55, 0.22])) + (1.0,))
+    texture_materials(tuple(cfg.get("window", [1.0, 0.55, 0.22])) + (1.0,), cfg.get("window_strength", 6.0))
     lights(cfg)
     camera(cfg)
     return cfg

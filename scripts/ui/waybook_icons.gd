@@ -77,6 +77,19 @@ static func picture(table: Dictionary, key: Variant, height: float, tooltip: Str
 		rect.mouse_filter = Control.MOUSE_FILTER_PASS
 	return rect
 
+const INK_MARK_SHADER: String = "res://scripts/ui/ink_mark.gdshader"
+static var _ink_materials: Dictionary = {}
+
+## Koyu zemin için tek renk mürekkep: resmin yalnızca saydamlığı kullanılır.
+static func ink_material(ink: Color) -> ShaderMaterial:
+	var key := ink.to_html()
+	if not _ink_materials.has(key):
+		var material := ShaderMaterial.new()
+		material.shader = load(INK_MARK_SHADER)
+		material.set_shader_parameter("ink", ink)
+		_ink_materials[key] = material
+	return _ink_materials[key]
+
 static func trait_token(is_positive: bool, height: float) -> TextureRect:
 	return WaybookTheme.picture(VIRTUE_TOKEN if is_positive else AFFLICTION_TOKEN, height)
 
@@ -91,6 +104,10 @@ static func grievance_row(character: CharacterData, height: float) -> HBoxContai
 			continue
 		var label_text := TranslationServer.translate(String(GRIEVANCE_LABEL_KEYS[key]))
 		var mark := picture(GRIEVANCE_MARKS, key, height, "%s ×%d" % [label_text, count])
+		# Kenar notları kâğıda koyu mürekkeple çizilmiş; bütün paneller koyu,
+		# o yüzden kan rengi açık mürekkeple yeniden boyanıyor (9.6 denetimi:
+		# koyu zeminde görünmüyordu).
+		mark.material = ink_material(ArtPalette.BLOOD.lightened(0.35))
 		row.add_child(mark)
 		if count > 1:
 			var times := Label.new()

@@ -159,22 +159,29 @@ const PHASE_DAY: String = "day"
 const PHASE_DUSK: String = "dusk"
 const PHASE_NIGHT: String = "night"
 
+## Görev 12.2e (onaylı taslak y_122e_yol_isik): evre başına gök, ışık, pus
+## ve ufuk bandı. Gündüz gökyüzü boğuk mavi-gri (parlak mavi değil), şafak ve
+## akşam ufukta sıcak bir bant, gece ay ışığı soğuk ama mavi parlamıyor.
 const SKIES: Dictionary = {
 	PHASE_DAWN: {
-		"top": Color(0.20, 0.24, 0.38), "bottom": Color(0.78, 0.55, 0.42),
-		"light": Color(1.00, 0.86, 0.74), "haze": Color(0.72, 0.58, 0.52),
+		"top": Color(0.18, 0.20, 0.31), "bottom": Color(0.77, 0.59, 0.50),
+		"light": Color(1.00, 0.86, 0.78), "haze": Color(0.67, 0.59, 0.59),
+		"band": Color(0.94, 0.67, 0.43),
 	},
 	PHASE_DAY: {
-		"top": Color(0.38, 0.55, 0.72), "bottom": Color(0.74, 0.81, 0.84),
-		"light": Color(1.00, 0.98, 0.92), "haze": Color(0.70, 0.76, 0.80),
+		"top": Color(0.36, 0.47, 0.59), "bottom": Color(0.77, 0.80, 0.78),
+		"light": Color(1.00, 0.98, 0.93), "haze": Color(0.75, 0.77, 0.77),
+		"band": Color(0.93, 0.89, 0.78),
 	},
 	PHASE_DUSK: {
-		"top": Color(0.17, 0.17, 0.30), "bottom": Color(0.68, 0.40, 0.32),
-		"light": Color(0.96, 0.72, 0.54), "haze": Color(0.52, 0.40, 0.42),
+		"top": Color(0.23, 0.18, 0.27), "bottom": Color(0.84, 0.49, 0.32),
+		"light": Color(1.00, 0.74, 0.55), "haze": Color(0.71, 0.47, 0.43),
+		"band": Color(0.98, 0.59, 0.27),
 	},
 	PHASE_NIGHT: {
-		"top": Color(0.045, 0.055, 0.095), "bottom": Color(0.13, 0.15, 0.22),
-		"light": Color(0.58, 0.66, 0.86), "haze": Color(0.18, 0.21, 0.30),
+		"top": Color(0.04, 0.05, 0.09), "bottom": Color(0.13, 0.16, 0.24),
+		"light": Color(0.50, 0.56, 0.74), "haze": Color(0.20, 0.23, 0.32),
+		"band": Color(0.27, 0.33, 0.47),
 	},
 }
 
@@ -247,6 +254,7 @@ static func blend_sky(from_phase: String, to_phase: String, ratio: float) -> Dic
 		"bottom": Color(a.bottom).lerp(b.bottom, t),
 		"light": Color(a.light).lerp(b.light, t),
 		"haze": Color(a.haze).lerp(b.haze, t),
+		"band": Color(a.band).lerp(b.band, t),
 	}
 
 ## İki araziyi karıştırır. Yol bir biyomdan ötekine geçerken renk

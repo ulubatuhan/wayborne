@@ -32,6 +32,10 @@ func _init() -> void:
 	get_root().add_child(panel)
 	await _settle()
 	_save("01_defter.png")
+	# Düşenler açılımı (görev 9.11): rütbeli mezar işaretleri ve hikâye satırları.
+	panel.set_fallen_page(true)
+	await _settle()
+	_save("01b_dusenler.png")
 	panel.queue_free()
 
 	var candidates: Array[CharacterData] = session.party.duplicate()
@@ -76,6 +80,11 @@ func _lineage_session() -> GameSession:
 	var result := session.resolve_deaths(leader, "LEDGER_CAUSE_COMBAT_WILDLIFE", "zelmarin")
 	if bool(result.get("awaiting_heir", false)):
 		session.appoint_heir(result["heir_candidates"][0])
+	var elif_id := session.party[0].character_id if not session.party.is_empty() else ""
+	session.ledger.record(CaravanLedger.KIND_STORY, "Elif", 50, 2, elif_id, "STORY_DEBTOR_1")
+	session.ledger.record(CaravanLedger.KIND_STORY, "Elif", 55, 2, elif_id, "STORY_DEBTOR_2")
+	session.total_days_elapsed = 61
+	session.call("_starve_one_crew_member")
 	return session
 
 func _settle() -> void:

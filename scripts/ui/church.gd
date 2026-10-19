@@ -34,6 +34,8 @@ func _ready() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_CITY_CHURCH") if location == null else tr("UI_CHURCH_TITLE_CITY") % location.location_name
 
+	_set_graveyard()
+
 	_purification_panel = PurificationPanel.new()
 	_content.add_child(_purification_panel)
 	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
@@ -116,3 +118,16 @@ func _on_wallet_changed(_new_balance: int) -> void:
 
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())
+
+## Kilisenin ardındaki mezarlık (görev 9.12, onaylı): sakin gece; kervan yastaysa
+## (son çizili satır yakın bir ölüm, CityBriefModel.build_memory) nöbet:
+## fenerler, ateş sepeti, mumlar. Dinî sembol yok (Art Rules).
+const GRAVEYARD_CALM: String = "res://data/assets/ui/towns/graveyard_calm/background.jpg"
+const GRAVEYARD_VIGIL: String = "res://data/assets/ui/towns/graveyard_vigil/background.jpg"
+
+func _set_graveyard() -> void:
+	var memory := CityBriefModel.build_memory(_session)
+	var path := GRAVEYARD_VIGIL if bool(memory.get("mourning", false)) else GRAVEYARD_CALM
+	var tex := TextureLoader.load_any(path)
+	if tex != null:
+		($BackgroundArt as TextureRect).texture = tex

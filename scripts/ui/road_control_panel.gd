@@ -236,7 +236,16 @@ func _caravan_summary(state: Dictionary) -> Control:
 	col.add_theme_constant_override("separation", 3)
 	col.add_child(_heading(tr("UI_PANEL_CARAVAN")))
 	col.add_child(_bar(tr("UI_PANEL_MORALE"), _session.caravan.morale, CaravanState.MAX_MORALE, ArtPalette.UI_GAUGE_MORALE))
-	col.add_child(_bar(tr("UI_PANEL_STAMINA"), _session.caravan.stamina, CaravanState.MAX_STAMINA, ArtPalette.UI_GAUGE_STAMINA))
+	# Kervanın takati en yorgun kişiye bağlı (Y-F01): bağlayan varsa adıyla.
+	col.add_child(_bar(tr("UI_PANEL_STAMINA"), _session.get_caravan_stamina(), CaravanState.MAX_STAMINA, ArtPalette.UI_GAUGE_STAMINA))
+	var binder := _session.get_stamina_binder()
+	if binder != null:
+		var bound := _dim_line(tr("UI_FATIGUE_BINDS") % [binder.character_name, binder.fatigue])
+		bound.add_theme_font_size_override("font_size", 14)
+		bound.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		bound.tooltip_text = bound.text
+		bound.mouse_filter = Control.MOUSE_FILTER_PASS
+		col.add_child(bound)
 	col.add_child(_bar(tr("UI_PANEL_DANGER"), int(round(float(state.get("danger", _session.danger_level)) * 100.0)), 100, ArtPalette.BLOOD))
 	var daily := maxi(1, _session.get_daily_provision_consumption())
 	col.add_child(_fact_line(tr("UI_PANEL_PROVISIONS"), tr("UI_PANEL_PROVISIONS_VALUE") % [_session.get_provisions(), _session.get_provisions() / daily]))
@@ -287,6 +296,9 @@ func _card(character: CharacterData, index: int) -> Control:
 	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name)
+	# Kırgınlıklar kartın kenarında (Y-F01, karakter ekranındaki işaretlerle aynı).
+	if character.get_grievance_total() > 0:
+		head.add_child(WaybookIcons.grievance_row(character, 18))
 	var cls := character.get_character_class()
 	var sub := Label.new()
 	sub.text = tr("UI_PANEL_CLASS_LEVEL") % [cls.display_name if cls != null else "", character.level]
@@ -297,9 +309,14 @@ func _card(character: CharacterData, index: int) -> Control:
 	col.add_child(sub)
 	col.add_child(_bar(tr("UI_PANEL_HP"), character.current_hp, character.get_max_hp(), ArtPalette.BLOOD))
 	col.add_child(_bar(tr("UI_PANEL_STRESS"), character.stress, CharacterData.MAX_STRESS, ArtPalette.UI_GAUGE_STRESS))
+	# Yorgunluk (Y-F01): bedenin hâli, stresin altında; sayı yanında.
+	col.add_child(_bar(tr("UI_PANEL_FATIGUE"), character.fatigue, CharacterData.MAX_FATIGUE, ArtPalette.UI_GAUGE_STAMINA))
 	var notes: Array[String] = [tr(character.get_condition_label_key())]
 	if character.is_stressed():
 		notes.append(tr("UI_PANEL_BROKEN"))
+	var weary := character.get_fatigue_combat_penalty()
+	if weary > 0:
+		notes.append(tr("UI_FATIGUE_COMBAT_PENALTY") % weary)
 	if character.consecutive_hungry_days > 0:
 		notes.append(tr("UI_PANEL_HUNGRY") % character.consecutive_hungry_days)
 	if not character.duty_id.is_empty():
@@ -310,7 +327,7 @@ func _card(character: CharacterData, index: int) -> Control:
 	note.text = " · ".join(notes)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	note.add_theme_font_size_override("font_size", 14)
-	note.add_theme_color_override("font_color", ArtPalette.GRIM_CRIMSON.lightened(0.3) if character.is_stressed() or character.consecutive_hungry_days > 0 else ArtPalette.GRIM_PARCHMENT_DIM)
+	note.add_theme_color_override("font_color", ArtPalette.GRIM_CRIMSON.lightened(0.3) if character.is_stressed() or character.consecutive_hungry_days > 0 or weary > 0 else ArtPalette.GRIM_PARCHMENT_DIM)
 	col.add_child(note)
 	card.tooltip_text = _traits_text(character)
 	return card
@@ -448,7 +465,7 @@ static func problems_for(session: GameSession, state: Dictionary) -> Array[Strin
 		out.append(TranslationServer.translate("UI_PANEL_PROBLEM_BROKEN") % broken)
 	if session.caravan.damaged_wagons > 0:
 		out.append(TranslationServer.translate("UI_PANEL_PROBLEM_WAGONS") % session.caravan.damaged_wagons)
-	if session.caravan.stamina <= 20:
+	if session.get_caravan_stamina() <= 20:
 		out.append(TranslationServer.translate("UI_PANEL_PROBLEM_STAMINA"))
 	for signal_text in state.get("signals", []):
 		out.append(String(signal_text))
