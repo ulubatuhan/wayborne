@@ -33,6 +33,12 @@ const KIND_CONTRABAND: String = "contraband"
 ## reputation). Daha kârlı/büyük kontratlar daha yüksek itibar ister.
 @export var required_reputation: int = 0
 
+## Eşiksiz (0) bir ilan itibar ne kadar düşmüş olursa olsun açık kalır: kötü bir
+## sefer panonun tamamını kilitlerse oyuncunun adını düzeltecek elinde hiçbir iş
+## kalmaz (bkz. Reputation Rules - en ucuz kapı hiç kapanmaz).
+func is_open_to(reputation: int) -> bool:
+	return required_reputation <= 0 or reputation >= required_reputation
+
 ## Faz 17 PR-4: loncanın kendi özel vagon görevleri - kontrat panosunun
 ## sıradan kabul/taşı/teslim akışını aynen kullanıyor (bkz. GameSession.
 ## accept_contract/depart_with_contracts/finish_journey) ama karşılığında

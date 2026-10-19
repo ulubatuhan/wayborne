@@ -37,6 +37,7 @@ func run(t) -> void:
 	_test_price_book(t)
 	_test_goods_variety(t)
 	_test_buy_then_sell_back_never_profits(t)
+	_test_unrequired_contracts_stay_open_at_bad_reputation(t)
 
 func _session(gold: int = 500, wagons: int = 1) -> GameSession:
 	return GameSession.new(gold, 10, wagons)
@@ -532,3 +533,15 @@ func _test_buy_then_sell_back_never_profits(t) -> void:
 				if back > paid:
 					profitable.append("%s/%s/%d" % [location.location_id, item.item_id, quantity])
 	t.eq(profitable.size(), 0, "aynı ziyarette al-sat hiçbir yerde kâr etmez %s" % str(profitable.slice(0, 3)))
+
+## En küçük ilanlar itibar eksiye düşse de açık kalır: kötü bir sefer panonun
+## tamamını kilitlerse oyuncunun adını düzeltecek işi kalmaz (kariyer ölçümünde
+## itibar -20'ye inen kervan bir daha tek kontrat alamadı).
+func _test_unrequired_contracts_stay_open_at_bad_reputation(t) -> void:
+	var small := MerchantOffer.new()
+	small.required_reputation = 0
+	t.ok(small.is_open_to(GameSession.MIN_REPUTATION), "eşiksiz ilan en düşük itibarda açık")
+	var large := MerchantOffer.new()
+	large.required_reputation = 5
+	t.ok(not large.is_open_to(4), "eşikli ilan eşiğin altında kapalı")
+	t.ok(large.is_open_to(5), "eşikli ilan eşikte açık")

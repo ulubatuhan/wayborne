@@ -2944,6 +2944,16 @@ finale is a threshold the player crosses, not a wall tuned to resist
 crossing, and the epilogue's free-trade tail (now ~28 journeys instead of
 ~10) is exactly where the game already says the post-finale game lives.
 
+**The sixth to eighth harness mistakes, found re-measuring after the contract board (Y-C02) and the 27-settlement map.**
+Chapters closed 4/8 and the finale 1/8 against a 6/8 baseline, and the debt (Y-C14) was blamed first - softening it
+changed nothing. The cause was the policy again: it picked a road at random (a board of 4-7 notices over 27 places
+rarely matches), filled the wagons with market goods *before* accepting contracts (consigned goods did not fit, were
+"missing on arrival" and each cost reputation, `cargo_room` was never set) and never repaired a wagon. A real player
+reads the board first, reserves the room and repairs. With the policy fixed the table is 8/8 for the expanding and
+campaign policies and 5/8 for the contract policy (see `docs/design_notes/denge_baba_borcu.md`). One real finding came
+with it, `MerchantOffer.is_open_to` (Reputation Rules). **When a report collapses after new content, fix the policy's
+blindness to that content before touching the content's numbers.**
+
 One genuine bug **was** found and fixed in the same pass, unrelated to this
 table's drift: `GameSession.fulfill_commission()` (Faz 17 PR-4's guild
 commissions) carried no repeat guard at all. As long as a world event
@@ -4496,6 +4506,9 @@ ever fell, and the career simulation had already measured the result
   (`MIN_REPUTATION`) lives in it. The simulator once produced a caravan at
   -44: past that point every door is shut and the player holds no lever
   that opens one, which is a silent game over rather than a hard game.
+- **An offer with no requirement never closes either.** `MerchantOffer.is_open_to(reputation)`: a requirement of 0 is
+  open at any reputation (the board and the guild screen both read it). Gating it with `reputation < required` locked
+  the whole board at -1, and a caravan that had fallen to -20 could never take a contract and so never climb back.
 - **The cheapest hiring venue never closes.** Meydan and taverna both asked
   for reputation 0, so a single bad journey locked *every* way to rebuild a
   crew at once. The people waiting in a market square are the ones without

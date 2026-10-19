@@ -43,6 +43,9 @@ const STARTING_PROVISIONS: int = 20
 ## alamaz, açlıkla yola çıkardı - bu bir oyuncu davranışı değil.
 const CASH_BUFFER: int = 220
 
+## Onarım için kesede bırakılan pay (erzak parası onarıma gitmesin).
+const REPAIR_BUFFER: int = 60
+
 ## Kariyer eğrisinin basıldığı duraklar.
 const CHECKPOINTS: Array[int] = [1, 5, 10, 20, 30, 40]
 
@@ -170,6 +173,9 @@ func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -
 	var father := session.debts.get_debt(GameSession.FATHER_DEBT_ID)
 	if father != null and session.wallet.balance > CASH_BUFFER:
 		session.repay_debt(GameSession.FATHER_DEBT_ID, session.wallet.balance - CASH_BUFFER)
+	# Hasarlı vagon kervanın en ucuz onarımıdır; gerçek oyuncu yardımda onarır.
+	if session.owned_wagon_damaged > 0 and session.wallet.balance > session.get_repair_cost() + REPAIR_BUFFER:
+		session.repair_wagons()
 	var wagon_cap := session.get_wagon_capacity()
 	if policy == POLICY_CONTRACTS:
 		wagon_cap = CONTRACT_POLICY_WAGON_CAP
@@ -194,6 +200,27 @@ func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -
 		if not session.recruit(candidate):
 			break
 
+## Yolu panoya göre seçer: gerçek oyuncu işin olduğu yöne gider, rastgele bir
+## yola kontrat aramaz. Pano şehir başına dört-yedi ilan taşıyor ve yirmi yedi
+## yerleşimde rastgele seçilen bir yol çoğu zaman hiçbir ilanla eşleşmiyor;
+## "önce yol, sonra kontrat" kuralı (üstteki ikinci tuzak) yol işe göre
+## seçildiğinde de bozulmuyor - kontrat yine yalnızca gidilecek hedefe alınıyor.
+func _pick_route(session: GameSession, open_routes: Array[TravelRoute], rng: RandomNumberGenerator) -> TravelRoute:
+	var board := session.get_contract_board()
+	var best: Array[TravelRoute] = []
+	var best_score := -1
+	for candidate in open_routes:
+		var score := 0
+		for offer in board:
+			if offer.destination_location_id == candidate.to_location_id and offer.is_open_to(session.reputation):
+				score += 1
+		if score > best_score:
+			best_score = score
+			best = [candidate]
+		elif score == best_score:
+			best.append(candidate)
+	return best[rng.randi_range(0, best.size() - 1)]
+
 ## Bir bacak koşar ve varışın sonucunu döner; yola çıkılamadıysa boş sözlük.
 func _run_leg(session: GameSession, rng: RandomNumberGenerator) -> Dictionary:
 	var origin := WorldMapData.get_location_by_id(session.current_location_id)
@@ -207,16 +234,21 @@ func _run_leg(session: GameSession, rng: RandomNumberGenerator) -> Dictionary:
 	if open_routes.is_empty():
 		return {}
 
-	var route: TravelRoute = open_routes[rng.randi_range(0, open_routes.size() - 1)]
+	var route: TravelRoute = _pick_route(session, open_routes, rng)
 	var destination := WorldMapData.get_location_by_id(route.to_location_id)
 	if destination == null:
 		return {}
 
 	_sell_trade_goods(session, origin)
-	_buy_trade_goods(session, origin)
 
+	# Kontrat önce, pazar malı sonra: emanet mal gerçek kargo yeri tutar
+	# (bkz. CaravanPlan.cargo_room) ve gerçek oyuncu panoyu okuyup yerini
+	# ayırdıktan sonra kalan boşluğa pazar malı doldurur. Sıra tersiyse
+	# vagonlar pazar malıyla dolar, emanet mal sığmaz ve "varışta yok"
+	# sayılıp her biri itibar yer - ölçüm düzeneğinin üçüncü tuzağı.
 	var travel_days := session.get_route_travel_days(route)
 	var plan := _build_plan(session, destination, travel_days)
+	_buy_trade_goods(session, origin, plan.get_contract_cargo_load())
 	_stock_provisions(session, plan)
 
 	session.depart_with_contracts(plan.get_selected_offers())
@@ -246,14 +278,14 @@ func _sell_trade_goods(session: GameSession, origin: Location) -> void:
 		session.wallet.earn(unit_price * quantity)
 		session.record_sale(item.item_id, quantity, unit_price * quantity)
 
-func _buy_trade_goods(session: GameSession, origin: Location) -> void:
+func _buy_trade_goods(session: GameSession, origin: Location, reserved_room: float) -> void:
 	for item_id in origin.produces:
 		var item := ItemCatalog.get_item(item_id)
 		if item == null:
 			continue
 		var unit_price := MarketPricing.get_buy_price(item, origin)
 		var affordable := int(floor(float(session.wallet.balance) * 0.4 / float(maxi(1, unit_price))))
-		var by_space := int(floor(session.get_cargo_space_remaining() / maxf(0.1, item.unit_weight)))
+		var by_space := int(floor(maxf(0.0, session.get_cargo_space_remaining() - reserved_room) / maxf(0.1, item.unit_weight)))
 		var quantity := mini(mini(affordable, by_space), session.get_market_stock(item_id))
 		if quantity <= 0:
 			continue
@@ -271,11 +303,12 @@ func _build_plan(session: GameSession, destination: Location, travel_days: int) 
 	plan.caravan_party_size = session.get_party().size()
 	plan.provision_multiplier = session.get_daily_provision_multiplier()
 	plan.provision_reduction = session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
+	plan.cargo_room = session.get_cargo_space_remaining()
 
 	for offer in session.get_contract_board():
 		if offer.destination_location_id != destination.location_id:
 			continue
-		if session.reputation < offer.required_reputation:
+		if not offer.is_open_to(session.reputation):
 			continue
 		if not plan.can_add_offer(offer):
 			continue
