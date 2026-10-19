@@ -2986,6 +2986,10 @@ func _on_combat_finished(
 		var reputation_delta := GUARD_VICTORY_REPUTATION if _current_combat_kind == "guard" else COMBAT_VICTORY_REPUTATION
 		effects.append(EventEffect.make(EventEffect.Type.REPUTATION, reputation_delta))
 		effects.append(EventEffect.make(EventEffect.Type.DANGER, COMBAT_VICTORY_DANGER))
+		# Av (görev Y-B06): yabani hayvan savaşı et getirir.
+		var meat := GameSession.combat_victory_provisions(_current_combat_kind)
+		if meat > 0:
+			effects.append(EventEffect.make(EventEffect.Type.PROVISIONS, meat))
 	else:
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, COMBAT_DEFEAT_GOLD))
 		effects.append(EventEffect.make(EventEffect.Type.WAGON_DAMAGE, COMBAT_DEFEAT_WAGON_DAMAGE))

@@ -4091,6 +4091,10 @@ every decision has a visible control, and a key is only its shortcut.**
   itself in the evening phase only (camp outlasts the evening, so it cannot
   relight the same night, even after a reload). The pre-combat roster and
   order are remembered, with Confirm focused. All three are saved.
+- **The road feeds you too, at a price (task Y-B06).** A won fight against wildlife brings `HUNT_PROVISIONS`; a
+  farmstead stop opens `evt_village_provisions` (dearer than town per unit, a Charisma haggle as the bait); gathering
+  by the road (`evt_forage`) costs a travel day. None of these enter the planner's reserve - the promise is kept by
+  the planner's own number, these are extras.
 - **The table can offer more than rations (task Y-B07).** Provisions stay the counted ration the planner promises.
   Wine (morale), honey (stress) and fresh fish (stamina) can go on the table, eating one unit per few mouths
   (`GameSession.MEAL_EXTRAS`); they are offered only when the meal panel is open, never by the standing order. Even in

@@ -1578,6 +1578,15 @@ func meal_needs_decision() -> bool:
 		return true
 	return false
 
+## --- Yolda erzak (görev Y-B06) ---
+## Av: yabani hayvana karşı kazanılan savaş et getirir. Köy durağı erzak
+## satar (şehirden pahalı - evt_village_provisions). Toplayıcılık zaman yer
+## (evt_forage'un "topla" seçeneği bir gün uzatır).
+const HUNT_PROVISIONS: int = 10
+
+static func combat_victory_provisions(enemy_kind: String) -> int:
+	return HUNT_PROVISIONS if enemy_kind == "wildlife" else 0
+
 ## --- Sofranın çeşnisi (görev Y-B07) ---
 ## Erzak (gün başına sayılan pay) aynı kalır - planlayıcının sözü ona bağlı.
 ## Kervanın taşıdığı bazı mallar sofraya çeşni olarak çıkabilir: şarap moral,

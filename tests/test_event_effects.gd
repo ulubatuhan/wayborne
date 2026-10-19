@@ -22,6 +22,7 @@ func run(t) -> void:
 	_test_grave_chain(t)
 	_test_deserter_chain(t)
 	_test_wolf_year_chain(t)
+	_test_road_food_sources(t)
 
 func _effects(items: Array) -> Array[EventEffect]:
 	var typed: Array[EventEffect] = []
@@ -437,3 +438,38 @@ func _test_wolf_year_chain(t) -> void:
 	var fight := EventEffectApplier.apply(pack.choices[0].effects, session)
 	t.eq(fight.combat_kinds, ["wildlife"] as Array[String], "sürüyle vahşi hayvan savaşı")
 	t.not_ok(session.has_flag("wolf_scent") or session.has_flag("wolves_counted"), "zincir kapandı")
+
+## Yolda erzak kaynakları (görev Y-B06): av zaferi et getirir, köy durağı
+## erzak satar (şehirden pahalı), toplayıcılık bir gün yer.
+func _effect_amount(effects: Array, type: EventEffect.Type) -> int:
+	var total := 0
+	for effect in effects:
+		if effect.type == type:
+			total += effect.amount
+	return total
+
+func _test_road_food_sources(t) -> void:
+	t.ok(GameSession.combat_victory_provisions("wildlife") > 0, "av zaferi erzak getirir")
+	t.eq(GameSession.combat_victory_provisions("bandit"), 0, "eşkıya zaferi erzak getirmez")
+	var village := EventCatalog.get_event("evt_village_provisions")
+	t.ok(village != null, "köy erzak kartı katalogda")
+	var near := false
+	for modifier in village.weight_modifiers:
+		for condition in modifier.conditions:
+			if condition.key == "near_mezra":
+				near = true
+	t.ok(near, "köy kartı mezra durağına bağlı")
+	var bought := false
+	for choice in village.choices:
+		var food := _effect_amount(choice.effects, EventEffect.Type.PROVISIONS)
+		var gold := -_effect_amount(choice.effects, EventEffect.Type.GOLD)
+		if food > 0:
+			bought = true
+			t.ok(float(gold) / float(food) > float(GameSession.PROVISIONS_UNIT_PRICE), "köy erzağı şehirden pahalı (%s)" % choice.text_key)
+	t.ok(bought, "köyde erzak alınabiliyor")
+	var forage := EventCatalog.get_event("evt_forage")
+	var gather: EventChoice = null
+	for choice in forage.choices:
+		if choice.text_key == "EVT_FORAGE_OPT_GATHER":
+			gather = choice
+	t.ok(gather != null and _effect_amount(gather.effects, EventEffect.Type.TRAVEL_DAYS) >= 1, "toplayıcılık zaman yer")

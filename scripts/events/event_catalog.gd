@@ -65,6 +65,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_guard_patrol())
 	_road_events.append(_route_diversion())
 	_road_events.append(_forage())
+	_road_events.append(_village_provisions())
 	_road_events.append(_party_theft())
 	_road_events.append(_party_investigation())
 	_road_events.append(_military_convoy())
@@ -1411,8 +1412,10 @@ static func _forage() -> GameEvent:
 		]), 1.6),
 	])
 	event.choices = _choices([
+		# Toplayıcılık zaman yer (görev Y-B06): bir gün kaybedilir.
 		_choice("EVT_FORAGE_OPT_GATHER", _effects([
-			EventEffect.make(EventEffect.Type.PROVISIONS, 6),
+			EventEffect.make(EventEffect.Type.PROVISIONS, 10),
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
 		])),
 		# Y-E03: ormanın derininde daha çok var - ve tanınmayan meyveler.
 		_check_choice(
@@ -1434,6 +1437,59 @@ static func _forage() -> GameEvent:
 		_choice("EVT_FORAGE_OPT_SKIP", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
+	])
+	return event
+
+## Köy durağında erzak (görev Y-B06): yol kenarındaki mezra erzak satar,
+## şehirden pahalı. Pazarlık cazip ama köylü küsebilir.
+const VILLAGE_SMALL_COST: int = 30
+const VILLAGE_SMALL_PROVISIONS: int = 6
+const VILLAGE_LARGE_COST: int = 70
+const VILLAGE_LARGE_PROVISIONS: int = 15
+
+static func _village_provisions() -> GameEvent:
+	var event := _event("evt_village_provisions", "EVT_VILLAGE_FOOD", 0.2)
+	event.cooldown_days = 3
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("near_mezra", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 12.0),
+	])
+	event.choices = _choices([
+		_gated_choice(
+			"EVT_VILLAGE_FOOD_OPT_SMALL", "EVT_VILLAGE_FOOD_OPT_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, VILLAGE_SMALL_COST)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -VILLAGE_SMALL_COST),
+				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_SMALL_PROVISIONS),
+			])
+		),
+		_gated_choice(
+			"EVT_VILLAGE_FOOD_OPT_LARGE", "EVT_VILLAGE_FOOD_OPT_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, VILLAGE_LARGE_COST)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -VILLAGE_LARGE_COST),
+				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_LARGE_PROVISIONS),
+			])
+		),
+		_requires(_check_choice(
+			"EVT_VILLAGE_FOOD_OPT_HAGGLE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
+			"EVT_VILLAGE_FOOD_HAGGLE_OK", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -64),
+				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_LARGE_PROVISIONS),
+			]),
+			"EVT_VILLAGE_FOOD_HAGGLE_MID", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -VILLAGE_SMALL_COST),
+				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_SMALL_PROVISIONS),
+			]),
+			"EVT_VILLAGE_FOOD_HAGGLE_BAD", _effects([
+				EventEffect.make(EventEffect.Type.MORALE, -3),
+				EventEffect.make(EventEffect.Type.REPUTATION, -1),
+			])
+		), "EVT_VILLAGE_FOOD_OPT_LOCKED", _conditions([
+			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 64),
+		])),
+		_choice("EVT_VILLAGE_FOOD_OPT_PASS", _effects([])),
 	])
 	return event
 
