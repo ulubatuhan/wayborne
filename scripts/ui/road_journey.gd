@@ -3414,6 +3414,19 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	panel.combat_finished.connect(_on_combat_finished)
 	_combat_retreat_kind = ""
 	panel.retreated.connect(func(kind): _combat_retreat_kind = String(kind))
+	# Ganimet ve sarf (Y-C03, Y-C04).
+	panel.consumables = {
+		CombatEncounter.CONSUMABLE_BANDAGE: _session.get_total_quantity(CombatEncounter.CONSUMABLE_BANDAGE),
+		CombatEncounter.CONSUMABLE_POTION: _session.get_total_quantity(CombatEncounter.CONSUMABLE_POTION),
+	}
+	panel.set_loot_context(_current_combat_kind, _pending_combat_danger)
+	panel.loot_rolled.connect(func(drops):
+		var lines := LootTable.apply(_session, drops)
+		if not lines.is_empty():
+			_add_log(tr("UI_ROAD_LOOT") % ", ".join(lines), OUTCOME_COLOR))
+	panel.consumables_used.connect(func(used):
+		for item_id in used:
+			_session.remove_from_cargo_or_bags(String(item_id), mini(int(used[item_id]), _session.get_total_quantity(String(item_id)))))
 	# Faz 17 PR-6: o günkü arazi vahşi hayvan kadrosunun kompozisyonunu da
 	# eğiyor (bkz. EnemyCatalog.build_wildlife_squad) - "kurt sürüsü" orman
 	# geçitlerinde, tekil ayı dağ geçitlerinde daha olası.

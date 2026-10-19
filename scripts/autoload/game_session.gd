@@ -1197,7 +1197,11 @@ func apply_camp_actions(actions: Array) -> Array[String]:
 					if worst == null or float(character.current_hp) / float(maxi(1, character.get_max_hp())) < float(worst.current_hp) / float(maxi(1, worst.get_max_hp())):
 						worst = character
 				if worst != null:
-					worst.current_hp = mini(worst.get_max_hp(), worst.current_hp + int(ceil(worst.get_max_hp() * CAMP_WOUND_HEAL_SHARE)))
+					# Sargı varsa harcanır ve bakım iki kat (Y-C04).
+					var share := CAMP_WOUND_HEAL_SHARE
+					if remove_from_cargo_or_bags(CombatEncounter.CONSUMABLE_BANDAGE, 1):
+						share *= 2.0
+					worst.current_hp = mini(worst.get_max_hp(), worst.current_hp + int(ceil(worst.get_max_hp() * share)))
 			"repair":
 				caravan.repair_wagons(1)
 			"hunt":
@@ -3617,6 +3621,8 @@ func craft_in_wagon(wagon_index: int, recipe_id: String) -> bool:
 			var output := ItemCatalog.get_item(recipe.output_item_id)
 			if output != null and not wagon_inventory.add_item(output, recipe.output_quantity):
 				add_to_cargo_or_bag(output, recipe.output_quantity)
+		CraftingRecipe.Effect.OUTFIT:
+			add_outfit(recipe.output_item_id, recipe.output_quantity)
 	return true
 
 ## Kervan Envanteri Rules'un kalan parçası: "Kervan Yükü" - hangi vagonun

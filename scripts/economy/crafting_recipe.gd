@@ -11,7 +11,8 @@ extends Resource
 ## azaltır. İkinci bir sistem icat etmiyor: onarım zaten var
 ## (GameSession.repair_wagons, para karşılığı); bu yalnızca aynı hasar
 ## sayacına malzemeyle ulaşan ikinci bir yol.
-enum Effect { ITEM, WAGON_REPAIR }
+## OUTFIT (görev Y-F03): çıktı bir kıyafet parçası, dolaba düşer.
+enum Effect { ITEM, WAGON_REPAIR, OUTFIT }
 
 @export var recipe_id: String = ""
 @export var recipe_name_key: String = ""

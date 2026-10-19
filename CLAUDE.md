@@ -4183,6 +4183,13 @@ every decision has a visible control, and a key is only its shortcut.**
   travels with the engine's save. Evenings and nights raise the signal rate by `NIGHT_SIGNAL_SCALE` unless there is a
   precaution: the camp fire, a watch set at camp, or a lit lantern/torch. `simulate_journeys` reports quiet triples
   and back-to-back heavy cards with the director on and off.
+- **Fights pay in kind, and kits are used (tasks Y-C03, Y-C04, Y-F03).** A won fight rolls its kind's table in
+  `data/config/loot.json` (`LootTable`, seeded from the fight); the victory screen lists the spoils and the road loads
+  them - goods into cargo (or a bag), clothes and gear into the lockers. Events can hand out clothes too
+  (`GRANT_OUTFIT`). Bandages and potions carried by the caravan appear as combat actions (a bandage heals and stops
+  bleeding, a potion heals and stiffens a Death's Door save) and are struck from the cargo at the end; at camp,
+  dressing a wound burns a bandage for double care. Every workshop recipe now has a consumer
+  (`RecipeCatalog.OUTPUT_USES`): bandage, canvas repair, a fur hat, fish oil for the lantern, cloth torches.
 - **Every key has an on-screen control** (touch parity). The hub walks to
   a tapped point and opens a tapped gate or wagon on arrival;
   `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and

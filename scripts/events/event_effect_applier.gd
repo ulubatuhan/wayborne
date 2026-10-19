@@ -134,6 +134,11 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_grant_trait(effect, session, result)
 		EventEffect.Type.GRANT_EQUIPMENT:
 			_apply_grant_equipment(effect, session, result)
+		EventEffect.Type.GRANT_OUTFIT:
+			var piece := OutfitCatalog.get_piece(effect.text_value)
+			if piece != null:
+				session.add_outfit(effect.text_value, maxi(1, effect.amount))
+				result.lines.append(_t("EFF_OUTFIT_FOUND") % piece.display_name)
 		EventEffect.Type.MARKET_SHOCK:
 			_apply_market_shock(effect, session, result)
 		EventEffect.Type.ROUTE_CHANGE:

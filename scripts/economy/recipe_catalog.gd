@@ -9,6 +9,19 @@ extends RefCounted
 const CRAFT_BANDAGE: String = "craft_bandage"
 const REPAIR_WAGON_CANVAS: String = "repair_wagon_canvas"
 const DISMANTLE_TO_BANDAGE: String = "dismantle_to_bandage"
+## Görev Y-F03: her tarifin oyunda bir tüketicisi var (bkz. OUTPUT_USES).
+const SEW_FUR_HAT: String = "sew_fur_hat"
+const RENDER_FISH_OIL: String = "render_fish_oil"
+const MAKE_TORCHES: String = "make_torches"
+## Çıktı -> onu tüketen sistem (test bunu sınar): sargı savaşta ve kampta,
+## branda vagon tamirinde, kürk başlık giyilir, yağ fenerde, meşale gecede.
+const OUTPUT_USES: Dictionary = {
+	"test_bandage": "CombatEncounter.use_consumable / GameSession.apply_camp_actions",
+	"wagon_repair": "GameSession.craft_in_wagon (owned_wagon_damaged)",
+	"fur_hat": "GameSession.wear_outfit",
+	"lantern_oil": "GameSession.light_for_night",
+	"torch": "GameSession.light_for_night",
+}
 
 static var _cache: Array[CraftingRecipe] = []
 static var _by_id: Dictionary = {}
@@ -56,5 +69,20 @@ static func _ensure_built() -> void:
 	dismantle.output_quantity = 2
 	_cache.append(dismantle)
 
+	_cache.append(_make(SEW_FUR_HAT, "RECIPE_SEW_FUR_HAT_NAME", "RECIPE_SEW_FUR_HAT_DESC", {"test_furs": 2}, CraftingRecipe.Effect.OUTFIT, "fur_hat", 1))
+	_cache.append(_make(RENDER_FISH_OIL, "RECIPE_FISH_OIL_NAME", "RECIPE_FISH_OIL_DESC", {"fish": 2}, CraftingRecipe.Effect.ITEM, ItemCatalog.LANTERN_OIL, 1))
+	_cache.append(_make(MAKE_TORCHES, "RECIPE_TORCHES_NAME", "RECIPE_TORCHES_DESC", {"test_cloth": 1}, CraftingRecipe.Effect.ITEM, ItemCatalog.TORCH, 2))
+
 	for recipe in _cache:
 		_by_id[recipe.recipe_id] = recipe
+
+static func _make(id: String, name_key: String, desc_key: String, inputs: Dictionary, effect: CraftingRecipe.Effect, output: String, quantity: int) -> CraftingRecipe:
+	var recipe := CraftingRecipe.new()
+	recipe.recipe_id = id
+	recipe.recipe_name_key = name_key
+	recipe.description_key = desc_key
+	recipe.inputs = inputs
+	recipe.effect = effect
+	recipe.output_item_id = output
+	recipe.output_quantity = quantity
+	return recipe

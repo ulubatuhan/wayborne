@@ -1,0 +1,28 @@
+{
+  "_doc": "Ganimet tabloları (görev Y-C03). Savaş türü -> düşebilecekler. type: item | outfit | equipment; chance 0-1 (yol tehlikesiyle biraz artar, bkz. LootTable.roll); min/max yalnız item için. Kıyafet ve ekipman dolaba, eşya kargoya (sığmazsa çantaya) düşer.",
+  "bandit": [
+    {"type": "item", "id": "test_bandage", "min": 1, "max": 2, "chance": 0.45},
+    {"type": "item", "id": "jewelry", "min": 1, "max": 2, "chance": 0.25},
+    {"type": "item", "id": "contraband_salt", "min": 2, "max": 5, "chance": 0.15},
+    {"type": "item", "id": "test_potion", "min": 1, "max": 1, "chance": 0.15},
+    {"type": "outfit", "id": "leather_jerkin", "chance": 0.10},
+    {"type": "outfit", "id": "leather_cap", "chance": 0.12},
+    {"type": "equipment", "id": "ring_gambler", "chance": 0.05},
+    {"type": "item", "id": "rare_relic", "min": 1, "max": 1, "chance": 0.04}
+  ],
+  "wildlife": [
+    {"type": "item", "id": "test_furs", "min": 1, "max": 3, "chance": 0.70},
+    {"type": "equipment", "id": "amulet_wolf_fang", "chance": 0.06},
+    {"type": "item", "id": "rare_relic", "min": 1, "max": 1, "chance": 0.02}
+  ],
+  "guard": [
+    {"type": "item", "id": "lantern_oil", "min": 1, "max": 2, "chance": 0.35},
+    {"type": "item", "id": "test_potion", "min": 1, "max": 1, "chance": 0.25},
+    {"type": "outfit", "id": "guard_helmet", "chance": 0.12},
+    {"type": "item", "id": "torch", "min": 2, "max": 4, "chance": 0.30},
+    {"type": "equipment", "id": "amulet_courage", "chance": 0.04}
+  ],
+  "hunt": [
+    {"type": "item", "id": "test_furs", "min": 1, "max": 2, "chance": 0.80}
+  ]
+}

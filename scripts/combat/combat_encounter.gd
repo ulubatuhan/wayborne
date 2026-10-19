@@ -425,6 +425,46 @@ static func pick_target(unit: CombatUnit, targets: Array[CombatUnit]) -> CombatU
 			best = candidate
 	return best
 
+## --- Sarf malzemesi (görev Y-C04) ---
+## Sargı: en yaralı dosta can ve kanamayı durdurur. İksir: can verir; Ölümün
+## Kıyısı'ndakinin ölümcül vuruş direncini artırır. Kullanmak turu yer. Kaç
+## tane olduğu ve kullanılanlar dışarıda (panel kervandan sayar, sonunda düşer).
+const CONSUMABLE_BANDAGE: String = "test_bandage"
+const CONSUMABLE_POTION: String = "test_potion"
+const BANDAGE_HEAL: int = 8
+const POTION_HEAL: int = 12
+const POTION_DEATHBLOW_RESIST: int = 20
+
+func use_consumable(kind: String, target: CombatUnit) -> bool:
+	if is_over() or not is_player_turn() or target == null or target.is_dead or not player_units.has(target):
+		return false
+	var user := get_active_unit()
+	if kind == CONSUMABLE_BANDAGE:
+		target.current_hp = mini(target.max_hp, target.current_hp + BANDAGE_HEAL)
+		target.clear_status(CombatUnit.STATUS_BLEED)
+		_emit_log(tr("CBT_LOG_BANDAGE") % [user.display_name, target.display_name])
+	elif kind == CONSUMABLE_POTION:
+		target.current_hp = mini(target.max_hp, target.current_hp + POTION_HEAL)
+		if target.on_deaths_door:
+			target.deathblow_resist = mini(CombatUnit.MAX_DEATHBLOW_RESIST, target.deathblow_resist + POTION_DEATHBLOW_RESIST)
+		_emit_log(tr("CBT_LOG_POTION") % [user.display_name, target.display_name])
+	else:
+		return false
+	if target.current_hp > 0:
+		target.on_deaths_door = false
+	_after_action()
+	return true
+
+## En çok yarası olan dost (can oranı en düşük, ölü değil).
+func most_wounded_ally() -> CombatUnit:
+	var best: CombatUnit = null
+	for unit in player_units:
+		if unit.is_dead:
+			continue
+		if best == null or float(unit.current_hp) / float(maxi(1, unit.max_hp)) < float(best.current_hp) / float(maxi(1, best.max_hp)):
+			best = unit
+	return best
+
 ## --- Bedelli geri çekilme (görev Y-C07) ---
 ## Zorda kalınca kaçılabilir: yük bırakmak, bir vagon feda etmek ya da birini
 ## artçı bırakmak. Bedeli yol ekranı uygular (yük, vagon); artçı burada

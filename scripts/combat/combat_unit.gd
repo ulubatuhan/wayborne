@@ -387,6 +387,14 @@ func apply_status(kind: String, amount: int, rounds: int) -> void:
 			return
 	_statuses.append({"kind": kind, "amount": amount, "rounds_left": rounds})
 
+## Bir durumu söker (sargı kanamayı durdurur, Y-C04).
+func clear_status(kind: String) -> void:
+	var kept: Array = []
+	for status in _statuses:
+		if String(status["kind"]) != kind:
+			kept.append(status)
+	_statuses = kept
+
 func has_status(kind: String) -> bool:
 	for status in _statuses:
 		if String(status.kind) == kind:

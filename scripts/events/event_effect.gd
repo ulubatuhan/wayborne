@@ -69,6 +69,9 @@ enum Type {
 	# etkisi borcu azaltmaz, spend_or_owe üzerinden *artırır*; borcu kapatan
 	# başka bir etki yoktu. Hiçbir zaman altın üretmez.
 	DEBT_SETTLE,
+	# Kıyafet ganimeti (görev Y-C03): text_value = parça kimliği, amount = adet;
+	# GRANT_EQUIPMENT gibi önce dolaba düşer, kime giydirileceği sonra seçilir.
+	GRANT_OUTFIT,
 }
 
 @export var type: Type = Type.GOLD

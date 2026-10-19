@@ -23,6 +23,15 @@ extends VBoxContainer
 signal combat_finished(victory, xp_awarded, downed_count, dead_characters)  # bool, int, int, Array[CharacterData]
 ## Bedelli geri çekilmenin türü (Y-C07); combat_finished'ten önce gelir.
 signal retreated(kind)  # String
+## Zaferde düşen ganimet (Y-C03) ve savaşta kullanılan sarf (Y-C04);
+## combat_finished'ten önce gelir, yol ekranı kervana uygular.
+signal loot_rolled(drops)  # Array[Dictionary]
+signal consumables_used(used)  # Dictionary item_id -> adet
+
+## Kervanda olan sarf (yol ekranı verir) ve bu savaşta kullanılanlar.
+var consumables: Dictionary = {}
+var _used: Dictionary = {}
+var _loot: Array[Dictionary] = []
 
 const MAX_LOG_LINES: int = 40
 ## Yorum balonu ne kadar sürsün. Slotlar her `_refresh()`'te yeniden
@@ -734,7 +743,26 @@ func _refresh_actions() -> void:
 		_skill_row.add_child(_build_skill_card(unit, skill))
 
 	_build_extra_actions()
+	_build_consumable_actions()
 	_build_retreat_actions(unit)
+
+func _left(item_id: String) -> int:
+	return int(consumables.get(item_id, 0)) - int(_used.get(item_id, 0))
+
+## Sargı ve iksir: kervanda varsa düğme (kaç kaldığıyla), yoksa yok.
+func _build_consumable_actions() -> void:
+	for spec in [[CombatEncounter.CONSUMABLE_BANDAGE, "UI_COMBAT_USE_BANDAGE"], [CombatEncounter.CONSUMABLE_POTION, "UI_COMBAT_USE_POTION"]]:
+		var item_id := String(spec[0])
+		if _left(item_id) <= 0:
+			continue
+		var button := Button.new()
+		button.text = tr(String(spec[1])) % _left(item_id)
+		button.pressed.connect(func():
+			var target := _encounter.most_wounded_ally()
+			if _encounter.use_consumable(item_id, target):
+				_used[item_id] = int(_used.get(item_id, 0)) + 1
+				_refresh())
+		_extra_row.add_child(button)
 
 ## Geri çekilme (Y-C07): zorda kalınca açılır, kapalıyken sebebiyle kilitli.
 ## Ayıya karşı tek bir bedelsiz düğme: ayı kaçanı kovalamaz.
@@ -954,6 +982,12 @@ func _scroll_log_to_bottom() -> void:
 func _on_state_changed(new_state: CombatEncounter.State) -> void:
 	if new_state == CombatEncounter.State.VICTORY:
 		_result_label.text = tr("UI_COMBAT_VICTORY") % _encounter.enemy_label
+		# Ganimet zafer ekranında (Y-C03): zar savaşın türü ve tohumundan.
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash("loot|%s|%d|%d" % [_loot_kind, _encounter.round_number, _encounter.enemy_units.size()])
+		_loot = LootTable.roll(_loot_kind, _loot_danger, rng)
+		if not _loot.is_empty():
+			_result_label.text += "\n" + tr("UI_COMBAT_LOOT") % ", ".join(LootTable.describe(_loot))
 	elif new_state == CombatEncounter.State.RETREAT:
 		_result_label.text = tr("UI_COMBAT_RETREATED") % _encounter.enemy_label
 	else:
@@ -976,4 +1010,16 @@ func _on_continue_pressed() -> void:
 	var dead := _encounter.get_dead_characters()
 	_encounter.write_back_party()
 	_continue_button.visible = false
+	if victory and not _loot.is_empty():
+		loot_rolled.emit(_loot)
+	if not _used.is_empty():
+		consumables_used.emit(_used)
 	combat_finished.emit(victory, xp_awarded, downed_count, dead)
+
+## Ganimet tablosunun türü ve tehlikesi (yol ekranı setup sonrası verir).
+var _loot_kind: String = "bandit"
+var _loot_danger: float = 0.3
+
+func set_loot_context(kind: String, danger: float) -> void:
+	_loot_kind = kind
+	_loot_danger = danger
