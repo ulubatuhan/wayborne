@@ -24,6 +24,7 @@ func run(t) -> void:
 	_test_warning_colour_is_readable(t)
 	_test_present_dismiss_is_a_settle_not_a_snap(t)
 	_test_default_button_is_minimal(t, theme)
+	_test_three_typefaces(t)
 
 ## Oyuncu deri dokuları reddetti ("deri efektini kullandığın her yer"):
 ## panel, mühür paneli, sekme, giriş alanı, hücre, kaydırma çubuğu ve
@@ -89,6 +90,21 @@ func _test_no_leather_texture_is_read(t) -> void:
 ## kapıdan her SpinBox). `SpinBox.alignment` tema özelliği değil, düğüm
 ## ağaca girerken UiTheme veriyor - autoload `--script` kipinde canlı
 ## olmadığı için kapı burada elle çağrılıyor.
+## Y-G14: üç yazı yüzü (gövde, başlık, vitrin) ve CJK yedekleri; başka yüz yok.
+const ALLOWED_FONTS: Array[String] = [
+	"EBGaramond.ttf", "IMFellEnglishSC.ttf", "GrenzeGotisch.ttf",
+	"NotoSerifSC-Subset.otf", "NotoSerifJP-Subset.otf",
+]
+
+func _test_three_typefaces(t) -> void:
+	var dir := DirAccess.open("res://data/assets/fonts")
+	if dir == null:
+		t.ok(false, "yazı klasörü açılamadı")
+		return
+	for file in dir.get_files():
+		if file.ends_with(".ttf") or file.ends_with(".otf"):
+			t.ok(ALLOWED_FONTS.has(file), "yazı yüzü listede: %s" % file)
+
 func _test_spin_box_number_is_centred(t) -> void:
 	var ui_theme: Node = load("res://scripts/autoload/ui_theme.gd").new()
 	var spin := SpinBox.new()

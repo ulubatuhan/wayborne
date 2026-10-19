@@ -84,6 +84,19 @@ Kültürlerin dili, kullanıcının benzetmeleri ve coğrafya birlikte:
 - **Ahit** (Orvahel): soluk taş, ay ışığı, şehrin ortasında dört kuleli büyük tapınak.
 - **Göçebeler** (Türkler gibi): bozkır kervansarayı, çadırlar, ateş, geniş amber gök.
 
+## Yazı (görev Y-G14)
+
+Oyunun her yüzeyinde (harita, arayüz, defter, kart) aynı üç yazı yüzü; başka yüz eklenmez.
+
+| Yüz | Nerede | Not |
+|---|---|---|
+| EB Garamond | gövde: bütün arayüz metni, defter satırları, kart metni | latin-ext ve Kiril; CJK için Noto Serif SC/JP arkasında |
+| IM Fell English SC | başlıklar ve harita yazıları (kent adları, `patch_labels.py`) | Türkçe harflerin hepsi var (ölçüldü) |
+| Grenze Gotisch | yalnızca vitrin: ana menü başlığı, büyük bölüm başlıkları | gövdede kullanılmaz |
+
+Sans-serif hiçbir yerde yok; motorun kendi yazısı yalnızca son yedek. `test_waybook_theme` yazı klasöründe bu üçü ve
+CJK yedekleri dışında yüz bırakmaz.
+
 ## Ne yapılmaz
 
 - Dünyanın kendi kurumu olmayan bir şey (cami, minare, kubbe) ufka konmaz (bkz. CLAUDE.md, Art Rules).
