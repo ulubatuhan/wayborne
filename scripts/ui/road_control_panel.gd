@@ -42,6 +42,8 @@ var _pages: Array[Control] = []
 var _active: int = TAB_PARTY
 var _timer: float = 0.0
 var _map_view: WorldMapView
+var _tab_box: HBoxContainer
+var _stack: Control
 
 func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadControlPanel:
 	_session = session
@@ -55,6 +57,7 @@ func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadCon
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 4)
 	col.add_child(tabs)
+	_tab_box = tabs
 	for index in TAB_KEYS.size():
 		var button := Button.new()
 		button.text = tr(TAB_KEYS[index])
@@ -67,6 +70,7 @@ func setup(session: GameSession, provider: Callable, gauges: Control) -> RoadCon
 	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	stack.clip_contents = true
 	col.add_child(stack)
+	_stack = stack
 	for index in TAB_KEYS.size():
 		var page: Control
 		if index == TAB_MAP:
@@ -90,8 +94,31 @@ func set_session(session: GameSession) -> void:
 	_session = session
 	refresh()
 
+## Yolun dışında (şehir mekânları) panel kendi sekmesini ekler: içerik çağıranın,
+## panel yalnızca sekmeyi ve sayfayı taşır (görev 9.4, taverna).
+func add_tab(title: String, page: Control) -> int:
+	var index := _pages.size()
+	var button := Button.new()
+	button.text = title
+	button.toggle_mode = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(select_tab.bind(index))
+	_tab_box.add_child(button)
+	_tab_buttons.append(button)
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.size = _stack.size
+	_stack.add_child(page)
+	_pages.append(page)
+	page.visible = false
+	return index
+
+## Yola özgü bir sekme (durum, defter) şehirde gizlenir.
+func hide_tab(index: int) -> void:
+	if index >= 0 and index < _tab_buttons.size():
+		_tab_buttons[index].visible = false
+
 func select_tab(index: int) -> void:
-	_active = clampi(index, 0, TAB_KEYS.size() - 1)
+	_active = clampi(index, 0, _pages.size() - 1)
 	for i in _tab_buttons.size():
 		_tab_buttons[i].set_pressed_no_signal(i == _active)
 		_pages[i].visible = i == _active

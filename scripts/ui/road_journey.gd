@@ -414,6 +414,8 @@ var _in_game_menu: InGameMenu = null
 var _succession_panel: SuccessionPanel = null
 var _meal_panel: MealDistributionPanel = null
 var _merchant_dialogue_panel: MerchantDialoguePanel = null
+## Yolda biriyle konuşma penceresi (katılmak isteyen yolcu).
+var _talk_panel: DialoguePanel = null
 ## Yolda açılır dünya haritası (bkz. MapPopup); açıkken zaman durur.
 var _map_popup: MapPopup = null
 ## Alt kontrol paneli (bkz. RoadControlPanel, _layout_panel).
@@ -3352,34 +3354,37 @@ func _open_recruit_offer() -> void:
 	candidate.hire_cost = int(round(candidate.hire_cost * ROAD_RECRUIT_COST_MULTIPLIER))
 
 	_set_journey_controls_enabled(false)
-	NodeUtil.clear_children(_recruit_holder)
-
-	var info := Label.new()
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info.text = tr("UI_ROAD_RECRUIT_OFFER") % [
+	# Konuşma penceresi (kullanıcı isteği: NPC konuşmaları portreli pencerede):
+	# solda yolcunun kendisi, sağda teklifi, altta katıl ya da geç.
+	var text := tr("UI_ROAD_RECRUIT_OFFER") % [
 		candidate.get_summary_line(),
 		candidate.get_max_hp(),
 		candidate.get_accuracy(),
 		candidate.get_dodge(),
 		candidate.hire_cost,
 	]
-	_recruit_holder.add_child(info)
-
-	var hire_button := Button.new()
-	if _session.wallet.can_afford(candidate.hire_cost):
-		hire_button.text = tr("UI_ROAD_RECRUIT_ACCEPT") % candidate.hire_cost
-		hire_button.pressed.connect(_on_road_recruit_accepted.bind(candidate))
-	else:
-		# `modulate` yazıyı da karartıp sebebi okunaksız kılıyordu;
-		# `disabled = true` temanın kendi ölçülmüş kontrastını sağlıyor.
-		hire_button.text = tr("UI_NOT_ENOUGH_GOLD")
-		hire_button.disabled = true
-	_recruit_holder.add_child(hire_button)
-
-	var decline_button := Button.new()
-	decline_button.text = tr("UI_CANCEL")
-	decline_button.pressed.connect(_on_road_recruit_declined)
-	_recruit_holder.add_child(decline_button)
+	var hire := {"id": "hire", "text": tr("UI_ROAD_RECRUIT_JOIN"), "cost": tr("UI_TALK_COST") % candidate.hire_cost}
+	if not _session.wallet.can_afford(candidate.hire_cost):
+		hire["locked"] = tr("UI_NOT_ENOUGH_GOLD")
+	var cls := candidate.get_character_class()
+	_talk_panel = DialoguePanel.new()
+	add_child(_talk_panel)
+	# Kapatmak (Esc, Kapat) geçmek demek; karar bir kez verilir.
+	var decided := [false]
+	_talk_panel.choice_made.connect(func(id: String) -> void:
+		decided[0] = true
+		if id == "hire":
+			_on_road_recruit_accepted(candidate)
+		else:
+			_on_road_recruit_declined()
+		_talk_panel.close())
+	_talk_panel.closed.connect(func() -> void:
+		_talk_panel = null
+		if not decided[0]:
+			_on_road_recruit_declined())
+	_talk_panel.open(candidate, cls.display_name if cls != null else "", text, [
+		hire, {"id": "decline", "text": tr("UI_ROAD_RECRUIT_DECLINE")},
+	], true, "")
 
 func _on_road_recruit_accepted(candidate: CharacterData) -> void:
 	if _session.recruit(candidate):
@@ -3750,6 +3755,7 @@ func _has_open_panel() -> bool:
 		or _meal_panel != null
 		or _pre_combat_panel != null
 		or _merchant_dialogue_panel != null
+		or _talk_panel != null
 		or _map_popup != null
 		or _story_panel != null
 		or _camp_panel != null

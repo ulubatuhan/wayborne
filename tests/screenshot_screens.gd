@@ -53,18 +53,28 @@ func _init() -> void:
 		await _settle()
 		if path.contains("market"):
 			# Terazi (Y-G11T): sepette üç çeşit mal.
-			for entry in [["wine", 6], ["test_furs", 3], ["spice", 9]]:
-				screen._basket.append({"item": ItemCatalog.get_item(String(entry[0])), "quantity": int(entry[1])})
-			screen._refresh_basket_panel()
+			for entry in [["test_furs", 3], ["spice", 9], ["wine", 6]]:
+				screen.put_in_pan(ItemCatalog.get_item(String(entry[0])), int(entry[1]))
 			await _settle()
 		if path.contains("tavern"):
 			# Canlı taverna: figürler yerleşsin, garson yürüsün (iki kare, aralarında 1,5 sn).
 			for _frame in 60:
 				await process_frame
 			_save("%s_%dx%d_a.png" % [path.get_file().get_basename(), view.x, view.y])
-			for _frame in 90:
+			# Rotalar ilerlesin: konuk içeri girsin, yardımcı masalara varsın.
+			screen._room.simulate(18.0)
+			for _frame in 30:
 				await process_frame
 		_save("%s_%dx%d.png" % [path.get_file().get_basename(), view.x, view.y])
+		if path.contains("tavern"):
+			# Konuşma penceresi: ozanla konuş, yolları sor.
+			screen._on_person_chosen(screen._room.character_of(2), screen._room.role_of(2))
+			for _frame in 30:
+				await process_frame
+			screen._on_talk_choice("roads", screen._room.character_of(2), screen._room.role_of(2))
+			for _frame in 10:
+				await process_frame
+			_save("tavern_talk_%dx%d.png" % [view.x, view.y])
 		screen.queue_free()
 		await _settle()
 	quit()

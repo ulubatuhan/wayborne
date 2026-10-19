@@ -17,12 +17,14 @@ func _init() -> void:
 	add_child(_figure)
 	resized.connect(_layout)
 
-func show_character(character: CharacterData) -> void:
+## `archetype` boşsa kişinin sınıfı (silahı sırtında); kadroda olmayanlar için
+## "villager" (silahsız) verilir.
+func show_character(character: CharacterData, archetype: String = "") -> void:
 	if character == null:
 		_figure.visible = false
 		return
 	show_look(
-		character.class_id,
+		character.class_id if archetype.is_empty() else archetype,
 		character.get_height_scale(),
 		CharacterData.get_skin_tone_color(character.skin_tone),
 		character.get_appearance_outfit(), Wardrobe.loadout_of(character.outfit, character.equipped),
@@ -39,6 +41,9 @@ func show_look(
 	_figure.set_standing()
 	_figure.set_facing(1.0)
 	_layout()
+
+func set_tint(tint: Color) -> void:
+	_figure.set_tint(tint)
 
 ## Figür pencerenin alt kenarına basıyor; boyu pencerenin yüksekliğinin bir
 ## payı, en uzun boy bile şapkasıyla sığsın diye.

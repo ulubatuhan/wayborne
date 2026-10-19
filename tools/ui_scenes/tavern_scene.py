@@ -28,8 +28,10 @@ OUT = os.path.join(ts.ROOT, "build/ui_scenes/town_tavern")
 GY = os.path.join(ts.ROOT, "art_source/models/props/kenney_graveyard")
 PLANKS = os.path.join(ts.TEX, "Planks037A/Planks037A_1K-JPG_Color.jpg")
 
-# Oda: x -14..14 (genişlik), y 0..14.5 (derinlik), z 0..6.4 (yükseklik).
-CAMERA = {"at": [0.0, -7.0, 2.0], "look": [0.0, 10.0, 1.9], "lens": 28}
+# Oda: x -8.3..8.3 (genişlik), y 0..9.5 (derinlik), z 0..4.6 (yükseklik).
+# Kamera yakın (9.4 ikinci tur, kullanıcı: "referans ekran gibi"): masadaki kişi
+# odanın yüksekliğinin dörtte biri; geniş açı odanın iki duvarını da tutar.
+CAMERA = {"at": [0.0, -2.4, 1.75], "look": [0.0, 9.0, 1.5], "lens": 24}
 
 _wood = {}
 
@@ -79,6 +81,48 @@ def stone(value=0.4):
     return ts._stone_material("tavern_stone_%d" % int(value * 100), value)
 
 
+_lantern_mat = None
+
+
+def lantern_material():
+    """Kenney fenerinin yeşil boyası stile aykırı (kullanıcı notu): renk
+    atlasının parlaklığı okunur, koyu kısım dövme demir, açık kısım (cam) sıcak
+    ve hafif ışıyan kehribar olur."""
+    global _lantern_mat
+    if _lantern_mat is not None:
+        return _lantern_mat
+    m = bpy.data.materials.new("lantern_iron")
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = bpy.data.images.load(os.path.join(GY, "Textures", "colormap.png"))
+    tex.interpolation = "Closest"
+    bw = nt.nodes.new("ShaderNodeRGBToBW")
+    nt.links.new(tex.outputs["Color"], bw.inputs["Color"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].position = 0.42
+    ramp.color_ramp.elements[0].color = (0.055, 0.048, 0.042, 1.0)
+    ramp.color_ramp.elements[1].position = 0.55
+    ramp.color_ramp.elements[1].color = (1.0, 0.60, 0.24, 1.0)
+    nt.links.new(bw.outputs["Val"], ramp.inputs["Fac"])
+    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
+    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Emission Color"])
+    glow = nt.nodes.new("ShaderNodeMath")
+    glow.operation = "GREATER_THAN"
+    glow.inputs[1].default_value = 0.5
+    nt.links.new(bw.outputs["Val"], glow.inputs[0])
+    strength = nt.nodes.new("ShaderNodeMath")
+    strength.operation = "MULTIPLY"
+    strength.inputs[1].default_value = 1.1
+    nt.links.new(glow.outputs["Value"], strength.inputs[0])
+    nt.links.new(strength.outputs["Value"], bsdf.inputs["Emission Strength"])
+    bsdf.inputs["Metallic"].default_value = 0.6
+    bsdf.inputs["Roughness"].default_value = 0.55
+    _lantern_mat = m
+    return m
+
+
 def table(x, y, w=3.0, d=1.3):
     top = wood("table", 0.62)
     box(x, y, 0.95, w, d, 0.14, top)
@@ -101,59 +145,63 @@ def bench(x, y, w=2.8):
 
 
 def build():
+    """Küçük, dolu bir taverna (9.4 ikinci tur): ilk oda 28 m genişliğinde bir
+    salondu ve insanlar içinde kayboluyordu. Şimdi 16 m x 9.5 m, tavan 4.6 m;
+    solda tezgâh ve fıçılar, ortada şömine, önde iki masa, sağ arkada küçük masa."""
     ts.reset()
     dark = wood("dark", 0.32, (0.9, 0.7, 0.55))
-    # Zemin ve duvarlar
-    box(0, 2.0, -0.1, 30, 30, 0.1, wood("floor", 0.6))
-    box(0, 14.7, 0.0, 30, 0.7, 6.6, stone(0.34))
-    box(-14.4, 7.0, 0.0, 0.7, 16, 6.6, stone(0.3))
-    box(14.4, 7.0, 0.0, 0.7, 16, 6.6, stone(0.3))
-    box(0, 7.0, 6.4, 30, 16, 0.3, dark)
-    # Tavan kirişleri
-    for x in range(-12, 13, 4):
-        box(x, 7.0, 5.7, 0.4, 16, 0.5, dark)
-    for y in (4.0, 9.0, 13.6):
-        box(0, y, 5.6, 29, 0.35, 0.45, dark)
+    # Zemin, duvarlar, tavan
+    box(0, 4.0, -0.1, 18, 16, 0.1, wood("floor", 0.6))
+    box(0, 9.85, 0.0, 17.4, 0.7, 4.9, stone(0.34))
+    box(-8.65, 4.0, 0.0, 0.7, 12, 4.9, stone(0.3))
+    box(8.65, 4.0, 0.0, 0.7, 12, 4.9, stone(0.3))
+    box(0, 4.0, 4.6, 18, 12, 0.3, dark)
+    # Tavan kirişleri ve dikmeler
+    for x in (-6.0, -3.0, 0.0, 3.0, 6.0):
+        box(x, 4.0, 4.15, 0.32, 12, 0.42, dark)
+    for y in (2.0, 5.5, 9.2):
+        box(0, y, 4.05, 17, 0.3, 0.4, dark)
+    for x in (-8.1, 8.1):
+        for y in (2.0, 5.5, 9.2):
+            box(x, y, 0.0, 0.3, 0.3, 4.6, dark)
     # Şömine: iki taş ayak, ocak, saçak, baca
-    fx = 0.0
-    box(fx - 2.1, 13.9, 0.0, 1.0, 1.4, 3.3, stone(0.45))
-    box(fx + 2.1, 13.9, 0.0, 1.0, 1.4, 3.3, stone(0.45))
-    box(fx, 14.0, 0.0, 3.2, 1.0, 0.25, stone(0.35))          # ocak tabanı
-    box(fx, 14.15, 0.3, 3.2, 0.6, 3.0, dark)                  # ocağın içi: kapkara
-    box(fx, 13.9, 3.3, 5.6, 1.5, 0.45, stone(0.5))           # saçak
-    box(fx, 14.1, 3.75, 3.8, 1.1, 2.7, stone(0.42))          # baca
-    # Tezgâh ve arkasındaki raflar (sol)
-    bx = -9.0
-    box(bx, 8.0, 0.0, 6.4, 1.5, 1.1, wood("counter", 0.5))
-    box(bx, 8.0, 1.1, 6.6, 1.7, 0.14, wood("counter_top", 0.66))
-    for z in (1.9, 2.8, 3.7):
-        box(bx - 0.4, 14.2, z, 5.4, 0.5, 0.1, dark)
-        for k in range(7):
-            cyl(bx - 2.6 + k * 0.8, 14.2, z + 0.1, 0.12, 0.38, wood("bottle", 0.28, (0.5, 0.8, 0.5)), 8)
-    box(bx - 5.4, 13.4, 0.0, 0.1, 0.1, 0.1, dark)
-    for k, (bx2, by2) in enumerate(((-12.4, 12.8), (-11.0, 13.4), (-12.4, 11.4))):
-        ts.place(ts.qv("Barrel"), (bx2, by2, 0.0), k * 40.0, 1.6)
-    ts.place(ts.qv("Barrel"), (bx - 3.6, 7.4, 0.0), 0.0, 1.3)
-    # Masalar ve oturaklar
-    table(-2.6, 5.0)
-    bench(-2.6, 3.9)
-    bench(-2.6, 6.1)
-    table(4.2, 4.4)
-    bench(4.2, 3.3)
-    bench(4.2, 5.5)
-    table(8.6, 9.4, 2.6, 1.2)
-    stool(7.4, 8.3)
-    stool(9.8, 8.3)
-    stool(bx + 3.5, 6.2)
-    stool(bx + 1.5, 6.2)
-    ts.place(ts.qv("Crate"), (12.0, 12.6, 0.0), 12.0, 1.5)
-    ts.place(ts.qv("Barrel"), (12.5, 8.2, 0.0), 0.0, 1.4)
-    # Hasır ve fenerler
-    for x in (-5.4, 5.4):
-        box(x, 7.0, 4.4, 0.04, 0.04, 1.2, dark)
-        ts.place(os.path.join(GY, "lantern-glass.glb"), (x, 7.0, 4.2), 0.0, 2.2)
-    for x, y in ((-12.8, 12.0), (12.8, 11.0)):
-        ts.place(os.path.join(GY, "lantern-candle.glb"), (x, y, 2.6), 0.0, 2.0)
+    box(-1.55, 9.2, 0.0, 0.8, 1.0, 2.3, stone(0.45))
+    box(1.55, 9.2, 0.0, 0.8, 1.0, 2.3, stone(0.45))
+    box(0.0, 9.25, 0.0, 2.4, 0.8, 0.22, stone(0.35))          # ocak tabanı
+    box(0.0, 9.45, 0.25, 2.4, 0.4, 2.05, dark)                 # ocağın içi: kapkara
+    box(0.0, 9.15, 2.3, 4.0, 1.1, 0.35, stone(0.5))            # saçak
+    box(0.0, 9.35, 2.65, 2.8, 0.8, 2.0, stone(0.42))           # baca
+    # Tezgâh (sol), arkasında raflar ve fıçılar
+    box(-6.0, 5.8, 0.0, 3.6, 0.8, 1.1, wood("counter", 0.5))
+    box(-6.0, 5.8, 1.1, 3.8, 1.0, 0.12, wood("counter_top", 0.66))
+    for z in (1.6, 2.3, 3.0):
+        box(-5.4, 9.45, z, 3.8, 0.4, 0.08, dark)
+        for k in range(8):
+            cyl(-7.0 + k * 0.45, 9.45, z + 0.08, 0.09, 0.3, wood("bottle", 0.28, (0.5, 0.8, 0.5)), 8)
+    for k, (bx2, by2) in enumerate(((-7.9, 7.4), (-7.9, 8.4), (-6.9, 8.9))):
+        ts.place(ts.qv("Barrel"), (bx2, by2, 0.0), k * 40.0, 1.3)
+    ts.place(ts.qv("Barrel"), (-7.6, 7.9, 1.25), 90.0, 1.0)
+    # Masalar: önde iki uzun masa, sağ arkada küçük masa
+    table(-1.9, 3.8, 2.4, 1.0)
+    bench(-1.9, 3.05, 2.3)
+    bench(-1.9, 4.55, 2.3)
+    table(3.0, 3.4, 2.4, 1.0)
+    bench(3.0, 2.65, 2.3)
+    bench(3.0, 4.15, 2.3)
+    table(5.6, 6.8, 1.8, 0.9)
+    stool(5.1, 7.45)
+    stool(6.1, 7.45)
+    stool(-6.6, 5.0)
+    stool(-5.2, 5.0)
+    ts.place(ts.qv("Crate"), (7.5, 8.7, 0.0), 12.0, 1.2)
+    ts.place(ts.qv("Barrel"), (7.6, 4.6, 0.0), 0.0, 1.2)
+    ts.place(ts.qv("Barrel"), (7.0, 9.0, 0.0), 30.0, 1.2)
+    # Asılı fenerler, duvar mumları
+    for x in (-3.5, 3.5):
+        box(x, 4.5, 3.6, 0.04, 0.04, 1.0, dark)
+        ts.place(os.path.join(GY, "lantern-glass.glb"), (x, 4.5, 3.3), 0.0, 1.8, mats=lantern_material())
+    for x, y in ((-8.2, 3.0), (8.2, 7.0), (-3.4, 9.4), (3.4, 9.4)):
+        ts.place(os.path.join(GY, "lantern-candle.glb"), (x, y, 2.2), 0.0, 1.6, mats=lantern_material())
 
 
 def lights():
@@ -173,31 +221,39 @@ def lights():
         o.location = (x, y, z)
         sc.collection.objects.link(o)
 
-    lamp(0.0, 13.0, 0.9, 1100, (1.0, 0.5, 0.2), 0.9)     # şömine ateşi
-    lamp(-5.4, 7.0, 4.0, 700)
-    lamp(5.4, 7.0, 4.0, 700)
-    lamp(-2.6, 5.0, 1.6, 120)
-    lamp(4.2, 4.4, 1.6, 120)
-    lamp(8.6, 9.4, 1.6, 90)
-    lamp(0.0, 3.0, 4.5, 520, (1.0, 0.8, 0.6), 1.5)
-    lamp(-9.0, 6.0, 2.6, 300)     # dolgu: yüzler görünsün
+    lamp(0.0, 8.7, 0.7, 650, (1.0, 0.5, 0.2), 0.8)      # şömine ateşi
+    lamp(-3.5, 4.5, 3.1, 320)
+    lamp(3.5, 4.5, 3.1, 320)
+    lamp(-1.9, 3.8, 1.5, 70)
+    lamp(3.0, 3.4, 1.5, 70)
+    lamp(5.6, 6.8, 1.4, 55)
+    lamp(-6.0, 6.4, 2.4, 160)                            # tezgâh
+    lamp(-3.4, 9.0, 2.3, 60)
+    lamp(3.4, 9.0, 2.3, 60)
+    lamp(0.0, 0.0, 3.4, 260, (1.0, 0.8, 0.6), 1.5)      # dolgu: yüzler görünsün
 
 
 def anchors():
     sc = bpy.context.scene
     cam = sc.camera
     names = {
-        # İnsanlar: ayak noktası
-        "bartender": (-9.0, 9.1, 0.0), "waitress_left": (-4.5, 10.2, 0.0), "waitress_right": (7.5, 11.2, 0.0),
-        "bard": (-3.4, 12.3, 0.0),
-        "seat_a1": (-3.7, 5.0, 0.0), "seat_a2": (-1.5, 5.0, 0.0),
-        "seat_b1": (3.1, 4.4, 0.0), "seat_b2": (5.3, 4.4, 0.0),
-        "seat_c1": (7.7, 9.4, 0.0), "seat_c2": (9.5, 9.4, 0.0),
-        "table_a": (-2.6, 5.0, 1.1), "table_b": (4.2, 4.4, 1.1), "table_c": (8.6, 9.4, 1.1),
-        "counter_top": (-9.0, 8.0, 1.25),
+        # İnsanlar: ayak noktası. Oturanlar masanın arka tarafındaki bankta,
+        # masa alt yarılarını örter (oyun figürü masa üstünde keser).
+        "bartender": (-6.3, 6.7, 0.0), "bar_pour": (-4.8, 6.7, 0.0),
+        "waitress_left": (-3.5, 6.6, 0.0), "waitress_right": (4.5, 6.0, 0.0),
+        "pickup": (-3.6, 6.1, 0.0), "serve_a": (-1.9, 5.3, 0.0), "serve_b": (3.0, 4.95, 0.0),
+        "bard": (-2.3, 8.1, 0.0), "bard_right": (2.3, 8.1, 0.0),
+        "seat_a1": (-2.5, 4.55, 0.0), "seat_a2": (-1.3, 4.55, 0.0),
+        "seat_b1": (2.4, 4.15, 0.0), "seat_b2": (3.6, 4.15, 0.0),
+        "seat_c1": (5.1, 7.45, 0.0), "seat_c2": (6.1, 7.45, 0.0),
+        "aisle_a1": (-2.5, 5.6, 0.0), "aisle_a2": (-1.3, 5.6, 0.0),
+        "aisle_b1": (2.4, 5.3, 0.0), "aisle_b2": (3.6, 5.3, 0.0), "door": (9.4, 5.6, 0.0),
+        # Kesim noktaları: masanın ve tezgâhın arka kenarının üstü
+        "table_a": (-1.9, 4.3, 1.09), "table_b": (3.0, 3.9, 1.09), "table_c": (5.6, 7.25, 1.09),
+        "counter_top": (-6.0, 6.3, 1.22),
         # Işıklar ve ateş
-        "fire": (0.0, 13.6, 0.7), "lantern_l": (-5.4, 7.0, 4.2), "lantern_r": (5.4, 7.0, 4.2),
-        "candle_a": (-2.6, 5.0, 1.2), "candle_b": (4.2, 4.4, 1.2), "candle_c": (8.6, 9.4, 1.2),
+        "fire": (0.0, 9.1, 0.45), "lantern_l": (-3.5, 4.5, 3.3), "lantern_r": (3.5, 4.5, 3.3),
+        "candle_a": (-1.9, 3.8, 1.2), "candle_b": (3.0, 3.4, 1.2), "candle_c": (5.6, 6.8, 1.2),
     }
     out = {}
     for key, (x, y, z) in names.items():
@@ -205,6 +261,23 @@ def anchors():
         head = world_to_camera_view(sc, cam, Vector((x, y, z + 1.75)))
         out[key] = {"x": round(p.x, 4), "y": round(1.0 - p.y, 4), "person_h": round(abs(head.y - p.y), 4)}
     return out
+
+
+def depth_fit():
+    """Zemindeki bir kişinin boyu, ayağının ekran yüksekliğine göre doğrusal
+    (düz zemin, iğne delikli kamera): oyun yürüyen figürü bu doğruyla büyütür."""
+    sc = bpy.context.scene
+    cam = sc.camera
+    ys, hs = [], []
+    for wy in [2.0 + 0.4 * i for i in range(19)]:
+        p = world_to_camera_view(sc, cam, Vector((0.0, wy, 0.0)))
+        head = world_to_camera_view(sc, cam, Vector((0.0, wy, 1.75)))
+        ys.append(1.0 - p.y)
+        hs.append(abs(head.y - p.y))
+    n = len(ys)
+    my, mh = sum(ys) / n, sum(hs) / n
+    slope = sum((y - my) * (h - mh) for y, h in zip(ys, hs)) / sum((y - my) ** 2 for y in ys)
+    return {"y0": round(my, 4), "h0": round(mh, 4), "slope": round(slope, 4)}
 
 
 def main(argv):
@@ -223,7 +296,10 @@ def main(argv):
              "const ANCHORS: Dictionary = {"]
     for key, v in found.items():
         lines.append('	"%s": {"x": %s, "y": %s, "person_h": %s},' % (key, v["x"], v["y"], v["person_h"]))
-    lines += ["}", ""]
+    fit = depth_fit()
+    lines += ["}", "",
+              "## Zemindeki kişinin boyu: h0 + (ayak_y - y0) * slope (ekran payı).",
+              "const DEPTH: Dictionary = {\"y0\": %s, \"h0\": %s, \"slope\": %s}" % (fit["y0"], fit["h0"], fit["slope"]), ""]
     with open(os.path.join(ts.ROOT, "scripts/ui/tavern_layout.gd"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     ts.render_beauty(os.path.join(OUT, "beauty.png"), samples, pct)

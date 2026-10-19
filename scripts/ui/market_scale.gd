@@ -179,7 +179,97 @@ func get_tilt() -> float:
 
 # --- çizim ---
 
+## Render edilmiş parçalar (tools/ui_scenes/market_scale_scene.py): sütun,
+## mil çevresinde dönen kol, kolun ucunda dik asılı kefe, sikke. Yoksa
+## prosedürel çizime düşer (sanat parça parça gelebilir).
+var _art: Dictionary = {}
+
+func _part(name: String) -> Texture2D:
+	if not _art.has(name):
+		_art[name] = TextureLoader.load_any(MarketScaleArt.DIR + name + ".png")
+	return _art[name]
+
 func _draw() -> void:
+	var column := _part("column")
+	var beam := _part("beam")
+	var pan := _part("pan")
+	if column == null or beam == null or pan == null:
+		_draw_procedural()
+		return
+	# Bütün terazi alanın içine sığsın: kol + iki kefe genişliği, iğneden ayağa yükseklik.
+	var span_w := float(beam.get_width()) + float(pan.get_width())
+	var span_h := (MarketScaleArt.COLUMN_FOOT.y - MarketScaleArt.COLUMN_PIVOT.y) + MarketScaleArt.BEAM_PIVOT.y
+	var k := minf(size.x / span_w, size.y / span_h) * 0.98
+	var pivot := Vector2(size.x * 0.5, MarketScaleArt.BEAM_PIVOT.y * k + (size.y - span_h * k) * 0.5)
+	draw_texture_rect(column, Rect2(pivot - MarketScaleArt.COLUMN_PIVOT * k, Vector2(column.get_size()) * k), false)
+	# Kol: pozitif eğim = mal ağır = sol uç iner.
+	var angle := -_tilt
+	var hook := MarketScaleArt.BEAM_LEFT_HOOK - MarketScaleArt.BEAM_PIVOT
+	var left_hook := pivot + (hook * k).rotated(angle)
+	var right_hook := pivot + (Vector2(-hook.x, hook.y) * k).rotated(angle)
+	_draw_sprite_pan(pan, left_hook, k, true)
+	_draw_sprite_pan(pan, right_hook, k, false)
+	draw_set_transform(pivot, angle, Vector2(k, k))
+	draw_texture(beam, -MarketScaleArt.BEAM_PIVOT)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## Kefe askısından dik asılır; mal ya da altın kefenin tabanına oturur, kefenin
+## ön yüzü malın altını örter (önce mal, sonra kefe).
+func _draw_sprite_pan(pan: Texture2D, hook: Vector2, k: float, goods: bool) -> void:
+	var origin := hook - MarketScaleArt.PAN_HOOK * k
+	var floor_at := origin + MarketScaleArt.PAN_FLOOR * k
+	var radius := MarketScaleArt.PAN_RADIUS * k
+	if goods:
+		_draw_goods_at(floor_at, radius, radius * 0.5)
+	else:
+		_draw_coins_at(floor_at, radius, k)
+	draw_texture_rect(pan, Rect2(origin, Vector2(pan.get_size()) * k), false)
+
+func _draw_goods_at(floor_at: Vector2, radius: float, item: float) -> void:
+	var quantities: Array[int] = []
+	for entry in _entries:
+		quantities.append(int(entry.get("quantity", 0)))
+	var shares := item_shares(quantities)
+	var total_shown := 0
+	for s in shares:
+		total_shown += s
+	var spots := pyramid(total_shown, item * 0.92)
+	var index := 0
+	for e in _entries.size():
+		var tex: Texture2D = _entries[e].get("texture")
+		for _k in shares[e]:
+			if index >= spots.size() or tex == null:
+				break
+			var age := _clock - (_item_born[index] if index < _item_born.size() else -1000.0)
+			var at := floor_at + spots[index] + Vector2(0.0, -item * 0.42 + drop_offset(age) * item / ITEM_SIZE)
+			draw_texture_rect(tex, Rect2(at - Vector2(item, item) * 0.5, Vector2(item, item)), false)
+			index += 1
+	var total := 0
+	for q in quantities:
+		total += q
+	if total > total_shown:
+		draw_string(ThemeDB.fallback_font, floor_at + Vector2(radius * 0.75, -radius * 1.1), "+%d" % (total - total_shown),
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, 18, Color(0.93, 0.85, 0.7))
+
+func _draw_coins_at(floor_at: Vector2, radius: float, _k: float) -> void:
+	var coin := _part("coin")
+	var count := coin_count(_gold)
+	var w := radius * 0.36
+	var spots := pyramid(count, w * 0.78)
+	for i in count:
+		var age := _clock - (_coin_born[i] if i < _coin_born.size() else -1000.0)
+		var at := floor_at + spots[i] * Vector2(1.0, 0.42) + Vector2(0.0, -w * 0.15 + drop_offset(age) * w / 18.0)
+		if coin != null:
+			draw_texture_rect(coin, Rect2(at - Vector2(w, w) * 0.5, Vector2(w, w)), false)
+		else:
+			draw_set_transform(at, 0.0, Vector2(1.0, 0.42))
+			draw_circle(Vector2.ZERO, w * 0.5, COIN)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if _gold > 0:
+		draw_string(ThemeDB.fallback_font, floor_at + Vector2(-radius * 1.0, -radius * 1.15), "%d" % _gold,
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, COIN)
+
+func _draw_procedural() -> void:
 	var w := size.x
 	var pivot := Vector2(w * 0.5, size.y * 0.16)
 	var arm := w * 0.40

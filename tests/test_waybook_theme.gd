@@ -242,7 +242,7 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 	t.eq(theme_script.workspace_side_margin(1920.0, 400.0), theme_script.workspace_side_margin(1920.0), "dar içerik oranı değiştirmiyor")
 	t.eq(theme_script.workspace_side_margin(1280.0, 5000.0), theme_script.WORKSPACE_EDGE_MARGIN, "kenar payı hiç sıfırın altına inmiyor")
 	var screens := [
-		"guild", "tavern", "caravan_yard", "church", "recruit",
+		"guild", "caravan_yard", "church", "recruit",
 		"character", "party", "caravan_planner", "character_creation",
 	]
 	for screen in screens:
@@ -251,6 +251,9 @@ func _test_desk_workspace_keeps_the_props(t) -> void:
 	# Şehir artık bir masa sahnesi değil: ekranın tamamı şehrin kendi resmi (CityFront).
 	var city := FileAccess.get_file_as_string("res://scripts/world/city_map.gd")
 	t.ok(city.contains("CityFront.new()"), "şehir kendi resmini kuruyor")
+	# Taverna da masa sahnesi değil (9.4): ekranın üstü odanın kendisi.
+	var tavern := FileAccess.get_file_as_string("res://scripts/ui/tavern.gd")
+	t.ok(tavern.contains("TavernRoom.new()"), "taverna kendi odasını kuruyor")
 
 ## Varsayılan düğme minimal: çerçeve + hafif dolgu, üstüne gelince ve
 ## basılınca dolgu koyulaşıyor.

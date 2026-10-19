@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bqecontest003"]
+[gd_scene load_steps=2 format=3 uid="uid://bqecontest003"]
 
 [ext_resource type="Script" path="res://scripts/ui/market.gd" id="1"]
-[ext_resource type="Texture2D" path="res://data/assets/ui/waybook/b2_market.jpg" id="2"]
 
 [node name="Market" type="Control"]
 layout_mode = 3
@@ -20,7 +19,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 6
 
@@ -32,96 +30,4 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.58)
-
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_type_variation = &"PageTitle"
-text = "UI_MARKET_TITLE"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 16
-
-[node name="LocationNoteLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-text = ""
-
-[node name="BalanceRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="BalanceLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/BalanceRow"]
-layout_mode = 2
-text = "UI_MARKET_BALANCE"
-
-[node name="BalanceValueLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/BalanceRow"]
-layout_mode = 2
-text = "0 GG"
-
-[node name="CargoValueLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/BalanceRow"]
-layout_mode = 2
-text = ""
-
-[node name="MessageLabel" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-text = ""
-
-[node name="ContentRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-theme_override_constants/separation = 24
-
-[node name="ShopPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="ShopTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/ShopPanel"]
-layout_mode = 2
-text = "UI_MARKET_SHOP"
-
-[node name="ShopList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/ShopPanel"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="InventoryPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="InventoryTitle" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/InventoryPanel"]
-layout_mode = 2
-text = "UI_MARKET_INVENTORY"
-
-[node name="InventoryGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/ContentRow/InventoryPanel"]
-layout_mode = 2
-columns = 5
-
-[node name="HaggleHolder" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
-layout_mode = 2
-
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Geri"
+color = Color(0.04, 0.03, 0.03, 0.55)
