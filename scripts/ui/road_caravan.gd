@@ -266,6 +266,9 @@ var _leader_mounted: bool = false
 ## figürle inip ateşe yürüyor. Kamp dışında görünmez.
 var _leader_rider: WalkFigure
 var _party_figures: Array[WalkFigure] = []
+## Figür -> kişi (görev R0): sohbet, bağ ve baloncuk kimin kim olduğunu bilmeli.
+## Tayfa figürleri burada yok (isimsiz yürürler, v2).
+var _figure_character: Dictionary = {}
 var _crew_figures: Array[WalkFigure] = []
 ## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
 ## sırasında gerçek birer figüre dönüşüyor (bkz. `configure`'daki not).
@@ -382,6 +385,7 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	for child in get_children():
 		child.queue_free()
 	_party_figures.clear()
+	_figure_character.clear()
 	_crew_figures.clear()
 	_driver_figures.clear()
 	_oxen.clear()
@@ -441,10 +445,12 @@ func configure(session: GameSession, mounted_leader: bool = true) -> void:
 	for character in party:
 		if character == player:
 			continue
-		_party_figures.append(_make_figure(
+		var figure := _make_figure(
 			WalkFigure.KIND_PERSON, _archetype_of(character),
 			_height_scale_of(character), _skin_of(character), true, character
-		))
+		)
+		_party_figures.append(figure)
+		_figure_character[figure] = character
 
 
 	for index in _wagon_count:
@@ -652,6 +658,36 @@ func set_leader_offset(offset: float) -> void:
 
 func get_leader_offset() -> float:
 	return _leader_offset
+
+func get_character_of(figure: WalkFigure) -> CharacterData:
+	return _figure_character.get(figure)
+
+func get_figure_of(character: CharacterData) -> WalkFigure:
+	for figure in _figure_character:
+		if _figure_character[figure] == character:
+			return figure
+	return null
+
+## Liderin yanında (yatay uzaklığı `radius` pikselden az) yürüyen yoldaşlar,
+## en yakından uzağa. Lider kampta atından inmişse yaya figürü ölçülür.
+func companions_near(radius: float) -> Array[CharacterData]:
+	var out: Array[CharacterData] = []
+	var leader: WalkFigure = _leader_rider if _leader_rider != null and _leader_rider.visible else _leader
+	if leader == null:
+		return out
+	var at := leader.position.x + leader.size.x * 0.5
+	var near: Array = []
+	for figure in _figure_character:
+		var f: WalkFigure = figure
+		if not f.visible:
+			continue
+		var d := absf(f.position.x + f.size.x * 0.5 - at)
+		if d <= radius:
+			near.append([d, _figure_character[figure]])
+	near.sort_custom(func(a, b): return float(a[0]) < float(b[0]))
+	for entry in near:
+		out.append(entry[1])
+	return out
 
 func get_column_length() -> float:
 	return _column_length()

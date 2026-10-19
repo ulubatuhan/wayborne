@@ -664,6 +664,12 @@ func _build_world_layer() -> void:
 	# oyuncu geri bildirimiyle kaldırıldı - yalnızca açlık kalıyor.
 	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
 
+	# Konuşma baloncukları (görev R0/R1): kervanın üstünde, HUD'un altında.
+	_balloon_layer = Control.new()
+	_balloon_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_balloon_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_world.add_child(_balloon_layer)
+
 ## Kenar maskesi tek parça bir resim: ekranın tamamına geriliyor. Bir süre
 ## dokuz dilimliydi (kalınlık en boy oranından bağımsız kalsın diye) ama
 ## maskeler bütün bir çerçeve olarak boyandı ve oyuncu onları öyle görmek
@@ -1746,8 +1752,57 @@ func _process(delta: float) -> void:
 		_caravan.set_ground_speed(0.0)
 		_caravan.set_leader_motion(0.0, false)
 
+	_update_chatter(delta)
 	_refresh_time_ui()
 	_refresh_modal()
+
+## --- Yanına yürü, konuş (görev R1 #1, Y-B01) ---
+## Lider bir yoldaşın yanında `CHAT_DWELL_SECONDS` gerçek saniye kalırsa yoldaş
+## konuşur: baloncuk ve günlük satırı, bağ günde en fazla +1. Tıklama yok -
+## yanında yürümek zaten karar (ve lideri o dikkat bölgesine taşır). Hızlı
+## akışta baloncuk açılmaz, satır günlüğe düşer.
+const CHAT_DWELL_SECONDS: float = 1.2
+const CHAT_RADIUS_HEIGHTS: float = 0.9
+const CHAT_BALLOON_MAX_SPEED: float = 1.5
+const MAX_BALLOONS: int = 2
+var _balloon_layer: Control
+var _chat_target: CharacterData = null
+var _chat_dwell: float = 0.0
+var _chat_rng := RandomNumberGenerator.new()
+
+func _update_chatter(delta: float) -> void:
+	if _session == null or _caravan == null or _has_open_panel() or not _caravan.visible:
+		_chat_dwell = 0.0
+		return
+	var near := _caravan.companions_near(_caravan.get_person_height() * CHAT_RADIUS_HEIGHTS)
+	var who: CharacterData = near[0] if not near.is_empty() else null
+	if who != _chat_target:
+		_chat_target = who
+		_chat_dwell = 0.0
+		return
+	if who == null or who.last_chat_day == _session.total_days_elapsed:
+		return
+	_chat_dwell += delta
+	if _chat_dwell < CHAT_DWELL_SECONDS:
+		return
+	_chat_dwell = 0.0
+	_chat_rng.seed = hash("chat|%s|%d" % [who.character_id, _session.total_days_elapsed])
+	var picked := RoadChatter.pick(who, {
+		"day": _session.total_days_elapsed, "weather": _weather,
+		"night": JourneyClock.darkness_for_hour(_clock.get_hour_of_day()) > 0.5,
+	}, _chat_rng)
+	if picked.is_empty():
+		return
+	var first_meeting := who.rapport == 0
+	RoadChatter.apply(who, picked, _session.total_days_elapsed)
+	var line := tr(String(picked["key"]))
+	_add_log(tr("UI_ROAD_CHAT_LINE") % [who.character_name, line])
+	if first_meeting and not who.backstory_id.is_empty():
+		_add_log(tr("UI_ROAD_CHAT_BACKSTORY") % [who.character_name, tr(String(CharacterData.BACKSTORY_LABEL_KEYS.get(who.backstory_id, "")))], OUTCOME_COLOR)
+	if _clock.get_speed() < CHAT_BALLOON_MAX_SPEED and _balloon_layer.get_child_count() < MAX_BALLOONS:
+		var figure := _caravan.get_figure_of(who)
+		if figure != null:
+			_balloon_layer.add_child(RoadBalloon.new().setup(figure, line))
 
 ## Kervan tempoyla kendi yürür; giriş yalnızca lideri kolon içinde
 ## gezdirir (bkz. yukarıdaki "Yürümek" notu). Kampta kervan durur, lider

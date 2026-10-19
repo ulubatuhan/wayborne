@@ -4119,6 +4119,13 @@ every decision has a visible control, and a key is only its shortcut.**
   walking_hours)` and `CaravanPlan.camp_provisions` put both into the
   planner's number, and `test_route_terrain.gd` asserts a caravan stocked
   that way still never runs out.
+- **Walking beside someone is talking to them (tasks R0, R1 #1, Y-B01).** `RoadCaravan` knows which figure is which
+  person (`get_character_of`, `companions_near`). When the leader stays beside a companion for `CHAT_DWELL_SECONDS` of
+  real time, `RoadChatter.pick` chooses what they say - top grievance first, then stress, backstory, duty, culture,
+  weather and night, then small talk - and `RoadBalloon` shows it over their head (never more than two, none at 1.5x and
+  faster; the line always reaches the log). A topic rests `TOPIC_COOLDOWN_DAYS`; `rapport` (0-5) rises at most once a
+  day. Every person has a `backstory_id` seeded from their id, so a reload never rerolls it; the first conversation
+  says it. No click is needed: walking there is the decision, and it moves the leader into that attention zone.
 - **Every key has an on-screen control** (touch parity). The hub walks to
   a tapped point and opens a tapped gate or wagon on arrival;
   `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and

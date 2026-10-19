@@ -657,10 +657,18 @@ func add_to_party(character: CharacterData) -> void:
 var _next_character_serial: int = 1
 
 func _assign_character_id(character: CharacterData) -> void:
-	if character == null or not character.character_id.is_empty():
+	if character == null:
 		return
-	character.character_id = "c%d_%d" % [total_days_elapsed, _next_character_serial]
-	_next_character_serial += 1
+	if character.character_id.is_empty():
+		character.character_id = "c%d_%d" % [total_days_elapsed, _next_character_serial]
+		_next_character_serial += 1
+	_ensure_backstory(character)
+
+## Geçmişi olmayan (eski kayıt, yeni katılan) kişiye kimliğinden tohumlu bir
+## geçmiş verilir (görev R0).
+func _ensure_backstory(character: CharacterData) -> void:
+	if character.backstory_id.is_empty() and not character.character_id.is_empty():
+		character.backstory_id = CharacterData.backstory_for_id(character.character_id)
 
 ## Kadroya ziyafet: paralı stres rahatlaması. Birikme artık şehir varışının
 ## tek başına eritemeyeceği kadar hızlı (bkz. get_city_rest_relief), o yüzden

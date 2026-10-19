@@ -624,6 +624,33 @@ var character_id: String = ""
 ## yiyecek", "kim savaşa girmeyecek", "kim lider olacak") şehir varışında
 ## eriyen stresin yanında kişide bir iz bırakıyor. Bkz.
 ## `GameSession.resolve_stress_breaks()` - ayrılma zarı bunu okuyor.
+## Yoldaşın geçmişi (görev R0): neden yola düştüğü. Kervana mecbur olanlar
+## katılır (Ana Hedefler: borçlu, sürgün, dul, kaçak, aç). Boşsa kimlikten
+## tohumlanır - kayıt yüklemek geçmişi yeniden atmaz.
+const BACKSTORY_DEBTOR: String = "debtor"
+const BACKSTORY_EXILE: String = "exile"
+const BACKSTORY_WIDOW: String = "widow"
+const BACKSTORY_FUGITIVE: String = "fugitive"
+const BACKSTORY_HUNGRY: String = "hungry"
+const BACKSTORY_KEYS: Array[String] = [BACKSTORY_DEBTOR, BACKSTORY_EXILE, BACKSTORY_WIDOW, BACKSTORY_FUGITIVE, BACKSTORY_HUNGRY]
+const BACKSTORY_LABEL_KEYS: Dictionary = {
+	"debtor": "BACKSTORY_DEBTOR", "exile": "BACKSTORY_EXILE", "widow": "BACKSTORY_WIDOW",
+	"fugitive": "BACKSTORY_FUGITIVE", "hungry": "BACKSTORY_HUNGRY",
+}
+## Liderle bağ (0-5): 1 tanıştık, 3 güven, 5 sır. Sohbet, ortak savaş ve kamp
+## hikâyesi artırır; şikâyet azaltır.
+const MAX_RAPPORT: int = 5
+var backstory_id: String = ""
+var rapport: int = 0
+var last_chat_day: int = -99
+var last_chat_topic: String = ""
+
+static func backstory_for_id(id: String) -> String:
+	return BACKSTORY_KEYS[absi(hash("backstory|" + id)) % BACKSTORY_KEYS.size()]
+
+func change_rapport(delta: int) -> void:
+	rapport = clampi(rapport + delta, 0, MAX_RAPPORT)
+
 const GRIEVANCE_UNFED: String = "unfed"
 const GRIEVANCE_BENCHED: String = "benched"
 const GRIEVANCE_WITNESSED_DEATH: String = "witnessed_death"
@@ -851,6 +878,10 @@ func to_dict() -> Dictionary:
 		"character_id": character_id,
 		"grievances": grievances.duplicate(),
 		"consecutive_hungry_days": consecutive_hungry_days,
+		"backstory_id": backstory_id,
+		"rapport": rapport,
+		"last_chat_day": last_chat_day,
+		"last_chat_topic": last_chat_topic,
 	}
 
 static func from_dict(data: Dictionary) -> CharacterData:
@@ -876,6 +907,10 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.second_class_id = str(data.get("second_class_id", ""))
 	character.duty_id = str(data.get("duty_id", ""))
 	character.auto_allocate = bool(data.get("auto_allocate", true))
+	character.backstory_id = str(data.get("backstory_id", ""))
+	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
+	character.last_chat_day = int(data.get("last_chat_day", -99))
+	character.last_chat_topic = str(data.get("last_chat_topic", ""))
 
 	character.trait_ids.clear()
 	for trait_id in (data.get("trait_ids", []) as Array):

@@ -33,6 +33,14 @@ const KIND_LED: String = "led"
 ## üstü çizili adıydı. Hiçbir sayaca girmiyor (kampanya/olay bağlamı
 ## `KIND_DIED`'ı sayıyor, bunu değil) - kurucu senin kaybın değil, mirasın.
 const KIND_FOUNDER: String = "founder"
+## Yolun hafızası (görev R0): kamp hikâyesi, günün cümlesi, töre, mahkeme
+## kararı, yolda dikilen anıt. Hiçbiri çizili değil, hiçbir sayaca girmez
+## (KIND_FOUNDER gibi); `cause` kendi metin anahtarını taşır.
+const KIND_STORY: String = "story"
+const KIND_DIARY: String = "diary"
+const KIND_CODE: String = "code"
+const KIND_VERDICT: String = "verdict"
+const KIND_MEMORIAL: String = "memorial"
 
 ## Tür -> çeviri anahtarı. Tam yazılıyor, çalışma anında birleştirilmiyor
 ## (bkz. CampaignCatalog.OBJECTIVE_LABEL_KEYS'in aynı notu).
@@ -42,6 +50,11 @@ const KIND_LABEL_KEYS: Dictionary = {
 	KIND_DIED: "LEDGER_DIED",
 	KIND_LED: "LEDGER_LED",
 	KIND_FOUNDER: "LEDGER_FOUNDER",
+	KIND_STORY: "LEDGER_STORY",
+	KIND_DIARY: "LEDGER_DIARY",
+	KIND_CODE: "LEDGER_CODE",
+	KIND_VERDICT: "LEDGER_VERDICT",
+	KIND_MEMORIAL: "LEDGER_MEMORIAL",
 }
 
 ## Üstü çizili sayılan türler: kervandan ayrılmış olmak.
