@@ -37,6 +37,9 @@ var _dismissing: bool = false
 
 ## `policy_only`: gece değil, emir ekranı - yemek dağıtılmıyor, yalnızca
 ## kalıcı sofra emri değişiyor (yol ekranındaki "Sofra" düğmesi).
+## Bu akşam açılan çeşniler (item_id), onaydan sonra yol ekranı okur.
+var chosen_extras: Array[String] = []
+
 func setup(session: GameSession, policy_only: bool = false) -> void:
 	_session = session
 	layer = 65
@@ -83,6 +86,26 @@ func setup(session: GameSession, policy_only: bool = false) -> void:
 	vbox.add_child(status)
 
 	vbox.add_child(_build_table())
+
+	# Sofranın çeşnisi (görev Y-B07): yalnız gerçek sofrada, mal yetiyorsa.
+	var extras: Array = []
+	if not policy_only:
+		extras = _session.get_meal_extras()
+	if not extras.is_empty():
+		var extras_title := Label.new()
+		extras_title.text = tr("UI_MEAL_FEAST_TITLE" if _session.is_feast_evening() else "UI_MEAL_EXTRAS_TITLE")
+		extras_title.autowrap_mode = TextServer.AUTOWRAP_WORD
+		vbox.add_child(extras_title)
+		for extra in extras:
+			var check := CheckBox.new()
+			check.text = tr(String(extra["key"])) % [int(extra["units"]), absi(int(extra["amount"]))]
+			var item_id := String(extra["item"])
+			check.toggled.connect(func(on: bool) -> void:
+				if on and not chosen_extras.has(item_id):
+					chosen_extras.append(item_id)
+				elif not on:
+					chosen_extras.erase(item_id))
+			vbox.add_child(check)
 
 	vbox.add_child(HSeparator.new())
 

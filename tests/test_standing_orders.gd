@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_policy_asks_before_starvation_bites(t)
 	_test_combat_roster_is_remembered(t)
 	_test_orders_survive_a_reload(t)
+	_test_feast_evening_extras(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(500, 0, 1)
@@ -86,3 +87,34 @@ func _test_orders_survive_a_reload(t) -> void:
 	t.eq(fresh.get_meal_policy_selected().size(), 1, "seçili kişi kayıttan döner")
 	t.ok(fresh.standing_camp_at_dusk, "akşam kampı emri kayıttan döner")
 	t.eq(fresh.combat_roster_ids.size(), 1, "savaş kadrosu kayıttan döner")
+
+## Sofranın çeşnisi (görev Y-B07): şarap, bal, balık sofraya çıkar ve etkisini
+## verir; bolluk varken haftada bir ziyafet akşamı sofrayı açar; çeşni yoksa
+## kalıcı emir sessiz kalır.
+func _test_feast_evening_extras(t) -> void:
+	var session := _session()
+	session.add_to_cargo(ItemCatalog.get_item(GameSession.PROVISIONS_ITEM_ID), 200)
+	var destination := WorldMapData.get_routes_from(session.current_location_id)[0].to_location_id
+	session.start_journey(destination, 10, 0.2, CaravanPlan.new(WorldMapData.get_location_by_id(destination), 10))
+	session.total_days_elapsed = GameSession.FEAST_EVENING_INTERVAL + 1
+	t.ok(session.get_meal_extras().is_empty(), "çeşni malı yokken liste boş")
+	t.not_ok(session.meal_needs_decision(), "çeşnisiz bolluk akşamı sofra sorulmaz")
+	session.add_to_cargo(ItemCatalog.get_item("wine"), 10)
+	session.add_to_cargo(ItemCatalog.get_item("fish"), 10)
+	t.eq(session.get_meal_extras().size(), 2, "şarap ve balık sofraya çıkabilir")
+	t.ok(session.meal_needs_decision(), "haftada bir ziyafet akşamı sofrayı açar")
+	var morale_before := session.caravan.morale
+	session.caravan.change_morale(-30)
+	var low := session.caravan.morale
+	session.caravan.stamina = 50
+	var units := int(ceil(float(session.get_meal_mouths()) / 4.0))
+	var served := session.serve_meal_extras(["wine", "fish"])
+	t.eq(served.size(), 2, "iki çeşni sofrada")
+	t.eq(session.caravan.morale, mini(low + 6, morale_before), "şarap moral verir")
+	t.eq(session.caravan.stamina, 62, "balık takat verir")
+	t.eq(session.get_total_quantity("wine"), 10 - units, "şarap ağız sayısına göre eksilir")
+	t.not_ok(session.is_feast_evening(), "ziyafetten sonra sayaç sıfırlanır")
+	t.not_ok(session.meal_needs_decision(), "ertesi akşam sofra yeniden sorulmaz")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	t.eq(copy.last_feast_evening_day, session.last_feast_evening_day, "ziyafet günü kayıttan döner")

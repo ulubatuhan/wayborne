@@ -1567,6 +1567,9 @@ func get_meal_policy_selected() -> Array[CharacterData]:
 func meal_needs_decision() -> bool:
 	if get_provisions() < get_daily_provision_consumption():
 		return true
+	# Bolluk varken de ara sıra bir ziyafet akşamı sorulur (görev Y-B07).
+	if is_feast_evening():
+		return true
 	var fed := get_meal_fed_party(meal_policy_mode, get_meal_policy_selected())
 	for character in get_party():
 		if not fed.has(character) and character.consecutive_hungry_days + 1 >= STARVATION_HP_LOSS_START_DAY:
@@ -1574,6 +1577,62 @@ func meal_needs_decision() -> bool:
 	if not meal_feeds_crew(meal_policy_mode) and crew_hungry_nights + 1 >= STARVATION_HP_LOSS_START_DAY:
 		return true
 	return false
+
+## --- Sofranın çeşnisi (görev Y-B07) ---
+## Erzak (gün başına sayılan pay) aynı kalır - planlayıcının sözü ona bağlı.
+## Kervanın taşıdığı bazı mallar sofraya çeşni olarak çıkabilir: şarap moral,
+## bal stres, taze balık takat verir; her biri ağız sayısına göre mal yer.
+## Bu bir seçim olduğu için yalnızca sofra açıkken sorulur; kalıcı emir
+## çeşniyi kendiliğinden açmaz. Bolluk varken de her FEAST_EVENING_INTERVAL
+## günde bir "ziyafet akşamı" sofrayı açar, çeşni varsa.
+const FEAST_EVENING_INTERVAL: int = 7
+const MEAL_EXTRAS: Array[Dictionary] = [
+	{"item": "wine", "effect": "morale", "amount": 6, "per_mouths": 4, "key": "UI_MEAL_EXTRA_WINE"},
+	{"item": "honey", "effect": "stress", "amount": -4, "per_mouths": 5, "key": "UI_MEAL_EXTRA_HONEY"},
+	{"item": "fish", "effect": "stamina", "amount": 12, "per_mouths": 4, "key": "UI_MEAL_EXTRA_FISH"},
+]
+var last_feast_evening_day: int = 0
+
+func get_meal_mouths() -> int:
+	return maxi(1, get_party().size() + owned_wagon_count * PEOPLE_PER_WAGON + caravan.merchant_names.size())
+
+## Bu akşam sofraya çıkabilecek çeşniler: yeterli mal varsa listede.
+func get_meal_extras() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var mouths := get_meal_mouths()
+	for extra in MEAL_EXTRAS:
+		var units := int(ceil(float(mouths) / float(extra["per_mouths"])))
+		if get_total_quantity(String(extra["item"])) >= units:
+			var entry := extra.duplicate()
+			entry["units"] = units
+			out.append(entry)
+	return out
+
+func is_feast_evening() -> bool:
+	return is_journey_active() \
+		and total_days_elapsed - last_feast_evening_day >= FEAST_EVENING_INTERVAL \
+		and not get_meal_extras().is_empty()
+
+## Sofra kurulduğunda çağrılır: seçilen çeşniler mal yer, etkisini verir.
+## Sayaç her sofrada değil, ziyafet akşamında ya da çeşni açılınca sıfırlanır.
+func serve_meal_extras(item_ids: Array) -> Array[Dictionary]:
+	var served: Array[Dictionary] = []
+	for extra in get_meal_extras():
+		if not item_ids.has(String(extra["item"])):
+			continue
+		if not remove_from_cargo_or_bags(String(extra["item"]), int(extra["units"])):
+			continue
+		match String(extra["effect"]):
+			"morale":
+				caravan.change_morale(int(extra["amount"]))
+			"stress":
+				change_stress(int(extra["amount"]))
+			"stamina":
+				caravan.stamina = clampi(caravan.stamina + int(extra["amount"]), 0, CaravanState.MAX_STAMINA)
+		served.append(extra)
+	if not served.is_empty() or is_feast_evening():
+		last_feast_evening_day = total_days_elapsed
+	return served
 
 ## Savaş kadrosu: son seçilen sıra, hâlâ partide olanlarla. Sonradan
 ## katılan biri sona ekleniyor ama dahil değil - hatırlanan emir onu
@@ -3304,6 +3363,7 @@ func to_save_dict() -> Dictionary:
 		"last_feast_day": last_feast_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
+		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
 		"bought_here": bought_here.duplicate(),
 		"price_book": price_book.duplicate(true),
@@ -3525,6 +3585,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
+	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	perishable_days = {}
 	for item_id in (data.get("perishable_days", {}) as Dictionary):
 		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])

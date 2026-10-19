@@ -4091,6 +4091,10 @@ every decision has a visible control, and a key is only its shortcut.**
   itself in the evening phase only (camp outlasts the evening, so it cannot
   relight the same night, even after a reload). The pre-combat roster and
   order are remembered, with Confirm focused. All three are saved.
+- **The table can offer more than rations (task Y-B07).** Provisions stay the counted ration the planner promises.
+  Wine (morale), honey (stress) and fresh fish (stamina) can go on the table, eating one unit per few mouths
+  (`GameSession.MEAL_EXTRAS`); they are offered only when the meal panel is open, never by the standing order. Even in
+  plenty, every `FEAST_EVENING_INTERVAL` days a feast night opens the table if there is something to offer.
 - **A standing order the planner does not know about is a starvation
   trap.** Camping every evening stops the column for `CAMP_HOURS` a day and
   burns `CAMP_PROVISIONS_COST` a night; `forecast_extra_days(...,

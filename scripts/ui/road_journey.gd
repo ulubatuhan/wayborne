@@ -2184,6 +2184,10 @@ func _on_meal_confirmed(mode: String, selected: Array) -> void:
 	# Sofrada verilen karar yeni kalıcı emir olur.
 	_session.set_meal_policy(mode, typed_selected)
 	_serve_meal(mode, typed_selected)
+	var extras: Array = _meal_panel.chosen_extras if _meal_panel != null else []
+	for extra in _session.serve_meal_extras(extras):
+		var dish := tr(String(extra["key"])) % [int(extra["units"]), absi(int(extra["amount"]))]
+		_add_log(tr("UI_ROAD_MEAL_EXTRA_SERVED") % dish, OUTCOME_COLOR)
 	_meal_panel = null
 	if not _camping:
 		_band.set_camping(false)
