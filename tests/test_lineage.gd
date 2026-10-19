@@ -161,6 +161,9 @@ func _test_inherited_from_father(t) -> void:
 	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
 	var loaded := copy.debts.get_debt(GameSession.FATHER_DEBT_ID)
 	t.ok(loaded != null and loaded.due_day == GameSession.FATHER_DEBT_TERM_DAYS, "borç ve vadesi kayıttan döner")
+	t.almost(loaded.interest_rate, GameSession.FATHER_DEBT_INTEREST_RATE, "aile borcunun gecikme faizi yumuşak ve kayıttan döner")
+	t.eq(loaded.reputation_penalty, GameSession.FATHER_DEBT_REPUTATION_PENALTY, "aile borcunun itibar bedeli hafif")
+	t.ok(loaded.interest_rate < Debt.OVERDUE_INTEREST_RATE, "aile borcu loncadan yumuşak")
 
 ## Yolun hafızası (Y-B11, R2): yolda ölen mezar, düşen lider taş, kaybedilen
 ## vagon enkaz, kamp kül bırakır; konum yönsüzdür (öbür yönden aynı yer),

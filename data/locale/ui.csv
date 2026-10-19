@@ -1107,7 +1107,7 @@
 "UI_CREATE_ORIGIN","Başlangıç","Origin","","","","","","","","",""
 "UI_ORIGIN_LOCKED","%s (kilitli: %s)","%s (locked: %s)","","","","","","","","",""
 "UI_ORIGIN_FATHER","Babanın kervanı","Your father's caravan","","","","","","","","",""
-"UI_ORIGIN_FATHER_DESC","Kervan babandan kaldı, borcuyla birlikte: loncaya 240 altın, 60 gün vadeli.","The caravan was your father's, and so is his debt: 240 gold to the guild, due in 60 days.","","","","","","","","",""
+"UI_ORIGIN_FATHER_DESC","Kervan babandan kaldı, borcuyla birlikte: loncaya 180 altın, 120 gün vadeli; gecikmesi hafif işler, alacaklı akraba.","The caravan was your father's, and so is his debt: 180 gold to the guild, due in 120 days; a late payment is forgiven lightly, the creditor is kin.","","","","","","","","",""
 "UI_ORIGIN_EXILE","Sürgün","Exile","","","","","","","","",""
 "UI_ORIGIN_EXILE_DESC","Şehrinden kovuldun. Kimseye borcun yok ama kesen hafif, adın da kötü.","Driven out of your city. You owe no one, but your purse is light and your name is poor.","","","","","","","","",""
 "UI_ORIGIN_UNLOCK_EXILE","bir soy sona ersin","let a lineage end","","","","","","","","",""
