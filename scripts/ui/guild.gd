@@ -30,6 +30,7 @@ var _rows: Array[Dictionary] = []
 func _ready() -> void:
 	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
+	FirstTimeHint.show_once(self, _session, FirstTimeHint.CONTRACT)
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)

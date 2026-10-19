@@ -47,6 +47,7 @@ var _result_label: Label
 func _ready() -> void:
 	WaybookTheme.fit_desk_workspace(self)
 	_session = GameState.get_session()
+	FirstTimeHint.show_once(self, _session, FirstTimeHint.PLANNER)
 
 	_destination = WorldMapData.get_location_by_id(TravelContext.selected_destination_id)
 	var origin := WorldMapData.get_location_by_id(_session.current_location_id)

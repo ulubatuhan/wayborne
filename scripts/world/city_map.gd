@@ -170,7 +170,8 @@ func _maybe_show_onboarding() -> void:
 	if _session.has_flag(GameSession.ONBOARDING_FLAG):
 		return
 	_session.set_flag(GameSession.ONBOARDING_FLAG)
-	add_child(OnboardingPanel.new())
+	# Dört konuluk panel kalktı: altı konu ilk karşılaşıldığı anda tek cümleyle
+	# gelir (FirstTimeHint, görev Y-H01). Panel yardım düğmesinde duruyor.
 	# Devir sahnesi onboarding'in üstünde açılır (görev Y-C14).
 	if _session.debts.get_debt(GameSession.FATHER_DEBT_ID) != null:
 		add_child(InheritancePanel.new().setup(_session))

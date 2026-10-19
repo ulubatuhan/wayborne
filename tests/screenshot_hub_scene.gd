@@ -23,6 +23,8 @@ func _init() -> void:
 	rng.seed = 7
 	session.start_playthrough(CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new()), rng)
 	session.set_flag(GameSession.ONBOARDING_FLAG)
+	for hint_flag in FirstTimeHint.FLAGS.values():
+		session.set_flag(String(hint_flag))
 	session.owned_wagon_count = 2
 	session.owned_donkeys = 1
 	session.owned_half_wagons = 1

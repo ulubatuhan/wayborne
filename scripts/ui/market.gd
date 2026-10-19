@@ -67,6 +67,7 @@ func _ready() -> void:
 	# Masa sütunu (%65) burada yok: tezgâh satırı ile kargo sütunu yan yana
 	# o genişliğe sığmıyor, sığdırmak yatay kaydırma çubuğu açıyordu.
 	_session = GameState.get_session()
+	FirstTimeHint.show_once(self, _session, FirstTimeHint.TRADE)
 	# Sahne dosyasındaki yazı yalnızca editör içindir; oyuncunun gördüğü her
 	# metin koddan, anahtarla gelir (bkz. Localization Rules).
 	$MarginContainer/VBoxContainer/TitleLabel.text = tr("UI_MARKET_TITLE")
