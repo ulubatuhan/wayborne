@@ -4345,6 +4345,12 @@ ever fell, and the career simulation had already measured the result
   starting city - see `GameSession.start_playthrough()`. One wagon is
   exactly two party slots, so the roster starts full; a third member is
   only possible after buying a wagon.
+- **The caravan was your father's, and it comes with his debt (task Y-C14).** `inherit_father_caravan()` runs after
+  `start_playthrough()` in the real new-game flow: the founder ledger line becomes the father (`LEDGER_CAUSE_FATHER`)
+  and a guild debt (`FATHER_DEBT_PRINCIPAL`, due on `FATHER_DEBT_TERM_DAYS`) opens the first period's clock.
+  `InheritancePanel` shows the handover over the onboarding, closed only by its button. Tests that need a debt-free
+  start simply do not call it; `simulate_career` does, and repays above its cash buffer. The amount and term are not
+  yet measured.
 - The companion comes from `RecruitCatalog.build_starting_companion()`,
   which reuses the normal candidate generator rather than duplicating the
   randomization.

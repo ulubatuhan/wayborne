@@ -31,6 +31,7 @@ func _initialize() -> void:
 		"Deneme Kervancısı", CultureCatalog.VALLEY, CharacterStats.new()
 	)
 	session.start_playthrough(hero, _rng)
+	session.inherit_father_caravan()
 
 	print("══ WAYBORNE PLAYTHROUGH ══")
 	_print_start(session)

@@ -19,6 +19,7 @@ func run(t) -> void:
 	_test_run_ends_only_without_an_heir(t)
 	_test_ledger_never_deletes(t)
 	_test_lineage_survives_a_save(t)
+	_test_inherited_from_father(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(500, 0, 1)
@@ -131,3 +132,31 @@ func _test_lineage_survives_a_save(t) -> void:
 		restored.ledger.entries.size(), session.ledger.entries.size(),
 		"defterin tamamı kayıtta yaşar"
 	)
+
+## Babadan borçlu kervan (görev Y-C14): devir borcu, vadesi ve kurucu satırı.
+func _test_inherited_from_father(t) -> void:
+	var session := GameSession.new(250, 20, 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4242
+	var hero := CharacterData.create("Varis", CultureCatalog.VALLEY, CharacterStats.new())
+	session.start_playthrough(hero, rng)
+	t.eq(session.get_total_debt(), 0, "devirden önce borç yok")
+	session.inherit_father_caravan()
+	var debt := session.debts.get_debt(GameSession.FATHER_DEBT_ID)
+	t.ok(debt != null, "babanın borcu deftere yazılı")
+	t.eq(debt.principal, GameSession.FATHER_DEBT_PRINCIPAL, "borcun tutarı sabit")
+	t.eq(debt.due_day, GameSession.FATHER_DEBT_TERM_DAYS, "vade ilk dönemin sonu")
+	t.eq(debt.creditor_name, GameSession.FATHER_CREDITOR_KEY, "alacaklı babanın alacaklısı")
+	var founder: Dictionary = session.ledger.entries[0]
+	t.eq(String(founder["kind"]), CaravanLedger.KIND_FOUNDER, "defterin ilk satırı kurucu")
+	t.eq(String(founder["cause"]), GameSession.FATHER_CAUSE_KEY, "kurucu satırı babayı söylüyor")
+	t.ok(not session.get_father_name().is_empty() and session.get_father_name() != hero.character_name, "babanın adı oyuncununkinden ayrı")
+	t.ok(InheritancePanel.text_for(session).contains(session.get_father_name()), "devir sahnesi babayı adıyla anar")
+	t.ok(InheritancePanel.text_for(session).contains(str(GameSession.FATHER_DEBT_PRINCIPAL)), "devir sahnesi borcu söyler")
+	session.inherit_father_caravan()
+	t.eq(session.get_total_debt(), GameSession.FATHER_DEBT_PRINCIPAL, "ikinci çağrı borcu ikilemez")
+	t.eq(session.get_companions_lost(), 0, "baba kayıp sayılmaz (finalin kayıp kapısı satın alınmaz)")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(session.to_save_dict())))
+	var loaded := copy.debts.get_debt(GameSession.FATHER_DEBT_ID)
+	t.ok(loaded != null and loaded.due_day == GameSession.FATHER_DEBT_TERM_DAYS, "borç ve vadesi kayıttan döner")

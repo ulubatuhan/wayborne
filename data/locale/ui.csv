@@ -839,3 +839,7 @@
 "UI_PLANNER_SHORTCUT_OFF","Kestirme var: %d gün kısa, zor araziden, tehlike +%d. Kestirmeden git","A shortcut exists: %d days shorter, over rough ground, danger +%d. Take it","","","","","","","","",""
 "UI_PLANNER_SHORTCUT_ON","Kestirmeden: %d gün kısa, tehlike +%d. Ana yola dön","By the shortcut: %d days shorter, danger +%d. Back to the main road","","","","","","","","",""
 "UI_DANGER_PART_SHORTCUT","kestirme %+d","shortcut %+d","","","","","","","","",""
+"LEDGER_CAUSE_FATHER","babandı; hastalanınca kervanı sana borcuyla devretti","your father; when sickness took him he handed you the caravan, and its debt","","","","","","","","",""
+"UI_INHERIT_TITLE","Kervan sana kaldı","The caravan is yours now","","","","","","","","",""
+"UI_INHERIT_TEXT","Baban %s bu kervanı yıllarca yürüttü. Bu mevsim hastalık onu yatağa düşürdü. Adını, vagonunu, yanındaki yoldaşı ve %d altınlık borcunu sana devretti. Alacaklı: %s. Borç %d. günün sonunda ödenmeli; geç kalan borç faiz işletir ve adını lekeler. Defterin ilk satırı onun.","Your father %s ran this caravan for years. This season sickness put him in his bed. He handed you his name, his wagon, the companion at his side and a debt of %d gold. Creditor: %s. It is due at the end of day %d; a late debt grows interest and stains the name. The first line of the ledger is his.","","","","","","","","",""
+"UI_INHERIT_DISMISS","Kervanı devral","Take the caravan","","","","","","","","",""

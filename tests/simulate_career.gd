@@ -110,6 +110,7 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 		CharacterStats.new()
 	)
 	session.start_playthrough(player, rng)
+	session.inherit_father_caravan()
 
 	## Bölüm kimliği -> kapandığı sefer numarası.
 	var chapter_legs: Dictionary = {}
@@ -151,6 +152,11 @@ func _snapshot(session: GameSession) -> Dictionary:
 ## bunu istiyor, ve bir oyuncu da bunu yapar - biriken parayı kesede
 ## tutmak hiçbir şeye yaramaz.
 func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -> void:
+	# Babadan kalan borç (Y-C14): gerçek oyuncu vadesinden önce öder - tampon
+	# kadarı kesede kalır, fazlası borca.
+	var father := session.debts.get_debt(GameSession.FATHER_DEBT_ID)
+	if father != null and session.wallet.balance > CASH_BUFFER:
+		session.repay_debt(GameSession.FATHER_DEBT_ID, session.wallet.balance - CASH_BUFFER)
 	var wagon_cap := session.get_wagon_capacity()
 	if policy == POLICY_CONTRACTS:
 		wagon_cap = CONTRACT_POLICY_WAGON_CAP

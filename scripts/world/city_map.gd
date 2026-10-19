@@ -171,6 +171,9 @@ func _maybe_show_onboarding() -> void:
 		return
 	_session.set_flag(GameSession.ONBOARDING_FLAG)
 	add_child(OnboardingPanel.new())
+	# Devir sahnesi onboarding'in üstünde açılır (görev Y-C14).
+	if _session.debts.get_debt(GameSession.FATHER_DEBT_ID) != null:
+		add_child(InheritancePanel.new().setup(_session))
 
 ## Onboarding'i isteğe bağlı yeniden açan kapı: F3 ya da brifingin
 ## altındaki yardım düğmesi. Bayrağa dokunmuyor.

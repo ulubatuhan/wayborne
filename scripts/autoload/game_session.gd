@@ -825,6 +825,35 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	contracts_delivered = 0
 	visited_location_ids = {current_location_id: true}
 
+## Babadan borçlu kervan (görev Y-C14, kullanıcı notu): kervan oyuncunun
+## değil babasınındı; baba hastalanınca kervanı borcuyla devretti. Defterin
+## kurucu satırı babadır; borç loncaya, vadesi ilk dönemin saati. Yeni oyunun
+## akışı (karakter oluşturma) start_playthrough'tan sonra çağırır; borçsuz
+## başlangıç isteyen testler çağırmaz. Tutar ve vade ölçülecek (akşam testi,
+## simulate_career) - onay paketinde kullanıcıya soruluyor.
+const FATHER_DEBT_ID: String = "father_debt"
+const FATHER_DEBT_PRINCIPAL: int = 240
+const FATHER_DEBT_TERM_DAYS: int = 60
+const FATHER_CREDITOR_KEY: String = "DEBT_CREDITOR_FATHER"
+const FATHER_CAUSE_KEY: String = "LEDGER_CAUSE_FATHER"
+
+func inherit_father_caravan() -> void:
+	if debts.get_debt(FATHER_DEBT_ID) != null:
+		return
+	var debt := debts.borrow(FATHER_CREDITOR_KEY, FATHER_DEBT_PRINCIPAL, total_days_elapsed, Debt.SOURCE_LOAN, FATHER_DEBT_ID)
+	debt.due_day = total_days_elapsed + FATHER_DEBT_TERM_DAYS
+	for entry in ledger.entries:
+		if String(entry.get("kind", "")) == CaravanLedger.KIND_FOUNDER:
+			entry["cause"] = FATHER_CAUSE_KEY
+			break
+
+## Defterin kurucu satırındaki ad: babadır (inherit_father_caravan sonrası).
+func get_father_name() -> String:
+	for entry in ledger.entries:
+		if String(entry.get("kind", "")) == CaravanLedger.KIND_FOUNDER:
+			return String(entry.get("name", ""))
+	return ""
+
 ## Kurucunun adı oyuncunun kültür havuzundan; oyuncunun kendi adıyla
 ## çakışırsa bir sonrakine geçilir.
 static func _roll_founder_name(player_character: CharacterData, rng: RandomNumberGenerator) -> String:

@@ -479,6 +479,7 @@ func _on_start_pressed() -> void:
 	# (bkz. GameSession.start_playthrough).
 	var session: GameSession = GameState.get_session()
 	session.start_playthrough(character, _rng)
+	session.inherit_father_caravan()
 
 	SceneInk.go(Nav.go_root(Nav.CITY_MAP))
 
