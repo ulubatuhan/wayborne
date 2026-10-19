@@ -275,6 +275,8 @@ const SIGNAL_ICONS: Dictionary = {
 	RoadSignals.KIND_WHEEL: "r7a_wheel.png",
 	RoadSignals.KIND_STRAGGLER: "r7b_straggler.png",
 	RoadSignals.KIND_SMOKE: "r7c_smoke.png",
+	# Kehanetin kendi ikonu yok: arkadan gelen, belirsiz bir iz (Y-B03).
+	RoadSignals.KIND_OMEN: "r7b_straggler.png",
 }
 const SIGNAL_FLASH_SECONDS: float = 1.6
 const SIGNAL_FADE_SECONDS: float = 0.8
@@ -2125,12 +2127,14 @@ func _tick_signals(hours: float) -> void:
 	)
 	for kind in outcome["appeared"]:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
-	for kind in outcome["resolved"]:
-		_add_log(tr(RoadSignals.get_resolved_key(String(kind))), OUTCOME_COLOR)
-		_flash_signal_icon(String(kind), ArtPalette.UI_SIGNAL_RESOLVED)
-	for kind in outcome["escalated"]:
-		_apply_signal_escalation(String(kind))
-		_flash_signal_icon(String(kind), ArtPalette.UI_SIGNAL_ESCALATED)
+	for i in (outcome["resolved"] as Array).size():
+		var kind := String(outcome["resolved"][i])
+		_apply_signal_resolution(String(outcome["resolved_truths"][i]))
+		_flash_signal_icon(kind, ArtPalette.UI_SIGNAL_RESOLVED)
+	for i in (outcome["escalated"] as Array).size():
+		var kind := String(outcome["escalated"][i])
+		_apply_signal_escalation(kind, String(outcome["escalated_truths"][i]))
+		_flash_signal_icon(kind, ArtPalette.UI_SIGNAL_ESCALATED)
 	if _signal_tween == null:
 		_refresh_signal_icon()
 
@@ -2162,20 +2166,67 @@ func _flash_signal_icon(kind: String, tint: Color) -> void:
 
 ## İhmal edilen işaretin bedeli oyunun kendi diliyle ödeniyor: vagon
 ## hasarı, stres, tehlike. Yeni bir ceza mekaniği yok.
-func _apply_signal_escalation(kind: String) -> void:
-	_add_log(tr(RoadSignals.get_escalated_key(kind)), LOCKED_COLOR)
-	match kind:
-		RoadSignals.KIND_WHEEL:
+##
+## Görev Y-B03: sonuç işaretin türüne değil gizli gerçeğine göre. Bazı gerçekler
+## boştur (yanlış alarm, çobanlar, boş kehanet) - ihmal ücretsiz kalır, ama
+## hangisi olduğunu bilmek için bakmak gerekir.
+func _apply_signal_escalation(_kind: String, truth: String) -> void:
+	_add_log(tr(String(RoadSignals.TRUTH_ESCALATED_KEYS.get(truth, ""))), LOCKED_COLOR)
+	match truth:
+		"axle":
 			_session.caravan.damage_wagons(1)
-		RoadSignals.KIND_STRAGGLER:
+		"loose_load":
+			_lose_some_cargo(2)
+		"tired":
 			_session.change_stress(SIGNAL_STRAGGLER_STRESS)
-		RoadSignals.KIND_SMOKE:
+		"sick":
+			_session.change_stress(SIGNAL_STRAGGLER_STRESS + 2)
+			_session.caravan.change_morale(-3)
+		"stranger":
+			_session.change_provisions(-3)
+		"bandit_camp":
 			# Duman bir pusunun habercisi: görmezden gelinirse yolun
 			# tehlikesi artıyor, yani savaş ihtimali yükseliyor.
 			_signal_danger_bonus = minf(
 				_signal_danger_bonus + RoadSignals.SMOKE_DANGER_DELTA, SIGNAL_DANGER_CAP
 			)
+		"village_fire":
+			_session.caravan.change_morale(-2)
+		"true_omen":
+			_signal_danger_bonus = minf(_signal_danger_bonus + SIGNAL_OMEN_DANGER, SIGNAL_DANGER_CAP)
 	_refresh_state()
+
+## İlgilenilen işaretin gerçeği ortaya çıkar; iyi gerçekler küçük bir ödül.
+const SIGNAL_OMEN_DANGER: float = 0.08
+const SIGNAL_FOREWARNED: float = 0.05
+
+func _apply_signal_resolution(truth: String) -> void:
+	_add_log(tr(String(RoadSignals.TRUTH_RESOLVED_KEYS.get(truth, ""))), OUTCOME_COLOR)
+	match truth:
+		"bandit_camp", "true_omen":
+			# Önceden görülen tehlike: yol biraz daha az tekinsiz.
+			_signal_danger_bonus = maxf(_signal_danger_bonus - SIGNAL_FOREWARNED, -SIGNAL_DANGER_CAP)
+		"village_fire":
+			_session.caravan.change_morale(3)
+			_session.change_reputation(1)
+		"herders":
+			_session.change_provisions(2)
+		"stranger":
+			_session.caravan.change_morale(2)
+	_refresh_state()
+
+## Gevşeyen yükten düşen: en ağır ticaret malından birkaç birim.
+func _lose_some_cargo(units: int) -> void:
+	var heaviest: Item = null
+	for item in ItemCatalog.get_trade_goods():
+		if item.item_id == GameSession.PROVISIONS_ITEM_ID or _session.get_total_quantity(item.item_id) <= 0:
+			continue
+		if heaviest == null or item.unit_weight > heaviest.unit_weight:
+			heaviest = item
+	if heaviest != null:
+		_session.remove_from_cargo_or_bags(heaviest.item_id, mini(units, _session.get_total_quantity(heaviest.item_id)))
+	else:
+		_session.caravan.change_morale(-2)
 
 ## `journey_days_remaining` artık bağımsız bir sayaç değil, kat edilen
 ## yoldan türetilen bir gösterge - HUD, sapma maliyeti (get_days_travelled)

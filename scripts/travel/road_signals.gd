@@ -24,6 +24,57 @@ extends RefCounted
 const KIND_WHEEL: String = "wheel"
 const KIND_STRAGGLER: String = "straggler"
 const KIND_SMOKE: String = "smoke"
+## Kehanet (görev Y-B03): kervanın ardından gelen kuzgun, kızıl bir gök. Arkada
+## görülür; gerçek mi, boş mu, ancak bakan bilir.
+const KIND_OMEN: String = "omen"
+
+## --- Belirsizlik (görev Y-B03) ---
+## İşaretin türünü görmek ne olduğunu söylemez. Her işaret doğarken gizli bir
+## "gerçek" çeker; ilgilenen (kendi bölgesine yürüyen) onu öğrenir ve gerçeğe
+## göre sonucu alır, ihmal eden de gerçeğe göre bedelini öder - bazısı boştur.
+## Gerçek kayda yazılır (yüklemek belirsizliği yeniden atmaz).
+## Her tür: [[gerçek, ağırlık], ...]; ilk gerçek eski kayıtların varsayılanı.
+const TRUTHS: Dictionary = {
+	KIND_WHEEL: [["axle", 0.5], ["loose_load", 0.3], ["false_alarm", 0.2]],
+	KIND_STRAGGLER: [["tired", 0.5], ["sick", 0.3], ["stranger", 0.2]],
+	KIND_SMOKE: [["bandit_camp", 0.4], ["village_fire", 0.35], ["herders", 0.25]],
+	KIND_OMEN: [["true_omen", 0.5], ["empty_omen", 0.5]],
+}
+## Gerçeğe göre metin anahtarları (tam yazılı).
+const TRUTH_RESOLVED_KEYS: Dictionary = {
+	"axle": "UI_ROAD_SIGNAL_WHEEL_FIXED", "loose_load": "UI_SIGNAL_LOOSE_LOAD_FIXED",
+	"false_alarm": "UI_SIGNAL_FALSE_ALARM_FIXED", "tired": "UI_ROAD_SIGNAL_STRAGGLER_FIXED",
+	"sick": "UI_SIGNAL_SICK_FIXED", "stranger": "UI_SIGNAL_STRANGER_FIXED",
+	"bandit_camp": "UI_SIGNAL_BANDIT_CAMP_FIXED", "village_fire": "UI_SIGNAL_VILLAGE_FIRE_FIXED",
+	"herders": "UI_SIGNAL_HERDERS_FIXED", "true_omen": "UI_SIGNAL_TRUE_OMEN_FIXED",
+	"empty_omen": "UI_SIGNAL_EMPTY_OMEN_FIXED",
+}
+const TRUTH_ESCALATED_KEYS: Dictionary = {
+	"axle": "UI_ROAD_SIGNAL_WHEEL_BROKE", "loose_load": "UI_SIGNAL_LOOSE_LOAD_LOST",
+	"false_alarm": "UI_SIGNAL_FALSE_ALARM_GONE", "tired": "UI_ROAD_SIGNAL_STRAGGLER_LOST",
+	"sick": "UI_SIGNAL_SICK_WORSE", "stranger": "UI_SIGNAL_STRANGER_STOLE",
+	"bandit_camp": "UI_ROAD_SIGNAL_SMOKE_AMBUSH", "village_fire": "UI_SIGNAL_VILLAGE_FIRE_GUILT",
+	"herders": "UI_SIGNAL_HERDERS_GONE", "true_omen": "UI_SIGNAL_TRUE_OMEN_CAME",
+	"empty_omen": "UI_SIGNAL_EMPTY_OMEN_GONE",
+}
+
+static func default_truth(kind: String) -> String:
+	var table: Array = TRUTHS.get(kind, [])
+	return String(table[0][0]) if not table.is_empty() else ""
+
+static func roll_truth(kind: String, rng: RandomNumberGenerator) -> String:
+	var table: Array = TRUTHS.get(kind, [])
+	var roll := rng.randf()
+	var acc := 0.0
+	for entry in table:
+		acc += float(entry[1])
+		if roll <= acc:
+			return String(entry[0])
+	return default_truth(kind)
+
+static func truth_of(entry: Dictionary) -> String:
+	var truth := String(entry.get("truth", ""))
+	return truth if not truth.is_empty() else default_truth(String(entry.get("kind", "")))
 
 ## Hangi bölgede ilgilenilirse çözülür. İşaretin bölgesi, onun *nerede*
 ## olduğudur: tekerlek vagonlarda, geride kalan kuyrukta, ufuktaki duman
@@ -32,6 +83,7 @@ const KIND_ZONES: Dictionary = {
 	KIND_WHEEL: RoadAttention.ZONE_WAGONS,
 	KIND_STRAGGLER: RoadAttention.ZONE_REAR,
 	KIND_SMOKE: RoadAttention.ZONE_FRONT,
+	KIND_OMEN: RoadAttention.ZONE_REAR,
 }
 
 ## Metin anahtarları - tam yazılıyor (bkz. Localization Rules).
@@ -39,19 +91,22 @@ const KIND_NOTICE_KEYS: Dictionary = {
 	KIND_WHEEL: "UI_ROAD_SIGNAL_WHEEL",
 	KIND_STRAGGLER: "UI_ROAD_SIGNAL_STRAGGLER",
 	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE",
+	KIND_OMEN: "UI_ROAD_SIGNAL_OMEN",
 }
 const KIND_RESOLVED_KEYS: Dictionary = {
 	KIND_WHEEL: "UI_ROAD_SIGNAL_WHEEL_FIXED",
 	KIND_STRAGGLER: "UI_ROAD_SIGNAL_STRAGGLER_FIXED",
 	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE_FIXED",
+	KIND_OMEN: "UI_SIGNAL_EMPTY_OMEN_FIXED",
 }
 const KIND_ESCALATED_KEYS: Dictionary = {
 	KIND_WHEEL: "UI_ROAD_SIGNAL_WHEEL_BROKE",
 	KIND_STRAGGLER: "UI_ROAD_SIGNAL_STRAGGLER_LOST",
 	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE_AMBUSH",
+	KIND_OMEN: "UI_SIGNAL_EMPTY_OMEN_GONE",
 }
 
-const ALL_KINDS: Array[String] = [KIND_WHEEL, KIND_STRAGGLER, KIND_SMOKE]
+const ALL_KINDS: Array[String] = [KIND_WHEEL, KIND_STRAGGLER, KIND_SMOKE, KIND_OMEN]
 
 ## Kaç saat ilgilenilmezse büyür. Bir günden uzun, çünkü oyuncunun
 ## kolonda yürüyüp gitmesine zaman tanımalı; iki günden kısa, çünkü
@@ -115,7 +170,7 @@ func tick(
 	hours: float, attention_zone: String, rng: RandomNumberGenerator,
 	affliction_count: int = 0
 ) -> Dictionary:
-	var result := {"appeared": [], "resolved": [], "escalated": []}
+	var result := {"appeared": [], "resolved": [], "escalated": [], "resolved_truths": [], "escalated_truths": []}
 	if hours <= 0.0:
 		return result
 
@@ -126,10 +181,12 @@ func tick(
 		var kind := String(entry["kind"])
 		if get_zone_for(kind) == attention_zone:
 			result["resolved"].append(kind)
+			result["resolved_truths"].append(truth_of(entry))
 			continue
 		entry["age_hours"] = float(entry["age_hours"]) + hours
 		if float(entry["age_hours"]) >= ESCALATE_HOURS:
 			result["escalated"].append(kind)
+			result["escalated_truths"].append(truth_of(entry))
 			continue
 		survivors.append(entry)
 	open_signals = survivors
@@ -142,7 +199,7 @@ func tick(
 	if open_signals.size() < MAX_OPEN and rng.randf() < chance:
 		var kind := _roll_kind(rng)
 		if not get_open_kinds().has(kind):
-			open_signals.append({"kind": kind, "age_hours": 0.0})
+			open_signals.append({"kind": kind, "age_hours": 0.0, "truth": roll_truth(kind, rng)})
 			result["appeared"].append(kind)
 
 	return result
@@ -155,7 +212,7 @@ func clear() -> void:
 func to_dict() -> Dictionary:
 	var entries: Array = []
 	for entry in open_signals:
-		entries.append({"kind": String(entry["kind"]), "age_hours": float(entry["age_hours"])})
+		entries.append({"kind": String(entry["kind"]), "age_hours": float(entry["age_hours"]), "truth": truth_of(entry)})
 	return {"open": entries}
 
 ## Eski kayıtta alan yok: boş liste. Bilinmeyen tür, eksi ya da sayı olmayan
@@ -174,7 +231,12 @@ func from_dict(data: Dictionary) -> void:
 			age = 0.0
 		if open_signals.size() >= MAX_OPEN:
 			break
-		open_signals.append({"kind": kind, "age_hours": maxf(0.0, age)})
+		var truth := String((raw as Dictionary).get("truth", ""))
+		var known := false
+		for option in TRUTHS.get(kind, []):
+			if String(option[0]) == truth:
+				known = true
+		open_signals.append({"kind": kind, "age_hours": maxf(0.0, age), "truth": truth if known else default_truth(kind)})
 
 ## Türler eşit ağırlıkta: biri ötekinden sık çıksaydı oyuncu tek bir
 ## bölgede durmayı öğrenir ve dikkat kararı ölürdü.

@@ -655,6 +655,11 @@ the walking figures are the game's strongest asset) but to deepen it.
   wagon damage, stress, route danger applied to the headroom — never a
   new punishment system. A signal that could be ignored for free would be
   scenery.
+- **A signal's kind is not its answer (task Y-B03).** Every road signal draws a hidden truth when it appears
+  (`RoadSignals.TRUTHS`: smoke may be a bandit camp, a farmstead burning or herders; a creak an axle, a loose load or
+  nothing; a straggler tired, sick or a stranger; a raven at the rear a true or an empty omen). Walking to its zone
+  reveals the truth and its small reward; ignoring it pays the truth's own price, and some truths cost nothing - but
+  only looking tells you which. The truth is saved with the signal, so a reload cannot reroll it.
 - **Pace is a resource, not a toggle.** The speed button was free,
   reversible and consequence-less. Pushing now burns `CaravanState.stamina`
   and an exhausted caravan drops back to steady on its own; camp is the

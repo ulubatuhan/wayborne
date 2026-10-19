@@ -14,6 +14,7 @@ func run(t) -> void:
 	_test_bad_entries_are_dropped(t)
 	_test_old_save_without_signals(t)
 	_test_full_save_round_trip_and_escalation(t)
+	_test_truth_is_hidden_and_kept(t)
 
 func _journey_with_open_signal(seed_value: int) -> JourneyController:
 	var journey := JourneyController.new()
@@ -95,3 +96,28 @@ func _test_full_save_round_trip_and_escalation(t) -> void:
 		if not escalated.is_empty():
 			break
 	t.ok(escalated.has(kinds_before[0]), "yüklenen işaret ihmal edilince büyür")
+
+## Belirsizlik (görev Y-B03): işaretin türü gerçeğini belirlemez, her türün
+## birden çok gerçeği var ve çekilişleri dağılır; gerçek kayıttan döner, bozuk
+## ya da eksik gerçek varsayılana düşer.
+func _test_truth_is_hidden_and_kept(t) -> void:
+	for kind in RoadSignals.ALL_KINDS:
+		var seen := {}
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 41
+		for i in 300:
+			seen[RoadSignals.roll_truth(kind, rng)] = true
+		t.ok(seen.size() >= 2, "%s türü birden çok gerçeğe çıkar" % kind)
+		for truth in seen:
+			t.ok(RoadSignals.TRUTH_RESOLVED_KEYS.has(truth) and RoadSignals.TRUTH_ESCALATED_KEYS.has(truth), "%s gerçeğinin iki sonucu yazılı" % truth)
+	var signals := RoadSignals.new()
+	signals.open_signals = [{"kind": RoadSignals.KIND_SMOKE, "age_hours": 1.0, "truth": "herders"}]
+	var copy := RoadSignals.new()
+	copy.from_dict(JSON.parse_string(JSON.stringify(signals.to_dict())))
+	t.eq(RoadSignals.truth_of(copy.open_signals[0]), "herders", "gerçek kayıttan döner")
+	copy.from_dict({"open": [{"kind": RoadSignals.KIND_WHEEL, "age_hours": 1.0, "truth": "uydurma"}]})
+	t.eq(RoadSignals.truth_of(copy.open_signals[0]), RoadSignals.default_truth(RoadSignals.KIND_WHEEL), "bilinmeyen gerçek varsayılana düşer")
+	var resolved := RoadSignals.new()
+	resolved.open_signals = [{"kind": RoadSignals.KIND_OMEN, "age_hours": 0.0, "truth": "true_omen"}]
+	var outcome := resolved.tick(1.0, RoadAttention.ZONE_REAR, RandomNumberGenerator.new())
+	t.eq(outcome["resolved_truths"], ["true_omen"], "ilgilenen gerçeği öğrenir")
