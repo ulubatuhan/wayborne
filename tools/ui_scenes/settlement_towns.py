@@ -48,7 +48,8 @@ VENUES_BY_TYPE = {
 # Kamera 2 m sağda: şehir ekranında sağdaki brifing sütunu ve kadro
 # kartları resmin sağ üçte birini örter (CityFront); meydan, levhalarla
 # brifing arasındaki görünür alanın ortasına düşsün.
-CAMERA = {"at": [2.0, -8.5, 2.0], "look": [2.0, 14.0, 6.2], "lens": 24}
+# Görev 12.1: kamera bir tık geride - 24 mm yerine 20 mm (kadraj ~%20 geniş).
+CAMERA = {"at": [2.0, -8.5, 2.0], "look": [2.0, 14.0, 6.2], "lens": 20}
 PLAZA = [0.0, 6.0, 6.5]
 
 # Kültür başına sahne dili. `post` town_post.py'nin boyası (0-255),
