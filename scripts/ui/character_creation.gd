@@ -513,6 +513,8 @@ func _on_start_pressed() -> void:
 	session.inherit_father_caravan()
 	session.fate_mode = _fate_mode
 	session.difficulty = _difficulty.duplicate()
+	# Eski soy varsa yeni kervan onu okur (Y-D03).
+	LineageArchive.apply_to(session, LineageArchive.latest())
 
 	SceneInk.go(Nav.go_root(Nav.CITY_MAP))
 

@@ -68,6 +68,8 @@ var hour: float = 12.0:
 ## bkz. GameSession.map_trail / journey_camps.
 var trail: Array = []
 var camps: Array = []
+## Yoldaki mezarlar ve lider taşları (Y-B11, Y-D03): [{"route", "share", "old"}].
+var graves: Array = []
 
 var _tint: Control
 
@@ -210,9 +212,29 @@ func _draw_trail() -> void:
 		flame.append(flame[0])
 		_overlay.draw_polyline(flame, TRAIL_COLOR, 1.0, true)
 
+## Mezar işareti: rotanın üstünde, paya göre; eski soyunki soluk.
+func _draw_graves() -> void:
+	for g in graves:
+		var parts := String(g.get("route", "")).split("|")
+		if parts.size() != 2:
+			continue
+		var path := WorldMapData.get_route_path(String(parts[0]), String(parts[1]))
+		if path.size() < 2:
+			continue
+		var at := tiles.map_to_screen(point_along(path, float(g.get("share", 0.5))))
+		if not Rect2(Vector2.ZERO, size).grow(8.0).has_point(at):
+			continue
+		var tone := Color(0.17, 0.12, 0.09, 0.45 if bool(g.get("old", false)) else 0.85)
+		draw_grave_mark(_overlay, at, tone)
+
+static func draw_grave_mark(canvas: CanvasItem, at: Vector2, tone: Color) -> void:
+	canvas.draw_rect(Rect2(at + Vector2(-2.5, -7.0), Vector2(5.0, 7.0)), tone)
+	canvas.draw_line(at + Vector2(-5.0, 0.0), at + Vector2(5.0, 0.0), tone, 1.5)
+
 func _draw_overlay() -> void:
 	_draw_lights()
 	_draw_trail()
+	_draw_graves()
 	for entry in routes:
 		var path := WorldMapData.get_route_path(current_location_id, String(entry["to"]))
 		if path.size() < 2:

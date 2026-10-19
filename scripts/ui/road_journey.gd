@@ -1155,6 +1155,7 @@ func _open_map_popup() -> void:
 	_map_popup.view.hour = _clock.get_hour_of_day()
 	_map_popup.view.trail = _session.map_trail
 	_map_popup.view.camps = _session.journey_camps
+	_map_popup.view.graves = _session.map_graves()
 	_map_popup.closed.connect(func(): _map_popup = null)
 	add_child(_map_popup)
 
@@ -3641,6 +3642,8 @@ func _show_run_over() -> void:
 
 	if _is_live_journey:
 		SaveManager.save_session(_session)
+		# Soy bitti: izi arşive yazılır, yeni kervan okur (Y-D03).
+		LineageArchive.record(_session)
 
 ## Bir olay pazarlık istediğinde gerçek pazarlık paneli açılır:
 ## anlaşırsan anlaştığın fiyatı, anlaşamazsan tam bedeli ödersin.

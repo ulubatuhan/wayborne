@@ -627,6 +627,12 @@ carry a caravan *name* down the road.
   market-square hires, dismissed in town, satisfy the finale's "two struck
   names" gate - the one gate that reads loss, bought with gold. Left behind,
   broken and gone, died, lost with a wagon: those still count.
+- **A lineage that ends leaves an inheritance (task Y-D03).** When nobody is left to carry the name, the run-over
+  screen writes the lineage to `LineageArchive` (`user://lineage_archive.json`, outside the save slots, capped at
+  `MAX_LINEAGES`): name, generations, days, reputation, its last ledger lines and its graves and cairns. A new game reads
+  the latest one: the old graves return to the roads (drawn faint on the road and the world map, `map_graves`), a share
+  of the old reputation (capped), an old seal as an heirloom, and a ledger line naming the old lineage. What was
+  inherited is the saved `GameSession.legacy`.
 - **The finale's gold gate became `days_as_leader`.** A pure money gate
   closed the story with "you got rich enough". The measurement survives:
   with a leader who never dies, tenure equals elapsed days and the finale's

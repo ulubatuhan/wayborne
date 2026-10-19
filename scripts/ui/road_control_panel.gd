@@ -456,6 +456,7 @@ func _refresh_map(state: Dictionary) -> void:
 	_map_view.hour = float(state.get("hour", 12.0))
 	_map_view.trail = _session.map_trail
 	_map_view.camps = _session.journey_camps
+	_map_view.graves = _session.map_graves()
 
 # --- Defter ------------------------------------------------------------------
 

@@ -2599,6 +2599,15 @@ func _trim_memorials(route: String) -> void:
 		if not dropped:
 			return
 
+## Haritaya düşen mezarlar: [{"route", "share", "old"}] (eski soyunkiler soluk).
+func map_graves() -> Array:
+	var out: Array = []
+	for m in road_memorials:
+		var kind := String(m["kind"])
+		if kind == MEMORIAL_GRAVE or kind == MEMORIAL_CAIRN:
+			out.append({"route": String(m["route"]), "share": float(m["share"]), "old": (m as Dictionary).has("old_lineage")})
+	return out
+
 func memorials_on(route: String) -> Array:
 	var out: Array = []
 	for m in road_memorials:
@@ -2614,6 +2623,10 @@ func _note_route_trip(origin_id: String, destination_id: String) -> void:
 	memory["trips"] = int(memory.get("trips", 0)) + 1
 	memory["last_day"] = total_days_elapsed
 	route_memory[route] = memory
+
+## Soy mirası (görev Y-D03): yeni oyunun eski soydan aldığı (bkz.
+## LineageArchive.apply_to). Kayıtta; boşsa eski soy yok.
+var legacy: Dictionary = {}
 
 ## --- Kader Modu ve açık zorluk (görev Y-D01) ---
 ## Kader Modu: tek kayıt, elle kayıt yok (şehirde de). Ayarlar açık, gizli
@@ -3838,6 +3851,7 @@ func to_save_dict() -> Dictionary:
 		"map_trail": map_trail.duplicate(true),
 		"bonds": bonds.duplicate(),
 		"fate_mode": fate_mode,
+		"legacy": legacy.duplicate(true),
 		"difficulty": difficulty.duplicate(),
 		"road_memorials": road_memorials.duplicate(true),
 		"route_memory": route_memory.duplicate(true),
@@ -4068,6 +4082,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
 	fate_mode = bool(data.get("fate_mode", false))
+	legacy = (data.get("legacy", {}) as Dictionary).duplicate(true)
 	difficulty = {}
 	for key in DIFFICULTY_KEYS:
 		difficulty[key] = clampi(int((data.get("difficulty", {}) as Dictionary).get(key, DIFFICULTY_STANDARD)), DIFFICULTY_EASY, DIFFICULTY_HARD)
