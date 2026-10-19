@@ -946,3 +946,19 @@ func _test_rogue_mage_is_ready_but_never_spawned(t) -> void:
 			var squad := EnemyCatalog.build_squad(kind, "zelmarin", 0.9, 4, rng)
 			for unit in squad:
 				t.ok(unit.figure_kind != EnemyCatalog.ROGUE_MAGE, "büyücü kadroya kendiliğinden girmez")
+	# Görev Y-F07T: büyücü yalnız kendi nadir olayıyla doğar.
+	var mage_squad := EnemyCatalog.build_squad(EnemyCatalog.KIND_MAGE, "zelmarin", 0.6, 2, rng)
+	var has_mage := false
+	for unit in mage_squad:
+		if unit.figure_kind == EnemyCatalog.ROGUE_MAGE:
+			has_mage = true
+			t.eq(unit.skills.size(), 7, "büyücü yedi büyüsüyle savaşır")
+	t.ok(has_mage, "büyücü kadrosunda büyücü var")
+	var event := EventCatalog.get_event("evt_rogue_mage")
+	t.ok(event != null and event.fire_only_once and event.base_weight < 0.2, "büyücüyü açan olay nadir ve bir seferlik")
+	var opens := false
+	for choice in event.choices:
+		for effect in choice.effects:
+			if effect.type == EventEffect.Type.TRIGGER_COMBAT and effect.text_value == "mage":
+				opens = true
+	t.ok(opens, "olay büyücü kadrosunu açar")

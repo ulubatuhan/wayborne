@@ -109,6 +109,9 @@ const KIND_BANDIT: String = "bandit"
 const KIND_WILDLIFE: String = "wildlife"
 const KIND_GUARD: String = "guard"
 const KIND_HUNT: String = "hunt"
+## Haydut büyücü (görev Y-F07T, kullanıcı notu: nadir bir olay, kaldırmak yok):
+## yalnız evt_rogue_mage açar; büyücü ve iki koruyucu kesici.
+const KIND_MAGE: String = "mage"
 
 ## Kadronun oyuncuya görünen adı. Savaş kayıtları ve panel başlığı bunu
 ## okur - kadro türü Faz 8 PR-B'de çeşitlenince metinler sabit "Haydutlar"
@@ -116,6 +119,7 @@ const KIND_HUNT: String = "hunt"
 ## anılıyordu. Etiket her zaman cümle başında/yalın halde kullanılır, o
 ## yüzden tek biçim yetiyor.
 const _KIND_LABELS: Dictionary = {
+	KIND_MAGE: "ENEMY_KIND_MAGE",
 	KIND_BANDIT: "ENEMY_KIND_BANDIT",
 	KIND_WILDLIFE: "ENEMY_KIND_WILDLIFE",
 	KIND_GUARD: "ENEMY_KIND_GUARD",
@@ -154,6 +158,8 @@ static func build_squad(
 			return build_guard_squad(danger_level, party_size, rng, average_level)
 		KIND_HUNT:
 			return build_hunt_squad(danger_level, party_size, rng, average_level)
+		KIND_MAGE:
+			return build_mage_squad(danger_level, party_size, average_level)
 		_:
 			return build_bandit_squad(danger_level, party_size, rng, average_level, region_id)
 
@@ -274,6 +280,13 @@ static func build_guard_squad(
 	if danger_level >= 0.4 or party_size >= 3:
 		ids.insert(0, GUARD_SERGEANT)
 
+	return _build_units(ids, party_size, average_level, danger_level)
+
+static func build_mage_squad(danger_level: float, party_size: int, average_level: int = 1) -> Array[CombatUnit]:
+	_ensure_built()
+	var ids: Array[String] = [CUTTER, ROGUE_MAGE]
+	if party_size >= 3:
+		ids.insert(0, CUTTER)
 	return _build_units(ids, party_size, average_level, danger_level)
 
 ## Avlanma girişimi başarılı olunca çıkan kadro (bkz. evt_hunting_trip).

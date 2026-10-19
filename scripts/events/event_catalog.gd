@@ -97,6 +97,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_merchant_shares_bread())
 	_road_events.append(_river_ford())
 	_road_events.append(_broken_outburst())
+	_road_events.append(_rogue_mage())
 	_road_events.append(_convoy_repaid())
 	_road_events.append(_convoy_search())
 	_road_events.append(_refugee_gratitude())
@@ -1805,6 +1806,41 @@ static func _merchant_caravan() -> GameEvent:
 		_choice("EVT_MERCHANT_CARAVAN_OPT_WAVE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
 		])),
+	])
+	return event
+
+## Haydut büyücü (görev Y-F07T): nadir, bir seferlik. Büyücüler bu dünyada
+## nadir ve istenmeyen (LORE.md §3.3); biri yolu kesince ya parası verilir,
+## ya kaçılır, ya da savaşılır - büyüleri savaşta gerçekten çalışır.
+static func _rogue_mage() -> GameEvent:
+	var event := _event("evt_rogue_mage", "EVT_ROGUE_MAGE", 0.08)
+	event.fire_only_once = true
+	event.conditions = _conditions([
+		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
+	])
+	event.choices = _choices([
+		_choice("EVT_ROGUE_MAGE_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "mage"),
+		])),
+		_gated_choice(
+			"EVT_ROGUE_MAGE_OPT_PAY", "EVT_ROGUE_MAGE_OPT_PAY_LOCKED",
+			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 90)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -90),
+				EventEffect.make(EventEffect.Type.STRESS, 4),
+			])
+		),
+		_check_choice(
+			"EVT_ROGUE_MAGE_OPT_FLEE", CharacterStats.Kind.AGILITY, SkillCheck.Source.LEADER,
+			"EVT_ROGUE_MAGE_FLED", _effects([EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1)]),
+			"EVT_ROGUE_MAGE_SCORCHED", _effects([
+				EventEffect.make(EventEffect.Type.WAGON_DAMAGE, 1),
+				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			]),
+			"EVT_ROGUE_MAGE_CAUGHT", _effects([
+				EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "mage"),
+			])
+		),
 	])
 	return event
 

@@ -141,6 +141,7 @@ const EVENT_ROAD_MARKER_KIND: Dictionary = {
 	"evt_convoy_repaid": "guard",
 	"evt_refugee_gratitude": "traveler",
 	"evt_rival_slander": "traveler",
+	"evt_rogue_mage": "bandit",
 }
 
 ## event_id -> `e6*.jpg` (Faz 22'nin olay kartı illüstrasyonları, bkz.
