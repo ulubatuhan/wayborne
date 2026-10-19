@@ -159,6 +159,14 @@ wayborne/
     (used by auto-allocate) and a `duty_id` - its "ana" kervan görevi, which
     `DutyCatalog.get_duty_power()` rewards when a character actually holds
     that duty.
+  - **Three roles, six effect channels (tasks Y-F09, Y-B04, Y-B12).** What a person is assigned is now one of
+    three roles - vanguard (front: scout, guard, crier), middle (wagons: wagoner, quartermaster), rear (rear:
+    herbalist) - and classes no longer multiply duty power. The six old duties below survive as effect channels:
+    `get_duty_holder(old_id)` returns the holder of the role that covers it, and old saves migrate
+    (`DutyCatalog.role_of`). A role holder can attend signals in their own zone while the leader is elsewhere
+    (`RoadSignals.tick`'s `role_cover`). The vanguard pays `VANGUARD_DAILY_STRESS` per road day; at every camp
+    `CampActionsPanel` sets tomorrow's formation and up to two evening actions. Design note:
+    `docs/design_notes/gorev_rolleri.md`.
   - `Duty` / `DutyCatalog`: the six road/city jobs (Muhafız/İzci/Levazımcı/
     Arabacı/Tellal/Otacı), separate from combat class. `GameSession.assign_duty()`
     gives a duty to one party member at a time; `get_duty_multiplier()` /

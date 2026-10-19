@@ -29,6 +29,10 @@ const DUTY_EMBLEMS: Dictionary = {
 	DutyCatalog.ARABACI: "p5_wagoner.png",
 	DutyCatalog.TELLAL: "p5_crier.png",
 	DutyCatalog.OTACI: "p5_herbalist.png",
+	# Üç rol (Y-F09) eski görevlerin resimlerini kullanır.
+	DutyCatalog.VANGUARD: "p5_scout.png",
+	DutyCatalog.MIDDLE: "p5_wagoner.png",
+	DutyCatalog.REAR: "p5_herbalist.png",
 }
 
 const GRIEVANCE_MARKS: Dictionary = {

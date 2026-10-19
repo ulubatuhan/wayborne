@@ -166,11 +166,18 @@ static func get_escalated_key(kind: String) -> String:
 ## `attention_zone` liderin o an baktığı yer. Bir işaret **yalnızca**
 ## kendi bölgesinde ilgilenilince çözülür: dikkat sonlu olmasaydı bütün
 ## katman bedava olurdu.
+##
+## `role_cover` (görev Y-B04): bölge -> saatlik çözme ihtimali. O bölgenin rol
+## sahibi (öncü, ortancı, artçı) lider orada değilken de işarete bakabilir;
+## liderin kendisi kadar kesin değil. Çözülen işaretin bölgesi
+## `resolved_by_role`'da (lider çözdüyse "").
+const ROLE_RESOLVE_PER_HOUR: float = 0.035
+
 func tick(
 	hours: float, attention_zone: String, rng: RandomNumberGenerator,
-	affliction_count: int = 0
+	affliction_count: int = 0, role_cover: Dictionary = {}
 ) -> Dictionary:
-	var result := {"appeared": [], "resolved": [], "escalated": [], "resolved_truths": [], "escalated_truths": []}
+	var result := {"appeared": [], "resolved": [], "escalated": [], "resolved_truths": [], "escalated_truths": [], "resolved_by_role": []}
 	if hours <= 0.0:
 		return result
 
@@ -182,6 +189,13 @@ func tick(
 		if get_zone_for(kind) == attention_zone:
 			result["resolved"].append(kind)
 			result["resolved_truths"].append(truth_of(entry))
+			result["resolved_by_role"].append("")
+			continue
+		var zone := get_zone_for(kind)
+		if role_cover.has(zone) and rng.randf() < clampf(float(role_cover[zone]) * hours, 0.0, 1.0):
+			result["resolved"].append(kind)
+			result["resolved_truths"].append(truth_of(entry))
+			result["resolved_by_role"].append(zone)
 			continue
 		entry["age_hours"] = float(entry["age_hours"]) + hours
 		if float(entry["age_hours"]) >= ESCALATE_HOURS:

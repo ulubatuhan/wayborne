@@ -1759,6 +1759,26 @@ func _process(delta: float) -> void:
 	_refresh_time_ui()
 	_refresh_modal()
 
+## Kamp eylem paneli (Y-B12): diziliş ve akşamın iki eylemi; ardından belki
+## bir hikâye. Nöbet ertesi günün tehlike payını düşürür.
+const CAMP_WATCH_DANGER: float = 0.06
+var _camp_panel: CampActionsPanel = null
+
+func _open_camp_panel() -> void:
+	_camp_panel = CampActionsPanel.new().setup(_session)
+	_camp_panel.confirmed.connect(func(formation: Array, actions: Array):
+		_session.set_formation(formation[0], formation[1], formation[2])
+		for action in _session.apply_camp_actions(actions):
+			if action == GameSession.CAMP_ACTION_WATCH:
+				_signal_danger_bonus = maxf(_signal_danger_bonus - CAMP_WATCH_DANGER, -SIGNAL_DANGER_CAP)
+			_add_log(tr("UI_CAMP_DONE") % tr(String(CampActionsPanel.ACTION_KEYS[action])), OUTCOME_COLOR)
+		_camp_panel = null
+		_refresh_state()
+		var teller := _session.roll_camp_story()
+		if teller != null:
+			_open_story_panel(teller))
+	add_child(_camp_panel)
+
 ## Kamp ateşi hikâyesi (R1 #3, Y-C17): bir karar anı, zaman durur.
 var _story_panel: CampStoryPanel = null
 
@@ -2123,12 +2143,17 @@ func _refresh_attention_zone() -> void:
 ## değil, kartlar arasındaki 23 saatti.
 func _tick_signals(hours: float) -> void:
 	var outcome := _signals.tick(
-		hours, _attention_zone, _signal_rng, _session.get_affliction_count()
+		hours, _attention_zone, _signal_rng, _session.get_affliction_count(), _role_cover()
 	)
 	for kind in outcome["appeared"]:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
 	for i in (outcome["resolved"] as Array).size():
 		var kind := String(outcome["resolved"][i])
+		var by_zone := String(outcome["resolved_by_role"][i])
+		if not by_zone.is_empty():
+			var holder := _session.get_duty_holder(_role_for_zone(by_zone))
+			if holder != null:
+				_add_log(tr("UI_ROAD_ROLE_ATTENDED") % holder.character_name, OUTCOME_COLOR)
 		_apply_signal_resolution(String(outcome["resolved_truths"][i]))
 		_flash_signal_icon(kind, ArtPalette.UI_SIGNAL_RESOLVED)
 	for i in (outcome["escalated"] as Array).size():
@@ -2195,6 +2220,22 @@ func _apply_signal_escalation(_kind: String, truth: String) -> void:
 		"true_omen":
 			_signal_danger_bonus = minf(_signal_danger_bonus + SIGNAL_OMEN_DANGER, SIGNAL_DANGER_CAP)
 	_refresh_state()
+
+## Rol sahiplerinin baktığı bölgeler ve saatlik ihtimalleri (Y-B04): görev
+## gücüyle ölçeklenir; rolü boş olan bölge kapsanmaz.
+func _role_cover() -> Dictionary:
+	var cover := {}
+	for role in DutyCatalog.ROLES:
+		var holder := _session.get_duty_holder(role)
+		if holder != null:
+			cover[String(DutyCatalog.ROLE_ZONES[role])] = RoadSignals.ROLE_RESOLVE_PER_HOUR * DutyCatalog.get_duty_power(holder, role)
+	return cover
+
+func _role_for_zone(zone: String) -> String:
+	for role in DutyCatalog.ROLE_ZONES:
+		if String(DutyCatalog.ROLE_ZONES[role]) == zone:
+			return String(role)
+	return ""
 
 ## İlgilenilen işaretin gerçeği ortaya çıkar; iyi gerçekler küçük bir ödül.
 const SIGNAL_OMEN_DANGER: float = 0.08
@@ -2406,9 +2447,7 @@ func _update_camp_state() -> void:
 		for note in _session.companion_notes:
 			_add_companion_note(note)
 		_refresh_pair_spacing()
-		var teller := _session.roll_camp_story()
-		if teller != null:
-			_open_story_panel(teller)
+		_open_camp_panel()
 		return
 	if _clock.total_hours < _camp_ends_at_hours:
 		return
@@ -3368,6 +3407,7 @@ func _has_open_panel() -> bool:
 		or _merchant_dialogue_panel != null
 		or _map_popup != null
 		or _story_panel != null
+		or _camp_panel != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),

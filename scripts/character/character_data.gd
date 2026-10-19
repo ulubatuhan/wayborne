@@ -911,7 +911,8 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.unspent_skill_points = maxi(0, int(data.get("unspent_skill_points", 0)))
 	character.skill_proficiency = (data.get("skill_proficiency", {}) as Dictionary).duplicate()
 	character.second_class_id = str(data.get("second_class_id", ""))
-	character.duty_id = str(data.get("duty_id", ""))
+	# Eski altı görevden biri kayıtlıysa rolüne göçer (Y-F09).
+	character.duty_id = DutyCatalog.role_of(str(data.get("duty_id", "")))
 	character.auto_allocate = bool(data.get("auto_allocate", true))
 	character.backstory_id = str(data.get("backstory_id", ""))
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)

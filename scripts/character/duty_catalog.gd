@@ -15,6 +15,33 @@ const ARABACI: String = "arabaci"
 const TELLAL: String = "tellal"
 const OTACI: String = "otaci"
 
+## Üç rol (görev Y-F09, kullanıcı notu): öncü, ortancı, artçı. Kişiye atanan
+## artık bunlardan biri; eski altı görev silinmedi, rolün kapsadığı **etki
+## kanalı** oldu - hiçbir etki kaybolmadı. Öncü önde: iz okur, ilk kılıcı çeker,
+## yabancıyla ilk o konuşur. Ortancı vagonlarda: tekerleğe ve erzağa bakar.
+## Artçı arkada: yaralıya, geride kalana bakar. Sınıflar rolden bağımsız
+## (masaüstü RPG usulü): sınıf eşleşmesi artık görev gücünü çarpmıyor.
+const VANGUARD: String = "vanguard"
+const MIDDLE: String = "middle"
+const REAR: String = "rear"
+const ROLES: Array[String] = [VANGUARD, MIDDLE, REAR]
+const ROLE_OF_DUTY: Dictionary = {
+	MUHAFIZ: VANGUARD, IZCI: VANGUARD, TELLAL: VANGUARD,
+	ARABACI: MIDDLE, LEVAZIMCI: MIDDLE,
+	OTACI: REAR,
+}
+## Rolün yolda durduğu dikkat bölgesi (Y-B04): rol sahibi kendi bölgesindeki
+## işarete lider orada değilken de bakabilir.
+const ROLE_ZONES: Dictionary = {
+	VANGUARD: "front", MIDDLE: "wagons", REAR: "rear",
+}
+
+## Rol ya da eski görev kimliğinden rol; tanınmayan kimlik "".
+static func role_of(duty_or_role: String) -> String:
+	if ROLES.has(duty_or_role):
+		return duty_or_role
+	return String(ROLE_OF_DUTY.get(duty_or_role, ""))
+
 ## Ana sınıf eşleşirse görev gücü bu kadar çarpılır.
 const PRIMARY_MATCH_MULTIPLIER: float = 1.5
 ## Yalnızca ikinci sınıf (multiclass) eşleşirse bu kadar.
@@ -33,9 +60,12 @@ const LOW_HP_THRESHOLD_RATIO: float = 0.5
 static var _duties: Array[Duty] = []
 static var _duty_by_id: Dictionary = {}
 
+## Atanabilir olanlar: üç rol (eski altı görev etki kanalı olarak get_duty'de).
 static func get_duties() -> Array[Duty]:
 	_ensure_built()
-	return _duties
+	return _roles
+
+static var _roles: Array[Duty] = []
 
 static func get_duty(duty_id: String) -> Duty:
 	_ensure_built()
@@ -52,17 +82,8 @@ static func get_duty_power(character: CharacterData, duty_id: String) -> float:
 
 	var effective := character.stats.get_effective_value(duty.primary_stat)
 	var base := 1.0 + 0.05 * effective
-
-	var multiplier := 1.0
-	var primary_class := ClassCatalog.get_character_class(character.class_id)
-	if primary_class != null and primary_class.duty_id == duty_id:
-		multiplier = PRIMARY_MATCH_MULTIPLIER
-	elif not character.second_class_id.is_empty():
-		var second_class := ClassCatalog.get_character_class(character.second_class_id)
-		if second_class != null and second_class.duty_id == duty_id:
-			multiplier = SECONDARY_MATCH_MULTIPLIER
-
-	return base * multiplier * get_condition_multiplier(character)
+	# Sınıf eşleşmesi artık çarpmıyor (Y-F09): sınıf rolden bağımsız.
+	return base * get_condition_multiplier(character)
 
 ## Bkz. STRESSED_CONDITION_PENALTY'nin yorumu. Sahipsiz bir görev bu
 ## fonksiyona hiç girmez (get_duty_power sahipsizken 1.0'ı doğrudan döner),
@@ -89,6 +110,11 @@ static func _ensure_built() -> void:
 
 	for duty in _duties:
 		_duty_by_id[duty.duty_id] = duty
+	_roles.append(_make(VANGUARD, "DUTY_VANGUARD_NAME", "DUTY_VANGUARD_DESC", CharacterStats.Kind.PERCEPTION))
+	_roles.append(_make(MIDDLE, "DUTY_MIDDLE_NAME", "DUTY_MIDDLE_DESC", CharacterStats.Kind.STRENGTH))
+	_roles.append(_make(REAR, "DUTY_REAR_NAME", "DUTY_REAR_DESC", CharacterStats.Kind.WISDOM))
+	for role in _roles:
+		_duty_by_id[role.duty_id] = role
 
 static func _make(duty_id: String, name_key: String, description_key: String, primary_stat: CharacterStats.Kind) -> Duty:
 	var duty := Duty.new()

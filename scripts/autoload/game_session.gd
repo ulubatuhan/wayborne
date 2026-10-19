@@ -1136,19 +1136,73 @@ func swap_party_positions(first_index: int, second_index: int) -> bool:
 
 ## Bir görevi bir karaktere verir; aynı görevi tutan başkası varsa
 ## boşa çıkar - bir görevin tek sahibi olabilir.
+## Rol atar (Y-F09); eski görev kimliği verilirse rolüne çevrilir. Her rolde
+## bir kişi: aynı rolü alan, öncekinin elinden alır.
 func assign_duty(character: CharacterData, duty_id: String) -> void:
 	if character == null or not get_party().has(character):
 		return
+	var role := DutyCatalog.role_of(duty_id)
 	for other in get_party():
-		if other != character and other.duty_id == duty_id:
+		if other != character and not role.is_empty() and other.duty_id == role:
 			other.duty_id = ""
-	character.duty_id = duty_id
+	character.duty_id = role
 
+## Bir etkinin (eski görev) ya da rolün sahibi: o etkiyi kapsayan rolü taşıyan.
 func get_duty_holder(duty_id: String) -> CharacterData:
+	var role := DutyCatalog.role_of(duty_id)
+	if role.is_empty():
+		return null
 	for character in get_party():
-		if character.duty_id == duty_id:
+		if character.duty_id == role:
 			return character
 	return null
+
+## --- Kamp: ertesi günün dizilişi ve akşam eylemleri (görev Y-B12) ---
+## Öncü önde gider ve bunun bedelini taşır: her yol günü stresi artar (ilk iz
+## onun, ilk ok da). Bu yüzden kampta kimin önde yürüyeceği bir karar.
+const VANGUARD_DAILY_STRESS: int = 1
+const CAMP_ACTION_LIMIT: int = 2
+const CAMP_ACTION_WATCH: String = "watch"
+const CAMP_ACTION_WOUNDS: String = "wounds"
+const CAMP_ACTION_REPAIR: String = "repair"
+const CAMP_ACTION_HUNT: String = "hunt"
+const CAMP_ACTION_TALES: String = "tales"
+const CAMP_ACTIONS: Array[String] = [CAMP_ACTION_WATCH, CAMP_ACTION_WOUNDS, CAMP_ACTION_REPAIR, CAMP_ACTION_HUNT, CAMP_ACTION_TALES]
+const CAMP_WOUND_HEAL_SHARE: float = 0.25
+const CAMP_HUNT_PROVISIONS: int = 2
+const CAMP_TALES_STRESS: int = -2
+
+## Dizilişi bir kerede kurar: [öncü, ortancı, artçı] kişileri (null = boş).
+func set_formation(vanguard: CharacterData, middle: CharacterData, rear: CharacterData) -> void:
+	for character in get_party():
+		character.duty_id = ""
+	for pair in [[vanguard, DutyCatalog.VANGUARD], [middle, DutyCatalog.MIDDLE], [rear, DutyCatalog.REAR]]:
+		if pair[0] != null:
+			assign_duty(pair[0], String(pair[1]))
+
+## Seçilen akşam eylemlerini uygular (en fazla CAMP_ACTION_LIMIT); dönen:
+## uygulananların listesi. Nöbetin etkisi yol ekranının tehlike payında.
+func apply_camp_actions(actions: Array) -> Array[String]:
+	var done: Array[String] = []
+	for action in actions:
+		if done.size() >= CAMP_ACTION_LIMIT or not CAMP_ACTIONS.has(String(action)):
+			continue
+		match String(action):
+			"wounds":
+				var worst: CharacterData = null
+				for character in get_party():
+					if worst == null or float(character.current_hp) / float(maxi(1, character.get_max_hp())) < float(worst.current_hp) / float(maxi(1, worst.get_max_hp())):
+						worst = character
+				if worst != null:
+					worst.current_hp = mini(worst.get_max_hp(), worst.current_hp + int(ceil(worst.get_max_hp() * CAMP_WOUND_HEAL_SHARE)))
+			"repair":
+				caravan.repair_wagons(1)
+			"hunt":
+				change_provisions(CAMP_HUNT_PROVISIONS)
+			"tales":
+				change_stress(CAMP_TALES_STRESS)
+		done.append(String(action))
+	return done
 
 ## Görevin ham gücü: sahibi yoksa 1.0 (nötr - ne bonus ne ceza).
 func get_duty_multiplier(duty_id: String) -> float:
@@ -1983,6 +2037,9 @@ func advance_day() -> Array[String]:
 		_apply_road_stress_day()
 		last_spoiled = spoil_perishables()
 		_companion_day()
+		var vanguard := get_duty_holder(DutyCatalog.VANGUARD)
+		if vanguard != null:
+			change_character_stress(vanguard, VANGUARD_DAILY_STRESS)
 
 	var expired: Array[String] = []
 	for merchant_id in accepted_contracts.keys():
