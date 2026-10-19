@@ -2269,6 +2269,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   the thickness would not depend on the aspect ratio, and the player
   rejected it - the mask is painted as a whole frame and slicing
   separated each corner from its sides.
+- **Words first, the number second (task Y-H03).** The user asked for prose, not "-10 morale". `Wording` turns a
+  value into one of four band words (`WORD_*` in game.csv; stress and danger read high-is-bad) and the current causes
+  into short sentences (hungry for N days, someone just buried, an overdue debt, someone about to break). The road
+  gauges' tooltips lead with that sentence and put the number on the second line; morale and stress effect lines say
+  direction and size in words with the number in parentheses. Guide: `docs/design_notes/dil_kilavuzu.md`.
 - **HP gets a sifat next to the number, never in place of it.** Games like
   This War of Mine hide the raw number entirely ("Sick"/"Wounded" only) -
   this project keeps the number, because numeric transparency is a

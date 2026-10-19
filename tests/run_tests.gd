@@ -85,6 +85,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_lineage_archive.gd",
 	"res://tests/test_event_chains.gd",
 	"res://tests/test_event_quality.gd",
+	"res://tests/test_wording.gd",
 ]
 
 ## Katalog metinleri artık çeviri anahtarı taşıyor ve display_name gibi

@@ -60,8 +60,19 @@ func set_value(new_value: float, new_max: float = 100.0) -> void:
 func set_marker(new_value: float, note: String = "") -> void:
 	marker_value = new_value
 	_marker_note = note if new_value >= 0.0 else ""
-	tooltip_text = label_text if _marker_note.is_empty() else label_text + "\n" + _marker_note
+	_refresh_tooltip()
 	queue_redraw()
+
+## Y-H03: ipucu sözle başlar ("Moral düşük: 2 gündür aç"), sayı ikinci satırda.
+var _reason: String = ""
+
+func set_reason(text: String) -> void:
+	_reason = text
+	_refresh_tooltip()
+
+func _refresh_tooltip() -> void:
+	var head := label_text if _reason.is_empty() else _reason
+	tooltip_text = head if _marker_note.is_empty() else head + "\n" + _marker_note
 
 func is_marker_visible() -> bool:
 	return marker_value >= 0.0

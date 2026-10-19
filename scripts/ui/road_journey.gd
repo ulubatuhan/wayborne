@@ -4130,6 +4130,16 @@ func _refresh_state() -> void:
 	_refresh_stress_marker()
 	_danger_bar.set_value(_weathered_danger() * 100.0, 100.0)
 	_stamina_bar.set_value(caravan.stamina, CaravanState.MAX_STAMINA)
+	# Y-H03: göstergenin ipucu önce söz, sonra sayı.
+	_morale_bar.set_reason(Wording.gauge_tooltip(tr("UI_HUB_MORALE"), Wording.MORALE, caravan.morale,
+		CaravanState.MAX_MORALE, Wording.reasons(_session, Wording.MORALE)))
+	_stress_bar.set_reason(Wording.gauge_tooltip(tr("UI_HUB_STRESS"), Wording.STRESS, _session.party_stress,
+		GameSession.MAX_STRESS, Wording.reasons(_session, Wording.STRESS)))
+	var no_reasons: Array[String] = []
+	_danger_bar.set_reason(Wording.gauge_tooltip(tr("UI_HUB_DANGER"), Wording.DANGER, _weathered_danger() * 100.0,
+		100.0, no_reasons))
+	_stamina_bar.set_reason(Wording.gauge_tooltip(tr("UI_ROAD_STAMINA"), Wording.STAMINA, caravan.stamina,
+		CaravanState.MAX_STAMINA, no_reasons))
 	_attention_label.text = tr("UI_ROAD_ATTENTION") % RoadAttention.get_zone_label(
 		_attention_zone
 	)
