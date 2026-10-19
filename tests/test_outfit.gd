@@ -10,6 +10,7 @@ func suite_name() -> String:
 	return "Outfit"
 
 func run(t) -> void:
+	_test_modesty_layer(t)
 	_test_resolve_color_falls_back_when_empty(t)
 	_test_resolve_color_returns_piece_color(t)
 	_test_resolve_torso_color_jacket_overrides_shirt(t)
@@ -381,3 +382,16 @@ func _test_tailor_purchases_survive_reload(t) -> void:
 	loaded.load_from_dict(session.to_save_dict())
 	t.eq(int(loaded.get_tailor_stock().get(piece_id, 0)), left - 1,
 		"yeniden yükleme satılanı tezgâha geri koymuyor")
+
+## Çıplak ten yok (görev Y-G12): boş yuvalara köylü takımı çizilir, giyilen
+## parça değişmez, örtülen yuvaya alt katman eklenmez.
+func _test_modesty_layer(t) -> void:
+	var bare := OutfitCatalog.with_modesty_layer({})
+	t.eq(str(bare.get(OutfitCatalog.SLOT_SHIRT, "")), "peasant_shirt", "boş gömlek yuvası köylü gömleği")
+	t.eq(str(bare.get(OutfitCatalog.SLOT_PANTS, "")), "peasant_pants", "boş pantolon yuvası köylü pantolonu")
+	var dressed := OutfitCatalog.with_modesty_layer({OutfitCatalog.SLOT_PANTS: "ranger_pants"})
+	t.eq(str(dressed[OutfitCatalog.SLOT_PANTS]), "ranger_pants", "giyilen pantolon değişmez")
+	var robed := OutfitCatalog.with_modesty_layer({OutfitCatalog.SLOT_JACKET: "pilgrim_robe"})
+	t.not_ok(robed.has(OutfitCatalog.SLOT_SHIRT), "cübbenin örttüğü gömlek yuvasına alt katman eklenmez")
+	for piece_id in OutfitCatalog.MODESTY_LAYER.values():
+		t.ok(OutfitCatalog.get_piece(str(piece_id)) != null, "alt katman parçası katalogda: %s" % piece_id)

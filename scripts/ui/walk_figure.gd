@@ -188,7 +188,8 @@ func set_kind(
 	)
 	_skin = skin
 	_carries_pack = carries_pack
-	_outfit = outfit
+	# Çıplak ten yok (görev Y-G12): bütün kişi figürleri tek kapıdan.
+	_outfit = OutfitCatalog.with_modesty_layer(outfit) if kind == KIND_PERSON else outfit
 	_body_variant = body_variant
 	# Kare kümesi ~5 kat küçültülerek çiziliyor; mipmap'siz kenarlar kumlu.
 	texture_filter = (

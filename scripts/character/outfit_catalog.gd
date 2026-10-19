@@ -134,6 +134,26 @@ static func frames_id(piece: OutfitPiece, body_variant: String) -> String:
 ## Giyilen parçaların kare kümeleri, çizim sırasıyla (alttan üste). Kare
 ## kümesi henüz olmayan parça (o beden için render edilmemiş) atlanıyor:
 ## figür o parçayı prosedürel rengiyle taşımaya devam ediyor.
+## Çıplak ten yok (görev Y-G12): görünüşte boş kalan gömlek, pantolon ve
+## ayakkabı yuvası köylü takımıyla çizilir. Yalnızca çizim - stat ve dolap
+## bundan habersiz (giyilmeyen bir parça stat vermez). İsimsiz tayfa da bu
+## takımla yürür.
+const MODESTY_LAYER: Dictionary = {
+	SLOT_SHIRT: "peasant_shirt",
+	SLOT_PANTS: "peasant_pants",
+	SLOT_SHOES: "peasant_shoes",
+}
+
+static func with_modesty_layer(outfit: Dictionary) -> Dictionary:
+	var out := outfit.duplicate()
+	var hidden := hidden_slots(out)
+	for slot in MODESTY_LAYER:
+		if hidden.has(slot):
+			continue  # elbise pantolonu, cübbe gömleği örtüyor: alta bir şey eklenmez
+		if not out.has(slot) or str(out[slot]).is_empty() or str(out[slot]) == NONE_PIECE:
+			out[slot] = MODESTY_LAYER[slot]
+	return out
+
 static func worn_frames(outfit: Dictionary, body_variant: String) -> Array[BodyFrames]:
 	var worn: Array[OutfitPiece] = []
 	var hidden := hidden_slots(outfit)

@@ -125,7 +125,7 @@ func get_outfit_piece(slot: String) -> String:
 ## burada yalnızca resmi, giysilerle aynı katman döngüsünde (draw_order 36:
 ## gömleğin üstü, ceketin altı) çizilsin diye.
 func get_appearance_outfit() -> Dictionary:
-	var out := outfit.duplicate()
+	var out := OutfitCatalog.with_modesty_layer(outfit)
 	var armor_art := str(OutfitCatalog.ARMOR_ART.get(get_equipped_id(EquipmentCatalog.SLOT_ARMOR), ""))
 	if not armor_art.is_empty():
 		out[OutfitCatalog.SLOT_ARMOR] = armor_art
