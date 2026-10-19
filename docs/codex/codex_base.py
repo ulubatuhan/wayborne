@@ -13,17 +13,37 @@ from reportlab.platypus import (
     KeepTogether, PageBreak, NextPageTemplate, Flowable,
 )
 
-# --- Font: Türkçe glifleri (ş ğ ı İ) tam taşıyan Liberation ailesi.
-# DejaVu'nun bu kurulumda italik varyantı yok; <i> etiketleri sessizce
-# düz metne düşerdi, o yüzden gövde için tam aile olan Liberation seçildi.
-LIB = "/usr/share/fonts/truetype/liberation"
-DJV_DIR = "/usr/share/fonts/truetype/dejavu"
-pdfmetrics.registerFont(TTFont("DJV", f"{LIB}/LiberationSans-Regular.ttf"))
-pdfmetrics.registerFont(TTFont("DJV-B", f"{LIB}/LiberationSans-Bold.ttf"))
-pdfmetrics.registerFont(TTFont("DJV-O", f"{LIB}/LiberationSans-Italic.ttf"))
-pdfmetrics.registerFont(TTFont("DJV-BO", f"{LIB}/LiberationSans-BoldItalic.ttf"))
-pdfmetrics.registerFont(TTFont("DJV-M", f"{DJV_DIR}/DejaVuSansMono.ttf"))
-pdfmetrics.registerFont(TTFont("DJV-MB", f"{DJV_DIR}/DejaVuSansMono-Bold.ttf"))
+# --- Font: Türkçe glifleri (ş ğ ı İ) tam taşıyan bir sans aile ve bir mono.
+# Linux'ta Liberation (DejaVu'nun bu kurulumda italik varyantı yok; <i>
+# etiketleri sessizce düz metne düşerdi), Windows'ta Arial ve Consolas.
+# İlk bulunan aile kullanılır; hiçbiri yoksa üreteç açık bir hatayla durur.
+import os
+
+_SANS = [
+    ("/usr/share/fonts/truetype/liberation",
+     ("LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf", "LiberationSans-Italic.ttf", "LiberationSans-BoldItalic.ttf")),
+    ("C:/Windows/Fonts", ("arial.ttf", "arialbd.ttf", "ariali.ttf", "arialbi.ttf")),
+]
+_MONO = [
+    ("/usr/share/fonts/truetype/dejavu", ("DejaVuSansMono.ttf", "DejaVuSansMono-Bold.ttf")),
+    ("C:/Windows/Fonts", ("consola.ttf", "consolab.ttf")),
+]
+
+
+def _first_family(candidates):
+    for folder, files in candidates:
+        paths = [os.path.join(folder, f) for f in files]
+        if all(os.path.exists(p) for p in paths):
+            return paths
+    raise SystemExit("Codex: Türkçe glifli yazı tipi bulunamadı (Liberation/DejaVu ya da Arial/Consolas)")
+
+
+_sans = _first_family(_SANS)
+_mono = _first_family(_MONO)
+for _name, _path in zip(("DJV", "DJV-B", "DJV-O", "DJV-BO"), _sans):
+    pdfmetrics.registerFont(TTFont(_name, _path))
+pdfmetrics.registerFont(TTFont("DJV-M", _mono[0]))
+pdfmetrics.registerFont(TTFont("DJV-MB", _mono[1]))
 
 # <b> / <i> etiketlerinin doğru varyanta bağlanması için aile kaydı
 pdfmetrics.registerFontFamily("DJV", normal="DJV", bold="DJV-B",

@@ -1,7 +1,7 @@
 # Dünya haritası araçları
 
 Wayborne dünya haritasının (v3, 16012×16013 px) üretim hattı. `xx/Harita_Calismasi/kod/`'dan alındı (görev 8.9); betiklerdeki mutlak yollar
-göreli yapıldı, referans oyunun adı ve `ih_hamlet` türü temizlendi (`kcd` klasörü `zemin` oldu, tür `ih_mezra`).
+göreli yapıldı, referans oyunun adı ve küçük köy türünün eski adı temizlendi (`kcd` klasörü `zemin` oldu, tür `ih_mezra`).
 
 | Klasör | Ne |
 |---|---|

@@ -2665,9 +2665,9 @@ re-roll the rain away.
     N29: the Tyrell-like valley is green, not dry grass), otherwise steppe.
     The labels are smoothed and merged into parts of at least 1.2 days.
   - **Stops:** a pass entering mountains, a bridge entering water, else
-    the nearest map point on the way (tower, abbey, mine, hamlet...),
+    the nearest map point on the way (tower, abbey, mine, village...),
     spaced at least three days apart (six on the steppe, where yurts and
-    hamlets otherwise stopped a 35-day road five times, task N30).
+    villages otherwise stopped a 35-day road five times, task N30).
 
   It is written in the direction of `terrain_from`, and
   `RouteTerrain.build(key, days, from_id)` reads it backwards from the

@@ -91,9 +91,22 @@ STOP_POI_PX = 650.0       # durağa dönüşecek harita noktasının yola uzakl�
 POI_STOPS = {
     "iw_tower": "outpost", "ir_ruins": "outpost", "ib_battle": "outpost", "ig_gallows": "outpost",
     "ip_lighthouse": "outpost", "ia_abbey": "shrine", "is_stones": "shrine", "ig_graveyard": "shrine",
-    "ie_deepmine": "mine", "ie_saltmine": "mine", "ih_hamlet": "mezra", "iv_farm": "mezra",
+    "ie_deepmine": "mine", "ie_saltmine": "mine", "iv_farm": "mezra",
     "iv_fishvillage": "mezra", "in_yurtcamp": "mezra", "ix_mountaintribe": "mezra", "il_lumber": "mezra",
 }
+# Haritanın küçük köy türü (`ih_` önekli) adıyla değil önekiyle eşlenir: türün
+# dışa aktarımdaki adı depoda yazılmıyor (isim kuralı, görev 1.x).
+POI_PREFIX_STOPS = {"ih_": "mezra"}
+
+
+def poi_stop_kind(kind):
+    """Harita noktası türünün yol durağı karşılığı ya da None."""
+    if kind in POI_STOPS:
+        return POI_STOPS[kind]
+    for prefix, stop in POI_PREFIX_STOPS.items():
+        if kind and kind.startswith(prefix):
+            return stop
+    return None
 TYPE_BY_PREFIX = {"ic_": "city", "it_": "town"}
 
 
@@ -473,7 +486,7 @@ def terrain_segments(labels, pts, days, pois):
                 if d <= STOP_POI_PX and (best_d is None or d < best_d):
                     best_i, best_d = i, d
             if best_i is not None:
-                cuts.append((best_i, POI_STOPS[kind], pid))
+                cuts.append((best_i, poi_stop_kind(kind), pid))
         cuts.sort()
         start = lo
         for i, stop, pid in cuts:
@@ -504,7 +517,7 @@ def terrain_segments(labels, pts, days, pois):
                 stop = "bridge"
             else:
                 pt = pts[min(hi, n - 1)]
-                near = sorted((math.dist(pt, pos), POI_STOPS[kind], pid) for kind, pos, pid in pois
+                near = sorted((math.dist(pt, pos), poi_stop_kind(kind), pid) for kind, pos, pid in pois
                               if pid not in used and math.dist(pt, pos) <= STOP_POI_PX)
                 if near:
                     stop = near[0][1]
@@ -526,7 +539,7 @@ def main(argv):
     forest_near = near_mask(forest, FOREST_NEAR_PX)
     mountain_near = near_mask(mountain, MOUNTAIN_NEAR_PX)
     swamp_towns = [p["pos"] for p in places.values() if p.get("kind") == "it_swamptown"]
-    pois = [(p["kind"], p["pos"], pid) for pid, p in places.items() if p.get("kind") in POI_STOPS]
+    pois = [(p["kind"], p["pos"], pid) for pid, p in places.items() if poi_stop_kind(p.get("kind"))]
     culture_codes = sorted({f["properties"].get("culture") for f in features
                             if f["properties"].get("layer") == "bölge"})
     region = raster(features, "bölge", size, lambda p: 1 + culture_codes.index(p.get("culture")))
