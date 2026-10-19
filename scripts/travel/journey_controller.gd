@@ -176,4 +176,6 @@ func load_from_dict(data: Dictionary, events: Array[GameEvent]) -> void:
 	clock = JourneyClock.new()
 	clock.load_from_dict(data.get("clock", {}) as Dictionary)
 	engine = EventEngine.new(events, 1)
+	# Yol yönetmeni seferle birlikte döner (Y-B02).
+	engine.director = RoadDirector.new()
 	engine.load_from_dict(data.get("engine", {}) as Dictionary)

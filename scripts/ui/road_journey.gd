@@ -1561,6 +1561,7 @@ func _init_journey() -> void:
 
 	_refresh_exit_button()
 	_engine = EventEngine.new(EventCatalog.get_road_events(), engine_seed)
+	_engine.director = RoadDirector.new()
 	_current_event = null
 	_journey_finished = false
 
@@ -1771,6 +1772,7 @@ func _open_camp_panel() -> void:
 		for action in _session.apply_camp_actions(actions):
 			if action == GameSession.CAMP_ACTION_WATCH:
 				_signal_danger_bonus = maxf(_signal_danger_bonus - CAMP_WATCH_DANGER, -SIGNAL_DANGER_CAP)
+				_watch_day = _session.total_days_elapsed
 			_add_log(tr("UI_CAMP_DONE") % tr(String(CampActionsPanel.ACTION_KEYS[action])), OUTCOME_COLOR)
 		_camp_panel = null
 		_refresh_state()
@@ -2143,7 +2145,8 @@ func _refresh_attention_zone() -> void:
 ## değil, kartlar arasındaki 23 saatti.
 func _tick_signals(hours: float) -> void:
 	var outcome := _signals.tick(
-		hours, _attention_zone, _signal_rng, _session.get_affliction_count(), _role_cover()
+		hours, _attention_zone, _signal_rng, _session.get_affliction_count(), _role_cover(),
+		_night_signal_scale()
 	)
 	for kind in outcome["appeared"]:
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
@@ -2230,6 +2233,19 @@ func _role_cover() -> Dictionary:
 		if holder != null:
 			cover[String(DutyCatalog.ROLE_ZONES[role])] = RoadSignals.ROLE_RESOLVE_PER_HOUR * DutyCatalog.get_duty_power(holder, role)
 	return cover
+
+## Akşam ve gece yol daha çok konuşur (Y-B02, kullanıcı notu); önlem alınmışsa
+## (ateş yanıyor, nöbet kuruldu, fener ya da meşale yanıyor) artış düşer.
+const NIGHT_SIGNAL_SCALE: float = 1.5
+var _watch_day: int = -99
+var _light_lit: bool = false
+
+func _night_signal_scale() -> float:
+	if JourneyClock.darkness_for_hour(_clock.get_hour_of_day()) < 0.5:
+		return 1.0
+	if _camping or _light_lit or _watch_day == _session.total_days_elapsed:
+		return 1.0
+	return NIGHT_SIGNAL_SCALE
 
 func _role_for_zone(zone: String) -> String:
 	for role in DutyCatalog.ROLE_ZONES:

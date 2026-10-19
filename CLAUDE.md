@@ -4148,6 +4148,13 @@ every decision has a visible control, and a key is only its shortcut.**
   backstory gated at bond 1/3/5): listening writes a `KIND_STORY` ledger line, and the third chapter, the secret,
   lifts their heaviest grievance. Each backstory carries a personal goal, shown on the character screen once you
   know them.
+- **The road has a director (task Y-B02).** `RoadDirector` bends `EventEngine`'s daily chance and weights - it
+  invents no event. Quiet days build tension (the chance rises from the second quiet day, capped); the day after a
+  heavy card (combat, a lost wagon, someone left behind) is a relief (heavy cards rarer, the chance a little lower);
+  a strained caravan (stress 60+, hunger, overdue debt) draws fewer heavy and more light cards. The director's state
+  travels with the engine's save. Evenings and nights raise the signal rate by `NIGHT_SIGNAL_SCALE` unless there is a
+  precaution: the camp fire, a watch set at camp, or a lit lantern/torch. `simulate_journeys` reports quiet triples
+  and back-to-back heavy cards with the director on and off.
 - **Every key has an on-screen control** (touch parity). The hub walks to
   a tapped point and opens a tapped gate or wagon on arrival;
   `tests/test_touch_parity.gd` scans every screen script for `KEY_*` and

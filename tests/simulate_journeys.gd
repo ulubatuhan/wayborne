@@ -43,6 +43,7 @@ func _initialize() -> void:
 			merged_event_counts[event_id] = int(merged_event_counts.get(event_id, 0)) + int(batch_counts[event_id])
 
 	_report_event_frequency(merged_event_counts)
+	_report_director()
 
 	print("── Savaş dengesi (kazanma oranı: parti büyüklüğü × yol tehlikesi)")
 	print("   Hedef: yalnız yolcu sakin yolda zorlanmasın ama eşkıya kaynayan")
@@ -731,3 +732,40 @@ func _report_duty_impact() -> void:
 				session.get_duty_discount(duty_id) * 100.0,
 				session.get_duty_flat_reduction(duty_id),
 			])
+
+## Yol yönetmeni (görev Y-B02): yönetmen kapalı ve açıkken üç sessiz gün üst
+## üste gelme oranı ve art arda iki ağır kart oranı. Bağlam sabit (tehlike 0.4,
+## zorluk yok) - ölçülen motorun kendisi.
+func _report_director() -> void:
+	print("── Yol yönetmeni (Y-B02): 300 sefer x 30 gün, tehlike 0.4")
+	for use_director in [false, true]:
+		var quiet_triples := 0
+		var heavy_pairs := 0
+		var days := 0
+		var cards := 0
+		for run in 300:
+			var engine := EventEngine.new(EventCatalog.get_road_events(), hash("director|%d" % run))
+			if use_director:
+				engine.director = RoadDirector.new()
+			var quiet := 0
+			var last_heavy := false
+			for day in 30:
+				days += 1
+				var event := engine.roll_for_day(day, {"danger": 0.4, "stress": 20.0})
+				if event == null:
+					quiet += 1
+					if quiet == 3:
+						quiet_triples += 1
+					last_heavy = false
+					continue
+				cards += 1
+				quiet = 0
+				var heavy := RoadDirector.is_heavy(event)
+				if heavy and last_heavy:
+					heavy_pairs += 1
+				last_heavy = heavy
+				engine.mark_fired(event, day)
+		print("   yönetmen %s: kart/gün %.2f, üç sessiz gün %.3f/gün, art arda iki ağır kart %.3f/kart" % [
+			"açık" if use_director else "kapalı", float(cards) / days, float(quiet_triples) / days,
+			float(heavy_pairs) / maxf(1.0, float(cards)),
+		])

@@ -2491,6 +2491,14 @@ func _companion_day() -> void:
 		who.change_rapport(-1)
 	companion_notes.append({"key": String(CompanionLife.ACTION_LINE_KEYS[action]), "args": [who.character_name], "who": who.character_id})
 
+func _anyone_hungry() -> bool:
+	if crew_hungry_nights > 0:
+		return true
+	for character in get_party():
+		if character.consecutive_hungry_days > 0:
+			return true
+	return false
+
 ## --- Mal çeşitliliği (görev Y-C19) ---
 ## Bozulan mal yolda gün sayar: `perishable_days` item_id -> taşınan stoğun
 ## ortalama yaşı (gün). Raf ömrünü geçince her yol günü stoğun ROT_SHARE'i
@@ -3919,6 +3927,8 @@ func build_event_context() -> Dictionary:
 		# "borcun varken ne yaparsın" kararları bunlara bakar.
 		"debt": get_total_debt(),
 		"debt_overdue": 1.0 if not debts.get_overdue_debts(total_days_elapsed).is_empty() else 0.0,
+		# Yol yönetmeni (Y-B02) açlığı zorluk sayar.
+		"hungry": 1.0 if _anyone_hungry() else 0.0,
 		"provisions": get_provisions(),
 		# Kaçak mal (Y-C19): gümrük onu arar.
 		"contraband": get_total_quantity(ItemCatalog.CONTRABAND_SALT),

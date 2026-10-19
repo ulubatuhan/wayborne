@@ -175,7 +175,7 @@ const ROLE_RESOLVE_PER_HOUR: float = 0.035
 
 func tick(
 	hours: float, attention_zone: String, rng: RandomNumberGenerator,
-	affliction_count: int = 0, role_cover: Dictionary = {}
+	affliction_count: int = 0, role_cover: Dictionary = {}, spawn_scale: float = 1.0
 ) -> Dictionary:
 	var result := {"appeared": [], "resolved": [], "escalated": [], "resolved_truths": [], "escalated_truths": [], "resolved_by_role": []}
 	if hours <= 0.0:
@@ -209,7 +209,7 @@ func tick(
 	# olabiliyor (3x hız, uzun bir olay), o yüzden ihtimal süreyle
 	# ölçekleniyor - yoksa hızlı oynayan oyuncu daha az işaret görürdü.
 	var affliction_scale := 1.0 + float(maxi(0, affliction_count)) * AFFLICTION_SPAWN_BONUS
-	var chance := clampf(SPAWN_CHANCE_PER_HOUR * hours * affliction_scale, 0.0, 1.0)
+	var chance := clampf(SPAWN_CHANCE_PER_HOUR * hours * affliction_scale * maxf(0.0, spawn_scale), 0.0, 1.0)
 	if open_signals.size() < MAX_OPEN and rng.randf() < chance:
 		var kind := _roll_kind(rng)
 		if not get_open_kinds().has(kind):

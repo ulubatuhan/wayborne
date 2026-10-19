@@ -15,6 +15,9 @@ var _rng := RandomNumberGenerator.new()
 var _fired_once: Dictionary = {}
 var _available_after_day: Dictionary = {}
 var _unlocked: Dictionary = {}
+## Yol yönetmeni (görev Y-B02): verilirse günlük ihtimali ve ağırlıkları eğer;
+## null ise motor eskisi gibi çalışır (testler, eski harness'ler).
+var director: RoadDirector = null
 
 func _init(events: Array[GameEvent], seed_value: int = 0) -> void:
 	_events = events
@@ -26,13 +29,29 @@ func _init(events: Array[GameEvent], seed_value: int = 0) -> void:
 ## Tehlike arttıkça günlük olay ihtimali yükselir.
 func get_daily_chance(context: Dictionary) -> float:
 	var danger: float = float(context.get("danger", 0.0))
-	return clampf(daily_event_chance * (0.5 + danger), 0.0, MAX_DAILY_EVENT_CHANCE)
+	var chance := daily_event_chance * (0.5 + danger)
+	if director != null:
+		chance *= director.chance_multiplier()
+	return clampf(chance, 0.0, MAX_DAILY_EVENT_CHANCE)
 
 ## Bir yolculuk günü ilerletir. Olay çıkmazsa null döner.
 func roll_for_day(current_day: int, context: Dictionary) -> GameEvent:
+	if director != null:
+		director.begin_day(current_day)
 	if _rng.randf() > get_daily_chance(context):
+		if director != null:
+			director.note_quiet()
 		return null
-	return draw_event(current_day, context)
+	var event := draw_event(current_day, context)
+	if event == null and director != null:
+		director.note_quiet()
+	return event
+
+func _weight(event: GameEvent, context: Dictionary) -> float:
+	var weight := event.get_weight(context)
+	if director != null:
+		weight *= director.weight_multiplier(event, context)
+	return weight
 
 ## Havuzdan koşulu sağlayan bir olayı ağırlıklı olarak çeker.
 func draw_event(current_day: int, context: Dictionary) -> GameEvent:
@@ -42,7 +61,7 @@ func draw_event(current_day: int, context: Dictionary) -> GameEvent:
 
 	var total_weight := 0.0
 	for event in eligible:
-		total_weight += event.get_weight(context)
+		total_weight += _weight(event, context)
 
 	if total_weight <= 0.0:
 		return null
@@ -50,7 +69,7 @@ func draw_event(current_day: int, context: Dictionary) -> GameEvent:
 	var roll := _rng.randf() * total_weight
 	var cursor := 0.0
 	for event in eligible:
-		cursor += event.get_weight(context)
+		cursor += _weight(event, context)
 		if roll <= cursor:
 			return event
 
@@ -74,6 +93,8 @@ func _is_eligible(event: GameEvent, current_day: int, context: Dictionary) -> bo
 
 ## Olay gösterildikten sonra çağrılır: bir-kez ve bekleme kayıtlarını işler.
 func mark_fired(event: GameEvent, current_day: int) -> void:
+	if director != null:
+		director.note_card(event, current_day)
 	if event.fire_only_once:
 		_fired_once[event.event_id] = true
 	if event.cooldown_days > 0:
@@ -94,6 +115,7 @@ func to_dict() -> Dictionary:
 		"unlocked": _unlocked.keys(),
 		"rng_seed": str(_rng.seed),
 		"rng_state": str(_rng.state),
+		"director": director.to_dict() if director != null else {},
 	}
 
 func load_from_dict(data: Dictionary) -> void:
@@ -113,6 +135,8 @@ func load_from_dict(data: Dictionary) -> void:
 		_rng.seed = String(data["rng_seed"]).to_int()
 	if data.has("rng_state"):
 		_rng.state = String(data["rng_state"]).to_int()
+	if director != null:
+		director.load_from_dict(data.get("director", {}) as Dictionary)
 
 ## Faz 17: seçeneğin arkasında bir SkillCheck varsa zar atar ve context'in
 ## bir KOPYASINA "check_tier" (0/1/2) yazar - orijinal context'e dokunmuyor,
