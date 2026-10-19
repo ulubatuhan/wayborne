@@ -110,7 +110,7 @@ func _test_feast_evening_extras(t) -> void:
 	var units := int(ceil(float(session.get_meal_mouths()) / 4.0))
 	var served := session.serve_meal_extras(["wine", "fish"])
 	t.eq(served.size(), 2, "iki çeşni sofrada")
-	t.eq(session.caravan.morale, mini(low + 6, morale_before), "şarap moral verir")
+	t.eq(session.caravan.morale, mini(low + 6, CaravanState.MAX_MORALE), "şarap moral verir")
 	t.eq(session.caravan.stamina, 62, "balık takat verir")
 	t.eq(session.get_total_quantity("wine"), 10 - units, "şarap ağız sayısına göre eksilir")
 	t.not_ok(session.is_feast_evening(), "ziyafetten sonra sayaç sıfırlanır")
