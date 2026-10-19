@@ -88,10 +88,14 @@ const ARCHETYPES: Dictionary = {
 	# --- Hayvanlar ---
 	# bulk 1.425: kullanıcının kendi isteği (mevcut halinin 1.5 katı, bkz.
 	# WOLF_ALPHA_WHITE/_BLACK'in kendi notu - reisler bunun katı).
+	# Kurt tek kaynaktan (görev Y-G15): olay kartındaki kurtların (e6b_wolves)
+	# kürkü savaş kurdunun render'ından sıcak ve açık - ölçülen ortalamalar
+	# kart (0.48, 0.47, 0.41), render (0.42, 0.43, 0.41). Çarpan render'ı
+	# kartın tonuna çekiyor; yolda karşılaşılan kurt da bu figürü taşıyor.
 	"wolf": {
 		"body": BEAST, "bulk": 1.425, "head": "snout", "weapon": "none",
 		"cloth": Color(0.34, 0.33, 0.32), "trim": Color(0.22, 0.21, 0.21),
-		"metal": Color(0.80, 0.80, 0.78),
+		"metal": Color(0.80, 0.80, 0.78), "sprite_tint": Color(1.15, 1.10, 1.01),
 	},
 	# bulk 2.6/1.75: kullanıcının kendi ölçüsü ("ayı iki insan genişliğinde,
 	# domuz bir buçuk") - bkz. `_draw_beast_sprites`'ın kendi notu, eskiden
