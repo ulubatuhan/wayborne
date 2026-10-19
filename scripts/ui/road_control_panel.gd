@@ -306,6 +306,11 @@ func _refresh_status(state: Dictionary) -> void:
 		["UI_PANEL_PROVISIONS", tr("UI_PANEL_PROVISIONS_VALUE") % [provisions, days_left]],
 		["UI_PANEL_GOLD", "%d" % _session.wallet.balance],
 		["UI_PANEL_DEBT", "%d" % _session.get_total_debt()],
+		# N23: üst şeridin sayı satırı kalktı; söylediği her şey burada.
+		["UI_PANEL_REPUTATION", "%d" % _session.reputation],
+		["UI_PANEL_WAGONS", tr("UI_PANEL_WAGONS_VALUE") % [_session.caravan.wagon_count, _session.caravan.damaged_wagons]],
+		["UI_PANEL_MERCHANTS", "%d" % _session.caravan.merchant_names.size()],
+		["UI_PANEL_DOCUMENTS", "%d" % _session.caravan.documents],
 	]
 	for fact in facts:
 		var key := Label.new()

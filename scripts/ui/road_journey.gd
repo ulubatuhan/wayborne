@@ -4175,16 +4175,9 @@ func _refresh_state() -> void:
 	if _signal_tween == null:
 		_refresh_signal_icon()
 
-	_state_label.text = tr("UI_ROAD_CHIPS") % [
-		_session.wallet.balance,
-		_session.get_provisions(),
-		_session.reputation,
-		caravan.wagon_count,
-		caravan.damaged_wagons,
-		caravan.merchant_names.size(),
-		caravan.documents,
-	]
-	_state_label.tooltip_text = _state_label.text
+	# N23: üst şeridin sayı satırı kalktı - kese, erzak, itibar, vagon, tüccar
+	# ve evrak denetim panelinin Durum sekmesinde (RoadControlPanel).
+	_state_label.visible = false
 
 ## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
 ## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.

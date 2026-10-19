@@ -1150,3 +1150,7 @@
 "UI_SETTINGS_PATTERN_STRIPES","Renk körlüğü: savaş şeridi desenli","Colour blindness: patterned combat stripe","","","","","","","","",""
 "UI_SETTINGS_AUTO_PAUSE","Yolda bir şey belirince duraklat","Pause when something appears on the road","","","","","","","","",""
 "UI_ROAD_AUTO_PAUSED","Yolda bir şey belirdi; zaman durdu (devam için bir tuşa bas).","Something appeared on the road; time is held (press any key).","","","","","","","","",""
+"UI_PANEL_REPUTATION","İtibar","Reputation","","","","","","","","",""
+"UI_PANEL_WAGONS_VALUE","%d (%d hasarlı)","%d (%d damaged)","","","","","","","","",""
+"UI_PANEL_MERCHANTS","Tüccar","Merchants","","","","","","","","",""
+"UI_PANEL_DOCUMENTS","Evrak","Papers","","","","","","","","",""
