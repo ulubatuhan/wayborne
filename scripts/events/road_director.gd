@@ -20,6 +20,8 @@ const STRAIN_HEAVY_WEIGHT: float = 0.7
 const STRAIN_LIGHT_WEIGHT: float = 1.2
 const STRAIN_STRESS: float = 60.0
 
+## Olay sertliği (Y-D01): ağır kartların ağırlık çarpanı (kolay < 1 < zor).
+var heavy_scale: float = 1.0
 var quiet_streak: int = 0
 var last_heavy_day: int = -99
 var _today: int = 0
@@ -58,7 +60,7 @@ func chance_multiplier() -> float:
 
 func weight_multiplier(event: GameEvent, context: Dictionary) -> float:
 	var heavy := is_heavy(event)
-	var m := 1.0
+	var m := heavy_scale if heavy else 1.0
 	if heavy and _today - last_heavy_day == 1:
 		m *= RELIEF_HEAVY_WEIGHT
 	if is_strained(context):

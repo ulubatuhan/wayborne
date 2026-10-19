@@ -221,7 +221,8 @@ func _open_in_game_menu() -> void:
 	var menu := InGameMenu.new()
 	menu.name = "InGameMenu"
 	add_child(menu)
-	menu.setup(true)
+	# Kader Modu'nda elle kayıt yok (Y-D01).
+	menu.setup(_session.can_save_manually())
 
 func _on_spot_pressed(scene_path: String) -> void:
 	SceneInk.go(Nav.open(Nav.CITY_MAP, scene_path))

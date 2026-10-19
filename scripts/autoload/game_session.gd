@@ -1813,7 +1813,7 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		if not starved:
 			character.add_grievance(CharacterData.GRIEVANCE_UNFED)
 		if character.consecutive_hungry_days >= STARVATION_HP_LOSS_START_DAY:
-			character.apply_damage(STARVATION_HP_LOSS_PER_DAY)
+			character.apply_damage(get_hunger_damage())
 			if not character.is_alive():
 				starving.append(character)
 	for character in fed_party:
@@ -2614,6 +2614,35 @@ func _note_route_trip(origin_id: String, destination_id: String) -> void:
 	memory["trips"] = int(memory.get("trips", 0)) + 1
 	memory["last_day"] = total_days_elapsed
 	route_memory[route] = memory
+
+## --- Kader Modu ve açık zorluk (görev Y-D01) ---
+## Kader Modu: tek kayıt, elle kayıt yok (şehirde de). Ayarlar açık, gizli
+## zorluk yok: ölümcül darbe direnci, açlık şiddeti, olay sertliği; her biri
+## kolay/standart/zor. Standart bugünkü denge. Yeni oyunda seçilir, kayıtta.
+const DIFFICULTY_EASY: int = 0
+const DIFFICULTY_STANDARD: int = 1
+const DIFFICULTY_HARD: int = 2
+const DIFFICULTY_KEYS: Array[String] = ["deathblow", "hunger", "events"]
+const DEATHBLOW_OFFSETS: Array[int] = [10, 0, -12]
+const HUNGER_DAMAGE: Array[int] = [2, 4, 6]
+const EVENT_SEVERITY: Array[float] = [0.75, 1.0, 1.3]
+var fate_mode: bool = false
+var difficulty: Dictionary = {"deathblow": DIFFICULTY_STANDARD, "hunger": DIFFICULTY_STANDARD, "events": DIFFICULTY_STANDARD}
+
+func can_save_manually() -> bool:
+	return not fate_mode
+
+func _difficulty_level(key: String) -> int:
+	return clampi(int(difficulty.get(key, DIFFICULTY_STANDARD)), DIFFICULTY_EASY, DIFFICULTY_HARD)
+
+func get_deathblow_offset() -> int:
+	return DEATHBLOW_OFFSETS[_difficulty_level("deathblow")]
+
+func get_hunger_damage() -> int:
+	return HUNGER_DAMAGE[_difficulty_level("hunger")]
+
+func get_event_severity() -> float:
+	return EVENT_SEVERITY[_difficulty_level("events")]
 
 ## --- Sakatlık, hastalık ve hekim (görev Y-C05) ---
 const FEVER_CHANCE_PER_DAY: float = 0.01
@@ -3808,6 +3837,8 @@ func to_save_dict() -> Dictionary:
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
 		"bonds": bonds.duplicate(),
+		"fate_mode": fate_mode,
+		"difficulty": difficulty.duplicate(),
 		"road_memorials": road_memorials.duplicate(true),
 		"route_memory": route_memory.duplicate(true),
 		"memorial_serial": _memorial_serial,
@@ -4036,6 +4067,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
+	fate_mode = bool(data.get("fate_mode", false))
+	difficulty = {}
+	for key in DIFFICULTY_KEYS:
+		difficulty[key] = clampi(int((data.get("difficulty", {}) as Dictionary).get(key, DIFFICULTY_STANDARD)), DIFFICULTY_EASY, DIFFICULTY_HARD)
 	road_memorials = []
 	for m in data.get("road_memorials", []):
 		if m is Dictionary and String((m as Dictionary).get("route", "")).contains("|"):

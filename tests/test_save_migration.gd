@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_old_session_save_loads(t)
 	_test_current_hp_is_clamped_to_max(t)
 	_test_v1_party_stress_spreads_to_members(t)
+	_test_fate_mode_and_difficulty(t)
 
 ## Faz 5'te yazılmış olabilecek, yeni alanları hiç bilmeyen bir kayıt.
 func _old_character_dict() -> Dictionary:
@@ -136,3 +137,29 @@ func _test_v1_party_stress_spreads_to_members(t) -> void:
 	})
 	t.eq(fresh.party[0].stress, 90, "güncel kayıtta kişinin kendi stresi korunur")
 	t.eq(fresh.party[1].stress, 10, "kadrodaki ikinci kişi ayrı bir değer taşır")
+
+## Kader Modu ve açık zorluk (görev Y-D01): ayarlar kayıtta, eski kayıt
+## standart açılır, Kader Modu'nda elle kayıt kapalı, ayarlar kendi kollarını
+## çevirir (ölümcül darbe, açlık, olay sertliği).
+func _test_fate_mode_and_difficulty(t) -> void:
+	var fresh := GameSession.new(0, 0)
+	t.ok(fresh.can_save_manually(), "standart oyunda elle kayıt açık")
+	t.eq(fresh.get_deathblow_offset(), 0, "standart ölümcül darbe bugünkü denge")
+	t.eq(fresh.get_hunger_damage(), GameSession.STARVATION_HP_LOSS_PER_DAY, "standart açlık bugünkü denge")
+	t.almost(fresh.get_event_severity(), 1.0, "standart olay sertliği nötr")
+	var hard := GameSession.new(0, 0)
+	hard.fate_mode = true
+	hard.difficulty = {"deathblow": GameSession.DIFFICULTY_HARD, "hunger": GameSession.DIFFICULTY_EASY, "events": GameSession.DIFFICULTY_HARD}
+	t.not_ok(hard.can_save_manually(), "Kader Modu'nda elle kayıt yok")
+	t.ok(hard.get_deathblow_offset() < 0, "zor: ölümcül darbe direnci düşer")
+	t.ok(hard.get_hunger_damage() < GameSession.STARVATION_HP_LOSS_PER_DAY, "kolay açlık hafif")
+	t.ok(hard.get_event_severity() > 1.0, "zor olaylar sert")
+	var copy := GameSession.new(0, 0)
+	copy.load_from_dict(JSON.parse_string(JSON.stringify(hard.to_save_dict())))
+	t.ok(copy.fate_mode, "Kader Modu kayıttan döner")
+	t.eq(int(copy.difficulty["deathblow"]), GameSession.DIFFICULTY_HARD, "ayar kayıttan döner")
+	var director := RoadDirector.new()
+	director.heavy_scale = hard.get_event_severity()
+	director.begin_day(50)
+	var combat := EventCatalog.get_event("evt_bandit_ambush")
+	t.ok(director.weight_multiplier(combat, {}) > 1.0, "zor ayar ağır kartı sıklaştırır")

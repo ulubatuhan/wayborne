@@ -4562,6 +4562,12 @@ never asked first.
   - both of which discard the current scene entirely instead of asking to
   return to it.
 
+- **Fate Mode and open difficulty (task Y-D01).** Chosen on the new-game screen and saved: Fate Mode keeps the
+  autosave only - no manual save anywhere, city included (`GameSession.can_save_manually`). Three open dials, no
+  hidden difficulty: deathblow resistance (`CombatUnit.deathblow_offset`, set before each fight), hunger damage
+  (`get_hunger_damage`) and event harshness (`RoadDirector.heavy_scale`). Standard is exactly today's balance; the
+  user asked for no extra penalty on the leader's death.
+
 ### Localization Rules
 
 The game targets **11 languages** (tr, en, de, fr, es, it, pt_BR, ru, pl,

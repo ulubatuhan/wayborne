@@ -69,6 +69,7 @@ func _build_ui() -> void:
 	_content.add_child(HSeparator.new())
 	_build_stats_section()
 	_content.add_child(HSeparator.new())
+	_build_fate_section()
 	_content.add_child(HSeparator.new())
 
 	_summary_label = Label.new()
@@ -89,6 +90,36 @@ func _build_ui() -> void:
 	back_button.text = Nav.back_label()
 	back_button.pressed.connect(_on_back_pressed)
 	exit_row.add_child(back_button)
+
+## Kader Modu ve açık zorluk (görev Y-D01): gizli ayar yok, hepsi burada.
+var _fate_mode: bool = false
+var _difficulty: Dictionary = {"deathblow": GameSession.DIFFICULTY_STANDARD, "hunger": GameSession.DIFFICULTY_STANDARD, "events": GameSession.DIFFICULTY_STANDARD}
+const DIFFICULTY_LABEL_KEYS: Dictionary = {
+	"deathblow": "UI_DIFF_DEATHBLOW", "hunger": "UI_DIFF_HUNGER", "events": "UI_DIFF_EVENTS",
+}
+
+func _build_fate_section() -> void:
+	_content.add_child(_make_section_title(tr("UI_CREATE_FATE")))
+	var fate := CheckBox.new()
+	fate.text = tr("UI_CREATE_FATE_MODE")
+	fate.tooltip_text = tr("UI_CREATE_FATE_MODE_TIP")
+	fate.toggled.connect(func(on: bool) -> void: _fate_mode = on)
+	_content.add_child(fate)
+	for key in GameSession.DIFFICULTY_KEYS:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var label := Label.new()
+		label.text = tr(String(DIFFICULTY_LABEL_KEYS[key]))
+		label.custom_minimum_size = Vector2(220, 0)
+		row.add_child(label)
+		var picker := OptionButton.new()
+		for level_key in ["UI_DIFF_EASY", "UI_DIFF_STANDARD", "UI_DIFF_HARD"]:
+			picker.add_item(tr(level_key))
+		picker.select(GameSession.DIFFICULTY_STANDARD)
+		var setting := String(key)
+		picker.item_selected.connect(func(index: int) -> void: _difficulty[setting] = index)
+		row.add_child(picker)
+		_content.add_child(row)
 
 func _build_culture_section() -> void:
 	_content.add_child(_make_section_title(tr("UI_CREATE_CULTURE")))
@@ -480,6 +511,8 @@ func _on_start_pressed() -> void:
 	var session: GameSession = GameState.get_session()
 	session.start_playthrough(character, _rng)
 	session.inherit_father_caravan()
+	session.fate_mode = _fate_mode
+	session.difficulty = _difficulty.duplicate()
 
 	SceneInk.go(Nav.go_root(Nav.CITY_MAP))
 

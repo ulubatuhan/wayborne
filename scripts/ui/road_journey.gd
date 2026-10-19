@@ -1578,6 +1578,7 @@ func _init_journey() -> void:
 	_refresh_exit_button()
 	_engine = EventEngine.new(EventCatalog.get_road_events(), engine_seed)
 	_engine.director = RoadDirector.new()
+	_engine.director.heavy_scale = _session.get_event_severity()
 	_current_event = null
 	_journey_finished = false
 
@@ -1670,6 +1671,8 @@ func _init_journey() -> void:
 ## Arazi ve hava zaten tohumdan hesaplandığı için yeniden yazılmıyor.
 func _restore_journey_snapshot() -> void:
 	_journey.load_from_dict(_session.journey_snapshot, EventCatalog.get_road_events())
+	if _engine != null and _engine.director != null:
+		_engine.director.heavy_scale = _session.get_event_severity()
 	_session.journey_snapshot = {}
 	# Geri dönmüş bir seferde oturumun çıkışı ve hedefi aynı şehir; arazi
 	# ve hava yolun kendi anahtarından (bkz. JourneyController.terrain_key).
@@ -3415,6 +3418,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
 	panel.combat_finished.connect(_on_combat_finished)
+	CombatUnit.deathblow_offset = _session.get_deathblow_offset()
 	_combat_retreat_kind = ""
 	panel.retreated.connect(func(kind): _combat_retreat_kind = String(kind))
 	# Ganimet ve sarf (Y-C03, Y-C04).

@@ -128,6 +128,8 @@ const DEATHS_DOOR_DAMAGE_PENALTY: int = 3
 ## doğal olarak dışlıyor, düşmanın Kıyı'ya ihtiyacı yok.
 var on_deaths_door: bool = false
 var deathblow_resist: int = DEFAULT_DEATHBLOW_RESIST
+## Açık zorluk ayarı (Y-D01): yol ekranı savaştan önce oturumdan yazar.
+static var deathblow_offset: int = 0
 ## Kalıcı ölüm. `is_alive()` bunu okur, `current_hp` değil - Kıyıdaki bir
 ## karakter 0 canla hâlâ ayaktadır.
 var is_dead: bool = false
@@ -170,7 +172,7 @@ static func from_character(character: CharacterData, position: int, is_stressed:
 	unit.composure = character.get_composure()
 	unit.refusal_bonus = character.get_refusal_bonus()
 	unit.deathblow_resist = clampi(
-		DEFAULT_DEATHBLOW_RESIST + character.get_deathblow_resist_bonus(), 0, MAX_DEATHBLOW_RESIST
+		DEFAULT_DEATHBLOW_RESIST + character.get_deathblow_resist_bonus() + deathblow_offset, 0, MAX_DEATHBLOW_RESIST
 	)
 	unit.source_character = character
 	return unit
