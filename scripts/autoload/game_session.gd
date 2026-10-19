@@ -1158,6 +1158,7 @@ func resolve_deaths(
 			total_days_elapsed, lineage_generation, character.character_id,
 			cause_key, location_id, character.class_id
 		)
+		note_beat(BEAT_DEATH, [character.character_name])
 		# Yolda ölen yolda kalır (Y-B11); düşen liderin yeri bir taş (R2 #6).
 		if is_journey_active():
 			add_memorial(MEMORIAL_CAIRN if character.is_player else MEMORIAL_GRAVE, character.character_name, cause_key)
@@ -1907,6 +1908,7 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		hungry_names.append(character.character_name)
 		character.consecutive_hungry_days += 1
 		mark_first(FIRST_LOSS_RISK)
+		note_beat(BEAT_HUNGER)
 		# Kırgınlık yalnızca bir *seçimin* bedeli: erzak gerçekten bittiyse
 		# kimse kimseyi aç bırakmadı, herkes birlikte aç kaldı.
 		if not starved:
@@ -1967,6 +1969,7 @@ func _starve_one_crew_member() -> String:
 		CaravanLedger.KIND_DIED, crew_name, total_days_elapsed, lineage_generation,
 		"", "LEDGER_CAUSE_STARVED", _ledger_location_id()
 	)
+	note_beat(BEAT_DEATH, [crew_name])
 	_sync_crew_names()
 	return crew_name
 
@@ -2556,6 +2559,78 @@ func roll_camp_story() -> CharacterData:
 	rng.seed = hash("camp_story|%s|%d" % [caravan_name, total_days_elapsed])
 	return CampStory.pick_teller(get_party(), rng)
 
+## --- Günün satırı (görev Y-B08) ---
+## Gün boyunca olan önemli şeyler bir iz bırakır; akşam kampında en ağırı
+## edebi bir cümleye döner ve oyuncu üç cümleden birini deftere yazar (ya da
+## o gün hiçbirini). Cümlelerde sayı yok (Y-H03'ün dil kılavuzu); adlar
+## cümlenin içinde, anahtar defterde.
+const BEAT_DEATH: String = "death"
+const BEAT_WAGON: String = "wagon"
+const BEAT_LOST: String = "lost"
+const BEAT_WON: String = "won"
+const BEAT_HUNGER: String = "hunger"
+const BEAT_STORY: String = "story"
+const BEAT_EVENT: String = "event"
+const BEAT_QUIET: String = "quiet"
+## Hangi iz günün satırı olur: en ağır olanı.
+const BEAT_WEIGHTS: Dictionary = {
+	BEAT_DEATH: 100, BEAT_WAGON: 80, BEAT_LOST: 70, BEAT_WON: 60,
+	BEAT_HUNGER: 45, BEAT_STORY: 35, BEAT_EVENT: 30, BEAT_QUIET: 0,
+}
+## İz türü başına üç cümle (anahtarlar tam yazılı, Localization Rules).
+const DIARY_KEYS: Dictionary = {
+	BEAT_DEATH: ["DIARY_DEATH_1", "DIARY_DEATH_2", "DIARY_DEATH_3"],
+	BEAT_WAGON: ["DIARY_WAGON_1", "DIARY_WAGON_2", "DIARY_WAGON_3"],
+	BEAT_LOST: ["DIARY_LOST_1", "DIARY_LOST_2", "DIARY_LOST_3"],
+	BEAT_WON: ["DIARY_WON_1", "DIARY_WON_2", "DIARY_WON_3"],
+	BEAT_HUNGER: ["DIARY_HUNGER_1", "DIARY_HUNGER_2", "DIARY_HUNGER_3"],
+	BEAT_STORY: ["DIARY_STORY_1", "DIARY_STORY_2", "DIARY_STORY_3"],
+	BEAT_EVENT: ["DIARY_EVENT_1", "DIARY_EVENT_2", "DIARY_EVENT_3"],
+	BEAT_QUIET: ["DIARY_QUIET_1", "DIARY_QUIET_2", "DIARY_QUIET_3"],
+}
+
+## Son satırdan bu yana biriken izler: {"kind", "args", "day"}. Kayıtta,
+## çünkü sefer ortasındaki otomatik kayıt bir gün ile akşamı arasına düşebilir.
+var day_beats: Array[Dictionary] = []
+
+func note_beat(kind: String, args: Array = []) -> void:
+	if not BEAT_WEIGHTS.has(kind) or not is_journey_active():
+		return
+	# Aynı türün iki izi tek satıra sığar: ilki kalır (ilk ölen, ilk olay).
+	for beat in day_beats:
+		if String(beat.get("kind", "")) == kind:
+			return
+	var text_args: Array = []
+	for value in args:
+		text_args.append(String(value))
+	day_beats.append({"kind": kind, "args": text_args, "day": total_days_elapsed})
+
+## Günün en ağır izi; iz yoksa sakin bir gün.
+func top_beat() -> Dictionary:
+	var best := {"kind": BEAT_QUIET, "args": [], "day": total_days_elapsed}
+	for beat in day_beats:
+		if int(BEAT_WEIGHTS.get(String(beat.get("kind", "")), 0)) > int(BEAT_WEIGHTS.get(String(best.kind), 0)):
+			best = beat
+	return best
+
+## Akşamın üç aday cümlesi: {"key", "args", "text"}.
+func diary_candidates() -> Array[Dictionary]:
+	var beat := top_beat()
+	var found: Array[Dictionary] = []
+	for key in DIARY_KEYS.get(String(beat.kind), DIARY_KEYS[BEAT_QUIET]):
+		var entry := {"kind": CaravanLedger.KIND_DIARY, "cause": String(key), "args": beat.get("args", [])}
+		found.append({"key": String(key), "args": beat.get("args", []), "text": CaravanLedger.diary_text(entry)})
+	return found
+
+## Seçilen cümle deftere; `key` boşsa o gün yazılmaz. İzler her iki durumda
+## da kapanır: yarının satırı yarının izlerinden.
+func write_diary(key: String, args: Array = []) -> void:
+	if not key.is_empty():
+		var leader := get_player_character()
+		ledger.record(CaravanLedger.KIND_DIARY, leader.character_name if leader != null else caravan_name,
+			total_days_elapsed, lineage_generation, "", key, _ledger_location_id(), "", args)
+	day_beats.clear()
+
 func resolve_camp_story(teller: CharacterData, choice: String) -> void:
 	last_story_day = total_days_elapsed
 	if choice == CampStory.CHOICE_LISTEN:
@@ -2563,6 +2638,7 @@ func resolve_camp_story(teller: CharacterData, choice: String) -> void:
 		teller.change_rapport(CampStory.LISTEN_RAPPORT)
 		ledger.record(CaravanLedger.KIND_STORY, teller.character_name, total_days_elapsed,
 			lineage_generation, teller.character_id, key)
+		note_beat(BEAT_STORY, [teller.character_name])
 		teller.story_chapter += 1
 		if teller.story_chapter >= 3:
 			# Sırrını söyleyen hafifler: en ağır şikâyeti silinir.
@@ -3365,6 +3441,8 @@ func divert_journey(destination_id: String) -> bool:
 func finish_journey() -> Dictionary:
 	# Şehirde herkes yer - tayfanın aç gece sayacı burada kapanır.
 	crew_hungry_nights = 0
+	# Yolun günlüğü yolda kalır: şehirde yeni bir sayfa.
+	day_beats.clear()
 	var settled := _settle_contract_cargo()
 	var payout := _calculate_arrival_payout()
 	payout["late_contracts"] = settled["late"]
@@ -4047,6 +4125,7 @@ func to_save_dict() -> Dictionary:
 		"route_memory": route_memory.duplicate(true),
 		"memorial_serial": _memorial_serial,
 		"last_story_day": last_story_day,
+		"day_beats": day_beats.duplicate(true),
 		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
 		"bought_here": bought_here.duplicate(),
@@ -4271,6 +4350,10 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
+	day_beats.clear()
+	for raw in data.get("day_beats", []):
+		if raw is Dictionary:
+			day_beats.append((raw as Dictionary).duplicate(true))
 	fate_mode = bool(data.get("fate_mode", false))
 	legacy = (data.get("legacy", {}) as Dictionary).duplicate(true)
 	origin_id = String(data.get("origin_id", "father"))

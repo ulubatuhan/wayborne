@@ -56,6 +56,18 @@ func _init() -> void:
 	succession.queue_free()
 	await _settle()
 
+	# Günün satırı (Y-B08): akşam kampında üç cümle.
+	var road := _lineage_session()
+	var destination := WorldMapData.get_location_by_id(WorldMapData.START_LOCATION_ID)
+	road.start_journey(WorldMapData.START_LOCATION_ID, 4, 0.2, CaravanPlan.new(destination, 4))
+	road.note_beat(GameSession.BEAT_DEATH, ["Zeynep"])
+	var diary := DiaryPanel.new().setup(road.diary_candidates())
+	get_root().add_child(diary)
+	await _wait_seconds(0.6)
+	_save("05_gunun_satiri.png")
+	diary.queue_free()
+	await _settle()
+
 	var closed := WaybookTheme.picture("m3_closed.png", 260.0)
 	closed.position = Vector2(VIEW_SIZE) * 0.5 - closed.custom_minimum_size * 0.5
 	get_root().add_child(closed)

@@ -75,8 +75,13 @@ static func get_kind_label(kind: String) -> String:
 func record(
 	kind: String, character_name: String, day: int, generation: int = 1,
 	character_id: String = "", cause_key: String = "", location_id: String = "",
-	role: String = ""
+	role: String = "", args: Array = []
 ) -> void:
+	# `args`: cümlenin içine giren adlar (günün satırı, Y-B08). Metin değil
+	# anahtar saklanır; ad oyuncunun dünyasından geldiği için çevrilmez.
+	var text_args: Array = []
+	for value in args:
+		text_args.append(String(value))
 	entries.append({
 		"kind": kind,
 		"name": character_name,
@@ -86,6 +91,7 @@ func record(
 		"cause": cause_key,
 		"location": location_id,
 		"role": role,
+		"args": text_args,
 	})
 
 func is_struck(entry: Dictionary) -> bool:
@@ -137,6 +143,8 @@ func entries_for_id(character_id: String, fallback_name: String = "") -> Array[D
 ## Satırın okunur hali: "Ad — sebep, yer (gün N)". Sebebi olmayan satır
 ## eski biçimde, türün etiketiyle kalır.
 static func describe(entry: Dictionary) -> String:
+	if String(entry.get("kind", "")) == KIND_DIARY:
+		return diary_text(entry)
 	var name := String(entry.get("name", ""))
 	var cause := String(entry.get("cause", ""))
 	var day := int(entry.get("day", 0))
@@ -150,6 +158,14 @@ static func describe(entry: Dictionary) -> String:
 			name, cause_text, location.location_name, day
 		]
 	return String(TranslationServer.translate("LEDGER_LINE")) % [name, cause_text, day]
+
+## Günün satırı (Y-B08): anahtarın cümlesi, içine adlar.
+static func diary_text(entry: Dictionary) -> String:
+	var text := String(TranslationServer.translate(String(entry.get("cause", ""))))
+	var args: Array = entry.get("args", [])
+	if args.is_empty() or not text.contains("%s"):
+		return text
+	return text % args
 
 ## Satırın kişisiz hali: "sebep, yer yakınlarında (gün N)". Düşenler sayfası
 ## adı ayrıca, çizili yazıyor (görev 9.11). Sebebi olmayan satırda boş.
@@ -231,4 +247,5 @@ func load_from_array(data: Array) -> void:
 			"cause": String(entry.get("cause", "")),
 			"location": String(entry.get("location", "")),
 			"role": String(entry.get("role", "")),
+			"args": (entry.get("args", []) as Array).duplicate() if entry.get("args", []) is Array else [],
 		})

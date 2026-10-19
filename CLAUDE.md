@@ -615,6 +615,14 @@ carry a caravan *name* down the road.
 - **The ledger can be shared as one page (task Y-E07).** The waybook's "save the page" button turns the left page into
   the lineage's summary (`LedgerPage.lines`: name, generation, day, journeys, who carried the name, who the road kept,
   graves) and saves the book as a PNG under `user://defter_sayfalari/`, then restores the ledger.
+- **The fallen have their own page, and the evening its own line (tasks 9.11, Y-B08).** The waybook's "Düşenler"
+  spread lists the founder and the dead (`CaravanLedger.fallen()`), each with a grave mark drawn by rank
+  (`GraveMark`: founder ring and plinth, leader ring, companion notch, crew bare - no religious sign) and "role · cause,
+  place (day)"; the dead person's class is written into the line (`role`). The right page holds the story lines: camp
+  stories as a short summary (`STORY_*_LINE`), and the line of the day. That line is chosen at evening camp: the day's
+  beats (`GameSession.note_beat`: death, lost wagon, fight, hunger, story, event card; saved, cleared at arrival) give
+  their heaviest kind's three sentences (`DIARY_*`, literary, no numbers, names as `args`), and the player picks one or
+  none (`DiaryPanel`). Writing it is choosing, not typing.
 - **The ledger never starts empty.** `start_playthrough()` writes a
   `KIND_FOUNDER` line first: the name the player inherits was already
   someone's struck-through name. It is struck but counted by nothing -

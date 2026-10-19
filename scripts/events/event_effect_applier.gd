@@ -80,6 +80,7 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				# Enkaz yolda kalır (Y-B11).
 				for i in lost:
 					session.add_memorial(GameSession.MEMORIAL_WRECK)
+				session.note_beat(GameSession.BEAT_WAGON)
 		EventEffect.Type.WAGON_REPAIR:
 			var repaired := session.caravan.repair_wagons(effect.amount)
 			if repaired > 0:

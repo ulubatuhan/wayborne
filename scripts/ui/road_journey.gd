@@ -1806,8 +1806,23 @@ func _open_camp_panel() -> void:
 		_refresh_state()
 		var teller := _session.roll_camp_story()
 		if teller != null:
-			_open_story_panel(teller))
+			_open_story_panel(teller)
+		else:
+			_open_diary_panel())
 	add_child(_camp_panel)
+
+## Günün satırı (Y-B08): kampın son anı, hikâyeden sonra. Zaman durur.
+var _diary_panel: DiaryPanel = null
+
+func _open_diary_panel() -> void:
+	_diary_panel = DiaryPanel.new().setup(_session.diary_candidates())
+	_diary_panel.chosen.connect(func(key: String, args: Array):
+		_session.write_diary(key, args)
+		if not key.is_empty():
+			var entry := {"kind": CaravanLedger.KIND_DIARY, "cause": key, "args": args}
+			_add_log(tr("UI_ROAD_DIARY_WRITTEN") % CaravanLedger.diary_text(entry), OUTCOME_COLOR)
+		_diary_panel = null)
+	add_child(_diary_panel)
 
 ## Kamp ateşi hikâyesi (R1 #3, Y-C17): bir karar anı, zaman durur.
 var _story_panel: CampStoryPanel = null
@@ -1818,7 +1833,8 @@ func _open_story_panel(teller: CharacterData) -> void:
 		_session.resolve_camp_story(teller, choice)
 		var key := "UI_ROAD_STORY_LISTENED" if choice == CampStory.CHOICE_LISTEN else ("UI_ROAD_STORY_OWN" if choice == CampStory.CHOICE_OWN_TALE else "UI_ROAD_STORY_SLEPT")
 		_add_log(tr(key) % teller.character_name, OUTCOME_COLOR)
-		_story_panel = null)
+		_story_panel = null
+		_open_diary_panel())
 	add_child(_story_panel)
 
 ## --- Bedelli geri çekilme (Y-C07) ---
@@ -1840,6 +1856,7 @@ func _apply_retreat_cost(kind: String) -> void:
 	elif kind == CombatEncounter.RETREAT_WAGON:
 		if _session.caravan.lose_wagons(1) > 0:
 			_session.add_memorial(GameSession.MEMORIAL_WRECK)
+			_session.note_beat(GameSession.BEAT_WAGON)
 			_add_log(tr("UI_ROAD_RETREAT_WAGON"), LOCKED_COLOR)
 		else:
 			_add_log(tr("UI_ROAD_RETREAT_NO_WAGON"), LOCKED_COLOR)
@@ -3311,6 +3328,8 @@ func _choice_triggers_combat(choice: EventChoice) -> bool:
 func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event
 	_current_event = null
+	if resolved_event != null:
+		_session.note_beat(GameSession.BEAT_EVENT, [tr(resolved_event.title_key)])
 	NodeUtil.clear_children(_card_panel)
 
 	_add_log("   » %s" % tr(choice.text_key))
@@ -3496,6 +3515,9 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 func _on_combat_finished(
 	victory: bool, xp_awarded: int, downed_count: int, dead_characters: Array
 ) -> void:
+	# Günün satırı (Y-B08): kazanılan ya da kaybedilen savaş, düşmanın adıyla.
+	_session.note_beat(GameSession.BEAT_WON if victory else GameSession.BEAT_LOST,
+		[EnemyCatalog.get_kind_label(_current_combat_kind)])
 	if xp_awarded > 0:
 		# Yalnızca bu savaşa girenler (bkz. PreCombatPanel) - risk almayan
 		# deneyim de kazanmaz.
@@ -3782,6 +3804,7 @@ func _has_open_panel() -> bool:
 		or _map_popup != null
 		or _story_panel != null
 		or _camp_panel != null
+		or _diary_panel != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),

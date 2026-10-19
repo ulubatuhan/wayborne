@@ -14,6 +14,9 @@ func run(t) -> void:
 	_test_role_recorded_and_saved(t)
 	_test_story_summaries_exist(t)
 	_test_story_text_uses_summary(t)
+	_test_beats_only_on_the_road(t)
+	_test_heaviest_beat_writes_the_line(t)
+	_test_diary_saved_and_skippable(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(250, 20)
@@ -86,3 +89,59 @@ func _test_story_text_uses_summary(t) -> void:
 	t.ok(ledger_line.contains("(gün 12)") and ledger_line.begins_with("Selin"), "defter satırı özet ve gün")
 	var memorial := {"kind": CaravanLedger.KIND_MEMORIAL, "name": "Eski Soy", "day": 0, "cause": ""}
 	t.eq(WaybookPanel.story_text(memorial), CaravanLedger.describe(memorial), "özeti olmayan satır defter biçiminde")
+
+## --- Günün satırı (Y-B08) ---
+
+func _on_road() -> GameSession:
+	var session := _session()
+	var destination := WorldMapData.get_location_by_id(WorldMapData.START_LOCATION_ID)
+	session.start_journey(WorldMapData.START_LOCATION_ID, 4, 0.2, CaravanPlan.new(destination, 4))
+	return session
+
+func _test_beats_only_on_the_road(t) -> void:
+	var session := _session()
+	session.note_beat(GameSession.BEAT_EVENT, ["Kurtlar"])
+	t.eq(session.day_beats.size(), 0, "şehirde iz tutulmuyor")
+	session = _on_road()
+	session.note_beat(GameSession.BEAT_EVENT, ["Kurtlar"])
+	session.note_beat(GameSession.BEAT_EVENT, ["Sel"])
+	t.eq(session.day_beats.size(), 1, "aynı türden ikinci iz tek satıra sığar")
+	t.eq(String(session.top_beat().kind), GameSession.BEAT_EVENT, "tek iz günün izi")
+
+func _test_heaviest_beat_writes_the_line(t) -> void:
+	var session := _on_road()
+	t.eq(String(session.top_beat().kind), GameSession.BEAT_QUIET, "izsiz gün sakin")
+	session.note_beat(GameSession.BEAT_EVENT, ["Yıkık Köprü"])
+	session.note_beat(GameSession.BEAT_DEATH, ["Elif"])
+	session.note_beat(GameSession.BEAT_HUNGER)
+	t.eq(String(session.top_beat().kind), GameSession.BEAT_DEATH, "en ağır iz ölüm")
+	var candidates := session.diary_candidates()
+	t.eq(candidates.size(), 3, "üç aday cümle")
+	var digits := RegEx.create_from_string("[0-9]")
+	for candidate in candidates:
+		var text := String(candidate.text)
+		t.ok(text.contains("Elif"), "cümle düşeni anıyor: %s" % text)
+		t.ok(digits.search(text) == null, "cümlede sayı yok: %s" % text)
+		t.ok(not text.begins_with("DIARY_"), "cümle çevrilmiş")
+	for kind in GameSession.DIARY_KEYS:
+		for key in GameSession.DIARY_KEYS[kind]:
+			t.ok(String(TranslationServer.translate(String(key))) != String(key), "%s yazılmış" % key)
+
+func _test_diary_saved_and_skippable(t) -> void:
+	var session := _on_road()
+	session.note_beat(GameSession.BEAT_WON, ["Haydutlar"])
+	var pick: Dictionary = session.diary_candidates()[1]
+	session.write_diary(String(pick.key), pick.args)
+	t.eq(session.day_beats.size(), 0, "satır yazılınca izler kapanır")
+	var lines := session.ledger.story_lines()
+	t.eq(lines.size(), 1, "defterde bir günün satırı")
+	t.eq(CaravanLedger.describe(lines[0]), String(pick.text), "defter satırı seçilen cümle")
+	t.ok(WaybookPanel.story_text(lines[0]).ends_with(String(pick.text)), "Düşenler sayfasında gün ve cümle")
+	var copy := GameSession.new(0, 0)
+	session.note_beat(GameSession.BEAT_HUNGER)
+	copy.load_from_dict(session.to_save_dict())
+	t.eq(copy.day_beats.size(), 1, "biriken iz kayıttan geri geliyor")
+	t.eq(CaravanLedger.describe(copy.ledger.story_lines()[0]), String(pick.text), "cümlenin adları kayıtta")
+	session.write_diary("")
+	t.eq(session.ledger.story_lines().size(), 1, "bugün yazma: deftere satır düşmez")
+	t.eq(session.day_beats.size(), 0, "yazılmasa da izler kapanır")

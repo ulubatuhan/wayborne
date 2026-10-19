@@ -295,6 +295,9 @@ static func ledger_text(entry: Dictionary) -> String:
 	return String(TranslationServer.translate("LEDGER_CAUSE_DAY")) % [summary, int(entry.get("day", 0))]
 
 static func _story_summary(entry: Dictionary) -> String:
+	# Günün satırı (Y-B08) zaten kısa bir cümle.
+	if String(entry.get("kind", "")) == CaravanLedger.KIND_DIARY:
+		return CaravanLedger.diary_text(entry)
 	var cause := String(entry.get("cause", ""))
 	var summary_key := cause + "_LINE"
 	if String(entry.get("kind", "")) != CaravanLedger.KIND_STORY or cause.is_empty() \
