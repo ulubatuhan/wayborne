@@ -24,8 +24,9 @@ from PIL import Image, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILD = os.path.join(ROOT, "build", "ui_scenes")
-CFG = os.path.join(ROOT, "tools", "ui_scenes", "towns.json")
-OUT = os.path.join(ROOT, "data", "assets", "ui", "towns")
+CFG = os.environ.get("WAYBORNE_TOWN_CFG") or os.path.join(ROOT, "tools", "ui_scenes", "towns.json")
+# Taslaklar oyunun resimlerine yazılmasın diye: WAYBORNE_TOWN_OUT (12.2a).
+OUT = os.environ.get("WAYBORNE_TOWN_OUT") or os.path.join(ROOT, "data", "assets", "ui", "towns")
 PAPER = os.path.join(ROOT, "art_source", "textures", "ambientcg", "Paper005", "Paper005_1K-JPG_Color.jpg")
 GRIME = os.path.join(ROOT, "data", "assets", "ui", "grim", "grime_overlay.png")
 

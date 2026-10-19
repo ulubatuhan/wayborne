@@ -1,0 +1,546 @@
+{
+ "gate_vastrevar": {
+  "seed": 205,
+  "plaza": [
+   0.0,
+   6.0,
+   6.5
+  ],
+  "camera": {
+   "at": [
+    0.0,
+    -11.0,
+    1.7
+   ],
+   "look": [
+    0.0,
+    16.0,
+    5.8
+   ],
+   "lens": 30
+  },
+  "sky": {
+   "horizon": [
+    0.24,
+    0.16,
+    0.2
+   ],
+   "zenith": [
+    0.01,
+    0.01,
+    0.025
+   ],
+   "height": 0.2,
+   "strength": 1.0
+  },
+  "moon": 1.0,
+  "backlight": 1.6,
+  "window": [
+   1.0,
+   0.5,
+   0.18
+  ],
+  "buildings": [],
+  "props": [
+   {
+    "kind": "Stable",
+    "at": [
+     -8.2,
+     21.0
+    ],
+    "rot": 38,
+    "scale": 1.5
+   },
+   {
+    "kind": "Blacksmith",
+    "at": [
+     -12.0,
+     26.5
+    ],
+    "rot": 30,
+    "scale": 1.2
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     -2.08,
+     25.05
+    ],
+    "rot": 11,
+    "scale": 2.1,
+    "terrace": [
+     8,
+     6,
+     3.0
+    ],
+    "spires": [
+     {
+      "at": [
+       3.6,
+       0.6,
+       0.0
+      ],
+      "floors": 4,
+      "size": 1.2,
+      "wood": false
+     },
+     {
+      "at": [
+       -3.8,
+       0.6,
+       0.0
+      ],
+      "floors": 3,
+      "size": 1.2,
+      "wood": false
+     }
+    ]
+   },
+   {
+    "kind": "Inn",
+    "at": [
+     7.32,
+     20.53
+    ],
+    "rot": -28,
+    "scale": 1.5
+   },
+   {
+    "kind": "Bell_Tower",
+    "at": [
+     9.46,
+     31.96
+    ],
+    "rot": -22,
+    "scale": 2.2,
+    "terrace": [
+     5,
+     5,
+     4.5
+    ],
+    "spires": [
+     {
+      "at": [
+       -2.6,
+       1.2,
+       0.0
+      ],
+      "floors": 5,
+      "size": 1.15
+     },
+     {
+      "at": [
+       2.8,
+       1.2,
+       0.0
+      ],
+      "floors": 4,
+      "size": 1.0
+     }
+    ]
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     10.86,
+     25.98
+    ],
+    "rot": -42,
+    "scale": 1.5
+   },
+   {
+    "kind": "spire",
+    "at": [
+     5.3500911677358065,
+     68.22999999999999
+    ],
+    "z": 4.0,
+    "floors": 6,
+    "size": 2.2,
+    "dark": true
+   },
+   {
+    "kind": "spire",
+    "at": [
+     -2.1499088322641935,
+     68.22999999999999
+    ],
+    "z": 4.0,
+    "floors": 3,
+    "size": 2.2,
+    "dark": true
+   },
+   {
+    "kind": "spire",
+    "at": [
+     12.850091167735807,
+     68.22999999999999
+    ],
+    "z": 4.0,
+    "floors": 6,
+    "size": 2.2,
+    "dark": true
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     9.42,
+     41.72
+    ],
+    "rot": -14,
+    "scale": 1.45
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -9.89,
+     34.43
+    ],
+    "rot": 22,
+    "scale": 1.41
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     -17.19,
+     37.68
+    ],
+    "rot": 27,
+    "scale": 1.48
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     3.52,
+     37.15
+    ],
+    "rot": -14,
+    "scale": 1.52
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -5.6,
+     39.67
+    ],
+    "rot": 20,
+    "scale": 1.42
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     13.41,
+     22.39
+    ],
+    "rot": -59,
+    "scale": 1.34
+   },
+   {
+    "kind": "House_2",
+    "at": [
+     -15.84,
+     19.009999999999998
+    ],
+    "rot": 75,
+    "scale": 1.58
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -14.0,
+     36.0
+    ],
+    "rot": 301,
+    "scale": 3.18
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     17.5,
+     24.5
+    ],
+    "rot": 97,
+    "scale": 3.04
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -16.5,
+     24.0
+    ],
+    "rot": 207,
+    "scale": 2.72
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     19.0,
+     38.0
+    ],
+    "rot": 241,
+    "scale": 2.85
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWallEntrance.blend",
+    "at": [
+     0.0,
+     16.0
+    ],
+    "scale": 2.5,
+    "venue": "gate",
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/WatchTowerWRoof.blend",
+    "at": [
+     -4.475,
+     16.0
+    ],
+    "scale": 3.0,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -8.625,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -12.425,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -16.225,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -20.025000000000002,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/WatchTowerWRoof.blend",
+    "at": [
+     -24.425000000000004,
+     16.0
+    ],
+    "scale": 2.55,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -28.250000000000004,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     -32.050000000000004,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/WatchTowerWRoof.blend",
+    "at": [
+     4.475,
+     16.0
+    ],
+    "scale": 3.0,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     8.625,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     12.425,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     16.225,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     20.025000000000002,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/WatchTowerWRoof.blend",
+    "at": [
+     24.425000000000004,
+     16.0
+    ],
+    "scale": 2.55,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     28.250000000000004,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/TallWall.blend",
+    "at": [
+     32.050000000000004,
+     16.0
+    ],
+    "scale": 2.5,
+    "stone": 0.26
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -12.0,
+     9.4
+    ],
+    "scale": 1.0
+   },
+   {
+    "kind": "ftk:tree-high-crooked",
+    "at": [
+     13.5,
+     9.7
+    ],
+    "scale": 1.0
+   },
+   {
+    "kind": "ftk:tree-high",
+    "at": [
+     -17.5,
+     10.5
+    ],
+    "scale": 1.0
+   }
+  ],
+  "moon_color": [
+   0.62,
+   0.66,
+   0.92
+  ],
+  "backlight_color": [
+   0.9,
+   0.45,
+   0.3
+  ],
+  "post": {
+   "zenith": [
+    3,
+    10,
+    13
+   ],
+   "horizon": [
+    80,
+    53,
+    58
+   ],
+   "cloud": [
+    29,
+    26,
+    40
+   ],
+   "fog": [
+    64,
+    61,
+    62
+   ],
+   "fog_amount": 0.4,
+   "exposure": 1.65,
+   "glow": 1.2,
+   "shadow": [
+    12,
+    23,
+    19
+   ],
+   "moon": [
+    0.18,
+    0.15
+   ]
+  },
+  "ground_tint": [
+   0.58,
+   0.55,
+   0.56
+  ],
+  "hill": {
+   "at": [
+    9.75,
+    61.73,
+    -8.0
+   ],
+   "scale": [
+    53.66,
+    10.0,
+    17.68
+   ],
+   "tint": [
+    0.55,
+    0.52,
+    0.56
+   ],
+   "snow": 0.39
+  },
+  "snow": 0.14,
+  "lamps": [
+   [
+    -2.6,
+    14.0,
+    2.8,
+    120
+   ],
+   [
+    2.6,
+    14.0,
+    2.8,
+    120
+   ]
+  ],
+  "far": 90.0
+ }
+}

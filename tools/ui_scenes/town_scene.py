@@ -26,7 +26,8 @@ QM = os.path.join(ROOT, "art_source/models/props/quaternius_modular_medieval")
 FTK = os.path.join(ROOT, "art_source/models/ui_scenes/kenney_fantasy_town/GLB format")
 TEX = os.path.join(ROOT, "art_source/textures/ambientcg")
 OUT = os.path.join(ROOT, "build/ui_scenes")
-CFG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "towns.json")
+# Kapı sahneleri (12.2a) kendi tanım dosyasını verir: WAYBORNE_TOWN_CFG.
+CFG = os.environ.get("WAYBORNE_TOWN_CFG") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "towns.json")
 
 # Mekân -> maske rengi (ids.png). Sıra CityFront.VENUES ile aynı.
 VENUE_IDS = {
@@ -200,7 +201,9 @@ def building(spec):
     elif kind.startswith("builder:"):
         _built(kind[8:], (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
     elif kind.startswith("file:"):
-        place(os.path.join(ROOT, kind[5:]), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
+        # `stone`: soluk paket parçalarına surun koyu taş boyası (kapı sahnesi, 12.2a).
+        mats = _stone_material("wall_dark", spec["stone"]) if "stone" in spec else None
+        place(os.path.join(ROOT, kind[5:]), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag, mats)
     elif kind.startswith("ftk:"):
         place(ftk(kind[4:]), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
     else:
