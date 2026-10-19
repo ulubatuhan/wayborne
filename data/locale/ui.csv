@@ -1154,3 +1154,7 @@
 "UI_PANEL_WAGONS_VALUE","%d (%d hasarlı)","%d (%d damaged)","","","","","","","","",""
 "UI_PANEL_MERCHANTS","Tüccar","Merchants","","","","","","","","",""
 "UI_PANEL_DOCUMENTS","Evrak","Papers","","","","","","","","",""
+"UI_TAVERN_CHAT","Sohbete başla","Start a conversation","","","","","","","","",""
+"UI_TAVERN_CHAT_END","Sohbeti bitir","End conversation","","","","","","","","",""
+"UI_TAVERN_WATCH","Tavernayı izle","Watch the tavern","","","","","","","","",""
+"UI_TAVERN_SERVICES","Hizmetleri göster","Show services","","","","","","","","",""

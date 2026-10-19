@@ -51,6 +51,19 @@ func _init() -> void:
 		var screen: Node = load(path).instantiate()
 		get_root().add_child(screen)
 		await _settle()
+		if path.contains("market"):
+			# Terazi (Y-G11T): sepette üç çeşit mal.
+			for entry in [["wine", 6], ["test_furs", 3], ["spice", 9]]:
+				screen._basket.append({"item": ItemCatalog.get_item(String(entry[0])), "quantity": int(entry[1])})
+			screen._refresh_basket_panel()
+			await _settle()
+		if path.contains("tavern"):
+			# Canlı taverna: figürler yerleşsin, garson yürüsün (iki kare, aralarında 1,5 sn).
+			for _frame in 60:
+				await process_frame
+			_save("%s_%dx%d_a.png" % [path.get_file().get_basename(), view.x, view.y])
+			for _frame in 90:
+				await process_frame
 		_save("%s_%dx%d.png" % [path.get_file().get_basename(), view.x, view.y])
 		screen.queue_free()
 		await _settle()

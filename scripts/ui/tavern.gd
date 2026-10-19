@@ -15,6 +15,11 @@ const PURIFICATION_COST: int = 60
 var _session: GameSession
 var _rows: Array[Dictionary] = []
 var _purification_panel: PurificationPanel
+var _room: TavernRoom
+var _chat_button: Button
+var _watch_button: Button
+var _scroll: ScrollContainer
+var _chat_rng := RandomNumberGenerator.new()
 var _feast_label: Label
 var _feast_button: Button
 ## Fiyat söylentisi (görev Y-C10): komşu şehirlerin fiyatı, bazen yanlış.
@@ -43,6 +48,7 @@ func _ready() -> void:
 	var location := WorldMapData.get_location_by_id(_session.current_location_id)
 	_title_label.text = tr("UI_TAVERN_TITLE") if location == null else tr("UI_TAVERN_TITLE_CITY") % location.location_name
 
+	_build_room()
 	_content.add_child(HSeparator.new())
 	_purification_panel = PurificationPanel.new()
 	_content.add_child(_purification_panel)
@@ -78,6 +84,60 @@ func _ready() -> void:
 	_refresh_rows()
 	_refresh_feast()
 	_refresh_price_rumors()
+
+## Canlı taverna (görev 9.4): başlığın altında oda, onun altında hizmetler.
+## "Sohbete başla" kişilerin üstüne gelince seçilebilir yapar; "Tavernayı izle"
+## hizmetleri gizleyip odayı büyütür.
+func _build_room() -> void:
+	var column: VBoxContainer = $MarginContainer/VBoxContainer
+	_scroll = $MarginContainer/VBoxContainer/ScrollContainer
+	_room = TavernRoom.new()
+	_room.custom_minimum_size = Vector2(0, 420)
+	_room.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_room.size_flags_stretch_ratio = 2.2
+	column.add_child(_room)
+	column.move_child(_room, _title_label.get_index() + 1)
+	_room.populate(_session.current_location_id, _session.total_days_elapsed)
+	_room.person_chosen.connect(_on_person_chosen)
+	_chat_rng.seed = hash("tavern_chat|%s|%d" % [_session.current_location_id, _session.total_days_elapsed])
+	var bar := HBoxContainer.new()
+	bar.alignment = BoxContainer.ALIGNMENT_END
+	bar.add_theme_constant_override("separation", 10)
+	_chat_button = Button.new()
+	_chat_button.text = tr("UI_TAVERN_CHAT")
+	_chat_button.toggle_mode = true
+	_chat_button.toggled.connect(_on_chat_toggled)
+	bar.add_child(_chat_button)
+	_watch_button = Button.new()
+	_watch_button.text = tr("UI_TAVERN_WATCH")
+	_watch_button.toggle_mode = true
+	_watch_button.toggled.connect(_on_watch_toggled)
+	bar.add_child(_watch_button)
+	column.add_child(bar)
+	column.move_child(bar, _room.get_index() + 1)
+
+func _on_chat_toggled(on: bool) -> void:
+	_room.set_chat_mode(on)
+	_chat_button.text = tr("UI_TAVERN_CHAT_END") if on else tr("UI_TAVERN_CHAT")
+
+func _on_watch_toggled(on: bool) -> void:
+	_scroll.visible = not on
+	_watch_button.text = tr("UI_TAVERN_SERVICES") if on else tr("UI_TAVERN_WATCH")
+
+## Bir kişiye tıklanınca: kendi derdinden bir söz (RoadChatter'ın seçimi) baloncukta.
+## Bilgi edinme ve sohbet sistemi N34'ün işi; bu, kapının ilk hâli.
+func _on_person_chosen(character: CharacterData, _role: String) -> void:
+	var figure: Control = null
+	for i in _room.get_actor_count():
+		if _room.character_of(i) == character:
+			figure = _room.figure_of(i)
+	if figure == null:
+		return
+	var picked := RoadChatter.pick(character, {"day": _session.total_days_elapsed, "night": true}, _chat_rng)
+	if picked.is_empty():
+		return
+	RoadChatter.apply(character, picked, _session.total_days_elapsed)
+	_room.add_child(RoadBalloon.new().setup(figure, tr(String(picked["key"]))))
 
 func _refresh_feast() -> void:
 	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [

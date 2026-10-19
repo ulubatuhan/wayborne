@@ -62,6 +62,7 @@ var _basket_total_label: Label
 var _basket_buy_button: Button
 var _basket_haggle_button: Button
 var _basket_clear_button: Button
+var _scale: MarketScale
 
 func _ready() -> void:
 	# Masa sütunu (%65) burada yok: tezgâh satırı ile kargo sütunu yan yana
@@ -131,6 +132,11 @@ func _build_basket_panel() -> void:
 	var title := Label.new()
 	title.text = tr("UI_MARKET_BASKET_TITLE")
 	_basket_holder.add_child(title)
+
+	# Terazi (Y-G11T): sepetin malı sol kefede, ödenecek altın sağda.
+	_scale = MarketScale.new()
+	_scale.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_basket_holder.add_child(_scale)
 
 	_basket_list = VBoxContainer.new()
 	_basket_list.add_theme_constant_override("separation", 2)
@@ -346,11 +352,35 @@ func _rebuild_basket_panel() -> void:
 
 			_basket_list.add_child(line)
 
+	_refresh_scale()
 	_basket_total_label.text = tr("UI_MARKET_BASKET_TOTAL") % _basket_total_sticker_price()
 	var has_items := not _basket.is_empty()
 	_basket_buy_button.disabled = not has_items or _haggling_active
 	_basket_haggle_button.disabled = not has_items or _haggling_active
 	_basket_clear_button.disabled = not has_items or _haggling_active
+
+## Terazinin iki kefesi: sepetteki mallar ve ödenecek altın; kolun eğimi, malın
+## bilinen en iyi satış değeriyle ödenecek altının farkından (kâr işareti).
+func _refresh_scale() -> void:
+	if _scale == null:
+		return
+	var entries: Array[Dictionary] = []
+	var value := 0
+	for entry in _basket:
+		var item: Item = entry.item
+		var file := "item_%s.png" % item.item_id.trim_prefix("test_")
+		var tex: Texture2D = WaybookTheme.texture(file) if ResourceLoader.exists(WaybookTheme.ART_DIR + file) else null
+		entries.append({"texture": tex, "quantity": int(entry.quantity)})
+		value += _best_known_sell_price(item) * int(entry.quantity)
+	_scale.set_basket(entries, _basket_total_sticker_price(), value)
+
+## Bu mal için bilinen en iyi satış fiyatı: burası ve fiyat defterindeki şehirler.
+func _best_known_sell_price(item: Item) -> int:
+	var best := _get_sell_price(item)
+	for city in _session.price_book:
+		var sell: Dictionary = (_session.price_book[city] as Dictionary).get("sell", {})
+		best = maxi(best, int(sell.get(item.item_id, 0)))
+	return best
 
 func _build_trade_note() -> String:
 	if _current_location == null:
