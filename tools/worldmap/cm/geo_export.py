@@ -196,7 +196,7 @@ ap = os.path.join(full, "arch.json")
 if os.path.exists(ap):
     a = json.load(open(ap))
     add({"type": "Point", "coordinates": img8(a["x"], a["y"])}, id="strait_kesgrav", layer="boğaz",
-        class_="boğaz", name_tr="Kesgrav Boğazı (adsız; geçici ad)",
+        class_="boğaz", name_tr="Drazvor Boğazı",
         note="Koy ile doğu denizi arasındaki boğazın ortası")
 
 # --- kültür bölgeleri
