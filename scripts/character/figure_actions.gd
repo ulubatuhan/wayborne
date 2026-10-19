@@ -48,6 +48,9 @@ const _BOW_DRAWN: Dictionary = {
 	"arm_f": [88.0, 90.0], "arm_b": [-99.0, 112.0], "weapon": 180.0, "draw": 1.0,
 }
 
+## Oturan duruşlar: elde silah yok, ayakta durma testinden muaf.
+const SEATED_CLIPS: Array[String] = ["sit_box"]
+
 ## Klip adı -> {frames, keys: [[t, poz]]}. Pozlar NEUTRAL'ın üstüne yazılır.
 const CLIPS: Dictionary = {
 	"stance_melee": {"frames": 1, "keys": [[0.0, _MELEE_STANCE]]},
@@ -230,6 +233,15 @@ const CLIPS: Dictionary = {
 		"foot_f": [0.40, 0.0, 25.0], "foot_b": [0.34, 0.0, 20.0],
 		# Arka kol neredeyse düz, parmakları tam zeminde (el bileği az üstünde).
 		"arm_f": [40.0, 80.0], "arm_b": [-58.0, -56.0], "weapon": 96.0,
+	}]]},
+	# Sandıkta, bankta, kütükte oturan yorgun biri (kullanıcı notu 2026-10-20:
+	# at sırtı duruşu oturmak gibi okunmuyordu). Kalça diz hizasına iner, uyluk
+	# yatay, baldır dik; ayaklar yerde dizin altında; gövde öne çökük; eller
+	# dizlerin üstünde. Oturduğu şey çizilmez: altına sandık/bank konur.
+	"sit_box": {"frames": 1, "keys": [[0.0, {
+		"hip_y": -0.225, "lean": 17.0,
+		"foot_f": [0.235, 0.0, 0.0], "foot_b": [0.215, 0.0, 0.0],
+		"arm_f": [6.0, 44.0], "arm_b": [2.0, 38.0], "weapon": 0.0,
 	}]]},
 }
 

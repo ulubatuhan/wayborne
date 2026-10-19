@@ -15,7 +15,7 @@ import subprocess
 import sys
 import time
 
-ROOT = "/home/user/wayborne"
+ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 OUT = os.path.join(ROOT, "build", "figures", "out")
 CLIPS = os.path.join(ROOT, "build", "figures", "clips")

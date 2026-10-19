@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KIT = os.path.join(ROOT, "art_source", "ui_kits")
 OUT = os.path.join(ROOT, "build", "ui_kit")
-PREVIEW = os.path.join(os.path.dirname(ROOT), "TODO", "taslaklar", "y_91_ui_kit.png")
+PREVIEW = os.path.join(os.path.dirname(ROOT), "TODO", "referans", "taslaklar", "y_91_ui_kit.png")
 FONT = os.path.join(ROOT, "data", "assets", "fonts", "EBGaramond.ttf")
 HEAD = os.path.join(ROOT, "data", "assets", "fonts", "IMFellEnglishSC.ttf")
 
@@ -55,6 +55,25 @@ def inked(img, line, fill=None, soften=1.2):
     return out
 
 
+def corners_only(img, share=0.34):
+    """Seçim köşebendi yalnız dört köşe: ortası ve kenarların ortası saydam
+    (ilk sürümde ortası altın dolu çıkmıştı - seçili satırın yazısını örtüyordu)."""
+    a = np.asarray(img).copy()
+    h, w = a.shape[:2]
+    keep = np.zeros((h, w), bool)
+    cw, ch = int(w * share), int(h * share)
+    for ys in (slice(0, ch), slice(h - ch, h)):
+        for xs in (slice(0, cw), slice(w - cw, w)):
+            keep[ys, xs] = True
+    # Köşenin içi de saydam: yalnız dış çizgi (kenardan 1/6 içeriye kadar).
+    band = np.zeros((h, w), bool)
+    bw, bh = max(2, w // 6), max(2, h // 6)
+    band[:bh, :] = band[-bh:, :] = True
+    band[:, :bw] = band[:, -bw:] = True
+    a[..., 3] = np.where(keep & band, a[..., 3], 0)
+    return Image.fromarray(a, "RGBA")
+
+
 def nine(img, size, margin):
     """Basit nine-slice: köşeler sabit, kenarlar ve orta gerilir (önizleme için)."""
     w, h = img.size
@@ -81,7 +100,7 @@ def main():
         "button_primary_pressed": inked(load("kenney_ui_rpg_expansion/buttonLong_brown_pressed.png"), (30, 10, 8), BLOOD_PRESSED),
         "button_primary_disabled": inked(load("kenney_ui_rpg_expansion/buttonLong_grey.png"), (50, 46, 44), (88, 80, 76)),
         "tooltip_plate": inked(load("kenney_ui_rpg_expansion/panelInset_beigeLight.png"), (90, 70, 50), PARCHMENT),
-        "select_corner": inked(load("kenney_fantasy_ui_borders/Transparent center/panel-transparent-center-003.png"), GOLD),
+        "select_corner": corners_only(inked(load("kenney_fantasy_ui_borders/Transparent center/panel-transparent-center-003.png"), GOLD)),
     }
     for name, img in pieces.items():
         img.save(os.path.join(OUT, name + ".png"))

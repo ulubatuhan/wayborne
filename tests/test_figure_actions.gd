@@ -59,6 +59,12 @@ func _test_standing_clips_stand(t) -> void:
 			continue
 		for i in FigureActions.frame_count(clip):
 			var j := FigureActions.pose(clip, i, ground, H, 1.0)
+			if clip in FigureActions.SEATED_CLIPS:
+				# Oturan: ayaklar yerde, kalça diz hizasında (ayakta değil).
+				t.almost(maxf(j["ankle_front"].y, j["ankle_back"].y), ground.y, "%s ayaklar yerde" % clip, GROUND_EPS)
+				t.ok(j["hip"].y > ground.y - H * 0.3 and j["hip"].y < ground.y - H * 0.18, "%s kalça oturma yüksekliğinde" % clip)
+				t.ok(absf(j["knee_front"].y - j["hip"].y) < H * 0.05, "%s uyluk yataya yakın" % clip)
+				continue
 			t.le(_lowest(j), ground.y + GROUND_EPS, "%s/%d hiçbir eklem zeminin altında değil" % [clip, i])
 			# İniş/biniş klipleri eyerden ve koltuktan başlıyor: ayak yere ancak
 			# klibin sonunda basıyor (kök kalça, bkz. WalkFigure.TRANSITION_CLIPS).

@@ -23,7 +23,7 @@ import sys
 import bpy
 from mathutils import Matrix, Quaternion, Vector
 
-ROOT = "/home/user/wayborne"
+ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 sys.path.insert(0, os.path.join(PIPE, "blender"))
 sys.path.insert(0, os.path.join(PIPE, "qa"))

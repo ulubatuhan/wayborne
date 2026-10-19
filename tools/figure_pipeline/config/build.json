@@ -291,6 +291,18 @@
     150
    ],
    "_note": "kok kalca: oyun kalcayi vagon koltugundan ayakta durana tasir; tersten oynatilinca cikis"
+  },
+  "sit_box": {
+   "kind": "action",
+   "action": "sit_box",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "_note": "Sandıkta oturan (2026-10-20): kalça diz hizasında, uyluk yatay; oturulan şey render edilmez."
   }
  },
  "facing": 1.0,

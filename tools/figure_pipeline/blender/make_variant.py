@@ -24,20 +24,28 @@ import sys
 import bpy
 from mathutils import Vector
 
-ROOT = "/home/user/wayborne"
+ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 sys.path.insert(0, os.path.join(PIPE, "blender"))
 
 import human_body_render as hbr  # noqa: E402 - kamera/paint_pose altyapisi yeniden kullaniliyor
 
-MPFB_ZIP = "/tmp/mpfb.zip"
+MPFB_ZIP = os.environ.get("MPFB_ZIP", "/tmp/mpfb.zip")
 RIG_SPEC_CANON = os.path.join(ROOT, "docs", "wardrobe", "rig_spec.json")
 BONE_MAP_PATH = os.path.join(PIPE, "config", "bone_map.json")
 OUT_ROOT = os.path.join(ROOT, "build", "figures", "variants")
 
 
 def ensure_mpfb():
+    """Kuruluysa yalnız etkinleştir; değilse zip'ten kur (MPFB_ZIP)."""
+    import addon_utils
+    try:
+        addon_utils.enable("bl_ext.user_default.mpfb", default_set=True)
+        import bl_ext.user_default.mpfb  # noqa: F401
+        return
+    except Exception:
+        pass
     bpy.ops.extensions.package_install_files(
         filepath=MPFB_ZIP, repo="user_default", enable_on_install=True
     )

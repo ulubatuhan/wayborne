@@ -26,7 +26,7 @@ import sys
 import bpy
 from mathutils import Matrix, Vector
 
-ROOT = "/home/user/wayborne"
+ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 for sub in ("blender", "beasts", "props"):
     sys.path.insert(0, os.path.join(PIPE, sub))

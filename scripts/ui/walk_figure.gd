@@ -308,6 +308,8 @@ const ACTION_FALLBACK: Dictionary = {
 	"hit_pierce": "hit", "hit_slash": "hit", "react_burn": "hit",
 	"react_freeze": "hit", "react_poison": "hit", "dodge": "defend",
 	"attack_cast": "attack_swing",
+	# Oturuşu render edilmemiş bir giysi varsa ayakta durur (çıplak oturmaz).
+	"sit_box": "idle",
 }
 
 ## Üstte saplı kalan oklar/bıçaklar (`CombatUnit.stuck`).
@@ -615,8 +617,9 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var wdir := xf.basis_xform(Vector2.from_angle(float(wdata.angle))).normalized()
 	# Ölü ve yerdeki el silahı bırakmış: kalkan ve mızrak havada kalıyordu.
 	var fallen := _action_clip in ["dead", "downed"]
-	# İnen/binen kişi silahı elinde taşımıyor: sırtta kalıyor.
-	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen and not hip_rooted
+	# İnen/binen ya da oturan kişi silahı elinde taşımıyor: sırtta kalıyor.
+	var resting := FigureActions.SEATED_CLIPS.has(_action_clip)
+	var held := (_combat_stance or not _action_clip.is_empty()) and not fallen and not hip_rooted and not resting
 	# Giysiler bedenin aynı karesinden, aynı katmanında: her katmanda beden,
 	# sonra giysiler alttan üste. Renk dokuda; yalnızca ışık/durum çarpanı.
 	_last_joints = joints

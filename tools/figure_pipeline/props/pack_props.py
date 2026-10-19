@@ -17,7 +17,7 @@ import sys
 import numpy as np
 from PIL import Image
 
-ROOT = "/home/user/wayborne"
+ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 sys.path.insert(0, os.path.join(PIPE, "mesh"))
 import posterize  # noqa: E402
