@@ -13,6 +13,7 @@ func run(t) -> void:
 	_test_higher_level_costs_more(t)
 	_test_granted_levels_are_spent(t)
 	_test_recruit_heights_stay_natural(t)
+	_test_hard_and_personal_recruiting(t)
 
 func _seeded_rng(seed_value: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
@@ -75,3 +76,24 @@ func _test_recruit_heights_stay_natural(t) -> void:
 		for c in RecruitCatalog.build_candidates(RecruitCatalog.VENUE_MARKET, _seeded_rng(seed_value)):
 			tallest = maxi(tallest, c.height_cm)
 	t.le(float(tallest), float(CharacterData.NATURAL_MAX_HEIGHT_CM), "aday boyu doğal tavanı aşmaz")
+
+## İşe almak zor ve kişisel (görev Y-C16): pano bir-iki kişi, savaşta bir eksik,
+## herkesin neden geldiği belli, iyi aday nadir, fiyat yeni tabloda.
+func _test_hard_and_personal_recruiting(t) -> void:
+	var top := 0
+	var total := 0
+	for seed_value in 200:
+		for venue in [RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD]:
+			var counts: Array = RecruitCatalog.VENUE_COUNTS[venue]
+			var list := RecruitCatalog.build_candidates(venue, _seeded_rng(seed_value), 5)
+			t.ok(list.size() >= int(counts[0]) and list.size() <= int(counts[1]), "%s panosu bir-iki kişi" % venue)
+			for c in list:
+				t.ok(CharacterData.BACKSTORY_KEYS.has(c.backstory_id), "adayın neden geldiği belli")
+				t.ge(float(c.hire_cost), float(RecruitCatalog.get_venue_profile(venue)[2]), "fiyat yeni tablonun tabanında")
+				if venue == RecruitCatalog.VENUE_GUILD:
+					total += 1
+					if c.level == 5 + RecruitCatalog.VENUE_GUILD_LEVEL_SPREAD[1]:
+						top += 1
+		var pressed := RecruitCatalog.build_candidates(RecruitCatalog.VENUE_MARKET, _seeded_rng(seed_value), 5, 0, 1)
+		t.le(float(pressed.size()), float(RecruitCatalog.VENUE_COUNTS["market"][1] - 1), "savaşta pano daha boş")
+	t.ok(float(top) / float(maxi(1, total)) < 0.2, "loncanın en tecrübelisi nadir (%d/%d)" % [top, total])

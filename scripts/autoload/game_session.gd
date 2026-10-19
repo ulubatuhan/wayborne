@@ -2511,6 +2511,14 @@ func _broken_count() -> int:
 			count += 1
 	return count
 
+## Savaş ya da veba varken kimse yola düşmek istemez (Y-C16).
+func _recruit_world_pressure() -> int:
+	for entry in world_events.get_active(total_days_elapsed):
+		var kind := int(entry["kind"])
+		if kind == WorldEvents.Kind.REGIONAL_WAR or kind == WorldEvents.Kind.PLAGUE:
+			return 1
+	return 0
+
 func _anyone_hungry() -> bool:
 	if crew_hungry_nights > 0:
 		return true
@@ -2856,7 +2864,7 @@ func _restock_recruits() -> void:
 		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
 	]:
 		var candidates: Array[CharacterData] = RecruitCatalog.build_candidates(
-			venue, rng, player_level, world_growth
+			venue, rng, player_level, world_growth, _recruit_world_pressure()
 		)
 		# Bu varışta zaten tutulmuş olanlar yeniden çekilen listeden düşer;
 		# yoksa şehirde alınan bir kayıt, tutulmuş bir yoldaşı panoya geri

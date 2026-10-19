@@ -28,9 +28,16 @@ const EPITHETS: Array[String] = [
 ## ne tavernaya girebiliyor, kadrosunu bir daha kuramıyordu. Meydanda
 ## bekleyenler zaten işi olmayan insanlar; kervanının adı kötüye çıkmışsa
 ## pahalı olan lonca kapanır, en ucuz kapı değil.
-const VENUE_MARKET_PROFILE: Array[int] = [2, 2, 40, 12, GameSession.MIN_REPUTATION]
-const VENUE_TAVERN_PROFILE: Array[int] = [3, 5, 70, 15, 0]
-const VENUE_GUILD_PROFILE: Array[int] = [2, 9, 140, 20, 5]
+## Görev Y-C16 (kullanıcı notu): yalnızca mecbur olanlar katılır, iyi biri
+## nadirdir. Pano çoğu zaman bir-iki kişi (`VENUE_COUNTS` [en az, en çok]),
+## savaş ya da veba varken bir kişi daha az; fiyatlar sertleşti (taban +%30);
+## seviye mekânın aralığında ama aşağıya yatık (iyi aday nadir).
+const VENUE_MARKET_PROFILE: Array[int] = [2, 2, 52, 14, GameSession.MIN_REPUTATION]
+const VENUE_TAVERN_PROFILE: Array[int] = [2, 5, 90, 18, 0]
+const VENUE_GUILD_PROFILE: Array[int] = [1, 9, 180, 24, 8]
+const VENUE_COUNTS: Dictionary = {"market": [1, 2], "tavern": [1, 2], "guild": [1, 1]}
+## Seviye yatıklığı: aralığın üstüne çıkma ihtimali bu üsle düşer.
+const LEVEL_SKEW_POWER: float = 2.5
 
 ## Mekân başına aday seviyesinin oyuncu seviyesine göre sapması
 ## [min_delta, max_delta] - meydan hep acemi çıkarır, lonca hep en az
@@ -81,14 +88,17 @@ static func get_venue_required_reputation(venue: String) -> int:
 
 static func build_candidates(
 	venue: String, rng: RandomNumberGenerator, player_level: int = 1,
-	world_growth_levels: int = 0
+	world_growth_levels: int = 0, world_pressure: int = 0
 ) -> Array[CharacterData]:
 	var profile := get_venue_profile(venue)
 	var spread := get_venue_level_spread(venue)
+	var counts: Array = VENUE_COUNTS.get(venue, [1, 2])
+	var count := maxi(0, rng.randi_range(int(counts[0]), int(counts[1])) - maxi(0, world_pressure))
 	var candidates: Array[CharacterData] = []
-	for _index in profile[0]:
+	for _index in count:
+		var reach := int(floor(pow(rng.randf(), LEVEL_SKEW_POWER) * float(spread[1] - spread[0] + 1)))
 		var level := clampi(
-			player_level + world_growth_levels + rng.randi_range(spread[0], spread[1]),
+			player_level + world_growth_levels + spread[0] + mini(reach, spread[1] - spread[0]),
 			1, CharacterData.MAX_LEVEL
 		)
 		candidates.append(_make_candidate(profile, rng, level))
@@ -133,6 +143,8 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 		rng.randi_range(0, CharacterData.BODY_WEIGHT_NAMES.size() - 1)
 	)
 	_grant_levels(candidate, level)
+	# Neden geldiği (Y-C16): kervana mecbur olanlar katılır.
+	candidate.backstory_id = CharacterData.BACKSTORY_KEYS[rng.randi_range(0, CharacterData.BACKSTORY_KEYS.size() - 1)]
 	candidate.grant_trait(TraitCatalog.roll_seed_trait(candidate.stats, rng), 0)
 	_dress(candidate)
 	candidate.heal_full()

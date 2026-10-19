@@ -194,6 +194,10 @@ wayborne/
     level scaled off the player's own (`get_venue_level_spread` - meydan
     always below the player, lonca always at or above), granted as real XP
     so `auto_allocate` spends it the same way a levelling companion would.
+  - **Recruiting is hard and personal (task Y-C16).** A board holds one or two people (`RecruitCatalog.VENUE_COUNTS`;
+    the guild one), one fewer while a war or plague is on; base prices rose 30%; levels lean to the low end of the
+    venue's spread (`LEVEL_SKEW_POWER`), so a seasoned hire is rare. Every candidate carries a backstory - why they
+    came - and the card says it with what they want.
   - `Trait` / `TraitCatalog`: sixteen huy (Faz 17: one
     virtue and one affliction per stat, now eight stats), each a small
     permanent modifier (`hp_bonus`/`dodge_bonus`/`accuracy_bonus`/

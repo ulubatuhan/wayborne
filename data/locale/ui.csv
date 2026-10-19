@@ -1093,3 +1093,4 @@
 "UI_DOCTOR_NOTHING","derdi kalmamış","nothing left to treat","","","","","","","","",""
 "UI_DOCTOR_NO_MEDICINE","ilaç yok - bu şehre iksir getiren olmadı","no medicine - no one has brought potions to this town","","","","","","","","",""
 "UI_DOCTOR_NO_GOLD","kese yetmiyor","not enough gold","","","","","","","","",""
+"UI_RECRUIT_WHY","Neden geldi: %s. Ne istiyor: %s.","Why they came: %s. What they want: %s.","","","","","","","","",""

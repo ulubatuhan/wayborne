@@ -138,6 +138,14 @@ func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 		candidate.hire_cost,
 	]
 	label.custom_minimum_size = Vector2(520, 0)
+	# Neden geldiği ve ne istediği (Y-C16).
+	if not candidate.backstory_id.is_empty():
+		label.text += "
+" + tr("UI_RECRUIT_WHY") % [
+			tr(String(CharacterData.BACKSTORY_LABEL_KEYS.get(candidate.backstory_id, ""))),
+			tr(String(CampStory.GOAL_KEYS.get(candidate.backstory_id, ""))),
+		]
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	row.add_child(label)
 
 	var hire_button := Button.new()
