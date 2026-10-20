@@ -69,12 +69,18 @@ func _init() -> void:
 	# 3:00 Kamp: ateşe yürüyüş ve oturuş.
 	if _screen.has_method("_on_camp_pressed"):
 		_screen.call("_on_camp_pressed")
-	# Kamp eylemleri paneli ateşe yürüyüşü örtüyor: bir an görünsün, sonra onaylansın.
-	await _hold(4.0)
-	var camp_panel = _screen.get("_camp_panel")
-	if camp_panel != null and is_instance_valid(camp_panel):
-		camp_panel.call("_confirm")
-	await _hold(41.0)
+	# Kamp eylemleri paneli ateşe yürüyüşü örtüyor: açıldığında birkaç saniye
+	# görünsün, sonra onaylansın (panel yürüyüşten sonra açılıyor).
+	var seen := -1
+	for step in 45 * FPS:
+		await process_frame
+		var camp_panel = _screen.get("_camp_panel")
+		if camp_panel == null or not is_instance_valid(camp_panel):
+			continue
+		if seen < 0:
+			seen = step
+		elif step - seen > 4 * FPS:
+			camp_panel.call("_confirm")
 
 	# 3:45 Savaş: iki taraf da kendi sırasında oynar.
 	await _show_combat()
@@ -139,7 +145,7 @@ func _show_combat() -> void:
 	_screen = holder
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SEED_VALUE
-	panel.start_combat(get_root().get_node("GameState").call("get_session").get_party(), 0.75, rng, "bandit", "", "forest")
+	panel.start_combat(get_root().get_node("GameState").call("get_session").get_party(), 0.55, rng, "bandit", "", "forest")
 	await _hold(0.5)
 
 func _play_combat(seconds: float) -> void:

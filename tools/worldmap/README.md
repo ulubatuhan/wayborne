@@ -14,5 +14,11 @@ Büyük ara veriler (`fields.npz` vb.) **depoda yok**: `xx/Harita_Calismasi/` al
 (`CM_FIELDS`, `CM_BASEMAP`, `CM_DEM`, `ZEMIN_LAYOUT`, `ZEMIN_WORLD`, `CM_DEBUG_DIR` ...) olarak alır. Bağımlılıklar: numpy, scipy, opencv,
 pillow. Kâğıt dokusu `art_source/textures/ambientcg/Paper005` yolundan depo köküne göre okunur.
 
-**Bilinen eksik:** hattın baştan sona yeniden koşturulması denenmedi; yalnızca derleme (`py_compile`) ve yol taraması yapıldı. Çıktı
-`xx/TODO/harita_final/` ve `Harita_Calismasi/cikti/v3_final/` altında.
+**Baştan sona koşturma (2026-10-20, görev 8.9):** `bash tools/worldmap/run_all.sh <girdi kökü> <çıktı klasörü>`. Girdi kökü
+`Harita_Calismasi/_replay/scratchpad/kcd` (eski pakette yol dosyası `out/world_kcd.json`; betik `world_zemin.json` adını
+bekliyor, kopyalayıp yeniden adlandırın). Süre bu makinede ~30 dk (alanlar 2,5 dk, sahne ve yollar ~3 dk, 16 karo ~20 dk).
+Çıktı `Harita_Calismasi/rerun_1020/full/` ile `cikti/v3_final/` karşılaştırıldı (4096 px, ortalama piksel farkı 10,8):
+kıyı, göl, dağ simgeleri, orman, kent ve adlar aynı yerde. Kalan iki fark: (1) son haritada alanların `roads` katmanı
+elle, uzun su geçişleri kesilmiş bir sürümle değiştirilmişti; bu adım kodda yok, o yüzden kervan yolunun kalın çizgisi
+ve birkaç yol parçası eksik çıkıyor; (2) birkaç kentin ayak izi (Rivecande, Dravoss) biraz farklı çiziliyor. İlk koşu
+`CM_PEAKS=1 CM_RELIEF=0` olmadan yapıldı ve dağlar koyu kabartma lekesi olarak çıktı; betik bunları artık kendisi veriyor.
