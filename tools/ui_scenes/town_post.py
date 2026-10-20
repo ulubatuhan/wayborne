@@ -144,14 +144,19 @@ PALETTE_KEYS = ("zenith", "horizon", "cloud", "fog", "shadow")
 
 
 def unpurple(rgb):
-    """Stil kuralı (kullanıcı: doygun mor yok): mor-eflatun bir göğün rengi
-    arduvaz maviye döner ve solar. Sıcak ufuk (turuncu, kızıl) dokunulmaz."""
+    """Stil kuralı (kullanıcı: doygun mor ve mavi yok): mor-eflatun bir göğün
+    rengi arduvaz maviye döner ve solar; çok doygun lacivert solar. Sıcak ufuk
+    (turuncu, kızıl) ve gündüzün ölçülü mavisi dokunulmaz."""
     import colorsys
     r, g, b = [v / 255.0 for v in rgb]
     h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    if not (0.70 < h < 0.985) or s < 0.15:
+    if 0.67 < h < 0.985 and s >= 0.15:
+        out = colorsys.hsv_to_rgb(0.60, s * 0.45, v)
+    elif 0.55 < h <= 0.67 and s > 0.40:
+        # Doygun lacivert (gece tepesi): tonu kalır, doygunluğu söner.
+        out = colorsys.hsv_to_rgb(h, s * 0.45, v)
+    else:
         return rgb
-    out = colorsys.hsv_to_rgb(0.60, s * 0.45, v)
     return [int(round(c * 255)) for c in out]
 
 
