@@ -86,6 +86,7 @@ func _test_dust_follows_pace(t) -> void:
 	t.ok(absf(TravelBand.dust_scale(1.0) - 1.0) < 0.001, "normal yürüyüşte toz eski yoğunlukta")
 	t.ok(TravelBand.dust_scale(1.3) > TravelBand.dust_scale(1.0), "tempolu yürüyüş daha çok toz")
 	t.ok(TravelBand.dust_scale(5.0) <= TravelBand.DUST_MAX_SHARE, "toz bir yerde durur")
+	t.ok(TravelBand.SNOW_DRIFT.get_luminance() > 0.85, "kışın savrulan kar beyaza yakın")
 
 func _test_mud_flies_back_and_lands(t) -> void:
 	var start := RoadCaravan.mud_fleck(0.0)

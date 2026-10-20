@@ -133,6 +133,16 @@ const PHASE_ORDER: Array = [
 var _terrain: RouteTerrain
 var _weather: String = RouteWeather.CLEAR
 var _dust_motion: float = 1.0
+## Kışta yolun tozu kar savrulması (görev N31e): renk kar, biraz daha yoğun;
+## yağmurda yine yok (ıslak kar uçmaz).
+var _winter: bool = false
+const SNOW_DRIFT: Color = Color(0.90, 0.92, 0.95)
+const SNOW_ALPHA_SCALE: float = 1.5
+
+func set_winter(on: bool) -> void:
+	if on != _winter:
+		_winter = on
+		queue_redraw()
 var _weather_visuals: Dictionary = RouteWeather.visuals(RouteWeather.CLEAR)
 
 var _sky: Dictionary = ArtPalette.sky(ArtPalette.PHASE_DAY)
@@ -569,9 +579,9 @@ func _draw_dust(cover: Rect2) -> void:
 	if float(_weather_visuals.rain) > 0.0:
 		return
 	var h := maxf(size.y, BAND_HEIGHT)
-	var dust := Color(0.74, 0.66, 0.54) * _light
+	var dust := (SNOW_DRIFT if _winter else Color(0.74, 0.66, 0.54)) * _light
 	var clear := Color(dust, 0.0)
-	var thick := Color(dust, DUST_ALPHA * dust_scale(_dust_motion))
+	var thick := Color(dust, DUST_ALPHA * dust_scale(_dust_motion) * (SNOW_ALPHA_SCALE if _winter else 1.0))
 	var x0 := cover.position.x
 	var x1 := cover.end.x
 	var y0 := _ground_y_at_screen(x0)

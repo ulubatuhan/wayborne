@@ -51,7 +51,7 @@
 "UI_BRIEF_GO_YARD","Avluya Git","To the Yard","","","","","","","","",""
 "UI_BRIEF_GO_TAVERN","Tavernaya Git","To the Tavern","","","","","","","","",""
 "UI_BRIEF_NO_ROUTES","Bu şehirden çıkan yol yok.","No road leaves this city.","","","","","","","","",""
-"UI_BRIEF_ROUTE_KNOWN","%d gün · tehlike %%%d%s","%d days · %d%% danger%s","","","","","","","","",""
+"UI_BRIEF_ROUTE_KNOWN","%d gün · %s (%%%d)%s","%d days · %s (%d%%)%s","","","","","","","","",""
 "UI_BRIEF_ROUTE_UNKNOWN","%d gün · tehlike %s%s","%d days · %s danger%s","","","","","","","","",""
 "UI_BRIEF_ROUTE_CONTRACTS","%d kontrat · toplam %d GG","%d contracts · %d GP in total","","","","","","","","",""
 "UI_BRIEF_ROUTE_NO_CONTRACT","Bu hedefe yazılmış kontrat yok.","No contract written to this destination.","","","","","","","","",""

@@ -2785,6 +2785,7 @@ func _refresh_weather() -> void:
 	# örtüşmez ve "doğru stokladım, yine aç kaldım" geri gelirdi.
 	_weather = RouteWeather.at(_route_key, _session.total_days_elapsed + 1, biome)
 	_band.set_weather(_weather)
+	_band.set_winter(_session.journey_season() == MarketConditions.Season.WINTER)
 	if _caravan != null:
 		_caravan.set_weather(_weather)
 	_refresh_weather_calls()
