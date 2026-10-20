@@ -118,9 +118,9 @@ oynamadan dengeye yaklaşmanın tek yolu bu.
 Her push ve PR `tests.yml`'i tetikler: içe aktarım, testler, ve Godot'un
 bastığı ama sessizce geçtiği ayrıştırma hatalarını (`SCRIPT ERROR`,
 `Parse Error`, `Failed to create an autoload` vb.) arayan bir kapı.
-`Wayborne`'e (ana dal) giden her şey bu kapıdan geçmiş olur.
+`main`'e (ana dal) giden her şey bu kapıdan geçmiş olur.
 
-`Wayborne`'e push, `deploy.yml`'i tetikler: aynı testler ve kapı, ardından
+`main`'e push, `deploy.yml`'i tetikler: aynı testler ve kapı, ardından
 Web (HTML5) dışa aktarımı ve GitHub Pages'e dağıtım. Web derlemesi
 `crossOriginIsolated`/`SharedArrayBuffer` gerektirdiği ve GitHub Pages
 özel başlık desteklemediği için `web/coi-serviceworker.js` istemci

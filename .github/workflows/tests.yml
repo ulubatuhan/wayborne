@@ -1,6 +1,6 @@
 name: Tests
 
-# Deploy iş akışı yalnızca ana dalda (Wayborne) çalışıyor, yani bir dal ana
+# Deploy iş akışı yalnızca ana dalda (main) çalışıyor, yani bir dal ana
 # dala girmeden doğrulanmıyordu. Bu iş akışı her dalda ve her PR'da koşar:
 # projeyi içe aktarır, testleri çalıştırır ve ayrıştırma hatası varsa
 # düşer. Dışa aktarım ve dağıtım burada yok - o iş deploy.yml'nin.
@@ -8,7 +8,7 @@ name: Tests
 on:
   push:
     branches-ignore:
-      - Wayborne
+      - main
   pull_request:
   workflow_dispatch:
 
