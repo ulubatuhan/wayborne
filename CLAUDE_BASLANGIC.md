@@ -46,7 +46,7 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
 | `art_source/` | Kaynak modeller ve dokular (CC0 paketler, MakeHuman giysileri; lisanslar klasörlerin içinde). |
 | `docs/` | Tasarım belgeleri: `lore/`, `design_notes/`, `ui/` (REDESIGN, STIL_REHBERI), `history/` (kapanmış fazların anlatıları, `FAZ_ANLATILARI.md`), `codex/` (Codex PDF'inin kaynağı), `playtest/` (döngü kontrol listesi), `olcum/` (ölçüm raporları), `steam/`. |
 | `proje_takibi/` | **Yapılacaklar ve proje takibi** (aşağıda). |
-| `.github/workflows/` | `tests.yml` (her dal ve PR), `deploy.yml` (main → Web/Pages), `screenshots.yml`, `olcum.yml` (ölçüm raporu, elle ve haftalık). |
+| `.github/workflows/` | `tests.yml` (her dal ve PR), `screenshots.yml`, `olcum.yml` (ölçüm raporu, elle ve haftalık). |
 
 ### proje_takibi/
 

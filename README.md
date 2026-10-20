@@ -5,8 +5,7 @@ savaş içeren bir Godot 4 oyunu. Oyuncu bir kervan lideri; şehirler arası
 mal taşıyor, tüccarlara refakat ediyor, yolda EU4 tarzı olay kartlarıyla
 karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
 
-**Hedef platform PC (Windows).** Web derlemesi yalnızca test içindir: GitHub Pages'te
-`Settings → Pages` etkinleştirildikten sonra bu deponun Pages adresinde yayımlanır, performansı ölçüt değildir.
+**Hedef platform PC (Windows).** Oyun depo klonlanıp Godot 4.2.2 ile yerelde açılarak oynanır; web derlemesi yoktur (tarayıcı sekmesi ~1,2 GB dokuyu taşıyamadı).
 
 ## Oyun döngüsü
 
@@ -119,12 +118,6 @@ Her push ve PR `tests.yml`'i tetikler: içe aktarım, testler, ve Godot'un
 bastığı ama sessizce geçtiği ayrıştırma hatalarını (`SCRIPT ERROR`,
 `Parse Error`, `Failed to create an autoload` vb.) arayan bir kapı.
 `main`'e (ana dal) giden her şey bu kapıdan geçmiş olur.
-
-`main`'e push, `deploy.yml`'i tetikler: aynı testler ve kapı, ardından
-Web (HTML5) dışa aktarımı ve GitHub Pages'e dağıtım. Web derlemesi
-`crossOriginIsolated`/`SharedArrayBuffer` gerektirdiği ve GitHub Pages
-özel başlık desteklemediği için `web/coi-serviceworker.js` istemci
-tarafında bu başlıkları enjekte ediyor.
 
 `olcum.yml` (elle ve haftalık) kariyer simülatörünü koşturup sefer süresi, sefer başına
 kart ve ölüm tablosunu iş özetine yazar (`tools/measure_report.py`). Oyuncu tarafı ölçüm

@@ -5128,66 +5128,19 @@ invocation to a log and fails the job on `SCRIPT ERROR`, `Parse Error`,
 `Compile Error`, `Failed to load script` or `Failed to create an autoload`.
 Never remove that step to make a build pass.
 
-## CI/CD & Deployment
+## CI/CD
 
-### GitHub Actions Workflow
-
-The project uses GitHub Actions to automatically export and deploy the game:
-
-- **Trigger**: Push to `main` branch
-- **Actions**:
-  1. Checkout code
-  2. Setup Godot 4.2.2
-  3. Import Godot project
-  4. Export to HTML5 (Web)
-  5. Deploy to GitHub Pages
-
-### GitHub Pages Setup
-
-To enable GitHub Pages deployment:
-
-1. Go to **Settings** → **Pages**
-2. Set **Source** to `GitHub Actions`
-3. Workflow will automatically deploy on each `main` push
-
-### Export Presets
-
-Web export is configured in `export_presets.cfg`:
-- Platform: HTML5/Web
-- Output: `build/web/index.html`
-- Features: WASM, streaming enabled, threading disabled
-
-### Cross-Origin Isolation (GitHub Pages)
-
-Godot's Web export requires `crossOriginIsolated`/`SharedArrayBuffer`
-unconditionally (this check is baked into the export template itself,
-regardless of the `web/enable_threading` setting). GitHub Pages cannot
-send the `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy`
-headers this needs, since it's static hosting with no custom header
-support.
-
-The deploy workflow (`.github/workflows/deploy.yml`) works around this by
-copying `web/coi-serviceworker.js` into the export output and injecting a
-`<script>` tag into `index.html`'s `<head>` after export. This service
-worker intercepts same-origin fetches and injects the required headers
-client-side, then triggers one page reload so the isolated context takes
-effect. Do not remove this step unless GitHub Pages gains custom header
-support or the game is hosted somewhere that can send these headers
-directly.
+**There is no web build any more (user's decision, 2026-10-21).** The game is played locally on PC from a clone; the Web
+export, the GitHub Pages deploy, `export_presets.cfg` and `web/coi-serviceworker.js` were removed. The browser tab
+could not hold the game (about 1.2 GB of imported textures against the tab's memory limit, `SBOX_FATAL_MEMORY_EXCEEDED`).
+`.github/workflows/tests.yml` runs on every push (main included) and every PR: import, the full suite and the
+script-error gate described above. Never remove that gate to make a build pass.
 
 ### Local Testing
 
-To export locally:
-```bash
-godot --headless --export-release Web build/web/index.html
-```
-
-Then serve with:
-```bash
-python -m http.server 8000 -d build/web
-```
-
-Visit `http://localhost:8000` in browser.
+Open `project.godot` in Godot 4.2.2 and press Play (import twice after pulling atlas changes:
+`godot --headless --import`, run it again). Run the tests with
+`godot --headless --script res://tests/run_tests.gd`.
 
 ## Development Status
 
@@ -5290,7 +5243,7 @@ verir.
 2. Create your first scene in `scenes/main.tscn`
 3. Create scripts in appropriate `scripts/` subfolders
 4. Reference scenes/scripts using `res://` paths
-5. Push to `main` branch to trigger automatic Web export & deployment
+5. Push to `main`; `tests.yml` runs the suite
 
 ## Codex
 

@@ -1,14 +1,11 @@
 name: Tests
 
-# Deploy iş akışı yalnızca ana dalda (main) çalışıyor, yani bir dal ana
-# dala girmeden doğrulanmıyordu. Bu iş akışı her dalda ve her PR'da koşar:
-# projeyi içe aktarır, testleri çalıştırır ve ayrıştırma hatası varsa
-# düşer. Dışa aktarım ve dağıtım burada yok - o iş deploy.yml'nin.
+# Her dalda (main dahil) ve her PR'da koşar: projeyi içe aktarır, testleri
+# çalıştırır ve ayrıştırma hatası varsa düşer. Web derlemesi ve dağıtım yok
+# (kullanıcı kararı: oyun yerelde PC'de oynanır).
 
 on:
   push:
-    branches-ignore:
-      - main
   pull_request:
   workflow_dispatch:
 
@@ -41,7 +38,7 @@ jobs:
       # çıktıları. Üçü birlikte saklanmazsa Godot hepsini yeniden üretir,
       # önbellek hiçbir şey kazandırmaz. Ölçüm (yerel, 2026-10-18): soğuk
       # içe aktarma ~100 sn, sıcak ~13 sn; testler ise ~34 sn. Yalnızca
-      # tests.yml'de: deploy.yml'in Web çıktısı bayat bir önbelleğe
+      # tests.yml'de: eskiden bayat bir önbelleğe
       # güvenmesin diye her seferinde sıfırdan içe aktarmaya devam ediyor.
       - name: Cache Godot import
         uses: actions/cache@v4
