@@ -8,7 +8,7 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
 - **Wayborne:** Godot 4.2.2 / GDScript ile yapılan 2D kervan oyunu. Ticaret, yol olayları, sıra tabanlı savaş, soy
   ve defter. Hedef **PC (Windows)**; Web derlemesi yalnızca test içindir.
 - **Kaynak:** bu dal, kullanıcının bilgisayarındaki yerel çalışmanın (2026-10-17 → 2026-10-20) tamamıdır. `origin/main`
-  (2026-10-16) üstüne 160'tan fazla commit ekler.
+  (2026-10-16) üstüne 157 commit ekler.
 - **Diğer dallar:** `main`, `dev`, `ui-hud-redesign`, `claude/merhaba-6bf7co` ve eski yerel dalların hepsi **bu dalın
   içinde**; bu dalda olmayan tek bir commit'leri yok (2026-10-20'de `git rev-list --count HEAD..<dal>` = 0).
   Kullanıcı onaylarsa bu dal ana hat olabilir ve diğerleri silinebilir. Silmeden önce kullanıcıya sor, sonra aynı
