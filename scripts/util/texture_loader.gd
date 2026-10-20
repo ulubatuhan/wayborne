@@ -18,12 +18,16 @@ static func load_any(path: String) -> Texture2D:
 		return null
 	return ImageTexture.create_from_image(image)
 
-## Çalışma anında mipmap'li kopya. Küçültülerek çizilen dokular mipmap
-## olmadan kumlanıyor; `.import` dosyaları depoda olmadığı için içe aktarma
-## ayarı bunu taşıyamaz. Sıkıştırılmış doku olduğu gibi döner.
+## Küçültülerek çizilen dokular mipmap olmadan kumlanıyor. İçe aktarılan
+## dokular mipmap'i içe aktarmadan getiriyor (görev 5.2: project.godot'un
+## [importer_defaults] bölümü, .import dosyaları depoda olmasa da CI'de
+## geçerli); onlar olduğu gibi döner. Yalnızca diskten ham okunan (henüz içe
+## aktarılmamış) dokunun mipmap'li kopyası çalışma anında üretilir.
 static func with_mipmaps(tex: Texture2D) -> Texture2D:
 	if tex == null:
 		return null
+	if tex is CompressedTexture2D:
+		return tex
 	var image := tex.get_image()
 	if image == null or image.is_compressed():
 		return tex

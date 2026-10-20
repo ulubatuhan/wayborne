@@ -1696,9 +1696,12 @@ in every preview the moment it is equipped.
       prints eight walk phases plus idle/attack/hit/dead per body x outfit;
       `test_outfit.gd` asserts every item has a frame set for all six
       bodies with the body's exact clip layout.
-  - Atlas pages get runtime mipmaps (`BodyFrames._with_mipmaps`): frames
-    are drawn ~5x smaller than rendered, and `.import` files are not in the
-    repo, so an import setting could not carry it.
+  - Atlas pages carry mipmaps from import: frames are drawn ~5x smaller than
+    rendered. `.import` files are not in the repo, so the setting lives in
+    `project.godot`'s `[importer_defaults]` (task 5.2), which CI applies to every
+    texture; `TextureLoader.with_mipmaps` only builds a copy for a raw file not
+    yet imported. An existing local `.import` keeps its old setting until its
+    cache entry in `.godot/imported` is deleted.
   - `tests/test_body_frames.gd` locks the contract: all six variants exist,
     entry counts agree, feet touch the ground line, garments stay inside
     the body. `tests/screenshot_body_range.gd` prints every variant across

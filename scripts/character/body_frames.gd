@@ -187,10 +187,10 @@ static func beast_clip(state: String, fall: float, role: String, motion: float) 
 			return "hit"
 	return "walk" if motion >= 0.5 else "idle"
 
-## Sayfalar mipmap'li yükleniyor: render ~5 kat küçültülerek çiziliyor ve
-## mipmap'siz küçültme kenarları kumlu yapıyor. Mipmap içe aktarma ayarıyla
-## açılamıyor (.import dosyaları depoda yok, CI varsayılanla üretiyor), o
-## yüzden çalışma anında üretiliyor - sayfa başına bir kez, önbellekte.
+## Sayfalar mipmap'li: render ~5 kat küçültülerek çiziliyor ve mipmap'siz
+## küçültme kenarları kumlu yapıyor. Mipmap'i içe aktarma üretiyor
+## (project.godot [importer_defaults], görev 5.2); ham dosyadan okunan sayfa
+## için TextureLoader çalışma anında üretir.
 func texture(page: int) -> Texture2D:
 	if _textures.is_empty():
 		for p in pages:

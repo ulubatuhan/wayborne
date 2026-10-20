@@ -50,3 +50,9 @@ locale/fallback="en"
 [rendering]
 
 textures/vram_compression/import_etc2_astc=true
+
+[importer_defaults]
+
+texture={
+"mipmaps/generate": true
+}
