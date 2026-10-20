@@ -71,16 +71,22 @@ func _init() -> void:
 		_screen.call("_on_camp_pressed")
 	# Kamp eylemleri paneli ateşe yürüyüşü örtüyor: açıldığında birkaç saniye
 	# görünsün, sonra onaylansın (panel yürüyüşten sonra açılıyor).
-	var seen := -1
+	# Ardından gelen günün satırı da öyle: ilk aday seçilir.
+	var seen := {}
 	for step in 45 * FPS:
 		await process_frame
-		var camp_panel = _screen.get("_camp_panel")
-		if camp_panel == null or not is_instance_valid(camp_panel):
-			continue
-		if seen < 0:
-			seen = step
-		elif step - seen > 4 * FPS:
-			camp_panel.call("_confirm")
+		for name in ["_camp_panel", "_diary_panel"]:
+			var overlay = _screen.get(name)
+			if overlay == null or not is_instance_valid(overlay):
+				continue
+			if not seen.has(overlay):
+				seen[overlay] = step
+			elif step - int(seen[overlay]) == 4 * FPS:
+				if name == "_camp_panel":
+					overlay.call("_confirm")
+				else:
+					var first: Dictionary = overlay.get("_candidates")[0] if not overlay.get("_candidates").is_empty() else {}
+					overlay.call("_choose", String(first.get("key", "")), first.get("args", []))
 
 	# 3:45 Savaş: iki taraf da kendi sırasında oynar.
 	await _show_combat()
