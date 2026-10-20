@@ -55,25 +55,6 @@ def inked(img, line, fill=None, soften=1.2):
     return out
 
 
-def corners_only(img, share=0.34):
-    """Seçim köşebendi yalnız dört köşe: ortası ve kenarların ortası saydam
-    (ilk sürümde ortası altın dolu çıkmıştı - seçili satırın yazısını örtüyordu)."""
-    a = np.asarray(img).copy()
-    h, w = a.shape[:2]
-    keep = np.zeros((h, w), bool)
-    cw, ch = int(w * share), int(h * share)
-    for ys in (slice(0, ch), slice(h - ch, h)):
-        for xs in (slice(0, cw), slice(w - cw, w)):
-            keep[ys, xs] = True
-    # Köşenin içi de saydam: yalnız dış çizgi (kenardan 1/6 içeriye kadar).
-    band = np.zeros((h, w), bool)
-    bw, bh = max(2, w // 6), max(2, h // 6)
-    band[:bh, :] = band[-bh:, :] = True
-    band[:, :bw] = band[:, -bw:] = True
-    a[..., 3] = np.where(keep & band, a[..., 3], 0)
-    return Image.fromarray(a, "RGBA")
-
-
 def nine(img, size, margin):
     """Basit nine-slice: köşeler sabit, kenarlar ve orta gerilir (önizleme için)."""
     w, h = img.size
@@ -100,7 +81,6 @@ def main():
         "button_primary_pressed": inked(load("kenney_ui_rpg_expansion/buttonLong_brown_pressed.png"), (30, 10, 8), BLOOD_PRESSED),
         "button_primary_disabled": inked(load("kenney_ui_rpg_expansion/buttonLong_grey.png"), (50, 46, 44), (88, 80, 76)),
         "tooltip_plate": inked(load("kenney_ui_rpg_expansion/panelInset_beigeLight.png"), (90, 70, 50), PARCHMENT),
-        "select_corner": corners_only(inked(load("kenney_fantasy_ui_borders/Transparent center/panel-transparent-center-003.png"), GOLD)),
     }
     for name, img in pieces.items():
         img.save(os.path.join(OUT, name + ".png"))
@@ -128,10 +108,6 @@ def main():
     sheet.alpha_composite(tip, (1160, 120))
     d.text((1180, 140), "İpucu plakası", font=head, fill=(40, 30, 26))
     d.text((1180, 186), "Moral düşük: 2 gündür aç", font=body, fill=(40, 30, 26))
-    sel = nine(pieces["select_corner"], (300, 200), 16)
-    d.rounded_rectangle((1200, 320, 1500, 520), 4, fill=(30, 26, 24))
-    sheet.alpha_composite(sel, (1200, 320))
-    d.text((1230, 540), "Seçim köşebentleri", font=body, fill=PARCHMENT)
     os.makedirs(os.path.dirname(PREVIEW), exist_ok=True)
     sheet.convert("RGB").save(PREVIEW, quality=92)
     print("yazıldı:", OUT, PREVIEW)

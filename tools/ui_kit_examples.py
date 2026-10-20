@@ -12,7 +12,6 @@ Kullanım kuralı (örneklerde görünen):
   - title_strip: sütun başlığının altındaki çizgi;
   - button_primary: kararın ana eylemi (Al, Sat, Yola çık) - ekranda bir tane;
     ikincil eylemler oyunun düz düğmesinde kalır (Pazarlık, Vazgeç);
-  - select_corner: seçili satır ya da kişi (dört köşe, ortası açık);
   - tooltip_plate: fiyat nedeni gibi ipuçları.
 
     python -X utf8 tools/ui_kit_examples.py
@@ -74,11 +73,6 @@ def button(img, box, label, key="button_primary", size=24):
            fill=PARCHMENT if key != "button_primary_disabled" else (150, 140, 128))
 
 
-def corners(img, box):
-    x0, y0, x1, y1 = box
-    img.alpha_composite(nine(kit("select_corner", 0.35), (x1 - x0 + 8, y1 - y0 + 8), 22), (x0 - 4, y0 - 4))
-
-
 def tip(img, box, title, line):
     x0, y0, x1, y1 = box
     img.alpha_composite(nine(kit("tooltip_plate"), (x1 - x0, y1 - y0), 40), (x0, y0))
@@ -99,18 +93,16 @@ def market():
     frame(img, (1422, 73, 1891, 1005))
     strip(img, 42, 128, 440)
     strip(img, 1436, 128, 440)
-    corners(img, (42, 331, 483, 384))
     button(img, (716, 948, 875, 1000), "Al")
     tip(img, (90, 392, 560, 486), "Fiyatın nedeni", "Pahalılık · Mevsim: kış, tezgâh az")
-    caption(img, "Pazar: kenar, başlık çizgisi, seçili satır, ana eylem (Al), ipucu plakası")
+    caption(img, "Pazar: kenar, başlık çizgisi, ana eylem (Al), ipucu plakası")
     return img
 
 
 def tavern():
     img = Image.open(os.path.join(SHOTS, "screen_shots", "tavern_1920x1080.png")).convert("RGBA")
     button(img, (1414, 1027, 1548, 1077), "Sohbete başla", size=22)
-    corners(img, (1195, 315, 1275, 545))
-    caption(img, "Taverna: ana eylem (Sohbete başla), seçili kişi köşebentle")
+    caption(img, "Taverna: ana eylem (Sohbete başla)")
     return img
 
 
