@@ -14,6 +14,8 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = true
 	_figure = WalkFigure.new()
+	# Önizleme figürü büyük çiziyor: duruş karesinin yakın plan kümesi (Y-G12).
+	_figure.hd = true
 	add_child(_figure)
 	resized.connect(_layout)
 
@@ -45,11 +47,11 @@ func show_look(
 func set_tint(tint: Color) -> void:
 	_figure.set_tint(tint)
 
-## Figür kareleri 320 px tuvalde render ediliyor, giysiler yarı çözünürlükte
-## paketli; bundan çok büyütülen figür bulanıklaşıyor (9.6 denetimi: 620 px'te
-## giysiler lekeye döndü). Pencere ne kadar uzun olursa olsun figür bu boyu
-## aşmaz, altta durur.
-const MAX_FIGURE_HEIGHT: float = 400.0
+## Figür kareleri 320 px tuvalde render ediliyor; duruşun yakın plan kümesi
+## (Y-G12) 3 katı. Önizleme yakın plan kümesini çiziyor; yine de figür bu boyu
+## aşmaz (9.6 denetimi: 620 px'te normal kareler lekeye dönmüştü; yakın plan
+## kümesi olmayan bir giysi normal kareye düşer).
+const MAX_FIGURE_HEIGHT: float = 560.0
 ## 0 = sınır yok: konuşma penceresinin portresi figürü bilerek büyütüp belden
 ## yukarısını kırpıyor (DialoguePanel).
 var max_figure_height: float = MAX_FIGURE_HEIGHT

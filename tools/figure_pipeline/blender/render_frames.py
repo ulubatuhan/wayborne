@@ -207,6 +207,23 @@ def back_markers(body, rig, rest, body_idx):
     return out
 
 
+## Yakın plan kümesi (görev Y-G12): WAYBORNE_HD=k (ör. 3) ise tuval, ölçek ve
+## çapa k katı; çıktı build/figures/out_hd. Yalnız ekran önizlemeleri için
+## (karakter ekranı, gardırop, konuşma portresi) duruş karesi.
+HD = float(os.environ.get("WAYBORNE_HD", "1") or 1)
+
+
+def hd_camera(camcfg):
+    if HD <= 1.0:
+        return camcfg
+    camcfg = dict(camcfg)
+    camcfg["px_per_meter"] = float(camcfg["px_per_meter"]) * HD
+    camcfg["canvas"] = [int(round(v * HD)) for v in camcfg["canvas"]]
+    if "ground_px" in camcfg:
+        camcfg["ground_px"] = [v * HD for v in camcfg["ground_px"]]
+    return camcfg
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     variant = arg(argv, "--variant")
@@ -215,10 +232,12 @@ def main():
     build = cfg("build.json")
     clip_cfg = build["clips"][clip_name]
     do_magenta = "--magenta" in argv and clip_cfg.get("magenta", True)
-    out_root = arg(argv, "--out", os.path.join(ROOT, "build", "figures", "out", variant, clip_name))
+    out_dir = "out_hd" if HD > 1.0 else "out"
+    out_root = arg(argv, "--out", os.path.join(ROOT, "build", "figures", out_dir, variant, clip_name))
     layers, retarget, garments = cfg("layers.json"), cfg("retarget.json"), cfg("garments.json")
     camcfg = dict(cfg("camera.json"))
     camcfg["ground_px"] = list(clip_cfg["anchor_px"])
+    camcfg = hd_camera(camcfg)
     clip = json.load(open(os.path.join(ROOT, "build", "figures", "clips", clip_name + ".json")))
     # Katman alt kumesi (walk_boots: yalniz bacaklar): kok, temel klibin ayni
     # karesinden alinir ki govde katmani (temelden) ile bacaklar ayni yere otursun.

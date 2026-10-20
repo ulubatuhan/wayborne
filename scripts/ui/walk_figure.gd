@@ -530,6 +530,14 @@ func _draw_transition(height: float) -> void:
 func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 	var frames := BodyFrames.for_body(_body_variant) if not _body_variant.is_empty() else null
 	if frames != null:
+		var hd_frames := _hd_frames(frames, seated)
+		if hd_frames != null:
+			# Yakın plan kümesi: giysiler de `_hd` kimliğiyle aranır.
+			var saved := _body_variant
+			_body_variant = saved + HD_SUFFIX
+			_draw_person_frames(hd_frames, figure_h * _scale, ground_y, seated)
+			_body_variant = saved
+			return
 		_draw_person_frames(frames, figure_h * _scale, ground_y, seated)
 		return
 	var h := figure_h * _scale
@@ -587,6 +595,29 @@ const DISMOUNT_FAR_LEG_U: float = 0.26
 const UNDERSHIRT_COLOR: Color = Color(0.78, 0.74, 0.64)
 const SHORTS_COLOR: Color = Color(0.42, 0.34, 0.26)
 const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
+
+## Yakın plan (görev Y-G12): ekran önizlemeleri (karakter ekranı, gardırop,
+## konuşma portresi) figürü render boyundan büyük gösteriyor. `hd` açıkken ve
+## figür düz duruyorken duruş karesinin 3 kat çözünürlüklü kümesi çizilir -
+## yalnız beden ve giyilen her giysinin `_hd` kümesi varsa; biri eksikse
+## normal küme (karışık çözünürlük ya da çıplak parça olmasın).
+const HD_SUFFIX: String = "_hd"
+var hd: bool = false
+
+func _hd_frames(frames: BodyFrames, seated: bool) -> BodyFrames:
+	if not hd or seated:
+		return null
+	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
+	var clip := pick_clip(shared_clips(frames, garments), seated, _motion, _action_clip, _combat_stance,
+		weapon_kind(), _carries_pack, _wears_boots())
+	if clip != "idle":
+		return null
+	var hd_frames := BodyFrames.for_body(_body_variant + HD_SUFFIX)
+	if hd_frames == null or not hd_frames.has_clip("idle"):
+		return null
+	if OutfitCatalog.worn_frames(_outfit, _body_variant + HD_SUFFIX).size() != garments.size():
+		return null
+	return hd_frames
 
 func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
 	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)

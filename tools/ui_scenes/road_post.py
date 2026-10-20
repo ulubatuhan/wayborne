@@ -124,6 +124,13 @@ def wrap_max(a, size):
     return np.asarray(wrap_filter(img, ImageFilter.MaxFilter(size), 4), np.float32) / 255.0
 
 
+# Ortak mürekkep geçişi (Y-G02) yalnız kervanın düzleminde: uzak katman
+# mürekkepsiz, ön tarla bulanık kalır (Rendered Road Rules).
+INKED_LAYERS = ("mid", "ground")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "npr"))
+import ink_pass  # noqa: E402
+
+
 def process(biome):
     src = os.path.join(BUILD, "road_" + biome)
     layout = json.load(open(os.path.join(src, "layout.json")))
@@ -136,6 +143,8 @@ def process(biome):
             continue
         orig_h = Image.open(path).size[1]
         img, h = process_layer(path, layer, 11 + i)
+        if layer in INKED_LAYERS:
+            img = ink_pass.light_pass(img)
         img.save(os.path.join(dst, layer + ".png"), optimize=True)
         spec = layout[layer]
         entry = {"L": spec["L"], "width": img.size[0], "height": h,

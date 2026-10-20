@@ -21,6 +21,8 @@ ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.d
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 sys.path.insert(0, os.path.join(PIPE, "mesh"))
 import posterize  # noqa: E402
+sys.path.insert(0, os.path.join(ROOT, "tools", "npr"))
+import ink_pass  # noqa: E402  ortak mürekkep geçişi (Y-G02)
 
 SRC = os.path.join(ROOT, "build", "props")
 DST = os.path.join(ROOT, "data", "assets", "props")
@@ -63,7 +65,7 @@ def main():
             bb = img.getchannel("A").point(lambda a: 255 if a > 4 else 0).getbbox()
             if bb is None:
                 continue
-            img = img.crop(bb)
+            img = ink_pass.light_pass(img.crop(bb))
             img.save(os.path.join(DST, pid, name + ".png"), optimize=True)
             # katmanin sol ust kosesi, cipaya gore
             layers[name] = [bb[0] - ax, bb[1] - ay]

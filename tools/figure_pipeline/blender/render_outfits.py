@@ -38,7 +38,9 @@ import render_beast  # noqa: E402
 
 CLOTHES = os.path.join(ROOT, "art_source", "models", "clothes", "quaternius_fantasy")
 MAKEHUMAN = os.path.join(ROOT, "art_source", "models", "clothes", "makehuman")
-OUT = os.path.join(ROOT, "build", "figures", "outfits")
+# Yakın plan kümesi (Y-G12): render_frames.HD ile aynı ortam değişkeni.
+OUT = os.path.join(ROOT, "build", "figures", "outfits_hd" if float(os.environ.get("WAYBORNE_HD", "1") or 1) > 1.0
+                   else "outfits")
 
 
 def fit_item(spec, gender, body, rig, inner=()):
@@ -326,11 +328,11 @@ def main():
         objs[name] = (obj, member_layers(olw, layers), [s.material for s in obj.material_slots])
         print("kalem", name, "katmanlar", objs[name][1], flush=True)
 
-    camcfg0 = dict(rf.cfg("camera.json"))
+    camcfg0 = rf.hd_camera(dict(rf.cfg("camera.json")))
     fig_shading.setup_render(camcfg0)
     # Yarim cozunurluk: paketleyici zaten yariya indiriyordu (pack_outfits.DOWNSCALE);
     # dogrudan yarim render ayni pikselleri dortte bir surede uretiyor.
-    bpy.context.scene.render.resolution_percentage = int(ocfg.get("resolution_percentage", 100))
+    bpy.context.scene.render.resolution_percentage = 100 if rf.HD > 1.0 else int(ocfg.get("resolution_percentage", 100))
     bpy.context.scene.render.use_persistent_data = True
     kw = dict(core=layers["core_threshold"], root=layers["root_threshold"])
     shade = {n: fig_shading.body_material(camcfg0, "layer:" + n, **kw) for n in layers["layers"]}
@@ -342,7 +344,7 @@ def main():
     for clip_name in clips:
         clip_cfg = build["clips"][clip_name]
         camcfg = dict(camcfg0)
-        camcfg["ground_px"] = list(clip_cfg["anchor_px"])
+        camcfg["ground_px"] = [v * max(rf.HD, 1.0) for v in clip_cfg["anchor_px"]]
         fig_shading.setup_camera(camcfg, 0.0, 0.0)
         clip = json.load(open(os.path.join(ROOT, "build", "figures", "clips", clip_name + ".json")))
         base = None

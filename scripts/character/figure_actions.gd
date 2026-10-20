@@ -245,10 +245,12 @@ const CLIPS: Dictionary = {
 	}]]},
 	# Yol tepkileri (görev N31d). Klip sözlüğünde baş yok: "bakmak" ön elin
 	# alnına siper olduğu, gövdenin hafifçe geriye kalktığı bir duruş - yolda
-	# bir işaret belirince en yakındaki ileri bakar.
+	# bir işaret belirince en yakındaki ileri bakar. Açılar 3B kare verisinden
+	# hesaplandı (joints.json: omuz-dirsek 29.5, dirsek-bilek 31 px); 118/238
+	# bileği başın üstüne koyuyordu, 92/206 alnın önüne.
 	"look_ahead": {"frames": 1, "keys": [[0.0, {
 		"lean": -4.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
-		"arm_f": [118.0, 238.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
+		"arm_f": [92.0, 206.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
 	}]]},
 	# Dur temposunda yorgun bekleyiş: gövde öne çökük, dizler hafif kırık,
 	# kollar sarkık ve biraz önde.

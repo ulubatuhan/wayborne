@@ -108,6 +108,24 @@ def ink_pass(img, strength=1.0):
     return Image.fromarray((res * 255).astype(np.uint8), "RGBA")
 
 
+def light_pass(img):
+    """Oyuna giden hafif geçiş (görev Y-G02, 2026-10-20 denetimi): tam geçiş
+    (üç ton + kâğıt) yol zeminini lekeli ve açık yaptı, figürle zemin ayrımı
+    azaldı. Bu sürüm rengi korur: yalnız siluet konturu ve en koyu gölgede
+    seyrek tarama. Eşyalar ve yolun orta/zemin katmanı bununla paketlenir."""
+    a = np.asarray(img.convert("RGBA"), np.float32) / 255.0
+    rgb, alpha = a[..., :3], a[..., 3]
+    lum = (rgb * LUMA).sum(-1)
+    h, w = alpha.shape
+    deep = smoothstep(0.14, 0.06, lum)
+    yy, xx = np.mgrid[0:h, 0:w]
+    hat = (((xx + yy) % 4) == 0) * deep * 0.35
+    out = rgb * (1 - hat[..., None]) + INK * hat[..., None]
+    sil = np.clip(sobel(alpha) * 1.2, 0, 1)
+    out = out * (1 - sil[..., None] * 0.8) + INK * sil[..., None] * 0.8
+    return Image.fromarray((np.dstack([np.clip(out, 0, 1), alpha]) * 255).astype(np.uint8), "RGBA")
+
+
 def compare(out_path, inputs, cell=520):
     rows = []
     for p in inputs:
