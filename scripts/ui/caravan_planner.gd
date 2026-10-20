@@ -373,7 +373,8 @@ func _refresh_departure_morale() -> void:
 
 	for entry in breakdown:
 		var line := Label.new()
-		line.text = "  %s %+d" % [tr(String(entry["key"])), int(entry["amount"])]
+		# Önce söz, sayı parantezde (Y-H03): "Zamanın darlığı: Moral biraz düştü (-8)".
+		line.text = "  %s: %s" % [tr(String(entry["key"])), Wording.change_line(Wording.MORALE, int(entry["amount"]))]
 		var line_color := SATISFIED_COLOR if int(entry["amount"]) > 0 else ArtPalette.UI_WARNING
 		line.add_theme_color_override("font_color", line_color)
 		_morale_reasons.add_child(line)
