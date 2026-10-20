@@ -8,8 +8,6 @@ ui_press.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - basma	Way
 ui_stamp.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - mühür	Wayborne	-	proje (kendi üretimi)	-	-	-
 wind_ambience.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - rüzgâr	Wayborne	-	proje (kendi üretimi)	-	-	-
 wooden_thud.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - tahta tıkırtısı	Wayborne	-	proje (kendi üretimi)	-	-	-
-copper_for_the_traveler.mp3	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	-
-high_noon_in_the_square.mp3	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	-
 fire_crackle.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - kamp ateşi çıtırtısı (tools/audio/make_fire_sounds.py)	Wayborne	-	proje (kendi üretimi)	-	-	-
 fire_ignite.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - ateşin tutuşması (tools/audio/make_fire_sounds.py)	Wayborne	-	proje (kendi üretimi)	-	-	-
 ui/press_0.ogg	Kenney UI Audio, click1.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-

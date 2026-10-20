@@ -37,10 +37,8 @@ extends Node
 const TRACK_ROAD: String = "road"
 const TRACK_CITY: String = "city"
 
-const TRACK_PATHS: Dictionary = {
-	TRACK_ROAD: "res://data/assets/audio/copper_for_the_traveler.mp3",
-	TRACK_CITY: "res://data/assets/audio/high_noon_in_the_square.mp3",
-}
+## Müzik kullanılmıyor (kullanıcının kararı): parça yok, çalma çağrıları sessizce geçer.
+const TRACK_PATHS: Dictionary = {}
 
 ## Geçiş süresi. Kısa olursa kesme gibi duyuluyor, uzun olursa iki parça
 ## birbirine karışıyor - ölçüldü, 1.4 saniye ikisinin arası.

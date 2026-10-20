@@ -25,9 +25,7 @@ ve onayı altında çalışmıştır:
   (bu depodaki `CLAUDE.md` dahil) hazırlanmasında kullanılmıştır.
 - **Ses**: Arayüz ve ortam sesleri (`ui_*.wav`, rüzgâr, kapı gıcırtısı,
   tahta tıkırtısı) gerçek kayıt yerine matematiksel olarak (sinüs/gürültü
-  dalgaları) üretilmiştir. Müzik: **[iki parçanın (`copper_for_the_traveler`,
-  `high_noon_in_the_square`) kaynağı depoda kayıtlı değil; geliştirici
-  doldurmalı - yayından önce bu satır kesinleşmeli]**. Her ses dosyasının
+  dalgaları) üretilmiştir. Oyunda müzik yoktur. Her ses dosyasının
   kaynağı ve lisansı `data/assets/audio/KUNYE.tsv`'de; `test_audio_credits.gd`
   ticari kullanımı yasaklayan bir lisansı ve künyesiz bir dosyayı yakalar.
 
@@ -58,10 +56,7 @@ under the direction, review, and approval of a human developer:
   `CLAUDE.md`).
 - **Audio**: interface and ambience sounds (`ui_*.wav`, wind, gate creak,
   wooden thud) are generated mathematically (sine/noise waveforms) rather
-  than recorded. Music: **[the origin of the two tracks
-  (`copper_for_the_traveler`, `high_noon_in_the_square`) is not recorded in
-  the repository; the developer must fill this in - the line has to be final
-  before release]**.
+  than recorded. The game has no music.
 
 **This game contains no Live-Generated AI content** — no AI system
 generates content dynamically while a person is playing. All AI-assisted
