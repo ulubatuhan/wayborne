@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/body_female_lean_hd/page_0_2a0ea4d2.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 443.303
+rects = PackedInt32Array(0, 1220, 2, 115, 208, 0, 1337, 2, 113, 199, 0, 1452, 2, 112, 199, 0, 1452, 2, 112, 199, 0, 263, 2, 87, 324, 0, 439, 2, 83, 315, 0, 352, 2, 85, 323, 0, 439, 2, 83, 315, 0, 524, 2, 88, 309, 0, 702, 2, 84, 307, 0, 614, 2, 86, 308, 0, 788, 2, 84, 307, 0, 2, 2, 87, 343, 0, 178, 2, 83, 341, 0, 91, 2, 85, 341, 0, 178, 2, 83, 341, 0, 874, 2, 115, 222, 0, 991, 2, 113, 218, 0, 1106, 2, 112, 218, 0, 1106, 2, 112, 218)
+offsets = PackedVector2Array(-21.00, -467.00, -21.00, -460.00, -20.00, -460.00, -20.00, -460.00, -35.00, -323.00, -33.00, -315.00, -35.00, -323.00, -33.00, -315.00, -35.00, -560.00, -33.00, -559.00, -35.00, -559.00, -33.00, -559.00, -35.00, -342.00, -33.00, -341.00, -35.00, -341.00, -33.00, -341.00, -21.00, -481.00, -21.00, -479.00, -20.00, -479.00, -20.00, -479.00)
+joint_names = PackedStringArray("shoulder", "elbow_front", "hand_front", "fingers_front", "elbow_back", "hand_back", "hip", "neck", "head_top", "chin", "knee_front", "ankle_front", "back_upper", "back_lower")
+joints = PackedVector2Array(6.39, -443.30, 21.79, -363.33, 61.50, -301.03, 91.84, -268.25, 21.79, -363.33, 61.50, -301.03, 0.00, -288.70, 0.00, -472.97, 16.33, -559.16, 27.46, -484.24, 23.69, -155.75, -2.76, -24.16, -8.51, -371.71, -21.68, -313.76)
+weapon_angles = PackedFloat32Array(1.5708)
+draws = PackedFloat32Array(0.000)

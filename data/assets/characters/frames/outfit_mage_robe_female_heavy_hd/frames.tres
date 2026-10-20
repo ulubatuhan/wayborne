@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_mage_robe_female_heavy_hd/page_0_8254c3a8.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 443.303
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 680, 2, 138, 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 185, 2, 172, 284, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 359, 2, 177, 279, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 181, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 538, 2, 140, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-48.00, -485.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -79.00, -327.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -82.00, -501.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -82.00, -356.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -48.00, -489.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_fisherman_sweater_female_lean_hd/page_0_dbf67575.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 443.303
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 99, 2, 92, 185, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 378, 2, 84, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 95, 197, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 287, 2, 89, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 193, 2, 92, 185, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-25.00, -481.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -41.00, -335.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -41.00, -481.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -41.00, -356.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -25.00, -481.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

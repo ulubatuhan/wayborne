@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_armor_plate_male_lean_hd/page_0_8007d4e1.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 484.667
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 120, 2, 133, 227, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 390, 2, 116, 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 116, 276, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 508, 2, 116, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 133, 226, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-47.00, -530.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -49.00, -381.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -49.00, -530.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -49.00, -379.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -47.00, -530.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_pilgrim_robe_male_average_hd/page_0_e739aec6.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 484.667
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 597, 2, 158, 242, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 148, 2, 146, 357, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 296, 2, 139, 315, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 144, 366, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 437, 2, 158, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-63.00, -542.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -60.00, -380.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -63.00, -553.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -60.00, -384.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -62.00, -552.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

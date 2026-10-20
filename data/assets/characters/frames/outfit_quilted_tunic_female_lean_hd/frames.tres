@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_quilted_tunic_female_lean_hd/page_0_f80c9a8d.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 443.303
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 204, 2, 97, 189, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 406, 2, 101, 139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 100, 273, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 303, 2, 101, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 2, 98, 189, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-25.00, -479.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -45.00, -340.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -45.00, -482.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -44.00, -351.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -26.00, -479.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

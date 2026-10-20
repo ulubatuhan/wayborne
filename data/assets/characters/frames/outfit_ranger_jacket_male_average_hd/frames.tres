@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_ranger_jacket_male_average_hd/page_0_0f55fcb3.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 484.667
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 187, 2, 208, 277, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 714, 2, 139, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 397, 2, 174, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 573, 2, 139, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 183, 279, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-90.00, -543.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -61.00, -380.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -90.00, -547.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -61.00, -383.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -67.00, -544.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)

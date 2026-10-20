@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BodyFrames" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/body_frames.gd" id="1_bf"]
+
+[resource]
+script = ExtResource("1_bf")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_linen_tunic_male_average_hd/page_0_8586335d.png")
+clip_names = PackedStringArray("idle")
+clip_frames = PackedInt32Array(1)
+shoulder_px = 484.667
+texel_scale = 1.0000
+rects = PackedInt32Array(0, 439, 2, 89, 107, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 231, 2, 115, 189, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 109, 265, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 113, 2, 116, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 348, 2, 89, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+offsets = PackedVector2Array(-40.00, -515.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -49.00, -375.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -50.00, -522.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -50.00, -380.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, -39.00, -522.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00)
