@@ -35,6 +35,37 @@ OUT = os.path.join(
 
 
 # ---------------------------------------------------------------- BÖLÜM VIII
+
+def _cover_counts():
+    """Kapaktaki sayılar elle yazılmaz, oyunun kendi verisinden okunur (görev
+    Y-E07: elle yazılan "41 olay, 5 şehir" eskimişti)."""
+    import json as _json
+    import re as _re
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    def read(rel):
+        return open(os.path.join(root, rel), encoding="utf-8").read()
+    def enum_size(rel, name):
+        body = _re.search(r"enum %s\s*\{(.*?)\}" % name, read(rel), _re.S).group(1)
+        # Yorumlar atılır (içlerinde virgül ve büyük harfli sözcük olabilir).
+        body = "\n".join(line.split("#")[0] for line in body.splitlines())
+        return len(_re.findall(r"\b[A-Z][A-Z0-9_]*\b", body))
+    events = _json.loads(read("docs/codex/events_export.json"))["events"]
+    settlements = _json.loads(read("data/config/settlements.json"))
+    kinds = [s.get("type", "") for s in settlements["settlements"]]
+    from codex_events_data import EVENTS as _HAND
+    return {
+        "live": len(events), "hand": len(_HAND),
+        "effects": enum_size("scripts/events/event_effect.gd", "Type"),
+        "cities": kinds.count("city"), "towns": kinds.count("town"), "serais": kinds.count("caravanserai"),
+        "routes": len(settlements["routes"]),
+        "stats": enum_size("scripts/character/character_stats.gd", "Kind"),
+        "traits": read("scripts/character/trait_catalog.gd").count("_make(") - 1,
+        "equipment": read("scripts/character/equipment_catalog.gd").count("_make(") - 1,
+    }
+
+
+COUNTS = _cover_counts()
+
 def ch8_engine():
     f = part("VIII", "Olay Motoru",
              "Yolun kalbi. Yirmi yedi kart, koşullu uygunluk, ağırlıklı çekim ve "
@@ -438,10 +469,10 @@ def cover():
             None,
             [
                 ["Bölüm sayısı", "8 bölüm + olay ağacı + ek"],
-                ["Olay kartı", "41 canlı, 29'u bu ekte belgeli (3'ü zincir)"],
-                ["Etki sözlüğü", "26 tip"],
-                ["Şehir / rota", "5 şehir · 7 kenar"],
-                ["Karakter", "6 stat · 5 kültür · 4 sınıf · 6 görev · 12 huy · 12 ekipman"],
+                ["Olay kartı", "%(live)d canlı; %(hand)d tanesi elle belgeli, kalanı katalogdan" % COUNTS],
+                ["Etki sözlüğü", "%(effects)d tip" % COUNTS],
+                ["Yerleşim / rota", "%(cities)d şehir · %(towns)d kasaba · %(serais)d kervansaray · %(routes)d yol" % COUNTS],
+                ["Karakter", "%(stats)d stat · 5 kültür · 4 sınıf · 3 rol · %(traits)d huy · %(equipment)d ekipman" % COUNTS],
                 ["Kampanya", "5 perde, sonu olan hikâye + sonsuz ticaret"],
             ],
             widths=[40 * mm, 114 * mm],
