@@ -56,6 +56,18 @@ jobs:
           set -o pipefail
           godot --headless --script res://tests/run_tests.gd 2>&1 | tee tests.log
 
+      # Tarayici sekmesi ~2 GB'ta doluyor (SBOX_FATAL_MEMORY_EXCEEDED): Web
+      # export tum .pck'yi bellege aliyor ve atlaslar ~1,25 GB tutuyordu.
+      # Testler tam cozunurlukte kosulduktan sonra atlas sayfalari yalnizca
+      # bu yapida kucultuluyor (depoya yazilmaz, masaustu kalitesi ayni);
+      # ayrintisi tools/web_shrink.py'de. Sonra yeniden import gerekiyor.
+      - name: Shrink atlases for the browser build
+        run: |
+          set -o pipefail
+          pip install --quiet pillow
+          python3 tools/web_shrink.py 2>&1 | tee shrink.log
+          godot --headless --import 2>&1 | tee import_shrunk.log || godot --headless --import 2>&1 | tee import_shrunk.log
+
       - name: Export to HTML5
         run: |
           set -o pipefail
@@ -69,7 +81,7 @@ jobs:
         if: always()
         run: |
           found=0
-          for log in import.log tests.log export.log; do
+          for log in import.log tests.log import_shrunk.log export.log; do
             [ -f "$log" ] || continue
             if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' "$log"; then
               echo "::error file=$log::$log içinde betik hatası var"
