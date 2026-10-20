@@ -1,5 +1,8 @@
 # Wayborne - Godot 4 Project Guide
 
+> **New here? Read `CLAUDE_BASLANGIC.md` first:** what this branch is, where the TODO registry (`proje_takibi/`)
+> and the change log live, the user's working rules, and the resume point.
+
 ## Vaat ve Sütunlar
 
 > **Durum: öneri, kullanıcı onayı bekliyor (görev Y-A01, Y-A02).** Cümleler yapılacaklar listesindeki kullanıcı notlarından

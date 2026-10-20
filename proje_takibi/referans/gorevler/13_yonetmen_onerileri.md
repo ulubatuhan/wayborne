@@ -1,0 +1,722 @@
+# §13. Yönetmen önerileri (kullanıcı seçimi, 2026-10-17)
+
+> Bu dosya `../YAPILACAKLAR.md` dizininin bir bölümü. Görev kimlikleri (ör. **8.2**, **12.2c**, **R0**) ve § başvuruları dizindekiyle aynı. Kurallar: `00_kurallar.md`. Başlamadan önce: `../00_BASLA_BURADAN.md`.
+
+**Kaynak:** Yönetmen masası ([artifact](https://claude.ai/artifact/EBVcPmdtyfc134ZL1R14nr)). 111 öneriden kullanıcı 96'sını onayladı, 13'ünü onaylamadı, 2'sine dokunmadı. Ham seçimler ve notlar: `../belgeler/yonetmen/secimler_2026-10-17.json`. Önerilerin gerekçeleri ve kanıtları: `../belgeler/yonetmen/` altındaki dört rapor (sistemler, görsel, vizyon, literatür; `[R#]` kaynak kimlikleri `4_literatur.md` kaynakçasında).
+
+**Kimlikler:** `Y-` + yönetmen masasındaki kod (ör. **Y-B02**). Sonu `T` ile biten kimlikler (**Y-F04T**, **Y-G10T** …) onaylanmayan bir önerinin altındaki kullanıcı notundan türetildi.
+
+**Kullanıcı notları aynen alındı** ve her görevde “Kullanıcı notu” satırında duruyor. Not öneriyle çeliştiğinde not geçerli; görevin “Ne” satırı nota göre yeniden yazıldı. Bir notun anlamı belirsizse uygulamadan önce kullanıcıya sor.
+
+**Öncelik eşlemesi:** Masadaki P0 ve P1 → burada P1; P2 → P2; P3 → P3. Bu dizinde P0 yalnızca hata ve engeller içindir.
+
+## Kullanıcı kararları (bu bölümün her görevini etkiler)
+
+- **A03:** Dikey dilim yok. Oyun Aralık'tan önce tamamlanacak; sonra pazarlama ve rötuş.
+- **A04:** Hedef Şubat 2027 Next Fest. Steam sayfası fest öncesi (Aralık) açılır, istek listesi toplanır. Kickstarter yok (Türkiye kısıtı).
+- **A05:** Karakter ve giysi sistemi oturdu. UI, HUD ve menüler oturduktan sonra sanat bir süre bırakılacak. Sunum işlerine ağırlık verilmesi bilinçli.
+- **B01:** İşlerin sırası teknik önceliğe göre; bu listedeki işler birkaç oturumda yapılacak.
+- **C01:** Harita aktarımı kademeli değil, tam ve hemen.
+- **C18:** Kampanya sahneleme önerisi onaylanmadı; yalnızca bölümler yazılacak.
+- **D02:** Lider ölümü için zorluk artışı yok; oyun süresi kısa olabilir ve lider hiç ölmeyebilir.
+- **E05:** Haritada yarı bilinen yerler şimdilik yok.
+- **F02:** Beş kapasite yolu kalır; kapasite ve maliyetleri farklı.
+- **F04:** Hub kalır. Şehir kapısı şehre girmek, vagon atölyeye gitmek demek. Bkz. Y-F04T.
+- **F06:** Kıyafetler stat verir; zırh mı kıyafet mi, oyuncunun tercihi.
+- **F07:** Büyücü ve büyüler kalır; nadir olay olarak doğabilir. Bkz. Y-F07T.
+- **F08:** Boy, kilo ve cinsiyet statları etkiler, statlar savaşı.
+- **G10:** Kervan merkezli şehir yok; kervan şehre girmez. Şehirde insanlar ve şehir görünmeli. Bkz. Y-G10T.
+- **G11:** Masa ekranı şablonu önce görsel taslak olarak görülecek. Bkz. Y-G11T.
+- **J01:** Steam hesabı ve sayfası Aralık'ta; pazarlama o zaman başlar. Bkz. Y-J01T.
+- **J07:** Etiket ve konumlama önerisi işaretlenmedi; Steam sayfası hazırlığında yeniden sorulabilir.
+- **J11:** Kickstarter işaretlenmedi; A04 notu gereği yok.
+- **K04:** Kapsam kilidi yok; kullanıcıya göre bu listedeki her şey bir ayda biter.
+- **K05:** Hijyen ve performans görevleri arka plana alınmaz (“Temiz masa, temiz iş, hızlı süreç. 5S!”); §3–§6 öncelikleri aynen kalır.
+- **K06:** Harita editörü şimdilik bekler.
+
+Bu kararlar `00_kurallar.md` içine de işlendi.
+
+## Teknik sıra (dalgalar)
+
+Kullanıcı kararı: sıra teknik önceliğe göre. Bir dalga içinde bağımlılıklara uy. Dalga 7 Aralık'ta başlar.
+
+| Dalga | Konu | Görevler |
+|---|---|---|
+| 1 | Temel ve önkoşullar | 11.1, Y-A01, Y-A02, Y-A06, Y-E06, Y-F11, Y-G01, Y-H04, Y-J05, Y-K01, Y-K02, Y-K03 |
+| 2 | Dünya, ekonomi ve kontratlar | 8.1, 8.2, Y-C01, Y-C02, Y-C10, Y-C11, Y-C12, Y-C13, Y-C14, Y-C19, Y-F10 |
+| 3 | Yol | Y-B01, Y-B02, Y-B03, Y-B04, Y-B05, Y-B06, Y-B07, Y-B08, Y-B09, Y-B10, Y-B11, Y-B12, Y-B13, Y-C20, Y-F05 |
+| 4 | Savaş, karakter, ölüm ve soy | Y-C03, Y-C04, Y-C05, Y-C06, Y-C07, Y-C08, Y-C09, Y-C15, Y-C16, Y-C17, Y-D01, Y-D03, Y-D04, Y-D05, Y-D06, Y-F01, Y-F03, Y-F09, Y-F07T |
+| 5 | İçerik ve anlatı | Y-A07, Y-C18, Y-E01, Y-E02, Y-E03, Y-E04, Y-E07, Y-E08, Y-J13 |
+| 6 | Görsel, arayüz ve ses | Y-F04T, Y-G02, Y-G03, Y-G04, Y-G05, Y-G06, Y-G07, Y-G08, Y-G09, Y-G10T, Y-G11T, Y-G12, Y-G14, Y-G15, Y-G16, Y-H01, Y-H02, Y-H03, Y-H05, Y-H07, Y-I01, Y-I02, Y-I03 |
+| 7 | Vitrin ve pazarlama (Aralık) | Y-G13, Y-H06, Y-J01T, Y-J02, Y-J03, Y-J04, Y-J06, Y-J08, Y-J09, Y-J10, Y-J12, Y-J14 |
+
+## Kullanıcının sorularına cevaplar
+
+- **Y-E01** — Soru: “Sayıyı arttır demek kolay ama arttırabilecek misin?”  
+  Cevap: Evet, ama sayıyı değil kaliteyi koruyan bir düzenle: (1) önce lore kapanır (Y-E06); (2) kart şablonu ve kalite listesi yazılır: en az bir zor seçim, bir cazip ama riskli seçenek, bir beceri kontrolü, kaynak takası tek başına kart sayılmaz; (3) kartlar bölge bölge 10'luk partiler hâlinde yazılır, her parti sana onaya gelir; (4) simülatör her partide tekrar oranını ve hiç çıkmayan kartları raporlar.
+- **Y-I03** — Soru: “görüntülerde ai içerği mevcut zaten, yani hali hazırda ai beyanı koymam lazım değil mi? o zaman sesi de yaparız ai ile sorun yok.”  
+  Cevap: Evet. Oyuncunun gördüğü ya da duyduğu AI içeriği (görsel, ses, metin) Steam'in AI beyan formunda bildirilmek zorunda; görsellerde zaten AI olduğu için beyan gerekiyor. AI ses de aynı beyana eklenir. Yalnızca geliştirme araçları (kod asistanı gibi) beyandan muaf.
+- **Y-J10** — Soru: “fiyattan emin miyiz? 2-5 usd arası fiyat da çok görüyorum indie oyunlarda.”  
+  Cevap: 2–5 $ aralığı genellikle 1–3 saatlik küçük oyunlar içindir. Onlarca saatlik, sistem ağırlıklı bir RPG için tür ortalaması 15–20 $. Düşük fiyat gelir kadar algılanan değeri de düşürür; Steam'in payı ve bölgesel fiyatlar (Türkiye dahil) da hesaba girer. Önerim: Erken Erişim için 14,99–19,99 $ aralığında, playtestten çıkan oyun süresine göre karar.
+- **Y-H06** — Soru: “bu daha sonra eklememiz gereken bir şey değil mi? listeye ekleyebiliriz yine de. steam deck, xbox.”  
+  Cevap: Evet, P3 olarak listede; kumanda ve Steam Deck en sona kalabilir, ama arayüz şimdiden fareye bağımlı tasarlanmamalı.
+
+## Yön ve kapsam
+
+- [ ] **Y-A01 Oyun vaadini yaz ve belgelere işle**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Tasarım belgesi ve Steam metni taslağı yazıldı; vaat cümlesi onay bekliyor.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Vaat cümlesi: “Bir kervanı kuşaklar boyu yolda tut. Her karar yola bir iz, her ölüm deftere bir satır olur.” Cümleyi `CLAUDE.md` başına, `docs/` altındaki tasarım belgesine ve Steam metni taslağına koy. Her yeni özellik bu cümleye karşı sınanır.
+  - **Neden:** Vaadi olmayan oyun her öneriyi kabul eder ve dağılır; mağaza sayfasında his satılır.
+  - **Kabul:** Vaat cümlesi CLAUDE.md'nin ilk bölümünde; kullanıcı son hâlini onayladı.
+  - **Literatür:** R6, R60
+- [ ] **Y-A02 Dört tasarım sütununu yazıya dök**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Görev şablonuna zorunlu 'Sütun' satırı eklendi.
+  - **Öncelik:** P1 · **Dalga:** 1 · **İlgili:** 6.3
+  - **Ne:** Yol yaşar · İnsanlar aşınır · Defter unutmaz · Ticaret bilgi oyunudur. CLAUDE.md'nin başına “Sütunlar” bölümü olarak eklensin; her yeni sistem en az birine hizmet ettiğini belirtsin. Kullanıcının “derinleşme, asla sadeleştirme” ilkesi sütunların üstünde durur.
+  - **Kabul:** Sütunlar CLAUDE.md'de; yeni görev şablonunda “hangi sütun” satırı var.
+  - **Literatür:** R6, R10
+- [ ] **Y-A06 Haftalık playtest günlüğü ve beş dış oyuncu**
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Kullanıcı her hafta oyunu baştan bir saat oynar, sıkıldığı anları not eder ve oturumu video olarak kaydeder (devlog malzemesi). Ocak'tan önce beş dış oyuncu izlenerek oynatılır. Claude her döngüde bir oyun içi kontrol listesi hazırlar.
+  - **Kullanıcı notu:** “Tamamdır, bunu da yapıp video alacağım hatta devlog olarak.”
+  - **Kabul:** `docs/playtest/` altında tarihli günlük dosyaları; en az 5 dış oyuncu notu.
+  - **Literatür:** R62, R78
+- [ ] **Y-A07 Zindanlar: tam sürüm**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `b76bb93`): docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Rota dışı zindan, hazine ve mistik yaratık (Temmuz pitch'inin çekirdeği) tam sürüm olarak tasarlanır ve uygulanır; küçük ara sürüm yok. Önce tasarım notu: giriş (haritada yer, söylenti, olay), yapı (oda ya da aşama dizisi), savaş, ganimet, kayıp ve stres kuralları, kervanın zindan dışında beklemesi. Tasarım notu kullanıcı onayından sonra uygulanır.
+  - **Neden:** Zindanlar konuşmalarda hiç ele alınmadı; keşif ve ganimet açığını kapatır.
+  - **Kullanıcı notu:** “Sıra zindanlara gelecek fakat bende küçük sürüm diye bir şey yok, tam gaz devam. Solo indie olduğum için istediğim gibi ilerleyebiliyorum ve claude, gemini, google ai sayesinde fazlasıyla da hızlı ilerliyor çalışmalar.”
+  - **Kabul:** Onaylı tasarım notu; haritadaki en az bir bölgede oynanabilir zindan; kayıt ve yükleme testi.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Yapılar: Quaternius Ultimate Modular Ruins ve Modular Dungeon (yeni indirme QAL), Kenney Castle Kit (CC0). Ses: OpenGameArt “Loopable Dungeon Ambience”, “Dripping water loop” (indirmeden önce lisans sayfası kontrol edilir).
+  - **Literatür:** R9
+
+## Yol deneyimi
+
+- [ ] **Y-B01 Yol önerilerini (R0–R1) ana iş olarak uygula**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `dd0d737`): R0 ve R1 kodda; R1 görsel onayı ONAY_PAKETI'nde.
+  - **Öncelik:** P1 · **Dalga:** 3 · **Bağımlı:** 11.1 · **İlgili:** R0, R1
+  - **Ne:** §10b R0 (altyapı) ve R1 (insanlar: baloncuklar, yakınlık, prosedürel mezar) “öneri” statüsünden çıkar, uygulanır. Sıralama teknik önceliğe göre: önce 11.1, sonra R0, sonra R1.
+  - **Kullanıcı notu:** “İşlerin sırası tamamen teknik önceliklere dayanarak yapılacak zira bu işlerin hepsini claude'un 2-3 session'da yapmasını bekliyorum zaten.”
+  - **Kabul:** R0 ve R1'in §10b'deki kabul ölçütleri sağlandı; testler geçti.
+  - **Literatür:** R11, R12, R22
+- [ ] **Y-B02 Yol yönetmeni: gerilimi kervanın durumuna göre ayarla**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `c330b93`): Sessizlik ihtimali artırır, ağır karttan sonra rahatlama, zorda ağır kart seyrek; gece işaret x1.5, ateş/nöbet/ışık önler; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3 · **İlgili:** Y-B12, Y-C20
+  - **Ne:** Olay ve işaret seçimi stres, açlık, borç ve son olayların sertliğine bakan bir yönetmenden geçer: gerilim → zirve → rahatlama eğrisi. `EventEngine` ağırlık kancası kullanılır. Kullanıcı notu: akşam ve gece olasılık artar; önlem alınmışsa (nöbet, ateş, fener ya da meşale, kamp yeri seçimi) artış düşer.
+  - **Kullanıcı notu:** “Çok mantıklı! ayrıca akşamları da bu olasılık artmalı gerekli önlemler alınmazsa.”
+  - **Kabul:** Simülatörde yönetmen açıkken üç sessiz gün üst üste gelme oranı ve art arda iki ağır kart oranı ölçülüp raporlanır; gece önlem alınınca olay oranı düşer.
+  - **Literatür:** R18, R19, R77
+- [ ] **Y-B03 İşaretleri bulmacaya çevir: belirsizlik ve bedel**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `e87e40e`): Dört tür x 2-3 gerçek; gerçek kayıtta; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3 · **Bağımlı:** 11.1 · **İlgili:** R2
+  - **Ne:** İşaretler belirsiz olur (duman köy yangını da olabilir, haydut kampı da). İşarete yürümek bilgi verir ama öbür bölge açık kalır. Aynı anda iki işaret çıkabilir. Kehanet (omen) türü buraya bağlanır.
+  - **Kabul:** İşaret türünü görmek çözümü belirlemiyor; kayıt ve yüklemede belirsizlik durumu korunuyor.
+  - **Literatür:** R16, R9
+- [ ] **Y-B04 Dikkat bölgelerine yeri doldurulamaz roller ver**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `40276b9`): Rol sahibi kendi bölgesinde saatlik %3.5 x güç; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3 · **İlgili:** Y-F09
+  - **Ne:** Ön: izci bilgisi ve erken uyarı. Vagonlar: kırılmayı önceden görür, yükü korur. Arka: geride kalanı yakalar, takip edeni fark eder. Her rolün sonucu ekranda görünür. Y-F09'daki öncü, ortancı ve artçı görevleriyle birlikte tasarlanır.
+  - **Kullanıcı notu:** “Mantıklı, tamamdır.”
+  - **Kabul:** Simülatörde “hep önde dur” stratejisi diğerlerinden belirgin biçimde üstün değil.
+  - **Literatür:** R16, R21
+- [ ] **Y-B05 Havaya karşı küçük kararlar**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `f92a1cc`): Beş hava, yedi karar; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3
+  - **Ne:** Fırtınada sığın, bekle ya da devam et; siste yavaşla ya da fener yak; yağmurda çamurlu kestirme ya da uzun yol. Kart değil, tek tıklık kararlar.
+  - **Kabul:** Her hava türü için en az bir karar; açık hava artık tamamen nötr değil.
+  - **Literatür:** R16
+- [ ] **Y-B06 Yolda erzak kaynağı: av, toplama, köy**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `fa60be3`): Av 10 erzak; köy 5 ve 4.7 altın/erzak (şehir 4); toplama +10 erzak, +1 gün; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3
+  - **Ne:** Av savaşı erzak getirir; köy durağında erzak alınabilir; toplayıcılık zaman kaybettirir.
+  - **Kabul:** Av zaferi erzak ekliyor; köy durağında erzak alımı var; testler var.
+  - **Literatür:** R51, R17
+- [ ] **Y-B07 Sofrayı anlamlı karar yap: erzak türleri**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `05ce4d8`): Erzak payı ve planlayıcı sözü değişmedi; çeşni yalnız sofra açıkken; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3 · **İlgili:** Y-C19
+  - **Ne:** Ekmek, kuru et, tahıl ve şarap gibi erzak türleri farklı etkiler verir (takat, moral, bozulma). Bolluk varken de ara sıra ziyafet akşamı seçimi gelir. Kalıcı emir korunur; sofra yalnızca gerçek bir seçim varken sorulur.
+  - **Kabul:** Erzak türleri ekonomi ve sofrada; kalıcı emirle günlük akış bozulmuyor.
+  - **Literatür:** R16
+- [ ] **Y-B08 Günün satırı: akşam kampında defter cümlesi**
+  - **Öncelik:** P1 · **Dalga:** 3 · **İlgili:** R3, Y-H03
+  - **Ne:** Her akşam günün en önemli olayı tek bir cümleye dönüşür ve deftere yazılır; oyuncu düzeltebilir. Cümleler edebi, sayısız (bkz. Y-H03).
+  - **Kabul:** Her kamp bir satır üretiyor; satırlar kayıtta; yerelleştirme anahtarları var.
+  - **Literatür:** R12, R11
+- [ ] **Y-B09 Yolu dolu yap, sonra hızlandırmayı kaldır**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `4017eda`): Ölçüm hedefi tutmazsa SPEEDS tek satırla geri açılır; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3 · **Bağımlı:** Y-B01, Y-B02, Y-B03 · **İlgili:** 12.2c
+  - **Ne:** Kullanıcı kararı: hızlandırma kalkmalı. Yol o kadar dolu ve seyri yüksek olmalı ki oyuncu hızlandırmak istememeli. Adımlar: (1) 1x hızda her 60–90 saniyede en az bir karar ya da bilgi hedefi koy ve simülatörle ölç; (2) B01–B13 ve R0–R5 bu hedefi sağlayınca 1.5x ve 3x hızları kaldır; duraklatma ve yavaşlatma kalır (erişilebilirlik için “olay gelince duraklat”, Y-H07).
+  - **Kullanıcı notu:** “Aslına bakarsan hızlandırma kalkmalı. yolda olmak o kadar dolu bir eylem olmalı ki oyuncu oylu hızlandıramamalı, aynı zamanda da ortam o kadar dolu, yoğun, seyri yüksek olmalı ki hızlandırmak istememeli.”
+  - **Kabul:** Ölçüm raporu hedefi gösteriyor; hız düğmeleri kaldırıldı; 12.2c'deki “3x'te bile yavaş” sorunu yürüme hızı düzeltilerek ayrıca çözüldü.
+  - **Literatür:** R3, R4
+- [ ] **Y-B10 Başka kervanlarla karşılaşma**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `b8ba074`): Askerî konvoy (borç ve arama), mülteci (minnet ve yoldaş), hacı (mevcut zincir), rakip tüccar (bilgi satın al, iftira); test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3
+  - **Ne:** Askerî konvoy, mülteci kafilesi, hacı kafilesi, rakip tüccar. Yolda uzaktan görünür; takas, bilgi, yolcu ya da çatışma sunar.
+  - **Kabul:** En az 4 kervan türü; her biri yolda görünür ve kendi kart zinciri var.
+  - **Literatür:** R11
+- [ ] **Y-B11 Yolun hafızası: mezarlar, enkaz, eski kül**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `a31c52c`): Prosedürel çizim (CC0 model sonraki tur); test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3 · **İlgili:** R1
+  - **Ne:** Ölenin mezarı, kırılan vagonun enkazı, önceki kampın külü aynı yolda kalır ve kayda yazılır. İkinci geçişte yol farklı görünür.
+  - **Kabul:** Ölüm ve kamp konumları kayıtta; aynı yoldan geçerken görünüyor.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Mezar ve enkaz modelleri: Kenney Graveyard Kit (CC0), Quaternius `Broken Cart`; dinî sembol yok; mürekkep geçişi.
+  - **Literatür:** R11, R12
+- [ ] **Y-B12 Kampı karar anına çevir; ertesi günün dizilişi**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `40276b9`): Öncü +1 stres/gün; nöbet ertesi günün tehlikesini düşürür; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 3 · **Bağımlı:** 12.2c · **İlgili:** Y-B04, Y-F09
+  - **Ne:** Akşam 2–3 eylem: nöbet sırası, yaralıyı sarmak, hikâye anlatmak (stres), tamir, av hazırlığı. Kullanıcı notu: ertesi gün kimin önde, ortada, arkada gideceği de kampta seçilir; önde olmanın karaktere bir bedeli vardır ve bu bedel yüzünden kişi gece arkaya alınabilir.
+  - **Kullanıcı notu:** “Evet, saydıklarına ek olarak sonraki gün kim önde, arkada, ortada gidecek buna da karar verilebilir burada zira önde olmanın maliyeti olabilir o karaktere ve bu maliyet sonucu arkaya almak isteyebiliriz gece.”
+  - **Kabul:** Kamp eylem paneli; diziliş seçimi ve önde gitmenin bedeli testli.
+  - **Literatür:** R22
+- [ ] **Y-B13 Aynı rotada farklı yol: mevsim ve kestirmeler**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `824187d`): İlkbahar su basar, yaz kurutur, kış dağı yavaşlatır; kestirme -%20 gün, orta üçte bir dağ/orman, tehlike +15 (boş pay); test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3 · **Bağımlı:** Y-C01
+  - **Ne:** Rota tohumu mevsime ve dünya olayına göre değişir; riskli kestirmeler ve alternatif patikalar eklenir. Harita aktarımıyla (Y-C01) birlikte yapılır.
+  - **Kabul:** Aynı rota iki farklı mevsimde farklı arazi veriyor; kestirme seçimi planlayıcıda.
+  - **Literatür:** R15
+
+## Sistemler ve mekanikler
+
+- [x] **Y-C01 Haritanın tamamını oyuna aktar (ya hep ya hiç)**
+  - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `b4a41c2`): Haritanın tamamı oyunda: 341 karo Git LFS ile, bütün yerleşimler ve yollar (N1-N7).
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** 8.1, Y-E06 · **İlgili:** 8.3, 8.4
+  - **Ne:** Kullanıcı kararı: kademeli aktarım yok, haritanın tamamı hemen ve tam kapasiteyle aktarılır. 128 yerin hepsi oynanabilir dünyaya girer. Bölgelere kendi malları, düşmanları ve olayları verilir. Ekonomi, kontrat ve rota tabloları elle yazılmış koddan JSON veriye taşınır. `test_loc_a…e` kimlikleri kalkar. Bu görev 8.3 ve 8.4'ü kapsar ve onlara ekonomi, kontrat ve olay tasarımını ekler.
+  - **Kullanıcı notu:** “HAYIR! YA HEP YA HİÇ! BU İŞİ TAM YAPACAĞIZ VE HEMEN YAPACAĞIZ TAM KAPASİTEDE!”
+  - **Kabul:** Oyun yalnızca GeoJSON ve JSON veriden kuruluyor; 128 yer yüklenebilir; simülatörler yeni dünyada çalışıyor ve sömürü testleri geçiyor.
+  - **Literatür:** R26
+- [ ] **Y-C02 Dinamik kontratlar ve yeni kontrat ekranı**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `2bc6802`): Lonca görevleri statik kaldı; teslimatta tüccar yolda yok (tüccar diyaloğu bu kontratlarda anlamsız, onay paketinde not); test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C01
+  - **Ne:** Kontrat türleri: eşlik, süre baskılı kargo, yolcu taşıma, av ya da kurtarma, kaçak yük. Kullanıcı notları: (1) Kontrat menüsü değişir: ilan panosu ya da arka planda lonca masası ve kenarda kontrat listesi. (2) Tüccar kendi vagonuyla gelmeyebilir; yalnızca kendisi ve malıyla gelirse ücrete vagon kirası eklenir. (3) En sık tür: “malımı X yerine teslim et” (tüccar gelmez). Pano her varışta tohumdan yeniden üretilir.
+  - **Kullanıcı notu:** “Kesinlikle çok dinmaik olmalı burası hatta kontrat menüsü de değişmeli. witcher^'daki gibi bir ilan panosu olabilir ya da bir masa arkasında lonca görevlerisi görebiliriz arkaplanda ve kenarda listelenir bu kontratlar. / Ayrıca her kontrat tipinde tüccar bizzat kendi vagonu ile gelmeyebilir, vagonsuz, malları ve kendisi gelmek isteyebilir ve bu durumda ücrete vagon kirası dahil olur. Bunun dışında benden sadece malını x lokasyonuna teslim etmemi de isteyebilir ki çoğunlukla durum bu olmalı bence.”
+  - **Kabul:** En az 5 tür; teslimat türü en sık çıkıyor; vagon kirası hesabı testli; yeni ekran taslağı kullanıcı onayından geçti.
+  - **Literatür:** R15, R16
+- [ ] **Y-C03 Ganimet: eşya, kıyafet, sarf, nadir bulgu**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5d4018d`): Tablolar data/config/loot.json; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4
+  - **Ne:** Savaş ve olaylardan eşya, kıyafet, iksir ve nadir bulgu düşer. `GRANT_OUTFIT` eklenir; kıyafet ganimete bağlanır.
+  - **Kabul:** Zafer ekranında ganimet; ganimet tabloları veri dosyasında; testler.
+  - **Literatür:** R79, R5
+- [ ] **Y-C04 Sarf malzemesi ve yolda tedavi**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5d4018d`): Sargı +8 can ve kanama, iksir +12 can ve Kıyı'da direnç +20; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4 · **İlgili:** Y-F03
+  - **Ne:** Bandaj, iksir ve merhem kampta ve savaşta kullanılır; Ölümün Kıyısı'nda direnç için de kullanılabilir.
+  - **Kabul:** Bandaj artık tüketiliyor; savaşta ve kampta kullanım testli.
+  - **Literatür:** R16
+- [ ] **Y-C05 Sakatlık, hastalık, hekim ve ilaç stoğu**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `c4a5782`): 5 dert; veba şehrinde varışta bulaşma; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 4 · **İlgili:** Y-C19
+  - **Ne:** Yarı kalıcı yaralar, vebayla bağlantılı salgın, şehirde hekim ve sınırlı ilaç stoğu. Kullanıcı notu: kervanın şehre getirdiği tedarik o şehrin ilaç ve ilgili stoklarını etkiler.
+  - **Kullanıcı notu:** “Evet ve o zaman dediğim gibi, bizim bu şehre sağladığımız tedarik bu konudaki stokları da etkilemeli.”
+  - **Kabul:** Sakatlık ve hastalık kayıtta; teslim edilen ilaç ve malzeme şehir stoğunu artırıyor.
+  - **Literatür:** R30, R22
+- [ ] **Y-C06 Ekipmanı 12 parçadan 35'in üstüne çıkar**
+  - **Öncelik:** P2 · **Dalga:** 4
+  - **Ne:** Ağırlık takılarda: huylarla sinerji kuran, bedeli olan, lanetli parçalar.
+  - **Kabul:** En az 35 parça; denge ölçümü güncel.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Eşya ikonları: game-icons.net siyah siluetleri mürekkep stiline uygun ama CC BY 3.0 (her ikonun yazarı künyeye). Alternatif: 3B prop render + mürekkep geçişi (Poly Haven, Quaternius Fantasy Props, MakeHuman equipment01: yay, savaş çekici, kaba kılıç, hançer, CC0). `../ICERIK_IHTIYACLARI.md` G-7.
+  - **Literatür:** R79
+- [ ] **Y-C07 Savaştan bedelli geri çekilme**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5f32931`): Yük üçte bir, vagon feda (enkaz yolda), artçı darbe alır; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4
+  - **Ne:** Zorda kalınca kaçış mümkün: yük bırakmak, bir vagonu feda etmek ya da bir kişiyi artçı bırakmak.
+  - **Kullanıcı notu:** “Zorda kalınılsa yapılabilmeli evet.”
+  - **Kabul:** Geri çekilme eylemi ve bedelleri testli.
+  - **Literatür:** R16, R17
+- [ ] **Y-C08 Düşmanlara kişilik ver**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5f32931`): Reis lideri, kurt en yaralıyı (oran), muhafız Kıyı'dakini bitirmez; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 4
+  - **Ne:** Haydut reisi önce lideri hedefler, kurt sürüsü yaralıyı kovalar, muhafız teslim olmayı teklif eder, ayı kaçana saldırmaz.
+  - **Kabul:** Düşman türü başına davranış profili; testler.
+  - **Literatür:** R22
+- [ ] **Y-C09 Bölgesel düşman kimlikleri**
+  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Her bölgede 2–3 özgün düşman; 14 şablondan 25'in üstüne. Kullanıcı notu: önce lore ve tarihçe tamamlanmalı.
+  - **Kullanıcı notu:** “Bu aşama için lore ve tarihçenin tamamlanması lazım gibi.”
+  - **Kabul:** Bölge başına düşman tablosu; lore belgesine uyuyor.
+  - **Kaynaklar ve teknik (CC0 araştırması):** İnsan düşmanlar MPFB ve MakeHuman CC0 ekipmanla (equipment01), hayvanlar G-3 kaynaklarıyla. Ayı için iyi CC0 model yok (bkz. içerik raporu).
+  - **Literatür:** R15
+- [ ] **Y-C10 Fiyat defteri: bilgi eskir, söylenti yanıltır**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `abc9d82`): Varışta görülen fiyat yazılır, 20 günden eski soluk; söylenti 2-6 gün eski ve yüzde 25 yanlış; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 2
+  - **Ne:** Görülen fiyatlar tarihli olarak deftere yazılır ve eskir. Taverna dedikodusu başka şehrin fiyatını satar; bazen yanlıştır.
+  - **Kabul:** Fiyat defteri ekranı; eskime ve yanlış söylenti testli.
+  - **Literatür:** R9, R16
+- [ ] **Y-C11 Gizli fiyat katmanlarını görünür kıl**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6014abe`): Satırda kısa etiketler, üstüne gelince katman başına bir cümle; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 2
+  - **Ne:** Mal satırında mevsim, enflasyon, arz baskısı ve dünya olayı işaretleri; üzerine gelince açıklama (Y-H03'e uygun, edebi dil).
+  - **Kabul:** Yedi katmanın her biri ekranda bir işaretle görünüyor.
+  - **Literatür:** R1, R4
+- [ ] **Y-C12 Bölgesel itibar, hizipler ve jeopolitik yayılma**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01, Y-E06
+  - **Ne:** Tek global itibar yerine bölge ve hizip başına itibar (lonca, şehir yönetimleri, inanç toplulukları, haydut kardeşlikleri). Kullanıcı notu: bölgeler birbirinden ağırlıklı etkilenir; bir yerde kazanılan 5 itibar komşuya 0,5 olarak yayılabilir. Yayılma jeopolitik ilişkilere (komşuluk, ittifak, düşmanlık) göre ağırlıklandırılır.
+  - **Kullanıcı notu:** “Evet, kesinlikle haklısın bu konuda ama bir bölgede çok itibarlı olup diğer bölgede hiç tanınmamak da olmaz. Birazcık da etkilenmeli bu bölgeler  birbirinden. Yani aradaki ilişki ağırlıklı olmalı, bir yerde 5 itibar kazanıyorsam diğer tarafta bu 0.5 olabilir. Jeopolitik olarak dağılmalı bu ilişki yani.”
+  - **Kabul:** İtibar matrisi veri dosyasında; yayılma testli; mevcut kilitler (kontrat, kredi, vagon) yeni sisteme taşındı.
+  - **Literatür:** R76
+- [ ] **Y-C13 Adı olan, hatırlayan kişiler**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01
+  - **Ne:** Her şehirde 2–3 tekrar eden kişi: lonca ustası, tefeci, han sahibi. Oyuncuyu hatırlar, görev verir, yaşlanır, ölebilir.
+  - **Kabul:** Kişiler kayıtta; en az bir kişisel zinciri olan kişi her şehirde.
+  - **Literatür:** R13, R14
+- [ ] **Y-C14 Başlangıç: babadan borçlu kervan**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `0c1b9d6`): 240 altın, 60 gün, alacaklı lonca; tutar ve vade ölçülecek; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 2 · **İlgili:** Y-D04
+  - **Ne:** Kullanıcı notu: kervan oyuncunun değil babasınındır; baba hastalık yüzünden kervanı borçlu olarak devreder. Oyun bu devirle açılır; ana borç ve vadesi ilk dönemin saatidir. Babanın durumu ilk olay zincirine bağlanabilir (iyileşir, ölür, defterde kurucu satırı).
+  - **Kullanıcı notu:** “Kervan bizim değil babamızın olsun ve babamız bize devretsin hastalıktan ötürü, borçlu bir şekilde devretmiş olsun ve de.”
+  - **Kabul:** Yeni oyun devir sahnesiyle başlıyor; başlangıç borcu ve vadesi testli; kurucu satırı babayı gösteriyor.
+  - **Literatür:** R17
+- [ ] **Y-C15 Orta ve geç oyuna yeni tehditler**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `c890afe`): Evre 10 ve 25 seferde; pusu, savaş/veba/haraç haberi, rakip kervan, gümrük sıklaşır; yükselen haraç tutarı sonraki tur; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 4
+  - **Ne:** Bölge açıldıkça yeni düşman, dünya krizleri (savaş, kıtlık), rakip kervan, yükselen haraç.
+  - **Kabul:** Kariyer simülatöründe orta ve geç dönem kazanma oranları hedef aralıkta.
+  - **Literatür:** R4, R80
+- [ ] **Y-C16 İşe almayı zorlaştır ve kişileştir**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `ba7b508`): Pano 1-2 kişi, lonca 1, savaş/vebada -1; fiyat +%30; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4
+  - **Ne:** Adayın neden geldiği, ne istediği, kimden kaçtığı. Yalnızca mecbur olanlar katılır (15 Ekim isteği). Fiyat ve bulunurluk sertleşir.
+  - **Kullanıcı notu:** “Zaten ben 15 ekimde istemişim bunu evet. onaylıyorum.”
+  - **Kabul:** Aday kartında geçmiş ve istek; aday sayısı ve fiyatları yeni tabloda.
+  - **Literatür:** R17, R22
+- [ ] **Y-C17 Yoldaşın kendi hikâyesi ve ilişkileri**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `dd0d737`): Geçmiş ve hedef her yoldaşta, üç kartlık kişisel zincir kamp hikâyesi olarak, bağ kayıtta; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4 · **Bağımlı:** Y-B01 · **İlgili:** R0, R1
+  - **Ne:** Geçmiş, kişisel hedef, 2–3 kartlık kişisel zincir; yoldaşlar arası dostluk ve husumet.
+  - **Kabul:** Her yoldaşta geçmiş ve hedef; kişisel zincirler; ilişki değeri kayıtta.
+  - **Literatür:** R11, R25
+- [ ] **Y-C18 Kampanya bölümlerini yaz**
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** Kullanıcı notu: bölümler henüz yazılmadı; bölüm sayısı ve sahneleme önerisi şimdilik onaylanmadı. Görev yalnızca bölümlerin yazılması. Sahneleme, final mekânı ve finalden sonrası, bölümler yazıldıktan sonra kullanıcıyla yeniden konuşulur.
+  - **Kullanıcı notu:** “Evet bölümler yazılmadı o yüzden bana 8 bölüm var demen bile aslında uydurma bir veriye dayanıyor. Bu bölümler yazıldıktan sonra düşünülecek bir konu bu, onaylamıyorum bu konuyu o yüzden şu an. ama bölüm yazılacak gibi bir not alabilirsin.”
+  - **Kabul:** Bölüm metinleri yazıldı ve kullanıcı onayladı.
+- [ ] **Y-C19 Mal çeşitliliği: bozulan, kaçak, nadir**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `9b79738`): Al-sat sömürüsü (kendi alımının şişirdiği fiyata geri satış) %90 tavanla kapandı; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01
+  - **Ne:** Balık ve meyve bozulur; kaçak mal yüksek kâr ve muhafız riski; nadir mal yalnızca özel alıcıya; toplu alım indirimi.
+  - **Kabul:** Yeni mal türleri ve kuralları; sömürü testleri geçiyor.
+  - **Literatür:** R16
+- [ ] **Y-C20 Fener ya da meşaleyle gece yürüyüşü**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `f92a1cc`): Karanlıkta ışıksız yürüyüş takat ve tehlike bedeli; fener 1 yağ/gece, meşale 2/gece; CC0 fener/meşale modeli ve sesi sonraki tur; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3 · **İlgili:** Y-B02, Y-G08, 8.10
+  - **Ne:** Gece fener ya da meşaleyle yürümek: süre kazancı karşılığında tehlike ve takat bedeli. Kullanıcı notu: meşale fenerin alternatifi; fener varsa oyuncu fener de yakabilir, seçim oyuncunun. Fener yağı ve meşale sarf malzemesidir.
+  - **Kullanıcı notu:** “meşale de olabilri fener alternatifi olarak, isterse fener de yakar varsa. oyuncuya bağlı olsun yani.”
+  - **Kabul:** Gece yürüyüşü eylemi; fener ve meşale farkı; görsel ışık kaynağı yolda görünüyor.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Fener: Poly Haven `Lantern_01`; meşale: Kenney Survival Kit (CC0). Ses: Freesound CC0 `torch ignite`, `match strike`, `lantern creak`.
+  - **Literatür:** R16
+
+## Ölüm, soy ve kalıcılık
+
+- [ ] **Y-D01 Kader Modu (ironman) ve açık zorluk ayarları**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `897b6d2`): Standart = bugünkü denge; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4
+  - **Ne:** Tek kayıt ve şehirde elle kayıt yok. Yanında açık ayarlar: ölümcül darbe direnci, açlık şiddeti, olay sertliği. Gizli zorluk ayarı yok. Not: kullanıcı lider ölümü için ayrıca bir zorluk artışı istemiyor (D02 onaylanmadı); standart ayarlar bugünkü dengede kalır.
+  - **Kullanıcı notu:** “tamamdır, haklısın.”
+  - **Kabul:** Yeni oyun ekranında mod ve ayarlar; Kader Modu'nda elle kayıt kapalı; testler.
+  - **Literatür:** R80, R36, R23
+- [ ] **Y-D03 Soy mirası: kervan bitince ne kalır**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `20d8861`): Arşiv user://lineage_archive.json; ün payı %20, tavan 6.
+  - **Öncelik:** P1 · **Dalga:** 4
+  - **Ne:** Yeni kervan eski soyun defterini, mezarlarını ve ününü görür; bir eşya ya da itibar mirası; eski kervanın mezarı haritada.
+  - **Kabul:** Run over sonrası yeni oyun eski soyu okuyor; miras kayıt dosyasında.
+  - **Literatür:** R54, R42
+- [ ] **Y-D04 Varis devralma sahnesi ve kısa video**
+  - **Öncelik:** P1 · **Dalga:** 4 · **İlgili:** Y-C14, Y-J03
+  - **Ne:** Yas sahnesi, defterde ismin canlı mürekkeple üstünün çizilmesi, kırık mühür, varis için ilk kart. Kullanıcı notu: buraya kısa bir video sahne eklenebilir (bir strateji klasiğindeki veraset ara sahneleri gibi). Önce sahne tahtası (storyboard) kullanıcıya sunulur; video üretimi ücretliyse maliyet onayı alınır.
+  - **Kullanıcı notu:** “Kesinlikle buraya bir küçük video sahne eklenebilir medieval total war 2 gibi.”
+  - **Kabul:** Onaylı sahne tahtası; oyunda sahne ve video; atlanabilir ama ilk seferde tam oynar.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Ücretsiz yol: oyun içi gerçek zamanlı sahne ya da Blender Grease Pencil ve kâğıt kesik tekniğiyle kısa video (J03 araçları). Sesler: Freesound CC0 `quill writing`, `wax seal`, `book close`.
+  - **Literatür:** R60, R22, R76
+- [ ] **Y-D05 Hafif meta ilerleme: güç değil çeşitlilik**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `0428df4`): Açılımlar user://lineage_archive.json içinde.
+  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-D03
+  - **Ne:** Soy defterinde kuşak başarıları; yeni başlangıç kökenleri, kurucu huyları ve hikâye başlangıçları açılır. Güç veren açılım yok.
+  - **Kabul:** En az 5 açılabilir başlangıç; açılımlar meta kayıtta.
+  - **Literatür:** R9, R54
+- [ ] **Y-D06 Kırılma: davranışla yaşatılan olay**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5f32931`): Dört kip son kötü huydan; ekran efekti yok; yol kartı; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 4 · **İlgili:** 2.5
+  - **Ne:** Kullanıcı notu: ekranda efekt ya da filtre değil, olay. Stres eşiği aşılınca karakter bir kırılma durumu kazanır ve davranışıyla gösterir: kendini öne atar, bütün hasarı üstüne çeker, emre uymaz ya da arkadaşına saldırır. Yolda kart, savaşta davranış olarak. Ekran efekti yok (2.5).
+  - **Kullanıcı notu:** “Evet ama bu ekranda görülen bir efekt gibi değil, bir olay gibi olmalı. referans oyunda mesela stres eşiği aşıldığında bir treat kazanıyor ve saçma hareketlere girmeye başlıyor karakter. kendini öne atıyor, tüm damage'ı kendine çekiyor ya da takım arkadaşlarına saldırıyor vs. direkt yaşatarak gösteriyor olayı, ekrana ucuz bir filtre koyarak değil.”
+  - **Kabul:** Kırılma durumları savaş yapay zekâsında ve yol kartlarında; ekran efekti yok; testler.
+  - **Literatür:** R22
+
+## İçerik ve anlatı
+
+- [ ] **Y-E01 Olay havuzunu 46'dan 120'nin üstüne çıkar**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `cbe2b02`): Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md.
+  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Bölge başına 6–10 kart, yoldaş kartları, zincirler. Her kart oyuncunun kararını değiştirecek kadar farklı olmalı. Üretim düzeni için “Kullanıcının sorularına cevaplar” bölümüne bak.
+  - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
+  - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
+  - **Literatür:** R15, R48
+- [ ] **Y-E02 Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3069762`): 10 zincirin içeriği Y-E06 (lore) kapanınca yazılacak.
+  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** En az 10 çok seferli zincir; sonucu başka bir şehirde ya da varisin döneminde gelir.
+  - **Kabul:** 10 zincir; kayıtta zincir durumu; testler.
+  - **Literatür:** R24, R48
+- [ ] **Y-E03 Her kartta cazip ama riskli bir seçenek**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6630a09`): 59 kart incelendi, 7 karta zarlı seçenek eklendi.
+  - **Öncelik:** P2 · **Dalga:** 5
+  - **Ne:** Yazım kuralı: kartların olabildiğince çoğunda anlatısal olarak çekici ama mekanik olarak riskli bir seçenek bulunur. Kural CLAUDE.md olay yazım kurallarına eklenir.
+  - **Kullanıcı notu:** “Evet, "olabildiğince" olması gereken bir özellik.”
+  - **Kabul:** Kural belgede; mevcut kartlar gözden geçirildi.
+  - **Literatür:** R25, R16
+- [ ] **Y-E04 Yavaş açılan dünya sırrı**
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** İnançlar, nefes inancı ve nadir görülen varlık: kenar notları, söylentiler, parça parça bulgular. Açıklama değil, ipucu.
+  - **Kullanıcı notu:** “Kesinlikle.”
+  - **Kabul:** Sır belgesi (yalnızca geliştirici için) ve oyuna dağıtılmış en az 15 ipucu.
+  - **Literatür:** R37, R38, R9
+- [ ] **Y-E06 Lore'u kapat, sonra içerik yaz**
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Önce lore: `SORULAR.md` coğrafya soruları, “Yolda doğan kim?” çelişkisi, şehir ve yer adlarının kesinleşmesi, tarihçe. Olay, düşman, zindan ve bölüm yazımı bundan sonra.
+  - **Kullanıcı notu:** “kesinlikle öyle, lore'a odaklanacağız önce o yüzden.”
+  - **Kabul:** SORULAR.md'de açık soru kalmadı; lore belgesi kullanıcı onaylı.
+- [ ] **Y-E07 Paylaşılabilir defter sayfası ve güncel Codex**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `35a0db9`): Codex 29 elle + 42 otomatik sayfa; PDF dışa aktarım sonrası yeniden üretilecek.
+  - **Öncelik:** P2 · **Dalga:** 5
+  - **Ne:** Seferin ya da soyun özeti ekran görüntüsüne uygun tek bir defter sayfası; Codex olay bölümü güncellenir.
+  - **Kabul:** Defter sayfası dışa aktarılabiliyor; Codex katalogla eşit.
+  - **Literatür:** R11, R44
+- [ ] **Y-E08 Takvim: bayramlar, fuarlar, hac dönemi**
+  - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
+  - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
+
+## Odak: birleştir ve anlamlandır
+
+- [ ] **Y-F01 Moral ve takat: kervanın nefesi, ama takat bedende kalır**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `86fdc4b`): docs/design_notes/moral_ve_takat.md; kod onaydan sonra.
+  - **Öncelik:** P2 · **Dalga:** 4
+  - **Ne:** Moral seferin ortak göstergesi olarak takatle bağlanır, ama kullanıcı notu gereği takat aynı zamanda kişiye ait fiziksel bir durumdur (yorgunluk, yürüme, savaş). Tasarım notu: hangi değer kervana, hangisi kişiye ait. Stres kişide kalır; kırgınlık portrede görünür.
+  - **Kullanıcı notu:** “takat aynı zamanda fiziksel bir durum olmalı ama.”
+  - **Kabul:** Onaylı tasarım notu; arayüzde göstergeler sadeleşmeden okunur hâlde.
+  - **Literatür:** R1, R4
+- [ ] **Y-F03 Atölye ve vagon envanterini anlamlandır**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5d4018d`): Her tarifin tüketicisi RecipeCatalog.OUTPUT_USES'ta; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 4 · **Bağımlı:** Y-C04 · **İlgili:** Y-C20, Y-F04T
+  - **Ne:** Gerçek üretim döngüsü: bandaj → tedavi, branda → tamir, av derisi → kıyafet, yağ → fener, meşale. Vagon başına envanter bu döngüye hizmet eder.
+  - **Kabul:** Her tarifin oyunda bir tüketicisi var; testler.
+  - **Literatür:** R16
+- [ ] **Y-F05 Tüccar mizacını yola bağla**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `ee5ea65`): Hırsız kaçar, çaresiz tehlikede döner, kinci kavga çıkarır, sadık erzak paylaşır; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 3 · **Bağımlı:** Y-C02
+  - **Ne:** Diyalogla öğrenilen mizaç yolda karşılık bulur: hırsız tüccar gece kaçar, korkak tüccar ilk tehlikede geri döner.
+  - **Kabul:** Her mizacın en az bir yol olayı var.
+  - **Literatür:** R16
+- [ ] **Y-F09 Görevler: öncü, ortancı, artçı; sınıflar ayrı**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `40276b9`): Tasarım notu docs/design_notes/gorev_rolleri.md; eski kayıt göçü; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 4 · **İlgili:** Y-B04, Y-B12
+  - **Ne:** Kullanıcı notu: görevler üçe indirilir (öncü, ortancı, artçı) ve iş kapsamları bu üçüne dağılır. Sınıflar görevden tamamen bağımsız olur (kolcu, savaşçı, kâtip gibi, masaüstü RPG usulü). Mevcut 6 görevin etkileri üç göreve ve gerekiyorsa sınıflara dağıtılır; kayıp olmaz. Y-B04 ve Y-B12 ile birlikte tasarlanır.
+  - **Kullanıcı notu:** “Görevleri sadeleştirebiliriz, sadece öncü, artçı, ve ortancı gibi görevler olabilir, iş kapsamları da bu üçüne göre dağılabilir. sınıflar ise tamamen bu görevlerden bağımsız olabilir kolcu, savaşçı, katip vs gibi bira dnd usulü.”
+  - **Kabul:** Onaylı tasarım notu; eski kayıtlar yeni görevlere göç ediyor; testler.
+  - **Literatür:** R16
+- [ ] **Y-F10 Tehlikenin dökümünü göster**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `cefadb6`): Planlayıcıda taban, yol durumu, dünya olayı, zamanla büyüme; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 2
+  - **Ne:** Planlayıcıda tehlike yüzdesinin kaynakları: taban, zamanla büyüme, rota durumu, hava, dünya olayı, duman.
+  - **Kabul:** Döküm ekranda; değerler motorla birebir.
+  - **Literatür:** R1, R4
+- [ ] **Y-F11 CLAUDE.md'yi kayıpsız incelt**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): 243 satır (CityView ve eski menü arka planı tarihçesi) arşive taşındı; dersler iki maddede kaldı.
+  - **Öncelik:** P2 · **Dalga:** 1 · **İlgili:** 6.3
+  - **Ne:** Kullanıcı notu: mevcut olmayan ve eski ayrıntılar kaldırılabilir, mevcut sistem daha sade ve öz anlatılabilir, ama bilgi kaybı olmamalı. Çıkarılan her bölüm `docs/arsiv/` altına taşınır.
+  - **Kullanıcı notu:** “mevcut olmayan, eski detaylar kaldırılabilir ya da mevcut sistem daha sade ve öz bir şekilde açıklanabilir ama kayıp yaşanmamalı burada.”
+  - **Kabul:** CLAUDE.md kısaldı; çıkarılan metin arşivde; hiçbir geçerli kural kaybolmadı (fark listesi kullanıcıya sunuldu).
+- [ ] **Y-F04T Vagon atölyesi ekranını özelleştir**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `4d6fb67`): Mantık değişmedi, yalnızca ekran; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-F03
+  - **Köken:** onaylanmayan **F04** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi (hub'ı kaldırma önerisi reddedildi): şehir kapısı şehre girmek, vagona gitmek atölyeye gitmek demek. Hub kalır; asıl iş atölye ekranının vagona özgü, kendine ait bir ekran olması.
+  - **Kullanıcı notu:** “şehir kapısına basmak şehre girmek demek. vagona gitmek ise oradaki atölyeye gitmek demek. asıl olması gereken şey vagon atölyesinin ekranını özelleştirmek.”
+  - **Kabul:** Atölye ekranı taslağı onaylandı ve uygulandı.
+- [ ] **Y-F07T Büyücüyü nadir olay düşmanı olarak bağla**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `dcd1edc`): Ağırlık 0.08, tehlike 0.35+, bir kez; lore kararı (Y-E06) metni değiştirebilir; test TEST_PLANI.md'de.
+  - **Öncelik:** P3 · **Dalga:** 4 · **Bağımlı:** Y-E06
+  - **Köken:** onaylanmayan **F07** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi: büyücü ve 7 büyü kaldırılmaz; nadir bir olayla doğabilir.
+  - **Kullanıcı notu:** “nadir bir olay evet ama olabilir, kaldırmak yok.”
+  - **Kabul:** Büyücü en az bir nadir olaydan doğuyor; büyüler savaşta çalışıyor.
+
+## Görsel kimlik
+
+- [x] **Y-G01 Stil cümlesi ve bir sayfalık stil rehberi**
+  - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `67c47ba`): Stil cümlesi kullanıcı onaylı; rehber docs/ui/STIL_REHBERI.md (N11).
+  - **Öncelik:** P1 · **Dalga:** 1 · **İlgili:** 12.2e
+  - **Ne:** Kullanıcı notu: cümle çok iyi kurgulanmalı. Taslak: “Wayborne, bir kervan kâtibinin defterine ve haritasına mürekkeple çizilmiş bir dünyadır.” Rehber: kâğıt ve mürekkep renk kodları, 3 ton kuralı, kontur kalınlığı, tarama yönü, tek sıcak ışık ve vinyet, kırmızı yalnızca kan, kayıp ve ana eylem, kehribar yalnızca ışık. Cümle ve rehber görsel örneklerle kullanıcı onayına sunulur.
+  - **Kullanıcı notu:** “evet ama bu cümle çok iyi kurgulanmalı.”
+  - **Kabul:** Onaylı stil cümlesi ve rehber `docs/` altında; §9 ve §12 rehbere bağlandı.
+  - **Literatür:** R58
+- [ ] **Y-G02 Ortak mürekkep geçişi (NPR)**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `afccc63`): Araç ve önce/sonra denemesi hazır; hatlara bağlama onaydan sonra (docs/design_notes/npr_gecisi.md).
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-G01
+  - **Ne:** Render sonrası tek geçiş: mürekkep konturu, 3 tonlu tarama, kâğıt dokusu. Karakter, hayvan, vagon, kasaba ve yol aynı geçişten çıkar.
+  - **Kabul:** Geçiş bütün render hatlarında; önce ve sonra karşılaştırması onaylandı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Sprite'lar Blender'da çevrimdışı pişirilir (Blender çıktısı serbest): Line Art ya da Freestyle kontur, compositor'da Depth ve Normal üzerinden Sobel kenar → mürekkep konturu, ışık değeri 3 eşiğe bölünüp 45°, yoğun 45° ve 45°+135° tarama, en sonda kâğıt dokusu Multiply. Tek şablon `.blend`: tek sıcak fener ışığı soldan, sabit kamera. Godot tarafında yalnızca kâğıt overlay, fener ışık maskesi ve kırmızı dışı desatürasyon. 3B önizleme için hazır shader'lar: godotshaders “Post-Process Outline (Depth/Normal)” ve “Advanced Hatching” (CC0), “Hatching shader” (MIT, lisans metni dağıtıma). GPLv3 shader kullanılmaz; hexaquo.at kodu (CC BY-SA) kopyalanmaz, yalnızca teknik referans. Tarama dokuları (3 ton, 512² döşenebilir) Krita ya da Inkscape'te kendimiz üretiriz. Kâğıt: TextureCan Paper 0027, 0006, 0024 (CC0), ambientCG Paper (CC0). `../ICERIK_IHTIYACLARI.md` G-4, G-6.
+  - **Literatür:** R58
+- [ ] **Y-G03 Saç ve başlıklar**
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 10.1, 10.2, 10.3
+  - **Ne:** Kukuleta, kalpak, sarık, başörtüsü, miğfer, şapka; kültürlere göre dağılım. Gerçek dinî figür ya da yapıya gönderme yok.
+  - **Kabul:** Yoldaki ve menülerdeki figürlerde kel manken kalmadı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** MakeHuman topluluk paketleri: **hair01** (CC0; 25 saç, örgüler), **bodyparts05** (CC0; sakal ve bıyık), **hats01** (CC0; çuval başlık, haydut için), **hats02** (CC0; miğferler, üzerindeki dinî sembol kaldırılıp yeniden dokulanır), **suits02** `monk_robe_hood` (CC0; kesimi sadeleştirilip kervan kukuletası olur). Künye zorunlu (CC-BY): **hats03** `elvs_charity_veil1` (başörtüsü), `mindfront_sherpa_hat` (kalpağa en yakın), **hats04** miğferler, hair02/03, bodyparts06. CC0 türban, sarık ve kalpak yok: Blender'da kapüşon kalıbından, torus ve kumaş simülasyonuyla modellenir; kalpak silindir ve kürk parçacığıyla. Mürekkep geçişinde kürk zaten taramaya döner, düşük detay yeter. `../ICERIK_IHTIYACLARI.md` G-1.
+- [ ] **Y-G04 Büst portreler**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): MPFB2 yerelde kurulu değil; figür hattıyla yakın plan render + mürekkep geçişi için gerekli. Taslaklardaki (9.4, 9.6) portre yuvası bu render için.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G02, Y-G03 · **İlgili:** 9.6, 9.7
+  - **Ne:** Karakter, parti, taverna adayı ve mezar defteri için olay kartı üslubunda büst portreler.
+  - **Kabul:** Portreler dört ekranda.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Portreler figür render'ının yakın planından mürekkep geçişiyle. Duruş ve tarama yönü için BHL, Rijksmuseum ve Met CC0 gravür portreleri yalnızca referans; kopyalanmaz. `../ICERIK_IHTIYACLARI.md` G-5.
+  - **Literatür:** R26
+- [ ] **Y-G05 Savaş ekranını yeniden kur**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si.
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 9.8
+  - **Ne:** Biyom başına mekân plakası, figürler ekran yüksekliğinin %30–35'i, kritikte kırmızı mühür. Kullanıcı notu: referans oyunun sahne ve menüleri bugün belgelendi; `belgeler/ART_IKINCI_TUR_REFERANSLARI.md` esas alınır.
+  - **Kullanıcı notu:** “evet, bu yüzden referans oyun sahne ve menülerini dokümante ettik bugün seninle.”
+  - **Kabul:** Yeni savaş ekranı ekran görüntüsüyle onaylandı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Mekân plakaları Y-G07 katmanlarından. Hayvan düşmanlar: Quaternius Ultimate Animated Animal Pack (elde), OpenGameArt yaban domuzu (Teh_Bucket), kurt (NewDLC), geyik (crownjoshua), hepsi CC0. Yan profilden 8–12 karelik döngüler; siluette 2 px kontur. Vuruş sesi üç katman (Y-H05). `../ICERIK_IHTIYACLARI.md` G-3.
+  - **Literatür:** R20, R21
+- [ ] **Y-G06 Gravür efektleri; parlak efektleri kaldır**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Kaba bir yön taslağı: tarama ve mürekkep dili, parlak mor/mavi yok. Gerçek dokular onaydan sonra Krita + David Revoy 2023 CC0 fırçalarıyla; eski efekt onaylı karşılığı gelince kalkar.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G01
+  - **Ne:** Kullanıcı notu: yerine ne konacağı çok önemli. Önce her efekt için (kan, duman, sis, kritik, büyü, yanma, donma, zehir) gravür karşılığının örnek karesi hazırlanır, onaydan sonra eskisi kaldırılır. 14 Ekim kararları korunur: yanan adam gerçekçi yanar, donma bölgesel buzlanma, zehir yeşil sis.
+  - **Kullanıcı notu:** “yerine ne koyacağımız çok önemli ama”
+  - **Kabul:** Her efektin onaylı örneği ve oyundaki karşılığı; parlak mor ve mavi efekt kalmadı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Hazır CC0 mürekkep sıçrama dokusu yok: Krita'da David Revoy 2023 fırça kitiyle (CC0; 2025 kitinin lisansı çelişkili, kullanılmaz) kendimiz üretiriz. Kritik mührü özgün tasarım. Godot'ta `CPUParticles2D` + mürekkep dokuları. `../ICERIK_IHTIYACLARI.md` G-6.
+  - **Literatür:** R20
+- [x] **Y-G07 Yol sahnesi: haritaya bağlı biyomlar ve varyantlar**
+  - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2c8be40`): Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4).
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-G01, Y-G02, Y-C01, 12.2d · **İlgili:** 12.2, 12.2e, 9.10
+  - **Ne:** Kullanıcı notu: tek biyom değil, bütün biyomlar için birer örnek kare; sonra her biyomun varyantları türetilir ve birbirine bağlanır. Biyom haritadan seçilir; yol arka planı haritadaki konuma göre kurulur (dağlık yerden geçerken arkada dağ). Halkalı güneş ve ay, lolipop ağaç, koni çam ve prosedürel sırtlar kalkar.
+  - **Kullanıcı notu:** “sadece bir biyom değil, tüm biyomlar için birer örnek olmalı ve daha sonra bu biyomlara ait varyantlar türetilmeli, birbirine bağlanmalı fakat unutma elimizde harita var artık, bu yüzden biyomları haritada seçmeli, bu haritadaki konumlara göre varyant oluşturmalıyız. mesela dağlık bir yerden geçiyorsak dağ görmeliyiz arkaplanda.”
+  - **Kabul:** Her biyomun onaylı örnek karesi; yol arka planı haritadaki konumdan üretiliyor; biyom geçişleri dikişsiz.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Arazi dokuları Poly Haven ve ambientCG (CC0): dirt, path, mud, rocky, snow, grass. Ağaç, kaya, harabe ve kamp nesneleri: Kenney Survival Kit, Quaternius Ultimate Modular Ruins; render ve mürekkep geçişi (Y-G02). Yeni Quaternius indirmeleri QAL lisansıyla (tarih ve lisans sayfasının ekran görüntüsü kaydedilir). Ses katmanı Y-I01'deki biyom × gün saati ambiyansıyla eşleşir. `../ICERIK_IHTIYACLARI.md` G-2, G-4.
+- [ ] **Y-G08 Fener, oyunun görsel motifi**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3784072`): Beş yerden üçü var, biri taslakta (menü), logo amblemi Poly Haven Lantern_01 indirmesine bağlı.
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 8.11, Y-C20
+  - **Ne:** Atlı işaretin feneri, yoldaki kervan feneri, menünün ışık kaynağı, arayüzün kehribar vurgusu, logo yanında küçük amblem.
+  - **Kabul:** Motif stil rehberinde; beş yerde uygulanmış.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Fener modeli: Poly Haven `Lantern_01` (CC0), render ve mürekkep geçişi.
+  - **Literatür:** R58
+- [ ] **Y-G09 Haritada kervanın mürekkep izi**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `4eca777`): GameSession.map_trail/journey_camps kayıtta; test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** 8.1, 8.2 · **İlgili:** 8.10, 8.11
+  - **Ne:** Kervanın geçtiği yol haritaya mürekkeple çizilir ve kalır; kamp yerleri küçük ateş işareti. Renk yok.
+  - **Kabul:** İz kayıtta; haritada görünüyor.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Harita süsleri için hat tekniği referansı: Carta Marina (Wikimedia, PD Mark): dalga taraması, gemi süsleri. Gerçek yer adları ve kıyılar alınmaz. David Rumsey koleksiyonu kullanılmaz (NC).
+  - **Literatür:** R11
+- [ ] **Y-G10T Şehir ekranı: insanlar ve şehir görünsün**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir.
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 12.1, 12.2a, 9.3
+  - **Köken:** onaylanmayan **G10** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi (kervan merkezli şehir önerisi reddedildi): şehir menüsü iyileştirilir, insanlar ve şehir görünür. Savaşın ve kıtlığın içinde bu işi yapmanın motivasyonu halkların kendisidir; ekran bunu hissettirmeli. Kervan şehre girmez. 12.1 ve 12.2a ile birlikte; önce taslak kare onaya.
+  - **Kullanıcı notu:** “Şehir menüsü iyileştirilebilir, evet başka oyuna çok benziyor fakat insanlar ve şehir gözükmeli. Bizim yolda olmamız büyük bir tehlike ve bu işin özünde şu durumda, savaşın ve kıtlığın içinde bu işi yapmamızın bir motivasyonu olmalı, o motivasyon ise halkların kendisi. ayrıca şehre kervan girmez.”
+  - **Kabul:** Onaylı taslak; şehirde insanlar görünüyor; kervan şehir içinde gösterilmiyor.
+- [ ] **Y-G11T Masa ekranı şablonunu görsel taslakla göster**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Oyunun kendi resim, yazı yüzü ve paletiyle; uygulama kararı taslaktan sonra 9.1e işlenir.
+  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** 9.1, 9.5
+  - **Köken:** onaylanmayan **G11** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi: “bunu görmem lazım, yazıyla anlaşılmıyor.” Sol liste, ortada metafor nesnesi, sağda kervan düzeni pazar ekranı üzerinde görsel taslak olarak hazırlanıp sunulur. Uygulama kararı taslaktan sonra.
+  - **Kullanıcı notu:** “bunu görmem lazım, yazıyla anlaşılmıyor.”
+  - **Kabul:** Taslak kare kullanıcıya sunuldu; karar 9.1'e işlendi.
+- [ ] **Y-G12 Gardırop: çıplak ten yok, karakterin kendi mankeni yüksek çözünürlükte**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `4250a4a`): Görünüşte boş yuvalar köylü takımıyla çiziliyor. Kalan: gardırop için yüksek çözünürlüklü manken (MPFB gerekli).
+  - **Öncelik:** P1 · **Dalga:** 6
+  - **Ne:** Varsayılan katman en az keten gömlek ve pantolon. Kullanıcı notu: gardıroptaki manken yoldakinden daha düşük kaliteli görünüyor; gardırop için aynı mankenin daha yüksek çözünürlüklü render'ı gerekir. Standart manken değil, seçili karakterin kendi mankeni.
+  - **Kullanıcı notu:** “evet, ayrıca gardroptaki mankenin görüntü kalitesi de iyleştirilmeli. yolda daha az pikselle kaliteli bir manken gösteribliyorken aynı mankeni gardropta gördüğümüzda daha çok pikselde aynı kaliteyi veremiyoruz o yüzden gardropta aynı mankenin daha yüksek çözünürlüküsü olması laızm diye düşünüyorum. (burada dikkat edilmesi gereken şey standart bir manken değil, hangi karakter ise onun mankeni olmalı)”
+  - **Kabul:** Gardıropta seçili karakterin yüksek çözünürlüklü render'ı; çıplak ten hiçbir ekranda yok.
+- [ ] **Y-G13 Kimliği tanımlayan beş ana görsel**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Hepsi oyunun kendi resimleri ve bugünkü taslaklardan; olay kartı gerçek kart düzeniyle (savaş şeridi, mühür).
+  - **Öncelik:** P1 · **Dalga:** 7 · **Bağımlı:** Y-G02, Y-G07 · **İlgili:** 8.10, 12.2a, 12.2c
+  - **Ne:** Gece haritası ve fenerli atlı; kamp ateşi panoraması; tam ekran olay kartı; defter ve kırık mühür; şehir kapısına varış. Mağaza görüntüleri ve fragman bunlardan çıkar.
+  - **Kabul:** Beş görsel onaylı.
+  - **Literatür:** R58, R59
+- [ ] **Y-G14 Tipografi birliği**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `c8cf507`): IM Fell Türkçe harflerin hepsini taşıyor (fontTools ile ölçüldü).
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G01
+  - **Ne:** Harita, arayüz, defter ve kartlarda aynı üç yazı yüzü; haritadaki sans-serif kalkar.
+  - **Kabul:** Yazı yüzü listesi stil rehberinde; ekranlar uyumlu.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Fontlar SIL OFL 1.1 (OFL.txt dağıtıma, Credits'te liste): IM Fell English yalnızca temel Latin; Türkçe ğ, ş, İ, ı eksik olabilir → test edilir, eksikse yalnızca İngilizce başlıklarda. Gövde EB Garamond (latin-ext ve Kiril), alternatif Cormorant Garamond, rakamlar için Old Standard TT; Çince Noto Serif SC, EB Garamond'un arkasında fallback. `../ICERIK_IHTIYACLARI.md` G-8.
+- [ ] **Y-G15 Vagon ve kurt tek kaynaktan**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `8b303d0`): Savaş kurdu kartın rengine çekildi; vagon zaten tek kaynak.
+  - **Öncelik:** P2 · **Dalga:** 6
+  - **Ne:** Menü, yol, kamp, kapı ve harita işaretinde aynı vagon render'ı; olay kartındaki kurtla savaş kurdu aynı renk ve konturda.
+  - **Kabul:** Varlık kaynakları tekilleşti.
+- [ ] **Y-G16 Ana menü: kamp ateşi ve üç yorgun yolcu**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı.
+  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** 9.2
+  - **Ne:** Ana menü kamp ateşi panoramasından bir kare; fener ışığı kısılır. Kullanıcı notu: ateş başında oturan, yorgunluktan bitmiş ve ısınmaya çalışan üç kişilik kervan ekibi. Ana menüde şarkı yok (Y-I02).
+  - **Kullanıcı notu:** “ana menüye kervan ekibi de katılmalı, ateş başında oturan, yorgunluktan ölmüş ve ısınmaya çalışan 3 kişi.”
+  - **Kabul:** Yeni ana menü onaylı; üç figür ateş başında.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Ana menüde müzik yok: gece ormanı ve ateş çıtırtısı ambiyansı (Freesound CC0 `campfire`, `forest night`), yaklaşık −22 LUFS. `../ICERIK_IHTIYACLARI.md` S-1.
+
+## Arayüz ve ilk saat
+
+- [ ] **Y-H01 Onboarding'i ilk seferin içine yay**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `2001285`): Babadan devir sahnesi (Y-C14) yeni oyunun ilk anı olarak kalıyor; dört konuluk panel yardım düğmesinde.
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C14
+  - **Ne:** Dört konuluk panel kalkar. İlk sefer rehberli: ticaret, kontrat, planlayıcı, dikkat, sofra, savaş; her biri ilk karşılaşıldığı anda tek cümleyle. Babadan devir başlangıcıyla (Y-C14) birleşir.
+  - **Kabul:** Yeni oyuncu testinde altı konu ilk seferde öğreniliyor.
+  - **Literatür:** R78
+- [ ] **Y-H02 İlk 10 dakikanın çizelgesi**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `46fa60b`): docs/design_notes/ilk_on_dakika.md; dört ilk gerçek oyunda user://playtest_times.json a yazılır.
+  - **Öncelik:** P1 · **Dalga:** 6
+  - **Ne:** İlk 3 dakikada ilk anlamlı karar; 10 dakikaya kadar ilk tehdit; 30 dakikaya kadar ilk kayıp tehlikesi ve ilk kârlı varış.
+  - **Kabul:** Dış oyuncu testlerinde süreler ölçüldü.
+  - **Literatür:** R78, R59
+- [ ] **Y-H03 Her sonucun nedeni, edebi dille**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6d2c0c2`): Dil kılavuzu docs/design_notes/dil_kilavuzu.md; planlayıcı dökümü ve şehir brifingi sonraki adım.
+  - **Öncelik:** P1 · **Dalga:** 6
+  - **Ne:** Kullanıcı notu: sayı değil söz. “Moral −10” yerine “Moral düşük: iki gündür aç” gibi edebi, yazılı ifadeler. Sayılar istenirse ipucu kutusunda ikinci planda.
+  - **Kullanıcı notu:** “olabildiğince edebi ya da yazılı olarak yazsın, -10 moral yerine moral düşük yazsın gibi.”
+  - **Kabul:** Neden satırları ipuçlarında ve defterde; dil kılavuzu yazıldı.
+  - **Literatür:** R1, R4
+- [ ] **Y-H04 Hiçbir ekranda sıkışma kalmasın**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `9c85ade`): Paneller Esc'i ele alıyor; karar panelleri yutuyor; yapısal test eklendi.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Her ekrandan Esc ile geri çıkış, sabit kısayollar, tutarlı geri düğmesi. Otomatik testle denetlenir.
+  - **Kabul:** Her ekran için geri çıkış testi geçiyor.
+- [ ] **Y-H05 Savaşa vuruş hissi**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `972c733`): Sesler: hit/hit_crit/hit_kill.wav gelince otomatik çalar (Freesound CC0 üç katman, indirme izni gerekli). Mürekkep sıçraması Y-G06 onayından sonra.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G06
+  - **Ne:** Kritikte kısa yakınlaşma, mürekkep sıçraması, anlatıcı satırı, ses; ölümde bir anlık duraklama.
+  - **Kabul:** Savaş videosu onaylı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Vuruş başına üç ses katmanı (metal çınlama + künt gövde + zırh ya da kumaş kuyruğu), her katmanda `AudioStreamRandomizer` (perde ±%5–8, tekrarsız rastgele). Kaynak: Freesound CC0 `sword clash`, `arrow impact`, Kenney Impact Sounds.
+  - **Literatür:** R20, R21
+- [ ] **Y-H06 Kumanda, Steam Deck ve Xbox**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `f3e22fb`): Sanal imleç bugün her ekranı kumandayla çalıştırıyor; eksikler (odak gezinmesi, tuş simgeleri, savaş ve pazar kısayolları, 1280x800 taraması) sıralı.
+  - **Öncelik:** P3 · **Dalga:** 7
+  - **Ne:** Kullanıcı notu: sonra eklenecek ama listede dursun. Tam kumanda desteği, Steam Deck uyumluluk denetimi, Xbox.
+  - **Kullanıcı notu:** “bu daha sonra eklememiz gereken bir şey değil mi? listeye ekleyebiliriz yine de. steam deck, xbox.”
+  - **Kabul:** Bütün ekranlar kumandayla oynanıyor.
+- [ ] **Y-H07 Erişilebilirlik ve oynanış ayarları**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `20d0400`): Ayarlar settings.cfg de; hızlandırma Y-B09 ile kalktı, duraklatma kaldı.
+  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** Y-B09
+  - **Ne:** Metin boyutu, renk körlüğü için kan şeridine desen, olay gelince otomatik duraklat. Hızlandırma Y-B09 gereği kalkacak; duraklatma kalır.
+  - **Kabul:** Ayarlar menüsünde; testler.
+
+## Ses ve atmosfer
+
+- [ ] **Y-I01 Ses tasarımı planı**
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** Y-J05
+  - **Ne:** Biyom ve gün saatine göre yol ambiyansı, tekerlek ve hayvan döngüleri, kamp ateşi, şehir uğultusu, kart açılış sesi. Kullanıcı notu: sesler Gemini ile üretiliyor ve sonuç iyi. Ses listesi ve üretim komutları hazırlanır; AI üretimi beyana girer (Y-J05).
+  - **Kullanıcı notu:** “sesleri gemini ile yapıyorum ve güzel de sonuç alıyorum.”
+  - **Kabul:** Ses listesi ve oyunda bağlı sesler.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Birincil CC0: Freesound (arama filtresi `license:"Creative Commons 0"`; indirilen seslerin listesi freesound.org/home/attribution), OpenGameArt CC0 paketleri (RPG Sound Pack, 80 CC0 RPG SFX, Kenney 50 RPG SFX, TinyWorlds ayak sesleri), Kenney ses paketleri, BigSoundBank. İkincil (atıfsız ama CC0 değil): Sonniss GDC paketi (YZ'ye örnek olarak verilmesi yasak → Gemini'ye beslenmez), Pixabay (hak talebinde kullanımı durdurma maddesi). Teknik: biyom × gün saati 30–90 sn döngüler, −20…−18 LUFS, döngü noktasında 1–2 sn eşit güç geçiş; bus yapısı `Master > Ambience > {Bed, Weather, Spot}`; Spot katmanında `AudioStreamRandomizer` (perde ±%5, ses ±3 dB, 8–25 sn aralık); olay kartı açılınca Ambience −6 dB; tekerlek gıcırtısının perdesi hıza bağlı, toynak adım başına randomizer. Gemini ile üretilen sesler künye dosyasında `kaynak: YZ (Gemini)`. `../ICERIK_IHTIYACLARI.md` S-1…S-6.
+  - **Literatür:** R21
+- [ ] **Y-I02 Yeni müzik dili: gerilim ve katmanlar**
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-E06 · **İlgili:** Y-B02, Y-G16
+  - **Ne:** Kullanıcı notu: eski şarkılar tarihçe belli olmadan yapıldı; ses tasarım tarzı tamamen değişecek, şarkılar çok daha gerilimli olacak ve ana menüde şarkı olmayacak. Gerilimde açılan katmanlar (Y-B02 eğrisine bağlı), ölüm ve yas teması.
+  - **Kullanıcı notu:** “bu şarkılar yapıldığında tarihçe belli değildi. artık çok daha gerilim dolu şarkılar olacak ve ana menüde şarkı olmamalı mesela. ses tasarım tarzımız tamamen değişecek yani.”
+  - **Kabul:** Yeni müzik kılavuzu; ana menüde müzik yok, ambiyans var.
+  - **Kaynaklar ve teknik (CC0 araştırması):** CC0 müzik: RandomMind (OpenGameArt) “Lament for a Warrior's Soul” yas teması adayı; OpenGameArt CC0 dark ambient drone'lar. Hazır stem yok: drone + Freesound CC0 tek vuruşlardan (frame drum, taiko, bodhran) 90 BPM döngüler + CC0 cello drone ve bowed metal gerilim katmanı, hepsi aynı tonalitede. Godot 4.2'de `AudioStreamSynchronized` yok (4.3+): ya sürüm yükseltme (P00 kararı) ya da aynı anda başlatılan birden çok `AudioStreamPlayer`. FreePD kapandı, kullanılmaz. `../ICERIK_IHTIYACLARI.md` S-7.
+  - **Literatür:** R18
+- [ ] **Y-I03 Kâtibin sesi: kısa anlatıcı satırları**
+  - **Öncelik:** P3 · **Dalga:** 6 · **İlgili:** Y-J05
+  - **Ne:** Kritik anlarda kısa, kuru anlatıcı satırları; önce Türkçe ve İngilizce. Kullanıcı kararı: AI ile seslendirilebilir; beyan edilir.
+  - **Kullanıcı notu:** “görüntülerde ai içerği mevcut zaten, yani hali hazırda ai beyanı koymam lazım değil mi? o zaman sesi de yaparız ai ile sorun yok.”
+  - **Kabul:** Satır listesi ve kayıtlar; beyan güncel.
+  - **Kaynaklar ve teknik (CC0 araştırması):** CC0 anlatıcı sesi yok. Kokoro-82M (Apache-2.0) yalnızca İngilizce, Türkçe yok; Piper `lessac` sesi ticari kullanıma kapalı. Gemini sesi Steam beyanına girer. `../ICERIK_IHTIYACLARI.md` S-8.
+  - **Literatür:** R22
+
+## Pazarlama ve Steam
+
+- [ ] **Y-J01T Steam sayfası Aralık'ta**
+  - **Öncelik:** P1 · **Dalga:** 7 · **Bağımlı:** Y-G13
+  - **Köken:** onaylanmayan **J01** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi: geliştirici hesabı ücreti şimdi harcanmayacak; sayfa Aralık gibi açılacak ve pazarlama o zaman başlayacak. Hazırlık şimdiden: sayfa metni, etiket önerisi, görsel listesi. Next Fest kaydı için Valve'ın son tarihleri kontrol edilir.
+  - **Kullanıcı notu:** “steam hesabı para gerekitiriyor biraz ve şu an istemiyorum bunu harcamayı. aralık gibi açmak istiyorum sayfayı. bu yüzden de pazarlamasını o zaman bırakıyorum.”
+  - **Kabul:** Aralık'ta Coming Soon sayfası açık; Next Fest kaydı yapıldı.
+  - **Literatür:** R56, R61
+- [ ] **Y-J02 Kapsül sanatı**
+  - **Öncelik:** P1 · **Dalga:** 7 · **Bağımlı:** Y-G08
+  - **Ne:** Logo, fener amblemi ve kervan silueti; küçük boyutta okunur. İnsan eliyle yapılması önerilir. Ücretliyse önce maliyet tahmini ve onay.
+  - **Kullanıcı notu:** “olabilir.”
+  - **Kabul:** Kapsül seti (bütün Steam boyutları) onaylı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Steam kapsül ölçüleri: Header 920×430, Small 462×174, Main 1232×706, Vertical 748×896; yalnızca sanat ve logo, metin yok. `../ICERIK_IHTIYACLARI.md` G-9.
+  - **Literatür:** R58, R59, R70
+- [ ] **Y-J03 Fragman ve menü öncesi açılış videosu**
+  - **Öncelik:** P1 · **Dalga:** 7 · **Bağımlı:** Y-D04, Y-G13
+  - **Ne:** Kanca ilk 10–15 saniyede: “kervan başı ölür, varis devralır”; oyun içi görüntü. Kullanıcı notu: bu türün oyuncuları menüden önce oynayan fragmanları seviyor; aynı malzemeden oyunun açılışında atlanabilir bir giriş videosu.
+  - **Kullanıcı notu:** “bu türde oyun oynayanlar menü öncesi fragmanları beğeniyor.”
+  - **Kabul:** Mağaza fragmanı ve oyun açılış videosu.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Ham görüntü Godot `--write-movie` ile; Blender Grease Pencil (haritada mürekkep çizgisinin akarak ilerlemesi, Build modifier) ve VSE kurgu; Krita çerçeve animasyonu; kâğıt kesik tekniği: sprite parçaları düzlemlere, 12 fps. `../ICERIK_IHTIYACLARI.md` G-10.
+  - **Literatür:** R60
+- [ ] **Y-J04 Demo ve Next Fest planı**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `7a44c6e`): Valve kuralı Steamworks sayfasından: fest için oyun çıkmamış olmalı ve çıkış festten sonra planlı; EAya festte girmek festten çıkarır.
+  - **Öncelik:** P1 · **Dalga:** 7 · **Bağımlı:** Y-J01T
+  - **Ne:** Kullanıcı planı: fest öncesi kısıtlı bir sürüm paylaşmak, fest sırasında Erken Erişim tam sürümünü paylaşmak. Dikkat: Next Fest yalnızca henüz çıkmamış oyunlar içindir ve Erken Erişim bir çıkış sayılır; Erken Erişime fest sırasında girilirse oyun festten çıkabilir. Valve'ın güncel kuralları kontrol edilmeli. Öneri: fest boyunca demo, Erken Erişim festten 4–10 hafta sonra. Demo: menüde geri bildirim bağlantısı, yayıncılara önden gönderim.
+  - **Kullanıcı notu:** “mantıklı, fest öncesinde kısıtlı bir vers paylaşıp festte erken erişim tam sürümü paylaşabilirim.”
+  - **Kabul:** Valve kuralı doğrulandı; demo ve Erken Erişim tarihleri kesinleşti; demo yayında.
+  - **Literatür:** R61, R62, R64
+- [ ] **Y-J05 AI beyanını ve CREDITS'i düzelt**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `6630a09`): Ses künyesi ve lisans testi eklendi. Kalan (kullanıcı): iki müzik parçasının kaynağı.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** `AI_DISCLOSURE.md` hâlâ “bütün görseller prosedürel” diyor; düzeltilir: AI görselleri, AI sesleri, 3B render'lar, CC0 paketler. Kullanıcı notu: kullanılan CC0 üreticileri de CREDITS'e eklenir (zorunlu olmasa da).
+  - **Kullanıcı notu:** “tamamdır, buraya kullandığımız co0 üreticileri de eklemek gerekir bence belki zorunlu olmasa bile.”
+  - **Kabul:** Beyan ve CREDITS güncel; her CC0 paketin üreticisi ve bağlantısı listede.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Künye düzeni: tek bir künye kaydı (dosya, kaynak, yazar, URL, lisans, lisans sayfası, indirme tarihi, değişiklik); ses için `audio/CREDITS.csv` ve derlemede NC ya da Sampling+ lisansı görünce duran kontrol; Quaternius indirmelerinde tarih ve lisans sayfası ekran görüntüsü (CC0 ile QAL ayrımı); OFL ve MIT metinleri dağıtım klasörüne; CC-BY varlıklar oyun içi Credits ekranında zorunlu. `../ICERIK_IHTIYACLARI.md` L bölümü.
+  - **Literatür:** R67, R68, R71
+- [ ] **Y-J06 Görünür AI sanatını elle yeniden çizme (sonra)**
+  - **Öncelik:** P2 · **Dalga:** 7
+  - **Ne:** Kullanıcı notu: oyun bittikten sonra, belki Kasım sonu; görseller elle yeniden çizilebilir ve içerik “AI üretimi” değil “AI destekli” olur. Hazırlık: AI ile üretilen görsellerin listesi tutulur. Not: AI çıktısının üzerinden çizilen görseller de beyan formunda bildirilmeye devam edebilir; form doldurulurken güncel Steam metnine bakılır.
+  - **Kullanıcı notu:** “Bu daha sonra yapılacka bir düzenleme ve emin değilim. önce oynu bitirelim sonra aynı görselleri elle çizebilirim yani sonuç olarak içerik ai üretimi değil, ai destekli olur. ama Kasım sonunda filan olabilir bu anca.”
+  - **Kabul:** AI görsel listesi güncel; yeniden çizim kararı verildi.
+  - **Literatür:** R70, R71, R69
+- [ ] **Y-J08 Düzenli devlog**
+  - **Öncelik:** P2 · **Dalga:** 7 · **Bağımlı:** Y-J01T
+  - **Ne:** Harita süreci, oyunda yaşanan hikâyeler, defter sayfaları, haftalık playtest videoları (Y-A06). Aralık'ta sayfa açılınca başlar.
+  - **Kabul:** Yayın takvimi; ilk üç devlog.
+  - **Literatür:** R11, R56
+- [ ] **Y-J09 Kliplenebilir anlar listesi**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `f5e6c40`): Beş an: kırılma, varis devralma, alacaklı atlısı, kurt sürüsü, açlık gecesi; her biri için tetikleme ve kayıt hazırlığı.
+  - **Öncelik:** P2 · **Dalga:** 7
+  - **Ne:** Kırılma, varis devralma, alacaklı atlısı, kurt sürüsü, açlık gecesi; her biri net başlangıç ve sonu olan sahne.
+  - **Kabul:** Liste ve her an için kayıt.
+  - **Literatür:** R22, R11
+- [ ] **Y-J10 Fiyat ve Erken Erişim zamanı kararı**
+  - **Öncelik:** P2 · **Dalga:** 7
+  - **Ne:** Kullanıcı sorusu: 2–5 $ fiyat da çok görülüyor. Karar, oyunun gerçek oynanma süresi ölçüldükten sonra verilir. Erken Erişime içerik hazırken girilir; çıkış haftası büyük çıkışlarla çakışmaz.
+  - **Kullanıcı notu:** “fiyattan emin miyiz? 2-5 usd arası fiyat da çok görüyorum indie oyunlarda.”
+  - **Kabul:** Fiyat kararı ve gerekçesi yazıldı.
+  - **Literatür:** R27, R28, R31
+- [ ] **Y-J12 Basın kiti, web sitesi, e-posta listesi, Discord**
+  - **Öncelik:** P2 · **Dalga:** 7 · **Bağımlı:** Y-J01T
+  - **Ne:** waybornegame.com'da tek sayfa: fragman, görseller, Steam bağlantısı, e-posta kaydı; indirilebilir basın kiti.
+  - **Kabul:** Site ve basın kiti yayında.
+  - **Literatür:** R59
+- [ ] **Y-J13 Yerelleştirme sırası ve terim sözlüğü**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Çeviri sırası ve 50 terimlik sözlük.
+  - **Öncelik:** P2 · **Dalga:** 5
+  - **Ne:** Önce İngilizce ve Türkçe, sonra Basitleştirilmiş Çince, Almanca, Rusça. Metin hacmi büyümeden terim sözlüğü.
+  - **Kabul:** Terim sözlüğü; çeviri sırası belgede.
+  - **Literatür:** R39
+- [ ] **Y-J14 Mağaza ekran görüntüsü seti**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Kullanıcı: pazarlama işleri Aralıkta. Beş ana görsel onaylanınca oyunun gerçek ekranlarından (screenshot araçları) beş kare alınır.
+  - **Öncelik:** P2 · **Dalga:** 7 · **Bağımlı:** Y-G13, Y-G05
+  - **Ne:** Beş ana görselden beş ekran görüntüsü; ilk ikisi yol ve olay kartı. Kullanıcı notu: pazarlama işleri Aralık'ta.
+  - **Kullanıcı notu:** “tamam zaten bu pazarlama işlerini hemen yapmayacağız. Aralık gibi yapılacak.”
+  - **Kabul:** Beş ekran görüntüsü onaylı.
+  - **Literatür:** R58
+
+## Üretim ve süreç
+
+- [ ] **Y-K01 İki haftalık döngü ve ekranda doğrulanmış “bitti”**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Kural CLAUDE.md'de, döngü kontrol listesi ve 5 dk çekim listesi yazıldı. Kalan: döngü videosu ve derleme (kullanıcının takvimi).
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Her döngü sonunda oynanabilir derleme ve 5 dakikalık video. “Bitti” yalnızca ekran görüntüsüyle doğrulanınca denir.
+  - **Kabul:** Kural CLAUDE.md'de; her döngünün videosu var.
+- [ ] **Y-K02 Otomatik ekran görüntüsü karşılaştırması**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6868274`): Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md).
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Kritik ekranlar her derlemede GitHub Actions'ta çekilip önceki sürümle karşılaştırılır; görsel bozulmalar yakalanır.
+  - **Kabul:** CI'da görsel karşılaştırma adımı; fark raporu artefakt olarak.
+- [ ] **Y-K03 Oyun ölçümü**
+  - **Öncelik:** P2 · **Dalga:** 1
+  - **Ne:** Sefer süresi, kart sayısı, ölüm oranı, oturum uzunluğu. Kullanıcı notu: “github'da çalışıyoruz normalde.” Simülatör ölçümleri GitHub Actions çıktısı olarak tutulabilir; oyuncu tarafı ölçüm yalnızca izinle ve yerel dosyaya. Notun anlamı kullanıcıya sorulup netleştirilmeli.
+  - **Kullanıcı notu:** “github'da çalışıyoruz normalde.”
+  - **Kabul:** Ölçüm raporu CI'da; oyun içi ölçüm izinli.
+  - **Literatür:** R79

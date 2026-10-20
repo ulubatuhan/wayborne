@@ -1,0 +1,562 @@
+{
+ "kaynak": "https://claude.ai/artifact/EBVcPmdtyfc134ZL1R14nr",
+ "tarih": "2026-10-17",
+ "toplam_oneri": 111,
+ "secimler": {
+  "A01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "A02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "A03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Kararım hala geçerli, bu şekilde kabul etmiyorum. Oyun düşündüğünden çok daha hızlı bitiyor. Aralık olmadan oyun bitecek ve pazarlamaya, rötuşlara odaklanacağım."
+  },
+  "A04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Hedefimiz hala şubat nextfest. Şubattan önce steam'e girip şubatta fest'e katılabilirim hatta. Kickstart işi türkiye'de olduğum için yalan oldu o yüzden en mantıklısı öndne steam'e girmek ve next fest'e wishlist toplamak gibi."
+  },
+  "A05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Sorun değil, tamamen sistem ve oynanış odaklıyıdm önceki ay ve artık sunum eksiğine katlanamadım daha fazla. karakter ve giysi sistemi sonunda oturdu. bundan sonra geliştirilebilir koalyca. UI HUD Menuleri de oturttuktan sonra sanat kısmı ile bir süre için vedalaşacağım."
+  },
+  "A06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Tamamdır, bunu da yapıp video alacağım hatta devlog olarak."
+  },
+  "A07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Sıra zindanlara gelecek fakat bende küçük sürüm diye bir şey yok, tam gaz devam. Solo indie olduğum için istediğim gibi ilerleyebiliyorum ve claude, gemini, google ai sayesinde fazlasıyla da hızlı ilerliyor çalışmalar."
+  },
+  "B01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "İşlerin sırası tamamen teknik önceliklere dayanarak yapılacak zira bu işlerin hepsini claude'un 2-3 session'da yapmasını bekliyorum zaten."
+  },
+  "B02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Çok mantıklı! ayrıca akşamları da bu olasılık artmalı gerekli önlemler alınmazsa."
+  },
+  "B03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Mantıklı, tamamdır."
+  },
+  "B05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B08": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B09": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Aslına bakarsan hızlandırma kalkmalı. yolda olmak o kadar dolu bir eylem olmalı ki oyuncu oylu hızlandıramamalı, aynı zamanda da ortam o kadar dolu, yoğun, seyri yüksek olmalı ki hızlandırmak istememeli."
+  },
+  "B10": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B11": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "B12": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet, saydıklarına ek olarak sonraki gün kim önde, arkada, ortada gidecek buna da karar verilebilir burada zira önde olmanın maliyeti olabilir o karaktere ve bu maliyet sonucu arkaya almak isteyebiliriz gece."
+  },
+  "B13": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "HAYIR! YA HEP YA HİÇ! BU İŞİ TAM YAPACAĞIZ VE HEMEN YAPACAĞIZ TAM KAPASİTEDE!"
+  },
+  "C02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Kesinlikle çok dinmaik olmalı burası hatta kontrat menüsü de değişmeli. witcher^'daki gibi bir ilan panosu olabilir ya da bir masa arkasında lonca görevlerisi görebiliriz arkaplanda ve kenarda listelenir bu kontratlar.\n\nAyrıca her kontrat tipinde tüccar bizzat kendi vagonu ile gelmeyebilir, vagonsuz, malları ve kendisi gelmek isteyebilir ve bu durumda ücrete vagon kirası dahil olur. Bunun dışında benden sadece malını x lokasyonuna teslim etmemi de isteyebilir ki çoğunlukla durum bu olmalı bence."
+  },
+  "C03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet ve o zaman dediğim gibi, bizim bu şehre sağladığımız tedarik bu konudaki stokları da etkilemeli."
+  },
+  "C06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Zorda kalınılsa yapılabilmeli evet."
+  },
+  "C08": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C09": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Bu aşama için lore ve tarihçenin tamamlanması lazım gibi."
+  },
+  "C10": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C11": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C12": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet, kesinlikle haklısın bu konuda ama bir bölgede çok itibarlı olup diğer bölgede hiç tanınmamak da olmaz. Birazcık da etkilenmeli bu bölgeler  birbirinden. Yani aradaki ilişki ağırlıklı olmalı, bir yerde 5 itibar kazanıyorsam diğer tarafta bu 0.5 olabilir. Jeopolitik olarak dağılmalı bu ilişki yani."
+  },
+  "C13": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C14": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Kervan bizim değil babamızın olsun ve babamız bize devretsin hastalıktan ötürü, borçlu bir şekilde devretmiş olsun ve de."
+  },
+  "C15": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C16": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Zaten ben 15 ekimde istemişim bunu evet. onaylıyorum."
+  },
+  "C17": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C18": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet bölümler yazılmadı o yüzden bana 8 bölüm var demen bile aslında uydurma bir veriye dayanıyor. Bu bölümler yazıldıktan sonra düşünülecek bir konu bu, onaylamıyorum bu konuyu o yüzden şu an. ama bölüm yazılacak gibi bir not alabilirsin."
+  },
+  "C19": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "C20": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "meşale de olabilri fener alternatifi olarak, isterse fener de yakar varsa. oyuncuya bağlı olsun yani."
+  },
+  "D01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "tamamdır, haklısın."
+  },
+  "D02": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "3-5 sefer dediğin 3-4 ay gibi kısa bir oyun süresi de olabilir ve lider ölmeyebilir de? buna ait bir zorluk eklenmemeli."
+  },
+  "D03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "D04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Kesinlikle buraya bir küçük video sahne eklenebilir medieval total war 2 gibi."
+  },
+  "D05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "D06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet ama bu ekranda görülen bir efekt gibi değil, bir olay gibi olmalı. referans oyunda mesela stres eşiği aşıldığında bir treat kazanıyor ve saçma hareketlere girmeye başlıyor karakter. kendini öne atıyor, tüm damage'ı kendine çekiyor ya da takım arkadaşlarına saldırıyor vs. direkt yaşatarak gösteriyor olayı, ekrana ucuz bir filtre koyarak değil."
+  },
+  "E01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Sayıyı arttır demek kolay ama arttırabilecek misin?"
+  },
+  "E02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "E03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Evet, \"olabildiğince\" olması gereken bir özellik."
+  },
+  "E04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Kesinlikle."
+  },
+  "E05": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "kalsın şimdilik."
+  },
+  "E06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "kesinlikle öyle, lore'a odaklanacağız önce o yüzden."
+  },
+  "E07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "E08": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "F01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "takat aynı zamanda fiziksel bir durum olmalı ama."
+  },
+  "F02": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "buradaki amacı anlamadım. evet hepsi aynı amaca hitap ediyor köpek hariç, ama farklı kapasitelerde ve maliyetlerde."
+  },
+  "F03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "F04": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "şehir kapısına basmak şehre girmek demek. vagona gitmek ise oradaki atölyeye gitmek demek. asıl olması gereken şey vagon atölyesinin ekranını özelleştirmek."
+  },
+  "F05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "F06": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "hayır, giyilen kıyafetlerden stat gelsin, ister zırh giyer ister kıyafet, tercih."
+  },
+  "F07": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "nadir bir olay evet ama olabilir, kaldırmak yok."
+  },
+  "F08": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "bunlar statları etkilemeli, statlar da savaşı."
+  },
+  "F09": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Görevleri sadeleştirebiliriz, sadece öncü, artçı, ve ortancı gibi görevler olabilir, iş kapsamları da bu üçüne göre dağılabilir. sınıflar ise tamamen bu görevlerden bağımsız olabilir kolcu, savaşçı, katip vs gibi bira dnd usulü."
+  },
+  "F10": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "F11": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "mevcut olmayan, eski detaylar kaldırılabilir ya da mevcut sistem daha sade ve öz bir şekilde açıklanabilir ama kayıp yaşanmamalı burada."
+  },
+  "G01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "evet ama bu cümle çok iyi kurgulanmalı."
+  },
+  "G02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "evet, bu yüzden referans oyun sahne ve menülerini dokümante ettik bugün seninle."
+  },
+  "G06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "yerine ne koyacağımız çok önemli ama"
+  },
+  "G07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "sadece bir biyom değil, tüm biyomlar için birer örnek olmalı ve daha sonra bu biyomlara ait varyantlar türetilmeli, birbirine bağlanmalı fakat unutma elimizde harita var artık, bu yüzden biyomları haritada seçmeli, bu haritadaki konumlara göre varyant oluşturmalıyız. mesela dağlık bir yerden geçiyorsak dağ görmeliyiz arkaplanda."
+  },
+  "G08": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G09": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G10": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "Şehir menüsü iyileştirilebilir, evet başka oyuna çok benziyor fakat insanlar ve şehir gözükmeli. Bizim yolda olmamız büyük bir tehlike ve bu işin özünde şu durumda, savaşın ve kıtlığın içinde bu işi yapmamızın bir motivasyonu olmalı, o motivasyon ise halkların kendisi. ayrıca şehre kervan girmez."
+  },
+  "G11": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "bunu görmem lazım, yazıyla anlaşılmıyor."
+  },
+  "G12": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "evet, ayrıca gardroptaki mankenin görüntü kalitesi de iyleştirilmeli. yolda daha az pikselle kaliteli bir manken gösteribliyorken aynı mankeni gardropta gördüğümüzda daha çok pikselde aynı kaliteyi veremiyoruz o yüzden gardropta aynı mankenin daha yüksek çözünürlüküsü olması laızm diye düşünüyorum. (burada dikkat edilmesi gereken şey standart bir manken değil, hangi karakter ise onun mankeni olmalı)"
+  },
+  "G13": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G14": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G15": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "G16": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "ana menüye kervan ekibi de katılmalı, ateş başında oturan, yorgunluktan ölmüş ve ısınmaya çalışan 3 kişi."
+  },
+  "H01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "H02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "H03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "olabildiğince edebi ya da yazılı olarak yazsın, -10 moral yerine moral düşük yazsın gibi."
+  },
+  "H04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "H05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "H06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "bu daha sonra eklememiz gereken bir şey değil mi? listeye ekleyebiliriz yine de. steam deck, xbox."
+  },
+  "H07": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "I01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "sesleri gemini ile yapıyorum ve güzel de sonuç alıyorum."
+  },
+  "I02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "bu şarkılar yapıldığında tarihçe belli değildi. artık çok daha gerilim dolu şarkılar olacak ve ana menüde şarkı olmamalı mesela. ses tasarım tarzımız tamamen değişecek yani."
+  },
+  "I03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "görüntülerde ai içerği mevcut zaten, yani hali hazırda ai beyanı koymam lazım değil mi? o zaman sesi de yaparız ai ile sorun yok."
+  },
+  "J01": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "steam hesabı para gerekitiriyor biraz ve şu an istemiyorum bunu harcamayı. aralık gibi açmak istiyorum sayfayı. bu yüzden de pazarlamasını o zaman bırakıyorum."
+  },
+  "J02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "olabilir."
+  },
+  "J03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "bu türde oyun oynayanlar menü öncesi fragmanları beğeniyor."
+  },
+  "J04": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "mantıklı, fest öncesinde kısıtlı bir vers paylaşıp festte erken erişim tam sürümü paylaşabilirim."
+  },
+  "J05": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "tamamdır, buraya kullandığımız co0 üreticileri de eklemek gerekir bence belki zorunlu olmasa bile."
+  },
+  "J06": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "Bu daha sonra yapılacka bir düzenleme ve emin değilim. önce oynu bitirelim sonra aynı görselleri elle çizebilirim yani sonuç olarak içerik ai üretimi değil, ai destekli olur. ama Kasım sonunda filan olabilir bu anca."
+  },
+  "J07": {
+   "secili": false,
+   "dokunulmadi": true,
+   "not": ""
+  },
+  "J08": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "J09": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "J10": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "fiyattan emin miyiz? 2-5 usd arası fiyat da çok görüyorum indie oyunlarda."
+  },
+  "J11": {
+   "secili": false,
+   "dokunulmadi": true,
+   "not": ""
+  },
+  "J12": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "J13": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "J14": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "tamam zaten bu pazarlama işlerini hemen yapmayacağız. Aralık gibi yapılacak."
+  },
+  "K01": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "K02": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": ""
+  },
+  "K03": {
+   "secili": true,
+   "dokunulmadi": false,
+   "not": "github'da çalışıyoruz normalde."
+  },
+  "K04": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "Hayır, bilakis bu listedeki her şey 1 ay içinde biter."
+  },
+  "K05": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "Temiz masa, temiz iş, hızlı süreç. yanlış düşünüyorsun. 5S!"
+  },
+  "K06": {
+   "secili": false,
+   "dokunulmadi": false,
+   "not": "tamamdır."
+  }
+ }
+}

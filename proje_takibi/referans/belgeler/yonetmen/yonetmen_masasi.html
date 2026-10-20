@@ -1,0 +1,663 @@
+<title>Wayborne Yönetmen Masası</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f2ead8; --paper:#f8f2e4; --paper2:#ede3cd; --ink:#241b12; --ink2:#5a4a38; --ink3:#8a7860;
+  --rule:#cdbd9c; --rule2:#e0d3b6; --amber:#a8631a; --amber-bg:#f3dfba; --seal:#8e2a1e; --seal-bg:#f1d6cc;
+  --moss:#4c5a32; --moss-bg:#dfe3c8; --slate:#3e4c5c; --slate-bg:#d9dfe4; --plum:#5d3a55; --plum-bg:#e7d6e2;
+  --chk:#241b12; --chk-fg:#f8f2e4; --shadow:0 1px 0 rgba(60,40,10,.06),0 6px 18px -10px rgba(60,40,10,.25);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15110c; --paper:#1f1912; --paper2:#2a2219; --ink:#ece2cc; --ink2:#c2b398; --ink3:#8e7f68;
+  --rule:#4a3d2d; --rule2:#342a1f; --amber:#e6a550; --amber-bg:#3b2a14; --seal:#e07a66; --seal-bg:#3d1d17;
+  --moss:#b9c68e; --moss-bg:#283019; --slate:#a9bccf; --slate-bg:#1f2a35; --plum:#d6a9c9; --plum-bg:#35202f;
+  --chk:#e6a550; --chk-fg:#15110c; --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.7); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#15110c; --paper:#1f1912; --paper2:#2a2219; --ink:#ece2cc; --ink2:#c2b398; --ink3:#8e7f68;
+  --rule:#4a3d2d; --rule2:#342a1f; --amber:#e6a550; --amber-bg:#3b2a14; --seal:#e07a66; --seal-bg:#3d1d17;
+  --moss:#b9c68e; --moss-bg:#283019; --slate:#a9bccf; --slate-bg:#1f2a35; --plum:#d6a9c9; --plum-bg:#35202f;
+  --chk:#e6a550; --chk-fg:#15110c; --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.7); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Alegreya,"Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-weight:400;text-wrap:balance;margin:0}
+h1{font-family:"IM Fell English SC","IM Fell English",Georgia,serif;font-size:clamp(34px,6vw,56px);line-height:1.02;letter-spacing:.01em}
+h2{font-family:"IM Fell English SC",Georgia,serif;font-size:clamp(24px,3.4vw,32px);line-height:1.1}
+h3{font-family:Alegreya,Georgia,serif;font-weight:700;font-size:19px;line-height:1.3}
+p{margin:0}
+a{color:var(--amber)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+.lbl{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+
+/* masthead */
+header.mast{padding-block:40px 28px;border-bottom:3px double var(--rule);display:grid;gap:18px}
+.mast .kicker{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lantern{width:26px;height:26px;flex:none}
+.mast .lede{font-size:19px;max-width:66ch;color:var(--ink2)}
+.ledger{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--rule);background:var(--paper)}
+.ledger div{padding:10px 14px;border-right:1px solid var(--rule2);min-width:0;flex:1 1 110px}
+.ledger div:last-child{border-right:0}
+.ledger b{display:block;font-family:"IM Fell English",Georgia,serif;font-size:26px;font-weight:400;line-height:1.1}
+.ledger span{font-size:13px;color:var(--ink3)}
+
+section{padding-block:34px 6px}
+.sec-head{display:grid;gap:8px;margin-bottom:18px}
+.sec-head p{max-width:70ch;color:var(--ink2)}
+
+/* verdict */
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.vcol{background:var(--paper);border:1px solid var(--rule);padding:16px 18px;display:grid;gap:10px;align-content:start;min-width:0}
+.vcol h3{font-family:"IM Fell English SC",Georgia,serif;font-weight:400;font-size:21px}
+.vcol ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.vcol li{font-size:15.5px}
+.vcol.g{border-top:4px solid var(--moss)} .vcol.z{border-top:4px solid var(--seal)} .vcol.f{border-top:4px solid var(--amber)}
+.quote{border-left:3px solid var(--amber);padding:6px 0 6px 16px;font-family:"IM Fell English",Georgia,serif;font-style:italic;font-size:22px;line-height:1.35;max-width:60ch}
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.pillar{border:1px solid var(--rule);background:var(--paper);padding:14px 16px;min-width:0}
+.pillar .n{font-family:"IM Fell English",Georgia,serif;font-size:30px;line-height:1;color:var(--amber)}
+.pillar b{display:block;margin:4px 0 4px;font-size:17px}
+.pillar p{font-size:15px;color:var(--ink2)}
+
+/* toolbar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--rule);padding-block:10px;margin-top:22px;display:grid;gap:10px}
+.bar-row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.count{font-family:"IM Fell English",Georgia,serif;font-size:22px}
+.count small{font-family:Alegreya,serif;font-size:14px;color:var(--ink3)}
+.status{font-family:"IBM Plex Mono",monospace;font-size:12px;padding:3px 8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink2)}
+.status.ok{border-color:var(--moss);color:var(--moss)} .status.warn{border-color:var(--amber);color:var(--amber)} .status.err{border-color:var(--seal);color:var(--seal)}
+.spacer{flex:1}
+button,select,input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--paper);border:1px solid var(--rule);padding:6px 10px;border-radius:2px}
+button{cursor:pointer}
+button:hover{border-color:var(--ink3)}
+button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+input[type=search]{min-width:0;flex:1 1 180px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.chip{white-space:nowrap;font-size:14px;padding:4px 10px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;border-radius:2px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip .c{font-family:"IBM Plex Mono",monospace;font-size:11.5px;opacity:.75;margin-left:4px}
+label.tog{display:inline-flex;gap:6px;align-items:center;font-size:15px;cursor:pointer}
+
+/* category + cards */
+.cat{padding-top:30px}
+.cat-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:14px}
+.cat-head .letter{font-family:"IM Fell English",Georgia,serif;font-size:40px;line-height:.9;color:var(--amber)}
+.cat-head p{flex-basis:100%;color:var(--ink2);max-width:72ch;font-size:16px}
+.cards{display:grid;gap:12px}
+.card{background:var(--paper);border:1px solid var(--rule);box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:14px 16px 12px;position:relative}
+.card.on{border-color:var(--ink);background:linear-gradient(0deg,var(--paper),var(--paper)) padding-box}
+.card.on::after{content:"ONAY";position:absolute;right:12px;top:10px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;color:var(--seal);border:1.5px solid var(--seal);padding:1px 6px;transform:rotate(-4deg);opacity:.85}
+.tick{grid-row:1 / span 3;padding-top:2px}
+.tick input{appearance:none;-webkit-appearance:none;width:26px;height:26px;border:2px solid var(--ink2);background:var(--paper);display:grid;place-content:center;cursor:pointer;margin:0;border-radius:2px}
+.tick input::before{content:"";width:14px;height:8px;border-left:3px solid var(--chk-fg);border-bottom:3px solid var(--chk-fg);transform:rotate(-45deg) translate(1px,-2px);opacity:0}
+.tick input:checked{background:var(--chk);border-color:var(--chk)}
+.tick input:checked::before{opacity:1}
+.tick input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tick input:disabled{opacity:.5;cursor:not-allowed}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-right:54px;min-width:0}
+.id{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink3)}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;padding:1px 6px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.t-EKLE{color:var(--moss);background:var(--moss-bg)} .t-DEĞİŞTİR{color:var(--slate);background:var(--slate-bg)}
+.t-BİRLEŞTİR{color:var(--plum);background:var(--plum-bg)} .t-ÇIKAR{color:var(--seal);background:var(--seal-bg)} .t-KARAR{color:var(--amber);background:var(--amber-bg)}
+.p-P0{color:var(--seal)} .p-P1{color:var(--amber)} .p-P2{color:var(--ink2)} .p-P3{color:var(--ink3)}
+.e{color:var(--ink3)}
+.star{font-size:12.5px;color:var(--amber);font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+.body{display:grid;gap:7px;min-width:0}
+.body h3{margin-top:2px}
+.row{font-size:16px;max-width:76ch}
+.row b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-right:6px}
+.warn{border-left:3px solid var(--amber);background:var(--amber-bg);padding:6px 10px;font-size:15px;max-width:76ch}
+.links{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ref{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink2);text-decoration:none;border-bottom:1px dotted var(--ink3)}
+.ref:hover{color:var(--amber)}
+.todo{font-family:"IBM Plex Mono",monospace;font-size:11.5px;background:var(--paper2);padding:1px 6px;border-radius:2px;color:var(--ink2)}
+.note-tog{background:none;border:0;padding:0;color:var(--ink3);font-size:14px;text-decoration:underline dotted;cursor:pointer}
+textarea{font:inherit;font-size:15px;width:100%;min-height:62px;background:var(--bg);color:var(--ink);border:1px solid var(--rule);padding:8px;resize:vertical;border-radius:2px}
+.note-has{color:var(--amber);font-weight:500}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--rule);background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:620px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule2);vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:500;background:var(--paper2)}
+tr:last-child td{border-bottom:0}
+.phase{display:grid;gap:12px}
+.ph{display:grid;grid-template-columns:150px 1fr;gap:14px;border-left:3px solid var(--rule);padding:4px 0 4px 14px}
+.ph .when{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--amber)}
+.ph h3{margin-bottom:4px}
+.ph p{font-size:15.5px;color:var(--ink2)}
+@media (max-width:620px){.ph{grid-template-columns:1fr;gap:4px}}
+ol.bib{padding-left:0;list-style:none;display:grid;gap:6px;font-size:14.5px;columns:1}
+ol.bib li{scroll-margin-top:140px;min-width:0;overflow-wrap:anywhere}
+ol.bib li:target{background:var(--amber-bg)}
+ol.bib .k{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--amber);margin-right:6px}
+.foot{margin-top:40px;border-top:3px double var(--rule);padding-top:16px;color:var(--ink3);font-size:14px;display:grid;gap:6px}
+.empty{padding:28px;text-align:center;color:var(--ink3);border:1px dashed var(--rule)}
+#copybox{width:100%;min-height:160px;margin-top:8px}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="kicker">
+    <svg class="lantern" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 2v4M11 6h10l-1 3H12z"/><path d="M12 9h8l2 15H10z"/><path d="M9 24h14v3H9z"/></g><circle cx="16" cy="17" r="3.2" fill="var(--amber)"/></svg>
+    <span class="lbl">Yönetmen raporu · 17 Ekim 2026 · Godot 4.2 · main 008ecb2</span>
+  </div>
+  <h1>Wayborne Yönetmen Masası</h1>
+  <p class="lede">Bütün belgeleri, iki oturumun konuşma geçmişini, kodun tamamını ve gönderilen görselleri okudum; 80 kaynaklık bir literatür taraması yaptım. Aşağıda oyunu daha iyi, daha sürükleyici ve daha satılabilir yapacak <b id="totalN">—</b> öneri var. Beğendiklerini işaretle, istersen not düş. İşaretlerin kaydediliyor; bitince bana “seçtim” demen yeterli, seçtiklerini yapılacaklar listesine ben eklerim.</p>
+  <div class="ledger" aria-label="Oyunun bugünkü içerik defteri">
+    <div><b>41.600</b><span>satır GDScript</span></div>
+    <div><b>5</b><span>şehir (haritada 128 yer)</span></div>
+    <div><b>7</b><span>yol</span></div>
+    <div><b>12</b><span>ticari mal</span></div>
+    <div><b>46</b><span>çekilebilir olay</span></div>
+    <div><b>14</b><span>düşman şablonu</span></div>
+    <div><b>12</b><span>ekipman</span></div>
+    <div><b>1</b><span>kontrat türü</span></div>
+  </div>
+</header>
+
+<section id="hukum">
+  <div class="sec-head">
+    <span class="lbl">I · Hüküm</span>
+    <h2>Mimari olgun, içerik ince, yol boş</h2>
+    <p>Wayborne’un iskeleti türünün iyilerinden: okunur olay kartları, ölçülmüş savaş, kuşaklar boyu süren defter. Ama oyuncunun en çok zaman geçirdiği yer olan yol, saniye başına en az kararın verildiği yer. Planlı işlerin yaklaşık 70’i sunum işi. Darboğaz görsel değil: içerik hacmi, ödül çeşitliliği ve yolun anlamı.</p>
+  </div>
+  <div class="verdict">
+    <div class="vcol g"><h3>Güçlü</h3><ul>
+      <li>Olay kartlarının okunabilirliği: kilitli seçeneğin sebebi, zarı kimin atacağı ve yüzdesi, savaş riski önceden görünüyor.</li>
+      <li>Soy, veraset ve defter tezi: hiçbir satır silinmiyor, ölenin üstü çiziliyor.</li>
+      <li>Planlayıcı: hava rezervi, kamp payı ve eksik erzak riski kesin hesaplanıyor.</li>
+      <li>Ölçülerek ayarlanmış savaş ve sömürüye dayanıklı ekonomi; simülatörlerle denge disiplini.</li>
+      <li>En güçlü görseller: mürekkep olay kartları, masa sahneleri, gravür harita ve fenerli atlı.</li>
+    </ul></div>
+    <div class="vcol z"><h3>Zayıf</h3><ul>
+      <li>Yolda bir gün 45 saniye; sefer başına 1–3 kart, ~4 işaret. İşaretin tek çözümü oraya yürümek.</li>
+      <li>Ödül yalnızca altın; bandajın tüketicisi yok; yolda iyileşme yok.</li>
+      <li>Tek kontrat türü, sabit pano; 46 kartlık havuz 10–15 seferde tekrar ediyor.</li>
+      <li>Ölüm nadir (dört kişilik parti %92 kazanıyor), şehirde elle kayıt var, ironman yok; kampanya bir sayaç listesi ve finalden sonra boş.</li>
+      <li>Beş ayrı görsel dil yan yana; kel mankenler, boş savaş sahnesi, “Excel” yönetim ekranları.</li>
+    </ul></div>
+    <div class="vcol f"><h3>Fırsat</h3><ul>
+      <li>Onaylı 128 yerlik harita, dünyayı kökten büyütecek; aktarım bir tasarım projesi olarak ele alınırsa.</li>
+      <li>“Kervan başı ölür, varis devralır” anı, fragman ve demo için hazır bir kanca.</li>
+      <li>Kervan/ticaret nişi az dolu; referans oyun (6M), Frostpunk (5M), Kenshi (3M), Against the Storm (2M) kitlesi örtüşüyor.</li>
+      <li>Fener motifi ve “kâtibin defteri” stili, tanınır bir kimliğe dönüşebilir.</li>
+    </ul></div>
+  </div>
+
+  <div style="margin-top:26px;display:grid;gap:10px">
+    <span class="lbl">Önerdiğim oyun vaadi</span>
+    <p class="quote">“Bir kervanı kuşaklar boyu yolda tut. Her karar yola bir iz, her ölüm deftere bir satır olur.”</p>
+    <div class="pillars">
+      <div class="pillar"><div class="n">i</div><b>Yol yaşar</b><p>Yolda her dakika bir şey görülür, sezilir ya da seçilir. İzlemek değil, okumak.</p></div>
+      <div class="pillar"><div class="n">ii</div><b>İnsanlar aşınır</b><p>Konu kervanı çekenler. Açlık, stres, yara ve kırgınlık kişiye yazılır, görünür.</p></div>
+      <div class="pillar"><div class="n">iii</div><b>Defter unutmaz</b><p>Kararların karşılığı başka şehirde ya da sonraki kuşakta gelir. Ölüm bir son değil, devir.</p></div>
+      <div class="pillar"><div class="n">iv</div><b>Ticaret bilgi oyunudur</b><p>Fiyatı bilen, yolu bilen, kişiyi bilen kazanır. Bilgi eskir, söylenti yanıltır.</p></div>
+    </div>
+    <p style="font-size:15px;color:var(--ink2);max-width:72ch;margin-top:6px">“Asla sadeleştirme” ilkene dokunmuyorum. “Birleştir” ve “çıkar” önerileri derinliği kesmiyor; görünmeyen derinliği oyuncunun hissedeceği yere taşıyor. Bu ilkeyle çelişebilecek her öneride kartın üstünde ayrıca uyarı var.</p>
+  </div>
+</section>
+
+<div class="bar" id="bar">
+  <div class="bar-row">
+    <span class="count"><span id="selN">0</span> <small>/ <span id="allN">0</span> onaylandı</small></span>
+    <span class="status" id="status">Bağlanıyor…</span>
+    <span class="spacer"></span>
+    <button id="copyBtn" type="button">Seçimleri kopyala</button>
+  </div>
+  <div class="bar-row">
+    <input type="search" id="q" placeholder="Ara: kontrat, fener, savaş…" aria-label="Önerilerde ara">
+    <select id="fTur" aria-label="Tür"><option value="">Tüm türler</option><option>EKLE</option><option>DEĞİŞTİR</option><option>BİRLEŞTİR</option><option>ÇIKAR</option><option>KARAR</option></select>
+    <select id="fOnc" aria-label="Öncelik"><option value="">Tüm öncelikler</option><option value="P0">P0 · Hemen</option><option value="P1">P1 · Next Fest öncesi</option><option value="P2">P2 · Erken Erişim öncesi</option><option value="P3">P3 · Sonra</option></select>
+    <label class="tog"><input type="checkbox" id="fStar"> Yönetmenin ilk seçimi</label>
+    <label class="tog"><input type="checkbox" id="fSel"> Yalnız onaylananlar</label>
+  </div>
+  <div class="chips" id="catChips" role="toolbar" aria-label="Bölümler"></div>
+  <div id="copyWrap" hidden><textarea id="copybox" readonly aria-label="Seçimlerin metni"></textarea></div>
+</div>
+
+<section id="oneriler" style="padding-top:6px">
+  <div class="sec-head" style="margin-top:22px">
+    <span class="lbl">II · Öneriler</span>
+    <h2>İşaretle, not düş</h2>
+    <p><b>Tür</b>: EKLE yeni şey, DEĞİŞTİR var olanı yeniden kur, BİRLEŞTİR iki sistemi tek yap, ÇIKAR kaldır ya da dondur, KARAR senin vermen gereken yön kararı. <b>Öncelik</b>: P0 hemen (Kasım), P1 Next Fest demosundan önce, P2 Erken Erişimden önce, P3 sonra. <b>Efor</b>: S ≤2 gün, M ≤1 hafta, L 2–4 hafta, XL bir aydan fazla (kodu Claude Code yazarsa; çizim işleri daha uzun sürer). ★ yönetmenin ilk seçimi.</p>
+  </div>
+  <div id="list"></div>
+  <div class="empty" id="empty" hidden>Bu süzgece uyan öneri yok.</div>
+</section>
+
+<section id="yol-haritasi">
+  <div class="sec-head">
+    <span class="lbl">III · Yol haritası</span>
+    <h2>Şubat 2027’ye on altı hafta</h2>
+    <p>Bugün 17 Ekim. Next Fest demosu için son tarih 8 Şubat 2027. Bütün dünyayı bu sürede bitirmek mümkün değil; bir bölgeyi kusursuz bitirmek mümkün. Book of Travels kapsamı küçük ekibi aştığı için battı; Sunless Skies Erken Erişime erken girdiği için zarar gördü.</p>
+  </div>
+  <div class="phase">
+    <div class="ph"><div class="when">Faz 0 · 20 Eki – 9 Kas</div><div><h3>Kararlar ve temizlik</h3><p>Oyun vaadi, dört sütun, dikey dilim tanımı, stil rehberi, lore kapanışı. Steam geliştirici hesabı ve sayfa taslağı. AI beyanının düzeltilmesi. P0 hata 11.1. İlk 10 dakika çizelgesi. Haftalık playtest günlüğü başlar.</p></div></div>
+    <div class="ph"><div class="when">Faz 1 · 10 Kas – 21 Ara</div><div><h3>Dikey dilim: bir bölge</h3><p>Haritadan 3–4 yerleşim ve 5–6 yol oyuna aktarılır. R0–R1 (yoldaş sesi, mezar), yol yönetmeni, belirsiz işaretler, kontrat türleri, ganimet ve sarf, onboarding. Görselde NPR geçişi, saç ve başlıklar, tek biyomun yol overhaul’u, savaş ekranı. Steam sayfası Coming Soon olarak açılır.</p></div></div>
+    <div class="ph"><div class="when">Faz 2 · 22 Ara – 31 Oca</div><div><h3>Demo cilası ve vitrin</h3><p>Varis devralma sahnesi, kamp ateşi, ses ve müzik geçişi. Kapsül sanatı, fragman, beş hero görselden ekran görüntüleri. Beş dış oyuncuyla test. Demo, Next Fest’ten 2–4 hafta önce yayında; menüde geri bildirim bağlantısı.</p></div></div>
+    <div class="ph"><div class="when">Faz 3 · Şubat 2027</div><div><h3>Next Fest</h3><p>Canlı yayın, devlog, topluluk. İstek listesi ölçülür; Kickstarter kararı bu sayıya bağlanır (≥5–10 bin).</p></div></div>
+    <div class="ph"><div class="when">Faz 4 · Mart – Eylül 2027</div><div><h3>Erken Erişime hazırlık</h3><p>Diğer bölgeler, 120+ olay, hizipler ve bölgesel itibar, soy mirası, sakatlık ve hastalık, adı olan kişiler, yerelleştirme. Erken Erişime içerik hazır olduğunda girilir.</p></div></div>
+  </div>
+</section>
+
+<section id="riskler">
+  <div class="sec-head"><span class="lbl">IV · Riskler</span><h2>Neyin bizi batırabileceği</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Risk</th><th>Olasılık</th><th>Etki</th><th>Önlem (öneri)</th></tr></thead>
+    <tbody>
+      <tr><td>Yolculuğun tekrara düşmesi (referans oyun II arabası, Banner Saga, Keep Driving şikâyeti)</td><td>Yüksek</td><td>Yüksek</td><td>B01, B02, B03, E01, E02</td></tr>
+      <tr><td>Kapsamın küçük ekibi aşması</td><td>Yüksek</td><td>Yüksek</td><td>A03, A05, K04</td></tr>
+      <tr><td>Görünür AI sanatı yüzünden inceleme ve itibar kaybı</td><td>Orta–Yüksek</td><td>Yüksek</td><td>J02, J05, J06</td></tr>
+      <tr><td>Kalıcı ölümün oyuncuyu kaçırması</td><td>Orta</td><td>Orta</td><td>D01, D03, D04</td></tr>
+      <tr><td>Haziran 2026 Steam değişikliğinden sonra istek listesi eşiklerinin belirsizliği</td><td>Orta</td><td>Orta</td><td>J01, J08: güncel GameDiscoverCo verisi izlenir</td></tr>
+      <tr><td>Takvim ile “mükemmel” hedefinin çatışması</td><td>Yüksek</td><td>Orta</td><td>A04: Şubat ya da Haziran kararı şimdi verilir</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="emsaller">
+  <div class="sec-head"><span class="lbl">V · Emsaller</span><h2>Benzer oyunlar ne öğretiyor</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Oyun</th><th>Satış</th><th>Wayborne için ders</th></tr></thead>
+    <tbody>
+      <tr><td>referans oyun</td><td>6M+</td><td>Stres ve anlatıcı sesi bir kimlik. 3.000’i aşkın olumsuz incelemenin ana sebebi şeffaf olmayan zorluk; açık ayarlar gerekiyor.</td></tr>
+      <tr><td>referans oyun II</td><td>600 bin (ilk ay)</td><td>Yol arabası etapları tekrarlı bulundu. Yolculuk kendi başına oyun olmalı.</td></tr>
+      <tr><td>Frostpunk</td><td>5M</td><td>Ahlaki ikilem ile hayatta kalmanın birleşimi. Toplum yorgunluğu görünür.</td></tr>
+      <tr><td>Kenshi</td><td>3M</td><td>Ortaya çıkan hikâyeler kendiliğinden pazarlama malzemesi oluyor.</td></tr>
+      <tr><td>Against the Storm</td><td>2M</td><td>Koşu sonrası meta ilerleme, kaybı anlamlı kılar ve “bir koşu daha” isteği yaratır.</td></tr>
+      <tr><td>Wartales</td><td>1M+</td><td>Paralı asker kervanı, yolda yönetim; ganimet ve sakatlık döngüsü.</td></tr>
+      <tr><td>Dredge · Inscryption</td><td>1M · 1M</td><td>Yavaş açılan dünya sırrı ve tonal kontrast kulaktan kulağa yayılıyor.</td></tr>
+      <tr><td>FTL · 80 Days</td><td>—</td><td>Yol bir düğüm dizisi değil, karar dizisi. Seçimlerin karşılığı daha sonra gelmeli.</td></tr>
+      <tr><td>Rogue Legacy</td><td>—</td><td>Varis değişimi bir oyun mekaniği ve bir kanca.</td></tr>
+      <tr><td>Book of Travels</td><td>—</td><td>Kapsam küçük ekibi aştı; ekip küçüldü. Uyarı.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="kaynaklar">
+  <div class="sec-head"><span class="lbl">VI · Kaynakça</span><h2>Dayanaklar</h2><p>Kartlardaki [R#] başvuruları buraya bağlanır. Satış rakamları üçüncü taraf tahminleridir.</p></div>
+  <ol class="bib" id="bib"></ol>
+</section>
+
+<div class="foot">
+  <span>Kaynak raporlar: sistem ve mekanik denetimi, görsel kimlik denetimi, yaratıcının vizyonu (Temmuz–Ekim konuşmaları), literatür ve pazar araştırması.</span>
+  <span>Seçimler bu sayfanın kendi veritabanında tutulur; sayfayı kapatıp açsan da kalır. Bağlantı olmazsa yalnızca bu tarayıcıda tutulur, o zaman “Seçimleri kopyala” ile bana gönder.</span>
+</div>
+</div>
+
+<script>
+const KAT=[
+ {id:'A',ad:'Yön ve kapsam',g:'Oyunun neye söz verdiği, neyi şimdi yapmadığı. Bunlar olmadan geri kalan her şey dağılır.'},
+ {id:'B',ad:'Yol deneyimi',g:'Oyuncunun zamanının yarısından fazlası burada geçiyor ve bugün en az karar burada veriliyor. En büyük kazanç burada.'},
+ {id:'C',ad:'Sistemler ve mekanikler',g:'Ekonomi, kontrat, savaş, karakter. İskelet sağlam; eksik olan ödül çeşitliliği ve dünyanın ölçeği.'},
+ {id:'D',ad:'Ölüm, soy ve kalıcılık',g:'Oyunun en özgün tezi, ama oyuncu onu nadiren yaşıyor. Bu bölüm tezi oyuncuya yaşatmak için.'},
+ {id:'E',ad:'İçerik ve anlatı',g:'Olay hacmi, zincirler, dünyanın sırrı. Algısal farklılık sayıdan önemli.'},
+ {id:'F',ad:'Odak: birleştir ya da çıkar',g:'Kod ve kural hacmi büyük, oyuncunun hissettiği etki küçük olan yerler. Derinlik kesilmiyor; görünür yere taşınıyor.'},
+ {id:'G',ad:'Görsel kimlik',g:'Beş ayrı üretim dili yan yana. Tek cümlelik stil, ortak mürekkep geçişi ve fener motifiyle tek dile indirmek.'},
+ {id:'H',ad:'Arayüz ve ilk saat',g:'Onboarding bugün yanlış konuları anlatıyor. İlk 10 dakika, oyunun Steam’de iade süresini geçip geçmeyeceğini belirler.'},
+ {id:'I',ad:'Ses ve atmosfer',g:'Atmosfer oyunu için kritik; bugün yer tutucu var.'},
+ {id:'J',ad:'Pazarlama ve Steam',g:'Hiçbir pazarlama görevi başlamadı. Next Fest için sayfa, kapsül, fragman ve demo sırası.'},
+ {id:'K',ad:'Üretim ve süreç',g:'“Bitti dendi ama test edilmedi” şikâyetine sistemli cevap, ölçüm ve kapsam disiplini.'}
+];
+
+const OGE=[
+/* A */
+{id:'A01',k:'A',t:'KARAR',p:'P0',e:'S',y:1,b:'Tek cümlelik oyun vaadini kabul et',ne:'“Bir kervanı kuşaklar boyu yolda tut. Her karar yola bir iz, her ölüm deftere bir satır olur.” Steam sayfası, fragman ve her tasarım kararı bu cümleye karşı sınanır.',neden:'Vaadi olmayan oyun her öneriyi kabul eder ve dağılır. Mağaza sayfasında “özellik değil his satılır”; senin pazarlama notun da bunu söylüyor.',ref:['R6','R60'],todo:[]},
+{id:'A02',k:'A',t:'KARAR',p:'P0',e:'S',b:'Dört tasarım sütununu yazıya dök',ne:'Yol yaşar · İnsanlar aşınır · Defter unutmaz · Ticaret bilgi oyunudur. CLAUDE.md’nin başına girsin; her yeni sistem en az birine hizmet etmezse alınmaz.',neden:'“Derinleşme” yönün doğru, ama derinlik her yöne yayılınca oyuncu hissetmiyor (8 stat, 16 huy, 6 görev, 5 kültür, ~50 kıyafet ±0,5–3 ile yığılıyor). Sütunlar derinliği dört eksende yoğunlaştırır.',ref:['R6','R10'],todo:['6.3']},
+{id:'A03',k:'A',t:'KARAR',p:'P0',e:'M',y:1,b:'Next Fest için dikey dilimi tanımla: bir bölge, kusursuz',ne:'Haritadan 3–4 yerleşim ve 5–6 yol, ilk sefer ve ilk varis anı, son kalitede görsel ve ses. Dünyanın geri kalanı Erken Erişime kalır.',neden:'Book of Travels kapsamı küçük ekibi aşınca battı. Next Fest demoları için en iyi tavsiye, kısa ve cilalı tek bir deneyim.',ref:['R50','R61','R62'],todo:['8.3'],u:'15 Eylül’de “amacım demo çıkartmak değil, oyunu mükemmel yapmak” demiştin. Burada demo amaç değil; mükemmelliğin ilk kanıtı. Önce bir bölgeyi mükemmel yapıp sonra çoğaltmak.'},
+{id:'A04',k:'A',t:'KARAR',p:'P0',e:'S',b:'Takvimi şimdi kesinleştir: Şubat mı Haziran mı',ne:'Ya Şubat 2027 Next Fest’e dikey dilimle gir, ya da Haziran 2027 Next Fest’e daha geniş bir demoyla. İki durumda da Steam sayfası hemen açılır.',neden:'Takvim baskısı ile kalite hedefi arasındaki çatışma Eylül’den beri çözülmedi. Kararsızlık hem kapsamı hem pazarlamayı askıda bırakıyor.',ref:['R56','R61'],todo:[]},
+{id:'A05',k:'A',t:'DEĞİŞTİR',p:'P0',e:'S',y:1,b:'Yapılacaklar dengesini oynanışa çevir',ne:'Yaklaşık 75 görevin ~70’i sanat, isim, hijyen ya da performans. Oynanış işlerini (içerik, ödül, yol) P1’e al; her iki haftalık döngünün en az yarısı oynanış olsun.',neden:'Bir sonraki dönem neredeyse tamamen sunuma ayrılmış. Ama oyuncuyu tutacak olan, yolun anlamı ve ödül çeşitliliği.',ref:['R1','R79'],todo:[]},
+{id:'A06',k:'A',t:'EKLE',p:'P0',e:'S',y:1,b:'Haftalık playtest günlüğü ve beş dış oyuncu',ne:'Her hafta oyunu baştan bir saat oyna, sıkıldığın her anı not et. Ocak’tan önce beş kişiye (tanımadığın oyuncular) izleyerek oynat.',neden:'Simülatörler sayıları ölçüyor ama “eğlenceli mi” sorusunu cevaplayamıyor. Oyunun uzun süre gerçekten oynandığına dair iz yok.',ref:['R62','R78'],todo:[]},
+{id:'A07',k:'A',t:'KARAR',p:'P2',e:'L',b:'Zindanlar: küçük sürüm şimdi, tam sürüm sonra',ne:'Temmuz’daki ilk fikrin çekirdeği olan rota dışı zindan ve hazine, önce “yol kenarı harabe” olay zinciri olarak (3–5 kart, bir mini savaş, ganimet) gelsin. Tam zindan Erken Erişimden sonra.',neden:'Zindanlar bu oturumların hiçbirinde ele alınmadı. Küçük sürüm keşif ve ganimet açığını kapatır, yeni bir sistem yükü getirmez.',ref:['R9'],todo:[]},
+/* B */
+{id:'B01',k:'B',t:'DEĞİŞTİR',p:'P1',e:'L',y:1,b:'Yol önerilerini (R0–R1) ana işe çevir',ne:'Yoldaş baloncukları, yoldaşlar arası yakınlık (rapport) ve prosedürel mezar ilk dilim olarak P1’e alınsın. “Öneri” statüsünden çıksın.',neden:'Raporun en büyük bulgusu “yol boş”, ve planlı işler arasında bunu çözen tek plan hâlâ öneri durumunda. Tezi (“konu kervanı çekenler”) sahneleyen bu.',ref:['R11','R12','R22'],todo:['R0','R1']},
+{id:'B02',k:'B',t:'EKLE',p:'P1',e:'M',y:1,b:'Yol yönetmeni: gerilimi kervanın durumuna göre ayarla',ne:'Olay ve işaret seçimi rastgele değil; stres, açlık, borç ve son olayların sertliğine göre gerilim → zirve → rahatlama eğrisi izlesin. EventEngine’deki ağırlık kancası buna hazır.',neden:'Bugün kart ritmi tamamen rastgele; üç sessiz gün üst üste gelebiliyor, iki ağır kart arka arkaya gelebiliyor. Left 4 Dead’in yönetmeni ve RimWorld’ün anlatıcıları bu sorunu çözmek için tasarlandı.',ref:['R18','R19','R77'],todo:[]},
+{id:'B03',k:'B',t:'DEĞİŞTİR',p:'P1',e:'M',y:1,b:'İşaretleri bulmacaya çevir: belirsizlik ve bedel',ne:'Duman bir köy yangını da olabilir, haydut kampı da. İşarete yürümek bilgi verir ama öbür bölge açık kalır. Aynı anda iki işaret: hangisine? Kehanet (omen) türü buraya bağlanır.',neden:'Bugün işaretin türü göründüğü an çözümü belli: o bölgeye yürü. 30 saatlik tırmanma süresiyle ustalık istemiyor. İlginç karar, bedeli ve belirsizliği olan karardır.',ref:['R16','R9'],todo:['11.1','R2']},
+{id:'B04',k:'B',t:'DEĞİŞTİR',p:'P1',e:'M',b:'Dikkat bölgelerine yeri doldurulamaz roller ver',ne:'Ön: izci bilgisi ve erken uyarı. Vagonlar: kırılmayı önceden görür, yükü korur. Arka: geride kalanı yakalar, takip edeni fark eder. Her rol ekranda görünür bir sonuç doğursun.',neden:'Arka bölgenin ödülü günde 1 stres; hissedilmiyor. Baskın strateji hep önde durmak. Seçenekler eşit derecede cazip olmalı.',ref:['R16','R21'],todo:[]},
+{id:'B05',k:'B',t:'EKLE',p:'P2',e:'M',b:'Havaya karşı küçük kararlar',ne:'Fırtınada sığın, bekle ya da devam et; siste yavaşla ya da fener yak; yağmurda çamurlu kestirme mi uzun yol mu. Kart değil, tek tıklık kararlar.',neden:'Hava bugün neredeyse yalnızca bir sayıyı değiştiriyor, açık hava tamamen nötr. Havaya özgü bir karar yok.',ref:['R16'],todo:[]},
+{id:'B06',k:'B',t:'EKLE',p:'P1',e:'M',b:'Yolda erzak kaynağı: av, toplama, köy',ne:'Av savaşı erzak getirsin; köy durağında erzak alınabilsin; toplayıcılık bir gün kaybettirsin. Erzak açığı ikilemi kötü planlamadan bağımsız da doğsun.',neden:'Av savaşı bile erzak vermiyor. Doğru stoklayan için açlık ikilemi hiç ortaya çıkmıyor.',ref:['R51','R17'],todo:[]},
+{id:'B07',k:'B',t:'DEĞİŞTİR',p:'P2',e:'M',b:'Sofrayı anlamlı karar yap: erzak türleri',ne:'Ekmek, kuru et, tahıl ve şarap gibi türler farklı etkiler versin (takat, moral, bozulma). Bolluk varken de ara sıra “ziyafet akşamı” seçimi gelsin.',neden:'Kalıcı “herkes” emriyle sofra çoğu gün hiç sorulmuyor. Bireysel açlık ve sofra senin ısrarla savunduğun bir sütun; şu an pratikte görünmez.',ref:['R16'],todo:[],u:'Kalıcı emir dikkat yükünü bilerek azaltıyor. Sofra yalnızca gerçek bir seçim varken sorulmalı, her akşam değil.'},
+{id:'B08',k:'B',t:'EKLE',p:'P1',e:'M',b:'Günün satırı: akşam kampında otomatik defter cümlesi',ne:'Her akşam kampta günün en önemli olayı tek bir cümleye dönüşür ve deftere mürekkeple yazılır (“Üçüncü gün, Ayaz’ın atı çamurda sakatlandı.”). Oyuncu isterse düzeltebilir.',neden:'Simülasyonda yaşananları anlatıya çeviren küratörlük, oyuncunun “kendi hikâyesini” görünür ve paylaşılabilir kılar. RimWorld’ün hikâye ürettiği yer burası.',ref:['R12','R11'],todo:['R3']},
+{id:'B09',k:'B',t:'DEĞİŞTİR',p:'P1',e:'S',b:'Karar yoğunluğu hedefi koy ve ölç',ne:'1x hızda her 60–90 saniyede en az bir anlamlı karar ya da bilgi. Olaysız günler kendiliğinden hızlansın, bir şey belirince normal hıza dönsün.',neden:'Bir gün 45 saniye; sefer başına 2,3–6 dakika olaysız yürüyüş izleniyor. Akış, zorlukla dikkatin dengede olmasını ister.',ref:['R3','R4'],todo:[]},
+{id:'B10',k:'B',t:'EKLE',p:'P2',e:'L',b:'Başka kervanlarla karşılaşma',ne:'Askerî konvoy, mülteci kafilesi, hacı kafilesi, rakip tüccar. Yolda uzaktan görünür; takas, bilgi, yolcu ya da çatışma sunar.',neden:'17 Eylül’de istediğin bir şey (#24–25). Dünyanın yaşadığı hissini en ucuz veren içerik.',ref:['R11'],todo:[]},
+{id:'B11',k:'B',t:'EKLE',p:'P2',e:'M',b:'Yolun hafızası: mezarlar, terk edilmiş vagon, eski kül',ne:'Ölenin mezarı, kırılan vagonun enkazı, önceki kampın külü aynı yolda kalır. İkinci geçişte yol farklı görünür.',neden:'Defter dünyada iz bırakmıyor. Kalıcı iz, “defter unutmaz” sütununu yola taşır.',ref:['R11','R12'],todo:['R1']},
+{id:'B12',k:'B',t:'DEĞİŞTİR',p:'P1',e:'M',b:'Kampı karar anına çevir',ne:'Akşam 2–3 eylem: nöbet sırası, yaralıyı sarmak, hikâye anlatmak (stres), tamir, av hazırlığı. Seçilen kişi o eylemi yapar, bedeli takat.',neden:'Kamp bugün 8 saatlik bekleme. Kamp ateşi senin en sevdiğin sahnelerden; orada karar da olmalı.',ref:['R22'],todo:['12.2c']},
+{id:'B13',k:'B',t:'EKLE',p:'P2',e:'M',b:'Aynı rotada farklı yol: mevsim ve kestirmeler',ne:'Rota tohumu mevsime ve dünya olayına göre değişsin; kenarlarda riskli kestirmeler ve alternatif patikalar olsun.',neden:'Aynı rota her seferde aynı araziyi veriyor; tekrar hissinin kaynaklarından biri.',ref:['R15'],todo:[]},
+/* C */
+{id:'C01',k:'C',t:'DEĞİŞTİR',p:'P1',e:'XL',y:1,b:'Harita aktarımını bir tasarım projesi olarak ele al',ne:'128 yerden önce 12–20 oynanabilir yerleşim ve bölge seç. Her bölgeye kendi malları, düşmanları ve olayları. Ekonomi ve kontrat tablolarını elle yazılmış koddan JSON veriye taşı.',neden:'Oyun bugün test_loc_a…e kimlikleriyle 5 şehirde çalışıyor; bütün tablolar bu beşe göre elle yazılmış. Aktarım yalnızca harita değil, ekonomi, kontrat ve olay tasarımını baştan yapmayı gerektiriyor ve bu iş planda yok.',ref:['R26'],todo:['8.3','8.4']},
+{id:'C02',k:'C',t:'EKLE',p:'P1',e:'L',y:1,b:'Kontrat türleri ve her varışta değişen pano',ne:'Eşlik, süre baskılı kargo, yolda kartı olan yolcu taşıma, av ya da kurtarma, kaçak yük. Pano her varışta tohumdan yeniden üretilsin.',neden:'Bugün tek tür var (eşlik), 42 sabit teklif; tüccar isimleri bile aynı. Tekrar hissinin ana kaynağı.',ref:['R15','R16'],todo:[]},
+{id:'C03',k:'C',t:'EKLE',p:'P1',e:'M',y:1,b:'Ganimet: eşya, kıyafet, sarf, nadir bulgu',ne:'Savaş ve olaylardan eşya, kıyafet, iksir ve nadir bulgu düşsün. Kıyafet ganimete bağlansın (9 Ekim isteğin).',neden:'Kazanmanın tek ödülü altın. Somut, görünür ödül yok.',ref:['R79','R5'],todo:[]},
+{id:'C04',k:'C',t:'EKLE',p:'P1',e:'M',y:1,b:'Sarf malzemesi ve yolda tedavi',ne:'Bandaj (tarifi zaten var), iksir, merhem; kampta ve savaşta kullanılsın. Ölümün Kıyısı’nda direnç için de kullanılabilsin.',neden:'Can yalnızca şehirde doluyor. Bandaj üretiliyor ama hiçbir yerde tüketilmiyor; üretim zinciri bir yere varmıyor.',ref:['R16'],todo:[]},
+{id:'C05',k:'C',t:'EKLE',p:'P2',e:'L',b:'Sakatlık ve hastalık; şehirde hekim ve ilaç stoğu',ne:'Kırık kol, topallık gibi yarı kalıcı yaralar; vebayla bağlantılı salgın; şehirde hekim ve sınırlı ilaç stoğu (15 Ekim isteğin).',neden:'Kalıcı yıpranma ve zor kararlar; “insanlar aşınır” sütununun en somut hâli.',ref:['R30','R22'],todo:[]},
+{id:'C06',k:'C',t:'EKLE',p:'P2',e:'M',b:'Ekipmanı 12 parçadan 35+ parçaya çıkar',ne:'Ağırlık takılarda (yüzük, kolye): huylarla sinerji kuran, bedeli olan, lanetli parçalar.',neden:'Üçüncü kademeden sonra aranacak bir şey kalmıyor.',ref:['R79'],todo:[]},
+{id:'C07',k:'C',t:'EKLE',p:'P1',e:'M',b:'Savaştan bedelli geri çekilme',ne:'Yük bırak, bir vagonu feda et ya da bir kişiyi artçı bırak. Kaçmak mümkün ama acı.',neden:'Savaşta geri çekilme yok. Kayıp ile kaçış arasındaki ikilem, kervan teması için en güçlü savaş kararı.',ref:['R16','R17'],todo:[]},
+{id:'C08',k:'C',t:'DEĞİŞTİR',p:'P2',e:'M',b:'Düşmanlara kişilik ver',ne:'Haydut reisi önce lideri hedefler, kurt sürüsü yaralıyı kovalar, muhafız teslim olmayı teklif eder, ayı kaçana saldırmaz.',neden:'Yapay zekâ “ilk kullanılabilir yetenek, canı en düşük hedef”. Tahmin edilebilir ve kimliksiz.',ref:['R22'],todo:[]},
+{id:'C09',k:'C',t:'EKLE',p:'P2',e:'L',b:'Bölgesel düşman kimlikleri',ne:'Her bölgede 2–3 özgün düşman: dağ haydutları, nehir korsanları, bir inanç tarikatı. 14 şablondan 25’in üstüne.',neden:'Haydut her yerde aynı 3 şablon. Geç oyunda yeni tehdit yok.',ref:['R15'],todo:[]},
+{id:'C10',k:'C',t:'EKLE',p:'P1',e:'M',y:1,b:'Fiyat defteri: bilgi eskir, söylenti yanıltır',ne:'Gördüğün fiyatlar tarihli olarak deftere yazılır ve eskir. Taverna dedikodusu başka şehrin fiyatını satar; bazen yanlıştır.',neden:'Bugün yalnızca bulunduğun şehrin fiyatı görünüyor. Optimal döngü birkaç seferde çözülüp rutine dönüyor. Bilgi boşluğu merakı besler.',ref:['R9','R16'],todo:[]},
+{id:'C11',k:'C',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Gizli fiyat katmanlarını görünür kıl',ne:'Mal satırında küçük işaretler: mevsim, enflasyon, arz baskısı, dünya olayı. Üzerine gelince açıklama.',neden:'Yedi katmanın çoğu oyuncuya görünmüyor; oyuncu bunu yalnızca “fiyat değişti” diye algılıyor.',ref:['R1','R4'],todo:[]},
+{id:'C12',k:'C',t:'EKLE',p:'P2',e:'L',b:'Bölgesel itibar ve hizipler',ne:'Lonca, şehir yönetimleri, Baikhan ve The Hand toplulukları, haydut kardeşlikleri. Tek global sayı yerine bölge ve hizip başına itibar.',neden:'Muhafız yenmek ile vurgunculuk aynı sayıyı etkiliyor ve iyi oyuncuda itibar 50–90’a çıkıp kısıt olmaktan çıkıyor.',ref:['R76'],todo:[]},
+{id:'C13',k:'C',t:'EKLE',p:'P2',e:'L',b:'Adı olan, hatırlayan kişiler',ne:'Her şehirde 2–3 tekrar eden kişi: lonca ustası, tefeci, han sahibi. Seni hatırlar, görev verir, yaşlanır, ölebilir.',neden:'Şehirler oynanışta yalnızca fiyat tablosuyla ayrılıyor. Kişiler dünyayı yaşatır.',ref:['R13','R14'],todo:[]},
+{id:'C14',k:'C',t:'DEĞİŞTİR',p:'P1',e:'S',b:'Kurucu borcu: oyun borçla başlasın',ne:'Kervanı kurmanın bedeli olarak bir ana borç ve vadesi. İlk bölümün saati bu olsun.',neden:'Borç sistemi derin ama isteğe bağlı; oyuncu borca girmezse hiç devreye girmiyor. “Borç ve yaşayan ekonomi” senin sütunun.',ref:['R17'],todo:[]},
+{id:'C15',k:'C',t:'DEĞİŞTİR',p:'P2',e:'M',b:'Orta ve geç oyuna yeni tehditler',ne:'Bölge açıldıkça yeni düşman, dünya krizleri (savaş, kıtlık), rakip kervan, yükselen haraç.',neden:'Zorluk ters bir U çiziyor: erken sert, orta rahat (4 kişi %92), geç tekrarlı.',ref:['R4','R80'],todo:[]},
+{id:'C16',k:'C',t:'DEĞİŞTİR',p:'P1',e:'M',b:'İşe almayı zorlaştır ve kişileştir',ne:'Aday neden geliyor, ne istiyor, kimden kaçıyor. “Yalnızca mecbur olanlar katılır” (15 Ekim isteğin). Fiyatlar ve bulunurluk sertleşsin.',neden:'Ölen birinin yerine kolayca biri alınabiliyor; bu “kayıp acı vermeli” teziyle çelişiyor.',ref:['R17','R22'],todo:[]},
+{id:'C17',k:'C',t:'EKLE',p:'P1',e:'L',b:'Yoldaşın kendi hikâyesi ve ilişkileri',ne:'Geçmiş, kişisel hedef, 2–3 kartlık kişisel zincir; yoldaşlar arası dostluk ve husumet.',neden:'Yoldaşın yalnızca huyu ve kırgınlığı var. Konu kervanı çekenlerse, onların bir hikâyesi olmalı.',ref:['R11','R25'],todo:['R0','R1']},
+{id:'C18',k:'C',t:'DEĞİŞTİR',p:'P1',e:'L',b:'Kampanyayı sahnele; final bir yer olsun',ne:'Her bölüm bir kart zinciri, bir karar ve bir yer. “Kendi Hanın” oyunda bir mekân olsun; finalden sonra yeni bir şey açılsın.',neden:'Bölümler sayaç listesi, 8/8 kervan finale ulaşıyor, finalden sonra yalnızca serbest ticaret var. 17 Eylül’de “bölümleri daha yazmadık bile” demiştin.',ref:['R24','R16'],todo:[]},
+{id:'C19',k:'C',t:'EKLE',p:'P2',e:'M',b:'Mal çeşitliliği: bozulan, kaçak, nadir',ne:'Balık ve meyve bozulur; kaçak mal yüksek kâr ve muhafız riski; nadir mal yalnızca özel alıcıya satılır; toplu alım indirimi.',neden:'Mallar yalnızca birer sayı. Bozulma Ana Hedefler’de planlı ama yok.',ref:['R16'],todo:[]},
+{id:'C20',k:'C',t:'EKLE',p:'P2',e:'S',b:'Fenerle gece yürüyüşü',ne:'Geceleri fener yakıp yürümek: süre kazancı karşılığında tehlike ve takat bedeli. Fener yağı bir sarf.',neden:'Fener görsel motifini mekaniğe bağlar; zaman baskısı olan kontratlarla gerçek bir ikilem kurar.',ref:['R16'],todo:['8.10']},
+/* D */
+{id:'D01',k:'D',t:'EKLE',p:'P1',e:'M',y:1,b:'Kader Modu (ironman) ve açık zorluk ayarları',ne:'Tek kayıt, şehirde elle kayıt yok. Yanında açık ayarlar: ölümcül darbe direnci, açlık şiddeti, olay sertliği. Gizli zorluk ayarı yerine şeffaf seçenekler.',neden:'Şehirde elle kayıt kalıcı ölümün ağırlığını eritiyor. referans oyun’ın olumsuz incelemelerinin ana sebebi şeffaf olmayan zorluk.',ref:['R80','R36','R23'],todo:[]},
+{id:'D02',k:'D',t:'DEĞİŞTİR',p:'P1',e:'S',b:'Ölümü daha sık ama adil yap',ne:'Standart zorlukta bir liderin ölmesi her 3–5 seferde bir gerçekçi bir olasılık olsun. Ölümün Kıyısı direnci zorluğa bağlansın; ölçüm hedefi simülatöre girsin.',neden:'Dört kişilik parti %92 kazanıyor, direnç %67’den başlıyor. Tez oyuncunun kayıp yaşamasını bekliyor ama iyi oynayana kayıp yaşatmıyor. Finaldeki “en az iki kayıp” kapısı bunun dolaylı itirafı.',ref:['R17','R22'],todo:[]},
+{id:'D03',k:'D',t:'EKLE',p:'P1',e:'L',b:'Soy mirası: kervan bitince ne kalır',ne:'Yeni kervan, eski soyun defterini, mezarlarını ve ününü görür. Bir eşya ya da bir itibar mirası; eski kervanın mezarı haritada.',neden:'Bugün defter kapanıyor ve sıfırdan başlanıyor. Against the Storm ve Rogue Legacy’de kaybı anlamlı kılan şey koşudan koşuya taşınan şey.',ref:['R54','R42'],todo:[]},
+{id:'D04',k:'D',t:'EKLE',p:'P0',e:'M',y:1,b:'Varis devralma anını sahnele: oyunun kancası',ne:'Yas sahnesi, defterde ismin canlı mürekkeple üstünün çizilmesi, kırık mühür, varis için bir ilk kart. Fragmanın ve demonun zirvesi bu an.',neden:'Literatürdeki en güçlü kanca önerisi “kervan başı ölür, varis devralır”. Bugün bu an bir panel.',ref:['R60','R22','R76'],todo:[]},
+{id:'D05',k:'D',t:'EKLE',p:'P2',e:'M',b:'Hafif meta ilerleme: güç değil çeşitlilik',ne:'Soy defterinde kuşak başarıları; yeni başlangıç kökenleri, kurucu huyları ve hikâye başlangıçları açılır.',neden:'“Bir koşu daha” isteği her ölümde yeni bir merak kancası açılmasıyla oluşur.',ref:['R9','R54'],todo:[],u:'Güç veren meta ilerleme zorluğu eritir; yalnızca çeşitlilik açmalı.'},
+{id:'D06',k:'D',t:'EKLE',p:'P2',e:'S',b:'Kırılmayı yolda da yaşat (kart olarak)',ne:'Stres eşiği aşılınca yolda anlık bir kırılma kartı: kavga, kaçma girişimi, emre itaatsizlik. Ekran efekti yok.',neden:'Kırılma yalnızca şehre varışta oluyor; yolda stresin dramatik bir anı yok.',ref:['R22'],todo:['2.5'],u:'26 Eylül’de görsel stres efektini “kaldır komple” demiştin. Bu yalnızca bir kart, ekran efekti değil.'},
+/* E */
+{id:'E01',k:'E',t:'EKLE',p:'P1',e:'XL',y:1,b:'Olay havuzunu 46’dan 120’nin üstüne çıkar',ne:'Bölge başına 6–10 kart, yoldaş kartları, zincirler. Her yeni kart oyuncunun kararını değiştirecek kadar farklı olmalı; yalnızca takas eden kart eklenmez.',neden:'Finale kadar 25–45 kart çekiliyor, havuz 30–35 kart. Finale gelmeden tekrar başlıyor. Çok sayıda benzer içerik “yulaf ezmesi” etkisi yaratır.',ref:['R15','R48'],todo:[]},
+{id:'E02',k:'E',t:'EKLE',p:'P1',e:'L',b:'Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta',ne:'En az 10 çok seferli zincir. Bir seçimin sonucu başka bir şehirde ya da varisin döneminde gelsin.',neden:'Kelebek etkisi senin sütunun. Bugün hikâye taşıyan zincir yaklaşık 8 tane ve çoğu tek seferlik.',ref:['R24','R48'],todo:[]},
+{id:'E03',k:'E',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Her kartta cazip ama riskli bir seçenek',ne:'Yazım kuralı: her kartta anlatısal olarak çekici ama mekanik olarak riskli bir seçenek bulunur.',neden:'80 Days’in yazarı oyuncuyu “yoldan çıkarmayı” bu şekilde tarif ediyor. Kartların çoğu bugün bir kaynağı başka bir kaynakla takas ediyor.',ref:['R25','R16'],todo:[]},
+{id:'E04',k:'E',t:'EKLE',p:'P2',e:'L',b:'Yavaş açılan dünya sırrı',ne:'Baikhan, The Hand, nefes inancı ve nadir görülen o varlık: kenar notları, söylentiler, parça parça bulgular. Açıklama değil, ipucu.',neden:'Dredge ve Inscryption’ın kulaktan kulağa yayılmasının sebebi tonal kontrast ve yavaş açılan sır.',ref:['R37','R38','R9'],todo:[]},
+{id:'E05',k:'E',t:'EKLE',p:'P2',e:'M',b:'Haritada yarı bilinen yerler',ne:'Söylentiyle bilinen ama çizilmemiş yerler; gidince mürekkeple haritaya eklenir. Kenar notu ve eksik çizim olarak, bulut olarak değil.',neden:'Bilgi boşluğu merak üretir; Sunless Sea keşfi buna dayanıyor.',ref:['R9','R26'],todo:['8.10'],u:'15 Ekim’de “bulutları ekleme” demiştin. Bu öneri bulut değil; boş bırakılmış, söylentiyle not düşülmüş alan.'},
+{id:'E06',k:'E',t:'KARAR',p:'P0',e:'S',b:'Lore’u kapat, sonra içerik yaz',ne:'SORULAR.md’deki coğrafya soruları, “Yolda doğan kim?” çelişkisi, şehir adlarının kesinleşmesi. Olay yazımından önce bitmeli.',neden:'120 kart yazılırken lore değişirse hepsi yeniden yazılır.',ref:[],todo:[]},
+{id:'E07',k:'E',t:'EKLE',p:'P2',e:'M',b:'Paylaşılabilir defter sayfası',ne:'Seferin ya da soyun özeti, ekran görüntüsüne uygun tek bir defter sayfası olarak; Codex olay bölümü de güncellenir.',neden:'Oyuncu hikâyeleri en ucuz pazarlama. Kenshi ve RimWorld’ü yayan şey buydu.',ref:['R11','R44'],todo:[]},
+{id:'E08',k:'E',t:'EKLE',p:'P3',e:'M',b:'Takvim: bayramlar, fuarlar, hac dönemi',ne:'Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.',neden:'Tasarım belgelerinde var; dünyaya ritim ve şehirlere kimlik verir.',ref:[],todo:[]},
+/* F */
+{id:'F01',k:'F',t:'BİRLEŞTİR',p:'P2',e:'M',b:'Moral ve takat: tek “kervanın nefesi”',ne:'Moral her seferde sıfırlanıyor ve pratikte bir ödeme çarpanı. Takatle birleşip seferin tek göstergesi olsun. Stres kişiye ait kalsın, kırgınlık portrede görünsün.',neden:'Dört gösterge aynı soruyu soruyor: kervan yorgun mu? İsyan 600 koşuda 6 kez çıktı.',ref:['R1','R4'],todo:[],u:'Derinlik azalmıyor, görünür hâle geliyor. Senin “asla sadeleştirme” ilkenle tartmak sana kalmış.'},
+{id:'F02',k:'F',t:'BİRLEŞTİR',p:'P2',e:'S',b:'Beş kapasite yolunu ikiye indir',ne:'Vagon (satın alma ve kilometre taşı) ve yük hayvanı. Köpek ayrı kalsın.',neden:'Satın alınan vagon, kazanılan vagon, bağış, eşek ve yarım vagon küçük farklarla aynı işi görüyor.',ref:['R16'],todo:[]},
+{id:'F03',k:'F',t:'DEĞİŞTİR',p:'P1',e:'M',b:'Atölye ve vagon envanterini anlamlandır',ne:'Gerçek bir üretim döngüsü: bandaj → tedavi, branda → tamir, av derisi → kıyafet, yağ → fener. Vagon başına envanter bu döngüye hizmet etsin.',neden:'Üç tarif var, ürünlerin tüketicisi yok; “Kervan Yükü” ekranının oyuncuya kazancı neredeyse sıfır.',ref:['R16'],todo:[],u:'17 Eylül’de vagon envanteri ve üretimi açıkça istemiştin. Öneri kesmek değil, bunları C04 ve C20 ile anlamlı kılmak.'},
+{id:'F04',k:'F',t:'ÇIKAR',p:'P2',e:'S',b:'Hub yürüyüş alanını kaldır',ne:'Şehir kapısına basmak doğrudan planlayıcıyı açsın. Atölye vagonun yanında, kervan ekranından açılsın.',neden:'836 satırlık ek bir katman; işlevi vagona yürüyüp atölyeyi açmak.',ref:[],todo:[]},
+{id:'F05',k:'F',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Tüccar mizacını yola bağla',ne:'Diyalogla öğrenilen mizaç yolda karşılık bulsun: hırsız tüccar gece kaçar, korkak tüccar ilk tehlikede geri döner.',neden:'Bugün ödülü yalnızca bilgi ve bu bilgiyle verilecek bir karar yok.',ref:['R16'],todo:[]},
+{id:'F06',k:'F',t:'KARAR',p:'P2',e:'S',b:'Kıyafet statları: görsele indir ya da zırhla birleştir',ne:'Kıyafet tamamen görsel ve kültürel kimlik olsun, statlar ekipmana kalsın. Ya da kıyafet zırh slotuyla birleşsin. 3B hat aynen kalır.',neden:'Ekipmana paralel ikinci bir stat sistemi; tam takım yaklaşık bir zırh kademesi ediyor. Oyuncunun karar yükünü artırıyor.',ref:[],todo:[]},
+{id:'F07',k:'F',t:'KARAR',p:'P2',e:'S',b:'Büyü ve doğmayan büyücü düşman',ne:'Lore kararı: büyü dünyada var mı? Varsa büyücü nadir bir olay düşmanı olsun. Yoksa 7 büyü dondurulsun.',neden:'7 büyü ve yanma, üşüme durumları hiç doğmayan bir düşmanda. Bakım maliyeti var, oyuncu görmüyor.',ref:[],todo:[]},
+{id:'F08',k:'F',t:'ÇIKAR',p:'P3',e:'S',b:'Beden göstergelerinin savaş etkisi',ne:'Boy, kilo ve cinsiyet yalnızca erzak payını etkilesin, savaştan çıksın.',neden:'Oyuncu fark etmiyor ama her denge ölçümünü kaydırıyor.',ref:[],todo:[],u:'2 Ekim’de cinsiyetin mekanik etkisini istemiştin. Karar sana ait.'},
+{id:'F09',k:'F',t:'BİRLEŞTİR',p:'P2',e:'M',b:'Görev ve sınıf: tek rol sistemi',ne:'Görev, sınıfın yol yeteneği olsun. Her sınıfın yolda ve şehirde kendine özgü bir eylemi olsun.',neden:'6 görev ve 4 sınıf iki ayrı rol sistemi; görevlerin etkileri küçük çarpanlar. Sınıflar yalnızca savaşta rol belirliyor.',ref:['R16'],todo:[]},
+{id:'F10',k:'F',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Tehlikenin dökümünü göster',ne:'Planlayıcıda tehlike yüzdesinin kaynakları: taban, zamanla büyüme, rota durumu, hava, dünya olayı, duman.',neden:'Altı katman var, oyuncu tek bir yüzde görüyor. Neden-sonuç görünmezse ustalık hissi oluşmaz.',ref:['R1','R4'],todo:[]},
+{id:'F11',k:'F',t:'DEĞİŞTİR',p:'P2',e:'M',b:'CLAUDE.md’yi incelt',ne:'7.345 satırlık kural kitabını, sistem sayısını azaltarak ve tasarım ile uygulama kurallarını ayırarak incelt.',neden:'Her yeni sistem 4–6 dosyaya, 2 teste ve bir ölçüm tablosuna dokunuyor. Kural kitabının büyüklüğü aşırı inşanın belirtisi.',ref:[],todo:['6.3']},
+/* G */
+{id:'G01',k:'G',t:'KARAR',p:'P0',e:'S',y:1,b:'Tek cümlelik stil ve bir sayfalık stil rehberi',ne:'“Wayborne, bir kervan kâtibinin defterine ve haritasına mürekkeple çizilmiş bir dünyadır.” Rehber: kâğıt ve mürekkep renk kodları, 3 ton kuralı, kontur kalınlığı (yakın 3 px, orta 2 px, uzak pus), 45° tek yön tarama, tek sıcak ışık ve vinyet, kırmızı yalnızca kan, kayıp ve ana eylem, kehribar yalnızca ışık.',neden:'Beş üretim dili yan yana. Her görsel karar bu cümleye karşı sınanmazsa her yeni varlık başka bir oyundan geliyor gibi görünür.',ref:['R58'],todo:['12.2e']},
+{id:'G02',k:'G',t:'EKLE',p:'P1',e:'L',y:1,b:'Ortak mürekkep geçişi (NPR)',ne:'Render sonrası tek geçiş: derinlik ve normal kenarından mürekkep konturu, 3 tonlu tarama, kâğıt dokusu. Karakter, hayvan, vagon, kasaba ve yol aynı geçişten çıkar. Atlı işaretin halftone’u referans.',neden:'Tutarlılığın anahtarı. 3B render’lar ile mürekkep kartlar arasındaki uçurumu kapatır.',ref:['R58'],todo:[]},
+{id:'G03',k:'G',t:'EKLE',p:'P1',e:'M',b:'Saç ve başlıklar',ne:'Kukuleta, kalpak, sarık, başörtüsü, miğfer, şapka. Kültürlere göre dağılım.',neden:'Kel ten rengi mankenler en çok batan görüntü. Siluet ve kültür ayrımını birden çözer; en ucuz, en görünür kazanç.',ref:[],todo:['10.1','10.2']},
+{id:'G04',k:'G',t:'EKLE',p:'P2',e:'L',b:'Büst portreler',ne:'Karakter, parti, taverna adayı ve mezar defteri için olay kartı üslubunda büst portreler (figür render’ından yakın plan ve mürekkep geçişi).',neden:'Kişiye bağlanmanın yüzü yok. Karakter ve kadro ekranları portresiz yarım kalıyor.',ref:['R26'],todo:['9.6','9.7']},
+{id:'G05',k:'G',t:'DEĞİŞTİR',p:'P1',e:'M',b:'Savaş ekranını yeniden kur',ne:'Biyom başına bir mekân plakası (yol katmanlarından), figürler ekran yüksekliğinin %30–35’i, kritikte kırmızı mühür damgası.',neden:'Şu an en zayıf ekran; boş zeminde küçük figürler. 12 Eylül’de “sıkıcı” demiştin.',ref:['R20','R21'],todo:['9.8']},
+{id:'G06',k:'G',t:'DEĞİŞTİR',p:'P2',e:'M',b:'Gravür efektleri; parlak efektleri kaldır',ne:'Kan mürekkep sıçraması, duman ve sis tarama, kritik kırmızı mühür, büyü sepya üzerine tek renk fırça. Parlak mor ve mavi efektler kalksın.',neden:'Parlak efektler mobil oyun gibi görünüyor ve stil cümlesine uymuyor.',ref:['R20'],todo:[]},
+{id:'G07',k:'G',t:'DEĞİŞTİR',p:'P1',e:'L',y:1,b:'Yol sahnesi overhaul: önce tek biyomluk deneme karesi',ne:'Halkalı güneş ve ay diskleri, lolipop ağaçlar, koni çamlar ve prosedürel sırtlar kalkar; render ve mürekkep geçişli katmanlar gelir. Önce bir biyomun tek karesi onayına sunulur.',neden:'Oyunun yıldız sahnesi en amatör görünen sahne. Önce stil kararı verilmezse yeniden prosedürel cila olur.',ref:[],todo:['12.2d','12.2e']},
+{id:'G08',k:'G',t:'EKLE',p:'P1',e:'S',y:1,b:'Fener, oyunun görsel motifi olsun',ne:'Atlı işaretin feneri, yoldaki kervan feneri, menünün ışık kaynağı, arayüzün kehribar vurgusu ve logonun yanında küçük bir fener amblemi.',neden:'Tanınır bir imge kapsülde, fragmanda ve oyunda aynı anda çalışır. Zaten onayladığın atlı işaretten doğuyor.',ref:['R58'],todo:['8.11']},
+{id:'G09',k:'G',t:'EKLE',p:'P1',e:'M',b:'Haritada kervanın mürekkep izi',ne:'Kervanın geçtiği yol haritaya mürekkeple çizilir ve kalır; kamp yerleri küçük ateş işareti olarak durur. Kıyılara çift kontur ve dalga çizgisi.',neden:'Kalıcı iz oyuncunun hikâyesidir; harita ile yolu birbirine bağlar.',ref:['R11'],todo:['8.10','8.11'],u:'16 Ekim’de “renklerden vazgeçelim” demiştin; bu öneride renk yok, yalnızca mürekkep.'},
+{id:'G10',k:'G',t:'KARAR',p:'P1',e:'L',b:'Kervan merkezli şehir ekranı',ne:'Ön planda kervanın kamp kurduğu meydan (her şehirde aynı), arka planda değişen şehir. Şehir kapısı ve şehir ekranı aynı Blender sahnesinin iki planı.',neden:'Mevcut düzen bir başka oyunun birebir kopyası gibi duruyor; kimlik açısından borç. Kervan ön planda olursa üretim de ucuzlar.',ref:[],todo:['12.1','12.2a'],u:'14 Ekim’de şehir için “birebir o mantıkta” istemiştin. Bu öneri ondan bilerek ayrılıyor; karar senin.'},
+{id:'G11',k:'G',t:'DEĞİŞTİR',p:'P1',e:'L',b:'Masa ekranları için tek şablon; “Excel” biter',ne:'Sol liste, ortada metafor nesnesi, sağda kervan. Pazarda satır başına dört düğme yerine seçim ve tek eylem paneli. Grim kit v2 P1’e çekilsin.',neden:'Yönetim ekranları metin dökümü. 12 Eylül’de “excel’de oyun yapıyoruz” demiştin.',ref:['R21'],todo:['9.1']},
+{id:'G12',k:'G',t:'ÇIKAR',p:'P1',e:'S',b:'Gardıropta çıplak manken',ne:'Varsayılan katman en az keten gömlek ve pantolon; çıplak ten hiçbir ekranda görünmez.',neden:'Mağaza ekran görüntüsüne düşerse en kötü izlenimi bırakır.',ref:[],todo:[]},
+{id:'G13',k:'G',t:'EKLE',p:'P1',e:'L',y:1,b:'Kimliği tanımlayan beş ana görsel',ne:'Gece haritası ve fenerli atlı; kamp ateşi panoraması; tam ekran olay kartı; defter ve kırık mühür; şehir kapısına varış. Mağaza görüntüleri ve fragman bunlardan çıkar.',neden:'Mağaza sayfası ilk beş saniyede okunur. Savaş ekranı düzelmeden bu listeye girmemeli.',ref:['R58','R59'],todo:['8.10','12.2a','12.2c']},
+{id:'G14',k:'G',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Tipografi birliği',ne:'Harita, arayüz, defter ve kartlarda aynı üç yazı yüzü. Harita önizlemesindeki sans-serif kalksın; yer adları IM Fell English SC.',neden:'Tipografi tutarsızlığı stil dilini en hızlı bozan şey.',ref:[],todo:[]},
+{id:'G15',k:'G',t:'BİRLEŞTİR',p:'P2',e:'S',b:'Vagon ve kurt tek kaynaktan',ne:'Menü, yol, kamp, kapı ve harita işaretinde aynı vagon render’ı; olay kartındaki kurtla savaş kurdu aynı renk ve konturda.',neden:'Aynı nesnenin her ekranda farklı görünmesi dünyayı parçalıyor.',ref:[],todo:[]},
+{id:'G16',k:'G',t:'DEĞİŞTİR',p:'P2',e:'S',b:'Ana menü: kamp ateşinin bir karesi',ne:'Ana menü kamp ateşi panoramasından bir kare; fener ışığı kısılır.',neden:'14 Ekim’de menü arka planı ve fazla parlak fener ışığı için şikâyet ettin.',ref:[],todo:[]},
+/* H */
+{id:'H01',k:'H',t:'DEĞİŞTİR',p:'P1',e:'M',y:1,b:'Onboarding’i ilk seferin içine yay',ne:'Dört konuluk panel kalksın. İlk sefer rehberli: ticaret, kontrat, planlayıcı, dikkat, sofra, savaş; her biri ilk karşılaşıldığı anda bir cümleyle.',neden:'Bugün stres, görev, huy ve ekipman anlatılıyor; ticaret, kontrat, yol ve savaş hiç anlatılmıyor. Karmaşık oyunlarda bağlama gömülü öğretim daha iyi tutuyor.',ref:['R78'],todo:[]},
+{id:'H02',k:'H',t:'KARAR',p:'P0',e:'S',b:'İlk 10 dakikanın çizelgesi',ne:'İlk 3 dakikada ilk anlamlı karar; 10 dakikaya kadar ilk tehdit; 30 dakikaya kadar ilk kayıp tehlikesi ve ilk kârlı varış.',neden:'Steam’in iade süresi iki saat; ilk dakikalar oyuncunun kalıp kalmayacağını belirler.',ref:['R78','R59'],todo:[]},
+{id:'H03',k:'H',t:'EKLE',p:'P1',e:'M',b:'Her sonucun nedeni yazsın',ne:'“Moral −10: açlık, 2 gün” türünden neden satırları; ipucu kutularında ve defterde.',neden:'Neden-sonuç görünür olunca oyuncu ustalık hisseder; görünmezse rastgelelik hisseder.',ref:['R1','R4'],todo:[]},
+{id:'H04',k:'H',t:'DEĞİŞTİR',p:'P0',e:'S',b:'Hiçbir ekranda sıkışma kalmasın',ne:'Her ekrandan Esc ile geri çıkış, sabit kısayollar, tutarlı “geri” düğmesi. Otomatik testle denetlensin.',neden:'En eski ve en sık tekrar eden şikâyetin (10 ve 11 Eylül).',ref:[],todo:[]},
+{id:'H05',k:'H',t:'EKLE',p:'P2',e:'M',b:'Savaşa vuruş hissi',ne:'Kritikte kısa yakınlaşma, mürekkep sıçraması, anlatıcı satırı, ses; ölümde bir anlık duraklama.',neden:'Sıra tabanlı savaşta his, geri bildirimin yoğunluğundan gelir.',ref:['R20','R21'],todo:[]},
+{id:'H06',k:'H',t:'EKLE',p:'P3',e:'M',b:'Kumanda ve Steam Deck',ne:'Tam kumanda desteği ve Steam Deck uyumluluk denetimi.',neden:'14 Eylül’de kumanda desteği istemiştin; Deck uyumluluğu görünürlük getirir.',ref:[],todo:[]},
+{id:'H07',k:'H',t:'EKLE',p:'P2',e:'S',b:'Erişilebilirlik ve oynanış ayarları',ne:'Metin boyutu, renk körlüğü için kan şeridine desen, olay gelince otomatik duraklat, hız seçenekleri.',neden:'Metin ağırlıklı bir oyun için okunabilirlik satış kriteri.',ref:[],todo:[]},
+/* I */
+{id:'I01',k:'I',t:'EKLE',p:'P1',e:'L',b:'Ses tasarımı planı',ne:'Biyom ve gün saatine göre yol ambiyansı, tekerlek ve hayvan döngüleri, kamp ateşi, şehir uğultusu, kart açılış sesi. Ses yapan arkadaşına verilecek bir liste.',neden:'Atmosfer oyunu sesle taşınır; bugün yer tutucu var. Demo için en az yol, kamp ve savaş sesi şart.',ref:['R21'],todo:[]},
+{id:'I02',k:'I',t:'EKLE',p:'P2',e:'M',b:'Katmanlı müzik',ne:'Elindeki iki folk parçaya gerilimde açılan katmanlar (davul, yaylı) ve bir ölüm ve yas teması.',neden:'Yol yönetmeninin (B02) gerilim eğrisini kulakla da hissettirir.',ref:['R18'],todo:[]},
+{id:'I03',k:'I',t:'EKLE',p:'P3',e:'L',b:'Kâtibin sesi: kısa anlatıcı satırları',ne:'Kritik anlarda kısa, kuru bir anlatıcı satırı; önce Türkçe ve İngilizce.',neden:'referans oyun’ın kimliğinin yarısı anlatıcı sesi. Wayborne’da bu ses kâtip olabilir.',ref:['R22'],todo:[],u:'Ses AI ile üretilirse Steam beyanına girer ve görünür AI içeriği sayılır (bkz. J05).'},
+/* J */
+{id:'J01',k:'J',t:'EKLE',p:'P0',e:'M',y:1,b:'Steam sayfasını hemen aç',ne:'Geliştirici hesabı, Coming Soon sayfası, açıklama metni, etiketler. Hedef: çıkışta en az 7 bin, ideal 15–20 bin istek listesi.',neden:'Next Fest’e katılmak için sayfanın açık olması gerekiyor ve istek listesi zaman ister. Pazarlama görevlerinin hiçbiri başlamadı.',ref:['R56','R57','R61'],todo:[]},
+{id:'J02',k:'J',t:'EKLE',p:'P0',e:'M',y:1,b:'Kapsül sanatı insan eliyle yapılsın',ne:'Logo, fener amblemi ve kervan silueti; küçük boyutta okunur. Bütçenin ilk kalemi. Türün başarılı kapsüllerinden referans toplanır.',neden:'Kapsül, mağazada tıklanma oranını belirleyen tek görsel. Görünür AI sanatı inceleme ve itibar riskidir.',ref:['R58','R59','R70'],todo:[],u:'Ücretli bir iş. Başlamadan önce maliyet tahmini çıkarıp onayına sunarım.'},
+{id:'J03',k:'J',t:'EKLE',p:'P1',e:'M',b:'Fragman: kanca ilk 10–15 saniyede',ne:'Oyun içi görüntüyle aç; kanca “kervan başı ölür, varis devralır”. Kapanış defter ve kırık mühür.',neden:'İzleyicilerin çoğu ilk saniyelerde karar veriyor; uzun girişler ve logo açılışları kaybettiriyor.',ref:['R60'],todo:[]},
+{id:'J04',k:'J',t:'EKLE',p:'P0',e:'L',y:1,b:'Demo: ilk sefer ve ilk varis anı',ne:'Demo Next Fest’ten 2–4 hafta önce yayında; menüde geri bildirim bağlantısı; yayıncılara önden gönderilir. Demo ilerlemesi tam oyuna taşınmaz.',neden:'Next Fest’te iyi demolar kısa, cilalı ve bir zirveyle bitiyor. Demosu olan oyunlarda istek listesinden satışa dönüş daha yüksek.',ref:['R61','R62','R64'],todo:[]},
+{id:'J05',k:'J',t:'DEĞİŞTİR',p:'P0',e:'S',y:1,b:'AI beyanını düzelt',ne:'AI_DISCLOSURE.md hâlâ “bütün görseller prosedürel çizimle üretilir” diyor. Gemini görselleri, 3B render’lar ve CC0 paketler oyunda. Beyan dürüst ve ayrıntılı olsun; CREDITS güncellensin.',neden:'Ocak 2026’dan beri Steam yalnızca geliştirme araçlarını muaf tutuyor; oyuncunun gördüğü AI içeriği beyan edilmek zorunda. Yanlış beyan mağaza riskidir.',ref:['R67','R68','R71'],todo:[]},
+{id:'J06',k:'J',t:'KARAR',p:'P1',e:'L',b:'Görünür AI sanatını azaltma politikası',ne:'Olay illüstrasyonları ve arka planlar için eşinin karakalemi ve dijital rötuş, ya da ücretli sanatçı. Gemini görselleri yer tutucu sayılsın ve listesi tutulsun.',neden:'AI beyanı olan oyunlarda inceleme sayısı ortalama %52,6 daha düşük (korelasyon, nedensellik değil). Clair Obscur’un ödülü bu sebeple geri alındı.',ref:['R70','R71','R69'],todo:[]},
+{id:'J07',k:'J',t:'EKLE',p:'P1',e:'S',b:'Etiketler ve konumlandırma',ne:'Etiketler: Caravan, Trading, Roguelite, Dark Fantasy, Turn-Based Tactics, Choices Matter, Permadeath. Karşılaştırma cümlesi: “Oregon Trail’in yolu, stres ve kalıcı ölümle.”',neden:'Etiketler Steam’in öneri algoritmasının girdisi; doğru komşulara düşmek ilk görünürlüğü belirler.',ref:['R65','R56'],todo:[]},
+{id:'J08',k:'J',t:'EKLE',p:'P1',e:'S',b:'İki haftada bir devlog',ne:'Harita süreci (r/fantasymap, r/worldbuilding), oyunda yaşanan hikâyeler, defter sayfaları. Önce Reddit hesabında karma.',neden:'Ortaya çıkan hikâyeler en paylaşılabilir içerik; aile projesi vurgusu güçlü bir anlatı.',ref:['R11','R56'],todo:[]},
+{id:'J09',k:'J',t:'EKLE',p:'P2',e:'S',b:'Kliplenebilir anlar listesi',ne:'Kırılma, varis devralma, alacaklı atlısı, kurt sürüsü, açlık gecesi. Her biri ekran kaydına uygun, net başlangıcı ve sonu olan bir sahne.',neden:'Yayıncılar ve kısa video izleyicileri bu anları paylaşır.',ref:['R22','R11'],todo:[]},
+{id:'J10',k:'J',t:'KARAR',p:'P2',e:'S',b:'Fiyat ve Erken Erişim zamanı',ne:'Erken Erişim fiyatı 14,99–19,99 $. Erken Erişime içerik hazır olduğunda gir; çıkış haftası büyük çıkışlarla çakışmasın.',neden:'Popüler Yaklaşanlar listesine girme hakkı tek seferlik. Sunless Skies erken girdiği için zarar gördü.',ref:['R27','R28','R31'],todo:[]},
+{id:'J11',k:'J',t:'KARAR',p:'P2',e:'M',b:'Kickstarter yalnızca istek listesi yeterse',ne:'Next Fest’ten sonra, istek listesi 5–10 bini geçerse. Geçmezse itch.io’da “ne istersen öde” ile topluluk. Türkiye’den Kickstarter’a erişim sorunu önceden çözülür.',neden:'Kitle yokken açılan kampanya başarısız olur ve kalıcı iz bırakır.',ref:['R31'],todo:[]},
+{id:'J12',k:'J',t:'EKLE',p:'P1',e:'S',b:'Basın kiti, web sitesi, e-posta listesi, Discord',ne:'waybornegame.com’da tek sayfa: fragman, görseller, Steam bağlantısı, e-posta kaydı. Basın kiti indirilebilir.',neden:'Yayıncılar ve basın için tek bir giriş noktası. Alan adın zaten var.',ref:['R59'],todo:[]},
+{id:'J13',k:'J',t:'EKLE',p:'P2',e:'M',b:'Yerelleştirme sırası ve terim sözlüğü',ne:'Önce İngilizce ve Türkçe, sonra Basitleştirilmiş Çince, Almanca, Rusça. Metin hacmi büyümeden terim sözlüğü.',neden:'Çin pazarı hedefin; metin ağırlıklı oyunlarda yerelleştirme hacimle pahalanır.',ref:['R39'],todo:[]},
+{id:'J14',k:'J',t:'EKLE',p:'P1',e:'S',b:'Mağaza ekran görüntüsü seti',ne:'Beş ana görselden (G13) beş ekran görüntüsü; ilk ikisi yol ve olay kartı. Savaş ekranı düzelmeden konmaz.',neden:'Ekran görüntüleri kapsülden sonra en çok bakılan şey.',ref:['R58'],todo:[]},
+/* K */
+{id:'K01',k:'K',t:'KARAR',p:'P0',e:'S',y:1,b:'İki haftalık döngü ve ekranda doğrulanmış “bitti”',ne:'Her döngü sonunda oynanabilir bir derleme ve 5 dakikalık bir video. “Bitti” yalnızca ekran görüntüsüyle doğrulanınca denir.',neden:'“Bitti dendi ama ekranda yanlış” şikâyeti Eylül ve Ekim boyunca tekrarlandı. Sistemli cevap bu.',ref:[],todo:[]},
+{id:'K02',k:'K',t:'EKLE',p:'P1',e:'M',b:'Otomatik ekran görüntüsü karşılaştırması',ne:'Kritik ekranlar her derlemede çekilip önceki sürümle karşılaştırılsın; görsel bozulmalar otomatik yakalansın.',neden:'Görsel hataların çoğunu kullanıcı yakaladı; makine yakalamalıydı.',ref:[],todo:[]},
+{id:'K03',k:'K',t:'EKLE',p:'P2',e:'M',b:'Yerel ve isteğe bağlı oyun ölçümü',ne:'Sefer süresi, kart sayısı, ölüm oranı, oturum uzunluğu; yalnızca oyuncu izin verirse, yerel dosyaya.',neden:'Dış testlerde ve demoda neyin sıkıcı olduğunu sayıyla görmek için.',ref:['R79'],todo:[]},
+{id:'K04',k:'K',t:'KARAR',p:'P0',e:'S',b:'Demoya kadar kapsam kilidi',ne:'Next Fest’e kadar yalnızca dikey dilime girecek sistemler yapılır; P2 ve P3 sistemleri demodan sonra.',neden:'Bu listedeki her güzel fikir aynı anda başlarsa hiçbiri demoya yetişmez.',ref:['R50'],todo:[]},
+{id:'K05',k:'K',t:'KARAR',p:'P1',e:'S',b:'Hijyen ve performans işlerini arka plana al',ne:'Atıl kod, kalite, performans ve hijyen görevlerinden yalnızca engelleyici olanlar yapılsın. Web performansı zaten ölçüt değil.',neden:'Bu görevler oyuncunun göreceği hiçbir şeyi değiştirmiyor.',ref:[],todo:['§3','§4','§5','§6']},
+{id:'K06',k:'K',t:'KARAR',p:'P3',e:'S',b:'Harita editörünü Erken Erişimden sonraya bırak',ne:'Harita editörü ayrı bir proje olarak beklesin; Kickstarter ödülü fikri dursun.',neden:'Ağustos’tan beri dokunulmadı; oyuna dönük bütün enerjiyi böler.',ref:[],todo:[]}
+];
+
+const KAYNAK={
+R1:['Ryan, Rigby, Przybylski (2006). The Motivational Pull of Video Games: A Self-Determination Theory Approach.','https://doi.org/10.1007/s11031-006-9051-8'],
+R3:['Csikszentmihalyi (1990). Flow: The Psychology of Optimal Experience.',''],
+R4:['Chen (2007). Flow in Games (and Everything Else). CACM.','https://doi.org/10.1145/1232743.1232769'],
+R5:['Lazzaro (2004). Why We Play Games: Four Keys to More Emotion Without Story.','http://www.xeodesign.com/xeodesign_whyweplaygames.pdf'],
+R6:['Hunicke, LeBlanc, Zubek (2004). MDA: A Formal Approach to Game Design.','https://users.cs.northwestern.edu/~hunicke/MDA.pdf'],
+R9:['Loewenstein (1994). The Psychology of Curiosity.','https://doi.org/10.1037/0033-2909.116.1.75'],
+R10:['Sylvester (2013). Designing Games: A Guide to Engineering Experiences.',''],
+R11:['Sylvester (2017). RimWorld: Contrarian, Ridiculous, and Impossible Design Methods. GDC.','https://gdcvault.com/play/1024232/-RimWorld-Contrarian-Ridiculous-and'],
+R12:['Ryan, J. (2018). Curating Simulated Storyworlds. UC Santa Cruz.','https://escholarship.org/uc/item/1340j5h2'],
+R13:['Mateas & Stern (2005). Structuring Content in the Façade Interactive Drama Architecture.','https://ojs.aaai.org/index.php/AIIDE'],
+R14:['Short & Adams (2019). Procedural Storytelling in Game Design.',''],
+R15:['Compton (2016). So you want to build a generator…','http://galaxykate0.tumblr.com/post/139774965871/so-you-want-to-build-a-generator'],
+R16:['Meier (2012). Interesting Decisions. GDC.','https://www.gdcvault.com/play/1015756/Interesting'],
+R17:['Kahneman & Tversky (1979). Prospect Theory.','https://doi.org/10.2307/1914185'],
+R18:['Booth (2009). The AI Systems of Left 4 Dead.','https://steamcdn-a.akamaihd.net/apps/valve/2009/ai_systems_of_l4d_mike_booth.pdf'],
+R19:['Valve Developer Community. L4D2 Director Scripts.','https://developer.valvesoftware.com/wiki/L4D2_Director_Scripts'],
+R20:['Jonasson & Purho (2012). Juice it or lose it. GDC Europe.','https://www.youtube.com/watch?v=Fy0aCDmgnxg'],
+R21:['Swink (2008). Game Feel.',''],
+R22:['PC Gamer. How referans oyun got inspiration from Band of Brothers and Aliens.','https://www.pcgamer.com/uk/how-referans oyun-dungeon-got-inspiration-from-band-of-brothers-and-aliens'],
+R23:['Davis & Ma (2013). Designing Without a Pitch: FTL Postmortem. GDC.','https://gdcvault.com/play/1018034/Designing-Without-a-Pitch-FTL'],
+R24:['Ingold & Humfrey. Postmortem: inkle’s 80 Days.','https://www.gamedeveloper.com/business/postmortem-inkle-s-i-80-days-i-'],
+R25:['Short (2015). Interactive Narrative GDC Talks: Jayanth, Leading Players Astray.','https://emshort.blog/2015/04/02/interactive-narrative-gdc-talks-part-1/'],
+R26:['Kennedy. Postmortem: Failbetter Games’ Sunless Sea.','https://www.gamedeveloper.com/audio/postmortem-failbetter-games-i-sunless-sea-i-'],
+R27:['Failbetter. Sunless Sea sales and funding deep dive, Part III.','https://www.failbettergames.com/sunless-sea-sales-and-funding-deep-dive-part-iii-early-access-and-final-release/'],
+R28:['Failbetter. Weathering a storm.','https://www.failbettergames.com/news/failbetter-update-weathering-a-storm'],
+R30:['Banner Saga Wiki: Caravan; GameBanshee röportajı.','https://bannersaga.fandom.com/wiki/Caravan'],
+R31:['Engadget (2017). Banner Saga back to Kickstarter to fund final chapter.','https://www.engadget.com/2017-01-25-banner-saga-back-to-kickstarter-to-fund-final-chapter.html'],
+R32:['Game World Observer (2022). referans oyun 6 million.','https://gameworldobserver.com/2022/12/26/referans oyun-dungeon-sales-6-million-copies-red-hook'],
+R35:['PC Gamer. referans oyun 2 review.','https://pcgamer.com/referans oyun-dungeon-2-review'],
+R36:['GamersDecide. referans oyun’s 3,000+ Negative Reviews.','https://gamersdecide.com/pc-game-news/referans oyun-dungeon-s-3000-negative-reviews-too-difficult-be-fun'],
+R37:['80.lv (2023). Dredge has sold over 1 million copies.','https://80.lv/articles/an-indie-game-dredge-has-sold-over-1-million-copies/'],
+R38:['Game Developer (2022). Inscryption passes 1 million sales.','https://gamedeveloper.com/business/demonic-deck-builder-inscryption-passes-1-million-sales'],
+R39:['GamesBeat (2019). Slay the Spire passes 1.5 million.','https://gamesbeat.com/slay-the-spire-passes-1-5-million-copies-sold/'],
+R42:['Game Developer (2023). How Against the Storm mixed city-building and roguelite play.','https://www.gamedeveloper.com/road-to-igf-2023/how-against-the-storm-managed-to-mix-city-building-and-roguelite-play'],
+R43:['GameDiscoverCo. Wartales: how did it sell 600k copies?','https://newsletter.gamediscover.co/p/wartales-how-did-it-sell-600k-copies'],
+R44:['Game World Observer (2024). Kenshi sales 2.3 million.','https://gameworldobserver.com/2024/04/10/kenshi-sales-2-3-million-copies-lo-fi-games'],
+R45:['Game Developer (2024). Frostpunk has topped 5 million sales.','https://gamedeveloper.com/business/frostpunk-has-topped-5-million-sales-in-six-years'],
+R48:['80.lv. Driving game inspired by FTL and Oregon Trail II (Keep Driving).','https://80.lv/articles/an-atmospheric-pixelated-driving-game-inspired-by-ftl-oregon-trail-ii'],
+R50:['TechRaptor. Book of Travels dev lays off staff after tough launch.','https://techraptor.net/gaming/news/book-of-travels-dev-lays-off-staff-after-tough-launch'],
+R51:['Steam. The Oregon Trail.','https://store.steampowered.com/app/2013360/The_Oregon_Trail'],
+R54:['Nintendo. Indie World interview: Rogue Legacy 2.','https://nintendo.com/whatsnew/indie-world-interview-rogue-legacy-2-game-designer-teddy-lee-talks-about-the-newly-available-heir'],
+R56:['Zukowski. How many wishlists should I have when I launch my game? (Haziran 2026’da arşive alındı)','https://howtomarketagame.com/2026/06/25/archive-how-many-wishlists-should-i-have-when-i-launch-my-game/'],
+R57:['Carless (2025). The state of Steam wishlist conversions. GameDiscoverCo.','https://newsletter.gamediscover.co/p/the-state-of-steam-wishlist-conversions'],
+R58:['Zukowski (2020). Five trends in Steam capsule art.','https://howtomarketagame.com/2020/07/27/five-trends-in-steam-capsule-art/'],
+R59:['Unity Blog. 5 tips & strategies for marketing indie games.','https://unity.com/blog/tips-strategies-for-marketing-indie-games'],
+R60:['GameDiscoverCo. How to get to your game’s hook quick.','https://newsletter.gamediscover.co/p/how-to-get-to-your-games-hook-quick'],
+R61:['Valve. Steam Next Fest Tips.','https://partner.steamgames.com/doc/marketing/upcoming_events/nextfest/tips'],
+R62:['Brown (GMTK). How to make a great Steam Next Fest demo.','https://gmtk.substack.com/p/how-to-make-a-great-steam-next-fest'],
+R64:['Alinea Analytics. Wishlist-to-buyer conversions for games with Next Fest demos.','https://alineaanalytics.substack.com/p/wishlist-to-buyer-conversions-for'],
+R65:['Game World Observer (2024). Top game genres on Steam H1 2024.','https://gameworldobserver.com/2024/07/18/top-game-genres-on-steam-first-half-2024-key-trends'],
+R67:['PC Games Insider. Valve has updated its Steam AI content policy.','https://www.pcgamesinsider.biz/news/74232/valve-has-updated-its-steam-ai-content-policy'],
+R68:['Notebookcheck (2026). Steam updates AI disclosure form.','https://www.notebookcheck.net/Steam-updates-AI-disclosure-form-requiring-developers-to-report-visible-and-in-game-AI-but-not-background-tools.1206103.0.html'],
+R69:['VGC (2025). Steam games disclosing generative AI use are up 800%.','https://www.videogameschronicle.com/news/steam-games-disclosing-generative-ai-use-are-up-800-this-year/'],
+R70:['Notebookcheck. Study suggests AI is hurting video game sales (Game Oracle).','https://www.notebookcheck.net/Study-suggests-AI-is-hurting-video-game-sales.1328725.0.html'],
+R71:['The A.V. Club (2025). Clair Obscur GenAI awards rescinded.','https://www.avclub.com/clair-obscur-genai-iga-awards-rescinded'],
+R76:['Crusader Kings III Wiki. Succession.','https://ck3.paradoxwikis.com/Succession'],
+R77:['RimWorld Wiki. AI Storytellers.','https://rimworldwiki.com/wiki/AI_Storytellers'],
+R78:['Andersen ve ark. (2012). The Impact of Tutorials on Games of Varying Complexity. CHI.','https://doi.org/10.1145/2207676.2207687'],
+R79:['Hopson (2001). Behavioral Game Design.','https://www.gamedeveloper.com/design/behavioral-game-design'],
+R80:['Hunicke (2005). The Case for Dynamic Difficulty Adjustment in Games.','https://doi.org/10.1145/1178477.1178573']
+};
+
+const $=s=>document.querySelector(s);
+const durum={};           // id -> {secili, not}
+let db=null, salt=false, kip='bekle';
+const yaziliyor={}, bekleyen={}, kirli=new Set();
+let aktifKat='';
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+const EFOR={S:'S · ≤2 gün',M:'M · ≤1 hafta',L:'L · 2–4 hafta',XL:'XL · 1 ay+'};
+
+function kartHTML(o){
+  const refs=(o.ref||[]).map(r=>`<a class="ref" href="#${r}" title="${esc((KAYNAK[r]||[''])[0])}">[${r}]</a>`).join(' ');
+  const todos=(o.todo||[]).map(t=>`<span class="todo" title="Mevcut yapılacaklar kimliği">${esc(t)}</span>`).join(' ');
+  return `<article class="card" id="k-${o.id}" data-id="${o.id}">
+    <div class="tick"><input type="checkbox" id="c-${o.id}" aria-label="${esc(o.id+' onayla: '+o.b)}"></div>
+    <div class="meta"><span class="id">${o.id}</span><span class="tag t-${o.t}">${o.t}</span><span class="tag p-${o.p}">${o.p}</span><span class="tag e">${EFOR[o.e]}</span>${o.y?'<span class="star">★ ilk seçim</span>':''}</div>
+    <div class="body">
+      <h3><label for="c-${o.id}" style="cursor:pointer">${esc(o.b)}</label></h3>
+      <p class="row"><b>Ne</b>${esc(o.ne)}</p>
+      <p class="row"><b>Neden</b>${esc(o.neden)}</p>
+      ${o.u?`<p class="warn"><b class="lbl" style="color:var(--amber)">Kararınla çelişebilir</b> ${esc(o.u)}</p>`:''}
+      <div class="links">${refs}${refs&&todos?' <span class="lbl" style="margin-left:6px">yapılacaklar</span> ':''}${!refs&&todos?'<span class="lbl">yapılacaklar</span> ':''}${todos}</div>
+      <div><button type="button" class="note-tog" data-n="${o.id}">Not ekle</button>
+      <div class="note" id="nw-${o.id}" hidden><textarea id="n-${o.id}" placeholder="Bu öneriyle ilgili notun (isteğe bağlı)" aria-label="${o.id} notu"></textarea></div></div>
+    </div>
+  </article>`;
+}
+
+function kur(){
+  $('#totalN').textContent=OGE.length; $('#allN').textContent=OGE.length;
+  const list=$('#list'); let h='';
+  for(const k of KAT){
+    const items=OGE.filter(o=>o.k===k.id); if(!items.length) continue;
+    h+=`<div class="cat" id="kat-${k.id}" data-k="${k.id}"><div class="cat-head"><span class="letter">${k.id}</span><h2>${esc(k.ad)}</h2><span class="lbl" id="kc-${k.id}"></span><p>${esc(k.g)}</p></div><div class="cards">${items.map(kartHTML).join('')}</div></div>`;
+  }
+  list.innerHTML=h;
+  // chips
+  const ch=$('#catChips');
+  ch.innerHTML=`<button class="chip" data-k="" aria-pressed="true">Tümü</button>`+KAT.map(k=>`<button class="chip" data-k="${k.id}" aria-pressed="false">${k.id} · ${esc(k.ad)}<span class="c" id="cc-${k.id}"></span></button>`).join('');
+  ch.addEventListener('click',e=>{const b=e.target.closest('.chip'); if(!b) return; aktifKat=b.dataset.k; ch.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false')); suz();});
+  // bib
+  $('#bib').innerHTML=Object.keys(KAYNAK).sort((a,b)=>+a.slice(1)-+b.slice(1)).map(k=>{const [t,u]=KAYNAK[k];return `<li id="${k}"><span class="k">[${k}]</span>${esc(t)}${u?` <a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//,'').slice(0,60))}${u.length>68?'…':''}</a>`:''}</li>`}).join('');
+  // events
+  list.addEventListener('change',e=>{
+    const c=e.target; if(c.type!=='checkbox') return; const id=c.closest('.card').dataset.id;
+    durum[id]=Object.assign({secili:false,not:''},durum[id],{secili:c.checked});
+    gorunum(id); sayac(); kaydet(id);
+  });
+  list.addEventListener('click',e=>{
+    const b=e.target.closest('.note-tog'); if(!b) return; const w=$('#nw-'+b.dataset.n); w.hidden=!w.hidden; if(!w.hidden) $('#n-'+b.dataset.n).focus();
+  });
+  const zaman={};
+  list.addEventListener('input',e=>{
+    const t=e.target; if(t.tagName!=='TEXTAREA') return; const id=t.closest('.card').dataset.id;
+    durum[id]=Object.assign({secili:false,not:''},durum[id],{not:t.value});
+    clearTimeout(zaman[id]); zaman[id]=setTimeout(()=>kaydet(id),900); notEtiket(id);
+  });
+  list.addEventListener('focusout',e=>{const t=e.target; if(t.tagName!=='TEXTAREA') return; const id=t.closest('.card').dataset.id; clearTimeout(zaman[id]); kaydet(id);});
+  ['#q','#fTur','#fOnc','#fStar','#fSel'].forEach(s=>$(s).addEventListener('input',suz));
+  $('#copyBtn').addEventListener('click',kopyala);
+}
+
+function notEtiket(id){const b=document.querySelector(`.note-tog[data-n="${id}"]`); const v=(durum[id]&&durum[id].not||'').trim(); if(b){b.textContent=v?'Not var · düzenle':'Not ekle'; b.classList.toggle('note-has',!!v);}}
+function gorunum(id){
+  const d=durum[id]||{}; const c=$('#c-'+id); if(!c) return;
+  c.checked=!!d.secili; c.closest('.card').classList.toggle('on',!!d.secili);
+  const n=$('#n-'+id); if(n && document.activeElement!==n && n.value!==(d.not||'')) n.value=d.not||'';
+  if((d.not||'').trim()) $('#nw-'+id).hidden=false;
+  notEtiket(id);
+}
+function sayac(){
+  let n=0; const per={};
+  for(const o of OGE){ if(durum[o.id]&&durum[o.id].secili){n++; per[o.k]=(per[o.k]||0)+1;} }
+  $('#selN').textContent=n;
+  for(const k of KAT){const tot=OGE.filter(o=>o.k===k.id).length; const s=per[k.id]||0; const a=$('#cc-'+k.id); if(a) a.textContent=s?` ${s}/${tot}`:` ${tot}`; const b=$('#kc-'+k.id); if(b) b.textContent=`${s} / ${tot} onaylı`;}
+  if(!$('#fSel').checked) return; suz();
+}
+function suz(){
+  const q=$('#q').value.trim().toLocaleLowerCase('tr'), tur=$('#fTur').value, onc=$('#fOnc').value, star=$('#fStar').checked, sel=$('#fSel').checked;
+  let gor=0;
+  for(const o of OGE){
+    const el=$('#k-'+o.id); let ok=true;
+    if(aktifKat && o.k!==aktifKat) ok=false;
+    if(tur && o.t!==tur) ok=false;
+    if(onc && o.p!==onc) ok=false;
+    if(star && !o.y) ok=false;
+    if(sel && !(durum[o.id]&&durum[o.id].secili)) ok=false;
+    if(ok && q){ const hay=(o.id+' '+o.b+' '+o.ne+' '+o.neden+' '+(o.u||'')+' '+(o.todo||[]).join(' ')).toLocaleLowerCase('tr'); if(!hay.includes(q)) ok=false; }
+    el.hidden=!ok; if(ok) gor++;
+  }
+  document.querySelectorAll('.cat').forEach(c=>{c.hidden=!c.querySelector('.card:not([hidden])');});
+  $('#empty').hidden=gor>0;
+}
+
+/* --- kayıt --- */
+function durumYaz(t,cls){const s=$('#status'); s.textContent=t; s.className='status'+(cls?' '+cls:'');}
+function yerelKaydet(){try{localStorage.setItem('wayborne_yonetmen_secim',JSON.stringify(durum));}catch(e){}}
+function yerelOku(){try{const v=JSON.parse(localStorage.getItem('wayborne_yonetmen_secim')||'{}'); return v&&typeof v==='object'?v:{};}catch(e){return {};}}
+
+async function kaydet(id){
+  yerelKaydet();
+  if(kip==='bekle'){kirli.add(id); return;}
+  if(!db||salt) return;
+  if(yaziliyor[id]){bekleyen[id]=true; return;}
+  yaziliyor[id]=true; durumYaz('Kaydediliyor…','warn');
+  const d=durum[id]||{};
+  const veri={secili:!!d.secili,not:(d.not||'').slice(0,4000),guncel:new Date().toISOString()};
+  try{
+    try{ await db.collection('secimler').doc(id).set(veri); }
+    catch(e){ if(e&&e.code==='unavailable'){ await new Promise(r=>setTimeout(r,600+Math.random()*900)); await db.collection('secimler').doc(id).set(veri);} else throw e; }
+    durumYaz('Kaydedildi','ok');
+  }catch(e){
+    const c=e&&e.code;
+    if(c==='invalid_argument'||c==='not_granted'||c==='revoked'||c==='capability_disabled'||c==='capability_removed'){ salt=true; durumYaz('Salt okunur · yalnızca bu tarayıcıda','warn'); kilitle(); }
+    else if(c==='quota_exceeded'){ durumYaz('Depolama dolu · seçimleri kopyala','err'); }
+    else { durumYaz('Kaydedilemedi · yalnızca bu tarayıcıda','err'); }
+  }finally{
+    yaziliyor[id]=false;
+    if(bekleyen[id]){bekleyen[id]=false; kaydet(id);}
+  }
+}
+function kilitle(){ /* yazamayan izleyici: kutular kendi tarayıcısında çalışmaya devam eder */ }
+
+function uygula(id,v){
+  if(!v) return;
+  const n=$('#n-'+id);
+  const notKoru=n&&document.activeElement===n;
+  durum[id]={secili:!!v.secili,not:notKoru?(durum[id]&&durum[id].not||''):(v.not||'')};
+  gorunum(id);
+}
+
+async function baslat(){
+  // önce bu tarayıcıdaki kopya
+  const y=yerelOku(); for(const id in y){ if(OGE.some(o=>o.id===id)){durum[id]={secili:!!y[id].secili,not:y[id].not||''}; gorunum(id);} }
+  sayac();
+  let ns=null;
+  try{ ns = window.claude && typeof window.claude.use==='function' ? await window.claude.use('db') : null; }catch(e){ ns=null; }
+  if(!ns){ kip='yerel'; durumYaz('Yalnızca bu tarayıcıda · bitince kopyala','warn'); return; }
+  db=ns; let ilk=true;
+  db.collection('secimler').onSnapshot(snap=>{
+    snap.docs.forEach(d=>{ if(d.exists && OGE.some(o=>o.id===d.id) && !kirli.has(d.id) && !yaziliyor[d.id]) uygula(d.id,d.data()); });
+    if(ilk){
+      ilk=false; kip='db';
+      // sayfa bağlanmadan önce yapılan ya da yalnızca bu tarayıcıda kalan seçimleri gönder
+      const sunucu=new Set(snap.docs.filter(d=>d.exists).map(d=>d.id));
+      for(const id in durum){ if(!sunucu.has(id) && (durum[id].secili||(durum[id].not||'').trim())) kirli.add(id); }
+      const liste=[...kirli]; kirli.clear();
+      (async()=>{ for(const id of liste){ await kaydet(id); } if(!liste.length) durumYaz('Bağlı · seçimler kaydediliyor','ok'); })();
+    }
+    yerelKaydet(); sayac();
+  },err=>{
+    kip='yerel'; db=null; durumYaz('Bağlantı koptu · yalnızca bu tarayıcıda','err');
+  });
+}
+
+async function kopyala(){
+  const sec=OGE.filter(o=>durum[o.id]&&durum[o.id].secili);
+  const notlu=OGE.filter(o=>!(durum[o.id]&&durum[o.id].secili)&&durum[o.id]&&(durum[o.id].not||'').trim());
+  let t=`Wayborne yönetmen önerileri: onaylananlar (${sec.length}/${OGE.length})\n\n`;
+  t+=sec.map(o=>`[x] ${o.id} ${o.b} (${o.t}, ${o.p}, ${o.e})${(durum[o.id].not||'').trim()?'\n    Not: '+durum[o.id].not.trim():''}`).join('\n')||'(henüz seçim yok)';
+  if(notlu.length) t+=`\n\nOnaylanmadan not düşülenler:\n`+notlu.map(o=>`[ ] ${o.id} ${o.b}\n    Not: ${durum[o.id].not.trim()}`).join('\n');
+  const box=$('#copybox'); box.value=t;
+  try{ await navigator.clipboard.writeText(t); $('#copyBtn').textContent='Kopyalandı'; setTimeout(()=>$('#copyBtn').textContent='Seçimleri kopyala',1800); $('#copyWrap').hidden=true; }
+  catch(e){ $('#copyWrap').hidden=false; box.focus(); box.select(); $('#copyBtn').textContent='Metni seçip kopyala'; }
+}
+
+kur(); suz(); baslat();
+</script>
