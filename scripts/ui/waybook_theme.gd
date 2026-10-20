@@ -90,8 +90,6 @@ const CELL_CONTENT: Array[int] = [8, 6, 8, 6]
 ## Yol HUD'unun şeritleriyle dünya arasındaki çizgi (eski perçinli kayışın
 ## yerine): bir kuşak değil, ince bir sınır.
 const HUD_RULE_HEIGHT: float = 2.0
-const SLIP_SLICE: Array[int] = [34, 72, 38, 40]
-const SLIP_CONTENT: Array[int] = [36, 66, 42, 36]
 ## Yazının arkasındaki koyu hale: deri, leke ve karalama üstünde bile
 ## kemik rengi yazı okunsun (bkz. Waybook UI Rules - kontrast).
 const TEXT_OUTLINE_SIZE: int = 4
@@ -254,8 +252,10 @@ static func _build_panels(theme: Theme) -> void:
 	theme.set_type_variation(SEAL_PANEL, "PanelContainer")
 	theme.set_stylebox("panel", SEAL_PANEL, seal_panel())
 
+	# Çivili kâğıt fiş (G8) kullanıcı kararıyla kalktı (2026-10-20): fiş de
+	# ailenin düz kutusu. Çeşit adı pazarın fişini ayırt etmek için duruyor.
 	theme.set_type_variation(SLIP_PANEL, "PanelContainer")
-	theme.set_stylebox("panel", SLIP_PANEL, _slip())
+	theme.set_stylebox("panel", SLIP_PANEL, frame_panel())
 
 	# Yolun HUD şeritleri dünyanın *üstünde* duruyor ve onu çerçevelememeli:
 	# ince, yarı saydam bir kuşak - düz renk kalan tek panel.
@@ -385,12 +385,6 @@ static func hud_rule() -> ColorRect:
 	rule.custom_minimum_size = Vector2(0.0, HUD_RULE_HEIGHT)
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rule
-
-static func _slip() -> StyleBoxTexture:
-	var box := StyleBoxTexture.new()
-	box.texture = texture("g8_slip.png")
-	_set_margins(box, SLIP_SLICE, SLIP_CONTENT)
-	return box
 
 # --- Düğmeler ---
 
@@ -572,8 +566,8 @@ static func _scroll_box(colour: Color) -> StyleBoxFlat:
 # --- İpucu ---
 
 static func _build_tooltip(theme: Theme) -> void:
-	theme.set_stylebox("panel", "TooltipPanel", _slip())
-	theme.set_color("font_color", "TooltipLabel", ArtPalette.UI_TEXT_ON_PAGE)
+	theme.set_stylebox("panel", "TooltipPanel", frame_panel())
+	theme.set_color("font_color", "TooltipLabel", ArtPalette.UI_TEXT)
 	theme.set_font_size("font_size", "TooltipLabel", TOOLTIP_FONT_SIZE)
 	theme.set_color("font_shadow_color", "TooltipLabel", Color(0, 0, 0, 0))
 

@@ -46,7 +46,10 @@ func _test_chrome_is_minimal(t, theme: Theme) -> void:
 				(box as StyleBoxFlat).corner_radius_top_left, theme_script.FRAME_RADIUS,
 				"%s/%s ailenin köşe yarıçapını taşıyor" % [pair[1], pair[0]]
 			)
-	for pair in [["panel", "SlipPanel"], ["panel", "TooltipPanel"], ["separator", "HSeparator"]]:
+	# Çivili kâğıt fiş (G8) kalktı: fiş ve ipucu da düz kutu.
+	for pair in [["panel", "SlipPanel"], ["panel", "TooltipPanel"]]:
+		t.ok(theme.get_stylebox(pair[0], pair[1]) is StyleBoxFlat, "%s/%s düz kutu (çivili fiş yok)" % [pair[1], pair[0]])
+	for pair in [["separator", "HSeparator"]]:
 		var box := theme.get_stylebox(pair[0], pair[1])
 		t.ok(
 			box is StyleBoxTexture and (box as StyleBoxTexture).texture != null,

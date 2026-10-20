@@ -313,7 +313,6 @@ func _build_centre() -> Control:
 	_line_box.add_theme_constant_override("separation", 2)
 	inside.add_child(_line_box)
 	_reason_label = Label.new()
-	_reason_label.theme_type_variation = WaybookTheme.PAGE_LABEL
 	_reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_reason_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_reason_label.add_theme_font_size_override("font_size", 15)
@@ -546,7 +545,6 @@ func _refresh_selection() -> void:
 		_primary_button.text = tr("UI_MARKET_SELL")
 	else:
 		var empty := Label.new()
-		empty.theme_type_variation = WaybookTheme.PAGE_LABEL
 		empty.text = tr("UI_MARKET_SLIP_EMPTY")
 		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_line_box.add_child(empty)
@@ -570,7 +568,8 @@ func _line_row(item: Item, quantity: int, active: bool) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	var text := Label.new()
-	text.theme_type_variation = WaybookTheme.PAGE_HEADING if active else WaybookTheme.PAGE_LABEL
+	if active:
+		text.add_theme_color_override("font_color", ArtPalette.UI_ACCENT)
 	text.text = tr("UI_MARKET_LINE") % [item.item_name, quantity, item.unit_weight * float(quantity)]
 	row.add_child(text)
 	if active:
@@ -588,7 +587,7 @@ func _line_row(item: Item, quantity: int, active: bool) -> Control:
 
 func _total_row(text: String) -> Control:
 	var label := Label.new()
-	label.theme_type_variation = WaybookTheme.PAGE_HEADING
+	label.add_theme_color_override("font_color", ArtPalette.UI_ACCENT)
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return label

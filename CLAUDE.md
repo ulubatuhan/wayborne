@@ -2172,7 +2172,8 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   needs a different tier opts in with `theme_type_variation`
   (`WaybookTheme.SEAL_PANEL` for irreversible decisions - the road's event
   card and `SuccessionPanel`; `HUD_BAR` for the road's translucent strips;
-  `SLIP_PANEL` + `PAGE_LABEL`/`PAGE_HEADING` for paper with ink text).
+  `SLIP_PANEL` for the market's receipt, now the same flat box; `PAGE_LABEL`/`PAGE_HEADING` for ink text on the
+  painted ledger pages).
 - **Controls are one flat family; leather is gone.** Every panel, the
   sealed panel, button, tab, text/number field, cargo cell and scrollbar
   is a `StyleBoxFlat` sharing `FRAME_RADIUS` and a thin palette-coloured
@@ -2186,7 +2187,7 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   button once. `test_waybook_theme.gd` fails if any control goes back to a
   texture or if a leather sheet is read or shipped again. Painted material
   survives only where it is a *picture* (desk scenes, the menu's lineage
-  book, seals, icons), the ink rule and the paper slip.
+  book, seals, icons) and the ink rule.
 - **Colour is still `ArtPalette`.** Every decision the UI makes - a
   panel's ground (`UI_PANEL_FILL`), text (`UI_TEXT`/`UI_TEXT_ON_PAGE`),
   hover/pressed/locked fill, the ink marks (`UI_INK_MARK`, `UI_RULE`) - is
@@ -2201,10 +2202,9 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   stays live text beside it (Event Engine Rules). For a while the ledger's
   scratch-out (G5) was composed over it; the player rejected it in
   playtest ("güzel gözükmüyor, silik olması yeterli").
-- **Nine-slice geometry is measured, not guessed.** The one nine-slice
-  left in the chrome is the paper slip (`SLIP_SLICE`); its margins must
-  contain the pin and the torn corners whole, and must leave a centre to
-  stretch (`test_waybook_theme.gd` checks it).
+- **No pinned paper in the chrome (user's decision, 2026-10-20).** The pinned paper slip (G8) used to frame tooltips
+  and the market receipt as a nine-slice; the user found the pinned notes ugly, and both are now the family's flat box
+  with bone text. `g8_slip.png` is no longer shipped.
 - **Art arrives through one pipeline.** Raw generated sheets live in
   `art_source/waybook/` (a `.gdignore` keeps them out of import and
   export); `python3 tools/waybook_assets.py` keys the flat grey backdrop

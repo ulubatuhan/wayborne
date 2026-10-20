@@ -106,8 +106,8 @@ def phase1() -> None:
     rgba = crop_to_alpha(key(_load("G6_ink_rule_separator.jpg")))
     save(rgba, "g6_rule.png", scale_to_width(rgba, 420))
 
-    rgba = crop_to_alpha(key(_load("G8_tooltip_slip.jpg")))
-    save(rgba, "g8_slip.png", scale_to_width(rgba, 200))
+    # G8 (çivili kâğıt fiş) yazılmıyor: kullanıcı kararıyla (2026-10-20) ipucu ve
+    # pazar fişi düz kutu.
 
     for src, name in [("G9_wax_seal_intact.jpg", "g9_seal.png"),
                       ("G9b_wax_seal_cracked.jpg", "g9b_seal_cracked.png")]:
