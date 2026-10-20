@@ -65,6 +65,32 @@ def shrink_set(folder: str, factor: int) -> tuple[int, int]:
     return before, after
 
 
+# Sehir/kapi/masa arka planlari JPG; Godot bunlari varsayilan olarak kayipsiz
+# iceri aliyor (1920x1080 icin ~1,8 MB) ve .pck'nin yarisini tutuyor. Kayipli
+# (WebP, kalite 0.8) iceri almak ~0,1 MB; resimler zaten ekrana sigdirilarak
+# cizilen manzara oldugundan fark gorunmuyor. Godot var olan bir .import
+# dosyasinin parametrelerini koruyor, bu yuzden iskelet bir .import yaziliyor.
+LOSSY_DIRS = [
+    os.path.join("data", "assets", "ui", "towns"),
+    os.path.join("data", "assets", "ui", "gates"),
+    os.path.join("data", "assets", "ui", "waybook"),
+]
+STUB = (
+    '[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n'
+    "[params]\n\ncompress/mode=1\ncompress/lossy_quality=0.8\nmipmaps/generate=true\n"
+)
+
+
+def lossy_backgrounds() -> int:
+    count = 0
+    for base in LOSSY_DIRS:
+        for path in glob.glob(os.path.join(base, "**", "*.jpg"), recursive=True):
+            with open(path + ".import", "w", encoding="utf-8", newline="\n") as f:
+                f.write(STUB)
+            count += 1
+    return count
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--body", type=int, default=4)
@@ -82,6 +108,7 @@ def main() -> int:
         total_b += b
         total_a += a
     print("sayfa piksel: %.1f Mpx -> %.1f Mpx" % (total_b / 1e6, total_a / 1e6))
+    print("kayipli iceri alinacak JPG: %d" % lossy_backgrounds())
     return 0
 
 

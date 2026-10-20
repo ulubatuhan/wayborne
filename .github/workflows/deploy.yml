@@ -66,7 +66,9 @@ jobs:
           set -o pipefail
           pip install --quiet pillow
           python3 tools/web_shrink.py 2>&1 | tee shrink.log
-          godot --headless --import 2>&1 | tee import_shrunk.log || godot --headless --import 2>&1 | tee import_shrunk.log
+          # Duz `--import` degisen dosyalari yeniden taramiyor (bkz. CLAUDE.md,
+          # atlas sayfalari); editor taramasi `--quit-after` ile bekliyor.
+          godot --headless --editor --quit-after 3000 2>&1 | tee import_shrunk.log
 
       - name: Export to HTML5
         run: |
