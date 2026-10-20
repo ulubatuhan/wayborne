@@ -13,8 +13,9 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
   içinde**; bu dalda olmayan tek bir commit'leri yok (2026-10-20'de `git rev-list --count HEAD..<dal>` = 0).
   Kullanıcı onaylarsa bu dal ana hat olabilir ve diğerleri silinebilir. Silmeden önce kullanıcıya sor, sonra aynı
   denetimi bir kez daha yap: `git fetch --all && git rev-list --count HEAD..origin/<dal>`.
-- **Dal adı ve gönderim:** bu dal GitHub'a `Wayborne` adıyla gitti (`ulubatuhan/wayborne`), yerel adı
-  `yerel/yapilacaklar-p05-p06`. Kullanıcı açıkça istemedikçe başka push yapma, dal açma ve geçmişi yeniden yazma.
+- **Dal adı ve gönderim:** bu dal GitHub'da `Wayborne` adıyla duracak (`ulubatuhan/wayborne`), yerel adı
+  `yerel/yapilacaklar-p05-p06`. İlk push denemesi (2026-10-20) token'da `workflow` yetkisi olmadığı için reddedildi; dalın
+  uzakta gerçekten var olduğunu `git ls-remote --heads origin Wayborne` ile doğrula, yoksa kullanıcıya söyle. Kullanıcı açıkça istemedikçe başka push yapma, dal açma ve geçmişi yeniden yazma.
 - **Kullanıcının dal kararı (2026-10-20):** `main` ve `dev` kalacak. `ui-hud-redesign`, `claude/merhaba-6bf7co` ve
   geri kalan bütün dallar silinecek. Kullanıcı bunları ve sonrasındaki kontrolleri **bu dalda çalışacak Claude'a**
   bıraktı. Kullanıcı kendisi bazılarını silmiş olabilir: önce `git fetch --all --prune && git branch -r` ile gör.
