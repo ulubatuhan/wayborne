@@ -49,6 +49,8 @@ Tavan dolarsa düşürme sırası: önce 8.9, sonra Y-K01 videosu; teslim notu v
   kuralları geri alındı (ddc6f89; gerekçe .gitattributes). TODO klasörü proje_takibi/ olarak depoya alındı (yasak
   kelimeler temizlendi; üç .docx dışarıda), CLAUDE_BASLANGIC.md yazıldı, CLAUDE.md başına yönlendirme eklendi.
 - Son test: 27301 geçti, 0 kaldı. GitHub uygunluğu: en büyük dosya 2,2 MB, yasak kelime ve anahtar taraması temiz.
+- DAL KARARI: kullanıcı main ve dev'i tutacak, kalan dalları silecek; silme ve sonrasındaki kontrolleri bu dalda
+  çalışacak Claude yapacak (ayrıntı CLAUDE_BASLANGIC.md bölüm 1 ve 8).
 - Sıradaki iş için aşağıdaki 15:15 notunun "Açık" maddeleri geçerli (N31d bakma pozu ilk sırada); "Sorulacak" maddesi
   kapandı (düz panele geçildi).
 

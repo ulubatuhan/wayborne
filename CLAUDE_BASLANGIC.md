@@ -13,8 +13,15 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
   içinde**; bu dalda olmayan tek bir commit'leri yok (2026-10-20'de `git rev-list --count HEAD..<dal>` = 0).
   Kullanıcı onaylarsa bu dal ana hat olabilir ve diğerleri silinebilir. Silmeden önce kullanıcıya sor, sonra aynı
   denetimi bir kez daha yap: `git fetch --all && git rev-list --count HEAD..origin/<dal>`.
-- **Push ve dal:** dalı kullanıcı kendisi gönderdi. Kullanıcı açıkça istemedikçe push yapma, dal açma ve geçmişi
-  yeniden yazma.
+- **Dal adı ve gönderim:** bu dal GitHub'a `Wayborne` adıyla gitti (`ulubatuhan/wayborne`), yerel adı
+  `yerel/yapilacaklar-p05-p06`. Kullanıcı açıkça istemedikçe başka push yapma, dal açma ve geçmişi yeniden yazma.
+- **Kullanıcının dal kararı (2026-10-20):** `main` ve `dev` kalacak. `ui-hud-redesign`, `claude/merhaba-6bf7co` ve
+  geri kalan bütün dallar silinecek. Kullanıcı bunları ve sonrasındaki kontrolleri **bu dalda çalışacak Claude'a**
+  bıraktı. Kullanıcı kendisi bazılarını silmiş olabilir: önce `git fetch --all --prune && git branch -r` ile gör.
+  Uzak depoda 2026-10-20'de bulunan uçlar: `main` 008ecb2, `claude/merhaba-6bf7co` 008ecb2 (main ile aynı), `dev`
+  834734f, `ui-hud-redesign` ecfdba2; dördü de `Wayborne`'in atası (`git merge-base --is-ancestor <sha> origin/Wayborne`
+  doğrulandı). Bunların dışında bir dal görürsen (ör. `claude/init-*`) silmeden önce aynı komutla ata olup olmadığına bak,
+  değilse kullanıcıya sor.
 
 ## 2. Okuma sırası
 
@@ -149,6 +156,14 @@ Kare atlası yeniden paketlendiyse sayfa adları değişir. `--import` yeni dosy
 
 1. `CLAUDE.md`'yi ve bu dosyayı oku; `git log --oneline origin/main..HEAD` ile işi gör.
 2. Testleri koştur; 0 kalan bekleniyor.
-3. Kullanıcıya diğer dalların bu dalın içinde olduğunu göster (bölüm 1'deki komut). Onay gelirse varsayılan dalı
-   bu dal yap, sonra diğerlerini sil (`git push origin --delete <dal>`). İkisi de kullanıcının açık onayıyla.
+3. **Dal temizliği (kullanıcı bunu sana bıraktı):**
+   - `git fetch --all --prune`, `git branch -r`.
+   - `Wayborne`'in GitHub'da 157 commit ile (origin/main'den ileride) tamam olduğunu kontrol et.
+   - `main` ve `dev` dışındaki dalların uçları `origin/Wayborne`'in atası mı bak, öyleyse sil
+     (`git push origin --delete <dal>`), değilse kullanıcıya sor. `main` ve `dev`'e dokunma.
+   - Varsayılan dal (Settings → Branches) hâlâ `main` olabilir; bunu değiştirmek ya da `Wayborne`'i ana hat yapmak
+     kullanıcının kararı, sormadan yapma.
+   - Yerel dalları (`main`, `yerel/yapilacaklar-p01-p04`) da kontrol et; silmeden önce sor.
+   - Kontroller: GitHub Actions `Tests` iş akışı `Wayborne` üzerinde yeşil mi (LFS'li klonda `lfs: true`); `git lfs
+     ls-files` harita karolarını gösteriyor mu; `git grep` ile yasak kelime taraması boş mu.
 4. Sonra DEVAM NOKTASI'ndan devam et.

@@ -309,3 +309,4 @@ Bu dosya, 2026-10-19 toplu çalışmasında ve öncesindeki iki yerel dalda yap�
 - 46dd8c1: KULLANICI KARARI - çivili kâğıt fiş (G8) ipucu baloncuğundan ve pazar fişinden kalktı; düz panel, g8_slip.png sevk edilmiyor.
 - ddc6f89: 6.1 geniş LFS kuralları geri alındı (geçmiş düz blob; CI LFS kotası). Yalnız harita karoları LFS.
 - Son commit: TODO klasörü `proje_takibi/` olarak depoya alındı (yasak kelimeler temizlendi), `CLAUDE_BASLANGIC.md`, `CLAUDE.md` yönlendirmesi, teslim notu güncel.
+- Dal kararı (2026-10-20): GitHub dalı `Wayborne`; main ve dev kalacak, diğer dalların silinmesi ve sonraki kontroller yeni Claude'a bırakıldı (CLAUDE_BASLANGIC.md).
