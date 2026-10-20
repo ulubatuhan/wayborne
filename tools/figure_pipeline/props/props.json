@@ -19,13 +19,6 @@
    "ppm": 120
   },
   {
-   "id": "stall_cart",
-   "file": "art_source/models/props/quaternius_fantasy_props/Stall_Cart_Empty.gltf",
-   "yaw": 90,
-   "size": 2.6,
-   "ppm": 120
-  },
-  {
    "id": "city_gate",
    "yaw": 90,
    "scale": 2.9,
@@ -202,13 +195,6 @@
    "ppm": 120
   },
   {
-   "id": "fence",
-   "file": "art_source/models/props/quaternius_medieval_village/Fence.blend",
-   "scale": 2.3,
-   "yaw": 90,
-   "ppm": 120
-  },
-  {
    "id": "hay",
    "file": "art_source/models/props/quaternius_medieval_village/Hay.blend",
    "scale": 2.3,
@@ -297,12 +283,6 @@
    "ppm": 120
   },
   {
-   "id": "bonfire_stones",
-   "file": "art_source/models/props/quaternius_medieval_village/Bonfire_Lit.blend",
-   "scale": 2.3,
-   "ppm": 120
-  },
-  {
    "id": "torch",
    "file": "art_source/models/props/quaternius_survival/WoodenTorch_Fire.blend",
    "size": 1.8,
@@ -316,45 +296,14 @@
    "ppm": 120
   },
   {
-   "id": "signpost_single",
-   "file": "art_source/models/props/kenney_survival/signpost-single.glb",
-   "size": 2.0,
-   "yaw": 90,
-   "ppm": 120
-  },
-  {
-   "id": "barrel",
-   "file": "art_source/models/props/quaternius_fantasy_props/Barrel.gltf",
-   "size": 0.9,
-   "ppm": 140
-  },
-  {
    "id": "crate",
    "file": "art_source/models/props/quaternius_fantasy_props/Crate_Wooden.gltf",
    "size": 0.8,
    "ppm": 140
   },
   {
-   "id": "sack",
-   "file": "art_source/models/props/quaternius_fantasy_props/Bag.gltf",
-   "size": 0.7,
-   "ppm": 140
-  },
-  {
-   "id": "crate_carrot",
-   "file": "art_source/models/props/quaternius_fantasy_props/FarmCrate_Carrot.gltf",
-   "size": 0.6,
-   "ppm": 140
-  },
-  {
    "id": "barrels_mv",
    "file": "art_source/models/props/quaternius_medieval_village/Barrel.blend",
-   "scale": 2.3,
-   "ppm": 140
-  },
-  {
-   "id": "bags_mv",
-   "file": "art_source/models/props/quaternius_medieval_village/Bags.blend",
    "scale": 2.3,
    "ppm": 140
   },
@@ -381,25 +330,9 @@
    "ppm": 200
   },
   {
-   "id": "weapon_sword_1",
-   "file": "art_source/models/props/quaternius_weapons/Sword_2.blend",
-   "size": 0.95,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
    "id": "weapon_sword_2",
    "file": "art_source/models/props/quaternius_weapons/Sword.blend",
    "size": 1.0,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
-   "id": "weapon_sword_3",
-   "file": "art_source/models/props/quaternius_weapons/Sword_Big.blend",
-   "size": 1.25,
    "measure": "long",
    "yaw": 90,
    "ppm": 240
@@ -421,22 +354,6 @@
    "ppm": 240
   },
   {
-   "id": "weapon_shield_heater",
-   "file": "art_source/models/props/quaternius_weapons/Shield_Heater.blend",
-   "size": 0.85,
-   "measure": "long",
-   "yaw": -90,
-   "ppm": 240
-  },
-  {
-   "id": "weapon_bow",
-   "file": "art_source/models/props/quaternius_weapons/Bow_Wooden.blend",
-   "size": 1.5,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
    "id": "weapon_hammer",
    "file": "art_source/models/props/quaternius_weapons/Hammer_Double.blend",
    "size": 1.3,
@@ -445,41 +362,9 @@
    "ppm": 240
   },
   {
-   "id": "weapon_axe",
-   "file": "art_source/models/props/quaternius_weapons/Axe.blend",
-   "size": 1.0,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
    "id": "weapon_axe_small",
    "file": "art_source/models/props/quaternius_weapons/Axe_Small.blend",
    "size": 0.6,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
-   "id": "weapon_arrow",
-   "file": "art_source/models/props/quaternius_weapons/Arrow.blend",
-   "size": 0.75,
-   "measure": "long",
-   "yaw": 0,
-   "ppm": 240
-  },
-  {
-   "id": "weapon_club",
-   "file": "art_source/models/props/quaternius_knight/Club.blend",
-   "size": 0.9,
-   "measure": "long",
-   "yaw": 90,
-   "ppm": 240
-  },
-  {
-   "id": "weapon_dagger",
-   "file": "art_source/models/props/quaternius_rpg_items/Dagger.blend",
-   "size": 0.4,
    "measure": "long",
    "yaw": 90,
    "ppm": 240
@@ -513,13 +398,6 @@
    "ppm": 32
   },
   {
-   "id": "iso_blacksmith",
-   "file": "art_source/models/props/quaternius_medieval_village/Blacksmith.blend",
-   "scale": 2.3,
-   "view": "iso",
-   "ppm": 32
-  },
-  {
    "id": "iso_house_3",
    "file": "art_source/models/props/quaternius_medieval_village/House_3.blend",
    "scale": 2.3,
@@ -543,13 +421,6 @@
   {
    "id": "iso_house_2",
    "file": "art_source/models/props/quaternius_medieval_village/House_2.blend",
-   "scale": 2.3,
-   "view": "iso",
-   "ppm": 32
-  },
-  {
-   "id": "iso_well",
-   "file": "art_source/models/props/quaternius_medieval_village/Well.blend",
    "scale": 2.3,
    "view": "iso",
    "ppm": 32

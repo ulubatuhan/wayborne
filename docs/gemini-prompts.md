@@ -79,9 +79,9 @@ hex codes or a game's name into a Gemini prompt itself.
 ## A. Event card illustrations
 
 The road event card now uses a **minimal, code-drawn frame** (flat panel,
-thin gold border). The four chrome textures planned in
-`docs/event-window-blueprint.md` (`E_Frame_Master`, `E_Header_Banner`,
-`E_Choice_Row_Normal`, `E_Choice_Row_Hover`) are **no longer needed** —
+thin gold border). The four chrome textures once planned for it
+(`E_Frame_Master`, `E_Header_Banner`, `E_Choice_Row_Normal`,
+`E_Choice_Row_Hover`; the blueprint was deleted in task 3.6) are **no longer needed** —
 leather/brass chrome was removed from the whole game. Only the
 illustrations remain: one vignette per category, 21 in total.
 
@@ -89,7 +89,7 @@ illustrations remain: one vignette per category, 21 in total.
   square). **Ships as:** `data/assets/ui/waybook/e6<letter>_<name>.jpg`,
   scaled down to 768×768.
 - **Output:** JPG, full bleed. No background removal.
-- Which events use which picture: `docs/event-window-blueprint.md` §6.1.
+- Which events use which picture: `EVENT_CARD_ART` in `scripts/ui/road_journey.gd`.
 
 ### STYLE-A (paste first, once per conversation)
 

@@ -287,11 +287,6 @@ const SIGNAL_ICONS: Dictionary = {
 }
 const SIGNAL_FLASH_SECONDS: float = 1.6
 const SIGNAL_FADE_SECONDS: float = 0.8
-const EDGE_HUNGER_FILE: String = "g11_edge_scorch.png"
-const EDGE_MAX_ALPHA: float = 0.85
-## Açlıktan can kaybı üçüncü gecede başlıyor (STARVATION_HP_LOSS_START_DAY);
-## kenar ondan bir gece sonra tamamen kavrulmuş.
-const EDGE_HUNGER_FULL_NIGHTS: int = 4
 
 var _session: GameSession
 ## Seferin görsel olmayan durumu (mesafe, gün, tempo, kamp, saat, olay
@@ -556,10 +551,6 @@ var _attention_icon: TextureRect
 var _signal_icon: TextureRect
 var _signal_tween: Tween
 var _time_dial: TimeDial
-## Kenar lekesi: açlık gecesi uzadıkça sayfanın kenarı kavruluyor. Sayı
-## değil his - sayısı zaten şişede yazılı. Stres ve don kenar lekeleri
-## (kullanıcı geri bildirimiyle) komple kaldırıldı - bkz. _refresh_edges().
-var _hunger_edge: Control
 ## Modal katmanı her karede içeriğe bakıyor (bkz. _refresh_modal); son
 ## durum burada tutuluyor ki görünürlük her karede yeniden atanmasın.
 var _modal_open: bool = false
@@ -667,30 +658,14 @@ func _build_world_layer() -> void:
 	_combat_holder.visible = false
 	_world.add_child(_combat_holder)
 
-	# Kenar lekesi dünyanın üstünde, HUD'un altında; savaşta da duruyor,
-	# çünkü yıpranma savaşa girince geçmiyor. Stres ve don kenar lekeleri
-	# oyuncu geri bildirimiyle kaldırıldı - yalnızca açlık kalıyor.
-	_hunger_edge = _edge_overlay(EDGE_HUNGER_FILE, ArtPalette.UI_EDGE_HUNGER)
+	# Kenar lekeleri (stres, don, açlık) kullanıcı kararıyla kalktı (görev 2.5):
+	# yıpranma sözle ve göstergelerle söyleniyor, ekranın kenarı temiz.
 
 	# Konuşma baloncukları (görev R0/R1): kervanın üstünde, HUD'un altında.
 	_balloon_layer = Control.new()
 	_balloon_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_balloon_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_world.add_child(_balloon_layer)
-
-## Kenar maskesi tek parça bir resim: ekranın tamamına geriliyor. Bir süre
-## dokuz dilimliydi (kalınlık en boy oranından bağımsız kalsın diye) ama
-## maskeler bütün bir çerçeve olarak boyandı ve oyuncu onları öyle görmek
-## istedi - dilimlenince köşe süslemesi ile kenar ortası birbirinden koptu.
-func _edge_overlay(file_name: String, tint: Color) -> Control:
-	var frame := TextureRect.new()
-	frame.texture = WaybookTheme.texture(file_name)
-	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	frame.stretch_mode = TextureRect.STRETCH_SCALE
-	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame.modulate = Color(tint, 0.0)
-	_world.add_child(frame)
-	return frame
 
 ## HUD: üstte zaman/durum şeridi, altta eylem şeridi, ikisinin arasında
 ## dünyanın göründüğü boşluk. Şeritler dışında hiçbir yer tıklamayı
@@ -4228,23 +4203,12 @@ func _refresh_state() -> void:
 	_attention_icon.texture = WaybookTheme.texture(ZONE_ICONS.get(
 		_attention_zone, ZONE_ICONS[RoadAttention.ZONE_WAGONS]
 	))
-	_refresh_edges()
 	if _signal_tween == null:
 		_refresh_signal_icon()
 
 	# N23: üst şeridin sayı satırı kalktı - kese, erzak, itibar, vagon, tüccar
 	# ve evrak denetim panelinin Durum sekmesinde (RoadControlPanel).
 	_state_label.visible = false
-
-## Kenar lekelerinin koyuluğu. Eşiğin altında hiçbir şey görünmüyor: sakin
-## bir kervanın ekranı temiz kalsın, leke ancak bir şey ters gidince gelsin.
-func _refresh_edges() -> void:
-	var hungry_nights := 0
-	for character in _session.party:
-		hungry_nights = maxi(hungry_nights, character.consecutive_hungry_days)
-	_hunger_edge.modulate.a = EDGE_MAX_ALPHA * clampf(
-		float(hungry_nights) / float(EDGE_HUNGER_FULL_NIGHTS), 0.0, 1.0
-	)
 
 func _add_log(text: String, color: Color = Color.WHITE) -> void:
 	# Alt şerit yalnızca son satırı gösteriyor; defterin tamamı kayıt

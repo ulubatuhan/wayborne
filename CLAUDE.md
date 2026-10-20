@@ -2262,24 +2262,9 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and
   moss when it is caught.
-- **Wear shows at the edge of the world, never as a number - but only
-  for hunger now.** Stress used to bleed ink in from the frame (G11
-  bleed) past `EDGE_STRESS_FROM`, and a third edge (G11 frost,
-  `cold_level()` - winter adds most, a mountain pass a little even out
-  of season) shaded the world in the cold. Both were removed outright on
-  direct player feedback - `road_journey.gd` no longer builds
-  `_stress_edge`/`_cold_edge` at all, and `ArtPalette.UI_EDGE_STRESS`/
-  `UI_EDGE_COLD` are gone with them. The hunger scorch (G11 scorch) is
-  the one edge that survives: the longest hungry streak in the party
-  still scorches the frame, coloured from `ArtPalette.UI_EDGE_HUNGER`.
-  The source sheet was painted on a torn paper card; the pipeline cuts
-  the card off and ships only the ink as a white mask - as shipped
-  first, the card's white border and pale wash covered the scene. The
-  mask is drawn **whole, stretched over
-  the screen** (`STRETCH_SCALE`): for one round it was nine-sliced so
-  the thickness would not depend on the aspect ratio, and the player
-  rejected it - the mask is painted as a whole frame and slicing
-  separated each corner from its sides.
+- **Wear never shows at the edge of the world.** Stress (G11 bleed), cold (G11 frost) and finally hunger (G11
+  scorch) each tinted the frame for a while; all three were removed on the player's decision (the last in task 2.5).
+  Wear is told in words and on the gauges, and the screen's edge stays clean.
 - **Words first, the number second (task Y-H03).** The user asked for prose, not "-10 morale". `Wording` turns a
   value into one of four band words (`WORD_*` in game.csv; stress and danger read high-is-bad) and the current causes
   into short sentences (hungry for N days, someone just buried, an overdue debt, someone about to break). The road
