@@ -5,8 +5,8 @@ savaş içeren bir Godot 4 oyunu. Oyuncu bir kervan lideri; şehirler arası
 mal taşıyor, tüccarlara refakat ediyor, yolda EU4 tarzı olay kartlarıyla
 karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
 
-**Oyna:** yayındaki web derlemesi GitHub Pages üzerinde —
-`Settings → Pages` etkinleştirildikten sonra bu deponun Pages adresinde.
+**Hedef platform PC (Windows).** Web derlemesi yalnızca test içindir: GitHub Pages'te
+`Settings → Pages` etkinleştirildikten sonra bu deponun Pages adresinde yayımlanır, performansı ölçüt değildir.
 
 ## Oyun döngüsü
 
@@ -16,7 +16,7 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
    kapasitesini belirler (her vagonda 2 kişi, en fazla 6 vagon); savaşa
    giren **parti** ise ayrı bir kavramdır ve en fazla 4 kişidir.
 2. **Şehirde hazırlan** — Pazar Meydanı'ndan mal al/sat, Tüccar
-   Loncası'ndan kontrat kabul et, Taverna'dan rota dedikodusu satın al,
+   Loncası'ndan kontrat kabul et, Taverna'da insanlarla konuşup yol ve fiyat haberi topla,
    Kervan Avlusu'ndan vagon onart/satın al, Kilise'de taze huyları
    arındır. Meydan, taverna ve lonca partine yeni kişiler de katabilir -
    adaylar oyuncunun seviyesine göre ölçeklenir (meydan hep acemi, lonca
@@ -104,9 +104,11 @@ godot --headless --script res://tests/run_tests.gd        # exit 1 hata varsa
 godot --headless --script res://tests/simulate_journeys.gd  # denge raporu
 ```
 
-`run_tests.gd` eklenti gerektirmeyen düz bir `SceneTree` koşucusu; elli
-altı paket ve 18.000'den fazla doğrulama, çekirdek sistemlerin (statlar,
-kültürler, savaş, olay motoru, oturum) sözleşmelerini kilitliyor.
+`run_tests.gd` eklenti gerektirmeyen düz bir `SceneTree` koşucusu; 27.000'den fazla
+doğrulama, çekirdek sistemlerin (statlar, kültürler, savaş, olay motoru, oturum, kayıt,
+kare kümeleri) sözleşmelerini kilitliyor. `tests/screenshot_*.gd` görüntü araçları (test
+değil): bir yapısal test görünüşü göremez, bu araçlar gerçek ekranın PNG'sini basar.
+`tests/record_loop.gd` beş dakikalık döngü videosunu `--write-movie` ile kaydeder.
 `simulate_journeys.gd` test değil — yüzlerce tohumla sefer koşturup net
 kazanç/moral/açlık/savaş kazanma oranı dağılımı basıyor; oyunu
 oynamadan dengeye yaklaşmanın tek yolu bu.
@@ -123,6 +125,17 @@ Web (HTML5) dışa aktarımı ve GitHub Pages'e dağıtım. Web derlemesi
 `crossOriginIsolated`/`SharedArrayBuffer` gerektirdiği ve GitHub Pages
 özel başlık desteklemediği için `web/coi-serviceworker.js` istemci
 tarafında bu başlıkları enjekte ediyor.
+
+`olcum.yml` (elle ve haftalık) kariyer simülatörünü koşturup sefer süresi, sefer başına
+kart ve ölüm tablosunu iş özetine yazar (`tools/measure_report.py`). Oyuncu tarafı ölçüm
+yalnızca Ayarlar'daki izinle ve oyuncunun kendi bilgisayarında tutulur.
+
+### Sanat hatları
+
+Figürler, giysiler ve hayvanlar Blender'da render edilip atlaslara paketlenir
+(`tools/figure_pipeline/`, kuralları `RULES.md`); kasaba, kapı ve yol resimleri
+`tools/ui_scenes/`, dünya haritası `tools/worldmap/`. Büyük ikili dosyalar Git LFS ile
+tutulur (`.gitattributes`); yeni bir klonda önce `git lfs install`.
 
 ## Yol haritası
 
