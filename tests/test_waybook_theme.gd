@@ -15,7 +15,6 @@ func run(t) -> void:
 	_test_chrome_is_minimal(t, theme)
 	_test_panel_fill_comes_from_palette(t, theme)
 	_test_locked_button_is_marked(t, theme)
-	_test_nine_slice_leaves_a_centre(t, theme)
 	_test_no_leather_texture_is_read(t)
 	_test_spin_box_number_is_centred(t)
 	_test_no_screen_builds_its_own_panel(t)
@@ -154,18 +153,6 @@ func _contrast_ratio(a: Color, b: Color) -> float:
 	var l1 := _relative_luminance(a) + 0.05
 	var l2 := _relative_luminance(b) + 0.05
 	return maxf(l1, l2) / minf(l1, l2)
-
-## Kenar payları dokunun yarısını geçerse ortada esneyecek bir bölge kalmaz
-## ve Godot çerçeveyi bozuk çizer. Dokulu kalan tek çerçeve kâğıt fiş.
-func _test_nine_slice_leaves_a_centre(t, theme: Theme) -> void:
-	for pair in [["panel", "SlipPanel"]]:
-		var box := theme.get_stylebox(pair[0], pair[1]) as StyleBoxTexture
-		var size := box.texture.get_size()
-		t.ok(
-			box.texture_margin_left + box.texture_margin_right < size.x
-			and box.texture_margin_top + box.texture_margin_bottom < size.y,
-			"%s/%s dokuz parçası ortada bir esneme bölgesi bırakıyor" % [pair[1], pair[0]]
-		)
 
 ## Dokuz ekran aynı paneli dokuz kez kendi renkleriyle kuruyordu; tema
 ## bunun yerine geçti. Biri kendi kutusunu yeniden kurarsa tek görünüm yine

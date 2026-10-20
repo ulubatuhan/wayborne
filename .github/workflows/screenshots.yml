@@ -1,7 +1,7 @@
 name: Screenshots
 
 # Görsel bozulmayı yakalamak için: kritik ekranların fotoğrafını çeker,
-# main'deki son başarılı koşunun fotoğraflarıyla karşılaştırır ve raporu
+# Wayborne'deki son başarılı koşunun fotoğraflarıyla karşılaştırır ve raporu
 # iş özetine yazar. Yapısal testler yerleşimi doğrular, görünümü değil;
 # birkaç kez bozulmayı kullanıcı yakaladı (bkz. CLAUDE.md, Testing).
 #
@@ -11,13 +11,13 @@ name: Screenshots
 # GPU'dan farklı çizdiği için baz görüntüler hep bu iş akışının kendi
 # çıktısından gelir, yerelden değil.
 #
-# main'e push: fotoğraflar önbelleğe baz olarak yazılır.
+# Wayborne'e push: fotoğraflar önbelleğe baz olarak yazılır.
 # Pull request ve elle çalıştırma: önbellekteki baz ile karşılaştırılır.
 
 on:
   push:
     branches:
-      - main
+      - Wayborne
     paths:
       - "scripts/**"
       - "scenes/**"
@@ -138,7 +138,7 @@ jobs:
           if [ ! -d shots/baseline ]; then
             echo "### Ekran görüntüsü karşılaştırması" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Henüz baz görüntü yok (main'e ilk push bunu üretir); karşılaştırma atlandı." >> "$GITHUB_STEP_SUMMARY"
+            echo "Henüz baz görüntü yok (Wayborne'e ilk push bunu üretir); karşılaştırma atlandı." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           python3 tools/ci/screenshot_diff.py shots/baseline shots/current \
