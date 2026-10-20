@@ -415,14 +415,13 @@ func _test_price_book(t) -> void:
 	t.eq(session.get_price_age(target), -1, "komşunun fiyatı bilinmiyor")
 	# Gün 0'da "birkaç gün eski" tarih 0'a kenetlenir; söylentinin yaşı ölçülsün diye ilerlet.
 	session.total_days_elapsed = GameSession.PRICE_RUMOR_MAX_AGE + 4
-	var cost := session.get_price_rumor_cost(target)
 	var gold := session.wallet.balance
-	t.ok(session.buy_price_rumor(target), "söylenti satın alınır")
-	t.eq(session.wallet.balance, gold - cost, "bedeli keseden düşer")
+	t.ok(session.hear_price_rumor(target), "söylenti sohbette duyulur")
+	t.eq(session.wallet.balance, gold, "söylenti satılmaz (N34)")
 	var age := session.get_price_age(target)
 	t.ok(age >= GameSession.PRICE_RUMOR_MIN_AGE and age <= GameSession.PRICE_RUMOR_MAX_AGE, "söylenti birkaç gün eski gelir (%d)" % age)
-	t.eq(session.get_price_rumor_block_reason(target), "UI_PRICE_RUMOR_FRESH", "taze bilgi varken yeniden satılmaz")
-	t.eq(session.get_price_rumor_block_reason(here), "UI_PRICE_RUMOR_INVALID", "bulunulan şehrin söylentisi satılmaz")
+	t.eq(session.get_price_rumor_block_reason(target), "UI_PRICE_RUMOR_FRESH", "taze bilgi varken yeniden anlatılmaz")
+	t.eq(session.get_price_rumor_block_reason(here), "UI_PRICE_RUMOR_INVALID", "bulunulan şehrin söylentisi anlatılmaz")
 	session.total_days_elapsed += GameSession.PRICE_STALE_DAYS + 1
 	t.ok(session.is_price_stale(here), "%d günden eski bilgi eskimiş" % GameSession.PRICE_STALE_DAYS)
 	var stale_line := false

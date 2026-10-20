@@ -533,13 +533,11 @@ var _exit_button: Button
 @onready var _log_overlay: MarginContainer = $LogOverlay
 ## Kervanın tam dökümü. Kendi katmanı, çünkü kayıt katmanıyla aynı anda
 ## açık olmaları anlamsız ama biri ötekini kapatmak zorunda da değil.
-@onready var _status_overlay: MarginContainer = $StatusOverlay
 
 ## Alt şeritteki tek satırlık kayıt - listenin tamamı artık `_log_overlay`'de.
 var _last_log_label: Label
 var _log_button: Button
 var _status_button: Button
-var _status_panel: CaravanStatusPanel
 var _help_button: Button
 ## Moral/stres/tehlike sayı değil **nesne** (şişe, leke): bir orandan
 ## ibaret olan değeri rakam olarak okumak oyuncuyu her karede metin okumaya
@@ -631,7 +629,6 @@ func _build_ui() -> void:
 	_build_hud_layer()
 	_build_modal_layer()
 	_build_log_layer()
-	_build_status_layer()
 	_refresh_exit_button()
 
 ## Dünya katmanı: manzara ve (savaş varsa) savaş sahnesi. `MarginContainer`
@@ -663,7 +660,7 @@ func _build_world_layer() -> void:
 	# Kamp ateşinin sesi (görev 12.2c): tutuşma ilk varanla, çıtırtı kamp
 	# boyunca, kamp kalkıp herkes binince söner.
 	_caravan.fire_lit.connect(_on_fire_lit)
-	_caravan.fires_out.connect(AudioManager.stop_ambience)
+	_caravan.fires_out.connect(_refresh_ambience)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -965,14 +962,13 @@ func _build_bottom_bar() -> PanelContainer:
 	row.add_child(_orders_button)
 
 	# Playtest: *"status, map, inventory, my contracts gibi"* düğmeler.
-	# Dördü de aynı soruyu soruyor - kervan ne durumda - ve cevabı tek bir
-	# dökümde duruyor (bkz. CaravanStatusPanel). Dört ayrı ekran, bir
-	# ekranın dört sekmesi kadar bile bilgi vermezdi.
+	# Cevapları alttaki kontrol panelinin sekmelerinde (P18); bu düğme ve
+	# Tab Durum sekmesini açar. Eski üstüne binen döküm katmanı (N23)
+	# kaldırıldı: kontratlar Yük sekmesinde, defter Defter sekmesinde.
 	_status_button = Button.new()
 	_status_button.text = tr("UI_STATUS_OPEN")
 	_status_button.tooltip_text = tr("UI_STATUS_TOOLTIP")
-	_status_button.toggle_mode = true
-	_status_button.toggled.connect(_on_status_toggled)
+	_status_button.pressed.connect(_on_status_toggled.bind(true))
 	row.add_child(_status_button)
 
 	# Aynı kısayol, aynı katman şeklinde şehirde de açılıyor (bkz.
@@ -1097,37 +1093,11 @@ func _make_bar() -> PanelContainer:
 	bar.theme_type_variation = WaybookTheme.HUD_BAR
 	return bar
 
-## Kervanın dökümü: bir tuş, bir katman. Şehre girmek ya da sahne
-## değiştirmek gerekmiyor - yol yürümeye devam ediyor, oyuncu üstüne
-## bakıyor. Kapatma tuşu kaydırma kutusunun dışında (bkz. `setup`).
-func _build_status_layer() -> void:
-	var frame := PanelContainer.new()
-	_status_overlay.add_child(frame)
-
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
-	frame.add_child(column)
-
-	_status_panel = CaravanStatusPanel.new()
-	_status_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(_status_panel)
-	_status_panel.setup(_session)
-
-	var close_button := Button.new()
-	close_button.text = tr("UI_CANCEL")
-	close_button.pressed.connect(_on_status_closed)
-	column.add_child(close_button)
-
-## Döküm **açıldığı anda** tazeleniyor, her karede değil: yol her saniye
-## değişiyor ama panel yalnızca bakılırken var.
+## Durum sekmesi (true) ya da Kadro (false). Sahne değişmez, yol yürür.
 func _on_status_toggled(pressed: bool) -> void:
-	if pressed:
-		_status_panel.refresh()
-	_status_overlay.visible = pressed
-
-func _on_status_closed() -> void:
-	_status_button.button_pressed = false
-	_status_overlay.visible = false
+	if _control_panel == null:
+		return
+	_control_panel.select_tab(RoadControlPanel.TAB_STATUS if pressed else RoadControlPanel.TAB_PARTY)
 
 ## Şehirdekiyle aynı kapı (bkz. city_map.gd'nin `_show_help`'i): bir kereye
 ## mahsus otomatik gösterimin bayrağına dokunmadan, isteğe bağlı yeniden
@@ -1476,9 +1446,10 @@ func _input(event: InputEvent) -> void:
 		accept_event()
 		return
 
-	# Tab: kervanın dökümü - bir tuşla açılıp kapanan bir katman.
+	# Tab: kontrol panelinde Durum ile Kadro arasında gidip gelir.
 	if key_event.keycode == KEY_TAB:
-		_status_button.button_pressed = not _status_button.button_pressed
+		var on_status := _control_panel != null and _control_panel.get_active_tab() == RoadControlPanel.TAB_STATUS
+		_on_status_toggled(not on_status)
 		accept_event()
 		return
 
@@ -1587,10 +1558,9 @@ func _init_journey() -> void:
 	_current_event = null
 	_journey_finished = false
 
-	# Durum paneli `_build_ui()` sırasında kuruldu, ama o an henüz gerçek
-	# oturum yoktu (`_session` burada ilk kez atanıyor) - panel de sessizce
-	# boş kaldı. Gerçek oturum eldeyken şimdi dolduruluyor.
-	_status_panel.set_session(_session)
+	# Kontrol paneli `_build_ui()` sırasında kuruldu, ama o an henüz gerçek
+	# oturum yoktu (`_session` burada ilk kez atanıyor). Gerçek oturum
+	# eldeyken şimdi dolduruluyor.
 	if _control_panel != null:
 		_control_panel.set_session(_session)
 
@@ -1786,6 +1756,8 @@ func _process(delta: float) -> void:
 	_update_chatter(delta)
 	_update_light_glow()
 	_refresh_time_ui()
+	# Gece çökünce ortam değişir; çağrı aynı katmanda hiçbir şey yapmaz.
+	_refresh_ambience()
 	_refresh_modal()
 
 ## Kamp eylem paneli (Y-B12): diziliş ve akşamın iki eylemi; ardından belki
@@ -1796,6 +1768,7 @@ var _camp_panel: CampActionsPanel = null
 func _open_camp_panel() -> void:
 	_camp_panel = CampActionsPanel.new().setup(_session)
 	_camp_panel.confirmed.connect(func(formation: Array, actions: Array):
+		_session.log_beat(GameSession.BEAT_LOG_DECISION, "camp")
 		_session.set_formation(formation[0], formation[1], formation[2])
 		for action in _session.apply_camp_actions(actions):
 			if action == GameSession.CAMP_ACTION_WATCH:
@@ -1817,6 +1790,7 @@ var _diary_panel: DiaryPanel = null
 func _open_diary_panel() -> void:
 	_diary_panel = DiaryPanel.new().setup(_session.diary_candidates())
 	_diary_panel.chosen.connect(func(key: String, args: Array):
+		_session.log_beat(GameSession.BEAT_LOG_DECISION, "diary")
 		_session.write_diary(key, args)
 		if not key.is_empty():
 			var entry := {"kind": CaravanLedger.KIND_DIARY, "cause": key, "args": args}
@@ -1971,6 +1945,7 @@ func _advance_position(hours: float, delta: float) -> void:
 	if delta > 0.0:
 		column_speed = day_step * _band.get_pixels_per_day() / delta
 	_caravan.set_ground_speed(column_speed)
+	_band.set_dust_motion(column_speed / maxf(_caravan.get_walk_ground_speed(), 1.0))
 	_move_leader(delta, column_speed)
 
 ## Manzaranın gün->piksel ölçeği. Kervan normal tempoda sakin bir
@@ -2227,6 +2202,7 @@ func _tick_signals(hours: float) -> void:
 		_night_signal_scale()
 	)
 	for kind in outcome["appeared"]:
+		_session.log_beat(GameSession.BEAT_LOG_INFO, "signal:" + String(kind))
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
 		_auto_pause()
 	for i in (outcome["resolved"] as Array).size():
@@ -2793,6 +2769,7 @@ func _update_camp_state() -> void:
 		OUTCOME_COLOR
 	)
 	_add_log(tr("UI_ROAD_CAMP_BREAK") % _clock.get_clock_text(), OUTCOME_COLOR)
+	_session.log_beat(GameSession.BEAT_LOG_CAMP_END)
 	_camping = false
 	_band.set_camping(false)
 	_caravan.set_camping(false)
@@ -2802,6 +2779,7 @@ func _update_camp_state() -> void:
 ## yanında gitmesin: şehirde çıtırtı duyuluyordu.
 func _exit_tree() -> void:
 	AudioManager.stop_ambience()
+	AudioManager.set_combat_duck(false)
 
 ## Kampın haritadaki yeri (görev Y-G09): yolun çizgisinde kervanın durduğu nokta.
 func _record_camp_on_map() -> void:
@@ -2832,6 +2810,16 @@ func _refresh_weather() -> void:
 	if _caravan != null:
 		_caravan.set_weather(_weather)
 	_refresh_weather_calls()
+	_refresh_ambience()
+
+## Ortam sesi (N31f): hava, gece ve kamp ateşinden; ateş yanarken ateş.
+## Kampta ateşin sesi ateşin kendisine bağlı (yanınca `_on_fire_lit`, sönünce
+## `fires_out` buraya döner); kamp sürerken tablo karışmaz.
+func _refresh_ambience() -> void:
+	if _clock == null or (_camping and not _caravan.is_breaking_camp()):
+		return
+	var night := JourneyClock.darkness_for_hour(_clock.get_hour_of_day()) > 0.5
+	AudioManager.set_road_ambience(_weather, night, false)
 
 func _refresh_time_ui() -> void:
 	if _clock == null:
@@ -2981,6 +2969,7 @@ func _on_camp_pressed() -> void:
 	# _update_camp_state faydayı uygular. Gün ilerlemesi kendiliğinden
 	# olur - saat gece yarısını geçince günlük mekanik zaten işler.
 	_camping = true
+	_session.log_beat(GameSession.BEAT_LOG_CAMP_START)
 	_camp_ends_at_hours = JourneyController.CAMP_PENDING
 	# Kamp kendi hızını öneriyor: 8 saatlik bir mola 1x'te dakikalarca
 	# beklemek demek, oysa kampın kendi görüntüsü (ateş, dinlenen kervan)
@@ -3145,6 +3134,7 @@ func _check_pending_event_reached() -> void:
 
 func _present_event(event: GameEvent) -> void:
 	_current_event = event
+	_session.log_beat(GameSession.BEAT_LOG_INFO, "card:" + event.event_id)
 	# Olay arka planda zamandan yer: kervan kartı çözerken duruyor,
 	# saat ilerliyor, arka plan da buna göre değişiyor.
 	_clock.consume_hours(EVENT_HOURS)
@@ -3330,6 +3320,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	_current_event = null
 	if resolved_event != null:
 		_session.note_beat(GameSession.BEAT_EVENT, [tr(resolved_event.title_key)])
+		_session.log_beat(GameSession.BEAT_LOG_DECISION, "card:" + resolved_event.event_id)
 	NodeUtil.clear_children(_card_panel)
 
 	_add_log("   » %s" % tr(choice.text_key))
@@ -3451,6 +3442,8 @@ func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 		FirstTimeHint.show_once(self, _session, FirstTimeHint.COMBAT)
 	_pending_combat_danger = _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
+	_session.log_beat(GameSession.BEAT_LOG_COMBAT_START, enemy_kind)
+	AudioManager.set_combat_duck(true)
 	_set_journey_controls_enabled(false)
 
 	# Kimin bu çarpışmaya gireceğini ve hangi sırada dizileceğini artık
@@ -3515,6 +3508,8 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 func _on_combat_finished(
 	victory: bool, xp_awarded: int, downed_count: int, dead_characters: Array
 ) -> void:
+	_session.log_beat(GameSession.BEAT_LOG_COMBAT_END, "won" if victory else "lost")
+	AudioManager.set_combat_duck(false)
 	# Günün satırı (Y-B08): kazanılan ya da kaybedilen savaş, düşmanın adıyla.
 	_session.note_beat(GameSession.BEAT_WON if victory else GameSession.BEAT_LOST,
 		[EnemyCatalog.get_kind_label(_current_combat_kind)])

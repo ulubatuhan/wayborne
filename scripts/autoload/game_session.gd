@@ -2003,8 +2003,14 @@ func get_trait_price_multiplier() -> float:
 func get_buy_price_multiplier() -> float:
 	return get_player_culture().buy_price_multiplier * get_trait_price_multiplier()
 
-func get_rumor_cost_multiplier() -> float:
-	return get_player_culture().rumor_cost_multiplier
+## Tavernada sohbetle haber alma şansına eklenen pay (N34): liman kültürü
+## (söylentiye yakın) ve tellal (dedikoduyu toplayan). Satın alma yok.
+const NEWS_CULTURE_SHARE: float = 0.5
+const NEWS_TELLAL_SHARE: float = 0.6
+
+func get_news_chance_bonus() -> float:
+	var culture := (1.0 - get_player_culture().rumor_difficulty) * NEWS_CULTURE_SHARE
+	return maxf(0.0, culture) + get_duty_discount(DutyCatalog.TELLAL) * NEWS_TELLAL_SHARE
 
 ## Tüm seferler boyunca ilerleyen gün sayacı (bkz. road_journey.gd
 ## _on_advance_day). journey_days_remaining bir seferin kalan gününü
@@ -2884,6 +2890,34 @@ func mark_first(mark: String) -> bool:
 			file.store_string(JSON.stringify(lines))
 	return true
 
+## --- Oyun testi beat kaydı (görev N31a) ---
+## Her karar ve bilgi anı gerçek oyun saniyesiyle user://playtest_beats.jsonl
+## dosyasına bir satır: tools/playtest_report.py boş dakikaları, savaşın ve
+## kampın süresini ve ekran başına zamanı buradan çıkarır. Yalnızca gerçek
+## oyun yazar (log_first_times'ın kapısı); testler ve simülatörler yazmaz.
+const PLAYTEST_BEATS: String = "user://playtest_beats.jsonl"
+const BEAT_LOG_DECISION: String = "decision"
+const BEAT_LOG_INFO: String = "info"
+const BEAT_LOG_COMBAT_START: String = "combat_start"
+const BEAT_LOG_COMBAT_END: String = "combat_end"
+const BEAT_LOG_CAMP_START: String = "camp_start"
+const BEAT_LOG_CAMP_END: String = "camp_end"
+const BEAT_LOG_SCREEN: String = "screen"
+
+## Kaydın satırı (saf, test edilebilir).
+func beat_log_line(kind: String, detail: String = "") -> Dictionary:
+	return {"caravan": caravan_name, "t": snappedf(play_seconds, 0.1), "kind": kind, "detail": detail}
+
+func log_beat(kind: String, detail: String = "") -> void:
+	if not log_first_times:
+		return
+	var mode := FileAccess.READ_WRITE if FileAccess.file_exists(PLAYTEST_BEATS) else FileAccess.WRITE
+	var file := FileAccess.open(PLAYTEST_BEATS, mode)
+	if file == null:
+		return
+	file.seek_end()
+	file.store_line(JSON.stringify(beat_log_line(kind, detail)))
+
 ## Başlangıç kökeni (Y-D05, StartOrigins); kayıtta.
 var origin_id: String = "father"
 
@@ -3061,8 +3095,6 @@ func spoil_perishables() -> Dictionary:
 const PRICE_SOURCE_SEEN: String = "seen"
 const PRICE_SOURCE_RUMOR: String = "rumor"
 const PRICE_STALE_DAYS: int = 20
-const PRICE_RUMOR_BASE_COST: int = 8
-const PRICE_RUMOR_PER_DAY_COST: int = 2
 const PRICE_RUMOR_FALSE_CHANCE: float = 0.25
 ## Söylenti taze gelmez: kulaktan kulağa geçene kadar birkaç gün eskir.
 const PRICE_RUMOR_MIN_AGE: int = 2
@@ -3100,30 +3132,22 @@ func get_price_age(location_id: String) -> int:
 func is_price_stale(location_id: String) -> bool:
 	return get_price_age(location_id) > PRICE_STALE_DAYS
 
-func get_price_rumor_cost(location_id: String) -> int:
-	var route := WorldMapData.get_route(current_location_id, location_id)
-	var days := route.travel_days if route != null else 6
-	var cost := float(PRICE_RUMOR_BASE_COST + days * PRICE_RUMOR_PER_DAY_COST) * get_rumor_cost_multiplier()
-	cost *= 1.0 - get_duty_discount(DutyCatalog.TELLAL)
-	return maxi(1, int(round(cost)))
-
-## Satın alınamıyorsa sebebi (anahtar), alınabiliyorsa "".
+## Duyulamıyorsa sebebi (anahtar), duyulabiliyorsa "". Söylenti satılmıyor
+## (N34, kullanıcı: "tavernadan doğrudan dedikodu satın alınmasın"); biri
+## sohbette anlatır.
 func get_price_rumor_block_reason(location_id: String) -> String:
 	if location_id == current_location_id or WorldMapData.get_location_by_id(location_id) == null:
 		return "UI_PRICE_RUMOR_INVALID"
 	var age := get_price_age(location_id)
 	if age >= 0 and age <= PRICE_RUMOR_MAX_AGE:
 		return "UI_PRICE_RUMOR_FRESH"
-	if not wallet.can_afford(get_price_rumor_cost(location_id)):
-		return "UI_PRICE_RUMOR_NO_GOLD"
 	return ""
 
-## Tavernada başka şehrin fiyatını dinle. Zar şehir + hedef + günden: aynı
-## gün aynı söylenti (yeniden yükleme bir doğruyu satın alamaz).
-func buy_price_rumor(location_id: String) -> bool:
+## Sohbette başka şehrin fiyatını duy. Zar şehir + hedef + günden: aynı gün
+## aynı söylenti (yeniden yükleme bir doğruyu duyuramaz).
+func hear_price_rumor(location_id: String) -> bool:
 	if not get_price_rumor_block_reason(location_id).is_empty():
 		return false
-	wallet.spend(get_price_rumor_cost(location_id))
 	price_book[location_id] = roll_price_rumor(location_id)
 	return true
 

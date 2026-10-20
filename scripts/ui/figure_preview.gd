@@ -50,10 +50,15 @@ func set_tint(tint: Color) -> void:
 ## giysiler lekeye döndü). Pencere ne kadar uzun olursa olsun figür bu boyu
 ## aşmaz, altta durur.
 const MAX_FIGURE_HEIGHT: float = 400.0
+## 0 = sınır yok: konuşma penceresinin portresi figürü bilerek büyütüp belden
+## yukarısını kırpıyor (DialoguePanel).
+var max_figure_height: float = MAX_FIGURE_HEIGHT
 
 ## Figür pencerenin alt kenarına basıyor; boyu pencerenin yüksekliğinin bir
 ## payı, en uzun boy bile şapkasıyla sığsın diye.
 func _layout() -> void:
-	var height := minf(size.y * 0.86, MAX_FIGURE_HEIGHT)
+	var height := size.y * 0.86
+	if max_figure_height > 0.0:
+		height = minf(height, max_figure_height)
 	_figure.size = Vector2(size.x, height)
 	_figure.position = Vector2(0.0, size.y - height)

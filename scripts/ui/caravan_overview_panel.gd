@@ -25,7 +25,7 @@ extends CanvasLayer
 ## sorulabilecek gerçek soru zaten bu, "şu an aç mısın" değil "yeterince
 ## stokladın mı."
 ##
-## `CaravanStatusPanel`'in yol ekranındaki salt-okunur dökümüyle akraba
+## Yolun kontrol panelindeki (RoadControlPanel) salt-okunur dökümle akraba
 ## ama onun yerine geçmiyor: o bir Tab paneli, bu Kervan Avlusu'ndan
 ## açılan ayrı bir ekran/mekanik - `MealDistributionPanel`/`WagonPanel`'in
 ## sahnesiz `CanvasLayer` deseni.
@@ -40,7 +40,7 @@ const HINT_COLOR: Color = Color(0.70, 0.72, 0.78)
 const HURT_COLOR: Color = Color(0.90, 0.55, 0.45)
 const URGENT_COLOR: Color = Color(0.90, 0.45, 0.35)
 
-## `CaravanStatusPanel`'inkiyle aynı eşik - kim kırılmaya yakın sorusunun
+## Yolun kontrol panelindekiyle aynı eşik - kim kırılmaya yakın sorusunun
 ## cevabı burada da kişinin kendi direncine göre okunuyor.
 const STRESS_WARNING_RATIO: float = 0.75
 const SATISFIED_COLOR: Color = Color(0.55, 0.80, 0.55)

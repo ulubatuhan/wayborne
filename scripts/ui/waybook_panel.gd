@@ -4,7 +4,7 @@ extends CanvasLayer
 ## Kervanın defteri, açık hâliyle: kuruluştan bugüne her satır, kuşak kuşak.
 ## `CaravanLedger` hiçbir satırı silmiyor (bkz. Lineage Rules) ama bugüne
 ## kadar yalnızca son birkaç satırı gösteren dar dökümlerde görünüyordu
-## (`CaravanStatusPanel`, şehir brifinginin son hatırası). Burada kitabın
+## (yolun kontrol paneli, şehir brifinginin son hatırası). Burada kitabın
 ## kendisi var: sol sayfada bütün satırlar - ölen ve ayrılanın adı mürekkeple
 ## çizili (`StruckLine`) - her kuşağın başında bir kurdele; sağ sayfada adı
 ## bugün kimin taşıdığı ve kaç kişinin geride kaldığı.
@@ -14,7 +14,7 @@ extends CanvasLayer
 ## (`GraveMark`) ve altında rolü, sebebi, yeri; sağda hikâye satırları - ateş
 ## başında anlatılanlar ve yolun anıtları.
 ##
-## Karar vermiyor, yalnızca okuyor (`CaravanStatusPanel`'in kuralı). Sahnesiz
+## Karar vermiyor, yalnızca okuyor (CityBriefPanel'in kuralı). Sahnesiz
 ## bir `CanvasLayer` (`OnboardingPanel` deseni): yoldan ve şehirden aynı
 ## örnek açılıyor, `Nav` yığınına hiç dokunmuyor. Kapat düğmesi kaydırma
 ## kutusunun dışında (World Navigation Rules); perde ve Esc de kapatıyor.
@@ -301,10 +301,8 @@ static func _story_summary(entry: Dictionary) -> String:
 	# Günün satırı (Y-B08) zaten kısa bir cümle.
 	if String(entry.get("kind", "")) == CaravanLedger.KIND_DIARY:
 		return CaravanLedger.diary_text(entry)
-	var cause := String(entry.get("cause", ""))
-	var summary_key := cause + "_LINE"
-	if String(entry.get("kind", "")) != CaravanLedger.KIND_STORY or cause.is_empty() \
-			or String(TranslationServer.translate(summary_key)) == summary_key:
+	var summary_key := String(CampStory.STORY_LINE_KEYS.get(String(entry.get("cause", "")), ""))
+	if String(entry.get("kind", "")) != CaravanLedger.KIND_STORY or summary_key.is_empty():
 		return ""
 	return String(TranslationServer.translate(summary_key)) % String(entry.get("name", ""))
 

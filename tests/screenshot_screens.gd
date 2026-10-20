@@ -76,6 +76,12 @@ func _init() -> void:
 			for _frame in 10:
 				await process_frame
 			_save("tavern_talk_%dx%d.png" % [view.x, view.y])
+			# Söylentiler sekmesi (N34): satılan söylenti yok, bilinen ve yaşı.
+			screen._talk.close()
+			screen._panel.select_tab(6)
+			for _frame in 20:
+				await process_frame
+			_save("tavern_rumors_%dx%d.png" % [view.x, view.y])
 		screen.queue_free()
 		await _settle()
 	quit()

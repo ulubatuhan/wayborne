@@ -145,7 +145,7 @@ static func get_event(event_id: String) -> GameEvent:
 ## Yolda partiye katılabilecek biri. Şehirdeki tayfa ekranlarının yol
 ## karşılığı: kadro yalnızca şehirde değil, yolda da büyüyebilsin diye.
 static func _road_wanderer() -> GameEvent:
-	var event := _event("evt_road_wanderer", "EVT_WANDERER", 0.9)
+	var event := _event("evt_road_wanderer", "EVT_WANDERER_TITLE", "EVT_WANDERER_TEXT", 0.9)
 	event.cooldown_days = 6
 	# Yolcunun kim olduğu peşinen bilinmiyor: mizacı burada yuvarlanıyor,
 	# seçeneklerin sonuçları o mizaca dallanıyor. Sezgisi kuvvetli bir parti
@@ -208,7 +208,7 @@ static func _road_wanderer() -> GameEvent:
 ## Görmezden gelinen kinci yolcu geri döner - kararın faturası hemen
 ## kesilmiyor, günler sonra kesiliyor (bkz. NpcDisposition).
 static func _wanderer_revenge() -> GameEvent:
-	var event := _event("evt_wanderer_revenge", "EVT_WANDERER_REVENGE", 3.0)
+	var event := _event("evt_wanderer_revenge", "EVT_WANDERER_REVENGE_TITLE", "EVT_WANDERER_REVENGE_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.category = GameEvent.Category.CHAIN
@@ -229,7 +229,7 @@ static func _wanderer_revenge() -> GameEvent:
 	return event
 
 static func _bandit_ambush() -> GameEvent:
-	var event := _event("evt_bandit_ambush", "EVT_AMBUSH", 3.2)
+	var event := _event("evt_bandit_ambush", "EVT_AMBUSH_TITLE", "EVT_AMBUSH_TEXT", 3.2)
 	event.cooldown_days = 1
 	# **Savaş seyrekti ve bu, oyunun en derin sisteminin en az görülen
 	# sistemi olması demekti.** Taban ağırlık yükseltildi, bekleme
@@ -296,7 +296,7 @@ static func _bandit_ambush() -> GameEvent:
 	return event
 
 static func _customs_checkpoint() -> GameEvent:
-	var event := _event("evt_customs_checkpoint", "EVT_CUSTOMS", 1.2)
+	var event := _event("evt_customs_checkpoint", "EVT_CUSTOMS_TITLE", "EVT_CUSTOMS_TEXT", 1.2)
 	# Kaçak taşıyan kervan gümrüğe daha sık takılır (görev Y-C19).
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -358,7 +358,7 @@ static func _customs_checkpoint() -> GameEvent:
 	return event
 
 static func _broken_axle() -> GameEvent:
-	var event := _event("evt_broken_axle", "EVT_AXLE", 1.0)
+	var event := _event("evt_broken_axle", "EVT_AXLE_TITLE", "EVT_AXLE_TEXT", 1.0)
 	event.conditions = _conditions([
 		EventCondition.make("wagons", EventCondition.Op.GREATER_EQUAL, 2),
 	])
@@ -383,7 +383,7 @@ static func _broken_axle() -> GameEvent:
 	return event
 
 static func _storm() -> GameEvent:
-	var event := _event("evt_storm", "EVT_STORM", 1.1)
+	var event := _event("evt_storm", "EVT_STORM_TITLE", "EVT_STORM_TEXT", 1.1)
 	event.cooldown_days = 3
 	event.choices = _choices([
 		_choice("EVT_STORM_OPT_SHELTER", _effects([
@@ -428,7 +428,7 @@ static func _storm_press_on_choice() -> EventChoice:
 	return choice
 
 static func _spoiled_provisions() -> GameEvent:
-	var event := _event("evt_spoiled_provisions", "EVT_SPOILED", 0.9)
+	var event := _event("evt_spoiled_provisions", "EVT_SPOILED_TITLE", "EVT_SPOILED_TEXT", 0.9)
 	event.conditions = _conditions([
 		EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 5),
 	])
@@ -472,7 +472,7 @@ static func _spoiled_provisions() -> GameEvent:
 	return event
 
 static func _stowaway() -> GameEvent:
-	var event := _event("evt_stowaway", "EVT_STOWAWAY", 0.7)
+	var event := _event("evt_stowaway", "EVT_STOWAWAY_TITLE", "EVT_STOWAWAY_TEXT", 0.7)
 	event.fire_only_once = true
 	# Kaçak yolcu da yoldaki yolcu gibi: kim olduğu önceden bilinmiyor.
 	event.immediate_effects = _effects([
@@ -523,7 +523,7 @@ static func _stowaway() -> GameEvent:
 	return event
 
 static func _stowaway_repay() -> GameEvent:
-	var event := _event("evt_stowaway_repay", "EVT_STOWAWAY_REPAY", 3.0)
+	var event := _event("evt_stowaway_repay", "EVT_STOWAWAY_REPAY_TITLE", "EVT_STOWAWAY_REPAY_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.category = GameEvent.Category.CHAIN
@@ -543,7 +543,7 @@ static func _stowaway_repay() -> GameEvent:
 	return event
 
 static func _sick_merchant() -> GameEvent:
-	var event := _event("evt_sick_merchant", "EVT_SICK", 0.9)
+	var event := _event("evt_sick_merchant", "EVT_SICK_TITLE", "EVT_SICK_TEXT", 0.9)
 	event.conditions = _conditions([
 		EventCondition.make("merchants", EventCondition.Op.GREATER_EQUAL, 1),
 	])
@@ -585,7 +585,7 @@ static func _sick_merchant() -> GameEvent:
 	return event
 
 static func _mutiny() -> GameEvent:
-	var event := _event("evt_mutiny", "EVT_MUTINY", 2.0)
+	var event := _event("evt_mutiny", "EVT_MUTINY_TITLE", "EVT_MUTINY_TEXT", 2.0)
 	event.conditions = _conditions([
 		EventCondition.make("morale", EventCondition.Op.LESS_EQUAL, MUTINY_MORALE_THRESHOLD),
 		EventCondition.make("merchants", EventCondition.Op.GREATER_EQUAL, 1),
@@ -644,7 +644,7 @@ static func _mutiny() -> GameEvent:
 	return event
 
 static func _abandoned_wagon() -> GameEvent:
-	var event := _event("evt_abandoned_wagon", "EVT_ABANDONED", 0.8)
+	var event := _event("evt_abandoned_wagon", "EVT_ABANDONED_TITLE", "EVT_ABANDONED_TEXT", 0.8)
 	event.choices = _choices([
 		# Yağmalamak herkesin kabul edeceği bir şey değil: kervanda bunu
 		# uğursuzluk sayan ya da ahlaken doğru bulmayan biri çıkabilir.
@@ -699,7 +699,7 @@ static func _abandoned_loot_choice() -> EventChoice:
 ## bırakabilir. Uykuyu iyi geçirmek İnanç'ın "umutsuzluğa direnç" tarafı -
 ## huzursuz bir gecede kendini toparlayabilmek irade meselesi.
 static func _troubled_night() -> GameEvent:
-	var event := _event("evt_troubled_night", "EVT_TROUBLED_NIGHT", 0.8)
+	var event := _event("evt_troubled_night", "EVT_TROUBLED_NIGHT_TITLE", "EVT_TROUBLED_NIGHT_TEXT", 0.8)
 	event.cooldown_days = 5
 	event.choices = _choices([
 		_choice("EVT_TROUBLED_NIGHT_OPT_WATCH", _effects([
@@ -727,7 +727,7 @@ static func _troubled_night() -> GameEvent:
 ## tükenmiş bir kadro birbirine düşebilir. `stress` bağlamı
 ## GameSession.build_event_context()'ten geliyor.
 static func _stress_brawl() -> GameEvent:
-	var event := _event("evt_stress_brawl", "EVT_BRAWL", 1.3)
+	var event := _event("evt_stress_brawl", "EVT_BRAWL_TITLE", "EVT_BRAWL_TEXT", 1.3)
 	event.conditions = _conditions([
 		EventCondition.make("stress", EventCondition.Op.GREATER_EQUAL, STRESS_BRAWL_THRESHOLD),
 	])
@@ -765,7 +765,7 @@ static func _stress_brawl() -> GameEvent:
 ## bir tılsımla ödüllenir; sonuç tablosu Terkedilmiş Vagon'un aksine
 ## kazanç garantili değil (bkz. EventOutcome ağırlıklı seçim).
 static func _forgotten_cache() -> GameEvent:
-	var event := _event("evt_forgotten_cache", "EVT_CACHE", 0.7)
+	var event := _event("evt_forgotten_cache", "EVT_CACHE_TITLE", "EVT_CACHE_TEXT", 0.7)
 	event.cooldown_days = 5
 	event.choices = _choices([
 		# Toprağın altından her zaman hazine çıkmaz: burası bir mezarlık da
@@ -825,7 +825,7 @@ static func _forgotten_cache_dig_choice() -> EventChoice:
 ## Silah/Zırh'ı yalnızca Kervan Avlusu satmaz - yolda geçen bir gezgin
 ## demirci de bir tanesini elden çıkarabilir, biraz daha pahalıya.
 static func _traveling_tinker() -> GameEvent:
-	var event := _event("evt_traveling_tinker", "EVT_TINKER", 0.7)
+	var event := _event("evt_traveling_tinker", "EVT_TINKER_TITLE", "EVT_TINKER_TEXT", 0.7)
 	event.cooldown_days = 6
 	event.choices = _choices([
 		_gated_choice(
@@ -887,7 +887,7 @@ static func _traveling_tinker() -> GameEvent:
 ## öndeki kestirmeyi biliyor - burada da işe yarıyor, ücretsiz bir gün
 ## kazandırıyor ama tehlikeyi biraz artırıyor. İzci yoksa seçenek kilitli.
 static func _scouted_pass() -> GameEvent:
-	var event := _event("evt_scouted_pass", "EVT_SCOUT_PASS", 0.9)
+	var event := _event("evt_scouted_pass", "EVT_SCOUT_PASS_TITLE", "EVT_SCOUT_PASS_TEXT", 0.9)
 	event.conditions = _conditions([
 		EventCondition.make("days_remaining", EventCondition.Op.GREATER_EQUAL, 2),
 	])
@@ -931,7 +931,7 @@ static func _scouted_pass() -> GameEvent:
 ## o yoldan dönemeyecek olmak, yani ROUTE_CHANGE'in asıl amacı: haritayı
 ## sabit yedi kenar olmaktan çıkarmak.
 static func _landslide() -> GameEvent:
-	var event := _event("evt_landslide", "EVT_LANDSLIDE", 0.7)
+	var event := _event("evt_landslide", "EVT_LANDSLIDE_TITLE", "EVT_LANDSLIDE_TEXT", 0.7)
 	event.cooldown_days = 12
 	event.choices = _choices([
 		# Kervanın gerçekten vagon kaybedebildiği iki yerden biri.
@@ -971,7 +971,7 @@ static func _landslide() -> GameEvent:
 ## kötüye gitmiyorsa dinamik rota bir ceza mekaniği olmaktan çıkıp gerçek
 ## bir dünya katmanı oluyor.
 static func _road_patrol() -> GameEvent:
-	var event := _event("evt_road_patrol", "EVT_PATROL", 0.6)
+	var event := _event("evt_road_patrol", "EVT_PATROL_TITLE", "EVT_PATROL_TEXT", 0.6)
 	event.conditions = _conditions([
 		# Bağlamdaki "danger" 0-1 arası bir oran, yüzde değil - 25 yazmak
 		# olayın hiç ateşlenmemesi demekti (simülatör yakaladı).
@@ -1012,7 +1012,7 @@ static func _road_patrol() -> GameEvent:
 ## kültürden** çıkıp çıkmadığında (bkz. ROLL_ENCOUNTER\'ın kin bayrağı).
 ## Hangi kültürden olursan ol, kendi boyunla karşılaşmak başka bir kapı açar.
 static func _kin_encounter() -> GameEvent:
-	var event := _event("evt_kin_encounter", "EVT_KIN", 0.8)
+	var event := _event("evt_kin_encounter", "EVT_KIN_TITLE", "EVT_KIN_TEXT", 0.8)
 	event.cooldown_days = 8
 	event.immediate_effects = _effects([
 		EventEffect.make(EventEffect.Type.ROLL_ENCOUNTER, 0, "kin"),
@@ -1053,7 +1053,7 @@ static func _kin_encounter() -> GameEvent:
 ## bulmak saf bir Zeka meselesi, parti kararı. Başarısızlık bedavaya
 ## değil: hesabı yanlış tutup yanlış tarafa hak verirsen itibar döner.
 static func _culture_valley_dispute() -> GameEvent:
-	var event := _event("evt_culture_valley_dispute", "EVT_VALLEY_DISPUTE", 0.8)
+	var event := _event("evt_culture_valley_dispute", "EVT_VALLEY_DISPUTE_TITLE", "EVT_VALLEY_DISPUTE_TEXT", 0.8)
 	event.conditions = _conditions([
 		EventCondition.make("is_valley_culture", EventCondition.Op.GREATER_EQUAL, 1),
 		EventCondition.make("merchants", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1085,7 +1085,7 @@ static func _culture_valley_dispute() -> GameEvent:
 ## gerçekten bir dağ geçidi durağının önünden geçilen gün neredeyse kesin
 ## çekiliyor, geçidin gerçekte hiç görünmediği düz bir günde neredeyse hiç.
 static func _culture_highland_challenge() -> GameEvent:
-	var event := _event("evt_culture_highland_challenge", "EVT_HIGHLAND_CHALLENGE", 0.25)
+	var event := _event("evt_culture_highland_challenge", "EVT_HIGHLAND_CHALLENGE_TITLE", "EVT_HIGHLAND_CHALLENGE_TEXT", 0.25)
 	event.conditions = _conditions([
 		EventCondition.make("is_highland_culture", EventCondition.Op.GREATER_EQUAL, 1),
 	])
@@ -1116,7 +1116,7 @@ static func _culture_highland_challenge() -> GameEvent:
 	return event
 
 static func _culture_port_gossip() -> GameEvent:
-	var event := _event("evt_culture_port_gossip", "EVT_PORT_GOSSIP", 0.8)
+	var event := _event("evt_culture_port_gossip", "EVT_PORT_GOSSIP_TITLE", "EVT_PORT_GOSSIP_TEXT", 0.8)
 	event.conditions = _conditions([
 		EventCondition.make("is_port_culture", EventCondition.Op.GREATER_EQUAL, 1),
 	])
@@ -1165,7 +1165,7 @@ static func _port_gossip_listen_choice() -> EventChoice:
 	return choice
 
 static func _culture_fisher_catch() -> GameEvent:
-	var event := _event("evt_culture_fisher_catch", "EVT_FISHER_CATCH", 0.8)
+	var event := _event("evt_culture_fisher_catch", "EVT_FISHER_CATCH_TITLE", "EVT_FISHER_CATCH_TEXT", 0.8)
 	event.conditions = _conditions([
 		EventCondition.make("is_fisher_culture", EventCondition.Op.GREATER_EQUAL, 1),
 	])
@@ -1212,7 +1212,7 @@ static func _culture_fisher_catch() -> GameEvent:
 ## katlıyor: sunak durağının önünden geçilen gün olay neredeyse kesin
 ## çekiliyor, başka hiçbir gün neredeyse hiç çekilmiyor.
 static func _roadside_shrine() -> GameEvent:
-	var event := _event("evt_roadside_shrine", "EVT_SHRINE", 0.15)
+	var event := _event("evt_roadside_shrine", "EVT_SHRINE_TITLE", "EVT_SHRINE_TEXT", 0.15)
 	event.cooldown_days = 6
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -1248,7 +1248,7 @@ static func _roadside_shrine() -> GameEvent:
 ## olumlu ucu - iyi bir seçim de günler sonra bir karşılık bulabilir, kötü bir
 ## seçimin tekelinde olmayan bir mekanik (bkz. _pilgrim_blessing).
 static func _pilgrim_encounter() -> GameEvent:
-	var event := _event("evt_pilgrim_encounter", "EVT_PILGRIM", 0.7)
+	var event := _event("evt_pilgrim_encounter", "EVT_PILGRIM_TITLE", "EVT_PILGRIM_TEXT", 0.7)
 	event.cooldown_days = 8
 	event.choices = _choices([
 		_choice("EVT_PILGRIM_OPT_ESCORT", _effects([
@@ -1280,7 +1280,7 @@ static func _pilgrim_encounter() -> GameEvent:
 ## Hacının teşekkürü - `evt_wanderer_revenge`'in bir faturaya dönüşmesi gibi,
 ## bu da günler sonra gelir, ama bir bedel değil bir karşılık.
 static func _pilgrim_blessing() -> GameEvent:
-	var event := _event("evt_pilgrim_blessing", "EVT_PILGRIM_BLESSING", 3.0)
+	var event := _event("evt_pilgrim_blessing", "EVT_PILGRIM_BLESSING_TITLE", "EVT_PILGRIM_BLESSING_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.category = GameEvent.Category.CHAIN
@@ -1301,7 +1301,7 @@ static func _pilgrim_blessing() -> GameEvent:
 ## Kaçmak/beslemek savaşsız atlatır ama bedelsiz değil - besleme erzak
 ## yer, kaçış tehlikeyi artırır (ürkütülen hayvanlar iz bırakır).
 static func _wild_animal() -> GameEvent:
-	var event := _event("evt_wild_animal", "EVT_WILD", 2.2)
+	var event := _event("evt_wild_animal", "EVT_WILD_TITLE", "EVT_WILD_TEXT", 2.2)
 	event.cooldown_days = 2
 	# Vahşi hayvan tehlikeyle değil ıssızlıkla gelir, ama sıklık
 	# gerekçesi haydutunkiyle aynı (bkz. _bandit_ambush).
@@ -1347,7 +1347,7 @@ static func _wild_animal() -> GameEvent:
 ## artmıyor - bu bir tehdit değil bir fırsat, kaçırmak yalnızca hayal
 ## kırıklığı.
 static func _hunting_trip() -> GameEvent:
-	var event := _event("evt_hunting_trip", "EVT_HUNTING_TRIP", 1.0)
+	var event := _event("evt_hunting_trip", "EVT_HUNTING_TRIP_TITLE", "EVT_HUNTING_TRIP_TEXT", 1.0)
 	event.cooldown_days = 4
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -1379,7 +1379,7 @@ static func _hunting_trip() -> GameEvent:
 ## yükseltmez, kırar (bkz. road_journey.gd GUARD_VICTORY_REPUTATION) -
 ## kanunla çatışmanın haydutla çatışmaktan farkı burada.
 static func _guard_patrol() -> GameEvent:
-	var event := _event("evt_guard_patrol", "EVT_GUARD_PATROL", 0.9)
+	var event := _event("evt_guard_patrol", "EVT_GUARD_PATROL_TITLE", "EVT_GUARD_PATROL_TEXT", 0.9)
 	event.conditions = _conditions([
 		EventCondition.make("reputation", EventCondition.Op.LESS_EQUAL, 10),
 	])
@@ -1420,7 +1420,7 @@ static func _guard_patrol() -> GameEvent:
 ## `_apply_replan()`'dan, kervan gerçekten yön değiştirdiği anda doğrudan
 ## sunulur, bir olay değil bir sonuç olduğu için.
 static func _route_diversion() -> GameEvent:
-	var event := _event("evt_route_diversion", "EVT_ROUTE_DIVERSION", 0.0)
+	var event := _event("evt_route_diversion", "EVT_ROUTE_DIVERSION_TITLE", "EVT_ROUTE_DIVERSION_TEXT", 0.0)
 	event.triggered_only = true
 	event.choices = _choices([
 		_gated_choice(
@@ -1441,7 +1441,7 @@ static func _route_diversion() -> GameEvent:
 ## zaten var, burada yalnızca yeni bir kapı. Zaman zaten her olay gibi
 ## `_present_event()`'in `EVENT_HOURS`'u üzerinden tüketiliyor.
 static func _forage() -> GameEvent:
-	var event := _event("evt_forage", "EVT_FORAGE", 1.1)
+	var event := _event("evt_forage", "EVT_FORAGE_TITLE", "EVT_FORAGE_TEXT", 1.1)
 	event.cooldown_days = 3
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -1483,7 +1483,7 @@ static func _forage() -> GameEvent:
 ## o mizaçtaki tüccardır (MERCHANT_LEAVE'in text_value'su).
 
 static func _merchant_night_flight() -> GameEvent:
-	var event := _event("evt_merchant_night_flight", "EVT_MERCHANT_FLIGHT", 0.7)
+	var event := _event("evt_merchant_night_flight", "EVT_MERCHANT_FLIGHT_TITLE", "EVT_MERCHANT_FLIGHT_TEXT", 0.7)
 	event.cooldown_days = 6
 	event.conditions = _conditions([
 		EventCondition.make("merchant_thief", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1512,7 +1512,7 @@ static func _merchant_night_flight() -> GameEvent:
 	return event
 
 static func _merchant_cold_feet() -> GameEvent:
-	var event := _event("evt_merchant_cold_feet", "EVT_MERCHANT_FEET", 0.8)
+	var event := _event("evt_merchant_cold_feet", "EVT_MERCHANT_FEET_TITLE", "EVT_MERCHANT_FEET_TEXT", 0.8)
 	event.cooldown_days = 6
 	event.conditions = _conditions([
 		EventCondition.make("merchant_desperate", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1539,7 +1539,7 @@ static func _merchant_cold_feet() -> GameEvent:
 	return event
 
 static func _merchant_grudge() -> GameEvent:
-	var event := _event("evt_merchant_grudge", "EVT_MERCHANT_GRUDGE", 0.6)
+	var event := _event("evt_merchant_grudge", "EVT_MERCHANT_GRUDGE_TITLE", "EVT_MERCHANT_GRUDGE_TEXT", 0.6)
 	event.cooldown_days = 8
 	event.conditions = _conditions([
 		EventCondition.make("merchant_vengeful", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1565,7 +1565,7 @@ static func _merchant_grudge() -> GameEvent:
 	return event
 
 static func _merchant_shares_bread() -> GameEvent:
-	var event := _event("evt_merchant_shares_bread", "EVT_MERCHANT_BREAD", 0.9)
+	var event := _event("evt_merchant_shares_bread", "EVT_MERCHANT_BREAD_TITLE", "EVT_MERCHANT_BREAD_TEXT", 0.9)
 	event.cooldown_days = 8
 	event.conditions = _conditions([
 		EventCondition.make("merchant_loyal", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1591,7 +1591,7 @@ const VILLAGE_LARGE_COST: int = 70
 const VILLAGE_LARGE_PROVISIONS: int = 15
 
 static func _village_provisions() -> GameEvent:
-	var event := _event("evt_village_provisions", "EVT_VILLAGE_FOOD", 0.2)
+	var event := _event("evt_village_provisions", "EVT_VILLAGE_FOOD_TITLE", "EVT_VILLAGE_FOOD_TEXT", 0.2)
 	event.cooldown_days = 3
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -1643,7 +1643,7 @@ static func _village_provisions() -> GameEvent:
 ## aldığı hemen söylenmez; ertesi güne değil, `UNLOCK_EVENT` ile açılan
 ## soruşturmaya bırakılır.
 static func _party_theft() -> GameEvent:
-	var event := _event("evt_party_theft", "EVT_PARTY_THEFT", 1.0)
+	var event := _event("evt_party_theft", "EVT_PARTY_THEFT_TITLE", "EVT_PARTY_THEFT_TEXT", 1.0)
 	event.cooldown_days = 10
 	event.choices = _choices([
 		_choice("EVT_PARTY_THEFT_OPT_INVESTIGATE", _effects([
@@ -1665,7 +1665,7 @@ static func _party_theft() -> GameEvent:
 ## giriyorsun" sorusunu check'in kendi yüzde gösterimiyle birlikte iki
 ## kez, iki farklı açıdan söylüyor (flavor + sayı).
 static func _party_investigation() -> GameEvent:
-	var event := _event("evt_party_investigation", "EVT_PARTY_INVESTIGATION", 2.0)
+	var event := _event("evt_party_investigation", "EVT_PARTY_INVESTIGATION_TITLE", "EVT_PARTY_INVESTIGATION_TEXT", 2.0)
 	event.triggered_only = true
 	event.conditions = _conditions([
 		EventCondition.make("theft_pending", EventCondition.Op.HAS_FLAG),
@@ -1698,7 +1698,7 @@ static func _party_investigation() -> GameEvent:
 ## Askeri konvoy - `EVENT_ROAD_MARKER_KIND`'de mevcut "guard" kategorisini
 ## yeniden kullanır (bkz. road_journey.gd), yeni bir figür çizmiyor.
 static func _military_convoy() -> GameEvent:
-	var event := _event("evt_military_convoy", "EVT_MILITARY_CONVOY", 0.7)
+	var event := _event("evt_military_convoy", "EVT_MILITARY_CONVOY_TITLE", "EVT_MILITARY_CONVOY_TEXT", 0.7)
 	event.cooldown_days = 8
 	event.choices = _choices([
 		_choice("EVT_MILITARY_CONVOY_OPT_YIELD", _effects([
@@ -1736,7 +1736,7 @@ static func _military_convoy() -> GameEvent:
 ## Mülteci kolonu - mevcut "traveler" kategorisini yeniden kullanır
 ## (bkz. `evt_road_wanderer`).
 static func _refugee_column() -> GameEvent:
-	var event := _event("evt_refugee_column", "EVT_REFUGEE_COLUMN", 0.7)
+	var event := _event("evt_refugee_column", "EVT_REFUGEE_COLUMN_TITLE", "EVT_REFUGEE_COLUMN_TEXT", 0.7)
 	event.cooldown_days = 8
 	event.choices = _choices([
 		_gated_choice(
@@ -1780,7 +1780,7 @@ static func _refugee_column() -> GameEvent:
 ## Başka bir tüccar kervanı - mevcut "traveler" kategorisini yeniden
 ## kullanır.
 static func _merchant_caravan() -> GameEvent:
-	var event := _event("evt_merchant_caravan", "EVT_MERCHANT_CARAVAN", 0.7)
+	var event := _event("evt_merchant_caravan", "EVT_MERCHANT_CARAVAN_TITLE", "EVT_MERCHANT_CARAVAN_TEXT", 0.7)
 	event.cooldown_days = 8
 	event.choices = _choices([
 		# Yol üstü takas Karizma meselesi - iyi bir pazarlıkçı kervandan
@@ -1815,7 +1815,7 @@ static func _merchant_caravan() -> GameEvent:
 ## nadir ve istenmeyen (LORE.md §3.3); biri yolu kesince ya parası verilir,
 ## ya kaçılır, ya da savaşılır - büyüleri savaşta gerçekten çalışır.
 static func _rogue_mage() -> GameEvent:
-	var event := _event("evt_rogue_mage", "EVT_ROGUE_MAGE", 0.08)
+	var event := _event("evt_rogue_mage", "EVT_ROGUE_MAGE_TITLE", "EVT_ROGUE_MAGE_TEXT", 0.08)
 	event.fire_only_once = true
 	event.conditions = _conditions([
 		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
@@ -1849,7 +1849,7 @@ static func _rogue_mage() -> GameEvent:
 ## Kırılma yolda (görev Y-D06): ekran efekti değil, bir olay. Kırılmış biri
 ## gece kervanın ortasında patlar; lider ne yapacağını seçer.
 static func _broken_outburst() -> GameEvent:
-	var event := _event("evt_broken_outburst", "EVT_BROKEN", 0.9)
+	var event := _event("evt_broken_outburst", "EVT_BROKEN_TITLE", "EVT_BROKEN_TEXT", 0.9)
 	event.cooldown_days = 5
 	event.conditions = _conditions([
 		EventCondition.make("broken_count", EventCondition.Op.GREATER_EQUAL, 1),
@@ -1881,7 +1881,7 @@ static func _broken_outburst() -> GameEvent:
 ## bırakır, beklemek ve köprü aramak gün yer (gönüllü uzatma). Kimse ölmez,
 ## hiçbir vagon yok olmaz.
 static func _river_ford() -> GameEvent:
-	var event := _event("evt_river_ford", "EVT_FORD", 0.2)
+	var event := _event("evt_river_ford", "EVT_FORD_TITLE", "EVT_FORD_TEXT", 0.2)
 	event.cooldown_days = 2
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -1933,7 +1933,7 @@ static func _river_ford() -> GameEvent:
 ## (evt_wanderer_revenge deseni: UNLOCK_EVENT ile açılan, yalnız tetiklenen kart).
 
 static func _convoy_repaid() -> GameEvent:
-	var event := _event("evt_convoy_repaid", "EVT_CONVOY_REPAID", 3.0)
+	var event := _event("evt_convoy_repaid", "EVT_CONVOY_REPAID_TITLE", "EVT_CONVOY_REPAID_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.choices = _choices([
@@ -1945,7 +1945,7 @@ static func _convoy_repaid() -> GameEvent:
 	return event
 
 static func _convoy_search() -> GameEvent:
-	var event := _event("evt_convoy_search", "EVT_CONVOY_SEARCH", 3.0)
+	var event := _event("evt_convoy_search", "EVT_CONVOY_SEARCH_TITLE", "EVT_CONVOY_SEARCH_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.choices = _choices([
@@ -1973,7 +1973,7 @@ static func _convoy_search() -> GameEvent:
 	return event
 
 static func _refugee_gratitude() -> GameEvent:
-	var event := _event("evt_refugee_gratitude", "EVT_REFUGEE_GRATITUDE", 3.0)
+	var event := _event("evt_refugee_gratitude", "EVT_REFUGEE_GRATITUDE_TITLE", "EVT_REFUGEE_GRATITUDE_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.choices = _choices([
@@ -1990,7 +1990,7 @@ static func _refugee_gratitude() -> GameEvent:
 	return event
 
 static func _rival_slander() -> GameEvent:
-	var event := _event("evt_rival_slander", "EVT_RIVAL_SLANDER", 3.0)
+	var event := _event("evt_rival_slander", "EVT_RIVAL_SLANDER_TITLE", "EVT_RIVAL_SLANDER_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.choices = _choices([
@@ -2072,7 +2072,7 @@ static func get_culture_framed_text_key(event_id: String, culture_id: String) ->
 ## Rules), o yüzden savaş bölgesi "daha çok haydut/devriye" olarak
 ## kendiliğinden hissettiriyor.
 static func _regional_war_news() -> GameEvent:
-	var event := _event("evt_regional_war_news", "EVT_WAR_NEWS", 0.35)
+	var event := _event("evt_regional_war_news", "EVT_WAR_NEWS_TITLE", "EVT_WAR_NEWS_TEXT", 0.35)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("route_has_regional_war", EventCondition.Op.LESS_EQUAL, 0.0),
@@ -2095,7 +2095,7 @@ static func _regional_war_news() -> GameEvent:
 ## CITY_PRICE_MULTIPLIER, gerçek fiyat etkisi MarketConditions.add_shock
 ## üstünden - iki ayrı fiyat motoru icat edilmedi).
 static func _plague_outbreak_news() -> GameEvent:
-	var event := _event("evt_plague_outbreak_news", "EVT_PLAGUE_NEWS", 0.3)
+	var event := _event("evt_plague_outbreak_news", "EVT_PLAGUE_NEWS_TITLE", "EVT_PLAGUE_NEWS_TEXT", 0.3)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("destination_has_plague", EventCondition.Op.LESS_EQUAL, 0.0),
@@ -2116,7 +2116,7 @@ static func _plague_outbreak_news() -> GameEvent:
 ## Ticaret fuarı - vebanın olumlu ikizi, aynı vokabüler (MARKET_SHOCK'ın
 ## kendisi, WorldEvents üstünden), ters yönde.
 static func _trade_fair_news() -> GameEvent:
-	var event := _event("evt_trade_fair_news", "EVT_TRADE_FAIR_NEWS", 0.3)
+	var event := _event("evt_trade_fair_news", "EVT_TRADE_FAIR_NEWS_TITLE", "EVT_TRADE_FAIR_NEWS_TEXT", 0.3)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("destination_has_trade_fair", EventCondition.Op.LESS_EQUAL, 0.0),
@@ -2138,7 +2138,7 @@ static func _trade_fair_news() -> GameEvent:
 ## ayrı bir olay (`evt_bandit_tribute_toll`), bu yalnızca haberi veriyor
 ## ve rota tehlikesine bir pay ekliyor.
 static func _bandit_tribute_zone_news() -> GameEvent:
-	var event := _event("evt_bandit_tribute_zone_news", "EVT_TRIBUTE_NEWS", 0.3)
+	var event := _event("evt_bandit_tribute_zone_news", "EVT_TRIBUTE_NEWS_TITLE", "EVT_TRIBUTE_NEWS_TEXT", 0.3)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("route_has_bandit_tribute", EventCondition.Op.LESS_EQUAL, 0.0),
@@ -2162,7 +2162,7 @@ static func _bandit_tribute_zone_news() -> GameEvent:
 ## OPT_HAGGLE'ıyla aynı vokabüleri kullanmıyor çünkü burada pazarlık
 ## payı yok - bir haraç, teklif değil.
 static func _bandit_tribute_toll() -> GameEvent:
-	var event := _event("evt_bandit_tribute_toll", "EVT_TRIBUTE_TOLL", 1.6)
+	var event := _event("evt_bandit_tribute_toll", "EVT_TRIBUTE_TOLL_TITLE", "EVT_TRIBUTE_TOLL_TEXT", 1.6)
 	event.cooldown_days = 3
 	event.conditions = _conditions([
 		EventCondition.make("route_has_bandit_tribute", EventCondition.Op.GREATER_EQUAL, 1.0),
@@ -2187,7 +2187,7 @@ static func _bandit_tribute_toll() -> GameEvent:
 ## iyileştirmek pahalıdır. Aynı zamanda konak durağının ilk mekanik
 ## karşılığı (bkz. near_mezra).
 static func _leave_the_wounded() -> GameEvent:
-	var event := _event("evt_leave_the_wounded", "EVT_LEAVE_WOUNDED", 0.3)
+	var event := _event("evt_leave_the_wounded", "EVT_LEAVE_WOUNDED_TITLE", "EVT_LEAVE_WOUNDED_TEXT", 0.3)
 	event.cooldown_days = 10
 	event.conditions = _conditions([
 		EventCondition.make("weakest_companion_hp_ratio", EventCondition.Op.LESS_EQUAL, 0.35),
@@ -2224,7 +2224,7 @@ static func _leave_the_wounded() -> GameEvent:
 ## Geride bırakılanın haberi, günler sonra. Bir fatura değil bir hesap:
 ## köy onu ya ayağa kaldırdı ya gömdü - oyuncu hangisi olduğunu seçmiyor.
 static func _left_behind_return() -> GameEvent:
-	var event := _event("evt_left_behind_return", "EVT_LEFT_BEHIND_RETURN", 3.0)
+	var event := _event("evt_left_behind_return", "EVT_LEFT_BEHIND_RETURN_TITLE", "EVT_LEFT_BEHIND_RETURN_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2250,7 +2250,7 @@ static func _left_behind_return() -> GameEvent:
 ## profiteering_sales): vebalı ya da savaşın kestiği bir şehre şişmiş fiyatla
 ## mal satan kervanı bir mülteci kolu tanıyor.
 static func _profiteer_recognized() -> GameEvent:
-	var event := _event("evt_profiteer_recognized", "EVT_PROFITEER", 1.2)
+	var event := _event("evt_profiteer_recognized", "EVT_PROFITEER_TITLE", "EVT_PROFITEER_TEXT", 1.2)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("profiteering_sales", EventCondition.Op.GREATER_EQUAL, 3),
@@ -2274,7 +2274,7 @@ static func _profiteer_recognized() -> GameEvent:
 ## Karakol durağının kartı: Zeka check'i (defterle, yazıyla tartışmak) ya
 ## da isimli bir bedel - en dayanıklı olan garnizonla geceyi nöbette geçirir.
 static func _frontier_outpost() -> GameEvent:
-	var event := _event("evt_frontier_outpost", "EVT_OUTPOST", 0.25)
+	var event := _event("evt_frontier_outpost", "EVT_OUTPOST_TITLE", "EVT_OUTPOST_TEXT", 0.25)
 	event.cooldown_days = 6
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -2308,7 +2308,7 @@ static func _frontier_outpost() -> GameEvent:
 ## (Dayanıklılık check'i) - başarırsa madenciler borcunu öder, başaramazsa
 ## o kişi yaralı çıkar. Yürüyüp geçmek de bir seçim, sesi duyduktan sonra.
 static func _mine_collapse() -> GameEvent:
-	var event := _event("evt_mine_collapse", "EVT_MINE", 0.25)
+	var event := _event("evt_mine_collapse", "EVT_MINE_TITLE", "EVT_MINE_TEXT", 0.25)
 	event.cooldown_days = 8
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -2344,7 +2344,7 @@ static func _mine_collapse() -> GameEvent:
 ## geçit bulabilir (Bilgelik), en çevik olan tahtaları önce yürüyüp
 ## sınayabilir (isimli bir risk), ya da kervan dolaşır.
 static func _failing_bridge() -> GameEvent:
-	var event := _event("evt_failing_bridge", "EVT_BRIDGE", 0.25)
+	var event := _event("evt_failing_bridge", "EVT_BRIDGE_TITLE", "EVT_BRIDGE_TEXT", 0.25)
 	event.cooldown_days = 6
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -2380,7 +2380,7 @@ static func _failing_bridge() -> GameEvent:
 ## tarafından hatırlanır. Zincirin sonu bayrakları temizler, yani sonraki
 ## kuşaklar aynı yolu yeniden yürüyebilir.
 static func _grave_on_the_road() -> GameEvent:
-	var event := _event("evt_grave_on_the_road", "EVT_GRAVE", 0.8)
+	var event := _event("evt_grave_on_the_road", "EVT_GRAVE_TITLE", "EVT_GRAVE_TEXT", 0.8)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
 		EventCondition.make("companions_died", EventCondition.Op.GREATER_EQUAL, 1),
@@ -2409,7 +2409,7 @@ static func _grave_on_the_road() -> GameEvent:
 	return event
 
 static func _grave_keeper() -> GameEvent:
-	var event := _event("evt_grave_keeper", "EVT_GRAVE_KEEPER", 3.0)
+	var event := _event("evt_grave_keeper", "EVT_GRAVE_KEEPER_TITLE", "EVT_GRAVE_KEEPER_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2453,7 +2453,7 @@ static func _grave_keeper() -> GameEvent:
 	return event
 
 static func _grave_offering() -> GameEvent:
-	var event := _event("evt_grave_offering", "EVT_GRAVE_OFFERING", 3.0)
+	var event := _event("evt_grave_offering", "EVT_GRAVE_OFFERING_TITLE", "EVT_GRAVE_OFFERING_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2483,7 +2483,7 @@ static func _grave_offering() -> GameEvent:
 ## saklamak iyilik, ama devriye gelir; yalanın tutarsa bir borç doğar,
 ## tutmazsa kanunla dövüşürsün (muhafız zaferi itibar kaybettirir).
 static func _deserter_plea() -> GameEvent:
-	var event := _event("evt_deserter_plea", "EVT_DESERTER", 1.6)
+	var event := _event("evt_deserter_plea", "EVT_DESERTER_TITLE", "EVT_DESERTER_TEXT", 1.6)
 	event.cooldown_days = 15
 	event.conditions = _conditions([
 		EventCondition.make("route_has_regional_war", EventCondition.Op.GREATER_EQUAL, 1),
@@ -2509,7 +2509,7 @@ static func _deserter_plea() -> GameEvent:
 	return event
 
 static func _deserter_search() -> GameEvent:
-	var event := _event("evt_deserter_search", "EVT_DESERTER_SEARCH", 3.0)
+	var event := _event("evt_deserter_search", "EVT_DESERTER_SEARCH_TITLE", "EVT_DESERTER_SEARCH_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2538,7 +2538,7 @@ static func _deserter_search() -> GameEvent:
 	return event
 
 static func _deserter_debt() -> GameEvent:
-	var event := _event("evt_deserter_debt", "EVT_DESERTER_DEBT", 3.0)
+	var event := _event("evt_deserter_debt", "EVT_DESERTER_DEBT_TITLE", "EVT_DESERTER_DEBT_TEXT", 3.0)
 	event.triggered_only = true
 	event.fire_only_once = true
 	event.category = GameEvent.Category.CHAIN
@@ -2570,7 +2570,7 @@ static func _deserter_debt() -> GameEvent:
 ## vahşi hayvan savaşı - ormanda üç kurtluk bir sürü (bkz. build_wildlife_
 ## squad'ın biyom parametresi).
 static func _carcass_on_road() -> GameEvent:
-	var event := _event("evt_carcass_on_road", "EVT_CARCASS", 0.9)
+	var event := _event("evt_carcass_on_road", "EVT_CARCASS_TITLE", "EVT_CARCASS_TEXT", 0.9)
 	event.cooldown_days = 12
 	event.conditions = _conditions([
 		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.3),
@@ -2589,7 +2589,7 @@ static func _carcass_on_road() -> GameEvent:
 	return event
 
 static func _wolves_follow() -> GameEvent:
-	var event := _event("evt_wolves_follow", "EVT_WOLVES_FOLLOW", 3.0)
+	var event := _event("evt_wolves_follow", "EVT_WOLVES_FOLLOW_TITLE", "EVT_WOLVES_FOLLOW_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2624,7 +2624,7 @@ static func _wolves_follow() -> GameEvent:
 	return event
 
 static func _wolf_pack() -> GameEvent:
-	var event := _event("evt_wolf_pack", "EVT_WOLF_PACK", 3.0)
+	var event := _event("evt_wolf_pack", "EVT_WOLF_PACK_TITLE", "EVT_WOLF_PACK_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2654,7 +2654,7 @@ static func _wolf_pack() -> GameEvent:
 ## Vagon teslimi bilerek yok - yolda kaybedilen vagonun tayfası deftere ölü
 ## yazılıyor, el konulan bir vagon için bu yanlış bir hatıra olurdu.
 static func _creditor_rider() -> GameEvent:
-	var event := _event("evt_creditor_rider", "EVT_CREDITOR", 1.5)
+	var event := _event("evt_creditor_rider", "EVT_CREDITOR_TITLE", "EVT_CREDITOR_TEXT", 1.5)
 	event.cooldown_days = 15
 	event.conditions = _conditions([
 		EventCondition.make("debt_overdue", EventCondition.Op.GREATER_EQUAL, 1.0),
@@ -2676,7 +2676,7 @@ static func _creditor_rider() -> GameEvent:
 	return event
 
 static func _bailiffs_at_camp() -> GameEvent:
-	var event := _event("evt_bailiffs_at_camp", "EVT_BAILIFFS", 3.0)
+	var event := _event("evt_bailiffs_at_camp", "EVT_BAILIFFS_TITLE", "EVT_BAILIFFS_TEXT", 3.0)
 	event.triggered_only = true
 	event.category = GameEvent.Category.CHAIN
 	event.conditions = _conditions([
@@ -2726,11 +2726,13 @@ static func _bailiffs_at_camp() -> GameEvent:
 	])
 	return event
 
-static func _event(event_id: String, key_prefix: String, base_weight: float) -> GameEvent:
+## Anahtarlar tam yazılır, çalışma anında birleştirilmez (Localization Rules:
+## tanımsız anahtar taraması ve çevirmen araması ancak böyle bulur; görev 4.4).
+static func _event(event_id: String, title_key: String, text_key: String, base_weight: float) -> GameEvent:
 	var event := GameEvent.new()
 	event.event_id = event_id
-	event.title_key = "%s_TITLE" % key_prefix
-	event.text_key = "%s_TEXT" % key_prefix
+	event.title_key = title_key
+	event.text_key = text_key
 	event.base_weight = base_weight
 	return event
 

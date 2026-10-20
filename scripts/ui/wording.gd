@@ -68,12 +68,24 @@ static func gauge_tooltip(label: String, kind: String, value: float, max_value: 
 
 ## Anahtarlar tam yazılı (Localization Rules: çalışırken birleştirilmez):
 ## [yukarı küçük, yukarı büyük, aşağı küçük, aşağı büyük].
+const PROVISIONS: String = "provisions"
+const REPUTATION: String = "reputation"
+const GOLD: String = "gold"
 const CHANGE_KEYS: Dictionary = {
 	MORALE: ["WORD_MORALE_UP_SMALL", "WORD_MORALE_UP_BIG", "WORD_MORALE_DOWN_SMALL", "WORD_MORALE_DOWN_BIG"],
 	STRESS: ["WORD_STRESS_UP_SMALL", "WORD_STRESS_UP_BIG", "WORD_STRESS_DOWN_SMALL", "WORD_STRESS_DOWN_BIG"],
+	PROVISIONS: ["WORD_PROVISIONS_UP_SMALL", "WORD_PROVISIONS_UP_BIG", "WORD_PROVISIONS_DOWN_SMALL", "WORD_PROVISIONS_DOWN_BIG"],
+	DANGER: ["WORD_DANGER_UP_SMALL", "WORD_DANGER_UP_BIG", "WORD_DANGER_DOWN_SMALL", "WORD_DANGER_DOWN_BIG"],
+	REPUTATION: ["WORD_REPUTATION_UP_SMALL", "WORD_REPUTATION_UP_BIG", "WORD_REPUTATION_DOWN_SMALL", "WORD_REPUTATION_DOWN_BIG"],
+	GOLD: ["WORD_GOLD_UP_SMALL", "WORD_GOLD_UP_BIG", "WORD_GOLD_DOWN_SMALL", "WORD_GOLD_DOWN_BIG"],
 }
+## Neyin "büyük" sayıldığı türüne göre (Y-H03): beş altın küçük, beş itibar büyük.
+const BIG_CHANGES: Dictionary = {PROVISIONS: 10, DANGER: 10, REPUTATION: 3, GOLD: 50}
+## Sayının birimi parantezde (tehlike yüzde).
+const CHANGE_SUFFIX: Dictionary = {DANGER: "%"}
 
 ## Etki satırı: "Moral sarsıldı (-10)". Yön ve büyüklük kelimede, sayı parantezde.
 static func change_line(kind: String, amount: int) -> String:
-	var slot := (0 if amount > 0 else 2) + (1 if absi(amount) >= BIG_CHANGE else 0)
-	return "%s (%+d)" % [TranslationServer.translate(String(CHANGE_KEYS[kind][slot])), amount]
+	var big := int(BIG_CHANGES.get(kind, BIG_CHANGE))
+	var slot := (0 if amount > 0 else 2) + (1 if absi(amount) >= big else 0)
+	return "%s (%+d%s)" % [TranslationServer.translate(String(CHANGE_KEYS[kind][slot])), amount, String(CHANGE_SUFFIX.get(kind, ""))]

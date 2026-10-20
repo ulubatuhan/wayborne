@@ -12,9 +12,6 @@ extends Control
 ## yapılır. Bilgi kalıcıdır (bkz. GameSession.known_routes), rota simetrik
 ## olduğu için öğrenince iki yön de kaydolur.
 
-const BASE_RUMOR_COST: int = 10
-const PER_DAY_RUMOR_COST: int = 5
-
 ## Bir konuğa ısmarlanan içkinin bedeli; içen konuk bildiğini daha kolay söyler.
 const DRINK_COST: int = 3
 ## Biri yollardan bildiğini söyler mi: rolüne göre (meyhaneci ve ozan her şeyi
@@ -45,6 +42,7 @@ var _price_rumor_list: VBoxContainer
 ## Bu gün kime içki ısmarlandı, kime yol soruldu (kişi kimliği -> true).
 var _treated: Dictionary = {}
 var _asked: Dictionary = {}
+var _asked_prices: Dictionary = {}
 var _talk: DialoguePanel
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
@@ -243,6 +241,8 @@ func _talk_choices(character: CharacterData) -> Array:
 		choices.append(drink)
 	if not _asked.has(character.character_id):
 		choices.append({"id": "roads", "text": tr("UI_TALK_ROADS")})
+	if not _asked_prices.has(character.character_id):
+		choices.append({"id": "prices", "text": tr("UI_TALK_PRICES")})
 	choices.append({"id": "bye", "text": tr("UI_TALK_BYE")})
 	return choices
 
@@ -257,6 +257,10 @@ func _on_talk_choice(id: String, character: CharacterData, role: String) -> void
 			_asked[character.character_id] = true
 			_talk.say(_road_news(character, role), _talk_choices(character))
 			_refresh_rows()
+		"prices":
+			_asked_prices[character.character_id] = true
+			_talk.say(_price_news(character, role), _talk_choices(character))
+			_refresh_price_rumors()
 		_:
 			_talk.close()
 
@@ -265,7 +269,7 @@ func _on_talk_choice(id: String, character: CharacterData, role: String) -> void
 func _road_news(character: CharacterData, role: String) -> String:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("tavern_news|%s|%d" % [character.character_id, _session.total_days_elapsed])
-	var chance := float(NEWS_CHANCE.get(role, 0.35)) + (NEWS_DRINK_BONUS if _treated.has(character.character_id) else 0.0)
+	var chance := _news_chance(character, role)
 	var unknown: Array[TravelRoute] = []
 	for route in WorldMapData.get_routes_from(_session.current_location_id):
 		if not _session.is_route_known(_session.current_location_id, route.to_location_id):
@@ -279,6 +283,29 @@ func _road_news(character: CharacterData, role: String) -> String:
 		destination.location_name if destination != null else route.to_location_id,
 		_session.get_route_travel_days(route), int(round(_session.get_route_danger(route) * 100.0)),
 	]
+
+## Birinin bildiğini söyleme şansı: rolü, içki, kervanın kültürü ve tellalı.
+func _news_chance(character: CharacterData, role: String) -> float:
+	var chance := float(NEWS_CHANCE.get(role, 0.35)) + _session.get_news_chance_bonus()
+	if _treated.has(character.character_id):
+		chance += NEWS_DRINK_BONUS
+	return minf(chance, 0.95)
+
+## Komşu bir pazarın fiyatları (Y-C10 söylentisi, N34): duyulan söylenti
+## dörtte bir yanlış olabilir; deftere "söylenti" diye yazılır.
+func _price_news(character: CharacterData, role: String) -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("tavern_prices|%s|%d" % [character.character_id, _session.total_days_elapsed])
+	var open: Array[String] = []
+	for route in WorldMapData.get_routes_from(_session.current_location_id):
+		if _session.get_price_rumor_block_reason(route.to_location_id).is_empty():
+			open.append(route.to_location_id)
+	if open.is_empty() or rng.randf() >= _news_chance(character, role):
+		return tr("UI_TALK_PRICE_NONE")
+	var target: String = open[rng.randi_range(0, open.size() - 1)]
+	_session.hear_price_rumor(target)
+	var destination := WorldMapData.get_location_by_id(target)
+	return tr("UI_TALK_PRICE_NEWS") % (destination.location_name if destination != null else target)
 
 func _refresh_feast() -> void:
 	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [
@@ -309,30 +336,16 @@ func _build_row(route: TravelRoute) -> HBoxContainer:
 	status_label.custom_minimum_size = Vector2(220, 0)
 	row.add_child(status_label)
 
-	var buy_button := Button.new()
-	buy_button.pressed.connect(_on_buy_pressed.bind(route))
-	row.add_child(buy_button)
-
 	_rows.append({
 		"route": route,
 		"status_label": status_label,
-		"buy_button": buy_button,
 	})
 	return row
-
-## Liman şehrinden gelen bir kervancı her dedikoduyu daha ucuza duyar
-## (bkz. Culture.rumor_cost_multiplier).
-func _rumor_cost(route: TravelRoute) -> int:
-	var base_cost := BASE_RUMOR_COST + route.travel_days * PER_DAY_RUMOR_COST
-	var cost := float(base_cost) * _session.get_rumor_cost_multiplier()
-	cost *= 1.0 - _session.get_duty_discount(DutyCatalog.TELLAL)
-	return maxi(1, int(round(cost)))
 
 func _refresh_rows() -> void:
 	for row in _rows:
 		var route: TravelRoute = row.route
 		var status_label: Label = row.status_label
-		var buy_button: Button = row.buy_button
 		var known := _session.is_route_known(_session.current_location_id, route.to_location_id)
 
 		# Yolun o günkü hali herkesin gözü önünde - çamura batmış bir geçit
@@ -349,21 +362,8 @@ func _refresh_rows() -> void:
 			status_label.text = tr("UI_TAVERN_ROUTE_KNOWN") % [
 				days, int(effective_danger * 100.0), state_note
 			]
-			buy_button.text = tr("UI_TAVERN_LEARNED")
-			buy_button.disabled = true
 		else:
-			var cost := _rumor_cost(route)
 			status_label.text = tr("UI_TAVERN_ROUTE_UNKNOWN") % [days, state_note]
-			buy_button.text = tr("UI_TAVERN_BUY_RUMOUR") % cost
-			buy_button.disabled = not _session.wallet.can_afford(cost)
-
-func _on_buy_pressed(route: TravelRoute) -> void:
-	var cost := _rumor_cost(route)
-	if not _session.wallet.can_afford(cost):
-		return
-	_session.wallet.spend(cost)
-	_session.learn_route(_session.current_location_id, route.to_location_id)
-	_refresh_rows()
 
 ## Komşu her şehir için bir satır: bildiğimizin yaşı, söylentinin bedeli ya
 ## da neden alınamadığı (kilitli düğme sebebiyle, gizlenmez).
@@ -384,19 +384,6 @@ func _refresh_price_rumors() -> void:
 		known.custom_minimum_size = Vector2(200, 0)
 		known.text = tr("UI_PRICE_RUMOR_UNKNOWN") if age < 0 else tr("UI_PRICE_RUMOR_KNOWN") % age
 		row.add_child(known)
-		var button := Button.new()
-		button.text = tr("UI_PRICE_RUMOR_BUY") % _session.get_price_rumor_cost(target)
-		var reason := _session.get_price_rumor_block_reason(target)
-		button.disabled = not reason.is_empty()
-		button.pressed.connect(func():
-			if _session.buy_price_rumor(target):
-				_refresh_price_rumors())
-		row.add_child(button)
-		if not reason.is_empty():
-			var why := Label.new()
-			why.text = tr(reason)
-			why.modulate = Color(0.75, 0.72, 0.66)
-			row.add_child(why)
 		_price_rumor_list.add_child(row)
 
 func _on_wallet_changed(_new_balance: int) -> void:

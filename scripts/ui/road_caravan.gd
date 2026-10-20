@@ -644,6 +644,30 @@ func get_amble_ground_speed() -> float:
 
 func set_weather(weather: String) -> void:
 	_wind_lean = float(WIND_LEAN.get(weather, 0.0))
+	_rain = float(RouteWeather.visuals(weather).rain)
+
+## Yağmurda tekerlekten çamur (görev N31e): her tekerleğin arka altından
+## geriye ve yukarı küçük topaklar, tekerleğin dönüşüyle - zar yok, aynı an
+## hep aynı resim. Duran tekerlek çamur atmaz.
+const MUD_FLECKS: int = 5
+const MUD_COLOR: Color = Color(0.20, 0.15, 0.10)
+var _rain: float = 0.0
+
+## Bir topağın yolu (tekerlek yarıçapı birimiyle, ileri +x): u 0..1 ömür.
+static func mud_fleck(u: float) -> Vector2:
+	return Vector2(-0.7 - u * 1.7, -0.12 - sin(u * PI) * 0.85 + u * 0.1)
+
+func _draw_mud(centre: float, wagon_w: float, wagon_h: float, index: int) -> void:
+	var amount := _rain * clampf(_wagon_motion, 0.0, 1.0)
+	if amount <= 0.01:
+		return
+	var r := wagon_h * ArtDraw.WAGON_WHEEL_RATIO
+	var mud := MUD_COLOR * _light
+	for wheel_x in [centre - wagon_w * 0.30, centre + wagon_w * 0.30]:
+		for k in MUD_FLECKS:
+			var u := fposmod(_wheel_angle * 0.32 + float(k) / float(MUD_FLECKS) + float(index) * 0.37, 1.0)
+			var p := mud_fleck(u) * r + Vector2(wheel_x, _ground_y)
+			draw_circle(p, maxf(1.0, r * 0.07 * (1.0 - u * 0.5)), Color(mud, 0.85 * amount * (1.0 - u)))
 
 ## Bir figürün o anki rüzgâr eğilmesi. Saf fonksiyon (test sahnesiz okur).
 static func wind_lean_at(base: float, time: float, index: int) -> float:
@@ -1761,6 +1785,7 @@ func _draw() -> void:
 			_wheel_angle, _light, index == 0, not driver_gone,
 			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion)
 		)
+		_draw_mud(centre, wagon_w, wagon_h, index)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_carts(height)
 

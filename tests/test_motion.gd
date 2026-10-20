@@ -15,6 +15,8 @@ func run(t) -> void:
 	_test_figure_keeps_its_phase_when_stopping(t)
 	_test_wind_only_in_bad_weather(t)
 	_test_canopy_rests_with_the_wagon(t)
+	_test_dust_follows_pace(t)
+	_test_mud_flies_back_and_lands(t)
 
 func _test_stop_is_a_settle_not_a_snap(t) -> void:
 	var motion := WalkFigure.ease_motion(1.0, false, FRAME)
@@ -76,3 +78,19 @@ func _test_canopy_rests_with_the_wagon(t) -> void:
 		peak = maxf(peak, absf(RoadCaravan.canopy_sway_at(step * 0.1, 1, 40.0, 1.0)))
 	t.ok(peak > 0.0, "giden vagonun brandası salınıyor")
 	t.ok(peak <= 40.0 * RoadCaravan.CANOPY_SWAY_RATIO + 0.0001, "salınım vagon boyuna oranlı ve küçük")
+
+## N31e: toz tempoyla artar, dururken neredeyse yok; çamur geriye ve yukarı
+## atılır, ömrünün sonunda yere iner.
+func _test_dust_follows_pace(t) -> void:
+	t.ok(TravelBand.dust_scale(0.0) < 0.2, "duran kervan toz kaldırmaz")
+	t.ok(absf(TravelBand.dust_scale(1.0) - 1.0) < 0.001, "normal yürüyüşte toz eski yoğunlukta")
+	t.ok(TravelBand.dust_scale(1.3) > TravelBand.dust_scale(1.0), "tempolu yürüyüş daha çok toz")
+	t.ok(TravelBand.dust_scale(5.0) <= TravelBand.DUST_MAX_SHARE, "toz bir yerde durur")
+
+func _test_mud_flies_back_and_lands(t) -> void:
+	var start := RoadCaravan.mud_fleck(0.0)
+	var mid := RoadCaravan.mud_fleck(0.5)
+	var end := RoadCaravan.mud_fleck(1.0)
+	t.ok(mid.x < start.x and end.x < mid.x, "çamur tekerleğin gerisine atılır")
+	t.ok(mid.y < start.y, "çamur yükselir")
+	t.ok(end.y > mid.y and end.y < 0.1, "çamur ömrünün sonunda yere iner")

@@ -114,6 +114,45 @@ const AMBIENCE_PATHS: Dictionary = {
 }
 const AMBIENCE_FADE_SECONDS: float = 1.6
 
+## Yolun ortam sesi tablosu (görev N31f): hava × saat × yer. Kampta ateş;
+## yolda rüzgâr kapalı ve sert havada, gece açık havada da (ıssızlık).
+## Anahtarlar RouteWeather'ın kimlikleri (Autoload rule: sınıf anılmıyor).
+## Yağmur, orman ve şehir uğultusu kayıtları gelince tablo genişler (Y-I01).
+const ROAD_AMBIENCE: Dictionary = {
+	"storm": AMBIENCE_WIND, "rain": AMBIENCE_WIND, "overcast": AMBIENCE_WIND,
+}
+## Savaşta müzik bu kadar kısılır (dB): vuruşlar ve çığlıklar öne çıksın.
+const COMBAT_DUCK_DB: float = -12.0
+const DUCK_SECONDS: float = 0.8
+var _ducked: bool = false
+
+## Saf: hangi ortam katmanı çalmalı ("" = sessiz).
+static func road_ambience_for(weather: String, night: bool, camping: bool) -> String:
+	if camping:
+		return AMBIENCE_FIRE
+	if ROAD_AMBIENCE.has(weather):
+		return String(ROAD_AMBIENCE[weather])
+	return AMBIENCE_WIND if night else ""
+
+## Yol ekranının çağırdığı kapı: tablo "" diyorsa katman söner.
+func set_road_ambience(weather: String, night: bool, camping: bool) -> void:
+	var id := road_ambience_for(weather, night, camping)
+	if id.is_empty():
+		stop_ambience()
+	else:
+		play_ambience(id)
+
+## Savaşta müzik kısılır, bitince geri gelir. Otobüsün düzeyine dokunmaz
+## (oyuncunun sürgüsü), çalıcının kendi düzeyiyle oynar.
+func set_combat_duck(on: bool) -> void:
+	if on == _ducked:
+		return
+	_ducked = on
+	if _fade != null and _fade.is_running():
+		return
+	var tween := create_tween()
+	tween.tween_property(_active, "volume_db", COMBAT_DUCK_DB if on else _target_db(), DUCK_SECONDS)
+
 var _active: AudioStreamPlayer
 var _standby: AudioStreamPlayer
 var _current_track: String = ""
@@ -303,7 +342,7 @@ func _finish_crossfade() -> void:
 	var previous := _active
 	_active = _standby
 	_standby = previous
-	_active.volume_db = _target_db()
+	_active.volume_db = COMBAT_DUCK_DB if _ducked else _target_db()
 
 func _kill_fade() -> void:
 	if _fade != null and _fade.is_valid():

@@ -78,6 +78,11 @@ static func transition_kind(move: String, reduce_motion: bool = false) -> Kind:
 ## Sahne değiştirmenin tek yolu. `path` bir `Nav` çağrısının sonucu - yığın
 ## o çağrıda zaten güncellendi, son hareketin türü de onunla birlikte.
 func go(path: String) -> void:
+	# Oyun testi kaydı (N31a): ekran başına geçen süre. Sınıf adı anılmıyor
+	# (Autoload rule); oturum varsa ve yazıyorsa satırı o düşer.
+	var state := get_node_or_null("/root/GameState")
+	if state != null and state.get("_session") != null:
+		state._session.log_beat("screen", path.get_file().get_basename())
 	var kind := transition_kind(String(load(NAV_PATH).last_move), _reduce_motion())
 	var snapshot := _capture()
 	if snapshot != null:

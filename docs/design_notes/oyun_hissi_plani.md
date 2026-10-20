@@ -58,6 +58,20 @@ görevler `TODO/gorevler/14_yeni_dunya.md`'de N31a-N31f olarak.
 | Öneri | Ortam = hava × saat × yer tablosu (`AudioManager.ambience_for(weather, hour, place)`), çapraz geçişli; savaşta müzik kısılır, davul katmanı; menüde ateş + gece ormanı (Y-G16) |
 | Maliyet / öncelik | M / P1 (kayıtlar Y-I01 planından) |
 
+## Uygulama durumu (2026-10-20)
+
+- N31a: `GameSession.log_beat` (yalnızca gerçek oyun) kart, seçim, yol işareti, kamp, savaş ve ekran anlarını
+  `user://playtest_beats.jsonl`'a yazıyor; `tools/playtest_report.py` boş dakikayı (90 sn'yi aşan aralar), en uzun
+  sessizliği, savaş ve kamp sürelerini, ekran başına süreyi raporluyor (`--self-test`).
+- N31c: dört otobüs (Music, Ambience, Sfx, Ui) kodda; Ayarlar'da dört sürgü; çeşitli seslerde tekrar yok; arayüz
+  sesleri Kenney UI Audio ve RPG Audio (CC0): basma, defter açma-kapama, sayfa, para.
+- N31e: toz yürüyüş hızıyla (dururken ince pus), yağmurda tekerlekten geriye çamur (tekerlek açısından, zarsız).
+  Kar tozu kalmadı (mevsim bilgisi şeride gelince).
+- N31f: yolun ortam tablosu (`AudioManager.road_ambience_for`: kamp ateş, sert hava ve gece rüzgâr), savaşta müzik
+  -12 dB. Yağmur, orman, şehir kayıtları yok; tablo onlarla genişler.
+- N31b: 12.2e ile güneş halesi ve ufuk bandı yolda; ayrı sis şeridi kalmadı.
+- N31d: figür klipleri (look, idle_tired) render gerektiriyor, sırada.
+
 ## Alt görevler (listeye eklendi)
 
 - N31a Ölçüm: beat kaydı ve boş dakika raporu (M, P1)

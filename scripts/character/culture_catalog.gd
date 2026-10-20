@@ -110,7 +110,7 @@ static func _ensure_built() -> void:
 		],
 		"CULTURE_PORT_PERK"
 	))
-	_cultures[-1].rumor_cost_multiplier = 0.6
+	_cultures[-1].rumor_difficulty = 0.6
 
 	_cultures.append(_make(
 		FISHER,

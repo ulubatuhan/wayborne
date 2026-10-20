@@ -35,8 +35,10 @@ var description: String:
 @export var buy_price_multiplier: float = 1.0
 ## Savaşta verilen hasar çarpanı (dağ kabilesi sert vurur).
 @export var combat_damage_multiplier: float = 1.0
-## Tavernadaki rota dedikodusu fiyat çarpanı (liman şehri her dedikoduyu duyar).
-@export var rumor_cost_multiplier: float = 1.0
+## Söylentiye uzaklık (N34): 1 nötr, küçüğü tavernada sohbetle haber almayı
+## kolaylaştırır (liman şehri her dedikoduyu duyar). Eskiden söylentinin
+## fiyat çarpanıydı; söylenti artık satılmıyor, sohbetle öğreniliyor.
+@export var rumor_difficulty: float = 1.0
 
 ## Perkin oyuncuya gösterilen metni - anahtar saklanır, metin hesaplanır
 ## (bkz. CLAUDE.md Localization Rules: katalog kaynakları prose değil

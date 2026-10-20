@@ -155,7 +155,7 @@ func _build_chapter() -> void:
 	_build_memory()
 
 ## Defter hiçbir satırı silmiyor ama pasifti - yalnızca yol ekranındaki
-## `CaravanStatusPanel`'i `Tab` ile açan biri görüyordu. Brifing zaten her
+## yolda `Tab` ile kontrol panelinin Durum sekmesini açan biri görüyordu. Brifing zaten her
 ## varışta kendiliğinden açılan ekran (bkz. City Hub Rules'un "hikâye ile
 ## başlar" maddesi), o yüzden en son düşen/ayrılan isim buraya da taşınıyor -
 ## oyuncu aramadan önüne geliyor. "No need, no row" burada da geçerli:

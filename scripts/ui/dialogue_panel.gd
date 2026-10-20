@@ -113,6 +113,7 @@ func _build_portrait() -> Control:
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(glow)
 	_portrait = FigurePreview.new()
+	_portrait.max_figure_height = 0.0
 	frame.add_child(_portrait)
 	# Belden yukarı: figür kutusu çerçevenin iki katı, baş üst kenarda.
 	frame.resized.connect(func() -> void:

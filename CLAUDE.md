@@ -152,7 +152,7 @@ wayborne/
     dağ kabilesi, liman şehri, balıkçı kasabası). Each carries a stat lean, a
     name pool and exactly **one** mechanical perk, and every perk plugs into
     a system that already exists (daily provisions, provision price, market
-    buy price, combat damage, rumor price). No perk may invent a new system.
+    buy price, combat damage, how easily tavern talk yields news). No perk may invent a new system.
   - `CharacterClass` / `ClassCatalog`: combat role. `class_name` is a
     reserved word, so the visible name lives in `display_name`. Four classes
     (Sıra Neferi/Sekban/Kırıkçı/Kalem Efendisi), each with a `stat_affinity`
@@ -3689,9 +3689,13 @@ the report said exactly 100.0 every run.
   `WorldEvents` label); their product is the price, which the test checks. `PriceLayerText.marks()` puts a short tag on
   the market row for each layer more than 2% off neutral and a sentence per layer in its tooltip.
 - **Seen prices are dated; rumours can lie (task Y-C10).** `GameSession.price_book` records a city's list prices on
-  arrival; past `PRICE_STALE_DAYS` the entry is stale. The tavern sells a neighbour's prices a few days old, and one
-  rumour in four exaggerates (seeded by city, target and day, so a reload cannot buy the truth). The book only informs:
-  the market always trades at today's price.
+  arrival; past `PRICE_STALE_DAYS` the entry is stale. In the tavern someone may tell you a neighbour's prices a few
+  days old, and one rumour in four exaggerates (seeded by city, target and day, so a reload cannot hear the truth). The
+  book only informs: the market always trades at today's price.
+- **Gossip is not for sale (task N34, the user's rule).** Road danger and neighbour prices are learned by talking to
+  people in the tavern (`DialoguePanel`): each person's chance depends on their role, a drink bought for them, the
+  caravan's culture (`Culture.rumor_difficulty`, the port perk) and the crier (`GameSession.get_news_chance_bonus`).
+  The rows that used to sell rumours only show what is known and how old it is.
 - **Weight binds, not just slots.** The limit lives in `Inventory.add_item`
   itself, so an event reward obeys it exactly like a market purchase - when
   only the market screen checked it, everything else leaked through.
@@ -4480,24 +4484,16 @@ box inside the text, so the text was the screen.
 - `tests/screenshot_journey_screen.gd` photographs **the real scene** with a
   live session, not a hand-built band - the other screenshot tools show the
   landscape but cannot show the layout, and the layout was the complaint.
-- **The thin HUD is deliberate, but it means the kervanın detayı has to
-  live somewhere.** A playtest asked for exactly that - *"a detailed 'My
-  Caravan Status' tab"*, then *"status, map, inventory, contracts"*
-  buttons. `CaravanStatusPanel` (`scripts/ui/`) is the one answer to
-  both: a `Tab`-toggled layer over the road (fifth stacked layer,
-  `StatusOverlay`, between `LogOverlay` and `Modal`) that reads the
-  session and shows the kadro, wagons, provisions/gold/debt, cargo,
-  carried contracts and the ledger's last lines - **never decides
-  anything**, same rule as `CityBriefPanel`. It is scene-less
-  (`.new()` + `setup()`), and `setup()` can be called before the road's
-  real session exists (`_build_ui()` runs before `_init_journey()`
-  assigns `_session`) - `set_session()` is the second call that actually
-  fills it, once the session is real.
+- **The thin HUD is deliberate, but the caravan's detail lives in the control panel.** A playtest asked for *"a
+  detailed 'My Caravan Status' tab"*, then *"status, map, inventory, contracts"* buttons. The answer is the control
+  panel below (next bullet): the bottom bar's "Durum" and `Tab` open its Durum tab (`Tab` again goes back to Kadro),
+  contracts sit in Yük, the ledger in Defter. The old `CaravanStatusPanel` overlay (`StatusOverlay`) duplicated all of
+  it and was removed (task N23). Panels that only read **never decide anything**, the `CityBriefPanel` rule.
 - **The sky strip gave its height to a control panel (P18).** The road's top fifth was empty sky; `road_journey.gd`
   shifts `World` up by `SKY_CROP_SHARE` and `RoadControlPanel` fills the freed bottom (`CONTROL_PANEL_SHARE`) with five
   tabs - Kadro (person cards plus the caravan's pulse: morale, stamina, danger, provisions), Durum (the `SurvivalGauge`
   plate, the facts and the troubles in words), Yük, Harita (a small `WorldMapView`), Defter. It reads a state dictionary
-  the road hands it (`_panel_state()`) and never decides anything, the `CaravanStatusPanel` rule. A `ScrollContainer`
+  the road hands it (`_panel_state()`) and never decides anything. A `ScrollContainer`
   page stretches its child only when the child is `SIZE_EXPAND_FILL`; without it every autowrapped goods label shrank to
   one word per line (seen in the first screenshot, `RoadControlPanel._fill`). `M` or the bottom bar's "Harita" opens the
   full map (`MapPopup`), counted as an open panel so time stops.

@@ -73,6 +73,10 @@ const HAZE_FAR_ALPHA: float = 0.42
 const HAZE_MID_ALPHA: float = 0.12
 ## Yolun üstünde kalkan toz: tekerleğin ve ayağın kaldırdığı ince bir perde.
 const DUST_ALPHA: float = 0.16
+## Toz tempoya bağlı (görev N31e): duran kervan toz kaldırmaz, tempolu
+## yürüyüş normalden biraz fazla. Pay = zemin hızı / normal yürüyüş hızı.
+const DUST_IDLE_SHARE: float = 0.12
+const DUST_MAX_SHARE: float = 1.35
 
 ## Kervanın durduğu yer, şeridin genişliğine oranla. **Sabit değil, bir
 ## aralık**: kolonun arkasına sığması gereken uzunluk kadar sağa kayıyor.
@@ -128,6 +132,7 @@ const PHASE_ORDER: Array = [
 
 var _terrain: RouteTerrain
 var _weather: String = RouteWeather.CLEAR
+var _dust_motion: float = 1.0
 var _weather_visuals: Dictionary = RouteWeather.visuals(RouteWeather.CLEAR)
 
 var _sky: Dictionary = ArtPalette.sky(ArtPalette.PHASE_DAY)
@@ -224,6 +229,17 @@ func cover_rect() -> Rect2:
 func set_route(terrain: RouteTerrain) -> void:
 	_terrain = terrain
 	_refresh_terrain()
+
+## Kervanın zemine göre hızının normal yürüyüşe oranı (N31e).
+func set_dust_motion(share: float) -> void:
+	var value := clampf(share, 0.0, 2.0)
+	if absf(value - _dust_motion) > 0.02:
+		_dust_motion = value
+		queue_redraw()
+
+## Tozun yoğunluk çarpanı: dururken ince bir pus, yürürken hıza göre.
+static func dust_scale(share: float) -> float:
+	return clampf(DUST_IDLE_SHARE + (1.0 - DUST_IDLE_SHARE) * share, DUST_IDLE_SHARE, DUST_MAX_SHARE)
 
 func set_weather(weather: String) -> void:
 	if _weather == weather:
@@ -555,7 +571,7 @@ func _draw_dust(cover: Rect2) -> void:
 	var h := maxf(size.y, BAND_HEIGHT)
 	var dust := Color(0.74, 0.66, 0.54) * _light
 	var clear := Color(dust, 0.0)
-	var thick := Color(dust, DUST_ALPHA)
+	var thick := Color(dust, DUST_ALPHA * dust_scale(_dust_motion))
 	var x0 := cover.position.x
 	var x1 := cover.end.x
 	var y0 := _ground_y_at_screen(x0)

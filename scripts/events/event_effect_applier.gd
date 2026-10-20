@@ -55,7 +55,7 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 		EventEffect.Type.PROVISIONS:
 			var changed := session.change_provisions(effect.amount)
 			if changed != 0:
-				result.lines.append(_t("EFF_PROVISIONS") % changed)
+				result.lines.append(Wording.change_line(Wording.PROVISIONS, changed))
 		EventEffect.Type.ITEM_ADD:
 			var item := ItemCatalog.get_item(effect.text_value)
 			if item != null and session.add_to_cargo_or_bag(item, effect.amount):
@@ -108,10 +108,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.lines.append(_t("EFF_TRAVEL_DAYS") % effect.amount)
 		EventEffect.Type.DANGER:
 			session.danger_level = clampf(session.danger_level + (effect.amount / 100.0), 0.0, 1.0)
-			result.lines.append(_t("EFF_DANGER") % effect.amount)
+			result.lines.append(Wording.change_line(Wording.DANGER, effect.amount))
 		EventEffect.Type.REPUTATION:
 			session.change_reputation(effect.amount)
-			result.lines.append(_t("EFF_REPUTATION") % effect.amount)
+			result.lines.append(Wording.change_line(Wording.REPUTATION, effect.amount))
 		EventEffect.Type.DOCUMENT_LOSE:
 			var seized := session.caravan.lose_documents(effect.amount)
 			if seized > 0:
@@ -264,13 +264,13 @@ static func _apply_grant_equipment(effect: EventEffect, session: GameSession, re
 static func _apply_gold(effect: EventEffect, session: GameSession, result: Result) -> void:
 	if effect.amount >= 0:
 		session.wallet.earn(effect.amount)
-		result.lines.append(_t("EFF_GOLD_GAIN") % effect.amount)
+		result.lines.append(Wording.change_line(Wording.GOLD, effect.amount))
 		return
 
 	var demanded := -effect.amount
 	var before := session.wallet.balance
 	session.spend_or_owe(demanded)
-	result.lines.append(_t("EFF_GOLD_LOSS") % demanded)
+	result.lines.append(Wording.change_line(Wording.GOLD, -demanded))
 	if before >= 0 and session.wallet.balance < 0:
 		result.lines.append(_t("EFF_WENT_INTO_DEBT"))
 

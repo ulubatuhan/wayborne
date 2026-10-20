@@ -32,7 +32,7 @@ func _test_every_culture_has_one_perk(t) -> void:
 			culture.provision_cost_multiplier,
 			culture.buy_price_multiplier,
 			culture.combat_damage_multiplier,
-			culture.rumor_cost_multiplier,
+			culture.rumor_difficulty,
 		]
 		var changed := 0
 		for multiplier in multipliers:

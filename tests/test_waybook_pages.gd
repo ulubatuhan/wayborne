@@ -77,8 +77,8 @@ func _test_role_recorded_and_saved(t) -> void:
 func _test_story_summaries_exist(t) -> void:
 	for backstory in CampStory.STORY_KEYS:
 		for key in CampStory.STORY_KEYS[backstory]:
-			var line_key := String(key) + "_LINE"
-			t.ok(String(TranslationServer.translate(line_key)) != line_key, "%s özeti var" % key)
+			var line_key := String(CampStory.STORY_LINE_KEYS.get(String(key), ""))
+			t.ok(not line_key.is_empty() and String(TranslationServer.translate(line_key)) != line_key, "%s özeti var" % key)
 
 func _test_story_text_uses_summary(t) -> void:
 	var entry := {"kind": CaravanLedger.KIND_STORY, "name": "Selin", "day": 12, "cause": "STORY_DEBTOR_1"}
