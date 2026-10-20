@@ -85,7 +85,6 @@ var _back_button: Button
 func _ready() -> void:
 	_session = GameState.get_session()
 	_current_location = WorldMapData.get_location_by_id(_session.current_location_id)
-	FirstTimeHint.show_once(self, _session, FirstTimeHint.TRADE)
 	# Kasaba ve kervansarayda her mal bulunmaz (bkz. Location.available);
 	# bulunmayan mal ne alınır ne satılır.
 	for item in ItemCatalog.get_trade_goods():

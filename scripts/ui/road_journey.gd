@@ -1501,7 +1501,6 @@ func _init_journey() -> void:
 	if live_session.is_journey_active():
 		_is_live_journey = true
 		_session = live_session
-		FirstTimeHint.show_once(self, _session, FirstTimeHint.ATTENTION)
 		_current_day = maxi(0, _session.journey_total_days - _session.journey_days_remaining)
 		_reset_button.visible = false
 		_seed_spin.editable = false
@@ -3417,8 +3416,6 @@ func _close_recruit_offer() -> void:
 ## region_id'si) sefer hedefinden okunuyor - haydut kadrosu gidilen yöreye
 ## göre reskin oluyor.
 func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
-	if _is_live_journey:
-		FirstTimeHint.show_once(self, _session, FirstTimeHint.COMBAT)
 	_pending_combat_danger = _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
 	_session.log_beat(GameSession.BEAT_LOG_COMBAT_START, enemy_kind)

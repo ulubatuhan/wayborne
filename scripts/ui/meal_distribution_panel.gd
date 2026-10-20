@@ -43,7 +43,6 @@ var chosen_extras: Array[String] = []
 func setup(session: GameSession, policy_only: bool = false) -> void:
 	_session = session
 	layer = 65
-	FirstTimeHint.show_once(self, session, FirstTimeHint.MEAL)
 
 	var root := Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)

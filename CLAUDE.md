@@ -4542,11 +4542,10 @@ ever fell, and the career simulation had already measured the result
 
 ### Playthrough Start Rules
 
-- **The game teaches inside the first journey, one sentence at a time (task Y-H01).** The four-topic onboarding panel
-  no longer opens on a new game (the help button still opens it). Six topics (trade, contract, planner, attention, meal,
-  combat) each show once, the first time the player meets them, as a pinned slip at the top (`FirstTimeHint`), closed
-  by a click or after a few seconds. Each topic's flag is saved, so a reload does not repeat it; screenshot tools set
-  all six flags.
+- **No pinned tutorial slips (user's decision, 2026-10-20).** The four-topic onboarding panel no longer opens on a new
+  game (the help button still opens it). The six first-time hints of task Y-H01 (`FirstTimeHint`, a pinned paper slip
+  at the top of the screen) were removed with their text: the user found them ugly and will write the teaching notes
+  later. Old saves may still carry the `hint_*` flags; nothing reads them.
 - **The opening is fixed and not offered as a choice**: two party members
   (the player plus one randomly rolled companion), one wagon, a random
   starting city - see `GameSession.start_playthrough()`. One wagon is

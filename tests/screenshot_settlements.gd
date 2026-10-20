@@ -23,8 +23,6 @@ func _init() -> void:
 	rng.seed = 4242
 	session.start_playthrough(CharacterData.create("Kervanbaşı", CultureCatalog.VALLEY, CharacterStats.new()), rng)
 	session.set_flag(GameSession.ONBOARDING_FLAG)
-	for hint_flag in FirstTimeHint.FLAGS.values():
-		session.set_flag(String(hint_flag))
 	var only := OS.get_cmdline_user_args()
 	var city_map: Script = load("res://scripts/world/city_map.gd")
 	for location in WorldMapData.get_locations():

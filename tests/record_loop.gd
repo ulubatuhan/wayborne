@@ -69,11 +69,16 @@ func _init() -> void:
 	# 3:00 Kamp: ateşe yürüyüş ve oturuş.
 	if _screen.has_method("_on_camp_pressed"):
 		_screen.call("_on_camp_pressed")
-	await _hold(45.0)
+	# Kamp eylemleri paneli ateşe yürüyüşü örtüyor: bir an görünsün, sonra onaylansın.
+	await _hold(4.0)
+	var camp_panel = _screen.get("_camp_panel")
+	if camp_panel != null and is_instance_valid(camp_panel):
+		camp_panel.call("_confirm")
+	await _hold(41.0)
 
 	# 3:45 Savaş: iki taraf da kendi sırasında oynar.
 	await _show_combat()
-	await _play_combat(50.0)
+	await _play_combat(45.0)
 
 	# 4:35 Varış: kapı açılır, şehir.
 	session.finish_journey()
@@ -89,8 +94,6 @@ func _session() -> GameSession:
 	var player := CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new())
 	session.start_playthrough(player, rng)
 	session.set_flag(GameSession.ONBOARDING_FLAG)
-	for hint_flag in FirstTimeHint.FLAGS.values():
-		session.set_flag(String(hint_flag))
 	session.current_location_id = ORIGIN
 	session.owned_wagon_count = 2
 	session.add_to_cargo(ItemCatalog.get_item("fish"), 12)
@@ -136,7 +139,7 @@ func _show_combat() -> void:
 	_screen = holder
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SEED_VALUE
-	panel.start_combat(get_root().get_node("GameState").call("get_session").get_party(), 0.4, rng, "bandit", "", "forest")
+	panel.start_combat(get_root().get_node("GameState").call("get_session").get_party(), 0.75, rng, "bandit", "", "forest")
 	await _hold(0.5)
 
 func _play_combat(seconds: float) -> void:
@@ -146,7 +149,10 @@ func _play_combat(seconds: float) -> void:
 	for _frame in frames:
 		await process_frame
 		wait -= 1
-		if wait > 0 or panel._encounter == null or panel._encounter.state != CombatEncounter.State.ONGOING:
+		if panel._encounter != null and panel._encounter.state != CombatEncounter.State.ONGOING:
+			await _hold(5.0)  # sonucu oku, sonra varış
+			return
+		if wait > 0 or panel._encounter == null:
 			continue
 		if not panel._encounter.is_player_turn():
 			continue

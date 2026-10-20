@@ -96,8 +96,6 @@ func _prepare_session() -> void:
 	var player := CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new())
 	session.start_playthrough(player, rng)
 	session.set_flag(GameSession.ONBOARDING_FLAG)
-	for hint_flag in FirstTimeHint.FLAGS.values():
-		session.set_flag(String(hint_flag))
 	session.owned_wagon_count = 2
 	session.add_to_cargo(ItemCatalog.get_item("test_grain"), 12)
 	session.add_to_cargo(ItemCatalog.get_item("silk"), 3)
