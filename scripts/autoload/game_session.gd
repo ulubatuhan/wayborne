@@ -2903,6 +2903,8 @@ const BEAT_LOG_COMBAT_END: String = "combat_end"
 const BEAT_LOG_CAMP_START: String = "camp_start"
 const BEAT_LOG_CAMP_END: String = "camp_end"
 const BEAT_LOG_SCREEN: String = "screen"
+## Oturum başı (Y-K03): tools/measure_report.py oturum uzunluğunu bununla ayırır.
+const BEAT_LOG_SESSION: String = "session"
 
 ## Kaydın satırı (saf, test edilebilir).
 func beat_log_line(kind: String, detail: String = "") -> Dictionary:

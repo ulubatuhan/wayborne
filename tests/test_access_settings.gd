@@ -18,5 +18,12 @@ func run(t) -> void:
 	t.ok(WaybookTheme.text_size_for(0.9) < WaybookTheme.text_size_for(1.0), "küçük kademe küçültür")
 	t.eq(PatternStripe.segment_count(40.0, false), 1, "desensiz şerit tek parça")
 	t.ok(PatternStripe.segment_count(40.0, true) > 1, "desenli şerit kesik kesik")
-	for key in ["UI_SETTINGS_TEXT_SIZE", "UI_SETTINGS_PATTERN_STRIPES", "UI_SETTINGS_AUTO_PAUSE", "UI_ROAD_AUTO_PAUSED"]:
+	for key in ["UI_SETTINGS_TEXT_SIZE", "UI_SETTINGS_PATTERN_STRIPES", "UI_SETTINGS_AUTO_PAUSE", "UI_ROAD_AUTO_PAUSED",
+			"UI_SETTINGS_PLAY_LOG"]:
 		t.ok(String(TranslationServer.translate(key)) != key, "yazılı: %s" % key)
+	# Y-K03: ölçüm izinsiz yapılmaz - ayar varsayılan kapalı, kapalı oturum yazmaz.
+	var fresh: Node = settings.new()
+	t.eq(fresh.allow_play_log, false, "ölçüm izni varsayılan kapalı")
+	fresh.free()
+	var session = load("res://scripts/autoload/game_session.gd").new()
+	t.eq(session.log_first_times, false, "yeni oturum izinsiz ölçmez")

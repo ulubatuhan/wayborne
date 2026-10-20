@@ -1,0 +1,65 @@
+name: Ölçüm
+
+# Görev Y-K03: oyun ölçümü CI'da. Kariyer simülatörü (8 kervan × 40 sefer, üç
+# politika) sefer süresini, sefer başına kart ve ölümü yazar; tools/measure_report.py
+# bunu tabloya çevirir, iş özetine ve yapıta koyar. Oyuncu tarafı ölçüm burada
+# yok: o yalnızca oyuncunun izniyle ve kendi bilgisayarında tutulur.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.2.2
+          use-dotnet: false
+          include-templates: false
+
+      - name: Import project
+        run: |
+          set -o pipefail
+          if ! godot --headless --import 2>&1 | tee import.log; then
+            godot --headless --import 2>&1 | tee import.log
+          fi
+
+      - name: Run career simulator
+        run: |
+          set -o pipefail
+          godot --headless --script res://tests/simulate_career.gd 2>&1 | tee career.log
+
+      - name: Build report
+        run: |
+          python3 tools/measure_report.py --self-test
+          python3 tools/measure_report.py career.log > olcum.md
+          cat olcum.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on script errors
+        if: always()
+        run: |
+          if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' import.log career.log; then
+            exit 1
+          fi
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: olcum-raporu
+          path: |
+            olcum.md
+            career.log

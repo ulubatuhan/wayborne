@@ -114,6 +114,7 @@ var _text_size: OptionButton
 var _text_size_label: Label
 var _pattern_toggle: CheckButton
 var _pause_toggle: CheckButton
+var _play_log_toggle: CheckButton
 
 func _setup_access(column: Node) -> void:
 	var row := HBoxContainer.new()
@@ -134,7 +135,10 @@ func _setup_access(column: Node) -> void:
 	_pause_toggle = CheckButton.new()
 	_pause_toggle.button_pressed = UserSettings.auto_pause_events
 	_pause_toggle.toggled.connect(func(on: bool) -> void: UserSettings.set_access("auto_pause_events", on))
-	for node in [row, _pattern_toggle, _pause_toggle]:
+	_play_log_toggle = CheckButton.new()
+	_play_log_toggle.button_pressed = UserSettings.allow_play_log
+	_play_log_toggle.toggled.connect(func(on: bool) -> void: GameState.set_play_log(on))
+	for node in [row, _pattern_toggle, _pause_toggle, _play_log_toggle]:
 		column.add_child(node)
 		column.move_child(node, _back_button.get_index())
 
@@ -232,6 +236,7 @@ func _refresh_texts() -> void:
 		_text_size_label.text = tr("UI_SETTINGS_TEXT_SIZE")
 		_pattern_toggle.text = tr("UI_SETTINGS_PATTERN_STRIPES")
 		_pause_toggle.text = tr("UI_SETTINGS_AUTO_PAUSE")
+		_play_log_toggle.text = tr("UI_SETTINGS_PLAY_LOG")
 	_back_button.text = tr("UI_BACK_TO_MENU")
 
 func _fit_column() -> void:

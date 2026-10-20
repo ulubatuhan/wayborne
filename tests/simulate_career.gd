@@ -108,7 +108,30 @@ func _initialize() -> void:
 			draws, unique, float(draws) / float(maxi(1, unique)),
 		])
 		_finale_draws = {}
+		_print_measure(policy, arcs)
 	quit()
+
+## Y-K03: makine okunur ölçüm satırı (tools/measure_report.py okur, CI'da
+## rapor olur). Sefer süresi gün ve 1x gerçek dakika, sefer başına kart,
+## sefer başına ölüm (kadro ve tayfa, defterin KIND_DIED satırları).
+func _print_measure(policy: String, arcs: Array[Dictionary]) -> void:
+	var legs := 0
+	var days := 0
+	var cards := 0
+	var deaths := 0
+	for arc in arcs:
+		legs += int(arc["legs"])
+		days += int(arc["days"])
+		cards += int(arc["cards"])
+		deaths += int(arc["deaths"])
+	var per := float(maxi(1, legs))
+	print("OLCUM " + JSON.stringify({
+		"policy": policy, "arcs": arcs.size(), "legs": legs,
+		"days_per_leg": snappedf(days / per, 0.01),
+		"minutes_per_leg": snappedf(days / per * JourneyClock.REAL_SECONDS_PER_DAY / 60.0, 0.01),
+		"cards_per_leg": snappedf(cards / per, 0.01),
+		"deaths_per_leg": snappedf(deaths / per, 0.001),
+	}))
 
 # --- Bir kervanın ömrü ---
 
@@ -117,6 +140,7 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 	rng.seed = seed_value
 
 	var session := GameSession.new(STARTING_GOLD, STARTING_PROVISIONS, 1)
+	_cards_drawn = 0
 	var cultures := CultureCatalog.get_cultures()
 	# Kültür ile olay motoru aynı tohumdan türerse ikisi ilişkili olur ve
 	# rapor sistematik olarak yanılır - bu hata bir kez yapıldı (bkz.
@@ -149,7 +173,11 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 			samples[leg_number] = _snapshot(session)
 
 	samples["final"] = _snapshot(session)
-	return {"chapters": chapter_legs, "samples": samples}
+	return {
+		"chapters": chapter_legs, "samples": samples,
+		"legs": session.journeys_completed, "days": session.total_days_elapsed,
+		"cards": _cards_drawn, "deaths": session.ledger.count_of(CaravanLedger.KIND_DIED),
+	}
 
 func _snapshot(session: GameSession) -> Dictionary:
 	return {
@@ -337,6 +365,7 @@ func _travel(session: GameSession, total_days: int, rng: RandomNumberGenerator) 
 		_consume_daily(session)
 		var event := engine.roll_for_day(day, session.build_event_context())
 		if event != null:
+			_cards_drawn += 1
 			engine.mark_fired(event, day)
 			_resolve_event(session, engine, event)
 
@@ -371,6 +400,8 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 		_threats_by_stage[stage] = int(_threats_by_stage.get(stage, 0)) + 1
 
 var _threats_by_stage: Dictionary = {}
+## Y-K03: bir kervanın ömrü boyunca çekilen kart.
+var _cards_drawn: int = 0
 ## Y-E01: finaleden önce hangi kart kaç kez çekildi (politika başına).
 var _finale_draws: Dictionary = {}
 
