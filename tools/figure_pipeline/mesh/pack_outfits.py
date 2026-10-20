@@ -119,6 +119,7 @@ def pack(variant, item, build, layers, post):
         "",
     ]
     open(os.path.join(dest, "frames.tres"), "w").write("\n".join(lines))
+    P.repack_atlas.repack_set(dest)  # gorev 5.4
     size = sum(os.path.getsize(os.path.join(dest, f)) for f in os.listdir(dest))
     print("%s: %d sayfa, %.2f MB" % (ident, len(pages), size / 1e6), flush=True)
 

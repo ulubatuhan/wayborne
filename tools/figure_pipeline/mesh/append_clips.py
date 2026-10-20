@@ -160,6 +160,7 @@ def append_body(variant, clips, build, layers, post):
         d["clip_frames"].append(n)
     d["pages"] += save_pages(shelf, dest, ident, first)
     write_tres(path, d, True)
+    P.repack_atlas.repack_set(dest)  # cikarilan klibin artiklari da gider (gorev 5.4)
     print("%s: +%s, %d sayfa" % (ident, ",".join(clips), len(d["pages"])))
 
 
@@ -202,6 +203,7 @@ def append_outfit(variant, item, clips, build, layers, post):
         d["clip_frames"].append(n)
     d["pages"] += save_pages(shelf, dest, ident, first)
     write_tres(path, d, False)
+    P.repack_atlas.repack_set(dest)
     print("%s: +%s" % (ident, ",".join(clips)), flush=True)
 
 

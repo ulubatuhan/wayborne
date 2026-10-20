@@ -100,6 +100,7 @@ def pack_species(species, cfg, post, src):
         "",
     ]
     open(os.path.join(dest, "frames.tres"), "w").write("\n".join(lines))
+    P.repack_atlas.repack_set(dest)  # gorev 5.4
     size = sum(os.path.getsize(os.path.join(dest, f)) for f in os.listdir(dest))
     print("beast_%s: %d sayfa, %d kayit, %.1f MB" % (species, len(pages), len(rects), size / 1e6))
 

@@ -23,6 +23,7 @@ ROOT = os.environ.get("WAYBORNE_ROOT") or os.path.abspath(os.path.join(os.path.d
 PIPE = os.path.join(ROOT, "tools", "figure_pipeline")
 sys.path.insert(0, os.path.join(PIPE, "mesh"))
 import posterize  # noqa: E402
+import repack_atlas  # noqa: E402
 
 OUT = os.path.join(ROOT, "build", "figures", "out")
 DEST = os.path.join(ROOT, "data", "assets", "characters", "frames")
@@ -159,6 +160,7 @@ def pack_variant(variant, build, layers, post):
         "",
     ]
     open(os.path.join(dest, "frames.tres"), "w").write("\n".join(lines))
+    repack_atlas.repack_set(dest)  # sira paketi -> sikica (gorev 5.4)
     size = sum(os.path.getsize(os.path.join(dest, f)) for f in os.listdir(dest))
     print("%s: %d sayfa, %d kayit, %.1f MB" % (body_id, len(page_paths), len(rects), size / 1e6))
 

@@ -1702,6 +1702,11 @@ in every preview the moment it is equipped.
     texture; `TextureLoader.with_mipmaps` only builds a copy for a raw file not
     yet imported. An existing local `.import` keeps its old setting until its
     cache entry in `.godot/imported` is deleted.
+  - **Atlas pages are packed tight, and a page's name carries its content (task 5.4).** Every packer ends with
+    `mesh/repack_atlas.py`'s `repack_set`: identical pieces share one rectangle, the rest are skyline-packed tallest
+    first, and page height rounds to 64 px rather than a power of two. Measured: 1139 pages / 473 Mpx became 295 / 182
+    Mpx with the same `rects` contract. Pages are named `page_<k>_<md5>.png`, so a rewritten page never reuses a cached
+    import; after a repack run `--headless --editor --quit-after 3000` (plain `--import` skipped the new files).
   - `tests/test_body_frames.gd` locks the contract: all six variants exist,
     entry counts agree, feet touch the ground line, garments stay inside
     the body. `tests/screenshot_body_range.gd` prints every variant across
