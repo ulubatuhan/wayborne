@@ -22,6 +22,8 @@ func setup(figure: Control, text: String) -> RoadBalloon:
 	_label.text = text
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.custom_minimum_size = Vector2(0, 0)
+	# Kâğıt üstünde mürekkep: kemik yazının koyu halesi burada yazıyı lekeliyordu.
+	_label.theme_type_variation = WaybookTheme.PAGE_LABEL
 	_label.add_theme_font_size_override("font_size", 15)
 	_label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -43,6 +45,7 @@ func _process(delta: float) -> void:
 		return
 	modulate.a = clampf((LIFETIME - _age) / FADE, 0.0, 1.0)
 	var label_size := _label.get_combined_minimum_size()
+	_label.size.y = label_size.y
 	size = Vector2(_label.size.x, label_size.y) + PAD * 2.0
 	var head := figure.get_global_transform_with_canvas() * Vector2(figure.size.x * 0.5, 0.0)
 	var local := get_parent_control().get_global_transform_with_canvas().affine_inverse() * head

@@ -30,8 +30,10 @@ PHASES = {
         "sky": {"horizon": [0.80, 0.58, 0.48], "zenith": [0.24, 0.30, 0.44], "height": 0.25, "strength": 2.2},
         "moon": 2.6, "moon_color": [1.0, 0.86, 0.72], "moon_rot": [76, 115],
         "backlight": 0.35, "backlight_color": [1.0, 0.75, 0.55], "window_strength": 1.2, "lamp_scale": 0.12,
-        "post": {"zenith": [70, 86, 118], "horizon": [226, 186, 160], "cloud": [212, 194, 188],
-                 "fog": [188, 178, 184], "fog_amount": 0.42, "exposure": 1.05, "glow": 0.15,
+        # Sabah gündüzden ayrı okunsun: ılık, puslu ve biraz loş (gündüz serin
+        # ve açık). Sis ılık bal rengi, pozlama düşük.
+        "post": {"zenith": [78, 86, 104], "horizon": [226, 186, 160], "cloud": [214, 192, 170],
+                 "fog": [196, 178, 156], "fog_amount": 0.56, "exposure": 0.93, "glow": 0.15,
                  "shadow": [58, 50, 62], "moon": [0.16, 0.56], "disc_r": 0.045,
                  "disc_color": [0.48, 0.40, 0.32], "disc_soft": 0.55, "halo": 0.5, "halo_r": 0.3},
         "mix": 0.25,

@@ -2419,8 +2419,8 @@ gave the game its motion, and every piece of it follows the same few rules.
   chosen from round and rank (no dice). A killing blow holds `KILL_PAUSE_MSEC` before the body falls
   (`CombatFx.fall_start`). Hit, crit and kill each have a sound id (`AudioManager.SFX_HIT/CRIT/KILL`): five Kenney Impact Sounds
   variants each (CC0), one picked at random with the pitch jittered by `SFX_PITCH_JITTER` (a path with `%d` is a
-  variant set). The ink splash waits for the engraved effects
-  (Y-G06).
+  variant set). There is no ink splash: the engraved
+  effects (Y-G06) were set aside by the user (2026-10-20, "eksik olsun şimdilik").
 - **Only figures shake; text never does.** Shake (3/6/8 px for hit/crit/
   kill) moves figure drawings, never labels, bars or buttons - what is
   read must not tremble.

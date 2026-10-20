@@ -140,9 +140,32 @@ def mask_from_ids(ids):
     return out
 
 
+PALETTE_KEYS = ("zenith", "horizon", "cloud", "fog", "shadow")
+
+
+def unpurple(rgb):
+    """Stil kuralı (kullanıcı: doygun mor yok): mor-eflatun bir göğün rengi
+    arduvaz maviye döner ve solar. Sıcak ufuk (turuncu, kızıl) dokunulmaz."""
+    import colorsys
+    r, g, b = [v / 255.0 for v in rgb]
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    if not (0.70 < h < 0.985) or s < 0.15:
+        return rgb
+    out = colorsys.hsv_to_rgb(0.60, s * 0.45, v)
+    return [int(round(c * 255)) for c in out]
+
+
+def tame_palette(p):
+    q = dict(p)
+    for key in PALETTE_KEYS:
+        if key in q and q[key] is not None:
+            q[key] = unpurple(q[key])
+    return q
+
+
 def process(city):
     cfg = json.load(open(CFG))[city]
-    p = cfg["post"]
+    p = tame_palette(cfg["post"])
     src = os.path.join(BUILD, "town_" + city)
     beauty = Image.open(os.path.join(src, "beauty.png")).convert("RGBA")
     w, h = beauty.size
