@@ -299,9 +299,13 @@ func _reaction_walkers() -> Array[WalkFigure]:
 			out.append(figure)
 	return out
 
+## Bakış tepkisi kapalı: 3B render'da el alnın önüne değil başın üstüne
+## düşüyor ("eli başında" okunuyor). Poz düzelip yeniden render edilince açılır.
+const LOOK_ENABLED: bool = false
+
 ## Bölgeye (RoadAttention: front/wagons/rear) en yakın yaya bakar.
 func react_look(zone: String) -> void:
-	if _ground_speed > 1.0 or _camping:
+	if not LOOK_ENABLED or _ground_speed > 1.0 or _camping:
 		return
 	var walkers := _reaction_walkers()
 	if walkers.is_empty():

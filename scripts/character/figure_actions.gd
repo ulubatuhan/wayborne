@@ -248,7 +248,7 @@ const CLIPS: Dictionary = {
 	# bir işaret belirince en yakındaki ileri bakar.
 	"look_ahead": {"frames": 1, "keys": [[0.0, {
 		"lean": -4.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
-		"arm_f": [125.0, 262.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
+		"arm_f": [118.0, 238.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
 	}]]},
 	# Dur temposunda yorgun bekleyiş: gövde öne çökük, dizler hafif kırık,
 	# kollar sarkık ve biraz önde.
