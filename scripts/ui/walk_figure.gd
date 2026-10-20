@@ -662,6 +662,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var shield := held and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
+	_draw_frame_outline(frames, garments, clip, frame, xf, h, seated)
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
@@ -694,6 +695,45 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 			_draw_stuck(joints, h)
 	if shield and shield_in_front(_facing):
 		_draw_shield(joints, h, look)
+
+## Ortak mürekkep konturu (görev Y-G02): figürün bütün parçaları önce
+## mürekkep renginde, birkaç yöne hafifçe kaydırılarak en arkaya çiziliyor;
+## üstüne gelen asıl figür içi örttüğü için yalnızca birleşik siluetin dışında
+## ince bir çizgi kalıyor. Parça başına kontur dikiş çizgisi üretiyordu (omuz,
+## kalça) ve oyuncu onu reddetmişti; bu geçişte iç çizgi yok. Kare kümeleri
+## değişmiyor, giysi bileşimi ne olursa olsun siluet doğru.
+const FRAME_OUTLINE: bool = true
+const FRAME_OUTLINE_SHARE: float = 0.008
+const FRAME_OUTLINE_MIN_PX: float = 0.9
+## Büyük önizlemelerde (karakter ekranı, portre) çizgi kalınlaşıp ağırlaşmasın.
+const FRAME_OUTLINE_MAX_PX: float = 2.2
+const FRAME_OUTLINE_INK: Color = Color(0.055, 0.050, 0.058, 0.85)
+const OUTLINE_DIRS: Array[Vector2] = [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]
+
+## Kontur kalınlığı (ekran pikseli): figür boyuna oranlı, alt sınırlı.
+static func outline_px(h: float) -> float:
+	return clampf(h * FRAME_OUTLINE_SHARE, FRAME_OUTLINE_MIN_PX, FRAME_OUTLINE_MAX_PX)
+
+func _draw_frame_outline(frames: BodyFrames, garments: Array[BodyFrames], clip: String, frame: int,
+		xf: Transform2D, h: float, seated: bool) -> void:
+	if not FRAME_OUTLINE:
+		return
+	var ink := Color(FRAME_OUTLINE_INK.r, FRAME_OUTLINE_INK.g, FRAME_OUTLINE_INK.b, FRAME_OUTLINE_INK.a * _tint.a)
+	var w := outline_px(h)
+	for dir in OUTLINE_DIRS:
+		var shifted := Transform2D(xf.x, xf.y, xf.origin + dir * w)
+		draw_set_transform_matrix(shifted)
+		for layer in BodyFrames.LAYERS.size():
+			if seated and BodyFrames.LAYERS[layer] == "back_leg":
+				continue
+			var e := frames.entry(clip, frame, layer, BodyFrames.KIND_BODY)
+			if not e.is_empty():
+				draw_texture_rect_region(e.texture, Rect2(e.offset, e.region.size), e.region, ink)
+			for garment in garments:
+				var g := garment.entry(clip, frame, layer, BodyFrames.KIND_BODY)
+				if not g.is_empty():
+					draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), g.region, ink)
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 
 ## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Temel kuşam
 ## giysinin altındaki iç çamaşırı; giyilen parça kendi render'ıyla üstüne
@@ -1493,7 +1533,13 @@ func _draw_beast_frames(frames: BodyFrames, h: float) -> float:
 	var k := frames.scale_for(h)
 	var origin := Vector2(size.x * 0.5, size.y)
 	ArtDraw.ellipse(self, origin, Vector2(h * 0.5, h * 0.030), Color(0.0, 0.0, 0.0, 0.24))
-	var joints := frames.draw_all(self, clip, frame, Transform2D(0.0, Vector2(k * _facing, k), 0.0, origin), _tint)
+	var beast_xf := Transform2D(0.0, Vector2(k * _facing, k), 0.0, origin)
+	if FRAME_OUTLINE:
+		var ink := Color(FRAME_OUTLINE_INK.r, FRAME_OUTLINE_INK.g, FRAME_OUTLINE_INK.b, FRAME_OUTLINE_INK.a * _tint.a)
+		var w := outline_px(size.y)
+		for dir in OUTLINE_DIRS:
+			frames.draw_all(self, clip, frame, Transform2D(beast_xf.x, beast_xf.y, beast_xf.origin + dir * w), ink)
+	var joints := frames.draw_all(self, clip, frame, beast_xf, _tint)
 	return (joints.get("saddle", origin - Vector2(0.0, h * 0.6)) as Vector2).y
 
 func _draw_quad_leg(
