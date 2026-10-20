@@ -277,6 +277,73 @@ func set_pair_gap_scales(scales: Array[float]) -> void:
 	_pair_gap_scales = scales
 	_layout()
 var _crew_figures: Array[WalkFigure] = []
+
+## --- Yol tepkileri (görev N31d) ---
+## Yolda bir işaret belirince o bölgeye en yakın yaya ileri bakar (göze siper);
+## kervan durmuşken yayalar yorgun bekler. Yalnızca duran kervanda: yürüyen bir
+## figürü duruş klibine sokmak ayağını zeminde kaydırırdı.
+const LOOK_SECONDS: float = 2.8
+const REACTION_CLIPS: Array[String] = ["look_ahead", "idle_tired"]
+var _look_timers: Dictionary = {}
+var _tired: bool = false
+
+## Tepki verebilecek yayalar: kadro ve tayfa, kampa yürümeyen, başka bir
+## klibin (iniş, biniş) ortasında olmayan.
+func _reaction_walkers() -> Array[WalkFigure]:
+	var out: Array[WalkFigure] = []
+	for figure in _party_figures + _crew_figures:
+		if figure == null or not figure.visible or _gather_homes.has(figure):
+			continue
+		var clip := figure.get_action()
+		if clip.is_empty() or REACTION_CLIPS.has(clip):
+			out.append(figure)
+	return out
+
+## Bölgeye (RoadAttention: front/wagons/rear) en yakın yaya bakar.
+func react_look(zone: String) -> void:
+	if _ground_speed > 1.0 or _camping:
+		return
+	var walkers := _reaction_walkers()
+	if walkers.is_empty():
+		return
+	var best: WalkFigure = walkers[0]
+	var best_score := -INF
+	var wagons := get_wagon_centres()
+	var wagon_mid := 0.0
+	for x in wagons:
+		wagon_mid += x / float(wagons.size())
+	for figure in walkers:
+		var x := (figure.position.x + figure.size.x * 0.5) * _heading
+		var score := x
+		if zone == RoadAttention.ZONE_REAR:
+			score = -x
+		elif zone == RoadAttention.ZONE_WAGONS:
+			score = -absf(figure.position.x + figure.size.x * 0.5 - wagon_mid)
+		if score > best_score:
+			best_score = score
+			best = figure
+	best.set_action("look_ahead")
+	_look_timers[best] = LOOK_SECONDS
+
+## Kervan durduğunda yorgun bekleyiş; yürümeye başlayınca biter.
+func set_tired(on: bool) -> void:
+	if on == _tired:
+		return
+	_tired = on
+	for figure in _reaction_walkers():
+		if not _look_timers.has(figure):
+			figure.set_action("idle_tired" if on else "")
+
+func _tick_reactions(delta: float) -> void:
+	if _look_timers.is_empty():
+		return
+	for figure in _look_timers.keys():
+		_look_timers[figure] = float(_look_timers[figure]) - delta
+		# Kervan yürümeye başladıysa bakış hemen biter (kayan ayak olmasın).
+		if float(_look_timers[figure]) <= 0.0 or _ground_speed > 1.0:
+			_look_timers.erase(figure)
+			if is_instance_valid(figure) and figure.get_action() == "look_ahead":
+				figure.set_action("idle_tired" if _tired else "")
 ## Arabacılar - normalde `ArtDraw.wagon()`'un çizdiği sabit silüet, kamp
 ## sırasında gerçek birer figüre dönüşüyor (bkz. `configure`'daki not).
 var _driver_figures: Array[WalkFigure] = []
@@ -1162,6 +1229,7 @@ func _process(delta: float) -> void:
 		return
 	_camp_time += delta
 	_advance_gather(delta)
+	_tick_reactions(delta)
 
 	# Faz herkeste ilerliyor; duran bir figür de `advance(0)` alıyor ki
 	# ayaklarını yan yana toplasın. Toplanan figürler burada atlanıyor -

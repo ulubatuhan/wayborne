@@ -1946,6 +1946,8 @@ func _advance_position(hours: float, delta: float) -> void:
 		column_speed = day_step * _band.get_pixels_per_day() / delta
 	_caravan.set_ground_speed(column_speed)
 	_band.set_dust_motion(column_speed / maxf(_caravan.get_walk_ground_speed(), 1.0))
+	# Yorgun bekleyiş (N31d): kervan durmuş ve kamp yok.
+	_caravan.set_tired(column_speed < 1.0 and not _camping and not _caravan.is_breaking_camp())
 	_move_leader(delta, column_speed)
 
 ## Manzaranın gün->piksel ölçeği. Kervan normal tempoda sakin bir
@@ -2203,6 +2205,7 @@ func _tick_signals(hours: float) -> void:
 	)
 	for kind in outcome["appeared"]:
 		_session.log_beat(GameSession.BEAT_LOG_INFO, "signal:" + String(kind))
+		_caravan.react_look(RoadSignals.get_zone_for(String(kind)))
 		_add_log(tr(RoadSignals.get_notice_key(String(kind))))
 		_auto_pause()
 	for i in (outcome["resolved"] as Array).size():

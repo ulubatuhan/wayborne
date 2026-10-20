@@ -243,6 +243,19 @@ const CLIPS: Dictionary = {
 		"foot_f": [0.235, 0.0, 0.0], "foot_b": [0.215, 0.0, 0.0],
 		"arm_f": [6.0, 44.0], "arm_b": [2.0, 38.0], "weapon": 0.0,
 	}]]},
+	# Yol tepkileri (görev N31d). Klip sözlüğünde baş yok: "bakmak" ön elin
+	# alnına siper olduğu, gövdenin hafifçe geriye kalktığı bir duruş - yolda
+	# bir işaret belirince en yakındaki ileri bakar.
+	"look_ahead": {"frames": 1, "keys": [[0.0, {
+		"lean": -4.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
+		"arm_f": [125.0, 262.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
+	}]]},
+	# Dur temposunda yorgun bekleyiş: gövde öne çökük, dizler hafif kırık,
+	# kollar sarkık ve biraz önde.
+	"idle_tired": {"frames": 1, "keys": [[0.0, {
+		"hip_y": -0.018, "lean": 11.0, "foot_f": [0.05, 0.0, 0.0], "foot_b": [-0.06, 0.0, 0.0],
+		"arm_f": [9.0, 16.0], "arm_b": [5.0, 12.0], "weapon": 0.0,
+	}]]},
 }
 
 const HEAD_OFFSET: Vector2 = Vector2(0.012, 0.0)

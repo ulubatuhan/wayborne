@@ -303,6 +303,30 @@
     300
    ],
    "_note": "Sandıkta oturan (2026-10-20): kalça diz hizasında, uyluk yatay; oturulan şey render edilmez."
+  },
+  "look_ahead": {
+   "kind": "action",
+   "action": "look_ahead",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "_note": "Yol tepkisi (N31d): ön el alında siper, ileri bakış."
+  },
+  "idle_tired": {
+   "kind": "action",
+   "action": "idle_tired",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "_note": "Dur temposunda yorgun bekleyiş (N31d): gövde öne çökük, kollar sarkık."
   }
  },
  "facing": 1.0,

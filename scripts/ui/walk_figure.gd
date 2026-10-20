@@ -205,6 +205,9 @@ func set_combat_stance(on: bool) -> void:
 	_combat_stance = on
 	queue_redraw()
 
+func get_action() -> String:
+	return _action_clip
+
 func set_action(clip: String, u: float = 0.0) -> void:
 	if _action_clip == clip and is_equal_approx(_action_u, u):
 		return
@@ -310,6 +313,8 @@ const ACTION_FALLBACK: Dictionary = {
 	"attack_cast": "attack_swing",
 	# Oturuşu render edilmemiş bir giysi varsa ayakta durur (çıplak oturmaz).
 	"sit_box": "idle",
+	# Yol tepkileri (N31d): render edilmemiş giysiyle düz durur.
+	"look_ahead": "idle", "idle_tired": "idle",
 }
 
 ## Üstte saplı kalan oklar/bıçaklar (`CombatUnit.stuck`).
