@@ -800,6 +800,8 @@ func _buy_basket() -> void:
 		_session.wallet.spend(subtotal)
 		paid += subtotal
 	_reset_selection()
+	if paid > 0:
+		AudioManager.play_sfx(AudioManager.SFX_UI_COIN)
 	if paid > 0 and _message_label.text.is_empty():
 		_show_message_soft(tr("UI_MARKET_BASKET_BOUGHT") % paid)
 	_refresh_all()
@@ -813,6 +815,7 @@ func _sell_selected() -> void:
 	var total_price := _get_sell_price(item) * quantity
 	_session.remove_from_cargo_or_bags(item.item_id, quantity)
 	_session.wallet.earn(total_price)
+	AudioManager.play_sfx(AudioManager.SFX_UI_COIN)
 	# Aynı malı aynı şehre boca etmek fiyatını düşürür (bkz. MarketConditions)
 	# ve şehrin hazinesinden o kadarını çeker.
 	_session.record_sale(item.item_id, quantity, total_price)

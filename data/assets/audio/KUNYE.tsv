@@ -12,3 +12,15 @@ copper_for_the_traveler.mp3	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKL
 high_noon_in_the_square.mp3	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	BEKLENİYOR	-
 fire_crackle.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - kamp ateşi çıtırtısı (tools/audio/make_fire_sounds.py)	Wayborne	-	proje (kendi üretimi)	-	-	-
 fire_ignite.wav	prosedürel üretim (Python wave: sinüs ve gürültü) - ateşin tutuşması (tools/audio/make_fire_sounds.py)	Wayborne	-	proje (kendi üretimi)	-	-	-
+ui/press_0.ogg	Kenney UI Audio, click1.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/press_1.ogg	Kenney UI Audio, click2.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/press_2.ogg	Kenney UI Audio, click3.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/press_3.ogg	Kenney UI Audio, click4.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/press_4.ogg	Kenney UI Audio, click5.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/ui-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/page_0.ogg	Kenney RPG Audio, bookFlip1.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/page_1.ogg	Kenney RPG Audio, bookFlip2.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/page_2.ogg	Kenney RPG Audio, bookFlip3.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/coin_0.ogg	Kenney RPG Audio, handleCoins.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/coin_1.ogg	Kenney RPG Audio, handleCoins2.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/book_open.ogg	Kenney RPG Audio, bookOpen.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-
+ui/book_close.ogg	Kenney RPG Audio, bookClose.ogg	Kenney (Kenney Vleugels)	https://kenney.nl/assets/rpg-audio	CC0 1.0	http://creativecommons.org/publicdomain/zero/1.0/	2026-10-20	-

@@ -29,6 +29,7 @@ const SCREENS: Array[String] = [
 	"res://scenes/game/wardrobe.tscn",
 	"res://scenes/ui/character_creation.tscn",
 	"res://scenes/world/city_map.tscn",
+	"res://scenes/ui/settings.tscn",
 ]
 
 func _init() -> void:

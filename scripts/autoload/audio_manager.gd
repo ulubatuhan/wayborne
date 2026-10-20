@@ -66,6 +66,26 @@ const SFX_CRIT: String = "hit_crit"
 const SFX_KILL: String = "hit_kill"
 const SFX_VARIANTS: int = 5
 const SFX_PITCH_JITTER: float = 0.06
+## Arayüz sesleri (görev N31c): Kenney UI Audio ve RPG Audio, CC0
+## (data/assets/audio/KUNYE.tsv). Basma beş, sayfa üç, para iki çeşit.
+const SFX_UI_PRESS: String = "ui_press"
+const SFX_UI_PAGE: String = "ui_page"
+const SFX_UI_COIN: String = "ui_coin"
+const SFX_UI_BOOK_OPEN: String = "ui_book_open"
+const SFX_UI_BOOK_CLOSE: String = "ui_book_close"
+## Çeşit sayısı `SFX_VARIANTS`'tan farklı olan sesler.
+const SFX_VARIANT_COUNTS: Dictionary = {
+	SFX_UI_PRESS: 5, SFX_UI_PAGE: 3, SFX_UI_COIN: 2,
+}
+
+## Ses otobüsleri (görev N31c): her katmanın kendi sürgüsü. Otobüsler kodda
+## kuruluyor, bir .tres düzeninde değil - Audio Rules: içe aktarma ve
+## düzen dosyalarına bağlanan ayar temiz bir klonda kaybolur.
+const BUS_MUSIC: String = "Music"
+const BUS_AMBIENCE: String = "Ambience"
+const BUS_SFX: String = "Sfx"
+const BUS_UI: String = "Ui"
+const BUSES: Array[String] = [BUS_MUSIC, BUS_AMBIENCE, BUS_SFX, BUS_UI]
 const SFX_PATHS: Dictionary = {
 	SFX_THUD: "res://data/assets/audio/wooden_thud.wav",
 	SFX_GATE: "res://data/assets/audio/gate_creak.wav",
@@ -74,6 +94,11 @@ const SFX_PATHS: Dictionary = {
 	SFX_HIT: "res://data/assets/audio/combat/hit_%d.ogg",
 	SFX_CRIT: "res://data/assets/audio/combat/hit_crit_%d.ogg",
 	SFX_KILL: "res://data/assets/audio/combat/hit_kill_%d.ogg",
+	SFX_UI_PRESS: "res://data/assets/audio/ui/press_%d.ogg",
+	SFX_UI_PAGE: "res://data/assets/audio/ui/page_%d.ogg",
+	SFX_UI_COIN: "res://data/assets/audio/ui/coin_%d.ogg",
+	SFX_UI_BOOK_OPEN: "res://data/assets/audio/ui/book_open.ogg",
+	SFX_UI_BOOK_CLOSE: "res://data/assets/audio/ui/book_close.ogg",
 }
 
 ## Ortam sesi (bkz. `play_ambience`) - müziğin *altında* değil, müziğin
@@ -101,21 +126,67 @@ var _current_ambience: String = ""
 ## okuma aynı zamanda autoload sırasına olan bağımlılığı da siliyor.
 var _music_volume: float = -1.0
 var _fade: Tween
+## Her çeşitli ses için son çalınan çeşit: aynısı arka arkaya gelmesin.
+var _last_variant: Dictionary = {}
 
 func _ready() -> void:
 	# Oyun duraklatılsa bile müzik sürsün: duraklamada kesilen müzik
 	# oyunun çöktüğü izlenimi veriyor.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	_active = _make_player()
-	_standby = _make_player()
-	_ambience_player = _make_player()
+	ensure_buses()
+	_active = _make_player(BUS_MUSIC)
+	_standby = _make_player(BUS_MUSIC)
+	_ambience_player = _make_player(BUS_AMBIENCE)
+	for bus in BUSES:
+		_apply_bus_volume(bus, get_bus_volume(bus))
 
-func _make_player() -> AudioStreamPlayer:
+func _make_player(bus: String) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.volume_db = SILENT_DB
+	player.bus = bus
 	add_child(player)
 	return player
+
+## Dört otobüs, hepsi Master'a akar. Var olanı yeniden kurmaz.
+static func ensure_buses() -> void:
+	for bus in BUSES:
+		if AudioServer.get_bus_index(bus) >= 0:
+			continue
+		AudioServer.add_bus()
+		var index := AudioServer.bus_count - 1
+		AudioServer.set_bus_name(index, bus)
+		AudioServer.set_bus_send(index, "Master")
+
+## 0.0 - 1.0, otobüs başına. Müzik eski anahtarını korur (eski ayarlar
+## dosyası sessizce sıfırlanmasın).
+func get_bus_volume(bus: String) -> float:
+	if bus == BUS_MUSIC:
+		return get_music_volume()
+	return UserSettings.load_volume(bus)
+
+func set_bus_volume(bus: String, volume: float) -> void:
+	if bus == BUS_MUSIC:
+		set_music_volume(volume)
+		return
+	UserSettings.save_volume(bus, volume)
+	_apply_bus_volume(bus, volume)
+
+func _apply_bus_volume(bus: String, volume: float) -> void:
+	var index := AudioServer.get_bus_index(bus)
+	if index < 0:
+		return
+	var v := clampf(volume, 0.0, 1.0)
+	AudioServer.set_bus_mute(index, v <= 0.0)
+	AudioServer.set_bus_volume_db(index, linear_to_db(v) if v > 0.0 else SILENT_DB)
+
+## Bir sesin hangi çeşidi: aynı çeşit arka arkaya gelmez (iki çeşit varsa
+## sırayla). Saf fonksiyon, test edilebilsin diye `last` dışarıdan.
+static func pick_variant(count: int, last: int, roll: int) -> int:
+	if count <= 1:
+		return 0
+	var pick := posmod(roll, count - 1)
+	return pick + 1 if pick >= last and last >= 0 else pick
 
 ## Ekranların çağırdığı tek kapı. Aynı parça zaten çalıyorsa hiçbir şey
 ## yapmıyor - yoksa şehir içinde ekran değiştirmek parçayı her seferinde
@@ -142,7 +213,10 @@ func play_sfx(sfx_id: String) -> void:
 	# perdesi ±SFX_PITCH_JITTER - aynı vuruş iki kez aynı duyulmasın.
 	var varied := path.contains("%d")
 	if varied:
-		path = path % randi_range(0, SFX_VARIANTS - 1)
+		var count := int(SFX_VARIANT_COUNTS.get(sfx_id, SFX_VARIANTS))
+		var variant := pick_variant(count, int(_last_variant.get(sfx_id, -1)), randi())
+		_last_variant[sfx_id] = variant
+		path = path % variant
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
 	var stream: AudioStream = load(path)
@@ -150,7 +224,9 @@ func play_sfx(sfx_id: String) -> void:
 		return
 	var player := AudioStreamPlayer.new()
 	player.stream = stream
-	player.volume_db = _target_db()
+	# Ses düzeyi otobüsün: arayüz sesleri Ui, gerisi Sfx.
+	player.bus = BUS_UI if sfx_id.begins_with("ui_") else BUS_SFX
+	player.volume_db = 0.0
 	if varied:
 		player.pitch_scale = randf_range(1.0 - SFX_PITCH_JITTER, 1.0 + SFX_PITCH_JITTER)
 	add_child(player)
@@ -177,7 +253,7 @@ func play_ambience(ambience_id: String) -> void:
 	_ambience_player.stream = stream
 	_ambience_player.volume_db = SILENT_DB
 	_ambience_player.play()
-	_fade_ambience(_target_db())
+	_fade_ambience(0.0)
 
 func stop_ambience() -> void:
 	if _current_ambience.is_empty():
@@ -199,12 +275,8 @@ func _fade_ambience(target_db: float, stop_after: bool = false) -> void:
 func set_music_volume(volume: float) -> void:
 	_music_volume = clampf(volume, 0.0, 1.0)
 	UserSettings.save_music_volume(_music_volume)
-	if _fade == null or not _fade.is_running():
-		_active.volume_db = _target_db()
-	# Ortam sesi de aynı tek tercihi okuyor (bkz. dosyanın başındaki not) -
-	# ayarlar ekranında sürgü değişince rüzgar de anında güncellenmeli.
-	if not _current_ambience.is_empty() and (_ambience_fade == null or not _ambience_fade.is_running()):
-		_ambience_player.volume_db = _target_db()
+	# Düzey Music otobüsünde (N31c); ortamın kendi otobüsü ve sürgüsü var.
+	_apply_bus_volume(BUS_MUSIC, _music_volume)
 
 ## Tercihin sahibi `UserSettings` (settings.cfg'yi o yazıyor); burası
 ## yalnızca okuyup uyguluyor.
@@ -213,13 +285,10 @@ func get_music_volume() -> float:
 		_music_volume = UserSettings.load_music_volume()
 	return _music_volume
 
-## Sessize alınmış müzik hâlâ çalıyor olmalı: sesi açınca parça kaldığı
-## yerden devam etsin, baştan başlamasın.
+## Çalıcının kendi düzeyi tam; ses düzeyi otobüste (N31c). Sessize alınmış
+## müzik yine de çalıyor: otobüs susuyor, parça kaldığı yerden sürüyor.
 func _target_db() -> float:
-	var volume := get_music_volume()
-	if volume <= 0.0:
-		return SILENT_DB
-	return linear_to_db(volume)
+	return 0.0
 
 func _crossfade() -> void:
 	_kill_fade()

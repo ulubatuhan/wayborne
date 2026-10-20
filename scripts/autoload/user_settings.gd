@@ -173,6 +173,23 @@ func load_music_volume() -> float:
 		0.0, 1.0
 	)
 
+## Ortam, efekt ve arayüz otobüslerinin düzeyi (görev N31c); anahtar
+## otobüsün adı. Müzik kendi eski anahtarında.
+const DEFAULT_BUS_VOLUMES: Dictionary = {"Ambience": 0.7, "Sfx": 0.8, "Ui": 0.6}
+
+func load_volume(bus: String) -> float:
+	var fallback := float(DEFAULT_BUS_VOLUMES.get(bus, 0.7))
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) != OK:
+		return fallback
+	return clampf(float(config.get_value(AUDIO_SECTION, "volume_" + bus.to_lower(), fallback)), 0.0, 1.0)
+
+func save_volume(bus: String, volume: float) -> void:
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	config.set_value(AUDIO_SECTION, "volume_" + bus.to_lower(), clampf(volume, 0.0, 1.0))
+	config.save(CONFIG_PATH)
+
 func save_music_volume(volume: float) -> void:
 	var config := ConfigFile.new()
 	config.load(CONFIG_PATH)

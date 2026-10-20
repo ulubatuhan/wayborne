@@ -1294,3 +1294,6 @@
 "DIARY_QUIET_1","Sakin bir gün. Tekerlek döndü, kimse bir şey söylemedi.","A quiet day. The wheels turned and no one said a thing.","","","","","","","","",""
 "DIARY_QUIET_2","Yol uzun, gün kısaydı; ikisini de geride bıraktık.","The road was long and the day short; we left both behind.","","","","","","","","",""
 "DIARY_QUIET_3","Bugün yazacak bir şey yok; bu da bir şeydir.","Nothing to write today; that too is something.","","","","","","","","",""
+"UI_SETTINGS_AMBIENCE_VOLUME","Ortam Sesi","Ambience Volume","","","","","","","","",""
+"UI_SETTINGS_SFX_VOLUME","Efekt Sesleri","Sound Effects","","","","","","","","",""
+"UI_SETTINGS_UI_VOLUME","Arayüz Sesleri","Interface Sounds","","","","","","","","",""

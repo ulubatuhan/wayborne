@@ -95,6 +95,12 @@ func _on_exited() -> void:
 	_animate(1.0, HOVER_SECONDS)
 
 func _on_down() -> void:
+	# Basma sesi (N31c) Hareket Azaltma'dan bağımsız: ses bilgi taşır, hareket
+	# süsdür. Kilitli düğme ses vermez.
+	if not _button.disabled:
+		var audio := _button.get_node_or_null("/root/AudioManager")
+		if audio != null:
+			audio.play_sfx("ui_press")
 	if _still():
 		return
 	_animate(PRESS_SCALE, PRESS_SECONDS)

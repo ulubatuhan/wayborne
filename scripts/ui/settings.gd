@@ -19,10 +19,17 @@ var _motion_toggle: CheckButton
 @onready var _music_value: Label = $MarginContainer/VBoxContainer/MusicRow/MusicValueLabel
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
+## Ayarlar tek bir orta sütunda: geniş ekranda sürgüler ortada, anahtarlar
+## en sağ kenarda kalıyordu (N31c denetimi).
+const COLUMN_WIDTH: float = 980.0
+
 func _ready() -> void:
+	resized.connect(_fit_column)
+	_fit_column()
 	_back_button.pressed.connect(_on_back_pressed)
 	_setup_language_selector()
 	_setup_music_slider()
+	_setup_bus_sliders()
 	_setup_motion_toggle()
 	_setup_credits()
 
@@ -34,6 +41,52 @@ func _setup_music_slider() -> void:
 	_music_slider.value = AudioManager.get_music_volume()
 	_music_slider.value_changed.connect(_on_music_volume_changed)
 	_refresh_music_value()
+
+## Ortam, efekt ve arayüz sesleri (görev N31c): müziğin altında, aynı
+## biçimde birer satır. Hepsi anında uygulanır ve settings.cfg'ye yazılır.
+const BUS_LABEL_KEYS: Dictionary = {
+	"Ambience": "UI_SETTINGS_AMBIENCE_VOLUME", "Sfx": "UI_SETTINGS_SFX_VOLUME", "Ui": "UI_SETTINGS_UI_VOLUME",
+}
+const VOLUME_LABEL_WIDTH: float = 220.0
+var _bus_labels: Dictionary = {}
+
+func _setup_bus_sliders() -> void:
+	_music_label.custom_minimum_size.x = VOLUME_LABEL_WIDTH
+	_language_label.custom_minimum_size.x = VOLUME_LABEL_WIDTH
+	# Bütün satırlar aynı sol kenarda, anahtarlar ve metin boyuyla hizalı.
+	(_language_label.get_parent() as BoxContainer).alignment = BoxContainer.ALIGNMENT_BEGIN
+	var music_row := _music_slider.get_parent()
+	(music_row as BoxContainer).alignment = BoxContainer.ALIGNMENT_BEGIN
+	var column := music_row.get_parent()
+	var at := music_row.get_index() + 1
+	for bus in BUS_LABEL_KEYS:
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_BEGIN
+		row.add_theme_constant_override("separation", 8)
+		var label := Label.new()
+		label.custom_minimum_size.x = VOLUME_LABEL_WIDTH
+		row.add_child(label)
+		_bus_labels[bus] = label
+		var slider := HSlider.new()
+		slider.custom_minimum_size = _music_slider.custom_minimum_size
+		slider.max_value = 1.0
+		slider.step = 0.05
+		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.value = AudioManager.get_bus_volume(bus)
+		row.add_child(slider)
+		var value := Label.new()
+		value.custom_minimum_size = _music_value.custom_minimum_size
+		value.text = "%d%%" % roundi(slider.value * 100.0)
+		row.add_child(value)
+		slider.value_changed.connect(func(v: float) -> void:
+			AudioManager.set_bus_volume(bus, v)
+			value.text = "%d%%" % roundi(v * 100.0))
+		# Arayüz sürgüsü bırakılınca kendi sesini çalar: oyuncu ne ayarladığını duysun.
+		if bus == "Ui":
+			slider.drag_ended.connect(func(_changed: bool) -> void: AudioManager.play_sfx("ui_press"))
+		column.add_child(row)
+		column.move_child(row, at)
+		at += 1
 
 func _on_music_volume_changed(value: float) -> void:
 	AudioManager.set_music_volume(value)
@@ -65,6 +118,7 @@ var _pause_toggle: CheckButton
 func _setup_access(column: Node) -> void:
 	var row := HBoxContainer.new()
 	_text_size_label = Label.new()
+	_text_size_label.custom_minimum_size.x = VOLUME_LABEL_WIDTH
 	row.add_child(_text_size_label)
 	_text_size = OptionButton.new()
 	for scale in UserSettings.TEXT_SCALES:
@@ -170,6 +224,8 @@ func _refresh_texts() -> void:
 	_title_label.text = tr("UI_SETTINGS")
 	_language_label.text = tr("UI_LANGUAGE")
 	_music_label.text = tr("UI_MUSIC_VOLUME")
+	for bus in _bus_labels:
+		(_bus_labels[bus] as Label).text = tr(String(BUS_LABEL_KEYS[bus]))
 	if _motion_toggle != null:
 		_motion_toggle.text = tr("UI_SETTINGS_REDUCE_MOTION")
 	if _pattern_toggle != null:
@@ -177,6 +233,12 @@ func _refresh_texts() -> void:
 		_pattern_toggle.text = tr("UI_SETTINGS_PATTERN_STRIPES")
 		_pause_toggle.text = tr("UI_SETTINGS_AUTO_PAUSE")
 	_back_button.text = tr("UI_BACK_TO_MENU")
+
+func _fit_column() -> void:
+	var margin := $MarginContainer as MarginContainer
+	var side := maxf(24.0, (size.x - COLUMN_WIDTH) * 0.5)
+	margin.add_theme_constant_override("margin_left", int(side))
+	margin.add_theme_constant_override("margin_right", int(side))
 
 func _on_back_pressed() -> void:
 	SceneInk.go(Nav.back())

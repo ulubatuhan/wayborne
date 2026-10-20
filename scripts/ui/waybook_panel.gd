@@ -95,6 +95,7 @@ func _ready() -> void:
 	root.resized.connect(_layout)
 	_layout()
 	WaybookTheme.present(_book, _backdrop, self)
+	AudioManager.play_sfx(AudioManager.SFX_UI_BOOK_OPEN)
 
 func _layout() -> void:
 	var view := _book.get_viewport_rect().size
@@ -201,6 +202,8 @@ func _toggle_fallen() -> void:
 	set_fallen_page(not _showing_fallen)
 
 func set_fallen_page(fallen: bool) -> void:
+	if fallen != _showing_fallen:
+		AudioManager.play_sfx(AudioManager.SFX_UI_PAGE)
 	_showing_fallen = fallen
 	for box in [_entries, _summary]:
 		for child in (box as Node).get_children():
@@ -373,6 +376,7 @@ func _close() -> void:
 	if _dismissing:
 		return
 	_dismissing = true
+	AudioManager.play_sfx(AudioManager.SFX_UI_BOOK_CLOSE)
 	WaybookTheme.dismiss(_book, _backdrop, self, func():
 		dismissed.emit()
 		queue_free()
