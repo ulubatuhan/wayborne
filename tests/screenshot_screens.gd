@@ -117,6 +117,9 @@ func _prepare_session() -> void:
 	companion.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH)
 	companion.consecutive_hungry_days = 2
 	companion.duty_id = DutyCatalog.LEVAZIMCI
+	# Karakter ekranı yoldaşı göstersin: geçmişi, amacı ve bağı tanınmış (taslak 9.6).
+	companion.rapport = 3
+	Nav.character_target_index = session.party.size() - 1
 	# Yakın bir ölüm: şehir brifingi yas kurdelesini taşısın.
 	var fallen := CharacterData.create("Yaruk", CultureCatalog.NOMAD, CharacterStats.new())
 	session.add_to_party(fallen)

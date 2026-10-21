@@ -22,21 +22,27 @@ const NEGATIVE_COLOR: Color = Color(0.9, 0.6, 0.55)
 ## Waybook işaretleri (bkz. WaybookIcons): stat/görev amblemleri, huy
 ## mühürleri, kırgınlık notları.
 const EMBLEM_SIZE: float = 26.0
-const STAT_EMBLEM_SIZE: float = 40.0
+const STAT_EMBLEM_SIZE: float = 44.0
 const TOKEN_SIZE: float = 36.0
-const TRAIT_TOKEN_SIZE: float = 36.0
-const RESIST_ICON_SIZE: float = 36.0
+const TRAIT_TOKEN_SIZE: float = 40.0
+const RESIST_ICON_SIZE: float = 40.0
 ## Ekipman satırının resmi - metin satırıyla aynı yükseklikte dursun diye
 ## küçük, `EMBLEM_SIZE`'a yakın.
 const EQUIP_ICON_HEIGHT: float = 28.0
 const GEAR_PREVIEW_SIZE: Vector2 = Vector2(200, 360)
 const IDENTITY_PREVIEW_MIN: Vector2 = Vector2(220, 300)
 
-const TITLE_FONT_SIZE: int = 40
-const SUBTITLE_FONT_SIZE: int = 20
-const HEADING_FONT_SIZE: int = 24
-const SUBHEADING_FONT_SIZE: int = 21
-const ROW_FONT_SIZE: int = 21
+## Taslak 9.6 (y_96_karakter.png, 1080p): ad ve sütun başlıkları IM Fell
+## (küçük büyük harf) soluk altın, satırlar EB Garamond.
+const TITLE_FONT_SIZE: int = 48
+const SUBTITLE_FONT_SIZE: int = 24
+const HEADING_FONT_SIZE: int = 30
+const SUBHEADING_FONT_SIZE: int = 26
+const ROW_FONT_SIZE: int = 25
+const HINT_FONT_SIZE: int = 21
+const STAT_ROW_GAP: int = 14
+const SKILL_ROW_GAP: int = 26
+const RESIST_ROW_GAP: int = 26
 ## Stat çubuğu beşer puanlık dilimlerle: 15 tavan, üç dilim.
 const STAT_SEGMENTS: int = 3
 ## Sütunların ekran kenarından payı. Taslak üç sütunu neredeyse tam genişlikte
@@ -71,7 +77,8 @@ func _ready() -> void:
 	WaybookTheme.fit_desk_workspace(self)
 	_title_label.text = tr("UI_CHARACTER_TITLE")
 	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
-	_title_label.add_theme_color_override("font_color", ArtPalette.GOLD)
+	_title_label.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
+	_title_label.add_theme_font_override("font", GrimTheme.title_font())
 	_session = GameState.get_session()
 	# Bu ekran yalnızca parti ekranından açılıyor, dönüş hedefi de her
 	# zaman orası; gezinme yığını geri yolunu zaten taşıyor (bkz. Nav).
@@ -128,7 +135,6 @@ func _refresh() -> void:
 func _build_header() -> void:
 	_title_label.text = _character.character_name
 	NodeUtil.clear_children(_subtitle_row)
-	_subtitle_row.add_child(WaybookIcons.picture(WaybookIcons.CLASS_EMBLEMS, _character.class_id, EMBLEM_SIZE))
 	var class_name_text := _character.get_character_class().display_name
 	if not _character.second_class_id.is_empty():
 		var second := ClassCatalog.get_character_class(_character.second_class_id)
@@ -139,7 +145,7 @@ func _build_header() -> void:
 		class_name_text, _character.level, _character.get_culture().culture_name,
 	]
 	subtitle.add_theme_font_size_override("font_size", SUBTITLE_FONT_SIZE)
-	subtitle.modulate = HINT_COLOR
+	subtitle.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM.lightened(0.15))
 	_subtitle_row.add_child(subtitle)
 
 # --- Kişi sekmesi: üç sütun ---
@@ -209,7 +215,7 @@ func _build_stats_column() -> PanelContainer:
 	var column := _make_column(tr("UI_CHAR_COL_TRAITS_STATS"))
 	var body := _body_of(column)
 	var stat_rows := VBoxContainer.new()
-	stat_rows.add_theme_constant_override("separation", 10)
+	stat_rows.add_theme_constant_override("separation", STAT_ROW_GAP)
 	body.add_child(stat_rows)
 	for kind in CharacterStats.KIND_ORDER:
 		stat_rows.add_child(_build_stat_row(kind))
@@ -223,11 +229,8 @@ func _build_stats_column() -> PanelContainer:
 	])
 	body.add_child(derived)
 
-	var traits_heading := Label.new()
-	traits_heading.text = tr("UI_CHAR_TRAITS")
-	traits_heading.add_theme_font_size_override("font_size", SUBHEADING_FONT_SIZE)
-	traits_heading.add_theme_color_override("font_color", ArtPalette.GRIM_AMBER)
-	body.add_child(_spacer(6))
+	var traits_heading := _heading_label(tr("UI_CHAR_TRAITS"), SUBHEADING_FONT_SIZE)
+	body.add_child(_spacer(10))
 	body.add_child(traits_heading)
 	_build_traits_into(body)
 	return column
@@ -241,7 +244,7 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 	var emblem := WaybookIcons.picture(WaybookIcons.STAT_EMBLEMS, kind, STAT_EMBLEM_SIZE)
 	row.add_child(emblem)
 	var name_label := _make_row_label(CharacterStats.kind_name(kind))
-	name_label.custom_minimum_size = Vector2(140, 0)
+	name_label.custom_minimum_size = Vector2(170, 0)
 	row.add_child(name_label)
 
 	var value := _character.stats.get_value(kind)
@@ -302,14 +305,14 @@ func _build_skills_column() -> PanelContainer:
 	var column := _make_column(tr("UI_CHAR_COL_SKILLS_RESISTS"))
 	var body := _body_of(column)
 	var skill_rows := VBoxContainer.new()
-	skill_rows.add_theme_constant_override("separation", 10)
+	skill_rows.add_theme_constant_override("separation", SKILL_ROW_GAP)
 	body.add_child(skill_rows)
 	for skill in _character.get_skills():
 		skill_rows.add_child(_build_skill_row(skill))
 
-	body.add_child(_spacer(14))
+	body.add_child(_spacer(36))
 	var resist_rows := VBoxContainer.new()
-	resist_rows.add_theme_constant_override("separation", 10)
+	resist_rows.add_theme_constant_override("separation", RESIST_ROW_GAP)
 	body.add_child(resist_rows)
 	var resists: Array[int] = [
 		_character.get_bleed_resist(), _character.get_blight_resist(),
@@ -318,7 +321,7 @@ func _build_skills_column() -> PanelContainer:
 	for i in RESIST_KEYS.size():
 		resist_rows.add_child(_build_resist_row(RESIST_ICONS[i], tr(RESIST_KEYS[i]), resists[i]))
 
-	body.add_child(_spacer(10))
+	body.add_child(_spacer(24))
 	var footer := _make_row_label(tr("UI_CHAR_FOOTER") % [
 		_character.current_hp, _character.get_max_hp(), _character.stress,
 		tr(_character.get_condition_label_key()),
@@ -341,7 +344,7 @@ func _build_skill_row(skill: CombatSkill) -> HBoxContainer:
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	var name_label := _make_row_label(skill.display_name)
-	name_label.custom_minimum_size = Vector2(150, 0)
+	name_label.custom_minimum_size = Vector2(210, 0)
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	row.add_child(name_label)
 
@@ -351,11 +354,8 @@ func _build_skill_row(skill: CombatSkill) -> HBoxContainer:
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(bar)
 
-	var value_label := _make_hint_label("%d/%d" % [proficiency, CharacterData.MAX_SKILL_PROFICIENCY])
-	value_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	value_label.custom_minimum_size = Vector2(60, 0)
-	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	row.add_child(value_label)
+	# Taslakta yalnız çubuk; sayı ipucunda (bkz. `row.tooltip_text`).
+	row.tooltip_text = "%s\n%d/%d" % [skill.description, proficiency, CharacterData.MAX_SKILL_PROFICIENCY]
 
 	if _character.unspent_skill_points > 0:
 		var plus_button := _make_plus_button()
@@ -382,7 +382,7 @@ func _build_resist_row(icon: String, label_text: String, percent: int) -> HBoxCo
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
 	var value_label := _make_row_label(tr("UI_CHAR_RESIST_VALUE") % percent)
-	value_label.custom_minimum_size = Vector2(64, 0)
+	value_label.custom_minimum_size = Vector2(90, 0)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(value_label)
 	return row
@@ -673,17 +673,22 @@ func _make_column(title: String) -> PanelContainer:
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 14)
 	panel.add_child(outer)
-	var heading := Label.new()
-	heading.text = title
-	heading.add_theme_font_size_override("font_size", HEADING_FONT_SIZE)
-	heading.add_theme_color_override("font_color", ArtPalette.GRIM_AMBER)
-	outer.add_child(heading)
+	outer.add_child(_heading_label(title, HEADING_FONT_SIZE))
 	outer.add_child(_make_rule(0.45))
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 10)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
 	return panel
+
+## Taslağın başlık yazısı: IM Fell küçük büyük harf, soluk altın.
+func _heading_label(text: String, font_size: int) -> Label:
+	var heading := Label.new()
+	heading.text = text
+	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_size_override("font_size", font_size)
+	heading.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
+	return heading
 
 ## Sütunun içerik kutusu: başlık ve çizginin altındaki VBox.
 func _body_of(panel: PanelContainer) -> VBoxContainer:
@@ -692,18 +697,18 @@ func _body_of(panel: PanelContainer) -> VBoxContainer:
 func _column_box() -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.88)
-	box.border_color = Color(ArtPalette.GRIM_AMBER, 0.45)
+	box.border_color = Color(ArtPalette.MENU_TITLE_GOLD, 0.45)
 	box.set_border_width_all(1)
 	box.set_corner_radius_all(2)
 	box.content_margin_left = 24
 	box.content_margin_right = 24
-	box.content_margin_top = 18
+	box.content_margin_top = 20
 	box.content_margin_bottom = 20
 	return box
 
 func _make_rule(alpha: float) -> ColorRect:
 	var rule := ColorRect.new()
-	rule.color = Color(ArtPalette.GRIM_AMBER, alpha)
+	rule.color = Color(ArtPalette.MENU_TITLE_GOLD, alpha)
 	rule.custom_minimum_size = Vector2(0, 1)
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rule
@@ -725,7 +730,8 @@ func _make_hint_label(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	label.modulate = HINT_COLOR
+	label.add_theme_font_size_override("font_size", HINT_FONT_SIZE)
+	label.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM.lightened(0.2))
 	return label
 
 const CHECK_ICON_SIZE: int = 18
