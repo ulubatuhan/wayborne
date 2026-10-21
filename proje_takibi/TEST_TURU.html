@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Wayborne Test Turu</title>
+<style>
+  :root {
+    --ground: #efe9db;
+    --panel: #f8f4ea;
+    --line: #cfc5ad;
+    --ink: #2a2118;
+    --dim: #6b5f4d;
+    --gold: #8a6a1f;
+    --moss: #3f6b3a;
+    --blood: #8e2f26;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14110e;
+      --panel: #1d1914;
+      --line: #3a3228;
+      --ink: #e8dfc9;
+      --dim: #a99d86;
+      --gold: #c9a24a;
+      --moss: #7fae6f;
+      --blood: #d36a5d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14110e;
+    --panel: #1d1914;
+    --line: #3a3228;
+    --ink: #e8dfc9;
+    --dim: #a99d86;
+    --gold: #c9a24a;
+    --moss: #7fae6f;
+    --blood: #d36a5d;
+  }
+  html, body { background: var(--ground); }
+  body { color: var(--ink); font: 16px/1.5 Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+         padding-inline: 16px; padding-block: 0 56px; margin: 0; }
+  .wrap { max-width: 760px; margin-inline: auto; }
+  header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--ground);
+               padding-block: 14px 10px; border-bottom: 1px solid var(--line); }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: .01em; text-wrap: balance; }
+  .sub { color: var(--dim); font-size: .9rem; margin: 0 0 10px; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--moss); transition: width .2s; }
+  .row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 8px;
+         font-size: .9rem; color: var(--dim); }
+  .row label { cursor: pointer; }
+  h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold);
+       margin: 28px 0 10px; font-weight: 600; text-wrap: balance; }
+  .m { display: grid; grid-template-columns: 24px 1fr; column-gap: 12px; row-gap: 3px;
+       padding: 12px 12px 12px 10px; margin: 0 0 8px; background: var(--panel);
+       border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+  .m input { grid-row: 1 / span 4; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--moss); }
+  .m .k { grid-column: 2; }
+  .m .k b { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .8rem; color: var(--gold);
+            margin-right: 6px; }
+  .m .r { grid-column: 2; font-size: .92rem; color: var(--dim); }
+  .m .r i { font-style: normal; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; margin-right: 6px;
+            color: var(--ink); opacity: .75; }
+  .m .b { color: var(--blood); }
+  .m .b i { color: var(--blood); opacity: 1; }
+  .m:has(input:checked) { opacity: .55; }
+  .m:has(input:checked) .k { text-decoration: line-through; text-decoration-color: var(--moss); }
+  .m:focus-within { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .hide-done .m:has(input:checked) { display: none; }
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Test turu</h1>
+    <p class="sub">Kodu yazıldı ve testten geçti; eksik olan gözünüzün onayı. Madde madde, ekran ekran.</p>
+    <div class="bar" role="progressbar" aria-label="İlerleme"><div id="fill"></div></div>
+    <div class="row">
+      <span><b id="done">0</b> / 85 onaylandı</span>
+      <label><input type="checkbox" id="hideDone"> onaylananları gizle</label>
+    </div>
+  </header>
+  <main id="liste">
+<section><h2>1. Ana menü ve yeni oyun</h2>
+<label class="m"><input type="checkbox" id="c-Y-D01"><span class="k"><b>Y-D01</b> Kader Modu (ironman) ve açık zorluk ayarları</span><span class="r"><i>Nereye</i> Ana menü → Yeni Soy. Açılan ekranda zorluk bölümüne bak.</span><span class="r"><i>Görmeli</i> Kader Modu seçeneği ve üç açık ayar (ölümcül vuruş direnci, açlık hasarı, olay sertliği) yazıyla görünür; Standart seçiliyken eskisi gibi oynanır. Kader Modunda oyun içi menüde elle kayıt kapalı ve nedeni yazıyor.</span><span class="r b"><i>Bozuksa</i> Gizli bir zorluk ya da nedensiz kilitli düğme</span></label>
+<label class="m"><input type="checkbox" id="c-Y-D03"><span class="k"><b>Y-D03</b> Soy mirası: kervan bitince ne kalır</span><span class="r"><i>Nereye</i> Bir oyunu bitir (ya da DevPanel F1 ile soyu bitir) → yeni oyun.</span><span class="r"><i>Görmeli</i> Önceki soyun mezarları yola/haritaya soluk döner, itibarın bir payı gelir, deftere eski soyun adı yazılır. `user://lineage_archive.json` oluşur.</span><span class="r b"><i>Bozuksa</i> Mezarlar hiç görünmüyor ya da itibar sıfırlanmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-A01"><span class="k"><b>Y-A01</b> Oyun vaadini yaz ve belgelere işle</span><span class="r"><i>Nereye</i> Doküman kontrolü: `CLAUDE.md` en üstü.</span><span class="r"><i>Görmeli</i> Vaat cümlesi ve dört sütun yazılı. Cümle sizin sesinizle uyuşuyor mu? Uyuşmuyorsa değiştirin (kutu &#x27;öneri, onay bekliyor&#x27; diyor).</span><span class="r b"><i>Bozuksa</i> Cümle size yabancı geliyor</span></label>
+</section>
+<section><h2>2. Şehir ekranı ve mekânlar</h2>
+<label class="m"><input type="checkbox" id="c-9.3"><span class="k"><b>9.3</b> CityFront durum varyantları</span><span class="r"><i>Nereye</i> Bir şehre gir; sabah/gündüz/akşam/gece için DevPanel F1 ile saati değiştir.</span><span class="r"><i>Görmeli</i> Şehir önü resmi saate göre değişiyor, şehir adı ve ihtiyaç levhaları okunuyor.</span><span class="r b"><i>Bozuksa</i> Saat değişse de resim aynı</span></label>
+<label class="m"><input type="checkbox" id="c-N33"><span class="k"><b>N33</b> Yerleşim menülerinin gün evresi varyantları: sabah, gündüz, akşam, gece</span><span class="r"><i>Nereye</i> Pazar, lonca, taverna, han, kilise ekranlarını sırayla aç (saat değiştirerek).</span><span class="r"><i>Görmeli</i> Her mekânın arka planı günün evresine uyuyor; geçişte kesilme/titreme yok.</span><span class="r b"><i>Bozuksa</i> Bir mekân hep aynı evrede kalıyor</span></label>
+<label class="m"><input type="checkbox" id="c-9.4"><span class="k"><b>9.4</b> Mekân ekranları</span><span class="r"><i>Nereye</i> Şehirden sırayla: Pazar, Lonca, Taverna, Han, Kilise, Terzi, Kıyafet Dolabı.</span><span class="r"><i>Görmeli</i> Hepsi aynı görsel dilde (koyu masa, ince çizgili paneller); metin okunur; geri düğmesi her zaman görünür.</span><span class="r b"><i>Bozuksa</i> Gri/kutu ekran, taşan yazı, ulaşılamayan geri düğmesi</span></label>
+<label class="m"><input type="checkbox" id="c-9.12"><span class="k"><b>9.12</b> Kilise ve mezarlık arka planı</span><span class="r"><i>Nereye</i> Kilise → mezarlık bölümü; ölüm olmuşsa &#x27;nöbet&#x27; hâli.</span><span class="r"><i>Görmeli</i> Mezarlık arka planı iki hâlde (sakin / nöbet) görünüyor.</span><span class="r b"><i>Bozuksa</i> Arka plan boş ya da yanlış hâl</span></label>
+<label class="m"><input type="checkbox" id="c-12.2a"><span class="k"><b>12.2a</b> Şehir kapısı görünümü çok kötü (&quot;rezalet&quot;), baştan tasarlanmalı</span><span class="r"><i>Nereye</i> Şehir kapısı: yola çıkarken ve şehre varırken kapıyı izle.</span><span class="r"><i>Görmeli</i> Kapı sur geçidi olarak çizili (düz renk kutu değil); kanat lider yaklaşınca kalkıyor.</span><span class="r b"><i>Bozuksa</i> Düz dikdörtgen ya da kanat takılıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C16"><span class="k"><b>Y-C16</b> İşe almayı zorlaştır ve kişileştir</span><span class="r"><i>Nereye</i> Taverna/Meydan/Lonca → işe alım panosu (birkaç şehirde).</span><span class="r"><i>Görmeli</i> Pano çoğu zaman 1-2 kişi; her adayın neden geldiği yazıyor; savaş/veba haberinde bir kişi eksik; fiyatlar önceki sürümden pahalı.</span><span class="r b"><i>Bozuksa</i> Pano hep dolu ya da adayın hikâyesi yok</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C10"><span class="k"><b>Y-C10</b> Fiyat defteri: bilgi eskir, söylenti yanıltır</span><span class="r"><i>Nereye</i> Pazar: bir şehre ilk varışta ve 20+ gün sonra komşu fiyatlarına bak; taverna&#x27;da sohbet et.</span><span class="r"><i>Görmeli</i> Gördüğün fiyatların yanında &#x27;kaç gün önce&#x27; yazıyor, 20 günden eskiler soluk. Söylenti bazen yalan çıkıyor.</span><span class="r b"><i>Bozuksa</i> Tarihsiz fiyat ya da hep doğru söylenti</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C11"><span class="k"><b>Y-C11</b> Gizli fiyat katmanlarını görünür kıl</span><span class="r"><i>Nereye</i> Pazar satırının üstüne gel.</span><span class="r"><i>Görmeli</i> Fiyat satırında kısa etiketler (mevsim, arz baskısı, haber vb.), üstüne gelince katman başına bir cümle.</span><span class="r b"><i>Bozuksa</i> Fiyat değişti ama nedeni yazmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C19"><span class="k"><b>Y-C19</b> Mal çeşitliliği: bozulan, kaçak, nadir</span><span class="r"><i>Nereye</i> Pazar: balık, kaçak tuz ve mühür alıp satmayı dene; 20+ adet toptan al; aldığın şeyi hemen geri sat.</span><span class="r"><i>Görmeli</i> Balık yolda bozuluyor; kaçak tuz yalnız han&#x27;da alınıyor; toptan alımda indirim; aynı ziyarette geri satış alış fiyatının en çok %90&#x27;ı.</span><span class="r b"><i>Bozuksa</i> Alıp aynı yerde satarak kâr edebiliyorsun</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C02"><span class="k"><b>Y-C02</b> Dinamik kontratlar ve yeni kontrat ekranı</span><span class="r"><i>Nereye</i> Tüccar Loncası → kontrat panosu (iki şehirde karşılaştır).</span><span class="r"><i>Görmeli</i> Pano her varışta farklı 4-7 ilan; teslimat, refakat, yolcu, kaçak yük türleri; acil olanlar kısa süreli ve daha yüksek ücretli.</span><span class="r b"><i>Bozuksa</i> Her seferinde aynı ilanlar</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C05"><span class="k"><b>Y-C05</b> Sakatlık, hastalık, hekim ve ilaç stoğu</span><span class="r"><i>Nereye</i> Kilise → hekim (yaralı/hasta bir yoldaşla; veba şehrine varış).</span><span class="r"><i>Görmeli</i> Hekim altın + şehrin ilaç stoğundan bir birim harcıyor; stok yoksa kilitli ve nedeni yazıyor. Veba şehrine varışta bulaşma olabiliyor.</span><span class="r b"><i>Bozuksa</i> Stok bitince bile iyileştiriyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F04T"><span class="k"><b>Y-F04T</b> Vagon atölyesi ekranını özelleştir</span><span class="r"><i>Nereye</i> Bir vagona yürü/tıkla (hub&#x27;da vagon etkileşimi) → atölye.</span><span class="r"><i>Görmeli</i> Vagonun kendi yükü ve tarif listesi; yapılamayan tarif nedeniyle kilitli; başka vagondaki malzeme sayılmıyor.</span><span class="r b"><i>Bozuksa</i> Tarif başka vagonun malzemesini kullanıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F03"><span class="k"><b>Y-F03</b> Atölye ve vagon envanterini anlamlandır</span><span class="r"><i>Nereye</i> Atölyede her tarifi bir kez yap (sargı, branda onarımı, kürk şapka, balık yağı, meşale).</span><span class="r"><i>Görmeli</i> Her ürünün bir kullanım yeri var (sargı savaşta/kampta, yağ fenerde, meşale gece yürüyüşünde).</span><span class="r b"><i>Bozuksa</i> Üretilip hiçbir işe yaramayan eşya</span></label>
+</section>
+<section><h2>3. Karakter, kadro ve defter kartları</h2>
+<label class="m"><input type="checkbox" id="c-9.6"><span class="k"><b>9.6</b> Karakter ve stat ekranı</span><span class="r"><i>Nereye</i> Karakter ekranı (kadrodan bir kişi).</span><span class="r"><i>Görmeli</i> Stat ve yetkinlik bölümü yeni görsel dilde; sekiz stat okunuyor; kıyafet önizlemesi yanında.</span><span class="r b"><i>Bozuksa</i> Taşan satır, kesik yazı</span></label>
+<label class="m"><input type="checkbox" id="c-9.7"><span class="k"><b>9.7</b> Roster kartı ve seviye rozeti</span><span class="r"><i>Nereye</i> Kadro (party) ekranı ve yol altındaki Kadro sekmesi.</span><span class="r"><i>Görmeli</i> Kişi kartında seviye rozeti net; kart içeriği kesilmiyor.</span><span class="r b"><i>Bozuksa</i> Rozet okunmuyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F09"><span class="k"><b>Y-F09</b> Görevler: öncü, ortancı, artçı; sınıflar ayrı</span><span class="r"><i>Nereye</i> Karakter ekranı → görev ata (öncü / ortancı / artçı).</span><span class="r"><i>Görmeli</i> Üç rol var (altı eski görev bu rollerin altında etki olarak duruyor); sınıf görev gücünü çarpmıyor; eski kayıt yüklenince roller doğru dağılıyor.</span><span class="r b"><i>Bozuksa</i> Eski kayıtta görev kaybolması</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C17"><span class="k"><b>Y-C17</b> Yoldaşın kendi hikâyesi ve ilişkileri</span><span class="r"><i>Nereye</i> Yoldaşın karakter ekranı; kampta bağ yüksekse kamp hikâyesi.</span><span class="r"><i>Görmeli</i> Her yoldaşın geçmişi ve kişisel hedefi (tanıdıkça) yazıyor; kamp hikâyesi üç bölüm; üçüncüsü (sır) en ağır kırgınlığı hafifletiyor.</span><span class="r b"><i>Bozuksa</i> Hikâye hiç açılmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F01"><span class="k"><b>Y-F01</b> Moral ve takat: kervanın nefesi, ama takat bedende kalır</span><span class="r"><i>Nereye</i> Yolda hızlı tempo, gece yürüyüşü, kamp; karakter kartında takat.</span><span class="r"><i>Görmeli</i> Her kişinin yorgunluğu ayrı; en yorgun kişi kervanın takatini bağlıyor ve adı yazıyor; kamp -30, şehir -60.</span><span class="r b"><i>Bozuksa</i> Yorgunluk hızı değiştiriyor (değiştirmemeli)</span></label>
+</section>
+<section><h2>4. Planlayıcı ve dünya haritası</h2>
+<label class="m"><input type="checkbox" id="c-Y-F10"><span class="k"><b>Y-F10</b> Tehlikenin dökümünü göster</span><span class="r"><i>Nereye</i> Şehirden yol seçip planlayıcıyı aç.</span><span class="r"><i>Görmeli</i> Tehlike yüzdesinin dökümü: taban, yol durumu, dünya olayı, zamanla büyüme satırları.</span><span class="r b"><i>Bozuksa</i> Tek bir sayı, nedensiz</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B13"><span class="k"><b>Y-B13</b> Aynı rotada farklı yol: mevsim ve kestirmeler</span><span class="r"><i>Nereye</i> Aynı rotayı farklı mevsimlerde planla; 5+ günlük rotada kestirme seç.</span><span class="r"><i>Görmeli</i> İlkbaharda bataklık, yazın kuruma, kışın dağda yavaşlama; kestirme -%20 gün ve tehlike +; erzak rezervi buna göre.</span><span class="r b"><i>Bozuksa</i> Erzak kestirmede yetmiyor</span></label>
+<label class="m"><input type="checkbox" id="c-8.5"><span class="k"><b>8.5</b> Yazı ile yolun çakışmasını gider</span><span class="r"><i>Nereye</i> Haritayı aç (M) ve kenti/yolları gez.</span><span class="r"><i>Görmeli</i> Kent adlarının altında yol çizgisi okumayı bozmuyor; adlar IM Fell yazı tipinde ve okunur.</span><span class="r b"><i>Bozuksa</i> Yazı yol çizgisine biniyor</span></label>
+<label class="m"><input type="checkbox" id="c-8.7"><span class="k"><b>8.7</b> Boğaza ad ver</span><span class="r"><i>Nereye</i> Haritada boğazı bul.</span><span class="r"><i>Görmeli</i> Boğazın kesin bir adı var (geçici &#x27;Kesgrav Boğazı&#x27; kalmamış olmalı; ad lore&#x27;a uyuyor mu?).</span><span class="r b"><i>Bozuksa</i> Yer tutucu ad</span></label>
+<label class="m"><input type="checkbox" id="c-8.10"><span class="k"><b>8.10</b> Harita saate göre kararıp aydınlansın (gündüz, akşam, gece)</span><span class="r"><i>Nereye</i> Haritayı gündüz/akşam/gece aç (saat değiştir).</span><span class="r"><i>Görmeli</i> Harita akşam sıcak, gece mavi-gri kararıyor; yazı her saatte okunuyor.</span><span class="r b"><i>Bozuksa</i> Gece harita okunmaz oluyor</span></label>
+<label class="m"><input type="checkbox" id="c-8.11"><span class="k"><b>8.11</b> Şehirlerde ve yerleşimlerde küçük ışıklar; akşam ve gece hafifçe parıldasın</span><span class="r"><i>Nereye</i> Haritayı akşam/gece aç, yakınlaş.</span><span class="r"><i>Görmeli</i> Şehir ve yerleşimlerde küçük ışıklar akşam belirir (şehir 6-12, kasaba 3-5, köy 1-2, harabede yok); yakınlaşınca boyutları sabit.</span><span class="r b"><i>Bozuksa</i> Işık harabelerde de var ya da hiç yok</span></label>
+<label class="m"><input type="checkbox" id="c-Y-G09"><span class="k"><b>Y-G09</b> Haritada kervanın mürekkep izi</span><span class="r"><i>Nereye</i> Bir sefer bitir, haritaya bak.</span><span class="r"><i>Görmeli</i> Bitmiş yolun ince mürekkep izi ve kamp yerleri haritada kalıyor.</span><span class="r b"><i>Bozuksa</i> İz yok ya da kayıttan yüklenince kayboluyor</span></label>
+<label class="m"><input type="checkbox" id="c-N29"><span class="k"><b>N29</b> Vadiye özgü yeşil çayır biyomu</span><span class="r"><i>Nereye</i> Vadi şehri çevresindeki yola çık.</span><span class="r"><i>Görmeli</i> Vadiye özgü yeşil çayır katmanı (kuru ot değil); biyom geçişi yumuşak.</span><span class="r b"><i>Bozuksa</i> Vadi hâlâ kuru bozkır</span></label>
+<label class="m"><input type="checkbox" id="c-N30"><span class="k"><b>N30</b> Bozkırda yol durakları arasını aç</span><span class="r"><i>Nereye</i> Bozkırdan geçen uzun bir yola çık.</span><span class="r"><i>Görmeli</i> Duraklar arası en az 6 gün; 35 günlük yolda 5 durak yok.</span><span class="r b"><i>Bozuksa</i> Durak peş peşe</span></label>
+</section>
+<section><h2>5. Yol: yürüyüş, figürler, kamp</h2>
+<label class="m"><input type="checkbox" id="c-10.1"><span class="k"><b>10.1</b> Binici atın biraz fazla önünde oturuyor, çok az geriye alınmalı</span><span class="r"><i>Nereye</i> Yola çık, atlı lideri yandan izle.</span><span class="r"><i>Görmeli</i> Binici atın sırtında biraz geride, eğerin üstünde oturuyor; dönüşte de aynı.</span><span class="r b"><i>Bozuksa</i> Binici atın boynunda/önünde</span></label>
+<label class="m"><input type="checkbox" id="c-10.2"><span class="k"><b>10.2</b> At üstündeki binici yürür gibi kol sallamaya devam ediyor</span><span class="r"><i>Nereye</i> Yürürken liderin kollarına bak.</span><span class="r"><i>Görmeli</i> Atlı lider yürür gibi kol sallamıyor; kollar sakin (oturma/ride dinlenme karesi).</span><span class="r b"><i>Bozuksa</i> Kollar sallanıyor</span></label>
+<label class="m"><input type="checkbox" id="c-10.4"><span class="k"><b>10.4</b> Vagonu çeken hayvanlar vagona bağlı görünmüyor</span><span class="r"><i>Nereye</i> Vagonu çeken öküze bak.</span><span class="r"><i>Görmeli</i> Çeki oku öküzün boynuna uzanıyor, boyunduruk öküzün üstünde çizili; öküz vagona bağlı okunuyor.</span><span class="r b"><i>Bozuksa</i> Öküz vagondan kopuk</span></label>
+<label class="m"><input type="checkbox" id="c-12.2b"><span class="k"><b>12.2b</b> Yol üstündeki kule (durak), kamp kurulduktan sonra kadrajdan bir anda kaçıyor</span><span class="r"><i>Nereye</i> Bir yol durağının (kule vb.) yanında kamp kur.</span><span class="r"><i>Görmeli</i> Kamp başlayınca durak kadrajdan kaçmıyor, yerinde duruyor.</span><span class="r b"><i>Bozuksa</i> Durak bir anda uçuyor</span></label>
+<label class="m"><input type="checkbox" id="c-12.2c"><span class="k"><b>12.2c</b> Kamp: karakterler ateşe çok yavaş yürüyor (3x&#x27;te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın</span><span class="r"><i>Nereye</i> Akşam kamp kur; ateşe yürüyüşü izle (1x hızda).</span><span class="r"><i>Görmeli</i> Herkes en çok ~3 sn&#x27;de ateşe varıyor; kamp süresi herkes oturunca başlıyor; sabah olmadan ateşteler.</span><span class="r b"><i>Bozuksa</i> Yürüyüş uzun sürüyor, sabah oluyor</span></label>
+<label class="m"><input type="checkbox" id="c-12.2e"><span class="k"><b>12.2e</b> Yol sahnesi estetik olarak güzel değil; her detayı yeniden tasarla: çimen, yol, arka plan, güneş</span><span class="r"><i>Nereye</i> Yol sahnesini gündüz/akşam/yağmurda izle.</span><span class="r"><i>Görmeli</i> Çimen, yol, arka plan ve ışık tek prodüksiyon gibi; zemin kaymıyor, yol ortada.</span><span class="r b"><i>Bozuksa</i> Yol &#x27;Excel gibi&#x27; ya da zemin kayıyor (kararını yaz: yeniden tasarım gerekir mi?)</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B09"><span class="k"><b>Y-B09</b> Yolu dolu yap, sonra hızlandırmayı kaldır</span><span class="r"><i>Nereye</i> Yolda bir süre bekle ve hızlandırma düğmesini ara.</span><span class="r"><i>Görmeli</i> Hızlandırma yok (yalnızca 0.5x ve 1x); yol boş gelmiyor: yaklaşık 60-90 sn&#x27;de bir karar ya da bilgi var.</span><span class="r b"><i>Bozuksa</i> Boş sessiz dakikalar</span></label>
+<label class="m"><input type="checkbox" id="c-N23"><span class="k"><b>N23</b> Eski HUD parçalarını kaldır</span><span class="r"><i>Nereye</i> Yolda eski HUD parçalarını ara.</span><span class="r"><i>Görmeli</i> Eski üst/alt bar kalıntısı yok; yalnızca gösterge plakası ve kontrol paneli var.</span><span class="r b"><i>Bozuksa</i> Çift gösterge, üst üste binen yazı</span></label>
+<label class="m"><input type="checkbox" id="c-5.1"><span class="k"><b>5.1</b> `_process` döngülerinin gereksiz çalışmasını durdur</span><span class="r"><i>Nereye</i> Menüde, şehirde, yolda 2-3 dakika dur; kumanda ve sahne geçişlerini dene.</span><span class="r"><i>Görmeli</i> Ortam animasyonu görünmezken çizilmiyor; terazi dengedeyken titremiyor; kumandada her şey çalışıyor; sahne geçişi bozulmuyor.</span><span class="r b"><i>Bozuksa</i> Kumanda ya da geçiş bozuldu</span></label>
+</section>
+<section><h2>6. Yol: insanlar, işaretler, hava, gece</h2>
+<label class="m"><input type="checkbox" id="c-R0"><span class="k"><b>R0</b> Altyapı</span><span class="r"><i>Nereye</i> Lideri bir yoldaşın yanına yürüt ve bekle.</span><span class="r"><i>Görmeli</i> Yoldaşın başında kısa söz balonu; satır log&#x27;a da yazılıyor; aynı anda en çok iki balon.</span><span class="r b"><i>Bozuksa</i> Balon çıkmıyor ya da üst üste biniyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B01"><span class="k"><b>Y-B01</b> Yol önerilerini (R0–R1) ana iş olarak uygula</span><span class="r"><i>Nereye</i> Birkaç gün yürü; farklı yoldaşlarla yan yana ol.</span><span class="r"><i>Görmeli</i> Konu seçimi: kırgınlık &gt; stres &gt; geçmiş &gt; görev &gt; kültür &gt; hava &gt; sohbet; aynı konu birkaç gün dinleniyor.</span><span class="r b"><i>Bozuksa</i> Hep aynı cümle</span></label>
+<label class="m"><input type="checkbox" id="c-R1"><span class="k"><b>R1</b> İnsanlar</span><span class="r"><i>Nereye</i> Kampta hikâye (bağ yüksek) ve dostluk/rekabet.</span><span class="r"><i>Görmeli</i> Dostlar kolonda yakın yürür, rakipler uzak; sıkıntılı biri bazen kendi başına bir şey yapar (ekmeğini paylaşır, dua eder).</span><span class="r b"><i>Bozuksa</i> Kimse hiç kendi kendine davranmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B02"><span class="k"><b>Y-B02</b> Yol yönetmeni: gerilimi kervanın durumuna göre ayarla</span><span class="r"><i>Nereye</i> Uzun bir yolda &#x27;sessiz&#x27; günler ve ağır bir karttan sonraki günü izle.</span><span class="r"><i>Görmeli</i> Sessiz günler birikince kart ihtimali artıyor; ağır karttan sonra rahatlık; gece işaretler sıklaşıyor (ateş/nöbet/fener bunu azaltıyor).</span><span class="r b"><i>Bozuksa</i> Üç sessiz gün arka arkaya ya da iki ağır kart arka arkaya</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B03"><span class="k"><b>Y-B03</b> İşaretleri bulmacaya çevir: belirsizlik ve bedel</span><span class="r"><i>Nereye</i> Yolda duman/gıcırtı/arkada kuş gibi işaretlere git ve görmezden gel (iki ayrı sefer).</span><span class="r"><i>Görmeli</i> Gidince gerçek yüzü ve küçük ödülü açılıyor; görmezden gelince o gerçeğin bedeli ödeniyor; bazı gerçekler bedelsiz.</span><span class="r b"><i>Bozuksa</i> İşaretin türü cevabı veriyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B04"><span class="k"><b>Y-B04</b> Dikkat bölgelerine yeri doldurulamaz roller ver</span><span class="r"><i>Nereye</i> Rol sahibi (öncü/ortancı/artçı) varken lideri başka bölgede tut.</span><span class="r"><i>Görmeli</i> Rol sahibi kendi bölgesindeki işareti liderin yerine yakalayabiliyor (saatlik ~%3.5).</span><span class="r b"><i>Bozuksa</i> Rol hiçbir fark yaratmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B05"><span class="k"><b>Y-B05</b> Havaya karşı küçük kararlar</span><span class="r"><i>Nereye</i> Farklı havalarda emir panelindeki küçük kararlar.</span><span class="r"><i>Görmeli</i> Her hava 1-2 tek tıkla karar (erken çık, yağmurdan önce it, çamur kestirmesi, fener, fırtınada sığın); sonuçları yazılı.</span><span class="r b"><i>Bozuksa</i> Karar etkisiz ya da erzak sözü bozuluyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C20"><span class="k"><b>Y-C20</b> Fener ya da meşaleyle gece yürüyüşü</span><span class="r"><i>Nereye</i> Geceye kadar yürü; fener/meşale yak ve yakma.</span><span class="r"><i>Görmeli</i> Işıksız gece takat ve tehlike bedeli; fener gece 1 yağ, meşale 2; liderde parıltı.</span><span class="r b"><i>Bozuksa</i> Gece bedelsiz</span></label>
+<label class="m"><input type="checkbox" id="c-R4"><span class="k"><b>R4</b> Risk</span><span class="r"><i>Nereye</i> Nehir geçidi olan bir yol (ford) ve gece yürüyüşü.</span><span class="r"><i>Görmeli</i> Su seviyesi (düşük/orta/yüksek) kartta; doğru geçiş seçeneği açık, yanlış olanlar nedenle kilitli; kimse ölmüyor, vagon kaybolmuyor.</span><span class="r b"><i>Bozuksa</i> Geçişte ölüm/vagon kaybı</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B10"><span class="k"><b>Y-B10</b> Başka kervanlarla karşılaşma</span><span class="r"><i>Nereye</i> Yolda başka kervanlarla karşılaş (birkaç sefer).</span><span class="r"><i>Görmeli</i> Askerî konvoy (borç/arama), mülteci (yoldaş), hacı, rakip tüccar (bilgi/iftira) kartları.</span><span class="r b"><i>Bozuksa</i> Karşılaşma hiç olmuyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B06"><span class="k"><b>Y-B06</b> Yolda erzak kaynağı: av, toplama, köy</span><span class="r"><i>Nereye</i> Yolda av, köy durağı ve toplama.</span><span class="r"><i>Görmeli</i> Vahşi hayvan zaferi +10 erzak; köyde birim fiyat şehirden pahalı; toplama +10 erzak ve +1 gün.</span><span class="r b"><i>Bozuksa</i> Erzak bedava geliyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B07"><span class="k"><b>Y-B07</b> Sofrayı anlamlı karar yap: erzak türleri</span><span class="r"><i>Nereye</i> Akşam sofra panelini aç (şarap/bal/balık varken).</span><span class="r"><i>Görmeli</i> Çeşni yalnızca panel açıkken teklif ediliyor; erzak payı ve planlayıcının sözü değişmiyor.</span><span class="r b"><i>Bozuksa</i> Standing order çeşni harcıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B12"><span class="k"><b>Y-B12</b> Kampı karar anına çevir; ertesi günün dizilişi</span><span class="r"><i>Nereye</i> Kampta nöbet ve formasyon.</span><span class="r"><i>Görmeli</i> Öncü +1 stres/gün; nöbet ertesi günün tehlikesini düşürüyor; akşam en çok iki eylem.</span><span class="r b"><i>Bozuksa</i> Kamp panelinde sıkışma</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B08"><span class="k"><b>Y-B08</b> Günün satırı: akşam kampında defter cümlesi</span><span class="r"><i>Nereye</i> Akşam kampında &#x27;günün satırı&#x27; (defter cümlesi).</span><span class="r"><i>Görmeli</i> O günün en ağır olayına göre üç cümle sunuluyor; birini seçiyorsun ya da hiçbirini; yazmıyorsun.</span><span class="r b"><i>Bozuksa</i> Cümleler sayı içeriyor ya da yazı kutusu çıkıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-B11"><span class="k"><b>Y-B11</b> Yolun hafızası: mezarlar, enkaz, eski kül</span><span class="r"><i>Nereye</i> Biri öldükten/vagon kaybından sonra o yoldan tekrar geç.</span><span class="r"><i>Görmeli</i> Mezar, kayıp vagonun enkazı, kamp külü yolda görünüyor; geçerken log&#x27;a satır (lider önde ise ad ve neden).</span><span class="r b"><i>Bozuksa</i> Anıtlar yerinde değil/yönden bağımsız kayıyor</span></label>
+<label class="m"><input type="checkbox" id="c-R2"><span class="k"><b>R2</b> Hafıza</span><span class="r"><i>Nereye</i> Yukarıdaki üç madde birlikte: mezar + gün satırı + kamp külü.</span><span class="r"><i>Görmeli</i> Defter ve yol aynı hafızayı gösteriyor.</span><span class="r b"><i>Bozuksa</i> Defterde olup yolda görünmeyen</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F05"><span class="k"><b>Y-F05</b> Tüccar mizacını yola bağla</span><span class="r"><i>Nereye</i> Tüccar refakat al; yolda kartlar.</span><span class="r"><i>Görmeli</i> Hırsız tüccar gece kaçıyor, çaresiz olan tehlikede dönmek istiyor, kinci kavga çıkarıyor, sadık erzak paylaşıyor.</span><span class="r b"><i>Bozuksa</i> Tüccar hiç tepki vermiyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C15"><span class="k"><b>Y-C15</b> Orta ve geç oyuna yeni tehditler</span><span class="r"><i>Nereye</i> Orta ve geç oyunda (10. ve 25. sefer sonrası) kart dağılımı.</span><span class="r"><i>Görmeli</i> Pusu, savaş/veba/haraç haberleri, rakip kervan ve gümrük sıklaşıyor.</span><span class="r b"><i>Bozuksa</i> Oyun hiç sertleşmiyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F07T"><span class="k"><b>Y-F07T</b> Büyücüyü nadir olay düşmanı olarak bağla</span><span class="r"><i>Nereye</i> Nadir olay: haydut büyücü (zor bulunur).</span><span class="r"><i>Görmeli</i> Çok nadir ve bir kez çıkıyor; tehlikeli yolda; savaşta ilk yıkıcı büyü.</span><span class="r b"><i>Bozuksa</i> Her sefer çıkıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-D06"><span class="k"><b>Y-D06</b> Kırılma: davranışla yaşatılan olay</span><span class="r"><i>Nereye</i> Kırılmış bir yoldaşla bir sefer.</span><span class="r"><i>Görmeli</i> Dört kip (öne atılır, alay çeker, reddeder, yakındakine saldırır) son kötü huya göre; ekran efekti yok; yolda kırılma kartı.</span><span class="r b"><i>Bozuksa</i> Kırılma sadece sayı</span></label>
+<label class="m"><input type="checkbox" id="c-Y-H04"><span class="k"><b>Y-H04</b> Hiçbir ekranda sıkışma kalmasın</span><span class="r"><i>Nereye</i> Her paneli aç ve Esc ile çık; karar panellerinde Esc&#x27;e bas.</span><span class="r"><i>Görmeli</i> Hiçbir ekranda sıkışma yok: paneller Esc&#x27;e yanıt veriyor; karar panelleri (devralma, kader) yutuyor.</span><span class="r b"><i>Bozuksa</i> Çıkılamayan ekran</span></label>
+</section>
+<section><h2>7. Savaş</h2>
+<label class="m"><input type="checkbox" id="c-Y-H05"><span class="k"><b>Y-H05</b> Savaşa vuruş hissi</span><span class="r"><i>Nereye</i> Savaşta vuruş, kritik ve öldürme anları.</span><span class="r"><i>Görmeli</i> Kritikte sahne hedefe yaklaşıyor ve defter satırı çıkıyor; öldürme anında kısa duraklama sonra düşüş; vuruş/kritik/öldürme sesleri çeşitli ve perde oynuyor.</span><span class="r b"><i>Bozuksa</i> Ses hep aynı ya da yakınlaştırma takılıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C07"><span class="k"><b>Y-C07</b> Savaştan bedelli geri çekilme</span><span class="r"><i>Nereye</i> Dar durumda geri çekil.</span><span class="r"><i>Görmeli</i> Savaş paneli geri çekilmeyi teklif ediyor: yükün üçte biri, bir vagon feda (enkaz yolda kalır) ya da artçı; savaş kaybı cezası yok, hafif moral kaybı.</span><span class="r b"><i>Bozuksa</i> Geri çekilme bedelsiz ya da seçenek çıkmıyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C08"><span class="k"><b>Y-C08</b> Düşmanlara kişilik ver</span><span class="r"><i>Nereye</i> Haydut reisi, kurt ve muhafızla birer savaş.</span><span class="r"><i>Görmeli</i> Reis liderine, kurt en yaralıya saldırıyor, muhafız ölümün kıyısındakini bitirmiyor.</span><span class="r b"><i>Bozuksa</i> Hepsi aynı hedefi seçiyor</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C03"><span class="k"><b>Y-C03</b> Ganimet: eşya, kıyafet, sarf, nadir bulgu</span><span class="r"><i>Nereye</i> Zaferden sonra ganimet ekranı.</span><span class="r"><i>Görmeli</i> Düşman türüne göre ganimet listesi; mal/kıyafet/ekipman ilgili depolara düşüyor.</span><span class="r b"><i>Bozuksa</i> Ganimet hep aynı</span></label>
+<label class="m"><input type="checkbox" id="c-Y-C04"><span class="k"><b>Y-C04</b> Sarf malzemesi ve yolda tedavi</span><span class="r"><i>Nereye</i> Sargı ve iksirle savaş içi tedavi; kampta yara sarma.</span><span class="r"><i>Görmeli</i> Sargı +8 can ve kanamayı keser, iksir +12 can; kullanılanlar kargodan düşüyor; kamp sargısı çift bakım.</span><span class="r b"><i>Bozuksa</i> Eşya düşmüyor</span></label>
+</section>
+<section><h2>8. Defter ve paylaşım</h2>
+<label class="m"><input type="checkbox" id="c-9.11"><span class="k"><b>9.11</b> Waybook ve defter</span><span class="r"><i>Nereye</i> L ile defter. &#x27;Düşenler&#x27; sayfası.</span><span class="r"><i>Görmeli</i> Kurucu ve ölüler rütbeye göre mezar işaretiyle listeli; dinî simge yok.</span><span class="r b"><i>Bozuksa</i> Çizgiler okunmuyor</span></label>
+<label class="m"><input type="checkbox" id="c-DFT1"><span class="k"><b>DFT1</b> Defter sayfası okunur olsun (cetvel çizgileri)</span><span class="r"><i>Nereye</i> Defter sayfasında cetvel çizgilerini oku.</span><span class="r"><i>Görmeli</i> Sayfa metni cetvel çizgilerine oturuyor ve okunur.</span><span class="r b"><i>Bozuksa</i> Satırlar çizgiye binmiş</span></label>
+<label class="m"><input type="checkbox" id="c-Y-E07"><span class="k"><b>Y-E07</b> Paylaşılabilir defter sayfası ve güncel Codex</span><span class="r"><i>Nereye</i> Defterde &#x27;sayfayı kaydet&#x27; düğmesi.</span><span class="r"><i>Görmeli</i> Sol sayfa soyun özetine dönüyor ve PNG `user://defter_sayfalari/` altına yazılıyor; defter eski hâline dönüyor.</span><span class="r b"><i>Bozuksa</i> Dosya yok ya da defter bozuk kaldı</span></label>
+</section>
+<section><h2>9. Otomatik kanıtlı</h2>
+<label class="m"><input type="checkbox" id="c-1.4"><span class="k"><b>1.4</b> Belgeleri temizle</span><span class="r">Codex PDF Windows yazı tipleriyle yeniden üretildi; yasaklı sözcük taraması temiz.</span></label>
+<label class="m"><input type="checkbox" id="c-1.5"><span class="k"><b>1.5</b> Doğrulama</span><span class="r">`git grep` yasaklı kelime taraması sıfır; kural `tests/test_naming_rule.gd` ile korunuyor.</span></label>
+<label class="m"><input type="checkbox" id="c-4.3"><span class="k"><b>4.3</b> Tekrarlanan yardımcıları birleştir</span><span class="r">`reduce_motion` NodeUtil&#x27;de; autoload kopyaları bilerek bırakıldı.</span></label>
+<label class="m"><input type="checkbox" id="c-4.4"><span class="k"><b>4.4</b> Olay anahtarlarını açık yaz</span><span class="r">Olay anahtarları açık yazılı (tarama testi geçiyor).</span></label>
+<label class="m"><input type="checkbox" id="c-5.2"><span class="k"><b>5.2</b> Mipmap&#x27;leri içe aktarma ayarıyla üret</span><span class="r">Mipmap&#x27;ler `project.godot` içe aktarma ayarıyla üretiliyor (CI&#x27;de her doku için geçerli).</span></label>
+<label class="m"><input type="checkbox" id="c-5.3"><span class="k"><b>5.3</b> `BodyFrames` önbelleğine çıkarma politikası ekle</span><span class="r">`BodyFrames` önbelleği LRU çıkarma politikalı (96 küme) ve ölçüm raporu var.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-A02"><span class="k"><b>Y-A02</b> Dört tasarım sütununu yazıya dök</span><span class="r">Görev şablonuna zorunlu &#x27;Sütun&#x27; satırı eklendi.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-E03"><span class="k"><b>Y-E03</b> Her kartta cazip ama riskli bir seçenek</span><span class="r">59 kart incelendi; 7 karta cazip-riskli zarlı seçenek eklendi.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-F11"><span class="k"><b>Y-F11</b> CLAUDE.md&#x27;yi kayıpsız incelt</span><span class="r">CLAUDE.md kayıpsız inceltildi; tarihçe `docs/history/` altında.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-J13"><span class="k"><b>Y-J13</b> Yerelleştirme sırası ve terim sözlüğü</span><span class="r">Çeviri sırası ve 50 terimlik sözlük yazıldı.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-G14"><span class="k"><b>Y-G14</b> Tipografi birliği</span><span class="r">IM Fell yazı tipi Türkçe harflerin hepsini taşıyor (ölçüldü).</span></label>
+<label class="m"><input type="checkbox" id="c-Y-G15"><span class="k"><b>Y-G15</b> Vagon ve kurt tek kaynaktan</span><span class="r">Savaş kurdu kartın rengine çekildi; vagon zaten tek kaynak.</span></label>
+<label class="m"><input type="checkbox" id="c-Y-K02"><span class="k"><b>Y-K02</b> Otomatik ekran görüntüsü karşılaştırması</span><span class="r">Otomatik ekran görüntüsü karşılaştırma aracı ve iş akışı hazır (rapor amaçlı).</span></label>
+<label class="m"><input type="checkbox" id="c-N31"><span class="k"><b>N31</b> Oyun hissi incelemesi ve planı (6 alan)</span><span class="r">Oyun hissi incelemesi tamamlandı; alt görevler N31a-f açıldı.</span></label>
+<label class="m"><input type="checkbox" id="c-N31a"><span class="k"><b>N31a</b> Ölçüm: beat kaydı ve boş dakika raporu</span><span class="r">Beat kaydı ve boş dakika raporu (`tests/simulate_road_beats.gd`); oyuncu ölçümü yalnız izinle.</span></label>
+<label class="m"><input type="checkbox" id="c-N31b"><span class="k"><b>N31b</b> Işık modeli ve sis şeridi koda</span><span class="r">Işık modeli ve sis şeridi kodda.</span></label>
+<label class="m"><input type="checkbox" id="c-N31c"><span class="k"><b>N31c</b> Ses otobüsleri, çeşitleme, ayar kaydırıcıları</span><span class="r">Ses otobüsleri, çeşitleme ve ayar kaydırıcıları: Ayarlar&#x27;dan müzik/efekt kaydırıcılarını deneyin (müzik yok, efektler ve rüzgâr var).</span></label>
+</section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var KEY = "wayborne-test-turu-v1";
+  var kutular = Array.prototype.slice.call(document.querySelectorAll('.m input[type=checkbox]'));
+  var durum = {};
+  try { durum = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { durum = {}; }
+  function say() {
+    var n = kutular.filter(function (c) { return c.checked; }).length;
+    document.getElementById('done').textContent = n;
+    document.getElementById('fill').style.width = (100 * n / Math.max(1, kutular.length)) + '%';
+  }
+  kutular.forEach(function (c) {
+    if (durum[c.id]) c.checked = true;
+    c.addEventListener('change', function () {
+      durum[c.id] = c.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(durum)); } catch (e) {}
+      say();
+    });
+  });
+  document.getElementById('hideDone').addEventListener('change', function (e) {
+    document.getElementById('liste').classList.toggle('hide-done', e.target.checked);
+  });
+  say();
+})();
+</script>
+
+</body>
+</html>

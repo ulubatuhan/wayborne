@@ -1,0 +1,108 @@
+<title>Wayborne Test Turu</title>
+<style>
+  :root {
+    --ground: #efe9db;
+    --panel: #f8f4ea;
+    --line: #cfc5ad;
+    --ink: #2a2118;
+    --dim: #6b5f4d;
+    --gold: #8a6a1f;
+    --moss: #3f6b3a;
+    --blood: #8e2f26;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14110e;
+      --panel: #1d1914;
+      --line: #3a3228;
+      --ink: #e8dfc9;
+      --dim: #a99d86;
+      --gold: #c9a24a;
+      --moss: #7fae6f;
+      --blood: #d36a5d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14110e;
+    --panel: #1d1914;
+    --line: #3a3228;
+    --ink: #e8dfc9;
+    --dim: #a99d86;
+    --gold: #c9a24a;
+    --moss: #7fae6f;
+    --blood: #d36a5d;
+  }
+  html, body { background: var(--ground); }
+  body { color: var(--ink); font: 16px/1.5 Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+         padding-inline: 16px; padding-block: 0 56px; margin: 0; }
+  .wrap { max-width: 760px; margin-inline: auto; }
+  header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--ground);
+               padding-block: 14px 10px; border-bottom: 1px solid var(--line); }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: .01em; text-wrap: balance; }
+  .sub { color: var(--dim); font-size: .9rem; margin: 0 0 10px; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--moss); transition: width .2s; }
+  .row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 8px;
+         font-size: .9rem; color: var(--dim); }
+  .row label { cursor: pointer; }
+  h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold);
+       margin: 28px 0 10px; font-weight: 600; text-wrap: balance; }
+  .m { display: grid; grid-template-columns: 24px 1fr; column-gap: 12px; row-gap: 3px;
+       padding: 12px 12px 12px 10px; margin: 0 0 8px; background: var(--panel);
+       border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+  .m input { grid-row: 1 / span 4; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--moss); }
+  .m .k { grid-column: 2; }
+  .m .k b { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .8rem; color: var(--gold);
+            margin-right: 6px; }
+  .m .r { grid-column: 2; font-size: .92rem; color: var(--dim); }
+  .m .r i { font-style: normal; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; margin-right: 6px;
+            color: var(--ink); opacity: .75; }
+  .m .b { color: var(--blood); }
+  .m .b i { color: var(--blood); opacity: 1; }
+  .m:has(input:checked) { opacity: .55; }
+  .m:has(input:checked) .k { text-decoration: line-through; text-decoration-color: var(--moss); }
+  .m:focus-within { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .hide-done .m:has(input:checked) { display: none; }
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Test turu</h1>
+    <p class="sub">Kodu yazıldı ve testten geçti; eksik olan gözünüzün onayı. Madde madde, ekran ekran.</p>
+    <div class="bar" role="progressbar" aria-label="İlerleme"><div id="fill"></div></div>
+    <div class="row">
+      <span><b id="done">0</b> / {{TOPLAM}} onaylandı</span>
+      <label><input type="checkbox" id="hideDone"> onaylananları gizle</label>
+    </div>
+  </header>
+  <main id="liste">
+{{GOVDE}}
+  </main>
+</div>
+
+<script>
+(function () {
+  var KEY = "wayborne-test-turu-v1";
+  var kutular = Array.prototype.slice.call(document.querySelectorAll('.m input[type=checkbox]'));
+  var durum = {};
+  try { durum = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { durum = {}; }
+  function say() {
+    var n = kutular.filter(function (c) { return c.checked; }).length;
+    document.getElementById('done').textContent = n;
+    document.getElementById('fill').style.width = (100 * n / Math.max(1, kutular.length)) + '%';
+  }
+  kutular.forEach(function (c) {
+    if (durum[c.id]) c.checked = true;
+    c.addEventListener('change', function () {
+      durum[c.id] = c.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(durum)); } catch (e) {}
+      say();
+    });
+  });
+  document.getElementById('hideDone').addEventListener('change', function (e) {
+    document.getElementById('liste').classList.toggle('hide-done', e.target.checked);
+  });
+  say();
+})();
+</script>
