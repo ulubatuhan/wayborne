@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **70** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **69** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -691,27 +691,6 @@ Toplam: **70** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Kervan bizim değil babamızın olsun ve babamız bize devretsin hastalıktan ötürü, borçlu bir şekilde devretmiş olsun ve de.”
   - **Kabul:** Yeni oyun devir sahnesiyle başlıyor; başlangıç borcu ve vadesi testli; kurucu satırı babayı gösteriyor.
   - **Literatür:** R17
-
-</details>
-
-## Paket P12
-
-### Y-G07 · Yol sahnesi: haritaya bağlı biyomlar ve varyantlar
-
-- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-G01, Y-G02, Y-C01, 12.2d
-- **Son not:** Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4).
-
-<details><summary>Görev metni</summary>
-
-- [x] **Y-G07 Yol sahnesi: haritaya bağlı biyomlar ve varyantlar**
-  - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2c8be40`): Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4).
-  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-G01, Y-G02, Y-C01, 12.2d · **İlgili:** 12.2, 12.2e, 9.10
-  - **Ne:** Kullanıcı notu: tek biyom değil, bütün biyomlar için birer örnek kare; sonra her biyomun varyantları türetilir ve birbirine bağlanır. Biyom haritadan seçilir; yol arka planı haritadaki konuma göre kurulur (dağlık yerden geçerken arkada dağ). Halkalı güneş ve ay, lolipop ağaç, koni çam ve prosedürel sırtlar kalkar.
-  - **Kullanıcı notu:** “sadece bir biyom değil, tüm biyomlar için birer örnek olmalı ve daha sonra bu biyomlara ait varyantlar türetilmeli, birbirine bağlanmalı fakat unutma elimizde harita var artık, bu yüzden biyomları haritada seçmeli, bu haritadaki konumlara göre varyant oluşturmalıyız. mesela dağlık bir yerden geçiyorsak dağ görmeliyiz arkaplanda.”
-  - **Kabul:** Her biyomun onaylı örnek karesi; yol arka planı haritadaki konumdan üretiliyor; biyom geçişleri dikişsiz.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Arazi dokuları Poly Haven ve ambientCG (CC0): dirt, path, mud, rocky, snow, grass. Ağaç, kaya, harabe ve kamp nesneleri: Kenney Survival Kit, Quaternius Ultimate Modular Ruins; render ve mürekkep geçişi (Y-G02). Yeni Quaternius indirmeleri QAL lisansıyla (tarih ve lisans sayfasının ekran görüntüsü kaydedilir). Ses katmanı Y-I01'deki biyom × gün saati ambiyansıyla eşleşir. `../ICERIK_IHTIYACLARI.md` G-2, G-4.
 
 </details>
 

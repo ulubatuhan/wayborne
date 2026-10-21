@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **97** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **98** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -1428,11 +1428,30 @@ Toplam: **97** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-G07 · Yol sahnesi: haritaya bağlı biyomlar ve varyantlar
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-G01, Y-G02, Y-C01, 12.2d
+- **Son not:** Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4). | 2026-10-21 iklim ve ufukta dağ varyantları (K14), test bekliyor.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G07 Yol sahnesi: haritaya bağlı biyomlar ve varyantlar**
+  - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2c8be40`): Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4).
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-G01, Y-G02, Y-C01, 12.2d · **İlgili:** 12.2, 12.2e, 9.10
+  - **Ne:** Kullanıcı notu: tek biyom değil, bütün biyomlar için birer örnek kare; sonra her biyomun varyantları türetilir ve birbirine bağlanır. Biyom haritadan seçilir; yol arka planı haritadaki konuma göre kurulur (dağlık yerden geçerken arkada dağ). Halkalı güneş ve ay, lolipop ağaç, koni çam ve prosedürel sırtlar kalkar.
+  - **Kullanıcı notu:** “sadece bir biyom değil, tüm biyomlar için birer örnek olmalı ve daha sonra bu biyomlara ait varyantlar türetilmeli, birbirine bağlanmalı fakat unutma elimizde harita var artık, bu yüzden biyomları haritada seçmeli, bu haritadaki konumlara göre varyant oluşturmalıyız. mesela dağlık bir yerden geçiyorsak dağ görmeliyiz arkaplanda.”
+  - **Kabul:** Her biyomun onaylı örnek karesi; yol arka planı haritadaki konumdan üretiliyor; biyom geçişleri dikişsiz.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Arazi dokuları Poly Haven ve ambientCG (CC0): dirt, path, mud, rocky, snow, grass. Ağaç, kaya, harabe ve kamp nesneleri: Kenney Survival Kit, Quaternius Ultimate Modular Ruins; render ve mürekkep geçişi (Y-G02). Yeni Quaternius indirmeleri QAL lisansıyla (tarih ve lisans sayfasının ekran görüntüsü kaydedilir). Ses katmanı Y-I01'deki biyom × gün saati ambiyansıyla eşleşir. `../ICERIK_IHTIYACLARI.md` G-2, G-4.
+
+</details>
+
 ### 9.10 · Yol arka planları, biyom başına
 
 - **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 sis şeridi ve gece varyantı oyunda (K5). Haritadaki konuma göre biyom varyantları (Y-G07) Blender işi, yapılmadı.
+- **Son not:** Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 sis şeridi ve gece varyantı oyunda (K5). Haritadaki konuma göre biyom varyantları (Y-G07) Blender işi, yapılmadı. | 2026-10-21 haritaya göre görünüşler oyunda (K14): kuzey soğuk, güney sıcak, dağa yakın parçada ufukta dağ; 24 görünüş.
 
 <details><summary>Görev metni</summary>
 

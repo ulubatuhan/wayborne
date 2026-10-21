@@ -2068,7 +2068,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "bitti",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-G01",
     "Y-G02",
@@ -2081,7 +2081,7 @@
    "sira": 129,
    "kim": "CO",
    "commit": "2c8be40",
-   "not": "Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4)."
+   "not": "Biyomlar haritadan (N28), vadiye çayır (N29, 5ae38c4). | 2026-10-21 iklim ve ufukta dağ varyantları (K14), test bekliyor."
   },
   {
    "id": "9.10",
@@ -2096,7 +2096,7 @@
    "sira": 130,
    "kim": "CO",
    "commit": "2dd895a",
-   "not": "Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 sis şeridi ve gece varyantı oyunda (K5). Haritadaki konuma göre biyom varyantları (Y-G07) Blender işi, yapılmadı."
+   "not": "Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 sis şeridi ve gece varyantı oyunda (K5). Haritadaki konuma göre biyom varyantları (Y-G07) Blender işi, yapılmadı. | 2026-10-21 haritaya göre görünüşler oyunda (K14): kuzey soğuk, güney sıcak, dağa yakın parçada ufukta dağ; 24 görünüş."
   },
   {
    "id": "12.2a",
