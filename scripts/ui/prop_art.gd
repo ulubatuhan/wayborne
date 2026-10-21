@@ -156,6 +156,40 @@ static func _quad(canvas: CanvasItem, tex: Texture2D, corners: Array, tint: Colo
 		uvs.append(Vector2(1.0 - uv.x, uv.y) if flip else uv)
 	canvas.draw_polygon(PackedVector2Array(corners), PackedColorArray([tint]), uvs, tex)
 
+## Kapı kanadı (`gate` katmanı) `open` 0..1 kadar açık. Taş kapının parmaklığı
+## yukarı kalkar; kütük kapının iki kanadı içeri, kendi menteşesine doğru döner -
+## kütük kapı kaldırılınca çerçevenin üstünde havada asılı bir tahta kalıyordu.
+const GATE_LIFT_SHARE: float = 0.92
+const GATE_SWING_PROPS: Array[String] = ["palisade_gate"]
+const GATE_SWING_MIN: float = 0.14
+
+static func draw_gate_leaf(
+	canvas: CanvasItem, id: String, base: Vector2, k: float, tint: Color, open: float, flip: bool = false
+) -> void:
+	var r := layer_rect(id, "gate", base, k, flip)
+	if r.size == Vector2.ZERO:
+		return
+	var tex := texture(id, "gate")
+	if not id in GATE_SWING_PROPS:
+		r.position.y -= r.size.y * GATE_LIFT_SHARE * open
+		_quad(canvas, tex, [r.position, r.position + Vector2(r.size.x, 0), r.end, r.position + Vector2(0, r.size.y)], tint, flip)
+		return
+	if tex == null:
+		return
+	var half := r.size.x * 0.5 * lerpf(1.0, GATE_SWING_MIN, open)
+	var shade := tint.darkened(0.45 * open)
+	for side in [0, 1]:
+		var x0 := r.position.x if side == 0 else r.end.x - half
+		var u0 := 0.0 if side == 0 else 0.5
+		var uvs := PackedVector2Array([Vector2(u0, 0), Vector2(u0 + 0.5, 0), Vector2(u0 + 0.5, 1), Vector2(u0, 1)])
+		if flip:
+			for i in uvs.size():
+				uvs[i].x = 1.0 - uvs[i].x
+		canvas.draw_polygon(PackedVector2Array([
+			Vector2(x0, r.position.y), Vector2(x0 + half, r.position.y),
+			Vector2(x0 + half, r.end.y), Vector2(x0, r.end.y),
+		]), PackedColorArray([shade]), uvs, tex)
+
 ## Duvarın arkasında kalan katmanlar (kapı kanadı) önce, gerisi sırayla.
 const BEHIND_LAYERS := ["gate"]
 

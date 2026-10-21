@@ -1062,8 +1062,63 @@ func _draw_memorials(area: Rect2, cover: Rect2) -> void:
 				draw_circle(base + Vector2(0, -h * 0.05), h * 0.7, Color(0.12, 0.11, 0.10, 0.55))
 				draw_circle(base + Vector2(h * 0.2, -h * 0.1), h * 0.3, Color(0.35, 0.33, 0.30, 0.6))
 
+## Varış kapısı (kullanıcı, 2026-10-21): yolun sonuna gelmek şehrin kapısına
+## gelmek; kapı üstüne yapıştırılmış bir resim değil yolun kendi parçası. Duraklar
+## gibi güne bağlı (kervanla kayıyor), duraklar gibi yolun gerisinde duruyor ve
+## kervan önünde duruyor. Lider yaklaşınca kanat kalkıyor (hub'daki kapıyla aynı).
+const GATE_PX_PER_M_OF_HEIGHT: float = 0.057
+## Kapının en fazla şerit boyunun bu kadarı: 12 m'lik taş kapı insan ölçeğinde
+## çerçevenin üstünden taşıyordu (ölçüldü), o yüzden yolun daha gerisinde duruyor.
+const GATE_MAX_HEIGHT_SHARE: float = 0.43
+const GATE_BASE_SINK: float = 0.03
+const GATE_OPEN_RANGE: float = 0.55
+
+var _gate_prop: String = ""
+var _gate_day: float = 0.0
+var _gate_lead: float = 0.0
+
+## `lead_px`: kervanın çapasından liderin burnuna uzaklık - kapının geçidi varışta
+## tam oraya düşer. Kapı eşyası boşsa ya da resmi yoksa şerit eski silüete döner.
+func set_arrival_gate(prop_id: String, day: float, lead_px: float) -> void:
+	if prop_id == _gate_prop and is_equal_approx(day, _gate_day) and is_equal_approx(lead_px, _gate_lead):
+		return
+	_gate_prop = prop_id
+	_gate_day = day
+	_gate_lead = lead_px
+	queue_redraw()
+
+func has_arrival_gate() -> bool:
+	return not _gate_prop.is_empty() and PropArt.has(_gate_prop)
+
+## Kapının ekrandaki x'i (geçidin ortası) ve ölçeği: test ve çizim aynı sayıyı okusun.
+func arrival_gate_x() -> float:
+	return screen_x_for_day(_gate_day) + _heading * _gate_lead
+
+func _draw_arrival_gate(area: Rect2, cover: Rect2) -> void:
+	if not has_arrival_gate():
+		return
+	var metres := maxf(PropArt.size_m(_gate_prop).z, 0.1)
+	var px_per_m := minf(area.size.y * GATE_PX_PER_M_OF_HEIGHT, area.size.y * GATE_MAX_HEIGHT_SHARE / metres)
+	var k := px_per_m / PropArt.ppm(_gate_prop)
+	var x := arrival_gate_x()
+	var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * GATE_BASE_SINK)
+	var box := PropArt.bounds(_gate_prop, base, k)
+	if box.end.x < cover.position.x or box.position.x > cover.end.x:
+		return
+	var tint := Color.WHITE.lerp(Color(_sky.haze), 0.18) * _light
+	tint.a = 1.0
+	ArtDraw.contact_shadow(self, base, box.size.x * 0.9, 0.18)
+	var reach := maxf(box.size.x * GATE_OPEN_RANGE, 1.0)
+	var near := clampf(1.0 - absf(x - (caravan_x() + _heading * _gate_lead)) / reach, 0.0, 1.0)
+	var open := near * near * (3.0 - 2.0 * near)
+	PropArt.draw_gate_leaf(self, _gate_prop, base, k, tint, open)
+	for layer in PropArt.info(_gate_prop).get("layers", {}).keys():
+		if layer != "gate":
+			PropArt.draw_layer(self, _gate_prop, layer, base, k, tint)
+
 func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	_draw_memorials(area, cover)
+	_draw_arrival_gate(area, cover)
 	if _terrain == null:
 		return
 	# Duraklar yolun *üstünde* duruyor, ağaç hattında değil: ilk hâlinde

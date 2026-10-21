@@ -2787,6 +2787,17 @@ func _refresh_ambience() -> void:
 	var night := JourneyClock.darkness_for_hour(_clock.get_hour_of_day()) > 0.5
 	AudioManager.set_road_ambience(_weather, night, false)
 
+## Yolun sonundaki kapı: varılacak yerleşimin kapısı (geri dönüşte yolun başı).
+## Kapı gününün kendisi yolun ucu; geçit, varışta kolonun başındaki atlının tam önünde.
+func _sync_arrival_gate() -> void:
+	var heading := _journey.heading
+	var place := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	var prop_id := place.gate_prop_id() if place != null else ""
+	var end_day := float(_journey.terrain_days) if heading > 0.0 else 0.0
+	var leader := _caravan.get_leader_figure()
+	var head := _caravan.get_front_offset() - (leader.size.x * 0.5 if leader != null else 0.0)
+	_band.set_arrival_gate(prop_id, end_day, head)
+
 func _refresh_time_ui() -> void:
 	if _clock == null:
 		return
@@ -2802,6 +2813,7 @@ func _refresh_time_ui() -> void:
 	_band.set_route_progress(
 		terrain_day / maxf(1.0, float(_journey.terrain_days)), terrain_day
 	)
+	_sync_arrival_gate()
 	_progress_bar.value = progress
 	var percent := int(round(progress * 100.0))
 	if percent != _last_progress_percent:

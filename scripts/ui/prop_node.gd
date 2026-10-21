@@ -23,7 +23,6 @@ var spin_speed: float = 0.0
 ## Kapının açıklığı 0..1 ve hedefi; 1'de kanat kendi boyunun bu payı kadar kalkıyor.
 var open_amount: float = 0.0
 var open_target: float = 0.0
-const OPEN_LIFT: float = 0.92
 const OPEN_SPEED: float = 1.6
 
 var _angle: float = 0.0
@@ -83,9 +82,6 @@ func _draw_one(layer: String) -> void:
 	if layer == spin_layer and spin_pivot != "":
 		PropArt.draw_layer_rotated(self, prop_id, layer, Vector2.ZERO, k, spin_pivot, _angle, tint, flip)
 	elif layer == "gate":
-		var r := PropArt.layer_rect(prop_id, layer, Vector2.ZERO, k, flip)
-		PropArt.draw_layer(
-			self, prop_id, layer, Vector2(0.0, -r.size.y * OPEN_LIFT * open_amount), k, tint, flip
-		)
+		PropArt.draw_gate_leaf(self, prop_id, Vector2.ZERO, k, tint, open_amount, flip)
 	else:
 		PropArt.draw_layer(self, prop_id, layer, Vector2.ZERO, k, tint, flip)

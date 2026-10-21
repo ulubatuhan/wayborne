@@ -34,6 +34,18 @@ var location_name: String:
 ## Surun malzemesi ("stone" ya da "wood"): şehir resmindeki duvarla ve hub'daki kapıyla aynı kaynak (settlements.json `wall`).
 @export var wall: String = "stone"
 
+const STONE_GATE_PROP: String = "city_gate"
+const WOOD_GATE_PROP: String = "palisade_gate"
+
+## Yerleşimin kapı eşyası (bkz. PropArt): önce kendi kapısı (`gate_<id>`), yoksa
+## sur malzemesine göre ortak kütük ya da taş kapı; hiçbiri çizili değilse boş.
+## Yolun sonu ile hub'ın kapısı aynı eşyayı okuyor - iki ayrı kapı olmasın.
+func gate_prop_id() -> String:
+	for candidate in ["gate_" + location_id, WOOD_GATE_PROP if wall == "wood" else STONE_GATE_PROP, STONE_GATE_PROP]:
+		if PropArt.has(candidate):
+			return candidate
+	return ""
+
 ## Burada ucuza üretilen / burada aranıp pahalıya alınan mal id'leri.
 ## Aradaki fark ticaretin kâr kaynağı (bkz. MarketPricing).
 @export var produces: Array[String] = []
