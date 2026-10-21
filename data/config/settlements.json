@@ -45,7 +45,8 @@
     "honey",
     "test_furs",
     "test_grain"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "auderin",
@@ -78,7 +79,8 @@
     "fish",
     "test_furs",
     "test_grain"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "belvanor",
@@ -110,7 +112,8 @@
     "test_weapon",
     "jewelry",
     "spice"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "brazdun",
@@ -144,7 +147,8 @@
     "jewelry",
     "test_grain",
     "test_weapon"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "caramine",
@@ -179,7 +183,8 @@
     "test_cloth",
     "test_grain",
     "wine"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "dravoss",
@@ -209,7 +214,8 @@
     "wine",
     "honey",
     "test_potion"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "ezmerak",
@@ -241,7 +247,8 @@
     "test_grain",
     "test_cloth",
     "spice"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "golcavar",
@@ -276,7 +283,8 @@
     "fish",
     "test_furs",
     "test_potion"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "ilsande",
@@ -309,7 +317,8 @@
     "test_furs",
     "test_weapon",
     "honey"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "kesgrav",
@@ -343,7 +352,8 @@
     "test_furs",
     "test_grain",
     "test_weapon"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "kirsavel",
@@ -378,7 +388,8 @@
     "test_cloth",
     "test_furs",
     "test_grain"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "liraven",
@@ -414,7 +425,8 @@
     "fish",
     "test_grain",
     "test_potion"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "merigaud",
@@ -446,7 +458,8 @@
     "test_weapon",
     "test_furs",
     "fish"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "mirsana",
@@ -484,7 +497,8 @@
     "spice",
     "test_cloth",
     "test_grain"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "ondrelle",
@@ -516,7 +530,8 @@
     "test_weapon",
     "fish",
     "test_cloth"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "orsolune",
@@ -549,7 +564,8 @@
     "test_furs",
     "test_weapon",
     "test_grain"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "orvahel",
@@ -584,7 +600,8 @@
     "wine",
     "honey",
     "jewelry"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "rivecande",
@@ -616,7 +633,8 @@
     "test_grain",
     "wine",
     "spice"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "samuran",
@@ -652,7 +670,8 @@
     "fish",
     "test_grain",
     "test_potion"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "selvicar",
@@ -687,7 +706,8 @@
     "fish",
     "test_furs",
     "test_grain"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "serai_duvenmor",
@@ -725,7 +745,8 @@
     "spice",
     "test_potion",
     "wine"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "serai_orbeyan",
@@ -763,7 +784,8 @@
     "silk",
     "spice",
     "test_furs"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "serai_seyvan",
@@ -804,7 +826,8 @@
     "silk",
     "spice",
     "test_potion"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "tolvarin",
@@ -836,7 +859,8 @@
     "test_weapon",
     "test_cloth",
     "wine"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "vastrevar",
@@ -869,7 +893,8 @@
     "wine",
     "silk",
     "jewelry"
-   ]
+   ],
+   "wall": "stone"
   },
   {
    "id": "vorgat",
@@ -906,7 +931,8 @@
     "fish",
     "jewelry",
     "test_weapon"
-   ]
+   ],
+   "wall": "wood"
   },
   {
    "id": "zelmarin",
@@ -939,7 +965,8 @@
     "test_grain",
     "wine",
     "test_furs"
-   ]
+   ],
+   "wall": "stone"
   }
  ],
  "routes": [

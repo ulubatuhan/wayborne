@@ -7,7 +7,9 @@ extends SceneTree
 ## önüne taşıyıp üç kare basar.
 ##
 ##   LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1920x1080x24" \
-##     godot --path . --rendering-driver opengl3 --script res://tests/screenshot_hub_scene.gd
+##     godot --path . --rendering-driver opengl3 --script res://tests/screenshot_hub_scene.gd [-- <şehir_id>]
+##
+## Şehir verilirse hub o yerleşimin kapısıyla açılır (kütük/taş kapıyı ayırt etmek için).
 
 const SHOT_DIR: String = "user://hub_scene_shots"
 const STOPS: Array = [[150.0, "01_degirmen"], [800.0, "02_koy"], [1640.0, "03_kapi"]]
@@ -23,6 +25,9 @@ func _init() -> void:
 	rng.seed = 7
 	session.start_playthrough(CharacterData.create("Kervanbaşı", CultureCatalog.NOMAD, CharacterStats.new()), rng)
 	session.set_flag(GameSession.ONBOARDING_FLAG)
+	var args := OS.get_cmdline_user_args()
+	if not args.is_empty():
+		session.current_location_id = args[0]
 	session.owned_wagon_count = 2
 	session.owned_donkeys = 1
 	session.owned_half_wagons = 1
@@ -36,7 +41,7 @@ func _init() -> void:
 		for i in 90:
 			await process_frame
 		var image := get_root().get_texture().get_image()
-		image.save_png("%s/%s.png" % [SHOT_DIR, stop[1]])
+		image.save_png("%s/%s%s.png" % [SHOT_DIR, "" if args.is_empty() else args[0] + "_", stop[1]])
 	quit()
 
 func _settle() -> void:

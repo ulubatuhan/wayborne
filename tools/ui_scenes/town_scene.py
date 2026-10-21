@@ -275,9 +275,11 @@ def palisade(spec):
     """Kütük sur: iki sıra, birbirine kayık, sivri uçlu dikey kütükler; ortada
     `gate_width` genişliğinde bir geçit, iki yanında kalın direk ve üstünde
     lento. Ahşap çitli kasabanın kapı sahnesi (settlement_gates)."""
-    (x0, y0), (x1, y1) = spec["from"], spec["to"]
+    (x0, y0), (x1, _y1) = spec["from"], spec["to"]
     height = spec.get("height", 4.4)
     gate = spec.get("gate_width", 3.6)
+    share = spec.get("gate", 0.5)
+    gx = x0 + (x1 - x0) * share if share >= 0.0 else None
     radius = spec.get("log", 0.21)
     step = radius * 1.9
     rng = random.Random(int(x0 * 7 + y0 * 3))
@@ -286,17 +288,19 @@ def palisade(spec):
     for row, dy in enumerate((0.0, 0.32)):
         for i in range(n + 1):
             x = x0 + i * step + (step / 2 if row else 0.0)
-            if abs(x) < gate / 2 + 0.25 or x > x1:
+            if x > x1 or (gx is not None and abs(x - gx) < gate / 2 + 0.25):
                 continue
             _log(bm, x, y0 + dy + rng.uniform(-0.05, 0.05), height + rng.uniform(-0.35, 0.35), radius)
     _mesh_object("palisade_logs", bm, spec.get("wall_tag", ""))
+    if gx is None:
+        return
     frame = bmesh.new()
     post_h = height + 1.1
     for side in (-1, 1):
-        _log(frame, side * (gate / 2 + 0.35), y0 + 0.1, post_h, radius * 1.8)
-    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((0.0, y0 + 0.1, height - 0.1)) @
+        _log(frame, gx + side * (gate / 2 + 0.35), y0 + 0.1, post_h, radius * 1.8)
+    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((gx, y0 + 0.1, height - 0.1)) @
                           Matrix.Diagonal((gate + 1.9, 0.55, 0.5, 1.0)))
-    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((0.0, y0 + 0.1, height - 1.0)) @
+    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((gx, y0 + 0.1, height - 1.0)) @
                           Matrix.Diagonal((gate + 0.9, 0.3, 0.3, 1.0)))
     _mesh_object("palisade_gate", frame, spec.get("venue", ""))
 
@@ -513,6 +517,17 @@ def wall_row(spec):
     n = max(1, int(length / size))
     ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
     gate = spec.get("gate", -1.0)
+    if wood:
+        # Ahşap çit kütük sur: dikey, sivri uçlu kütükler (palisade); Kenney
+        # `wall-wood` parçaları direkli bir çit gibi okunuyordu.
+        palisade({"from": [x0, y0], "to": [x1, y1], "height": spec.get("height", 3.8), "gate": gate,
+                  "gate_width": spec.get("gate_width", 3.4), "venue": tag, "wall_tag": spec.get("wall_tag", "")})
+        for i in range(n):
+            if spec.get("towers") and i % spec["towers"] == 0:
+                t = (i + 0.5) / n
+                spire_tower(x0 + (x1 - x0) * t, y0 + 0.2, z, spec.get("floors", 2) + 2, size * 0.9,
+                            spec.get("wall_tag", ""), True)
+        return
     for i in range(n):
         t = (i + 0.5) / n
         x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t

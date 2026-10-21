@@ -31,6 +31,8 @@ var location_name: String:
 ## Harita bölgesi ve kültürü ("vadi", "imparatorluk", ...).
 @export var region: String = ""
 @export var culture: String = ""
+## Surun malzemesi ("stone" ya da "wood"): şehir resmindeki duvarla ve hub'daki kapıyla aynı kaynak (settlements.json `wall`).
+@export var wall: String = "stone"
 
 ## Burada ucuza üretilen / burada aranıp pahalıya alınan mal id'leri.
 ## Aradaki fark ticaretin kâr kaynağı (bkz. MarketPricing).

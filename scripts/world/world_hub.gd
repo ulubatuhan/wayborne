@@ -146,6 +146,7 @@ static func turn_facing(target: float, elapsed: float, along: float) -> float:
 const LEADER_COLOR: Color = Color(0.85, 0.78, 0.55)
 const GATE_COLOR: Color = Color(0.48, 0.48, 0.55)
 const GATE_PROP: String = "city_gate"
+const PALISADE_GATE_PROP: String = "palisade_gate"
 const GATE_X: float = 1795.0
 ## Kapının ekrandaki boyu: kulelerin tepesi. Geçit bununla bir vagonun
 ## (WAGON_SIZE) geçebileceği kadar açık oluyor - gerçek ölçekte (kişi
@@ -484,6 +485,13 @@ func _build_scenery() -> void:
 	add_child(front)
 	front.setup(span, GROUND_Y, city_id, HubScenery.LAYER_FRONT, hour)
 
+## Kütük surlu yerleşimin kapısı kütük, ötekiler taş; kütük kapının resmi yoksa taşa düşer.
+func _gate_prop_id() -> String:
+	var location := WorldMapData.get_location_by_id(GameState.get_session().current_location_id)
+	if location != null and location.wall == "wood" and PropArt.has(PALISADE_GATE_PROP):
+		return PALISADE_GATE_PROP
+	return GATE_PROP
+
 func _build_spots() -> void:
 	if PropArt.has(GATE_PROP):
 		_build_gate()
@@ -505,7 +513,9 @@ func _build_gate() -> void:
 	gate.position = Vector2(GATE_X, GROUND_Y - 6.0)
 	gate.z_index = -10
 	add_child(gate)
-	gate.setup(GATE_PROP, PropArt.scale_for_height(GATE_PROP, GATE_HEIGHT, PropArt.size_m(GATE_PROP).z),
+	# İki kapı aynı piksel/metre ölçeğinde: kütük kapı taş kapıdan küçük ya da büyük çıkmasın.
+	var prop_id := _gate_prop_id()
+	gate.setup(prop_id, PropArt.scale_for_height(prop_id, GATE_HEIGHT, PropArt.size_m(GATE_PROP).z),
 		_night_tint())
 	_gate_node = gate
 	var opening := gate.layer_bounds("gate")

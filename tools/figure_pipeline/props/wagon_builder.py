@@ -14,6 +14,7 @@ import math
 
 import bmesh
 import bpy
+from mathutils import Matrix
 
 H = 1.6                  # ArtDraw'daki h, metre
 W = H * 0.21 / 0.17      # WAGON_WIDTH_RATIO / WAGON_HEIGHT_RATIO
@@ -319,4 +320,68 @@ def half_cart():
     }
 
 
-BUILDERS = {"covered_wagon": covered_wagon, "half_cart": half_cart}
+GATE_HALF = 9.85         # kapı sahnesi city_gate ile aynı genişlikte (19,7 m)
+GATE_OPENING = 3.6
+LOG_STEP = 0.40
+LOG_R = 0.20
+
+
+def _log(bm, y, x, h, r, segs=8):
+    """Dikili kütük: sekizgen gövde, sivri uç (town_scene.palisade ile aynı)."""
+    bmesh.ops.create_cone(bm, cap_ends=True, segments=segs, radius1=r, radius2=r, depth=h,
+                          matrix=Matrix.Translation((x, y, h / 2.0)))
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=segs, radius1=r, radius2=0.0, depth=r * 2.4,
+                          matrix=Matrix.Translation((x, y, h + r * 1.2)))
+
+
+def palisade_gate():
+    """Ahşap surlu kasabanın hub kapısı: iki sıra sivri kütük, ortada kalın
+    direkli geçit ve lento, iki yanda ahşap gözcü kulesi. `gate` katmanı geçidi
+    kapatan tahta kanat - lider yaklaşınca kalkıyor (city_gate'in kafesi gibi).
+    Taş kapıyla aynı genişlikte, yani oyun aynı ölçekle çiziyor."""
+    logs = bmesh.new()
+    clear = GATE_OPENING / 2 + 0.3
+    n = int(GATE_HALF * 2 / LOG_STEP)
+    for row, x in enumerate((0.0, 0.30)):
+        for i in range(n + 1):
+            y = -GATE_HALF + i * LOG_STEP + (LOG_STEP / 2 if row else 0.0)
+            if abs(y) < clear or y > GATE_HALF:
+                continue
+            _log(logs, y, x, 4.1 + (((i * 37 + row * 11) % 11) / 11.0 - 0.5) * 0.6, LOG_R)
+    body = [_obj("palisade_logs", logs, "wood")]
+    posts = bmesh.new()
+    for side in (-1, 1):
+        _log(posts, side * (GATE_OPENING / 2 + 0.4), 0.1, 5.6, LOG_R * 2.0)
+    body.append(_obj("gate_posts", posts, "wood_dark"))
+    half = GATE_OPENING / 2 + 1.0
+    body.append(box("lintel", (-0.3, -half, 4.2), (0.45, half, 4.65), "wood_dark"))
+    for side in (-1, 1):
+        yc = side * 5.4
+        body.append(box("tower_body%d" % side, (-0.8, yc - 0.8, 0.0), (0.8, yc + 0.8, 4.6), "wood_light"))
+        for cx in (-0.85, 0.85):
+            for cy in (-0.85, 0.85):
+                body.append(box("tower_post%d_%d_%d" % (side, cx > 0, cy > 0),
+                                (cx - 0.11, yc + cy - 0.11, 0.0), (cx + 0.11, yc + cy + 0.11, 4.9), "wood_dark"))
+        body.append(box("tower_deck%d" % side, (-1.15, yc - 1.15, 4.6), (1.15, yc + 1.15, 4.8), "wood_dark"))
+        for cy in (-1.05, 1.05):
+            body.append(box("parapet_y%d_%d" % (side, cy > 0), (-1.15, yc + cy - 0.06, 4.8),
+                            (1.15, yc + cy + 0.06, 5.7), "wood"))
+        for cx in (-1.05, 1.05):
+            body.append(box("parapet_x%d_%d" % (side, cx > 0), (cx - 0.06, yc - 1.15, 4.8),
+                            (cx + 0.06, yc + 1.15, 5.7), "wood"))
+        roof = bmesh.new()
+        bmesh.ops.create_cone(roof, cap_ends=True, cap_tris=True, segments=4, radius1=1.9, radius2=0.0, depth=1.9,
+                              matrix=Matrix.Translation((0.0, yc, 6.65)) @ Matrix.Rotation(math.radians(45), 4, "Z"))
+        body.append(_obj("tower_roof%d" % side, roof, "wood_dark"))
+    body_obj = join(body, "body")
+
+    leaf = []
+    for k in range(9):
+        y = -GATE_OPENING / 2 + 0.2 + k * 0.4
+        leaf.append(box("plank%d" % k, (-0.12, y - 0.19, 0.0), (0.12, y + 0.19, 3.6), "wood" if k % 2 else "wood_light"))
+    for z in (0.7, 2.6):
+        leaf.append(box("strap%.1f" % z, (-0.15, -GATE_OPENING / 2, z), (0.15, GATE_OPENING / 2, z + 0.2), "iron"))
+    return {"body": [body_obj], "gate": [join(leaf, "gate")]}, {}
+
+
+BUILDERS = {"covered_wagon": covered_wagon, "half_cart": half_cart, "palisade_gate": palisade_gate}

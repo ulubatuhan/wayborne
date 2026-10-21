@@ -424,6 +424,11 @@
    "scale": 2.3,
    "view": "iso",
    "ppm": 32
+  },
+  {
+   "id": "palisade_gate",
+   "builder": "palisade_gate",
+   "ppm": 80
   }
  ]
 }

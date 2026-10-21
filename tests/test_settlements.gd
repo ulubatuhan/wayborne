@@ -15,6 +15,7 @@ func run(t) -> void:
 	_test_start_location(t)
 	_test_legacy_save(t)
 	_test_town_art(t)
+	_test_wall_material(t)
 
 func _count(type: String) -> int:
 	var n := 0
@@ -158,3 +159,22 @@ func _test_town_art(t) -> void:
 		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/background.jpg"), "şehir resmi var: %s" % id)
 		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/mask.png"), "tıklama maskesi var: %s" % id)
 		t.eq(city_map.town_dir(id), id, "kendi resmini okur: %s" % id)
+
+## Sur malzemesi tek kaynaktan: şehir resmindeki duvar (towns.json `wood`),
+## kapı sahnesi ve hub kapısı aynı `wall` alanını izler. Biri kütük, ötekisi
+## taş çıkarsa oyuncu kütük surlu kasabaya taş kapıdan girmiş olur.
+func _test_wall_material(t) -> void:
+	var towns = JSON.parse_string(FileAccess.get_file_as_string("res://tools/ui_scenes/towns.json"))
+	var wood := 0
+	for location in WorldMapData.get_locations():
+		var town: Dictionary = (towns as Dictionary).get(location.location_id, {})
+		var town_wood := false
+		for p in town.get("props", []):
+			if (p as Dictionary).get("kind", "") == "wallrow" and (p as Dictionary).get("wood", false):
+				town_wood = true
+		t.ok(location.wall == "wood" or location.wall == "stone", "sur malzemesi tanımlı: %s" % location.location_id)
+		t.eq(location.wall == "wood", town_wood, "sur malzemesi kasaba sahnesiyle aynı: %s" % location.location_id)
+		if location.wall == "wood":
+			wood += 1
+	t.ok(wood > 0, "kütük surlu yerleşim var")
+	t.ok(PropArt.has("palisade_gate"), "kütük kapının hub resmi var")

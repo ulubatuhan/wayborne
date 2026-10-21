@@ -157,6 +157,7 @@ static func _build_locations(data: Dictionary) -> void:
 		location.settlement_type = String(s.get("type", SettlementRules.CITY))
 		location.region = String(s.get("region", ""))
 		location.culture = String(s.get("culture", ""))
+		location.wall = String(s.get("wall", "stone"))
 		location.produces = _typed(s.get("produces", []))
 		location.demands = _typed(s.get("demands", []))
 		location.available = _typed(s.get("available", []))
