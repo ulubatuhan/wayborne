@@ -72,7 +72,7 @@ theme_override_constants/separation = 18
 
 [node name="CardRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 60
 
 [node name="DetailPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/ContentContainer"]
 layout_mode = 2

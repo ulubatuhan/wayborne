@@ -125,6 +125,15 @@ func _prepare_session() -> void:
 	session.add_to_party(fallen)
 	var dead: Array[CharacterData] = [fallen]
 	session.resolve_deaths(dead, "LEDGER_CAUSE_COMBAT_WILDLIFE", session.current_location_id)
+	# Kadro kartlarının dört hâli (taslak 9.7): lider, seçili, yaralı, Ölümün Kıyısı.
+	var hurt := CharacterData.create("Ali", CultureCatalog.NOMAD, CharacterStats.new())
+	session.add_to_party(hurt)
+	hurt.current_hp = int(hurt.get_max_hp() * 0.35)
+	hurt.stress = 50
+	var dying := CharacterData.create("Derya", CultureCatalog.NOMAD, CharacterStats.new())
+	session.add_to_party(dying)
+	dying.current_hp = 1
+	dying.stress = 80
 
 func _settle() -> void:
 	for _frame in 10:

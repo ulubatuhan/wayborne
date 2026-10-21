@@ -16,13 +16,14 @@ extends Button
 
 ## Kart dik bir kart: dört kişi yan yana sığacak genişlikte, sırada az
 ## kişi varken yayılıp yatay bir levhaya dönmüyor (ilk ekran görüntüsü).
-const CARD_MIN_SIZE: Vector2 = Vector2(280.0, 520.0)
-const CARD_PADDING: int = 18
-const NAME_FONT_SIZE: int = 26
-const STATUS_FONT_SIZE: int = 17
-const RANK_FONT_SIZE: int = 15
-const BADGE_SIZE: float = 54.0
-const BADGE_FONT_SIZE: int = 24
+## Ölçüler taslağın (y_97_kadro_karti.png, 1080p): 380x640 kart, 60 px rozet.
+## Mevki yazısı kartta yok (sıra soldan sağa zaten mevki); ipucunda duruyor.
+const CARD_MIN_SIZE: Vector2 = Vector2(380.0, 620.0)
+const CARD_PADDING: int = 22
+const NAME_FONT_SIZE: int = 34
+const STATUS_FONT_SIZE: int = 22
+const BADGE_SIZE: float = 62.0
+const BADGE_FONT_SIZE: int = 30
 const HP_BAR_HEIGHT: float = 10.0
 const STRESS_BAR_HEIGHT: float = 5.0
 ## Figürün ayak altındaki gölge: kişi kartın tabanına basıyor, havada
@@ -62,9 +63,9 @@ func _init() -> void:
 func setup(person: CharacterData, rank: int) -> RosterCard:
 	character = person
 	_at_deaths_door = is_at_deaths_door(person)
-	tooltip_text = tr("UI_PARTY_CARD_TOOLTIP") % [
+	tooltip_text = "%s\n%s" % [tr("UI_PARTY_CARD_RANK") % rank, tr("UI_PARTY_CARD_TOOLTIP") % [
 		person.current_hp, person.get_max_hp(), person.stress, CharacterData.MAX_STRESS
-	]
+	]]
 	_build(rank)
 	_apply_frame()
 	return self
@@ -106,18 +107,21 @@ func _build(rank: int) -> void:
 	column.add_child(status)
 
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0.0, 6.0)
+	gap.custom_minimum_size = Vector2(0.0, 14.0)
 	column.add_child(gap)
 
 	var hp_ratio := float(character.current_hp) / float(maxi(1, character.get_max_hp()))
 	column.add_child(_bar(hp_ratio, HP_HURT_COLOR if is_wounded(character) else HP_COLOR, HP_BAR_HEIGHT))
+	var bar_gap := Control.new()
+	bar_gap.custom_minimum_size = Vector2(0.0, 12.0)
+	column.add_child(bar_gap)
 	var stress_ratio := float(character.stress) / float(CharacterData.MAX_STRESS)
 	column.add_child(_bar(stress_ratio, STRESS_COLOR, STRESS_BAR_HEIGHT))
 
 	_ignore_mouse(margin)
 
-## Figürün durduğu sahne: figür, ayak gölgesi, mevki yazısı, seviye rozeti.
-func _build_stage(rank: int) -> Control:
+## Figürün durduğu sahne: figür, ayak gölgesi, seviye rozeti.
+func _build_stage(_rank: int) -> Control:
 	var stage := Control.new()
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
@@ -132,13 +136,6 @@ func _build_stage(rank: int) -> Control:
 	_figure.show_character(character)
 	if _at_deaths_door:
 		_figure.set_tint(ArtPalette.UI_TINT_DISABLED)
-
-	var rank_label := Label.new()
-	rank_label.text = tr("UI_PARTY_CARD_RANK") % rank
-	rank_label.add_theme_font_size_override("font_size", RANK_FONT_SIZE)
-	rank_label.add_theme_color_override("font_color", ArtPalette.UI_TEXT_DIM)
-	rank_label.position = Vector2.ZERO
-	stage.add_child(rank_label)
 
 	var badge := Control.new()
 	badge.custom_minimum_size = Vector2(BADGE_SIZE, BADGE_SIZE)
