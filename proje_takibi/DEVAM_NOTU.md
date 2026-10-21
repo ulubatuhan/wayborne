@@ -46,8 +46,9 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | K8 | C1 UI kiti v2 (stash "B2 UI kiti denemesi", y_91_ui_kit*.png) | test ederek ekle | bitti: stash uygulandı; çerçeveli panel (pazar, olay kartı), kırmızı ana eylem (pazar Al, taverna Sohbete başla, kartın ilk seçeneği), parşömen ipucu plakası ve pazar fişi, başlık şeridi; test_waybook_theme yeni karara göre güncellendi, 27298 test yeşil |
 | K9 | C2 savaş ekranı (y_98_savas.png) | taslaktakini al; kanama/kritik vb. efektler OLMASIN | bitti: tur madalyonu (Roma rakamı), tam ekran (yol HUD gizli), iki alt panel: yetenek kartları (isabet %/kilit sebebi) ve hedef (can, koruma, durum, davranış, kayıt); kritik mührü eklenmedi |
 | K10 | D1 pazar | oyundaki kalsın; diğer vagonlar, vagon ve kullanıcı envanterleri açılır-kapanır sekme olarak eklensin | bitti: kervan sütunu bölüm bölüm (her vagon, her kişinin çantası), başlığa tıklayınca açılıp kapanıyor, kapalıyken yük özeti; açık/kapalı oturum boyunca hatırlanıyor |
-| K11 | D2 yol HUD | oyundaki kalsın, taslak y_99_yol_hud.png silinsin | sırada |
+| K11 | D2 yol HUD | oyundaki kalsın, taslak y_99_yol_hud.png silinsin | bitti: taslak ve karar görseli silindi, arayuz_taslaklari.py'den hud() çıktı |
 | K12 | D3 şehirde insanlar (y_g10t_sehir_halk_vastrevar*.png) | taslaktakini al | bitti: TownsfolkLayer (gece 4 kişi, akşam/gündüz 9), yerin ışığı, fenerli bekçi, yürüyenler gidip geliyor; ayaklar alt şeridin üstünde |
+| K13 | Kapı bayrakları (kullanıcı notu, 2026-10-21) | şehir kapılarında kule bayrakları taş dokusuyla çiziliyor; SONRA düzeltilecek, şimdi dokunma | bekliyor: büyük olasılıkla bayrak WatchTower modelinin parçası ve settlement_gates/town_scene'in taş tint kuralı (malzeme adına göre) onu da boyuyor; bayrağın malzemesini ayırıp kumaş rengi verilecek, sonra 27 kapı yeniden render |
 
 KALSIN (dokunma): A4 kilise, A7 gün evreleri, A8 taverna, A9 sohbet, A10 terazi, A11, A12, A13, B3, C4 (oyundaki masa), C5.
 
