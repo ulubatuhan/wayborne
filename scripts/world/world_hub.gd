@@ -153,6 +153,8 @@ const GATE_X: float = 1795.0
 const GATE_HEIGHT: float = 520.0
 ## Kapı resminin en fazla yüksekliği (şehrin kendi kapısında arkadaki çatılar dahil).
 const GATE_MAX_HEIGHT: float = 600.0
+## Kapının tabanı yolun bu kadar gerisinde (en uzak köy evinin hemen önü).
+const GATE_SETBACK: float = 56.0
 ## Kanadı olmayan kapının geçidi, metre.
 const GATE_OPENING_M: float = 4.0
 const GATE_OPENING_HEIGHT_M: float = 5.0
@@ -511,8 +513,9 @@ func _build_spots() -> void:
 ## kalkıyor; uzaklaşınca iniyor.
 func _build_gate() -> void:
 	var gate := PropNode.new()
-	gate.position = Vector2(GATE_X, GROUND_Y - 6.0)
-	gate.z_index = -10
+	# Sur kapı dışındaki köyün gerisinde duruyor: evler ve araba önünde, yol kapıya uzanıyor.
+	gate.position = Vector2(GATE_X, GROUND_Y - GATE_SETBACK)
+	gate.z_index = -20
 	add_child(gate)
 	# İki kapı aynı piksel/metre ölçeğinde: kütük kapı taş kapıdan küçük ya da büyük çıkmasın.
 	var prop_id := _gate_prop_id()
