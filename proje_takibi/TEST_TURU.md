@@ -19,6 +19,10 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Bir oyunu bitir (ya da DevPanel F1 ile soyu bitir) → yeni oyun.
   - Görmeli: Önceki soyun mezarları yola/haritaya soluk döner, itibarın bir payı gelir, deftere eski soyun adı yazılır. `user://lineage_archive.json` oluşur.
   - Bozuksa: Mezarlar hiç görünmüyor ya da itibar sıfırlanmıyor
+- [ ] **Y-H07** Erişilebilirlik ve oynanış ayarları
+  - Nereye: Ana menü → Ayarlar; sonra yol ve savaşta etkisine bak.
+  - Görmeli: Metin boyutu dört kademe (menüler büyür/küçülür, taşma yok); desenli şerit açıkken savaştaki kan şeridi parçalı çiziliyor; otomatik duraklatma açıkken yol işareti/karşılaşma işaretinde zaman bir tuş ya da tıklamaya kadar duruyor. Hızlandırma seçeneği yok. Ayarlar kayıt dosyasında değil `settings.cfg`'de.
+  - Bozuksa: Büyük metinde taşan düğme ya da duraklatma kapalıyken zamanın durması
 - [ ] **Y-A01** Oyun vaadini yaz ve belgelere işle
   - Nereye: Doküman kontrolü: `CLAUDE.md` en üstü.
   - Görmeli: Vaat cümlesi ve dört sütun yazılı. Cümle sizin sesinizle uyuşuyor mu? Uyuşmuyorsa değiştirin (kutu 'öneri, onay bekliyor' diyor).
@@ -327,4 +331,4 @@ Bu görevlerin kabulü testle ya da belgeyle yapıldı. Onay vermeniz yeterli; i
 - [ ] **N31b** Işık modeli ve sis şeridi koda: Işık modeli ve sis şeridi kodda.
 - [ ] **N31c** Ses otobüsleri, çeşitleme, ayar kaydırıcıları: Ses otobüsleri, çeşitleme ve ayar kaydırıcıları: Ayarlar'dan müzik/efekt kaydırıcılarını deneyin (müzik yok, efektler ve rüzgâr var).
 
-Toplam madde: 85.
+Toplam madde: 86.

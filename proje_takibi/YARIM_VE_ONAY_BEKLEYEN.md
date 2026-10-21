@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -491,22 +491,6 @@ Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** İlk 3 dakikada ilk anlamlı karar; 10 dakikaya kadar ilk tehdit; 30 dakikaya kadar ilk kayıp tehlikesi ve ilk kârlı varış.
   - **Kabul:** Dış oyuncu testlerinde süreler ölçüldü.
   - **Literatür:** R78, R59
-
-</details>
-
-### Y-H07 · Erişilebilirlik ve oynanış ayarları
-
-- **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P14 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Üç ayar kodda ama kapsamı dar: metin boyu yalnız tema taban boyu (elle verilmiş boylar sabit), desenli şerit yalnız savaş seçeneği şeridi, otomatik duraklama yalnız yol işareti ve karşılaşma işareti. Denenmedi.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-H07 Erişilebilirlik ve oynanış ayarları**
-  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `20d0400`): Ayarlar settings.cfg de; hızlandırma Y-B09 ile kalktı, duraklatma kaldı.
-  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** Y-B09
-  - **Ne:** Metin boyutu, renk körlüğü için kan şeridine desen, olay gelince otomatik duraklat. Hızlandırma Y-B09 gereği kalkacak; duraklatma kalır.
-  - **Kabul:** Ayarlar menüsünde; testler.
 
 </details>
 

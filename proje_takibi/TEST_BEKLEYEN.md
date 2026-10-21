@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **86** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **87** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -1513,6 +1513,24 @@ Toplam: **86** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/referans/gorevler/09_art_ikinci_tur.md](referans/referans/gorevler/09_art_ikinci_tur.md)
 - **Son not:** Kullanıcı bildirimi (2026-10-19). tools/ledger_unrule.py: kaynak art_source/waybook/l1_ledger_ruled.jpg, çıktı data/assets/ui/waybook/l1_ledger.jpg; cetvel normalize evrişimle silindi, CC0 kâğıt dokusu eklendi. Lekelerin içinde küçük ızgara parçaları kaldı.
+
+## Paket P14
+
+### Y-H07 · Erişilebilirlik ve oynanış ayarları
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P14 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Üç ayar kodda ama kapsamı dar: metin boyu yalnız tema taban boyu (elle verilmiş boylar sabit), desenli şerit yalnız savaş seçeneği şeridi, otomatik duraklama yalnız yol işareti ve karşılaşma işareti. Denenmedi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-H07 Erişilebilirlik ve oynanış ayarları**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `20d0400`): Ayarlar settings.cfg de; hızlandırma Y-B09 ile kalktı, duraklatma kaldı.
+  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** Y-B09
+  - **Ne:** Metin boyutu, renk körlüğü için kan şeridine desen, olay gelince otomatik duraklat. Hızlandırma Y-B09 gereği kalkacak; duraklatma kalır.
+  - **Kabul:** Ayarlar menüsünde; testler.
+
+</details>
 
 ## Paket P16
 

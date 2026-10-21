@@ -16,11 +16,11 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 
 | # | İş | Durum |
 |---|---|---|
-| F1 | Test turu dokümanı: `proje_takibi/TEST_TURU.md` + `.html` (85 madde, 8 bölüm; üretici `referans/test_turu_uret.py`). Yayınlanan sayfa linki kullanıcıya verildi mi: aşağıya yaz | md/html bitti, yayın sırada |
+| F1 | Test turu dokümanı: `proje_takibi/TEST_TURU.md` + `.html` (85 madde, 8 bölüm; üretici `referans/test_turu_uret.py`). Yayınlanan sayfa linki kullanıcıya verildi mi: aşağıya yaz | md/html bitti; sayfa https://claude.ai/artifact/JBLDXTSBvqL8V5gsm1j2ox (özel; kullanıcıya verildi) |
 | A1 | 2.1 kapandı (web/export kaldırıldı) | bitti |
 | A2 | Y-J05 kapandı (müzik silindi, künyede BEKLENİYOR yok) | bitti |
 | A3 | N31d: `look_ahead` pozu çubuk figürde düzeltildi (arm_f 64/148, 27295 test yeşil). KALAN: Blender yok bu ortamda; `tools/figure_pipeline/mesh/append_clips.py --clips look_ahead` ile 6 beden x giysi render, `tests/screenshot_reactions.gd` ile bak, sonra `RoadCaravan.LOOK_ENABLED = true`. Kullanıcının PC'sinde (Blender) yapılacak | pozu bitti, render kullanıcıda |
-| A4 | Y-H07: erişilebilirlik kapsamını genişlet (öneri, kapsam kararı gerektirmeyen kısım) | sırada |
+| A4 | Y-H07: istenen kapsam (metin boyutu, desenli şerit, otomatik duraklatma) zaten yapılmış; "test bekliyor"a alındı ve test turuna eklendi | bitti |
 | B1 | 9.2 + Y-G16 ana menü: katmanlı gece kampı, ateş, üç yorgun yolcu | sırada |
 | B2 | 9.1 ortak UI kiti v2 | sırada |
 | B3 | Y-G05 savaş ekranı | sırada |
