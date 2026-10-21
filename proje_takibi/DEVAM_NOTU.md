@@ -30,5 +30,10 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | B4 | 12.2 yol görünümü büyük revizyon, 9.10 biyom arka planları | sırada |
 | B5 | Y-G11T masa şablonu taslağı, Y-G13 beş ana görsel | sırada |
 
+**Durum (2026-10-21 07:17):** iş kullanıcıda. Önceki oturumun işleri denetlendi (`OYUN_DENETIMI.md`) ve karar
+defterine kondu (`KARAR_SAYFASI.html`, https://claude.ai/artifact/7QXy9Ec8fcFP5N7aDgsXxD). Kullanıcı her madde için
+Kalsın/Ekle/Çıkar seçip "Kararlarım" metnini gönderecek. O gelene kadar B2-B5'e ve karar defterindeki maddelere
+dokunma; zamanlanmış görev tetiklenirse yalnızca bu notu kontrol edip dur.
+
 Kullanıcıdan karar bekleyenler (bunlara dokunma, sorma): 2.3 (CityView silme onayı), 6.1 (LFS), Y-G08, Y-H01, N31f.
 Lore'a bağlı olanlar (Y-E01/E02/E06, Y-A07) yazılmaz.
