@@ -205,7 +205,16 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 	var glow := LanternGlow.new().setup(150.0, 0.22, 1.3)
 	glow.set_meta("image_point", FIRE_POINT)
 	root.add_child(glow)
-	root.resized.connect(func(): _place_on_image(glow, bg, root.size))
+	var travellers := _camp_travellers()
+	for figure in travellers:
+		root.add_child(figure)
+	root.resized.connect(func():
+		_place_on_image(glow, bg, root.size)
+		for figure in travellers:
+			_place_traveller(figure, bg, root.size))
+	(func():
+		for figure in travellers:
+			_place_traveller(figure, bg, root.size)).call_deferred()
 	_finish(root, 0.5)
 	var strip := _title_strip(hovered, lineage, entry_keys)
 	root.add_child(strip)
@@ -214,6 +223,46 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 
 ## Kamp ateşinin resimdeki yeri (payı). Işık bu noktaya oturur.
 const FIRE_POINT: Vector2 = Vector2(0.285, 0.735)
+
+## Ateşin başındaki üç yorgun yolcu (görev Y-G16): ateşe dönük, yalnızca ondan
+## ışık alıyorlar (kısık, sıcak ton). Ayak noktası ve boy resmin payı olarak
+## verilir; ekran boyutu değişince `_place_traveller` yeniden oturtur. Cinsiyet,
+## ten, boy ve giysi elle seçildi: aynı kişi üç kez çizilmesin.
+const CAMP_TRAVELLERS: Array = [
+	{"at": Vector2(0.338, 0.808), "height": 0.255, "scale": 1.0, "skin": 1, "gender": 1, "weight": 0, "tint": Color(0.9, 0.64, 0.46)},
+	{"at": Vector2(0.384, 0.778), "height": 0.225, "scale": 0.92, "skin": 2, "gender": 0, "weight": 1, "tint": Color(0.66, 0.48, 0.38)},
+	{"at": Vector2(0.424, 0.818), "height": 0.265, "scale": 1.06, "skin": 3, "gender": 1, "weight": 2, "tint": Color(0.46, 0.36, 0.32)},
+]
+
+static func _camp_travellers() -> Array:
+	var out: Array = []
+	for entry in CAMP_TRAVELLERS:
+		var person := FigurePreview.new()
+		person.max_figure_height = 0.0
+		var look: Dictionary = entry
+		var skin := CharacterData.get_skin_tone_color(int(look["skin"]))
+		var variant := Wardrobe.body_id_for(int(look["gender"]), int(look["weight"]))
+		person.show_look("villager", float(look["scale"]), skin, {}, PackedStringArray(), variant)
+		person.set_facing(-1.0)
+		person.set_tint(look["tint"])
+		person.set_meta("look", look)
+		person.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		out.append(person)
+	return out
+
+static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) -> void:
+	if bg.texture == null:
+		return
+	var img := Vector2(bg.texture.get_size())
+	var k := maxf(view.x / img.x, view.y / img.y)
+	var offset := (view - img * k) * 0.5
+	var look: Dictionary = person.get_meta("look")
+	var at: Vector2 = look["at"]
+	var figure_h := float(look["height"]) * img.y * k
+	# FigurePreview çizdiği boyu penceresinin %86'sı yapar (`_layout`).
+	person.size = Vector2(figure_h * 0.8, figure_h / 0.86)
+	person.position = offset + at * img * k - Vector2(person.size.x * 0.5, person.size.y)
+	person.refit()
 
 static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> void:
 	if bg.texture == null:

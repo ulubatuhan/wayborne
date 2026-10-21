@@ -6,6 +6,16 @@ Biçim: kimlik -> {"img": [(dosya, altyazı)], "ben": bakıp gördüğüm, "este
 """
 
 G = {
+    "9.2": {
+        "img": [("menu_baslik.jpg", "Başlık evresi"), ("menu_ana.jpg", "Menü açık")],
+        "ben": "Gece kampı katmanları çiziliyor (ay, uzak şehir, vagon, kütük ateşi, sandık); sağ şerit menü ve soy satırıyla düzgün, yazılar okunuyor.",
+        "estetik": "Gökyüzü ve zemin çok karanlık mı, yoksa kasvet tam yerinde mi?",
+    },
+    "Y-G16": {
+        "img": [("menu_ana.jpg", "Ateşin başındaki üç yolcu")],
+        "ben": "Üç figür ateşe dönük, ayakları yere basıyor; ateşe en yakın olan sıcak, uzaktakiler daha koyu. Hepsi yeni mankenler (farklı boy, kilo, ten).",
+        "estetik": "Yolcular yan yana dizilmiş gibi duruyor ve saçsız: daha dağınık, çömelmiş ya da oturur pozlar istiyor musunuz?",
+    },
     "Y-H07": {
         "img": [("ayarlar.jpg", "Ayarlar ekranı")],
         "ben": "Yazı boyutu, renk körlüğü (desenli şerit) ve 'yolda bir şey belirince duraklat' anahtarları var, hizalı, taşma yok. "

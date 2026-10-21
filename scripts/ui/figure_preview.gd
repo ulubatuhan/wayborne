@@ -44,6 +44,13 @@ func show_look(
 	_figure.set_facing(1.0)
 	_layout()
 
+## Ağaçta olmayan bir önizlemenin boyutu `resized` göndermez; yerleştiren elle çağırır.
+func refit() -> void:
+	_layout()
+
+func set_facing(direction: float) -> void:
+	_figure.set_facing(direction)
+
 func set_tint(tint: Color) -> void:
 	_figure.set_tint(tint)
 

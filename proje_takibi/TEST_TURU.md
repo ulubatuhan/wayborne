@@ -29,6 +29,21 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Görmeli: Önceki soyun mezarları yola/haritaya soluk döner, itibarın bir payı gelir, deftere eski soyun adı yazılır. `user://lineage_archive.json` oluşur.
   - Bozuksa: Mezarlar hiç görünmüyor ya da itibar sıfırlanmıyor
   - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
+- [ ] **9.2** Ana menü gece kampı, katmanlı
+  - Nereye: Oyunu aç; ana menüde bir tuşa bas.
+  - Görmeli: Gece kampı: ay, uzak şehir, vagon, ateş; sağda koyu şerit ve menü.
+  - Bozuksa: Arka plan boş ya da şerit üst üste biniyorsa not al.
+  - ![Başlık evresi](test_turu_gorseller/menu_baslik.jpg)
+  - ![Menü açık](test_turu_gorseller/menu_ana.jpg)
+  - **Ben baktım:** Gece kampı katmanları çiziliyor (ay, uzak şehir, vagon, kütük ateşi, sandık); sağ şerit menü ve soy satırıyla düzgün, yazılar okunuyor.
+  - **Size kalan (zevk):** Gökyüzü ve zemin çok karanlık mı, yoksa kasvet tam yerinde mi?
+- [ ] **Y-G16** Ana menü: kamp ateşi ve üç yorgun yolcu
+  - Nereye: Aynı ana menü ekranı.
+  - Görmeli: Ateşin başında üç yorgun yolcu, ateşe dönük; ateşe yakın olan daha sıcak ışıkta.
+  - Bozuksa: Yolcular havada ya da ateşten uzak duruyorsa not al.
+  - ![Ateşin başındaki üç yolcu](test_turu_gorseller/menu_ana.jpg)
+  - **Ben baktım:** Üç figür ateşe dönük, ayakları yere basıyor; ateşe en yakın olan sıcak, uzaktakiler daha koyu. Hepsi yeni mankenler (farklı boy, kilo, ten).
+  - **Size kalan (zevk):** Yolcular yan yana dizilmiş gibi duruyor ve saçsız: daha dağınık, çömelmiş ya da oturur pozlar istiyor musunuz?
 - [ ] **Y-H07** Erişilebilirlik ve oynanış ayarları
   - Nereye: Ana menü → Ayarlar; sonra yol ve savaşta etkisine bak.
   - Görmeli: Metin boyutu dört kademe (menüler büyür/küçülür, taşma yok); desenli şerit açıkken savaştaki kan şeridi parçalı çiziliyor; otomatik duraklatma açıkken yol işareti/karşılaşma işaretinde zaman bir tuş ya da tıklamaya kadar duruyor. Hızlandırma seçeneği yok. Ayarlar kayıt dosyasında değil `settings.cfg`'de.
@@ -438,4 +453,4 @@ Bu görevlerin kabulü testle ya da belgeyle yapıldı. Onay vermeniz yeterli; i
 - [ ] **N31b** Işık modeli ve sis şeridi koda: Işık modeli ve sis şeridi kodda.
 - [ ] **N31c** Ses otobüsleri, çeşitleme, ayar kaydırıcıları: Ses otobüsleri, çeşitleme ve ayar kaydırıcıları: Ayarlar'dan müzik/efekt kaydırıcılarını deneyin (müzik yok, efektler ve rüzgâr var).
 
-Toplam madde: 86.
+Toplam madde: 88.
