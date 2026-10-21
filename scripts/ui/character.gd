@@ -489,7 +489,12 @@ func _build_outfit_row(slot: String) -> VBoxContainer:
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	value_label.clip_text = true
 	var piece := OutfitCatalog.get_piece(_character.get_outfit_piece(slot))
-	value_label.text = piece.display_name if piece != null else tr("UI_CREATE_OUTFIT_NONE")
+	if piece != null:
+		value_label.text = piece.display_name
+	elif OutfitCatalog.is_plain_cloth_slot(_character.outfit, slot):
+		value_label.text = tr("UI_OUTFIT_PLAIN")
+	else:
+		value_label.text = tr("UI_CREATE_OUTFIT_NONE")
 	row.add_child(value_label)
 	# Dolapta bu slota ait başka bir şey yoksa oklar bir yere götürmüyor:
 	# kapalı, nedeni altında (kilitli seçim gizlenmez, nedeniyle gösterilir).

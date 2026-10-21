@@ -763,6 +763,7 @@
 "UI_WARDROBE_HINT","Dolaptaki bir giysiyi kişinin üstündeki yerine sürükle; çıkarmak için dolaba geri, satmak için terziye sürükle. Düğmeler de aynı işi görür.","Drag a garment from the locker onto its place on the person; drag it back to the locker to take it off, or onto the tailor to sell it. The buttons do the same.","","","","","","","","",""
 "UI_WARDROBE_WORN","Üstündekiler","Wearing","","","","","","","","",""
 "UI_WARDROBE_SLOT_EMPTY","boş","empty","","","","","","","","",""
+"UI_OUTFIT_PLAIN","sade köylü giysisi","plain peasant clothes","","","","","","","","",""
 "UI_WARDROBE_SLOT_TOOLTIP","Dolaptan bu yere ait bir giysiyi buraya bırak; dolaba geri bırakmak için buradan sürükle.","Drop a garment for this place here; drag it from here back to the locker to take it off.","","","","","","","","",""
 "UI_WARDROBE_CARD_TOOLTIP","Kişinin üstündeki yerine ya da satmak için terziye sürükle.","Drag onto its place on the person, or onto the tailor to sell it.","","","","","","","","",""
 "UI_WARDROBE_LOCKER","Kervanın Dolabı","Caravan Locker","","","","","","","","",""

@@ -468,7 +468,7 @@ func _refresh() -> void:
 		var piece_id: String = _outfit.get(slot, OutfitCatalog.NONE_PIECE)
 		var value_label: Label = outfit_row.value_label
 		if piece_id.is_empty():
-			value_label.text = tr("UI_CREATE_OUTFIT_NONE")
+			value_label.text = tr("UI_OUTFIT_PLAIN") if OutfitCatalog.is_plain_cloth_slot(_outfit, slot) else tr("UI_CREATE_OUTFIT_NONE")
 		else:
 			value_label.text = OutfitCatalog.get_piece(piece_id).display_name
 	_outfit_preview.show_look(

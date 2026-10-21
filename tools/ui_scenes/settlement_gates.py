@@ -59,6 +59,27 @@ def _wall_behind(qm, cx, width, value):
     return out
 
 
+# Ahşap çitli kasabanın kapısı da ahşap: kütük sur (town_scene.palisade), ortada
+# direkli ahşap geçit, iki yanda ahşap gözcü kulesi (kasaba sahnesindeki Kenney
+# parçaları). Taş kapı yalnızca taş surlu yerleşimlere (şehir, kervansaray, taş
+# kasaba) gider.
+WOOD_HALF = 30.0
+WOOD_TOWER_AT = (7.0, 22.0)
+
+
+def has_wood_wall(town):
+    return any(p.get("kind") == "wallrow" and p.get("wood") for p in town.get("props", []))
+
+
+def _wood_gate(keep):
+    half = WOOD_HALF
+    keep.append({"kind": "palisade", "from": [-half, WALL_Y], "to": [half, WALL_Y], "height": 4.4,
+                 "gate_width": 3.6, "venue": "gate"})
+    for side in (-1, 1):
+        for x in WOOD_TOWER_AT:
+            keep.append({"kind": "spire", "at": [side * x, WALL_Y], "floors": 3, "size": 2.0, "wood": True})
+
+
 def gate_config(town):
     cfg = copy.deepcopy(town)
     keep = []
@@ -75,6 +96,9 @@ def gate_config(town):
         moved.pop("venue", None)
         keep.append(moved)
     value = next((p.get("value", 0.3) for p in town.get("props", []) if p.get("kind") == "wallrow"), 0.3)
+    if has_wood_wall(town):
+        _wood_gate(keep)
+        return _finish_gate(cfg, keep)
     # Sur Quaternius Modular Medieval parçalarından (CC0): ortada giriş, iki
     # yanında kule, sonra duvar dizisi, uçlarda gözcü kulesi. Ölçüler paketin
     # biriminde ölçüldü (TallWall 1.52 geniş, Entrance 1.78, Tower 1.12).
@@ -100,6 +124,10 @@ def gate_config(town):
                              "scale": TOWER_SCALE * 0.85, "stone": value})
                 keep.extend(_wall_behind(qm, side * (x + 0.6), 1.5 * TOWER_SCALE * 0.85, value))
                 x += 1.5 * TOWER_SCALE * 0.85 + 0.6
+    return _finish_gate(cfg, keep)
+
+
+def _finish_gate(cfg, keep):
     for x, tree in ((-12.0, "ftk:tree-high"), (13.5, "ftk:tree-high-crooked"), (-17.5, "ftk:tree-high")):
         keep.append({"kind": tree, "at": [x, 7.0 + abs(x) * 0.2], "scale": 1.0})
     cfg["buildings"] = []

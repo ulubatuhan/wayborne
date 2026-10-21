@@ -18,6 +18,7 @@ import random
 import sys
 
 import bpy
+import bmesh
 from mathutils import Euler, Matrix, Vector
 
 ROOT = os.environ.get("WAYBORNE_ROOT", "/home/user/wayborne-ui")
@@ -61,11 +62,51 @@ def _import(path):
     return [o for o in bpy.data.objects if o not in before]
 
 
+FLAG_MATERIAL = "flag_cloth"
+FLAG_COLOR = (0.30, 0.055, 0.045, 1.0)
+
+
+def _cloth_material():
+    m = bpy.data.materials.get(FLAG_MATERIAL)
+    if m is not None:
+        return m
+    m = bpy.data.materials.new(FLAG_MATERIAL)
+    m.use_nodes = True
+    bsdf = m.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = FLAG_COLOR
+    bsdf.inputs["Roughness"].default_value = 0.95
+    return m
+
+
+def _split_flag(objs):
+    """Gözcü kulesinin bayrağı çatıyla aynı malzemeyi paylaşıyor; taş boyası
+    ('stone') bütün yuvaları ezince bayrak da taş dokusuna çıkıyordu. Bayrağın
+    bezi (en üst 0.4 birimdeki çatı malzemeli yüzler) kendi kumaş malzemesine
+    ayrılır; `place` o yuvaya dokunmaz. Şablon bir kez bölünür, kopyalar
+    aynı mesh'i paylaşır."""
+    for o in objs:
+        if o.type != "MESH" or o.data.get("flag_split"):
+            continue
+        me = o.data
+        if len(me.materials) != 2 or me.materials[1].name != "Celing":
+            continue
+        top = max(v.co.z for v in me.vertices)
+        me.materials.append(_cloth_material())
+        cloth = 0
+        for poly in me.polygons:
+            if poly.material_index == 1 and poly.center.z > top - 0.4:
+                poly.material_index = 2
+                cloth += 1
+        me["flag_split"] = cloth
+
+
 def _template(path):
     """Bir modeli bir kez yükler, gizli bir şablon olarak tutar."""
     if path in _cache:
         return _cache[path]
     objs = _import(path)
+    if path.endswith("WatchTowerWRoof.blend"):
+        _split_flag(objs)
     roots = [o for o in objs if o.parent is None]
     for o in objs:
         o.hide_render = True
@@ -101,6 +142,8 @@ def place(path, loc, rot_z=0.0, scale=1.0, tag="", mats=None):
         c["venue"] = tag
         if mats is not None and c.type == "MESH":
             for slot in c.material_slots:
+                if slot.material is not None and slot.material.name == FLAG_MATERIAL:
+                    continue  # bayrağın kumaşı taş boyasına girmez
                 slot.link = "OBJECT"
                 slot.material = mats
     return out
@@ -182,9 +225,88 @@ def _built(name, loc, rot_z, scale, tag):
     pivot.scale = (scale, scale, scale)
 
 
+def _wood_material():
+    m = bpy.data.materials.get("palisade_wood")
+    if m is not None:
+        return m
+    m = bpy.data.materials.new("palisade_wood")
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    mp = nt.nodes.new("ShaderNodeMapping")
+    # Damar boyuna: z'de gerilmiş gürültü.
+    mp.inputs["Scale"].default_value = (7.0, 7.0, 0.8)
+    nt.links.new(tc.outputs["Object"], mp.inputs["Vector"])
+    noise = nt.nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = 3.0
+    nt.links.new(mp.outputs["Vector"], noise.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (0.15, 0.085, 0.045, 1.0)
+    ramp.color_ramp.elements[1].color = (0.30, 0.18, 0.09, 1.0)
+    nt.links.new(noise.outputs["Fac"], ramp.inputs["Fac"])
+    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = 0.95
+    return m
+
+
+def _mesh_object(name, bm, tag):
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(o)
+    o.data.materials.append(_wood_material())
+    o["venue"] = tag
+    for poly in me.polygons:
+        poly.use_smooth = False
+    return o
+
+
+def _log(bm, x, y, h, r):
+    """Dikili kütük: sekizgen gövde, sivri uç."""
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=8, radius1=r, radius2=r, depth=h,
+                          matrix=Matrix.Translation((x, y, h / 2.0)))
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=8, radius1=r, radius2=0.0, depth=r * 2.4,
+                          matrix=Matrix.Translation((x, y, h + r * 1.2)))
+
+
+def palisade(spec):
+    """Kütük sur: iki sıra, birbirine kayık, sivri uçlu dikey kütükler; ortada
+    `gate_width` genişliğinde bir geçit, iki yanında kalın direk ve üstünde
+    lento. Ahşap çitli kasabanın kapı sahnesi (settlement_gates)."""
+    (x0, y0), (x1, y1) = spec["from"], spec["to"]
+    height = spec.get("height", 4.4)
+    gate = spec.get("gate_width", 3.6)
+    radius = spec.get("log", 0.21)
+    step = radius * 1.9
+    rng = random.Random(int(x0 * 7 + y0 * 3))
+    bm = bmesh.new()
+    n = int((x1 - x0) / step)
+    for row, dy in enumerate((0.0, 0.32)):
+        for i in range(n + 1):
+            x = x0 + i * step + (step / 2 if row else 0.0)
+            if abs(x) < gate / 2 + 0.25 or x > x1:
+                continue
+            _log(bm, x, y0 + dy + rng.uniform(-0.05, 0.05), height + rng.uniform(-0.35, 0.35), radius)
+    _mesh_object("palisade_logs", bm, spec.get("wall_tag", ""))
+    frame = bmesh.new()
+    post_h = height + 1.1
+    for side in (-1, 1):
+        _log(frame, side * (gate / 2 + 0.35), y0 + 0.1, post_h, radius * 1.8)
+    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((0.0, y0 + 0.1, height - 0.1)) @
+                          Matrix.Diagonal((gate + 1.9, 0.55, 0.5, 1.0)))
+    bmesh.ops.create_cube(frame, size=1.0, matrix=Matrix.Translation((0.0, y0 + 0.1, height - 1.0)) @
+                          Matrix.Diagonal((gate + 0.9, 0.3, 0.3, 1.0)))
+    _mesh_object("palisade_gate", frame, spec.get("venue", ""))
+
+
 def building(spec):
     if spec["kind"] == "wallrow":
         wall_row(spec)
+        return
+    if spec["kind"] == "palisade":
+        palisade(spec)
         return
     tag = spec.get("venue", "")
     x, y = spec["at"]

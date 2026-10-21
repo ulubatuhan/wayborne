@@ -137,7 +137,13 @@ func _build_slot_box(character: CharacterData, slot: String) -> PanelContainer:
 	slot_label.add_theme_font_size_override("font_size", 13)
 	text.add_child(slot_label)
 	var name_label := Label.new()
-	name_label.text = piece.display_name if piece != null else tr("UI_WARDROBE_SLOT_EMPTY")
+	if piece != null:
+		name_label.text = piece.display_name
+	elif OutfitCatalog.is_plain_cloth_slot(character.outfit, slot):
+		name_label.text = tr("UI_OUTFIT_PLAIN")
+		name_label.modulate = HINT_COLOR
+	else:
+		name_label.text = tr("UI_WARDROBE_SLOT_EMPTY")
 	text.add_child(name_label)
 	if piece != null:
 		var bonus := Label.new()

@@ -154,6 +154,14 @@ static func with_modesty_layer(outfit: Dictionary) -> Dictionary:
 			out[slot] = MODESTY_LAYER[slot]
 	return out
 
+## Bu yuva boş görünüyor ama figür üstünde köylü takımı taşıyor mu: ekran
+## "boş" yerine bunu söylesin, yoksa figür giyinik, yuva boş görünür.
+static func is_plain_cloth_slot(outfit: Dictionary, slot: String) -> bool:
+	if not MODESTY_LAYER.has(slot) or hidden_slots(outfit).has(slot):
+		return false
+	var id := str(outfit.get(slot, ""))
+	return id.is_empty() or id == NONE_PIECE
+
 static func worn_frames(outfit: Dictionary, body_variant: String) -> Array[BodyFrames]:
 	var worn: Array[OutfitPiece] = []
 	var hidden := hidden_slots(outfit)
