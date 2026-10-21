@@ -2099,6 +2099,13 @@ ağaçlar, uzakta puslu sırtlar. Ayrıntı ve görüntüler
 - **Mürekkep yalnızca kervanın düzleminde.** Uzak katman mürekkepsiz ve
   bulanık, ön tarla koyu ve bulanık: derinlik pustan ve alan
   derinliğinden geliyor, göz yola düşüyor.
+- **Işık taslağın ışığı (12.2e, y_122e_yol_isik.png).** Güneş ve ay disk değil: üç Gauss katmanı (geniş hale, orta
+  hale, küçük çekirdek) `ArtDraw.radial_glow` ile - `light_pool`'un üst üste binen halkaları geniş bir halede saydamlığı
+  biriktirip opak bir disk çiziyordu (ölçüldü). Bulutlar güneşe bakan kenarı ufuk bandının ışığını alan yumuşak
+  elipsler, ufukta bütün genişlikte bir ışık bandı, uzak sırtla ağaç hattı arasında ayrı bir sis şeridi; uzak ve orta
+  katman soğuk (`COOL_GRADE`), ön sıcak (`WARM_GRADE`). Gece evrenin son üçte birine kadar gece kalıyor (düz karışımla
+  gece yarısı yarı şafaktı) ve kervanın feneri yolda sıcak bir daire bırakıyor. `tests/screenshot_road_light.gd`
+  taslağın 4 evre × 3 biyom tablosunu basıyor.
 - **Biyom geçişi rengin geçişiyle aynı oranda**
   (`RouteTerrain.biome_blend_at`); zemin opak olduğu için eskisi tam,
   yenisi üstünde beliriyor, saydam katmanlarda eskisi de sönüyor.

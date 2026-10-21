@@ -70,6 +70,13 @@ const STRIP_MID_DROP_RATIO: float = 0.035
 const RENDERED_ROAD_RATIO: float = 0.72
 ## Hava perspektifi: uzak sırtın ve ağaç hattının üstüne gökyüzünün pusu.
 const HAZE_FAR_ALPHA: float = 0.42
+## Katman başına ışık derecesi (taslak 12.2e): uzak soğuk, ön sıcak.
+const COOL_GRADE: Color = Color(0.86, 0.92, 1.0)
+const WARM_GRADE: Color = Color(1.0, 0.97, 0.88)
+## Uzak sırtla ağaç hattı arasında ayrı bir sis şeridi.
+const FOG_BAND_ALPHA: float = 0.43
+## Gece kervanın feneri yolda sıcak bir daire bırakıyor.
+const NIGHT_LAMP: Color = Color(0.85, 0.62, 0.32)
 const HAZE_MID_ALPHA: float = 0.12
 ## Yolun üstünde kalkan toz: tekerleğin ve ayağın kaldırdığı ince bir perde.
 const DUST_ALPHA: float = 0.16
@@ -279,7 +286,12 @@ func set_route_progress(progress: float, day_position: float = -1.0) -> void:
 static func sky_for_phase(phase: JourneyClock.Phase, phase_progress: float) -> Dictionary:
 	var from_key: String = PHASE_SKY.get(phase, ArtPalette.PHASE_DAY)
 	var to_key: String = PHASE_SKY.get(_next_phase(phase), ArtPalette.PHASE_DAY)
-	return ArtPalette.blend_sky(from_key, to_key, clampf(phase_progress, 0.0, 1.0))
+	var t := clampf(phase_progress, 0.0, 1.0)
+	# Gece dokuz saat sürüyor: düz karışımla gece yarısı yarı şafaktı (taslak
+	# 12.2e'nin gecesi koyu). Gece son üçte birine kadar gece kalıyor.
+	if phase == JourneyClock.Phase.NIGHT:
+		t = smoothstep(0.62, 1.0, t)
+	return ArtPalette.blend_sky(from_key, to_key, t)
 
 ## Gökyüzünün ne kadar gece olduğu (0-1) - yıldızlar, meşale ışığı ve
 ## şehrin gece örtüsü aynı sayıyı okusun.
@@ -482,6 +494,7 @@ func _draw() -> void:
 	if rendered:
 		_draw_strip(RoadStrips.FAR, area, cover, horizon)
 		_draw_haze(cover, horizon - h_of(area) * 0.30, horizon + h_of(area) * 0.06, HAZE_FAR_ALPHA)
+		_draw_fog_band(cover, horizon - h_of(area) * 0.02, h_of(area) * 0.07)
 	else:
 		_draw_far_ridges(area, cover, horizon)
 		_draw_mid_ridges(area, cover, horizon)
@@ -504,6 +517,7 @@ func _draw() -> void:
 		_draw_stops(area, cover, horizon)
 		_draw_strip(RoadStrips.GROUND, area, cover, horizon)
 		_draw_dust(cover)
+		_draw_night_lamp(area)
 	else:
 		_draw_tree_line(area, cover, horizon)
 		_draw_stops(area, cover, horizon)
@@ -514,7 +528,7 @@ func _draw() -> void:
 	# çizilse kervanın arkasında kalırdı.
 	_foreground.cover = cover
 	_foreground.sync_state(
-		_colors, _light, _scroll_x(), _ground_y_at_screen(area.size.x * 0.5),
+		_colors, _light * WARM_GRADE, _scroll_x(), _ground_y_at_screen(area.size.x * 0.5),
 		_slope, float(_weather_visuals.rain), int(ceil(_route_days())),
 		screen_x_for_day(0.0), _pixels_per_day
 	)
@@ -547,10 +561,12 @@ func _draw_strip(layer: String, area: Rect2, cover: Rect2, horizon: float) -> vo
 		RoadStrips.FAR:
 			parallax = PARALLAX_FAR
 			anchor = horizon + h * STRIP_FAR_DROP_RATIO
-			light = _light * Color(_sky.haze).lerp(Color.WHITE, 0.55)
+			light = _light * COOL_GRADE * Color(_sky.haze).lerp(Color.WHITE, 0.55)
 		RoadStrips.MID:
 			parallax = PARALLAX_TREES
 			anchor = horizon + h * STRIP_MID_DROP_RATIO
+			# Uzak ve orta soğuk ve puslu, ön sıcak (taslak 12.2e).
+			light = _light * COOL_GRADE * Color(_sky.haze).lerp(Color.WHITE, 0.82)
 		RoadStrips.GROUND:
 			# Yol merkezi kervanın bastığı çizgide, eğimle birlikte.
 			shear = -_slope * h * 0.16 / maxf(1.0, size.x)
@@ -572,6 +588,28 @@ func _draw_haze(cover: Rect2, top: float, bottom: float, alpha: float) -> void:
 		Vector2(cover.end.x, mid), Vector2(cover.position.x, mid),
 	]), PackedColorArray([clear, clear, thick, thick]))
 	draw_rect(Rect2(Vector2(cover.position.x, mid), Vector2(cover.size.x, bottom - mid)), thick, true)
+
+## Sis şeridi: ortası en yoğun, iki kenarı sönen bir pus bandı (sinüs profili).
+func _draw_fog_band(cover: Rect2, top: float, height: float) -> void:
+	var haze := Color(_sky.haze)
+	var middle := Color(haze, FOG_BAND_ALPHA * (1.0 + float(_weather_visuals.gloom) * 0.5))
+	var none := Color(haze, 0.0)
+	var mid_y := top + height * 0.5
+	for half in [[top, mid_y, none, middle], [mid_y, top + height, middle, none]]:
+		draw_polygon(PackedVector2Array([
+			Vector2(cover.position.x, half[0]), Vector2(cover.end.x, half[0]),
+			Vector2(cover.end.x, half[1]), Vector2(cover.position.x, half[1]),
+		]), PackedColorArray([half[2], half[2], half[3], half[3]]))
+
+## Gece fenerin yol üstündeki sıcak dairesi (taslak 12.2e), kervanın başında.
+func _draw_night_lamp(area: Rect2) -> void:
+	if _night_ratio <= 0.3:
+		return
+	var x := caravan_x()
+	var y := _ground_y_at_screen(x)
+	var strength := clampf((_night_ratio - 0.3) / 0.5, 0.0, 1.0)
+	ArtDraw.radial_glow(self, Vector2(x, y - area.size.y * 0.02), Vector2(area.size.x * 0.14, area.size.y * 0.13),
+		NIGHT_LAMP, 0.6 * strength)
 
 ## Toz: yol çizgisinin biraz üstünde en yoğun, iki yana sönen bir perde;
 ## ışığın rengini alıyor (akşam toz da altın).
@@ -624,6 +662,17 @@ func _draw_sky(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# Şeridin üstünde kalan gökyüzü: gradyan orada zaten en koyu tonunda.
 	if cover.position.y < 0.0:
 		draw_rect(Rect2(cover.position, Vector2(cover.size.x, -cover.position.y + 1.0)), top, true)
+	# Ufukta ışık bandı (taslak 12.2e): güneşten önce ışığı - bütün genişlikte,
+	# ufkun iki yanına sönen yumuşak bir şerit, evrenin bant renginde.
+	var band := Color(_sky.band)
+	var reach := area.size.y * 0.07
+	var peak := Color(band, 0.55 * (1.0 - gloom * 0.6))
+	var none := Color(band, 0.0)
+	for half in [[horizon - reach * 1.6, horizon, none, peak], [horizon, horizon + reach * 0.6, peak, none]]:
+		draw_polygon(PackedVector2Array([
+			Vector2(cover.position.x, half[0]), Vector2(cover.end.x, half[0]),
+			Vector2(cover.end.x, half[1]), Vector2(cover.position.x, half[1]),
+		]), PackedColorArray([half[2], half[2], half[3], half[3]]))
 
 ## Güneş/ay ufuk boyunca bir yay çiziyor. Gökyüzünde sabit bir nokta
 ## olmaması, zamanın aktığını renkten bağımsız olarak söylüyor.
@@ -649,27 +698,44 @@ func _draw_celestial(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# uzaklaşmak onu değiştirmemeli.)
 	var arc_y := horizon - sin(_sun_ratio * PI) * horizon * 0.72 - horizon * 0.06
 	var is_night := _night_ratio > 0.55
-	var disc := Color(0.72, 0.78, 0.92) if is_night else Color(1.0, 0.93, 0.74)
-	# Ufukta sıcak bant (12.2e): güneş alçaktayken ufkun güneş tarafı ısınır.
-	var low := clampf(1.0 - sin(_sun_ratio * PI) * 1.6, 0.0, 1.0)
-	if low > 0.0 and not is_night:
-		ArtDraw.light_pool(self, Vector2(arc_x, horizon), area.size.x * 0.42, Color(_sky.band),
-			0.30 * low * (1.0 - gloom), 0.32, 48)
-	# Güneş bir disk değil ışık: geniş hale, küçük parlak çekirdek (12.2e).
-	var disc_r := area.size.y * (0.034 if is_night else 0.022)
-	# Geniş hale çok halkayla: 16 halkada halka halka bant görünüyordu.
-	ArtDraw.light_pool(
-		self, Vector2(arc_x, arc_y), area.size.y * 0.30, disc,
-		(0.16 if is_night else 0.34) * (1.0 - gloom), 1.0, 64
-	)
-	ArtDraw.light_pool(self, Vector2(arc_x, arc_y), disc_r * 3.0, disc, 0.55 * (1.0 - gloom), 1.0)
-	draw_circle(Vector2(arc_x, arc_y), disc_r, Color(disc.lightened(0.25), (1.0 - gloom * 0.6)))
-	if is_night:
-		# Ay: diskin bir kenarını gökyüzü rengiyle kesip hilal yapıyoruz.
-		draw_circle(
-			Vector2(arc_x + disc_r * 0.42, arc_y - disc_r * 0.24), disc_r * 0.86,
-			Color(_sky.top)
-		)
+	var disc := Color(0.82, 0.87, 1.0) if is_night else Color(1.0, 0.95, 0.85)
+	var h := area.size.y
+	var clear := 1.0 - gloom
+	# Güneş bir disk değil ışık (taslak 12.2e): geniş soluk hale, orta hale,
+	# küçük parlak çekirdek - üçü Gauss düşüşlü (yolun 540 px'lik taslak
+	# karesinde 260/70/9 px). Gece aynı ışık ayın soğuk renginde.
+	var dim := 0.75 if is_night else 1.0
+	ArtDraw.radial_glow(self, Vector2(arc_x, arc_y), Vector2.ONE * h * 0.96, disc, 0.20 * clear * dim)
+	ArtDraw.radial_glow(self, Vector2(arc_x, arc_y), Vector2.ONE * h * 0.30, disc, 0.45 * clear * dim)
+	ArtDraw.radial_glow(self, Vector2(arc_x, arc_y), Vector2.ONE * h * 0.05, disc, 1.0 * clear)
+	draw_circle(Vector2(arc_x, arc_y), h * 0.007, Color(disc.lightened(0.4), clear))
+	_draw_clouds(area, cover, horizon, arc_x)
+
+## Bulut şeritleri (taslak 12.2e): gökyüzünün kendi tonunda yumuşak elipsler,
+## güneşe bakan üst kenarı ufuk bandının ışığını alıyor. Tohumlu, çok yavaş
+## kayıyor (uzak katmandan da yavaş) - gökyüzü durağan bir resim değil.
+const CLOUD_COUNT: int = 7
+const CLOUD_PARALLAX: float = 0.03
+
+func _draw_clouds(area: Rect2, cover: Rect2, horizon: float, sun_x: float) -> void:
+	var gloom := float(_weather_visuals.gloom)
+	var body := Color(_sky.top).lerp(Color(_sky.bottom), 0.45)
+	var lit := Color(_sky.band)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7311
+	var span := maxf(cover.size.x, area.size.x)
+	var shift := _scroll_x() * CLOUD_PARALLAX
+	for _index in CLOUD_COUNT:
+		var x := fposmod(rng.randf() * span - shift, span) + cover.position.x
+		var y := rng.randf_range(0.12, 0.42) * area.size.y
+		var w := rng.randf_range(120.0, 260.0) * area.size.y / 540.0
+		var hh := rng.randf_range(10.0, 22.0) * area.size.y / 540.0
+		if y > horizon - hh:
+			continue
+		ArtDraw.radial_glow(self, Vector2(x, y), Vector2(w * 0.8, hh * 1.5), body, 0.85 * (1.0 + gloom * 0.4))
+		var side := 1.0 if sun_x > x else -1.0
+		ArtDraw.radial_glow(self, Vector2(x + side * 8.0, y - hh * 0.55), Vector2(w * 0.75, hh * 0.8), lit,
+			0.6 * (1.0 - gloom))
 
 ## Şeridin dışındaki gökyüzüne düşen yıldızlar - ayrı bir tohumla, yani
 ## şeridin içindekiler yerinden oynamıyor.

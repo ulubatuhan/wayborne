@@ -383,6 +383,41 @@ static func light_pool(
 			Color(color.r, color.g, color.b, (1.0 - ratio) * strength)
 		)
 
+## Yumuşak ışık lekesi: Gauss düşüşlü tek bir radyal doku, `radii` kadar
+## (eliptik olabilir). `light_pool` halkaları üst üste bindirip saydamlığı
+## biriktiriyordu - geniş ve güçlü bir halede merkez opak bir diske
+## dönüşüyordu (yolun güneşi, ölçüldü). Burada merkez tam `peak` kadar.
+static func radial_glow(canvas: CanvasItem, centre: Vector2, radii: Vector2, color: Color, peak: float) -> void:
+	if peak <= 0.0 or radii.x <= 0.0 or radii.y <= 0.0:
+		return
+	canvas.draw_texture_rect(_glow_texture(), Rect2(centre - radii, radii * 2.0), false,
+		Color(color.r, color.g, color.b, clampf(peak, 0.0, 1.0)))
+
+static var _glow_tex: GradientTexture2D
+
+static func _glow_texture() -> GradientTexture2D:
+	if _glow_tex != null:
+		return _glow_tex
+	var gradient := Gradient.new()
+	var offsets := PackedFloat32Array()
+	var colors := PackedColorArray()
+	for i in 13:
+		var r := float(i) / 12.0
+		offsets.append(r)
+		# Kenarda sıfır: Gauss (r=1'de ~%2) kenara doğru sıfıra çekiliyor.
+		colors.append(Color(1, 1, 1, exp(-pow(r * 2.0, 2.0)) * (1.0 - r)))
+	gradient.offsets = offsets
+	gradient.colors = colors
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 256
+	tex.height = 256
+	_glow_tex = tex
+	return tex
+
 static func ellipse(canvas: CanvasItem, centre: Vector2, radii: Vector2, color: Color) -> void:
 	canvas.draw_colored_polygon(ellipse_points(centre, radii), color)
 
