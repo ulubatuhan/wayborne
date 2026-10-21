@@ -168,6 +168,28 @@ func _test_road_strips(t) -> void:
 		if img.is_compressed():
 			img.decompress()
 		t.ok(_seam_error(img) < 0.08, "%s: zemin dikişsiz döşeniyor" % biome)
+	# Haritanın her parçasının görünüşü (Y-G07) dört katmanını da buluyor; varyant
+	# klasörlerinin bağlantı noktaları biyomunkiyle aynı.
+	var looks := {}
+	for location in WorldMapData.get_locations():
+		for route in WorldMapData.get_routes_from(location.location_id):
+			var mapped := WorldMapData.get_route_terrain(
+				RouteConditions.route_key(location.location_id, route.to_location_id))
+			for seg in mapped.get("segments", []):
+				looks[RouteTerrain.look_of(seg)] = true
+	for look in looks:
+		for layer in RoadStrips.LAYERS:
+			t.ok(RoadStrips.texture(String(look), layer) != null, "%s/%s çizilebiliyor" % [look, layer])
+	for dir_name in DirAccess.get_directories_at(RoadStrips.DIR):
+		if not dir_name.contains("_"):
+			continue
+		var vlayout = JSON.parse_string(FileAccess.get_file_as_string(RoadStrips.DIR + dir_name + "/layout.json"))
+		t.ok(vlayout is Dictionary, "%s: layout okunuyor" % dir_name)
+		if not vlayout is Dictionary:
+			continue
+		for layer in vlayout:
+			t.ok(absf(float(vlayout[layer]["anchor_px"]) - float(RoadStrips.SPEC[layer]["anchor_px"])) < 0.5,
+				"%s/%s: bağlantı noktası render'la aynı" % [dir_name, layer])
 	var terrain := RouteTerrain.build("karakonak|ipekevi", 12)
 	for day in [0.0, 1.3, 2.9, 5.5, 8.2, 11.9]:
 		var blend := terrain.biome_blend_at(day)

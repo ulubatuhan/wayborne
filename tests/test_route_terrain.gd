@@ -47,6 +47,7 @@ func run(t) -> void:
 	_test_map_routes_keep_the_provision_promise(t)
 	_test_seasons_and_shortcuts(t)
 	_test_river_fords(t)
+	_test_map_looks(t)
 
 func _test_terrain_is_reproducible(t) -> void:
 	for key in SAMPLE_KEYS:
@@ -719,3 +720,29 @@ func _test_river_fords(t) -> void:
 	t.ok(ford.choices[1].is_available(high) and not ford.choices[1].is_available(low), "selde geçmek yalnız yüksek suda")
 	t.ok(ford.is_eligible(low) and not ford.is_eligible({"near_ford": 0.0}), "kart yalnız geçitte")
 	t.ok(String(TranslationServer.translate(RouteTerrain.stop_name_key(RouteTerrain.STOP_FORD))) != "STOP_FORD", "geçidin adı var")
+
+
+## Haritadaki konuma göre görünüş (görev Y-G07): kuzey soğuk, güney sıcak, dağa
+## yakın parçanın ufkunda dağ; iki yönden aynı parça aynı görünüş.
+func _test_map_looks(t) -> void:
+	for leg in _map_legs():
+		var key := String(leg[3])
+		var forth := RouteTerrain.build(key, int(leg[2]), String(leg[0]))
+		var back := RouteTerrain.build(key, int(leg[2]), String(leg[1]))
+		var n := forth.segments.size()
+		for k in n:
+			var a: Dictionary = forth.segments[k]
+			t.ok(String(a.get("climate", "")) in ["", "cold", "warm"], "iklim bilinen bir değer: %s" % key)
+			if String(a.biome) == ArtPalette.BIOME_MOUNTAIN:
+				t.ok(not RouteTerrain.look_of(a).ends_with("_peaks"), "dağın ufkuna ayrıca dağ konmuyor: %s" % key)
+			if back.segments.size() == n:
+				t.eq(RouteTerrain.look_of(back.segments[n - 1 - k]), RouteTerrain.look_of(a),
+					"ters yönde görünüş aynı: %s" % key)
+	var north := RouteTerrain.build(RouteConditions.route_key("brazdun", "kesgrav"), 2, "brazdun")
+	t.eq(north.look_at(1.0), "mountain_cold", "kuzey dağları soğuk")
+	var south := RouteTerrain.build(RouteConditions.route_key("orsolune", "serai_seyvan"), 4, "orsolune")
+	t.ok(south.look_at(1.0).contains("_warm"), "güneyin yolu sıcak")
+	t.eq(RoadStrips.fallback_chain("forest_cold_peaks"),
+		PackedStringArray(["forest_cold_peaks", "forest_cold", "forest_peaks", "forest"]),
+		"varyantın eksik katmanı bir alttakine düşüyor")
+	t.eq(RoadStrips.fallback_chain("marsh"), PackedStringArray(["marsh"]), "düz biyom kendisi")
