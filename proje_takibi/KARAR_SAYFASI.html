@@ -1,0 +1,223 @@
+<title>Wayborne Karar Defteri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=IM+Fell+English+SC&display=swap">
+<style>
+  /* Düzen: oyunun kendi defteri gibi - koyu kömür sayfa, pas çizgi; her madde bir kayıt, solda görüntü, sağda karar. */
+  :root {
+    --bg: #f1eadb; --panel: #faf6ec; --line: #c9b79a; --ink: #2b221a; --dim: #6e604e;
+    --amber: #8a5f17; --rust: #8c4a2a; --keep: #3f6a3a; --add: #8a5f17; --cut: #9a3328;
+    --display: "IM Fell English SC", "Palatino Linotype", Georgia, serif;
+    --body: "EB Garamond", "Palatino Linotype", Georgia, serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #141110; --panel: #1d1915; --line: #4a3a2c; --ink: #e6dcc4; --dim: #a59885;
+    --amber: #dbb357; --rust: #b0683e; --keep: #8fb27c; --add: #dbb357; --cut: #e0796b; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #141110; --panel: #1d1915; --line: #4a3a2c; --ink: #e6dcc4; --dim: #a59885;
+    --amber: #dbb357; --rust: #b0683e; --keep: #8fb27c; --add: #dbb357; --cut: #e0796b; color-scheme: dark; }
+  html, body { background: var(--bg); }
+  body { color: var(--ink); font: 18px/1.5 var(--body); margin: 0;
+         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+         padding-block: 0 64px; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  .wrap { max-width: 1180px; margin-inline: auto; }
+  header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+               padding-block: 16px 12px; border-bottom: 1px solid var(--line); }
+  h1 { font: 2rem/1.1 var(--display); margin: 0 0 4px; color: var(--amber); letter-spacing: .01em; }
+  .sub { margin: 0; color: var(--dim); max-width: 70ch; }
+  .tally { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font-size: .95rem; color: var(--dim);
+           font-variant-numeric: tabular-nums; }
+  .tally b { color: var(--ink); }
+  .bar { height: 4px; background: var(--line); margin-top: 8px; }
+  .bar > div { height: 100%; width: 0; background: var(--amber); transition: width .2s; }
+  h2 { font: 1.45rem/1.2 var(--display); color: var(--rust); margin: 40px 0 4px; text-wrap: balance; }
+  .gnote { margin: 0 0 16px; color: var(--dim); max-width: 75ch; }
+  .item { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px;
+          padding: 18px 0; border-top: 1px solid var(--line); }
+  .shots { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); min-width: 0; }
+  figure { margin: 0; min-width: 0; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #000; cursor: zoom-in; }
+  figcaption { font-size: .82rem; color: var(--dim); margin-top: 4px; }
+  figcaption .tag { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; margin-right: 6px; padding: 1px 6px;
+                    border: 1px solid currentColor; }
+  .tag.oyun { color: var(--keep); } .tag.taslak { color: var(--add); }
+  .noshot { border: 1px dashed var(--line); padding: 28px 16px; color: var(--dim); text-align: center; font-style: italic; }
+  .text { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .id { font: .8rem/1 ui-monospace, "SFMono-Regular", Consolas, monospace; color: var(--amber); letter-spacing: .04em; }
+  .text h3 { font: 600 1.2rem/1.25 var(--body); margin: 0; text-wrap: balance; }
+  .text p { margin: 0; }
+  .state { color: var(--dim); font-size: .95rem; }
+  .choice { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .choice label { cursor: pointer; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice span { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); font-size: .95rem; background: var(--panel); }
+  .choice input:focus-visible + span { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .choice input[value="kalsin"]:checked + span { border-color: var(--keep); color: var(--keep); box-shadow: inset 0 -3px 0 var(--keep); }
+  .choice input[value="ekle"]:checked + span { border-color: var(--add); color: var(--add); box-shadow: inset 0 -3px 0 var(--add); }
+  .choice input[value="cikar"]:checked + span { border-color: var(--cut); color: var(--cut); box-shadow: inset 0 -3px 0 var(--cut); }
+  textarea { width: 100%; box-sizing: border-box; font: .95rem/1.4 var(--body); color: var(--ink); background: var(--panel);
+             border: 1px solid var(--line); padding: 6px 8px; min-height: 2.4em; resize: vertical; }
+  textarea:focus-visible, button:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+  .out { margin-top: 48px; border-top: 2px solid var(--rust); padding-top: 12px; }
+  .out h2 { margin-top: 8px; }
+  #ozet { min-height: 14em; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .85rem; }
+  button { font: 1rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--rust); padding: 8px 16px; cursor: pointer; }
+  .copied { color: var(--keep); margin-left: 10px; font-size: .9rem; }
+  dialog { border: 1px solid var(--line); background: var(--bg); padding: 8px; max-width: 96vw; }
+  dialog img { max-width: 92vw; max-height: 86vh; display: block; }
+  dialog::backdrop { background: rgba(0,0,0,.75); }
+  @media (max-width: 760px) { .item { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Karar defteri</h1>
+    <p class="sub">Önceki oturumun her işi, oyundaki hâli ve taslağıyla yan yana. Her madde için <b>Kalsın</b>, <b>Ekle</b> (oyuna bağla) ya da <b>Çıkar</b> seçin; isterseniz not yazın. En altta kararlarınız tek metin olarak toplanır.</p>
+    <div class="tally"><span><b id="n-done">0</b> / <span id="n-all">0</span> karar</span>
+      <span>kalsın <b id="n-kalsin">0</b></span><span>ekle <b id="n-ekle">0</b></span><span>çıkar <b id="n-cikar">0</b></span></div>
+    <div class="bar" role="progressbar" aria-label="Karar ilerlemesi"><div id="fill"></div></div>
+  </header>
+  <main id="liste"></main>
+  <section class="out">
+    <h2>Kararlarım</h2>
+    <p class="gnote">Bu metni kopyalayıp bana yapıştırın; ona göre uygularım.</p>
+    <textarea id="ozet" readonly aria-label="Kararların özeti"></textarea>
+    <p><button id="kopyala" type="button">Metni kopyala</button><span class="copied" id="kopyalandi" hidden>Kopyalandı</span></p>
+  </section>
+</div>
+<dialog id="buyut"><img id="buyut-img" alt=""></dialog>
+
+<script>
+(function () {
+  var G = "karar_gorselleri/";
+  var gruplar = [
+    { id: "A", ad: "Oyunda ve bağlı", not: "Bunlar şu an oyunda çalışıyor. Beğenmediğinizi Çıkar ile işaretleyin; kalmasını istediklerinize Kalsın deyin." , maddeler: [
+      { id: "9.2 · Y-G16", ad: "Ana menü: gece kampı ve ateş başındaki üç yolcu", d: "Oyunda: kamp arka planı, ateş ışığı, sağda menü şeridi; üç yolcu taslaktaki gibi sandıklarda oturuyor (bugün bağlandı). Taslakta figürler daha yumuşak ve ateş ışığı daha güçlü.",
+        img: [["oyun_menu", "oyun", "Oyundaki menü"], ["taslak_menu", "taslak", "Onaylanan taslak"]] },
+      { id: "9.6", ad: "Karakter ekranı (üç sütun)", d: "Oyunda: kimlik, nitelikler, beceriler ve dirençler; taslakla aynı düzen. Taslakta kimlik altında geçmiş, amaç ve bağ satırları var; oyunda oyuncu karakterinde yalnızca kültür satırı görünüyor.",
+        img: [["oyun_karakter", "oyun", "Oyundaki karakter ekranı"], ["taslak_karakter", "taslak", "Taslak"]] },
+      { id: "9.11", ad: "Defter: Düşenler sayfası ve mezar işaretleri", d: "Kod ve testlerde var (L ile açılan defter). Bu ortamda defterin ekran görüntüsü alınamadı; yanda taslak.",
+        img: [[null, null, "Oyun ekranı alınamadı"], ["taslak_dusenler", "taslak", "Taslak"]] },
+      { id: "9.12", ad: "Kilise mezarlığı: sakin ve nöbet hâli", d: "Oyunda: mezarlık arka planı; yakında bir ölüm olduysa nöbet resmi (meşaleli) açılıyor.",
+        img: [["oyun_kilise", "oyun", "Oyundaki kilise (sakin)"], ["taslak_kilise", "taslak", "Taslak: sakin ve nöbet"]] },
+      { id: "12.2a", ad: "Şehir kapıları: 27 yerleşim, gece ve gündüz", d: "Şehre girişte her şehrin kendi kapısı bir an ekranı kaplıyor.",
+        img: [["oyun_kapi_gece", "oyun", "Vastrevar, gece"], ["oyun_kapi_gunduz", "oyun", "Kirsavel, gündüz"]] },
+      { id: "12.2e", ad: "Yol: 6 biyomun render katmanları, saat ve hava ışığı", d: "Oyunda: render edilmiş çayır/bozkır/orman/dağ/göl/bataklık şeritleri; ışık saate ve havaya göre değişiyor.",
+        img: [["oyun_yol", "oyun", "Oyundaki yol (bozkır, fırtına)"], ["taslak_yol_isik", "taslak", "Taslak: biyom × saat"]] },
+      { id: "N33", ad: "Şehir gün evreleri (sabah, gündüz, akşam, gece)", d: "Her şehrin dört saat resmi var; şehre girilen saate göre seçiliyor.",
+        img: [["oyun_sehir", "oyun", "Kirsavel, öğleden sonra"]] },
+      { id: "9.4", ad: "Canlı taverna", d: "Tam ekran taverna odası: ocak, oturan konuklar, ozan, garson; sekmeler ve söylentiler altta.",
+        img: [["oyun_taverna", "oyun", "Oyundaki taverna"]] },
+      { id: "N34", ad: "Konuşma penceresi ve portre", d: "Tavernada biriyle konuşma, portreli pencere; söylenti satın alınmıyor, konuşarak öğreniliyor.",
+        img: [["oyun_sohbet", "oyun", "Oyundaki konuşma"]] },
+      { id: "Y-G11T", ad: "Pazar terazisi", d: "Pazarda sepete konan mal kefeye, altın öbür kefeye; terazi değere göre eğiliyor.",
+        img: [["oyun_pazar", "oyun", "Oyundaki pazar"], ["taslak_terazi", "taslak", "Taslak: terazi durumları"]] },
+      { id: "Onay paketi 2", ad: "Savaşta yerin manzarası ve stilize can/stres çubukları", d: "Savaş sahnesi biyomun önünde; kritik vuruşta yakınlaşma ve sayı.",
+        img: [["oyun_savas", "oyun", "Oyundaki savaş"]] },
+      { id: "Onay paketi 2", ad: "Yol paneli küçük harita ve sahnenin içindeki olay kartı", d: "Alt panelde sekmeler, sağda küçük harita; olay kartı yolun ortasında açılıyor.",
+        img: [["oyun_olay", "oyun", "Olay kartı ve Durum sekmesi"]] },
+      { id: "Y-H05", ad: "Vuruş, kritik ve öldürme sesleri", d: "Her biri beş varyant (Kenney, CC0), perdesi hafifçe oynuyor. Görüntüsü yok; oyunda dinlenir.",
+        img: [[null, null, "Ses, görüntü yok"]] }
+    ]},
+    { id: "B", ad: "Kısmen: taslakta var, oyunda eksik", not: "Ekle derseniz eksik kısmı tamamlarım; Çıkar derseniz taslaktaki fazlayı bırakırız.", maddeler: [
+      { id: "9.3", ad: "Şehir durum varyantları", d: "Oyunda yalnızca gün evreleri var. Taslaktaki 'gri' ve 'kriz' varyantları, pencere ışığı, ışık huzmesi, hasar ve kalabalık katmanları yok.",
+        img: [["oyun_sehir", "oyun", "Oyundaki şehir"], ["taslak_sehir_varyant", "taslak", "Taslak: bugünkü, alacakaranlık, gece, gri, kriz"]] },
+      { id: "9.7", ad: "Kadro kartı ve seviye rozeti", d: "Oyunda kart, sıra rozeti ve tek can çubuğu var. Taslaktaki seviye rozeti, stres çubuğu, durum yazısı (yaralı, Ölümün Kıyısı) ve kırmızı kenar yok.",
+        img: [["oyun_kadro", "oyun", "Oyundaki kadro"], ["taslak_kadro", "taslak", "Taslak"]] },
+      { id: "9.4", ad: "Mekân ekranlarında ortak iskelet ve büyük sahip portresi", d: "Taslak dosyası repoda yok. Görev tarifi: ortak iskelet, büyük sahip portresi (hancı, rahip, hekim), mimariden yuvalar (kilise nişi, taverna fıçısı). Oyunda kilise metin ve mezarlık, taverna canlı oda.",
+        img: [["oyun_kilise", "oyun", "Oyundaki kilise"], ["oyun_taverna", "oyun", "Oyundaki taverna"]] }
+    ]},
+    { id: "C", ad: "Onaylı ama oyunda yok", not: "Bu taslakları onaylamıştınız; hiçbiri oyuna bağlanmadı.", maddeler: [
+      { id: "9.1", ad: "Ortak UI kiti v2", d: "İnce pas çerçeveli panel, kırmızı ana eylem düğmesi (dört durumu). Bir deneme stash'te bekliyor; ilk denemede çerçeve kalın çıktı.",
+        img: [["taslak_ui_kit", "taslak", "Kit parçaları"], ["taslak_ui_kit_ornek", "taslak", "Ekranlarda örnek"]] },
+      { id: "Y-G05 · 9.8", ad: "Savaş ekranı yeniden", d: "Taslakta: büyük tur madalyonu, kritik mührü, büyük figürler, altta etkin kişi ve hedef panelleri. 9.8 için değişiklik istemiştiniz, Y-G05 onaylı.",
+        img: [["oyun_savas", "oyun", "Oyundaki savaş"], ["taslak_savas", "taslak", "Taslak"]] },
+      { id: "12.2 · 9.10", ad: "Yol görünümü revizyonu ve biyom varyantları", d: "Biyom başına haritadaki konuma göre varyantlar (Y-G07 ile birlikte), CC0 dokular ve enkaz nesneleri. Oyundaki yol render'ı bunun ilk adımı.",
+        img: [["oyun_yol", "oyun", "Oyundaki yol"], ["taslak_yol_isik", "taslak", "Taslak"]] },
+      { id: "Y-G11T", ad: "Masa ekranı şablonu (sol liste, ortada nesne, sağda kervan)", d: "Pazarda terazi biçimi uygulandı. Diğer masa ekranlarına (lonca, avlu) yayılmadı; taslaktaki vagon kutulu sağ sütun da yok.",
+        img: [["oyun_pazar", "oyun", "Oyundaki pazar"], ["taslak_masa", "taslak", "Taslak v2"]] },
+      { id: "Y-G13", ad: "Kimliği tanımlayan beş ana görsel", d: "Mağaza ve vitrin için (oyun dışı): gece haritası, kamp ateşi, olay kartı, defter, kapı varışı.",
+        img: [["taslak_vitrin", "taslak", "Beş görsel"]] }
+    ]},
+    { id: "D", ad: "Değişiklik istenmiş, yön sizden", not: "Bunlar için değişiklik istemiştiniz. Ekle derseniz taslağı uygularım, Çıkar derseniz bırakırım; notta yeni yönü yazabilirsiniz.", maddeler: [
+      { id: "9.5", ad: "Pazar: üstte mal kartları, altta vagonlar", d: "Oyunda terazili pazar var; bu taslak uygulanmadı.",
+        img: [["oyun_pazar", "oyun", "Oyundaki pazar"], ["taslak_pazar", "taslak", "Taslak"]] },
+      { id: "9.9", ad: "Yol HUD'u: sağ üstte gösterge levhası", d: "Oyunda göstergeler alt paneldeki Durum sekmesinde.",
+        img: [["oyun_yol", "oyun", "Oyundaki yol"], ["taslak_yol_hud", "taslak", "Taslak"]] },
+      { id: "Y-G10T", ad: "Şehirde insanlar", d: "Taslakta gece şehirde kapı bekçisi, konuşan iki kişi, eve dönen biri. Oyunda şehir boş.",
+        img: [["oyun_sehir", "oyun", "Oyundaki şehir"], ["taslak_halk", "taslak", "Taslak"]] }
+    ]}
+  ];
+
+  var KEY = "wayborne-karar-v1", durum = {};
+  try { durum = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { durum = {}; }
+  function kaydet() { try { localStorage.setItem(KEY, JSON.stringify(durum)); } catch (e) {} }
+  function el(tag, cls, txt) { var n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; }
+
+  var liste = document.getElementById("liste"), tum = [];
+  gruplar.forEach(function (g) {
+    var sec = el("section"); sec.appendChild(el("h2", null, g.ad)); sec.appendChild(el("p", "gnote", g.not));
+    g.maddeler.forEach(function (m, i) {
+      var key = g.id + (i + 1); tum.push({ key: key, m: m });
+      var row = el("article", "item"); row.id = "m-" + key;
+      var shots = el("div", "shots");
+      m.img.forEach(function (s) {
+        var f = el("figure");
+        if (s[0]) {
+          var im = el("img"); im.src = G + s[0] + ".jpg"; im.alt = s[2]; im.loading = "lazy";
+          im.addEventListener("click", function () { var d = document.getElementById("buyut"); document.getElementById("buyut-img").src = im.src;
+            if (d.showModal) d.showModal(); });
+          f.appendChild(im);
+          var c = el("figcaption"); c.appendChild(el("span", "tag " + s[1], s[1] === "oyun" ? "Oyunda" : "Taslak")); c.appendChild(document.createTextNode(s[2])); f.appendChild(c);
+        } else { f.appendChild(el("div", "noshot", s[2])); }
+        shots.appendChild(f);
+      });
+      var t = el("div", "text");
+      t.appendChild(el("div", "id", key + " · " + m.id));
+      t.appendChild(el("h3", null, m.ad));
+      t.appendChild(el("p", "state", m.d));
+      var ch = el("div", "choice"); ch.setAttribute("role", "radiogroup"); ch.setAttribute("aria-label", m.ad);
+      [["kalsin", "Kalsın"], ["ekle", "Ekle"], ["cikar", "Çıkar"]].forEach(function (o) {
+        var lb = el("label"), inp = el("input"); inp.type = "radio"; inp.name = "k-" + key; inp.value = o[0]; inp.id = "k-" + key + "-" + o[0];
+        if ((durum[key] || {}).k === o[0]) inp.checked = true;
+        inp.addEventListener("change", function () { durum[key] = durum[key] || {}; durum[key].k = o[0]; kaydet(); say(); });
+        lb.appendChild(inp); lb.appendChild(el("span", null, o[1])); ch.appendChild(lb);
+      });
+      t.appendChild(ch);
+      var ta = el("textarea"); ta.id = "n-" + key; ta.placeholder = "Not (isteğe bağlı)"; ta.setAttribute("aria-label", m.ad + " notu");
+      ta.value = (durum[key] || {}).n || "";
+      ta.addEventListener("input", function () { durum[key] = durum[key] || {}; durum[key].n = ta.value; kaydet(); say(); });
+      t.appendChild(ta);
+      row.appendChild(shots); row.appendChild(t); sec.appendChild(row);
+    });
+    liste.appendChild(sec);
+  });
+
+  var ADI = { kalsin: "KALSIN", ekle: "EKLE", cikar: "ÇIKAR" };
+  function say() {
+    var c = { kalsin: 0, ekle: 0, cikar: 0 }, satir = [];
+    tum.forEach(function (x) {
+      var d = durum[x.key] || {};
+      if (d.k) c[d.k]++;
+      if (d.k || d.n) satir.push(x.key + " (" + x.m.id + ") " + x.m.ad + ": " + (d.k ? ADI[d.k] : "karar yok") + (d.n ? " - " + d.n.trim() : ""));
+    });
+    var n = c.kalsin + c.ekle + c.cikar;
+    document.getElementById("n-done").textContent = n; document.getElementById("n-all").textContent = tum.length;
+    ["kalsin", "ekle", "cikar"].forEach(function (k) { document.getElementById("n-" + k).textContent = c[k]; });
+    document.getElementById("fill").style.width = (100 * n / tum.length) + "%";
+    document.getElementById("ozet").value = satir.length ? satir.join("\n") : "Henüz karar yok.";
+  }
+  document.getElementById("kopyala").addEventListener("click", function () {
+    var t = document.getElementById("ozet"), ok = document.getElementById("kopyalandi");
+    function goster() { ok.hidden = false; setTimeout(function () { ok.hidden = true; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t.value).then(goster, function () { t.focus(); t.select(); });
+    } else { t.focus(); t.select(); }
+  });
+  document.getElementById("buyut").addEventListener("click", function (e) { e.currentTarget.close(); });
+  say();
+})();
+</script>
