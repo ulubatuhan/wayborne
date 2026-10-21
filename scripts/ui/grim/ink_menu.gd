@@ -13,11 +13,33 @@ const ROW_WIDTH: float = 420.0
 const REVEAL_SECONDS: float = 0.22
 
 var _rows: Array[Control] = []
+## Düz kip (ana menü taslağı): leke ve çentik yok, yalnızca renk geçişi.
+var _plain: bool = false
+var _font_size: int = GrimTheme.HEADING_SIZE + 2
+var _row_height: float = ROW_HEIGHT
+var _rest_color: Color = ArtPalette.GRIM_PARCHMENT
+var _hover_color: Color = ArtPalette.GRIM_AMBER
 var _hover: Array[float] = []
 var _target: Array[float] = []
 
 func setup(entries: Array) -> InkMenu:
 	add_theme_constant_override("separation", 2)
+	for i in entries.size():
+		var row := _make_row(String(entries[i]), i)
+		_rows.append(row)
+		_hover.append(0.0)
+		_target.append(0.0)
+		add_child(row)
+	return self
+
+## Kutusuz, lekesiz satırlar: gövde yazısı, üstüne gelince `hover_color`.
+func setup_plain(entries: Array, font_size: int, row_height: float, rest_color: Color, hover_color: Color) -> InkMenu:
+	_plain = true
+	_font_size = font_size
+	_row_height = row_height
+	_rest_color = rest_color
+	_hover_color = hover_color
+	add_theme_constant_override("separation", 0)
 	for i in entries.size():
 		var row := _make_row(String(entries[i]), i)
 		_rows.append(row)
@@ -53,12 +75,12 @@ func force_hover(index: int) -> void:
 
 func _make_row(text: String, index: int) -> Control:
 	var row := Control.new()
-	row.custom_minimum_size = Vector2(ROW_WIDTH, ROW_HEIGHT)
+	row.custom_minimum_size = Vector2(ROW_WIDTH, _row_height)
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	row.draw.connect(_draw_row.bind(row, index))
-	var label := GrimTheme.label(text, GrimTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true)
-	label.position = Vector2(44, 8)
+	var label := GrimTheme.label(text, _font_size, _rest_color, not _plain)
+	label.position = Vector2(0, 0) if _plain else Vector2(44, 8)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(label)
 	row.set_meta("label", label)
@@ -82,9 +104,8 @@ func _process(delta: float) -> void:
 func _draw_row(row: Control, index: int) -> void:
 	var reveal := blot_reveal(_hover[index])
 	var label: Label = row.get_meta("label")
-	label.add_theme_color_override("font_color",
-		ArtPalette.GRIM_PARCHMENT.lerp(ArtPalette.GRIM_AMBER, reveal))
-	if reveal <= 0.0:
+	label.add_theme_color_override("font_color", _rest_color.lerp(_hover_color, reveal))
+	if reveal <= 0.0 or _plain:
 		return
 	var tex := GrimTheme.texture("ink_blot.png")
 	if tex != null:

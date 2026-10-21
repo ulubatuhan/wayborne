@@ -146,6 +146,11 @@ const GRIM_AMBER: Color = Color(0.93, 0.66, 0.32)
 const GRIM_ASH: Color = Color(0.67, 0.65, 0.62)
 const GRIM_FROST: Color = Color(0.80, 0.88, 0.93)
 const GRIM_BILE: Color = Color(0.55, 0.58, 0.25)
+# Ana menü (taslak y_g16_menu_kamp): şeritsiz, yazı doğrudan gece göğünün
+# üstünde. Başlık ve seçili satır soluk altın, satırlar kemik, soy satırı kül.
+const MENU_TITLE_GOLD: Color = Color(0.86, 0.70, 0.34)
+const MENU_TEXT_BONE: Color = Color(0.88, 0.85, 0.78)
+const MENU_TEXT_DIM: Color = Color(0.62, 0.59, 0.54)
 
 # --- Gün evreleri: gökyüzü üstü/altı ve ışığın rengi ---
 ## Yol ve şehir aynı tabloyu okuyor, o yüzden bir sefer akşamüstü

@@ -36,7 +36,7 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 
 | # | Madde | Karar | Durum |
 |---|---|---|---|
-| K1 | A1 ana menü (y_g16_menu_kamp.png) | şerit yok, sahne tam ekran, sağda altın WAYBORNE (IM Fell SC), EB Garamond menü, soy satırı altta | sırada |
+| K1 | A1 ana menü (y_g16_menu_kamp.png) | şerit yok, sahne tam ekran, sağda altın WAYBORNE (IM Fell SC), EB Garamond menü, soy satırı altta | bitti: şerit, alt yazı ve fener kalktı; yolcular ateşten aydınlanıyor (firelit.gdshader); keçe başlık düzeldi (felt_cap) |
 | K2 | A2 karakter ekranı (y_96_karakter.png) | taslaktakini al | sırada |
 | K3 | A3 defter Düşenler (y_911_dusenler.png) | taslaktakini al | sırada |
 | K4 | A5 şehir kapıları | kulelerin altında kapıyla birleşen sur duvarı yok; düzelt | sırada |

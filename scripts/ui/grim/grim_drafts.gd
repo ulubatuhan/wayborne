@@ -232,20 +232,23 @@ const FIRE_POINT: Vector2 = Vector2(0.285, 0.735)
 ## boy resmin payı; ekran boyutu değişince `_place_traveller` yeniden oturtur.
 const CAMP_TRAVELLERS: Array = [
 	{"at": Vector2(0.206, 0.787), "height": 0.33, "gender": 1, "weight": 2, "skin": 1, "right": true,
-		"tint": Color(0.9, 0.74, 0.62),
-		"outfit": ["wool_pants", "short_boots", "linen_tunic", "wool_coat", "felt_hat"]},
+		"light": 1.0,
+		"outfit": ["wool_pants", "short_boots", "linen_tunic", "wool_coat", "felt_cap"]},
 	{"at": Vector2(0.388, 0.796), "height": 0.33, "gender": 0, "weight": 0, "skin": 0, "right": false,
-		"tint": Color(0.9, 0.74, 0.62),
+		"light": 1.0,
 		"outfit": ["long_skirt", "felt_shoes", "peasant_blouse", "head_veil"]},
 	{"at": Vector2(0.341, 0.748), "height": 0.27, "gender": 1, "weight": 0, "skin": 2, "right": false,
-		"tint": Color(0.55, 0.45, 0.4),
+		"light": 0.55,
 		"outfit": ["peasant_pants", "peasant_shoes", "peasant_shirt"]},
 ]
 const CRATE_ART: String = "res://data/assets/props/crate/body.png"
+const FIRELIT_SHADER: Shader = preload("res://scripts/ui/grim/firelit.gdshader")
 const SEATED_CLIP: String = "sit_box"
 ## Sandığın boyu oturanın boyunun bu payı; kalça sandığın kapağında.
 const CRATE_HEIGHT_SHARE: float = 0.26
 const CRATE_BACK_SHARE: float = 0.09
+## Ateşin ışığının eriştiği yarıçap, resmin boyunun payı.
+const FIRE_LIGHT_RADIUS: float = 0.34
 
 static func _camp_travellers() -> Array:
 	var out: Array = []
@@ -267,14 +270,22 @@ static func _camp_travellers() -> Array:
 		person.show_look("villager", 1.0, skin, outfit, PackedStringArray(), variant)
 		person.set_facing(1.0 if look["right"] else -1.0)
 		person.set_action(SEATED_CLIP)
-		person.set_tint(look["tint"])
+		var lit := ShaderMaterial.new()
+		lit.shader = FIRELIT_SHADER
+		lit.set_shader_parameter("strength", float(look["light"]))
+		person.set_figure_material(lit)
+		person.set_meta("light", lit)
 		person.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var crate := TextureRect.new()
 		crate.texture = crate_tex
 		crate.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		crate.stretch_mode = TextureRect.STRETCH_SCALE
 		crate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		crate.modulate = Color(look["tint"]).darkened(0.1)
+		# Sandık da ateşten aydınlanır, yolcudan biraz daha az (taslak: ışık × 0.8).
+		var crate_light := ShaderMaterial.new()
+		crate_light.shader = FIRELIT_SHADER
+		crate_light.set_shader_parameter("strength", float(look["light"]) * 0.8)
+		crate.material = crate_light
 		person.set_meta("look", look)
 		person.set_meta("crate", crate)
 		out.append(person)
@@ -294,6 +305,12 @@ static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) ->
 	person.size = Vector2(figure_h * 0.8, figure_h / 0.86)
 	person.position = feet - Vector2(person.size.x * 0.5, person.size.y)
 	(person as FigurePreview).refit()
+	# Işık ateşten yayılır: ateşe dönük yan sıcak, sırt karanlık.
+	var fire := offset + FIRE_POINT * img * k
+	var radius := img.y * k * FIRE_LIGHT_RADIUS
+	var lit: ShaderMaterial = person.get_meta("light")
+	lit.set_shader_parameter("fire", fire)
+	lit.set_shader_parameter("radius", radius)
 	var crate: TextureRect = person.get_meta("crate")
 	if crate != null and crate.texture != null:
 		var crate_h := figure_h * CRATE_HEIGHT_SHARE
@@ -301,6 +318,9 @@ static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) ->
 		var back := -1.0 if look["right"] else 1.0
 		crate.size = Vector2(crate_w, crate_h)
 		crate.position = Vector2(feet.x + back * figure_h * CRATE_BACK_SHARE - crate_w * 0.5, feet.y - crate_h + 4.0)
+		var crate_light: ShaderMaterial = crate.material
+		crate_light.set_shader_parameter("fire", fire)
+		crate_light.set_shader_parameter("radius", radius)
 
 static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> void:
 	if bg.texture == null:
@@ -311,62 +331,52 @@ static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> vo
 	var p: Vector2 = node.get_meta("image_point")
 	node.position = offset + p * img * k - node.size * 0.5
 
-## Sağ şerit (Wartales'in menü şeridi): koyu, sol kenarında pas demir bir
-## çizgi. Başlık, kervanın soy satırı (kitap animasyonunun yerine: adı ve
-## kaçıncı kuşak olduğu - oyunun asıl kaydı bu), sonra kutusuz menü.
-const LANTERN_EMBLEM: String = "res://data/assets/ui/grim/lantern_emblem.png"
+## Başlık ve menü (taslak `y_g16_menu_kamp.png`): şerit yok, kutu yok. Yazı
+## doğrudan kampın gece göğünün üstünde, sahnenin sağ yarısında: altın
+## WAYBORNE, altında kemik renkli satırlar, en altta kervanın soy satırı.
+## Konumlar 1920x1080 taslağın payları; ekran genişleyince sütun sağa kayar.
+const TITLE_COLUMN_X: float = 1180.0 / 1920.0
+const TITLE_Y: float = 300.0 / 1080.0
+const MENU_Y: float = 460.0 / 1080.0
+const LINEAGE_Y: float = 800.0 / 1080.0
+const TITLE_FONT_SIZE: int = 92
+const MENU_FONT_SIZE: int = 38
+const MENU_ROW_HEIGHT: float = 62.0
+const LINEAGE_FONT_SIZE: int = 24
 
 static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -> Control:
-	var strip := PanelContainer.new()
-	strip.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	strip.offset_left = -560
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.86)
-	box.border_color = Color(ArtPalette.GRIM_RUST, 0.9)
-	box.border_width_left = 2
-	box.content_margin_left = 64
-	box.content_margin_right = 40
-	box.content_margin_top = 120
-	box.shadow_color = Color(0, 0, 0, 0.7)
-	box.shadow_size = 40
-	strip.add_theme_stylebox_override("panel", box)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 6)
-	strip.add_child(col)
-	# Fener motifi (Y-G08): başlığın yanında küçük amblem; resim yoksa yalnız başlık.
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 14)
-	var emblem_tex := TextureLoader.load_any(LANTERN_EMBLEM)
-	if emblem_tex != null:
-		var emblem := TextureRect.new()
-		emblem.texture = emblem_tex
-		emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		emblem.custom_minimum_size = Vector2(72, 96)
-		head.add_child(emblem)
-	head.add_child(GrimTheme.display_label("Wayborne", 96, ArtPalette.GRIM_PARCHMENT))
-	col.add_child(head)
-	var sub := GrimTheme.label(tr_key("UI_GRIM_TITLE_SUB"), GrimTheme.BODY_SIZE + 1, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.95))
-	sub.autowrap_mode = TextServer.AUTOWRAP_WORD
-	col.add_child(sub)
-	if not lineage.is_empty():
-		var rule := ColorRect.new()
-		rule.color = Color(ArtPalette.GRIM_RUST, 0.8)
-		rule.custom_minimum_size = Vector2(0, 1)
-		col.add_child(rule)
-		col.add_child(GrimTheme.label(tr_key("UI_GRIM_LINEAGE_LINE") % [String(lineage.get("name", "")),
-			int(lineage.get("generation", 1)), int(lineage.get("day", 1))], GrimTheme.BODY_SIZE, ArtPalette.GRIM_AMBER, true))
-	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 40)
-	col.add_child(gap)
+	var column := Control.new()
+	column.set_anchors_preset(Control.PRESET_FULL_RECT)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var title := GrimTheme.label("WAYBORNE", TITLE_FONT_SIZE, ArtPalette.MENU_TITLE_GOLD, true)
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pin(title, TITLE_COLUMN_X, TITLE_Y - 0.012)
+	column.add_child(title)
 	var entries: Array = []
 	for key in entry_keys:
 		entries.append(tr_key(String(key)))
-	var menu := InkMenu.new().setup(entries)
-	col.add_child(menu)
+	var menu := InkMenu.new().setup_plain(entries, MENU_FONT_SIZE, MENU_ROW_HEIGHT,
+		ArtPalette.MENU_TEXT_BONE, ArtPalette.MENU_TITLE_GOLD)
+	_pin(menu, TITLE_COLUMN_X + 10.0 / 1920.0, MENU_Y - 0.008)
+	column.add_child(menu)
 	menu.force_hover(hovered)
-	strip.set_meta("menu", menu)
-	return strip
+	if not lineage.is_empty():
+		var line := GrimTheme.label(tr_key("UI_GRIM_LINEAGE_LINE") % [String(lineage.get("name", "")),
+			int(lineage.get("generation", 1)), int(lineage.get("day", 1))], LINEAGE_FONT_SIZE, ArtPalette.MENU_TEXT_DIM)
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_pin(line, TITLE_COLUMN_X + 10.0 / 1920.0, LINEAGE_Y)
+		column.add_child(line)
+	column.set_meta("menu", menu)
+	return column
+
+## Bir düğümün sol üst köşesini ekranın payına çiviler (anchor, offset sıfır).
+static func _pin(node: Control, x_share: float, y_share: float) -> void:
+	node.anchor_left = x_share
+	node.anchor_right = x_share
+	node.anchor_top = y_share
+	node.anchor_bottom = y_share
+	node.grow_horizontal = Control.GROW_DIRECTION_END
+	node.grow_vertical = Control.GROW_DIRECTION_END
 
 # ------------------------------------------------------------------ ticaret
 

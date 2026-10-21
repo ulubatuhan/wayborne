@@ -57,6 +57,14 @@ func set_facing(direction: float) -> void:
 func set_tint(tint: Color) -> void:
 	_figure.set_tint(tint)
 
+## Figürün kendi çizimine bir gölgelendirici (ana menüde ateş ışığı).
+func set_figure_material(material: Material) -> void:
+	_figure.material = material
+
+## Figürün kendi alanı: gölgelendirici yerel koordinatla çalışır.
+func get_figure_size() -> Vector2:
+	return _figure.size
+
 ## Figür kareleri 320 px tuvalde render ediliyor; duruşun yakın plan kümesi
 ## (Y-G12) 3 katı. Önizleme yakın plan kümesini çiziyor; yine de figür bu boyu
 ## aşmaz (9.6 denetimi: 620 px'te normal kareler lekeye dönmüştü; yakın plan

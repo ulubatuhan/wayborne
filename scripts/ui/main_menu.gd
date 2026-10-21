@@ -136,6 +136,8 @@ func _show_menu_immediately() -> void:
 	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_strip.modulate.a = 1.0
 	_set_menu_mouse_ignore(false)
+	# Taslakta ilk satır seçili açılıyor: klavye ve kol hemen bir yerden başlasın.
+	_menu.move_focus(1)
 
 ## Başlık evresinde menü satırları da fareyi görmemeli, yoksa tık satırın
 ## üstünde yutulur ve geçişi başlatmaz (tuş basımı bu yoldan hiç geçmiyor).
@@ -186,6 +188,7 @@ func _begin_transition() -> void:
 	fade_out.tween_callback(prompt.queue_free)
 
 	_set_menu_mouse_ignore(false)
+	_menu.move_focus(1)
 	var home_x := _strip.position.x
 	_strip.position.x = home_x + REVEAL_SLIDE_PX
 	var reveal := create_tween().set_parallel(true)
