@@ -76,6 +76,12 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 		mat.set_shader_parameter("mood", int(model.get("mood", MOOD_NORMAL)))
 		_bg.material = mat
 	add_child(_bg)
+	# Meydanın halkı (Y-G10T): gece az, akşam ve gündüz biraz daha.
+	var hour := float(model.get("hour", 22.0))
+	var phase := JourneyClock.phase_for_hour(hour)
+	var night := phase == JourneyClock.Phase.NIGHT
+	var lantern := night or phase == JourneyClock.Phase.EVENING
+	add_child(TownsfolkLayer.new().setup(_bg, night, "%s|%d" % [city_id, int(model.get("day", 1))], lantern))
 	var smoke := SmokeWisps.new()
 	add_child(smoke)
 	var ash := AshFall.new()

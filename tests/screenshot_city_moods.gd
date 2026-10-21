@@ -27,7 +27,7 @@ func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	session.current_location_id = String(args[0]) if not args.is_empty() else "vastrevar"
 	var city_map: Script = load("res://scripts/world/city_map.gd")
-	for hour in [12.0, 22.0]:
+	for hour in [12.0, 18.5, 22.0]:
 		session.last_clock_hour = hour
 		for mood in MOOD_NAMES.size():
 			var front := CityFront.new()
