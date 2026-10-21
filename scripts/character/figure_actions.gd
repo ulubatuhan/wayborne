@@ -247,10 +247,13 @@ const CLIPS: Dictionary = {
 	# alnına siper olduğu, gövdenin hafifçe geriye kalktığı bir duruş - yolda
 	# bir işaret belirince en yakındaki ileri bakar. Açılar 3B kare verisinden
 	# hesaplandı (joints.json: omuz-dirsek 29.5, dirsek-bilek 31 px); 118/238
-	# bileği başın üstüne koyuyordu, 92/206 alnın önüne.
+	# bileği başın üstüne koyuyordu, 92/206 da çubuk figürde elin başın tepesine
+	# çıkıp "başını kaşıyor" gibi okunmasına yol açtı. 64/148: dirsek ileride,
+	# el göz hizasında ve yüzün önünde - alna siper (çubuk figür karşılaştırması
+	# 2026-10-21, tests/screenshot_poses.gd).
 	"look_ahead": {"frames": 1, "keys": [[0.0, {
 		"lean": -4.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
-		"arm_f": [92.0, 206.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
+		"arm_f": [64.0, 148.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
 	}]]},
 	# Dur temposunda yorgun bekleyiş: gövde öne çökük, dizler hafif kırık,
 	# kollar sarkık ve biraz önde.
