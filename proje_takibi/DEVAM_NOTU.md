@@ -30,10 +30,26 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | B4 | 12.2 yol görünümü büyük revizyon, 9.10 biyom arka planları | sırada |
 | B5 | Y-G11T masa şablonu taslağı, Y-G13 beş ana görsel | sırada |
 
-**Durum (2026-10-21 07:17):** iş kullanıcıda. Önceki oturumun işleri denetlendi (`OYUN_DENETIMI.md`) ve karar
-defterine kondu (`KARAR_SAYFASI.html`, https://claude.ai/artifact/7QXy9Ec8fcFP5N7aDgsXxD). Kullanıcı her madde için
-Kalsın/Ekle/Çıkar seçip "Kararlarım" metnini gönderecek. O gelene kadar B2-B5'e ve karar defterindeki maddelere
-dokunma; zamanlanmış görev tetiklenirse yalnızca bu notu kontrol edip dur.
+## Kullanıcı kararları (2026-10-21, karar defteri) - İŞ SIRASI
+
+"Taslaktakini al" = taslak görseli oyunda birebir kurulacak. Her madde bitince ekran görüntüsüyle taslakla karşılaştır.
+
+| # | Madde | Karar | Durum |
+|---|---|---|---|
+| K1 | A1 ana menü (y_g16_menu_kamp.png) | şerit yok, sahne tam ekran, sağda altın WAYBORNE (IM Fell SC), EB Garamond menü, soy satırı altta | sırada |
+| K2 | A2 karakter ekranı (y_96_karakter.png) | taslaktakini al | sırada |
+| K3 | A3 defter Düşenler (y_911_dusenler.png) | taslaktakini al | sırada |
+| K4 | A5 şehir kapıları | kulelerin altında kapıyla birleşen sur duvarı yok; düzelt | sırada |
+| K5 | A6 + C3 yol ışığı/biyom (y_122e_yol_isik.png) | taslaktakini al | sırada |
+| K6 | B1 şehir durum varyantları (y_93_sehir_varyant_vastrevar.png) | taslaktakini al | sırada |
+| K7 | B2 kadro kartı (y_97_kadro_karti.png) | taslaktakini al | sırada |
+| K8 | C1 UI kiti v2 (stash "B2 UI kiti denemesi", y_91_ui_kit*.png) | test ederek ekle | sırada |
+| K9 | C2 savaş ekranı (y_98_savas.png) | taslaktakini al; kanama/kritik vb. efektler OLMASIN | sırada |
+| K10 | D1 pazar | oyundaki kalsın; diğer vagonlar, vagon ve kullanıcı envanterleri açılır-kapanır sekme olarak eklensin | sırada |
+| K11 | D2 yol HUD | oyundaki kalsın, taslak y_99_yol_hud.png silinsin | sırada |
+| K12 | D3 şehirde insanlar (y_g10t_sehir_halk_vastrevar*.png) | taslaktakini al | sırada |
+
+KALSIN (dokunma): A4 kilise, A7 gün evreleri, A8 taverna, A9 sohbet, A10 terazi, A11, A12, A13, B3, C4 (oyundaki masa), C5.
 
 Kullanıcıdan karar bekleyenler (bunlara dokunma, sorma): 2.3 (CityView silme onayı), 6.1 (LFS), Y-G08, Y-H01, N31f.
 Lore'a bağlı olanlar (Y-E01/E02/E06, Y-A07) yazılmaz.

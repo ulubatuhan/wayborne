@@ -296,27 +296,6 @@ def combat():
     save(base, "y_98_savas.png")
 
 
-# ------------------------------------------------------------------ 9.9
-def hud():
-    base = Image.open(os.path.join(HERE, "y_122e_yol_isik.png")).convert("RGB")
-    base = base.crop((504, 52, 984, 322)).resize((W, H), Image.LANCZOS).convert("RGBA")
-    d = ImageDraw.Draw(base)
-    stamp(base, "taslak 9.9 - ince göstergeler")
-    gauges = [("r4a_morale.png", "Moral", 0.72, MOSS), ("r4b_stress.png", "Stres", 0.41, GOLD),
-              ("r4_vial.png", "Takat", 0.58, (120, 150, 190)), ("r7c_smoke.png", "Tehlike", 0.38, BLOOD)]
-    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(layer).rounded_rectangle((1440, 30, 1890, 270), 6, fill=(14, 12, 12, 200), outline=(*GOLD_DIM, 160))
-    base.alpha_composite(layer)
-    for i, (ic, name, v, col) in enumerate(gauges):
-        y = 52 + i * 54
-        base.alpha_composite(icon(ic, 36), (1460, y))
-        d.text((1506, y + 2), name, font=body(22), fill=BONE)
-        bar(d, 1620, y + 14, 200, v, col, h=6, notches=4)
-        d.text((1832, y + 2), str(int(v * 100)), font=body(22), fill=BONE)
-    d.text((1460, 268 - 24), "çentik = olay eşiği", font=body(16), fill=BONE_DIM)
-    save(base, "y_99_yol_hud.png")
-
-
 # ------------------------------------------------------------------ 9.11
 def fallen():
     book = Image.open(os.path.join(WB, "l1_ledger.jpg")).convert("RGB")
@@ -353,7 +332,7 @@ def fallen():
     save(base, "y_911_dusenler.png")
 
 
-JOBS = {"94": venue, "95": market_b, "96": character, "97": roster, "98": combat, "99": hud, "911": fallen}
+JOBS = {"94": venue, "95": market_b, "96": character, "97": roster, "98": combat, "911": fallen}
 
 if __name__ == "__main__":
     which = sys.argv[1] if len(sys.argv) > 1 else "hepsi"
