@@ -118,6 +118,19 @@ func _init() -> void:
 	await _settle()
 	_save("07_uzak.png")
 	screen.set("_zoom_target", 1.0)
+	await _settle()
+
+	# Savaş yolun yerine, ekranın tamamında (taslak 9.8 + Y-G05): HUD gizli,
+	# üstte tur madalyonu, altta iki panel.
+	screen.call("_open_combat", 60, "wildlife")
+	await _settle()
+	var pre: Node = screen.get("_pre_combat_panel")
+	if pre != null:
+		screen.call("_on_pre_combat_confirmed", (get_root().get_node("GameState").call("get_session") as GameSession).get_party())
+		pre.queue_free()
+	for _frame in 20:
+		await process_frame
+	_save("08_savas.png")
 
 	quit()
 

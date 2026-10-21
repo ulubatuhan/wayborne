@@ -23,7 +23,7 @@ extends SceneTree
 ## koşu sonunda basılır.
 
 const SHOT_DIR: String = "user://combat_shots"
-const VIEW_SIZE: Vector2i = Vector2i(1600, 900)
+const VIEW_SIZE: Vector2i = Vector2i(1920, 1080)
 const SEED_VALUE: int = 4242
 
 func _init() -> void:

@@ -571,10 +571,19 @@ const CONTROL_PANEL_SHARE: float = 0.27
 
 func _layout_panel() -> void:
 	var h := get_viewport_rect().size.y
-	_world.offset_top = -h * SKY_CROP_SHARE
-	_world.offset_bottom = -h * SKY_CROP_SHARE
+	# Savaş bütün ekranı alıyor (taslak 9.8 + Y-G05): üstte tur madalyonu, altta
+	# iki panel. Gökyüzü kırpması ve yolun kontrol paneli o sırada yok.
+	var crop := 0.0 if _combat_holder != null and _combat_holder.visible else h * SKY_CROP_SHARE
+	_world.offset_top = -crop
+	_world.offset_bottom = -crop
 	if _control_panel != null:
 		_control_panel.custom_minimum_size = Vector2(0, h * CONTROL_PANEL_SHARE)
+
+## Savaş sırasında yolun HUD'u (üst şerit, kontrol paneli, alt şerit) gizli,
+## savaş paneli ekranın tamamında; savaş bitince her şey yerine döner.
+func _set_combat_view(on: bool) -> void:
+	_hud.visible = not on
+	_layout_panel()
 
 ## Panelin okuduğu yol hâli (bkz. RoadControlPanel). Yalnızca okunur.
 func _panel_state() -> Dictionary:
@@ -1586,6 +1595,7 @@ func _init_journey() -> void:
 	NodeUtil.clear_children(_haggle_holder)
 	NodeUtil.clear_children(_combat_holder)
 	_combat_holder.visible = false
+	_set_combat_view(false)
 	_band.visible = true
 	NodeUtil.clear_children(_recruit_holder)
 	NodeUtil.clear_children(_arrival_panel)
@@ -3452,6 +3462,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	# ekranın altına eklenen ayrı bir blok gibi duruyordu.
 	_band.visible = false
 	_combat_holder.visible = true
+	_set_combat_view(true)
 
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
@@ -3573,6 +3584,7 @@ func _on_combat_finished(
 
 	NodeUtil.clear_children(_combat_holder)
 	_combat_holder.visible = false
+	_set_combat_view(false)
 	_band.visible = true
 	_set_journey_controls_enabled(true)
 	_refresh_state()

@@ -462,6 +462,13 @@ wayborne/
     not zero either, or a fresh character bleeds on every hit and bleed
     stops being a choice and becomes a tax on every attack.
 
+- **The combat screen is the approved draft (9.8 + Y-G05, `y_98_savas.png`).** It takes the whole road screen (the HUD
+  and control panel hide, `road_journey._set_combat_view`): a round medallion with the round in Roman numerals and this
+  round's order under it, the stage, and two panels - the active person's skill cards (name, hit chance against the
+  focused enemy from the engine's own formula, or the lock reason; launch/target pips underneath) with swap, consumables
+  and retreat wrapping below, and the focused unit (hovered, else the selected skill's first target, else the enemy
+  front): health, armour, statuses, temper (`BEHAVIOR_KEYS`), then the log. The draft's crit seal was left out on the
+  user's word ("kanama, kritik vs efektler olmasın").
 - **Magic is the existing vocabulary in a new colour.** Seven first-tier
   D&D spells (`SkillCatalog._build_spells`) each sit on a mechanic that
   already existed: Fire Bolt and Burning Hands (an `ADJACENT` area, weaker

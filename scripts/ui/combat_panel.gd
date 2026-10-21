@@ -61,10 +61,22 @@ const PIP_HOLLOW_FILE: String = "k5_pip_hollow.png"
 ## Alan ve kaydırma işaretleri (K7) yeteneğin not satırının başında.
 const AREA_GLYPH_HEIGHT: float = 16.0
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
-const SKILL_CARD_WIDTH: float = 156.0
+## Taslağın yetenek kartı (1080p): 200x110, adı büyük, altında isabet.
+const SKILL_CARD_WIDTH: float = 200.0
+const SKILL_CARD_HEIGHT: float = 112.0
+const MEDAL_SIZE: float = 104.0
+const BOTTOM_PANEL_HEIGHT: float = 250.0
+## Düşmanın huyu (CombatUnit.behavior, Y-C08) sağ panelde bir cümle.
+const BEHAVIOR_KEYS: Dictionary = {
+	"": "UI_COMBAT_BEHAVIOR_WEAKEST",
+	"leader_hunter": "UI_COMBAT_BEHAVIOR_LEADER",
+	"pack": "UI_COMBAT_BEHAVIOR_PACK",
+	"guard": "UI_COMBAT_BEHAVIOR_GUARD",
+	"beast": "UI_COMBAT_BEHAVIOR_BEAST",
+}
 ## Savaş alanının en az yüksekliği. İlk denemede alan 900 pikselin
 ## üst 200'ünde ince bir şeritti; savaş alanı ekranın kendisi olmalı.
-const STAGE_HEIGHT: float = 380.0
+const STAGE_HEIGHT: float = 480.0
 const TARGET_MARK_COLOR: Color = Color(0.90, 0.45, 0.40)
 
 var _encounter: CombatEncounter
@@ -72,6 +84,11 @@ var _selected_skill: CombatSkill
 var _built: bool = false
 
 var _round_label: Label
+var _medal: RoundMedal
+var _target_heading: Label
+var _target_bar: HpLine
+var _target_stats: Label
+var _target_behavior: Label
 var _order_strip: HBoxContainer
 var _fx_layer: CombatFxLayer
 var _player_row: HBoxContainer
@@ -79,7 +96,7 @@ var _enemy_row: HBoxContainer
 var _active_label: Label
 var _hint_label: Label
 var _skill_row: HBoxContainer
-var _extra_row: HBoxContainer
+var _extra_row: HFlowContainer
 var _result_label: Label
 var _continue_button: Button
 var _log_scroll: ScrollContainer
@@ -183,12 +200,18 @@ func _apply_muhafiz_opening_bonus(party: Array[CharacterData], units: Array[Comb
 	for unit in units:
 		unit.apply_modifier("accuracy", bonus, 1)
 
+func _draw() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), ArtPalette.GRIM_CHARCOAL)
+
 # --- Kurulum ---
 
 func _ensure_built() -> void:
 	if _built:
 		return
 	_built = true
+	# Savaş ekranın tamamı (yolun HUD'u o sırada gizli): kendi koyu zemini var.
+	size_flags_vertical = Control.SIZE_EXPAND_FILL
+	resized.connect(queue_redraw)
 
 	add_theme_constant_override("separation", 6)
 	_build_header()
@@ -196,21 +219,30 @@ func _ensure_built() -> void:
 	_build_action_area()
 	_build_log()
 
+## Üstte ortada tur madalyonu (taslak 9.8 + Y-G05, y_98_savas.png): altın
+## halkada Roma rakamıyla tur, altında "N. tur" ve küçük harflerle bu turun
+## sırası. Sıra hız zarıyla her tur değişiyor (CombatEncounter.SPEED_DIE),
+## o yüzden kalıyor; taslakta yalnız madalyon vardı.
 func _build_header() -> void:
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 12)
-
+	var header := VBoxContainer.new()
+	header.add_theme_constant_override("separation", 2)
+	header.alignment = BoxContainer.ALIGNMENT_CENTER
+	var top := Control.new()
+	top.custom_minimum_size = Vector2(0, 14)
+	header.add_child(top)
+	_medal = RoundMedal.new()
+	_medal.custom_minimum_size = Vector2(MEDAL_SIZE, MEDAL_SIZE)
+	_medal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	header.add_child(_medal)
 	_round_label = Label.new()
-	_round_label.custom_minimum_size = Vector2(90.0, 0.0)
+	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_round_label.add_theme_font_size_override("font_size", 22)
+	_round_label.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_BONE)
 	header.add_child(_round_label)
-
-	# Tur sırası şeridi: hız zarı round başına sırayı değiştirdiği için
-	# artık gerçekten bilgi taşıyor (bkz. CombatEncounter.SPEED_DIE).
-	# Sabit sırada bunu göstermenin bir anlamı yoktu.
 	_order_strip = HBoxContainer.new()
-	_order_strip.add_theme_constant_override("separation", 4)
+	_order_strip.alignment = BoxContainer.ALIGNMENT_CENTER
+	_order_strip.add_theme_constant_override("separation", 10)
 	header.add_child(_order_strip)
-
 	add_child(header)
 
 ## İki karşılıklı saf. Oyuncu tarafı ters sırada diziliyor: 1. mevki
@@ -295,67 +327,121 @@ func _build_field() -> void:
 	_fx_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(_fx_layer)
 
+## Altta iki panel (taslak): solda sırası gelen kişi ve yetenek kartları,
+## altında mevki değişimi, sargı/iksir, geri çekilme; sağda hedef - üstüne
+## gelinen ya da seçili yeteneğin ilk hedefi, yoksa düşmanın ön safı: canı,
+## zırhı, durumları, huyu - ve altında savaşın kaydı.
 func _build_action_area() -> void:
-	_active_label = Label.new()
-	add_child(_active_label)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 40)
+	margin.add_theme_constant_override("margin_right", 40)
+	margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(margin)
+	var bottom := HBoxContainer.new()
+	bottom.add_theme_constant_override("separation", 40)
+	margin.add_child(bottom)
 
+	var left := _bottom_panel()
+	bottom.add_child(left)
+	var left_col: VBoxContainer = left.get_child(0)
+	_active_label = _panel_heading()
+	left_col.add_child(_active_label)
+	left_col.add_child(_panel_rule())
+	_skill_row = HBoxContainer.new()
+	_skill_row.add_theme_constant_override("separation", 14)
+	left_col.add_child(_skill_row)
 	_hint_label = Label.new()
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_hint_label.modulate = Color(0.72, 0.70, 0.64)
-	add_child(_hint_label)
-
-	_skill_row = HBoxContainer.new()
-	_skill_row.add_theme_constant_override("separation", 6)
-	add_child(_skill_row)
-
-	_extra_row = HBoxContainer.new()
-	_extra_row.add_theme_constant_override("separation", 6)
-	add_child(_extra_row)
-
+	_hint_label.add_theme_font_size_override("font_size", 16)
+	_hint_label.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM)
+	left_col.add_child(_hint_label)
+	# Satır kırılıyor: mevki değişimi ve geri çekilme düğmeleri bir arada
+	# sol paneli genişletip hedef panelini eziyordu.
+	_extra_row = HFlowContainer.new()
+	_extra_row.add_theme_constant_override("h_separation", 6)
+	_extra_row.add_theme_constant_override("v_separation", 6)
+	left_col.add_child(_extra_row)
 	_result_label = Label.new()
 	_result_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	add_child(_result_label)
-
+	_result_label.add_theme_font_size_override("font_size", 22)
+	left_col.add_child(_result_label)
 	_continue_button = Button.new()
 	_continue_button.text = tr("UI_COMBAT_CONTINUE")
 	_continue_button.visible = false
+	_continue_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_continue_button.custom_minimum_size = Vector2(220, 0)
 	_continue_button.pressed.connect(_on_continue_pressed)
-	add_child(_continue_button)
+	left_col.add_child(_continue_button)
 
-func _build_log() -> void:
-	# Sahne sabit yükseklikte (STAGE_HEIGHT), yetenek düğmeleri de kendi
-	# içeriği kadar - altlarında ekranın neredeyse yarısı boş siyah
-	# kalıyordu (ölçüldü: 1920x1080'de ~45%). ScrollContainer'ın kendi
-	# hiç çizilen zemini olmadığı için yalnızca `size_flags_vertical`
-	# büyütmek görsel olarak hiçbir şeyi değiştirmiyordu - genişleyen alan
-	# hâlâ boş siyah okunuyordu. Kayıt artık HUD_BAR temalı bir panelin
-	# içinde: hem kalan boşluğu dolduruyor hem de "burası kaydın olduğu
-	# yer" diyen görünür bir zemin taşıyor.
-	var log_panel := PanelContainer.new()
-	# HUD_BAR (bkz. WaybookTheme) dünyanın kendi renkli zemini üstünde
-	# okunmak üzere neredeyse siyah boyanmış - savaş sahnesinin zaten
-	# neredeyse siyah arka planında tamamen kayboluyordu. Sahnenin kendi
-	# kart çerçevesiyle (`stage_style`, yukarıda) aynı aileden, biraz
-	# daha açık bir zemin kullanılıyor.
-	var log_style := StyleBoxFlat.new()
-	log_style.bg_color = Color(0.12, 0.11, 0.10, 0.55)
-	log_style.border_color = Color(0.30, 0.25, 0.18, 0.8)
-	log_style.set_border_width_all(1)
-	log_style.content_margin_left = 8
-	log_style.content_margin_right = 8
-	log_style.content_margin_top = 6
-	log_style.content_margin_bottom = 6
-	log_panel.add_theme_stylebox_override("panel", log_style)
-	log_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(log_panel)
-
+	var right := _bottom_panel()
+	bottom.add_child(right)
+	var right_col: VBoxContainer = right.get_child(0)
+	_target_heading = _panel_heading()
+	right_col.add_child(_target_heading)
+	right_col.add_child(_panel_rule())
+	_target_bar = HpLine.new()
+	_target_bar.custom_minimum_size = Vector2(0, 12)
+	right_col.add_child(_target_bar)
+	_target_stats = Label.new()
+	_target_stats.add_theme_font_size_override("font_size", 22)
+	_target_stats.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_BONE)
+	right_col.add_child(_target_stats)
+	_target_behavior = Label.new()
+	_target_behavior.add_theme_font_size_override("font_size", 18)
+	_target_behavior.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM)
+	right_col.add_child(_target_behavior)
 	_log_scroll = ScrollContainer.new()
-	_log_scroll.custom_minimum_size = Vector2(0, 96)
-	log_panel.add_child(_log_scroll)
-
+	_log_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_log_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_log_scroll.custom_minimum_size = Vector2(0, 60)
+	right_col.add_child(_log_scroll)
 	_log_list = VBoxContainer.new()
 	_log_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_log_scroll.add_child(_log_list)
+	var foot := Control.new()
+	foot.custom_minimum_size = Vector2(0, 16)
+	add_child(foot)
+
+## Kayıt sağ panelin altında (bkz. `_build_action_area`); ayrı bir kutu yok.
+func _build_log() -> void:
+	pass
+
+func _bottom_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.92)
+	box.border_color = Color(ArtPalette.MENU_TITLE_GOLD, 0.45)
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(2)
+	box.content_margin_left = 24
+	box.content_margin_right = 24
+	box.content_margin_top = 14
+	box.content_margin_bottom = 14
+	panel.add_theme_stylebox_override("panel", box)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.custom_minimum_size = Vector2(0, BOTTOM_PANEL_HEIGHT)
+	# İki panel eşit: içerik genişliği paneli büyütmesin.
+	panel.clip_contents = true
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	panel.add_child(col)
+	return panel
+
+func _panel_heading() -> Label:
+	var heading := Label.new()
+	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_size_override("font_size", 30)
+	heading.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
+	heading.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	return heading
+
+func _panel_rule() -> ColorRect:
+	var rule := ColorRect.new()
+	rule.color = Color(ArtPalette.MENU_TITLE_GOLD, 0.45)
+	rule.custom_minimum_size = Vector2(0, 1)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rule
 
 # --- Tazeleme ---
 
@@ -367,6 +453,7 @@ func _refresh() -> void:
 	_refresh_side(_enemy_row, _encounter.enemy_units, false)
 	_fit_row_separation.call_deferred()
 	_refresh_actions()
+	_refresh_target()
 	_spawn_hp_numbers()
 	_animate(Time.get_ticks_msec())
 
@@ -388,6 +475,7 @@ func _fit_row_separation() -> void:
 
 func _refresh_header() -> void:
 	_round_label.text = tr("UI_COMBAT_ROUND") % _encounter.round_number
+	_medal.set_round(_encounter.round_number)
 	NodeUtil.clear_children(_order_strip)
 	if _encounter.is_over():
 		return
@@ -400,7 +488,7 @@ func _refresh_header() -> void:
 func _build_order_chip(unit: CombatUnit, is_active: bool) -> Label:
 	var chip := Label.new()
 	chip.text = unit.display_name
-	chip.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
+	chip.add_theme_font_size_override("font_size", 15)
 	if is_active:
 		chip.modulate = CombatUnitSlot.ACTIVE_BORDER
 	elif unit.is_player_side:
@@ -431,6 +519,7 @@ func _refresh_side(row: HBoxContainer, units: Array[CombatUnit], reversed_order:
 		row.add_child(slot)
 		slot.bind(unit, unit == active and not _encounter.is_over(), targets.has(unit))
 		slot.clicked.connect(_on_unit_clicked)
+		slot.mouse_entered.connect(_on_unit_hovered.bind(unit))
 		_slot_by_unit[unit] = slot
 		_apply_pending_bark(slot, unit)
 		_apply_pending_animation(slot, unit)
@@ -778,9 +867,11 @@ func _refresh_actions() -> void:
 		return
 
 	var unit := _encounter.get_active_unit()
-	_active_label.text = tr("UI_COMBAT_ACTIVE") % [
+	_active_label.text = _unit_title(unit)
+	_active_label.tooltip_text = tr("UI_COMBAT_ACTIVE") % [
 		unit.display_name, unit.position, unit.get_effective_accuracy(), unit.get_effective_protection()
 	]
+	_active_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	if _selected_skill != null:
 		_hint_label.text = tr("UI_COMBAT_HINT_PICK_TARGET") % _selected_skill.display_name
 	else:
@@ -839,51 +930,139 @@ func _retreat_button(key: String, kind: String, unit: CombatUnit) -> Button:
 			_refresh())
 	return button
 
-## Bir yetenek kartı: adı, iki mevki belirteci satırı ve kilitliyse
-## sebebi. Kilitli yetenek gizlenmez - oyuncu mevki kilidini böyle
-## öğrenir (bkz. olay ekranındaki kilitli seçenekler).
+## Bir yetenek kartı (taslak): adı ve altında hedefe isabet şansı - kilitliyse
+## sebebi. Altında iki küçük mevki belirteci satırı: nereden kullanılır, kime
+## erişir. Kilitli yetenek gizlenmez - oyuncu mevki kilidini böyle öğrenir
+## (bkz. olay ekranındaki kilitli seçenekler).
 func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
-	var card := VBoxContainer.new()
-	card.add_theme_constant_override("separation", 1)
-	# Eşit genişlik: ilk görüntüde kartlar ad uzunluğuna göre farklı
-	# genişlikteydi ve satır tırtıklı duruyordu.
-	card.custom_minimum_size = Vector2(SKILL_CARD_WIDTH, 0.0)
-
-	var button := Button.new()
-	button.text = skill.display_name
-	button.tooltip_text = skill.description
-	button.toggle_mode = true
-	button.button_pressed = skill == _selected_skill
-
+	var card := Button.new()
+	card.toggle_mode = true
+	card.button_pressed = skill == _selected_skill
+	card.focus_mode = Control.FOCUS_NONE
+	card.custom_minimum_size = Vector2(SKILL_CARD_WIDTH, SKILL_CARD_HEIGHT)
+	card.tooltip_text = skill.description
 	var reason := unit.get_skill_block_reason(skill)
 	if reason.is_empty():
-		button.pressed.connect(_on_skill_pressed.bind(skill))
+		card.pressed.connect(_on_skill_pressed.bind(skill))
 	else:
-		# `modulate` düğmenin dokusunu ve yazısını birlikte karartıp sebebi
-		# ~2.8:1'e düşürüyordu; `disabled = true` temanın kendi ölçülmüş
-		# kontrastını (font_disabled_color) zaten sağlıyor.
-		button.disabled = true
-		button.tooltip_text = "%s\n%s" % [skill.description, reason]
-	card.add_child(button)
-
-	card.add_child(_build_mark_row(tr("UI_COMBAT_MARK_LAUNCH"), skill.usable_positions, LAUNCH_COLOR))
-	card.add_child(_build_mark_row(tr("UI_COMBAT_MARK_TARGET"), skill.target_positions, TARGET_MARK_COLOR))
-
-	# Yeteneğin "ne yaptığı" yalnızca adında yazmamalı: alan genişliği,
-	# mevki kaydırması ve durum efekti oyuncunun kararını değiştiren
-	# şeyler. Görünmeyen bir etki, bir mekaniğin hiç olmaması gibidir.
+		card.disabled = true
+		card.tooltip_text = "%s\n%s" % [skill.description, reason]
+	var col := VBoxContainer.new()
+	col.set_anchors_preset(Control.PRESET_FULL_RECT)
+	col.offset_left = 14
+	col.offset_top = 10
+	col.offset_right = -10
+	col.offset_bottom = -8
+	col.add_theme_constant_override("separation", 2)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(col)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 6)
+	col.add_child(name_row)
+	var name_label := Label.new()
+	name_label.text = skill.display_name
+	name_label.add_theme_font_size_override("font_size", 23)
+	name_label.add_theme_color_override("font_color",
+		ArtPalette.MENU_TEXT_DIM if not reason.is_empty() else ArtPalette.MENU_TEXT_BONE)
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(name_label)
+	# Alan/itme işaretleri adın yanında: belirteç satırının sonuna sığmıyordu.
 	var glyphs := _skill_glyphs(skill)
 	if glyphs.get_child_count() > 0:
-		card.add_child(glyphs)
-
+		glyphs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		name_row.add_child(glyphs)
+	else:
+		glyphs.free()
+	var line := Label.new()
+	line.text = reason if not reason.is_empty() else _skill_line(unit, skill)
+	line.add_theme_font_size_override("font_size", 16)
+	line.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM)
+	line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(line)
+	var marks := HBoxContainer.new()
+	marks.add_theme_constant_override("separation", 10)
+	marks.add_child(_build_mark_row(tr("UI_COMBAT_MARK_LAUNCH"), skill.usable_positions, LAUNCH_COLOR))
+	marks.add_child(_build_mark_row(tr("UI_COMBAT_MARK_TARGET"), skill.target_positions, TARGET_MARK_COLOR))
+	col.add_child(marks)
 	var notes := _skill_notes(skill)
 	if not notes.is_empty():
-		var note := Label.new()
-		note.text = " · ".join(notes)
-		note.autowrap_mode = TextServer.AUTOWRAP_WORD
-		note.modulate = ArtPalette.GOLD_DIM
-		card.add_child(note)
+		card.tooltip_text += "\n" + " · ".join(notes)
+	_ignore_mouse(col)
 	return card
+
+## Kartın ikinci satırı: odaktaki düşmana isabet şansı (motorun aynı
+## formülü, CombatEncounter.use_skill); düşmana gitmeyen yetenekte notları.
+func _skill_line(unit: CombatUnit, skill: CombatSkill) -> String:
+	var target := _focus_unit()
+	if skill.target_kind == CombatSkill.Target.ENEMY and target != null and not target.is_player_side:
+		var chance := clampi(unit.get_effective_accuracy() + skill.accuracy_bonus - target.get_effective_dodge(),
+			CombatEncounter.MIN_HIT_CHANCE, CombatEncounter.MAX_HIT_CHANCE)
+		return tr("UI_COMBAT_CARD_HIT") % chance
+	var notes := _skill_notes(skill)
+	return " · ".join(notes) if not notes.is_empty() else tr("UI_COMBAT_CARD_SUPPORT")
+
+func _ignore_mouse(node: Node) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for child in node.get_children():
+		_ignore_mouse(child)
+
+## Kart başlığı: "Ad · Sınıf" (sınıfı olmayan düşmanda yalnız ad).
+func _unit_title(unit: CombatUnit) -> String:
+	var who := unit.display_name
+	if unit.source_character != null:
+		var cls := unit.source_character.get_character_class()
+		if cls != null:
+			who = "%s · %s" % [who, cls.display_name]
+	return who
+
+# --- Hedef paneli ---
+
+var _hovered_unit: CombatUnit = null
+
+func _on_unit_hovered(unit: CombatUnit) -> void:
+	if _hovered_unit == unit:
+		return
+	_hovered_unit = unit
+	_refresh_target()
+	_refresh_actions()
+
+## Sağ panelin kimi gösterdiği: üstüne gelinen, yoksa seçili yeteneğin ilk
+## hedefi, yoksa düşmanın en öndeki ayakta kalanı.
+func _focus_unit() -> CombatUnit:
+	if _hovered_unit != null and _hovered_unit.is_alive():
+		return _hovered_unit
+	var targets := _current_targets()
+	if not targets.is_empty():
+		return targets[0]
+	var front: CombatUnit = null
+	for unit in _encounter.enemy_units:
+		if unit.is_alive() and (front == null or unit.position < front.position):
+			front = unit
+	return front
+
+func _refresh_target() -> void:
+	if _target_heading == null:
+		return
+	var unit := _focus_unit()
+	if unit == null:
+		_target_heading.text = ""
+		_target_stats.text = ""
+		_target_behavior.text = ""
+		_target_bar.set_share(0.0)
+		return
+	_target_heading.text = tr("UI_COMBAT_TARGET_HEAD") % [unit.display_name, unit.position]
+	_target_bar.set_share(float(unit.current_hp) / float(maxi(1, unit.max_hp)))
+	var parts: Array[String] = [tr("UI_COMBAT_TARGET_HP") % [unit.current_hp, unit.max_hp],
+		tr("UI_COMBAT_TARGET_PROT") % unit.get_effective_protection()]
+	for kind in unit.get_active_status_kinds():
+		var rounds := unit.get_status_rounds(kind)
+		parts.append(tr("UI_COMBAT_TARGET_STATUS") % [tr(_status_label_key(kind)), rounds])
+	_target_stats.text = " · ".join(parts)
+	var behavior_key := String(BEHAVIOR_KEYS.get(unit.behavior, ""))
+	_target_behavior.text = tr("UI_COMBAT_TARGET_BEHAVIOR") % tr(behavior_key) \
+		if not unit.is_player_side and not behavior_key.is_empty() else ""
 
 ## Notun resmi: ok satırı gibi okunuyor, metni yine notta ve ipucunda.
 func _skill_glyphs(skill: CombatSkill) -> HBoxContainer:
@@ -934,6 +1113,8 @@ func _status_label_key(kind: String) -> String:
 	match kind:
 		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
 		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
+		CombatUnit.STATUS_BURN: return "CBT_STATUS_BURN"
+		CombatUnit.STATUS_CHILL: return "CBT_STATUS_CHILL"
 		_: return "CBT_STATUS_BLEED"
 
 func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBoxContainer:
@@ -1011,7 +1192,8 @@ func _on_pass_pressed() -> void:
 func _on_log_added(line: String) -> void:
 	var label := Label.new()
 	label.text = line
-	label.add_theme_font_size_override("font_size", WaybookTheme.FONT_MIN)
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM.lightened(0.15))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_log_list.add_child(label)
 	while _log_list.get_child_count() > MAX_LOG_LINES:
@@ -1070,3 +1252,48 @@ var _loot_danger: float = 0.3
 func set_loot_context(kind: String, danger: float) -> void:
 	_loot_kind = kind
 	_loot_danger = danger
+
+## Tur madalyonu: koyu disk, altın halka, ortasında Roma rakamıyla tur.
+class RoundMedal extends Control:
+	var _round: int = 1
+
+	func set_round(value: int) -> void:
+		_round = value
+		queue_redraw()
+
+	func _draw() -> void:
+		var centre := size * 0.5
+		var radius := minf(size.x, size.y) * 0.5 - 3.0
+		draw_circle(centre, radius, Color(ArtPalette.INK, 0.85))
+		draw_arc(centre, radius, 0.0, TAU, 64, ArtPalette.MENU_TITLE_GOLD, 3.0, true)
+		var font := GrimTheme.title_font()
+		var text := roman(_round)
+		var font_size := int(radius * (0.95 if text.length() <= 3 else 0.7))
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+		var baseline := centre.y + (font.get_ascent(font_size) - font.get_descent(font_size)) * 0.5 - font_size * 0.12
+		draw_string(font, Vector2(centre.x - text_size.x * 0.5, baseline), text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, ArtPalette.MENU_TITLE_GOLD)
+
+	static func roman(value: int) -> String:
+		var n := clampi(value, 1, 3999)
+		var numerals := [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"],
+			[50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]
+		var out := ""
+		for pair in numerals:
+			while n >= int(pair[0]):
+				out += String(pair[1])
+				n -= int(pair[0])
+		return out
+
+## Hedefin can çizgisi: koyu yatak, kanlı dolgu.
+class HpLine extends Control:
+	var _share: float = 0.0
+
+	func set_share(value: float) -> void:
+		_share = clampf(value, 0.0, 1.0)
+		queue_redraw()
+
+	func _draw() -> void:
+		var w := size.x * 0.7
+		draw_rect(Rect2(Vector2.ZERO, Vector2(w, size.y)), Color(ArtPalette.BONE_DIM, 0.12))
+		draw_rect(Rect2(Vector2.ZERO, Vector2(w * _share, size.y)), ArtPalette.BLOOD.lightened(0.1))

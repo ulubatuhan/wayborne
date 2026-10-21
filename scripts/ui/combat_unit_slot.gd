@@ -18,8 +18,8 @@ signal clicked(unit)  # CombatUnit
 ## 900 piksel yüksekliğin yalnızca üst 200'ünde ince bir şerit olarak
 ## duruyordu - mekân hissi vermiyordu. Figür artık ekranın gövdesini
 ## dolduruyor; savaş alanı ekranın kendisi olmalı.
-const SLOT_WIDTH: float = 136.0
-const FIGURE_HEIGHT: float = 208.0
+const SLOT_WIDTH: float = 170.0
+const FIGURE_HEIGHT: float = 290.0
 
 
 const ACTIVE_BORDER: Color = ArtPalette.GOLD
