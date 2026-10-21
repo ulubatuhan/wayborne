@@ -33,9 +33,18 @@ const RIGHT_PAGE: Rect2 = Rect2(0.645, 0.11, 0.245, 0.70)
 const BUTTON_WIDTH: float = 230.0
 const RIBBON_HEIGHT: float = 34.0
 const ENTRY_FONT_SIZE: int = 19
-const FALLEN_NAME_SIZE: int = 23
-const FALLEN_DETAIL_SIZE: int = 18
-const GRAVE_MARK_HEIGHT: float = 64.0
+## Düşenler açılımı taslağın ölçüleriyle (y_911_dusenler.png, 1080p): başlık
+## ve adlar IM Fell küçük büyük harf, mürekkep; satırlar arası geniş.
+const FALLEN_HEADING_SIZE: int = 40
+const FALLEN_NAME_SIZE: int = 30
+const FALLEN_DETAIL_SIZE: int = 22
+const FALLEN_ROW_GAP: float = 40.0
+## IM Fell'in tabanı bildirdiği üst boşluktan yukarıda; çizgi küçük büyük
+## harflerin ortasına bu payla oturuyor (ekran görüntüsünde ölçüldü).
+const FALLEN_STRIKE_RISE: float = 0.62
+const STORY_LINE_SIZE: int = 22
+const STORY_LINE_GAP: float = 26.0
+const GRAVE_MARK_HEIGHT: float = 80.0
 
 var _session: GameSession
 var _book: TextureRect
@@ -95,7 +104,7 @@ func _ready() -> void:
 	root.resized.connect(_layout)
 	_layout()
 	WaybookTheme.present(_book, _backdrop, self)
-	AudioManager.play_sfx(AudioManager.SFX_UI_BOOK_OPEN)
+	_play_sfx("ui_book_open")
 
 func _layout() -> void:
 	var view := _book.get_viewport_rect().size
@@ -203,7 +212,7 @@ func _toggle_fallen() -> void:
 
 func set_fallen_page(fallen: bool) -> void:
 	if fallen != _showing_fallen:
-		AudioManager.play_sfx(AudioManager.SFX_UI_PAGE)
+		_play_sfx("ui_page")
 	_showing_fallen = fallen
 	for box in [_entries, _summary]:
 		for child in (box as Node).get_children():
@@ -220,7 +229,7 @@ func set_fallen_page(fallen: bool) -> void:
 	_share_note.visible = false
 
 func _fill_fallen(box: VBoxContainer) -> void:
-	box.add_child(_page_heading(tr("UI_WAYBOOK_FALLEN_TITLE")))
+	box.add_child(_fallen_heading(tr("UI_WAYBOOK_FALLEN_TITLE")))
 	var fallen: Array[Dictionary] = _session.ledger.fallen() if _session != null else []
 	if fallen.is_empty():
 		box.add_child(_page_label(tr("UI_WAYBOOK_FALLEN_EMPTY")))
@@ -241,7 +250,9 @@ func _fallen_row(entry: Dictionary, leaders: Dictionary) -> Control:
 	text.add_theme_constant_override("separation", 0)
 	row.add_child(text)
 	var name_line := StruckLine.new().setup(String(entry.get("name", "")), false).set_on_page(true)
+	name_line.label.add_theme_font_override("font", GrimTheme.title_font())
 	name_line.label.add_theme_font_size_override("font_size", FALLEN_NAME_SIZE)
+	name_line.rise = FALLEN_STRIKE_RISE
 	text.add_child(name_line)
 	var detail := _page_label(_fallen_detail(entry, rank, leaders))
 	detail.add_theme_font_size_override("font_size", FALLEN_DETAIL_SIZE)
@@ -250,7 +261,7 @@ func _fallen_row(entry: Dictionary, leaders: Dictionary) -> Control:
 	wrap.add_theme_constant_override("separation", 0)
 	wrap.add_child(row)
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 22)
+	gap.custom_minimum_size = Vector2(0, FALLEN_ROW_GAP)
 	wrap.add_child(gap)
 	return wrap
 
@@ -273,14 +284,18 @@ func _fallen_detail(entry: Dictionary, rank: int, leaders: Dictionary) -> String
 	return role if cause.is_empty() else tr("UI_FALLEN_DETAIL") % [role, cause]
 
 func _fill_stories(box: VBoxContainer) -> void:
-	box.add_child(_page_heading(tr("UI_WAYBOOK_STORIES_TITLE")))
+	box.add_child(_fallen_heading(tr("UI_WAYBOOK_STORIES_TITLE")))
 	var lines: Array[Dictionary] = _session.ledger.story_lines() if _session != null else []
 	if lines.is_empty():
 		box.add_child(_page_label(tr("UI_WAYBOOK_STORIES_EMPTY")))
 		return
 	for entry in lines:
 		var line := _page_label(story_text(entry))
+		line.add_theme_font_size_override("font_size", STORY_LINE_SIZE)
 		box.add_child(line)
+		var gap := Control.new()
+		gap.custom_minimum_size = Vector2(0, STORY_LINE_GAP)
+		box.add_child(gap)
 
 ## Hikâye satırı: anlatılan bölümün kısa özeti ("Gün 12: Selin ... anlattı");
 ## özeti olmayan satır (anıt, karar) defterin kendi biçimiyle.
@@ -310,6 +325,16 @@ func _page_heading(text: String) -> Label:
 	var heading := _page_label(text)
 	heading.theme_type_variation = WaybookTheme.PAGE_HEADING
 	heading.add_theme_font_size_override("font_size", 30)
+	return heading
+
+## Düşenler açılımının başlığı: IM Fell, sayfanın mürekkebiyle (taslakta
+## kırmızı değil - kan adların üstündeki çizgide).
+func _fallen_heading(text: String) -> Label:
+	var heading := _page_label(text)
+	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_size_override("font_size", FALLEN_HEADING_SIZE)
+	heading.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
+	heading.custom_minimum_size = Vector2(0, FALLEN_HEADING_SIZE * 1.6)
 	return heading
 
 func _on_share_pressed() -> void:
@@ -374,8 +399,16 @@ func _close() -> void:
 	if _dismissing:
 		return
 	_dismissing = true
-	AudioManager.play_sfx(AudioManager.SFX_UI_BOOK_CLOSE)
+	_play_sfx("ui_book_close")
 	WaybookTheme.dismiss(_book, _backdrop, self, func():
 		dismissed.emit()
 		queue_free()
 	)
+
+## Autoload'a ağaçtan ulaşılıyor (CombatPanel'in yolu): ekran görüntüsü araçları
+## defteri autoload'suz kuruyor, adla anılan bir autoload derlenmezdi.
+## Kimlikler AudioManager.SFX_UI_BOOK_OPEN / _PAGE / _BOOK_CLOSE ile aynı.
+func _play_sfx(sfx_id: String) -> void:
+	var audio := get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() else null
+	if audio != null:
+		audio.play_sfx(sfx_id)

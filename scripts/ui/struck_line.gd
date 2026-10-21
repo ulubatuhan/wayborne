@@ -59,6 +59,11 @@ func set_on_page(on_page: bool) -> StruckLine:
 	_ink.queue_redraw()
 	return self
 
+const STRIKE_RISE: float = 0.3
+## Çizginin taban çizgisinden yükselişi, yazı boyunun payı. IM Fell'in
+## bildirdiği üst boşluk gerçek tabanından büyük: o yüzle çizen ayarlar.
+var rise: float = STRIKE_RISE
+
 func _play() -> void:
 	var tween := create_tween()
 	tween.tween_interval(STRIKE_DELAY_SECONDS)
@@ -78,7 +83,10 @@ func _draw_strike() -> void:
 	var x0 := _text_left(text_width) - STRIKE_OVERHANG
 	var full := text_width + STRIKE_OVERHANG * 2.0
 	var height := line_height * _height_ratio
-	var y := minf(size.y, line_height) * 0.55 - height * 0.5
+	# Çizgi küçük harflerin ortasından geçer: taban çizgisinden yazı boyunun
+	# ~üçte biri yukarısı. Satır yüksekliğinin payı yüzden yüze kayıyordu
+	# (IM Fell'in büyük üst boşluğu çizgiyi harflerin altına indirdi).
+	var y := minf(font.get_ascent(font_size) - font_size * rise, size.y) - height * 0.5
 	var tex_size := texture.get_size()
 	var shown := full * progress
 	_ink.draw_texture_rect_region(
