@@ -57,6 +57,48 @@ const ROGUE_MAGE: String = "rogue_mage"
 const CITY_GUARD: String = "city_guard"
 const GUARD_SERGEANT: String = "guard_sergeant"
 
+## İnsan düşmanların görünüşü: render edilmiş giysiler ve bir beden kare
+## kümesi. Boş bırakılan düşman eski parça iskeletinde çiziliyordu - savaşta
+## partinin gerçek bedenlerinin yanında manken gibi duruyordu (kullanıcı
+## raporu). Yoldaki karşılaşma işaretinin türleri (`bandit`, `guard`,
+## `traveler`) de buradan okunuyor, savaşta göreceğin kişi yolda da o.
+const LOOKS: Dictionary = {
+	CUTTER: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots"}},
+	ARCHER: {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "ranger_jacket", "pants": "ranger_pants",
+		"shoes": "ranger_boots", "hat": "ranger_hood"}},
+	LEADER: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "ranger_pants",
+		"shoes": "ranger_boots"}},
+	MOUNTAIN_BANDIT: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "wool_coat", "pants": "viking_pants",
+		"shoes": "hobnail_boots", "hat": "fur_hat"}},
+	ARMED_BRIGAND: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "cloth_trousers",
+		"shoes": "leather_boots", "gloves": "leather_gloves", "hat": "leather_cap"}},
+	CITY_GUARD: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "cloth_trousers",
+		"shoes": "leather_boots", "gloves": "leather_gloves", "hat": "guard_helmet"}},
+	GUARD_SERGEANT: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_plate", "pants": "cloth_trousers",
+		"shoes": "riding_boots", "gloves": "leather_gloves", "hat": "spiked_helmet"}},
+	ROGUE_MAGE: {"body": "body_male_lean", "outfit": {
+		"jacket": "mage_robe", "hat": "wizard_hat", "shoes": "felt_shoes"}},
+	"bandit": {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots"}},
+	"guard": {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "cloth_trousers",
+		"shoes": "leather_boots", "hat": "guard_helmet"}},
+	"traveler": {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "pilgrim_robe", "pants": "peasant_pants",
+		"shoes": "peasant_shoes", "hat": "pilgrim_hood"}},
+}
+
+## Bir düşmanın ya da yol işareti türünün görünüşü; hayvanlar için boş.
+static func look_for(kind: String) -> Dictionary:
+	return LOOKS.get(kind, {})
+
 ## Haydut kadrosu yolun gittiği yerin bölgesine göre değişir (bkz.
 ## Location.region): dağ kabilelerinin ve madenlerin yolunda ağır vuran Dağ
 ## Haydutu, kuzeyin eski imparatorluğunda (garnizonlar, asker kaçakları)
@@ -405,11 +447,13 @@ static func _ensure_built() -> void:
 	))
 
 	var mage: EnemyTemplate = _enemies[_enemies.size() - 1]
-	mage.outfit = {"jacket": "mage_robe", "hat": "wizard_hat", "shoes": "felt_shoes"}
-	mage.body_variant = "body_male_lean"
 	mage.burn_resist = 35
 
 	for enemy in _enemies:
+		var look := look_for(enemy.enemy_id)
+		if not look.is_empty():
+			enemy.outfit = (look.outfit as Dictionary).duplicate()
+			enemy.body_variant = String(look.body)
 		_enemy_by_id[enemy.enemy_id] = enemy
 
 static func _make(

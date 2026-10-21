@@ -19,7 +19,7 @@ func run(t) -> void:
 	_test_resolve_headgear_hat_overrides_shape_and_color(t)
 	_test_unknown_piece_id_falls_back(t)
 	_test_combat_unit_carries_outfit_from_character(t)
-	_test_enemy_units_have_no_outfit(t)
+	_test_enemy_units_wear_rendered_outfits(t)
 	_test_figures_accept_outfit_without_error(t)
 	_test_every_piece_has_art_for_every_body(t)
 	_test_garment_frames_match_body_layout(t)
@@ -102,10 +102,25 @@ func _test_combat_unit_carries_outfit_from_character(t) -> void:
 		"taşınan sözlükte seçilen parça gerçekten var"
 	)
 
-func _test_enemy_units_have_no_outfit(t) -> void:
+## İnsan düşman eski parça iskeletinde çiziliyordu (kullanıcı raporu): her
+## görünüşün bir bedeni var ve her parçası o beden için render edilmiş.
+func _test_enemy_units_wear_rendered_outfits(t) -> void:
 	var template := EnemyCatalog.get_enemy(EnemyCatalog.CUTTER)
 	var unit := CombatUnit.from_enemy(template, 1)
-	t.eq(unit.outfit, {}, "düşmanın hiç kıyafeti yok - kendi arketip paletinde kalır")
+	t.ok(unit.body_variant.begins_with("body_"), "insan düşman bir beden kare kümesiyle çizilmeli")
+	t.ok(not unit.outfit.is_empty(), "insan düşman render edilmiş giysiler giymeli")
+	for kind in EnemyCatalog.LOOKS:
+		var look: Dictionary = EnemyCatalog.LOOKS[kind]
+		var body := String(look.body)
+		t.ok(BodyFrames.for_body(body) != null, "%s: beden %s yok" % [kind, body])
+		var outfit: Dictionary = look.outfit
+		for slot in outfit:
+			var piece := OutfitCatalog.get_piece(String(outfit[slot]))
+			t.ok(piece != null, "%s: %s diye bir giysi yok" % [kind, outfit[slot]])
+			if piece != null:
+				t.eq(piece.slot, String(slot), "%s: %s yanlış yuvada" % [kind, piece.piece_id])
+				t.ok(BodyFrames.for_body(OutfitCatalog.frames_id(piece, body)) != null,
+					"%s: %s bu beden için render edilmemiş" % [kind, outfit[slot]])
 
 ## Yapısal: yeni `outfit` parametresi geriye dönük uyumlu (varsayılanı boş
 ## sözlük) ve figürler bir outfit verildiğinde hatasız çiziyor. Görünümü

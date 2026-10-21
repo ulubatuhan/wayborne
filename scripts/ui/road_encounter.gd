@@ -37,7 +37,11 @@ func setup(kind: String) -> void:
 	# Kervan sağa yürür, dünya sola akar: işaret gelen kervana baksın diye
 	# sola bakıyor - CombatFigure'ın "oyuncu sağa, düşman sola" kuralının
 	# aynısı (bkz. combat_figure.gd).
-	_figure.setup(kind, false, "normal", 0.0)
+	var look := EnemyCatalog.look_for(kind)
+	_figure.setup(
+		kind, false, "normal", 0.0, look.get("outfit", {}), PackedStringArray(),
+		CombatFigure.SKIN_PALE, 1.0, String(look.get("body", ""))
+	)
 
 ## Gelen kervana dönük dursun: kervan geri dönmüşse (sola yürüyorsa)
 ## karşılaşılan şey sağa bakıyor. Silüet aynalanıyor, yeniden çizilmiyor.

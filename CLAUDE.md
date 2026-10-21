@@ -1408,8 +1408,11 @@ in every preview the moment it is equipped.
     (`CharacterData.get_height_scale()`, 155-250 cm, user's call) - six
     screens used to clamp it to 0.86-1.14 each, so nothing over 200 cm
     showed. Random recruits stay under `NATURAL_MAX_HEIGHT_CM`.
-  - Crew use `BodyFrames.CREW_BODY`; enemies still draw on the old part
-    rig until clothing modules exist (open: `QUESTIONS.md` #13-15 - the
+  - Crew use `BodyFrames.CREW_BODY`. Human enemies wear rendered garments on a body frame set too
+    (`EnemyCatalog.LOOKS`, also read by the road's encounter markers): left empty they fell back to the old
+    part rig and stood like mannequins beside the party (user report). The MakeHuman pieces read pale in
+    combat light, so the kits lean on the Quaternius peasant/ranger pieces and the metal armours; `test_outfit`
+    checks every look's body and pieces are rendered. The rest of this item is history (open: `QUESTIONS.md` #13-15 - the
     nude body pokes past a garment's edge where MPFB's delete group would
     hide it in 3D; the MakeClothes-era `qa/garment_tests.py` that measured it was deleted with that route).
   - **Clothes are worn, not painted on: each garment is its own frame
