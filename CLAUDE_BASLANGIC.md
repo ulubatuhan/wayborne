@@ -12,7 +12,7 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
 - **Tek dal: `Wayborne` (kullanıcı kararı 2026-10-21).** GitHub'da (`ulubatuhan/wayborne`) yalnızca `Wayborne` var ve
   varsayılan dal o. `dev`, `ui-hud-redesign`, `claude/merhaba-6bf7co` silindi, `main` de varsayılan dal
   `Wayborne` yapılınca silinir; hepsi bu dalın atasıydı (silmeden
-  önce `git merge-base --is-ancestor` ile doğrulandı), kaybolan commit yok. Her iş doğrudan `Wayborne`'a push edilir;
+  önce `git merge-base --is-ancestor` ile doğrulandı), kaybolan commit yok. Her iş doğrudan `Wayborne`'da yapılır ve oraya push edilir, merge ya da ara dal yok;
   başka dal açma, geçmişi yeniden yazma.
 - **Commit iletileri:** imza ya da oturum bağlantısı (`Claude-Session:` vb.) **yok** - kullanıcı kuralı.
 
