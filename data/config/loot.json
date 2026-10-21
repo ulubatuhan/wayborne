@@ -8,6 +8,7 @@
     {"type": "outfit", "id": "leather_jerkin", "chance": 0.10},
     {"type": "outfit", "id": "leather_cap", "chance": 0.12},
     {"type": "equipment", "id": "ring_gambler", "chance": 0.05},
+    {"type": "equipment", "id": "ring_charmed", "chance": 0.04},
     {"type": "item", "id": "rare_relic", "min": 1, "max": 1, "chance": 0.04}
   ],
   "wildlife": [

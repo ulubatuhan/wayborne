@@ -5236,54 +5236,23 @@ verir.
   pazar/envanter, ve GrimTheme'in kalıcı parçalarının WaybookTheme'e
   taşınması. Sıra ve ayrıntı `docs/ui/REDESIGN.md` §7'de. Dosya ve sınıf
   adları oyuna özgü kalır (başka bir oyunun terimi değil).
-- **Kıyafetler ganimete bağlanacak.** Terzi kuruldu (şehirde Kıyafet
-  Dolabı ekranı, statlı ve statına göre fiyatlı 48 giysi, her ziyarette
-  başka bir tezgâh - bkz. Wardrobe & Rig Rules). Kalan iş yolda bulma:
-  `EventEffect`'e `GRANT_OUTFIT`, `GRANT_EQUIPMENT`'in deseniyle (parça
-  önce dolaba düşer, kime giydirileceği sonra seçilir).
+- **`GRANT_OUTFIT` hiçbir olayda kullanılmıyor.** Giysiler ganimetten düşüyor (`loot.json`) ve terzide satılıyor, ama yolda
+  bir olay kartı henüz giysi vermiyor; etki türü hazır (`GRANT_EQUIPMENT`'in deseniyle, parça önce dolaba düşer).
+  Ölü bir etki türü kuralına göre (Ruin Rules) bir olay kartına bağlanmalı; kart yazımı olay üretim düzeninden geçer.
 - **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
   `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
-- **Eşya bozulması mekaniği.** `Item` bugün yalnızca fiyat ve ağırlık
-  taşıyor; arayüz taslağının yıpranmış hücresi (ui-hud-redesign) çizebiliyor
-  ama oyun hesaplamıyor. Hedef: bozulabilir mallar (balık, erzak, bal) yolda
-  gün sayar ve tazeliği satış fiyatını düşürür, süresi dolan yığın çürür;
-  kalıcı mallar yalnızca görsel kir/kırağı alır. Yeni bir sistem değil,
-  `Inventory` yığınına bir yaş alanı ve `MarketPricing`'e bir çarpan.
-- **Hastalık, doktor ve şehrin ilacı.** Karakterler hastalanabilir (yolda,
-  açlıkta, soğukta, kirli suda); iyileşmek için şehirde bir doktor/hemşire
-  bulmak, iğne yaptırmak, ilaç almak gerekir. Ama şehrin **ilaç stoğu**
-  vardır: kıtlıkta doktor iğneyi yapamaz. Kıtlığın sebebi oyuncunun kendi
-  geçmişi olabilir - o şehre zamanında üstlenilen ilaç sevkiyatını teslim
-  etmemek (bkz. Veba İlacı görevi, `fulfill_commission`), ya da bir veba
-  haberi. Yeni bir sistem değil: hastalık bir `Trait` benzeri süreli durum
-  (stat cezası, kötüleşirse `resolve_deaths`'in kapısı), ilaç bir `Item`,
-  şehrin stoğu `MarketConditions`'ın şehir başına bir sayacı, iğne
-  Kilise/Taverna'nın `PurificationPanel` deseninde bir hizmet. Kıtlık
-  hizmeti **sebebiyle kilitli** gösterir ("ilaç yok - X'e sevkiyat
-  gelmedi"), gizlemez.
-- **Yoldaş bulmak zor olmalı; iyi biri çok nadir.** Savaş zamanında kimse
-  yollara düşmek istemez - kervana yalnızca **mecbur olanlar** katılır
-  (borçlu, sürgün, dul, kaçak, aç). Bugün `RecruitCatalog` her varışta her
-  mekânda dolu bir pano atıyor ve seviyeleri oyuncunun etrafına yayıyor
-  (`get_venue_level_spread`); hedef: pano çoğu zaman boş ya da bir-iki kişi,
-  yüksek seviyeli aday nadirin de nadiri (seviye arttıkça ağırlık hızla
-  düşer), loncanın itibar kapısı daha sert. Dünyanın hali sayıya bağlı:
-  bölgesel savaş/veba haberi (`WorldEvents`) panoyu daha da boşaltır,
-  kıtlık ve borç ise çaresizleri çoğaltır. Her adayın **neden** geldiği bir
-  satırla söylenir (mecburiyeti), ve bu sebep huyuna/sadakatine yansır -
-  `NpcDisposition`'ın kervan içi karşılığı. Ölçü `simulate_career.gd` ile
-  yeniden alınmalı: kadro bölümü (Bir Kadro) bugün 6. seferde kapanıyor.
-- **Sıcaklık, Celsius derecesiyle.** Yol HUD'unun alev göstergesi gerçek bir
-  sayıya bağlanacak: mevsim + biyom + saat + hava (+ kamp ateşi) bir °C
-  üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik
-  bağlantılar mevcut kollarla: soğukta günlük erzak payı ve stres artar,
-  giysilerin bir ısı değeri olur; planlayıcı bunu erzak rezervine katmak
-  zorunda (Provision Rules'un sözü bozulmasın). G11 kırağı kenarı oyuncunun
-  isteğiyle kaldırılmıştı; sıcaklık kenarla değil sayı ve göstergeyle
-  gösterilir.
+- **Eşya bozulması: tazelik fiyata yansımıyor.** Balık yolda çürüyor (`spoil_perishables`, Economy Rules) ama yığının yaşı
+  `MarketPricing`'e girmiyor ve kalıcı mallar görsel kir/kırağı almıyor (arayüz taslağının yıpranmış hücresi çizebiliyor,
+  oyun hesaplamıyor). Hedef: tazeliğin satış fiyatına çarpan olarak girmesi; yeni bir sistem değil.
+- **Sıcaklık, Celsius derecesiyle.** Oyunda henüz bir sıcaklık modeli yok: `SurvivalGauge.set_celsius` göstergesi var ama
+  yalnızca taslak ekranlar (`GrimDrafts`) besliyor, gerçek yol HUD'unun alev göstergesi bir sayıya bağlı değil. Hedef: mevsim +
+  biyom + saat + hava (+ kamp ateşi) bir °C üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik bağlantılar
+  mevcut kollarla: soğukta günlük erzak payı ve stres artar, giysilerin bir ısı değeri olur; planlayıcı bunu erzak rezervine
+  katmak zorunda (Provision Rules'un sözü bozulmasın). G11 kırağı kenarı oyuncunun isteğiyle kaldırılmıştı; sıcaklık kenarla
+  değil sayı ve göstergeyle gösterilir.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
