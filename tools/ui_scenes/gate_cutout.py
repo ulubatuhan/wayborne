@@ -36,6 +36,10 @@ def _keep(spec):
         return True
     if kind.startswith("ftk:") or kind in CLUTTER:
         return False
+    if spec.get("terrace"):
+        # Setli yukarı şehir (çan kulesi, setli ev) yandan surun iki katı yükseliyor;
+        # yol ekranı kapıyı ona göre küçültüp suru çimenin arkasına gömüyordu.
+        return False
     at = spec.get("at")
     if at is None:
         return False

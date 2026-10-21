@@ -185,9 +185,9 @@ func _test_wall_material(t) -> void:
 func _test_own_gates(t) -> void:
 	for location in WorldMapData.get_locations():
 		var id := "gate_" + location.location_id
-		t.ok(location.gate_prop_id() != "", "kapısı var: %s" % location.location_id)
+		t.ok(PropArt.has(id), "kendi kapı kesiti var: %s" % location.location_id)
+		t.eq(location.gate_prop_id(), id, "kendi kapısını okur: %s" % location.location_id)
 		if PropArt.has(id):
-			t.eq(location.gate_prop_id(), id, "kendi kapısını okur: %s" % location.location_id)
 			var box := PropArt.bounds(id, Vector2.ZERO, 1.0)
 			t.ok(box.position.x < 0.0 and box.end.x > 0.0, "geçit kesitin içinde: %s" % location.location_id)
 			t.ok(absf(box.end.y) <= 4.0, "taban yerde: %s" % location.location_id)

@@ -1072,7 +1072,7 @@ const GATE_PX_PER_M_OF_HEIGHT: float = 0.05
 ## uzun bir kapı yolun daha gerisinde, daha küçük duruyor.
 const GATE_MAX_HEIGHT_SHARE: float = 0.62
 ## Görünen alanın tepesinden bırakılan pay (yolun üst çubuğu).
-const GATE_TOP_MARGIN_SHARE: float = 0.09
+const GATE_TOP_MARGIN_SHARE: float = 0.065
 const GATE_BASE_SINK: float = 0.03
 const GATE_OPEN_RANGE: float = 0.55
 
