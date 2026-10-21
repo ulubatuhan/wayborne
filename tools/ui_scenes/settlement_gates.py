@@ -42,6 +42,23 @@ def _y(spec):
     return float(at[1]) if at else 0.0
 
 
+## Kulenin genişliği kadar sur, kulenin hemen arkasında: duvar boyu surun
+## kendisiyle aynı (WALL_SCALE), genişlik birden çok parçayla kapanır.
+WALL_BEHIND_DEPTH = 0.45
+
+
+def _wall_behind(qm, cx, width, value):
+    unit = 1.52 * WALL_SCALE
+    count = max(1, int(-(-width // unit)))
+    span = count * unit
+    out = []
+    for k in range(count):
+        x = cx - span / 2 + unit * (k + 0.5)
+        out.append({"kind": qm + "TallWall.blend", "at": [x, WALL_Y + WALL_BEHIND_DEPTH], "scale": WALL_SCALE,
+                    "stone": value})
+    return out
+
+
 def gate_config(town):
     cfg = copy.deepcopy(town)
     keep = []
@@ -70,6 +87,10 @@ def gate_config(town):
     for side in (-1, 1):
         keep.append({"kind": qm + "WatchTowerWRoof.blend", "at": [side * tower_x, WALL_Y], "scale": TOWER_SCALE,
                      "stone": value})
+        # Kullanıcı notu (karar A5, 2026-10-21): gözcü kulesi direkler üstünde
+        # açık bir çatkı; altında duvar yoktu, sur kulenin altından kopuyordu.
+        # Sur kulenin arkasından geçer: kule duvarın üstünde yükselir.
+        keep.extend(_wall_behind(qm, side * tower_x, 1.5 * TOWER_SCALE, value))
         x = tower_x + 1.5 * TOWER_SCALE / 2 + 1.52 * WALL_SCALE / 2
         for i in range(6):
             keep.append({"kind": qm + "TallWall.blend", "at": [side * x, WALL_Y], "scale": WALL_SCALE, "stone": value})
@@ -77,6 +98,7 @@ def gate_config(town):
             if i == 3:
                 keep.append({"kind": qm + "WatchTowerWRoof.blend", "at": [side * (x + 0.6), WALL_Y],
                              "scale": TOWER_SCALE * 0.85, "stone": value})
+                keep.extend(_wall_behind(qm, side * (x + 0.6), 1.5 * TOWER_SCALE * 0.85, value))
                 x += 1.5 * TOWER_SCALE * 0.85 + 0.6
     for x, tree in ((-12.0, "ftk:tree-high"), (13.5, "ftk:tree-high-crooked"), (-17.5, "ftk:tree-high")):
         keep.append({"kind": tree, "at": [x, 7.0 + abs(x) * 0.2], "scale": 1.0})
@@ -92,8 +114,15 @@ def main(argv):
     towns = json.load(open(TOWNS, encoding="utf-8"))
     ids = argv or [k for k in towns if k not in SKIP]
     gates = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
+    sys.path.insert(0, HERE)
+    import town_phases
     for city in ids:
-        gates["gate_" + city] = gate_config(towns[city])
+        gate = gate_config(towns[city])
+        gates["gate_" + city] = gate
+        # Gündüz kapısı (12.2a): aynı sahne, town_phases'ın gündüz ışığıyla;
+        # kamera ve yapılar aynı, piksel hizalı.
+        if "post" in gate:
+            gates["gate_%s@day" % city] = town_phases.phase_cfg(gate, "day")
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         json.dump(gates, f, ensure_ascii=False, indent=1)
         f.write("\n")

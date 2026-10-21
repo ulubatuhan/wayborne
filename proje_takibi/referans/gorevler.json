@@ -2004,7 +2004,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P1",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "oncelik_eski": "P2",
@@ -2012,7 +2012,7 @@
    "sira": 125,
    "kim": "CO",
    "commit": "-",
-   "not": "Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirildi; tools/ui_kit_ink.py ile mürekkep ve palet renklerine boyandı (build/ui_kit); önizleme referans/taslaklar/y_91_ui_kit.png. Seçim köşebendinin ortası dolu çıktı. Onaydan sonra temaya bağlanır. | 2026-10-19 karar: beklet: kit, önceki düzeltmelerle birlikte ilgili sahnelerde örnekle gösterilecek. | 2026-10-20 kullanıcı kararı: köşebentler kaldırıldı (select_corner kitten ve örneklerden çıktı). | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirildi; tools/ui_kit_ink.py ile mürekkep ve palet renklerine boyandı (build/ui_kit); önizleme referans/taslaklar/y_91_ui_kit.png. Seçim köşebendinin ortası dolu çıktı. Onaydan sonra temaya bağlanır. | 2026-10-19 karar: beklet: kit, önceki düzeltmelerle birlikte ilgili sahnelerde örnekle gösterilecek. | 2026-10-20 kullanıcı kararı: köşebentler kaldırıldı (select_corner kitten ve örneklerden çıktı). | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K8): kit plakaları ipucu ve fiş, başlık şeridi pazar yan panellerinde, olay kartı FRAMED_PANEL, ilk seçenek ve taverna sohbet düğmesi PRIMARY_BUTTON; test_waybook_theme kilitliyor."
   },
   {
    "id": "Y-G11T",
@@ -2036,14 +2036,14 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P1",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/12_sehir_ve_yol_gorunumu.md",
    "paket": "P12",
    "sira": 127,
    "kim": "CO",
    "commit": "2dd895a",
-   "not": "12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K5): güneş/ay tek Gauss parıltısı (radial_glow), bulutlar, ufuk bandı, sis şeridi, uzak/orta soğuk ve ön sıcak renk ayarı, gece fener ışığı; screenshot_road_light.gd."
   },
   {
    "id": "12.2e",
@@ -2089,14 +2089,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 130,
    "kim": "CO",
    "commit": "2dd895a",
-   "not": "Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 sis şeridi ve gece varyantı oyunda (K5). Haritadaki konuma göre biyom varyantları (Y-G07) Blender işi, yapılmadı."
   },
   {
    "id": "12.2a",
@@ -2134,7 +2134,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "değişiklik istendi",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2142,7 +2142,7 @@
    "sira": 133,
    "kim": "CO",
    "commit": "-",
-   "not": "Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir. | 2026-10-19 karar: insanların ışığı ortama aykırı; gece/akşam çok daha az insan; herkes yürüyor, sahne kurgulanmalı (duran, konuşan, satan)."
+   "not": "Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir. | 2026-10-19 karar: insanların ışığı ortama aykırı; gece/akşam çok daha az insan; herkes yürüyor, sahne kurgulanmalı (duran, konuşan, satan). | 2026-10-21 uygulandı (K12): TownsfolkLayer; gece 4, akşam +5 kişi, arka plandan ışık örneklenir, bekçi feneriyle; screenshot_city_moods.gd."
   },
   {
    "id": "9.3",
@@ -2184,14 +2184,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "değişiklik istendi",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 136,
    "kim": "CO",
    "commit": "-",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: oyunda uygulandı - pazar terazisi (MarketScale: mühür içinde mal ve sikke, sepet büyüdükçe parça sayısı artar, kol dengeye göre yaylı eğilir, düşen parça yerine oturur); ekran görüntüsüyle kontrol edildi, onay bekliyor. | 2026-10-19 karar: terazili tek ekran gereksiz; pazar Y-G11T masa ekranı olacak, terazi referans görseldeki gibi."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: oyunda uygulandı - pazar terazisi (MarketScale: mühür içinde mal ve sikke, sepet büyüdükçe parça sayısı artar, kol dengeye göre yaylı eğilir, düşen parça yerine oturur); ekran görüntüsüyle kontrol edildi, onay bekliyor. | 2026-10-19 karar: terazili tek ekran gereksiz; pazar Y-G11T masa ekranı olacak, terazi referans görseldeki gibi. | 2026-10-21 kullanıcı: oyundaki hali kalsın; vagon ve karakter çantaları açılır-kapanır bölüm olarak eklendi (K10)."
   },
   {
    "id": "9.6",
@@ -2248,14 +2248,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "değişiklik istendi",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 140,
    "kim": "CO",
    "commit": "-",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: savaş arka planı savaşın olduğu yere göre; karakterlerin altında stilize can barı, can sağ panelden izlenmemeli."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: savaş arka planı savaşın olduğu yere göre; karakterlerin altında stilize can barı, can sağ panelden izlenmemeli. | 2026-10-21 taslaktaki savaş ekranı alındı (K9, bkz. Y-G05)."
   },
   {
    "id": "Y-G05",
@@ -2263,7 +2263,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2271,7 +2271,7 @@
    "sira": 141,
    "kim": "CO",
    "commit": "-",
-   "not": "Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K9): tur madalyonu, tam ekran, yetenek kartları (isabet %/kilit sebebi), hedef paneli; kanama/kritik efektleri kullanıcı kararıyla eklenmedi."
   },
   {
    "id": "Y-G06",
@@ -2315,7 +2315,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P1",
-   "durum": "değişiklik istendi",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "oncelik_eski": "P2",
@@ -2323,7 +2323,7 @@
    "sira": 144,
    "kim": "CO",
    "commit": "-",
-   "not": "Alt panel (P18) zaten sekmeli: harita ve envanter orada. | 2026-10-19 karar: harita ve envanterle birlikte gösterilecek; sağ üstteki moral/stres/takat paneli kalkar, alt panele iner."
+   "not": "Alt panel (P18) zaten sekmeli: harita ve envanter orada. | 2026-10-19 karar: harita ve envanterle birlikte gösterilecek; sağ üstteki moral/stres/takat paneli kalkar, alt panele iner. | 2026-10-21 kullanıcı: oyundaki hali iyi, taslak silindi (y_99_yol_hud.png)."
   },
   {
    "id": "9.11",

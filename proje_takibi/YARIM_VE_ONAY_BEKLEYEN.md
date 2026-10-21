@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -177,21 +177,6 @@ Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ## Paket P12
 
-### 9.1 · Ortak UI kiti v2
-
-- **Durum:** onaylandı, uygulanacak · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirildi; tools/ui_kit_ink.py ile mürekkep ve palet renklerine boyandı (build/ui_kit); önizleme referans/taslaklar/y_91_ui_kit.png. Seçim köşebendinin ortası dolu çıktı. Onaydan sonra temaya bağlanır. | 2026-10-19 karar: beklet: kit, önceki düzeltmelerle birlikte ilgili sahnelerde örnekle gösterilecek. | 2026-10-20 kullanıcı kararı: köşebentler kaldırıldı (select_corner kitten ve örneklerden çıktı). | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.1 Ortak UI kiti v2** (K-01, K-03, T-02…T-12)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirilince kâğıt-mürekkep diline boyanır; Y-G11T ve 9.4-9.9 taslaklarındaki ince çerçeve ve kehribar vurgu bu kitin hedefi.
-  - 9-slice panel çerçevesi, başlık şeridi, kırmızı ana eylem düğmesi (tüm durumlarıyla), tooltip plakası, seçim köşebentleri.
-  - **Kaynak (CC0, 2026-10-17):** Kenney UI Pack RPG Expansion (85 dosya) ve Kenney Fantasy UI Borders (140 çerçeve), ikisi de CC0. Çerçeveler kâğıt ve mürekkep diline yeniden boyanır (stil rehberi Y-G01); kullanıcının reddettiği çizik, deri ve nine-slice süs dili kullanılmaz (25–27 Eylül kararları). Süsleme ve vinyet için Old Book Illustrations “Ornaments” görselleri (görseller serbest, açıklama metinleri NC, kopyalanmaz). Ayrıntı: `../ICERIK_IHTIYACLARI.md` G-7.
-
-</details>
-
 ### Y-G11T · Masa ekranı şablonunu görsel taslakla göster
 
 - **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
@@ -207,164 +192,6 @@ Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Kullanıcı notundan türetildi: “bunu görmem lazım, yazıyla anlaşılmıyor.” Sol liste, ortada metafor nesnesi, sağda kervan düzeni pazar ekranı üzerinde görsel taslak olarak hazırlanıp sunulur. Uygulama kararı taslaktan sonra.
   - **Kullanıcı notu:** “bunu görmem lazım, yazıyla anlaşılmıyor.”
   - **Kabul:** Taslak kare kullanıcıya sunuldu; karar 9.1'e işlendi.
-
-</details>
-
-### 12.2 · Yol görünümü: büyük revizyon (overhaul)
-
-- **Durum:** onaylandı, uygulanacak · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
-- **Son not:** 12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **12.2 Yol görünümü: büyük revizyon (overhaul).** Kullanıcı: "yol görünümü üzerine büyük bir overhaul çalışması yapacağız." Aşağıdaki üç sorun ilk somut maddeler. Kapsam §9.9–9.10 (yol HUD'u ve biyom arka planları, art referansları) ve §10b ile birlikte planlanmalı. Önce kısa bir tasarım notu yazılıp kullanıcıya onaylatılsın, sonra uygulansın.
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2dd895a`): 12.2a, 12.2e, 9.9, 9.10 bu notta sıralı.
-  - [ ] **12.2a Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı.**
-    - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `5bfcc7d`): settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı.
-    - Varış ve ayrılışta yolun sonundaki şehir kapısı ve sur sahnesi.
-    - **Yer:** `scripts/ui/travel_band.gd` (kapı ve varış çizimi; `:203` ve `:1045` civarındaki notlar), şehir kapısı sesi ve varış akışı `road_journey.gd`.
-    - **Yön:** Render edilmiş, katmanlı bir kapı sahnesi:
-      - sur, kapı kemeri ve kuleler,
-      - şehrin kendi mimari ve kültür dili (CityFront kasaba render'larıyla aynı set),
-      - kervanın kapıya yaklaşırken ölçeklenmesi ve kapıdan geçişi.
-    - Referanslar §9.3 (A-25…A-29, T-01).
-    - **Kaynaklar (CC0, 2026-10-17):** sur, kule ve kapı modülleri Kenney Castle Kit ve Fantasy Town Kit (CC0), Quaternius Medieval Village MegaKit (elde varsa CC0; yeni indirme QAL). Render + mürekkep geçişi (Y-G02). Kapı sesi için hazır CC0 kayıt yok: Freesound CC0 `large wooden door`, `chain rattle`, `winch` katmanlanarak tasarlanır. Kullanıcı kararı: kervan şehre girmez; kapı sahnesi varışta kervanı kapı önünde bırakır (Y-G10T).
-  - [ ] **12.2b Yol üstündeki kule (durak), kamp kurulduktan sonra kadrajdan bir anda kaçıyor.**
-    - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `0b5e4b6`): Kod ve test önceki turda; gözle doğrulanacak.
-    - **Gözlem (kullanıcı):** Yolda giderken karşıya bir kule çıkıyor; kamp kuruluyor; ardından kule bir anda kadrajdan kayboluyor.
-    - **Yer:** Durak çizimi `travel_band.gd:951-1006` (`STOP_SPRITES`, karakol kulesi `:993-1006`).
-    - **Olası sebep:** Kamp kurulunca `_layout()` ya da bant kayması yeniden hesaplanıyor (kamp yerleşimi, `road_caravan.gd` `_refresh_gather_targets()` notu), ya da duraklar yolun "önündeki boş alana" göre yerleştirildiği için kamp konumu değişince durak çapası kayıyor.
-    - **Çözüm:** Durağın dünya konumu, yol mesafesi cinsinden sabit olsun; kamp ve yeniden düzenleme onu kaydırmasın.
-    - **Test:** Kampa girmeden önce ve sonra durağın ekran x'i aynı (ya da yalnızca kamera hareketi kadar farklı).
-  - [ ] **12.2c Kamp: karakterler ateşe çok yavaş yürüyor (3x'te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın.**
-    - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `968111f`): Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak.
-    - **Kullanıcı:** "Buradaki temel sorun karakterlerin çok çok yavaş yürümesi. 3x'te dahi yavaşlar." "Ateş, ilk kişi ateşin başına vardığında yansın." Gidip dönme yaklaşık 10 oyun saati sürüyor.
-    - **Kodda görülen** (`scripts/ui/road_caravan.gd`):
-      - `gather_seconds()` (`:1198-1209`): süre = `max(1.3, 1.5 × en_uzak_mesafe / en_yavaş_figürün_tempolu_hızı)`.
-        - En yavaş figürün hızı ve 1,5 çarpanı tüm grubu yavaşlatıyor.
-        - En uzaktaki vagon da süreyi uzatıyor.
-      - Süre gerçek saniye üzerinden; oyun hızı çarpanı (2x, 3x) büyük ihtimalle yürüyüşe uygulanmıyor. Bu yüzden 3x'te de aynı yavaşlık var. **Doğrula.**
-      - Kamp süresi `road_journey.gd:2279` `_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS` (8 saat). Saat yürüyüş sırasında kampın hızlı akışıyla ilerliyor, sayaç yürüyüş bitmeden başlıyor. Bu yüzden ateşe varmak saatler yiyor ve sabah oluyor.
-    - **Yapılacak:**
-      1. **Yürüyüş hızı:**
-         - Toplanma ve dağılma yürüyüşü tempolu bir hızla olsun; en yavaşa göre ve 1,5 çarpanıyla uzatılmasın. Herkes kendi tempolu hızıyla yürüsün.
-         - Toplam yürüyüşe bir üst sınır: gerçek zamanda en fazla yaklaşık 2–3 sn (1x'te).
-         - Oyun hızı çarpanı yürüyüş animasyonuna da uygulansın: 3x'te üç kat hızlı.
-      2. **Ateş:** Kamp ateşi ilk figür ateş başına vardığında yansın. Kısa bir tutuşma animasyonu (kıvılcım, alevin büyümesi) ve ateş sesi; varmadan önce yalnızca odun yığını görünsün.
-         - **Ses kaynağı (CC0):** Freesound CC0 `campfire` (114 sonuç; ör. kyles “fire small campfire crackling”) taban döngü, ayrı rastgele çıtırtı sesleri; tutuşma için `torch ignite`, `fire whoosh`. Ayrıntı: `../ICERIK_IHTIYACLARI.md` S-3.
-      - **Not (kullanıcı kararı, Y-B09):** Yol yeterince dolunca 1.5x ve 3x hızları kalkacak; o zaman aşağıdaki (b) testi kaldırılır.
-      3. **Saat:**
-         - Toplanma ve dağılma sırasında oyun saati durmasın ama normal yürüyüş hızıyla aksın; kampın hızlı akışı uygulanmasın.
-         - `CAMP_HOURS` sayacı herkes ateşe vardığında başlasın.
-         - Toplanma ve dağılmanın toplamı en fazla yaklaşık 0,5 oyun saati.
-      4. Kampın kurulduğu ve kalkıldığı saat günlüğe yazılsın.
-    - **Test** (`tests/test_camp_gathering.gd` ve yeni ekler):
-      - (a) 1x'te toplanma ≤ 3 sn gerçek zaman.
-      - (b) 3x'te süre üçte birine iniyor.
-      - (c) İlk varan figürle ateş yanıyor; ondan önce yanmıyor.
-      - (d) Kamp kurma ve kalkma arası tam `CAMP_HOURS` ± 0,1; yürüyüşler toplam ≤ 0,5 oyun saati.
-      - (e) Mevcut üst üste binme ve oturma testleri geçiyor.
-  - [x] **12.2d Kervanın altında, yerde ağaç kütüğü gibi çubuklar görünüyor; anlamsız duruyor.**
-    - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2eaec93`): Kullanıcı 12.2d şeritlerinin kalmasını onayladı.
-    - **Gözlem (kullanıcı):** Yolda giderken kervanın alt kısmında, yerde kütük ya da çubuk benzeri dikey parçalar var.
-    - **Olası kaynaklar** (önce ekran görüntüsüyle ve katmanları tek tek kapatarak doğrula):
-      1. **Yol kenarı nesneleri:** `scripts/ui/travel_band.gd:1094` `_draw_ground_props()`.
-         - Koddaki not (`:1107-1113`): yakın kenardaki nesneler yolun bankında bitiyor ve yol en son çiziliyor.
-         - Çalı ya da ağaçların alt kısmı bankta kalıp üstü yolun altında kaybolunca geriye yalnızca gövde (çubuk) görünüyor olabilir.
-         - Yolun yakın kenarındaki (kameraya yakın) ağaçlar, kervanın hemen altında kesik gövdeler olarak okunuyor.
-      2. **Render edilmiş zemin şeridi:** `RoadStrips.GROUND` (`travel_band.gd:490`, `:539`). Şerit görselinin kendi içindeki çit kazığı, kütük ya da dal desenleri kervanın tam altına denk geliyor olabilir.
-      3. **Duraklar:** `travel_band.gd:951-1006` `STOP_SPRITES`. Çit ya da kazık parçaları zemin hizasında kalıyor olabilir.
-    - **Çözüm:**
-      - Kervanın yürüdüğü şeridin (yol ve hemen önü) içine dikey ve ince hiçbir nesne konmasın: kervan şeridi için bir "boş bant" maskesi.
-      - Yakın kenar nesneleri ya tamamen görünür olsun (tepesi dahil) ya da hiç çizilmesin; yarım kesik gövde kalmasın.
-      - Zemin şeridinde kervan bandına denk gelen bölge düz zemin olsun.
-    - **Test:** Yol ekranının ekran görüntüsü testine (`tests/screenshot_journey_screen.gd`) bir kontrol: kervan bandının dikdörtgeni içinde dikey ince koyu çizgi kümesi yok (basit kenar yoğunluğu ölçümü) ya da elle onay.
-
-</details>
-
-### 9.10 · Yol arka planları, biyom başına
-
-- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.10 Yol arka planları, biyom başına** (A-03, A-05, A-07, A-09, A-10, A-12, A-20, A-24 …)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2dd895a`): Y-G07 biyom şeritleri hazır; sis şeridi ve gece varyantı taslakta, enkaz (Broken Cart) 12.2 sırasının 5. adımı.
-  - Katmanlar: soğuk uzak katman, sıcak ön plan, döşenebilir orta katman, sis şeridi.
-  - Kervan enkazı eşyası.
-  - Gece varyantı.
-  - **Kullanıcı kararı ve kaynaklar:** Bu iş **Y-G07** ile birlikte yapılır (bütün biyomlar, haritadaki konuma göre varyantlar). Dokular Poly Haven ve ambientCG (CC0), nesneler Kenney Survival Kit ve Quaternius (yeni indirmeler QAL), enkaz Quaternius `Broken Cart`. Ayrıntı: `../ICERIK_IHTIYACLARI.md` G-2, G-4.
-
-</details>
-
-### Y-G10T · Şehir ekranı: insanlar ve şehir görünsün
-
-- **Durum:** değişiklik istendi · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir. | 2026-10-19 karar: insanların ışığı ortama aykırı; gece/akşam çok daha az insan; herkes yürüyor, sahne kurgulanmalı (duran, konuşan, satan).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G10T Şehir ekranı: insanlar ve şehir görünsün**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir.
-  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 12.1, 12.2a, 9.3
-  - **Köken:** onaylanmayan **G10** önerisinin altındaki kullanıcı notu.
-  - **Ne:** Kullanıcı notundan türetildi (kervan merkezli şehir önerisi reddedildi): şehir menüsü iyileştirilir, insanlar ve şehir görünür. Savaşın ve kıtlığın içinde bu işi yapmanın motivasyonu halkların kendisidir; ekran bunu hissettirmeli. Kervan şehre girmez. 12.1 ve 12.2a ile birlikte; önce taslak kare onaya.
-  - **Kullanıcı notu:** “Şehir menüsü iyileştirilebilir, evet başka oyuna çok benziyor fakat insanlar ve şehir gözükmeli. Bizim yolda olmamız büyük bir tehlike ve bu işin özünde şu durumda, savaşın ve kıtlığın içinde bu işi yapmamızın bir motivasyonu olmalı, o motivasyon ise halkların kendisi. ayrıca şehre kervan girmez.”
-  - **Kabul:** Onaylı taslak; şehirde insanlar görünüyor; kervan şehir içinde gösterilmiyor.
-
-</details>
-
-### 9.5 · Pazar, erzak ve envanter
-
-- **Durum:** değişiklik istendi · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: oyunda uygulandı - pazar terazisi (MarketScale: mühür içinde mal ve sikke, sepet büyüdükçe parça sayısı artar, kol dengeye göre yaylı eğilir, düşen parça yerine oturur); ekran görüntüsüyle kontrol edildi, onay bekliyor. | 2026-10-19 karar: terazili tek ekran gereksiz; pazar Y-G11T masa ekranı olacak, terazi referans görseldeki gibi.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.5 Pazar, erzak ve envanter** (T-12, T-08)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak).
-  - Üstte fiyatlı mal kartları, altta kervan envanteri.
-
-</details>
-
-### 9.8 · Savaş ekranı
-
-- **Durum:** değişiklik istendi · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: savaş arka planı savaşın olduğu yere göre; karakterlerin altında stilize can barı, can sağ panelden izlenmemeli.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.8 Savaş ekranı** (K-03…K-05)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak).
-  - Alt panel: solda aktif üye, sağda hedef kartı.
-  - Tur madalyonu.
-  - Kritik vuruşta renk değişimi ve yakınlaşma.
-  - `g9_seal` ile uyumlu bir öldürücü darbe mührü.
-
-</details>
-
-### Y-G05 · Savaş ekranını yeniden kur
-
-- **Durum:** onaylandı, uygulanacak · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G05 Savaş ekranını yeniden kur**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si.
-  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 9.8
-  - **Ne:** Biyom başına mekân plakası, figürler ekran yüksekliğinin %30–35'i, kritikte kırmızı mühür. Kullanıcı notu: referans oyunun sahne ve menüleri bugün belgelendi; `belgeler/ART_IKINCI_TUR_REFERANSLARI.md` esas alınır.
-  - **Kullanıcı notu:** “evet, bu yüzden referans oyun sahne ve menülerini dokümante ettik bugün seninle.”
-  - **Kabul:** Yeni savaş ekranı ekran görüntüsüyle onaylandı.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Mekân plakaları Y-G07 katmanlarından. Hayvan düşmanlar: Quaternius Ultimate Animated Animal Pack (elde), OpenGameArt yaban domuzu (Teh_Bucket), kurt (NewDLC), geyik (crownjoshua), hepsi CC0. Yan profilden 8–12 karelik döngüler; siluette 2 px kontur. Vuruş sesi üç katman (Y-H05). `../ICERIK_IHTIYACLARI.md` G-3.
-  - **Literatür:** R20, R21
 
 </details>
 
@@ -385,22 +212,6 @@ Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Her efektin onaylı örneği ve oyundaki karşılığı; parlak mor ve mavi efekt kalmadı.
   - **Kaynaklar ve teknik (CC0 araştırması):** Hazır CC0 mürekkep sıçrama dokusu yok: Krita'da David Revoy 2023 fırça kitiyle (CC0; 2025 kitinin lisansı çelişkili, kullanılmaz) kendimiz üretiriz. Kritik mührü özgün tasarım. Godot'ta `CPUParticles2D` + mürekkep dokuları. `../ICERIK_IHTIYACLARI.md` G-6.
   - **Literatür:** R20
-
-</details>
-
-### 9.9 · Yol HUD'u
-
-- **Durum:** değişiklik istendi · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Son not:** Alt panel (P18) zaten sekmeli: harita ve envanter orada. | 2026-10-19 karar: harita ve envanterle birlikte gösterilecek; sağ üstteki moral/stres/takat paneli kalkar, alt panele iner.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.9 Yol HUD'u** (K-02; çatlak efekti kaldırılacak, bkz. §2.5)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Alt panel (P18) zaten sekmeli: harita ve envanter orada.
-  - `SurvivalGauge` ince çubuk, amblem ve çentiklerle çizilecek.
-  - Harita ve envanter sekmeli alt panel.
-  - Bu iş §8 ile bağlantılı.
 
 </details>
 
