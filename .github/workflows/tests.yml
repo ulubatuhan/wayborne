@@ -1,6 +1,6 @@
 name: Tests
 
-# Her dalda (main dahil) ve her PR'da koşar: projeyi içe aktarır, testleri
+# Her dalda (Wayborne dahil) ve her PR'da koşar: projeyi içe aktarır, testleri
 # çalıştırır ve ayrıştırma hatası varsa düşer. Web derlemesi ve dağıtım yok
 # (kullanıcı kararı: oyun yerelde PC'de oynanır).
 

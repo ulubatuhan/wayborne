@@ -5133,7 +5133,7 @@ Never remove that step to make a build pass.
 **There is no web build any more (user's decision, 2026-10-21).** The game is played locally on PC from a clone; the Web
 export, the GitHub Pages deploy, `export_presets.cfg` and `web/coi-serviceworker.js` were removed. The browser tab
 could not hold the game (about 1.2 GB of imported textures against the tab's memory limit, `SBOX_FATAL_MEMORY_EXCEEDED`).
-`.github/workflows/tests.yml` runs on every push (main included) and every PR: import, the full suite and the
+`.github/workflows/tests.yml` runs on every push (`Wayborne` included) and every PR: import, the full suite and the
 script-error gate described above. Never remove that gate to make a build pass.
 
 ### Local Testing
@@ -5243,7 +5243,7 @@ verir.
 2. Create your first scene in `scenes/main.tscn`
 3. Create scripts in appropriate `scripts/` subfolders
 4. Reference scenes/scripts using `res://` paths
-5. Push to `main`; `tests.yml` runs the suite
+5. Push to `Wayborne` (the only and default branch); `tests.yml` runs the suite
 
 ## Codex
 

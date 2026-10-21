@@ -1,7 +1,7 @@
 # Devam notu (oturum köprüsü)
 
 Bu dosya, oturum limiti dolup çalışma durduğunda bir sonraki oturumun kaldığı yerden devam etmesi içindir.
-Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantısı yok, `main` ve `Wayborne`'a ileri sarma push.
+Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantısı yok; tek dal `Wayborne` (varsayılan), push yalnızca oraya.
 
 ## Çalışma düzeni
 

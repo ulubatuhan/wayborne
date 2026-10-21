@@ -117,7 +117,7 @@ oynamadan dengeye yaklaşmanın tek yolu bu.
 Her push ve PR `tests.yml`'i tetikler: içe aktarım, testler, ve Godot'un
 bastığı ama sessizce geçtiği ayrıştırma hatalarını (`SCRIPT ERROR`,
 `Parse Error`, `Failed to create an autoload` vb.) arayan bir kapı.
-`main`'e (ana dal) giden her şey bu kapıdan geçmiş olur.
+`Wayborne`'a (tek ve varsayılan dal) giden her şey bu kapıdan geçmiş olur.
 
 `olcum.yml` (elle ve haftalık) kariyer simülatörünü koşturup sefer süresi, sefer başına
 kart ve ölüm tablosunu iş özetine yazar (`tools/measure_report.py`). Oyuncu tarafı ölçüm

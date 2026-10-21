@@ -7,22 +7,14 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
 
 - **Wayborne:** Godot 4.2.2 / GDScript ile yapılan 2D kervan oyunu. Ticaret, yol olayları, sıra tabanlı savaş, soy
   ve defter. Hedef **PC (Windows)**; Web derlemesi yalnızca test içindir.
-- **Kaynak:** bu dal, kullanıcının bilgisayarındaki yerel çalışmanın (2026-10-17 → 2026-10-20) tamamıdır. `origin/main`
-  (2026-10-16) üstüne 157 commit ekler.
-- **Diğer dallar:** `main`, `dev`, `ui-hud-redesign`, `claude/merhaba-6bf7co` ve eski yerel dalların hepsi **bu dalın
-  içinde**; bu dalda olmayan tek bir commit'leri yok (2026-10-20'de `git rev-list --count HEAD..<dal>` = 0).
-  Kullanıcı onaylarsa bu dal ana hat olabilir ve diğerleri silinebilir. Silmeden önce kullanıcıya sor, sonra aynı
-  denetimi bir kez daha yap: `git fetch --all && git rev-list --count HEAD..origin/<dal>`.
-- **Dal adı ve gönderim:** bu dal GitHub'da `Wayborne` adıyla duracak (`ulubatuhan/wayborne`), yerel adı
-  `yerel/yapilacaklar-p05-p06`. İlk push denemesi (2026-10-20) token'da `workflow` yetkisi olmadığı için reddedildi; dalın
-  uzakta gerçekten var olduğunu `git ls-remote --heads origin Wayborne` ile doğrula, yoksa kullanıcıya söyle. Kullanıcı açıkça istemedikçe başka push yapma, dal açma ve geçmişi yeniden yazma.
-- **Kullanıcının dal kararı (2026-10-20):** `main` ve `dev` kalacak. `ui-hud-redesign`, `claude/merhaba-6bf7co` ve
-  geri kalan bütün dallar silinecek. Kullanıcı bunları ve sonrasındaki kontrolleri **bu dalda çalışacak Claude'a**
-  bıraktı. Kullanıcı kendisi bazılarını silmiş olabilir: önce `git fetch --all --prune && git branch -r` ile gör.
-  Uzak depoda 2026-10-20'de bulunan uçlar: `main` 008ecb2, `claude/merhaba-6bf7co` 008ecb2 (main ile aynı), `dev`
-  834734f, `ui-hud-redesign` ecfdba2; dördü de `Wayborne`'in atası (`git merge-base --is-ancestor <sha> origin/Wayborne`
-  doğrulandı). Bunların dışında bir dal görürsen (ör. `claude/init-*`) silmeden önce aynı komutla ata olup olmadığına bak,
-  değilse kullanıcıya sor.
+- **Kaynak:** bu dal, kullanıcının bilgisayarındaki yerel çalışmanın (2026-10-17 → 2026-10-20) tamamıdır. eski `main` ucu
+  `008ecb2` (2026-10-16) üstüne 157 commit ekler.
+- **Tek dal: `Wayborne` (kullanıcı kararı 2026-10-21).** GitHub'da (`ulubatuhan/wayborne`) yalnızca `Wayborne` var ve
+  varsayılan dal o. `dev`, `ui-hud-redesign`, `claude/merhaba-6bf7co` silindi, `main` de varsayılan dal
+  `Wayborne` yapılınca silinir; hepsi bu dalın atasıydı (silmeden
+  önce `git merge-base --is-ancestor` ile doğrulandı), kaybolan commit yok. Her iş doğrudan `Wayborne`'a push edilir;
+  başka dal açma, geçmişi yeniden yazma.
+- **Commit iletileri:** imza ya da oturum bağlantısı (`Claude-Session:` vb.) **yok** - kullanıcı kuralı.
 
 ## 2. Okuma sırası
 
@@ -155,16 +147,8 @@ Kare atlası yeniden paketlendiyse sayfa adları değişir. `--import` yeni dosy
 
 ## 8. Bu dalı benimsemek için önerilen ilk adımlar
 
-1. `CLAUDE.md`'yi ve bu dosyayı oku; `git log --oneline origin/main..HEAD` ile işi gör.
+1. `CLAUDE.md`'yi ve bu dosyayı oku; `git log --oneline -30 origin/Wayborne` ile son işi gör.
 2. Testleri koştur; 0 kalan bekleniyor.
-3. **Dal temizliği (kullanıcı bunu sana bıraktı):**
-   - `git fetch --all --prune`, `git branch -r`.
-   - `Wayborne`'in GitHub'da 157 commit ile (origin/main'den ileride) tamam olduğunu kontrol et.
-   - `main` ve `dev` dışındaki dalların uçları `origin/Wayborne`'in atası mı bak, öyleyse sil
-     (`git push origin --delete <dal>`), değilse kullanıcıya sor. `main` ve `dev`'e dokunma.
-   - Varsayılan dal (Settings → Branches) hâlâ `main` olabilir; bunu değiştirmek ya da `Wayborne`'i ana hat yapmak
-     kullanıcının kararı, sormadan yapma.
-   - Yerel dalları (`main`, `yerel/yapilacaklar-p01-p04`) da kontrol et; silmeden önce sor.
-   - Kontroller: GitHub Actions `Tests` iş akışı `Wayborne` üzerinde yeşil mi (LFS'li klonda `lfs: true`); `git lfs
-     ls-files` harita karolarını gösteriyor mu; `git grep` ile yasak kelime taraması boş mu.
+3. **Kontroller:** GitHub Actions `Tests` iş akışı `Wayborne` üzerinde yeşil mi; `git grep` ile yasak kelime taraması
+   boş mu. Dal temizliği bitti (yalnız `Wayborne`).
 4. Sonra DEVAM NOKTASI'ndan devam et.
