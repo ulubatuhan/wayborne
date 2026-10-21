@@ -3126,6 +3126,9 @@ paid for. A new game starts in a city (`character_creation.gd` →
   it and raises a red horizon and three smoke columns; overcast/rain/fog/storm (the city's own seeded weather,
   `RouteWeather.at("city|<id>", day)`, never stored) turns it grey. Colour only, so the click mask stays aligned.
   `tests/screenshot_city_moods.gd` prints all three at noon and night.
+- **A gate's wall runs behind its towers (user's decision A5).** The gate scenes (`settlement_gates.py`, `gates.json`)
+  put a `TallWall` piece behind every watchtower (`WALL_BEHIND_DEPTH`), so the curtain wall meets the gate instead of
+  stopping at an open tower base. Known open item: the tower flags take the stone tint (K13, to fix later).
 - **The square is not empty, and it is staged, not crowded (task Y-G10T).** `TownsfolkLayer` places small scenes from
   the approved drafts: at night a watchman with a lantern, two people talking, one walking home; at dusk and by day a
   vendor, an old man on a crate, a couple and a second walker join. Each figure takes the light of the spot it stands
