@@ -9,6 +9,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_turu_gorsel import G, HATALAR  # noqa: E402
+
 BURASI = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(BURASI)
 
@@ -295,6 +298,10 @@ def main():
           "",
           "Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti' yaparım. Bozuksa maddenin yanına ne gördüğünüzü yazın.",
           ""]
+    md += ["## Bulduğum hatalar", ""]
+    for durum, baslik, ayrinti in HATALAR:
+        md.append(f"- **[{durum}]** {baslik}: {ayrinti}")
+    md.append("")
     sayac = 0
     for ekran, satirlar in EKRANLAR:
         md += [f"## {ekran}", ""]
@@ -305,6 +312,14 @@ def main():
                    f"  - Nereye: {nasil}",
                    f"  - Görmeli: {gorulmeli}",
                    f"  - Bozuksa: {bozuk}"]
+            if kimlik in G:
+                for dosya, alt in G[kimlik]["img"]:
+                    md.append(f"  - ![{alt}](test_turu_gorseller/{dosya})")
+                md.append(f"  - **Ben baktım:** {G[kimlik]['ben']}")
+                if G[kimlik]["estetik"]:
+                    md.append(f"  - **Size kalan (zevk):** {G[kimlik]['estetik']}")
+            else:
+                md.append("  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._")
         md.append("")
     md += ["## 9. Otomatik kanıtlı (gözle bakmanız gerekmeyen)", "",
            "Bu görevlerin kabulü testle ya da belgeyle yapıldı. Onay vermeniz yeterli; itirazınız yoksa kapatırım.", ""]
@@ -318,7 +333,22 @@ def main():
     # HTML: onay kutularını tarayıcı (yerel depolama) hatırlar.
     def esc(s):
         return html.escape(s)
+    def gorsel_html(kimlik):
+        if kimlik not in G:
+            return '<span class="r nv"><i>Durum</i> Bu ortamda görüntülenemedi; gözle bakılması gerekir.</span>'
+        g = G[kimlik]
+        out = "".join(f'<figure class="im"><img loading="lazy" src="test_turu_gorseller/{esc(d)}" alt="{esc(a)}">'
+                      f'<figcaption>{esc(a)}</figcaption></figure>' for d, a in g["img"])
+        out += f'<span class="r ok"><i>Ben baktım</i> {esc(g["ben"])}</span>'
+        if g["estetik"]:
+            out += f'<span class="r ze"><i>Size kalan</i> {esc(g["estetik"])}</span>'
+        return out
+
     govde = []
+    govde.append("<section><h2>Bulduğum hatalar</h2>")
+    for durum, baslik, ayrinti in HATALAR:
+        govde.append(f'<div class="h {esc(durum)}"><b>{esc(durum)}</b> <span><strong>{esc(baslik)}.</strong> {esc(ayrinti)}</span></div>')
+    govde.append("</section>")
     for ekran, satirlar in EKRANLAR:
         govde.append(f"<section><h2>{esc(ekran)}</h2>")
         for kimlik, nasil, gorulmeli, bozuk in satirlar:
@@ -328,7 +358,7 @@ def main():
                 f'<b>{esc(kimlik)}</b> {esc(g.get("baslik", ""))}</span>'
                 f'<span class="r"><i>Nereye</i> {esc(nasil)}</span>'
                 f'<span class="r"><i>Görmeli</i> {esc(gorulmeli)}</span>'
-                f'<span class="r b"><i>Bozuksa</i> {esc(bozuk)}</span></label>')
+                f'<span class="r b"><i>Bozuksa</i> {esc(bozuk)}</span>' + gorsel_html(kimlik) + '</label>')
         govde.append("</section>")
     govde.append("<section><h2>9. Otomatik kanıtlı</h2>")
     for kimlik, ne in OTOMATIK:

@@ -9,24 +9,38 @@ emir paneli: **F2**, yardım: **F3**, Durum sekmesi: **Tab**.
 
 Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti' yaparım. Bozuksa maddenin yanına ne gördüğünüzü yazın.
 
+## Bulduğum hatalar
+
+- **[düzeldi]** Ayarlar'da müzik kaydırıcısı: Oyunda müzik olmamasına rağmen kaydırıcı duruyordu; gizlendi.
+- **[düzeldi]** Yeni oyun ekranında Türkçe kalan iki başlık: 'Kimlik' ve 'Statlar' yazıları İngilizce arayüzde Türkçe çıkıyordu; çeviri anahtarına bağlandı.
+- **[açık]** Hub: kapı yazısı lider adının üstüne biniyor: 'Vastrevar Kapısı' etiketi ile lider adı aynı yükseklikte çakışıyor.
+- **[açık]** Savaş sahnesi taşması (görev Y-G05): 1920 genişlikte üçüncü düşman yarım, dördüncü görünmüyor; alttaki günlük kutusu ekranın yarısını boş kaplıyor.
+- **[açık]** Kıyafet Dolabı: boş yuvalar ama figür giyinik: Altı yuva 'boş' diyor, figür ise yelek, eldiven, bot giymiş; taban kıyafet mi, bir uyumsuzluk mu araştırılacak.
+- **[not]** Bu ortamda gösterilemeyenler: Dünya haritasının zemini (Git LFS dokuları indirilmedi, harita boş koyu görünüyor), saat/hava/gece varyantları, kamp, olay kartı zincirleri, defter sayfaları: bunlar bu araçla çekilemedi, kullanıcının bakışına kaldı.
+
 ## 1. Ana menü ve yeni oyun
 
 - [ ] **Y-D01** Kader Modu (ironman) ve açık zorluk ayarları
   - Nereye: Ana menü → Yeni Soy. Açılan ekranda zorluk bölümüne bak.
   - Görmeli: Kader Modu seçeneği ve üç açık ayar (ölümcül vuruş direnci, açlık hasarı, olay sertliği) yazıyla görünür; Standart seçiliyken eskisi gibi oynanır. Kader Modunda oyun içi menüde elle kayıt kapalı ve nedeni yazıyor.
   - Bozuksa: Gizli bir zorluk ya da nedensiz kilitli düğme
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-D03** Soy mirası: kervan bitince ne kalır
   - Nereye: Bir oyunu bitir (ya da DevPanel F1 ile soyu bitir) → yeni oyun.
   - Görmeli: Önceki soyun mezarları yola/haritaya soluk döner, itibarın bir payı gelir, deftere eski soyun adı yazılır. `user://lineage_archive.json` oluşur.
   - Bozuksa: Mezarlar hiç görünmüyor ya da itibar sıfırlanmıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-H07** Erişilebilirlik ve oynanış ayarları
   - Nereye: Ana menü → Ayarlar; sonra yol ve savaşta etkisine bak.
   - Görmeli: Metin boyutu dört kademe (menüler büyür/küçülür, taşma yok); desenli şerit açıkken savaştaki kan şeridi parçalı çiziliyor; otomatik duraklatma açıkken yol işareti/karşılaşma işaretinde zaman bir tuş ya da tıklamaya kadar duruyor. Hızlandırma seçeneği yok. Ayarlar kayıt dosyasında değil `settings.cfg`'de.
   - Bozuksa: Büyük metinde taşan düğme ya da duraklatma kapalıyken zamanın durması
+  - ![Ayarlar ekranı](test_turu_gorseller/ayarlar.jpg)
+  - **Ben baktım:** Yazı boyutu, renk körlüğü (desenli şerit) ve 'yolda bir şey belirince duraklat' anahtarları var, hizalı, taşma yok. Müzik kaydırıcısı hâlâ duruyordu; oyunda müzik olmadığı için gizledim.
 - [ ] **Y-A01** Oyun vaadini yaz ve belgelere işle
   - Nereye: Doküman kontrolü: `CLAUDE.md` en üstü.
   - Görmeli: Vaat cümlesi ve dört sütun yazılı. Cümle sizin sesinizle uyuşuyor mu? Uyuşmuyorsa değiştirin (kutu 'öneri, onay bekliyor' diyor).
   - Bozuksa: Cümle size yabancı geliyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 2. Şehir ekranı ve mekânlar
 
@@ -34,54 +48,80 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Bir şehre gir; sabah/gündüz/akşam/gece için DevPanel F1 ile saati değiştir.
   - Görmeli: Şehir önü resmi saate göre değişiyor, şehir adı ve ihtiyaç levhaları okunuyor.
   - Bozuksa: Saat değişse de resim aynı
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **N33** Yerleşim menülerinin gün evresi varyantları: sabah, gündüz, akşam, gece
   - Nereye: Pazar, lonca, taverna, han, kilise ekranlarını sırayla aç (saat değiştirerek).
   - Görmeli: Her mekânın arka planı günün evresine uyuyor; geçişte kesilme/titreme yok.
   - Bozuksa: Bir mekân hep aynı evrede kalıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **9.4** Mekân ekranları
   - Nereye: Şehirden sırayla: Pazar, Lonca, Taverna, Han, Kilise, Terzi, Kıyafet Dolabı.
   - Görmeli: Hepsi aynı görsel dilde (koyu masa, ince çizgili paneller); metin okunur; geri düğmesi her zaman görünür.
   - Bozuksa: Gri/kutu ekran, taşan yazı, ulaşılamayan geri düğmesi
+  - ![Şehir: sol dört mekân düğmesi, sağda brifing, altta şerit](test_turu_gorseller/sehir.jpg)
+  - ![Pazar (terazi)](test_turu_gorseller/pazar.jpg)
+  - ![Taverna](test_turu_gorseller/taverna.jpg)
+  - ![Kilise](test_turu_gorseller/kilise.jpg)
+  - ![Kıyafet Dolabı + terzi tezgâhı](test_turu_gorseller/dolap.jpg)
+  - **Ben baktım:** Mekânlar açılıyor, her biri kendi sahnesiyle; yazılar sığıyor, düğmeler görünür. Kıyafet dolabında kilitli satın alma 'altın yetmiyor' nedeniyle soluk ve gerekçeli. Not: şehirde şu an tavernada 'Han' düğmesi yok (bu yerleşim türünde yok).
+  - **Size kalan (zevk):** Taverna kalabalığı hâlâ düz gri-bej gölgeler; kasvetli bir han için yeterince canlı mı, yoksa figürleri çeşitlendirelim mi?
 - [ ] **9.12** Kilise ve mezarlık arka planı
   - Nereye: Kilise → mezarlık bölümü; ölüm olmuşsa 'nöbet' hâli.
   - Görmeli: Mezarlık arka planı iki hâlde (sakin / nöbet) görünüyor.
   - Bozuksa: Arka plan boş ya da yanlış hâl
+  - ![Kilise ve mezarlık](test_turu_gorseller/kilise.jpg)
+  - **Ben baktım:** Mezarlık sahnesi çiziliyor, mezar taşları ve ay görünüyor, metin okunuyor. 'Nöbet' hâli bu görüntüde yok (ölüm gerektirir).
+  - **Size kalan (zevk):** Soldaki ay diski metin sütununa yakın duruyor; kompozisyonu rahatsız ediyor mu?
 - [ ] **12.2a** Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı
   - Nereye: Şehir kapısı: yola çıkarken ve şehre varırken kapıyı izle.
   - Görmeli: Kapı sur geçidi olarak çizili (düz renk kutu değil); kanat lider yaklaşınca kalkıyor.
   - Bozuksa: Düz dikdörtgen ya da kanat takılıyor
+  - ![Şehir kapısı (hub)](test_turu_gorseller/kapi.jpg)
+  - **Ben baktım:** Kapı, kuleler ve duvar çiziliyor; 'Vastrevar Kapısı' yazısı ve 'tıkla ya da E' ipucu var. Hata: kapı yazısı lider adının üstüne biniyor (aşağıdaki hata listesinde).
+  - **Size kalan (zevk):** Kapının gri bloklu kuleleri yeterince 'kervan yolu' hissi veriyor mu, yoksa ahşap/taş doku mu istersiniz?
 - [ ] **Y-C16** İşe almayı zorlaştır ve kişileştir
   - Nereye: Taverna/Meydan/Lonca → işe alım panosu (birkaç şehirde).
   - Görmeli: Pano çoğu zaman 1-2 kişi; her adayın neden geldiği yazıyor; savaş/veba haberinde bir kişi eksik; fiyatlar önceki sürümden pahalı.
   - Bozuksa: Pano hep dolu ya da adayın hikâyesi yok
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C10** Fiyat defteri: bilgi eskir, söylenti yanıltır
   - Nereye: Pazar: bir şehre ilk varışta ve 20+ gün sonra komşu fiyatlarına bak; taverna'da sohbet et.
   - Görmeli: Gördüğün fiyatların yanında 'kaç gün önce' yazıyor, 20 günden eskiler soluk. Söylenti bazen yalan çıkıyor.
   - Bozuksa: Tarihsiz fiyat ya da hep doğru söylenti
+  - ![Taverna → Söylentiler sekmesi](test_turu_gorseller/taverna.jpg)
+  - **Ben baktım:** 'Tehlike: bilinmiyor (etrafa sor)' satırları ve 'söylenti satılmaz, konuş' açıklaması görünüyor.
 - [ ] **Y-C11** Gizli fiyat katmanlarını görünür kıl
   - Nereye: Pazar satırının üstüne gel.
   - Görmeli: Fiyat satırında kısa etiketler (mevsim, arz baskısı, haber vb.), üstüne gelince katman başına bir cümle.
   - Bozuksa: Fiyat değişti ama nedeni yazmıyor
+  - ![Pazar satırlarında fiyat etiketleri](test_turu_gorseller/pazar.jpg)
+  - **Ben baktım:** Her satırın altında kısa etiketler (Yerleşim · Pahalılık · Mevsim) görünüyor. Üstüne gelince açılan açıklamayı çekemedim.
 - [ ] **Y-C19** Mal çeşitliliği: bozulan, kaçak, nadir
   - Nereye: Pazar: balık, kaçak tuz ve mühür alıp satmayı dene; 20+ adet toptan al; aldığın şeyi hemen geri sat.
   - Görmeli: Balık yolda bozuluyor; kaçak tuz yalnız han'da alınıyor; toptan alımda indirim; aynı ziyarette geri satış alış fiyatının en çok %90'ı.
   - Bozuksa: Alıp aynı yerde satarak kâr edebiliyorsun
+  - ![Kaçak tuz satırı](test_turu_gorseller/pazar.jpg)
+  - **Ben baktım:** 'Mühürsüz tuz: kaçak, yalnızca kervansarayda bulunur' satırı listede, alış fiyatı yerine tire var. Toptan indirim ve geri satış sınırı bu görüntüde görünmez; onlar testlerle kanıtlı.
 - [ ] **Y-C02** Dinamik kontratlar ve yeni kontrat ekranı
   - Nereye: Tüccar Loncası → kontrat panosu (iki şehirde karşılaştır).
   - Görmeli: Pano her varışta farklı 4-7 ilan; teslimat, refakat, yolcu, kaçak yük türleri; acil olanlar kısa süreli ve daha yüksek ücretli.
   - Bozuksa: Her seferinde aynı ilanlar
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C05** Sakatlık, hastalık, hekim ve ilaç stoğu
   - Nereye: Kilise → hekim (yaralı/hasta bir yoldaşla; veba şehrine varış).
   - Görmeli: Hekim altın + şehrin ilaç stoğundan bir birim harcıyor; stok yoksa kilitli ve nedeni yazıyor. Veba şehrine varışta bulaşma olabiliyor.
   - Bozuksa: Stok bitince bile iyileştiriyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-F04T** Vagon atölyesi ekranını özelleştir
   - Nereye: Bir vagona yürü/tıkla (hub'da vagon etkileşimi) → atölye.
   - Görmeli: Vagonun kendi yükü ve tarif listesi; yapılamayan tarif nedeniyle kilitli; başka vagondaki malzeme sayılmıyor.
   - Bozuksa: Tarif başka vagonun malzemesini kullanıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-F03** Atölye ve vagon envanterini anlamlandır
   - Nereye: Atölyede her tarifi bir kez yap (sargı, branda onarımı, kürk şapka, balık yağı, meşale).
   - Görmeli: Her ürünün bir kullanım yeri var (sargı savaşta/kampta, yağ fenerde, meşale gece yürüyüşünde).
   - Bozuksa: Üretilip hiçbir işe yaramayan eşya
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 3. Karakter, kadro ve defter kartları
 
@@ -89,22 +129,31 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Karakter ekranı (kadrodan bir kişi).
   - Görmeli: Stat ve yetkinlik bölümü yeni görsel dilde; sekiz stat okunuyor; kıyafet önizlemesi yanında.
   - Bozuksa: Taşan satır, kesik yazı
+  - ![Karakter ekranı](test_turu_gorseller/karakter.jpg)
+  - **Ben baktım:** Üç sütun (kimlik, nitelikler, beceriler) düzgün; sekiz stat ikonlu ve çubuklu; kanama/yanma dirençleri, can ve stres satırı var. Figür çiziliyor (asa taşıyan çıplak başlı manken).
+  - **Size kalan (zevk):** Figürün sahne içindeki boyu ve kutudaki boşluk (üst-alt) dengeli mi?
 - [ ] **9.7** Roster kartı ve seviye rozeti
   - Nereye: Kadro (party) ekranı ve yol altındaki Kadro sekmesi.
   - Görmeli: Kişi kartında seviye rozeti net; kart içeriği kesilmiyor.
   - Bozuksa: Rozet okunmuyor
+  - ![Kadro ekranı](test_turu_gorseller/kadro.jpg)
+  - **Ben baktım:** İki kart (1. ve 2. sıra), lider halkası, can çubuğu, altta seçili kişinin ayrıntısı; yetenekler 'bu sıradan kullanılamaz' diye soluk gerekçeli.
+  - **Size kalan (zevk):** Kart boyutu ve çadır arka planı hoşunuza gidiyor mu?
 - [ ] **Y-F09** Görevler: öncü, ortancı, artçı; sınıflar ayrı
   - Nereye: Karakter ekranı → görev ata (öncü / ortancı / artçı).
   - Görmeli: Üç rol var (altı eski görev bu rollerin altında etki olarak duruyor); sınıf görev gücünü çarpmıyor; eski kayıt yüklenince roller doğru dağılıyor.
   - Bozuksa: Eski kayıtta görev kaybolması
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C17** Yoldaşın kendi hikâyesi ve ilişkileri
   - Nereye: Yoldaşın karakter ekranı; kampta bağ yüksekse kamp hikâyesi.
   - Görmeli: Her yoldaşın geçmişi ve kişisel hedefi (tanıdıkça) yazıyor; kamp hikâyesi üç bölüm; üçüncüsü (sır) en ağır kırgınlığı hafifletiyor.
   - Bozuksa: Hikâye hiç açılmıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-F01** Moral ve takat: kervanın nefesi, ama takat bedende kalır
   - Nereye: Yolda hızlı tempo, gece yürüyüşü, kamp; karakter kartında takat.
   - Görmeli: Her kişinin yorgunluğu ayrı; en yorgun kişi kervanın takatini bağlıyor ve adı yazıyor; kamp -30, şehir -60.
   - Bozuksa: Yorgunluk hızı değiştiriyor (değiştirmemeli)
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 4. Planlayıcı ve dünya haritası
 
@@ -112,38 +161,47 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Şehirden yol seçip planlayıcıyı aç.
   - Görmeli: Tehlike yüzdesinin dökümü: taban, yol durumu, dünya olayı, zamanla büyüme satırları.
   - Bozuksa: Tek bir sayı, nedensiz
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B13** Aynı rotada farklı yol: mevsim ve kestirmeler
   - Nereye: Aynı rotayı farklı mevsimlerde planla; 5+ günlük rotada kestirme seç.
   - Görmeli: İlkbaharda bataklık, yazın kuruma, kışın dağda yavaşlama; kestirme -%20 gün ve tehlike +; erzak rezervi buna göre.
   - Bozuksa: Erzak kestirmede yetmiyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **8.5** Yazı ile yolun çakışmasını gider
   - Nereye: Haritayı aç (M) ve kenti/yolları gez.
   - Görmeli: Kent adlarının altında yol çizgisi okumayı bozmuyor; adlar IM Fell yazı tipinde ve okunur.
   - Bozuksa: Yazı yol çizgisine biniyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **8.7** Boğaza ad ver
   - Nereye: Haritada boğazı bul.
   - Görmeli: Boğazın kesin bir adı var (geçici 'Kesgrav Boğazı' kalmamış olmalı; ad lore'a uyuyor mu?).
   - Bozuksa: Yer tutucu ad
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **8.10** Harita saate göre kararıp aydınlansın (gündüz, akşam, gece)
   - Nereye: Haritayı gündüz/akşam/gece aç (saat değiştir).
   - Görmeli: Harita akşam sıcak, gece mavi-gri kararıyor; yazı her saatte okunuyor.
   - Bozuksa: Gece harita okunmaz oluyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **8.11** Şehirlerde ve yerleşimlerde küçük ışıklar; akşam ve gece hafifçe parıldasın
   - Nereye: Haritayı akşam/gece aç, yakınlaş.
   - Görmeli: Şehir ve yerleşimlerde küçük ışıklar akşam belirir (şehir 6-12, kasaba 3-5, köy 1-2, harabede yok); yakınlaşınca boyutları sabit.
   - Bozuksa: Işık harabelerde de var ya da hiç yok
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-G09** Haritada kervanın mürekkep izi
   - Nereye: Bir sefer bitir, haritaya bak.
   - Görmeli: Bitmiş yolun ince mürekkep izi ve kamp yerleri haritada kalıyor.
   - Bozuksa: İz yok ya da kayıttan yüklenince kayboluyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **N29** Vadiye özgü yeşil çayır biyomu
   - Nereye: Vadi şehri çevresindeki yola çık.
   - Görmeli: Vadiye özgü yeşil çayır katmanı (kuru ot değil); biyom geçişi yumuşak.
   - Bozuksa: Vadi hâlâ kuru bozkır
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **N30** Bozkırda yol durakları arasını aç
   - Nereye: Bozkırdan geçen uzun bir yola çık.
   - Görmeli: Duraklar arası en az 6 gün; 35 günlük yolda 5 durak yok.
   - Bozuksa: Durak peş peşe
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 5. Yol: yürüyüş, figürler, kamp
 
@@ -151,38 +209,54 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Yola çık, atlı lideri yandan izle.
   - Görmeli: Binici atın sırtında biraz geride, eğerin üstünde oturuyor; dönüşte de aynı.
   - Bozuksa: Binici atın boynunda/önünde
+  - ![Atlı lider (sağda)](test_turu_gorseller/yol.jpg)
+  - **Ben baktım:** Lider yandan, atın üstünde, mızrak sırtında; at ve binici birbirine oturuyor, havada değil.
 - [ ] **10.2** At üstündeki binici yürür gibi kol sallamaya devam ediyor
   - Nereye: Yürürken liderin kollarına bak.
   - Görmeli: Atlı lider yürür gibi kol sallamıyor; kollar sakin (oturma/ride dinlenme karesi).
   - Bozuksa: Kollar sallanıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **10.4** Vagonu çeken hayvanlar vagona bağlı görünmüyor
   - Nereye: Vagonu çeken öküze bak.
   - Görmeli: Çeki oku öküzün boynuna uzanıyor, boyunduruk öküzün üstünde çizili; öküz vagona bağlı okunuyor.
   - Bozuksa: Öküz vagondan kopuk
+  - ![Vagonu çeken öküzler](test_turu_gorseller/yol.jpg)
+  - **Ben baktım:** Öküzler vagonun önünde, boyunduruk çizgisiyle bağlı; boyları insanla orantılı (omuz hizasında boynuz).
 - [ ] **12.2b** Yol üstündeki kule (durak), kamp kurulduktan sonra kadrajdan bir anda kaçıyor
   - Nereye: Bir yol durağının (kule vb.) yanında kamp kur.
   - Görmeli: Kamp başlayınca durak kadrajdan kaçmıyor, yerinde duruyor.
   - Bozuksa: Durak bir anda uçuyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **12.2c** Kamp: karakterler ateşe çok yavaş yürüyor (3x'te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın
   - Nereye: Akşam kamp kur; ateşe yürüyüşü izle (1x hızda).
   - Görmeli: Herkes en çok ~3 sn'de ateşe varıyor; kamp süresi herkes oturunca başlıyor; sabah olmadan ateşteler.
   - Bozuksa: Yürüyüş uzun sürüyor, sabah oluyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **12.2e** Yol sahnesi estetik olarak güzel değil; her detayı yeniden tasarla: çimen, yol, arka plan, güneş
   - Nereye: Yol sahnesini gündüz/akşam/yağmurda izle.
   - Görmeli: Çimen, yol, arka plan ve ışık tek prodüksiyon gibi; zemin kaymıyor, yol ortada.
   - Bozuksa: Yol 'Excel gibi' ya da zemin kayıyor (kararını yaz: yeniden tasarım gerekir mi?)
+  - ![Yol, fırtınada şafak](test_turu_gorseller/yol.jpg)
+  - ![Yol, öğleden sonra, Durum sekmesi](test_turu_gorseller/durum.jpg)
+  - **Ben baktım:** Katmanlı manzara (uzak sırt, kuru ot, öndeki karanlık tarla), yağmur, soluk güneş; kervan, öküzler, atlı lider çiziliyor. Gündüz/akşam sürümlerini bu araçla çekemedim.
+  - **Size kalan (zevk):** Fırtınadaki kuru gövdeler 'direk' gibi duruyor: ağaç gibi mi okunuyor, yoksa dal ekleyelim mi?
 - [ ] **Y-B09** Yolu dolu yap, sonra hızlandırmayı kaldır
   - Nereye: Yolda bir süre bekle ve hızlandırma düğmesini ara.
   - Görmeli: Hızlandırma yok (yalnızca 0.5x ve 1x); yol boş gelmiyor: yaklaşık 60-90 sn'de bir karar ya da bilgi var.
   - Bozuksa: Boş sessiz dakikalar
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **N23** Eski HUD parçalarını kaldır
   - Nereye: Yolda eski HUD parçalarını ara.
   - Görmeli: Eski üst/alt bar kalıntısı yok; yalnızca gösterge plakası ve kontrol paneli var.
   - Bozuksa: Çift gösterge, üst üste binen yazı
+  - ![Yeni HUD](test_turu_gorseller/durum.jpg)
+  - **Ben baktım:** Üstte saat/hız/hava şeridi, altta sekmeler (Kadro/Durum/Yük/Harita/Defter) ve düğmeler; eski parçalar yok. Durum sekmesinde dört şişe/damla gösterge ve 'Sorunlar' listesi var.
+  - **Size kalan (zevk):** Alt şerit düğme sayısı (10) kalabalık mı?
 - [ ] **5.1** `_process` döngülerinin gereksiz çalışmasını durdur
   - Nereye: Menüde, şehirde, yolda 2-3 dakika dur; kumanda ve sahne geçişlerini dene.
   - Görmeli: Ortam animasyonu görünmezken çizilmiyor; terazi dengedeyken titremiyor; kumandada her şey çalışıyor; sahne geçişi bozulmuyor.
   - Bozuksa: Kumanda ya da geçiş bozuldu
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 6. Yol: insanlar, işaretler, hava, gece
 
@@ -190,86 +264,107 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Lideri bir yoldaşın yanına yürüt ve bekle.
   - Görmeli: Yoldaşın başında kısa söz balonu; satır log'a da yazılıyor; aynı anda en çok iki balon.
   - Bozuksa: Balon çıkmıyor ya da üst üste biniyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B01** Yol önerilerini (R0–R1) ana iş olarak uygula
   - Nereye: Birkaç gün yürü; farklı yoldaşlarla yan yana ol.
   - Görmeli: Konu seçimi: kırgınlık > stres > geçmiş > görev > kültür > hava > sohbet; aynı konu birkaç gün dinleniyor.
   - Bozuksa: Hep aynı cümle
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **R1** İnsanlar
   - Nereye: Kampta hikâye (bağ yüksek) ve dostluk/rekabet.
   - Görmeli: Dostlar kolonda yakın yürür, rakipler uzak; sıkıntılı biri bazen kendi başına bir şey yapar (ekmeğini paylaşır, dua eder).
   - Bozuksa: Kimse hiç kendi kendine davranmıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B02** Yol yönetmeni: gerilimi kervanın durumuna göre ayarla
   - Nereye: Uzun bir yolda 'sessiz' günler ve ağır bir karttan sonraki günü izle.
   - Görmeli: Sessiz günler birikince kart ihtimali artıyor; ağır karttan sonra rahatlık; gece işaretler sıklaşıyor (ateş/nöbet/fener bunu azaltıyor).
   - Bozuksa: Üç sessiz gün arka arkaya ya da iki ağır kart arka arkaya
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B03** İşaretleri bulmacaya çevir: belirsizlik ve bedel
   - Nereye: Yolda duman/gıcırtı/arkada kuş gibi işaretlere git ve görmezden gel (iki ayrı sefer).
   - Görmeli: Gidince gerçek yüzü ve küçük ödülü açılıyor; görmezden gelince o gerçeğin bedeli ödeniyor; bazı gerçekler bedelsiz.
   - Bozuksa: İşaretin türü cevabı veriyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B04** Dikkat bölgelerine yeri doldurulamaz roller ver
   - Nereye: Rol sahibi (öncü/ortancı/artçı) varken lideri başka bölgede tut.
   - Görmeli: Rol sahibi kendi bölgesindeki işareti liderin yerine yakalayabiliyor (saatlik ~%3.5).
   - Bozuksa: Rol hiçbir fark yaratmıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B05** Havaya karşı küçük kararlar
   - Nereye: Farklı havalarda emir panelindeki küçük kararlar.
   - Görmeli: Her hava 1-2 tek tıkla karar (erken çık, yağmurdan önce it, çamur kestirmesi, fener, fırtınada sığın); sonuçları yazılı.
   - Bozuksa: Karar etkisiz ya da erzak sözü bozuluyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C20** Fener ya da meşaleyle gece yürüyüşü
   - Nereye: Geceye kadar yürü; fener/meşale yak ve yakma.
   - Görmeli: Işıksız gece takat ve tehlike bedeli; fener gece 1 yağ, meşale 2; liderde parıltı.
   - Bozuksa: Gece bedelsiz
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **R4** Risk
   - Nereye: Nehir geçidi olan bir yol (ford) ve gece yürüyüşü.
   - Görmeli: Su seviyesi (düşük/orta/yüksek) kartta; doğru geçiş seçeneği açık, yanlış olanlar nedenle kilitli; kimse ölmüyor, vagon kaybolmuyor.
   - Bozuksa: Geçişte ölüm/vagon kaybı
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B10** Başka kervanlarla karşılaşma
   - Nereye: Yolda başka kervanlarla karşılaş (birkaç sefer).
   - Görmeli: Askerî konvoy (borç/arama), mülteci (yoldaş), hacı, rakip tüccar (bilgi/iftira) kartları.
   - Bozuksa: Karşılaşma hiç olmuyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B06** Yolda erzak kaynağı: av, toplama, köy
   - Nereye: Yolda av, köy durağı ve toplama.
   - Görmeli: Vahşi hayvan zaferi +10 erzak; köyde birim fiyat şehirden pahalı; toplama +10 erzak ve +1 gün.
   - Bozuksa: Erzak bedava geliyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B07** Sofrayı anlamlı karar yap: erzak türleri
   - Nereye: Akşam sofra panelini aç (şarap/bal/balık varken).
   - Görmeli: Çeşni yalnızca panel açıkken teklif ediliyor; erzak payı ve planlayıcının sözü değişmiyor.
   - Bozuksa: Standing order çeşni harcıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B12** Kampı karar anına çevir; ertesi günün dizilişi
   - Nereye: Kampta nöbet ve formasyon.
   - Görmeli: Öncü +1 stres/gün; nöbet ertesi günün tehlikesini düşürüyor; akşam en çok iki eylem.
   - Bozuksa: Kamp panelinde sıkışma
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B08** Günün satırı: akşam kampında defter cümlesi
   - Nereye: Akşam kampında 'günün satırı' (defter cümlesi).
   - Görmeli: O günün en ağır olayına göre üç cümle sunuluyor; birini seçiyorsun ya da hiçbirini; yazmıyorsun.
   - Bozuksa: Cümleler sayı içeriyor ya da yazı kutusu çıkıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-B11** Yolun hafızası: mezarlar, enkaz, eski kül
   - Nereye: Biri öldükten/vagon kaybından sonra o yoldan tekrar geç.
   - Görmeli: Mezar, kayıp vagonun enkazı, kamp külü yolda görünüyor; geçerken log'a satır (lider önde ise ad ve neden).
   - Bozuksa: Anıtlar yerinde değil/yönden bağımsız kayıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **R2** Hafıza
   - Nereye: Yukarıdaki üç madde birlikte: mezar + gün satırı + kamp külü.
   - Görmeli: Defter ve yol aynı hafızayı gösteriyor.
   - Bozuksa: Defterde olup yolda görünmeyen
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-F05** Tüccar mizacını yola bağla
   - Nereye: Tüccar refakat al; yolda kartlar.
   - Görmeli: Hırsız tüccar gece kaçıyor, çaresiz olan tehlikede dönmek istiyor, kinci kavga çıkarıyor, sadık erzak paylaşıyor.
   - Bozuksa: Tüccar hiç tepki vermiyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C15** Orta ve geç oyuna yeni tehditler
   - Nereye: Orta ve geç oyunda (10. ve 25. sefer sonrası) kart dağılımı.
   - Görmeli: Pusu, savaş/veba/haraç haberleri, rakip kervan ve gümrük sıklaşıyor.
   - Bozuksa: Oyun hiç sertleşmiyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-F07T** Büyücüyü nadir olay düşmanı olarak bağla
   - Nereye: Nadir olay: haydut büyücü (zor bulunur).
   - Görmeli: Çok nadir ve bir kez çıkıyor; tehlikeli yolda; savaşta ilk yıkıcı büyü.
   - Bozuksa: Her sefer çıkıyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-D06** Kırılma: davranışla yaşatılan olay
   - Nereye: Kırılmış bir yoldaşla bir sefer.
   - Görmeli: Dört kip (öne atılır, alay çeker, reddeder, yakındakine saldırır) son kötü huya göre; ekran efekti yok; yolda kırılma kartı.
   - Bozuksa: Kırılma sadece sayı
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-H04** Hiçbir ekranda sıkışma kalmasın
   - Nereye: Her paneli aç ve Esc ile çık; karar panellerinde Esc'e bas.
   - Görmeli: Hiçbir ekranda sıkışma yok: paneller Esc'e yanıt veriyor; karar panelleri (devralma, kader) yutuyor.
   - Bozuksa: Çıkılamayan ekran
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 7. Savaş
 
@@ -277,22 +372,32 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Savaşta vuruş, kritik ve öldürme anları.
   - Görmeli: Kritikte sahne hedefe yaklaşıyor ve defter satırı çıkıyor; öldürme anında kısa duraklama sonra düşüş; vuruş/kritik/öldürme sesleri çeşitli ve perde oynuyor.
   - Bozuksa: Ses hep aynı ya da yakınlaştırma takılıyor
+  - ![Savaş: kritik vuruş ve Ölümün Kıyısı](test_turu_gorseller/savas_kritik.jpg)
+  - ![Savaş açılışı](test_turu_gorseller/savas_acilis.jpg)
+  - **Ben baktım:** Kritik vuruşta 'Critical! -7' sayısı ve sarı parlama, hedef halkası; Ölümün Kıyısındaki dosta 'DOOR' etiketi ve kırmızı ton. Hata: sağdaki düşmanlar kadrajdan taşıyor, günlük alanı çok büyük ve boş (hata listesinde).
+  - **Size kalan (zevk):** Vuruş geri bildirimi (parlama + sayı) yeterince 'ağır' mı?
 - [ ] **Y-C07** Savaştan bedelli geri çekilme
   - Nereye: Dar durumda geri çekil.
   - Görmeli: Savaş paneli geri çekilmeyi teklif ediyor: yükün üçte biri, bir vagon feda (enkaz yolda kalır) ya da artçı; savaş kaybı cezası yok, hafif moral kaybı.
   - Bozuksa: Geri çekilme bedelsiz ya da seçenek çıkmıyor
+  - ![Geri çekilme düğmeleri](test_turu_gorseller/savas_kritik.jpg)
+  - **Ben baktım:** Dar durumda 'Yükü bırakıp kaç', 'Bir vagonu feda edip kaç' ve 'artçıyı tut' düğmeleri çıkıyor (ilk görüntüde gri/kilitli).
 - [ ] **Y-C08** Düşmanlara kişilik ver
   - Nereye: Haydut reisi, kurt ve muhafızla birer savaş.
   - Görmeli: Reis liderine, kurt en yaralıya saldırıyor, muhafız ölümün kıyısındakini bitirmiyor.
   - Bozuksa: Hepsi aynı hedefi seçiyor
+  - ![Haydut kadrosu](test_turu_gorseller/savas_acilis.jpg)
+  - **Ben baktım:** Sıra listesinde Haydut Reisi, Okçusu ve iki Kesici var; reisin canı diğerlerinden yüksek (68). Kurt ve muhafızı çekemedim.
 - [ ] **Y-C03** Ganimet: eşya, kıyafet, sarf, nadir bulgu
   - Nereye: Zaferden sonra ganimet ekranı.
   - Görmeli: Düşman türüne göre ganimet listesi; mal/kıyafet/ekipman ilgili depolara düşüyor.
   - Bozuksa: Ganimet hep aynı
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-C04** Sarf malzemesi ve yolda tedavi
   - Nereye: Sargı ve iksirle savaş içi tedavi; kampta yara sarma.
   - Görmeli: Sargı +8 can ve kanamayı keser, iksir +12 can; kullanılanlar kargodan düşüyor; kamp sargısı çift bakım.
   - Bozuksa: Eşya düşmüyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 8. Defter ve paylaşım
 
@@ -300,14 +405,17 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: L ile defter. 'Düşenler' sayfası.
   - Görmeli: Kurucu ve ölüler rütbeye göre mezar işaretiyle listeli; dinî simge yok.
   - Bozuksa: Çizgiler okunmuyor
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **DFT1** Defter sayfası okunur olsun (cetvel çizgileri)
   - Nereye: Defter sayfasında cetvel çizgilerini oku.
   - Görmeli: Sayfa metni cetvel çizgilerine oturuyor ve okunur.
   - Bozuksa: Satırlar çizgiye binmiş
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 - [ ] **Y-E07** Paylaşılabilir defter sayfası ve güncel Codex
   - Nereye: Defterde 'sayfayı kaydet' düğmesi.
   - Görmeli: Sol sayfa soyun özetine dönüyor ve PNG `user://defter_sayfalari/` altına yazılıyor; defter eski hâline dönüyor.
   - Bozuksa: Dosya yok ya da defter bozuk kaldı
+  - _Bu ortamda görüntülenemedi; gözle bakılması gerekir._
 
 ## 9. Otomatik kanıtlı (gözle bakmanız gerekmeyen)
 

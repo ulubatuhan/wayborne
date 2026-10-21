@@ -62,6 +62,19 @@
   .m:has(input:checked) { opacity: .55; }
   .m:has(input:checked) .k { text-decoration: line-through; text-decoration-color: var(--moss); }
   .m:focus-within { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .m .r.ok { color: var(--moss); }
+  .m .r.ok i, .m .r.ze i { color: inherit; opacity: 1; }
+  .m .r.ze { color: var(--gold); }
+  .m .r.nv { font-style: italic; }
+  .im { grid-column: 2; margin: 8px 0 2px; }
+  .im img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 3px; background: #000; }
+  .im figcaption { font-size: .78rem; color: var(--dim); margin-top: 3px; }
+  .h { display: grid; grid-template-columns: 4.6rem 1fr; gap: 10px; padding: 9px 12px; margin: 0 0 6px; background: var(--panel);
+       border: 1px solid var(--line); border-radius: 4px; font-size: .92rem; }
+  .h b { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; padding-top: 3px; }
+  .h.düzeldi b { color: var(--moss); }
+  .h.açık b { color: var(--blood); }
+  .h.not b { color: var(--dim); }
   .hide-done .m:has(input:checked) { display: none; }
   @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
 </style>

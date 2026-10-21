@@ -41,6 +41,8 @@ func _setup_music_slider() -> void:
 	_music_slider.value = AudioManager.get_music_volume()
 	_music_slider.value_changed.connect(_on_music_volume_changed)
 	_refresh_music_value()
+	# Oyunda müzik yok (kullanıcının kararı); satır, altındaki satırların ölçü şablonu olarak kalır ama görünmez.
+	(_music_slider.get_parent() as Control).visible = false
 
 ## Ortam, efekt ve arayüz sesleri (görev N31c): müziğin altında, aynı
 ## biçimde birer satır. Hepsi anında uygulanır ve settings.cfg'ye yazılır.

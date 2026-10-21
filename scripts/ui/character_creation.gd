@@ -182,7 +182,7 @@ func _build_class_section() -> void:
 	_content.add_child(_class_description)
 
 func _build_identity_section() -> void:
-	_content.add_child(_make_section_title("Kimlik"))
+	_content.add_child(_make_section_title(tr("UI_CREATE_IDENTITY")))
 
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 8)
@@ -324,7 +324,7 @@ func _on_outfit_cycle(slot: String, direction: int) -> void:
 	_refresh()
 
 func _build_stats_section() -> void:
-	_content.add_child(_make_section_title("Statlar"))
+	_content.add_child(_make_section_title(tr("UI_CREATE_STATS")))
 
 	_points_label = Label.new()
 	_content.add_child(_points_label)
