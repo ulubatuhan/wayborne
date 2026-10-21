@@ -184,13 +184,7 @@ func _build_header() -> Control:
 func _side_panel(heading: String) -> Array:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(SIDE_WIDTH, 0)
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(ArtPalette.GRIM_CHARCOAL, 0.88)
-	box.border_color = Color(ArtPalette.GRIM_AMBER, 0.45)
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(4)
-	box.set_content_margin_all(14)
-	panel.add_theme_stylebox_override("panel", box)
+	panel.theme_type_variation = WaybookTheme.FRAMED_PANEL
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
 	panel.add_child(col)
@@ -199,10 +193,7 @@ func _side_panel(heading: String) -> Array:
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", ArtPalette.GRIM_AMBER)
 	col.add_child(title)
-	var rule := ColorRect.new()
-	rule.color = Color(ArtPalette.GRIM_AMBER, 0.35)
-	rule.custom_minimum_size = Vector2(0, 1)
-	col.add_child(rule)
+	col.add_child(WaybookTheme.title_strip())
 	return [panel, col]
 
 func _build_stall() -> Control:
@@ -316,6 +307,8 @@ func _build_centre() -> Control:
 	_reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_reason_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_reason_label.add_theme_font_size_override("font_size", 15)
+	_reason_label.theme_type_variation = WaybookTheme.PAGE_LABEL
+	_reason_label.add_theme_color_override("font_color", WaybookTheme.KIT_PLATE_TEXT)
 	inside.add_child(_reason_label)
 	_message_label = Label.new()
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -328,6 +321,7 @@ func _build_centre() -> Control:
 	_button_row.add_theme_constant_override("separation", 14)
 	col.add_child(_button_row)
 	_primary_button = _wide_button("UI_MARKET_BUY", _on_primary_pressed)
+	_primary_button.theme_type_variation = WaybookTheme.PRIMARY_BUTTON
 	_haggle_button = _wide_button("UI_MARKET_HAGGLE", _on_haggle_pressed)
 	_cancel_button = _wide_button("UI_MARKET_CANCEL", _on_cancel_pressed)
 	_haggle_holder = VBoxContainer.new()
@@ -615,8 +609,9 @@ func _line_row(item: Item, quantity: int, active: bool) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	var text := Label.new()
-	if active:
-		text.add_theme_color_override("font_color", ArtPalette.UI_ACCENT)
+	# Fiş parşömen (UI kiti v2): yazı mürekkep, seçili satır kan.
+	text.theme_type_variation = WaybookTheme.PAGE_LABEL
+	text.add_theme_color_override("font_color", ArtPalette.BLOOD if active else WaybookTheme.KIT_PLATE_TEXT)
 	text.text = tr("UI_MARKET_LINE") % [item.item_name, quantity, item.unit_weight * float(quantity)]
 	row.add_child(text)
 	if active:
@@ -634,7 +629,8 @@ func _line_row(item: Item, quantity: int, active: bool) -> Control:
 
 func _total_row(text: String) -> Control:
 	var label := Label.new()
-	label.add_theme_color_override("font_color", ArtPalette.UI_ACCENT)
+	label.theme_type_variation = WaybookTheme.PAGE_LABEL
+	label.add_theme_color_override("font_color", ArtPalette.BLOOD)
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return label

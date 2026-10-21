@@ -66,6 +66,18 @@ const PAGE_TITLE_FONT_SIZE: int = 24
 const MAP_LABEL: StringName = &"MapLabel"
 ## Kargo/pazar hücresi: minimal çerçeve, içinde malın resmi.
 const CELL_PANEL: StringName = &"CellPanel"
+## UI kiti v2 (görev 9.1, onaylı taslak): Kenney CC0 biçimleri kâğıt-mürekkep
+## renklerine boyandı (`tools/ui_kit_ink.py`). İki çeşit: ince pas çerçeveli
+## kömür panel (mekân ekranlarının yan levhaları) ve kırmızı ana eylem düğmesi
+## (dört durumuyla). Çivili fiş ve seçim köşebentleri kullanıcı kararıyla yok.
+const KIT_DIR: String = "res://data/assets/ui/kit/"
+const FRAMED_PANEL: StringName = &"FramedPanel"
+const PRIMARY_BUTTON: StringName = &"PrimaryButton"
+const KIT_FRAME_SLICE: int = 22
+const KIT_BUTTON_SLICE: int = 30
+## İpucu plakası ve pazar fişi (taslak 9.1): açık parşömen, üstüne mürekkep.
+const KIT_PLATE_SLICE: int = 18
+const KIT_PLATE_TEXT: Color = Color(0.16, 0.12, 0.10)
 ## Sürüklenebilir "Kervan Emirleri" paneli yarı saydam bir cam gibi okunuyor
 ## (bkz. road_journey.gd::_build_orders_panel): dolgu mürekkep tabanlı ve
 ## çok düşük alfalı, varsayılan düğmenin altın tonlu dolgusu camda ağır
@@ -201,6 +213,7 @@ static func item_line(item_id: String, text: String, icon_height: float) -> HBox
 static func build() -> Theme:
 	var theme := Theme.new()
 	_build_panels(theme)
+	_build_kit(theme)
 	_build_buttons(theme)
 	_build_tabs(theme)
 	_build_rules_and_scroll(theme)
@@ -222,6 +235,57 @@ static func frame_panel() -> StyleBoxFlat:
 	box.shadow_size = 6
 	box.set_content_margin_all(PANEL_CONTENT)
 	return box
+
+static func _kit_box(file_name: String, slice: int, margin: Vector4) -> StyleBox:
+	var texture: Texture2D = TextureLoader.load_any(KIT_DIR + file_name)
+	if texture == null:
+		return frame_panel()
+	var box := StyleBoxTexture.new()
+	box.texture = texture
+	box.set_texture_margin_all(slice)
+	box.content_margin_left = margin.x
+	box.content_margin_top = margin.y
+	box.content_margin_right = margin.z
+	box.content_margin_bottom = margin.w
+	return box
+
+static func plate_panel() -> StyleBox:
+	return _kit_box("tooltip_plate.png", KIT_PLATE_SLICE, Vector4(18, 12, 18, 12))
+
+## Başlık şeridi (taslak 9.1): panel başlığının altındaki pas çizgi, sağ ucu
+## düğümlü. Düz bir çizgi olmasın diye dokudan; doku yoksa ince bir çizgi.
+static func title_strip() -> Control:
+	var texture: Texture2D = TextureLoader.load_any(KIT_DIR + "title_strip.png")
+	if texture == null:
+		var rule := ColorRect.new()
+		rule.color = Color(ArtPalette.GRIM_AMBER, 0.35)
+		rule.custom_minimum_size = Vector2(0, 1)
+		return rule
+	var strip := TextureRect.new()
+	strip.texture = texture
+	strip.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	strip.stretch_mode = TextureRect.STRETCH_SCALE
+	strip.custom_minimum_size = Vector2(0, 14)
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return strip
+
+static func framed_panel() -> StyleBox:
+	return _kit_box("frame_panel.png", KIT_FRAME_SLICE, Vector4(22, 20, 22, 20))
+
+static func _build_kit(theme: Theme) -> void:
+	theme.set_type_variation(FRAMED_PANEL, "PanelContainer")
+	theme.set_stylebox("panel", FRAMED_PANEL, framed_panel())
+	theme.set_type_variation(PRIMARY_BUTTON, "Button")
+	var pad := Vector4(22, 10, 22, 10)
+	var states := {"normal": "button_primary.png", "hover": "button_primary_hover.png",
+		"pressed": "button_primary_pressed.png", "disabled": "button_primary_disabled.png",
+		"focus": "button_primary_hover.png"}
+	for state in states:
+		theme.set_stylebox(state, PRIMARY_BUTTON, _kit_box(String(states[state]), KIT_BUTTON_SLICE, pad))
+	theme.set_color("font_color", PRIMARY_BUTTON, ArtPalette.UI_TEXT)
+	theme.set_color("font_hover_color", PRIMARY_BUTTON, ArtPalette.UI_TEXT)
+	theme.set_color("font_pressed_color", PRIMARY_BUTTON, ArtPalette.UI_TEXT)
+	theme.set_color("font_disabled_color", PRIMARY_BUTTON, Color(ArtPalette.UI_TEXT, 0.5))
 
 static func seal_panel() -> StyleBoxFlat:
 	var box := frame_panel()
@@ -255,7 +319,7 @@ static func _build_panels(theme: Theme) -> void:
 	# Çivili kâğıt fiş (G8) kullanıcı kararıyla kalktı (2026-10-20): fiş de
 	# ailenin düz kutusu. Çeşit adı pazarın fişini ayırt etmek için duruyor.
 	theme.set_type_variation(SLIP_PANEL, "PanelContainer")
-	theme.set_stylebox("panel", SLIP_PANEL, frame_panel())
+	theme.set_stylebox("panel", SLIP_PANEL, plate_panel())
 
 	# Yolun HUD şeritleri dünyanın *üstünde* duruyor ve onu çerçevelememeli:
 	# ince, yarı saydam bir kuşak - düz renk kalan tek panel.
@@ -565,9 +629,12 @@ static func _scroll_box(colour: Color) -> StyleBoxFlat:
 
 # --- İpucu ---
 
+## UI kiti v2 (kullanıcı kararı C1, 2026-10-21): ipucu taslağın plakası -
+## açık parşömen, koyu mürekkep. Çivili fiş (G8) değil, kenarları yıpranmış
+## bir levha.
 static func _build_tooltip(theme: Theme) -> void:
-	theme.set_stylebox("panel", "TooltipPanel", frame_panel())
-	theme.set_color("font_color", "TooltipLabel", ArtPalette.UI_TEXT)
+	theme.set_stylebox("panel", "TooltipPanel", plate_panel())
+	theme.set_color("font_color", "TooltipLabel", KIT_PLATE_TEXT)
 	theme.set_font_size("font_size", "TooltipLabel", TOOLTIP_FONT_SIZE)
 	theme.set_color("font_shadow_color", "TooltipLabel", Color(0, 0, 0, 0))
 

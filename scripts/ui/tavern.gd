@@ -130,6 +130,8 @@ func _build_screen() -> void:
 	bar.add_child(hint)
 	_chat_button = Button.new()
 	_chat_button.text = tr("UI_TAVERN_CHAT")
+	# UI kiti v2 (taslak 9.1): tavernanın ana eylemi kırmızı düğme.
+	_chat_button.theme_type_variation = WaybookTheme.PRIMARY_BUTTON
 	_chat_button.toggle_mode = true
 	_chat_button.toggled.connect(_on_chat_toggled)
 	bar.add_child(_chat_button)

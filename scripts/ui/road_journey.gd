@@ -1006,7 +1006,8 @@ func _build_bottom_bar() -> PanelContainer:
 ## koymak, kartın seçeneklerini de kartın içine almak.
 func _build_modal_layer() -> void:
 	var frame := PanelContainer.new()
-	frame.theme_type_variation = WaybookTheme.SEAL_PANEL
+	# UI kiti v2 (taslak 9.1): kartın kenarı kitin bakır-pas çerçevesi.
+	frame.theme_type_variation = WaybookTheme.FRAMED_PANEL
 	frame.custom_minimum_size = Vector2(CARD_WIDTH, 0.0)
 	_modal_center.add_child(frame)
 
@@ -3174,8 +3175,14 @@ func _render_card(event: GameEvent) -> void:
 	)
 
 	var context := _session.build_event_context()
+	var first := true
 	for choice in event.choices:
-		_card_panel.add_child(_build_choice_button(choice, context))
+		var button := _build_choice_button(choice, context)
+		# Taslak 9.1: kartın ilk seçeneği ana eylem (kırmızı); kilitliyse değil.
+		if first and not button.disabled:
+			button.theme_type_variation = WaybookTheme.PRIMARY_BUTTON
+		first = false
+		_card_panel.add_child(button)
 
 ## Aynı haber kartının gövdesini liderin kültürüne göre çerçeveler (bkz.
 ## EventCatalog.get_culture_framed_text_key'in kendi yorumu) - haber

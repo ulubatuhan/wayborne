@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KIT = os.path.join(ROOT, "art_source", "ui_kits")
 OUT = os.path.join(ROOT, "build", "ui_kit")
-PREVIEW = os.path.join(os.path.dirname(ROOT), "TODO", "referans", "taslaklar", "y_91_ui_kit.png")
+PREVIEW = os.path.join(ROOT, "build", "ui_kit", "preview.png")
 FONT = os.path.join(ROOT, "data", "assets", "fonts", "EBGaramond.ttf")
 HEAD = os.path.join(ROOT, "data", "assets", "fonts", "IMFellEnglishSC.ttf")
 

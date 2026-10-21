@@ -2222,6 +2222,12 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
 - **No pinned paper in the chrome (user's decision, 2026-10-20).** The pinned paper slip (G8) used to frame tooltips
   and the market receipt as a nine-slice; the user found the pinned notes ugly, and both are now the family's flat box
   with bone text. `g8_slip.png` is no longer shipped.
+- **UI kit v2 (task 9.1, user's decision C1, 2026-10-21) is the one sanctioned texture family on controls.** Kenney
+  CC0 shapes inked into the palette by `tools/ui_kit_ink.py` (`data/assets/ui/kit/`): `FRAMED_PANEL` (charcoal fill,
+  rust frame - market side panels, the road's event card), `PRIMARY_BUTTON` (blood red, four states - the screen's
+  one main action: market Buy, tavern Start a conversation, the event card's first available choice), the tooltip and
+  the market receipt on the kit's parchment plate (`plate_panel`, ink text, `KIT_PLATE_TEXT`) - a worn plaque, not the
+  pinned G8 slip - and the title strip under a panel heading (`title_strip`). Everything else stays the flat family.
 - **Art arrives through one pipeline.** Raw generated sheets live in
   `art_source/waybook/` (a `.gdignore` keeps them out of import and
   export); `python3 tools/waybook_assets.py` keys the flat grey backdrop
