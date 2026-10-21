@@ -49,7 +49,7 @@ concurrency:
 env:
   # Ekran görüntüsü araçları (tests/screenshot_*.gd) bu klasörlere yazıyor.
   GODOT_USER_DIR: ~/.local/share/godot/app_userdata/Wayborne
-  SHOT_SCRIPTS: "screenshot_menu screenshot_city screenshot_journey_screen screenshot_combat"
+  SHOT_SCRIPTS: "screenshot_menu screenshot_city_moods screenshot_journey_screen screenshot_combat"
 
 jobs:
   screenshots:
