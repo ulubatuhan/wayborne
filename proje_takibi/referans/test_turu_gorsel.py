@@ -9,7 +9,7 @@ G = {
     "Y-H07": {
         "img": [("ayarlar.jpg", "Ayarlar ekranı")],
         "ben": "Yazı boyutu, renk körlüğü (desenli şerit) ve 'yolda bir şey belirince duraklat' anahtarları var, hizalı, taşma yok. "
-               "Müzik kaydırıcısı hâlâ duruyordu; oyunda müzik olmadığı için gizledim.",
+               "Müzik kaydırıcısı bilerek duruyor (şarkılar sonra eklenecek).",
         "estetik": None,
     },
     "9.4": {
@@ -100,7 +100,6 @@ G = {
 
 # Bulunan hatalar: (durum, başlık, ayrıntı). durum: "düzeldi" ya da "açık".
 HATALAR = [
-    ("düzeldi", "Ayarlar'da müzik kaydırıcısı", "Oyunda müzik olmamasına rağmen kaydırıcı duruyordu; gizlendi."),
     ("düzeldi", "Yeni oyun ekranında Türkçe kalan iki başlık", "'Kimlik' ve 'Statlar' yazıları İngilizce arayüzde Türkçe çıkıyordu; çeviri anahtarına bağlandı."),
     ("düzeldi", "Hub: kapı yazısı lider adının üstüne biniyordu", "Etiket yukarı alındı (aşağıdaki kapı görüntüsü eski hâli; yeni çekim sizin PC'nizde doğrulanacak)."),
     ("düzeldi", "Savaş sahnesi taşması", "1920 genişlikte üçüncü düşman yarım, dördüncü görünmüyordu; mevki aralığı artık sığacak kadar daralıyor, dört düşman da kadrajda (görüntüler yeni)."),

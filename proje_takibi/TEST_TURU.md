@@ -11,7 +11,6 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
 
 ## Bulduğum hatalar
 
-- **[düzeldi]** Ayarlar'da müzik kaydırıcısı: Oyunda müzik olmamasına rağmen kaydırıcı duruyordu; gizlendi.
 - **[düzeldi]** Yeni oyun ekranında Türkçe kalan iki başlık: 'Kimlik' ve 'Statlar' yazıları İngilizce arayüzde Türkçe çıkıyordu; çeviri anahtarına bağlandı.
 - **[düzeldi]** Hub: kapı yazısı lider adının üstüne biniyordu: Etiket yukarı alındı (aşağıdaki kapı görüntüsü eski hâli; yeni çekim sizin PC'nizde doğrulanacak).
 - **[düzeldi]** Savaş sahnesi taşması: 1920 genişlikte üçüncü düşman yarım, dördüncü görünmüyordu; mevki aralığı artık sığacak kadar daralıyor, dört düşman da kadrajda (görüntüler yeni).
@@ -35,7 +34,7 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Görmeli: Metin boyutu dört kademe (menüler büyür/küçülür, taşma yok); desenli şerit açıkken savaştaki kan şeridi parçalı çiziliyor; otomatik duraklatma açıkken yol işareti/karşılaşma işaretinde zaman bir tuş ya da tıklamaya kadar duruyor. Hızlandırma seçeneği yok. Ayarlar kayıt dosyasında değil `settings.cfg`'de.
   - Bozuksa: Büyük metinde taşan düğme ya da duraklatma kapalıyken zamanın durması
   - ![Ayarlar ekranı](test_turu_gorseller/ayarlar.jpg)
-  - **Ben baktım:** Yazı boyutu, renk körlüğü (desenli şerit) ve 'yolda bir şey belirince duraklat' anahtarları var, hizalı, taşma yok. Müzik kaydırıcısı hâlâ duruyordu; oyunda müzik olmadığı için gizledim.
+  - **Ben baktım:** Yazı boyutu, renk körlüğü (desenli şerit) ve 'yolda bir şey belirince duraklat' anahtarları var, hizalı, taşma yok. Müzik kaydırıcısı bilerek duruyor (şarkılar sonra eklenecek).
 - [ ] **Y-A01** Oyun vaadini yaz ve belgelere işle
   - Nereye: Doküman kontrolü: `CLAUDE.md` en üstü.
   - Görmeli: Vaat cümlesi ve dört sütun yazılı. Cümle sizin sesinizle uyuşuyor mu? Uyuşmuyorsa değiştirin (kutu 'öneri, onay bekliyor' diyor).
