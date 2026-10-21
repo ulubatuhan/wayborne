@@ -53,5 +53,5 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 
 KALSIN (dokunma): A4 kilise, A7 gün evreleri, A8 taverna, A9 sohbet, A10 terazi, A11, A12, A13, B3, C4 (oyundaki masa), C5.
 
-Kullanıcıdan karar bekleyenler (bunlara dokunma, sorma): 2.3 (CityView silme onayı), 6.1 (LFS), Y-G08, Y-H01, N31f.
+Kullanıcı kararları (2026-10-21): 2.3 CityView silinmiş kalsın (bitti); 6.1 LFS taşınmayacak (bitti); Y-H01 şimdilik öğretici/yardım paneli yok, kaldırıldı (bitti); Y-G08 motif ateş ve fener birlikte (güncellenecek); N31f ortam kayıtlarını kullanıcı getirecek. Karar bekleyen madde kalmadı; lore'a bağlılar yazılmaz.
 Lore'a bağlı olanlar (Y-E01/E02/E06, Y-A07) yazılmaz.

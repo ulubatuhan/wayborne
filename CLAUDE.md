@@ -2841,7 +2841,9 @@ target in `character.gd`, a `return` field carried in the road's spot table
   map read straight through the text). Dismissal is no longer one button
   either — the backdrop and Esc both close it, because a player's first
   reflex is to click outside.
-- **`test_navigation.gd` guards that overlay by building it**, which is
+- *(The panel and the test below were removed with the tutorial on 2026-10-21; the rule itself stands for every
+  overlay: content that can outgrow the screen sits in a scroll, the exit outside it.)*
+- **`test_navigation.gd` guarded that overlay by building it**, which is
   possible precisely because it is scene-less (`.new()` + an explicit
   `_ready()`, since suites run before the tree is live). What it asserts is
   structural — content in a scroll, dismiss button not inside it, more than
@@ -4590,10 +4592,11 @@ ever fell, and the career simulation had already measured the result
 
 ### Playthrough Start Rules
 
-- **No pinned tutorial slips (user's decision, 2026-10-20).** The four-topic onboarding panel no longer opens on a new
-  game (the help button still opens it). The six first-time hints of task Y-H01 (`FirstTimeHint`, a pinned paper slip
-  at the top of the screen) were removed with their text: the user found them ugly and will write the teaching notes
-  later. Old saves may still carry the `hint_*` flags; nothing reads them.
+- **There is no tutorial and no help panel for now (user's decision, 2026-10-21; task Y-H01 closed).** The pinned paper
+  hints (`FirstTimeHint`, 2026-10-20: "ugly") and then the four-topic help panel (`OnboardingPanel`, its Help buttons
+  and the F3 key, `UI_ONBOARD_*`/`UI_HELP_*`) were removed; the user will add teaching back later, in a form of their
+  own. `GameSession.ONBOARDING_FLAG` stays: it now only gates the one-time handover scene on the first city arrival.
+  Old saves may still carry the `hint_*` flags; nothing reads them.
 - **The opening is fixed and not offered as a choice**: two party members
   (the player plus one randomly rolled companion), one wagon, a random
   starting city - see `GameSession.start_playthrough()`. One wagon is

@@ -2026,7 +2026,7 @@ static func _rival_slander() -> GameEvent:
 ## anında birleştiren bir anahtar `test_localization.gd`'nin tanımsız-anahtar
 ## taramasına (yalnızca tr çağrısının içindeki literal dizeyi görür) ve bir
 ## çevirmenin kod içinde anahtar aramasına görünmez olurdu - Localization
-## Rules'un `OnboardingPanel.TOPIC_KEYS` için zaten koyduğu kuralın aynısı.
+## Rules'un anahtar-tablosu maddesinin koyduğu kuralın aynısı.
 const NEWS_EVENT_CULTURE_TEXT_KEYS: Dictionary = {
 	"evt_regional_war_news": {
 		"nomad": "EVT_WAR_NEWS_NOMAD_TEXT",

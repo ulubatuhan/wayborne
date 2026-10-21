@@ -54,46 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
-
-## Paket P01
-
-### 6.1 · LFS ve `.gitattributes` ekle
-
-- **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P01 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/06_depo_hijyeni.md](referans/gorevler/06_depo_hijyeni.md)
-- **Son not:** .gitattributes eklendi (metin dosyaları LF, ikililer binary). Bu makinedeki core.autocrlf=true yüzünden CRLF'ye dönen iki spec JSON'u iki testi kırıyordu; artık geçiyor. LFS taşıması (`git lfs migrate`, geçmişi yeniden yazar) kullanıcı onayı bekliyor, yapılmadı. git-lfs 3.7.1 kurulu. | 2026-10-20 kullanıcı kararı: LFS taşıması (git lfs migrate, geçmiş yeniden yazılır) ONAYLANDI. | 2026-10-20 güncelleme: push yok, geçmiş yeniden yazılmayacak; kullanıcı dosyaları yeni bir dala kendisi alacak. Yalnızca .gitattributes LFS kuralları. | 2026-10-20: .gitattributes LFS kuralları (png, jpg, ogg, wav, mp3, glb, blend, npz, pdf, ttf, otf). Geçmiş yeniden yazılmadı (kullanıcı kararı). Yeni dalda: git lfs install && git add --renormalize . | 2026-10-20 (son): geniş LFS kuralları denendi ve GERİ ALINDI: geçmiş düz blob, klonda pointer uyarısı; taşınırsa ~500 MB LFS ve CI her koşuda indirir (ücretsiz aylık 1 GB kota). En büyük dosya 2,2 MB, 100 MB sınırı sorun değil. Yalnız harita karoları LFS. Karar kullanıcıda.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **6.1 LFS ve `.gitattributes` ekle** (§5 H-1, H-9)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `32f9ac4`): .gitattributes eklendi (metin dosyaları LF, ikililer binary). Bu makinedeki core.autocrlf=true yüzünden CRLF'ye dönen iki spec JSON'u iki testi kırıyordu; artık geçiyor. LFS taşıması (`git lfs migrate`, geçmişi yeniden yazar) kullanıcı onayı bekliyor, yapılmadı. git-lfs 3.7.1 kurulu.
-  - İkili dosyalar LFS'e gitsin.
-  - Metin dosyaları için `eol=lf` tanımla (Windows'tan yapılacak commitler için gerekli).
-  - Geçmişi yeniden yazmak (`git lfs migrate`) **kullanıcı onayı** ister (§7 madde 11).
-
-</details>
-
-## Paket P02
-
-### 2.3 · Ölü `CityView` sınıfını ve bağlı varlıklarını kaldır
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P02 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/02_yuksek_etkili.md](referans/gorevler/02_yuksek_etkili.md)
-- **Bağımlı:** 7
-- **Son not:** city_view.gd (983 satır) ve screenshot_city.gd silindi; yorum başvuruları CityFront/TravelBand'e çevrildi. Kanıt: şehir CityFront'a geçti (REDESIGN §7.2), kullanıcı önden görünüm istiyor, izometrik dönüş planı yok. DENETİM YANILMIŞ: iso_* eşyaları ölü değil, tools/ui_scenes/ui_kit.py şehir madalyonlarını iso_stable, iso_market_stand_1, iso_house_2, iso_inn, iso_bell_tower'dan üretiyor; 10 iso_* eşyası ve test_props.gd beklentileri tutuldu. Kullanıcı onayı hâlâ açık: istenmezse commit geri alınabilir. CLAUDE.md Art Rules'taki CityView maddeleri 4.2'de.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **2.3 Ölü `CityView` sınıfını ve bağlı varlıklarını kaldır** (§1A, §1E)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `b756a52`): city_view.gd (983 satır) ve screenshot_city.gd silindi; yorum başvuruları CityFront/TravelBand'e çevrildi. Kanıt: şehir CityFront'a geçti (REDESIGN §7.2), kullanıcı önden görünüm istiyor, izometrik dönüş planı yok. DENETİM YANILMIŞ: iso_* eşyaları ölü değil, tools/ui_scenes/ui_kit.py şehir madalyonlarını iso_stable, iso_market_stand_1, iso_house_2, iso_inn, iso_bell_tower'dan üretiyor; 10 iso_* eşyası ve test_props.gd beklentileri tutuldu. Kullanıcı onayı hâlâ açık: istenmezse commit geri alınabilir. CLAUDE.md Art Rules'taki CityView maddeleri 4.2'de.
-  - Dosyalar: `scripts/ui/city_view.gd`, `tests/screenshot_city.gd`, 10 adet `iso_*` eşya, `b10_city.jpg`.
-  - İlişkili listeler: `tests/test_props.gd:18-20`, `props.json` girdileri, `tools/waybook_assets.py` ve `waybook_ingest_v2.py`.
-  - Bayat yorumlar: §3A'daki 4 CityView yorumu.
-  - CLAUDE.md Art Rules'taki CityView maddeleri.
-  - **Önce doğrula** (§7 madde 6): izometrik şehre dönüş planı yok mu?
-
-</details>
+Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P10
 
@@ -219,7 +180,7 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 - **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü.
+- **Son not:** Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak.
 
 <details><summary>Görev metni</summary>
 
@@ -234,24 +195,6 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P14
-
-### Y-H01 · Onboarding'i ilk seferin içine yay
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P14 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-C14
-- **Son not:** Babadan devir sahnesi (Y-C14) yeni oyunun ilk anı olarak kalıyor; dört konuluk panel yardım düğmesinde. | 2026-10-20 KULLANICI KARARI: çivili ipucu fişleri (FirstTimeHint) metinleriyle kaldırıldı ("iğrenç duruyor"); öğretici notları kullanıcı sonra yazacak. Dört konuluk panel yardım düğmesinde. | 2026-10-20 (son): çivili kâğıt fiş (G8) ipucu baloncuklarından ve pazar fişinden de kalktı, düz panel (46dd8c1).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-H01 Onboarding'i ilk seferin içine yay**
-  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `2001285`): Babadan devir sahnesi (Y-C14) yeni oyunun ilk anı olarak kalıyor; dört konuluk panel yardım düğmesinde.
-  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C14
-  - **Ne:** Dört konuluk panel kalkar. İlk sefer rehberli: ticaret, kontrat, planlayıcı, dikkat, sofra, savaş; her biri ilk karşılaşıldığı anda tek cümleyle. Babadan devir başlangıcıyla (Y-C14) birleşir.
-  - **Kabul:** Yeni oyuncu testinde altı konu ilk seferde öğreniliyor.
-  - **Literatür:** R78
-
-</details>
 
 ### Y-H02 · İlk 10 dakikanın çizelgesi
 
@@ -363,7 +306,7 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kullanıcıda · **Öncelik:** P1 · **Paket:** P18 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/14_yeni_dunya.md](referans/gorevler/14_yeni_dunya.md)
 - **Bağımlı:** N31
-- **Son not:** N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: ortam tablosu (ateş, rüzgâr) ve savaşta müzik kısma. Yağmur/orman/şehir kayıtları yok. | 2026-10-20 kullanıcı: ortam sesleri kullanıcıya bırakıldı.
+- **Son not:** N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: ortam tablosu (ateş, rüzgâr) ve savaşta müzik kısma. Yağmur/orman/şehir kayıtları yok. | 2026-10-20 kullanıcı: ortam sesleri kullanıcıya bırakıldı. | 2026-10-21 kullanıcı kararı: yağmur, orman ve şehir kayıtlarını kullanıcı getirecek; gelince ortam tablosuna bağlanır (play_ambience eksik dosyayı atlıyor).
 
 <details><summary>Görev metni</summary>
 

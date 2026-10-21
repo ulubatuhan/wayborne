@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Yoldaki kolonun yerleşimi. Sahnesiz kurulabildiği için test edilebiliyor
-## (`OnboardingPanel` ile aynı numara: `.new()` + boyu elle vermek).
+## (sahnesiz paneller gibi: `.new()` + boyu elle vermek).
 ##
 ## Neden var: bu kolon iki kez çakıştı (iki vagon üst üste, sonra arkadaki
 ## vagonun öküzü öndekinin içinde) ve bir kez de **hiç görünmedi** - iki

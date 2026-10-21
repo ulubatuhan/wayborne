@@ -298,7 +298,7 @@ def main():
           "",
           "**Nasıl çalıştırılır:** depoyu klonlayın (Git LFS kurulu olsun), `project.godot`'u Godot 4.2.2'de açın, ilk açılışta içe aktarma bitince",
           "editörü kapatıp bir kez daha açın, Play'e basın. Geliştirici paneli: **F1** (saat/soy gibi şeyleri değiştirir). Defter: **L**, harita: **M**,",
-          "emir paneli: **F2**, yardım: **F3**, Durum sekmesi: **Tab**.",
+          "emir paneli: **F2**, Durum sekmesi: **Tab**.",
           "",
           "Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti' yaparım. Bozuksa maddenin yanına ne gördüğünüzü yazın.",
           ""]

@@ -10,7 +10,6 @@ extends RefCounted
 ## Tuş -> aynı betikte bulunması gereken izlerden biri.
 const EVIDENCE: Dictionary = {
 	"KEY_TAB": ["UI_STATUS_OPEN"],
-	"KEY_F3": ["UI_HELP_OPEN"],
 	"KEY_L": ["UI_WAYBOOK_OPEN"],
 	"KEY_M": ["UI_ROAD_MAP_OPEN"],
 	"KEY_F2": ["_pace_buttons"],

@@ -58,14 +58,14 @@
    "bolum": "6",
    "alan": "Depo hijyeni",
    "oncelik": "P2",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/06_depo_hijyeni.md",
    "paket": "P01",
    "sira": 4,
    "kim": "CK",
    "commit": "ddc6f89",
-   "not": ".gitattributes eklendi (metin dosyaları LF, ikililer binary). Bu makinedeki core.autocrlf=true yüzünden CRLF'ye dönen iki spec JSON'u iki testi kırıyordu; artık geçiyor. LFS taşıması (`git lfs migrate`, geçmişi yeniden yazar) kullanıcı onayı bekliyor, yapılmadı. git-lfs 3.7.1 kurulu. | 2026-10-20 kullanıcı kararı: LFS taşıması (git lfs migrate, geçmiş yeniden yazılır) ONAYLANDI. | 2026-10-20 güncelleme: push yok, geçmiş yeniden yazılmayacak; kullanıcı dosyaları yeni bir dala kendisi alacak. Yalnızca .gitattributes LFS kuralları. | 2026-10-20: .gitattributes LFS kuralları (png, jpg, ogg, wav, mp3, glb, blend, npz, pdf, ttf, otf). Geçmiş yeniden yazılmadı (kullanıcı kararı). Yeni dalda: git lfs install && git add --renormalize . | 2026-10-20 (son): geniş LFS kuralları denendi ve GERİ ALINDI: geçmiş düz blob, klonda pointer uyarısı; taşınırsa ~500 MB LFS ve CI her koşuda indirir (ücretsiz aylık 1 GB kota). En büyük dosya 2,2 MB, 100 MB sınırı sorun değil. Yalnız harita karoları LFS. Karar kullanıcıda."
+   "not": ".gitattributes eklendi (metin dosyaları LF, ikililer binary). Bu makinedeki core.autocrlf=true yüzünden CRLF'ye dönen iki spec JSON'u iki testi kırıyordu; artık geçiyor. LFS taşıması (`git lfs migrate`, geçmişi yeniden yazar) kullanıcı onayı bekliyor, yapılmadı. git-lfs 3.7.1 kurulu. | 2026-10-20 kullanıcı kararı: LFS taşıması (git lfs migrate, geçmiş yeniden yazılır) ONAYLANDI. | 2026-10-20 güncelleme: push yok, geçmiş yeniden yazılmayacak; kullanıcı dosyaları yeni bir dala kendisi alacak. Yalnızca .gitattributes LFS kuralları. | 2026-10-20: .gitattributes LFS kuralları (png, jpg, ogg, wav, mp3, glb, blend, npz, pdf, ttf, otf). Geçmiş yeniden yazılmadı (kullanıcı kararı). Yeni dalda: git lfs install && git add --renormalize . | 2026-10-20 (son): geniş LFS kuralları denendi ve GERİ ALINDI: geçmiş düz blob, klonda pointer uyarısı; taşınırsa ~500 MB LFS ve CI her koşuda indirir (ücretsiz aylık 1 GB kota). En büyük dosya 2,2 MB, 100 MB sınırı sorun değil. Yalnız harita karoları LFS. Karar kullanıcıda. | 2026-10-21 kullanıcı kararı: LFS taşıması yapılmayacak, bugünkü hâliyle (yalnız harita karoları LFS) kalsın."
   },
   {
    "id": "2.1",
@@ -376,7 +376,7 @@
    "bolum": "2",
    "alan": "Kod: yüksek etki",
    "oncelik": "P1",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [
     "7"
    ],
@@ -385,7 +385,7 @@
    "sira": 25,
    "kim": "CK",
    "commit": "b756a52",
-   "not": "city_view.gd (983 satır) ve screenshot_city.gd silindi; yorum başvuruları CityFront/TravelBand'e çevrildi. Kanıt: şehir CityFront'a geçti (REDESIGN §7.2), kullanıcı önden görünüm istiyor, izometrik dönüş planı yok. DENETİM YANILMIŞ: iso_* eşyaları ölü değil, tools/ui_scenes/ui_kit.py şehir madalyonlarını iso_stable, iso_market_stand_1, iso_house_2, iso_inn, iso_bell_tower'dan üretiyor; 10 iso_* eşyası ve test_props.gd beklentileri tutuldu. Kullanıcı onayı hâlâ açık: istenmezse commit geri alınabilir. CLAUDE.md Art Rules'taki CityView maddeleri 4.2'de."
+   "not": "city_view.gd (983 satır) ve screenshot_city.gd silindi; yorum başvuruları CityFront/TravelBand'e çevrildi. Kanıt: şehir CityFront'a geçti (REDESIGN §7.2), kullanıcı önden görünüm istiyor, izometrik dönüş planı yok. DENETİM YANILMIŞ: iso_* eşyaları ölü değil, tools/ui_scenes/ui_kit.py şehir madalyonlarını iso_stable, iso_market_stand_1, iso_house_2, iso_inn, iso_bell_tower'dan üretiyor; 10 iso_* eşyası ve test_props.gd beklentileri tutuldu. Kullanıcı onayı hâlâ açık: istenmezse commit geri alınabilir. CLAUDE.md Art Rules'taki CityView maddeleri 4.2'de. | 2026-10-21 kullanıcı onayı: CityView silinmiş kalsın, izometrik dönüş yok."
   },
   {
    "id": "Y-A01",
@@ -2403,7 +2403,7 @@
    "sira": 149,
    "kim": "CO",
    "commit": "3784072",
-   "not": "Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü."
+   "not": "Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak."
   },
   {
    "id": "Y-G14",
@@ -2489,7 +2489,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Arayüz ve ilk saat",
    "oncelik": "P1",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [
     "Y-C14"
    ],
@@ -2499,7 +2499,7 @@
    "sira": 155,
    "kim": "C",
    "commit": "af53ca7",
-   "not": "Babadan devir sahnesi (Y-C14) yeni oyunun ilk anı olarak kalıyor; dört konuluk panel yardım düğmesinde. | 2026-10-20 KULLANICI KARARI: çivili ipucu fişleri (FirstTimeHint) metinleriyle kaldırıldı (\"iğrenç duruyor\"); öğretici notları kullanıcı sonra yazacak. Dört konuluk panel yardım düğmesinde. | 2026-10-20 (son): çivili kâğıt fiş (G8) ipucu baloncuklarından ve pazar fişinden de kalktı, düz panel (46dd8c1)."
+   "not": "Babadan devir sahnesi (Y-C14) yeni oyunun ilk anı olarak kalıyor; dört konuluk panel yardım düğmesinde. | 2026-10-20 KULLANICI KARARI: çivili ipucu fişleri (FirstTimeHint) metinleriyle kaldırıldı (\"iğrenç duruyor\"); öğretici notları kullanıcı sonra yazacak. Dört konuluk panel yardım düğmesinde. | 2026-10-20 (son): çivili kâğıt fiş (G8) ipucu baloncuklarından ve pazar fişinden de kalktı, düz panel (46dd8c1). | 2026-10-21 kullanıcı kararı: şimdilik öğretici ve yardım paneli YOK, sonra eklenecek. Dört konuluk panel, Yardım düğmeleri ve F3 kaldırıldı (UI_ONBOARD_*, UI_HELP_*). Madde kapandı; öğretim sonra yeni bir görev olarak açılır."
   },
   {
    "id": "Y-H02",
@@ -3399,7 +3399,7 @@
    "paket": "P18",
    "sira": 207,
    "kim": "CO",
-   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: ortam tablosu (ateş, rüzgâr) ve savaşta müzik kısma. Yağmur/orman/şehir kayıtları yok. | 2026-10-20 kullanıcı: ortam sesleri kullanıcıya bırakıldı."
+   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: ortam tablosu (ateş, rüzgâr) ve savaşta müzik kısma. Yağmur/orman/şehir kayıtları yok. | 2026-10-20 kullanıcı: ortam sesleri kullanıcıya bırakıldı. | 2026-10-21 kullanıcı kararı: yağmur, orman ve şehir kayıtlarını kullanıcı getirecek; gelince ortam tablosuna bağlanır (play_ambience eksik dosyayı atlıyor)."
   },
   {
    "id": "DFT1",

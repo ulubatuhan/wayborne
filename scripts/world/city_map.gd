@@ -138,12 +138,6 @@ func _build_brief() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_child(scroll)
-	# Yardım düğmesi kaydırmanın dışında: brifing uzasa da hep görünür.
-	var help := Button.new()
-	help.text = tr("UI_HELP_OPEN")
-	help.tooltip_text = tr("UI_HELP_TOOLTIP")
-	help.pressed.connect(_show_help)
-	col.add_child(help)
 	_brief_panel = CityBriefPanel.new()
 	_brief_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_brief_panel)
@@ -171,26 +165,15 @@ func _on_nav_pressed(key: String) -> void:
 			SceneInk.go(Nav.go_root(Nav.WORLD_HUB))
 
 ## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
-## mahsus, atlanabilir bir ipucu katmanı gösterir (bkz. OnboardingPanel,
-## GameSession.ONBOARDING_FLAG).
+## mahsus babadan devir sahnesini gösterir (bkz. GameSession.ONBOARDING_FLAG).
 func _maybe_show_onboarding() -> void:
 	if _session.has_flag(GameSession.ONBOARDING_FLAG):
 		return
 	_session.set_flag(GameSession.ONBOARDING_FLAG)
-	# Dört konuluk panel yeni oyunda açılmıyor (yardım düğmesinde duruyor). İlk
-	# karşılaşmada çıkan çivili ipucu fişleri kullanıcı kararıyla kalktı
-	# (2026-10-20); öğretici notları kullanıcı sonra yazacak.
-	# Devir sahnesi onboarding'in üstünde açılır (görev Y-C14).
+	# Öğretici ve yardım paneli şimdilik yok (kullanıcı kararı, 2026-10-21):
+	# sonra eklenecek. Devir sahnesi yeni oyunun ilk anı (görev Y-C14).
 	if _session.debts.get_debt(GameSession.FATHER_DEBT_ID) != null:
 		add_child(InheritancePanel.new().setup(_session))
-
-## Onboarding'i isteğe bağlı yeniden açan kapı: F3 ya da brifingin
-## altındaki yardım düğmesi. Bayrağa dokunmuyor.
-func _show_help() -> void:
-	for child in get_children():
-		if child is OnboardingPanel:
-			return
-	add_child(OnboardingPanel.new())
 
 ## Defterin tamamı (bkz. WaybookPanel) - yolda da aynı panel, aynı tuş;
 ## ekrandaki karşılığı şeridin "Defter" düğmesi (UI_WAYBOOK_OPEN).
@@ -210,10 +193,6 @@ func _show_caravan() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_F3:
-			_show_help()
-			get_viewport().set_input_as_handled()
-			return
 		if event.keycode == KEY_L:
 			_show_waybook()
 			get_viewport().set_input_as_handled()

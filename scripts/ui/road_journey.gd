@@ -533,7 +533,6 @@ var _exit_button: Button
 var _last_log_label: Label
 var _log_button: Button
 var _status_button: Button
-var _help_button: Button
 ## Moral/stres/tehlike sayı değil **nesne** (şişe, leke): bir orandan
 ## ibaret olan değeri rakam olarak okumak oyuncuyu her karede metin okumaya
 ## zorluyor. Sayı yine altında yazılı (bkz. SurvivalGauge).
@@ -955,16 +954,7 @@ func _build_bottom_bar() -> PanelContainer:
 	_status_button.pressed.connect(_on_status_toggled.bind(true))
 	row.add_child(_status_button)
 
-	# Aynı kısayol, aynı katman şeklinde şehirde de açılıyor (bkz.
-	# city_map.gd'nin `_show_help`'i) - playtest'in *"kesinlikle bir
-	# kısayol tuşuyla"* isteği ekrana bağlı değil.
-	_help_button = Button.new()
-	_help_button.text = tr("UI_HELP_OPEN")
-	_help_button.tooltip_text = tr("UI_HELP_TOOLTIP")
-	_help_button.pressed.connect(_show_help)
-	row.add_child(_help_button)
-
-	# Defterin tamamı: yardım katmanı gibi bir okuma, zamanı durdurmuyor.
+	# Defterin tamamı: bir okuma, zamanı durdurmuyor.
 	var waybook_button := Button.new()
 	waybook_button.text = tr("UI_WAYBOOK_OPEN")
 	waybook_button.pressed.connect(_show_waybook)
@@ -1084,9 +1074,7 @@ func _on_status_toggled(pressed: bool) -> void:
 		return
 	_control_panel.select_tab(RoadControlPanel.TAB_STATUS if pressed else RoadControlPanel.TAB_PARTY)
 
-## Şehirdekiyle aynı kapı (bkz. city_map.gd'nin `_show_help`'i): bir kereye
-## mahsus otomatik gösterimin bayrağına dokunmadan, isteğe bağlı yeniden
-## açılıyor. Zamanı durdurmuyor - bu bir okuma, bir karar değil, log ve
+## Defter ve harita okumadır, karar değil: zamanı durdurmuyorlar, log ve
 ## durum katmanlarıyla aynı muamele (bkz. `_can_time_flow`).
 const WAYBOOK_KEY: Key = KEY_L
 const MAP_KEY: Key = KEY_M
@@ -1121,12 +1109,6 @@ func _show_waybook() -> void:
 		if child is WaybookPanel:
 			return
 	add_child(WaybookPanel.new().setup(_session))
-
-func _show_help() -> void:
-	for child in get_children():
-		if child is OnboardingPanel:
-			return
-	add_child(OnboardingPanel.new())
 
 func _on_log_toggled(pressed: bool) -> void:
 	_log_overlay.visible = pressed
@@ -1435,11 +1417,6 @@ func _input(event: InputEvent) -> void:
 	if key_event.keycode == KEY_TAB:
 		var on_status := _control_panel != null and _control_panel.get_active_tab() == RoadControlPanel.TAB_STATUS
 		_on_status_toggled(not on_status)
-		accept_event()
-		return
-
-	if key_event.keycode == KEY_F3:
-		_show_help()
 		accept_event()
 		return
 
