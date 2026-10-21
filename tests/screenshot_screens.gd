@@ -119,6 +119,9 @@ func _prepare_session() -> void:
 	companion.duty_id = DutyCatalog.LEVAZIMCI
 	# Karakter ekranı yoldaşı göstersin: geçmişi, amacı ve bağı tanınmış (taslak 9.6).
 	companion.rapport = 3
+	# Kişi çantası dolu biri: pazarın açılır-kapanır çanta bölümü (karar D1).
+	companion.personal_inventory.add_item(ItemCatalog.get_item("spice"), 2)
+	session.call("_sync_wagon_inventories")
 	Nav.character_target_index = session.party.size() - 1
 	# Yakın bir ölüm: şehir brifingi yas kurdelesini taşısın.
 	var fallen := CharacterData.create("Yaruk", CultureCatalog.NOMAD, CharacterStats.new())

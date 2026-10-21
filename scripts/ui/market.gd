@@ -418,32 +418,32 @@ func _refresh_shop_rows() -> void:
 		(row.button as Button).set_pressed_no_signal(chosen)
 		(row.button as Button).disabled = _haggling_active
 
-## Her vagon kendi bloğu: başlık, yuva ve ağırlık çubukları, mal hücreleri.
+## Kervan sütunu açılır-kapanır bölümler (kullanıcı kararı D1, 2026-10-21):
+## her vagon kendi bölümü (başlık, yuva ve ağırlık çubukları, mal hücreleri),
+## altında her kişinin kendi çantası. Başlığa tıklamak bölümü açar ya da
+## kapatır; kapalı bölüm başlığında yükünün özeti kalır. Hangi bölümün açık
+## olduğu ekrandan çıkıp gelince de hatırlanır (oturum boyunca).
+static var _collapsed: Dictionary = {}
+
 func _refresh_wagons() -> void:
 	NodeUtil.clear_children(_wagon_column)
 	for index in _session.wagon_inventories.size():
 		var inv: Inventory = _session.wagon_inventories[index]
-		var block := VBoxContainer.new()
-		block.add_theme_constant_override("separation", 3)
-		_wagon_column.add_child(block)
 		var crew_index := index * GameSession.PEOPLE_PER_WAGON
 		var driver := _session.crew_names[crew_index] if crew_index < _session.crew_names.size() else ""
-		var head := Label.new()
-		head.text = tr("UI_MARKET_WAGON_HEAD") % [index + 1, driver] if not driver.is_empty() else tr("UI_MARKET_WAGON_N") % (index + 1)
-		head.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)
-		block.add_child(head)
+		var title := tr("UI_MARKET_WAGON_HEAD") % [index + 1, driver] if not driver.is_empty() else tr("UI_MARKET_WAGON_N") % (index + 1)
 		var entries := inv.get_all_entries()
+		var summary := tr("UI_MARKET_WEIGHT") % [inv.get_total_weight(), inv.weight_limit]
+		var body := _section("wagon_%d" % index, title, summary, false)
+		if body == null:
+			continue
 		var bars := HBoxContainer.new()
 		bars.add_theme_constant_override("separation", 12)
-		block.add_child(bars)
+		body.add_child(bars)
 		bars.add_child(_meter(tr("UI_MARKET_SLOTS") % [entries.size(), inv.max_slots], float(entries.size()) / float(maxi(1, inv.max_slots))))
 		var limit := maxf(1.0, inv.weight_limit)
-		bars.add_child(_meter(tr("UI_MARKET_WEIGHT") % [inv.get_total_weight(), inv.weight_limit], inv.get_total_weight() / limit))
-		var grid := GridContainer.new()
-		grid.columns = CELL_COLUMNS
-		grid.add_theme_constant_override("h_separation", 4)
-		grid.add_theme_constant_override("v_separation", 4)
-		block.add_child(grid)
+		bars.add_child(_meter(summary, inv.get_total_weight() / limit))
+		var grid := _cell_grid(body)
 		var shown := mini(inv.max_slots, CELL_COLUMNS * int(ceil(float(entries.size() + 1) / float(CELL_COLUMNS))))
 		for i in shown:
 			if i < entries.size():
@@ -451,25 +451,72 @@ func _refresh_wagons() -> void:
 				grid.add_child(_cargo_cell(entry.item, int(entry.quantity)))
 			else:
 				grid.add_child(_cargo_cell(null, 0))
-	var bag_entries := _bag_entries()
-	if not bag_entries.is_empty():
-		var head := Label.new()
-		head.text = tr("UI_MARKET_BAGS")
-		head.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)
-		_wagon_column.add_child(head)
-		var grid := GridContainer.new()
-		grid.columns = CELL_COLUMNS
-		_wagon_column.add_child(grid)
+	# Kişilerin çantaları: vagonlara sığmayan küçük kazançlar, kişi kişi.
+	for character in _session.get_party():
+		var bag: Inventory = character.personal_inventory
+		var bag_entries := bag.get_all_entries()
+		var summary := tr("UI_MARKET_WEIGHT") % [bag.get_total_weight(), bag.weight_limit]
+		var body := _section("bag_" + character.character_id, tr("UI_MARKET_BAG_OF") % character.character_name,
+			summary, true)
+		if body == null:
+			continue
+		if bag_entries.is_empty():
+			var empty := Label.new()
+			empty.text = tr("UI_MARKET_BAG_EMPTY")
+			empty.add_theme_font_size_override("font_size", 14)
+			empty.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT_DIM)
+			body.add_child(empty)
+			continue
+		var grid := _cell_grid(body)
 		for entry in bag_entries:
 			grid.add_child(_cargo_cell(entry.item, int(entry.quantity)))
 
-## Kişilerin çantasındaki mallar (vagonlara sığmayan küçük kazançlar).
-func _bag_entries() -> Array[Dictionary]:
-	var out: Array[Dictionary] = []
-	for character in _session.get_party():
-		for entry in character.personal_inventory.get_all_entries():
-			out.append(entry)
-	return out
+## Bölüm başlığı ve (açıksa) gövdesi. Kapalıysa null döner: gövde kurulmaz.
+func _section(key: String, title: String, summary: String, closed_by_default: bool) -> VBoxContainer:
+	var closed := bool(_collapsed.get(key, closed_by_default))
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 3)
+	_wagon_column.add_child(block)
+	var head := Button.new()
+	head.flat = true
+	head.focus_mode = Control.FOCUS_NONE
+	head.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	head.text = "      %s" % title
+	head.tooltip_text = summary
+	head.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)
+	head.pressed.connect(func():
+		_collapsed[key] = not closed
+		_refresh_wagons())
+	var arrow := UiIcon.new()
+	arrow.setup(UiIcon.Kind.CHEVRON_RIGHT if closed else UiIcon.Kind.CHEVRON_DOWN, ArtPalette.GRIM_AMBER, 10.0)
+	arrow.position = Vector2(6, 9)
+	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	head.add_child(arrow)
+	var row := HBoxContainer.new()
+	row.add_child(head)
+	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if closed:
+		var note := Label.new()
+		note.text = summary
+		note.add_theme_font_size_override("font_size", 13)
+		note.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT_DIM)
+		note.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(note)
+	block.add_child(row)
+	if closed:
+		return null
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 3)
+	block.add_child(body)
+	return body
+
+func _cell_grid(body: VBoxContainer) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = CELL_COLUMNS
+	grid.add_theme_constant_override("h_separation", 4)
+	grid.add_theme_constant_override("v_separation", 4)
+	body.add_child(grid)
+	return grid
 
 func _meter(text: String, share: float) -> Control:
 	var col := VBoxContainer.new()
