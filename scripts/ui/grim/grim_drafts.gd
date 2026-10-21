@@ -207,6 +207,7 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 	root.add_child(glow)
 	var travellers := _camp_travellers()
 	for figure in travellers:
+		root.add_child(figure.get_meta("crate"))
 		root.add_child(figure)
 	root.resized.connect(func():
 		_place_on_image(glow, bg, root.size)
@@ -224,29 +225,58 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 ## Kamp ateşinin resimdeki yeri (payı). Işık bu noktaya oturur.
 const FIRE_POINT: Vector2 = Vector2(0.285, 0.735)
 
-## Ateşin başındaki üç yorgun yolcu (görev Y-G16): ateşe dönük, yalnızca ondan
-## ışık alıyorlar (kısık, sıcak ton). Ayak noktası ve boy resmin payı olarak
-## verilir; ekran boyutu değişince `_place_traveller` yeniden oturtur. Cinsiyet,
-## ten, boy ve giysi elle seçildi: aynı kişi üç kez çizilmesin.
+## Ateşin başındaki üç yorgun yolcu (görev Y-G16, taslak: `menu_kamp_taslak.py`):
+## her biri bir sandığın üstünde oturuyor (`sit_box` klibi: kalça sandığın
+## kapağında, ayaklar yerde), ikisi ateşe yan dönük, biri ateşin ardında.
+## Işık yalnızca ateşten: yakın olan sıcak, uzaktaki karanlık. Ayak noktası ve
+## boy resmin payı; ekran boyutu değişince `_place_traveller` yeniden oturtur.
 const CAMP_TRAVELLERS: Array = [
-	{"at": Vector2(0.338, 0.808), "height": 0.255, "scale": 1.0, "skin": 1, "gender": 1, "weight": 0, "tint": Color(0.9, 0.64, 0.46)},
-	{"at": Vector2(0.384, 0.778), "height": 0.225, "scale": 0.92, "skin": 2, "gender": 0, "weight": 1, "tint": Color(0.66, 0.48, 0.38)},
-	{"at": Vector2(0.424, 0.818), "height": 0.265, "scale": 1.06, "skin": 3, "gender": 1, "weight": 2, "tint": Color(0.46, 0.36, 0.32)},
+	{"at": Vector2(0.206, 0.787), "height": 0.33, "gender": 1, "weight": 2, "skin": 1, "right": true,
+		"tint": Color(0.9, 0.74, 0.62),
+		"outfit": ["wool_pants", "short_boots", "linen_tunic", "wool_coat", "felt_hat"]},
+	{"at": Vector2(0.388, 0.796), "height": 0.33, "gender": 0, "weight": 0, "skin": 0, "right": false,
+		"tint": Color(0.9, 0.74, 0.62),
+		"outfit": ["long_skirt", "felt_shoes", "peasant_blouse", "head_veil"]},
+	{"at": Vector2(0.341, 0.748), "height": 0.27, "gender": 1, "weight": 0, "skin": 2, "right": false,
+		"tint": Color(0.55, 0.45, 0.4),
+		"outfit": ["peasant_pants", "peasant_shoes", "peasant_shirt"]},
 ]
+const CRATE_ART: String = "res://data/assets/props/crate/body.png"
+const SEATED_CLIP: String = "sit_box"
+## Sandığın boyu oturanın boyunun bu payı; kalça sandığın kapağında.
+const CRATE_HEIGHT_SHARE: float = 0.26
+const CRATE_BACK_SHARE: float = 0.09
 
 static func _camp_travellers() -> Array:
 	var out: Array = []
-	for entry in CAMP_TRAVELLERS:
+	var crate_tex: Texture2D = TextureLoader.load_any(CRATE_ART)
+	# Önce uzaktakiler çizilsin: ayak noktası yukarıda olan arkada kalır.
+	var order: Array = CAMP_TRAVELLERS.duplicate()
+	order.sort_custom(func(x, y): return Vector2(x["at"]).y < Vector2(y["at"]).y)
+	for entry in order:
+		var look: Dictionary = entry
 		var person := FigurePreview.new()
 		person.max_figure_height = 0.0
-		var look: Dictionary = entry
+		var outfit := {}
+		for piece_id in look["outfit"]:
+			var piece := OutfitCatalog.get_piece(String(piece_id))
+			if piece != null:
+				outfit[piece.slot] = piece.piece_id
 		var skin := CharacterData.get_skin_tone_color(int(look["skin"]))
 		var variant := Wardrobe.body_id_for(int(look["gender"]), int(look["weight"]))
-		person.show_look("villager", float(look["scale"]), skin, {}, PackedStringArray(), variant)
-		person.set_facing(-1.0)
+		person.show_look("villager", 1.0, skin, outfit, PackedStringArray(), variant)
+		person.set_facing(1.0 if look["right"] else -1.0)
+		person.set_action(SEATED_CLIP)
 		person.set_tint(look["tint"])
-		person.set_meta("look", look)
 		person.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var crate := TextureRect.new()
+		crate.texture = crate_tex
+		crate.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		crate.stretch_mode = TextureRect.STRETCH_SCALE
+		crate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		crate.modulate = Color(look["tint"]).darkened(0.1)
+		person.set_meta("look", look)
+		person.set_meta("crate", crate)
 		out.append(person)
 	return out
 
@@ -258,11 +288,19 @@ static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) ->
 	var offset := (view - img * k) * 0.5
 	var look: Dictionary = person.get_meta("look")
 	var at: Vector2 = look["at"]
+	var feet := offset + at * img * k
 	var figure_h := float(look["height"]) * img.y * k
 	# FigurePreview çizdiği boyu penceresinin %86'sı yapar (`_layout`).
 	person.size = Vector2(figure_h * 0.8, figure_h / 0.86)
-	person.position = offset + at * img * k - Vector2(person.size.x * 0.5, person.size.y)
-	person.refit()
+	person.position = feet - Vector2(person.size.x * 0.5, person.size.y)
+	(person as FigurePreview).refit()
+	var crate: TextureRect = person.get_meta("crate")
+	if crate != null and crate.texture != null:
+		var crate_h := figure_h * CRATE_HEIGHT_SHARE
+		var crate_w := crate_h * 0.98
+		var back := -1.0 if look["right"] else 1.0
+		crate.size = Vector2(crate_w, crate_h)
+		crate.position = Vector2(feet.x + back * figure_h * CRATE_BACK_SHARE - crate_w * 0.5, feet.y - crate_h + 4.0)
 
 static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> void:
 	if bg.texture == null:

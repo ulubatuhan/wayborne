@@ -13,8 +13,9 @@ G = {
     },
     "Y-G16": {
         "img": [("menu_ana.jpg", "Ateşin başındaki üç yolcu")],
-        "ben": "Üç figür ateşe dönük, ayakları yere basıyor; ateşe en yakın olan sıcak, uzaktakiler daha koyu. Hepsi yeni mankenler (farklı boy, kilo, ten).",
-        "estetik": "Yolcular yan yana dizilmiş gibi duruyor ve saçsız: daha dağınık, çömelmiş ya da oturur pozlar istiyor musunuz?",
+        "ben": "Üç yolcu birer sandığın üstünde oturuyor (taslaktaki kompozisyon: ikisi ateşe yan dönük, biri ateşin ardında), kalçaları sandık kapağında, ayakları yerde. "
+               "Taslağa göre figürler daha pikselli/yumuşak görünüyor ve giysi ayrıntısı az.",
+        "estetik": "Figürlerin keskinliği ve ışığı taslaktaki kadar iyi mi, yoksa ateş ışığını güçlendirelim mi?",
     },
     "Y-H07": {
         "img": [("ayarlar.jpg", "Ayarlar ekranı")],
@@ -63,10 +64,12 @@ G = {
         "estetik": "Kart boyutu ve çadır arka planı hoşunuza gidiyor mu?",
     },
     "12.2a": {
-        "img": [("kapi.jpg", "Şehir kapısı (hub)")],
-        "ben": "Kapı, kuleler ve duvar çiziliyor; 'Vastrevar Kapısı' yazısı ve 'tıkla ya da E' ipucu var. "
-               "Hata: kapı yazısı lider adının üstüne biniyor (aşağıdaki hata listesinde).",
-        "estetik": "Kapının gri bloklu kuleleri yeterince 'kervan yolu' hissi veriyor mu, yoksa ahşap/taş doku mu istersiniz?",
+        "img": [("kapi_vastrevar_gece.jpg", "Vastrevar kapısı, gece (meşaleli)"),
+                ("kapi_kirsavel_gunduz.jpg", "Kirsavel kapısı, gündüz"),
+                ("kapi_belvanor_gunduz.jpg", "Belvanor kapısı, gündüz")],
+        "ben": "Her şehrin kendi kapısı var ve oyuna bağlı (şehre gerçek bir girişte `GateArrival` açılıyor): Vastrevar ve Kirsavel birbirinden farklı, "
+               "geceyi meşale ve ay, gündüzü gündüz resmi veriyor. Kapının açılıp şehrin belirmesini (solma) ve tıkla-geç davranışını bu araçla çekemedim.",
+        "estetik": "Gece kapıları çok karanlık mı? Meşale ışığı kapıyı yeterince gösteriyor mu?",
     },
     "12.2e": {
         "img": [("yol.jpg", "Yol, fırtınada şafak"), ("durum.jpg", "Yol, öğleden sonra, Durum sekmesi")],

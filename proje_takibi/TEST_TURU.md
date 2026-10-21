@@ -42,8 +42,8 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Görmeli: Ateşin başında üç yorgun yolcu, ateşe dönük; ateşe yakın olan daha sıcak ışıkta.
   - Bozuksa: Yolcular havada ya da ateşten uzak duruyorsa not al.
   - ![Ateşin başındaki üç yolcu](test_turu_gorseller/menu_ana.jpg)
-  - **Ben baktım:** Üç figür ateşe dönük, ayakları yere basıyor; ateşe en yakın olan sıcak, uzaktakiler daha koyu. Hepsi yeni mankenler (farklı boy, kilo, ten).
-  - **Size kalan (zevk):** Yolcular yan yana dizilmiş gibi duruyor ve saçsız: daha dağınık, çömelmiş ya da oturur pozlar istiyor musunuz?
+  - **Ben baktım:** Üç yolcu birer sandığın üstünde oturuyor (taslaktaki kompozisyon: ikisi ateşe yan dönük, biri ateşin ardında), kalçaları sandık kapağında, ayakları yerde. Taslağa göre figürler daha pikselli/yumuşak görünüyor ve giysi ayrıntısı az.
+  - **Size kalan (zevk):** Figürlerin keskinliği ve ışığı taslaktaki kadar iyi mi, yoksa ateş ışığını güçlendirelim mi?
 - [ ] **Y-H07** Erişilebilirlik ve oynanış ayarları
   - Nereye: Ana menü → Ayarlar; sonra yol ve savaşta etkisine bak.
   - Görmeli: Metin boyutu dört kademe (menüler büyür/küçülür, taşma yok); desenli şerit açıkken savaştaki kan şeridi parçalı çiziliyor; otomatik duraklatma açıkken yol işareti/karşılaşma işaretinde zaman bir tuş ya da tıklamaya kadar duruyor. Hızlandırma seçeneği yok. Ayarlar kayıt dosyasında değil `settings.cfg`'de.
@@ -90,9 +90,11 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Nereye: Şehir kapısı: yola çıkarken ve şehre varırken kapıyı izle.
   - Görmeli: Kapı sur geçidi olarak çizili (düz renk kutu değil); kanat lider yaklaşınca kalkıyor.
   - Bozuksa: Düz dikdörtgen ya da kanat takılıyor
-  - ![Şehir kapısı (hub)](test_turu_gorseller/kapi.jpg)
-  - **Ben baktım:** Kapı, kuleler ve duvar çiziliyor; 'Vastrevar Kapısı' yazısı ve 'tıkla ya da E' ipucu var. Hata: kapı yazısı lider adının üstüne biniyor (aşağıdaki hata listesinde).
-  - **Size kalan (zevk):** Kapının gri bloklu kuleleri yeterince 'kervan yolu' hissi veriyor mu, yoksa ahşap/taş doku mu istersiniz?
+  - ![Vastrevar kapısı, gece (meşaleli)](test_turu_gorseller/kapi_vastrevar_gece.jpg)
+  - ![Kirsavel kapısı, gündüz](test_turu_gorseller/kapi_kirsavel_gunduz.jpg)
+  - ![Belvanor kapısı, gündüz](test_turu_gorseller/kapi_belvanor_gunduz.jpg)
+  - **Ben baktım:** Her şehrin kendi kapısı var ve oyuna bağlı (şehre gerçek bir girişte `GateArrival` açılıyor): Vastrevar ve Kirsavel birbirinden farklı, geceyi meşale ve ay, gündüzü gündüz resmi veriyor. Kapının açılıp şehrin belirmesini (solma) ve tıkla-geç davranışını bu araçla çekemedim.
+  - **Size kalan (zevk):** Gece kapıları çok karanlık mı? Meşale ışığı kapıyı yeterince gösteriyor mu?
 - [ ] **Y-C16** İşe almayı zorlaştır ve kişileştir
   - Nereye: Taverna/Meydan/Lonca → işe alım panosu (birkaç şehirde).
   - Görmeli: Pano çoğu zaman 1-2 kişi; her adayın neden geldiği yazıyor; savaş/veba haberinde bir kişi eksik; fiyatlar önceki sürümden pahalı.

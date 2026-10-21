@@ -48,6 +48,9 @@ func show_look(
 func refit() -> void:
 	_layout()
 
+func set_action(clip: String) -> void:
+	_figure.set_action(clip)
+
 func set_facing(direction: float) -> void:
 	_figure.set_facing(direction)
 
