@@ -429,6 +429,438 @@
    "id": "palisade_gate",
    "builder": "palisade_gate",
    "ppm": 80
+  },
+  {
+   "id": "gate_vastrevar",
+   "builder": "settlement_gate:vastrevar",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_ilsande",
+   "builder": "settlement_gate:ilsande",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_serai_orbeyan",
+   "builder": "settlement_gate:serai_orbeyan",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_akavan",
+   "builder": "settlement_gate:akavan",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_brazdun",
+   "builder": "settlement_gate:brazdun",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_orsolune",
+   "builder": "settlement_gate:orsolune",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_orvahel",
+   "builder": "settlement_gate:orvahel",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_auderin",
+   "builder": "settlement_gate:auderin",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_belvanor",
+   "builder": "settlement_gate:belvanor",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_caramine",
+   "builder": "settlement_gate:caramine",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_dravoss",
+   "builder": "settlement_gate:dravoss",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_ezmerak",
+   "builder": "settlement_gate:ezmerak",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_golcavar",
+   "builder": "settlement_gate:golcavar",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_kesgrav",
+   "builder": "settlement_gate:kesgrav",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_kirsavel",
+   "builder": "settlement_gate:kirsavel",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_liraven",
+   "builder": "settlement_gate:liraven",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_merigaud",
+   "builder": "settlement_gate:merigaud",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_mirsana",
+   "builder": "settlement_gate:mirsana",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_ondrelle",
+   "builder": "settlement_gate:ondrelle",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_rivecande",
+   "builder": "settlement_gate:rivecande",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_samuran",
+   "builder": "settlement_gate:samuran",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_selvicar",
+   "builder": "settlement_gate:selvicar",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_serai_duvenmor",
+   "builder": "settlement_gate:serai_duvenmor",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_serai_seyvan",
+   "builder": "settlement_gate:serai_seyvan",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_tolvarin",
+   "builder": "settlement_gate:tolvarin",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_vorgat",
+   "builder": "settlement_gate:vorgat",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gate_zelmarin",
+   "builder": "settlement_gate:zelmarin",
+   "ppm": 40,
+   "samples": 96,
+   "tints": [
+    {
+     "match": "palisade_wood",
+     "color": [
+      0.46,
+      0.3,
+      0.17
+     ]
+    }
+   ]
   }
  ]
 }

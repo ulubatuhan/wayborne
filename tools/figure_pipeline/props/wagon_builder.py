@@ -11,6 +11,8 @@ ayni kutuya dusuyor ve RoadCaravan'in hicbir mesafesi degismiyor.
 Eksenler kameranin: on taraf -Y (ekranin sagi), yukari +Z, yer z=0.
 """
 import math
+import os
+import sys
 
 import bmesh
 import bpy
@@ -384,4 +386,14 @@ def palisade_gate():
     return {"body": [body_obj], "gate": [join(leaf, "gate")]}, {}
 
 
-BUILDERS = {"covered_wagon": covered_wagon, "half_cart": half_cart, "palisade_gate": palisade_gate}
+def settlement_gate(city):
+    """Bir yerleşimin kendi kapısı, kendi kapı sahnesinden (tools/ui_scenes/gate_cutout.py)."""
+    ui = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ui_scenes")
+    if ui not in sys.path:
+        sys.path.insert(0, ui)
+    import gate_cutout
+    return gate_cutout.settlement_gate(city)
+
+
+BUILDERS = {"covered_wagon": covered_wagon, "half_cart": half_cart, "palisade_gate": palisade_gate,
+            "settlement_gate": settlement_gate}

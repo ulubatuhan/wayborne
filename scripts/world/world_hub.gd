@@ -151,6 +151,11 @@ const GATE_X: float = 1795.0
 ## (WAGON_SIZE) geçebileceği kadar açık oluyor - gerçek ölçekte (kişi
 ## ~36 px/m) on iki metrelik sur bir vagona dar bir kapı bırakıyordu.
 const GATE_HEIGHT: float = 520.0
+## Kapı resminin en fazla yüksekliği (şehrin kendi kapısında arkadaki çatılar dahil).
+const GATE_MAX_HEIGHT: float = 600.0
+## Kanadı olmayan kapının geçidi, metre.
+const GATE_OPENING_M: float = 4.0
+const GATE_OPENING_HEIGHT_M: float = 5.0
 ## Yerleşimin ölçeği: kişi kutusu BODY_HEIGHT 72 px, figür onun ~%86'sı,
 ## 1.73 m'lik bir insan ~36 px/m. Binalar biraz büyük (40), uzaktakiler küçük.
 const HUB_PX_PER_M: float = 40.0
@@ -511,10 +516,15 @@ func _build_gate() -> void:
 	add_child(gate)
 	# İki kapı aynı piksel/metre ölçeğinde: kütük kapı taş kapıdan küçük ya da büyük çıkmasın.
 	var prop_id := _gate_prop_id()
-	gate.setup(prop_id, PropArt.scale_for_height(prop_id, GATE_HEIGHT, PropArt.size_m(GATE_PROP).z),
-		_night_tint())
+	# Şehrin kendi kapısının arkasında çatılar da var: bütün resim GATE_MAX_HEIGHT'i geçmesin.
+	var px_per_m := minf(GATE_HEIGHT / PropArt.size_m(GATE_PROP).z, GATE_MAX_HEIGHT / maxf(PropArt.size_m(prop_id).z, 0.1))
+	gate.setup(prop_id, px_per_m / PropArt.ppm(prop_id), _night_tint())
 	_gate_node = gate
 	var opening := gate.layer_bounds("gate")
+	if opening.size == Vector2.ZERO:
+		# Kanadı olmayan kapı (şehrin kendi kapısı): geçit eşyanın çapasında, kapı genişliğinde.
+		var w := GATE_OPENING_M * px_per_m
+		opening = Rect2(gate.position + Vector2(-w * 0.5, -GATE_OPENING_HEIGHT_M * px_per_m), Vector2(w, GATE_OPENING_HEIGHT_M * px_per_m))
 	_add_spot(_gate_label(), opening.position, opening.size, Color.TRANSPARENT, Nav.CITY_MAP)
 
 ## Kapının dışındaki yerleşim: değirmen, evler, kuyu, araba, tabela. Hepsi

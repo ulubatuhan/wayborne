@@ -178,7 +178,9 @@ def build(spec):
     """Sahneyi kurar; (katman -> nesneler, pivotlar(dunya), golge-yalniz nesneler)."""
     reset()
     if "builder" in spec:
-        layers, pivots = wagon_builder.BUILDERS[spec["builder"]]()
+        # "ad:argüman" - aynı kurucudan birden çok eşya (yerleşim başına kapı)
+        name, _, arg = spec["builder"].partition(":")
+        layers, pivots = wagon_builder.BUILDERS[name](arg) if arg else wagon_builder.BUILDERS[name]()
         shadow_only = layers.pop("_shadow_only", [])
         return layers, {k: Vector(v) for k, v in pivots.items()}, shadow_only
     layers = {}

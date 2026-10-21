@@ -1066,10 +1066,11 @@ func _draw_memorials(area: Rect2, cover: Rect2) -> void:
 ## gelmek; kapı üstüne yapıştırılmış bir resim değil yolun kendi parçası. Duraklar
 ## gibi güne bağlı (kervanla kayıyor), duraklar gibi yolun gerisinde duruyor ve
 ## kervan önünde duruyor. Lider yaklaşınca kanat kalkıyor (hub'daki kapıyla aynı).
-const GATE_PX_PER_M_OF_HEIGHT: float = 0.057
-## Kapının en fazla şerit boyunun bu kadarı: 12 m'lik taş kapı insan ölçeğinde
-## çerçevenin üstünden taşıyordu (ölçüldü), o yüzden yolun daha gerisinde duruyor.
-const GATE_MAX_HEIGHT_SHARE: float = 0.43
+const GATE_PX_PER_M_OF_HEIGHT: float = 0.05
+## Kapının (arkasındaki çatılar dahil) en fazla şerit boyunun bu kadarı: 12 m'lik
+## taş kapı insan ölçeğinde çerçevenin üstünden taşıyordu (ölçüldü), o yüzden
+## uzun bir kapı yolun daha gerisinde, daha küçük duruyor.
+const GATE_MAX_HEIGHT_SHARE: float = 0.62
 const GATE_BASE_SINK: float = 0.03
 const GATE_OPEN_RANGE: float = 0.55
 

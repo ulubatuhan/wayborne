@@ -3141,6 +3141,18 @@ paid for. A new game starts in a city (`character_creation.gd` →
   put a `TallWall` piece behind every watchtower (`WALL_BEHIND_DEPTH`), so the curtain wall meets the gate instead of
   stopping at an open tower base. The tower flags have their own cloth material (`FLAG_MATERIAL`), so the stone
   tint rule never reaches them.
+- **The road ends at the settlement's own gate, as part of the road (user's decision, 2026-10-21).** Arriving used to
+  be only a growing procedural silhouette on the horizon. Now `TravelBand` draws the
+  destination's gate in the world (`set_arrival_gate`, `_draw_arrival_gate`): day-anchored at the road's end like a
+  stop, behind the road's far edge, lit by the band's light, its opening centred on the column's head rider when the
+  caravan arrives (`road_journey._sync_arrival_gate`; after turning back, the road's start). The hub draws the same
+  prop. `Location.gate_prop_id()` is the one choice: the settlement's own `gate_<id>` cutout, else the shared log or
+  stone gate by `wall`. The cutouts are rendered from the gate scenes themselves (`tools/ui_scenes/gate_cutout.py`,
+  builder `settlement_gate:<id>` in `render_props.py`, packed one by one with `pack_some.py --prefix gate_`): the same
+  wall, towers, flags and the town's roofs behind it, seen from the side; trees, ground and clutter left out, the wall
+  cut to `HALF_SPAN`. A tall gate (roofs included) is held under `GATE_MAX_HEIGHT_SHARE` of the band, so a 15 m bell
+  tower stands farther back rather than off the frame. A log gate's leaf swings open to both sides
+  (`PropArt.draw_gate_leaf`); a stone portcullis lifts.
 - **A settlement's wall is one fact, read by three places (user's decision, 2026-10-21).** `settlements.json` `wall`
   (`"wood"`/`"stone"`, `Location.wall`, written by `tools/worldmap/annotate_walls.py` from the town scene's own `wood`
   flag) says what the wall is made of: nine settlements (akavan, auderin, caramine, golcavar, kirsavel, liraven,
