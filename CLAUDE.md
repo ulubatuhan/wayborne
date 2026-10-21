@@ -3139,7 +3139,15 @@ paid for. A new game starts in a city (`character_creation.gd` →
   `tests/screenshot_city_moods.gd` prints all three at noon and night.
 - **A gate's wall runs behind its towers (user's decision A5).** The gate scenes (`settlement_gates.py`, `gates.json`)
   put a `TallWall` piece behind every watchtower (`WALL_BEHIND_DEPTH`), so the curtain wall meets the gate instead of
-  stopping at an open tower base. Known open item: the tower flags take the stone tint (K13, to fix later).
+  stopping at an open tower base. The tower flags have their own cloth material (`FLAG_MATERIAL`), so the stone
+  tint rule never reaches them.
+- **A settlement's wall is one fact, read by three places (user's decision, 2026-10-21).** `settlements.json` `wall`
+  (`"wood"`/`"stone"`, `Location.wall`, written by `tools/worldmap/annotate_walls.py` from the town scene's own `wood`
+  flag) says what the wall is made of: nine settlements (akavan, auderin, caramine, golcavar, kirsavel, liraven,
+  samuran, selvicar, vorgat) have a log palisade - sharpened logs, timber towers - in the town front
+  (`town_scene.palisade`), the gate scene (`settlement_gates._wood_gate`) and the hub's gate prop (`palisade_gate`,
+  `WorldHub._gate_prop_id`, same px/m as the stone `city_gate`). `test_settlements::_test_wall_material` fails if the
+  field and the town scene disagree, so a log-walled town cannot be entered through a stone gate.
 - **The square is not empty, and it is staged, not crowded (task Y-G10T).** `TownsfolkLayer` places small scenes from
   the approved drafts: at night a watchman with a lantern, two people talking, one walking home; at dusk and by day a
   vendor, an old man on a crate, a couple and a second walker join. Each figure takes the light of the spot it stands
