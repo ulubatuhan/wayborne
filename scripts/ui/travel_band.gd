@@ -1071,6 +1071,8 @@ const GATE_PX_PER_M_OF_HEIGHT: float = 0.05
 ## taş kapı insan ölçeğinde çerçevenin üstünden taşıyordu (ölçüldü), o yüzden
 ## uzun bir kapı yolun daha gerisinde, daha küçük duruyor.
 const GATE_MAX_HEIGHT_SHARE: float = 0.62
+## Görünen alanın tepesinden bırakılan pay (yolun üst çubuğu).
+const GATE_TOP_MARGIN_SHARE: float = 0.09
 const GATE_BASE_SINK: float = 0.03
 const GATE_OPEN_RANGE: float = 0.55
 
@@ -1098,11 +1100,14 @@ func arrival_gate_x() -> float:
 func _draw_arrival_gate(area: Rect2, cover: Rect2) -> void:
 	if not has_arrival_gate():
 		return
-	var metres := maxf(PropArt.size_m(_gate_prop).z, 0.1)
-	var px_per_m := minf(area.size.y * GATE_PX_PER_M_OF_HEIGHT, area.size.y * GATE_MAX_HEIGHT_SHARE / metres)
-	var k := px_per_m / PropArt.ppm(_gate_prop)
 	var x := arrival_gate_x()
 	var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * GATE_BASE_SINK)
+	var metres := maxf(PropArt.size_m(_gate_prop).z, 0.1)
+	# Görünen göğün altında kalsın: yol ekranı şeridin tepesini üst çubuğun altına itiyor.
+	var seen_top := _view.position.y if _view.has_area() else cover.position.y
+	var room := minf(area.size.y * GATE_MAX_HEIGHT_SHARE, base.y - seen_top - area.size.y * GATE_TOP_MARGIN_SHARE)
+	var px_per_m := minf(area.size.y * GATE_PX_PER_M_OF_HEIGHT, maxf(room, 1.0) / metres)
+	var k := px_per_m / PropArt.ppm(_gate_prop)
 	var box := PropArt.bounds(_gate_prop, base, k)
 	if box.end.x < cover.position.x or box.position.x > cover.end.x:
 		return

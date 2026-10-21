@@ -2080,7 +2080,9 @@ func _apply_zoom(delta: float) -> void:
 		_caravan.get_leader_centre(), _caravan.get_ground_y()
 	)
 	_band.scale = Vector2(_zoom, _zoom)
-	_band.set_view_rect(visible_rect_in(_band, _world.get_global_rect()))
+	# Görüş, dünyanın ekranda kalan kısmı: gök kırpması dünyayı ekranın üstüne itiyor.
+	var seen := _world.get_global_rect().intersection(get_viewport_rect())
+	_band.set_view_rect(visible_rect_in(_band, seen if seen.has_area() else _world.get_global_rect()))
 
 ## Ekranın bir dikdörtgeninin (global) bir düğümün yerel uzayındaki karşılığı -
 ## ölçeklenmiş şeridin o an gördüğü alan.

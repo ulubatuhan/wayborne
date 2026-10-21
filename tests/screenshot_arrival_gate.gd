@@ -11,7 +11,7 @@ extends SceneTree
 const SHOT_DIR: String = "user://arrival_gate_shots"
 const VIEW_SIZE: Vector2i = Vector2i(1920, 1080)
 ## [çıkış, varış]
-const ROADS: Array = [["tolvarin", "akavan"], ["akavan", "tolvarin"]]
+const ROADS: Array = [["tolvarin", "akavan"], ["akavan", "tolvarin"], ["caramine", "ilsande"]]
 ## Varışa kalan yol, ekran genişliği cinsinden.
 const REMAINING_SCREENS: Array = [0.9, 0.45, 0.15, 0.0]
 

@@ -185,7 +185,8 @@ def _copy_upstream(src_nt, sock, dst_nt, memo):
     if node.name not in memo:
         new = dst_nt.nodes.new(node.bl_idname)
         for attr in ("image", "interpolation", "extension", "uv_map", "layer_name", "data_type",
-                     "blend_type", "clamp_result", "clamp_factor", "factor_mode", "operation"):
+                     "blend_type", "clamp_result", "clamp_factor", "factor_mode", "operation",
+                     "projection", "projection_blend", "vector_type"):
             if hasattr(node, attr):
                 try:
                     setattr(new, attr, getattr(node, attr))
