@@ -13,8 +13,8 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
 
 - **[düzeldi]** Ayarlar'da müzik kaydırıcısı: Oyunda müzik olmamasına rağmen kaydırıcı duruyordu; gizlendi.
 - **[düzeldi]** Yeni oyun ekranında Türkçe kalan iki başlık: 'Kimlik' ve 'Statlar' yazıları İngilizce arayüzde Türkçe çıkıyordu; çeviri anahtarına bağlandı.
-- **[açık]** Hub: kapı yazısı lider adının üstüne biniyor: 'Vastrevar Kapısı' etiketi ile lider adı aynı yükseklikte çakışıyor.
-- **[açık]** Savaş sahnesi taşması (görev Y-G05): 1920 genişlikte üçüncü düşman yarım, dördüncü görünmüyor; alttaki günlük kutusu ekranın yarısını boş kaplıyor.
+- **[düzeldi]** Hub: kapı yazısı lider adının üstüne biniyordu: Etiket yukarı alındı (aşağıdaki kapı görüntüsü eski hâli; yeni çekim sizin PC'nizde doğrulanacak).
+- **[düzeldi]** Savaş sahnesi taşması: 1920 genişlikte üçüncü düşman yarım, dördüncü görünmüyordu; mevki aralığı artık sığacak kadar daralıyor, dört düşman da kadrajda (görüntüler yeni).
 - **[açık]** Kıyafet Dolabı: boş yuvalar ama figür giyinik: Altı yuva 'boş' diyor, figür ise yelek, eldiven, bot giymiş; taban kıyafet mi, bir uyumsuzluk mu araştırılacak.
 - **[not]** Bu ortamda gösterilemeyenler: Dünya haritasının zemini (Git LFS dokuları indirilmedi, harita boş koyu görünüyor), saat/hava/gece varyantları, kamp, olay kartı zincirleri, defter sayfaları: bunlar bu araçla çekilemedi, kullanıcının bakışına kaldı.
 
@@ -374,7 +374,7 @@ Bir maddeyi onayladığınızda bana 'X tamam' demeniz yeter; ben kaydı 'bitti'
   - Bozuksa: Ses hep aynı ya da yakınlaştırma takılıyor
   - ![Savaş: kritik vuruş ve Ölümün Kıyısı](test_turu_gorseller/savas_kritik.jpg)
   - ![Savaş açılışı](test_turu_gorseller/savas_acilis.jpg)
-  - **Ben baktım:** Kritik vuruşta 'Critical! -7' sayısı ve sarı parlama, hedef halkası; Ölümün Kıyısındaki dosta 'DOOR' etiketi ve kırmızı ton. Hata: sağdaki düşmanlar kadrajdan taşıyor, günlük alanı çok büyük ve boş (hata listesinde).
+  - **Ben baktım:** Kritik vuruşta 'Critical! -7' sayısı ve sarı parlama, hedef halkası; Ölümün Kıyısındaki dosta 'DOOR' etiketi ve kırmızı ton. Sağdaki düşmanların kadrajdan taşması düzeltildi.
   - **Size kalan (zevk):** Vuruş geri bildirimi (parlama + sayı) yeterince 'ağır' mı?
 - [ ] **Y-C07** Savaştan bedelli geri çekilme
   - Nereye: Dar durumda geri çekil.

@@ -232,6 +232,7 @@ func _build_field() -> void:
 	stage.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	add_child(stage)
 	_stage = stage
+	stage.resized.connect(_fit_row_separation)
 
 	var backdrop := CombatBackdrop.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -364,9 +365,26 @@ func _refresh() -> void:
 	_refresh_header()
 	_refresh_side(_player_row, _encounter.player_units, true)
 	_refresh_side(_enemy_row, _encounter.enemy_units, false)
+	_fit_row_separation.call_deferred()
 	_refresh_actions()
 	_spawn_hp_numbers()
 	_animate(Time.get_ticks_msec())
+
+## Dört mevki yan yana 160 px'lik ayraçla 1920 px'e sığmıyordu: en arkadaki
+## düşman kadrajdan taşıyordu. Ayraç, sığmayacağı kadar genişse daralır;
+## sığıyorsa eski 160 kalır.
+const MIN_ROW_SEPARATION: float = 12.0
+const MAX_ROW_SEPARATION: float = 160.0
+
+func _fit_row_separation() -> void:
+	for row in [_player_row, _enemy_row]:
+		if row == null or not is_instance_valid(row) or row.get_child_count() < 2 or _stage == null or _stage.size.x <= 0.0:
+			continue
+		var content := 0.0
+		for child in row.get_children():
+			content += (child as Control).get_combined_minimum_size().x
+		var spare := ((_stage.size.x - 160.0) * 0.5 - content) / float(row.get_child_count() - 1)
+		row.add_theme_constant_override("separation", int(clampf(spare, MIN_ROW_SEPARATION, MAX_ROW_SEPARATION)))
 
 func _refresh_header() -> void:
 	_round_label.text = tr("UI_COMBAT_ROUND") % _encounter.round_number

@@ -572,7 +572,7 @@ func _add_spot(
 
 	var name_label := Label.new()
 	name_label.text = spot_name
-	name_label.position = Vector2(position.x - 40.0, position.y - 34.0)
+	name_label.position = Vector2(position.x - 40.0, position.y - 62.0)
 	name_label.size = Vector2(size.x + 80.0, 28.0)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(name_label)
