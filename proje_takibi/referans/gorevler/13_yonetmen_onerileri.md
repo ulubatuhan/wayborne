@@ -652,8 +652,8 @@ Kullanıcı kararı: sıra teknik önceliğe göre. Bir dalga içinde bağımlı
   - **Kullanıcı notu:** “mantıklı, fest öncesinde kısıtlı bir vers paylaşıp festte erken erişim tam sürümü paylaşabilirim.”
   - **Kabul:** Valve kuralı doğrulandı; demo ve Erken Erişim tarihleri kesinleşti; demo yayında.
   - **Literatür:** R61, R62, R64
-- [ ] **Y-J05 AI beyanını ve CREDITS'i düzelt**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `6630a09`): Ses künyesi ve lisans testi eklendi. Kalan (kullanıcı): iki müzik parçasının kaynağı.
+- [x] **Y-J05 AI beyanını ve CREDITS'i düzelt**
+  - **Kapandı (2026-10-21):** Ses künyesi ve lisans testi var; kaynağı belirsiz iki müzik parçası kullanıcı kararıyla silindi, `AI_DISCLOSURE.md` "oyunda müzik yoktur" diyor, künyede BEKLENİYOR satırı kalmadı (`tests/test_audio_credits.gd` bunu zorluyor). Yeni müzik gelirse (Y-I02) künyesiyle gelir.
   - **Öncelik:** P1 · **Dalga:** 1
   - **Ne:** `AI_DISCLOSURE.md` hâlâ “bütün görseller prosedürel” diyor; düzeltilir: AI görselleri, AI sesleri, 3B render'lar, CC0 paketler. Kullanıcı notu: kullanılan CC0 üreticileri de CREDITS'e eklenir (zorunlu olmasa da).
   - **Kullanıcı notu:** “tamamdır, buraya kullandığımız co0 üreticileri de eklemek gerekir bence belki zorunlu olmasa bile.”

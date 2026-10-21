@@ -2,8 +2,8 @@
 
 > Bu dosya `../YAPILACAKLAR.md` dizininin bir bölümü. Görev kimlikleri (ör. **8.2**, **12.2c**, **R0**) ve § başvuruları dizindekiyle aynı. Kurallar: `00_kurallar.md`. Başlamadan önce: `../00_BASLA_BURADAN.md`.
 
-- [ ] **2.1 Dışa aktarımlardan test ve araçları çıkar** (§4 O-1; PC dışa aktarımı asıl hedef, Web yalnız test için)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `ded1091`): export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil).
+- [x] **2.1 Dışa aktarımlardan test ve araçları çıkar** (§4 O-1; PC dışa aktarımı asıl hedef, Web yalnız test için)
+  - **Kapandı (2026-10-21, kullanıcı kararı):** Web derlemesi ve `export_presets.cfg` tamamen kaldırıldı; oyun klonlanıp yerelde oynanıyor, dışa aktarım yok. Aşağıdaki not tarihçedir. (Önceki durum: `yerel/yapilacaklar-p01-p04`, commit `ded1091`): export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil).
   - `export_presets.cfg` içine `exclude_filter="tests/*, tools/*"` ekle.
   - Önce `test_selector.tscn`'in yalnız `scripts/` kullandığını doğrula.
   - `DevPanel` ve `test_selector` PC sürümünde kalmalı mı, kullanıcıya sor (§7 madde 4). Web test derlemesinde kalabilir.

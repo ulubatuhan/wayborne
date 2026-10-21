@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **31** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -71,22 +71,6 @@ Toplam: **31** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - İkili dosyalar LFS'e gitsin.
   - Metin dosyaları için `eol=lf` tanımla (Windows'tan yapılacak commitler için gerekli).
   - Geçmişi yeniden yazmak (`git lfs migrate`) **kullanıcı onayı** ister (§7 madde 11).
-
-</details>
-
-### 2.1 · Dışa aktarımlardan test ve araçları çıkar
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P01 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/02_yuksek_etkili.md](referans/gorevler/02_yuksek_etkili.md)
-- **Son not:** export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil). | 2026-10-20 kullanıcı kararı: DevPanel şimdilik PC sürümünde KALSIN.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **2.1 Dışa aktarımlardan test ve araçları çıkar** (§4 O-1; PC dışa aktarımı asıl hedef, Web yalnız test için)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `ded1091`): export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil).
-  - `export_presets.cfg` içine `exclude_filter="tests/*, tools/*"` ekle.
-  - Önce `test_selector.tscn`'in yalnız `scripts/` kullandığını doğrula.
-  - `DevPanel` ve `test_selector` PC sürümünde kalmalı mı, kullanıcıya sor (§7 madde 4). Web test derlemesinde kalabilir.
 
 </details>
 
@@ -108,27 +92,6 @@ Toplam: **31** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - Bayat yorumlar: §3A'daki 4 CityView yorumu.
   - CLAUDE.md Art Rules'taki CityView maddeleri.
   - **Önce doğrula** (§7 madde 6): izometrik şehre dönüş planı yok mu?
-
-</details>
-
-## Paket P03
-
-### Y-J05 · AI beyanını ve CREDITS'i düzelt
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P03 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Ses künyesi ve lisans testi eklendi. Kalan (kullanıcı): iki müzik parçasının kaynağı.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-J05 AI beyanını ve CREDITS'i düzelt**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `6630a09`): Ses künyesi ve lisans testi eklendi. Kalan (kullanıcı): iki müzik parçasının kaynağı.
-  - **Öncelik:** P1 · **Dalga:** 1
-  - **Ne:** `AI_DISCLOSURE.md` hâlâ “bütün görseller prosedürel” diyor; düzeltilir: AI görselleri, AI sesleri, 3B render'lar, CC0 paketler. Kullanıcı notu: kullanılan CC0 üreticileri de CREDITS'e eklenir (zorunlu olmasa da).
-  - **Kullanıcı notu:** “tamamdır, buraya kullandığımız co0 üreticileri de eklemek gerekir bence belki zorunlu olmasa bile.”
-  - **Kabul:** Beyan ve CREDITS güncel; her CC0 paketin üreticisi ve bağlantısı listede.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Künye düzeni: tek bir künye kaydı (dosya, kaynak, yazar, URL, lisans, lisans sayfası, indirme tarihi, değişiklik); ses için `audio/CREDITS.csv` ve derlemede NC ya da Sampling+ lisansı görünce duran kontrol; Quaternius indirmelerinde tarih ve lisans sayfası ekran görüntüsü (CC0 ile QAL ayrımı); OFL ve MIT metinleri dağıtım klasörüne; CC-BY varlıklar oyun içi Credits ekranında zorunlu. `../ICERIK_IHTIYACLARI.md` L bölümü.
-  - **Literatür:** R67, R68, R71
 
 </details>
 

@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **68** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **70** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -18,6 +18,22 @@ Toplam: **68** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `af1f044`): *.blend1, *.blend@, Thumbs.db, .DS_Store, *.log, *.orig eklendi; hiçbir dosyayla eşleşmeyen data_*/ satırı kaldırıldı.
   - Ekle: `*.blend1`, `*.blend@`, `Thumbs.db`, `.DS_Store`, `*.log`, `*.orig`.
   - `data_*/` satırını kaldır.
+
+</details>
+
+### 2.1 · Dışa aktarımlardan test ve araçları çıkar
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P01 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/02_yuksek_etkili.md](referans/gorevler/02_yuksek_etkili.md)
+- **Son not:** export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil). | 2026-10-20 kullanıcı kararı: DevPanel şimdilik PC sürümünde KALSIN.
+
+<details><summary>Görev metni</summary>
+
+- [x] **2.1 Dışa aktarımlardan test ve araçları çıkar** (§4 O-1; PC dışa aktarımı asıl hedef, Web yalnız test için)
+  - **Kapandı (2026-10-21, kullanıcı kararı):** Web derlemesi ve `export_presets.cfg` tamamen kaldırıldı; oyun klonlanıp yerelde oynanıyor, dışa aktarım yok. Aşağıdaki not tarihçedir. (Önceki durum: `yerel/yapilacaklar-p01-p04`, commit `ded1091`): export_presets.cfg Web ön ayarına exclude_filter="tests/*, tools/*" eklendi; oyun kodu bu klasörlere çalışma anında başvurmuyor (yalnızca yorumlar). Yapılmadı: DevPanel'in PC sürümünde kalıp kalmayacağı kararı (kullanıcıya soruldu) ve henüz var olmayan PC (Windows) ön ayarı (dışa aktarma şablonları kurulu değil).
+  - `export_presets.cfg` içine `exclude_filter="tests/*, tools/*"` ekle.
+  - Önce `test_selector.tscn`'in yalnız `scripts/` kullandığını doğrula.
+  - `DevPanel` ve `test_selector` PC sürümünde kalmalı mı, kullanıcıya sor (§7 madde 4). Web test derlemesinde kalabilir.
 
 </details>
 
@@ -310,6 +326,25 @@ Toplam: **68** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Yapıldı** (`yerel/yapilacaklar-p01-p04`, commit `2b13dcc`): Development Status'un Ana Hedefler sonrası kısmı (2130 satır, 148 KB) docs/history/FAZ_ANLATILARI.md'ye metin değişmeden taşındı; kayıpsızlık betikle doğrulandı. CLAUDE.md 480 KB'dan 332 KB'a indi. Kural bölümlerine (Art Rules, Wardrobe vb.) dokunulmadı: onlar kural ve gerekçe iç içe, ayıklamak kullanıcı onayı ister. Koddaki 'bkz. CLAUDE.md Faz N' başvuruları artık history dosyasına bakıyor.
   - Kurallar kalsın; faz anlatılarını `docs/history/` altına taşı.
   - **Kullanıcı onayı** iste.
+
+</details>
+
+### Y-J05 · AI beyanını ve CREDITS'i düzelt
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P03 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Ses künyesi ve lisans testi eklendi. Kalan (kullanıcı): iki müzik parçasının kaynağı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-J05 AI beyanını ve CREDITS'i düzelt**
+  - **Kapandı (2026-10-21):** Ses künyesi ve lisans testi var; kaynağı belirsiz iki müzik parçası kullanıcı kararıyla silindi, `AI_DISCLOSURE.md` "oyunda müzik yoktur" diyor, künyede BEKLENİYOR satırı kalmadı (`tests/test_audio_credits.gd` bunu zorluyor). Yeni müzik gelirse (Y-I02) künyesiyle gelir.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** `AI_DISCLOSURE.md` hâlâ “bütün görseller prosedürel” diyor; düzeltilir: AI görselleri, AI sesleri, 3B render'lar, CC0 paketler. Kullanıcı notu: kullanılan CC0 üreticileri de CREDITS'e eklenir (zorunlu olmasa da).
+  - **Kullanıcı notu:** “tamamdır, buraya kullandığımız co0 üreticileri de eklemek gerekir bence belki zorunlu olmasa bile.”
+  - **Kabul:** Beyan ve CREDITS güncel; her CC0 paketin üreticisi ve bağlantısı listede.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Künye düzeni: tek bir künye kaydı (dosya, kaynak, yazar, URL, lisans, lisans sayfası, indirme tarihi, değişiklik); ses için `audio/CREDITS.csv` ve derlemede NC ya da Sampling+ lisansı görünce duran kontrol; Quaternius indirmelerinde tarih ve lisans sayfası ekran görüntüsü (CC0 ile QAL ayrımı); OFL ve MIT metinleri dağıtım klasörüne; CC-BY varlıklar oyun içi Credits ekranında zorunlu. `../ICERIK_IHTIYACLARI.md` L bölümü.
+  - **Literatür:** R67, R68, R71
 
 </details>
 
