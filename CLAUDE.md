@@ -2109,6 +2109,15 @@ ağaçlar, uzakta puslu sırtlar. Ayrıntı ve görüntüler
   katman soğuk (`COOL_GRADE`), ön sıcak (`WARM_GRADE`). Gece evrenin son üçte birine kadar gece kalıyor (düz karışımla
   gece yarısı yarı şafaktı) ve kervanın feneri yolda sıcak bir daire bırakıyor. `tests/screenshot_road_light.gd`
   taslağın 4 evre × 3 biyom tablosunu basıyor.
+- **Aynı biyom haritada nerede olduğuna göre görünür (görev Y-G07, kullanıcı kararı 2026-10-21).** Kuzeyde soğuk
+  (karlı zemin, ladin, karlı sırtlar), güneyde sıcak (kuru ot, seyrek ağaç, bol taş), dağa yakın parçanın ufkunda dağ.
+  Haritadan ölçülüyor ve `settlements.json`'da her parçanın `climate`/`peaks` alanı (`build_settlements.py
+  --annotate`: ortalama y < 5600 soğuk, > 12400 sıcak; dağ maskesine 100 px'ten yakınsa ufukta dağ, dağ biyomu hariç).
+  `--annotate` yalnızca bu alanları yazar: bütün üretimi yeniden koşmak bir yolun güzergâhını oynatıyordu.
+  `RouteTerrain.look_of` görünüşü kurar ("forest_cold_peaks"), `RoadStrips.texture` katman başına bir alttakine düşer
+  (biyom_iklim_peaks -> biyom_iklim -> biyom_peaks -> biyom): ufukta dağ yalnızca uzak katmandır. Varyant
+  `road_scene.py --variant` ile biyomun kendi tohumundan render edilir, yani ağaçlar ve tepeler aynı yerde kalır.
+  `tests/screenshot_road_looks.gd` 6 biyom x 4 görünüş tablosunu basıyor.
 - **Biyom geçişi rengin geçişiyle aynı oranda**
   (`RouteTerrain.biome_blend_at`); zemin opak olduğu için eskisi tam,
   yenisi üstünde beliriyor, saydam katmanlarda eskisi de sönüyor.
