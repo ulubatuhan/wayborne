@@ -1,6 +1,7 @@
 """Yol ekranının paralaks katmanları, biyom başına, şehirlerle aynı hattan.
 
-    python3 tools/ui_scenes/road_scene.py --biome forest [--samples 32] [--layers far,mid,ground,fore]
+    python3 tools/ui_scenes/road_scene.py --biome forest [--variant cold|warm|peaks|cold_peaks|warm_peaks]
+        [--samples 32] [--layers far,mid,ground,fore]
 
 Her katman **yatayda dikişsiz döşenen** bir şerit: sahnedeki her şey x'te
 L periyotlu (yükseklik alanı tam sayı frekanslı sinüslerin toplamı, her nesne
@@ -111,6 +112,66 @@ BIOMES = {
         "flowers": [(0.60, 0.58, 0.50)],
     },
 }
+
+
+# Haritadaki konuma göre varyantlar (görev Y-G07): aynı biyom kuzeyde soğuk,
+# güneyde sıcak; dağa yakın bir parçada ufukta dağ var. Varyant biyomun
+# kendi yapılandırmasını değiştiriyor, yeni bir sahne icat etmiyor - tohum
+# biyomunki, yani ağaçlar ve tepeler aynı yerde, yalnızca iklimleri farklı;
+# iki parça arasındaki geçiş bu yüzden yumuşak okunuyor.
+#   cold   kuzey (imparatorluk, kuzey dağları): karlı zemin, ladin, soluk
+#          ve soğuk renk, karlı sırtlar
+#   warm   güney: kuru, sarıya çalan ot, seyrek ağaç, bol taş, sıcak renk
+#   peaks  yalnızca uzak katman: biyomun ufkunda dağ (dağın kendisinde yok)
+COLD_TINT = (0.66, 0.68, 0.70)
+WARM_SHIFT = (1.10, 1.00, 0.80)
+
+
+def _mix(c, target, t):
+    return [a * (1.0 - t) + b * t for a, b in zip(c, target)]
+
+
+def _warm(c, k=1.0):
+    return [min(1.0, a * (1.0 + (m - 1.0) * k)) for a, m in zip(c, WARM_SHIFT)]
+
+
+def variant_config(biome, variant):
+    """Biyomun yapılandırması, varyantı uygulanmış (yeni bir sözlük)."""
+    b = json.loads(json.dumps(BIOMES[biome]))
+    parts = [p for p in variant.split("_") if p]
+    if "cold" in parts:
+        b["far"]["tint"] = _mix(b["far"]["tint"], COLD_TINT, 0.30)
+        b["far"]["snow"] = max(b["far"].get("snow", 0.0), 0.75 if biome == "mountain" else 0.5)
+        b["ground_tint"] = _mix(b["ground_tint"], COLD_TINT, 0.30)
+        b["grass"] = _mix(b["grass"], [0.42, 0.44, 0.40], 0.40)
+        b["snow"] = 0.32
+        b["trees"] = [("conifer", 0.7), ("dead", 0.3)]
+        b["tufts"] = int(b["tufts"] * 0.7)
+        b["flowers"] = [(0.72, 0.72, 0.74)]
+        if "rock_tint" in b:
+            b["rock_tint"] = _mix(b["rock_tint"], COLD_TINT, 0.3)
+    if "warm" in parts:
+        b["far"]["tint"] = _warm(b["far"]["tint"], 0.7)
+        if biome == "mountain":
+            b["far"]["snow"] = 0.25
+        b["ground_tint"] = _warm(_mix(b["ground_tint"], [0.72, 0.62, 0.44], 0.35))
+        b["grass"] = _mix(b["grass"], [0.60, 0.54, 0.32], 0.55)
+        b["tree_count"] = max(4, int(b["tree_count"] * 0.55))
+        if b["far"].get("trees"):
+            b["far"]["trees"] = int(b["far"]["trees"] * 0.5)
+        b["rocks"] = b["rocks"] * 1.6 + 0.3
+        b["tufts"] = int(b["tufts"] * 0.8)
+        b["flowers"] = [(0.72, 0.58, 0.26), (0.66, 0.36, 0.20)]
+    if "peaks" in parts and biome != "mountain":
+        m = BIOMES["mountain"]["far"]
+        far = b["far"]
+        far.update({
+            "amp": m["amp"] * 0.85, "base": m["base"], "freqs": list(m["freqs"]),
+            "tint": _mix(m["tint"], far["tint"], 0.35),
+            "snow": 0.25 if "warm" in parts else (0.8 if "cold" in parts else 0.6),
+        })
+        b.setdefault("frames", {})["far"] = dict(BIOMES["mountain"]["frames"]["far"])
+    return b
 
 
 # ---------------------------------------------------------------- yardımcılar
@@ -656,17 +717,22 @@ def render(path, samples, res_y, transparent=True):
 
 def main(argv):
     biome = argv[argv.index("--biome") + 1]
+    variant = argv[argv.index("--variant") + 1] if "--variant" in argv else ""
     samples = int(argv[argv.index("--samples") + 1]) if "--samples" in argv else 32
-    layers = argv[argv.index("--layers") + 1].split(",") if "--layers" in argv else list(LAYERS)
-    out = os.path.join(OUT, "road_" + biome)
+    default_layers = ["far"] if variant == "peaks" or variant.endswith("_peaks") else list(LAYERS)
+    layers = argv[argv.index("--layers") + 1].split(",") if "--layers" in argv else default_layers
+    name_dir = biome + ("_" + variant if variant else "")
+    cfg = variant_config(biome, variant) if variant else BIOMES[biome]
+    out = os.path.join(OUT, "road_" + name_dir)
     os.makedirs(out, exist_ok=True)
     layout_path = os.path.join(out, "layout.json")
     layout = json.load(open(layout_path)) if os.path.exists(layout_path) else {}
     for name in layers:
-        spec = dict(LAYERS[name], **BIOMES[biome].get("frames", {}).get(name, {}))
+        spec = dict(LAYERS[name], **cfg.get("frames", {}).get(name, {}))
         T.reset()
+        # Tohum biyomun: varyantta ağaçlar ve tepeler aynı yerde kalıyor.
         rng = random.Random(zlib.crc32(("%s|%s" % (biome, name)).encode()))
-        BUILDERS[name](BIOMES[biome], spec, rng)
+        BUILDERS[name](cfg, spec, rng)
         T.texture_materials((1.0, 0.55, 0.22, 1.0))
         light_rig()
         camera(spec, spec["h"])
@@ -677,7 +743,7 @@ def main(argv):
             entry["road_top_v"] = v_of(spec, spec["h"], 8.5)
             entry["road_bottom_v"] = v_of(spec, spec["h"], 2.5)
         layout[name] = entry
-        print("KATMAN", biome, name)
+        print("KATMAN", name_dir, name)
     json.dump(layout, open(layout_path, "w"), indent=1)
     print("BITTI", out)
 

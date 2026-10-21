@@ -1,0 +1,29 @@
+{
+ "far": {
+  "L": 360.0,
+  "width": 2048,
+  "height": 203,
+  "anchor_px": 61.4
+ },
+ "mid": {
+  "L": 120.0,
+  "width": 2048,
+  "height": 278,
+  "anchor_px": 76.8
+ },
+ "ground": {
+  "L": 40.0,
+  "width": 2048,
+  "height": 352,
+  "anchor_px": 172.8,
+  "road_px": 172.8,
+  "road_top_px": 204.7,
+  "road_bottom_px": 140.9
+ },
+ "fore": {
+  "L": 16.0,
+  "width": 2048,
+  "height": 512,
+  "anchor_px": 435.2
+ }
+}
