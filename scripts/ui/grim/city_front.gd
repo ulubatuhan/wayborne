@@ -73,6 +73,7 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 		var mat := ShaderMaterial.new()
 		mat.shader = load(SHADER_PATH)
 		mat.set_shader_parameter("mask", mask_tex)
+		mat.set_shader_parameter("mood", int(model.get("mood", MOOD_NORMAL)))
 		_bg.material = mat
 	add_child(_bg)
 	var smoke := SmokeWisps.new()
@@ -86,6 +87,21 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 	add_child(_roster())
 	add_child(_strip())
 	return self
+
+## Şehrin hâli (görev 9.3): kriz (veba ya da yolunda savaş) kapalı havadan
+## önce gelir. Resmin üstünde gölgelendirici renklendirir (venue_highlight).
+const MOOD_NORMAL: int = 0
+const MOOD_GREY: int = 1
+const MOOD_CRISIS: int = 2
+const GREY_WEATHERS: Array[String] = [RouteWeather.OVERCAST, RouteWeather.RAIN, RouteWeather.FOG, RouteWeather.STORM]
+
+## Şehrin bugünkü havası: yolun havası gibi tohumdan, saklanmıyor - aynı
+## gün aynı şehir aynı göğü gösterir, yeniden yüklemek havayı değiştirmez.
+static func mood_for(in_crisis: bool, location_id: String, day: int) -> int:
+	if in_crisis:
+		return MOOD_CRISIS
+	var weather := RouteWeather.at("city|" + location_id, day, "meadow")
+	return MOOD_GREY if GREY_WEATHERS.has(weather) else MOOD_NORMAL
 
 ## Gün evresinin resmi (görevler 9.3, N33): şafak sabah, öğle ve ikindi gündüz,
 ## akşam akşam, gece taban resim. Evre resmi yoksa taban resim (gece) kalır.

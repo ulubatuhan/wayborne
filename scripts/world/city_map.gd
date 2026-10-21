@@ -84,6 +84,8 @@ static func build_model(session: GameSession) -> Dictionary:
 		"city_name": location.location_name if location != null else TranslationServer.translate("UI_CITY_FALLBACK_NAME"),
 		"day": day + 1,
 		"hour": session.last_clock_hour,
+		"mood": CityFront.mood_for(session.is_city_in_crisis(session.current_location_id),
+			session.current_location_id, day),
 		"season_key": SEASON_KEYS[int(MarketConditions.get_season(day))],
 		"gold": session.wallet.balance,
 		"debt": session.get_total_debt(),

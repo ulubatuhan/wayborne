@@ -3098,6 +3098,11 @@ paid for. A new game starts in a city (`character_creation.gd` →
   only where `SettlementRules` gives that facility, so the click mask never offers a venue the place lacks. The camera
   sits 2 m right because the brief column covers the picture's right third. `test_settlements` fails if any settlement
   falls back to another's picture; the style rules are `docs/ui/STIL_REHBERI.md`.
+- **A city wears its state, not only its hour (task 9.3).** On top of the phase pictures, `venue_highlight.gdshader`
+  grades the picture by `CityFront.mood_for()`: crisis (`is_city_in_crisis` - plague, or a war on its road) desaturates
+  it and raises a red horizon and three smoke columns; overcast/rain/fog/storm (the city's own seeded weather,
+  `RouteWeather.at("city|<id>", day)`, never stored) turns it grey. Colour only, so the click mask stays aligned.
+  `tests/screenshot_city_moods.gd` prints all three at noon and night.
 
 ### Caravan Ruin Rules
 
