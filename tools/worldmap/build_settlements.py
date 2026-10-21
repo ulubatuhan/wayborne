@@ -3,6 +3,7 @@
 kurar (görevler N1, N2, N3; §14 yeni dünya).
 
     python3 tools/worldmap/build_settlements.py <wayborne_harita.geojson> [çıktı.json] [rapor.md]
+    python3 tools/worldmap/build_settlements.py --annotate <wayborne_harita.geojson> [settlements.json]
 
 Varsayılan çıktı `data/config/settlements.json`.
 
@@ -556,7 +557,55 @@ def terrain_segments(labels, pts, days, pois):
     return segs
 
 
+# Yol ekranının varyantları (görev Y-G07): aynı biyom kuzeyde soğuk, güneyde
+# sıcak; dağa yakın parçanın ufkunda dağ. Harita pikseli: 1000 px ~ 3 gün,
+# yani 100 px ~ 7-8 km - o mesafedeki dağ ufukta görünür.
+COLD_MAX_Y = 5600.0
+WARM_MIN_Y = 12400.0
+PEAKS_NEAR_PX = 100.0
+
+
+def mountain_distance(features, size):
+    from scipy import ndimage
+    mountain = raster(features, "dağ", size)
+    return ndimage.distance_transform_edt(mountain == 0) * MASK_SCALE
+
+
+def annotate_variants(routes, dist):
+    """Her terrain parçasına `climate` ("cold"/"warm"/"") ve `peaks` ekler.
+
+    Parça yolun `path`'inde kendi payına düşen noktalardan ölçülür; dizi
+    `terrain_from` yönünde yazılı, oyun ters yönde aynı parçayı okur."""
+    h, w = dist.shape
+    for r in routes:
+        pts = r["path"]
+        n = len(pts)
+        lo = 0
+        for seg in r["terrain"]:
+            hi = max(lo + 1, int(round(float(seg["to"]) * n)))
+            part = pts[lo:hi] or pts[-1:]
+            mean_y = sum(p[1] for p in part) / len(part)
+            near = min(dist[min(int(p[1] / MASK_SCALE), h - 1), min(int(p[0] / MASK_SCALE), w - 1)] for p in part)
+            seg["climate"] = "cold" if mean_y < COLD_MAX_Y else ("warm" if mean_y > WARM_MIN_Y else "")
+            seg["peaks"] = bool(near <= PEAKS_NEAR_PX and seg["biome"] != "mountain")
+            lo = hi
+
+
+def annotate_only(geojson, out_path):
+    """Var olan settlements.json'a yalnızca varyant alanlarını yazar - bütün
+    üretimi yeniden koşmak bir yolun güzergâhını oynatıyordu."""
+    features, size = load(geojson)
+    doc = json.load(open(out_path, encoding="utf-8"))
+    annotate_variants(doc["routes"], mountain_distance(features, size))
+    with open(out_path, "w", encoding="utf-8", newline=chr(10)) as fh:
+        json.dump(doc, fh, ensure_ascii=False, indent=1)
+
+
 def main(argv):
+    if "--annotate" in argv:
+        rest = [a for a in argv[1:] if a != "--annotate"]
+        annotate_only(rest[0], rest[1] if len(rest) > 1 else DEFAULT_OUT)
+        return
     geojson = argv[1]
     out_path = argv[2] if len(argv) > 2 else DEFAULT_OUT
     report_path = argv[3] if len(argv) > 3 else None
@@ -626,6 +675,8 @@ def main(argv):
             "terrain": terrain,
             "path": [[round(x), round(y)] for x, y in pts],
         })
+
+    annotate_variants(routes, mountain_distance(features, size))
 
     comps, seen = [], set()
     for pid in playable:

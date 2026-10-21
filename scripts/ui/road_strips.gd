@@ -47,18 +47,50 @@ static func path_of(biome: String, layer: String) -> String:
 	return DIR + biome + "/" + layer + ".png"
 
 ## Biyomun dört katmanı da varsa doğru - yarım bir set prosedürelle
-## karışırsa iki ayrı prodüksiyon görünür.
+## karışırsa iki ayrı prodüksiyon görünür. Bir görünüş ("forest_cold_peaks")
+## soruluyorsa biyomun kendi seti yeter: varyantın eksik katmanı ona düşüyor.
 static func has_biome(biome: String) -> bool:
+	var base := biome.get_slice("_", 0)
 	for layer in LAYERS:
-		if texture(biome, layer) == null:
+		if _load(base, layer) == null:
 			return false
 	return true
 
-static func texture(biome: String, layer: String) -> Texture2D:
-	var key := biome + "/" + layer
+## Görünüşün katmanı (görev Y-G07). Varyant yalnızca değişen katmanları
+## taşıyor - "ufukta dağ" yalnızca uzak sırtı - gerisi bir alttakinden:
+## biyom_iklim_peaks -> biyom_iklim -> biyom_peaks -> biyom.
+static func texture(look: String, layer: String) -> Texture2D:
+	for candidate in fallback_chain(look):
+		var tex := _load(candidate, layer)
+		if tex != null:
+			return tex
+	return null
+
+static func fallback_chain(look: String) -> PackedStringArray:
+	var parts := look.split("_")
+	var base := parts[0]
+	var peaks := parts.has("peaks")
+	var climate := ""
+	for part in parts.slice(1):
+		if part != "peaks":
+			climate = part
+	var out := PackedStringArray()
+	if not climate.is_empty() and peaks:
+		out.append("%s_%s_peaks" % [base, climate])
+	if not climate.is_empty():
+		out.append("%s_%s" % [base, climate])
+	if peaks:
+		out.append(base + "_peaks")
+	out.append(base)
+	return out
+
+static func _load(name: String, layer: String) -> Texture2D:
+	var key := name + "/" + layer
 	if _cache.has(key):
 		return _cache[key]
-	var tex: Texture2D = TextureLoader.load_any(path_of(biome, layer))
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path_of(name, layer)) or FileAccess.file_exists(path_of(name, layer)):
+		tex = TextureLoader.load_any(path_of(name, layer))
 	_cache[key] = tex
 	return tex
 
@@ -102,8 +134,8 @@ static func draw_blend(
 	scroll: float, cover: Rect2, anchor_y: float, modulate: Color, shear: float = 0.0
 ) -> void:
 	var ratio := float(blend.get("ratio", 0.0))
-	var from := String(blend.get("from", ""))
-	var to := String(blend.get("to", from))
+	var from := String(blend.get("from_look", blend.get("from", "")))
+	var to := String(blend.get("to_look", blend.get("to", from)))
 	# Zemin opak: eskisi tam, yenisi üstünde belirerek. Saydam katmanlarda
 	# (ağaç, sırt) eskisi de söner, yoksa iki ormanın ağaçları üst üste.
 	var base := modulate

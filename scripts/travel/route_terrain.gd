@@ -97,7 +97,9 @@ const SHORTCUT_TO: float = 0.65
 
 var route_key: String = ""
 var total_days: int = 1
-## Her biri {"biome", "from_day", "to_day", "stop", "slope"}.
+## Her biri {"biome", "from_day", "to_day", "stop", "slope", "climate", "peaks"}.
+## `climate` ("cold"/"warm"/"") ve `peaks` haritadan (build_settlements.py
+## annotate_variants): yol ekranı aynı biyomun o konumdaki resmini seçiyor.
 var segments: Array[Dictionary] = []
 
 ## Belirli bir yol için coğrafyayı kurar. `total_days` rotanın taban
@@ -205,6 +207,8 @@ func _build_from_map(mapped: Dictionary, from_id: String, rng: RandomNumberGener
 			"to_day": to_day,
 			"stop": stop,
 			"slope": slopes[i],
+			"climate": String(source[i].get("climate", "")),
+			"peaks": bool(source[i].get("peaks", false)),
 		})
 		from_day = to_day
 
@@ -248,8 +252,10 @@ func _apply_shortcut() -> void:
 			out.append(head)
 		if from_day < b and to_day > a and (out.is_empty() or String(out[-1]["biome"]) != "shortcut"):
 			if out.is_empty() or float(out[-1]["to_day"]) <= a:
+				var climate := String(out[-1].get("climate", "")) if not out.is_empty() else ""
 				out.append({"biome": "shortcut", "from_day": a, "to_day": b, "stop": STOP_NONE,
-					"slope": 0.5 if rough == ArtPalette.BIOME_MOUNTAIN else 0.1})
+					"slope": 0.5 if rough == ArtPalette.BIOME_MOUNTAIN else 0.1,
+					"climate": climate, "peaks": false})
 		if to_day > b:
 			var tail := segment.duplicate()
 			tail["from_day"] = maxf(from_day, b)
@@ -318,6 +324,21 @@ func segment_at(day: float) -> Dictionary:
 			return segment
 	return segments[-1]
 
+## Parçanın yol ekranındaki görünüşü (görev Y-G07): biyom, haritadaki
+## iklimi ve ufkunda dağ olup olmadığı - "forest_cold_peaks" gibi.
+## RoadStrips bir katmanın varyantı yoksa bir alttakine düşüyor.
+static func look_of(segment: Dictionary) -> String:
+	var look := String(segment.get("biome", ArtPalette.FALLBACK_BIOME))
+	var climate := String(segment.get("climate", ""))
+	if not climate.is_empty():
+		look += "_" + climate
+	if bool(segment.get("peaks", false)) and String(segment.get("biome", "")) != ArtPalette.BIOME_MOUNTAIN:
+		look += "_peaks"
+	return look
+
+func look_at(day: float) -> String:
+	return look_of(segment_at(day))
+
 func biome_at(day: float) -> String:
 	return String(segment_at(day).biome)
 
@@ -353,7 +374,8 @@ func terrain_colors_at(day: float) -> Dictionary:
 func biome_blend_at(day: float) -> Dictionary:
 	var segment := segment_at(day)
 	var current := String(segment.biome)
-	var still := {"from": current, "to": current, "ratio": 0.0}
+	var look := look_of(segment)
+	var still := {"from": current, "to": current, "from_look": look, "to_look": look, "ratio": 0.0}
 	var remaining := float(segment.to_day) - clampf(day, 0.0, float(total_days))
 	if remaining >= BLEND_DAYS:
 		return still
@@ -362,6 +384,7 @@ func biome_blend_at(day: float) -> Dictionary:
 		return still
 	return {
 		"from": current, "to": String(segments[next_index].biome),
+		"from_look": look_of(segment), "to_look": look_of(segments[next_index]),
 		"ratio": 1.0 - clampf(remaining / BLEND_DAYS, 0.0, 1.0),
 	}
 

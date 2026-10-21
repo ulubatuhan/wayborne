@@ -3206,7 +3206,7 @@ func _build_event_illustration(event_id: String) -> Control:
 	if file_name.is_empty() or not ResourceLoader.exists(path):
 		# Kendi resmi olmayan olay da resimsiz açılmaz: kervanın yürüdüğü yolun
 		# manzarası (kullanıcı notu: olaya ait görsel kartın içinde, EU4 gibi).
-		var biome := String(_terrain.segment_at(_terrain_day()).biome) if _terrain != null else ""
+		var biome := _terrain.look_at(_terrain_day()) if _terrain != null else ""
 		if not EventVignette.available(biome):
 			return null
 		var vignette := EventVignette.new()
@@ -3496,7 +3496,8 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	var current_biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())
 	panel.start_combat(
 		_current_combat_party, _pending_combat_danger, null,
-		_current_combat_kind, _session.journey_destination_id, current_biome
+		_current_combat_kind, _session.journey_destination_id, current_biome,
+		"" if _terrain == null else _terrain.look_at(_terrain_day())
 	)
 
 func _on_combat_finished(

@@ -134,10 +134,11 @@ func _ready() -> void:
 func start_combat(
 	party: Array[CharacterData], danger_level: float,
 	rng: RandomNumberGenerator = null,
-	enemy_kind: String = "bandit", region_id: String = "", biome: String = ""
+	enemy_kind: String = "bandit", region_id: String = "", biome: String = "", look: String = ""
 ) -> void:
 	_ensure_built()
-	_backdrop.biome = biome
+	# Arka plan yolun o konumdaki resmi (RouteTerrain.look_of); kadro biyomu okuyor.
+	_backdrop.biome = look if not look.is_empty() else biome
 
 	var combat_rng := rng
 	if combat_rng == null:

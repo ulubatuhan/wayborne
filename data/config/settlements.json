@@ -958,12 +958,16 @@
     {
      "biome": "steppe",
      "to": 0.583,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -1080,12 +1084,16 @@
     {
      "biome": "forest",
      "to": 0.619,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -1190,7 +1198,9 @@
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": true
     }
    ],
    "path": [
@@ -1271,7 +1281,9 @@
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -1408,7 +1420,9 @@
     {
      "biome": "mountain",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": false
     }
    ],
    "path": [
@@ -1461,7 +1475,9 @@
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -1506,12 +1522,16 @@
     {
      "biome": "meadow",
      "to": 0.364,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "mountain",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -1576,12 +1596,16 @@
     {
      "biome": "marsh",
      "to": 0.5,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -1706,12 +1730,16 @@
     {
      "biome": "marsh",
      "to": 0.364,
-     "stop": "outpost"
+     "stop": "outpost",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -1820,7 +1848,9 @@
     {
      "biome": "marsh",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -1861,17 +1891,23 @@
     {
      "biome": "marsh",
      "to": 0.414,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.759,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -2008,12 +2044,16 @@
     {
      "biome": "meadow",
      "to": 0.316,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "mountain",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -2110,17 +2150,23 @@
     {
      "biome": "mountain",
      "to": 0.25,
-     "stop": "mine"
+     "stop": "mine",
+     "climate": "cold",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.5,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": true
     }
    ],
    "path": [
@@ -2224,17 +2270,23 @@
     {
      "biome": "steppe",
      "to": 0.465,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.767,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "marsh",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -2427,7 +2479,9 @@
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -2552,7 +2606,9 @@
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -2593,7 +2649,9 @@
     {
      "biome": "marsh",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -2646,17 +2704,23 @@
     {
      "biome": "marsh",
      "to": 0.35,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.675,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
@@ -2837,7 +2901,9 @@
     {
      "biome": "marsh",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -2914,7 +2980,9 @@
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -2979,7 +3047,9 @@
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -3020,22 +3090,30 @@
     {
      "biome": "steppe",
      "to": 0.211,
-     "stop": "outpost"
+     "stop": "outpost",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.298,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "meadow",
      "to": 0.649,
-     "stop": "outpost"
+     "stop": "outpost",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -3284,17 +3362,23 @@
     {
      "biome": "steppe",
      "to": 0.286,
-     "stop": "outpost"
+     "stop": "outpost",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.405,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -3483,17 +3567,23 @@
     {
      "biome": "meadow",
      "to": 0.375,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "marsh",
      "to": 0.562,
-     "stop": "outpost"
+     "stop": "outpost",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -3642,7 +3732,9 @@
     {
      "biome": "meadow",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -3701,32 +3793,44 @@
     {
      "biome": "lake",
      "to": 0.151,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.226,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.462,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.548,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.72,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -4119,7 +4223,9 @@
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
@@ -4206,42 +4312,58 @@
     {
      "biome": "steppe",
      "to": 0.255,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.324,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "mountain",
      "to": 0.48,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.549,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.706,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.775,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.863,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
@@ -4673,17 +4795,23 @@
     {
      "biome": "steppe",
      "to": 0.132,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.553,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": false
     }
    ],
    "path": [
@@ -4856,17 +4984,23 @@
     {
      "biome": "marsh",
      "to": 0.188,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.594,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
@@ -5015,7 +5149,9 @@
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": false
     }
    ],
    "path": [
@@ -5104,22 +5240,30 @@
     {
      "biome": "steppe",
      "to": 0.222,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "cold",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.411,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "cold",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.646,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "cold",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -5772,7 +5916,9 @@
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "cold",
+     "peaks": false
     }
    ],
    "path": [
@@ -5829,7 +5975,9 @@
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": true
     }
    ],
    "path": [
@@ -5964,42 +6112,58 @@
     {
      "biome": "mountain",
      "to": 0.354,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.427,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.542,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.615,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.781,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.854,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.948,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -6404,42 +6568,58 @@
     {
      "biome": "mountain",
      "to": 0.459,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.5,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.554,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.649,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.811,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.851,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.919,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -6758,42 +6938,58 @@
     {
      "biome": "mountain",
      "to": 0.324,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.39,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.495,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.562,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.714,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.781,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.867,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
@@ -7234,12 +7430,16 @@
     {
      "biome": "mountain",
      "to": 0.882,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "lake",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -7398,42 +7598,58 @@
     {
      "biome": "mountain",
      "to": 0.295,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.375,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.5,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.58,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.761,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.841,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.943,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     }
    ],
    "path": [
@@ -7806,37 +8022,51 @@
     {
      "biome": "lake",
      "to": 0.061,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "mountain",
      "to": 0.439,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.5,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.606,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.833,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.909,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     }
    ],
    "path": [
@@ -8123,42 +8353,58 @@
     {
      "biome": "mountain",
      "to": 0.268,
-     "stop": ""
+     "stop": "",
+     "climate": "",
+     "peaks": false
     },
     {
      "biome": "forest",
      "to": 0.34,
-     "stop": "pass"
+     "stop": "pass",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "mountain",
      "to": 0.454,
-     "stop": "mezra"
+     "stop": "mezra",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 0.526,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "forest",
      "to": 0.691,
-     "stop": "shrine"
+     "stop": "shrine",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "steppe",
      "to": 0.763,
-     "stop": "bridge"
+     "stop": "bridge",
+     "climate": "warm",
+     "peaks": true
     },
     {
      "biome": "lake",
      "to": 0.856,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": false
     },
     {
      "biome": "steppe",
      "to": 1.0,
-     "stop": ""
+     "stop": "",
+     "climate": "warm",
+     "peaks": true
     }
    ],
    "path": [
