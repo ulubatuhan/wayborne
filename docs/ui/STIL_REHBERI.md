@@ -45,6 +45,20 @@ girer, sonra kullanılır.
 - **Uzaklık sisten gelir, keskinlikten değil.** Uzak katman mürekkepsiz ve puslu, yakın katman koyu ve mürekkepli. Göz
   kervanın ve meydanın düzlemine düşer.
 
+## Kasvet (kullanıcı kararı, 2026-10-22)
+
+**Bütün yapılar ve bütün sahneler kasvetli (grim) tondadır.** Şehir resmi, yol, hub, kapı kesiti, savaş: aynı soluk,
+yorgun, kirli dünya. Somut ölçü (öğlen, doğrudan güneşte): ortalama doygunluk 0.15 civarı, parlaklığın %95'i 0.70'in
+altında; ancak sıcak ışık (ateş, fener, batan güneş) doygun kalır.
+
+- Şehir resimleri bunu `town_post.py`'nin `grade`'inden alır; kapı kesitleri `pack_some.py`'nin `town_grade`'inden;
+  oyunun dünya katmanı (yol, savaş, hub) `GrimGrade`'den (`scripts/ui/grim/grim_grade.gdshader`, HUD'un altında).
+- Paket modellerinin (Kenney, Quaternius, KayKit) parlak oyuncak renkleri hiçbir yerde ham çıkmaz: pembe çatı tuğlaya,
+  parlak yeşil zeytine, turuncu tahta pasa döner.
+- Yapılar yıpranmıştır: vadi gibi eski kültürlerde kir lekesi, akıntı izi, dipte toprak ve yosun
+  (`town_scene.weather_materials`). Temiz, yeni boyanmış bir duvar yanlış yerdedir.
+- Ölçmeden "grim" denmez: yeni bir sahne eklendiğinde doygunluk ve parlaklık yukarıdaki ölçüyle karşılaştırılır.
+
 ## Çizgi
 
 - **Kontur mürekkeptir.** Yakında kalın, uzakta ince. Render'larda parlaklık, derinlik ve maske kenarlarından türetilir;
@@ -71,7 +85,7 @@ kadro kartlarının yerini sabit tutar. Yerel görünüş beş girdiden türer:
 | Kültür | Taş mı ahşap mı, kule rengi, sancak, ağaç cinsi, ışığın rengi |
 | Enlem | Kuzeyde karlı tepe, soğuk ışık |
 | Tür | Şehir: sur, kapı, lonca, kale. Kasaba: çit, az ev. Kervansaray: dört yanı duvarlı avlu |
-| Alt tür | Liman: açık deniz ufku, fener. Özgür şehir: kale yok, lonca kuleleri yüksek. Maden: kaya, demirci. Bataklık: sis, eğri ağaç. Nehir: su değirmeni |
+| Alt tür | Liman: rıhtım, iskele, demirli gemi, sandal, fener, ağ sergisi. Özgür şehir: kale yok, lonca kuleleri yüksek. Maden: galeri ağzı, ray ve maden arabası, kuyu iskelesi, cevher yığını. Bataklık: göl, kazıklı ev, sazlık, sandal. Nehir: ırmak, köprü, su değirmeni. Su kıyısında kamera bir kat yüksek: alçak kamerada su tezgâhların ardında bir çizgiydi |
 | Mallar | Fıçı, saman ve değirmen, çuval, renkli tente |
 
 Kültürlerin dili, kullanıcının benzetmeleri ve coğrafya birlikte:
@@ -82,7 +96,12 @@ Kültürlerin dili, kullanıcının benzetmeleri ve coğrafya birlikte:
 - **Dağ kabileleri ve madenler**: karlı sırt, kaya, iğne yapraklı orman, mavi ay ışığı.
 - **Güney** (Essos gibi): sıcak turuncu-mor ufuk, kum rengi zemin, düz damlı evler, renkli tenteler.
 - **Ahit** (Orvahel): soluk taş, ay ışığı, şehrin ortasında dört kuleli büyük tapınak.
-- **Göçebeler** (Türkler gibi): bozkır kervansarayı, çadırlar, ateş, geniş amber gök.
+- **Göçebeler** (Türkler gibi): sur yok; keçe yurtlar (kafes duvar, kuşak, tepe halkası, boyalı kapı), hanın büyük
+  yurdu, tuğlar, at bağlama ipleri ve atlar, hasır çit, ortada ocak. Girişi iki tuğun arasıdır.
+
+Yolun iki ucunda yerleşimin kendi kapısı durur (`gate_cutout.py`): sur ya da çit önde, arkasında şehrin kendisi ayrı
+bir katmanda (pusla, biraz yukarıda ve küçük: derinlik). Taşta demir parmaklık, kütükte iki kanatlı kapı, obada iki tuğ;
+geçidin içi karanlık, gece iki yanında meşale.
 
 ## Yazı (görev Y-G14)
 

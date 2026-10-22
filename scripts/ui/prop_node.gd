@@ -26,6 +26,11 @@ var open_target: float = 0.0
 const OPEN_SPEED: float = 1.6
 
 var _angle: float = 0.0
+## Yerleşim kapısı kesiti (`gate_<id>`): sur malzemesi, pus ve gece payı
+## GateArt'a gider - arkadaki şehir, geçit ve kanat orada çiziliyor.
+var gate_kind: String = ""
+var haze: Color = Color(0.8, 0.84, 0.9)
+var night: float = 0.0
 
 func setup(id: String, scale_k: float, colour: Color = Color.WHITE, mirrored: bool = false) -> void:
 	prop_id = id
@@ -67,8 +72,14 @@ func _process(delta: float) -> void:
 		set_process(false)
 	queue_redraw()
 
+func is_settlement_gate() -> bool:
+	return not gate_kind.is_empty() and (PropArt.has_layer(prop_id, "town") or GateArt.has_door(prop_id))
+
 func _draw() -> void:
 	if not PropArt.has(prop_id):
+		return
+	if is_settlement_gate():
+		GateArt.draw(self, prop_id, Vector2.ZERO, k, tint, haze, open_amount, night, gate_kind)
 		return
 	var layers: Array = PropArt.info(prop_id).get("layers", {}).keys()
 	for layer in layers:

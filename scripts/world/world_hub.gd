@@ -223,6 +223,13 @@ func _ready() -> void:
 	_menu_button.pressed.connect(_on_menu_pressed)
 	_build_status_bars()
 
+	# Kasvetli ton dünyaya, HUD'a değil (bkz. GrimGrade).
+	var grim := CanvasLayer.new()
+	grim.layer = 1
+	add_child(grim)
+	grim.add_child(GrimGrade.new())
+	$HUD.layer = 2
+
 	_build_scenery()
 	_build_settlement()
 	_build_spots()
@@ -519,11 +526,20 @@ func _build_gate() -> void:
 	add_child(gate)
 	# İki kapı aynı piksel/metre ölçeğinde: kütük kapı taş kapıdan küçük ya da büyük çıkmasın.
 	var prop_id := _gate_prop_id()
-	# Şehrin kendi kapısının arkasında çatılar da var: bütün resim GATE_MAX_HEIGHT'i geçmesin.
-	var px_per_m := minf(GATE_HEIGHT / PropArt.size_m(GATE_PROP).z, GATE_MAX_HEIGHT / maxf(PropArt.size_m(prop_id).z, 0.1))
-	gate.setup(prop_id, px_per_m / PropArt.ppm(prop_id), _night_tint())
+	var location := WorldMapData.get_location_by_id(GameState.get_session().current_location_id)
+	gate.gate_kind = location.wall if location != null else GateArt.KIND_STONE
+	gate.haze = HUB_HAZE
+	var tint := _night_tint()
+	gate.night = JourneyClock.darkness_for_hour(GameState.get_session().last_clock_hour)
+	# Ölçek surun kendisinden (arkadaki şehir ayrı bir katman, GateArt onu pusta
+	# küçültüyor): sur GATE_MAX_HEIGHT'i geçmesin.
+	var px_per_m := minf(GATE_HEIGHT / PropArt.size_m(GATE_PROP).z, GATE_MAX_HEIGHT / maxf(GateArt.body_height_m(prop_id), 0.1))
+	var k := px_per_m / PropArt.ppm(prop_id)
+	gate.setup(prop_id, k, tint)
 	_gate_node = gate
 	var opening := gate.layer_bounds("gate")
+	if opening.size == Vector2.ZERO and GateArt.has_door(prop_id):
+		opening = GateArt.door_rect(prop_id, gate.position, k)
 	if opening.size == Vector2.ZERO:
 		# Kanadı olmayan kapı (şehrin kendi kapısı): geçit eşyanın çapasında, kapı genişliğinde.
 		var w := GATE_OPENING_M * px_per_m

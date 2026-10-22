@@ -1062,53 +1062,66 @@ func _draw_memorials(area: Rect2, cover: Rect2) -> void:
 				draw_circle(base + Vector2(0, -h * 0.05), h * 0.7, Color(0.12, 0.11, 0.10, 0.55))
 				draw_circle(base + Vector2(h * 0.2, -h * 0.1), h * 0.3, Color(0.35, 0.33, 0.30, 0.6))
 
-## Varış kapısı (kullanıcı, 2026-10-21): yolun sonuna gelmek şehrin kapısına
-## gelmek; kapı üstüne yapıştırılmış bir resim değil yolun kendi parçası. Duraklar
-## gibi güne bağlı (kervanla kayıyor), duraklar gibi yolun gerisinde duruyor ve
-## kervan önünde duruyor. Lider yaklaşınca kanat kalkıyor (hub'daki kapıyla aynı).
+## Yolun iki ucu (kullanıcı, 2026-10-21 ve 22): yolun sonu varılacak yerleşimin
+## kapısı, başı çıkılan yerleşiminki - üstüne yapıştırılmış bir resim değil,
+## yolun kendi parçası. Duraklar gibi güne bağlı (kervanla kayıyor), yolun
+## gerisinde duruyor; geçidi kervan oradayken liderin burnunun önünde. Çizimi
+## GateArt yapıyor (arkadaki şehir pusta, geçit, kanat, gece meşaleleri), hub
+## da aynısını kullanıyor.
 const GATE_PX_PER_M_OF_HEIGHT: float = 0.05
-## Kapının (arkasındaki çatılar dahil) en fazla şerit boyunun bu kadarı: 12 m'lik
-## taş kapı insan ölçeğinde çerçevenin üstünden taşıyordu (ölçüldü), o yüzden
-## uzun bir kapı yolun daha gerisinde, daha küçük duruyor.
-const GATE_MAX_HEIGHT_SHARE: float = 0.62
+## Surun (arkadaki şehir hariç) en fazla şerit boyunun bu kadarı.
+const GATE_MAX_HEIGHT_SHARE: float = 0.46
 ## Görünen alanın tepesinden bırakılan pay (yolun üst çubuğu).
 const GATE_TOP_MARGIN_SHARE: float = 0.065
 const GATE_BASE_SINK: float = 0.03
 const GATE_OPEN_RANGE: float = 0.55
 
-var _gate_prop: String = ""
-var _gate_day: float = 0.0
+## [{"prop", "day", "kind"}]: arazi gününe bağlı kapılar.
+var _gates: Array = []
 var _gate_lead: float = 0.0
 
-## `lead_px`: kervanın çapasından liderin burnuna uzaklık - kapının geçidi varışta
-## tam oraya düşer. Kapı eşyası boşsa ya da resmi yoksa şerit eski silüete döner.
-func set_arrival_gate(prop_id: String, day: float, lead_px: float) -> void:
-	if prop_id == _gate_prop and is_equal_approx(day, _gate_day) and is_equal_approx(lead_px, _gate_lead):
+## `lead_px`: kervanın çapasından liderin burnuna uzaklık - geçit kervan
+## oradayken tam oraya düşer. Eşyası olmayan kapı çizilmez.
+func set_road_gates(gates: Array, lead_px: float) -> void:
+	if gates == _gates and is_equal_approx(lead_px, _gate_lead):
 		return
-	_gate_prop = prop_id
-	_gate_day = day
+	_gates = gates.duplicate(true)
 	_gate_lead = lead_px
 	queue_redraw()
 
+## Tek kapılı eski çağrı (varış ucu).
+func set_arrival_gate(prop_id: String, day: float, lead_px: float) -> void:
+	set_road_gates([] if prop_id.is_empty() else [{"prop": prop_id, "day": day, "kind": GateArt.KIND_STONE}], lead_px)
+
 func has_arrival_gate() -> bool:
-	return not _gate_prop.is_empty() and PropArt.has(_gate_prop)
+	return not _gates.is_empty() and PropArt.has(String(_gates[-1].prop))
 
-## Kapının ekrandaki x'i (geçidin ortası) ve ölçeği: test ve çizim aynı sayıyı okusun.
+func gate_count() -> int:
+	return _gates.size()
+
+## Bir kapının geçidinin ekrandaki x'i: test ve çizim aynı sayıyı okusun.
+func gate_x_for_day(day: float) -> float:
+	return screen_x_for_day(day) + _heading * _gate_lead
+
 func arrival_gate_x() -> float:
-	return screen_x_for_day(_gate_day) + _heading * _gate_lead
+	return gate_x_for_day(float(_gates[-1].day)) if not _gates.is_empty() else 0.0
 
-func _draw_arrival_gate(area: Rect2, cover: Rect2) -> void:
-	if not has_arrival_gate():
-		return
-	var x := arrival_gate_x()
+func _draw_road_gates(area: Rect2, cover: Rect2) -> void:
+	for gate in _gates:
+		var prop_id := String(gate.prop)
+		if PropArt.has(prop_id):
+			_draw_road_gate(prop_id, float(gate.day), String(gate.get("kind", GateArt.KIND_STONE)), area, cover)
+
+func _draw_road_gate(prop_id: String, day: float, kind: String, area: Rect2, cover: Rect2) -> void:
+	var x := gate_x_for_day(day)
 	var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * GATE_BASE_SINK)
-	var metres := maxf(PropArt.size_m(_gate_prop).z, 0.1)
+	var metres := maxf(GateArt.body_height_m(prop_id), 0.1)
 	# Görünen göğün altında kalsın: yol ekranı şeridin tepesini üst çubuğun altına itiyor.
 	var seen_top := _view.position.y if _view.has_area() else cover.position.y
 	var room := minf(area.size.y * GATE_MAX_HEIGHT_SHARE, base.y - seen_top - area.size.y * GATE_TOP_MARGIN_SHARE)
 	var px_per_m := minf(area.size.y * GATE_PX_PER_M_OF_HEIGHT, maxf(room, 1.0) / metres)
-	var k := px_per_m / PropArt.ppm(_gate_prop)
-	var box := PropArt.bounds(_gate_prop, base, k)
+	var k := px_per_m / PropArt.ppm(prop_id)
+	var box := GateArt.bounds(prop_id, base, k)
 	if box.end.x < cover.position.x or box.position.x > cover.end.x:
 		return
 	var tint := Color.WHITE.lerp(Color(_sky.haze), 0.18) * _light
@@ -1117,14 +1130,11 @@ func _draw_arrival_gate(area: Rect2, cover: Rect2) -> void:
 	var reach := maxf(box.size.x * GATE_OPEN_RANGE, 1.0)
 	var near := clampf(1.0 - absf(x - (caravan_x() + _heading * _gate_lead)) / reach, 0.0, 1.0)
 	var open := near * near * (3.0 - 2.0 * near)
-	PropArt.draw_gate_leaf(self, _gate_prop, base, k, tint, open)
-	for layer in PropArt.info(_gate_prop).get("layers", {}).keys():
-		if layer != "gate":
-			PropArt.draw_layer(self, _gate_prop, layer, base, k, tint)
+	GateArt.draw(self, prop_id, base, k, tint, Color(_sky.haze) * _light, open, _night_ratio, kind)
 
 func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	_draw_memorials(area, cover)
-	_draw_arrival_gate(area, cover)
+	_draw_road_gates(area, cover)
 	if _terrain == null:
 		return
 	# Duraklar yolun *üstünde* duruyor, ağaç hattında değil: ilk hâlinde

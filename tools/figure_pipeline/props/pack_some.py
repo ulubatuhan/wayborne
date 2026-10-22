@@ -56,6 +56,35 @@ def door_pivots(img, ax, ay, ppm):
     return {"door_l": [lx - ax, mid - ay], "door_r": [rx - ax, mid - ay], "door_top": [0, top - ay]}
 
 
+def town_grade(img):
+    """Kasaba resimlerinin rengi (town_post.grade'in renk kısmı): doygunluk
+    yalnızca sıcak ışıkta kalır, parlak yeşil zeytine, paket pembesi tuğlaya
+    döner. Pozlama ve gölge eğrisi yok - ışığı oyun veriyor. Yolun ucundaki
+    kapı, şehre girince görülen resimle aynı paletten konuşsun."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(img).astype(np.float32) / 255.0
+    rgb, alpha = a[..., :3], a[..., 3:]
+    lum = (rgb * np.array([0.299, 0.587, 0.114], np.float32)).sum(-1, keepdims=True)
+
+    def smooth(e0, e1, x):
+        t = np.clip((x - e0) / (e1 - e0), 0.0, 1.0)
+        return t * t * (3 - 2 * t)
+    warm = np.clip((rgb[..., :1] - rgb[..., 2:3]) * 2.2, 0, 1) * smooth(0.25, 0.6, lum)
+    # Kasvetli ton (kullanıcı, 2026-10-22): doygunluk çoğunlukla gider, açık
+    # tonlar kararır; yoldaki GrimGrade bunun üstüne bir kez daha iner.
+    keep = 0.30 + 0.50 * warm
+    rgb = lum + (rgb - lum) * keep
+    rgb = rgb * (0.80 + 0.12 * smooth(0.0, 0.35, lum)) - np.maximum(lum - 0.6, 0.0) * 0.25
+    r, g, b = rgb[..., :1], rgb[..., 1:2], rgb[..., 2:3]
+    green = smooth(0.0, 0.08, g - r)
+    rgb = rgb * (1 - green) + lum * np.array([0.74, 0.76, 0.62], np.float32) * 0.85 * green
+    pink = smooth(0.0, 0.06, b - g) * smooth(0.05, 0.2, r - g)
+    rgb = rgb * (1 - pink) + lum * np.array([1.05, 0.66, 0.52], np.float32) * pink
+    out = np.concatenate([np.clip(rgb, 0, 1), alpha], -1)
+    return Image.fromarray((out * 255 + 0.5).astype(np.uint8))
+
+
 def pack_one(pid):
     meta = json.load(open(os.path.join(pack_props.SRC, pid, "meta.json")))
     ax, ay = meta["anchor"]
@@ -65,8 +94,10 @@ def pack_one(pid):
     for name in meta["layers"]:
         img = pack_props.compose(os.path.join(pack_props.SRC, pid, name + "__shade.png"),
                                  os.path.join(pack_props.SRC, pid, name + "__albedo.png"))
-        if name == "body" and pid.startswith("gate_"):
-            extra = door_pivots(img, ax, ay, meta["ppm"])
+        if pid.startswith("gate_"):
+            img = town_grade(img)
+            if name == "body":
+                extra = door_pivots(img, ax, ay, meta["ppm"])
         bb = img.getchannel("A").point(lambda a: 255 if a > 4 else 0).getbbox()
         if bb is None:
             continue

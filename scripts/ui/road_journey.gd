@@ -557,6 +557,7 @@ var _modal_open: bool = false
 func _ready() -> void:
 	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_ui()
+	_world.add_child(GrimGrade.new())
 	_init_journey()
 	get_viewport().size_changed.connect(_layout_panel)
 	_layout_panel()
@@ -2791,14 +2792,26 @@ func _refresh_ambience() -> void:
 
 ## Yolun sonundaki kapı: varılacak yerleşimin kapısı (geri dönüşte yolun başı).
 ## Kapı gününün kendisi yolun ucu; geçit, varışta kolonun başındaki atlının tam önünde.
+## Yolun iki ucunda iki yerleşimin kendi kapısı: arazinin ilk günü yolun
+## çıkıldığı ucu, son günü öteki ucu. Geri dönünce de doğru: arazi aynı yol,
+## ters yönde yürünüyor (terrain_day), kapılar kendi uçlarında kalıyor.
 func _sync_arrival_gate() -> void:
-	var heading := _journey.heading
-	var place := WorldMapData.get_location_by_id(_session.journey_destination_id)
-	var prop_id := place.gate_prop_id() if place != null else ""
-	var end_day := float(_journey.terrain_days) if heading > 0.0 else 0.0
+	var gates: Array = []
+	var from_id := _session.journey_origin_id
+	var far_id := _session.journey_destination_id
+	var parts := _journey.terrain_key.split("|")
+	if parts.size() == 2:
+		far_id = String(parts[1] if String(parts[0]) == from_id else parts[0])
+	for end in [[from_id, 0.0], [far_id, float(_journey.terrain_days)]]:
+		var place := WorldMapData.get_location_by_id(String(end[0]))
+		if place == null:
+			continue
+		var prop_id := place.gate_prop_id()
+		if not prop_id.is_empty():
+			gates.append({"prop": prop_id, "day": float(end[1]), "kind": place.wall})
 	var leader := _caravan.get_leader_figure()
 	var head := _caravan.get_front_offset() - (leader.size.x * 0.5 if leader != null else 0.0)
-	_band.set_arrival_gate(prop_id, end_day, head)
+	_band.set_road_gates(gates, head)
 
 func _refresh_time_ui() -> void:
 	if _clock == null:
