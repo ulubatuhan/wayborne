@@ -392,6 +392,108 @@ def texture_materials(window_glow, window_strength=6.0):
         bsdf.inputs["Roughness"].default_value = 0.9
 
 
+# Yıpranma (kullanıcı, 2026-10-22: "vadi kültüründeki kale, kasaba yapıları biraz
+# daha yıpranmış olsun"): yapı malzemelerinin rengine kir lekeleri, yağmurun
+# indirdiği dikey izler, dibe çöken toprak ve taşta yosun. Zemin, tepe, bayrak,
+# pencere ve render geçişlerinin malzemeleri dokunulmaz.
+WEATHER_SKIP = ("Windows", "ground_mat", "hill_mat", "id_mat", "depth_mat", FLAG_MATERIAL)
+MOSS = (0.30, 0.33, 0.19, 1.0)
+
+
+def _value_node(nt, kind, **inputs):
+    n = nt.nodes.new(kind)
+    for key, value in inputs.items():
+        n.inputs[key].default_value = value
+    return n
+
+
+def weather_materials(amount):
+    if amount <= 0.0:
+        return
+    for m in bpy.data.materials:
+        if not m.use_nodes or m.name.split(".")[0] in WEATHER_SKIP:
+            continue
+        nt = m.node_tree
+        bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+        if bsdf is None:
+            continue
+        sock = bsdf.inputs["Base Color"]
+        source = sock.links[0].from_socket if sock.is_linked else None
+        geo = nt.nodes.new("ShaderNodeNewGeometry")
+        # Lekeler: iri, yumuşak gürültü.
+        blot = _value_node(nt, "ShaderNodeTexNoise", Scale=0.45, Detail=6.0, Roughness=0.62)
+        nt.links.new(geo.outputs["Position"], blot.inputs["Vector"])
+        blot_r = _value_node(nt, "ShaderNodeMapRange", **{"From Min": 0.47, "From Max": 0.60})
+        nt.links.new(blot.outputs["Fac"], blot_r.inputs["Value"])
+        # Akıntı izleri: yatayda sık, dikeyde uzun gürültü.
+        streak_map = _value_node(nt, "ShaderNodeMapping")
+        streak_map.inputs["Scale"].default_value = (9.0, 9.0, 0.35)
+        nt.links.new(geo.outputs["Position"], streak_map.inputs["Vector"])
+        streak = _value_node(nt, "ShaderNodeTexNoise", Scale=1.6, Detail=3.0)
+        nt.links.new(streak_map.outputs["Vector"], streak.inputs["Vector"])
+        streak_r = _value_node(nt, "ShaderNodeMapRange", **{"From Min": 0.52, "From Max": 0.62})
+        nt.links.new(streak.outputs["Fac"], streak_r.inputs["Value"])
+        # Dipteki toprak: yerden 2.2 m'ye kadar.
+        sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+        nt.links.new(geo.outputs["Position"], sep.inputs["Vector"])
+        foot = _value_node(nt, "ShaderNodeMapRange", **{"From Min": 2.2, "From Max": 0.0})
+        nt.links.new(sep.outputs["Z"], foot.inputs["Value"])
+        grime = nt.nodes.new("ShaderNodeMath")
+        grime.operation = "MULTIPLY_ADD"
+        grime.inputs[1].default_value = 0.55
+        nt.links.new(streak_r.outputs["Result"], grime.inputs[0])
+        nt.links.new(foot.outputs["Result"], grime.inputs[2])
+        total = nt.nodes.new("ShaderNodeMath")
+        total.operation = "MULTIPLY_ADD"
+        total.inputs[1].default_value = 0.60
+        total.use_clamp = True
+        nt.links.new(blot_r.outputs["Result"], total.inputs[0])
+        nt.links.new(grime.outputs["Value"], total.inputs[2])
+        dark = nt.nodes.new("ShaderNodeMath")
+        dark.operation = "MULTIPLY"
+        dark.inputs[1].default_value = 0.85 * amount
+        nt.links.new(total.outputs["Value"], dark.inputs[0])
+        dirty = nt.nodes.new("ShaderNodeMix")
+        dirty.data_type = "RGBA"
+        dirty.blend_type = "MULTIPLY"
+        dirty.inputs["B"].default_value = (0.30, 0.26, 0.21, 1.0)
+        nt.links.new(dark.outputs["Value"], dirty.inputs["Factor"])
+        if source is not None:
+            nt.links.new(source, dirty.inputs["A"])
+        else:
+            dirty.inputs["A"].default_value = sock.default_value[:]
+        # Yosun: lekelerin en koyusunda ve dipte, solgun zeytin.
+        moss_f = nt.nodes.new("ShaderNodeMath")
+        moss_f.operation = "MULTIPLY"
+        moss_f.inputs[1].default_value = 0.45 * amount
+        nt.links.new(foot.outputs["Result"], moss_f.inputs[0])
+        moss_m = nt.nodes.new("ShaderNodeMath")
+        moss_m.operation = "MULTIPLY"
+        nt.links.new(moss_f.outputs["Value"], moss_m.inputs[0])
+        nt.links.new(blot_r.outputs["Result"], moss_m.inputs[1])
+        moss = nt.nodes.new("ShaderNodeMix")
+        moss.data_type = "RGBA"
+        moss.blend_type = "MIX"
+        moss.inputs["B"].default_value = MOSS
+        nt.links.new(moss_m.outputs["Value"], moss.inputs["Factor"])
+        nt.links.new(dirty.outputs["Result"], moss.inputs["A"])
+        # Eskimiş: boya ve sıva griye değil toprağa döner (doygunluğu düşürmek
+        # kırmızı çatıyı pembeleştirip açıyordu, ölçüldü).
+        fade = nt.nodes.new("ShaderNodeMix")
+        fade.data_type = "RGBA"
+        fade.blend_type = "MULTIPLY"
+        fade.inputs["Factor"].default_value = 0.45 * amount
+        fade.inputs["B"].default_value = (0.68, 0.60, 0.48, 1.0)
+        nt.links.new(moss.outputs["Result"], fade.inputs["A"])
+        nt.links.new(fade.outputs["Result"], sock)
+        # Quaternius malzemelerinin Cycles'a ayrı bir çıkışı var (düz Diffuse):
+        # Cycles onu okuyor ve yıpranma görünmüyordu (ölçüldü). Yıpranan
+        # malzemede Cycles da aynı Principled'ı okur.
+        for out in [n for n in nt.nodes if n.bl_idname == "ShaderNodeOutputMaterial"]:
+            if out.target == "CYCLES":
+                nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+
+
 def ground(cfg):
     """Meydan (kaldırım taşı) ve çevresi (toprak), arkada tepe."""
     bpy.ops.mesh.primitive_plane_add(size=120, location=(0, 25, 0))
@@ -710,6 +812,7 @@ def build(city):
     for spec in cfg.get("props", []):
         building(spec)
     texture_materials(tuple(cfg.get("window", [1.0, 0.55, 0.22])) + (1.0,), cfg.get("window_strength", 6.0))
+    weather_materials(cfg.get("weathered", 0.0))
     lights(cfg)
     camera(cfg)
     return cfg

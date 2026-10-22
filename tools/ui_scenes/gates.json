@@ -1211,7 +1211,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_serai_orbeyan": {
   "seed": 337,
@@ -4548,7 +4549,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_caramine": {
   "seed": 948,
@@ -4864,7 +4866,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_dravoss": {
   "seed": 443,
@@ -7599,7 +7602,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_merigaud": {
   "seed": 670,
@@ -8212,7 +8216,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_mirsana": {
   "seed": 571,
@@ -9288,7 +9293,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_rivecande": {
   "seed": 356,
@@ -10953,7 +10959,8 @@
     120
    ]
   ],
-  "far": 90.0
+  "far": 90.0,
+  "weathered": 0.75
  },
  "gate_serai_seyvan": {
   "seed": 247,
@@ -13512,7 +13519,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_serai_orbeyan@day": {
   "seed": 337,
@@ -17509,7 +17517,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_caramine@day": {
   "seed": 948,
@@ -17833,7 +17842,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_dravoss@day": {
   "seed": 443,
@@ -20606,7 +20616,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_merigaud@day": {
   "seed": 670,
@@ -21227,7 +21238,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_mirsana@day": {
   "seed": 571,
@@ -22319,7 +22331,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_rivecande@day": {
   "seed": 356,
@@ -24006,7 +24019,8 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0
+  "lamp_scale": 0.0,
+  "weathered": 0.75
  },
  "gate_serai_seyvan@day": {
   "seed": 247,

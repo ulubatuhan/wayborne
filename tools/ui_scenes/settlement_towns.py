@@ -73,6 +73,8 @@ CULTURES = {
         "moon": 0.8, "backlight": 2.6, "backlight_color": [1.0, 0.58, 0.28],
         "window": [1.0, 0.56, 0.22], "hill_tint": [0.62, 0.78, 0.5], "ground_tint": None,
         "wall": "stone", "wall_value": 0.45, "dark_spires": False, "banners": ["ftk:banner-green", "ftk:banner-red"],
+        # Kullanıcı (2026-10-22): vadinin kalesi ve yapıları daha yıpranmış.
+        "weathered": 0.75,
         "trees": ["ftk:tree-high-round", "ftk:tree", "ftk:tree-high-crooked"],
         "extra": ["ftk:hedge-large", "ftk:hedge-large"],
     },
@@ -189,7 +191,7 @@ def build(place, map_h):
     cfg = {"seed": rng.randrange(1, 999), "plaza": list(PLAZA), "camera": dict(CAMERA),
            "sky": dict(style["sky"]), "moon": style["moon"], "backlight": style["backlight"],
            "window": style["window"], "buildings": [], "props": []}
-    for key in ("moon_color", "backlight_color"):
+    for key in ("moon_color", "backlight_color", "weathered"):
         if key in style:
             cfg[key] = style[key]
     post = dict(style["post"])
