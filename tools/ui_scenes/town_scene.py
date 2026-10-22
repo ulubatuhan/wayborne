@@ -26,6 +26,9 @@ QV = os.path.join(ROOT, "art_source/models/props/quaternius_medieval_village")
 QM = os.path.join(ROOT, "art_source/models/props/quaternius_modular_medieval")
 FTK = os.path.join(ROOT, "art_source/models/ui_scenes/kenney_fantasy_town/GLB format")
 TEX = os.path.join(ROOT, "art_source/textures/ambientcg")
+KP = os.path.join(ROOT, "art_source/models/ui_scenes/kenney_pirate_kit")
+KS = os.path.join(ROOT, "art_source/models/ui_scenes/kenney_survival_kit")
+KK = os.path.join(ROOT, "art_source/models/ui_scenes/kaykit_hexagon")
 OUT = os.path.join(ROOT, "build/ui_scenes")
 # Kapı sahneleri (12.2a) kendi tanım dosyasını verir: WAYBORNE_TOWN_CFG.
 CFG = os.environ.get("WAYBORNE_TOWN_CFG") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "towns.json")
@@ -57,7 +60,10 @@ def _import(path):
         bpy.ops.import_scene.gltf(filepath=path)
     new = [o for o in bpy.data.objects if o not in before]
     for o in new:
-        if o.type in ("CAMERA", "LIGHT"):
+        # Quaternius hayvanlarında malzemesiz bir yardımcı küre var (atın
+        # ayağında beyaz bir top olarak render ediliyordu).
+        helper = o.type == "MESH" and o.name.startswith("Icosphere") and not o.data.materials
+        if o.type in ("CAMERA", "LIGHT") or helper:
             bpy.data.objects.remove(o, do_unlink=True)
     return [o for o in bpy.data.objects if o not in before]
 
@@ -205,13 +211,20 @@ def _stone_material(name="terrace_stone", value=0.55):
 
 
 def _built(name, loc, rot_z, scale, tag):
-    """Eşya hattının kurucusundan (brandalı vagon) bir model: oyunun yolda
-    çizdiği vagonun aynısı, bir boşluk nesnesine bağlanıp yerleştirilir."""
-    sys.path.insert(0, os.path.join(ROOT, "tools/figure_pipeline/props"))
-    import wagon_builder
-    before = set(bpy.data.objects)
-    wagon_builder.BUILDERS[name]()
-    new = [o for o in bpy.data.objects if o not in before]
+    """Eşya hattının kurucusundan (brandalı vagon) ya da settlement_props'tan
+    (yurt, maden arabası...) bir model, bir boşluk nesnesine bağlanıp
+    yerleştirilir. `ad:arg` biçimi kurucuya bir sayı geçirir (ray boyu gibi)."""
+    name, _, arg = name.partition(":")
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import settlement_props
+    if name in settlement_props.BUILDERS:
+        new = settlement_props.build(name, arg)
+    else:
+        sys.path.insert(0, os.path.join(ROOT, "tools/figure_pipeline/props"))
+        import wagon_builder
+        before = set(bpy.data.objects)
+        wagon_builder.BUILDERS[name]()
+        new = [o for o in bpy.data.objects if o not in before]
     pivot = bpy.data.objects.new(name + "_pivot", None)
     bpy.context.scene.collection.objects.link(pivot)
     for o in new:
@@ -312,6 +325,12 @@ def building(spec):
     if spec["kind"] == "palisade":
         palisade(spec)
         return
+    if spec["kind"] == "water":
+        water(spec)
+        return
+    if spec["kind"] == "quay":
+        quay(spec)
+        return
     tag = spec.get("venue", "")
     x, y = spec["at"]
     z = spec.get("z", 0.0)
@@ -326,6 +345,12 @@ def building(spec):
             mats=_stone_material("wall_dark", 0.3) if spec.get("dark") else None)
     elif kind.startswith("builder:"):
         _built(kind[8:], (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
+    elif kind.startswith("kp:"):
+        place(os.path.join(KP, kind[3:] + ".glb"), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
+    elif kind.startswith("ks:"):
+        place(os.path.join(KS, kind[3:] + ".glb"), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
+    elif kind.startswith("kk:"):
+        place(os.path.join(KK, kind[3:] + ".gltf"), (x, y, z), spec.get("rot", 0.0), spec.get("scale", 1.0), tag)
     elif kind.startswith("file:"):
         # `stone`: soluk paket parçalarına surun koyu taş boyası (kapı sahnesi, 12.2a).
         mats = _stone_material("wall_dark", spec["stone"]) if "stone" in spec else None
@@ -396,7 +421,7 @@ def texture_materials(window_glow, window_strength=6.0):
 # daha yıpranmış olsun"): yapı malzemelerinin rengine kir lekeleri, yağmurun
 # indirdiği dikey izler, dibe çöken toprak ve taşta yosun. Zemin, tepe, bayrak,
 # pencere ve render geçişlerinin malzemeleri dokunulmaz.
-WEATHER_SKIP = ("Windows", "ground_mat", "hill_mat", "id_mat", "depth_mat", FLAG_MATERIAL)
+WEATHER_SKIP = ("Windows", "ground_mat", "hill_mat", "id_mat", "depth_mat", "water_mat", FLAG_MATERIAL)
 MOSS = (0.30, 0.33, 0.19, 1.0)
 
 
@@ -411,7 +436,7 @@ def weather_materials(amount):
     if amount <= 0.0:
         return
     for m in bpy.data.materials:
-        if not m.use_nodes or m.name.split(".")[0] in WEATHER_SKIP:
+        if not m.use_nodes or m.name.split(".")[0] in WEATHER_SKIP or m.name.startswith("water_mat"):
             continue
         nt = m.node_tree
         bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
@@ -492,6 +517,51 @@ def weather_materials(amount):
         for out in [n for n in nt.nodes if n.bl_idname == "ShaderNodeOutputMaterial"]:
             if out.target == "CYCLES":
                 nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+
+
+def water(spec):
+    """Su yüzeyi (liman, nehir, bataklık gölü): zeminin hemen üstünde düz bir
+    levha, koyu yeşilimsi gri, gürültüyle kırışmış; gökyüzünü yansıtır."""
+    x0, y0, x1, y1 = spec["rect"]
+    bpy.ops.mesh.primitive_plane_add(size=1.0, location=((x0 + x1) / 2, (y0 + y1) / 2, spec.get("z", 0.04)))
+    w = bpy.context.object
+    w.name = "water"
+    w.scale = (x1 - x0, y1 - y0, 1.0)
+    color = tuple(spec.get("color", (0.07, 0.11, 0.12)))
+    name = "water_mat" if "color" not in spec else "water_mat_%02d%02d%02d" % tuple(int(c * 99) for c in color)
+    m = bpy.data.materials.get(name)
+    if m is None:
+        m = bpy.data.materials.new(name)
+        m.use_nodes = True
+        nt = m.node_tree
+        bsdf = nt.nodes["Principled BSDF"]
+        bsdf.inputs["Base Color"].default_value = color + (1.0,)
+        bsdf.inputs["Roughness"].default_value = 0.12
+        noise = nt.nodes.new("ShaderNodeTexNoise")
+        noise.inputs["Scale"].default_value = 2.5
+        mp = nt.nodes.new("ShaderNodeMapping")
+        mp.inputs["Scale"].default_value = (1.0, 3.0, 1.0)
+        geo = nt.nodes.new("ShaderNodeNewGeometry")
+        nt.links.new(geo.outputs["Position"], mp.inputs["Vector"])
+        nt.links.new(mp.outputs["Vector"], noise.inputs["Vector"])
+        bump = nt.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.35
+        nt.links.new(noise.outputs["Fac"], bump.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    w.data.materials.append(m)
+    w["venue"] = ""
+
+
+def quay(spec):
+    """Rıhtım ya da kıyı taşı: suyun kenarında alçak taş set."""
+    (x0, y0), (x1, y1) = spec["from"], spec["to"]
+    h = spec.get("height", 0.55)
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=((x0 + x1) / 2, (y0 + y1) / 2, h / 2))
+    q = bpy.context.object
+    q.name = "quay"
+    q.scale = (max(abs(x1 - x0), 0.8), max(abs(y1 - y0), 0.8), h)
+    q.data.materials.append(_stone_material("quay_stone", spec.get("value", 0.45)))
+    q["venue"] = ""
 
 
 def ground(cfg):

@@ -34,7 +34,7 @@ const CC_BY: Array = [
 ## CC0 paketler (atıf gerekmez).
 const CC0_PACKS: Array = [
 	"Quaternius - Medieval Village Pack, Medieval Village MegaKit, Fantasy Props MegaKit, Modular Medieval Pack, Farm Buildings, Ultimate RPG Items, Survival Pack, Medieval Weapons, Animated Knight, Modular Character Outfits (quaternius.com)",
-	"Kenney - Castle Kit, Survival Kit, Particle Pack, Graveyard Kit, Impact Sounds, UI Pack RPG Expansion, Fantasy UI Borders (kenney.nl)",
+	"Kenney - Castle Kit, Survival Kit, Fantasy Town Kit, Pirate Kit, Particle Pack, Graveyard Kit, Impact Sounds, UI Pack RPG Expansion, Fantasy UI Borders (kenney.nl)",
 	"Poly Haven - Lantern 01, Rajil Jose Macatangay (polyhaven.com)",
 	"Kay Lousberg - KayKit Medieval Hexagon (kaylousberg.com)",
 	"MakeHuman community - CC0 clothes by culturalibre, Donitz, javherre, MargaretToigo, RehmanPolanski, wdg",

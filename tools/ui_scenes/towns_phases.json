@@ -470,6 +470,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -590,8 +591,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "ilsande@day": {
   "seed": 699,
@@ -1064,6 +1064,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -1172,8 +1173,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "ilsande@evening": {
   "seed": 699,
@@ -1646,6 +1646,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -1766,8 +1767,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "serai_orbeyan@morning": {
   "seed": 337,
@@ -1832,195 +1832,486 @@
     "scale": 1.6
    },
    {
-    "venue": "market",
-    "kind": "MarketStand_1",
-    "at": [
-     -1.93,
-     4.83
-    ],
-    "rot": -24,
-    "scale": 1.6
-   },
-   {
     "venue": "tavern",
-    "kind": "Inn",
+    "kind": "builder:yurt:4.2",
     "at": [
-     0.46,
-     15.0
+     0.22,
+     17.5
     ],
-    "rot": 0,
-    "scale": 2.2
+    "rot": 3.9
    },
    {
     "venue": "yard",
-    "kind": "Stable",
+    "kind": "builder:horse_line:6",
     "at": [
-     -7.6,
-     10.0
+     -10.0,
+     8.0
     ],
-    "rot": 50,
-    "scale": 1.5
+    "rot": 35
+   },
+   {
+    "venue": "yard",
+    "kind": "builder:horse_line:6",
+    "at": [
+     -12.5,
+     12.0
+    ],
+    "rot": 40
    }
   ],
   "props": [
    {
-    "venue": "yard",
-    "kind": "Cart",
+    "kind": "builder:tug:5.2",
     "at": [
-     -6.0,
-     8.6
-    ],
-    "rot": 70,
-    "scale": 1.2
+     -4.78,
+     14.3
+    ]
    },
    {
-    "venue": "tavern",
-    "kind": "Barrel",
+    "kind": "builder:tug:5.2",
     "at": [
-     4.8,
-     8.0
+     5.22,
+     14.3
+    ]
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -9.0,
+     9.2
+    ],
+    "rot": 125,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -11.5,
+     13.2
+    ],
+    "rot": 130,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -13.5,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 0.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -15.0,
+     11.0
     ],
     "scale": 1.3
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.0,
-     19.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     1.61,
+     28.54
     ],
-    "to": [
-     12.0,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "towers": 5,
-    "value": 0.5
+    "rot": -17.4
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.5,
-     3.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     -15.91,
+     26.06
     ],
-    "to": [
-     -12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": 43.4
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "builder:yurt:2.4",
+    "at": [
+     17.47,
+     26.91
+    ],
+    "rot": -19.6
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     7.75,
+     23.94
+    ],
+    "rot": 5.9
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     -8.11,
+     11.86
+    ],
+    "rot": 32.4
+   },
+   {
+    "kind": "builder:yurt:2.7",
+    "at": [
+     -8.12,
+     23.61
+    ],
+    "rot": 12.5
+   },
+   {
+    "kind": "builder:yurt:2.3",
+    "at": [
+     8.11,
+     10.98
+    ],
+    "rot": -26.4
+   },
+   {
+    "kind": "builder:yurt:3.2",
+    "at": [
+     -13.06,
+     16.0
+    ],
+    "rot": 27.6
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -30.0,
+     33.335152605903296
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -27.8,
+     33.146320112119234
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -25.6,
+     33.106038666371376
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -23.400000000000002,
+     33.23122710172686
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -21.200000000000003,
+     33.469304330282995
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -19.000000000000004,
+     33.720274217039055
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -16.800000000000004,
+     33.87872551023705
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -14.600000000000005,
+     33.87810620487522
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -12.400000000000006,
+     33.71867641882771
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -10.200000000000006,
+     33.46739913929589
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -8.000000000000007,
+     33.22981472777954
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -5.800000000000007,
+     33.10571232846578
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -3.6000000000000068,
+     33.147216877246024
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -1.4000000000000066,
+     33.33689581877617
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     0.7999999999999936,
+     33.595081050570855
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     2.999999999999994,
+     33.81333076385099
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     11.799999999999994,
+     33.34481963282331
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     13.999999999999993,
+     33.15136969103457
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     16.199999999999992,
+     33.104349895682255
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     18.39999999999999,
+     33.22350929136115
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     20.59999999999999,
+     33.45879908050596
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     22.79999999999999,
+     33.711393895977174
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     24.99999999999999,
+     33.875199990709895
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     27.19999999999999,
+     33.88141625986023
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     29.399999999999988,
+     33.72743177380283
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     4.8,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     9.2,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     10.5,
+     6.5
+    ],
+    "rot": -70,
+    "scale": 0.5
+   },
+   {
+    "kind": "builder:horse_line:4",
+    "at": [
      12.5,
-     3.0
+     5.5
     ],
-    "to": [
-     12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": -25
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "ftk:tree-crooked",
+    "at": [
+     15.0,
+     25.0
+    ],
+    "rot": 146,
+    "scale": 3.24
+   },
+   {
+    "kind": "ftk:tree-crooked",
+    "at": [
      -12.5,
-     -1.0
+     0.5
     ],
-    "to": [
-     -12.5,
-     3.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "gate": 0.5,
-    "venue": "gate",
-    "value": 0.5
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -11.75,
-     2.98
-    ],
-    "rot": 79,
-    "scale": 1.49
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     12.29,
-     4.07
-    ],
-    "rot": -61,
-    "scale": 1.34
+    "rot": 359,
+    "scale": 2.68
    },
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
+     0.0,
+     29.0
     ],
-    "rot": 214,
-    "scale": 2.98
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 55,
-    "scale": 3.31
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     13.0,
-     4.0
-    ],
-    "rot": 39,
-    "scale": 2.78
+    "rot": 59,
+    "scale": 3.02
    },
    {
     "kind": "Bags",
     "at": [
-     -16.650000000000002,
-     17.6
+     -11.25,
+     0.4
     ],
-    "rot": 1,
+    "rot": 52,
     "scale": 1.3
    },
    {
     "kind": "Hay",
     "at": [
-     -11.25,
-     0.4
+     17.1,
+     22.400000000000002
     ],
-    "rot": 172,
+    "rot": 263,
     "scale": 1.3
    },
    {
     "kind": "Bags",
     "at": [
-     -5.0,
-     9.5
+     -9.5,
+     7.0
     ],
-    "rot": -21,
+    "rot": -23,
     "scale": 1.3
    },
    {
     "kind": "ftk:stall-green",
     "at": [
-     -6.5,
-     4.8
+     4.8,
+     8.0
     ],
-    "rot": -4,
+    "rot": 24,
     "scale": 1.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     -4.1,
+     9.21
+    ],
+    "rot": 4,
+    "scale": 2.0
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     4.17,
+     8.18
+    ],
+    "rot": 12,
+    "scale": 2.0
    },
    {
     "kind": "file:art_source/models/props/quaternius_survival/Tent.blend",
@@ -2052,34 +2343,32 @@
    {
     "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
-     2.66,
+     2.85,
      9.0
     ],
     "scale": 0.42
    },
    {
-    "kind": "ftk:fountain-square",
+    "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
      0.0,
      6.0
     ],
-    "scale": 1.6
+    "scale": 0.6
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      -3.0,
      2.5
-    ],
-    "scale": 1.4
+    ]
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      3.2,
      2.5
-    ],
-    "scale": 1.4
+    ]
    }
   ],
   "backlight_color": [
@@ -2178,8 +2467,8 @@
     90
    ],
    [
-    0.36800000000000005,
-    13.0,
+    0.22,
+    12.0,
     2.4,
     150
    ]
@@ -2259,195 +2548,486 @@
     "scale": 1.6
    },
    {
-    "venue": "market",
-    "kind": "MarketStand_1",
-    "at": [
-     -1.93,
-     4.83
-    ],
-    "rot": -24,
-    "scale": 1.6
-   },
-   {
     "venue": "tavern",
-    "kind": "Inn",
+    "kind": "builder:yurt:4.2",
     "at": [
-     0.46,
-     15.0
+     0.22,
+     17.5
     ],
-    "rot": 0,
-    "scale": 2.2
+    "rot": 3.9
    },
    {
     "venue": "yard",
-    "kind": "Stable",
+    "kind": "builder:horse_line:6",
     "at": [
-     -7.6,
-     10.0
+     -10.0,
+     8.0
     ],
-    "rot": 50,
-    "scale": 1.5
+    "rot": 35
+   },
+   {
+    "venue": "yard",
+    "kind": "builder:horse_line:6",
+    "at": [
+     -12.5,
+     12.0
+    ],
+    "rot": 40
    }
   ],
   "props": [
    {
-    "venue": "yard",
-    "kind": "Cart",
+    "kind": "builder:tug:5.2",
     "at": [
-     -6.0,
-     8.6
-    ],
-    "rot": 70,
-    "scale": 1.2
+     -4.78,
+     14.3
+    ]
    },
    {
-    "venue": "tavern",
-    "kind": "Barrel",
+    "kind": "builder:tug:5.2",
     "at": [
-     4.8,
-     8.0
+     5.22,
+     14.3
+    ]
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -9.0,
+     9.2
+    ],
+    "rot": 125,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -11.5,
+     13.2
+    ],
+    "rot": 130,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -13.5,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 0.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -15.0,
+     11.0
     ],
     "scale": 1.3
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.0,
-     19.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     1.61,
+     28.54
     ],
-    "to": [
-     12.0,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "towers": 5,
-    "value": 0.5
+    "rot": -17.4
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.5,
-     3.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     -15.91,
+     26.06
     ],
-    "to": [
-     -12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": 43.4
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "builder:yurt:2.4",
+    "at": [
+     17.47,
+     26.91
+    ],
+    "rot": -19.6
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     7.75,
+     23.94
+    ],
+    "rot": 5.9
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     -8.11,
+     11.86
+    ],
+    "rot": 32.4
+   },
+   {
+    "kind": "builder:yurt:2.7",
+    "at": [
+     -8.12,
+     23.61
+    ],
+    "rot": 12.5
+   },
+   {
+    "kind": "builder:yurt:2.3",
+    "at": [
+     8.11,
+     10.98
+    ],
+    "rot": -26.4
+   },
+   {
+    "kind": "builder:yurt:3.2",
+    "at": [
+     -13.06,
+     16.0
+    ],
+    "rot": 27.6
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -30.0,
+     33.335152605903296
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -27.8,
+     33.146320112119234
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -25.6,
+     33.106038666371376
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -23.400000000000002,
+     33.23122710172686
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -21.200000000000003,
+     33.469304330282995
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -19.000000000000004,
+     33.720274217039055
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -16.800000000000004,
+     33.87872551023705
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -14.600000000000005,
+     33.87810620487522
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -12.400000000000006,
+     33.71867641882771
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -10.200000000000006,
+     33.46739913929589
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -8.000000000000007,
+     33.22981472777954
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -5.800000000000007,
+     33.10571232846578
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -3.6000000000000068,
+     33.147216877246024
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -1.4000000000000066,
+     33.33689581877617
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     0.7999999999999936,
+     33.595081050570855
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     2.999999999999994,
+     33.81333076385099
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     11.799999999999994,
+     33.34481963282331
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     13.999999999999993,
+     33.15136969103457
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     16.199999999999992,
+     33.104349895682255
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     18.39999999999999,
+     33.22350929136115
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     20.59999999999999,
+     33.45879908050596
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     22.79999999999999,
+     33.711393895977174
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     24.99999999999999,
+     33.875199990709895
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     27.19999999999999,
+     33.88141625986023
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     29.399999999999988,
+     33.72743177380283
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     4.8,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     9.2,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     10.5,
+     6.5
+    ],
+    "rot": -70,
+    "scale": 0.5
+   },
+   {
+    "kind": "builder:horse_line:4",
+    "at": [
      12.5,
-     3.0
+     5.5
     ],
-    "to": [
-     12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": -25
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "ftk:tree-crooked",
+    "at": [
+     15.0,
+     25.0
+    ],
+    "rot": 146,
+    "scale": 3.24
+   },
+   {
+    "kind": "ftk:tree-crooked",
+    "at": [
      -12.5,
-     -1.0
+     0.5
     ],
-    "to": [
-     -12.5,
-     3.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "gate": 0.5,
-    "venue": "gate",
-    "value": 0.5
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -11.75,
-     2.98
-    ],
-    "rot": 79,
-    "scale": 1.49
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     12.29,
-     4.07
-    ],
-    "rot": -61,
-    "scale": 1.34
+    "rot": 359,
+    "scale": 2.68
    },
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
+     0.0,
+     29.0
     ],
-    "rot": 214,
-    "scale": 2.98
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 55,
-    "scale": 3.31
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     13.0,
-     4.0
-    ],
-    "rot": 39,
-    "scale": 2.78
+    "rot": 59,
+    "scale": 3.02
    },
    {
     "kind": "Bags",
     "at": [
-     -16.650000000000002,
-     17.6
+     -11.25,
+     0.4
     ],
-    "rot": 1,
+    "rot": 52,
     "scale": 1.3
    },
    {
     "kind": "Hay",
     "at": [
-     -11.25,
-     0.4
+     17.1,
+     22.400000000000002
     ],
-    "rot": 172,
+    "rot": 263,
     "scale": 1.3
    },
    {
     "kind": "Bags",
     "at": [
-     -5.0,
-     9.5
+     -9.5,
+     7.0
     ],
-    "rot": -21,
+    "rot": -23,
     "scale": 1.3
    },
    {
     "kind": "ftk:stall-green",
     "at": [
-     -6.5,
-     4.8
+     4.8,
+     8.0
     ],
-    "rot": -4,
+    "rot": 24,
     "scale": 1.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     -4.1,
+     9.21
+    ],
+    "rot": 4,
+    "scale": 2.0
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     4.17,
+     8.18
+    ],
+    "rot": 12,
+    "scale": 2.0
    },
    {
     "kind": "file:art_source/models/props/quaternius_survival/Tent.blend",
@@ -2479,34 +3059,32 @@
    {
     "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
-     2.66,
+     2.85,
      9.0
     ],
     "scale": 0.42
    },
    {
-    "kind": "ftk:fountain-square",
+    "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
      0.0,
      6.0
     ],
-    "scale": 1.6
+    "scale": 0.6
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      -3.0,
      2.5
-    ],
-    "scale": 1.4
+    ]
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      3.2,
      2.5
-    ],
-    "scale": 1.4
+    ]
    }
   ],
   "backlight_color": [
@@ -2593,8 +3171,8 @@
     90
    ],
    [
-    0.36800000000000005,
-    13.0,
+    0.22,
+    12.0,
     2.4,
     150
    ]
@@ -2674,195 +3252,486 @@
     "scale": 1.6
    },
    {
-    "venue": "market",
-    "kind": "MarketStand_1",
-    "at": [
-     -1.93,
-     4.83
-    ],
-    "rot": -24,
-    "scale": 1.6
-   },
-   {
     "venue": "tavern",
-    "kind": "Inn",
+    "kind": "builder:yurt:4.2",
     "at": [
-     0.46,
-     15.0
+     0.22,
+     17.5
     ],
-    "rot": 0,
-    "scale": 2.2
+    "rot": 3.9
    },
    {
     "venue": "yard",
-    "kind": "Stable",
+    "kind": "builder:horse_line:6",
     "at": [
-     -7.6,
-     10.0
+     -10.0,
+     8.0
     ],
-    "rot": 50,
-    "scale": 1.5
+    "rot": 35
+   },
+   {
+    "venue": "yard",
+    "kind": "builder:horse_line:6",
+    "at": [
+     -12.5,
+     12.0
+    ],
+    "rot": 40
    }
   ],
   "props": [
    {
-    "venue": "yard",
-    "kind": "Cart",
+    "kind": "builder:tug:5.2",
     "at": [
-     -6.0,
-     8.6
-    ],
-    "rot": 70,
-    "scale": 1.2
+     -4.78,
+     14.3
+    ]
    },
    {
-    "venue": "tavern",
-    "kind": "Barrel",
+    "kind": "builder:tug:5.2",
     "at": [
-     4.8,
-     8.0
+     5.22,
+     14.3
+    ]
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -9.0,
+     9.2
+    ],
+    "rot": 125,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -11.5,
+     13.2
+    ],
+    "rot": 130,
+    "scale": 0.5
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     -13.5,
+     9.0
+    ],
+    "rot": 70,
+    "scale": 0.5
+   },
+   {
+    "venue": "yard",
+    "kind": "Hay",
+    "at": [
+     -15.0,
+     11.0
     ],
     "scale": 1.3
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.0,
-     19.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     1.61,
+     28.54
     ],
-    "to": [
-     12.0,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "towers": 5,
-    "value": 0.5
+    "rot": -17.4
    },
    {
-    "kind": "wallrow",
-    "from": [
-     -12.5,
-     3.0
+    "kind": "builder:yurt:2.4",
+    "at": [
+     -15.91,
+     26.06
     ],
-    "to": [
-     -12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": 43.4
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "builder:yurt:2.4",
+    "at": [
+     17.47,
+     26.91
+    ],
+    "rot": -19.6
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     7.75,
+     23.94
+    ],
+    "rot": 5.9
+   },
+   {
+    "kind": "builder:yurt:2.5",
+    "at": [
+     -8.11,
+     11.86
+    ],
+    "rot": 32.4
+   },
+   {
+    "kind": "builder:yurt:2.7",
+    "at": [
+     -8.12,
+     23.61
+    ],
+    "rot": 12.5
+   },
+   {
+    "kind": "builder:yurt:2.3",
+    "at": [
+     8.11,
+     10.98
+    ],
+    "rot": -26.4
+   },
+   {
+    "kind": "builder:yurt:3.2",
+    "at": [
+     -13.06,
+     16.0
+    ],
+    "rot": 27.6
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -30.0,
+     33.335152605903296
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -27.8,
+     33.146320112119234
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -25.6,
+     33.106038666371376
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -23.400000000000002,
+     33.23122710172686
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -21.200000000000003,
+     33.469304330282995
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -19.000000000000004,
+     33.720274217039055
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -16.800000000000004,
+     33.87872551023705
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -14.600000000000005,
+     33.87810620487522
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -12.400000000000006,
+     33.71867641882771
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -10.200000000000006,
+     33.46739913929589
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -8.000000000000007,
+     33.22981472777954
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -5.800000000000007,
+     33.10571232846578
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -3.6000000000000068,
+     33.147216877246024
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     -1.4000000000000066,
+     33.33689581877617
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     0.7999999999999936,
+     33.595081050570855
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     2.999999999999994,
+     33.81333076385099
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     11.799999999999994,
+     33.34481963282331
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     13.999999999999993,
+     33.15136969103457
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     16.199999999999992,
+     33.104349895682255
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     18.39999999999999,
+     33.22350929136115
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     20.59999999999999,
+     33.45879908050596
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     22.79999999999999,
+     33.711393895977174
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     24.99999999999999,
+     33.875199990709895
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     27.19999999999999,
+     33.88141625986023
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "ftk:fence",
+    "at": [
+     29.399999999999988,
+     33.72743177380283
+    ],
+    "rot": 90,
+    "scale": 2.2
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     4.8,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "builder:tug:5.6",
+    "at": [
+     9.2,
+     33.5
+    ],
+    "venue": "gate"
+   },
+   {
+    "kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+    "at": [
+     10.5,
+     6.5
+    ],
+    "rot": -70,
+    "scale": 0.5
+   },
+   {
+    "kind": "builder:horse_line:4",
+    "at": [
      12.5,
-     3.0
+     5.5
     ],
-    "to": [
-     12.5,
-     19.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "value": 0.5
+    "rot": -25
    },
    {
-    "kind": "wallrow",
-    "from": [
+    "kind": "ftk:tree-crooked",
+    "at": [
+     15.0,
+     25.0
+    ],
+    "rot": 146,
+    "scale": 3.24
+   },
+   {
+    "kind": "ftk:tree-crooked",
+    "at": [
      -12.5,
-     -1.0
+     0.5
     ],
-    "to": [
-     -12.5,
-     3.0
-    ],
-    "size": 2.4,
-    "floors": 2,
-    "gate": 0.5,
-    "venue": "gate",
-    "value": 0.5
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -11.75,
-     2.98
-    ],
-    "rot": 79,
-    "scale": 1.49
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     12.29,
-     4.07
-    ],
-    "rot": -61,
-    "scale": 1.34
+    "rot": 359,
+    "scale": 2.68
    },
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
+     0.0,
+     29.0
     ],
-    "rot": 214,
-    "scale": 2.98
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 55,
-    "scale": 3.31
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     13.0,
-     4.0
-    ],
-    "rot": 39,
-    "scale": 2.78
+    "rot": 59,
+    "scale": 3.02
    },
    {
     "kind": "Bags",
     "at": [
-     -16.650000000000002,
-     17.6
+     -11.25,
+     0.4
     ],
-    "rot": 1,
+    "rot": 52,
     "scale": 1.3
    },
    {
     "kind": "Hay",
     "at": [
-     -11.25,
-     0.4
+     17.1,
+     22.400000000000002
     ],
-    "rot": 172,
+    "rot": 263,
     "scale": 1.3
    },
    {
     "kind": "Bags",
     "at": [
-     -5.0,
-     9.5
+     -9.5,
+     7.0
     ],
-    "rot": -21,
+    "rot": -23,
     "scale": 1.3
    },
    {
     "kind": "ftk:stall-green",
     "at": [
-     -6.5,
-     4.8
+     4.8,
+     8.0
     ],
-    "rot": -4,
+    "rot": 24,
     "scale": 1.6
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     -4.1,
+     9.21
+    ],
+    "rot": 4,
+    "scale": 2.0
+   },
+   {
+    "kind": "ftk:banner-red",
+    "at": [
+     4.17,
+     8.18
+    ],
+    "rot": 12,
+    "scale": 2.0
    },
    {
     "kind": "file:art_source/models/props/quaternius_survival/Tent.blend",
@@ -2894,34 +3763,32 @@
    {
     "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
-     2.66,
+     2.85,
      9.0
     ],
     "scale": 0.42
    },
    {
-    "kind": "ftk:fountain-square",
+    "kind": "file:art_source/models/props/quaternius_survival/Bonfire_Fire.blend",
     "at": [
      0.0,
      6.0
     ],
-    "scale": 1.6
+    "scale": 0.6
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      -3.0,
      2.5
-    ],
-    "scale": 1.4
+    ]
    },
    {
-    "kind": "ftk:lantern",
+    "kind": "builder:tug:3.2",
     "at": [
      3.2,
      2.5
-    ],
-    "scale": 1.4
+    ]
    }
   ],
   "backlight_color": [
@@ -3020,8 +3887,8 @@
     90
    ],
    [
-    0.36800000000000005,
-    13.0,
+    0.22,
+    12.0,
     2.4,
     150
    ]
@@ -6419,15 +7286,6 @@
     "scale": 1.3
    },
    {
-    "kind": "House_1",
-    "at": [
-     -6.04,
-     30.06
-    ],
-    "rot": 6,
-    "scale": 1.48
-   },
-   {
     "kind": "House_3",
     "at": [
      16.35,
@@ -6480,15 +7338,6 @@
     ],
     "rot": 292,
     "scale": 3.28
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 49,
-    "scale": 3.56
    },
    {
     "kind": "ftk:tree-high",
@@ -6567,6 +7416,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     -7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     -3.5,
+     9.0
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -4.5,
+     12.875
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -6.3,
+     19.85
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     -16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     -13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     -1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -6.5,
+     7.5
+    ],
+    "rot": 8,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -10.0,
+     15.0
+    ],
+    "rot": 323,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     -5.0,
+     5.0
+    ],
+    "rot": 206,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -6870,15 +7808,6 @@
     "scale": 1.3
    },
    {
-    "kind": "House_1",
-    "at": [
-     -6.04,
-     30.06
-    ],
-    "rot": 6,
-    "scale": 1.48
-   },
-   {
     "kind": "House_3",
     "at": [
      16.35,
@@ -6931,15 +7860,6 @@
     ],
     "rot": 292,
     "scale": 3.28
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 49,
-    "scale": 3.56
    },
    {
     "kind": "ftk:tree-high",
@@ -7018,6 +7938,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     -7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     -3.5,
+     9.0
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -4.5,
+     12.875
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -6.3,
+     19.85
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     -16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     -13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     -1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -6.5,
+     7.5
+    ],
+    "rot": 8,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -10.0,
+     15.0
+    ],
+    "rot": 323,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     -5.0,
+     5.0
+    ],
+    "rot": 206,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -7309,15 +8318,6 @@
     "scale": 1.3
    },
    {
-    "kind": "House_1",
-    "at": [
-     -6.04,
-     30.06
-    ],
-    "rot": 6,
-    "scale": 1.48
-   },
-   {
     "kind": "House_3",
     "at": [
      16.35,
@@ -7370,15 +8370,6 @@
     ],
     "rot": 292,
     "scale": 3.28
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 49,
-    "scale": 3.56
    },
    {
     "kind": "ftk:tree-high",
@@ -7457,6 +8448,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     -7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     -3.5,
+     9.0
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -4.5,
+     12.875
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     -6.3,
+     19.85
+    ],
+    "rot": 14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     -16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     -13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     -1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -6.5,
+     7.5
+    ],
+    "rot": 8,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     -10.0,
+     15.0
+    ],
+    "rot": 323,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     -5.0,
+     5.0
+    ],
+    "rot": 206,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -7600,12 +8680,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -7645,10 +8725,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -7705,10 +8785,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.89,
-     15.97
+     -13.5,
+     10.5
     ],
-    "rot": 5,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -7742,20 +8822,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     6.74,
-     10.32
+     8.0,
+     9.5
     ],
-    "rot": -37,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     8.55,
-     22.27
+     18.0,
+     7.0
     ],
-    "rot": -25,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -7787,10 +8867,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.46,
-     15.75
+     12.5,
+     11.5
     ],
-    "rot": -32,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -7827,12 +8907,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -7843,32 +8923,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     4.11,
-     26.92
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -9.18,
-     24.33
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_1",
@@ -7878,35 +8939,6 @@
     ],
     "rot": 71,
     "scale": 1.43
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -13.95,
-     20.78
-    ],
-    "rot": 30,
-    "scale": 1.31
-   },
-   {
-    "kind": "spire",
-    "at": [
-     14.42,
-     19.82
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.47,
-     31.45
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
    },
    {
     "kind": "House_1",
@@ -7928,25 +8960,6 @@
     "roof": "roof-flat"
    },
    {
-    "kind": "spire",
-    "at": [
-     -16.65,
-     27.99
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 141,
-    "scale": 3.43
-   },
-   {
     "kind": "ftk:tree-high-round",
     "at": [
      13.0,
@@ -7954,33 +8967,6 @@
     ],
     "rot": 30,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 106,
-    "scale": 3.45
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 116,
-    "scale": 3.57
-   },
-   {
-    "kind": "ftk:stall-red",
-    "at": [
-     -16.650000000000002,
-     17.6
-    ],
-    "rot": 129,
-    "scale": 2.2
    },
    {
     "kind": "ftk:stall-green",
@@ -8059,6 +9045,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 8
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [
@@ -8187,12 +9369,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -8232,10 +9414,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -8292,10 +9474,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.89,
-     15.97
+     -13.5,
+     10.5
     ],
-    "rot": 5,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -8329,20 +9511,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     6.74,
-     10.32
+     8.0,
+     9.5
     ],
-    "rot": -37,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     8.55,
-     22.27
+     18.0,
+     7.0
     ],
-    "rot": -25,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -8374,10 +9556,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.46,
-     15.75
+     12.5,
+     11.5
     ],
-    "rot": -32,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -8414,12 +9596,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -8430,32 +9612,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     4.11,
-     26.92
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -9.18,
-     24.33
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_1",
@@ -8465,35 +9628,6 @@
     ],
     "rot": 71,
     "scale": 1.43
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -13.95,
-     20.78
-    ],
-    "rot": 30,
-    "scale": 1.31
-   },
-   {
-    "kind": "spire",
-    "at": [
-     14.42,
-     19.82
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.47,
-     31.45
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
    },
    {
     "kind": "House_1",
@@ -8515,25 +9649,6 @@
     "roof": "roof-flat"
    },
    {
-    "kind": "spire",
-    "at": [
-     -16.65,
-     27.99
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 141,
-    "scale": 3.43
-   },
-   {
     "kind": "ftk:tree-high-round",
     "at": [
      13.0,
@@ -8541,33 +9656,6 @@
     ],
     "rot": 30,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 106,
-    "scale": 3.45
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 116,
-    "scale": 3.57
-   },
-   {
-    "kind": "ftk:stall-red",
-    "at": [
-     -16.650000000000002,
-     17.6
-    ],
-    "rot": 129,
-    "scale": 2.2
    },
    {
     "kind": "ftk:stall-green",
@@ -8646,6 +9734,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 8
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [
@@ -8762,12 +10046,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -8807,10 +10091,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -8867,10 +10151,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.89,
-     15.97
+     -13.5,
+     10.5
     ],
-    "rot": 5,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -8904,20 +10188,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     6.74,
-     10.32
+     8.0,
+     9.5
     ],
-    "rot": -37,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     8.55,
-     22.27
+     18.0,
+     7.0
     ],
-    "rot": -25,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -8949,10 +10233,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.46,
-     15.75
+     12.5,
+     11.5
     ],
-    "rot": -32,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -8989,12 +10273,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -9005,32 +10289,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     4.11,
-     26.92
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -9.18,
-     24.33
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_1",
@@ -9040,35 +10305,6 @@
     ],
     "rot": 71,
     "scale": 1.43
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -13.95,
-     20.78
-    ],
-    "rot": 30,
-    "scale": 1.31
-   },
-   {
-    "kind": "spire",
-    "at": [
-     14.42,
-     19.82
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.47,
-     31.45
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
    },
    {
     "kind": "House_1",
@@ -9090,25 +10326,6 @@
     "roof": "roof-flat"
    },
    {
-    "kind": "spire",
-    "at": [
-     -16.65,
-     27.99
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 141,
-    "scale": 3.43
-   },
-   {
     "kind": "ftk:tree-high-round",
     "at": [
      13.0,
@@ -9116,33 +10333,6 @@
     ],
     "rot": 30,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 106,
-    "scale": 3.45
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 116,
-    "scale": 3.57
-   },
-   {
-    "kind": "ftk:stall-red",
-    "at": [
-     -16.650000000000002,
-     17.6
-    ],
-    "rot": 129,
-    "scale": 2.2
    },
    {
     "kind": "ftk:stall-green",
@@ -9221,6 +10411,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 8
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [
@@ -12908,6 +14294,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -13028,8 +14415,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "belvanor@day": {
   "seed": 857,
@@ -13511,6 +14897,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -13619,8 +15006,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "belvanor@evening": {
   "seed": 857,
@@ -14102,6 +15488,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -14222,8 +15609,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "caramine@morning": {
   "seed": 948,
@@ -14581,6 +15967,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -14695,8 +16082,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "caramine@day": {
   "seed": 948,
@@ -15054,6 +16440,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -15156,8 +16543,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "caramine@evening": {
   "seed": 948,
@@ -15515,6 +16901,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -15629,8 +17016,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "dravoss@morning": {
   "seed": 443,
@@ -19312,12 +20698,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -19387,21 +20773,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.18,
-     21.89
+     2.5,
+     22.0
     ],
-    "rot": -28,
+    "rot": -10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.2,
-     16.18
+     14.0,
+     16.0
     ],
-    "rot": -35,
-    "scale": 1.35
+    "rot": -50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -19479,15 +20866,6 @@
     "scale": 1.34
    },
    {
-    "kind": "House_3",
-    "at": [
-     8.66,
-     31.81
-    ],
-    "rot": -13,
-    "scale": 1.53
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -12.5,
@@ -19508,74 +20886,11 @@
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 319,
-    "scale": 2.88
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 68,
-    "scale": 3.23
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 192,
-    "scale": 2.74
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
      0.0,
      29.0
     ],
     "rot": 118,
     "scale": 2.79
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 15,
-    "scale": 3.22
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -16.5,
-     14.0
-    ],
-    "rot": 247,
-    "scale": 2.89
-   },
-   {
-    "kind": "Bags",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 19,
-    "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 334,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -19627,6 +20942,193 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.0,
+     16.0
+    ],
+    "rot": -50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "rot": 34.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": 34.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "rot": 35.9,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": 35.9,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "rot": -28.7,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": -28.7,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     -28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     -11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": 30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": -40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.0,
+     9.5
+    ],
+    "rot": 0
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     7.0,
+     10.5
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -19767,12 +21269,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -19842,21 +21344,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.18,
-     21.89
+     2.5,
+     22.0
     ],
-    "rot": -28,
+    "rot": -10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.2,
-     16.18
+     14.0,
+     16.0
     ],
-    "rot": -35,
-    "scale": 1.35
+    "rot": -50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -19934,15 +21437,6 @@
     "scale": 1.34
    },
    {
-    "kind": "House_3",
-    "at": [
-     8.66,
-     31.81
-    ],
-    "rot": -13,
-    "scale": 1.53
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -12.5,
@@ -19963,74 +21457,11 @@
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 319,
-    "scale": 2.88
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 68,
-    "scale": 3.23
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 192,
-    "scale": 2.74
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
      0.0,
      29.0
     ],
     "rot": 118,
     "scale": 2.79
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 15,
-    "scale": 3.22
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -16.5,
-     14.0
-    ],
-    "rot": 247,
-    "scale": 2.89
-   },
-   {
-    "kind": "Bags",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 19,
-    "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 334,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -20082,6 +21513,193 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.0,
+     16.0
+    ],
+    "rot": -50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "rot": 34.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": 34.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "rot": 35.9,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": 35.9,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "rot": -28.7,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": -28.7,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     -28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     -11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": 30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": -40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.0,
+     9.5
+    ],
+    "rot": 0
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     7.0,
+     10.5
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -20210,12 +21828,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -20285,21 +21903,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.18,
-     21.89
+     2.5,
+     22.0
     ],
-    "rot": -28,
+    "rot": -10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.2,
-     16.18
+     14.0,
+     16.0
     ],
-    "rot": -35,
-    "scale": 1.35
+    "rot": -50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -20377,15 +21996,6 @@
     "scale": 1.34
    },
    {
-    "kind": "House_3",
-    "at": [
-     8.66,
-     31.81
-    ],
-    "rot": -13,
-    "scale": 1.53
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -12.5,
@@ -20406,74 +22016,11 @@
    {
     "kind": "ftk:tree-crooked",
     "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 319,
-    "scale": 2.88
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 68,
-    "scale": 3.23
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -18.5,
-     22.0
-    ],
-    "rot": 192,
-    "scale": 2.74
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
      0.0,
      29.0
     ],
     "rot": 118,
     "scale": 2.79
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 15,
-    "scale": 3.22
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -16.5,
-     14.0
-    ],
-    "rot": 247,
-    "scale": 2.89
-   },
-   {
-    "kind": "Bags",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 19,
-    "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 334,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -20525,6 +22072,193 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.0,
+     16.0
+    ],
+    "rot": -50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "rot": 34.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     -14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": 34.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "rot": 35.9,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": 35.9,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "rot": -28.7,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": -28.7,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     -28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     -11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": 30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": -40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.0,
+     9.5
+    ],
+    "rot": 0
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     7.0,
+     10.5
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -20807,29 +22541,11 @@
    {
     "kind": "House_3",
     "at": [
-     9.38,
-     23.93
-    ],
-    "rot": -23,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      -9.53,
      32.29
     ],
     "rot": 6,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     6.1,
-     29.59
-    ],
-    "rot": -13,
-    "scale": 1.52
    },
    {
     "kind": "House_3",
@@ -20857,15 +22573,6 @@
     ],
     "rot": 136,
     "scale": 3.18
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 347,
-    "scale": 2.85
    },
    {
     "kind": "ftk:tree-high",
@@ -20953,6 +22660,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     3.5,
+     9.0
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     4.5,
+     12.875
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.3,
+     19.85
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 86,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 221,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 273,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -21238,29 +23034,11 @@
    {
     "kind": "House_3",
     "at": [
-     9.38,
-     23.93
-    ],
-    "rot": -23,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      -9.53,
      32.29
     ],
     "rot": 6,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     6.1,
-     29.59
-    ],
-    "rot": -13,
-    "scale": 1.52
    },
    {
     "kind": "House_3",
@@ -21288,15 +23066,6 @@
     ],
     "rot": 136,
     "scale": 3.18
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 347,
-    "scale": 2.85
    },
    {
     "kind": "ftk:tree-high",
@@ -21384,6 +23153,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     3.5,
+     9.0
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     4.5,
+     12.875
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.3,
+     19.85
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 86,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 221,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 273,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -21657,29 +23515,11 @@
    {
     "kind": "House_3",
     "at": [
-     9.38,
-     23.93
-    ],
-    "rot": -23,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      -9.53,
      32.29
     ],
     "rot": 6,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     6.1,
-     29.59
-    ],
-    "rot": -13,
-    "scale": 1.52
    },
    {
     "kind": "House_3",
@@ -21707,15 +23547,6 @@
     ],
     "rot": 136,
     "scale": 3.18
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 347,
-    "scale": 2.85
    },
    {
     "kind": "ftk:tree-high",
@@ -21803,6 +23634,95 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:16.0",
+    "at": [
+     3.5,
+     9.0
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     4.5,
+     12.875
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.3,
+     19.85
+    ],
+    "rot": -14.5
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 86,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 221,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 273,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -23257,12 +25177,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -23332,21 +25252,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.81,
-     21.74
+     -2.5,
+     22.0
     ],
-    "rot": 25,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.65,
-     15.5
+     -14.0,
+     16.0
     ],
-    "rot": 47,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -23401,29 +25322,11 @@
    {
     "kind": "House_3",
     "at": [
-     17.16,
-     27.63
-    ],
-    "rot": -24,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      15.82,
      9.08
     ],
     "rot": -84,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     9.46,
-     24.93
-    ],
-    "rot": -7,
-    "scale": 1.51
    },
    {
     "kind": "House_3",
@@ -23444,15 +25347,6 @@
     "scale": 1.47
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 135,
-    "scale": 3.32
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -13.0,
@@ -23460,15 +25354,6 @@
     ],
     "rot": 123,
     "scale": 3.54
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 165,
-    "scale": 2.72
    },
    {
     "kind": "ftk:tree-high-crooked",
@@ -23487,51 +25372,6 @@
     ],
     "rot": 128,
     "scale": 2.97
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -19.0,
-     28.0
-    ],
-    "rot": 339,
-    "scale": 3.44
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 313,
-    "scale": 3.16
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 247,
-    "scale": 3.3
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     12.6,
-     20.8
-    ],
-    "rot": 162,
-    "scale": 2.2
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     -17.1,
-     22.400000000000002
-    ],
-    "rot": 263,
-    "scale": 2.2
    },
    {
     "kind": "Barrel",
@@ -23610,6 +25450,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -9
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -23617,6 +25636,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -23732,8 +25752,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "liraven@day": {
   "seed": 964,
@@ -23746,12 +25765,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -23821,21 +25840,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.81,
-     21.74
+     -2.5,
+     22.0
     ],
-    "rot": 25,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.65,
-     15.5
+     -14.0,
+     16.0
     ],
-    "rot": 47,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -23890,29 +25910,11 @@
    {
     "kind": "House_3",
     "at": [
-     17.16,
-     27.63
-    ],
-    "rot": -24,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      15.82,
      9.08
     ],
     "rot": -84,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     9.46,
-     24.93
-    ],
-    "rot": -7,
-    "scale": 1.51
    },
    {
     "kind": "House_3",
@@ -23933,15 +25935,6 @@
     "scale": 1.47
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 135,
-    "scale": 3.32
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -13.0,
@@ -23949,15 +25942,6 @@
     ],
     "rot": 123,
     "scale": 3.54
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 165,
-    "scale": 2.72
    },
    {
     "kind": "ftk:tree-high-crooked",
@@ -23976,51 +25960,6 @@
     ],
     "rot": 128,
     "scale": 2.97
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -19.0,
-     28.0
-    ],
-    "rot": 339,
-    "scale": 3.44
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 313,
-    "scale": 3.16
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 247,
-    "scale": 3.3
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     12.6,
-     20.8
-    ],
-    "rot": 162,
-    "scale": 2.2
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     -17.1,
-     22.400000000000002
-    ],
-    "rot": 263,
-    "scale": 2.2
    },
    {
     "kind": "Barrel",
@@ -24099,6 +26038,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -9
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -24106,6 +26224,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -24209,8 +26328,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "liraven@evening": {
   "seed": 964,
@@ -24223,12 +26341,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -24298,21 +26416,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.81,
-     21.74
+     -2.5,
+     22.0
     ],
-    "rot": 25,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.65,
-     15.5
+     -14.0,
+     16.0
     ],
-    "rot": 47,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -24367,29 +26486,11 @@
    {
     "kind": "House_3",
     "at": [
-     17.16,
-     27.63
-    ],
-    "rot": -24,
-    "scale": 1.53
-   },
-   {
-    "kind": "House_3",
-    "at": [
      15.82,
      9.08
     ],
     "rot": -84,
     "scale": 1.35
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     9.46,
-     24.93
-    ],
-    "rot": -7,
-    "scale": 1.51
    },
    {
     "kind": "House_3",
@@ -24410,15 +26511,6 @@
     "scale": 1.47
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 135,
-    "scale": 3.32
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -13.0,
@@ -24426,15 +26518,6 @@
     ],
     "rot": 123,
     "scale": 3.54
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 165,
-    "scale": 2.72
    },
    {
     "kind": "ftk:tree-high-crooked",
@@ -24453,51 +26536,6 @@
     ],
     "rot": 128,
     "scale": 2.97
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -19.0,
-     28.0
-    ],
-    "rot": 339,
-    "scale": 3.44
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 313,
-    "scale": 3.16
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 247,
-    "scale": 3.3
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     12.6,
-     20.8
-    ],
-    "rot": 162,
-    "scale": 2.2
-   },
-   {
-    "kind": "ftk:hedge-large",
-    "at": [
-     -17.1,
-     22.400000000000002
-    ],
-    "rot": 263,
-    "scale": 2.2
    },
    {
     "kind": "Barrel",
@@ -24576,6 +26614,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -9
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -24583,6 +26800,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -24698,8 +26916,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "merigaud@morning": {
   "seed": 670,
@@ -25221,6 +27438,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -25341,8 +27559,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "merigaud@day": {
   "seed": 670,
@@ -25864,6 +28081,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -25972,8 +28190,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "merigaud@evening": {
   "seed": 670,
@@ -26495,6 +28712,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -26615,8 +28833,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "mirsana@morning": {
   "seed": 571,
@@ -28573,6 +30790,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -28693,8 +30911,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "ondrelle@day": {
   "seed": 102,
@@ -29172,6 +31389,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -29280,8 +31498,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "ondrelle@evening": {
   "seed": 102,
@@ -29759,6 +31976,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -29879,8 +32097,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "rivecande@morning": {
   "seed": 356,
@@ -29893,12 +32110,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -29938,10 +32155,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -29998,10 +32215,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.46,
-     15.5
+     -13.5,
+     10.5
     ],
-    "rot": 1,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -30035,20 +32252,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.58,
-     10.15
+     8.0,
+     9.5
     ],
-    "rot": -33,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.35,
-     21.74
+     18.0,
+     7.0
     ],
-    "rot": -16,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -30080,10 +32297,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     10.62,
-     15.89
+     12.5,
+     11.5
     ],
-    "rot": -37,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -30120,12 +32337,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -30136,21 +32353,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     -9.36,
-     24.47
-    ],
-    "rot": 9,
-    "scale": 1.44
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_3",
@@ -30160,15 +32369,6 @@
     ],
     "rot": 83,
     "scale": 1.4
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -16.62,
-     27.82
-    ],
-    "rot": 26,
-    "scale": 1.44
    },
    {
     "kind": "House_1",
@@ -30200,38 +32400,11 @@
    {
     "kind": "House_3",
     "at": [
-     3.64,
-     26.53
-    ],
-    "rot": -1,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_2",
-    "at": [
-     -5.94,
-     30.04
-    ],
-    "rot": 3,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_3",
-    "at": [
      11.47,
      3.2
     ],
     "rot": -61,
     "scale": 1.36
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 25,
-    "scale": 2.63
    },
    {
     "kind": "ftk:tree-high",
@@ -30241,33 +32414,6 @@
     ],
     "rot": 83,
     "scale": 3.39
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 171,
-    "scale": 2.64
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 291,
-    "scale": 3.44
-   },
-   {
-    "kind": "Barrel",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 280,
-    "scale": 1.3
    },
    {
     "kind": "Crate",
@@ -30337,6 +32483,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "moon_color": [
@@ -30465,12 +32807,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -30510,10 +32852,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -30570,10 +32912,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.46,
-     15.5
+     -13.5,
+     10.5
     ],
-    "rot": 1,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -30607,20 +32949,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.58,
-     10.15
+     8.0,
+     9.5
     ],
-    "rot": -33,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.35,
-     21.74
+     18.0,
+     7.0
     ],
-    "rot": -16,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -30652,10 +32994,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     10.62,
-     15.89
+     12.5,
+     11.5
     ],
-    "rot": -37,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -30692,12 +33034,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -30708,21 +33050,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     -9.36,
-     24.47
-    ],
-    "rot": 9,
-    "scale": 1.44
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_3",
@@ -30732,15 +33066,6 @@
     ],
     "rot": 83,
     "scale": 1.4
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -16.62,
-     27.82
-    ],
-    "rot": 26,
-    "scale": 1.44
    },
    {
     "kind": "House_1",
@@ -30772,38 +33097,11 @@
    {
     "kind": "House_3",
     "at": [
-     3.64,
-     26.53
-    ],
-    "rot": -1,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_2",
-    "at": [
-     -5.94,
-     30.04
-    ],
-    "rot": 3,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_3",
-    "at": [
      11.47,
      3.2
     ],
     "rot": -61,
     "scale": 1.36
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 25,
-    "scale": 2.63
    },
    {
     "kind": "ftk:tree-high",
@@ -30813,33 +33111,6 @@
     ],
     "rot": 83,
     "scale": 3.39
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 171,
-    "scale": 2.64
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 291,
-    "scale": 3.44
-   },
-   {
-    "kind": "Barrel",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 280,
-    "scale": 1.3
    },
    {
     "kind": "Crate",
@@ -30909,6 +33180,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "moon_color": [
@@ -31025,12 +33492,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -31070,10 +33537,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -31130,10 +33597,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -2.46,
-     15.5
+     -13.5,
+     10.5
     ],
-    "rot": 1,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -31167,20 +33634,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.58,
-     10.15
+     8.0,
+     9.5
     ],
-    "rot": -33,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.35,
-     21.74
+     18.0,
+     7.0
     ],
-    "rot": -16,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -31212,10 +33679,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     10.62,
-     15.89
+     12.5,
+     11.5
     ],
-    "rot": -37,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -31252,12 +33719,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -31268,21 +33735,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     -9.36,
-     24.47
-    ],
-    "rot": 9,
-    "scale": 1.44
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "House_3",
@@ -31292,15 +33751,6 @@
     ],
     "rot": 83,
     "scale": 1.4
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     -16.62,
-     27.82
-    ],
-    "rot": 26,
-    "scale": 1.44
    },
    {
     "kind": "House_1",
@@ -31332,38 +33782,11 @@
    {
     "kind": "House_3",
     "at": [
-     3.64,
-     26.53
-    ],
-    "rot": -1,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_2",
-    "at": [
-     -5.94,
-     30.04
-    ],
-    "rot": 3,
-    "scale": 1.41
-   },
-   {
-    "kind": "House_3",
-    "at": [
      11.47,
      3.2
     ],
     "rot": -61,
     "scale": 1.36
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 25,
-    "scale": 2.63
    },
    {
     "kind": "ftk:tree-high",
@@ -31373,33 +33796,6 @@
     ],
     "rot": 83,
     "scale": 3.39
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 171,
-    "scale": 2.64
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     19.0,
-     28.0
-    ],
-    "rot": 291,
-    "scale": 3.44
-   },
-   {
-    "kind": "Barrel",
-    "at": [
-     -12.6,
-     20.8
-    ],
-    "rot": 280,
-    "scale": 1.3
    },
    {
     "kind": "Crate",
@@ -31469,6 +33865,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 2
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "moon_color": [
@@ -31597,12 +34189,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -31672,21 +34264,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.69,
-     21.8
+     -2.5,
+     22.0
     ],
-    "rot": 27,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.51,
-     16.01
+     -14.0,
+     16.0
     ],
-    "rot": 33,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -31737,24 +34330,6 @@
     "scale": 1.51
    },
    {
-    "kind": "House_2",
-    "at": [
-     -13.37,
-     11.69
-    ],
-    "rot": 65,
-    "scale": 1.45
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     16.62,
-     27.6
-    ],
-    "rot": -33,
-    "scale": 1.43
-   },
-   {
     "kind": "House_3",
     "at": [
      15.71,
@@ -31762,33 +34337,6 @@
     ],
     "rot": -73,
     "scale": 1.52
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     13.56,
-     20.62
-    ],
-    "rot": -33,
-    "scale": 1.6
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 293,
-    "scale": 3.47
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 15,
-    "scale": 3.06
    },
    {
     "kind": "ftk:tree-crooked",
@@ -31809,33 +34357,6 @@
     "scale": 3.13
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 225,
-    "scale": 3.49
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 67,
-    "scale": 3.43
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 304,
-    "scale": 3.1
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -0.0,
@@ -31852,15 +34373,6 @@
     ],
     "rot": 67,
     "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -15.75,
-     11.600000000000001
-    ],
-    "rot": 50,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -31912,6 +34424,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -2
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -32052,12 +34743,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -32127,21 +34818,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.69,
-     21.8
+     -2.5,
+     22.0
     ],
-    "rot": 27,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.51,
-     16.01
+     -14.0,
+     16.0
     ],
-    "rot": 33,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -32192,24 +34884,6 @@
     "scale": 1.51
    },
    {
-    "kind": "House_2",
-    "at": [
-     -13.37,
-     11.69
-    ],
-    "rot": 65,
-    "scale": 1.45
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     16.62,
-     27.6
-    ],
-    "rot": -33,
-    "scale": 1.43
-   },
-   {
     "kind": "House_3",
     "at": [
      15.71,
@@ -32217,33 +34891,6 @@
     ],
     "rot": -73,
     "scale": 1.52
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     13.56,
-     20.62
-    ],
-    "rot": -33,
-    "scale": 1.6
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 293,
-    "scale": 3.47
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 15,
-    "scale": 3.06
    },
    {
     "kind": "ftk:tree-crooked",
@@ -32264,33 +34911,6 @@
     "scale": 3.13
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 225,
-    "scale": 3.49
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 67,
-    "scale": 3.43
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 304,
-    "scale": 3.1
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -0.0,
@@ -32307,15 +34927,6 @@
     ],
     "rot": 67,
     "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -15.75,
-     11.600000000000001
-    ],
-    "rot": 50,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -32367,6 +34978,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -2
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -32495,12 +35285,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -32570,21 +35360,22 @@
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     -8.69,
-     21.8
+     -2.5,
+     22.0
     ],
-    "rot": 27,
+    "rot": 10,
     "scale": 1.7
    },
    {
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.51,
-     16.01
+     -14.0,
+     16.0
     ],
-    "rot": 33,
-    "scale": 1.35
+    "rot": 50,
+    "scale": 1.35,
+    "z": 1.6
    }
   ],
   "props": [
@@ -32635,24 +35426,6 @@
     "scale": 1.51
    },
    {
-    "kind": "House_2",
-    "at": [
-     -13.37,
-     11.69
-    ],
-    "rot": 65,
-    "scale": 1.45
-   },
-   {
-    "kind": "House_3",
-    "at": [
-     16.62,
-     27.6
-    ],
-    "rot": -33,
-    "scale": 1.43
-   },
-   {
     "kind": "House_3",
     "at": [
      15.71,
@@ -32660,33 +35433,6 @@
     ],
     "rot": -73,
     "scale": 1.52
-   },
-   {
-    "kind": "House_1",
-    "at": [
-     13.56,
-     20.62
-    ],
-    "rot": -33,
-    "scale": 1.6
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -15.0,
-     25.0
-    ],
-    "rot": 293,
-    "scale": 3.47
-   },
-   {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 15,
-    "scale": 3.06
    },
    {
     "kind": "ftk:tree-crooked",
@@ -32707,33 +35453,6 @@
     "scale": 3.13
    },
    {
-    "kind": "ftk:tree-high-crooked",
-    "at": [
-     18.5,
-     22.0
-    ],
-    "rot": 225,
-    "scale": 3.49
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     -17.5,
-     14.5
-    ],
-    "rot": 67,
-    "scale": 3.43
-   },
-   {
-    "kind": "ftk:tree-crooked",
-    "at": [
-     14.0,
-     26.0
-    ],
-    "rot": 304,
-    "scale": 3.1
-   },
-   {
     "kind": "ftk:tree-crooked",
     "at": [
      -0.0,
@@ -32750,15 +35469,6 @@
     ],
     "rot": 67,
     "scale": 1.3
-   },
-   {
-    "kind": "ftk:fence",
-    "at": [
-     -15.75,
-     11.600000000000001
-    ],
-    "rot": 50,
-    "scale": 2.2
    },
    {
     "kind": "Bags",
@@ -32810,6 +35520,185 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -14.0,
+     16.0
+    ],
+    "rot": 50,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "rot": -27.0,
+    "wet": true
+   },
+   {
+    "kind": "House_1",
+    "at": [
+     14.5,
+     16.0
+    ],
+    "z": 1.6,
+    "rot": -27.0,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "rot": -31.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     23.0,
+     26.0
+    ],
+    "z": 1.6,
+    "rot": -31.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:stilts:1.6",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "rot": 33.3,
+    "wet": true
+   },
+   {
+    "kind": "House_3",
+    "at": [
+     -22.0,
+     28.0
+    ],
+    "z": 1.6,
+    "rot": 33.3,
+    "scale": 1.25,
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     8.5,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.5",
+    "at": [
+     -9.5,
+     15.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:5.0",
+    "at": [
+     28.0,
+     14.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.5",
+    "at": [
+     -26.0,
+     18.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:3.0",
+    "at": [
+     11.0,
+     30.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -13.0,
+     34.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     10.5,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -30.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-small",
+    "at": [
+     -11.5,
+     22.0
+    ],
+    "z": 0.05,
+    "rot": 40.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     6.0,
+     9.5
+    ],
+    "rot": -2
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -34.0,
+     10.0,
+     -7.5,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
+   },
+   {
+    "kind": "water",
+    "rect": [
+     8.5,
+     12.0,
+     34.0,
+     50.0
+    ],
+    "z": 0.04,
+    "wet": true,
+    "color": [
+     0.06,
+     0.08,
+     0.05
+    ]
    }
   ],
   "backlight_color": [
@@ -34626,6 +37515,7 @@
    0.75,
    0.55
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     78,
@@ -34728,8 +37618,7 @@
    115
   ],
   "window_strength": 1.2,
-  "lamp_scale": 0.12,
-  "weathered": 0.75
+  "lamp_scale": 0.12
  },
  "serai_duvenmor@day": {
   "seed": 486,
@@ -35050,6 +37939,7 @@
    0.58,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     92,
@@ -35140,8 +38030,7 @@
    160
   ],
   "window_strength": 0.0,
-  "lamp_scale": 0.0,
-  "weathered": 0.75
+  "lamp_scale": 0.0
  },
  "serai_duvenmor@evening": {
   "seed": 486,
@@ -35462,6 +38351,7 @@
    0.5,
    0.28
   ],
+  "weathered": 0.75,
   "post": {
    "zenith": [
     36,
@@ -35564,8 +38454,7 @@
    250
   ],
   "window_strength": 6.0,
-  "lamp_scale": 1.0,
-  "weathered": 0.75
+  "lamp_scale": 1.0
  },
  "serai_seyvan@morning": {
   "seed": 247,
@@ -38620,12 +41509,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -38705,10 +41594,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.54,
-     15.65
+     -13.5,
+     10.0
     ],
-    "rot": 46,
+    "rot": 50,
     "scale": 1.35
    }
   ],
@@ -38769,15 +41658,6 @@
     "scale": 1.53
    },
    {
-    "kind": "House_3",
-    "at": [
-     9.02,
-     25.07
-    ],
-    "rot": -17,
-    "scale": 1.34
-   },
-   {
     "kind": "House_2",
     "at": [
      -4.15,
@@ -38798,11 +41678,12 @@
    {
     "kind": "ftk:watermill",
     "at": [
-     -12.0,
+     11.0,
      13.0
     ],
-    "rot": 60,
-    "scale": 3.0
+    "rot": 0,
+    "scale": 3.0,
+    "wet": true
    },
    {
     "kind": "ftk:tree-high",
@@ -38812,15 +41693,6 @@
     ],
     "rot": 134,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 80,
-    "scale": 2.68
    },
    {
     "kind": "ftk:tree-high",
@@ -38935,6 +41807,151 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/Bridge.blend",
+    "at": [
+     0.0,
+     15.5
+    ],
+    "rot": 90,
+    "scale": 2.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -6.5,
+     15.0
+    ],
+    "z": 0.05,
+    "rot": -80.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -5.5,
+     11.0
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -17.0,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     20.0,
+     17.5
+    ],
+    "wet": true
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     12.5,
+     140.0,
+     18.5
+    ],
+    "z": 0.04,
+    "wet": true
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:4.7",
+    "at": [
+     6.0,
+     20.0
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.375,
+     21.125
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     7.05,
+     23.15
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 15,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 146,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 309,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -39078,12 +42095,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -39163,10 +42180,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.54,
-     15.65
+     -13.5,
+     10.0
     ],
-    "rot": 46,
+    "rot": 50,
     "scale": 1.35
    }
   ],
@@ -39227,15 +42244,6 @@
     "scale": 1.53
    },
    {
-    "kind": "House_3",
-    "at": [
-     9.02,
-     25.07
-    ],
-    "rot": -17,
-    "scale": 1.34
-   },
-   {
     "kind": "House_2",
     "at": [
      -4.15,
@@ -39256,11 +42264,12 @@
    {
     "kind": "ftk:watermill",
     "at": [
-     -12.0,
+     11.0,
      13.0
     ],
-    "rot": 60,
-    "scale": 3.0
+    "rot": 0,
+    "scale": 3.0,
+    "wet": true
    },
    {
     "kind": "ftk:tree-high",
@@ -39270,15 +42279,6 @@
     ],
     "rot": 134,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 80,
-    "scale": 2.68
    },
    {
     "kind": "ftk:tree-high",
@@ -39393,6 +42393,151 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/Bridge.blend",
+    "at": [
+     0.0,
+     15.5
+    ],
+    "rot": 90,
+    "scale": 2.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -6.5,
+     15.0
+    ],
+    "z": 0.05,
+    "rot": -80.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -5.5,
+     11.0
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -17.0,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     20.0,
+     17.5
+    ],
+    "wet": true
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     12.5,
+     140.0,
+     18.5
+    ],
+    "z": 0.04,
+    "wet": true
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:4.7",
+    "at": [
+     6.0,
+     20.0
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.375,
+     21.125
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     7.05,
+     23.15
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 15,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 146,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 309,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -39524,12 +42669,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -39609,10 +42754,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     -10.54,
-     15.65
+     -13.5,
+     10.0
     ],
-    "rot": 46,
+    "rot": 50,
     "scale": 1.35
    }
   ],
@@ -39673,15 +42818,6 @@
     "scale": 1.53
    },
    {
-    "kind": "House_3",
-    "at": [
-     9.02,
-     25.07
-    ],
-    "rot": -17,
-    "scale": 1.34
-   },
-   {
     "kind": "House_2",
     "at": [
      -4.15,
@@ -39702,11 +42838,12 @@
    {
     "kind": "ftk:watermill",
     "at": [
-     -12.0,
+     11.0,
      13.0
     ],
-    "rot": 60,
-    "scale": 3.0
+    "rot": 0,
+    "scale": 3.0,
+    "wet": true
    },
    {
     "kind": "ftk:tree-high",
@@ -39716,15 +42853,6 @@
     ],
     "rot": 134,
     "scale": 2.85
-   },
-   {
-    "kind": "ftk:tree-high",
-    "at": [
-     16.5,
-     14.0
-    ],
-    "rot": 80,
-    "scale": 2.68
    },
    {
     "kind": "ftk:tree-high",
@@ -39839,6 +42967,151 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "file:art_source/models/props/quaternius_modular_medieval/Bridge.blend",
+    "at": [
+     0.0,
+     15.5
+    ],
+    "rot": 90,
+    "scale": 2.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -6.5,
+     15.0
+    ],
+    "z": 0.05,
+    "rot": -80.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -5.5,
+     11.0
+    ],
+    "rot": -3
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     -17.0,
+     13.0
+    ],
+    "wet": true
+   },
+   {
+    "kind": "builder:reeds:4.0",
+    "at": [
+     20.0,
+     17.5
+    ],
+    "wet": true
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     12.5,
+     140.0,
+     18.5
+    ],
+    "z": 0.04,
+    "wet": true
+   },
+   {
+    "kind": "file:art_source/models/props/kaykit_medieval_hexagon/building_mine_red.gltf",
+    "at": [
+     7.5,
+     27.0
+    ],
+    "rot": 0,
+    "scale": 7.0
+   },
+   {
+    "kind": "builder:rails:4.7",
+    "at": [
+     6.0,
+     20.0
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     6.375,
+     21.125
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:minecart",
+    "at": [
+     7.05,
+     23.15
+    ],
+    "rot": -18.4
+   },
+   {
+    "kind": "builder:headframe:8",
+    "at": [
+     16.5,
+     21.0
+    ],
+    "rot": 5
+   },
+   {
+    "kind": "builder:ore_heap:2.2",
+    "at": [
+     13.0,
+     27.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.5",
+    "at": [
+     1.5,
+     28.0
+    ]
+   },
+   {
+    "kind": "builder:ore_heap:1.8",
+    "at": [
+     -4.5,
+     33.0
+    ]
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     6.5,
+     7.5
+    ],
+    "rot": 15,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:resource_stone",
+    "at": [
+     10.0,
+     15.0
+    ],
+    "rot": 146,
+    "scale": 2.5
+   },
+   {
+    "kind": "kk:wheelbarrow",
+    "at": [
+     5.0,
+     5.0
+    ],
+    "rot": 309,
+    "scale": 2.2
    }
   ],
   "moon_color": [
@@ -39982,12 +43255,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -40027,10 +43300,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -40087,10 +43360,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -1.91,
-     15.42
+     -13.5,
+     10.5
     ],
-    "rot": 0,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -40124,20 +43397,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.24,
-     10.35
+     8.0,
+     9.5
     ],
-    "rot": -36,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.08,
-     22.02
+     18.0,
+     7.0
     ],
-    "rot": -13,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -40169,10 +43442,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.5,
-     16.32
+     12.5,
+     11.5
     ],
-    "rot": -36,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -40209,12 +43482,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -40225,22 +43498,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.51,
-     31.68
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "spire",
@@ -40270,92 +43534,6 @@
     "floors": 2,
     "size": 2.0,
     "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -6.5,
-     29.43
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -13.75,
-     20.72
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     3.96,
-     26.48
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -16.92,
-     28.22
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     15.35,
-     20.36
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 150,
-    "scale": 2.86
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 221,
-    "scale": 2.82
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 344,
-    "scale": 2.63
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 143,
-    "scale": 2.83
    },
    {
     "kind": "ftk:stall-red",
@@ -40443,6 +43621,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [
@@ -40571,12 +43945,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -40616,10 +43990,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -40676,10 +44050,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -1.91,
-     15.42
+     -13.5,
+     10.5
     ],
-    "rot": 0,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -40713,20 +44087,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.24,
-     10.35
+     8.0,
+     9.5
     ],
-    "rot": -36,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.08,
-     22.02
+     18.0,
+     7.0
     ],
-    "rot": -13,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -40758,10 +44132,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.5,
-     16.32
+     12.5,
+     11.5
     ],
-    "rot": -36,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -40798,12 +44172,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -40814,22 +44188,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.51,
-     31.68
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "spire",
@@ -40859,92 +44224,6 @@
     "floors": 2,
     "size": 2.0,
     "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -6.5,
-     29.43
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -13.75,
-     20.72
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     3.96,
-     26.48
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -16.92,
-     28.22
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     15.35,
-     20.36
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 150,
-    "scale": 2.86
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 221,
-    "scale": 2.82
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 344,
-    "scale": 2.63
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 143,
-    "scale": 2.83
    },
    {
     "kind": "ftk:stall-red",
@@ -41032,6 +44311,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [
@@ -41148,12 +44623,12 @@
    "at": [
     2.0,
     -8.5,
-    2.0
+    5.2
    ],
    "look": [
     2.0,
     14.0,
-    6.2
+    4.2
    ],
    "lens": 20
   },
@@ -41193,10 +44668,10 @@
     "venue": "yard",
     "kind": "Blacksmith",
     "at": [
-     -12.0,
-     16.5
+     -18.5,
+     5.0
     ],
-    "rot": 30,
+    "rot": 65,
     "scale": 1.2
    },
    {
@@ -41253,10 +44728,10 @@
     "venue": "guild",
     "kind": "House_2",
     "at": [
-     -1.91,
-     15.42
+     -13.5,
+     10.5
     ],
-    "rot": 0,
+    "rot": 15,
     "scale": 2.1,
     "terrace": [
      8,
@@ -41290,20 +44765,20 @@
     "venue": "tavern",
     "kind": "Inn",
     "at": [
-     7.24,
-     10.35
+     8.0,
+     9.5
     ],
-    "rot": -36,
+    "rot": -30,
     "scale": 1.5
    },
    {
     "venue": "church",
     "kind": "Bell_Tower",
     "at": [
-     9.08,
-     22.02
+     18.0,
+     7.0
     ],
-    "rot": -13,
+    "rot": -55,
     "scale": 2.2,
     "terrace": [
      5,
@@ -41335,10 +44810,10 @@
     "venue": "tailor",
     "kind": "House_1",
     "at": [
-     11.5,
-     16.32
+     12.5,
+     11.5
     ],
-    "rot": -36,
+    "rot": -45,
     "scale": 1.5
    }
   ],
@@ -41375,12 +44850,12 @@
    {
     "kind": "wallrow",
     "from": [
-     -8.0,
-     26.0
+     -27.0,
+     12.4
     ],
     "to": [
-     8.0,
-     26.0
+     -19.0,
+     12.4
     ],
     "size": 2.4,
     "floors": 1,
@@ -41391,22 +44866,13 @@
    {
     "kind": "spire",
     "at": [
-     18.0,
-     30.0
+     21.0,
+     38.0
     ],
     "floors": 8,
     "size": 1.7,
-    "roof": "roof-point"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     9.51,
-     31.68
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
+    "roof": "roof-point",
+    "wet": true
    },
    {
     "kind": "spire",
@@ -41436,92 +44902,6 @@
     "floors": 2,
     "size": 2.0,
     "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -6.5,
-     29.43
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -13.75,
-     20.72
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     3.96,
-     26.48
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     -16.92,
-     28.22
-    ],
-    "floors": 1,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "spire",
-    "at": [
-     15.35,
-     20.36
-    ],
-    "floors": 2,
-    "size": 2.0,
-    "roof": "roof-flat"
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     -14.0,
-     26.0
-    ],
-    "rot": 150,
-    "scale": 2.86
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     0.0,
-     29.0
-    ],
-    "rot": 221,
-    "scale": 2.82
-   },
-   {
-    "kind": "ftk:tree",
-    "at": [
-     17.5,
-     14.5
-    ],
-    "rot": 344,
-    "scale": 2.63
-   },
-   {
-    "kind": "ftk:tree-high-round",
-    "at": [
-     15.0,
-     25.0
-    ],
-    "rot": 143,
-    "scale": 2.83
    },
    {
     "kind": "ftk:stall-red",
@@ -41609,6 +44989,202 @@
      2.5
     ],
     "scale": 1.4
+   },
+   {
+    "kind": "quay",
+    "from": [
+     -70.0,
+     14.0
+    ],
+    "to": [
+     70.0,
+     14.0
+    ],
+    "height": 0.7,
+    "wet": true
+   },
+   {
+    "kind": "quay",
+    "from": [
+     21.0,
+     14.0
+    ],
+    "to": [
+     21.0,
+     38.0
+    ],
+    "height": 0.9,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     -4.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     16.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     20.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     24.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:structure-platform-dock",
+    "at": [
+     5.0,
+     28.3
+    ],
+    "z": -0.45,
+    "scale": 1.6,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-large",
+    "at": [
+     -12.0,
+     24.0
+    ],
+    "rot": 90.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-medium",
+    "at": [
+     12.5,
+     29.0
+    ],
+    "rot": -82.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:ship-small",
+    "at": [
+     1.0,
+     44.0
+    ],
+    "rot": 98.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -1.5,
+     17.5
+    ],
+    "z": 0.05,
+    "rot": 20.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     8.0,
+     19.0
+    ],
+    "z": 0.05,
+    "rot": -35.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "kp:boat-row-large",
+    "at": [
+     -7.0,
+     18.5
+    ],
+    "z": 0.05,
+    "rot": 70.0,
+    "scale": 1.0,
+    "wet": true
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     -6.5,
+     12.8
+    ],
+    "rot": 7
+   },
+   {
+    "kind": "builder:net_rack:3.0",
+    "at": [
+     3.0,
+     13.0
+    ],
+    "rot": 10
+   },
+   {
+    "kind": "water",
+    "rect": [
+     -140.0,
+     14.3,
+     140.0,
+     220.0
+    ],
+    "z": 0.04,
+    "wet": true
    }
   ],
   "backlight_color": [

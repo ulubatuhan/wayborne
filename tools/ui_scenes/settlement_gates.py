@@ -82,11 +82,39 @@ def _wood_gate(keep):
             keep.append({"kind": "spire", "at": [side * x, WALL_Y], "floors": 3, "size": 2.0, "wood": True})
 
 
+def is_nomad(town):
+    return any(str(p.get("kind", "")).startswith("builder:yurt") for p in town["buildings"] + town.get("props", []))
+
+
+# Göçebe obasının girişi sur değil (kullanıcı, 2026-10-22: "yurt girişlerini
+# kültüre özel görmedim"): iki tuğ arasında açık geçit, iki yana hasır çit,
+# geçidin önünde at bağlama ipi ve atlar; arkada obanın yurtları.
+NOMAD_HALF = 21.0
+
+
+def _nomad_gate(keep):
+    x = -NOMAD_HALF
+    while x <= NOMAD_HALF:
+        if abs(x) > 2.8:
+            keep.append({"kind": "ftk:fence", "at": [x, WALL_Y], "rot": 90, "scale": 2.2})
+        x += 2.2
+    for side in (-1, 1):
+        keep.append({"kind": "builder:tug:6.2", "at": [side * 2.3, WALL_Y], "venue": "gate"})
+        keep.append({"kind": "builder:tug:4.4", "at": [side * 9.5, WALL_Y]})
+        keep.append({"kind": "builder:horse_line:5", "at": [side * 6.0, WALL_Y - 1.2]})
+        keep.append({"kind": "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb",
+                     "at": [side * 5.2, WALL_Y - 1.6], "rot": 90 * side, "scale": 0.5})
+
+
 def gate_config(town):
     cfg = copy.deepcopy(town)
     keep = []
     for spec in town["buildings"] + town.get("props", []):
-        if spec.get("kind") in PLAZA_KINDS or spec.get("kind") == "wallrow":
+        if spec.get("kind") in PLAZA_KINDS or spec.get("kind") in ("wallrow", "water", "quay"):
+            continue
+        if str(spec.get("kind", "")).startswith(("builder:tug", "builder:horse_line", "ftk:fence")):
+            continue
+        if spec.get("kind") == "file:art_source/models/animals/quaternius_gltf/glTF/Horse.glb":
             continue
         # Meydanın önündekiler (kameraya yakın evler) de kalkar; geridekiler surun arkasına.
         if _y(spec) < 9.0:
@@ -98,6 +126,9 @@ def gate_config(town):
         moved.pop("venue", None)
         keep.append(moved)
     value = next((p.get("value", 0.3) for p in town.get("props", []) if p.get("kind") == "wallrow"), 0.3)
+    if is_nomad(town):
+        _nomad_gate(keep)
+        return _finish_gate(cfg, keep)
     if has_wood_wall(town):
         _wood_gate(keep)
         return _finish_gate(cfg, keep)
