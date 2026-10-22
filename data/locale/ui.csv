@@ -1316,3 +1316,4 @@
 "UI_OUTFIT_WARMTH","Sıcaklık +%d °C","Warmth +%d °C","","","","","","","","",""
 "UI_CHARACTER_WARMTH","Giysisinin sıcaklığı: %s","Warmth of their clothes: %s","","","","","","","","",""
 "UI_MARKET_STALE","bayat: taze fiyatın yüzde %d kadarı","stale: %d%% of the fresh price","","","","","","","","",""
+"UI_MAP_TILES_MISSING","Harita karoları indirilmemiş (Git LFS). Oyunun klasöründe: git lfs install, sonra git lfs pull.","The map tiles were not downloaded (Git LFS). In the game folder: git lfs install, then git lfs pull.","","","","","","","","",""

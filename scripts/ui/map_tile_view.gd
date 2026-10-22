@@ -184,6 +184,27 @@ func has_tiles() -> bool:
 	var path := tile_path(0, 0, 0)
 	return ResourceLoader.exists(path) or FileAccess.file_exists(path)
 
+## Karolar Git LFS'te (.gitattributes): git-lfs'siz bir klonda dosyalar resim değil
+## 130 baytlık işaretçi metni. O zaman harita sessizce boş kalmasın, ne
+## yapılacağını söylesin.
+const LFS_POINTER_HEAD: String = "version https://git-lfs"
+
+static func is_lfs_pointer(path: String) -> bool:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return false
+	var head := f.get_buffer(LFS_POINTER_HEAD.length()).get_string_from_ascii()
+	return head == LFS_POINTER_HEAD
+
+var _tiles_missing: int = -1
+
+## Bütün haritanın karosu (seviye 0) yüklenemiyorsa harita yok demektir.
+func tiles_missing() -> bool:
+	if _tiles_missing < 0:
+		var path := tile_path(0, 0, 0)
+		_tiles_missing = 1 if is_lfs_pointer(path) or TextureLoader.load_any(path) == null else 0
+	return _tiles_missing == 1
+
 func cached_tile_count() -> int:
 	return _cache.size()
 
@@ -216,6 +237,9 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.10, 0.09, 0.08))
+	if tiles_missing():
+		_draw_missing_note()
+		return
 	var view := visible_map_rect()
 	# Önce tüm harita (seviye 0), sonra daha ince seviyeler: ince karo henüz
 	# yüklenmediyse boşluk değil bulanık harita görünür.
@@ -235,3 +259,12 @@ func _draw() -> void:
 			# Kenardaki karo tam kare olmayabilir: gerçek boyu kullanılıyor.
 			var size_map := Vector2(tex.get_size()) / scale
 			draw_texture_rect(tex, Rect2(origin, size_map * zoom), false)
+
+## Karolar yoksa: parşömen zemin ve tek satır - yol ve yerleşimler üstünde yine çizilir.
+func _draw_missing_note() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), ArtPalette.GRIM_PARCHMENT_DIM.darkened(0.55))
+	var font := get_theme_default_font()
+	var font_size := clampi(int(size.y / 14.0), 10, 18)
+	var text := tr("UI_MAP_TILES_MISSING")
+	draw_multiline_string(font, Vector2(12.0, size.y * 0.5), text, HORIZONTAL_ALIGNMENT_CENTER,
+		size.x - 24.0, font_size, -1, ArtPalette.UI_TEXT)

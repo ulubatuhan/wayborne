@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_hour_tint(t)
 	_test_map_lights(t)
 	_test_trail_memory(t)
+	_test_tiles_are_real_pictures(t)
 
 func _test_level_choice(t) -> void:
 	t.eq(MapTileView.level_for_zoom(1.0, MAX_LEVEL), 4, "tam çözünürlükte en ince seviye")
@@ -229,3 +230,20 @@ func _test_trail_memory(t) -> void:
 		session.record_journey_camp(Vector2(i, i))
 	t.eq(session.journey_camps.size(), GameSession.MAX_JOURNEY_CAMPS, "kamp listesi sınırlı")
 	t.eq(float(session.journey_camps[-1][0]), float(GameSession.MAX_JOURNEY_CAMPS + 19), "sınırda en yeniler kalır")
+
+## Karolar Git LFS'te: git-lfs'siz bir klonda dosyalar resim değil işaretçi ve
+## harita boş kalır. Test bunu adıyla söylesin, ekran da uyarı çizsin.
+func _test_tiles_are_real_pictures(t) -> void:
+	var view := MapTileView.new()
+	var path := view.tile_path(0, 0, 0)
+	t.ok(FileAccess.file_exists(path), "bütün haritanın karosu var")
+	t.not_ok(MapTileView.is_lfs_pointer(path),
+		"harita karosu Git LFS işaretçisi: 'git lfs install' ve 'git lfs pull' gerekiyor")
+	t.not_ok(view.tiles_missing(), "harita karosu yüklenebiliyor")
+	var pointer := "user://lfs_pointer_probe.jpg"
+	var f := FileAccess.open(pointer, FileAccess.WRITE)
+	f.store_string("version https://git-lfs.github.com/spec/v1\noid sha256:00\nsize 1\n")
+	f.close()
+	t.ok(MapTileView.is_lfs_pointer(pointer), "işaretçi dosyası tanınıyor")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(pointer))
+	view.free()
