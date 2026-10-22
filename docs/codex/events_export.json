@@ -1190,6 +1190,11 @@
                   "type": "ITEM_ADD"
                 },
                 {
+                  "amount": 1,
+                  "text": "wool_coat",
+                  "type": "GRANT_OUTFIT"
+                },
+                {
                   "amount": 10,
                   "text": "",
                   "type": "DANGER"
@@ -1809,6 +1814,29 @@
                 }
               ],
               "label": "Bir bez parçasına sarılı, eski bir muska çıkıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "fisherman_sweater",
+                  "type": "GRANT_OUTFIT"
+                },
+                {
+                  "amount": 1,
+                  "text": "knit_cap",
+                  "type": "GRANT_OUTFIT"
+                }
+              ],
+              "label": "Yağlı bir muşambaya sarılı bir bohça çıkıyor: içinde kalın örgü bir kazak ve bir yün başlık. Biri kışa hazırlanmış, ama kış ona gelmemiş.",
               "weight": 1
             },
             {

@@ -5280,9 +5280,9 @@ verir.
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
   karşılığı olarak zaten kurulu.
-- **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
-  on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
-  PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
+- **Codex'in olay bölümünde tasarım notları eksik.** Karar ağaçları kataloğun 71 olayının hepsini kapsıyor (Y-E07,
+  2026-10-22'de yeniden üretildi); elle yazılmış tasarım notu yalnızca 29 kartta. Kalan kartların notu lore kapanınca
+  yazılır.
 - **Karanlık arayüzün kalanı: yalnızca kod düzeni.** Şehir (`CityFront`), ana menü, karakter, kadro kartı, defter,
   savaş ve UI kiti v2 bağlı. Yol HUD'u ve pazar kullanıcı kararıyla oyundaki hâlinde kalıyor (karar defteri K10/K11,
   2026-10-21): `GrimNotice`, `WornCell`, `MarketMeter` ve `TradeScales` yalnızca taslak ekranlarda (`GrimDrafts`) duruyor
