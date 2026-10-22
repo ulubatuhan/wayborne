@@ -17,6 +17,11 @@ func run(t) -> void:
 	_test_town_art(t)
 	_test_wall_material(t)
 
+## Saat -> beklenen dosya (CityFront.PHASE_FILES): şafak sabah, öğle gündüz, akşam akşam, gece taban.
+const TOWN_PHASE_HOURS: Dictionary = {
+	6: "background_morning.jpg", 12: "background_day.jpg", 18: "background_evening.jpg", 23: "background.jpg",
+}
+
 func _count(type: String) -> int:
 	var n := 0
 	for location in WorldMapData.get_locations():
@@ -159,6 +164,13 @@ func _test_town_art(t) -> void:
 		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/background.jpg"), "şehir resmi var: %s" % id)
 		t.ok(FileAccess.file_exists(CityFront.TOWNS_DIR + id + "/mask.png"), "tıklama maskesi var: %s" % id)
 		t.eq(city_map.town_dir(id), id, "kendi resmini okur: %s" % id)
+		# Dört vaktin her biri kendi resmine çözülür ve yüklenir (eksik evre sessizce
+		# gece resmine düşerdi; render kuyruğu yarıda kalırsa bunu bu test yakalar).
+		for hour in TOWN_PHASE_HOURS:
+			var path := CityFront.background_path(id, float(hour))
+			t.eq(path, CityFront.TOWNS_DIR + id + "/" + String(TOWN_PHASE_HOURS[hour]),
+				"%s saat %d kendi evre resmini okur" % [id, hour])
+			t.ok(TextureLoader.load_any(path) != null, "%s saat %d resmi yükleniyor" % [id, hour])
 
 ## Sur malzemesi tek kaynaktan: şehir resmindeki duvar (towns.json `wood`),
 ## kapı sahnesi ve hub kapısı aynı `wall` alanını izler. Biri kütük, ötekisi
