@@ -5283,15 +5283,11 @@ verir.
 - **Codex'in olay bölümü canlı kataloğun gerisinde.** Faz 18 altı, Faz 19
   on bir yeni kart ekledi (üç zincir + borç krizi); codex bunları (ve Faz 17
   PR-9'un kaydettiği önceki açığı) henüz işlemedi - bilerek ertelendi.
-- **Karanlık arayüzü ekranlara bağla (Faz 27'de onaylandı, yarısı bağlı).**
-  Şehir artık render edilmiş, şehre özgü önden kasaba (`CityFront`:
-  levhalar brifingin ihtiyaçlarını taşıyor, kadro kartları, alt şerit,
-  yanında koyu brifing sütunu); ana menü gece kampı ve sağ şerit. Kalan:
-  yol HUD'unun kalanı (göstergeler `SurvivalGauge`'a geçti; ikonlu alt
-  şerit, `GrimNotice`),
-  pazar/envanter, ve GrimTheme'in kalıcı parçalarının WaybookTheme'e
-  taşınması. Sıra ve ayrıntı `docs/ui/REDESIGN.md` §7'de. Dosya ve sınıf
-  adları oyuna özgü kalır (başka bir oyunun terimi değil).
+- **Karanlık arayüzün kalanı: yalnızca kod düzeni.** Şehir (`CityFront`), ana menü, karakter, kadro kartı, defter,
+  savaş ve UI kiti v2 bağlı. Yol HUD'u ve pazar kullanıcı kararıyla oyundaki hâlinde kalıyor (karar defteri K10/K11,
+  2026-10-21): `GrimNotice`, `WornCell`, `MarketMeter` ve `TradeScales` yalnızca taslak ekranlarda (`GrimDrafts`) duruyor
+  ve bilerek bağlanmıyor. Kalan: GrimTheme'in kalıcı parçalarının WaybookTheme'e taşınması (`docs/ui/REDESIGN.md` §7).
+  Dosya ve sınıf adları oyuna özgü kalır (başka bir oyunun terimi değil).
 - **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
   `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin

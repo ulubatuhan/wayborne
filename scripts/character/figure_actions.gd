@@ -253,7 +253,7 @@ const CLIPS: Dictionary = {
 	# 2026-10-21, tests/screenshot_poses.gd).
 	"look_ahead": {"frames": 1, "keys": [[0.0, {
 		"lean": -4.0, "foot_f": [0.07, 0.0, 0.0], "foot_b": [-0.07, 0.0, 0.0],
-		"arm_f": [64.0, 148.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
+		"arm_f": [70.0, 197.0], "arm_b": [6.0, 16.0], "weapon": 0.0,
 	}]]},
 	# Dur temposunda yorgun bekleyiş: gövde öne çökük, dizler hafif kırık,
 	# kollar sarkık ve biraz önde.
