@@ -14,7 +14,9 @@ void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
 	float warm = clamp((c.r - c.b) * 2.0, 0.0, 1.0) * smoothstep(0.3, 0.7, l);
-	c = mix(c, vec3(l), desaturate * (1.0 - 0.6 * warm));
+	// Doygun gece mavisi de söner (stil kuralı: doygun mor ve mavi yok).
+	float cool = clamp((c.b - c.r) * 2.5, 0.0, 1.0);
+	c = mix(c, vec3(l), clamp(desaturate * (1.0 - 0.6 * warm) + 0.3 * cool, 0.0, 1.0));
 	c -= vec3(max(l - 0.55, 0.0) * highlight_squeeze);
 	c *= mix(shadow_tint, vec3(1.0), smoothstep(0.08, 0.45, l));
 	COLOR = vec4(clamp(c, 0.0, 1.0), 1.0);
