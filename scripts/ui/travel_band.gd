@@ -1100,20 +1100,25 @@ func gate_count() -> int:
 	return _gates.size()
 
 ## Bir kapının geçidinin ekrandaki x'i: test ve çizim aynı sayıyı okusun.
-func gate_x_for_day(day: float) -> float:
-	return screen_x_for_day(day) + _heading * _gate_lead
+## `lead`: geçidin kervan çapasına göre yeri (önde liderin burnu, arkada kuyruk).
+func gate_x_for_day(day: float, lead: float = NAN) -> float:
+	return screen_x_for_day(day) + _heading * (_gate_lead if is_nan(lead) else lead)
 
 func arrival_gate_x() -> float:
-	return gate_x_for_day(float(_gates[-1].day)) if not _gates.is_empty() else 0.0
+	return _gate_x(_gates[-1]) if not _gates.is_empty() else 0.0
+
+func _gate_x(gate: Dictionary) -> float:
+	return gate_x_for_day(float(gate.day), float(gate.get("lead", _gate_lead)))
 
 func _draw_road_gates(area: Rect2, cover: Rect2) -> void:
 	for gate in _gates:
 		var prop_id := String(gate.prop)
 		if PropArt.has(prop_id):
-			_draw_road_gate(prop_id, float(gate.day), String(gate.get("kind", GateArt.KIND_STONE)), area, cover)
+			_draw_road_gate(gate, prop_id, String(gate.get("kind", GateArt.KIND_STONE)), area, cover)
 
-func _draw_road_gate(prop_id: String, day: float, kind: String, area: Rect2, cover: Rect2) -> void:
-	var x := gate_x_for_day(day)
+func _draw_road_gate(gate: Dictionary, prop_id: String, kind: String, area: Rect2, cover: Rect2) -> void:
+	var lead := float(gate.get("lead", _gate_lead))
+	var x := _gate_x(gate)
 	var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * GATE_BASE_SINK)
 	var metres := maxf(GateArt.body_height_m(prop_id), 0.1)
 	# Görünen göğün altında kalsın: yol ekranı şeridin tepesini üst çubuğun altına itiyor.
@@ -1128,7 +1133,7 @@ func _draw_road_gate(prop_id: String, day: float, kind: String, area: Rect2, cov
 	tint.a = 1.0
 	ArtDraw.contact_shadow(self, base, box.size.x * 0.9, 0.18)
 	var reach := maxf(box.size.x * GATE_OPEN_RANGE, 1.0)
-	var near := clampf(1.0 - absf(x - (caravan_x() + _heading * _gate_lead)) / reach, 0.0, 1.0)
+	var near := clampf(1.0 - absf(x - (caravan_x() + _heading * lead)) / reach, 0.0, 1.0)
 	var open := near * near * (3.0 - 2.0 * near)
 	GateArt.draw(self, prop_id, base, k, tint, Color(_sky.haze) * _light, open, _night_ratio, kind)
 

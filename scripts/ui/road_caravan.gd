@@ -220,6 +220,17 @@ var _wagon_count: int = 1
 var _wheel_angle: float = 0.0
 var _scale: float = 1.0
 
+## Kervanın **en arkasındaki** noktanın çapaya uzaklığı, yürüyüş yönünde
+## (geride kaldığı için eksi). Yolun başındaki kapı buna bakıyor: kervan
+## yola çıktığında son vagon kapıdan yeni çıkmış olmalı, lider kapının önünde
+## değil (lidere hizalı kapı, kervan kapıya giriyormuş gibi okunuyordu).
+func get_rear_offset() -> float:
+	if _leader == null:
+		return 0.0
+	if _heading < 0.0:
+		return -(_lead_at(_scale) + _leader.size.x * 0.5)
+	return -_walk_column(_scale, false)
+
 ## Yerleşimin hesapladığı vagon merkezleri. Çizim bunları okuyor,
 ## kendi aritmetiğini yapmıyor: iki ayrı formül tam olarak öküzün
 ## vagonun içine girmesine yol açan şeydi.

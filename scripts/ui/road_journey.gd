@@ -2802,15 +2802,21 @@ func _sync_arrival_gate() -> void:
 	var parts := _journey.terrain_key.split("|")
 	if parts.size() == 2:
 		far_id = String(parts[1] if String(parts[0]) == from_id else parts[0])
+	var leader := _caravan.get_leader_figure()
+	var head := _caravan.get_front_offset() - (leader.size.x * 0.5 if leader != null else 0.0)
+	# Önümüzdeki kapının geçidi liderin burnunda, arkamızdakinin geçidi son
+	# vagonun ardında: varırken lider kapıya girer, çıkarken kuyruk kapıdan çıkar.
+	var rear := _caravan.get_rear_offset()
+	var here := _terrain_day()
 	for end in [[from_id, 0.0], [far_id, float(_journey.terrain_days)]]:
 		var place := WorldMapData.get_location_by_id(String(end[0]))
 		if place == null:
 			continue
 		var prop_id := place.gate_prop_id()
-		if not prop_id.is_empty():
-			gates.append({"prop": prop_id, "day": float(end[1]), "kind": place.wall})
-	var leader := _caravan.get_leader_figure()
-	var head := _caravan.get_front_offset() - (leader.size.x * 0.5 if leader != null else 0.0)
+		if prop_id.is_empty():
+			continue
+		var ahead := (float(end[1]) - here) * _journey.heading > 0.0
+		gates.append({"prop": prop_id, "day": float(end[1]), "kind": place.wall, "lead": head if ahead else rear})
 	_band.set_road_gates(gates, head)
 
 func _refresh_time_ui() -> void:
