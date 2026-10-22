@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_bf")
-pages = PackedStringArray("res://data/assets/characters/frames/outfit_knit_cap_female_lean/page_0_02b956cd.png")
+pages = PackedStringArray("res://data/assets/characters/frames/outfit_knit_cap_female_lean/page_0_f1d9c6dd.png")
 clip_names = PackedStringArray("walk", "idle", "ride", "walk_boots", "walk_laden", "stance_melee", "stance_bow", "aim_bow", "attack_swing", "attack_thrust", "attack_bow", "hit", "defend", "dead", "downed", "hit_pierce", "hit_slash", "dodge", "react_burn", "react_freeze", "react_poison", "attack_cast", "dismount", "climb_down", "sit_box", "idle_tired", "look_ahead")
 clip_frames = PackedInt32Array(24, 1, 24, 12, 12, 1, 1, 1, 8, 6, 8, 4, 4, 1, 1, 4, 4, 4, 6, 4, 4, 6, 8, 8, 1, 1, 1)
 shoulder_px = 147.768
