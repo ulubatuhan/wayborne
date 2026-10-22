@@ -31,13 +31,13 @@ in the background.
 |---|---|---|---|
 | **Moral (meşale)** | An iron wall-bracket torch with a tall, full flame, wrapped pitch-soaked cloth head, sparks rising. | The same torch, flame half as tall, leaning and ragged, fewer sparks. | The same torch burnt out: charred black cloth head, one small red ember, a thin wisp of grey smoke. |
 | **Moral (sancak, öneri)** | A caravan's swallow-tailed cloth banner on a wooden pole, raised to the top and flying full in the wind. | The same banner halfway down the pole, hanging slack, edges frayed. | The same banner at the foot of the pole, torn, limp and muddy. |
-| **Stres (dikenli sarmaşık)** | A loose, open ring of a thorny bramble vine, few thorns, calm and even. | The same bramble ring drawn tighter, coiling over itself, more thorns pointing inward. | The same bramble crushed into a dense, knotted ball, thorns everywhere, a few dark red drops on the thorns. |
+| **Stres (dikenli sarmaşık)** | A thorny bramble vine crushed into a dense, knotted ball, thorns everywhere, a few dark red drops on the thorns. | The same bramble drawn into a tighter ring, coiling over itself, more thorns pointing inward. | The same bramble as a loose, open ring, few thorns, calm and even. |
 | **Takat (at)** | A draught horse in side profile, trotting strongly, head up, mane and tail lifted by the motion. | The same horse standing still, head lowered, flanks heaving, breath vapour from the nostrils. | The same horse collapsed on its side, legs folded, head on the ground, eyes half closed, exhausted but alive. |
-| **Tehlike (kuzgunlar)** | A gnarled, leafless dark branch, empty. | The same branch with one black raven perched, looking forward, a small dark-red glint in its eye. | The same branch crowded with three black ravens, feathers ruffled, beaks open, dark-red eye glints. |
+| **Tehlike (kuzgunlar)** | A gnarled, leafless dark branch crowded with three black ravens, feathers ruffled, beaks open, dark-red eye glints. | The same branch with one black raven perched, looking forward, a small dark-red glint in its eye. | The same branch, empty. |
 
-Not: tablo kullanıcının sütun düzeninde. Stres ve tehlikede **Yüksek kötü hâl** demek, moral ve takatte iyi hâl.
-Yukarıdaki stres ve tehlike satırları bu yüzden "sakin → yoğun" sırasıyla yazıldı. Yüksek stres en yoğun hâl
-(sağdaki), yüksek tehlike üç kuzgun (sağdaki). Oyuna girerken sütun sırası değere göre çevrilir.
+Not: sütunlar değerin kendisi. Yüksek stres en yoğun düğüm, yüksek tehlike üç kuzgun. Tutarlılık için her
+göstergede önce en dolu hâli (Yüksek) üret, öbür ikisini ondan türet: dalı ve sarmaşığı boşaltmak, eklemekten daha
+kolay tutarlı kalıyor.
 
 ## Neden bu değişiklikler
 
