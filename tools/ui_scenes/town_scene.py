@@ -106,6 +106,33 @@ def _split_flag(objs):
         me["flag_split"] = cloth
 
 
+# Quaternius hayvanları içe aktarılınca ilk klibin (saldırı) karesinde duruyor:
+# at boynunu yukarı germiş, kafası geriye atılmış görünüyordu (kullanıcı
+# raporu). Durma klibinin bir karesi uygulanıp ağa işleniyor; kopyalar durağan.
+ANIMAL_POSE = ("Idle", 12)
+
+
+def _settle_pose(objs):
+    arm = next((o for o in objs if o.type == "ARMATURE"), None)
+    action = bpy.data.actions.get(ANIMAL_POSE[0])
+    if arm is None or action is None:
+        return
+    if arm.animation_data is None:
+        arm.animation_data_create()
+    arm.animation_data.action = action
+    if hasattr(arm.animation_data, "action_slot") and len(getattr(action, "slots", [])):
+        arm.animation_data.action_slot = action.slots[0]
+    bpy.context.scene.frame_set(ANIMAL_POSE[1])
+    for o in objs:
+        if o.type != "MESH":
+            continue
+        for mod in [m for m in o.modifiers if m.type == "ARMATURE"]:
+            bpy.context.view_layer.objects.active = o
+            with bpy.context.temp_override(object=o, active_object=o):
+                bpy.ops.object.modifier_apply(modifier=mod.name)
+    arm.animation_data.action = None
+
+
 def _template(path):
     """Bir modeli bir kez yükler, gizli bir şablon olarak tutar."""
     if path in _cache:
@@ -113,6 +140,8 @@ def _template(path):
     objs = _import(path)
     if path.endswith("WatchTowerWRoof.blend"):
         _split_flag(objs)
+    if "/animals/" in path:
+        _settle_pose(objs)
     roots = [o for o in objs if o.parent is None]
     for o in objs:
         o.hide_render = True
