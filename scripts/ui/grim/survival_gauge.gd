@@ -10,15 +10,30 @@ extends Control
 ## - FLAME: fitil. Değer düştükçe alev küçülür, mavileşir ve titrer
 ##   (sıcaklık/soğuk).
 ## - STAIN: kan lekesi. Değer büyüdükçe leke yayılır (tehlike).
+## - PICTURE: parşömen kartta gravür bir resim, üç hâl (yüksek/orta/düşük):
+##   moral meşale, stres dikenli sarmaşık, takat at, tehlike kuzgunlar. Yol
+##   ekranı bunu kullanıyor; şişe ve leke kullanıcı kararıyla yoldan kalktı
+##   (2026-10-22, "şişe istemiyorum"). Resim değerin kelimesiyle aynı eşikte
+##   değişiyor (`Wording.band`), yani ipucundaki söz ile resim hep birlikte
+##   döner. Mürekkep kuzgun koyu taşın üstünde kayboluyordu; eskimiş bronz bir
+##   madalyon ona açık bir zemin veriyor (`tools/gauge_icons.py`; resim ve
+##   madalyon aynı kare tuvalde, aynı dikdörtgene çiziliyor).
 ##
 ## **Sayı kaybolmuyor.** Bu proje sayısal şeffaflığı bilerek seçti (Waybook
 ## UI Rules: "HP gets a sifat next to the number, never in place of it");
 ## nesne aynı gerçeğin ikinci okuması, yerine geçen değil. Bütün eğriler
 ## statik ve saf (Motion Rules), test aynı sayıları okuyor.
 
-enum Kind { VIAL, FLAME, STAIN }
+enum Kind { VIAL, FLAME, STAIN, PICTURE }
 
 const SIZE: Vector2 = Vector2(64, 92)
+## Resimli göstergenin madalyonu kare; boyu öbürleriyle aynı, sayılar aynı hizada kalsın.
+const PICTURE_SIZE: Vector2 = Vector2(92, 92)
+const PICTURE_DIR: String = "res://data/assets/ui/gauges/"
+const PICTURE_STATES: Array[String] = ["low", "mid", "high"]
+## Kelimenin dört kademesinden resmin üç hâline (ortadaki iki kademe aynı resim).
+const BAND_TO_PICTURE: Array[int] = [0, 1, 1, 2]
+const PICTURE_FADE_SECONDS: float = 0.6
 const NUMBER_HEIGHT: float = 18.0
 const FLAME_MIN_SHARE: float = 0.12
 
@@ -38,6 +53,12 @@ var _marker_note: String = ""
 var _time: float = 0.0
 var _redraw_wait: float = 0.0
 var _seed: float = 0.0
+## PICTURE: resmin kimliği ("morale" gibi), şimdiki ve önceki hâl, geçişin başı.
+var picture_id: String = ""
+var _picture_state: int = -1
+var _prev_picture_state: int = -1
+var _picture_switch_time: float = -100.0
+static var _picture_cache: Dictionary = {}
 
 func _init() -> void:
 	custom_minimum_size = SIZE + Vector2(0, NUMBER_HEIGHT * 2.0)
@@ -52,10 +73,41 @@ func setup(gauge_kind: Kind, fill: Color, text: String, low_is_bad: bool = true)
 	tooltip_text = text
 	return self
 
+## Resimli gösterge: `id` resim dosyalarının adı (`<id>_<low|mid|high>.png`).
+func setup_picture(id: String, text: String, low_is_bad: bool = true) -> SurvivalGauge:
+	setup(Kind.PICTURE, ArtPalette.GRIM_PARCHMENT, text, low_is_bad)
+	picture_id = id
+	custom_minimum_size = PICTURE_SIZE + Vector2(0, NUMBER_HEIGHT * 2.0)
+	_picture_state = picture_state(value, max_value)
+	return self
+
 func set_value(new_value: float, new_max: float = 100.0) -> void:
 	value = new_value
 	max_value = new_max
+	if kind == Kind.PICTURE:
+		var state := picture_state(value, max_value)
+		if state != _picture_state:
+			_prev_picture_state = _picture_state
+			_picture_state = state
+			_picture_switch_time = _time
 	queue_redraw()
+
+## Değerin resmi: 0 düşük, 1 orta, 2 yüksek - değerin kendisi, iyi ya da kötü
+## olması değil (yüksek stres en sıkı düğüm, yüksek tehlike üç kuzgun).
+static func picture_state(v: float, max_v: float) -> int:
+	return BAND_TO_PICTURE[Wording.band(v, max_v)]
+
+static func picture_path(id: String, state: int) -> String:
+	return PICTURE_DIR + "%s_%s.png" % [id, PICTURE_STATES[clampi(state, 0, 2)]]
+
+static func picture_texture(file_path: String) -> Texture2D:
+	if not _picture_cache.has(file_path):
+		_picture_cache[file_path] = TextureLoader.load_any(file_path)
+	return _picture_cache[file_path]
+
+## Geçişte yeni resmin görünürlüğü: 0'dan 1'e, uçlarda tam (Motion Rules).
+static func picture_fade(since_switch: float) -> float:
+	return clampf(since_switch / PICTURE_FADE_SECONDS, 0.0, 1.0)
 
 func set_marker(new_value: float, note: String = "") -> void:
 	marker_value = new_value
@@ -129,7 +181,8 @@ static func flame_colour(fraction: float) -> Color:
 func _draw() -> void:
 	var frac := fill_fraction(value, max_value)
 	var sev := severity(frac, bad_when_low)
-	var box := Rect2(Vector2((size.x - SIZE.x) * 0.5, 0), SIZE)
+	var box_size := PICTURE_SIZE if kind == Kind.PICTURE else SIZE
+	var box := Rect2(Vector2((size.x - box_size.x) * 0.5, 0), box_size)
 	match kind:
 		Kind.VIAL:
 			_draw_vial(box, frac, sev)
@@ -137,6 +190,8 @@ func _draw() -> void:
 			_draw_flame(box, frac)
 		Kind.STAIN:
 			_draw_stain(box, frac)
+		Kind.PICTURE:
+			_draw_picture(box, frac)
 	_draw_number(box, sev)
 
 func _vial_shape(box: Rect2) -> PackedVector2Array:
@@ -228,6 +283,33 @@ func _draw_stain(box: Rect2, frac: float) -> void:
 		for i in 3:
 			var ang := _seed * 2.0 + float(i) * 2.1
 			draw_circle(c + Vector2(cos(ang), sin(ang)) * (r + 6.0), 2.5, blood)
+
+func _draw_picture(box: Rect2, _frac: float) -> void:
+	var medallion := picture_texture(PICTURE_DIR + "medallion.png")
+	if medallion != null:
+		draw_texture_rect(medallion, box, false)
+	else:
+		draw_circle(box.get_center(), box.size.x * 0.5, ArtPalette.GRIM_PARCHMENT_DIM)
+	var fade := picture_fade(_time - _picture_switch_time)
+	if fade < 1.0 and _prev_picture_state >= 0:
+		_draw_picture_state(box, _prev_picture_state, 1.0 - fade)
+	_draw_picture_state(box, _picture_state, fade if _prev_picture_state >= 0 else 1.0)
+	if marker_value >= 0.0:
+		# Ortalamadan ayrışan kişinin değeri: madalyonun sağında kızıl bir çivi,
+		# yüksekliği değeri.
+		var y := lerpf(box.end.y - 6.0, box.position.y + 6.0, fill_fraction(marker_value, max_value))
+		var x := box.end.x + 1.0
+		draw_colored_polygon(PackedVector2Array([Vector2(x - 8, y), Vector2(x + 3, y - 5), Vector2(x + 3, y + 5)]),
+			ArtPalette.UI_SIGNAL_ESCALATED)
+	if fade < 1.0:
+		queue_redraw()
+
+func _draw_picture_state(box: Rect2, state: int, alpha: float) -> void:
+	if alpha <= 0.0 or picture_id.is_empty():
+		return
+	var tex := picture_texture(picture_path(picture_id, state))
+	if tex != null:
+		draw_texture_rect(tex, box, false, Color(1, 1, 1, alpha))
 
 func _draw_number(box: Rect2, sev: float) -> void:
 	var font := WaybookTheme.get_font()

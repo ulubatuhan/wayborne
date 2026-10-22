@@ -22,6 +22,7 @@ func run(t) -> void:
 	_test_town_assets(t)
 	_test_road_strips(t)
 	_test_title_menu(t)
+	_test_gauge_pictures(t)
 
 func _test_gauge_curves(t) -> void:
 	t.eq(SurvivalGauge.fill_fraction(150, 100), 1.0, "dolum tavanda kalıyor")
@@ -230,4 +231,32 @@ func _test_title_menu(t) -> void:
 	t.ok(gauge.is_marker_visible() and gauge.tooltip_text.contains("Ayşe"), "göstergede kişi çentiği ve adı")
 	gauge.set_marker(-1.0)
 	t.ok(not gauge.is_marker_visible() and gauge.tooltip_text == "Stres", "çentik kalkınca ad da kalkıyor")
+	gauge.free()
+
+## Yol göstergeleri resimli kart (2026-10-22): her hâlin resmi var, resim
+## kelimeyle aynı eşikte dönüyor, geçiş uçlarda tam.
+func _test_gauge_pictures(t) -> void:
+	for id in ["morale", "stress", "stamina", "danger"]:
+		for state in 3:
+			var path := SurvivalGauge.picture_path(id, state)
+			t.ok(SurvivalGauge.picture_texture(path) != null, "gösterge resmi var: %s" % path)
+	t.ok(SurvivalGauge.picture_texture(SurvivalGauge.PICTURE_DIR + "medallion.png") != null, "gösterge madalyonu var")
+	var medallion := SurvivalGauge.picture_texture(SurvivalGauge.PICTURE_DIR + "medallion.png")
+	for id in ["morale", "stress", "stamina", "danger"]:
+		var tex := SurvivalGauge.picture_texture(SurvivalGauge.picture_path(id, 2))
+		t.eq(tex.get_size(), medallion.get_size(), "resim madalyonla aynı tuvalde: %s" % id)
+	t.eq(SurvivalGauge.picture_state(0.0, 100.0), 0, "sıfır değer düşük resim")
+	t.eq(SurvivalGauge.picture_state(100.0, 100.0), 2, "tam değer yüksek resim")
+	t.eq(SurvivalGauge.picture_state(45.0, 100.0), 1, "ortada orta resim")
+	for v in [0.0, 24.0, 25.0, 49.0, 50.0, 74.0, 75.0, 100.0]:
+		var word := Wording.band(v, 100.0)
+		t.eq(SurvivalGauge.picture_state(v, 100.0), SurvivalGauge.BAND_TO_PICTURE[word],
+			"resim kelimenin kademesini izliyor (%d)" % int(v))
+	t.eq(SurvivalGauge.picture_fade(0.0), 0.0, "geçiş baştan başlıyor")
+	t.eq(SurvivalGauge.picture_fade(SurvivalGauge.PICTURE_FADE_SECONDS * 2.0), 1.0, "geçiş tam bitiyor")
+	var gauge := SurvivalGauge.new().setup_picture("stress", "Stres", false)
+	gauge.set_value(10.0)
+	gauge.set_value(90.0)
+	t.eq(gauge._picture_state, 2, "yüksek stres en sıkı düğüm")
+	t.eq(gauge._prev_picture_state, 0, "önceki resim geçiş için tutuluyor")
 	gauge.free()

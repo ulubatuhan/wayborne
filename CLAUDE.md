@@ -2295,9 +2295,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   the strap then sat beside the bars until the leather went. The bars stay
   `HUD_BAR` and `WaybookTheme.hud_rule()` (`HUD_RULE_HEIGHT`, a
   `GOLD_DIM` line) separates each bar from the world. The road's gauges
-  left the top bar: a plate in the top-right of the world holds four
-  `SurvivalGauge`s (vials for morale, stress and stamina, a blood stain for
-  danger), each with its number and name written under it and liquid
+  left the top bar: the Durum tab holds four
+  `SurvivalGauge` medallions and the warmth candle (user's decision 2026-10-22: no vials): an engraved picture per
+  value band on an aged bronze coin - morale a torch, stress a bramble (tightest when high), danger ravens, stamina a
+  horse - switching at the same thresholds as the words (`Wording.band`) with a short cross-fade; pictures and coin
+  come from `tools/gauge_icons.py` (sources in `art_source/gauges/`). Each has its number and name written under it and liquid
   colours from `ArtPalette.UI_GAUGE_*` (the hub still uses `PulseBar`); the clock has a `TimeDial`
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and

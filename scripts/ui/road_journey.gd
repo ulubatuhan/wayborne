@@ -702,10 +702,9 @@ func _build_hud_layer() -> void:
 	_hud.add_child(_build_bottom_bar())
 	_build_orders_panel()
 
-## Kervanın hali: dört nesne, sağ üstte, gökyüzünün önünde - kervanın ve
-## yolun üstüne binmiyor. Şişe (moral, stres, takat) ve leke (tehlike);
-## sayı her birinin altında yazılı (bkz. SurvivalGauge). Üst şeritteki
-## metin şişelerinin yerini aldılar: şerit artık yalnızca zaman ve sayılar.
+## Kervanın hali: Durum sekmesinde dört resimli kart (moral meşale, stres
+## dikenli sarmaşık, tehlike kuzgunlar, takat at) ve sıcaklık mumu; sayı her
+## birinin altında yazılı (bkz. SurvivalGauge).
 const GAUGE_PLATE_MARGIN: int = 14
 
 func _build_gauge_plate() -> Control:
@@ -721,10 +720,10 @@ func _build_gauge_plate() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	plate.add_child(row)
-	_morale_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_MORALE, tr("UI_HUB_MORALE"))
-	_stress_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STRESS, tr("UI_HUB_STRESS"), false)
-	_danger_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.STAIN, ArtPalette.GRIM_CRIMSON, tr("UI_HUB_DANGER"), false)
-	_stamina_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STAMINA, tr("UI_ROAD_STAMINA"))
+	_morale_bar = SurvivalGauge.new().setup_picture("morale", tr("UI_HUB_MORALE"))
+	_stress_bar = SurvivalGauge.new().setup_picture("stress", tr("UI_HUB_STRESS"), false)
+	_danger_bar = SurvivalGauge.new().setup_picture("danger", tr("UI_HUB_DANGER"), false)
+	_stamina_bar = SurvivalGauge.new().setup_picture("stamina", tr("UI_ROAD_STAMINA"))
 	_warmth_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.FLAME, ArtPalette.GRIM_AMBER, tr("UI_ROAD_WARMTH"))
 	for gauge in [_morale_bar, _stress_bar, _danger_bar, _stamina_bar, _warmth_bar]:
 		row.add_child(gauge)
