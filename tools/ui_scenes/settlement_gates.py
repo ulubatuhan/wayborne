@@ -34,6 +34,9 @@ WALL_Y = 16.0
 SHIFT_Y = 10.0
 WALL_SCALE = 2.5
 TOWER_SCALE = 3.0
+# Kapı kulesi surdan büyük: paketin geçidi 2.5 ölçekte 1.4 m genişti, bir
+# vagon geçmezdi (ölçüldü). 4.4'te geçit 2.4 x 4.5 m, kule surdan yüksek.
+ENTRANCE_SCALE = 4.4
 # Meydan eşyası: kapı sahnesine girmez.
 PLAZA_KINDS = {"MarketStand_1", "MarketStand_2", "Cart", "Barrel", "Crate", "ftk:fountain-round",
                "ftk:lantern", "ftk:banner-red", "ftk:banner-green", "Well"}
@@ -138,9 +141,9 @@ def gate_config(town):
     qm = "file:art_source/models/props/quaternius_modular_medieval/"
     # Yuvarlak, ince ve balkonlu Tower minare gibi okunuyor (Art Rules: ibadet
     # yeri silueti yok); kapıyı kare, çatılı gözcü kuleleri tutar.
-    keep.append({"kind": qm + "TallWallEntrance.blend", "at": [0.0, WALL_Y], "scale": WALL_SCALE, "venue": "gate",
+    keep.append({"kind": qm + "TallWallEntrance.blend", "at": [0.0, WALL_Y], "scale": ENTRANCE_SCALE, "venue": "gate",
                  "stone": value})
-    tower_x = 1.78 * WALL_SCALE / 2 + 1.5 * TOWER_SCALE / 2
+    tower_x = 1.78 * ENTRANCE_SCALE / 2 + 1.5 * TOWER_SCALE / 2
     for side in (-1, 1):
         keep.append({"kind": qm + "WatchTowerWRoof.blend", "at": [side * tower_x, WALL_Y], "scale": TOWER_SCALE,
                      "stone": value})
