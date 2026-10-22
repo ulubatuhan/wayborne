@@ -397,6 +397,10 @@ func _refresh_shop_rows() -> void:
 				notes.append(tr(reason))
 		if not layer_text[0].is_empty():
 			notes.append(layer_text[0])
+		# Tazelik: taşıdığımız bozulan malın yaşı satışa vurur.
+		var fresh := _session.get_freshness(item.item_id)
+		if fresh < 0.995 and _session.get_total_quantity(item.item_id) > 0:
+			notes.append(tr("UI_MARKET_STALE") % int(round(fresh * 100.0)))
 		var note: Label = row.note
 		note.text = " · ".join(notes)
 		note.add_theme_color_override("font_color", note_colour)

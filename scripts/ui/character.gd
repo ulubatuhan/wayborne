@@ -468,6 +468,11 @@ func _build_appearance_into(body: VBoxContainer) -> void:
 	row.add_child(slots)
 	for slot in OutfitCatalog.ALL_SLOTS:
 		slots.add_child(_build_outfit_row(slot))
+	# Giysinin soğuğa karşı toplamı (Temperature): yolun kış gecesine bu sayıyla gidiliyor.
+	var warmth := Label.new()
+	warmth.text = tr("UI_CHARACTER_WARMTH") % Temperature.round_text(_character.get_warmth())
+	warmth.add_theme_color_override("font_color", ArtPalette.GRIM_AMBER)
+	slots.add_child(warmth)
 
 func _build_outfit_row(slot: String) -> VBoxContainer:
 	var holder := VBoxContainer.new()

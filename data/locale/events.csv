@@ -510,3 +510,4 @@
 "EVT_ROGUE_MAGE_FLED","Işık arkanızda söner; bir gün kaybedip uzaklaşırsınız.","The light fades behind you; you lose a day getting clear.","","","","","","","","",""
 "EVT_ROGUE_MAGE_SCORCHED","Bir alev vagonun brandasını yalar; yine de kurtulursunuz.","A flame licks a wagon's canvas; still, you get away.","","","","","","","","",""
 "EVT_ROGUE_MAGE_CAUGHT","Ayağınız takılır; büyücü yolu kapatır. Savaşmaktan başka yol yok.","You stumble; the mage closes the road. There is nothing for it but to fight.","","","","","","","","",""
+"EVT_CACHE_DIG_BUNDLE","Yağlı bir muşambaya sarılı bir bohça çıkıyor: içinde kalın örgü bir kazak ve bir yün başlık. Biri kışa hazırlanmış, ama kış ona gelmemiş.","A bundle wrapped in oiled canvas: inside, a thick knitted sweater and a wool cap. Someone had readied for winter, but winter never came for them.","","","","","","","","",""

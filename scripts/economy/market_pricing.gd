@@ -76,6 +76,21 @@ static func get_sell_price(
 	multiplier *= _dynamic_multiplier(item, location, conditions, day)
 	return maxi(1, int(round(item.base_price * multiplier)))
 
+## --- Tazelik (Ana Hedefler: eşya bozulması) ---
+## Bozulan malın yaşı satış fiyatına girer: raf ömrünün ilk çeyreğinde taze
+## fiyatına, sonra raf ömrünün sonuna kadar FRESHNESS_FLOOR'a iner. Çürüme
+## (GameSession.spoil_perishables) miktarı yer, bu fiyatı: üç günlük balık
+## hâlâ balıktır ama tezgâhta tazesi gibi satılmaz.
+const FRESHNESS_FULL_SHARE: float = 0.25
+const FRESHNESS_FLOOR: float = 0.6
+
+static func freshness_multiplier(item: Item, age_days: float) -> float:
+	if item == null or item.shelf_days <= 0 or age_days <= 0.0:
+		return 1.0
+	var shelf := float(item.shelf_days)
+	var t := clampf((age_days - shelf * FRESHNESS_FULL_SHARE) / (shelf * (1.0 - FRESHNESS_FULL_SHARE)), 0.0, 1.0)
+	return lerpf(1.0, FRESHNESS_FLOOR, t)
+
 ## --- Fiyatın katmanları (görev Y-C11) ---
 ## Yedi katman, her biri {"layer", "multiplier", "arg"}: yer (şehir üretir ya
 ## da arar), yerleşim türü, enflasyon, mevsim, arz baskısı, olay şoku, dünya

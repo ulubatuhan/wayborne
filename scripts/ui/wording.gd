@@ -60,6 +60,35 @@ static func reasons(session: GameSession, kind: String) -> Array[String]:
 			out.append(TranslationServer.translate("WORD_REASON_NEAR_BREAK") % worst.character_name)
 	return out
 
+## Sıcaklığın sözü: kavurucu, ılık, serin, dondurucu, ayaz.
+const WARMTH_EDGES: Array[float] = [-12.0, 0.0, 10.0, 24.0]
+const WARMTH_KEYS: Array[String] = ["WORD_WARMTH_0", "WORD_WARMTH_1", "WORD_WARMTH_2", "WORD_WARMTH_3", "WORD_WARMTH_4"]
+
+static func warmth_key(celsius: float) -> String:
+	var b := 0
+	for edge in WARMTH_EDGES:
+		if celsius >= edge:
+			b += 1
+	return WARMTH_KEYS[b]
+
+## Sıcaklık göstergesinin ipucu: söz, gecenin en soğuğu ve bu gece kimin
+## üşüyeceği (ateşsiz), sonra derece.
+static func warmth_tooltip(session: GameSession, now_c: float) -> String:
+	var low := session.get_road_night_low()
+	var head := "%s: %s" % [
+		TranslationServer.translate(warmth_key(now_c)),
+		TranslationServer.translate("WORD_WARMTH_NIGHT") % Temperature.round_text(low),
+	]
+	var cold: Array[String] = []
+	for character in session.get_party():
+		if session.get_cold_band(character) >= 1:
+			cold.append(character.character_name)
+	if not cold.is_empty():
+		head += "\n" + TranslationServer.translate("WORD_WARMTH_SHIVER") % ", ".join(cold)
+	if session.get_cold_ration_share() > 0.0:
+		head += "\n" + TranslationServer.translate("WORD_WARMTH_RATION")
+	return "%s\n%s %s" % [head, TranslationServer.translate("UI_ROAD_WARMTH"), Temperature.round_text(now_c)]
+
 ## İpucu: önce söz ("Moral düşük: 2 gündür aç"), sonra sayı.
 static func gauge_tooltip(label: String, kind: String, value: float, max_value: float, why: Array[String]) -> String:
 	var word: String = String(TranslationServer.translate(level_key(kind, value, max_value)))

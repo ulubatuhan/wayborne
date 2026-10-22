@@ -1664,7 +1664,7 @@ func get_daily_provision_consumption() -> int:
 		party.size(),
 		owned_wagon_count,
 		caravan.get_contract_mouths(),
-		get_daily_provision_multiplier(),
+		get_daily_provision_multiplier() * (1.0 + get_cold_ration_share()),
 		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
 		CaravanPlan.height_adjustment_for(party),
 		get_pack_animal_provision_mouths()
@@ -2148,8 +2148,10 @@ func advance_day() -> Array[String]:
 	last_spoiled = {}
 	companion_notes = []
 	ailment_notes = []
+	cold_notes = []
 	market.regen_medicine(total_days_elapsed)
 	if is_journey_active():
+		_cold_night()
 		_ailment_day()
 		caravan.apply_daily_drift()
 		_apply_road_stress_day()
@@ -2952,6 +2954,81 @@ func get_hunger_damage() -> int:
 func get_event_severity() -> float:
 	return EVENT_SEVERITY[_difficulty_level("events")]
 
+## --- Sıcaklık (°C, bkz. Temperature) ---
+## Yolun bugünkü göğü: yol ekranı her sabah yazar (`set_road_sky`). Şehirde
+## ve yol ekranı olmadan koşan simülasyonlarda boş: soğuk hesaba girmez.
+var road_sky: Dictionary = {}
+## Kamp ateşinin en son yandığı günün numarası (yolun gün sayısı:
+## total_days_elapsed + 1). O gecenin soğuğunu ateş ılıtır.
+var last_fire_day: int = -1
+## Son gecenin soğuk notları (yol günlüğü okur): [{"key", "args"}].
+var cold_notes: Array = []
+
+func set_road_sky(route_key: String, day: int, biome: String, climate: String, weather: String) -> void:
+	road_sky = {"key": route_key, "day": day, "biome": biome, "climate": climate, "weather": weather}
+
+func note_campfire() -> void:
+	last_fire_day = total_days_elapsed + 1
+
+func has_road_sky() -> bool:
+	return is_journey_active() and not road_sky.is_empty()
+
+## Yolun şu anki derecesi; yol yoksa NAN.
+func get_road_celsius(hour: float) -> float:
+	if not has_road_sky():
+		return NAN
+	return Temperature.celsius(int(road_sky["day"]), hour, String(road_sky["biome"]),
+		String(road_sky["climate"]), String(road_sky["weather"]))
+
+func get_road_night_low() -> float:
+	if not has_road_sky():
+		return NAN
+	return Temperature.daily_low(int(road_sky["day"]), String(road_sky["biome"]),
+		String(road_sky["climate"]), String(road_sky["weather"]))
+
+## Bugünün dondurucu erzak payı; planlayıcı aynı sayıyı önceden istiyor
+## (CaravanPlan.cold_ration_shares).
+func get_cold_ration_share() -> float:
+	if not has_road_sky():
+		return 0.0
+	return Temperature.ration_share(get_road_night_low())
+
+## Bir kişinin bu gecenin soğuğundaki bandı (0-3).
+func get_cold_band(character: CharacterData, by_fire: bool = false) -> int:
+	if not has_road_sky():
+		return 0
+	return Temperature.band(Temperature.cold_load(get_road_night_low(), character.get_warmth(), by_fire))
+
+## Şafakta geçen gecenin bedeli: kişi başına bant (giysisi ve bedeni, ateş
+## yandıysa ılık), bant başına stres ve yorgunluk; ayazda humma şansı.
+## Tayfa giysisiyle aynı hesaba girer ama isimsiz: üşürse moral düşer.
+func _cold_night() -> void:
+	cold_notes = []
+	if not has_road_sky():
+		return
+	var by_fire := last_fire_day == total_days_elapsed
+	var low := get_road_night_low()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("cold|%s|%d" % [caravan_name, total_days_elapsed])
+	var shivering: Array[String] = []
+	for character in get_party():
+		var b := Temperature.band(Temperature.cold_load(low, character.get_warmth(), by_fire))
+		if b <= 0:
+			continue
+		change_character_stress(character, Temperature.BAND_STRESS[b])
+		if Temperature.BAND_FATIGUE[b] > 0:
+			character.change_fatigue(Temperature.BAND_FATIGUE[b])
+		shivering.append(character.character_name)
+		if b >= 3 and rng.randf() < Temperature.FROSTBITE_FEVER_BONUS and character.add_ailment("fever"):
+			cold_notes.append({"key": "UI_COLD_FEVER", "args": [character.character_name]})
+	var crew_band := Temperature.band(Temperature.cold_load(low, Temperature.CREW_WARMTH, by_fire))
+	if owned_wagon_count > 0 and Temperature.CREW_BAND_MORALE[crew_band] != 0:
+		caravan.change_morale(Temperature.CREW_BAND_MORALE[crew_band])
+		cold_notes.append({"key": "UI_COLD_CREW", "args": []})
+	if not shivering.is_empty():
+		var key := "UI_COLD_NIGHT_FIRE" if by_fire else "UI_COLD_NIGHT"
+		cold_notes.push_front({"key": key, "args": [Temperature.round_text(low), ", ".join(shivering)]})
+
 ## --- Sakatlık, hastalık ve hekim (görev Y-C05) ---
 const FEVER_CHANCE_PER_DAY: float = 0.01
 const FEVER_HUNGRY_BONUS: float = 0.03
@@ -3064,11 +3141,17 @@ func note_purchase(item: Item, quantity: int, unit_price: int) -> void:
 		var age := float(perishable_days.get(item.item_id, 0.0))
 		perishable_days[item.item_id] = age * float(held) / float(held + quantity)
 
-## Satış birim fiyatı, aynı ziyarette alınan mal için tavanlı.
+## Satış birim fiyatı: bozulan malda stoğun yaşı fiyatı düşürür
+## (MarketPricing.freshness_multiplier), aynı ziyarette alınan mal tavanlı.
 func capped_sell_price(item_id: String, market_price: int) -> int:
+	var price := maxi(1, int(round(float(market_price) * get_freshness(item_id))))
 	if not bought_here.has(item_id):
-		return market_price
-	return mini(market_price, maxi(1, int(floor(float(bought_here[item_id]) * BUYBACK_SHARE))))
+		return price
+	return mini(price, maxi(1, int(floor(float(bought_here[item_id]) * BUYBACK_SHARE))))
+
+## Taşınan stoğun tazelik çarpanı (bozulmayan mal için 1.0).
+func get_freshness(item_id: String) -> float:
+	return MarketPricing.freshness_multiplier(ItemCatalog.get_item(item_id), float(perishable_days.get(item_id, 0.0)))
 
 ## Yolun bir günü: bozulan mal yaşlanır, raf ömrünü aşan çürür.
 func spoil_perishables() -> Dictionary:
@@ -4137,6 +4220,7 @@ func to_save_dict() -> Dictionary:
 		"leader_since_day": leader_since_day,
 		"ledger": ledger.to_array(),
 		"last_feast_day": last_feast_day,
+		"last_fire_day": last_fire_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
 		"bonds": bonds.duplicate(),
@@ -4373,6 +4457,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	leader_since_day = maxi(0, int(data.get("leader_since_day", 0)))
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
+	last_fire_day = int(data.get("last_fire_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))

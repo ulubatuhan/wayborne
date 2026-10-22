@@ -49,6 +49,23 @@ const BONUS_FIELDS: Array[String] = [
 ## ucuza satılmaz.
 const MIN_PRICE_SHARE: float = 0.5
 
+## Giysinin soğuğa karşı sıcaklığı (°C, bkz. Temperature). Tabloda olmayan
+## parça slotunun varsayılanını alır. Köylü takımı ~4, kalın giyinmiş biri
+## ~18: yolun kış gecesine giysiyle hazırlanılıyor.
+const SLOT_WARMTH: Dictionary = {
+	SLOT_HAT: 1, SLOT_SHIRT: 1, SLOT_JACKET: 3, SLOT_GLOVES: 2, SLOT_PANTS: 1, SLOT_SHOES: 1,
+}
+const WARMTH: Dictionary = {
+	"fur_hat": 4, "knit_cap": 3, "felt_cap": 2, "pilgrim_hood": 2, "ranger_hood": 2, "head_veil": 1,
+	"fisherman_sweater": 4, "quilted_shirt": 3, "silk_shirt": 0, "shift_dress": 2, "pinafore_dress": 2,
+	"wool_coat": 6, "pilgrim_robe": 4, "scribe_robe": 3, "mage_robe": 3, "ranger_jacket": 3,
+	"leather_jerkin": 2,
+	"viking_pants": 2, "cloth_trousers": 2, "riding_breeches": 2, "ranger_pants": 2, "harem_pants": 0,
+	"long_skirt": 2,
+	"ranger_boots": 2, "hobnail_boots": 2, "riding_boots": 3, "leather_boots": 2, "womens_knee_boots": 3,
+	"felt_shoes": 2, "strap_sandals": 0,
+}
+
 ## Kıyafetler render'a geçmeden önceki renk-kalemleri. Eski bir kayıttaki
 ## kimlik en yakın gerçek giysiye çevriliyor (`migrate_piece_id`).
 const LEGACY_IDS: Dictionary = {
@@ -217,6 +234,8 @@ static func bonus_text(piece: OutfitPiece) -> String:
 		var value := int(piece.get(field))
 		if value != 0:
 			parts.append("%+d %s" % [value, String(TranslationServer.translate(_stat_key(field)))])
+	if piece.warmth > 0:
+		parts.append(String(TranslationServer.translate("UI_OUTFIT_WARMTH")) % piece.warmth)
 	return ", ".join(parts)
 
 static func _stat_key(field: String) -> String:
@@ -378,6 +397,7 @@ static func _add(
 	for field in bonuses:
 		piece.set(field, int(bonuses[field]))
 	piece.price = price_for(base_price, bonuses)
+	piece.warmth = int(WARMTH.get(piece_id, SLOT_WARMTH.get(slot, 0)))
 	_pieces.append(piece)
 	_by_id[piece_id] = piece
 

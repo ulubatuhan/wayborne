@@ -39,6 +39,9 @@ var travel_reserve_days: int = 0
 ## GameSession.CAMP_PROVISIONS_COST). Kampın yoldan yediği saatler
 ## `travel_reserve_days`'e giriyor; bu alan yalnızca ateşin başındaki pay.
 var camp_provisions: int = 0
+## Dondurucu günlerin erzak payı, gün gün (bkz. Temperature.
+## forecast_ration_shares). Boşsa soğuk hesaba girmiyor - eski davranış.
+var cold_ration_shares: Array[float] = []
 
 var _selected_offers: Array[MerchantOffer] = []
 
@@ -181,7 +184,22 @@ func get_provisioned_days() -> int:
 	return maxi(0, travel_days) + maxi(0, travel_reserve_days)
 
 func get_required_provisions() -> int:
-	return get_daily_consumption() * get_provisioned_days() + maxi(0, camp_provisions)
+	return get_daily_consumption() * get_provisioned_days() + maxi(0, camp_provisions) + get_cold_provisions()
+
+## Soğuğun kattığı erzak: her dondurucu gün, yolun aynı formülüyle
+## (`daily_consumption`, çarpan payla büyümüş) eksi o günün tabanı. Yol da
+## o gün tam bu sayıyı yiyor (GameSession.get_daily_provision_consumption).
+func get_cold_provisions() -> int:
+	var base := get_daily_consumption()
+	var extra := 0
+	for share in cold_ration_shares:
+		if share <= 0.0:
+			continue
+		extra += daily_consumption(
+			caravan_party_size, player_wagon_count, get_contract_mouths(),
+			provision_multiplier * (1.0 + share), provision_reduction, height_adjustment, animal_mouths
+		) - base
+	return maxi(0, extra)
 
 func get_provisions_shortfall(current_provisions: int) -> int:
 	return maxi(0, get_required_provisions() - current_provisions)

@@ -344,6 +344,12 @@ const MENU_FONT_SIZE: int = 38
 const MENU_ROW_HEIGHT: float = 62.0
 const LINEAGE_FONT_SIZE: int = 24
 
+## Fener amblemi başlığın yazı boyunun bu payı kadar, başlığın solunda.
+const EMBLEM_SHARE: float = 1.15
+const EMBLEM_GAP: float = 18.0
+## Fener kare resmin ortasında dar duruyor: yanlardaki boş pay kadar başlığa yaklaştır.
+const EMBLEM_SIDE_MARGIN: float = 0.22
+
 static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -> Control:
 	var column := Control.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -352,6 +358,21 @@ static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pin(title, TITLE_COLUMN_X, TITLE_Y - 0.012)
 	column.add_child(title)
+	# Görev Y-G08: oyunun motifi fener, adın yanında küçük bir amblem.
+	# Menünün ışığı ateş kalıyor (kullanıcı kararı: ateş ve fener birlikte).
+	var emblem := TextureRect.new()
+	emblem.texture = GrimTheme.texture("lantern_emblem.png")
+	emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	emblem.modulate = Color(0.92, 0.86, 0.74)
+	emblem.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pin(emblem, TITLE_COLUMN_X, TITLE_Y - 0.012)
+	var side := float(TITLE_FONT_SIZE) * EMBLEM_SHARE
+	emblem.offset_right = -EMBLEM_GAP + side * EMBLEM_SIDE_MARGIN
+	emblem.offset_left = emblem.offset_right - side
+	emblem.offset_top = (float(TITLE_FONT_SIZE) * 1.25 - side) * 0.5
+	emblem.offset_bottom = emblem.offset_top + side
+	column.add_child(emblem)
 	var entries: Array = []
 	for key in entry_keys:
 		entries.append(tr_key(String(key)))

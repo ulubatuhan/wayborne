@@ -929,6 +929,12 @@ func _ailment_bonus_sum(field: String) -> int:
 		total += int((AILMENTS.get(id, {}) as Dictionary).get(field, 0))
 	return total
 
+## Soğuğa karşı sıcaklık (°C): giydiklerinin toplamı ve bedenin payı
+## (bkz. Temperature.cold_load).
+func get_warmth() -> float:
+	var total := float(_outfit_bonus_sum("warmth"))
+	return total + Temperature.BODY_WEIGHT_WARMTH[clampi(body_weight, BODY_WEIGHT_LEAN, BODY_WEIGHT_HEAVY)]
+
 func _outfit_bonus_sum(field: String) -> int:
 	var total := 0
 	for slot in outfit:

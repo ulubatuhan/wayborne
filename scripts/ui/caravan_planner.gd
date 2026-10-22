@@ -19,6 +19,9 @@ var _offer_rows: Array[Dictionary] = []
 
 var _wagon_counter_label: Label
 var _gold_label: Label
+## Dondurucu gecelerin erzak payı; tüccar seçildikçe ağız sayısı değişiyor,
+## o yüzden _refresh'te yeniden yazılıyor.
+var _cold_label: Label
 var _party_label: Label
 var _documents_label: Label
 var _required_provisions_label: Label
@@ -130,6 +133,13 @@ func _setup(origin: Location, chosen: Array[MerchantOffer]) -> void:
 	)))
 	if _session.standing_camp_at_dusk:
 		_plan.camp_provisions = GameSession.CAMP_PROVISIONS_COST * _plan.get_provisioned_days()
+	# Soğuk: dondurucu günlerde herkes daha çok yer. Yol o günü aynı formülle
+	# yiyor (GameSession.get_daily_provision_consumption), planlayıcı da
+	# kervanın o gün girebileceği en soğuk parçaya göre önceden istiyor.
+	_plan.cold_ration_shares = Temperature.forecast_ration_shares(
+		route_key, _session.total_days_elapsed + 1, _terrain, travel_days,
+		_session.get_caravan_theoretical_speed(), walking_hours
+	)
 
 	if not _session.wallet.balance_changed.is_connected(_on_wallet_changed):
 		_session.wallet.balance_changed.connect(_on_wallet_changed)
@@ -261,6 +271,11 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		camp_label.text = tr("UI_PLANNER_CAMP_RESERVE") % _plan.camp_provisions
 		camp_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		_content.add_child(camp_label)
+
+	_cold_label = Label.new()
+	_cold_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_cold_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
+	_content.add_child(_cold_label)
 
 	_gold_label = Label.new()
 	_content.add_child(_gold_label)
@@ -457,6 +472,9 @@ func _on_borrow_pressed() -> void:
 
 func _refresh() -> void:
 	_refresh_departure_morale()
+	var cold := _plan.get_cold_provisions()
+	_cold_label.visible = cold > 0
+	_cold_label.text = tr("UI_PLANNER_COLD_RESERVE") % cold
 	_gold_label.text = tr("UI_PURSE") % _session.wallet.balance
 	_wagon_counter_label.text = tr("UI_PLANNER_WAGON_SLOTS") % [
 		_plan.get_used_wagon_count(),

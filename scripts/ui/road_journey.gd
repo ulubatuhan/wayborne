@@ -542,6 +542,9 @@ var _danger_bar: SurvivalGauge
 ## Takat: temponun harcanan kaynağı. Görünmeyen bir kaynak kaynak
 ## değildir - oyuncu neyi harcadığını görmeden harcama kararı veremez.
 var _stamina_bar: SurvivalGauge
+## Yolun derecesi (Temperature): alev, altında °C; ipucu geceyi ve üşüyecekleri söyler.
+var _warmth_bar: SurvivalGauge
+var _warmth_hour: int = -1
 ## Liderin o an neye dikkat ettiği. Mekanik görünmezse hata gibi okunur.
 var _attention_label: Label
 ## Dikkatin yeri bir ikon da taşıyor (baş/vagonlar/art) - etiket okunmadan
@@ -722,7 +725,8 @@ func _build_gauge_plate() -> Control:
 	_stress_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STRESS, tr("UI_HUB_STRESS"), false)
 	_danger_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.STAIN, ArtPalette.GRIM_CRIMSON, tr("UI_HUB_DANGER"), false)
 	_stamina_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.VIAL, ArtPalette.UI_GAUGE_STAMINA, tr("UI_ROAD_STAMINA"))
-	for gauge in [_morale_bar, _stress_bar, _danger_bar, _stamina_bar]:
+	_warmth_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.FLAME, ArtPalette.GRIM_AMBER, tr("UI_ROAD_WARMTH"))
+	for gauge in [_morale_bar, _stress_bar, _danger_bar, _stamina_bar, _warmth_bar]:
 		row.add_child(gauge)
 	return holder
 
@@ -1719,6 +1723,7 @@ func _process(delta: float) -> void:
 	_update_chatter(delta)
 	_update_light_glow()
 	_refresh_time_ui()
+	_refresh_warmth()
 	# Gece çökünce ortam değişir; çağrı aynı katmanda hiçbir şey yapmaz.
 	_refresh_ambience()
 	_refresh_modal()
@@ -2571,6 +2576,8 @@ func _run_day() -> void:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 	for note in _session.companion_notes:
 		_add_companion_note(note)
+	for note in _session.cold_notes:
+		_add_log(tr(String(note["key"])) % note["args"], LOCKED_COLOR)
 	for note in _session.ailment_notes:
 		_add_log(tr(String(note["key"])) % note["args"], LOCKED_COLOR)
 	for item_id in _session.last_spoiled:
@@ -2774,6 +2781,11 @@ func _refresh_weather() -> void:
 	# E+1, E+2, E+3 üzerinden hesaplandığı için hava payı yolda yaşananla
 	# örtüşmez ve "doğru stokladım, yine aç kaldım" geri gelirdi.
 	_weather = RouteWeather.at(_route_key, _session.total_days_elapsed + 1, biome)
+	var climate := ""
+	if _terrain != null:
+		climate = String(_terrain.segment_at(_terrain_day()).get("climate", ""))
+	_session.set_road_sky(_route_key, _session.total_days_elapsed + 1, biome, climate, _weather)
+	_warmth_hour = -1
 	_band.set_weather(_weather)
 	_band.set_winter(_session.journey_season() == MarketConditions.Season.WINTER)
 	if _caravan != null:
@@ -2968,6 +2980,7 @@ func _on_camp_pressed() -> void:
 	# _update_camp_state faydayı uygular. Gün ilerlemesi kendiliğinden
 	# olur - saat gece yarısını geçince günlük mekanik zaten işler.
 	_camping = true
+	_session.note_campfire()
 	_session.log_beat(GameSession.BEAT_LOG_CAMP_START)
 	_camp_ends_at_hours = JourneyController.CAMP_PENDING
 	# Kamp kendi hızını öneriyor: 8 saatlik bir mola 1x'te dakikalarca
@@ -4197,6 +4210,21 @@ func _refresh_stress_marker() -> void:
 	_stress_bar.set_marker(
 		worst.stress, tr("UI_HUD_STRESS_WORST") % [worst.character_name, worst.stress]
 	)
+
+## Alev saatte bir güncellenir: derece günün saatiyle değişiyor.
+func _refresh_warmth() -> void:
+	if _warmth_bar == null or _clock == null:
+		return
+	var hour := int(_clock.get_hour_of_day())
+	if hour == _warmth_hour:
+		return
+	_warmth_hour = hour
+	var now := _session.get_road_celsius(_clock.get_hour_of_day())
+	_warmth_bar.visible = not is_nan(now)
+	if is_nan(now):
+		return
+	_warmth_bar.set_celsius(now)
+	_warmth_bar.set_reason(Wording.warmth_tooltip(_session, now))
 
 func _refresh_state() -> void:
 	var caravan := _session.caravan

@@ -673,6 +673,9 @@ static func _abandoned_loot_choice() -> EventChoice:
 			EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 2.0),
 		]), _effects([
 			EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_furs"),
+			# Ölü kervanın sandığında bir de yün palto: kışın yolu giysiyle
+			# geçiliyor (Temperature), temiz yağma onu da getirir.
+			EventEffect.make(EventEffect.Type.GRANT_OUTFIT, 1, "wool_coat"),
 			EventEffect.make(EventEffect.Type.DANGER, 10),
 			EventEffect.make(EventEffect.Type.MORALE, -3),
 		]), 1.0),
@@ -805,6 +808,12 @@ static func _forgotten_cache_dig_choice() -> EventChoice:
 			EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 2.0),
 		]), _effects([
 			EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_WARD),
+		]), 1.0),
+		_outcome_if("EVT_CACHE_DIG_BUNDLE", _conditions([
+			EventCondition.make("check_tier", EventCondition.Op.GREATER_EQUAL, 2.0),
+		]), _effects([
+			EventEffect.make(EventEffect.Type.GRANT_OUTFIT, 1, "fisherman_sweater"),
+			EventEffect.make(EventEffect.Type.GRANT_OUTFIT, 1, "knit_cap"),
 		]), 1.0),
 		_outcome_if("EVT_CACHE_DIG_NOTHING", _conditions([
 			EventCondition.make("check_tier", EventCondition.Op.EQUAL, 1.0),

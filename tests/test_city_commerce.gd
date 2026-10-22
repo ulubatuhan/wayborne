@@ -483,6 +483,14 @@ func _test_goods_variety(t) -> void:
 	session.note_purchase(fish, 15, 5)
 	t.ok(float(session.perishable_days["fish"]) < float(ItemCatalog.FISH_SHELF_DAYS), "taze alım yaşı ortalamayla düşürür, sıfırlamaz")
 	t.ok(float(session.perishable_days["fish"]) > 0.0, "eski stok tazelenmiş sayılmaz")
+	# Tazelik satışa vurur: taze balık tam fiyat, raf ömrünün sonunda taban.
+	t.almost(MarketPricing.freshness_multiplier(fish, 0.0), 1.0, "taze balık tam fiyat")
+	t.almost(MarketPricing.freshness_multiplier(fish, float(ItemCatalog.FISH_SHELF_DAYS)), MarketPricing.FRESHNESS_FLOOR, "bayat balık tabanda")
+	t.ok(MarketPricing.freshness_multiplier(fish, 3.0) < 1.0, "üç günlük balık tazesi gibi satılmaz")
+	t.almost(MarketPricing.freshness_multiplier(ItemCatalog.get_item("test_furs"), 30.0), 1.0, "bozulmayan mal yaşlanmaz")
+	session.perishable_days["fish"] = float(ItemCatalog.FISH_SHELF_DAYS)
+	session.bought_here.erase("fish")
+	t.eq(session.capped_sell_price("fish", 100), int(round(100.0 * MarketPricing.FRESHNESS_FLOOR)), "satış fiyatı stoğun yaşını okur")
 
 	var salt := ItemCatalog.get_item(ItemCatalog.CONTRABAND_SALT)
 	var city := _first_of(SettlementRules.CITY)

@@ -39,6 +39,9 @@ extends Resource
 @export var accuracy_bonus: int = 0
 @export var crit_bonus: int = 0
 @export var damage_bonus: int = 0
+## Soğuğa karşı kaç derece (Temperature.cold_load): kalın yün palto gece
+## ayazını altı derece geri iter, ipek gömlek hiç. Savaşa değmiyor, yola değiyor.
+@export var warmth: int = 0
 ## Terzide satış fiyatı: kumaşın ve işçiliğin tabanı + verdiği her statın
 ## değeri (OutfitCatalog.price_for) - fiyat statla büyüyor, hepsi aynı formül.
 @export var price: int = 0

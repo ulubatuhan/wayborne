@@ -2602,6 +2602,27 @@ re-roll the rain away.
   day - which would silently desynchronise it from the planner's forecast
   and bring the starvation back.
 
+### Temperature Rules
+
+`Temperature` (`scripts/travel/temperature.gd`) turns season, the map's climate (`cold`/`warm` per segment, Rendered
+Road Rules), biome, hour and the day's weather into a Celsius degree. **Computed, never stored**, like `RouteWeather`:
+the same road on the same day is the same cold, and a reload cannot warm it.
+
+- **It turns existing levers only.** The night before each dawn costs every named person by their *cold band*
+  (`cold_load` = `COMFORT_C` − night low − their clothes' warmth, `CAMPFIRE_WARMTH` more if the fire burned that
+  night): stress and fatigue, and in the worst band a small fever chance. The crew (fixed `CREW_WARMTH`) costs morale.
+  Clothing carries `OutfitPiece.warmth` (`OutfitCatalog.WARMTH`, slot defaults); body weight adds ±2, the middle weight
+  exactly neutral. A peasant kit is ~4, a full winter kit ~19.
+- **A freezing day eats more, and the planner asks for it first.** `ration_share` (0 / 0.25 / 0.5 below 0 and −12 °C)
+  multiplies the daily provision formula on the road (`GameSession.get_daily_provision_consumption`, only while
+  `road_sky` is set), and `CaravanPlan.cold_ration_shares` - filled by `Temperature.forecast_ration_shares`, the same
+  day-by-day walk as `forecast_extra_days`, taking the coldest segment the caravan could reach that day - adds exactly
+  that to the required provisions. `test_temperature` walks every map road in midwinter at steady and fast pace and
+  asserts nobody starves; removing the share starves 107 of them.
+- **The road writes the sky, the session reads it.** `road_journey._refresh_weather` calls `set_road_sky` every dawn
+  and on load (transient, recomputed); the fire's night is the saved `last_fire_day`. The gauge is a flame in the Durum
+  tab's plate, its tooltip words-first (`Wording.warmth_tooltip`: the night's low and who will be cold without a fire).
+
 ### Stress Rules
 
 - **Stress (`GameSession.party_stress`) and morale (`CaravanState.morale`)
@@ -3766,6 +3787,10 @@ the report said exactly 100.0 every run.
   never on a stall, sold only in a city. Buying 20+ at once is 6% cheaper. **Selling back what you bought in the same
   visit is capped at 90% of what you paid** (`capped_sell_price`), because your own purchase raises the market's price
   and selling into that raise was a money printer; every purchase path reaches it through `consume_stock`.
+- **A stale stock sells cheaper (Ana Hedefler: eşya bozulması).** Rot eats the quantity; age eats the price.
+  `MarketPricing.freshness_multiplier` keeps a perishable at full price for the first quarter of its shelf life, then
+  slides it to `FRESHNESS_FLOOR` (60%) at the end; `GameSession.capped_sell_price` reads the stock's age
+  (`perishable_days`) before the same-visit buyback cap, and the market row says "stale" with the share.
 - **Every price layer shows itself (task Y-C11).** `MarketPricing.price_layers()` lists the seven factors (place,
   settlement type, inflation, season, supply pressure, event shock, world-event shock - the last told apart by its
   `WorldEvents` label); their product is the price, which the test checks. `PriceLayerText.marks()` puts a short tag on
@@ -5267,23 +5292,11 @@ verir.
   pazar/envanter, ve GrimTheme'in kalıcı parçalarının WaybookTheme'e
   taşınması. Sıra ve ayrıntı `docs/ui/REDESIGN.md` §7'de. Dosya ve sınıf
   adları oyuna özgü kalır (başka bir oyunun terimi değil).
-- **`GRANT_OUTFIT` hiçbir olayda kullanılmıyor.** Giysiler ganimetten düşüyor (`loot.json`) ve terzide satılıyor, ama yolda
-  bir olay kartı henüz giysi vermiyor; etki türü hazır (`GRANT_EQUIPMENT`'in deseniyle, parça önce dolaba düşer).
-  Ölü bir etki türü kuralına göre (Ruin Rules) bir olay kartına bağlanmalı; kart yazımı olay üretim düzeninden geçer.
 - **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
   `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
-- **Eşya bozulması: tazelik fiyata yansımıyor.** Balık yolda çürüyor (`spoil_perishables`, Economy Rules) ama yığının yaşı
-  `MarketPricing`'e girmiyor ve kalıcı mallar görsel kir/kırağı almıyor (arayüz taslağının yıpranmış hücresi çizebiliyor,
-  oyun hesaplamıyor). Hedef: tazeliğin satış fiyatına çarpan olarak girmesi; yeni bir sistem değil.
-- **Sıcaklık, Celsius derecesiyle.** Oyunda henüz bir sıcaklık modeli yok: `SurvivalGauge.set_celsius` göstergesi var ama
-  yalnızca taslak ekranlar (`GrimDrafts`) besliyor, gerçek yol HUD'unun alev göstergesi bir sayıya bağlı değil. Hedef: mevsim +
-  biyom + saat + hava (+ kamp ateşi) bir °C üretir (`RouteWeather` gibi tohumdan hesaplanır, saklanmaz). Mekanik bağlantılar
-  mevcut kollarla: soğukta günlük erzak payı ve stres artar, giysilerin bir ısı değeri olur; planlayıcı bunu erzak rezervine
-  katmak zorunda (Provision Rules'un sözü bozulmasın). G11 kırağı kenarı oyuncunun isteğiyle kaldırılmıştı; sıcaklık kenarla
-  değil sayı ve göstergeyle gösterilir.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler

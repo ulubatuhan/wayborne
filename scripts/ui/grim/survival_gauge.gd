@@ -97,8 +97,7 @@ static func celsius_fraction(c: float) -> float:
 	return clampf((c - CELSIUS_MIN) / (CELSIUS_MAX - CELSIUS_MIN), 0.0, 1.0)
 
 static func celsius_text(c: float) -> String:
-	var n := roundi(c)
-	return ("−%d" % absi(n) if n < 0 else "%d" % n) + " °C"
+	return Temperature.round_text(c)
 
 func set_celsius(c: float) -> void:
 	value = celsius_fraction(c) * 100.0
