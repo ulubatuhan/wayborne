@@ -5273,12 +5273,11 @@ verir.
   İkinci sanat turu (bkz. aşağıdaki Faz 22 anlatısı) yönetim ekranı
   arka planlarını, mal/durum/stat/görev/sınıf ikonlarını, haritayı ve
   mührü çok daha yüksek çözünürlükte yeniden gönderdi ve hepsi
-  `data/assets/ui/waybook`'a işlendi. Gerçekten açık kalan: beş ikon
-  (`p3_agility`, `p5_scout` - teslim edilen içerik kendi dosya adıyla
-  uyuşmuyor; `p3_intellect`, `p4_passed_over` - prompt'tan sapan ama
-  önceki turdan beri kabul edilmiş bir ikon dili; `eq_ring_charmed` - mavi
-  boncuk detayı eksik) ve wardrobe'un kıyafet parça sayfaları (B kategorisi,
-  artık istenmiyor, giysiler 3B render). Tam liste ve
+  `data/assets/ui/waybook`'a işlendi. Beş sorunlu ikon 2026-10-22'de kapandı:
+  `tools/icon_discs.py` çıplak ya da bozuk gelen stat/görev ikonlarını (çeviklik, dayanıklılık, zekâ, sezgi, tellal)
+  ailenin parşömen diskine oturtuyor ve `eq_ring_charmed`'ın boncuğunu maviye çeviriyor; gözcü portresi, terazi ve
+  kırık mühür kalıyor. Açık kalan yalnızca wardrobe'un kıyafet parça sayfaları (B kategorisi, artık istenmiyor,
+  giysiler 3B render). Tam liste ve
   her satırın durumu `docs/wayborne_gorsel_denetim.xlsx`'te.
 - **Gerçek seslendirme + savaş nidaları** (#7, #11). `AudioManager`'ın
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
