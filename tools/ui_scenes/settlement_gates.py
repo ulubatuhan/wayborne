@@ -5,9 +5,11 @@ türeyen, yoldan bakılan bir kapı sahnesi tanımı yazar (`gates.json`).
     python -X utf8 tools/ui_scenes/settlement_gates.py            # hepsi
     python -X utf8 tools/ui_scenes/settlement_gates.py vastrevar  # tek yer
 
-Ardından (pencere açmaz):
-    WAYBORNE_TOWN_CFG=tools/ui_scenes/gates.json blender -b --python tools/ui_scenes/town_scene.py -- --city gate_<id>
-    WAYBORNE_TOWN_CFG=... WAYBORNE_TOWN_OUT=build/gates python -X utf8 tools/ui_scenes/town_post.py gate_<id>
+Oyun bu sahnenin önden resmini artık kullanmıyor (şehre girişte açılan tam
+ekran kapı resmi kaldırıldı, kullanıcı kararı 2026-10-22). Sahne yolun iki
+ucundaki kapı kesitinin kaynağı: `gate_cutout.py` buradan yalnızca suru,
+kuleleri ve arkadaki çatıları alıp yandan render eder
+(`render_props.py`, `"builder": "settlement_gate:<id>"`).
 
 Sahne kasabanınkiyle aynı dilde (gök, ay, ışık, kar, zemin, pencere rengi):
   - yola bakan sur (Quaternius Modular Medieval): ortada giriş, iki yanında

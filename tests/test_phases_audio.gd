@@ -18,7 +18,6 @@ func run(t) -> void:
 	_test_variant_never_repeats(t)
 	_test_beat_log(t)
 	_test_road_ambience_table(t)
-	_test_gate_pictures(t)
 
 func _test_every_settlement_has_its_phases(t) -> void:
 	for city in PHASED:
@@ -77,12 +76,3 @@ func _test_road_ambience_table(t) -> void:
 	t.eq(audio.road_ambience_for(RouteWeather.CLEAR, true, false), audio.AMBIENCE_WIND, "açık gece rüzgâr")
 	for weather in audio.ROAD_AMBIENCE:
 		t.ok(audio.AMBIENCE_PATHS.has(String(audio.ROAD_AMBIENCE[weather])), "%s katmanının dosyası tanımlı" % weather)
-
-## 12.2a: her yerleşimin kapısı var; gündüz evresinde gündüz kapısı, gece taban.
-func _test_gate_pictures(t) -> void:
-	for city in PHASED:
-		t.ok(GateArrival.available(city), "%s kapısı var" % city)
-	var base := GateArrival.DIR % "vastrevar"
-	t.eq(GateArrival.picture_path("vastrevar", 12.0), base + "background_day.jpg", "öğlen gündüz kapısı")
-	t.eq(GateArrival.picture_path("vastrevar", 22.0), base + "background.jpg", "gece meşaleli kapı")
-	t.eq(GateArrival.picture_path("vastrevar", 18.5), base + "background.jpg", "akşam meşaleli kapı")

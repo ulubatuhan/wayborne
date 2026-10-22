@@ -42,16 +42,12 @@ func _ready() -> void:
 	# notu. Bayrak tüketiliyor (hemen false'a dönüyor), yoksa pazar/lonca
 	# gibi bir alt ekrandan geri dönmek de aynı sahneyi yeniden yükler ve
 	# kapı her seferinde bir daha "açılırdı".
-	var arriving := Nav.city_gate_opening
 	if Nav.city_gate_opening:
 		Nav.city_gate_opening = false
 		AudioManager.play_sfx(AudioManager.SFX_GATE)
 	_build_front()
 	_build_brief()
 	_maybe_show_onboarding()
-	# Kapının resmi bir an ekranı kaplar, şehir arkasından belirir (12.2a).
-	if arriving and GateArrival.available(_session.current_location_id):
-		add_child(GateArrival.new().setup(_session.current_location_id, _session.last_clock_hour))
 
 func _build_front() -> void:
 	_front = CityFront.new()
