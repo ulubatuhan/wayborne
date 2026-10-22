@@ -3141,20 +3141,39 @@ paid for. A new game starts in a city (`character_creation.gd` →
   put a `TallWall` piece behind every watchtower (`WALL_BEHIND_DEPTH`), so the curtain wall meets the gate instead of
   stopping at an open tower base. The tower flags have their own cloth material (`FLAG_MATERIAL`), so the stone
   tint rule never reaches them.
-- **The road ends at the settlement's own gate, as part of the road (user's decision, 2026-10-21).** Arriving used to
-  be only a growing procedural silhouette on the horizon. Now `TravelBand` draws the
-  destination's gate in the world (`set_arrival_gate`, `_draw_arrival_gate`): day-anchored at the road's end like a
-  stop, behind the road's far edge, lit by the band's light, its opening centred on the column's head rider when the
-  caravan arrives (`road_journey._sync_arrival_gate`; after turning back, the road's start). The hub draws the same
-  prop. `Location.gate_prop_id()` is the one choice: the settlement's own `gate_<id>` cutout, else the shared log or
-  stone gate by `wall`. The cutouts are rendered from the gate scenes themselves (`tools/ui_scenes/gate_cutout.py`,
-  builder `settlement_gate:<id>` in `render_props.py`, packed one by one with `pack_some.py --prefix gate_`): the same
-  wall, towers, flags and the town's roofs behind it, seen from the side; trees, ground and clutter left out, the wall
-  cut to `HALF_SPAN`. A tall gate (roofs included) is held under `GATE_MAX_HEIGHT_SHARE` of the band, so a 15 m bell
-  tower stands farther back rather than off the frame. A log gate's leaf swings open to both sides
-  (`PropArt.draw_gate_leaf`); a stone portcullis lifts.
+- **Both ends of the road are the settlements' own gates, as part of the road (user's decisions, 2026-10-21/22).** The
+  full-screen frontal gate picture shown on city entry (`GateArrival`) and its renders were removed: the gate lives in
+  the world. `TravelBand.set_road_gates` takes one gate per end of the terrain - the origin's at day 0, the other city's
+  at `terrain_days` (`road_journey._sync_arrival_gate`), so turning back finds the right gate at each end - day-anchored
+  like a stop, behind the road's far edge, its opening centred on the head rider when the caravan stands there. The hub
+  draws the same prop. `GateArt` is the one drawing: the town behind the wall (`town` layer, hazed, raised by
+  `TOWN_RAISE` and shrunk - a side ortho camera would otherwise hide everything behind a wall), the dark passage, the
+  leaf drawn in code (stone: an iron portcullis that lifts; wood: two leaves that swing in; felt: none - the nomad
+  camp's entrance is two tug standards), the wall (`body`), and at night two torches (a fire for the camp). Scale comes
+  from the wall alone (`GateArt.body_height_m`). The opening is measured from the render by `pack_some.door_pivots`
+  (`door_l`/`door_r`/`door_top`); `test_settlements` asserts a wagon fits (>= 2 x 2.5 m) - at the pack's own scale the
+  stone arch was 1.4 m wide, so the gatehouse is scaled up (`settlement_gates.ENTRANCE_SCALE`). Cutouts:
+  `tools/ui_scenes/gate_cutout.py` (`render_props.py` builder `settlement_gate:<id>`), packed with
+  `pack_some.py --prefix gate_`, which also runs `town_grade` so the cutout speaks the town pictures' palette.
+- **A settlement looks like what it is (user's report, 2026-10-22: "yurt, maden, balık kasabalarına özel ekran ve
+  giriş").** `settlement_towns.py` adds each kind's face after the shared skeleton, drawing seeds only for its own kind
+  so every other town stays byte-identical: the nomad camp (`gocebe`) has no wall - felt yurts, the khan's big yurt as
+  the inn, tugs, horse lines and horses, a wicker fence, a fire at the centre; mines get an adit at the hill's foot, rails
+  and carts to the square, a headframe and ore heaps; ports a quay, piers, moored ships and boats, a lighthouse mole;
+  swamps pools, stilt houses and reeds; river towns a river, a bridge and the mill on the bank. Water towns put the
+  camera a storey higher (at eye level the water was a line behind the stalls - measured). The procedural pieces (yurt,
+  tug, cart, rails, headframe, net rack, stilts, reeds) are `tools/ui_scenes/settlement_props.py`; ships, piers and boats
+  are Kenney's Pirate Kit (CC0). Animal models are posed on their idle clip (`town_scene._settle_pose`): imported raw,
+  the horse stood in its attack frame with its neck thrown back.
+- **Every structure and every scene is grim (user's decision, 2026-10-22).** Town pictures get it from
+  `town_post.grade`, gate cutouts from `pack_some.town_grade`, the road, combat and hub world from `GrimGrade`
+  (`scripts/ui/grim/grim_grade.gdshader`, a screen pass under the HUD: desaturate except warm light, squeeze highlights,
+  cool shadows). Measured before it: the noon road was more saturated (0.17-0.20) and brighter than the town pictures
+  (0.15). Valley-culture buildings are weathered on top (`town_scene.weather_materials`: blots, rain streaks, earth
+  and moss at the foot; Quaternius' separate Cycles output is rerouted, or Cycles never saw it). The rule and its
+  numbers are in `docs/ui/STIL_REHBERI.md` ("Kasvet").
 - **A settlement's wall is one fact, read by three places (user's decision, 2026-10-21).** `settlements.json` `wall`
-  (`"wood"`/`"stone"`, `Location.wall`, written by `tools/worldmap/annotate_walls.py` from the town scene's own `wood`
+  (`"wood"`/`"stone"`, `"felt"` for the nomad camp, `Location.wall`, written by `tools/worldmap/annotate_walls.py` from the town scene's own `wood`
   flag) says what the wall is made of: nine settlements (akavan, auderin, caramine, golcavar, kirsavel, liraven,
   samuran, selvicar, vorgat) have a log palisade - sharpened logs, timber towers - in the town front
   (`town_scene.palisade`), the gate scene (`settlement_gates._wood_gate`) and the hub's gate prop (`palisade_gate`,
