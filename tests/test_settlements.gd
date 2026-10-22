@@ -169,11 +169,16 @@ func _test_wall_material(t) -> void:
 	for location in WorldMapData.get_locations():
 		var town: Dictionary = (towns as Dictionary).get(location.location_id, {})
 		var town_wood := false
-		for p in town.get("props", []):
+		var town_yurt := false
+		for p in town.get("props", []) + town.get("buildings", []):
 			if (p as Dictionary).get("kind", "") == "wallrow" and (p as Dictionary).get("wood", false):
 				town_wood = true
-		t.ok(location.wall == "wood" or location.wall == "stone", "sur malzemesi tanımlı: %s" % location.location_id)
-		t.eq(location.wall == "wood", town_wood, "sur malzemesi kasaba sahnesiyle aynı: %s" % location.location_id)
+			if String((p as Dictionary).get("kind", "")).begins_with("builder:yurt"):
+				town_yurt = true
+		t.ok(location.wall in ["wood", "stone", "felt"], "sur malzemesi tanımlı: %s" % location.location_id)
+		t.eq(location.wall == "felt", town_yurt, "göçebe obası keçe, sur yok: %s" % location.location_id)
+		if not town_yurt:
+			t.eq(location.wall == "wood", town_wood, "sur malzemesi kasaba sahnesiyle aynı: %s" % location.location_id)
 		if location.wall == "wood":
 			wood += 1
 	t.ok(wood > 0, "kütük surlu yerleşim var")
