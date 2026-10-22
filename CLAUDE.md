@@ -5293,6 +5293,11 @@ verir.
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
+- **AI beyanı gerekmeyecek görseller (kullanıcı hedefi, 2026-10-22).** Üretken modelle yapılmış 2B varlıklar
+  (Waybook arka planları, ikonlar, olay illüstrasyonları, gösterge resimleri) ileride elle yeniden çizilecek: AI çıktısı
+  yalnızca tablette %30-40 opaklıkta bir referans katmanı, lineart ve düz boyama üstüne elle, referans katmanı silinir,
+  şeffaf PNG aynı hatlardan (`art_source/` -> `data/assets/`) girer. Süreç ve aşamalar:
+  `docs/design_notes/ai_referansli_sprite.md`. 3B render'lar CC0 modellerden, kapsam dışı.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler
