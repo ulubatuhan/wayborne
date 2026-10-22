@@ -2807,7 +2807,6 @@ func _sync_arrival_gate() -> void:
 	# Önümüzdeki kapının geçidi liderin burnunda, arkamızdakinin geçidi son
 	# vagonun ardında: varırken lider kapıya girer, çıkarken kuyruk kapıdan çıkar.
 	var rear := _caravan.get_rear_offset()
-	var here := _terrain_day()
 	for end in [[from_id, 0.0], [far_id, float(_journey.terrain_days)]]:
 		var place := WorldMapData.get_location_by_id(String(end[0]))
 		if place == null:
@@ -2815,7 +2814,8 @@ func _sync_arrival_gate() -> void:
 		var prop_id := place.gate_prop_id()
 		if prop_id.is_empty():
 			continue
-		var ahead := (float(end[1]) - here) * _journey.heading > 0.0
+		# Yürüyüş yönündeki uç önde: ileri giderken son gün, geri dönerken ilk gün.
+		var ahead := (float(end[1]) > 0.0) == (_journey.heading > 0.0)
 		gates.append({"prop": prop_id, "day": float(end[1]), "kind": place.wall, "lead": head if ahead else rear})
 	_band.set_road_gates(gates, head)
 

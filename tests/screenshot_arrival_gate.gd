@@ -47,10 +47,11 @@ func _shoot_road(origin: String, destination_id: String) -> void:
 		await _frames(30)
 		_save("%s_from_%s_%02d.png" % [destination_id, origin, int(round(float(share) * 100.0))])
 	for hour in HOURS:
-		_set_hour(screen, float(hour))
 		for share in REMAINING_SCREENS:
 			var remaining_days := float(share) * VIEW_SIZE.x / maxf(1.0, band.get_pixels_per_day())
 			journey.days_covered = maxf(0.0, total - remaining_days)
+			# Saat yol ilerledikten sonra: gün sayısı saati de sürüklüyor.
+			_set_hour(screen, float(hour))
 			screen.call("_refresh_time_ui")
 			await _frames(30)
 			_save("%s_%02dh_%02d.png" % [destination_id, int(hour), int(round(float(share) * 100.0))])

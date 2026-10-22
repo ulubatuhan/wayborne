@@ -193,6 +193,11 @@ func _test_own_gates(t) -> void:
 		t.ok(PropArt.has(id), "kendi kapı kesiti var: %s" % location.location_id)
 		t.eq(location.gate_prop_id(), id, "kendi kapısını okur: %s" % location.location_id)
 		if PropArt.has(id):
-			var box := PropArt.bounds(id, Vector2.ZERO, 1.0)
+			var box := PropArt.layer_rect(id, "body", Vector2.ZERO, 1.0)
 			t.ok(box.position.x < 0.0 and box.end.x > 0.0, "geçit kesitin içinde: %s" % location.location_id)
 			t.ok(absf(box.end.y) <= 4.0, "taban yerde: %s" % location.location_id)
+			t.ok(PropArt.has_layer(id, "town"), "surun arkasında şehir katmanı var: %s" % location.location_id)
+			# Geçit render'dan ölçülüyor: bir vagon geçmeli (2 m'den geniş, 2.5 m'den yüksek).
+			var door := GateArt.door_rect(id, Vector2.ZERO, 1.0 / PropArt.ppm(id))
+			t.ok(door.size.x >= 2.0 and door.size.y >= 2.5, "geçit vagon geçecek kadar: %s %s" % [location.location_id, door.size])
+			t.ok(absf(door.get_center().x) < 0.5, "geçit çapada: %s" % location.location_id)

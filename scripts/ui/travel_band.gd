@@ -995,6 +995,10 @@ func _ground_y_at_screen(x: float) -> float:
 ## Kalkılan ve varılacak şehir. Biri arkada küçülüyor, öteki önde
 ## büyüyor - ilerleme hissinin en okunur hâli, çünkü hedef *görünüyor*.
 func _draw_cities(area: Rect2, horizon: float) -> void:
+	# Yolun iki ucunda yerleşimin kendi kapısı duruyorsa ufuktaki jenerik silüet
+	# çizilmez: varışta liderin önünde ikinci, yabancı bir şehir beliriyordu.
+	if not _gates.is_empty():
+		return
 	var haze := Color(_sky.haze)
 	var silhouette := ArtPalette.fade_to_haze(Color(_colors.far).darkened(0.25), haze, 0.55)
 
