@@ -19,10 +19,16 @@ extends Control
 ##   madalyon ona açık bir zemin veriyor (`tools/gauge_icons.py`; resim ve
 ##   madalyon aynı kare tuvalde, aynı dikdörtgene çiziliyor).
 ##
-## **Sayı kaybolmuyor.** Bu proje sayısal şeffaflığı bilerek seçti (Waybook
-## UI Rules: "HP gets a sifat next to the number, never in place of it");
-## nesne aynı gerçeğin ikinci okuması, yerine geçen değil. Bütün eğriler
-## statik ve saf (Motion Rules), test aynı sayıları okuyor.
+## - Sıcaklık da PICTURE: madalyonda o anın havası (`weather_picture`: güneş,
+##   ay, bulut, yağmur, sis, fırtına; sıfırın altında yağmur kar, fırtına tipi).
+##
+## **Sayı kaybolmuyor, ama resmin üstünde durmuyor (kullanıcı kararı
+## 2026-10-22).** Madalyonun altında yalnızca adı yazar; değer, birimiyle
+## ("72/100", "%45", "−4 °C"), fare üstüne gelince madalyonun alt kenarında
+## küçük bir levhada belirir (`value_text`). İpucu da sözle başlayıp sayıyı
+## ikinci satırda verir (Y-H03). Eski biçimler (şişe, alev, leke) yalnızca
+## taslak ekranlarında, sayıları altlarında yazılı. Bütün eğriler statik ve
+## saf (Motion Rules), test aynı sayıları okuyor.
 
 enum Kind { VIAL, FLAME, STAIN, PICTURE }
 
@@ -34,6 +40,21 @@ const PICTURE_STATES: Array[String] = ["low", "mid", "high"]
 ## Kelimenin dört kademesinden resmin üç hâline (ortadaki iki kademe aynı resim).
 const BAND_TO_PICTURE: Array[int] = [0, 1, 1, 2]
 const PICTURE_FADE_SECONDS: float = 0.6
+## Değerin birimi: puan ("72/100") ya da yüzde ("%45"). Sıcaklık kendi metnini taşır.
+enum Unit { OF_MAX, PERCENT }
+## Fare üstündeyken değer levhası: yazı boyu ve madalyonun altına binme payı.
+const VALUE_FONT_SIZE: int = 14
+const VALUE_PLATE_PAD: Vector2 = Vector2(7, 2)
+## Hava resimleri (`weather_<ad>.png`). Gece açık hava ay; sıfırın altında yağmur
+## kar, fırtına tipi olur - yeni bir hava değil, aynı havanın görünüşü.
+const WEATHER_PICTURES: Dictionary = {
+	RouteWeather.CLEAR: "clear_day",
+	RouteWeather.OVERCAST: "overcast",
+	RouteWeather.RAIN: "rain",
+	RouteWeather.FOG: "fog",
+	RouteWeather.STORM: "storm",
+}
+const NIGHT_DARKNESS: float = 0.5
 const NUMBER_HEIGHT: float = 18.0
 const FLAME_MIN_SHARE: float = 0.12
 
@@ -58,11 +79,28 @@ var picture_id: String = ""
 var _picture_state: int = -1
 var _prev_picture_state: int = -1
 var _picture_switch_time: float = -100.0
+var _picture_path: String = ""
+var _prev_picture_path: String = ""
+var unit: Unit = Unit.OF_MAX
+var _hovered: bool = false
 static var _picture_cache: Dictionary = {}
 
 func _init() -> void:
 	custom_minimum_size = SIZE + Vector2(0, NUMBER_HEIGHT * 2.0)
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	mouse_entered.connect(_set_hovered.bind(true))
+	mouse_exited.connect(_set_hovered.bind(false))
+
+func _set_hovered(on: bool) -> void:
+	_hovered = on
+	queue_redraw()
+
+## Ekran görüntüsü ve test için: fare üstündeymiş gibi çiz.
+func set_hovered(on: bool) -> void:
+	_set_hovered(on)
+
+func is_value_shown() -> bool:
+	return kind != Kind.PICTURE or _hovered
 
 func setup(gauge_kind: Kind, fill: Color, text: String, low_is_bad: bool = true) -> SurvivalGauge:
 	kind = gauge_kind
@@ -77,9 +115,54 @@ func setup(gauge_kind: Kind, fill: Color, text: String, low_is_bad: bool = true)
 func setup_picture(id: String, text: String, low_is_bad: bool = true) -> SurvivalGauge:
 	setup(Kind.PICTURE, ArtPalette.GRIM_PARCHMENT, text, low_is_bad)
 	picture_id = id
-	custom_minimum_size = PICTURE_SIZE + Vector2(0, NUMBER_HEIGHT * 2.0)
+	custom_minimum_size = PICTURE_SIZE + Vector2(0, NUMBER_HEIGHT)
 	_picture_state = picture_state(value, max_value)
+	_picture_path = picture_path(id, _picture_state)
 	return self
+
+## Sıcaklık madalyonu: resim havadan, değer dereceden (`set_weather`).
+func setup_weather(text: String) -> SurvivalGauge:
+	setup(Kind.PICTURE, ArtPalette.GRIM_PARCHMENT, text, true)
+	custom_minimum_size = PICTURE_SIZE + Vector2(0, NUMBER_HEIGHT)
+	return self
+
+func with_unit(new_unit: Unit) -> SurvivalGauge:
+	unit = new_unit
+	return self
+
+func set_weather(weather: String, night: bool, c: float) -> void:
+	set_celsius(c)
+	_switch_picture(PICTURE_DIR + "weather_%s.png" % weather_picture(weather, night, c))
+
+## Havanın resmi: gece açık hava ay, sıfırın altında yağmur kar, fırtına tipi.
+static func weather_picture(weather: String, night: bool, c: float) -> String:
+	if weather == RouteWeather.CLEAR and night:
+		return "clear_night"
+	if c < 0.0 and weather == RouteWeather.RAIN:
+		return "snow"
+	if c < 0.0 and weather == RouteWeather.STORM:
+		return "blizzard"
+	return String(WEATHER_PICTURES.get(weather, "overcast"))
+
+static func is_night(hour: float) -> bool:
+	return JourneyClock.darkness_for_hour(hour) >= NIGHT_DARKNESS
+
+## Fare üstündeyken yazılan değer, birimiyle.
+func value_text() -> String:
+	if number_text != "":
+		return number_text
+	if unit == Unit.PERCENT:
+		return tr("UI_CHECK_PERCENT") % roundi(value)
+	return tr("UI_GAUGE_OF_MAX") % [roundi(value), roundi(max_value)]
+
+func _switch_picture(path: String) -> void:
+	if path == _picture_path:
+		return
+	if _picture_path != "":
+		_prev_picture_path = _picture_path
+		_picture_switch_time = _time
+	_picture_path = path
+	queue_redraw()
 
 func set_value(new_value: float, new_max: float = 100.0) -> void:
 	value = new_value
@@ -89,7 +172,8 @@ func set_value(new_value: float, new_max: float = 100.0) -> void:
 		if state != _picture_state:
 			_prev_picture_state = _picture_state
 			_picture_state = state
-			_picture_switch_time = _time
+		if picture_id != "":
+			_switch_picture(picture_path(picture_id, state))
 	queue_redraw()
 
 ## Değerin resmi: 0 düşük, 1 orta, 2 yüksek - değerin kendisi, iyi ya da kötü
@@ -291,9 +375,9 @@ func _draw_picture(box: Rect2, _frac: float) -> void:
 	else:
 		draw_circle(box.get_center(), box.size.x * 0.5, ArtPalette.GRIM_PARCHMENT_DIM)
 	var fade := picture_fade(_time - _picture_switch_time)
-	if fade < 1.0 and _prev_picture_state >= 0:
-		_draw_picture_state(box, _prev_picture_state, 1.0 - fade)
-	_draw_picture_state(box, _picture_state, fade if _prev_picture_state >= 0 else 1.0)
+	if fade < 1.0 and _prev_picture_path != "":
+		_draw_picture_file(box, _prev_picture_path, 1.0 - fade)
+	_draw_picture_file(box, _picture_path, fade if _prev_picture_path != "" else 1.0)
 	if marker_value >= 0.0:
 		# Ortalamadan ayrışan kişinin değeri: madalyonun sağında kızıl bir çivi,
 		# yüksekliği değeri.
@@ -304,15 +388,35 @@ func _draw_picture(box: Rect2, _frac: float) -> void:
 	if fade < 1.0:
 		queue_redraw()
 
-func _draw_picture_state(box: Rect2, state: int, alpha: float) -> void:
-	if alpha <= 0.0 or picture_id.is_empty():
+func _draw_picture_file(box: Rect2, path: String, alpha: float) -> void:
+	if alpha <= 0.0 or path.is_empty():
 		return
-	var tex := picture_texture(picture_path(picture_id, state))
+	var tex := picture_texture(path)
 	if tex != null:
 		draw_texture_rect(tex, box, false, Color(1, 1, 1, alpha))
 
+## Fare üstündeyken madalyonun alt kenarında küçük bir levha: değer, birimiyle.
+func _draw_value_plate(box: Rect2, sev: float) -> void:
+	var font := WaybookTheme.get_font()
+	var text := value_text()
+	var tsize := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, VALUE_FONT_SIZE)
+	var plate_size := Vector2(tsize.x, float(VALUE_FONT_SIZE)) + VALUE_PLATE_PAD * 2.0
+	var plate := Rect2(Vector2(box.get_center().x - plate_size.x * 0.5, box.end.y - plate_size.y - 3.0), plate_size)
+	draw_rect(plate, Color(ArtPalette.GRIM_CHARCOAL, 0.92))
+	draw_rect(plate, Color(ArtPalette.GRIM_RUST, 0.9), false, 1.0)
+	var col := ArtPalette.GRIM_PARCHMENT if sev < 0.6 else ArtPalette.GRIM_CRIMSON.lightened(0.3)
+	draw_string(font, Vector2(plate.position.x + VALUE_PLATE_PAD.x, plate.end.y - VALUE_PLATE_PAD.y - 3.0), text,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, VALUE_FONT_SIZE, col)
+
 func _draw_number(box: Rect2, sev: float) -> void:
 	var font := WaybookTheme.get_font()
+	if kind == Kind.PICTURE:
+		var lw := font.get_string_size(label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		draw_string(font, Vector2(box.get_center().x - lw * 0.5, box.end.y + NUMBER_HEIGHT - 3), label_text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, ArtPalette.GRIM_PARCHMENT_DIM)
+		if _hovered:
+			_draw_value_plate(box, sev)
+		return
 	var y := box.end.y + NUMBER_HEIGHT - 2
 	var col := ArtPalette.GRIM_PARCHMENT if sev < 0.6 else ArtPalette.GRIM_CRIMSON.lightened(0.25)
 	var number := number_text if number_text != "" else "%d" % roundi(value)

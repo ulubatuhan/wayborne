@@ -29,12 +29,20 @@ OUT = os.path.join(ROOT, "data", "assets", "ui", "gauges")
 
 GAUGES = {"moral": "morale", "stres": "stress", "takat": "stamina", "tehlike": "danger"}
 STATES = {"yuksek": "high", "orta": "mid", "dusuk": "low"}
+# Sıcaklık göstergesinin hava resimleri (kaynak `sicaklik_<ad>.png`, çıktı `weather_<id>.png`).
+# Oyunun beş havası; gece ve kar/tipi yalnızca görünüş (bkz. SurvivalGauge.weather_picture).
+WEATHERS = {
+    "acik_gunduz": "clear_day", "acik_gece": "clear_night", "bulutlu": "overcast", "yagmur": "rain",
+    "sis": "fog", "firtina": "storm", "kar": "snow", "tipi": "blizzard",
+}
 
 # Ortak tuval (en büyük teslimatın boyu).
 CANVAS = (1696, 2528)
 # Resmin en uzak opak pikseli madalyonun iç halkasının bu payında durur.
 FIT_SHARE = 0.93
 ALPHA_SOLID = 24
+# Hava sahnesinin kendi dairesi iç halkayı bu kadar taşar; taşan kenar (çizgisiyle) kırpılır.
+WEATHER_FILL = 1.06
 
 # Madalyon: eskimiş bronz bir sikke (kullanıcının gösterdiği örnekteki gibi):
 # ortası aşınmış açık, kenara doğru koyu pas, bir sıra kabartma diş, kalkık
@@ -88,6 +96,47 @@ def export_icons():
                 else canvas.paste(im.resize(size, Image.LANCZOS), offset, im.resize(size, Image.LANCZOS))
             canvas.save(os.path.join(OUT, f"{out_id}_{STATES[s]}.png"), optimize=True)
         print(f"{out_id}: ölçek {scale:.3f}, merkez ({cx:.0f}, {cy:.0f})")
+
+
+def place_in_medallion(images, out_paths, fill=FIT_SHARE, clip=False):
+    """Bir ya da birkaç resmi, birleşik maskelerine göre madalyonun iç dairesine oturtur.
+    `clip`: resim kendi dairesiyle geldiyse (hava sahneleri) iç daireyi taşacak kadar
+    büyütülüp oraya kırpılır; yoksa kendi kenar çizgisi pirincin içinde ikinci bir halka
+    gibi kalıyordu (ölçüldü)."""
+    canvas_size = images[0].size
+    mask = np.zeros((canvas_size[1], canvas_size[0]), bool)
+    for im in images:
+        mask |= np.asarray(im.getchannel("A")) > ALPHA_SOLID
+    ys, xs = np.nonzero(mask)
+    cx = (xs.min() + xs.max()) * 0.5
+    cy = (ys.min() + ys.max()) * 0.5
+    reach = float(np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2).max())
+    scale = fill * inner_radius() / reach
+    size = (max(1, round(canvas_size[0] * scale)), max(1, round(canvas_size[1] * scale)))
+    offset = (round(MEDALLION * 0.5 - cx * scale), round(MEDALLION * 0.5 - cy * scale))
+    yy, xx = np.mgrid[0:MEDALLION, 0:MEDALLION].astype(np.float32)
+    d = np.sqrt((xx - (MEDALLION - 1) * 0.5) ** 2 + (yy - (MEDALLION - 1) * 0.5) ** 2)
+    circle = np.clip(inner_radius() + 0.5 - d, 0.0, 1.0)
+    for im, path in zip(images, out_paths):
+        small = im.resize(size, Image.LANCZOS)
+        canvas = Image.new("RGBA", (MEDALLION, MEDALLION), (0, 0, 0, 0))
+        canvas.paste(small, offset, small)
+        if clip:
+            arr = np.asarray(canvas).astype(np.float32)
+            arr[..., 3] *= circle
+            canvas = Image.fromarray(arr.astype(np.uint8), "RGBA")
+        canvas.save(path, optimize=True)
+    return scale
+
+
+def export_weather():
+    """Her hava resmi kendi başına oturur: üç hâlli göstergelerden farklı olarak bunlar aynı
+    nesnenin hâlleri değil, ayrı resimler; ortak kutu güneşi bulutun boyuna küçültürdü."""
+    for src_id, out_id in WEATHERS.items():
+        im = Image.open(os.path.join(SRC, f"sicaklik_{src_id}.png")).convert("RGBA")
+        scale = place_in_medallion([im], [os.path.join(OUT, f"weather_{out_id}.png")],
+                                   fill=WEATHER_FILL, clip=True)
+        print(f"weather_{out_id}: ölçek {scale:.3f}")
 
 
 def smooth_noise(rng, shape, cell):
@@ -160,6 +209,7 @@ def make_medallion():
 def main():
     os.makedirs(OUT, exist_ok=True)
     export_icons()
+    export_weather()
     make_medallion()
     stale = os.path.join(OUT, "card.png")
     if os.path.exists(stale):

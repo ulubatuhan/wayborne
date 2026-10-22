@@ -54,6 +54,14 @@ func _init() -> void:
 		for _frame in 40:
 			await process_frame
 		_save("01_panel_%d.png" % tab)
+	# Durum sekmesinin madalyonları, fare üstündeymiş gibi: değer levhası.
+	panel.select_tab(RoadControlPanel.TAB_STATUS)
+	for bar_name in ["_morale_bar", "_stress_bar", "_danger_bar", "_stamina_bar", "_warmth_bar"]:
+		var gauge: SurvivalGauge = screen.get(bar_name)
+		gauge.set_hovered(true)
+	for _frame in 40:
+		await process_frame
+	_save("01_panel_durum_ustunde.png")
 	panel.select_tab(RoadControlPanel.TAB_PARTY)
 
 	# Olay kartı: EU4 yerleşiminin asıl sınandığı kare.

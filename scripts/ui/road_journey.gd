@@ -702,9 +702,9 @@ func _build_hud_layer() -> void:
 	_hud.add_child(_build_bottom_bar())
 	_build_orders_panel()
 
-## Kervanın hali: Durum sekmesinde dört resimli kart (moral meşale, stres
-## dikenli sarmaşık, tehlike kuzgunlar, takat at) ve sıcaklık mumu; sayı her
-## birinin altında yazılı (bkz. SurvivalGauge).
+## Kervanın hali: Durum sekmesinde beş madalyon (moral meşale, stres dikenli
+## sarmaşık, tehlike kuzgunlar, takat at, sıcaklıkta o anın havası); değer,
+## birimiyle, fare üstüne gelince belirir (bkz. SurvivalGauge).
 const GAUGE_PLATE_MARGIN: int = 14
 
 func _build_gauge_plate() -> Control:
@@ -722,9 +722,10 @@ func _build_gauge_plate() -> Control:
 	plate.add_child(row)
 	_morale_bar = SurvivalGauge.new().setup_picture("morale", tr("UI_HUB_MORALE"))
 	_stress_bar = SurvivalGauge.new().setup_picture("stress", tr("UI_HUB_STRESS"), false)
-	_danger_bar = SurvivalGauge.new().setup_picture("danger", tr("UI_HUB_DANGER"), false)
+	_danger_bar = SurvivalGauge.new().setup_picture("danger", tr("UI_HUB_DANGER"), false) \
+		.with_unit(SurvivalGauge.Unit.PERCENT)
 	_stamina_bar = SurvivalGauge.new().setup_picture("stamina", tr("UI_ROAD_STAMINA"))
-	_warmth_bar = SurvivalGauge.new().setup(SurvivalGauge.Kind.FLAME, ArtPalette.GRIM_AMBER, tr("UI_ROAD_WARMTH"))
+	_warmth_bar = SurvivalGauge.new().setup_weather(tr("UI_ROAD_WARMTH"))
 	for gauge in [_morale_bar, _stress_bar, _danger_bar, _stamina_bar, _warmth_bar]:
 		row.add_child(gauge)
 	return holder
@@ -4222,7 +4223,8 @@ func _refresh_warmth() -> void:
 	_warmth_bar.visible = not is_nan(now)
 	if is_nan(now):
 		return
-	_warmth_bar.set_celsius(now)
+	var weather := String(_session.road_sky.get("weather", RouteWeather.CLEAR))
+	_warmth_bar.set_weather(weather, SurvivalGauge.is_night(_clock.get_hour_of_day()), now)
 	_warmth_bar.set_reason(Wording.warmth_tooltip(_session, now))
 
 func _refresh_state() -> void:

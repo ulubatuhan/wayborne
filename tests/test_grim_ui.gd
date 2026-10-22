@@ -260,3 +260,34 @@ func _test_gauge_pictures(t) -> void:
 	t.eq(gauge._picture_state, 2, "yüksek stres en sıkı düğüm")
 	t.eq(gauge._prev_picture_state, 0, "önceki resim geçiş için tutuluyor")
 	gauge.free()
+	_test_weather_gauge(t)
+
+## Sıcaklık madalyonu havayı gösterir; değer yalnızca fare üstündeyken, birimiyle.
+func _test_weather_gauge(t) -> void:
+	for w in ["clear_day", "clear_night", "overcast", "rain", "fog", "storm", "snow", "blizzard"]:
+		t.ok(SurvivalGauge.picture_texture(SurvivalGauge.PICTURE_DIR + "weather_%s.png" % w) != null,
+			"hava resmi var: %s" % w)
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.CLEAR, false, 12.0), "clear_day", "gündüz açık hava güneş")
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.CLEAR, true, 12.0), "clear_night", "gece açık hava ay")
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.RAIN, false, 4.0), "rain", "sıfırın üstünde yağmur")
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.RAIN, false, -3.0), "snow", "sıfırın altında yağmur kar")
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.STORM, true, -9.0), "blizzard", "sıfırın altında fırtına tipi")
+	t.eq(SurvivalGauge.weather_picture(RouteWeather.FOG, true, -9.0), "fog", "sis gece de sis")
+	for w in [RouteWeather.CLEAR, RouteWeather.OVERCAST, RouteWeather.RAIN, RouteWeather.FOG, RouteWeather.STORM]:
+		t.ok(SurvivalGauge.WEATHER_PICTURES.has(w), "her havanın resmi var: %s" % w)
+	t.ok(SurvivalGauge.is_night(1.0) and not SurvivalGauge.is_night(13.0), "gece yarısı gece, öğlen gündüz")
+	var warmth := SurvivalGauge.new().setup_weather("Sıcaklık")
+	warmth.set_weather(RouteWeather.RAIN, false, -4.2)
+	t.eq(warmth.value_text(), "−4 °C", "sıcaklık değeri birimiyle")
+	t.ok(not warmth.is_value_shown(), "değer fare üstüne gelmeden görünmüyor")
+	warmth.set_hovered(true)
+	t.ok(warmth.is_value_shown(), "fare üstündeyken değer görünüyor")
+	warmth.free()
+	var danger := SurvivalGauge.new().setup_picture("danger", "Tehlike", false).with_unit(SurvivalGauge.Unit.PERCENT)
+	danger.set_value(45.0)
+	t.eq(danger.value_text(), "%45", "tehlike yüzdeyle")
+	danger.free()
+	var morale := SurvivalGauge.new().setup_picture("morale", "Moral")
+	morale.set_value(72.0, 100.0)
+	t.eq(morale.value_text(), "72/100", "moral puanla")
+	morale.free()

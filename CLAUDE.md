@@ -2298,9 +2298,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   left the top bar: the Durum tab holds four
   `SurvivalGauge` medallions and the warmth candle (user's decision 2026-10-22: no vials): an engraved picture per
   value band on an aged bronze coin - morale a torch, stress a bramble (tightest when high), danger ravens, stamina a
-  horse - switching at the same thresholds as the words (`Wording.band`) with a short cross-fade; pictures and coin
-  come from `tools/gauge_icons.py` (sources in `art_source/gauges/`). Each has its number and name written under it and liquid
-  colours from `ArtPalette.UI_GAUGE_*` (the hub still uses `PulseBar`); the clock has a `TimeDial`
+  horse - switching at the same thresholds as the words (`Wording.band`) with a short cross-fade; warmth shows the
+  hour's weather on the same coin (`SurvivalGauge.weather_picture`: a moon on a clear night, snow and blizzard for rain
+  and storm below 0 °C). Pictures and coin come from `tools/gauge_icons.py` (sources in `art_source/gauges/`). Only the
+  name is written under a coin; the value, with its unit ("72/100", "%45", "−4 °C"), appears on a small plate when the
+  pointer is over it (user's decision 2026-10-22: no numbers on the pictures). The hub still uses `PulseBar`; the clock has a `TimeDial`
   (R3, sun at noon, stars at midnight); attention and an open road signal
   show their R6/R7 icon, the signal flashing blood when it escalates and
   moss when it is caught.
@@ -2622,8 +2624,8 @@ the same road on the same day is the same cold, and a reload cannot warm it.
   that to the required provisions. `test_temperature` walks every map road in midwinter at steady and fast pace and
   asserts nobody starves; removing the share starves 107 of them.
 - **The road writes the sky, the session reads it.** `road_journey._refresh_weather` calls `set_road_sky` every dawn
-  and on load (transient, recomputed); the fire's night is the saved `last_fire_day`. The gauge is a flame in the Durum
-  tab's plate, its tooltip words-first (`Wording.warmth_tooltip`: the night's low and who will be cold without a fire).
+  and on load (transient, recomputed); the fire's night is the saved `last_fire_day`. The gauge is the hour's weather on a bronze coin in
+  the Durum tab, its tooltip words-first (`Wording.warmth_tooltip`: the night's low and who will be cold without a fire).
 
 ### Stress Rules
 
