@@ -411,6 +411,7 @@ def main(out):
         } for s in settlements],
         "places": [],
         "sections": build_questions(settlements, places, region_names),
+        "summary": open(os.path.join(ROOT, "docs/lore/LORE_OZET.txt"), encoding="utf-8").read(),
     }
     for p in places:
         if p["k"] in PLACE_KIND and p["k"] not in ("it_town",):
