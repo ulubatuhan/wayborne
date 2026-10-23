@@ -5349,6 +5349,12 @@ verir.
   yalnızca tablette %30-40 opaklıkta bir referans katmanı, lineart ve düz boyama üstüne elle, referans katmanı silinir,
   şeffaf PNG aynı hatlardan (`art_source/` -> `data/assets/`) girer. Süreç ve aşamalar:
   `docs/design_notes/ai_referansli_sprite.md`. 3B render'lar CC0 modellerden, kapsam dışı.
+- **Kamp ateşi başında oturma postürü (kullanıcı isteği, 2026-10-23).** Bugün kamp kurulunca herkes ateşin iki yanında
+  ayakta duruyor (`RoadCaravan.CAMPFIRE_SEATS`). İstenen: ateşin etrafında oturan, ısınan kervan. Yapılacaklar:
+  `FigureActions`'a oturma klipleri (`sit_fire`: bağdaş/kütükte oturuş, eller ateşe; birkaç varyant), MPFB hattında
+  altı beden ve bütün giysiler için render (`render_frames.py`/`render_outfits.py --clips`), varınca yürüyüşten
+  oturuşa geçiş (dismount/climb_down gibi kalçadan köklü), koltuk düzeni oturan figüre göre yeniden (yükseklik farkı),
+  ateşin önünde/arkasında oturma için çizim sırası, kalkışta tersine oynatma; vitrin kamp karesi yeniden çekilir.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler

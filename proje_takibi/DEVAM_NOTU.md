@@ -36,6 +36,7 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | C4 | Y-C06 36 ekipman (sinerji, bedelli, lanetli; kilise laneti kaldırır), ikonlar `tools/equipment_icons.py`, ölçüm simulate_journeys parça taraması | bitti (24527c4) |
 | C5 | Y-G04 büst portresi (`BustPortrait`): karakter, kadro, aday, madalyon (devir, döküm), Düşenler (ölünün görünüşü defter satırında `look`) | bitti: madalyon oval maskeyle, Düşenler portreleri ekranda doğrulandı |
 | C6 | Y-G13 vitrin: `tests/screenshot_showcase.gd` -> `docs/steam/vitrin/*.jpg`. Bulunan ve oyunda düzeltilen: kamp koltukları ateşin üstündeydi, harita atlısında fener yoktu | bitti: beş kare saçlı figürlerle, `docs/steam/vitrin/*.jpg`; kullanıcı onayı bekliyor |
+| C7 | Kamp ateşi oturma postürü + sahne (kullanıcı, 2026-10-23): yalnızca hedeflere eklendi (CLAUDE.md Ana Hedefler), haftalık limit nedeniyle başlanmadı | sırada |
 
 ## Kullanıcı kararları (2026-10-21, karar defteri) - İŞ SIRASI
 
