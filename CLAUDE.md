@@ -2231,6 +2231,11 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   stays live text beside it (Event Engine Rules). For a while the ledger's
   scratch-out (G5) was composed over it; the player rejected it in
   playtest ("güzel gözükmüyor, silik olması yeterli").
+- **The cursor is a brass arrowhead (user's reference, 2026-10-23).** `tools/cursor_art.py` draws the "Shaped" dart in
+  two tones: `arrow.png` (dull) everywhere, `pointer.png` (bright) over anything clickable - `UiTheme` gives every
+  `BaseButton` `CURSOR_POINTING_HAND`, and `ButtonFeedback` drops a locked button back to the dull arrow on hover. The
+  arrow is also the project's `display/mouse_cursor/custom_image` (so it shows before the first frame) and the gamepad's
+  virtual cursor (`GamepadCursorIcon`), so switching to a pad never changes the picture. Hotspot is the tip, (3, 2).
 - **No pinned paper in the chrome (user's decision, 2026-10-20).** The pinned paper slip (G8) used to frame tooltips
   and the market receipt as a nine-slice; the user found the pinned notes ugly, and both are now the family's flat box
   with bone text. `g8_slip.png` is no longer shipped.

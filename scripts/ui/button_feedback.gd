@@ -49,6 +49,9 @@ static func hover_scale(width: float) -> float:
 ## o anda çocuk eklemek motorun "ebeveyn meşgul" hatasıdır. İç (internal)
 ## çocuk olarak ekleniyor - `get_children()` onu görmez, yani düğmenin
 ## çocuklarını sayan hiçbir kod bundan etkilenmez.
+static func cursor_for(disabled: bool) -> Control.CursorShape:
+	return Control.CURSOR_ARROW if disabled else Control.CURSOR_POINTING_HAND
+
 static func attach(button: BaseButton) -> void:
 	if button.has_meta(ATTACHED_META):
 		return
@@ -83,6 +86,9 @@ func _recentre() -> void:
 
 func _on_entered() -> void:
 	_hovered = true
+	# Kilitli düğmede imleç parlamaz: parlak ok "buraya tıklanır" demek.
+	if _button.mouse_default_cursor_shape in [Control.CURSOR_ARROW, Control.CURSOR_POINTING_HAND]:
+		_button.mouse_default_cursor_shape = cursor_for(_button.disabled)
 	if _still():
 		return
 	_animate(hover_scale(_button.size.x), HOVER_SECONDS)

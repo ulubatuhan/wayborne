@@ -29,6 +29,9 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | B3 | Y-G05 savaş ekranı | sırada |
 | B4 | 12.2 yol görünümü büyük revizyon, 9.10 biyom arka planları | sırada |
 | B5 | Y-G11T masa şablonu taslağı, Y-G13 beş ana görsel | sırada |
+| L1 | Lore özeti `docs/lore/LORE_OZET.txt` + soru defteri (harita v3, 302 soru, özet ilk sekmede) https://claude.ai/artifact/GL3TcJUe1Agerti9VP6JbH ; üretici `tools/lore_soru_sayfasi.py`. Cevaplar sayfanın db'sinde `answers/<qid>`: okunup LORE.md/TARIHCE.md'ye işlenecek | bitti, cevap bekleniyor |
+| C1 | İmleç: pirinç ok ucu (kullanıcı referansı "Shaped"), `tools/cursor_art.py`; sönük ok her yerde, parlak düğme üstünde; kumanda imleci aynı resim. 28779 test yeşil, `tests/screenshot_cursor.gd` | bitti |
+| C2 | Sırada (kullanıcı, 2026-10-23): Y-G03 saç/başlık render, Y-C06 35+ ekipman, Y-G04 büst portreleri, Y-G13 vitrin görselleri | sırada |
 
 ## Kullanıcı kararları (2026-10-21, karar defteri) - İŞ SIRASI
 

@@ -41,6 +41,8 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+mouse_cursor/custom_image="res://data/assets/ui/cursor/arrow.png"
+mouse_cursor/custom_image_hotspot=Vector2(3, 2)
 
 [internationalization]
 

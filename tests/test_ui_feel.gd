@@ -18,6 +18,7 @@ func run(t) -> void:
 	_test_near_miss(t)
 	_test_road_zoom_is_bounded(t)
 	_test_safe_zone_ring_shrinks_with_wagons(t)
+	_test_mouse_cursor(t)
 
 func _test_hover_growth_is_bounded(t) -> void:
 	var feedback = load(FEEDBACK_PATH)
@@ -106,3 +107,20 @@ func _test_safe_zone_ring_shrinks_with_wagons(t) -> void:
 		map.SAFE_ZONE_RING_MIN_RADIUS,
 		"eşiği aştıktan sonra da minimumda kenetli"
 	)
+
+## İmleç (tools/cursor_art.py): proje ayarı oku gösteriyor, uç resmin üstünde ve dolu,
+## parlak ton aynı boyda; kilitli düğme parlamıyor.
+func _test_mouse_cursor(t) -> void:
+	var theme = load("res://scripts/autoload/ui_theme.gd")
+	t.eq(ProjectSettings.get_setting("display/mouse_cursor/custom_image", ""), theme.CURSOR_ARROW, "proje imleci ok resmi")
+	t.eq(ProjectSettings.get_setting("display/mouse_cursor/custom_image_hotspot", Vector2.ZERO), theme.CURSOR_HOTSPOT,
+		"proje ayarındaki uç UiTheme'inkiyle aynı")
+	for path in [theme.CURSOR_ARROW, theme.CURSOR_POINTER]:
+		var img: Image = load(path).get_image()
+		t.eq(img.get_size(), Vector2i(32, 32), "%s 32 px" % path)
+		var tip := Vector2i(theme.CURSOR_HOTSPOT) + Vector2i(1, 2)
+		t.ok(img.get_pixelv(tip).a > 0.5, "%s: ucun hemen altı dolu" % path)
+		t.ok(img.get_pixel(30, 2).a < 0.05, "%s: sağ üst köşe boş" % path)
+	var feedback = load(FEEDBACK_PATH)
+	t.eq(feedback.cursor_for(false), Control.CURSOR_POINTING_HAND, "açık düğmede parlak ok")
+	t.eq(feedback.cursor_for(true), Control.CURSOR_ARROW, "kilitli düğmede sönük ok")

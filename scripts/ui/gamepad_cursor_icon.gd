@@ -5,20 +5,27 @@ extends Control
 ## çocuk düğüm - fare filtresi kapalı, yani kendisi hiçbir tıklamayı
 ## yutmuyor, yalnızca konumu gösteriyor.
 ##
-## Klasik ok: oyunun tek fırçası (`ArtDraw.inked`) ve tek paletinden
-## (`ArtPalette.GOLD`) - Art Rules'un kuralı burada da geçerli, kumanda
-## imleci için ayrı bir renk icat edilmiyor.
+## Fareyle aynı ok (tools/cursor_art.py): kumandaya geçince imleç değişmiş gibi
+## görünmesin. Resim yoksa eski çizgi oka düşer.
 
-const SIZE_PX: float = 30.0
+const SIZE_PX: float = 32.0
+const ARROW_PATH: String = "res://data/assets/ui/cursor/arrow.png"
+## Okun ucu resmin bu pikselinde; düğümün sol üstü imlecin gerçek noktası.
+const HOTSPOT: Vector2 = Vector2(3, 2)
+
+var _arrow: Texture2D
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	size = Vector2(SIZE_PX, SIZE_PX)
-	# İmleç konumu ekranın *gerçek* koordinatı, kendi kutusunun sol
-	# üstü değil - ok ucu tam o noktayı göstermeli.
 	pivot_offset = Vector2.ZERO
+	if ResourceLoader.exists(ARROW_PATH):
+		_arrow = load(ARROW_PATH)
 
 func _draw() -> void:
+	if _arrow != null:
+		draw_texture(_arrow, -HOTSPOT)
+		return
 	var points := PackedVector2Array([
 		Vector2(0.0, 0.0),
 		Vector2(0.0, 22.0),
