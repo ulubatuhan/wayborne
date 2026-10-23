@@ -163,6 +163,15 @@ func _build_identity_column() -> PanelContainer:
 	var column := _make_column(tr("UI_CHAR_COL_IDENTITY"))
 	var body := _body_of(column)
 
+	# Büst portresi (görev Y-G04) boy önizlemesinin üstünde: yüz ve saç
+	# yakından, beden aşağıda boydan.
+	var bust := BustPortrait.new()
+	bust.custom_minimum_size = Vector2(150, 186)
+	bust.size = bust.custom_minimum_size
+	bust.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	body.add_child(bust)
+	bust.show_character(_character)
+
 	var preview := FigurePreview.new()
 	preview.custom_minimum_size = IDENTITY_PREVIEW_MIN
 	preview.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -610,11 +619,18 @@ func _build_equipment_slot_row(slot: String) -> VBoxContainer:
 	var unequip_button := Button.new()
 	unequip_button.text = tr("UI_CHAR_UNEQUIP")
 	unequip_button.disabled = equipped == null
+	# Lanetli parça çıkmaz: düğme kilitli, sebebi yanında (gizlenmez).
+	var block := _session.get_unequip_block_reason(_character, slot)
+	if not block.is_empty():
+		unequip_button.disabled = true
+		unequip_button.tooltip_text = tr(block)
 	unequip_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	unequip_button.pressed.connect(_on_unequip_pressed.bind(slot))
 	header.add_child(unequip_button)
 
 	column.add_child(header)
+	if not block.is_empty():
+		column.add_child(_make_hint_label(tr(block)))
 
 	for candidate in EquipmentCatalog.get_equipment_for_slot(slot):
 		var available := _session.get_equipment_count(candidate.equipment_id)
@@ -635,7 +651,11 @@ func _build_equip_option_row(slot: String, candidate: Equipment, available: int)
 	# Kilitli seçenek gizlenmez, sebebiyle gösterilir - olay kartlarındaki ve
 	# savaştaki yetenek kilidiyle aynı kural: oyuncu neye hazırlanacağını
 	# görmeli (bkz. Equipment.required_level).
-	if _session.can_equip(_character, candidate.equipment_id):
+	if _character.is_slot_cursed(slot):
+		equip_button.disabled = true
+		equip_button.text = tr("UI_CHAR_EQUIP") % [candidate.display_name, available]
+		equip_button.tooltip_text = tr("UI_EQUIP_CURSED_LOCK")
+	elif _session.can_equip(_character, candidate.equipment_id):
 		equip_button.text = tr("UI_CHAR_EQUIP") % [candidate.display_name, available]
 	else:
 		equip_button.disabled = true
@@ -657,18 +677,7 @@ func _equipment_summary(equipment_resource: Equipment) -> String:
 	return "%s — %s" % [equipment_resource.display_name, _equipment_bonus_text(equipment_resource)]
 
 func _equipment_bonus_text(equipment_resource: Equipment) -> String:
-	var parts: Array[String] = []
-	if equipment_resource.hp_bonus != 0:
-		parts.append(tr("UI_BONUS_HP") % equipment_resource.hp_bonus)
-	if equipment_resource.dodge_bonus != 0:
-		parts.append(tr("UI_BONUS_DODGE") % equipment_resource.dodge_bonus)
-	if equipment_resource.accuracy_bonus != 0:
-		parts.append(tr("UI_BONUS_ACCURACY") % equipment_resource.accuracy_bonus)
-	if equipment_resource.crit_bonus != 0:
-		parts.append(tr("UI_BONUS_CRIT") % equipment_resource.crit_bonus)
-	if equipment_resource.damage_bonus != 0:
-		parts.append(tr("UI_BONUS_DAMAGE") % equipment_resource.damage_bonus)
-	return ", ".join(parts)
+	return EquipmentCatalog.bonus_line(equipment_resource)
 
 # --- Yapı taşları ---
 

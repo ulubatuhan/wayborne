@@ -54,6 +54,12 @@ var culture_id: String = CultureCatalog.NOMAD
 var class_id: String = ClassCatalog.GUARD
 var height_cm: int = DEFAULT_HEIGHT_CM
 var skin_tone: int = 1
+## Saç (görev Y-G03): `OutfitCatalog.HAIR_STYLES`'tan bir stil ("" = saçsız) ve
+## `HAIR_COLORS`'ta bir sıra. Görünüş yalnız: stat ya da sıcaklık vermez.
+## `create()` saç vermez (testler belirlenimci kalsın); oluşturma ekranı,
+## aday tahtası ve eski kayıt yüklemesi verir.
+var hair_style: String = ""
+var hair_color: int = 1
 
 ## Cinsiyet ve vücut kilosu. Hangi "body_<cinsiyet>_<kilo>" sanat
 ## katmanının çizileceğini seçer (bkz. Wardrobe.body_id_for) **ve** boyun
@@ -125,11 +131,22 @@ func get_outfit_piece(slot: String) -> String:
 ## burada yalnızca resmi, giysilerle aynı katman döngüsünde (draw_order 36:
 ## gömleğin üstü, ceketin altı) çizilsin diye.
 func get_appearance_outfit() -> Dictionary:
-	var out := OutfitCatalog.with_modesty_layer(outfit)
+	var out := OutfitCatalog.with_hair(OutfitCatalog.with_modesty_layer(outfit), hair_style,
+		OutfitCatalog.get_hair_color(hair_color))
 	var armor_art := str(OutfitCatalog.ARMOR_ART.get(get_equipped_id(EquipmentCatalog.SLOT_ARMOR), ""))
 	if not armor_art.is_empty():
 		out[OutfitCatalog.SLOT_ARMOR] = armor_art
 	return out
+
+## Görünüşün saklanabilir özeti (defter: ölünün portresi). Renk değil sıra
+## saklanır, JSON'a sığsın.
+func get_look_snapshot() -> Dictionary:
+	var look_outfit := get_appearance_outfit()
+	look_outfit.erase(OutfitCatalog.HAIR_TINT_KEY)
+	return {
+		"name": character_name, "body": get_body_variant_id(), "height_cm": height_cm,
+		"skin_tone": skin_tone, "hair_color": hair_color, "outfit": look_outfit,
+	}
 
 func set_outfit_piece(slot: String, piece_id: String) -> void:
 	if piece_id.is_empty():
@@ -882,7 +899,22 @@ func _equipment_bonus_sum(field: String) -> int:
 		var equipment_resource := EquipmentCatalog.get_equipment(str(equipped[slot]))
 		if equipment_resource != null:
 			total += int(equipment_resource.get(field))
+			total += equipment_resource.synergy_bonus(field, has_trait(equipment_resource.synergy_trait))
 	return total
+
+## Kuşanılan parçaların yoldaki günlük stres bedeli (görev Y-C06).
+func get_equipment_daily_stress() -> int:
+	var total := 0
+	for slot in equipped:
+		var equipment_resource := EquipmentCatalog.get_equipment(str(equipped[slot]))
+		if equipment_resource != null:
+			total += equipment_resource.daily_stress
+	return total
+
+## Bu yuvadaki parça lanetli mi (çıkarılamaz, üstüne takılamaz).
+func is_slot_cursed(slot: String) -> bool:
+	var equipment_resource := EquipmentCatalog.get_equipment(get_equipped_id(slot))
+	return equipment_resource != null and equipment_resource.cursed
 
 ## Giyilen kıyafetlerin katkısı - huy ve ekipmanla aynı alan adları, aynı
 ## sarmalayıcılar (savaş bunları okuyor, `stats`'ı değil).
@@ -973,6 +1005,8 @@ func to_dict() -> Dictionary:
 		"class_id": class_id,
 		"height_cm": height_cm,
 		"skin_tone": skin_tone,
+		"hair_style": hair_style,
+		"hair_color": hair_color,
 		"gender": gender,
 		"body_weight": body_weight,
 		"stats": stats.to_dict(),
@@ -1014,6 +1048,14 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.height_cm = clampi(int(data.get("height_cm", DEFAULT_HEIGHT_CM)), MIN_HEIGHT_CM, MAX_HEIGHT_CM)
 	character.skin_tone = int(data.get("skin_tone", 1))
 	character.gender = clampi(int(data.get("gender", GENDER_FEMALE)), GENDER_FEMALE, GENDER_MALE)
+	# Y-G03'ten önceki kayıtta saç yok: addan tohumlanır, her yüklemede aynı.
+	if data.has("hair_style"):
+		character.hair_style = str(data.get("hair_style", ""))
+		character.hair_color = int(data.get("hair_color", 1))
+	else:
+		var hair := OutfitCatalog.roll_hair(character.gender, hash(character.character_name + "|hair"))
+		character.hair_style = str(hair.style)
+		character.hair_color = int(hair.color)
 	character.body_weight = clampi(
 		int(data.get("body_weight", BODY_WEIGHT_AVERAGE)), BODY_WEIGHT_LEAN, BODY_WEIGHT_HEAVY
 	)

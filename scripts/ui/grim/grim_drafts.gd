@@ -239,7 +239,7 @@ const CAMP_TRAVELLERS: Array = [
 		"outfit": ["long_skirt", "felt_shoes", "peasant_blouse", "head_veil"]},
 	{"at": Vector2(0.341, 0.748), "height": 0.27, "gender": 1, "weight": 0, "skin": 2, "right": false,
 		"light": 0.55,
-		"outfit": ["peasant_pants", "peasant_shoes", "peasant_shirt"]},
+		"outfit": ["peasant_pants", "peasant_shoes", "peasant_shirt"], "hair": "hair_short02", "hair_color": 0},
 ]
 const CRATE_ART: String = "res://data/assets/props/crate/body.png"
 const FIRELIT_SHADER: Shader = preload("res://scripts/ui/grim/firelit.gdshader")
@@ -265,6 +265,8 @@ static func _camp_travellers() -> Array:
 			var piece := OutfitCatalog.get_piece(String(piece_id))
 			if piece != null:
 				outfit[piece.slot] = piece.piece_id
+		if look.has("hair"):
+			outfit = OutfitCatalog.with_hair(outfit, String(look["hair"]), OutfitCatalog.get_hair_color(int(look["hair_color"])))
 		var skin := CharacterData.get_skin_tone_color(int(look["skin"]))
 		var variant := Wardrobe.body_id_for(int(look["gender"]), int(look["weight"]))
 		person.show_look("villager", 1.0, skin, outfit, PackedStringArray(), variant)

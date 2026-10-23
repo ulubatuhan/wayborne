@@ -94,6 +94,12 @@ func record(
 		"args": text_args,
 	})
 
+## Ölünün görünüşü (görev Y-G04): Düşenler sayfasının büst portresi bundan
+## çizilir. Kişinin kendisi artık yok; yalnız defterde kalan bu.
+func set_last_look(look: Dictionary) -> void:
+	if not entries.is_empty():
+		entries[entries.size() - 1]["look"] = look.duplicate(true)
+
 func is_struck(entry: Dictionary) -> bool:
 	return STRUCK_KINDS.has(String(entry.get("kind", "")))
 
@@ -248,4 +254,5 @@ func load_from_array(data: Array) -> void:
 			"location": String(entry.get("location", "")),
 			"role": String(entry.get("role", "")),
 			"args": (entry.get("args", []) as Array).duplicate() if entry.get("args", []) is Array else [],
+			"look": (entry.get("look", {}) as Dictionary).duplicate() if entry.get("look", {}) is Dictionary else {},
 		})

@@ -34,6 +34,8 @@ var _cards: Array[RosterCard] = []
 @onready var _ledger_box: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/ContentContainer/LedgerBox
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
+const BUST_SIZE: Vector2 = Vector2(96, 120)
+
 func _ready() -> void:
 	WaybookTheme.fit_desk_workspace(self)
 	var title: Label = $MarginContainer/VBoxContainer/TitleLabel
@@ -167,6 +169,13 @@ func _build_detail() -> void:
 
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
+
+	# Büst portresi (görev Y-G04): kişinin kendi figüründen, olay kartı dilinde.
+	var bust := BustPortrait.new()
+	bust.custom_minimum_size = BUST_SIZE
+	bust.size = BUST_SIZE
+	header.add_child(bust)
+	bust.show_character(character)
 
 	header.add_child(WaybookIcons.picture(
 		WaybookIcons.CLASS_EMBLEMS, character.class_id, EMBLEM_SIZE, character.get_character_class().display_name

@@ -73,7 +73,11 @@ def pack(variant, item, build, layers, post):
         own = ccfg.get("layers", layers)
         for i in range(n):
             fdir = os.path.join(src, clip, "f%02d" % i)
-            j = json.load(open(os.path.join(BODY, variant, clip, "f%02d" % i, "joints.json")))
+            # Eklemler yalnız omuz ölçüsü (idle) ve botun kayması (base_dy_px) için;
+            # bedenin bu klibi bu makinede render edilmemişse (sonradan eklenen
+            # sit_box gibi) giysinin karesi yine paketlenir.
+            jpath = os.path.join(BODY, variant, clip, "f%02d" % i, "joints.json")
+            j = json.load(open(jpath)) if os.path.exists(jpath) else {}
             if clip == "idle":
                 shoulder_px = ay - j["front_shoulder"][1]
             if ccfg.get("base"):

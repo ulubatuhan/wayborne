@@ -36,6 +36,9 @@ var _height_label: Label
 var _skin_button: OptionButton
 var _skin_preview: ColorRect
 var _gender_button: OptionButton
+## Saç (görev Y-G03): ilk seçenek saçsız, sonra `OutfitCatalog.HAIR_STYLES`.
+var _hair_button: OptionButton
+var _hair_color_button: OptionButton
 var _weight_button: OptionButton
 var _points_label: Label
 var _stat_rows: Array[Dictionary] = []
@@ -241,6 +244,28 @@ func _build_identity_section() -> void:
 	_skin_preview.custom_minimum_size = Vector2(48, 24)
 	skin_row.add_child(_skin_preview)
 	_content.add_child(skin_row)
+
+	var hair_row := HBoxContainer.new()
+	hair_row.add_theme_constant_override("separation", 8)
+	var hair_title := Label.new()
+	hair_title.text = tr("UI_CREATE_HAIR_STYLE")
+	hair_title.custom_minimum_size = Vector2(120, 0)
+	hair_row.add_child(hair_title)
+	_hair_button = OptionButton.new()
+	_hair_button.add_item(OutfitCatalog.get_hair_style_name(""))
+	for style in OutfitCatalog.HAIR_STYLES:
+		_hair_button.add_item(OutfitCatalog.get_hair_style_name(style))
+	_hair_button.select(OutfitCatalog.HAIR_STYLES.find("hair_long01") + 1)
+	_hair_button.item_selected.connect(func(_i: int) -> void: _refresh())
+	hair_row.add_child(_hair_button)
+	_hair_color_button = OptionButton.new()
+	_hair_color_button.tooltip_text = tr("UI_CREATE_HAIR_COLOR")
+	for index in OutfitCatalog.HAIR_COLORS.size():
+		_hair_color_button.add_item(OutfitCatalog.get_hair_color_name(index))
+	_hair_color_button.select(1)
+	_hair_color_button.item_selected.connect(func(_i: int) -> void: _refresh())
+	hair_row.add_child(_hair_color_button)
+	_content.add_child(hair_row)
 
 	var gender_row := HBoxContainer.new()
 	gender_row.add_theme_constant_override("separation", 8)
@@ -475,7 +500,8 @@ func _refresh() -> void:
 		preview.class_id,
 		preview.get_height_scale(),
 		CharacterData.get_skin_tone_color(preview.skin_tone),
-		_outfit, Wardrobe.loadout_of(_outfit, {}), preview.get_body_variant_id()
+		OutfitCatalog.with_hair(_outfit, preview.hair_style, OutfitCatalog.get_hair_color(preview.hair_color)),
+		Wardrobe.loadout_of(_outfit, {}), preview.get_body_variant_id()
 	)
 
 	_summary_label.text = tr("UI_CREATE_PREVIEW") % [
@@ -513,6 +539,9 @@ func _build_character() -> CharacterData:
 		_weight_button.selected
 	)
 	character.outfit = _outfit.duplicate()
+	var hair_index := _hair_button.selected - 1
+	character.hair_style = OutfitCatalog.HAIR_STYLES[hair_index] if hair_index >= 0 else ""
+	character.hair_color = maxi(_hair_color_button.selected, 0)
 	return character
 
 # --- Çıkış ---

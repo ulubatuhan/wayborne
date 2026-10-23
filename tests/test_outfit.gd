@@ -115,6 +115,9 @@ func _test_enemy_units_wear_rendered_outfits(t) -> void:
 		t.ok(BodyFrames.for_body(body) != null, "%s: beden %s yok" % [kind, body])
 		var outfit: Dictionary = look.outfit
 		for slot in outfit:
+			if slot == OutfitCatalog.HAIR_TINT_KEY:
+				t.ok(outfit[slot] is Color, "%s: saç rengi bir renk" % kind)
+				continue
 			var piece := OutfitCatalog.get_piece(String(outfit[slot]))
 			t.ok(piece != null, "%s: %s diye bir giysi yok" % [kind, outfit[slot]])
 			if piece != null:

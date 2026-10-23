@@ -22,6 +22,9 @@ var _title_label: Label
 var _info_label: Label
 var _list: VBoxContainer
 var _built: bool = false
+## Lanet çözme (görev Y-C06) yalnız kilisede: taverna arındırır ama bağ koparamaz.
+var _curse_enabled: bool = false
+var _curse_list: VBoxContainer
 
 func setup(session: GameSession, title: String, cost: int) -> void:
 	_ensure_built()
@@ -32,10 +35,16 @@ func setup(session: GameSession, title: String, cost: int) -> void:
 	# Kendi perdesi yok - salt gövde, Taverna/Kilise'nin sekmesine gömülü.
 	WaybookTheme.present(self, null, self)
 
+func enable_curse_lifting() -> void:
+	_ensure_built()
+	_curse_enabled = true
+	refresh()
+
 func refresh() -> void:
 	if _session == null:
 		return
 	NodeUtil.clear_children(_list)
+	_refresh_curses()
 
 	var any_fresh := false
 	for character in _session.get_party():
@@ -87,6 +96,43 @@ func _on_purify_pressed(character: CharacterData, trait_id: String) -> void:
 	refresh()
 	trait_removed.emit()
 
+func _refresh_curses() -> void:
+	NodeUtil.clear_children(_curse_list)
+	_curse_list.visible = _curse_enabled
+	if not _curse_enabled:
+		return
+	var heading := Label.new()
+	heading.text = tr("UI_CHURCH_CURSE_HEADING")
+	heading.add_theme_font_size_override("font_size", 18)
+	_curse_list.add_child(heading)
+	var any := false
+	for character in _session.get_party():
+		for slot in EquipmentCatalog.ALL_SLOTS:
+			if not character.is_slot_cursed(slot):
+				continue
+			any = true
+			var piece := character.get_equipped(slot)
+			var button := Button.new()
+			button.text = tr("UI_CHURCH_CURSE_LIFT") % [character.character_name, piece.display_name,
+				GameSession.CURSE_LIFT_PRICE]
+			button.tooltip_text = piece.description
+			if _session.wallet.can_afford(GameSession.CURSE_LIFT_PRICE):
+				button.pressed.connect(_on_lift_pressed.bind(character, slot))
+			else:
+				button.disabled = true
+				button.tooltip_text = tr("UI_CHURCH_CURSE_NO_GOLD")
+			_curse_list.add_child(button)
+	if not any:
+		var empty_label := Label.new()
+		empty_label.text = tr("UI_CHURCH_CURSE_NONE")
+		empty_label.modulate = HINT_COLOR
+		_curse_list.add_child(empty_label)
+
+func _on_lift_pressed(character: CharacterData, slot: String) -> void:
+	if _session.lift_curse(character, slot):
+		refresh()
+		trait_removed.emit()
+
 func _ensure_built() -> void:
 	if _built:
 		return
@@ -105,3 +151,8 @@ func _ensure_built() -> void:
 
 	_list = VBoxContainer.new()
 	add_child(_list)
+
+	_curse_list = VBoxContainer.new()
+	_curse_list.add_theme_constant_override("separation", 6)
+	_curse_list.visible = false
+	add_child(_curse_list)

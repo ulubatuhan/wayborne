@@ -24,7 +24,94 @@ const SLOT_SHOES: String = "shoes"
 const SLOT_ARMOR: String = "armor"
 const ARMOR_ART: Dictionary = {
 	"armor_tier_1": "armor_leather", "armor_tier_2": "armor_mail", "armor_tier_3": "armor_plate",
+	"armor_gambeson": "armor_leather", "armor_scale": "armor_mail", "armor_lamellar": "armor_leather",
 }
+
+## Saç (görev Y-G03): bir giysi gibi bedenin aynı karesinde render edildi ama
+## giyilip çıkarılmıyor, satılmıyor - kişinin kendisi. `ALL_SLOTS`'ta yok
+## (dolap ve terzi onu görmez); `CharacterData.get_appearance_outfit` ekliyor.
+## Gri render edildi, figür kişinin saç rengiyle çarpıyor (`HAIR_TINT_KEY`).
+## Her başlık saçı örtüyor: başlıklar başa sarılarak oturtuldu, saç üstüne
+## değil (render_outfits.worn_under), çizilse içinden taşardı.
+const SLOT_HAIR: String = "hair"
+const HAIR_TINT_KEY: String = "hair_tint"
+const HAIR_STYLES: Array[String] = [
+	"hair_short01", "hair_short02", "hair_short04", "hair_long01", "hair_ponytail01", "hair_braid01", "hair_bob01",
+]
+## Cinsiyete göre olasılık ağırlığı (kadın, erkek): rastgele kişiler için.
+## Karakter oluşturmada her stil iki cinsiyete de açık.
+const HAIR_WEIGHTS: Dictionary = {
+	"hair_short01": [1, 6], "hair_short02": [1, 6], "hair_short04": [2, 4], "hair_long01": [4, 2],
+	"hair_ponytail01": [5, 2], "hair_braid01": [5, 1], "hair_bob01": [4, 1],
+}
+const HAIR_NAME_KEYS: Dictionary = {
+	"hair_short01": "HAIR_SHORT01", "hair_short02": "HAIR_SHORT02", "hair_short04": "HAIR_SHORT04",
+	"hair_long01": "HAIR_LONG01", "hair_ponytail01": "HAIR_PONYTAIL01", "hair_braid01": "HAIR_BRAID01",
+	"hair_bob01": "HAIR_BOB01",
+}
+const HAIR_COLOR_KEYS: Array[String] = [
+	"HAIR_COLOR_BLACK", "HAIR_COLOR_DARK_BROWN", "HAIR_COLOR_BROWN", "HAIR_COLOR_AUBURN",
+	"HAIR_COLOR_DARK_BLOND", "HAIR_COLOR_GREY",
+]
+## Gri render'ın ışığı (render_outfits TINT_LUM) ile çarpılınca okunan tonlar.
+const HAIR_COLORS: Array[Color] = [
+	Color(0.20, 0.17, 0.15), Color(0.34, 0.24, 0.17), Color(0.50, 0.35, 0.22), Color(0.60, 0.30, 0.16),
+	Color(0.74, 0.60, 0.40), Color(0.66, 0.64, 0.62),
+]
+
+static func get_hair_color(index: int) -> Color:
+	return HAIR_COLORS[clampi(index, 0, HAIR_COLORS.size() - 1)]
+
+static func get_hair_color_name(index: int) -> String:
+	return String(TranslationServer.translate(HAIR_COLOR_KEYS[clampi(index, 0, HAIR_COLOR_KEYS.size() - 1)]))
+
+static func get_hair_style_name(style: String) -> String:
+	if style.is_empty():
+		return String(TranslationServer.translate("HAIR_NONE"))
+	var piece := get_piece(style)
+	return piece.display_name if piece != null else style
+
+## Bir kişiye tohumdan saç: stil cinsiyet ağırlığıyla, renk gri yalnız
+## nadiren (yaşlılık burada sayılmıyor). Aynı tohum aynı saçı verir.
+static func roll_hair(gender: int, seed_value: int) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var col := 1 if gender == 1 else 0
+	var total := 0
+	for style in HAIR_STYLES:
+		total += int(HAIR_WEIGHTS[style][col])
+	var pick := rng.randi_range(1, total)
+	var chosen := HAIR_STYLES[0]
+	for style in HAIR_STYLES:
+		pick -= int(HAIR_WEIGHTS[style][col])
+		if pick <= 0:
+			chosen = style
+			break
+	var color := rng.randi_range(0, HAIR_COLORS.size() - 2)
+	if rng.randf() < 0.08:
+		color = HAIR_COLORS.size() - 1
+	return {"style": chosen, "color": color}
+
+## Görünüş sözlüğüne saç ekler (isimsiz tayfa, kasaba halkı: karakter verisi yok).
+static func with_hair(outfit: Dictionary, style: String, color: Color) -> Dictionary:
+	var out := outfit.duplicate()
+	if get_piece(style) != null:
+		out[SLOT_HAIR] = style
+		out[HAIR_TINT_KEY] = color
+	return out
+
+## İsimsiz biri (tayfa, kasaba halkı, düşman): tohumdan saçlı görünüş.
+static func with_rolled_hair(outfit: Dictionary, gender: int, seed_value: int) -> Dictionary:
+	var hair := roll_hair(gender, seed_value)
+	return with_hair(outfit, str(hair.style), get_hair_color(int(hair.color)))
+
+## Bu kare kümesi bir saç mı (figür onu kişinin saç rengiyle çarpar).
+static func is_hair_frames(frames: BodyFrames) -> bool:
+	return frames != null and frames.resource_path.contains("/outfit_hair_")
+
+static func hair_tint(outfit: Dictionary) -> Color:
+	var value = outfit.get(HAIR_TINT_KEY, null)
+	return value if value is Color else HAIR_COLORS[1]
 
 ## Baştan ayağa doğru sıra - önizleme penceresi ve slot listesi bu sırayla
 ## döner.
@@ -368,9 +455,17 @@ static func _ensure_built() -> void:
 		40, {"hp_bonus": 4, "dodge_bonus": -1}, art, false, "helmet")
 	_add(SLOT_HAT, "spiked_helmet", "OUTFIT_SPIKED_HELMET", Color(0.55, 0.52, 0.50), 50,
 		46, {"hp_bonus": 3, "damage_bonus": 1, "dodge_bonus": -1}, art, false, "helmet")
+	# --- saç (satılmaz, kişinin kendisi; görev Y-G03) ---
+	for style in HAIR_STYLES:
+		_add(SLOT_HAIR, style, HAIR_NAME_KEYS[style], HAIR_COLORS[1], 95,
+			0, {}, art, false, "", false, {"sold": false})
 	# --- zırhın görünüşü (satılmaz; Equipment'ın zırh kademesinden) ---
+	var armor_looks: Array[String] = []
 	for tier in ARMOR_ART:
-		_add(SLOT_ARMOR, ARMOR_ART[tier], "", Color(0.45, 0.40, 0.34), 36, 0, {}, art, false, "", false,
+		if not armor_looks.has(String(ARMOR_ART[tier])):
+			armor_looks.append(String(ARMOR_ART[tier]))
+	for look in armor_looks:
+		_add(SLOT_ARMOR, look, "", Color(0.45, 0.40, 0.34), 36, 0, {}, art, false, "", false,
 			{"sold": false})
 
 ## `extra`: "art" (kare kümesi başka adla render edildiyse - eski kimlik
@@ -390,6 +485,8 @@ static func _add(
 	piece.gender_only = int(extra.get("gender", -1))
 	for hidden in extra.get("hides", []):
 		piece.hides.append(String(hidden))
+	if slot == SLOT_HAT:
+		piece.hides.append(SLOT_HAIR)
 	piece.sold = bool(extra.get("sold", true))
 	piece.draw_order = draw_order
 	piece.boots = boots

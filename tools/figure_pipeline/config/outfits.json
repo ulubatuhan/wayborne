@@ -706,6 +706,125 @@
     0.16,
     0.38
    ]
+  },
+  "hair_short01": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "short01",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_short02": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "short02",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_short04": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "short04",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_long01": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "long01",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_ponytail01": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "ponytail01",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_braid01": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "braid01",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
+  },
+  "hair_bob01": {
+   "slot": "hair",
+   "draw_order": 95,
+   "eps": 0.004,
+   "source": "mpfb_hair",
+   "hair": "bob01",
+   "tint": [
+    0.78,
+    0.76,
+    0.72
+   ],
+   "alpha_cutoff": 0.5,
+   "_note": "MPFB sistem saci (CC0). Notr gri render; oyun saci kisinin sac rengiyle carpar.",
+   "layers": [
+    "torso_head"
+   ]
   }
  },
  "samples_shade": 64,

@@ -127,6 +127,12 @@ func _build_party_row(character: CharacterData, slot: int) -> HBoxContainer:
 func _build_candidate_row(candidate: CharacterData) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+	var bust := BustPortrait.new()
+	bust.custom_minimum_size = Vector2(84, 104)
+	bust.size = bust.custom_minimum_size
+	bust.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(bust)
+	bust.show_character(candidate)
 
 	var label := Label.new()
 	label.text = tr("UI_RECRUIT_CANDIDATE") % [

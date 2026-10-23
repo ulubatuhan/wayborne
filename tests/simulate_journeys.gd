@@ -66,6 +66,10 @@ func _initialize() -> void:
 	_report_equipment_impact()
 
 	print("")
+	print("── Tek parça taraması (Y-C06; tehlike %50, donanımsızla aynı tohumlar; * huyuyla)")
+	_report_piece_sweep()
+
+	print("")
 	print("── Beden etkisi (tehlike %50) - cinsiyet ve kilo birbirini yemeli")
 	_report_body_impact()
 
@@ -623,6 +627,41 @@ func _battle_batch(battles: int, geared: bool) -> int:
 				_equip_best_gear(character)
 			party.append(character)
 
+		if bool(_simulate_combat(party, 0.5, rng).victory):
+			wins += 1
+	return wins
+
+## Her parça tek başına, aynı tohum dizisiyle: bir takı kendi kademesindeki
+## silahı geçerse ya da lanetlinin gücü bedelini aşarsa burada görünür.
+## Sinerjili parça ayrıca huyuyla birlikte ölçülür (* işaretli satır).
+func _report_piece_sweep() -> void:
+	var battles := 60
+	var bare := _battle_batch(battles, false)
+	var rows: Array = []
+	for piece in EquipmentCatalog.get_all_equipment():
+		rows.append([piece.equipment_id, _piece_batch(battles, piece, false)])
+		if not piece.synergy_trait.is_empty():
+			rows.append([piece.equipment_id + " *", _piece_batch(battles, piece, true)])
+	rows.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	print("    donanımsız                     %%%d" % int(round(100.0 * float(bare) / float(battles))))
+	for row in rows:
+		print("    %-30s %%%d (%+d)" % [String(row[0]), int(round(100.0 * float(row[1]) / float(battles))),
+			int(round(100.0 * float(int(row[1]) - bare) / float(battles)))])
+
+func _piece_batch(battles: int, piece: Equipment, with_trait: bool) -> int:
+	var wins := 0
+	for index in battles:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 900 + index
+		var party: Array[CharacterData] = []
+		for slot in EQUIPMENT_TEST_PARTY_SIZE:
+			var culture := CultureCatalog.get_cultures()[slot % CultureCatalog.get_cultures().size()]
+			var character := CharacterData.create("Yoldaş %d" % (slot + 1), culture.culture_id, CharacterStats.new())
+			_level_up(character, piece.required_level)
+			character.equip(piece.slot, piece.equipment_id)
+			if with_trait:
+				character.grant_trait(piece.synergy_trait, 0)
+			party.append(character)
 		if bool(_simulate_combat(party, 0.5, rng).victory):
 			wins += 1
 	return wins

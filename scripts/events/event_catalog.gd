@@ -1048,6 +1048,7 @@ static func _kin_encounter() -> GameEvent:
 				EventEffect.make(EventEffect.Type.MORALE, 10),
 				EventEffect.make(EventEffect.Type.REPUTATION, 4),
 				EventEffect.make(EventEffect.Type.STRESS, -6),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.ARMOR_LAMELLAR),
 			]), 4.0),
 			EventOutcome.make("EVT_KIN_GREET_PLAIN", _effects([
 				EventEffect.make(EventEffect.Type.MORALE, 4),
@@ -1191,6 +1192,7 @@ static func _culture_fisher_catch() -> GameEvent:
 			"EVT_FISHER_DEEP_OK", _effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, 12),
 				EventEffect.make(EventEffect.Type.MORALE, 4),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.RING_SALT_SEAL),
 			]),
 			"EVT_FISHER_DEEP_MID", _effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, 6),
@@ -1232,6 +1234,8 @@ static func _roadside_shrine() -> GameEvent:
 		_choice("EVT_SHRINE_OPT_PRAY", _effects([
 			EventEffect.make(EventEffect.Type.STRESS, -10),
 			EventEffect.make(EventEffect.Type.MORALE, 3),
+			# Y-C06: adakların arasında bir yolcu taşı; dua edene bırakılmış sayılır.
+			EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.AMULET_WAYFARER_STONE),
 		])),
 		# Adakları almak bir İnanç meselesi - kutsalın öfkesini göze
 		# alabilecek kadar sağlam bir vicdan mı, yoksa lanetten korkan biri mi.
@@ -1469,6 +1473,7 @@ static func _forage() -> GameEvent:
 			"EVT_FORAGE_DEEP_OK", _effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, 14),
 				EventEffect.make(EventEffect.Type.MORALE, 3),
+				EventEffect.make(EventEffect.Type.GRANT_EQUIPMENT, 0, EquipmentCatalog.RING_HAWK),
 			]),
 			"EVT_FORAGE_DEEP_MID", _effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, 8),

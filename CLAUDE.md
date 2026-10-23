@@ -251,6 +251,17 @@ wayborne/
     only path that moves a piece between that shared locker and a
     character's `equipped` dict - upgrading a slot automatically returns
     the old piece to the locker.
+  - **Thirty-six pieces, and most of the new ones are trinkets with a story (task Y-C06).** Six weapons, six
+    armours, twelve rings, twelve amulets. Three new kinds of piece, each read by the same derived getters:
+    *synergy* (`synergy_trait` + `synergy_bonuses`: the bonus counts only on someone who carries that huy, e.g. the
+    lamellar coat on a nimble-footed wearer), *costly* (`daily_stress`: a strong piece that wears its wearer down
+    every road day, `GameSession._apply_equipment_cost_day`) and *cursed* (`cursed`: cannot be taken off; the
+    church lifts it for `CURSE_LIFT_PRICE` gold in a city, and the piece is destroyed - `lift_curse`). Locked
+    unequips and equips show their reason (`UI_EQUIP_CURSED_LOCK`). Found pieces come from the loot tables and four
+    event outcomes; their price is 0 (never sold), and `EquipmentCatalog.bonus_line` is the one line every screen
+    prints. Icons are derived from the painted set by `tools/equipment_icons.py` (tint, bead, crack). Measured with
+    `simulate_journeys`' piece sweep (one character, 50% danger): bare 63%, weapon tier 3 +17, the new pieces
+    between +12 and -5, no cursed piece dominant.
 
   - `FigureRig` / `Wardrobe`: the skeleton every person is drawn on and the
     sprite parts (clothes, armour, weapons) hung on its bones - see Wardrobe
@@ -820,6 +831,12 @@ the walking figures are the game's strongest asset) but to deepen it.
   ratios keep the exact values and the exact separation the stacking test
   already verified; only `y` is new, so a fix aimed at "surround the
   fire" could not quietly reopen "don't stand on top of each other."
+- **A ring is not a heap either (task Y-G13).** The first seat ring stayed inside ±2.3 units (about 30 px), narrower
+  than the fire's own logs, and six people at a lead-wagon fire stood on the wood and covered the flame - caught in
+  the campfire showcase frame, invisible to the stacking test, which only asked that people stand apart from each
+  other. Seats now sit on both sides of the fire (±2.9 to ±6.6 units, alternating, inside out) so the flame stays
+  open; figures are drawn over the fire, so nobody may sit in front of or behind it. A figure that has arrived
+  turns to face the fire (its seat can lie past the fire from where it walked in).
 
 - **Off the seat first, then to the fire - and back on before anyone
   moves.** Reported as "önce vagondan inip sonra ateşe gitmeli; lider de
@@ -1402,6 +1419,14 @@ in every preview the moment it is equipped.
     `render_frames.py --hair` renders one). The kit is painted onto the
     body's own surface from rest-pose bone heights, with a signed-distance
     ramp so the hem is a true plane section, not a jagged vertex edge.
+  - **Hair is a garment now (task Y-G03).** Seven MPFB hair proxies (`hair_short01/02/04`, `hair_long01`,
+    `hair_ponytail01`, `hair_braid01`, `hair_bob01`) are fitted by `fit_mhclo` like clothes (source `mpfb_hair`,
+    slot `hair`, draw order 95, alpha-cut cards) and rendered grey, one frame set per body; the colour is a tint
+    (`OutfitCatalog.HAIR_COLORS`, saved per person as `hair_color`, multiplied in `WalkFigure` through
+    `hair_tint`). A hat hides the hair slot. Style and colour are chosen at creation, rolled for recruits and crew
+    from the name's own seed (`OutfitCatalog.roll_hair`, weighted by gender; never the candidate roll's RNG), and
+    backfilled the same way for old saves. Enemy looks carry their own `hair` and `hair_tint`. No turban or beard
+    yet: no CC0 source fits the body.
   - **Skin and height stay player choices.** The body is rendered grey and
     multiplied by the skin tone, like the mannequin's ALBEDO contract.
     Height is one uniform scale over the whole frame
@@ -2283,6 +2308,14 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   animated only when a name is struck *now* (`SuccessionPanel`), static
   everywhere else. A struck name is a stroke through the name, never a
   grey label: the party screen's ledger uses the same line.
+- **A face is the person's own figure, close up (task Y-G04).** `BustPortrait` frames the HD standing frame of the
+  person's `WalkFigure` from its own joints (head top to shoulder = `BUST_SPAN` of the portrait, measured after the
+  first draw, because a fixed ratio cut the head on tall people and under hats), inks it (`bust_ink.gdshader`:
+  a pale wash, hatching only in real shadow) over the event cards' dusk wash (`bust_wash.gdshader`). It is on the
+  character screen, the party header, every recruit candidate, inside the brass cameo (`PortraitCameo`: succession,
+  caravan overview) and on the fallen page. The dead keep their face: `resolve_deaths` stores the person's look
+  (`CharacterData.get_look_snapshot`: body, height, skin, hair colour, outfit) on the ledger line, and the fallen
+  page draws it pale (`set_struck`); lines from before this have only the grave mark.
 - **One icon table for people** (`WaybookIcons`): stat emblems (P3),
   duty emblems (P5), grievance marginalia (P4), class emblems (K6), trait
   tokens (P2), the hunger tally (P6). The character screen, party screen,
@@ -2495,6 +2528,9 @@ gave the game its motion, and every piece of it follows the same few rules.
   4.5:1 against its paper at every hour. Settlement lights (`settlements.json` `lights`, generated per kind by
   `build_settlements.py`, none on ruins) fade in at evening at a screen-constant size. Finished routes and camp sites
   stay as a thin ink trail (`GameSession.map_trail`/`journey_camps`, saved, capped).
+- **The rider carries a lantern at night (task Y-G13).** As the map darkens (`light_strength_for_hour`), a warm
+  pool (`RIDER_LANTERN_GLOW` rider heights, two `radial_glow` layers) and a small flickering core burn on the side
+  the rider is heading (`rider_lantern_offset`), the map's echo of the road lantern.
 - **A button under the cursor answers.** `ButtonFeedback` attaches itself
   to every button through `UiTheme`'s `node_added` (the `SceneInk`
   pattern): hover grows `1+min(3%, 6px/width)` - 3% of a 1000 px row is a
@@ -5241,6 +5277,13 @@ build and a five-minute video of it. "Done" is said only after a screenshot of t
 test is not enough for anything the player sees, because the structural tests below never see appearance (see the
 screenshot tools in this section). A claim of "fixed" that was never checked against the place the report pointed at has
 been wrong twice in this file's history.
+
+**The five showcase images are the game's own screens (task Y-G13).** `tests/screenshot_showcase.gd` builds the night
+map with the lantern rider, the campfire panorama, the event card, the succession with its cracked seal and the
+arrival at a gate from the real scenes (the road frames hide the HUD and give the sky back; the card keeps it) and
+writes `docs/steam/vitrin/*.jpg`. No separate marketing painting: a store image that shows something the game does not
+draw is a promise the game breaks. Shooting them found two real defects (people standing on the camp fire, the
+map rider without a light), fixed in the game, not in the picture.
 
 **CI is the real gate.** Godot prints parse errors and still exits `0`, so a
 broken script hid under a green build twice (`city_map.gd`,

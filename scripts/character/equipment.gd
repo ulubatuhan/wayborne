@@ -45,3 +45,21 @@ var description: String:
 @export var accuracy_bonus: int = 0
 @export var crit_bonus: int = 0
 @export var damage_bonus: int = 0
+
+## Huy sinerjisi (görev Y-C06): kuşanan bu huyu taşıyorsa `synergy_bonuses`
+## (aynı beş alan) ayrıca eklenir. Yeni bir sistem değil: huy zaten
+## CharacterData'nın aynı türetilmiş değerlerine yazıyor.
+@export var synergy_trait: String = ""
+@export var synergy_bonuses: Dictionary = {}
+## Bedel: yoldaki her gün kuşanana bu kadar stres (stresin kendi kapısından,
+## `GameSession.change_character_stress`). Gücün bir bedeli var.
+@export var daily_stress: int = 0
+## Lanetli: kuşanılınca çıkarılamaz, üstüne başka parça da takılamaz; bağı
+## yalnız kilise çözer (`GameSession.lift_curse`), parça o zaman yok olur.
+@export var cursed: bool = false
+
+func synergy_bonus(field: String, has_trait: bool) -> int:
+	if not has_trait or synergy_trait.is_empty():
+		return 0
+	return int(synergy_bonuses.get(field, 0))
+

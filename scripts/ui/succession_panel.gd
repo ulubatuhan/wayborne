@@ -40,7 +40,7 @@ var _confirmed: bool = false
 ## Rules - geri alınamaz karar mühürlü cilt ve mühür taşır).
 const FALLEN_NAME_FONT_SIZE: int = 30
 const HEIR_CAMEO_HEIGHT: float = 120.0
-const SEAL_HEIGHT: float = 64.0
+const SEAL_HEIGHT: float = 96.0
 const SEAL_FILE: String = "g9_seal.png"
 const SEAL_CRACKED_FILE: String = "g9b_seal_cracked.png"
 const SEAL_PRESS_SCALE: float = 0.82

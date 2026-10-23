@@ -164,6 +164,10 @@ const DRESS_CHANCES: Dictionary = {
 }
 
 static func _dress(candidate: CharacterData) -> void:
+	# Saç ayrı tohumdan: giysi zarına dokunmasın (eski kayıtların yükleme yedeğiyle aynı).
+	var hair := OutfitCatalog.roll_hair(candidate.gender, hash(candidate.character_name + "|hair"))
+	candidate.hair_style = str(hair.style)
+	candidate.hair_color = int(hair.color)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%s|%d|%d" % [candidate.character_name, candidate.height_cm, candidate.skin_tone])
 	for slot in OutfitCatalog.ALL_SLOTS:

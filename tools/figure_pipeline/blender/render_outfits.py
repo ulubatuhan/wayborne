@@ -43,8 +43,22 @@ OUT = os.path.join(ROOT, "build", "figures", "outfits_hd" if float(os.environ.ge
                    else "outfits")
 
 
+def hair_paths(spec):
+    """MPFB'nin kendi sac varliklari (CC0 MakeHuman sistem varliklari): .mhclo ve
+    alfa tasiyan diffuse doku."""
+    d = os.path.join(rf.MPFB_DATA, "hair", spec["hair"])
+    return os.path.join(d, spec["hair"] + ".mhclo"), os.path.join(d, spec["hair"] + "_diffuse.png")
+
+
 def fit_item(spec, gender, body, rig, inner=()):
     src = spec.get("source", "quaternius")
+    if src == "mpfb_hair":
+        # Sac karti: altina hicbir sey giyilmez (inner yok), yalniz bedenin
+        # disinda kalsin diye sarilir; sekli bozulmasin diye kabuk yok.
+        obj, pushed = fit_garment.fit_mhclo(hair_paths(spec)[0], body, rig, float(spec["eps"]), (),
+                                            float(spec.get("gap", 0.003)))
+        print("giydirildi sac", spec["hair"], "itilen", pushed, flush=True)
+        return obj
     if src == "mhclo":
         obj, pushed = fit_garment.fit_mhclo(os.path.join(MAKEHUMAN, spec["mhclo"], spec["mhclo"] + ".mhclo"),
                                             body, rig, float(spec["eps"]), inner, float(spec.get("gap", 0.003)),
@@ -112,7 +126,7 @@ def worn_under(inner_spec, spec):
     baska yuva, ve dis kalem o yuvayi gizlemiyor (elbise pantolonu gizler:
     elbise giyilince pantolon cizilmez, o yuzden elbise pantolonlarin ustune
     sisirilmez)."""
-    if spec["slot"] == "hat":  # baslik yalniz basa oturur; yakalar onu itip bozuyordu
+    if spec["slot"] in ("hat", "hair"):  # baslik ve sac yalniz basa oturur; yakalar onu itip bozuyordu
         return False
     if inner_spec.get("skirt"):
         # Etegin kabarikligi kalcadan disari acilir; ustune oturtulan gomlek,
@@ -228,12 +242,13 @@ def albedo_material(cfg, layer, src_mat, core, root):
     return mat
 
 
-def tint_material(cfg, layer, src_mat, tint, core, root):
+def tint_material(cfg, layer, src_mat, tint, core, root, alpha_image=None, alpha_cutoff=0.5):
     """Oyunun dili (onay sayfasinda kabul edilen): rengi paletten, dokudan yalniz
     acik-koyu deseni. MakeHuman dokulari fotografik baski tasiyor (cicekli
     etek, kot deseni); dort tona inince gurultu oluyor ve dunyaya uymuyordu."""
     mat = fig_shading.body_material(cfg, "id:" + layer, core=core, root=root,
-                                    name_suffix="_tint_%s" % (src_mat.name if src_mat else "none"))
+                                    name_suffix="_tint_%s" % (src_mat.name if src_mat else "none"),
+                                    alpha_image=alpha_image, alpha_cutoff=alpha_cutoff)
     nt = mat.node_tree
     em = next(n for n in nt.nodes if n.type == "EMISSION" and n.inputs["Color"].is_linked
               and n.inputs["Color"].links[0].from_node.type == "COMBINE_COLOR")
@@ -326,7 +341,10 @@ def main():
             obj.hide_render = True
             continue
         olw = lws[name]
-        objs[name] = (obj, member_layers(olw, layers), [s.material for s in obj.material_slots])
+        # Sac yalniz bas katmaninda: uzun sac omza degince kol katmanina da giriyordu,
+        # oysa on kol sacin onunden gecer.
+        mlayers = sc["ocfg"]["items"][name].get("layers") or member_layers(olw, layers)
+        objs[name] = (obj, mlayers, [s.material for s in obj.material_slots])
         print("kalem", name, "katmanlar", objs[name][1], flush=True)
 
     camcfg0 = rf.hd_camera(dict(rf.cfg("camera.json")))
@@ -341,6 +359,10 @@ def main():
     body.data.materials.append(fig_shading.body_material(camcfg0, "full", **kw))
     body.visible_camera = False
     curl = retarget.get("finger_curl_deg", [0, 0, 0])
+    # Sac kartlari: dokunun alfasi esigin altinda kalan yuzeyi siler (render_frames --hair ile ayni).
+    alpha_images = {name: bpy.data.images.load(hair_paths(sc["ocfg"]["items"][name])[1], check_existing=True)
+                    for name in objs if sc["ocfg"]["items"][name].get("source") == "mpfb_hair"}
+    item_shade = {}
 
     for clip_name in clips:
         clip_cfg = build["clips"][clip_name]
@@ -360,8 +382,17 @@ def main():
         # (kare basina ~2 sn, render'in kendisinden uzun).
         mats = {}
         for name, (obj, mlayers, src) in objs.items():
-            tint = sc["ocfg"]["items"][name].get("tint")
-            if tint:
+            spec = sc["ocfg"]["items"][name]
+            tint = spec.get("tint")
+            alpha = alpha_images.get(name)
+            if alpha is not None:
+                cut = float(spec.get("alpha_cutoff", 0.5))
+                alb = {n: [tint_material(camcfg, n, s_, tint, kw["core"], kw["root"], alpha, cut) for s_ in src]
+                       for n in layers["layers"]}
+                item_shade[name] = {n: fig_shading.body_material(camcfg0, "layer:" + n, alpha_image=alpha,
+                                                                 alpha_cutoff=cut, name_suffix="_a_" + name, **kw)
+                                    for n in layers["layers"]}
+            elif tint:
                 alb = {n: [tint_material(camcfg, n, s_, tint, kw["core"], kw["root"]) for s_ in src]
                        for n in layers["layers"]}
             else:
@@ -389,7 +420,7 @@ def main():
                 os.makedirs(d, exist_ok=True)
                 for n in todo:
                     bpy.context.scene.cycles.samples = int(ocfg["samples_shade"])
-                    set_slots(obj, shade[n])
+                    set_slots(obj, item_shade.get(name, shade)[n])
                     rc.render(os.path.join(d, "shade_%s.png" % n))
                     bpy.context.scene.cycles.samples = int(ocfg["samples_albedo"])
                     set_slots(obj, alb[n])

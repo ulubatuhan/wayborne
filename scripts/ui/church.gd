@@ -39,6 +39,7 @@ func _ready() -> void:
 	_purification_panel = PurificationPanel.new()
 	_content.add_child(_purification_panel)
 	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
+	_purification_panel.enable_curse_lifting()
 
 	_build_doctor()
 	_build_myths()

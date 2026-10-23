@@ -64,13 +64,14 @@ const GUARD_SERGEANT: String = "guard_sergeant"
 ## `traveler`) de buradan okunuyor, savaşta göreceğin kişi yolda da o.
 const LOOKS: Dictionary = {
 	CUTTER: {"body": "body_male_average", "outfit": {
-		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots"}},
+		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots",
+		"hair": "hair_short01", "hair_tint": Color(0.20, 0.17, 0.15)}},
 	ARCHER: {"body": "body_male_lean", "outfit": {
 		"shirt": "peasant_shirt", "jacket": "ranger_jacket", "pants": "ranger_pants",
 		"shoes": "ranger_boots", "hat": "ranger_hood"}},
 	LEADER: {"body": "body_male_heavy", "outfit": {
 		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "ranger_pants",
-		"shoes": "ranger_boots"}},
+		"shoes": "ranger_boots", "hair": "hair_long01", "hair_tint": Color(0.34, 0.24, 0.17)}},
 	MOUNTAIN_BANDIT: {"body": "body_male_heavy", "outfit": {
 		"shirt": "peasant_shirt", "jacket": "wool_coat", "pants": "viking_pants",
 		"shoes": "hobnail_boots", "hat": "fur_hat"}},
@@ -86,7 +87,8 @@ const LOOKS: Dictionary = {
 	ROGUE_MAGE: {"body": "body_male_lean", "outfit": {
 		"jacket": "mage_robe", "hat": "wizard_hat", "shoes": "felt_shoes"}},
 	"bandit": {"body": "body_male_average", "outfit": {
-		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots"}},
+		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "ranger_boots",
+		"hair": "hair_short04", "hair_tint": Color(0.50, 0.35, 0.22)}},
 	"guard": {"body": "body_male_average", "outfit": {
 		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "cloth_trousers",
 		"shoes": "leather_boots", "hat": "guard_helmet"}},

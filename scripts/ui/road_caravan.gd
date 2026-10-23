@@ -173,10 +173,16 @@ const SEAT_BLEND_U: Dictionary = {"dismount": 0.72, "climb_down": 0.62}
 ## kasıtlı olarak birbirinden ayrı tutuluyor (bkz. `_fire_tolerance` ve
 ## `test_camp_gathering.gd`'nin üst üste binme testi): ayrım ekseni yine
 ## `x`, `y` yalnızca kümeyi ateşin tamamen etrafına yayıyor.
+##
+## Koltuklar ateşin **iki yanında**, odunu açık bırakarak: ilk sürüm
+## (±2.3 birim) ateşin kendi genişliğinden darın kaldı ve altı kişilik bir
+## ateşte herkes odunun üstünde, alevi örterek duruyordu (vitrin karesinde
+## görüldü, Y-G13). Figürler ateşin üstüne çizildiği için önünde ya da
+## arkasında oturmak yok; sıra soldan sağa dönüşümlü, içten dışa.
 const CAMPFIRE_SEAT_SPACING: float = 15.0
 const CAMPFIRE_SEATS: Array[Vector2] = [
-	Vector2(-0.6, 0.5), Vector2(0.7, -0.6), Vector2(-1.5, -0.3),
-	Vector2(1.6, 0.4), Vector2(0.0, -1.1), Vector2(-2.3, 0.2),
+	Vector2(-2.9, 0.4), Vector2(3.1, -0.3), Vector2(-4.7, -0.5),
+	Vector2(4.9, 0.5), Vector2(-6.4, 0.1), Vector2(6.6, -0.4),
 ]
 
 var _anchor_x: float = 0.0
@@ -608,6 +614,7 @@ func _make_figure(
 	var body_variant := character.get_body_variant_id() if character != null else ""
 	if character == null and kind == WalkFigure.KIND_PERSON:
 		body_variant = BodyFrames.CREW_BODY
+		outfit = OutfitCatalog.with_rolled_hair(outfit, CharacterData.GENDER_MALE, get_child_count() * 7919)
 	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit, body_variant)
 	figure.set_loadout(Wardrobe.loadout_for(character))
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
@@ -1412,6 +1419,10 @@ func _advance_gather(real_delta: float) -> void:
 			if figure.is_in_transition():
 				figure.set_transition("", 0.0, 0.0)
 			figure.advance_ground(delta, (figure.position.x - before.x) / maxf(delta, 0.0001))
+		if _camping and walk >= 1.0:
+			# Yerine varan ateşe dönüyor (koltuğu yürüdüğü yönün ötesinde olabilir).
+			var fire_x := _campfire_position(int(_gather_fire_index.get(figure, 0))).x
+			figure.set_facing(1.0 if fire_x >= figure.position.x + figure.size.x * 0.5 else -1.0)
 		if walk > 0.0 or (has_trans and trans > 0.0):
 			settled = false
 

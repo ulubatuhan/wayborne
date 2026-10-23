@@ -39,6 +39,8 @@ const LIGHT_COLOR: Color = Color(1.0, 0.72, 0.36)
 const LIGHT_CORE_RADIUS: float = 1.6
 const LIGHT_GLOW_RADIUS: float = 6.0
 const LIGHT_FLICKER: float = 0.18
+## Atlının feneri: ışık dairesinin yarıçapı, atlı boyu cinsinden.
+const RIDER_LANTERN_GLOW: float = 1.7
 ## Geçmiş yollar ve kamp işaretleri.
 const TRAIL_COLOR: Color = Color(0.17, 0.12, 0.09, 0.55)
 const TRAIL_WIDTH: float = 1.5
@@ -293,7 +295,27 @@ func _draw_rider() -> void:
 		return
 	var anchor: Vector2 = _rider_anchor.get(dir, Vector2(0.5, 0.94))
 	var s := RIDER_SIZE
+	var lantern := at + rider_lantern_offset(dir) * s
+	var strength := light_strength_for_hour(hour)
+	if strength > 0.01:
+		# Gecenin fenerli atlısı (Y-G13): kervanın feneri yolda olduğu gibi
+		# haritada da yanar; ışık atlının gittiği yanda.
+		var a := strength * light_flicker(Time.get_ticks_msec() / 1000.0, 1.7)
+		ArtDraw.radial_glow(_overlay, lantern, Vector2(s, s) * RIDER_LANTERN_GLOW, LIGHT_COLOR, 0.42 * a)
+		ArtDraw.radial_glow(_overlay, lantern, Vector2(s, s) * RIDER_LANTERN_GLOW * 0.4, LIGHT_COLOR, 0.55 * a)
 	_overlay.draw_texture_rect(tex, Rect2(at - anchor * s, Vector2(s, s)), false)
+	if strength > 0.01:
+		var a := strength * light_flicker(Time.get_ticks_msec() / 1000.0, 1.7)
+		_overlay.draw_circle(lantern, LIGHT_CORE_RADIUS * 1.6, Color(LIGHT_COLOR.lightened(0.45), 0.95 * a))
+
+## Fenerin atlıya göre yeri (atlı boyu cinsinden): gidilen yanda, eyer hizasında.
+static func rider_lantern_offset(dir: String) -> Vector2:
+	var side := 0.0
+	if dir.contains("D"):
+		side = 1.0
+	elif dir.contains("B"):
+		side = -1.0
+	return Vector2(0.22 * side, -0.42)
 
 ## Gidiş vektörünün yönü: en yakın 45°'ye yuvarlanır (harita görüntüleyicisiyle aynı).
 static func rider_direction(delta: Vector2) -> String:

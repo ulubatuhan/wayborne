@@ -3,6 +3,10 @@
     WAYBORNE_HD=3 blender -b --python tools/figure_pipeline/blender/render_frames.py -- --variant V --clip idle
     WAYBORNE_HD=3 blender -b --python tools/figure_pipeline/blender/render_outfits.py -- --variant V --clips idle
     python -X utf8 tools/figure_pipeline/mesh/pack_hd.py [--variants male_average,...] [--scale 3]
+        [--items hair_short01,...] [--outfits-only]
+
+--outfits-only: beden kümesi yeniden paketlenmez (kaynağı yine gerekir, kalemler
+bedenin eklemlerine oturur); yeni kalem eklenince oyundaki beden kümesi değişmesin.
 
 Girdi : build/figures/out_hd/<varyant>/idle, build/figures/outfits_hd/<varyant>/<kalem>/idle
 Cikti : data/assets/characters/frames/body_<varyant>_hd, outfit_<kalem>_<varyant>_hd
@@ -55,6 +59,9 @@ def main():
     idle["anchor_px"] = [v * scale for v in idle["anchor_px"]]
     hd_build = {"clips": {"idle": idle}}
     items = list(json.load(open(os.path.join(PIPE, "config", "outfits.json")))["items"])
+    if "--items" in sys.argv:
+        items = sys.argv[sys.argv.index("--items") + 1].split(",")
+    outfits_only = "--outfits-only" in sys.argv
     tmp = tempfile.mkdtemp(prefix="hd_pack_")
     P.OUT = os.path.join(ROOT, "build", "figures", "out_hd")
     P.DEST = tmp
@@ -67,8 +74,9 @@ def main():
             if not os.path.isdir(os.path.join(P.OUT, v, "idle")):
                 print("yok:", v)
                 continue
-            P.pack_variant(v, hd_build, layers, post)
-            _move(tmp, "body_" + v, "body_%s_hd" % v)
+            if not outfits_only:
+                P.pack_variant(v, hd_build, layers, post)
+                _move(tmp, "body_" + v, "body_%s_hd" % v)
             for item in items:
                 if not os.path.isdir(os.path.join(PO.SRC, v, item, "idle")):
                     continue

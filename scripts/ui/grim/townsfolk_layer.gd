@@ -125,6 +125,7 @@ func _add_person(spot: Array, rng: RandomNumberGenerator) -> void:
 		var piece := OutfitCatalog.get_piece(String(piece_id))
 		if piece != null and piece.fits(gender):
 			outfit[piece.slot] = piece.piece_id
+	outfit = OutfitCatalog.with_rolled_hair(outfit, gender, rng.randi())
 	figure.set_kind(WalkFigure.KIND_PERSON, VILLAGER, CharacterData.height_scale_for(rng.randi_range(158, 184)),
 		CharacterData.get_skin_tone_color(rng.randi_range(0, 3)), false, outfit, Wardrobe.body_id_for(gender, weight))
 	figure.set_standing()

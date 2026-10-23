@@ -20,6 +20,8 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(SHOT_DIR)
 	get_root().size = VIEW_SIZE
 	await _settle()
+	# UserSettings dili ilk karede kendi kaydından kuruyor.
+	TranslationServer.set_locale("tr")
 	WaybookTheme.install()
 
 	var backdrop := ColorRect.new()

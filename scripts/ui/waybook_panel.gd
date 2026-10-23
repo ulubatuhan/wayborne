@@ -45,6 +45,7 @@ const FALLEN_STRIKE_RISE: float = 0.62
 const STORY_LINE_SIZE: int = 22
 const STORY_LINE_GAP: float = 26.0
 const GRAVE_MARK_HEIGHT: float = 80.0
+const FALLEN_BUST_SIZE: Vector2 = Vector2(68, 84)
 
 var _session: GameSession
 var _book: TextureRect
@@ -245,6 +246,15 @@ func _fallen_row(entry: Dictionary, leaders: Dictionary) -> Control:
 	var mark := GraveMark.new().setup(rank, GRAVE_MARK_HEIGHT)
 	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(mark)
+	# Ölümden önce saklanan görünüş varsa yüzü de (görev Y-G04); eski kayıtlarda yalnız mezar.
+	var look: Dictionary = entry.get("look", {})
+	if not look.is_empty():
+		var bust := BustPortrait.new()
+		bust.custom_minimum_size = FALLEN_BUST_SIZE
+		bust.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bust)
+		bust.show_snapshot(look)
+		bust.set_struck(true)
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.add_theme_constant_override("separation", 0)

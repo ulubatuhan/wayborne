@@ -453,7 +453,12 @@ func _build_gear_box(character: CharacterData, slot: String) -> PanelContainer:
 		var off := Button.new()
 		off.text = tr("UI_WARDROBE_TAKE_OFF")
 		off.pressed.connect(_unequip.bind(slot))
+		var block := _session.get_unequip_block_reason(character, slot)
+		off.disabled = not block.is_empty()
+		off.tooltip_text = tr(block) if not block.is_empty() else ""
 		inner.add_child(off)
+		if not block.is_empty():
+			text.add_child(_hint(tr(block)))
 	box.set_drag_forwarding(
 		_gear_drag.bind(equipped.equipment_id if equipped != null else "", "slot", slot),
 		_gear_slot_can_drop.bind(slot),
@@ -492,23 +497,21 @@ func _build_gear_card(equipment_id: String) -> PanelContainer:
 	var equip := Button.new()
 	equip.text = tr("UI_WARDROBE_EQUIP")
 	var allowed := _character() != null and _session.can_equip(_character(), equipment_id)
-	equip.disabled = not allowed
+	var cursed_slot := _character() != null and _character().is_slot_cursed(equipment.slot)
+	equip.disabled = not allowed or cursed_slot
 	equip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	equip.pressed.connect(_equip.bind(equipment.slot, equipment_id))
 	column.add_child(equip)
 	if _character() != null and not allowed:
 		column.add_child(_hint(tr("UI_WARDROBE_NEEDS_LEVEL") % equipment.required_level))
+	elif cursed_slot:
+		column.add_child(_hint(tr("UI_EQUIP_CURSED_LOCK")))
 	card.set_drag_forwarding(_gear_drag.bind(equipment_id, "locker", ""), Callable(), Callable())
 	return card
 
 ## Bir ekipmanın katkısı, giysininkiyle aynı biçimde ("+2 can, +1 isabet").
 static func gear_bonus_text(equipment: Equipment) -> String:
-	var parts: PackedStringArray = []
-	for field in OutfitCatalog.BONUS_FIELDS:
-		var value := int(equipment.get(field))
-		if value != 0:
-			parts.append("%+d %s" % [value, String(TranslationServer.translate(OutfitCatalog._stat_key(field)))])
-	return ", ".join(parts)
+	return EquipmentCatalog.bonus_line(equipment)
 
 # --- Yardımcılar ---
 

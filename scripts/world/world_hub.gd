@@ -792,7 +792,8 @@ func _build_crew_member(centre_x: float) -> WalkFigure:
 	# Tayfa isimsiz: sınıfı yok, nötr bir silüet paleti taşıyor.
 	body.set_kind(
 		WalkFigure.KIND_PERSON, "bandit", 0.95,
-		CharacterData.get_skin_tone_color(int(absf(centre_x)) % 4), true, {},
+		CharacterData.get_skin_tone_color(int(absf(centre_x)) % 4), true,
+		OutfitCatalog.with_rolled_hair({}, CharacterData.GENDER_MALE, int(absf(centre_x))),
 		BodyFrames.CREW_BODY
 	)
 	body.set_phase_offset(centre_x * 0.03)

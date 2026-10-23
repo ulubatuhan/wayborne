@@ -663,6 +663,10 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
 	_draw_frame_outline(frames, garments, clip, frame, xf, h, seated)
+	# Saç gri render edildi: kişinin saç rengiyle çarpılıyor (ten gibi).
+	var garment_tints: Array[Color] = []
+	for garment in garments:
+		garment_tints.append(_tint * OutfitCatalog.hair_tint(_outfit) if OutfitCatalog.is_hair_frames(garment) else _tint)
 	for layer in BodyFrames.LAYERS.size():
 		if seated and BodyFrames.LAYERS[layer] == "back_leg":
 			continue  # atın arkasında kalıyor (FigureRig.bones_for(true) ile aynı kural)
@@ -683,12 +687,12 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 				continue
 			var region: Rect2 = e.region
 			draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tones[kind])
-		for garment in garments:
-			var g := garment.entry(clip, frame, layer, BodyFrames.KIND_BODY)
+		for gi in garments.size():
+			var g := garments[gi].entry(clip, frame, layer, BodyFrames.KIND_BODY)
 			if g.is_empty():
 				continue
 			var gregion: Rect2 = g.region
-			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, _tint)
+			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, garment_tints[gi])
 		draw_set_transform_matrix(Transform2D.IDENTITY)
 		if BodyFrames.LAYERS[layer] == "torso_head":
 			_draw_frame_extras(joints, h, look)

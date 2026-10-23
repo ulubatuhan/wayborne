@@ -248,6 +248,8 @@ func remove_equipment(equipment_id: String, quantity: int = 1) -> bool:
 func equip_to_character(character: CharacterData, slot: String, equipment_id: String) -> bool:
 	if character == null or not can_equip(character, equipment_id):
 		return false
+	if character.is_slot_cursed(slot):
+		return false
 	if not remove_equipment(equipment_id, 1):
 		return false
 	var previous_id := character.get_equipped_id(slot)
@@ -270,9 +272,36 @@ func can_equip(character: CharacterData, equipment_id: String) -> bool:
 		return false
 	return character.level >= piece.required_level
 
+## Bedelli parçalar (görev Y-C06): kuşananı yolda her gün biraz yıpratır.
+func _apply_equipment_cost_day() -> void:
+	for character in party:
+		var cost := character.get_equipment_daily_stress()
+		if cost > 0:
+			change_character_stress(character, cost)
+
+## Lanetin kilisedeki bedeli. Bir taze huyu arındırmaktan pahalı: bir bağ
+## koparılıyor, parça da gömülüyor (depoya dönmez).
+const CURSE_LIFT_PRICE: int = 60
+
+## Lanetli bir parçanın bağını çözer: ücret alınır, parça yok olur. Kilise
+## ekranı çağırır; yolda çağrılamaz.
+func lift_curse(character: CharacterData, slot: String) -> bool:
+	if character == null or not character.is_slot_cursed(slot) or is_journey_active():
+		return false
+	if not wallet.spend(CURSE_LIFT_PRICE):
+		return false
+	character.unequip(slot)
+	return true
+
+## Bir yuvadaki parçanın neden çıkarılamadığı ("" = çıkarılabilir).
+func get_unequip_block_reason(character: CharacterData, slot: String) -> String:
+	if character != null and character.is_slot_cursed(slot):
+		return "UI_EQUIP_CURSED_LOCK"
+	return ""
+
 ## Karakterden bir parçayı çıkarıp depoya geri koyar.
 func unequip_from_character(character: CharacterData, slot: String) -> bool:
-	if character == null:
+	if character == null or character.is_slot_cursed(slot):
 		return false
 	var previous_id := character.get_equipped_id(slot)
 	if previous_id.is_empty() or not character.unequip(slot):
@@ -1158,6 +1187,7 @@ func resolve_deaths(
 			total_days_elapsed, lineage_generation, character.character_id,
 			cause_key, location_id, character.class_id
 		)
+		ledger.set_last_look(character.get_look_snapshot())
 		note_beat(BEAT_DEATH, [character.character_name])
 		# Yolda ölen yolda kalır (Y-B11); düşen liderin yeri bir taş (R2 #6).
 		if is_journey_active():
@@ -2160,6 +2190,7 @@ func advance_day() -> Array[String]:
 		var vanguard := get_duty_holder(DutyCatalog.VANGUARD)
 		if vanguard != null:
 			change_character_stress(vanguard, VANGUARD_DAILY_STRESS)
+		_apply_equipment_cost_day()
 		_apply_formation_fatigue_day()
 
 	var expired: Array[String] = []
