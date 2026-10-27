@@ -1,5 +1,7 @@
 # AI-referanslı 2D sprite üretimi (hedef, kullanıcı kararı 2026-10-22)
 
+> **Yerini aldı (2026-10-27):** bütün görsellerin el çizimi programı `docs/el_cizimi/SUREC.md`. Bu not aşağıdaki ilk planın kaydı olarak kalıyor.
+
 Amaç: oyunun görselleri, mağaza sayfasında AI beyanı gerekmeyecek kadar elle üretilmiş olsun. AI çıktısı yalnızca
 **referans** olarak kullanılır; oyuna giren her piksel tablette elle çizilir. Süreç ileride kurulacak; aşağıdaki metin
 kullanıcının kendi tarifidir, değiştirilmeden alındı.

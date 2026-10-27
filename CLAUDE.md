@@ -5344,11 +5344,15 @@ verir.
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
   [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
   kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
-- **AI beyanı gerekmeyecek görseller (kullanıcı hedefi, 2026-10-22).** Üretken modelle yapılmış 2B varlıklar
-  (Waybook arka planları, ikonlar, olay illüstrasyonları, gösterge resimleri) ileride elle yeniden çizilecek: AI çıktısı
-  yalnızca tablette %30-40 opaklıkta bir referans katmanı, lineart ve düz boyama üstüne elle, referans katmanı silinir,
-  şeffaf PNG aynı hatlardan (`art_source/` -> `data/assets/`) girer. Süreç ve aşamalar:
-  `docs/design_notes/ai_referansli_sprite.md`. 3B render'lar CC0 modellerden, kapsam dışı.
+- **Bütün görseller el çizimi (kullanıcı hedefi, 2026-10-22; program 2026-10-27).** Kullanıcı oyunun bütün görsellerini
+  tablette (ibis Paint X) kendisi çiziyor; amaç AI beyanından olabildiğince kurtulmak. Tek liste
+  `tools/el_cizimi/envanter.py` (676 satır, eski ve kullanılmayan dosyalar hariç); şablonlar `sablon_uret.py` (hizalı
+  referans, katman haritası, adlı katmanlı PSD; zipler depoda değil), takip `docs/el_cizimi/el_cizimi_takip.xlsx`
+  (`takip_excel.py`, çizerin girdileri korunur), teslim `art_source/el_cizimi/gelen/` -> `al.py` (doğrular, oyuna işler,
+  durumu "Oyunda" yapar; ardından ekran görüntüsü). Süreç: `docs/el_cizimi/SUREC.md`. Figürler tek rölanti çizimi,
+  oyun kemiklerle büker: pilot `docs/el_cizimi/pilot/PILOT.md` (14 pozda çalışıyor; etek/cüppe tek parça `etek`
+  katmanı). Açık: `HumanSkin` (GDScript) ilk gerçek beden çizimiyle kurulacak; ince/iri beden türetme denenmedi.
+  Öncelik 1 (181 AI görsel) bitince `AI_DISCLOSURE.md` yeniden yazılır.
 - **Kamp ateşi başında oturma postürü (kullanıcı isteği, 2026-10-23).** Bugün kamp kurulunca herkes ateşin iki yanında
   ayakta duruyor (`RoadCaravan.CAMPFIRE_SEATS`). İstenen: ateşin etrafında oturan, ısınan kervan. Yapılacaklar:
   `FigureActions`'a oturma klipleri (`sit_fire`: bağdaş/kütükte oturuş, eller ateşe; birkaç varyant), MPFB hattında

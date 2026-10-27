@@ -1,0 +1,12289 @@
+{
+ "ARY-arrow": {
+  "asil": [
+   32,
+   32
+  ],
+  "hedef": "data/assets/ui/cursor/arrow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "ARY-ash_flake": {
+  "asil": [
+   32,
+   32
+  ],
+  "hedef": "data/assets/ui/grim/ash_flake.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "ARY-b1_guild": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b1_guild.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b2_market": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b2_market.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b2b_thumb": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/b2b_thumb.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   2752,
+   2752
+  ]
+ },
+ "ARY-b3_tavern": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b3_tavern.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b4_yard": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b4_yard.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b5_church": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b5_church.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b7_planner": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b7_planner.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b8_recruit": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b8_recruit.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-b9_tent": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/b9_tent.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-banner": {
+  "asil": [
+   620,
+   120
+  ],
+  "hedef": "data/assets/ui/grim/kit/banner.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1248,
+   240
+  ]
+ },
+ "ARY-beam": {
+  "asil": [
+   832,
+   248
+  ],
+  "hedef": "data/assets/ui/market_scale/beam.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1664,
+   496
+  ]
+ },
+ "ARY-c1_crepe": {
+  "asil": [
+   92,
+   160
+  ],
+  "hedef": "data/assets/ui/waybook/c1_crepe.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   592,
+   1024
+  ]
+ },
+ "ARY-card": {
+  "asil": [
+   300,
+   132
+  ],
+  "hedef": "data/assets/ui/grim/kit/card.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   608,
+   256
+  ]
+ },
+ "ARY-coin": {
+  "asil": [
+   64,
+   64
+  ],
+  "hedef": "data/assets/ui/market_scale/coin.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-column": {
+  "asil": [
+   480,
+   816
+  ],
+  "hedef": "data/assets/ui/market_scale/column.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1632
+  ]
+ },
+ "ARY-crest": {
+  "asil": [
+   160,
+   160
+  ],
+  "hedef": "data/assets/ui/grim/kit/crest.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-e6a_wildlife": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6a_wildlife.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6b_wolves": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6b_wolves.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6c_bandits": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6c_bandits.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6d_guard": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6d_guard.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6e_traveler": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6e_traveler.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6f_merchant": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6f_merchant.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6g_pilgrim": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6g_pilgrim.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6h_shrine": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6h_shrine.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6i_pass": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6i_pass.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6j_village": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6j_village.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6k_outpost": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6k_outpost.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6l_mine": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6l_mine.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6m_bridge": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6m_bridge.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6n_storm": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6n_storm.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6o_landslide": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6o_landslide.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6p_wagon": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6p_wagon.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6q_camp": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6q_camp.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6r_grave": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6r_grave.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6s_creditor": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6s_creditor.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6t_news": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6t_news.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-e6u_cache": {
+  "asil": [
+   900,
+   900
+  ],
+  "hedef": "data/assets/ui/waybook/e6u_cache.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   1792,
+   1792
+  ]
+ },
+ "ARY-eq_amulet_ancient_eye": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_ancient_eye.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_ash_locket": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_ash_locket.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_bear_claw": {
+  "asil": [
+   25,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_bear_claw.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   272,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_copper_coin": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_copper_coin.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_courage": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_courage.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_horse_hair": {
+  "asil": [
+   71,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_horse_hair.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   752,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_raven_feather": {
+  "asil": [
+   25,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_raven_feather.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   272,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_salt_charm": {
+  "asil": [
+   71,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_salt_charm.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   752,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_ward": {
+  "asil": [
+   71,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_ward.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   752,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_wayfarer_stone": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_wayfarer_stone.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_wolf_fang": {
+  "asil": [
+   25,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_wolf_fang.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   272,
+   1024
+  ]
+ },
+ "ARY-eq_amulet_wolf_skull": {
+  "asil": [
+   25,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_amulet_wolf_skull.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   272,
+   1024
+  ]
+ },
+ "ARY-eq_armor_gambeson": {
+  "asil": [
+   75,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_gambeson.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   800,
+   1024
+  ]
+ },
+ "ARY-eq_armor_lamellar": {
+  "asil": [
+   96,
+   92
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_lamellar.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   976
+  ]
+ },
+ "ARY-eq_armor_scale": {
+  "asil": [
+   96,
+   92
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_scale.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   976
+  ]
+ },
+ "ARY-eq_armor_tier_1": {
+  "asil": [
+   75,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_tier_1.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   800,
+   1024
+  ]
+ },
+ "ARY-eq_armor_tier_2": {
+  "asil": [
+   96,
+   94
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_tier_2.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1008
+  ]
+ },
+ "ARY-eq_armor_tier_3": {
+  "asil": [
+   96,
+   92
+  ],
+  "hedef": "data/assets/ui/waybook/eq_armor_tier_3.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   976
+  ]
+ },
+ "ARY-eq_ring_bloodstone": {
+  "asil": [
+   89,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_bloodstone.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-eq_ring_charmed": {
+  "asil": [
+   89,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_charmed.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-eq_ring_debtor": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_debtor.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_drowned": {
+  "asil": [
+   89,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_drowned.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-eq_ring_gambler": {
+  "asil": [
+   74,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_gambler.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   784,
+   1024
+  ]
+ },
+ "ARY-eq_ring_hawk": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_hawk.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_iron_band": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_iron_band.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_marksman": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_marksman.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_salt_seal": {
+  "asil": [
+   89,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_salt_seal.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-eq_ring_silent": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_silent.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_steady_hand": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_steady_hand.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_ring_widow": {
+  "asil": [
+   90,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_ring_widow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   960,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_axe": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_axe.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_old_blade": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_old_blade.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_spear": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_spear.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_tier_1": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_tier_1.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_tier_2": {
+  "asil": [
+   89,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_tier_2.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-eq_weapon_tier_3": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/eq_weapon_tier_3.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-g6_rule": {
+  "asil": [
+   420,
+   19
+  ],
+  "hedef": "data/assets/ui/waybook/g6_rule.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   48
+  ]
+ },
+ "ARY-g9_seal": {
+  "asil": [
+   192,
+   186
+  ],
+  "hedef": "data/assets/ui/waybook/g9_seal.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   992
+  ]
+ },
+ "ARY-g9b_seal_cracked": {
+  "asil": [
+   192,
+   186
+  ],
+  "hedef": "data/assets/ui/waybook/g9b_seal_cracked.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   992
+  ]
+ },
+ "ARY-icon_camp": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_camp.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_caravan": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_caravan.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_church": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_church.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_gate": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_gate.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_guild": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_guild.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_ledger": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_ledger.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_map": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_map.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_market": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_market.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_party": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_party.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_tailor": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_tailor.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_tavern": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_tavern.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_wardrobe": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_wardrobe.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-icon_yard": {
+  "asil": [
+   112,
+   112
+  ],
+  "hedef": "data/assets/ui/grim/kit/icon_yard.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-ink_blot": {
+  "asil": [
+   768,
+   192
+  ],
+  "hedef": "data/assets/ui/grim/ink_blot.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1536,
+   384
+  ]
+ },
+ "ARY-isaretler": {
+  "kutular": {
+   "arti": [
+    349,
+    600,
+    325,
+    416
+   ],
+   "eksi": [
+    690,
+    600,
+    325,
+    416
+   ],
+   "nokta_bos": [
+    349,
+    168,
+    325,
+    416
+   ],
+   "nokta_dolu": [
+    8,
+    168,
+    325,
+    416
+   ],
+   "ok": [
+    690,
+    168,
+    325,
+    416
+   ],
+   "onay": [
+    8,
+    600,
+    325,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-item_bandage": {
+  "asil": [
+   88,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/item_bandage.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   944,
+   1024
+  ]
+ },
+ "ARY-item_cloth": {
+  "asil": [
+   96,
+   73
+  ],
+  "hedef": "data/assets/ui/waybook/item_cloth.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   784
+  ]
+ },
+ "ARY-item_fish": {
+  "asil": [
+   53,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/item_fish.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   560,
+   1024
+  ]
+ },
+ "ARY-item_furs": {
+  "asil": [
+   96,
+   83
+  ],
+  "hedef": "data/assets/ui/waybook/item_furs.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   880
+  ]
+ },
+ "ARY-item_grain": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/item_grain.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-item_honey": {
+  "asil": [
+   71,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/item_honey.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   752,
+   1024
+  ]
+ },
+ "ARY-item_jewelry": {
+  "asil": [
+   96,
+   84
+  ],
+  "hedef": "data/assets/ui/waybook/item_jewelry.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   896
+  ]
+ },
+ "ARY-item_potion": {
+  "asil": [
+   76,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/item_potion.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   816,
+   1024
+  ]
+ },
+ "ARY-item_provisions": {
+  "asil": [
+   96,
+   87
+  ],
+  "hedef": "data/assets/ui/waybook/item_provisions.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   928
+  ]
+ },
+ "ARY-item_silk": {
+  "asil": [
+   96,
+   87
+  ],
+  "hedef": "data/assets/ui/waybook/item_silk.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   928
+  ]
+ },
+ "ARY-item_spice": {
+  "asil": [
+   96,
+   81
+  ],
+  "hedef": "data/assets/ui/waybook/item_spice.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   864
+  ]
+ },
+ "ARY-item_weapon": {
+  "asil": [
+   96,
+   81
+  ],
+  "hedef": "data/assets/ui/waybook/item_weapon.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   864
+  ]
+ },
+ "ARY-item_wine": {
+  "asil": [
+   96,
+   78
+  ],
+  "hedef": "data/assets/ui/waybook/item_wine.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   832
+  ]
+ },
+ "ARY-k3_bar": {
+  "asil": [
+   240,
+   27
+  ],
+  "hedef": "data/assets/ui/waybook/k3_bar.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   112
+  ]
+ },
+ "ARY-k4a_bleed": {
+  "asil": [
+   93,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4a_bleed.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   992,
+   1024
+  ]
+ },
+ "ARY-k4b_blight": {
+  "asil": [
+   76,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4b_blight.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   816,
+   1024
+  ]
+ },
+ "ARY-k4c_stun": {
+  "asil": [
+   63,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4c_stun.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   672,
+   1024
+  ]
+ },
+ "ARY-k4d_stun_resist": {
+  "asil": [
+   79,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4d_stun_resist.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   848,
+   1024
+  ]
+ },
+ "ARY-k4e_buff": {
+  "asil": [
+   96,
+   75
+  ],
+  "hedef": "data/assets/ui/waybook/k4e_buff.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   800
+  ]
+ },
+ "ARY-k4f_debuff": {
+  "asil": [
+   96,
+   75
+  ],
+  "hedef": "data/assets/ui/waybook/k4f_debuff.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   800
+  ]
+ },
+ "ARY-k4g_burn": {
+  "asil": [
+   93,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4g_burn.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   992,
+   1024
+  ]
+ },
+ "ARY-k4h_chill": {
+  "asil": [
+   93,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k4h_chill.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   992,
+   1024
+  ]
+ },
+ "ARY-k5_pip_filled": {
+  "asil": [
+   32,
+   32
+  ],
+  "hedef": "data/assets/ui/waybook/k5_pip_filled.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-k5_pip_hollow": {
+  "asil": [
+   32,
+   32
+  ],
+  "hedef": "data/assets/ui/waybook/k5_pip_hollow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-k6a_guard": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k6a_guard.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-k6b_hunter": {
+  "asil": [
+   91,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k6b_hunter.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   976,
+   1024
+  ]
+ },
+ "ARY-k6c_breaker": {
+  "asil": [
+   95,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/k6c_breaker.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-k6d_clerk": {
+  "asil": [
+   96,
+   86
+  ],
+  "hedef": "data/assets/ui/waybook/k6d_clerk.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   912
+  ]
+ },
+ "ARY-k7_adjacent": {
+  "asil": [
+   47,
+   48
+  ],
+  "hedef": "data/assets/ui/waybook/k7_adjacent.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-k7_all": {
+  "asil": [
+   118,
+   48
+  ],
+  "hedef": "data/assets/ui/waybook/k7_all.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   416
+  ]
+ },
+ "ARY-k7_pull": {
+  "asil": [
+   48,
+   48
+  ],
+  "hedef": "data/assets/ui/waybook/k7_pull.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-k7_push": {
+  "asil": [
+   48,
+   48
+  ],
+  "hedef": "data/assets/ui/waybook/k7_push.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-kit_button_primary": {
+  "asil": [
+   760,
+   196
+  ],
+  "hedef": "data/assets/ui/kit/button_primary.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1520,
+   384
+  ]
+ },
+ "ARY-kit_button_primary_disabled": {
+  "asil": [
+   760,
+   196
+  ],
+  "hedef": "data/assets/ui/kit/button_primary_disabled.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1520,
+   384
+  ]
+ },
+ "ARY-kit_button_primary_hover": {
+  "asil": [
+   760,
+   196
+  ],
+  "hedef": "data/assets/ui/kit/button_primary_hover.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1520,
+   384
+  ]
+ },
+ "ARY-kit_button_primary_pressed": {
+  "asil": [
+   760,
+   180
+  ],
+  "hedef": "data/assets/ui/kit/button_primary_pressed.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1520,
+   352
+  ]
+ },
+ "ARY-kit_frame_panel": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/kit/frame_panel.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-kit_title_strip": {
+  "asil": [
+   384,
+   88
+  ],
+  "hedef": "data/assets/ui/kit/title_strip.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   768,
+   176
+  ]
+ },
+ "ARY-kit_tooltip_plate": {
+  "asil": [
+   372,
+   376
+  ],
+  "hedef": "data/assets/ui/kit/tooltip_plate.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   736,
+   752
+  ]
+ },
+ "ARY-l1_ledger": {
+  "asil": [
+   1376,
+   768
+  ],
+  "hedef": "data/assets/ui/waybook/l1_ledger.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   2752,
+   1536
+  ]
+ },
+ "ARY-l2_ribbon": {
+  "asil": [
+   480,
+   43
+  ],
+  "hedef": "data/assets/ui/waybook/l2_ribbon.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   96
+  ]
+ },
+ "ARY-logo": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "ARY-m3_closed": {
+  "asil": [
+   560,
+   529
+  ],
+  "hedef": "data/assets/ui/waybook/m3_closed.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1120,
+   1056
+  ]
+ },
+ "ARY-mal_emanet": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-mal_eski_muhur": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-mal_fener": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-mal_fener_yagi": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-mal_kontrabant_tuz": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-mal_mesale": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p1_cameo": {
+  "asil": [
+   157,
+   220
+  ],
+  "hedef": "data/assets/ui/waybook/p1_cameo.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   736,
+   1024
+  ]
+ },
+ "ARY-p2_affliction": {
+  "asil": [
+   94,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p2_affliction.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-p2_virtue": {
+  "asil": [
+   94,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p2_virtue.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-p3_agility": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_agility.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p3_charisma": {
+  "asil": [
+   96,
+   95
+  ],
+  "hedef": "data/assets/ui/waybook/p3_charisma.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1008
+  ]
+ },
+ "ARY-p3_endurance": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_endurance.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p3_faith": {
+  "asil": [
+   96,
+   90
+  ],
+  "hedef": "data/assets/ui/waybook/p3_faith.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   960
+  ]
+ },
+ "ARY-p3_intellect": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_intellect.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p3_perception": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_perception.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p3_strength": {
+  "asil": [
+   93,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_strength.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   992,
+   1024
+  ]
+ },
+ "ARY-p3_wisdom": {
+  "asil": [
+   95,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p3_wisdom.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-p4_benched": {
+  "asil": [
+   79,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p4_benched.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   848,
+   1024
+  ]
+ },
+ "ARY-p4_passed_over": {
+  "asil": [
+   96,
+   80
+  ],
+  "hedef": "data/assets/ui/waybook/p4_passed_over.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   848
+  ]
+ },
+ "ARY-p4_unfed": {
+  "asil": [
+   96,
+   70
+  ],
+  "hedef": "data/assets/ui/waybook/p4_unfed.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   752
+  ]
+ },
+ "ARY-p4_witnessed_death": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p4_witnessed_death.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_crier": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_crier.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_guard": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_guard.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_herbalist": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_herbalist.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_quartermaster": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_quartermaster.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_scout": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_scout.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p5_wagoner": {
+  "asil": [
+   96,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/p5_wagoner.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "ARY-p6_tally": {
+  "asil": [
+   240,
+   20
+  ],
+  "hedef": "data/assets/ui/waybook/p6_tally.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   80
+  ]
+ },
+ "ARY-pan": {
+  "asil": [
+   344,
+   352
+  ],
+  "hedef": "data/assets/ui/market_scale/pan.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   688,
+   704
+  ]
+ },
+ "ARY-plate": {
+  "asil": [
+   360,
+   76
+  ],
+  "hedef": "data/assets/ui/grim/kit/plate.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   720,
+   160
+  ]
+ },
+ "ARY-plate_hover": {
+  "asil": [
+   360,
+   76
+  ],
+  "hedef": "data/assets/ui/grim/kit/plate_hover.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   720,
+   160
+  ]
+ },
+ "ARY-pointer": {
+  "asil": [
+   32,
+   32
+  ],
+  "hedef": "data/assets/ui/cursor/pointer.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "ARY-r3_dial": {
+  "asil": [
+   96,
+   95
+  ],
+  "hedef": "data/assets/ui/waybook/r3_dial.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1008
+  ]
+ },
+ "ARY-r3_needle": {
+  "asil": [
+   65,
+   90
+  ],
+  "hedef": "data/assets/ui/waybook/r3_needle.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   736,
+   1024
+  ]
+ },
+ "ARY-r4_vial": {
+  "asil": [
+   240,
+   27
+  ],
+  "hedef": "data/assets/ui/waybook/r4_vial.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   112
+  ]
+ },
+ "ARY-r4a_morale": {
+  "asil": [
+   58,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r4a_morale.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   624,
+   1024
+  ]
+ },
+ "ARY-r4b_stress": {
+  "asil": [
+   64,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r4b_stress.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   688,
+   1024
+  ]
+ },
+ "ARY-r6a_front": {
+  "asil": [
+   96,
+   93
+  ],
+  "hedef": "data/assets/ui/waybook/r6a_front.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   992
+  ]
+ },
+ "ARY-r6b_wagons": {
+  "asil": [
+   95,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r6b_wagons.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-r6c_rear": {
+  "asil": [
+   96,
+   95
+  ],
+  "hedef": "data/assets/ui/waybook/r6c_rear.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1008
+  ]
+ },
+ "ARY-r7a_wheel": {
+  "asil": [
+   95,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r7a_wheel.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1008,
+   1024
+  ]
+ },
+ "ARY-r7b_straggler": {
+  "asil": [
+   75,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r7b_straggler.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   800,
+   1024
+  ]
+ },
+ "ARY-r7c_smoke": {
+  "asil": [
+   96,
+   90
+  ],
+  "hedef": "data/assets/ui/waybook/r7c_smoke.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   960
+  ]
+ },
+ "ARY-r8a_bowl_full": {
+  "asil": [
+   86,
+   96
+  ],
+  "hedef": "data/assets/ui/waybook/r8a_bowl_full.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   912,
+   1024
+  ]
+ },
+ "ARY-r8b_bowl_empty": {
+  "asil": [
+   96,
+   72
+  ],
+  "hedef": "data/assets/ui/waybook/r8b_bowl_empty.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   768
+  ]
+ },
+ "ARY-r9_strike": {
+  "asil": [
+   480,
+   32
+  ],
+  "hedef": "data/assets/ui/waybook/r9_strike.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   64
+  ]
+ },
+ "ARY-strip_wood": {
+  "asil": [
+   1920,
+   104
+  ],
+  "hedef": "data/assets/ui/grim/kit/strip_wood.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   3840,
+   208
+  ]
+ },
+ "EFX-circle_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/circle_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-circle_05": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/circle_05.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-dirt_01": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/dirt_01.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-fire_01": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/fire_01.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-fire_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/fire_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_01": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_01.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_03": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_03.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_04": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_04.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_05": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_05.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-flame_06": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/flame_06.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-light_01": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/light_01.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-light_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/light_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-light_03": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/light_03.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-magic_03": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/magic_03.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-magic_04": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/magic_04.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-slash_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/slash_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_03": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_03.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_04": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_04.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_05": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_05.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_06": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_06.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_07": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_07.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-smoke_08": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/smoke_08.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-spark_05": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/spark_05.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-spark_06": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/spark_06.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-star_04": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/star_04.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-star_06": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/star_06.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-trace_03": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/trace_03.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-twirl_01": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/twirl_01.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "EFX-twirl_02": {
+  "asil": [
+   128,
+   128
+  ],
+  "hedef": "data/assets/fx/twirl_02.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   512
+  ]
+ },
+ "ESY-asa": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "ESY-backpack": {
+  "esya": "backpack",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     122,
+     109
+    ],
+    "boyut": [
+     488,
+     436
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   768,
+   848
+  ]
+ },
+ "ESY-barrels_mv": {
+  "esya": "barrels_mv",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     53,
+     68
+    ],
+    "boyut": [
+     212,
+     272
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   496,
+   672
+  ]
+ },
+ "ESY-bonfire": {
+  "esya": "bonfire",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     126,
+     145
+    ],
+    "boyut": [
+     504,
+     580
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   784,
+   992
+  ]
+ },
+ "ESY-city_gate": {
+  "esya": "city_gate",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1581,
+     980
+    ],
+    "boyut": [
+     3780,
+     2343
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kapi_kanadi": {
+    "asil": [
+     212,
+     222
+    ],
+    "boyut": [
+     507,
+     531
+    ],
+    "dosya": "gate.png",
+    "konum": [
+     1778,
+     2070
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2752
+  ]
+ },
+ "ESY-covered_wagon": {
+  "esya": "covered_wagon",
+  "katmanlar": {
+   "branda": {
+    "asil": [
+     258,
+     157
+    ],
+    "boyut": [
+     1032,
+     628
+    ],
+    "dosya": "canopy.png",
+    "konum": [
+     300,
+     260
+    ]
+   },
+   "govde": {
+    "asil": [
+     386,
+     175
+    ],
+    "boyut": [
+     1544,
+     700
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     808
+    ]
+   },
+   "teker_arka": {
+    "asil": [
+     176,
+     175
+    ],
+    "boyut": [
+     704,
+     700
+    ],
+    "dosya": "wheel.png",
+    "konum": [
+     212,
+     808
+    ]
+   },
+   "teker_on": {
+    "asil": [
+     141,
+     140
+    ],
+    "boyut": [
+     564,
+     560
+    ],
+    "dosya": "wheel_front.png",
+    "konum": [
+     1040,
+     948
+    ]
+   },
+   "yuk": {
+    "asil": [
+     41,
+     54
+    ],
+    "boyut": [
+     164,
+     216
+    ],
+    "dosya": "load.png",
+    "konum": [
+     144,
+     804
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1824,
+   1648
+  ]
+ },
+ "ESY-crate": {
+  "esya": "crate",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     112,
+     114
+    ],
+    "boyut": [
+     448,
+     456
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   736,
+   864
+  ]
+ },
+ "ESY-crate_mv": {
+  "esya": "crate_mv",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     54,
+     54
+    ],
+    "boyut": [
+     216,
+     216
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   496,
+   624
+  ]
+ },
+ "ESY-fener": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "ESY-half_cart": {
+  "esya": "half_cart",
+  "katmanlar": {
+   "branda": {
+    "asil": [
+     216,
+     107
+    ],
+    "boyut": [
+     864,
+     428
+    ],
+    "dosya": "canopy.png",
+    "konum": [
+     232,
+     260
+    ]
+   },
+   "govde": {
+    "asil": [
+     368,
+     129
+    ],
+    "boyut": [
+     1472,
+     516
+    ],
+    "dosya": "body.png",
+    "konum": [
+     276,
+     580
+    ]
+   },
+   "teker_arka": {
+    "asil": [
+     129,
+     129
+    ],
+    "boyut": [
+     516,
+     516
+    ],
+    "dosya": "wheel.png",
+    "konum": [
+     384,
+     580
+    ]
+   },
+   "yuk": {
+    "asil": [
+     37,
+     39
+    ],
+    "boyut": [
+     148,
+     156
+    ],
+    "dosya": "load.png",
+    "konum": [
+     140,
+     636
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1888,
+   1248
+  ]
+ },
+ "ESY-hancer": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "ESY-hay": {
+  "esya": "hay",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     35,
+     51
+    ],
+    "boyut": [
+     140,
+     204
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   432,
+   608
+  ]
+ },
+ "ESY-house_1": {
+  "esya": "house_1",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     490,
+     626
+    ],
+    "boyut": [
+     1487,
+     1900
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1776,
+   2304
+  ]
+ },
+ "ESY-house_2": {
+  "esya": "house_2",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     630,
+     599
+    ],
+    "boyut": [
+     1900,
+     1807
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   2192,
+   2208
+  ]
+ },
+ "ESY-market_cart": {
+  "esya": "market_cart",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     258,
+     222
+    ],
+    "boyut": [
+     1032,
+     888
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1312,
+   1296
+  ]
+ },
+ "ESY-mill_wooden": {
+  "esya": "mill_wooden",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     626,
+     764
+    ],
+    "boyut": [
+     1342,
+     1638
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     522
+    ]
+   },
+   "kanatlar": {
+    "asil": [
+     620,
+     620
+    ],
+    "boyut": [
+     1330,
+     1330
+    ],
+    "dosya": "blades.png",
+    "konum": [
+     146,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1632,
+   2304
+  ]
+ },
+ "ESY-mine": {
+  "esya": "mine",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     677,
+     401
+    ],
+    "boyut": [
+     1900,
+     1125
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   2192,
+   1536
+  ]
+ },
+ "ESY-ok": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "ESY-outpost": {
+  "esya": "outpost",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     220,
+     561
+    ],
+    "boyut": [
+     745,
+     1900
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1040,
+   2304
+  ]
+ },
+ "ESY-palisade_gate": {
+  "esya": "palisade_gate",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1603,
+     610
+    ],
+    "boyut": [
+     1900,
+     723
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kapi_kanadi": {
+    "asil": [
+     291,
+     291
+    ],
+    "boyut": [
+     345,
+     345
+    ],
+    "dosya": "gate.png",
+    "konum": [
+     913,
+     638
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   2192,
+   1136
+  ]
+ },
+ "ESY-saddlebag": {
+  "esya": "saddlebag",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     91,
+     73
+    ],
+    "boyut": [
+     364,
+     292
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   656,
+   704
+  ]
+ },
+ "ESY-sawmill": {
+  "esya": "sawmill",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     605,
+     529
+    ],
+    "boyut": [
+     1900,
+     1661
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   2192,
+   2064
+  ]
+ },
+ "ESY-signpost": {
+  "esya": "signpost",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     113,
+     241
+    ],
+    "boyut": [
+     452,
+     964
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   736,
+   1376
+  ]
+ },
+ "ESY-tent": {
+  "esya": "tent",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     638,
+     265
+    ],
+    "boyut": [
+     1900,
+     789
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   2192,
+   1200
+  ]
+ },
+ "ESY-torch": {
+  "esya": "torch",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     33,
+     217
+    ],
+    "boyut": [
+     132,
+     868
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   416,
+   1280
+  ]
+ },
+ "ESY-weapon_axe_small": {
+  "esya": "weapon_axe_small",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     58,
+     145
+    ],
+    "boyut": [
+     232,
+     580
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   512,
+   992
+  ]
+ },
+ "ESY-weapon_hammer": {
+  "esya": "weapon_hammer",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     140,
+     314
+    ],
+    "boyut": [
+     560,
+     1256
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   848,
+   1664
+  ]
+ },
+ "ESY-weapon_shield_round": {
+  "esya": "weapon_shield_round",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     170,
+     170
+    ],
+    "boyut": [
+     680,
+     680
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   960,
+   1088
+  ]
+ },
+ "ESY-weapon_spear": {
+  "esya": "weapon_spear",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     31,
+     529
+    ],
+    "boyut": [
+     111,
+     1900
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   400,
+   2304
+  ]
+ },
+ "ESY-weapon_sword_2": {
+  "esya": "weapon_sword_2",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     51,
+     241
+    ],
+    "boyut": [
+     204,
+     964
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   496,
+   1376
+  ]
+ },
+ "ESY-well": {
+  "esya": "well",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     279,
+     346
+    ],
+    "boyut": [
+     1116,
+     1384
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1408,
+   1792
+  ]
+ },
+ "ESY-windmill": {
+  "esya": "windmill",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     348,
+     654
+    ],
+    "boyut": [
+     786,
+     1478
+    ],
+    "dosya": "body.png",
+    "konum": [
+     404,
+     682
+    ]
+   },
+   "kanatlar": {
+    "asil": [
+     584,
+     586
+    ],
+    "boyut": [
+     1319,
+     1324
+    ],
+    "dosya": "blades.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   1600,
+   2304
+  ]
+ },
+ "ESY-yay": {
+  "kutular": {
+   "govde": [
+    8,
+    168,
+    496,
+    1872
+   ],
+   "kiris": [
+    520,
+    168,
+    496,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "FIG-BEDEN-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "FIG-BEDEN-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "FIG-TEMEL-ALT-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "FIG-TEMEL-ALT-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "FIG-TEMEL-UST-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "FIG-TEMEL-UST-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "GST-danger_high": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/danger_high.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-danger_low": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/danger_low.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-danger_mid": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/danger_mid.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-medallion": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/medallion.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-morale_high": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/morale_high.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-morale_low": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/morale_low.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-morale_mid": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/morale_mid.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stamina_high": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stamina_high.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stamina_low": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stamina_low.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stamina_mid": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stamina_mid.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stress_high": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stress_high.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stress_low": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stress_low.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-stress_mid": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/stress_mid.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_blizzard": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_blizzard.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_clear_day": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_clear_day.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_clear_night": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_clear_night.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_fog": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_fog.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_overcast": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_overcast.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_rain": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_rain.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_snow": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "GST-weather_storm": {
+  "asil": [
+   300,
+   300
+  ],
+  "hedef": "data/assets/ui/gauges/weather_storm.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "HAY-bear": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     598,
+     353
+    ],
+    "boyut": [
+     1800,
+     1063
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     124,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     74,
+     162
+    ],
+    "boyut": [
+     223,
+     488
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     183,
+     262
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     427,
+     284
+    ],
+    "boyut": [
+     1285,
+     855
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     132,
+     382
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1312
+  ]
+ },
+ "HAY-boar": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     397,
+     264
+    ],
+    "boyut": [
+     1788,
+     1189
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     136,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     37,
+     101
+    ],
+    "boyut": [
+     167,
+     455
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     124,
+     481
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     221,
+     181
+    ],
+    "boyut": [
+     995,
+     815
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     259,
+     537
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1440
+  ]
+ },
+ "HAY-deer": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     376,
+     366
+    ],
+    "boyut": [
+     1800,
+     1752
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     124,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     39,
+     62
+    ],
+    "boyut": [
+     187,
+     297
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     214,
+     734
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     254,
+     216
+    ],
+    "boyut": [
+     1216,
+     1034
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     151,
+     870
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   2000
+  ]
+ },
+ "HAY-donkey": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     527,
+     455
+    ],
+    "boyut": [
+     1800,
+     1554
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     124,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     102,
+     195
+    ],
+    "boyut": [
+     348,
+     666
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     131,
+     580
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     349,
+     310
+    ],
+    "boyut": [
+     1192,
+     1059
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     142,
+     657
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1808
+  ]
+ },
+ "HAY-harita_atli": {
+  "asil": [
+   128,
+   128
+  ],
+  "kutular": {
+   "atli_B": [
+    1056,
+    544,
+    448,
+    448
+   ],
+   "atli_D": [
+    1056,
+    32,
+    448,
+    448
+   ],
+   "atli_G": [
+    32,
+    544,
+    448,
+    448
+   ],
+   "atli_GB": [
+    544,
+    544,
+    448,
+    448
+   ],
+   "atli_GD": [
+    1568,
+    32,
+    448,
+    448
+   ],
+   "atli_K": [
+    32,
+    32,
+    448,
+    448
+   ],
+   "atli_KB": [
+    1568,
+    544,
+    448,
+    448
+   ],
+   "atli_KD": [
+    544,
+    32,
+    448,
+    448
+   ]
+  },
+  "tip": "rider",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "HAY-horse": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     630,
+     568
+    ],
+    "boyut": [
+     1747,
+     1575
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     177,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     101,
+     238
+    ],
+    "boyut": [
+     280,
+     660
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     124,
+     622
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     421,
+     368
+    ],
+    "boyut": [
+     1168,
+     1021
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     197,
+     715
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1824
+  ]
+ },
+ "HAY-horse_white": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     630,
+     568
+    ],
+    "boyut": [
+     1747,
+     1575
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     177,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     101,
+     238
+    ],
+    "boyut": [
+     280,
+     660
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     124,
+     622
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     421,
+     368
+    ],
+    "boyut": [
+     1168,
+     1021
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     197,
+     715
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1824
+  ]
+ },
+ "HAY-husky": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     345,
+     302
+    ],
+    "boyut": [
+     1735,
+     1519
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     189,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     78,
+     154
+    ],
+    "boyut": [
+     392,
+     775
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     124,
+     248
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     253,
+     171
+    ],
+    "boyut": [
+     1272,
+     860
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     213,
+     812
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1760
+  ]
+ },
+ "HAY-ox": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     580,
+     343
+    ],
+    "boyut": [
+     1800,
+     1064
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     124,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     63,
+     202
+    ],
+    "boyut": [
+     196,
+     627
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     128,
+     220
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     393,
+     254
+    ],
+    "boyut": [
+     1220,
+     788
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     134,
+     447
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1312
+  ]
+ },
+ "HAY-stag": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     498,
+     549
+    ],
+    "boyut": [
+     1633,
+     1800
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     208,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     48,
+     80
+    ],
+    "boyut": [
+     157,
+     262
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     279,
+     922
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     338,
+     276
+    ],
+    "boyut": [
+     1108,
+     905
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     241,
+     1044
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HAY-wolf": {
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     462,
+     325
+    ],
+    "boyut": [
+     1360,
+     957
+    ],
+    "doku": "skin_main.png",
+    "konum": [
+     564,
+     180
+    ]
+   },
+   "kuyruk": {
+    "asil": [
+     230,
+     155
+    ],
+    "boyut": [
+     677,
+     456
+    ],
+    "doku": "skin_tail.png",
+    "konum": [
+     124,
+     355
+    ]
+   },
+   "uzak_bacaklar": {
+    "asil": [
+     322,
+     226
+    ],
+    "boyut": [
+     948,
+     666
+    ],
+    "doku": "skin_far.png",
+    "konum": [
+     574,
+     462
+    ]
+   }
+  },
+  "tip": "beast",
+  "tuval": [
+   2048,
+   1200
+  ]
+ },
+ "HRT-00": {
+  "satir": 0,
+  "seviye": 3,
+  "sutun": 0,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-01": {
+  "satir": 0,
+  "seviye": 3,
+  "sutun": 1,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-02": {
+  "satir": 0,
+  "seviye": 3,
+  "sutun": 2,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-03": {
+  "satir": 0,
+  "seviye": 3,
+  "sutun": 3,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-10": {
+  "satir": 1,
+  "seviye": 3,
+  "sutun": 0,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-11": {
+  "satir": 1,
+  "seviye": 3,
+  "sutun": 1,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-12": {
+  "satir": 1,
+  "seviye": 3,
+  "sutun": 2,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-13": {
+  "satir": 1,
+  "seviye": 3,
+  "sutun": 3,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-20": {
+  "satir": 2,
+  "seviye": 3,
+  "sutun": 0,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-21": {
+  "satir": 2,
+  "seviye": 3,
+  "sutun": 1,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-22": {
+  "satir": 2,
+  "seviye": 3,
+  "sutun": 2,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-23": {
+  "satir": 2,
+  "seviye": 3,
+  "sutun": 3,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-30": {
+  "satir": 3,
+  "seviye": 3,
+  "sutun": 0,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-31": {
+  "satir": 3,
+  "seviye": 3,
+  "sutun": 1,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-32": {
+  "satir": 3,
+  "seviye": 3,
+  "sutun": 2,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "HRT-33": {
+  "satir": 3,
+  "seviye": 3,
+  "sutun": 3,
+  "tip": "map",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KAP-akavan": {
+  "esya": "gate_akavan",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     423
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1404,
+     407
+    ],
+    "boyut": [
+     2864,
+     830
+    ],
+    "dosya": "town.png",
+    "konum": [
+     750,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1232
+  ]
+ },
+ "KAP-auderin": {
+  "esya": "gate_auderin",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     423
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1201,
+     407
+    ],
+    "boyut": [
+     2450,
+     830
+    ],
+    "dosya": "town.png",
+    "konum": [
+     528,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1232
+  ]
+ },
+ "KAP-belvanor": {
+  "esya": "gate_belvanor",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     542
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1299,
+     602
+    ],
+    "boyut": [
+     2595,
+     1203
+    ],
+    "dosya": "town.png",
+    "konum": [
+     803,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1616
+  ]
+ },
+ "KAP-brazdun": {
+  "esya": "gate_brazdun",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     584
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1367,
+     623
+    ],
+    "boyut": [
+     2731,
+     1245
+    ],
+    "dosya": "town.png",
+    "konum": [
+     604,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1664
+  ]
+ },
+ "KAP-caramine": {
+  "esya": "gate_caramine",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     588
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1426,
+     812
+    ],
+    "boyut": [
+     2909,
+     1656
+    ],
+    "dosya": "town.png",
+    "konum": [
+     736,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2064
+  ]
+ },
+ "KAP-dravoss": {
+  "esya": "gate_dravoss",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     1081
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1342,
+     872
+    ],
+    "boyut": [
+     2681,
+     1742
+    ],
+    "dosya": "town.png",
+    "konum": [
+     937,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2160
+  ]
+ },
+ "KAP-ezmerak": {
+  "esya": "gate_ezmerak",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     1081
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1458,
+     872
+    ],
+    "boyut": [
+     2913,
+     1742
+    ],
+    "dosya": "town.png",
+    "konum": [
+     645,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2160
+  ]
+ },
+ "KAP-golcavar": {
+  "esya": "gate_golcavar",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1854,
+     325
+    ],
+    "boyut": [
+     2991,
+     524
+    ],
+    "dosya": "body.png",
+    "konum": [
+     609,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     2343,
+     341
+    ],
+    "boyut": [
+     3780,
+     550
+    ],
+    "dosya": "town.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   960
+  ]
+ },
+ "KAP-ilsande": {
+  "esya": "gate_ilsande",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     542
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1433,
+     602
+    ],
+    "boyut": [
+     2863,
+     1203
+    ],
+    "dosya": "town.png",
+    "konum": [
+     617,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1616
+  ]
+ },
+ "KAP-kesgrav": {
+  "esya": "gate_kesgrav",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1231,
+     362
+    ],
+    "boyut": [
+     2459,
+     723
+    ],
+    "dosya": "town.png",
+    "konum": [
+     1007,
+     458
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1328
+  ]
+ },
+ "KAP-kirsavel": {
+  "esya": "gate_kirsavel",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     588
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1281,
+     812
+    ],
+    "boyut": [
+     2613,
+     1656
+    ],
+    "dosya": "town.png",
+    "konum": [
+     982,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2064
+  ]
+ },
+ "KAP-liraven": {
+  "esya": "gate_liraven",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     325
+    ],
+    "boyut": [
+     2989,
+     524
+    ],
+    "dosya": "body.png",
+    "konum": [
+     466,
+     389
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     2343,
+     421
+    ],
+    "boyut": [
+     3780,
+     679
+    ],
+    "dosya": "town.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1088
+  ]
+ },
+ "KAP-merigaud": {
+  "esya": "gate_merigaud",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     905
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1460,
+     784
+    ],
+    "boyut": [
+     2917,
+     1566
+    ],
+    "dosya": "town.png",
+    "konum": [
+     538,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1984
+  ]
+ },
+ "KAP-mirsana": {
+  "esya": "gate_mirsana",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     462
+    ],
+    "boyut": [
+     3780,
+     923
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     314
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     981,
+     486
+    ],
+    "boyut": [
+     1960,
+     971
+    ],
+    "dosya": "town.png",
+    "konum": [
+     1381,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1392
+  ]
+ },
+ "KAP-ondrelle": {
+  "esya": "gate_ondrelle",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     462
+    ],
+    "boyut": [
+     3780,
+     923
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     544
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1456,
+     926
+    ],
+    "boyut": [
+     2909,
+     1850
+    ],
+    "dosya": "town.png",
+    "konum": [
+     695,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2256
+  ]
+ },
+ "KAP-orsolune": {
+  "esya": "gate_orsolune",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     504
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1623,
+     600
+    ],
+    "boyut": [
+     3243,
+     1199
+    ],
+    "dosya": "town.png",
+    "konum": [
+     546,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1600
+  ]
+ },
+ "KAP-orvahel": {
+  "esya": "gate_orvahel",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     462
+    ],
+    "boyut": [
+     3780,
+     923
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     851
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1189,
+     757
+    ],
+    "boyut": [
+     2375,
+     1512
+    ],
+    "dosya": "town.png",
+    "konum": [
+     931,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1920
+  ]
+ },
+ "KAP-rivecande": {
+  "esya": "gate_rivecande",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     504
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1623,
+     600
+    ],
+    "boyut": [
+     3243,
+     1199
+    ],
+    "dosya": "town.png",
+    "konum": [
+     546,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1600
+  ]
+ },
+ "KAP-samuran": {
+  "esya": "gate_samuran",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     325
+    ],
+    "boyut": [
+     2989,
+     524
+    ],
+    "dosya": "body.png",
+    "konum": [
+     466,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     2343,
+     341
+    ],
+    "boyut": [
+     3780,
+     550
+    ],
+    "dosya": "town.png",
+    "konum": [
+     140,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   960
+  ]
+ },
+ "KAP-selvicar": {
+  "esya": "gate_selvicar",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     588
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1077,
+     812
+    ],
+    "boyut": [
+     2197,
+     1656
+    ],
+    "dosya": "town.png",
+    "konum": [
+     699,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2064
+  ]
+ },
+ "KAP-serai_duvenmor": {
+  "esya": "gate_serai_duvenmor",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     604,
+     310
+    ],
+    "boyut": [
+     1207,
+     619
+    ],
+    "dosya": "town.png",
+    "konum": [
+     1622,
+     562
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1328
+  ]
+ },
+ "KAP-serai_orbeyan": {
+  "esya": "gate_serai_orbeyan",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1761,
+     266
+    ],
+    "boyut": [
+     3780,
+     571
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1539,
+     209
+    ],
+    "boyut": [
+     3303,
+     449
+    ],
+    "dosya": "town.png",
+    "konum": [
+     453,
+     387
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   976
+  ]
+ },
+ "KAP-serai_seyvan": {
+  "esya": "gate_serai_seyvan",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     260
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     600,
+     310
+    ],
+    "boyut": [
+     1199,
+     619
+    ],
+    "dosya": "town.png",
+    "konum": [
+     1630,
+     562
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1328
+  ]
+ },
+ "KAP-tolvarin": {
+  "esya": "gate_tolvarin",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     1081
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1462,
+     872
+    ],
+    "boyut": [
+     2921,
+     1742
+    ],
+    "dosya": "town.png",
+    "konum": [
+     705,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   2160
+  ]
+ },
+ "KAP-vastrevar": {
+  "esya": "gate_vastrevar",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     905
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1396,
+     784
+    ],
+    "boyut": [
+     2789,
+     1566
+    ],
+    "dosya": "town.png",
+    "konum": [
+     442,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1984
+  ]
+ },
+ "KAP-vorgat": {
+  "esya": "gate_vorgat",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1853,
+     326
+    ],
+    "boyut": [
+     3780,
+     665
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     331
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1635,
+     469
+    ],
+    "boyut": [
+     3335,
+     957
+    ],
+    "dosya": "town.png",
+    "konum": [
+     483,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1360
+  ]
+ },
+ "KAP-zelmarin": {
+  "esya": "gate_zelmarin",
+  "katmanlar": {
+   "govde": {
+    "asil": [
+     1892,
+     463
+    ],
+    "boyut": [
+     3780,
+     925
+    ],
+    "dosya": "body.png",
+    "konum": [
+     140,
+     504
+    ]
+   },
+   "kasaba": {
+    "asil": [
+     1623,
+     600
+    ],
+    "boyut": [
+     3243,
+     1199
+    ],
+    "dosya": "town.png",
+    "konum": [
+     546,
+     260
+    ]
+   }
+  },
+  "tip": "prop",
+  "tuval": [
+   4064,
+   1600
+  ]
+ },
+ "KSB-akavan-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/akavan/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-akavan-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/akavan/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-akavan-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/akavan/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-akavan-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/akavan/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-auderin-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/auderin/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-auderin-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/auderin/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-auderin-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/auderin/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-auderin-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/auderin/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-belvanor-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/belvanor/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-belvanor-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/belvanor/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-belvanor-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/belvanor/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-belvanor-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/belvanor/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-brazdun-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/brazdun/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-brazdun-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/brazdun/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-brazdun-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/brazdun/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-brazdun-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/brazdun/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-caramine-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/caramine/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-caramine-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/caramine/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-caramine-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/caramine/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-caramine-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/caramine/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-dravoss-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/dravoss/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-dravoss-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/dravoss/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-dravoss-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/dravoss/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-dravoss-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/dravoss/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ezmerak-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ezmerak/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ezmerak-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ezmerak/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ezmerak-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ezmerak/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ezmerak-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ezmerak/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-golcavar-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/golcavar/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-golcavar-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/golcavar/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-golcavar-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/golcavar/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-golcavar-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/golcavar/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-han_ici": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/tavern/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ilsande-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ilsande/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ilsande-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ilsande/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ilsande-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ilsande/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ilsande-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ilsande/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kesgrav-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kesgrav/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kesgrav-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kesgrav/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kesgrav-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kesgrav/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kesgrav-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kesgrav/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kirsavel-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kirsavel/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kirsavel-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kirsavel/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kirsavel-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kirsavel/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-kirsavel-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/kirsavel/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-liraven-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/liraven/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-liraven-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/liraven/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-liraven-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/liraven/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-liraven-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/liraven/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-merigaud-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/merigaud/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-merigaud-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/merigaud/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-merigaud-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/merigaud/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-merigaud-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/merigaud/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mezarlik_nobet": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/graveyard_vigil/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mezarlik_sakin": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/graveyard_calm/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mirsana-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/mirsana/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mirsana-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/mirsana/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mirsana-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/mirsana/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-mirsana-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/mirsana/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ondrelle-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ondrelle/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ondrelle-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ondrelle/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ondrelle-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ondrelle/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-ondrelle-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/ondrelle/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orsolune-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orsolune/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orsolune-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orsolune/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orsolune-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orsolune/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orsolune-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orsolune/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orvahel-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orvahel/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orvahel-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orvahel/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orvahel-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orvahel/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-orvahel-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/orvahel/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-rivecande-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/rivecande/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-rivecande-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/rivecande/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-rivecande-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/rivecande/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-rivecande-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/rivecande/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-samuran-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/samuran/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-samuran-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/samuran/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-samuran-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/samuran/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-samuran-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/samuran/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-selvicar-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/selvicar/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-selvicar-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/selvicar/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-selvicar-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/selvicar/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-selvicar-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/selvicar/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_duvenmor-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_duvenmor/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_duvenmor-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_duvenmor/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_duvenmor-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_duvenmor/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_duvenmor-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_duvenmor/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_orbeyan-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_orbeyan/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_orbeyan-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_orbeyan/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_orbeyan-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_orbeyan/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_orbeyan-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_orbeyan/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_seyvan-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_seyvan/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_seyvan-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_seyvan/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_seyvan-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_seyvan/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-serai_seyvan-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/serai_seyvan/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-tolvarin-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/tolvarin/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-tolvarin-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/tolvarin/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-tolvarin-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/tolvarin/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-tolvarin-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/tolvarin/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vastrevar-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vastrevar/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vastrevar-gece": {
+  "asil": [
+   960,
+   540
+  ],
+  "hedef": "data/assets/ui/towns/vastrevar/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vastrevar-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vastrevar/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vastrevar-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vastrevar/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vorgat-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vorgat/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vorgat-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vorgat/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vorgat-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vorgat/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-vorgat-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/vorgat/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-zelmarin-aksam": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/zelmarin/background_evening.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-zelmarin-gece": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/zelmarin/background.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-zelmarin-gunduz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/zelmarin/background_day.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KSB-zelmarin-sabah": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/ui/towns/zelmarin/background_morning.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "KYF-ankle_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_leather-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_leather-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_mail-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_mail-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_plate-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-armor_plate-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-bodice_top-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-cloth_trousers-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-cloth_trousers-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-felt_hat-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-felt_hat-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-felt_shoes-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-felt_shoes-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-fisherman_sweater-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-fisherman_sweater-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-fur_hat-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-fur_hat-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-guard_helmet-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-guard_helmet-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-harem_pants-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-harem_pants-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-head_veil-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-hobnail_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-hobnail_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-knit_cap-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-knit_cap-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-laced_shirt-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-laced_shirt-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_gloves-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_gloves-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_helmet-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_helmet-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_vest-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-leather_vest-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-linen_tunic-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-linen_tunic-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-long_skirt-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "etek"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-mage_robe-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-mage_robe-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_blouse-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_pants-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_pants-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_shirt-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_shirt-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_shoes-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-peasant_shoes-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-pilgrim_hood-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-pilgrim_hood-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-pilgrim_robe-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-pilgrim_robe-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-pinafore_dress-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-quilted_tunic-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-quilted_tunic-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_hood-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_hood-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "govde",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_jacket-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_jacket-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_pants-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-ranger_pants-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-riding_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-riding_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-sarik-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-sarik-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-scribe_robe-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-scribe_robe-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-shift_dress-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "etek",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-short_boots-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-short_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-silk_blouse-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-silk_blouse-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-spiked_helmet-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-spiked_helmet-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-strap_sandals-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-strap_sandals-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-tiered_skirt-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "etek"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "etek": "skirt",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-viking_pants-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-viking_pants-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wide_hat-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wide_hat-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wizard_hat-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wizard_hat-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-womens_ankle_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-womens_knee_boots-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wool_coat-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wool_coat-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wool_pants-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "KYF-wool_pants-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "arka_bacak",
+   "govde",
+   "on_bacak"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "OLY-broken_outburst": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-carcass_on_road": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-convoy_repaid": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-convoy_search": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-culture_fisher_catch": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-culture_port_gossip": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-culture_valley_dispute": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-forage": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-hunting_trip": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-left_behind_return": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-merchant_cold_feet": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-merchant_grudge": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-merchant_night_flight": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-merchant_shares_bread": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-military_convoy": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-mutiny": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-party_investigation": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-party_theft": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-profiteer_recognized": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-refugee_column": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-refugee_gratitude": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-rival_slander": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-river_ford": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-rogue_mage": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-sick_merchant": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-spoiled_provisions": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-stress_brawl": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-traveling_tinker": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-village_provisions": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-wanderer_revenge": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "SAC-biyik-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_bob01-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_bob01-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_braid01-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_braid01-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_long01-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_long01-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_ponytail01-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_ponytail01-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short01-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short01-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short02-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short02-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short04-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-hair_short04-K": {
+  "beden": "body_female_average_hd",
+  "dolu": [
+   "govde"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-sakal_kisa-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAC-sakal_uzun-E": {
+  "beden": "body_male_average_hd",
+  "dolu": [
+   "arka_kol",
+   "arka_bacak",
+   "govde",
+   "on_bacak",
+   "on_kol"
+  ],
+  "katmanlar": {
+   "arka_bacak": "back_leg",
+   "arka_kol": "back_arm",
+   "govde": "torso_head",
+   "on_bacak": "front_leg",
+   "on_kol": "front_arm"
+  },
+  "koken": [
+   914.0,
+   1968
+  ],
+  "olcek": 2.75,
+  "tip": "figure",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
+ "SAH-agac_kuru": {
+  "kutular": {
+   "agac_1": [
+    8,
+    168,
+    496,
+    1872
+   ],
+   "agac_2": [
+    520,
+    168,
+    496,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "SAH-agac_ladin": {
+  "kutular": {
+   "agac_1": [
+    8,
+    168,
+    325,
+    1872
+   ],
+   "agac_2": [
+    349,
+    168,
+    325,
+    1872
+   ],
+   "agac_3": [
+    690,
+    168,
+    325,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "SAH-agac_yaprakli": {
+  "kutular": {
+   "agac_1": [
+    8,
+    168,
+    325,
+    1872
+   ],
+   "agac_2": [
+    349,
+    168,
+    325,
+    1872
+   ],
+   "agac_3": [
+    690,
+    168,
+    325,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   2048
+  ]
+ },
+ "SAH-ates": {
+  "kutular": {
+   "kare_1": [
+    8,
+    168,
+    496,
+    416
+   ],
+   "kare_2": [
+    520,
+    168,
+    496,
+    416
+   ],
+   "kare_3": [
+    1032,
+    168,
+    496,
+    416
+   ],
+   "kare_4": [
+    1544,
+    168,
+    496,
+    416
+   ],
+   "kare_5": [
+    8,
+    600,
+    496,
+    416
+   ],
+   "kare_6": [
+    520,
+    600,
+    496,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-bulut": {
+  "kutular": {
+   "bulut_1": [
+    8,
+    168,
+    496,
+    416
+   ],
+   "bulut_2": [
+    520,
+    168,
+    496,
+    416
+   ],
+   "bulut_3": [
+    1032,
+    168,
+    496,
+    416
+   ],
+   "bulut_4": [
+    1544,
+    168,
+    496,
+    416
+   ],
+   "bulut_5": [
+    8,
+    600,
+    496,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-cali": {
+  "kutular": {
+   "cali_1": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "cali_2": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "cali_3": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "cali_4": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-camur_su": {
+  "kutular": {
+   "camur_1": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "camur_2": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "su_1": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "su_2": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-cicek": {
+  "kutular": {
+   "cicek_1": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "cicek_2": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "cicek_3": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "cicek_4": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_gecit": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_kopru": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_mezra": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_sig_gecit": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_sunak": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "SAH-enkaz": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-gunes_ay": {
+  "kutular": {
+   "ay_dolunay": [
+    520,
+    168,
+    496,
+    416
+   ],
+   "ay_hilal": [
+    1544,
+    168,
+    496,
+    416
+   ],
+   "ay_yarim": [
+    1032,
+    168,
+    496,
+    416
+   ],
+   "gunes": [
+    8,
+    168,
+    496,
+    416
+   ],
+   "yildiz": [
+    8,
+    600,
+    496,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-hoyuk": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "SAH-karsilasma_isaret": {
+  "kutular": {
+   "devriye": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "haydut": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "hayvan": [
+    1544,
+    168,
+    496,
+    848
+   ],
+   "yolcu": [
+    8,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-kaya": {
+  "kutular": {
+   "kaya_1": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "kaya_2": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "kaya_3": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "kaya_4": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-kul": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1008,
+    336
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   512
+  ]
+ },
+ "SAH-mezar": {
+  "kutular": {
+   "kurucu": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "lider": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "murettebat": [
+    1544,
+    168,
+    496,
+    848
+   ],
+   "yoldas": [
+    1032,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-mil_tasi": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   512,
+   1024
+  ]
+ },
+ "SAH-ot_tutami": {
+  "kutular": {
+   "ot_1": [
+    8,
+    168,
+    496,
+    416
+   ],
+   "ot_2": [
+    520,
+    168,
+    496,
+    416
+   ],
+   "ot_3": [
+    1032,
+    168,
+    496,
+    416
+   ],
+   "ot_4": [
+    1544,
+    168,
+    496,
+    416
+   ],
+   "ot_5": [
+    8,
+    600,
+    496,
+    416
+   ],
+   "ot_6": [
+    520,
+    600,
+    496,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-sazlik": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-tas": {
+  "kutular": {
+   "tas_1": [
+    8,
+    168,
+    496,
+    416
+   ],
+   "tas_2": [
+    520,
+    168,
+    496,
+    416
+   ],
+   "tas_3": [
+    1032,
+    168,
+    496,
+    416
+   ],
+   "tas_4": [
+    1544,
+    168,
+    496,
+    416
+   ],
+   "tas_5": [
+    8,
+    600,
+    496,
+    416
+   ],
+   "tas_6": [
+    520,
+    600,
+    496,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-tug": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    496,
+    1872
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   512,
+   2048
+  ]
+ },
+ "SAH-uzak_sehir": {
+  "kutular": {
+   "sehir_1": [
+    8,
+    168,
+    666,
+    848
+   ],
+   "sehir_2": [
+    690,
+    168,
+    666,
+    848
+   ],
+   "sehir_3": [
+    1372,
+    168,
+    666,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-yagmur_kar": {
+  "kutular": {
+   "kar": [
+    349,
+    168,
+    325,
+    848
+   ],
+   "sis": [
+    690,
+    168,
+    325,
+    848
+   ],
+   "yagmur": [
+    8,
+    168,
+    325,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1024,
+   1024
+  ]
+ },
+ "YOL-forest-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/forest/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-forest-orta": {
+  "asil": [
+   2048,
+   299
+  ],
+  "hedef": "data/assets/ui/road/forest/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   598
+  ]
+ },
+ "YOL-forest-uzak": {
+  "asil": [
+   2048,
+   274
+  ],
+  "hedef": "data/assets/ui/road/forest/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   548
+  ]
+ },
+ "YOL-forest-zemin": {
+  "asil": [
+   2048,
+   356
+  ],
+  "hedef": "data/assets/ui/road/forest/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   712
+  ]
+ },
+ "YOL-forest_cold-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/forest_cold/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-forest_cold-orta": {
+  "asil": [
+   2048,
+   383
+  ],
+  "hedef": "data/assets/ui/road/forest_cold/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   766
+  ]
+ },
+ "YOL-forest_cold-uzak": {
+  "asil": [
+   2048,
+   274
+  ],
+  "hedef": "data/assets/ui/road/forest_cold/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   548
+  ]
+ },
+ "YOL-forest_cold-zemin": {
+  "asil": [
+   2048,
+   352
+  ],
+  "hedef": "data/assets/ui/road/forest_cold/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   704
+  ]
+ },
+ "YOL-forest_cold_peaks-uzak": {
+  "asil": [
+   2048,
+   560
+  ],
+  "hedef": "data/assets/ui/road/forest_cold_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1120
+  ]
+ },
+ "YOL-forest_peaks-uzak": {
+  "asil": [
+   2048,
+   560
+  ],
+  "hedef": "data/assets/ui/road/forest_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1120
+  ]
+ },
+ "YOL-forest_warm-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/forest_warm/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-forest_warm-orta": {
+  "asil": [
+   2048,
+   281
+  ],
+  "hedef": "data/assets/ui/road/forest_warm/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   562
+  ]
+ },
+ "YOL-forest_warm-uzak": {
+  "asil": [
+   2048,
+   274
+  ],
+  "hedef": "data/assets/ui/road/forest_warm/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   548
+  ]
+ },
+ "YOL-forest_warm-zemin": {
+  "asil": [
+   2048,
+   356
+  ],
+  "hedef": "data/assets/ui/road/forest_warm/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   712
+  ]
+ },
+ "YOL-forest_warm_peaks-uzak": {
+  "asil": [
+   2048,
+   560
+  ],
+  "hedef": "data/assets/ui/road/forest_warm_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1120
+  ]
+ },
+ "YOL-lake-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/lake/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-lake-orta": {
+  "asil": [
+   2048,
+   295
+  ],
+  "hedef": "data/assets/ui/road/lake/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   590
+  ]
+ },
+ "YOL-lake-uzak": {
+  "asil": [
+   2048,
+   229
+  ],
+  "hedef": "data/assets/ui/road/lake/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   458
+  ]
+ },
+ "YOL-lake-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/lake/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-lake_cold-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/lake_cold/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-lake_cold-orta": {
+  "asil": [
+   2048,
+   288
+  ],
+  "hedef": "data/assets/ui/road/lake_cold/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   576
+  ]
+ },
+ "YOL-lake_cold-uzak": {
+  "asil": [
+   2048,
+   229
+  ],
+  "hedef": "data/assets/ui/road/lake_cold/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   458
+  ]
+ },
+ "YOL-lake_cold-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/lake_cold/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-lake_cold_peaks-uzak": {
+  "asil": [
+   2048,
+   540
+  ],
+  "hedef": "data/assets/ui/road/lake_cold_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1080
+  ]
+ },
+ "YOL-lake_peaks-uzak": {
+  "asil": [
+   2048,
+   540
+  ],
+  "hedef": "data/assets/ui/road/lake_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1080
+  ]
+ },
+ "YOL-lake_warm-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/lake_warm/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-lake_warm-orta": {
+  "asil": [
+   2048,
+   260
+  ],
+  "hedef": "data/assets/ui/road/lake_warm/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   520
+  ]
+ },
+ "YOL-lake_warm-uzak": {
+  "asil": [
+   2048,
+   220
+  ],
+  "hedef": "data/assets/ui/road/lake_warm/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   440
+  ]
+ },
+ "YOL-lake_warm-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/lake_warm/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-lake_warm_peaks-uzak": {
+  "asil": [
+   2048,
+   540
+  ],
+  "hedef": "data/assets/ui/road/lake_warm_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1080
+  ]
+ },
+ "YOL-marsh-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/marsh/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-marsh-orta": {
+  "asil": [
+   2048,
+   274
+  ],
+  "hedef": "data/assets/ui/road/marsh/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   548
+  ]
+ },
+ "YOL-marsh-uzak": {
+  "asil": [
+   2048,
+   213
+  ],
+  "hedef": "data/assets/ui/road/marsh/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   426
+  ]
+ },
+ "YOL-marsh-zemin": {
+  "asil": [
+   2048,
+   356
+  ],
+  "hedef": "data/assets/ui/road/marsh/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   712
+  ]
+ },
+ "YOL-marsh_peaks-uzak": {
+  "asil": [
+   2048,
+   580
+  ],
+  "hedef": "data/assets/ui/road/marsh_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1160
+  ]
+ },
+ "YOL-meadow-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/meadow/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-meadow-orta": {
+  "asil": [
+   2048,
+   268
+  ],
+  "hedef": "data/assets/ui/road/meadow/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   536
+  ]
+ },
+ "YOL-meadow-uzak": {
+  "asil": [
+   2048,
+   210
+  ],
+  "hedef": "data/assets/ui/road/meadow/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   420
+  ]
+ },
+ "YOL-meadow-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/meadow/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-meadow_peaks-uzak": {
+  "asil": [
+   2048,
+   585
+  ],
+  "hedef": "data/assets/ui/road/meadow_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1170
+  ]
+ },
+ "YOL-meadow_warm-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/meadow_warm/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-meadow_warm-orta": {
+  "asil": [
+   2048,
+   258
+  ],
+  "hedef": "data/assets/ui/road/meadow_warm/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   516
+  ]
+ },
+ "YOL-meadow_warm-uzak": {
+  "asil": [
+   2048,
+   210
+  ],
+  "hedef": "data/assets/ui/road/meadow_warm/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   420
+  ]
+ },
+ "YOL-meadow_warm-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/meadow_warm/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-mountain-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/mountain/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-mountain-orta": {
+  "asil": [
+   2048,
+   362
+  ],
+  "hedef": "data/assets/ui/road/mountain/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   724
+  ]
+ },
+ "YOL-mountain-uzak": {
+  "asil": [
+   2048,
+   585
+  ],
+  "hedef": "data/assets/ui/road/mountain/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1170
+  ]
+ },
+ "YOL-mountain-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/mountain/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-mountain_cold-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/mountain_cold/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-mountain_cold-orta": {
+  "asil": [
+   2048,
+   378
+  ],
+  "hedef": "data/assets/ui/road/mountain_cold/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   756
+  ]
+ },
+ "YOL-mountain_cold-uzak": {
+  "asil": [
+   2048,
+   585
+  ],
+  "hedef": "data/assets/ui/road/mountain_cold/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1170
+  ]
+ },
+ "YOL-mountain_cold-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/mountain_cold/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-mountain_warm-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/mountain_warm/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-mountain_warm-orta": {
+  "asil": [
+   2048,
+   362
+  ],
+  "hedef": "data/assets/ui/road/mountain_warm/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   724
+  ]
+ },
+ "YOL-mountain_warm-uzak": {
+  "asil": [
+   2048,
+   585
+  ],
+  "hedef": "data/assets/ui/road/mountain_warm/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1170
+  ]
+ },
+ "YOL-mountain_warm-zemin": {
+  "asil": [
+   2048,
+   357
+  ],
+  "hedef": "data/assets/ui/road/mountain_warm/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   714
+  ]
+ },
+ "YOL-steppe-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/steppe/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-steppe-orta": {
+  "asil": [
+   2048,
+   254
+  ],
+  "hedef": "data/assets/ui/road/steppe/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   508
+  ]
+ },
+ "YOL-steppe-uzak": {
+  "asil": [
+   2048,
+   203
+  ],
+  "hedef": "data/assets/ui/road/steppe/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   406
+  ]
+ },
+ "YOL-steppe-zemin": {
+  "asil": [
+   2048,
+   358
+  ],
+  "hedef": "data/assets/ui/road/steppe/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   716
+  ]
+ },
+ "YOL-steppe_cold-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/steppe_cold/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-steppe_cold-orta": {
+  "asil": [
+   2048,
+   278
+  ],
+  "hedef": "data/assets/ui/road/steppe_cold/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   556
+  ]
+ },
+ "YOL-steppe_cold-uzak": {
+  "asil": [
+   2048,
+   203
+  ],
+  "hedef": "data/assets/ui/road/steppe_cold/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   406
+  ]
+ },
+ "YOL-steppe_cold-zemin": {
+  "asil": [
+   2048,
+   352
+  ],
+  "hedef": "data/assets/ui/road/steppe_cold/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   704
+  ]
+ },
+ "YOL-steppe_cold_peaks-uzak": {
+  "asil": [
+   2048,
+   541
+  ],
+  "hedef": "data/assets/ui/road/steppe_cold_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1082
+  ]
+ },
+ "YOL-steppe_peaks-uzak": {
+  "asil": [
+   2048,
+   541
+  ],
+  "hedef": "data/assets/ui/road/steppe_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1082
+  ]
+ },
+ "YOL-steppe_warm-on": {
+  "asil": [
+   2048,
+   512
+  ],
+  "hedef": "data/assets/ui/road/steppe_warm/fore.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "YOL-steppe_warm-orta": {
+  "asil": [
+   2048,
+   254
+  ],
+  "hedef": "data/assets/ui/road/steppe_warm/mid.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   508
+  ]
+ },
+ "YOL-steppe_warm-uzak": {
+  "asil": [
+   2048,
+   203
+  ],
+  "hedef": "data/assets/ui/road/steppe_warm/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   406
+  ]
+ },
+ "YOL-steppe_warm-zemin": {
+  "asil": [
+   2048,
+   355
+  ],
+  "hedef": "data/assets/ui/road/steppe_warm/ground.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   710
+  ]
+ },
+ "YOL-steppe_warm_peaks-uzak": {
+  "asil": [
+   2048,
+   541
+  ],
+  "hedef": "data/assets/ui/road/steppe_warm_peaks/far.png",
+  "saydam": true,
+  "tip": "strip",
+  "tuval": [
+   4096,
+   1082
+  ]
+ }
+}

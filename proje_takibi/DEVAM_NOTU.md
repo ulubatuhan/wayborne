@@ -37,6 +37,9 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 | C5 | Y-G04 büst portresi (`BustPortrait`): karakter, kadro, aday, madalyon (devir, döküm), Düşenler (ölünün görünüşü defter satırında `look`) | bitti: madalyon oval maskeyle, Düşenler portreleri ekranda doğrulandı |
 | C6 | Y-G13 vitrin: `tests/screenshot_showcase.gd` -> `docs/steam/vitrin/*.jpg`. Bulunan ve oyunda düzeltilen: kamp koltukları ateşin üstündeydi, harita atlısında fener yoktu | bitti: beş kare saçlı figürlerle, `docs/steam/vitrin/*.jpg`; kullanıcı onayı bekliyor |
 | C7 | Kamp ateşi oturma postürü + sahne (kullanıcı, 2026-10-23): yalnızca hedeflere eklendi (CLAUDE.md Ana Hedefler), haftalık limit nedeniyle başlanmadı | sırada |
+| D1 | El çizimi programı (kullanıcı, 2026-10-27): envanter (676 görsel), şablon üretici ve 10 zip (scratchpad'de üretildi, kullanıcıya gönderildi; depoda yok, `python3 -I tools/el_cizimi/sablon_uret.py <klasör>` ile yeniden), Excel takip, süreç belgesi, alım aracı (sahte teslimlerle oyunda denendi, deneme sanatı geri alındı). Bu ortamda gerekenler: `pip install psd-tools opencv-python-headless`, Godot 4.2.2 indir (`/usr/local/bin/godot`) | bitti |
+| D2 | Figür pilotu: tek rölanti çizimi 14 poza bükülüyor (`docs/el_cizimi/pilot/`); etek/cüppe tek parça `etek` katmanı. Klip açıları `godot --headless --path . --script res://tools/figure_pipeline/godot/export_clips.gd` -> `build/figures/clips` | bitti |
+| D3 | Sıradaki: ilk gerçek çizim gelince `al.py`; ilk beden çizimiyle `HumanSkin` (GDScript) + ince/iri türetme denemesi | bekliyor (kullanıcının çizimi) |
 
 ## Kullanıcı kararları (2026-10-21, karar defteri) - İŞ SIRASI
 
