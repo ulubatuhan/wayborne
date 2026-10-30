@@ -70,10 +70,11 @@ Yakın geçmiş ise yaşayanların hafızasında: imparatorluğun çöküşünü
 
 | | olay | işaret |
 |---|---|---|
-| V.1 | Bir **imparatorluk** kıtanın kuzeyini ve ortasını tutar. Başkenti **Merigard**, bugünkü Orvahel'in yerinde. Adı ve süresi bilinmiyor. | [Yazar] / [Çelişki Ç3 — ad] / [Boş — imparatorluğun adı] |
+| V.1 | Bir **imparatorluk** kıtanın kuzeyini ve ortasını tutar. Başkenti bugünkü Orvahel'in yerinde; adı defter I'de **Merigard** [Çelişki Ç3: Vadi şehri Merigaud ile karışıyor]. Adı ve süresi bilinmiyor. | [Yazar] / [Çelişki Ç3 — ad] / [Boş — imparatorluğun adı] |
 | V.2 | Büyücüler imparatorluktan önce de Sideria'da; Raviellon'la temas imparatorluktan eski. | [Yazar, onaylandı] |
 | V.3 | Ana yollar **imparatorluk yollarıdır**; üstlerindeki çok nadir pagan sunakları ondan eskidir ve Vadi'nin dış kıyılarında, köy yollarında kalır. | [Yazar, onaylandı] |
-| V.4 | **El kilisesi** imparatorluğun dini olur ve onunla yayılır; pagan inançları asimile eder, tarihlerini siler. Dağın Nefesi ve Denizin Gözyaşı "El'in yazdığı sayfa" olur. | [Yazar] / [Türetme T6 — sıra] |
+| V.4 | **El kilisesi** imparatorluğun dini olur ve onunla yayılır; pagan inançları asimile eder, tarihlerini siler. Dağın Nefesi ve Denizin Gözyaşı "El'in yazdığı sayfa" olur. | [Yazar] / [Yazar, onaylandı T6] |
+| V.4b | **İmparator Septimius**, kural koyucu: imparatorluk altındaki farklı dinî görüşleri ezer, El inancına katar. Kilisenin bugünkü kurulu mezhebi **Septisizm** adını ondan alır. [Türetme T35] Kitap'a eklenen satırlar asimile edilen inançların kendisidir. | [Yazar] / [Türetme T35] |
 | V.5 | Vadi'nin eski inançları imparatorluk zamanında kilisenin içine soğurulur; yönetenler onları medeni bulmaz. | [Yazar] |
 | V.6 | **Tüccar Loncası**'nın merkezi Merigaud. | [Yazar] |
 | V.7 | Vastrevar imparatorluğun en büyük kentlerinden biri. | [Yazar] |
@@ -93,13 +94,13 @@ Kullanıcının 2026-10-29 notu: kıtayı etkileyen bir olay bir kıtlık başla
 | VI.3 | **[Türetme T33]** Deli kral kıtlığı büyücülere yükler ve onları katleder; katliam bir delinin işi değil, aç bir halkın aradığı suçlunun bulunmasıdır. Kıtlık büyüyle geldiyse onu anlayabilecek tek insanlar böylece gider. | [Türetme T33] |
 | VI.4 | Göçebe boyları tarihte bir kez birlikte davranır: Han birliği toplar, ordular birleşir ve **imparatorluğa karşı savaşır**. İmparatorluk dize gelir ve parçalanır. Savaş bitince her boy obasına döner. | [Yazar] |
 | VI.5 | **Büyük savaşın sonunda** Merigard'ın halkı sürülür, şehir yakılır. | [Yazar] / [Boş — kim yaktı] |
-| VI.6 | **[Türetme T7]** Dört kuleli tapınak yangından kalan tek yapıdır. | [Türetme T7] |
-| VI.7 | **[Türetme T8]** Son meydan muharebesi Mühür Savaşı Ovası'nda olur; düşen imparatorluk mühürleri bugün nadir "eski mühür" olarak elden ele geçer. | [Türetme T8] |
+| VI.6 | **[Yazar, T7]** Dört kuleli tapınak yangından kalan tek yapıdır: şehir genç, tapınak eski. | [Yazar, T7] |
+| VI.7 | **[Yazar, onaylandı T8]** Son meydan muharebesi Mühür Savaşı Ovası'nda olur; düşen imparatorluk mühürleri bugün nadir "eski mühür" olarak elden ele geçer. | [Yazar, onaylandı T8] |
 | VI.8 | Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemez. | [Yazar] |
 
 ## VII. Parçalanma
 
-Yaşayanların hafızasındaki çağ. **[Türetme T26]** Alex imparatorluk ordusunda hizmet etti, döndü, hüküm sürdü, genç
+Yaşayanların hafızasındaki çağ. **[Yazar, onaylandı T26]** Alex imparatorluk ordusunda hizmet etti, döndü, hüküm sürdü, genç
 öldü; oğlu bugün hüküm sürüyor. Çöküş bu yüzden bundan **30–50 yıl önce** olmalı.
 
 | | olay | işaret |
@@ -108,10 +109,10 @@ Yaşayanların hafızasındaki çağ. **[Türetme T26]** Alex imparatorluk ordus
 | VII.2 | **Büyük Vadi**'nin şehirleri bağımsızlık ilan eder; prensleri ve hanedanları yerlerini korur. Her şehir bir prenslik olur. | [Yazar] |
 | VII.3 | **Kanlı Baron.** Alex, Dük Vlad'ın öldüğünü öğrenince döner, hanedanın geri kalanını bir yemekte basıp öldürür, toprakları alır. Bölgeyi iyi yönetir, refah artar; ordu yıllarının hastalıklarından genç ölür. | [Yazar] |
 | VII.4 | Tüccar Loncası'nın merkezi Merigaud'dan **Orsolune**'ye taşınır. | [Yazar] |
-| VII.5 | **[Türetme T24]** Lonca güneye geçince Orsian sözleşme ahlakı kıtanın ticaret kuralı olur. | [Türetme T24] |
-| VII.6 | **Orvahel kurulur.** Vaelghard, Merigard'ın yanmış yerine kutsal kenti kurar, dinî geçmişi yüzünden fonlar ve garantörü olur. Birinci Okuyucu orada oturur. | [Yazar] |
-| VII.7 | **El inancı ikiye bölünür:** eski görüş (açık el; adı önerisi İlk Sayfa) ve **reformcular** (yumruk; önerisi Yeni Okuma). Reform güneyde, seküler Vadi şehirlerinde ve Orsolune'de kök salar. | [Yazar] / [Türetme T1 — adlar] / [Boş — reformun doğuşu, önderi] |
-| VII.8 | Batı sınırında **Tolvarin** ve **Kirsavel** iki ayrı şehir olur; sınır kavgaları başlar. **[Türetme T15]** Bölünmüş Sancak Ovası ayrılığın yeri. | [Yazar] / [Türetme T15] |
+| VII.5 | **[Yazar, onaylandı T24]** Lonca güneye geçince Orsian sözleşme ahlakı kıtanın ticaret kuralı olur. | [Yazar, onaylandı T24] |
+| VII.6 | **Orvahel kurulur.** Vaelghard, eski başkentin yanmış yerine kutsal kenti kurar, dinî geçmişi yüzünden fonlar ve garantörü olur. Birinci Okuyucu orada oturur. | [Yazar] |
+| VII.7 | **El inancı ikiye bölünür:** kurulu mezhep **Septisizm** (açık el; Kitap eklenen satırlarıyla birlikte El'in sözü, sorgulamak günah) ve reformcu **Yumruk** (The Fist; yumruk; yalnızca ilk sayfa, eklenen her satır yasak ve iğrençlik, her şey sorgulanabilir). Reform güneyde, seküler Vadi şehirlerinde ve Orsolune'de kök salar. [Türetme T47] Yumruk Belvanor'da doğar. | [Yazar, T1] / [Türetme T47 — doğuş] |
+| VII.8 | Batı sınırında **Tolvarin** ve **Kirsavel** iki ayrı şehir olur; sınır kavgaları başlar. **[Yazar, onaylandı T15]** Bölünmüş Sancak Ovası ayrılığın yeri. | [Yazar] / [Yazar, onaylandı T15] |
 | VII.9 | Savaş mültecileri sınır topraklarına yığılır, ucuz işçi olur. | [Yazar] |
 | VII.10 | Ayazkaya'nın kabileleri imparatorluk düzeninden kurtulup Vaelghard'a karşı savaşa girer. | [Yazar] / [Boş — ne zaman başladı] |
 
@@ -123,7 +124,7 @@ Oyunun başladığı an. Her oyunda yaşanmış sayılır.
 |---|---|---|
 | VIII.1 | **Vaelghard**'da Kral Reynald. Dağlılarla savaşta; göçebe yağmalarına karşılık veremiyor; güneye borçlu. | [Yazar] |
 | VIII.2 | **Ezmerak**'ta Baron Daemon, Kanlı Baron'un oğlu: ticarete odaklı, faydacı, halkından uzak. | [Yazar] |
-| VIII.3 | **Orvahel**'de Birinci Okuyucu V. Leon "Lekesiz". | [Yazar] / [Türetme T3 — sıfat] |
+| VIII.3 | **Orvahel**'de Birinci Okuyucu V. Leon "Lekesiz". | [Yazar] / [Yazar, onaylandı T3] |
 | VIII.4 | **Gokyurt**'ta Büyük Han Arsalkan Obası'ndan. | [Yazar] / [Boş — Han'ın adı] |
 | VIII.5 | **Ayazkaya**'da Droskal'in Demirbalta kabilesi hükmeder; öbür kabileler zaman zaman başkaldırır. | [Yazar] |
 | VIII.6 | **Tolvarin**'de Leon Bey, **Kirsavel**'de Vasko Bey; sınır kavgası sürüyor. | [Yazar] |
@@ -147,7 +148,7 @@ Her oyunda yeniden yazılır ve kervanın defterine kaydedilir.
 | IX.5 | **Kendi Hanın** (final) | Dört vagon, seni tanıyan bir yol, defterde iki üstü çizili ad, adı en az 60 gün taşımak. Kayıpsız son yok. | [Oyun] |
 | IX.6 | **Kuşaklar** | Lider düşünce ad devredilir; kıdemliyi geçmek kırgınlık bırakır. | [Oyun] |
 | IX.7 | **Son** | Adı taşıyacak kimse kalmadığında kitap kapanır. | [Oyun] |
-| IX.8 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Türetme T25] |
+| IX.8 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Yazar, T25: bir bakış açısı] |
 
 [Not] Kampanya bölümlerinin metinleri ticaret ve büyüme dilinde ("dolu bir kese", "para kazandırır"). Kıtlık
 revizyonu (görev Y-C21) gelince bu metinler ulaştırma ve hayatta kalma diline çevrilmeli.

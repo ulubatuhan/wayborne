@@ -4,13 +4,15 @@ Bu belge ile [TARIHCE.md](TARIHCE.md) **tek bir çalışmanın iki yarısıdır*
 zaman ne olduğu* yazıyor. İkisi birlikte güncellenir; biri öbürüyle çelişirse ikisi de yanlıştır. Açık sorular ve
 onay bekleyen öneriler [SORULAR.md](SORULAR.md)'de. Yazım kuralları ve yöntem: `.claude/skills/wayborne-lore/SKILL.md`.
 
-**Son güncelleme:** 2026-10-29. Soru defterinin ilk 91 sorusunun (sekiz bölge) cevapları ve öneri onayları işlendi.
+**Son güncelleme:** 2026-10-30. Defter II'nin onay ve düzeltmeleri işlendi: mezhepler (Septisizm ve Yumruk), her
+harita parçası kendi bölgesi, dil, tuz, Avuçiçi'nin cezaları. Yeni öneriler defter III'te ve
+[ONERILER_III.md](ONERILER_III.md)'de.
 
 ## Bu belge nasıl okunur
 
 | işaret | anlamı |
 |---|---|
-| **[Yazar]** | Kullanıcının sözü (önceki tur C1–C16, bu tur bölge cevapları ve onaylar). Kanon. |
+| **[Yazar]** | Kullanıcının sözü (C1–C16, bölge cevapları, onaylar). "[Yazar, onaylandı Tn]" benim önerimdi, onaylandı; "[Yazar, Tn]" düzeltilerek onaylandı. Kanon. |
 | **[Oyun]** | Bugün oyunda yazılı (metin, kart, kural, veri). Değiştirmek kod ya da çeviri işi. |
 | **[Harita]** | Onaylı harita v3 ve yer atlası (`places_v3.json`, `settlements.json`). |
 | **[Türetme Tn]** | Benim kurduğum bağ ya da çıkarım. **Onay bekliyor**; numarası SORULAR.md'deki listede. |
@@ -47,8 +49,10 @@ Adlar cevaplardaki yazımdan haritadaki yazıma düzeltildi: Tolyarin → **Tolv
 - **[Yazar]** "Wayborne" bir yer adı değil: ana karakter **yolda doğmuştur** ve kendini ait hissedebildiği tek yer yoldur.
 - **[Yazar]** **Defter El inancını, yol Baikhan inancını temsil eder.** Kervan defteri adları silmez, yol ise adları
   mühürlemez: biri yazarak hatırlar, öbürü bırakarak.
-  - **[Türetme T25]** Kervan bu iki inancın arasında yaşar: yazan ama yola ait. "Yolda doğan" bu yüzden iki dünyanın da
-    çocuğudur; defter onu kaydeder, yol onu sahiplenir. Oyunun yas ve hafıza tonu buradan beslenir.
+  - **[Yazar, T25]** Bu bir bakış açısıdır, tek doğru okuma değil. Kervanı iki inancın arasında yaşayan biri olarak
+    gören de olur (yazan ama yola ait; "yolda doğan" iki dünyanın da çocuğu), yalnızca El'in ya da yalnızca
+    Baikhan'ın gözünden bakan da, dini hiç işe katmadan yalnızca yolu ve yükü gören de. Oyun bu bakışlardan birini
+    doğrulamaz; her karakter kendi gözüyle konuşur.
 
 ## 3. Görünmeyen dünya
 
@@ -120,32 +124,38 @@ ya da bu ikisinin içinde erimiş.
 
 ### 4.1 El ve onun Kilisesi
 
-- **[Yazar]** El kilisesinin inancı The Hand; Türkçe metinlerde **El**. "El'in yazdığı sayfa" inancın dilidir.
+- **[Yazar]** El kilisesinin inancı **The Hand**; Türkçe metinlerde **El**. "El'in yazdığı sayfa" inancın dilidir.
   Kutsal metin **El'in Kitabı**'dır; kutsal kentin askerleri onu göğüslerine bağlı taşır.
 - **[Yazar]** Kilisenin başı **Birinci Okuyucu**'dur (en yüksek mertebe). Bugün: **V. Leon "The Pure"**, makamı
-  **Orvahel**. [Türetme T3] Sıfatın Türkçesi: **Lekesiz** (lekesiz sayfa: El'in yazısını bozmamış olan).
-  [Çelişki Ç4: ad]
+  **Orvahel**. **[Yazar, onaylandı T3]** Sıfatın Türkçesi: **Lekesiz**. [Çelişki Ç4: ad]
 - **[Yazar]** Kilise karşılaştığı pagan inançları asimile ederek büyüdü ve tarihlerini sildi; Denizin İlk Gözyaşı ve
   Dağın İlk Nefesi'ni adlarını değiştirerek benimsedi: bugün onlar "El'in yazdığı bir sayfa".
-- **[Yazar]** El inancı bugün iki görüşe bölünmüş:
+- **[Yazar]** El inancı bugün iki mezhebe bölünmüş:
 
-| | eski görüş | reformcular |
+| | **Septisizm** | **Yumruk (The Fist)** |
 |---|---|---|
-| kanonda geçen adı | "Eski Ahit" (ad değişecek, aşağıya bak) | Reformcular |
+| ne der | Kitap zaman içinde eklenen satırlarıyla birlikte El'in sözüdür. Eklenenleri sorgulamak kesin olarak günahtır. | Kitabın yalnızca özü, ilk sayfası okunmalı ve uygulanmalı. Sonradan eklenen her satır yasaktır, bir iğrençliktir. Her şey okunabilir, sorgulanabilir, anlaşılabilir. |
+| adı nereden | Farklı dinî görüşleri ezerek El inancına katan, kural koyucu imparator **Septimius**'tan | reformcuların sembolünden |
 | sembolü | **parmak uçları yukarı bakan, avuç içi görünen açık el** | **yatay, yumruk yapmış el** |
 | nerede baskın | Vaelghard, Orvahel (yüzde yüz), kuzey Vadi (Ondrelle, Merigaud), Ezmerak, Zelmarin | güney Vadi (Belvanor, Ilsande, Caramine), Orsolune |
-| karışık | Mirsana (ikisi ve eski inanç), Zelmarin (eski görüş ağır) | |
+| karışık | Mirsana (ikisi ve eski inanç), Zelmarin (Septisizm ağır) | |
 
-- **[Yazar]** "Eski Ahit" adı gerçek bir kutsal kitabın adı olduğu için değişecek; adı ben öneriyorum:
-  - **[Türetme T1]** Eski görüş: **İlk Sayfa** (ya da "İlk Okuma"). Gerekçe: inancın dili sayfa ve yazı; başı "Birinci
-    Okuyucu"; Orvahel'in yanında zaten bir **İlk Sayfa Manastırı** var [Harita]. İlk Sayfa ehli, El'in yazdığını ilk
-    yazıldığı gibi okur; tek bir harf oynatmaz. Reformcuların adı: **Yeni Okuma**. Onlar aynı kitabı yeniden okur,
-    sayfanın kenarına not düşmeyi meşru sayar. Dışarıdan biri onlara sembolleri yüzünden "Yumruklar", eski görüşe
-    "Açık Avuçlar" diyebilir.
-  - **[Türetme T2]** Orvahel'in kutsal bölgesinin adı: **Avuçiçi** (El'in avucunun içi; açık el sembolüyle aynı imge).
-    Diğer adaylar: "Okuyucu Toprağı", "Sayfa Yurdu".
-- **[Türetme T4]** Kilisenin dereceleri kitap imgesinden: **Birinci Okuyucu** > **Okuyucular** (şehir kiliselerinin
-  başları) > **Kâtipler** (rahipler, Kitap'ı kopyalayanlar ve okutanlar) > **Çırak**. Arınmayı kâtipler yürütür.
+- **[Yazar]** Septisizm kilisenin kurulu düzenidir; Yumruk ise reformdur. Reformun özü bir geri dönüştür: Septimius'un
+  ve ondan sonrakilerin Kitap'a kattığı her şeyi silip ilk sayfaya inmek.
+- **[Türetme T35]** Septimius'un "eklemeleri" asimile ettiği inançların kendisidir: Dağın İlk Nefesi, Denizin İlk
+  Gözyaşı ve adı silinmiş başkaları Kitap'a birer sayfa olarak girdi. Yumruk bu sayfaları söküp atmak ister. Bu yüzden
+  Yumruk'un yükseldiği yerde eski inanışlar daha da sıkışır, Septisizm'in yerleştiği yerde kılık değiştirmiş hâlleriyle
+  yaşar. Bir Yumruk vaizi kıyıdaki balıkçının deniz duasını "sonradan eklenmiş satır" diye yasaklar; bir Septisist
+  kâtip aynı duayı Kitap'tan okutur.
+- **[Yazar, onaylandı T2]** Orvahel'in kutsal bölgesinin adı: **Avuçiçi** (El'in avucunun içi; açık el sembolüyle
+  aynı imge).
+- **[Türetme T4, düzeltildi]** Septisizm'in dereceleri Kitap imgesinden: **Birinci Okuyucu** > **Okuyucular** (şehir
+  kiliselerinin başları) > **Kâtipler** (rahipler; Kitap'ı kopyalar, eklenen satırları sayfaya işler, okutur) >
+  **Çırak**. Arınmayı kâtipler yürütür. Kâtibin asıl görevi eklemeleri korumaktır: Kitap'ın her kopyası bütün
+  satırlarıyla, Orvahel'in mühürlediği sırayla yazılır.
+  Yumruk'ta derece yoktur, **Okuyan** vardır: Kitap'ın ilk sayfasını ezbere bilen ve onu herkese sorgulatabilen kişi.
+  Yumruk cemaati bir Okuyan'ın çevresinde toplanır; Okuyanlar birbirine bağlı değildir. Başlarında bir kurum yok
+  [Boş: Yumruk'un ortak bir sözcüsü var mı].
 - **[Yazar]** Vadi'de din bir inanç göstergesinden çok topluluk, güç alanı ve politik araçtır: kiliseler orta derecede
   doludur, iletişim ve ağ kurmak için kullanılır, entrikaya açıktır.
 - **[Oyun]** Kilise ekranı Dağın İlk Nefesi ve Denizin İlk Gözyaşı'nı "İki İnanış" başlığıyla okutur.
@@ -167,10 +177,15 @@ bakımda ve toplulukta yarar.
 - **[Yazar]** **Gokyurt'ta Baikhan'dan başka inanç yoktur.**
 - **[Yazar]** **Sogurtay Obası şamanlarındır.** Bütün boylar yılda bir ay oraya göçüp konaklar, suyun tadına varır ve
   doğaya şükreder.
-  - [Türetme T22] Şamanlar Baikhan'ın tek kurumsal yüzü: kitapları yok, sözle ve sudan okurlar. Sogurtay suyu
-    kutsaldır.
-  - [Türetme T21] Yıllık Sogurtay buluşması boyların tek ortak zamanı: beyler orada görüşür, kan davaları orada barışa
-    bağlanır, hanlık iddiaları orada duyulur.
+  - **[Yazar, onaylandı T22]** Şamanlar Baikhan'ın tek kurumsal yüzü: kitapları yok, sözle ve sudan okurlar.
+    Sogurtay suyu kutsaldır.
+  - **[Yazar, T21]** Sogurtay'ın takvimi: dokuz boyun her biri yılda bir ay Sogurtay'a gelir (dokuz boy, dokuz ay).
+    Kalan **üç ay** şamanlarındır: sessizce ibadet eder, doğayla bütünleşir, doğayı tımar eder, şükrederler. Bu
+    şamanlara doğanın hiçbir unsuru zarar vermez; doğa onları tanır. Boyların beyleri Sogurtay'a yalnızca **konsey**
+    toplanacağı zaman birlikte gelir; konsey her zaman orada toplanır.
+  - [Türetme T36] Bir boyun ayı ötekinin ayıyla çakışmaz; Sogurtay'da iki boy aynı anda bulunmaz. Kan davası olan iki
+    boy bu yüzden Sogurtay'da hiç karşılaşmaz; barış ancak konsey toplanınca, beylerin ağzından konuşulur. Şamanların
+    üç ayı kışın en sert ayları: oba kışlağa çekilmişken Sogurtay'da yalnızca şamanlar kalır.
 - [Boş] Baikhan ve Gokana: varlık mı, yer mi, gök ve toprak mı.
 
 ### 4.4 Eski efsaneler ve küçük inanışlar
@@ -179,15 +194,17 @@ bakımda ve toplulukta yarar.
   yaklaşma çabasıdır.
   - Sideria genelinde küçük bir inanış ama **en yüksek sesle Ayazkaya'da** yaşar; orada güçlü olmak her şeydir.
   - Kutsal doruk **Kartalın Nefesi Zirvesi**: Ulmarec ile Droskal arasındaki en yüksek zirve.
-  - [Türetme T20] Ayazkaya'da yönetim "kim güçlü çıkarsa" el değiştirir. Bir kabile beyinin hükmü, Kartalın Nefesi'ne
-    tırmanıp dönmesiyle tanınır. Güç sınavı bir dua değil, bir taç giyme.
+  - **[Yazar, T20]** Ayazkaya'da yönetim "kim güçlü çıkarsa" el değiştirir. Bir kabile beyinin hükmü, Kartalın
+    Nefesi'ne tırmanıp dönmesiyle tanınır. Hüküm sınanacaksa meydan okuyan önce dağa tırmanır, sonra mevcut beyin
+    yerleşkesinde **düello** edilir; kazananın hükmü sürer ya da el değiştirir. Güç sınavı bir dua değil, bir taç
+    giyme.
 - **Denizin İlk Gözyaşı** [Oyun]: deniz ilk tanrının gözyaşından doğdu ve hâlâ ağlar; balıkçıların "deniz tanrıları".
   [Boş: kimin, hangi kıyıda]
-- **Yasaklı eski inançlar** [Yazar], İlk Sayfa'nın ("Eski Ahit") yasakladıkları:
+- **Yasaklı eski inançlar** [Yazar], Septisizm'in yasakladıkları:
   - **Kirsavel**: göçebe inancına benzeyen eski bir inanç; Kirsavel'de **hayvanlar kutsaldır**.
   - **Tolvarin**: tarım ve işçilik üzerine kurulu eski bir inanç; Tolvarin'de **toprak kutsaldır**.
   - **Taşkök**: madencilik ve odunculuk temelli eski inançlar baskın; azınlıkta göçebe inançları.
-  - **Vadi**: çok azınlıkta eski inançlar. İmparatorluk zamanında İlk Sayfa'nın içine soğurulmuş halleriyle yaşanır ve
+  - **Vadi**: çok azınlıkta eski inançlar. İmparatorluk zamanında Septisizm'in içine soğurulmuş halleriyle yaşanır ve
     tanınırlar; yöneticiler onları pek medeni bulmaz.
 
 ### 4.5 Yol, ölüm ve Bekçi Kadın [Yazar]
@@ -269,19 +286,27 @@ o dine göre yerleştirilmiş mezarlar (katakomb), çok azında eski tılsımlı
 **[Yazar]** Siyasi birim her bölgede kendi sözcüğünü taşır; oyunun haber kartlarındaki "beylik" sözcüğü sınırda,
 Taşkök'te ve bozkırda doğrudur.
 
-| bölge (haritada) | bugünkü adı | yönetim | başta | merkez | baskın inanç | dil |
+**[Yazar, 2026-10-30]** Haritadaki her bölge parçası kendi bölgesidir. İlk haritada benzer kültürler aynı adla
+eşlenmişti (iki "dağ", iki "sınır", iki "güney"); bu eşleşme kaldırıldı. Adı yazarın verdiği bölgeler [Yazar], benim
+önerdiğim adlar [Türetme] ve onay bekliyor.
+
+| harita parçası | bölgenin adı | yönetim | başta | merkez | baskın inanç | dil |
 |---|---|---|---|---|---|---|
-| Göçebe boyları | **Gokyurt** (dışarıdakiler: Çadıreli) | Obalar, her biri kendi beyiyle; ortak töre; Büyük Han | Han (Arsalkan Obası) | Arsalkan | Baikhan | göçebe dili |
-| Kuzeyin eski imparatorluğu | **Vaelghard Krallığı** (Kuzey Krallığı) | Krallık | Kral **Reynald** | **Vastrevar** | İlk Sayfa | imparatorluk dili (resmî) |
-| Sınır halkları, doğu | **Baron'un toprakları** (Ezmerak Baronluğu) | Bağımsız baronluk | Baron **Daemon** | **Ezmerak** | İlk Sayfa | vadi dili, imparatorluk dili |
-| Sınır halkları, batı | **Tolvarin** ve **Kirsavel** (iki bağımsız şehir) | İki bey | **Leon Bey** (Tolvarin), **Vasko Bey** (Kirsavel) | kendileri | yasaklı eski inançlar | vadi dili; Kirsavel göçebe dili de |
-| Dağ kabileleri | **Ayazkaya** (halkı: dağlılar) | Kabileler; en güçlü kabile hükmeder | **Demirbalta** kabilesi | **Droskal** | Dağın Nefesi | [Boş] |
-| Dağ kabileleri ve madenler | **Taşkök** | Beylikler; her yerleşimin beyi, ortak konsey | konsey | **Harvek** | madenci ve oduncu eski inançları | [Boş] |
-| Vadi | **Büyük Vadi** | Her şehir ayrı bir prenslik | prensler | yok | kuzeyde İlk Sayfa, güneyde Yeni Okuma | vadi dili (imparatorluk dilinin gündelik hâli) |
-| Eski Ahit kutsal kenti | [Türetme T2: **Avuçiçi**] | Teokrasi | Birinci Okuyucu **V. Leon** | **Orvahel** | yalnızca İlk Sayfa | imparatorluk dili |
-| Güney kentleri | **Ors** (halkı: **Orsianlar**) | Orsolune Konseyi (ticaret oligarşisi) | konsey | **Orsolune** | Yeni Okuma | [Boş] |
-| (güney) | **Zelmarin** | Bağımsız, konsey | konsey | Zelmarin | İlk Sayfa ağır, karışık | [Boş] |
-| (güney) | **Mirsana** | Bağımsız ticaret şehir devleti | [Boş] | Mirsana | Yeni Okuma, İlk Sayfa ve eski inanç karışık | [Boş] |
+| kuzeybatı bozkırı | **Gokyurt** (dışarıdakiler: Çadıreli) | Obalar, her biri kendi beyiyle; ortak töre; Büyük Han | Han (Arsalkan Obası) | Arsalkan | Baikhan | göçebe dili |
+| kuzeybatı dağları | **Taşkök** [Yazar] | Beylikler; her yerleşimin beyi, ortak konsey | konsey | **Harvek** | madenci ve oduncu eski inançları | [T41] |
+| kuzey | **Vaelghard Krallığı** (Kuzey Krallığı) | Krallık | Kral **Reynald** | **Vastrevar** | Septisizm | imparatorluk dili, Kuzey ağzı (resmî) |
+| kuzeydoğu dağları | **Ayazkaya** (halkı: dağlılar) [Yazar] | Kabileler; en güçlü kabile hükmeder | **Demirbalta** kabilesi | **Droskal** | Dağın Nefesi | dağlıların dili (Normanca tadı) |
+| batı sınırı | **Tolvarin ve Kirsavel** (ortak adları yok; kervancılar "Çitler" der [Türetme T38]) | İki bağımsız şehir, iki bey | **Leon Bey** (Tolvarin), **Vasko Bey** (Kirsavel) | kendileri | yasaklı eski inançlar | Vadi ağzı; Kirsavel göçebe dili de |
+| doğu sınırı | **Ezmerak Baronluğu** ("Baron'un toprakları") [Yazar] | Bağımsız baronluk | Baron **Daemon** | **Ezmerak** | Septisizm | Vadi ağzı, Kuzey ağzı |
+| orta | **Büyük Vadi** | Her şehir ayrı bir prenslik | prensler | yok | kuzeyde Septisizm, güneyde Yumruk | Vadi ağzı |
+| doğu, çember | **Avuçiçi** [Yazar, onaylandı T2] | Teokrasi | Birinci Okuyucu **V. Leon** | **Orvahel** | yalnızca Septisizm | imparatorluk dili |
+| doğu sıradağı | **Karaocak** [Türetme T37] | Beylik [Türetme] | Vorgat beyi | **Vorgat** | madenci eski inançları | [T41] |
+| güneybatı kıyısı | **Ors** (halkı: **Orsianlar**) | Orsolune Konseyi (ticaret oligarşisi) | konsey | **Orsolune** | Yumruk | imparatorluk dili, hesap sözcükleri deniz ötesinden |
+| (Ors içinde) | **Mirsana** | Bağımsız ticaret şehir devleti | [Boş] | Mirsana | Yumruk, Septisizm ve eski inanç karışık | imparatorluk dili |
+| güneydoğu kıyısı | **Gelgit Kıyısı** [Türetme T39] | Zelmarin Konseyi | konsey | **Zelmarin** | Septisizm ağır, karışık | [Boş] |
+
+Haritanın dışında kalan yerleşimler en yakın parçaya düşer: Akavan ve Samuran batı sınırına, Golcavar Ezmerak
+Baronluğu'na, Liraven Vadi'ye, Zelmarin Gelgit Kıyısı'na. Akavan ve Samuran'ın siyasi bağı için bkz. Ç11.
 
 [Çelişki Ç4] Reynald, Daemon, Vlad, Alex ve Leon adları gerçek tarihî ya da başka eserlerden tanıdık adlara çok yakın;
 Leon iki ayrı kişide geçiyor.
@@ -319,7 +344,7 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** Düşmanı **Vaelghard**: büyük bir savaş yok ama göçebeler zaman zaman yağmaya çıkar ve pusu kurar;
   Vaelghard henüz bir karşılık verememiştir. **Taşkök** ile dosttur ve ticaret anlaşmaları vardır.
 - **[Yazar]** Saygısızlığı ve bağımsızlığına dokunulmasını asla affetmez.
-- [Türetme T29] "Çadıreli" Vaelghard'ın ağzıdır: bir kayıt bürosunda adı olmayan, vergi vermeyen halka verilmiş ad.
+- **[Yazar, onaylandı T29]** "Çadıreli" Vaelghard'ın ağzıdır: bir kayıt bürosunda adı olmayan, vergi vermeyen halka verilmiş ad.
 
 ### 8.2 Vaelghard Krallığı
 
@@ -330,7 +355,7 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** Dili resmî ve grameri kuvvetli; edebiyatı çoğunlukla roman, kanun ve tarih. Haritadaki adlar (Auderin,
   Dravoss, Rivecande, Selvicar, Vastrevar) bu tadı doğru taşır.
 - **[Yazar]** **İnanç:**
-  - Baskın inanç İlk Sayfa (El'in eski görüşü). Halk içinde başka inanış yoktur; bölge bu konuda çok katıdır.
+  - Baskın inanç Septisizm (El'in kurulu mezhebi). Halk içinde başka inanış yoktur; bölge bu konuda çok katıdır.
   - Krallık kilisenin koruyucusudur.
   - Yalnızca dağ kabileleri kendi dinlerini yaşar ve Vaelghard'la savaşır.
 - **[Yazar]** **Kervan girerken:**
@@ -353,7 +378,7 @@ Leon iki ayrı kişide geçiyor.
 - **[Harita]** Deli Kral Sarayı Yıkıntısı bu bölgede, Vastrevar'ın doğusunda.
 - **[Yazar]** Ayazkaya'nın madenleri Ezmerak ve tüccarlar üzerinden Vaelghard'a akar; **Vaelghard bu madenlerin
   kaynağını görmezden gelir.**
-  - [Türetme T12] Yani Vaelghard ordusu, savaştığı dağlıların Kazrun çeliğini taşır. Bir Vaelghard subayı bunu bilir
+  - **[Yazar, onaylandı T12]** Yani Vaelghard ordusu, savaştığı dağlıların Kazrun çeliğini taşır. Bir Vaelghard subayı bunu bilir
     ama söylemez; bir dağlı bunu bilir ve güler.
 
 ### 8.3 Ezmerak Baronluğu ("Baron'un toprakları")
@@ -369,7 +394,7 @@ Leon iki ayrı kişide geçiyor.
   - Ordu yıllarında kaptığı hastalıklardan genç yaşta öldü ve yönetimi oğlu **Daemon**'a bıraktı.
   - Daemon bugün daha çok artan ticarete odaklı, halkından biraz uzak bir lider. Aradaki konumu hem Vadi hem Kuzey
     Krallığı için kritik; bunu en faydacı şekilde yönetmeye çalışır.
-- **[Yazar]** Kültürü Vadi ile güney kentleri arasında; vadi dili ve imparatorluk dili konuşulur. İnanç: İlk Sayfa.
+- **[Yazar]** Kültürü Vadi ile güney kentleri arasında; imparatorluk dilinin Vadi ve Kuzey ağzı konuşulur. İnanç: Septisizm.
 - **[Yazar]** **Baron'un kanunu:**
   - Bölgeden geçen kervan mutlaka Ezmerak'a uğrar ve orada **en az bir öküz değerinde** ticaret yapar. Buradan
     geçmeden gidilebilecek başka bir yol yoktur [Çelişki Ç10].
@@ -377,20 +402,21 @@ Leon iki ayrı kişide geçiyor.
     bir sebeptir**.
 - **[Yazar]** **Ezmerak'a bazı Vadi şehirleri borçludur.** Dağ kabileleriyle ticaret anlaşmaları vardır.
 - **[Yazar]** Sur: Ezmerak taş surlu [Oyun]; doğudaki kütük surlar sık el değiştirmenin sonucu.
-- [Türetme T14] Aldatmayı ölümle cezalandıran yasa, kurucusunun bir yemekte akrabalarını aldatıp öldürmesinin gölgesi:
-  Daemon, babasının yükseldiği yolu herkese kapatarak kendi tahtını korur.
-- [Türetme T11] **Mühürsüz tuz** Saldrek'ten (Ayazkaya) gelir. "Mühürsüz" demek, Vaelghard'ın ya da baronun vergi
-  mührünü taşımamak demek. Ezmerak'ın dağlılarla anlaşması tuzun ve çeliğin kapısı; tuz yasal yoldan girdiğinde
-  mühürlenir, kervansaraylarda mühürsüz satılır.
+- **[Yazar, onaylandı T14]** Aldatmayı ölümle cezalandıran yasa, kurucusunun bir yemekte akrabalarını aldatıp
+  öldürmesinin gölgesi: Daemon, babasının yükseldiği yolu herkese kapatarak kendi tahtını korur.
+- **[Yazar, T11]** **Mühürsüz tuz** Saldrek'ten (Ayazkaya) gelir. "Mühürsüz" demek Vaelghard'ın ya da baronun vergi
+  mührünü taşımamak demek; bu yüzden **daha ucuzdur**. Mühürsüz tuz satmak **Ezmerak'ta ve büyük şehirlerde
+  yasaktır**; ancak kervansaraylarda ve küçük yerlerde el altından satılır. Ezmerak'ın dağlılarla anlaşması tuzun ve
+  çeliğin kapısıdır: yasal yoldan giren tuz orada mühürlenir.
 
 ### 8.4 Tolvarin ve Kirsavel (batı sınırı)
 
 - **[Yazar]** Husumetli iki sınır şehri; ikisi de bağımsız. Tolvarin Vadi kültürüne, Kirsavel göçebe kültürüne daha
   yakın; ikisi de arada kalmış halklar. Sonuç: bitmek bilmeyen sınır kavgaları, güç arzusu, küçük savaşlar.
-- **[Yazar]** Tolvarin'i **Leon Bey**, Kirsavel'i **Vasko Bey** yönetir. İkisi de vadi dilini konuşur; Kirsavel göçebe
+- **[Yazar]** Tolvarin'i **Leon Bey**, Kirsavel'i **Vasko Bey** yönetir. İkisi de Vadi ağzıyla konuşur; Kirsavel göçebe
   dilini de.
 - **[Yazar]** Kirsavel'in inancı göçebe inancına benzeyen eski bir inanç; Tolvarin'inki tarım ve işçilik üzerine eski
-  bir inanç. İkisi de İlk Sayfa'nın yasakladığı inançlar.
+  bir inanç. İkisi de Septisizm'in yasakladığı inançlar.
 - **[Yazar]** Tolvarin'de toprak, Kirsavel'de hayvanlar kutsaldır; ikisine zarar vermek büyük saygısızlıktır.
 - **[Yazar]** Kervan bu bölgede kimsenin arsasına ve toprağına yanaşmamaya özen gösterir; bu yüzden çok kan döküldü.
 - **[Yazar]** Batı sınır kasabaları yoksulluktan kütük surludur [Çelişki Ç7: Tolvarin oyunda taş surlu]. Savaş mültecileri bu topraklarda yoğundur ve ucuz işçi
@@ -398,12 +424,15 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** **Akavan Ondrelle'e, Samuran Liraven'e bağlıdır** (haritada sınır bölgesinde, siyasette Vadi).
   [Çelişki Ç11]
 - **[Yazar]** "Sınır halkları" yalnızca lore ve harita yazımında arada kaldıkları için birlikte sınıflandırıldı; hiçbir
-  yerde birlikte adlandırılmazlar.
-- [Türetme T13] Kavganın kökü inançlarında: Kirsavel'in kutsal sürüleri otlak arar, Tolvarin'in kutsal toprağı
+  yerde birlikte adlandırılmazlar. Haritada bu parça **doğu sınırından (Ezmerak Baronluğu) ayrı** bir bölgedir.
+- [Türetme T38] İki şehrin ortak adı yoktur ama kervancıların vardır: **"Çitler"**. Toprağı kutsal sayan Tolvarin her
+  tarlayı çitler, sürüsü kutsal Kirsavel her otlağı; kervan çitler arasından geçer ve hiçbirine dokunmaz. Bir Tolvarinli
+  ya da Kirsavelli bu adı duyunca kervancıyı yabancı sayar.
+- **[Yazar, onaylandı T13]** Kavganın kökü inançlarında: Kirsavel'in kutsal sürüleri otlak arar, Tolvarin'in kutsal toprağı
   çiğnenmez. Her sınır ihlali iki tarafın da kutsalına yapılmış bir saygısızlıktır.
-- [Türetme T15] **Bölünmüş Sancak Ovası** iki şehrin bir zamanlar tek sancak altından ayrıldığı yer;
+- **[Yazar, onaylandı T15]** **Bölünmüş Sancak Ovası** iki şehrin bir zamanlar tek sancak altından ayrıldığı yer;
   **Dönek Darağacı** taraf değiştirenlerin asıldığı yer.
-- [Türetme T30] Haber kartlarındaki "iki beyliğin savaşı" en çok bu ikisinin savaşıdır.
+- **[Yazar, onaylandı T30]** Haber kartlarındaki "iki beyliğin savaşı" en çok bu ikisinin savaşıdır.
 
 ### 8.5 Ayazkaya
 
@@ -414,7 +443,8 @@ Leon iki ayrı kişide geçiyor.
   - Zaman zaman öbür kabileler muhalefete geçer; kim güçlü çıkarsa o kazanır.
   - En güçlü ve en eski kabile **Droskal**, ikinci **Ulmarec**, üçüncü **Ulgras**.
 - **[Yazar]** Kuzeybatı ve kuzeydoğu dağlarındaki kabileler **aynı çatı altındaki farklı kabileler**, aynı halkın iki
-  kolu. [Çelişki Ç1, Ç2: Taşkök ile çakışma]
+  kolu. Haritada kuzeybatı dağları Taşkök'ündür (2026-10-30); Gokyurt ile Vaelghard arasındaki tepelerde yaşayan
+  Kovrast ve Kemersal bu kolun kopmuş parçası olabilir [Çelişki Ç2].
 - **[Yazar]** **İnanç:** Dağın Nefesi burada en yüksek sesle yaşar. Güçlü olmak çok önemlidir.
 - **[Yazar]** **Haydutluk** burada bir geçim kaynağı değil, **kültürdür**. Kervan yeterince korumalı olmalı ya da
   bölgede tanıdığı olmalı; yoksa her an pusuya düşer.
@@ -430,15 +460,15 @@ Leon iki ayrı kişide geçiyor.
   Ayazkaya'dadır.
 - **[Oyun]** Brazdun–Kesgrav kıtanın en tehlikeli yolu (iki gün ama dağ); Kesgrav–Rivecande da tehlikeli. Kanonla birebir
   örtüşüyor.
-- [Türetme T19] Oyundaki **haydut kralları** (yolu ele geçirip haraç alan güçler) en çok Ayazkaya'nın bedel kültürüdür:
+- **[Yazar, onaylandı T19]** Oyundaki **haydut kralları** (yolu ele geçirip haraç alan güçler) en çok Ayazkaya'nın bedel kültürüdür:
   bir kabile bir yolu tutar, bedelini isteyen kabileye göre değişir.
-- [Türetme T18] **İlk Nefes Taşları** (doğu kıyısı, Saldrek'in güneydoğusu): dağlıların Kartalın Nefesi'ne giden
+- **[Yazar, onaylandı T18]** **İlk Nefes Taşları** (doğu kıyısı, Saldrek'in güneydoğusu): dağlıların Kartalın Nefesi'ne giden
   sınavın başladığı yer.
 
-### 8.6 Taşkök
+### 8.6 Taşkök (kuzeybatı dağları)
 
-- **[Yazar]** Bölgenin adı **Taşkök**. Merkezi **Harvek**. Cevaba göre Vorgat, Harvek ve Zurek bu bölgeye ait.
-  [Çelişki Ç1: Harvek ile Zurek haritada kuzeybatı dağlarında, Vorgat doğu sıradağında]
+- **[Yazar]** Bölgenin adı **Taşkök**. Merkezi **Harvek**. Haritadaki yerleri: Harvek, Zurek, Dornak, Velkrun
+  Yıkıntısı. Oynanabilir yerleşimi yok; kervan oraya kadar nadiren çıkar.
 - **[Yazar]** **Geçim:** az sayıda ama değerli cevherli maden, ünlü odunları; odunculuk, marangozluk ve kuyumculuk.
   Halk kıtanın geri kalanına göre mütevazı ve hoşgörülü yaşar.
 - **[Yazar]** **Yönetim:** madenler bölge halkınındır. Daha adil bir yönetim: her yerleşimin bir beyi var, beylikler
@@ -448,6 +478,26 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** **Komşuları:** göçebelerle dost, ticaret anlaşmaları var.
 - **[Yazar]** Çok sabırlıdır; onu yalnızca ihanet ya da katliam gibi büyük kötülükler öfkelendirir.
 - **[Yazar]** Kullanıcının tarifiyle "kuzeybatıdaki barışçıl dağ ve orman beylikleri".
+- [Türetme T43] **Velkrun Yıkıntısı** Taşkök'ün imparatorluğa bağlandığı tek yerdi: imparatorluk orada bir kereste
+  hanı kurdu, Taşkök'ün ünlü odunu başkentin çatılarına oradan gitti. Parçalanmada han yakıldı; Taşkök bir daha kimseye
+  bağlanmadı. Harvek'in konseyi o günden beri bir kuralla toplanır: odun satılır, orman satılmaz.
+
+### 8.6b Karaocak (doğu sıradağı)
+
+- **[Yazar]** İlk haritada Taşkök'le aynı kültür sayıldığı için onunla eşlenmişti; ayrı bir bölgedir. Yerleri:
+  **Vorgat** (oynanabilir maden kasabası), Kemrug, Kör Kazmalar Mezarlığı.
+- [Türetme T37] Adı **Karaocak**: ocak hem maden kuyusu hem demirci ocağıdır; sıradağın karası kömürden ve isten.
+  Taşkök'le aynı kökten gelir ama Taşkök odunu, Karaocak cevheri yaşar.
+- [Türetme T44] **Kültür ve yönetim** Taşkök'ünkiyle akrabadır: madenler halkındır, her yerleşimin beyi var. Ama
+  Karaocak tek başınadır. Vorgat'ın beyi bölgenin sözcüsüdür; Kemrug ona bağlı küçük bir ocaktır. Taşkök'ün konseyi gibi
+  bir konseyi yoktur, çünkü yardım isteyecek komşusu yoktur.
+- [Türetme T44] **Komşular:** batıda Avuçiçi, güneyde Gelgit Kıyısı. Avuçiçi'nin yolu Vorgat'tan geçer, zil oradan
+  satılır (T27). Orvahel Karaocak'ın cevherini ister ama Karaocak'ın eski inancını şehrine sokmaz: maden kapıda alınır,
+  parası kapıda ödenir. Karaocaklı bunu bir aşağılama olarak bilir ve yine de satar; kıtlıkta başka alıcı yok.
+- [Türetme T44] **Kör Kazmalar Mezarlığı**: ocakta gözünü kaybeden madencilerin mezarlığı. Karaocak'ta kör madenci
+  kazmasını bırakmaz, ocağın karanlığında gözü olandan iyi yürür; öldüğünde kazmasıyla gömülür.
+- [Türetme T44] **Kervan:** Vorgat'a gelen kervan iki şey fark eder: zil sesi (Orvahel yolu buradan başlar) ve isli
+  hava. Karaocaklı kervanı hoş karşılar ama pazarlık etmez: cevherin fiyatı ocağın derinliğidir.
 
 ### 8.7 Büyük Vadi
 
@@ -455,7 +505,7 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** **Yönetim:**
   - Her şehir bir devlettir, hepsi birer **prenslik**.
   - Kuzeydeki Ondrelle ve Merigaud daha mikro milliyetçi.
-  - Belvanor, Ilsande ve Caramine daha seküler; Yeni Okuma ağırlıkta.
+  - Belvanor, Ilsande ve Caramine daha seküler; Yumruk ağırlıkta.
 - **[Yazar]** **Bağımsızlık:** Vadi'deki bütün şehirler serbesttir. İmparatorluk bölündüğünde bu şehirlerin prensleri ve
   hanedanları bağımsızlık ilan edip yerlerini korudu.
 - **[Yazar]** **Dil:** imparatorluk dilini taşır, ama kullanımı Kuzey Krallığı'na göre daha günlük ve serbest.
@@ -469,16 +519,16 @@ Leon iki ayrı kişide geçiyor.
 - **[Yazar]** Vadi halkı eleştiriye sabredemez, en çok ona öfkelenir.
 - **[Yazar]** **Lonca:** imparatorluk zamanında Tüccar Loncası'nın merkezi Merigaud'du; çöküşten sonra Orsolune'ye taşındı.
 - **[Yazar]** İpek için bkz. §5; Vadi'de din için bkz. §4.1.
-- [Türetme T23] Harita Vadi'yi "bereketli" diye işaretliyor, kanon onu en aç bölge diyor. İkisi birlikte doğru: toprak
+- **[Yazar, onaylandı T23]** Harita Vadi'yi "bereketli" diye işaretliyor, kanon onu en aç bölge diyor. İkisi birlikte doğru: toprak
   kıtanın en verimlisi, ama bitmeyen prens savaşları hasadı yakıyor, yolları kesiyor ve köylüyü kaçırıyor. Vadi buğday
   üretir ve aç kalır.
 
 ### 8.8 Avuçiçi (Orvahel)
 
-- **[Yazar]** Bölgenin adını ben önereceğim (T2). **El kilisesinin baş şehri.**
+- **[Yazar]** Bölgenin adı **Avuçiçi** (onaylandı T2). **El kilisesinin baş şehri.**
 - **[Yazar]** **Yönetim ve dil:** başında **Birinci Okuyucu V. Leon** var. İmparatorluk dili konuşulur; kutsal metin de
   bu dilde.
-- **[Yazar]** **Yalnızca İlk Sayfa:**
+- **[Yazar]** **Yalnızca Septisizm:**
   - Başka hiçbir dinî görüş bu topraklarda barınamaz.
   - Başka dinden tüccarlar şehre sokulmaz: şehre yaklaşınca görevliler mallarını alıp parasını verir ve onları
     gönderir.
@@ -496,28 +546,33 @@ Leon iki ayrı kişide geçiyor.
   - Eski kilise inancının kıtadaki en büyük ve güçlü tapınağı; kıtanın en kutsal yeri.
   - Dört kule, dört bir yanı gören ve saran muazzam bir dengeyi ve gücü temsil eder.
 - **[Yazar]** Kutsal kent kervandan sürekli **gıda, kâğıt ve tekstil** ister. [Çelişki Ç5]
-- **[Yazar]** Orvahel'in bulunduğu yerde imparatorluğun başkenti **Merigard** vardı [Çelişki Ç3]:
+- **[Yazar]** Orvahel'in bulunduğu yerde imparatorluğun başkenti vardı [Çelişki Ç3: başkentin adı]:
   - Büyük savaşın sonunda halkı sürüldü, şehir yakıldı.
   - Sonra Kuzey Krallığı burada Orvahel'i kurdu; dinî geçmişi yüzünden fonladı ve garantörü oldu.
-- [Türetme T7] Dört kuleli tapınak Merigard'ın yanmadan kalan tek yapısıdır; Orvahel onun çevresine kuruldu. Bu
-  yüzden şehir genç, tapınak eski.
-- [Türetme T8] **Mühür Savaşı Ovası** (Orvahel'in kuzeybatısı) büyük savaşın son meydanıdır. Oyundaki nadir "eski mühür"
+- **[Yazar, T7]** Dört kuleli tapınak eski başkentin yanmadan kalan tek yapısıdır; Orvahel onun çevresine kuruldu.
+  **Şehir genç, tapınak eski.**
+- **[Yazar, onaylandı T8]** **Mühür Savaşı Ovası** (Orvahel'in kuzeybatısı) büyük savaşın son meydanıdır. Oyundaki nadir "eski mühür"
   imparatorluğun orada düşen mühürlerinden biridir.
-- [Türetme T9] **Kefaret Darağacı** (Orvahel'in doğusu) inançsızların asıldığı yerdir.
-- [Türetme T10] **İlk Sayfa Manastırı** (Orvahel'in güneyi) eski görüşün okuludur; Okuyucular orada yetişir.
-- [Türetme T16] **İki Bayrak Kulesi** baronluk ile Avuçiçi'nin sınırıdır.
-- [Türetme T27] Zil Avuçiçi'ye giden her yolun başında satılır (Ezmerak, Vorgat, Seyvan); zil sesi Orvahel yolunun sesi.
+- **[Yazar, T9]** **Kefaret Darağacı** (Orvahel'in doğusu): Avuçiçi'de suç işleyen inançsız burada asılır.
+  Suç işlememiş inançsızın, görüldüğü yerde **eli kesilir**: "El'e inanmayan El'i taşıyamaz." (Oyunda olaylar
+  öldürmez; bu kural kervanın bir yoldaşını sakat bırakabilir, bkz. §15.)
+- **[Yazar, T10]** **İlk Sayfa Manastırı** (Orvahel'in güneyi) bir manastırdır; Okuyucular orada yetişir.
+  [Türetme T45] Adı mezheplerin ayrılığından eskidir: Kitap'ın ilk sayfası orada yazıldı, öyle bilinir. Septisistler
+  için manastır ilk sayfanın üstüne yazılmış bütün satırların bekçisidir. Yumruk ise manastırın adını kendi davasının
+  kanıtı sayar: "İlk sayfa oradaysa, öbür sayfalar sonradan gelmiştir." İki mezhep aynı taşa iki ayrı anlam yükler; bir
+  Yumruk vaizinin manastırın kapısına dokunması Avuçiçi'de hakaret sayılır.
+- **[Yazar, onaylandı T16]** **İki Bayrak Kulesi** baronluk ile Avuçiçi'nin sınırıdır.
+- **[Yazar, onaylandı T27]** Zil Avuçiçi'ye giden her yolun başında satılır (Ezmerak, Vorgat, Seyvan); zil sesi Orvahel yolunun sesi.
 
-### 8.9 Ors ve güney kentleri
+### 8.9 Ors (güneybatı kıyısı)
 
 - **[Yazar]** **Ors** bölgesinde tek bir büyük şehir var: **Orsolune**. Yerlisi kendine **Orsian** der. Bölge, şehir ve
   güney kıyısının **Ors sıradağları** aynı kökten gelir. **Seyvan Orsolune'ye bağlıdır.**
-- **[Yazar]** **Yönetim:**
-  - Ors'u **Orsolune Konseyi** yönetir: ticaret ağırlıklı, oligarşik.
-  - **Zelmarin** bu yapıya ve bölgeye ait değil: kendi kültürüyle ona benzeyen kültürlerin arasında bir şehir, konseyle
-    yönetilir, Orsolune ile ticaret anlaşması var. İlk Sayfa ağırlıkta ama karışık.
-  - **Mirsana** bağımsız başka bir ticaret şehir devleti; Yeni Okuma ve eski inanç karışık.
-- **[Yazar]** **İnanç:** Ors'ta Yeni Okuma baskın. Gizli yaşayan inanç yoktur; azınlıklarla baskın gruplar arasında
+- **[Yazar]** **Yönetim:** Ors'u **Orsolune Konseyi** yönetir: ticaret ağırlıklı, oligarşik.
+- **[Yazar]** **Mirsana** Ors'un parçasında durur ama bağımsız başka bir ticaret şehir devletidir; Yumruk, Septisizm
+  ve eski inanç karışık.
+- **[Yazar]** Zelmarin bu yapıya ve bölgeye ait değildir (bkz. §8.10).
+- **[Yazar]** **İnanç:** Ors'ta Yumruk baskın. Gizli yaşayan inanç yoktur; azınlıklarla baskın gruplar arasında
   yönetimin kontrolünde, radikal olmayan bir çatışma vardır.
 - **[Yazar]** **Kervan girerken:**
   - Paranın kokusunu alır: her karar paradır, her nefes bir fırsat ve risktir.
@@ -533,13 +588,31 @@ Leon iki ayrı kişide geçiyor.
   - Asla izin verilmeyen şey **dolandırıcılıktır**: sistem bir kere kirlenirse bir daha düzelmez. Ya kitabına göre
     olur ya da kitapta bir açık bulunur.
 - **[Yazar]** Tüccar Loncası'nın merkezi bugün Orsolune'de.
-- [Türetme T17] **Kiralık Kılıçlar Ovası** (Mirsana yakını) Orsolune'nin paralı askerlerinin bir zaman sözleşmeyi
+- **[Yazar, onaylandı T17]** **Kiralık Kılıçlar Ovası** (Mirsana yakını) Orsolune'nin paralı askerlerinin bir zaman sözleşmeyi
   bozduğu, Orsianların bunu hiç unutmadığı yer.
-- [Türetme T24] Tüccar Loncası Orsolune'ye taşınınca Orsian sözleşme ahlakını kıtaya yaydı. Kurucunun loncaya borcu,
+- **[Yazar, onaylandı T24]** Tüccar Loncası Orsolune'ye taşınınca Orsian sözleşme ahlakını kıtaya yaydı. Kurucunun loncaya borcu,
   kontrat cezaları ve itibar sistemi bu ahlakın oyundaki yüzüdür: söz bozan kervanın adı her şehirde aynı defterde
   yazar.
 
+### 8.10 Gelgit Kıyısı (güneydoğu kıyısı)
+
+- **[Yazar]** **Zelmarin** Ors'a ait değildir: kendi kültürüyle ona benzeyen kültürlerin arasında bir şehirdir.
+  Konseyle yönetilir; Orsolune ile ticaret anlaşması var. Septisizm ağırlıkta ama karışık. Raviellon'a ve uzak
+  kıtalara giden gemiler Orsolune'nin yanında Zelmarin'den de kalkar.
+- [Türetme T39] Bölgenin adı **Gelgit Kıyısı**. Haritadaki yerleri: Zelmarin, **Vesperra Bağları**, **Gelgit
+  Taşları**. İlk haritada Ors'la aynı adla eşlenmişti; kıyı kültürü olarak benzer, siyaseten ayrı.
+- [Türetme T42] Gelgit Kıyısı **balıkçıların yurdudur** (Balıkçı Kasabası kültürü, Ç12'nin çözümü). Gelgit Taşları
+  Denizin İlk Gözyaşı'nın kıyıdaki yeridir: gelgit taşları örtüp açtıkça denizin ağladığı söylenir. Septisizm bu
+  inanışı Kitap'a bir sayfa olarak kattı (T35); Zelmarin'in "karışık" inancı budur: kilisede El'e, kıyıda denize dua
+  edilir, ikisi aynı kişinin ağzından.
+- [Türetme T42] **Vesperra Bağları** kıyının şarabıdır; Zelmarin'in Orsolune'ye sattığı başlıca maldır. Kıtlıkta bağ
+  sökülüp yerine buğday ekilsin mi diye konsey ikiye bölünmüştür.
+- [Türetme T42] Zelmarin ile Karaocak komşudur: Vorgat'ın cevheri gemiye Zelmarin'den biner.
+
 ## 9. Yerleşimler (27)
+
+Her yerleşimin kimlik, kalp, gelenek ve kıtlık taslağı [Türetme, defter III]: [ONERILER_III.md](ONERILER_III.md).
+Onaylananlar buraya taşınır.
 
 | yerleşim | bağlı olduğu güç | bilinen | not |
 |---|---|---|---|
@@ -549,30 +622,30 @@ Leon iki ayrı kişide geçiyor.
 | Orbeyan Kervansarayı | Gokyurt | göçebe kültüründen bir yönetici | yalnızca izinli tüccarlar |
 | Tolvarin | bağımsız | Leon Bey | toprak kutsal |
 | Kirsavel | bağımsız | Vasko Bey | hayvanlar kutsal; göçebe dili |
-| Akavan | Ondrelle | | |
-| Samuran | Liraven | | |
+| Akavan | Ondrelle (haritada batı sınırı) | | |
+| Samuran | Liraven (haritada batı sınırı) | | |
 | Ezmerak | Ezmerak Baronluğu | Baron Daemon | öküz değerinde zorunlu ticaret; aldatma düello sebebi |
 | Golcavar | Ezmerak Baronluğu | | |
 | Brazdun, Kesgrav | Ayazkaya | | maden kasabaları; Kazrun ve Saldrek yakını |
-| Vorgat | Taşkök (cevaba göre) | | [Çelişki Ç1] |
+| Vorgat | Karaocak [T37] | Vorgat beyi | zil burada dökülür; nehir kasabası |
 | Merigaud | prenslik | | imparatorluk zamanının lonca merkezi; mikro milliyetçi; Ondrelle ve Belvanor ile savaşta |
 | Ondrelle | prenslik | | mikro milliyetçi; Akavan bağlı; Merigaud ve Belvanor ile savaşta |
-| Belvanor | prenslik | | seküler, Yeni Okuma; Caramine ile anlaşmalı; Merigaud ve Ondrelle ile savaşta |
-| Ilsande | prenslik | | seküler, Yeni Okuma; ipek; Caramine ile savaşta |
+| Belvanor | prenslik | | seküler, Yumruk; Caramine ile anlaşmalı; Merigaud ve Ondrelle ile savaşta |
+| Ilsande | prenslik | | seküler, Yumruk; ipek; Caramine ile savaşta |
 | Caramine | prenslik | | seküler; Belvanor ile anlaşmalı, Ilsande ile savaşta |
 | Liraven | prenslik | | Samuran bağlı |
 | Duvenmor Kervansarayı | Vadi | | ipek |
 | Orvahel | Avuçiçi | Birinci Okuyucu V. Leon | zil; inançsız tüccar kapıda satar |
 | Orsolune | Ors (Konsey) | | lonca merkezi; Raviellon gemileri |
 | Seyvan Kervansarayı | Orsolune | | |
-| Zelmarin | bağımsız (konsey) | | Raviellon gemileri; İlk Sayfa ağır |
+| Zelmarin | Gelgit Kıyısı [T39] (konsey) | | Raviellon gemileri; Septisizm ağır, kıyıda deniz duası |
 | Mirsana | bağımsız şehir devleti | | karışık inanç |
 
 ## 10. Kurumlar
 
 - **Tüccar Loncası** [Oyun, Yazar]: kontrat, borç, haber; her şehirde aynı defter. Merkezi imparatorlukta Merigaud,
-  bugün Orsolune. [Boş: kime bağlı, askeri]
-- **El kilisesi** [Yazar]: İlk Sayfa (Orvahel, Birinci Okuyucu) ve Yeni Okuma (güney). [Boş: Yeni Okuma'nın başı]
+  bugün Orsolune. [defter III: kime bağlı, askeri]
+- **El kilisesi** [Yazar]: Septisizm (Orvahel, Birinci Okuyucu) ve Yumruk (güney). [Boş: Yumruk'un sözcüsü]
 - **Ordular** [Yazar]: Vaelghard'ın düzenli ordusu; Orvahel'in Kitap taşıyan muhafızları; Orsolune'nin küçük ordusu ve
   kiralık kılıçları; dağlıların akınları; göçebe atlıları.
 - **Büyücüler** [Yazar]: Raviellon'da eğitimli; güneyde ve sayılı konseylerde.
@@ -581,12 +654,18 @@ Leon iki ayrı kişide geçiyor.
 
 - **[Yazar]** **İmparatorluk dili**: Vaelghard'ın resmî, gramerli dili; Orvahel'in ve kutsal metnin dili; Ezmerak'ta da
   konuşulur.
-- **[Yazar]** **Vadi dili**: imparatorluk dilinin daha günlük ve serbest kullanımı; Vadi, Tolvarin, Kirsavel ve
+- **[Yazar]** **Vadi ağzı**: imparatorluk dilinin daha günlük ve serbest kullanımı; Vadi, Tolvarin, Kirsavel ve
   Ezmerak'ta.
 - **[Yazar]** **Göçebe dili**: Gokyurt; Kirsavel'de de konuşulur.
-- [Türetme T5] Vadi dili kıtanın ortak ticaret dilidir. Bir liman insanının "beş dili" imparatorluk dili, vadi dili,
-  göçebe dili, dağlıların dili ve deniz ötesinden bir dildir.
-- [Boş] Dağlıların, Taşkök'ün ve Orsianların dilleri.
+- **[Yazar, T5]** Vadi dili ayrı bir dil değildir; imparatorluk dilinin bir **konuşuluş biçimidir**, şehir ağzı ile
+  köy ağzı farkı gibi (ama köy kadar gündelik değil). Kuzey Krallığı'nda imparatorluk dili keskin, diksiyonlu, dolu
+  dolu konuşulur; Vadi'de aynı dil daha serbest kullanılır. **Ortak dil imparatorluk dilidir.**
+- **[Yazar, T5]** **Dağlıların dili** ayrı bir dildir; tadı Normanca'ya yakın (sert ünsüzler, kısa heceler, eski bir
+  kuzey dilinin tınısı).
+- [Türetme T40] Bir liman insanının "beş dili": imparatorluk dilinin iki ağzı (Kuzey ve Vadi; ağzından nereli olduğu
+  anlaşılır, ticarette bu bir dildir), göçebe dili, dağlıların dili ve deniz ötesinden bir dil.
+- [Türetme T41] Taşkök ve Karaocak dağlıların dilinin yumuşamış bir kolunu konuşur; Orsianlar imparatorluk dilini
+  konuşur ama sözleşmenin ve hesabın sözcükleri deniz ötesinden gelmiştir.
 
 ## 12. İlişkiler ağı
 
@@ -607,8 +686,10 @@ Leon iki ayrı kişide geçiyor.
 | Merigaud, Ondrelle, Belvanor | birbirleri | savaş [Yazar] |
 | Orvahel | bütün kâfir şehirler | düşman ama yalnızca kendini korur [Yazar] |
 
-[Türetme T28] Vaelghard çember içinde: batıda göçebeler, kuzeyde ve doğuda dağlılar, güneyde borçlu olduğu güney.
-Kıtanın en güçlü ordusu hiçbir cephede kazanamıyor. Herkes ondan korkuyor, o herkese karşı bekliyor.
+**[Yazar, onaylandı T28]** Vaelghard çember içinde: batıda göçebeler, kuzeyde ve doğuda dağlılar, güneyde borçlu
+olduğu güney. Kibri yüzünden birden fazla düşmanla birden savaşıyor ve bu yüzden şu an hiçbir cephede kazanamıyor.
+Ama her şey birkaç diplomatik hamleyle ya da yeterince zekice birkaç stratejik hamleyle her an değişebilir. Herkes
+ondan korkuyor, o herkese karşı bekliyor.
 
 ## 13. Halklar (oynanabilir beş kültür) [Oyun]
 
@@ -617,8 +698,8 @@ Kıtanın en güçlü ordusu hiçbir cephede kazanamıyor. Herkes ondan korkuyor
 | Göçebe Boyları | "Bozkırda doğdun; yol senin evin, kervan senin obandır." | yolda az erzak | Gokyurt [Yazar] |
 | Vadi Loncaları | "Taş köprüler ve lonca defterleri arasında büyüdün; rakam senin dilin." | pazarda indirim | Büyük Vadi [Yazar] |
 | Dağ Kabilesi | "Geçitleri koruyan bir kabiledensin; kavga senin için pazarlıktan kolaydır." | savaşta fazla hasar | Ayazkaya [Yazar, "geçitleri koruyan" birebir] |
-| Liman Şehri | "Rıhtımda beş dil öğrendin…" | tavernada haber kolay | Ors (Orsolune) ya da Zelmarin [Boş] |
-| Balıkçı Kasabası | "Ağ onarmayı yürümeden önce öğrendin…" | erzak ucuz | [Boş] [Çelişki Ç12: başlangıç yerleri arasında maden kasabası Brazdun] |
+| Liman Şehri | "Rıhtımda beş dil öğrendin…" | tavernada haber kolay | Ors (Orsolune) [defter III] |
+| Balıkçı Kasabası | "Ağ onarmayı yürümeden önce öğrendin…" | erzak ucuz | Gelgit Kıyısı [Türetme T42] [Çelişki Ç12: başlangıç yerleri arasında maden kasabası Brazdun] |
 
 [Çelişki Ç8] Göçebe kültürünün başlangıç yerleri arasında Vaelghard'ın şehirleri (Selvicar, Vastrevar) var; kanona
 göre Vaelghard göçebelerin düşmanı.
@@ -641,8 +722,9 @@ Ana Hedefler ve `proje_takibi/`.
    - Zilsiz kervan Orvahel yoluna girerse büyük tehlike ya da bir olay kartı.
    - Zil bir eşya ya da yol başında bir hazırlık.
    - Bölgede yağma yok: Orvahel yollarında haydut tehlikesi çok düşük.
-3. **Orvahel kapısı:** İlk Sayfa'dan olmayan kervan (göçebe, dağlı, Yeni Okuma'dan olan?) şehre giremez; malları kapıda
-   görevlinin fiyatıyla satılır.
+3. **Orvahel kapısı:** Septisizm'den olmayan kervan şehre giremez; malları kapıda görevlinin fiyatıyla satılır.
+   Suç işleyen inançsız Kefaret Darağacı'nda asılır; El'i taşıyan inançsızın eli kesilir [Yazar, T9; Ç14]. Olaylar
+   öldürmez, ama bir yoldaşın eli kesilebilir: kalıcı bir sakatlık, kart açılmadan önce görünür (öneri, defter III).
 4. **Orvahel'in talebi** gıda, kâğıt, tekstil (yeni mal: kâğıt) [Çelişki Ç5].
 5. **Vaelghard sınır bürosu:** kayıt, beyan, vergi; teftiş sık, rüşvet işlemez.
 6. **Ezmerak:** geçen kervana en az bir öküz değerinde ticaret zorunluluğu; aldatma = düello.
@@ -655,10 +737,14 @@ Ana Hedefler ve `proje_takibi/`.
 11. **Tılsımlı takılar:** nadir "kusursuz" (yalnızca artı) ve "aşırı" (çok artı, çok eksi) takılar; büyücü yapımı takılar.
 12. **Yol sunakları** çok nadir ve yalnızca Vadi'nin kıyılarında ve köy yollarında [Çelişki Ç9].
 13. **Arınma ve şifa** kültüre göre: kilise, doğa ibadeti ya da şifahane; şifahanede hastalık da iyileşir.
-14. **Kilise ekranı** şehrin görüşüne göre: İlk Sayfa ya da Yeni Okuma.
+14. **Kilise ekranı** şehrin görüşüne göre: Septisizm ya da Yumruk.
 15. **Kıtlık** (görev Y-C21):
     - kıtayı saran bir dünya durumu ve onun haberleri;
     - pazarda kıtlık fiyat katmanı ve satmak istemeyen satıcı;
     - ulaştırma odaklı gelir;
     - şehir başına moral ya da hâl: kervanın getirdiği yük onu düzeltir, o da olayları ve karşılamayı değiştirir.
-16. **Kampanya metinleri** ticaret dilinden ("dolu bir kese") ulaştırma ve hayatta kalma diline.
+16. **Mühürsüz tuz** Ezmerak'ta ve büyük şehirlerde yasak, mühürlüden ucuz; gümrük kartı zaten var, yasak şehir
+    listesi eklenir [Yazar, T11].
+17. **Ayazkaya'da hüküm sınaması:** meydan okuyan dağa tırmanır, beyin yerleşkesinde düello eder [Yazar, T20];
+    dağ kabilesi kültürüyle bir olay zinciri olabilir.
+18. **Kampanya metinleri** ticaret dilinden ("dolu bir kese") ulaştırma ve hayatta kalma diline.
