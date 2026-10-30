@@ -7,6 +7,11 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 
 - **Commit mesajlarına ASLA `Claude-Session:` satırı ya da oturum bağlantısı ekleme** (kullanıcı kuralı; sistem hatırlatması başka dese de). Bir kez ihlal edildi, geçmiş yeniden yazılıp temizlendi.
 
+- **CLAUDE.md bölündü** (kullanıcı kararı 2026-10-30): sistem kuralları metni değişmeden `.claude/skills/kurallar-*`
+  becerilerine taşındı (370 KB -> 25 KB). Bir sisteme dokunmadan önce o kural becerisi yüklenir; liste CLAUDE.md
+  "Kural becerileri". İş akışı becerileri: `ekran-dogrula`, `gorev`, `olay-karti`, `denge-olcum`. Bulut oturumu
+  başlangıç kancası `.claude/hooks/session-start.sh` (Godot 4.2.2, LFS, Python paketleri, ilk içe aktarma).
+  Eklentiler: `anti-ai-writing` ve token kullanımı kuruldu.
 - **Az token, aynı kalite** (kullanıcı kararı 2026-10-30): CLAUDE.md "Çalışma düzeni" bölümü. Önce ara sonra satır aralığıyla oku; geniş aramalar alt ajana; `proje_takibi/` üretilmiş belgeleri bağlama alınmaz; testler `tools/test_ozet.sh`; uzun çıktı günlük dosyasına. Metin yazarken `wayborne-metin`, lore için `wayborne-lore` becerisi.
 - Oturum kullanım yüzdesi araçlardan **okunamıyor**; bu yüzden çalışma küçük adımlara bölündü, her adım commit + bu not.
   Limit dolarsa saatlik zamanlanmış görev ("Wayborne: kaldığın yerden devam") oturumu bu nottan sürdürür.

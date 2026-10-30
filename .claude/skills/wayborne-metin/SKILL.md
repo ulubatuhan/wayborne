@@ -63,7 +63,7 @@ değiştirmek izi silmez.
 
 ## 4. Araç
 
-`anti-ai-writing` eklentisi kuruluysa İngilizce metinlerde (çeviri, Steam sayfası, fragman metni) önce onun denetim
+`anti-ai-writing` eklentisi kurulu (2026-10-30). İngilizce metinlerde (çeviri, Steam sayfası, fragman metni) önce onun denetim
 kipini çalıştır. Önerdiği değişikliği körü körüne uygulama: oyunun sesini ve lore'un kurallarını bozan öneri
 atılır. Türkçe metinlerde bu becerinin listesi esastır; eklenti İngilizce odaklıdır.
 
