@@ -19,6 +19,33 @@ Her yeni özellik bu cümleye karşı sınanır: yola ya da deftere bir iz bıra
   önerilmez; ölçülmüş ve korunan sistemler (beş kapasite yolu, merkez, kıyafet statları, haydut büyücü, beden statları)
   kesilmez.
 
+## Çalışma düzeni: az token, aynı kalite (kullanıcı kararı, 2026-10-30)
+
+Amaç: kaliteden ödün vermeden daha az okumak ve daha az yazmak. Kısalık açıklığın önüne geçmez; şüphede açık yaz.
+
+**Az oku.**
+- Önce ara, sonra oku: `Grep`/`Glob` ile yeri bul, dosyayı satır aralığıyla (`offset`/`limit`) oku. Büyük dosyayı
+  (`game_session.gd`, `road_journey.gd`, bu dosya) baştan sona okuma.
+- Birden çok dizine, ada ya da kalıba yayılan geniş aramalar alt ajana (Explore) verilir; yalnızca sonucu döner.
+  Kullanıcı bunu çalışma düzeni olarak onayladı.
+- `proje_takibi/` altındaki üretilmiş belgeler (`KALAN_ISLER.md`, `YAPILAN_ISLER.md`, `TEST_BEKLEYEN.md`,
+  `YARIM_VE_ONAY_BEKLEYEN.md`, `TEST_TURU.md`) bağlama alınmaz. Görev değişikliği `referans/gorevler.json` ve
+  `referans/gorevler/*.md` üzerinden yapılır, belgeler `referans/belge_uret.py` ile yeniden üretilir; bir görevi
+  aramak için `grep -n "<görev no>"` yeter.
+- Testler `tools/test_ozet.sh` ile koşar: tam çıktı dosyaya, ekrana yalnızca kalanlar ve özet satırı. Uzun komut
+  çıktısı (render, içe aktarma, simülatör) bir günlük dosyasına yazılır, sonra `grep`/`tail` ile bakılır.
+- Düzenlenen dosya doğrulamak için yeniden okunmaz; ekran görüntüsü yalnızca değişen ekran için çekilir.
+
+**Az yaz.**
+- Ara mesajlar tek cümle: ne yapıyorum. Süreci anlatma, sonucu söyle.
+- Sonuç raporu: ne değişti, ne doğrulandı, ne açık kaldı, senden ne gerekiyor. Aynı bilgiyi iki kez yazma; tablo
+  yalnızca karşılaştırma varsa.
+- Bilinen bir kararı yeniden tartışma, uygulamayacağın seçenekleri sayma.
+
+**Asla kısaltılmayanlar.** Kod, dosya yolları, komutlar, hata mesajları, sayılar ve ölçümler; kullanıcıya sorulan
+sorular ve onay listeleri; oyun içi metinler, lore ve tarihçe; bu dosyadaki kuralların "neden"i. Bu dosya ve lore
+belgeleri hiçbir araçla otomatik sıkıştırılmaz.
+
 ## Stack
 
 - **Engine**: Godot 4.2+

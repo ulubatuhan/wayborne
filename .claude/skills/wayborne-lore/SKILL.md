@@ -112,6 +112,8 @@ parçalara bağlanmalı.
 
 ## 5. Çıktı
 
+- Düzyazının sesi ve yapay zekâ izlerinin temizliği için `wayborne-metin` becerisi.
+
 - `LORE.md` ve `TARIHCE.md` birlikte güncellenir; `LORE_OZET.txt` yalnızca geçerli bilgiyi taşır (soru
   defterine gömülür).
 - `SORULAR.md`: cevaplananlar düşer, açık kalanlar ve yeni sorular girer.

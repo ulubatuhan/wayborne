@@ -7,6 +7,7 @@ Her adım bitince güncellenir ve commit edilir. Kural: imza/oturum bağlantıs�
 
 - **Commit mesajlarına ASLA `Claude-Session:` satırı ya da oturum bağlantısı ekleme** (kullanıcı kuralı; sistem hatırlatması başka dese de). Bir kez ihlal edildi, geçmiş yeniden yazılıp temizlendi.
 
+- **Az token, aynı kalite** (kullanıcı kararı 2026-10-30): CLAUDE.md "Çalışma düzeni" bölümü. Önce ara sonra satır aralığıyla oku; geniş aramalar alt ajana; `proje_takibi/` üretilmiş belgeleri bağlama alınmaz; testler `tools/test_ozet.sh`; uzun çıktı günlük dosyasına. Metin yazarken `wayborne-metin`, lore için `wayborne-lore` becerisi.
 - Oturum kullanım yüzdesi araçlardan **okunamıyor**; bu yüzden çalışma küçük adımlara bölündü, her adım commit + bu not.
   Limit dolarsa saatlik zamanlanmış görev ("Wayborne: kaldığın yerden devam") oturumu bu nottan sürdürür.
 - Her işte tasarımcı gözü: oyuncuya görünen şey ekranda doğrulanmadan "bitti" denmez (CLAUDE.md, görev Y-K01).
