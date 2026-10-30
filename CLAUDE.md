@@ -5359,6 +5359,27 @@ verir.
   altı beden ve bütün giysiler için render (`render_frames.py`/`render_outfits.py --clips`), varınca yürüyüşten
   oturuşa geçiş (dismount/climb_down gibi kalçadan köklü), koltuk düzeni oturan figüre göre yeniden (yükseklik farkı),
   ateşin önünde/arkasında oturma için çizim sırası, kalkışta tersine oynatma; vitrin kamp karesi yeniden çekilir.
+- **Kıtlık: oyunun ağırlık merkezi ticaretten ulaştırmaya kayıyor (kullanıcı, 2026-10-29; görev Y-C21).** Kıtanın
+  tamamını etkileyen bir olay (büyülü ve devasa ya da mevsimlerin değişmesi; sebebi lore kararı) bir kıtlık başlatır
+  ve bütün savaşlar temelde ondan doğar. Ticaret kalır ama kıt ve pahalı olur (sistem kesilmez, derinleşir); oyunun
+  odağı kervanı bir noktadan öbürüne sağ salim ulaştırmak. Her şehir arka planda bir moral/mental durum taşır; kervanın
+  ulaştırdığı yük onu düzeltir; bu durum o şehirdeki olayları ve kervana yaklaşımı değiştirir. Hedef his: kıtlık ve
+  yokluk her mekanikte ve ortamda hissedilir, hiçbir şey kolay değildir. Ayrıntı ve karar listesi
+  `proje_takibi/referans/gorevler/13_yonetmen_onerileri.md` Y-C21; bölgesel itibarla (Y-C12) birlikte tasarlanır.
+- **Kıtlığın üç tasarım dersi (kullanıcı, 2026-10-30; görevler Y-C22, Y-C23, Y-C24).** Tasarım notu
+  `docs/design_notes/kitlik_tasarim_dersleri.md`.
+  - *Ahlaki zorunluluk:* kıtlık kartlarında doğru seçenek yok, her seçenek bir şeyi feda eder ve bedel adı olan
+    birine düşer; palet kıtlık derecesiyle solar ve kirlenir (dünyada; arayüz okunaklı kalır).
+  - *Yenilmez çevre ve domino:* soğuk ve kıtlık yenilmez, dayanılır; var olan sistemlerin bedelleri birbirini
+    tetikler ve kervan son eşyalarını yakmaya, yemeye itilir.
+  - *Çözülemeyen problem:* büyüme ve servet kendiliğinden yeni kriz doğurur; bir krizi çözen hamle öbürünü
+    besler; `simulate_career` sakin sefer dizilerini ölçer.
+  - Sınır: güç ve ödül sistemleri kesilmez, bedelli olur (derinleşme, asla sadeleştirme); bir sistemin kalkmasına
+    kullanıcı karar verir. "Doğru stoklayan aç kalmaz" sözü korunur.
+- **Haritada adı olan her yer oynanabilir olmalı (kullanıcı, 2026-10-29).** Bugün 27 yerleşim oynanabilir; obalar,
+  kabile yurtları, mezralar, manastırlar, kuleler ve harabeler yalnızca harita adı. Hepsi bir durak, olay ya da
+  ziyaret edilebilir yer olarak oyuna girmeli. Lore'un bu yerler için verdiği bilgi (`docs/lore/LORE.md` §15) bu işin
+  girdisi.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler

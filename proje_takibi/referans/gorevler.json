@@ -3451,6 +3451,74 @@
    "sira": 210,
    "kim": "CO",
    "not": "Kullanıcı isteği (2026-10-19), akşam düşünme ve geliştirme görevi. Taverna dedikodusu satın alınmaz, sohbetle edinilir. | 2026-10-20: söylenti satın alma kalktı; yol ve fiyat haberi sohbette (rol, içki, liman kültürü, tellal). Commit dee753b. Kalan: konaklama, mini oyunlar, adlı NPC hafızası (Y-C13/N32 lore'a bağlı)."
+  },
+  {
+   "id": "Y-C21",
+   "baslik": "Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali",
+   "bolum": "13",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-E06"
+   ],
+   "dosya": "gorevler/13_yonetmen_onerileri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 81,
+   "kim": "CK",
+   "not": "2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı."
+  },
+  {
+   "id": "Y-C22",
+   "baslik": "Ahlaki zorunluluk: doğru seçenek yok, bedel bir insana düşer",
+   "bolum": "13",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21"
+   ],
+   "dosya": "gorevler/13_yonetmen_onerileri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 82,
+   "kim": "CK",
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor)."
+  },
+  {
+   "id": "Y-C23",
+   "baslik": "Yenilmez çevre ve domino zinciri",
+   "bolum": "13",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21"
+   ],
+   "dosya": "gorevler/13_yonetmen_onerileri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 83,
+   "kim": "CK",
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür."
+  },
+  {
+   "id": "Y-C24",
+   "baslik": "Çözülemeyen problem: büyüme yeni kriz doğurur",
+   "bolum": "13",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21"
+   ],
+   "dosya": "gorevler/13_yonetmen_onerileri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 84,
+   "kim": "CK",
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi)."
   }
  ],
  "guncelleme": "2026-10-20 16:00",
@@ -3594,6 +3662,10 @@
    "alan": "`scripts/economy/`, `world_map_data` yerine gelen JSON veri, `debt.gd`, kontrat ekranı, `game_session.gd`",
    "gerekce": "Hepsi yeni dünya verisini (P06) kullanır ve ekonomi dosyalarına dokunur. Başlangıç borcu (Y-C14) ilk, çünkü yeni oyun akışını belirler.",
    "gorevler": [
+    "Y-C21",
+    "Y-C22",
+    "Y-C23",
+    "Y-C24",
     "Y-C14",
     "Y-C10",
     "Y-C11",

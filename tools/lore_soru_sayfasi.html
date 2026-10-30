@@ -1,4 +1,4 @@
-<title>Sideria Soru Defteri</title>
+<title>__TITLE__</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Grenze+Gotisch:wght@500;600&display=swap">
 <style>
@@ -102,6 +102,9 @@ nav.secs button.on span { color: var(--paper); opacity: .75; }
 .qmeta .done { color: var(--moss); font-weight: 600; }
 .qmeta .fly { margin-left: auto; font-size: 13px; padding: 1px 8px; }
 .hint { margin: 0; font-style: italic; color: var(--ink-soft); font-size: 16px; }
+.draft { margin: 2px 0 2px; padding: 8px 12px; border-left: 3px solid var(--moss); background: var(--leaf); font-size: 16px; }
+.draft b { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--moss); font-weight: 600; }
+.draft p { margin: 2px 0 0; }
 .choices { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 textarea { width: 100%; min-height: 64px; resize: vertical; font: 17px/1.45 var(--body); color: var(--ink);
@@ -121,8 +124,8 @@ textarea { width: 100%; min-height: 64px; resize: vertical; font: 17px/1.45 var(
 
 <div class="wrap">
   <header class="top">
-    <h1>Sideria Soru Defteri</h1>
-    <p class="lede">Kalan lore ve tarihçe için sorular, onaylı harita üstünde. Cevabın yazdıkça kaydedilir; bir soruyu boş bırakmak da bir cevaptır. Kırmızı “öncelikli” işaretli olanlar başka işlerin önünü açıyor.</p>
+    <h1>__TITLE__</h1>
+    <p class="lede">__LEDE__</p>
     <div class="bar">
       <div class="progress" aria-hidden="true"><i id="prog"></i></div>
       <span class="count" id="count">0 / 0 cevaplandı</span>
@@ -354,6 +357,8 @@ function qRow(q) {
   const t = document.createElement("p"); t.className = "qtext"; t.textContent = q.t;
   row.append(m, t);
   if (q.h) { const h = document.createElement("p"); h.className = "hint"; h.textContent = q.h; row.appendChild(h); }
+  if (q.d) { const d = document.createElement("div"); d.className = "draft"; const l = document.createElement("b"); l.textContent = q.dl || "Önerim";
+    d.appendChild(l); for (const para of q.d.split("\n")) { const p = document.createElement("p"); p.textContent = para; d.appendChild(p); } row.appendChild(d); }
   const a = answers[q.id] || {};
   if (q.c) {
     const ch = document.createElement("div"); ch.className = "choices"; ch.setAttribute("role", "group");
@@ -377,7 +382,7 @@ function grow(ta) { ta.style.height = "auto"; ta.style.height = Math.max(64, ta.
 function renderSummary() {
   main.innerHTML = "";
   const head = document.createElement("div"); head.className = "sec-head";
-  head.innerHTML = "<h2>Eldeki lore</h2><p>Bugüne kadar kesinleşen her şey, düz madde madde. Yer tutucu, reddedilmiş ve terk edilmiş bilgi yok. (Yazar) senin cevapların, (Oyun) oyunda yazılı olan, (Harita) onaylı harita v3.</p>";
+  head.innerHTML = "<h2>Eldeki lore</h2><p>Bugüne kadar kesinleşen her şey, düz madde madde. Yer tutucu, reddedilmiş ve terk edilmiş bilgi yok. (Yazar) senin cevapların ve onayların, (Oyun) oyunda yazılı olan, (Harita) onaylı harita v3. En sonda onay bekleyen önerilerim ve çelişkiler.</p>";
   main.appendChild(head);
   const box = document.createElement("div"); box.className = "sum"; let ul = null;
   for (const raw of DATA.summary.split("\n")) {

@@ -1,192 +1,126 @@
-WAYBORNE - ELDEKİ LORE VE TARİHÇE (2026-10-22)
+WAYBORNE - ELDEKİ LORE VE TARİHÇE (2026-10-29)
 
-Yalnızca geçerli bilgi. Yer tutucu (eski beş şehir: Karakonak, Kurtboğazı, İpekevi, Demirkapı, Yeşilova; eski harita parşömeni), reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) senin cevapların C1-C16, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve onun yer atlası. Onay bekleyen önerilerim en sonda ayrı.
+Yalnızca geçerli bilgi. Yer tutucu, reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) senin cevapların ve onayların, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve onun yer atlası. Onay bekleyen önerilerim ve çelişkiler en sonda ayrı; tam liste docs/lore/SORULAR.md.
 
 ÇERÇEVE
 - (Yazar) Tek bir kıta: Sideria. Ortaçağ'ın farklı yerlerinden ve dönemlerinden sekansların karışımı; hiçbir tarihî figür, ad, imge ya da olay olduğu gibi alınmaz, taklit edilmez, referans verilmez.
-- (Yazar) Tanrıların varlığı kanıtsız. İnanç insanların yorumu ve ihtiyacı; anlamlandıramadıklarını tanrıya bağlarlar.
-- (Yazar) Gerçekten doğaüstü olaylar çok nadir; onlar da insanın idrak edemediği şeyler.
-- (Yazar) Zaman derinliği: en az on bin yıl görünüyor (binlerce yıllık ağaçlar, buzda donmuş eşi görülmemiş hayvanlar); hakikatte yüz binlerce yıl ve sayısız nesil.
-- (Yazar) Tarih oyuncuya parça parça verilir: NPC sohbetleri, okunabilen kitaplar, yazıtlar. Kısa, bağlama uygun, merak uyandıran parçalar.
-- (Yazar) Oyunda anlatıcı yok. Her metin dünyanın içinden biri tarafından söylenmiş ya da yazılmıştır; kimse tarihin tamamını bilmez, çoğu anlatım eksik ya da yanlıştır.
-- (Oyun) Aynı haberi her kültür farklı okur: göçebe savaşı otlak kavgası, vadi bir masraf kalemi, dağ eski bir kan davası, liman omuz silkme, balıkçı bir fırtına olarak duyar.
-- (Harita) Adlar başka fantastik eserlerden ya da gerçek tarihten alınmaz, birbirine çok benzeyen ad olmaz, gerçek dinî figür (kilise, cami gibi) kullanılmaz. Özel adlar ASCII yazılır ve her dilde aynı kalır.
-- (Oyun) Mimari ticaret kökenli: sur, kapı, ambar. Ufukta kubbe ve minare yok; kilise binası bir çan kulesi.
+- (Yazar) Tanrıların varlığı kanıtsız. İnanç insanların yorumu ve ihtiyacı. Gerçekten doğaüstü olaylar çok nadir; onlar da insanın idrak edemediği şeyler.
+- (Yazar) Zaman derinliği: en az on bin yıl görünüyor; hakikatte yüz binlerce yıl ve sayısız nesil.
+- (Yazar) Oyunda anlatıcı yok. Her metin dünyanın içinden biri tarafından söylenmiş ya da yazılmıştır; tarih oyuncuya parça parça (NPC sohbeti, kitap, yazıt) verilir.
+- (Oyun) Aynı haberi her kültür farklı okur.
+- (Harita) Adlar uydurmadır, başka eserlerden ya da gerçek tarihten alınmaz, birbirine çok benzemez, ASCII yazılır. Gerçek dinî imge yok; kilise binası bir çan kulesi; mimari ticaret kökenli (sur, kapı, ambar).
 
 TEZ
-- (Oyun) Konu kervan değil, kervanı çeken insanlar ve onların aşınması.
-- (Oyun) Oyuncu bir kervanı değil, bir kervanın adını taşır. Lider ölünce ad kıdemliye ya da oyuncunun seçtiği kişiye geçer; kervan dağılmaz.
-- (Oyun) Tek gerçek son, adı taşıyacak kimsenin kalmaması. Zenginlik hiçbir şeyi bitirmez.
-- (Oyun) Kervanın defteri hiçbir satırı silmez; ölenin ya da gidenin adının üstü çizilir. Defterin ilk satırı kurucudur.
-- (Yazar) "Wayborne" bir yer adı değil: ana karakter yolda doğmuştur ve kendini ait hissedebildiği tek yer yoldur.
+- (Oyun) Konu kervan değil, kervanı çeken insanlar ve onların aşınması. Oyuncu bir kervanın adını taşır; lider ölünce ad devredilir; tek son, adı taşıyacak kimsenin kalmaması.
+- (Oyun) Kervanın defteri hiçbir satırı silmez; ölenin ya da gidenin adının üstü çizilir. İlk satır kurucudur.
+- (Yazar) "Wayborne" bir yer adı değil: ana karakter yolda doğmuştur, kendini ait hissedebildiği tek yer yoldur.
+- (Yazar) Defter El inancını, yol Baikhan inancını temsil eder.
+
+KITLIK
+- (Yazar) Kıtayı bütünüyle etkileyen bir olay bir kıtlık başlattı: büyülü ve devasa bir olay ya da mevsimlerin değişmesi (hangisi olduğu henüz açık). Bütün savaşlar temelde bu kıtlıktan doğar.
+- (Yazar) Oyunda kıtlık ve yokluk her mekanikte ve ortamda hissedilir: ticaret kıt, asıl iş kervanı bir yerden öbürüne ulaştırmak; şehirlerin morali var ve kervanın getirdiği yük onu değiştirir.
+- (Yazar) Vadi kıtada en çok kıtlık ve mali zarar yaşayan bölge.
 
 ÖBÜRKÜLER, YARATIKLAR, BÜYÜ
-- (Yazar) Öbürküler: insanlarla aynı dünyada, başka bir boyutta yaşayan, insanlara görünmeyen (bazıları insanları da görmeyen) varlıklar. Halk onlara peri, hayalet, ruh der.
-- (Yazar) Öbürküler yaşamdan beslenir ama onu tüketmez, dönüştürür: kimi kötüye, kimi iyiye.
-- (Yazar) Etkileri çok küçük ve ancak birikerek büyür: bir moral düşüşü, bir motivasyon, vesvese ya da sağduyu. Kimi bir yere yerleşip nesneleri oynatır (perili köşk).
-- (Yazar) Güçleri yaşlarıyla değişir, ömürleri genelde çok kısa; kültürleri, anlayışları yok; dünyada haklarında hiçbir kaynak yok. Çok dolaylı yoldan savaşa bile sebep olabilirler ama bu radikal bir istisna.
-- (Yazar) Nadir "kült" canlılar: kurtadamlar, vampirler, olağanüstü iri ve güçlü hayvanlar. Çok nadir hastalıkların sonucu. Halkın bilgisi çocuk masallarıyla sınırlı. Görenler genelde zekâlarına yenilir (onlara çalışır olur, kandırılır ya da öldürülür). Kötü niyetli olmak zorunda değiller; bazıları çektiği acı yüzünden kötülüğe meyleder.
-- (Oyun) Kurt sürüsü reisleri: Kırağı Kurdu ve Zifir Kurdu.
-- (Yazar) Büyü, yaşam enerjisini öbürkülerin ötesinde kullanmayı öğrenmek. Büyülü sayılan yapı ve nesnelerin çoğu büyücülerin doğru ya da yanlış büyülerinin eseri.
-- (Yazar) Büyücüler Raviellon'daki büyü okulunda yıllarca eğitim alıp Sideria'ya döner ve krallara hizmet eder. Eğitim o kadar ağır ki çoğu aday kendi yaşam enerjisini tüketerek ölür ya da öldürülür; bu yüzden çok nadirler.
-- (Yazar) Kilise ve göçebe boyları büyücüleri hoş karşılamaz. Yalnızca ticari güney kentlerinde ve sayılı krallıkların konseylerinde yer alırlar.
-- (Yazar) Büyü D&D'nin temel büyüleri gibi (efsun, koruma, saldırı); sözlü ya da hareketli, gerekli malzemeleriyle yapılır.
-- (Yazar) Büyücü avcıları: eski büyücülerin öğrettiği tılsımlı giysiler giyen özel savaşçılar. Avantajları bu giysiler ve sayı üstünlüğü.
-- (Oyun) Yolda nadir ve bir kez görülen bir kaçak büyücü kervanı kesebilir ("Yolu kesen büyücü").
+- (Yazar) Öbürküler: aynı dünyada başka bir boyutta yaşayan, görünmeyen varlıklar; yaşamdan beslenir, onu dönüştürür. Etkileri küçük ve birikerek büyür (moral, vesvese, sağduyu). Haklarında hiçbir kaynak yok.
+- (Yazar) Nadir "kült" canlılar: kurtadamlar, vampirler, olağanüstü iri hayvanlar; nadir hastalıkların sonucu. Kurt sürüsü reisleri (Kırağı Kurdu, Zifir Kurdu) bu ailenin en hafif ucu: aslında iri ve yaşlı hayvanlar.
+- (Yazar) Buzullar kuzeybatı ve kuzeydoğu dağlarında: maden derinliklerinde, ışıksız vadilerde, zirvelerde. Oralarda eski ve çok tehlikeli yaratıklar yer alabilir.
+- (Yazar) Büyü yaşam enerjisini öbürkülerin ötesinde kullanmak. Büyücüler Raviellon'daki okulda eğitilir; çoğu aday ölür, bu yüzden çok nadirler. Kilise ve göçebeler hoş karşılamaz.
+- (Yazar) Büyücüler deli kralın katliamından önce de Sideria'daydı; Raviellon'la temas imparatorluktan eski.
+- (Yazar) Güneyde büyücü güçlülere büyülü eşya yapar ya da araştırmasını sürdürmek için konseye avantaj sağlar.
+- (Yazar) Büyücü avcıları: eski büyücülerin öğrettiği tılsımlı giysili savaşçılar.
+- (Yazar) Tılsımlı takılar kadim nesnelerin izi; bugünün büyücüleri de yapar. Çoğu bir statı artırıp birini düşürür; nadir olanları hiç düşürmeden birkaçını artırır; bazıları birini çok artırıp birini çok düşürür.
 
 KADİM UYGARLIK
-- (Yazar) Bugünkü insanlıktan önce bir antik uygarlık vardı. Gündelik hayatları çok basitti, teknolojileri yoktu; klasik çağ öncesi bir antik dünya gibi.
-- (Yazar) Yaşam enerjisini bugünkü büyücülerden çok daha güçlü, serbest ve radikal kullanmayı buldular; kontrol edemedikleri bu güç sonlarını getirdi. Nasıl olduğu bilinmiyor.
-- (Yazar) Hayatta kalanlar yaşam mücadelesini sürdürdü ama kültürlerini yitirdi; zamanla yeni bir medeniyet kurdular: bugünkü insanlık.
-- (Yazar) Kalan bilgi neredeyse yalnızca antik tapınak duvarlarındaki gündelik hayat tasvirleri.
-- (Yazar) Bu tapınaklarda eski büyüyle tılsımlanmış basit nesneler bulunur: kimi dokunanı öldürür, kimi geleceği gösterir, kimi kalıcı güç ya da zaaf verir, kimi bela musallat eder ya da eski yaratıkları uyandırır.
-- (Yazar) Eski yaratıklar: eskinin vahşi hayvanlarının daha ilkel ve vahşi halleri; eski büyüyle mutasyona uğramış olanları çok daha çirkin ve güçlü. Benzerlerinin kalıntısı nadiren buzullardan çıkar.
+- (Yazar) Bugünkü insanlıktan önce basit gündelik hayatlı, teknolojisiz bir uygarlık; yaşam enerjisini radikal kullandı, kontrol edemediği güç sonunu getirdi. Kalan bilgi tapınak duvarı tasvirleri ve tılsımlı basit nesneler.
+- (Yazar) Hayatta kalanlar kültürlerini yitirdi; zamanla bugünkü insanlığı kurdular.
 
 İNANÇLAR
-- (Yazar) Sideria'nın iki güçlü inancı: The Hand (Türkçe metinlerde El) ve Baikhan. Diğer bütün inançlar küçük, yerel ya da bu ikisinin içinde erimiş.
-- (Yazar) El'in kilisesi karşılaştığı pagan dinleri asimile ederek büyüdü ve onların tarihini sildi.
-- (Yazar) Denizin İlk Gözyaşı ve Dağın İlk Nefesi silinmedi; kilise adlarını değiştirerek benimsedi, zamanla sönmelerini sağladı. Bugün bunlar "El'in yazdığı bir sayfa, çizdiği bir figür, nakşettiği bir imge".
-- (Yazar) Dağın İlk Nefesi bugün dağ halkı arasında yaşayan küçük bir inanış.
-- (Yazar) İki eski inancın az sayıda gerçek takipçisi var; kilise onları hor görür. Kilise merkezli şehirlerde barınmazlar, taşrada ya da gizlice yaşarlar.
-- (Oyun) Dağın İlk Nefesi efsanesi: dünya ilk soluğunu dağların doruğunda aldı, o nefes hâlâ orada (rüzgârda, ayinde, gücün kendisinde). Ustaların güç sınavı doruğa varıp o ilk nefese yaklaşma çabası.
-- (Oyun) Denizin İlk Gözyaşı efsanesi: deniz ilk tanrının döktüğü gözyaşından doğdu ve hâlâ ağlar (dalgada, fırtınada, tuzda). Denize açılmadan dua edilir; sakinleştirilebilen tek şey tanrının kederi. Balıkçılar "deniz tanrılarından" söz eder.
-- (Oyun) Kilise ekranı bu iki efsaneyi "İki İnanış" başlığıyla birlikte okutur.
-- (Oyun) Kilisenin arınma ritüeli: rahip yeni edinilmiş (beş gün içinde kazanılmış) bir huyu dinler ve arındırır; eski, köklenmiş huylara sözü geçmez.
-- (Yazar) Baikhan: göçebe boylarının inancı ve kilisenin asimilasyonundan kaçabilen tek inanç. Bir dinden çok yaşam tarzı, bakış açısı, felsefe; temeli özgürlük ve bağımsızlık; doğaya, göğe ve toprağa saygı.
-- (Yazar) Baikhan'ın tek ibadeti: su içerken, toprağa basarken, avlanırken, yaşama dokunulan her an saygı göstermek. Göçebelerin bilgeliği buradan gelir.
-- (Yazar) Baikhan'ın ayakta kalma sebebi göçebelerin özgürlük tutkusu ve bir zamanlar imparatorluğu dize getirip parçalanmasına yol açan birlikleri.
-- (Yazar) Baikhan'da ölü doğanın parçası olur, hayata hayat katar, Baikhan'a ve Gokana'ya kavuşur.
-- (Yazar) Vadi ve Liman halkı kiliseye bağlı ama inanç bir aç/kapa düğmesi değil: ibadet edip pek inanmayan, umursamayan ya da karşı olan da var. Vadi halkı rasyonel olduğu için merkezi görüşü kabul edip kendi hayatını sürmeyi seçti. Sebep genetik ve coğrafi.
+- (Yazar) İki büyük inanç: El (The Hand) ve Baikhan. Diğerleri küçük, yerel, yasaklı ya da bu ikisinin içinde erimiş.
+- (Yazar) El kilisesi pagan inançları asimile etti, tarihlerini sildi; Dağın İlk Nefesi ve Denizin İlk Gözyaşı "El'in yazdığı sayfa" oldu.
+- (Yazar) El inancı iki görüşe bölünmüş. Eski görüşün sembolü parmak uçları yukarı, avuç içi görünen açık el; reformcularınki yatay, yumruk yapmış el. Eski görüşün adı ("Eski Ahit") değişecek.
+- (Yazar) Kilisenin başı Birinci Okuyucu; bugün V. Leon "The Pure", makamı Orvahel. Kutsal metin El'in Kitabı, imparatorluk dilinde.
+- (Yazar) Eski görüş baskın: Vaelghard, Orvahel (yalnızca o), kuzey Vadi, Ezmerak, Zelmarin. Reformcular baskın: güney Vadi (Belvanor, Ilsande, Caramine) ve Orsolune. Mirsana karışık.
+- (Yazar) Vadi'de din bir topluluk, güç alanı ve politik araç; kiliseler ağ kurmak ve entrika için kullanılır.
+- (Yazar) Baikhan: göçebelerin inancı, kilisenin asimilasyonundan kaçan tek büyük inanç; özgürlük, doğaya, göğe ve toprağa saygı. Gokyurt'ta başka inanç yok. Sogurtay Obası şamanlarındır; bütün boylar yılda bir ay oraya göçer, suyun tadına varır, doğaya şükreder.
+- (Yazar) Dağın Nefesi en yüksek sesle Ayazkaya'da yaşar; güçlü olmak her şey. Kutsal doruk Kartalın Nefesi Zirvesi, Ulmarec ile Droskal arasındaki en yüksek zirve.
+- (Yazar) Eski görüşün yasakladığı inançlar: Kirsavel'de göçebe inancına benzeyen eski bir inanç (hayvanlar kutsal), Tolvarin'de tarım ve işçilik inancı (toprak kutsal), Taşkök'te madencilik ve odunculuk inançları. Vadi'de azınlıktaki eski inançlar imparatorluk zamanında kilisenin içine soğuruldu.
+- (Yazar) Huy arınması kültüre göre kilisede ya da doğada ibadetle, ya da şifahane gibi bir yerde tedaviyle olur; aynı yerde hastalıklar da iyileşir.
+- (Oyun) Kilise ekranı Dağın İlk Nefesi ve Denizin İlk Gözyaşı'nı "İki İnanış" başlığıyla okutur.
 
 YOL, ÖLÜM, BEKÇİ KADIN
-- (Yazar) Yol kutsaldır, hangi dinden olunursa olunsun, çünkü hayatı temsil eder: sen dursan da yol durmaz, bir yol bitse diğeri başlar.
-- (Yazar) Yolda ölen yola aittir; mezarı dünyada hitap edildiği adla mühürlenmez. Yol kenarı mezarları bu yüzden işaretsiz.
-- (Yazar) Ahiret: kiliseye göre cennet ya da cehennem; Baikhan'a göre doğaya karışmak.
-- (Yazar) Bekçi Kadın: iki inançta da tanrının elçisi, meleği; yoldaki ölüleri karşılayan ya da ruhlarını almaya gelen. Darda kalan yolculara farklı kılıklarda yardıma geldiğine inanılır. İki inançta da kendi dillerinde "yolcu / wayfarer" anlamına gelen adlarla anılır.
-- (Oyun) Yolda işaretsiz mezarlar ve onları sayan yaşlı bir bekçi kadın.
-- (Yazar) Yol kenarı sunaklarının çoğu eski pagan dinlerinden kalma: yıkık ya da devletin/halkın başka amaçla kullandığı yapılar; sağlam olanlar da terk edilmiş olabilir (inananları cevap alamayınca merkezi inanca teslim olmuş).
-- (Yazar) Sağlam sunaklarda dua yerleri, alt katlarda o dine göre yerleştirilmiş mezarlar (katakomb), çok azında eski büyülü ya da tılsımlı eşyalar (kılıç, küpe, kolye, zırh).
-- (Oyun) "Yol Kenarı Türbesi": yosun tutmuş taşlar, üzerinde geçmiş yolcuların küçük adakları; adakları almak uğursuz sayılır.
+- (Yazar) Yol kutsaldır, hangi dinden olunursa olunsun. Yolda ölen yola aittir; mezarı adla mühürlenmez.
+- (Yazar) Ahiret: El'e göre cennet ya da cehennem; Baikhan'a göre doğaya karışmak.
+- (Yazar) Bekçi Kadın: iki inançta da tanrının elçisi; yoldaki ölüleri karşılar, darda kalan yolcuya kılık değiştirip yardıma gelir. Oyundaki yaşlı bekçi kadını halk onun kılıklarından biri sayar; oyun bunu asla doğrulamaz.
+- (Yazar) Ana yollar imparatorluk yolları. Pagan sunakları onlardan eski ama çok nadir; yalnızca Vadi'nin dış kıyılarında ve köy yollarında.
 
 SİDERİA VE ÖTESİ
-- (Yazar) Kıta dışında: büyücülüğüyle ünlü küçük kıta Raviellon; daha çok güney tüccarlarının bildiği adalar; iki büyük kıta. Hepsi çok uzak, deniz koşulları yüzünden yolculuk çok zor.
-- (Yazar) Yönler Sideria'ya göre; diğer kıtaların konumu hikâyeyi etkilemez. Harita kıtayla birlikte biter.
-- (Yazar) Lüks malların bir kısmı Sideria'da üretilir; çok nadir lüks eşyalar, özel ipekler, üst kalite malzemeler ve özellikle baharat uzak kıtalardan ya da Raviellon'dan liman kentlerine gelir.
+- (Yazar) Kıta dışında: büyücülüğüyle ünlü küçük kıta Raviellon, güney tüccarlarının bildiği adalar, iki büyük kıta. Gemiler Orsolune ve Zelmarin'den kalkar.
+- (Yazar) Çok nadir lüks eşya, özel ipek ve özellikle baharat uzaktan liman kentlerine gelir. Ilsande ve Duvenmor standart ipek üretir; deniz ötesinin ipeği özel bir melez böcekten, daha iyi.
 
-HARİTA: GENEL
-- (Harita) Harita v3 mürekkep ve parşömen tonunda; renk yok, yalnızca su biraz koyu. Dağlar basık ve dolgun, kar yalnızca kuzeybatı dağlarında.
-- (Oyun) 27 oynanabilir yerleşim: 12 şehir, 12 kasaba, 3 kervansaray; aralarında 41 yol.
-- (Oyun) Kıtanın kuzey ucundan (Auderin) güney ucuna (Orsolune) kervanla 61 gün.
-- (Oyun) Yollar 2 ile 38 gün arası. En uzunları güneydoğuda: Vorgat-Seyvan 38, Orvahel-Seyvan 37, Vorgat-Orsolune 36, Orsolune-Orvahel 35 gün.
-- (Oyun) En tehlikeli yollar: Brazdun-Kesgrav (2 gün ama dağ), Samuran-Mirsana, Liraven-Mirsana, Kesgrav-Rivecande, Kirsavel-Samuran.
-- (Oyun) Yolların arazisi: bozkır, dağ, orman, göl kıyısı, çayır, bataklık. Yol üstü duraklar: geçit (14), köprü (13), mezra (11), yol sunağı (10), karakol (5), maden (1). Köprülerin bir kısmı köprüsüz geçit (sığ yer); suyun seviyesi son günlerin havasına bağlı.
-- (Oyun) İklim haritadan: kuzey soğuk (karlı zemin, ladin, karlı sırtlar), güney sıcak (kuru ot, seyrek ağaç, bol taş); dağa yakın yolların ufkunda dağ.
-- (Oyun) Mevsimler yolu değiştirir: ilkbaharda su kıyısındaki bozkır ve çayır bataklığa döner, yazın içerideki bataklık kurur, kışın dağ yolları dikleşir.
+COĞRAFYA VE İKLİM
+- (Harita) Harita v3: 27 oynanabilir yerleşim (12 şehir, 12 kasaba, 3 kervansaray), 41 yol; kuzey ucu Auderin'den güney ucu Orsolune'ye 61 gün.
+- (Yazar) Kıtanın en kuzeyi daima karlı. Kış Sideria'ya kuzeydoğudan gelir.
+- (Yazar) Vaelghard çok dağlı ve göllü, manzarası güzel. Orvahel yöresi dağlık, çam ormanlı, havası basık ve puslu. Güney kıyısında Ors sıradağları.
+- (Yazar) Gokyurt'un güneybatısı obaların kışlağı: hayvancılık ve balıkçılık.
+- (Oyun) Yolların arazisi bozkır, dağ, orman, göl kıyısı, çayır, bataklık; mevsimler yolu değiştirir.
 
-HARİTA: BÖLGELER VE HALKLAR (kullanıcının 16 Ekim renk işaretlemesi)
-- (Harita) Göçebe boyları (turuncu): kıtanın kuzeybatısındaki geniş bozkır. Yurt kampları (obalar): Kaynurak, Ebrusun, Sadirim, Ilkatay, Burkasan, Otekur, Taragun, Yelbarik, Sogurtay ve hanın obası Arsalkan. Tek oynanabilir yerleşimleri Orbeyan Kervansarayı (keçe). Benzetme: Türk boyları.
-- (Harita) Kuzeyin eski imparatorluğu (kırmızı): kıtanın kuzey ortası; askerî açıdan güçlü, koyu taş, düzen. Yerleşimler: Vastrevar (kuzeyin en büyük şehri, koyu taş sur), Dravoss, Rivecande (liman), Auderin, Selvicar. Haritada "Deli Kral Sarayı Yıkıntısı" bu bölgede. Benzetme: Nilfgaard.
-- (Harita) Sınır halkları (mavi): arada kalmış karışık kültürler, ahşap ve tedirginlik. İki parça: batıda Tolvarin, Kirsavel, Akavan, Samuran; doğuda Ezmerak (iç kaleli şehir) ve Golcavar.
-- (Harita) Dağ kabileleri (mor): kuzeybatının en ucundaki dağlar ve kuzeydoğu dağları. Dağ kabileleri: Harvek, Kovrast, Kemersal, Ulmarec, Droskal, Ulgras. Maden kasabaları Brazdun ve Kesgrav kuzeydoğuda; Kazrun Ocağı (derin maden) ve Saldrek Tuzlası yakınlarında.
-- (Harita) Dağ kabileleri ve madenler (gri): doğunun büyük sıradağı boyunca. Oynanabilir yerleşimi Vorgat (nehir kasabası).
-- (Harita) Vadi (yeşil): kıtanın ortası ve güney-ortası; bereketli, loncalar, açık taş, çit ve bahçe. Merigaud, Ondrelle, Belvanor, Ilsande (serbest şehirler ve şehir), Caramine, Liraven, Duvenmor Kervansarayı. Benzetme: Tyrell.
-- (Harita) Eski Ahit kutsal kenti (siyah): Orvahel, doğu-ortada. Soluk taş, ay ışığı, şehrin ortasında dört kuleli büyük tapınak. Oyunda "Eski Ahit'in kutsal kenti".
-- (Harita) Güney kentleri (sarı): güney kıyısı, güneybatıda ve güneydoğuda; ticaret odaklı, hoşgörülü. Orsolune ve Zelmarin (liman), Mirsana (pazar kasabası), Seyvan Kervansarayı. Benzetme: Essos.
-- (Harita) Kültüre göre yapı farkı minimal ve kozmetik; coğrafya gerçekleri her şeyden önce gelir.
+SİYASİ HARİTA BUGÜN
+- (Yazar) Gokyurt (dışarıdan küçümseyerek Çadıreli): yalnızca kuzeybatıda. Her obayı kendi beyi yönetir; ortak töre; dokuz boy ve şamanların Sogurtay'ı. İç savaşta beyler barış konseyi kurar, askerî müdahale etmez. Konseyi en güçlü boyun beyi Büyük Han yönetir; hanın obası Arsalkan; han yalnızca dış ilişkileri yönetir; hanlık savaşla el değiştirir. Tarihte boylar yalnızca imparatorluğa karşı birlikte savaştı.
+- (Yazar) Gokyurt'ta yabancı kervan doğaya saygı gösterir, geçtiği beylerden izin alır ve hediye getirir; misafirlik esas ama hediye beklenir. Orbeyan Kervansarayı göçebelerin ticaret kapısı; yalnızca izinli tüccarlar gelir; göçebe kültüründen biri işletir. Düşmanı Vaelghard (yağma ve pusu), dostu Taşkök.
+- (Yazar) Vaelghard Krallığı (Kuzey Krallığı): Kral Reynald, başkent Vastrevar. İmparatorluğun en güçlü kalıntısı, resmî devamı değil ama aynı kültür. Dil resmî ve gramerli; edebiyatı roman, kanun, tarih. Yalnızca eski görüş; kilisenin koruyucusu. Sınırda kayıt bürosu, mal ve yolcu beyanı, vergi. İçerisi güvenli; dağlar ve göçebe sınırı baskın alır. Ordu düzenli, sık teftiş eder, rüşvet almaz. Orvahel'in garantörü, güneye borçlu ve hoşnutsuz; herkes ondan korkar. Şehirler arası yollar kışın açık, kuzey kasaba yolları kardan kapanır (yalnızca atla, ağır yük yok).
+- (Yazar) Ezmerak Baronluğu (Ezmerak, Golcavar): bağımsız; kuzeye akan ticaret ve sulak tarım. Baron Daemon; babası Kanlı Baron Alex, Dük Vlad'ın piç oğluydu, imparatorluk çökünce hanedanı bir yemekte öldürüp toprakları aldı, iyi yönetti, genç öldü. Vadi dili ve imparatorluk dili; eski görüş. Geçen kervan Ezmerak'ta en az bir öküz değerinde ticaret yapmak zorunda. Aldatma kanunen düello sebebi. Bazı Vadi şehirleri Ezmerak'a borçlu; dağlılarla ticaret anlaşması var.
+- (Yazar) Tolvarin (Leon Bey) ve Kirsavel (Vasko Bey): husumetli iki bağımsız sınır şehri; Tolvarin Vadi'ye, Kirsavel göçebelere yakın. Vadi dili; Kirsavel göçebe dili de. Tolvarin'de toprak, Kirsavel'de hayvanlar kutsal; kervan kimsenin toprağına yanaşmaz. Yoksulluktan kütük surlar; savaş mültecileri ucuz işçi. Akavan Ondrelle'e, Samuran Liraven'e bağlı.
+- (Yazar) Ayazkaya (halkı: dağlılar): Droskal'deki Demirbalta kabilesi hükmeder; en güçlü ve eski Droskal, sonra Ulmarec, sonra Ulgras; kim güçlü çıkarsa kazanır. Kuzeybatı ve kuzeydoğu kabileleri aynı çatı altında. Haydutluk kültürdür: kervan güçlü ya da tanıdıklı değilse yağmalanır, bedel tekrar tekrar ödenir. Ulmarec–Droskal arasında gizli geçitler; Rivecande–Kesgrav yolu korunur. Vaelghard'la savaşta; Ezmerak'la ticaret; madenleri tüccarlar üzerinden Vaelghard'a da gider. Kazrun Ocağı kıtanın en sağlam çeliği, Saldrek Tuzlası mühürsüz tuzun kaynağı.
+- (Yazar) Taşkök: barışçıl dağ ve orman beylikleri; merkezi Harvek; Harvek, Zurek ve Vorgat bu bölgenin (haritadaki yeri soruluyor). Az ama değerli maden, ünlü odunlar; odunculuk, marangozluk, kuyumculuk. Madenler halkın; her yerleşimin beyi, ortak konsey. Hoşgörülü, sabırlı; yalnızca ihanet ve katliam öfkelendirir. Göçebelerle dost.
+- (Yazar) Büyük Vadi: her şehir bir prenslik; imparatorluk bölünürken prensler bağımsızlık ilan etti. Kuzey (Ondrelle, Merigaud) mikro milliyetçi ve eski görüşlü; güney (Belvanor, Ilsande, Caramine) seküler ve reformcu. İmparatorluk dilinin gündelik hâli. Savaşlar: Ilsande–Caramine; Merigaud, Ondrelle ve Belvanor birbirleriyle. Caramine–Belvanor anlaşmalı. Yollar çapulcu, haydut, yozlaşmış görevli ve aç hayvanlarla tehlikeli. Eleştiriye sabredemez. Lonca imparatorlukta Merigaud'daydı.
+- (Yazar) Orvahel: El kilisesinin baş şehri, Birinci Okuyucu V. Leon. Yalnızca eski görüş; inançsız tüccar şehre girmez, malı kapıda alınıp parası verilir. İnançsızlar idam edilir. Kafileler bineğe, vagona ya da kendilerine zil takar; zilsiz giren öldürülür; bu yüzden çok güvenli. Ordusu yalnızca kendini korur, her asker El'in Kitabı'nı göğsünde taşır. Dört kuleli tapınak kıtanın en büyük tapınağı ve en kutsal yeri; dört kule dört yanı gören denge ve güç. Kervandan gıda, kâğıt ve tekstil ister. İmparatorluğun başkenti Merigard buradaydı; büyük savaşın sonunda halkı sürüldü, şehir yakıldı; Vaelghard Orvahel'i kurdu ve fonladı.
+- (Yazar) Ors (halkı Orsianlar): tek büyük şehri Orsolune; Orsolune Konseyi (ticaret oligarşisi) yönetir; Seyvan Orsolune'ye bağlı. Reformcular baskın, gizli inanç yok. Para her şey; hızlı yükselinir, hızlı düşülür. Kimseyle savaşta değil, küçük sağlam ordu, güçlü paralı askerler; kıtanın çoğuna borç verir. Sözleşmeye uyulmamasına öfkelenir; dolandırıcılığa asla izin vermez: ya kitabına göre ya kitaptaki açıkla. Tüccar Loncası'nın merkezi bugün Orsolune.
+- (Yazar) Zelmarin bağımsız, konseyle yönetilir, Orsolune ile ticaret anlaşmalı, eski görüş ağır ama karışık. Mirsana bağımsız bir ticaret şehir devleti, karışık inanç.
 
-HARİTA: YERLEŞİMLER (27)
-- (Oyun) Vastrevar: şehir, eski imparatorluk, taş sur. Demir ve kumaş üretir; baharat, şarap, ipek, mücevher arar.
-- (Oyun) Dravoss: şehir, eski imparatorluk, taş. Demir, buğday; şarap, bal, iksir arar.
-- (Oyun) Rivecande: liman şehri, eski imparatorluk, taş. Balık, kürk; buğday, şarap, baharat arar.
-- (Oyun) Auderin: kasaba, eski imparatorluk, kütük sur, kıtanın en kuzeyi. Kürk; buğday, şarap arar.
-- (Oyun) Selvicar: kasaba, eski imparatorluk, kütük sur. Buğday; kumaş, şarap arar.
-- (Oyun) Tolvarin: şehir, sınır halkları, taş. Kürk, buğday; demir, kumaş, şarap arar.
-- (Oyun) Kirsavel: kasaba, sınır halkları, kütük sur. Buğday; demir, iksir arar.
-- (Oyun) Akavan: kasaba, sınır halkları, kütük sur. Bal, buğday; kumaş, balık arar.
-- (Oyun) Samuran: bataklık kasabası, sınır halkları, kütük sur. İksir, balık; buğday, kumaş arar.
-- (Oyun) Ezmerak: şehir (iç kaleli), doğu sınırı, taş. Bal, kürk; buğday, kumaş, baharat arar.
-- (Oyun) Golcavar: bataklık kasabası, doğu sınırı, kütük sur. İksir, balık; buğday, demir arar.
-- (Oyun) Orbeyan Kervansarayı: göçebe, keçe (sur yok; yurtlar, tuğlar). Kürk, baharat; kumaş, demir arar.
-- (Oyun) Brazdun: maden kasabası, dağ kabileleri, taş. Demir, mücevher; buğday, kumaş arar.
-- (Oyun) Kesgrav: maden kasabası, dağ kabileleri, taş. Demir; buğday, şarap arar.
-- (Oyun) Vorgat: nehir kasabası, dağ ve maden bölgesi, kütük sur. Mücevher, balık; buğday, kumaş arar.
-- (Oyun) Merigaud: şehir, vadi, taş. Buğday, şarap; demir, kürk, balık arar.
-- (Oyun) Ondrelle: serbest şehir, vadi, taş. Buğday, bal; demir, balık, kumaş arar.
-- (Oyun) Belvanor: serbest şehir, vadi, taş. Şarap, kumaş; demir, mücevher, baharat arar.
-- (Oyun) Ilsande: serbest şehir, vadi, taş. İpek, şarap; kürk, demir, bal arar.
-- (Oyun) Caramine: kasaba, vadi, kütük sur. Şarap, buğday; balık, kürk arar.
-- (Oyun) Liraven: bataklık kasabası, vadi, kütük sur. Balık, iksir; buğday, kumaş arar.
-- (Oyun) Duvenmor Kervansarayı: vadi, taş. İpek, şarap; baharat, kürk arar.
-- (Oyun) Orvahel: serbest şehir, Eski Ahit kutsal kenti, taş; kıtanın en çok yolun buluştuğu yeri (altı komşu). İksir, kumaş; şarap, bal, mücevher arar.
-- (Oyun) Orsolune: liman şehri, güney, taş, kıtanın en güneyi. Baharat, balık; kürk, demir, buğday arar.
-- (Oyun) Zelmarin: liman şehri, güney, taş. Mücevher, baharat; buğday, şarap, kürk arar.
-- (Oyun) Mirsana: pazar kasabası, güney, taş. Baharat, kumaş; buğday, balık arar.
-- (Oyun) Seyvan Kervansarayı: güney, taş, altı yolun kavşağı. Baharat, mücevher; şarap, buğday arar.
-- (Oyun) Kervan sınır karakolu vagon sevkiyatı: doğu sınırındaki Ezmerak'tan Eski Ahit'in kutsal kenti Orvahel'e.
-- (Oyun) Başlangıç yerleri kültüre göre: göçebe Kirsavel, Selvicar ya da Vastrevar; vadi altı vadi kenti; dağlı Brazdun ya da Kesgrav; limanlı Orsolune; balıkçı su kıyısındaki altı yerleşimden biri.
+DİLLER
+- (Yazar) İmparatorluk dili: Vaelghard'ın resmî dili, Orvahel'in ve kutsal metnin dili, Ezmerak'ta da konuşulur.
+- (Yazar) Vadi dili: imparatorluk dilinin gündelik ve serbest hâli; Vadi, Tolvarin, Kirsavel, Ezmerak.
+- (Yazar) Göçebe dili: Gokyurt ve Kirsavel.
 
-HARİTA: ADI KONMUŞ YERLER (atlas v3; hikâyeleri boş)
+TARİHÇE - YAZARIN BİLDİĞİ SIRA
+- (Yazar) Derin zaman, kadim uygarlık ve sonu, kayıp çağ, eski inançlar.
+- (Yazar) İmparatorluk: başkenti Merigard (bugünkü Orvahel'in yeri), Vastrevar en büyük kentlerinden; kilise onun dini; lonca Merigaud'da; Dük Vlad bugünkü Ezmerak'ı yönetiyordu. Deli kral büyücüleri katletti; sarayının yıkıntısı Vastrevar'ın doğusunda.
+- (Yazar) Kıtlık başladı (sebebi ve zamanı açık); bütün savaşların kökü.
+- (Yazar) Göçebe boyları Han'ın çağrısıyla birleşti ve imparatorluğa karşı savaştı; imparatorluk dize geldi ve parçalandı; büyük savaşın sonunda Merigard yakıldı; boylar obalarına döndü.
+- (Yazar) Parçalanma: Vaelghard kalıntıyı topladı; Vadi şehirleri bağımsızlık ilan etti; Alex Kanlı Baron oldu; lonca Orsolune'ye taşındı; Vaelghard Orvahel'i kurdu; El inancı eski görüş ve reformcular diye bölündü; Tolvarin ve Kirsavel ayrıldı; mülteciler sınıra yığıldı.
+- (Yazar) Bugün: Kral Reynald, Baron Daemon, Birinci Okuyucu V. Leon, Han Arsalkan Obası'ndan, Leon Bey ve Vasko Bey, Demirbalta kabilesi, Orsolune Konseyi.
+- (Oyun) Kurucu: babandı; hastalanınca kervanı borcuyla devretti. Oyunun zamanı: İlk Yol, Bir Kadro, Ağ, Temiz Defter, Kendi Hanın; kuşaklar boyu ad devredilir.
+
+HARİTA: ADI KONMUŞ YERLER
 - (Harita) Manastırlar: Sessiz El, İlk Sayfa, Açık Kapı, Yamalı Çatı, Taşsoluk.
 - (Harita) Harabeler: Deli Kral Sarayı Yıkıntısı, Eski Darphane Yıkıntısı, Tozkapı, Velkrun, Sargalak, Solgun Bahçe, Hallecort.
-- (Harita) Dikili taşlar: İlk Nefes Taşları, Altıkuşak Taşları, Bahçıvan Taşları, Yıldızölçer Taşları, Gelgit Taşları.
+- (Harita) Dikili taşlar: İlk Nefes, Altıkuşak, Bahçıvan, Yıldızölçer, Gelgit.
 - (Harita) Savaş alanları: Kırık Mızrak Çayırı, Bölünmüş Sancak Ovası, Kiralık Kılıçlar Ovası, Mühür Savaşı Ovası.
-- (Harita) Darağaçları: Sarmaşıklı, Kuru Halat, Kızıl Ferman, Kefaret, Dönek.
-- (Harita) Mezarlıklar: Yabancılar, Leylak, Tuzlu Çardak, Kör Kazmalar, Sancaksız.
-- (Harita) Gözcü kuleleri: Kıyıgözü, Geribakan, Sentinara, Ferrant, İki Bayrak, Öksüz Göz, Vardas.
-- (Harita) Fenerler: Yalaz, Yaşlı Martı, Grauth. Batıklar: Sessiz Kadırga, Kanlı Direk.
-- (Harita) Balıkçı köyleri: Reskel, Sallenz, Calvenna, Sugalik, Tuzyali, Neminsu, Brezzane.
-- (Harita) Çiftlik, değirmen ve bağlar: Vintaro, Morvask, Limeral Bahçeleri, Tuhrem, Hasırlı, Vesperra Bağları, Gezar, Aubrenne Bağları, Kumbag, Hulvad, Hasdren, Taşgözü, Sorrelay Bağları.
-- (Harita) Mezralar: Kemrug, Hestemar, Ambrisal, Ostiven, Quellara, Callorde, Pelhaut, Nostrel, Tuylum, Dornak, Zurek, Sennabel.
-- (Harita) Kereste kampları: Erguvan, Kordel, Grodan, Celvane, Gurzan Bıçkıhanesi, Tersane Kesimliği.
+- (Harita) Darağaçları: Sarmaşıklı, Kuru Halat, Kızıl Ferman, Kefaret, Dönek. Mezarlıklar: Yabancılar, Leylak, Tuzlu Çardak, Kör Kazmalar, Sancaksız.
+- (Harita) Kuleler: Kıyıgözü, Geribakan, Sentinara, Ferrant, İki Bayrak, Öksüz Göz, Vardas. Fenerler: Yalaz, Yaşlı Martı, Grauth. Batıklar: Sessiz Kadırga, Kanlı Direk.
+- (Harita) Obalar, dağ kabileleri, balıkçı köyleri, çiftlik ve bağlar, mezralar, kereste kampları.
+- (Yazar) Haritada adı olan her yer oynanabilir olmalı (oyun hedefi).
 
-KURUMLAR VE GÜÇLER
-- (Oyun) Tüccar Loncası: kontrat, borç, haber; her şehirde aynı defter. Kampanyanın amacı loncanın defterinde bir satır olmaktan çıkıp kendi hanını kurmak.
-- (Yazar/Oyun) Kilise: El inancının kilisesi; kilise merkezli şehirler var; arınma ritüeli.
-- (Yazar) Krallar ve konseyleri (büyücüler sayılı krallıkların konseylerinde oturur); ortada binbir prenslik ve iç savaş (C1).
-- (Oyun) Haber kartları "iki beyliğin savaşı" der.
-- (Yazar) Geçmişte bir imparatorluk vardı; deli kralı büyücüleri katletti; göçebe birliği onu dize getirip parçaladı.
-- (Yazar) Güney ticaret kentleri: zengin, denizci, büyücülere açık.
-- (Yazar) Göçebe boyları: özgür, kiliseye kapalı, bir zaman imparatorluğu yıkan güç.
-- (Oyun) Yolun günlük güçleri: muhafızlar, gümrük, devriyeler, haydut kralları (bir yolu ele geçirip her kervandan haraç alan, silahlı tahsildarları olan güçler), alacaklılar.
-- (Oyun) Mühürsüz tuz kaçak maldır; yalnızca kervansaraylarda bulunur, gümrük el koyar.
-
-HALKLAR (oynanabilir beş kültür)
-- (Oyun) Göçebe Boyları: "Bozkırda doğdun; yol senin evin, kervan senin obandır." Yolda daha az erzak yer.
-- (Oyun) Vadi Loncaları: "Taş köprüler ve lonca defterleri arasında büyüdün; rakam senin dilin." Pazarda indirim. İnanç eğilimi düşük (kayıtsızlık).
-- (Oyun) Dağ Kabilesi: "Geçitleri koruyan bir kabiledensin; kavga senin için pazarlıktan kolaydır." Savaşta fazla hasar.
-- (Oyun) Liman Şehri: "Rıhtımda beş dil öğrendin; her geminin taşıdığı dedikoduyu bilirsin." Tavernada haber kolay.
-- (Oyun) Balıkçı Kasabası: "Ağ onarmayı yürümeden önce öğrendin; sabır ve tuz senin sermayen." Erzak ucuz.
-- (Oyun) Yolda sohbet: "Bozkırda gökyüzü daha büyük", "Vadide şimdi hasat vakti", "Dağda söz bir kez verilir", "Limanda her dil konuşulur; burada yalnız rüzgâr", "Yol ağ gibi değil, düğümü yok".
+HALKLAR - OYNANABİLİR BEŞ KÜLTÜR
+- (Oyun) Göçebe Boyları (Gokyurt): yolda az erzak. Vadi Loncaları (Büyük Vadi): pazarda indirim. Dağ Kabilesi (Ayazkaya; "geçitleri koruyan"): savaşta fazla hasar. Liman Şehri: tavernada haber kolay. Balıkçı Kasabası: erzak ucuz.
 
 KERVAN HAYATI
-- (Oyun) Tayfa ve parti ayrı: vagon başına iki isimsiz tayfa savaşmaz ama ölünce deftere adıyla yazılır.
-- (Oyun) Görevler: Muhafız, İzci, Levazımcı, Arabacı, Tellal, Otacı. Savaş sınıfları: Sıra Neferi, Sekban, Kırıkçı, Kalem Efendisi.
-- (Oyun) Huylar: her stat için bir erdem, bir kusur. Kırgınlık unutulmaz; stres ve moral ayrı.
-- (Oyun) Hayvanlar: öküz, at, eşek, köpek. Yolda kurt, ayı, yaban domuzu, geyik.
+- (Oyun) Tayfa ve parti ayrı; görevler ve savaş sınıfları; huylar; kırgınlık unutulmaz; stres ve moral ayrı.
 - (Oyun) Ölümün kapıları: savaş, açlık, vagonuyla kaybolmak. Olaylar öldürmez.
-- (Oyun) Mallar: buğday, kumaş, demir, iksir, kürk, baharat, bal, ipek, mücevher, balık, şarap; kaçak mühürsüz tuz; nadir bulunan eski mühür. Para birimi GG.
-- (Oyun) Yol hafızası: yolda ölenin mezarı, düşen liderin taş yığını, kaybolan vagonun enkazı, kampın külü yolda kalır.
-- (Oyun) Yoldaşların geçmişleri: borçlu (alacaklısı Hesper), sürgün (annesinin verdiği toprak), dul (eşinin görmek istediği deniz), kaçak (bir beyin ahırının kapısını açtı; at Kül; gerçek adı Erel), aç (kuraklık yılı bir kervanın attığı somun).
+- (Oyun) Mallar: buğday, kumaş, demir, iksir, kürk, baharat, bal, ipek, mücevher, balık, şarap; kaçak mühürsüz tuz; nadir eski mühür. Para birimi GG.
+- (Oyun) Yol hafızası: mezar, taş yığını, enkaz, kül yolda kalır.
 
-TARİHÇE (yazarın bildiği sıra; Sideria'da kimse tamamını bilmez)
-- (Oyun) Takvim: gün ve mevsim sayılır, yıl yok.
-- (Yazar) Derin zaman: dünya insanların ölçemediği kadar eski. Öbürküler hep vardı. Vahşi hayvanların daha ilkel atalarının çağı.
-- (Yazar) Kadim uygarlık: basit gündelik hayat, yaşam enerjisinin radikal kullanımı, tılsımlı nesneler, mutasyona uğramış eski yaratıklar, tapınak duvarı tasvirleri. Kontrol edilemeyen güç sonlarını getirdi.
-- (Yazar) Kayıp çağ: hayatta kalanlar kültürlerini yitirdi; zamanla bugünkü insanlığı kurdular.
-- (Yazar) Eski inançlar çağı: insanlar anlamlandıramadıklarını tanrılara bağladı, pek çok pagan inanç doğdu: Dağın İlk Nefesi, Denizin İlk Gözyaşı, Baikhan yolu. Yollar, sunaklar, tapınaklar, katakomblar bu inançlar için yapıldı. Yol kutsallaştı; Bekçi Kadın inancı.
-- (Yazar) İmparatorluk: Sideria'da (ya da bir kısmında) bir imparatorluk vardı. Deli kral büyücüleri katletti; bu katliam büyücülerin bugün bile Sideria'dan uzak durmasının sebebi. Göçebe birliği imparatorluğu dize getirdi ve parçalanmasına sebep oldu.
-- (Yazar) Parçalanma ve kilise çağı: imparatorluğun yerinde binbir prenslik, dinî kaos ve iç savaş. El'in kilisesi pagan inançları asimile ederek yayıldı. Eski tapınakların çoğu terk edildi, yıkıldı ya da başka amaçla kullanıldı. Güney ticaret kentleri zenginleşti, uzak kıtalar ve Raviellon ile deniz ticaretini tuttu. Büyücüler Raviellon'da eğitim alıp krallara hizmet etmeye başladı; karşılarında büyücü avcıları yetişti. Tüccar Loncası şehirler arası bir güce dönüştü.
-- (Oyun) Yakın geçmiş: haydut kralları, savaşlar ve mülteciler (evini bırakmış kolonlar, cepheden kaçıp asılmaktan korkan askerler), kıtlık günleri (mülteciler kıtlıkta pahalı satan kervanları adıyla hatırlar), yol kenarında işaretsiz mezarlar.
-- (Oyun) Kurucu: babandı; yıllarca kervanı yürüttü, hastalanınca kervanı borcuyla devretti (loncaya 180 altın, 120 gün vadeli, alacaklı akraba).
-- (Oyun) Kapanan soylar yeni başlangıçlar açar: sürgün, lonca yetiştirmesi, tuz kaçakçısı, göçer sürücüler, dul tüccarın defteri.
-- (Oyun) Oyunun zamanı: İlk Yol ("Babandan kalan tek vagon ve bir yol arkadaşı. Loncanın defterinde adın bile yok."), Bir Kadro, Ağ, Temiz Defter, Kendi Hanın. Kuşaklar boyu ad devredilir; adı taşıyacak kimse kalmayınca kitap kapanır.
+ONAY BEKLEYEN ÖNERİLERİM (T1-T34)
+- Eski görüşün adı İlk Sayfa, reformcularınki Yeni Okuma; kutsal bölgenin adı Avuçiçi; V. Leon'un sıfatı Lekesiz.
+- Kilise dereceleri: Birinci Okuyucu, Okuyucular, Kâtipler, Çıraklar.
+- Kıtlığın sebebi uzayan kış ya da toprağı solduran bir büyü; imparatorluğun son yıllarında başladı; büyük savaş ilk kıtlık savaşıydı; deli kral kıtlığı büyücülere yükledi.
+- Dört kuleli tapınak Merigard'ın yanmadan kalan tek yapısı; Mühür Savaşı Ovası büyük savaşın son meydanı.
+- Mühürsüz tuz vergi mührü taşımayan Saldrek tuzu; Vaelghard ordusu dağlıların Kazrun çeliğini taşır.
+- İmparatorluğun çöküşü 30-50 yıl önce; yakın tarih yaşayanların hafızasında.
 
-ONAY BEKLEYEN ÖNERİLERİM (kanon değil)
-- El kilisesinin imgesi bir el olabilir (açık el, mühür basan el).
-- Huy arındırma mistik değil, toplumsal bir yüzleşme ve kefaret.
-- Kurt sürüsü reisleri "kült" canlıların en hafif ucu: halk masal yakıştırır, aslında iri ve yaşlı hayvanlar.
-- Yüzük ve kolyeler (bir stat artar, biri düşer; satılmaz, bulunur) kadim tılsımlı nesnelerin ilk izi.
-- Ana yollar imparatorluk yolları; yolların üstündeki pagan sunakları ondan eski.
-- Büyücüler katliamdan önce de Sideria'daydı; Raviellon'la temas imparatorluktan eski.
-- Kervan defterinin adları silmemesi ile yolun adları mühürlememesi oyunun tezinin lore'daki karşılığı.
-- Yaşlı bekçi kadını halk Bekçi Kadın'ın kılıklarından biri sayar; oyun bunu asla doğrulamaz.
+ÇELİŞKİLER (Ç1-Ç12)
+- Taşkök'ün haritadaki yeri (Harvek ve Zurek kuzeybatıda, Vorgat doğuda).
+- Merigard ile Merigaud'nun benzerliği; Vlad, Reynald, Daemon, Alex ve iki Leon.
+- Orvahel'in istediği mallar ile oyundaki verisi; kâğıt diye bir mal yok.
+- Orbeyan'ın baharatı; Tolvarin'in taş suru; göçebelerin Vaelghard'da başlaması; sunak sayısı; Ezmerak'ı geçmeden yol olmaması; Akavan ve Samuran'ın bölgesi; balıkçıların yurdu.

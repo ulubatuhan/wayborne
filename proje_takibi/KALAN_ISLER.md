@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **25** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -87,6 +87,83 @@ Toplam: **25** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Her şehirde 2–3 tekrar eden kişi: lonca ustası, tefeci, han sahibi. Oyuncuyu hatırlar, görev verir, yaşlanır, ölebilir.
   - **Kabul:** Kişiler kayıtta; en az bir kişisel zinciri olan kişi her şehirde.
   - **Literatür:** R13, R14
+
+</details>
+
+### Y-C21 · Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:** 2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C21 Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-E06 · **İlgili:** Y-C12, Y-C15, Y-C13, Y-B06, Y-B07
+  - **Ne:** Mekanik revizyon, üç parça:
+    1. **Kıtlığın sebebi.** Kıtlığı başlatan, bütün kıtayı etkileyen bir olay olmalı: büyülü ve devasa bir olay ya da mevsimlerin değişmesi. Savaşların hepsi temelde bu kıtlıktan doğar. Sebep lore kararıdır (soru defteri v2'de soruldu). Oyunda dünyanın bir durumu olarak yaşar: hasat, stok ve fiyat katmanı, haber kartları ve savaş haberlerinin kökü. Lore'daki "Vadi kıtada en çok kıtlık yaşayan bölge" bilgisi bunun bölgesel yüzü olur.
+    2. **Ticaret sınırlanır, odak ulaştırmak olur.** Oyunun merkezi al-sat kârı değil, kervanı bir noktadan öbürüne sağ salim götürebilmek. Pazarda az mal, yüksek fiyat ve satıcının satmak istememesi; kontrat ve ulaştırma geliri ana gelir; yük bir yerin hayatta kalması demek. Sistemler kesilmez (kullanıcının ilkesi: derinleşme, asla sadeleştirme): ticaret kalır ama kıt ve pahalı olur. "Ticaret bilgi oyunudur" sütunu kıtlıkta şu anlama gelir: nerede ne kaldığını bilmek.
+    3. **Şehirlerin morali ve hâli.** Her şehir arka planda bir moral/mental durum taşır (açlık, umut, öfke gibi). Kervan oraya gıda ve gerekli malı ulaştırınca bu durum düzelir. Bu durum şehirdeki olayları (isyan, veba, yağma, bayram), kapıdaki karşılamayı, fiyatları, işe alınabilecek insanları ve şehrin kervana yaklaşımını değiştirir. Y-C12'nin bölgesel itibarıyla birlikte tasarlanır: itibar şehrin kervan hakkında ne düşündüğü, moral şehrin kendi hâli.
+  - **His:** Kıtlık ve yokluk oyunda bütün ağırlığıyla hissedilmeli. Hiçbir şey kolay olmamalı: mekanikler ve ortam (görsel, ses, metin, şehir hâli, yol kenarındaki açlar) bu hissi birlikte aktarmalı.
+  - **Kullanıcı notu:** "Kıtada kıtlığı tetikleyen bir olay olmalı. Bu büyülü devasa bir olay olabilir, mevsimler değişiklikler olabilir ama tüm kıta bundan etkilenmeli. Temelinde tüm savaşlar bu kıtlıktan sebep olarak çıkmalı. Kıtlık sebebiyle ticaret tarafı limite edilmeli, oyunun odağı ticaret yapmak değil kervanı gerçekten bir noktadan diğerine başarılı bir şekilde götürebilmek olmalı. Belki şehirlerin de morali, mentali tutulmalı arkaplanda ve kervanı oraya iletebilirsek bu statlara katkıda bulunuruz. bu statların seviyesi de o şehirde olan olayları ve bize yaklaşımlarını etkiler. Sonuç olarak o kıtlığı ve yokluğu oyunda cabasıya hissetmeliyiz! Yaptığımız hiçbir şey kolay olmamalı ve mekanikler+ortam bu hissi aktarmalı bize."
+  - **Karar gerekenler:** kıtlığın sebebi ve başlangıcı (lore); kıtlık sabit mi, dalgalı mı, oyun boyunca kötüleşiyor mu; şehir moralinin kaç ekseni olacağı; ölçüm (simulate_career'da kârın düşüşü, sefer başı ölüm ve açlık).
+  - **Kabul:** Dünyada bir kıtlık durumu ve kökü; savaş haberleri ona bağlı; pazarda kıtlık katmanı (`price_layers` yeni katman); şehir başına kayıtlı moral değeri, ulaştırmayla değişiyor, olay ağırlıklarını ve karşılamayı etkiliyor; simülatörde ticaret payı düştü, ulaştırma geliri öne geçti; ekran görüntüsüyle şehir hâli görünüyor.
+
+</details>
+
+### Y-C22 · Ahlaki zorunluluk: doğru seçenek yok, bedel bir insana düşer
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C22 Ahlaki zorunluluk: doğru seçenek yok, bedel bir insana düşer**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-E01, Y-B08
+  - **Ne:** Kıtlık kartlarında baskın seçenek olmaz; her seçenek bir kaynaktan ya da adı olan bir kişiden bir şey alır. Feda kartları (yaşlıyı köyde bırakmak, hastayı karantinaya almak, bir vagonu aç kasabaya ayırmak), aç şehre yükü satmak ya da satmamak ikilemi, feda kararından sonra günlüğün o kararı anan cümleleri. Görsel dil: kıtlık derecesine bağlı soluk, kontrastlı, kirli palet (dünyada, arayüz okunaklı kalır).
+  - **Sınır:** kullanıcının ilkesi (derinleşme, asla sadeleştirme) gereği güç ve ödül sistemleri kesilmez, bedelli olur. Kaldırılacak bir sistem varsa kullanıcı karar verir.
+  - **Kullanıcı notu:** "GDC - Lessons from Frostpunk & This War of Mine: Geleneksel ödül ve güçlenme mekaniklerini kaldırarak oyuncuya doğru ya da yanlış seçenekler değil, yalnızca kervan üyelerini feda etmek gibi ağır bedelleri olan ahlaki zorunluluklar sunulmalı; görsel dil ise umutsuzluğu pekiştirecek soluk, kontrastlı ve kirli bir paletle inşa edilmelidir."
+  - **Kabul:** `EventQuality` baskın seçenek kontrolü ve raporu; en az beş feda kartı; şehir hâline bağlı palet ekran görüntüsüyle.
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §1
+
+</details>
+
+### Y-C23 · Yenilmez çevre ve domino zinciri
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C23 Yenilmez çevre ve domino zinciri**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-B02, Y-B03, Y-C20
+  - **Ne:** Soğuk ve kıtlık yenilen bir düşman değil, dayanılan bir şey; atlatılan kış ganimet vermez. Var olan sistemlerin bedelleri birbirini tetikler (kırık aks yolu uzatır, uzayan yol erzağı bitirir, açlık ateşi getirir, ateşli biri savaşta düşer); `RoadDirector` açık zincirin sonraki halkasına ağırlık verir. Kampta son eşyaları tüketme eylemleri: brandayı, tohumluk buğdayı, kürkü, sandığı ve vagon tahtasını yakmak ya da yemek. Zincir dertler listesinde cümleyle görünür.
+  - **Kullanıcı notu:** "Jacob Geller - Fear of Cold: Çevresel zorlukların (soğuk, kıtlık) yenilemez bir düşman gibi kurgulanması gerektiği belirtilerek, kervanın yolda yaptığı küçücük bir hatanın kelebek etkisiyle büyük bir felakete dönüştüğü ve oyuncuyu elindeki son eşyaları tüketmeye iten acımasız "domino taşı" mekaniklerinin tasarlanması öneriliyor."
+  - **Kabul:** zincir halkaları testli; dört yakma/yeme eylemi kamp panelinde; "doğru stoklayan aç kalmaz" sözü korunur (test_provisions yeşil).
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §2
+
+</details>
+
+### Y-C24 · Çözülemeyen problem: büyüme yeni kriz doğurur
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C24 Çözülemeyen problem: büyüme yeni kriz doğurur**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-C15, Y-C17, Y-C12
+  - **Ne:** Oyuncu kusursuz dengeye ulaşmaz. Ün artınca aç şehirler yüke el koymak ister, dolu kese haydut ve haraççı çeker, kalabalık kadroda hizipler büyür, çok vagon kıtlıkta çok ağız demek. Bir krizi çözen hamle öbürünü besler; her yeni sistem için "bunu çözen hamle neyi bozuyor?" cevabı yazılır. Final sonrası da dertler büyür.
+  - **Kullanıcı notu:** "Adam Millard - How To Design An Unsolvable Problem: Hayatta kalma gerilimini sürekli kılmak için oyuncunun asla kusursuz bir dengeye ulaşamaması gerektiği, kervan büyüdükçe veya zenginleştikçe sistemin otomatik olarak yeni krizler üreterek oyuncuyu daima "tam bir çözümü olmayan" dinamik problemleri yönetmeye mecbur bırakması gerektiği anlatılıyor."
+  - **Kabul:** `simulate_career` denge raporu (dertsiz sefer sayısı, en uzun sakin dizi); hiçbir politika uzun sakin diziye ulaşmıyor; en az üç büyüme krizi oyunda.
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §3
 
 </details>
 

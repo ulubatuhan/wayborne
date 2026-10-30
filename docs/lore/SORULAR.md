@@ -1,247 +1,121 @@
-# Wayborne — Lore Soruları
+# Lore soruları ve onay listesi
 
-Lore ([LORE.md](LORE.md)) ve tarihçe ([TARIHCE.md](TARIHCE.md)) bu soruların
-cevaplarıyla yazılıyor. Sıra:
+[LORE.md](LORE.md) ve [TARIHCE.md](TARIHCE.md)'nin açık uçları. Bu belge üç şeyi tutar: senin onayını bekleyen
+önerilerim (Tn), iki kaynağın tutmadığı yerler (Çn) ve hâlâ açık sorular. Hepsi soru defterinde de var; cevaplar
+oradan gelir, buraya işlenir.
 
-1. **Faz G — Coğrafya** (şimdi): haritadaki her yapının adı, rolü, etkisi.
-2. **Faz Ş — Bugünün dünyası**: Faz G'nin cevaplarıyla şekillenecek; siyaset,
-   şehirler, halklar, kurumlar bugün.
-3. **Faz T — Geçmiş**: bugünden geriye doğru.
+**Son güncelleme:** 2026-10-29.
 
-Önceki turun cevapları (C1–C16) LORE.md ve TARIHCE.md'ye işlendi. Sonraki fazlara
-kalan konular bu belgenin sonunda, unutulmasınlar diye listelendi.
+- **Soru defteri v1** (302 soru): https://claude.ai/artifact/GL3TcJUe1Agerti9VP6JbH. İlk 91 soru (sekiz bölge)
+  cevaplandı ve işlendi.
+- **Soru defteri v2**: bu turun onay listesi, çelişkileri, kıtlık soruları, takip soruları ve v1'in kalan soruları.
+  Bağlantı `proje_takibi/DEVAM_NOTU.md` L2 satırında.
 
----
+## Bu turda işlenenler
 
-## Faz G — Coğrafya
+- **Bölge cevapları (90 soru):** Gokyurt, Vaelghard, sınır (Ezmerak Baronluğu, Tolvarin ve Kirsavel), Ayazkaya,
+  Taşkök, Büyük Vadi, Orvahel, Ors ve güney.
+- **Sekiz onay** (kanona geçti):
+  - El sembolü: açık el ve yumruk.
+  - Arınma ve şifa kültüre göre.
+  - Kurt reisleri.
+  - Tılsımlı takılar (bugünün büyücüleri de yapar; nadirlerinde eksi yok).
+  - Sunakların yeri (çok nadir, Vadi'nin dış kıyıları ve köy yolları).
+  - Büyücülerin eskiliği.
+  - Defter El'i, yol Baikhan'ı temsil eder.
+  - Yaşlı bekçi kadın.
+- **Kullanıcı notu (2026-10-29):** kıtayı saran kıtlık ve şehir morali. LORE §6b ve görev Y-C21'e işlendi.
+- **Silinen eski bilgi:**
+  - "Doğudaki göçebe boylar" (göçebeler yalnızca kuzeybatıda).
+  - "Kar yalnızca kuzeybatıda" (kıtanın en kuzeyi daima karlı, kış kuzeydoğudan gelir).
+  - "İmparatorluğun adı, merkezi bilinmiyor": merkez artık Merigard.
+- **Yeni oyun hedefi:** haritada adı olan her yer oynanabilir olmalı (CLAUDE.md Ana Hedefler).
 
-Harita: [sideria_harita.jpg](sideria_harita.jpg). Sorularda geçen numaralar
-işaretli kopyadaki etiketler: [sideria_harita_isaretli.jpg](sideria_harita_isaretli.jpg).
+## Onay bekleyen öneriler
 
-- **Kırmızı 1–24**: kara bölgeleri
-- **Mavi A–E**: denizler
-- **Turkuaz r1–r4**: nehirler
+Her biri LORE.md ya da TARIHCE.md'de numarasıyla işaretli. Onaylanan [Yazar] olur, reddedilen silinir.
 
-Etiketleri haritaya bakarak ben koydum; yanlış okuduğum bir şekil varsa
-(örneğin bir su kütlesi göl değil de körfezse) cevabında düzelt.
-
-### G0. Haritanın kendisi
-
-**G0.1 Kapsam.** Bu harita Sideria'nın tamamı mı? Sağ alt köşedeki ormanlı kara
-(**22**) bir boğazın karşısında duruyor gibi: Sideria'nın parçası mı, başka bir kara
-mı (örneğin Raviellon ya da büyük kıtalardan birinin ucu)?
-
-**G0.2 Ölçek.** Bir kervanın kıtayı batıdan doğuya (**A**'dan **C**'ye) geçmesi kaç
-gün sürmeli? Bugün oyunda şehirler arası yollar 3–8 gün.
-- (a) Kıta bir kervan için birkaç haftalık: bugünkü ölçek korunur, bütün harita oynanır.
-- (b) Kıta aylarca sürer: oyun haritanın bir bölümünde geçer, gerisi uzak ülke kalır.
-- *Etkisi: şehir sayısı, yol uzunlukları, oyunun hangi bölgede geçeceği.*
-
-**G0.3 Oynanan alan.** Kervanın gidebildiği yerler haritanın tamamı mı, yoksa bir
-bölgesi mi? Bölgeyse hangisi, ve gerisi oyunda nasıl görünür (haber, mülteci,
-yabancı tüccar olarak mı)?
-
-**G0.4 Yol ağı.** Haritada çizili ince çizgiler nehir mi, yol mu, ikisi birden mi?
-Kervan yolları haritaya ayrıca mı çizilecek?
-
-### G1. Büyük bölgeler ve halkların yurtları
-
-**G1.1 Göçebelerin yurdu.** C1'de "doğudaki göçebeler" dedin, ama bu haritada açık
-bozkıra benzeyen geniş ova **batıda** (**1**); doğu ise dağ sıraları (**8**, **15**).
-Hangisi?
-- (a) Göçebeler batı ovasında (**1**). C1'deki "doğu" esin kaynağının yönüydü, bu
-  dünyanın yönü değil.
-- (b) Göçebeler doğuda; o zaman doğudaki hangi bölge (dağ arası vadiler, **23**
-  kıyısı, harita dışı)?
-- (c) İkisi birden: batıda bir boy kolu, doğuda başka biri.
-
-**G1.2 Prenslikler.** "Ortada binbir prenslik" hangi bölgeleri kapsıyor? Aday:
-nehirlerin ve iç denizin bulunduğu orta kuşak (**4**, **7**, **10**, **12**, **13**,
-**14**). Batı ovasıyla orta arasında bir sırt var (**24**): doğal bir sınır mı?
-
-**G1.3 Güney ticaret kentleri.** Hangi kıyılar? Adaylar: güneybatı yarımadası
-(**18**), güney kıyısı (**20**), güneydoğu koyu (**21**). Limanların sayısı ve hangi
-denizlere açıldıkları (**A**, **B**, **C**)?
-
-**G1.4 Kilisenin kalbi.** Kilise merkezli şehirlerin yoğunlaştığı bölge nerede?
-Kilisenin baş şehri (bir "kutsal şehir") var mı, varsa nerede?
-
-**G1.5 Kuzey.** Kuzey kıyısı ve kuzey dağları (**2**, **3**, **6**, **8**) kimin?
-Buzullar (C3, C6) haritada nerede: kuzey dağlarında mı (**3**, **8**), Doğu Sırtı'nın
-doruklarında mı (**15**), yoksa haritanın kuzeyindeki denizin ötesinde mi?
-
-**G1.6 Doğu.** Büyük Doğu Sırtı'nın (**15**) iki yanı kimin? Sırt ile doğu denizi
-arasındaki kıyı şeridi (**23**) ve sırtın içindeki vadi (**r3**) yerleşik mi, ıssız mı?
-
-**G1.7 Beş kültürün haritası.** Her kültürü bir bölgeye koy (birden fazla bölge
-olabilir). Öneri olarak:
-
-| kültür | önerim | senin kararın |
+| no | öneri | nerede |
 |---|---|---|
-| Göçebe Boyları | **1** (batı ovası) | |
-| Vadi Loncaları | **4**, **14** (nehir vadileri, orta kuşak) | |
-| Dağ Kabilesi | **15** (Doğu Sırtı) ya da **8** | |
-| Liman Şehri | **20**, **21** (güney kıyısı) | |
-| Balıkçı Kasabası | **18** ya da iç deniz kıyısı (**10**, **11**) | |
+| T1 | "Eski Ahit" yerine **İlk Sayfa** (eski görüş) ve **Yeni Okuma** (reformcular). Halk ağzında "Açık Avuçlar" ve "Yumruklar". | LORE §4.1 |
+| T2 | Orvahel'in kutsal bölgesinin adı **Avuçiçi** (diğer adaylar: Okuyucu Toprağı, Sayfa Yurdu). | §4.1, §8.8 |
+| T3 | V. Leon "The Pure" sıfatının Türkçesi **Lekesiz**. | §4.1 |
+| T4 | Kilise dereceleri: Birinci Okuyucu > Okuyucular > Kâtipler > Çıraklar; arınmayı kâtipler yürütür. | §4.1 |
+| T5 | Vadi dili kıtanın ortak ticaret dili; liman insanının "beş dili". | §11 |
+| T6 | El kilisesi imparatorluğun dini olarak onunla yayıldı. | TARIHCE V.4 |
+| T7 | Dört kuleli tapınak Merigard'ın yanmadan kalan tek yapısı; şehir genç, tapınak eski. | §8.8 |
+| T8 | Mühür Savaşı Ovası büyük savaşın son meydanı; "eski mühür" eşyası oradan. | §8.8 |
+| T9 | Kefaret Darağacı inançsızların asıldığı yer. | §8.8 |
+| T10 | İlk Sayfa Manastırı eski görüşün okulu; Okuyucular orada yetişir. | §8.8 |
+| T11 | Mühürsüz tuz Saldrek'ten gelir; "mühürsüz" vergi mührü yok demek; kervansaraylarda satılır. | §8.3 |
+| T12 | Vaelghard ordusu savaştığı dağlıların Kazrun çeliğini taşır. | §8.2 |
+| T13 | Tolvarin–Kirsavel kavgasının kökü kutsal sürü ile kutsal toprak. | §8.4 |
+| T14 | Ezmerak'ın aldatma yasası kurucusunun yemekteki ihanetinin gölgesi. | §8.3 |
+| T15 | Bölünmüş Sancak Ovası iki şehrin ayrıldığı yer; Dönek Darağacı taraf değiştirenlerin. | §8.4 |
+| T16 | İki Bayrak Kulesi baronluk ile Avuçiçi sınırı. | §8.8 |
+| T17 | Kiralık Kılıçlar Ovası Orsolune paralılarının sözleşme bozduğu yer. | §8.9 |
+| T18 | İlk Nefes Taşları dağlıların Kartalın Nefesi sınavının başladığı yer. | §8.5 |
+| T19 | Oyundaki haydut kralları en çok Ayazkaya'nın bedel kültürü. | §8.5 |
+| T20 | Ayazkaya'da hüküm Kartalın Nefesi'ne tırmanıp dönmekle tanınır. | §4.4 |
+| T21 | Sogurtay buluşması boyların tek ortak zamanı; kan davası ve hanlık orada konuşulur. | §4.3 |
+| T22 | Şamanlar Baikhan'ın tek kurumu; kitapsız, sözle ve sudan okurlar; Sogurtay suyu kutsal. | §4.3 |
+| T23 | Vadi toprağı kıtanın en verimlisi ama savaş yüzünden aç: buğday üretir, aç kalır. | §8.7 |
+| T24 | Lonca Orsolune'ye geçince Orsian sözleşme ahlakı kıtanın ticaret kuralı oldu. | §8.9 |
+| T25 | Kervan yazan ama yola ait; "yolda doğan" iki inancın çocuğu. | §2 |
+| T26 | İmparatorluğun çöküşü 30–50 yıl önce (Alex'in ömründen). | TARIHCE VII |
+| T27 | Zil Avuçiçi'ye giden yolların başında satılır (Ezmerak, Vorgat, Seyvan). | §8.8 |
+| T28 | Vaelghard çember içinde: hiçbir cephede kazanamayan en güçlü ordu. | §12 |
+| T29 | "Çadıreli" Vaelghard'ın ağzı. | §8.1 |
+| T30 | Haber kartlarındaki "iki beyliğin savaşı" en çok Tolvarin ile Kirsavel. | §8.4 |
+| T31 | Kıtlığın sebebi: (a) uzayan kış ve ilerleyen buzullar, (b) toprağın yaşam enerjisini çeken "solgunluk", ya da ikisi birlikte. | §6b |
+| T32 | Kıtlık imparatorluğun son yıllarında başladı, hâlâ sürüyor; büyük savaş ilk kıtlık savaşıydı. | §6b, TARIHCE VI |
+| T33 | Deli kral kıtlığı büyücülere yükleyip onları katletti. | §6b, TARIHCE VI |
+| T34 | Kıtlıkta kim ne ister: Orvahel gıda, Vadi buğday üretip aç, Vaelghard borçla beslenir, Orsolune borç verip zenginleşir. | §6b |
 
-**G1.8 Kültürlerin adları.** "Göçebe Boyları", "Vadi Loncaları" gibi adlar oyunda
-tanımlayıcı başlık olarak kalacak mı, yoksa her halka kendi özel adı mı verilecek
-(Baikhan gibi)? Kalacaksa bunlar yer tutucu mu?
+## Çelişkiler
 
-### G2. Omurga yapılar (dağlar, sular, ormanlar)
+| no | çelişki | seçenekler |
+|---|---|---|
+| Ç1 | **Taşkök nerede?** Cevaba göre Harvek, Zurek ve Vorgat Taşkök'ün; "kuzeybatıdaki barışçıl dağ/orman beylikleri". Haritada Harvek ve Zurek kuzeybatı dağlarında, Vorgat ve gri "dağ ve maden" bölgesi doğu sıradağında, kıtanın öbür ucunda. | Taşkök kuzeybatıda, Vorgat başka bölgeye geçer · Taşkök doğuda, Harvek ve Zurek oraya taşınır ya da yeniden adlanır · Taşkök iki parçalı · başka |
+| Ç2 | **Ayazkaya'nın kuzeybatı kolu.** "Kuzeybatı ve kuzeydoğu kabileleri aynı çatı altında" dedin, ama kuzeybatı dağları Taşkök ise orada barışçıl beylikler var. Kovrast ve Kemersal kimin? | Ç1'in cevabına bağlı |
+| Ç3 | **Merigard ve Merigaud** neredeyse aynı ad (iki ayrı yer). | Eski başkentin adı değişsin (öneriler: Aldamere, Kaelvaris, Sorvanthe) · Merigaud'nun adı değişsin · ikisi kalsın, Merigaud adını eski başkentten almış olsun |
+| Ç4 | **Gerçek ya da başka eserlerden tanıdık adlar:** Vlad (tarihî), Reynald (tarihî), Daemon (başka bir fantastik eser), Alex (gündelik). Leon iki kişide (Tolvarin'in beyi ve Birinci Okuyucu). Ad kuralı uydurma ad istiyor. | Her biri için yeni ad önereyim · kalsınlar · bir kısmı değişsin |
+| Ç5 | **Orvahel'in ekonomisi.** Kanon: gıda, kâğıt, tekstil ister. Oyun: iksir ve kumaş üretir, şarap, bal ve mücevher ister. Oyunda kâğıt diye bir mal yok. | Veri kanona uysun (kâğıt yeni mal) · ikisi birleşsin · başka |
+| Ç6 | **Orbeyan baharat üretiyor**, kanonda baharat denizden liman kentlerine gelir. | Orbeyan'dan baharatı kaldır · bozkırın kendi baharı (otlar) · kara yoluyla uzaktan gelir |
+| Ç7 | **Tolvarin taş surlu** (oyun), kanonda batı sınırı yoksulluktan kütük surlu. | Tolvarin kütük olsun · şehir olduğu için taş kalsın, kasabalar kütük |
+| Ç8 | **Göçebe kültürü** Selvicar ve Vastrevar'da (Vaelghard, düşman) başlayabiliyor. | Orbeyan ve Kirsavel olsun · kalsın (sürgün göçebe) |
+| Ç9 | **Yol sunakları:** kanon "çok nadir, Vadi'nin dış kıyıları ve köy yolları"; oyunda haritanın her yerinde 10 sunak durağı var. | Sayı ve yer kanona uysun · kalsın |
+| Ç10 | **Ezmerak'ı geçmeden yol yok** diyor kanon; oyunun yol ağında Vadi'den kuzeye batıdan (Duvenmor, Akavan, Tolvarin, Orbeyan, Selvicar) da gidiliyor. | Kural yalnızca doğu yolu için · yol ağı değişsin · başka |
+| Ç11 | **Akavan ve Samuran** kanonda Ondrelle ve Liraven'e bağlı, oyunda bölgeleri "sınır" ve kütük surlu. | Bölge alanı Vadi olsun · haritadaki bölge kalsın, bağlılık siyasi |
+| Ç12 | **Balıkçı Kasabası** kültürünün başlangıç yerleri arasında dağdaki maden kasabası Brazdun var; balıkçıların yurdu henüz belirsiz. | Yurdu sor (aşağıda) ve başlangıç yerlerini ona göre düzelt |
 
-Her biri için sorular aynı: **adı ne, kim kullanıyor, kervana ne yapıyor**
-(yavaşlatır, tehlikeli, korunaklı, geçit ister, sınırdır, kutsaldır…). Hepsini
-cevaplamak zorunda değilsin; ad vermediğin yapıya oyun içinde de ad koymayız.
+## Açık sorular
 
-**Dağlar**
-- **G2.1** Doğu Sırtı (**15**): kıtanın en büyük sıradağı. Geçitleri var mı, kaç tane,
-  hangi yönleri bağlıyor? Dağ Kabilesi'nin "koruduğu geçitler" bunlar mı?
-- **G2.2** Kuzeydoğu zinciri (**8**): Doğu Sırtı'nın devamı mı, ayrı bir dağ mı?
-- **G2.3** Kuzey dağları (**3**) ve kuzeybatı tepeleri (**2**).
-- **G2.4** Batı ovasının güneyindeki tepe hattı (**17**) ve güney kıyı dağları (**20**).
-- **G2.5** Batı ovası ile orta kuşak arasındaki sırt (**24**).
-- **G2.6** "Dağın İlk Nefesi" (artık küçük bir inanış) belirli bir dağa bağlı mı? Hangisi?
+### Kıtlık (yeni)
 
-**Sular**
-- **G2.7** İç deniz (**10**) ve doğu körfezi (**11**): ikisi tuzlu deniz mi, tatlı
-  su gölü mü? Açık denize bağlılar mı? Birbirlerine bağlılar mı? Üstlerinde gemi
-  ya da kayık ticareti var mı?
-- **G2.8** Kuzey nehir sistemi (**r1**, kavşağı **4**'teki göl) iç denize mi akıyor?
-  Ana nehrin adı ne?
-- **G2.9** Batı nehri (**r2**): halka ormanlı gölden (**5**) batı kıyısına akıyor gibi.
-- **G2.10** Orta nehir (**r4**): iç denizden güneye. Haritanın en çok yolun
-  buluştuğu yer bu civar (**12**–**14**); doğal bir kavşak şehri yeri mi?
-- **G2.11** Doğu Sırtı'nın içindeki vadi nehri (**r3**).
-- **G2.12** Denizler: batı (**A**), güneybatı (**B**), doğu (**C**), kuzeydoğu
-  (**D**), kuzey koyu (**E**). Hangileri tek bir deniz, hangileri ayrı? Hangisi
-  sert, hangisi sakin? Raviellon ve uzak kıtalar hangi denizin ötesinde?
-- **G2.13** "Denizin İlk Gözyaşı" efsanesinin denizi hangisi?
+- Sebep T31'in hangisi ya da başka bir şey mi? Başlangıcı ne zaman (T32)?
+- Kıtlık oyun boyunca sabit mi, dalgalı mı, kötüleşiyor mu, bir gün biter mi?
+- Kıtlığın kıtadaki halklarca adları (her kültür başka okur).
+- Şehirlerin moral ya da hâl eksenleri: tek değer mi (umut), birkaç eksen mi (açlık, öfke, inanç)?
 
-**Ormanlar**
-- **G2.14** Büyük Güney Ormanı (**19**): kıtanın en büyük ormanı. Binlerce yıllık
-  ağaçlar (C3) burada mı?
-- **G2.15** Halka orman ve göl (**5**): bu şekil çok belirgin; özel bir yer mi
-  (kutsal, lanetli, antik)?
-- **G2.16** Nehrin sardığı oval orman (**7**), iç denizin ortasındaki ormanlık
-  yarımada (**12**), kuzey orman şeridi (**6**), kuzeybatı ormanı (**2**), dağ eteği
-  ormanı (**16**), güneydoğu ormanları (**21**, **22**).
+### Bölge cevaplarından doğan takip soruları
 
-**Adalar**
-- **G2.17** Kuzeydoğu adaları (**9**) ve batı/güneybatı kıyısındaki küçük adalar.
-  "Güney tüccarlarının bildiği adalar" (C15) bunlar mı, yoksa harita dışında mı?
+- Büyük Han'ın adı; Orbeyan'ı işleten kişinin adı.
+- Sogurtay şamanlarının adı, ritüeli; Baikhan ve Gokana ne?
+- Tolvarin'in toprak inancının ve Kirsavel'in hayvan inancının adları.
+- Reformcular nasıl doğdu, önderleri kim, başları var mı?
+- Birinci Okuyucu nasıl seçilir?
+- Vaelghard'ın hanedanının adı; Reynald'ın ailesi.
+- Orsolune Konseyi kaç kişi, nasıl oluşur; Zelmarin ve Mirsana'yı kim yönetiyor?
+- Dağlıların, Taşkök'ün ve Orsianların dilleri.
+- İmparatorluğun adı; Merigard'ı kim yaktı (göçebeler, kendi halkı, Vaelghard)?
+- Deli kral kimdi, imparator mu bir kral mı; katliam ne zaman?
+- Ayazkaya'nın Vaelghard'la savaşı ne zaman başladı?
+- Kartalın Nefesi Zirvesi'nin haritadaki yeri (Ulmarec ile Droskal arası).
+- Liman Şehri kültürü Orsolune mi Zelmarin mi; Balıkçı Kasabası hangi kıyı?
 
-### G3. Yerleşim düzeni
+### v1'den kalanlar
 
-**G3.1 Şehir sayısı.** Oyunun ekonomisi bugün beş şehir üzerine kurulu. Yeni
-haritada kaç şehir olsun?
-- (a) Beş kalsın, yalnızca yerleri ve adları değişsin.
-- (b) Daha fazla (kaç?). *Her şehir ekonomi tablosuna, kontrat panosuna ve denge
-  ölçümlerine yeni iş demek.*
-
-**G3.2 Şehir türleri.** Hangi türler olsun: liman kenti, nehir kavşağı, kale/garnizon,
-geçit kasabası, kilise şehri, maden kasabası, göçebe pazar yeri (obaların toplandığı
-mevsimlik bir yer)? Göçebelerin kalıcı bir şehri var mı, yoksa bozkırda yalnızca
-pazar yerleri mi?
-
-**G3.3 Yerleşim yoğunluğu.** Hangi bölgeler kalabalık, hangileri ıssız? Issız
-bölgeler kervan için ne demek (erzak bulunmaz, kurt ve haydut çok, ama kestirme yol)?
-
-**G3.4 Yolların kökeni.** Ana yollar eski imparatorluğun yolları mı? İmparatorluğun
-merkezi haritada neredeydi; kalıntısı (yıkık başkent, eski yol taşları) bugün
-görülüyor mu?
-
-**G3.5 Sınırlar.** Oyunda "sınır karakolu" ve gümrük var. Hangi doğal yapılar sınır
-(nehir, sırt, dağ)? Karakollar en çok nerede?
-
-**G3.6 Su yolu.** Kervan nehirde ya da iç denizde gemiye binebilir mi, yoksa yol
-hep karadan mı? (Oyunda bugün yalnızca kara yolu var.)
-
-### G4. Gizemli coğrafya
-
-**G4.1 Antik uygarlığın izleri.** Antik tapınaklar ve kalıntılar nerede yoğun?
-Tek bir bölgede mi (eski uygarlığın yurdu), yoksa kıtaya dağılmış mı?
-
-**G4.2 Pagan sunakları.** Kilisenin taşrası (C5): eski inançların hâlâ gizlice
-yaşadığı yerler hangi bölgeler?
-
-**G4.3 Öbürkülerin yerleri.** Halkın "orada bir şey var" dediği, insanların
-kaçındığı yerler var mı (bir orman, bir bataklık, bir vadi)? Halk bu yerlere ne ad
-veriyor?
-
-**G4.4 Nadir yaratıklar.** Kurtadam, vampir ya da olağanüstü iri hayvan masalları
-belirli bölgelere mi bağlı?
-
-### G5. Coğrafyanın mekanikteki karşılığı
-
-**G5.1 Arazi türleri.** Oyunda bugün beş arazi var: bozkır, orman, göl kıyısı, dağ
-yolu, bataklık. Bu haritaya bakınca eksik olan: **deniz kıyısı**, **ova/tarla**,
-**tepe/kırsal**, **nehir vadisi**, **ıssız/çorak**. Hangilerini eklemek istersin?
-(Bataklık bu haritada belirgin değil: var mı, nerede?)
-
-**G5.2 İklim.** Kuzey soğuk, güney ılık mı? Kışın kapanan geçitler, bölgeye göre
-yağmur/sis/fırtına olasılığı farklı mı?
-
-**G5.3 Bölgesel hayvanlar.** Kurt, ayı, yaban domuzu, geyik hangi bölgelerde? Dağ
-haydutları ve silahlı eşkıya gibi bölgesel düşmanlar nereye oturuyor?
-
-**G5.4 Bölgesel mallar.** Her bölge ne üretir? Bugünkü mallar: buğday, kumaş, ipek,
-demir, mücevher, kürk, bal, baharat (C15'e göre denizden gelir), balık, şarap,
-iksir. Eksik mallar varsa (tuz, kereste, at, yün, kalay, kehribar…) yaz.
-
-### G6. Adlandırma
-
-**G6.1 Ad dilleri.** C1 gereği adlar gerçek bir yeri çağırmamalı. Her bölgenin
-adları kendi "dil tadını" taşısın mı (göçebe adları bir ses ailesinden, güney
-kentleri başka birinden)? Örnek verirsen o tadı ben genişletebilirim.
-
-**G6.2 Türkçe ad mı, uydurma ad mı.** Bugünkü şehir adları anlamlı Türkçe
-bileşikler (Karakonak, Kurtboğazı). Yeni adlar da böyle mi olsun, yoksa Sideria,
-Raviellon, Baikhan gibi uydurma adlar mı? Ya da karışık: halkın verdiği lakap
-Türkçe, resmî ad uydurma?
-
-**G6.3 Çeviri.** Oyun 11 dile çevriliyor. Anlamlı adlar ("Kurtboğazı") her dilde
-çevrilsin mi, yoksa yer adları hiç çevrilmeden aynı mı kalsın?
-
-**G6.4 Adlar senden mi, benden mi?** Bütün adları sen mi koyacaksın, yoksa her
-yapı için birkaç öneri hazırlayıp seçmeni mi istersin?
-
----
-
-## Sonraki fazlara kalanlar
-
-Bunlar şimdi sorulmuyor; Faz G'nin cevaplarıyla yeniden yazılıp sorulacak.
-
-**Faz Ş — Bugünün dünyası**
-- Siyasi hiyerarşi: krallık, prenslik, beylik. Oyunun haber kartları "beylik"
-  diyor; C1 "prenslik", C6 "kral" ve "konsey" diyor. Üçü birlikte nasıl duruyor?
-- Kaç krallık/prenslik var, hangi şehir kime bağlı?
-- **The Hand (El)**: El bir tanrı mı, tanrının bir sıfatı mı, yoksa tanrının
-  kendisi bilinmeyen bir "el" mi? Kilisenin yapısı (başkanı, rahipleri, bekçi
-  kadınla ilişkisi), sembolü.
-- Dağın İlk Nefesi küçük bir inanışa indi: Kilise ekranı onu hâlâ Denizin İlk
-  Gözyaşı ile eşit okutuyor; metin değişsin mi?
-- **Deniz efsanesi kimin?** Soru metni (S5) "Denizin İlk Gözyaşı"nı Baikanlara
-  bağlıyor, oyunda Balıkçılarınki, C7'de Baikhan göçebe inancı.
-- Baikhan ve Gokana: inancın adı mı, varlıklar mı, yer mi (gök ve toprak)?
-- "Yolda doğan" ana karakter oyunun kuşak sisteminde kim (kurucu, ilk lider, her
-  lider)?
-- Tüccar Loncası: merkezi, kime bağlı, kilise ve krallarla ilişkisi.
-- Haydut kralı: bir kişi mi, bir unvan mı, nerede?
-- Para birimi **GG**: açılımı, kim basıyor.
-- Kervan adları nasıl konur?
-- Büyücü kadroya katılabilir mi? Büyücü avcıları oyunda bir düşman/sınıf mı?
-- Huy arındırma mistik mi, toplumsal mı (C2 gereği toplumsal olması önerildi).
-- "İşaretsiz Mezar" kartındaki "bir işaret koy" seçeneği yolun kutsallığıyla
-  çelişiyor mu?
-- Önceki soru listesinde **S11 yok**: atlandı mı, yoksa cevabı eksik mi?
-
-**Faz T — Geçmiş**
-- İmparatorluk: adı, merkezi, ne kadar sürdü, kilise ondan önce mi sonra mı, deli
-  kral kimdi.
-- Göçebe birliği imparatorluğu nasıl dize getirdi, sonra ne oldu?
-- Prensliklerin doğuşu ve iç savaşlar.
-- Kilisenin kuruluşu ve asimilasyonun sırası.
-- Antik uygarlığın sonu ile bugünkü insanlık arasında geçen kayıp çağ.
-- Raviellon'daki büyü okuluyla ilk temas.
-- Bugün oyunda olan haber olaylarının (savaş, veba, kıtlık) tarihsel örnekleri.
+Soru defteri v1'in bölge dışı soruları (yerleşimler, adı konmuş yerler, coğrafya, bugünün dünyası, geçmiş) v2'ye
+taşındı. Cevabı bu turda çıkan sorular düştü ya da yanına taslak cevap kondu: yerleşimlerin yönetimi, kilise yapısı,
+sembol, arınma, ortak dil, yollar ve sunaklar, kilisenin doğuşu, Orvahel'in tarihi, kar ve kış.
