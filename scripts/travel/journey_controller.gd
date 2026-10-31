@@ -65,6 +65,10 @@ var terrain_days: int = 0
 var pending_event: GameEvent = null
 var pending_event_day_position: float = 0.0
 
+## Bu yolda kullanılan durakların günleri (kuyu, kervansaray): bir durağın
+## faydası bir kez alınır; kayıtta durur ki yeniden yükleme onu tekrarlamasın.
+var used_stop_days: Array = []
+
 ## Tempo, hava, kervanın kondisyonu, eğim ve açlık bir yürüyüş adımında
 ## **aynı yerde** çarpılıyor - iki yerde çarpılırsa biri güncellenmeyi
 ## unutur (bkz. road_journey.gd `_walk_at`, RouteWeather.forecast_extra_days).
@@ -114,6 +118,7 @@ func start_leg(length_days: int) -> void:
 	journey_length_days = maxi(1, length_days)
 	days_covered = 0.0
 	pending_event = null
+	used_stop_days = []
 
 ## Geri dönüş: kervan aynı yolu ters yönde yürüyor. Bacak arazide şimdi
 ## durulan günden başlıyor ve 0'a (çıkış şehrine) doğru iniyor. Sapma bu
@@ -144,6 +149,7 @@ func to_dict() -> Dictionary:
 		"terrain_days": terrain_days,
 		"pending_event_id": "" if pending_event == null else pending_event.event_id,
 		"pending_event_day_position": pending_event_day_position,
+		"used_stop_days": used_stop_days.duplicate(),
 		"clock": {} if clock == null else clock.to_dict(),
 		"engine": {} if engine == null else engine.to_dict(),
 	}
@@ -173,6 +179,7 @@ func load_from_dict(data: Dictionary, events: Array[GameEvent]) -> void:
 	var pending_id := String(data.get("pending_event_id", ""))
 	pending_event = EventCatalog.get_event(pending_id) if not pending_id.is_empty() else null
 	pending_event_day_position = float(data.get("pending_event_day_position", 0.0))
+	used_stop_days = (data.get("used_stop_days", []) as Array).duplicate()
 	clock = JourneyClock.new()
 	clock.load_from_dict(data.get("clock", {}) as Dictionary)
 	engine = EventEngine.new(events, 1)

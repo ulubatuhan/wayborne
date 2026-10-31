@@ -1160,7 +1160,7 @@ func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 		var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.045)
 		var stop_height := area.size.y * 0.15
 		ArtDraw.contact_shadow(self, base, stop_height * 1.9, 0.15)
-		_draw_stop(String(entry.stop), base, stop_height)
+		_draw_stop(String(entry.stop), base, stop_height, String(entry.get("state", "")))
 
 ## Render edilmiş duraklar (PropArt): mezra evleri, karakol kulesi, maden
 ## ağzı. Ölçek yoldaki insandan: kişi şeridin `PERSON_HEIGHT_RATIO`'su,
@@ -1171,6 +1171,7 @@ const STOP_SPRITES := {
 	RouteTerrain.STOP_MEZRA: [["house_2", -1.05, false], ["hay", -0.25, false], ["house_1", 0.45, true], ["well", 1.25, false]],
 	RouteTerrain.STOP_OUTPOST: [["tent", -0.85, false], ["outpost", 0.35, false], ["torch", 1.05, false]],
 	RouteTerrain.STOP_MINE: [["mine", 0.0, false], ["crate_mv", 1.15, false]],
+	RouteTerrain.STOP_WELL: [["well", 0.0, false], ["hay", 0.9, false]],
 }
 
 func _draw_stop_sprites(stop: String, base: Vector2, height: float) -> bool:
@@ -1188,7 +1189,10 @@ func _draw_stop_sprites(stop: String, base: Vector2, height: float) -> bool:
 			px_per_m / PropArt.ppm(id), tint, bool(part[2]))
 	return true
 
-func _draw_stop(stop: String, base: Vector2, height: float) -> void:
+func _draw_stop(stop: String, base: Vector2, height: float, state: String = "") -> void:
+	if stop == RouteTerrain.STOP_SERAI:
+		_draw_serai(base, height, state)
+		return
 	if _draw_stop_sprites(stop, base, height):
 		return
 	var haze := Color(_sky.haze)
@@ -1292,6 +1296,38 @@ func _draw_stop(stop: String, base: Vector2, height: float) -> void:
 				Vector2(base.x + span * 0.46, deck - height * 0.26),
 				timber, maxf(1.4, height * 0.045)
 			)
+
+## Yol kenarı kervansarayı (Y-B14): alçak, uzun bir sur, ortada kemerli
+## kapı, köşelerde kuleler. Harabede sur kırık ve kapı karanlık; haydut
+## elindeyse kulede koyu bir bez. Sıcak renk yok: açık olanın ışığı yalnızca
+## kapı ağzındaki fener (tek sıcak kaynak kuralı).
+func _draw_serai(base: Vector2, height: float, state: String) -> void:
+	var haze := Color(_sky.haze)
+	var stone := ArtPalette.fade_to_haze(Color(0.44, 0.42, 0.39), haze, 0.30)
+	var dark := ArtPalette.fade_to_haze(ArtPalette.INK, haze, 0.20)
+	var width := height * 2.6
+	var wall_h := height * 0.55
+	var ruin := state == RouteTerrain.SERAI_RUIN
+	if ruin:
+		for part in [[-1.0, -0.35, 0.8], [0.15, 0.55, 0.45], [0.7, 1.0, 0.7]]:
+			var x0 := width * 0.5 * float(part[0])
+			var x1 := width * 0.5 * float(part[1])
+			draw_rect(Rect2(base + Vector2(x0, -wall_h * float(part[2])), Vector2(x1 - x0, wall_h * float(part[2]))), stone, true)
+	else:
+		draw_rect(Rect2(base + Vector2(-width * 0.5, -wall_h), Vector2(width, wall_h)), stone, true)
+		for side in [-1.0, 1.0]:
+			draw_rect(Rect2(base + Vector2(side * width * 0.5 - height * 0.16, -wall_h * 1.45), Vector2(height * 0.32, wall_h * 1.45)), stone.darkened(0.08), true)
+	draw_rect(Rect2(base + Vector2(-height * 0.2, -wall_h * 0.72), Vector2(height * 0.4, wall_h * 0.72)), dark, true)
+	draw_circle(base + Vector2(0.0, -wall_h * 0.72), height * 0.2, dark)
+	if state == RouteTerrain.SERAI_BANDIT:
+		var pole := base + Vector2(width * 0.5, -wall_h * 1.45)
+		draw_line(pole, pole + Vector2(0.0, -height * 0.45), dark, maxf(1.2, height * 0.035))
+		draw_colored_polygon(PackedVector2Array([
+			pole + Vector2(0.0, -height * 0.45), pole + Vector2(height * 0.32, -height * 0.38), pole + Vector2(0.0, -height * 0.28),
+		]), ArtPalette.fade_to_haze(ArtPalette.BLOOD.darkened(0.45), haze, 0.25))
+	elif not ruin:
+		ArtDraw.radial_glow(self, base + Vector2(height * 0.32, -wall_h * 0.62), Vector2(height * 0.22, height * 0.22),
+			ArtPalette.fade_to_haze(Color(0.95, 0.66, 0.30), haze, 0.15), 0.55)
 
 func _draw_hut(base: Vector2, height: float, wall: Color, roof: Color) -> void:
 	var half := height * 0.46

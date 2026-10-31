@@ -39,6 +39,22 @@ const STOP_BRIDGE: String = "bridge"
 ## Irmak geçidi (görev R4 #16): köprüsüz kısa bir su parçası. Su seviyesi
 ## son üç günün yağışından (RouteFord), kervan okuyarak karar verir.
 const STOP_FORD: String = "ford"
+## Kuyu (Y-B15): bozkırda bir sınırda. Yeni bir su kaynağı değil, yorgunluğu
+## ve stresi biraz alır; erzak hesabına dokunmaz.
+const STOP_WELL: String = "well"
+## Yol kenarı kervansarayı (Y-B14). Hâli `stop_state`te: çoğu eskimiş ama
+## açık, çok azı kapanmış harabe, bazıları haydut elinde. Oyun metninde "han"
+## denmez.
+const STOP_SERAI: String = "serai"
+const SERAI_OPEN: String = "open"
+const SERAI_RUIN: String = "ruin"
+const SERAI_BANDIT: String = "bandit"
+## Harita sınırında boş durak yeri varsa: bozkırda ikide bir kuyu, uzun
+## yolda üçte bir kervansaray. Tohum yolun anahtarı ve sınırın kaynaktaki
+## sırası: iki yönden aynı yer seçilir.
+const WELL_SHARE: int = 2
+const SERAI_SHARE: int = 3
+const SERAI_MIN_ROUTE_DAYS: int = 5
 ## Haritadaki her üç köprüden biri geçit.
 const FORD_SHARE_OF_BRIDGES: int = 3
 
@@ -196,21 +212,52 @@ func _build_from_map(mapped: Dictionary, from_id: String, rng: RandomNumberGener
 				stop = String(source[i]["stop"])
 		# Haritanın köprülerinin bir kısmı köprüsüz geçit (R4 #16): sınır
 		# kaynaktaki sırasıyla tohumlanır, iki yönden aynı yer seçilir.
+		var boundary := i - 1 if reverse else i
 		if stop == STOP_BRIDGE:
-			var boundary := i - 1 if reverse else i
 			if absi(hash("ford|%s|%d" % [route_key, boundary])) % FORD_SHARE_OF_BRIDGES == 0:
 				stop = STOP_FORD
+		var stop_state := ""
+		if stop == STOP_NONE and k < n - 1:
+			stop = _derived_stop(source, boundary)
+			if stop == STOP_SERAI:
+				stop_state = serai_state(route_key, boundary)
 		var to_day := days if k == n - 1 else clampf(to_share * days, from_day, days)
 		segments.append({
 			"biome": String(source[i]["biome"]),
 			"from_day": from_day,
 			"to_day": to_day,
 			"stop": stop,
+			"stop_state": stop_state,
 			"slope": slopes[i],
 			"climate": String(source[i].get("climate", "")),
 			"peaks": bool(source[i].get("peaks", false)),
 		})
 		from_day = to_day
+
+## Haritanın boş bir sınırına türetilmiş durak. Komşu sınırlarda durak varsa
+## boş kalır (duraklar birbirine yığılmasın); karar yalnızca kaynağın
+## sırasına bakar, yön değiştirince aynı sonuç çıkar.
+func _derived_stop(source: Array, boundary: int) -> String:
+	for near in [boundary - 1, boundary + 1]:
+		if near >= 0 and near < source.size() - 1 and String(source[near]["stop"]) != STOP_NONE:
+			return STOP_NONE
+	var steppe := String(source[boundary]["biome"]) == ArtPalette.BIOME_STEPPE \
+		or String(source[boundary + 1]["biome"]) == ArtPalette.BIOME_STEPPE
+	if steppe and absi(hash("well|%s|%d" % [route_key, boundary])) % WELL_SHARE == 0:
+		return STOP_WELL
+	if total_days >= SERAI_MIN_ROUTE_DAYS and absi(hash("serai|%s|%d" % [route_key, boundary])) % SERAI_SHARE == 0:
+		return STOP_SERAI
+	return STOP_NONE
+
+## Kervansarayın hâli: onda yedi açık (eskimiş, ücra), onda biri harabe,
+## onda ikisi haydut elinde. Saklanmaz, yeniden kurulduğunda aynı çıkar.
+static func serai_state(key: String, boundary: int) -> String:
+	var roll := absi(hash("serai_state|%s|%d" % [key, boundary])) % 10
+	if roll == 0:
+		return SERAI_RUIN
+	if roll <= 2:
+		return SERAI_BANDIT
+	return SERAI_OPEN
 
 func _apply_season(season: int) -> void:
 	var source := segments.duplicate(true)
@@ -395,7 +442,7 @@ func get_stops() -> Array[Dictionary]:
 	for segment in segments:
 		if String(segment.stop) == STOP_NONE:
 			continue
-		stops.append({"stop": String(segment.stop), "day": float(segment.to_day)})
+		stops.append({"stop": String(segment.stop), "day": float(segment.to_day), "state": String(segment.get("stop_state", ""))})
 	return stops
 
 ## Oyuncuya tek satırda "bu yol neye benziyor": planlayıcı ekranı bunu
@@ -427,4 +474,6 @@ static func stop_name_key(stop: String) -> String:
 		STOP_SHRINE: return "STOP_SHRINE"
 		STOP_BRIDGE: return "STOP_BRIDGE"
 		STOP_FORD: return "STOP_FORD"
+		STOP_WELL: return "STOP_WELL"
+		STOP_SERAI: return "STOP_SERAI"
 		_: return "STOP_MEZRA"

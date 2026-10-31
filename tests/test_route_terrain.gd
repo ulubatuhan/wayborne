@@ -29,6 +29,7 @@ func run(t) -> void:
 	_test_stops_never_land_on_the_city(t)
 	_test_colors_exist_for_every_day(t)
 	_test_every_biome_and_stop_is_named(t)
+	_test_wells_and_serais_on_the_map(t)
 	_test_weather_is_reproducible(t)
 	_test_weather_changes_from_day_to_day(t)
 	_test_clear_weather_is_neutral(t)
@@ -177,6 +178,7 @@ func _test_every_biome_and_stop_is_named(t) -> void:
 	var stops: Array[String] = [
 		RouteTerrain.STOP_MEZRA, RouteTerrain.STOP_OUTPOST, RouteTerrain.STOP_MINE,
 		RouteTerrain.STOP_PASS, RouteTerrain.STOP_SHRINE, RouteTerrain.STOP_BRIDGE,
+		RouteTerrain.STOP_FORD, RouteTerrain.STOP_WELL, RouteTerrain.STOP_SERAI,
 	]
 	for stop in stops:
 		var key := RouteTerrain.stop_name_key(stop)
@@ -746,3 +748,23 @@ func _test_map_looks(t) -> void:
 		PackedStringArray(["forest_cold_peaks", "forest_cold", "forest_peaks", "forest"]),
 		"varyantın eksik katmanı bir alttakine düşüyor")
 	t.eq(RoadStrips.fallback_chain("marsh"), PackedStringArray(["marsh"]), "düz biyom kendisi")
+
+
+# Y-B14, Y-B15: haritanın boş sınırlarına türeyen kuyu ve kervansaraylar
+# gerçekten var, iki yönden aynı hâli taşıyor, ve hâllerin üçü de görülüyor.
+func _test_wells_and_serais_on_the_map(t) -> void:
+	var counts := {}
+	for leg in _map_legs():
+		var forth := RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[0]))
+		var back := RouteTerrain.build(String(leg[3]), int(leg[2]), String(leg[1]))
+		var forth_stops := forth.get_stops()
+		var back_stops := back.get_stops()
+		for j in mini(forth_stops.size(), back_stops.size()):
+			var a: Dictionary = forth_stops[j]
+			var b: Dictionary = back_stops[back_stops.size() - 1 - j]
+			t.eq(String(a.state), String(b.state), "kervansarayın hâli iki yönden aynı: %s" % leg[3])
+			var kind := String(a.stop) + ("|" + String(a.state) if String(a.state) != "" else "")
+			counts[kind] = int(counts.get(kind, 0)) + 1
+	t.ok(int(counts.get(RouteTerrain.STOP_WELL, 0)) > 0, "haritada kuyu var")
+	t.ok(int(counts.get("serai|open", 0)) > int(counts.get("serai|ruin", 0)), "açık kervansaray harabeden çok")
+	t.ok(int(counts.get("serai|open", 0)) > 0, "açık kervansaray var")

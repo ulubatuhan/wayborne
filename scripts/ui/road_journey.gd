@@ -2670,14 +2670,48 @@ func _serve_meal(mode: String, typed_selected: Array[CharacterData]) -> void:
 	if not (death_outcome.get("dead_names", []) as Array).is_empty():
 		_handle_death_outcome(death_outcome)
 
+## Kuyu (Y-B15) ve yol kenarı kervansarayı (Y-B14): durağa varılan gün bir
+## kez işler. Kuyu yorgunluğu ve biraz stresi alır, erzak hesabına dokunmaz;
+## kervansarayın hâli deftere yazılır, açıksa bir gece dinlendirir.
+const WELL_FATIGUE_RELIEF: int = 10
+const WELL_STRESS_RELIEF: int = 2
+
+func _use_roadside_stop(segment: Dictionary) -> void:
+	var stop := String(segment.get("stop", RouteTerrain.STOP_NONE))
+	if stop != RouteTerrain.STOP_WELL and stop != RouteTerrain.STOP_SERAI:
+		return
+	var stop_day := float(segment.get("to_day", 0.0))
+	if absf(_terrain_day() - stop_day) > 1.0 or _journey.used_stop_days.has(stop_day):
+		return
+	_journey.used_stop_days.append(stop_day)
+	if stop == RouteTerrain.STOP_WELL:
+		for member in _session.get_party():
+			member.change_fatigue(-WELL_FATIGUE_RELIEF)
+		_session.change_stress(-WELL_STRESS_RELIEF)
+		_add_log(tr("UI_ROAD_WELL"))
+		return
+	var state := String(segment.get("stop_state", RouteTerrain.SERAI_OPEN))
+	match state:
+		RouteTerrain.SERAI_OPEN:
+			for member in _session.get_party():
+				member.change_fatigue(-WELL_FATIGUE_RELIEF)
+			_session.change_stress(-GameSession.CAMP_STRESS_RELIEF)
+			_add_log(tr("UI_ROAD_SERAI_OPEN"))
+		RouteTerrain.SERAI_RUIN:
+			_add_log(tr("UI_ROAD_SERAI_RUIN"))
+		RouteTerrain.SERAI_BANDIT:
+			_add_log(tr("UI_ROAD_SERAI_BANDIT"))
+
 ## Sofradan sonra günün geri kalanı: olay çekimi, kayıt.
 func _after_meal() -> void:
 	var context := _session.build_event_context()
 	# Günün durağı olay bağlamına bayrak olarak giriyor (near_shrine,
 	# near_mezra, near_mine...): durak olaylarının ağırlığı ekranda gerçekten
 	# o durak geçilirken artıyor - bkz. EventResolver.stop_context.
-	var stop: String = RouteTerrain.STOP_NONE if _terrain == null else _terrain.segment_at(_terrain_day()).stop
-	context.merge(EventResolver.stop_context(stop), true)
+	var segment: Dictionary = {} if _terrain == null else _terrain.segment_at(_terrain_day())
+	var stop: String = String(segment.get("stop", RouteTerrain.STOP_NONE))
+	context.merge(EventResolver.stop_context(stop, String(segment.get("stop_state", ""))), true)
+	_use_roadside_stop(segment)
 	# Irmak geçidi (R4 #16): su seviyesi bağlama girer; ön bölgede olan onu
 	# önceden okur.
 	if stop == RouteTerrain.STOP_FORD:

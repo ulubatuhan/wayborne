@@ -247,6 +247,10 @@ static func _bandit_ambush() -> GameEvent:
 		EventWeightModifier.make(_conditions([
 			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.6),
 		]), 2.2),
+		# Haydut elindeki yol kenarı kervansarayının önünden geçerken (Y-B14).
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("serai_bandit", EventCondition.Op.GREATER_EQUAL, 1),
+		]), 4.0),
 	])
 	# Faz 17 PR-6 eksiği: fidye sabit 120 GG'ydi, yolun tehlikesinden
 	# bağımsız - haydut kadrosunun kendisi zaten danger/party_size/seviyeye

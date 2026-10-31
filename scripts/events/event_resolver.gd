@@ -42,12 +42,17 @@ const STOP_CONTEXT_KEYS: Dictionary = {
 	RouteTerrain.STOP_MINE: "near_mine",
 	RouteTerrain.STOP_BRIDGE: "near_bridge",
 	RouteTerrain.STOP_FORD: "near_ford",
+	RouteTerrain.STOP_WELL: "near_well",
+	RouteTerrain.STOP_SERAI: "near_serai",
 }
 
-static func stop_context(stop: String) -> Dictionary:
+static func stop_context(stop: String, state: String = "") -> Dictionary:
 	var context := {}
 	for stop_id in STOP_CONTEXT_KEYS:
 		context[STOP_CONTEXT_KEYS[stop_id]] = 1.0 if stop == stop_id else 0.0
+	# Yol kenarı kervansarayının hâli (Y-B14): açık, harabe, haydut elinde.
+	for serai in [RouteTerrain.SERAI_OPEN, RouteTerrain.SERAI_RUIN, RouteTerrain.SERAI_BANDIT]:
+		context["serai_" + serai] = 1.0 if stop == RouteTerrain.STOP_SERAI and state == serai else 0.0
 	return context
 
 ## `stop_context`in aynı deseni, o günkü arazinin kendisi için - bkz.
