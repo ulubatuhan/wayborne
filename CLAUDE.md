@@ -419,6 +419,11 @@ verir.
     besler; `simulate_career` sakin sefer dizilerini ölçer.
   - Sınır: güç ve ödül sistemleri kesilmez, bedelli olur (derinleşme, asla sadeleştirme); bir sistemin kalkmasına
     kullanıcı karar verir. "Doğru stoklayan aç kalmaz" sözü korunur.
+- **Film ve kervan fikirleri (kullanıcı, 2026-10-31; görevler Y-G17..Y-G23, Y-C25..Y-C35, Y-B14..Y-B16,
+  Y-E09..Y-E12, Y-H08, Y-A08).** Ayrıntı `proje_takibi/referans/gorevler/14_film_kervan_fikirleri.md`. Öne çıkanlar:
+  tek sıcak kaynak kuralı (`kurallar-sanat`), veba bir dünya hâli (kart açılmadan görünür), yol kenarı kervansarayları,
+  geçiş belgesi, portreler baştan yorgun. **Konforlu final yok:** oyun kıtlık içinde kervanı ilerletmek ve ek
+  görevlerle geçer (Y-A08).
 - **Haritada adı olan her yer oynanabilir olmalı (kullanıcı, 2026-10-29).** Bugün 27 yerleşim oynanabilir; obalar,
   kabile yurtları, mezralar, manastırlar, kuleler ve harabeler yalnızca harita adı. Hepsi bir durak, olay ya da
   ziyaret edilebilir yer olarak oyuna girmeli. Lore'un bu yerler için verdiği bilgi (`docs/lore/LORE.md` §15) bu işin

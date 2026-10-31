@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P10
 
@@ -191,6 +191,23 @@ Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Motif stil rehberinde; beş yerde uygulanmış.
   - **Kaynaklar ve teknik (CC0 araştırması):** Fener modeli: Poly Haven `Lantern_01` (CC0), render ve mürekkep geçişi.
   - **Literatür:** R58
+
+</details>
+
+### Y-G17 · Tek sıcak kaynak: kural ve bütün sahnelerin denetimi
+
+- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C22
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G17 Tek sıcak kaynak: kural ve bütün sahnelerin denetimi**
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C22 · **Kim:** CO
+  - **Ne:** Dünyada sıcak renk yalnızca bir ışık kaynağından gelir: ateş, fener, meşale, pencere ışığı, defter sayfası. Kural `kurallar-sanat` Art Rules'a yazıldı. Kalan: yol, şehir, savaş, hub, kervansaray ve kart görsellerinin denetim listesi, aykırı olanların sırayla düzeltilmesi; her düzeltme ekran görüntüsüyle.
+  - **Kullanıcı notu:** "Tek sıcak kaynak: Onay. Bunu gene kurallara yaz çünkü buna göre çok düzenleme gerekecek."
+  - **Kabul:** Denetim listesi `docs/ui/` altında; her sahne için önce ve sonra görüntüsü.
 
 </details>
 

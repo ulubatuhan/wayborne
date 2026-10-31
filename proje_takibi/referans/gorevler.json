@@ -3519,9 +3519,441 @@
    "sira": 84,
    "kim": "CK",
    "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi)."
+  },
+  {
+   "id": "Y-G17",
+   "baslik": "Tek sıcak kaynak: kural ve bütün sahnelerin denetimi",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P1",
+   "durum": "kısmen",
+   "bagimli": [
+    "Y-C22"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 211,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G18",
+   "baslik": "Kıtlık paleti bölgeye göre: Gokyurt en geç solar",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21",
+    "Y-G17"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 212,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G19",
+   "baslik": "Portreler baştan yorgun ve aşınmış",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 213,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G20",
+   "baslik": "Olay kartının görsel dili bölgeye göre",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 214,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G21",
+   "baslik": "Kart açılışında yavaş kayma",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 215,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G22",
+   "baslik": "Bataklık görünüşü: gri-yeşil sis",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 216,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-G23",
+   "baslik": "Soy sonu: ufukta yürüyen adlar",
+   "bolum": "14",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [
+    "Y-D03"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 217,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C25",
+   "baslik": "Veba bir dünya hâli: kart açılmadan görünür",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 218,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C26",
+   "baslik": "Vebanın hiç bulaşmadığı köyler",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C25"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 219,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C27",
+   "baslik": "Gokyurt misafirliği",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 220,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C28",
+   "baslik": "Yolcu defteri",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C10"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 221,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C29",
+   "baslik": "Tarafsız zemin: Duvenmor",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 222,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C30",
+   "baslik": "Kıtlıkta kervansaray: kapıya bırakılan yemek",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P3",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P12",
+   "sira": 223,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-B14",
+   "baslik": "Yol kenarı kervansarayları",
+   "bolum": "14",
+   "alan": "Yönetmen: Yol deneyimi",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 3,
+   "paket": "P08",
+   "sira": 224,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-B15",
+   "baslik": "Kuyu durağı",
+   "bolum": "14",
+   "alan": "Yönetmen: Yol deneyimi",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 3,
+   "paket": "P08",
+   "sira": 225,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-B16",
+   "baslik": "Küçük lütuf anı",
+   "bolum": "14",
+   "alan": "Yönetmen: Yol deneyimi",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 3,
+   "paket": "P08",
+   "sira": 226,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C31",
+   "baslik": "Geçiş belgesi",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-E06"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 227,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C32",
+   "baslik": "Bedeli erzakla öde",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 228,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-E09",
+   "baslik": "Yozlaşmış yol bekçisi kartı",
+   "bolum": "14",
+   "alan": "Yönetmen: İçerik ve anlatı",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C31"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 229,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-E10",
+   "baslik": "Esirlikten kaçış zinciri",
+   "bolum": "14",
+   "alan": "Yönetmen: İçerik ve anlatı",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-E02"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 230,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-E11",
+   "baslik": "Gezgin oyuncular ve tövbe alayı",
+   "bolum": "14",
+   "alan": "Yönetmen: İçerik ve anlatı",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 231,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-E12",
+   "baslik": "Gizli güdülü kılavuz",
+   "bolum": "14",
+   "alan": "Yönetmen: İçerik ve anlatı",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 232,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C33",
+   "baslik": "Ant bağı",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C17"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 4,
+   "paket": "P09",
+   "sira": 233,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C34",
+   "baslik": "Hacı kafilesine katılmak",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C25"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 234,
+   "kim": "CK",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-H08",
+   "baslik": "Sessizlik anları",
+   "bolum": "14",
+   "alan": "Yönetmen: Ses ve atmosfer",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 6,
+   "paket": "P13",
+   "sira": 235,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-C35",
+   "baslik": "İlan panosu",
+   "bolum": "14",
+   "alan": "Yönetmen: Sistemler ve mekanikler",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C02"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 2,
+   "paket": "P07",
+   "sira": 236,
+   "kim": "C",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+  },
+  {
+   "id": "Y-A08",
+   "baslik": "Kampanya: konforlu final yok",
+   "bolum": "14",
+   "alan": "Yönetmen: Yön ve kapsam",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [
+    "Y-C21"
+   ],
+   "dosya": "gorevler/14_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 237,
+   "kim": "CO",
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
   }
  ],
- "guncelleme": "2026-10-20 16:00",
+ "guncelleme": "2026-10-31",
  "kim_anlami": {
   "C": "Claude tek başına (kod, test, belge)",
   "CO": "Claude yapar; senin görsel ya da tasarım onayın gerekir",
@@ -3675,7 +4107,15 @@
     "Y-C02",
     "Y-F05",
     "Y-C12",
-    "Y-C13"
+    "Y-C13",
+    "Y-C25",
+    "Y-C27",
+    "Y-C28",
+    "Y-C29",
+    "Y-C31",
+    "Y-C32",
+    "Y-C34",
+    "Y-C35"
    ]
   },
   {
@@ -3702,7 +4142,10 @@
     "R3",
     "R4",
     "R5",
-    "Y-B09"
+    "Y-B09",
+    "Y-B14",
+    "Y-B15",
+    "Y-B16"
    ]
   },
   {
@@ -3724,7 +4167,8 @@
     "Y-C16",
     "Y-C15",
     "Y-C09",
-    "Y-F07T"
+    "Y-F07T",
+    "Y-C33"
    ]
   },
   {
@@ -3751,7 +4195,13 @@
     "Y-E08",
     "Y-C18",
     "Y-A07",
-    "Y-E07"
+    "Y-E07",
+    "Y-C26",
+    "Y-E09",
+    "Y-E10",
+    "Y-E11",
+    "Y-E12",
+    "Y-A08"
    ]
   },
   {
@@ -3785,7 +4235,15 @@
     "9.2",
     "Y-G16",
     "Y-G08",
-    "Y-G14"
+    "Y-G14",
+    "Y-G17",
+    "Y-G18",
+    "Y-G19",
+    "Y-G20",
+    "Y-G21",
+    "Y-G22",
+    "Y-G23",
+    "Y-C30"
    ]
   },
   {
@@ -3796,7 +4254,8 @@
    "gorevler": [
     "Y-I01",
     "Y-I02",
-    "Y-I03"
+    "Y-I03",
+    "Y-H08"
    ]
   },
   {

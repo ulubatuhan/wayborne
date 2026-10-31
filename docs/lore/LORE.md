@@ -281,6 +281,12 @@ o dine göre yerleştirilmiş mezarlar (katakomb), çok azında eski tılsımlı
   yüzünden yine aç kalır (T23); Vaelghard güneye borçlanarak beslenir [Yazar: borçlu]; Orsolune kıtlıkta borç verir ve
   zenginleşir. Orsian ahlakı "dolandırma, ama kitaptaki açığı kullan" kıtlıkta en çok burada sınanır.
 
+- **[Yazar, 2026-10-31]** Gokyurt kıtlıktan öbür yerlere göre daha az etkilendi; kıtanın hâlâ en sağlıklı yeri.
+- **[Yazar, 2026-10-31]** **Veba** genel bir durum; etkisi her yerde görülür, bölgeden bölgeye farklıdır. Vebanın hiç
+  bulaşmadığı köyler var; nedeni bilinmez.
+- **[Yazar, 2026-10-31]** Kervansaraylar: çoğu eskimiş, ücra ama açık; çok azı kapanmış harabe; bazıları haydutların
+  elinde. Oyun metninde "han" denmez, kervansaray denir.
+
 ## 7. Siyasi harita bugün
 
 **[Yazar]** Siyasi birim her bölgede kendi sözcüğünü taşır; oyunun haber kartlarındaki "beylik" sözcüğü sınırda,
@@ -345,6 +351,10 @@ Leon iki ayrı kişide geçiyor.
   Vaelghard henüz bir karşılık verememiştir. **Taşkök** ile dosttur ve ticaret anlaşmaları vardır.
 - **[Yazar]** Saygısızlığı ve bağımsızlığına dokunulmasını asla affetmez.
 - **[Yazar, onaylandı T29]** "Çadıreli" Vaelghard'ın ağzıdır: bir kayıt bürosunda adı olmayan, vergi vermeyen halka verilmiş ad.
+
+- **[Yazar, 2026-10-31]** **Misafirlik:** Gokyurt'taki kervansaray ve öbür konaklama yerlerinde bir gün konaklama
+  ve yeme içme ücretsizdir; bedelini konsey öder. Öbür bölgelerin kervansaraylarında da eskiden böyleydi; kıtlıkta
+  kaldırıldı.
 
 ### 8.2 Vaelghard Krallığı
 

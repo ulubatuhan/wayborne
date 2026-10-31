@@ -74,6 +74,13 @@ way to textures one screen at a time.
   tree, conifer, rock, shrub, water, light pool, vignette, inked fill,
   wagon). Every screen inventing its own colours is why the game did not
   look like one production.
+- **Tek sıcak kaynak (kullanıcı kararı 2026-10-31, görev Y-G17).** Dünyada sıcak renk yalnızca bir ışık
+  kaynağından gelir: ateş, fener, meşale, pencere ışığı ve defterin sayfası (hatıra). Gök, zemin, bina, giysi ve
+  sahne dokusu soğuk ve soluk kalır; bir sahnede sıcak olan ışığın kendisi ve düştüğü yerdir. Kıtlık derinleştikçe
+  sıcağın payı küçülür, bölgeye göre (Gokyurt en geç solar, Y-G18). Neden: sıcak her yerde olunca ateşin anlamı
+  kalmaz; kervanın ısındığı yer ekranda da tek sıcak yer olmalı. `GrimGrade` sıcak ışık dışındaki doygunluğu zaten
+  düşürüyor; bu kural onun hedefini söyler. Arayüzün okunaklılığı (metin kontrastı) kuralın dışında. Yeni bir sahne
+  ya da sanat bu kurala göre yapılır; eski sahnelerin denetimi Y-G17'de.
 - **A shape drawn in two places is two different shapes.** The wagon lives
   in `ArtDraw.wagon()` because the road band and the walking area both draw
   it; keeping a copy each meant the same caravan's wagon was two different
