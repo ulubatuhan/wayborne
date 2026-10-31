@@ -506,6 +506,10 @@ _NEW = [
     ("ARY-mal_fener_yagi", "Arayüz", "Mal ikonu", "Mal: Fener yağı", "", "1024x1024", ["cizim"], 0.75),
     ("ARY-mal_mesale", "Arayüz", "Mal ikonu", "Mal: Meşale", "", "1024x1024", ["cizim"], 0.75),
     ("ARY-mal_eski_muhur", "Arayüz", "Mal ikonu", "Mal: Eski mühür", "", "1024x1024", ["cizim"], 0.75),
+    ("SAH-durak_kervansaray", "Sahne", "Yol durağı", "Yol kenarı kervansarayı (3 hâl)", "Avlulu, iki kuleli yapı; açık (kapıda fener), harabe (kırık duvar, ayakta kemer), haydut elinde (kulede koyu bez). Kubbe ve dini simge yok.", "2048x1024", ["acik", "harabe", "haydut"], 5.0),
+    ("SAH-bataklik_sis", "Efekt", "Hava", "Bataklık sisi tutamları (4 çeşit)", "Gri-yeşil, yere yakın, yumuşak kenarlı; oyun kaydırır ve saydamlaştırır. Gri tonla da olur.", "2048x1024", ["sis_1", "sis_2", "sis_3", "sis_4"], 1.5),
+    ("ARY-ilan_panosu", "Arayüz", "Lonca", "İlan Panosu", "Loncanın tahta panosu: çivili kâğıtlar asılı. Pano boş çizilir; ilan kâğıtları ayrı katmanlarda (oyun içine yazı basar), raptiye/çivi ayrı.", "2048x2048", ["pano", "ilan_1", "ilan_2", "ilan_3", "ilan_4", "civi"], 5.0),
+    ("ARY-kart_cerceve", "Arayüz", "Olay kartı", "Olay kartı çerçeveleri (8 bölge)", "Kartın resmini saran çerçeve; bölgenin dili: Gokyurt dikiş, Vadi düz, Dağ ve Maden çentik, Sınır kırık, İmparatorluk çift çizgi, Güney noktalı, Ahit köşe taşları. İçi boş.", "2048x2048", ["gokyurt", "vadi", "dag", "maden", "sinir", "imparatorluk", "guney", "ahit"], 4.0),
 ]
 
 
@@ -515,7 +519,7 @@ def new_art() -> list[dict]:
         rows.append(_row(
             id=rid, kategori=cat, alt_grup=group, ad=ad, ne_cizilecek=note or "Yeni parça.",
             hedef="(yeni)", kaynak=KAYNAK_PROC if not rid.startswith("ARY-mal") else KAYNAK_YOK,
-            renk=GRI if rid in ("SAH-bulut",) else RENK, tuval=canvas, katmanlar=layers, oncelik=3,
+            renk=GRI if rid in ("SAH-bulut", "SAH-bataklik_sis") else RENK, tuval=canvas, katmanlar=layers, oncelik=3,
             saat=hours, sablon_tip="blank", kod_gerekir=True,
         ))
         if len(layers) > 1:
