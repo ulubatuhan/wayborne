@@ -431,7 +431,7 @@ func _bottom_panel() -> PanelContainer:
 
 func _panel_heading() -> Label:
 	var heading := Label.new()
-	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_override("font", WaybookTheme.title_font())
 	heading.add_theme_font_size_override("font_size", 30)
 	heading.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
 	heading.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1267,7 +1267,7 @@ class RoundMedal extends Control:
 		var radius := minf(size.x, size.y) * 0.5 - 3.0
 		draw_circle(centre, radius, Color(ArtPalette.INK, 0.85))
 		draw_arc(centre, radius, 0.0, TAU, 64, ArtPalette.MENU_TITLE_GOLD, 3.0, true)
-		var font := GrimTheme.title_font()
+		var font := WaybookTheme.title_font()
 		var text := roman(_round)
 		var font_size := int(radius * (0.95 if text.length() <= 3 else 0.7))
 		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)

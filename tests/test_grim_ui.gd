@@ -60,9 +60,9 @@ func _test_notice_motion(t) -> void:
 	t.eq(GrimNotice.fade_alpha(1.0), 1.0, "kart okunurken tam görünür")
 	t.eq(GrimNotice.fade_alpha(GrimNotice.DROP_SECONDS + GrimNotice.HOLD_SECONDS + GrimNotice.FADE_SECONDS), 0.0,
 		"solma tam sıfırda bitiyor")
-	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.LOSS) in GrimTheme.SOUND_CUES, "kaybın ses imi tabloda")
-	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.OMEN) in GrimTheme.SOUND_CUES, "alametin ses imi tabloda")
-	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.GAIN) in GrimTheme.SOUND_CUES, "kazancın ses imi tabloda")
+	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.LOSS) in WaybookTheme.SOUND_CUES, "kaybın ses imi tabloda")
+	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.OMEN) in WaybookTheme.SOUND_CUES, "alametin ses imi tabloda")
+	t.ok(GrimNotice.sound_cue(GrimNotice.Severity.GAIN) in WaybookTheme.SOUND_CUES, "kazancın ses imi tabloda")
 
 func _test_market_meter(t) -> void:
 	t.eq(MarketMeter.filled_notches(0.0), 0, "boş stok çentiksiz")
@@ -100,11 +100,11 @@ func _test_menu_beside_building(t) -> void:
 func _test_assets_exist(t) -> void:
 	for name in ["ash_flake.png", "vignette.png", "grime_overlay.png", "frost_overlay.png", "tatter_mask.png",
 			"notice_card.png", "ink_blot.png", "lantern_glow.png"]:
-		t.ok(GrimTheme.texture(name) != null, "doku var: %s" % name)
-	for cue in GrimTheme.SOUND_CUES:
-		var path := GrimTheme.SFX_DIR + String(GrimTheme.SOUND_CUES[cue])
+		t.ok(WaybookTheme.grim_texture(name) != null, "doku var: %s" % name)
+	for cue in WaybookTheme.SOUND_CUES:
+		var path := WaybookTheme.SFX_DIR + String(WaybookTheme.SOUND_CUES[cue])
 		t.ok(FileAccess.file_exists(path) or ResourceLoader.exists(path), "ses imi var: %s" % cue)
-	t.ok(GrimTheme.title_font() != null, "başlık yazı yüzü yükleniyor")
+	t.ok(WaybookTheme.title_font() != null, "başlık yazı yüzü yükleniyor")
 
 func _test_celsius(t) -> void:
 	t.eq(SurvivalGauge.celsius_fraction(SurvivalGauge.CELSIUS_MIN), 0.0, "en soğukta alev dibe yakın")

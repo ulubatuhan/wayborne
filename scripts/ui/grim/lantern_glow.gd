@@ -43,7 +43,7 @@ static func flicker(t: float, seed_value: float) -> float:
 
 func _draw() -> void:
 	if _tex == null:
-		_tex = GrimTheme.texture("lantern_glow.png")
+		_tex = WaybookTheme.grim_texture("lantern_glow.png")
 		if _tex == null:
 			return
 	var f := flicker(_time, _seed)

@@ -15,7 +15,7 @@ const REVEAL_SECONDS: float = 0.22
 var _rows: Array[Control] = []
 ## Düz kip (ana menü taslağı): leke ve çentik yok, yalnızca renk geçişi.
 var _plain: bool = false
-var _font_size: int = GrimTheme.HEADING_SIZE + 2
+var _font_size: int = WaybookTheme.HEADING_SIZE + 2
 var _row_height: float = ROW_HEIGHT
 var _rest_color: Color = ArtPalette.GRIM_PARCHMENT
 var _hover_color: Color = ArtPalette.GRIM_AMBER
@@ -79,7 +79,7 @@ func _make_row(text: String, index: int) -> Control:
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	row.draw.connect(_draw_row.bind(row, index))
-	var label := GrimTheme.label(text, _font_size, _rest_color, not _plain)
+	var label := WaybookTheme.label(text, _font_size, _rest_color, not _plain)
 	label.position = Vector2(0, 0) if _plain else Vector2(44, 8)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(label)
@@ -107,7 +107,7 @@ func _draw_row(row: Control, index: int) -> void:
 	label.add_theme_color_override("font_color", _rest_color.lerp(_hover_color, reveal))
 	if reveal <= 0.0 or _plain:
 		return
-	var tex := GrimTheme.texture("ink_blot.png")
+	var tex := WaybookTheme.grim_texture("ink_blot.png")
 	if tex != null:
 		var w := row.size.x * reveal
 		row.draw_texture_rect_region(tex, Rect2(Vector2(18, 2), Vector2(w, row.size.y - 4)),

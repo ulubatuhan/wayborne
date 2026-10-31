@@ -87,7 +87,7 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 	var ash := AshFall.new()
 	ash.density = 0.5
 	add_child(ash)
-	add_child(GrimTheme.overlay("vignette.png", 0.7))
+	add_child(WaybookTheme.overlay("vignette.png", 0.7))
 	add_child(_crest_and_banner())
 	add_child(_venue_column())
 	add_child(_roster())
@@ -205,7 +205,7 @@ static func _sliced(tex: Texture2D, margin: int, content: Vector4) -> StyleBoxTe
 	return box
 
 func _plate_box(lit: bool) -> StyleBox:
-	return GrimTheme.plate_box(lit, Vector4(10, 6, 14, 6))
+	return WaybookTheme.plate_box(lit, Vector4(10, 6, 14, 6))
 
 ## Sol üst: kervanın arması ve şehrin adını taşıyan yırtık sancak.
 func _crest_and_banner() -> Control:
@@ -221,12 +221,12 @@ func _crest_and_banner() -> Control:
 	col.position = Vector2(150, 22)
 	col.add_theme_constant_override("separation", -6)
 	host.add_child(col)
-	col.add_child(GrimTheme.display_label(String(_model.get("city_name", "")), 50, ArtPalette.BONE))
+	col.add_child(WaybookTheme.display_label(String(_model.get("city_name", "")), 50, ArtPalette.BONE))
 	var when: String = GrimDrafts.tr_key("UI_GRIM_DAY_SEASON") % [int(_model.get("day", 1)),
 		GrimDrafts.tr_key(String(_model.get("season_key", "UI_GRIM_SEASON_AUTUMN")))]
 	if _model.has("weather_key"):
 		when += "  ·  " + GrimDrafts.tr_key(String(_model["weather_key"]))
-	col.add_child(GrimTheme.label(when, GrimTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
+	col.add_child(WaybookTheme.label(when, WaybookTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
 	return host
 
 ## Sol sütun: her mekân bir levha - ikon, ad, bugünkü tek satır durumu.
@@ -252,7 +252,7 @@ func _venue_column() -> Control:
 		text.alignment = BoxContainer.ALIGNMENT_CENTER
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(text)
-		var name := GrimTheme.label(GrimDrafts.tr_key(String(v["key"])), GrimTheme.HEADING_SIZE, ArtPalette.GRIM_PARCHMENT, true)
+		var name := WaybookTheme.label(GrimDrafts.tr_key(String(v["key"])), WaybookTheme.HEADING_SIZE, ArtPalette.GRIM_PARCHMENT, true)
 		text.add_child(name)
 		var first: Array = lines.get(String(v["key"]), [])
 		if not first.is_empty():
@@ -260,7 +260,7 @@ func _venue_column() -> Control:
 			var bad := String(line.get("kind", "")) == "bad"
 			# Satır ya çevrilmiş metin (brifingin ihtiyacı) ya da anahtar + argüman taşır.
 			var text_line: String = String(line["text"]) if line.has("text") else GrimDrafts.tr_key(String(line["key"])) % line.get("args", [])
-			var l := GrimTheme.label(text_line, GrimTheme.SMALL_SIZE,
+			var l := WaybookTheme.label(text_line, WaybookTheme.SMALL_SIZE,
 				ArtPalette.GRIM_CRIMSON.lightened(0.35) if bad else ArtPalette.GRIM_PARCHMENT_DIM)
 			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			l.custom_minimum_size = Vector2(230, 0)
@@ -302,10 +302,10 @@ func _card(p: Dictionary) -> PanelContainer:
 	text.add_theme_constant_override("separation", 3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	text.add_child(GrimTheme.label(String(p["name"]), GrimTheme.HEADING_SIZE, ArtPalette.BONE, true))
+	text.add_child(WaybookTheme.label(String(p["name"]), WaybookTheme.HEADING_SIZE, ArtPalette.BONE, true))
 	if p.has("class_key"):
-		text.add_child(GrimTheme.label(GrimDrafts.tr_key(String(p["class_key"])) + "  ·  " +
-			GrimDrafts.tr_key("UI_GRIM_LEVEL") % int(p.get("level", 1)), GrimTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT_DIM))
+		text.add_child(WaybookTheme.label(GrimDrafts.tr_key(String(p["class_key"])) + "  ·  " +
+			GrimDrafts.tr_key("UI_GRIM_LEVEL") % int(p.get("level", 1)), WaybookTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT_DIM))
 	var hp := float(p["hp"]) / maxf(1.0, float(p["max_hp"]))
 	text.add_child(_bar(hp, ArtPalette.GRIM_CRIMSON.lightened(0.1), "%d/%d" % [int(p["hp"]), int(p["max_hp"])]))
 	text.add_child(_stress_pips(int(p["stress"])))
@@ -319,7 +319,7 @@ static func _bar(share: float, colour: Color, caption: String) -> Control:
 	fill.color = colour
 	fill.size = Vector2(180.0 * clampf(share, 0.0, 1.0), 12)
 	back.add_child(fill)
-	var l := GrimTheme.label(caption, 11, ArtPalette.BONE)
+	var l := WaybookTheme.label(caption, 11, ArtPalette.BONE)
 	l.position = Vector2(4, -3)
 	back.add_child(l)
 	return back
@@ -346,7 +346,7 @@ func _strip() -> Control:
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bar.offset_top = -STRIP_HEIGHT
 	bar.custom_minimum_size = Vector2(0, STRIP_HEIGHT)
-	bar.add_theme_stylebox_override("panel", GrimTheme.bar_panel())
+	bar.add_theme_stylebox_override("panel", WaybookTheme.bar_panel())
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 26)
 	bar.add_child(row)
@@ -372,12 +372,12 @@ static func _resource(caption_key: String, value: String, colour: Color) -> VBox
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", -6)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.add_child(GrimTheme.label(GrimDrafts.tr_key(caption_key), GrimTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT_DIM))
-	v.add_child(GrimTheme.label(value, 30, colour, true))
+	v.add_child(WaybookTheme.label(GrimDrafts.tr_key(caption_key), WaybookTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT_DIM))
+	v.add_child(WaybookTheme.label(value, 30, colour, true))
 	return v
 
 func _icon_button(key: String, icon_name: String) -> Button:
-	var b := GrimTheme.icon_button(GrimDrafts.tr_key(key), icon_name)
+	var b := WaybookTheme.icon_button(GrimDrafts.tr_key(key), icon_name)
 	b.tooltip_text = b.text
 	b.pressed.connect(func(): nav_pressed.emit(key))
 	return b
@@ -385,7 +385,7 @@ func _icon_button(key: String, icon_name: String) -> Button:
 ## Yola Çık: tek kızıl düğme, sağda. Kapının ikonu ve ağır yazı. Üstüne
 ## gelmek resimdeki kapıyı (varsa) aydınlatır.
 func _embark() -> Button:
-	var b := GrimTheme.crimson_button(GrimDrafts.tr_key("UI_GRIM_EMBARK"), "gate")
+	var b := WaybookTheme.crimson_button(GrimDrafts.tr_key("UI_GRIM_EMBARK"), "gate")
 	b.custom_minimum_size = Vector2(250, 70)
 	b.pressed.connect(func(): nav_pressed.emit("UI_GRIM_EMBARK"))
 	b.mouse_entered.connect(func(): set_hovered(GATE_ID))

@@ -377,11 +377,6 @@ verir.
 - **Codex'in olay bölümünde tasarım notları eksik.** Karar ağaçları kataloğun 71 olayının hepsini kapsıyor (Y-E07,
   2026-10-22'de yeniden üretildi); elle yazılmış tasarım notu yalnızca 29 kartta. Kalan kartların notu lore kapanınca
   yazılır.
-- **Karanlık arayüzün kalanı: yalnızca kod düzeni.** Şehir (`CityFront`), ana menü, karakter, kadro kartı, defter,
-  savaş ve UI kiti v2 bağlı. Yol HUD'u ve pazar kullanıcı kararıyla oyundaki hâlinde kalıyor (karar defteri K10/K11,
-  2026-10-21): `GrimNotice`, `WornCell`, `MarketMeter` ve `TradeScales` yalnızca taslak ekranlarda (`GrimDrafts`) duruyor
-  ve bilerek bağlanmıyor. Kalan: GrimTheme'in kalıcı parçalarının WaybookTheme'e taşınması (`docs/ui/REDESIGN.md` §7).
-  Dosya ve sınıf adları oyuna özgü kalır (başka bir oyunun terimi değil).
 - **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
   `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
   [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin

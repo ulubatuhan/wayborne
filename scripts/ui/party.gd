@@ -41,7 +41,7 @@ func _ready() -> void:
 	var title: Label = $MarginContainer/VBoxContainer/TitleLabel
 	title.text = tr("UI_PARTY_TITLE")
 	# Taslak 9.7: başlık IM Fell, soluk altın.
-	title.add_theme_font_override("font", GrimTheme.title_font())
+	title.add_theme_font_override("font", WaybookTheme.title_font())
 	title.add_theme_font_size_override("font_size", 44)
 	title.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
 	_session = GameState.get_session()

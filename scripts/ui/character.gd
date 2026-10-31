@@ -78,7 +78,7 @@ func _ready() -> void:
 	_title_label.text = tr("UI_CHARACTER_TITLE")
 	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	_title_label.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
-	_title_label.add_theme_font_override("font", GrimTheme.title_font())
+	_title_label.add_theme_font_override("font", WaybookTheme.title_font())
 	_session = GameState.get_session()
 	# Bu ekran yalnızca parti ekranından açılıyor, dönüş hedefi de her
 	# zaman orası; gezinme yığını geri yolunu zaten taşıyor (bkz. Nav).
@@ -704,7 +704,7 @@ func _make_column(title: String) -> PanelContainer:
 func _heading_label(text: String, font_size: int) -> Label:
 	var heading := Label.new()
 	heading.text = text
-	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_override("font", WaybookTheme.title_font())
 	heading.add_theme_font_size_override("font_size", font_size)
 	heading.add_theme_color_override("font_color", ArtPalette.MENU_TITLE_GOLD)
 	return heading

@@ -24,23 +24,23 @@ func setup(title: String, body: String, kind: Severity, tilt_degrees: float = -1
 	severity = kind
 	_tilt = deg_to_rad(tilt_degrees)
 	custom_minimum_size = Vector2(WIDTH, 0)
-	add_theme_stylebox_override("panel", GrimTheme.notice_panel())
+	add_theme_stylebox_override("panel", WaybookTheme.notice_panel())
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 4)
 	add_child(col)
 	var head := HBoxContainer.new()
 	col.add_child(head)
-	var t := GrimTheme.label(title, GrimTheme.HEADING_SIZE - 2, ArtPalette.INK, true)
+	var t := WaybookTheme.label(title, WaybookTheme.HEADING_SIZE - 2, ArtPalette.INK, true)
 	t.remove_theme_color_override("font_shadow_color")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD
 	head.add_child(t)
-	_stamp = GrimTheme.label(stamp_text(kind), GrimTheme.SMALL_SIZE, stamp_colour(kind), true)
+	_stamp = WaybookTheme.label(stamp_text(kind), WaybookTheme.SMALL_SIZE, stamp_colour(kind), true)
 	_stamp.remove_theme_color_override("font_shadow_color")
 	_stamp.rotation = deg_to_rad(-8)
 	head.add_child(_stamp)
-	var b := GrimTheme.label(body, GrimTheme.BODY_SIZE - 1, Color(ArtPalette.INK, 0.86))
+	var b := WaybookTheme.label(body, WaybookTheme.BODY_SIZE - 1, Color(ArtPalette.INK, 0.86))
 	b.remove_theme_color_override("font_shadow_color")
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD
 	b.custom_minimum_size = Vector2(WIDTH - 72, 0)

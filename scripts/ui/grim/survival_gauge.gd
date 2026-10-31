@@ -327,7 +327,7 @@ func _draw_vial(box: Rect2, frac: float, sev: float) -> void:
 
 func _draw_flame(box: Rect2, frac: float) -> void:
 	var base := Vector2(box.get_center().x, box.end.y - 10)
-	var glow := GrimTheme.texture("lantern_glow.png")
+	var glow := WaybookTheme.grim_texture("lantern_glow.png")
 	if glow != null and frac > 0.02:
 		var r := box.size.x * (0.6 + 0.7 * frac)
 		draw_texture_rect(glow, Rect2(base - Vector2(r, r * 1.3), Vector2(r * 2, r * 2)), false,

@@ -40,13 +40,13 @@ func setup(id: String, quantity: int, weight: float, condition: float,
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(row)
-	var q := GrimTheme.label("×%d" % quantity, GrimTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT)
+	var q := WaybookTheme.label("×%d" % quantity, WaybookTheme.SMALL_SIZE, ArtPalette.GRIM_PARCHMENT)
 	q.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(q)
-	row.add_child(GrimTheme.label("%.0f" % weight, GrimTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM))
+	row.add_child(WaybookTheme.label("%.0f" % weight, WaybookTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM))
 	stack.add_child(_condition_bar(condition))
 	if days_left >= 0:
-		var rot := GrimTheme.label(tr("UI_GRIM_DAYS_LEFT") % days_left, GrimTheme.SMALL_SIZE - 2,
+		var rot := WaybookTheme.label(tr("UI_GRIM_DAYS_LEFT") % days_left, WaybookTheme.SMALL_SIZE - 2,
 			ArtPalette.GRIM_CRIMSON.lightened(0.3) if days_left <= 2 else ArtPalette.GRIM_BILE.lightened(0.2))
 		rot.position = Vector2(4, 2)
 		add_child(rot)
@@ -58,9 +58,9 @@ static func wear_material(tatter: float, frost: float, grime: float) -> ShaderMa
 		_material_cache = load(WEAR_SHADER)
 	var m := ShaderMaterial.new()
 	m.shader = _material_cache
-	m.set_shader_parameter("tatter_mask", GrimTheme.texture("tatter_mask.png"))
-	m.set_shader_parameter("frost_tex", GrimTheme.texture("frost_overlay.png"))
-	m.set_shader_parameter("grime_tex", GrimTheme.texture("grime_overlay.png"))
+	m.set_shader_parameter("tatter_mask", WaybookTheme.grim_texture("tatter_mask.png"))
+	m.set_shader_parameter("frost_tex", WaybookTheme.grim_texture("frost_overlay.png"))
+	m.set_shader_parameter("grime_tex", WaybookTheme.grim_texture("grime_overlay.png"))
 	m.set_shader_parameter("tatter", clampf(tatter, 0.0, 1.0))
 	m.set_shader_parameter("frost", clampf(frost, 0.0, 1.0))
 	m.set_shader_parameter("grime", clampf(grime, 0.0, 1.0))

@@ -20,7 +20,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _ready() -> void:
-	_tex = GrimTheme.texture("ash_flake.png")
+	_tex = WaybookTheme.grim_texture("ash_flake.png")
 
 func set_time(t: float) -> void:
 	_time = t
@@ -45,7 +45,7 @@ static func flake_position(i: int, t: float, area: Vector2) -> Vector2:
 
 func _draw() -> void:
 	if _tex == null:
-		_tex = GrimTheme.texture("ash_flake.png")
+		_tex = WaybookTheme.grim_texture("ash_flake.png")
 		if _tex == null:
 			return
 	var n := int(COUNT * density)

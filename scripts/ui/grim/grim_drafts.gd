@@ -35,13 +35,13 @@ static func _finish(root: Control, ash: float) -> void:
 		var a := AshFall.new()
 		a.density = ash
 		root.add_child(a)
-	root.add_child(GrimTheme.overlay("vignette.png", 0.95))
+	root.add_child(WaybookTheme.overlay("vignette.png", 0.95))
 
 static func _stat(caption_key: String, value: String, colour: Color) -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", -4)
-	v.add_child(GrimTheme.label(tr_key(caption_key), GrimTheme.SMALL_SIZE - 2, ArtPalette.GRIM_PARCHMENT_DIM))
-	v.add_child(GrimTheme.label(value, GrimTheme.HEADING_SIZE, colour, true))
+	v.add_child(WaybookTheme.label(tr_key(caption_key), WaybookTheme.SMALL_SIZE - 2, ArtPalette.GRIM_PARCHMENT_DIM))
+	v.add_child(WaybookTheme.label(value, WaybookTheme.HEADING_SIZE, colour, true))
 	return v
 
 static func tr_key(key: String) -> String:
@@ -56,13 +56,13 @@ static func _sep() -> Control:
 ## Üst şerit: kaynaklar, zaman, hava, etkin değiştiriciler, kervanın hali.
 static func top_bar(model: Dictionary) -> PanelContainer:
 	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", GrimTheme.bar_panel())
+	bar.add_theme_stylebox_override("panel", WaybookTheme.bar_panel())
 	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	bar.custom_minimum_size = Vector2(0, BAR_HEIGHT)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 18)
 	bar.add_child(row)
-	row.add_child(GrimTheme.label(String(model.get("city_name", "")), GrimTheme.TITLE_SIZE - 4, ArtPalette.GRIM_PARCHMENT, true))
+	row.add_child(WaybookTheme.label(String(model.get("city_name", "")), WaybookTheme.TITLE_SIZE - 4, ArtPalette.GRIM_PARCHMENT, true))
 	row.add_child(_sep())
 	row.add_child(_stat("UI_GRIM_GOLD", "%d" % int(model.get("gold", 0)), ArtPalette.GRIM_AMBER))
 	var debt := int(model.get("debt", 0))
@@ -86,7 +86,7 @@ static func top_bar(model: Dictionary) -> PanelContainer:
 	mods.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for m in model.get("modifiers", []):
 		var bad := String(m.get("kind", "bad")) == "bad"
-		mods.add_child(GrimTheme.banner_tag(tr_key(String(m["key"])) % m.get("args", []), not bad))
+		mods.add_child(WaybookTheme.banner_tag(tr_key(String(m["key"])) % m.get("args", []), not bad))
 	row.add_child(mods)
 	row.add_child(_party_strip(model.get("party", [])))
 	return bar
@@ -104,7 +104,7 @@ static func _party_strip(party: Array) -> HBoxContainer:
 		v.add_theme_constant_override("separation", 1)
 		v.custom_minimum_size = Vector2(70, 0)
 		cell.add_child(v)
-		v.add_child(GrimTheme.label(String(p["name"]), GrimTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT))
+		v.add_child(WaybookTheme.label(String(p["name"]), WaybookTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT))
 		v.add_child(_thin_bar(float(p["hp"]) / maxf(1.0, float(p["max_hp"])), ArtPalette.GRIM_CRIMSON.lightened(0.15)))
 		v.add_child(_thin_bar(float(p["stress"]) / 100.0, ArtPalette.GRIM_SLATE_LIGHT))
 		cell.tooltip_text = "%d/%d · %d" % [int(p["hp"]), int(p["max_hp"]), int(p["stress"])]
@@ -131,7 +131,7 @@ const ACTION_ICONS: Dictionary = {
 
 static func bottom_bar(keys: Array, exit_key: String) -> PanelContainer:
 	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", GrimTheme.bar_panel())
+	bar.add_theme_stylebox_override("panel", WaybookTheme.bar_panel())
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bar.offset_top = -STRIP_HEIGHT
@@ -143,15 +143,15 @@ static func bottom_bar(keys: Array, exit_key: String) -> PanelContainer:
 		var key := String(k)
 		var b: Button
 		if ACTION_ICONS.has(key):
-			b = GrimTheme.icon_button(tr_key(key), String(ACTION_ICONS[key]))
+			b = WaybookTheme.icon_button(tr_key(key), String(ACTION_ICONS[key]))
 		else:
-			b = GrimTheme.button(tr_key(key))
+			b = WaybookTheme.button(tr_key(key))
 			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(gap)
-	var exit := GrimTheme.crimson_button(tr_key(exit_key))
+	var exit := WaybookTheme.crimson_button(tr_key(exit_key))
 	exit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(exit)
 	return bar
@@ -356,14 +356,14 @@ static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -
 	var column := Control.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var title := GrimTheme.label("WAYBORNE", TITLE_FONT_SIZE, ArtPalette.MENU_TITLE_GOLD, true)
+	var title := WaybookTheme.label("WAYBORNE", TITLE_FONT_SIZE, ArtPalette.MENU_TITLE_GOLD, true)
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pin(title, TITLE_COLUMN_X, TITLE_Y - 0.012)
 	column.add_child(title)
 	# Görev Y-G08: oyunun motifi fener, adın yanında küçük bir amblem.
 	# Menünün ışığı ateş kalıyor (kullanıcı kararı: ateş ve fener birlikte).
 	var emblem := TextureRect.new()
-	emblem.texture = GrimTheme.texture("lantern_emblem.png")
+	emblem.texture = WaybookTheme.grim_texture("lantern_emblem.png")
 	emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	emblem.modulate = Color(0.92, 0.86, 0.74)
@@ -384,7 +384,7 @@ static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -
 	column.add_child(menu)
 	menu.force_hover(hovered)
 	if not lineage.is_empty():
-		var line := GrimTheme.label(tr_key("UI_GRIM_LINEAGE_LINE") % [String(lineage.get("name", "")),
+		var line := WaybookTheme.label(tr_key("UI_GRIM_LINEAGE_LINE") % [String(lineage.get("name", "")),
 			int(lineage.get("generation", 1)), int(lineage.get("day", 1))], LINEAGE_FONT_SIZE, ArtPalette.MENU_TEXT_DIM)
 		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_pin(line, TITLE_COLUMN_X + 10.0 / 1920.0, LINEAGE_Y)
@@ -432,13 +432,13 @@ static func trade(model: Dictionary) -> Control:
 
 static func _goods_column(heading: String, rows: Array, theirs: bool) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", GrimTheme.iron_panel(0.9))
+	panel.add_theme_stylebox_override("panel", WaybookTheme.iron_panel(0.9))
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	panel.add_child(col)
-	col.add_child(GrimTheme.label(heading, GrimTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true))
+	col.add_child(WaybookTheme.label(heading, WaybookTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true))
 	for r in rows:
 		col.add_child(_goods_row(r, theirs))
 	return panel
@@ -452,15 +452,15 @@ static func _goods_row(r: Dictionary, theirs: bool) -> HBoxContainer:
 	name_col.add_theme_constant_override("separation", -2)
 	name_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var item := ItemCatalog.get_item(id)
-	name_col.add_child(GrimTheme.label(tr_key(item.item_name_key) if item != null else id, GrimTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
+	name_col.add_child(WaybookTheme.label(tr_key(item.item_name_key) if item != null else id, WaybookTheme.BODY_SIZE, ArtPalette.GRIM_PARCHMENT))
 	var sub := tr_key("UI_GRIM_WEIGHT_QTY") % [float(item.unit_weight) if item != null else 0.0, int(r.get("qty", 0))]
-	name_col.add_child(GrimTheme.label(sub, GrimTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM))
+	name_col.add_child(WaybookTheme.label(sub, WaybookTheme.SMALL_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM))
 	row.add_child(name_col)
 	if theirs:
 		var meter := MarketMeter.new()
 		meter.set_state(float(r.get("stock", 0.5)), float(r.get("mult", 1.0)), bool(r.get("shocked", false)))
 		row.add_child(meter)
-	var price := GrimTheme.label("%d" % int(r.get("price", 0)), GrimTheme.HEADING_SIZE, ArtPalette.GRIM_AMBER, true)
+	var price := WaybookTheme.label("%d" % int(r.get("price", 0)), WaybookTheme.HEADING_SIZE, ArtPalette.GRIM_AMBER, true)
 	price.custom_minimum_size = Vector2(52, 0)
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(price)
@@ -470,17 +470,17 @@ static func _scales_column(model: Dictionary) -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.custom_minimum_size = Vector2(420, 0)
 	col.add_theme_constant_override("separation", 8)
-	col.add_child(GrimTheme.label(tr_key("UI_GRIM_SCALES_HEADING"), GrimTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true))
+	col.add_child(WaybookTheme.label(tr_key("UI_GRIM_SCALES_HEADING"), WaybookTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true))
 	var scales := TradeScales.new()
 	scales.custom_minimum_size = Vector2(420, 360)
 	scales.set_values(float(model.get("trade_ask", 120)), float(model.get("trade_offer", 96)), true)
 	col.add_child(scales)
-	var note := GrimTheme.label(tr_key("UI_GRIM_SCALES_NOTE") % [int(model.get("trade_rounds", 2))],
-		GrimTheme.BODY_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM)
+	var note := WaybookTheme.label(tr_key("UI_GRIM_SCALES_NOTE") % [int(model.get("trade_rounds", 2))],
+		WaybookTheme.BODY_SIZE - 1, ArtPalette.GRIM_PARCHMENT_DIM)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(note)
-	var hint := GrimTheme.label(tr_key("UI_GRIM_SCARCITY_LEGEND"), GrimTheme.SMALL_SIZE - 1, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.8))
+	var hint := WaybookTheme.label(tr_key("UI_GRIM_SCARCITY_LEGEND"), WaybookTheme.SMALL_SIZE - 1, Color(ArtPalette.GRIM_PARCHMENT_DIM, 0.8))
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(hint)
@@ -521,7 +521,7 @@ static func inventory(model: Dictionary) -> Control:
 
 static func _grid_panel(heading: String, cells: Array, columns: int, capacity: float) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", GrimTheme.iron_panel(0.92))
+	panel.add_theme_stylebox_override("panel", WaybookTheme.iron_panel(0.92))
 	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
@@ -531,10 +531,10 @@ static func _grid_panel(heading: String, cells: Array, columns: int, capacity: f
 		load += float(c["weight"])
 	var head := HBoxContainer.new()
 	col.add_child(head)
-	var h := GrimTheme.label(heading, GrimTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true)
+	var h := WaybookTheme.label(heading, WaybookTheme.HEADING_SIZE + 2, ArtPalette.GRIM_PARCHMENT, true)
 	h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(h)
-	head.add_child(GrimTheme.label("%.0f / %.0f" % [load, capacity], GrimTheme.BODY_SIZE,
+	head.add_child(WaybookTheme.label("%.0f / %.0f" % [load, capacity], WaybookTheme.BODY_SIZE,
 		ArtPalette.GRIM_CRIMSON.lightened(0.3) if load > capacity * 0.9 else ArtPalette.GRIM_PARCHMENT_DIM))
 	var grid := GridContainer.new()
 	grid.columns = columns
@@ -572,7 +572,7 @@ static func hud(model: Dictionary) -> Control:
 	root.add_child(top_bar(model))
 	_add_notice_host(root)
 	var plate := PanelContainer.new()
-	plate.add_theme_stylebox_override("panel", GrimTheme.plate_box(false, Vector4(18, 12, 18, 10)))
+	plate.add_theme_stylebox_override("panel", WaybookTheme.plate_box(false, Vector4(18, 12, 18, 10)))
 	root.add_child(plate)
 	plate.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	plate.offset_left = 24

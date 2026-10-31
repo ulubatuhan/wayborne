@@ -260,7 +260,7 @@ func _fallen_row(entry: Dictionary, leaders: Dictionary) -> Control:
 	text.add_theme_constant_override("separation", 0)
 	row.add_child(text)
 	var name_line := StruckLine.new().setup(String(entry.get("name", "")), false).set_on_page(true)
-	name_line.label.add_theme_font_override("font", GrimTheme.title_font())
+	name_line.label.add_theme_font_override("font", WaybookTheme.title_font())
 	name_line.label.add_theme_font_size_override("font_size", FALLEN_NAME_SIZE)
 	name_line.rise = FALLEN_STRIKE_RISE
 	text.add_child(name_line)
@@ -341,7 +341,7 @@ func _page_heading(text: String) -> Label:
 ## kırmızı değil - kan adların üstündeki çizgide).
 func _fallen_heading(text: String) -> Label:
 	var heading := _page_label(text)
-	heading.add_theme_font_override("font", GrimTheme.title_font())
+	heading.add_theme_font_override("font", WaybookTheme.title_font())
 	heading.add_theme_font_size_override("font_size", FALLEN_HEADING_SIZE)
 	heading.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
 	heading.custom_minimum_size = Vector2(0, FALLEN_HEADING_SIZE * 1.6)

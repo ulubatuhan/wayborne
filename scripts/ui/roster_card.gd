@@ -163,7 +163,7 @@ func _build_name() -> Control:
 func _style_name(label: Label) -> void:
 	label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	label.add_theme_font_override("font", GrimTheme.title_font())
+	label.add_theme_font_override("font", WaybookTheme.title_font())
 	label.add_theme_font_size_override("font_size", NAME_FONT_SIZE)
 	label.add_theme_color_override("font_color", ArtPalette.UI_TEXT)
 
@@ -192,7 +192,7 @@ func _draw_badge(target: Control) -> void:
 	var centre := target.size * 0.5
 	target.draw_circle(centre, radius, Color(ArtPalette.INK, 0.55))
 	target.draw_arc(centre, radius, 0.0, TAU, 48, ArtPalette.GOLD, 2.0, true)
-	var font := GrimTheme.title_font()
+	var font := WaybookTheme.title_font()
 	var number := str(character.level)
 	var text_size := font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, BADGE_FONT_SIZE)
 	var baseline := centre.y + (font.get_ascent(BADGE_FONT_SIZE) - font.get_descent(BADGE_FONT_SIZE)) * 0.5

@@ -714,7 +714,7 @@ func _build_gauge_plate() -> Control:
 	holder.add_theme_constant_override("margin_top", GAUGE_PLATE_MARGIN)
 	holder.add_theme_constant_override("margin_right", GAUGE_PLATE_MARGIN + 6)
 	var plate := PanelContainer.new()
-	plate.add_theme_stylebox_override("panel", GrimTheme.plate_box(false, Vector4(14, 8, 14, 4)))
+	plate.add_theme_stylebox_override("panel", WaybookTheme.plate_box(false, Vector4(14, 8, 14, 4)))
 	plate.mouse_filter = Control.MOUSE_FILTER_PASS
 	holder.add_child(plate)
 	var row := HBoxContainer.new()

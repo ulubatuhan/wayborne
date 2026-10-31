@@ -28,10 +28,10 @@ pikseli oyuna girmedi**; alınan şey düzen, oran, palet ve kural.
 |---|---|---|
 | Referans oyun - kasaba | Önden, mürekkepli, sıcak pencereli kasaba; arkada tepede kale; sol üstte arma ve sancak; binanın üstüne gelince kontur ve aydınlanma; altta koyu şerit, kaynaklar solda, kızıl gömme düğme sağda | `CityFront`, `town_scene.py` + `town_post.py` |
 | Referans oyun - kadro | Sağda dikey kişi kartları: amblem, ad, sınıf/seviye, can çubuğu, on boncuklu stres | `CityFront._card` |
-| Referans oyun - ikonlar | Alt şeritte kutusuz, resmin kendisi olan düğmeler | `GrimTheme.icon_button`, `ui_kit.py` madalyonları |
+| Referans oyun - ikonlar | Alt şeritte kutusuz, resmin kendisi olan düğmeler | `WaybookTheme.icon_button`, `ui_kit.py` madalyonları |
 | Frostpunk | Sıcaklık bir derece; soğuk bir sistem soğuk renkte | `SurvivalGauge.set_celsius` |
 | Wartales | Manzaranın üstünde sağda koyu bir menü şeridi | Başlık ekranı |
-| Banner Saga | Yırtık kızıl sancak - haber ve uyarı bir kumaş parçası | `GrimTheme.banner_tag`, şehir sancağı |
+| Banner Saga | Yırtık kızıl sancak - haber ve uyarı bir kumaş parçası | `WaybookTheme.banner_tag`, şehir sancağı |
 | KCD | Parşömen yalnızca belge olan yerde | Haber kartı (`GrimNotice`) |
 | This War of Mine | Karanlık zemin, kurşun kalem çizgi | Render'ın mürekkep geçişi |
 
@@ -117,7 +117,7 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 |---|---|
 | `CityFront` | Önden bakan, düzenli şehir ekranı; `venue_pressed(scene_path)` CityView ile aynı sinyal, `nav_pressed(key)` alt şerit |
 | `venue_highlight.gdshader` | Maskeye göre mekân vurgusu |
-| `GrimTheme` | Yazı yüzleri, şerit/levha/sancak kutuları, madalyon ve kızıl düğme |
+| `WaybookTheme` (eski `GrimTheme`) | Yazı yüzleri, şerit/levha/sancak kutuları, madalyon ve kızıl düğme |
 | `SurvivalGauge` | Şişe, alev (Celsius), leke - sayı yanında |
 | `GrimNotice`, `TradeScales`, `MarketMeter`, `WornCell` | İlk turda onaylandı |
 | `AshFall`, `SmokeWisps`, `LanternGlow`, `InkMenu` | Atmosfer ve kutusuz menü |
@@ -154,7 +154,7 @@ CJK dillerinde ilk ikisi kitap yüzüne düşer (fallback zinciri).
 
 ## 7. Onaydan sonra uygulama sırası
 
-1. GrimTheme'in kalıcı parçaları WaybookTheme'e (yüzler, şerit/levha/sancak,
+1. ✓ GrimTheme'in kalıcı parçaları WaybookTheme'e (2026-10-31; `GrimTheme` sınıfı kalktı, doku okuyucusu `WaybookTheme.grim_texture`) (yüzler, şerit/levha/sancak,
    GRIM paleti); `test_waybook_theme.gd` yeni kuralla güncellenir.
 2. ✓ Şehir: `city_map.tscn`'de CityView yerine `CityFront`; CityBriefPanel
    satırları levhalara ve kartlara dağılır; `test_navigation.gd` grafiği.
