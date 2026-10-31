@@ -3639,7 +3639,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "kısmen",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-C21"
    ],
@@ -3648,7 +3648,7 @@
    "paket": "P07",
    "sira": 218,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir. | 2026-10-31: PlagueWorld (nüfus, bulaşma, yollarla yayılma, kervanın taşıması, bağışıklığın sönmesi) ve plague_news (görülür/duyulur); ölçüm kurallar-ekonomi Plague Rules."
   },
   {
    "id": "Y-C26",

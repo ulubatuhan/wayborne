@@ -937,6 +937,9 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 		CaravanLedger.KIND_LED, player_character.character_name, 0, 1,
 		player_character.character_id
 	)
+	plague = PlagueWorld.new()
+	plague.setup(hash(caravan_name))
+	plague_news = {}
 
 	owned_wagon_count = STARTING_WAGONS
 	_sync_wagon_inventories()
@@ -2196,6 +2199,7 @@ func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 ## (bkz. road_journey.gd - günlüğe not düşer).
 func advance_day() -> Array[String]:
 	total_days_elapsed += 1
+	plague.step()
 
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
@@ -2590,8 +2594,32 @@ var profiteering_sales: int = 0
 func has_plague(location_id: String) -> bool:
 	if world_events.has_kind_on_city(WorldEvents.Kind.PLAGUE, location_id, total_days_elapsed):
 		return true
-	var location := WorldMapData.get_location_by_id(location_id)
-	return location != null and WorldEvents.natural_plague(location.region, total_days_elapsed)
+	return plague.is_sick(location_id)
+
+## Vebanın arka plan modeli (Y-C25): nüfus, bulaşma, yollarla yayılma. Kayıtta.
+var plague: PlagueWorld = PlagueWorld.new()
+## Oyuncunun bildiği: yer -> {"day", "sick"}. Veba bildirilmez; görülür ya da
+## duyulur (kullanıcı notu: "nerede veba olup olmadığı da öğrendiğimiz bir haber
+## olmalı yolda ya da şehirde"). Kayıtta.
+var plague_news: Dictionary = {}
+
+func learn_plague(location_id: String) -> void:
+	if WorldMapData.get_location_by_id(location_id) == null:
+		return
+	plague_news[location_id] = {"day": total_days_elapsed, "sick": has_plague(location_id)}
+
+## Bilinen son haber; hiç duyulmadıysa boş.
+func plague_news_for(location_id: String) -> Dictionary:
+	return plague_news.get(location_id, {})
+
+## Eski kayıt: model yoksa kurulur ve kaydın gününe kadar ilerletilir.
+const PLAGUE_CATCH_UP_DAYS: int = 400
+func _ensure_plague() -> void:
+	if not plague.cities.is_empty():
+		return
+	plague.setup(hash(caravan_name))
+	for _d in mini(total_days_elapsed, PLAGUE_CATCH_UP_DAYS):
+		plague.step()
 
 const NEUTRAL_GROUND_ID: String = "serai_duvenmor"
 
@@ -3746,6 +3774,8 @@ func finish_journey() -> Dictionary:
 	change_stress(-get_city_rest_relief())
 	change_party_fatigue(-FATIGUE_CITY_RELIEF)
 
+	# Vebalı yerden gelen kervan hastalığı da getirir (Y-C25).
+	plague.carry(journey_origin_id, journey_destination_id)
 	_record_map_trail(journey_origin_id, journey_destination_id)
 	_note_route_trip(journey_origin_id, journey_destination_id)
 	road_position = {}
@@ -3766,6 +3796,7 @@ func finish_journey() -> Dictionary:
 	bought_here = {}
 	_restock_current_location()
 	record_seen_prices(current_location_id)
+	learn_plague(current_location_id)
 	_plague_on_arrival()
 	heal_party()
 
@@ -4389,6 +4420,8 @@ func to_save_dict() -> Dictionary:
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
 		"world_events": world_events.to_save_dict(),
+		"plague": plague.to_dict(),
+		"plague_news": plague_news.duplicate(true),
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
@@ -4523,6 +4556,9 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	market.load_from_dict(data.get("market", {}) as Dictionary)
 	route_conditions.load_from_dict(data.get("route_conditions", {}) as Dictionary)
 	world_events.load_from_dict(data.get("world_events", {}) as Dictionary)
+	plague = PlagueWorld.new()
+	plague.load_from_dict(data.get("plague", {}) as Dictionary)
+	plague_news = (data.get("plague_news", {}) as Dictionary).duplicate(true)
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
 	# sayısındayken doğru sığar (bkz. `_sync_wagon_inventories`). Eskiden
@@ -4704,6 +4740,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 			market_stock[str(item_id)] = maxi(0, int(stock_data[item_id]))
 
 	_load_journey_block(data.get("journey", {}) as Dictionary)
+	_ensure_plague()
 
 ## Koşulların baktığı düz sözlük. Her olay değerlendirmesinde bir kez
 ## kurulur, tek tek koşullar bunun üzerinde tahsisatsız çalışır.

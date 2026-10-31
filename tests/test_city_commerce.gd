@@ -581,17 +581,68 @@ func _test_caravanserai_rumor_bonus(t) -> void:
 	t.ok(session.get_news_chance_bonus() > city, "kervansarayda söylenti payı yüksek")
 
 
-# Y-C25: veba kartsız bir bölge hâli; hesaplanır (aynı gün aynı sonuç),
-# Gokyurt en sağlıklı, Vadi en ağır.
+# Y-C25 (kullanıcı düzeltmesi): veba kendiliğinden gelip gitmez. Nüfus,
+# bulaşma ve yollar: tohumdan aynı, yollarla yayılır, ölü sayar, söndükten
+# sonra bağışıklık sönünce geri dönebilir; Gokyurt Vadi'den az hastalanır;
+# oyuncu yalnızca gördüğünü ve duyduğunu bilir.
 func _test_plague_is_a_world_state(t) -> void:
-	var days := {"gocebe": 0, "vadi": 0}
-	for day in 2000:
-		for region in days:
-			t.eq(WorldEvents.natural_plague(region, day), WorldEvents.natural_plague(region, day), "veba yeniden hesaplanınca aynı")
-			if WorldEvents.natural_plague(region, day):
-				days[region] = int(days[region]) + 1
-	t.ok(int(days["vadi"]) > int(days["gocebe"]) * 2, "Vadi Gokyurt'tan çok daha sık vebalı")
-	t.ok(int(days["gocebe"]) > 0, "Gokyurt da hiç kurtulmuş değil")
+	var a := PlagueWorld.new()
+	var b := PlagueWorld.new()
+	a.setup(77)
+	b.setup(77)
+	var sick_days := {}
+	var region_days := {"gocebe": 0, "vadi": 0}
+	var region_cities := {"gocebe": 0, "vadi": 0}
+	for location in WorldMapData.get_locations():
+		if region_cities.has(location.region):
+			region_cities[location.region] = int(region_cities[location.region]) + 1
+	var start_sick := 0
+	for id in a.cities:
+		if a.sick_share(id) > 0.0:
+			start_sick += 1
+	t.eq(start_sick, PlagueWorld.SEED_CITIES, "salgın iki şehirde başlıyor")
+	for day in 720:
+		a.step()
+		b.step()
+		for location in WorldMapData.get_locations():
+			if a.is_sick(location.location_id):
+				sick_days[location.location_id] = int(sick_days.get(location.location_id, 0)) + 1
+				if region_days.has(location.region):
+					region_days[location.region] = int(region_days[location.region]) + 1
+	t.eq(a.to_dict(), b.to_dict(), "aynı tohum aynı salgın")
+	t.ok(sick_days.size() > PlagueWorld.SEED_CITIES, "veba yollarla başka şehirlere yayıldı (%d şehir)" % sick_days.size())
+	var gocebe := float(region_days["gocebe"]) / maxf(1.0, float(region_cities["gocebe"]))
+	var vadi := float(region_days["vadi"]) / maxf(1.0, float(region_cities["vadi"]))
+	t.ok(vadi > gocebe, "Vadi Gokyurt'tan sık vebalı (şehir başına %.0f / %.0f gün)" % [vadi, gocebe])
+	var deaths := 0
+	for id in a.cities:
+		deaths += a.dead(id)
+	t.ok(deaths > 0, "veba ölü sayıyor")
+	print("    veba: 720 günde %d yerleşim vebalı oldu, %d ölü; Vadi %.0f, Gokyurt %.0f gün/şehir" % [sick_days.size(), deaths, vadi, gocebe])
+
+	var session := _session()
+	session.plague = PlagueWorld.new()
+	session.plague.setup(5)
+	var target := ""
+	for id in session.plague.cities:
+		if session.plague.sick_share(id) > 0.0:
+			target = id
+	session.plague.cities[target]["i"] = 0.2
+	t.ok(session.has_plague(target), "vebalı şehir vebalı")
+	t.ok(session.plague_news_for(target).is_empty(), "duyulmayan veba bilinmez")
+	session.learn_plague(target)
+	t.ok(bool(session.plague_news_for(target)["sick"]), "duyulunca bilinir")
+	var clean := ""
+	for id in session.plague.cities:
+		if session.plague.sick_share(id) == 0.0:
+			clean = id
+			break
+	session.plague.carry(target, clean)
+	t.ok(session.plague.sick_share(clean) > 0.0, "kervan vebayı vardığı yere taşır")
+	var copy := GameSession.new()
+	copy.load_from_dict(session.to_save_dict())
+	t.eq(copy.plague.to_dict(), session.plague.to_dict(), "salgın kayıttan döner")
+	t.eq(copy.plague_news, session.plague_news, "haberler kayıttan döner")
 
 
 # Y-C29: Duvenmor yasağı kayıtta durur.

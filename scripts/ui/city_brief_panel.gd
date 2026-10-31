@@ -185,10 +185,12 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 	headline.autowrap_mode = TextServer.AUTOWRAP_WORD
 	box.add_child(headline)
 
-	# Veba bir dünya hâli (Y-C25): gidilecek şehirde varsa kart açılmadan söylenir.
-	if _session.has_plague(route.to_location_id):
+	# Veba (Y-C25): yalnızca bilinen haber söylenir; ne zaman duyulduğuyla.
+	var news := _session.plague_news_for(route.to_location_id)
+	if bool(news.get("sick", false)):
 		var plague := Label.new()
-		plague.text = tr("UI_BRIEF_ROUTE_PLAGUE")
+		var age := _session.total_days_elapsed - int(news.get("day", 0))
+		plague.text = tr("UI_BRIEF_ROUTE_PLAGUE") if age <= 0 else tr("UI_BRIEF_ROUTE_PLAGUE_OLD") % age
 		plague.autowrap_mode = TextServer.AUTOWRAP_WORD
 		plague.modulate = URGENT_COLOR
 		box.add_child(plague)

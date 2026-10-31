@@ -54,28 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **19** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
-
-## Paket P07
-
-### Y-C25 · Veba bir dünya hâli: kart açılmadan görünür
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C21
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C25 Veba bir dünya hâli: kart açılmadan görünür**
-  - **Onay turu (2026-10-31):** kısmen. Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir.
-  - **Durum (2026-10-31):** kısmen. İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20).
-  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **Kim:** C
-  - **Ne:** Veba genel bir durum. Etkileri kart açılmadan görülür: şehrin görünüşü ve kapısı, yol, pazar, işe alınacak insanlar, kervanın sağlığı. Bölgeye göre farklılık var. İlgili olaylar ayrıca olabilir.
-  - **Kullanıcı notu:** "Veba genel bir durum olmalı, bununla ilgili olaylar olabilir ama event card çıkmadan da etkilerini görmeliyiz. Bölgeye göre farklılık olmalı."
-  - **Kabul:** Veba altındaki bir şehir ve yolun, kart açılmadan farkı gösterilen görüntüsü; etkiler test edilir.
-
-</details>
+Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P10
 

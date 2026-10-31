@@ -302,7 +302,12 @@ func _road_news(character: CharacterData, role: String) -> String:
 	return tr("UI_TALK_ROAD_NEWS") % [
 		destination.location_name if destination != null else route.to_location_id,
 		_session.get_route_travel_days(route), int(round(_session.get_route_danger(route) * 100.0)),
-	]
+	] + _plague_word(route.to_location_id)
+
+## Yolun haberiyle o yerin vebası da duyulur (Y-C25): veba bildirilmez, anlatılır.
+func _plague_word(location_id: String) -> String:
+	_session.learn_plague(location_id)
+	return (" " + tr("UI_TALK_PLAGUE_THERE")) if _session.has_plague(location_id) else ""
 
 ## Yolcu defteri (Y-C28): kervansarayın sahibi kimin hangi yöne geçtiğini
 ## yazar. Zar yok: defterde yazan kesin, ama gün eskidir; söylediği fiyat
@@ -316,10 +321,10 @@ func _traveller_ledger() -> String:
 		var route: TravelRoute = routes.pop_at(rng.randi_range(0, routes.size() - 1))
 		_session.learn_route(_session.current_location_id, route.to_location_id)
 		var destination := WorldMapData.get_location_by_id(route.to_location_id)
-		lines.append(tr("UI_TALK_LEDGER_LINE") % [
+		lines.append((tr("UI_TALK_LEDGER_LINE") % [
 			rng.randi_range(1, 5), destination.location_name if destination != null else route.to_location_id,
 			int(round(_session.get_route_danger(route) * 100.0)),
-		])
+		]) + _plague_word(route.to_location_id))
 		if _session.get_price_rumor_block_reason(route.to_location_id).is_empty() and index == 0:
 			_session.hear_price_rumor(route.to_location_id)
 	return "\n".join(lines)

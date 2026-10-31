@@ -698,3 +698,17 @@ ever fell, and the career simulation had already measured the result
   fails, it shows whether the game actually loops. It mirrors the road
   screen's `_process` order deliberately, so what it verifies is what the
   screen does.
+
+## Plague Rules (Y-C25, kullanıcı düzeltmesi 2026-10-31)
+
+- **Veba kendiliğinden gelip gitmez.** `PlagueWorld` her yerleşim için nüfus ve sağlam/hasta/iyileşmiş payı tutar;
+  her gün (`GameSession.advance_day`) şehir içinde bulaşır, yollar boyunca komşuya sızar (yol günüyle söner), hastalar
+  iyileşir ya da ölür (ölüler sayılır), iyileşenin bağışıklığı yavaş söner. Kervan vebalı yerden geldiyse vardığı
+  yere taşır (`carry`). Bölge yatkınlığı `WorldEvents.PLAGUE_REGION_SHARE`'den: Gokyurt en sağlıklı, Vadi en ağır.
+- **Ölçüm (2026-10-31, BETA 0,12, 720 gün):** Vadi şehir günlerinin %35'i vebalı; Sınır, Güney, İmparatorluk, Maden
+  ~%19; Dağ %8; Gokyurt ve Ahit %0; iki yılda nüfusun ~%10'u ölür. Sayı değişirse bu satır yeniden ölçülür.
+- **Veba bildirilmez, öğrenilir.** Oyuncunun bildiği `plague_news` (yer -> gün, vebalı mı): bulunduğu şehirde görür,
+  meyhanede yol haberiyle ve kervansarayın yolcu defteriyle duyar. Şehir özeti yalnızca bilineni ve kaç gün önce
+  duyulduğunu söyler. Oyun mekaniği (kriz, bulaşma, kartlar) gerçeği okur, arayüz haberi.
+- Kayıtta durur; modeli olmayan eski kayıt kurulup kaydın gününe kadar ilerletilir (en çok 400 gün).
+
