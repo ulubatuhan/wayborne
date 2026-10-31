@@ -1182,6 +1182,51 @@
    1024
   ]
  },
+ "ARY-ilan_panosu": {
+  "kutular": {
+   "civi": [
+    1372,
+    1112,
+    666,
+    928
+   ],
+   "ilan_1": [
+    690,
+    168,
+    666,
+    928
+   ],
+   "ilan_2": [
+    1372,
+    168,
+    666,
+    928
+   ],
+   "ilan_3": [
+    8,
+    1112,
+    666,
+    928
+   ],
+   "ilan_4": [
+    690,
+    1112,
+    666,
+    928
+   ],
+   "pano": [
+    8,
+    168,
+    666,
+    928
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   2048
+  ]
+ },
  "ARY-ink_blot": {
   "asil": [
    768,
@@ -1654,6 +1699,63 @@
   "tuval": [
    1024,
    1024
+  ]
+ },
+ "ARY-kart_cerceve": {
+  "kutular": {
+   "ahit": [
+    690,
+    1426,
+    666,
+    613
+   ],
+   "dag": [
+    1372,
+    168,
+    666,
+    613
+   ],
+   "gokyurt": [
+    8,
+    168,
+    666,
+    613
+   ],
+   "guney": [
+    8,
+    1426,
+    666,
+    613
+   ],
+   "imparatorluk": [
+    1372,
+    797,
+    666,
+    613
+   ],
+   "maden": [
+    8,
+    797,
+    666,
+    613
+   ],
+   "sinir": [
+    690,
+    797,
+    666,
+    613
+   ],
+   "vadi": [
+    690,
+    168,
+    666,
+    613
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   2048
   ]
  },
  "ARY-kit_button_primary": {
@@ -9820,6 +9922,21 @@
    1800
   ]
  },
+ "OLY-captive_strangers": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
  "OLY-carcass_on_road": {
   "kutular": {
    "cizim": [
@@ -9910,7 +10027,37 @@
    1800
   ]
  },
+ "OLY-duvenmor_quarrel": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
  "OLY-forage": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-hidden_guide": {
   "kutular": {
    "cizim": [
     8,
@@ -10075,6 +10222,21 @@
    1800
   ]
  },
+ "OLY-penitent_procession": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
  "OLY-profiteer_recognized": {
   "kutular": {
    "cizim": [
@@ -10150,7 +10312,67 @@
    1800
   ]
  },
+ "OLY-road_warden": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
  "OLY-rogue_mage": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-serai_bandit": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-serai_open": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-serai_ruin": {
   "kutular": {
    "cizim": [
     8,
@@ -10210,7 +10432,37 @@
    1800
   ]
  },
+ "OLY-taken_captive": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
  "OLY-traveling_tinker": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-untouched_village": {
   "kutular": {
    "cizim": [
     8,
@@ -10241,6 +10493,21 @@
   ]
  },
  "OLY-wanderer_revenge": {
+  "kutular": {
+   "cizim": [
+    8,
+    168,
+    1784,
+    1624
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   1800,
+   1800
+  ]
+ },
+ "OLY-wandering_players": {
   "kutular": {
    "cizim": [
     8,
@@ -10778,6 +11045,39 @@
    1024
   ]
  },
+ "SAH-bataklik_sis": {
+  "kutular": {
+   "sis_1": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "sis_2": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "sis_3": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "sis_4": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
  "SAH-bulut": {
   "kutular": {
    "bulut_1": [
@@ -10922,6 +11222,33 @@
     8,
     168,
     2032,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
+ "SAH-durak_kervansaray": {
+  "kutular": {
+   "acik": [
+    8,
+    168,
+    666,
+    848
+   ],
+   "harabe": [
+    690,
+    168,
+    666,
+    848
+   ],
+   "haydut": [
+    1372,
+    168,
+    666,
     848
    ]
   },
