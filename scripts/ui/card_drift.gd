@@ -28,6 +28,14 @@ static func pivot_share_at(u: float) -> float:
 static func attach(picture: Control, reduce_motion: bool) -> void:
 	if reduce_motion:
 		return
+	# Kart resmi ağaca girmeden kuruluyor; ağaç dışındaki düğümün tween'i
+	# null döner (CI screenshots, 2026-10-31). Ağaca girince başlar.
+	if not picture.is_inside_tree():
+		picture.tree_entered.connect(func() -> void: _start(picture), CONNECT_ONE_SHOT)
+		return
+	_start(picture)
+
+static func _start(picture: Control) -> void:
 	var tween := picture.create_tween()
 	tween.tween_method(func(u: float) -> void:
 		picture.pivot_offset = Vector2(picture.size.x * pivot_share_at(u), picture.size.y * 0.5)
