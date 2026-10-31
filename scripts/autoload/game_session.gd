@@ -2036,10 +2036,19 @@ func get_buy_price_multiplier() -> float:
 ## (söylentiye yakın) ve tellal (dedikoduyu toplayan). Satın alma yok.
 const NEWS_CULTURE_SHARE: float = 0.5
 const NEWS_TELLAL_SHARE: float = 0.6
+## Kervansarayda her yerden yolcu var (Y-C28): söylenti şehirdekinden kolay.
+const NEWS_CARAVANSERAI_SHARE: float = 0.2
 
 func get_news_chance_bonus() -> float:
 	var culture := (1.0 - get_player_culture().rumor_difficulty) * NEWS_CULTURE_SHARE
-	return maxf(0.0, culture) + get_duty_discount(DutyCatalog.TELLAL) * NEWS_TELLAL_SHARE
+	var bonus := maxf(0.0, culture) + get_duty_discount(DutyCatalog.TELLAL) * NEWS_TELLAL_SHARE
+	if is_at_caravanserai():
+		bonus += NEWS_CARAVANSERAI_SHARE
+	return bonus
+
+func is_at_caravanserai() -> bool:
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	return location != null and location.settlement_type == SettlementRules.CARAVANSERAI
 
 ## Tüm seferler boyunca ilerleyen gün sayacı (bkz. road_journey.gd
 ## _on_advance_day). journey_days_remaining bir seferin kalan gününü

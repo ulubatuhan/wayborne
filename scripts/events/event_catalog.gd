@@ -2175,6 +2175,10 @@ static func _bandit_tribute_zone_news() -> GameEvent:
 ## savaşı açıyor (TRIGGER_COMBAT), pazarlık haydut pususunun kendi
 ## OPT_HAGGLE'ıyla aynı vokabüleri kullanmıyor çünkü burada pazarlık
 ## payı yok - bir haraç, teklif değil.
+## Haracın erzakla ödenen karşılığı (Y-C32): dört ağızlı bir kervanın iki
+## günlük payı.
+const TOLL_PROVISIONS: int = 8
+
 static func _bandit_tribute_toll() -> GameEvent:
 	var event := _event("evt_bandit_tribute_toll", "EVT_TRIBUTE_TOLL_TITLE", "EVT_TRIBUTE_TOLL_TEXT", 1.6)
 	event.cooldown_days = 3
@@ -2187,6 +2191,16 @@ static func _bandit_tribute_toll() -> GameEvent:
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 70)]),
 			_effects([
 				EventEffect.make(EventEffect.Type.GOLD, -70),
+			])
+		),
+		# Y-C32: kıtlıkta haraççı para kadar unu da ister. Bedel sofradan
+		# çıkar; planlayıcının erzak hesabına girmez, çünkü gönüllü seçenek.
+		_gated_choice(
+			"EVT_TRIBUTE_TOLL_OPT_PROVISIONS", "EVT_TRIBUTE_TOLL_OPT_PROVISIONS_LOCKED",
+			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, TOLL_PROVISIONS)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -TOLL_PROVISIONS),
+				EventEffect.make(EventEffect.Type.MORALE, -4),
 			])
 		),
 		_choice("EVT_TRIBUTE_TOLL_OPT_RESIST", _effects([

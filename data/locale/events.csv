@@ -284,6 +284,8 @@
 "EVT_TRIBUTE_TOLL_TEXT","Haydut kralının silahlı tahsildarları yolu kesiyor. Ya haracı ödersin ya da yolunu yumrukla açarsın.","The bandit king's armed collectors block the road. Pay the tribute, or fight your way through.","","","","","","","","",""
 "EVT_TRIBUTE_TOLL_OPT_PAY","Haracı öde (70 GG)","Pay the tribute (70 GG)","","","","","","","","",""
 "EVT_TRIBUTE_TOLL_OPT_PAY_LOCKED","Haracı ödeyecek kadar altının yok","Not enough gold to pay the tribute","","","","","","","","",""
+"EVT_TRIBUTE_TOLL_OPT_PROVISIONS","Haracı erzakla öde (8 erzak)","Pay the tribute in provisions (8 provisions)","","","","","","","","",""
+"EVT_TRIBUTE_TOLL_OPT_PROVISIONS_LOCKED","Verecek kadar erzak yok","Not enough provisions to give","","","","","","","","",""
 "EVT_TRIBUTE_TOLL_OPT_RESIST","Direniş göster","Resist","","","","","","","","",""
 "EVT_LEAVE_WOUNDED_TITLE","Köyün Kapısında","At the Village Gate","","","","","","","","",""
 "EVT_LEAVE_WOUNDED_TEXT","Yaralı yoldaşınız artık yürüyemiyor. Köyün yaşlıları onu yanlarında tutabileceklerini söylüyor - karşılığında kervanın bir kısım erzağını paylaşmaya da razılar. Taşımak kervanı yavaşlatır; bırakmak onu bir daha görememek demek olabilir.","Your wounded companion can no longer walk. The village elders say they could keep them - and they would even share some stores in return. Carrying them slows the caravan; leaving them may mean never seeing them again.","","","","","","","","",""

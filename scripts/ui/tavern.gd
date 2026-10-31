@@ -43,6 +43,12 @@ var _price_rumor_list: VBoxContainer
 var _treated: Dictionary = {}
 var _asked: Dictionary = {}
 var _asked_prices: Dictionary = {}
+## Yolcu defteri (Y-C28) bu ziyarette okundu mu.
+var _ledger_read: bool = false
+## Konuşulan kişinin rolü (defteri yalnızca kervansarayın sahibi açar).
+var _talk_role: String = ""
+## Defterde kaç yön yazılı.
+const LEDGER_ROUTES: int = 2
 var _talk: DialoguePanel
 
 @onready var _title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
@@ -228,6 +234,7 @@ func _on_person_chosen(character: CharacterData, role: String) -> void:
 	if not picked.is_empty():
 		RoadChatter.apply(character, picked, _session.total_days_elapsed)
 		opening = tr(String(picked["key"]))
+	_talk_role = role
 	_talk = DialoguePanel.new()
 	add_child(_talk)
 	_talk.choice_made.connect(_on_talk_choice.bind(character, role))
@@ -245,6 +252,8 @@ func _talk_choices(character: CharacterData) -> Array:
 		choices.append({"id": "roads", "text": tr("UI_TALK_ROADS")})
 	if not _asked_prices.has(character.character_id):
 		choices.append({"id": "prices", "text": tr("UI_TALK_PRICES")})
+	if _session.is_at_caravanserai() and not _ledger_read and _talk_role == "bartender":
+		choices.append({"id": "ledger", "text": tr("UI_TALK_LEDGER")})
 	choices.append({"id": "bye", "text": tr("UI_TALK_BYE")})
 	return choices
 
@@ -262,6 +271,11 @@ func _on_talk_choice(id: String, character: CharacterData, role: String) -> void
 		"prices":
 			_asked_prices[character.character_id] = true
 			_talk.say(_price_news(character, role), _talk_choices(character))
+			_refresh_price_rumors()
+		"ledger":
+			_ledger_read = true
+			_talk.say(_traveller_ledger(), _talk_choices(character))
+			_refresh_rows()
 			_refresh_price_rumors()
 		_:
 			_talk.close()
@@ -285,6 +299,26 @@ func _road_news(character: CharacterData, role: String) -> String:
 		destination.location_name if destination != null else route.to_location_id,
 		_session.get_route_travel_days(route), int(round(_session.get_route_danger(route) * 100.0)),
 	]
+
+## Yolcu defteri (Y-C28): kervansarayın sahibi kimin hangi yöne geçtiğini
+## yazar. Zar yok: defterde yazan kesin, ama gün eskidir; söylediği fiyat
+## yine bir söylentidir (dörtte bir yanlış olabilir).
+func _traveller_ledger() -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("traveller_ledger|%s|%d" % [_session.current_location_id, _session.total_days_elapsed])
+	var routes: Array[TravelRoute] = WorldMapData.get_routes_from(_session.current_location_id)
+	var lines: Array[String] = [tr("UI_TALK_LEDGER_OPEN")]
+	for index in mini(LEDGER_ROUTES, routes.size()):
+		var route: TravelRoute = routes.pop_at(rng.randi_range(0, routes.size() - 1))
+		_session.learn_route(_session.current_location_id, route.to_location_id)
+		var destination := WorldMapData.get_location_by_id(route.to_location_id)
+		lines.append(tr("UI_TALK_LEDGER_LINE") % [
+			rng.randi_range(1, 5), destination.location_name if destination != null else route.to_location_id,
+			int(round(_session.get_route_danger(route) * 100.0)),
+		])
+		if _session.get_price_rumor_block_reason(route.to_location_id).is_empty() and index == 0:
+			_session.hear_price_rumor(route.to_location_id)
+	return "\n".join(lines)
 
 ## Birinin bildiğini söyleme şansı: rolü, içki, kervanın kültürü ve tellalı.
 func _news_chance(character: CharacterData, role: String) -> float:
