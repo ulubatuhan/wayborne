@@ -185,6 +185,14 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 	headline.autowrap_mode = TextServer.AUTOWRAP_WORD
 	box.add_child(headline)
 
+	# Veba bir dünya hâli (Y-C25): gidilecek şehirde varsa kart açılmadan söylenir.
+	if _session.has_plague(route.to_location_id):
+		var plague := Label.new()
+		plague.text = tr("UI_BRIEF_ROUTE_PLAGUE")
+		plague.autowrap_mode = TextServer.AUTOWRAP_WORD
+		plague.modulate = URGENT_COLOR
+		box.add_child(plague)
+
 	var offers := _session.get_accepted_offers_for_destination(route.to_location_id)
 	var payout := 0
 	for offer in offers:

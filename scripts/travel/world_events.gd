@@ -58,6 +58,26 @@ const MAX_DURATION_DAYS: int = 30
 ## "started_day": int, "until_day": int}.
 var _events: Array[Dictionary] = []
 
+## Veba bir dünya hâli (Y-C25, kullanıcı kararı 2026-10-31): kart açılmadan
+## da bölge bölge dolaşır. Hesaplanır, saklanmaz (RouteConditions'ın doğal
+## hâlleri gibi): her bölge `PLAGUE_SPELL_DAYS` günlük dönemlerde, bölgesinin
+## payı kadar olasılıkla vebalıdır; dönem başları bölgeye göre kayık, yoksa
+## bütün kıta aynı sabah hastalanırdı. Gokyurt kıtanın en sağlıklı yeri,
+## Vadi en ağır (LORE §6b, §7).
+const PLAGUE_SPELL_DAYS: int = 18
+const PLAGUE_REGION_SHARE: Dictionary = {
+	"vadi": 0.40, "guney": 0.30, "sinir": 0.30, "imparatorluk": 0.25,
+	"dag_maden": 0.25, "dag": 0.20, "ahit": 0.15, "gocebe": 0.08,
+}
+
+static func natural_plague(region: String, day: int) -> bool:
+	var share := float(PLAGUE_REGION_SHARE.get(region, 0.2))
+	var offset := absi(hash("plague_offset|%s" % region)) % PLAGUE_SPELL_DAYS
+	var spell := int(floor(float(day + offset) / float(PLAGUE_SPELL_DAYS)))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("plague|%s|%d" % [region, spell])
+	return rng.randf() < share
+
 static func kind_from_id(kind_id: String) -> Kind:
 	return int(KIND_IDS.get(kind_id, Kind.REGIONAL_WAR)) as Kind
 

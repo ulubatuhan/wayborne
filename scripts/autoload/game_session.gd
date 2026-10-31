@@ -2572,8 +2572,16 @@ func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
 ## hatırlıyor (bkz. evt_profiteer_recognized). Kayda yazılıyor.
 var profiteering_sales: int = 0
 
-func is_city_in_crisis(location_id: String) -> bool:
+## Veba bu şehirde mi: bir haber kartının başlattığı salgın ya da bölgenin
+## kendi dönemi (Y-C25). Kartı görmeyen oyuncu da şehrin hâlinden okur.
+func has_plague(location_id: String) -> bool:
 	if world_events.has_kind_on_city(WorldEvents.Kind.PLAGUE, location_id, total_days_elapsed):
+		return true
+	var location := WorldMapData.get_location_by_id(location_id)
+	return location != null and WorldEvents.natural_plague(location.region, total_days_elapsed)
+
+func is_city_in_crisis(location_id: String) -> bool:
+	if has_plague(location_id):
 		return true
 	for entry in world_events.get_active_by_kind(WorldEvents.Kind.REGIONAL_WAR, total_days_elapsed):
 		if (String(entry["target"]).split("|") as Array).has(location_id):
@@ -2761,6 +2769,8 @@ func _broken_count() -> int:
 
 ## Savaş ya da veba varken kimse yola düşmek istemez (Y-C16).
 func _recruit_world_pressure() -> int:
+	if has_plague(current_location_id):
+		return 1
 	for entry in world_events.get_active(total_days_elapsed):
 		var kind := int(entry["kind"])
 		if kind == WorldEvents.Kind.REGIONAL_WAR or kind == WorldEvents.Kind.PLAGUE:
@@ -3113,7 +3123,7 @@ func _ailment_day() -> void:
 			ailment_notes.append({"key": "UI_AILMENT_FEVER_CAUGHT", "args": [character.character_name]})
 
 func _plague_on_arrival() -> void:
-	if not world_events.has_kind_on_city(WorldEvents.Kind.PLAGUE, current_location_id, total_days_elapsed):
+	if not has_plague(current_location_id):
 		return
 	market.change_medicine(current_location_id, -PLAGUE_MEDICINE_DRAIN)
 	var rng := RandomNumberGenerator.new()

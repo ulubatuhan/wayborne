@@ -18,6 +18,7 @@ func suite_name() -> String:
 	return "CityCommerce"
 
 func run(t) -> void:
+	_test_plague_is_a_world_state(t)
 	_test_gokyurt_hospitality(t)
 	_test_caravanserai_rumor_bonus(t)
 	_test_wagon_sale_never_returns_its_cost(t)
@@ -577,3 +578,16 @@ func _test_caravanserai_rumor_bonus(t) -> void:
 	session.current_location_id = "serai_seyvan"
 	t.ok(session.is_at_caravanserai(), "Seyvan kervansaray")
 	t.ok(session.get_news_chance_bonus() > city, "kervansarayda söylenti payı yüksek")
+
+
+# Y-C25: veba kartsız bir bölge hâli; hesaplanır (aynı gün aynı sonuç),
+# Gokyurt en sağlıklı, Vadi en ağır.
+func _test_plague_is_a_world_state(t) -> void:
+	var days := {"gocebe": 0, "vadi": 0}
+	for day in 2000:
+		for region in days:
+			t.eq(WorldEvents.natural_plague(region, day), WorldEvents.natural_plague(region, day), "veba yeniden hesaplanınca aynı")
+			if WorldEvents.natural_plague(region, day):
+				days[region] = int(days[region]) + 1
+	t.ok(int(days["vadi"]) > int(days["gocebe"]) * 2, "Vadi Gokyurt'tan çok daha sık vebalı")
+	t.ok(int(days["gocebe"]) > 0, "Gokyurt da hiç kurtulmuş değil")
