@@ -1296,6 +1296,7 @@
 "UI_ROAD_SERAI_BANDIT","Yol kenarındaki kervansarayın kulesinde koyu bir bez dalgalanıyor: haydutların elinde.","A dark rag flies from the caravanserai's tower by the road: bandits hold it.","","","","","","","","",""
 "UI_BRIEF_ROUTE_PLAGUE","Orada veba var: kapıda hastalık, hekimde ilaç az.","There is plague there: sickness at the gate, little medicine with the physician.","","","","","","","","",""
 "UI_MAP_BANNED","Bu kapıdan bir daha giremezsin: içeride kılıç çektin.","You may never pass this gate again: you drew a sword inside.","","","","","","","","",""
+"UI_TALK_KEEPER_BOWL","Kapının dışına her akşam bir tas çorba koyarım. Sabaha boş olur; kimin içtiğini sormam.","Every evening I set a bowl of soup outside the gate. By morning it is empty; I never ask who drank it.","","","","","","","","",""
 "UI_TALK_LEDGER","Yolcu defterine bakabilir miyim?","May I look at the travellers' ledger?","","","","","","","","",""
 "UI_TALK_LEDGER_OPEN","Defteri açar, parmağıyla satırları izler.","The keeper opens the ledger and runs a finger down the lines.","","","","","","","","",""
 "UI_TALK_LEDGER_LINE","%d gün önce %s yönüne bir kervan çıktı; yolu yüzde %d tehlikeli diye yazmışlar.","%d days ago a caravan left for %s; they wrote the road down as %d percent dangerous.","","","","","","","","",""

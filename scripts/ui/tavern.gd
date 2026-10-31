@@ -234,6 +234,10 @@ func _on_person_chosen(character: CharacterData, role: String) -> void:
 	if not picked.is_empty():
 		RoadChatter.apply(character, picked, _session.total_days_elapsed)
 		opening = tr(String(picked["key"]))
+	# Kıtlıkta kervansaray (Y-C30): sahibi kapıya yemek bırakır; bunu bir
+	# ayrıntı olarak söyler, bir mekanik olarak değil.
+	if role == "bartender" and _session.is_at_caravanserai():
+		opening = tr("UI_TALK_KEEPER_BOWL")
 	_talk_role = role
 	_talk = DialoguePanel.new()
 	add_child(_talk)
