@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **37** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **32** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -189,11 +189,12 @@ Toplam: **37** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C25
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle.
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-C34 Hacı kafilesine katılmak**
+  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle.
   - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C25 · **Kim:** CK
   - **Ne:** Avuçiçi yolunda bir kafileye katılma seçeneği: güvenli ama yavaş ve kurallı. Şart aynı inançtan olmak ya da rol yapmak; rol yapan yakalanırsa Avuçiçi'nin El'i taşıyan inançsıza cezası (Ç14'e bağlı). Kervanın inancını tutan bir değer gerekir.
   - **Kullanıcı notu:** "Ek bir seçenek olarak eklenebilir ama aynı dinden olmamız lazım ya da rol yapmalıyız."
@@ -269,11 +270,12 @@ Toplam: **37** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C17
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-C33 Ant bağı**
+  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
   - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-C17 · **Kim:** C
   - **Ne:** İki yoldaşın bağı +3'e çıkınca birbirine söz verir; söz bozulursa ağır kırgınlık. Göçebe töresinden.
   - **Kullanıcı notu:** "Gokyurt'ta ant bağı: Onay."
@@ -331,94 +333,6 @@ Toplam: **37** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
   - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
   - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
-
-</details>
-
-### Y-C26 · Vebanın hiç bulaşmadığı köyler
-
-- **Durum:** öneri · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C25
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C26 Vebanın hiç bulaşmadığı köyler**
-  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-C25 · **Kim:** C
-  - **Ne:** Bazı köylere veba hiç bulaşmamış (kurtulan değil). Oyun nedenini açıklamaz. Durak ya da olay zinciri; lore kaydı LORE.md §6b.
-  - **Kullanıcı notu:** "Vebanın hiç bulaşmadığı köyler olabilir, kurtulan köy olmasın."
-  - **Kabul:** Kartlar onaya 10'luk partiyle gider.
-
-</details>
-
-### Y-E09 · Yozlaşmış yol bekçisi kartı
-
-- **Durum:** öneri · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C31
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E09 Yozlaşmış yol bekçisi kartı**
-  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-C31 · **Kim:** C
-  - **Ne:** Yol bekçisi zayıf görünen kervandan fazla ister, fiş vermez, muaf olandan da alır.
-  - **Kullanıcı notu:** "Yozlaşmış yol bekçisi: Onay."
-  - **Kabul:** Kalite listesinden geçer; onaya 10'luk partide.
-
-</details>
-
-### Y-E10 · Esirlikten kaçış zinciri
-
-- **Durum:** öneri · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-E02
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E10 Esirlikten kaçış zinciri**
-  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E02 · **Kim:** C
-  - **Ne:** Kervandan biri ya da lider esir düşer; kaçarken gizli sebepleri olan yabancılar geçici olarak gruba katılır.
-  - **Kullanıcı notu:** "Esirlikten kaçış zinciri: Onay."
-  - **Kabul:** Zincir taslağı onaya gider.
-
-</details>
-
-### Y-E11 · Gezgin oyuncular ve tövbe alayı
-
-- **Durum:** öneri · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E11 Gezgin oyuncular ve tövbe alayı**
-  - **Durum (2026-10-31):** öneri. İki kart taslağı kart partisi 1'de, onay bekliyor.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** - · **Kim:** C
-  - **Ne:** İki yol kartı: gezgin oyuncular (küçük lütuf, haber) ve tövbe alayı (kıtlıkta yardım ister; Septisizm ve Yumruk gözünden başka okunur).
-  - **Kullanıcı notu:** "Gezgin oyuncular ve tövbe alayı: Onay."
-  - **Kabul:** Kalite listesinden geçer; onaya partide.
-
-</details>
-
-### Y-E12 · Gizli güdülü kılavuz
-
-- **Durum:** öneri · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E12 Gizli güdülü kılavuz**
-  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** - · **Kim:** C
-  - **Ne:** Kervanı bir yere götürmeyi öneren kılavuz yalnızca olayda çıkar, kiralanamaz. Saklı bir sebebi var (`NpcDisposition`).
-  - **Kullanıcı notu:** "Gizli güdülü kılavuz: Onay. (Yerel rehber kiralamak: Red, buna para verecek imkânımız olmamalı hiç.)"
-  - **Kabul:** Kart onaya partide.
 
 </details>
 

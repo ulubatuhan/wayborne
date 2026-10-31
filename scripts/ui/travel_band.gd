@@ -706,7 +706,8 @@ func _draw_celestial(area: Rect2, cover: Rect2, horizon: float) -> void:
 	# uzaklaşmak onu değiştirmemeli.)
 	var arc_y := horizon - sin(_sun_ratio * PI) * horizon * 0.72 - horizon * 0.06
 	var is_night := _night_ratio > 0.55
-	var disc := Color(0.82, 0.87, 1.0) if is_night else Color(1.0, 0.95, 0.85)
+	# Güneş de soğuk (Y-G17): disk ve halesi beyaza yakın, sarı değil.
+	var disc := Color(0.82, 0.87, 1.0) if is_night else Color(0.95, 0.96, 1.0)
 	var h := area.size.y
 	var clear := 1.0 - gloom
 	# Güneş bir disk değil ışık (taslak 12.2e): geniş soluk hale, orta hale,

@@ -161,13 +161,15 @@ const PHASE_DUSK: String = "dusk"
 const PHASE_NIGHT: String = "night"
 
 ## Görev 12.2e (onaylı taslak y_122e_yol_isik): evre başına gök, ışık, pus
-## ve ufuk bandı. Gündüz gökyüzü boğuk mavi-gri (parlak mavi değil), şafak ve
-## akşam ufukta sıcak bir bant, gece ay ışığı soğuk ama mavi parlamıyor.
+## ve ufuk bandı. Gündüz gökyüzü boğuk mavi-gri (parlak mavi değil), gece ay
+## ışığı soğuk ama mavi parlamıyor. Şafak ve akşam da soğuk ve soluk (kullanıcı
+## kararı 2026-10-31, tek sıcak kaynak: "akşam ve kış güneşi daha soğuktur");
+## gündüzden farkları daha karanlık ve morumsu-gri olmaları, turuncu değil.
 const SKIES: Dictionary = {
 	PHASE_DAWN: {
-		"top": Color(0.18, 0.20, 0.31), "bottom": Color(0.77, 0.59, 0.50),
-		"light": Color(1.00, 0.86, 0.78), "haze": Color(0.67, 0.59, 0.59),
-		"band": Color(0.94, 0.67, 0.43),
+		"top": Color(0.17, 0.19, 0.28), "bottom": Color(0.63, 0.62, 0.66),
+		"light": Color(0.88, 0.90, 0.95), "haze": Color(0.58, 0.59, 0.63),
+		"band": Color(0.79, 0.79, 0.83),
 	},
 	PHASE_DAY: {
 		"top": Color(0.36, 0.47, 0.59), "bottom": Color(0.77, 0.80, 0.78),
@@ -175,9 +177,9 @@ const SKIES: Dictionary = {
 		"band": Color(0.93, 0.89, 0.78),
 	},
 	PHASE_DUSK: {
-		"top": Color(0.23, 0.18, 0.27), "bottom": Color(0.84, 0.49, 0.32),
-		"light": Color(1.00, 0.74, 0.55), "haze": Color(0.71, 0.47, 0.43),
-		"band": Color(0.98, 0.59, 0.27),
+		"top": Color(0.17, 0.16, 0.23), "bottom": Color(0.53, 0.50, 0.56),
+		"light": Color(0.80, 0.80, 0.88), "haze": Color(0.50, 0.49, 0.55),
+		"band": Color(0.71, 0.68, 0.75),
 	},
 	PHASE_NIGHT: {
 		"top": Color(0.04, 0.05, 0.09), "bottom": Color(0.13, 0.16, 0.24),

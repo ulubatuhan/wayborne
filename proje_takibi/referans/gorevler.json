@@ -3536,7 +3536,7 @@
    "paket": "P12",
    "sira": 211,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur)."
   },
   {
    "id": "Y-G18",
@@ -3562,14 +3562,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P12",
    "sira": 213,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yönergesi docs/el_cizimi/PORTRE_YONERGESI.md; ara çözüm bust_ink.gdshader weariness (soğuk ışık, soluk renk, derin gölge)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yönergesi docs/el_cizimi/PORTRE_YONERGESI.md; ara çözüm bust_ink.gdshader weariness (soğuk ışık, soluk renk, derin gölge). | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-G20",
@@ -3577,14 +3577,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P12",
    "sira": 214,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardRegionLook: sekiz bölgenin göğü, tonu, örtüsü, çerçeve deseni; vebalı bölgede solma. Tablo: tests/screenshot_card_regions.gd."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardRegionLook: sekiz bölgenin göğü, tonu, örtüsü, çerçeve deseni; vebalı bölgede solma. Tablo: tests/screenshot_card_regions.gd. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-G21",
@@ -3592,14 +3592,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P12",
    "sira": 215,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardDrift: kart resmi açılırken yavaşça yaklaşıp kayar; Reduce Motion'da durur; ağaca girince başlar (CI düzeltmesi)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardDrift: kart resmi açılırken yavaşça yaklaşıp kayar; Reduce Motion'da durur; ağaca girince başlar (CI düzeltmesi). | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-G22",
@@ -3607,14 +3607,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P12",
    "sira": 216,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: TravelBand._draw_marsh_mist: havadan bağımsız gri-yeşil perde, zemin örtüsü, alçak tutamlar; biyom geçişiyle açılır. screenshot_road_looks marsh satırı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: TravelBand._draw_marsh_mist: havadan bağımsız gri-yeşil perde, zemin örtüsü, alçak tutamlar; biyom geçişiyle açılır. screenshot_road_looks marsh satırı. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-G23",
@@ -3622,7 +3622,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "iptal",
    "bagimli": [
     "Y-D03"
    ],
@@ -3631,7 +3631,7 @@
    "paket": "P12",
    "sira": 217,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd. | 2026-10-31 onay turu: Kullanıcı (onay turu): Red - kaldırıldı."
   },
   {
    "id": "Y-C25",
@@ -3648,7 +3648,7 @@
    "paket": "P07",
    "sira": 218,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir."
   },
   {
    "id": "Y-C26",
@@ -3656,7 +3656,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "öneri",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [
     "Y-C25"
    ],
@@ -3665,7 +3665,7 @@
    "paket": "P11",
    "sira": 219,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor. | 2026-10-31 onay turu: Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli."
   },
   {
    "id": "Y-C27",
@@ -3673,14 +3673,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 2,
    "paket": "P07",
    "sira": 220,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Gokyurt'ta (gocebe) varışta bir gece konsey öder; varış ekranında satır."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Gokyurt'ta (gocebe) varışta bir gece konsey öder; varış ekranında satır. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-C28",
@@ -3688,7 +3688,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C10"
    ],
@@ -3697,7 +3697,7 @@
    "paket": "P07",
    "sira": 221,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kervansarayda meyhaneci yolcu defterini okutur: iki yolun haberi."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kervansarayda meyhaneci yolcu defterini okutur: iki yolun haberi. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-C29",
@@ -3705,14 +3705,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P3",
-   "durum": "kısmen",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 2,
    "paket": "P07",
    "sira": 222,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Kavga kartı onaylandı."
   },
   {
    "id": "Y-C30",
@@ -3720,14 +3720,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P12",
    "sira": 223,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kıtlıkta kervansaray sahibinin kapıya bıraktığı tas: meyhane açılış satırı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kıtlıkta kervansaray sahibinin kapıya bıraktığı tas: meyhane açılış satırı. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-B14",
@@ -3735,14 +3735,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "kısmen",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 3,
    "paket": "P08",
    "sira": 224,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Duraklar onaylandı; üç kart onaylandı."
   },
   {
    "id": "Y-B15",
@@ -3750,14 +3750,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 3,
    "paket": "P08",
    "sira": 225,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kuyu durağı: yolda türetilen durak, faydası bir kez."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kuyu durağı: yolda türetilen durak, faydası bir kez. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-B16",
@@ -3765,14 +3765,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 3,
    "paket": "P08",
    "sira": 226,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kampta nadir an (akşam başına ~0,077, en az 7 gün arayla; test_waybook_pages ölçer), sinema bantları ve tek cümle, günlük o akşam lütfu yazar. tests/screenshot_mercy.gd."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kampta nadir an (akşam başına ~0,077, en az 7 gün arayla; test_waybook_pages ölçer), sinema bantları ve tek cümle, günlük o akşam lütfu yazar. tests/screenshot_mercy.gd. | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-C31",
@@ -3797,14 +3797,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 2,
    "paket": "P07",
    "sira": 228,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Haraç kartında erzakla öde seçeneği (8 erzak, moral -4)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Haraç kartında erzakla öde seçeneği (8 erzak, moral -4). | 2026-10-31 onay turu: Onay turunda onaylandı."
   },
   {
    "id": "Y-E09",
@@ -3812,7 +3812,7 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "öneri",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [
     "Y-C31"
    ],
@@ -3821,7 +3821,7 @@
    "paket": "P11",
    "sira": 229,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
   },
   {
    "id": "Y-E10",
@@ -3829,7 +3829,7 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "öneri",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [
     "Y-E02"
    ],
@@ -3838,7 +3838,7 @@
    "paket": "P11",
    "sira": 230,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
   },
   {
    "id": "Y-E11",
@@ -3846,14 +3846,14 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "öneri",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 5,
    "paket": "P11",
    "sira": 231,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
   },
   {
    "id": "Y-E12",
@@ -3861,14 +3861,14 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "öneri",
+   "durum": "onaylandı, uygulanacak",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 5,
    "paket": "P11",
    "sira": 232,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
   },
   {
    "id": "Y-C33",
@@ -3885,7 +3885,7 @@
    "paket": "P09",
    "sira": 233,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer."
   },
   {
    "id": "Y-C34",
@@ -3902,7 +3902,7 @@
    "paket": "P07",
    "sira": 234,
    "kim": "CK",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle."
   },
   {
    "id": "Y-H08",
@@ -3910,14 +3910,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Ses ve atmosfer",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 6,
    "paket": "P13",
    "sira": 235,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: AudioManager.hush: feda ve ölümden sonra müzik susar, adım, nefes, sürünme; yer tutucu sesler."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: AudioManager.hush: feda ve ölümden sonra müzik susar, adım, nefes, sürünme; yer tutucu sesler. | 2026-10-31 onay turu: Onay turunda onaylandı (sesler yer tutucu)."
   },
   {
    "id": "Y-C35",
@@ -3925,7 +3925,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "kısmen",
    "bagimli": [
     "Y-C02"
    ],
@@ -3934,7 +3934,7 @@
    "paket": "P07",
    "sira": 236,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı."
   },
   {
    "id": "Y-A08",

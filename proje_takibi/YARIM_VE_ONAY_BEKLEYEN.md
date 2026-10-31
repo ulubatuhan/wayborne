@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P07
 
@@ -63,11 +63,12 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P07 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C21
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20).
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir.
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-C25 Veba bir dünya hâli: kart açılmadan görünür**
+  - **Onay turu (2026-10-31):** kısmen. Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir.
   - **Durum (2026-10-31):** kısmen. İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20).
   - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **Kim:** C
   - **Ne:** Veba genel bir durum. Etkileri kart açılmadan görülür: şehrin görünüşü ve kapısı, yol, pazar, işe alınacak insanlar, kervanın sağlığı. Bölgeye göre farklılık var. İlgili olaylar ayrıca olabilir.
@@ -78,13 +79,14 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ### Y-C29 · Tarafsız zemin: Duvenmor
 
-- **Durum:** kısmen · **Öncelik:** P3 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P3 · **Paket:** P07 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Kavga kartı onaylandı.
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-C29 Tarafsız zemin: Duvenmor**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kavga kartı onaylandı.
   - **Durum (2026-10-31):** kısmen. Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor.
   - **Öncelik:** P3 · **Dalga:** 2 · **Bağımlı:** - · **Kim:** C
   - **Ne:** Duvenmor'un içinde kılıç çekilmez; çeken kervan bir daha giremez. Tetikleyici bir yol düşmanlığının kervansarayda sürmesi (rakip kervan, intikamcı tüccar).
@@ -93,17 +95,37 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-C35 · İlan panosu
+
+- **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C02
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C35 İlan panosu**
+  - **Onay turu (2026-10-31):** kısmen. Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı.
+  - **Durum (2026-10-31):** test bekliyor. Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C02 · **Kim:** C
+  - **Ne:** Kontrat panosunun adı İlan Panosu olur; kafile ve sürücü ilanları da aynı panoda.
+  - **Kullanıcı notu:** "Bu ilanlar da kontrat panosunda olabilir. Bu panoya kontrat panosu yerine ilan panosu deriz mesela."
+  - **Kabul:** Çeviri anahtarları ve ekran görüntüsü.
+
+</details>
+
 ## Paket P08
 
 ### Y-B14 · Yol kenarı kervansarayları
 
-- **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Duraklar onaylandı; üç kart onaylandı.
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-B14 Yol kenarı kervansarayları**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Duraklar onaylandı; üç kart onaylandı.
   - **Durum (2026-10-31):** kısmen. Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor.
   - **Öncelik:** P2 · **Dalga:** 3 · **Bağımlı:** - · **Kim:** C
   - **Ne:** Yol üstünde kervansaray durakları: çoğu eskimiş, ücra ama açık; çok azı kapanmış harabe; bazıları haydutların elinde. Oyun metninde "han" denmez, kervansaray denir. Harita verisi (`build_settlements.py`) ve durak kartı düzeni (`near_<durak>`).
@@ -209,6 +231,99 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-C26 · Vebanın hiç bulaşmadığı köyler
+
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C25
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor. | 2026-10-31 onay turu: Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C26 Vebanın hiç bulaşmadığı köyler**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli.
+  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-C25 · **Kim:** C
+  - **Ne:** Bazı köylere veba hiç bulaşmamış (kurtulan değil). Oyun nedenini açıklamaz. Durak ya da olay zinciri; lore kaydı LORE.md §6b.
+  - **Kullanıcı notu:** "Vebanın hiç bulaşmadığı köyler olabilir, kurtulan köy olmasın."
+  - **Kabul:** Kartlar onaya 10'luk partiyle gider.
+
+</details>
+
+### Y-E09 · Yozlaşmış yol bekçisi kartı
+
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C31
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E09 Yozlaşmış yol bekçisi kartı**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart partisi 1 onaylandı.
+  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-C31 · **Kim:** C
+  - **Ne:** Yol bekçisi zayıf görünen kervandan fazla ister, fiş vermez, muaf olandan da alır.
+  - **Kullanıcı notu:** "Yozlaşmış yol bekçisi: Onay."
+  - **Kabul:** Kalite listesinden geçer; onaya 10'luk partide.
+
+</details>
+
+### Y-E10 · Esirlikten kaçış zinciri
+
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-E02
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E10 Esirlikten kaçış zinciri**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart partisi 1 onaylandı.
+  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E02 · **Kim:** C
+  - **Ne:** Kervandan biri ya da lider esir düşer; kaçarken gizli sebepleri olan yabancılar geçici olarak gruba katılır.
+  - **Kullanıcı notu:** "Esirlikten kaçış zinciri: Onay."
+  - **Kabul:** Zincir taslağı onaya gider.
+
+</details>
+
+### Y-E11 · Gezgin oyuncular ve tövbe alayı
+
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E11 Gezgin oyuncular ve tövbe alayı**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart partisi 1 onaylandı.
+  - **Durum (2026-10-31):** öneri. İki kart taslağı kart partisi 1'de, onay bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** İki yol kartı: gezgin oyuncular (küçük lütuf, haber) ve tövbe alayı (kıtlıkta yardım ister; Septisizm ve Yumruk gözünden başka okunur).
+  - **Kullanıcı notu:** "Gezgin oyuncular ve tövbe alayı: Onay."
+  - **Kabul:** Kalite listesinden geçer; onaya partide.
+
+</details>
+
+### Y-E12 · Gizli güdülü kılavuz
+
+- **Durum:** onaylandı, uygulanacak · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E12 Gizli güdülü kılavuz**
+  - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart partisi 1 onaylandı.
+  - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de, onay bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** Kervanı bir yere götürmeyi öneren kılavuz yalnızca olayda çıkar, kiralanamaz. Saklı bir sebebi var (`NpcDisposition`).
+  - **Kullanıcı notu:** "Gizli güdülü kılavuz: Onay. (Yerel rehber kiralamak: Red, buna para verecek imkânımız olmamalı hiç.)"
+  - **Kabul:** Kart onaya partide.
+
+</details>
+
 ## Paket P12
 
 ### Y-G11T · Masa ekranı şablonunu görsel taslakla göster
@@ -272,16 +387,36 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C22
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda).
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur).
 
 <details><summary>Görev metni</summary>
 
 - [ ] **Y-G17 Tek sıcak kaynak: kural ve bütün sahnelerin denetimi**
+  - **Onay turu (2026-10-31):** kısmen. Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur).
   - **Durum (2026-10-31):** kısmen. Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda).
   - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C22 · **Kim:** CO
   - **Ne:** Dünyada sıcak renk yalnızca bir ışık kaynağından gelir: ateş, fener, meşale, pencere ışığı, defter sayfası. Kural `kurallar-sanat` Art Rules'a yazıldı. Kalan: yol, şehir, savaş, hub, kervansaray ve kart görsellerinin denetim listesi, aykırı olanların sırayla düzeltilmesi; her düzeltme ekran görüntüsüyle.
   - **Kullanıcı notu:** "Tek sıcak kaynak: Onay. Bunu gene kurallara yaz çünkü buna göre çok düzenleme gerekecek."
   - **Kabul:** Denetim listesi `docs/ui/` altında; her sahne için önce ve sonra görüntüsü.
+
+</details>
+
+### Y-G23 · Soy sonu: ufukta yürüyen adlar
+
+- **Durum:** iptal · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-D03
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd. | 2026-10-31 onay turu: Kullanıcı (onay turu): Red - kaldırıldı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G23 Soy sonu: ufukta yürüyen adlar**
+  - **Onay turu (2026-10-31):** iptal. Kullanıcı (onay turu): Red - kaldırıldı.
+  - **Durum (2026-10-31):** test bekliyor. LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd.
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** Y-D03 · **Kim:** CO
+  - **Ne:** Soy bitince üstü çizili adların sahipleri ufukta siluet olarak yürür. Ortaçağın ölüm dansı geleneğinden; filmin karesinden değil.
+  - **Kullanıcı notu:** "Soy sonu: ufukta adlar: Onay."
+  - **Kabul:** Bitiş ekranının görüntüsü onaylandı.
 
 </details>
 
