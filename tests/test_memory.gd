@@ -13,6 +13,7 @@ func suite_name() -> String:
 	return "Memory"
 
 func run(t) -> void:
+	_test_lineage_procession_walks_the_dead(t)
 	_test_save_writes_are_atomic_with_backup(t)
 	_test_hired_recruit_does_not_return_after_reload(t)
 	_test_market_stock_survives_reload(t)
@@ -917,3 +918,22 @@ func _test_city_brief_model_without_a_scene(t) -> void:
 	t.ok(bool(memory["mourning"]), "yakın bir ölüm yas kurdelesi taşır")
 	session.total_days_elapsed += CityBriefModel.MOURNING_DAYS + 1
 	t.ok(not bool(CityBriefModel.build_memory(session)["mourning"]), "yas günlerce sürer, sonsuza dek değil")
+
+## Soy sonunda ufukta yalnızca ölenler yürür, ölüm sırasıyla, her biri bir kez (Y-G23).
+func _test_lineage_procession_walks_the_dead(t) -> void:
+	var ledger := CaravanLedger.new()
+	ledger.record(CaravanLedger.KIND_DIED, "Aybike", 3)
+	ledger.record(CaravanLedger.KIND_DEPARTED, "Gidip Giden", 5)
+	ledger.record(CaravanLedger.KIND_DIED, "Tolun", 9)
+	ledger.record(CaravanLedger.KIND_DIED, "Aybike", 9)
+	var names := LineageProcession.names_from(ledger)
+	t.eq(names, ["Aybike", "Tolun"] as Array[String], "ölenler sırayla, bir kez; ayrılan yürümez")
+	for i in 20:
+		ledger.record(CaravanLedger.KIND_DIED, "Ölü %d" % i, 20 + i)
+	t.eq(LineageProcession.names_from(ledger).size(), LineageProcession.MAX_WALKERS, "sıra uzunluğu sınırlı")
+	var width := 600.0
+	var span := width + LineageProcession.SPACING
+	for time in [0.0, 37.0, 900.0]:
+		var x := LineageProcession.walker_x(0, time, width, 5)
+		t.ok(x >= -LineageProcession.SPACING and x <= span, "yürüyen sahneden kaybolmaz (t=%s)" % time)
+	t.ok(LineageProcession.walker_x(0, 10.0, width, 5) > LineageProcession.walker_x(0, 0.0, width, 5), "sıra sağa yürür")

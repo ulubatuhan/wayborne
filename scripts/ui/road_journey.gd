@@ -3798,6 +3798,13 @@ func _show_run_over() -> void:
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body.modulate = LOCKED_COLOR
 	_arrival_panel.add_child(body)
+	# Defterde üstü çizili adlar ufukta yürür (Y-G23).
+	var procession := LineageProcession.new()
+	procession.names = LineageProcession.names_from(_session.ledger)
+	procession.still = UserSettings.reduce_motion
+	procession.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not procession.names.is_empty():
+		_arrival_panel.add_child(procession)
 
 	if _is_live_journey:
 		SaveManager.save_session(_session)
