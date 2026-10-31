@@ -3260,6 +3260,7 @@ func _framed_text_key(event: GameEvent) -> String:
 func _build_event_illustration(event_id: String) -> Control:
 	var file_name: String = EVENT_CARD_ART.get(event_id, "")
 	var path := "res://data/assets/ui/waybook/" + file_name
+	var look := _card_look()
 	if file_name.is_empty() or not ResourceLoader.exists(path):
 		# Kendi resmi olmayan olay da resimsiz açılmaz: kervanın yürüdüğü yolun
 		# manzarası (kullanıcı notu: olaya ait görsel kartın içinde, EU4 gibi).
@@ -3268,6 +3269,7 @@ func _build_event_illustration(event_id: String) -> Control:
 			return null
 		var vignette := EventVignette.new()
 		vignette.biome = biome
+		vignette.look = look
 		vignette.darkness = JourneyClock.darkness_for_hour(_clock.get_hour_of_day())
 		vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
 		vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3276,6 +3278,7 @@ func _build_event_illustration(event_id: String) -> Control:
 		vignette_frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
 		vignette_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		vignette_frame.add_child(vignette)
+		vignette_frame.add_child(CardRegionLook.overlay(look))
 		CardDrift.attach(vignette, UserSettings.reduce_motion)
 		return vignette_frame
 	var frame := Control.new()
@@ -3288,9 +3291,22 @@ func _build_event_illustration(event_id: String) -> Control:
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	picture.set_anchors_preset(Control.PRESET_FULL_RECT)
 	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	picture.modulate = Color(look.tint)
 	frame.add_child(picture)
+	frame.add_child(CardRegionLook.overlay(look))
 	CardDrift.attach(picture, UserSettings.reduce_motion)
 	return frame
+
+## Kartın görünüşü kervanın bulunduğu bölgeden (Y-G20): yolun ilk yarısında
+## çıkılan şehrin bölgesi, ikinci yarısında varılacak olanınki. Veba o
+## bölgenin şehrinde varsa resim solmuş açılır.
+func _card_look() -> Dictionary:
+	var place_id := _session.journey_origin_id
+	if _journey != null and _journey.days_covered * 2.0 >= float(_journey.journey_length_days):
+		place_id = _session.journey_destination_id
+	var place := WorldMapData.get_location_by_id(place_id)
+	var region := place.region if place != null else ""
+	return CardRegionLook.look_for(region, place != null and _session.has_plague(place_id))
 
 func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	# Görünüm WaybookTheme'in düğme sekmesinden geliyor: EU4'ün kartında

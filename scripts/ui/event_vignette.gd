@@ -15,6 +15,8 @@ const BAND_SCALE: float = 1.7
 var biome: String = ""
 ## Kartın ışığı günün saatine uysun: 0 gün ışığı, 1 gece.
 var darkness: float = 0.0
+## Bölgenin kart görünüşü (bkz. CardRegionLook.look_for); boşsa eski renkler.
+var look: Dictionary = {}
 
 static func available(biome_id: String) -> bool:
 	return not biome_id.is_empty() and RoadStrips.has_biome(biome_id)
@@ -26,16 +28,21 @@ func _init() -> void:
 func _draw() -> void:
 	if not available(biome) or size.x < 8.0:
 		return
-	var tint := Color(1, 1, 1).lerp(Color(0.32, 0.34, 0.45), clampf(darkness, 0.0, 1.0))
+	var base_tint: Color = Color(look.get("tint", Color(1, 1, 1)))
+	var tint := base_tint.lerp(Color(0.32, 0.34, 0.45), clampf(darkness, 0.0, 1.0))
+	var sky_top: Color = Color(look.get("sky_top", SKY_TOP))
+	var sky_bottom: Color = Color(look.get("sky_bottom", SKY_BOTTOM))
 	var feet := size.y * FEET_LINE
 	var steps := 24
 	for i in steps:
 		var u := float(i) / float(steps)
 		var y0 := feet * u
-		draw_rect(Rect2(0, y0, size.x, feet / float(steps) + 1.0), SKY_TOP.lerp(SKY_BOTTOM, u) * tint)
+		draw_rect(Rect2(0, y0, size.x, feet / float(steps) + 1.0), sky_top.lerp(sky_bottom, u) * tint)
 	var band := size.y * BAND_SCALE
 	var cover := Rect2(Vector2.ZERO, size)
 	RoadStrips.draw_layer(self, biome, RoadStrips.FAR, band, 0.0, cover, feet - size.y * 0.12, tint.darkened(0.1))
 	RoadStrips.draw_layer(self, biome, RoadStrips.MID, band, 120.0, cover, feet - size.y * 0.05, tint)
 	RoadStrips.draw_layer(self, biome, RoadStrips.GROUND, band, 60.0, cover, feet, tint)
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.04, 0.03, 0.9), false, 2.0)
+	# Bölge görünüşü varsa çerçeveyi üstteki CardRegionLook çizer.
+	if look.is_empty():
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.04, 0.03, 0.9), false, 2.0)

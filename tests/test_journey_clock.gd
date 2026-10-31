@@ -21,6 +21,7 @@ func run(t) -> void:
 	_test_save_round_trip(t)
 	_test_arrival_hour_colours_the_city(t)
 	_test_marsh_mist_follows_the_blend(t)
+	_test_card_look_by_region(t)
 
 func _test_speed_selection(t) -> void:
 	var clock := JourneyClock.new()
@@ -226,3 +227,20 @@ func _test_marsh_mist_follows_the_blend(t) -> void:
 	t.eq(TravelBand.marsh_weight({"from": m, "to": m, "ratio": 0.0}), 1.0, "bataklıkta sis tam")
 	t.eq(TravelBand.marsh_weight({"from": s, "to": m, "ratio": 0.25}), 0.25, "bataklığa girerken sis açılıyor")
 	t.eq(TravelBand.marsh_weight({"from": m, "to": s, "ratio": 0.25}), 0.75, "bataklıktan çıkarken sis kapanıyor")
+
+## Kartın görünüşü bölgeye göre, kartın türüne göre değil (Y-G20); veba resmi soldurur.
+func _test_card_look_by_region(t) -> void:
+	var regions := CardRegionLook.LOOKS.keys()
+	t.eq(regions.size(), 8, "sekiz bölgenin sekiz görünüşü")
+	var steppe := CardRegionLook.look_for("gocebe", false)
+	var valley := CardRegionLook.look_for("vadi", false)
+	t.ok(Color(steppe.sky_bottom) != Color(valley.sky_bottom), "iki bölgenin göğü farklı")
+	t.ok(Color(steppe.tint).v >= Color(valley.tint).v, "Gokyurt'un resmi vadininkinden açık")
+	var sick := CardRegionLook.look_for("vadi", true)
+	t.ok(float(sick.wash_alpha) > float(valley.wash_alpha), "veba örtüyü kalınlaştırıyor")
+	t.ok(Color(sick.tint).v < Color(valley.tint).v, "veba resmi soldurur")
+	t.eq(String(CardRegionLook.look_for("", false).region), CardRegionLook.DEFAULT_REGION, "bilinmeyen bölge varsayılana düşer")
+	for region in regions:
+		var look := CardRegionLook.look_for(String(region), false)
+		var bottom := Color(look.sky_bottom)
+		t.ok(bottom.s < 0.25, "%s göğü soluk (tek sıcak kaynak)" % region)
