@@ -1,12 +1,12 @@
 ---
 name: denge-olcum
-description: Wayborne'da bir oyun sayısını (fiyat, hasar, olasılık, eşik, stres, erzak, kampanya kapısı) değiştirmeden önce ve sonra ölçmek, denge raporu almak için kullan. simulate_journeys ve simulate_career'ı doğru koşturur, sonucu ölçüm kurallarına göre okur.
+description: Wayborne'da bir oyun sayısını (fiyat, hasar, olasılık, eşik, stres, erzak, kariyer eşiği) değiştirmeden önce ve sonra ölçmek, denge raporu almak için kullan. simulate_journeys ve simulate_career'ı doğru koşturur, sonucu ölçüm kurallarına göre okur.
 ---
 
 # Denge ölçümü
 
 Kural kitabının özü: **bir mekanik indiğinde yeniden ölçülmezse, kimsenin görmediği bir denge değişikliğidir.**
-Ölçülmüş tablolar ilgili kural becerisinde (Ruin Rules ve savaş: `kurallar-savas`; kampanya, erzak, moral, stres:
+Ölçülmüş tablolar ilgili kural becerisinde (Ruin Rules ve savaş: `kurallar-savas`; erzak, moral, stres, şehir:
 `kurallar-ekonomi`, `kurallar-karakter`). Ölçülmüş ve korunan sistemler kesilmez (CLAUDE.md, Vaat ve Sütunlar).
 
 ## 1. Önce ölç

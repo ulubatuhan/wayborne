@@ -64,7 +64,7 @@ yükle** (Skill aracı ya da dosyayı oku). Bir iş birden çok sisteme değiyor
 | `kurallar-sanat` | Audio, Art, Rendered Road, Prop | çizim, palet, sahne, render edilmiş yol ve eşya, ses |
 | `kurallar-figur` | Wardrobe & Rig | insan ve hayvan figürü, giysi, iskelet, render hattı, yürüyüş |
 | `kurallar-arayuz` | Title Screen, Waybook UI, Motion, scripts/world, World Navigation, Save & Menu, Localization | ekran, tema, hareket, gezinme, kayıt, çeviri |
-| `kurallar-ekonomi` | Campaign, City Hub, Caravan Ruin, Provision, Morale, Economy, Kervan Envanteri, Haggling, Reputation, Playthrough Start | pazar, şehir, kampanya, borç, vagon, erzak, moral, itibar, başlangıç |
+| `kurallar-ekonomi` | City Hub, Caravan Ruin, Provision, Morale, Economy, Kervan Envanteri, Haggling, Reputation, Playthrough Start | pazar, şehir, borç, vagon, erzak, moral, itibar, başlangıç |
 | `kurallar-test` | Testing (ayrıntı) | test, simülatör, ekran görüntüsü aracı, ölçüm |
 | `ekran-dogrula` | (iş akışı) | oyuncunun gördüğü bir şey değiştiğinde "bitti" demeden önce |
 | `gorev` | (iş akışı) | `proje_takibi/` görev kaydına iş eklemek, durum değiştirmek |
@@ -89,7 +89,7 @@ wayborne/
 ├── CLAUDE.md              # This file
 ├── scenes/                # Game scenes (*.tscn files)
 ├── scripts/
-│   ├── campaign/          # Story spine: chapters and their objectives
+│   ├── campaign/          # Ledger, lineage archive, start origins (no scenario system)
 │   ├── economy/           # Economy & trade system scripts
 │   ├── travel/            # Map, routes & caravan logistics scripts
 │   ├── events/            # Event & dialogue system scripts
@@ -420,10 +420,10 @@ verir.
   - Sınır: güç ve ödül sistemleri kesilmez, bedelli olur (derinleşme, asla sadeleştirme); bir sistemin kalkmasına
     kullanıcı karar verir. "Doğru stoklayan aç kalmaz" sözü korunur.
 - **Film ve kervan fikirleri (kullanıcı, 2026-10-31; görevler Y-G17..Y-G23, Y-C25..Y-C35, Y-B14..Y-B16,
-  Y-E09..Y-E12, Y-H08, Y-A08).** Ayrıntı `proje_takibi/referans/gorevler/14_film_kervan_fikirleri.md`. Öne çıkanlar:
+  Y-E09..Y-E12, Y-H08, Y-A08).** Ayrıntı `proje_takibi/referans/gorevler/15_film_kervan_fikirleri.md`. Öne çıkanlar:
   tek sıcak kaynak kuralı (`kurallar-sanat`), veba bir dünya hâli (kart açılmadan görünür), yol kenarı kervansarayları,
-  geçiş belgesi, portreler baştan yorgun. **Konforlu final yok:** oyun kıtlık içinde kervanı ilerletmek ve ek
-  görevlerle geçer (Y-A08).
+  geçiş belgesi, portreler baştan yorgun. **Senaryo sistemi yok (2026-10-31):** beş
+  bölümlü kampanya kaldırıldı; oyun kıtlık içinde kervanı ilerletmek ve ek görevlerle geçer, konforlu final yok (Y-A08).
 - **Haritada adı olan her yer oynanabilir olmalı (kullanıcı, 2026-10-29).** Bugün 27 yerleşim oynanabilir; obalar,
   kabile yurtları, mezralar, manastırlar, kuleler ve harabeler yalnızca harita adı. Hepsi bir durak, olay ya da
   ziyaret edilebilir yer olarak oyuna girmeli. Lore'un bu yerler için verdiği bilgi (`docs/lore/LORE.md` §15) bu işin

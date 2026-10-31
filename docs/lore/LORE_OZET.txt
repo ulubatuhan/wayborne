@@ -94,7 +94,7 @@ TARİHÇE - YAZARIN BİLDİĞİ SIRA
 - (Yazar) Göçebe boyları Han'ın çağrısıyla birleşti ve imparatorluğa karşı savaştı; imparatorluk dize geldi ve parçalandı; büyük savaşın sonunda başkent yakıldı; boylar obalarına döndü.
 - (Yazar) Parçalanma: Vaelghard kalıntıyı topladı; Vadi şehirleri bağımsızlık ilan etti; Alex Kanlı Baron oldu; lonca Orsolune'ye taşındı; Vaelghard Orvahel'i kurdu; El inancı Septisizm ve Yumruk diye bölündü; Tolvarin ve Kirsavel ayrıldı; mülteciler sınıra yığıldı.
 - (Yazar) Bugün: Kral Reynald, Baron Daemon, Birinci Okuyucu V. Leon, Han Arsalkan Obası'ndan, Leon Bey ve Vasko Bey, Demirbalta kabilesi, Orsolune Konseyi.
-- (Oyun) Kurucu: babandı; hastalanınca kervanı borcuyla devretti. Oyunun zamanı: İlk Yol, Bir Kadro, Ağ, Temiz Defter, Kendi Hanın; kuşaklar boyu ad devredilir.
+- (Oyun) Kurucu: babandı; hastalanınca kervanı borcuyla devretti. Oyunun bir senaryosu yok: kervan kıtlık içinde ilerler, ek görevler var; kuşaklar boyu ad devredilir.
 
 HARİTA: ADI KONMUŞ YERLER
 - (Harita) Manastırlar: Sessiz El, İlk Sayfa, Açık Kapı, Yamalı Çatı, Taşsoluk.

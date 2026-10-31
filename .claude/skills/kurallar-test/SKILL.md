@@ -37,7 +37,7 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   line, grievances, starvation deaths (and that a fed caravan never counts a
   hungry day), the chosen heir, named crew dying with their wagon,
   profiteering memory, `LEAVE_BEHIND`/`PARTY_HP`, the stop cards, the
-  finale's memory gate, `EventResolver`, `JourneyController`, and a
+  that a loss cannot be bought, `EventResolver`, `JourneyController`, and a
   mid-journey save round trip that replays **the same dice** after a reload.
 - `test_motion.gd`, `test_combat_fx.gd` and `test_ui_feel.gd` (Faz 20) lock
   the motion layer's contracts rather than its look: every curve starts and
@@ -174,13 +174,12 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
   many times: is a journey profitable, is combat winnable, does morale move.
   `simulate_career.gd` runs one caravan's *life* through the real city loop
   — market, contract board, caravan yard — for forty journeys, and reports
-  where gold, reputation, wagons and campaign chapters land (see Campaign
-  Rules for the numbers). Anything about progression over time needs the
-  second tool; the first cannot see it, which is exactly why the campaign
-  thresholds shipped unmeasured the first time.
+  where gold, reputation, wagons and contracts land. Anything about
+  progression over time needs the second tool; the first cannot see it.
 - **A balance report needs more than one policy, for the same reason ruin
   tuning needed two knobs.** `simulate_career.gd` runs three — expand
-  aggressively, stay lean and haul contracts, and follow the campaign — and
+  aggressively, stay lean and haul contracts, and stay lean for ten journeys
+  before expanding — and
   the first two disagree so sharply (11 contracts delivered vs 41) that
   either one alone would have given a confidently wrong answer.
 

@@ -1,232 +1,13 @@
 ---
 name: kurallar-ekonomi
-description: Wayborne kural kitabının "Ekonomi, şehir, kampanya, erzak ve borç" bölümü (CLAUDE.md'den taşındı). Şunlara dokunmadan, şunları tasarlamadan ya da şunlar hakkında karar vermeden önce yükle: pazar ve fiyat katmanları, MarketConditions, pazarlık (HagglingSession), kontrat panosu, şehir özeti (CityBriefPanel), kampanya bölümleri, borç (DebtLedger), vagon alıp satma, vagon envanteri ve atölye, erzak formülü, moral, itibar, oyun başlangıcı, simulate_career. Bozulmaması gerekenleri ve nedenlerini tutar.
+description: Wayborne kural kitabının "Ekonomi, şehir, erzak ve borç" bölümü (CLAUDE.md'den taşındı). Şunlara dokunmadan, şunları tasarlamadan ya da şunlar hakkında karar vermeden önce yükle: pazar ve fiyat katmanları, MarketConditions, pazarlık (HagglingSession), kontrat panosu, şehir özeti (CityBriefPanel), kampanya bölümleri, borç (DebtLedger), vagon alıp satma, vagon envanteri ve atölye, erzak formülü, moral, itibar, oyun başlangıcı, simulate_career. Bozulmaması gerekenleri ve nedenlerini tutar.
 ---
 
-# Ekonomi, şehir, kampanya, erzak ve borç
+# Ekonomi, şehir, erzak ve borç
 
 CLAUDE.md'nin bu bölümleri 2026-10-30'da kullanıcı kararıyla buraya taşındı; metin değişmedi, başlıklar aynı. Koddaki
 "bkz. CLAUDE.md <başlık>" başvuruları buraya bakar. Kural becerilerinin listesi CLAUDE.md'de ("Kural becerileri").
-Bölümler: Campaign Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
-
-### Campaign Rules
-
-The game has a story with an ending, and trade that can run forever after
-it. `scripts/campaign/` is that spine: `CampaignChapter` (one beat) and
-`CampaignCatalog` (the ordered five).
-
-- **A chapter objective is an `EventCondition`, not a new language.** Event
-  triggers already read a flat context dictionary, cheaply and with tests
-  behind them. Writing a second "quest condition" vocabulary would mean two
-  ways to say the same thing, diverging from day one. Objectives are the
-  same sentences.
-- **But they read a different context.** `build_campaign_context()`
-  describes the caravan's *career* — journeys completed, contracts
-  delivered, cities seen, wagons owned; `build_event_context()` describes
-  the journey happening *now*. A chapter objective reading the event context
-  would complete and un-complete on every arrival, because `finish_journey()`
-  resets the caravan. Add a career counter rather than reaching into the
-  road's numbers.
-- **A closed chapter never reopens.** Chapters advance by index and are
-  never re-evaluated, so "amass 2500 gold" stays earned after the gold is
-  spent. Progress that a purchase could undo is not progress.
-- **The finale is a threshold, not a stop.** `is_finale` shows an epilogue;
-  the purse, the roads and the market carry on exactly as before — the same
-  shape as the `GOAL_GOLD` screen's "Devam Et". `tests/test_campaign.gd`
-  asserts the game still works after the last chapter closes, because that
-  is the promise most easily broken by accident.
-- **Chapters close at arrival, and more than one may close at once.** The
-  check runs at the *end* of `finish_journey()`, after the payout, the
-  delivery count and the new city are recorded — otherwise a chapter would
-  always close one journey late. A long journey that satisfies two chapters
-  closes both; making the player sail back and forth for the bookkeeping
-  would be a worse game.
-- **Each chapter sets a flag on completion, and that is how the story
-  reaches the road.** An event can gate itself on `HAS_FLAG` — the campaign
-  plugs into the event pool that already exists instead of inventing a
-  parallel one.
-- **Campaign progress lives in the save.** Same reasoning as
-  `last_feast_day` and `RouteConditions`' computed states: anything a reload
-  could replay is not progress.
-
-**The chapter thresholds are measured.** `tests/simulate_career.gd` is the
-tool that was missing when they were first written: `simulate_journeys.gd`
-measures *one journey* repeatedly, this measures *one caravan's life* —
-forty journeys of market trading, contracts, wagons and hires, reporting
-where the money, reputation and chapters actually land.
-
-Measured over 8 caravans × 40 journeys, following the campaign (stay lean
-while delivering, expand once the ledger is clean):
-
-| chapter | closed | earliest | median | latest |
-|---|---|---|---|---|
-| İlk Yol | 8/8 | 1 | 1 | 1 |
-| Bir Kadro | 7/8 | 5 | 11 | 20 |
-| Ağ | 6/8 | 8 | 16 | 36 |
-| Temiz Defter | 6/8 | 8 | 17 | 38 |
-| Kendi Hanın | 5/8 | 22 | 30 | 40 |
-
-So a full story runs roughly thirty journeys / 180 game days, and about a
-quarter of caravans never finish it — acceptable in a game where the
-caravan can be ruined, and worth revisiting if it ever feels punishing.
-
-Three findings came out of the measurement, and each is worth more than the
-numbers:
-
-- **Reputation is the scarcest resource in the game** and the real gate on
-  chapters 3 and 5 (average reputation is ~1 at journey 20, ~11 at 30). Any
-  future chapter that gates on it is gating on the slowest-moving stat.
-- **Buying wagons crowds out contracts.** `CaravanPlan.DEFAULT_MAX_WAGONS`
-  is the caravan's *total* cap, so the player's own wagons eat the merchant
-  slots: a caravan that buys five wagons has one escort slot left, and its
-  `contracts_delivered` froze at 11 while a lean caravan reached 41. That
-  is a real trade-off (haul your own goods, or escort others') rather than a
-  bug — but it means the two middle chapters pull in opposite directions,
-  and a player has to sequence them.
-- **Two chapters that close together are one beat.** Chapters 3 and 4 both
-  landed on journey 19. Dropping chapter 3's reputation bar from 8 to 5
-  separated them. Raising chapter 4's contract bar from 8 to 12 was tried
-  for the same purpose and **reverted**: it separated the beats but halved
-  the finale (6/8 → 3/8), because delaying chapter 4 delays the expansion
-  phase that chapter 5 needs. Tune the *earlier* gate, not the later one.
-
-Two things the harness itself got wrong first, recorded because the next
-person will hit them too (the third and fourth entries in this file's
-history of measurement bugs):
-
-1. **Running on contract income alone.** Most real income is market trading
-   (see Provision Rules). Without it the caravan went broke by journey eight
-   and every threshold looked unreachable.
-2. **Accepting contracts bound for cities it then did not travel to.** Every
-   undeliverable contract costs reputation; the probe cratered to -44 and
-   `required_reputation` closed the whole board. **Pick the route first,
-   then the contracts.**
-
-And one clean negative result worth keeping: making the simulated player
-expand one chapter earlier changed the outcome *not at all* (finale still
-5/8, median still 30), so the finale's failure rate is real difficulty and
-not an artifact of how the policy was written.
-
-**Re-measured in Faz 17 PR-8 ("Sayı ve denge turu").** Faz 17's own PR-8
-exists to re-run every simulator against the cumulative weight of Faz 10-17
-and refresh whatever drifted — the same discipline this file has applied to
-itself since the very first "measurement bug" entry. `simulate_career.gd`
-against the current codebase, same three policies, same 8×40 shape:
-
-| chapter | closed (kampanyacı) | earliest | median | latest |
-|---|---|---|---|---|
-| İlk Yol | 8/8 | 1 | 1 | 1 |
-| Bir Kadro | 8/8 | 5 | 6 | 9 |
-| Ağ | 8/8 | 5 | 6 | 9 |
-| Temiz Defter | 8/8 | 5 | 6 | 9 |
-| Kendi Hanın | 8/8 | 10 | 12 | 13 |
-
-Every chapter now closes for every caravan, and the finale lands at median
-journey 12 (~65 game days) instead of 30 (~180). **This is not a Faz 17
-regression — it is the "reputation is the scarcest resource" finding above
-finally catching up with a fix that predates it.** Reputation Rules (this
-file, Faz 11) rewrote reputation from "six ways down and none the player
-controls" to "delivering pays" specifically *because* an average of ~1 at
-journey 20 meant playing well never moved the stat that gates the game.
-That fix was correct and stays — but nobody re-ran `simulate_career.gd`
-against it until now, so this table (measured on the pre-fix reputation
-economy) kept citing scarcity that no longer exists: a delivery-focused
-caravan now carries reputation into the 50s-90s by journey 20, not ~1, so
-`reputation >= 15` on the finale is not a gate at all anymore — the finale
-is now paced almost entirely by `days_as_leader >= 60`, which a caravan
-whose leader survives crosses by journey ~11-12 regardless of anything the
-player chose to prioritize.
-
-**This was deliberately not "fixed" by raising the finale's reputation bar.**
-Reputation growing with good play is the *intended* outcome of the Faz 11
-fix, not a bug to suppress — a finale that arrives sooner for a caravan that
-delivers well is consistent with "playing well moves the stat that gates
-the game," the exact sentence Reputation Rules was written to make true.
-Raising the bar back up would fight that fix rather than accept it, and
-this file's own history (the chapter-3/chapter-4 threshold tuning above)
-already shows finale thresholds are sensitive enough that they are not
-touched without dedicated, multi-policy measurement of their own — a
-separate, narrower question than "did the numbers in this table go stale."
-Wealth-gate removal already established the design answer here too: the
-finale is a threshold the player crosses, not a wall tuned to resist
-crossing, and the epilogue's free-trade tail (now ~28 journeys instead of
-~10) is exactly where the game already says the post-finale game lives.
-
-**The sixth to eighth harness mistakes, found re-measuring after the contract board (Y-C02) and the 27-settlement map.**
-Chapters closed 4/8 and the finale 1/8 against a 6/8 baseline, and the debt (Y-C14) was blamed first - softening it
-changed nothing. The cause was the policy again: it picked a road at random (a board of 4-7 notices over 27 places
-rarely matches), filled the wagons with market goods *before* accepting contracts (consigned goods did not fit, were
-"missing on arrival" and each cost reputation, `cargo_room` was never set) and never repaired a wagon. A real player
-reads the board first, reserves the room and repairs. With the policy fixed the table is 8/8 for the expanding and
-campaign policies and 5/8 for the contract policy (see `docs/design_notes/denge_baba_borcu.md`). One real finding came
-with it, `MerchantOffer.is_open_to` (Reputation Rules). **When a report collapses after new content, fix the policy's
-blindness to that content before touching the content's numbers.**
-
-One genuine bug **was** found and fixed in the same pass, unrelated to this
-table's drift: `GameSession.fulfill_commission()` (Faz 17 PR-4's guild
-commissions) carried no repeat guard at all. As long as a world event
-stayed active (8-30 days) and the resource cost was affordable, the same
-commission could be completed every single call — Ticaret Fuarı Sponsorluğu
-alone nets +60 gold and +2 reputation per call for a flat 80-gold outlay,
-with nothing to stop calling it in a loop. This is the same class of
-exploit Haggling Rules closes for "repeat the same lowball three times" -
-a system's own rules have to survive being pushed on repeatedly, not just
-read correctly once. `_fulfilled_commission_starts` (keyed by the active
-event's own `started_day`, the same identity `WorldEvents` itself uses) now
-blocks a second completion of the *same* news instance
-(`UI_COMMISSION_ALREADY_FULFILLED`, the same disabled-with-reason pattern
-as every other locked action in the game) while still reopening the moment
-a genuinely new instance of that kind starts. `simulate_career.gd` never
-called `fulfill_commission()` at all, so this exploit is not what produced
-the reputation numbers above — it is a real, separate finding the same
-measurement pass turned up.
-
-**Faz 18 touched the finale, and measured it the way this section demands.**
-The finale now also asks for `companions_lost >= 2` (two struck names in the
-ledger - dead or departed, crew lost with a wagon included, the founder
-excluded). A threshold reached without losing anyone contradicts the
-thesis; this is the one gate in the game that reads loss rather than
-accumulation. Re-measured with `simulate_career.gd`, all three policies,
-8×40:
-
-| policy | finale closed | earliest | median | latest |
-|---|---|---|---|---|
-| kampanyacı (before) | 8/8 | 10 | 12 | 13 |
-| kampanyacı (after) | 8/8 | 9 | 16 | 30 |
-| genişleyen (after) | 8/8 | 9 | 16 | 30 |
-| kontratçı (after) | 0/8 | — | — | — |
-
-The finale no longer arrives on schedule: a caravan that loses people
-early closes it by journey 9, one that keeps everyone waits until its
-losses catch up. The contract policy's 0/8 is **not** this gate - that
-policy's caravans stop at three wagons and never meet the finale's
-existing `owned_wagons >= 4`, which is the "buying wagons crowds out
-contracts" finding above, unchanged.
-
-**Faz 24 closed the wagon/contract conflict, and the measurement is the
-clearest this table has ever produced.** Growing now earns wagons (see
-Caravan Ruin Rules), so the caravan no longer has to choose between
-hauling its own goods and escorting someone else's. Re-measured,
-`simulate_career.gd`, all three policies, 8×40:
-
-| policy | finale | earliest | median | latest | wagons @40 | delivered @40 |
-|---|---|---|---|---|---|---|
-| kontratçı (before) | **0/8** | — | — | — | 3 | 41 |
-| kontratçı (after) | **8/8** | 9 | 15 | 25 | 7 | 120 |
-| genişleyen (after) | 8/8 | 9 | 13 | 22 | 10 | 61 |
-| kampanyacı (after) | 8/8 | 9 | 13 | 22 | 10 | 60 |
-
-The contract policy's 0/8 was never the loss gate - Faz 18 said so
-explicitly: those caravans stopped at three wagons and never met
-`owned_wagons >= 4`. Four earned wagons carry them to seven, and the
-finale opens for every policy. Deliveries rise across the board
-(41 → 120 for the contract policy, 11 → 61 for the expanding one)
-because escort room no longer shrinks as the caravan grows - the
-"buying wagons crowds out contracts" finding is the thing that was
-fixed, not a number that drifted. **Every chapter now closes 8/8 under
-every policy**, which is the same question Faz 17 PR-8 already answered
-and deliberately did not suppress: a threshold the player crosses, not a
-wall tuned to resist crossing.
+Bölümler: City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
 
 ### City Hub Rules
 
@@ -235,10 +16,9 @@ paid for. A new game starts in a city (`character_creation.gd` →
 `Nav.go_root(Nav.CITY_MAP)`), and so does every arrival and every
 "Continue".
 
-- **The brief leads with the story.** `CityBriefPanel`'s first block is the
-  current chapter, its narration and its objectives with live counts (see
-  Campaign Rules) — "where am I in this story" is the question a session
-  opens with, before "what do I lack" and "where do I go".
+- **There is no scenario system (user's decision, 2026-10-31).** The five-chapter campaign (`CampaignCatalog`) and
+  its story block on the brief were removed: the game is the caravan carried forward through the famine and its side
+  tasks, with no comfortable finale. The brief opens with the ledger's last line, then needs and roads.
 - **The city answers two questions on one screen, or it answers neither.**
   It used to be five doors and an exit: to learn where you could even go,
   you had to walk tavern → world map → planner, and to learn what the
@@ -439,10 +219,9 @@ can be lost.
   showing both consequences *before* the decision, not after.
 - **Growing earns wagons; buying them still costs a contract slot.**
   Wagon ownership had exactly one door - gold, at a price that climbed
-  with every purchase - and Campaign Rules had already measured where
-  that led: a caravan that lives on contracts freezes at three wagons
-  and can never pass the finale's `owned_wagons >= 4`, so one honest way
-  of playing was simply locked out. `GameSession.grant_earned_wagons()`
+  with every purchase - and the career simulator had already measured
+  where that led: a caravan that lives on contracts froze at three wagons,
+  so one honest way of playing could never grow. `GameSession.grant_earned_wagons()`
   opens a second door: the leader's level and the caravan's reputation
   are two threshold lists (`WAGON_LEVEL_MILESTONES`,
   `WAGON_REPUTATION_MILESTONES`) and each threshold pays **+1 wagon,
@@ -462,8 +241,7 @@ can be lost.
     `owned_wagon_count`, or a seven-wagon save would be clipped back to
     six on every load.
   - Not free either: each wagon is `PEOPLE_PER_WAGON` more mouths (see
-    Provision Rules), so a grown caravan eats more. Measured results are
-    in Campaign Rules.
+    Provision Rules), so a grown caravan eats more.
 - **A wagon can be sold, and resale never returns its cost.** Otherwise
   buy-then-sell is a free capacity toggle around every journey.
   `WAGON_RESALE_FACTOR` is the depreciation and a damaged wagon is worth

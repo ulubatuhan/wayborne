@@ -137,21 +137,14 @@ Oyunun başladığı an. Her oyunda yaşanmış sayılır.
 
 ## IX. Oyunun zamanı
 
-Her oyunda yeniden yazılır ve kervanın defterine kaydedilir.
+Her oyunda yeniden yazılır ve kervanın defterine kaydedilir. Oyunun bir senaryosu yok (kullanıcı kararı 2026-10-31):
+kervan kıtlık içinde ilerler, ek görevler var, konforlu bir final yok.
 
 | | bölüm | oyundaki metin | işaret |
 |---|---|---|---|
-| IX.1 | **İlk Yol** | "Babandan kalan tek vagon ve bir yol arkadaşı. Loncanın defterinde adın bile yok; önce birinin sana bir yük emanet etmesi gerek." | [Oyun] |
-| IX.2 | **Bir Kadro** | "Tek vagonla yol alınır ama yol seni bulduğunda yalnız kalırsın…" | [Oyun] |
-| IX.3 | **Ağ** | "Tek bir hattı gidip gelmek para kazandırır, isim kazandırmaz…" | [Oyun] |
-| IX.4 | **Temiz Defter** | "Borçla yola çıkan kervan, kendi yükünü değil alacaklısının yükünü taşır…" | [Oyun] |
-| IX.5 | **Kendi Hanın** (final) | Dört vagon, seni tanıyan bir yol, defterde iki üstü çizili ad, adı en az 60 gün taşımak. Kayıpsız son yok. | [Oyun] |
-| IX.6 | **Kuşaklar** | Lider düşünce ad devredilir; kıdemliyi geçmek kırgınlık bırakır. | [Oyun] |
-| IX.7 | **Son** | Adı taşıyacak kimse kalmadığında kitap kapanır. | [Oyun] |
-| IX.8 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Yazar, T25: bir bakış açısı] |
-
-[Not] Kampanya bölümlerinin metinleri ticaret ve büyüme dilinde ("dolu bir kese", "para kazandırır"). Kıtlık
-revizyonu (görev Y-C21) gelince bu metinler ulaştırma ve hayatta kalma diline çevrilmeli.
+| IX.1 | **Kuşaklar** | Lider düşünce ad devredilir; kıdemliyi geçmek kırgınlık bırakır. | [Oyun] |
+| IX.2 | **Son** | Adı taşıyacak kimse kalmadığında kitap kapanır. | [Oyun] |
+| IX.3 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Yazar, T25: bir bakış açısı] |
 
 ---
 

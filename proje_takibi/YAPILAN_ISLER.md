@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **72** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **73** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -726,6 +726,26 @@ Toplam: **72** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Kervan bizim değil babamızın olsun ve babamız bize devretsin hastalıktan ötürü, borçlu bir şekilde devretmiş olsun ve de.”
   - **Kabul:** Yeni oyun devir sahnesiyle başlıyor; başlangıç borcu ve vadesi testli; kurucu satırı babayı gösteriyor.
   - **Literatür:** R17
+
+</details>
+
+## Paket P11
+
+### Y-A08 · Senaryo sistemi kaldırıldı, konforlu final yok
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. 2026-10-31: senaryo (kampanya) sistemi kaldırıldı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-A08 Kampanya: konforlu final yok**
+  - **Yapıldı (2026-10-31):** kullanıcı "oyundaki mevcut senaryo sistemini ve kurgusunu kaldır" dedi. `CampaignCatalog`, `CampaignChapter`, bölüm sayacı, şehir özetindeki hikâye bloğu, çeviri anahtarları, Codex bölümü ve kural notları silindi; `simulate_career` bölüme değil sefer sayısına bakıyor.
+  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-C21 · **Kim:** CO
+  - **Ne:** "Kendi hanını kur" gibi bir final yok. Oyun zorluk ve kıtlık içinde geçer; yapılan tek şey kervanı ilerletmek ve ek görevleri başarmak. Kampanya bölümlerinin hedefleri ve metinleri buna göre yeniden yazılır (defter III'teki kampanya metni sorusu da buraya bağlı).
+  - **Kullanıcı notu:** "Böyle bir final olmayacak, oyun zorluk ve kıtlık içinde geçecek, şimdilik tek yaptığımız ve yapabildiğimiz kervanı ilerletmek ve ek görevleri başarmak."
+  - **Kabul:** Yeni bölüm taslağı onaylandı; `simulate_career` yeniden ölçüldü.
 
 </details>
 

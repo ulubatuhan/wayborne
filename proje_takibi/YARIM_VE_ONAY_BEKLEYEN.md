@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P10
 
@@ -112,6 +112,23 @@ Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** En az 10 çok seferli zincir; sonucu başka bir şehirde ya da varisin döneminde gelir.
   - **Kabul:** 10 zincir; kayıtta zincir durumu; testler.
   - **Literatür:** R24, R48
+
+</details>
+
+### Y-C18 · Kampanya bölümlerini yaz
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:**  2026-10-31: senaryo sistemi kaldırıldı (kullanıcı kararı); bölüm yazılmayacak.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C18 Kampanya bölümlerini yaz**
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** Kullanıcı notu: bölümler henüz yazılmadı; bölüm sayısı ve sahneleme önerisi şimdilik onaylanmadı. Görev yalnızca bölümlerin yazılması. Sahneleme, final mekânı ve finalden sonrası, bölümler yazıldıktan sonra kullanıcıyla yeniden konuşulur.
+  - **Kullanıcı notu:** “Evet bölümler yazılmadı o yüzden bana 8 bölüm var demen bile aslında uydurma bir veriye dayanıyor. Bu bölümler yazıldıktan sonra düşünülecek bir konu bu, onaylamıyorum bu konuyu o yüzden şu an. ama bölüm yazılacak gibi bir not alabilirsin.”
+  - **Kabul:** Bölüm metinleri yazıldı ve kullanıcı onayladı.
 
 </details>
 
@@ -197,7 +214,7 @@ Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G17 · Tek sıcak kaynak: kural ve bütün sahnelerin denetimi
 
 - **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C22
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 

@@ -757,4 +757,4 @@ Ana Hedefler ve `proje_takibi/`.
     listesi eklenir [Yazar, T11].
 17. **Ayazkaya'da hüküm sınaması:** meydan okuyan dağa tırmanır, beyin yerleşkesinde düello eder [Yazar, T20];
     dağ kabilesi kültürüyle bir olay zinciri olabilir.
-18. **Kampanya metinleri** ticaret dilinden ("dolu bir kese") ulaştırma ve hayatta kalma diline.
+18. **Senaryo sistemi kaldırıldı** (2026-10-31): oyun kervanı ilerletmek ve ek görevlerden oluşur.

@@ -1,4 +1,4 @@
-# 14. Film ve kervan fikirleri (2026-10-31)
+# 15. Film ve kervan fikirleri (2026-10-31)
 
 Kaynak: kullanıcının film listesi (The Road, The Way Back, The Seventh Seal, Mongol, Extraordinary Tales, Black Death) ve tarihteki kervan ve kervansaray araştırması. Fikir listesindeki 30 maddenin cevapları burada; filmler yalnızca his ve teknik kaynağı, lore ve oyun metnine adları girmez.
 
@@ -162,7 +162,8 @@ Kaynak: kullanıcının film listesi (The Road, The Way Back, The Seventh Seal, 
   - **Kullanıcı notu:** "Bu ilanlar da kontrat panosunda olabilir. Bu panoya kontrat panosu yerine ilan panosu deriz mesela."
   - **Kabul:** Çeviri anahtarları ve ekran görüntüsü.
 
-- [ ] **Y-A08 Kampanya: konforlu final yok**
+- [x] **Y-A08 Kampanya: konforlu final yok**
+  - **Yapıldı (2026-10-31):** kullanıcı "oyundaki mevcut senaryo sistemini ve kurgusunu kaldır" dedi. `CampaignCatalog`, `CampaignChapter`, bölüm sayacı, şehir özetindeki hikâye bloğu, çeviri anahtarları, Codex bölümü ve kural notları silindi; `simulate_career` bölüme değil sefer sayısına bakıyor.
   - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-C21 · **Kim:** CO
   - **Ne:** "Kendi hanını kur" gibi bir final yok. Oyun zorluk ve kıtlık içinde geçer; yapılan tek şey kervanı ilerletmek ve ek görevleri başarmak. Kampanya bölümlerinin hedefleri ve metinleri buna göre yeniden yazılır (defter III'teki kampanya metni sorusu da buraya bağlı).
   - **Kullanıcı notu:** "Böyle bir final olmayacak, oyun zorluk ve kıtlık içinde geçecek, şimdilik tek yaptığımız ve yapabildiğimiz kervanı ilerletmek ve ek görevleri başarmak."

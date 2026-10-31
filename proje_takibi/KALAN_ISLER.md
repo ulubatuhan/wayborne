@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **53** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -170,7 +170,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C25 · Veba bir dünya hâli: kart açılmadan görünür
 
 - **Durum:** açık · **Öncelik:** P1 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C21
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -187,7 +187,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C27 · Gokyurt misafirliği
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -203,7 +203,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C28 · Yolcu defteri
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C10
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -220,7 +220,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C29 · Tarafsız zemin: Duvenmor
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -236,7 +236,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C31 · Geçiş belgesi
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-E06
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -253,7 +253,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C32 · Bedeli erzakla öde
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -269,7 +269,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C34 · Hacı kafilesine katılmak
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C25
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -286,7 +286,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C35 · İlan panosu
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C02
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -330,7 +330,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-B14 · Yol kenarı kervansarayları
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -346,7 +346,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-B15 · Kuyu durağı
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -362,7 +362,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-B16 · Küçük lütuf anı
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -414,7 +414,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C33 · Ant bağı
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C17
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -481,26 +481,10 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
-### Y-C18 · Kampanya bölümlerini yaz
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C18 Kampanya bölümlerini yaz**
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
-  - **Ne:** Kullanıcı notu: bölümler henüz yazılmadı; bölüm sayısı ve sahneleme önerisi şimdilik onaylanmadı. Görev yalnızca bölümlerin yazılması. Sahneleme, final mekânı ve finalden sonrası, bölümler yazıldıktan sonra kullanıcıyla yeniden konuşulur.
-  - **Kullanıcı notu:** “Evet bölümler yazılmadı o yüzden bana 8 bölüm var demen bile aslında uydurma bir veriye dayanıyor. Bu bölümler yazıldıktan sonra düşünülecek bir konu bu, onaylamıyorum bu konuyu o yüzden şu an. ama bölüm yazılacak gibi bir not alabilirsin.”
-  - **Kabul:** Bölüm metinleri yazıldı ve kullanıcı onayladı.
-
-</details>
-
 ### Y-C26 · Vebanın hiç bulaşmadığı köyler
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C25
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -517,7 +501,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-E09 · Yozlaşmış yol bekçisi kartı
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C31
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -534,7 +518,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-E10 · Esirlikten kaçış zinciri
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-E02
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -551,7 +535,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-E11 · Gezgin oyuncular ve tövbe alayı
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -567,7 +551,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-E12 · Gizli güdülü kılavuz
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -577,23 +561,6 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Kervanı bir yere götürmeyi öneren kılavuz yalnızca olayda çıkar, kiralanamaz. Saklı bir sebebi var (`NpcDisposition`).
   - **Kullanıcı notu:** "Gizli güdülü kılavuz: Onay. (Yerel rehber kiralamak: Red, buna para verecek imkânımız olmamalı hiç.)"
   - **Kabul:** Kart onaya partide.
-
-</details>
-
-### Y-A08 · Kampanya: konforlu final yok
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C21
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-A08 Kampanya: konforlu final yok**
-  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-C21 · **Kim:** CO
-  - **Ne:** "Kendi hanını kur" gibi bir final yok. Oyun zorluk ve kıtlık içinde geçer; yapılan tek şey kervanı ilerletmek ve ek görevleri başarmak. Kampanya bölümlerinin hedefleri ve metinleri buna göre yeniden yazılır (defter III'teki kampanya metni sorusu da buraya bağlı).
-  - **Kullanıcı notu:** "Böyle bir final olmayacak, oyun zorluk ve kıtlık içinde geçecek, şimdilik tek yaptığımız ve yapabildiğimiz kervanı ilerletmek ve ek görevleri başarmak."
-  - **Kabul:** Yeni bölüm taslağı onaylandı; `simulate_career` yeniden ölçüldü.
 
 </details>
 
@@ -621,7 +588,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G18 · Kıtlık paleti bölgeye göre: Gokyurt en geç solar
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C21, Y-G17
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -638,7 +605,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G19 · Portreler baştan yorgun ve aşınmış
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -654,7 +621,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G20 · Olay kartının görsel dili bölgeye göre
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -670,7 +637,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G21 · Kart açılışında yavaş kayma
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -686,7 +653,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G22 · Bataklık görünüşü: gri-yeşil sis
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -702,7 +669,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-G23 · Soy sonu: ufukta yürüyen adlar
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-D03
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
@@ -719,7 +686,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-C30 · Kıtlıkta kervansaray: kapıya bırakılan yemek
 
 - **Durum:** açık · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>
@@ -789,7 +756,7 @@ Toplam: **55** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 ### Y-H08 · Sessizlik anları
 
 - **Durum:** açık · **Öncelik:** P2 · **Paket:** P13 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_film_kervan_fikirleri.md](referans/gorevler/14_film_kervan_fikirleri.md)
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı.
 
 <details><summary>Görev metni</summary>

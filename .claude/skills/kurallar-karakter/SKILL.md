@@ -258,9 +258,9 @@ carry a caravan *name* down the road.
 - **The name outlives the leader.** `caravan_name` comes from the founder
   and survives succession; `lineage_generation` counts how many times the
   name has changed hands, not how many times you restarted.
-- **`leader_since_day` makes the era a thing the story can ask about.**
-  Campaign objectives read `days_as_leader`, so a chapter can gate on
-  *this* leader's tenure rather than the caravan's total age.
+- **`leader_since_day` makes the era a thing events can ask about.**
+  The event context reads `days_as_leader`, so a card can gate on *this*
+  leader's tenure rather than the caravan's total age.
 - **The only real ending is having nobody left to carry the name**
   (`RUN_OVER_FLAG`). Wealth ends nothing.
 - **The one non-negotiable rule needs a scene, not a log line.** Succession
@@ -278,9 +278,8 @@ carry a caravan *name* down the road.
   stays in the book, struck through. The reason is not mechanical: a
   deleted name reads as never having existed, a struck one is the
   player's own past. The ledger is also the world's memory —
-  `build_campaign_context()` exposes counts from it, so events and
-  chapters can read history without a second "memory system" being
-  invented. Same discipline as objectives being `EventCondition`s.
+  `build_event_context()` exposes counts from it, so events can read
+  history without a second "memory system" being invented.
 - **Death has one door: `resolve_deaths(dead, cause_key, location_id)`.**
   Combat and starvation both go through it; it writes the ledger line with
   its cause and place, marks every survivor with `GRIEVANCE_WITNESSED_DEATH`,
@@ -330,13 +329,12 @@ carry a caravan *name* down the road.
   because the founder is an inheritance, not a loss.
 - **The event pool reads the ledger now, as this section always claimed.**
   `build_event_context()` exposes `companions_died`, `companions_departed`,
-  `companions_lost`, `lineage_generation` and `days_as_leader`; for a long
-  time only the campaign context had them and no event could ask.
-- **A loss cannot be bought.** `companions_lost` (event and campaign
-  contexts both read `get_companions_lost()`) excludes departures whose
-  cause is `LEDGER_CAUSE_DISMISSED`. Counting every departure let two cheap
-  market-square hires, dismissed in town, satisfy the finale's "two struck
-  names" gate - the one gate that reads loss, bought with gold. Left behind,
+  `companions_lost`, `lineage_generation` and `days_as_leader`.
+- **A loss cannot be bought.** `companions_lost` (the event context reads
+  `get_companions_lost()`) excludes departures whose cause is
+  `LEDGER_CAUSE_DISMISSED`. Counting every departure let two cheap
+  market-square hires, dismissed in town, count as loss - loss bought with
+  gold. Left behind,
   broken and gone, died, lost with a wagon: those still count.
 - **A lineage that ends leaves an inheritance (task Y-D03).** When nobody is left to carry the name, the run-over
   screen writes the lineage to `LineageArchive` (`user://lineage_archive.json`, outside the save slots, capped at
@@ -350,13 +348,6 @@ carry a caravan *name* down the road.
   (`LineageArchive.unlocked_origins`), so they survive a lineage dropping off the archive's cap. Locked origins are
   shown on the new-game screen with their unlock condition; the chosen one is the saved `GameSession.origin_id` and
   rewrites the founder's ledger cause.
-- **The finale's gold gate became `days_as_leader`.** A pure money gate
-  closed the story with "you got rich enough". The measurement survives:
-  with a leader who never dies, tenure equals elapsed days and the finale's
-  median lands at journey 30 (~180 days), so 60 is comfortably cleared. The
-  other two thresholds stay as measured — Campaign Rules already records
-  that moving the *later* gate halved the finale.
-
 ### Stress Rules
 
 - **Stress (`GameSession.party_stress`) and morale (`CaravanState.morale`)

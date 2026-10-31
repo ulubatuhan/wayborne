@@ -143,7 +143,7 @@ way to textures one screen at a time.
   anchor was a constant 0.34 of the band's width, so only a third of the
   screen sat behind the caravan — measured, a two-wagon caravan had its
   second wagon at x = −264 and a six-wagon one showed nothing but the
-  first. Buying wagons is what the campaign pushes the player toward, and
+  first. Buying wagons is how a caravan grows, and
   it had no visible consequence at all: the same failure as the nameless
   crew being invisible before Faz 8 PR-C. The anchor now slides right with
   the column (`TravelBand.caravan_x_ratio()`, clamped) and, only if that
