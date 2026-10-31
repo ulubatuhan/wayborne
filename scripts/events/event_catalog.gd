@@ -112,6 +112,17 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_trade_fair_news())
 	_road_events.append(_bandit_tribute_zone_news())
 	_road_events.append(_bandit_tribute_toll())
+	_road_events.append(_road_warden())
+	_road_events.append(_taken_captive())
+	_road_events.append(_captive_strangers())
+	_road_events.append(_wandering_players())
+	_road_events.append(_penitent_procession())
+	_road_events.append(_hidden_guide())
+	_road_events.append(_untouched_village())
+	_road_events.append(_serai_open())
+	_road_events.append(_serai_ruin())
+	_road_events.append(_serai_bandit())
+	_road_events.append(_duvenmor_quarrel())
 	_road_events.append(_leave_the_wounded())
 	_road_events.append(_left_behind_return())
 	_road_events.append(_profiteer_recognized())
@@ -2209,6 +2220,259 @@ static func _bandit_tribute_toll() -> GameEvent:
 		),
 		_choice("EVT_TRIBUTE_TOLL_OPT_RESIST", _effects([
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
+		])),
+	])
+	return event
+
+## --- Kart partisi 1 (görevler Y-E09..Y-E12, Y-C26, Y-B14, Y-C29; kullanıcı
+## onayı 2026-10-31, docs/design_notes/kart_partisi_01.md) ---
+
+static func _c(key: String, op: EventCondition.Op, value: float) -> EventCondition:
+	return EventCondition.make(key, op, value)
+
+static func _fx(type: EventEffect.Type, amount: int = 0, text: String = "") -> EventEffect:
+	return EventEffect.make(type, amount, text)
+
+## Y-E09: mühür gerçek, bedel uydurma. Haraç bölgesinde değil (orada haraç kartı var).
+static func _road_warden() -> GameEvent:
+	var event := _event("evt_road_warden", "EVT_WARDEN_TITLE", "EVT_WARDEN_TEXT", 0.12)
+	event.cooldown_days = 8
+	event.conditions = _conditions([_c("route_has_bandit_tribute", EventCondition.Op.LESS_THAN, 1.0)])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("near_outpost", EventCondition.Op.GREATER_EQUAL, 1)]), 8.0),
+		EventWeightModifier.make(_conditions([_c("serai_open", EventCondition.Op.GREATER_EQUAL, 1)]), 6.0),
+	])
+	event.choices = _choices([
+		_gated_choice("EVT_WARDEN_OPT_PAY", "EVT_WARDEN_OPT_PAY_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 40)]),
+			_effects([_fx(EventEffect.Type.GOLD, -40)])),
+		_gated_choice("EVT_WARDEN_OPT_GRAIN", "EVT_WARDEN_OPT_GRAIN_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.MORALE, -2)])),
+		_check_choice("EVT_WARDEN_OPT_EXEMPT", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_WARDEN_EXEMPT_OK", _effects([_fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_WARDEN_EXEMPT_MID", _effects([_fx(EventEffect.Type.GOLD, -20)]),
+			"EVT_WARDEN_EXEMPT_BAD", _effects([_fx(EventEffect.Type.GOLD, -80), _fx(EventEffect.Type.REPUTATION, -1)])),
+		_check_choice("EVT_WARDEN_OPT_GUILD", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_WARDEN_GUILD_OK", _effects([_fx(EventEffect.Type.REPUTATION, 1), _fx(EventEffect.Type.SET_FLAG, 0, "warden_grudge")]),
+			"EVT_WARDEN_GUILD_MID", _effects([_fx(EventEffect.Type.GOLD, -20), _fx(EventEffect.Type.SET_FLAG, 0, "warden_grudge")]),
+			"EVT_WARDEN_GUILD_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard")])),
+	])
+	return event
+
+## Y-E10: zincirin başı. Gece kampın kenarından biri kaçırılır; kim olduğu
+## düğmede yazar (en zayıf yoldaş, LEAVE_BEHIND'ın seçicisi).
+static func _taken_captive() -> GameEvent:
+	var event := _event("evt_taken_captive", "EVT_CAPTIVE_TITLE", "EVT_CAPTIVE_TEXT", 0.18)
+	event.cooldown_days = 30
+	event.conditions = _conditions([
+		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
+		_c("danger", EventCondition.Op.GREATER_EQUAL, 0.3),
+	])
+	event.choices = _choices([
+		_check_choice("EVT_CAPTIVE_OPT_FOLLOW", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_CAPTIVE_FOLLOW_OK", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.PARTY_HP, -8, "weakest"), _fx(EventEffect.Type.CHAIN_ADVANCE, 3, "captive|1")]),
+			"EVT_CAPTIVE_FOLLOW_MID", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.PARTY_HP, -14, "weakest"), _fx(EventEffect.Type.CHAIN_ADVANCE, 5, "captive|1")]),
+			"EVT_CAPTIVE_FOLLOW_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2), _fx(EventEffect.Type.STRESS, 8), _fx(EventEffect.Type.PARTY_HP, -20, "weakest")])),
+		_gated_choice("EVT_CAPTIVE_OPT_RANSOM", "EVT_CAPTIVE_OPT_RANSOM_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 100)]),
+			_effects([_fx(EventEffect.Type.GOLD, -100), _fx(EventEffect.Type.STRESS, 3)])),
+		_choice("EVT_CAPTIVE_OPT_LEAVE", _effects([
+			_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.MORALE, -10), _fx(EventEffect.Type.STRESS, 8),
+		])),
+	])
+	return event
+
+## Y-E10'un ikinci halkası: kurtarılan yoldaş esirlikte iki kişiyle tanışmış;
+## peşinizden gelmişler. Hangisinin ne olduğu gizli (ROLL_ENCOUNTER).
+static func _captive_strangers() -> GameEvent:
+	var event := _event("evt_captive_strangers", "EVT_STRANGERS_TITLE", "EVT_STRANGERS_TEXT", 6.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_captive_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.immediate_effects = _effects([_fx(EventEffect.Type.ROLL_ENCOUNTER, 0, "wanderer")])
+	event.choices = _choices([
+		_gated_choice("EVT_STRANGERS_OPT_TAKE", "EVT_STRANGERS_OPT_TAKE_LOCKED",
+			_conditions([_c("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([_fx(EventEffect.Type.TRIGGER_RECRUIT), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
+		_requires(_checked_choice("EVT_STRANGERS_OPT_ASK", SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_STRANGERS_ASK_OK", _effects([_fx(EventEffect.Type.TRIGGER_RECRUIT), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")]),
+			"EVT_STRANGERS_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
+			"EVT_STRANGERS_OPT_ASK_LOCKED", _conditions([_c("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)])),
+		_gated_choice("EVT_STRANGERS_OPT_FEED", "EVT_STRANGERS_OPT_FEED_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 3)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -3), _fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
+		_choice("EVT_STRANGERS_OPT_SEND", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
+	])
+	return event
+
+## Y-E11: akşam ateşine gezgin oyuncular.
+static func _wandering_players() -> GameEvent:
+	var event := _event("evt_wandering_players", "EVT_PLAYERS_TITLE", "EVT_PLAYERS_TEXT", 0.3)
+	event.cooldown_days = 12
+	event.choices = _choices([
+		_gated_choice("EVT_PLAYERS_OPT_SHARE", "EVT_PLAYERS_OPT_SHARE_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 4)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.MORALE, 5)])),
+		_checked_choice("EVT_PLAYERS_OPT_NEWS", SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_PLAYERS_NEWS_OK", _effects([_fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_PLAYERS_NEWS_BAD", _effects([_fx(EventEffect.Type.MORALE, -1)])),
+		_choice("EVT_PLAYERS_OPT_PERFORM", _effects([
+			_fx(EventEffect.Type.GOLD, 15), _fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.MERCHANT_LEAVE),
+		])),
+		_choice("EVT_PLAYERS_OPT_SEND", _effects([_fx(EventEffect.Type.MORALE, -2)])),
+	])
+	return event
+
+## Y-E11: yalınayak tövbe alayı. Septisist bunu dua, Yumruk'tan biri gösteriş okur.
+static func _penitent_procession() -> GameEvent:
+	var event := _event("evt_penitent_procession", "EVT_PENITENT_TITLE", "EVT_PENITENT_TEXT", 0.25)
+	event.cooldown_days = 14
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("plague_here", EventCondition.Op.GREATER_EQUAL, 1)]), 3.0),
+	])
+	event.choices = _choices([
+		_gated_choice("EVT_PENITENT_OPT_BREAD", "EVT_PENITENT_OPT_BREAD_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.STRESS, -3)])),
+		_choice("EVT_PENITENT_OPT_REFUSE", _effects([_fx(EventEffect.Type.STRESS, 4)])),
+		_gated_choice("EVT_PENITENT_OPT_SELL", "EVT_PENITENT_OPT_SELL_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.GOLD, 30), _fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.SET_FLAG, 0, "sold_to_penitents")])),
+		_checked_choice("EVT_PENITENT_OPT_PRAY", SkillCheck.make(CharacterStats.Kind.FAITH, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_PENITENT_PRAY_OK", _effects([_fx(EventEffect.Type.STRESS, -5)]),
+			"EVT_PENITENT_PRAY_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1)])),
+	])
+	return event
+
+## Y-E12: kiralanmayan kılavuz. Mizacı gizli; Sezgisi yüksek olan sınayabilir.
+static func _hidden_guide() -> GameEvent:
+	var event := _event("evt_hidden_guide", "EVT_GUIDE_TITLE", "EVT_GUIDE_TEXT", 0.2)
+	event.cooldown_days = 15
+	event.conditions = _conditions([_c("days_remaining", EventCondition.Op.GREATER_EQUAL, 2)])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("near_mountain", EventCondition.Op.GREATER_EQUAL, 1)]), 3.0),
+	])
+	event.immediate_effects = _effects([_fx(EventEffect.Type.ROLL_ENCOUNTER, 0, "guide")])
+	var accept := _choice_with_outcomes("EVT_GUIDE_OPT_ACCEPT", _outcomes([
+		_outcome_if("EVT_GUIDE_ACCEPT_LOYAL", _conditions([_c(NpcDisposition.get_flag("guide", NpcDisposition.LOYAL), EventCondition.Op.HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.TRAVEL_DAYS, -1)]), 1.0),
+		_outcome_if("EVT_GUIDE_ACCEPT_DESPERATE", _conditions([_c(NpcDisposition.get_flag("guide", NpcDisposition.DESPERATE), EventCondition.Op.HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -8)]), 1.0),
+		_outcome_if("EVT_GUIDE_ACCEPT_THIEF", _conditions([_c(NpcDisposition.get_flag("guide", NpcDisposition.THIEF), EventCondition.Op.HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.GOLD, -30)]), 1.0),
+		_outcome_if("EVT_GUIDE_ACCEPT_VENGEFUL", _conditions([_c(NpcDisposition.get_flag("guide", NpcDisposition.VENGEFUL), EventCondition.Op.HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit")]), 1.0),
+	]))
+	accept = _requires(accept, "EVT_GUIDE_OPT_ACCEPT_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 4)]))
+	var test := EventChoice.new()
+	test.text_key = "EVT_GUIDE_OPT_TEST"
+	test.check = SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST, 0.0)
+	var loyal_flag := NpcDisposition.get_flag("guide", NpcDisposition.LOYAL)
+	test.outcomes = _outcomes([
+		_outcome_if("EVT_GUIDE_TEST_LOYAL", _conditions([_c("check_tier", EventCondition.Op.GREATER_EQUAL, 1.0), _c(loyal_flag, EventCondition.Op.HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.TRAVEL_DAYS, -1)]), 1.0),
+		_outcome_if("EVT_GUIDE_TEST_FALSE", _conditions([_c("check_tier", EventCondition.Op.GREATER_EQUAL, 1.0), _c(loyal_flag, EventCondition.Op.NOT_HAS_FLAG, 0)]),
+			_effects([_fx(EventEffect.Type.MORALE, 2)]), 1.0),
+		_outcome_if("EVT_GUIDE_TEST_BAD", _conditions([_c("check_tier", EventCondition.Op.EQUAL, 0.0)]),
+			_effects([_fx(EventEffect.Type.STRESS, 2)]), 1.0),
+	])
+	event.choices = _choices([accept, test, _choice("EVT_GUIDE_OPT_REFUSE", _effects([_fx(EventEffect.Type.STRESS, 1)]))])
+	return event
+
+## Y-C26: vebanın hiç uğramadığı köy; nedeni söylenmez. Zorla giren kervanın
+## adı kötüye çıkar (kullanıcı notu: ticarette ciddi dezavantaj, itibar doğrudan).
+const STAIN_DAYS: int = 45
+static func _untouched_village() -> GameEvent:
+	var event := _event("evt_untouched_village", "EVT_UNTOUCHED_TITLE", "EVT_UNTOUCHED_TEXT", 0.3)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("plague_here", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("near_mezra", EventCondition.Op.GREATER_EQUAL, 1)]), 5.0),
+	])
+	var force_cost := [_fx(EventEffect.Type.REPUTATION, -8), _fx(EventEffect.Type.TRADE_STAIN, STAIN_DAYS)]
+	event.choices = _choices([
+		_gated_choice("EVT_UNTOUCHED_OPT_GATE", "EVT_UNTOUCHED_OPT_GATE_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 30)]),
+			_effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.PROVISIONS, 6)])),
+		_checked_choice("EVT_UNTOUCHED_OPT_SICK", SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 0.0),
+			"EVT_UNTOUCHED_SICK_OK", _effects([_fx(EventEffect.Type.PARTY_HP, 20, "weakest")]),
+			"EVT_UNTOUCHED_SICK_BAD", _effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.REPUTATION, -1)])),
+		_checked_choice("EVT_UNTOUCHED_OPT_FORCE", SkillCheck.make(CharacterStats.Kind.STRENGTH, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_UNTOUCHED_FORCE_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 10)] + force_cost),
+			"EVT_UNTOUCHED_FORCE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard")] + force_cost)),
+		_choice("EVT_UNTOUCHED_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, 2)])),
+	])
+	return event
+
+## Y-B14: yol kenarı kervansarayının üç hâli, durağın hâline bağlı.
+static func _serai_open() -> GameEvent:
+	var event := _event("evt_serai_open", "EVT_SERAI_OPEN_TITLE", "EVT_SERAI_OPEN_TEXT", 2.0)
+	event.cooldown_days = 3
+	event.conditions = _conditions([_c("serai_open", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_SERAI_OPEN_OPT_BED", "EVT_SERAI_OPEN_OPT_BED_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 20)]),
+			_effects([_fx(EventEffect.Type.GOLD, -20), _fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.MORALE, 4)])),
+		_choice("EVT_SERAI_OPEN_OPT_YARD", _effects([_fx(EventEffect.Type.STRESS, -2)])),
+		_checked_choice("EVT_SERAI_OPEN_OPT_LISTEN", SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_SERAI_OPEN_LISTEN_OK", _effects([_fx(EventEffect.Type.DANGER, -10)]),
+			"EVT_SERAI_OPEN_LISTEN_BAD", _effects([_fx(EventEffect.Type.STRESS, 1)])),
+		_choice_with_outcomes("EVT_SERAI_OPEN_OPT_STRAW", _outcomes([
+			EventOutcome.make("EVT_SERAI_OPEN_STRAW_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 4)]), 2.0),
+			EventOutcome.make("EVT_SERAI_OPEN_STRAW_SEEN", _effects([_fx(EventEffect.Type.PROVISIONS, 4), _fx(EventEffect.Type.REPUTATION, -2)]), 1.0),
+		])),
+	])
+	return event
+
+static func _serai_ruin() -> GameEvent:
+	var event := _event("evt_serai_ruin", "EVT_SERAI_RUIN_TITLE", "EVT_SERAI_RUIN_TEXT", 2.0)
+	event.cooldown_days = 3
+	event.conditions = _conditions([_c("serai_ruin", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_SERAI_RUIN_OPT_NIGHT", _effects([_fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.MORALE, -1)])),
+		_check_choice("EVT_SERAI_RUIN_OPT_SEARCH", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_SERAI_RUIN_SEARCH_OK", _effects([_fx(EventEffect.Type.GOLD, 25)]),
+			"EVT_SERAI_RUIN_SEARCH_MID", _effects([_fx(EventEffect.Type.GOLD, 10)]),
+			"EVT_SERAI_RUIN_SEARCH_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -10, "perception")])),
+		_choice("EVT_SERAI_RUIN_OPT_ON", _effects([_fx(EventEffect.Type.STRESS, 3)])),
+	])
+	return event
+
+static func _serai_bandit() -> GameEvent:
+	var event := _event("evt_serai_bandit", "EVT_SERAI_BANDIT_TITLE", "EVT_SERAI_BANDIT_TEXT", 2.0)
+	event.cooldown_days = 3
+	event.conditions = _conditions([_c("serai_bandit", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_SERAI_BANDIT_OPT_PAY", "EVT_SERAI_BANDIT_OPT_PAY_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 50)]),
+			_effects([_fx(EventEffect.Type.GOLD, -50)])),
+		_gated_choice("EVT_SERAI_BANDIT_OPT_GRAIN", "EVT_SERAI_BANDIT_OPT_GRAIN_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, TOLL_PROVISIONS)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -TOLL_PROVISIONS)])),
+		_choice("EVT_SERAI_BANDIT_OPT_AROUND", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1)])),
+		_check_choice("EVT_SERAI_BANDIT_OPT_HAGGLE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_SERAI_BANDIT_HAGGLE_OK", _effects([_fx(EventEffect.Type.GOLD, -25)]),
+			"EVT_SERAI_BANDIT_HAGGLE_MID", _effects([_fx(EventEffect.Type.GOLD, -40)]),
+			"EVT_SERAI_BANDIT_HAGGLE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit")])),
+		_choice("EVT_SERAI_BANDIT_OPT_ATTACK", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"), _fx(EventEffect.Type.DANGER, -10)])),
+	])
+	return event
+
+## Y-C29: Duvenmor tarafsız zemin; içeride kılıç çeken bir daha giremez.
+static func _duvenmor_quarrel() -> GameEvent:
+	var event := _event("evt_duvenmor_quarrel", "EVT_DUVENMOR_TITLE", "EVT_DUVENMOR_TEXT", 1.5)
+	event.cooldown_days = 30
+	event.conditions = _conditions([
+		_c("dest_neutral_ground", EventCondition.Op.GREATER_EQUAL, 1),
+		_c("days_remaining", EventCondition.Op.LESS_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_choice("EVT_DUVENMOR_OPT_SWALLOW", _effects([_fx(EventEffect.Type.STRESS, 6)])),
+		_checked_choice("EVT_DUVENMOR_OPT_DAWN", SkillCheck.make(CharacterStats.Kind.STRENGTH, SkillCheck.Source.LEADER, 0.0),
+			"EVT_DUVENMOR_DAWN_OK", _effects([_fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.MORALE, 4)]),
+			"EVT_DUVENMOR_DAWN_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -12), _fx(EventEffect.Type.MORALE, -3)])),
+		_choice("EVT_DUVENMOR_OPT_DRAW", _effects([
+			_fx(EventEffect.Type.MORALE, 6), _fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.BAN_LOCATION, 0, GameSession.NEUTRAL_GROUND_ID),
 		])),
 	])
 	return event

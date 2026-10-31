@@ -3656,7 +3656,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [
     "Y-C25"
    ],
@@ -3665,7 +3665,7 @@
    "paket": "P11",
    "sira": 219,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor. | 2026-10-31 onay turu: Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor. | 2026-10-31 onay turu: Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-C27",
@@ -3705,14 +3705,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P3",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 2,
    "paket": "P07",
    "sira": 222,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Kavga kartı onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yasak mekanizması (ban_location, haritada kilitli planla düğmesi) hazır; kavga kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Kavga kartı onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-C30",
@@ -3735,14 +3735,14 @@
    "bolum": "15",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 3,
    "paket": "P08",
    "sira": 224,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Duraklar onaylandı; üç kart onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yol kenarı kervansaray durakları (eskimiş, harabe, haydut elinde) yolda ve şeritte; üç kartı kart partisi 1'de onay bekliyor. | 2026-10-31 onay turu: Duraklar onaylandı; üç kart onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-B15",
@@ -3812,7 +3812,7 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [
     "Y-C31"
    ],
@@ -3821,7 +3821,7 @@
    "paket": "P11",
    "sira": 229,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-E10",
@@ -3829,7 +3829,7 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [
     "Y-E02"
    ],
@@ -3838,7 +3838,7 @@
    "paket": "P11",
    "sira": 230,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-E11",
@@ -3846,14 +3846,14 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 5,
    "paket": "P11",
    "sira": 231,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İki kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-E12",
@@ -3861,14 +3861,14 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "onaylandı, uygulanacak",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 5,
    "paket": "P11",
    "sira": 232,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kart taslağı kart partisi 1'de, onay bekliyor. | 2026-10-31 onay turu: Kart partisi 1 onaylandı. | 2026-10-31: kart oyunda (EventCatalog, events.csv)."
   },
   {
    "id": "Y-C33",

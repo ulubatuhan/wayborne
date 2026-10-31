@@ -537,3 +537,5 @@
 "EQUIP_AMULET_WOLF_SKULL_DESC","Bir sürü reisinin kafatası. Saldırganlaştırır, bedeni kemirir, çıkmaz.","The skull of a pack leader. It makes you fierce, gnaws at the body, and will not come off.","","","","","","","","",""
 "EQUIP_AMULET_COPPER_COIN_NAME","Delik Bakır Para","Holed Copper Coin","","","","","","","","",""
 "EQUIP_AMULET_COPPER_COIN_DESC","Hiçbir şeye yetmeyen bir para. Şansına inanan saf biri için her şeye yeter.","A coin that buys nothing. To a naive soul who believes in luck, it buys everything.","","","","","","","","",""
+"EFF_BANNED","Bu kapıdan bir daha giremezsin.","You can never pass this gate again.","","","","","","","","",""
+"EFF_TRADE_STAIN","Adın kötüye çıktı: pazarlar bir süre sana pahalı satar, ucuza alır.","Word of it spreads: for a while markets sell to you dear and buy from you cheap.","","","","","","","","",""

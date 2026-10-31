@@ -9,6 +9,7 @@ func suite_name() -> String:
 	return "EventEffects"
 
 func run(t) -> void:
+	_test_ban_and_trade_stain(t)
 	_test_gold_can_go_into_debt(t)
 	_test_provisions_never_negative(t)
 	_test_player_wagon_survives(t)
@@ -530,3 +531,18 @@ func _test_other_caravans(t) -> void:
 			t.ok(unlocked.has(follow), "%s kararı %s zincirini açar" % [event_id, follow])
 			var next := EventCatalog.get_event(follow)
 			t.ok(next != null and next.triggered_only, "%s yalnız tetiklenince gelir" % follow)
+
+## Kart partisi 1: Duvenmor'da kılıç çeken bir daha giremez (Y-C29); köyü
+## zorla basan kervanın adı kötüye çıkar, pazar ona bir süre pahalı satar (Y-C26).
+func _test_ban_and_trade_stain(t) -> void:
+	var session := _session()
+	EventEffectApplier.apply(_effects([EventEffect.make(EventEffect.Type.BAN_LOCATION, 0, "serai_duvenmor")]), session)
+	t.ok(session.is_banned("serai_duvenmor"), "kılıç çeken Duvenmor'a giremez")
+	var clean := session.get_buy_price_multiplier()
+	var sell_clean := session.capped_sell_price("salt", 100)
+	EventEffectApplier.apply(_effects([EventEffect.make(EventEffect.Type.TRADE_STAIN, 45)]), session)
+	t.ok(session.is_trade_stained(), "leke tuttu")
+	t.ok(session.get_buy_price_multiplier() > clean * 1.2, "lekeli kervana pazar pahalı satar")
+	t.ok(session.capped_sell_price("salt", 100) < sell_clean, "lekeli kervandan ucuza alır")
+	session.total_days_elapsed += 46
+	t.ok(not session.is_trade_stained(), "leke süresi dolunca kalkar")

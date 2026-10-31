@@ -157,6 +157,14 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
+		EventEffect.Type.BAN_LOCATION:
+			var place := effect.text_value if not effect.text_value.is_empty() else session.journey_destination_id
+			if not place.is_empty():
+				session.ban_location(place)
+				result.lines.append(_t("EFF_BANNED"))
+		EventEffect.Type.TRADE_STAIN:
+			session.stain_trade(effect.amount)
+			result.lines.append(_t("EFF_TRADE_STAIN"))
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:

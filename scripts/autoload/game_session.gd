@@ -2045,7 +2045,20 @@ func get_trait_price_multiplier() -> float:
 	)
 
 func get_buy_price_multiplier() -> float:
-	return get_player_culture().buy_price_multiplier * get_trait_price_multiplier()
+	return get_player_culture().buy_price_multiplier * get_trait_price_multiplier() * (TRADE_STAIN_BUY if is_trade_stained() else 1.0)
+
+## Ticaret lekesi (Y-C26, kullanıcı notu: köyü zorla basan kervan "ticari
+## eylemlerde ciddi oranda dezavantajlı" olmalı): bir süre pazar kervana
+## pahalı satar, ucuza alır. Kayıtta; süre dolunca kalkar.
+const TRADE_STAIN_BUY: float = 1.25
+const TRADE_STAIN_SELL: float = 0.8
+var trade_stain_until_day: int = -1
+
+func stain_trade(days: int) -> void:
+	trade_stain_until_day = maxi(trade_stain_until_day, total_days_elapsed + maxi(1, days))
+
+func is_trade_stained() -> bool:
+	return total_days_elapsed < trade_stain_until_day
 
 ## Tavernada sohbetle haber alma şansına eklenen pay (N34): liman kültürü
 ## (söylentiye yakın) ve tellal (dedikoduyu toplayan). Satın alma yok.
@@ -2579,6 +2592,13 @@ func has_plague(location_id: String) -> bool:
 		return true
 	var location := WorldMapData.get_location_by_id(location_id)
 	return location != null and WorldEvents.natural_plague(location.region, total_days_elapsed)
+
+const NEUTRAL_GROUND_ID: String = "serai_duvenmor"
+
+func _plague_on_route() -> bool:
+	if not is_journey_active():
+		return has_plague(current_location_id)
+	return has_plague(journey_origin_id) or has_plague(journey_destination_id)
 
 ## Kapısından bir daha girilemeyen yerler (Y-C29): Duvenmor'un içinde kılıç
 ## çeken kervan yasaklanır. Kayıtta durur; yeniden yükleme yasağı kaldırmaz.
@@ -3262,7 +3282,8 @@ func note_purchase(item: Item, quantity: int, unit_price: int) -> void:
 ## Satış birim fiyatı: bozulan malda stoğun yaşı fiyatı düşürür
 ## (MarketPricing.freshness_multiplier), aynı ziyarette alınan mal tavanlı.
 func capped_sell_price(item_id: String, market_price: int) -> int:
-	var price := maxi(1, int(round(float(market_price) * get_freshness(item_id))))
+	var stain := TRADE_STAIN_SELL if is_trade_stained() else 1.0
+	var price := maxi(1, int(round(float(market_price) * get_freshness(item_id) * stain)))
 	if not bought_here.has(item_id):
 		return price
 	return mini(price, maxi(1, int(floor(float(bought_here[item_id]) * BUYBACK_SHARE))))
@@ -4351,6 +4372,7 @@ func to_save_dict() -> Dictionary:
 		"memorial_serial": _memorial_serial,
 		"last_story_day": last_story_day,
 		"last_mercy_day": last_mercy_day,
+		"trade_stain_until_day": trade_stain_until_day,
 		"day_beats": day_beats.duplicate(true),
 		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
@@ -4574,6 +4596,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
 	last_mercy_day = int(data.get("last_mercy_day", -99))
+	trade_stain_until_day = int(data.get("trade_stain_until_day", -1))
 	day_beats.clear()
 	for raw in data.get("day_beats", []):
 		if raw is Dictionary:
@@ -4704,6 +4727,10 @@ func build_event_context() -> Dictionary:
 		# Yol yönetmeni (Y-B02) açlığı zorluk sayar.
 		"hungry": 1.0 if _anyone_hungry() else 0.0,
 		"provisions": get_provisions(),
+		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
+		"plague_here": 1.0 if _plague_on_route() else 0.0,
+		# Tarafsız zemine gidiliyor mu (Y-C29: Duvenmor'da kılıç çekilmez).
+		"dest_neutral_ground": 1.0 if journey_destination_id == NEUTRAL_GROUND_ID else 0.0,
 		# Kaçak mal (Y-C19): gümrük onu arar.
 		"contraband": get_total_quantity(ItemCatalog.CONTRABAND_SALT),
 		# Yoldaki tüccarların mizacı (Y-F05): hırsız gece kaçar, çaresiz

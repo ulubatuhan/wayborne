@@ -77,6 +77,12 @@ enum Type {
 	# şehre giden yolda), "city:<id>" (o şehre giden yolda), "heir" (sonraki
 	# kuşakta), boş = her yerde. Karşılık kartı `chain_<id>_ripe`'a bakar.
 	CHAIN_ADVANCE,
+	# Kapısından bir daha girilemeyen yer (Y-C29). text_value = yer kimliği;
+	# boşsa seferin hedefi.
+	BAN_LOCATION,
+	# Ticaret lekesi (Y-C26): `amount` gün boyunca pazarlar kervana pahalı
+	# satar, ucuza alır - adın kötüye çıktı.
+	TRADE_STAIN,
 }
 
 @export var type: Type = Type.GOLD
