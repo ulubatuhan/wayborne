@@ -3269,8 +3269,15 @@ func _build_event_illustration(event_id: String) -> Control:
 		var vignette := EventVignette.new()
 		vignette.biome = biome
 		vignette.darkness = JourneyClock.darkness_for_hour(_clock.get_hour_of_day())
-		vignette.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
-		return vignette
+		vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+		vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var vignette_frame := Control.new()
+		vignette_frame.clip_contents = true
+		vignette_frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
+		vignette_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vignette_frame.add_child(vignette)
+		CardDrift.attach(vignette, UserSettings.reduce_motion)
+		return vignette_frame
 	var frame := Control.new()
 	frame.clip_contents = true
 	frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
@@ -3282,6 +3289,7 @@ func _build_event_illustration(event_id: String) -> Control:
 	picture.set_anchors_preset(Control.PRESET_FULL_RECT)
 	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(picture)
+	CardDrift.attach(picture, UserSettings.reduce_motion)
 	return frame
 
 func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:

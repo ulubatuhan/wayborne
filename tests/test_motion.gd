@@ -11,6 +11,7 @@ func suite_name() -> String:
 	return "Motion"
 
 func run(t) -> void:
+	_test_card_drift_settles(t)
 	_test_stop_is_a_settle_not_a_snap(t)
 	_test_figure_keeps_its_phase_when_stopping(t)
 	_test_wind_only_in_bad_weather(t)
@@ -95,3 +96,13 @@ func _test_mud_flies_back_and_lands(t) -> void:
 	t.ok(mid.x < start.x and end.x < mid.x, "çamur tekerleğin gerisine atılır")
 	t.ok(mid.y < start.y, "çamur yükselir")
 	t.ok(end.y > mid.y and end.y < 0.1, "çamur ömrünün sonunda yere iner")
+
+
+# Y-G21: kartın resmi durgundan başlar, hızı sıfıra inerek durur.
+func _test_card_drift_settles(t) -> void:
+	t.almost(CardDrift.scale_at(0.0), 1.0, "kayma ölçeği 1'den başlar")
+	t.almost(CardDrift.scale_at(1.0), 1.0 + CardDrift.ZOOM, "kayma hedefte durur")
+	t.almost(CardDrift.scale_at(2.0), 1.0 + CardDrift.ZOOM, "süreden sonra kıpırdamaz")
+	var late := CardDrift.scale_at(1.0) - CardDrift.scale_at(0.98)
+	var early := CardDrift.scale_at(0.02) - CardDrift.scale_at(0.0)
+	t.ok(late < early * 0.01, "sonda hız neredeyse sıfır")
