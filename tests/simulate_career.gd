@@ -88,6 +88,7 @@ func _initialize() -> void:
 		for arc_index in ARC_COUNT:
 			arcs.append(_run_arc(BASE_SEED + arc_index * 977, policy))
 		_report_curve(arcs, policy)
+		_report_calm(arcs, policy)
 		print("   tehdit kartı (Y-C15) evreye göre: erken %d · orta %d · geç %d" % [
 			int(_threats_by_stage.get(0, 0)), int(_threats_by_stage.get(1, 0)), int(_threats_by_stage.get(2, 0)),
 		])
@@ -147,17 +148,34 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 
 	var samples: Dictionary = {}
 
+	# Y-C24: dertsiz sefer sayısı ve en uzun sakin dizi.
+	var calm_legs := 0
+	var calm_run := 0
+	var longest_calm := 0
 	for leg_index in LEGS_PER_ARC:
 		var leg_number := leg_index + 1
 		_invest(session, rng, policy)
+		var losses_before := session.ledger.count_of(CaravanLedger.KIND_DIED) + session.ledger.count_of(CaravanLedger.KIND_DEPARTED)
+		var threats_before := _threat_total()
 		var payout := _run_leg(session, rng)
 		if payout.is_empty():
 			break
+		var losses := session.ledger.count_of(CaravanLedger.KIND_DIED) + session.ledger.count_of(CaravanLedger.KIND_DEPARTED) - losses_before
+		var trouble := losses > 0 or int(payout.get("lost_contracts", 0)) > 0 \
+			or _threat_total() > threats_before \
+			or not session.debts.get_overdue_debts(session.total_days_elapsed).is_empty()
+		if trouble:
+			calm_run = 0
+		else:
+			calm_legs += 1
+			calm_run += 1
+			longest_calm = maxi(longest_calm, calm_run)
 		if CHECKPOINTS.has(leg_number):
 			samples[leg_number] = _snapshot(session)
 
 	samples["final"] = _snapshot(session)
 	return {
+		"calm_legs": calm_legs, "longest_calm": longest_calm,
 		"samples": samples,
 		"legs": session.journeys_completed, "days": session.total_days_elapsed,
 		"cards": _cards_drawn, "deaths": session.ledger.count_of(CaravanLedger.KIND_DIED),
@@ -414,3 +432,24 @@ func _report_curve(arcs: Array[Dictionary], policy: String) -> void:
 			int(totals.contracts / count), int(totals.cities / count),
 			int(totals.debt / count), int(totals.days / count),
 		])
+
+## Y-C24: kusursuz denge olmamalı. Dert = kayıp (ölüm ya da ayrılma), teslim
+## edilemeyen kontrat, tehdit kartı ya da vadesi geçmiş borç. Hedef: hiçbir
+## politika uzun bir sakin diziye ulaşmasın.
+func _report_calm(arcs: Array[Dictionary], policy: String) -> void:
+	var calm := 0
+	var legs := 0
+	var longest := 0
+	for arc in arcs:
+		calm += int(arc["calm_legs"])
+		legs += int(arc["legs"])
+		longest = maxi(longest, int(arc["longest_calm"]))
+	print("   denge (Y-C24) · %s: dertsiz sefer %d/%d (%%%d), en uzun sakin dizi %d" % [
+		policy, calm, legs, int(round(100.0 * calm / float(maxi(1, legs)))), longest,
+	])
+
+func _threat_total() -> int:
+	var total := 0
+	for stage in _threats_by_stage:
+		total += int(_threats_by_stage[stage])
+	return total
