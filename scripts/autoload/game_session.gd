@@ -1619,6 +1619,21 @@ const CAMP_HOURS: float = 8.0
 ## çünkü onun bir bedeli var.
 const CAMP_STRESS_RELIEF: int = 8
 
+## Gokyurt misafirliği (Y-C27, kullanıcı kararı 2026-10-31): Gokyurt'taki
+## konaklama yerlerinde bir gün konaklama ve yeme içme ücretsizdir, bedelini
+## konsey öder. Öbür bölgelerin kervansaraylarında da eskiden böyleydi;
+## kıtlıkta kaldırıldı. Oyunda gün yalnızca yolda aktığı için bir gece olarak
+## çevrilir: bir kamp gecesinin dinlenmesi ve kervanın bir günlük sofrası.
+const HOSPITALITY_REGION: String = "gocebe"
+
+## Varışta misafirlik: verilen erzak (0 = misafirlik yok).
+func _apply_hospitality() -> int:
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	if location == null or location.region != HOSPITALITY_REGION:
+		return 0
+	change_stress(-CAMP_STRESS_RELIEF)
+	return change_provisions(get_daily_provision_consumption())
+
 ## Yolda geçen her günün gerginlik bedeli - CaravanState.MORALE_DRAIN_PER_DAY'in
 ## stres karşılığı. Uzun süre yoktu ve fark edilmiyordu, çünkü yerini bir hata
 ## dolduruyordu: açlık cezası doğru stoklanmış her seferde de işlediği için
@@ -3675,6 +3690,8 @@ func finish_journey() -> Dictionary:
 	# kampanyanın kendisinin payout'tan sonraya alınma gerekçesi gibi.
 	# Seviye (grant_party_xp) ve itibar (teslimat) bu noktada güncel.
 	payout["wagons_earned"] = grant_earned_wagons()
+
+	payout["hospitality"] = _apply_hospitality()
 
 	return payout
 

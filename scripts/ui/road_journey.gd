@@ -4127,6 +4127,14 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		wagon_label.modulate = OUTCOME_COLOR
 		_arrival_panel.add_child(wagon_label)
 
+	# Gokyurt misafirliği (Y-C27): konseyin sofrası.
+	var hospitality: int = payout.get("hospitality", 0)
+	if hospitality > 0:
+		var guest_label := _make_summary_label(tr("UI_ROAD_HOSPITALITY") % [hospitality, GameSession.CAMP_STRESS_RELIEF])
+		guest_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		guest_label.modulate = OUTCOME_COLOR
+		_arrival_panel.add_child(guest_label)
+
 	var xp_awarded: int = payout.get("xp_awarded", 0)
 	if xp_awarded > 0:
 		var xp_label := _make_summary_label(tr("UI_ROAD_JOURNEY_XP") % xp_awarded)

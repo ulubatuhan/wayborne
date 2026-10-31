@@ -1289,6 +1289,7 @@
 "UI_SETTINGS_AMBIENCE_VOLUME","Ortam Sesi","Ambience Volume","","","","","","","","",""
 "UI_SETTINGS_SFX_VOLUME","Efekt Sesleri","Sound Effects","","","","","","","","",""
 "UI_SETTINGS_UI_VOLUME","Arayüz Sesleri","Interface Sounds","","","","","","","","",""
+"UI_ROAD_HOSPITALITY","Konseyin misafirisiniz: bir gecelik konak ve sofra bedava (+%d erzak, stres -%d).","You are the council's guests: a night's lodging and table, free (+%d provisions, stress -%d).","","","","","","","","",""
 "UI_TALK_LEDGER","Yolcu defterine bakabilir miyim?","May I look at the travellers' ledger?","","","","","","","","",""
 "UI_TALK_LEDGER_OPEN","Defteri açar, parmağıyla satırları izler.","The keeper opens the ledger and runs a finger down the lines.","","","","","","","","",""
 "UI_TALK_LEDGER_LINE","%d gün önce %s yönüne bir kervan çıktı; yolu yüzde %d tehlikeli diye yazmışlar.","%d days ago a caravan left for %s; they wrote the road down as %d percent dangerous.","","","","","","","","",""

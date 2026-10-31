@@ -18,6 +18,8 @@ func suite_name() -> String:
 	return "CityCommerce"
 
 func run(t) -> void:
+	_test_gokyurt_hospitality(t)
+	_test_caravanserai_rumor_bonus(t)
 	_test_wagon_sale_never_returns_its_cost(t)
 	_test_selling_never_takes_the_last_wagon(t)
 	_test_repair_always_beats_sell_and_rebuy(t)
@@ -552,3 +554,26 @@ func _test_unrequired_contracts_stay_open_at_bad_reputation(t) -> void:
 	large.required_reputation = 5
 	t.ok(not large.is_open_to(4), "eşikli ilan eşiğin altında kapalı")
 	t.ok(large.is_open_to(5), "eşikli ilan eşikte açık")
+
+
+# Y-C27: Gokyurt'ta konseyin sofrası; öbür kervansaraylarda yok.
+func _test_gokyurt_hospitality(t) -> void:
+	var session := _session()
+	session.current_location_id = "serai_orbeyan"
+	var before := session.get_provisions()
+	var given: int = session._apply_hospitality()
+	t.ok(given > 0, "Orbeyan'da misafirlik erzak verir")
+	t.eq(session.get_provisions(), before + given, "erzak gerçekten eklendi")
+	session.current_location_id = "serai_seyvan"
+	t.eq(session._apply_hospitality(), 0, "Seyvan'da misafirlik kalktı")
+	session.current_location_id = "vastrevar"
+	t.eq(session._apply_hospitality(), 0, "şehirde misafirlik yok")
+
+# Y-C28: kervansarayda söylenti şehirdekinden kolay.
+func _test_caravanserai_rumor_bonus(t) -> void:
+	var session := _session()
+	session.current_location_id = "vastrevar"
+	var city := session.get_news_chance_bonus()
+	session.current_location_id = "serai_seyvan"
+	t.ok(session.is_at_caravanserai(), "Seyvan kervansaray")
+	t.ok(session.get_news_chance_bonus() > city, "kervansarayda söylenti payı yüksek")
