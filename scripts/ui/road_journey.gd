@@ -3393,9 +3393,19 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 			for line in resolution.outcome_result.lines:
 				_add_log("      %s" % line)
 
+	# Sessizlik anı (Y-H08): birini geride bırakmak bir feda kararıdır.
+	if _choice_leaves_someone(choice):
+		AudioManager.hush(false)
+
 	_refresh_state()
 	_check_journey_end()
 	_autosave_journey()
+
+func _choice_leaves_someone(choice: EventChoice) -> bool:
+	for effect in choice.effects:
+		if effect.type == EventEffect.Type.LEAVE_BEHIND:
+			return true
+	return false
 
 func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 	for event_id in result.unlocked_event_ids:
@@ -3690,6 +3700,9 @@ func _report_combat_deaths(dead_characters: Array) -> void:
 ## öldüğünü sebebiyle yazar; lider öldüyse varisi oyuncuya seçtirir.
 func _handle_death_outcome(outcome: Dictionary) -> void:
 	var dead_names: Array = outcome.get("dead_names", [])
+	# Sessizlik anı (Y-H08): bir ölümden sonra yalnızca beden sesleri, yerde biri.
+	if not dead_names.is_empty():
+		AudioManager.hush(true)
 	# Defterin kendi satırı - sebebiyle ve yeriyle, "öldü" değil.
 	var recent_deaths := _session.ledger.recent(dead_names.size() + 2).filter(
 		func(entry): return String(entry.get("kind", "")) == CaravanLedger.KIND_DIED

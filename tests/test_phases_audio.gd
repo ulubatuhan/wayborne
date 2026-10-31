@@ -16,6 +16,7 @@ func run(t) -> void:
 	_test_every_settlement_has_its_phases(t)
 	_test_background_path_by_hour(t)
 	_test_variant_never_repeats(t)
+	_test_hush_is_only_the_body(t)
 	_test_beat_log(t)
 	_test_road_ambience_table(t)
 
@@ -76,3 +77,16 @@ func _test_road_ambience_table(t) -> void:
 	t.eq(audio.road_ambience_for(RouteWeather.CLEAR, true, false), audio.AMBIENCE_WIND, "açık gece rüzgâr")
 	for weather in audio.ROAD_AMBIENCE:
 		t.ok(audio.AMBIENCE_PATHS.has(String(audio.ROAD_AMBIENCE[weather])), "%s katmanının dosyası tanımlı" % weather)
+
+
+# Y-H08: sessizlik anında yalnızca beden sesleri, hepsinin dosyası var.
+func _test_hush_is_only_the_body(t) -> void:
+	var audio: Script = load("res://scripts/autoload/audio_manager.gd")
+	var beats: Array = audio.hush_sequence(9.0, true)
+	t.ok(beats.size() >= 8, "sessizlik bir süre sürer")
+	t.eq(String(beats[0]), "body_crawl", "ölümden sonra sürünmeyle başlar")
+	t.ok(beats.has("body_breath") and beats.has("body_step"), "adım ve nefes var")
+	for id in ["body_step", "body_breath", "body_crawl"]:
+		var path := String(audio.SFX_PATHS[id])
+		for v in int(audio.SFX_VARIANT_COUNTS[id]):
+			t.ok(FileAccess.file_exists(ProjectSettings.globalize_path(path % v)) or ResourceLoader.exists(path % v), "ses var: %s" % (path % v))

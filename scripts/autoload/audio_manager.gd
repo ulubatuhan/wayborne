@@ -72,8 +72,13 @@ const SFX_UI_COIN: String = "ui_coin"
 const SFX_UI_BOOK_OPEN: String = "ui_book_open"
 const SFX_UI_BOOK_CLOSE: String = "ui_book_close"
 ## Çeşit sayısı `SFX_VARIANTS`'tan farklı olan sesler.
+## Sessizlik anının beden sesleri (Y-H08): adım, nefes, sürünme.
+const SFX_BODY_STEP: String = "body_step"
+const SFX_BODY_BREATH: String = "body_breath"
+const SFX_BODY_CRAWL: String = "body_crawl"
 const SFX_VARIANT_COUNTS: Dictionary = {
 	SFX_UI_PRESS: 5, SFX_UI_PAGE: 3, SFX_UI_COIN: 2,
+	SFX_BODY_STEP: 3, SFX_BODY_BREATH: 2, SFX_BODY_CRAWL: 2,
 }
 
 ## Ses otobüsleri (görev N31c): her katmanın kendi sürgüsü. Otobüsler kodda
@@ -97,7 +102,50 @@ const SFX_PATHS: Dictionary = {
 	SFX_UI_COIN: "res://data/assets/audio/ui/coin_%d.ogg",
 	SFX_UI_BOOK_OPEN: "res://data/assets/audio/ui/book_open.ogg",
 	SFX_UI_BOOK_CLOSE: "res://data/assets/audio/ui/book_close.ogg",
+	SFX_BODY_STEP: "res://data/assets/audio/body/step_%d.wav",
+	SFX_BODY_BREATH: "res://data/assets/audio/body/breath_%d.wav",
+	SFX_BODY_CRAWL: "res://data/assets/audio/body/crawl_%d.wav",
 }
+
+## Sessizlik anı (Y-H08, kullanıcı notu: "tamamen sessizlik ve adım, sürünme,
+## nefes gibi seslerin ... sadece onların duyulması daha etkili"). Müzik ve
+## ortam sesi söner, `HUSH_SECONDS` boyunca yalnızca beden sesleri çalar, sonra
+## ikisi geri gelir. Bir feda kararından ve bir ölümden sonra çalar.
+const HUSH_SECONDS: float = 9.0
+const HUSH_FADE_SECONDS: float = 0.6
+const HUSH_BEAT_SECONDS: float = 0.9
+var _hushing: bool = false
+
+## Saf: sessizlikte hangi beden sesi hangi sırayla (test bunu okur). Adımlar
+## arasına her dördüncü vuruşta bir nefes; sürünmeyle başlayabilir (yerde biri).
+static func hush_sequence(seconds: float, crawl: bool) -> Array[String]:
+	var beats: Array[String] = []
+	var count := int(floor(seconds / HUSH_BEAT_SECONDS))
+	for index in count:
+		if index == 0 and crawl:
+			beats.append(SFX_BODY_CRAWL)
+		elif index % 4 == 3:
+			beats.append(SFX_BODY_BREATH)
+		else:
+			beats.append(SFX_BODY_STEP)
+	return beats
+
+func hush(crawl: bool = false) -> void:
+	if _hushing:
+		return
+	_hushing = true
+	var music_db := _active.volume_db
+	var ambience_db := _ambience_player.volume_db
+	var down := create_tween().set_parallel(true)
+	down.tween_property(_active, "volume_db", SILENT_DB, HUSH_FADE_SECONDS)
+	down.tween_property(_ambience_player, "volume_db", SILENT_DB, HUSH_FADE_SECONDS)
+	for sfx_id in hush_sequence(HUSH_SECONDS, crawl):
+		await get_tree().create_timer(HUSH_BEAT_SECONDS).timeout
+		play_sfx(sfx_id)
+	var up := create_tween().set_parallel(true)
+	up.tween_property(_active, "volume_db", music_db, HUSH_FADE_SECONDS * 2.0)
+	up.tween_property(_ambience_player, "volume_db", ambience_db, HUSH_FADE_SECONDS * 2.0)
+	_hushing = false
 
 ## Ortam sesi (bkz. `play_ambience`) - müziğin *altında* değil, müziğin
 ## **yerine** duran bir katman: başlangıç ekranında henüz müzik yok, yalnızca
