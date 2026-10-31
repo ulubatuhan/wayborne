@@ -1309,33 +1309,83 @@ func _draw_stop(stop: String, base: Vector2, height: float, state: String = "") 
 ## kapı, köşelerde kuleler. Harabede sur kırık ve kapı karanlık; haydut
 ## elindeyse kulede koyu bir bez. Sıcak renk yok: açık olanın ışığı yalnızca
 ## kapı ağzındaki fener (tek sıcak kaynak kuralı).
-func _draw_serai(base: Vector2, height: float, state: String) -> void:
+## Kervansaray bir köyden büyük: avlulu, kuleli bir yapı. Durak ölçüsünün
+## iki katından küçük çizilince render edilmiş zeminin otu onu örtüyordu
+## (2026-10-31 ekran görüntüsü: yalnızca bayrak direği görünüyordu).
+const SERAI_SCALE: float = 1.7
+## Haydut elindeki kervansarayın kulesindeki koyu bez (kart metni de böyle
+## anlatıyor); doygun kırmızı değil, tek sıcak kaynak kuralı.
+const SERAI_BANDIT_CLOTH: Color = Color(0.17, 0.15, 0.14)
+
+func _draw_serai(at: Vector2, stop_height: float, state: String) -> void:
+	var height := stop_height * SERAI_SCALE
+	# Yolun biraz daha gerisinde, yamaçta: render edilmiş otun üstüne çıksın.
+	var base := at - Vector2(0.0, height * 0.10)
 	var haze := Color(_sky.haze)
 	var stone := ArtPalette.fade_to_haze(Color(0.44, 0.42, 0.39), haze, 0.30)
 	var dark := ArtPalette.fade_to_haze(ArtPalette.INK, haze, 0.20)
+	var line := maxf(1.5, height * 0.012)
 	var width := height * 2.6
 	var wall_h := height * 0.55
 	var ruin := state == RouteTerrain.SERAI_RUIN
 	if ruin:
-		for part in [[-1.0, -0.35, 0.8], [0.15, 0.55, 0.45], [0.7, 1.0, 0.7]]:
+		# Kırık duvar parçaları: üstleri dişli, biri neredeyse yere inmiş.
+		for part in [[-1.0, -0.35, 1.05], [0.15, 0.55, 0.62], [0.7, 1.0, 0.92]]:
 			var x0 := width * 0.5 * float(part[0])
 			var x1 := width * 0.5 * float(part[1])
-			draw_rect(Rect2(base + Vector2(x0, -wall_h * float(part[2])), Vector2(x1 - x0, wall_h * float(part[2]))), stone, true)
+			var top := wall_h * float(part[2])
+			var poly := PackedVector2Array([
+				base + Vector2(x0, 0), base + Vector2(x0, -top), base + Vector2(lerpf(x0, x1, 0.3), -top * 0.82),
+				base + Vector2(lerpf(x0, x1, 0.55), -top * 0.95), base + Vector2(lerpf(x0, x1, 0.8), -top * 0.7),
+				base + Vector2(x1, -top * 0.78), base + Vector2(x1, 0),
+			])
+			draw_colored_polygon(poly, stone)
+			poly.append(poly[0])
+			draw_polyline(poly, dark, line)
 	else:
-		draw_rect(Rect2(base + Vector2(-width * 0.5, -wall_h), Vector2(width, wall_h)), stone, true)
+		var wall := Rect2(base + Vector2(-width * 0.5, -wall_h), Vector2(width, wall_h))
+		draw_rect(wall, stone, true)
+		# Taş sıraları.
+		var rows: Array[float] = [0.33, 0.66]
+		for row in rows:
+			var y: float = base.y - wall_h * row
+			draw_line(Vector2(wall.position.x, y), Vector2(wall.end.x, y), Color(dark, 0.35), line * 0.6)
+		draw_rect(wall, dark, false, line)
 		for side in [-1.0, 1.0]:
-			draw_rect(Rect2(base + Vector2(side * width * 0.5 - height * 0.16, -wall_h * 1.45), Vector2(height * 0.32, wall_h * 1.45)), stone.darkened(0.08), true)
-	draw_rect(Rect2(base + Vector2(-height * 0.2, -wall_h * 0.72), Vector2(height * 0.4, wall_h * 0.72)), dark, true)
-	draw_circle(base + Vector2(0.0, -wall_h * 0.72), height * 0.2, dark)
+			var tower := Rect2(base + Vector2(float(side) * width * 0.5 - height * 0.16, -wall_h * 1.45), Vector2(height * 0.32, wall_h * 1.45))
+			draw_rect(tower, stone.darkened(0.08), true)
+			# Mazgallar.
+			var merlon := tower.size.x / 5.0
+			var merlons: Array[int] = [0, 2, 4]
+			for m in merlons:
+				var r := Rect2(Vector2(tower.position.x + merlon * float(m), tower.position.y - merlon), Vector2(merlon, merlon))
+				draw_rect(r, stone.darkened(0.08), true)
+				draw_rect(r, dark, false, line)
+			draw_rect(tower, dark, false, line)
+	# Kapı kemeri: yıkıkta da ayakta kalan tek şey.
+	var gate_w := height * 0.4
+	var gate_h := wall_h * 0.72
+	draw_rect(Rect2(base + Vector2(-gate_w * 0.5, -gate_h), Vector2(gate_w, gate_h)), dark, true)
+	draw_circle(base + Vector2(0.0, -gate_h), gate_w * 0.5, dark)
+	if ruin:
+		var arch := stone.darkened(0.05)
+		for side in [-1.0, 1.0]:
+			var sx: float = float(side)
+			draw_rect(Rect2(base + Vector2(sx * gate_w * 0.5 + (0.0 if sx > 0.0 else -gate_w * 0.22), -gate_h), Vector2(gate_w * 0.22, gate_h)), arch, true)
+		draw_arc(base + Vector2(0.0, -gate_h), gate_w * 0.61, PI, TAU, 16, arch, gate_w * 0.22)
 	if state == RouteTerrain.SERAI_BANDIT:
-		var pole := base + Vector2(width * 0.5, -wall_h * 1.45)
+		var pole := base + Vector2(width * 0.5, -wall_h * 1.45 - height * 0.064)
 		draw_line(pole, pole + Vector2(0.0, -height * 0.45), dark, maxf(1.2, height * 0.035))
 		draw_colored_polygon(PackedVector2Array([
-			pole + Vector2(0.0, -height * 0.45), pole + Vector2(height * 0.32, -height * 0.38), pole + Vector2(0.0, -height * 0.28),
-		]), ArtPalette.fade_to_haze(ArtPalette.BLOOD.darkened(0.45), haze, 0.25))
+			pole + Vector2(0.0, -height * 0.45), pole + Vector2(height * 0.32, -height * 0.40),
+			pole + Vector2(height * 0.22, -height * 0.34), pole + Vector2(height * 0.30, -height * 0.27), pole + Vector2(0.0, -height * 0.28),
+		]), ArtPalette.fade_to_haze(SERAI_BANDIT_CLOTH, haze, 0.20))
 	elif not ruin:
-		ArtDraw.radial_glow(self, base + Vector2(height * 0.32, -wall_h * 0.62), Vector2(height * 0.22, height * 0.22),
+		# Kapının feneri: yoldaki tek sıcak ışık.
+		var lamp := base + Vector2(gate_w * 0.8, -gate_h * 1.05)
+		ArtDraw.radial_glow(self, lamp, Vector2(height * 0.22, height * 0.22),
 			ArtPalette.fade_to_haze(Color(0.95, 0.66, 0.30), haze, 0.15), 0.55)
+		draw_circle(lamp, maxf(2.0, height * 0.025), Color(1.0, 0.78, 0.42))
 
 func _draw_hut(base: Vector2, height: float, wall: Color, roof: Color) -> void:
 	var half := height * 0.46
