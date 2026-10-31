@@ -2640,6 +2640,47 @@ func roll_camp_story() -> CharacterData:
 	rng.seed = hash("camp_story|%s|%d" % [caravan_name, total_days_elapsed])
 	return CampStory.pick_teller(get_party(), rng)
 
+## --- Küçük lütuf (görev Y-B16) ---
+## Kampta nadir, arayüzsüz bir an: iki yoldaş arasında küçük bir iyilik.
+## Nadir olması ağırlığını korur: zar düşük ve iki lütuf arasında en az bir
+## hafta. Tohum kervan ve günden: aynı akşamı yeniden yüklemek sonucu
+## değiştirmez. Lütuf günün izine girer, günlük o akşam onu yazabilir.
+const MERCY_CHANCE: float = 0.12
+const MERCY_MIN_GAP_DAYS: int = 7
+const MERCY_STRESS: int = -3
+const MERCY_KINDS: Array[String] = ["blanket", "hum", "ox", "bread", "stars"]
+const MERCY_TEXT_KEYS: Dictionary = {
+	"blanket": "UI_MERCY_BLANKET", "hum": "UI_MERCY_HUM", "ox": "UI_MERCY_OX",
+	"bread": "UI_MERCY_BREAD", "stars": "UI_MERCY_STARS",
+}
+var last_mercy_day: int = -99
+
+## Bu akşamın lütfu: {"kind", "args": [ad, ad]} ya da boş. Kadroda iki kişi
+## yoksa lütuf da yok: iyilik iki kişi arasında olur.
+func roll_small_mercy() -> Dictionary:
+	if total_days_elapsed - last_mercy_day < MERCY_MIN_GAP_DAYS:
+		return {}
+	var party := get_party()
+	if party.size() < 2:
+		return {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("mercy|%s|%d" % [caravan_name, total_days_elapsed])
+	if rng.randf() >= MERCY_CHANCE:
+		return {}
+	var kind := MERCY_KINDS[rng.randi() % MERCY_KINDS.size()]
+	var first := rng.randi() % party.size()
+	var second := (first + 1 + rng.randi() % (party.size() - 1)) % party.size()
+	return {"kind": kind, "args": [party[first].character_name, party[second].character_name]}
+
+## Lütuf yaşandı: kadronun stresi biraz iner, iz günün satırına girer.
+func receive_small_mercy(mercy: Dictionary) -> void:
+	if mercy.is_empty():
+		return
+	last_mercy_day = total_days_elapsed
+	for member in get_party():
+		member.change_stress(MERCY_STRESS)
+	note_beat(BEAT_MERCY, mercy.get("args", []) as Array)
+
 ## --- Günün satırı (görev Y-B08) ---
 ## Gün boyunca olan önemli şeyler bir iz bırakır; akşam kampında en ağırı
 ## edebi bir cümleye döner ve oyuncu üç cümleden birini deftere yazar (ya da
@@ -2653,10 +2694,11 @@ const BEAT_HUNGER: String = "hunger"
 const BEAT_STORY: String = "story"
 const BEAT_EVENT: String = "event"
 const BEAT_QUIET: String = "quiet"
+const BEAT_MERCY: String = "mercy"
 ## Hangi iz günün satırı olur: en ağır olanı.
 const BEAT_WEIGHTS: Dictionary = {
 	BEAT_DEATH: 100, BEAT_WAGON: 80, BEAT_LOST: 70, BEAT_WON: 60,
-	BEAT_HUNGER: 45, BEAT_STORY: 35, BEAT_EVENT: 30, BEAT_QUIET: 0,
+	BEAT_MERCY: 50, BEAT_HUNGER: 45, BEAT_STORY: 35, BEAT_EVENT: 30, BEAT_QUIET: 0,
 }
 ## İz türü başına üç cümle (anahtarlar tam yazılı, Localization Rules).
 const DIARY_KEYS: Dictionary = {
@@ -2668,6 +2710,7 @@ const DIARY_KEYS: Dictionary = {
 	BEAT_STORY: ["DIARY_STORY_1", "DIARY_STORY_2", "DIARY_STORY_3"],
 	BEAT_EVENT: ["DIARY_EVENT_1", "DIARY_EVENT_2", "DIARY_EVENT_3"],
 	BEAT_QUIET: ["DIARY_QUIET_1", "DIARY_QUIET_2", "DIARY_QUIET_3"],
+	BEAT_MERCY: ["DIARY_MERCY_1", "DIARY_MERCY_2", "DIARY_MERCY_3"],
 }
 
 ## Son satırdan bu yana biriken izler: {"kind", "args", "day"}. Kayıtta,
@@ -4307,6 +4350,7 @@ func to_save_dict() -> Dictionary:
 		"route_memory": route_memory.duplicate(true),
 		"memorial_serial": _memorial_serial,
 		"last_story_day": last_story_day,
+		"last_mercy_day": last_mercy_day,
 		"day_beats": day_beats.duplicate(true),
 		"last_feast_evening_day": last_feast_evening_day,
 		"perishable_days": perishable_days.duplicate(),
@@ -4529,6 +4573,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
+	last_mercy_day = int(data.get("last_mercy_day", -99))
 	day_beats.clear()
 	for raw in data.get("day_beats", []):
 		if raw is Dictionary:

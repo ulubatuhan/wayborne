@@ -17,6 +17,7 @@ func run(t) -> void:
 	_test_beats_only_on_the_road(t)
 	_test_heaviest_beat_writes_the_line(t)
 	_test_diary_saved_and_skippable(t)
+	_test_small_mercy_is_rare_and_written(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(250, 20)
@@ -145,3 +146,47 @@ func _test_diary_saved_and_skippable(t) -> void:
 	session.write_diary("")
 	t.eq(session.ledger.story_lines().size(), 1, "bugün yazma: deftere satır düşmez")
 	t.eq(session.day_beats.size(), 0, "yazılmasa da izler kapanır")
+
+## Küçük lütuf (Y-B16): nadir, en az bir hafta arayla, aynı akşam aynı sonuç;
+## yaşanınca stres iner ve günlüğün o akşamki cümleleri lütfun cümleleri olur.
+func _test_small_mercy_is_rare_and_written(t) -> void:
+	var session := _on_road()
+	while session.get_party().size() < 3:
+		session.add_to_party(CharacterData.create("Yoldaş %d" % session.get_party().size(), CultureCatalog.NOMAD, CharacterStats.new()))
+	var hits := 0
+	var last := -99
+	var min_gap := 9999
+	for day in 600:
+		session.total_days_elapsed = day
+		var mercy := session.roll_small_mercy()
+		if mercy.is_empty():
+			continue
+		t.eq(session.roll_small_mercy(), mercy, "aynı akşam yeniden yüklense de aynı lütuf")
+		var names: Array = mercy.args
+		t.ok(names.size() == 2 and names[0] != names[1], "lütuf iki ayrı kişi arasında")
+		hits += 1
+		min_gap = mini(min_gap, day - last)
+		last = day
+		session.last_mercy_day = day
+	var per_camp := float(hits) / 600.0
+	print("    küçük lütuf: 600 akşamda %d (akşam başına %.3f, en kısa ara %d gün)" % [hits, per_camp, min_gap])
+	t.ok(per_camp > 0.02 and per_camp < 0.10, "lütuf nadir ama görülür (%.3f)" % per_camp)
+	t.ok(min_gap >= GameSession.MERCY_MIN_GAP_DAYS, "iki lütuf arası en az bir hafta")
+
+	session = _on_road()
+	while session.get_party().size() < 2:
+		session.add_to_party(CharacterData.create("Yoldaş", CultureCatalog.NOMAD, CharacterStats.new()))
+	for member in session.get_party():
+		member.change_stress(10)
+	var before := session.get_party()[0].stress
+	session.receive_small_mercy({"kind": "hum", "args": ["Aybike", "Tolun"]})
+	t.eq(session.get_party()[0].stress, before + GameSession.MERCY_STRESS, "lütuf stresi indiriyor")
+	t.eq(String(session.top_beat().kind), GameSession.BEAT_MERCY, "lütuf günün izi")
+	var line := String(session.diary_candidates()[0].text)
+	t.ok(line.contains("Aybike") and line.contains("Tolun"), "günlük cümlesi iki adı taşıyor: %s" % line)
+	for kind in GameSession.MERCY_KINDS:
+		var key := String(GameSession.MERCY_TEXT_KEYS[kind])
+		var text := String(TranslationServer.translate(key))
+		t.ok(text != key and text.count("%s") == 2, "%s sahne cümlesi yazılmış" % kind)
+	session.receive_small_mercy({})
+	t.eq(session.last_mercy_day, session.total_days_elapsed, "boş lütuf hiçbir şeyi değiştirmez")

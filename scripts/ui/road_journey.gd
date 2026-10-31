@@ -1745,12 +1745,86 @@ func _open_camp_panel() -> void:
 			_add_log(tr("UI_CAMP_DONE") % tr(String(CampActionsPanel.ACTION_KEYS[action])), OUTCOME_COLOR)
 		_camp_panel = null
 		_refresh_state()
-		var teller := _session.roll_camp_story()
-		if teller != null:
-			_open_story_panel(teller)
+		var mercy := _session.roll_small_mercy()
+		if mercy.is_empty():
+			_open_camp_evening()
 		else:
-			_open_diary_panel())
+			_session.receive_small_mercy(mercy)
+			_play_mercy_moment(mercy))
 	add_child(_camp_panel)
+
+## Akşamın sırası: belki bir hikâye, sonra günün satırı.
+func _open_camp_evening() -> void:
+	var teller := _session.roll_camp_story()
+	if teller != null:
+		_open_story_panel(teller)
+	else:
+		_open_diary_panel()
+
+## Küçük lütuf anı (Y-B16): arayüz çekilir, sahne bir an tutulur, altında
+## tek cümle belirir. Zaman durur. Bir tuş ya da tık anı erken bitirir ama
+## ilk saniyelerde değil: an, atlanmak için değil.
+const MERCY_HOLD_SECONDS: float = 6.0
+const MERCY_FADE_SECONDS: float = 1.2
+const MERCY_SKIP_AFTER: float = 2.0
+## Sinema bantları: sahnenin altında HUD'un boşalttığı yer koyu kalır, üstte
+## ince bir bant; cümle alttakinin içinde.
+const MERCY_BAR_BOTTOM_SHARE: float = 0.20
+const MERCY_BAR_TOP_SHARE: float = 0.05
+const MERCY_BAR_COLOR: Color = Color(0.025, 0.025, 0.03)
+var _mercy_layer: Control = null
+
+func _play_mercy_moment(mercy: Dictionary) -> void:
+	# Savaş görünümü gibi: HUD gizlenince sahne bütün ekranı kaplasın.
+	_hud.visible = false
+	_layout_panel()
+	_mercy_layer = Control.new()
+	_mercy_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_mercy_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	var h := get_viewport_rect().size.y
+	for bar in [[Control.PRESET_BOTTOM_WIDE, -h * MERCY_BAR_BOTTOM_SHARE, 0.0], [Control.PRESET_TOP_WIDE, 0.0, h * MERCY_BAR_TOP_SHARE]]:
+		var band := ColorRect.new()
+		band.color = MERCY_BAR_COLOR
+		band.set_anchors_preset(int(bar[0]))
+		band.offset_top = float(bar[1])
+		band.offset_bottom = float(bar[2])
+		band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_mercy_layer.add_child(band)
+	var line := Label.new()
+	line.text = tr(String(GameSession.MERCY_TEXT_KEYS.get(String(mercy.kind), ""))) % (mercy.args as Array)
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD
+	line.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	line.offset_left = -420.0
+	line.offset_right = 420.0
+	line.offset_top = -h * MERCY_BAR_BOTTOM_SHARE * 0.70
+	line.offset_bottom = -h * MERCY_BAR_BOTTOM_SHARE * 0.30
+	line.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	line.add_theme_font_size_override("font_size", 26)
+	line.add_theme_color_override("font_color", Color(0.86, 0.85, 0.82))
+	line.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	line.modulate.a = 0.0
+	_mercy_layer.add_child(line)
+	add_child(_mercy_layer)
+	var started := Time.get_ticks_msec()
+	_mercy_layer.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and Time.get_ticks_msec() - started > MERCY_SKIP_AFTER * 1000.0:
+			_end_mercy_moment())
+	var tween := _mercy_layer.create_tween()
+	tween.tween_property(line, "modulate:a", 1.0, MERCY_FADE_SECONDS)
+	tween.tween_interval(MERCY_HOLD_SECONDS)
+	tween.tween_property(line, "modulate:a", 0.0, MERCY_FADE_SECONDS)
+	tween.tween_callback(_end_mercy_moment)
+	_refresh_modal()
+
+func _end_mercy_moment() -> void:
+	if _mercy_layer == null:
+		return
+	_mercy_layer.queue_free()
+	_mercy_layer = null
+	_hud.visible = true
+	_layout_panel()
+	_open_camp_evening()
 
 ## Günün satırı (Y-B08): kampın son anı, hikâyeden sonra. Zaman durur.
 var _diary_panel: DiaryPanel = null
@@ -3897,6 +3971,7 @@ func _has_open_panel() -> bool:
 		or _story_panel != null
 		or _camp_panel != null
 		or _diary_panel != null
+		or _mercy_layer != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),
