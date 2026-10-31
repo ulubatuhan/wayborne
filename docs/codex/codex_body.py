@@ -127,17 +127,14 @@ def ch1():
             "  7. Ödeme hesaplanır (moral ve hasar kesintili) · XP dağıtılır",
             "     Stres kırılma zarı atılır → huy, bazen ayrılma",
             "     Şehir dinlenmesi stresi düşürür · Parti tam iyileşir",
-            "  8. Kampanya bölümü kontrol edilir → kapanırsa ödül + bayrak",
-            "     Oyun kaydedilir → 1. adıma dön",
+            "  8. Oyun kaydedilir → 1. adıma dön",
         ]),
         sp(6),
         callout(
             "Sıralamanın kendisi bir tasarım kararı",
             "Yedinci adımda <b>kırılma zarı, şehir dinlenmesinden önce</b> atılır. Tersi olsaydı "
             "dinlenme stresi düşürür ve kırılma hiç yaşanmamış gibi olurdu - yolda biriken "
-            "yıpranma kapıdan girer girmez silinirdi. Aynı şekilde kampanya kontrolü "
-            "<b>en sonda</b> yapılır: ödeme yatmış, teslimat sayılmış, şehir görülmüş olmalı, "
-            "yoksa her bölüm bir sefer geriden kapanırdı.",
+            "yıpranma kapıdan girer girmez silinirdi.",
             accent=BLUE, bg=__import__("reportlab").lib.colors.HexColor("#EAEFF5"),
         ),
     ]

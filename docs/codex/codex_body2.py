@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Codex gövdesi, ikinci yarı: şehir, yol, savaş, ekonomi, kampanya."""
+"""Codex gövdesi, ikinci yarı: şehir, yol, savaş, ekonomi."""
 
 from reportlab.lib import colors
 from reportlab.lib.units import mm
@@ -51,7 +51,7 @@ def ch4():
             "için bile taverna → dünya haritası → planlayıcı gezmek, kervanın neye ihtiyacı "
             "olduğunu öğrenmek içinse beş kapıyı tek tek açmak gerekiyordu.<br/><br/>"
             "Haritanın yanındaki özet paneli üç soruyu birden cevaplıyor: <b>(1)</b> hikâyenin "
-            "neresindesin - açık kampanya bölümü, anlatısı ve hedeflerinin canlı sayacı; "
+            "neresindesin - defterin son satırı, en son düşen ya da ayrılan; "
             "<b>(2)</b> kervanın neye ihtiyacı var - erzak kaç güne yetiyor, hasarlı vagon, "
             "kontratsızlık, yüksek stres, boş parti yeri, borç; <b>(3)</b> nereye gidilir - "
             "her komşu şehir için gün, tehlike, yolun o günkü hali ve o hedefe yazılı "
@@ -525,124 +525,3 @@ def ch6():
 
 
 # =====================================================================
-def ch7():
-    f = part("VII", "Kampanya",
-             "Sonu olan bir hikâye, bitmeyen bir ticaret. Beş perde, sırayla, varışta.")
-
-    f += [
-        para("İki mimari karar", "h1"),
-        table(
-            ["Karar", "Gerekçe"],
-            [
-                ["<b>Hedefler yeni bir dil icat etmez</b>",
-                 "Bölüm hedefleri, olay tetikleyicileriyle <b>aynı</b> yapıyı kullanır "
-                 "(<tt>EventCondition</tt>). İkinci bir “görev koşulu” kelime dağarcığı "
-                 "yazmak, aynı işi yapan iki dil demek olurdu ve ikisi ilk günden ayrışmaya "
-                 "başlardı."],
-                ["<b>Ama okudukları bağlam ayrıdır</b>",
-                 "Kampanya bağlamı kervanın <b>ömrünü</b> anlatır (kaç sefer, kaç teslimat, "
-                 "kaç şehir, kaç vagon); olay bağlamı o anki <i>yolu</i> anlatır (tehlike, "
-                 "kalan gün, moral). Bölüm hedefi yol bağlamını okusaydı, <tt>finish_journey()</tt> "
-                 "kervanı sıfırladığı için her varışta tamamlanıp tamamlanmamaya geri dönerdi."],
-            ],
-            widths=[46 * mm, 108 * mm],
-        ),
-        sp(4),
-        para("Beş perde", "h1"),
-        table(
-            ["#", "Perde", "Hedefler", "Ödül"],
-            [
-                ["I", "<b>İlk Yol</b>", "1 sefer tamamla · 1 kontrat teslim et", "50 GG, +1 itibar"],
-                ["II", "<b>Bir Kadro</b>", "3 kişi · 2 vagon", "120 GG, +2 itibar"],
-                ["III", "<b>Ağ</b>", "4 ayrı şehir gör · itibar 5", "200 GG, +2 itibar"],
-                ["IV", "<b>Temiz Defter</b>", "Borç sıfır · 8 kontrat teslim", "250 GG, +3 itibar"],
-                ["V", "<b>Kendi Hanın</b>", "2500 GG · 4 vagon · itibar 15", "+5 itibar · <b>FİNAL</b>"],
-            ],
-            widths=[10 * mm, 34 * mm, 68 * mm, 42 * mm],
-        ),
-        sp(4),
-        table(
-            ["Kural", "Açıklama"],
-            [
-                ["<b>Kapanan bölüm bir daha açılmaz</b>",
-                 "Bölümler indeksle ilerler ve yeniden değerlendirilmez - “2500 altın birik­tir” "
-                 "hedefi, para sonradan harcanınca geri alınmaz. Bir alışverişin geri alabildiği "
-                 "ilerleme, ilerleme değildir."],
-                ["<b>Final bir eşiktir, durak değil</b>",
-                 "Son perde epilog gösterir; kese, yollar ve pazar aynen devam eder. "
-                 "Bu, kazanılan altın hedefi ekranındaki “Devam Et”le aynı şekil."],
-                ["<b>Bölümler varışta kapanır, birden fazlası aynı anda kapanabilir</b>",
-                 "Kontrol <tt>finish_journey()</tt>'in <b>sonunda</b> çalışır - ödeme yatmış, "
-                 "teslimat sayılmış, yeni şehir kaydedilmiş olmalı. Uzun bir sefer iki perdeyi "
-                 "birden karşılarsa ikisi de kapanır."],
-                ["<b>Her bölüm bitişte bir bayrak kurar</b>",
-                 "Bir olay <tt>HAS_FLAG</tt> ile kendini o bayrağa kilitleyebilir - kampanya, "
-                 "paralel bir sistem icat etmek yerine zaten var olan olay havuzuna bağlanır."],
-                ["<b>İlerleme kayda yazılır</b>",
-                 "Yeniden yüklemekle tekrar oynanabilen bir şey ilerleme değildir."],
-            ],
-            widths=[50 * mm, 104 * mm],
-        ),
-
-        PageBreak(),
-        para("Ölçüm: hikâye ne kadar sürüyor?", "h1"),
-        para(
-            "8 kervan × 40 sefer, kampanyayı izleyen bir oyuncu politikasıyla (teslimat "
-            "yaparken yalın kal, defter temizlenince genişle):"
-        ),
-        sp(2),
-        table(
-            ["Perde", "Kapanan", "En erken", "Ortanca", "En geç"],
-            [
-                ["İlk Yol", "8/8", "1", "<b>1</b>", "1"],
-                ["Bir Kadro", "7/8", "5", "<b>11</b>", "20"],
-                ["Ağ", "6/8", "8", "<b>16</b>", "36"],
-                ["Temiz Defter", "6/8", "8", "<b>17</b>", "38"],
-                ["Kendi Hanın", "5/8", "22", "<b>30</b>", "40"],
-            ],
-            widths=[42 * mm, 26 * mm, 28 * mm, 28 * mm, 26 * mm],
-            align_center=[1, 2, 3, 4],
-        ),
-        sp(3),
-        para(
-            "Yani tam bir hikâye kabaca <b>otuz sefer / 180 oyun günü</b> sürüyor ve kervanların "
-            "dörtte biri bitiremiyor - kervanın mahvolabildiği bir oyunda kabul edilebilir, "
-            "ama canı yakarsa geri dönülecek bir sayı."
-        ),
-        sp(4),
-        para("Ölçümün üç bulgusu (sayılardan değerli)", "h2"),
-        callout(
-            "1 · İtibar oyunun en kıt kaynağı",
-            "20. seferde ortalama itibar <b>1</b>, 30. seferde <b>11</b>. Üçüncü ve beşinci "
-            "perdenin gerçek kapısı bu. İtibara kapı koyan her yeni içerik, oyunun en yavaş "
-            "hareket eden statına kapı koyuyor demektir.",
-        ),
-        sp(3),
-        callout(
-            "2 · Vagon almak kontratı kovuyor",
-            "Kervanın vagon tavanı <b>toplam</b> tavandır - oyuncunun kendi vagonları tüccar "
-            "slotlarını yer. Beş vagonlu bir kervanda escort'a tek slot kalıyor ve teslimat "
-            "sayısı <b>11'de donuyor</b>; yalın kalan bir kervan <b>41</b> teslimata ulaşıyor. "
-            "Bu bir hata değil gerçek bir ödünleşim (kendi malını mı taşırsın, başkasınınkini "
-            "mi) - ama iki orta perdenin ters yönlere çektiği ve oyuncunun onları sıralaması "
-            "gerektiği anlamına geliyor.",
-        ),
-        sp(3),
-        callout(
-            "3 · Aynı anda kapanan iki perde tek perdedir",
-            "Üçüncü ve dördüncü perde ikisi de 19. seferde kapanıyordu. Üçüncünün itibar "
-            "eşiğini 8'den 5'e indirmek onları ayırdı. Dördüncünün kontrat eşiğini 12'ye "
-            "<i>çıkarmak</i> da denendi ve <b>geri alındı</b>: perdeyi ayırdı ama finali yarıya "
-            "düşürdü (6/8 → 3/8), çünkü dördüncüyü geciktirmek beşincinin ihtiyacı olan "
-            "genişleme evresini de geciktiriyor. <b>Erken kapıyı ayarla, geç olanı değil.</b>",
-            accent=RED, bg=REDBG,
-        ),
-        sp(3),
-        para(
-            "Bir de temiz bir <b>olumsuz sonuç</b>: simüle oyuncuyu bir perde erken genişletmek "
-            "sonucu hiç değiştirmedi (final yine 5/8, ortanca yine 30). Yani finalin "
-            "başarısızlık oranı politikanın değil gerçek zorluğun ölçüsü.",
-            "small",
-        ),
-    ]
-    return f

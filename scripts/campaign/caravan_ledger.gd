@@ -43,7 +43,7 @@ const KIND_VERDICT: String = "verdict"
 const KIND_MEMORIAL: String = "memorial"
 
 ## Tür -> çeviri anahtarı. Tam yazılıyor, çalışma anında birleştirilmiyor
-## (bkz. CampaignCatalog.OBJECTIVE_LABEL_KEYS'in aynı notu).
+## (çeviri tarayıcısı ve çevirmen anahtarı arayınca bulabilsin diye).
 const KIND_LABEL_KEYS: Dictionary = {
 	KIND_JOINED: "LEDGER_JOINED",
 	KIND_DEPARTED: "LEDGER_DEPARTED",

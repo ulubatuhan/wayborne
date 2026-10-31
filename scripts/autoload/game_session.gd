@@ -566,9 +566,9 @@ var caravan_name: String = ""
 ## sayı "kaç kez yeniden başladın" değil, "bu ad kaç kez el değiştirdi".
 var lineage_generation: int = 1
 
-## Mevcut liderin dönemi bu günde başladı. Kampanya bölümleri bunu
-## okuyabiliyor (bkz. build_campaign_context): hikâye kervanın toplam
-## yaşına değil, *bu liderin* dönemine bakabilsin diye.
+## Mevcut liderin dönemi bu günde başladı. Olay bağlamı `days_as_leader`
+## olarak okur: bir olay kervanın toplam yaşına değil, *bu liderin*
+## dönemine bakabilsin diye.
 var leader_since_day: int = 0
 
 ## Kervanın hafızası - kim geldi, kim gitti, kim öldü, liderlik kime
@@ -956,7 +956,6 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	price_book = {}
 	record_seen_prices(current_location_id)
 
-	campaign_chapter_index = 0
 	journeys_completed = 0
 	contracts_delivered = 0
 	visited_location_ids = {current_location_id: true}
@@ -3592,8 +3591,8 @@ func finish_journey() -> Dictionary:
 	_apply_guild_wagon_quest_rewards()
 	payout["lost_contracts"] = _apply_undelivered_contract_penalty()
 
-	# Kariyer sayaçları: kampanya bölümleri bunlara bakıyor (bkz.
-	# build_campaign_context). Teslim edilen = yola çıkarken yazılı olan
+	# Kariyer sayaçları: kariyer evresi ve olay bağlamı bunlara bakıyor.
+	# Teslim edilen = yola çıkarken yazılı olan
 	# eksi yolda kaybedilen.
 	journeys_completed += 1
 	var delivered := maxi(
@@ -3667,11 +3666,6 @@ func finish_journey() -> Dictionary:
 	# kampanyanın kendisinin payout'tan sonraya alınma gerekçesi gibi.
 	# Seviye (grant_party_xp) ve itibar (teslimat) bu noktada güncel.
 	payout["wagons_earned"] = grant_earned_wagons()
-
-	# Kampanya en sona bırakılıyor: bölüm hedefleri varışın *sonucunu*
-	# okumalı (ödeme yatmış, teslimat sayılmış, şehir görülmüş olmalı),
-	# yoksa bir bölüm hep bir sefer geriden kapanırdı.
-	payout["campaign_chapters"] = advance_campaign()
 
 	return payout
 
@@ -4282,7 +4276,6 @@ func to_save_dict() -> Dictionary:
 		"market": market.to_save_dict(),
 		"route_conditions": route_conditions.to_save_dict(),
 		"world_events": world_events.to_save_dict(),
-		"campaign_chapter_index": campaign_chapter_index,
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
@@ -4462,12 +4455,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	known_routes = (data.get("known_routes", {}) as Dictionary).duplicate()
 	total_days_elapsed = int(data.get("total_days_elapsed", 0))
 
-	# Kampanyayı bilmeyen bir kayıt ilk bölümden başlar ve sayaçları sıfır
-	# görür - bölümler zaten varışta değerlendirildiği için eski bir kayıt
-	# oynanmaya devam edince kendiliğinden yerine oturur.
-	campaign_chapter_index = clampi(
-		int(data.get("campaign_chapter_index", 0)), 0, CampaignCatalog.chapter_count()
-	)
+	# Eski kayıtların "campaign_chapter_index" alanı okunmaz: senaryo sistemi
+	# kaldırıldı (kullanıcı kararı 2026-10-31).
 	journeys_completed = maxi(0, int(data.get("journeys_completed", 0)))
 	contracts_delivered = maxi(0, int(data.get("contracts_delivered", 0)))
 	visited_location_ids = (data.get("visited_location_ids", {}) as Dictionary).duplicate()
@@ -4838,68 +4827,15 @@ func _player_culture_id() -> String:
 	var player := get_player_character()
 	return player.culture_id if player != null else ""
 
-# --- Kampanya ---
+# --- Kariyer sayaçları ---
 #
-# Oyunun sonu olan bir hikâyesi var ama son bölüm oyunu kapatmıyor
-# (bkz. CampaignCatalog). Bölüm hedefleri `EventCondition` ile yazılıyor -
-# yeni bir görev dili icat etmemek bilinçli - ama okudukları bağlam
-# ayrı: burası kervanın **ömrünü** anlatır, `build_event_context()` ise
-# o anki yolu. Bölüm hedefi yol bağlamına baksaydı, her varışta kervan
-# sıfırlandığı için tamamlanıp tamamlanmamaya geri dönerdi.
+# Kervanın **ömrü**: kaç sefer, kaç teslimat, kaç şehir. Senaryo sistemi
+# 2026-10-31'de kaldırıldı; sayaçlar kariyer evresi ve olay bağlamı için
+# duruyor.
 
-var campaign_chapter_index: int = 0
 var journeys_completed: int = 0
 var contracts_delivered: int = 0
 
-## Görülen şehirler kümesi (location_id -> true). Sayısı kampanya
-## bağlamında `cities_visited` olarak duruyor.
+## Görülen şehirler kümesi (location_id -> true).
 var visited_location_ids: Dictionary = {}
 
-func build_campaign_context() -> Dictionary:
-	return {
-		"gold": wallet.balance,
-		"debt": get_total_debt(),
-		"reputation": reputation,
-		"days": total_days_elapsed,
-		"party_size": get_party().size(),
-		"owned_wagons": owned_wagon_count,
-		"journeys_completed": journeys_completed,
-		"contracts_delivered": contracts_delivered,
-		"cities_visited": visited_location_ids.size(),
-		# Soy: hikâye kervanın toplam yaşına değil, bu liderin dönemine de
-		# bakabiliyor. Bir bölüm "şu kadar gün bu adı taşı" diyebilir.
-		"lineage_generation": lineage_generation,
-		"days_as_leader": get_days_as_leader(),
-		"companions_lost": get_companions_lost(),
-		"flags": _flags,
-	}
-
-func get_current_chapter() -> CampaignChapter:
-	return CampaignCatalog.get_chapter(campaign_chapter_index)
-
-## Hikâye bitti mi? Bitmesi oyunun bitmesi değil - kese, yol ve pazar
-## olduğu gibi durur (bkz. CampaignCatalog'un `is_finale` notu).
-func is_campaign_finished() -> bool:
-	return campaign_chapter_index >= CampaignCatalog.chapter_count()
-
-## Şehre varışta çağrılır. Tamamlanan bölümleri sırayla kapatır - tek
-## varışta birden fazla bölüm bitebilir, çünkü uzun bir sefer iki hedefi
-## birden karşılayabilir ve oyuncuyu "bir varış = bir bölüm" diye
-## bekletmenin bir sebebi yok. Kapanan bölümlerin listesini döner.
-##
-## Bölüm bir kez kapandı mı bir daha değerlendirilmez: hedef "2500 altın"
-## ise, parayı sonra harcamak hikâyeyi geri almaz.
-func advance_campaign() -> Array[CampaignChapter]:
-	var completed: Array[CampaignChapter] = []
-	while not is_campaign_finished():
-		var chapter := get_current_chapter()
-		if chapter == null or not chapter.is_complete(build_campaign_context()):
-			break
-		campaign_chapter_index += 1
-		if not chapter.completion_flag.is_empty():
-			set_flag(chapter.completion_flag)
-		if chapter.reward_gold > 0:
-			wallet.earn(chapter.reward_gold)
-		change_reputation(chapter.reward_reputation)
-		completed.append(chapter)
-	return completed

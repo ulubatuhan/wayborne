@@ -315,7 +315,7 @@ EVENTS = [
     "effects": [("REPUTATION", 8), ("MORALE", 12)]},
  ],
  "note": "Havuzdaki en saf “para mı itibar mı” kararı. 200 altın erken oyunda büyük paradır; "
-         "8 itibar ise kampanyanın üçüncü bölümünün kapısının yarısı ve lonca kredisinin "
+         "8 itibar ise lonca kredisinin "
          "200 GG hat genişlemesi demektir. Ölçüm itibarın oyunun en kıt kaynağı olduğunu "
          "gösterdi - bu yüzden reddetmek göründüğünden daha güçlü bir hamle.",
 },

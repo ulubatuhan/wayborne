@@ -29,13 +29,12 @@ signal planner_requested(destination_id: String)
 const URGENT_COLOR: Color = ArtPalette.UI_WARNING
 const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
-const OBJECTIVE_MARK_SIZE: float = 11.0
 
 const CREPE_FILE: String = "c1_crepe.png"
 const CREPE_HEIGHT: float = 34.0
 
 var _session: GameSession
-var _chapter_box: VBoxContainer
+var _memory_box: VBoxContainer
 var _needs_box: VBoxContainer
 var _routes_box: VBoxContainer
 
@@ -53,10 +52,9 @@ func _ensure_built() -> void:
 	add_child(_note(tr("UI_BRIEF_WELCOME_LINE")))
 	add_child(HSeparator.new())
 
-	add_child(_heading(tr("UI_BRIEF_CHAPTER_TITLE")))
-	_chapter_box = VBoxContainer.new()
-	_chapter_box.add_theme_constant_override("separation", 4)
-	add_child(_chapter_box)
+	_memory_box = VBoxContainer.new()
+	_memory_box.add_theme_constant_override("separation", 4)
+	add_child(_memory_box)
 
 	add_child(HSeparator.new())
 
@@ -76,83 +74,14 @@ func refresh() -> void:
 	if _session == null:
 		return
 	_ensure_built()
-	_clear(_chapter_box)
+	_clear(_memory_box)
 	_clear(_needs_box)
 	_clear(_routes_box)
-	_build_chapter()
+	_build_memory()
 	_build_needs()
 	_build_routes()
 
-# --- Hikâyenin neresindeyiz ---
-
-## Hikâye bittikten sonra da ekran boş kalmıyor: oyun kapanmıyor, serbest
-## ticaret sürüyor (bkz. CampaignCatalog'un `is_finale` notu), o yüzden
-## bunu söyleyen bir satır duruyor.
-func _build_chapter() -> void:
-	var chapter := _session.get_current_chapter()
-	if chapter == null:
-		var epilogue := Label.new()
-		epilogue.text = tr("UI_BRIEF_CHAPTER_DONE")
-		epilogue.autowrap_mode = TextServer.AUTOWRAP_WORD
-		epilogue.modulate = GOOD_COLOR
-		_chapter_box.add_child(epilogue)
-		return
-
-	var heading := Label.new()
-	heading.text = tr("UI_BRIEF_CHAPTER_LINE") % [
-		_session.campaign_chapter_index + 1,
-		CampaignCatalog.chapter_count(),
-		tr(chapter.title_key),
-	]
-	heading.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_chapter_box.add_child(heading)
-
-	var summary := Label.new()
-	summary.text = tr(chapter.summary_key)
-	summary.autowrap_mode = TextServer.AUTOWRAP_WORD
-	summary.modulate = NOTE_COLOR
-	_chapter_box.add_child(summary)
-
-	var objective := Label.new()
-	objective.text = tr(chapter.objective_key)
-	objective.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_chapter_box.add_child(objective)
-
-	# Sayaç hedefinde "tamam/değil" oyuncuya hiçbir şey söylemez; kaç kaldığı
-	# söyler (bkz. CampaignChapter.describe_progress).
-	var context := _session.build_campaign_context()
-	for row in chapter.describe_progress(context):
-		# Tamamlanmış hedefin tiki bir süre `✓` karakteriydi ve ekranda boş
-		# kutu olarak çıkıyordu (varsayılan font o bloğu taşımıyor), yani
-		# *biten* hedef bozuk görünüyordu. Artık çiziliyor, bkz. `UiIcon`.
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 6)
-
-		var met := bool(row.met)
-		var color: Color = GOOD_COLOR if met else NOTE_COLOR
-
-		var mark := UiIcon.new()
-		mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if met:
-			mark.setup(UiIcon.Kind.CHECK, color, OBJECTIVE_MARK_SIZE)
-		else:
-			mark.setup_pips(1, [], color, OBJECTIVE_MARK_SIZE)
-		line.add_child(mark)
-
-		var label := CampaignCatalog.get_objective_label(String(row.key))
-		var text := Label.new()
-		if bool(row.numeric):
-			text.text = tr("UI_BRIEF_OBJECTIVE_COUNT") % [label, int(row.current), int(row.target)]
-		else:
-			text.text = label
-		text.autowrap_mode = TextServer.AUTOWRAP_WORD
-		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.modulate = color
-		line.add_child(text)
-
-		_chapter_box.add_child(line)
-
-	_build_memory()
+# --- Defterden son satır ---
 
 ## Defter hiçbir satırı silmiyor ama pasifti - yalnızca yol ekranındaki
 ## yolda `Tab` ile kontrol panelinin Durum sekmesini açan biri görüyordu. Brifing zaten her
@@ -178,15 +107,15 @@ func _build_memory() -> void:
 		crepe.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(crepe)
 		row.add_child(memory)
-		_chapter_box.add_child(row)
+		_memory_box.add_child(row)
 	else:
-		_chapter_box.add_child(memory)
+		_memory_box.add_child(memory)
 	if not String(memory_data["detail"]).is_empty():
 		var detail := Label.new()
 		detail.text = String(memory_data["detail"])
 		detail.autowrap_mode = TextServer.AUTOWRAP_WORD
 		detail.modulate = NOTE_COLOR
-		_chapter_box.add_child(detail)
+		_memory_box.add_child(detail)
 
 # --- Kervanın ihtiyaçları ---
 

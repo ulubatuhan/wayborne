@@ -3,13 +3,13 @@ extends SceneTree
 ## Kariyer yayı simülatörü. `simulate_journeys.gd` **bir** seferi tekrar
 ## tekrar ölçer (kazanç, moral, savaş oranı); bu ise **bir kervanın ömrünü**
 ## ölçer: kırk sefer boyunca kese, itibar, vagon, kadro ve teslimat nasıl
-## büyüyor, ve kampanya bölümleri kaçıncı seferde kapanıyor.
+## büyüyor.
 ##
 ##   godot --headless --script res://tests/simulate_career.gd
 ##
 ## Test değil - hiç kırmızı dönmez, bir tablo basar.
 ##
-## **Neden yeni bir araç gerekti.** Kampanya eşikleri (bkz. CampaignCatalog)
+## **Neden yeni bir araç gerekti.** Kariyer eşikleri
 ## yazıldığında ölçülemedi, çünkü elde kariyer yayını gösteren hiçbir şey
 ## yoktu. O turda yazılan tek kullanımlık bir prob iki tuzağa birden düştü
 ## ve ikisi de burada kapatıldı - ikisi de oyunun değil düzeneğin hatasıydı:
@@ -58,26 +58,20 @@ const CHECKPOINTS: Array[int] = [1, 5, 10, 20, 30, 40]
 ## alan bir kervanda escort'a tek slot kalıyor, kontrat geliri ve onunla
 ## birlikte itibar duruyor. Tüccar için yer bırakan ikinci politika bunu
 ## ayırt ediyor.
-## Üçüncü politika ikisinin de cevaplamadığı soruyu cevaplıyor: kampanya
-## **tasarlandığı gibi** bitirilebiliyor mu? Dördüncü bölüm sekiz teslimat
-## istiyor (az vagon ister), beşinci bölüm dört vagon istiyor (çok vagon
-## ister) - sabit bir politika ikisini birden yapamaz, ama bir oyuncu
-## yapar: önce yalın kervanla teslimat, sonra genişleme. Kampanyacı
-## politika tam da bunu yapıyor.
+## Üçüncü politika ikisinin arasında: önce yalın kervanla teslimat, sonra
+## genişleme. Senaryo sistemi kaldırıldı (2026-10-31); politika artık bölüme
+## değil sefer sayısına bakıyor.
 const POLICY_EXPAND: String = "genişleyen"
 const POLICY_CONTRACTS: String = "kontratçı"
-const POLICY_CAMPAIGN: String = "kampanyacı"
+const POLICY_PHASED: String = "aşamalı"
 
 ## Kontratçı politikanın kendine aldığı azami vagon: geri kalanı tüccara
 ## bırakır.
 const CONTRACT_POLICY_WAGON_CAP: int = 2
 
-## Kampanyacı politika bu bölüm kapanana kadar yalın kalır, sonra büyür.
-## (Dördüncü bölüm "Temiz Defter"in indeksi.) 3 de denendi - yani "ağı
-## kurunca genişlemeye başla" - ve sonuç **birebir aynı** çıktı: final
-## yine 5/8, ortanca yine 30. Yani finalin 5/8'i politikanın değil,
-## gerçek zorluğun ölçüsü.
-const CAMPAIGN_EXPAND_AFTER_CHAPTER: int = 4
+## Aşamalı politika bu kadar sefer yalın kalır, sonra büyür (eski kampanyacı
+## politikanın dördüncü bölümü kapattığı ortanca sefere yakın).
+const PHASED_EXPAND_AFTER_LEG: int = 10
 
 var _catalog_events: Array[GameEvent] = []
 
@@ -89,25 +83,24 @@ func _initialize() -> void:
 	print("   Politika: pazarda al-sat, yalnızca gidilen hedefe kontrat,")
 	print("   fazla parayı vagona ve kadroya yatır.")
 
-	for policy in [POLICY_EXPAND, POLICY_CONTRACTS, POLICY_CAMPAIGN]:
+	for policy in [POLICY_EXPAND, POLICY_CONTRACTS, POLICY_PHASED]:
 		var arcs: Array[Dictionary] = []
 		for arc_index in ARC_COUNT:
 			arcs.append(_run_arc(BASE_SEED + arc_index * 977, policy))
 		_report_curve(arcs, policy)
-		_report_chapters(arcs, policy)
 		print("   tehdit kartı (Y-C15) evreye göre: erken %d · orta %d · geç %d" % [
 			int(_threats_by_stage.get(0, 0)), int(_threats_by_stage.get(1, 0)), int(_threats_by_stage.get(2, 0)),
 		])
 		_threats_by_stage = {}
-		# Y-E01: finale kadar çekilen kartların tekrar oranı (çekiliş / farklı kart).
-		var unique := _finale_draws.keys().size()
+		# Y-E01: kariyer boyunca çekilen kartların tekrar oranı (çekiliş / farklı kart).
+		var unique := _career_draws.keys().size()
 		var draws := 0
-		for id in _finale_draws:
-			draws += int(_finale_draws[id])
-		print("   finale kadar: %d çekiliş, %d farklı kart, tekrar oranı %.2f" % [
+		for id in _career_draws:
+			draws += int(_career_draws[id])
+		print("   kariyer boyunca: %d çekiliş, %d farklı kart, tekrar oranı %.2f" % [
 			draws, unique, float(draws) / float(maxi(1, unique)),
 		])
-		_finale_draws = {}
+		_career_draws = {}
 		_print_measure(policy, arcs)
 	quit()
 
@@ -152,8 +145,6 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 	session.start_playthrough(player, rng)
 	session.inherit_father_caravan()
 
-	## Bölüm kimliği -> kapandığı sefer numarası.
-	var chapter_legs: Dictionary = {}
 	var samples: Dictionary = {}
 
 	for leg_index in LEGS_PER_ARC:
@@ -162,19 +153,12 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 		var payout := _run_leg(session, rng)
 		if payout.is_empty():
 			break
-		# Kapanan bölümler varışın kendi sonucundan okunuyor (bkz.
-		# GameSession.finish_journey) - simülatör için ayrı bir API açmak,
-		# ölçtüğü şeyin oyunun yaptığı şey olmadığı anlamına gelirdi.
-		for chapter in (payout.get("campaign_chapters", []) as Array):
-			var closed: CampaignChapter = chapter
-			if not chapter_legs.has(closed.chapter_id):
-				chapter_legs[closed.chapter_id] = leg_number
 		if CHECKPOINTS.has(leg_number):
 			samples[leg_number] = _snapshot(session)
 
 	samples["final"] = _snapshot(session)
 	return {
-		"chapters": chapter_legs, "samples": samples,
+		"samples": samples,
 		"legs": session.journeys_completed, "days": session.total_days_elapsed,
 		"cards": _cards_drawn, "deaths": session.ledger.count_of(CaravanLedger.KIND_DIED),
 	}
@@ -189,11 +173,9 @@ func _snapshot(session: GameSession) -> Dictionary:
 		"cities": session.visited_location_ids.size(),
 		"debt": session.get_total_debt(),
 		"days": session.total_days_elapsed,
-		"chapter": session.campaign_chapter_index,
 	}
 
-## Fazla parayı kervana yatır. Kampanyanın ikinci ve beşinci bölümü tam da
-## bunu istiyor, ve bir oyuncu da bunu yapar - biriken parayı kesede
+## Fazla parayı kervana yatır. Bir oyuncu da bunu yapar - biriken parayı kesede
 ## tutmak hiçbir şeye yaramaz.
 func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -> void:
 	# Babadan kalan borç (Y-C14): gerçek oyuncu vadesinden önce öder - tampon
@@ -207,7 +189,7 @@ func _invest(session: GameSession, rng: RandomNumberGenerator, policy: String) -
 	var wagon_cap := session.get_wagon_capacity()
 	if policy == POLICY_CONTRACTS:
 		wagon_cap = CONTRACT_POLICY_WAGON_CAP
-	elif policy == POLICY_CAMPAIGN and session.campaign_chapter_index < CAMPAIGN_EXPAND_AFTER_CHAPTER:
+	elif policy == POLICY_PHASED and session.journeys_completed < PHASED_EXPAND_AFTER_LEG:
 		wagon_cap = CONTRACT_POLICY_WAGON_CAP
 	if (
 		session.owned_wagon_count < wagon_cap
@@ -392,8 +374,7 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 
 	# Yol ekranıyla birebir aynı çözüm yolu (bkz. EventResolver).
 	EventResolver.resolve_choice(session, engine, event, chosen)
-	if not session.has_flag(CampaignCatalog.FLAG_HOUSE):
-		_finale_draws[event.event_id] = int(_finale_draws.get(event.event_id, 0)) + 1
+	_career_draws[event.event_id] = int(_career_draws.get(event.event_id, 0)) + 1
 	# Y-C15: evreye göre tehdit kartı sayacı.
 	if EventCatalog.CAREER_THREATS.has(event.event_id):
 		var stage := session.get_career_stage()
@@ -402,8 +383,8 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 var _threats_by_stage: Dictionary = {}
 ## Y-K03: bir kervanın ömrü boyunca çekilen kart.
 var _cards_drawn: int = 0
-## Y-E01: finaleden önce hangi kart kaç kez çekildi (politika başına).
-var _finale_draws: Dictionary = {}
+## Y-E01: kariyer boyunca hangi kart kaç kez çekildi (politika başına).
+var _career_draws: Dictionary = {}
 
 # --- Rapor ---
 
@@ -432,29 +413,4 @@ func _report_curve(arcs: Array[Dictionary], policy: String) -> void:
 			int(round(float(totals.party) / float(count))),
 			int(totals.contracts / count), int(totals.cities / count),
 			int(totals.debt / count), int(totals.days / count),
-		])
-
-## Asıl soru: bölüm kaçıncı seferde kapanıyor, ve kapanıyor mu? Hiç
-## kapanmayan bir bölüm "katalogda var, oyunda yok" demektir - evt_mutiny
-## ile aynı hata (bkz. Morale Rules).
-func _report_chapters(arcs: Array[Dictionary], policy: String) -> void:
-	print("")
-	print("── Kampanya bölümleri · %s politika (%d sefer içinde)" % [policy, LEGS_PER_ARC])
-	print("   bölüm                     kapanan  en erken  ortanca  en geç")
-
-	for chapter in CampaignCatalog.get_chapters():
-		var legs: Array[int] = []
-		for arc in arcs:
-			var chapters: Dictionary = arc.chapters
-			if chapters.has(chapter.chapter_id):
-				legs.append(int(chapters[chapter.chapter_id]))
-		legs.sort()
-
-		var title := String(TranslationServer.translate(chapter.title_key))
-		if legs.is_empty():
-			print("   %-24s  %d/%d  —  hiç kapanmadı" % [title, 0, arcs.size()])
-			continue
-		print("   %-24s  %d/%d %9d %8d %7d" % [
-			title, legs.size(), arcs.size(),
-			legs[0], legs[legs.size() / 2], legs[legs.size() - 1],
 		])

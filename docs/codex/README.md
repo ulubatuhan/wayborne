@@ -20,7 +20,7 @@ ikinci bir kopya bırakmaz.
 |---|---|
 | `codex_base.py` | Font kaydı, renk paleti, paragraf stilleri, akış nesneleri (`callout`, `codebox`, `table`, `HRule`, `ColorBar`) |
 | `codex_body.py` | I-III. bölümler: Oyun Nedir, Karakter, Kervan |
-| `codex_body2.py` | IV-VII. bölümler: Şehir, Yol, Savaş, Kampanya |
+| `codex_body2.py` | IV-VI. bölümler: Şehir, Yol, Savaş |
 | `codex_main.py` | VIII. bölüm (Olay Motoru), olay ağacı bölümü, ek, kapak, içindekiler, sayfa şablonu ve `build()` |
 | `codex_event.py` | Bir olayın tam sayfasını çizen işleyici (künye şeridi, karar ağacı, etki renklendirmesi) |
 | `codex_events_data.py` | Yirmi yedi olay kartının içeriği - `scripts/events/event_catalog.gd`'nin okunur karşılığı |

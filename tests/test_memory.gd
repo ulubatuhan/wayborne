@@ -34,7 +34,7 @@ func run(t) -> void:
 	_test_leave_behind_and_party_hp(t)
 	_test_leave_behind_names_its_target_first(t)
 	_test_stop_events_follow_their_stop(t)
-	_test_finale_needs_struck_names(t)
+	_test_loss_cannot_be_bought(t)
 	_test_event_resolver_is_the_single_path(t)
 	_test_journey_controller_walk_and_arrival(t)
 	_test_journey_controller_round_trip_keeps_the_dice(t)
@@ -278,7 +278,7 @@ func _test_founder_line_is_struck_but_not_counted(t) -> void:
 	t.eq(String(first["kind"]), CaravanLedger.KIND_FOUNDER, "defterin ilk satırı kurucu")
 	t.ok(session.ledger.is_struck(first), "kurucunun adı üstü çizili")
 	t.ne(String(first["name"]), "Kurucu", "kurucu oyuncunun kendisi değil")
-	t.eq(int(session.build_campaign_context()["companions_lost"]), 0, "kurucu kayıp sayılmaz")
+	t.eq(int(session.build_event_context()["companions_lost"]), 0, "kurucu kayıp sayılmaz")
 	t.eq(int(session.build_event_context()["companions_died"]), 0, "kurucu ölü sayılmaz")
 	var memory := CityBriefModel.build_memory(session)
 	t.ok(String(memory.get("text", "")).contains(String(first["name"])), "brifing kurucuyu anıyor")
@@ -687,29 +687,19 @@ func _test_stop_events_follow_their_stop(t) -> void:
 	t.eq(float(stops["near_mine"]), 1.0, "maden bayrağı")
 	t.eq(float(stops["near_bridge"]), 0.0, "diğerleri kapalı")
 
-# --- S17: finalin hafıza kapısı ---
+# --- S17: kayıp satın alınamaz ---
 
-func _test_finale_needs_struck_names(t) -> void:
-	var finale: CampaignChapter = null
-	for chapter in CampaignCatalog.get_chapters():
-		if chapter.is_finale:
-			finale = chapter
-	t.ok(finale != null, "final var")
-	var keys: Array[String] = []
-	for condition in finale.objectives:
-		keys.append(condition.key)
-	t.ok(keys.has("companions_lost"), "final defterde üstü çizili ad istiyor")
-
+func _test_loss_cannot_be_bought(t) -> void:
 	# Kayıp satın alınamaz: meydandan iki kişi tutup şehirde göndermek
-	# finalin kapısını açmamalı.
+	# defterin kayıp sayısını artırmamalı.
 	var session := _session()
-	var baseline := int(session.build_campaign_context()["companions_lost"])
+	var baseline := int(session.build_event_context()["companions_lost"])
 	for index in 2:
 		var hire := CharacterData.create("Tutulan %d" % index, CultureCatalog.VALLEY, CharacterStats.new())
 		session.add_to_party(hire)
 		t.ok(session.dismiss(hire), "şehirde gönderildi")
 	t.eq(
-		int(session.build_campaign_context()["companions_lost"]), baseline,
+		int(session.build_event_context()["companions_lost"]), baseline,
 		"kendi isteğiyle gönderilen kayıp sayılmaz"
 	)
 	t.eq(
@@ -724,7 +714,7 @@ func _test_finale_needs_struck_names(t) -> void:
 	session.add_to_party(left)
 	session.dismiss(left, "LEDGER_CAUSE_LEFT_BEHIND")
 	t.eq(
-		int(session.build_campaign_context()["companions_lost"]), baseline + 1,
+		int(session.build_event_context()["companions_lost"]), baseline + 1,
 		"geride bırakılan kayıp sayılır"
 	)
 

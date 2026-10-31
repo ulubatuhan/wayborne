@@ -20,7 +20,7 @@ from codex_event import event_page, EFFECT_LABEL
 from codex_events_data import EVENTS
 from codex_events_auto import auto_events, catalog_ids
 from codex_body import ch1, ch2, ch3, part
-from codex_body2 import ch4, ch5, ch6, ch7
+from codex_body2 import ch4, ch5, ch6
 
 BLUEBG = colors.HexColor("#EAEFF5")
 REDBG = colors.HexColor("#F6EAE7")
@@ -67,7 +67,7 @@ def _cover_counts():
 COUNTS = _cover_counts()
 
 def ch8_engine():
-    f = part("VIII", "Olay Motoru",
+    f = part("VII", "Olay Motoru",
              "Yolun kalbi. Yirmi yedi kart, koşullu uygunluk, ağırlıklı çekim ve "
              "dallanan sonuçlar - EU4'ün olay bloğunun kervan karşılığı.")
 
@@ -468,12 +468,11 @@ def cover():
         table(
             None,
             [
-                ["Bölüm sayısı", "8 bölüm + olay ağacı + ek"],
+                ["Bölüm sayısı", "7 bölüm + olay ağacı + ek"],
                 ["Olay kartı", "%(live)d canlı; %(hand)d tanesi elle belgeli, kalanı katalogdan" % COUNTS],
                 ["Etki sözlüğü", "%(effects)d tip" % COUNTS],
                 ["Yerleşim / rota", "%(cities)d şehir · %(towns)d kasaba · %(serais)d kervansaray · %(routes)d yol" % COUNTS],
                 ["Karakter", "%(stats)d stat · 5 kültür · 4 sınıf · 3 rol · %(traits)d huy · %(equipment)d ekipman" % COUNTS],
-                ["Kampanya", "5 perde, sonu olan hikâye + sonsuz ticaret"],
             ],
             widths=[40 * mm, 114 * mm],
             label_column=True,
@@ -489,8 +488,7 @@ def toc():
         ("IV", "Şehir", "Beş mekân, pazar fiyatı, pazarlık, kontrat ve borç"),
         ("V", "Yol", "Harita, dinamik rota katmanı, zaman, plan değişikliği"),
         ("VI", "Savaş", "Saha, çözüm sırası, düşman kadroları, ölçekleme"),
-        ("VII", "Kampanya", "Beş perde, ölçülen süre, üç bulgu"),
-        ("VIII", "Olay Motoru", "Bir günün anatomisi, etki sözlüğü, mizaç"),
+        ("VII", "Olay Motoru", "Bir günün anatomisi, etki sözlüğü, mizaç"),
         ("—", "Olay Ağacı", "Yirmi yedi kartın tek tek dökümü"),
         ("—", "Ek", "Sayı tabloları"),
     ]
@@ -571,7 +569,7 @@ def build():
     story += cover()
     story.append(NextPageTemplate("main"))
     story += toc()
-    for chapter in (ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8_engine):
+    for chapter in (ch1, ch2, ch3, ch4, ch5, ch6, ch8_engine):
         story.append(PageBreak())
         story += chapter()
     story += ch8_tree()
