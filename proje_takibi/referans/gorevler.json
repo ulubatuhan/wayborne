@@ -3925,7 +3925,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [
     "Y-C02"
    ],
@@ -3934,7 +3934,7 @@
    "paket": "P07",
    "sira": 236,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı. | 2026-10-31: NoticeBoard - ilanlar tahtaya çivili parşömen plakalar; kasabada pano boş ve nedeni yazar. Kafile/sürücü ilanları Y-C34 ile."
   },
   {
    "id": "Y-A08",

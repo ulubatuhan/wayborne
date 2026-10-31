@@ -95,8 +95,17 @@ func _rebuild() -> void:
 	NodeUtil.clear_children(_commission_container)
 	_rows.clear()
 
-	for offer in _available_offers():
-		_contract_list.add_child(_build_offer_row(offer))
+	# İlanlar panoya çivili (Y-C35): liste değil, tahtada asılı plakalar.
+	var board := NoticeBoard.new()
+	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_contract_list.add_child(board)
+	var offers := _available_offers()
+	for offer in offers:
+		board.pin(_build_offer_card(offer), hash(offer.merchant_id), offer.rush)
+	if offers.is_empty():
+		var here := WorldMapData.get_location_by_id(_session.current_location_id)
+		var town := here != null and not SettlementRules.offers_contracts(here.settlement_type)
+		board.pin(_row_label(tr("UI_GUILD_BOARD_TOWN" if town else "UI_GUILD_BOARD_EMPTY")), 1)
 	_refresh_offer_rows()
 
 	for kind in COMMISSION_KINDS:
@@ -142,30 +151,28 @@ func _accepted_offers() -> Array[MerchantOffer]:
 
 ## Pano bir ilan tahtası (görev Y-C02): her kontrat kendi kâğıdında - üstte
 ## türü (ve acele damgası), altta ayrıntısı, yanda kabul.
-func _build_offer_row(offer: MerchantOffer) -> Control:
+## Panodaki plakanın içi: türü, satırı ve altında kabul düğmesi.
+func _build_offer_card(offer: MerchantOffer) -> Control:
 	var destination := WorldMapData.get_location_by_id(offer.destination_location_id)
 	var destination_name := destination.location_name if destination != null else offer.destination_location_id
-	var notice := PanelContainer.new()
-	notice.theme_type_variation = WaybookTheme.CELL_PANEL
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	notice.add_child(row)
-
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(text)
+	var card := VBoxContainer.new()
+	card.add_theme_constant_override("separation", 4)
 	var kind_label := Label.new()
 	kind_label.text = kind_heading(offer)
 	kind_label.modulate = ArtPalette.UI_ACCENT if offer.rush else HINT_COLOR
-	text.add_child(kind_label)
-	text.add_child(_row_label(_offer_line_text(offer, destination_name)))
-
+	kind_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card.add_child(kind_label)
+	var line := _row_label(_offer_line_text(offer, destination_name))
+	line.custom_minimum_size = Vector2.ZERO
+	line.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	line.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	card.add_child(line)
 	var accept_button := _row_action()
+	accept_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	accept_button.pressed.connect(_on_accept_pressed.bind(offer))
-	row.add_child(accept_button)
-
+	card.add_child(accept_button)
 	_rows.append({"offer": offer, "accept_button": accept_button})
-	return notice
+	return card
 
 const KIND_KEYS: Dictionary = {
 	"escort": "UI_CONTRACT_KIND_ESCORT", "delivery": "UI_CONTRACT_KIND_DELIVERY",

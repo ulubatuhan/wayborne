@@ -1341,3 +1341,5 @@
 "DIARY_MERCY_1","%s ile %s bu gece aynı ateşi paylaştı; yol bir an hafifledi.","%s and %s shared the same fire tonight; for a moment the road weighed less.","","","","","","","","",""
 "DIARY_MERCY_2","Kıtlıkta küçük bir iyilik gördük. %s ile %s bunu hatırlayacak.","We saw a small kindness in a lean time. %s and %s will remember it.","","","","","","","","",""
 "DIARY_MERCY_3","Bu geceyi yazmak için bir sebep yok; %s ile %s yine de yazılsın istedi.","No reason to write this night down; %s and %s wanted it written all the same.","","","","","","","","",""
+"UI_GUILD_BOARD_EMPTY","Panoda bugün ilan yok. Yalnızca eski çivi delikleri.","No notices on the board today. Only old nail holes.","","","","","","","","",""
+"UI_GUILD_BOARD_TOWN","Bu kasabanın panosuna kervan ilanı asılmaz. İlanlar şehirlerde.","No caravan notices go up on this town's board. Look for them in the cities.","","","","","","","","",""
