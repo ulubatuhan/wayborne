@@ -123,6 +123,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_serai_ruin())
 	_road_events.append(_serai_bandit())
 	_road_events.append(_duvenmor_quarrel())
+	_road_events.append(_pilgrim_caravan())
 	_road_events.append(_leave_the_wounded())
 	_road_events.append(_left_behind_return())
 	_road_events.append(_profiteer_recognized())
@@ -2401,6 +2402,30 @@ static func _untouched_village() -> GameEvent:
 			"EVT_UNTOUCHED_FORCE_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 10)] + force_cost),
 			"EVT_UNTOUCHED_FORCE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard")] + force_cost)),
 		_choice("EVT_UNTOUCHED_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, 2)])),
+	])
+	return event
+
+## Y-C34: Avuçiçi yolunda hacı kafilesi. Kafile yalnızca Septisistleri alır
+## (kervanın inancı kervanbaşınınki); başkası ancak rol yaparak katılır.
+## Yakalanan inançsızı kafilenin muhafızları cezalandırır.
+static func _pilgrim_caravan() -> GameEvent:
+	var event := _event("evt_pilgrim_caravan", "EVT_PALM_COLUMN_TITLE", "EVT_PALM_COLUMN_TEXT", 1.2)
+	event.cooldown_days = 20
+	event.conditions = _conditions([
+		_c("dest_holy", EventCondition.Op.GREATER_EQUAL, 1),
+		_c("days_remaining", EventCondition.Op.GREATER_EQUAL, 2),
+	])
+	var join := [_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.DANGER, -25), _fx(EventEffect.Type.MORALE, -2)]
+	event.choices = _choices([
+		_gated_choice("EVT_PALM_COLUMN_OPT_JOIN", "EVT_PALM_COLUMN_OPT_JOIN_LOCKED",
+			_conditions([_c("leader_septist", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects(join + [_fx(EventEffect.Type.STRESS, -3)])),
+		_requires(_check_choice("EVT_PALM_COLUMN_OPT_PRETEND", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_PALM_COLUMN_PRETEND_OK", _effects(join),
+			"EVT_PALM_COLUMN_PRETEND_MID", _effects(join + [_fx(EventEffect.Type.STRESS, 5)]),
+			"EVT_PALM_COLUMN_PRETEND_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.REPUTATION, -6), _fx(EventEffect.Type.PARTY_HP, -10)])),
+			"EVT_PALM_COLUMN_OPT_PRETEND_LOCKED", _conditions([_c("leader_septist", EventCondition.Op.LESS_EQUAL, 0)])),
+		_choice("EVT_PALM_COLUMN_OPT_ALONE", _effects([_fx(EventEffect.Type.STRESS, 1)])),
 	])
 	return event
 

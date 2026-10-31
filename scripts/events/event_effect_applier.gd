@@ -176,6 +176,12 @@ static func _apply_leave_behind(session: GameSession, result: Result) -> void:
 	var target := _weakest_companion(session)
 	if target == null:
 		return
+	# Ant içmiş birini geride bırakmak sözü bozmaktır (Y-C33): aynı töreden
+	# olanlar bunu unutmaz.
+	if target.sworn:
+		for member in session.get_party():
+			if member != target and CharacterData.OATH_CULTURES.has(member.culture_id):
+				member.add_grievance(CharacterData.GRIEVANCE_OATH_BROKEN, 2)
 	if session.dismiss(target, "LEDGER_CAUSE_LEFT_BEHIND"):
 		result.lines.append(_t("EFF_LEFT_BEHIND") % target.character_name)
 

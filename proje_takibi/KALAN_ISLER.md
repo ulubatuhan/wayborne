@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **32** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **30** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -184,24 +184,6 @@ Toplam: **32** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
-### Y-C34 · Hacı kafilesine katılmak
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C25
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C34 Hacı kafilesine katılmak**
-  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle.
-  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C25 · **Kim:** CK
-  - **Ne:** Avuçiçi yolunda bir kafileye katılma seçeneği: güvenli ama yavaş ve kurallı. Şart aynı inançtan olmak ya da rol yapmak; rol yapan yakalanırsa Avuçiçi'nin El'i taşıyan inançsıza cezası (Ç14'e bağlı). Kervanın inancını tutan bir değer gerekir.
-  - **Kullanıcı notu:** "Ek bir seçenek olarak eklenebilir ama aynı dinden olmamız lazım ya da rol yapmalıyız."
-  - **Kabul:** Karar: kervanın inancı neye göre belirlenir.
-
-</details>
-
 ## Paket P08
 
 ### R3 · Merak ve töre
@@ -262,24 +244,6 @@ Toplam: **32** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Bölge başına düşman tablosu; lore belgesine uyuyor.
   - **Kaynaklar ve teknik (CC0 araştırması):** İnsan düşmanlar MPFB ve MakeHuman CC0 ekipmanla (equipment01), hayvanlar G-3 kaynaklarıyla. Ayı için iyi CC0 model yok (bkz. içerik raporu).
   - **Literatür:** R15
-
-</details>
-
-### Y-C33 · Ant bağı
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C17
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C33 Ant bağı**
-  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
-  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-C17 · **Kim:** C
-  - **Ne:** İki yoldaşın bağı +3'e çıkınca birbirine söz verir; söz bozulursa ağır kırgınlık. Göçebe töresinden.
-  - **Kullanıcı notu:** "Gokyurt'ta ant bağı: Onay."
-  - **Kabul:** Bağ ve kırgınlık testi; soru: yalnızca Gokyurtlu yoldaşlar mı, herkes mi.
 
 </details>
 

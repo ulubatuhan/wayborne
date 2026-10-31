@@ -713,6 +713,42 @@ var consecutive_hungry_days: int = 0
 
 func add_grievance(key: String, amount: int = 1) -> void:
 	grievances[key] = int(grievances.get(key, 0)) + amount
+	# Ant içmiş biri aç bırakılır, savaştan uzak tutulur ya da liderlikte
+	# geçilirse söz bozulmuş sayılır (Y-C33): bağ kopar, kırgınlık ağırdır.
+	if sworn and amount > 0 and OATH_BREAKERS.has(key):
+		break_oath()
+
+## --- Ant bağı (görev Y-C33, kullanıcı kararı 2026-10-31: "yalnızca
+## Gokyurtlular ve dağ kabilesi tarafları ant içer") ---
+## Liderle bağı güvene (3) varan göçebe ya da dağlı yoldaş, lider de bu iki
+## töreden biriyse, ateşin başında ant içer. Ant içen kırılsa da kervanı
+## bırakmaz (bkz. GameSession.get_break_departure_chance). Lider sözü bozarsa
+## (aç bırakmak, savaştan uzak tutmak, liderlikte geçmek) bağ sıfırlanır ve
+## kırgınlık ağırdır.
+const OATH_CULTURES: Array[String] = ["nomad", "highland"]
+const OATH_RAPPORT: int = 3
+const OATH_BROKEN_WEIGHT: int = 3
+const GRIEVANCE_OATH_BROKEN: String = "oath_broken"
+const OATH_BREAKERS: Array[String] = ["unfed", "benched", "passed_over"]
+var sworn: bool = false
+
+func can_swear_oath() -> bool:
+	return not sworn and OATH_CULTURES.has(culture_id) and rapport >= OATH_RAPPORT
+
+func break_oath() -> void:
+	if not sworn:
+		return
+	sworn = false
+	rapport = 0
+	grievances[GRIEVANCE_OATH_BROKEN] = int(grievances.get(GRIEVANCE_OATH_BROKEN, 0)) + OATH_BROKEN_WEIGHT
+
+## Kervanbaşının inancı (Y-C34, kullanıcı kararı: "kervanın inancı kervan
+## başının inancına göre"). Boşsa kültürden ve doğduğu yerden türetilir.
+const CREED_SEPTISM: String = "septisizm"
+const CREED_FIST: String = "yumruk"
+const CREED_BAIKHAN: String = "baikhan"
+const CREED_OLD: String = "eski"
+var creed: String = ""
 
 func get_grievance(key: String) -> int:
 	return int(grievances.get(key, 0))
@@ -1033,6 +1069,8 @@ func to_dict() -> Dictionary:
 		"consecutive_hungry_days": consecutive_hungry_days,
 		"backstory_id": backstory_id,
 		"rapport": rapport,
+		"sworn": sworn,
+		"creed": creed,
 		"last_chat_day": last_chat_day,
 		"last_chat_topic": last_chat_topic,
 		"last_action_day": last_action_day,
@@ -1076,6 +1114,8 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.auto_allocate = bool(data.get("auto_allocate", true))
 	character.backstory_id = str(data.get("backstory_id", ""))
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
+	character.sworn = bool(data.get("sworn", false))
+	character.creed = str(data.get("creed", ""))
 	character.last_chat_day = int(data.get("last_chat_day", -99))
 	character.last_chat_topic = str(data.get("last_chat_topic", ""))
 	character.last_action_day = int(data.get("last_action_day", -99))

@@ -548,3 +548,16 @@ said "flat" and the equipment report said "strong", and neither said that
 the two were unconnected. The simulator's equipment A/B also has to level
 the geared character to the tier requirement now - measuring a combination
 the player cannot reach says nothing about balance.
+
+## Oath & Creed Rules (Y-C33, Y-C34; kullanıcı kararları 2026-10-31)
+
+- **Ant bağını yalnızca Gokyurtlular (göçebe) ve dağ kabileleri içer.** Lider de bu iki töreden biriyse, liderle bağı
+  güvene (3) varan aynı töreden yoldaş kamp ateşinde ant içer (`GameSession.swear_oaths`). Ant içen kırılsa da
+  kervanı bırakmaz (`get_break_departure_chance` 0). Lider sözü bozarsa (aç bırakmak, savaştan uzak tutmak,
+  liderlikte geçmek) bağ sıfırlanır ve `oath_broken` kırgınlığı ağırdır (3); antlı birini geride bırakmak aynı
+  töreden herkese bu kırgınlığı yazar. Ant kayıtta (`CharacterData.sworn`).
+- **Kervanın inancı kervanbaşının inancıdır** (`caravan_creed`). Boşsa kültürden ve bulunduğu yerden türetilir (LORE
+  §4): göçebe Baikhan; dağlı ve balıkçı eski inanç; güney Vadi ve Orsolune Yumruk; geri kalanı Septisizm. Avuçiçi
+  kafilesi (`evt_pilgrim_caravan`) yalnızca Septisistleri alır; başkası rol yaparak katılır (lider Karizma kontrolü),
+  yakalanan inançsız muhafızlarca cezalandırılır.
+

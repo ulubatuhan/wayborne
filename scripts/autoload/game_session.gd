@@ -1565,6 +1565,9 @@ const GRIEVANCE_DEPARTURE_PER_POINT: float = 0.03
 const MAX_BREAK_DEPARTURE_CHANCE: float = 0.6
 
 func get_break_departure_chance(character: CharacterData) -> float:
+	# Ant içen kırılsa da kervanı bırakmaz (Y-C33).
+	if character.sworn:
+		return 0.0
 	return minf(
 		MAX_BREAK_DEPARTURE_CHANCE,
 		BREAK_DEPARTURE_CHANCE + GRIEVANCE_DEPARTURE_PER_POINT * float(character.get_grievance_total())
@@ -2622,11 +2625,48 @@ func _ensure_plague() -> void:
 		plague.step()
 
 const NEUTRAL_GROUND_ID: String = "serai_duvenmor"
+const HOLY_CITY_ID: String = "orvahel"
 
 func _plague_on_route() -> bool:
 	if not is_journey_active():
 		return has_plague(current_location_id)
 	return has_plague(journey_origin_id) or has_plague(journey_destination_id)
+
+## Ateşin başında ant içenler (Y-C33): lider de göçebe ya da dağlıysa, bağı
+## güvene varan aynı töreden yoldaşlar. Yeni ant içenlerin adlarını döner.
+func swear_oaths() -> Array[String]:
+	var sworn_names: Array[String] = []
+	var leader := get_player_character()
+	if leader == null or not CharacterData.OATH_CULTURES.has(leader.culture_id):
+		return sworn_names
+	for member in get_party():
+		if member.is_player or not member.can_swear_oath():
+			continue
+		member.sworn = true
+		sworn_names.append(member.character_name)
+		note_beat(BEAT_STORY, [member.character_name])
+	return sworn_names
+
+## Kervanın inancı kervanbaşınınki (Y-C34). Boşsa kültüründen ve bulunduğu
+## yerden türetilir (LORE §4: göçebe Baikhan; dağlı ve balıkçı eski inanç;
+## güney Vadi ve Orsolune Yumruk; geri kalan El'in kurulu düzeni Septisizm).
+const FIST_PLACES: Array[String] = ["belvanor", "ilsande", "caramine", "orsolune"]
+
+static func derive_creed(culture_id: String, place_id: String) -> String:
+	match culture_id:
+		CultureCatalog.NOMAD:
+			return CharacterData.CREED_BAIKHAN
+		CultureCatalog.HIGHLAND, CultureCatalog.FISHER:
+			return CharacterData.CREED_OLD
+	return CharacterData.CREED_FIST if FIST_PLACES.has(place_id) else CharacterData.CREED_SEPTISM
+
+func caravan_creed() -> String:
+	var leader := get_player_character()
+	if leader == null:
+		return ""
+	if leader.creed.is_empty():
+		leader.creed = derive_creed(leader.culture_id, current_location_id)
+	return leader.creed
 
 ## Kapısından bir daha girilemeyen yerler (Y-C29): Duvenmor'un içinde kılıç
 ## çeken kervan yasaklanır. Kayıtta durur; yeniden yükleme yasağı kaldırmaz.
@@ -4768,6 +4808,9 @@ func build_event_context() -> Dictionary:
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
 		# Tarafsız zemine gidiliyor mu (Y-C29: Duvenmor'da kılıç çekilmez).
 		"dest_neutral_ground": 1.0 if journey_destination_id == NEUTRAL_GROUND_ID else 0.0,
+		# Avuçiçi yolu (Y-C34): hacı kafilesi Orvahel'e gider; kervanbaşı Septisist mi.
+		"dest_holy": 1.0 if journey_destination_id == HOLY_CITY_ID else 0.0,
+		"leader_septist": 1.0 if caravan_creed() == CharacterData.CREED_SEPTISM else 0.0,
 		# Kaçak mal (Y-C19): gümrük onu arar.
 		"contraband": get_total_quantity(ItemCatalog.CONTRABAND_SALT),
 		# Yoldaki tüccarların mizacı (Y-F05): hırsız gece kaçar, çaresiz

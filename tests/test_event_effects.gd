@@ -9,6 +9,7 @@ func suite_name() -> String:
 	return "EventEffects"
 
 func run(t) -> void:
+	_test_oath_and_creed(t)
 	_test_ban_and_trade_stain(t)
 	_test_gold_can_go_into_debt(t)
 	_test_provisions_never_negative(t)
@@ -546,3 +547,35 @@ func _test_ban_and_trade_stain(t) -> void:
 	t.ok(session.capped_sell_price("salt", 100) < sell_clean, "lekeli kervandan ucuza alır")
 	session.total_days_elapsed += 46
 	t.ok(not session.is_trade_stained(), "leke süresi dolunca kalkar")
+
+## Ant bağı (Y-C33): yalnızca göçebe ve dağlılar, bağ güvene varınca; ant içen
+## kırılsa da gitmez; söz bozulunca bağ kopar. Kervanın inancı (Y-C34).
+func _test_oath_and_creed(t) -> void:
+	var session := _session()
+	var leader := session.get_player_character()
+	leader.culture_id = CultureCatalog.NOMAD
+	var nomad := CharacterData.create("Aybike", CultureCatalog.NOMAD, CharacterStats.new())
+	var valley := CharacterData.create("Lucia", CultureCatalog.VALLEY, CharacterStats.new())
+	session.add_to_party(nomad)
+	session.add_to_party(valley)
+	nomad.rapport = 3
+	valley.rapport = 5
+	t.eq(session.swear_oaths(), ["Aybike"] as Array[String], "yalnızca göçebe yoldaş ant içer")
+	t.ok(nomad.sworn and not valley.sworn, "vadili ant içmez")
+	t.eq(session.get_break_departure_chance(nomad), 0.0, "ant içen kırılsa da gitmez")
+	t.ok(session.get_break_departure_chance(valley) > 0.0, "ant içmeyen gidebilir")
+	var copy := CharacterData.from_dict(nomad.to_dict())
+	t.ok(copy.sworn, "ant kayıttan döner")
+	nomad.add_grievance(CharacterData.GRIEVANCE_UNFED)
+	t.ok(not nomad.sworn, "aç bırakılan antlı sözün bozulduğunu sayar")
+	t.eq(nomad.rapport, 0, "bağ sıfırlanır")
+	t.eq(nomad.get_grievance(CharacterData.GRIEVANCE_OATH_BROKEN), CharacterData.OATH_BROKEN_WEIGHT, "kırgınlık ağır")
+	leader.culture_id = CultureCatalog.VALLEY
+	nomad.rapport = 4
+	t.eq(session.swear_oaths().size(), 0, "lider bu törelerden değilse ant içilmez")
+
+	t.eq(GameSession.derive_creed(CultureCatalog.NOMAD, "vastrevar"), CharacterData.CREED_BAIKHAN, "göçebe Baikhan")
+	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "belvanor"), CharacterData.CREED_FIST, "güney Vadi Yumruk")
+	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "ondrelle"), CharacterData.CREED_SEPTISM, "kuzey Vadi Septisizm")
+	leader.creed = CharacterData.CREED_SEPTISM
+	t.eq(session.caravan_creed(), CharacterData.CREED_SEPTISM, "kervanın inancı kervanbaşınınki")

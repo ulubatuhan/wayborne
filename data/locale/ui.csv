@@ -1345,3 +1345,6 @@
 "UI_GUILD_BOARD_TOWN","Bu kasabanın panosuna kervan ilanı asılmaz. İlanlar şehirlerde.","No caravan notices go up on this town's board. Look for them in the cities.","","","","","","","","",""
 "UI_BRIEF_ROUTE_PLAGUE_OLD","Haber: orada veba var (%d gün önce duyuldu). Şimdi nasıl, bilinmiyor.","Word is there is plague there (heard %d days ago). How it stands now, no one knows.","","","","","","","","",""
 "UI_TALK_PLAGUE_THERE","Oradan gelenler öksürüyordu; veba var diyorlar.","The ones who came from there were coughing; they say there is plague.","","","","","","","","",""
+"UI_ROAD_OATH_SWORN","%s ateşin başında ant içti: kırılsa da kervanı bırakmayacak. Sözünü sen bozarsan unutmaz.","%s swore an oath by the fire: even broken, they will not leave the caravan. If you break your word, they will not forget.","","","","","","","","",""
+"UI_GRIEVANCE_OATH_BROKEN","Bozulan ant","Broken oath","","","","","","","","",""
+"UI_THOUGHT_OATH_BROKEN","%s ant içmişti. Sözü bozan sendin.","%s swore an oath. It was you who broke it.","","","","","","","","",""

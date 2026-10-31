@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **99** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -732,6 +732,24 @@ Toplam: **99** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-C34 · Hacı kafilesine katılmak
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C25
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C34 Hacı kafilesine katılmak**
+  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C25 · **Kim:** CK
+  - **Ne:** Avuçiçi yolunda bir kafileye katılma seçeneği: güvenli ama yavaş ve kurallı. Şart aynı inançtan olmak ya da rol yapmak; rol yapan yakalanırsa Avuçiçi'nin El'i taşıyan inançsıza cezası (Ç14'e bağlı). Kervanın inancını tutan bir değer gerekir.
+  - **Kullanıcı notu:** "Ek bir seçenek olarak eklenebilir ama aynı dinden olmamız lazım ya da rol yapmalıyız."
+  - **Kabul:** Karar: kervanın inancı neye göre belirlenir.
+
+</details>
+
 ## Paket P08
 
 ### R0 · Altyapı
@@ -1237,6 +1255,24 @@ Toplam: **99** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Kullanıcı notundan türetildi: büyücü ve 7 büyü kaldırılmaz; nadir bir olayla doğabilir.
   - **Kullanıcı notu:** “nadir bir olay evet ama olabilir, kaldırmak yok.”
   - **Kabul:** Büyücü en az bir nadir olaydan doğuyor; büyüler savaşta çalışıyor.
+
+</details>
+
+### Y-C33 · Ant bağı
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C17
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C33 Ant bağı**
+  - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
+  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-C17 · **Kim:** C
+  - **Ne:** İki yoldaşın bağı +3'e çıkınca birbirine söz verir; söz bozulursa ağır kırgınlık. Göçebe töresinden.
+  - **Kullanıcı notu:** "Gokyurt'ta ant bağı: Onay."
+  - **Kabul:** Bağ ve kırgınlık testi; soru: yalnızca Gokyurtlu yoldaşlar mı, herkes mi.
 
 </details>
 

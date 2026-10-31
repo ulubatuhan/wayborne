@@ -1745,6 +1745,8 @@ func _open_camp_panel() -> void:
 			_add_log(tr("UI_CAMP_DONE") % tr(String(CampActionsPanel.ACTION_KEYS[action])), OUTCOME_COLOR)
 		_camp_panel = null
 		_refresh_state()
+		for name in _session.swear_oaths():
+			_add_log(tr("UI_ROAD_OATH_SWORN") % name, OUTCOME_COLOR)
 		var mercy := _session.roll_small_mercy()
 		if mercy.is_empty():
 			_open_camp_evening()
