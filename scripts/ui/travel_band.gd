@@ -107,6 +107,13 @@ const RAIN_WIDTH: float = 0.85
 const RAIN_ALPHA_BASE: float = 0.17
 const RAIN_ALPHA_PER_RAIN: float = 0.15
 const FOG_BANDS: int = 7
+## Bataklığın kendi sisi (görev Y-G22): havadan bağımsız, yere yakın,
+## gri-yeşil. Renk soğuk ve soluk (tek sıcak kaynak kuralı).
+const MARSH_MIST: Color = Color(0.50, 0.56, 0.49)
+const MARSH_MIST_ALPHA: float = 0.55
+## Zemini gri-yeşile çeken örtü: render edilmiş otun sarısını söndürür.
+const MARSH_GROUND_WASH: float = 0.22
+const MARSH_MIST_WISPS: int = 9
 
 ## Kasvetin gökyüzüne karışma payı - 1.0 olduğunda günün evresi tamamen
 ## siliniyordu (bkz. _draw_sky). Ufuk daha az karışıyor: bulutun altından
@@ -537,6 +544,7 @@ func _draw() -> void:
 	# aktör katmanının (kervanın) *altında* kalıyor - vagon merkezli
 	# ateşler orada kalırsa hep bir vagonun arkasına düşerdi. `_camping`
 	# burada yalnızca sıcak ışık tonu için yaşıyor (bkz. set_phase).
+	_draw_marsh_mist(area, cover, horizon, marsh_weight(_blend))
 	_draw_weather(area, cover, horizon)
 	# Kenar kararması ekranın kenarında, şeridin değil: uzaklaşınca şeridin
 	# kenarı ekranın ortasına düşüyor ve orada koyu bir çerçeve kalırdı.
@@ -1403,6 +1411,49 @@ func _draw_ground_props(area: Rect2, cover: Rect2, horizon: float) -> void:
 				ArtDraw.conifer(self, base, height * 1.15, near.darkened(0.45), flora)
 			else:
 				ArtDraw.tree(self, base, height, near.darkened(0.45), flora.lightened(0.05))
+
+## Bataklığın görünen payı: geçişin hangi ucu bataklıksa o kadarı. Sis
+## bir sınırda birden belirmesin diye biyom geçişiyle birlikte açılır.
+static func marsh_weight(blend: Dictionary) -> float:
+	var ratio := clampf(float(blend.get("ratio", 0.0)), 0.0, 1.0)
+	var weight := 0.0
+	if String(blend.get("from", "")) == ArtPalette.BIOME_MARSH:
+		weight += 1.0 - ratio
+	if String(blend.get("to", "")) == ArtPalette.BIOME_MARSH:
+		weight += ratio
+	return clampf(weight, 0.0, 1.0)
+
+## Bataklık sisi: ufukta kalın bir gri-yeşil perde, zeminin üstünde
+## yavaş kayan alçak tutamlar. Tutamlar yerin çizgisine oturur, yolun
+## eğimiyle birlikte iner çıkar.
+func _draw_marsh_mist(area: Rect2, cover: Rect2, horizon: float, weight: float) -> void:
+	if weight <= 0.0:
+		return
+	var mist := ArtPalette.fade_to_haze(MARSH_MIST, Color(_sky.haze), 0.35)
+	var veil := Color(mist, MARSH_MIST_ALPHA * 0.8 * weight)
+	var clear := Color(mist, 0.0)
+	draw_rect(Rect2(Vector2(cover.position.x, horizon), Vector2(cover.size.x, cover.end.y - horizon)),
+		Color(mist.darkened(0.25), MARSH_GROUND_WASH * weight), true)
+	var top := horizon - area.size.y * 0.14
+	var bottom := horizon + area.size.y * 0.30
+	var mid := horizon + area.size.y * 0.02
+	for half in [[top, mid, clear, veil], [mid, bottom, veil, clear]]:
+		draw_polygon(PackedVector2Array([
+			Vector2(cover.position.x, half[0]), Vector2(cover.end.x, half[0]),
+			Vector2(cover.end.x, half[1]), Vector2(cover.position.x, half[1]),
+		]), PackedColorArray([half[2], half[2], half[3], half[3]]))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4417
+	var span := cover.size.x + area.size.x * 0.6
+	for index in MARSH_MIST_WISPS:
+		var speed := rng.randf_range(4.0, 11.0)
+		var x := cover.position.x - area.size.x * 0.3 + fposmod(
+			rng.randf() * span + _time * speed - _scroll_x() * 0.15, span
+		)
+		var lift := area.size.y * rng.randf_range(0.0, 0.06)
+		var center := Vector2(x, _ground_y_at_screen(clampf(x, cover.position.x, cover.end.x)) - lift)
+		var radius := Vector2(area.size.x * rng.randf_range(0.14, 0.28), area.size.y * rng.randf_range(0.04, 0.08))
+		ArtDraw.radial_glow(self, center, radius, mist, MARSH_MIST_ALPHA * weight * rng.randf_range(0.6, 1.0))
 
 ## Hava. Üç katman: kasvet gökyüzünde (bkz. _draw_sky), sis ufukta,
 ## yağmur her yerde. Yoğunluklar `RouteWeather.visuals`'tan - ekran kendi

@@ -20,6 +20,7 @@ func run(t) -> void:
 	_test_camp_window(t)
 	_test_save_round_trip(t)
 	_test_arrival_hour_colours_the_city(t)
+	_test_marsh_mist_follows_the_blend(t)
 
 func _test_speed_selection(t) -> void:
 	var clock := JourneyClock.new()
@@ -216,3 +217,12 @@ func _test_arrival_hour_colours_the_city(t) -> void:
 	var old := GameSession.new()
 	old.load_from_dict(legacy)
 	t.eq(old.last_clock_hour, JourneyClock.START_HOUR, "eski kayıt şafağa düşer")
+
+## Bataklık sisi biyom geçişiyle açılır kapanır, sınırda birden belirmez (Y-G22).
+func _test_marsh_mist_follows_the_blend(t) -> void:
+	var m := ArtPalette.BIOME_MARSH
+	var s := ArtPalette.BIOME_STEPPE
+	t.eq(TravelBand.marsh_weight({"from": s, "to": s, "ratio": 0.0}), 0.0, "bozkırda bataklık sisi yok")
+	t.eq(TravelBand.marsh_weight({"from": m, "to": m, "ratio": 0.0}), 1.0, "bataklıkta sis tam")
+	t.eq(TravelBand.marsh_weight({"from": s, "to": m, "ratio": 0.25}), 0.25, "bataklığa girerken sis açılıyor")
+	t.eq(TravelBand.marsh_weight({"from": m, "to": s, "ratio": 0.25}), 0.75, "bataklıktan çıkarken sis kapanıyor")
