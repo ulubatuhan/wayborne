@@ -200,6 +200,10 @@ func _refresh_info_panel() -> void:
 	plan_button.text = tr("UI_MAP_PLAN") % _focused_location.location_name
 	plan_button.pressed.connect(_on_plan_pressed)
 	_info_panel.add_child(plan_button)
+	# Yasaklı yer (Y-C29): düğme kilitli, nedeni yanında (gizlenmez).
+	if _session.is_banned(_focused_location.location_id):
+		plan_button.disabled = true
+		_add_info_label(tr("UI_MAP_BANNED"))
 
 ## Tehlike yüzdesi Taverna'da öğrenilmişse ya da kervanda bir İzci
 ## varsa (bkz. DutyCatalog.IZCI - ücretsiz, ödeme gerektirmeyen keşif)

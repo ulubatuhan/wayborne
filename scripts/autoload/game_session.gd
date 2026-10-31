@@ -2580,6 +2580,17 @@ func has_plague(location_id: String) -> bool:
 	var location := WorldMapData.get_location_by_id(location_id)
 	return location != null and WorldEvents.natural_plague(location.region, total_days_elapsed)
 
+## Kapısından bir daha girilemeyen yerler (Y-C29): Duvenmor'un içinde kılıç
+## çeken kervan yasaklanır. Kayıtta durur; yeniden yükleme yasağı kaldırmaz.
+var banned_locations: Array = []
+
+func ban_location(location_id: String) -> void:
+	if not banned_locations.has(location_id):
+		banned_locations.append(location_id)
+
+func is_banned(location_id: String) -> bool:
+	return banned_locations.has(location_id)
+
 func is_city_in_crisis(location_id: String) -> bool:
 	if has_plague(location_id):
 		return true
@@ -4317,6 +4328,7 @@ func to_save_dict() -> Dictionary:
 		"visited_location_ids": visited_location_ids.duplicate(),
 		"market_stock": market_stock.duplicate(),
 		"hired_recruit_indices": hired_recruit_indices.duplicate(true),
+		"banned_locations": banned_locations.duplicate(),
 		"next_character_serial": _next_character_serial,
 		"profiteering_sales": profiteering_sales,
 		"crew_names": crew_names.duplicate(),
@@ -4588,6 +4600,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 			indices.append(int(index))
 		hired_recruit_indices[str(venue)] = indices
 	profiteering_sales = maxi(0, int(data.get("profiteering_sales", 0)))
+	banned_locations = (data.get("banned_locations", []) as Array).duplicate()
 
 	# Kimliği olmayan (eski kayıttan gelen) herkes kimliğini burada alır;
 	# sayaç kayıttakinden ve partidekinin en büyüğünden küçük olamaz.

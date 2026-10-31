@@ -18,6 +18,7 @@ func suite_name() -> String:
 	return "CityCommerce"
 
 func run(t) -> void:
+	_test_ban_survives_save(t)
 	_test_plague_is_a_world_state(t)
 	_test_gokyurt_hospitality(t)
 	_test_caravanserai_rumor_bonus(t)
@@ -591,3 +592,13 @@ func _test_plague_is_a_world_state(t) -> void:
 				days[region] = int(days[region]) + 1
 	t.ok(int(days["vadi"]) > int(days["gocebe"]) * 2, "Vadi Gokyurt'tan çok daha sık vebalı")
 	t.ok(int(days["gocebe"]) > 0, "Gokyurt da hiç kurtulmuş değil")
+
+
+# Y-C29: Duvenmor yasağı kayıtta durur.
+func _test_ban_survives_save(t) -> void:
+	var session := _session()
+	session.ban_location("serai_duvenmor")
+	var copy := GameSession.new()
+	copy.load_from_dict(session.to_save_dict())
+	t.ok(copy.is_banned("serai_duvenmor"), "yasak kayıttan döner")
+	t.ok(not copy.is_banned("serai_seyvan"), "yasak yalnızca o yere")
