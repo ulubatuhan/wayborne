@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **98** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **111** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -713,6 +713,76 @@ Toplam: **98** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-C27 · Gokyurt misafirliği
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Gokyurt'ta (gocebe) varışta bir gece konsey öder; varış ekranında satır.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C27 Gokyurt misafirliği**
+  - **Durum (2026-10-31):** test bekliyor. Gokyurt'ta (gocebe) varışta bir gece konsey öder; varış ekranında satır.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** Gokyurt'taki kervansaray ve öbür konaklamalarda bir gün konaklama ve yeme içme ücretsiz; bedeli konsey öder. Öbür kervansaraylarda bu eskiden vardı, kıtlıkta kaldırıldı. Oyunda gün yalnızca yolda aktığı için varışta bir misafir gecesi olarak çevrilir (erzak harcanmadan dinlenme).
+  - **Kullanıcı notu:** "Gokyurt'ta yer alan kervansaray ve diğer konaklama imkanlarında bir gün ücretsiz konaklama ve yeme içme konsey tarafından karşılanır. Bu tavır diğer kervansaraylarda da eskiden olsa da bu kıtlık döneminde kaldırılmıştır."
+  - **Kabul:** Orbeyan'a varışta misafirlik; öbür kervansaraylarda yok; `denge-olcum` ile ölçüldü.
+
+</details>
+
+### Y-C28 · Yolcu defteri
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C10
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kervansarayda meyhaneci yolcu defterini okutur: iki yolun haberi.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C28 Yolcu defteri**
+  - **Durum (2026-10-31):** test bekliyor. Kervansarayda meyhaneci yolcu defterini okutur: iki yolun haberi.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C10 · **Kim:** C
+  - **Ne:** Kervansaray tavernasında söylenti şansı yüksek; defterde son geçen kervanların yönü, yol tehlikesi ve tarihli fiyatlar (söylenti yalan olabilir).
+  - **Kullanıcı notu:** "Yolcu defteri: Onay."
+  - **Kabul:** Kervansarayda bilgi şehirdekinden zengin; test eder.
+
+</details>
+
+### Y-C32 · Bedeli erzakla öde
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Haraç kartında erzakla öde seçeneği (8 erzak, moral -4).
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C32 Bedeli erzakla öde**
+  - **Durum (2026-10-31):** test bekliyor. Haraç kartında erzakla öde seçeneği (8 erzak, moral -4).
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** Haraç ve bedel kartlarına para yerine erzak seçeneği; ödememek o yolun tehlikesini yükseltir. Gönüllü seçenek, planlayıcının erzak hesabına girmez.
+  - **Kullanıcı notu:** "Bedeli erzakla öde: Onay."
+  - **Kabul:** Kart seçeneği ve yol tehlikesi testi.
+
+</details>
+
+### Y-C35 · İlan panosu
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C02
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C35 İlan panosu**
+  - **Durum (2026-10-31):** test bekliyor. Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor.
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C02 · **Kim:** C
+  - **Ne:** Kontrat panosunun adı İlan Panosu olur; kafile ve sürücü ilanları da aynı panoda.
+  - **Kullanıcı notu:** "Bu ilanlar da kontrat panosunda olabilir. Bu panoya kontrat panosu yerine ilan panosu deriz mesela."
+  - **Kabul:** Çeviri anahtarları ve ekran görüntüsü.
+
+</details>
+
 ## Paket P08
 
 ### R0 · Altyapı
@@ -1002,6 +1072,40 @@ Toplam: **98** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Aslına bakarsan hızlandırma kalkmalı. yolda olmak o kadar dolu bir eylem olmalı ki oyuncu oylu hızlandıramamalı, aynı zamanda da ortam o kadar dolu, yoğun, seyri yüksek olmalı ki hızlandırmak istememeli.”
   - **Kabul:** Ölçüm raporu hedefi gösteriyor; hız düğmeleri kaldırıldı; 12.2c'deki “3x'te bile yavaş” sorunu yürüme hızı düzeltilerek ayrıca çözüldü.
   - **Literatür:** R3, R4
+
+</details>
+
+### Y-B15 · Kuyu durağı
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kuyu durağı: yolda türetilen durak, faydası bir kez.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-B15 Kuyu durağı**
+  - **Durum (2026-10-31):** test bekliyor. Kuyu durağı: yolda türetilen durak, faydası bir kez.
+  - **Öncelik:** P2 · **Dalga:** 3 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** Çöl ve bozkır kesimlerinde kuyu durağı. Yeni bir su kaynağı değil: erzak ve yorgunluk kollarına bağlanır. "Doğru stoklayan aç kalmaz" sözü korunur.
+  - **Kullanıcı notu:** "Kuyu durağı: Onay."
+  - **Kabul:** `test_route_terrain` her yolda erzak sözünü sınar.
+
+</details>
+
+### Y-B16 · Küçük lütuf anı
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kampta nadir an (akşam başına ~0,077, en az 7 gün arayla; test_waybook_pages ölçer), sinema bantları ve tek cümle, günlük o akşam lütfu yazar. tests/screenshot_mercy.gd.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-B16 Küçük lütuf anı**
+  - **Durum (2026-10-31):** test bekliyor. Kampta nadir an (akşam başına ~0,077, en az 7 gün arayla; test_waybook_pages ölçer), sinema bantları ve tek cümle, günlük o akşam lütfu yazar. tests/screenshot_mercy.gd.
+  - **Öncelik:** P2 · **Dalga:** 3 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Kampta nadir, arayüzsüz, bir an tutulan sahne; ardından günlük cümlesi seçimi (`DiaryPanel`). Nadir olması ağırlığını korur.
+  - **Kullanıcı notu:** "Küçük lütuf anı: Onay."
+  - **Kabul:** Sıklık `simulate_road_beats` ile ölçüldü; sahne görüntüsü onaylandı.
 
 </details>
 
@@ -1756,6 +1860,128 @@ Toplam: **98** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/referans/gorevler/09_art_ikinci_tur.md](referans/referans/gorevler/09_art_ikinci_tur.md)
 - **Son not:** Kullanıcı bildirimi (2026-10-19). tools/ledger_unrule.py: kaynak art_source/waybook/l1_ledger_ruled.jpg, çıktı data/assets/ui/waybook/l1_ledger.jpg; cetvel normalize evrişimle silindi, CC0 kâğıt dokusu eklendi. Lekelerin içinde küçük ızgara parçaları kaldı.
+
+### Y-G19 · Portreler baştan yorgun ve aşınmış
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Yönergesi docs/el_cizimi/PORTRE_YONERGESI.md; ara çözüm bust_ink.gdshader weariness (soğuk ışık, soluk renk, derin gölge).
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G19 Portreler baştan yorgun ve aşınmış**
+  - **Durum (2026-10-31):** test bekliyor. Yönergesi docs/el_cizimi/PORTRE_YONERGESI.md; ara çözüm bust_ink.gdshader weariness (soğuk ışık, soluk renk, derin gölge).
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Karakter portreleri bir duruma göre aşınmaz, baştan öyle çizilir: yorgun, aşınmış yüzler. El çizimi programının portre yönergesine (`docs/el_cizimi/`) girer; mevcut `BustPortrait` mürekkep gölgelendirmesi ara çözüm olarak aynı yöne çekilir.
+  - **Kullanıcı notu:** "Karakter portreleri direkt bu şekilde çizilmeli, zaten aşınmış, yorgun olmalı."
+  - **Kabul:** Yönerge yazıldı; mevcut portrelerin önce ve sonra görüntüsü onaylandı.
+
+</details>
+
+### Y-G20 · Olay kartının görsel dili bölgeye göre
+
+- **Durum:** test bekliyor · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardRegionLook: sekiz bölgenin göğü, tonu, örtüsü, çerçeve deseni; vebalı bölgede solma. Tablo: tests/screenshot_card_regions.gd.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G20 Olay kartının görsel dili bölgeye göre**
+  - **Durum (2026-10-31):** test bekliyor. CardRegionLook: sekiz bölgenin göğü, tonu, örtüsü, çerçeve deseni; vebalı bölgede solma. Tablo: tests/screenshot_card_regions.gd.
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Kartın çizim dili kartın türüne göre değişmez, bölgeye göre değişir (Gokyurt, Vaelghard, Vadi, Ayazkaya...).
+  - **Kullanıcı notu:** "Bölgeye göre farklılık olmalı, karta göre de farklılık olmasın."
+  - **Kabul:** Üç bölgenin kart görünüşü yan yana onaylandı.
+
+</details>
+
+### Y-G21 · Kart açılışında yavaş kayma
+
+- **Durum:** test bekliyor · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: CardDrift: kart resmi açılırken yavaşça yaklaşıp kayar; Reduce Motion'da durur; ağaca girince başlar (CI düzeltmesi).
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G21 Kart açılışında yavaş kayma**
+  - **Durum (2026-10-31):** test bekliyor. CardDrift: kart resmi açılırken yavaşça yaklaşıp kayar; Reduce Motion'da durur; ağaca girince başlar (CI düzeltmesi).
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Olay kartının resmi açılırken yavaşça kayar (paralaks); Reduce Motion açıkken kayma yok.
+  - **Kullanıcı notu:** "Yavaş kayan kart açılışı: Onay."
+  - **Kabul:** Hareket eğrisi duruştan başlayıp duruşta biter (`test_motion` kalıbı); görüntü onaylandı.
+
+</details>
+
+### Y-G22 · Bataklık görünüşü: gri-yeşil sis
+
+- **Durum:** test bekliyor · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: TravelBand._draw_marsh_mist: havadan bağımsız gri-yeşil perde, zemin örtüsü, alçak tutamlar; biyom geçişiyle açılır. screenshot_road_looks marsh satırı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G22 Bataklık görünüşü: gri-yeşil sis**
+  - **Durum (2026-10-31):** test bekliyor. TravelBand._draw_marsh_mist: havadan bağımsız gri-yeşil perde, zemin örtüsü, alçak tutamlar; biyom geçişiyle açılır. screenshot_road_looks marsh satırı.
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Samuran ve Liraven çevresindeki yol kesimleri için çamurlu, sisli, gri-yeşil yol katmanları (`RoadStrips` görünüşü).
+  - **Kullanıcı notu:** "Gri-yeşil sisli bataklık: Onay."
+  - **Kabul:** `screenshot_road_looks` tablosunda bataklık görünüşü.
+
+</details>
+
+### Y-G23 · Soy sonu: ufukta yürüyen adlar
+
+- **Durum:** test bekliyor · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-D03
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G23 Soy sonu: ufukta yürüyen adlar**
+  - **Durum (2026-10-31):** test bekliyor. LineageProcession: bitiş panelinde ölenler ufukta yükleriyle yürür, adları üstü çizili. tests/screenshot_lineage_end.gd.
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** Y-D03 · **Kim:** CO
+  - **Ne:** Soy bitince üstü çizili adların sahipleri ufukta siluet olarak yürür. Ortaçağın ölüm dansı geleneğinden; filmin karesinden değil.
+  - **Kullanıcı notu:** "Soy sonu: ufukta adlar: Onay."
+  - **Kabul:** Bitiş ekranının görüntüsü onaylandı.
+
+</details>
+
+### Y-C30 · Kıtlıkta kervansaray: kapıya bırakılan yemek
+
+- **Durum:** test bekliyor · **Öncelik:** P3 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kıtlıkta kervansaray sahibinin kapıya bıraktığı tas: meyhane açılış satırı.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-C30 Kıtlıkta kervansaray: kapıya bırakılan yemek**
+  - **Durum (2026-10-31):** test bekliyor. Kıtlıkta kervansaray sahibinin kapıya bıraktığı tas: meyhane açılış satırı.
+  - **Öncelik:** P3 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** CO
+  - **Ne:** Kıtlığın kervansaraydaki izi küçük kalır: diyalogda bir ayrıntı ya da hancının kapıya yemek bıraktığının görüldüğü bir sahne.
+  - **Kullanıcı notu:** "Diyalogda belirtilen küçük bir detay ya da sadece görsel olarak hancının kapıya yemek bıraktığını gördüğümüz bir yer olabilir."
+  - **Kabul:** Satır ya da görüntü onaylandı.
+
+</details>
+
+## Paket P13
+
+### Y-H08 · Sessizlik anları
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P13 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: AudioManager.hush: feda ve ölümden sonra müzik susar, adım, nefes, sürünme; yer tutucu sesler.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-H08 Sessizlik anları**
+  - **Durum (2026-10-31):** test bekliyor. AudioManager.hush: feda ve ölümden sonra müzik susar, adım, nefes, sürünme; yer tutucu sesler.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** Bir feda kararından sonra ya da çok gergin anlarda müzik ve ortam sesi kesilir; yalnızca adım, sürünme ve nefes sesleri duyulur.
+  - **Kullanıcı notu:** "Tamamen sessizlik ve adım, sürünme, nefes gibi seslerin daha belirgin olması, daha doğrusu sadece onların duyulması daha etkili."
+  - **Kabul:** Ses varlıkları (CC0 ya da sentez yer tutucu); geçiş `AudioManager` üzerinden.
+
+</details>
 
 ## Paket P14
 
