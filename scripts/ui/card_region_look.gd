@@ -21,8 +21,8 @@ const LOOKS: Dictionary = {
 		"frame": Frame.STITCH,
 	},
 	"vadi": {
-		"sky_top": Color(0.21, 0.22, 0.19), "sky_bottom": Color(0.50, 0.50, 0.40),
-		"tint": Color(0.88, 0.90, 0.78), "wash": Color(0.40, 0.42, 0.29), "wash_alpha": 0.16,
+		"sky_top": Color(0.21, 0.22, 0.20), "sky_bottom": Color(0.50, 0.50, 0.43),
+		"tint": Color(0.90, 0.91, 0.83), "wash": Color(0.40, 0.42, 0.29), "wash_alpha": 0.16,
 		"frame": Frame.PLAIN,
 	},
 	"dag": {
@@ -91,7 +91,8 @@ func _draw() -> void:
 	_draw_frame(int(look.frame))
 
 func _draw_frame(frame: int) -> void:
-	var r := Rect2(Vector2.ZERO, size)
+	# Bir piksel içeride: kırpılan çerçevenin kenarında çizgi yarıya bölünmesin.
+	var r := Rect2(Vector2.ZERO, size).grow(-1.0)
 	var corners: Array[Vector2] = [r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]
 	match frame:
 		Frame.DOUBLE:
