@@ -199,7 +199,9 @@ const EVENT_CARD_ART: Dictionary = {
 ## Kartın içindeki illüstrasyon şeridi - kare resmi genişliğe göre kırpıp
 ## geniş bir şerit gösteriyor (bkz. `_build_event_illustration`), kartın
 ## kendi metin+seçenek yüksekliğini ezmesin diye.
-const CARD_ILLUSTRATION_HEIGHT: float = 200.0
+## 200 piksel resmi kartın içinde bir şeride indiriyordu (kullanıcı, 2026-11-01:
+## "arka plan çok küçük kalmış").
+const CARD_ILLUSTRATION_HEIGHT: float = 300.0
 
 ## Her kategori birden fazla `CombatFigure` arketipine düşebiliyor (aynı
 ## haydut pususunun kadroda birkaç çeşidi olması gibi) - tekdüzeliği kırıyor
@@ -259,7 +261,7 @@ const LEADER_MIN_SCREEN_SHARE: float = 0.35
 
 ## Ortadaki karar kartının genişliği. EU4'ün olay kartı gibi: ekranın
 ## tamamını kaplamıyor, arkasında dünyanın durduğu görünüyor.
-const CARD_WIDTH: float = 660.0
+const CARD_WIDTH: float = 820.0
 ## Kart gövdesinin en fazla ne kadar yer kaplayacağı - uzun bir metin
 ## kartı ekran boyu uzatmasın diye kaydırma kutusuna giriyor.
 const CARD_BODY_MAX_HEIGHT: float = 320.0
