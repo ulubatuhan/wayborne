@@ -7676,6 +7676,328 @@
         {
           "effects": [
             {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -25,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kafileye katıl (yavaş ama güvenli, kurallı)",
+          "locked": "Kafileye katıl: kafile yalnızca Septisistleri alır",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "leader_septist",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Septisist gibi davran ve katıl",
+          "locked": "Rol yapmaya gerek yok: kervanbaşı zaten Septisist",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": -25,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Duaları doğru yerde kesip doğru yerde başlattın. Kimse bir şey sormadı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": -25,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Katıldınız, ama her duada birinin size baktığını hissettiniz.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -10,
+                  "text": "",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "Yanlış satırı okudun. Muhafızlar El'i taşıyan inançsızın cezasını kesip kafileden attı.",
+              "weight": 1
+            }
+          ],
+          "requirements": [
+            {
+              "key": "leader_septist",
+              "op": "LESS_EQUAL",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kendi yolunuza devam edin",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "dest_holy",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        },
+        {
+          "key": "days_remaining",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_pilgrim_caravan",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orvahel yolunda, açık el işareti taşıyan bir hacı kafilesi. Yavaş yürüyorlar, saatleri duayla bölünüyor; ama yanlarında silahlı muhafız var ve haydut onlara yaklaşmıyor. Kafilenin başı kim olduğunuzu soruyor.",
+      "title": "Avuçiçi Kafilesi",
+      "triggered_only": false,
+      "weight": 1.2
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Onu savun",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Sözlerin tuttu. Görevliler başlarını sallayıp yollarına gidiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -1,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Bıraktılar ama adını defterlerine yazdılar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -15,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Savunman cezayı ağırlaştırdı. Yolun ortasında kırbaçladılar.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kiliseye bağış yap (60 GG)",
+          "locked": "Bağış: 60 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "LEAVE_BEHIND"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Teslim et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 25,
+      "id": "evt_faith_tribunal",
+      "immediate": [],
+      "modifiers": 2,
+      "once": false,
+      "text": "Yolun kenarında üç din görevlisi kervanı durduruyor. Yoldaşlarından birini parmakla gösteriyorlar: yanlış duayı okuduğunu, El'in sayfasını kirlettiğini söylüyorlar. Mahkemeleri burada, yolun ortasında.",
+      "title": "Sapkınlık Suçlaması",
+      "triggered_only": false,
+      "weight": 0.18
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": 0,
               "text": "",
               "type": "LEAVE_BEHIND"

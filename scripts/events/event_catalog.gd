@@ -124,6 +124,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_serai_bandit())
 	_road_events.append(_duvenmor_quarrel())
 	_road_events.append(_pilgrim_caravan())
+	_road_events.append(_faith_tribunal())
 	_road_events.append(_leave_the_wounded())
 	_road_events.append(_left_behind_return())
 	_road_events.append(_profiteer_recognized())
@@ -2426,6 +2427,31 @@ static func _pilgrim_caravan() -> GameEvent:
 			"EVT_PALM_COLUMN_PRETEND_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.REPUTATION, -6), _fx(EventEffect.Type.PARTY_HP, -10)])),
 			"EVT_PALM_COLUMN_OPT_PRETEND_LOCKED", _conditions([_c("leader_septist", EventCondition.Op.LESS_EQUAL, 0)])),
 		_choice("EVT_PALM_COLUMN_OPT_ALONE", _effects([_fx(EventEffect.Type.STRESS, 1)])),
+	])
+	return event
+
+## İnanç mahkemesi (kullanıcı onayı 2026-10-31): din görevlileri kervandan
+## birini sapkınlıkla suçlar. Kimse ölmez; bedel suçlanana düşer (sakatlık,
+## kervandan ayrılma). Suçlanan en zayıf yoldaş: kartta adı yazar.
+static func _faith_tribunal() -> GameEvent:
+	var event := _event("evt_faith_tribunal", "EVT_TRIBUNAL_TITLE", "EVT_TRIBUNAL_TEXT", 0.18)
+	event.cooldown_days = 25
+	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 2)])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("near_shrine", EventCondition.Op.GREATER_EQUAL, 1)]), 4.0),
+		EventWeightModifier.make(_conditions([_c("near_mezra", EventCondition.Op.GREATER_EQUAL, 1)]), 2.0),
+	])
+	event.choices = _choices([
+		_check_choice("EVT_TRIBUNAL_OPT_DEFEND", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_TRIBUNAL_DEFEND_OK", _effects([_fx(EventEffect.Type.MORALE, 4)]),
+			"EVT_TRIBUNAL_DEFEND_MID", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.REPUTATION, -1)]),
+			"EVT_TRIBUNAL_DEFEND_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -15, "weakest"), _fx(EventEffect.Type.REPUTATION, -2)])),
+		_gated_choice("EVT_TRIBUNAL_OPT_BRIBE", "EVT_TRIBUNAL_OPT_BRIBE_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 60)]),
+			_effects([_fx(EventEffect.Type.GOLD, -60), _fx(EventEffect.Type.STRESS, 2)])),
+		_choice("EVT_TRIBUNAL_OPT_HAND_OVER", _effects([
+			_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.MORALE, -6), _fx(EventEffect.Type.REPUTATION, 1),
+		])),
 	])
 	return event
 
