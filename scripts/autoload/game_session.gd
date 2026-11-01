@@ -2226,6 +2226,7 @@ func advance_day() -> Array[String]:
 	market.regen_medicine(total_days_elapsed)
 	if is_journey_active():
 		_cold_night()
+		_hear_road_plague()
 		_ailment_day()
 		caravan.apply_daily_drift()
 		_apply_road_stress_day()
@@ -2616,6 +2617,25 @@ func learn_plague(location_id: String) -> void:
 func plague_news_for(location_id: String) -> Dictionary:
 	return plague_news.get(location_id, {})
 
+## Yolda veba haberi (Y-C25, kullanıcı notu: "yolda ya da şehirde"): karşıdan
+## gelen yolcular gittiğin yerin ya da onun komşusunun hâlini söyler.
+const ROAD_PLAGUE_NEWS_CHANCE: float = 0.3
+
+func _hear_road_plague() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("road_plague|%s|%d" % [journey_destination_id, total_days_elapsed])
+	if rng.randf() >= ROAD_PLAGUE_NEWS_CHANCE:
+		return
+	var places: Array[String] = [journey_destination_id]
+	for route in WorldMapData.get_routes_from(journey_destination_id):
+		places.append(route.to_location_id)
+	var place: String = places[rng.randi_range(0, places.size() - 1)]
+	var knew := bool(plague_news_for(place).get("sick", false))
+	learn_plague(place)
+	var location := WorldMapData.get_location_by_id(place)
+	if location != null and has_plague(place) != knew:
+		ailment_notes.append({"key": "UI_ROAD_PLAGUE_HEARD" if has_plague(place) else "UI_ROAD_PLAGUE_CLEARED", "args": [location.location_name]})
+
 ## Eski kayıt: model yoksa kurulur ve kaydın gününe kadar ilerletilir.
 const PLAGUE_CATCH_UP_DAYS: int = 400
 func _ensure_plague() -> void:
@@ -2687,6 +2707,19 @@ func swear_oaths() -> Array[String]:
 		member.sworn = true
 		sworn_names.append(member.character_name)
 		note_beat(BEAT_STORY, [member.character_name])
+	# İki antlı yoldaş birbirine de ant içer (ilk tarif: "iki yoldaşın bağı"):
+	# biri geride bırakılırsa öbürü onunla gider.
+	var single: CharacterData = null
+	for member in get_party():
+		if not member.sworn or not member.oath_partner.is_empty():
+			continue
+		if single == null:
+			single = member
+			continue
+		single.oath_partner = member.character_id
+		member.oath_partner = single.character_id
+		sworn_names.append("%s & %s" % [single.character_name, member.character_name])
+		single = null
 	return sworn_names
 
 ## Kervanın inancı kervanbaşınınki (Y-C34). Boşsa kültüründen ve bulunduğu

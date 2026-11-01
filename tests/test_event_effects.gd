@@ -570,6 +570,16 @@ func _test_oath_and_creed(t) -> void:
 	t.ok(not nomad.sworn, "aç bırakılan antlı sözün bozulduğunu sayar")
 	t.eq(nomad.rapport, 0, "bağ sıfırlanır")
 	t.eq(nomad.get_grievance(CharacterData.GRIEVANCE_OATH_BROKEN), CharacterData.OATH_BROKEN_WEIGHT, "kırgınlık ağır")
+	# Ant kardeşleri: iki antlı yoldaş birbirine bağlanır, biri geride kalırsa öbürü de gider.
+	var brother := CharacterData.create("Tolun", CultureCatalog.HIGHLAND, CharacterStats.new())
+	session.add_to_party(brother)
+	nomad.rapport = 3
+	brother.rapport = 3
+	session.swear_oaths()
+	t.eq(nomad.oath_partner, brother.character_id, "iki antlı birbirine ant içti")
+	nomad.current_hp = 1
+	EventEffectApplier.apply(_effects([EventEffect.make(EventEffect.Type.LEAVE_BEHIND)]), session)
+	t.ok(not session.get_party().has(brother), "ant kardeşi geride bırakılanla gitti")
 	leader.culture_id = CultureCatalog.VALLEY
 	nomad.rapport = 4
 	t.eq(session.swear_oaths().size(), 0, "lider bu törelerden değilse ant içilmez")

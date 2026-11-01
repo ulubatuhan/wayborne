@@ -182,8 +182,15 @@ static func _apply_leave_behind(session: GameSession, result: Result) -> void:
 		for member in session.get_party():
 			if member != target and CharacterData.OATH_CULTURES.has(member.culture_id):
 				member.add_grievance(CharacterData.GRIEVANCE_OATH_BROKEN, 2)
+	var partner: CharacterData = null
+	for member in session.get_party():
+		if not target.oath_partner.is_empty() and member.character_id == target.oath_partner:
+			partner = member
 	if session.dismiss(target, "LEDGER_CAUSE_LEFT_BEHIND"):
 		result.lines.append(_t("EFF_LEFT_BEHIND") % target.character_name)
+	# Ant kardeşi geride bırakılanla gider.
+	if partner != null and session.dismiss(partner, "LEDGER_CAUSE_FOLLOWED_OATH"):
+		result.lines.append(_t("EFF_FOLLOWED_OATH") % [partner.character_name, target.character_name])
 
 static func _apply_party_hp(effect: EventEffect, session: GameSession, result: Result) -> void:
 	var target := _pick_party_target(effect.text_value, session)

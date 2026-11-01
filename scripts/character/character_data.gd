@@ -731,6 +731,8 @@ const OATH_BROKEN_WEIGHT: int = 3
 const GRIEVANCE_OATH_BROKEN: String = "oath_broken"
 const OATH_BREAKERS: Array[String] = ["unfed", "benched", "passed_over"]
 var sworn: bool = false
+## Ant kardeşi: aynı ateşte birbirine de ant içen yoldaşın kimliği.
+var oath_partner: String = ""
 
 func can_swear_oath() -> bool:
 	return not sworn and OATH_CULTURES.has(culture_id) and rapport >= OATH_RAPPORT
@@ -739,6 +741,7 @@ func break_oath() -> void:
 	if not sworn:
 		return
 	sworn = false
+	oath_partner = ""
 	rapport = 0
 	grievances[GRIEVANCE_OATH_BROKEN] = int(grievances.get(GRIEVANCE_OATH_BROKEN, 0)) + OATH_BROKEN_WEIGHT
 
@@ -1073,6 +1076,7 @@ func to_dict() -> Dictionary:
 		"backstory_id": backstory_id,
 		"rapport": rapport,
 		"sworn": sworn,
+		"oath_partner": oath_partner,
 		"creed": creed,
 		"last_chat_day": last_chat_day,
 		"last_chat_topic": last_chat_topic,
@@ -1118,6 +1122,7 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.backstory_id = str(data.get("backstory_id", ""))
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
 	character.sworn = bool(data.get("sworn", false))
+	character.oath_partner = str(data.get("oath_partner", ""))
 	character.creed = str(data.get("creed", ""))
 	character.last_chat_day = int(data.get("last_chat_day", -99))
 	character.last_chat_topic = str(data.get("last_chat_topic", ""))
