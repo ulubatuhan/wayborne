@@ -22,6 +22,7 @@ func run(t) -> void:
 	_test_arrival_hour_colours_the_city(t)
 	_test_marsh_mist_follows_the_blend(t)
 	_test_card_look_by_region(t)
+	_test_scarcity_palette(t)
 
 func _test_speed_selection(t) -> void:
 	var clock := JourneyClock.new()
@@ -244,3 +245,11 @@ func _test_card_look_by_region(t) -> void:
 		var look := CardRegionLook.look_for(String(region), false)
 		var bottom := Color(look.sky_bottom)
 		t.ok(bottom.s < 0.25, "%s göğü soluk (tek sıcak kaynak)" % region)
+
+## Kıtlık paleti (Y-G18): bölgenin derecesi palete geçer; Gokyurt en geç solar.
+func _test_scarcity_palette(t) -> void:
+	var day := 200
+	var gok := GrimGrade.grade_for(Scarcity.degree("gocebe", day))
+	var vadi := GrimGrade.grade_for(Scarcity.degree("vadi", day))
+	t.ok(vadi.x > gok.x, "Vadi yolu Gokyurt yolundan soluk")
+	t.ok(vadi.y > gok.y, "Vadi yolunun kontrastı sert")

@@ -560,8 +560,9 @@ var _modal_open: bool = false
 func _ready() -> void:
 	AudioManager.play_track(AudioManager.TRACK_ROAD)
 	_build_ui()
-	_world.add_child(GrimGrade.new())
+	_world.add_child(_grade)
 	_init_journey()
+	_grade.set_scarcity(Scarcity.at(_nearest_place_id(), _session.total_days_elapsed))
 	get_viewport().size_changed.connect(_layout_panel)
 	_layout_panel()
 
@@ -2644,6 +2645,7 @@ func _process_elapsed_days() -> void:
 ## harcar, mesafeyi kapatmaz; Oregon Trail'in bütün gerilimi bu farkta.
 func _run_day() -> void:
 	_current_day += 1
+	_grade.set_scarcity(Scarcity.at(_nearest_place_id(), _session.total_days_elapsed))
 	_refresh_weather()
 	_apply_daily_pace_and_weather()
 
@@ -3373,13 +3375,19 @@ func _build_event_illustration(event_id: String) -> Control:
 	CardDrift.attach(picture, UserSettings.reduce_motion)
 	return frame
 
+## Kervanın bulunduğu yer: yolun ilk yarısında çıkılan, ikincisinde varılacak şehir.
+func _nearest_place_id() -> String:
+	if _journey != null and _journey.days_covered * 2.0 >= float(_journey.journey_length_days):
+		return _session.journey_destination_id
+	return _session.journey_origin_id
+
+var _grade: GrimGrade = GrimGrade.new()
+
 ## Kartın görünüşü kervanın bulunduğu bölgeden (Y-G20): yolun ilk yarısında
 ## çıkılan şehrin bölgesi, ikinci yarısında varılacak olanınki. Veba o
 ## bölgenin şehrinde varsa resim solmuş açılır.
 func _card_look() -> Dictionary:
-	var place_id := _session.journey_origin_id
-	if _journey != null and _journey.days_covered * 2.0 >= float(_journey.journey_length_days):
-		place_id = _session.journey_destination_id
+	var place_id := _nearest_place_id()
 	var place := WorldMapData.get_location_by_id(place_id)
 	var region := place.region if place != null else ""
 	return CardRegionLook.look_for(region, place != null and _session.has_plague(place_id))

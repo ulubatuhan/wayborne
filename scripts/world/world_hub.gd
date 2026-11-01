@@ -227,7 +227,9 @@ func _ready() -> void:
 	var grim := CanvasLayer.new()
 	grim.layer = 1
 	add_child(grim)
-	grim.add_child(GrimGrade.new())
+	var grade := GrimGrade.new()
+	grade.set_scarcity(GameState.get_session().scarcity_here())
+	grim.add_child(grade)
 	$HUD.layer = 2
 
 	_build_scenery()
