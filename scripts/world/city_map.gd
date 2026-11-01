@@ -178,7 +178,7 @@ func _on_nav_pressed(key: String) -> void:
 		"UI_GRIM_NAV_CARAVAN":
 			_show_caravan()
 		"UI_GRIM_EMBARK":
-			SceneInk.go(Nav.go_root(Nav.WORLD_HUB))
+			_ask_direction()
 
 ## Karakter oluşturmadan sonra ilk kez şehre varan oyuncuya bir kereye
 ## mahsus babadan devir sahnesini gösterir (bkz. GameSession.ONBOARDING_FLAG).
@@ -193,6 +193,47 @@ func _maybe_show_onboarding() -> void:
 
 ## Defterin tamamı (bkz. WaybookPanel) - yolda da aynı panel, aynı tuş;
 ## ekrandaki karşılığı şeridin "Defter" düğmesi (UI_WAYBOOK_OPEN).
+## "Yola Çık" dış alana değil, yön sorusuna gider: hangi yöne gidileceği
+## seçilir, o yönün yolu (planlayıcı) açılır (kullanıcı, 2026-11-01).
+const COMPASS_KEYS: Array[String] = ["UI_COMPASS_E", "UI_COMPASS_SE", "UI_COMPASS_S", "UI_COMPASS_SW",
+	"UI_COMPASS_W", "UI_COMPASS_NW", "UI_COMPASS_N", "UI_COMPASS_NE"]
+
+func _ask_direction() -> void:
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.55)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(shade)
+	var holder := CenterContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.add_child(holder)
+	var panel := PanelContainer.new()
+	holder.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	col.custom_minimum_size.x = 560.0
+	panel.add_child(col)
+	col.add_child(WaybookTheme.label(tr("UI_DEPART_ASK"), WaybookTheme.HEADING_SIZE, ArtPalette.GRIM_PARCHMENT, true))
+	var here := WorldMapData.get_location_by_id(_session.current_location_id)
+	for route in WorldMapData.get_routes_from(_session.current_location_id):
+		var there := WorldMapData.get_location_by_id(route.to_location_id)
+		if there == null:
+			continue
+		var button := Button.new()
+		button.text = tr("UI_DEPART_ROUTE") % [_compass(here, there), there.location_name, _brief_panel.route_summary(route)]
+		button.pressed.connect(_on_planner_requested.bind(route.to_location_id))
+		col.add_child(button)
+	var cancel := Button.new()
+	cancel.text = tr("UI_BACK_TO_CITY")
+	cancel.pressed.connect(shade.queue_free)
+	col.add_child(cancel)
+
+func _compass(from: Location, to: Location) -> String:
+	if from == null:
+		return ""
+	var d := to.map_position - from.map_position
+	var sector := posmod(int(round(atan2(d.y, d.x) / (TAU / 8.0))), 8)
+	return tr(COMPASS_KEYS[sector])
+
 func _show_waybook() -> void:
 	for child in get_children():
 		if child is WaybookPanel:

@@ -30,11 +30,8 @@ const URGENT_COLOR: Color = ArtPalette.UI_WARNING
 const NOTE_COLOR: Color = Color(0.7, 0.72, 0.78)
 const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
 
-const CREPE_FILE: String = "c1_crepe.png"
-const CREPE_HEIGHT: float = 34.0
 
 var _session: GameSession
-var _memory_box: VBoxContainer
 var _needs_box: VBoxContainer
 var _routes_box: VBoxContainer
 
@@ -50,12 +47,6 @@ func _ensure_built() -> void:
 
 	add_child(_welcome_heading())
 	add_child(_note(tr("UI_BRIEF_WELCOME_LINE")))
-	add_child(HSeparator.new())
-
-	_memory_box = VBoxContainer.new()
-	_memory_box.add_theme_constant_override("separation", 4)
-	add_child(_memory_box)
-
 	add_child(HSeparator.new())
 
 	add_child(_heading(tr("UI_BRIEF_NEEDS_TITLE")))
@@ -74,58 +65,26 @@ func refresh() -> void:
 	if _session == null:
 		return
 	_ensure_built()
-	_clear(_memory_box)
 	_clear(_needs_box)
 	_clear(_routes_box)
-	_build_city_mood()
-	_build_memory()
+	_session.note_city_arrival(journal_lines(_session))
 	_build_needs()
 	_build_routes()
 
-## Şehrin hâli kapıda okunur (Y-C21): kıtlık ve moral, tek cümle.
-func _build_city_mood() -> void:
-	var here := _session.current_location_id
-	var mood := Label.new()
-	mood.text = tr("UI_CITY_MOOD_LINE") % [tr(_session.morale_key(here)), int(round(_session.scarcity_here() * 100.0))]
-	mood.autowrap_mode = TextServer.AUTOWRAP_WORD
-	mood.modulate = URGENT_COLOR if _session.morale_of(here) < GameSession.MORALE_HUNGRY else NOTE_COLOR
-	_memory_box.add_child(mood)
-
-# --- Defterden son satır ---
-
-## Defter hiçbir satırı silmiyor ama pasifti - yalnızca yol ekranındaki
-## yolda `Tab` ile kontrol panelinin Durum sekmesini açan biri görüyordu. Brifing zaten her
-## varışta kendiliğinden açılan ekran (bkz. City Hub Rules'un "hikâye ile
-## başlar" maddesi), o yüzden en son düşen/ayrılan isim buraya da taşınıyor -
-## oyuncu aramadan önüne geliyor. "No need, no row" burada da geçerli:
-## defterde üstü çizili hiçbir satır yoksa bu blok da yok.
-func _build_memory() -> void:
-	var memory_data := CityBriefModel.build_memory(_session)
-	if memory_data.is_empty():
-		return
-	var memory := Label.new()
-	memory.text = String(memory_data["text"])
-	memory.autowrap_mode = TextServer.AUTOWRAP_WORD
-	memory.modulate = NOTE_COLOR
-	memory.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if bool(memory_data.get("mourning", false)):
-		# Yakın bir ölümün yası: hatıranın başında siyah kurdele (C1).
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		var crepe := WaybookTheme.picture(CREPE_FILE, CREPE_HEIGHT)
-		crepe.tooltip_text = tr("UI_BRIEF_MOURNING")
-		crepe.mouse_filter = Control.MOUSE_FILTER_PASS
-		row.add_child(crepe)
-		row.add_child(memory)
-		_memory_box.add_child(row)
-	else:
-		_memory_box.add_child(memory)
-	if not String(memory_data["detail"]).is_empty():
-		var detail := Label.new()
-		detail.text = String(memory_data["detail"])
-		detail.autowrap_mode = TextServer.AUTOWRAP_WORD
-		detail.modulate = NOTE_COLOR
-		_memory_box.add_child(detail)
+## Şehrin hâli (Y-C21) ve defterin son hatırası artık panelde değil, günlükte:
+## varışta kervanbaşının gözlemi olarak yazılır (kullanıcı, 2026-11-01).
+static func journal_lines(session: GameSession) -> Array[String]:
+	var here := session.current_location_id
+	var location := WorldMapData.get_location_by_id(here)
+	var out: Array[String] = [TranslationServer.translate("UI_JOURNAL_ARRIVED") % (location.location_name if location != null else here)]
+	out.append(TranslationServer.translate("UI_CITY_MOOD_LINE") % [TranslationServer.translate(session.morale_key(here)), int(round(session.scarcity_here() * 100.0))])
+	var memory := CityBriefModel.build_memory(session)
+	# Hatıra her varışta tekrarlanmaz: ilk sayfada ve yakın bir ölümün yasında yazılır.
+	if not memory.is_empty() and (session.journal.is_empty() or bool(memory.get("mourning", false))):
+		out.append(String(memory["text"]))
+		if not String(memory["detail"]).is_empty():
+			out.append(String(memory["detail"]))
+	return out
 
 # --- Kervanın ihtiyaçları ---
 
@@ -191,7 +150,7 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 	box.add_theme_constant_override("separation", 2)
 
 	var headline := Label.new()
-	headline.text = "%s · %s" % [destination_name, _route_summary(route)]
+	headline.text = "%s · %s" % [destination_name, route_summary(route)]
 	headline.autowrap_mode = TextServer.AUTOWRAP_WORD
 	box.add_child(headline)
 
@@ -242,7 +201,7 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 
 ## Dünya haritasındaki özetin aynısı: tehlike yüzdesi ancak tavernada
 ## öğrenildiyse ya da kervanda bir İzci varsa açık, yoksa kaba bant.
-func _route_summary(route: TravelRoute) -> String:
+func route_summary(route: TravelRoute) -> String:
 	var days := _session.get_route_travel_days(route)
 	var danger := _session.get_route_danger(route)
 	var state := _session.get_route_state(route)

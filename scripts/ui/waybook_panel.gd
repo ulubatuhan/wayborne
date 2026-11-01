@@ -61,6 +61,8 @@ var _share_note: Label
 var _summary: VBoxContainer
 var _fallen_toggle: Button
 var _showing_fallen: bool = false
+var _journal_toggle: Button
+var _showing_journal: bool = false
 
 func setup(session: GameSession) -> WaybookPanel:
 	_session = session
@@ -176,6 +178,13 @@ func _fill_summary(box: VBoxContainer) -> void:
 	box.add_child(_fallen_toggle)
 	_fallen_toggle.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_fallen_toggle.custom_minimum_size = Vector2(BUTTON_WIDTH, 0)
+	_journal_toggle = Button.new()
+	_journal_toggle.text = tr("UI_WAYBOOK_JOURNAL_OPEN")
+	_journal_toggle.disabled = _session == null
+	_journal_toggle.pressed.connect(func(): set_journal_page(not _showing_journal))
+	box.add_child(_journal_toggle)
+	_journal_toggle.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_journal_toggle.custom_minimum_size = Vector2(BUTTON_WIDTH, 0)
 	_share = Button.new()
 	_share.text = tr("UI_WAYBOOK_SHARE")
 	_share.disabled = _session == null
@@ -215,6 +224,8 @@ func set_fallen_page(fallen: bool) -> void:
 	if fallen != _showing_fallen:
 		_play_sfx("ui_page")
 	_showing_fallen = fallen
+	_showing_journal = false
+	_journal_toggle.text = tr("UI_WAYBOOK_JOURNAL_OPEN")
 	for box in [_entries, _summary]:
 		for child in (box as Node).get_children():
 			child.queue_free()
@@ -228,6 +239,28 @@ func set_fallen_page(fallen: bool) -> void:
 	# Paylaşılan sayfa soyun özeti; Düşenler açıkken düğme yok.
 	_share.visible = not fallen
 	_share_note.visible = false
+
+## Günlük (kullanıcı, 2026-11-01): kervanbaşının gözlemleri, gün ve yerle;
+## eskiden yeniye, açılınca en yeni satır görünür.
+func set_journal_page(on: bool) -> void:
+	set_fallen_page(false)
+	if not on:
+		return
+	_showing_journal = true
+	for child in _entries.get_children():
+		child.queue_free()
+	_entries.add_child(_fallen_heading(tr("UI_WAYBOOK_JOURNAL_TITLE")))
+	if _session.journal.is_empty():
+		_entries.add_child(_page_label(tr("UI_WAYBOOK_JOURNAL_EMPTY")))
+	for entry in _session.journal:
+		var place := WorldMapData.get_location_by_id(String(entry.get("place", "")))
+		var heading := _page_label(tr("UI_WAYBOOK_JOURNAL_DATE") % [int(entry.get("day", 0)) + 1, place.location_name if place != null else ""])
+		heading.theme_type_variation = WaybookTheme.PAGE_HEADING
+		_entries.add_child(heading)
+		_entries.add_child(_page_label(String(entry.get("text", ""))))
+	_journal_toggle.text = tr("UI_WAYBOOK_FALLEN_CLOSE")
+	_share.visible = false
+	(func(): _left.scroll_vertical = int(_left.get_v_scroll_bar().max_value)).call_deferred()
 
 func _fill_fallen(box: VBoxContainer) -> void:
 	box.add_child(_fallen_heading(tr("UI_WAYBOOK_FALLEN_TITLE")))

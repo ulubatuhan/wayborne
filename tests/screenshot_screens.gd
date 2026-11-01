@@ -82,6 +82,19 @@ func _init() -> void:
 			for _frame in 20:
 				await process_frame
 			_save("tavern_rumors_%dx%d.png" % [view.x, view.y])
+		if path.contains("city_map"):
+			# Yola çıkış: yön sorusu; karar paneli katlı; defterin günlüğü.
+			screen._ask_direction()
+			await _settle()
+			_save("city_depart_%dx%d.png" % [view.x, view.y])
+			screen._on_nav_pressed("UI_GRIM_NAV_LEDGER")
+			await _settle()
+			for child in screen.get_children():
+				if child is WaybookPanel:
+					child.set_journal_page(true)
+			for _frame in 20:
+				await process_frame
+			_save("city_journal_%dx%d.png" % [view.x, view.y])
 		screen.queue_free()
 		await _settle()
 	quit()

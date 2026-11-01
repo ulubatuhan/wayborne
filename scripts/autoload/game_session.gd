@@ -940,6 +940,7 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	plague = PlagueWorld.new()
 	plague.setup(hash(caravan_name))
 	plague_news = {}
+	journal = []
 
 	owned_wagon_count = STARTING_WAGONS
 	_sync_wagon_inventories()
@@ -2654,6 +2655,23 @@ func learn_plague(location_id: String) -> void:
 	if WorldMapData.get_location_by_id(location_id) == null:
 		return
 	plague_news[location_id] = {"day": total_days_elapsed, "sick": has_plague(location_id)}
+
+## Kervanbaşının günlüğü (kullanıcı, 2026-11-01: "şehre girince şehirle ilgili
+## gözlemlerimiz deftere yazılmalı, defter bir journal gibi olmalı"). Şehir
+## brifinginde duran hâl ve hatıra satırları buraya yazılır, defterin Günlük
+## sayfasında okunur. Kayıtta; satır silinmez (defterin kuralı).
+var journal: Array = []
+
+func write_journal(text: String) -> void:
+	journal.append({"day": total_days_elapsed, "place": current_location_id, "text": text})
+
+## Şehre varışta bir kez: o gün o şehir için satır yoksa yazar.
+func note_city_arrival(lines: Array[String]) -> bool:
+	for entry in journal:
+		if int(entry.get("day", -1)) == total_days_elapsed and String(entry.get("place", "")) == current_location_id:
+			return false
+	write_journal(" ".join(lines))
+	return true
 
 ## Bilinen son haber; hiç duyulmadıysa boş.
 func plague_news_for(location_id: String) -> Dictionary:
@@ -4725,6 +4743,7 @@ func to_save_dict() -> Dictionary:
 		"world_events": world_events.to_save_dict(),
 		"plague": plague.to_dict(),
 		"plague_news": plague_news.duplicate(true),
+		"journal": journal.duplicate(true),
 		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
@@ -4863,6 +4882,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	plague = PlagueWorld.new()
 	plague.load_from_dict(data.get("plague", {}) as Dictionary)
 	plague_news = (data.get("plague_news", {}) as Dictionary).duplicate(true)
+	journal = (data.get("journal", []) as Array).duplicate(true)
 	city_morale = (data.get("city_morale", {}) as Dictionary).duplicate()
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
