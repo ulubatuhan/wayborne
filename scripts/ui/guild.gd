@@ -102,6 +102,7 @@ func _rebuild() -> void:
 	var offers := _available_offers()
 	for offer in offers:
 		board.pin(_build_offer_card(offer), hash(offer.merchant_id), offer.rush)
+	_pin_convoy_and_driver(board)
 	if offers.is_empty():
 		var here := WorldMapData.get_location_by_id(_session.current_location_id)
 		var town := here != null and not SettlementRules.offers_contracts(here.settlement_type)
@@ -151,6 +152,41 @@ func _accepted_offers() -> Array[MerchantOffer]:
 
 ## Pano bir ilan tahtası (görev Y-C02): her kontrat kendi kâğıdında - üstte
 ## türü (ve acele damgası), altta ayrıntısı, yanda kabul.
+## Kafile ve sürücü ilanları (Y-C35): kontrat değil, panonun öbür kâğıtları.
+func _pin_convoy_and_driver(board: NoticeBoard) -> void:
+	var dest_id := _session.board_convoy_destination()
+	var dest := WorldMapData.get_location_by_id(dest_id)
+	if dest != null:
+		var joined := _session.has_flag("convoy_" + dest_id)
+		var reason := _session.convoy_block_reason(dest_id)
+		board.pin(_notice(tr("UI_BOARD_CONVOY_TITLE"), tr("UI_BOARD_CONVOY_TEXT") % [dest.location_name, GameSession.CONVOY_FEE],
+			tr("UI_BOARD_JOINED") if joined else (tr(reason) if not reason.is_empty() else tr("UI_BOARD_CONVOY_JOIN")),
+			joined or not reason.is_empty(), func() -> void: _session.join_convoy(dest_id)), hash(dest_id) + 7)
+	var hired := _session.has_flag(GameSession.FLAG_HIRED_DRIVER)
+	board.pin(_notice(tr("UI_BOARD_DRIVER_TITLE"), tr("UI_BOARD_DRIVER_TEXT") % GameSession.DRIVER_FEE,
+		tr("UI_BOARD_HIRED") if hired else tr("UI_BOARD_DRIVER_HIRE"),
+		hired or not _session.wallet.can_afford(GameSession.DRIVER_FEE), func() -> void: _session.hire_driver()), 13)
+
+func _notice(title: String, text: String, action: String, locked: bool, on_press: Callable) -> Control:
+	var card := VBoxContainer.new()
+	var heading := Label.new()
+	heading.text = title
+	heading.modulate = HINT_COLOR
+	card.add_child(heading)
+	var line := _row_label(text)
+	line.custom_minimum_size = Vector2.ZERO
+	line.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	card.add_child(line)
+	var button := _row_action()
+	button.text = action
+	button.disabled = locked
+	button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	button.pressed.connect(func() -> void:
+		on_press.call()
+		_rebuild())
+	card.add_child(button)
+	return card
+
 ## Panodaki plakanın içi: türü, satırı ve altında kabul düğmesi.
 func _build_offer_card(offer: MerchantOffer) -> Control:
 	var destination := WorldMapData.get_location_by_id(offer.destination_location_id)

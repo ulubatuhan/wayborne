@@ -749,6 +749,9 @@ const CREED_FIST: String = "yumruk"
 const CREED_BAIKHAN: String = "baikhan"
 const CREED_OLD: String = "eski"
 var creed: String = ""
+const CREED_NAME_KEYS: Dictionary = {
+	"septisizm": "UI_CREED_SEPTISM", "yumruk": "UI_CREED_FIST", "baikhan": "UI_CREED_BAIKHAN", "eski": "UI_CREED_OLD",
+}
 
 func get_grievance(key: String) -> int:
 	return int(grievances.get(key, 0))

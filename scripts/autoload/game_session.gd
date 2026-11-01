@@ -1344,7 +1344,8 @@ func apply_camp_actions(actions: Array) -> Array[String]:
 func get_duty_multiplier(duty_id: String) -> float:
 	var holder := get_duty_holder(duty_id)
 	if holder == null:
-		return 1.0
+		# Panodan tutulan sürücü bir seferlik arabacıdır (Y-C35).
+		return HIRED_DRIVER_POWER if duty_id == DutyCatalog.ARABACI and has_flag(FLAG_HIRED_DRIVER) else 1.0
 	return DutyCatalog.get_duty_power(holder, duty_id)
 
 ## Yüzdesel indirimler için (pazar fiyatı, onarım bedeli gibi):
@@ -2632,6 +2633,47 @@ func _plague_on_route() -> bool:
 		return has_plague(current_location_id)
 	return has_plague(journey_origin_id) or has_plague(journey_destination_id)
 
+## --- İlan panosunun kafile ve sürücü ilanları (Y-C35, Y-C34) ---
+## Kafile: panodaki yöne giden kafileye bir sonraki seferde katılırsın; yavaş
+## ama güvenli. Avuçiçi'ne (Orvahel) giden hacı kafilesi yalnızca Septisistleri
+## alır. Sürücü: bir seferlik arabacı; görevde arabacı yoksa onun işini görür.
+const CONVOY_FEE: int = 10
+const CONVOY_DANGER: float = 0.7
+const CONVOY_EXTRA_DAYS: int = 1
+const DRIVER_FEE: int = 30
+const HIRED_DRIVER_POWER: float = 1.4
+const FLAG_HIRED_DRIVER: String = "hired_driver"
+
+## Bugün panoda hangi yöne kafile var (şehir ve günden; kasabada da olur).
+func board_convoy_destination() -> String:
+	var routes := WorldMapData.get_routes_from(current_location_id)
+	if routes.is_empty():
+		return ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("convoy|%s|%d" % [current_location_id, total_days_elapsed])
+	return routes[rng.randi_range(0, routes.size() - 1)].to_location_id
+
+func convoy_block_reason(destination_id: String) -> String:
+	if destination_id == HOLY_CITY_ID and caravan_creed() != CharacterData.CREED_SEPTISM:
+		return "UI_BOARD_CONVOY_SEPTISTS_ONLY"
+	if not wallet.can_afford(CONVOY_FEE):
+		return "UI_BOARD_NO_GOLD"
+	return ""
+
+func join_convoy(destination_id: String) -> bool:
+	if not convoy_block_reason(destination_id).is_empty():
+		return false
+	wallet.spend(CONVOY_FEE)
+	set_flag("convoy_" + destination_id)
+	return true
+
+func hire_driver() -> bool:
+	if has_flag(FLAG_HIRED_DRIVER) or not wallet.can_afford(DRIVER_FEE):
+		return false
+	wallet.spend(DRIVER_FEE)
+	set_flag(FLAG_HIRED_DRIVER)
+	return true
+
 ## Ateşin başında ant içenler (Y-C33): lider de göçebe ya da dağlıysa, bağı
 ## güvene varan aynı töreden yoldaşlar. Yeni ant içenlerin adlarını döner.
 func swear_oaths() -> Array[String]:
@@ -3721,6 +3763,12 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_total_days = maxi(1, days)
 	journey_days_remaining = journey_total_days
 	danger_level = danger
+	# Panodan katılınan kafile: aynı yöne yavaş ve güvenli.
+	if has_flag("convoy_" + destination_id):
+		clear_flag("convoy_" + destination_id)
+		danger_level *= CONVOY_DANGER
+		journey_total_days += CONVOY_EXTRA_DAYS
+		journey_days_remaining = journey_total_days
 	caravan = CaravanState.from_plan(plan, get_departure_morale(), total_days_elapsed)
 
 ## Yolun ortasında planı değiştirmek. Şehirde kurulan plan bir niyet, bir
@@ -3870,6 +3918,7 @@ func finish_journey() -> Dictionary:
 	_restock_current_location()
 	record_seen_prices(current_location_id)
 	learn_plague(current_location_id)
+	clear_flag(FLAG_HIRED_DRIVER)
 	_plague_on_arrival()
 	heal_party()
 

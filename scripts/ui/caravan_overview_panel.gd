@@ -295,6 +295,10 @@ func _refresh_party() -> void:
 
 		var thought := Label.new()
 		thought.text = _thought_for(character)
+		if character.is_player:
+			thought.text += "  ·  " + tr("UI_CHAR_CREED") % tr(String(CharacterData.CREED_NAME_KEYS.get(_session.caravan_creed(), "UI_CREED_OLD")))
+		elif character.sworn:
+			thought.text += "  ·  " + tr("UI_CHAR_SWORN")
 		thought.modulate = HINT_COLOR
 		thought.autowrap_mode = TextServer.AUTOWRAP_WORD
 		text_column.add_child(thought)

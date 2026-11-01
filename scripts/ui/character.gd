@@ -201,6 +201,13 @@ func _build_identity_column() -> PanelContainer:
 			bond.mouse_filter = Control.MOUSE_FILTER_PASS
 			body.add_child(bond)
 
+	# Kervanın inancı kervanbaşınınki (Y-C34); ant içen yoldaş ateşteki sözüyle (Y-C33).
+	if _character.is_player:
+		var creed := _session.caravan_creed()
+		body.add_child(_make_hint_label(tr("UI_CHAR_CREED") % tr(String(CharacterData.CREED_NAME_KEYS.get(creed, "UI_CREED_OLD")))))
+	elif _character.sworn:
+		body.add_child(_make_hint_label(tr("UI_CHAR_SWORN")))
+
 	var perk := _make_hint_label(_character.get_culture().perk_text)
 	perk.modulate = PERK_COLOR
 	body.add_child(perk)

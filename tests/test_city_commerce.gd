@@ -19,6 +19,7 @@ func suite_name() -> String:
 
 func run(t) -> void:
 	_test_ban_survives_save(t)
+	_test_convoy_and_driver(t)
 	_test_plague_is_a_world_state(t)
 	_test_gokyurt_hospitality(t)
 	_test_caravanserai_rumor_bonus(t)
@@ -643,6 +644,28 @@ func _test_plague_is_a_world_state(t) -> void:
 	copy.load_from_dict(session.to_save_dict())
 	t.eq(copy.plague.to_dict(), session.plague.to_dict(), "salgın kayıttan döner")
 	t.eq(copy.plague_news, session.plague_news, "haberler kayıttan döner")
+
+
+# Y-C35: panodan kafileye yazılan bir sonraki o yöne seferde yavaş ve güvenli
+# yürür; hacı kafilesi yalnızca Septisistleri alır; tutulan sürücü arabacı olur.
+func _test_convoy_and_driver(t) -> void:
+	var session := _session()
+	session.wallet.earn(200)
+	var dest := WorldMapData.get_routes_from(session.current_location_id)[0].to_location_id
+	t.ok(session.join_convoy(dest), "kafileye yazıldı")
+	var place := WorldMapData.get_location_by_id(dest)
+	var days := 4
+	session.start_journey(dest, days, 0.5, CaravanPlan.new(place, days))
+	t.eq(session.journey_total_days, days + GameSession.CONVOY_EXTRA_DAYS, "kafile bir gün yavaş")
+	t.ok(absf(session.danger_level - 0.5 * GameSession.CONVOY_DANGER) < 0.001, "kafile güvenli")
+	var pilgrim := _session()
+	pilgrim.wallet.earn(200)
+	pilgrim.get_player_character().creed = CharacterData.CREED_BAIKHAN
+	t.eq(pilgrim.convoy_block_reason(GameSession.HOLY_CITY_ID), "UI_BOARD_CONVOY_SEPTISTS_ONLY", "hacı kafilesi Septisist ister")
+	var before := pilgrim.get_duty_multiplier(DutyCatalog.ARABACI)
+	t.ok(pilgrim.hire_driver(), "sürücü tutuldu")
+	if pilgrim.get_duty_holder(DutyCatalog.ARABACI) == null:
+		t.ok(pilgrim.get_duty_multiplier(DutyCatalog.ARABACI) > before, "tutulan sürücü arabacının işini görür")
 
 
 # Y-C29: Duvenmor yasağı kayıtta durur.
