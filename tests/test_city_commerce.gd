@@ -656,9 +656,11 @@ func _test_convoy_and_driver(t) -> void:
 	t.ok(session.join_convoy(dest), "kafileye yazıldı")
 	var place := WorldMapData.get_location_by_id(dest)
 	var days := 4
+	var growth := session.growth_danger()
 	session.start_journey(dest, days, 0.5, CaravanPlan.new(place, days))
 	t.eq(session.journey_total_days, days + GameSession.CONVOY_EXTRA_DAYS, "kafile bir gün yavaş")
-	t.ok(absf(session.danger_level - 0.5 * GameSession.CONVOY_DANGER) < 0.001, "kafile güvenli")
+	t.ok(absf(session.danger_level - (0.5 + growth) * GameSession.CONVOY_DANGER) < 0.001, "kafile güvenli")
+	t.ok(growth > 0.0, "dolu kese yola duyulur (Y-C24)")
 	var pilgrim := _session()
 	pilgrim.wallet.earn(200)
 	pilgrim.get_player_character().creed = CharacterData.CREED_BAIKHAN

@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **92** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -807,7 +807,7 @@ Toplam: **92** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** bitti · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C02
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı. | 2026-10-31: NoticeBoard - ilanlar tahtaya çivili parşömen plakalar; kasabada pano boş ve nedeni yazar. Kafile/sürücü ilanları Y-C34 ile.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı. | 2026-10-31: NoticeBoard - ilanlar tahtaya çivili parşömen plakalar; kasabada pano boş ve nedeni yazar. Kafile/sürücü ilanları Y-C34 ile. | 2026-11-01: kafile ve sürücü ilanları panoda.
 
 <details><summary>Görev metni</summary>
 
@@ -991,6 +991,25 @@ Toplam: **92** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P12
+
+### Y-G17 · Tek sıcak kaynak: kural ve bütün sahnelerin denetimi
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C22
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur). | 2026-11-01: şehir akşam/gece/şafak resimleri gölgelendiricide soğur, güneş soğuk, şalvar soluk.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G17 Tek sıcak kaynak: kural ve bütün sahnelerin denetimi**
+  - **Onay turu (2026-10-31):** kısmen. Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur).
+  - **Durum (2026-10-31):** kısmen. Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda).
+  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C22 · **Kim:** CO
+  - **Ne:** Dünyada sıcak renk yalnızca bir ışık kaynağından gelir: ateş, fener, meşale, pencere ışığı, defter sayfası. Kural `kurallar-sanat` Art Rules'a yazıldı. Kalan: yol, şehir, savaş, hub, kervansaray ve kart görsellerinin denetim listesi, aykırı olanların sırayla düzeltilmesi; her düzeltme ekran görüntüsüyle.
+  - **Kullanıcı notu:** "Tek sıcak kaynak: Onay. Bunu gene kurallara yaz çünkü buna göre çok düzenleme gerekecek."
+  - **Kabul:** Denetim listesi `docs/ui/` altında; her sahne için önce ve sonra görüntüsü.
+
+</details>
 
 ### Y-G19 · Portreler baştan yorgun ve aşınmış
 

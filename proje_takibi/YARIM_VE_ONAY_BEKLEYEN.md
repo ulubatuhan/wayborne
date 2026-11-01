@@ -54,7 +54,48 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **19** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+
+## Paket P07
+
+### Y-C21 · Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali
+
+- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:** 2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C21 Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-E06 · **İlgili:** Y-C12, Y-C15, Y-C13, Y-B06, Y-B07
+  - **Ne:** Mekanik revizyon, üç parça:
+    1. **Kıtlığın sebebi.** Kıtlığı başlatan, bütün kıtayı etkileyen bir olay olmalı: büyülü ve devasa bir olay ya da mevsimlerin değişmesi. Savaşların hepsi temelde bu kıtlıktan doğar. Sebep lore kararıdır (soru defteri v2'de soruldu). Oyunda dünyanın bir durumu olarak yaşar: hasat, stok ve fiyat katmanı, haber kartları ve savaş haberlerinin kökü. Lore'daki "Vadi kıtada en çok kıtlık yaşayan bölge" bilgisi bunun bölgesel yüzü olur.
+    2. **Ticaret sınırlanır, odak ulaştırmak olur.** Oyunun merkezi al-sat kârı değil, kervanı bir noktadan öbürüne sağ salim götürebilmek. Pazarda az mal, yüksek fiyat ve satıcının satmak istememesi; kontrat ve ulaştırma geliri ana gelir; yük bir yerin hayatta kalması demek. Sistemler kesilmez (kullanıcının ilkesi: derinleşme, asla sadeleştirme): ticaret kalır ama kıt ve pahalı olur. "Ticaret bilgi oyunudur" sütunu kıtlıkta şu anlama gelir: nerede ne kaldığını bilmek.
+    3. **Şehirlerin morali ve hâli.** Her şehir arka planda bir moral/mental durum taşır (açlık, umut, öfke gibi). Kervan oraya gıda ve gerekli malı ulaştırınca bu durum düzelir. Bu durum şehirdeki olayları (isyan, veba, yağma, bayram), kapıdaki karşılamayı, fiyatları, işe alınabilecek insanları ve şehrin kervana yaklaşımını değiştirir. Y-C12'nin bölgesel itibarıyla birlikte tasarlanır: itibar şehrin kervan hakkında ne düşündüğü, moral şehrin kendi hâli.
+  - **His:** Kıtlık ve yokluk oyunda bütün ağırlığıyla hissedilmeli. Hiçbir şey kolay olmamalı: mekanikler ve ortam (görsel, ses, metin, şehir hâli, yol kenarındaki açlar) bu hissi birlikte aktarmalı.
+  - **Kullanıcı notu:** "Kıtada kıtlığı tetikleyen bir olay olmalı. Bu büyülü devasa bir olay olabilir, mevsimler değişiklikler olabilir ama tüm kıta bundan etkilenmeli. Temelinde tüm savaşlar bu kıtlıktan sebep olarak çıkmalı. Kıtlık sebebiyle ticaret tarafı limite edilmeli, oyunun odağı ticaret yapmak değil kervanı gerçekten bir noktadan diğerine başarılı bir şekilde götürebilmek olmalı. Belki şehirlerin de morali, mentali tutulmalı arkaplanda ve kervanı oraya iletebilirsek bu statlara katkıda bulunuruz. bu statların seviyesi de o şehirde olan olayları ve bize yaklaşımlarını etkiler. Sonuç olarak o kıtlığı ve yokluğu oyunda cabasıya hissetmeliyiz! Yaptığımız hiçbir şey kolay olmamalı ve mekanikler+ortam bu hissi aktarmalı bize."
+  - **Karar gerekenler:** kıtlığın sebebi ve başlangıcı (lore); kıtlık sabit mi, dalgalı mı, oyun boyunca kötüleşiyor mu; şehir moralinin kaç ekseni olacağı; ölçüm (simulate_career'da kârın düşüşü, sefer başı ölüm ve açlık).
+  - **Kabul:** Dünyada bir kıtlık durumu ve kökü; savaş haberleri ona bağlı; pazarda kıtlık katmanı (`price_layers` yeni katman); şehir başına kayıtlı moral değeri, ulaştırmayla değişiyor, olay ağırlıklarını ve karşılamayı etkiliyor; simülatörde ticaret payı düştü, ulaştırma geliri öne geçti; ekran görüntüsüyle şehir hâli görünüyor.
+
+</details>
+
+### Y-C31 · Geçiş belgesi
+
+- **Durum:** lore bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-E06
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: geçiş belgelerinin adları ve sahipleri defter III'te; cevap gelince yapılır.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C31 Geçiş belgesi**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-E06 · **Kim:** C
+  - **Ne:** Orbeyan tamgası, Ezmerak boynuz fişi, Ayazkaya bedel taşı ve Avuçiçi zili tek sistem: yolun sahibi güce ödenir, karşılığında süreli belge alınır, deftere yazılır. Lore taslakları defter III'te onay bekliyor.
+  - **Kullanıcı notu:** "Geçiş belgesi: Onay."
+  - **Kabul:** Belgesiz geçişin bedeli ve belgenin süresi test edilir.
+
+</details>
 
 ## Paket P10
 
@@ -208,25 +249,6 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Motif stil rehberinde; beş yerde uygulanmış.
   - **Kaynaklar ve teknik (CC0 araştırması):** Fener modeli: Poly Haven `Lantern_01` (CC0), render ve mürekkep geçişi.
   - **Literatür:** R58
-
-</details>
-
-### Y-G17 · Tek sıcak kaynak: kural ve bütün sahnelerin denetimi
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-C22
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G17 Tek sıcak kaynak: kural ve bütün sahnelerin denetimi**
-  - **Onay turu (2026-10-31):** kısmen. Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur).
-  - **Durum (2026-10-31):** kısmen. Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda).
-  - **Öncelik:** P1 · **Dalga:** 6 · **Bağımlı:** Y-C22 · **Kim:** CO
-  - **Ne:** Dünyada sıcak renk yalnızca bir ışık kaynağından gelir: ateş, fener, meşale, pencere ışığı, defter sayfası. Kural `kurallar-sanat` Art Rules'a yazıldı. Kalan: yol, şehir, savaş, hub, kervansaray ve kart görsellerinin denetim listesi, aykırı olanların sırayla düzeltilmesi; her düzeltme ekran görüntüsüyle.
-  - **Kullanıcı notu:** "Tek sıcak kaynak: Onay. Bunu gene kurallara yaz çünkü buna göre çok düzenleme gerekecek."
-  - **Kabul:** Denetim listesi `docs/ui/` altında; her sahne için önce ve sonra görüntüsü.
 
 </details>
 

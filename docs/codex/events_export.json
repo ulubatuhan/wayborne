@@ -8720,6 +8720,292 @@
         {
           "effects": [
             {
+              "amount": -12,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 15,
+              "text": "",
+              "type": "CITY_MORALE"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Yükten ver (12 erzak)",
+          "locked": "Ver: 12 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "",
+              "type": "GOLD"
+            }
+          ],
+          "label": "Kethüdaya kese ver (60 GG)",
+          "locked": "Kese: 60 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Reddet",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -1,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Kethüda geri adım attı; ama bunu unutmayacak.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Yarısıyla yetindi.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "guard",
+                  "type": "TRIGGER_COMBAT"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -10,
+                  "text": "",
+                  "type": "CITY_MORALE"
+                }
+              ],
+              "label": "Muhafızlar silahlarını çekiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "reputation",
+          "op": "GREATER_EQUAL",
+          "value": 40
+        },
+        {
+          "key": "city_morale",
+          "op": "LESS_THAN",
+          "value": 35
+        },
+        {
+          "key": "days_remaining",
+          "op": "LESS_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_cargo_seized",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Adınız sizden önce varmış. Aç şehrin kethüdası yolda bekliyor: kervanın yükünün bir kısmına \"şehir adına\" el koyacağını söylüyor.",
+      "title": "Ünün Bedeli",
+      "triggered_only": false,
+      "weight": 1.2
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -5,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Eskilerin ateşine otur",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -3,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Yenilerin ateşine otur",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "İki ateşi bir et",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Gece yarısı herkes aynı ateşin başındaydı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Ateşler birleşti ama kimse konuşmadı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "LEAVE_BEHIND"
+                },
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Tartışma büyüdü; sabah biri eşyasını toplayıp gitmişti.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 6
+        }
+      ],
+      "cooldown": 14,
+      "id": "evt_faction_split",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Kadro büyüdü ve ikiye bölündü: eskiler bir ateşte, yeni gelenler öbüründe. Akşam iki taraf da senden kendi yanında oturmanı bekliyor.",
+      "title": "İki Ateş",
+      "triggered_only": false,
+      "weight": 0.6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": 0,
               "text": "",
               "type": "LEAVE_BEHIND"

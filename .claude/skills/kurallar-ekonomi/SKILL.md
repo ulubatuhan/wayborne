@@ -712,3 +712,21 @@ ever fell, and the career simulation had already measured the result
   duyulduğunu söyler. Oyun mekaniği (kriz, bulaşma, kartlar) gerçeği okur, arayüz haberi.
 - Kayıtta durur; modeli olmayan eski kayıt kurulup kaydın gününe kadar ilerletilir (en çok 400 gün).
 
+## Scarcity & City Morale Rules (Y-C21..Y-C24, 2026-11-01)
+
+- **Kıtlık bir dünya hâli, hesaplanır** (`Scarcity.degree`): bölge tabanı (Vadi 0,55 ... Gokyurt 0,12), mevsim (kış
+  ağır, ±0,12), yıllarla artan kayma (günde 0,0004, tavan 0,2). Sebebi lore kararı (defter III); sebep gelince bu
+  sayılar ona bağlanır, sistem kesilmez.
+- **Ticaret kalır, kıt ve pahalı olur:** stok dereceyle azalır (satıcı %60'a kadar saklar), yiyecek %60'a kadar,
+  öbür mallar %20'ye kadar pahalanır. "Doğru stoklayan aç kalmaz" sözü korunur (test_provisions).
+- **Şehrin morali** (0-100, kayıtta) kıtlık ve vebanın belirlediği hedefe günde 2 kayar; kervanın sattığı yiyecek
+  (satış başına en çok +15) ve teslim ettiği kontrat (+6) yükseltir. 50'nin altında aç şehir yiyeceğe %40'a kadar çok
+  verir; 30'un altında işe alma zorlaşır, aç kapı ve kapıda kalabalık kartları açılır. Şehir özeti hâli yazar.
+- **Feda kartları** (Y-C22) baskın seçeneksiz; geride bırakılan o akşam günlüğe yazılır (`BEAT_SACRIFICE`).
+- **Domino** (Y-C23): aks, uzun yol, açlık, ateş; açık halka dertler listesinde cümle, yönetmen sonraki halkanın
+  kartına x2,5. Son çareler (yakmak, yemek) kamp panelinde ayrı seçim, iki eylem sınırının dışında.
+- **Büyüme krizleri** (Y-C24): kese (altın/6000, tavan +0,12) ve ikiden fazla vagon (+0,02 her biri) sefer tehlikesine
+  eklenir; ün aç şehirde yüke el koyma, kalabalık kadro hizip getirir. Ölçüm (`simulate_career`, 2026-11-01, 3
+  politika x 8 kervan x 40 sefer): dertsiz sefer %25-27, en uzun sakin dizi 4-5. Uzun sakin dizi çıkarsa bir kriz
+  eksik demektir.
+

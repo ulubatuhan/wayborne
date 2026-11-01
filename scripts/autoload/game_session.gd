@@ -2816,6 +2816,21 @@ func domino_sentence() -> String:
 		parts.append(String(TranslationServer.translate(String(DOMINO_KEYS[DOMINO_LINKS[i]]))))
 	return " → ".join(parts)
 
+## --- Büyüme krizleri (Y-C24): oyuncu kusursuz dengeye ulaşmaz. Her biri
+## "bunu çözen hamle neyi bozuyor?" sorusunun cevabı:
+## - zenginleşmek kesenin sesini yola duyurur: altın tehlikeyi artırır,
+## - vagon çoğaltmak kıtlıkta çok ağız ve uzaktan görünen bir kervan demek,
+## - ün aç şehirde yüke el konmasını getirir (evt_cargo_seized),
+## - kalabalık kadro hiziplere bölünür (evt_faction_split). ---
+const GOLD_DANGER_PER: float = 6000.0
+const GOLD_DANGER_CAP: float = 0.12
+const WAGON_DANGER_FROM: int = 2
+const WAGON_DANGER_EACH: float = 0.02
+
+func growth_danger() -> float:
+	var purse := clampf(float(wallet.balance) / GOLD_DANGER_PER, 0.0, GOLD_DANGER_CAP)
+	return purse + float(maxi(0, owned_wagon_count - WAGON_DANGER_FROM)) * WAGON_DANGER_EACH
+
 ## Ateşin başında ant içenler (Y-C33): lider de göçebe ya da dağlıysa, bağı
 ## güvene varan aynı töreden yoldaşlar. Yeni ant içenlerin adlarını döner.
 func swear_oaths() -> Array[String]:
@@ -3925,6 +3940,8 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_total_days = maxi(1, days)
 	journey_days_remaining = journey_total_days
 	danger_level = danger
+	# Büyüme yeni kriz doğurur (Y-C24): dolu kese ve kalabalık kervan haydut çeker.
+	danger_level = clampf(danger_level + growth_danger(), 0.0, 1.0)
 	# Panodan katılınan kafile: aynı yöne yavaş ve güvenli.
 	if has_flag("convoy_" + destination_id):
 		clear_flag("convoy_" + destination_id)

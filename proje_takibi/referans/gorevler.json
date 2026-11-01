@@ -3459,7 +3459,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kısmen",
    "bagimli": [
     "Y-E06"
    ],
@@ -3468,7 +3468,7 @@
    "paket": "P07",
    "sira": 81,
    "kim": "CK",
-   "not": "2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı."
+   "not": "2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III)."
   },
   {
    "id": "Y-C22",
@@ -3476,7 +3476,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-C21"
    ],
@@ -3485,7 +3485,7 @@
    "paket": "P07",
    "sira": 82,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor)."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor). | 2026-11-01: beş feda kartı, günlükte feda satırı, kıtlık paleti."
   },
   {
    "id": "Y-C23",
@@ -3493,7 +3493,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-C21"
    ],
@@ -3502,7 +3502,7 @@
    "paket": "P07",
    "sira": 83,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür. | 2026-11-01: domino zinciri, dertler cümlesi, yönetmen ağırlığı, dört son çare."
   },
   {
    "id": "Y-C24",
@@ -3510,7 +3510,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-C21"
    ],
@@ -3519,7 +3519,7 @@
    "paket": "P07",
    "sira": 84,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi)."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi). | 2026-11-01: üç büyüme krizi; simulate_career: dertsiz %25-27, en uzun sakin dizi 4-5."
   },
   {
    "id": "Y-G17",
@@ -3527,7 +3527,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [
     "Y-C22"
    ],
@@ -3536,7 +3536,7 @@
    "paket": "P12",
    "sira": 211,
    "kim": "CO",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Kural yazılı; denetim docs/ui/sicak_kaynak_denetimi.md (akşam şehir resimleri aykırı, render gerekir; güneş ışık kaynağı mı kararı kullanıcıda). | 2026-10-31 onay turu: Kullanıcı kararı: güneşin halesi de soğuk (akşam ve kış güneşi soğuktur). | 2026-11-01: şehir akşam/gece/şafak resimleri gölgelendiricide soğur, güneş soğuk, şalvar soluk."
   },
   {
    "id": "Y-G18",
@@ -3544,7 +3544,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-C21",
     "Y-G17"
@@ -3554,7 +3554,7 @@
    "paket": "P12",
    "sira": 212,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: GrimGrade kıtlıkla solar; Gokyurt en geç."
   },
   {
    "id": "Y-G19",
@@ -3648,7 +3648,7 @@
    "paket": "P07",
    "sira": 218,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir. | 2026-10-31: PlagueWorld (nüfus, bulaşma, yollarla yayılma, kervanın taşıması, bağışıklığın sönmesi) ve plague_news (görülür/duyulur); ölçüm kurallar-ekonomi Plague Rules."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir. | 2026-10-31: PlagueWorld (nüfus, bulaşma, yollarla yayılma, kervanın taşıması, bağışıklığın sönmesi) ve plague_news (görülür/duyulur); ölçüm kurallar-ekonomi Plague Rules. | 2026-11-01: veba yolda da duyulur."
   },
   {
    "id": "Y-C26",
@@ -3780,7 +3780,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "lore bekliyor",
    "bagimli": [
     "Y-E06"
    ],
@@ -3789,7 +3789,7 @@
    "paket": "P07",
    "sira": 227,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: geçiş belgelerinin adları ve sahipleri defter III'te; cevap gelince yapılır."
   },
   {
    "id": "Y-C32",
@@ -3885,7 +3885,7 @@
    "paket": "P09",
    "sira": 233,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules). | 2026-11-01: ant kardeşleri."
   },
   {
    "id": "Y-C34",
@@ -3902,7 +3902,7 @@
    "paket": "P07",
    "sira": 234,
    "kim": "CK",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım. | 2026-11-01: inanç ekranda; kafile ilanı (hacı kafilesi Septisist)."
   },
   {
    "id": "Y-H08",
@@ -3934,7 +3934,7 @@
    "paket": "P07",
    "sira": 236,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı. | 2026-10-31: NoticeBoard - ilanlar tahtaya çivili parşömen plakalar; kasabada pano boş ve nedeni yazar. Kafile/sürücü ilanları Y-C34 ile."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: Lonca sekmesi İlan Panosu; kafile ve sürücü ilanları Y-C34'ü bekliyor. | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - menü sekmesi değil, ilanların çivili kâğıt olarak asılı durduğu görünür bir pano olmalı. | 2026-10-31: NoticeBoard - ilanlar tahtaya çivili parşömen plakalar; kasabada pano boş ve nedeni yazar. Kafile/sürücü ilanları Y-C34 ile. | 2026-11-01: kafile ve sürücü ilanları panoda."
   },
   {
    "id": "Y-A08",

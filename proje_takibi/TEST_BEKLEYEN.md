@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **105** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -713,12 +713,67 @@ Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 
 </details>
 
+### Y-C22 · Ahlaki zorunluluk: doğru seçenek yok, bedel bir insana düşer
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor). | 2026-11-01: beş feda kartı, günlükte feda satırı, kıtlık paleti.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C22 Ahlaki zorunluluk: doğru seçenek yok, bedel bir insana düşer**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-E01, Y-B08
+  - **Ne:** Kıtlık kartlarında baskın seçenek olmaz; her seçenek bir kaynaktan ya da adı olan bir kişiden bir şey alır. Feda kartları (yaşlıyı köyde bırakmak, hastayı karantinaya almak, bir vagonu aç kasabaya ayırmak), aç şehre yükü satmak ya da satmamak ikilemi, feda kararından sonra günlüğün o kararı anan cümleleri. Görsel dil: kıtlık derecesine bağlı soluk, kontrastlı, kirli palet (dünyada, arayüz okunaklı kalır).
+  - **Sınır:** kullanıcının ilkesi (derinleşme, asla sadeleştirme) gereği güç ve ödül sistemleri kesilmez, bedelli olur. Kaldırılacak bir sistem varsa kullanıcı karar verir.
+  - **Kullanıcı notu:** "GDC - Lessons from Frostpunk & This War of Mine: Geleneksel ödül ve güçlenme mekaniklerini kaldırarak oyuncuya doğru ya da yanlış seçenekler değil, yalnızca kervan üyelerini feda etmek gibi ağır bedelleri olan ahlaki zorunluluklar sunulmalı; görsel dil ise umutsuzluğu pekiştirecek soluk, kontrastlı ve kirli bir paletle inşa edilmelidir."
+  - **Kabul:** `EventQuality` baskın seçenek kontrolü ve raporu; en az beş feda kartı; şehir hâline bağlı palet ekran görüntüsüyle.
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §1
+
+</details>
+
+### Y-C23 · Yenilmez çevre ve domino zinciri
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür. | 2026-11-01: domino zinciri, dertler cümlesi, yönetmen ağırlığı, dört son çare.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C23 Yenilmez çevre ve domino zinciri**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-B02, Y-B03, Y-C20
+  - **Ne:** Soğuk ve kıtlık yenilen bir düşman değil, dayanılan bir şey; atlatılan kış ganimet vermez. Var olan sistemlerin bedelleri birbirini tetikler (kırık aks yolu uzatır, uzayan yol erzağı bitirir, açlık ateşi getirir, ateşli biri savaşta düşer); `RoadDirector` açık zincirin sonraki halkasına ağırlık verir. Kampta son eşyaları tüketme eylemleri: brandayı, tohumluk buğdayı, kürkü, sandığı ve vagon tahtasını yakmak ya da yemek. Zincir dertler listesinde cümleyle görünür.
+  - **Kullanıcı notu:** "Jacob Geller - Fear of Cold: Çevresel zorlukların (soğuk, kıtlık) yenilemez bir düşman gibi kurgulanması gerektiği belirtilerek, kervanın yolda yaptığı küçücük bir hatanın kelebek etkisiyle büyük bir felakete dönüştüğü ve oyuncuyu elindeki son eşyaları tüketmeye iten acımasız "domino taşı" mekaniklerinin tasarlanması öneriliyor."
+  - **Kabul:** zincir halkaları testli; dört yakma/yeme eylemi kamp panelinde; "doğru stoklayan aç kalmaz" sözü korunur (test_provisions yeşil).
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §2
+
+</details>
+
+### Y-C24 · Çözülemeyen problem: büyüme yeni kriz doğurur
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C21
+- **Son not:** 2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi). | 2026-11-01: üç büyüme krizi; simulate_career: dertsiz %25-27, en uzun sakin dizi 4-5.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C24 Çözülemeyen problem: büyüme yeni kriz doğurur**
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C21 · **İlgili:** Y-C15, Y-C17, Y-C12
+  - **Ne:** Oyuncu kusursuz dengeye ulaşmaz. Ün artınca aç şehirler yüke el koymak ister, dolu kese haydut ve haraççı çeker, kalabalık kadroda hizipler büyür, çok vagon kıtlıkta çok ağız demek. Bir krizi çözen hamle öbürünü besler; her yeni sistem için "bunu çözen hamle neyi bozuyor?" cevabı yazılır. Final sonrası da dertler büyür.
+  - **Kullanıcı notu:** "Adam Millard - How To Design An Unsolvable Problem: Hayatta kalma gerilimini sürekli kılmak için oyuncunun asla kusursuz bir dengeye ulaşamaması gerektiği, kervan büyüdükçe veya zenginleştikçe sistemin otomatik olarak yeni krizler üreterek oyuncuyu daima "tam bir çözümü olmayan" dinamik problemleri yönetmeye mecbur bırakması gerektiği anlatılıyor."
+  - **Kabul:** `simulate_career` denge raporu (dertsiz sefer sayısı, en uzun sakin dizi); hiçbir politika uzun sakin diziye ulaşmıyor; en az üç büyüme krizi oyunda.
+  - **Tasarım notu:** `docs/design_notes/kitlik_tasarim_dersleri.md` §3
+
+</details>
+
 ### Y-C25 · Veba bir dünya hâli: kart açılmadan görünür
 
 - **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P07 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C21
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir. | 2026-10-31: PlagueWorld (nüfus, bulaşma, yollarla yayılma, kervanın taşıması, bağışıklığın sönmesi) ve plague_news (görülür/duyulur); ölçüm kurallar-ekonomi Plague Rules.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31: İlk parça: WorldEvents.natural_plague bölge ve 18 günlük dönem; has_plague kriz, bulaşma, işe alma ve şehir özetinde. Kart görseli bölgeyle soluyor (Y-G20). | 2026-10-31 onay turu: Kullanıcı (onay turu): Düzenle - veba kendiliğinden gelip gitmez; arka planda nüfus, bulaşma ve şehirler arası ilişki sistemi kurulacak; nerede veba olduğu yolda ya da şehirde haber olarak öğrenilir. | 2026-10-31: PlagueWorld (nüfus, bulaşma, yollarla yayılma, kervanın taşıması, bağışıklığın sönmesi) ve plague_news (görülür/duyulur); ölçüm kurallar-ekonomi Plague Rules. | 2026-11-01: veba yolda da duyulur.
 
 <details><summary>Görev metni</summary>
 
@@ -737,7 +792,7 @@ Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C25
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım.
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım. | 2026-11-01: inanç ekranda; kafile ilanı (hacı kafilesi Septisist).
 
 <details><summary>Görev metni</summary>
 
@@ -1263,7 +1318,7 @@ Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
 - **Bağımlı:** Y-C17
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules).
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules). | 2026-11-01: ant kardeşleri.
 
 <details><summary>Görev metni</summary>
 
@@ -1811,6 +1866,23 @@ Toplam: **101** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/referans/gorevler/09_art_ikinci_tur.md](referans/referans/gorevler/09_art_ikinci_tur.md)
 - **Son not:** Kullanıcı bildirimi (2026-10-19). tools/ledger_unrule.py: kaynak art_source/waybook/l1_ledger_ruled.jpg, çıktı data/assets/ui/waybook/l1_ledger.jpg; cetvel normalize evrişimle silindi, CC0 kâğıt dokusu eklendi. Lekelerin içinde küçük ızgara parçaları kaldı.
+
+### Y-G18 · Kıtlık paleti bölgeye göre: Gokyurt en geç solar
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-C21, Y-G17
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: GrimGrade kıtlıkla solar; Gokyurt en geç.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G18 Kıtlık paleti bölgeye göre: Gokyurt en geç solar**
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-C21, Y-G17 · **Kim:** C
+  - **Ne:** Kıtlığın derecesi bölge başına bir değer; palet o değere göre solar. Gokyurt hâlâ öbür yerlere göre daha sağlıklı, bu yüzden en geç solar. Bağlarla ilgisi yok.
+  - **Kullanıcı notu:** "Hayır bağ ile ilgili bir şey olmamalı bu. Gokyurt hala diğer yerlere kıyasla daha sağlıklı bir yer o sebeple palet daha geç solabilir orada."
+  - **Kabul:** Aynı saatte Gokyurt yolu ile Vadi yolunun görüntüsü yan yana; test bölge değerinin palete geçtiğini doğrular.
+
+</details>
 
 ## Paket P14
 

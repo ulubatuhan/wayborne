@@ -130,6 +130,8 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_wagon_for_town())
 	_road_events.append(_starving_roadside())
 	_road_events.append(_hunger_riot())
+	_road_events.append(_cargo_seized())
+	_road_events.append(_faction_split())
 	_road_events.append(_leave_the_wounded())
 	_road_events.append(_left_behind_return())
 	_road_events.append(_profiteer_recognized())
@@ -2557,6 +2559,43 @@ static func _hunger_riot() -> GameEvent:
 		_checked_choice("EVT_RIOT_OPT_SPEAK", SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 0.0),
 			"EVT_RIOT_SPEAK_OK", _effects([_fx(EventEffect.Type.CITY_MORALE, 5), _fx(EventEffect.Type.REPUTATION, 2)]),
 			"EVT_RIOT_SPEAK_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.CITY_MORALE, -5)])),
+	])
+	return event
+
+## --- Büyüme krizleri (Y-C24) ---
+static func _cargo_seized() -> GameEvent:
+	var event := _event("evt_cargo_seized", "EVT_SEIZED_TITLE", "EVT_SEIZED_TEXT", 1.2)
+	event.cooldown_days = 20
+	event.conditions = _conditions([
+		_c("reputation", EventCondition.Op.GREATER_EQUAL, 40),
+		_c("city_morale", EventCondition.Op.LESS_THAN, 35),
+		_c("days_remaining", EventCondition.Op.LESS_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_gated_choice("EVT_SEIZED_OPT_YIELD", "EVT_SEIZED_OPT_YIELD_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 12)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -12), _fx(EventEffect.Type.CITY_MORALE, 15), _fx(EventEffect.Type.REPUTATION, 2)])),
+		_gated_choice("EVT_SEIZED_OPT_BRIBE", "EVT_SEIZED_OPT_BRIBE_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 60)]),
+			_effects([_fx(EventEffect.Type.GOLD, -60)])),
+		_check_choice("EVT_SEIZED_OPT_REFUSE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_SEIZED_REFUSE_OK", _effects([_fx(EventEffect.Type.REPUTATION, -1)]),
+			"EVT_SEIZED_REFUSE_MID", _effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.REPUTATION, -3)]),
+			"EVT_SEIZED_REFUSE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.REPUTATION, -5), _fx(EventEffect.Type.CITY_MORALE, -10)])),
+	])
+	return event
+
+static func _faction_split() -> GameEvent:
+	var event := _event("evt_faction_split", "EVT_FACTION_TITLE", "EVT_FACTION_TEXT", 0.6)
+	event.cooldown_days = 14
+	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 6)])
+	event.choices = _choices([
+		_choice("EVT_FACTION_OPT_OLD", _effects([_fx(EventEffect.Type.MORALE, -5), _fx(EventEffect.Type.STRESS, 4)])),
+		_choice("EVT_FACTION_OPT_NEW", _effects([_fx(EventEffect.Type.MORALE, -3), _fx(EventEffect.Type.STRESS, 6)])),
+		_check_choice("EVT_FACTION_OPT_MEND", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_FACTION_MEND_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_FACTION_MEND_MID", _effects([_fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_FACTION_MEND_BAD", _effects([_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.MORALE, -6)])),
 	])
 	return event
 
