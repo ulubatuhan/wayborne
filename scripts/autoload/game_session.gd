@@ -2648,24 +2648,57 @@ func swear_oaths() -> Array[String]:
 	return sworn_names
 
 ## Kervanın inancı kervanbaşınınki (Y-C34). Boşsa kültüründen ve bulunduğu
-## yerden türetilir (LORE §4: göçebe Baikhan; dağlı ve balıkçı eski inanç;
-## güney Vadi ve Orsolune Yumruk; geri kalan El'in kurulu düzeni Septisizm).
-const FIST_PLACES: Array[String] = ["belvanor", "ilsande", "caramine", "orsolune"]
+## yerden türetilir (LORE §4, kullanıcı onayı 2026-11-01): göçebe Baikhan;
+## dağlı ve balıkçı eski inanç; Vadili ve limanlı bulunduğu bölgenin El
+## inançlarından birine. Birden çok inancın yaşadığı bölgelerde (Vadi, Güney)
+## inanç o bölgenin inançları arasından rastgele gelir (kullanıcı kararı
+## 2026-11-01); şehrin baskın inancı iki kat ağırdır. Zar karakterin
+## kimliğinden: aynı kişi her yüklemede aynı inançta.
+const REGION_CREEDS: Dictionary = {
+	"vadi": [CharacterData.CREED_SEPTISM, CharacterData.CREED_FIST],
+	"guney": [CharacterData.CREED_SEPTISM, CharacterData.CREED_FIST, CharacterData.CREED_OLD],
+}
+## Şehrin baskın inancı (LORE §4 tablosu); listede olmayan bölgenin ilki sayılır.
+const PLACE_CREEDS: Dictionary = {
+	"belvanor": CharacterData.CREED_FIST, "ilsande": CharacterData.CREED_FIST,
+	"caramine": CharacterData.CREED_FIST, "orsolune": CharacterData.CREED_FIST,
+	"zelmarin": CharacterData.CREED_SEPTISM, "ondrelle": CharacterData.CREED_SEPTISM,
+	"merigaud": CharacterData.CREED_SEPTISM,
+}
 
-static func derive_creed(culture_id: String, place_id: String) -> String:
+static func derive_creed(culture_id: String, place_id: String, seed_key: String = "") -> String:
 	match culture_id:
 		CultureCatalog.NOMAD:
 			return CharacterData.CREED_BAIKHAN
 		CultureCatalog.HIGHLAND, CultureCatalog.FISHER:
 			return CharacterData.CREED_OLD
-	return CharacterData.CREED_FIST if FIST_PLACES.has(place_id) else CharacterData.CREED_SEPTISM
+	var place := WorldMapData.get_location_by_id(place_id)
+	var region := place.region if place != null else ""
+	if not REGION_CREEDS.has(region):
+		return CharacterData.CREED_SEPTISM
+	var pool: Array = REGION_CREEDS[region]
+	var dominant := String(PLACE_CREEDS.get(place_id, ""))
+	var weights: Array[float] = []
+	var total := 0.0
+	for creed in pool:
+		var w := 2.0 if creed == dominant else 1.0
+		weights.append(w)
+		total += w
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("creed|%s|%s" % [seed_key, place_id])
+	var roll := rng.randf() * total
+	for i in pool.size():
+		roll -= weights[i]
+		if roll < 0.0:
+			return String(pool[i])
+	return String(pool[pool.size() - 1])
 
 func caravan_creed() -> String:
 	var leader := get_player_character()
 	if leader == null:
 		return ""
 	if leader.creed.is_empty():
-		leader.creed = derive_creed(leader.culture_id, current_location_id)
+		leader.creed = derive_creed(leader.culture_id, current_location_id, leader.character_id)
 	return leader.creed
 
 ## Kapısından bir daha girilemeyen yerler (Y-C29): Duvenmor'un içinde kılıç

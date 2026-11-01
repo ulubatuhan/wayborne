@@ -171,8 +171,10 @@ bakımda ve toplulukta yarar.
 
 - **[Yazar, onaylandı 2026-11-01]** Halkların inancı (kervanbaşının inancı buradan gelir, görev Y-C34): göçebeler
   Baikhan; dağlılar ve balıkçılar eski inançta (Dağın İlk Nefesi, Denizin İlk Gözyaşı) kalır; Vadili ve limanlılar
-  doğdukları yere göre El'e bağlıdır: güney Vadi (Belvanor, Ilsande, Caramine) ve Orsolune Yumruk, geri kalanı
-  Septisizm.
+  doğdukları yere göre El'e bağlıdır. Birden çok inancın yaşadığı bölgelerde kişinin inancı o bölgenin inançlarından
+  biridir, her şehrin baskın inancı daha sık (kullanıcı kararı 2026-11-01): Vadi'de Septisizm ve Yumruk (güney Vadi
+  Yumruk, kuzey Vadi Septisizm baskın); Güney'de Septisizm, Yumruk ve eski inanç (Orsolune Yumruk, Zelmarin
+  Septisizm baskın). Tek inançlı bölgeler (Vaelghard, Orvahel, Ezmerak...) Septisizm.
 
 ### 4.3 Baikhan
 

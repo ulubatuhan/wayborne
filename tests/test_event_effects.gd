@@ -575,7 +575,23 @@ func _test_oath_and_creed(t) -> void:
 	t.eq(session.swear_oaths().size(), 0, "lider bu törelerden değilse ant içilmez")
 
 	t.eq(GameSession.derive_creed(CultureCatalog.NOMAD, "vastrevar"), CharacterData.CREED_BAIKHAN, "göçebe Baikhan")
-	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "belvanor"), CharacterData.CREED_FIST, "güney Vadi Yumruk")
-	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "ondrelle"), CharacterData.CREED_SEPTISM, "kuzey Vadi Septisizm")
+	t.eq(GameSession.derive_creed(CultureCatalog.HIGHLAND, "belvanor"), CharacterData.CREED_OLD, "dağlı eski inançta")
+	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "vastrevar", "x"), CharacterData.CREED_SEPTISM, "tek inançlı bölge Septisizm")
+	t.eq(GameSession.derive_creed(CultureCatalog.VALLEY, "belvanor", "k1"), GameSession.derive_creed(CultureCatalog.VALLEY, "belvanor", "k1"), "aynı kişi hep aynı inançta")
+	# Çok inançlı bölgede zar: Vadi'de iki El inancı, Güney'de eski inanç da; baskın olan çoğunlukta.
+	var seen := {}
+	var fist := 0
+	for i in 300:
+		var c := GameSession.derive_creed(CultureCatalog.VALLEY, "belvanor", "k%d" % i)
+		seen[c] = true
+		if c == CharacterData.CREED_FIST:
+			fist += 1
+	t.ok(seen.has(CharacterData.CREED_SEPTISM) and seen.has(CharacterData.CREED_FIST), "Vadi'de iki inanç da çıkar")
+	t.ok(not seen.has(CharacterData.CREED_OLD), "Vadi'de eski inanç çıkmaz")
+	t.ok(fist > 150, "Belvanor'da baskın Yumruk çoğunlukta (%d/300)" % fist)
+	var south := {}
+	for i in 300:
+		south[GameSession.derive_creed(CultureCatalog.PORT, "mirsana", "m%d" % i)] = true
+	t.eq(south.size(), 3, "Güney'de üç inanç da çıkar")
 	leader.creed = CharacterData.CREED_SEPTISM
 	t.eq(session.caravan_creed(), CharacterData.CREED_SEPTISM, "kervanın inancı kervanbaşınınki")
