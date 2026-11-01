@@ -10,6 +10,12 @@ Python 3.11 ister. Kurulum tek komut: `tools/figure_pipeline/setup_blender.sh` (
 `/root/bpyenv`, bpy, MPFB). Betikler `/root/bpyenv/bin/python <betik>` ile koşar. "Blender yok" demeden önce bu
 betik çalıştırılır.
 
+**Ölçülen süreler (2026-11-01, bulut konteyneri, CPU):** beden varyantı (`make_variant.py`) 1 sn; bir bedenin tek
+karelik klibi (`render_frames.py`) 16 sn; bir giysinin ilk giydirilmesi ve tek karelik render'ı
+(`render_outfits.py`) 2,5 dk. Giysi render'ı saç vekilleri için **MakeHuman sistem varlık paketini** de ister
+(`mpfb/data/hair/short01/short01.mhclo` yoksa durur). Yeni bir klibi bütün giysilere eklemek (6 beden x ~52 kalem,
+HD dahil) bu konteynerde 13 saati aşar: uzun bir oturumda ya da kullanıcının makinesinde koşar.
+
 Bu ortamda ayrı bir `blender` CLI ikili dosyası **yok**. `bpy` pip paketi
 kuruludur (`pip show bpy` → `5.0.1`) - bu, Blender'ın kendisinin Python
 modülü olarak derlenmiş hali, ayrı bir kurulum değil. Her script
