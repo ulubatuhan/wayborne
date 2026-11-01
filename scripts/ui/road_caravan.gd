@@ -182,7 +182,7 @@ const SEAT_BLEND_U: Dictionary = {"dismount": 0.72, "climb_down": 0.62}
 const CAMPFIRE_SEAT_SPACING: float = 15.0
 ## Ateşin başında oturuş (sit_box) ve altındaki kütük: boyu oturanın boyunun
 ## payı, kalça kütüğün üstünde (GrimDrafts'ın menüdeki sandığıyla aynı oran).
-const CAMP_SEATED_CLIP: String = "sit_box"
+const CAMP_SEATED_CLIP: String = "sit_fire"
 const LOG_HEIGHT_SHARE: float = 0.24
 const LOG_BACK_SHARE: float = 0.09
 const LOG_WOOD: Color = Color(0.26, 0.21, 0.18)

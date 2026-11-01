@@ -313,6 +313,8 @@ const ACTION_FALLBACK: Dictionary = {
 	"attack_cast": "attack_swing",
 	# Oturuşu render edilmemiş bir giysi varsa ayakta durur (çıplak oturmaz).
 	"sit_box": "idle",
+	# Ateşte ısınma render edilmemiş giysiyle kütükte oturuşa düşer.
+	"sit_fire": "sit_box",
 	# Yol tepkileri (N31d): render edilmemiş giysiyle düz durur.
 	"look_ahead": "idle", "idle_tired": "idle",
 }
