@@ -435,7 +435,7 @@ func _test_camp_timer_starts_when_everyone_is_at_the_fire(t) -> void:
 	for _frame in 20000:
 		var dt := 1.0 / 30.0
 		var transitioning := caravan.is_camp_transitioning()
-		clock.advance(dt, maxf(1.0, clock.get_speed()) if transitioning else -1.0)
+		clock.advance(dt, maxf(1.0, clock.get_speed()) * JourneyController.CAMP_WALK_CLOCK_SCALE if transitioning else -1.0)
 		caravan._process(dt)
 		ends = JourneyController.camp_ends_at(ends, clock.total_hours, caravan.is_camp_settled(), 8.0)
 		if settled_at < 0.0 and ends != JourneyController.CAMP_PENDING:
@@ -445,15 +445,15 @@ func _test_camp_timer_starts_when_everyone_is_at_the_fire(t) -> void:
 			caravan.set_camping(false)
 			break
 	t.ok(settled_at > 0.0, "kamp hiç kurulmadı")
-	t.ok(settled_at - camp_start <= 2.6, "ateşe yürüyüş 2.6 oyun saatini aşıyor (%.2f)" % (settled_at - camp_start))
+	t.ok(settled_at - camp_start <= 0.5, "ateşe yürüyüş yarım oyun saatini aşıyor (%.2f, görev 12.2c)" % (settled_at - camp_start))
 	t.ok(absf((struck_at - settled_at) - 8.0) < 0.1, "kurulma ile sökülme arası tam CAMP_HOURS değil")
 	# Dönüş: oyun saati normal hızda akıyor, yine üst sınırın içinde.
 	var back_start := clock.total_hours
 	for _frame in 2000:
 		var dt := 1.0 / 30.0
-		clock.advance(dt, maxf(1.0, clock.get_speed()) if caravan.is_camp_transitioning() else -1.0)
+		clock.advance(dt, maxf(1.0, clock.get_speed()) * JourneyController.CAMP_WALK_CLOCK_SCALE if caravan.is_camp_transitioning() else -1.0)
 		caravan._process(dt)
 		if not caravan.is_breaking_camp():
 			break
 	t.not_ok(caravan.is_breaking_camp(), "kamp sökülünce herkes yerine dönmedi")
-	t.ok(clock.total_hours - back_start <= 2.6, "dönüş 2.6 oyun saatini aşıyor (%.2f)" % (clock.total_hours - back_start))
+	t.ok(clock.total_hours - back_start <= 0.5, "dönüş yarım oyun saatini aşıyor (%.2f)" % (clock.total_hours - back_start))

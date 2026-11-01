@@ -2047,10 +2047,21 @@ func _draw_bonfire(base: Vector2, k: float, tint: Color, lit: float) -> void:
 		return
 	var flame_full := split - r.position.y
 	var flame_h := flame_full * lit
-	draw_texture_rect_region(
-		tex, Rect2(r.position.x, split - flame_h, r.size.x, flame_h),
-		Rect2(0.0, 0.0, w, h * CAMPFIRE_LOGS_FROM), Color(tint.r, tint.g, tint.b, lit)
-	)
+	# Render'ın alevi köşeli tek renk bir koniydi (görev 12.2c denetimi): yerine
+	# tavernadaki ocağın katmanlı, dalgalanan dilleri (TavernRoom._flame_shape).
+	var t := _camp_time
+	var base_x := r.position.x + r.size.x * 0.5
+	var unit := r.size.x
+	for tongue_i in 5:
+		var seed_offset := float(tongue_i) * 1.9
+		var tongue := flame_h * (0.62 + 0.38 * TavernRoom.flicker(t, seed_offset)) * (1.0 - 0.22 * absf(float(tongue_i) - 2.0) / 2.0)
+		var half_w := unit * (0.075 + 0.02 * float(tongue_i % 2))
+		var x := base_x + (float(tongue_i) - 2.0) * unit * 0.07
+		var sway := sin(t * 3.1 + seed_offset) * unit * 0.025
+		var root := Vector2(x, split + unit * 0.02)
+		draw_colored_polygon(TavernRoom._flame_shape(root, half_w, tongue, sway), Color(0.95, 0.40, 0.10, 0.88 * lit) * Color(tint.r, tint.g, tint.b))
+		draw_colored_polygon(TavernRoom._flame_shape(root, half_w * 0.62, tongue * 0.72, sway * 0.7), Color(1.0, 0.70, 0.26, 0.92 * lit))
+		draw_colored_polygon(TavernRoom._flame_shape(root, half_w * 0.3, tongue * 0.42, sway * 0.4), Color(1.0, 0.93, 0.64, 0.95 * lit))
 
 ## Tutuşurken yükselen birkaç kıvılcım: yalnızca ilk anlarda, alev
 ## oturunca kesiliyor. Konumları ilerlemeye ve sıraya bağlı, rastgele değil

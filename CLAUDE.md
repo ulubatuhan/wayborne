@@ -419,8 +419,8 @@ verir.
 - **Yol ekranında yön (kullanıcı, 2026-11-01).** Batıya giden yolda kervan hâlâ sağa yürüyor; yol bandı ve işaretler
   hep sağa akıyor. Haritadaki yöne göre aynalamak bant, işaretler ve yazılar için ayrı bir iş; kullanıcı kararı bekliyor.
 - **Doğrulama turunda kalan görsel borç (2026-11-01, DEVAM_NOTU C10).** Vastrevar gece resmi düşük çözünürlüklü, defter
-  lekelerinde ızgara, menüde öndeki iki yolcu bulanık, köşeli alev, eksik biyom varyantları, Drazvor adı haritada yok,
-  yolda veba görseli ve başka kervanların kendi figürü yok.
+  lekelerinde ızgara, menüde öndeki iki yolcu bulanık ve menü ateşi köşeli, eksik biyom varyantları, Drazvor adı haritada
+  yok, yolda veba görseli yok.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;
   `docs/gemini-prompts-wardrobe.md` ve şablonları silindi; yeni kalemler

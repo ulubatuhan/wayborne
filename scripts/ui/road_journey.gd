@@ -1708,11 +1708,12 @@ func _process(delta: float) -> void:
 	_apply_zoom(delta)
 
 	# Kamp kurulurken ve sökülürken insanlar yürürken saat kampın yavaş
-	# akışında değil normal hızda akıyor; yürüyüş de oyun hızıyla hızlanıyor.
+	# akışında değil, CAMP_WALK_CLOCK_SCALE ile akıyor (yürüyüş yarım oyun
+	# saatini geçmesin); yürüyüş de oyun hızıyla hızlanıyor.
 	_caravan.set_gather_time_scale(_clock.get_speed())
 	if _can_time_flow():
 		var transitioning := _caravan.is_camp_transitioning()
-		var hours := _clock.advance(delta, maxf(1.0, _clock.get_speed()) if transitioning else -1.0)
+		var hours := _clock.advance(delta, maxf(1.0, _clock.get_speed()) * JourneyController.CAMP_WALK_CLOCK_SCALE if transitioning else -1.0)
 		_advance_position(hours, delta)
 		_tick_signals(hours)
 		_tick_night(hours)

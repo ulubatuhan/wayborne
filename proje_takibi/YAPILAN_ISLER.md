@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **103** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **104** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -449,6 +449,45 @@ Toplam: **103** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
     - (d) Yüklemeden sonra işaret, ihmal edilince yine büyüyor mu?
     - (e) `signals` alanı olmayan eski kayıt yükleniyor mu?
   - Ardından `godot --headless --script res://tests/run_tests.gd` çalıştır; CI'daki betik-hatası taraması da geçmeli.
+
+</details>
+
+### 12.2c · Kamp: karakterler ateşe çok yavaş yürüyor (3x'te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın
+
+- **Durum:** bitti · **Öncelik:** P0 · **Paket:** P04 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
+- **Son not:** Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **12.2c Kamp: karakterler ateşe çok yavaş yürüyor (3x'te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın.**
+    - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `968111f`): Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak.
+    - **Kullanıcı:** "Buradaki temel sorun karakterlerin çok çok yavaş yürümesi. 3x'te dahi yavaşlar." "Ateş, ilk kişi ateşin başına vardığında yansın." Gidip dönme yaklaşık 10 oyun saati sürüyor.
+    - **Kodda görülen** (`scripts/ui/road_caravan.gd`):
+      - `gather_seconds()` (`:1198-1209`): süre = `max(1.3, 1.5 × en_uzak_mesafe / en_yavaş_figürün_tempolu_hızı)`.
+        - En yavaş figürün hızı ve 1,5 çarpanı tüm grubu yavaşlatıyor.
+        - En uzaktaki vagon da süreyi uzatıyor.
+      - Süre gerçek saniye üzerinden; oyun hızı çarpanı (2x, 3x) büyük ihtimalle yürüyüşe uygulanmıyor. Bu yüzden 3x'te de aynı yavaşlık var. **Doğrula.**
+      - Kamp süresi `road_journey.gd:2279` `_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS` (8 saat). Saat yürüyüş sırasında kampın hızlı akışıyla ilerliyor, sayaç yürüyüş bitmeden başlıyor. Bu yüzden ateşe varmak saatler yiyor ve sabah oluyor.
+    - **Yapılacak:**
+      1. **Yürüyüş hızı:**
+         - Toplanma ve dağılma yürüyüşü tempolu bir hızla olsun; en yavaşa göre ve 1,5 çarpanıyla uzatılmasın. Herkes kendi tempolu hızıyla yürüsün.
+         - Toplam yürüyüşe bir üst sınır: gerçek zamanda en fazla yaklaşık 2–3 sn (1x'te).
+         - Oyun hızı çarpanı yürüyüş animasyonuna da uygulansın: 3x'te üç kat hızlı.
+      2. **Ateş:** Kamp ateşi ilk figür ateş başına vardığında yansın. Kısa bir tutuşma animasyonu (kıvılcım, alevin büyümesi) ve ateş sesi; varmadan önce yalnızca odun yığını görünsün.
+         - **Ses kaynağı (CC0):** Freesound CC0 `campfire` (114 sonuç; ör. kyles “fire small campfire crackling”) taban döngü, ayrı rastgele çıtırtı sesleri; tutuşma için `torch ignite`, `fire whoosh`. Ayrıntı: `../ICERIK_IHTIYACLARI.md` S-3.
+      - **Not (kullanıcı kararı, Y-B09):** Yol yeterince dolunca 1.5x ve 3x hızları kalkacak; o zaman aşağıdaki (b) testi kaldırılır.
+      3. **Saat:**
+         - Toplanma ve dağılma sırasında oyun saati durmasın ama normal yürüyüş hızıyla aksın; kampın hızlı akışı uygulanmasın.
+         - `CAMP_HOURS` sayacı herkes ateşe vardığında başlasın.
+         - Toplanma ve dağılmanın toplamı en fazla yaklaşık 0,5 oyun saati.
+      4. Kampın kurulduğu ve kalkıldığı saat günlüğe yazılsın.
+    - **Test** (`tests/test_camp_gathering.gd` ve yeni ekler):
+      - (a) 1x'te toplanma ≤ 3 sn gerçek zaman.
+      - (b) 3x'te süre üçte birine iniyor.
+      - (c) İlk varan figürle ateş yanıyor; ondan önce yanmıyor.
+      - (d) Kamp kurma ve kalkma arası tam `CAMP_HOURS` ± 0,1; yürüyüşler toplam ≤ 0,5 oyun saati.
+      - (e) Mevcut üst üste binme ve oturma testleri geçiyor.
 
 </details>
 

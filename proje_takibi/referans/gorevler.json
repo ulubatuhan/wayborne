@@ -566,14 +566,14 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P0",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/12_sehir_ve_yol_gorunumu.md",
    "paket": "P04",
    "sira": 37,
    "kim": "C",
    "commit": "968111f",
-   "not": "Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak."
+   "not": "Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı."
   },
   {
    "id": "12.2b",
