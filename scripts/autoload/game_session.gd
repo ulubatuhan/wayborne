@@ -2940,10 +2940,11 @@ const BEAT_STORY: String = "story"
 const BEAT_EVENT: String = "event"
 const BEAT_QUIET: String = "quiet"
 const BEAT_MERCY: String = "mercy"
+const BEAT_SACRIFICE: String = "sacrifice"
 ## Hangi iz günün satırı olur: en ağır olanı.
 const BEAT_WEIGHTS: Dictionary = {
 	BEAT_DEATH: 100, BEAT_WAGON: 80, BEAT_LOST: 70, BEAT_WON: 60,
-	BEAT_MERCY: 50, BEAT_HUNGER: 45, BEAT_STORY: 35, BEAT_EVENT: 30, BEAT_QUIET: 0,
+	BEAT_SACRIFICE: 90, BEAT_MERCY: 50, BEAT_HUNGER: 45, BEAT_STORY: 35, BEAT_EVENT: 30, BEAT_QUIET: 0,
 }
 ## İz türü başına üç cümle (anahtarlar tam yazılı, Localization Rules).
 const DIARY_KEYS: Dictionary = {
@@ -2956,6 +2957,7 @@ const DIARY_KEYS: Dictionary = {
 	BEAT_EVENT: ["DIARY_EVENT_1", "DIARY_EVENT_2", "DIARY_EVENT_3"],
 	BEAT_QUIET: ["DIARY_QUIET_1", "DIARY_QUIET_2", "DIARY_QUIET_3"],
 	BEAT_MERCY: ["DIARY_MERCY_1", "DIARY_MERCY_2", "DIARY_MERCY_3"],
+	BEAT_SACRIFICE: ["DIARY_SACRIFICE_1", "DIARY_SACRIFICE_2", "DIARY_SACRIFICE_3"],
 }
 
 ## Son satırdan bu yana biriken izler: {"kind", "args", "day"}. Kayıtta,

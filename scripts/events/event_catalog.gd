@@ -125,6 +125,11 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_duvenmor_quarrel())
 	_road_events.append(_pilgrim_caravan())
 	_road_events.append(_faith_tribunal())
+	_road_events.append(_elder_burden())
+	_road_events.append(_fever_quarantine())
+	_road_events.append(_wagon_for_town())
+	_road_events.append(_starving_roadside())
+	_road_events.append(_hunger_riot())
 	_road_events.append(_leave_the_wounded())
 	_road_events.append(_left_behind_return())
 	_road_events.append(_profiteer_recognized())
@@ -2452,6 +2457,106 @@ static func _faith_tribunal() -> GameEvent:
 		_choice("EVT_TRIBUNAL_OPT_HAND_OVER", _effects([
 			_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.MORALE, -6), _fx(EventEffect.Type.REPUTATION, 1),
 		])),
+	])
+	return event
+
+## --- Feda kartları (Y-C22): kıtlıkta doğru seçenek yok; her seçenek bir
+## kaynaktan ya da adı olan birinden bir şey alır. Bırakılan kişinin adı
+## düğmede yazar (LEAVE_BEHIND seçicisi). ---
+
+static func _elder_burden() -> GameEvent:
+	var event := _event("evt_elder_burden", "EVT_ELDER_TITLE", "EVT_ELDER_TEXT", 0.3)
+	event.cooldown_days = 20
+	event.conditions = _conditions([
+		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
+		_c("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.4),
+		_c("weakest_companion_hp_ratio", EventCondition.Op.LESS_EQUAL, 0.6),
+	])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([_c("near_mezra", EventCondition.Op.GREATER_EQUAL, 1)]), 5.0),
+	])
+	event.choices = _choices([
+		_choice("EVT_ELDER_OPT_LEAVE", _effects([_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.MORALE, -6)])),
+		_gated_choice("EVT_ELDER_OPT_CARRY", "EVT_ELDER_OPT_CARRY_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 4)]),
+			_effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.PROVISIONS, -4)])),
+		_choice("EVT_ELDER_OPT_RATION", _effects([_fx(EventEffect.Type.PARTY_HP, -10), _fx(EventEffect.Type.STRESS, 4)])),
+		_checked_choice("EVT_ELDER_OPT_TEND", SkillCheck.make(CharacterStats.Kind.WISDOM, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_ELDER_TEND_OK", _effects([_fx(EventEffect.Type.PARTY_HP, 15, "weakest")]),
+			"EVT_ELDER_TEND_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 4)])),
+	])
+	return event
+
+static func _fever_quarantine() -> GameEvent:
+	var event := _event("evt_fever_quarantine", "EVT_QUARANTINE_TITLE", "EVT_QUARANTINE_TEXT", 0.3)
+	event.cooldown_days = 18
+	event.conditions = _conditions([
+		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
+		_c("plague_here", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_choice("EVT_QUARANTINE_OPT_APART", _effects([_fx(EventEffect.Type.PARTY_HP, -12, "weakest"), _fx(EventEffect.Type.MORALE, -3)])),
+		_checked_choice("EVT_QUARANTINE_OPT_TOGETHER", SkillCheck.make(CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_QUARANTINE_TOGETHER_LUCK", _effects([_fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_QUARANTINE_TOGETHER_SPREAD", _effects([_fx(EventEffect.Type.PARTY_HP, -12, "endurance"), _fx(EventEffect.Type.PARTY_HP, -6, "weakest")])),
+		_gated_choice("EVT_QUARANTINE_OPT_VILLAGE", "EVT_QUARANTINE_OPT_VILLAGE_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 20)]),
+			_effects([_fx(EventEffect.Type.LEAVE_BEHIND), _fx(EventEffect.Type.GOLD, -20)])),
+	])
+	return event
+
+static func _wagon_for_town() -> GameEvent:
+	var event := _event("evt_wagon_for_town", "EVT_WAGON_TOWN_TITLE", "EVT_WAGON_TOWN_TEXT", 0.5)
+	event.cooldown_days = 25
+	event.conditions = _conditions([
+		_c("city_morale", EventCondition.Op.LESS_THAN, 30),
+		_c("wagons", EventCondition.Op.GREATER_EQUAL, 2),
+		_c("days_remaining", EventCondition.Op.LESS_EQUAL, 2),
+	])
+	event.choices = _choices([
+		_choice("EVT_WAGON_TOWN_OPT_GIVE", _effects([_fx(EventEffect.Type.WAGON_LOSE, 1), _fx(EventEffect.Type.REPUTATION, 6), _fx(EventEffect.Type.CITY_MORALE, 20)])),
+		_choice("EVT_WAGON_TOWN_OPT_SELL", _effects([_fx(EventEffect.Type.WAGON_LOSE, 1), _fx(EventEffect.Type.GOLD, 70), _fx(EventEffect.Type.REPUTATION, -4), _fx(EventEffect.Type.CITY_MORALE, 8)])),
+		_choice("EVT_WAGON_TOWN_OPT_REFUSE", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.CITY_MORALE, -8)])),
+		_checked_choice("EVT_WAGON_TOWN_OPT_HALF", SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 0.0),
+			"EVT_WAGON_TOWN_HALF_OK", _effects([_fx(EventEffect.Type.PROVISIONS, -8), _fx(EventEffect.Type.CITY_MORALE, 10), _fx(EventEffect.Type.REPUTATION, 2)]),
+			"EVT_WAGON_TOWN_HALF_BAD", _effects([_fx(EventEffect.Type.WAGON_LOSE, 1), _fx(EventEffect.Type.REPUTATION, -2)])),
+	])
+	return event
+
+static func _starving_roadside() -> GameEvent:
+	var event := _event("evt_starving_roadside", "EVT_STARVING_TITLE", "EVT_STARVING_TEXT", 0.35)
+	event.cooldown_days = 10
+	event.conditions = _conditions([_c("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.5)])
+	event.choices = _choices([
+		_gated_choice("EVT_STARVING_OPT_SHARE", "EVT_STARVING_OPT_SHARE_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.MORALE, 3)])),
+		_choice("EVT_STARVING_OPT_DRIVE", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.MORALE, -2)])),
+		_checked_choice("EVT_STARVING_OPT_HUNT", SkillCheck.make(CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_STARVING_HUNT_OK", _effects([_fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.STRESS, -2)]),
+			"EVT_STARVING_HUNT_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 2)])),
+		_gated_choice("EVT_STARVING_OPT_TAKE", "EVT_STARVING_OPT_TAKE_LOCKED",
+			_conditions([_c("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)]),
+			_effects([_fx(EventEffect.Type.TRIGGER_RECRUIT), _fx(EventEffect.Type.PROVISIONS, -2)])),
+	])
+	return event
+
+static func _hunger_riot() -> GameEvent:
+	var event := _event("evt_hunger_riot", "EVT_RIOT_TITLE", "EVT_RIOT_TEXT", 1.5)
+	event.cooldown_days = 15
+	event.conditions = _conditions([
+		_c("city_morale", EventCondition.Op.LESS_THAN, 20),
+		_c("days_remaining", EventCondition.Op.LESS_EQUAL, 1),
+	])
+	event.choices = _choices([
+		_gated_choice("EVT_RIOT_OPT_GIVE", "EVT_RIOT_OPT_GIVE_LOCKED",
+			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 10)]),
+			_effects([_fx(EventEffect.Type.PROVISIONS, -10), _fx(EventEffect.Type.CITY_MORALE, 15), _fx(EventEffect.Type.REPUTATION, 3)])),
+		_choice("EVT_RIOT_OPT_FORCE", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.REPUTATION, -4), _fx(EventEffect.Type.CITY_MORALE, -10)])),
+		_choice("EVT_RIOT_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 5)])),
+		_checked_choice("EVT_RIOT_OPT_SPEAK", SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 0.0),
+			"EVT_RIOT_SPEAK_OK", _effects([_fx(EventEffect.Type.CITY_MORALE, 5), _fx(EventEffect.Type.REPUTATION, 2)]),
+			"EVT_RIOT_SPEAK_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.CITY_MORALE, -5)])),
 	])
 	return event
 

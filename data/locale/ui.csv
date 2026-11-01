@@ -1372,3 +1372,6 @@
 "UI_CITY_MOOD_UNEASY","tedirgin; herkes erzağını sayıyor","uneasy; everyone counts their stores","","","","","","","","",""
 "UI_CITY_MOOD_HOPEFUL","umutlu; kervana kapı açılıyor","hopeful; the gate opens for the caravan","","","","","","","","",""
 "UI_BRIEF_ROUTE_HUNGRY","Orası aç: götürülen yiyecek oranın hâlini düzeltir ve iyi satar.","They are hungry there: food brought in eases the city and sells well.","","","","","","","","",""
+"DIARY_SACRIFICE_1","Geride bıraktığımız: %s. Yol bunu yazmaz, biz yazarız.","The one we left behind: %s. The road will not write it down, so we do.","","","","","","","","",""
+"DIARY_SACRIFICE_2","%s arkamızdan bakıyordu. Kimse dönüp bakmadı.","%s watched us go. No one looked back.","","","","","","","","",""
+"DIARY_SACRIFICE_3","Bugün kervan hafifledi. %s yoktu, erzak yetti.","Today the caravan grew lighter. %s was gone, and the food was enough.","","","","","","","","",""

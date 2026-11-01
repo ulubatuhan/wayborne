@@ -8003,6 +8003,728 @@
               "type": "LEAVE_BEHIND"
             },
             {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Köyde bırak",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Taşı (bir gün, 4 erzak)",
+          "locked": "Taşı: 4 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -10,
+              "text": "",
+              "type": "PARTY_HP"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kendi tayınını ver (kervanbaşı zayıflar)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Otacı baksın, yürüyebilsin",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 15,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "Sargı ve sıcak su: ertesi sabah kendi ayağıyla yürüyordu.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bakım yetmedi. Bir gün daha kaybettiniz.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 3
+        },
+        {
+          "key": "scarcity_here",
+          "op": "GREATER_EQUAL",
+          "value": 0.4
+        },
+        {
+          "key": "weakest_companion_hp_ratio",
+          "op": "LESS_EQUAL",
+          "value": 0.6
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_elder_burden",
+      "immediate": [],
+      "modifiers": 1,
+      "once": false,
+      "text": "Erzak sayılıyor. Kervanın en yavaşı herkesin yarım gününü yiyor, tayınının da. Köy yakın; kalırsa orada kalır. Kimse söylemiyor, herkes biliyor.",
+      "title": "Yükü Ağır Olan",
+      "triggered_only": false,
+      "weight": 0.3
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -12,
+              "text": "weakest",
+              "type": "PARTY_HP"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Ayrı ateşte yatsın",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "Kimse ayrılmaz",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Ateş düştü, kimse hastalanmadı. Bu sefer.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -12,
+                  "text": "endurance",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": -6,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "Üç gün sonra iki kişi daha öksürüyordu.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "LEAVE_BEHIND"
+            },
+            {
+              "amount": -20,
+              "text": "",
+              "type": "GOLD"
+            }
+          ],
+          "label": "Köydeki şifacıya bırak (20 GG)",
+          "locked": "Şifacı: 20 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 3
+        },
+        {
+          "key": "plague_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 18,
+      "id": "evt_fever_quarantine",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vebalı topraklardayız ve kervandan biri sabaha ateşle uyandı. Yanında yatanlar yerlerini değiştirmek istiyor.",
+      "title": "Ateşli",
+      "triggered_only": false,
+      "weight": 0.3
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "WAGON_LOSE"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 20,
+              "text": "",
+              "type": "CITY_MORALE"
+            }
+          ],
+          "label": "Bir vagonu ver",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "WAGON_LOSE"
+            },
+            {
+              "amount": 70,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 8,
+              "text": "",
+              "type": "CITY_MORALE"
+            }
+          ],
+          "label": "Bir vagonu kıtlık fiyatından sat (+70 GG)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -8,
+              "text": "",
+              "type": "CITY_MORALE"
+            }
+          ],
+          "label": "Reddet",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Pazarlık et: vagon değil, yarım yük",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 10,
+                  "text": "",
+                  "type": "CITY_MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Yarım yüke razı oldular. Kapıda sizi bekleyecekler.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "WAGON_LOSE"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Pazarlık uzadı; gece vagonun birini kendileri sürüp götürdüler.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "city_morale",
+          "op": "LESS_THAN",
+          "value": 30
+        },
+        {
+          "key": "wagons",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        },
+        {
+          "key": "days_remaining",
+          "op": "LESS_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 25,
+      "id": "evt_wagon_for_town",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Varacağınız yer aç. Yolda karşılayan bir heyet bir vagonun yükünü istiyor: çocuklar için, diyorlar.",
+      "title": "Aç Kapı",
+      "triggered_only": false,
+      "weight": 0.5
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -6,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Erzaktan ver (6 erzak)",
+          "locked": "Ver: 6 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Durmadan geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Onlarla birlikte avlan",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bir yaban keçisi düştü. Aile yedi, sizinkiler de.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bütün gün iz sürdünüz; av yoktu.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_RECRUIT"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "En güçlüsünü kervana al (bir ağız daha)",
+          "locked": "Kervana al: yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "party_slots_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "scarcity_here",
+          "op": "GREATER_EQUAL",
+          "value": 0.5
+        }
+      ],
+      "cooldown": 10,
+      "id": "evt_starving_roadside",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun kenarında oturmuş bir aile. Kalkmıyorlar; yalnızca bakıyorlar.",
+      "title": "Yol Kenarındakiler",
+      "triggered_only": false,
+      "weight": 0.35
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -10,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 15,
+              "text": "",
+              "type": "CITY_MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Erzaktan dağıt (10 erzak)",
+          "locked": "Dağıt: 10 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "guard",
+              "type": "TRIGGER_COMBAT"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": -10,
+              "text": "",
+              "type": "CITY_MORALE"
+            }
+          ],
+          "label": "Kalabalığı yarıp geç (savaş)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 5,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Dışarıda bir gün bekle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Kalabalıkla konuş",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "CITY_MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Yüklerin şehre gideceğini anlattın; kalabalık yol açtı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "guard",
+                  "type": "TRIGGER_COMBAT"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "CITY_MORALE"
+                }
+              ],
+              "label": "Biri taş attı, sonra herkes. Muhafızlar araya girdi.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "city_morale",
+          "op": "LESS_THAN",
+          "value": 20
+        },
+        {
+          "key": "days_remaining",
+          "op": "LESS_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 15,
+      "id": "evt_hunger_riot",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Şehrin kapısında aç bir kalabalık. Vagonları görünce yürümeye başlıyorlar. Muhafızlar kapıyı kapatmak üzere.",
+      "title": "Kapıda Kalabalık",
+      "triggered_only": false,
+      "weight": 1.5
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "LEAVE_BEHIND"
+            },
+            {
               "amount": 6,
               "text": "",
               "type": "PROVISIONS"

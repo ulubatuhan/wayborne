@@ -83,6 +83,8 @@ enum Type {
 	# Ticaret lekesi (Y-C26): `amount` gün boyunca pazarlar kervana pahalı
 	# satar, ucuza alır - adın kötüye çıktı.
 	TRADE_STAIN,
+	# Şehrin hâli (Y-C21): `amount` kadar; seferdeyse varılacak şehrin, değilse bulunulanın.
+	CITY_MORALE,
 }
 
 @export var type: Type = Type.GOLD

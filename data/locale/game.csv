@@ -541,3 +541,5 @@
 "EFF_TRADE_STAIN","Adın kötüye çıktı: pazarlar bir süre sana pahalı satar, ucuza alır.","Word of it spreads: for a while markets sell to you dear and buy from you cheap.","","","","","","","","",""
 "EFF_FOLLOWED_OATH","%s, ant kardeşi %s ile birlikte gitti.","%s left with their oath-sibling %s.","","","","","","","","",""
 "LEDGER_CAUSE_FOLLOWED_OATH","ant kardeşinin peşinden gitti","followed their oath-sibling","","","","","","","","",""
+"EFF_CITY_MORALE_UP","Şehrin hâli biraz düzeldi.","The city's state eased a little.","","","","","","","","",""
+"EFF_CITY_MORALE_DOWN","Şehrin hâli kötüleşti.","The city's state grew worse.","","","","","","","","",""

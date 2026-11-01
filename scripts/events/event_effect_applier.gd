@@ -162,6 +162,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			if not place.is_empty():
 				session.ban_location(place)
 				result.lines.append(_t("EFF_BANNED"))
+		EventEffect.Type.CITY_MORALE:
+			var city := session.journey_destination_id if session.is_journey_active() else session.current_location_id
+			session.change_city_morale(city, float(effect.amount))
+			result.lines.append(_t("EFF_CITY_MORALE_UP" if effect.amount > 0 else "EFF_CITY_MORALE_DOWN"))
 		EventEffect.Type.TRADE_STAIN:
 			session.stain_trade(effect.amount)
 			result.lines.append(_t("EFF_TRADE_STAIN"))
@@ -188,6 +192,8 @@ static func _apply_leave_behind(session: GameSession, result: Result) -> void:
 			partner = member
 	if session.dismiss(target, "LEDGER_CAUSE_LEFT_BEHIND"):
 		result.lines.append(_t("EFF_LEFT_BEHIND") % target.character_name)
+		# Feda günlüğe düşer (Y-C22): o akşamın cümlesi bu karar olur.
+		session.note_beat(GameSession.BEAT_SACRIFICE, [target.character_name])
 	# Ant kardeşi geride bırakılanla gider.
 	if partner != null and session.dismiss(partner, "LEDGER_CAUSE_FOLLOWED_OATH"):
 		result.lines.append(_t("EFF_FOLLOWED_OATH") % [partner.character_name, target.character_name])
