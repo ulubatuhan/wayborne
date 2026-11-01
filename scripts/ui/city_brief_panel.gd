@@ -77,9 +77,19 @@ func refresh() -> void:
 	_clear(_memory_box)
 	_clear(_needs_box)
 	_clear(_routes_box)
+	_build_city_mood()
 	_build_memory()
 	_build_needs()
 	_build_routes()
+
+## Şehrin hâli kapıda okunur (Y-C21): kıtlık ve moral, tek cümle.
+func _build_city_mood() -> void:
+	var here := _session.current_location_id
+	var mood := Label.new()
+	mood.text = tr("UI_CITY_MOOD_LINE") % [tr(_session.morale_key(here)), int(round(_session.scarcity_here() * 100.0))]
+	mood.autowrap_mode = TextServer.AUTOWRAP_WORD
+	mood.modulate = URGENT_COLOR if _session.morale_of(here) < GameSession.MORALE_HUNGRY else NOTE_COLOR
+	_memory_box.add_child(mood)
 
 # --- Defterden son satır ---
 
@@ -194,6 +204,14 @@ func _build_route_row(route: TravelRoute) -> VBoxContainer:
 		plague.autowrap_mode = TextServer.AUTOWRAP_WORD
 		plague.modulate = URGENT_COLOR
 		box.add_child(plague)
+
+	# Gidilecek yerin hâli: aç şehre yük götürmek oranın hâlini düzeltir.
+	if _session.morale_of(route.to_location_id) < GameSession.MORALE_HUNGRY:
+		var hungry := Label.new()
+		hungry.text = tr("UI_BRIEF_ROUTE_HUNGRY")
+		hungry.autowrap_mode = TextServer.AUTOWRAP_WORD
+		hungry.modulate = NOTE_COLOR
+		box.add_child(hungry)
 
 	var offers := _session.get_accepted_offers_for_destination(route.to_location_id)
 	var payout := 0

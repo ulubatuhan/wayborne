@@ -2204,6 +2204,7 @@ func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 func advance_day() -> Array[String]:
 	total_days_elapsed += 1
 	plague.step()
+	_drift_city_morale()
 
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
@@ -2582,6 +2583,9 @@ func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
 	# Önce okunuyor: satış baskıyı değiştirmeden önceki şok hali sayılır.
 	if is_profiteering_sale(item_id):
 		profiteering_sales += 1
+	# Aç şehre yiyecek getirmek şehrin hâlini düzeltir (Y-C21).
+	if Scarcity.is_food(item_id):
+		change_city_morale(current_location_id, minf(MORALE_FOOD_CAP, float(quantity) * MORALE_PER_FOOD))
 	market.record_sale(current_location_id, item_id, quantity)
 	# Şehre satılan ilaç hekimin stoğuna girer (Y-C05, kullanıcı notu).
 	if item_id == MarketConditions.MEDICINE_ITEM:
@@ -2635,6 +2639,51 @@ func _hear_road_plague() -> void:
 	var location := WorldMapData.get_location_by_id(place)
 	if location != null and has_plague(place) != knew:
 		ailment_notes.append({"key": "UI_ROAD_PLAGUE_HEARD" if has_plague(place) else "UI_ROAD_PLAGUE_CLEARED", "args": [location.location_name]})
+
+## --- Şehirlerin morali (Y-C21) ---
+## Her şehir arka planda bir hâl taşır (0 isyan eşiği, 100 umut). Kıtlık ve
+## veba onu düşürür; kervanın getirdiği yiyecek ve teslim ettiği yük yükseltir.
+## Hâl fiyatı, işe alınabilecekleri, kapıdaki karşılamayı ve olayları
+## değiştirir. Kayıtta.
+var city_morale: Dictionary = {}
+const MORALE_START: float = 50.0
+const MORALE_DRIFT: float = 2.0
+const MORALE_PER_FOOD: float = 0.5
+const MORALE_FOOD_CAP: float = 15.0
+const MORALE_PER_DELIVERY: float = 6.0
+const MORALE_HUNGRY: float = 30.0
+## Aç şehir yiyeceğe çok verir: moral düştükçe yiyeceğin satış fiyatı artar.
+const HUNGRY_FOOD_SELL_RISE: float = 0.4
+
+func scarcity_here(location_id: String = "") -> float:
+	return Scarcity.at(current_location_id if location_id.is_empty() else location_id, total_days_elapsed)
+
+func morale_of(location_id: String) -> float:
+	return float(city_morale.get(location_id, MORALE_START))
+
+func morale_target(location_id: String) -> float:
+	return clampf(75.0 - 55.0 * scarcity_here(location_id) - (25.0 if has_plague(location_id) else 0.0), 0.0, 100.0)
+
+func change_city_morale(location_id: String, delta: float) -> void:
+	if WorldMapData.get_location_by_id(location_id) != null:
+		city_morale[location_id] = clampf(morale_of(location_id) + delta, 0.0, 100.0)
+
+func _drift_city_morale() -> void:
+	for location in WorldMapData.get_locations():
+		var id := location.location_id
+		var now := morale_of(id)
+		city_morale[id] = move_toward(now, morale_target(id), MORALE_DRIFT)
+
+## Moralin adı (kapıda ve özette): aç ve öfkeli, umutsuz, tedirgin, umutlu.
+func morale_key(location_id: String) -> String:
+	var m := morale_of(location_id)
+	if m < 20.0:
+		return "UI_CITY_MOOD_ANGRY"
+	if m < MORALE_HUNGRY:
+		return "UI_CITY_MOOD_HUNGRY"
+	if m < 55.0:
+		return "UI_CITY_MOOD_UNEASY"
+	return "UI_CITY_MOOD_HOPEFUL"
 
 ## Eski kayıt: model yoksa kurulur ve kaydın gününe kadar ilerletilir.
 const PLAGUE_CATCH_UP_DAYS: int = 400
@@ -3019,7 +3068,7 @@ func _broken_count() -> int:
 
 ## Savaş ya da veba varken kimse yola düşmek istemez (Y-C16).
 func _recruit_world_pressure() -> int:
-	if has_plague(current_location_id):
+	if has_plague(current_location_id) or morale_of(current_location_id) < MORALE_HUNGRY:
 		return 1
 	for entry in world_events.get_active(total_days_elapsed):
 		var kind := int(entry["kind"])
@@ -3459,6 +3508,8 @@ func note_purchase(item: Item, quantity: int, unit_price: int) -> void:
 ## (MarketPricing.freshness_multiplier), aynı ziyarette alınan mal tavanlı.
 func capped_sell_price(item_id: String, market_price: int) -> int:
 	var stain := TRADE_STAIN_SELL if is_trade_stained() else 1.0
+	if Scarcity.is_food(item_id):
+		stain *= 1.0 + maxf(0.0, (MORALE_START - morale_of(current_location_id)) / MORALE_START) * HUNGRY_FOOD_SELL_RISE
 	var price := maxi(1, int(round(float(market_price) * get_freshness(item_id) * stain)))
 	if not bought_here.has(item_id):
 		return price
@@ -3571,8 +3622,10 @@ func _restock_current_location() -> void:
 	market_stock.clear()
 	var location := WorldMapData.get_location_by_id(current_location_id)
 	if location != null:
+		# Kıtlıkta satıcı malını vermek istemez (Y-C21).
+		var withheld := scarcity_here()
 		for item_id in location.stock_per_item:
-			market_stock[item_id] = location.stock_per_item[item_id]
+			market_stock[item_id] = Scarcity.stock_left(int(location.stock_per_item[item_id]), withheld)
 	_restock_recruits()
 
 ## Şehirdeki partiye katılabilecek adaylar (mekân -> aday listesi).
@@ -3890,6 +3943,7 @@ func finish_journey() -> Dictionary:
 		0, caravan.original_merchant_names.size() - int(payout["lost_contracts"])
 	)
 	contracts_delivered += delivered
+	change_city_morale(current_location_id, float(delivered) * MORALE_PER_DELIVERY)
 	# Teslimat **varışta kendiliğinden** oluyor - ayrı bir "teslim et"
 	# ekranı yok, çünkü kervan malı zaten getirdi. Ama bunu hiçbir yer
 	# söylemiyordu: bir playtest oyuncusu Demirkapı'dan Kurtboğazı'na
@@ -4577,6 +4631,7 @@ func to_save_dict() -> Dictionary:
 		"world_events": world_events.to_save_dict(),
 		"plague": plague.to_dict(),
 		"plague_news": plague_news.duplicate(true),
+		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
@@ -4714,6 +4769,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	plague = PlagueWorld.new()
 	plague.load_from_dict(data.get("plague", {}) as Dictionary)
 	plague_news = (data.get("plague_news", {}) as Dictionary).duplicate(true)
+	city_morale = (data.get("city_morale", {}) as Dictionary).duplicate()
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
 	# sayısındayken doğru sığar (bkz. `_sync_wagon_inventories`). Eskiden
@@ -4921,6 +4977,9 @@ func build_event_context() -> Dictionary:
 		"provisions": get_provisions(),
 		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
+		# Kıtlık (Y-C21): yolun gittiği yerin derecesi ve oranın hâli.
+		"scarcity_here": scarcity_here(journey_destination_id if is_journey_active() else ""),
+		"city_morale": morale_of(journey_destination_id if is_journey_active() else current_location_id),
 		# Tarafsız zemine gidiliyor mu (Y-C29: Duvenmor'da kılıç çekilmez).
 		"dest_neutral_ground": 1.0 if journey_destination_id == NEUTRAL_GROUND_ID else 0.0,
 		# Avuçiçi yolu (Y-C34): hacı kafilesi Orvahel'e gider; kervanbaşı Septisist mi.

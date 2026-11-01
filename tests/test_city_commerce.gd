@@ -20,6 +20,7 @@ func suite_name() -> String:
 func run(t) -> void:
 	_test_ban_survives_save(t)
 	_test_convoy_and_driver(t)
+	_test_scarcity_and_city_morale(t)
 	_test_plague_is_a_world_state(t)
 	_test_gokyurt_hospitality(t)
 	_test_caravanserai_rumor_bonus(t)
@@ -666,6 +667,32 @@ func _test_convoy_and_driver(t) -> void:
 	t.ok(pilgrim.hire_driver(), "sürücü tutuldu")
 	if pilgrim.get_duty_holder(DutyCatalog.ARABACI) == null:
 		t.ok(pilgrim.get_duty_multiplier(DutyCatalog.ARABACI) > before, "tutulan sürücü arabacının işini görür")
+
+
+# Y-C21: kıtlık bölgeye göre (Vadi en ağır, Gokyurt en hafif), kışın ağırlaşır,
+# yıllarla artar; stok azalır, yiyecek pahalanır; şehrin morali kıtlıkla düşer,
+# getirilen yiyecek ve teslimatla düzelir; aç şehir yiyeceğe çok verir.
+func _test_scarcity_and_city_morale(t) -> void:
+	t.ok(Scarcity.degree("vadi", 100) > Scarcity.degree("gocebe", 100) + 0.3, "Vadi Gokyurt'tan çok daha kıt")
+	t.ok(Scarcity.degree("vadi", Scarcity.WINTER_PEAK_DAY) > Scarcity.degree("vadi", Scarcity.WINTER_PEAK_DAY - 180), "kış yazdan ağır")
+	t.ok(Scarcity.degree("dag", 700) > Scarcity.degree("dag", 340), "kıtlık yıllarla ağırlaşır")
+	t.ok(Scarcity.stock_left(20, 0.5) < 20, "kıtlıkta stok azalır")
+	t.ok(Scarcity.buy_factor("test_grain", 0.5) > Scarcity.buy_factor("silk", 0.5), "yiyecek ötekinden çok pahalanır")
+	var session := _session()
+	var here := session.current_location_id
+	for _d in 60:
+		session.advance_day()
+	t.ok(absf(session.morale_of(here) - session.morale_target(here)) < 2.5, "moral şehrin hâline doğru kayar")
+	session.city_morale[here] = 10.0
+	var hungry_price := session.capped_sell_price("test_grain", 100)
+	session.city_morale[here] = 90.0
+	t.ok(hungry_price > session.capped_sell_price("test_grain", 100), "aç şehir yiyeceğe çok verir")
+	session.city_morale[here] = 10.0
+	session.record_sale("test_grain", 20)
+	t.ok(session.morale_of(here) > 10.0, "getirilen yiyecek şehrin hâlini düzeltir")
+	var copy := GameSession.new()
+	copy.load_from_dict(session.to_save_dict())
+	t.eq(copy.morale_of(here), session.morale_of(here), "moral kayıttan döner")
 
 
 # Y-C29: Duvenmor yasağı kayıtta durur.

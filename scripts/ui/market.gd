@@ -952,6 +952,7 @@ func _get_buy_price(item: Item) -> int:
 		item, _current_location, _session.market, _session.total_days_elapsed
 	))
 	price *= _session.get_buy_price_multiplier()
+	price *= Scarcity.buy_factor(item.item_id, _session.scarcity_here())
 	if item.item_id == GameSession.PROVISIONS_ITEM_ID:
 		price *= _session.get_provision_cost_multiplier()
 	# Tellal pazarlığı ucuzlatır - tıpkı kültür perki gibi bir çarpan daha.
