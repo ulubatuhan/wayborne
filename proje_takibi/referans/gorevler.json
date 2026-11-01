@@ -197,14 +197,14 @@
    "bolum": "1",
    "alan": "İsim kuralı",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/01_isim_kurali.md",
    "paket": "P02",
    "sira": 13,
    "kim": "C",
    "commit": "8b9db66",
-   "not": "Codex PDF Windows yazı tipleriyle yeniden üretildi; metinde yasaklı sözcük yok (pypdf ile tarandı)."
+   "not": "Codex PDF Windows yazı tipleriyle yeniden üretildi; metinde yasaklı sözcük yok (pypdf ile tarandı). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "1.5",
@@ -212,14 +212,14 @@
    "bolum": "1",
    "alan": "İsim kuralı",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/01_isim_kurali.md",
    "paket": "P02",
    "sira": 14,
    "kim": "C",
    "commit": "8b9db66",
-   "not": "git grep sıfır; kural tests/test_naming_rule.gd ile korunuyor."
+   "not": "git grep sıfır; kural tests/test_naming_rule.gd ile korunuyor. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "3.1",
@@ -347,13 +347,13 @@
    "bolum": "4",
    "alan": "Kod: kalite",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/04_kod_kalitesi.md",
    "paket": "P02",
    "sira": 23,
    "kim": "CK",
-   "not": "2026-10-20: EventCatalog._event başlık ve metin anahtarını açık alıyor (71 çağrı); Düşenler sayfasının hikâye özeti de açık tablodan (CampStory.STORY_LINE_KEYS). Kullanıcıya sorulmadı: kural CLAUDE.md'de zaten açık."
+   "not": "2026-10-20: EventCatalog._event başlık ve metin anahtarını açık alıyor (71 çağrı); Düşenler sayfasının hikâye özeti de açık tablodan (CampStory.STORY_LINE_KEYS). Kullanıcıya sorulmadı: kural CLAUDE.md'de zaten açık. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "4.3",
@@ -488,7 +488,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 1,
@@ -496,7 +496,7 @@
    "sira": 32,
    "kim": "CO",
    "commit": "7083b90",
-   "not": "243 satır (CityView ve eski menü arka planı tarihçesi) arşive taşındı; dersler iki maddede kaldı."
+   "not": "243 satır (CityView ve eski menü arka planı tarihçesi) arşive taşındı; dersler iki maddede kaldı. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "6.3",
@@ -535,7 +535,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Pazarlama ve Steam",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 5,
@@ -543,7 +543,7 @@
    "sira": 35,
    "kim": "CO",
    "commit": "7083b90",
-   "not": "Çeviri sırası ve 50 terimlik sözlük."
+   "not": "Çeviri sırası ve 50 terimlik sözlük. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "11.1",
@@ -581,14 +581,14 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/12_sehir_ve_yol_gorunumu.md",
    "paket": "P04",
    "sira": 38,
    "kim": "C",
    "commit": "0b5e4b6",
-   "not": "Kod ve test önceki turda; gözle doğrulanacak."
+   "not": "Kod ve test önceki turda; gözle doğrulanacak. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "12.2d",
@@ -641,14 +641,14 @@
    "bolum": "5",
    "alan": "Performans",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/05_performans.md",
    "paket": "P04",
    "sira": 42,
    "kim": "C",
    "commit": "9d924e7",
-   "not": "Ortam animasyonları görünmezken çizilmiyor ve en çok 30 Hz; terazi dengede işlemeyi bırakıyor; kumanda ve geçiş elle denenecek."
+   "not": "Ortam animasyonları görünmezken çizilmiyor ve en çok 30 Hz; terazi dengede işlemeyi bırakıyor; kumanda ve geçiş elle denenecek. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-H04",
@@ -656,7 +656,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Arayüz ve ilk saat",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 1,
@@ -664,7 +664,7 @@
    "sira": 43,
    "kim": "C",
    "commit": "9c85ade",
-   "not": "Paneller Esc'i ele alıyor; karar panelleri yutuyor; yapısal test eklendi."
+   "not": "Paneller Esc'i ele alıyor; karar panelleri yutuyor; yapısal test eklendi. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "10.1",
@@ -672,14 +672,14 @@
    "bolum": "10",
    "alan": "Yol: figürler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/10_yol_figurleri.md",
    "paket": "P05",
    "sira": 44,
    "kim": "CO",
    "commit": "ba76d99",
-   "not": "Binici at boyunun %5'i geride; iniş noktası aynı."
+   "not": "Binici at boyunun %5'i geride; iniş noktası aynı. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "10.2",
@@ -687,14 +687,14 @@
    "bolum": "10",
    "alan": "Yol: figürler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/10_yol_figurleri.md",
    "paket": "P05",
    "sira": 45,
    "kim": "CO",
    "commit": "ba76d99",
-   "not": "Oturan figürde kol salınımı yok; ride klibi dinlenme karesinde."
+   "not": "Oturan figürde kol salınımı yok; ride klibi dinlenme karesinde. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "10.4",
@@ -702,14 +702,14 @@
    "bolum": "10",
    "alan": "Yol: figürler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/10_yol_figurleri.md",
    "paket": "P05",
    "sira": 46,
    "kim": "CO",
    "commit": "ba76d99",
-   "not": "Ok öküzün boynuna uzanıyor, boyunduruk üst katmanda."
+   "not": "Ok öküzün boynuna uzanıyor, boyunduruk üst katmanda. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "10.3",
@@ -752,14 +752,14 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
    "paket": "P05",
    "sira": 49,
    "kim": "CI",
-   "not": "2026-10-20 kullanıcı: lore'a bağlı değil."
+   "not": "2026-10-20 kullanıcı: lore'a bağlı değil. | 2026-11-01 kayıt düzeltmesi: DEVAM_NOTU C3: 42 saç kümesi ve 42 HD küme oyunda (sarık/sakal CC0 kaynak bulununca)."
   },
   {
    "id": "Y-G12",
@@ -783,7 +783,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -791,7 +791,7 @@
    "sira": 51,
    "kim": "CO",
    "commit": "8b303d0",
-   "not": "Savaş kurdu kartın rengine çekildi; vagon zaten tek kaynak."
+   "not": "Savaş kurdu kartın rengine çekildi; vagon zaten tek kaynak. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "5.5",
@@ -814,13 +814,13 @@
    "bolum": "5",
    "alan": "Performans",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/05_performans.md",
    "paket": "P05",
    "sira": 53,
    "kim": "CK",
-   "not": "2026-10-20: project.godot [importer_defaults] texture mipmaps; içe aktarılmış dokuda çalışma anı kopyası yok; yerel 1537 .import çevrildi ve yeniden içe aktarıldı (596 -> 855 MB önbellek). Commit bd9e560."
+   "not": "2026-10-20: project.godot [importer_defaults] texture mipmaps; içe aktarılmış dokuda çalışma anı kopyası yok; yerel 1537 .import çevrildi ve yeniden içe aktarıldı (596 -> 855 MB önbellek). Commit bd9e560. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "5.3",
@@ -828,14 +828,14 @@
    "bolum": "5",
    "alan": "Performans",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/05_performans.md",
    "paket": "P05",
    "sira": 54,
    "kim": "C",
    "commit": "9534722",
-   "not": "LRU çıkarma (96 küme) ve ölçüm raporu."
+   "not": "LRU çıkarma (96 küme) ve ölçüm raporu. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "5.4",
@@ -975,14 +975,14 @@
    "bolum": "8",
    "alan": "Dünya haritası",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/08_dunya_haritasi.md",
    "paket": "P06",
    "sira": 63,
    "kim": "CO",
    "commit": "c59fb3a",
-   "not": "126 etikete opak kâğıt halesi, yazı IM FELL; 161+85 karo yeniden yazıldı."
+   "not": "126 etikete opak kâğıt halesi, yazı IM FELL; 161+85 karo yeniden yazıldı. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "8.8",
@@ -1020,7 +1020,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C01"
    ],
@@ -1030,7 +1030,7 @@
    "sira": 66,
    "kim": "C",
    "commit": "824187d",
-   "not": "İlkbahar su basar, yaz kurutur, kış dağı yavaşlatır; kestirme -%20 gün, orta üçte bir dağ/orman, tehlike +15 (boş pay); test TEST_PLANI.md'de."
+   "not": "İlkbahar su basar, yaz kurutur, kış dağı yavaşlatır; kestirme -%20 gün, orta üçte bir dağ/orman, tehlike +15 (boş pay); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-F10",
@@ -1038,7 +1038,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 2,
@@ -1046,7 +1046,7 @@
    "sira": 67,
    "kim": "C",
    "commit": "cefadb6",
-   "not": "Planlayıcıda taban, yol durumu, dünya olayı, zamanla büyüme; test TEST_PLANI.md'de."
+   "not": "Planlayıcıda taban, yol durumu, dünya olayı, zamanla büyüme; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "8.10",
@@ -1054,14 +1054,14 @@
    "bolum": "8",
    "alan": "Dünya haritası",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/08_dunya_haritasi.md",
    "paket": "P06",
    "sira": 68,
    "kim": "CO",
    "commit": "4eca777",
-   "not": "Çarpan ton katmanı, kararma eğrisi yolun gökyüzüyle aynı; test TEST_PLANI.md'de."
+   "not": "Çarpan ton katmanı, kararma eğrisi yolun gökyüzüyle aynı; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "8.11",
@@ -1069,7 +1069,7 @@
    "bolum": "8",
    "alan": "Dünya haritası",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "8.10"
    ],
@@ -1078,7 +1078,7 @@
    "sira": 69,
    "kim": "CO",
    "commit": "4eca777",
-   "not": "250 ışık, türe göre (şehir 6-12, kasaba 3-5, köy 1-2, harabe yok); test TEST_PLANI.md'de."
+   "not": "250 ışık, türe göre (şehir 6-12, kasaba 3-5, köy 1-2, harabe yok); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-G09",
@@ -1086,7 +1086,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "8.1",
     "8.2"
@@ -1097,7 +1097,7 @@
    "sira": 70,
    "kim": "CO",
    "commit": "4eca777",
-   "not": "GameSession.map_trail/journey_camps kayıtta; test TEST_PLANI.md'de."
+   "not": "GameSession.map_trail/journey_camps kayıtta; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turunda düzeltildi: kamp işareti renksiz mürekkep çadır."
   },
   {
    "id": "Y-C14",
@@ -1121,7 +1121,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 2,
@@ -1129,7 +1129,7 @@
    "sira": 72,
    "kim": "C",
    "commit": "abc9d82",
-   "not": "Varışta görülen fiyat yazılır, 20 günden eski soluk; söylenti 2-6 gün eski ve yüzde 25 yanlış; test TEST_PLANI.md'de."
+   "not": "Varışta görülen fiyat yazılır, 20 günden eski soluk; söylenti 2-6 gün eski ve yüzde 25 yanlış; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C11",
@@ -1137,7 +1137,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 2,
@@ -1145,7 +1145,7 @@
    "sira": 73,
    "kim": "C",
    "commit": "6014abe",
-   "not": "Satırda kısa etiketler, üstüne gelince katman başına bir cümle; test TEST_PLANI.md'de."
+   "not": "Satırda kısa etiketler, üstüne gelince katman başına bir cümle; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C19",
@@ -1153,7 +1153,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C01"
    ],
@@ -1163,7 +1163,7 @@
    "sira": 74,
    "kim": "C",
    "commit": "9b79738",
-   "not": "Al-sat sömürüsü (kendi alımının şişirdiği fiyata geri satış) %90 tavanla kapandı; test TEST_PLANI.md'de."
+   "not": "Al-sat sömürüsü (kendi alımının şişirdiği fiyata geri satış) %90 tavanla kapandı; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B07",
@@ -1171,7 +1171,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1179,7 +1179,7 @@
    "sira": 75,
    "kim": "C",
    "commit": "05ce4d8",
-   "not": "Erzak payı ve planlayıcı sözü değişmedi; çeşni yalnız sofra açıkken; test TEST_PLANI.md'de."
+   "not": "Erzak payı ve planlayıcı sözü değişmedi; çeşni yalnız sofra açıkken; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B06",
@@ -1187,7 +1187,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1195,7 +1195,7 @@
    "sira": 76,
    "kim": "C",
    "commit": "fa60be3",
-   "not": "Av 10 erzak; köy 5 ve 4.7 altın/erzak (şehir 4); toplama +10 erzak, +1 gün; test TEST_PLANI.md'de."
+   "not": "Av 10 erzak; köy 5 ve 4.7 altın/erzak (şehir 4); toplama +10 erzak, +1 gün; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C02",
@@ -1221,7 +1221,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C02"
    ],
@@ -1231,7 +1231,7 @@
    "sira": 78,
    "kim": "C",
    "commit": "ee5ea65",
-   "not": "Hırsız kaçar, çaresiz tehlikede döner, kinci kavga çıkarır, sadık erzak paylaşır; test TEST_PLANI.md'de."
+   "not": "Hırsız kaçar, çaresiz tehlikede döner, kinci kavga çıkarır, sadık erzak paylaşır; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C12",
@@ -1272,7 +1272,7 @@
    "bolum": "10b",
    "alan": "Yol: deneyim önerileri",
    "oncelik": "Öneri",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "11.1"
    ],
@@ -1281,7 +1281,7 @@
    "sira": 81,
    "kim": "C",
    "commit": "8d435e1",
-   "not": "Figür-kişi eşlemesi, RoadBalloon, RoadChatter, backstory/rapport, beş yeni defter türü; test TEST_PLANI.md'de."
+   "not": "Figür-kişi eşlemesi, RoadBalloon, RoadChatter, backstory/rapport, beş yeni defter türü; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B01",
@@ -1289,7 +1289,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "11.1"
    ],
@@ -1299,7 +1299,7 @@
    "sira": 82,
    "kim": "C",
    "commit": "dd0d737",
-   "not": "R0 ve R1 kodda; R1 görsel onayı ONAY_PAKETI'nde."
+   "not": "R0 ve R1 kodda; R1 görsel onayı ONAY_PAKETI'nde. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "R1",
@@ -1307,7 +1307,7 @@
    "bolum": "10b",
    "alan": "Yol: deneyim önerileri",
    "oncelik": "Öneri",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "R0"
    ],
@@ -1316,7 +1316,7 @@
    "sira": 83,
    "kim": "CO",
    "commit": "dd0d737",
-   "not": "15 hikâye (5 geçmiş x 3 bölüm) tr/en; test TEST_PLANI.md'de."
+   "not": "15 hikâye (5 geçmiş x 3 bölüm) tr/en; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C17",
@@ -1324,7 +1324,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-B01"
    ],
@@ -1334,7 +1334,7 @@
    "sira": 84,
    "kim": "CO",
    "commit": "dd0d737",
-   "not": "Geçmiş ve hedef her yoldaşta, üç kartlık kişisel zincir kamp hikâyesi olarak, bağ kayıtta; test TEST_PLANI.md'de."
+   "not": "Geçmiş ve hedef her yoldaşta, üç kartlık kişisel zincir kamp hikâyesi olarak, bağ kayıtta; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B03",
@@ -1342,7 +1342,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "11.1"
    ],
@@ -1352,7 +1352,7 @@
    "sira": 85,
    "kim": "C",
    "commit": "e87e40e",
-   "not": "Dört tür x 2-3 gerçek; gerçek kayıtta; test TEST_PLANI.md'de."
+   "not": "Dört tür x 2-3 gerçek; gerçek kayıtta; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-F09",
@@ -1360,7 +1360,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1368,7 +1368,7 @@
    "sira": 86,
    "kim": "CO",
    "commit": "40276b9",
-   "not": "Tasarım notu docs/design_notes/gorev_rolleri.md; eski kayıt göçü; test TEST_PLANI.md'de."
+   "not": "Tasarım notu docs/design_notes/gorev_rolleri.md; eski kayıt göçü; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B04",
@@ -1376,7 +1376,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1384,7 +1384,7 @@
    "sira": 87,
    "kim": "C",
    "commit": "40276b9",
-   "not": "Rol sahibi kendi bölgesinde saatlik %3.5 x güç; test TEST_PLANI.md'de."
+   "not": "Rol sahibi kendi bölgesinde saatlik %3.5 x güç; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B12",
@@ -1392,7 +1392,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "12.2c"
    ],
@@ -1402,7 +1402,7 @@
    "sira": 88,
    "kim": "C",
    "commit": "40276b9",
-   "not": "Öncü +1 stres/gün; nöbet ertesi günün tehlikesini düşürür; test TEST_PLANI.md'de."
+   "not": "Öncü +1 stres/gün; nöbet ertesi günün tehlikesini düşürür; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turunda düzeltildi: onay kutuları görünür."
   },
   {
    "id": "Y-B02",
@@ -1410,7 +1410,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1418,7 +1418,7 @@
    "sira": 89,
    "kim": "C",
    "commit": "c330b93",
-   "not": "Sessizlik ihtimali artırır, ağır karttan sonra rahatlama, zorda ağır kart seyrek; gece işaret x1.5, ateş/nöbet/ışık önler; test TEST_PLANI.md'de."
+   "not": "Sessizlik ihtimali artırır, ağır karttan sonra rahatlama, zorda ağır kart seyrek; gece işaret x1.5, ateş/nöbet/ışık önler; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B05",
@@ -1426,7 +1426,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1434,7 +1434,7 @@
    "sira": 90,
    "kim": "C",
    "commit": "f92a1cc",
-   "not": "Beş hava, yedi karar; test TEST_PLANI.md'de."
+   "not": "Beş hava, yedi karar; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C20",
@@ -1442,7 +1442,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1450,7 +1450,7 @@
    "sira": 91,
    "kim": "C",
    "commit": "f92a1cc",
-   "not": "Karanlıkta ışıksız yürüyüş takat ve tehlike bedeli; fener 1 yağ/gece, meşale 2/gece; CC0 fener/meşale modeli ve sesi sonraki tur; test TEST_PLANI.md'de."
+   "not": "Karanlıkta ışıksız yürüyüş takat ve tehlike bedeli; fener 1 yağ/gece, meşale 2/gece; CC0 fener/meşale modeli ve sesi sonraki tur; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-B10",
@@ -1458,7 +1458,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1466,7 +1466,7 @@
    "sira": 92,
    "kim": "CO",
    "commit": "b8ba074",
-   "not": "Askerî konvoy (borç ve arama), mülteci (minnet ve yoldaş), hacı (mevcut zincir), rakip tüccar (bilgi satın al, iftira); test TEST_PLANI.md'de."
+   "not": "Askerî konvoy (borç ve arama), mülteci (minnet ve yoldaş), hacı (mevcut zincir), rakip tüccar (bilgi satın al, iftira); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turunda düzeltildi: kullanıcı: başka kervanların kendi figürü şimdilik gerekmez."
   },
   {
    "id": "Y-B11",
@@ -1474,7 +1474,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1482,7 +1482,7 @@
    "sira": 93,
    "kim": "C",
    "commit": "a31c52c",
-   "not": "Prosedürel çizim (CC0 model sonraki tur); test TEST_PLANI.md'de."
+   "not": "Prosedürel çizim (CC0 model sonraki tur); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turunda düzeltildi: yol hafızası işaretleri büyütüldü."
   },
   {
    "id": "Y-B08",
@@ -1506,7 +1506,7 @@
    "bolum": "10b",
    "alan": "Yol: deneyim önerileri",
    "oncelik": "Öneri",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "R0"
    ],
@@ -1514,7 +1514,7 @@
    "paket": "P08",
    "sira": 95,
    "kim": "CO",
-   "not": "#7 günün cümlesi (Y-B08) kullanıcı kararı bekliyor (serbest metin mi); test TEST_PLANI.md'de.",
+   "not": "#7 günün cümlesi (Y-B08) kullanıcı kararı bekliyor (serbest metin mi); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı.",
    "commit": "a31c52c"
   },
   {
@@ -1539,7 +1539,7 @@
    "bolum": "10b",
    "alan": "Yol: deneyim önerileri",
    "oncelik": "Öneri",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "R0"
    ],
@@ -1547,7 +1547,7 @@
    "paket": "P08",
    "sira": 97,
    "kim": "C",
-   "not": "#15 gece yürüyüşü Y-C20'de; #16 v1 kart ve günlük (görsel v2: vagonlar suya girer, sonraki tur); test TEST_PLANI.md'de.",
+   "not": "#15 gece yürüyüşü Y-C20'de; #16 v1 kart ve günlük (görsel v2: vagonlar suya girer, sonraki tur); test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı.",
    "commit": "4d5f4ed"
   },
   {
@@ -1571,7 +1571,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-B01",
     "Y-B02",
@@ -1583,7 +1583,7 @@
    "sira": 99,
    "kim": "C",
    "commit": "4017eda",
-   "not": "Ölçüm hedefi tutmazsa SPEEDS tek satırla geri açılır; test TEST_PLANI.md'de."
+   "not": "Ölçüm hedefi tutmazsa SPEEDS tek satırla geri açılır; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C07",
@@ -1591,7 +1591,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1599,7 +1599,7 @@
    "sira": 100,
    "kim": "C",
    "commit": "5f32931",
-   "not": "Yük üçte bir, vagon feda (enkaz yolda), artçı darbe alır; test TEST_PLANI.md'de."
+   "not": "Yük üçte bir, vagon feda (enkaz yolda), artçı darbe alır; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C08",
@@ -1607,7 +1607,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1615,7 +1615,7 @@
    "sira": 101,
    "kim": "C",
    "commit": "5f32931",
-   "not": "Reis lideri, kurt en yaralıyı (oran), muhafız Kıyı'dakini bitirmez; test TEST_PLANI.md'de."
+   "not": "Reis lideri, kurt en yaralıyı (oran), muhafız Kıyı'dakini bitirmez; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-D06",
@@ -1623,7 +1623,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Ölüm, soy ve kalıcılık",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1631,7 +1631,7 @@
    "sira": 102,
    "kim": "C",
    "commit": "5f32931",
-   "not": "Dört kip son kötü huydan; ekran efekti yok; yol kartı; test TEST_PLANI.md'de."
+   "not": "Dört kip son kötü huydan; ekran efekti yok; yol kartı; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C03",
@@ -1639,7 +1639,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1647,7 +1647,7 @@
    "sira": 103,
    "kim": "C",
    "commit": "5d4018d",
-   "not": "Tablolar data/config/loot.json; test TEST_PLANI.md'de."
+   "not": "Tablolar data/config/loot.json; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C04",
@@ -1655,7 +1655,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1663,7 +1663,7 @@
    "sira": 104,
    "kim": "C",
    "commit": "5d4018d",
-   "not": "Sargı +8 can ve kanama, iksir +12 can ve Kıyı'da direnç +20; test TEST_PLANI.md'de."
+   "not": "Sargı +8 can ve kanama, iksir +12 can ve Kıyı'da direnç +20; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-F03",
@@ -1671,7 +1671,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C04"
    ],
@@ -1681,7 +1681,7 @@
    "sira": 105,
    "kim": "C",
    "commit": "5d4018d",
-   "not": "Her tarifin tüketicisi RecipeCatalog.OUTPUT_USES'ta; test TEST_PLANI.md'de."
+   "not": "Her tarifin tüketicisi RecipeCatalog.OUTPUT_USES'ta; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-F04T",
@@ -1707,13 +1707,14 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
    "paket": "P09",
    "sira": 107,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-01 kayıt düzeltmesi: DEVAM_NOTU C4: 36 ekipman oyunda (24527c4)."
   },
   {
    "id": "Y-C05",
@@ -1721,7 +1722,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1729,7 +1730,7 @@
    "sira": 108,
    "kim": "C",
    "commit": "c4a5782",
-   "not": "5 dert; veba şehrinde varışta bulaşma; test TEST_PLANI.md'de."
+   "not": "5 dert; veba şehrinde varışta bulaşma; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-F01",
@@ -1737,7 +1738,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1745,7 +1746,7 @@
    "sira": 109,
    "kim": "CO",
    "commit": "4af6c2f",
-   "not": "docs/design_notes/moral_ve_takat.md; kod onaydan sonra. | 2026-10-19 karar: not onaylandı; kod yazılacak. | 2026-10-20: kişi başına yorgunluk (0-100), kervanın takati en yorgun kişiye bağlı; normal tempo yavaşlamaz, yalnız hızlı tempo kilitlenir; savaşta küçük isabet/kaçınma cezası. test_fatigue. Commit 4af6c2f."
+   "not": "docs/design_notes/moral_ve_takat.md; kod onaydan sonra. | 2026-10-19 karar: not onaylandı; kod yazılacak. | 2026-10-20: kişi başına yorgunluk (0-100), kervanın takati en yorgun kişiye bağlı; normal tempo yavaşlamaz, yalnız hızlı tempo kilitlenir; savaşta küçük isabet/kaçınma cezası. test_fatigue. Commit 4af6c2f. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C16",
@@ -1753,7 +1754,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1761,7 +1762,7 @@
    "sira": 110,
    "kim": "C",
    "commit": "ba7b508",
-   "not": "Pano 1-2 kişi, lonca 1, savaş/vebada -1; fiyat +%30; test TEST_PLANI.md'de."
+   "not": "Pano 1-2 kişi, lonca 1, savaş/vebada -1; fiyat +%30; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C15",
@@ -1769,7 +1770,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1777,7 +1778,7 @@
    "sira": 111,
    "kim": "C",
    "commit": "c890afe",
-   "not": "Evre 10 ve 25 seferde; pusu, savaş/veba/haraç haberi, rakip kervan, gümrük sıklaşır; yükselen haraç tutarı sonraki tur; test TEST_PLANI.md'de."
+   "not": "Evre 10 ve 25 seferde; pusu, savaş/veba/haraç haberi, rakip kervan, gümrük sıklaşır; yükselen haraç tutarı sonraki tur; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C09",
@@ -1802,7 +1803,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P3",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-E06"
    ],
@@ -1812,7 +1813,7 @@
    "sira": 113,
    "kim": "C",
    "commit": "dcd1edc",
-   "not": "Ağırlık 0.08, tehlike 0.35+, bir kez; lore kararı (Y-E06) metni değiştirebilir; test TEST_PLANI.md'de."
+   "not": "Ağırlık 0.08, tehlike 0.35+, bir kez; lore kararı (Y-E06) metni değiştirebilir; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-D01",
@@ -1820,7 +1821,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Ölüm, soy ve kalıcılık",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1828,7 +1829,7 @@
    "sira": 114,
    "kim": "C",
    "commit": "897b6d2",
-   "not": "Standart = bugünkü denge; test TEST_PLANI.md'de."
+   "not": "Standart = bugünkü denge; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turunda düzeltildi: Kader Modu kutusu görünür, stat satırları düzeldi."
   },
   {
    "id": "Y-D04",
@@ -1850,7 +1851,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Ölüm, soy ve kalıcılık",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 4,
@@ -1858,7 +1859,7 @@
    "sira": 116,
    "kim": "C",
    "commit": "20d8861",
-   "not": "Arşiv user://lineage_archive.json; ün payı %20, tavan 6."
+   "not": "Arşiv user://lineage_archive.json; ün payı %20, tavan 6. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-D05",
@@ -1989,7 +1990,7 @@
    "bolum": "13",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 5,
@@ -1997,7 +1998,7 @@
    "sira": 124,
    "kim": "C",
    "commit": "35a0db9",
-   "not": "Defter sayfası kaydı ve Codex otomatik sayfa aracı yazıldı; dışa aktarım ve PDF hiç koşmadı, \"71 sayfa\" doğrulanmadı. | 2026-10-20: dışa aktarım (71 olay) ve PDF (110 sayfa) koşturuldu; kapak sayıları veriden. Commit f935975."
+   "not": "Defter sayfası kaydı ve Codex otomatik sayfa aracı yazıldı; dışa aktarım ve PDF hiç koşmadı, \"71 sayfa\" doğrulanmadı. | 2026-10-20: dışa aktarım (71 olay) ve PDF (110 sayfa) koşturuldu; kapak sayıları veriden. Commit f935975. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.1",
@@ -2005,7 +2006,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "oncelik_eski": "P2",
@@ -2013,7 +2014,7 @@
    "sira": 125,
    "kim": "CO",
    "commit": "-",
-   "not": "Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirildi; tools/ui_kit_ink.py ile mürekkep ve palet renklerine boyandı (build/ui_kit); önizleme referans/taslaklar/y_91_ui_kit.png. Seçim köşebendinin ortası dolu çıktı. Onaydan sonra temaya bağlanır. | 2026-10-19 karar: beklet: kit, önceki düzeltmelerle birlikte ilgili sahnelerde örnekle gösterilecek. | 2026-10-20 kullanıcı kararı: köşebentler kaldırıldı (select_corner kitten ve örneklerden çıktı). | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K8): kit plakaları ipucu ve fiş, başlık şeridi pazar yan panellerinde, olay kartı FRAMED_PANEL, ilk seçenek ve taverna sohbet düğmesi PRIMARY_BUTTON; test_waybook_theme kilitliyor."
+   "not": "Kenney UI Pack RPG Expansion + Fantasy UI Borders (CC0) indirildi; tools/ui_kit_ink.py ile mürekkep ve palet renklerine boyandı (build/ui_kit); önizleme referans/taslaklar/y_91_ui_kit.png. Seçim köşebendinin ortası dolu çıktı. Onaydan sonra temaya bağlanır. | 2026-10-19 karar: beklet: kit, önceki düzeltmelerle birlikte ilgili sahnelerde örnekle gösterilecek. | 2026-10-20 kullanıcı kararı: köşebentler kaldırıldı (select_corner kitten ve örneklerden çıktı). | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K8): kit plakaları ipucu ve fiş, başlık şeridi pazar yan panellerinde, olay kartı FRAMED_PANEL, ilk seçenek ve taverna sohbet düğmesi PRIMARY_BUTTON; test_waybook_theme kilitliyor. | 2026-11-01 doğrulama turunda düzeltildi: olay kartı içi opak, kart 820 px, son düğme çerçevenin içinde."
   },
   {
    "id": "Y-G11T",
@@ -2135,7 +2136,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2143,7 +2144,7 @@
    "sira": 133,
    "kim": "CO",
    "commit": "-",
-   "not": "Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir. | 2026-10-19 karar: insanların ışığı ortama aykırı; gece/akşam çok daha az insan; herkes yürüyor, sahne kurgulanmalı (duran, konuşan, satan). | 2026-10-21 uygulandı (K12): TownsfolkLayer; gece 4, akşam +5 kişi, arka plandan ışık örneklenir, bekçi feneriyle; screenshot_city_moods.gd."
+   "not": "Oyunun gövde ve giysi kareleriyle meydanda halk; kervan yok. Uygulamada kalabalık ayrı katman: town_scene içinde sahne ışığı ve örtmeyle render, saatle yoğunluk (gece az, pazar günü çok), krizde (9.3) azalır ve yüzler değişir. | 2026-10-19 karar: insanların ışığı ortama aykırı; gece/akşam çok daha az insan; herkes yürüyor, sahne kurgulanmalı (duran, konuşan, satan). | 2026-10-21 uygulandı (K12): TownsfolkLayer; gece 4, akşam +5 kişi, arka plandan ışık örneklenir, bekçi feneriyle; screenshot_city_moods.gd. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.3",
@@ -2151,7 +2152,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "9.1"
    ],
@@ -2160,7 +2161,7 @@
    "sira": 134,
    "kim": "CO",
    "commit": "-",
-   "not": "Piksel hizalı renk ve ışık türetimi; gerçek uygulamada gök town_post adım 1de varyanta göre değişecek (taslakta ay her varyantta kalıyor). Kalabalık ve hasar katmanları Y-G10T ile. | 2026-10-19 karar: sabah/gündüz/akşam/gece ve her şehre kültüre göre ayrı varyant (N33 ile birlikte). | 2026-10-20: 27 yerleşim x sabah/gündüz/akşam yeniden render ediliyor (town_phases.py, towns_phases.json, kültürün ufku korunur); CityFront.background_path saate göre seçer. Denetimde akşam göğü mordan nötr koyu taşa çekildi, sabah güneşi yumuşak kenarlı. Render bitince görsel kontrol ve commit. | 2026-10-20: 81 evre resmi render edildi ve denetlendi; mor gece gökleri town_post.tame_palette ile arduvaza, sabah ılık ve puslu. Commit 0b7eeeb; test_phases_audio."
+   "not": "Piksel hizalı renk ve ışık türetimi; gerçek uygulamada gök town_post adım 1de varyanta göre değişecek (taslakta ay her varyantta kalıyor). Kalabalık ve hasar katmanları Y-G10T ile. | 2026-10-19 karar: sabah/gündüz/akşam/gece ve her şehre kültüre göre ayrı varyant (N33 ile birlikte). | 2026-10-20: 27 yerleşim x sabah/gündüz/akşam yeniden render ediliyor (town_phases.py, towns_phases.json, kültürün ufku korunur); CityFront.background_path saate göre seçer. Denetimde akşam göğü mordan nötr koyu taşa çekildi, sabah güneşi yumuşak kenarlı. Render bitince görsel kontrol ve commit. | 2026-10-20: 81 evre resmi render edildi ve denetlendi; mor gece gökleri town_post.tame_palette ile arduvaza, sabah ılık ve puslu. Commit 0b7eeeb; test_phases_audio. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.4",
@@ -2168,7 +2169,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "9.1"
    ],
@@ -2177,7 +2178,7 @@
    "sira": 135,
    "kim": "CO",
    "commit": "c8f0a21",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: taverna oyunda canlı (TavernRoom: barmen, garson yürüyüşü, ozan, 4-6 müşteri, şömine alevi, mumlar, sohbet modu); ekran görüntüsüyle kontrol edildi, onay bekliyor. Eski dedikodu satın alma düzeni hizmetler panelinde duruyor, N34 değiştirecek. | 2026-10-19 karar: popup değil, referanstaki gibi tam ekran oda; mankenler canlı, önceden belirlenmiş rotasyonlarla hareketli ve rollü (konuk, müzisyen, barmen, yardımcı). Mekân iskeleti taslağı (y_94) silindi, taverna bu ekranı izler. | 2026-10-20: tavernada masadaki konuklar sit_box klibiyle oturuyor; masa ve bank gerçek ölçülerde (0.75 / 0.46 m) yeniden render edildi, bardak masada (el kalkmadan bardak kalkmıyordu)."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: taverna oyunda canlı (TavernRoom: barmen, garson yürüyüşü, ozan, 4-6 müşteri, şömine alevi, mumlar, sohbet modu); ekran görüntüsüyle kontrol edildi, onay bekliyor. Eski dedikodu satın alma düzeni hizmetler panelinde duruyor, N34 değiştirecek. | 2026-10-19 karar: popup değil, referanstaki gibi tam ekran oda; mankenler canlı, önceden belirlenmiş rotasyonlarla hareketli ve rollü (konuk, müzisyen, barmen, yardımcı). Mekân iskeleti taslağı (y_94) silindi, taverna bu ekranı izler. | 2026-10-20: tavernada masadaki konuklar sit_box klibiyle oturuyor; masa ve bank gerçek ölçülerde (0.75 / 0.46 m) yeniden render edildi, bardak masada (el kalkmadan bardak kalkmıyordu). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.5",
@@ -2185,14 +2186,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 136,
    "kim": "CO",
    "commit": "-",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: oyunda uygulandı - pazar terazisi (MarketScale: mühür içinde mal ve sikke, sepet büyüdükçe parça sayısı artar, kol dengeye göre yaylı eğilir, düşen parça yerine oturur); ekran görüntüsüyle kontrol edildi, onay bekliyor. | 2026-10-19 karar: terazili tek ekran gereksiz; pazar Y-G11T masa ekranı olacak, terazi referans görseldeki gibi. | 2026-10-21 kullanıcı: oyundaki hali kalsın; vagon ve karakter çantaları açılır-kapanır bölüm olarak eklendi (K10)."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19: oyunda uygulandı - pazar terazisi (MarketScale: mühür içinde mal ve sikke, sepet büyüdükçe parça sayısı artar, kol dengeye göre yaylı eğilir, düşen parça yerine oturur); ekran görüntüsüyle kontrol edildi, onay bekliyor. | 2026-10-19 karar: terazili tek ekran gereksiz; pazar Y-G11T masa ekranı olacak, terazi referans görseldeki gibi. | 2026-10-21 kullanıcı: oyundaki hali kalsın; vagon ve karakter çantaları açılır-kapanır bölüm olarak eklendi (K10). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.6",
@@ -2200,14 +2201,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 137,
    "kim": "CO",
    "commit": "4af6c2f",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: onay (\"güzel\"). | 2026-10-20: üç sütunlu karakter ekranı (kimlik, huylar ve statlar, beceriler ve dirençler), Kişi / Kuşam ve görev sekmeleri, SegmentBar. Denetimde düzeltildi: önizleme figürü render çözünürlüğünün üstüne büyütülmüyor (bulanıklık), kırgınlık işaretleri koyu zeminde açık mürekkeple. Commit 4af6c2f."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: onay (\"güzel\"). | 2026-10-20: üç sütunlu karakter ekranı (kimlik, huylar ve statlar, beceriler ve dirençler), Kişi / Kuşam ve görev sekmeleri, SegmentBar. Denetimde düzeltildi: önizleme figürü render çözünürlüğünün üstüne büyütülmüyor (bulanıklık), kırgınlık işaretleri koyu zeminde açık mürekkeple. Commit 4af6c2f. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.7",
@@ -2215,14 +2216,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 138,
    "kim": "CO",
    "commit": "4af6c2f",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: onay (\"güzel\"). | 2026-10-20: RosterCard ve seviye rozeti (party ekranı). Kart başlığındaki açlık çetelesi kaldırıldı (durum satırı söylüyor, ismi kesiyordu). Commit 4af6c2f."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: onay (\"güzel\"). | 2026-10-20: RosterCard ve seviye rozeti (party ekranı). Kart başlığındaki açlık çetelesi kaldırıldı (durum satırı söylüyor, ismi kesiyordu). Commit 4af6c2f. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-G04",
@@ -2230,7 +2231,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [
     "Y-G02",
     "Y-G03"
@@ -2241,7 +2242,7 @@
    "sira": 139,
    "kim": "CO",
    "commit": "-",
-   "not": "MPFB2 eklentisi GPL lisanslı (CC0 değil); kullanıcının izni \"CC0 ise indir\" olduğu için indirilmedi. MPFB izni gelince figür hattıyla büst portre render edilir."
+   "not": "MPFB2 eklentisi GPL lisanslı (CC0 değil); kullanıcının izni \"CC0 ise indir\" olduğu için indirilmedi. MPFB izni gelince figür hattıyla büst portre render edilir. | 2026-11-01 kayıt düzeltmesi: DEVAM_NOTU C5: büst portreleri oyunda, ekranda doğrulandı."
   },
   {
    "id": "9.8",
@@ -2249,14 +2250,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 140,
    "kim": "CO",
    "commit": "-",
-   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: savaş arka planı savaşın olduğu yere göre; karakterlerin altında stilize can barı, can sağ panelden izlenmemeli. | 2026-10-21 taslaktaki savaş ekranı alındı (K9, bkz. Y-G05)."
+   "not": "arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak). | 2026-10-19 karar: savaş arka planı savaşın olduğu yere göre; karakterlerin altında stilize can barı, can sağ panelden izlenmemeli. | 2026-10-21 taslaktaki savaş ekranı alındı (K9, bkz. Y-G05). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-G05",
@@ -2316,7 +2317,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "oncelik_eski": "P2",
@@ -2324,7 +2325,7 @@
    "sira": 144,
    "kim": "CO",
    "commit": "-",
-   "not": "Alt panel (P18) zaten sekmeli: harita ve envanter orada. | 2026-10-19 karar: harita ve envanterle birlikte gösterilecek; sağ üstteki moral/stres/takat paneli kalkar, alt panele iner. | 2026-10-21 kullanıcı: oyundaki hali iyi, taslak silindi (y_99_yol_hud.png)."
+   "not": "Alt panel (P18) zaten sekmeli: harita ve envanter orada. | 2026-10-19 karar: harita ve envanterle birlikte gösterilecek; sağ üstteki moral/stres/takat paneli kalkar, alt panele iner. | 2026-10-21 kullanıcı: oyundaki hali iyi, taslak silindi (y_99_yol_hud.png). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.11",
@@ -2347,14 +2348,14 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/09_art_ikinci_tur.md",
    "paket": "P12",
    "sira": 146,
    "kim": "CO",
    "commit": "4af6c2f",
-   "not": "Kenney Graveyard Kit (CC0, haçsız) ile sakin ve nöbet varyantları: tools/ui_scenes/graveyard_scene.py; taslak referans/taslaklar/y_912_mezarlik_sakin_nobet.png. Onaydan sonra kilise ekranına (b5_church yerine) bağlanır. | 2026-10-19 karar: onay; kilise ekranına bağlanacak. | 2026-10-20: kilise mezarlığı tam çözünürlükte sakin ve nöbet (yas) varyantı; church.gd yas varsa nöbet resmini açar. Commit 4af6c2f."
+   "not": "Kenney Graveyard Kit (CC0, haçsız) ile sakin ve nöbet varyantları: tools/ui_scenes/graveyard_scene.py; taslak referans/taslaklar/y_912_mezarlik_sakin_nobet.png. Onaydan sonra kilise ekranına (b5_church yerine) bağlanır. | 2026-10-19 karar: onay; kilise ekranına bağlanacak. | 2026-10-20: kilise mezarlığı tam çözünürlükte sakin ve nöbet (yas) varyantı; church.gd yas varsa nöbet resmini açar. Commit 4af6c2f. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "9.2",
@@ -2412,7 +2413,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-G01"
    ],
@@ -2422,7 +2423,7 @@
    "sira": 150,
    "kim": "C",
    "commit": "c8cf507",
-   "not": "IM Fell Türkçe harflerin hepsini taşıyor (fontTools ile ölçüldü)."
+   "not": "IM Fell Türkçe harflerin hepsini taşıyor (fontTools ile ölçüldü). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-I01",
@@ -2524,7 +2525,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Arayüz ve ilk saat",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2532,7 +2533,7 @@
    "sira": 157,
    "kim": "C",
    "commit": "20d0400",
-   "not": "Üç ayar kodda ama kapsamı dar: metin boyu yalnız tema taban boyu (elle verilmiş boylar sabit), desenli şerit yalnız savaş seçeneği şeridi, otomatik duraklama yalnız yol işareti ve karşılaşma işareti. Denenmedi."
+   "not": "Üç ayar kodda ama kapsamı dar: metin boyu yalnız tema taban boyu (elle verilmiş boylar sabit), desenli şerit yalnız savaş seçeneği şeridi, otomatik duraklama yalnız yol işareti ve karşılaşma işareti. Denenmedi. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-H06",
@@ -3132,7 +3133,7 @@
    "bolum": "14",
    "alan": "Yol kontrol paneli",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N18",
     "N19",
@@ -3145,7 +3146,7 @@
    "sira": 192,
    "kim": "C",
    "commit": "e967039",
-   "not": "Tab ile açılan CaravanStatusPanel kontrat listesini de gösterdiği için duruyor; panelin Yük sekmesine kontratlar taşınınca kalkar (karar senin). | 2026-10-20: eski Tab paneli (CaravanStatusPanel, StatusOverlay) kaldırıldı; kontratlar kontrol panelinin Yük sekmesinde, Durum düğmesi ve Tab kontrol panelinin Durum sekmesini açıyor."
+   "not": "Tab ile açılan CaravanStatusPanel kontrat listesini de gösterdiği için duruyor; panelin Yük sekmesine kontratlar taşınınca kalkar (karar senin). | 2026-10-20: eski Tab paneli (CaravanStatusPanel, StatusOverlay) kaldırıldı; kontratlar kontrol panelinin Yük sekmesinde, Durum düğmesi ve Tab kontrol panelinin Durum sekmesini açıyor. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "N24",
@@ -3255,7 +3256,7 @@
    "bolum": "14",
    "alan": "Yeni dünya: veri",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N28"
    ],
@@ -3264,7 +3265,7 @@
    "paket": "P16",
    "sira": 199,
    "kim": "C",
-   "not": "Bozkırda durak aralığı 6 gün; test TEST_PLANI.md'de.",
+   "not": "Bozkırda durak aralığı 6 gün; test TEST_PLANI.md'de. | 2026-11-01 doğrulama turu: oyunda doğrulandı.",
    "commit": "5ae38c4"
   },
   {
@@ -3273,14 +3274,14 @@
    "bolum": "14",
    "alan": "Oyun hissi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/14_yeni_dunya.md",
    "dalga": 8,
    "paket": "P18",
    "sira": 200,
    "kim": "C",
-   "not": "Altı alan incelendi; N31a-N31f alt görevleri 14_yeni_dunya.md ye eklendi (gorevler.json a bir sonraki durum.py taramasında).",
+   "not": "Altı alan incelendi; N31a-N31f alt görevleri 14_yeni_dunya.md ye eklendi (gorevler.json a bir sonraki durum.py taramasında). | 2026-11-01 doğrulama turu: oyunda doğrulandı.",
    "commit": "ebd4e3a"
   },
   {
@@ -3304,7 +3305,7 @@
    "bolum": "14",
    "alan": "Oyun hissi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N31"
    ],
@@ -3313,7 +3314,7 @@
    "paket": "P18",
    "sira": 202,
    "kim": "C",
-   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: log_beat + playtest_beats.jsonl; playtest_report.py boş dakika, en uzun ara, savaş/kamp süresi, ekran süresi."
+   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: log_beat + playtest_beats.jsonl; playtest_report.py boş dakika, en uzun ara, savaş/kamp süresi, ekran süresi. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "N31b",
@@ -3321,7 +3322,7 @@
    "bolum": "14",
    "alan": "Oyun hissi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N31"
    ],
@@ -3330,7 +3331,7 @@
    "paket": "P18",
    "sira": 203,
    "kim": "CO",
-   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: 12.2e ile güneş halesi ve ufuk bandı yolda (commit 4af6c2f). Ayrı sis şeridi eklenmedi; 12.2e onaylı ışık modeli yeterli görüldü."
+   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: 12.2e ile güneş halesi ve ufuk bandı yolda (commit 4af6c2f). Ayrı sis şeridi eklenmedi; 12.2e onaylı ışık modeli yeterli görüldü. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "N31c",
@@ -3338,7 +3339,7 @@
    "bolum": "14",
    "alan": "Oyun hissi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N31"
    ],
@@ -3347,7 +3348,7 @@
    "paket": "P18",
    "sira": 204,
    "kim": "C",
-   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: dört ses otobüsü, Ayarlar'da dört sürgü, tekrarsız çeşit, Kenney CC0 arayüz sesleri (indirildi, KUNYE.tsv). Commit 461be41."
+   "not": "N31 planından (docs/design_notes/oyun_hissi_plani.md). | 2026-10-20: dört ses otobüsü, Ayarlar'da dört sürgü, tekrarsız çeşit, Kenney CC0 arayüz sesleri (indirildi, KUNYE.tsv). Commit 461be41. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "N31d",
@@ -3476,7 +3477,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C21"
    ],
@@ -3485,7 +3486,7 @@
    "paket": "P07",
    "sira": 82,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor). | 2026-11-01: beş feda kartı, günlükte feda satırı, kıtlık paleti."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Feda kartları, baskın seçenek raporu, aç şehre satma ikilemi, kıtlık paleti. Güç ve ödül kesilmez, bedelli olur (kullanıcı onayı bekleniyor). | 2026-11-01: beş feda kartı, günlükte feda satırı, kıtlık paleti. | 2026-11-01 doğrulama turunda düzeltildi: baskın seçenek 9 -> 0."
   },
   {
    "id": "Y-C23",
@@ -3493,7 +3494,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C21"
    ],
@@ -3502,7 +3503,7 @@
    "paket": "P07",
    "sira": 83,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür. | 2026-11-01: domino zinciri, dertler cümlesi, yönetmen ağırlığı, dört son çare."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Sistemlerin bedelleri birbirini tetikler (aks, yol, erzak, ateş, savaş); kampta son eşyaları yakma eylemleri; zincir dertler listesinde cümleyle görünür. | 2026-11-01: domino zinciri, dertler cümlesi, yönetmen ağırlığı, dört son çare. | 2026-11-01 doğrulama turunda düzeltildi: onay kutuları görünür."
   },
   {
    "id": "Y-C24",
@@ -3510,7 +3511,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C21"
    ],
@@ -3519,7 +3520,7 @@
    "paket": "P07",
    "sira": 84,
    "kim": "CK",
-   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi). | 2026-11-01: üç büyüme krizi; simulate_career: dertsiz %25-27, en uzun sakin dizi 4-5."
+   "not": "2026-10-30 kullanıcı: üç konuşmadan dersler (docs/design_notes/kitlik_tasarim_dersleri.md). Ün ve servet el koyma, haraç, hizip doğurur; bir krizi çözen hamle öbürünü besler; simulate_career denge raporu (sakin sefer dizisi). | 2026-11-01: üç büyüme krizi; simulate_career: dertsiz %25-27, en uzun sakin dizi 4-5. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-G17",
@@ -3544,7 +3545,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C21",
     "Y-G17"
@@ -3554,7 +3555,7 @@
    "paket": "P12",
    "sira": 212,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: GrimGrade kıtlıkla solar; Gokyurt en geç."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: GrimGrade kıtlıkla solar; Gokyurt en geç. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-G19",
@@ -3876,7 +3877,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C17"
    ],
@@ -3885,7 +3886,7 @@
    "paket": "P09",
    "sira": 233,
    "kim": "C",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules). | 2026-11-01: ant kardeşleri."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer. | 2026-10-31: ant bağı oyunda (kurallar-karakter Oath & Creed Rules). | 2026-11-01: ant kardeşleri. | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-C34",
@@ -3893,7 +3894,7 @@
    "bolum": "15",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C25"
    ],
@@ -3902,7 +3903,7 @@
    "paket": "P07",
    "sira": 234,
    "kim": "CK",
-   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım. | 2026-11-01: inanç ekranda; kafile ilanı (hacı kafilesi Septisist)."
+   "not": "2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-10-31 onay turu: Kullanıcı kararı: kervanın inancı kervanbaşının inancıdır; rol yapma seçeneği Karizma/manipülasyon kontrolüyle. | 2026-10-31: kervanbaşı inancı ve Avuçiçi kafilesi kartı oyunda; ilan panosunda kafile ilanı sonraki adım. | 2026-11-01: inanç ekranda; kafile ilanı (hacı kafilesi Septisist). | 2026-11-01 doğrulama turu: oyunda doğrulandı."
   },
   {
    "id": "Y-H08",

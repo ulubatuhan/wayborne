@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -34,24 +34,6 @@ Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Tamamdır, bunu da yapıp video alacağım hatta devlog olarak.”
   - **Kabul:** `docs/playtest/` altında tarihli günlük dosyaları; en az 5 dış oyuncu notu.
   - **Literatür:** R62, R78
-
-</details>
-
-## Paket P05
-
-### Y-G03 · Saç ve başlıklar
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P05 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** 2026-10-20 kullanıcı: lore'a bağlı değil.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G03 Saç ve başlıklar**
-  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 10.1, 10.2, 10.3
-  - **Ne:** Kukuleta, kalpak, sarık, başörtüsü, miğfer, şapka; kültürlere göre dağılım. Gerçek dinî figür ya da yapıya gönderme yok.
-  - **Kabul:** Yoldaki ve menülerdeki figürlerde kel manken kalmadı.
-  - **Kaynaklar ve teknik (CC0 araştırması):** MakeHuman topluluk paketleri: **hair01** (CC0; 25 saç, örgüler), **bodyparts05** (CC0; sakal ve bıyık), **hats01** (CC0; çuval başlık, haydut için), **hats02** (CC0; miğferler, üzerindeki dinî sembol kaldırılıp yeniden dokulanır), **suits02** `monk_robe_hood` (CC0; kesimi sadeleştirilip kervan kukuletası olur). Künye zorunlu (CC-BY): **hats03** `elvs_charity_veil1` (başörtüsü), `mindfront_sherpa_hat` (kalpağa en yakın), **hats04** miğferler, hair02/03, bodyparts06. CC0 türban, sarık ve kalpak yok: Blender'da kapüşon kalıbından, torus ve kumaş simülasyonuyla modellenir; kalpak silindir ve kürk parçacığıyla. Mürekkep geçişinde kürk zaten taramaya döner, düşük detay yeter. `../ICERIK_IHTIYACLARI.md` G-1.
 
 </details>
 
@@ -118,22 +100,6 @@ Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P09
-
-### Y-C06 · Ekipmanı 12 parçadan 35'in üstüne çıkar
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P09 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C06 Ekipmanı 12 parçadan 35'in üstüne çıkar**
-  - **Öncelik:** P2 · **Dalga:** 4
-  - **Ne:** Ağırlık takılarda: huylarla sinerji kuran, bedeli olan, lanetli parçalar.
-  - **Kabul:** En az 35 parça; denge ölçümü güncel.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Eşya ikonları: game-icons.net siyah siluetleri mürekkep stiline uygun ama CC BY 3.0 (her ikonun yazarı künyeye). Alternatif: 3B prop render + mürekkep geçişi (Poly Haven, Quaternius Fantasy Props, MakeHuman equipment01: yay, savaş çekici, kaba kılıç, hançer, CC0). `../ICERIK_IHTIYACLARI.md` G-7.
-  - **Literatür:** R79
-
-</details>
 
 ### Y-C09 · Bölgesel düşman kimlikleri
 
@@ -203,27 +169,6 @@ Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
   - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
   - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
-
-</details>
-
-## Paket P12
-
-### Y-G04 · Büst portreler
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-G02, Y-G03
-- **Son not:** MPFB2 eklentisi GPL lisanslı (CC0 değil); kullanıcının izni "CC0 ise indir" olduğu için indirilmedi. MPFB izni gelince figür hattıyla büst portre render edilir.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G04 Büst portreler**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): MPFB2 yerelde kurulu değil; figür hattıyla yakın plan render + mürekkep geçişi için gerekli. Taslaklardaki (9.4, 9.6) portre yuvası bu render için.
-  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G02, Y-G03 · **İlgili:** 9.6, 9.7
-  - **Ne:** Karakter, parti, taverna adayı ve mezar defteri için olay kartı üslubunda büst portreler.
-  - **Kabul:** Portreler dört ekranda.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Portreler figür render'ının yakın planından mürekkep geçişiyle. Duruş ve tarama yönü için BHL, Rijksmuseum ve Met CC0 gravür portreleri yalnızca referans; kopyalanmaz. `../ICERIK_IHTIYACLARI.md` G-5.
-  - **Literatür:** R26
 
 </details>
 
