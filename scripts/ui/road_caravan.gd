@@ -183,10 +183,6 @@ const CAMPFIRE_SEAT_SPACING: float = 15.0
 ## Ateşin başında oturuş (sit_box) ve altındaki kütük: boyu oturanın boyunun
 ## payı, kalça kütüğün üstünde (GrimDrafts'ın menüdeki sandığıyla aynı oran).
 const CAMP_SEATED_CLIP: String = "sit_fire"
-const LOG_HEIGHT_SHARE: float = 0.24
-const LOG_BACK_SHARE: float = 0.09
-const LOG_WOOD: Color = Color(0.26, 0.21, 0.18)
-const LOG_BARK: Color = Color(0.15, 0.12, 0.11)
 ## Koltukların sayısı ve derinlik kayması (`y`); yatay yer `_seat_reach`'ten.
 const CAMPFIRE_SEATS: Array[Vector2] = [
 	Vector2(-1.0, 0.4), Vector2(1.0, 0.3), Vector2(-1.0, -0.4),
@@ -196,6 +192,7 @@ const CAMPFIRE_SEATS: Array[Vector2] = [
 ## öbürleri oturanların hemen arkasında ayakta durur, el uzatmadan (kullanıcı,
 ## 2026-11-01: dörder kişi ateşin dibine girip alevi örtüyordu).
 const CAMP_SITTERS: int = 2
+const CAMP_CRATE_BACK_SHARE: float = 0.02
 ## Oturanın ayak ucu figür merkezinin bu kadar önünde (boyun payı; `sit_fire`
 ## ayağı 0.235 + ayak boyu).
 const SIT_TOE_SHARE: float = 0.33
@@ -1669,7 +1666,8 @@ func _turn_figure(figure: WalkFigure, facing: float) -> void:
 ## öküzün boynu. Öküzün çizimi kutusunun yaklaşık %62'sini dolduruyor
 ## (bkz. `DRAWN_BEAST_SHARE`): boyun gidiş yönünde kutunun `OX_NECK_SHARE`
 ## payı ilerde, yerden `OX_NECK_HEIGHT_SHARE` yukarıda.
-const OX_NECK_SHARE: float = 0.30
+## 0.30 öküz render olmadan önceki çizim içindi: boyunduruk burnun önüne düşüyordu (kullanıcı, 2026-11-01).
+const OX_NECK_SHARE: float = 0.18
 const OX_NECK_HEIGHT_SHARE: float = 0.46
 
 func _hitch_points(index: int, wagon_w: float, wagon_h: float) -> Dictionary:
@@ -1968,23 +1966,22 @@ func _draw_carts(height: float) -> void:
 ## Vagon başına çoğaltınca o kaçış yolu kapandı, bu yüzden her ateş artık
 ## kendi vagonunun *arkasında* (bkz. yukarıdaki not) duruyor; çizim,
 ## rengi ve titreme deseni tek ateşin aynısı.
-## Oturanların kütükleri: figürün altında, ateşe dönük olduğu yönün gerisinde.
+## Oturanların sandıkları: figürün altında, ateşe dönük olduğu yönün gerisinde;
+## menünün kampındaki sandığın aynısı (kullanıcı, 2026-11-01).
 func _draw_camp_logs() -> void:
+	var crate := PropArt.texture("crate", "body")
+	if crate == null:
+		return
 	for figure in _gathering_figures:
 		if figure.get_action() != CAMP_SEATED_CLIP:
 			continue
 		var h := figure.person_height() * 0.86
-		var log_h := h * LOG_HEIGHT_SHARE
-		var log_w := log_h * 1.6
+		var crate_h := h * GrimDrafts.CRATE_HEIGHT_SHARE
+		var crate_w := crate_h * 0.98
 		var feet := figure.position + Vector2(figure.size.x * 0.5, figure.size.y)
-		var centre := feet + Vector2(-figure.get_facing() * h * LOG_BACK_SHARE, -log_h * 0.5 + 2.0 * _scale)
-		var rect := Rect2(centre - Vector2(log_w * 0.5, log_h * 0.5), Vector2(log_w, log_h))
-		var wood := LOG_WOOD * _light
-		draw_rect(rect, wood, true)
-		draw_circle(Vector2(rect.position.x, centre.y), log_h * 0.5, wood.darkened(0.1))
-		draw_circle(Vector2(rect.end.x, centre.y), log_h * 0.5, wood.lightened(0.08))
-		draw_arc(Vector2(rect.end.x, centre.y), log_h * 0.28, 0.0, TAU, 12, LOG_BARK, 1.0 * _scale)
-		draw_line(rect.position + Vector2(0, log_h * 0.35), Vector2(rect.end.x, rect.position.y + log_h * 0.30), LOG_BARK, 1.0 * _scale)
+		# Kalça figür kutusunun ortasından biraz geride: sandık tam altında.
+		var x := feet.x - figure.get_facing() * h * CAMP_CRATE_BACK_SHARE - crate_w * 0.5
+		draw_texture_rect(crate, Rect2(Vector2(x, feet.y - crate_h + 2.0 * _scale), Vector2(crate_w, crate_h)), false, _light)
 
 func _draw_campfires() -> void:
 	_draw_camp_logs()

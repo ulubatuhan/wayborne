@@ -24,6 +24,12 @@ const MARKER_RADIUS: Dictionary = {
 	SettlementRules.CITY: 13.0, SettlementRules.TOWN: 10.0, SettlementRules.CARAVANSERAI: 9.0,
 }
 const HIT_RADIUS: float = 18.0
+## Uzaklaştıkça işaretler ve atlı haritaya göre büyür; tam sabit boy çok iri
+## kalıyordu (kullanıcı, 2026-11-01). Boy yakınlaştırmanın bu üssüyle küçülür,
+## ICON_REF_ZOOM'da (kervana odak) tam boy, en az ICON_MIN_SCALE.
+const ICON_REF_ZOOM: float = 0.3
+const ICON_ZOOM_POWER: float = 0.6
+const ICON_MIN_SCALE: float = 0.45
 const ROUTE_WIDTH: float = 4.0
 
 ## Gece tonu (çarpan). Mürekkep (`INK_ON_MAP`) kâğıda (`PAPER_ON_MAP`) karşı en
@@ -118,6 +124,9 @@ func caravan_position() -> Vector2:
 	return here.map_position if here != null else Vector2(tiles.map_size) * 0.5
 
 ## Kervanı ortalar ("Kervana git").
+func icon_scale() -> float:
+	return clampf(pow(maxf(tiles.zoom, 0.0001) / ICON_REF_ZOOM, ICON_ZOOM_POWER), ICON_MIN_SCALE, 1.0)
+
 func focus_caravan(zoom: float = 0.25) -> void:
 	tiles.focus_on(caravan_position(), zoom)
 
@@ -201,7 +210,7 @@ func _draw_trail() -> void:
 		for p in path:
 			pts.append(tiles.map_to_screen(p))
 		_overlay.draw_polyline(pts, TRAIL_COLOR, TRAIL_WIDTH, true)
-	var s := CAMP_MARK_SIZE
+	var s := CAMP_MARK_SIZE * icon_scale()
 	for camp in camps:
 		var c: Array = camp
 		if c.size() < 2:
@@ -258,7 +267,7 @@ func _draw_overlay() -> void:
 		var at := tiles.map_to_screen(location.map_position)
 		if not Rect2(Vector2(-40, -40), size + Vector2(80, 80)).has_point(at):
 			continue
-		var r: float = MARKER_RADIUS.get(location.settlement_type, 10.0)
+		var r: float = float(MARKER_RADIUS.get(location.settlement_type, 10.0)) * icon_scale()
 		var ink := Color(0.13, 0.10, 0.08, 0.9)
 		var fill := Color(0.93, 0.86, 0.70, 0.9)
 		if location.location_id == focused_location_id:
@@ -294,7 +303,7 @@ func _draw_rider() -> void:
 		_overlay.draw_circle(at, 8.0, ArtPalette.BLOOD)
 		return
 	var anchor: Vector2 = _rider_anchor.get(dir, Vector2(0.5, 0.94))
-	var s := RIDER_SIZE
+	var s := RIDER_SIZE * icon_scale()
 	var lantern := at + rider_lantern_offset(dir) * s
 	var strength := light_strength_for_hour(hour)
 	if strength > 0.01:
