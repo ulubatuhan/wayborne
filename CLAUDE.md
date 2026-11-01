@@ -391,12 +391,6 @@ verir.
   oyun kemiklerle büker: pilot `docs/el_cizimi/pilot/PILOT.md` (14 pozda çalışıyor; etek/cüppe tek parça `etek`
   katmanı). Açık: `HumanSkin` (GDScript) ilk gerçek beden çizimiyle kurulacak; ince/iri beden türetme denenmedi.
   Öncelik 1 (181 AI görsel) bitince `AI_DISCLOSURE.md` yeniden yazılır.
-- **Kamp ateşi başında oturma postürü (kullanıcı isteği, 2026-10-23).** Bugün kamp kurulunca herkes ateşin iki yanında
-  ayakta duruyor (`RoadCaravan.CAMPFIRE_SEATS`). İstenen: ateşin etrafında oturan, ısınan kervan. Yapılacaklar:
-  `FigureActions`'a oturma klipleri (`sit_fire`: bağdaş/kütükte oturuş, eller ateşe; birkaç varyant), MPFB hattında
-  altı beden ve bütün giysiler için render (`render_frames.py`/`render_outfits.py --clips`), varınca yürüyüşten
-  oturuşa geçiş (dismount/climb_down gibi kalçadan köklü), koltuk düzeni oturan figüre göre yeniden (yükseklik farkı),
-  ateşin önünde/arkasında oturma için çizim sırası, kalkışta tersine oynatma; vitrin kamp karesi yeniden çekilir.
 - **Kıtlık: oyunun ağırlık merkezi ticaretten ulaştırmaya kayıyor (kullanıcı, 2026-10-29; görev Y-C21).** Kıtanın
   tamamını etkileyen bir olay (büyülü ve devasa ya da mevsimlerin değişmesi; sebebi lore kararı) bir kıtlık başlatır
   ve bütün savaşlar temelde ondan doğar. Ticaret kalır ama kıt ve pahalı olur (sistem kesilmez, derinleşir); oyunun

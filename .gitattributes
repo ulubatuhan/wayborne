@@ -41,3 +41,5 @@ data/assets/map/tiles/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 # dosyalar düz blob olduğu için klonda "should have been pointers" uyarısı çıkıyor, taşınırsa
 # ~500 MB LFS'e giriyor ve CI her koşuda (lfs: true) bunu indirip ücretsiz aylık 1 GB LFS
 # kotasını iki koşuda bitiriyor. En büyük dosya 2,2 MB, GitHub'ın 100 MB sınırı sorun değil.
+# Windows baslaticisi: cmd CRLF ister.
+*.cmd text eol=crlf

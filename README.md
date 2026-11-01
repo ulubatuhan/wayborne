@@ -7,6 +7,10 @@ karşılaşıyor ve gerektiğinde haydutlarla savaşıyor.
 
 **Hedef platform PC (Windows).** Oyun depo klonlanıp Godot 4.2.2 ile yerelde açılarak oynanır; web derlemesi yoktur (tarayıcı sekmesi ~1,2 GB dokuyu taşıyamadı).
 
+**Tek tıkla kurulum (Windows):** `kurulum/Wayborne.cmd` dosyasını indirip boş bir klasöre koy ve çift tıkla. Git yoksa
+kurar (winget), depoyu `Wayborne\oyun` klasörüne indirir, Godot 4.2.2'yi `Wayborne\godot`'a indirir, projeyi içe aktarır
+ve oyunu açar. Her oynayışta yeniden çalıştır: GitHub'daki `Wayborne` dalında yeni sürüm varsa indirip içe aktarır.
+
 ## Oyun döngüsü
 
 1. **Karakter oluştur** — kültür, sınıf (dördü var: Sıra Neferi/Sekban/

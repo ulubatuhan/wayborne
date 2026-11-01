@@ -13,8 +13,10 @@ betik çalıştırılır.
 **Ölçülen süreler (2026-11-01, bulut konteyneri, CPU):** beden varyantı (`make_variant.py`) 1 sn; bir bedenin tek
 karelik klibi (`render_frames.py`) 16 sn; bir giysinin ilk giydirilmesi ve tek karelik render'ı
 (`render_outfits.py`) 2,5 dk. Giysi render'ı saç vekilleri için **MakeHuman sistem varlık paketini** de ister
-(`mpfb/data/hair/short01/short01.mhclo` yoksa durur). Yeni bir klibi bütün giysilere eklemek (6 beden x ~52 kalem,
-HD dahil) bu konteynerde 13 saati aşar: uzun bir oturumda ya da kullanıcının makinesinde koşar.
+(`mpfb/data/hair/short01/short01.mhclo` yoksa durur). 2,5 dakikanın neredeyse tamamı süreç kurulumu, kalem başına render ~1 sn. Yeni bir klibi bütün bedenlere ve
+giysilere eklemek tek komut: `python3 -I tools/figure_pipeline/add_clip.py --clip <ad>` (bedenleri 4 işçiyle paralel
+koşar, bir bedenin bütün kalemleri tek süreçte; yarıda kalırsa kaldığı yerden sürer). `sit_fire` (6 beden, 48-56
+kalem) bu konteynerde ~10 dakikada bitti, paketleme (`append_clips`) ayrıca ~5 dakika.
 
 Bu ortamda ayrı bir `blender` CLI ikili dosyası **yok**. `bpy` pip paketi
 kuruludur (`pip show bpy` → `5.0.1`) - bu, Blender'ın kendisinin Python
