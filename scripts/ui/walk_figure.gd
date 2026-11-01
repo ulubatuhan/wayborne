@@ -996,6 +996,9 @@ func _draw_shield(joints: Dictionary, h: float, look: Dictionary) -> void:
 static func _px_per_m(h: float) -> float:
 	return h * 0.84 / 1.73
 
+const SCABBARD_LEATHER: Color = Color(0.24, 0.16, 0.11)
+const SCABBARD_CHAPE: Color = Color(0.55, 0.50, 0.42)
+
 func _weapon_prop() -> Array:
 	var spec: Array = WEAPON_PROPS.get(weapon_kind(), [])
 	if spec.is_empty() or not PropArt.has(String(spec[0])):
@@ -1023,6 +1026,14 @@ func _draw_slung_sprite(pts: Dictionary, h: float) -> bool:
 	if weapon_kind() in ["sword", "cleaver"]:
 		dir = (Vector2(pts.bottom) - Vector2(pts.top)).normalized()
 		from = Vector2(pts.top) - dir * length * float(spec[1])
+		PropArt.draw_between(self, spec[0], "body", from, from + dir * length, _tint, _facing < 0.0)
+		# Belde asılı kılıç kınında: çıplak ağız elde tutuluyor gibi okunuyordu
+		# (kullanıcı, 2026-11-01: "bir şey tutuyor gibi ama ne tutuyor?").
+		var mouth := Vector2(pts.top) + dir * h * 0.012
+		var tip := from + dir * length * 1.01
+		draw_line(mouth, tip, SCABBARD_LEATHER * _tint, maxf(2.0, h * 0.022))
+		draw_line(tip - dir * h * 0.018, tip, SCABBARD_CHAPE * _tint, maxf(2.0, h * 0.024))
+		return true
 	else:
 		dir = (Vector2(pts.top) - Vector2(pts.bottom)).normalized()
 		from = (Vector2(pts.top) + Vector2(pts.bottom)) * 0.5 - dir * length * 0.5
