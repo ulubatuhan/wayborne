@@ -180,9 +180,17 @@ const SEAT_BLEND_U: Dictionary = {"dismount": 0.72, "climb_down": 0.62}
 ## görüldü, Y-G13). Figürler ateşin üstüne çizildiği için önünde ya da
 ## arkasında oturmak yok; sıra soldan sağa dönüşümlü, içten dışa.
 const CAMPFIRE_SEAT_SPACING: float = 15.0
+## Ateşin başında oturuş (sit_box) ve altındaki kütük: boyu oturanın boyunun
+## payı, kalça kütüğün üstünde (GrimDrafts'ın menüdeki sandığıyla aynı oran).
+const CAMP_SEATED_CLIP: String = "sit_box"
+const LOG_HEIGHT_SHARE: float = 0.24
+const LOG_BACK_SHARE: float = 0.09
+const LOG_WOOD: Color = Color(0.26, 0.21, 0.18)
+const LOG_BARK: Color = Color(0.15, 0.12, 0.11)
+## Oturan figür dizleriyle öne taşar: koltuklar ayaktakilerden geniş (2026-11-01).
 const CAMPFIRE_SEATS: Array[Vector2] = [
-	Vector2(-2.9, 0.4), Vector2(3.1, -0.3), Vector2(-4.7, -0.5),
-	Vector2(4.9, 0.5), Vector2(-6.4, 0.1), Vector2(6.6, -0.4),
+	Vector2(-3.8, 0.4), Vector2(4.0, -0.3), Vector2(-6.6, -0.5),
+	Vector2(6.8, 0.5), Vector2(-9.2, 0.1), Vector2(9.4, -0.4),
 ]
 
 var _anchor_x: float = 0.0
@@ -1423,6 +1431,13 @@ func _advance_gather(real_delta: float) -> void:
 			# Yerine varan ateşe dönüyor (koltuğu yürüdüğü yönün ötesinde olabilir).
 			var fire_x := _campfire_position(int(_gather_fire_index.get(figure, 0))).x
 			figure.set_facing(1.0 if fire_x >= figure.position.x + figure.size.x * 0.5 else -1.0)
+			# Ateşin başında oturur (kullanıcı isteği 2026-10-23): kütüğün üstünde,
+			# meyhanedeki ve menüdeki oturuşla aynı klip.
+			if figure.get_action() != CAMP_SEATED_CLIP:
+				figure.set_action(CAMP_SEATED_CLIP)
+		elif figure.get_action() == CAMP_SEATED_CLIP:
+			# Kalkış: yürüyüşe dönmeden önce oturuş biter.
+			figure.set_action("")
 		if walk > 0.0 or (has_trans and trans > 0.0):
 			settled = false
 
@@ -1929,7 +1944,26 @@ func _draw_carts(height: float) -> void:
 ## Vagon başına çoğaltınca o kaçış yolu kapandı, bu yüzden her ateş artık
 ## kendi vagonunun *arkasında* (bkz. yukarıdaki not) duruyor; çizim,
 ## rengi ve titreme deseni tek ateşin aynısı.
+## Oturanların kütükleri: figürün altında, ateşe dönük olduğu yönün gerisinde.
+func _draw_camp_logs() -> void:
+	for figure in _gathering_figures:
+		if figure.get_action() != CAMP_SEATED_CLIP:
+			continue
+		var h := figure.person_height() * 0.86
+		var log_h := h * LOG_HEIGHT_SHARE
+		var log_w := log_h * 1.6
+		var feet := figure.position + Vector2(figure.size.x * 0.5, figure.size.y)
+		var centre := feet + Vector2(-figure.get_facing() * h * LOG_BACK_SHARE, -log_h * 0.5 + 2.0 * _scale)
+		var rect := Rect2(centre - Vector2(log_w * 0.5, log_h * 0.5), Vector2(log_w, log_h))
+		var wood := LOG_WOOD * _light
+		draw_rect(rect, wood, true)
+		draw_circle(Vector2(rect.position.x, centre.y), log_h * 0.5, wood.darkened(0.1))
+		draw_circle(Vector2(rect.end.x, centre.y), log_h * 0.5, wood.lightened(0.08))
+		draw_arc(Vector2(rect.end.x, centre.y), log_h * 0.28, 0.0, TAU, 12, LOG_BARK, 1.0 * _scale)
+		draw_line(rect.position + Vector2(0, log_h * 0.35), Vector2(rect.end.x, rect.position.y + log_h * 0.30), LOG_BARK, 1.0 * _scale)
+
 func _draw_campfires() -> void:
+	_draw_camp_logs()
 	var glow_radius := size.y * 0.24
 	var flicker := 0.88 + 0.12 * sin(_camp_time * FIRE_FLICKER_SPEED)
 	for index in _wagon_centres.size():

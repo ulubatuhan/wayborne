@@ -5,6 +5,11 @@ Burada yazılanlar bu depo için gerçekten doğrulanmış adımlardır - tahmin
 
 ## Blender / bpy
 
+**Bulut oturumu (2026-11-01):** konteyner her oturumda sıfırdan başlar ve sistem Python'u 3.13; `bpy` 5.0.1 yalnızca
+Python 3.11 ister. Kurulum tek komut: `tools/figure_pipeline/setup_blender.sh` (Python 3.11 sanal ortamı
+`/root/bpyenv`, bpy, MPFB). Betikler `/root/bpyenv/bin/python <betik>` ile koşar. "Blender yok" demeden önce bu
+betik çalıştırılır.
+
 Bu ortamda ayrı bir `blender` CLI ikili dosyası **yok**. `bpy` pip paketi
 kuruludur (`pip show bpy` → `5.0.1`) - bu, Blender'ın kendisinin Python
 modülü olarak derlenmiş hali, ayrı bir kurulum değil. Her script
