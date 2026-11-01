@@ -14,6 +14,8 @@ const ROLE_KEYS: Array[String] = ["DUTY_VANGUARD_NAME", "DUTY_MIDDLE_NAME", "DUT
 const ACTION_KEYS: Dictionary = {
 	"watch": "UI_CAMP_ACT_WATCH", "wounds": "UI_CAMP_ACT_WOUNDS", "repair": "UI_CAMP_ACT_REPAIR",
 	"hunt": "UI_CAMP_ACT_HUNT", "tales": "UI_CAMP_ACT_TALES",
+	"burn_canvas": "UI_CAMP_ACT_BURN_CANVAS", "eat_seed": "UI_CAMP_ACT_EAT_SEED",
+	"burn_furs": "UI_CAMP_ACT_BURN_FURS", "burn_planks": "UI_CAMP_ACT_BURN_PLANKS",
 }
 
 var _session: GameSession
@@ -22,6 +24,8 @@ var _backdrop: ColorRect
 var _pickers: Array[OptionButton] = []
 var _checks: Dictionary = {}
 var _done: bool = false
+var _resort: OptionButton
+const LAST_RESORTS: Array[String] = ["burn_canvas", "eat_seed", "burn_furs", "burn_planks"]
 
 func setup(session: GameSession) -> CampActionsPanel:
 	_session = session
@@ -80,11 +84,21 @@ func _ready() -> void:
 	actions_title.text = tr("UI_CAMP_ACTIONS_TITLE") % GameSession.CAMP_ACTION_LIMIT
 	col.add_child(actions_title)
 	for action in GameSession.CAMP_ACTIONS:
+		if LAST_RESORTS.has(action):
+			continue
 		var check := CheckBox.new()
 		check.text = tr(String(ACTION_KEYS[action]))
 		check.toggled.connect(func(_on: bool) -> void: _limit_actions())
 		_checks[action] = check
 		col.add_child(check)
+	# Son çareler tek satırda (Y-C23): ekrana sığsın; yakacak ya da yiyecek
+	# bir şey yoksa seçenek kilitli görünür, gizlenmez. Sınırın dışında.
+	_resort = OptionButton.new()
+	_resort.add_item(tr("UI_CAMP_RESORT_NONE"))
+	for action in LAST_RESORTS:
+		_resort.add_item(tr(String(ACTION_KEYS[action])))
+		_resort.set_item_disabled(_resort.item_count - 1, not _session.can_camp_action(action))
+	col.add_child(_resort)
 	var confirm := Button.new()
 	confirm.text = tr("UI_CAMP_CONFIRM")
 	confirm.pressed.connect(_confirm)
@@ -126,6 +140,8 @@ func _confirm() -> void:
 	for action in _checks:
 		if (_checks[action] as CheckBox).button_pressed:
 			actions.append(String(action))
+	if _resort.selected > 0:
+		actions.append(LAST_RESORTS[_resort.selected - 1])
 	WaybookTheme.dismiss(_card, _backdrop, self, func():
 		confirmed.emit(formation, actions)
 		queue_free()

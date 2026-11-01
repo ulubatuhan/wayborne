@@ -9,6 +9,7 @@ func suite_name() -> String:
 	return "EventEffects"
 
 func run(t) -> void:
+	_test_domino_and_last_resorts(t)
 	_test_oath_and_creed(t)
 	_test_ban_and_trade_stain(t)
 	_test_gold_can_go_into_debt(t)
@@ -605,3 +606,26 @@ func _test_oath_and_creed(t) -> void:
 	t.eq(south.size(), 3, "Güney'de üç inanç da çıkar")
 	leader.creed = CharacterData.CREED_SEPTISM
 	t.eq(session.caravan_creed(), CharacterData.CREED_SEPTISM, "kervanın inancı kervanbaşınınki")
+
+## Domino (Y-C23): açık halka zincir cümlesini ve sonraki kartın ağırlığını
+## açar; son çareler son eşyayı yakar ya da yer.
+func _test_domino_and_last_resorts(t) -> void:
+	var session := _session()
+	t.eq(session.domino_sentence(), "", "dertsiz kervanda zincir yok")
+	session.caravan.damage_wagons(1)
+	t.ok(session.domino_open().has("axle"), "kırık aks zinciri açar")
+	t.ok(session.domino_sentence().count("→") == 3, "zincir aksdan sona dört halka")
+	var director := RoadDirector.new()
+	var quarantine := EventCatalog.get_event("evt_fever_quarantine")
+	var calm := director.weight_multiplier(quarantine, {"domino_open": []})
+	t.ok(director.weight_multiplier(quarantine, {"domino_open": ["hunger"]}) > calm, "açlık sonraki halkanın kartını getirir")
+	session.add_to_cargo(ItemCatalog.get_item("test_grain"), 10)
+	var food := session.get_provisions()
+	session.apply_camp_actions([GameSession.CAMP_ACTION_EAT_SEED])
+	t.eq(session.get_provisions(), food + GameSession.SEED_EATEN, "tohumluk buğday erzak olur")
+	t.ok(not session.can_camp_action(GameSession.CAMP_ACTION_BURN_FURS), "kürk yoksa yakılamaz")
+	session.caravan.repair_wagons(1)
+	var damaged := session.caravan.damaged_wagons
+	session.apply_camp_actions([GameSession.CAMP_ACTION_BURN_CANVAS])
+	t.ok(session.caravan.damaged_wagons > damaged or session.caravan.damaged_wagons == session.caravan.wagon_count, "branda yakılınca vagon hasar alır")
+	t.eq(session.burned_warmth_day, session.total_days_elapsed + 1, "o gece ılık")

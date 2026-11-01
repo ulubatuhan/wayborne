@@ -443,6 +443,10 @@ func _refresh_status(state: Dictionary) -> void:
 ## sözle). Saf: test aynı listeyi okur.
 static func problems_for(session: GameSession, state: Dictionary) -> Array[String]:
 	var out: Array[String] = []
+	# Domino zinciri (Y-C23): açık halkadan sona, tek cümle.
+	var chain := session.domino_sentence()
+	if not chain.is_empty():
+		out.append(chain)
 	var daily := maxi(1, session.get_daily_provision_consumption())
 	var days_left := session.get_provisions() / daily
 	if days_left < session.journey_days_remaining:

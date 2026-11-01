@@ -65,7 +65,20 @@ func weight_multiplier(event: GameEvent, context: Dictionary) -> float:
 		m *= RELIEF_HEAVY_WEIGHT
 	if is_strained(context):
 		m *= STRAIN_HEAVY_WEIGHT if heavy else STRAIN_LIGHT_WEIGHT
+	# Domino (Y-C23): açık halkanın sonraki kartı daha sık gelir.
+	for link in (context.get("domino_open", []) as Array):
+		if (DOMINO_NEXT.get(String(link), []) as Array).has(event.event_id):
+			m *= DOMINO_WEIGHT
 	return m
+
+## Zincirin halkası -> sonraki halkayı getiren kartlar.
+const DOMINO_WEIGHT: float = 2.5
+const DOMINO_NEXT: Dictionary = {
+	"axle": ["evt_elder_burden", "evt_hidden_guide"],
+	"long_road": ["evt_starving_roadside", "evt_hunting_trip"],
+	"hunger": ["evt_fever_quarantine", "evt_starving_roadside"],
+	"fever": ["evt_bandit_ambush", "evt_wolves_follow", "evt_fever_quarantine"],
+}
 
 func note_card(event: GameEvent, day: int) -> void:
 	quiet_streak = 0

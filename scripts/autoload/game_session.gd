@@ -1299,7 +1299,29 @@ const CAMP_ACTION_WOUNDS: String = "wounds"
 const CAMP_ACTION_REPAIR: String = "repair"
 const CAMP_ACTION_HUNT: String = "hunt"
 const CAMP_ACTION_TALES: String = "tales"
-const CAMP_ACTIONS: Array[String] = [CAMP_ACTION_WATCH, CAMP_ACTION_WOUNDS, CAMP_ACTION_REPAIR, CAMP_ACTION_HUNT, CAMP_ACTION_TALES]
+## Son çareler (Y-C23): kervanı son eşyalarını yakmaya, yemeye iten eylemler.
+## Yakılan şey o gecenin soğuğunu kırar; yenen tohum bugünü kurtarır.
+const CAMP_ACTION_BURN_CANVAS: String = "burn_canvas"
+const CAMP_ACTION_EAT_SEED: String = "eat_seed"
+const CAMP_ACTION_BURN_FURS: String = "burn_furs"
+const CAMP_ACTION_BURN_PLANKS: String = "burn_planks"
+const CAMP_ACTIONS: Array[String] = [CAMP_ACTION_WATCH, CAMP_ACTION_WOUNDS, CAMP_ACTION_REPAIR, CAMP_ACTION_HUNT, CAMP_ACTION_TALES,
+	CAMP_ACTION_BURN_CANVAS, CAMP_ACTION_EAT_SEED, CAMP_ACTION_BURN_FURS, CAMP_ACTION_BURN_PLANKS]
+const BURN_WARMTH_C: float = 6.0
+const SEED_EATEN: int = 6
+const FURS_BURNED: int = 2
+var burned_warmth_day: int = -1
+
+## Son çare yapılabilir mi: tohum ve kürk yükte olmalı, branda ve tahta için sağlam vagon.
+func can_camp_action(action: String) -> bool:
+	match action:
+		CAMP_ACTION_EAT_SEED:
+			return get_total_quantity("test_grain") > 0
+		CAMP_ACTION_BURN_FURS:
+			return get_total_quantity("test_furs") > 0
+		CAMP_ACTION_BURN_CANVAS, CAMP_ACTION_BURN_PLANKS:
+			return caravan.wagon_count - caravan.damaged_wagons > 0
+	return true
 const CAMP_WOUND_HEAL_SHARE: float = 0.25
 const CAMP_HUNT_PROVISIONS: int = 2
 const CAMP_TALES_STRESS: int = -2
@@ -1317,7 +1339,8 @@ func set_formation(vanguard: CharacterData, middle: CharacterData, rear: Charact
 func apply_camp_actions(actions: Array) -> Array[String]:
 	var done: Array[String] = []
 	for action in actions:
-		if done.size() >= CAMP_ACTION_LIMIT or not CAMP_ACTIONS.has(String(action)):
+		var resort := [CAMP_ACTION_BURN_CANVAS, CAMP_ACTION_EAT_SEED, CAMP_ACTION_BURN_FURS, CAMP_ACTION_BURN_PLANKS].has(String(action))
+		if (done.size() >= CAMP_ACTION_LIMIT and not resort) or not CAMP_ACTIONS.has(String(action)):
 			continue
 		match String(action):
 			"wounds":
@@ -1337,6 +1360,21 @@ func apply_camp_actions(actions: Array) -> Array[String]:
 				change_provisions(CAMP_HUNT_PROVISIONS)
 			"tales":
 				change_stress(CAMP_TALES_STRESS)
+			CAMP_ACTION_BURN_CANVAS, CAMP_ACTION_BURN_PLANKS:
+				if not can_camp_action(String(action)):
+					continue
+				caravan.damage_wagons(1 if action == CAMP_ACTION_BURN_CANVAS else 2)
+				burned_warmth_day = total_days_elapsed + 1
+			CAMP_ACTION_EAT_SEED:
+				var seed_eaten := mini(SEED_EATEN, get_total_quantity("test_grain"))
+				if seed_eaten <= 0 or not remove_from_cargo_or_bags("test_grain", seed_eaten):
+					continue
+				change_provisions(seed_eaten)
+			CAMP_ACTION_BURN_FURS:
+				var furs := mini(FURS_BURNED, get_total_quantity("test_furs"))
+				if furs <= 0 or not remove_from_cargo_or_bags("test_furs", furs):
+					continue
+				burned_warmth_day = total_days_elapsed + 1
 		done.append(String(action))
 	return done
 
@@ -2743,6 +2781,41 @@ func hire_driver() -> bool:
 	set_flag(FLAG_HIRED_DRIVER)
 	return true
 
+## --- Domino zinciri (Y-C23): soğuk ve kıtlık yenilmez, dayanılır; var olan
+## bedeller birbirini tetikler. Kırık aks yolu uzatır, uzayan yol erzağı
+## bitirir, açlık ateş getirir (FEVER_HUNGRY_BONUS), ateşli biri savaşta düşer.
+## Zincirin açık halkaları dertler listesinde tek cümle; RoadDirector sonraki
+## halkanın kartına ağırlık verir. ---
+const DOMINO_LINKS: Array[String] = ["axle", "long_road", "hunger", "fever"]
+const DOMINO_KEYS: Dictionary = {
+	"axle": "UI_DOMINO_AXLE", "long_road": "UI_DOMINO_LONG_ROAD", "hunger": "UI_DOMINO_HUNGER", "fever": "UI_DOMINO_FEVER",
+}
+
+func domino_open() -> Array[String]:
+	var open: Array[String] = []
+	if caravan.damaged_wagons > 0:
+		open.append("axle")
+	if is_journey_active() and get_provisions() < get_daily_provision_consumption() * maxi(1, journey_days_remaining):
+		open.append("long_road")
+	if _anyone_hungry():
+		open.append("hunger")
+	for member in get_party():
+		if member.ailments.has("fever"):
+			open.append("fever")
+			break
+	return open
+
+## İlk açık halkadan zincirin sonuna kadar cümle: oyuncu nereye gittiğini görür.
+func domino_sentence() -> String:
+	var open := domino_open()
+	if open.is_empty():
+		return ""
+	var start := DOMINO_LINKS.find(open[0])
+	var parts: Array[String] = []
+	for i in range(start, DOMINO_LINKS.size()):
+		parts.append(String(TranslationServer.translate(String(DOMINO_KEYS[DOMINO_LINKS[i]]))))
+	return " → ".join(parts)
+
 ## Ateşin başında ant içenler (Y-C33): lider de göçebe ya da dağlıysa, bağı
 ## güvene varan aynı töreden yoldaşlar. Yeni ant içenlerin adlarını döner.
 func swear_oaths() -> Array[String]:
@@ -3372,7 +3445,8 @@ func _cold_night() -> void:
 	if not has_road_sky():
 		return
 	var by_fire := last_fire_day == total_days_elapsed
-	var low := get_road_night_low()
+	# Yakılan branda, kürk ya da tahta o gecenin soğuğunu kırar (Y-C23).
+	var low := get_road_night_low() + (BURN_WARMTH_C if burned_warmth_day == total_days_elapsed else 0.0)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("cold|%s|%d" % [caravan_name, total_days_elapsed])
 	var shivering: Array[String] = []
@@ -4599,6 +4673,7 @@ func to_save_dict() -> Dictionary:
 		"ledger": ledger.to_array(),
 		"last_feast_day": last_feast_day,
 		"last_fire_day": last_fire_day,
+		"burned_warmth_day": burned_warmth_day,
 		"last_clock_hour": last_clock_hour,
 		"map_trail": map_trail.duplicate(true),
 		"bonds": bonds.duplicate(),
@@ -4841,6 +4916,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	ledger.load_from_array(data.get("ledger", []) as Array)
 	last_feast_day = int(data.get("last_feast_day", -1))
 	last_fire_day = int(data.get("last_fire_day", -1))
+	burned_warmth_day = int(data.get("burned_warmth_day", -1))
 	last_clock_hour = fposmod(float(data.get("last_clock_hour", JourneyClock.START_HOUR)), 24.0)
 	last_feast_evening_day = int(data.get("last_feast_evening_day", total_days_elapsed))
 	last_story_day = int(data.get("last_story_day", -99))
@@ -4979,6 +5055,7 @@ func build_event_context() -> Dictionary:
 		"provisions": get_provisions(),
 		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
+		"domino_open": domino_open(),
 		# Kıtlık (Y-C21): yolun gittiği yerin derecesi ve oranın hâli.
 		"scarcity_here": scarcity_here(journey_destination_id if is_journey_active() else ""),
 		"city_morale": morale_of(journey_destination_id if is_journey_active() else current_location_id),
