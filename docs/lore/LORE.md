@@ -169,6 +169,11 @@ bakımda ve toplulukta yarar.
 - [Oyun bağlantısı] Bugün arınma taverna ve kilisede, şifa kilisenin hekiminde. Kanon, kültüre göre bir "doğa ibadeti"
   (Baikhan, Taşkök, Ayazkaya) ve bir "şifahane" yolu istiyor (bkz. §15).
 
+- **[Yazar, onaylandı 2026-11-01]** Halkların inancı (kervanbaşının inancı buradan gelir, görev Y-C34): göçebeler
+  Baikhan; dağlılar ve balıkçılar eski inançta (Dağın İlk Nefesi, Denizin İlk Gözyaşı) kalır; Vadili ve limanlılar
+  doğdukları yere göre El'e bağlıdır: güney Vadi (Belvanor, Ilsande, Caramine) ve Orsolune Yumruk, geri kalanı
+  Septisizm.
+
 ### 4.3 Baikhan
 
 - **[Yazar]** Göçebe boylarının inancı; kilisenin asimilasyonundan kaçabilen tek büyük inanç. Bir dinden çok yaşam

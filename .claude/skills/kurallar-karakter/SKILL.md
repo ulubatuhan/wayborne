@@ -557,7 +557,8 @@ the player cannot reach says nothing about balance.
   liderlikte geçmek) bağ sıfırlanır ve `oath_broken` kırgınlığı ağırdır (3); antlı birini geride bırakmak aynı
   töreden herkese bu kırgınlığı yazar. Ant kayıtta (`CharacterData.sworn`).
 - **Kervanın inancı kervanbaşının inancıdır** (`caravan_creed`). Boşsa kültürden ve bulunduğu yerden türetilir (LORE
-  §4): göçebe Baikhan; dağlı ve balıkçı eski inanç; güney Vadi ve Orsolune Yumruk; geri kalanı Septisizm. Avuçiçi
+  §4, kullanıcı onayı 2026-11-01): göçebe Baikhan; dağlı ve balıkçı eski inanç; güney Vadi ve Orsolune Yumruk; geri
+  kalanı Septisizm. Avuçiçi
   kafilesi (`evt_pilgrim_caravan`) yalnızca Septisistleri alır; başkası rol yaparak katılır (lider Karizma kontrolü),
   yakalanan inançsız muhafızlarca cezalandırılır.
 
