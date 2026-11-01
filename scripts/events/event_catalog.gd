@@ -111,6 +111,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_plague_outbreak_news())
 	_road_events.append(_trade_fair_news())
 	_road_events.append(_bandit_tribute_zone_news())
+	_road_events.append(_avucici_hand())
 	_road_events.append(_bandit_tribute_toll())
 	_road_events.append(_road_warden())
 	_road_events.append(_taken_captive())
@@ -2186,6 +2187,46 @@ static func _trade_fair_news() -> GameEvent:
 ## Haydut kralının haraç bölgesi - yoldaki gerçek tahsildarla karşılaşma
 ## ayrı bir olay (`evt_bandit_tribute_toll`), bu yalnızca haberi veriyor
 ## ve rota tehlikesine bir pay ekliyor.
+## Avuçiçi'nin kapısı (lore defter III, Ç14): şehirde görülen ya da inançlı
+## rolü yapıp yakalanan inançsızın eli kesilir. Kimin başına geleceği seçimden
+## önce yazılır (Event Rules); bedel kalıcı sakatlık, ölüm değil.
+static func _avucici_hand() -> GameEvent:
+	var event := _event("evt_avucici_hand", "EVT_AVUCICI_HAND_TITLE", "EVT_AVUCICI_HAND_TEXT", 1.2)
+	event.cooldown_days = 30
+	event.conditions = _conditions([
+		EventCondition.make("avucici_unbeliever", EventCondition.Op.GREATER_EQUAL, 1.0),
+	])
+	event.choices = _choices([
+		# İnançlı rolü: Kitap'ı göğsüne as, ağzına duayı ver. Yakalanırsa el gider.
+		_check_choice(
+			"EVT_AVUCICI_HAND_OPT_PRETEND", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
+			"EVT_AVUCICI_HAND_PRETEND_OK", _effects([
+				EventEffect.make(EventEffect.Type.STRESS, 4),
+			]),
+			"EVT_AVUCICI_HAND_PRETEND_MID", _effects([
+				EventEffect.make(EventEffect.Type.GOLD, -25),
+				EventEffect.make(EventEffect.Type.STRESS, 6),
+			]),
+			"EVT_AVUCICI_HAND_PRETEND_BAD", _effects([
+				EventEffect.make(EventEffect.Type.CUT_HAND, 1),
+				EventEffect.make(EventEffect.Type.MORALE, -12),
+			])
+		),
+		# Kapıda bırakmak: güvenli, ama kafile bölünür, yük ve gün kaybı.
+		_choice("EVT_AVUCICI_HAND_OPT_LEAVE", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.MORALE, -6),
+			EventEffect.make(EventEffect.Type.STRESS, 3),
+		])),
+		# Geri dön: Orvahel'e girmeden yol değişir.
+		_choice("EVT_AVUCICI_HAND_OPT_TURN", _effects([
+			EventEffect.make(EventEffect.Type.MORALE, -3),
+			EventEffect.make(EventEffect.Type.REPUTATION, -4),
+			EventEffect.make(EventEffect.Type.PROVISIONS, -3),
+		])),
+	])
+	return event
+
 static func _bandit_tribute_zone_news() -> GameEvent:
 	var event := _event("evt_bandit_tribute_zone_news", "EVT_TRIBUTE_NEWS_TITLE", "EVT_TRIBUTE_NEWS_TEXT", 0.3)
 	event.cooldown_days = 20

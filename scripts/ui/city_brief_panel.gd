@@ -124,9 +124,12 @@ func _build_need_row(need: Dictionary) -> HBoxContainer:
 
 	var button := Button.new()
 	button.text = String(need.action)
-	if String(need.scene).is_empty():
-		# Bu yerde o mekân yok (bkz. CityBriefModel): kilitli, sebebi yazılı.
+	if String(need.scene).is_empty() or (_session.is_shut_out() and String(need.scene) != Nav.ECONOMY):
+		# Bu yerde o mekân yok (bkz. CityBriefModel) ya da Avuçiçi kapısı inançsıza
+		# kapalı (Ç14): kilitli, sebebi yazılı.
 		button.disabled = true
+		if _session.is_shut_out():
+			button.tooltip_text = tr("UI_AVUCICI_SHUT_OUT")
 	else:
 		button.pressed.connect(_on_screen_requested.bind(String(need.scene)))
 	row.add_child(button)

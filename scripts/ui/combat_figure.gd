@@ -292,6 +292,13 @@ func figure_height() -> float:
 
 ## `kind` sınıf ya da düşman kimliği; tanınmayan bir kimlik haydut
 ## silüetine düşer, yani yeni bir düşman çizimsiz kalmaz.
+var _missing_hand: bool = false
+
+func set_missing_hand(on: bool) -> void:
+	if on != _missing_hand:
+		_missing_hand = on
+		_sync_rig()
+
 func setup(
 	kind: String, face_right: bool, state: String, depth: float, outfit: Dictionary = {},
 	loadout: PackedStringArray = PackedStringArray(), skin: Color = SKIN_PALE,
@@ -388,6 +395,7 @@ func _sync_rig() -> void:
 		false, _outfit, _body_variant
 	)
 	_rig.set_loadout(_loadout)
+	_rig.set_missing_hand(_missing_hand)
 	_rig.set_combat_stance(true)
 	_rig.set_standing()
 	_rig.set_facing(1.0 if _face_right else -1.0)

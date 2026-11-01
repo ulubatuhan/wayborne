@@ -731,6 +731,15 @@ const OATH_BROKEN_WEIGHT: int = 3
 const GRIEVANCE_OATH_BROKEN: String = "oath_broken"
 const OATH_BREAKERS: Array[String] = ["unfed", "benched", "passed_over"]
 var sworn: bool = false
+## Kesik el (lore defter III, Ç14): Avuçiçi'nde inançsızın eli kesilir. Kalıcı:
+## figürde el yok; iki elle yapılan iş (yay, balyoz, kalkan) yapılamaz.
+var missing_hand: bool = false
+## İki el isteyen silah türleri (CombatFigure.ARCHETYPES "weapon").
+const TWO_HANDED_WEAPONS: Array[String] = ["bow", "maul", "spear_shield"]
+
+func needs_two_hands() -> bool:
+	var weapon := String(CombatFigure.ARCHETYPES.get(class_id, {}).get("weapon", "none"))
+	return TWO_HANDED_WEAPONS.has(weapon)
 ## Ant kardeşi: aynı ateşte birbirine de ant içen yoldaşın kimliği.
 var oath_partner: String = ""
 
@@ -1076,6 +1085,7 @@ func to_dict() -> Dictionary:
 		"backstory_id": backstory_id,
 		"rapport": rapport,
 		"sworn": sworn,
+		"missing_hand": missing_hand,
 		"oath_partner": oath_partner,
 		"creed": creed,
 		"last_chat_day": last_chat_day,
@@ -1122,6 +1132,7 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.backstory_id = str(data.get("backstory_id", ""))
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
 	character.sworn = bool(data.get("sworn", false))
+	character.missing_hand = bool(data.get("missing_hand", false))
 	character.oath_partner = str(data.get("oath_partner", ""))
 	character.creed = str(data.get("creed", ""))
 	character.last_chat_day = int(data.get("last_chat_day", -99))

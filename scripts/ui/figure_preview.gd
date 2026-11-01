@@ -32,6 +32,7 @@ func show_character(character: CharacterData, archetype: String = "") -> void:
 		character.get_appearance_outfit(), Wardrobe.loadout_of(character.outfit, character.equipped),
 		character.get_body_variant_id()
 	)
+	_figure.set_missing_hand(character.missing_hand)
 
 func show_look(
 	archetype_id: String, height_scale: float, skin: Color, outfit: Dictionary,

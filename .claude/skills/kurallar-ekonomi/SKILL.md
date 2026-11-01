@@ -730,3 +730,16 @@ ever fell, and the career simulation had already measured the result
   politika x 8 kervan x 40 sefer): dertsiz sefer %25-27, en uzun sakin dizi 4-5. Uzun sakin dizi çıkarsa bir kriz
   eksik demektir.
 
+### Avuçiçi Gate Rules (lore defter III, Ç14)
+
+- **An unbelieving caravan never enters an Avuçiçi city.** `GameSession.is_shut_out()` is true in the `ahit` region when
+  the caravan's creed (its leader's, Y-C34) is not Septism. The city screen then offers only the market, which is the
+  guild's gate broker: buying costs `GATE_BROKER_COMMISSION` (20%) more and selling pays 20% less, through the same
+  doors every other price factor uses (`get_buy_price_multiplier`, `capped_sell_price`). The brief's need buttons that
+  lead anywhere else are locked with the reason; leaving (the planner) stays open.
+- **The penalty for being seen is a hand, never a life.** `evt_avucici_hand` fires on the way to Avuçiçi when an
+  unbelieving companion is in the party; the card names who before the choice (`CUT_HAND` is a target selector like
+  `PARTY_HP`). `CharacterData.missing_hand` is permanent and saved: the figure draws the near hand cut away with a
+  wrapped wrist (`stump.gdshader`, only the front-arm layer is cut), no weapon is carried in hand, and
+  `CombatUnit.TWO_HANDED_SKILLS` (shield, bow, maul) are locked with "cannot be done one-handed".
+

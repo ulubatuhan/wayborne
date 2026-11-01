@@ -539,7 +539,15 @@ func get_effective_damage_bonus() -> int:
 ## Yetenek şu an kullanılabilir mi; kullanılamıyorsa neden - UI kilitli
 ## butonu sebebiyle birlikte gösterir (bkz. olay ekranındaki kilitli
 ## seçenekler).
+## İki el isteyen yetenekler: kalkan, yay ve balyoz (lore defter III, Ç14).
+const TWO_HANDED_SKILLS: Array[String] = [
+	SkillCatalog.SHIELD_BASH, SkillCatalog.BRACE, SkillCatalog.ARROW_SHOT, SkillCatalog.AIMED_SHOT,
+	SkillCatalog.SLEDGE_STRIKE, SkillCatalog.SHIELD_BREAK, SkillCatalog.SWEEPING_BLOW,
+]
+
 func get_skill_block_reason(skill: CombatSkill) -> String:
+	if source_character != null and source_character.missing_hand and TWO_HANDED_SKILLS.has(skill.skill_id):
+		return tr("CBT_BLOCK_ONE_HAND")
 	if not skill.can_use_from(position):
 		return tr("CBT_BLOCK_POSITION") % position
 	var remaining := get_cooldown(skill.skill_id)

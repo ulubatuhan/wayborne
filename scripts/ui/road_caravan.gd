@@ -632,6 +632,7 @@ func _make_figure(
 		outfit = OutfitCatalog.with_rolled_hair(outfit, CharacterData.GENDER_MALE, get_child_count() * 7919)
 	figure.set_kind(kind, archetype, height_scale, skin, pack, outfit, body_variant)
 	figure.set_loadout(Wardrobe.loadout_for(character))
+	figure.set_missing_hand(character != null and character.missing_hand)
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
 	# gibi duruyor.
 	figure.set_phase_offset(float(get_child_count()) * 1.27)

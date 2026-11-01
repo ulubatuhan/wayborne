@@ -231,6 +231,7 @@ func bind(bound_unit: CombatUnit, is_active: bool, is_target: bool) -> void:
 		bound_unit.outfit, bound_unit.loadout, bound_unit.skin, bound_unit.height_scale,
 		bound_unit.body_variant
 	)
+	_figure.set_missing_hand(person != null and person.missing_hand)
 	_figure.set_stunned(bound_unit.is_stunned and bound_unit.is_alive())
 	_figure.set_conditions(bound_unit.get_active_status_kinds(), bound_unit.stuck)
 	_border.border_color = _border_color(is_active, is_target)

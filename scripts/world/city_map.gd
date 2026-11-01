@@ -90,7 +90,8 @@ static func build_model(session: GameSession) -> Dictionary:
 		"provisions_days": session.get_provisions() / daily,
 		"party": party,
 		"venue_lines": venue_lines(session),
-		"facilities": SettlementRules.facilities(location.settlement_type) if location != null else [],
+		# Avuçiçi'nde inançsız şehre giremez: yalnızca kapıdaki lonca aracısı (Ç14).
+		"facilities": ([SettlementRules.MARKET] if session.is_shut_out() else SettlementRules.facilities(location.settlement_type)) if location != null else [],
 	}
 
 ## Brifingin ihtiyaçları, hangi mekân çözüyorsa o mekânın levhasına da
@@ -100,6 +101,8 @@ static func venue_lines(session: GameSession) -> Dictionary:
 	for v in CityFront.VENUES:
 		by_scene[String(v["scene"])] = String(v["key"])
 	var lines := {}
+	if session.is_shut_out():
+		lines["UI_GRIM_VENUE_MARKET"] = [{"text": TranslationServer.translate("UI_AVUCICI_BROKER_LINE") % int(round(GameSession.GATE_BROKER_COMMISSION * 100.0)), "kind": "bad"}]
 	for need in CityBriefModel.build_needs(session):
 		var key := String(by_scene.get(String(need.get("scene", "")), ""))
 		if key.is_empty():

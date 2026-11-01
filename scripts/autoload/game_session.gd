@@ -2091,7 +2091,39 @@ func get_trait_price_multiplier() -> float:
 	)
 
 func get_buy_price_multiplier() -> float:
-	return get_player_culture().buy_price_multiplier * get_trait_price_multiplier() * (TRADE_STAIN_BUY if is_trade_stained() else 1.0)
+	return get_player_culture().buy_price_multiplier * get_trait_price_multiplier() * (TRADE_STAIN_BUY if is_trade_stained() else 1.0) \
+		* (1.0 + GATE_BROKER_COMMISSION if is_shut_out() else 1.0)
+
+## Avuçiçi'nde inançsız (lore defter III, Ç14): şehre giremez; ticaretini kapıda
+## ticaret loncasının aracılarıyla, fazladan komisyon ödeyerek yapar. Kervanın
+## inancı kervanbaşınınki (Y-C34). Şehirde görülen ya da inançlı rolü yapan
+## inançsızın eli kesilir (olay kartı `evt_avucici_hand`).
+const AVUCICI_REGION: String = "ahit"
+const GATE_BROKER_COMMISSION: float = 0.2
+
+## El'e inanmayan, eli henüz yerinde bir yoldaş (önce kervanbaşı olmayanlar).
+func unbelieving_companion() -> CharacterData:
+	var leader_fallback: CharacterData = null
+	for member in get_party():
+		if member.missing_hand:
+			continue
+		if member.creed.is_empty():
+			member.creed = derive_creed(member.culture_id, current_location_id, member.character_id)
+		if member.creed == CharacterData.CREED_SEPTISM:
+			continue
+		if member.is_player:
+			leader_fallback = member
+			continue
+		return member
+	return leader_fallback
+
+func _bound_for_avucici() -> bool:
+	var dest := WorldMapData.get_location_by_id(journey_destination_id)
+	return dest != null and dest.region == AVUCICI_REGION
+
+func is_shut_out(location_id: String = "") -> bool:
+	var location := WorldMapData.get_location_by_id(current_location_id if location_id.is_empty() else location_id)
+	return location != null and location.region == AVUCICI_REGION and caravan_creed() != CharacterData.CREED_SEPTISM
 
 ## Ticaret lekesi (Y-C26, kullanıcı notu: köyü zorla basan kervan "ticari
 ## eylemlerde ciddi oranda dezavantajlı" olmalı): bir süre pazar kervana
@@ -3617,6 +3649,8 @@ func note_purchase(item: Item, quantity: int, unit_price: int) -> void:
 ## (MarketPricing.freshness_multiplier), aynı ziyarette alınan mal tavanlı.
 func capped_sell_price(item_id: String, market_price: int) -> int:
 	var stain := TRADE_STAIN_SELL if is_trade_stained() else 1.0
+	if is_shut_out():
+		stain *= 1.0 - GATE_BROKER_COMMISSION
 	if Scarcity.is_food(item_id):
 		stain *= 1.0 + maxf(0.0, (MORALE_START - morale_of(current_location_id)) / MORALE_START) * HUNGRY_FOOD_SELL_RISE
 	var price := maxi(1, int(round(float(market_price) * get_freshness(item_id) * stain)))
@@ -5146,6 +5180,7 @@ func build_event_context() -> Dictionary:
 		"has_muhafiz": 1.0 if get_duty_holder(DutyCatalog.MUHAFIZ) != null else 0.0,
 		"has_izci": 1.0 if get_duty_holder(DutyCatalog.IZCI) != null else 0.0,
 		"has_levazimci": 1.0 if get_duty_holder(DutyCatalog.LEVAZIMCI) != null else 0.0,
+		"avucici_unbeliever": 1.0 if _bound_for_avucici() and unbelieving_companion() != null else 0.0,
 		"has_arabaci": 1.0 if get_duty_holder(DutyCatalog.ARABACI) != null else 0.0,
 		"has_tellal": 1.0 if get_duty_holder(DutyCatalog.TELLAL) != null else 0.0,
 		"has_otaci": 1.0 if get_duty_holder(DutyCatalog.OTACI) != null else 0.0,

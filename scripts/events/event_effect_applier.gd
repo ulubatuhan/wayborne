@@ -157,6 +157,12 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
+		EventEffect.Type.CUT_HAND:
+			var maimed := session.unbelieving_companion()
+			if maimed != null:
+				maimed.missing_hand = true
+				maimed.change_stress(15)
+				result.lines.append(_t("EFF_HAND_CUT") % maimed.character_name)
 		EventEffect.Type.BAN_LOCATION:
 			var place := effect.text_value if not effect.text_value.is_empty() else session.journey_destination_id
 			if not place.is_empty():
@@ -236,6 +242,8 @@ static func _target_in(effects: Array[EventEffect], session: GameSession) -> Cha
 				return _weakest_companion(session)
 			EventEffect.Type.PARTY_HP:
 				return _pick_party_target(effect.text_value, session)
+			EventEffect.Type.CUT_HAND:
+				return session.unbelieving_companion()
 	return null
 
 static func _pick_party_target(selector: String, session: GameSession) -> CharacterData:

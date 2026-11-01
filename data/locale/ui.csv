@@ -856,6 +856,8 @@
 "UI_GRIM_WEIGHT_QTY","%.1f ağırlık · %d adet","%.1f weight · %d units","","","","","","","","",""
 "UI_GRIM_YOUR_LOAD","Senin Yükün","Your Load","","","","","","","","",""
 "UI_GRIM_EMBARK","Yola Çık","Set Out","","","","","","","","",""
+"UI_AVUCICI_BROKER_LINE","Kapı dışarıda: lonca aracısı alır, satar; %%%d komisyon","Kept outside the gate: a guild broker buys and sells; %d%% commission","","","","","","","","",""
+"UI_AVUCICI_SHUT_OUT","İnançsız şehre giremez","Unbelievers may not enter the city","","","","","","","","",""
 "UI_DEPART_ASK","Hangi yöne gidiyoruz?","Which way are we heading?","","","","","","","","",""
 "UI_DEPART_ROUTE","%s · %s · %s","%s · %s · %s","","","","","","","","",""
 "UI_COMPASS_E","Doğu","East","","","","","","","","",""

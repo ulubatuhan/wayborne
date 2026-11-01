@@ -121,6 +121,13 @@ var _motion: float = 1.0
 ## gövdesi eğiliyor - bkz. RoadCaravan.set_weather.
 var _lean: float = 0.0
 var _carries_pack: bool = false
+## Kesik el (lore defter III, Ç14): yakın kolun (sağ el) eli yok, bilekte sargı;
+## elde silah taşınmaz, silah sırtta kalır.
+var _missing_hand: bool = false
+const STUMP_MARK: float = 0.987
+const STUMP_OUTLINE_MARK: float = 0.849
+const STUMP_SHADER: String = "res://scripts/ui/stump.gdshader"
+const STUMP_WRAP: Color = Color(0.78, 0.72, 0.60)
 ## `CharacterData.outfit` - boş sözlük (tayfa, düşman reskin'i, oxen) hiçbir
 ## şeyi değiştirmez, figür tamamen sınıf/arketip paletinde kalır. Yalnızca
 ## karakter oluşturmada seçilen bir parça varsa o slotun rengi/kafa şekli
@@ -200,6 +207,26 @@ func set_kind(
 	if (kind == KIND_HORSE or kind == KIND_MOUNTED) and _horse_species.is_empty():
 		_horse_species = BeastRig.HORSE_WHITE if randf() < WHITE_HORSE_CHANCE else BeastRig.HORSE
 	queue_redraw()
+
+func set_missing_hand(on: bool) -> void:
+	if on == _missing_hand:
+		return
+	_missing_hand = on
+	if on:
+		var mat := ShaderMaterial.new()
+		mat.shader = load(STUMP_SHADER)
+		material = mat
+	elif material is ShaderMaterial and (material as ShaderMaterial).shader.resource_path == STUMP_SHADER:
+		material = null
+	queue_redraw()
+
+func has_missing_hand() -> bool:
+	return _missing_hand
+
+## Bilekten öteye: elin kapladığı daire (merkez, yarıçap) - kol yönünde.
+static func stump_circle(wrist: Vector2, elbow: Vector2, h: float) -> Array:
+	var dir := (wrist - elbow).normalized()
+	return [wrist + dir * h * 0.06, h * 0.068]
 
 func set_combat_stance(on: bool) -> void:
 	_combat_stance = on
@@ -664,6 +691,14 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	var shield := held and weapon_kind() == "spear_shield"
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
+	var stump := _missing_hand and joints.has("hand_front") and joints.has("elbow_front")
+	if stump and material is ShaderMaterial:
+		var circle := stump_circle(joints.hand_front, joints.elbow_front, h)
+		# Katmanlar draw_set_transform_matrix(xf) ile çiziliyor; gölgelendiricinin
+		# VERTEX'i dönüşümden önceki (kare) uzayda.
+		var inv := xf.affine_inverse()
+		(material as ShaderMaterial).set_shader_parameter("cut_center", inv * Vector2(circle[0]))
+		(material as ShaderMaterial).set_shader_parameter("cut_radius", float(circle[1]) / maxf(0.0001, absf(xf.get_scale().y)))
 	_draw_frame_outline(frames, garments, clip, frame, xf, h, seated)
 	# Saç gri render edildi: kişinin saç rengiyle çarpılıyor (ten gibi).
 	var garment_tints: Array[Color] = []
@@ -678,24 +713,38 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 				and BodyFrames.LAYERS[layer] == "back_leg":
 			continue
 		var weapon_layer := "front_arm" if weapon_in_front(_facing, weapon_kind()) else "torso_head"
-		if BodyFrames.LAYERS[layer] == weapon_layer and held:
+		if BodyFrames.LAYERS[layer] == weapon_layer and held and not _missing_hand:
 			_draw_frame_weapon(joints, h, look, wdir, float(wdata.draw))
 		if BodyFrames.LAYERS[layer] == "torso_head" and not fallen:
-			_draw_frame_back_items(joints, h, look, held)
+			_draw_frame_back_items(joints, h, look, held and not _missing_hand)
 		draw_set_transform_matrix(xf)
+		var cut_layer := stump and BodyFrames.LAYERS[layer] == "front_arm"
 		for kind in [BodyFrames.KIND_BODY, BodyFrames.KIND_BOTTOM, BodyFrames.KIND_TOP]:
 			var e := frames.entry(clip, frame, layer, kind)
 			if e.is_empty():
 				continue
 			var region: Rect2 = e.region
-			draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tones[kind])
+			var tone: Color = tones[kind]
+			if cut_layer:
+				tone.a = STUMP_MARK
+			draw_texture_rect_region(e.texture, Rect2(e.offset, region.size), region, tone)
 		for gi in garments.size():
 			var g := garments[gi].entry(clip, frame, layer, BodyFrames.KIND_BODY)
 			if g.is_empty():
 				continue
 			var gregion: Rect2 = g.region
-			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, garment_tints[gi])
+			var gtint := garment_tints[gi]
+			if cut_layer:
+				gtint.a = STUMP_MARK
+			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, gtint)
 		draw_set_transform_matrix(Transform2D.IDENTITY)
+		if cut_layer:
+			# Bilekte sargı: kesik kol böyle okunur.
+			var dir := (Vector2(joints.hand_front) - Vector2(joints.elbow_front)).normalized()
+			var a: Vector2 = Vector2(joints.hand_front) - dir * h * 0.012
+			var b: Vector2 = Vector2(joints.hand_front) + dir * h * 0.014
+			draw_line(a, b, FRAME_OUTLINE_INK, maxf(2.0, h * 0.036))
+			draw_line(a, b, STUMP_WRAP * _tint, maxf(1.5, h * 0.028))
 		if BodyFrames.LAYERS[layer] == "torso_head":
 			_draw_frame_extras(joints, h, look)
 			_draw_stuck(joints, h)
@@ -732,13 +781,16 @@ func _draw_frame_outline(frames: BodyFrames, garments: Array[BodyFrames], clip: 
 		for layer in BodyFrames.LAYERS.size():
 			if seated and BodyFrames.LAYERS[layer] == "back_leg":
 				continue
+			var layer_ink := ink
+			if _missing_hand and BodyFrames.LAYERS[layer] == "front_arm" and is_equal_approx(_tint.a, 1.0):
+				layer_ink.a = STUMP_OUTLINE_MARK
 			var e := frames.entry(clip, frame, layer, BodyFrames.KIND_BODY)
 			if not e.is_empty():
-				draw_texture_rect_region(e.texture, Rect2(e.offset, e.region.size), e.region, ink)
+				draw_texture_rect_region(e.texture, Rect2(e.offset, e.region.size), e.region, layer_ink)
 			for garment in garments:
 				var g := garment.entry(clip, frame, layer, BodyFrames.KIND_BODY)
 				if not g.is_empty():
-					draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), g.region, ink)
+					draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), g.region, layer_ink)
 	draw_set_transform_matrix(Transform2D.IDENTITY)
 
 ## Katman türü başına renk: beden ten, alt şort, üst atlet/bra. Temel kuşam

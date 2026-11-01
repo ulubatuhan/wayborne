@@ -85,6 +85,9 @@ enum Type {
 	TRADE_STAIN,
 	# Şehrin hâli (Y-C21): `amount` kadar; seferdeyse varılacak şehrin, değilse bulunulanın.
 	CITY_MORALE,
+	# Avuçiçi'nde inançsızın eli kesilir (lore defter III, Ç14): kervanın El'e
+	# inanmayan bir yoldaşı kalıcı olarak tek elli kalır. Olaylar öldürmez.
+	CUT_HAND,
 }
 
 @export var type: Type = Type.GOLD
