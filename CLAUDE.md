@@ -5,8 +5,7 @@
 
 ## Vaat ve Sütunlar
 
-> **Durum: öneri, kullanıcı onayı bekliyor (görev Y-A01, Y-A02).** Cümleler yapılacaklar listesindeki kullanıcı notlarından
-> alındı; onaylanınca bu kutu kalkar.
+> **Onaylandı (kullanıcı, 2026-11-01; görev Y-A01, Y-A02).**
 
 **Vaat.** Bir kervanı kuşaklar boyu yolda tut. Her karar yola bir iz, her ölüm deftere bir satır olur.
 

@@ -393,7 +393,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yön ve kapsam",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 1,
@@ -401,7 +401,7 @@
    "sira": 26,
    "kim": "CO",
    "commit": "7083b90",
-   "not": "Tasarım belgesi ve Steam metni taslağı yazıldı; vaat cümlesi onay bekliyor."
+   "not": "Tasarım belgesi ve Steam metni taslağı yazıldı; vaat cümlesi onay bekliyor. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "Y-A02",
@@ -409,7 +409,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yön ve kapsam",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 1,
@@ -417,7 +417,7 @@
    "sira": 27,
    "kim": "CO",
    "commit": "7083b90",
-   "not": "Görev şablonuna zorunlu 'Sütun' satırı eklendi."
+   "not": "Görev şablonuna zorunlu 'Sütun' satırı eklendi. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "Y-K01",
@@ -1203,7 +1203,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-C01"
    ],
@@ -1213,7 +1213,7 @@
    "sira": 77,
    "kim": "CO",
    "commit": "2bc6802",
-   "not": "Lonca görevleri statik kaldı; teslimatta tüccar yolda yok (tüccar diyaloğu bu kontratlarda anlamsız, onay paketinde not); test TEST_PLANI.md'de."
+   "not": "Lonca görevleri statik kaldı; teslimatta tüccar yolda yok (tüccar diyaloğu bu kontratlarda anlamsız, onay paketinde not); test TEST_PLANI.md'de. | 2026-11-01 kullanıcı onayı: ekran ve lonca görevlerinin sabit kalması olduğu gibi."
   },
   {
    "id": "Y-F05",
@@ -1490,7 +1490,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yol deneyimi",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 3,
@@ -1498,7 +1498,7 @@
    "sira": 94,
    "kim": "CK",
    "commit": "fb3d2de",
-   "not": "2026-10-20: gün boyu izler (ölüm, vagon, savaş, açlık, hikâye, olay), akşam kampında en ağır izden üç edebi cümle, oyuncu birini seçer ya da yazmaz (DiaryPanel); defterin Düşenler sayfasında görünür. test_waybook_pages."
+   "not": "2026-10-20: gün boyu izler (ölüm, vagon, savaş, açlık, hikâye, olay), akşam kampında en ağır izden üç edebi cümle, oyuncu birini seçer ya da yazmaz (DiaryPanel); defterin Düşenler sayfasında görünür. test_waybook_pages. | 2026-11-01 kullanıcı onayı: olduğu gibi kalır (üç hazır cümleden biri ya da hiç; serbest metin yok)."
   },
   {
    "id": "R2",
@@ -1689,7 +1689,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Odak: birleştir ve anlamlandır",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-F03"
    ],
@@ -1699,7 +1699,7 @@
    "sira": 106,
    "kim": "CO",
    "commit": "4d6fb67",
-   "not": "Mantık değişmedi, yalnızca ekran; test TEST_PLANI.md'de."
+   "not": "Mantık değişmedi, yalnızca ekran; test TEST_PLANI.md'de. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "Y-C06",
@@ -2037,14 +2037,14 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/12_sehir_ve_yol_gorunumu.md",
    "paket": "P12",
    "sira": 127,
    "kim": "CO",
    "commit": "2dd895a",
-   "not": "12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K5): güneş/ay tek Gauss parıltısı (radial_glow), bulutlar, ufuk bandı, sis şeridi, uzak/orta soğuk ve ön sıcak renk ayarı, gece fener ışığı; screenshot_road_light.gd."
+   "not": "12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K5): güneş/ay tek Gauss parıltısı (radial_glow), bulutlar, ufuk bandı, sis şeridi, uzak/orta soğuk ve ön sıcak renk ayarı, gece fener ışığı; screenshot_road_light.gd. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "12.2e",
@@ -2052,7 +2052,7 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "12.2d"
    ],
@@ -2061,7 +2061,7 @@
    "sira": 128,
    "kim": "CO",
    "commit": "4af6c2f",
-   "not": "Gerçek şeritlerle; değişen yalnızca gök, güneş-ışık, renk derecelendirmesi, sis şeridi, gece feneri. | 2026-10-19 karar: onay; yol sahnesine uygulanacak. | 2026-10-20: ArtPalette.SKIES onaylı taslağa göre (band anahtarı), ufukta sıcak bant, güneş hale + küçük çekirdek. Commit 4af6c2f."
+   "not": "Gerçek şeritlerle; değişen yalnızca gök, güneş-ışık, renk derecelendirmesi, sis şeridi, gece feneri. | 2026-10-19 karar: onay; yol sahnesine uygulanacak. | 2026-10-20: ArtPalette.SKIES onaylı taslağa göre (band anahtarı), ufukta sıcak bant, güneş hale + küçük çekirdek. Commit 4af6c2f. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "Y-G07",
@@ -2264,7 +2264,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2272,7 +2272,7 @@
    "sira": 141,
    "kim": "CO",
    "commit": "-",
-   "not": "Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K9): tur madalyonu, tam ekran, yetenek kartları (isabet %/kilit sebebi), hedef paneli; kanama/kritik efektleri kullanıcı kararıyla eklenmedi."
+   "not": "Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K9): tur madalyonu, tam ekran, yetenek kartları (isabet %/kilit sebebi), hedef paneli; kanama/kritik efektleri kullanıcı kararıyla eklenmedi. | 2026-11-01 kullanıcı onayı."
   },
   {
    "id": "Y-G06",
@@ -3237,7 +3237,7 @@
    "bolum": "14",
    "alan": "Yeni dünya: görsel",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "N28"
    ],
@@ -3246,7 +3246,7 @@
    "paket": "P16",
    "sira": 198,
    "kim": "CO",
-   "not": "Kod, veri ve dört katman hazır; testler ve ekran görüntüsü TEST_PLANI.md'de, onay ONAY_PAKETI.md'de.",
+   "not": "Kod, veri ve dört katman hazır; testler ve ekran görüntüsü TEST_PLANI.md'de, onay ONAY_PAKETI.md'de. | 2026-11-01 kullanıcı onayı.",
    "commit": "5ae38c4"
   },
   {

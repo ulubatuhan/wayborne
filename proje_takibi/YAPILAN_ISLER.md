@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **102** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -297,6 +297,41 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P03
+
+### Y-A01 · Oyun vaadini yaz ve belgelere işle
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P03 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Tasarım belgesi ve Steam metni taslağı yazıldı; vaat cümlesi onay bekliyor. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-A01 Oyun vaadini yaz ve belgelere işle**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Tasarım belgesi ve Steam metni taslağı yazıldı; vaat cümlesi onay bekliyor.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Vaat cümlesi: “Bir kervanı kuşaklar boyu yolda tut. Her karar yola bir iz, her ölüm deftere bir satır olur.” Cümleyi `CLAUDE.md` başına, `docs/` altındaki tasarım belgesine ve Steam metni taslağına koy. Her yeni özellik bu cümleye karşı sınanır.
+  - **Neden:** Vaadi olmayan oyun her öneriyi kabul eder ve dağılır; mağaza sayfasında his satılır.
+  - **Kabul:** Vaat cümlesi CLAUDE.md'nin ilk bölümünde; kullanıcı son hâlini onayladı.
+  - **Literatür:** R6, R60
+
+</details>
+
+### Y-A02 · Dört tasarım sütununu yazıya dök
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P03 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Görev şablonuna zorunlu 'Sütun' satırı eklendi. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-A02 Dört tasarım sütununu yazıya dök**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `7083b90`): Görev şablonuna zorunlu 'Sütun' satırı eklendi.
+  - **Öncelik:** P1 · **Dalga:** 1 · **İlgili:** 6.3
+  - **Ne:** Yol yaşar · İnsanlar aşınır · Defter unutmaz · Ticaret bilgi oyunudur. CLAUDE.md'nin başına “Sütunlar” bölümü olarak eklensin; her yeni sistem en az birine hizmet ettiğini belirtsin. Kullanıcının “derinleşme, asla sadeleştirme” ilkesi sütunların üstünde durur.
+  - **Kabul:** Sütunlar CLAUDE.md'de; yeni görev şablonunda “hangi sütun” satırı var.
+  - **Literatür:** R6, R10
+
+</details>
 
 ### Y-K01 · İki haftalık döngü ve ekranda doğrulanmış “bitti”
 
@@ -729,6 +764,25 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+### Y-C02 · Dinamik kontratlar ve yeni kontrat ekranı
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P07 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C01
+- **Son not:** Lonca görevleri statik kaldı; teslimatta tüccar yolda yok (tüccar diyaloğu bu kontratlarda anlamsız, onay paketinde not); test TEST_PLANI.md'de. | 2026-11-01 kullanıcı onayı: ekran ve lonca görevlerinin sabit kalması olduğu gibi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C02 Dinamik kontratlar ve yeni kontrat ekranı**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `2bc6802`): Lonca görevleri statik kaldı; teslimatta tüccar yolda yok (tüccar diyaloğu bu kontratlarda anlamsız, onay paketinde not); test TEST_PLANI.md'de.
+  - **Öncelik:** P1 · **Dalga:** 2 · **Bağımlı:** Y-C01
+  - **Ne:** Kontrat türleri: eşlik, süre baskılı kargo, yolcu taşıma, av ya da kurtarma, kaçak yük. Kullanıcı notları: (1) Kontrat menüsü değişir: ilan panosu ya da arka planda lonca masası ve kenarda kontrat listesi. (2) Tüccar kendi vagonuyla gelmeyebilir; yalnızca kendisi ve malıyla gelirse ücrete vagon kirası eklenir. (3) En sık tür: “malımı X yerine teslim et” (tüccar gelmez). Pano her varışta tohumdan yeniden üretilir.
+  - **Kullanıcı notu:** “Kesinlikle çok dinmaik olmalı burası hatta kontrat menüsü de değişmeli. witcher^'daki gibi bir ilan panosu olabilir ya da bir masa arkasında lonca görevlerisi görebiliriz arkaplanda ve kenarda listelenir bu kontratlar. / Ayrıca her kontrat tipinde tüccar bizzat kendi vagonu ile gelmeyebilir, vagonsuz, malları ve kendisi gelmek isteyebilir ve bu durumda ücrete vagon kirası dahil olur. Bunun dışında benden sadece malını x lokasyonuna teslim etmemi de isteyebilir ki çoğunlukla durum bu olmalı bence.”
+  - **Kabul:** En az 5 tür; teslimat türü en sık çıkıyor; vagon kirası hesabı testli; yeni ekran taslağı kullanıcı onayından geçti.
+  - **Literatür:** R15, R16
+
+</details>
+
 ### Y-C27 · Gokyurt misafirliği
 
 - **Durum:** bitti · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
@@ -823,6 +877,22 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ## Paket P08
 
+### Y-B08 · Günün satırı: akşam kampında defter cümlesi
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P08 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** 2026-10-20: gün boyu izler (ölüm, vagon, savaş, açlık, hikâye, olay), akşam kampında en ağır izden üç edebi cümle, oyuncu birini seçer ya da yazmaz (DiaryPanel); defterin Düşenler sayfasında görünür. test_waybook_pages. | 2026-11-01 kullanıcı onayı: olduğu gibi kalır (üç hazır cümleden biri ya da hiç; serbest metin yok).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-B08 Günün satırı: akşam kampında defter cümlesi**
+  - **Öncelik:** P1 · **Dalga:** 3 · **İlgili:** R3, Y-H03
+  - **Ne:** Her akşam günün en önemli olayı tek bir cümleye dönüşür ve deftere yazılır; oyuncu düzeltebilir. Cümleler edebi, sayısız (bkz. Y-H03).
+  - **Kabul:** Her kamp bir satır üretiyor; satırlar kayıtta; yerelleştirme anahtarları var.
+  - **Literatür:** R12, R11
+
+</details>
+
 ### Y-B14 · Yol kenarı kervansarayları
 
 - **Durum:** bitti · **Öncelik:** P2 · **Paket:** P08 · **Kim:** Claude tek başına
@@ -874,6 +944,27 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Kampta nadir, arayüzsüz, bir an tutulan sahne; ardından günlük cümlesi seçimi (`DiaryPanel`). Nadir olması ağırlığını korur.
   - **Kullanıcı notu:** "Küçük lütuf anı: Onay."
   - **Kabul:** Sıklık `simulate_road_beats` ile ölçüldü; sahne görüntüsü onaylandı.
+
+</details>
+
+## Paket P09
+
+### Y-F04T · Vagon atölyesi ekranını özelleştir
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P09 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-F03
+- **Son not:** Mantık değişmedi, yalnızca ekran; test TEST_PLANI.md'de. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-F04T Vagon atölyesi ekranını özelleştir**
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `4d6fb67`): Mantık değişmedi, yalnızca ekran; test TEST_PLANI.md'de.
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-F03
+  - **Köken:** onaylanmayan **F04** önerisinin altındaki kullanıcı notu.
+  - **Ne:** Kullanıcı notundan türetildi (hub'ı kaldırma önerisi reddedildi): şehir kapısı şehre girmek, vagona gitmek atölyeye gitmek demek. Hub kalır; asıl iş atölye ekranının vagona özgü, kendine ait bir ekran olması.
+  - **Kullanıcı notu:** “şehir kapısına basmak şehre girmek demek. vagona gitmek ise oradaki atölyeye gitmek demek. asıl olması gereken şey vagon atölyesinin ekranını özelleştirmek.”
+  - **Kabul:** Atölye ekranı taslağı onaylandı ve uygulandı.
 
 </details>
 
@@ -991,6 +1082,159 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P12
+
+### 12.2 · Yol görünümü: büyük revizyon (overhaul)
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
+- **Son not:** 12.2a, 12.2e, 9.9, 9.10 bu notta sıralı. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K5): güneş/ay tek Gauss parıltısı (radial_glow), bulutlar, ufuk bandı, sis şeridi, uzak/orta soğuk ve ön sıcak renk ayarı, gece fener ışığı; screenshot_road_light.gd. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **12.2 Yol görünümü: büyük revizyon (overhaul).** Kullanıcı: "yol görünümü üzerine büyük bir overhaul çalışması yapacağız." Aşağıdaki üç sorun ilk somut maddeler. Kapsam §9.9–9.10 (yol HUD'u ve biyom arka planları, art referansları) ve §10b ile birlikte planlanmalı. Önce kısa bir tasarım notu yazılıp kullanıcıya onaylatılsın, sonra uygulansın.
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2dd895a`): 12.2a, 12.2e, 9.9, 9.10 bu notta sıralı.
+  - [ ] **12.2a Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı.**
+    - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `5bfcc7d`): settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı.
+    - Varış ve ayrılışta yolun sonundaki şehir kapısı ve sur sahnesi.
+    - **Yer:** `scripts/ui/travel_band.gd` (kapı ve varış çizimi; `:203` ve `:1045` civarındaki notlar), şehir kapısı sesi ve varış akışı `road_journey.gd`.
+    - **Yön:** Render edilmiş, katmanlı bir kapı sahnesi:
+      - sur, kapı kemeri ve kuleler,
+      - şehrin kendi mimari ve kültür dili (CityFront kasaba render'larıyla aynı set),
+      - kervanın kapıya yaklaşırken ölçeklenmesi ve kapıdan geçişi.
+    - Referanslar §9.3 (A-25…A-29, T-01).
+    - **Kaynaklar (CC0, 2026-10-17):** sur, kule ve kapı modülleri Kenney Castle Kit ve Fantasy Town Kit (CC0), Quaternius Medieval Village MegaKit (elde varsa CC0; yeni indirme QAL). Render + mürekkep geçişi (Y-G02). Kapı sesi için hazır CC0 kayıt yok: Freesound CC0 `large wooden door`, `chain rattle`, `winch` katmanlanarak tasarlanır. Kullanıcı kararı: kervan şehre girmez; kapı sahnesi varışta kervanı kapı önünde bırakır (Y-G10T).
+  - [ ] **12.2b Yol üstündeki kule (durak), kamp kurulduktan sonra kadrajdan bir anda kaçıyor.**
+    - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `0b5e4b6`): Kod ve test önceki turda; gözle doğrulanacak.
+    - **Gözlem (kullanıcı):** Yolda giderken karşıya bir kule çıkıyor; kamp kuruluyor; ardından kule bir anda kadrajdan kayboluyor.
+    - **Yer:** Durak çizimi `travel_band.gd:951-1006` (`STOP_SPRITES`, karakol kulesi `:993-1006`).
+    - **Olası sebep:** Kamp kurulunca `_layout()` ya da bant kayması yeniden hesaplanıyor (kamp yerleşimi, `road_caravan.gd` `_refresh_gather_targets()` notu), ya da duraklar yolun "önündeki boş alana" göre yerleştirildiği için kamp konumu değişince durak çapası kayıyor.
+    - **Çözüm:** Durağın dünya konumu, yol mesafesi cinsinden sabit olsun; kamp ve yeniden düzenleme onu kaydırmasın.
+    - **Test:** Kampa girmeden önce ve sonra durağın ekran x'i aynı (ya da yalnızca kamera hareketi kadar farklı).
+  - [ ] **12.2c Kamp: karakterler ateşe çok yavaş yürüyor (3x'te bile); ateşe varana kadar sabah oluyor; ateş ilk varan kişiyle yansın.**
+    - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `968111f`): Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak.
+    - **Kullanıcı:** "Buradaki temel sorun karakterlerin çok çok yavaş yürümesi. 3x'te dahi yavaşlar." "Ateş, ilk kişi ateşin başına vardığında yansın." Gidip dönme yaklaşık 10 oyun saati sürüyor.
+    - **Kodda görülen** (`scripts/ui/road_caravan.gd`):
+      - `gather_seconds()` (`:1198-1209`): süre = `max(1.3, 1.5 × en_uzak_mesafe / en_yavaş_figürün_tempolu_hızı)`.
+        - En yavaş figürün hızı ve 1,5 çarpanı tüm grubu yavaşlatıyor.
+        - En uzaktaki vagon da süreyi uzatıyor.
+      - Süre gerçek saniye üzerinden; oyun hızı çarpanı (2x, 3x) büyük ihtimalle yürüyüşe uygulanmıyor. Bu yüzden 3x'te de aynı yavaşlık var. **Doğrula.**
+      - Kamp süresi `road_journey.gd:2279` `_camp_ends_at_hours = _clock.total_hours + CAMP_HOURS` (8 saat). Saat yürüyüş sırasında kampın hızlı akışıyla ilerliyor, sayaç yürüyüş bitmeden başlıyor. Bu yüzden ateşe varmak saatler yiyor ve sabah oluyor.
+    - **Yapılacak:**
+      1. **Yürüyüş hızı:**
+         - Toplanma ve dağılma yürüyüşü tempolu bir hızla olsun; en yavaşa göre ve 1,5 çarpanıyla uzatılmasın. Herkes kendi tempolu hızıyla yürüsün.
+         - Toplam yürüyüşe bir üst sınır: gerçek zamanda en fazla yaklaşık 2–3 sn (1x'te).
+         - Oyun hızı çarpanı yürüyüş animasyonuna da uygulansın: 3x'te üç kat hızlı.
+      2. **Ateş:** Kamp ateşi ilk figür ateş başına vardığında yansın. Kısa bir tutuşma animasyonu (kıvılcım, alevin büyümesi) ve ateş sesi; varmadan önce yalnızca odun yığını görünsün.
+         - **Ses kaynağı (CC0):** Freesound CC0 `campfire` (114 sonuç; ör. kyles “fire small campfire crackling”) taban döngü, ayrı rastgele çıtırtı sesleri; tutuşma için `torch ignite`, `fire whoosh`. Ayrıntı: `../ICERIK_IHTIYACLARI.md` S-3.
+      - **Not (kullanıcı kararı, Y-B09):** Yol yeterince dolunca 1.5x ve 3x hızları kalkacak; o zaman aşağıdaki (b) testi kaldırılır.
+      3. **Saat:**
+         - Toplanma ve dağılma sırasında oyun saati durmasın ama normal yürüyüş hızıyla aksın; kampın hızlı akışı uygulanmasın.
+         - `CAMP_HOURS` sayacı herkes ateşe vardığında başlasın.
+         - Toplanma ve dağılmanın toplamı en fazla yaklaşık 0,5 oyun saati.
+      4. Kampın kurulduğu ve kalkıldığı saat günlüğe yazılsın.
+    - **Test** (`tests/test_camp_gathering.gd` ve yeni ekler):
+      - (a) 1x'te toplanma ≤ 3 sn gerçek zaman.
+      - (b) 3x'te süre üçte birine iniyor.
+      - (c) İlk varan figürle ateş yanıyor; ondan önce yanmıyor.
+      - (d) Kamp kurma ve kalkma arası tam `CAMP_HOURS` ± 0,1; yürüyüşler toplam ≤ 0,5 oyun saati.
+      - (e) Mevcut üst üste binme ve oturma testleri geçiyor.
+  - [x] **12.2d Kervanın altında, yerde ağaç kütüğü gibi çubuklar görünüyor; anlamsız duruyor.**
+    - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2eaec93`): Kullanıcı 12.2d şeritlerinin kalmasını onayladı.
+    - **Gözlem (kullanıcı):** Yolda giderken kervanın alt kısmında, yerde kütük ya da çubuk benzeri dikey parçalar var.
+    - **Olası kaynaklar** (önce ekran görüntüsüyle ve katmanları tek tek kapatarak doğrula):
+      1. **Yol kenarı nesneleri:** `scripts/ui/travel_band.gd:1094` `_draw_ground_props()`.
+         - Koddaki not (`:1107-1113`): yakın kenardaki nesneler yolun bankında bitiyor ve yol en son çiziliyor.
+         - Çalı ya da ağaçların alt kısmı bankta kalıp üstü yolun altında kaybolunca geriye yalnızca gövde (çubuk) görünüyor olabilir.
+         - Yolun yakın kenarındaki (kameraya yakın) ağaçlar, kervanın hemen altında kesik gövdeler olarak okunuyor.
+      2. **Render edilmiş zemin şeridi:** `RoadStrips.GROUND` (`travel_band.gd:490`, `:539`). Şerit görselinin kendi içindeki çit kazığı, kütük ya da dal desenleri kervanın tam altına denk geliyor olabilir.
+      3. **Duraklar:** `travel_band.gd:951-1006` `STOP_SPRITES`. Çit ya da kazık parçaları zemin hizasında kalıyor olabilir.
+    - **Çözüm:**
+      - Kervanın yürüdüğü şeridin (yol ve hemen önü) içine dikey ve ince hiçbir nesne konmasın: kervan şeridi için bir "boş bant" maskesi.
+      - Yakın kenar nesneleri ya tamamen görünür olsun (tepesi dahil) ya da hiç çizilmesin; yarım kesik gövde kalmasın.
+      - Zemin şeridinde kervan bandına denk gelen bölge düz zemin olsun.
+    - **Test:** Yol ekranının ekran görüntüsü testine (`tests/screenshot_journey_screen.gd`) bir kontrol: kervan bandının dikdörtgeni içinde dikey ince koyu çizgi kümesi yok (basit kenar yoğunluğu ölçümü) ya da elle onay.
+
+</details>
+
+### 12.2e · Yol sahnesi estetik olarak güzel değil; her detayı yeniden tasarla: çimen, yol, arka plan, güneş
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
+- **Bağımlı:** 12.2d
+- **Son not:** Gerçek şeritlerle; değişen yalnızca gök, güneş-ışık, renk derecelendirmesi, sis şeridi, gece feneri. | 2026-10-19 karar: onay; yol sahnesine uygulanacak. | 2026-10-20: ArtPalette.SKIES onaylı taslağa göre (band anahtarı), ufukta sıcak bant, güneş hale + küçük çekirdek. Commit 4af6c2f. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **12.2e Yol sahnesi estetik olarak güzel değil; her detayı yeniden tasarla: çimen, yol, arka plan, güneş.**
+    - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2dd895a`): Gerçek şeritlerle; değişen yalnızca gök, güneş-ışık, renk derecelendirmesi, sis şeridi, gece feneri.
+    - **Kullanıcı:** "çimenler, yol, arka plan, hele ki güneş estetik olarak güzel bir sahne değil, buradaki her detayı yeniden tasarlamak lazım."
+    - **Bugünkü yapı:** `scripts/ui/travel_band.gd` katmanları, uzaktan yakına:
+      | Katman | Kod |
+      |---|---|
+      | Gökyüzü | `_draw_sky()` `:589` |
+      | Güneş ve ay yayı | `:613-` civarı, "Güneş/ay ufuk boyunca bir yay çiziyor" |
+      | Uzak sırtlar | `_draw_far_ridges()` `:683`, ya da render şeridi `RoadStrips.FAR` |
+      | Orta sırtlar | `_draw_mid_ridges()` `:696` / `RoadStrips.MID` |
+      | Zemin dolgusu | `_draw_ground_fill()` `:795` / `RoadStrips.GROUND` |
+      | Yol | `_draw_road()` `:841` |
+      | Yol kenarı nesneleri | `_draw_ground_props()` `:1094` |
+      | Hava | `_draw_weather()` |
+      - Prosedürel çizim ile render şeritleri (`scripts/ui/road_strips.gd`) karışık kullanılıyor; biyom geçişi `RoadStrips.draw_blend`.
+    - **Yeniden tasarım adımları** (her biri için önce bir mockup ya da tek kare render çıkarılıp kullanıcıya onaylatılsın):
+      1. **Görsel dil kararı:** Yol sahnesi, haritanın ve UI'ın "mürekkep ve parşömen + karanlık arayüz" diliyle nasıl konuşacak? §9.10'daki referanslar (A-03, A-05, A-07, A-09, A-10, A-12, A-20, A-24): soğuk uzak katman, sıcak ön plan, sis şeridi, sınırlı palet, güçlü siluet. Karar tek sayfalık bir stil rehberine yazılsın.
+      2. **Gökyüzü ve güneş:**
+         - Güneş bugün düz bir disk ve yay; çiğ duruyor.
+         - Öneri: güneşi ve ayı doğrudan göstermek yerine ışığın kendisini göster:
+           - ufukta sıcak ışık bandı,
+           - bulut kenarlarında ışık,
+           - gece ay ışığı,
+           - gerekirse çok yumuşak, haleli küçük bir disk.
+         - Gün evreleri (şafak, gündüz, akşam, gece) için 4 palet anahtarı. Hava durumu (kapalı, yağmur, sis) bu paletleri griye çeker ama evreyi silmez (koddaki mevcut kural korunur).
+      3. **Uzak ve orta katmanlar:**
+         - Biyom başına render edilmiş, döşenebilir ve paralakslı katmanlar.
+         - Uzak katman soğuk ve düşük kontrastlı, orta katman siluetli.
+         - Sis şeridi ayrı bir katman.
+         - Prosedürel sırtlar kaldırılsın ya da yalnızca yedek olarak kalsın.
+      4. **Zemin ve çimen:**
+         - Tekdüze çimen dolgusu yerine katmanlı zemin: uzakta tonal düzlük, yakında seçici detay (tutam, taş, iz).
+         - Yakın plan detayı az ama nitelikli olsun.
+         - Kervan bandı sade kalsın (12.2d).
+      5. **Yol:**
+         - Tekerlek izi ve çamur; biyoma göre toprak, taş ya da kar.
+         - Kenarlar yumuşak ve doğal; bugünkü koyu bank çizgisi yerine çimen ile yol arasında organik geçiş.
+         - Okunurluk korunmalı: yol zeminden ayrılmalı (koddaki %42 ayrım dersi).
+      6. **Yol kenarı nesneleri:**
+         - Biyomun ağaç, çalı ve kaya seti; derinliğe göre ölçek ve pus.
+         - Yarım kesik nesne yok (12.2d).
+         - Yoğunluk biyoma göre.
+      7. **Işık ve atmosfer:**
+         - Günün saatine göre tüm katmanlara tek bir renk derecelendirmesi.
+         - Gece fener ve kamp ateşi ışığı. Kervanın feneri haritadaki atlı işaretle aynı dili paylaşsın: `../belgeler/ATLI_ISARET.md`, §8.10–8.11.
+      8. **Performans:** Hedef PC'de 60 FPS (orta sınıf ekran kartı). Web yalnız test için, ölçüt değil. Katmanlar önbellekli dokular; kare başına yeniden çizim en az. §5 ve §2.2 kuralları geçerli.
+    - **Kabul:** Dört gün evresinde ve en az üç biyomda (ova, orman, dağ) ekran görüntüleri kullanıcı tarafından onaylanmış. Kervan, yol ve HUD okunurluğu korunmuş. Mevcut yol testleri (`tests/test_road_layers.gd` ve diğerleri) güncellenmiş ve geçiyor.
+    - **Kullanıcı kararı (2026-10-17, Y-G07):** Tek biyom değil, bütün biyomlar için birer örnek kare; sonra varyantlar. Biyom haritadan seçilir, arka plan haritadaki konuma göre kurulur (dağlık yerde arkada dağ). Kaynaklar Y-G07'de.
+    - **Bağlantılı maddeler:** 12.2a (şehir kapısı), 12.2b (durak ve kule), 12.2c (kamp), 12.2d (yerdeki çubuklar), §9.9–9.10 (yol HUD'u ve biyom arka planları), §10 (binici, arabacı, koşum), §10b.
+
+</details>
+
+### Y-G05 · Savaş ekranını yeniden kur
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-10-21 uygulandı (K9): tur madalyonu, tam ekran, yetenek kartları (isabet %/kilit sebebi), hedef paneli; kanama/kritik efektleri kullanıcı kararıyla eklenmedi. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G05 Savaş ekranını yeniden kur**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Biyom plakası yolun kendi şeritlerinden; figürler ekranın %32si.
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 9.8
+  - **Ne:** Biyom başına mekân plakası, figürler ekran yüksekliğinin %30–35'i, kritikte kırmızı mühür. Kullanıcı notu: referans oyunun sahne ve menüleri bugün belgelendi; `belgeler/ART_IKINCI_TUR_REFERANSLARI.md` esas alınır.
+  - **Kullanıcı notu:** “evet, bu yüzden referans oyun sahne ve menülerini dokümante ettik bugün seninle.”
+  - **Kabul:** Yeni savaş ekranı ekran görüntüsüyle onaylandı.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Mekân plakaları Y-G07 katmanlarından. Hayvan düşmanlar: Quaternius Ultimate Animated Animal Pack (elde), OpenGameArt yaban domuzu (Teh_Bucket), kurt (NewDLC), geyik (crownjoshua), hepsi CC0. Yan profilden 8–12 karelik döngüler; siluette 2 px kontur. Vuruş sesi üç katman (Y-H05). `../ICERIK_IHTIYACLARI.md` G-3.
+  - **Literatür:** R20, R21
+
+</details>
 
 ### Y-G17 · Tek sıcak kaynak: kural ve bütün sahnelerin denetimi
 
@@ -1361,6 +1605,24 @@ Toplam: **93** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - [x] **N28 Yol biyomları haritanın gerçek arazisinden** (`C`)
   - Dağ, bataklık, göl, orman, bozkır güzergâhtan ölçülür; duraklar geçit, köprü ve yoldaki harita noktaları. Ters yönde dizi ters okunur.
   - **Yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `2c8be40`).
+
+</details>
+
+### N29 · Vadiye özgü yeşil çayır biyomu
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P16 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/14_yeni_dunya.md](referans/gorevler/14_yeni_dunya.md)
+- **Bağımlı:** N28
+- **Son not:** Kod, veri ve dört katman hazır; testler ve ekran görüntüsü TEST_PLANI.md'de, onay ONAY_PAKETI.md'de. | 2026-11-01 kullanıcı onayı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **N29 Vadiye özgü yeşil çayır biyomu** (`CO`)
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `5ae38c4`): Kod, veri ve dört katman hazır; testler ve ekran görüntüsü TEST_PLANI.md'de, onay ONAY_PAKETI.md'de.
+  - Bugün vadinin açık tarım arazisi "bozkır" şeridiyle çiziliyor (kuru, sarı ot). Vadi (Tyrell benzetmesi) bereketli: yeşil çayır, ekin tarlası, çit ve ağaç sırası, uzakta yumuşak tepeler.
+  - Yeni biyom `meadow`: `ArtPalette` dört rolü (gökyüzü/uzak/yakın/flora), `tools/ui_scenes/road_scene.py` `BIOMES` girdisi ve dört katmanın (far, mid, ground, fore) Blender render'ı, `road_post.py`; `RouteTerrain.BIOME_CHAIN`, isim anahtarı (`TERRAIN_MEADOW`, tr/en), hava eğilimi (`RouteWeather`), ağaç çizimi.
+  - Üreteç (`build_settlements.py`): vadi bölgesindeki açık arazi bozkır değil çayır; bozkır göçebe ve güney kuru topraklarında kalır.
+  - **Kabul:** Belvanor-İlsande yolu çayır; ekran görüntüsü senin onayına; `test_grim_ui` şerit kenar testleri ve `test_route_terrain` geçer.
 
 </details>
 
