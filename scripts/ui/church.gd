@@ -59,6 +59,13 @@ func _build_myths() -> void:
 
 	_add_myth_label(tr("MYTH_HIGHLAND_TITLE"), tr("MYTH_HIGHLAND_TEXT"))
 	_add_myth_label(tr("MYTH_FISHER_TITLE"), tr("MYTH_FISHER_TEXT"))
+	# Yumruk şehrinde bu iki sayfa "sonradan eklenmiş" okunur (lore defter III, T35).
+	if String(GameSession.PLACE_CREEDS.get(_session.current_location_id, "")) == CharacterData.CREED_FIST:
+		var note := Label.new()
+		note.text = tr("UI_CHURCH_MYTHS_FIST")
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD
+		note.modulate = ArtPalette.UI_WARNING
+		_content.add_child(note)
 
 func _add_myth_label(title_text: String, body_text: String) -> void:
 	var title := Label.new()

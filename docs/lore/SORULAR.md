@@ -17,7 +17,7 @@ oradan gelir, buraya işlenir.
   sınır, iki güney); eşleşme kaldırıldı. Kuzeybatı dağları Taşkök, kuzeydoğu Ayazkaya; doğu sıradağı (Vorgat) ve
   güneydoğu kıyısı (Zelmarin) kendi adını bekliyor (T37, T39); batı sınırı Tolvarin ve Kirsavel, doğu sınırı Ezmerak
   Baronluğu. Ç1 böylece çözüldü.
-- **Mezhepler düzeltildi (T1):** din **El (The Hand)**. Kurulu mezhep **Septisizm**: adını imparator Septimius'tan
+- **Mezhepler düzeltildi (T1):** din **El (The Hand)**. Kurulu mezhep **Septisizm**: adını imparator Septimar'dan
   alır, Kitap'ı eklenen satırlarıyla birlikte kabul eder, sorgulamayı günah sayar. Reformcu mezhep **Yumruk (The
   Fist)**: yalnızca ilk sayfa, eklenen her satır yasak ve iğrençlik, her şey sorgulanabilir. "İlk Sayfa" ve "Yeni
   Okuma" adları kalktı; İlk Sayfa Manastırı bir yer adı olarak kaldı (T45).
@@ -38,7 +38,7 @@ oradan gelir, buraya işlenir.
 |---|---|---|
 | T4 | Septisizm'in dereceleri; Yumruk'ta derece yok, Okuyan var. | LORE §4.1 |
 | T31–T34 | Kıtlığın sebebi, zamanı, deli kral, kim ne ister. | §6b, TARIHCE VI |
-| T35 | Septimius'un eklemeleri asimile edilen inançların kendisi; Yumruk onları söküp atmak ister. | §4.1, TARIHCE V.4b |
+| T35 | Septimar'ın eklemeleri asimile edilen inançların kendisi; Yumruk onları söküp atmak ister. | §4.1, TARIHCE V.4b |
 | T36 | Sogurtay'da iki boy hiç karşılaşmaz; şamanların üç ayı kışın en sert ayları. | §4.3 |
 | T37 | Doğu sıradağının adı **Karaocak** (Vorgat). | §7, §8.6b |
 | T38 | Tolvarin ve Kirsavel'in ortak adı yok; kervancılar "Çitler" der. | §7, §8.4 |
@@ -61,19 +61,19 @@ oradan gelir, buraya işlenir.
 | no | çelişki | durum |
 |---|---|---|
 | Ç1 | Taşkök nerede? | **Çözüldü:** kuzeybatı dağları Taşkök; Vorgat doğu sıradağında ayrı bölge (T37). |
-| Ç2 | Kovrast ve Kemersal (Gokyurt ile Vaelghard arası tepeler) kimin? | Defter III: Ayazkaya kanından kopmuş iki kabile önerisi. |
-| Ç3 | Eski başkent Merigard (defter I'deki cevabın) ile Vadi şehri Merigaud karışıyor. | Defter III: ikisi kalsın, Merigaud adını başkentten almış önerisi. |
-| Ç4 | Tanıdık adlar: Vlad, Reynald, Daemon, Alex, iki Leon; yeni: Septimius (gerçek bir Roma adı). | Defter III: aday adlar. |
-| Ç5 | Orvahel'in malları (kanon: gıda, kâğıt, kumaş; oyun: şarap, bal, mücevher). | Defter III. |
-| Ç6 | Orbeyan'ın baharatı. | Defter III: bozkır baharı. |
-| Ç7 | Tolvarin'in suru (oyun taş, kanon kütük). | Defter III. |
-| Ç8 | Göçebe başlangıcı Vaelghard şehirlerinde. | Defter III. |
-| Ç9 | Yol sunaklarının sayısı ve yeri. | Defter III. |
-| Ç10 | Ezmerak'tan geçmeden kuzeye yol yok (oyunda batı yolu var). | Defter III. |
-| Ç11 | Akavan ve Samuran: haritada batı sınırı, siyasette Vadi. | Defter III. |
+| Ç2 | Kovrast ve Kemersal (Gokyurt ile Vaelghard arası tepeler) kimin? | **Çözüldü (defter III):** dağlı değil; Orman'ın Nefesi'ne inanan, barışçı tepe halkları, göçebelerle iyi; Zurek dağ kültüründen madenci ve kuyumcu. LORE §8.1b. |
+| Ç3 | Eski başkent Merigard (defter I'deki cevabın) ile Vadi şehri Merigaud karışıyor. | **Çözüldü:** ikisi bağlı; Merigaud adını başkentten alır, GG = Gümüş Gard. |
+| Ç4 | Tanıdık adlar: Valdric, Raegmund, Daveric, Aldemar, iki Leon; yeni: Septimar (gerçek bir Roma adı). | **Çözüldü:** Raegmund, Daveric, Aldemar, Valdric, Lenart Bey, Septimar; V. Leon kalır. |
+| Ç5 | Orvahel'in malları (kanon: gıda, kâğıt, kumaş; oyun: şarap, bal, mücevher). | **Çözüldü:** iksir üretir; gıda, kâğıt, kumaş, bal ister; kâğıt yeni mal. |
+| Ç6 | Orbeyan'ın baharatı. | **Çözüldü:** bozkır baharı, deniz baharatından ucuz. |
+| Ç7 | Tolvarin'in suru (oyun taş, kanon kütük). | **Çözüldü:** Tolvarin şehir, taş suru imparatorluktan; kasabalar kütük. |
+| Ç8 | Göçebe başlangıcı Vaelghard şehirlerinde. | **Çözüldü:** göçebe Orbeyan ve Kirsavel'de başlar. |
+| Ç9 | Yol sunaklarının sayısı ve yeri. | **Çözüldü:** oyundaki on sunak kalır. |
+| Ç10 | Ezmerak'tan geçmeden kuzeye yol yok (oyunda batı yolu var). | **Çözüldü:** Orbeyan'dan Selvicar'a doğrudan yol yok (yurtlar ve göl); kuzeye en mantıklı yol Ezmerak. |
+| Ç11 | Akavan ve Samuran: haritada batı sınırı, siyasette Vadi. | **Çözüldü:** kanon geçerli, ikisi de Vadi. |
 | Ç12 | Balıkçıların yurdu. | Defter III: Gelgit Kıyısı (T42). |
-| Ç13 | On bir bölge, beş oynanabilir kültür. | Defter III. |
-| Ç14 | Avuçiçi'nde inançsız: "kapıda malını satar ve gider" ile "görüldüğü yerde eli kesilir" yan yana. | Defter III: el kesme El'i taşıyan inançsıza. |
+| Ç13 | On bir bölge, beş oynanabilir kültür. | **Çözüldü:** her bölge oynanabilir; kültür sayısı artmaz, kültür yere göre. |
+| Ç14 | Avuçiçi'nde inançsız: "kapıda malını satar ve gider" ile "görüldüğü yerde eli kesilir" yan yana. | **Çözüldü:** suçlu inançsız asılır; inançsız şehre giremez, kapıda lonca aracısıyla komisyonla satar; şehirde görülen ya da inançlı rolü yapanın eli kesilir; sakatlık oyunda yaşanır. |
 
 ## Açık sorular
 

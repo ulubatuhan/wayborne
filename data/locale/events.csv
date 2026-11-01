@@ -325,7 +325,7 @@
 "EVT_BRIDGE_OPT_DETOUR","Yukarıdaki sağlam köprüye dolaşın","Detour to the sound bridge upstream","","","","","","","","",""
 "EVT_GRAVE_TITLE","İşaretsiz Mezar","The Unmarked Grave","","","","","","","","",""
 "EVT_GRAVE_TEXT","Yol kenarında, taşları dağılmış alçak bir tümsek. Üstünde ne ad var ne işaret. Kervandakiler bakışlarını kaçırıyor - hepsi birini bu yola gömdüklerini hatırlıyor.","A low mound at the roadside, its stones scattered. No name, no mark. The company looks away - every one of them remembers burying someone on this road.","","","","","","","","",""
-"EVT_GRAVE_OPT_TEND","Dur, taşları topla, bir işaret koy","Stop, gather the stones, raise a marker","","","","","","","","",""
+"EVT_GRAVE_OPT_TEND","Dur, dağılan taşları yeniden yığ","Stop and heap the scattered stones again","","","","","","","","",""
 "EVT_GRAVE_OPT_PASS","Başını eğ ve geç","Bow your head and pass","","","","","","","","",""
 "EVT_GRAVE_KEEPER_TITLE","Mezarların Bekçisi","The Keeper of Graves","","","","","","","","",""
 "EVT_GRAVE_KEEPER_TEXT","Birkaç gün sonra yaşlı bir kadın kervanın önünde duruyor. Bu yoldaki mezarları o sayarmış; kimin durduğunu, kimin geçip gittiğini de.","A few days on, an old woman stands before the caravan. She keeps count of the graves on this road - and of who stopped, and who walked on.","","","","","","","","",""

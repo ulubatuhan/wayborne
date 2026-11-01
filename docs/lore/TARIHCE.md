@@ -70,15 +70,15 @@ Yakın geçmiş ise yaşayanların hafızasında: imparatorluğun çöküşünü
 
 | | olay | işaret |
 |---|---|---|
-| V.1 | Bir **imparatorluk** kıtanın kuzeyini ve ortasını tutar. Başkenti bugünkü Orvahel'in yerinde; adı defter I'de **Merigard** [Çelişki Ç3: Vadi şehri Merigaud ile karışıyor]. Adı ve süresi bilinmiyor. | [Yazar] / [Çelişki Ç3 — ad] / [Boş — imparatorluğun adı] |
+| V.1 | Bir **imparatorluk** kıtanın kuzeyini ve ortasını tutar. Başkenti bugünkü Orvahel'in yerinde; adı **Merigard**; Vadi'deki Merigaud adını ondan alır, para birimi GG (Gümüş Gard) da [Yazar, Ç3]. Adı ve süresi bilinmiyor. | [Yazar] / [Çelişki Ç3 — ad] / [Boş — imparatorluğun adı] |
 | V.2 | Büyücüler imparatorluktan önce de Sideria'da; Raviellon'la temas imparatorluktan eski. | [Yazar, onaylandı] |
 | V.3 | Ana yollar **imparatorluk yollarıdır**; üstlerindeki çok nadir pagan sunakları ondan eskidir ve Vadi'nin dış kıyılarında, köy yollarında kalır. | [Yazar, onaylandı] |
 | V.4 | **El kilisesi** imparatorluğun dini olur ve onunla yayılır; pagan inançları asimile eder, tarihlerini siler. Dağın Nefesi ve Denizin Gözyaşı "El'in yazdığı sayfa" olur. | [Yazar] / [Yazar, onaylandı T6] |
-| V.4b | **İmparator Septimius**, kural koyucu: imparatorluk altındaki farklı dinî görüşleri ezer, El inancına katar. Kilisenin bugünkü kurulu mezhebi **Septisizm** adını ondan alır. [Türetme T35] Kitap'a eklenen satırlar asimile edilen inançların kendisidir. | [Yazar] / [Türetme T35] |
+| V.4b | **İmparator Septimar**, kural koyucu: imparatorluk altındaki farklı dinî görüşleri ezer, El inancına katar. Kilisenin bugünkü kurulu mezhebi **Septisizm** adını ondan alır. [Türetme T35] Kitap'a eklenen satırlar asimile edilen inançların kendisidir. | [Yazar] / [Türetme T35] |
 | V.5 | Vadi'nin eski inançları imparatorluk zamanında kilisenin içine soğurulur; yönetenler onları medeni bulmaz. | [Yazar] |
 | V.6 | **Tüccar Loncası**'nın merkezi Merigaud. | [Yazar] |
 | V.7 | Vastrevar imparatorluğun en büyük kentlerinden biri. | [Yazar] |
-| V.8 | İmparatorluğun baron ve düklerinden **Dük Vlad**, bugünkü Ezmerak ve Golcavar topraklarını yönetir. Piç oğlu **Alex** hanedanda yetişmeye uygun görülmez, orduya verilir. | [Yazar] / [Çelişki Ç4 — adlar] |
+| V.8 | İmparatorluğun baron ve düklerinden **Dük Valdric**, bugünkü Ezmerak ve Golcavar topraklarını yönetir. Piç oğlu **Aldemar** hanedanda yetişmeye uygun görülmez, orduya verilir. | [Yazar] / [Çelişki Ç4 — adlar] |
 | V.9 | **Deli kral** büyücüleri katleder. Katliam büyücülerin bugün bile Sideria'dan uzak durmasının sebebi. Sarayının yıkıntısı Vastrevar'ın doğusunda. | [Yazar] / [Harita] |
 | V.10 | Deli kral imparator muydu, bir krallığın kralı mı; katliam çöküşten ne kadar önce? | [Boş] |
 
@@ -100,14 +100,14 @@ Kullanıcının 2026-10-29 notu: kıtayı etkileyen bir olay bir kıtlık başla
 
 ## VII. Parçalanma
 
-Yaşayanların hafızasındaki çağ. **[Yazar, onaylandı T26]** Alex imparatorluk ordusunda hizmet etti, döndü, hüküm sürdü, genç
+Yaşayanların hafızasındaki çağ. **[Yazar, onaylandı T26]** Aldemar imparatorluk ordusunda hizmet etti, döndü, hüküm sürdü, genç
 öldü; oğlu bugün hüküm sürüyor. Çöküş bu yüzden bundan **30–50 yıl önce** olmalı.
 
 | | olay | işaret |
 |---|---|---|
 | VII.1 | İmparatorluğun en güçlü kalıntısı kuzeyde **Vaelghard Krallığı** olarak toplanır: resmî devamı değil, aynı kültür. Başkenti Vastrevar. | [Yazar] |
 | VII.2 | **Büyük Vadi**'nin şehirleri bağımsızlık ilan eder; prensleri ve hanedanları yerlerini korur. Her şehir bir prenslik olur. | [Yazar] |
-| VII.3 | **Kanlı Baron.** Alex, Dük Vlad'ın öldüğünü öğrenince döner, hanedanın geri kalanını bir yemekte basıp öldürür, toprakları alır. Bölgeyi iyi yönetir, refah artar; ordu yıllarının hastalıklarından genç ölür. | [Yazar] |
+| VII.3 | **Kanlı Baron.** Aldemar, Dük Valdric'in öldüğünü öğrenince döner, hanedanın geri kalanını bir yemekte basıp öldürür, toprakları alır. Bölgeyi iyi yönetir, refah artar; ordu yıllarının hastalıklarından genç ölür. | [Yazar] |
 | VII.4 | Tüccar Loncası'nın merkezi Merigaud'dan **Orsolune**'ye taşınır. | [Yazar] |
 | VII.5 | **[Yazar, onaylandı T24]** Lonca güneye geçince Orsian sözleşme ahlakı kıtanın ticaret kuralı olur. | [Yazar, onaylandı T24] |
 | VII.6 | **Orvahel kurulur.** Vaelghard, eski başkentin yanmış yerine kutsal kenti kurar, dinî geçmişi yüzünden fonlar ve garantörü olur. Birinci Okuyucu orada oturur. | [Yazar] |
@@ -122,12 +122,12 @@ Oyunun başladığı an. Her oyunda yaşanmış sayılır.
 
 | | olay | işaret |
 |---|---|---|
-| VIII.1 | **Vaelghard**'da Kral Reynald. Dağlılarla savaşta; göçebe yağmalarına karşılık veremiyor; güneye borçlu. | [Yazar] |
-| VIII.2 | **Ezmerak**'ta Baron Daemon, Kanlı Baron'un oğlu: ticarete odaklı, faydacı, halkından uzak. | [Yazar] |
+| VIII.1 | **Vaelghard**'da Kral Raegmund. Dağlılarla savaşta; göçebe yağmalarına karşılık veremiyor; güneye borçlu. | [Yazar] |
+| VIII.2 | **Ezmerak**'ta Baron Daveric, Kanlı Baron'un oğlu: ticarete odaklı, faydacı, halkından uzak. | [Yazar] |
 | VIII.3 | **Orvahel**'de Birinci Okuyucu V. Leon "Lekesiz". | [Yazar] / [Yazar, onaylandı T3] |
 | VIII.4 | **Gokyurt**'ta Büyük Han Arsalkan Obası'ndan. | [Yazar] / [Boş — Han'ın adı] |
 | VIII.5 | **Ayazkaya**'da Droskal'in Demirbalta kabilesi hükmeder; öbür kabileler zaman zaman başkaldırır. | [Yazar] |
-| VIII.6 | **Tolvarin**'de Leon Bey, **Kirsavel**'de Vasko Bey; sınır kavgası sürüyor. | [Yazar] |
+| VIII.6 | **Tolvarin**'de Lenart Bey, **Kirsavel**'de Vasko Bey; sınır kavgası sürüyor. | [Yazar] |
 | VIII.7 | **Vadi** savaşta: Ilsande ile Caramine; Merigaud, Ondrelle ve Belvanor birbirleriyle. Caramine ile Belvanor anlaşmalı. Kıtanın en büyük kıtlığı ve mali zararı Vadi'de. | [Yazar] |
 | VIII.8 | **Ors**'ta Orsolune Konseyi kimseyle savaşmıyor, kıtanın yarısına borç vermiş. | [Yazar] |
 | VIII.9 | **Haydut kralları**: bir yolu ele geçirip her kervandan haraç alan güçler. | [Oyun] / [Boş — kim] |
@@ -144,7 +144,7 @@ kervan kıtlık içinde ilerler, ek görevler var, konforlu bir final yok.
 |---|---|---|---|
 | IX.1 | **Kuşaklar** | Lider düşünce ad devredilir; kıdemliyi geçmek kırgınlık bırakır. | [Oyun] |
 | IX.2 | **Son** | Adı taşıyacak kimse kalmadığında kitap kapanır. | [Oyun] |
-| IX.3 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Yazar, T25: bir bakış açısı] |
+| IX.3 | **Yolda doğan** | Ana karakter yolda doğdu; kendini yalnızca yola ait hisseder. Kuşak sisteminde ilk liderdir [Yazar, defter III]. Defter onu kaydeder (El), yol onu sahiplenir (Baikhan). | [Yazar] / [Yazar, T25: bir bakış açısı] |
 
 ---
 
@@ -157,5 +157,5 @@ kervan kıtlık içinde ilerler, ek görevler var, konforlu bir final yok.
   geri çevirir; kartın kendisi öldürmez.
 - **Anlatıcı yok:** Bu çizelgedeki hiçbir satır oyunda bu biçimde yazılmaz. Oyuna her zaman birinin anlatımı olarak
   girer.
-- **Yakın tarih kişileri:** Alex, Vlad ve büyük savaş yaşayanların hafızasında. NPC'ler bunları "babamın zamanı",
+- **Yakın tarih kişileri:** Aldemar, Valdric ve büyük savaş yaşayanların hafızasında. NPC'ler bunları "babamın zamanı",
   "dedemin zamanı" diye anar; tarih kitabı dili Vaelghard'a, destan dili Gokyurt'a aittir.

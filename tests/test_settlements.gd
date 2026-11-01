@@ -126,13 +126,25 @@ func _test_start_location(t) -> void:
 		var candidates := WorldMapData.get_start_candidates(culture.culture_id)
 		t.ok(not candidates.is_empty(), "kültürün başlangıç adayı var: %s" % culture.culture_id)
 		for id in candidates:
-			t.ne(WorldMapData.get_location_by_id(id).settlement_type, SettlementRules.CARAVANSERAI, "kervansarayda başlanmaz")
+			# Tek istisna göçebe: Orbeyan Kervansarayı onların kapısı (lore defter III, Ç8).
+			if id != "serai_orbeyan":
+				t.ne(WorldMapData.get_location_by_id(id).settlement_type, SettlementRules.CARAVANSERAI, "kervansarayda başlanmaz")
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 11
 		var picked := GameSession.roll_starting_location(rng, culture.culture_id)
 		t.ok(candidates.has(picked), "%s kültürü kendi bölgesinde başlar (%s)" % [culture.culture_id, picked])
-	for id in WorldMapData.get_start_candidates(CultureCatalog.VALLEY):
-		t.eq(WorldMapData.get_location_by_id(id).region, "vadi", "vadi kültürü Vadi bölgesinde başlar")
+	# Her bölge oynanabilir (lore defter III): şehri ya da kasabası olan her bölgede
+	# en az bir kültür başlayabilir; kültürü olmayan bölgeler Vadi kültürüyle.
+	var start_regions := {}
+	for culture in CultureCatalog.get_cultures():
+		for id in WorldMapData.get_start_candidates(culture.culture_id):
+			start_regions[WorldMapData.get_location_by_id(id).region] = true
+	for location in WorldMapData.get_locations():
+		# Karaocak'ın tek yeri Vorgat: en kısa ilk yolu 15 gün, oradan başlayan
+		# kervan ilk kontratı teslim edemeden batıyordu (görev N8).
+		if location.settlement_type != SettlementRules.CARAVANSERAI and location.region != "dag_maden":
+			t.ok(start_regions.has(location.region), "bölgede başlanabilir: %s" % location.region)
+	t.ok(WorldMapData.get_start_candidates(CultureCatalog.NOMAD).has("serai_orbeyan"), "göçebe Orbeyan'da başlayabilir (Ç8)")
 
 func _test_legacy_save(t) -> void:
 	var session := GameSession.new(500, 0, 1)

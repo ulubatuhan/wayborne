@@ -17,8 +17,8 @@
    "type": "town",
    "map_kind": "it_town",
    "map_place_id": "place_36",
-   "culture": "sinir",
-   "region": "sinir",
+   "culture": "vadi",
+   "region": "vadi",
    "name": {
     "tr": "Akavan",
     "en": "Akavan",
@@ -593,13 +593,13 @@
     "zelmarin"
    ],
    "produces": [
-    "test_potion",
-    "test_cloth"
+    "test_potion"
    ],
    "demands": [
-    "wine",
-    "honey",
-    "jewelry"
+    "test_grain",
+    "paper",
+    "test_cloth",
+    "honey"
    ],
    "wall": "stone"
   },
@@ -641,8 +641,8 @@
    "type": "town",
    "map_kind": "it_swamptown",
    "map_place_id": "place_40",
-   "culture": "sinir",
-   "region": "sinir",
+   "culture": "vadi",
+   "region": "vadi",
    "name": {
     "tr": "Samuran",
     "en": "Samuran",
@@ -772,7 +772,7 @@
    ],
    "produces": [
     "test_furs",
-    "spice"
+    "steppe_spice"
    ],
    "demands": [
     "test_cloth",
@@ -782,7 +782,7 @@
     "honey",
     "jewelry",
     "silk",
-    "spice",
+    "steppe_spice",
     "test_furs"
    ],
    "wall": "felt"
@@ -8829,16 +8829,27 @@
  "start_candidates": {
   "nomad": [
    "kirsavel",
-   "selvicar",
-   "vastrevar"
+   "serai_orbeyan"
   ],
   "valley": [
+   "akavan",
+   "auderin",
    "belvanor",
    "caramine",
+   "dravoss",
+   "ezmerak",
+   "golcavar",
    "ilsande",
+   "kirsavel",
    "liraven",
    "merigaud",
-   "ondrelle"
+   "ondrelle",
+   "orvahel",
+   "rivecande",
+   "samuran",
+   "selvicar",
+   "tolvarin",
+   "vastrevar"
   ],
   "highland": [
    "brazdun",

@@ -50,6 +50,8 @@ static func get_trade_goods() -> Array[Item]:
 		LANTERN,
 		LANTERN_OIL,
 		TORCH,
+		"paper",
+		"steppe_spice",
 	]
 	var items: Array[Item] = []
 	for item_id in ids:
@@ -91,6 +93,10 @@ static func _build_cache() -> void:
 	_add(LANTERN_OIL, "ITEM_LANTERN_OIL_NAME", 3, 0.3)
 	_add(TORCH, "ITEM_TORCH_NAME", 2, 0.5)
 	_cache[RARE_RELIC].rare = true
+	# Lore defter III (Ç5, Ç6): Orvahel kâğıt ister; Orbeyan'ın baharatı
+	# denizden değil bozkırdan, deniz baharatından ucuz.
+	_add("paper", "ITEM_PAPER_NAME", 10, 0.4)
+	_add("steppe_spice", "ITEM_STEPPE_SPICE_NAME", 20, 0.4)
 
 static func _add(item_id: String, item_name: String, base_price: int, unit_weight: float) -> void:
 	var item := Item.new()

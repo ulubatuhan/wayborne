@@ -575,6 +575,7 @@
 "UI_GUILD_DELIVERY_HINT","Teslimat ayrı bir işlem değil: kervan hedef şehre vardığı anda mal sahibine geçer ve ücret keseye yatar.","Delivery is not a separate step: the moment the caravan reaches the destination city the goods change hands and the fee lands in your purse.","","","","","","","","",""
 "UI_CHURCH_HINT","Rahip yeni edinilmiş bir huyu sabırla dinler ve arındırır - eski, köklenmiş huylara sözü geçmez.","The priest hears out a freshly taken trait and cleanses it - an old, rooted one is beyond his words.","","","","","","","","",""
 "UI_CHURCH_MYTHS_HEADING","İki İnanış","Two Beliefs","","","","","","","","",""
+"UI_CHURCH_MYTHS_FIST","Okuyan iki sayfanın üstüne parmağını koyuyor: 'Bunlar sonradan eklendi. Kitap ilk sayfasından okunur.'","The Reader lays a finger on both pages: 'These were added later. The Book is read from its first page.'","","","","","","","","",""
 "UI_TAVERN_HINT","Yolcular burada yollardan ve pazarlardan konuşur. Söylenti satılmaz: sohbet et, bir içki ısmarla; bilen söyler. Bilmediğin yolun tehlikesi yalnızca kaba bir tahmin.","Travellers talk here about roads and markets. Gossip is not for sale: talk, buy someone a drink; whoever knows will tell. The danger of a road you do not know is only a rough guess.","","","","","","","","",""
 "UI_GO_TO_WORLD_MAP","Dünya Haritasına Git","To the World Map","","","","","","","","",""
 "UI_CREATION_TITLE","Kimsin?","Who Are You?","","","","","","","","",""

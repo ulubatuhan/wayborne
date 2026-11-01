@@ -21,7 +21,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 ### İnanç: senin düzeltmenden sonra
 
-- **T35 · Septimius'un eklemeleri.** Septimius'un Kitap'a kattığı satırlar asimile ettiği inançların kendisi: Dağın İlk Nefesi, Denizin İlk Gözyaşı ve adı silinmiş başkaları birer sayfa olarak girdi. Yumruk bu sayfaları söküp atmak ister. Bu yüzden Yumruk'un yükseldiği yerde eski inanışlar daha da sıkışır, Septisizm'in yerleştiği yerde kılık değiştirmiş hâlleriyle yaşar. Bir Yumruk vaizi balıkçının deniz duasını "sonradan eklenmiş satır" diye yasaklar; bir Septisist kâtip aynı duayı Kitap'tan okutur.
+- **T35 · Septimar'ın eklemeleri.** Septimar'ın Kitap'a kattığı satırlar asimile ettiği inançların kendisi: Dağın İlk Nefesi, Denizin İlk Gözyaşı ve adı silinmiş başkaları birer sayfa olarak girdi. Yumruk bu sayfaları söküp atmak ister. Bu yüzden Yumruk'un yükseldiği yerde eski inanışlar daha da sıkışır, Septisizm'in yerleştiği yerde kılık değiştirmiş hâlleriyle yaşar. Bir Yumruk vaizi balıkçının deniz duasını "sonradan eklenmiş satır" diye yasaklar; bir Septisist kâtip aynı duayı Kitap'tan okutur.
 
 - **T4 · Kilisenin dereceleri (yeniden, senin isteğinle cevapladım).** Septisizm: Birinci Okuyucu > Okuyucular (şehir kiliselerinin başları) > Kâtipler (rahipler: Kitap'ı kopyalar, eklenen satırları sayfaya işler, okutur; arınmayı yürütür) > Çıraklar. Kâtibin asıl görevi eklemeleri korumak: her kopya bütün satırlarıyla, Orvahel'in mühürlediği sırayla yazılır. Yumruk'ta derece yok, Okuyan var: Kitap'ın ilk sayfasını ezbere bilen ve onu herkese sorgulatabilen kişi. Cemaat bir Okuyan'ın çevresinde toplanır; Okuyanlar birbirine bağlı değil.
 
@@ -29,7 +29,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 - **T46 · Yumruk'un sembolü ne anlatır.** Yatay yumruk ilk sayfayı sıkıca tutan eldir; açık el bütün sayfaları gösterir. Septisist yumruğu öfke diye okur, Yumruk'tan olan sadakat diye.
 
-- **T47 · Yumruk nasıl doğdu.** Çöküşten sonra, Belvanor'da. İmparatorluğun dağılmasını Septimius'un eklemelerine bağlayan bir kâtip, Kitap'ın yalnızca ilk sayfasını kilisenin kapısına çaktı ve altına bir soru yazdı. Kâtibin adı bilinmiyor (Yumruk bunu bilerek saklar: kimse Okuyan'dan büyük değil). Güney Vadi'nin seküler prensleri Yumruk'u Orvahel'in vergisinden kurtulmak için de sevdi.
+- **T47 · Yumruk nasıl doğdu.** Çöküşten sonra, Belvanor'da. İmparatorluğun dağılmasını Septimar'ın eklemelerine bağlayan bir kâtip, Kitap'ın yalnızca ilk sayfasını kilisenin kapısına çaktı ve altına bir soru yazdı. Kâtibin adı bilinmiyor (Yumruk bunu bilerek saklar: kimse Okuyan'dan büyük değil). Güney Vadi'nin seküler prensleri Yumruk'u Orvahel'in vergisinden kurtulmak için de sevdi.
 
 - **T36 · Sogurtay'ın takvimi (senin cevabının devamı).** Bir boyun ayı ötekininkiyle çakışmaz; Sogurtay'da iki boy aynı anda bulunmaz. Kan davası olan iki boy bu yüzden orada hiç karşılaşmaz; barış ancak konsey toplanınca beylerin ağzından konuşulur. Şamanların üç ayı kışın en sert ayları: obalar kışlağa çekilmişken Sogurtay'da yalnızca şamanlar kalır.
 
@@ -63,7 +63,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 - **Sekiz bölge değil, artık on bir bölge var; oyunda beş oynanabilir kültür.** Önerim: beş kalsın, diğerleri NPC. Eşleme: Göçebe = Gokyurt; Vadi Loncaları = Büyük Vadi; Dağ Kabilesi = Ayazkaya; Liman Şehri = Ors (Orsolune); Balıkçı Kasabası = Gelgit Kıyısı (T42). Seçenekler: Önerim gibi / Vaelghard ve Ors da oynanabilir olsun / Her bölge oynanabilir olsun / Başka.
 
-- **Kilise ekranı Dağın İlk Nefesi ile Denizin İlk Gözyaşı'nı eşit okutuyor.** Septimius'un eklemeleri (T35) ile tutarlı: kilise ikisini de Kitap'ın birer sayfası diye eşit okutur. Önerim: metin kalsın, yalnızca Yumruk şehirlerinde kilise ekranı bu iki sayfayı "sonradan eklenmiş" diye okusun. Seçenekler: Önerim gibi / Nefes ikinci planda / Başka.
+- **Kilise ekranı Dağın İlk Nefesi ile Denizin İlk Gözyaşı'nı eşit okutuyor.** Septimar'ın eklemeleri (T35) ile tutarlı: kilise ikisini de Kitap'ın birer sayfası diye eşit okutur. Önerim: metin kalsın, yalnızca Yumruk şehirlerinde kilise ekranı bu iki sayfayı "sonradan eklenmiş" diye okusun. Seçenekler: Önerim gibi / Nefes ikinci planda / Başka.
 
 - **"Yolda doğan" ana karakter kuşak sisteminde kim?.** Önerim: her lider. Adı taşıyan her kişi yolda doğmuş sayılır, çünkü kervanın adını aldığı gün yeniden doğar. Seçenekler: Kurucu (baba) / İlk lider / Her lider / Kervanın adının kendisi / Başka.
 
@@ -83,7 +83,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 **Vastrevar.** Kralın şehri: burada her şeyin bir kaydı var.
 
-- Şehrin kalbi saray değil, Kayıt Bürosu. Kral sarayda oturur, şehir büroda yaşar: her doğum, her vergi, her kapıdan giren kervan oraya yazılır. "Çadıreli" sözü buradan çıktı (T29). Reynald'ın hanedanı için ad önerim Ç4'te.
+- Şehrin kalbi saray değil, Kayıt Bürosu. Kral sarayda oturur, şehir büroda yaşar: her doğum, her vergi, her kapıdan giren kervan oraya yazılır. "Çadıreli" sözü buradan çıktı (T29). Raegmund'un hanedanı için ad önerim Ç4'te.
 - Gelenek: Kapıdaki kâtip kervanın adını deftere bir kez yazar; yanlış yazarsa ad öyle kalır. Vastrevar'da adı yanlış yazılmış eski kervanlar vardır ve bununla övünürler.
 - Kıtlık: Demir ve kumaş çıkarır, ekmeği güneyin kesesinden yer: buğday borçla gelir. Fırın kuyrukları uzar, kâtip kuyruğu da yazar.
 
@@ -137,7 +137,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 **Tolvarin.** Toprağın kutsal olduğu şehir.
 
-- Kalbi şehrin ortasındaki Ekin Taşı: imparatorluktan önce de ekilen ilk tarla. Leon Bey her bahar ilk sabanı orada sürer.
+- Kalbi şehrin ortasındaki Ekin Taşı: imparatorluktan önce de ekilen ilk tarla. Lenart Bey her bahar ilk sabanı orada sürer.
 - Gelenek: Kervan şehre girerken tekerleklerin çamurunu kapıda bırakır: yabancı toprak kutsal toprağa karışmasın. Kapıda bunun için bir oluk ve su var; yıkamayan kervan içeri alınmaz.
 - Kıtlık: Toprak kutsal ama ekin yetmiyor. Kirsavel'in sürüleri gece tarlaya iniyor. Mülteciler tarlada ucuza çalışıyor; Tolvarinli ekmeği onlardan esirgiyor ve bunu toprağın hakkı sayıyor.
 
@@ -157,7 +157,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 **Ezmerak.** Baron'un şehri: geçen her kervan burada ticaret yapar.
 
-- Kale baronu dışarıdan değil kendi halkından korur. Kanlı Baron'un yemeği Kırmızı Sofra denen salonda oldu; salon bugün sözleşme mahkemesi: anlaşmalar aynı masada imzalanır. Daemon o salonda yemek yemez.
+- Kale baronu dışarıdan değil kendi halkından korur. Kanlı Baron'un yemeği Kırmızı Sofra denen salonda oldu; salon bugün sözleşme mahkemesi: anlaşmalar aynı masada imzalanır. Daveric o salonda yemek yemez.
 - Gelenek: Kapıda Öküz Kâtibi oturur: kervanın yaptığı ticareti yazar, bir boynuz fiş verir. Fişsiz çıkan kervan İki Bayrak Kulesi'nde ya da Golcavar yolunda iki katını öder. Aldatma düello sebebidir.
 - Kıtlık: Sulak tarımı Ezmerak'ı korur; baron buğdayı Vadi'ye borçla satar. Vadi şehirleri bu yüzden ona borçlu: kıtlık baronun kesesini büyütüyor ve halk bunu biliyor.
 
@@ -267,7 +267,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 - **Orsolune, Zelmarin ve Mirsana'yı kim yönetiyor?** (`d3.konsey`). Orsolune Konseyi dokuz sandalye: en büyük dokuz defter (ticaret evi). Sandalye tuttuğu borçla alınır; başkan yok, Defter Başı her yıl dönüşümlü. Zelmarin Konseyi kaptanlar ve bağ sahipleri. Mirsana'yı tezgâh sahiplerinin seçtiği Terazi yönetir.
 
-- **İmparatorluğun adı ve imparatorun unvanı** (`d3.imparatorluk`). Vael İmparatorluğu; hükümdarın unvanı İmparator. Vaelghard "Vael'in bekçisi" demek: krallık imparatorluğun mirasçısı olduğunu adıyla söyler. Septimius bu imparatorluğun kural koyucu imparatoru.
+- **İmparatorluğun adı ve imparatorun unvanı** (`d3.imparatorluk`). Vael İmparatorluğu; hükümdarın unvanı İmparator. Vaelghard "Vael'in bekçisi" demek: krallık imparatorluğun mirasçısı olduğunu adıyla söyler. Septimar bu imparatorluğun kural koyucu imparatoru.
 
 - **Eski başkenti kim yaktı?** (`d3.merigard`). Herkes başkasını suçlar ve oyun hiçbirini doğrulamaz. Vaelghard göçebeleri suçlar; göçebeler açlıktan ayaklanan halkı; Vadi Vaelghard'ın kendi ordusunu (başkenti yakıp Orvahel'i kurmak için). Doğrusu: göçebe birliği şehri kuşattı, açlık kapıyı açtı, yangını kimin başlattığı bilinmez.
 
@@ -387,7 +387,7 @@ Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, 
 
 - **Yaratık masalları nerede anlatılır?** (`d3.yaratik`). Kurtadam Gokyurt sınırında (Selvicar), vampir Vadi'nin bataklıklarında, dev hayvanlar Ayazkaya'da ve buzulda. Masal hep komşu bölgenin yaratığını anlatır.
 
-- **Takvim** (`d3.takvim`). İki takvim: Vaelghard ve Septisistler Septimius'un fermanından sayar (Ferman yılı); Vadi'nin seküler şehirleri ve Ors çöküşten sayar ("çöküşten beri"). Gokyurt yıl saymaz, Sogurtay'daki suyun tadını sayar.
+- **Takvim** (`d3.takvim`). İki takvim: Vaelghard ve Septisistler Septimar'ın fermanından sayar (Ferman yılı); Vadi'nin seküler şehirleri ve Ors çöküşten sayar ("çöküşten beri"). Gokyurt yıl saymaz, Sogurtay'daki suyun tadını sayar.
 
 - **Yol dışında ölüler nasıl gömülür?** (`d3.olum`). Septisistler kilise mezarlığına, adıyla. Yumruk mezara yalnızca ilk sayfadan bir satır yazar. Göçebeler ölüyü bozkıra bırakır. Dağlılar yakar. Bataklıkta suya bırakılır.
 

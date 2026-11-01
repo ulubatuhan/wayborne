@@ -695,6 +695,9 @@ def main(argv):
 
     economy = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "economy.json"), encoding="utf-8"))
     for s in settlements:
+        # Lore kararıyla bölgesi değişen yerleşim (economy.json region_override).
+        if s["id"] in economy.get("region_override", {}):
+            s["region"] = s["culture"] = economy["region_override"][s["id"]]
         g = economy["goods"].get(s["id"])
         if g is None:
             raise SystemExit("economy.json'da mal yok: %s" % s["id"])
@@ -709,6 +712,9 @@ def main(argv):
         if culture.startswith("_"):
             continue
         homes = [s for s in settlements if s["type"] != "caravanserai"]
+        if regions and regions[0] == "@ids":
+            starts[culture] = sorted(regions[1:])
+            continue
         if regions == ["@fishvillage"]:
             # Balıkçı kültürü: her balıkçı köyüne en yakın şehir ya da kasaba.
             picked = set()
