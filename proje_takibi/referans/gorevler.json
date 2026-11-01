@@ -103,7 +103,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Üretim ve süreç",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "iptal",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 1,
@@ -111,7 +111,7 @@
    "sira": 7,
    "kim": "C",
    "commit": "6868274",
-   "not": "Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md)."
+   "not": "Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md). | 2026-11-01 kullanıcı: gerek yok, kaldırıldı (tools/ci ve iş akışındaki karşılaştırma adımları silindi; fotoğraf çekimi ve betik hatası kapısı kaldı)."
   },
   {
    "id": "Y-K03",
@@ -2105,14 +2105,14 @@
    "bolum": "12",
    "alan": "Şehir ve yol görünümü",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/12_sehir_ve_yol_gorunumu.md",
    "paket": "P12",
    "sira": 131,
    "kim": "CO",
    "commit": "1484e6f",
-   "not": "settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı. | 2026-10-19 karar: onay; 27 yerleşimin kapısı render edilecek. | 2026-10-20: GateArrival: gerçek girişte şehrin kapı resmi 1.6 s, sonra solar; gündüz evresinde gündüz kapısı. 27 kapının gündüz renderları sürüyor (gates_phases.json). | 27 kapı x gece/gündüz render edildi ve denetlendi, tame_palette ile."
+   "not": "settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı. | 2026-10-19 karar: onay; 27 yerleşimin kapısı render edilecek. | 2026-10-20: GateArrival: gerçek girişte şehrin kapı resmi 1.6 s, sonra solar; gündüz evresinde gündüz kapısı. 27 kapının gündüz renderları sürüyor (gates_phases.json). | 27 kapı x gece/gündüz render edildi ve denetlendi, tame_palette ile. | 2026-11-01: tam ekran GateArrival 2026-10-22 kullanıcı kararıyla silinmişti; kapılar yolun iki ucunda (çıkış ve varış) oyunda. Kapandı."
   },
   {
    "id": "12.1",

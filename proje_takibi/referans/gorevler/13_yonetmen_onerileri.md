@@ -739,7 +739,9 @@ Kullanıcı kararı: sıra teknik önceliğe göre. Bir dalga içinde bağımlı
   - **Öncelik:** P1 · **Dalga:** 1
   - **Ne:** Her döngü sonunda oynanabilir derleme ve 5 dakikalık video. “Bitti” yalnızca ekran görüntüsüyle doğrulanınca denir.
   - **Kabul:** Kural CLAUDE.md'de; her döngünün videosu var.
-- [ ] **Y-K02 Otomatik ekran görüntüsü karşılaştırması**
+- [x] **Y-K02 Otomatik ekran görüntüsü karşılaştırması**
+  - **İptal (kullanıcı, 2026-11-01):** gerek yok; karşılaştırma aracı (`tools/ci`) ve iş akışındaki karşılaştırma adımları
+    silindi. `screenshots.yml` yalnızca fotoğraf çekip betik hatası arıyor.
   - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6868274`): Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md).
   - **Öncelik:** P1 · **Dalga:** 1
   - **Ne:** Kritik ekranlar her derlemede GitHub Actions'ta çekilip önceki sürümle karşılaştırılır; görsel bozulmalar yakalanır.

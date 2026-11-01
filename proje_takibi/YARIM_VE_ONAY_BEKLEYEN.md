@@ -54,7 +54,27 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **19** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+
+## Paket P01
+
+### Y-K02 · Otomatik ekran görüntüsü karşılaştırması
+
+- **Durum:** iptal · **Öncelik:** P1 · **Paket:** P01 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md). | 2026-11-01 kullanıcı: gerek yok, kaldırıldı (tools/ci ve iş akışındaki karşılaştırma adımları silindi; fotoğraf çekimi ve betik hatası kapısı kaldı).
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-K02 Otomatik ekran görüntüsü karşılaştırması**
+  - **İptal (kullanıcı, 2026-11-01):** gerek yok; karşılaştırma aracı (`tools/ci`) ve iş akışındaki karşılaştırma adımları
+    silindi. `screenshots.yml` yalnızca fotoğraf çekip betik hatası arıyor.
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6868274`): Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md).
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Kritik ekranlar her derlemede GitHub Actions'ta çekilip önceki sürümle karşılaştırılır; görsel bozulmalar yakalanır.
+  - **Kabul:** CI'da görsel karşılaştırma adımı; fark raporu artefakt olarak.
+
+</details>
 
 ## Paket P07
 

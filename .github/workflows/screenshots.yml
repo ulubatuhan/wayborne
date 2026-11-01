@@ -1,18 +1,9 @@
 name: Screenshots
 
-# Görsel bozulmayı yakalamak için: kritik ekranların fotoğrafını çeker,
-# Wayborne'daki son başarılı koşunun fotoğraflarıyla karşılaştırır ve raporu
-# iş özetine yazar. Yapısal testler yerleşimi doğrular, görünümü değil;
-# birkaç kez bozulmayı kullanıcı yakaladı (bkz. CLAUDE.md, Testing).
-#
-# Kapı DEĞİL: birleştirmeyi engellemez, yalnızca rapor eder. Karşılaştırma
-# kendi eşiklerini yerel ölçümden aldı (iki ardışık çekim arasında piksellerin
-# yalnızca %0,014-0,049'u değişiyor, eşik %1). Yazılım rasterleyicisinin
-# GPU'dan farklı çizdiği için baz görüntüler hep bu iş akışının kendi
-# çıktısından gelir, yerelden değil.
-#
-# Wayborne'a push: fotoğraflar önbelleğe baz olarak yazılır.
-# Pull request ve elle çalıştırma: önbellekteki baz ile karşılaştırılır.
+# Kritik ekranların fotoğrafını çeker ve betik hatası arar (Godot ayrıştırma
+# hatasında bile 0 ile çıkar; bkz. CLAUDE.md Testing). Fotoğraflar iş
+# çıktısı olarak indirilebilir. Önceki koşuyla görüntü karşılaştırması
+# kullanıcı kararıyla kaldırıldı (2026-11-01, görev Y-K02 iptal).
 
 on:
   push:
@@ -24,17 +15,6 @@ on:
       - "data/assets/**"
       - "data/locale/**"
       - "tests/screenshot_*.gd"
-      - "tools/ci/**"
-      - "project.godot"
-      - ".github/workflows/screenshots.yml"
-  pull_request:
-    paths:
-      - "scripts/**"
-      - "scenes/**"
-      - "data/assets/**"
-      - "data/locale/**"
-      - "tests/screenshot_*.gd"
-      - "tools/ci/**"
       - "project.godot"
       - ".github/workflows/screenshots.yml"
   workflow_dispatch:
@@ -72,12 +52,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libglu1-mesa
-
-      - name: Install Python dependencies
-        run: python3 -m pip install --quiet pillow numpy
-
-      - name: Test the comparison tool
-        run: python3 -m unittest discover -s tools/ci -p "test_*.py"
 
       - name: Cache Godot import
         uses: actions/cache@v4
@@ -123,50 +97,11 @@ jobs:
             exit 1
           fi
 
-      - name: Restore baseline
-        if: github.event_name != 'push'
-        uses: actions/cache/restore@v4
-        with:
-          path: shots/baseline
-          key: screens-baseline-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            screens-baseline-${{ runner.os }}-
-
-      - name: Compare with baseline
-        if: github.event_name != 'push'
-        run: |
-          if [ ! -d shots/baseline ]; then
-            echo "### Ekran görüntüsü karşılaştırması" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Henüz baz görüntü yok (Wayborne'a ilk push bunu üretir); karşılaştırma atlandı." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          python3 tools/ci/screenshot_diff.py shots/baseline shots/current \
-            --tolerance 12 --max-percent 1.0 \
-            --report shots/report.md --diff-dir shots/diff
-          cat shots/report.md >> "$GITHUB_STEP_SUMMARY"
-
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-${{ github.sha }}
-          path: |
-            shots/current
-            shots/diff
-            shots/report.md
+          path: shots/current
           if-no-files-found: ignore
           retention-days: 14
-
-      - name: Prepare baseline
-        if: github.event_name == 'push'
-        run: |
-          rm -rf shots/baseline
-          cp -r shots/current shots/baseline
-
-      - name: Save baseline
-        if: github.event_name == 'push'
-        uses: actions/cache/save@v4
-        with:
-          path: shots/baseline
-          key: screens-baseline-${{ runner.os }}-${{ github.sha }}

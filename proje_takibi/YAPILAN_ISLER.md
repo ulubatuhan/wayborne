@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **102** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **103** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -1214,6 +1214,27 @@ Toplam: **102** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
     - **Kabul:** Dört gün evresinde ve en az üç biyomda (ova, orman, dağ) ekran görüntüleri kullanıcı tarafından onaylanmış. Kervan, yol ve HUD okunurluğu korunmuş. Mevcut yol testleri (`tests/test_road_layers.gd` ve diğerleri) güncellenmiş ve geçiyor.
     - **Kullanıcı kararı (2026-10-17, Y-G07):** Tek biyom değil, bütün biyomlar için birer örnek kare; sonra varyantlar. Biyom haritadan seçilir, arka plan haritadaki konuma göre kurulur (dağlık yerde arkada dağ). Kaynaklar Y-G07'de.
     - **Bağlantılı maddeler:** 12.2a (şehir kapısı), 12.2b (durak ve kule), 12.2c (kamp), 12.2d (yerdeki çubuklar), §9.9–9.10 (yol HUD'u ve biyom arka planları), §10 (binici, arabacı, koşum), §10b.
+
+</details>
+
+### 12.2a · Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
+- **Son not:** settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı. | 2026-10-19 karar: onay; 27 yerleşimin kapısı render edilecek. | 2026-10-20: GateArrival: gerçek girişte şehrin kapı resmi 1.6 s, sonra solar; gündüz evresinde gündüz kapısı. 27 kapının gündüz renderları sürüyor (gates_phases.json). | 27 kapı x gece/gündüz render edildi ve denetlendi, tame_palette ile. | 2026-11-01: tam ekran GateArrival 2026-10-22 kullanıcı kararıyla silinmişti; kapılar yolun iki ucunda (çıkış ve varış) oyunda. Kapandı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **12.2a Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı.**
+    - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `5bfcc7d`): settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı.
+    - Varış ve ayrılışta yolun sonundaki şehir kapısı ve sur sahnesi.
+    - **Yer:** `scripts/ui/travel_band.gd` (kapı ve varış çizimi; `:203` ve `:1045` civarındaki notlar), şehir kapısı sesi ve varış akışı `road_journey.gd`.
+    - **Yön:** Render edilmiş, katmanlı bir kapı sahnesi:
+      - sur, kapı kemeri ve kuleler,
+      - şehrin kendi mimari ve kültür dili (CityFront kasaba render'larıyla aynı set),
+      - kervanın kapıya yaklaşırken ölçeklenmesi ve kapıdan geçişi.
+    - Referanslar §9.3 (A-25…A-29, T-01).
+    - **Kaynaklar (CC0, 2026-10-17):** sur, kule ve kapı modülleri Kenney Castle Kit ve Fantasy Town Kit (CC0), Quaternius Medieval Village MegaKit (elde varsa CC0; yeni indirme QAL). Render + mürekkep geçişi (Y-G02). Kapı sesi için hazır CC0 kayıt yok: Freesound CC0 `large wooden door`, `chain rattle`, `winch` katmanlanarak tasarlanır. Kullanıcı kararı: kervan şehre girmez; kapı sahnesi varışta kervanı kapı önünde bırakır (Y-G10T).
 
 </details>
 

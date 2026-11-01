@@ -92,25 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **96** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
-
-## Paket P01
-
-### Y-K02 · Otomatik ekran görüntüsü karşılaştırması
-
-- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P01 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-K02 Otomatik ekran görüntüsü karşılaştırması**
-  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `6868274`): Araç ve iş akışı hazır; GitHub Actions koşusu push sonrası (TEST_PLANI.md).
-  - **Öncelik:** P1 · **Dalga:** 1
-  - **Ne:** Kritik ekranlar her derlemede GitHub Actions'ta çekilip önceki sürümle karşılaştırılır; görsel bozulmalar yakalanır.
-  - **Kabul:** CI'da görsel karşılaştırma adımı; fark raporu artefakt olarak.
-
-</details>
+Toplam: **94** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P02
 
@@ -1348,27 +1330,6 @@ Toplam: **96** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - Kervan enkazı eşyası.
   - Gece varyantı.
   - **Kullanıcı kararı ve kaynaklar:** Bu iş **Y-G07** ile birlikte yapılır (bütün biyomlar, haritadaki konuma göre varyantlar). Dokular Poly Haven ve ambientCG (CC0), nesneler Kenney Survival Kit ve Quaternius (yeni indirmeler QAL), enkaz Quaternius `Broken Cart`. Ayrıntı: `../ICERIK_IHTIYACLARI.md` G-2, G-4.
-
-</details>
-
-### 12.2a · Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı
-
-- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
-- **Son not:** settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı. | 2026-10-19 karar: onay; 27 yerleşimin kapısı render edilecek. | 2026-10-20: GateArrival: gerçek girişte şehrin kapı resmi 1.6 s, sonra solar; gündüz evresinde gündüz kapısı. 27 kapının gündüz renderları sürüyor (gates_phases.json). | 27 kapı x gece/gündüz render edildi ve denetlendi, tame_palette ile.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **12.2a Şehir kapısı görünümü çok kötü ("rezalet"), baştan tasarlanmalı.**
-    - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `5bfcc7d`): settlement_gates.py her yerleşimin kapısını kasabasından türetir (gök, ışık, kar, mimari değer); render WAYBORNE_TOWN_CFG/OUT ile build/gates altına. Yuvarlak Tower minareye benzediği için kullanılmadı.
-    - Varış ve ayrılışta yolun sonundaki şehir kapısı ve sur sahnesi.
-    - **Yer:** `scripts/ui/travel_band.gd` (kapı ve varış çizimi; `:203` ve `:1045` civarındaki notlar), şehir kapısı sesi ve varış akışı `road_journey.gd`.
-    - **Yön:** Render edilmiş, katmanlı bir kapı sahnesi:
-      - sur, kapı kemeri ve kuleler,
-      - şehrin kendi mimari ve kültür dili (CityFront kasaba render'larıyla aynı set),
-      - kervanın kapıya yaklaşırken ölçeklenmesi ve kapıdan geçişi.
-    - Referanslar §9.3 (A-25…A-29, T-01).
-    - **Kaynaklar (CC0, 2026-10-17):** sur, kule ve kapı modülleri Kenney Castle Kit ve Fantasy Town Kit (CC0), Quaternius Medieval Village MegaKit (elde varsa CC0; yeni indirme QAL). Render + mürekkep geçişi (Y-G02). Kapı sesi için hazır CC0 kayıt yok: Freesound CC0 `large wooden door`, `chain rattle`, `winch` katmanlanarak tasarlanır. Kullanıcı kararı: kervan şehre girmez; kapı sahnesi varışta kervanı kapı önünde bırakır (Y-G10T).
 
 </details>
 

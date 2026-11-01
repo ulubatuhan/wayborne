@@ -261,7 +261,6 @@ OTOMATIK = [
     ("Y-J13", "Çeviri sırası ve 50 terimlik sözlük yazıldı."),
     ("Y-G14", "IM Fell yazı tipi Türkçe harflerin hepsini taşıyor (ölçüldü)."),
     ("Y-G15", "Savaş kurdu kartın rengine çekildi; vagon zaten tek kaynak."),
-    ("Y-K02", "Otomatik ekran görüntüsü karşılaştırma aracı ve iş akışı hazır (rapor amaçlı)."),
     ("N31", "Oyun hissi incelemesi tamamlandı; alt görevler N31a-f açıldı."),
     ("N31a", "Beat kaydı ve boş dakika raporu (`tests/simulate_road_beats.gd`); oyuncu ölçümü yalnız izinle."),
     ("N31b", "Işık modeli ve sis şeridi kodda."),
