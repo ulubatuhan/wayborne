@@ -12,6 +12,10 @@ uniform vec3 glow_colour = vec3(0.93, 0.66, 0.32);
 // hava), 2 kriz (savaş, veba). Pikseller yerinden oynamıyor, yalnızca renk
 // ve ışık - maske hizalı kalıyor, tıklama eşlemesi değişmiyor.
 uniform int mood = 0;
+// Tek sıcak kaynak (Y-G17): akşam ve gece resimlerinde sıcaklık göğe ve
+// duvara yayılmış. 1'de turuncu söner, soğuk griye kayar; parlak ve sıcak
+// pikseller (pencere, meşale, fener) ışık kaynağıdır, sıcak kalır.
+uniform float cool : hint_range(0.0, 1.0) = 0.0;
 
 float luma(vec3 c) {
 	return dot(c, vec3(0.299, 0.587, 0.114));
@@ -41,12 +45,23 @@ vec3 crisis(vec3 c, vec2 uv) {
 	return out_c * (1.0 - smoke * 0.6) + vec3(0.40, 0.36, 0.34) * smoke * 0.6;
 }
 
+// Işık kaynağı yalnızca yerde sayılır (pencere, ateş, fener); göktekiler,
+// güneş ve halesi dahil, soğur (kullanıcı kararı: akşam güneşi soğuktur).
+vec3 cool_grade(vec3 c, float y) {
+	float l = luma(c);
+	float warm = clamp(c.r - c.b, 0.0, 1.0);
+	float lamp = smoothstep(0.55, 0.75, l) * smoothstep(0.12, 0.30, warm) * smoothstep(0.60, 0.66, y);
+	vec3 cold = vec3(l) * vec3(0.92, 0.96, 1.05);
+	return mix(c, cold, cool * smoothstep(0.02, 0.25, warm) * (1.0 - lamp));
+}
+
 int id_at(vec2 uv) {
 	return int(round(texture(mask, uv).r * 255.0));
 }
 
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
+	c.rgb = cool_grade(c.rgb, UV.y);
 	if (mood == 1) {
 		c.rgb = grey_day(c.rgb);
 	} else if (mood == 2) {

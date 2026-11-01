@@ -360,7 +360,7 @@ static func _ensure_built() -> void:
 		18, {"accuracy_bonus": 2}, art, false, "", false, {"art": "wool_pants"})
 	_add(SLOT_PANTS, "viking_pants", "OUTFIT_VIKING_PANTS", Color(0.40, 0.33, 0.25), 10,
 		14, {"hp_bonus": 2}, art)
-	_add(SLOT_PANTS, "harem_pants", "OUTFIT_HAREM_PANTS", Color(0.60, 0.30, 0.22), 10,
+	_add(SLOT_PANTS, "harem_pants", "OUTFIT_HAREM_PANTS", Color(0.47, 0.34, 0.29), 10,
 		10, {"dodge_bonus": 1}, art)
 	_add(SLOT_PANTS, "cloth_trousers", "OUTFIT_CLOTH_TROUSERS", Color(0.34, 0.31, 0.27), 10,
 		16, {"hp_bonus": 1, "accuracy_bonus": 1}, art)

@@ -39,3 +39,12 @@ kurala uygun.
 5. **Arayüz altın ve kan rengi** (`ArtPalette.GOLD`, `BLOOD`, uyarı rengi): kuralın dışında, dokunulmaz.
 
 Her düzeltme ekran görüntüsüyle önce ve sonra gösterilir (`ekran-dogrula`).
+
+## Uygulama (2026-11-01)
+
+- Akşam ve gece şehir resimleri yeniden render edilmeden, şehrin gölgelendiricisinde soğutuldu
+  (`venue_highlight.gdshader`, `cool`): turuncu gök ve duvar soğuk griye kayar; yerdeki parlak sıcak pikseller
+  (pencere, ateş, fener) ışık kaynağı sayılıp sıcak kalır. Güneş ve halesi de soğur (kullanıcı kararı).
+- Şafak ve akşam göğü, ufuk bandı ve güneş diski soğuk (`ArtPalette.SKIES`, `TravelBand`).
+- Kırmızı şalvar soluk kiremit rengine çekildi; öbür giysi tonları zaten soluk.
+

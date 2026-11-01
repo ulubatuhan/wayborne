@@ -74,6 +74,8 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 		mat.shader = load(SHADER_PATH)
 		mat.set_shader_parameter("mask", mask_tex)
 		mat.set_shader_parameter("mood", int(model.get("mood", MOOD_NORMAL)))
+		var phase_now := JourneyClock.phase_for_hour(float(model.get("hour", 22.0)))
+		mat.set_shader_parameter("cool", 1.0 if phase_now == JourneyClock.Phase.EVENING or phase_now == JourneyClock.Phase.NIGHT else 0.0)
 		_bg.material = mat
 	add_child(_bg)
 	# Meydanın halkı (Y-G10T): gece az, akşam ve gündüz biraz daha.
