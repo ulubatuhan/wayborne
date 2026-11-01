@@ -187,11 +187,21 @@ const LOG_HEIGHT_SHARE: float = 0.24
 const LOG_BACK_SHARE: float = 0.09
 const LOG_WOOD: Color = Color(0.26, 0.21, 0.18)
 const LOG_BARK: Color = Color(0.15, 0.12, 0.11)
-## Oturan figür dizleriyle öne taşar: koltuklar ayaktakilerden geniş (2026-11-01).
+## Koltukların sayısı ve derinlik kayması (`y`); yatay yer `_seat_reach`'ten.
 const CAMPFIRE_SEATS: Array[Vector2] = [
-	Vector2(-3.8, 0.4), Vector2(4.0, -0.3), Vector2(-6.6, -0.5),
-	Vector2(6.8, 0.5), Vector2(-9.2, 0.1), Vector2(9.4, -0.4),
+	Vector2(-1.0, 0.4), Vector2(1.0, 0.3), Vector2(-1.0, -0.4),
+	Vector2(1.0, -0.4), Vector2(-1.0, -0.2), Vector2(1.0, -0.2),
 ]
+## Ateşin başında yalnızca iki kişi oturur, ayak uçları taş çemberin bittiği yerde;
+## öbürleri oturanların hemen arkasında ayakta durur, el uzatmadan (kullanıcı,
+## 2026-11-01: dörder kişi ateşin dibine girip alevi örtüyordu).
+const CAMP_SITTERS: int = 2
+## Oturanın ayak ucu figür merkezinin bu kadar önünde (boyun payı; `sit_fire`
+## ayağı 0.235 + ayak boyu).
+const SIT_TOE_SHARE: float = 0.33
+## Ayaktakiler: oturanın arkasındaki ilk adım ve sonrakilerin aralığı (boyun payı).
+const STAND_BEHIND_SHARE: float = 0.22
+const STAND_STEP_SHARE: float = 0.24
 
 var _anchor_x: float = 0.0
 ## Ölçeğin hesaplandığı çapa (ileri yöndeki) - negatifse `_anchor_x`.
@@ -1062,10 +1072,24 @@ func _transition_hip(figure: WalkFigure, u: float) -> float:
 func _campfire_target(figure: WalkFigure, fire_index: int, seat: int) -> Vector2:
 	var fire := _campfire_position(fire_index)
 	var seat_ratio: Vector2 = CAMPFIRE_SEATS[seat % CAMPFIRE_SEATS.size()]
-	var offset := seat_ratio * CAMPFIRE_SEAT_SPACING * _scale
 	return Vector2(
-		fire.x + offset.x - figure.size.x * 0.5, _ground_y + offset.y - figure.size.y
+		fire.x + seat_ratio.x * _seat_reach(seat, figure.person_height()) - figure.size.x * 0.5,
+		_ground_y + seat_ratio.y * CAMPFIRE_SEAT_SPACING * _scale - figure.size.y
 	)
+
+## Koltuğun ateş merkezinden yatay uzaklığı: taş çemberin yarı genişliği,
+## oturanın ayak ucu, ayaktaysa oturanın arkasındaki adımlar.
+func _seat_reach(seat: int, person_h: float) -> float:
+	var px_per_m := size.y * _scale * PERSON_HEIGHT_RATIO * 0.86 / 1.73
+	var ring := PropArt.layer_rect(CAMPFIRE_PROP, "body", Vector2.ZERO, px_per_m / PropArt.ppm(CAMPFIRE_PROP))
+	var reach := ring.size.x * 0.5 + person_h * SIT_TOE_SHARE
+	if seat >= CAMP_SITTERS:
+		reach += person_h * (STAND_BEHIND_SHARE + STAND_STEP_SHARE * float((seat - CAMP_SITTERS) / 2))
+	return reach
+
+## Testler için: en uzak koltuğun ateşe uzaklığı.
+func max_seat_reach() -> float:
+	return _seat_reach(CAMPFIRE_SEATS.size() - 1, size.y * _scale * PERSON_HEIGHT_RATIO)
 
 ## Bir vagonun ateşinin durduğu yer. Ateş vagonun **kuyruk yönüne**
 ## kayıyor (bkz. CAMPFIRE_TRAIL_RATIO'nun notu) - önü zaten öküz ve
@@ -1433,7 +1457,7 @@ func _advance_gather(real_delta: float) -> void:
 			figure.set_facing(1.0 if fire_x >= figure.position.x + figure.size.x * 0.5 else -1.0)
 			# Ateşin başında oturur (kullanıcı isteği 2026-10-23): kütüğün üstünde,
 			# meyhanedeki ve menüdeki oturuşla aynı klip.
-			if figure.get_action() != CAMP_SEATED_CLIP:
+			if figure.get_action() != CAMP_SEATED_CLIP and int(_gather_seat_index.get(figure, 0)) < CAMP_SITTERS:
 				figure.set_action(CAMP_SEATED_CLIP)
 		elif figure.get_action() == CAMP_SEATED_CLIP:
 			# Kalkış: yürüyüşe dönmeden önce oturuş biter.

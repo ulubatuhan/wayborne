@@ -168,6 +168,11 @@ the walking figures are the game's strongest asset) but to deepen it.
   other. Seats now sit on both sides of the fire (±2.9 to ±6.6 units, alternating, inside out) so the flame stays
   open; figures are drawn over the fire, so nobody may sit in front of or behind it. A figure that has arrived
   turns to face the fire (its seat can lie past the fire from where it walked in).
+- **Two sit, the rest stand behind (user, 2026-11-01).** With everyone seated, four people crowded into the fire and
+  covered it. Only `CAMP_SITTERS` (2) sit (`sit_fire`, hands to the flame), one on each side, the toes where the stone
+  ring ends (`_seat_reach`: the ring's half width from `PropArt.layer_rect` plus `SIT_TOE_SHARE` of the person's height);
+  everyone else stands right behind them, arms down, further from the fire and slightly deeper. Seat x is computed from
+  the ring, not a table, so it holds at any screen height; `max_seat_reach()` feeds the gathering test's tolerance.
 
 - **Off the seat first, then to the fire - and back on before anyone
   moves.** Reported as "önce vagondan inip sonra ateşe gitmeli; lider de
