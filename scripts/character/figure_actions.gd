@@ -49,7 +49,7 @@ const _BOW_DRAWN: Dictionary = {
 }
 
 ## Oturan duruşlar: elde silah yok, ayakta durma testinden muaf.
-const SEATED_CLIPS: Array[String] = ["sit_box"]
+const SEATED_CLIPS: Array[String] = ["sit_box", "sit_fire"]
 
 ## Klip adı -> {frames, keys: [[t, poz]]}. Pozlar NEUTRAL'ın üstüne yazılır.
 const CLIPS: Dictionary = {
@@ -242,6 +242,13 @@ const CLIPS: Dictionary = {
 		"hip_y": -0.225, "lean": 17.0,
 		"foot_f": [0.235, 0.0, 0.0], "foot_b": [0.215, 0.0, 0.0],
 		"arm_f": [6.0, 44.0], "arm_b": [2.0, 38.0], "weapon": 0.0,
+	}]]},
+	# Ateşin başında ısınan (kullanıcı isteği 2026-10-23, Ana Hedefler): sit_box
+	# gibi kütükte oturuş, ama gövde ateşe eğik ve iki el ileride, avuçlar ateşe.
+	"sit_fire": {"frames": 1, "keys": [[0.0, {
+		"hip_y": -0.225, "lean": 22.0,
+		"foot_f": [0.235, 0.0, 0.0], "foot_b": [0.215, 0.0, 0.0],
+		"arm_f": [64.0, 62.0], "arm_b": [56.0, 66.0], "weapon": 0.0,
 	}]]},
 	# Yol tepkileri (görev N31d). Klip sözlüğünde baş yok: "bakmak" ön elin
 	# alnına siper olduğu, gövdenin hafifçe geriye kalktığı bir duruş - yolda

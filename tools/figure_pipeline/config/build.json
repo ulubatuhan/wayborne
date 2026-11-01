@@ -327,6 +327,18 @@
     300
    ],
    "_note": "Dur temposunda yorgun bekleyiş (N31d): gövde öne çökük, kollar sarkık."
+  },
+  "sit_fire": {
+   "kind": "action",
+   "action": "sit_fire",
+   "frames": 1,
+   "seated": false,
+   "root": "ground",
+   "anchor_px": [
+    160,
+    300
+   ],
+   "_note": "Ateşin başında ısınan (2026-11-01): sit_box oturuşu, gövde ateşe eğik, eller ileride; oturulan kütük render edilmez."
   }
  },
  "facing": 1.0,
