@@ -63,7 +63,10 @@ const AREA_GLYPH_HEIGHT: float = 16.0
 const LAUNCH_COLOR: Color = Color(0.95, 0.82, 0.45)
 ## Taslağın yetenek kartı (1080p): 200x110, adı büyük, altında isabet.
 const SKILL_CARD_WIDTH: float = 200.0
-const SKILL_CARD_HEIGHT: float = 112.0
+const SKILL_CARD_HEIGHT: float = 128.0
+## Bir düşman hamlesinden sonraki bekleme: saldırı klibi, mermi ve tepki
+## (CombatFx.ATTACK_MSEC + REACT_MSEC) görünsün.
+const ENEMY_STEP_SECONDS: float = 1.35
 const MEDAL_SIZE: float = 104.0
 const BOTTOM_PANEL_HEIGHT: float = 250.0
 ## Düşmanın huyu (CombatUnit.behavior, Y-C08) sağ panelde bir cümle.
@@ -176,10 +179,12 @@ func start_combat(
 	_bark_texts.clear()
 	_reset_fx()
 
+	_encounter.paced = is_inside_tree() and not NodeUtil.reduce_motion(self)
 	_encounter.start()
 	for unit in _encounter.player_units + _encounter.enemy_units:
 		_hp_seen[unit] = unit.current_hp
 	_refresh()
+	_pump_enemies()
 
 ## Muhafız görevini tutan biri varsa kadro ilk tura iyi konumlanmış girer:
 ## herkese tek turluk bir isabet bonusu. DutyCatalog.get_duty_power()
@@ -981,8 +986,9 @@ func _build_skill_card(unit: CombatUnit, skill: CombatSkill) -> Control:
 	line.add_theme_color_override("font_color", ArtPalette.MENU_TEXT_DIM)
 	line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(line)
-	var marks := HBoxContainer.new()
-	marks.add_theme_constant_override("separation", 10)
+	# Durur ve Vurur alt alta: yan yana kartın genişliğine sığmıyordu.
+	var marks := VBoxContainer.new()
+	marks.add_theme_constant_override("separation", 1)
 	marks.add_child(_build_mark_row(tr("UI_COMBAT_MARK_LAUNCH"), skill.usable_positions, LAUNCH_COLOR))
 	marks.add_child(_build_mark_row(tr("UI_COMBAT_MARK_TARGET"), skill.target_positions, TARGET_MARK_COLOR))
 	col.add_child(marks)
@@ -1177,16 +1183,29 @@ func _on_unit_clicked(target: CombatUnit) -> void:
 	_selected_skill = null
 	_encounter.use_skill(skill, target)
 	_refresh()
+	_pump_enemies()
 
 func _on_swap_pressed(first: CombatUnit, second: CombatUnit) -> void:
 	_selected_skill = null
 	_encounter.swap_player_positions(first, second)
 	_refresh()
+	_pump_enemies()
 
 func _on_pass_pressed() -> void:
 	_selected_skill = null
 	_encounter.pass_turn()
 	_refresh()
+	_pump_enemies()
+
+## Düşmanlar sırayla, her biri görünür bir aralıkla oynar: hamlesi, mermisi
+## ve hedefin tepkisi bitmeden sıradaki başlamaz.
+func _pump_enemies() -> void:
+	while _encounter != null and _encounter.paced and not _encounter.is_over() and not _encounter.is_player_turn():
+		await get_tree().create_timer(ENEMY_STEP_SECONDS).timeout
+		if not is_inside_tree() or _encounter == null or _encounter.is_over():
+			return
+		_encounter.step()
+		_refresh()
 
 # --- Kayıt ve bitiş ---
 

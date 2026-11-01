@@ -15,7 +15,7 @@ extends RefCounted
 const FLASH_MSEC: int = 500
 ## Kritik daha uzun parlıyor: oyuncunun "bu farklıydı" demesi için.
 const CRIT_FLASH_MSEC: int = 750
-const RECOIL_MSEC: int = 260
+const RECOIL_MSEC: int = 380
 const FALL_MSEC: int = 300
 const RING_MSEC: int = 250
 const SHAKE_MSEC: int = 250
@@ -24,8 +24,9 @@ const NUMBER_MSEC: int = 900
 ## Kare kümesi olan figürün savaş klipleri: saldırı (kalkış-vuruş-dönüş)
 ## ve darbe/sıyrılma tepkisi. Hamleden (RECOIL_MSEC) uzun, çünkü klip bir
 ## kayma değil bir hareket; düşüşten (FALL_MSEC) bağımsız.
-const ATTACK_MSEC: int = 520
-const REACT_MSEC: int = 420
+## 520/420 hamleyi görülemeyecek kadar hızlı geçiriyordu (kullanıcı, 2026-11-01).
+const ATTACK_MSEC: int = 800
+const REACT_MSEC: int = 650
 const NUMBER_RISE: float = 28.0
 ## Sayı sonuna kadar tam görünür, son %40'ta sönüyor.
 const NUMBER_FADE_FROM: float = 0.6

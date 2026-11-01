@@ -128,6 +128,15 @@ func _init(
 
 ## Savaşı başlatır ve sıra düşmandaysa onların hamlelerini işler; sıra
 ## oyuncuya gelince durur.
+## Ekran düşman turlarını tek tek oynatır: `true` iken düşmanın her hamlesinden
+## sonra durulur, ekran bekleyip `step()` çağırır (kullanıcı, 2026-11-01:
+## "düşmanların eylemleri gözükmüyor"). Testler ve simülatör anında koşar.
+var paced: bool = false
+
+## Sıradaki düşmanın turu (paced iken ekran çağırır).
+func step() -> void:
+	_run_until_player_turn()
+
 func start() -> void:
 	_emit_log(tr("CBT_LOG_OPENING") % [enemy_label, player_units.size()])
 	_run_until_player_turn()
@@ -283,6 +292,8 @@ func _run_until_player_turn() -> void:
 		if _check_end():
 			return
 		_advance_turn()
+		if paced:
+			return
 
 ## Sırası gelen birimin turunu açar. `false` dönerse tur zaten tüketildi
 ## (birim sersemlemiş ya da kanamadan düştü) ve çağıran `_advance_turn()`'e
