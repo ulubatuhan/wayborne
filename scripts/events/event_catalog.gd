@@ -468,6 +468,8 @@ static func _spoiled_provisions() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, -1),
 				EventEffect.make(EventEffect.Type.MORALE, 2),
+				# Y-C22: levazımcının didik didik ayıklaması kervanı sıkar.
+				EventEffect.make(EventEffect.Type.STRESS, 2),
 			])
 		),
 		# Otacı bozulmuşu yahniye çevirir: daha az besleyici, biraz moral
@@ -480,6 +482,8 @@ static func _spoiled_provisions() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, -2),
 				EventEffect.make(EventEffect.Type.MORALE, -4),
+				# Y-C22: ekşi yahni mideyi bozar.
+				EventEffect.make(EventEffect.Type.STRESS, 1),
 			])
 		),
 		_choice("EVT_SPOILED_OPT_SHARE", _effects([
@@ -1208,6 +1212,8 @@ static func _culture_fisher_catch() -> GameEvent:
 		_choice("EVT_FISHER_CATCH_OPT_GATHER", _effects([
 			EventEffect.make(EventEffect.Type.PROVISIONS, 5),
 			EventEffect.make(EventEffect.Type.MORALE, 2),
+			# Y-C22: soğuk suda saatler; geçip gitmek bunu esirger.
+			EventEffect.make(EventEffect.Type.STRESS, 3),
 		])),
 		# Y-E03: derin kolda ağ dolu çıkar - akıntı da güçlü. Bedeli en
 		# dayanıklı olanın bedeninden ödenir (adı seçmeden önce görünür).
@@ -2119,12 +2125,15 @@ static func _regional_war_news() -> GameEvent:
 		EventEffect.make(EventEffect.Type.WORLD_EVENT_START, 24, "war|current"),
 	])
 	event.choices = _choices([
+		# Y-C22: hazırlanmak keyfi kaçırır ama içleri rahatlar; duymazdan gelmek
+		# keyfi korur, korkuyu içe atar.
 		_choice("EVT_WAR_NEWS_OPT_BRACE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -4),
-			EventEffect.make(EventEffect.Type.STRESS, 3),
+			EventEffect.make(EventEffect.Type.STRESS, -2),
 		])),
 		_choice("EVT_WAR_NEWS_OPT_IGNORE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -1),
+			EventEffect.make(EventEffect.Type.STRESS, 3),
 		])),
 	])
 	return event
@@ -2163,8 +2172,10 @@ static func _trade_fair_news() -> GameEvent:
 		EventEffect.make(EventEffect.Type.WORLD_EVENT_START, 12, "trade_fair|current"),
 	])
 	event.choices = _choices([
+		# Y-C22: acele etmek erzak yer.
 		_choice("EVT_TRADE_FAIR_NEWS_OPT_HURRY", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 3),
+			EventEffect.make(EventEffect.Type.PROVISIONS, -2),
 		])),
 		_choice("EVT_TRADE_FAIR_NEWS_OPT_IGNORE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, 1),
@@ -2187,9 +2198,11 @@ static func _bandit_tribute_zone_news() -> GameEvent:
 	event.choices = _choices([
 		_choice("EVT_TRIBUTE_NEWS_OPT_BRACE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -3),
+			EventEffect.make(EventEffect.Type.STRESS, -2),
 		])),
 		_choice("EVT_TRIBUTE_NEWS_OPT_IGNORE", _effects([
 			EventEffect.make(EventEffect.Type.MORALE, -1),
+			EventEffect.make(EventEffect.Type.STRESS, 3),
 		])),
 	])
 	return event

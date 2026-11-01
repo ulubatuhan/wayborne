@@ -50,7 +50,7 @@ const RIDER_LANTERN_GLOW: float = 1.7
 ## Geçmiş yollar ve kamp işaretleri.
 const TRAIL_COLOR: Color = Color(0.17, 0.12, 0.09, 0.55)
 const TRAIL_WIDTH: float = 1.5
-const CAMP_MARK_SIZE: float = 4.0
+const CAMP_MARK_SIZE: float = 7.0
 
 var tiles: MapTileView
 var _overlay: Control
@@ -218,10 +218,12 @@ func _draw_trail() -> void:
 		var at := tiles.map_to_screen(Vector2(float(c[0]), float(c[1])))
 		if not Rect2(Vector2.ZERO, size).grow(s).has_point(at):
 			continue
-		var flame := PackedVector2Array([at + Vector2(-s * 0.6, s * 0.5), at + Vector2(0, -s), at + Vector2(s * 0.6, s * 0.5)])
-		_overlay.draw_colored_polygon(flame, Color(ArtPalette.GRIM_AMBER, 0.85))
-		flame.append(flame[0])
-		_overlay.draw_polyline(flame, TRAIL_COLOR, 1.0, true)
+		# Mürekkep izi renksiz (Y-G09): kamp, izin mürekkebiyle çizilmiş küçük bir çadır.
+		var tent := PackedVector2Array([at + Vector2(-s, s * 0.7), at + Vector2(0, -s), at + Vector2(s, s * 0.7)])
+		_overlay.draw_colored_polygon(tent, Color(INK_ON_MAP, 0.55))
+		tent.append(tent[0])
+		_overlay.draw_polyline(tent, INK_ON_MAP, 1.4, true)
+		_overlay.draw_line(at + Vector2(0, -s), at + Vector2(0, s * 0.7), PAPER_ON_MAP, 1.0)
 
 ## Mezar işareti: rotanın üstünde, paya göre; eski soyunki soluk.
 func _draw_graves() -> void:

@@ -1048,14 +1048,15 @@ func _draw_memorials(area: Rect2, cover: Rect2) -> void:
 		var x := screen_x_for_day(float(m["day"]))
 		if x < cover.position.x - 60.0 or x > cover.end.x + 60.0:
 			continue
-		var h := area.size.y * 0.045
+		# 0.045 otların arasında kayboluyordu (1080p'de ~10x25 px; TEST_BEKLEYEN Y-B11).
+		var h := area.size.y * 0.075
 		var base := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.03)
 		match String(m["kind"]):
 			"grave":
 				ArtDraw.contact_shadow(self, base, h * 2.2, 0.12)
 				draw_colored_polygon(PackedVector2Array([base + Vector2(-h * 1.1, 0), base + Vector2(0, -h * 0.45), base + Vector2(h * 1.1, 0)]), Color(0.30, 0.24, 0.18))
 				draw_rect(Rect2(base + Vector2(-h * 0.18, -h * 1.25), Vector2(h * 0.36, h * 1.0)), stone)
-				draw_rect(Rect2(base + Vector2(-h * 0.18, -h * 1.25), Vector2(h * 0.36, h * 1.0)), ink, false, 1.0)
+				draw_rect(Rect2(base + Vector2(-h * 0.18, -h * 1.25), Vector2(h * 0.36, h * 1.0)), ink, false, 2.0)
 			"cairn":
 				ArtDraw.contact_shadow(self, base, h * 2.4, 0.14)
 				for i in 4:

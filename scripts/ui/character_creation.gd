@@ -382,7 +382,15 @@ func _build_stat_row(kind: CharacterStats.Kind) -> HBoxContainer:
 
 	var description_label := _make_hint_label()
 	description_label.text = CharacterStats.kind_description(kind)
+	# Açıklama kalan genişliği alır, düğmeler kendi boyunda kalır: genişlik
+	# verilmeyince açıklama kelime kelime kırılıp düğmeleri uzatıyordu.
+	description_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(description_label)
+	for button in [minus_button, plus_button]:
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		button.custom_minimum_size = Vector2(36, 0)
+	value_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 	_stat_rows.append({
 		"kind": kind,

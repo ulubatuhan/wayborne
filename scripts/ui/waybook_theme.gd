@@ -275,6 +275,16 @@ static func framed_panel() -> StyleBox:
 static func _build_kit(theme: Theme) -> void:
 	theme.set_type_variation(FRAMED_PANEL, "PanelContainer")
 	theme.set_stylebox("panel", FRAMED_PANEL, framed_panel())
+	# Onay kutusu: Godot'nun koyu varsayılan simgesi koyu zeminde görünmüyordu
+	# (kamp kararları, Kader Modu; TEST_BEKLEYEN doğrulaması 2026-11-01).
+	var checks := {"unchecked": "check_off.png", "checked": "check_on.png",
+		"unchecked_disabled": "check_off_disabled.png", "checked_disabled": "check_on_disabled.png",
+		"radio_unchecked": "radio_off.png", "radio_checked": "radio_on.png",
+		"radio_unchecked_disabled": "radio_off.png", "radio_checked_disabled": "radio_on.png"}
+	for icon in checks:
+		var tex: Texture2D = TextureLoader.load_any(KIT_DIR + String(checks[icon]))
+		if tex != null:
+			theme.set_icon(icon, "CheckBox", tex)
 	theme.set_type_variation(PRIMARY_BUTTON, "Button")
 	var pad := Vector4(22, 10, 22, 10)
 	var states := {"normal": "button_primary.png", "hover": "button_primary_hover.png",
