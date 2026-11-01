@@ -72,7 +72,7 @@ func setup(city_id: String, model: Dictionary) -> CityFront:
 		_mask_img = mask_tex.get_image()
 		var mat := ShaderMaterial.new()
 		mat.shader = load(SHADER_PATH)
-		mat.set_shader_parameter("mask", mask_tex)
+		mat.set_shader_parameter("outline", TextureLoader.load_any(TOWNS_DIR + city_id + "/outline.png"))
 		mat.set_shader_parameter("mood", int(model.get("mood", MOOD_NORMAL)))
 		var phase_now := JourneyClock.phase_for_hour(float(model.get("hour", 22.0)))
 		mat.set_shader_parameter("cool", 1.0 if [JourneyClock.Phase.DAWN, JourneyClock.Phase.EVENING, JourneyClock.Phase.NIGHT].has(phase_now) else 0.0)

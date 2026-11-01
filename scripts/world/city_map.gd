@@ -30,6 +30,7 @@ const EDGE: float = 26.0
 var _session: GameSession
 var _front: CityFront
 var _brief_panel: CityBriefPanel
+static var _brief_folded: bool = false
 
 func _ready() -> void:
 	_session = GameState.get_session()
@@ -133,7 +134,26 @@ func _build_brief() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Sağ üstte +/- : panel katlanır, şehir resmi açılır (kullanıcı, 2026-11-01).
+	# Seçim oturum boyunca kalır (sahne değişince unutulmasın).
+	var toggle := Button.new()
+	toggle.flat = true
+	toggle.focus_mode = Control.FOCUS_NONE
+	toggle.size_flags_horizontal = Control.SIZE_SHRINK_END
+	toggle.add_theme_font_size_override("font_size", 22)
+	toggle.tooltip_text = tr("UI_BRIEF_TOGGLE")
+	col.add_child(toggle)
 	col.add_child(scroll)
+	var apply := func():
+		scroll.visible = not _brief_folded
+		toggle.text = "+" if _brief_folded else "\u2212"
+		holder.anchor_bottom = 0.0 if _brief_folded else 1.0
+		holder.offset_bottom = holder.offset_top + 56.0 if _brief_folded else -(CityFront.STRIP_HEIGHT + 18.0)
+		holder.offset_left = holder.offset_right - (56.0 if _brief_folded else BRIEF_WIDTH)
+	toggle.pressed.connect(func():
+		_brief_folded = not _brief_folded
+		apply.call())
+	apply.call()
 	_brief_panel = CityBriefPanel.new()
 	_brief_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_brief_panel)

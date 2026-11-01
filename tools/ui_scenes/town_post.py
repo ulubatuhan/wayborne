@@ -22,6 +22,9 @@ import sys
 import numpy as np
 from PIL import Image, ImageFilter
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from venue_outline import write_outline  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILD = os.path.join(ROOT, "build", "ui_scenes")
 CFG = os.environ.get("WAYBORNE_TOWN_CFG") or os.path.join(ROOT, "tools", "ui_scenes", "towns.json")
@@ -228,6 +231,7 @@ def process(city):
     if not phase:
         Image.fromarray(mask_from_ids(ids)).save(os.path.join(dst, "mask.png"))
         json.dump({"venues": list(VENUE_IDS)}, open(os.path.join(dst, "mask.json"), "w"))
+        write_outline(dst)
     print("YAZILDI", os.path.join(dst, name))
 
 

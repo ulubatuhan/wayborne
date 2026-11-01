@@ -324,6 +324,8 @@ func _place_actors() -> void:
 		figure.position = Vector2.ZERO
 		var clip: Control = actor.clip
 		var cut := String(actor.cut)
+		if cut.is_empty():
+			cut = _table_in_front(actor.pos)
 		clip.position = foot - Vector2(h * 0.45, h)
 		if cut.is_empty():
 			clip.clip_contents = false
@@ -421,6 +423,25 @@ func _arrive(actor: Dictionary, leg: Dictionary) -> void:
 		figure.set_facing(1.0 if Vector2(actor.pos).x < table_x else -1.0)
 		figure.set_action(SEATED_CLIP if String(actor.act) == "drink" else "")
 
+## Masanın gerisinden geçen ya da masada duran masanın arkasında kalır
+## (kullanıcı, 2026-11-01: garsonun eteği ve yürüyenin bacakları masanın
+## üstüne çiziliyordu). Masanın zemin çizgisi boy payından (DEPTH), genişliği
+## iki ucundaki koltuktan.
+func _table_in_front(pos: Vector2) -> String:
+	var depth: Dictionary = TavernLayout.DEPTH
+	for table in ["table_a", "table_b", "table_c"]:
+		var top := anchor_share(table)
+		var floor_y := float(depth.y0) + (float(TavernLayout.ANCHORS[table].person_h) - float(depth.h0)) / float(depth.slope)
+		if pos.y <= top.y or pos.y >= floor_y:
+			continue
+		var xs: Array = []
+		for seat in SEAT_TABLE:
+			if SEAT_TABLE[seat] == table:
+				xs.append(anchor_share(seat).x)
+		if pos.x >= float(xs.min()) and pos.x <= float(xs.max()):
+			return table
+	return ""
+
 func at_table_x(actor: Dictionary) -> float:
 	return anchor_share(String(actor.cut)).x
 
@@ -431,9 +452,10 @@ func _redress_visitor(actor: Dictionary) -> void:
 	actor.character = character
 	_dress(actor.figure, character)
 
-## Ateş, mum ve fener için: titremenin saf fonksiyonu.
+## Ateş, mum ve fener için: titremenin saf fonksiyonu. Ortam ışığı gibi yavaş
+## ve hafif nefes alır (kullanıcı, 2026-11-01: "çok hızlı, çok belirgin").
 static func flicker(t: float, seed_offset: float) -> float:
-	return 0.78 + 0.14 * sin(t * 7.3 + seed_offset) + 0.08 * sin(t * 13.1 + seed_offset * 1.7)
+	return 0.90 + 0.06 * sin(t * 1.9 + seed_offset) + 0.04 * sin(t * 3.3 + seed_offset * 1.7)
 
 # --- girdi ---
 
@@ -514,7 +536,7 @@ func _draw_back(c: Control) -> void:
 		var p := at(key)
 		var f := flicker(t if moving else 0.0, float(key.hash() % 5))
 		for i in 3:
-			c.draw_circle(p, unit * (0.05 + 0.035 * float(i)) * f, Color(1.0, 0.7, 0.35, 0.05 + 0.025 * float(2 - i)))
+			c.draw_circle(p, unit * (0.05 + 0.035 * float(i)) * f, Color(1.0, 0.7, 0.35, 0.025 + 0.012 * float(2 - i)))
 
 ## Alev damlası: tabanda geniş, uca doğru eğri daralır; uç `sway` kadar yana kayar.
 static func _flame_shape(base: Vector2, w: float, h: float, sway: float) -> PackedVector2Array:
@@ -531,8 +553,8 @@ static func _flame_shape(base: Vector2, w: float, h: float, sway: float) -> Pack
 func _draw_flame(c: Control, p: Vector2, size_px: float, t: float, seed_offset: int) -> void:
 	var f := flicker(t if not NodeUtil.reduce_motion(self) else 0.0, float(seed_offset))
 	var pts := PackedVector2Array([p + Vector2(-size_px * 0.6, 0), p + Vector2(0, -size_px * 2.2 * f), p + Vector2(size_px * 0.6, 0)])
-	c.draw_circle(p + Vector2(0, -size_px * 0.8), size_px * 3.0 * f, Color(1.0, 0.7, 0.3, 0.10))
-	c.draw_colored_polygon(pts, Color(1.0, 0.8, 0.35, 0.95))
+	c.draw_circle(p + Vector2(0, -size_px * 0.8), size_px * 3.0 * f, Color(1.0, 0.7, 0.3, 0.05))
+	c.draw_colored_polygon(pts, Color(1.0, 0.8, 0.35, 0.8))
 
 func _draw_front(c: Control) -> void:
 	var t := _clock

@@ -73,6 +73,8 @@ var auto_pause_events: bool = false
 ## yalnızca oyuncu izin verirse, yalnızca bu bilgisayara yazar
 ## (user://playtest_times.json, user://playtest_beats.jsonl). Varsayılan kapalı.
 var allow_play_log: bool = false
+## Oyun tam ekran açılır (kullanıcı, 2026-11-01); ayarlardan pencereye alınır.
+var fullscreen: bool = true
 
 func _ready() -> void:
 	apply_saved_locale()
@@ -83,9 +85,17 @@ func _ready() -> void:
 		pattern_stripes = bool(config.get_value(ACCESS_SECTION, "pattern_stripes", false))
 		auto_pause_events = bool(config.get_value(ACCESS_SECTION, "auto_pause_events", false))
 		allow_play_log = bool(config.get_value(ACCESS_SECTION, "play_log", false))
+		fullscreen = bool(config.get_value(ACCESS_SECTION, "fullscreen", true))
+	apply_window_mode()
 	# Kayıtlı metin boyu temaya: autoload class_name anamaz, betik çalışırken yüklenir.
 	if text_scale_index != DEFAULT_TEXT_SCALE_INDEX:
 		load("res://scripts/ui/waybook_theme.gd").apply_text_scale(get_text_scale())
+
+## Test ve ekran görüntüsü betikleri (--script) pencere boyunu kendileri kurar.
+func apply_window_mode() -> void:
+	if OS.get_cmdline_args().has("--script") or DisplayServer.get_name() == "headless":
+		return
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_MAXIMIZED)
 
 func get_text_scale() -> float:
 	return TEXT_SCALES[clampi(text_scale_index, 0, TEXT_SCALES.size() - 1)]
@@ -100,6 +110,9 @@ func set_access(key: String, value) -> void:
 			auto_pause_events = bool(value)
 		"play_log":
 			allow_play_log = bool(value)
+		"fullscreen":
+			fullscreen = bool(value)
+			apply_window_mode()
 	var config := ConfigFile.new()
 	config.load(CONFIG_PATH)
 	config.set_value(ACCESS_SECTION, key, value)

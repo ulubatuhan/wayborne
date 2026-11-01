@@ -338,6 +338,9 @@ func _news_chance(character: CharacterData, role: String) -> float:
 
 ## Komşu bir pazarın fiyatları (Y-C10 söylentisi, N34): duyulan söylenti
 ## dörtte bir yanlış olabilir; deftere "söylenti" diye yazılır.
+## Sohbette sayılan mal: üçten fazlası akılda kalmaz.
+const PRICE_NEWS_ITEMS: int = 3
+
 func _price_news(character: CharacterData, role: String) -> String:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("tavern_prices|%s|%d" % [character.character_id, _session.total_days_elapsed])
@@ -350,7 +353,18 @@ func _price_news(character: CharacterData, role: String) -> String:
 	var target: String = open[rng.randi_range(0, open.size() - 1)]
 	_session.hear_price_rumor(target)
 	var destination := WorldMapData.get_location_by_id(target)
-	return tr("UI_TALK_PRICE_NEWS") % (destination.location_name if destination != null else target)
+	var said := tr("UI_TALK_PRICE_NEWS") % (destination.location_name if destination != null else target)
+	# Söylediğini de söyler (kullanıcı, 2026-11-01: "anlatayım dedi, sonra anlatmadı").
+	var prices: Dictionary = (_session.price_book.get(target, {}) as Dictionary).get("buy", {})
+	var ids: Array = prices.keys()
+	var parts: Array[String] = []
+	while not ids.is_empty() and parts.size() < PRICE_NEWS_ITEMS:
+		var item_id := String(ids.pop_at(rng.randi_range(0, ids.size() - 1)))
+		var item := ItemCatalog.get_item(item_id)
+		parts.append(tr("UI_TALK_PRICE_ITEM") % [item.item_name if item != null else item_id, int(prices[item_id])])
+	if not parts.is_empty():
+		said += " " + tr("UI_TALK_PRICE_ITEMS") % ", ".join(parts)
+	return said
 
 func _refresh_feast() -> void:
 	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [

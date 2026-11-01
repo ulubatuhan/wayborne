@@ -206,16 +206,24 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 	glow.set_meta("image_point", FIRE_POINT)
 	root.add_child(glow)
 	var travellers := _camp_travellers()
+	# Ateşin ardındaki yolcunun bacakları ateşin arkasında kalır: arka planın
+	# ateşi (odun ve alev) o yolcunun üstüne yeniden çizilir (kullanıcı, 2026-11-01).
+	var fire_front := TextureRect.new()
+	fire_front.texture = TextureLoader.load_any(CityFront.TOWNS_DIR + "camp/fire_front.png")
+	fire_front.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fire_front.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for figure in travellers:
+		if fire_front.get_parent() == null and Vector2(figure.get_meta("look")["at"]).y >= FIRE_FRONT_Y:
+			root.add_child(fire_front)
 		root.add_child(figure.get_meta("crate"))
 		root.add_child(figure)
-	root.resized.connect(func():
+	var place := func():
 		_place_on_image(glow, bg, root.size)
+		_place_rect_on_image(fire_front, bg, root.size, FIRE_FRONT_RECT)
 		for figure in travellers:
-			_place_traveller(figure, bg, root.size))
-	(func():
-		for figure in travellers:
-			_place_traveller(figure, bg, root.size)).call_deferred()
+			_place_traveller(figure, bg, root.size)
+	root.resized.connect(place)
+	place.call_deferred()
 	_finish(root, 0.5)
 	var strip := _title_strip(hovered, lineage, entry_keys)
 	root.add_child(strip)
@@ -224,6 +232,10 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 
 ## Kamp ateşinin resimdeki yeri (payı). Işık bu noktaya oturur.
 const FIRE_POINT: Vector2 = Vector2(0.285, 0.735)
+## Ateşin kesiti (`tools/ui_scenes/camp_fire_front.py`, 1920x1080'de 460,665 200x195)
+## ve ayak noktası bundan yukarıda olan yolcu ateşin arkasında kalır.
+const FIRE_FRONT_RECT: Rect2 = Rect2(460.0 / 1920.0, 665.0 / 1080.0, 200.0 / 1920.0, 195.0 / 1080.0)
+const FIRE_FRONT_Y: float = 0.77
 
 ## Ateşin başındaki üç yorgun yolcu (görev Y-G16, taslak: `menu_kamp_taslak.py`):
 ## her biri bir sandığın üstünde oturuyor (`sit_box` klibi: kalça sandığın
@@ -324,6 +336,14 @@ static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) ->
 		crate_light.set_shader_parameter("fire", fire)
 		crate_light.set_shader_parameter("radius", radius)
 
+static func _place_rect_on_image(node: Control, bg: TextureRect, view: Vector2, part: Rect2) -> void:
+	if bg.texture == null:
+		return
+	var img := Vector2(bg.texture.get_size())
+	var k := maxf(view.x / img.x, view.y / img.y)
+	node.position = (view - img * k) * 0.5 + part.position * img * k
+	node.size = part.size * img * k
+
 static func _place_on_image(node: Control, bg: TextureRect, view: Vector2) -> void:
 	if bg.texture == null:
 		return
@@ -346,12 +366,6 @@ const MENU_FONT_SIZE: int = 38
 const MENU_ROW_HEIGHT: float = 62.0
 const LINEAGE_FONT_SIZE: int = 24
 
-## Fener amblemi başlığın yazı boyunun bu payı kadar, başlığın solunda.
-const EMBLEM_SHARE: float = 1.15
-const EMBLEM_GAP: float = 18.0
-## Fener kare resmin ortasında dar duruyor: yanlardaki boş pay kadar başlığa yaklaştır.
-const EMBLEM_SIDE_MARGIN: float = 0.22
-
 static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -> Control:
 	var column := Control.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -360,21 +374,6 @@ static func _title_strip(hovered: int, lineage: Dictionary, entry_keys: Array) -
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pin(title, TITLE_COLUMN_X, TITLE_Y - 0.012)
 	column.add_child(title)
-	# Görev Y-G08: oyunun motifi fener, adın yanında küçük bir amblem.
-	# Menünün ışığı ateş kalıyor (kullanıcı kararı: ateş ve fener birlikte).
-	var emblem := TextureRect.new()
-	emblem.texture = WaybookTheme.grim_texture("lantern_emblem.png")
-	emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	emblem.modulate = Color(0.92, 0.86, 0.74)
-	emblem.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_pin(emblem, TITLE_COLUMN_X, TITLE_Y - 0.012)
-	var side := float(TITLE_FONT_SIZE) * EMBLEM_SHARE
-	emblem.offset_right = -EMBLEM_GAP + side * EMBLEM_SIDE_MARGIN
-	emblem.offset_left = emblem.offset_right - side
-	emblem.offset_top = (float(TITLE_FONT_SIZE) * 1.25 - side) * 0.5
-	emblem.offset_bottom = emblem.offset_top + side
-	column.add_child(emblem)
 	var entries: Array = []
 	for key in entry_keys:
 		entries.append(tr_key(String(key)))
