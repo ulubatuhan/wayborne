@@ -652,7 +652,11 @@ Zelmarin Gelgit Kıyısı'na. **[Yazar, Ç11]** Akavan ve Samuran kanona göre V
   kıtalara giden gemiler Orsolune'nin yanında Zelmarin'den de kalkar.
 - [Türetme T39] Bölgenin adı **Gelgit Kıyısı**. Haritadaki yerleri: Zelmarin, **Vesperra Bağları**, **Gelgit
   Taşları**. İlk haritada Ors'la aynı adla eşlenmişti; kıyı kültürü olarak benzer, siyaseten ayrı.
-- [Türetme T42] Gelgit Kıyısı **balıkçıların yurdudur** (Balıkçı Kasabası kültürü, Ç12'nin çözümü). Gelgit Taşları
+- **[Yazar, Ç12]** **Balıkçıların tek bir yurdu yoktur.** Balıkçı Kasabası kültürü kıyıda ve göl kıyısında,
+  balıkçılık yapılan her kasabada yaşar ve orada bölgenin kültürüyle karışıktır: Mirsana'nın balıkçısı limanlıyla,
+  Samuran'ınki ve Rivecande'ninki vadiliyle, Brazdun'unki dağlıyla, Kirsavel'inki bozkırlıyla ve vadiliyle aynı
+  sokakta oturur, aynı evde evlenir. Gelgit Kıyısı onların yurdu değil, birçok yerinden biridir.
+- [Türetme T42] Gelgit Taşları'nın kıyısı balıkçıların en eski duasının yeridir. Gelgit Taşları
   Denizin İlk Gözyaşı'nın kıyıdaki yeridir: gelgit taşları örtüp açtıkça denizin ağladığı söylenir. Septisizm bu
   inanışı Kitap'a bir sayfa olarak kattı (T35); Zelmarin'in "karışık" inancı budur: kilisede El'e, kıyıda denize dua
   edilir, ikisi aynı kişinin ağzından.
@@ -750,7 +754,7 @@ ondan korkuyor, o herkese karşı bekliyor.
 | Vadi Loncaları | "Taş köprüler ve lonca defterleri arasında büyüdün; rakam senin dilin." | pazarda indirim | Büyük Vadi [Yazar] |
 | Dağ Kabilesi | "Geçitleri koruyan bir kabiledensin; kavga senin için pazarlıktan kolaydır." | savaşta fazla hasar | Ayazkaya [Yazar, "geçitleri koruyan" birebir] |
 | Liman Şehri | "Rıhtımda beş dil öğrendin…" | tavernada haber kolay | Ors (Orsolune) [defter III] |
-| Balıkçı Kasabası | "Ağ onarmayı yürümeden önce öğrendin…" | erzak ucuz | Gelgit Kıyısı [Türetme T42] [Çelişki Ç12: başlangıç yerleri arasında maden kasabası Brazdun] |
+| Balıkçı Kasabası | "Ağ onarmayı yürümeden önce öğrendin…" | erzak ucuz | tek yurdu yok: balıkçı kasabaları (Brazdun, Dravoss, Kirsavel, Mirsana, Rivecande, Samuran), bölgenin kültürüyle karışık [Yazar, Ç12] |
 
 - **[Yazar, Ç8]** Göçebe kültürü Orbeyan ve Kirsavel'de başlar (Vaelghard şehirlerinde değil).
 - **[Yazar, kültür kararı]** Her bölge oynanabilir: oyuncu her bölgenin bir yerleşiminden başlayabilir. Bu daha fazla

@@ -3978,14 +3978,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Lore ve veri",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 301,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Ç12."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Ç12. | Bitti: settlements.json `peoples` (bölge kültürü + balıkçı kasabalarında balıkçı), Location.peoples, işe alınanların %75'i yerleşimin halklarından (RecruitCatalog.LOCAL_SHARE); lore Ç12 çözüldü (LORE §8.10, §13; SORULAR; LORE_OZET). Test: test_settlements _test_fisher_towns_are_mixed."
   },
   {
    "id": "T16-03",

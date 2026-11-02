@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -292,20 +292,6 @@ Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P19
-
-### T16-02 · Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ç12.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-02 Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık**
-  - **Ne:** Kullanıcı: "Balıkçıların yurdu diye tek bir yer olmamalı, balıkçı kasabası olan yerler bu kültüre ve o bölgenin kültürüne sahiptir mix olarak." Lore'da Ç12 kapanır; balıkçı kültürünün başlangıcı ve balıkçı köyleri bu karışımı taşır.
-  - **Kim:** C · **Eski:** Ç12
-
-</details>
 
 ### T16-03 · Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner
 

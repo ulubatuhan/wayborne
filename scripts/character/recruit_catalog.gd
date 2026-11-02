@@ -86,9 +86,14 @@ static func get_venue_level_spread(venue: String) -> Array[int]:
 static func get_venue_required_reputation(venue: String) -> int:
 	return get_venue_profile(venue)[4]
 
+## Yerleşimde bekleyenlerin bu payı oranın halklarından (`Location.peoples`);
+## kalanı yoldan gelip geçen herhangi bir kültürden. Balıkçı kasabasında
+## balıkçıyla bölgenin insanı karışık çıkar (T16-02).
+const LOCAL_SHARE: float = 0.75
+
 static func build_candidates(
 	venue: String, rng: RandomNumberGenerator, player_level: int = 1,
-	world_growth_levels: int = 0, world_pressure: int = 0
+	world_growth_levels: int = 0, world_pressure: int = 0, peoples: Array[String] = []
 ) -> Array[CharacterData]:
 	var profile := get_venue_profile(venue)
 	var spread := get_venue_level_spread(venue)
@@ -101,7 +106,7 @@ static func build_candidates(
 			player_level + world_growth_levels + spread[0] + mini(reach, spread[1] - spread[0]),
 			1, CharacterData.MAX_LEVEL
 		)
-		candidates.append(_make_candidate(profile, rng, level))
+		candidates.append(_make_candidate(profile, rng, level, peoples))
 	return candidates
 
 ## Oyunun sabit açılışındaki yoldaş (bkz. GameSession.start_playthrough):
@@ -115,9 +120,8 @@ static func build_starting_companion(rng: RandomNumberGenerator) -> CharacterDat
 	companion.is_player = false
 	return companion
 
-static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, level: int) -> CharacterData:
-	var cultures := CultureCatalog.get_cultures()
-	var culture := cultures[rng.randi_range(0, cultures.size() - 1)]
+static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, level: int, peoples: Array[String] = []) -> CharacterData:
+	var culture := _pick_culture(rng, peoples)
 
 	var base_stats := CharacterStats.new()
 	for _point in profile[1]:
@@ -162,6 +166,17 @@ const DRESS_CHANCES: Dictionary = {
 	OutfitCatalog.SLOT_SHIRT: 0.8, OutfitCatalog.SLOT_JACKET: 0.12,
 	OutfitCatalog.SLOT_GLOVES: 0.06, OutfitCatalog.SLOT_HAT: 0.08,
 }
+
+## Halkı bilinen yerde önce yerlilerden biri (LOCAL_SHARE), yoksa herhangi bir
+## kültür. Halk listesi boşsa eski çekiliş aynen (tek randi_range): tohumlu
+## eski sonuçlar değişmesin.
+static func _pick_culture(rng: RandomNumberGenerator, peoples: Array[String]) -> Culture:
+	var cultures := CultureCatalog.get_cultures()
+	if not peoples.is_empty() and rng.randf() < LOCAL_SHARE:
+		var local := CultureCatalog.get_culture(peoples[rng.randi_range(0, peoples.size() - 1)])
+		if local != null:
+			return local
+	return cultures[rng.randi_range(0, cultures.size() - 1)]
 
 static func _dress(candidate: CharacterData) -> void:
 	# Saç ayrı tohumdan: giysi zarına dokunmasın (eski kayıtların yükleme yedeğiyle aynı).

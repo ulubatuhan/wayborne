@@ -46,6 +46,9 @@
     "test_furs",
     "test_grain"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "wood"
   },
   {
@@ -80,6 +83,9 @@
     "test_furs",
     "test_grain"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "wood"
   },
   {
@@ -112,6 +118,9 @@
     "test_weapon",
     "jewelry",
     "spice"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -147,6 +156,10 @@
     "jewelry",
     "test_grain",
     "test_weapon"
+   ],
+   "peoples": [
+    "highland",
+    "fisher"
    ],
    "wall": "stone"
   },
@@ -184,6 +197,9 @@
     "test_grain",
     "wine"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "wood"
   },
   {
@@ -214,6 +230,10 @@
     "wine",
     "honey",
     "test_potion"
+   ],
+   "peoples": [
+    "valley",
+    "fisher"
    ],
    "wall": "stone"
   },
@@ -247,6 +267,9 @@
     "test_grain",
     "test_cloth",
     "spice"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -284,6 +307,9 @@
     "test_furs",
     "test_potion"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "wood"
   },
   {
@@ -317,6 +343,9 @@
     "test_furs",
     "test_weapon",
     "honey"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -353,6 +382,9 @@
     "test_grain",
     "test_weapon"
    ],
+   "peoples": [
+    "highland"
+   ],
    "wall": "stone"
   },
   {
@@ -388,6 +420,11 @@
     "test_cloth",
     "test_furs",
     "test_grain"
+   ],
+   "peoples": [
+    "nomad",
+    "valley",
+    "fisher"
    ],
    "wall": "wood"
   },
@@ -426,6 +463,9 @@
     "test_grain",
     "test_potion"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "wood"
   },
   {
@@ -458,6 +498,9 @@
     "test_weapon",
     "test_furs",
     "fish"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -498,6 +541,10 @@
     "test_cloth",
     "test_grain"
    ],
+   "peoples": [
+    "port",
+    "fisher"
+   ],
    "wall": "stone"
   },
   {
@@ -530,6 +577,9 @@
     "test_weapon",
     "fish",
     "test_cloth"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -564,6 +614,9 @@
     "test_furs",
     "test_weapon",
     "test_grain"
+   ],
+   "peoples": [
+    "port"
    ],
    "wall": "stone"
   },
@@ -601,6 +654,9 @@
     "test_cloth",
     "honey"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "stone"
   },
   {
@@ -633,6 +689,10 @@
     "test_grain",
     "wine",
     "spice"
+   ],
+   "peoples": [
+    "valley",
+    "fisher"
    ],
    "wall": "stone"
   },
@@ -671,6 +731,10 @@
     "test_grain",
     "test_potion"
    ],
+   "peoples": [
+    "valley",
+    "fisher"
+   ],
    "wall": "wood"
   },
   {
@@ -706,6 +770,9 @@
     "fish",
     "test_furs",
     "test_grain"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "wood"
   },
@@ -746,6 +813,9 @@
     "test_potion",
     "wine"
    ],
+   "peoples": [
+    "valley"
+   ],
    "wall": "stone"
   },
   {
@@ -784,6 +854,9 @@
     "silk",
     "steppe_spice",
     "test_furs"
+   ],
+   "peoples": [
+    "nomad"
    ],
    "wall": "felt"
   },
@@ -827,6 +900,9 @@
     "spice",
     "test_potion"
    ],
+   "peoples": [
+    "port"
+   ],
    "wall": "stone"
   },
   {
@@ -859,6 +935,9 @@
     "test_weapon",
     "test_cloth",
     "wine"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -893,6 +972,9 @@
     "wine",
     "silk",
     "jewelry"
+   ],
+   "peoples": [
+    "valley"
    ],
    "wall": "stone"
   },
@@ -932,6 +1014,9 @@
     "jewelry",
     "test_weapon"
    ],
+   "peoples": [
+    "highland"
+   ],
    "wall": "wood"
   },
   {
@@ -965,6 +1050,9 @@
     "test_grain",
     "wine",
     "test_furs"
+   ],
+   "peoples": [
+    "port"
    ],
    "wall": "stone"
   }

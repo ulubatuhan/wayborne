@@ -16,6 +16,7 @@ func run(t) -> void:
 	_test_legacy_save(t)
 	_test_town_art(t)
 	_test_wall_material(t)
+	_test_fisher_towns_are_mixed(t)
 
 ## Saat -> beklenen dosya (CityFront.PHASE_FILES): şafak sabah, öğle gündüz, akşam akşam, gece taban.
 const TOWN_PHASE_HOURS: Dictionary = {
@@ -225,3 +226,29 @@ func _test_own_gates(t) -> void:
 			var door := GateArt.door_rect(id, Vector2.ZERO, 1.0 / PropArt.ppm(id))
 			t.ok(door.size.x >= 2.0 and door.size.y >= 2.5, "geçit vagon geçecek kadar: %s %s" % [location.location_id, door.size])
 			t.ok(absf(door.get_center().x) < 0.5, "geçit çapada: %s" % location.location_id)
+
+## T16-02 (kullanıcı, 2026-11-02): balıkçıların tek yurdu yok. Balıkçı kasabası
+## balıkçıyla bölgenin kültürünü birlikte taşır; işe alınanlar o karışımdan çıkar.
+func _test_fisher_towns_are_mixed(t) -> void:
+	var fisher_towns := 0
+	for location in WorldMapData.get_locations():
+		t.ok(not location.peoples.is_empty(), "%s: halkı yok" % location.location_id)
+		if location.peoples.has(CultureCatalog.FISHER):
+			fisher_towns += 1
+			t.ok(location.peoples.size() >= 2, "%s: balıkçı kasabası bölgenin kültürünü taşımıyor" % location.location_id)
+	t.ok(fisher_towns >= 3, "balıkçı kültürü birkaç kıyı kasabasına dağılmalı (%d)" % fisher_towns)
+	for start in WorldMapData.get_start_candidates(CultureCatalog.FISHER):
+		t.ok(WorldMapData.get_location_by_id(start).peoples.has(CultureCatalog.FISHER), "%s: balıkçı başlangıcı balıkçı kasabası değil" % start)
+	var mirsana := WorldMapData.get_location_by_id("mirsana")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1602
+	var counts := {}
+	for _round in 60:
+		for candidate in RecruitCatalog.build_candidates(RecruitCatalog.VENUE_TAVERN, rng, 1, 0, 0, mirsana.peoples):
+			counts[candidate.culture_id] = int(counts.get(candidate.culture_id, 0)) + 1
+	var total := 0
+	for id in counts:
+		total += int(counts[id])
+	var local := int(counts.get("fisher", 0)) + int(counts.get("port", 0))
+	t.ok(float(local) / float(maxi(1, total)) > 0.6, "Mirsana'da işe alınanların çoğu balıkçı ya da limanlı olmalı (%d/%d)" % [local, total])
+	t.ok(int(counts.get("fisher", 0)) > 0 and int(counts.get("port", 0)) > 0, "Mirsana'da iki kültür de çıkmalı")

@@ -45,7 +45,7 @@ oradan gelir, buraya işlenir.
 | T39 | Güneydoğu kıyısının adı **Gelgit Kıyısı** (Zelmarin). | §7, §8.10 |
 | T40 | Liman insanının "beş dili" (imparatorluk dilinin iki ağzı dahil). | §11 |
 | T41 | Taşkök ve Karaocak dağlıların dilinin yumuşamış bir kolu; Orsian hesap sözcükleri deniz ötesinden. | §11 |
-| T42 | Gelgit Kıyısı balıkçıların yurdu; Gelgit Taşları Denizin İlk Gözyaşı'nın yeri. | §8.10 |
+| T42 | Gelgit Taşları Denizin İlk Gözyaşı'nın yeri ("balıkçıların yurdu" kısmı Ç12 ile düştü). | §8.10 |
 | T43 | Velkrun Yıkıntısı imparatorluğun kereste hanı; "odun satılır, orman satılmaz". | §8.6 |
 | T44 | Karaocak'ın komşuları, Kör Kazmalar Mezarlığı. | §8.6b |
 | T45 | İlk Sayfa Manastırı'nın adı iki mezhebin kavgası. | §8.8 |
@@ -71,7 +71,7 @@ oradan gelir, buraya işlenir.
 | Ç9 | Yol sunaklarının sayısı ve yeri. | **Çözüldü:** oyundaki on sunak kalır. |
 | Ç10 | Ezmerak'tan geçmeden kuzeye yol yok (oyunda batı yolu var). | **Çözüldü:** Orbeyan'dan Selvicar'a doğrudan yol yok (yurtlar ve göl); kuzeye en mantıklı yol Ezmerak. |
 | Ç11 | Akavan ve Samuran: haritada batı sınırı, siyasette Vadi. | **Çözüldü:** kanon geçerli, ikisi de Vadi. |
-| Ç12 | Balıkçıların yurdu. | Defter III: Gelgit Kıyısı (T42). |
+| Ç12 | Balıkçıların yurdu. | **Çözüldü (2026-11-02):** tek bir yurt yok; balıkçı kasabaları balıkçı kültürüyle bölgenin kültürünü karışık taşır. |
 | Ç13 | On bir bölge, beş oynanabilir kültür. | **Çözüldü:** her bölge oynanabilir; kültür sayısı artmaz, kültür yere göre. |
 | Ç14 | Avuçiçi'nde inançsız: "kapıda malını satar ve gider" ile "görüldüğü yerde eli kesilir" yan yana. | **Çözüldü:** suçlu inançsız asılır; inançsız şehre giremez, kapıda lonca aracısıyla komisyonla satar; şehirde görülen ya da inançlı rolü yapanın eli kesilir; sakatlık oyunda yaşanır. |
 

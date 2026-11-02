@@ -31,6 +31,10 @@ var location_name: String:
 ## Harita bölgesi ve kültürü ("vadi", "imparatorluk", ...).
 @export var region: String = ""
 @export var culture: String = ""
+## Burada yaşayan halklar (kültür kimlikleri, settlements.json `peoples`): bölgenin
+## kültürü, balıkçı kasabalarında yanında balıkçılar (T16-02). İşe alınanlar
+## çoğunlukla bunlardan çıkar (bkz. RecruitCatalog.LOCAL_SHARE).
+@export var peoples: Array[String] = []
 ## Surun malzemesi ("stone" ya da "wood"): şehir resmindeki duvarla ve hub'daki kapıyla aynı kaynak (settlements.json `wall`).
 @export var wall: String = "stone"
 

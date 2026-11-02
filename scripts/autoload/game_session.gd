@@ -3794,8 +3794,10 @@ func _restock_recruits() -> void:
 	for venue in [
 		RecruitCatalog.VENUE_MARKET, RecruitCatalog.VENUE_TAVERN, RecruitCatalog.VENUE_GUILD
 	]:
+		var here := WorldMapData.get_location_by_id(current_location_id)
 		var candidates: Array[CharacterData] = RecruitCatalog.build_candidates(
-			venue, rng, player_level, world_growth, _recruit_world_pressure()
+			venue, rng, player_level, world_growth, _recruit_world_pressure(),
+			here.peoples if here != null else ([] as Array[String])
 		)
 		# Bu varışta zaten tutulmuş olanlar yeniden çekilen listeden düşer;
 		# yoksa şehirde alınan bir kayıt, tutulmuş bir yoldaşı panoya geri

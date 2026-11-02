@@ -737,6 +737,25 @@ def main(argv):
         near = [i for i in inside if any(r["days"] <= START_MAX_FIRST_LEG and i in (r["a"], r["b"]) for r in routes)]
         starts[culture] = sorted(near or inside)
 
+    # Yerleşimin halkları (T16-02): bölgesinin kültürü, balıkçı kasabalarında
+    # yanında balıkçılar. Balıkçıların tek bir yurdu yok (kullanıcı, 2026-11-02);
+    # kıyıdaki ve göl kıyısındaki kasabalar iki kültürü karışık taşır.
+    fish_towns = set(starts.get("fisher", []))
+    for s in settlements:
+        peoples = []
+        for culture, regions in economy["start_cultures"].items():
+            if culture.startswith("_") or not regions:
+                continue
+            if regions[0] == "@ids":
+                hit = s["id"] in regions[1:]
+            elif regions[0].startswith("@"):
+                hit = s["id"] in fish_towns
+            else:
+                hit = s["region"] in regions
+            if hit:
+                peoples.append(culture)
+        s["peoples"] = peoples
+
     doc = {
         "_doc": "Oynanabilir yerleşimler ve aralarındaki yollar (tools/worldmap/build_settlements.py ile harita v3 GeoJSON'undan; elle düzenleme yok). Koordinat: harita görüntüsü pikseli (16012x16013).",
         "map_size": size,

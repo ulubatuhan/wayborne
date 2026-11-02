@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **189** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **190** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3386,5 +3386,19 @@ Toplam: **189** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-01 Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn**
   - **Ne:** Kamp kurulunca insanlar vagondan ateşe normal yürüyüş hızıyla yürür (koşmaz). En uzaktaki kişi, en öndeki at, ateşe en fazla 10 saniyede varır. Yürüyüş sırasında oyun saati gece bitmeyecek hızda akar.
   - **Kim:** C · **Eski:** 12.2c
+
+</details>
+
+### T16-02 · Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ç12. | Bitti: settlements.json `peoples` (bölge kültürü + balıkçı kasabalarında balıkçı), Location.peoples, işe alınanların %75'i yerleşimin halklarından (RecruitCatalog.LOCAL_SHARE); lore Ç12 çözüldü (LORE §8.10, §13; SORULAR; LORE_OZET). Test: test_settlements _test_fisher_towns_are_mixed.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-02 Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık**
+  - **Ne:** Kullanıcı: "Balıkçıların yurdu diye tek bir yer olmamalı, balıkçı kasabası olan yerler bu kültüre ve o bölgenin kültürüne sahiptir mix olarak." Lore'da Ç12 kapanır; balıkçı kültürünün başlangıcı ve balıkçı köyleri bu karışımı taşır.
+  - **Kim:** C · **Eski:** Ç12
 
 </details>
