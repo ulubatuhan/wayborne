@@ -92,24 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **13** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
-
-## Paket P02
-
-### 4.3 · Tekrarlanan yardımcıları birleştir
-
-- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P02 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/04_kod_kalitesi.md](referans/gorevler/04_kod_kalitesi.md)
-- **Son not:** reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **4.3 Tekrarlanan yardımcıları birleştir** (§3C)
-  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `3e35324`): reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı.
-  - `TextureLoader.load_any` (5 kopya), `_reduce_motion` (4), `_clear_children` (8), işe alma düğmesi (3), `tr` sarmalayıcıları (4), `_with_mipmaps` (2).
-  - CI adımlarını tek bir reusable workflow'a topla.
-
-</details>
+Toplam: **10** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P03
 
@@ -253,41 +236,6 @@ Toplam: **13** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): arayuz_taslaklari.py yeniden üretir; figürler oyunun gövde ve giysi kareleri (büyütüldüğü için yumuşak).
   - Hikâye satırları.
   - "Düşenler" sayfası: mezar işaretleri rütbeyle süslenir.
-
-</details>
-
-### 9.2 · Ana menü gece kampı, katmanlı
-
-- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
-- **Bağımlı:** 9.1
-- **Son not:** Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **9.2 Ana menü gece kampı, katmanlı** (A-25, A-19, A-10, A-17)
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan.
-  - Mor-lacivert gök ve tek ateş ışığı.
-  - Duman ayrı katmanda.
-  - Arayüze karanlık, sade bir alan bırakılacak.
-
-</details>
-
-### Y-G16 · Ana menü: kamp ateşi ve üç yorgun yolcu
-
-- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı. | 2026-10-19 karar: sağdaki iki figür oturuyor gibi değil: bağdaş kurmuş ya da sandık/kutu üstünde otursunlar. | 2026-10-20: taslak MPFB oturuş klibi (sit_box) ile yeniden: üç yolcu sandığın üstünde gerçekten oturuyor (kalça kapakta, uyluk yatay, ayaklar yerde), ateşe dönük. y_g16_menu_kamp.png. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş).
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-G16 Ana menü: kamp ateşi ve üç yorgun yolcu**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı.
-  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** 9.2
-  - **Ne:** Ana menü kamp ateşi panoramasından bir kare; fener ışığı kısılır. Kullanıcı notu: ateş başında oturan, yorgunluktan bitmiş ve ısınmaya çalışan üç kişilik kervan ekibi. Ana menüde şarkı yok (Y-I02).
-  - **Kullanıcı notu:** “ana menüye kervan ekibi de katılmalı, ateş başında oturan, yorgunluktan ölmüş ve ısınmaya çalışan 3 kişi.”
-  - **Kabul:** Yeni ana menü onaylı; üç figür ateş başında.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Ana menüde müzik yok: gece ormanı ve ateş çıtırtısı ambiyansı (Freesound CC0 `campfire`, `forest night`), yaklaşık −22 LUFS. `../ICERIK_IHTIYACLARI.md` S-1.
 
 </details>
 

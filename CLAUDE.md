@@ -412,14 +412,12 @@ verir.
   tek sıcak kaynak kuralı (`kurallar-sanat`), veba bir dünya hâli (kart açılmadan görünür), yol kenarı kervansarayları,
   geçiş belgesi, portreler baştan yorgun. **Senaryo sistemi yok (2026-10-31):** beş
   bölümlü kampanya kaldırıldı; oyun kıtlık içinde kervanı ilerletmek ve ek görevlerle geçer, konforlu final yok (Y-A08).
-- **Haritada adı olan her yer oynanabilir olmalı (kullanıcı, 2026-10-29).** Bugün 27 yerleşim oynanabilir; obalar,
-  kabile yurtları, mezralar, manastırlar, kuleler ve harabeler yalnızca harita adı. Hepsi bir durak, olay ya da
-  ziyaret edilebilir yer olarak oyuna girmeli. Lore'un bu yerler için verdiği bilgi (`docs/lore/LORE.md` §15) bu işin
-  girdisi.
-- **Yol ekranında yön (kullanıcı, 2026-11-01).** Batıya giden yolda kervan hâlâ sağa yürüyor; yol bandı ve işaretler
-  hep sağa akıyor. Haritadaki yöne göre aynalamak bant, işaretler ve yazılar için ayrı bir iş; kullanıcı kararı bekliyor.
+- **Oyun testi turu (kullanıcı, 2026-11-02; bölüm 16, görevler T16-01..T16-11).** Ayrıntı
+  `proje_takibi/referans/gorevler/16_oyun_testi_isleri.md`: kamp yürüyüşü, balıkçı kültürü, batıya yolda yön ve geri
+  dönüş, ana menü, kesik el, tavernada konaklama ve oyun, bölgesel itibar, düşman kimlikleri, hatırlayan kişiler, CI
+  düzeni, haritada adı olan her yerin oynanabilmesi.
 - **Doğrulama turunda kalan görsel borç (2026-11-01, DEVAM_NOTU C10).** Vastrevar gece resmi düşük çözünürlüklü, defter
-  lekelerinde ızgara, menüde öndeki iki yolcu bulanık ve menü ateşi köşeli, eksik biyom varyantları, Drazvor adı haritada
+  lekelerinde ızgara (menü yolcuları ve ateşi T16-04), eksik biyom varyantları, Drazvor adı haritada
   yok, yolda veba görseli yok.
 - **Eski kuşam listesi (B-01..B-20) artık boyanmayacak.** Giysi 2B boyama
   yolu (parça sayfası, sonra `wardrobe_cut.py`) yerini 3B render'a bıraktı;

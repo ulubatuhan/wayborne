@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -37,41 +37,6 @@ Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
-## Paket P07
-
-### Y-C12 · Bölgesel itibar, hizipler ve jeopolitik yayılma
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-C01, Y-E06
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C12 Bölgesel itibar, hizipler ve jeopolitik yayılma**
-  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01, Y-E06
-  - **Ne:** Tek global itibar yerine bölge ve hizip başına itibar (lonca, şehir yönetimleri, inanç toplulukları, haydut kardeşlikleri). Kullanıcı notu: bölgeler birbirinden ağırlıklı etkilenir; bir yerde kazanılan 5 itibar komşuya 0,5 olarak yayılabilir. Yayılma jeopolitik ilişkilere (komşuluk, ittifak, düşmanlık) göre ağırlıklandırılır.
-  - **Kullanıcı notu:** “Evet, kesinlikle haklısın bu konuda ama bir bölgede çok itibarlı olup diğer bölgede hiç tanınmamak da olmaz. Birazcık da etkilenmeli bu bölgeler  birbirinden. Yani aradaki ilişki ağırlıklı olmalı, bir yerde 5 itibar kazanıyorsam diğer tarafta bu 0.5 olabilir. Jeopolitik olarak dağılmalı bu ilişki yani.”
-  - **Kabul:** İtibar matrisi veri dosyasında; yayılma testli; mevcut kilitler (kontrat, kredi, vagon) yeni sisteme taşındı.
-  - **Literatür:** R76
-
-</details>
-
-### Y-C13 · Adı olan, hatırlayan kişiler
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-C01
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C13 Adı olan, hatırlayan kişiler**
-  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01
-  - **Ne:** Her şehirde 2–3 tekrar eden kişi: lonca ustası, tefeci, han sahibi. Oyuncuyu hatırlar, görev verir, yaşlanır, ölebilir.
-  - **Kabul:** Kişiler kayıtta; en az bir kişisel zinciri olan kişi her şehirde.
-  - **Literatür:** R13, R14
-
-</details>
-
 ## Paket P08
 
 ### R3 · Merak ve töre
@@ -96,26 +61,6 @@ Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 <details><summary>Görev metni</summary>
 
 - [ ] **R5 Büyük sahneler:** #21 kervan mahkemesi, #13 sancak, #14 yol şarkısı (ses varlığına bağlı), #11 çatallar (en riskli).
-
-</details>
-
-## Paket P09
-
-### Y-C09 · Bölgesel düşman kimlikleri
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P09 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06, Y-C01
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C09 Bölgesel düşman kimlikleri**
-  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-E06, Y-C01
-  - **Ne:** Her bölgede 2–3 özgün düşman; 14 şablondan 25'in üstüne. Kullanıcı notu: önce lore ve tarihçe tamamlanmalı.
-  - **Kullanıcı notu:** “Bu aşama için lore ve tarihçenin tamamlanması lazım gibi.”
-  - **Kabul:** Bölge başına düşman tablosu; lore belgesine uyuyor.
-  - **Kaynaklar ve teknik (CC0 araştırması):** İnsan düşmanlar MPFB ve MakeHuman CC0 ekipmanla (equipment01), hayvanlar G-3 kaynaklarıyla. Ayı için iyi CC0 model yok (bkz. içerik raporu).
-  - **Literatür:** R15
 
 </details>
 
@@ -346,20 +291,158 @@ Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
-## Paket P18
+## Paket P19
 
-### N32 · Nemesis benzeri NPC hafıza sistemi: tasarım
+### T16-01 · Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn
 
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P18 · **Kim:** kullanıcı kararı gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/14_yeni_dunya.md](referans/gorevler/14_yeni_dunya.md)
-- **Son not:** Kullanıcı isteği (2026-10-19): Shadow of Mordor/War Nemesis; lore'a bağlı.
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 12.2c.
 
 <details><summary>Görev metni</summary>
 
-- [ ] **N32 Nemesis benzeri NPC hafıza sistemi: tasarım** (`CK`)
-  - **Sütun:** Defter unutmaz · Yol yaşar
-  - **Ne:** Shadow of Mordor/War'un Nemesis sisteminden esinle, yolda karşılaşılan kişilerin (eşkıya reisi, muhafız çavuşu, tüccar, yoldaş adayı) oyuncuyu hatırlaması: kaçan ya da yenilen düşman adıyla, yarasıyla ve kinle geri döner; terfi eder, çetesi büyür; kurtarılan ya da kandırılan kişi sonra iyilikle ya da intikamla karşına çıkar. Sistem olarak mı, hikâye kurgusu olarak mı (ya da ikisi) yapılacağı kullanıcı kararı.
-  - Mevcut zemin: `CaravanLedger` (dünyanın hafızası), `NpcDisposition` ve `ROLL_ENCOUNTER`, gecikmeli zincir olaylar (`evt_wanderer_revenge`), `EnemyCatalog` yöre reskin'leri, şikâyetler (grievances). Kural: yeni sistem icat etmez, olay sözlüğüyle (`EventEffect`) konuşur; adlı NPC'ler kayıtta tutulur, yeniden yüklemeyle değişmez.
-  - **Kabul:** `docs/design_notes/nemesis_npc_plani.md` (seçenekler, lore'a bağımlılık, maliyet) ve kullanıcı kararından sonra alt görevler. Lore'a bağlı (Lore önce kuralı).
+- [ ] **T16-01 Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn**
+  - **Ne:** Kamp kurulunca insanlar vagondan ateşe normal yürüyüş hızıyla yürür (koşmaz). En uzaktaki kişi, en öndeki at, ateşe en fazla 10 saniyede varır. Yürüyüş sırasında oyun saati gece bitmeyecek hızda akar.
+  - **Kim:** C · **Eski:** 12.2c
+
+</details>
+
+### T16-02 · Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ç12.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-02 Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık**
+  - **Ne:** Kullanıcı: "Balıkçıların yurdu diye tek bir yer olmamalı, balıkçı kasabası olan yerler bu kültüre ve o bölgenin kültürüne sahiptir mix olarak." Lore'da Ç12 kapanır; balıkçı kültürünün başlangıcı ve balıkçı köyleri bu karışımı taşır.
+  - **Kim:** C · **Eski:** Ç12
+
+</details>
+
+### T16-03 · Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-03 Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner**
+  - **Ne:** Kullanıcı: "Batıya giden yolda kervanın sola yürümesi. Bir noktada kervan geri dönmek isteyebilir, bunu yaparsa tüm kervan geriye dönebilmeli." Yol ekranı haritadaki yöne göre aynalanır: bant, işaretler, duraklar ve kapılar; yazılar ters dönmez.
+  - **Kim:** C · **Eski:** Yol yönü hedefi
+
+</details>
+
+### T16-04 · Ana menü: öndeki iki yolcu net, ateş yumuşak
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 9.2, Y-G16.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-04 Ana menü: öndeki iki yolcu net, ateş yumuşak**
+  - **Ne:** Ana menüde öndeki iki yolcu bulanık, pikselli ve soluk; arka plandaki ateş köşeli tek renk parçalar. İkisi de düzelir, ekran görüntüsüyle doğrulanır.
+  - **Kim:** CO · **Eski:** 9.2, Y-G16
+
+</details>
+
+### T16-05 · Kesik el her pozda tam silinsin
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-05 Kesik el her pozda tam silinsin**
+  - **Ne:** Kesik elin durur pozun bazı karelerinde gövde katmanında kalan kısmı da silinir; her klipte el yok, bilekte sargı.
+  - **Kim:** C · **Eski:** -
+
+</details>
+
+### T16-06 · Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: N34.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-06 Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır**
+  - **Ne:** Tavernada konaklama: para karşılığı gece kalmak (stres ve yorgunluk düşer, gün geçer). Oyun seçeneği: şimdilik oyunu olmayan bir ekrana girer, geri çıkılır.
+  - **Kim:** C · **Eski:** N34
+
+</details>
+
+### T16-07 · Bölgesel itibar ve hizipler
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C12.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-07 Bölgesel itibar ve hizipler**
+  - **Ne:** Bölgesel itibar ve hizipler (eski Y-C12). Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C12
+
+</details>
+
+### T16-08 · Bölgesel düşman kimlikleri
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C09.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-08 Bölgesel düşman kimlikleri**
+  - **Ne:** Bölgesel düşman kimlikleri (eski Y-C09). Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C09
+
+</details>
+
+### T16-09 · Adı olan, kervanı hatırlayan kişiler ve NPC hafızası
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C13, N32.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-09 Adı olan, kervanı hatırlayan kişiler ve NPC hafızası**
+  - **Ne:** Adı olan, kervanı hatırlayan kişiler (eski Y-C13) ve NPC hafızası (eski N32). Varis devralma sahnesi (Y-D04) şimdilik atlandı. Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C13, N32
+
+</details>
+
+### T16-10 · Kod düzeni: iş akışlarını tek dosyada topla
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 4.3.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-10 Kod düzeni: iş akışlarını tek dosyada topla**
+  - **Ne:** Kod düzeni (eski 4.3): testler, ekran görüntüleri ve ölçüm iş akışları tek dosyada toplanır.
+  - **Kim:** C · **Eski:** 4.3
+
+</details>
+
+### T16-11 · Haritada adı olan her yer oynanabilir
+
+- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ana hedef.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-11 Haritada adı olan her yer oynanabilir**
+  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: LORE.md §15 ve places_v3.json.
+  - **Kim:** C · **Eski:** Ana hedef
 
 </details>

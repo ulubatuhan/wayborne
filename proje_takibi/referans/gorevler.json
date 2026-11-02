@@ -361,14 +361,14 @@
    "bolum": "4",
    "alan": "Kod: kalite",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "iptal",
    "bagimli": [],
    "dosya": "gorevler/04_kod_kalitesi.md",
    "paket": "P02",
    "sira": 24,
    "kim": "C",
    "commit": "3e35324",
-   "not": "reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı."
+   "not": "reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı. | 2026-11-02: T16-10 görevine taşındı."
   },
   {
    "id": "2.3",
@@ -573,7 +573,7 @@
    "sira": 37,
    "kim": "C",
    "commit": "968111f",
-   "not": "Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı."
+   "not": "Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı. | 2026-11-02 kullanıcı: yarım oyun saati hedefi kullanıcının değildi; asıl ölçüt T16-01."
   },
   {
    "id": "12.2b",
@@ -1239,7 +1239,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "iptal",
    "bagimli": [
     "Y-C01",
     "Y-E06"
@@ -1248,7 +1248,8 @@
    "dalga": 2,
    "paket": "P07",
    "sira": 79,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-02: T16-07 görevine taşındı."
   },
   {
    "id": "Y-C13",
@@ -1256,7 +1257,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "iptal",
    "bagimli": [
     "Y-C01"
    ],
@@ -1264,7 +1265,8 @@
    "dalga": 2,
    "paket": "P07",
    "sira": 80,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-02: T16-09 görevine taşındı."
   },
   {
    "id": "R0",
@@ -1786,7 +1788,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Sistemler ve mekanikler",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "iptal",
    "bagimli": [
     "Y-E06",
     "Y-C01"
@@ -1795,7 +1797,8 @@
    "dalga": 4,
    "paket": "P09",
    "sira": 112,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-02: T16-08 görevine taşındı."
   },
   {
    "id": "Y-F07T",
@@ -2363,7 +2366,7 @@
    "bolum": "9",
    "alan": "Art (ikinci tur)",
    "oncelik": "P1",
-   "durum": "test bekliyor",
+   "durum": "iptal",
    "bagimli": [
     "9.1"
    ],
@@ -2373,7 +2376,7 @@
    "sira": 147,
    "kim": "CO",
    "commit": "-",
-   "not": "Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-11-02: T16-04 görevine taşındı."
   },
   {
    "id": "Y-G16",
@@ -2381,7 +2384,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P2",
-   "durum": "test bekliyor",
+   "durum": "iptal",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2389,7 +2392,7 @@
    "sira": 148,
    "kim": "CO",
    "commit": "-",
-   "not": "Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı. | 2026-10-19 karar: sağdaki iki figür oturuyor gibi değil: bağdaş kurmuş ya da sandık/kutu üstünde otursunlar. | 2026-10-20: taslak MPFB oturuş klibi (sit_box) ile yeniden: üç yolcu sandığın üstünde gerçekten oturuyor (kalça kapakta, uyluk yatay, ayaklar yerde), ateşe dönük. y_g16_menu_kamp.png. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş)."
+   "not": "Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı. | 2026-10-19 karar: sağdaki iki figür oturuyor gibi değil: bağdaş kurmuş ya da sandık/kutu üstünde otursunlar. | 2026-10-20: taslak MPFB oturuş klibi (sit_box) ile yeniden: üç yolcu sandığın üstünde gerçekten oturuyor (kalça kapakta, uyluk yatay, ayaklar yerde), ateşe dönük. y_g16_menu_kamp.png. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-11-02: T16-04 görevine taşındı."
   },
   {
    "id": "Y-G08",
@@ -2397,7 +2400,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Görsel kimlik",
    "oncelik": "P1",
-   "durum": "kısmen",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
@@ -2405,7 +2408,7 @@
    "sira": 149,
    "kim": "CO",
    "commit": "3784072",
-   "not": "Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak."
+   "not": "Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak. | 2026-11-02 kullanıcı: kapatıldı."
   },
   {
    "id": "Y-G14",
@@ -3290,14 +3293,14 @@
    "bolum": "14",
    "alan": "NPC tasarımı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "iptal",
    "bagimli": [],
    "dosya": "gorevler/14_yeni_dunya.md",
    "dalga": 8,
    "paket": "P18",
    "sira": 201,
    "kim": "CK",
-   "not": "Kullanıcı isteği (2026-10-19): Shadow of Mordor/War Nemesis; lore'a bağlı."
+   "not": "Kullanıcı isteği (2026-10-19): Shadow of Mordor/War Nemesis; lore'a bağlı. | 2026-11-02: T16-09 görevine taşındı."
   },
   {
    "id": "N31a",
@@ -3442,7 +3445,7 @@
    "bolum": "14",
    "alan": "Yerleşim ve NPC",
    "oncelik": "P2",
-   "durum": "kısmen",
+   "durum": "iptal",
    "bagimli": [
     "N33",
     "Y-C13"
@@ -3452,7 +3455,7 @@
    "paket": "P18",
    "sira": 210,
    "kim": "CO",
-   "not": "Kullanıcı isteği (2026-10-19), akşam düşünme ve geliştirme görevi. Taverna dedikodusu satın alınmaz, sohbetle edinilir. | 2026-10-20: söylenti satın alma kalktı; yol ve fiyat haberi sohbette (rol, içki, liman kültürü, tellal). Commit dee753b. Kalan: konaklama, mini oyunlar, adlı NPC hafızası (Y-C13/N32 lore'a bağlı)."
+   "not": "Kullanıcı isteği (2026-10-19), akşam düşünme ve geliştirme görevi. Taverna dedikodusu satın alınmaz, sohbetle edinilir. | 2026-10-20: söylenti satın alma kalktı; yol ve fiyat haberi sohbette (rol, içki, liman kültürü, tellal). Commit dee753b. Kalan: konaklama, mini oyunlar, adlı NPC hafızası (Y-C13/N32 lore'a bağlı). | 2026-11-02: T16-06 görevine taşındı."
   },
   {
    "id": "Y-C21",
@@ -3953,9 +3956,174 @@
    "sira": 237,
    "kim": "CO",
    "not": "2026-10-31 kullanıcı: fikir listesi cevabı. 2026-10-31: senaryo (kampanya) sistemi kaldırıldı."
+  },
+  {
+   "id": "T16-01",
+   "baslik": "Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Yol",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 300,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: 12.2c."
+  },
+  {
+   "id": "T16-02",
+   "baslik": "Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Lore ve veri",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 301,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Ç12."
+  },
+  {
+   "id": "T16-03",
+   "baslik": "Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Yol",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 302,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi."
+  },
+  {
+   "id": "T16-04",
+   "baslik": "Ana menü: öndeki iki yolcu net, ateş yumuşak",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Görsel",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 303,
+   "kim": "CO",
+   "not": "2026-11-02 kullanıcı listesi. Eski: 9.2, Y-G16."
+  },
+  {
+   "id": "T16-05",
+   "baslik": "Kesik el her pozda tam silinsin",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Figür",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 304,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi."
+  },
+  {
+   "id": "T16-06",
+   "baslik": "Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Şehir",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 305,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: N34."
+  },
+  {
+   "id": "T16-07",
+   "baslik": "Bölgesel itibar ve hizipler",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Sistem",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 306,
+   "kim": "CO",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C12."
+  },
+  {
+   "id": "T16-08",
+   "baslik": "Bölgesel düşman kimlikleri",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Sistem",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 307,
+   "kim": "CO",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C09."
+  },
+  {
+   "id": "T16-09",
+   "baslik": "Adı olan, kervanı hatırlayan kişiler ve NPC hafızası",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Sistem",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 308,
+   "kim": "CO",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C13, N32."
+  },
+  {
+   "id": "T16-10",
+   "baslik": "Kod düzeni: iş akışlarını tek dosyada topla",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Kod",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 309,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: 4.3."
+  },
+  {
+   "id": "T16-11",
+   "baslik": "Haritada adı olan her yer oynanabilir",
+   "bolum": "16",
+   "alan": "Oyun testi 2026-11-02: Dünya",
+   "oncelik": "P1",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/16_oyun_testi_isleri.md",
+   "dalga": 9,
+   "paket": "P19",
+   "sira": 310,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı listesi. Eski: Ana hedef."
   }
  ],
- "guncelleme": "2026-10-31",
+ "guncelleme": "2026-11-02",
  "kim_anlami": {
   "C": "Claude tek başına (kod, test, belge)",
   "CO": "Claude yapar; senin görsel ya da tasarım onayın gerekir",
@@ -4338,6 +4506,25 @@
     "N21",
     "N22",
     "N23"
+   ]
+  },
+  {
+   "id": "P19",
+   "ad": "Oyun testi turu 2026-11-02",
+   "alan": "yol, figür, taverna, sistemler, dünya",
+   "gerekce": "Kullanıcının oyun testinden çıkan ve sırayla, açık bırakılmadan yapılacak işler.",
+   "gorevler": [
+    "T16-01",
+    "T16-02",
+    "T16-03",
+    "T16-04",
+    "T16-05",
+    "T16-06",
+    "T16-07",
+    "T16-08",
+    "T16-09",
+    "T16-10",
+    "T16-11"
    ]
   }
  ]

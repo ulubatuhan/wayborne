@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -76,7 +76,59 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
+## Paket P02
+
+### 4.3 · Tekrarlanan yardımcıları birleştir
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P02 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/04_kod_kalitesi.md](referans/gorevler/04_kod_kalitesi.md)
+- **Son not:** reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı. | 2026-11-02: T16-10 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **4.3 Tekrarlanan yardımcıları birleştir** (§3C)
+  - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `3e35324`): reduce_motion NodeUtil'de; autoload kopyaları bilerek kaldı; CI birleştirme GitHub'da doğrulanamadığı için yapılmadı.
+  - `TextureLoader.load_any` (5 kopya), `_reduce_motion` (4), `_clear_children` (8), işe alma düğmesi (3), `tr` sarmalayıcıları (4), `_with_mipmaps` (2).
+  - CI adımlarını tek bir reusable workflow'a topla.
+
+</details>
+
 ## Paket P07
+
+### Y-C12 · Bölgesel itibar, hizipler ve jeopolitik yayılma
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C01, Y-E06
+- **Son not:**  | 2026-11-02: T16-07 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C12 Bölgesel itibar, hizipler ve jeopolitik yayılma**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01, Y-E06
+  - **Ne:** Tek global itibar yerine bölge ve hizip başına itibar (lonca, şehir yönetimleri, inanç toplulukları, haydut kardeşlikleri). Kullanıcı notu: bölgeler birbirinden ağırlıklı etkilenir; bir yerde kazanılan 5 itibar komşuya 0,5 olarak yayılabilir. Yayılma jeopolitik ilişkilere (komşuluk, ittifak, düşmanlık) göre ağırlıklandırılır.
+  - **Kullanıcı notu:** “Evet, kesinlikle haklısın bu konuda ama bir bölgede çok itibarlı olup diğer bölgede hiç tanınmamak da olmaz. Birazcık da etkilenmeli bu bölgeler  birbirinden. Yani aradaki ilişki ağırlıklı olmalı, bir yerde 5 itibar kazanıyorsam diğer tarafta bu 0.5 olabilir. Jeopolitik olarak dağılmalı bu ilişki yani.”
+  - **Kabul:** İtibar matrisi veri dosyasında; yayılma testli; mevcut kilitler (kontrat, kredi, vagon) yeni sisteme taşındı.
+  - **Literatür:** R76
+
+</details>
+
+### Y-C13 · Adı olan, hatırlayan kişiler
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P07 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-C01
+- **Son not:**  | 2026-11-02: T16-09 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C13 Adı olan, hatırlayan kişiler**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-C01
+  - **Ne:** Her şehirde 2–3 tekrar eden kişi: lonca ustası, tefeci, han sahibi. Oyuncuyu hatırlar, görev verir, yaşlanır, ölebilir.
+  - **Kabul:** Kişiler kayıtta; en az bir kişisel zinciri olan kişi her şehirde.
+  - **Literatür:** R13, R14
+
+</details>
 
 ### Y-C21 · Kıtayı saran kıtlık: ticaret değil ulaştırma, şehirlerin morali
 
@@ -114,6 +166,27 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Orbeyan tamgası, Ezmerak boynuz fişi, Ayazkaya bedel taşı ve Avuçiçi zili tek sistem: yolun sahibi güce ödenir, karşılığında süreli belge alınır, deftere yazılır. Lore taslakları defter III'te onay bekliyor.
   - **Kullanıcı notu:** "Geçiş belgesi: Onay."
   - **Kabul:** Belgesiz geçişin bedeli ve belgenin süresi test edilir.
+
+</details>
+
+## Paket P09
+
+### Y-C09 · Bölgesel düşman kimlikleri
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P09 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06, Y-C01
+- **Son not:**  | 2026-11-02: T16-08 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C09 Bölgesel düşman kimlikleri**
+  - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Her bölgede 2–3 özgün düşman; 14 şablondan 25'in üstüne. Kullanıcı notu: önce lore ve tarihçe tamamlanmalı.
+  - **Kullanıcı notu:** “Bu aşama için lore ve tarihçenin tamamlanması lazım gibi.”
+  - **Kabul:** Bölge başına düşman tablosu; lore belgesine uyuyor.
+  - **Kaynaklar ve teknik (CC0 araştırması):** İnsan düşmanlar MPFB ve MakeHuman CC0 ekipmanla (equipment01), hayvanlar G-3 kaynaklarıyla. Ayı için iyi CC0 model yok (bkz. içerik raporu).
+  - **Literatür:** R15
 
 </details>
 
@@ -254,21 +327,38 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 </details>
 
-### Y-G08 · Fener, oyunun görsel motifi
+### 9.2 · Ana menü gece kampı, katmanlı
 
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Son not:** Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak.
+- **Durum:** iptal · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/09_art_ikinci_tur.md](referans/gorevler/09_art_ikinci_tur.md)
+- **Bağımlı:** 9.1
+- **Son not:** Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-11-02: T16-04 görevine taşındı.
 
 <details><summary>Görev metni</summary>
 
-- [ ] **Y-G08 Fener, oyunun görsel motifi**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3784072`): Beş yerden üçü var, biri taslakta (menü), logo amblemi Poly Haven Lantern_01 indirmesine bağlı.
-  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 8.11, Y-C20
-  - **Ne:** Atlı işaretin feneri, yoldaki kervan feneri, menünün ışık kaynağı, arayüzün kehribar vurgusu, logo yanında küçük amblem.
-  - **Kabul:** Motif stil rehberinde; beş yerde uygulanmış.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Fener modeli: Poly Haven `Lantern_01` (CC0), render ve mürekkep geçişi.
-  - **Literatür:** R58
+- [ ] **9.2 Ana menü gece kampı, katmanlı** (A-25, A-19, A-10, A-17)
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Mor-lacivert gök ve tek ateş ışığı resmin kendisinden; duman ayrı katman; sağda arayüz için karanlık sade alan.
+  - Mor-lacivert gök ve tek ateş ışığı.
+  - Duman ayrı katmanda.
+  - Arayüze karanlık, sade bir alan bırakılacak.
+
+</details>
+
+### Y-G16 · Ana menü: kamp ateşi ve üç yorgun yolcu
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı. | 2026-10-19 karar: sağdaki iki figür oturuyor gibi değil: bağdaş kurmuş ya da sandık/kutu üstünde otursunlar. | 2026-10-20: taslak MPFB oturuş klibi (sit_box) ile yeniden: üç yolcu sandığın üstünde gerçekten oturuyor (kalça kapakta, uyluk yatay, ayaklar yerde), ateşe dönük. y_g16_menu_kamp.png. | 2026-10-20 kullanıcı: taslak onaylandı (bugünkü pakette değil, sonraki iş). | 2026-11-02: T16-04 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G16 Ana menü: kamp ateşi ve üç yorgun yolcu**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Figürler oyunun karelerinden, ride karesinin oturuşuyla; gerçek sürümde FigureActions a sit_tired (kambur, elleri ateşe) klibi yazılıp MPFB hattıyla render edilir. Menüde müzik yok, ateş ve gece ambiyansı.
+  - **Öncelik:** P2 · **Dalga:** 6 · **İlgili:** 9.2
+  - **Ne:** Ana menü kamp ateşi panoramasından bir kare; fener ışığı kısılır. Kullanıcı notu: ateş başında oturan, yorgunluktan bitmiş ve ısınmaya çalışan üç kişilik kervan ekibi. Ana menüde şarkı yok (Y-I02).
+  - **Kullanıcı notu:** “ana menüye kervan ekibi de katılmalı, ateş başında oturan, yorgunluktan ölmüş ve ısınmaya çalışan 3 kişi.”
+  - **Kabul:** Yeni ana menü onaylı; üç figür ateş başında.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Ana menüde müzik yok: gece ormanı ve ateş çıtırtısı ambiyansı (Freesound CC0 `campfire`, `forest night`), yaklaşık −22 LUFS. `../ICERIK_IHTIYACLARI.md` S-1.
 
 </details>
 
@@ -385,6 +475,22 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ## Paket P18
 
+### N32 · Nemesis benzeri NPC hafıza sistemi: tasarım
+
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P18 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/14_yeni_dunya.md](referans/gorevler/14_yeni_dunya.md)
+- **Son not:** Kullanıcı isteği (2026-10-19): Shadow of Mordor/War Nemesis; lore'a bağlı. | 2026-11-02: T16-09 görevine taşındı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **N32 Nemesis benzeri NPC hafıza sistemi: tasarım** (`CK`)
+  - **Sütun:** Defter unutmaz · Yol yaşar
+  - **Ne:** Shadow of Mordor/War'un Nemesis sisteminden esinle, yolda karşılaşılan kişilerin (eşkıya reisi, muhafız çavuşu, tüccar, yoldaş adayı) oyuncuyu hatırlaması: kaçan ya da yenilen düşman adıyla, yarasıyla ve kinle geri döner; terfi eder, çetesi büyür; kurtarılan ya da kandırılan kişi sonra iyilikle ya da intikamla karşına çıkar. Sistem olarak mı, hikâye kurgusu olarak mı (ya da ikisi) yapılacağı kullanıcı kararı.
+  - Mevcut zemin: `CaravanLedger` (dünyanın hafızası), `NpcDisposition` ve `ROLL_ENCOUNTER`, gecikmeli zincir olaylar (`evt_wanderer_revenge`), `EnemyCatalog` yöre reskin'leri, şikâyetler (grievances). Kural: yeni sistem icat etmez, olay sözlüğüyle (`EventEffect`) konuşur; adlı NPC'ler kayıtta tutulur, yeniden yüklemeyle değişmez.
+  - **Kabul:** `docs/design_notes/nemesis_npc_plani.md` (seçenekler, lore'a bağımlılık, maliyet) ve kullanıcı kararından sonra alt görevler. Lore'a bağlı (Lore önce kuralı).
+
+</details>
+
 ### N31d · Figür tepkileri: bakma ve yorgun bekleyiş
 
 - **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P18 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
@@ -413,10 +519,10 @@ Toplam: **20** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ### N34 · Konaklama, mini oyun ve sohbetle öğrenilen bilgi: yerleşimde kalmak
 
-- **Durum:** kısmen · **Öncelik:** P2 · **Paket:** P18 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Durum:** iptal · **Öncelik:** P2 · **Paket:** P18 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/14_yeni_dunya.md](referans/gorevler/14_yeni_dunya.md)
 - **Bağımlı:** N33, Y-C13
-- **Son not:** Kullanıcı isteği (2026-10-19), akşam düşünme ve geliştirme görevi. Taverna dedikodusu satın alınmaz, sohbetle edinilir. | 2026-10-20: söylenti satın alma kalktı; yol ve fiyat haberi sohbette (rol, içki, liman kültürü, tellal). Commit dee753b. Kalan: konaklama, mini oyunlar, adlı NPC hafızası (Y-C13/N32 lore'a bağlı).
+- **Son not:** Kullanıcı isteği (2026-10-19), akşam düşünme ve geliştirme görevi. Taverna dedikodusu satın alınmaz, sohbetle edinilir. | 2026-10-20: söylenti satın alma kalktı; yol ve fiyat haberi sohbette (rol, içki, liman kültürü, tellal). Commit dee753b. Kalan: konaklama, mini oyunlar, adlı NPC hafızası (Y-C13/N32 lore'a bağlı). | 2026-11-02: T16-06 görevine taşındı.
 
 <details><summary>Görev metni</summary>
 

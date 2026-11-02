@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **187** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **188** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -532,7 +532,7 @@ Toplam: **187** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 
 - **Durum:** bitti · **Öncelik:** P0 · **Paket:** P04 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/12_sehir_ve_yol_gorunumu.md](referans/gorevler/12_sehir_ve_yol_gorunumu.md)
-- **Son not:** Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı.
+- **Son not:** Ateş sesi (tutuşma + çıtırtı döngüsü, prosedürel) eklendi; ekranda ve kulakla doğrulanacak. | 2026-11-01: ölçüldü; yürüyüş 2,4 oyun saati yiyordu, kurulum/söküm yürüyüşünde saat CAMP_WALK_CLOCK_SCALE (0.2) ile akıyor, test sınırı 0,5 saat. Yoldaki kamp alevi render konisi yerine katmanlı dalgalanan diller. Kapandı. | 2026-11-02 kullanıcı: yarım oyun saati hedefi kullanıcının değildi; asıl ölçüt T16-01.
 
 <details><summary>Görev metni</summary>
 
@@ -2567,6 +2567,24 @@ Toplam: **187** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `-`): Kenney Graveyard Kit (CC0) indirilince town_scene hattıyla sakin ve nöbet varyantları; dini sembol yok, lore (Y-E06) işaretleri bekleniyor.
   - Tek illüstrasyondan sakin ve nöbet varyantları.
   - **Kaynak:** Kenney Graveyard Kit (CC0; mezar taşı, çit, kripta). Kural: gerçek dinî yapı ve figür yok; haç ve benzeri semboller çıkarılır. Lore'daki inançlara (Y-E06) göre özgün işaretler.
+
+</details>
+
+### Y-G08 · Fener, oyunun görsel motifi
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P12 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** Emblem oyunda (ana menü başlığı). Menünün ışık kaynağı yalnızca taslakta (Y-G16), oyunda değil: beş yerin dördü. | 2026-10-21 kullanıcı kararı: motif ateş ve fener birlikte. Menüde ateş kalır, fener yolda (kervan feneri, atlı işaret) ve arayüz kehribar vurgusunda motif olur; 'beş yer' bu tanıma göre yeniden sayılacak. | 2026-11-02 kullanıcı: kapatıldı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-G08 Fener, oyunun görsel motifi**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3784072`): Beş yerden üçü var, biri taslakta (menü), logo amblemi Poly Haven Lantern_01 indirmesine bağlı.
+  - **Öncelik:** P1 · **Dalga:** 6 · **İlgili:** 8.11, Y-C20
+  - **Ne:** Atlı işaretin feneri, yoldaki kervan feneri, menünün ışık kaynağı, arayüzün kehribar vurgusu, logo yanında küçük amblem.
+  - **Kabul:** Motif stil rehberinde; beş yerde uygulanmış.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Fener modeli: Poly Haven `Lantern_01` (CC0), render ve mürekkep geçişi.
+  - **Literatür:** R58
 
 </details>
 
