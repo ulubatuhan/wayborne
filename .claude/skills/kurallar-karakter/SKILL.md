@@ -68,6 +68,9 @@ Bölümler: scripts/character/, Character & Party Rules, Lineage Rules, Stress R
     level scaled off the player's own (`get_venue_level_spread` - meydan
     always below the player, lonca always at or above), granted as real XP
     so `auto_allocate` spends it the same way a levelling companion would.
+    A candidate's culture comes from the settlement's peoples (`Location.peoples`, settlements.json `peoples`) with
+    `LOCAL_SHARE` (0.75), otherwise any culture (travellers). Fishers have no single homeland (user, 2026-11-02, Ç12):
+    fishing towns list both the fisher culture and the region's, so their boards come out mixed.
   - **Recruiting is hard and personal (task Y-C16).** A board holds one or two people (`RecruitCatalog.VENUE_COUNTS`;
     the guild one), one fewer while a war or plague is on; base prices rose 30%; levels lean to the low end of the
     venue's spread (`LEVEL_SKEW_POWER`), so a seasoned hire is rare. Every candidate carries a backstory - why they
