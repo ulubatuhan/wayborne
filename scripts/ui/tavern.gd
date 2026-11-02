@@ -37,6 +37,9 @@ var _purse_label: Label
 var _chat_rng := RandomNumberGenerator.new()
 var _feast_label: Label
 var _feast_button: Button
+var _lodging_label: Label
+var _lodging_button: Button
+var _game_button: Button
 ## Fiyat söylentisi (görev Y-C10): komşu şehirlerin fiyatı, bazen yanlış.
 var _price_rumor_list: VBoxContainer
 ## Bu gün kime içki ısmarlandı, kime yol soruldu (kişi kimliği -> true).
@@ -76,6 +79,7 @@ func _ready() -> void:
 	_build_rows()
 	_refresh_rows()
 	_refresh_feast()
+	_refresh_lodging()
 	_refresh_price_rumors()
 	_refresh_purse()
 
@@ -146,6 +150,11 @@ func _build_screen() -> void:
 	_watch_button.toggle_mode = true
 	_watch_button.toggled.connect(_on_watch_toggled)
 	bar.add_child(_watch_button)
+	# Oyun masası (T16-06): şimdilik oyunu olmayan, geri çıkılan bir ekran.
+	_game_button = Button.new()
+	_game_button.text = tr("UI_TAVERN_GAME")
+	_game_button.pressed.connect(_on_game_pressed)
+	bar.add_child(_game_button)
 	_back_button.reparent(bar)
 	_back_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	RecruitButton.add_before(_back_button, RecruitCatalog.VENUE_TAVERN, Nav.TAVERN)
@@ -163,7 +172,7 @@ func _strip() -> PanelContainer:
 	strip.add_theme_stylebox_override("panel", box)
 	return strip
 
-## Hizmetler sekmesi: arınma, ziyafet, fiyat söylentileri.
+## Hizmetler sekmesi: konaklama, ziyafet, arınma, fiyat söylentileri.
 func _services_page() -> Control:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -172,13 +181,19 @@ func _services_page() -> Control:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(content)
 
+	# Sol: kadronun bedeni (konaklama, ziyafet); orta: arınma; sağ: fiyatlar.
+	# Konaklama ilk sırada: en sık başvurulan hizmet ve kaydırmanın altında
+	# kalmamalı (T16-06).
 	var left := VBoxContainer.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_child(left)
-	_purification_panel = PurificationPanel.new()
-	left.add_child(_purification_panel)
-	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
-	_purification_panel.trait_removed.connect(_refresh_rows)
+	_lodging_label = Label.new()
+	_lodging_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	left.add_child(_lodging_label)
+	_lodging_button = Button.new()
+	_lodging_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_lodging_button.pressed.connect(_on_lodging_pressed)
+	left.add_child(_lodging_button)
 	# Ziyafet: stresin paralı kolu. Varış rahatlaması artık seferin
 	# getirdiğini tek başına eritmiyor (bkz. GameSession.get_city_rest_relief),
 	# o yüzden oyuncunun kesesiyle müdahale edebileceği bir yol olmalı -
@@ -191,6 +206,14 @@ func _services_page() -> Control:
 	_feast_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_feast_button.pressed.connect(_on_feast_pressed)
 	left.add_child(_feast_button)
+
+	var middle := VBoxContainer.new()
+	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(middle)
+	_purification_panel = PurificationPanel.new()
+	middle.add_child(_purification_panel)
+	_purification_panel.setup(_session, tr("UI_PURIFY_TRAIT"), PURIFICATION_COST)
+	_purification_panel.trait_removed.connect(_refresh_rows)
 
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -376,6 +399,38 @@ func _refresh_feast() -> void:
 func _on_feast_pressed() -> void:
 	if _session.throw_feast():
 		_refresh_feast()
+		_refresh_lodging()
+
+func _refresh_lodging() -> void:
+	if _lodging_label == null:
+		return
+	_lodging_label.text = tr("UI_TAVERN_LODGING_HINT") % GameSession.LODGING_STRESS_RELIEF
+	_lodging_button.text = tr("UI_TAVERN_LODGE") % _session.get_lodging_cost()
+	_lodging_button.disabled = not _session.can_afford_lodging()
+
+func _on_lodging_pressed() -> void:
+	var day_before := _session.total_days_elapsed
+	var expired := _session.lodge_night()
+	if _session.total_days_elapsed == day_before:
+		return
+	var said := tr("UI_TAVERN_LODGED") % (_session.total_days_elapsed + 1)
+	if not expired.is_empty():
+		said += " " + tr("UI_TAVERN_LODGED_EXPIRED") % expired.size()
+	_info_label.text = said
+	# Şehirde, sefer alanları boşken: varış kaydıyla aynı güvenli an.
+	SaveManager.save_session(_session)
+	# Yeni gün: odadakiler, söylentiler ve fiyatlar o günün tohumundan.
+	_room.populate(_session.current_location_id, _session.total_days_elapsed)
+	_chat_rng.seed = hash("tavern_chat|%s|%d" % [_session.current_location_id, _session.total_days_elapsed])
+	_refresh_purse()
+	_refresh_feast()
+	_refresh_lodging()
+	_refresh_rows()
+
+func _on_game_pressed() -> void:
+	var game := TavernGame.new()
+	game.closed.connect(func(): _game_button.grab_focus())
+	add_child(game)
 
 func _build_rows() -> void:
 	for route in WorldMapData.get_routes_from(_session.current_location_id):
@@ -449,6 +504,7 @@ func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh_price_rumors()
 	_refresh_rows()
 	_refresh_feast()
+	_refresh_lodging()
 	_refresh_purse()
 	_purification_panel.refresh()
 

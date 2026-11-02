@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **192** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **193** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3428,5 +3428,19 @@ Toplam: **192** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-05 Kesik el her pozda tam silinsin**
   - **Ne:** Kesik elin durur pozun bazı karelerinde gövde katmanında kalan kısmı da silinir; her klipte el yok, bilekte sargı.
   - **Kim:** C · **Eski:** -
+
+</details>
+
+### T16-06 · Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: N34. | Bitti: GameSession.lodge_night (oda parası kişi başı 6 × (1+kıtlık), bir gün geçer, yorgunluk sıfır, yaraların dörtte biri, stres -6, yeni günün işe alım panosu, günlüğe satır, kayıt); Hizmetler sekmesinin ilk satırı. "Masaya otur" → TavernGame ekranı (zar masası, oyun yok), "Masadan kalk"/Esc ile çıkılır. Test: test_tavern_lodging. Ekran: tavern_services, tavern_game.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-06 Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır**
+  - **Ne:** Tavernada konaklama: para karşılığı gece kalmak (stres ve yorgunluk düşer, gün geçer). Oyun seçeneği: şimdilik oyunu olmayan bir ekrana girer, geri çıkılır.
+  - **Kim:** C · **Eski:** N34
 
 </details>

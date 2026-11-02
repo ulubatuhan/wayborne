@@ -82,6 +82,15 @@ func _init() -> void:
 			for _frame in 20:
 				await process_frame
 			_save("tavern_rumors_%dx%d.png" % [view.x, view.y])
+			# Hizmetler (T16-06): ziyafet ve konaklama; sonra oyun masası.
+			screen._panel.select_tab(5)
+			for _frame in 20:
+				await process_frame
+			_save("tavern_services_%dx%d.png" % [view.x, view.y])
+			screen._on_game_pressed()
+			for _frame in 10:
+				await process_frame
+			_save("tavern_game_%dx%d.png" % [view.x, view.y])
 		if path.contains("city_map"):
 			# Yola çıkış: yön sorusu; karar paneli katlı; defterin günlüğü.
 			screen._ask_direction()

@@ -840,6 +840,42 @@ func _record_map_trail(from_id: String, to_id: String) -> void:
 	if map_trail.size() > MAX_MAP_TRAIL:
 		map_trail = map_trail.slice(map_trail.size() - MAX_MAP_TRAIL)
 
+## Tavernada gece kalmak (T16-06, N34; sütun: İnsanlar aşınır). Varışın bir
+## gecesi kervanın kendi vagonlarında geçer (FATIGUE_CITY_RELIEF); oda parayla:
+## yorgunluk tamamen gider, yaralar dörtte bir kapanır, stres biraz iner ve bir
+## gün geçer (dünya yürür: borç vadesi, kontrat süresi, veba, şehrin hâli). Kıtlık
+## oda fiyatını da yükseltir; ziyafetten ucuz ama günü yer. Defterde iz bırakır.
+const LODGING_COST_PER_HEAD: int = 6
+const LODGING_STRESS_RELIEF: int = 6
+const LODGING_HEAL_SHARE: float = 0.25
+
+func get_lodging_cost() -> int:
+	return int(ceil(LODGING_COST_PER_HEAD * maxi(1, party.size()) * (1.0 + scarcity_here())))
+
+func can_afford_lodging() -> bool:
+	return is_city_open_to_lodging() and wallet.can_afford(get_lodging_cost())
+
+func is_city_open_to_lodging() -> bool:
+	return not is_journey_active() and not is_shut_out()
+
+## Bir gece kalır; süresi geçen kontratların listesini döner (advance_day gibi).
+func lodge_night() -> Array[String]:
+	var expired: Array[String] = []
+	if not can_afford_lodging():
+		return expired
+	wallet.spend(get_lodging_cost())
+	expired = advance_day()
+	for character in party:
+		character.change_fatigue(-CharacterData.MAX_FATIGUE)
+		character.current_hp = mini(character.get_max_hp(), character.current_hp + int(ceil(character.get_max_hp() * LODGING_HEAL_SHARE)))
+	change_stress(-LODGING_STRESS_RELIEF)
+	# Yeni gün, yeni pano: tohum şehir + gün (bkz. _restock_recruits).
+	hired_recruit_indices = {}
+	_restock_recruits()
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	write_journal(TranslationServer.translate("UI_JOURNAL_LODGED") % (location.location_name if location != null else current_location_id))
+	return expired
+
 func has_feasted_today() -> bool:
 	return last_feast_day == total_days_elapsed
 

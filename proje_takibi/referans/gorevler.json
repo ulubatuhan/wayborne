@@ -4038,14 +4038,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Şehir",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 305,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: N34."
+   "not": "2026-11-02 kullanıcı listesi. Eski: N34. | Bitti: GameSession.lodge_night (oda parası kişi başı 6 × (1+kıtlık), bir gün geçer, yorgunluk sıfır, yaraların dörtte biri, stres -6, yeni günün işe alım panosu, günlüğe satır, kayıt); Hizmetler sekmesinin ilk satırı. \"Masaya otur\" → TavernGame ekranı (zar masası, oyun yok), \"Masadan kalk\"/Esc ile çıkılır. Test: test_tavern_lodging. Ekran: tavern_services, tavern_game."
   },
   {
    "id": "T16-07",

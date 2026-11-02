@@ -149,8 +149,8 @@ wayborne/
     yüzden hedefin geri tuşu paneli açtığın yere döner, panele değil.
   - `SaveManager` (registered autoload): `GameSession.to_save_dict()` /
     `load_from_dict()` içeriği bilir, burada yalnızca `user://save.json`
-    G/Ç'si var. Yalnızca şehir varışında (`finish_journey()` sonrası)
-    çağrılır - sefer/kervan alanları o an her zaman sıfırlanmış olduğu
+    G/Ç'si var. Yalnızca şehirde - varışta (`finish_journey()` sonrası) ve
+    tavernada gece kalındıktan sonra (T16-06) - çağrılır - sefer/kervan alanları o an her zaman sıfırlanmış olduğu
     için hiç serileştirilmez. `GameSession`'ı `load()` ile kurup normal
     örnek metodu çağırır, hiçbir yerde `class_name` ile anmaz.
   - `AudioManager` (registered autoload): music crossfade, ambience and

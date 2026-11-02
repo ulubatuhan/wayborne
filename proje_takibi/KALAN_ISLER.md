@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **23** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -304,20 +304,6 @@ Toplam: **24** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - [ ] **T16-04 Ana menü: öndeki iki yolcu net, ateş yumuşak**
   - **Ne:** Ana menüde öndeki iki yolcu bulanık, pikselli ve soluk; arka plandaki ateş köşeli tek renk parçalar. İkisi de düzelir, ekran görüntüsüyle doğrulanır.
   - **Kim:** CO · **Eski:** 9.2, Y-G16
-
-</details>
-
-### T16-06 · Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: N34.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-06 Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır**
-  - **Ne:** Tavernada konaklama: para karşılığı gece kalmak (stres ve yorgunluk düşer, gün geçer). Oyun seçeneği: şimdilik oyunu olmayan bir ekrana girer, geri çıkılır.
-  - **Kim:** C · **Eski:** N34
 
 </details>
 
