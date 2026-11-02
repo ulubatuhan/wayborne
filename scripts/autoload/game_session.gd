@@ -475,6 +475,16 @@ var danger_level: float = 0.0
 var standing: Standing = _new_standing()
 ## Adı olan, hatırlayan kişiler ve yolun reisleri (Y-C13, N32; T16-09).
 var people: People = People.new()
+## Yolda görülen adlı yerler (T16-11): id -> ilk görüldüğü gün. Kayıtta.
+var seen_places: Dictionary = {}
+
+## Bir yer ilk kez görülünce deftere yazılır (Defter unutmaz).
+func note_road_place(place_id: String, place_name: String) -> void:
+	if seen_places.has(place_id):
+		return
+	seen_places[place_id] = total_days_elapsed
+	journal.append({"day": total_days_elapsed, "place": place_id,
+		"text": TranslationServer.translate("UI_JOURNAL_ROAD_PLACE") % place_name})
 var reputation: int:
 	get:
 		return standing.region(current_region())
@@ -4891,6 +4901,7 @@ func to_save_dict() -> Dictionary:
 		"wagon_inventories": wagon_inventory_data,
 		"current_location_id": current_location_id,
 		"reputation": reputation,
+		"seen_places": seen_places.duplicate(),
 		"people": people.to_dict(),
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
@@ -5122,6 +5133,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
 	# Bölgesel itibar (T16-07); eski kayıtta tek sayı vardı: her bölge onunla açılır.
 	people.from_dict(data.get("people", {}) as Dictionary)
+	seen_places = (data.get("seen_places", {}) as Dictionary).duplicate()
 	if data.has("standing"):
 		standing.from_dict(data["standing"] as Dictionary)
 	else:

@@ -471,6 +471,18 @@ every decision has a visible control, and a key is only its shortcut.**
   westward road flips the whole caravan to the right (`begin_turn`, same ceremony). Everything that turns a terrain day
   into a canonical share (`set_road_position`, `day_for_share`, gates, the map's progress via `_map_progress()`) uses
   `_terrain_from()`, never the session's origin; a diversion lays its own road the same way. Text is never mirrored.
+- **Every named place on the map is playable (user, 2026-10-29; T16-11).** `build_settlements.py` binds each named
+  map point that is not a settlement (obalar, mezralar, balıkçı köyleri, kereste kampları, manastırlar, taşlar,
+  mezarlıklar, kuleler, harabeler, fenerler, savaş yerleri, darağaçları, batıklar, madenler; 99 today) to its nearest
+  road (`road_places` in settlements.json: route, share from the road's `a` end, `off_days` one way). On the road a
+  signboard with the place's name stands at its day (`TravelBand.set_places`, drawn in `_draw_roadside` *after* the
+  ground strip - drawn before it, the memorial stones had been hidden under the grass all along), and when the wagons
+  reach it the place's card opens once per leg (`_check_road_places`; `JourneyController.passed_places`):
+  `EventCatalog.place_visit_event(visit, off_days)` - village/oba (provisions, ask about the road), shrine (rest,
+  offering → church), ruin (search: purse/wound/nothing, watch the road), mine (iron). A place off the road costs
+  `off_days × 2` on every visiting choice; passing by costs a little morale. The first sighting is written to the
+  journal (`GameSession.seen_places`, saved). Place cards never come from the random draw (`place_here` is never in
+  the context).
 - **The camera moves at once, the caravan never slides.** `TravelBand`
   anchors a reversed caravan on the right of the frame (the mirror of the
   forward anchor) over `CAMERA_TURN_SECONDS`, and every layer scrolls by

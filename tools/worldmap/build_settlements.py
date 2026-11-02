@@ -100,6 +100,42 @@ POI_STOPS = {
 POI_PREFIX_STOPS = {"ih_": "mezra"}
 
 
+# Yolda ziyaret kartının türü: köy/oba/mezra, sunak/manastır, harabe/kule, maden.
+PLACE_VISIT = {"mezra": "village", "shrine": "shrine", "outpost": "ruin", "mine": "mine"}
+PLACE_FALLBACK_STOP = {"ix_wreck": "outpost"}
+
+
+def place_roads(places, playable, routes, days_per_px):
+    """Yerleşim olmayan her adlı harita noktası: en yakın yol, yolun payı (a ucundan) ve yoldan uzaklığı (gün)."""
+    out = []
+    for pid, p in sorted(places.items()):
+        kind = p.get("kind") or ""
+        if pid in playable or kind == "ik_caravanserai" or not p.get("name_tr"):
+            continue
+        stop = poi_stop_kind(kind) or PLACE_FALLBACK_STOP.get(kind)
+        if stop is None:
+            continue
+        best = None
+        for r in routes:
+            pts = r["path"]
+            for i, pt in enumerate(pts):
+                d = math.dist(pt, p["pos"])
+                if best is None or d < best[0]:
+                    best = (d, r, i / max(1, len(pts) - 1))
+        if best is None:
+            continue
+        d, r, share = best
+        off = 0 if d <= STOP_POI_PX else int(math.ceil((d - STOP_POI_PX) * days_per_px))
+        out.append({
+            "id": pid, "kind": kind, "visit": PLACE_VISIT[stop],
+            "name": {"tr": p["name_tr"], "en": p.get("name_en", p["name_tr"])},
+            "culture": p.get("culture", ""),
+            "route": "%s|%s" % tuple(sorted((r["a"], r["b"]))), "from": r["a"],
+            "share": round(share, 3), "off_days": off,
+        })
+    return out
+
+
 def poi_stop_kind(kind):
     """Harita noktası türünün yol durağı karşılığı ya da None."""
     if kind in POI_STOPS:
@@ -677,6 +713,7 @@ def main(argv):
         })
 
     annotate_variants(routes, mountain_distance(features, size))
+    road_places = place_roads(places, playable, routes, days_per_px)
 
     comps, seen = [], set()
     for pid in playable:
@@ -765,6 +802,9 @@ def main(argv):
         "routes": routes,
         "start_candidates": starts,
         "lights": map_lights(places),
+        # Haritada adı olan her yer oynanabilir (kullanıcı, 2026-10-29; T16-11):
+        # yerleşim olmayan her adlı nokta en yakın yola, yolun o noktasına bağlanır.
+        "road_places": road_places,
     }
     with open(out_path, "w", encoding="utf-8", newline=chr(10)) as fh:
         json.dump(doc, fh, ensure_ascii=False, indent=1)

@@ -4113,14 +4113,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Dünya",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 310,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Ana hedef."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Ana hedef. | Bitti: 99 adlı yer (54 köy/oba/mezra, 28 harabe/kule, 15 sunak/manastır, 2 maden) en yakın yola bağlandı (road_places); yolda adı yazılı levha, kervan varınca yerin kartı (village/shrine/ruin/mine; uzak yere sapma gün ister), deftere ilk görülüş; şerit sırası düzeltmesi (anıt taşları da artık görünüyor). Test: test_road_places. Ekran: Golcavar→Rivecande, Sentinara Kulesi."
   }
  ],
  "guncelleme": "2026-11-02",

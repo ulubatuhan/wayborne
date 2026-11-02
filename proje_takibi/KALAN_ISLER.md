@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -288,21 +288,5 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Bu daha sonra yapılacka bir düzenleme ve emin değilim. önce oynu bitirelim sonra aynı görselleri elle çizebilirim yani sonuç olarak içerik ai üretimi değil, ai destekli olur. ama Kasım sonunda filan olabilir bu anca.”
   - **Kabul:** AI görsel listesi güncel; yeniden çizim kararı verildi.
   - **Literatür:** R70, R71, R69
-
-</details>
-
-## Paket P19
-
-### T16-11 · Haritada adı olan her yer oynanabilir
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ana hedef.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-11 Haritada adı olan her yer oynanabilir**
-  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: LORE.md §15 ve places_v3.json.
-  - **Kim:** C · **Eski:** Ana hedef
 
 </details>

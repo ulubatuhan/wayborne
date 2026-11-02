@@ -10206,5 +10206,1393 @@
    14269.2,
    3.26
   ]
+ ],
+ "road_places": [
+  {
+   "id": "place_0",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Kaynurak Obası",
+    "en": "Kaynurak Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.65,
+   "off_days": 0
+  },
+  {
+   "id": "place_1",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Ebrusun Obası",
+    "en": "Ebrusun Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.783,
+   "off_days": 0
+  },
+  {
+   "id": "place_100",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Sentinara Kulesi",
+    "en": "Sentinara Tower"
+   },
+   "culture": "imparatorluk",
+   "route": "golcavar|rivecande",
+   "from": "golcavar",
+   "share": 0.393,
+   "off_days": 0
+  },
+  {
+   "id": "place_101",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Ferrant Kulesi",
+    "en": "Ferrant Tower"
+   },
+   "culture": "imparatorluk",
+   "route": "golcavar|rivecande",
+   "from": "golcavar",
+   "share": 0.679,
+   "off_days": 0
+  },
+  {
+   "id": "place_102",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "İki Bayrak Kulesi",
+    "en": "Two Banners Tower"
+   },
+   "culture": "sinir",
+   "route": "ezmerak|ondrelle",
+   "from": "ezmerak",
+   "share": 0.08,
+   "off_days": 2
+  },
+  {
+   "id": "place_103",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Öksüz Göz Kulesi",
+    "en": "Orphan Eye Tower"
+   },
+   "culture": "dag_maden",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 0.758,
+   "off_days": 1
+  },
+  {
+   "id": "place_104",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Vardas Kulesi",
+    "en": "Vardas Tower"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.095,
+   "off_days": 0
+  },
+  {
+   "id": "place_105",
+   "kind": "ig_gallows",
+   "visit": "ruin",
+   "name": {
+    "tr": "Sarmaşıklı Darağacı",
+    "en": "Ivy Gallows"
+   },
+   "culture": "vadi",
+   "route": "ilsande|serai_seyvan",
+   "from": "ilsande",
+   "share": 0.056,
+   "off_days": 0
+  },
+  {
+   "id": "place_106",
+   "kind": "ig_gallows",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kuru Halat Darağacı",
+    "en": "Dry Rope Gallows"
+   },
+   "culture": "dag_maden",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 0.909,
+   "off_days": 0
+  },
+  {
+   "id": "place_107",
+   "kind": "ig_gallows",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kızıl Ferman Darağacı",
+    "en": "Red Edict Gallows"
+   },
+   "culture": "imparatorluk",
+   "route": "selvicar|vastrevar",
+   "from": "selvicar",
+   "share": 0.5,
+   "off_days": 0
+  },
+  {
+   "id": "place_108",
+   "kind": "ig_gallows",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kefaret Darağacı",
+    "en": "Atonement Gallows"
+   },
+   "culture": "ahit",
+   "route": "orsolune|orvahel",
+   "from": "orsolune",
+   "share": 0.978,
+   "off_days": 0
+  },
+  {
+   "id": "place_109",
+   "kind": "ig_gallows",
+   "visit": "ruin",
+   "name": {
+    "tr": "Dönek Darağacı",
+    "en": "Turncoat Gallows"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|tolvarin",
+   "from": "kirsavel",
+   "share": 1.0,
+   "off_days": 1
+  },
+  {
+   "id": "place_110",
+   "kind": "ig_graveyard",
+   "visit": "shrine",
+   "name": {
+    "tr": "Yabancılar Mezarlığı",
+    "en": "Strangers' Graveyard"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.692,
+   "off_days": 0
+  },
+  {
+   "id": "place_111",
+   "kind": "ig_graveyard",
+   "visit": "shrine",
+   "name": {
+    "tr": "Leylak Mezarlığı",
+    "en": "Lilac Graveyard"
+   },
+   "culture": "vadi",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.026,
+   "off_days": 0
+  },
+  {
+   "id": "place_112",
+   "kind": "ig_graveyard",
+   "visit": "shrine",
+   "name": {
+    "tr": "Tuzlu Çardak Mezarlığı",
+    "en": "Salt Arbor Graveyard"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.872,
+   "off_days": 0
+  },
+  {
+   "id": "place_113",
+   "kind": "ig_graveyard",
+   "visit": "shrine",
+   "name": {
+    "tr": "Kör Kazmalar Mezarlığı",
+    "en": "Graveyard of the Blind Picks"
+   },
+   "culture": "dag_maden",
+   "route": "orsolune|vorgat",
+   "from": "vorgat",
+   "share": 0.0,
+   "off_days": 0
+  },
+  {
+   "id": "place_114",
+   "kind": "ig_graveyard",
+   "visit": "shrine",
+   "name": {
+    "tr": "Sancaksız Mezarlık",
+    "en": "Bannerless Graveyard"
+   },
+   "culture": "imparatorluk",
+   "route": "dravoss|selvicar",
+   "from": "selvicar",
+   "share": 1.0,
+   "off_days": 1
+  },
+  {
+   "id": "place_115",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Tozkapı Yıkıntısı",
+    "en": "Dustgate Ruins"
+   },
+   "culture": "sinir",
+   "route": "ezmerak|ondrelle",
+   "from": "ezmerak",
+   "share": 0.0,
+   "off_days": 5
+  },
+  {
+   "id": "place_116",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Velkrun Yıkıntısı",
+    "en": "Velkrun Ruins"
+   },
+   "culture": "dag",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.318,
+   "off_days": 6
+  },
+  {
+   "id": "place_117",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Eski Darphane Yıkıntısı",
+    "en": "Old Mint Ruins"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.59,
+   "off_days": 0
+  },
+  {
+   "id": "place_118",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Sargalak Yıkıntısı",
+    "en": "Sargalak Ruins"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 1.0,
+   "off_days": 1
+  },
+  {
+   "id": "place_119",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Deli Kral Sarayı Yıkıntısı",
+    "en": "Ruins of the Mad King's Palace"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.595,
+   "off_days": 2
+  },
+  {
+   "id": "place_120",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Solgun Bahçe Yıkıntısı",
+    "en": "Ruins of the Faded Garden"
+   },
+   "culture": "vadi",
+   "route": "belvanor|mirsana",
+   "from": "mirsana",
+   "share": 0.25,
+   "off_days": 0
+  },
+  {
+   "id": "place_121",
+   "kind": "ir_ruins",
+   "visit": "ruin",
+   "name": {
+    "tr": "Hallecort Yıkıntısı",
+    "en": "Hallecort Ruins"
+   },
+   "culture": "imparatorluk",
+   "route": "auderin|vastrevar",
+   "from": "auderin",
+   "share": 0.0,
+   "off_days": 3
+  },
+  {
+   "id": "place_122",
+   "kind": "is_stones",
+   "visit": "shrine",
+   "name": {
+    "tr": "Altıkuşak Taşları",
+    "en": "Six-Belt Stones"
+   },
+   "culture": "gocebe",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.238,
+   "off_days": 5
+  },
+  {
+   "id": "place_123",
+   "kind": "is_stones",
+   "visit": "shrine",
+   "name": {
+    "tr": "Bahçıvan Taşları",
+    "en": "Gardener's Stones"
+   },
+   "culture": "vadi",
+   "route": "orsolune|orvahel",
+   "from": "orsolune",
+   "share": 0.739,
+   "off_days": 0
+  },
+  {
+   "id": "place_124",
+   "kind": "is_stones",
+   "visit": "shrine",
+   "name": {
+    "tr": "Yıldızölçer Taşları",
+    "en": "Starmeasurer Stones"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.974,
+   "off_days": 9
+  },
+  {
+   "id": "place_125",
+   "kind": "is_stones",
+   "visit": "shrine",
+   "name": {
+    "tr": "İlk Nefes Taşları",
+    "en": "First Breath Stones"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 1.0,
+   "off_days": 10
+  },
+  {
+   "id": "place_126",
+   "kind": "is_stones",
+   "visit": "shrine",
+   "name": {
+    "tr": "Gelgit Taşları",
+    "en": "Tide Stones"
+   },
+   "culture": "guney",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 1.0,
+   "off_days": 6
+  },
+  {
+   "id": "place_127",
+   "kind": "ip_lighthouse",
+   "visit": "ruin",
+   "name": {
+    "tr": "Yalaz Feneri",
+    "en": "Yalaz Lighthouse"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.667,
+   "off_days": 3
+  },
+  {
+   "id": "place_128",
+   "kind": "ip_lighthouse",
+   "visit": "ruin",
+   "name": {
+    "tr": "Yaşlı Martı Feneri",
+    "en": "Old Gull Lighthouse"
+   },
+   "culture": "sinir",
+   "route": "ezmerak|ondrelle",
+   "from": "ezmerak",
+   "share": 0.0,
+   "off_days": 3
+  },
+  {
+   "id": "place_129",
+   "kind": "ip_lighthouse",
+   "visit": "ruin",
+   "name": {
+    "tr": "Grauth Feneri",
+    "en": "Grauth Lighthouse"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 8
+  },
+  {
+   "id": "place_130",
+   "kind": "ix_wreck",
+   "visit": "ruin",
+   "name": {
+    "tr": "Sessiz Kadırga Batığı",
+    "en": "Silent Galley Wreck"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.571,
+   "off_days": 9
+  },
+  {
+   "id": "place_131",
+   "kind": "ix_wreck",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kanlı Direk Batığı",
+    "en": "Bloody Mast Wreck"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 9
+  },
+  {
+   "id": "place_132",
+   "kind": "ib_battle",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kırık Mızrak Çayırı",
+    "en": "Broken Spear Meadow"
+   },
+   "culture": "vadi",
+   "route": "ezmerak|ondrelle",
+   "from": "ezmerak",
+   "share": 0.88,
+   "off_days": 1
+  },
+  {
+   "id": "place_133",
+   "kind": "ib_battle",
+   "visit": "ruin",
+   "name": {
+    "tr": "Bölünmüş Sancak Ovası",
+    "en": "Field of the Split Banner"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.667,
+   "off_days": 0
+  },
+  {
+   "id": "place_134",
+   "kind": "ib_battle",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kiralık Kılıçlar Ovası",
+    "en": "Field of Hired Swords"
+   },
+   "culture": "guney",
+   "route": "belvanor|mirsana",
+   "from": "mirsana",
+   "share": 0.054,
+   "off_days": 0
+  },
+  {
+   "id": "place_135",
+   "kind": "ib_battle",
+   "visit": "ruin",
+   "name": {
+    "tr": "Mühür Savaşı Ovası",
+    "en": "Field of the Seal War"
+   },
+   "culture": "ahit",
+   "route": "ezmerak|orvahel",
+   "from": "ezmerak",
+   "share": 0.476,
+   "off_days": 0
+  },
+  {
+   "id": "place_16",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Harvek",
+    "en": "Harvek"
+   },
+   "culture": "dag",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.344,
+   "off_days": 3
+  },
+  {
+   "id": "place_17",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Kovrast",
+    "en": "Kovrast"
+   },
+   "culture": "imparatorluk",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.14,
+   "off_days": 1
+  },
+  {
+   "id": "place_18",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Kemersal",
+    "en": "Kemersal"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.064,
+   "off_days": 0
+  },
+  {
+   "id": "place_19",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Ulmarec",
+    "en": "Ulmarec"
+   },
+   "culture": "imparatorluk",
+   "route": "kesgrav|rivecande",
+   "from": "kesgrav",
+   "share": 0.211,
+   "off_days": 1
+  },
+  {
+   "id": "place_2",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Sadirim Obası",
+    "en": "Sadirim Camp"
+   },
+   "culture": "gocebe",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.143,
+   "off_days": 1
+  },
+  {
+   "id": "place_20",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Droskal",
+    "en": "Droskal"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 1
+  },
+  {
+   "id": "place_21",
+   "kind": "ix_mountaintribe",
+   "visit": "village",
+   "name": {
+    "tr": "Ulgras",
+    "en": "Ulgras"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 1
+  },
+  {
+   "id": "place_24",
+   "kind": "ie_deepmine",
+   "visit": "mine",
+   "name": {
+    "tr": "Kazrun Ocağı",
+    "en": "Kazrun Pits"
+   },
+   "culture": "dag",
+   "route": "kesgrav|rivecande",
+   "from": "kesgrav",
+   "share": 0.211,
+   "off_days": 0
+  },
+  {
+   "id": "place_25",
+   "kind": "ie_saltmine",
+   "visit": "mine",
+   "name": {
+    "tr": "Saldrek Tuzlası",
+    "en": "Saldrek Saltworks"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 2
+  },
+  {
+   "id": "place_26",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Reskel",
+    "en": "Reskel"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 2
+  },
+  {
+   "id": "place_27",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Sallenz",
+    "en": "Sallenz"
+   },
+   "culture": "imparatorluk",
+   "route": "kesgrav|rivecande",
+   "from": "kesgrav",
+   "share": 0.789,
+   "off_days": 0
+  },
+  {
+   "id": "place_28",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Calvenna",
+    "en": "Calvenna"
+   },
+   "culture": "imparatorluk",
+   "route": "dravoss|selvicar",
+   "from": "selvicar",
+   "share": 0.733,
+   "off_days": 0
+  },
+  {
+   "id": "place_29",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Sugalik",
+    "en": "Sugalik"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.758,
+   "off_days": 1
+  },
+  {
+   "id": "place_3",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Ilkatay Obası",
+    "en": "Ilkatay Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.943,
+   "off_days": 0
+  },
+  {
+   "id": "place_30",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Tuzyali",
+    "en": "Tuzyali"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.286,
+   "off_days": 1
+  },
+  {
+   "id": "place_31",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Neminsu",
+    "en": "Neminsu"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.69,
+   "off_days": 1
+  },
+  {
+   "id": "place_32",
+   "kind": "iv_fishvillage",
+   "visit": "village",
+   "name": {
+    "tr": "Brezzane",
+    "en": "Brezzane"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.744,
+   "off_days": 0
+  },
+  {
+   "id": "place_4",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Burkasan Obası",
+    "en": "Burkasan Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.223,
+   "off_days": 0
+  },
+  {
+   "id": "place_5",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Otekur Obası",
+    "en": "Otekur Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.306,
+   "off_days": 0
+  },
+  {
+   "id": "place_6",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Taragun Obası",
+    "en": "Taragun Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.395,
+   "off_days": 1
+  },
+  {
+   "id": "place_60",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Vintaro Çiftliği",
+    "en": "Vintaro Farm"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.243,
+   "off_days": 2
+  },
+  {
+   "id": "place_61",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Morvask Değirmeni",
+    "en": "Morvask Mill"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.143,
+   "off_days": 5
+  },
+  {
+   "id": "place_62",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Limeral Bahçeleri",
+    "en": "Limeral Gardens"
+   },
+   "culture": "guney",
+   "route": "belvanor|mirsana",
+   "from": "mirsana",
+   "share": 0.054,
+   "off_days": 5
+  },
+  {
+   "id": "place_63",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Tuhrem Çiftliği",
+    "en": "Tuhrem Farm"
+   },
+   "culture": "dag_maden",
+   "route": "orsolune|vorgat",
+   "from": "vorgat",
+   "share": 0.0,
+   "off_days": 3
+  },
+  {
+   "id": "place_64",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Hasırlı Çiftlik",
+    "en": "Reedmat Farm"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.476,
+   "off_days": 0
+  },
+  {
+   "id": "place_65",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Vesperra Bağları",
+    "en": "Vesperra Vineyards"
+   },
+   "culture": "guney",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 1.0,
+   "off_days": 5
+  },
+  {
+   "id": "place_66",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Gezar Çiftliği",
+    "en": "Gezar Farm"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 9
+  },
+  {
+   "id": "place_67",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Aubrenne Bağları",
+    "en": "Aubrenne Vineyards"
+   },
+   "culture": "vadi",
+   "route": "orsolune|orvahel",
+   "from": "orsolune",
+   "share": 0.565,
+   "off_days": 0
+  },
+  {
+   "id": "place_68",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Kumbag Değirmeni",
+    "en": "Kumbag Mill"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.738,
+   "off_days": 0
+  },
+  {
+   "id": "place_69",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Hulvad Değirmeni",
+    "en": "Hulvad Mill"
+   },
+   "culture": "dag",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 6
+  },
+  {
+   "id": "place_7",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Arsalkan Obası",
+    "en": "Arsalkan Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.414,
+   "off_days": 0
+  },
+  {
+   "id": "place_70",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Hasdren Değirmeni",
+    "en": "Hasdren Mill"
+   },
+   "culture": "imparatorluk",
+   "route": "auderin|vastrevar",
+   "from": "auderin",
+   "share": 0.0,
+   "off_days": 2
+  },
+  {
+   "id": "place_71",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Taşgözü Değirmeni",
+    "en": "Stone-Eye Mill"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.571,
+   "off_days": 3
+  },
+  {
+   "id": "place_72",
+   "kind": "iv_farm",
+   "visit": "village",
+   "name": {
+    "tr": "Sorrelay Bağları",
+    "en": "Sorrelay Vineyards"
+   },
+   "culture": "vadi",
+   "route": "akavan|serai_duvenmor",
+   "from": "akavan",
+   "share": 0.565,
+   "off_days": 0
+  },
+  {
+   "id": "place_73",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Kemrug",
+    "en": "Kemrug"
+   },
+   "culture": "dag_maden",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 0.818,
+   "off_days": 0
+  },
+  {
+   "id": "place_74",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Hestemar",
+    "en": "Hestemar"
+   },
+   "culture": "imparatorluk",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 0.0,
+   "off_days": 4
+  },
+  {
+   "id": "place_75",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Ambrisal",
+    "en": "Ambrisal"
+   },
+   "culture": "guney",
+   "route": "vorgat|zelmarin",
+   "from": "vorgat",
+   "share": 0.939,
+   "off_days": 4
+  },
+  {
+   "id": "place_76",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Ostiven",
+    "en": "Ostiven"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.432,
+   "off_days": 0
+  },
+  {
+   "id": "place_77",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Quellara",
+    "en": "Quellara"
+   },
+   "culture": "guney",
+   "route": "liraven|mirsana",
+   "from": "liraven",
+   "share": 0.974,
+   "off_days": 5
+  },
+  {
+   "id": "place_78",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Callorde",
+    "en": "Callorde"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.676,
+   "off_days": 0
+  },
+  {
+   "id": "place_79",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Pelhaut",
+    "en": "Pelhaut"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.676,
+   "off_days": 5
+  },
+  {
+   "id": "place_80",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Yelbarik Obası",
+    "en": "Yelbarik Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.516,
+   "off_days": 0
+  },
+  {
+   "id": "place_81",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Nostrel",
+    "en": "Nostrel"
+   },
+   "culture": "imparatorluk",
+   "route": "rivecande|vastrevar",
+   "from": "rivecande",
+   "share": 0.676,
+   "off_days": 3
+  },
+  {
+   "id": "place_82",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Tuylum",
+    "en": "Tuylum"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.439,
+   "off_days": 3
+  },
+  {
+   "id": "place_83",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Dornak",
+    "en": "Dornak"
+   },
+   "culture": "dag",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.414,
+   "off_days": 7
+  },
+  {
+   "id": "place_84",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Zurek",
+    "en": "Zurek"
+   },
+   "culture": "dag",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.408,
+   "off_days": 5
+  },
+  {
+   "id": "place_85",
+   "kind": "ih_mezra",
+   "visit": "village",
+   "name": {
+    "tr": "Sennabel",
+    "en": "Sennabel"
+   },
+   "culture": "vadi",
+   "route": "akavan|serai_duvenmor",
+   "from": "akavan",
+   "share": 0.522,
+   "off_days": 2
+  },
+  {
+   "id": "place_86",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Erguvan Kesimliği",
+    "en": "Redbud Logging Camp"
+   },
+   "culture": "vadi",
+   "route": "liraven|merigaud",
+   "from": "liraven",
+   "share": 0.571,
+   "off_days": 1
+  },
+  {
+   "id": "place_87",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Kordel Kesimliği",
+    "en": "Kordel Logging Camp"
+   },
+   "culture": "imparatorluk",
+   "route": "dravoss|selvicar",
+   "from": "selvicar",
+   "share": 1.0,
+   "off_days": 2
+  },
+  {
+   "id": "place_88",
+   "kind": "in_yurtcamp",
+   "visit": "village",
+   "name": {
+    "tr": "Sogurtay Obası",
+    "en": "Sogurtay Camp"
+   },
+   "culture": "gocebe",
+   "route": "selvicar|serai_orbeyan",
+   "from": "selvicar",
+   "share": 0.471,
+   "off_days": 2
+  },
+  {
+   "id": "place_89",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Grodan Kesimliği",
+    "en": "Grodan Logging Camp"
+   },
+   "culture": "dag_maden",
+   "route": "orvahel|serai_seyvan",
+   "from": "orvahel",
+   "share": 0.505,
+   "off_days": 2
+  },
+  {
+   "id": "place_90",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Celvane Kesimliği",
+    "en": "Celvane Logging Camp"
+   },
+   "culture": "vadi",
+   "route": "belvanor|mirsana",
+   "from": "mirsana",
+   "share": 1.0,
+   "off_days": 2
+  },
+  {
+   "id": "place_91",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Gurzan Bıçkıhanesi",
+    "en": "Gurzan Sawmill"
+   },
+   "culture": "dag_maden",
+   "route": "orsolune|vorgat",
+   "from": "vorgat",
+   "share": 0.263,
+   "off_days": 1
+  },
+  {
+   "id": "place_92",
+   "kind": "il_lumber",
+   "visit": "village",
+   "name": {
+    "tr": "Tersane Kesimliği",
+    "en": "Shipwrights' Logging Camp"
+   },
+   "culture": "guney",
+   "route": "orsolune|orvahel",
+   "from": "orsolune",
+   "share": 0.424,
+   "off_days": 0
+  },
+  {
+   "id": "place_93",
+   "kind": "ia_abbey",
+   "visit": "shrine",
+   "name": {
+    "tr": "Sessiz El Manastırı",
+    "en": "Monastery of the Silent Hand"
+   },
+   "culture": "sinir",
+   "route": "brazdun|kesgrav",
+   "from": "brazdun",
+   "share": 1.0,
+   "off_days": 6
+  },
+  {
+   "id": "place_94",
+   "kind": "ia_abbey",
+   "visit": "shrine",
+   "name": {
+    "tr": "İlk Sayfa Manastırı",
+    "en": "Monastery of the First Page"
+   },
+   "culture": "ahit",
+   "route": "orsolune|orvahel",
+   "from": "orsolune",
+   "share": 0.837,
+   "off_days": 0
+  },
+  {
+   "id": "place_95",
+   "kind": "ia_abbey",
+   "visit": "shrine",
+   "name": {
+    "tr": "Açık Kapı Manastırı",
+    "en": "Open Door Monastery"
+   },
+   "culture": "guney",
+   "route": "orvahel|serai_seyvan",
+   "from": "orvahel",
+   "share": 0.673,
+   "off_days": 0
+  },
+  {
+   "id": "place_96",
+   "kind": "ia_abbey",
+   "visit": "shrine",
+   "name": {
+    "tr": "Yamalı Çatı Manastırı",
+    "en": "Patched Roof Monastery"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|serai_orbeyan",
+   "from": "kirsavel",
+   "share": 0.68,
+   "off_days": 0
+  },
+  {
+   "id": "place_97",
+   "kind": "ia_abbey",
+   "visit": "shrine",
+   "name": {
+    "tr": "Taşsoluk Manastırı",
+    "en": "Stonebreath Monastery"
+   },
+   "culture": "dag_maden",
+   "route": "orsolune|vorgat",
+   "from": "vorgat",
+   "share": 0.0,
+   "off_days": 3
+  },
+  {
+   "id": "place_98",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Kıyıgözü Kulesi",
+    "en": "Shore-Eye Tower"
+   },
+   "culture": "guney",
+   "route": "orsolune|serai_seyvan",
+   "from": "orsolune",
+   "share": 0.933,
+   "off_days": 0
+  },
+  {
+   "id": "place_99",
+   "kind": "iw_tower",
+   "visit": "ruin",
+   "name": {
+    "tr": "Geribakan Kulesi",
+    "en": "Lookback Tower"
+   },
+   "culture": "sinir",
+   "route": "kirsavel|samuran",
+   "from": "kirsavel",
+   "share": 0.69,
+   "off_days": 1
+  }
  ]
 }

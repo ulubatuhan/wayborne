@@ -53,6 +53,8 @@ static var _offer_by_merchant_id: Dictionary = {}
 static var _start_candidates: Dictionary = {}
 static var _route_paths: Dictionary = {}
 static var _route_meta: Dictionary = {}
+## Yoldaki adlı yerler (T16-11): route_key -> [{id, kind, visit, name, from, share, off_days}].
+static var _road_places: Dictionary = {}
 static var _map_lights: PackedVector3Array = PackedVector3Array()
 
 static func get_locations() -> Array[Location]:
@@ -95,6 +97,12 @@ static func _ensure_built() -> void:
 	_build_locations(data)
 	_build_routes_and_offers(data)
 	_build_guild_wagon_quests()
+	for entry in data.get("road_places", []):
+		var place: Dictionary = entry
+		var key := String(place["route"])
+		if not _road_places.has(key):
+			_road_places[key] = []
+		(_road_places[key] as Array).append(place)
 
 static func _load_data() -> Dictionary:
 	var text := FileAccess.get_file_as_string(DATA_PATH)
@@ -103,6 +111,19 @@ static func _load_data() -> Dictionary:
 		push_error("WorldMapData: cannot read %s" % DATA_PATH)
 		return {"settlements": [], "routes": []}
 	return parsed
+
+## Bir yolun üstündeki ya da yanındaki adlı yerler (T16-11).
+static func get_road_places(route_key: String) -> Array:
+	_ensure_built()
+	return _road_places.get(route_key, [])
+
+## Bütün adlı yerler (testler ve harita).
+static func get_all_road_places() -> Array:
+	_ensure_built()
+	var out: Array = []
+	for key in _road_places:
+		out.append_array(_road_places[key])
+	return out
 
 ## Kültürün başlangıç adayları (bkz. GameSession.roll_starting_location).
 static func get_start_candidates(culture_id: String) -> Array[String]:

@@ -43,6 +43,9 @@ const CHIEF_ESCAPE_CHANCE: float = 0.5
 var persons: Dictionary = {}
 ## Şu an kartta adı geçen reis (olay metni {nemesis} ile ona bakar).
 var active_chief: String = ""
+## Şu an kartta olan yoldaki yer (T16-11): {place} adı, {off} sapma günü.
+var active_place_name: String = ""
+var active_place_off: int = 0
 
 # --- şehrin kişileri ---
 
@@ -190,7 +193,11 @@ func chief_killed(id: String, day: int) -> void:
 
 ## Olay metninde {nemesis} ve {scar}: o an kartta olan reis.
 func fill_names(text: String) -> String:
-	if active_chief.is_empty() or not persons.has(active_chief) or not text.contains("{"):
+	if not text.contains("{"):
+		return text
+	if not active_place_name.is_empty():
+		text = text.replace("{place}", active_place_name).replace("{off}", str(active_place_off * 2))
+	if active_chief.is_empty() or not persons.has(active_chief):
 		return text
 	var chief: Dictionary = persons[active_chief]
 	return text.replace("{nemesis}", String(chief["name"])).replace("{scar}", TranslationServer.translate(String(chief.get("scar", SCARS[0]))))

@@ -2247,6 +2247,7 @@ func _walk_at(rate: float, hours: float) -> void:
 	_sync_days_remaining()
 	_session.set_road_position(_route_key, _terrain_from(), _terrain_day(), maxi(1, _journey.terrain_days))
 	_read_nearby_memorials()
+	_check_road_places()
 	_check_pending_event_reached()
 	# Varış mesafeyle olur, günle değil - ve **o anda** olmalı. Eskiden
 	# yalnızca gün dönerken sınanıyordu: mesafe kapandıktan sonra kervan
@@ -2368,6 +2369,50 @@ func _refresh_memorials() -> void:
 	for m in _session.memorials_on(_route_key):
 		list.append({"day": GameSession.day_for_share(_route_key, _terrain_from(), float(m["share"]), maxi(1, _journey.terrain_days)), "kind": String(m["kind"])})
 	_band.set_memorials(list)
+	_band.set_places(_road_place_marks())
+
+## Yoldaki adlı yerler (T16-11): arazi gününe çevrilmiş [{place, day}].
+func _road_places_here() -> Array:
+	var out: Array = []
+	var first := _route_key.split("|")[0] if not _route_key.is_empty() else ""
+	for entry in WorldMapData.get_road_places(_route_key):
+		var place: Dictionary = entry
+		var canonical := float(place["share"]) if String(place["from"]) == first else 1.0 - float(place["share"])
+		out.append({"place": place, "day": GameSession.day_for_share(_route_key, _terrain_from(), canonical, maxi(1, _journey.terrain_days))})
+	return out
+
+func _road_place_marks() -> Array:
+	var marks: Array = []
+	var lang := "en" if TranslationServer.get_locale().begins_with("en") else "tr"
+	for item in _road_places_here():
+		marks.append({"day": float(item["day"]), "name": String((item["place"]["name"] as Dictionary).get(lang, ""))})
+	return marks
+
+## Kervanın başı adlı bir yere varınca o yerin kartı bir kez açılır; uğranan yer
+## deftere ve kalıcı ziyaret listesine yazılır (kart seçeneğinden bağımsız: yanından
+## geçmek de görmektir). Varış = yerin günü yürüyüş yönünde geçildi; yolun ölçeği
+## büyük (bir gün binlerce piksel), sabit bir yakınlık eşiği kartı levha ekrana
+## girmeden açıyordu. Çok geride kalmış yer (yükleme, dönüş) açılmaz.
+const ROAD_PLACE_STALE_DAYS: float = 0.5
+
+func _check_road_places() -> void:
+	if _current_event != null or _has_open_panel() or _camping or _session == null:
+		return
+	var here := _terrain_day()
+	for item in _road_places_here():
+		var place: Dictionary = item["place"]
+		var id := String(place["id"])
+		var behind := (here - float(item["day"])) * _journey.heading
+		if _journey.passed_places.has(id) or behind < 0.0 or behind > ROAD_PLACE_STALE_DAYS:
+			continue
+		_journey.passed_places.append(id)
+		var lang := "en" if TranslationServer.get_locale().begins_with("en") else "tr"
+		var name := String((place["name"] as Dictionary).get(lang, id))
+		_session.note_road_place(id, name)
+		_session.people.active_place_name = name
+		_session.people.active_place_off = int(place.get("off_days", 0))
+		_present_event(EventCatalog.place_visit_event(String(place["visit"]), int(place.get("off_days", 0))))
+		return
 
 ## Yanından geçilen anıt bir kez okunur; ön bölgede olan adını ve sebebini
 ## okur, başka yerde olan yalnızca bir taş görür (dikkat sonludur).
@@ -3284,6 +3329,8 @@ func _present_event(event: GameEvent) -> void:
 	# Yolun reisi (N32, T16-09): kartın {nemesis}'i bu bölgenin reisi.
 	if event.event_id == CHIEF_EVENT_ID:
 		_session.people.active_chief = _session.people.chief_in(_session.journey_region())
+	if not EventCatalog.PLACE_EVENTS.values().has(event.event_id):
+		_session.people.active_place_name = ""
 
 	_add_log("—— %s" % _session.people.fill_names(tr(event.title_key)))
 
@@ -3500,7 +3547,7 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event
 	_current_event = null
 	if resolved_event != null:
-		_session.note_beat(GameSession.BEAT_EVENT, [tr(resolved_event.title_key)])
+		_session.note_beat(GameSession.BEAT_EVENT, [_session.people.fill_names(tr(resolved_event.title_key))])
 		_session.log_beat(GameSession.BEAT_LOG_DECISION, "card:" + resolved_event.event_id)
 	NodeUtil.clear_children(_card_panel)
 

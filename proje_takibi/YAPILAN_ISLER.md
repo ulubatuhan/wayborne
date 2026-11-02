@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **195** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **196** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3470,5 +3470,19 @@ Toplam: **195** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-10 Kod düzeni: iş akışlarını tek dosyada topla**
   - **Ne:** Kod düzeni (eski 4.3): testler, ekran görüntüleri ve ölçüm iş akışları tek dosyada toplanır.
   - **Kim:** C · **Eski:** 4.3
+
+</details>
+
+### T16-11 · Haritada adı olan her yer oynanabilir
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ana hedef. | Bitti: 99 adlı yer (54 köy/oba/mezra, 28 harabe/kule, 15 sunak/manastır, 2 maden) en yakın yola bağlandı (road_places); yolda adı yazılı levha, kervan varınca yerin kartı (village/shrine/ruin/mine; uzak yere sapma gün ister), deftere ilk görülüş; şerit sırası düzeltmesi (anıt taşları da artık görünüyor). Test: test_road_places. Ekran: Golcavar→Rivecande, Sentinara Kulesi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-11 Haritada adı olan her yer oynanabilir**
+  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: LORE.md §15 ve places_v3.json.
+  - **Kim:** C · **Eski:** Ana hedef
 
 </details>

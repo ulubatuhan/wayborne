@@ -1449,3 +1449,4 @@
 "UI_PEOPLE_CHAIN","İstediği: %d %s, gün %d'e kadar. Karşılığı %d GG.","Wants: %d %s by day %d. Pays %d GP.","","","","","","","","",""
 "UI_PEOPLE_DELIVER","Teslim et","Deliver","","","","","","","","",""
 "UI_PEOPLE_CHAIN_DONE_ALL","Verebileceği başka iş kalmadı; adımız onun defterinde.","No more work from them; our name is in their book.","","","","","","","","",""
+"UI_JOURNAL_ROAD_PLACE","Yol bizi %s önünden geçirdi.","The road took us past %s.","","","","","","","","",""

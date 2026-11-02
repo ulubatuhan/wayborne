@@ -113,6 +113,10 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_bandit_tribute_zone_news())
 	_road_events.append(_avucici_hand())
 	_road_events.append(_chief_returns())
+	# Yoldaki adlı yerler (T16-11): rastgele çekilmezler ("place_here" bağlamda
+	# yok), yer yolda gelince açılırlar; katalogda olmaları kayıt için.
+	for visit in PLACE_EVENTS:
+		_road_events.append(place_visit_event(String(visit), 0))
 	_road_events.append(_bandit_tribute_toll())
 	_road_events.append(_road_warden())
 	_road_events.append(_taken_captive())
@@ -3421,4 +3425,76 @@ static func _chief_returns() -> GameEvent:
 			EventEffect.make(EventEffect.Type.STRESS, 6),
 		])),
 	])
+	return event
+
+## Haritada adı olan her yer oynanabilir (kullanıcı, 2026-10-29; T16-11; sütun:
+## Yol yaşar). Yerleşim olmayan her adlı harita noktası en yakın yola bağlı
+## (settlements.json `road_places`); kervan oraya gelince bu kartlardan biri
+## yerin adıyla açılır ({place}). Yoldan uzak yere uğramak gidiş-dönüş gün
+## ister (`off_days` × 2). Yer türünün kartı: köy, oba, mezra, balıkçı köyü,
+## kereste kampı → village; manastır, taşlar, mezarlık → shrine; harabe, kule,
+## fener, savaş yeri, darağacı, batık → ruin; maden → mine.
+const PLACE_EVENTS: Dictionary = {
+	"village": "evt_place_village", "shrine": "evt_place_shrine",
+	"ruin": "evt_place_ruin", "mine": "evt_place_mine",
+}
+const PLACE_PROVISIONS_COST: int = 20
+const PLACE_PROVISIONS: int = 6
+const PLACE_OFFERING: int = 10
+
+static func place_visit_event(visit: String, off_days: int) -> GameEvent:
+	var id := String(PLACE_EVENTS.get(visit, PLACE_EVENTS["village"]))
+	var key := id.to_upper()
+	var event := _event(id, key + "_TITLE", key + ("_TEXT_OFF" if off_days > 0 else "_TEXT"), 0.0)
+	event.conditions = _conditions([_c("place_here", EventCondition.Op.GREATER_EQUAL, 1.0)])
+	# Uğramak yoldan sapmaksa gidiş-dönüş günü her ziyaret seçeneğine biner.
+	var detour: Array = []
+	if off_days > 0:
+		detour.append(EventEffect.make(EventEffect.Type.TRAVEL_DAYS, off_days * 2))
+	var choices: Array = []
+	match visit:
+		"shrine":
+			choices.append(_choice("EVT_PLACE_SHRINE_OPT_REST", _effects(detour + [
+				EventEffect.make(EventEffect.Type.STRESS, -8),
+			])))
+			choices.append(_gated_choice("EVT_PLACE_SHRINE_OPT_OFFER", "EVT_PLACE_SHRINE_OPT_OFFER_LOCKED",
+				_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, PLACE_OFFERING)]),
+				_effects(detour + [
+					EventEffect.make(EventEffect.Type.GOLD, -PLACE_OFFERING),
+					EventEffect.make(EventEffect.Type.FACTION, 1, Standing.CHURCH),
+					EventEffect.make(EventEffect.Type.MORALE, 3),
+				])))
+		"ruin":
+			var search := _choice("EVT_PLACE_RUIN_OPT_SEARCH", _effects(detour))
+			search.outcomes = _outcomes([
+				EventOutcome.make("EVT_PLACE_RUIN_FOUND", _effects([EventEffect.make(EventEffect.Type.GOLD, 25)]), 4.0),
+				EventOutcome.make("EVT_PLACE_RUIN_HURT", _effects([EventEffect.make(EventEffect.Type.PARTY_HP, -6)]), 3.0),
+				EventOutcome.make("EVT_PLACE_RUIN_NOTHING", _effects([EventEffect.make(EventEffect.Type.STRESS, 3)]), 3.0),
+			])
+			choices.append(search)
+			choices.append(_choice("EVT_PLACE_RUIN_OPT_WATCH", _effects(detour + [
+				EventEffect.make(EventEffect.Type.DANGER, -5),
+			])))
+		"mine":
+			choices.append(_gated_choice("EVT_PLACE_MINE_OPT_TRADE", "EVT_PLACE_MINE_OPT_TRADE_LOCKED",
+				_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 30)]),
+				_effects(detour + [
+					EventEffect.make(EventEffect.Type.GOLD, -30),
+					EventEffect.make(EventEffect.Type.ITEM_ADD, 3, "test_weapon"),
+				])))
+		_:
+			choices.append(_gated_choice("EVT_PLACE_VILLAGE_OPT_FOOD", "EVT_PLACE_VILLAGE_OPT_FOOD_LOCKED",
+				_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, PLACE_PROVISIONS_COST)]),
+				_effects(detour + [
+					EventEffect.make(EventEffect.Type.GOLD, -PLACE_PROVISIONS_COST),
+					EventEffect.make(EventEffect.Type.PROVISIONS, PLACE_PROVISIONS),
+				])))
+			choices.append(_choice("EVT_PLACE_VILLAGE_OPT_NEWS", _effects(detour + [
+				EventEffect.make(EventEffect.Type.DANGER, -4),
+				EventEffect.make(EventEffect.Type.STRESS, -3),
+			])))
+	# Geçip gitmek de bir karar: kıtlıkta canlı bir yeri arkada bırakmak yürekte
+	# küçük bir yük (karşılıksız seçenek yok kuralı).
+	choices.append(_choice("EVT_PLACE_OPT_PASS", _effects([EventEffect.make(EventEffect.Type.MORALE, -1)])))
+	event.choices = _choices(choices)
 	return event

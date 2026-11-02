@@ -523,6 +523,9 @@ func _draw() -> void:
 		_draw_haze(cover, horizon - h_of(area) * 0.25, horizon + h_of(area) * 0.06, HAZE_MID_ALPHA)
 		_draw_stops(area, cover, horizon)
 		_draw_strip(RoadStrips.GROUND, area, cover, horizon)
+		# Yol kenarı işaretleri zemin şeridinin *önünde*: arkasında kalınca
+		# anıt taşları ve yer levhaları otların altında kayboluyordu (T16-11).
+		_draw_roadside(area, cover)
 		_draw_dust(cover)
 		_draw_night_lamp(area)
 	else:
@@ -530,6 +533,7 @@ func _draw() -> void:
 		_draw_stops(area, cover, horizon)
 		_draw_ground_props(area, cover, horizon)
 		_draw_road(area, cover)
+		_draw_roadside(area, cover)
 	_foreground.set_strips(_blend if rendered else {})
 	# Yolun önü ayrı bir katmanda (bkz. TravelForeground): burada
 	# çizilse kervanın arkasında kalırdı.
@@ -1041,6 +1045,36 @@ func set_memorials(list: Array) -> void:
 	_memorials = list
 	queue_redraw()
 
+## Yoldaki adlı yerlerin işareti (T16-11): [{"day", "name"}]. Yol kenarında
+## bir direk ve üstünde yerin adı yazılı bir levha; yer yoldan uzaksa levha o
+## yöne bakar. Yazı aynalanmaz.
+var _places: Array = []
+
+func set_places(list: Array) -> void:
+	_places = list
+	queue_redraw()
+
+func _draw_places(area: Rect2, cover: Rect2) -> void:
+	var font := ThemeDB.fallback_font
+	var size := int(maxf(12.0, area.size.y * 0.022))
+	var wood := Color(0.36, 0.26, 0.17)
+	var board := Color(0.62, 0.52, 0.38).lerp(Color(_sky.haze), 0.2)
+	var ink := Color(0.14, 0.11, 0.09, 0.9)
+	for p in _places:
+		var x := screen_x_for_day(float(p["day"]))
+		if x < cover.position.x - 160.0 or x > cover.end.x + 160.0:
+			continue
+		var h := area.size.y * 0.11
+		var foot := Vector2(x, _ground_y_at_screen(x) - area.size.y * 0.02)
+		ArtDraw.contact_shadow(self, foot, h * 0.5, 0.12)
+		draw_line(foot, foot + Vector2(0, -h), wood, maxf(2.0, h * 0.05))
+		var text := String(p["name"])
+		var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x + size
+		var plate := Rect2(foot + Vector2(-width * 0.5, -h - size * 1.3), Vector2(width, size * 1.4))
+		draw_rect(plate, board)
+		draw_rect(plate, ink, false, 1.5)
+		draw_string(font, plate.position + Vector2(size * 0.5, size * 1.05), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, ink)
+
 func _draw_memorials(area: Rect2, cover: Rect2) -> void:
 	var ink := Color(0.14, 0.11, 0.09, 0.85)
 	var stone := Color(0.52, 0.49, 0.44).lerp(Color(_sky.haze), 0.25)
@@ -1151,8 +1185,11 @@ func _draw_road_gate(gate: Dictionary, prop_id: String, kind: String, area: Rect
 	var open := near * near * (3.0 - 2.0 * near)
 	GateArt.draw(self, prop_id, base, k, tint, Color(_sky.haze) * _light, open, _night_ratio, kind)
 
-func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
+func _draw_roadside(area: Rect2, cover: Rect2) -> void:
 	_draw_memorials(area, cover)
+	_draw_places(area, cover)
+
+func _draw_stops(area: Rect2, cover: Rect2, horizon: float) -> void:
 	_draw_road_gates(area, cover)
 	if _terrain == null:
 		return
