@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **10** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **11** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P03
 
@@ -268,5 +268,21 @@ Toplam: **10** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
     5. Kriz ve gri ile çarpışma (9.3, Y-G10T): evre × durum matrisi nasıl sadeleşir.
   - **Kabul:** Tasarım notu (render mi türetme mi, boyut hesabı) ve 3 yerleşim türünden birer örnek, dört evrede; kullanıcı onayından sonra 27 yer.
   - **Bağlı:** 9.3, 12.1 (geniş kadraj önce), Y-G10T, N34.
+
+</details>
+
+## Paket P19
+
+### T16-07 · Bölgesel itibar ve hizipler
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C12. | Yapıldı, kullanıcı onayına sunuldu: Standing (bölge başına itibar + lonca/kilise/kardeşlik), standing.json ilişki matrisi (LORE §12; komşu 0,1, uzak 0,03, düşman eksi), reputation artık bölgenin değeri (eski kapılar bölgeden okur), kredi ve pano lonca payıyla, kardeşlik yol tehlikesini ±%20 oynatır (dökümde satırı var), kilise bağışı ve hekim indirimi, EventEffect.FACTION (haraç/fidye +, direniş -), kayıt + eski kayıt geçişi, durum sekmesinde satırlar. Test: test_standing.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-07 Bölgesel itibar ve hizipler**
+  - **Ne:** Bölgesel itibar ve hizipler (eski Y-C12). Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C12
 
 </details>

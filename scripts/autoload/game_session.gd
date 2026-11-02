@@ -179,7 +179,7 @@ func get_available_credit_after_repay(amount: int) -> int:
 ## gördüğü yüzde ile defterdeki tutar kuruşu kuruşuna aynı kalsın.
 func get_loan_fee_percent() -> int:
 	var spread := LOAN_ORIGINATION_PERCENT_UNTRUSTED - LOAN_ORIGINATION_PERCENT_TRUSTED
-	var clamped := clampi(reputation, 0, LOAN_FEE_REPUTATION_CAP)
+	var clamped := clampi(credit_standing(), 0, LOAN_FEE_REPUTATION_CAP)
 	return LOAN_ORIGINATION_PERCENT_UNTRUSTED - (spread * clamped) / LOAN_FEE_REPUTATION_CAP
 
 ## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
@@ -192,7 +192,7 @@ func get_loan_principal(amount: int) -> int:
 func get_loan_block_reason() -> String:
 	if is_journey_active():
 		return "UI_GUILD_LOAN_ON_ROAD"
-	if reputation < LOAN_MIN_REPUTATION:
+	if credit_standing() < LOAN_MIN_REPUTATION:
 		return "UI_GUILD_LOAN_NO_TRUST"
 	if get_available_credit() < LOAN_MIN_AMOUNT:
 		return "UI_GUILD_LOAN_LINE_FULL"
@@ -467,7 +467,44 @@ var journey_shortcut: bool = false
 var journey_days_remaining: int = 0
 
 var danger_level: float = 0.0
-var reputation: int = 0
+## Bölgesel itibar ve hizipler (Y-C12, T16-07; bkz. Standing). `reputation`
+## artık bulunulan bölgenin gözündeki ad: bütün eski kapılar (işe alma, kontrat,
+## vagon kilometre taşları, kredi) onu okur, yani her bölge kapısını kendi açar.
+var standing: Standing = _new_standing()
+var reputation: int:
+	get:
+		return standing.region(current_region())
+	set(value):
+		standing.set_region(current_region(), float(value))
+
+static func _new_standing() -> Standing:
+	var s := Standing.new()
+	s.reset()
+	return s
+
+## Bulunulan yerin bölgesi (yoldayken çıkılan şehrinki).
+func current_region() -> String:
+	var here := WorldMapData.get_location_by_id(current_location_id)
+	return here.region if here != null else ""
+
+## Kredinin gözü: bölgenin adı ve loncanın defteri (lonca alacaklıdır).
+func credit_standing() -> int:
+	return reputation + standing.faction(Standing.GUILD) / 2
+
+## Kontrat panosunun gözü: bölgenin adı ve loncanın defteri.
+func trade_standing() -> int:
+	return reputation + standing.faction(Standing.GUILD) / 2
+
+func change_faction_standing(faction_id: String, delta: int) -> int:
+	return standing.change_faction(faction_id, float(delta))
+
+## Kardeşlikle arası iyi olan kervana yol daha az pusu kurar, kılıç çekmiş olana
+## daha çok (±%20). Kardeşlik bölge tanımaz: haraç kralları birbirine haber verir.
+const BROTHERHOOD_DANGER_SHARE: float = 0.01
+const BROTHERHOOD_DANGER_LIMIT: float = 0.2
+
+func brotherhood_danger_factor() -> float:
+	return 1.0 - clampf(float(standing.faction(Standing.BROTHERHOOD)) * BROTHERHOOD_DANGER_SHARE, -BROTHERHOOD_DANGER_LIMIT, BROTHERHOOD_DANGER_LIMIT)
 
 ## Rotanın kendi tehlike tablosu (bkz. WorldMapData) sabit kalır ama
 ## kervan ne kadar deneyimli olursa olsun yollar günler geçtikçe daha
@@ -509,7 +546,7 @@ func get_route_danger(route: TravelRoute) -> float:
 	var route_key := RouteConditions.route_key(route.from_location_id, route.to_location_id)
 	var world_delta := world_events.get_route_danger_delta(route_key, total_days_elapsed)
 	var with_world_events := clampf(base + world_delta * (1.0 - base), 0.0, 1.0)
-	return get_effective_danger(with_world_events)
+	return clampf(get_effective_danger(with_world_events) * brotherhood_danger_factor(), 0.0, 1.0)
 
 ## Tehlikenin dökümü (görev Y-F10): get_route_danger'ın adımları sırayla,
 ## her biri {"part", "value" (adımdan sonraki tehlike), "delta", "arg"}.
@@ -519,6 +556,7 @@ const DANGER_PART_BASE: String = "base"
 const DANGER_PART_STATE: String = "state"
 const DANGER_PART_WORLD: String = "world"
 const DANGER_PART_GROWTH: String = "growth"
+const DANGER_PART_BROTHERHOOD: String = "brotherhood"
 
 func get_route_danger_breakdown(route: TravelRoute) -> Array[Dictionary]:
 	var parts: Array[Dictionary] = []
@@ -535,9 +573,12 @@ func get_route_danger_breakdown(route: TravelRoute) -> Array[Dictionary]:
 	var with_world := clampf(with_state + world_delta * (1.0 - with_state), 0.0, 1.0)
 	if not is_equal_approx(with_world, with_state):
 		parts.append({"part": DANGER_PART_WORLD, "value": with_world, "delta": with_world - with_state, "arg": ""})
-	var final := get_effective_danger(with_world)
-	if not is_equal_approx(final, with_world):
-		parts.append({"part": DANGER_PART_GROWTH, "value": final, "delta": final - with_world, "arg": ""})
+	var grown := get_effective_danger(with_world)
+	if not is_equal_approx(grown, with_world):
+		parts.append({"part": DANGER_PART_GROWTH, "value": grown, "delta": grown - with_world, "arg": ""})
+	var final := clampf(grown * brotherhood_danger_factor(), 0.0, 1.0)
+	if not is_equal_approx(final, grown):
+		parts.append({"part": DANGER_PART_BROTHERHOOD, "value": final, "delta": final - grown, "arg": ""})
 	return parts
 
 ## Bir olayın o yol üstünde hâlâ süren müdahalesi var mı (bkz. ROUTE_CHANGE).
@@ -2228,10 +2269,10 @@ const MAX_REPUTATION: int = 100
 ## Doğrudan `reputation += x` yazmak, o dibi olmayan tek bir yol bırakmak
 ## demek (aynı gerekçe `Inventory.add_item`'ın ağırlık kontrolünü kendi
 ## içinde tutmasında da var).
+## Bölgesel itibarla (T16-07) değişim bulunulan bölgede olur ve öbür bölgelere
+## jeopolitik ağırlıkla yayılır (Standing.spill); dip ve tavan Standing'de.
 func change_reputation(delta: int) -> int:
-	var before := reputation
-	reputation = clampi(reputation + delta, MIN_REPUTATION, MAX_REPUTATION)
-	return reputation - before
+	return standing.change_region(current_region(), float(delta))
 
 func accept_contract(offer: MerchantOffer) -> void:
 	accepted_contracts[offer.merchant_id] = total_days_elapsed
@@ -2315,7 +2356,10 @@ func advance_day() -> Array[String]:
 
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
-	change_reputation(-debts.advance_to_day(total_days_elapsed))
+	# Alacaklı lonca: geciken borç loncanın defterine de yazılır.
+	var overdue_hit := debts.advance_to_day(total_days_elapsed)
+	change_reputation(-overdue_hit)
+	change_faction_standing(Standing.GUILD, -overdue_hit)
 	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
 	market.advance_day(total_days_elapsed)
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
@@ -2358,6 +2402,7 @@ func advance_day() -> Array[String]:
 	for merchant_id in expired:
 		accepted_contracts.erase(merchant_id)
 		change_reputation(-REPUTATION_PENALTY_PER_LOST_CONTRACT)
+		change_faction_standing(Standing.GUILD, -1)
 
 	return expired
 
@@ -3608,8 +3653,32 @@ func _plague_on_arrival() -> void:
 		if rng.randf() < PLAGUE_ARRIVAL_CHANCE:
 			character.add_ailment("plague")
 
+## Kilisenin hekimi kiliseyle arası iyi olana ucuz bakar (T16-07): kilise
+## itibarının her puanı %1, en çok %25.
+const CHURCH_FEE_SHARE: float = 0.01
+const CHURCH_FEE_LIMIT: float = 0.25
+
 func doctor_fee(id: String) -> int:
-	return DOCTOR_FEE_SICKNESS if String(CharacterData.AILMENTS.get(id, {}).get("kind", "")) == "sickness" else DOCTOR_FEE_INJURY
+	var base := DOCTOR_FEE_SICKNESS if String(CharacterData.AILMENTS.get(id, {}).get("kind", "")) == "sickness" else DOCTOR_FEE_INJURY
+	var discount := clampf(float(standing.faction(Standing.CHURCH)) * CHURCH_FEE_SHARE, -CHURCH_FEE_LIMIT, CHURCH_FEE_LIMIT)
+	return maxi(1, int(round(float(base) * (1.0 - discount))))
+
+## Kiliseye bağış (T16-07): kesesi olan kervan kilise topluluğunda ad yapar.
+## Kıtlıkta kilise sofra kurar; bağış o sofraya gider, şehrin hâli de biraz
+## düzelir (Y-C21).
+const CHURCH_DONATION: int = 30
+const CHURCH_DONATION_STANDING: int = 2
+
+func can_donate_to_church() -> bool:
+	return not is_journey_active() and wallet.can_afford(CHURCH_DONATION)
+
+func donate_to_church() -> bool:
+	if not can_donate_to_church():
+		return false
+	wallet.spend(CHURCH_DONATION)
+	change_faction_standing(Standing.CHURCH, CHURCH_DONATION_STANDING)
+	change_city_morale(current_location_id, 0.01)
+	return true
 
 ## Hekim: kilitliyse sebebi, açıksa "".
 func get_doctor_block_reason(character: CharacterData, id: String) -> String:
@@ -4145,6 +4214,7 @@ func finish_journey() -> Dictionary:
 	payout["reputation_gained"] = change_reputation(
 		delivered * REPUTATION_PER_DELIVERED_CONTRACT
 	)
+	change_faction_standing(Standing.GUILD, delivered)
 
 	# XP hesabı sıfırlanmadan önce yapılmalı: moral ve kontrat kaybı seferin
 	# "başarılı" mı "başarısız" mı sayıldığını belirliyor (bkz. _calculate_journey_xp).
@@ -4763,6 +4833,7 @@ func to_save_dict() -> Dictionary:
 		"wagon_inventories": wagon_inventory_data,
 		"current_location_id": current_location_id,
 		"reputation": reputation,
+		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
 		"owned_wagon_damaged": owned_wagon_damaged,
@@ -4990,7 +5061,11 @@ func load_from_dict(raw_data: Dictionary) -> void:
 				add_to_cargo(item, quantity)
 
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
-	reputation = int(data.get("reputation", 0))
+	# Bölgesel itibar (T16-07); eski kayıtta tek sayı vardı: her bölge onunla açılır.
+	if data.has("standing"):
+		standing.from_dict(data["standing"] as Dictionary)
+	else:
+		standing.reset(float(data.get("reputation", 0)))
 	_flags = (data.get("flags", {}) as Dictionary).duplicate()
 	owned_wagon_damaged = clampi(int(data.get("owned_wagon_damaged", 0)), 0, owned_wagon_count)
 	owned_dogs = clampi(int(data.get("owned_dogs", 0)), 0, MAX_DOGS)

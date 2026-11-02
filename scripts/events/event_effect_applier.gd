@@ -157,6 +157,10 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
+		EventEffect.Type.FACTION:
+			var moved := session.change_faction_standing(effect.text_value, effect.amount)
+			if moved != 0:
+				result.lines.append(_t("EFF_FACTION") % [_t(Standing.faction_name_key(effect.text_value)), moved])
 		EventEffect.Type.CUT_HAND:
 			var maimed := session.unbelieving_companion()
 			if maimed != null:

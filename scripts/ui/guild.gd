@@ -228,7 +228,7 @@ func _refresh_offer_rows() -> void:
 	for row in _rows:
 		var offer: MerchantOffer = row.offer
 		var accept_button: Button = row.accept_button
-		if not offer.is_open_to(_session.reputation):
+		if not offer.is_open_to(_session.trade_standing()):
 			accept_button.text = tr("UI_GUILD_NEED_REPUTATION") % offer.required_reputation
 			accept_button.disabled = true
 		else:
@@ -344,7 +344,7 @@ func _on_commission_pressed(kind: WorldEvents.Kind) -> void:
 		_rebuild()
 
 func _on_accept_pressed(offer: MerchantOffer) -> void:
-	if not offer.is_open_to(_session.reputation):
+	if not offer.is_open_to(_session.trade_standing()):
 		return
 	_session.accept_contract(offer)
 	_rebuild()

@@ -17,6 +17,7 @@ const SUITE_PATHS: Array[String] = [
 	"res://tests/test_character_stats.gd",
 	"res://tests/test_avucici.gd",
 	"res://tests/test_tavern_lodging.gd",
+	"res://tests/test_standing.gd",
 	"res://tests/test_culture.gd",
 	"res://tests/test_character_data.gd",
 	"res://tests/test_combat.gd",

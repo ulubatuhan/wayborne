@@ -42,6 +42,7 @@ func _ready() -> void:
 	_purification_panel.enable_curse_lifting()
 
 	_build_doctor()
+	_build_donation()
 	_build_myths()
 
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
@@ -82,6 +83,29 @@ func _add_myth_label(title_text: String, body_text: String) -> void:
 ## Stok yoksa düğme sebebiyle kilitli; iksir satan kervan stoğu artırır.
 var _doctor_box: VBoxContainer
 
+## Bağış (T16-07): kilise itibarı hekimi ucuzlatır.
+var _donation_label: Label
+var _donation_button: Button
+
+func _build_donation() -> void:
+	_content.add_child(HSeparator.new())
+	_donation_label = Label.new()
+	_donation_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_content.add_child(_donation_label)
+	_donation_button = Button.new()
+	_donation_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_donation_button.pressed.connect(func():
+		if _session.donate_to_church():
+			_refresh_donation()
+			_refresh_doctor())
+	_content.add_child(_donation_button)
+	_refresh_donation()
+
+func _refresh_donation() -> void:
+	_donation_label.text = tr("UI_CHURCH_DONATION_HINT") % _session.standing.faction(Standing.CHURCH)
+	_donation_button.text = tr("UI_CHURCH_DONATE") % GameSession.CHURCH_DONATION
+	_donation_button.disabled = not _session.can_donate_to_church()
+
 func _build_doctor() -> void:
 	_doctor_box = VBoxContainer.new()
 	_doctor_box.add_theme_constant_override("separation", 4)
@@ -121,6 +145,7 @@ func _refresh_doctor() -> void:
 		_doctor_box.add_child(none)
 
 func _on_wallet_changed(_new_balance: int) -> void:
+	_refresh_donation()
 	_purification_panel.refresh()
 	_refresh_doctor()
 

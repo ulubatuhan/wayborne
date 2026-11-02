@@ -547,3 +547,4 @@
 "LEDGER_CAUSE_FOLLOWED_OATH","ant kardeşinin peşinden gitti","followed their oath-sibling","","","","","","","","",""
 "EFF_CITY_MORALE_UP","Şehrin hâli biraz düzeldi.","The city's state eased a little.","","","","","","","","",""
 "EFF_CITY_MORALE_DOWN","Şehrin hâli kötüleşti.","The city's state grew worse.","","","","","","","","",""
+"EFF_FACTION","%s ile aramız: %+d","Standing with the %s: %+d","","","","","","","","",""

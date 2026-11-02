@@ -293,6 +293,7 @@ static func _bandit_ambush() -> GameEvent:
 		_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80)]),
 		_effects([
 			EventEffect.make(EventEffect.Type.MORALE, -5),
+			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
 		])
 	)
 	pay_choice.outcomes = _outcomes([
@@ -312,6 +313,7 @@ static func _bandit_ambush() -> GameEvent:
 		# Zar atılmıyor: gerçek savaş paneli açılıyor, sonucun etkilerini
 		# road_journey.gd uyguluyor (bkz. _on_combat_finished).
 		_choice("EVT_AMBUSH_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.FACTION, -2, Standing.BROTHERHOOD),
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
 		])),
 		_choice("EVT_AMBUSH_OPT_HAGGLE", _effects([
@@ -2269,6 +2271,8 @@ static func _bandit_tribute_toll() -> GameEvent:
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 70)]),
 			_effects([
 				EventEffect.make(EventEffect.Type.GOLD, -70),
+				# Haraç veren kervanın adı kardeşlikte duyulur (T16-07).
+				EventEffect.make(EventEffect.Type.FACTION, 2, Standing.BROTHERHOOD),
 			])
 		),
 		# Y-C32: kıtlıkta haraççı para kadar unu da ister. Bedel sofradan
@@ -2279,9 +2283,11 @@ static func _bandit_tribute_toll() -> GameEvent:
 			_effects([
 				EventEffect.make(EventEffect.Type.PROVISIONS, -TOLL_PROVISIONS),
 				EventEffect.make(EventEffect.Type.MORALE, -4),
+				EventEffect.make(EventEffect.Type.FACTION, 2, Standing.BROTHERHOOD),
 			])
 		),
 		_choice("EVT_TRIBUTE_TOLL_OPT_RESIST", _effects([
+			EventEffect.make(EventEffect.Type.FACTION, -3, Standing.BROTHERHOOD),
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
 		])),
 	])

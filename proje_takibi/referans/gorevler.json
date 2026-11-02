@@ -4053,14 +4053,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Sistem",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 306,
    "kim": "CO",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C12."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C12. | Yapıldı, kullanıcı onayına sunuldu: Standing (bölge başına itibar + lonca/kilise/kardeşlik), standing.json ilişki matrisi (LORE §12; komşu 0,1, uzak 0,03, düşman eksi), reputation artık bölgenin değeri (eski kapılar bölgeden okur), kredi ve pano lonca payıyla, kardeşlik yol tehlikesini ±%20 oynatır (dökümde satırı var), kilise bağışı ve hekim indirimi, EventEffect.FACTION (haraç/fidye +, direniş -), kayıt + eski kayıt geçişi, durum sekmesinde satırlar. Test: test_standing."
   },
   {
    "id": "T16-08",

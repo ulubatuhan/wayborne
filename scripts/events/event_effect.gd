@@ -88,6 +88,9 @@ enum Type {
 	# Avuçiçi'nde inançsızın eli kesilir (lore defter III, Ç14): kervanın El'e
 	# inanmayan bir yoldaşı kalıcı olarak tek elli kalır. Olaylar öldürmez.
 	CUT_HAND,
+	# Hizip itibarı (Y-C12, T16-07): text_value hizip (Standing.GUILD/CHURCH/
+	# BROTHERHOOD), amount değişim.
+	FACTION,
 }
 
 @export var type: Type = Type.GOLD

@@ -163,6 +163,7 @@ const DANGER_PART_KEYS: Dictionary = {
 	"state": "UI_DANGER_PART_STATE",
 	"world": "UI_DANGER_PART_WORLD",
 	"growth": "UI_DANGER_PART_GROWTH",
+	"brotherhood": "UI_DANGER_PART_BROTHERHOOD",
 }
 
 ## Kestirme (görev Y-B13): yol kısalır, ortası zor araziden geçer, tehlike artar.

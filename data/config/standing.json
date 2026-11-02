@@ -1,0 +1,36 @@
+{
+  "_doc": "Bölgesel itibar ve hizipler (Y-C12, T16-07). Bir bölgede kazanılan itibar öbür bölgelere 'spill' ağırlığıyla yayılır (kullanıcı: 'bir yerde 5 itibar kazanıyorsam diğer tarafta bu 0.5 olabilir; jeopolitik olarak dağılmalı'). Ağırlıklar LORE §12 İlişkiler ağından; listede olmayan çift komşuysa 'neighbour', değilse 'far'. Eksi ağırlık düşmanlık: düşmanın yurdunda sevilen burada sevilmez.",
+  "regions": {
+    "vadi": "Büyük Vadi",
+    "imparatorluk": "Vaelghard",
+    "sinir": "Ezmerak",
+    "dag": "Ayazkaya",
+    "dag_maden": "Taşkök",
+    "guney": "Ors",
+    "ahit": "Avuçiçi",
+    "gocebe": "Gokyurt"
+  },
+  "neighbour": 0.1,
+  "far": 0.03,
+  "relations": [
+    {"a": "gocebe", "b": "imparatorluk", "spill": -0.1, "why": "düşman; yağma ve pusu (LORE §12)"},
+    {"a": "dag", "b": "imparatorluk", "spill": -0.1, "why": "düşman; savaş"},
+    {"a": "gocebe", "b": "dag_maden", "spill": 0.2, "why": "dost, ticaret anlaşması"},
+    {"a": "dag", "b": "sinir", "spill": 0.2, "why": "Ayazkaya-Ezmerak ticaret anlaşması"},
+    {"a": "imparatorluk", "b": "ahit", "spill": 0.25, "why": "müttefik ve garantör"},
+    {"a": "imparatorluk", "b": "guney", "spill": 0.05, "why": "borçlu, hoşnutsuz"},
+    {"a": "vadi", "b": "sinir", "spill": 0.12, "why": "bazı Vadi şehirleri Ezmerak'a borçlu"},
+    {"a": "guney", "b": "vadi", "spill": 0.15, "why": "Orsolune kıtanın çoğuna borç verir"},
+    {"a": "guney", "b": "sinir", "spill": 0.12, "why": "Orsolune'nin ticaret anlaşmaları"},
+    {"a": "ahit", "b": "vadi", "spill": -0.05, "why": "Avuçiçi bütün kâfir şehirlerle düşman"},
+    {"a": "ahit", "b": "guney", "spill": -0.05, "why": "Avuçiçi bütün kâfir şehirlerle düşman"},
+    {"a": "ahit", "b": "sinir", "spill": -0.05, "why": "Avuçiçi bütün kâfir şehirlerle düşman"},
+    {"a": "ahit", "b": "gocebe", "spill": -0.05, "why": "Avuçiçi bütün kâfir şehirlerle düşman"},
+    {"a": "ahit", "b": "dag", "spill": -0.05, "why": "Avuçiçi bütün kâfir şehirlerle düşman"}
+  ],
+  "factions": {
+    "lonca": {"name_key": "STANDING_FACTION_GUILD", "why": "Tüccar loncası: kontrat, kredi, babanın borcu."},
+    "kilise": {"name_key": "STANDING_FACTION_CHURCH", "why": "İnanç toplulukları: kilise bağışı, sunaklar, Avuçiçi."},
+    "kardeslik": {"name_key": "STANDING_FACTION_BROTHERHOOD", "why": "Haydut kardeşlikleri ve yol kralları: haraç verenin yolu açık, kılıç çekenin kapalı."}
+  }
+}

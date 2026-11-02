@@ -671,6 +671,21 @@ ever fell, and the career simulation had already measured the result
   the moment the caravan reaches the destination - the same rule as every
   other screen having to name the mechanic it's leaning on.
 
+- **Reputation is regional, and it spills (task Y-C12, T16-07).** `Standing` (`scripts/economy/standing.gd`, data in
+  `data/config/standing.json`) keeps one value per map region and one per faction. `GameSession.reputation` is now a
+  property: the standing of the region the caravan is in, so every old door (recruiting, the contract board, wagon
+  milestones, credit) is opened by the region it stands in. `change_reputation()` is still the only door: it changes
+  the current region and spills to the others by `Standing.spill()` - lore relations first (LORE §12: friends and
+  creditors positive, enemies negative, Avuçiçi against every faithless region), then road neighbours (0.1, the
+  user's "5 here is 0.5 there"), then far regions (0.03; "nowhere is a name wholly unknown"). Values are floats so the
+  0.5 is not lost; the outside sees integers. Old saves load every region at their single number.
+  - **Factions:** `lonca` (guild: +1 per delivered contract, -1 per lost one, overdue debt hits it as it hits the
+    region; credit and the contract board read `credit_standing()`/`trade_standing()` = region + guild/2), `kilise`
+    (alms at the church, `donate_to_church()`; its physician charges up to 25% less, `doctor_fee`), `kardeslik`
+    (paying a toll or a ransom +, drawing steel -; route danger × `brotherhood_danger_factor()`, ±20%, shown as its own
+    line in the danger breakdown). Events speak to factions through `EventEffect.Type.FACTION` (text_value = faction).
+  - The status tab shows the current region's standing, the factions and one line of every region's view.
+
 ### Playthrough Start Rules
 
 - **There is no tutorial and no help panel for now (user's decision, 2026-10-21; task Y-H01 closed).** The pinned paper

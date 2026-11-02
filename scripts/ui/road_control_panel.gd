@@ -411,7 +411,9 @@ func _refresh_status(state: Dictionary) -> void:
 		["UI_PANEL_GOLD", "%d" % _session.wallet.balance],
 		["UI_PANEL_DEBT", "%d" % _session.get_total_debt()],
 		# N23: üst şeridin sayı satırı kalktı; söylediği her şey burada.
-		["UI_PANEL_REPUTATION", "%d" % _session.reputation],
+		# Bölgesel itibar (T16-07): bulunulan bölgenin gözü, sonra hizipler.
+		["UI_PANEL_REPUTATION", tr("UI_PANEL_REPUTATION_VALUE") % [region_name(_session.current_region()), _session.reputation]],
+		["UI_PANEL_FACTIONS", faction_line(_session)],
 		["UI_PANEL_WAGONS", tr("UI_PANEL_WAGONS_VALUE") % [_session.caravan.wagon_count, _session.caravan.damaged_wagons]],
 		["UI_PANEL_MERCHANTS", "%d" % _session.caravan.merchant_names.size()],
 		["UI_PANEL_DOCUMENTS", "%d" % _session.caravan.documents],
@@ -425,6 +427,11 @@ func _refresh_status(state: Dictionary) -> void:
 		value.text = String(fact[1])
 		value.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT)
 		_status_facts.add_child(value)
+	var regions := Label.new()
+	regions.text = tr("UI_PANEL_REGIONS") % regions_line(_session)
+	regions.autowrap_mode = TextServer.AUTOWRAP_WORD
+	regions.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT_DIM)
+	_status_problems.add_child(regions)
 	var title := Label.new()
 	title.text = tr("UI_PANEL_PROBLEMS")
 	title.add_theme_color_override("font_color", ArtPalette.GRIM_AMBER)
@@ -608,3 +615,20 @@ func _panel_box() -> StyleBox:
 	box.set_content_margin_all(10)
 	box.content_margin_top = 8
 	return box
+
+## Bölgenin oyundaki adı (Standing verisinden; özel ad, çevrilmez).
+static func region_name(region_id: String) -> String:
+	return String((Standing.data().get("regions", {}) as Dictionary).get(region_id, region_id))
+
+static func faction_line(session: GameSession) -> String:
+	var parts: Array[String] = []
+	for id in Standing.faction_ids():
+		parts.append("%s %d" % [TranslationServer.translate(Standing.faction_name_key(String(id))), session.standing.faction(String(id))])
+	return " · ".join(parts)
+
+## Bütün bölgelerin gözü, tek satır: bir yerde sevilen öbür yerde ne kadar tanınıyor.
+static func regions_line(session: GameSession) -> String:
+	var parts: Array[String] = []
+	for id in Standing.region_ids():
+		parts.append("%s %d" % [region_name(String(id)), session.standing.region(String(id))])
+	return " · ".join(parts)

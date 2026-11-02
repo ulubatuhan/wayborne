@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **22** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **21** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -304,20 +304,6 @@ Toplam: **22** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - [ ] **T16-04 Ana menü: öndeki iki yolcu net, ateş yumuşak**
   - **Ne:** Ana menüde öndeki iki yolcu bulanık, pikselli ve soluk; arka plandaki ateş köşeli tek renk parçalar. İkisi de düzelir, ekran görüntüsüyle doğrulanır.
   - **Kim:** CO · **Eski:** 9.2, Y-G16
-
-</details>
-
-### T16-07 · Bölgesel itibar ve hizipler
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C12.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-07 Bölgesel itibar ve hizipler**
-  - **Ne:** Bölgesel itibar ve hizipler (eski Y-C12). Kullanıcı onayına sunulur.
-  - **Kim:** CO · **Eski:** Y-C12
 
 </details>
 
