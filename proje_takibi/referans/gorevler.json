@@ -4068,14 +4068,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Sistem",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 307,
    "kim": "CO",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C09."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C09. | Yapıldı, onaya sunuldu: 12 yeni düşman (toplam şablon 29), REGIONAL_BANDITS (sekiz bölge, her birinde en az iki özgün kimlik), giysili görünüş, davranış (kaçak askerler guard, bedel adamı leader_hunter), LORE §14 T48 tablosu, simulate_journeys bölge başına kazanma oranı (kurallar-savas'ta ölçüm). Test: test_enemy_variety _test_every_region_has_its_own_bandits."
   },
   {
    "id": "T16-09",

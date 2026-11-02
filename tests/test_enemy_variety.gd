@@ -15,6 +15,7 @@ func run(t) -> void:
 	_test_hunt_squad_composition(t)
 	_test_guard_squad_composition(t)
 	_test_bandit_squad_region_reskin(t)
+	_test_every_region_has_its_own_bandits(t)
 	_test_build_squad_dispatches_by_kind(t)
 	_test_grant_equipment_effect_still_works_alongside_combat_kind(t)
 	_test_trigger_combat_carries_kind(t)
@@ -211,6 +212,33 @@ func _test_guard_squad_composition(t) -> void:
 	for unit in with_sergeant:
 		names.append(unit.display_name)
 	t.ok(names.has("Muhafız Çavuşu"), "yüksek tehlikede çavuş katılır")
+
+## Y-C09 / T16-08: her bölgenin en az iki özgün haydutu var, kadro o bölgenin
+## yerinde onları çıkarır, görünüşleri gerçek giysilerle.
+func _test_every_region_has_its_own_bandits(t) -> void:
+	var regional := {}
+	for region in Standing.region_ids():
+		var ids := EnemyCatalog.regional_bandit_ids(String(region))
+		t.ok(ids.size() >= 2, "%s: en az iki bölgesel düşman" % region)
+		var place := ""
+		for location in WorldMapData.get_locations():
+			if location.region == String(region):
+				place = location.location_id
+				break
+		var squad := EnemyCatalog.build_bandit_squad(0.6, 4, _seeded_rng(5), 1, place)
+		var squad_ids: Array[String] = []
+		for unit in squad:
+			squad_ids.append(unit.figure_kind)
+		t.ok(squad_ids.has(String(EnemyCatalog.REGIONAL_BANDITS[region]["melee"])), "%s: kadroda bölgenin ön safı" % region)
+		for id in ids:
+			regional[id] = true
+			t.ok(EnemyCatalog.get_enemy(id) != null, "%s tanımlı" % id)
+			for slot in (EnemyCatalog.look_for(id).get("outfit", {}) as Dictionary):
+				if slot == "hair_tint":
+					continue
+				var piece_id := String(EnemyCatalog.look_for(id)["outfit"][slot])
+				t.ok(OutfitCatalog.get_piece(piece_id) != null, "%s: %s giysisi var" % [id, piece_id])
+	t.ok(regional.size() >= 12, "bölgesel kimlik sayısı (%d)" % regional.size())
 
 func _test_bandit_squad_region_reskin(t) -> void:
 	var default_squad := EnemyCatalog.build_bandit_squad(0.6, 4, _seeded_rng(3), 1, "")

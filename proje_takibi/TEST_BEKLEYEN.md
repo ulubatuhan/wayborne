@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **11** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **12** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P03
 
@@ -284,5 +284,19 @@ Toplam: **11** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - [ ] **T16-07 Bölgesel itibar ve hizipler**
   - **Ne:** Bölgesel itibar ve hizipler (eski Y-C12). Kullanıcı onayına sunulur.
   - **Kim:** CO · **Eski:** Y-C12
+
+</details>
+
+### T16-08 · Bölgesel düşman kimlikleri
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C09. | Yapıldı, onaya sunuldu: 12 yeni düşman (toplam şablon 29), REGIONAL_BANDITS (sekiz bölge, her birinde en az iki özgün kimlik), giysili görünüş, davranış (kaçak askerler guard, bedel adamı leader_hunter), LORE §14 T48 tablosu, simulate_journeys bölge başına kazanma oranı (kurallar-savas'ta ölçüm). Test: test_enemy_variety _test_every_region_has_its_own_bandits.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-08 Bölgesel düşman kimlikleri**
+  - **Ne:** Bölgesel düşman kimlikleri (eski Y-C09). Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C09
 
 </details>

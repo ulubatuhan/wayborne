@@ -52,7 +52,10 @@ func _init() -> void:
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SEED_VALUE
-	panel.start_combat(_build_party(), 0.65, rng, "bandit", "", "forest")
+	# İsteğe bağlı argüman: bir yerleşim kimliği - o bölgenin haydutları (T16-08).
+	var args := OS.get_cmdline_user_args()
+	var place := String(args[0]) if not args.is_empty() else ""
+	panel.start_combat(_build_party(), 0.65, rng, "bandit", place, "forest")
 
 	await _settle()
 	_save("01_acilis.png")

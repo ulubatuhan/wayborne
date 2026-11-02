@@ -260,6 +260,15 @@ status effects, area skills):
 | 3 | 100% | 92% | 50% | 50% |
 | 4 | 100% | 100% | 87% | 87% |
 
+**Every region has its own bandits (task Y-C09, T16-08; LORE §14 T48).** `EnemyCatalog.REGIONAL_BANDITS` maps a
+region to its melee, second melee, ranged, leader and the one who joins at higher danger; a missing slot falls back to
+the cutter/archer/leader. The twelve new identities sit in the cutter/archer/leader power band; deserters fight as
+`guard` (`CombatUnit.behavior_for`), the toll man as `leader_hunter`. `simulate_journeys` prints a per-region win
+rate (party 2 and 3, danger 40% and 65%). Measured 2026-11-02, columns 2p40 2p65 3p40 3p65:
+none 67/53/100/77, vadi 82/57/95/77, imparatorluk 73/42/93/72, sinir 57/43/95/77, guney 57/48/85/67, ahit 75/40/93/73,
+dag 47/47/87/52, gocebe 62/42/97/52, dag_maden 52/43/95/55. Mountain and steppe roads are deliberately the harshest
+(as in `REGION_DANGER`); the coast first measured 40/32/80/63 and was softened (corsair dodge, smuggler accuracy).
+
 A lone traveller on a bandit-infested road is nearly hopeless, and that is
 the intended message rather than an oversight: the game starts you with two
 people, and party 1 only exists if you dismiss someone. Losing a fight used

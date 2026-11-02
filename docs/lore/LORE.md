@@ -768,6 +768,20 @@ olaylar öldürmez. Mallar: buğday, kumaş, demir, iksir, kürk, baharat, bal, 
 tuz; nadir eski mühür. Para birimi GG [Boş: kim basıyor]. Dünyayı sallayan olaylar: bölgesel savaş, veba, ticaret fuarı,
 haydut haracı. Ton: aşınma, yas, hafıza.
 
+**[Türetme T48] Yolun düşmanları (bölgesel haydut kimlikleri, Y-C09).** Kıtlıkta yolu kesenler her bölgenin kendi
+aç insanlarıdır; kimin olduğu oranın tarihinden (§8, §12). Oyunda `EnemyCatalog.REGIONAL_BANDITS`.
+
+| bölge | ön saf | arka saf / reis / katılan | neden |
+|---|---|---|---|
+| Büyük Vadi | Prens Kaçağı | Hasat Yağmacısı | bitmeyen prens savaşları, hasadı yanan köylü |
+| Vaelghard | Garnizon Kaçağı | Silahlı Eşkıya | çember içindeki krallığın kaçak askeri; çeliği iyi |
+| Ezmerak ve batı sınırı | Sınır Çapulcusu | Aç Sürgün (tehlike yükselince) | Tolvarin-Kirsavel kavgası, savaş mültecileri |
+| Ayazkaya | Dağ Haydutu | Bedel Adamı (reis) | bedel kültürü, yolu tutan haydut kralları |
+| Taşkök | Maden Kaçağı | Dağ Haydutu | kuzeybatı madenlerinden kaçanlar |
+| Ors ve Gelgit Kıyısı | Kıyı Korsanı | Tuz Kaçakçısı | kıyı, mühürsüz tuz |
+| Avuçiçi | Elsiz Sürgün | Garnizon Kaçağı | eli kesilip sürülenler (Ç14); garantör Vaelghard'ın kaçakları |
+| Gokyurt | Oba Yağmacısı | Bozkır Akıncısı | otlağı kuruyan obalar, atlı okçular |
+
 ## 15. Oyuna bağlanış (kod işi; her biri ayrı karar)
 
 Kanonun oyunda görünmesi için gereken değişiklikler. Lore belgesi bunları yalnızca kaydeder; iş listesi CLAUDE.md

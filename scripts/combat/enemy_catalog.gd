@@ -13,6 +13,20 @@ const LEADER: String = "bandit_leader"
 ## görünüm/sayı değişir, pusunun genel yapısı aynı kalır.
 const MOUNTAIN_BANDIT: String = "mountain_bandit"
 const ARMED_BRIGAND: String = "armed_brigand"
+## Bölgesel düşman kimlikleri (görev Y-C09, T16-08; LORE §8, §12). Her bölgenin
+## yolunu kendi aç insanları keser; adları ve teçhizatı oranın tarihinden.
+const VALLEY_DESERTER: String = "valley_deserter"
+const VALLEY_FORAGER: String = "valley_forager"
+const GARRISON_DESERTER: String = "garrison_deserter"
+const BORDER_RAIDER: String = "border_raider"
+const HUNGRY_EXILE: String = "hungry_exile"
+const TOLL_MAN: String = "toll_man"
+const MINE_RUNAWAY: String = "mine_runaway"
+const COAST_CORSAIR: String = "coast_corsair"
+const SMUGGLER: String = "smuggler"
+const HANDLESS_EXILE: String = "handless_exile"
+const OBA_RAIDER: String = "oba_raider"
+const STEPPE_RIDER: String = "steppe_rider"
 
 ## Vahşi hayvanlar (bkz. build_wildlife_squad, evt_wild_animal).
 const WOLF: String = "wolf"
@@ -84,6 +98,40 @@ const LOOKS: Dictionary = {
 	GUARD_SERGEANT: {"body": "body_male_heavy", "outfit": {
 		"shirt": "peasant_shirt", "armor": "armor_plate", "pants": "cloth_trousers",
 		"shoes": "riding_boots", "gloves": "leather_gloves", "hat": "spiked_helmet"}},
+	VALLEY_DESERTER: {"body": "body_male_average", "outfit": {
+		"shirt": "linen_tunic", "pants": "cloth_trousers", "shoes": "leather_boots", "hat": "leather_cap"}},
+	VALLEY_FORAGER: {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "pants": "peasant_pants", "shoes": "peasant_shoes",
+		"hair": "hair_short02", "hair_tint": Color(0.42, 0.30, 0.18)}},
+	GARRISON_DESERTER: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "armor": "armor_mail", "pants": "cloth_trousers",
+		"shoes": "riding_boots", "hat": "guard_helmet"}},
+	BORDER_RAIDER: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "wool_coat", "pants": "peasant_pants", "shoes": "ranger_boots",
+		"hair": "hair_long01", "hair_tint": Color(0.22, 0.18, 0.14)}},
+	HUNGRY_EXILE: {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "pants": "peasant_pants",
+		"hair": "hair_short04", "hair_tint": Color(0.30, 0.26, 0.22)}},
+	TOLL_MAN: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "wool_coat", "armor": "armor_mail", "pants": "viking_pants",
+		"shoes": "hobnail_boots", "hat": "fur_hat"}},
+	MINE_RUNAWAY: {"body": "body_male_heavy", "outfit": {
+		"shirt": "peasant_shirt", "pants": "viking_pants", "shoes": "hobnail_boots", "gloves": "leather_gloves",
+		"hair": "hair_short01", "hair_tint": Color(0.16, 0.14, 0.13)}},
+	COAST_CORSAIR: {"body": "body_male_average", "outfit": {
+		"shirt": "linen_tunic", "pants": "cloth_trousers", "shoes": "short_boots", "hat": "leather_cap"}},
+	SMUGGLER: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "ranger_jacket", "pants": "cloth_trousers",
+		"shoes": "leather_boots", "hat": "ranger_hood"}},
+	HANDLESS_EXILE: {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "pilgrim_robe", "pants": "peasant_pants",
+		"shoes": "peasant_shoes", "hat": "pilgrim_hood"}},
+	OBA_RAIDER: {"body": "body_male_average", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "wool_coat", "pants": "viking_pants", "shoes": "riding_boots",
+		"hat": "fur_hat"}},
+	STEPPE_RIDER: {"body": "body_male_lean", "outfit": {
+		"shirt": "peasant_shirt", "jacket": "ranger_jacket", "pants": "viking_pants",
+		"shoes": "riding_boots", "hat": "fur_hat"}},
 	ROGUE_MAGE: {"body": "body_male_lean", "outfit": {
 		"jacket": "mage_robe", "hat": "wizard_hat", "shoes": "felt_shoes"}},
 	"bandit": {"body": "body_male_average", "outfit": {
@@ -109,6 +157,40 @@ const MOUNTAIN_REGIONS: Array[String] = ["dag", "dag_maden"]
 const GARRISON_REGIONS: Array[String] = ["imparatorluk"]
 const MOUNTAIN_REGION_ID: String = "kesgrav"
 const GARRISON_REGION_ID: String = "dravoss"
+
+## Bölge başına haydut kadrosu (Y-C09, T16-08): ön saf (`melee`), ikinci ön saf
+## (`second`, yoksa melee), arka saf (`ranged`), reis (`leader`) ve tehlike
+## yükselince katılan (`extra`). Eksik anahtar varsayılan haydutla dolar. Kim
+## olduklarının gerekçesi LORE.md §8 ve docs/lore/LORE.md "Yolun düşmanları".
+const REGIONAL_BANDITS: Dictionary = {
+	# Bitmeyen prens savaşlarının kaçakları ve hasadı yanan köylüler.
+	"vadi": {"melee": VALLEY_DESERTER, "ranged": VALLEY_FORAGER},
+	# Çember içindeki krallığın garnizon kaçakları; çeliği iyi.
+	"imparatorluk": {"melee": GARRISON_DESERTER, "ranged": ARMED_BRIGAND},
+	# Tolvarin-Kirsavel kavgasının çapulcuları; kıtlıkta aç sürgünler de katılır.
+	"sinir": {"melee": BORDER_RAIDER, "extra": HUNGRY_EXILE},
+	# Bedel kültürü: yolu tutan haydut kralının adamı haracını ister.
+	"dag": {"melee": MOUNTAIN_BANDIT, "leader": TOLL_MAN},
+	# Kuzeybatı madenlerinden kaçanlar, kazmalarıyla.
+	"dag_maden": {"melee": MINE_RUNAWAY, "second": MOUNTAIN_BANDIT},
+	# Kıyının korsanı ve tuz kaçakçısı.
+	"guney": {"melee": COAST_CORSAIR, "ranged": SMUGGLER},
+	# Avuçiçi'nden eli kesilip sürülenler (Ç14) yolda birbirini bulmuş; garantör
+	# Vaelghard'ın oradaki garnizonundan kaçanlar onlara katılır.
+	"ahit": {"melee": HANDLESS_EXILE, "second": GARRISON_DESERTER},
+	# Otlağı kuruyan obaların yağmacıları ve atlı okçuları.
+	"gocebe": {"melee": OBA_RAIDER, "ranged": STEPPE_RIDER},
+}
+
+## Bir bölgenin haydut kimlikleri (testler ve codex için): kadroda çıkabilecek
+## bütün bölgeye özgü düşmanlar.
+static func regional_bandit_ids(region: String) -> Array[String]:
+	var out: Array[String] = []
+	for slot in (REGIONAL_BANDITS.get(region, {}) as Dictionary):
+		var id := String(REGIONAL_BANDITS[region][slot])
+		if not out.has(id):
+			out.append(id)
+	return out
 
 ## Pusu kadrosu bu kadar savaşçıyı geçemez (savaş alanı 4 mevki).
 const MAX_SQUAD_SIZE: int = 4
@@ -229,26 +311,26 @@ static func build_bandit_squad(
 ) -> Array[CombatUnit]:
 	_ensure_built()
 
-	var melee_id := CUTTER
-	var ranged_id := ARCHER
 	var place := WorldMapData.get_location_by_id(region_id) if not region_id.is_empty() else null
 	var region := place.region if place != null else ""
-	if MOUNTAIN_REGIONS.has(region):
-		melee_id = MOUNTAIN_BANDIT
-	elif GARRISON_REGIONS.has(region):
-		ranged_id = ARMED_BRIGAND
+	var table: Dictionary = REGIONAL_BANDITS.get(region, {})
+	var melee_id := String(table.get("melee", CUTTER))
+	var second_id := String(table.get("second", melee_id))
+	var ranged_id := String(table.get("ranged", ARCHER))
+	var leader_id := String(table.get("leader", LEADER))
+	var extra_id := String(table.get("extra", melee_id))
 
 	# Sıra = önem sırası. Küçük bir parti kadroyu kırptığında baştakiler
 	# kalır, o yüzden tehlike yükseldikçe reis listenin *başına* geçer:
 	# eşkıya kaynayan bir yolda yalnız yolcunun karşısına iki sıradan
 	# kesici değil, reis ve bir kesici çıkar.
-	var ids: Array[String] = [melee_id, melee_id]
+	var ids: Array[String] = [melee_id, second_id]
 	if danger_level >= 0.25:
 		ids.append(ranged_id)
 	if danger_level >= 0.55:
-		ids.insert(0, LEADER)
+		ids.insert(0, leader_id)
 	elif danger_level >= 0.40 and rng.randf() < 0.5:
-		ids.append(melee_id)
+		ids.append(extra_id)
 
 	return _build_units(ids, party_size, average_level, danger_level)
 
@@ -404,6 +486,25 @@ static func _ensure_built() -> void:
 	# yöre teçhizatıyla çıkan versiyonları (bkz. build_bandit_squad).
 	_enemies.append(_make(MOUNTAIN_BANDIT, "ENEMY_MOUNTAIN_BANDIT_NAME", 32, 76, 5, 5, 7, 7, [SkillCatalog.CLEAVER], 1, 12))
 	_enemies.append(_make(ARMED_BRIGAND, "ENEMY_ARMED_BRIGAND_NAME", 24, 88, 8, 10, 4, 11, [SkillCatalog.BANDIT_ARROW], 3, 14))
+
+	# Bölgesel kimlikler (Y-C09, T16-08): Kesici/Okçu/Reis'in mevki ve güç
+	# bandında, karakterleri farklı (bkz. REGIONAL_BANDITS). Ölçüm:
+	# simulate_journeys "bölge başına kazanma oranı" tablosu.
+	_enemies.append(_make(VALLEY_DESERTER, "ENEMY_VALLEY_DESERTER_NAME", 28, 82, 5, 5, 5, 8, [SkillCatalog.GUARD_STRIKE], 1, 11))
+	_enemies.append(_make(VALLEY_FORAGER, "ENEMY_VALLEY_FORAGER_NAME", 20, 80, 10, 6, 3, 12, [SkillCatalog.BANDIT_ARROW], 3, 11))
+	_enemies.append(_make(GARRISON_DESERTER, "ENEMY_GARRISON_DESERTER_NAME", 31, 82, 4, 5, 5, 7, [SkillCatalog.GUARD_STRIKE], 1, 13))
+	_enemies.append(_make(BORDER_RAIDER, "ENEMY_BORDER_RAIDER_NAME", 26, 80, 8, 7, 5, 10, [SkillCatalog.CLEAVER], 1, 11))
+	_enemies.append(_make(HUNGRY_EXILE, "ENEMY_HUNGRY_EXILE_NAME", 18, 72, 6, 4, 3, 9, [SkillCatalog.CLEAVER], 1, 6))
+	_enemies.append(_make(
+		TOLL_MAN, "ENEMY_TOLL_MAN_NAME", 36, 84, 6, 8, 6, 9,
+		[SkillCatalog.BANDIT_ORDER, SkillCatalog.CLEAVER], 2, 26
+	))
+	_enemies.append(_make(MINE_RUNAWAY, "ENEMY_MINE_RUNAWAY_NAME", 30, 74, 4, 5, 6, 6, [SkillCatalog.CLEAVER], 1, 12))
+	_enemies.append(_make(COAST_CORSAIR, "ENEMY_COAST_CORSAIR_NAME", 23, 80, 8, 6, 5, 11, [SkillCatalog.CLEAVER], 1, 11))
+	_enemies.append(_make(SMUGGLER, "ENEMY_SMUGGLER_NAME", 21, 80, 8, 6, 3, 12, [SkillCatalog.BANDIT_ARROW], 3, 12))
+	_enemies.append(_make(HANDLESS_EXILE, "ENEMY_HANDLESS_EXILE_NAME", 25, 76, 8, 6, 5, 9, [SkillCatalog.CLEAVER], 1, 10))
+	_enemies.append(_make(OBA_RAIDER, "ENEMY_OBA_RAIDER_NAME", 27, 78, 8, 6, 5, 10, [SkillCatalog.CLEAVER], 1, 11))
+	_enemies.append(_make(STEPPE_RIDER, "ENEMY_STEPPE_RIDER_NAME", 21, 82, 10, 7, 3, 14, [SkillCatalog.BANDIT_ARROW], 3, 13))
 
 	# Vahşi hayvanlar - kurt sürü halinde hızlı/hafif, ayı nadir/tekil ve
 	# ezici, domuz ortada saldırgan bir tekil tehdit (bkz. build_wildlife_squad).

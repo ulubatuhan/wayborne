@@ -211,11 +211,12 @@ static func from_enemy(template: EnemyTemplate, position: int, power_scale: floa
 ## Düşman türünün huyu (görev Y-C08).
 static func behavior_for(enemy_id: String) -> String:
 	match enemy_id:
-		"bandit_leader", "mountain_bandit":
+		"bandit_leader", "mountain_bandit", "toll_man":
 			return "leader_hunter"
 		"wolf", "wolf_alpha_white", "wolf_alpha_black":
 			return "pack"
-		"city_guard", "guard_sergeant":
+		# Kaçak askerler talimi unutmamış (T16-08).
+		"city_guard", "guard_sergeant", "garrison_deserter", "valley_deserter":
 			return "guard"
 		"bear", "boar":
 			return "beast"

@@ -45,6 +45,7 @@ oradan gelir, buraya işlenir.
 | T39 | Güneydoğu kıyısının adı **Gelgit Kıyısı** (Zelmarin). | §7, §8.10 |
 | T40 | Liman insanının "beş dili" (imparatorluk dilinin iki ağzı dahil). | §11 |
 | T41 | Taşkök ve Karaocak dağlıların dilinin yumuşamış bir kolu; Orsian hesap sözcükleri deniz ötesinden. | §11 |
+| T48 | Yolun düşmanları: her bölgenin kendi haydut kimlikleri (Prens Kaçağı, Garnizon Kaçağı, Elsiz Sürgün...). | §14 |
 | T42 | Gelgit Taşları Denizin İlk Gözyaşı'nın yeri ("balıkçıların yurdu" kısmı Ç12 ile düştü). | §8.10 |
 | T43 | Velkrun Yıkıntısı imparatorluğun kereste hanı; "odun satılır, orman satılmaz". | §8.6 |
 | T44 | Karaocak'ın komşuları, Kör Kazmalar Mezarlığı. | §8.6b |

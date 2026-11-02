@@ -49,6 +49,9 @@ func _initialize() -> void:
 	print("   Hedef: yalnız yolcu sakin yolda zorlanmasın ama eşkıya kaynayan")
 	print("   yolda gerçekten kaybedebilsin; dolu parti güçlü olsun, dokunulmaz olmasın.")
 	_report_combat_matrix()
+	print("── Bölge başına kazanma oranı (Y-C09/T16-08: bölgesel haydut kimlikleri;")
+	print("   2 ve 3 kişilik parti, tehlike %40 ve %65; bölgesiz satır karşılaştırma)")
+	_report_regional_matrix()
 
 	print("")
 	# Parti 4 tehlike %50'de zaten tavana yakın kazanıyor; seviye farkı orada
@@ -359,7 +362,7 @@ func _apply(
 
 func _simulate_combat(
 	party: Array[CharacterData], danger: float, rng: RandomNumberGenerator,
-	average_level: int = 1, party_stress: int = 0
+	average_level: int = 1, party_stress: int = 0, place_id: String = ""
 ) -> Dictionary:
 	var units: Array[CombatUnit] = []
 	var position := 1
@@ -369,7 +372,7 @@ func _simulate_combat(
 		units.append(CombatUnit.from_character(character, position, character.is_stressed()))
 		position += 1
 
-	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng, average_level)
+	var enemies := EnemyCatalog.build_bandit_squad(danger, units.size(), rng, average_level, place_id)
 	var encounter := CombatEncounter.new(units, enemies, rng)
 	encounter.start()
 
@@ -480,7 +483,22 @@ func _report_combat_matrix() -> void:
 			line += " %3d%% " % _combat_win_rate(party_size, danger)
 		print(line)
 
-func _combat_win_rate(party_size: int, danger: float, average_level: int = 1) -> int:
+func _report_regional_matrix() -> void:
+	var places := {"(bölgesiz)": ""}
+	for location in WorldMapData.get_locations():
+		if not places.values().has(location.location_id) and not _has_region(places, location.region):
+			places[location.region] = location.location_id
+	for region in places:
+		var line: String = "    %-14s" % region
+		for party_size in [2, 3]:
+			for danger in [0.4, 0.65]:
+				line += " %3d%% " % _combat_win_rate(party_size, danger, 1, String(places[region]))
+		print(line)
+
+func _has_region(places: Dictionary, region: String) -> bool:
+	return places.has(region)
+
+func _combat_win_rate(party_size: int, danger: float, average_level: int = 1, place_id: String = "") -> int:
 	var wins := 0
 	var battles := 60
 
@@ -496,7 +514,7 @@ func _combat_win_rate(party_size: int, danger: float, average_level: int = 1) ->
 				CharacterStats.new()
 			))
 
-		if bool(_simulate_combat(party, danger, rng, average_level).victory):
+		if bool(_simulate_combat(party, danger, rng, average_level, 0, place_id).victory):
 			wins += 1
 
 	return int(round(100.0 * float(wins) / float(battles)))
