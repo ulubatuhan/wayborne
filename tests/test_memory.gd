@@ -39,6 +39,7 @@ func run(t) -> void:
 	_test_journey_controller_walk_and_arrival(t)
 	_test_journey_controller_round_trip_keeps_the_dice(t)
 	_test_return_leg_walks_the_same_road_back(t)
+	_test_westward_road_walks_left(t)
 	_test_mid_journey_save_round_trip(t)
 	_test_city_brief_model_without_a_scene(t)
 
@@ -918,3 +919,34 @@ func _test_city_brief_model_without_a_scene(t) -> void:
 	session.total_days_elapsed += CityBriefModel.MOURNING_DAYS + 1
 	t.ok(not bool(CityBriefModel.build_memory(session)["mourning"]), "yas günlerce sürer, sonsuza dek değil")
 
+
+## T16-03 (kullanıcı, 2026-11-02): batıya giden yolda kervan sola yürür.
+## Arazi batıdaki uçtan (hedeften) yazılır, bacak sonundan geriye yürünür;
+## geri dönünce bütün kervan döner ve çıkışa doğru sağa yürür.
+func _test_westward_road_walks_left(t) -> void:
+	t.ok(JourneyController.is_westward("golcavar", "rivecande"), "Golcavar'dan Rivecande batıda")
+	t.not_ok(JourneyController.is_westward("rivecande", "golcavar"), "ters yön doğu")
+	t.not_ok(JourneyController.is_westward("rivecande", "rivecande"), "aynı şehir yön değil")
+	var journey := JourneyController.new()
+	journey.engine = EventEngine.new(EventCatalog.get_road_events(), 7)
+	journey.start_leg(8)
+	journey.lay_road("golcavar", "rivecande", "golcavar|rivecande", 8)
+	t.eq(journey.heading, -1.0, "batıya giden kervan sola (arazide geriye) yürür")
+	t.eq(journey.terrain_from, "rivecande", "arazi batıdaki uçtan yazılır")
+	t.almost(journey.terrain_day(), 8.0, "çıkış arazinin doğu ucunda")
+	journey.walk(1.0, JourneyClock.HOURS_PER_DAY * 3.0)
+	t.almost(journey.terrain_day(), 5.0, "yürüdükçe arazi günü azalır, ekranda sola")
+	journey.start_return_leg(3)
+	t.eq(journey.heading, 1.0, "geri dönen kervan sağa, çıkışa yürür")
+	journey.walk(1.0, JourneyClock.HOURS_PER_DAY * 3.0)
+	t.almost(journey.terrain_day(), 8.0, "geri dönüş çıkış şehrinde biter")
+	var copy := JourneyController.new()
+	copy.load_from_dict(journey.to_dict(), EventCatalog.get_road_events())
+	t.eq(copy.terrain_from, "rivecande", "arazinin ucu kayıtta")
+	var east := JourneyController.new()
+	east.lay_road("rivecande", "golcavar", "golcavar|rivecande", 8)
+	t.eq(east.heading, 1.0, "doğuya giden kervan sağa yürür")
+	t.eq(east.terrain_from, "rivecande", "doğu yolunda arazi çıkıştan")
+	# İki yön aynı araziyi aynı uçtan çizer: yol ekranında doğu hep sağda.
+	t.eq(RouteTerrain.build("golcavar|rivecande", 8, journey.terrain_from).biome_at(1.0),
+		RouteTerrain.build("golcavar|rivecande", 8, east.terrain_from).biome_at(1.0), "iki yön aynı arazi")

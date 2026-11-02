@@ -296,6 +296,8 @@ var _session: GameSession
 ## adlar: ekranın geri kalanı değişmeden okuyup yazabilsin, ama tek
 ## doğruluk kaynağı ve kaydedilen şey controller.
 var _journey: JourneyController = JourneyController.new()
+## Şu anki `_terrain`'in yazıldığı uç (kayıttan dönüşte yeniden kurmak gerekir mi).
+var _terrain_built_from: String = ""
 var _engine: EventEngine:
 	get:
 		return _journey.engine
@@ -625,7 +627,7 @@ func _panel_state() -> Dictionary:
 		"orders": orders,
 		"origin": origin,
 		"path": path,
-		"progress": clampf(_terrain_day() / float(maxi(1, _journey.terrain_days)), 0.0, 1.0),
+		"progress": _map_progress(),
 		"danger": _weathered_danger(),
 		"hour": _clock.get_hour_of_day(),
 	}
@@ -1101,9 +1103,7 @@ func _open_map_popup() -> void:
 		path = WorldMapData.get_route_path(origin, String(parts[1] if String(parts[0]) == origin else parts[0]))
 	if path.is_empty() and origin != destination:
 		path = WorldMapData.get_route_path(origin, destination)
-	var progress := 0.0
-	if _journey.terrain_days > 0:
-		progress = clampf(_terrain_day() / float(_journey.terrain_days), 0.0, 1.0)
+	var progress := _map_progress()
 	_map_popup = MapPopup.new().setup(origin, destination, path, progress)
 	_map_popup.view.hour = _clock.get_hour_of_day()
 	_map_popup.view.trail = _session.map_trail
@@ -1548,11 +1548,10 @@ func _init_journey() -> void:
 	_route_key = RouteConditions.route_key(
 		_session.journey_origin_id, _session.journey_destination_id
 	)
-	_terrain = RouteTerrain.build(_route_key, _journey_length_days, _session.journey_origin_id, _session.journey_season(), _session.journey_shortcut)
-	_band.set_route(_terrain)
-	_journey.terrain_key = _route_key
-	_journey.terrain_days = _journey_length_days
-	_band.set_heading(1.0, true)
+	# Batıya giden yolda arazi hedeften yazılır, kervan sola yürür (T16-03).
+	_journey.lay_road(_session.journey_origin_id, _session.journey_destination_id, _route_key, _journey_length_days)
+	_build_terrain(_route_key, _journey_length_days)
+	_band.set_heading(_journey.heading, true)
 	_refresh_memorials()
 	_announce_route_memory()
 	_pace = PACE_STEADY
@@ -1574,7 +1573,7 @@ func _init_journey() -> void:
 	# bir kez (yolda bir yoldaş katılırsa yine) çağrılıyor, karede değil.
 	_caravan.configure(_session)
 	_refresh_pair_spacing()
-	_caravan.set_heading(1.0)
+	_caravan.set_heading(_journey.heading)
 	_caravan.set_leader_offset(0.0)
 	_turn_event_after = null
 	NodeUtil.clear_children(_card_panel)
@@ -1624,10 +1623,11 @@ func _restore_journey_snapshot() -> void:
 	if _journey.terrain_key.is_empty():
 		_journey.terrain_key = _route_key
 		_journey.terrain_days = _journey_length_days
-	elif _journey.terrain_key != _route_key or _journey.terrain_days != _terrain.total_days:
+	if _journey.terrain_key != _route_key or _journey.terrain_days != _terrain.total_days or _terrain_from() != _terrain_built_from:
+		# Başka yol, başka boy ya da başka uçtan yazılmış arazi (batı yolu,
+		# T16-03; terrain_from'suz eski kayıt çıkıştan yazılmıştı).
 		_route_key = _journey.terrain_key
-		_terrain = RouteTerrain.build(_route_key, maxi(1, _journey.terrain_days), _session.journey_origin_id, _session.journey_season(), _session.journey_shortcut)
-		_band.set_route(_terrain)
+		_build_terrain(_route_key, maxi(1, _journey.terrain_days))
 	_band.set_heading(_journey.heading, true)
 	_caravan.set_heading(_journey.heading)
 	_sync_days_remaining()
@@ -2108,6 +2108,21 @@ static func leader_screen_speed(
 func _leader_ground_speed() -> float:
 	return _caravan.get_leader_brisk_speed()
 
+## Araziyi `_terrain_from()` ucundan kurar ve şeride verir.
+func _build_terrain(key: String, days: int) -> void:
+	_terrain_built_from = _terrain_from()
+	_terrain = RouteTerrain.build(key, days, _terrain_built_from, _session.journey_season(), _session.journey_shortcut)
+	_band.set_route(_terrain)
+
+## Arazinin 0. günü hangi şehirde (bkz. JourneyController.terrain_from).
+func _terrain_from() -> String:
+	return _session.journey_origin_id if _journey.terrain_from.is_empty() else _journey.terrain_from
+
+## Haritadaki ilerleme çıkıştan ölçülür; arazi hedeften yazılmışsa tersi.
+func _map_progress() -> float:
+	var share := clampf(_terrain_day() / float(maxi(1, _journey.terrain_days)), 0.0, 1.0)
+	return share if _terrain_from() == _session.journey_origin_id else 1.0 - share
+
 ## Kervanın arazideki şimdiki günü (bkz. JourneyController.terrain_day).
 func _terrain_day() -> float:
 	return _journey.terrain_day()
@@ -2230,7 +2245,7 @@ func _walk_at(rate: float, hours: float) -> void:
 	)
 	_journey.walk(effective, hours)
 	_sync_days_remaining()
-	_session.set_road_position(_route_key, _session.journey_origin_id, _terrain_day(), maxi(1, _journey.terrain_days))
+	_session.set_road_position(_route_key, _terrain_from(), _terrain_day(), maxi(1, _journey.terrain_days))
 	_read_nearby_memorials()
 	_check_pending_event_reached()
 	# Varış mesafeyle olur, günle değil - ve **o anda** olmalı. Eskiden
@@ -2351,7 +2366,7 @@ func _refresh_memorials() -> void:
 		return
 	var list: Array = []
 	for m in _session.memorials_on(_route_key):
-		list.append({"day": GameSession.day_for_share(_route_key, _session.journey_origin_id, float(m["share"]), maxi(1, _journey.terrain_days)), "kind": String(m["kind"])})
+		list.append({"day": GameSession.day_for_share(_route_key, _terrain_from(), float(m["share"]), maxi(1, _journey.terrain_days)), "kind": String(m["kind"])})
 	_band.set_memorials(list)
 
 ## Yanından geçilen anıt bir kez okunur; ön bölgede olan adını ve sebebini
@@ -2362,7 +2377,7 @@ func _read_nearby_memorials() -> void:
 		var id := String(m["id"])
 		if _read_memorial_ids.has(id) or String(m["kind"]) == GameSession.MEMORIAL_ASH:
 			continue
-		var day := GameSession.day_for_share(_route_key, _session.journey_origin_id, float(m["share"]), maxi(1, _journey.terrain_days))
+		var day := GameSession.day_for_share(_route_key, _terrain_from(), float(m["share"]), maxi(1, _journey.terrain_days))
 		if absf(day - here) > MEMORIAL_READ_DAYS:
 			continue
 		_read_memorial_ids[id] = true
@@ -2838,7 +2853,7 @@ func _update_camp_state() -> void:
 		_add_log(tr("UI_ROAD_CAMP_SETTLED") % _clock.get_clock_text(), OUTCOME_COLOR)
 		_record_camp_on_map()
 		# Kampın külü yolda kalır (Y-B11).
-		_session.set_road_position(_route_key, _session.journey_origin_id, _terrain_day(), maxi(1, _journey.terrain_days))
+		_session.set_road_position(_route_key, _terrain_from(), _terrain_day(), maxi(1, _journey.terrain_days))
 		_session.add_memorial(GameSession.MEMORIAL_ASH)
 		_refresh_memorials()
 		_session.companion_notes = []
@@ -2924,7 +2939,7 @@ func _refresh_ambience() -> void:
 ## ters yönde yürünüyor (terrain_day), kapılar kendi uçlarında kalıyor.
 func _sync_arrival_gate() -> void:
 	var gates: Array = []
-	var from_id := _session.journey_origin_id
+	var from_id := _terrain_from()
 	var far_id := _session.journey_destination_id
 	var parts := _journey.terrain_key.split("|")
 	if parts.size() == 2:
@@ -4142,15 +4157,12 @@ func _on_divert_pressed(destination_id: String) -> void:
 	# Sapma başka bir yol: arazisi o yolun kendi anahtarından (planlayıcının
 	# gösterdiği), bacak onun başından ve hedefe doğru.
 	_journey.start_leg(_session.journey_total_days)
-	_journey.heading = 1.0
-	_journey.leg_origin_day = 0.0
 	_route_key = RouteConditions.route_key(
 		_session.journey_origin_id, _session.journey_destination_id
 	)
-	_journey.terrain_key = _route_key
-	_journey.terrain_days = _journey_length_days
-	_terrain = RouteTerrain.build(_route_key, _journey_length_days, _session.journey_origin_id, _session.journey_season(), _session.journey_shortcut)
-	_band.set_route(_terrain)
+	# Yeni yolun yönü de haritadan: batıya sapan kervan sola döner (T16-03).
+	_journey.lay_road(_session.journey_origin_id, _session.journey_destination_id, _route_key, _journey_length_days)
+	_build_terrain(_route_key, _journey_length_days)
 	_refresh_memorials()
 	_apply_replan(tr("UI_ROAD_DIVERTED"))
 

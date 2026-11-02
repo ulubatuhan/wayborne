@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **25** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -292,20 +292,6 @@ Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P19
-
-### T16-03 · Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-03 Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner**
-  - **Ne:** Kullanıcı: "Batıya giden yolda kervanın sola yürümesi. Bir noktada kervan geri dönmek isteyebilir, bunu yaparsa tüm kervan geriye dönebilmeli." Yol ekranı haritadaki yöne göre aynalanır: bant, işaretler, duraklar ve kapılar; yazılar ters dönmez.
-  - **Kim:** C · **Eski:** Yol yönü hedefi
-
-</details>
 
 ### T16-04 · Ana menü: öndeki iki yolcu net, ateş yumuşak
 

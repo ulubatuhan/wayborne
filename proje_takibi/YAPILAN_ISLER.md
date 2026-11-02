@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **190** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **191** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3400,5 +3400,19 @@ Toplam: **190** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-02 Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık**
   - **Ne:** Kullanıcı: "Balıkçıların yurdu diye tek bir yer olmamalı, balıkçı kasabası olan yerler bu kültüre ve o bölgenin kültürüne sahiptir mix olarak." Lore'da Ç12 kapanır; balıkçı kültürünün başlangıcı ve balıkçı köyleri bu karışımı taşır.
   - **Kim:** C · **Eski:** Ç12
+
+</details>
+
+### T16-03 · Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi. | Bitti: JourneyController.lay_road/is_westward/terrain_from (kayıtlı); batı yolunda arazi hedeften yazılır, kervan baştan heading -1 ile sola yürür; geri dönüş bütün kervanı sağa çevirir (begin_turn); kapı, anıt, yol konumu ve harita ilerlemesi _terrain_from() ile; sapma da yönünü haritadan alır. Test: test_memory _test_westward_road_walks_left. Ekran: screenshot_journey_screen golcavar→rivecande.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-03 Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner**
+  - **Ne:** Kullanıcı: "Batıya giden yolda kervanın sola yürümesi. Bir noktada kervan geri dönmek isteyebilir, bunu yaparsa tüm kervan geriye dönebilmeli." Yol ekranı haritadaki yöne göre aynalanır: bant, işaretler, duraklar ve kapılar; yazılar ters dönmez.
+  - **Kim:** C · **Eski:** Yol yönü hedefi
 
 </details>

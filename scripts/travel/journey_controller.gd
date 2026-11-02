@@ -66,6 +66,10 @@ static func camp_ends_at(current_ends: float, total_hours: float, settled: bool,
 var heading: float = 1.0
 var leg_origin_day: float = 0.0
 var terrain_key: String = ""
+## Arazinin yazıldığı uç (0. günü): ekranda sağa doğru gün artar. Batıya giden
+## yolda arazi hedeften yazılır ve kervan baştan `heading` -1 ile, yani sola
+## yürür (T16-03); boşsa seferin çıkışı.
+var terrain_from: String = ""
 var terrain_days: int = 0
 ## Yolda görünüp kartı henüz açılmamış olay ve yolda durduğu gün konumu.
 var pending_event: GameEvent = null
@@ -110,6 +114,28 @@ func has_reached_pending(front_offset_days: float) -> bool:
 		return false
 	return days_covered + ENCOUNTER_TRIGGER_EPSILON >= pending_event_day_position - front_offset_days
 
+## Haritada batıya giden yol: hedef çıkışın solunda. Yol ekranı doğuyu sağda
+## tutar; batıya giden kervan sola yürür (kullanıcı, 2026-11-02, T16-03).
+static func is_westward(origin_id: String, destination_id: String) -> bool:
+	if origin_id == destination_id:
+		return false
+	var origin := WorldMapData.get_location_by_id(origin_id)
+	var destination := WorldMapData.get_location_by_id(destination_id)
+	if origin == null or destination == null:
+		return false
+	return destination.map_position.x < origin.map_position.x
+
+## Yeni bir yol döşer: arazi doğudaki uçtan değil batıdaki uçtan yazılır ki
+## ekranda gün hep sağa artsın; batıya giden bacak arazinin sonundan geriye,
+## sola yürür. Uzunluk ve anahtar `terrain_days`/`terrain_key`'e yazılır.
+func lay_road(origin_id: String, destination_id: String, key: String, length_days: int) -> void:
+	var west := is_westward(origin_id, destination_id)
+	terrain_key = key
+	terrain_days = length_days
+	terrain_from = destination_id if west else origin_id
+	heading = -1.0 if west else 1.0
+	leg_origin_day = float(length_days) if west else 0.0
+
 ## Bacağın bir noktasının (gün) arazideki karşılığı.
 func terrain_day_at(leg_day: float) -> float:
 	return clampf(leg_origin_day + heading * leg_day, 0.0, float(maxi(terrain_days, journey_length_days)))
@@ -152,6 +178,7 @@ func to_dict() -> Dictionary:
 		"heading": heading,
 		"leg_origin_day": leg_origin_day,
 		"terrain_key": terrain_key,
+		"terrain_from": terrain_from,
 		"terrain_days": terrain_days,
 		"pending_event_id": "" if pending_event == null else pending_event.event_id,
 		"pending_event_day_position": pending_event_day_position,
@@ -181,6 +208,7 @@ func load_from_dict(data: Dictionary, events: Array[GameEvent]) -> void:
 	heading = -1.0 if float(data.get("heading", 1.0)) < 0.0 else 1.0
 	leg_origin_day = maxf(0.0, float(data.get("leg_origin_day", 0.0)))
 	terrain_key = String(data.get("terrain_key", ""))
+	terrain_from = String(data.get("terrain_from", ""))
 	terrain_days = maxi(0, int(data.get("terrain_days", 0)))
 	var pending_id := String(data.get("pending_event_id", ""))
 	pending_event = EventCatalog.get_event(pending_id) if not pending_id.is_empty() else null

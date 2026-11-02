@@ -3993,14 +3993,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Yol",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 302,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Yol yönü hedefi. | Bitti: JourneyController.lay_road/is_westward/terrain_from (kayıtlı); batı yolunda arazi hedeften yazılır, kervan baştan heading -1 ile sola yürür; geri dönüş bütün kervanı sağa çevirir (begin_turn); kapı, anıt, yol konumu ve harita ilerlemesi _terrain_from() ile; sapma da yönünü haritadan alır. Test: test_memory _test_westward_road_walks_left. Ekran: screenshot_journey_screen golcavar→rivecande."
   },
   {
    "id": "T16-04",

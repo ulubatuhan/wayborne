@@ -463,6 +463,14 @@ every decision has a visible control, and a key is only its shortcut.**
   done. Heading, the leg's place on the terrain and the terrain's own key
   are saved, because after turning back the session's origin and
   destination are the same city and the key cannot be re-derived.
+- **East is always to the right; a westward road walks left (user, 2026-11-02, T16-03).** The road screen is the map
+  turned on its side: terrain day grows to the right. `JourneyController.lay_road()` writes a road's terrain from its
+  **western** end (`terrain_from`, saved) - for a westward leg that is the destination - and starts the leg at the
+  terrain's end with `heading` -1, so the caravan, the band, the gates and every marker run leftward with no mirroring
+  of their own: it is the turned-back case from the first step. `is_westward()` compares map x. Turning back on a
+  westward road flips the whole caravan to the right (`begin_turn`, same ceremony). Everything that turns a terrain day
+  into a canonical share (`set_road_position`, `day_for_share`, gates, the map's progress via `_map_progress()`) uses
+  `_terrain_from()`, never the session's origin; a diversion lays its own road the same way. Text is never mirrored.
 - **The camera moves at once, the caravan never slides.** `TravelBand`
   anchors a reversed caravan on the right of the frame (the mirror of the
   forward anchor) over `CAMERA_TURN_SECONDS`, and every layer scrolls by
