@@ -65,8 +65,8 @@ func refresh() -> void:
 	if _session == null:
 		return
 	_ensure_built()
-	_clear(_needs_box)
-	_clear(_routes_box)
+	NodeUtil.clear_children(_needs_box)
+	NodeUtil.clear_children(_routes_box)
 	_session.note_city_arrival(journal_lines(_session))
 	_build_needs()
 	_build_routes()
@@ -260,8 +260,3 @@ func _note(text: String) -> Label:
 	label.modulate = NOTE_COLOR
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	return label
-
-func _clear(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()

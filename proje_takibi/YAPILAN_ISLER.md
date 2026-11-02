@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **193** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **194** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3442,5 +3442,19 @@ Toplam: **193** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-06 Tavernada konaklama; oyun seçeneği boş ekrana girer, geri çıkılır**
   - **Ne:** Tavernada konaklama: para karşılığı gece kalmak (stres ve yorgunluk düşer, gün geçer). Oyun seçeneği: şimdilik oyunu olmayan bir ekrana girer, geri çıkılır.
   - **Kim:** C · **Eski:** N34
+
+</details>
+
+### T16-10 · Kod düzeni: iş akışlarını tek dosyada topla
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 4.3. | Bitti: tests.yml, screenshots.yml, olcum.yml tek ci.yml'de (test / screenshots / measure işleri); ortak kurulum-içe aktarma .github/actions/godot-import, betik hatası kapısı .github/actions/script-gate; ekran işi görünen dosya değişmediyse atlanır. Yardımcılar: city_brief_panel._clear → NodeUtil.clear_children; autoload kopyaları (ButtonFeedback, SceneInk) autoload kuralı gereği kalır. GitHub'da koşu doğrulandı (aşağıdaki not).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-10 Kod düzeni: iş akışlarını tek dosyada topla**
+  - **Ne:** Kod düzeni (eski 4.3): testler, ekran görüntüleri ve ölçüm iş akışları tek dosyada toplanır.
+  - **Kim:** C · **Eski:** 4.3
 
 </details>

@@ -1,0 +1,46 @@
+name: Godot kur ve içe aktar
+description: >
+  Godot 4.2.2'yi kurar, içe aktarma önbelleğini geri yükler ve projeyi içe aktarır
+  (çökerse bir kez daha). Çıktı import.log. Üç işin (test, ekran, ölçüm) ortak başı
+  (görev 4.3 / T16-10: aynı adımlar üç dosyada kopyaydı).
+inputs:
+  templates:
+    description: Dışa aktarma şablonları da kurulsun mu
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Setup Godot
+      uses: chickensoft-games/setup-godot@v1
+      with:
+        version: 4.2.2
+        use-dotnet: false
+        include-templates: ${{ inputs.templates }}
+
+    # İçe aktarma çıktıları depoda yok (.gitignore'da): .godot/imported, her
+    # kaynağın yanındaki .import dosyaları ve CSV'lerin .translation çıktıları.
+    # Üçü birlikte saklanmazsa Godot hepsini yeniden üretir. Ölçüm (yerel,
+    # 2026-10-18): soğuk içe aktarma ~100 sn, sıcak ~13 sn.
+    - name: Cache Godot import
+      uses: actions/cache@v4
+      with:
+        path: |
+          .godot
+          **/*.import
+          **/*.translation
+        key: godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-${{ github.sha }}
+        restore-keys: |
+          godot-import-${{ runner.os }}-4.2.2-${{ hashFiles('project.godot') }}-
+
+    # Godot 4.2.2'nin headless import'u ara sıra motorun kendi içinde çöküyor
+    # (signal 4, iş parçacığı yarışı). Bir kez daha deneniyor; ikinci çökme
+    # gerçek sayılır. Betik hataları bu adımda değil script-gate'te yakalanır,
+    # yani yeniden denemek gerçek bir hatayı gizlemiyor.
+    - name: Import project
+      shell: bash
+      run: |
+        set -o pipefail
+        if ! godot --headless --import 2>&1 | tee import.log; then
+          echo "Import çöktü; bir kez daha deneniyor."
+          godot --headless --import 2>&1 | tee import.log
+        fi

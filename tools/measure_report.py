@@ -7,7 +7,7 @@
 İki kaynak, iki ayrı soru:
 - Simülatör (tests/simulate_career.gd, `OLCUM {...}` satırları): politika başına
   sefer süresi (gün ve 1x gerçek dakika), sefer başına çekilen kart ve ölüm.
-  CI'da (.github/workflows/olcum.yml) her çalıştırmada üretilir.
+  CI'da (.github/workflows/ci.yml, `measure` işi) her çalıştırmada üretilir.
 - Oyuncu tarafı (user://playtest_beats.jsonl): yalnızca oyuncu Ayarlar'dan izin
   verdiyse yazılır ve yalnızca o bilgisayarda kalır. Oturumlar `session`
   satırlarıyla ayrılır; oturum uzunluğu oturumun ilk ve son anı arasındaki

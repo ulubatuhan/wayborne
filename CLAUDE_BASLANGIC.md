@@ -38,7 +38,7 @@ olduğunu ve kullanıcının çalışma kurallarını tek yerde toplar. Önce bu
 | `art_source/` | Kaynak modeller ve dokular (CC0 paketler, MakeHuman giysileri; lisanslar klasörlerin içinde). |
 | `docs/` | Tasarım belgeleri: `lore/`, `design_notes/`, `ui/` (REDESIGN, STIL_REHBERI), `history/` (kapanmış fazların anlatıları, `FAZ_ANLATILARI.md`), `codex/` (Codex PDF'inin kaynağı), `playtest/` (döngü kontrol listesi), `olcum/` (ölçüm raporları), `steam/`. |
 | `proje_takibi/` | **Yapılacaklar ve proje takibi** (aşağıda). |
-| `.github/workflows/` | `tests.yml` (her dal ve PR), `screenshots.yml`, `olcum.yml` (ölçüm raporu, elle ve haftalık). |
+| `.github/workflows/` | Tek dosya `ci.yml` (T16-10): `test` (her dal ve PR), `screenshots` (Wayborne'a push, elle), `measure` (elle ve haftalık); ortak adımlar `.github/actions/godot-import` ve `script-gate`. |
 
 ### proje_takibi/
 

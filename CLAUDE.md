@@ -330,7 +330,7 @@ Ayrıntı, geçmiş ölçüm hataları ve araç listesi `kurallar-test` becerisi
 - Sömürü olan yerde formülü değil sömürünün kapandığını doğrula. Bir rapor şaşırtıcıysa önce ölçüm aracından şüphelen.
 - **Bir iş ekranda görününce biter (Y-K01).** Oyuncunun gördüğü her değişiklik gerçek ekranın görüntüsüyle
   doğrulanır (`ekran-dogrula` becerisi); yapısal testler görünüşü görmez.
-- **CI asıl kapıdır.** Godot ayrıştırma hatasında bile 0 ile çıkar; `tests.yml` günlükte `SCRIPT ERROR`, `Parse
+- **CI asıl kapıdır.** Godot ayrıştırma hatasında bile 0 ile çıkar; `ci.yml` (`script-gate` eylemi) günlükte `SCRIPT ERROR`, `Parse
   Error`, `Compile Error`, `Failed to load script`, `Failed to create an autoload` arar. Bu adımı derleme geçsin diye
   asla kaldırma.
 
@@ -339,8 +339,9 @@ Ayrıntı, geçmiş ölçüm hataları ve araç listesi `kurallar-test` becerisi
 **There is no web build any more (user's decision, 2026-10-21).** The game is played locally on PC from a clone; the Web
 export, the GitHub Pages deploy, `export_presets.cfg` and `web/coi-serviceworker.js` were removed. The browser tab
 could not hold the game (about 1.2 GB of imported textures against the tab's memory limit, `SBOX_FATAL_MEMORY_EXCEEDED`).
-`.github/workflows/tests.yml` runs on every push (`Wayborne` included) and every PR: import, the full suite and the
-script-error gate described above. Never remove that gate to make a build pass.
+`.github/workflows/ci.yml` is the only workflow (task T16-10): its `test` job runs on every push (`Wayborne` included)
+and every PR: import, the full suite and the script-error gate described above (`.github/actions/script-gate`); its
+`screenshots` job photographs the key screens on pushes to `Wayborne`, and `measure` runs the career simulator weekly. Never remove that gate to make a build pass.
 
 ### Local Testing
 
@@ -434,7 +435,7 @@ verir.
 2. Create your first scene in `scenes/main.tscn`
 3. Create scripts in appropriate `scripts/` subfolders
 4. Reference scenes/scripts using `res://` paths
-5. Push to `Wayborne` (the only and default branch); `tests.yml` runs the suite
+5. Push to `Wayborne` (the only and default branch); `ci.yml` runs the suite
 
 ## Codex
 

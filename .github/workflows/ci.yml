@@ -1,0 +1,144 @@
+name: CI
+
+# Tek iş akışı (görev 4.3 / T16-10): testler, ekran görüntüleri ve ölçüm. Eskiden
+# üç dosyaydı (tests.yml, screenshots.yml, olcum.yml) ve kurulum, içe aktarma ve
+# betik hatası kapısı üçünde de kopyaydı; ortak adımlar artık
+# .github/actions/godot-import ve .github/actions/script-gate'te.
+#
+# - test: her push ve PR. İçe aktarma, bütün testler, betik hatası kapısı.
+# - screenshots: Wayborne'a push (görünen bir dosya değiştiyse) ve elle. Kritik
+#   ekranların fotoğrafı iş çıktısı olur; karşılaştırma yok (kullanıcı kararı,
+#   Y-K02 iptal).
+# - measure: elle ve haftalık (Y-K03). Kariyer simülatörünün raporu iş özetine.
+# Web derlemesi ve dağıtım yok (kullanıcı kararı: oyun yerelde PC'de oynanır).
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: "ci-test-${{ github.ref }}"
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: ./.github/actions/godot-import
+        with:
+          templates: "true"
+      - name: Run tests
+        run: |
+          set -o pipefail
+          godot --headless --script res://tests/run_tests.gd 2>&1 | tee tests.log
+      - if: always()
+        uses: ./.github/actions/script-gate
+        with:
+          logs: import.log tests.log
+
+  screenshots:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/Wayborne')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: "ci-screenshots-${{ github.ref }}"
+      cancel-in-progress: true
+    env:
+      GODOT_USER_DIR: ~/.local/share/godot/app_userdata/Wayborne
+      SHOT_SCRIPTS: "screenshot_menu screenshot_city_moods screenshot_journey_screen screenshot_combat"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 2
+      # Eski screenshots.yml'in yol süzgeci: yalnız görünen bir şey değiştiyse.
+      - name: Did anything visible change?
+        id: visible
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(scripts/|scenes/|data/assets/|data/locale/|tests/screenshot_|project\.godot|\.github/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Görünen bir dosya değişmedi; ekran görüntüsü atlandı."
+          fi
+      - if: steps.visible.outputs.run == 'true'
+        name: Install display libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libglu1-mesa
+      - if: steps.visible.outputs.run == 'true'
+        uses: ./.github/actions/godot-import
+      - if: steps.visible.outputs.run == 'true'
+        name: Capture screenshots
+        run: |
+          set -o pipefail
+          mkdir -p shots/current
+          for name in $SHOT_SCRIPTS; do
+            echo "── $name"
+            LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1920x1080x24" \
+              godot --path . --rendering-driver opengl3 --script "res://tests/$name.gd" 2>&1 \
+              | tee -a screens.log
+          done
+          # Araçların hepsi user://<ad>_shots/ altına yazıyor.
+          for dir in $(eval echo "$GODOT_USER_DIR")/*_shots; do
+            [ -d "$dir" ] && cp -r "$dir" shots/current/
+          done
+          find shots/current -name '*.png' | wc -l
+      - if: always() && steps.visible.outputs.run == 'true'
+        uses: ./.github/actions/script-gate
+        with:
+          logs: import.log screens.log
+      - if: always() && steps.visible.outputs.run == 'true'
+        name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.sha }}
+          path: shots/current
+          if-no-files-found: ignore
+          retention-days: 14
+
+  measure:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: ./.github/actions/godot-import
+      - name: Run career simulator
+        run: |
+          set -o pipefail
+          godot --headless --script res://tests/simulate_career.gd 2>&1 | tee career.log
+      # Oyuncu tarafı ölçüm burada yok: o yalnızca oyuncunun izniyle ve kendi
+      # bilgisayarında tutulur.
+      - name: Build report
+        run: |
+          python3 tools/measure_report.py --self-test
+          python3 tools/measure_report.py career.log > olcum.md
+          cat olcum.md >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        uses: ./.github/actions/script-gate
+        with:
+          logs: import.log career.log
+      - if: always()
+        name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: olcum-raporu
+          path: |
+            olcum.md
+            career.log

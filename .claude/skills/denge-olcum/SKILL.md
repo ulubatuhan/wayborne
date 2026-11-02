@@ -39,4 +39,4 @@ Günlükler uzun: ekrana basma, dosyadan `grep`/`tail` ile oku.
 
 - Yeni tablo ilgili kural becerisinin başlığının altına, eski tablonun yanına ve **neden değiştiğiyle** yazılır.
   Hedef bandın dışında bilerek bırakılan hücre gerekçesiyle kaydedilir.
-- CI'da haftalık ölçüm: `.github/workflows/olcum.yml`; son rapor `docs/olcum/`.
+- CI'da haftalık ölçüm: `.github/workflows/ci.yml` (`measure` işi); son rapor `docs/olcum/`.

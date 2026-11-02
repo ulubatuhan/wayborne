@@ -1,0 +1,28 @@
+name: Betik hatası kapısı
+description: >
+  Godot ayrıştırma hatasını basıp yine de sıfırla çıkıyor; hatalı betik yalnızca
+  bir ekranda kullanılıyorsa testler onu hiç görmez. Verilen günlüklerde hata
+  satırı varsa iş düşer. Bu kapı derleme geçsin diye asla kaldırılmaz (CLAUDE.md).
+inputs:
+  logs:
+    description: Boşlukla ayrılmış günlük dosyaları
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Fail on script errors
+      shell: bash
+      run: |
+        found=0
+        for log in ${{ inputs.logs }}; do
+          [ -f "$log" ] || continue
+          if grep -nE 'SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Failed to create an autoload' "$log"; then
+            echo "::error file=$log::$log içinde betik hatası var"
+            found=1
+          fi
+        done
+        if [ "$found" -ne 0 ]; then
+          echo "Godot bu hataları basıp yine de sıfırla çıkıyor; yapı bilerek düşürüldü."
+          exit 1
+        fi
+        echo "Betik hatası yok."

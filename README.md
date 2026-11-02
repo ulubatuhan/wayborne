@@ -118,12 +118,12 @@ oynamadan dengeye yaklaşmanın tek yolu bu.
 
 ### CI/CD
 
-Her push ve PR `tests.yml`'i tetikler: içe aktarım, testler, ve Godot'un
+Her push ve PR `ci.yml`'in `test` işini tetikler: içe aktarım, testler, ve Godot'un
 bastığı ama sessizce geçtiği ayrıştırma hatalarını (`SCRIPT ERROR`,
 `Parse Error`, `Failed to create an autoload` vb.) arayan bir kapı.
 `Wayborne`'a (tek ve varsayılan dal) giden her şey bu kapıdan geçmiş olur.
 
-`olcum.yml` (elle ve haftalık) kariyer simülatörünü koşturup sefer süresi, sefer başına
+`ci.yml`'in `measure` işi (elle ve haftalık) kariyer simülatörünü koşturup sefer süresi, sefer başına
 kart ve ölüm tablosunu iş özetine yazar (`tools/measure_report.py`). Oyuncu tarafı ölçüm
 yalnızca Ayarlar'daki izinle ve oyuncunun kendi bilgisayarında tutulur.
 

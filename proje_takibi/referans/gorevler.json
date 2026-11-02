@@ -4098,14 +4098,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Kod",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 309,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: 4.3."
+   "not": "2026-11-02 kullanıcı listesi. Eski: 4.3. | Bitti: tests.yml, screenshots.yml, olcum.yml tek ci.yml'de (test / screenshots / measure işleri); ortak kurulum-içe aktarma .github/actions/godot-import, betik hatası kapısı .github/actions/script-gate; ekran işi görünen dosya değişmediyse atlanır. Yardımcılar: city_brief_panel._clear → NodeUtil.clear_children; autoload kopyaları (ButtonFeedback, SceneInk) autoload kuralı gereği kalır. GitHub'da koşu doğrulandı (aşağıdaki not)."
   },
   {
    "id": "T16-11",

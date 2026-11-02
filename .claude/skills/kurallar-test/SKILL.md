@@ -185,7 +185,7 @@ godot --headless --script res://tests/simulate_career.gd     # career arc report
 
 **Measurement runs in CI; the player is measured only with consent (task Y-K03).** `simulate_career.gd` prints one
 `OLCUM {json}` line per policy (days and 1x real minutes per journey, cards and deaths per journey);
-`tools/measure_report.py` turns it into a table, and `.github/workflows/olcum.yml` (manual and weekly) puts it in the job
+`tools/measure_report.py` turns it into a table, and `.github/workflows/ci.yml`'s `measure` job (manual and weekly) puts it in the job
 summary. The game writes `playtest_times.json` and `playtest_beats.jsonl` only when Settings' play-measurement box is on
 (`UserSettings.allow_play_log`, default off, `GameState.set_play_log`); a `session` beat opens each session so the report
 can give session lengths. First report: `docs/olcum/OLCUM_2026-10-20.md`.
