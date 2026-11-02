@@ -220,6 +220,20 @@ func set_missing_hand(on: bool) -> void:
 		material = null
 	queue_redraw()
 
+## Kesilen katmanlar: her zaman ön kol; duruşta olduğu gibi iki el aynı yere
+## düşüyorsa arka kol da. Arka kolun eli tam kesik elin yerinde görünüyor ve
+## el silinmemiş gibi okunuyordu (kullanıcı, 2026-11-02, T16-05).
+var _stump_layers: Array = []
+const STUMP_OVERLAP_SHARE: float = 1.6
+
+static func stump_layers(joints: Dictionary, h: float) -> Array:
+	var layers := ["front_arm"]
+	if joints.has("hand_back") and joints.has("hand_front"):
+		var circle := stump_circle(joints.hand_front, joints.elbow_front, h)
+		if Vector2(joints.hand_back).distance_to(Vector2(circle[0])) < float(circle[1]) * STUMP_OVERLAP_SHARE:
+			layers.append("back_arm")
+	return layers
+
 func has_missing_hand() -> bool:
 	return _missing_hand
 
@@ -637,19 +651,24 @@ const FRAME_SHADOW: Color = Color(0.0, 0.0, 0.0, 0.26)
 const HD_SUFFIX: String = "_hd"
 var hd: bool = false
 
+## Yalnız duruş değil: yakın plan kümesinde o klip varsa (ör. ana menünün
+## sandıkta oturan yolcuları, `sit_box`, T16-04) o da çizilir. Beden ve her
+## giysinin HD kümesi o klibi taşımalı; biri eksikse normal küme.
 func _hd_frames(frames: BodyFrames, seated: bool) -> BodyFrames:
-	if not hd or seated:
+	if not hd:
 		return null
 	var garments := OutfitCatalog.worn_frames(_outfit, _body_variant)
 	var clip := pick_clip(shared_clips(frames, garments), seated, _motion, _action_clip, _combat_stance,
 		weapon_kind(), _carries_pack, _wears_boots())
-	if clip != "idle":
-		return null
 	var hd_frames := BodyFrames.for_body(_body_variant + HD_SUFFIX)
-	if hd_frames == null or not hd_frames.has_clip("idle"):
+	if hd_frames == null or not hd_frames.has_clip(clip):
 		return null
-	if OutfitCatalog.worn_frames(_outfit, _body_variant + HD_SUFFIX).size() != garments.size():
+	var hd_garments := OutfitCatalog.worn_frames(_outfit, _body_variant + HD_SUFFIX)
+	if hd_garments.size() != garments.size():
 		return null
+	for garment in hd_garments:
+		if not garment.has_clip(clip):
+			return null
 	return hd_frames
 
 func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: bool) -> void:
@@ -696,6 +715,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 	if shield and not shield_in_front(_facing):
 		_draw_shield(joints, h, look)
 	var stump := _missing_hand and joints.has("hand_front") and joints.has("elbow_front")
+	_stump_layers = stump_layers(joints, h) if stump else []
 	if stump and material is ShaderMaterial:
 		var circle := stump_circle(joints.hand_front, joints.elbow_front, h)
 		# Katmanlar draw_set_transform_matrix(xf) ile çiziliyor; gölgelendiricinin
@@ -722,7 +742,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 		if BodyFrames.LAYERS[layer] == "torso_head" and not fallen:
 			_draw_frame_back_items(joints, h, look, held and not _missing_hand)
 		draw_set_transform_matrix(xf)
-		var cut_layer := stump and BodyFrames.LAYERS[layer] == "front_arm"
+		var cut_layer := _stump_layers.has(BodyFrames.LAYERS[layer])
 		for kind in [BodyFrames.KIND_BODY, BodyFrames.KIND_BOTTOM, BodyFrames.KIND_TOP]:
 			var e := frames.entry(clip, frame, layer, kind)
 			if e.is_empty():
@@ -742,7 +762,7 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 				gtint.a = STUMP_MARK
 			draw_texture_rect_region(g.texture, Rect2(g.offset, g.size), gregion, gtint)
 		draw_set_transform_matrix(Transform2D.IDENTITY)
-		if cut_layer:
+		if cut_layer and BodyFrames.LAYERS[layer] == "front_arm":
 			# Bilekte sargı: kesik kol böyle okunur.
 			var dir := (Vector2(joints.hand_front) - Vector2(joints.elbow_front)).normalized()
 			var a: Vector2 = Vector2(joints.hand_front) - dir * h * 0.012
@@ -786,7 +806,7 @@ func _draw_frame_outline(frames: BodyFrames, garments: Array[BodyFrames], clip: 
 			if seated and BodyFrames.LAYERS[layer] == "back_leg":
 				continue
 			var layer_ink := ink
-			if _missing_hand and BodyFrames.LAYERS[layer] == "front_arm" and is_equal_approx(_tint.a, 1.0):
+			if _stump_layers.has(BodyFrames.LAYERS[layer]) and is_equal_approx(_tint.a, 1.0):
 				layer_ink.a = STUMP_OUTLINE_MARK
 			var e := frames.entry(clip, frame, layer, BodyFrames.KIND_BODY)
 			if not e.is_empty():

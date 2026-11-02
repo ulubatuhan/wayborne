@@ -740,6 +740,6 @@ ever fell, and the career simulation had already measured the result
 - **The penalty for being seen is a hand, never a life.** `evt_avucici_hand` fires on the way to Avuçiçi when an
   unbelieving companion is in the party; the card names who before the choice (`CUT_HAND` is a target selector like
   `PARTY_HP`). `CharacterData.missing_hand` is permanent and saved: the figure draws the near hand cut away with a
-  wrapped wrist (`stump.gdshader`, only the front-arm layer is cut), no weapon is carried in hand, and
+  wrapped wrist (`stump.gdshader`; the front-arm layer is cut, and the back-arm layer too in every frame where both hands fall on the same spot - in the standing pose the back hand showed exactly where the cut hand had been, T16-05, `WalkFigure.stump_layers`), no weapon is carried in hand, and
   `CombatUnit.TWO_HANDED_SKILLS` (shield, bow, maul) are locked with "cannot be done one-handed".
 

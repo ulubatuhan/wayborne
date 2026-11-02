@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **191** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **192** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3414,5 +3414,19 @@ Toplam: **191** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-03 Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner**
   - **Ne:** Kullanıcı: "Batıya giden yolda kervanın sola yürümesi. Bir noktada kervan geri dönmek isteyebilir, bunu yaparsa tüm kervan geriye dönebilmeli." Yol ekranı haritadaki yöne göre aynalanır: bant, işaretler, duraklar ve kapılar; yazılar ters dönmez.
   - **Kim:** C · **Eski:** Yol yönü hedefi
+
+</details>
+
+### T16-05 · Kesik el her pozda tam silinsin
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. | Bitti: duruşta arka kolun eli kesik elin yerinde görünüyordu; eller üst üste olan karede arka kol da aynı çemberde kesilir (WalkFigure.stump_layers). Ekran: idle (HD ve normal), savaş, oturuş, yürüyüş iki yönde. Test: test_avucici _test_stump_in_every_pose.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-05 Kesik el her pozda tam silinsin**
+  - **Ne:** Kesik elin durur pozun bazı karelerinde gövde katmanında kalan kısmı da silinir; her klipte el yok, bilekte sargı.
+  - **Kim:** C · **Eski:** -
 
 </details>

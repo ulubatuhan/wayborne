@@ -4023,14 +4023,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Figür",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 304,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi."
+   "not": "2026-11-02 kullanıcı listesi. | Bitti: duruşta arka kolun eli kesik elin yerinde görünüyordu; eller üst üste olan karede arka kol da aynı çemberde kesilir (WalkFigure.stump_layers). Ekran: idle (HD ve normal), savaş, oturuş, yürüyüş iki yönde. Test: test_avucici _test_stump_in_every_pose."
   },
   {
    "id": "T16-06",
