@@ -34,6 +34,7 @@ const GOOD_COLOR: Color = Color(0.55, 0.8, 0.55)
 var _session: GameSession
 var _needs_box: VBoxContainer
 var _routes_box: VBoxContainer
+var _people_box: VBoxContainer
 
 func setup(session: GameSession) -> void:
 	_session = session
@@ -56,6 +57,14 @@ func _ensure_built() -> void:
 
 	add_child(HSeparator.new())
 
+	# Tanıdıklar (Y-C13, T16-09): şehrin kalıcı kişileri, hatıraları ve işleri.
+	add_child(_heading(tr("UI_PEOPLE_TITLE")))
+	_people_box = VBoxContainer.new()
+	_people_box.add_theme_constant_override("separation", 6)
+	add_child(_people_box)
+
+	add_child(HSeparator.new())
+
 	add_child(_heading(tr("UI_BRIEF_ROUTES_TITLE")))
 	_routes_box = VBoxContainer.new()
 	_routes_box.add_theme_constant_override("separation", 6)
@@ -67,8 +76,10 @@ func refresh() -> void:
 	_ensure_built()
 	NodeUtil.clear_children(_needs_box)
 	NodeUtil.clear_children(_routes_box)
+	NodeUtil.clear_children(_people_box)
 	_session.note_city_arrival(journal_lines(_session))
 	_build_needs()
+	_build_people()
 	_build_routes()
 
 ## Şehrin hâli (Y-C21) ve defterin son hatırası artık panelde değil, günlükte:
@@ -134,6 +145,60 @@ func _build_need_row(need: Dictionary) -> HBoxContainer:
 		button.pressed.connect(_on_screen_requested.bind(String(need.scene)))
 	row.add_child(button)
 	return row
+
+# --- Tanıdıklar ---
+
+func _build_people() -> void:
+	_session.people.ensure_city(_session.current_location_id, _session.total_days_elapsed)
+	for person in _session.people.city_people(_session.current_location_id):
+		_people_box.add_child(_person_row(person))
+
+func _person_row(person: Dictionary) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	var role := tr(String(People.ROLE_KEYS[person["role"]]))
+	var head := Label.new()
+	head.autowrap_mode = TextServer.AUTOWRAP_WORD
+	box.add_child(head)
+	if not bool(person["alive"]):
+		head.text = tr("UI_PEOPLE_DEAD") % [String(person["name"]), role, int(person.get("died_day", 0)) + 1]
+		head.modulate = NOTE_COLOR
+		return box
+	head.text = tr("UI_PEOPLE_ROW") % [String(person["name"]), role, People.age_years(person, _session.total_days_elapsed)]
+	var memory := tr("UI_PEOPLE_MET") % int(person["met"])
+	var regard := People.regard(person)
+	if regard > 0:
+		memory += " " + tr("UI_PEOPLE_REGARD_GOOD")
+	elif regard < 0:
+		memory += " " + tr("UI_PEOPLE_REGARD_BAD")
+	box.add_child(_note(memory))
+	var chain: Dictionary = person.get("chain", {})
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	box.add_child(row)
+	var id := String(person["id"])
+	if int(person.get("chain_step", 0)) >= People.CHAIN_STEPS:
+		row.add_child(_note(tr("UI_PEOPLE_CHAIN_DONE_ALL")))
+	elif chain.is_empty():
+		var ask := Button.new()
+		ask.text = tr("UI_PEOPLE_ASK")
+		ask.pressed.connect(func():
+			_session.people.offer_chain(id, _session.total_days_elapsed)
+			refresh())
+		row.add_child(ask)
+	else:
+		var item := ItemCatalog.get_item(String(chain["item"]))
+		var wants := _note(tr("UI_PEOPLE_CHAIN") % [int(chain["qty"]), item.item_name if item != null else String(chain["item"]), int(chain["due"]) + 1, int(chain["gold"])])
+		wants.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(wants)
+		var deliver := Button.new()
+		deliver.text = tr("UI_PEOPLE_DELIVER")
+		deliver.disabled = not _session.can_deliver_chain(id)
+		deliver.pressed.connect(func():
+			if _session.deliver_chain(id):
+				refresh())
+		row.add_child(deliver)
+	return box
 
 # --- Nereye gidilir ---
 

@@ -3281,8 +3281,11 @@ func _present_event(event: GameEvent) -> void:
 	# saat ilerliyor, arka plan da buna göre değişiyor.
 	_clock.consume_hours(EVENT_HOURS)
 	_engine.mark_fired(event, _current_day)
+	# Yolun reisi (N32, T16-09): kartın {nemesis}'i bu bölgenin reisi.
+	if event.event_id == CHIEF_EVENT_ID:
+		_session.people.active_chief = _session.people.chief_in(_session.journey_region())
 
-	_add_log("—— %s" % tr(event.title_key))
+	_add_log("—— %s" % _session.people.fill_names(tr(event.title_key)))
 
 	if not event.immediate_effects.is_empty():
 		var immediate := _apply_effects(event.immediate_effects)
@@ -3297,7 +3300,7 @@ func _render_card(event: GameEvent) -> void:
 	NodeUtil.clear_children(_card_panel)
 
 	var title := Label.new()
-	title.text = tr(event.title_key)
+	title.text = _session.people.fill_names(tr(event.title_key))
 	title.add_theme_font_size_override("font_size", 20)
 	title.modulate = ArtPalette.GOLD
 	_card_panel.add_child(title)
@@ -3315,7 +3318,7 @@ func _render_card(event: GameEvent) -> void:
 	_card_panel.add_child(body_scroll)
 
 	var body := Label.new()
-	body.text = tr(_framed_text_key(event))
+	body.text = _session.people.fill_names(tr(_framed_text_key(event)))
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, 0.0)
@@ -3415,7 +3418,7 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	# seçenek bir satır değil bir tuş, ve kilitli olan üstü çizili sekme.
 	var button := Button.new()
 	var available := choice.is_available(context)
-	var label := tr(choice.text_key)
+	var label := _session.people.fill_names(tr(choice.text_key))
 	var hint_key := choice.get_hint_text(_session.get_best_effective_stat(choice.hint_stat))
 	if not hint_key.is_empty():
 		label = "%s (%s)" % [label, tr(hint_key)]
@@ -3628,6 +3631,11 @@ func _close_recruit_offer() -> void:
 func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
 	_pending_combat_danger = _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
+	# Reisle yüzleşme (T16-09): kadroda reis olsun diye tehlike reis eşiğinde.
+	_chief_fight = ""
+	if _current_event != null and _current_event.event_id == CHIEF_EVENT_ID and not _session.people.active_chief.is_empty():
+		_chief_fight = _session.people.active_chief
+		_pending_combat_danger = maxf(_pending_combat_danger, CHIEF_FIGHT_DANGER)
 	_session.log_beat(GameSession.BEAT_LOG_COMBAT_START, enemy_kind)
 	AudioManager.set_combat_duck(true)
 	_set_journey_controls_enabled(false)
@@ -3692,11 +3700,66 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 		_current_combat_kind, _session.journey_destination_id, current_biome,
 		"" if _terrain == null else _terrain.look_at(_terrain_day())
 	)
+	_mark_chief(panel)
+
+## Kadrodaki reis (N32, T16-09): yüzleşmede adı bilinen reis odur, yarası ve
+## büyüyen çetesiyle (rank başına can); sıradan çatışmada yalnızca not edilir.
+const CHIEF_EVENT_ID: String = "evt_chief_returns"
+const CHIEF_FIGHT_DANGER: float = 0.55
+const CHIEF_HP_PER_RANK: int = 6
+const CHIEF_KINDS: Array[String] = ["bandit_leader", "toll_man"]
+var _chief_fight: String = ""
+var _squad_had_chief: bool = false
+
+func _mark_chief(panel: CombatPanel) -> void:
+	_squad_had_chief = false
+	if _current_combat_kind != "bandit" or panel._encounter == null:
+		return
+	for unit in panel._encounter.enemy_units:
+		if CHIEF_KINDS.has(unit.figure_kind):
+			_squad_had_chief = true
+			if not _chief_fight.is_empty():
+				var chief := _session.people.person(_chief_fight)
+				unit.display_name = String(chief.get("name", unit.display_name))
+				unit.max_hp += CHIEF_HP_PER_RANK * int(chief.get("rank", 0))
+				unit.current_hp = unit.max_hp
+			break
+
+## Savaştan sonra yolun hafızası: yüzleşilen reis ölür ya da yine kaçar;
+## sıradan bir çatışmanın reisi yarısında kaçar ve adıyla kayda geçer.
+func _remember_chief(victory: bool) -> void:
+	if _current_combat_kind != "bandit":
+		return
+	var region := _session.journey_region()
+	var people := _session.people
+	if not _chief_fight.is_empty():
+		var chief := people.person(_chief_fight)
+		if victory:
+			people.chief_killed(_chief_fight, _session.total_days_elapsed)
+			_add_log(tr("UI_ROAD_CHIEF_KILLED") % String(chief.get("name", "")), OUTCOME_COLOR)
+			_session.write_journal(tr("UI_JOURNAL_CHIEF_KILLED") % String(chief.get("name", "")))
+		else:
+			people.chief_paid(_chief_fight)
+		_chief_fight = ""
+		return
+	if not victory or not _squad_had_chief:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("chief_escape|%s|%d" % [_route_key, _session.total_days_elapsed])
+	if rng.randf() >= People.CHIEF_ESCAPE_CHANCE:
+		return
+	var place := WorldMapData.get_location_by_id(_session.journey_destination_id)
+	var cultures: Array[String] = place.peoples if place != null else ([] as Array[String])
+	var id := people.chief_escaped(region, _session.total_days_elapsed, cultures)
+	var chief := people.person(id)
+	_add_log(tr("UI_ROAD_CHIEF_ESCAPED") % [String(chief["name"]), tr(String(chief["scar"]))], LOCKED_COLOR)
+	_session.write_journal(tr("UI_JOURNAL_CHIEF_ESCAPED") % [String(chief["name"]), tr(String(chief["scar"]))])
 
 func _on_combat_finished(
 	victory: bool, xp_awarded: int, downed_count: int, dead_characters: Array
 ) -> void:
 	_session.log_beat(GameSession.BEAT_LOG_COMBAT_END, "won" if victory else "lost")
+	_remember_chief(victory)
 	AudioManager.set_combat_duck(false)
 	# Günün satırı (Y-B08): kazanılan ya da kaybedilen savaş, düşmanın adıyla.
 	_session.note_beat(GameSession.BEAT_WON if victory else GameSession.BEAT_LOST,

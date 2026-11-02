@@ -157,6 +157,9 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 				result.lines.append(_t("EFF_DEBT_SETTLED") % settled)
 		EventEffect.Type.PARTY_HP:
 			_apply_party_hp(effect, session, result)
+		EventEffect.Type.CHIEF_MEMORY:
+			if effect.text_value == "paid":
+				session.people.chief_paid(session.people.active_chief)
 		EventEffect.Type.FACTION:
 			var moved := session.change_faction_standing(effect.text_value, effect.amount)
 			if moved != 0:

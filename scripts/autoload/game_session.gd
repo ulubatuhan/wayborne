@@ -180,7 +180,9 @@ func get_available_credit_after_repay(amount: int) -> int:
 func get_loan_fee_percent() -> int:
 	var spread := LOAN_ORIGINATION_PERCENT_UNTRUSTED - LOAN_ORIGINATION_PERCENT_TRUSTED
 	var clamped := clampi(credit_standing(), 0, LOAN_FEE_REPUTATION_CAP)
-	return LOAN_ORIGINATION_PERCENT_UNTRUSTED - (spread * clamped) / LOAN_FEE_REPUTATION_CAP
+	var fee := LOAN_ORIGINATION_PERCENT_UNTRUSTED - (spread * clamped) / LOAN_FEE_REPUTATION_CAP
+	# Tefeci hatırlar (T16-09): gönlü iyiyse ücreti indirir, küsse artırır.
+	return clampi(fee - regard_here(People.ROLE_LENDER), LOAN_ORIGINATION_PERCENT_TRUSTED - 2, LOAN_ORIGINATION_PERCENT_UNTRUSTED + 3)
 
 ## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
 ## Ücret yukarı yuvarlanır, ama tam sayı aritmetiğiyle.
@@ -471,6 +473,8 @@ var danger_level: float = 0.0
 ## artık bulunulan bölgenin gözündeki ad: bütün eski kapılar (işe alma, kontrat,
 ## vagon kilometre taşları, kredi) onu okur, yani her bölge kapısını kendi açar.
 var standing: Standing = _new_standing()
+## Adı olan, hatırlayan kişiler ve yolun reisleri (Y-C13, N32; T16-09).
+var people: People = People.new()
 var reputation: int:
 	get:
 		return standing.region(current_region())
@@ -481,6 +485,11 @@ static func _new_standing() -> Standing:
 	var s := Standing.new()
 	s.reset()
 	return s
+
+## Seferin gittiği yerin bölgesi (yoldaki reis ona bakar); sefer yoksa bulunulan yer.
+func journey_region() -> String:
+	var place := WorldMapData.get_location_by_id(journey_destination_id if is_journey_active() else current_location_id)
+	return place.region if place != null else ""
 
 ## Bulunulan yerin bölgesi (yoldayken çıkılan şehrinki).
 func current_region() -> String:
@@ -891,7 +900,38 @@ const LODGING_STRESS_RELIEF: int = 6
 const LODGING_HEAL_SHARE: float = 0.25
 
 func get_lodging_cost() -> int:
-	return int(ceil(LODGING_COST_PER_HEAD * maxi(1, party.size()) * (1.0 + scarcity_here())))
+	# Taverna sahibi hatırlar (T16-09): gönlüne göre %10'ar, en çok yarısı.
+	var kindness := clampf(1.0 - 0.1 * float(regard_here(People.ROLE_INNKEEPER)), 0.5, 1.3)
+	return int(ceil(LODGING_COST_PER_HEAD * maxi(1, party.size()) * (1.0 + scarcity_here()) * kindness))
+
+## Bu şehrin o rolündeki kişinin gönlü (ölü ya da yoksa 0).
+func regard_here(role: String) -> int:
+	var p := people.person("%s_%s" % [current_location_id, role])
+	if p.is_empty() or not bool(p.get("alive", false)):
+		return 0
+	return People.regard(p)
+
+## Kişisel iş (T16-09): kişinin evinde, istenen mal kervanda yeterliyse teslim edilir.
+func can_deliver_chain(person_id: String) -> bool:
+	var p := people.person(person_id)
+	if p.is_empty() or not bool(p["alive"]) or String(p["home"]) != current_location_id or is_journey_active():
+		return false
+	var chain: Dictionary = p.get("chain", {})
+	return not chain.is_empty() and get_total_quantity(String(chain["item"])) >= int(chain["qty"])
+
+func deliver_chain(person_id: String) -> bool:
+	if not can_deliver_chain(person_id):
+		return false
+	var p := people.person(person_id)
+	var chain: Dictionary = p["chain"]
+	remove_from_cargo_or_bags(String(chain["item"]), int(chain["qty"]))
+	wallet.earn(int(chain["gold"]))
+	change_reputation(People.CHAIN_REPUTATION)
+	if String(p["role"]) == People.ROLE_GUILD:
+		change_faction_standing(Standing.GUILD, 1)
+	people.complete_chain(person_id)
+	write_journal(TranslationServer.translate("UI_JOURNAL_CHAIN_DONE") % [String(p["name"]), TranslationServer.translate(String(People.ROLE_KEYS[p["role"]]))])
+	return true
 
 func can_afford_lodging() -> bool:
 	return is_city_open_to_lodging() and wallet.can_afford(get_lodging_cost())
@@ -916,6 +956,20 @@ func lodge_night() -> Array[String]:
 	var location := WorldMapData.get_location_by_id(current_location_id)
 	write_journal(TranslationServer.translate("UI_JOURNAL_LODGED") % (location.location_name if location != null else current_location_id))
 	return expired
+
+## Kişilerin günü (T16-09): yaşlanan ölür, süresi dolan iş kin bırakır. Defter yazar.
+func _people_day() -> void:
+	for note in people.daily(total_days_elapsed, func(place: String) -> float: return scarcity_here(place) if not place.is_empty() else 0.0):
+		var p := people.person(String(note["id"]))
+		var role := TranslationServer.translate(String(People.ROLE_KEYS.get(p.get("role", ""), "")))
+		var place := WorldMapData.get_location_by_id(String(p.get("home", "")))
+		var place_name := place.location_name if place != null else String(p.get("home", ""))
+		if String(note["kind"]) == "died":
+			journal.append({"day": total_days_elapsed, "place": String(p.get("home", "")),
+				"text": TranslationServer.translate("UI_JOURNAL_PERSON_DIED") % [String(p["name"]), role, place_name]})
+		else:
+			journal.append({"day": total_days_elapsed, "place": String(p.get("home", "")),
+				"text": TranslationServer.translate("UI_JOURNAL_CHAIN_FAILED") % [String(p["name"]), role]})
 
 func has_feasted_today() -> bool:
 	return last_feast_day == total_days_elapsed
@@ -2353,6 +2407,7 @@ func advance_day() -> Array[String]:
 	total_days_elapsed += 1
 	plague.step()
 	_drift_city_morale()
+	_people_day()
 
 	# Vadesi geçen borçlara faiz biner ve itibar yer. Tek giriş noktası
 	# burası - başka yerden çağrılırsa aynı gecikme iki kez cezalandırılırdı.
@@ -3867,6 +3922,9 @@ func roll_price_rumor(location_id: String) -> Dictionary:
 	return out
 
 func _restock_current_location() -> void:
+	# Şehrin kalıcı kişileri varışta kervanı görür (T16-09).
+	people.ensure_city(current_location_id, total_days_elapsed)
+	people.greet_city(current_location_id, total_days_elapsed)
 	market_stock.clear()
 	var location := WorldMapData.get_location_by_id(current_location_id)
 	if location != null:
@@ -4833,6 +4891,7 @@ func to_save_dict() -> Dictionary:
 		"wagon_inventories": wagon_inventory_data,
 		"current_location_id": current_location_id,
 		"reputation": reputation,
+		"people": people.to_dict(),
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
@@ -5062,6 +5121,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
 	# Bölgesel itibar (T16-07); eski kayıtta tek sayı vardı: her bölge onunla açılır.
+	people.from_dict(data.get("people", {}) as Dictionary)
 	if data.has("standing"):
 		standing.from_dict(data["standing"] as Dictionary)
 	else:
@@ -5224,7 +5284,10 @@ func build_event_context() -> Dictionary:
 	# için kurulduğundan tekrarlı tarama boşuna.
 	var culture_id := _player_culture_id()
 	var party_size := get_party().size()
+	var chief := people.chief_in(journey_region())
 	var context := {
+		# Yolun reisi (N32, T16-09): bu yolun bölgesinde adı bilinen, kinli bir reis var mı.
+		"chief_here": 1.0 if not chief.is_empty() and int(people.person(chief).get("grudge", 0)) > 0 else 0.0,
 		"gold": wallet.balance,
 		# Borç olaylara açık: alacaklı baskısı, tefeci teklifi ve
 		# "borcun varken ne yaparsın" kararları bunlara bakar.

@@ -143,3 +143,11 @@ Who you are travelling with, and who you meet, changes what an event does.
   Any event not in the table, or a culture with no variant, falls back to
   the base `event.text_key` untouched - old saves and any harness that
   doesn't build a full party never notice the table exists.
+
+### Named people on cards (T16-09)
+
+- A card's title, body and choice labels pass through `People.fill_names()`: `{nemesis}` and `{scar}` are the chief
+  `People.active_chief`, set by `road_journey._present_event` for `evt_chief_returns`. A key with braces and no active
+  chief shows the braces, so only that card uses them.
+- `EventEffect.Type.FACTION` (text_value = faction id) and `EventEffect.Type.CHIEF_MEMORY` ("paid") are how cards
+  touch factions and the chief's memory; no card writes `People` or `Standing` directly.

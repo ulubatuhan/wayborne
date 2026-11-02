@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **12** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **13** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P03
 
@@ -298,5 +298,19 @@ Toplam: **12** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - [ ] **T16-08 Bölgesel düşman kimlikleri**
   - **Ne:** Bölgesel düşman kimlikleri (eski Y-C09). Kullanıcı onayına sunulur.
   - **Kim:** CO · **Eski:** Y-C09
+
+</details>
+
+### T16-09 · Adı olan, kervanı hatırlayan kişiler ve NPC hafızası
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Y-C13, N32. | Yapıldı, onaya sunuldu: People (her şehirde lonca ustası, tefeci, taverna sahibi; tohumdan, kayıtta; hatıra, gönül, yaş, ölüm, kıtlıkta erken ölüm, deftere yazım), kişisel iş zinciri (3 adım, şehrin istediği mal, süre, ödül, kin), gönlün kapıları (oda fiyatı, kredi ücreti), şehir panelinde Tanıdıklar; yolun reisi: kaçan reis adı, izi, kini ve büyüyen çetesiyle evt_chief_returns kartında döner ({nemesis}/{scar}), öldürülünce biter; EventEffect.CHIEF_MEMORY. Varis sahnesi (Y-D04) kullanıcı kararıyla atlandı. Test: test_people. Ekran: city_map Tanıdıklar.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-09 Adı olan, kervanı hatırlayan kişiler ve NPC hafızası**
+  - **Ne:** Adı olan, kervanı hatırlayan kişiler (eski Y-C13) ve NPC hafızası (eski N32). Varis devralma sahnesi (Y-D04) şimdilik atlandı. Kullanıcı onayına sunulur.
+  - **Kim:** CO · **Eski:** Y-C13, N32
 
 </details>

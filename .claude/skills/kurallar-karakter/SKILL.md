@@ -71,6 +71,16 @@ Bölümler: scripts/character/, Character & Party Rules, Lineage Rules, Stress R
     A candidate's culture comes from the settlement's peoples (`Location.peoples`, settlements.json `peoples`) with
     `LOCAL_SHARE` (0.75), otherwise any culture (travellers). Fishers have no single homeland (user, 2026-11-02, Ç12):
     fishing towns list both the fisher culture and the region's, so their boards come out mixed.
+  - **People who remember (Y-C13, N32; T16-09).** `People` (`scripts/campaign/people.gd`, saved as `people`) holds
+    three lasting persons per city - guild master, moneylender, tavern keeper - built from a `people|<city>` seed and
+    the city's peoples, so a reload never changes them. They see the caravan once per arrival day (`met`), keep
+    `favor`/`grudge` (`People.regard`), age by `Scarcity.YEAR_DAYS` and may die after sixty, three times as easily in
+    a starving city; deaths and broken promises are written to the journal (the ledger forgets nothing). Each gives a
+    three-step personal chain from the city's demanded goods (`offer_chain`, `deliver_chain`: gold, regional standing,
+    favor; missing the deadline leaves a grudge). Regard opens doors: the tavern keeper's prices the room
+    (±10% per point, 0.5-1.3), the moneylender's moves the loan fee. On the road a beaten gang's chief escapes half the
+    time (`chief_escaped`: name, scar, grudge, rank) and returns in `evt_chief_returns` with a stronger, named leader;
+    killing them ends the line. The city brief lists the people under "Tanıdıklar".
   - **Recruiting is hard and personal (task Y-C16).** A board holds one or two people (`RecruitCatalog.VENUE_COUNTS`;
     the guild one), one fewer while a war or plague is on; base prices rose 30%; levels lean to the low end of the
     venue's spread (`LEVEL_SKEW_POWER`), so a seasoned hire is rare. Every candidate carries a backstory - why they

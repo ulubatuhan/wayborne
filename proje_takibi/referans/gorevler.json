@@ -4083,14 +4083,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Sistem",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "test bekliyor",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 308,
    "kim": "CO",
-   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C13, N32."
+   "not": "2026-11-02 kullanıcı listesi. Eski: Y-C13, N32. | Yapıldı, onaya sunuldu: People (her şehirde lonca ustası, tefeci, taverna sahibi; tohumdan, kayıtta; hatıra, gönül, yaş, ölüm, kıtlıkta erken ölüm, deftere yazım), kişisel iş zinciri (3 adım, şehrin istediği mal, süre, ödül, kin), gönlün kapıları (oda fiyatı, kredi ücreti), şehir panelinde Tanıdıklar; yolun reisi: kaçan reis adı, izi, kini ve büyüyen çetesiyle evt_chief_returns kartında döner ({nemesis}/{scar}), öldürülünce biter; EventEffect.CHIEF_MEMORY. Varis sahnesi (Y-D04) kullanıcı kararıyla atlandı. Test: test_people. Ekran: city_map Tanıdıklar."
   },
   {
    "id": "T16-10",

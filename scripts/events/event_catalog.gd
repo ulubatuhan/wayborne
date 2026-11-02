@@ -112,6 +112,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_trade_fair_news())
 	_road_events.append(_bandit_tribute_zone_news())
 	_road_events.append(_avucici_hand())
+	_road_events.append(_chief_returns())
 	_road_events.append(_bandit_tribute_toll())
 	_road_events.append(_road_warden())
 	_road_events.append(_taken_captive())
@@ -3393,3 +3394,31 @@ static func _modifiers(items: Array) -> Array[EventWeightModifier]:
 	for item in items:
 		result.append(item)
 	return result
+
+## Yolun reisi geri döner (N32, T16-09; sütun: Defter unutmaz, Yol yaşar). Bir
+## kez yenilip kaçan haydut reisi adıyla ve yüzündeki bizim izimizle bu
+## bölgenin yolunu bekler; metindeki {nemesis} ve {scar} People'dan dolar.
+static func _chief_returns() -> GameEvent:
+	var event := _event("evt_chief_returns", "EVT_CHIEF_RETURNS_TITLE", "EVT_CHIEF_RETURNS_TEXT", 2.4)
+	event.cooldown_days = 6
+	event.conditions = _conditions([_c("chief_here", EventCondition.Op.GREATER_EQUAL, 1.0)])
+	event.choices = _choices([
+		_choice("EVT_CHIEF_RETURNS_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.FACTION, -2, Standing.BROTHERHOOD),
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
+		])),
+		_gated_choice("EVT_CHIEF_RETURNS_OPT_PAY", "EVT_CHIEF_RETURNS_OPT_PAY_LOCKED",
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 90)]),
+			_effects([
+				EventEffect.make(EventEffect.Type.GOLD, -90),
+				EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
+				EventEffect.make(EventEffect.Type.CHIEF_MEMORY, 0, "paid"),
+				EventEffect.make(EventEffect.Type.MORALE, -6),
+			])
+		),
+		_choice("EVT_CHIEF_RETURNS_OPT_DETOUR", _effects([
+			EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+		])),
+	])
+	return event

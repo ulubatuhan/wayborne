@@ -91,6 +91,9 @@ enum Type {
 	# Hizip itibarı (Y-C12, T16-07): text_value hizip (Standing.GUILD/CHURCH/
 	# BROTHERHOOD), amount değişim.
 	FACTION,
+	# Yolun reisi (N32, T16-09): text_value "paid" - kartta olan reise boyun
+	# eğildi, çetesi büyür (People.chief_paid).
+	CHIEF_MEMORY,
 }
 
 @export var type: Type = Type.GOLD
