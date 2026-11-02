@@ -422,6 +422,10 @@ func cycle_distance() -> float:
 
 ## Bu figürün tempolu yürüyüşte zemine göre hızı (piksel/s): kervanın
 ## zemin hızının tavanı bunların en küçüğü.
+## Normal (tempolu olmayan) yürüyüşün zemin hızı: kampta ateşe yürüyüş bu.
+func walk_ground_speed() -> float:
+	return WALK_CADENCE * cycle_distance()
+
 func brisk_ground_speed() -> float:
 	return brisk_cadence() * cycle_distance()
 

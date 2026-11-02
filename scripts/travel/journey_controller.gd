@@ -41,9 +41,12 @@ var camp_ends_at_hours: float = 0.0
 ## Kamp kuruldu ama herkes henüz ateşe varmadı: `camp_ends_at_hours` bu
 ## değerde bekler, sayaç herkes vardığında başlar (bkz. camp_ends_at).
 const CAMP_PENDING: float = -1.0
-## Kamp kurulurken ve sökülürken insanlar yürürken oyun saati bu çarpanla akar
-## (görev 12.2c: yürüyüş en çok yarım oyun saati; normal hızda 2,4 saat yiyordu).
-const CAMP_WALK_CLOCK_SCALE: float = 0.2
+## Kamp kurulurken ve sökülürken insanlar yürürken oyun saati bu çarpanla akar.
+## Ateşe yürüyüş normal yürüyüşle en çok 10 gerçek saniye (T16-01); saat normal
+## akışta (günde 45 sn) bu on saniyede 5 oyun saati geçirir, yirmi adımlık yol
+## gecenin yarısını yerdi. 0.05'te on saniye on altı oyun dakikası: hayvanı
+## bağlamak, yükü indirmek, ateşi tutuşturmak kadar.
+const CAMP_WALK_CLOCK_SCALE: float = 0.05
 
 ## Kampın bitiş saatini günceller. Kamp sayacı yürüyüş bitince başlar:
 ## eskiden `kamp saati + CAMP_HOURS` kurulduğu anda yazılıyordu ve ateşe

@@ -16,13 +16,13 @@ const MOMENTS: Array = [
 	["0.2 sn: iniş başlıyor", true, 0.2],
 	["0.8 sn: iniş ortası", true, 0.8],
 	["1.4 sn: yere iniyor", true, 1.4],
-	["ateşe yürüyüş", true, 2.0],
-	["ateşe varmadan: yalnızca odun", true, 2.6],
-	["ilk figür vardı: tutuşuyor", true, 2.85],
-	["ateş oturdu", true, 4.2],
-	["kamp kalktı: dönüş", false, 1.0],
-	["binmeden önce", false, 3.0],
-	["yerinde, yürümeye hazır", false, 6.0],
+	["ateşe yürüyüş", true, 1.8],
+	["ilk figür vardı: tutuşuyor", true, 2.2],
+	["5 sn: yürüyüş sürüyor", true, 5.0],
+	["10 sn: herkes ateşte", true, 10.1],
+	["kamp kalktı: dönüş", false, 3.0],
+	["binmeden önce", false, 9.0],
+	["yerinde, yürümeye hazır", false, 11.0],
 ]
 
 var _band: TravelBand
@@ -114,7 +114,7 @@ func _closeup() -> void:
 
 ## Kervanın ön yarısı (lider, ilk vagon, ateşi) her an için bir satır.
 func _compose(shots: Array[Image], labels: Array[String]) -> void:
-	var crop := Rect2i(0, int(BAND.y * 0.35), int(BAND.x * 0.62), int(BAND.y * 0.62))
+	var crop := Rect2i(0, int(BAND.y * 0.35), BAND.x, int(BAND.y * 0.62))
 	var sheet := Image.create(crop.size.x, crop.size.y * shots.size(), false, Image.FORMAT_RGBA8)
 	for i in shots.size():
 		var img := shots[i]

@@ -129,6 +129,8 @@ const CAMPFIRE_TRAIL_RATIO: float = 0.62
 ## Zemin çizgisinden biraz izleyiciye doğru (aşağı) - tam tekerleğin
 ## dibine oturmasın diye (bkz. Art Rules'un "yakın olan aşağıda" kuralı).
 const CAMPFIRE_NEAR_OFFSET: float = 9.0
+## Öncü ateşinin atın burnundan uzaklığı (insan boyu cinsinden).
+const VANGUARD_FIRE_GAP: float = 1.1
 const FIRE_FLICKER_SPEED: float = 9.0
 
 ## İnsanlar ateşe yürüyor, hayvanlar ve lider yerinde kalıyor: öküz
@@ -138,19 +140,18 @@ const FIRE_FLICKER_SPEED: float = 9.0
 ## `CAMP_HOURS` (8 oyun saati) yanında görünmeyecek kadar kısa olmamalı
 ## ama oyuncunun sabrını da sınamamalı.
 ##
-## Süre figür başına: herkes kendi yoluna göre yürür (`_figure_gather_seconds`),
-## ne en yavaşa ne en uzağa göre beklenir. Üst sınır `MAX_GATHER_SECONDS`:
-## eskiden en uzak figürün tempolu hızı herkesi 30-60 saniyeye bağlıyordu ve
-## sayaç yürüyüş bitmeden başlıyordu - ateşe varana kadar sabah oluyordu
-## (görev 12.2c). Oyun hızı çarpanı yürüyüşe de uygulanıyor
+## Süre figür başına: herkes kendi yoluna, kendi normal yürüyüş hızıyla
+## yürür (`_figure_gather_seconds`); ne koşar ne en yavaşı bekler. Üst sınır
+## `MAX_GATHER_SECONDS`: en öndeki attan ateşe yürüyüş bile 10 saniyeyi
+## geçmez (kullanıcı, 2026-11-02, T16-01). Eskiden en uzak figürün tempolu
+## hızı herkesi 30-60 saniyeye bağlıyordu, ardından 3 saniyelik sınır
+## insanları koşturuyordu. Oyun hızı çarpanı yürüyüşe de uygulanıyor
 ## (`set_gather_time_scale`).
 const CAMP_GATHER_SECONDS: float = 1.0
-const MAX_GATHER_SECONDS: float = 3.0
-## Üst sınır yüzünden tempolu hızın kaç katına çıkılabileceği: uzak bir figür
-## 3 saniyeye sığmak için biraz koşar, ama kendi yürüyüşünden iki katından
-## fazla değil (ondan sonrası yola ateşi yaklaştırarak, bkz. `_nearest_fire`).
-const GATHER_JOG_FACTOR: float = 2.0
-## Ateşin tutuşma süresi (gerçek saniye, oyun hızıyla ölçekli).
+const MAX_GATHER_SECONDS: float = 10.0
+## Ateşe yürüyüşün ortalama hızı figürün normal yürüyüşü
+## (`WalkFigure.walk_ground_speed`); smoothstep'in tepesi bunun 1.5 katı,
+## yani tempolu yürüyüş kadar - koşu değil.
 const IGNITE_SECONDS: float = 0.7
 ## Ateş resminin (bonfire/body.png) alt kısmı odun, üstü alev. Tutuşmadan
 ## önce yalnızca odun görünür; oran resmin yüksekliğinden (145 satırın
@@ -184,9 +185,12 @@ const CAMPFIRE_SEAT_SPACING: float = 15.0
 ## payı, kalça kütüğün üstünde (GrimDrafts'ın menüdeki sandığıyla aynı oran).
 const CAMP_SEATED_CLIP: String = "sit_fire"
 ## Koltukların sayısı ve derinlik kayması (`y`); yatay yer `_seat_reach`'ten.
+## Sekiz yer: tek vagonlu altı kişilik kervanda arka koruma dolu ateşi atlayıp
+## kolonun başındaki öncü ateşine yürümesin (T16-01).
 const CAMPFIRE_SEATS: Array[Vector2] = [
 	Vector2(-1.0, 0.4), Vector2(1.0, 0.3), Vector2(-1.0, -0.4),
 	Vector2(1.0, -0.4), Vector2(-1.0, -0.2), Vector2(1.0, -0.2),
+	Vector2(-1.0, -0.5), Vector2(1.0, -0.5),
 ]
 ## Ateşin başında yalnızca iki kişi oturur, ayak uçları taş çemberin bittiği yerde;
 ## öbürleri oturanların hemen arkasında ayakta durur, el uzatmadan (kullanıcı,
@@ -949,15 +953,16 @@ func _begin_gathering() -> void:
 	# CAMPFIRE_SEATS'in notu).
 	var seats_taken: Dictionary = {}
 
-	# Lider kervanın başında; en yakın ateş baştaki vagonunki.
+	# Lider kervanın başında; ateşi öncü ateşi.
+	var vanguard := _vanguard_index()
 	if _leader_mounted and _leader_rider != null:
 		var rider_h := _leader.size.y * WalkFigure.MOUNT_RIDER_RATIO
 		_leader_rider.size = Vector2(rider_h * 0.6, rider_h)
 		_leader_rider.set_facing(_leader.get_facing())
-		_assign_transition(_leader_rider, "dismount", 0, seats_taken)
+		_assign_transition(_leader_rider, "dismount", vanguard, seats_taken)
 		_leader.set_riderless(true)
 	elif _leader != null:
-		_assign_gather(_leader, 0, seats_taken)
+		_assign_gather(_leader, vanguard, seats_taken)
 	for index in _driver_figures.size():
 		if index >= fire_count:
 			break
@@ -978,10 +983,10 @@ func _nearest_fire(figure: WalkFigure, seats_taken: Dictionary) -> int:
 	var best := 0
 	var best_dist := INF
 	var any_free := false
-	for index in _wagon_centres.size():
+	for index in _fire_count():
 		if int(seats_taken.get(index, 0)) < CAMPFIRE_SEATS.size():
 			any_free = true
-	for index in _wagon_centres.size():
+	for index in _fire_count():
 		if any_free and int(seats_taken.get(index, 0)) >= CAMPFIRE_SEATS.size():
 			continue
 		var dist := absf(_campfire_position(index).x - centre)
@@ -990,15 +995,34 @@ func _nearest_fire(figure: WalkFigure, seats_taken: Dictionary) -> int:
 			best = index
 	return best
 
-func _take_seat(fire_index: int, seats_taken: Dictionary) -> int:
-	var seat := int(seats_taken.get(fire_index, 0))
-	seats_taken[fire_index] = seat + 1
+## Ateşin geldiği yandaki ilk boş yer: soldan gelen sol yanda, sağdan gelen
+## sağ yanda durur; o yan doluysa öbür yan. Sırayla dağıtınca arkadan gelen
+## ateşin karşı yanına dolanıyordu (T16-01: yol uzuyor, yürüyüş koşuya
+## dönüyordu). `seats_taken[fire]` dolu yer sayısı (`_nearest_fire` okur).
+func _take_seat(fire_index: int, seats_taken: Dictionary, from_x: float) -> int:
+	var used_key := "used_%d" % fire_index
+	var used: Dictionary = seats_taken.get(used_key, {})
+	var side := 1.0 if from_x >= _campfire_position(fire_index).x else -1.0
+	var seat := -1
+	for pass_side in [side, -side]:
+		for index in CAMPFIRE_SEATS.size():
+			if not used.has(index) and signf(CAMPFIRE_SEATS[index].x) == pass_side:
+				seat = index
+				break
+		if seat >= 0:
+			break
+	if seat < 0:
+		# Bütün yerler dolu: sayaç gibi taşar (`_campfire_target` sınırlar).
+		seat = int(seats_taken.get(fire_index, 0))
+	used[seat] = true
+	seats_taken[used_key] = used
+	seats_taken[fire_index] = int(seats_taken.get(fire_index, 0)) + 1
 	return seat
 
 func _assign_gather(figure: WalkFigure, fire_index: int, seats_taken: Dictionary) -> void:
 	if figure == null:
 		return
-	var seat := _take_seat(fire_index, seats_taken)
+	var seat := _take_seat(fire_index, seats_taken, figure.position.x + figure.size.x * 0.5)
 	_gathering_figures.append(figure)
 	_gather_fire_index[figure] = fire_index
 	_gather_seat_index[figure] = seat
@@ -1019,7 +1043,7 @@ func _assign_transition(figure: WalkFigure, clip: String, fire_index: int, seats
 	_gather_trans[figure] = 0.0
 	var home := _transition_home(figure)
 	figure.position = home
-	var seat := _take_seat(fire_index, seats_taken)
+	var seat := _take_seat(fire_index, seats_taken, home.x + figure.size.x * 0.5)
 	_gathering_figures.append(figure)
 	_gather_fire_index[figure] = fire_index
 	_gather_seat_index[figure] = seat
@@ -1089,10 +1113,32 @@ func _seat_reach(seat: int, person_h: float) -> float:
 func max_seat_reach() -> float:
 	return _seat_reach(CAMPFIRE_SEATS.size() - 1, size.y * _scale * PERSON_HEIGHT_RATIO)
 
+## Ateş sayısı: vagon başına bir ateş ve kolonun başında bir öncü ateşi.
+## Öncü ateşi liderin ve önde yürüyenlerin: en öndeki attan baştaki vagonun
+## ateşine on bir boy vardı, normal yürüyüşle yarım dakika (kullanıcı,
+## 2026-11-02, T16-01: attan ateşe en fazla 10 saniye).
+func _fire_count() -> int:
+	return 0 if _wagon_centres.is_empty() else _wagon_centres.size() + 1
+
+func _vanguard_index() -> int:
+	return _wagon_centres.size()
+
+## Öncü ateşi atın burnunun önünde, yürüyüş yönünde.
+func _vanguard_fire_position() -> Vector2:
+	var person_h := size.y * _scale * PERSON_HEIGHT_RATIO
+	var x := _anchor_x
+	var facing := 1.0
+	if _leader != null:
+		facing = _leader.get_facing()
+		x = _leader.position.x + _leader.size.x * (0.5 + 0.5 * facing)
+	return Vector2(x + facing * person_h * VANGUARD_FIRE_GAP, _ground_y + CAMPFIRE_NEAR_OFFSET * _scale)
+
 ## Bir vagonun ateşinin durduğu yer. Ateş vagonun **kuyruk yönüne**
 ## kayıyor (bkz. CAMPFIRE_TRAIL_RATIO'nun notu) - önü zaten öküz ve
 ## tayfayla dolu.
 func _campfire_position(index: int) -> Vector2:
+	if index == _vanguard_index() and index > 0:
+		return _vanguard_fire_position()
 	if index < 0 or index >= _wagon_centres.size():
 		return Vector2(_anchor_x, _ground_y)
 	var wagon_w := maxf(size.y, 1.0) * _scale * WAGON_WIDTH_RATIO
@@ -1205,11 +1251,11 @@ func get_pack_centres() -> Array[float]:
 		centres.append(figure.position.x + figure.size.x * 0.5)
 	return centres
 
-## Ateşlerin merkezleri, vagonlarla aynı sırada - `_wagon_centres` gibi
+## Ateşlerin merkezleri, vagonlarla aynı sırada, sonda öncü ateşi - `_wagon_centres` gibi
 ## test bunu okuyor, kendi aritmetiğini yapmıyor.
 func get_campfire_positions() -> Array[Vector2]:
 	var positions: Array[Vector2] = []
-	for index in _wagon_centres.size():
+	for index in _fire_count():
 		positions.append(_campfire_position(index))
 	return positions
 
@@ -1504,7 +1550,7 @@ func _update_fires(delta: float) -> void:
 		if float(_gather_walk.get(figure, 0.0)) >= 1.0:
 			arrived_at[fire_index] = true
 			anyone = true
-	for index in _wagon_centres.size():
+	for index in _fire_count():
 		var lit := arrived_at.has(index) or (anyone and not assigned_to.has(index))
 		if lit or _fire_ignite.has(index):
 			var was_lit := _fire_ignite.has(index)
@@ -1531,18 +1577,18 @@ func is_camp_settled() -> bool:
 func is_camp_transitioning() -> bool:
 	return (_camping and not is_camp_settled()) or is_breaking_camp()
 
-## Bir figürün ateşe yürüyüş süresi: kendi yolu ve kendi tempolu hızı. En
-## uzağa yürüyenin en hızlı anı (smoothstep'in tepesi ortalamanın 1.5 katı)
-## tempolu yürüyüşün `GATHER_JOG_FACTOR` katını geçmesin; ama hiçbir yürüyüş
-## `MAX_GATHER_SECONDS`'ı aşmasın.
+## Bir figürün ateşe yürüyüş süresi: kendi yolu bölü kendi normal yürüyüş
+## hızı. İnip binme klibiyle birlikte hiçbir toplanma `MAX_GATHER_SECONDS`'ı
+## aşmaz; sınıra dayanan figür ancak tempolu yürüyüşe çıkar (test ölçüyor).
 func _figure_gather_seconds(figure: WalkFigure) -> float:
 	var home: Vector2 = _gather_homes.get(figure, figure.position)
 	var dest: Vector2 = _gather_targets.get(figure, home)
 	var dist := absf(dest.x - home.x)
-	var brisk := figure.brisk_ground_speed()
-	if dist <= 0.0 or brisk <= 0.0:
+	var walk := figure.walk_ground_speed()
+	if dist <= 0.0 or walk <= 0.0:
 		return CAMP_GATHER_SECONDS
-	return clampf(1.5 * dist / (brisk * GATHER_JOG_FACTOR), CAMP_GATHER_SECONDS, MAX_GATHER_SECONDS)
+	var ceiling := MAX_GATHER_SECONDS - (TRANSITION_SECONDS if _gather_trans.has(figure) else 0.0)
+	return clampf(dist / walk, CAMP_GATHER_SECONDS, ceiling)
 
 ## Toplanmanın en uzun yürüyüşü (gerçek saniye, oyun hızı çarpanından önce).
 func gather_seconds() -> float:
@@ -1554,7 +1600,10 @@ func gather_seconds() -> float:
 ## Toplanmanın (ya da dönüşün) tamamı: inip binenler yürüyüşten önce/sonra
 ## kendi klibini oynuyor.
 func settle_seconds() -> float:
-	return gather_seconds() + (TRANSITION_SECONDS if not _gather_trans.is_empty() else 0.0)
+	var longest := CAMP_GATHER_SECONDS
+	for figure in _gathering_figures:
+		longest = maxf(longest, _figure_gather_seconds(figure) + (TRANSITION_SECONDS if _gather_trans.has(figure) else 0.0))
+	return longest
 
 ## Yumuşak geçiş (smoothstep): doğrusal enterpolasyon yürüyüşü başta ve
 ## sonda aniden kesiyor, figür ateşin dibinde fren yapmış gibi duruyordu.
@@ -1988,7 +2037,7 @@ func _draw_campfires() -> void:
 	_draw_camp_logs()
 	var glow_radius := size.y * 0.24
 	var flicker := 0.88 + 0.12 * sin(_camp_time * FIRE_FLICKER_SPEED)
-	for index in _wagon_centres.size():
+	for index in _fire_count():
 		var fire := _campfire_position(index)
 		# Tutuşma: 0'da yalnızca odun yığını, 1'de tam alev (ilk figür varınca
 		# başlıyor, bkz. `_update_fires`).

@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **188** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **189** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3370,5 +3370,21 @@ Toplam: **188** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 <details><summary>Görev metni</summary>
 
 - [ ] **N31e Tempoya bağlı toz, çamur ve kar** (`C`) - toz yoğunluğu yürüyüş hızıyla, yağmurda tekerlek çamuru. (S, P2) §5.
+
+</details>
+
+## Paket P19
+
+### T16-01 · Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 12.2c. | Bitti: normal yürüyüş hızı (WalkFigure.walk_ground_speed), yürüyüş+iniş ≤10 sn, lider ve öndekiler için atın önünde öncü ateşi (attan ateşe 1,5 sn iniş + 4,4 sn yürüyüş), ateş başına 8 yer, gelinen yandan yer seçimi, yürüyüşte saat 0.05x. Ekran: screenshot_camp.gd 10. saniyede herkes ateşte.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-01 Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn**
+  - **Ne:** Kamp kurulunca insanlar vagondan ateşe normal yürüyüş hızıyla yürür (koşmaz). En uzaktaki kişi, en öndeki at, ateşe en fazla 10 saniyede varır. Yürüyüş sırasında oyun saati gece bitmeyecek hızda akar.
+  - **Kim:** C · **Eski:** 12.2c
 
 </details>

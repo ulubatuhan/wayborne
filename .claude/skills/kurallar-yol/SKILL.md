@@ -213,15 +213,22 @@ the walking figures are the game's strongest asset) but to deepen it.
     `climb_down` (hip on the seat, facing the wagon), so the silhouette is
     never drawn while the caravan has its drivers.
 
-- **Camp walking has a ceiling, and the camp clock starts when everyone is at the fire (task 12.2c).** Gathering used to
-  last 30-60 real seconds (the farthest figure's brisk speed bound everyone; party members were dealt to fires in turn
-  and walked twenty body-heights) and `CAMP_HOURS` started at the press, so the walk ate the camp. Now each figure walks
-  its own way (`_figure_gather_seconds`), capped at `MAX_GATHER_SECONDS` (3 s at 1x) and at twice its brisk speed; party
-  members go to the *nearest* fire. The game-speed multiplier scales the walk (`set_gather_time_scale`, never below 1x).
-  A fire lights when its first figure arrives (`_update_fires`; wood only before). `JourneyController.camp_ends_at`
-  starts the `CAMP_HOURS` counter when `is_camp_settled()`; while people walk (`is_camp_transitioning()`) the clock runs at
-  normal speed, not the camp's 0.5x. The task text asked both for <= 3 s and for <= 0.5 game hours; those disagree
-  (0.5 h is under one real second at 1x), the seconds were kept.
+- **Camp walking has a ceiling, and the camp clock starts when everyone is at the fire (task 12.2c, revised T16-01).**
+  Gathering used to last 30-60 real seconds (the farthest figure's brisk speed bound everyone; party members were dealt
+  to fires in turn and walked twenty body-heights) and `CAMP_HOURS` started at the press, so the walk ate the camp. A
+  3-second cap then made people run. The user's rule (2026-11-02): people walk to the fire at a **normal walking pace**,
+  and the walk from the front horse to the fire takes **at most 10 seconds**. So each figure walks its own way at its own
+  normal walk speed (`_figure_gather_seconds` = distance / `WalkFigure.walk_ground_speed()`), and walk plus
+  dismount/climb-down never exceeds `MAX_GATHER_SECONDS` (10 s at 1x); a figure that hits the ceiling may reach brisk
+  pace on average but never more (the test checks every figure). To make that possible the column has a **vanguard
+  fire** ahead of the leader's horse (`_vanguard_index()`, the last of `_fire_count()`): the leader and the front walkers
+  sit there; before it, the leader walked eleven body-heights past the oxen. Each fire has eight places, and a figure
+  takes the first free place on the side it comes from (`_take_seat(..., from_x)`) - dealt in order, rear walkers
+  circled the fire. Party members go to the *nearest* fire. The game-speed multiplier scales the walk
+  (`set_gather_time_scale`, never below 1x). A fire lights when its first figure arrives (`_update_fires`; wood only
+  before). `JourneyController.camp_ends_at` starts the `CAMP_HOURS` counter when `is_camp_settled()`; while people walk
+  (`is_camp_transitioning()`) the clock runs at `CAMP_WALK_CLOCK_SCALE` (0.05: a ten-second walk is sixteen game
+  minutes, tying the animals and kindling, not half the night). The old "<= 0.5 game hours" limit was not the user's.
 - **The world scale holds while the caravan is not walking (task 12.2b).** `pixels_per_day` was re-derived as ground speed
   over day rate; at camp the day rate fell toward zero and the scale blew up, so road stops flew out of frame. See
   `RoadJourney.world_scale_holds`.

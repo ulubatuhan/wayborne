@@ -39,6 +39,7 @@ func run(t) -> void:
 	_test_leader_dismounts_and_remounts(t)
 	_test_caravan_waits_until_everyone_is_back(t)
 	_test_gathering_is_capped_and_scales_with_game_speed(t)
+	_test_leader_reaches_the_vanguard_fire_quickly(t)
 	_test_fire_lights_with_the_first_arrival(t)
 	_test_camp_timer_starts_when_everyone_is_at_the_fire(t)
 
@@ -99,8 +100,8 @@ func _test_one_fire_per_wagon(t) -> void:
 	for wagons in [1, 2, 4, 6]:
 		var caravan := _build(wagons, 2)
 		t.eq(
-			caravan.get_campfire_positions().size(), wagons,
-			"%d vagon: ateş sayısı vagon sayısını tutmuyor" % wagons
+			caravan.get_campfire_positions().size(), wagons + 1,
+			"%d vagon: vagon başına bir ateş ve bir öncü ateşi olmalı" % wagons
 		)
 
 ## Tek ateşken kaçış yolu "kolonun önü, boş alan"dı (bkz. CLAUDE.md Art
@@ -113,7 +114,8 @@ func _test_fires_clear_the_wagons(t) -> void:
 		var centres := caravan.get_wagon_centres()
 		var fires := caravan.get_campfire_positions()
 		var wagon_w := BAND.y * caravan.get_column_scale() * RoadCaravan.WAGON_WIDTH_RATIO
-		for index in fires.size():
+		# Sonuncusu öncü ateşi, vagonla eşleşmiyor.
+		for index in centres.size():
 			t.ok(
 				absf(fires[index].x - centres[index]) > wagon_w * 0.3,
 				"%d vagon, %d. ateş kendi vagonunun üstünde duruyor" % [wagons, index + 1]
@@ -320,7 +322,7 @@ func _test_leader_dismounts_and_remounts(t) -> void:
 	t.ok(rider.visible and rider.is_in_transition(), "lider önce attan inmeli")
 	t.ok(caravan.is_leader_at_camp(), "lider ateşteyken kolonda gezdirilmemeli")
 	_walk_frames(caravan, _full_gather(caravan))
-	var fire := caravan.get_campfire_positions()[0]
+	var fire := caravan.get_campfire_positions()[caravan._vanguard_index()]
 	t.ok(absf(caravan.get_leader_rider_centre() - fire.x) < _fire_tolerance(caravan) + 4.0,
 		"inen lider ateşe varmadı")
 	t.eq(caravan.get_leader_centre(), horse_home, "at yerinde beklemeli")
@@ -355,28 +357,45 @@ func _frames_until_settled(caravan: RoadCaravan, limit: int) -> int:
 			return frame + 1
 	return limit
 
+## T16-01 (kullanıcı, 2026-11-02): ateşe normal yürüyüş hızıyla yürünür, en
+## öndeki attan ateşe varış (iniş dahil) en fazla 10 saniye. Ortalama hız hiçbir
+## figürde tempolu yürüyüşü geçmez - koşan yok.
 func _test_gathering_is_capped_and_scales_with_game_speed(t) -> void:
 	for wagons in [1, 2, 4, 6]:
-		var caravan := _build(wagons, 4)
-		caravan.set_camping(true)
-		t.ok(
-			caravan.gather_seconds() <= RoadCaravan.MAX_GATHER_SECONDS + 0.001,
-			"%d vagonda toplanma yürüyüşü üst sınırı aşıyor" % wagons
-		)
-		var limit := int((RoadCaravan.MAX_GATHER_SECONDS + RoadCaravan.TRANSITION_SECONDS) * 30.0) + 30
-		var frames_1x := _frames_until_settled(caravan, limit)
-		t.ok(frames_1x < limit, "%d vagonda 1x'te herkes sınır içinde ateşe varmadı" % wagons)
-		t.ok(
-			float(frames_1x) / 30.0 <= RoadCaravan.MAX_GATHER_SECONDS + RoadCaravan.TRANSITION_SECONDS + 0.2,
-			"%d vagonda 1x toplanma gerçek zamanda 4.7 sn'yi aştı" % wagons
-		)
+		for party in [2, 6]:
+			var caravan := _build(wagons, party)
+			caravan.set_camping(true)
+			t.ok(caravan.settle_seconds() <= RoadCaravan.MAX_GATHER_SECONDS + 0.001,
+				"%d vagon %d kişide toplanma 10 sn'yi aşıyor" % [wagons, party])
+			for figure in caravan._gathering_figures:
+				var home: Vector2 = caravan._gather_homes.get(figure, figure.position)
+				var dest: Vector2 = caravan._gather_targets.get(figure, home)
+				var average := absf(dest.x - home.x) / caravan._figure_gather_seconds(figure)
+				t.ok(average <= figure.brisk_ground_speed() + 0.01,
+					"%d vagon %d kişide biri ateşe koşuyor (%.1f > %.1f px/s)" % [wagons, party, average, figure.brisk_ground_speed()])
+			var limit := int(RoadCaravan.MAX_GATHER_SECONDS * 30.0) + 30
+			var frames_1x := _frames_until_settled(caravan, limit)
+			t.ok(float(frames_1x) / 30.0 <= RoadCaravan.MAX_GATHER_SECONDS + 0.2,
+				"%d vagon %d kişide 1x toplanma gerçek zamanda 10 sn'yi aştı" % [wagons, party])
 
-		var fast := _build(wagons, 4)
-		fast.set_gather_time_scale(3.0)
-		fast.set_camping(true)
-		var frames_3x := _frames_until_settled(fast, limit)
-		var ratio := float(frames_1x) / float(maxi(1, frames_3x))
-		t.ok(ratio > 2.4 and ratio < 3.6, "%d vagonda 3x yürüyüş 1x'in üçte biri değil (oran %.2f)" % [wagons, ratio])
+			var fast := _build(wagons, party)
+			fast.set_gather_time_scale(3.0)
+			fast.set_camping(true)
+			var frames_3x := _frames_until_settled(fast, limit)
+			var ratio := float(frames_1x) / float(maxi(1, frames_3x))
+			t.ok(ratio > 2.4 and ratio < 3.6, "%d vagonda 3x yürüyüş 1x'in üçte biri değil (oran %.2f)" % [wagons, ratio])
+
+## Lider en öndeki atından inip öncü ateşine yürür: iniş ve yürüyüş 10 sn içinde.
+func _test_leader_reaches_the_vanguard_fire_quickly(t) -> void:
+	var caravan := _build(4, 4)
+	caravan.set_camping(true)
+	var rider := caravan.get_leader_rider()
+	t.ok(rider != null and caravan._gather_fire_index.get(rider, -1) == caravan._vanguard_index(),
+		"lider öncü ateşine gitmeli")
+	t.ok(caravan._figure_gather_seconds(rider) + RoadCaravan.TRANSITION_SECONDS <= 10.0,
+		"attan ateşe varış 10 sn'yi aşıyor")
+	t.ok(caravan._figure_gather_seconds(rider) < RoadCaravan.MAX_GATHER_SECONDS - RoadCaravan.TRANSITION_SECONDS,
+		"lider sınıra dayanmadan, normal hızında varabilmeli")
 
 ## Ateş ilk varan figürle yanıyor; ondan önce yalnızca odun yığını.
 func _test_fire_lights_with_the_first_arrival(t) -> void:
@@ -445,7 +464,8 @@ func _test_camp_timer_starts_when_everyone_is_at_the_fire(t) -> void:
 			caravan.set_camping(false)
 			break
 	t.ok(settled_at > 0.0, "kamp hiç kurulmadı")
-	t.ok(settled_at - camp_start <= 0.5, "ateşe yürüyüş yarım oyun saatini aşıyor (%.2f, görev 12.2c)" % (settled_at - camp_start))
+	# On saniyelik yürüyüş gecenin saatlerini yemez (CAMP_WALK_CLOCK_SCALE'in notu).
+	t.ok(settled_at - camp_start <= 0.3, "ateşe yürüyüş %.2f oyun saati yedi" % (settled_at - camp_start))
 	t.ok(absf((struck_at - settled_at) - 8.0) < 0.1, "kurulma ile sökülme arası tam CAMP_HOURS değil")
 	# Dönüş: oyun saati normal hızda akıyor, yine üst sınırın içinde.
 	var back_start := clock.total_hours
@@ -456,4 +476,4 @@ func _test_camp_timer_starts_when_everyone_is_at_the_fire(t) -> void:
 		if not caravan.is_breaking_camp():
 			break
 	t.not_ok(caravan.is_breaking_camp(), "kamp sökülünce herkes yerine dönmedi")
-	t.ok(clock.total_hours - back_start <= 0.5, "dönüş yarım oyun saatini aşıyor (%.2f)" % (clock.total_hours - back_start))
+	t.ok(clock.total_hours - back_start <= 0.3, "dönüş %.2f oyun saati yedi" % (clock.total_hours - back_start))

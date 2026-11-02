@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -292,20 +292,6 @@ Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P19
-
-### T16-01 · Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 12.2c.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **T16-01 Kamp: vagondan ateşe normal yürüyüş hızı, en öndeki attan ateşe en fazla 10 sn**
-  - **Ne:** Kamp kurulunca insanlar vagondan ateşe normal yürüyüş hızıyla yürür (koşmaz). En uzaktaki kişi, en öndeki at, ateşe en fazla 10 saniyede varır. Yürüyüş sırasında oyun saati gece bitmeyecek hızda akar.
-  - **Kim:** C · **Eski:** 12.2c
-
-</details>
 
 ### T16-02 · Balıkçı kültürü: tek yurt yok, balıkçı kasabaları balıkçı ve bölge kültürü karışık
 

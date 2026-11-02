@@ -3963,14 +3963,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Yol",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 300,
    "kim": "C",
-   "not": "2026-11-02 kullanıcı listesi. Eski: 12.2c."
+   "not": "2026-11-02 kullanıcı listesi. Eski: 12.2c. | Bitti: normal yürüyüş hızı (WalkFigure.walk_ground_speed), yürüyüş+iniş ≤10 sn, lider ve öndekiler için atın önünde öncü ateşi (attan ateşe 1,5 sn iniş + 4,4 sn yürüyüş), ateş başına 8 yer, gelinen yandan yer seçimi, yürüyüşte saat 0.05x. Ekran: screenshot_camp.gd 10. saniyede herkes ateşte."
   },
   {
    "id": "T16-02",
