@@ -4008,14 +4008,14 @@
    "bolum": "16",
    "alan": "Oyun testi 2026-11-02: Görsel",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/16_oyun_testi_isleri.md",
    "dalga": 9,
    "paket": "P19",
    "sira": 303,
    "kim": "CO",
-   "not": "2026-11-02 kullanıcı listesi. Eski: 9.2, Y-G16."
+   "not": "2026-11-02 kullanıcı listesi. Eski: 9.2, Y-G16. | Bitti: yolcular oturuşun 3 kat çözünürlüklü kümesiyle (sit_box HD: male_heavy, female_lean, male_lean bedenleri ve giysileri; pack_hd --clips; WalkFigure HD artık oturan klipte de), ateş ışığı yolcuları yıkamıyor (firelit 1.1→0.85); render'ın köşeli konisi arka plandan silindi (camp_fire_front.py, OpenCV inpaint; ham render art_source/ui_scenes) ve yerine dalgalanan diller (CampFlame) çiziliyor. Ekran: screenshot_menu."
   },
   {
    "id": "T16-05",

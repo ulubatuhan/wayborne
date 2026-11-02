@@ -212,14 +212,22 @@ static func title(hovered: int = 0, lineage: Dictionary = {}, entry_keys: Array 
 	fire_front.texture = TextureLoader.load_any(CityFront.TOWNS_DIR + "camp/fire_front.png")
 	fire_front.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	fire_front.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Alev arka planın köşeli konisi değil, dalgalanan diller (T16-04); odunların
+	# kesitinin hemen üstünde, öndeki yolcuların altında.
+	var flame := CampFlame.new()
 	for figure in travellers:
 		if fire_front.get_parent() == null and Vector2(figure.get_meta("look")["at"]).y >= FIRE_FRONT_Y:
 			root.add_child(fire_front)
+			root.add_child(flame)
 		root.add_child(figure.get_meta("crate"))
 		root.add_child(figure)
+	if flame.get_parent() == null:
+		root.add_child(fire_front)
+		root.add_child(flame)
 	var place := func():
 		_place_on_image(glow, bg, root.size)
 		_place_rect_on_image(fire_front, bg, root.size, FIRE_FRONT_RECT)
+		_place_flame(flame, bg, root.size)
 		for figure in travellers:
 			_place_traveller(figure, bg, root.size)
 	root.resized.connect(place)
@@ -335,6 +343,21 @@ static func _place_traveller(person: Control, bg: TextureRect, view: Vector2) ->
 		var crate_light: ShaderMaterial = crate.material
 		crate_light.set_shader_parameter("fire", fire)
 		crate_light.set_shader_parameter("radius", radius)
+
+## Alevin kökü ve genişliği (resmin payı): silinen koninin dibi ve eni.
+const FLAME_ROOT: Vector2 = Vector2(558.0 / 1920.0, 793.0 / 1080.0)
+const FLAME_WIDTH: float = 110.0 / 1920.0
+
+static func _place_flame(flame: CampFlame, bg: TextureRect, view: Vector2) -> void:
+	if bg.texture == null:
+		return
+	var img := Vector2(bg.texture.get_size())
+	var k := maxf(view.x / img.x, view.y / img.y)
+	var offset := (view - img * k) * 0.5
+	flame.position = Vector2.ZERO
+	flame.size = view
+	flame.base = offset + FLAME_ROOT * img * k
+	flame.unit = FLAME_WIDTH * img.x * k
 
 static func _place_rect_on_image(node: Control, bg: TextureRect, view: Vector2, part: Rect2) -> void:
 	if bg.texture == null:

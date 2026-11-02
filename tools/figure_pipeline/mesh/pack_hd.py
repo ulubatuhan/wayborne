@@ -3,7 +3,7 @@
     WAYBORNE_HD=3 blender -b --python tools/figure_pipeline/blender/render_frames.py -- --variant V --clip idle
     WAYBORNE_HD=3 blender -b --python tools/figure_pipeline/blender/render_outfits.py -- --variant V --clips idle
     python -X utf8 tools/figure_pipeline/mesh/pack_hd.py [--variants male_average,...] [--scale 3]
-        [--items hair_short01,...] [--outfits-only]
+        [--items hair_short01,...] [--outfits-only] [--clips idle,sit_box]
 
 --outfits-only: beden kümesi yeniden paketlenmez (kaynağı yine gerekir, kalemler
 bedenin eklemlerine oturur); yeni kalem eklenince oyundaki beden kümesi değişmesin.
@@ -55,9 +55,14 @@ def main():
     variants = build["variants"]
     if "--variants" in sys.argv:
         variants = sys.argv[sys.argv.index("--variants") + 1].split(",")
-    idle = dict(build["clips"]["idle"])
-    idle["anchor_px"] = [v * scale for v in idle["anchor_px"]]
-    hd_build = {"clips": {"idle": idle}}
+    # --clips idle,sit_box (2026-11-02, T16-04): menünün oturan yolcuları için
+    # oturuşun yakın plan kümesi; varsayılan yalnız duruş.
+    clips = sys.argv[sys.argv.index("--clips") + 1].split(",") if "--clips" in sys.argv else ["idle"]
+    hd_build = {"clips": {}}
+    for name in clips:
+        clip = dict(build["clips"][name])
+        clip["anchor_px"] = [v * scale for v in clip["anchor_px"]]
+        hd_build["clips"][name] = clip
     items = list(json.load(open(os.path.join(PIPE, "config", "outfits.json")))["items"])
     if "--items" in sys.argv:
         items = sys.argv[sys.argv.index("--items") + 1].split(",")

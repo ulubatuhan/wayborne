@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **194** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **195** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -3414,6 +3414,20 @@ Toplam: **194** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 - [ ] **T16-03 Batıya giden yolda kervan sola yürür; geri dönen kervanın tamamı döner**
   - **Ne:** Kullanıcı: "Batıya giden yolda kervanın sola yürümesi. Bir noktada kervan geri dönmek isteyebilir, bunu yaparsa tüm kervan geriye dönebilmeli." Yol ekranı haritadaki yöne göre aynalanır: bant, işaretler, duraklar ve kapılar; yazılar ters dönmez.
   - **Kim:** C · **Eski:** Yol yönü hedefi
+
+</details>
+
+### T16-04 · Ana menü: öndeki iki yolcu net, ateş yumuşak
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: 9.2, Y-G16. | Bitti: yolcular oturuşun 3 kat çözünürlüklü kümesiyle (sit_box HD: male_heavy, female_lean, male_lean bedenleri ve giysileri; pack_hd --clips; WalkFigure HD artık oturan klipte de), ateş ışığı yolcuları yıkamıyor (firelit 1.1→0.85); render'ın köşeli konisi arka plandan silindi (camp_fire_front.py, OpenCV inpaint; ham render art_source/ui_scenes) ve yerine dalgalanan diller (CampFlame) çiziliyor. Ekran: screenshot_menu.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **T16-04 Ana menü: öndeki iki yolcu net, ateş yumuşak**
+  - **Ne:** Ana menüde öndeki iki yolcu bulanık, pikselli ve soluk; arka plandaki ateş köşeli tek renk parçalar. İkisi de düzelir, ekran görüntüsüyle doğrulanır.
+  - **Kim:** CO · **Eski:** 9.2, Y-G16
 
 </details>
 
