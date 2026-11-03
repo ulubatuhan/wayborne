@@ -149,12 +149,7 @@ const LOOKS: Dictionary = {
 static func look_for(kind: String) -> Dictionary:
 	return LOOKS.get(kind, {})
 
-## Haydut kadrosu yolun gittiği yerin bölgesine göre değişir (bkz.
-## Location.region): dağ kabilelerinin ve madenlerin yolunda ağır vuran Dağ
-## Haydutu, kuzeyin eski imparatorluğunda (garnizonlar, asker kaçakları)
-## daha isabetli Silahlı Eşkıya. Örnek yerler testler için.
-const MOUNTAIN_REGIONS: Array[String] = ["dag", "dag_maden"]
-const GARRISON_REGIONS: Array[String] = ["imparatorluk"]
+## Testlerin örnek yerleri: dağ bölgesinden ve garnizon bölgesinden birer şehir.
 const MOUNTAIN_REGION_ID: String = "kesgrav"
 const GARRISON_REGION_ID: String = "dravoss"
 

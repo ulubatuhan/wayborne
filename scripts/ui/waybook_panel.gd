@@ -364,12 +364,6 @@ static func _story_summary(entry: Dictionary) -> String:
 		return ""
 	return String(TranslationServer.translate(summary_key)) % String(entry.get("name", ""))
 
-func _page_heading(text: String) -> Label:
-	var heading := _page_label(text)
-	heading.theme_type_variation = WaybookTheme.PAGE_HEADING
-	heading.add_theme_font_size_override("font_size", 30)
-	return heading
-
 ## Düşenler açılımının başlığı: IM Fell, sayfanın mürekkebiyle (taslakta
 ## kırmızı değil - kan adların üstündeki çizgide).
 func _fallen_heading(text: String) -> Label:

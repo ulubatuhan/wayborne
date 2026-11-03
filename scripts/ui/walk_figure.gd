@@ -234,9 +234,6 @@ static func stump_layers(joints: Dictionary, h: float) -> Array:
 			layers.append("back_arm")
 	return layers
 
-func has_missing_hand() -> bool:
-	return _missing_hand
-
 ## Bilekten öteye: elin kapladığı daire (merkez, yarıçap) - kol yönünde.
 static func stump_circle(wrist: Vector2, elbow: Vector2, h: float) -> Array:
 	var dir := (wrist - elbow).normalized()

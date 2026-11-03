@@ -326,6 +326,18 @@ combat, menu backdrop) stay procedural; the Waybook *frames* them.
   not written by the pipeline at all; the reason stays as a comment in
   `tools/waybook_assets.py`.
 
+- **Perdeli panel tek yerden kurulur (2026-11-02, görev 4.5).** On panel (`CampActionsPanel`, `CampStoryPanel`,
+  `DiaryPanel`, `InheritancePanel`, `InGameMenu`, `CaravanCargoPanel`, `CaravanOverviewPanel`,
+  `MealDistributionPanel`, `WagonPanel`, `PreCombatPanel`) aynı on üç satırı kopyalıyordu. Artık
+  `NodeUtil.modal_card(self, BACKDROP_COLOR, PANEL_WIDTH)` kuruyor ve `{"root", "backdrop", "card"}` döndürüyor;
+  panel yalnızca kendi farkını yazıyor (perdenin tıklaması, `SEAL_PANEL` çeşidi, kartın içi). Kopyanın bedeli
+  görünmezdi ama gerçekti: kökün `MOUSE_FILTER_STOP` olması altındaki ekranın tıklama almamasını, ortalayıcının
+  `IGNORE` olması da kartın *dışındaki* perdenin tıklanabilir kalmasını sağlıyor - birini atlayan panel ya arkasına
+  tıklatır ya da perdesini sağırlaştırır ve bu yalnızca elle fark edilir. Aynı gerekçeyle satır içi panelin başlığı
+  da `NodeUtil.panel_header()`.
+- **Dönen sözlükten alınan düğüm `:=` ile yazılmaz.** `var panel := parts.card` ayrıştırma hatasıdır (bkz. CLAUDE.md
+  "`:=` / Variant tuzağı"); tipi açık yaz: `var panel: PanelContainer = parts.card`.
+
 ### Motion Rules
 
 The world was drawn well and moved like a slideshow: a scene change was a

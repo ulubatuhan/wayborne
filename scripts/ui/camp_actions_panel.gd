@@ -33,21 +33,9 @@ func setup(session: GameSession) -> CampActionsPanel:
 
 func _ready() -> void:
 	layer = 64
-	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(root)
-	_backdrop = ColorRect.new()
-	_backdrop.color = BACKDROP_COLOR
-	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(_backdrop)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(center)
-	_card = PanelContainer.new()
-	_card.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	center.add_child(_card)
+	var parts := NodeUtil.modal_card(self, BACKDROP_COLOR, PANEL_WIDTH)
+	_backdrop = parts.backdrop
+	_card = parts.card
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	_card.add_child(col)

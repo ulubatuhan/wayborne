@@ -967,10 +967,5 @@ func _on_menu_pressed() -> void:
 	_open_in_game_menu()
 
 func _open_in_game_menu() -> void:
-	if has_node("InGameMenu"):
-		return
-	var menu := InGameMenu.new()
-	menu.name = "InGameMenu"
-	add_child(menu)
 	# Kader Modu'nda elle kayıt yok (Y-D01).
-	menu.setup(GameState.get_session().can_save_manually())
+	InGameMenu.open_in(self, GameState.get_session().can_save_manually())

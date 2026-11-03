@@ -69,26 +69,10 @@ func setup(session: GameSession) -> void:
 	_session = session
 	layer = 65
 
-	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(root)
-	_root = root
-
-	var backdrop := ColorRect.new()
-	backdrop.color = BACKDROP_COLOR
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(backdrop)
-	_backdrop = backdrop
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(center)
-
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	center.add_child(panel)
+	var parts := NodeUtil.modal_card(self, BACKDROP_COLOR, PANEL_WIDTH)
+	_root = parts.root
+	_backdrop = parts.backdrop
+	var panel: PanelContainer = parts.card
 	_card = panel
 
 	var vbox := VBoxContainer.new()

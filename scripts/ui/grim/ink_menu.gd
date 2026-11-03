@@ -22,14 +22,18 @@ var _hover_color: Color = ArtPalette.GRIM_AMBER
 var _hover: Array[float] = []
 var _target: Array[float] = []
 
-func setup(entries: Array) -> InkMenu:
-	add_theme_constant_override("separation", 2)
+## Satırları kurar: iki `setup` da aynı altı satırı yazıyordu.
+func _add_rows(entries: Array) -> void:
 	for i in entries.size():
 		var row := _make_row(String(entries[i]), i)
 		_rows.append(row)
 		_hover.append(0.0)
 		_target.append(0.0)
 		add_child(row)
+
+func setup(entries: Array) -> InkMenu:
+	add_theme_constant_override("separation", 2)
+	_add_rows(entries)
 	return self
 
 ## Kutusuz, lekesiz satırlar: gövde yazısı, üstüne gelince `hover_color`.
@@ -40,12 +44,7 @@ func setup_plain(entries: Array, font_size: int, row_height: float, rest_color: 
 	_rest_color = rest_color
 	_hover_color = hover_color
 	add_theme_constant_override("separation", 0)
-	for i in entries.size():
-		var row := _make_row(String(entries[i]), i)
-		_rows.append(row)
-		_hover.append(0.0)
-		_target.append(0.0)
-		add_child(row)
+	_add_rows(entries)
 	return self
 
 ## Darbenin görünen payı 0..1 (eğri: hızlı başlar, yavaş oturur).

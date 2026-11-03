@@ -42,8 +42,6 @@ static func role_of(duty_or_role: String) -> String:
 		return duty_or_role
 	return String(ROLE_OF_DUTY.get(duty_or_role, ""))
 
-## Ana sınıf eşleşirse görev gücü bu kadar çarpılır.
-const PRIMARY_MATCH_MULTIPLIER: float = 1.5
 ## Yalnızca ikinci sınıf (multiclass) eşleşirse bu kadar.
 const SECONDARY_MATCH_MULTIPLIER: float = 1.25
 

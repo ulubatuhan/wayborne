@@ -260,6 +260,11 @@ status effects, area skills):
 | 3 | 100% | 92% | 50% | 50% |
 | 4 | 100% | 100% | 87% | 87% |
 
+**A status's player-facing name lives with the status constants** (`CombatUnit.status_name_key`, 2026-11-02, task
+4.5). `CombatEncounter` and `CombatPanel` each carried a byte-identical copy of the match; a status added to one and
+not the other would have made that screen quietly say "kanama" (bleed) for it. The log line and the skill card now
+read the same table.
+
 **Every region has its own bandits (task Y-C09, T16-08; LORE §14 T48).** `EnemyCatalog.REGIONAL_BANDITS` maps a
 region to its melee, second melee, ranged, leader and the one who joins at higher danger; a missing slot falls back to
 the cutter/archer/leader. The twelve new identities sit in the cutter/archer/leader power band; deserters fight as

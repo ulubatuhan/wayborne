@@ -93,18 +93,6 @@ const KIND_NOTICE_KEYS: Dictionary = {
 	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE",
 	KIND_OMEN: "UI_ROAD_SIGNAL_OMEN",
 }
-const KIND_RESOLVED_KEYS: Dictionary = {
-	KIND_WHEEL: "UI_ROAD_SIGNAL_WHEEL_FIXED",
-	KIND_STRAGGLER: "UI_ROAD_SIGNAL_STRAGGLER_FIXED",
-	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE_FIXED",
-	KIND_OMEN: "UI_SIGNAL_EMPTY_OMEN_FIXED",
-}
-const KIND_ESCALATED_KEYS: Dictionary = {
-	KIND_WHEEL: "UI_ROAD_SIGNAL_WHEEL_BROKE",
-	KIND_STRAGGLER: "UI_ROAD_SIGNAL_STRAGGLER_LOST",
-	KIND_SMOKE: "UI_ROAD_SIGNAL_SMOKE_AMBUSH",
-	KIND_OMEN: "UI_SIGNAL_EMPTY_OMEN_GONE",
-}
 
 const ALL_KINDS: Array[String] = [KIND_WHEEL, KIND_STRAGGLER, KIND_SMOKE, KIND_OMEN]
 
@@ -151,12 +139,6 @@ static func get_zone_for(kind: String) -> String:
 
 static func get_notice_key(kind: String) -> String:
 	return String(KIND_NOTICE_KEYS.get(kind, ""))
-
-static func get_resolved_key(kind: String) -> String:
-	return String(KIND_RESOLVED_KEYS.get(kind, ""))
-
-static func get_escalated_key(kind: String) -> String:
-	return String(KIND_ESCALATED_KEYS.get(kind, ""))
 
 ## Bir zaman dilimini işler. Dönen sözlük ekranın anlatması gerekenler:
 ##   appeared  -> yeni çıkan işaret türleri

@@ -13,8 +13,6 @@ const DANGER: String = "danger"
 
 ## Kademe eşikleri (pay olarak, küçükten büyüğe): altı -> 0, ... üstü -> 3.
 const BAND_EDGES: Array[float] = [0.25, 0.5, 0.75]
-## Yüksek olanın kötü olduğu değerler: kelime sırası ters.
-const HIGH_IS_BAD: Array[String] = [STRESS, DANGER]
 const BAND_KEYS: Dictionary = {
 	MORALE: ["WORD_MORALE_0", "WORD_MORALE_1", "WORD_MORALE_2", "WORD_MORALE_3"],
 	STRESS: ["WORD_STRESS_0", "WORD_STRESS_1", "WORD_STRESS_2", "WORD_STRESS_3"],
@@ -25,6 +23,19 @@ const RECENT_DEATH_DAYS: int = 3
 const NEAR_BREAK_STRESS: int = 70
 ## Etki satırında "büyük" sayılan değişim (moral ve stres puanı).
 const BIG_CHANGE: int = 8
+
+## Yüzdesi bilinmeyen bir yolun kaba tehlike bandı: taverna ya da İzci
+## sayıyı açmadıysa ekranlar yüzde yerine bunu yazar (bkz. CityBriefPanel,
+## WorldMap - ikisinde de birebir kopyaydı). `BAND_KEYS[DANGER]`'dan ayrı:
+## o çözülmüş yüzdenin dört kademesi, bu bilinmeyenin üç kabası.
+const DANGER_BAND_EDGES: Array[float] = [0.3, 0.55]
+const DANGER_BAND_KEYS: Array[String] = ["UI_DANGER_LOW", "UI_DANGER_MEDIUM", "UI_DANGER_HIGH"]
+
+static func danger_band(danger: float) -> String:
+	for index in DANGER_BAND_EDGES.size():
+		if danger < DANGER_BAND_EDGES[index]:
+			return TranslationServer.translate(DANGER_BAND_KEYS[index])
+	return TranslationServer.translate(DANGER_BAND_KEYS[-1])
 
 static func band(value: float, max_value: float) -> int:
 	var share := clampf(value / maxf(1.0, max_value), 0.0, 1.0)

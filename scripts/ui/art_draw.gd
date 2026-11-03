@@ -425,6 +425,9 @@ static func ellipse(canvas: CanvasItem, centre: Vector2, radii: Vector2, color: 
 ##
 ## Bunlar bir süre Unicode karakterdi (`●○↑↓→✓`) ve hepsi ekranda boş
 ## kutu olarak çıkıyordu: Godot'un varsayılan fontu o blokları taşımıyor.
+## (Nokta belirteci `pip` 2026-11-02'de silindi: savaş ekranı o noktaları
+## `WaybookTheme` resimleriyle çiziyor, bu çizimin çağrısı kalmamıştı.
+## Kalanlar şevron, tik ve artı/eksi.)
 ## Bir playtest'te savaş ekranındaki mevki belirteçleri fotoğraflandı ama
 ## hata tek bir yerde değildi - on iki oyuncu-yüzlü yerdeydi ve hiçbir
 ## test göremezdi, çünkü metin *doğru*ydu, yalnızca çizilemiyordu.
@@ -432,19 +435,6 @@ static func ellipse(canvas: CanvasItem, centre: Vector2, radii: Vector2, color: 
 ## Zaten oyunun her şeyi `_draw()` ile çiziliyor; bir şekli metinden
 ## dilenmek en baştan yanlış kapıydı. Çizilen işaret ayrıca boyutlanabilir
 ## ve palete uyar - font ne taşırsa onunla yetinmez.
-
-## Dolu ya da boş nokta. Savaşın mevki belirteci: dolu "burada durabilir",
-## boş duramaz.
-static func pip(
-	canvas: CanvasItem, centre: Vector2, radius: float, color: Color, filled: bool
-) -> void:
-	if filled:
-		ellipse(canvas, centre, Vector2(radius, radius), color)
-		return
-	# Boş nokta bir *halka*: içi boş bırakılmış bir daire, soluk bir dolu
-	# daire değil. Soluklaştırmak iki durumu yan yana ayırt edilemez
-	# kılıyordu, çünkü fark renk farkına iniyordu.
-	canvas.draw_arc(centre, radius, 0.0, TAU, 14, color, maxf(1.0, radius * 0.45), true)
 
 ## Yön oku - üç çizgili bir şevron. Dolu bir üçgen aynı boyutta çok daha
 ## ağır okunuyor ve metin satırının içinde bir leke gibi duruyor.

@@ -685,12 +685,12 @@ func _apply_skill_status(skill: CombatSkill, target: CombatUnit) -> void:
 		return
 	if not target.roll_status(skill.status_kind, skill.status_chance, _rng):
 		_emit_log(tr("CBT_LOG_STATUS_RESIST") % [
-			target.display_name, tr(_status_name_key(skill.status_kind))
+			target.display_name, tr(CombatUnit.status_name_key(skill.status_kind))
 		])
 		return
 	target.apply_status(skill.status_kind, skill.status_amount, skill.status_rounds)
 	_emit_log(tr("CBT_LOG_STATUS_APPLIED") % [
-		target.display_name, tr(_status_name_key(skill.status_kind)), skill.status_rounds
+		target.display_name, tr(CombatUnit.status_name_key(skill.status_kind)), skill.status_rounds
 	])
 	unit_barked.emit(target, "", status_bark(skill.status_kind))
 
@@ -724,14 +724,6 @@ func _apply_skill_shift(skill: CombatSkill, target: CombatUnit) -> void:
 	if skill.target_kind == CombatSkill.Target.SELF:
 		key = "CBT_LOG_STEPPED_BACK" if skill.shift_amount > 0 else "CBT_LOG_STEPPED_FORWARD"
 	_emit_log(tr(key) % [target.display_name, target.position])
-
-func _status_name_key(kind: String) -> String:
-	match kind:
-		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
-		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
-		CombatUnit.STATUS_BURN: return "CBT_STATUS_BURN"
-		CombatUnit.STATUS_CHILL: return "CBT_STATUS_CHILL"
-		_: return "CBT_STATUS_BLEED"
 
 func _roll_damage(unit: CombatUnit, skill: CombatSkill, is_crit: bool) -> int:
 	var variance := _rng.randi_range(-skill.damage_variance, skill.damage_variance)

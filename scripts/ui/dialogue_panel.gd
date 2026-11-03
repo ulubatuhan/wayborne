@@ -192,12 +192,6 @@ func _choice_button(choice: Dictionary) -> Button:
 	button.pressed.connect(func() -> void: choice_made.emit(String(choice.get("id", ""))))
 	return button
 
-func get_text() -> String:
-	return _text_label.text
-
-func get_choice_count() -> int:
-	return _choices.get_child_count()
-
 func close() -> void:
 	if _dismissing:
 		return

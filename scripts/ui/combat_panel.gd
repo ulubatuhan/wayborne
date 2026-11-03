@@ -1065,7 +1065,7 @@ func _refresh_target() -> void:
 		tr("UI_COMBAT_TARGET_PROT") % unit.get_effective_protection()]
 	for kind in unit.get_active_status_kinds():
 		var rounds := unit.get_status_rounds(kind)
-		parts.append(tr("UI_COMBAT_TARGET_STATUS") % [tr(_status_label_key(kind)), rounds])
+		parts.append(tr("UI_COMBAT_TARGET_STATUS") % [tr(CombatUnit.status_name_key(kind)), rounds])
 	_target_stats.text = " · ".join(parts)
 	var behavior_key := String(BEHAVIOR_KEYS.get(unit.behavior, ""))
 	_target_behavior.text = tr("UI_COMBAT_TARGET_BEHAVIOR") % tr(behavior_key) \
@@ -1112,17 +1112,9 @@ func _skill_notes(skill: CombatSkill) -> Array[String]:
 		))
 	if skill.has_status():
 		notes.append(tr("UI_COMBAT_SKILL_STATUS") % [
-			tr(_status_label_key(skill.status_kind)), skill.status_chance
+			tr(CombatUnit.status_name_key(skill.status_kind)), skill.status_chance
 		])
 	return notes
-
-func _status_label_key(kind: String) -> String:
-	match kind:
-		CombatUnit.STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
-		CombatUnit.STATUS_STUN: return "CBT_STATUS_STUN"
-		CombatUnit.STATUS_BURN: return "CBT_STATUS_BURN"
-		CombatUnit.STATUS_CHILL: return "CBT_STATUS_CHILL"
-		_: return "CBT_STATUS_BLEED"
 
 func _build_mark_row(prefix: String, positions: Array[int], color: Color) -> HBoxContainer:
 	var row := HBoxContainer.new()

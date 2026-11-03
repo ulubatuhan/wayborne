@@ -314,6 +314,18 @@ func get_proficiency_multiplier(skill_id: String) -> float:
 ## sözlüğü - bir yeteneğin yazdığı ad buradaki üçünden biri olmalı,
 ## yoksa efekt sessizce hiçbir şey yapmaz (aynı kural
 ## `EventEffect.Type`/`EventEffectApplier` ikilisinde de var).
+## Durumun oyuncuya görünen adı. Bu eşleme iki yerde birebir kopyaydı
+## (`CombatEncounter._status_name_key`, `CombatPanel._status_label_key`):
+## yeni bir durum birine eklenip öbürüne eklenmeyince o ekran sessizce
+## "kanama" diyordu. Sabitler burada olduğu için adları da burası söyler.
+static func status_name_key(kind: String) -> String:
+	match kind:
+		STATUS_BLIGHT: return "CBT_STATUS_BLIGHT"
+		STATUS_STUN: return "CBT_STATUS_STUN"
+		STATUS_BURN: return "CBT_STATUS_BURN"
+		STATUS_CHILL: return "CBT_STATUS_CHILL"
+		_: return "CBT_STATUS_BLEED"
+
 const STATUS_BLEED: String = "bleed"
 const STATUS_BLIGHT: String = "blight"
 const STATUS_STUN: String = "stun"

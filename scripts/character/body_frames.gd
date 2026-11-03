@@ -122,19 +122,6 @@ static func _trim(limit: int) -> void:
 		_cache.erase(oldest)
 		_last_used.erase(oldest)
 
-## Ölçüm için (akşam testi, görev 5.3): yüklü küme sayısı ve sayfa dokularının
-## toplam boyutu (bayt, sıkıştırılmamış RGBA8 tahmini).
-static func cache_report() -> Dictionary:
-	var bytes := 0
-	for value in _cache.values():
-		var frames := value as BodyFrames
-		if frames == null:
-			continue
-		for tex in frames._textures:
-			if tex != null:
-				bytes += tex.get_width() * tex.get_height() * 4
-	return {"sets": cached_set_count(), "bytes": bytes}
-
 func has_clip(clip: String) -> bool:
 	_index_clips()
 	return _clip_base.has(clip)

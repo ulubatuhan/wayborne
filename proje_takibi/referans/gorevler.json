@@ -4121,6 +4121,20 @@
    "sira": 310,
    "kim": "C",
    "not": "2026-11-02 kullanıcı listesi. Eski: Ana hedef. | Bitti: 99 adlı yer (54 köy/oba/mezra, 28 harabe/kule, 15 sunak/manastır, 2 maden) en yakın yola bağlandı (road_places); yolda adı yazılı levha, kervan varınca yerin kartı (village/shrine/ruin/mine; uzak yere sapma gün ister), deftere ilk görülüş; şerit sırası düzeltmesi (anıt taşları da artık görünüyor). Test: test_road_places. Ekran: Golcavar→Rivecande, Sentinara Kulesi."
+  },
+  {
+   "id": "4.5",
+   "baslik": "Ölü kod ve kopya mantık temizliği",
+   "bolum": "4",
+   "alan": "Kod: kalite",
+   "oncelik": "P2",
+   "durum": "bitti",
+   "bagimli": [],
+   "dosya": "gorevler/04_kod_kalitesi.md",
+   "paket": "P02",
+   "sira": 26,
+   "kim": "C",
+   "not": "2026-11-02 kullanıcı denetimi. Silinen: 21 hiç çağrılmayan fonksiyon, 9 hiç okunmayan sabit, UiIcon'un PIPS modu ve ArtDraw.pip (savaş mevkiyi yazıyla gösteriyor), _route_meta'nın okunmayan üç payı. Tek kaynağa indirilen: durum adı (CombatUnit.status_name_key, iki ekranda birebir kopyaydı), kaba tehlike bandı (Wording.danger_band), oyun içi menünün açılışı (InGameMenu.open_in), dokuz panelin modal iskeleti (NodeUtil.modal_card), iki panelin başlığı (NodeUtil.panel_header), InkMenu'nün satır kurulumu. Net: -414/+157 satır, 41 dosya. Testler 30602/0; on modal panel ekran görüntüsüyle doğrulandı. Değiştirilmeyen: koruma zinciri (guard clause) kalıpları ve MarketScale'in resim yüklenemezse devreye giren ikinci çizim yolu."
   }
  ],
  "guncelleme": "2026-11-02",

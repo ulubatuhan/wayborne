@@ -175,15 +175,8 @@ func set_chat_mode(on: bool) -> void:
 		_hovered = -1
 	_front_fx.queue_redraw()
 
-func is_chat_mode() -> bool:
-	return _chat_mode
-
 func get_actor_count() -> int:
 	return _actors.size()
-
-## Bir kişinin (sohbet balonu için) figür kutusu.
-func figure_of(index: int) -> Control:
-	return _actors[index].figure if index >= 0 and index < _actors.size() else null
 
 func character_of(index: int) -> CharacterData:
 	return _actors[index].character if index >= 0 and index < _actors.size() else null
@@ -308,10 +301,6 @@ func at(anchor: String) -> Vector2:
 
 func share_px(share: Vector2) -> Vector2:
 	return _plate_rect.position + share * _plate_rect.size
-
-func person_px(anchor: String) -> float:
-	var a: Dictionary = TavernLayout.ANCHORS.get(anchor, {"person_h": 0.15})
-	return float(a.person_h) * _plate_rect.size.y
 
 func _place_actors() -> void:
 	if _plate_rect.size.y <= 0.0:

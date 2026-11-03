@@ -682,16 +682,6 @@ static func _recoloured(file_name: String, colour: Color) -> Image:
 				image.set_pixel(x, y, Color(colour, alpha * colour.a))
 	return image
 
-static func _set_margins(box: StyleBoxTexture, slice: Array[int], content: Array[int]) -> void:
-	box.texture_margin_left = slice[0]
-	box.texture_margin_top = slice[1]
-	box.texture_margin_right = slice[2]
-	box.texture_margin_bottom = slice[3]
-	box.content_margin_left = content[0]
-	box.content_margin_top = content[1]
-	box.content_margin_right = content[2]
-	box.content_margin_bottom = content[3]
-
 # --- Açılış/kapanış (sahnesiz panellerin ortak devinimi) ---
 ## Onboarding, Vagon, Sofra, Savaş Öncesi, Tüccar, Waybook, Kervan Dökümü/
 ## Yükü gibi sahnesiz `.new()` panelleri tek karede belirip kayboluyordu -

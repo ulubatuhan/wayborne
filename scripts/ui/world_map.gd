@@ -228,7 +228,7 @@ func _route_summary(route: TravelRoute) -> String:
 			days, int(effective_danger * 100.0), state_note
 		]
 	return tr("UI_MAP_ROUTE_UNKNOWN") % [
-		days, _danger_band(effective_danger), state_note
+		days, Wording.danger_band(effective_danger), state_note
 	]
 
 ## Doğrudan yol kapalı ya da hiç yokken alternatifi gösterir.
@@ -253,13 +253,6 @@ func _add_detour_hint() -> void:
 func _settlement_line(location: Location) -> String:
 	var type_key := {"city": "UI_SETTLEMENT_CITY", "town": "UI_SETTLEMENT_TOWN", "caravanserai": "UI_SETTLEMENT_CARAVANSERAI"}
 	return "%s · %s" % [location.location_name, tr(String(type_key.get(location.settlement_type, "UI_SETTLEMENT_CITY")))]
-
-func _danger_band(danger: float) -> String:
-	if danger < 0.3:
-		return tr("UI_DANGER_LOW")
-	if danger < 0.55:
-		return tr("UI_DANGER_MEDIUM")
-	return tr("UI_DANGER_HIGH")
 
 func _on_plan_pressed() -> void:
 	if _focused_location == null:

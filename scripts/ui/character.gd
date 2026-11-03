@@ -60,7 +60,6 @@ const BOND_WORD_KEYS: Array[String] = [
 	"UI_CHAR_BOND_WORD_4", "UI_CHAR_BOND_WORD_5",
 ]
 const TAB_PERSON: int = 0
-const TAB_GEAR: int = 1
 
 var _session: GameSession
 var _character: CharacterData

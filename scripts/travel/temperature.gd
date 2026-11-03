@@ -130,9 +130,6 @@ static func celsius(day: int, hour: float, biome: String, climate: String, weath
 static func daily_low(day: int, biome: String, climate: String, weather: String) -> float:
 	return daily_mean(day, biome, climate, weather) - swing(biome, weather)
 
-static func daily_high(day: int, biome: String, climate: String, weather: String) -> float:
-	return daily_mean(day, biome, climate, weather) + swing(biome, weather)
-
 ## Dondurucu günün erzak payı (0, 0.25 ya da 0.5).
 static func ration_share(low_c: float) -> float:
 	if low_c < RATION_HARD_FREEZE_C:

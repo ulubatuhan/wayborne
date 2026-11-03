@@ -2326,8 +2326,11 @@ const REPUTATION_PER_DELIVERED_CONTRACT: int = 2
 ## noktadan sonra bütün kapılar kapalı ve oyuncunun elinde onu geri
 ## çevirecek hiçbir kol yok, yani oyun sessizce bitmiş oluyor. Dip,
 ## "toparlanabilir bir kötü durum" ile "kilitlenme" arasındaki sınır.
-const MIN_REPUTATION: int = -20
-const MAX_REPUTATION: int = 100
+##
+## Dibi artık `Standing` uyguluyor (bölgesel itibar, T16-07); buradaki sabit
+## "eşiği olmayan kapı" işareti (bkz. RecruitCatalog.VENUE_MARKET_PROFILE).
+## İkisi ayrı yerde -20 yazılıydı: dip değişse meydan yanlış yerde kapanırdı.
+const MIN_REPUTATION: int = int(Standing.MIN_VALUE)
 
 ## İtibarın **tek** değişim kapısı - dip ve tavan burada uygulanıyor.
 ## Doğrudan `reputation += x` yazmak, o dibi olmayan tek bir yol bırakmak
@@ -3553,7 +3556,6 @@ const BEAT_LOG_COMBAT_START: String = "combat_start"
 const BEAT_LOG_COMBAT_END: String = "combat_end"
 const BEAT_LOG_CAMP_START: String = "camp_start"
 const BEAT_LOG_CAMP_END: String = "camp_end"
-const BEAT_LOG_SCREEN: String = "screen"
 ## Oturum başı (Y-K03): tools/measure_report.py oturum uzunluğunu bununla ayırır.
 const BEAT_LOG_SESSION: String = "session"
 

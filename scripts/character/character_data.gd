@@ -737,9 +737,6 @@ var missing_hand: bool = false
 ## İki el isteyen silah türleri (CombatFigure.ARCHETYPES "weapon").
 const TWO_HANDED_WEAPONS: Array[String] = ["bow", "maul", "spear_shield"]
 
-func needs_two_hands() -> bool:
-	var weapon := String(CombatFigure.ARCHETYPES.get(class_id, {}).get("weapon", "none"))
-	return TWO_HANDED_WEAPONS.has(weapon)
 ## Ant kardeşi: aynı ateşte birbirine de ant içen yoldaşın kimliği.
 var oath_partner: String = ""
 

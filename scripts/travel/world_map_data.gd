@@ -151,11 +151,6 @@ static func get_route_path(from_location_id: String, to_location_id: String) -> 
 		out.append(reverse[i])
 	return out
 
-## Yolun ek bilgisi: orman ve dağ payı, kervan yolu payı, duraklar.
-static func get_route_meta(from_location_id: String, to_location_id: String) -> Dictionary:
-	_ensure_built()
-	return _route_meta.get(RouteConditions.route_key(from_location_id, to_location_id), {})
-
 ## Yolun haritadan gelen arazisi, yönsüz anahtarla (`RouteConditions.route_key`):
 ## {"from": çıkış şehri, "segments": [{"biome", "to" (0-1), "stop"}]}; haritada
 ## olmayan bir anahtar (test, sentetik sefer) için boş sözlük.
@@ -215,10 +210,10 @@ static func _build_routes_and_offers(data: Dictionary) -> void:
 		for point in r.get("path", []):
 			path.append(Vector2(float(point[0]), float(point[1])))
 		_route_paths[_pair_key(a, b)] = path
+		# Yalnızca arazi okunuyor (bkz. get_route_terrain). Yolun orman/dağ/kervan
+		# payları settlements.json'da duruyor ama oyunda okuyanı yok: tehlikeye
+		# zaten üretici (build_settlements.py) çeviriyor, oyun hazır sayıyı alıyor.
 		_route_meta[RouteConditions.route_key(a, b)] = {
-			"forest_share": float(r.get("forest_share", 0.0)),
-			"mountain_share": float(r.get("mountain_share", 0.0)),
-			"caravan_road_share": float(r.get("caravan_road_share", 0.0)),
 			"via": r.get("via", []),
 			# Yol ekranının arazisi, `terrain_from` şehrinden okunacak sırada
 			# (bkz. RouteTerrain.build, build_settlements.py terrain_segments).

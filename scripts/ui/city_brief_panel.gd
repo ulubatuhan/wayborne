@@ -281,14 +281,7 @@ func route_summary(route: TravelRoute) -> String:
 	if known or _session.get_duty_holder(DutyCatalog.IZCI) != null:
 		# Önce söz, yüzde parantezde (Y-H03).
 		return tr("UI_BRIEF_ROUTE_KNOWN") % [days, tr(Wording.level_key(Wording.DANGER, danger, 1.0)), int(danger * 100.0), state_note]
-	return tr("UI_BRIEF_ROUTE_UNKNOWN") % [days, _danger_band(danger), state_note]
-
-func _danger_band(danger: float) -> String:
-	if danger < 0.3:
-		return tr("UI_DANGER_LOW")
-	if danger < 0.55:
-		return tr("UI_DANGER_MEDIUM")
-	return tr("UI_DANGER_HIGH")
+	return tr("UI_BRIEF_ROUTE_UNKNOWN") % [days, Wording.danger_band(danger), state_note]
 
 # --- Yardımcılar ---
 

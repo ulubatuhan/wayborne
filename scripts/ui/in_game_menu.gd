@@ -1,6 +1,23 @@
 class_name InGameMenu
 extends CanvasLayer
 
+## Menüyü bir ekranın üstünde açar; zaten açıksa hiçbir şey yapmaz. Şehir
+## haritası ve dünya merkezi bu sekiz satırı birebir kopyalıyordu (Esc ve
+## "Menü" tuşu aynı yere bağlı). Yol ekranı bunu kullanmaz, bilerek: orada
+## menünün açık olduğunu `_has_open_panel()` bilmek zorunda (takvim durur)
+## ve seferde elle kayıt yok, o yüzden kendi alanını tutar.
+##
+## `can_save` çağıranın işi: oturumu burada aramak, `class_name` taşıyan bir
+## sınıfın içinden otomatik yüklenen bir düğüme bakmak olurdu - projenin
+## autoload kuralının ters yönü ve betiğin tek başına derlenmesini bozuyor.
+static func open_in(host: Node, can_save: bool) -> void:
+	if host.has_node("InGameMenu"):
+		return
+	var menu := InGameMenu.new()
+	menu.name = "InGameMenu"
+	host.add_child(menu)
+	menu.setup(can_save)
+
 ## Oyun içi duraklatma menüsü. `OnboardingPanel` deseni: sahnesiz,
 ## `.new()` ile kurulur, Esc/perdeye tıklama ile kapanır.
 ##
@@ -54,25 +71,12 @@ func _ready() -> void:
 	_build()
 
 func _build() -> void:
-	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(_root)
-
-	_backdrop = ColorRect.new()
-	_backdrop.color = BACKDROP_COLOR
-	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var parts := NodeUtil.modal_card(self, BACKDROP_COLOR, PANEL_WIDTH)
+	_root = parts.root
+	_backdrop = parts.backdrop
+	# Perdeye tıklamak menüyü kapatır - yalnızca buraya özgü.
 	_backdrop.gui_input.connect(_on_backdrop_input)
-	_root.add_child(_backdrop)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(center)
-
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0.0)
-	center.add_child(panel)
+	var panel: PanelContainer = parts.card
 	_card = panel
 
 	var stack := VBoxContainer.new()

@@ -138,16 +138,9 @@ func _ensure_built() -> void:
 		return
 	_built = true
 
-	add_theme_constant_override("separation", 6)
-
-	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 18)
-	add_child(_title_label)
-
-	_info_label = Label.new()
-	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_info_label.modulate = HINT_COLOR
-	add_child(_info_label)
+	var header := NodeUtil.panel_header(self, HINT_COLOR)
+	_title_label = header.title
+	_info_label = header.info
 
 	_list = VBoxContainer.new()
 	add_child(_list)

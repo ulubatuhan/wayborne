@@ -1137,23 +1137,10 @@ func set_road_gates(gates: Array, lead_px: float) -> void:
 	_gate_lead = lead_px
 	queue_redraw()
 
-## Tek kapılı eski çağrı (varış ucu).
-func set_arrival_gate(prop_id: String, day: float, lead_px: float) -> void:
-	set_road_gates([] if prop_id.is_empty() else [{"prop": prop_id, "day": day, "kind": GateArt.KIND_STONE}], lead_px)
-
-func has_arrival_gate() -> bool:
-	return not _gates.is_empty() and PropArt.has(String(_gates[-1].prop))
-
-func gate_count() -> int:
-	return _gates.size()
-
 ## Bir kapının geçidinin ekrandaki x'i: test ve çizim aynı sayıyı okusun.
 ## `lead`: geçidin kervan çapasına göre yeri (önde liderin burnu, arkada kuyruk).
 func gate_x_for_day(day: float, lead: float = NAN) -> float:
 	return screen_x_for_day(day) + _heading * (_gate_lead if is_nan(lead) else lead)
-
-func arrival_gate_x() -> float:
-	return _gate_x(_gates[-1]) if not _gates.is_empty() else 0.0
 
 func _gate_x(gate: Dictionary) -> float:
 	return gate_x_for_day(float(gate.day), float(gate.get("lead", _gate_lead)))

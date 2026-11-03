@@ -264,13 +264,8 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Sefer hiçbir zaman burada canlı olamaz (yol yalnızca `Nav.JOURNEY`'de
 ## yaşanıyor), o yüzden kayıt hep açık - bkz. InGameMenu'nün başındaki not.
 func _open_in_game_menu() -> void:
-	if has_node("InGameMenu"):
-		return
-	var menu := InGameMenu.new()
-	menu.name = "InGameMenu"
-	add_child(menu)
 	# Kader Modu'nda elle kayıt yok (Y-D01).
-	menu.setup(_session.can_save_manually())
+	InGameMenu.open_in(self, _session.can_save_manually())
 
 func _on_spot_pressed(scene_path: String) -> void:
 	SceneInk.go(Nav.open(Nav.CITY_MAP, scene_path))

@@ -34,9 +34,6 @@ class Result extends RefCounted:
 	## (bkz. tests/test_event_effects.gd).
 	var unlocked_event_ids: Array[String] = []
 
-	func get_side_channel_count() -> int:
-		return combat_requests.size() + recruit_requests.size() + haggling_requests.size()
-
 ## tr() bir Object örnek metodu, buradaki her şey static (bkz. CLAUDE.md
 ## Localization Rules) - o yüzden çeviriler TranslationServer'dan geçiyor.
 static func _t(key: String) -> String:
