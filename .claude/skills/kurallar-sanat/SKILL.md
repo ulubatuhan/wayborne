@@ -426,3 +426,81 @@ KayKit; `art_source/models/props/LICENSES.md`).
 - Ekran görüntüsü: `tests/screenshot_hub_scene.gd` gerçek `world_hub`'ı
   açıyor (kapı, yerleşim, araba); `screenshot_hub.gd` sahneyi elle kurduğu
   için bunları göstermez.
+
+### Effect Rules
+
+Zeminin ve havanın efektleri (görev Y-G24): yağmur, kar, sis, sıçrama,
+toz, çamur, yerde kalan iz, nefes buharı, kor ve duman. Kaynak
+`tools/efekt/`, çıktı `data/assets/fx/sheets/` + `fx.json`, oyun tarafı
+`FxCatalog` / `FxLayer` / `WeatherCurtain` / `GroundCover`.
+
+- **Efekt resim değil koddur; sprite sheet o kodun çıktısıdır.** Her
+  efekt bir çekirdek (perde, patlama, halka, bulut, iz) ve bir parametre
+  takımı; rengi, yoğunluğu ya da hızı değiştirip
+  `python3 tools/efekt/uret.py <id>` demek yeter ve diffte yalnızca o
+  efekt görünür. Üretim tohumlu: `hash()` değil `zlib.crc32`, çünkü
+  Python'un dizge karması her süreçte başka tohumlanıyor ve aynı efekt her
+  çalıştırmada farklı çıkardı.
+- **Zeminin hâli hesaplanır, saklanmaz.** `GroundCover` ıslaklığı,
+  çamuru, karı ve tozu son üç günün havasından ve sıcaklığından çıkarıyor
+  (`RouteWeather` + `Temperature`) - `RouteConditions`'ın doğal
+  durumlarıyla aynı kural: aynı yolun aynı günü her zaman aynı çamur,
+  kaydı yeniden yükleyip yağmuru silmek yok. Üç gün hafıza, çünkü dün
+  yağan yağmur bugün hâlâ çamur.
+- **Zemin durumundan efekt adı tek kalıpla türer**
+  (`GroundCover.pick(cover, "step")` → `step_splash`), sıra her yerde
+  aynı: su > kar > çamur > toz. Sıra çağıranda olsaydı aynı zeminde öküz
+  çamur, insan toz savururdu. Bir efektin adı değişirse `emit` sessizce
+  hiçbir şey çizmez; `tests/test_road_fx.gd` üretilebilecek her adın
+  katalogda karşılığı olduğunu doğruluyor.
+- **Efekt yere bırakılır, ekrana değil.** Yol ekranında kervan sabit
+  durur, dünya altından kayar; `FxLayer` her efektin bırakıldığı andaki
+  dünya x'ini saklıyor ve ekrandaki yerini aradaki farktan çıkarıyor.
+  Ekran koordinatında tutulan bir ayak izi kervanla kayar, yani hep
+  ayağın altında kalırdı - kayan dikdörtgen kusurunun efekt hâli.
+- **İki katman: yerde kalan altta, havaya kalkan üstte.** `_fx_ground`
+  kervandan önce, `_fx_front` sonra eklenir (ön plan yine en üstte kalır,
+  `add_actor_layer`). Tek katmanda ayak izi figürün üstüne basılıyordu.
+- **Tetik figürün kendi adımından gelir, zamanlayıcıdan değil.**
+  `WalkFigure.take_footfalls()` fazın *sarmayan* toplamını sayıyor (insan
+  çevrimde iki, hayvan dört): hızlanan kervan daha sık, duran kervan hiç
+  sıçratmıyor. Sabit aralıklı bir zamanlayıcı, duran kervanın altında toz
+  kaldırırdı. Sayaç `FOOTFALLS_MAX_PENDING` ile tavanlı, yoksa uzun bir
+  karenin ardından tek seferde yirmi sıçrama doğardı.
+- **Aynı işi iki sistem yapmaz.** Perde yağışı üstlendiğinde `TravelBand`
+  kendi prosedürel yağmurunu susturuyor (`set_curtain_rain`): ikisi
+  birden çizilince kar perdesinin altından ince çizgili yağmur geçiyordu,
+  ekran görüntüsünde yakalandı. Prosedürel çizim **silinmedi**, yedek
+  kaldı - `WeatherCurtain.layers_for` resmi olmayan perdeyi listeye
+  almıyor, yani sanat eksikse yağmur yine yağıyor (`PropArt`'ın "resmi
+  yoksa çağıran kendi çizimine düşer" kuralı).
+- **Ölçek figürün boyundan, tek zemin tek ölçek.** Efektler kervanın
+  insan boyundan çıkan tek bir piksel/metre ile ölçekleniyor (`×0.86`,
+  çünkü bir figür kutusunun yalnızca o kadarını dolduruyor); ölçeği her
+  figürün kendi kutusundan çıkarmak öküzün sıçramasını insanınkinin iki
+  katı yapardı. Üstüne `FX_READABILITY` (1.45) var: ölçüldü, gerçek
+  sahnede 59 px/m, yani fiziksel olarak doğru bir ayak sıçraması 56
+  piksel ve yolun koyu zemininde fark edilmiyor. Aynı gerekçe öküzün
+  boyunda da var - hesap işi başlatır, ölçüm bitirir.
+- **Sprite sheet'in kareleri içeriğe kırpılır ve aralarında boşluk
+  kalır.** Kırpma, `m` alanının (efektin dünyadaki eni) gerçekten efektin
+  eni olmasını sağlıyor: kırpmadan önce parçacıklar karenin ortasında
+  duruyordu ve ekranda efekt iki buçuk kat küçük görünüyordu. Boşluk,
+  doğrusal süzgecin komşu kareden piksel çekmesini engelliyor. **Döşenen
+  perde kırpılmaz** ve boşluğu saydam değil karenin karşı kenarıyla
+  doldurulur, yoksa her döşeme sınırında soluk bir dikiş kalır.
+- **Yerdeki şeyler önlükten açık seçilir.** Gerçek çamur rengi
+  (0.26, 0.21, 0.16) yolun altındaki neredeyse siyah toprak bandında koyu
+  üstünde koyu kalıp hiç görünmüyordu; havaya savrulan çamur ışık da alır
+  ve yerdeki iz kendi rengiyle değil içinde biriken suyun parıltısıyla
+  (`parlak`) okunur. Aynı kural `TravelForeground`'un çalısında ve
+  taşında da var.
+- **Tek sıcak kaynak burada da geçerli.** `tools/efekt/palet.py`'de sıcak
+  olan yalnızca `KOR` ve `KOR_AK` - ateşin kendisi. Yağmur, kar, sis, su,
+  çamur, toz, duman ve nefes soğuk ve soluk.
+- Ekran görüntüsü: `tests/screenshot_road_fx.gd` gerçek yol ekranını
+  kurup yedi hava/zemin hâlini ve bir katalog karesini basıyor. **Kare
+  sayısı değil geçen süre:** yazılım render'ında bir kare ~100 ms, yani
+  on dört kare beklemek yarım saniyelik bir sıçramanın çoktan ölmesi
+  demek. İlk iki denemede katalog sayfasının boş çıkması efektin
+  zayıflığı değil, bu ölçüm hatasıydı.

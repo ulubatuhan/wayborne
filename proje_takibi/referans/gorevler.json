@@ -4135,6 +4135,20 @@
    "sira": 26,
    "kim": "C",
    "not": "2026-11-02 kullanıcı denetimi. Silinen: 21 hiç çağrılmayan fonksiyon, 9 hiç okunmayan sabit, UiIcon'un PIPS modu ve ArtDraw.pip (savaş mevkiyi yazıyla gösteriyor), _route_meta'nın okunmayan üç payı. Tek kaynağa indirilen: durum adı (CombatUnit.status_name_key, iki ekranda birebir kopyaydı), kaba tehlike bandı (Wording.danger_band), oyun içi menünün açılışı (InGameMenu.open_in), dokuz panelin modal iskeleti (NodeUtil.modal_card), iki panelin başlığı (NodeUtil.panel_header), InkMenu'nün satır kurulumu. Net: -414/+157 satır, 41 dosya. Testler 30602/0; on modal panel ekran görüntüsüyle doğrulandı. Değiştirilmeyen: koruma zinciri (guard clause) kalıpları ve MarketScale'in resim yüklenemezse devreye giren ikinci çizim yolu."
+  },
+  {
+   "id": "Y-G24",
+   "baslik": "Zemin ve hava efektleri: yağmur, kar, sıçrama, iz",
+   "bolum": "15",
+   "alan": "Yönetmen: Görsel kimlik",
+   "oncelik": "P2",
+   "durum": "bitti",
+   "bagimli": [],
+   "dosya": "gorevler/15_film_kervan_fikirleri.md",
+   "paket": "P12",
+   "sira": 218,
+   "kim": "C",
+   "not": "2026-11-03 kullanıcı isteği (\"tüm efektleri çizip sprite'a dökebilir misin\"). 46 efekt, hepsi kod: tools/efekt/ (tuval, beş çekirdek, palet, katalog) PNG ızgara + data/assets/fx/sheets/fx.json üretiyor; python3 tools/efekt/uret.py [<id>...] [--tabaka]. Aileler: perde (yağmur x3, karla karışık, dolu, kar x2, tipi, sis, yer buğusu), yere düşüş (kuru toprağa damla, birikinti halkası, taç sıçrama, kar konması, branda damlası), ayak/toynak/pençe (dört zemin: kuru, çamur, su, kar), tekerlek (dört zemin), yerde kalan iz (ayak, toynak, tekerlek; çamur ve kar), soğuk (nefes buharı insan/hayvan, kırağı, birikinti kırışığı), ateş (kor, ince/kalın duman, ateşe düşen yağmurun buharı, fener halesi), rüzgâr (toz, yaprak, yerden kar). Oyun tarafı: FxCatalog (manifesto + doku + kare), FxLayer (havuzlu, dünyaya çivili: iz bırakıldığı toprakla geriye akıyor), WeatherCurtain (iki derinlikte döşenen perde), GroundCover (ıslak/çamur/kar/toz; RouteWeather+Temperature'dan hesaplanıyor, saklanmıyor, üç gün hafıza). RoadCaravan her ayak/toynak/tekerlek temasında zemine göre efekt ve iz bırakıyor (WalkFigure.take_footfalls). Perde varken şeridin kendi prosedürel yağmuru susuyor (iki yağmur üst üste biniyordu), sanat eksikse geri geliyor. Doğrulama: tests/test_road_fx.gd 280 test, tests/screenshot_road_fx.gd sekiz kare (kuru, yağmur, fırtına, çamur, kar, tipi, sis, katalog)."
   }
  ],
  "guncelleme": "2026-11-02",

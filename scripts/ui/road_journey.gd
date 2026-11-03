@@ -344,6 +344,15 @@ var _clock: JourneyClock:
 		_journey.clock = value
 var _band: TravelBand
 var _caravan: RoadCaravan
+## Zeminin ve havanın efektleri (görev Y-G24). `_fx_ground` kervanın altı
+## (yerde kalan iz), `_fx_front` üstü (sıçrama, toz, nefes), `_curtain`
+## gökten düşen perde. Üçü de sanat eksikse sessizce boş kalır.
+var _fx_ground: FxLayer
+var _fx_front: FxLayer
+var _curtain: WeatherCurtain
+## Zeminin o günkü hâli (`GroundCover.at`); her şafakta yenileniyor.
+var _ground_cover: Dictionary = {}
+var _ripple_accum: float = 0.0
 ## Yolun coğrafyası ve o günkü havası. İkisi de tohumdan hesaplanıyor,
 ## planlayıcının gösterdiğiyle birebir aynı (bkz. RouteTerrain,
 ## RouteWeather) - yolda başka bir arazi görülürse planlayıcı yalan
@@ -654,6 +663,11 @@ func _build_world_layer() -> void:
 	# Kervan şeridin *çocuğu*: manzara arkada çizilir, figürler onun
 	# üstünde. Ayrı bir kardeş düğüm olsaydı iki ayrı zemin çizgisi
 	# hesaplanırdı ve eğimli yolda kervan havada yürürdü.
+	# Yerde kalan izler kervanın **altında**: ayak izi ve tekerlek yivi
+	# toprağa basılı, figürün üstüne değil (bkz. FxLayer'ın iki katmanı).
+	_fx_ground = FxLayer.new()
+	_band.add_actor_layer(_fx_ground)
+
 	_caravan = RoadCaravan.new()
 	# `add_child` değil `add_actor_layer`: şerit ön plan katmanını her
 	# zaman en üstte tutuyor, yoksa yolun önündeki çalılar kervanın
@@ -669,6 +683,20 @@ func _build_world_layer() -> void:
 	# boyunca, kamp kalkıp herkes binince söner.
 	_caravan.fire_lit.connect(_on_fire_lit)
 	_caravan.fires_out.connect(_refresh_ambience)
+
+	# Havaya kalkan her şey (sıçrama, toz, savrulma, nefes buharı) kervanın
+	# **üstünde** ama ön plandan (`TravelForeground`) altta: `add_actor_layer`
+	# ön planı her zaman en üstte tutuyor, yani yolun önündeki çalı yine
+	# sıçramanın önünde kalıyor.
+	_fx_front = FxLayer.new()
+	_band.add_actor_layer(_fx_front)
+	_caravan.set_fx_layers(_fx_ground, _fx_front)
+
+	# Gökten düşen perde dünyanın **en üstünde**: yağmur kervanın da
+	# manzaranın da önünden geçer. HUD'un altında kalıyor, çünkü `_world`
+	# ayrı bir katman (bkz. Road Screen Layout Rules).
+	_curtain = WeatherCurtain.new()
+	_world.add_child(_curtain)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -1724,6 +1752,7 @@ func _process(delta: float) -> void:
 		_caravan.set_ground_speed(0.0)
 		_caravan.set_leader_motion(0.0, false)
 
+	_sync_fx(delta)
 	_update_chatter(delta)
 	_update_light_glow()
 	_refresh_time_ui()
@@ -2965,8 +2994,88 @@ func _refresh_weather() -> void:
 	_band.set_winter(_session.journey_season() == MarketConditions.Season.WINTER)
 	if _caravan != null:
 		_caravan.set_weather(_weather)
+	_refresh_ground_fx(biome, climate)
 	_refresh_weather_calls()
 	_refresh_ambience()
+
+## Zeminin ve gökyüzünün efektleri, her şafakta bir kez. Üçü de **tek
+## kaynaktan** okuyor: hangi perde düşeceği `RouteWeather` + `Temperature`,
+## zeminin ıslaklığı `GroundCover`. Ekran kendi havasını uydurmuyor - yolu
+## yavaşlatan yağmur ekranda görünenin aynısı.
+func _refresh_ground_fx(biome: String, climate: String) -> void:
+	var day := _session.total_days_elapsed + 1
+	_ground_cover = GroundCover.at(_route_key, day, biome, climate)
+	_snow_share = GroundCover.snow_share(
+		Temperature.daily_mean(day, biome, climate, _weather)
+	)
+	if _caravan != null:
+		_caravan.set_ground_cover(_ground_cover)
+		# Nefes buharı donmaya yaklaşınca beliriyor, soğukta her nefeste.
+		_caravan.set_breath_share(clampf(
+			(BREATH_FROM_C - Temperature.daily_mean(day, biome, climate, _weather))
+			/ (BREATH_FROM_C - BREATH_FULL_C), 0.0, 1.0
+		))
+	if _curtain != null:
+		var visuals := RouteWeather.visuals(_weather)
+		var rain := float(visuals.get("rain", 0.0))
+		var layers := WeatherCurtain.layers_for(
+			rain, float(visuals.get("fog", 0.0)), _snow_share
+		)
+		_curtain.set_layers(layers)
+		# Perde yağışı üstlendiyse şeridin kendi yağmuru sussun; yoksa
+		# ekranda iki yağmur üst üste biner (bkz. TravelBand._curtain_rain).
+		_band.set_curtain_rain(rain > 0.01 and not layers.is_empty())
+
+## Nefesin göründüğü sıcaklık aralığı (santigrat).
+const BREATH_FROM_C: float = 7.0
+const BREATH_FULL_C: float = -2.0
+## Yağmurun yere çarpma izleri: en yoğun havada saniyede kaç tane.
+const RAIN_MARKS_PER_SECOND: float = 15.0
+var _snow_share: float = 0.0
+
+## Her karede: efekt katmanlarının zeminle birlikte kayması ve yağmurun
+## yere çarpma izleri.
+func _sync_fx(delta: float) -> void:
+	if _band == null:
+		return
+	var scroll := _band.scroll_x()
+	if _fx_ground != null:
+		_fx_ground.set_world_x(scroll)
+	if _fx_front != null:
+		_fx_front.set_world_x(scroll)
+	if _curtain != null:
+		_curtain.set_world_x(scroll)
+		if _caravan != null:
+			_curtain.set_px_per_metre(_caravan.fx_px_per_metre())
+	_spawn_rain_marks(delta)
+
+## Damlanın yere değdiği yer. Kuru toprakta küçük bir toz, ıslak zeminde
+## halka ve taç sıçrama, karda konan kar. **Yolun altındaki şeride**
+## düşüyor: orası kameraya en yakın yer, birikintiler de orada
+## (bkz. TravelForeground'un yassı lekeleri).
+func _spawn_rain_marks(delta: float) -> void:
+	if _fx_front == null or _caravan == null or _ground_cover.is_empty():
+		return
+	var rain := float(RouteWeather.visuals(_weather).get("rain", 0.0))
+	if rain <= 0.01 or not _can_time_flow():
+		return
+	_ripple_accum += delta * RAIN_MARKS_PER_SECOND * rain
+	var count := int(_ripple_accum)
+	if count <= 0:
+		return
+	_ripple_accum -= float(count)
+	var ground := _caravan.get_ground_y()
+	var band_h := maxf(_band.size.y, 1.0)
+	var wet := float(_ground_cover.get("wet", 0.0))
+	for _i in mini(count, 4):
+		var x := randf_range(0.0, _band.size.x)
+		var y := ground + (band_h - ground) * randf_range(0.08, 0.60)
+		var id := "rain_impact_dry"
+		if _snow_share >= WeatherCurtain.SNOW_FULL:
+			id = "snow_settle"
+		elif wet >= 0.45:
+			id = "rain_ripple" if randf() < 0.6 else "rain_crown"
+		_fx_front.emit(id, Vector2(x, y))
 
 ## Ortam sesi (N31f): hava, gece ve kamp ateşinden; ateş yanarken ateş.
 ## Kampta ateşin sesi ateşin kendisine bağlı (yanınca `_on_fire_lit`, sönünce

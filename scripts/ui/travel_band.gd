@@ -153,6 +153,19 @@ var _winter: bool = false
 const SNOW_DRIFT: Color = Color(0.90, 0.92, 0.95)
 const SNOW_ALPHA_SCALE: float = 1.5
 
+## Gökten düşeni `WeatherCurtain` çiziyorsa şeridin kendi prosedürel
+## yağmuru susar. İkisi birden çizilince ekranda **iki yağmur** oluyordu:
+## kar perdesinin altından ince çizgili yağmur geçiyordu (ekran görüntüsünde
+## yakalandı). Prosedürel çizim silinmedi, yedek kaldı - efekt sanatı
+## yoksa (`FxCatalog.has` yanlış) yağmur yine yağmalı, `RoadStrips`'in
+## biyom resmi eksikken prosedürele düşmesiyle aynı kural.
+var _curtain_rain: bool = false
+
+func set_curtain_rain(active: bool) -> void:
+	if active != _curtain_rain:
+		_curtain_rain = active
+		queue_redraw()
+
 func set_winter(on: bool) -> void:
 	if on != _winter:
 		_winter = on
@@ -424,6 +437,13 @@ func get_heading() -> float:
 ## kayarken kervan toprağın üstünde kayardı.
 func _scroll_x() -> float:
 	return _world_x - caravan_x()
+
+## Efekt katmanları için dışarı açık hâli: yerde bırakılan bir iz ya da
+## sıçrama bunu okuyup bırakıldığı toprakla birlikte geriye akıyor
+## (bkz. `FxLayer`). Aynı sayıyı okudukları için manzarayla efekt birbirine
+## göre hiç kaymıyor.
+func scroll_x() -> float:
+	return _scroll_x()
 
 ## Bir "gün" konumunun şerit üzerindeki ekran koordinatı - `_draw_stops()`'un
 ## konum hesabıyla birebir aynı formül. Yaklaşan bir olay işareti (bkz.
@@ -1551,7 +1571,7 @@ func _draw_weather(area: Rect2, cover: Rect2, horizon: float) -> void:
 			)
 
 	var rain := float(_weather_visuals.rain)
-	if rain <= 0.0:
+	if rain <= 0.0 or _curtain_rain:
 		return
 	# Yağmur ekranın gördüğü her yere yağıyor, damla sıklığı aynı kalarak.
 	var drops := int(RAIN_MAX_DROPS * rain * cover.get_area() / maxf(1.0, area.get_area()))

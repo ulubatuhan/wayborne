@@ -394,10 +394,51 @@ func advance(delta: float, speed: float) -> void:
 		# aynalanıyor, yani sola yürüyen figür de fazını ileri sarmalı.
 		# Fazı geri sarmak sola bakıp *geri geri* yürümekti (moonwalk) -
 		# lider kolonda geriye giderken tam olarak bu görünüyordu.
-		_phase = fmod(_phase + delta * absf(speed) * TAU, TAU)
+		var step := delta * absf(speed) * TAU
+		_phase = fmod(_phase + step, TAU)
 		_facing = 1.0 if speed >= 0.0 else -1.0
+		_tick_footfalls(step)
 	_motion = ease_motion(_motion, _moving, delta)
 	queue_redraw()
+
+## Ayak basma anı: zeminin tepkisi (toz, sıçrama, çamur, iz) buradan
+## tetikleniyor. Sayaç fazın *sarmayan* toplamından, `_phase`'in kendisinden
+## değil: `fmod` ile sarılan bir değerde eşik geçişini yakalamak 1.5x hızda
+## ya da uzun bir kareden sonra bir adımı sessizce atlıyordu.
+##
+## Çevrim başına kaç temas: insanın iki ayağı, hayvanın dördü. Hepsine iki
+## demek, öküzün ve atın yarım adımda bir toz kaldırması olurdu.
+const FOOTFALLS_MAX_PENDING: int = 3
+
+var _gait_accum: float = 0.0
+var _pending_footfalls: int = 0
+
+func _tick_footfalls(step: float) -> void:
+	var interval := TAU / float(footfalls_per_cycle())
+	_gait_accum += step
+	while _gait_accum >= interval:
+		_gait_accum -= interval
+		_pending_footfalls = mini(_pending_footfalls + 1, FOOTFALLS_MAX_PENDING)
+
+func footfalls_per_cycle() -> int:
+	if _kind == KIND_PERSON or _kind == KIND_MOUNTED:
+		return 2
+	return 4
+
+## Son çağrıdan beri kaç ayak yere bastı; sayacı sıfırlar. Sinyal değil
+## yoklama: dinleyen tek yer `RoadCaravan` ve o zaten her karede bütün
+## figürleri yürütüyor, yani ayrıca bağlanacak bir dinleyici yok (projede
+## sinyal yolu olmamasının aynı gerekçesi, bkz. CLAUDE.md "no signal bus").
+func take_footfalls() -> int:
+	var count := _pending_footfalls
+	_pending_footfalls = 0
+	return count
+
+## Basan ayağın gövdeye göre yatay yeri. Topuk adımın yarısı kadar önde
+## yere iniyor; efekt figürün tam ortasına bırakılırsa toz ayağın değil
+## karnının altından kalkıyor.
+func footfall_offset() -> float:
+	return _facing * cycle_distance() * 0.25
 
 ## Zemine göre hızdan yürüyüş: kadans = zemin hızı / çevrim başına yol.
 ## Ayak böylece hiçbir hızda zeminde kaymıyor - ne öne (koşu bandı) ne
@@ -493,6 +534,9 @@ func set_phase_offset(offset: float) -> void:
 
 func set_facing(facing: float) -> void:
 	_facing = 1.0 if facing >= 0.0 else -1.0
+
+func get_kind() -> String:
+	return _kind
 
 func get_facing() -> float:
 	return _facing

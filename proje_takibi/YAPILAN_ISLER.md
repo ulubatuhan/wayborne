@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **197** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **198** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -2740,6 +2740,33 @@ Toplam: **197** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Ne:** Samuran ve Liraven çevresindeki yol kesimleri için çamurlu, sisli, gri-yeşil yol katmanları (`RoadStrips` görünüşü).
   - **Kullanıcı notu:** "Gri-yeşil sisli bataklık: Onay."
   - **Kabul:** `screenshot_road_looks` tablosunda bataklık görünüşü.
+
+</details>
+
+### Y-G24 · Zemin ve hava efektleri: yağmur, kar, sıçrama, iz
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-11-03 kullanıcı isteği ("tüm efektleri çizip sprite'a dökebilir misin"). 46 efekt, hepsi kod: tools/efekt/ (tuval, beş çekirdek, palet, katalog) PNG ızgara + data/assets/fx/sheets/fx.json üretiyor; python3 tools/efekt/uret.py [<id>...] [--tabaka]. Aileler: perde (yağmur x3, karla karışık, dolu, kar x2, tipi, sis, yer buğusu), yere düşüş (kuru toprağa damla, birikinti halkası, taç sıçrama, kar konması, branda damlası), ayak/toynak/pençe (dört zemin: kuru, çamur, su, kar), tekerlek (dört zemin), yerde kalan iz (ayak, toynak, tekerlek; çamur ve kar), soğuk (nefes buharı insan/hayvan, kırağı, birikinti kırışığı), ateş (kor, ince/kalın duman, ateşe düşen yağmurun buharı, fener halesi), rüzgâr (toz, yaprak, yerden kar). Oyun tarafı: FxCatalog (manifesto + doku + kare), FxLayer (havuzlu, dünyaya çivili: iz bırakıldığı toprakla geriye akıyor), WeatherCurtain (iki derinlikte döşenen perde), GroundCover (ıslak/çamur/kar/toz; RouteWeather+Temperature'dan hesaplanıyor, saklanmıyor, üç gün hafıza). RoadCaravan her ayak/toynak/tekerlek temasında zemine göre efekt ve iz bırakıyor (WalkFigure.take_footfalls). Perde varken şeridin kendi prosedürel yağmuru susuyor (iki yağmur üst üste biniyordu), sanat eksikse geri geliyor. Doğrulama: tests/test_road_fx.gd 280 test, tests/screenshot_road_fx.gd sekiz kare (kuru, yağmur, fırtına, çamur, kar, tipi, sis, katalog).
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G24 Zemin ve hava efektleri: yağmur, kar, sıçrama, iz**
+  - **Yapıldı (2026-11-03):** kullanıcı isteği - "tüm efektleri çizip sprite'a dökebilir misin... yağmur, kar, yerdeki su birikintisi, yağmurun suya düşüşü, yoldan geçen yaya, vagon ve hayvanların yerdeki kar çamur ve suyla tepkisi gibi gibi".
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** - · **Kim:** C
+  - **Ne:** 46 efekt, hepsi **kod** (parçacık parametreleri); sprite sheet o kodun çıktısı. Üretici `tools/efekt/` (tuval + beş çekirdek + palet + katalog), çıktı `data/assets/fx/sheets/<id>.png` ve `fx.json`. Yeniden basmak: `python3 tools/efekt/uret.py [<id>...] [--tabaka]`.
+  - **Aileler:**
+    - *Perde (döşenir, zamanda döngülü):* `rain_light/medium/heavy`, `sleet`, `hail`, `snow_light/heavy`, `blizzard`, `fog_drift`, `ground_mist`.
+    - *Yere düşüş:* `rain_impact_dry` (kuru toprağa damla), `rain_ripple` (birikintide halka), `rain_crown` (taç sıçrama), `snow_settle`, `canopy_drip` (brandanın kenarından).
+    - *Ayak, toynak, pençe:* `step_*` ve `hoof_*` dört zeminde (`_dust`, `_mud`, `_splash`, `_snow`), `paw_snow`.
+    - *Tekerlek:* `wheel_dust/mud/splash/snow`.
+    - *Yerde kalan iz:* `track_foot_*`, `track_hoof_*`, `track_wheel_*` (çamur ve kar).
+    - *Soğuk ve nem:* `breath_vapor`, `breath_vapor_beast`, `frost_glint`, `puddle_shiver`.
+    - *Ateş (tek sıcak kaynak):* `ember_rise`, `smoke_thin/thick`, `fire_steam`, `lantern_halo`.
+    - *Rüzgâr:* `dust_gust`, `leaf_drift`, `snow_gust`.
+  - **Oyun tarafı:** `FxCatalog` (manifesto, doku, kare, dünya ölçüsü), `FxLayer` (havuzlu; efekt bırakıldığı **toprağa** çivili, kervanla birlikte kaymıyor), `WeatherCurtain` (iki derinlikte döşenen perde), `GroundCover` (ıslak/çamur/kar/toz; `RouteWeather` + `Temperature`'dan **hesaplanır, saklanmaz**, üç gün hafıza). `RoadCaravan` her ayak, toynak ve tekerlek temasında zemine göre efekt ve iz bırakıyor (`WalkFigure.take_footfalls`).
+  - **Karar:** Perde varken `TravelBand`'in kendi prosedürel yağmuru susuyor (ekranda iki yağmur üst üste biniyordu); sanat eksikse geri geliyor - `PropArt`'ın "resmi yoksa çağıran kendi çizimine düşer" kuralı.
+  - **Kabul:** `tests/test_road_fx.gd` (280 test: ad uyumu, manifesto bütünlüğü, zeminin yinelenebilirliği, adım sayacı, havuz tavanı), `tests/screenshot_road_fx.gd` sekiz kare (kuru, yağmur, fırtına, çamur, kar, tipi, sis, katalog) ve `docs/ui/efekt_tabakasi.png`.
 
 </details>
 

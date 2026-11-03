@@ -1322,6 +1322,149 @@ func get_leader_centre() -> float:
 		return 0.0
 	return _leader.position.x + _leader.size.x * 0.5
 
+# -- Zeminin kervana tepkisi ------------------------------------------------
+#
+# Yürüyen her ayak, her toynak, her pençe ve dönen her tekerlek zemine
+# dokunuyor; zemin de kuru, çamurlu, sulu ya da karlı. `GroundCover` o günün
+# hâlini söylüyor, burası yalnızca **temas anını** yakalıyor.
+#
+# Üç kural:
+#
+# 1. **Temas figürün kendi adımından gelir, bir zamanlayıcıdan değil.**
+#    `WalkFigure.take_footfalls()` fazın sarmayan toplamını sayıyor, yani
+#    hızlanan kervan daha sık, duran kervan hiç sıçratmıyor. Sabit aralıklı
+#    bir zamanlayıcı, duran kervanın altında toz kaldırırdı - ayağı yerde
+#    kaydıran kusurun efekt hâli.
+# 2. **İki katman.** Yerde kalan iz kervanın *altına* (`_fx_ground`),
+#    havaya kalkan sıçrama *üstüne* (`_fx_front`). Tek katmanda ayak izi
+#    figürün üstüne basılıyordu.
+# 3. **Efekt yoksa sessizce vazgeç.** `FxLayer.emit` olmayan bir efekti
+#    çizmiyor; sanat parça parça gelebilir (PropArt'ın kuralı).
+
+## Tekerlek yarım turda bir zemine "basıyor" sayılıyor: tam turda bir
+## seyrek, çeyrekte bir gürültülü.
+const WHEEL_FX_TURNS: float = 0.5
+## Nefes buharı aralığı (saniye) ve kişiden kişiye kayma.
+const BREATH_PERIOD: float = 3.4
+const BREATH_SPREAD: float = 2.2
+## Efektin ölçeği figürün boyundan; hayvan insandan iri bastığı için payı
+## büyük. Oran, figürün kendi boyuna göre - sabit piksel 1080p'de kaybolurdu.
+const FX_BEAST_SCALE: float = 1.25
+## Okunurluk payı: zemin efektleri gerçek boyunun bir buçuk katı çiziliyor.
+## Ölçüldü - gerçek sahnede 59 px/m, yani fiziksel olarak doğru bir ayak
+## sıçraması (0.95 m) 56 piksel ve yolun koyu zemininde fark edilmiyor.
+## Aynı gerekçeyle öküzün boyu da ölçülmüş paya göre büyütülmüştü
+## (`OX_HEIGHT_RATIO`): hesap işi başlatır, ölçüm bitirir.
+const FX_READABILITY: float = 1.45
+
+var _fx_ground: FxLayer = null
+var _fx_front: FxLayer = null
+var _cover: Dictionary = {}
+var _breath_share: float = 0.0
+var _wheel_fx_accum: float = 0.0
+var _breath_time: float = 0.0
+
+func set_fx_layers(ground: FxLayer, front: FxLayer) -> void:
+	_fx_ground = ground
+	_fx_front = front
+
+## Zeminin o günkü hâli (`GroundCover.at`). Yol ekranı her şafakta veriyor.
+func set_ground_cover(cover: Dictionary) -> void:
+	_cover = cover
+
+## Nefesin görünme payı: 0 görünmez, 1 her nefeste. `Temperature`'dan
+## geliyor - soğuğun tek sahibi orası.
+func set_breath_share(share: float) -> void:
+	_breath_share = clampf(share, 0.0, 1.0)
+
+## Efektlerin ölçeği: **tek zemin, tek ölçek.** Öküzün ayağının altındaki
+## su da insanınkinin altındaki de aynı dünyada; ölçeği figür kutusundan
+## tek tek çıkarmak öküzün sıçramasını insanınkinden iki kat büyük yapardı.
+## Ölçü kervanın kendi insan boyundan ve 0.86 payıyla: bir figür kutusunun
+## yalnızca %86'sını dolduruyor (bkz. Road Movement Rules, "A figure fills
+## about 86% of its box" - iki hayvan tam bu pay unutulduğu için yanlış
+## boyutlanmıştı).
+const FIGURE_DRAWN_SHARE: float = 0.86
+
+func fx_px_per_metre() -> float:
+	return FxCatalog.px_per_metre(
+		maxf(size.y, 1.0) * _scale * PERSON_HEIGHT_RATIO * FIGURE_DRAWN_SHARE
+	)
+
+## Bir figürün attığı adımları zemine yazar.
+func _spend_footfalls(figure: WalkFigure) -> void:
+	var steps := figure.take_footfalls()
+	if steps <= 0 or _cover.is_empty():
+		return
+	if _fx_front == null and _fx_ground == null:
+		return
+	var beast := figure.footfalls_per_cycle() > 2
+	var prefix := "hoof" if beast else "step"
+	# Köpeğin pençesi kendi efektine sahip, ama yalnızca karda: çamurda ve
+	# tozda insanın adımının küçültülmüşü yeterli, ayrı bir sanat borcu
+	# açmaya değmez.
+	var dog := figure.get_kind() == WalkFigure.KIND_DOG
+	var id := GroundCover.pick(_cover, prefix)
+	if dog:
+		id = "paw_snow" if float(_cover.get("snow", 0.0)) >= 0.30 else GroundCover.pick(_cover, "step")
+	if id.is_empty():
+		return
+	var scale := (FX_BEAST_SCALE if beast else 1.0) * FX_READABILITY
+	if dog:
+		scale = 0.75 * FX_READABILITY
+	var at := Vector2(
+		figure.position.x + figure.size.x * 0.5 + figure.footfall_offset(),
+		_ground_y
+	)
+	var flip := figure.get_facing() < 0.0
+	if _fx_front != null:
+		_fx_front.emit(id, at, scale, flip)
+	if _fx_ground != null:
+		var mark := GroundCover.track(_cover, "track_hoof" if beast else "track_foot")
+		if not mark.is_empty():
+			_fx_ground.emit(mark, at, scale, flip)
+
+## Soğukta nefes: kişinin ağzından, yürüdüğü yöne doğru.
+func _breathe(figure: WalkFigure, index: int, delta: float) -> void:
+	if _fx_front == null or _breath_share <= 0.05:
+		return
+	var period := BREATH_PERIOD / maxf(0.35, _breath_share)
+	var phase := fposmod(_breath_time + float(index) * BREATH_SPREAD, period)
+	if phase >= delta:
+		return
+	var beast := figure.footfalls_per_cycle() > 2
+	var id := "breath_vapor_beast" if beast else "breath_vapor"
+	var joints := figure.get_body_anchors()
+	var head: Vector2 = joints.get("head", Vector2(figure.size.x * 0.5, figure.size.y * 0.18))
+	var facing := figure.get_facing()
+	var mouth := figure.position + head + Vector2(figure.size.x * 0.22 * facing, 0.0)
+	_fx_front.emit(id, mouth, 1.0, facing < 0.0)
+
+## Tekerleklerin zemine tepkisi. Yarım turda bir, her vagonun arka
+## tekerleğinden: öndeki küçük tekerlek zaten izin üstünden geçiyor.
+func _spend_wheel_fx(delta: float) -> void:
+	if _cover.is_empty() or _ground_speed <= 0.5:
+		return
+	if _fx_front == null and _fx_ground == null:
+		return
+	var wheel_r := maxf(size.y, 1.0) * _scale * WAGON_HEIGHT_RATIO * ArtDraw.WAGON_WHEEL_RATIO
+	var step := TAU * wheel_r * WHEEL_FX_TURNS
+	_wheel_fx_accum += delta * _ground_speed
+	if _wheel_fx_accum < step:
+		return
+	_wheel_fx_accum = fmod(_wheel_fx_accum, step)
+	var id := GroundCover.pick(_cover, "wheel")
+	var mark := GroundCover.track(_cover, "track_wheel")
+	if id.is_empty() and mark.is_empty():
+		return
+	for centre in _wagon_centres:
+		var at := Vector2(float(centre) - wheel_r * _heading, _ground_y)
+		if not mark.is_empty() and _fx_ground != null:
+			_fx_ground.emit(mark, at, FX_READABILITY)
+		if not id.is_empty() and _fx_front != null:
+			# Savrulan şey tekerleğin **arkasına** gidiyor: yön tersine.
+			_fx_front.emit(id, at, FX_READABILITY, _heading > 0.0)
+
 func _process(delta: float) -> void:
 	if _leader == null:
 		return
@@ -1334,8 +1477,17 @@ func _process(delta: float) -> void:
 	# onların fazını `_advance_gather` kendi yollarından sürüyor, çünkü
 	# kamp sırasında kervanın zemin hızı zaten sıfır (bkz. orası).
 	_anim_time += delta
+	_breath_time += delta
 	if _turning:
 		_advance_turn(delta)
+	# Efektlerin ölçeği her karede: ekran boyu ve yakınlaştırma değişince
+	# figür de efekt de büyümeli (sabit piksel, 1080p'de kaybolan sıçrama).
+	var fx_px := fx_px_per_metre()
+	if _fx_front != null:
+		_fx_front.set_px_per_metre(fx_px)
+	if _fx_ground != null:
+		_fx_ground.set_px_per_metre(fx_px)
+	_spend_wheel_fx(delta)
 	var figure_index := 0
 	for child in get_children():
 		var figure := child as WalkFigure
@@ -1343,6 +1495,12 @@ func _process(delta: float) -> void:
 			continue
 		figure_index += 1
 		figure.set_lean(wind_lean_at(_wind_lean, _anim_time, figure_index))
+		# Adımlar döngünün **başında** okunuyor, yani bir önceki karenin
+		# adımları: aşağıda lider, arabacı ve ateşe yürüyen figür ayrı
+		# dallara ayrılıyor ve her dala ayrı bir okuma yazmak, eklenecek
+		# yeni bir dalın sessizce efektsiz kalması demekti.
+		_spend_footfalls(figure)
+		_breathe(figure, figure_index, delta)
 		if _gather_homes.has(figure):
 			continue
 		if figure == _leader:

@@ -60,7 +60,7 @@ yükle** (Skill aracı ya da dosyayı oku). Bir iş birden çok sisteme değiyor
 | `kurallar-karakter` | scripts/character, Character & Party, Lineage, Stress, Progression | kişi, parti, kültür, sınıf, huy, ekipman, işe alma, ölüm ve varis, defter, stres, yorgunluk, seviye |
 | `kurallar-savas` | scripts/combat, Combat Rules, Ruin Rules | savaş motoru, beceri, düşman, durum etkisi, kazanma oranı dengesi |
 | `kurallar-yol` | Road Layer, Route Terrain & Weather, Temperature, Route, En-Route Plan, Road Movement, Journey Time, Road Encounter, Road Screen Layout, Encounter Timing | yol ekranı, yolculuk, kamp, tempo, hava, arazi, sapma, karşılaşma |
-| `kurallar-sanat` | Audio, Art, Rendered Road, Prop | çizim, palet, sahne, render edilmiş yol ve eşya, ses |
+| `kurallar-sanat` | Audio, Art, Rendered Road, Prop, Effect | çizim, palet, sahne, render edilmiş yol ve eşya, ses, efekt (yağmur/kar/sıçrama/iz) |
 | `kurallar-figur` | Wardrobe & Rig | insan ve hayvan figürü, giysi, iskelet, render hattı, yürüyüş |
 | `kurallar-arayuz` | Title Screen, Waybook UI, Motion, scripts/world, World Navigation, Save & Menu, Localization | ekran, tema, hareket, gezinme, kayıt, çeviri |
 | `kurallar-ekonomi` | City Hub, Caravan Ruin, Provision, Morale, Economy, Kervan Envanteri, Haggling, Reputation, Playthrough Start | pazar, şehir, borç, vagon, erzak, moral, itibar, başlangıç |

@@ -1,0 +1,787 @@
+{
+ "efektler": {
+  "blizzard": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 30,
+   "kare": 16,
+   "m": 5.0,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "breath_vapor": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 24,
+   "dongu": false,
+   "dosenir": false,
+   "en": 38,
+   "fps": 16,
+   "kare": 14,
+   "m": 0.6,
+   "mil": [
+    0.09473684210526317,
+    0.6699999999999999
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "breath_vapor_beast": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 30,
+   "dongu": false,
+   "dosenir": false,
+   "en": 58,
+   "fps": 14,
+   "kare": 14,
+   "m": 0.85,
+   "mil": [
+    0.0896551724137931,
+    0.7093333333333334
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "canopy_drip": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 48,
+   "dongu": false,
+   "dosenir": false,
+   "en": 8,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.3,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "dust_gust": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 35,
+   "dongu": false,
+   "dosenir": false,
+   "en": 84,
+   "fps": 18,
+   "kare": 16,
+   "m": 2.4,
+   "mil": [
+    0.08333333333333333,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "ember_rise": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 71,
+   "dongu": true,
+   "dosenir": false,
+   "en": 25,
+   "fps": 20,
+   "kare": 16,
+   "m": 0.5,
+   "mil": [
+    0.4,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "fire_steam": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 69,
+   "dongu": false,
+   "dosenir": false,
+   "en": 53,
+   "fps": 18,
+   "kare": 14,
+   "m": 1.0,
+   "mil": [
+    0.49056603773584906,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "fog_drift": {
+   "aile": "sis",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 320,
+   "fps": 12,
+   "kare": 16,
+   "m": 11.0,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "frost_glint": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 23,
+   "dongu": false,
+   "dosenir": false,
+   "en": 24,
+   "fps": 16,
+   "kare": 14,
+   "m": 0.55,
+   "mil": [
+    0.5,
+    1.3478260869565217
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "ground_mist": {
+   "aile": "sis",
+   "bosluk": 2,
+   "boy": 80,
+   "dongu": true,
+   "dosenir": true,
+   "en": 320,
+   "fps": 10,
+   "kare": 16,
+   "m": 11.0,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "hail": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 30,
+   "kare": 16,
+   "m": 5.0,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "hoof_dust": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 27,
+   "dongu": false,
+   "dosenir": false,
+   "en": 49,
+   "fps": 26,
+   "kare": 12,
+   "m": 1.15,
+   "mil": [
+    0.08163265306122448,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "hoof_mud": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 28,
+   "dongu": false,
+   "dosenir": false,
+   "en": 70,
+   "fps": 26,
+   "kare": 12,
+   "m": 1.08,
+   "mil": [
+    0.44285714285714284,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "hoof_snow": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 22,
+   "dongu": false,
+   "dosenir": false,
+   "en": 52,
+   "fps": 26,
+   "kare": 12,
+   "m": 1.12,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "hoof_splash": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 42,
+   "dongu": false,
+   "dosenir": false,
+   "en": 94,
+   "fps": 26,
+   "kare": 12,
+   "m": 1.18,
+   "mil": [
+    0.44680851063829785,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "lantern_halo": {
+   "aile": "sis",
+   "bosluk": 2,
+   "boy": 72,
+   "dongu": true,
+   "dosenir": true,
+   "en": 72,
+   "fps": 14,
+   "kare": 16,
+   "m": 0.95,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "leaf_drift": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 30,
+   "dongu": false,
+   "dosenir": false,
+   "en": 63,
+   "fps": 16,
+   "kare": 16,
+   "m": 2.4,
+   "mil": [
+    0.07936507936507936,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "paw_snow": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 11,
+   "dongu": false,
+   "dosenir": false,
+   "en": 20,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.55,
+   "mil": [
+    0.15,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "puddle_shiver": {
+   "aile": "sis",
+   "bosluk": 2,
+   "boy": 28,
+   "dongu": true,
+   "dosenir": true,
+   "en": 80,
+   "fps": 12,
+   "kare": 16,
+   "m": 0.7,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_crown": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 16,
+   "dongu": false,
+   "dosenir": false,
+   "en": 34,
+   "fps": 30,
+   "kare": 10,
+   "m": 0.5,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_heavy": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 28,
+   "kare": 16,
+   "m": 5.0,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_impact_dry": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 11,
+   "dongu": false,
+   "dosenir": false,
+   "en": 28,
+   "fps": 30,
+   "kare": 10,
+   "m": 0.44,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_light": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 24,
+   "kare": 16,
+   "m": 5.5,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_medium": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 24,
+   "kare": 16,
+   "m": 5.5,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "rain_ripple": {
+   "aile": "halka",
+   "bosluk": 2,
+   "boy": 30,
+   "dongu": false,
+   "dosenir": false,
+   "en": 56,
+   "fps": 24,
+   "kare": 12,
+   "m": 0.62,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "sleet": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 24,
+   "kare": 16,
+   "m": 5.5,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "smoke_thick": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 68,
+   "dongu": true,
+   "dosenir": false,
+   "en": 81,
+   "fps": 12,
+   "kare": 16,
+   "m": 1.4,
+   "mil": [
+    0.4691358024691358,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "smoke_thin": {
+   "aile": "bulut",
+   "bosluk": 2,
+   "boy": 59,
+   "dongu": true,
+   "dosenir": false,
+   "en": 52,
+   "fps": 14,
+   "kare": 16,
+   "m": 0.95,
+   "mil": [
+    0.46153846153846156,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "snow_gust": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 40,
+   "dongu": false,
+   "dosenir": false,
+   "en": 86,
+   "fps": 20,
+   "kare": 16,
+   "m": 2.3,
+   "mil": [
+    0.06976744186046512,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "snow_heavy": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 18,
+   "kare": 16,
+   "m": 5.5,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "snow_light": {
+   "aile": "perde",
+   "bosluk": 2,
+   "boy": 160,
+   "dongu": true,
+   "dosenir": true,
+   "en": 160,
+   "fps": 18,
+   "kare": 16,
+   "m": 6.0,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "snow_settle": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 14,
+   "dongu": false,
+   "dosenir": false,
+   "en": 32,
+   "fps": 18,
+   "kare": 10,
+   "m": 0.5,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "yok",
+   "sutun": 4
+  },
+  "step_dust": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 22,
+   "dongu": false,
+   "dosenir": false,
+   "en": 35,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.95,
+   "mil": [
+    0.14285714285714285,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "step_mud": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 23,
+   "dongu": false,
+   "dosenir": false,
+   "en": 60,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.88,
+   "mil": [
+    0.4166666666666667,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "step_snow": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 17,
+   "dongu": false,
+   "dosenir": false,
+   "en": 45,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.9,
+   "mil": [
+    0.4666666666666667,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "step_splash": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 36,
+   "dongu": false,
+   "dosenir": false,
+   "en": 74,
+   "fps": 26,
+   "kare": 12,
+   "m": 0.95,
+   "mil": [
+    0.4864864864864865,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "track_foot_mud": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 14,
+   "dongu": false,
+   "dosenir": false,
+   "en": 26,
+   "fps": 1,
+   "kare": 5,
+   "m": 0.42,
+   "mil": [
+    0.5,
+    0.42857142857142855
+   ],
+   "oklama": "x",
+   "sutun": 3
+  },
+  "track_foot_snow": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 14,
+   "dongu": false,
+   "dosenir": false,
+   "en": 27,
+   "fps": 1,
+   "kare": 5,
+   "m": 0.42,
+   "mil": [
+    0.5185185185185185,
+    0.42857142857142855
+   ],
+   "oklama": "x",
+   "sutun": 3
+  },
+  "track_hoof_mud": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 10,
+   "dongu": false,
+   "dosenir": false,
+   "en": 24,
+   "fps": 1,
+   "kare": 5,
+   "m": 0.34,
+   "mil": [
+    0.5,
+    0.9
+   ],
+   "oklama": "x",
+   "sutun": 3
+  },
+  "track_hoof_snow": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 10,
+   "dongu": false,
+   "dosenir": false,
+   "en": 24,
+   "fps": 1,
+   "kare": 5,
+   "m": 0.34,
+   "mil": [
+    0.5,
+    0.9
+   ],
+   "oklama": "x",
+   "sutun": 3
+  },
+  "track_wheel_mud": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 16,
+   "dongu": false,
+   "dosenir": false,
+   "en": 96,
+   "fps": 1,
+   "kare": 5,
+   "m": 1.35,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 3
+  },
+  "track_wheel_snow": {
+   "aile": "iz",
+   "bosluk": 2,
+   "boy": 16,
+   "dongu": false,
+   "dosenir": false,
+   "en": 96,
+   "fps": 1,
+   "kare": 5,
+   "m": 1.35,
+   "mil": [
+    0.5,
+    0.5
+   ],
+   "oklama": "yok",
+   "sutun": 3
+  },
+  "wheel_dust": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 25,
+   "dongu": false,
+   "dosenir": false,
+   "en": 55,
+   "fps": 24,
+   "kare": 14,
+   "m": 1.6,
+   "mil": [
+    0.16363636363636364,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "wheel_mud": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 35,
+   "dongu": false,
+   "dosenir": false,
+   "en": 111,
+   "fps": 26,
+   "kare": 14,
+   "m": 1.6,
+   "mil": [
+    0.45045045045045046,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "wheel_snow": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 29,
+   "dongu": false,
+   "dosenir": false,
+   "en": 89,
+   "fps": 22,
+   "kare": 14,
+   "m": 1.6,
+   "mil": [
+    0.48314606741573035,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  },
+  "wheel_splash": {
+   "aile": "patlama",
+   "bosluk": 2,
+   "boy": 44,
+   "dongu": false,
+   "dosenir": false,
+   "en": 126,
+   "fps": 28,
+   "kare": 14,
+   "m": 1.7,
+   "mil": [
+    0.5,
+    1.0
+   ],
+   "oklama": "x",
+   "sutun": 4
+  }
+ },
+ "surum": 1
+}
