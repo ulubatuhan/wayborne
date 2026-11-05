@@ -106,7 +106,7 @@ func _fresh() -> GameSession:
 func _test_buying_is_capped_by_stock(t) -> void:
 	var session := _fresh()
 	session.current_location_id = _first_location().location_id
-	session.wallet.add(100000)
+	session.wallet.earn(100000)
 	var stock := session.get_provision_stock()
 	t.ge(float(stock), 0.0, "şehrin rafı okunuyor")
 	var got := session.buy_provisions(stock + 500)
@@ -120,7 +120,7 @@ func _test_buying_is_capped_by_purse(t) -> void:
 	var session := _fresh()
 	session.current_location_id = _first_location().location_id
 	session.wallet.spend(session.wallet.balance)
-	session.wallet.add(GameSession.PROVISIONS_UNIT_PRICE * 3)
+	session.wallet.earn(GameSession.PROVISIONS_UNIT_PRICE * 3)
 	var before := session.get_provisions()
 	var got := session.buy_provisions(50)
 	t.eq(got, 3, "kesenin yettiği kadar alındı")
@@ -132,7 +132,7 @@ func _test_buying_is_capped_by_purse(t) -> void:
 func _test_taken_today_survives_a_reload(t) -> void:
 	var session := _fresh()
 	session.current_location_id = _first_location().location_id
-	session.wallet.add(100000)
+	session.wallet.earn(100000)
 	var took := session.buy_provisions(5)
 	t.eq(took, 5, "beş erzak alındı")
 	var left := session.get_provision_stock()
