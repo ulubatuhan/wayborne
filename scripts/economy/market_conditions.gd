@@ -86,29 +86,45 @@ var _shocks: Array = []
 ## zaten dinlenme noktasında, dict'e girmesine gerek yok.
 var _city_gold: Dictionary = {}
 
-func get_city_gold(location_id: String) -> int:
-	return int(round(float(_city_gold.get(location_id, default_city_gold(location_id)))))
+## `day` verilmezse dinlenme noktası kıtlıksız okunur. Dokunulmamış bir
+## şehir dict'e hiç girmediği için günü bilmek şart: yoksa geç oyunda
+## uğranmamış her şehir hâlâ ilk günün hazinesiyle görünürdü.
+func get_city_gold(location_id: String, day: int = 0) -> int:
+	return int(round(float(_city_gold.get(location_id, default_city_gold(location_id, day)))))
 
-## Hazinenin dinlenme noktası: kasabanın ve kervansarayın ticaret payı
-## şehrinkinden düşük (bkz. SettlementRules.TRADE_SHARE).
-static func default_city_gold(location_id: String) -> float:
+## Kıtlık şehrin kesesini de kurutuyor (P8, kullanıcı kararı 2026-11-05).
+##
+## Neden burada: kâr tavanının asıl musluğu şehir hazinesiydi - kervan
+## rotasını dönerken her şehir arkada dolduğu için kese kırk seferde
+## 6900 GG'ye çıkabiliyordu (ölçüldü). Tavanı sabit bir sayıyı kısarak
+## değil **dünyayı fakirleştirerek** indiriyoruz: aç bir bölgenin şehri
+## yalnız mal değil, para da bulamaz.
+##
+## Ve bu, takasla (P6) aynı cümleyi söylüyor: altın kıtlıkta işe yaramaz.
+## Şehrin alacak parası kalmayınca mal mala değişmek bir seçenek değil,
+## tek yol olur.
+const CITY_GOLD_SCARCITY_DRAIN: float = 0.55
+
+static func default_city_gold(location_id: String, day: int = 0) -> float:
 	var location := WorldMapData.get_location_by_id(location_id)
 	if location == null:
 		return CITY_GOLD_DEFAULT
-	return CITY_GOLD_DEFAULT * SettlementRules.trade_share(location.settlement_type)
+	var rest := CITY_GOLD_DEFAULT * SettlementRules.trade_share(location.settlement_type)
+	var degree := Scarcity.degree(location.region, day)
+	return rest * (1.0 - CITY_GOLD_SCARCITY_DRAIN * degree)
 
 ## Oyuncu alım yaptıkça şehrin kesesi dolar - MAX'ta kenetlenir.
-func earn_city_gold(location_id: String, amount: int) -> void:
+func earn_city_gold(location_id: String, amount: int, day: int = 0) -> void:
 	if amount <= 0:
 		return
-	_set_city_gold(location_id, float(get_city_gold(location_id)) + float(amount))
+	_set_city_gold(location_id, float(get_city_gold(location_id, day)) + float(amount))
 
 ## Oyuncu sattıkça şehrin kesesi boşalır - asla eksiye düşmez, bir şehir
 ## borçlanmaz, yalnızca "elimde bu kadar var" der.
-func spend_city_gold(location_id: String, amount: int) -> void:
+func spend_city_gold(location_id: String, amount: int, day: int = 0) -> void:
 	if amount <= 0:
 		return
-	_set_city_gold(location_id, float(get_city_gold(location_id)) - float(amount))
+	_set_city_gold(location_id, float(get_city_gold(location_id, day)) - float(amount))
 
 func _set_city_gold(location_id: String, value: float) -> void:
 	_city_gold[location_id] = clampf(value, 0.0, CITY_GOLD_MAX)
@@ -240,7 +256,7 @@ func advance_day(day: int) -> void:
 	var updated_gold: Dictionary = {}
 	for location_id in _city_gold:
 		var current := float(_city_gold[location_id])
-		var rest := default_city_gold(location_id)
+		var rest := default_city_gold(location_id, day)
 		var next_value := current + (rest - current) * CITY_GOLD_REGEN_RATE
 		if absf(next_value - rest) > 1.0:
 			updated_gold[location_id] = next_value

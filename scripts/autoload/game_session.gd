@@ -2793,7 +2793,7 @@ func consume_stock(item_id: String, quantity: int, total_price: int = 0) -> void
 		market_stock[item_id] = maxi(0, market_stock[item_id] - quantity)
 	market.record_purchase(current_location_id, item_id, quantity)
 	if total_price > 0:
-		market.earn_city_gold(current_location_id, total_price)
+		market.earn_city_gold(current_location_id, total_price, total_days_elapsed)
 
 ## Satış tersini yapar: aynı malı aynı şehre boca etmek getirisini düşürür.
 ## total_price şehrin hazinesinden çıkan altın (bkz. can_city_afford_sale -
@@ -2813,7 +2813,7 @@ func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
 	if item_id == MarketConditions.MEDICINE_ITEM:
 		market.change_medicine(current_location_id, quantity)
 	if total_price > 0:
-		market.spend_city_gold(current_location_id, total_price)
+		market.spend_city_gold(current_location_id, total_price, total_days_elapsed)
 
 ## Kriz anındaki ticaretin ahlaki izi (P14, kullanıcı kararı 2026-11-05).
 ## Ticaret bugüne kadar hiçbir iz bırakmıyordu: para ve stok değişiyor,
@@ -3183,7 +3183,7 @@ func is_profiteering_sale(item_id: String) -> bool:
 
 ## Şu an bulunduğun şehrin altın hazinesi - satışların tavanı.
 func get_city_gold_reserve() -> int:
-	return market.get_city_gold(current_location_id)
+	return market.get_city_gold(current_location_id, total_days_elapsed)
 
 ## Şehir bu toplam fiyatı ödeyebilir mi? market.gd satış öncesi bunu sorar -
 ## "disabled with reason" kuralı: hazine yetmiyorsa satış hiç başlamaz,

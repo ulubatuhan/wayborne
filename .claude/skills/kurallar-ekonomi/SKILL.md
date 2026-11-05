@@ -7,7 +7,7 @@ description: Wayborne kural kitabının "Ekonomi, şehir, erzak ve borç" bölü
 
 CLAUDE.md'nin bu bölümleri 2026-10-30'da kullanıcı kararıyla buraya taşındı; metin değişmedi, başlıklar aynı. Koddaki
 "bkz. CLAUDE.md <başlık>" başvuruları buraya bakar. Kural becerilerinin listesi CLAUDE.md'de ("Kural becerileri").
-Bölümler: Barter Rules, Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
+Bölümler: Profit Ceiling Rules, Barter Rules, Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
 
 ### City Hub Rules
 
@@ -658,6 +658,36 @@ The resulting range on a 135 list price (base 100, greed 0.5, rep 0.3):
 accept pays 135, a won push pays 115-135 by skill, a lost push pays 149 plus
 1 reputation, walking out pays nothing and costs 1. A master talker (Charisma
 maxed, trusted) pays 85 against a list of 100 - it was 68 in the old design.
+
+### Profit Ceiling Rules
+
+Trade's profit must cover **staying on the road**, not wealth (P8). The
+measure is the purse curve over forty journeys in `simulate_career`: the
+target is flat, not rising, and the report prints it on every run
+("kâr tavanı").
+
+The first report said the second half averaged 2.09× the first and peaked at
+6948 GP - a money printer. It was in the **tool**, not the game:
+`simulate_career` sold through `MarketPricing.get_sell_price` straight into
+`wallet.earn`, bypassing `capped_sell_price` (the buyback cap), freshness and
+**the city treasury**, and bought without market conditions, day or the
+scarcity factor. Measured through the screen's own gates the curve falls
+(0.59-0.82) and peaks at 1617, with deaths unchanged. *When a report is
+surprising, suspect the instrument first.*
+
+- **No constant needed tuning.** P1's haggling cap (45% → 15%), P5's
+  provision stock and the two existing gates (city treasury, `BUYBACK_SHARE`)
+  already hold the ceiling.
+- **A simulator that does not pass through the gates measures a game that
+  does not exist.** Any new policy in `simulate_career` buys and sells the
+  way `market.gd` does, or it is not a measurement.
+- `CITY_GOLD_SCARCITY_DRAIN` exists for the world's sake, not the curve's: a
+  hungry region's city cannot find coin either, which is the same sentence
+  barter speaks. Its measured effect sits inside the noise of eight careers -
+  recorded here so nobody reads it as a tuned number.
+- `get_city_gold` and `default_city_gold` take the day. Untouched cities
+  never enter `_city_gold`, so without it every city the caravan had not
+  visited still showed day-one money late in the game.
 
 ### Barter Rules
 

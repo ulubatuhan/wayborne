@@ -22,6 +22,9 @@ func run(t) -> void:
 	_test_wear_shows_in_three_places(t)
 	_test_wear_and_wet_do_not_erase_each_other(t)
 	_test_body_wear_reads_existing_numbers(t)
+	_test_city_treasury_dries_with_scarcity(t)
+	_test_sale_cannot_exceed_the_city_purse(t)
+	_test_buyback_cap_blocks_the_same_city_loop(t)
 
 # --- P7: fiyatın nedeni, sayısı değil ---
 
@@ -319,3 +322,54 @@ func _test_body_wear_reads_existing_numbers(t) -> void:
 	session.change_party_fatigue(CharacterData.MAX_FATIGUE)
 	t.almost(session.body_fatigue(), 1.0, "tükenmiş parti tavanda")
 	t.le(session.body_hunger(), 1.0, "okuma 0-1 arasında kalır")
+
+# --- P8: kâr tavanı ---
+
+func _test_city_treasury_dries_with_scarcity(t) -> void:
+	# Tavanı sabit bir sayıyı kısarak değil dünyayı fakirleştirerek
+	# indiriyoruz: aç bir bölgenin şehri yalnız mal değil, para da bulamaz.
+	# Ve bu takasla (P6) aynı cümleyi söylüyor.
+	var hungry := _hungry_city()
+	var early := MarketConditions.default_city_gold(hungry.location_id, 1)
+	var late := MarketConditions.default_city_gold(hungry.location_id, 320)
+	t.ok(late < early, "kıtlık derinleşince şehrin hazinesi küçülür")
+	t.ge(late, 0.0, "hazine eksiye düşmez")
+	t.le(
+		early,
+		MarketConditions.CITY_GOLD_DEFAULT,
+		"hazine hiçbir zaman tabanın üstüne çıkmaz"
+	)
+	# Dokunulmamış bir şehir de günü bilmek zorunda: yoksa geç oyunda
+	# uğranmamış her şehir hâlâ ilk günün hazinesiyle görünürdü.
+	var conditions := MarketConditions.new()
+	t.ok(
+		conditions.get_city_gold(hungry.location_id, 320)
+			< conditions.get_city_gold(hungry.location_id, 1),
+		"hiç uğranmamış şehir de kıtlığı taşır"
+	)
+
+func _test_sale_cannot_exceed_the_city_purse(t) -> void:
+	# Kâr tavanının asıl kapısı: şehir ancak kesesindeki kadarını alır.
+	# Bu kapı bir kez ölçüm aracında atlanmıştı ve rapor 6948 GG'lik bir
+	# tepe gösteriyordu - gerçekte 1617.
+	var place := WorldMapData.get_locations()[0]
+	var session := _session_at(place.location_id, 1)
+	var reserve := session.get_city_gold_reserve()
+	t.ge(float(reserve), 0.0, "hazine okunabiliyor")
+	t.not_ok(
+		session.can_city_afford_sale(reserve + 1),
+		"hazinenin üstünde bir satış kabul edilmez"
+	)
+	t.ok(session.can_city_afford_sale(reserve), "hazine kadarı kabul edilir")
+
+func _test_buyback_cap_blocks_the_same_city_loop(t) -> void:
+	# Aynı şehirde al-sat döngüsü para basamaz.
+	var place := WorldMapData.get_locations()[0]
+	var session := _session_at(place.location_id, 1)
+	var item := ItemCatalog.get_item("test_cloth")
+	session.note_purchase(item, 5, 100)
+	t.le(
+		float(session.capped_sell_price(item.item_id, 500)),
+		float(100 * GameSession.BUYBACK_SHARE) + 0.5,
+		"burada aldığın mal, buradaki alış fiyatının altında geri satılır"
+	)

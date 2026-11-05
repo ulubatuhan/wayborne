@@ -149,6 +149,11 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 	var samples: Dictionary = {}
 
 	# Y-C24: dertsiz sefer sayısı ve en uzun sakin dizi.
+	var purse_peak := 0
+	var purse_first_half := 0
+	var purse_second_half := 0
+	var first_half_legs := 0
+	var second_half_legs := 0
 	var calm_legs := 0
 	var calm_run := 0
 	var longest_calm := 0
@@ -170,6 +175,16 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 			calm_legs += 1
 			calm_run += 1
 			longest_calm = maxi(longest_calm, calm_run)
+		# P8 (kâr tavanı): kesenin tepesi ve eğilimi her seferde okunuyor.
+		# Yalnız kontrol noktalarına bakmak yanıltıyordu - aradaki bir
+		# zirveyi ya da ilk yarıdan ikinciye kayan bir yükselişi göremez.
+		purse_peak = maxi(purse_peak, session.wallet.balance)
+		if leg_number * 2 <= LEGS_PER_ARC:
+			purse_first_half += session.wallet.balance
+			first_half_legs += 1
+		else:
+			purse_second_half += session.wallet.balance
+			second_half_legs += 1
 		if CHECKPOINTS.has(leg_number):
 			samples[leg_number] = _snapshot(session)
 
@@ -177,6 +192,9 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 	return {
 		"calm_legs": calm_legs, "longest_calm": longest_calm,
 		"samples": samples,
+		"purse_peak": purse_peak,
+		"purse_first": int(purse_first_half / maxi(1, first_half_legs)),
+		"purse_second": int(purse_second_half / maxi(1, second_half_legs)),
 		"legs": session.journeys_completed, "days": session.total_days_elapsed,
 		"cards": _cards_drawn, "deaths": session.ledger.count_of(CaravanLedger.KIND_DIED),
 	}
@@ -299,19 +317,36 @@ func _sell_trade_goods(session: GameSession, origin: Location) -> void:
 		var quantity := session.get_total_quantity(item.item_id)
 		if quantity <= 0:
 			continue
-		var unit_price := MarketPricing.get_sell_price(
+		# **Pazar ekranının kapılarından geçmek zorunda** (P8 ölçümü):
+		# önce doğrudan `MarketPricing.get_sell_price` ile satılıyor ve
+		# `wallet.earn` çağrılıyordu - yani geri satış tavanı
+		# (`capped_sell_price`), tazelik ve **şehir hazinesi** hiç
+		# uğranmıyordu. Rapor bu yüzden gerçekte olmayan bir kâr
+		# gösteriyordu; önce ölçüm aracından şüphelen kuralının tam örneği.
+		var unit_price := session.capped_sell_price(item.item_id, MarketPricing.get_sell_price(
 			item, origin, session.market, session.total_days_elapsed
-		)
+		))
+		# Şehir ancak kesesindeki kadarını alır.
+		var reserve := session.get_city_gold_reserve()
+		var affordable_units := int(floor(float(reserve) / float(maxi(1, unit_price))))
+		quantity = mini(quantity, affordable_units)
+		if quantity <= 0:
+			continue
+		var total := unit_price * quantity
 		session.remove_from_cargo_or_bags(item.item_id, quantity)
-		session.wallet.earn(unit_price * quantity)
-		session.record_sale(item.item_id, quantity, unit_price * quantity)
+		session.wallet.earn(total)
+		session.record_sale(item.item_id, quantity, total)
 
 func _buy_trade_goods(session: GameSession, origin: Location, reserved_room: float) -> void:
 	for item_id in origin.produces:
 		var item := ItemCatalog.get_item(item_id)
 		if item == null:
 			continue
-		var unit_price := MarketPricing.get_buy_price(item, origin)
+		# Alış da ekranla aynı: piyasa durumu, gün ve kıtlık çarpanı.
+		var unit_price := int(round(float(MarketPricing.get_buy_price(
+			item, origin, session.market, session.total_days_elapsed
+		)) * Scarcity.buy_factor(item_id, session.scarcity_here())))
+		unit_price = maxi(1, unit_price)
 		var affordable := int(floor(float(session.wallet.balance) * 0.4 / float(maxi(1, unit_price))))
 		var by_space := int(floor(maxf(0.0, session.get_cargo_space_remaining() - reserved_room) / maxf(0.1, item.unit_weight)))
 		var quantity := mini(mini(affordable, by_space), session.get_market_stock(item_id))
@@ -433,6 +468,27 @@ func _report_curve(arcs: Array[Dictionary], policy: String) -> void:
 			int(totals.debt / count), int(totals.days / count),
 		])
 
+## P8 (kullanıcı kararı 2026-11-05): ticaretin kârı **yolda kalmaya**
+## yetsin, servete yetmesin. Ölçü kesenin eğrisi: hedef yatay, yükselen
+## değil. İlk yirmi seferin ortalamasıyla son yirminin ortalaması
+## karşılaştırılıyor - ikincisi birincisinin belirgin üstündeyse ortada bir
+## para musluğu var demektir.
+func _report_ceiling(arcs: Array[Dictionary], policy: String) -> void:
+	var peak := 0
+	var first := 0
+	var second := 0
+	for arc in arcs:
+		peak = maxi(peak, int(arc["purse_peak"]))
+		first += int(arc["purse_first"])
+		second += int(arc["purse_second"])
+	var count := maxi(1, arcs.size())
+	var first_avg := float(first) / float(count)
+	var second_avg := float(second) / float(count)
+	print("   kâr tavanı (P8) · %s: kese ilk yarı ort. %d, son yarı ort. %d (oran %.2f), tepe %d" % [
+		policy, int(first_avg), int(second_avg),
+		second_avg / maxf(1.0, first_avg), peak,
+	])
+
 ## Y-C24: kusursuz denge olmamalı. Dert = kayıp (ölüm ya da ayrılma), teslim
 ## edilemeyen kontrat, tehdit kartı ya da vadesi geçmiş borç. Hedef: hiçbir
 ## politika uzun bir sakin diziye ulaşmasın.
@@ -447,6 +503,7 @@ func _report_calm(arcs: Array[Dictionary], policy: String) -> void:
 	print("   denge (Y-C24) · %s: dertsiz sefer %d/%d (%%%d), en uzun sakin dizi %d" % [
 		policy, calm, legs, int(round(100.0 * calm / float(maxi(1, legs)))), longest,
 	])
+	_report_ceiling(arcs, policy)
 
 func _threat_total() -> int:
 	var total := 0

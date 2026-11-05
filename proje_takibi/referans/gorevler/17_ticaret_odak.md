@@ -120,3 +120,29 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
     konuşması gerekiyordu.
   - **Kabul:** `tests/test_trade_focus.gd`'ye üç test, `tests/screenshot_wear.gd` dört hâl yan yana
     (tok · aç · yorgun · ikisi birden).
+
+- [x] **P08 Kâr tavanı: ölçüldü, asıl bulgu ölçüm aracıydı**
+  - **İlk rapor:** kese kırk seferde 6948 GG'lik bir tepe yapıyor, son yirmi seferin ortalaması ilk yirminin
+    2.09 katı. Yani ortada bir para musluğu var gibi görünüyordu.
+  - **Asıl bulgu:** musluk oyunda değil, ölçüm aracındaydı. `simulate_career` satışı doğrudan
+    `MarketPricing.get_sell_price` + `wallet.earn` ile yapıyordu; yani **geri satış tavanını**
+    (`capped_sell_price`), tazeliği ve **şehir hazinesini** hiç uğramıyordu. Alış da piyasa durumunu, günü ve
+    kıtlık çarpanını atlıyordu. *"Bir rapor şaşırtıcıysa önce ölçüm aracından şüphelen"* kuralının tam örneği.
+  - **Araç ekranın kapılarından geçirildi, tablo tersine döndü:**
+
+    | politika | kese ilk yarı | son yarı | oran | tepe |
+    |---|---|---|---|---|
+    | genişleyen | 154 | 127 | 0.82 | 1617 |
+    | kontratçı | 157 | 92 | 0.59 | 1617 |
+    | aşamalı | 150 | 95 | 0.64 | 1617 |
+
+    Hedef "yatay, yükselen değil"di; eğri **düşüyor**. Ölüm oranı değişmedi (0.025-0.031) ve sekiz kervanın
+    hepsi kırk seferi tamamladı: kıtlık kıvrandırıyor, öldürmüyor.
+  - **Sayı ayarı gerekmedi.** P1'in pazarlık tavanı (%45 → %15), P5'in erzak stoğu ve var olan iki kapı
+    (şehir hazinesi, `BUYBACK_SHARE`) zaten yetiyor.
+  - Tek yeni kural, tema gereği eklendi: `CITY_GOLD_SCARCITY_DRAIN` - aç bir bölgenin şehri yalnız mal değil
+    **para** da bulamaz. Takasla (P6) aynı cümleyi söylüyor. **Dürüst not:** bu sabitin ölçülen etkisi
+    gürültünün içinde kaldı (0.65 → 0.82, sekiz kervanda); gerekçesi ölçüm değil, dünyanın tutarlılığı.
+    Hazine artık günü de biliyor - yoksa geç oyunda uğranmamış her şehir hâlâ ilk günün parasıyla görünüyordu.
+  - **Kabul:** `tests/test_trade_focus.gd`'ye üç regresyon testi (hazine kıtlıkla kurur, satış hazineyi
+    aşamaz, aynı şehirde al-sat döngüsü para basamaz) ve `simulate_career`'a kalıcı "kâr tavanı" satırı.
