@@ -102,3 +102,21 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
     sayılıyor."* Oyuncu farkı sayıdan değil cümleden anlamalı.
   - **Kabul:** `tests/test_trade_focus.gd`'ye üç test, `tests/screenshot_barter.gd` iki kare
     (altınla / takas).
+
+- [x] **P16 Açlık ve yorgunluk bedende görünüyor**
+  - Islaklık ve kar için yaptığımızın (Y-G25) karşılığı. `WalkFigure.set_wear(hunger, fatigue)` dört yerden
+    konuşuyor: **çöken omuz** (`wear_hunch`), **kısalan adım** (`wear_step`), **incelen siluet** (`wear_bulk`),
+    **soluklaşan ten** (`ArtDraw.worn_tint`) ve **çöken boy** (`wear_stoop`).
+  - Yorgunluk adımı açlıktan çok kısaltır (aç insan yürür, yorgun insan sürüklenir); açlık incelttiği hâlde
+    yorgunluk inceltmez (uyku kiloyu almaz).
+  - Islaklık ve aşınma aynı `self_modulate` çarpanından geçiyor; ikisi de doğrudan yazmıyor
+    (`_apply_body_tint`), yoksa yağmurda aç bir kervan tok görünürdü.
+  - Sayılar var olan durumlardan okunuyor (`GameSession.body_hunger` = `consecutive_hungry_days` /
+    `crew_hungry_nights`, `body_fatigue` = en yorgun kişinin yorgunluğu): çizim mekaniğin üstüne bir katman,
+    yanına ikinci bir hakikat değil.
+  - **Ekran görüntüsü yine düzeltti:** ilk değerlerle (0.085 rad eğim, soluk renk) dört hâl yan yana
+    konduğunda fark görünmüyordu. Eğim 0.17'ye, renk payları %30'a çıktı ve `wear_stoop` eklendi - çünkü
+    render edilmiş figürde kareler sabit olduğu için adım kısalması oraya hiç inmiyor, duruşun tek başına
+    konuşması gerekiyordu.
+  - **Kabul:** `tests/test_trade_focus.gd`'ye üç test, `tests/screenshot_wear.gd` dört hâl yan yana
+    (tok · aç · yorgun · ikisi birden).

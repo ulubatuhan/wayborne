@@ -3411,6 +3411,26 @@ func _recruit_world_pressure() -> int:
 			return 1
 	return 0
 
+## Kervanın **bedeninde görünen** açlık ve yorgunluk (P16), 0-1. İkisi de
+## var olan sayılardan okunuyor, yeni durum tutulmuyor: çizim mekaniğin
+## üstüne bir katman, yanına ikinci bir hakikat değil.
+##
+## Kollwitz dersi: kıtlığın yeri bedendir, çubuk değil. Aynı sayı çubukta
+## bir idari iş, bedende bir korku.
+const WEAR_HUNGER_DAYS: float = 4.0
+
+func body_hunger() -> float:
+	var worst := crew_hungry_nights
+	for character in get_party():
+		worst = maxi(worst, character.consecutive_hungry_days)
+	return clampf(float(worst) / WEAR_HUNGER_DAYS, 0.0, 1.0)
+
+func body_fatigue() -> float:
+	var worst := get_most_fatigued_character()
+	if worst == null:
+		return 0.0
+	return clampf(float(worst.fatigue) / float(CharacterData.MAX_FATIGUE), 0.0, 1.0)
+
 func _anyone_hungry() -> bool:
 	if crew_hungry_nights > 0:
 		return true

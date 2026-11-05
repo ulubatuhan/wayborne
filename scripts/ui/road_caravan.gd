@@ -640,6 +640,10 @@ func _make_figure(
 	# Faz kaydırması: aynı anda aynı adımı atan bir kervan yürüyüş kolu
 	# gibi duruyor.
 	figure.set_phase_offset(float(get_child_count()) * 1.27)
+	# Sonradan katılan figür de ıslak ve aşınmış doğar: yoksa yolun
+	# ortasında işe alınan kişi kupkuru ve tok görünüyor.
+	figure.set_weather_coat(_coat_wet, _coat_snow)
+	figure.set_wear(_wear_hunger, _wear_fatigue)
 	return figure
 
 func _archetype_of(character: CharacterData) -> String:
@@ -1363,6 +1367,8 @@ const FX_READABILITY: float = 1.45
 ## sırılsıklam olurdu; ıslanmak ve kurumak **görünen** bir süreç.
 const COAT_EASE_PER_SECOND: float = 0.055
 
+var _wear_hunger: float = 0.0
+var _wear_fatigue: float = 0.0
 var _coat_wet: float = 0.0
 var _coat_snow: float = 0.0
 var _coat_wet_target: float = 0.0
@@ -1425,6 +1431,25 @@ func _advance_coat(delta: float) -> void:
 		if figure != null:
 			figure.set_weather_coat(_coat_wet, _coat_snow)
 	queue_redraw()
+
+## Kervanın aşınması (P16): açlık ve yorgunluk her figüre iner. Islaklık
+## gibi yumuşak geçişe gerek yok - bu sayılar günde bir kez değişiyor,
+## saniyede değil.
+func set_wear(hunger: float, fatigue: float) -> void:
+	var h := clampf(hunger, 0.0, 1.0)
+	var f := clampf(fatigue, 0.0, 1.0)
+	if is_equal_approx(h, _wear_hunger) and is_equal_approx(f, _wear_fatigue):
+		return
+	_wear_hunger = h
+	_wear_fatigue = f
+	for child in get_children():
+		var figure := child as WalkFigure
+		if figure != null:
+			figure.set_wear(h, f)
+	queue_redraw()
+
+func get_wear() -> Vector2:
+	return Vector2(_wear_hunger, _wear_fatigue)
 
 func set_fx_layers(ground: FxLayer, front: FxLayer) -> void:
 	_fx_ground = ground

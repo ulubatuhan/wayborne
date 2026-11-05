@@ -835,3 +835,36 @@ in every preview the moment it is equipped.
     (`SMOOTH_ITERATIONS`, `HINGE_BAND`). Stored as a `.tres`, because the
     Web export ships resources only - a `.json` would be missing there.
     Restyling is repainting the three layer PNGs inside the same silhouette.
+
+### Body Wear Rules
+
+Hunger and fatigue show **on the body** (P16), the counterpart of what
+soaking and snow do (Y-G25). The Kollwitz lesson: *scarcity lives in the
+body, not in a bar.* The same number is administrative work on a gauge and
+frightening on a figure.
+
+`WalkFigure.set_wear(hunger, fatigue)` drives five pure readings, so a test
+sees the same numbers the screen does:
+
+- `wear_hunch()` - the shoulders drop (`WEAR_HUNCH_RADIANS`).
+- `wear_stoop()` - the figure stands shorter; it is not drawing itself up.
+- `wear_step()` - the stride shortens. Fatigue shortens it far more than
+  hunger: a starving person still walks, an exhausted one drags.
+- `wear_bulk()` - the silhouette thins. Fatigue does **not** thin it; sleep
+  does not take weight off.
+- `ArtDraw.worn_tint()` - hunger pulls the red out, fatigue greys the skin.
+
+Two rules that cost a screenshot each:
+
+- **Wet and worn share one multiplier.** Neither writes `self_modulate`
+  directly; `_apply_body_tint()` composes them. Letting either win made a
+  starving caravan look fed in the rain.
+- **The rendered-frame path carries only the hunch, the stoop and the
+  tint.** Frames are fixed, so no stride change reaches them - which is
+  exactly why `wear_stoop` exists. The first values (0.085 rad, a faint
+  tint) were invisible with four states side by side, and **a change nobody
+  can see says nothing**; `tests/screenshot_wear.gd` is the check.
+
+The numbers come from state that already exists (`GameSession.body_hunger`,
+`body_fatigue`). The drawing is a layer over the mechanics, never a second
+truth beside them.

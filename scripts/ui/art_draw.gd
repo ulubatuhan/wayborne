@@ -830,6 +830,30 @@ static func wet_tint(tint: Color, wet: float) -> Color:
 	var soaked := tint.darkened(0.30 * w)
 	return soaked.lerp(Color(soaked.r * 0.90, soaked.g * 0.95, soaked.b * 1.06, soaked.a), 0.55 * w)
 
+## Aşınmış bedenin rengi (P16): aç ten kanını kaybeder, yorgun ten
+## griye düşer. Islaklıkla aynı yerden geçiyor (`self_modulate`) çünkü
+## ikisi de bütün figürü kapsayan tek çarpan - biri öbürünü ezmemeli.
+##
+## Kollwitz dersi: **kıtlığın yeri bedendir, çubuk değil.** Açlığı çubukla
+## anlatmak "idari iş" eleştirisine giden yoldur; bedende göstermek aynı
+## sayıyı korkutucu yapar.
+const WORN_HUNGER_DRAIN: float = 0.30
+const WORN_FATIGUE_GREY: float = 0.32
+
+static func worn_tint(tint: Color, hunger: float, fatigue: float) -> Color:
+	var h := clampf(hunger, 0.0, 1.0)
+	var f := clampf(fatigue, 0.0, 1.0)
+	# Açlık: kırmızıyı çeker, teni mumsu bırakır.
+	var drained := Color(
+		tint.r * (1.0 - WORN_HUNGER_DRAIN * h),
+		tint.g * (1.0 - WORN_HUNGER_DRAIN * h * 0.75),
+		tint.b * (1.0 - WORN_HUNGER_DRAIN * h * 0.45),
+		tint.a
+	)
+	# Yorgunluk: doygunluğu alır, griye yaklaştırır.
+	var grey := (drained.r + drained.g + drained.b) / 3.0
+	return drained.lerp(Color(grey, grey, grey, drained.a), WORN_FATIGUE_GREY * f)
+
 static func inked(canvas: CanvasItem, points: PackedVector2Array, fill: Color, width: float = 1.6) -> void:
 	if points.size() < 3:
 		return

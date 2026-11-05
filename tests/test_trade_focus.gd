@@ -19,6 +19,9 @@ func run(t) -> void:
 	_test_barter_beats_coin_under_scarcity(t)
 	_test_barter_scales_with_quantity(t)
 	_test_barter_tilt_reads_equivalence(t)
+	_test_wear_shows_in_three_places(t)
+	_test_wear_and_wet_do_not_erase_each_other(t)
+	_test_body_wear_reads_existing_numbers(t)
 
 # --- P7: fiyatın nedeni, sayısı değil ---
 
@@ -253,3 +256,66 @@ func _test_barter_tilt_reads_equivalence(t) -> void:
 	t.ok(scale.tilt_for(200, 100) > 0.0, "aldığın ağırsa kol o yana iner")
 	t.ok(scale.tilt_for(100, 200) < 0.0, "verdiğin ağırsa öbür yana")
 	scale.free()
+
+# --- P16: açlık ve yorgunluk bedende ---
+
+func _test_wear_shows_in_three_places(t) -> void:
+	# Tek bir sinyal bakışta aşınma değil, çizim hatası gibi okunuyor;
+	# bu yüzden duruş, adım ve renk birlikte değişiyor.
+	var figure := WalkFigure.new()
+	t.almost(figure.wear_hunch(), 0.0, "tok ve dinç figür dik durur")
+	t.almost(figure.wear_step(), 1.0, "adımı kısalmaz")
+	t.almost(figure.wear_bulk(), 1.0, "silueti incelmez")
+	t.almost(figure.wear_stoop(), 1.0, "boyu kısalmaz")
+	figure.set_wear(1.0, 1.0)
+	t.ok(figure.wear_hunch() > 0.0, "aç ve yorgun figürün omzu çöker")
+	t.ok(figure.wear_step() < 1.0, "adımı kısalır")
+	t.ok(figure.wear_bulk() < 1.0, "silueti incelir")
+	# Dördüncü sinyal, ekran görüntüsünden sonra eklendi: render edilmiş
+	# figürde kareler sabit olduğu için adım kısalması oraya inmiyor,
+	# duruşun tek başına konuşması gerekiyordu.
+	t.ok(figure.wear_stoop() < 1.0, "dikilmeyen insan kısalır")
+	t.eq(figure.get_wear(), Vector2(1.0, 1.0), "okunan değer yazılanla aynı")
+	# Uyku kiloyu geri almaz: incelme yalnız açlıktan.
+	var tired := WalkFigure.new()
+	tired.set_wear(0.0, 1.0)
+	t.almost(tired.wear_bulk(), 1.0, "yorgunluk tek başına inceltmez")
+	t.ok(tired.wear_stoop() < 1.0, "ama yorgunluk da çökertir")
+	t.ok(tired.wear_step() < 1.0, "yorgunluk adımı kısaltır")
+	# Aç bir insan yine de yürür, yorgun bir insan sürüklenir.
+	var starving := WalkFigure.new()
+	starving.set_wear(1.0, 0.0)
+	t.ok(starving.wear_step() > tired.wear_step(), "yorgunluk adımı açlıktan çok kısaltır")
+	figure.free()
+	tired.free()
+	starving.free()
+
+func _test_wear_and_wet_do_not_erase_each_other(t) -> void:
+	# İkisi de bütün figürü kapsayan tek çarpandan geçiyor; biri öbürünü
+	# sıfırlarsa yağmurda aç bir kervan tok görünür.
+	var dry_fed := ArtDraw.worn_tint(ArtDraw.wet_tint(Color.WHITE, 0.0), 0.0, 0.0)
+	var wet_fed := ArtDraw.worn_tint(ArtDraw.wet_tint(Color.WHITE, 1.0), 0.0, 0.0)
+	var wet_starving := ArtDraw.worn_tint(ArtDraw.wet_tint(Color.WHITE, 1.0), 1.0, 1.0)
+	t.ok(wet_fed.v < dry_fed.v, "ıslak figür koyulaşır")
+	t.ok(wet_starving.v < wet_fed.v, "aç ve ıslak figür daha da soluk")
+	t.ok(wet_starving.r < wet_fed.r, "açlık kırmızıyı çeker")
+	var figure := WalkFigure.new()
+	figure.set_weather_coat(0.8, 0.0)
+	var only_wet: Color = figure.self_modulate
+	figure.set_wear(1.0, 1.0)
+	t.ne(figure.self_modulate, only_wet, "aşınma ıslaklığın üstüne biniyor")
+	figure.set_weather_coat(0.0, 0.0)
+	t.ne(figure.self_modulate, Color.WHITE, "ıslaklık silinince aşınma kalıyor")
+	figure.free()
+
+func _test_body_wear_reads_existing_numbers(t) -> void:
+	# Yeni durum tutulmuyor: çizim mekaniğin üstüne bir katman, yanına
+	# ikinci bir hakikat değil.
+	var session := _session_at(WorldMapData.get_locations()[0].location_id, 1)
+	t.almost(session.body_hunger(), 0.0, "yola çıkan kervan aç değil")
+	t.almost(session.body_fatigue(), 0.0, "ve dinç")
+	session.crew_hungry_nights = int(GameSession.WEAR_HUNGER_DAYS) + 2
+	t.almost(session.body_hunger(), 1.0, "uzun açlık tavana oturur")
+	session.change_party_fatigue(CharacterData.MAX_FATIGUE)
+	t.almost(session.body_fatigue(), 1.0, "tükenmiş parti tavanda")
+	t.le(session.body_hunger(), 1.0, "okuma 0-1 arasında kalır")

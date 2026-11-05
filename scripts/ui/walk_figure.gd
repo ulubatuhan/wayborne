@@ -646,6 +646,11 @@ const SHEEN_ALPHA: float = 0.42
 
 var _wet: float = 0.0
 var _snow: float = 0.0
+## Aşınma (P16): açlık ve yorgunluk. Islaklık gibi saf bir görünüş değeri -
+## mekanik etkisi yok, mekaniği `Caravan` ve `Temperature` tutuyor. Bedende
+## görünmesinin sebebi Kollwitz dersi: **kıtlığın yeri bedendir, çubuk değil.**
+var _hunger: float = 0.0
+var _fatigue: float = 0.0
 var _coat_seed: int = 0
 
 ## Üstündeki su ve kar payı (0..1). `RoadCaravan` her karede veriyor.
@@ -656,11 +661,66 @@ func set_weather_coat(wet: float, snow: float) -> void:
 		return
 	_wet = w
 	_snow = s
-	# Islak kumaş koyulaşır: bütün çizimi kapsayan tek yer burası.
-	# `self_modulate`, `modulate` değil - çocuk düğümler (durum efektleri,
-	# baloncuk) ıslanmamalı.
-	self_modulate = ArtDraw.wet_tint(Color.WHITE, _wet)
+	_apply_body_tint()
 	queue_redraw()
+
+## Açlık ve yorgunluk (P16): ıslaklık ve kar için yaptığımızın (Y-G25)
+## karşılığı. Üç yerden konuşuyor - **çöken omuz** (öne eğilme),
+## **kısalan adım** (yürüyüşün genliği) ve **soluklaşan ten** (renk) -
+## çünkü tek bir sinyal bakışta aşınma değil, çizim hatası gibi okunuyor.
+func set_wear(hunger: float, fatigue: float) -> void:
+	var h := clampf(hunger, 0.0, 1.0)
+	var f := clampf(fatigue, 0.0, 1.0)
+	if is_equal_approx(h, _hunger) and is_equal_approx(f, _fatigue):
+		return
+	_hunger = h
+	_fatigue = f
+	_apply_body_tint()
+	queue_redraw()
+
+func get_wear() -> Vector2:
+	return Vector2(_hunger, _fatigue)
+
+## Islaklık ve aşınma aynı çarpandan geçiyor: biri öbürünü silmemeli,
+## bu yüzden ikisi de doğrudan `self_modulate`'e yazmıyor.
+## `self_modulate`, `modulate` değil - çocuk düğümler (durum efektleri,
+## baloncuk) ıslanmamalı ve açlıktan solmamalı.
+func _apply_body_tint() -> void:
+	self_modulate = ArtDraw.worn_tint(
+		ArtDraw.wet_tint(Color.WHITE, _wet), _hunger, _fatigue
+	)
+
+## Aşınmanın duruşa ve adıma etkisi. Saf: test aynı sayıyı okur.
+##
+## Sayılar bir kez büyütüldü: ilk değerlerle (0.085 rad eğim, soluk bir
+## renk) dört hâl yan yana konduğunda **fark görünmüyordu** - görünmeyen
+## bir değişiklik hiçbir şey söylemez. Dördüncü sinyal (`wear_stoop`) de
+## o ekran görüntüsünden sonra eklendi: render edilmiş figürde kareler
+## sabit olduğu için adım kısalması oraya hiç inmiyor, o yüzden duruşun
+## tek başına konuşması gerekiyordu.
+const WEAR_HUNCH_RADIANS: float = 0.17
+const WEAR_STEP_LOSS: float = 0.30
+const WEAR_BULK_LOSS: float = 0.16
+const WEAR_STOOP_LOSS: float = 0.065
+
+## Açlık omzu çökertir, yorgunluk biraz daha. Dönen açı `_lean`'in üstüne
+## biner: tepe eğimi (rüzgâr, yokuş) ile aşınma toplanır.
+func wear_hunch() -> float:
+	return WEAR_HUNCH_RADIANS * (_hunger * 0.65 + _fatigue * 0.35)
+
+## Yorgun adım kısalır; açlık da kısaltır ama daha az - aç bir insan yine
+## de yürür, yorgun bir insan sürüklenir.
+func wear_step() -> float:
+	return 1.0 - WEAR_STEP_LOSS * (_fatigue * 0.7 + _hunger * 0.3)
+
+## Aç beden incelir. Yorgunluk inceltmez: uyku kiloyu almaz.
+func wear_bulk() -> float:
+	return 1.0 - WEAR_BULK_LOSS * _hunger
+
+## Çöken boy: aşınmış insan kısalır, çünkü dikilmiyor. Eğimle birlikte
+## render edilmiş figürde aşınmayı taşıyan iki sinyalden biri.
+func wear_stoop() -> float:
+	return 1.0 - WEAR_STOOP_LOSS * (_hunger * 0.5 + _fatigue * 0.5)
 
 func get_weather_coat() -> Vector2:
 	return Vector2(_wet, _snow)
@@ -760,11 +820,12 @@ func _draw_person(figure_h: float, ground_y: float, seated: bool) -> void:
 			return
 		_draw_person_frames(frames, figure_h * _scale, ground_y, seated)
 		return
-	var h := figure_h * _scale
+	var h := figure_h * _scale * wear_stoop()
 	var cx := size.x * 0.5 - _seat_back * _facing
-	var bulk: float = float(_archetype.get("bulk", 1.0))
+	var bulk: float = float(_archetype.get("bulk", 1.0)) * wear_bulk()
 	var joints := FigureRig.pose(
-		Vector2(cx, ground_y), h, _phase, _motion, _facing, _lean, seated, bulk
+		Vector2(cx, ground_y), h, _phase, _motion * wear_step(), _facing,
+		_lean + wear_hunch(), seated, bulk
 	)
 	var look := _person_colors()
 
@@ -856,7 +917,14 @@ func _draw_person_frames(frames: BodyFrames, h: float, ground_y: float, seated: 
 		frame = frames.frame_for_phase(clip, RIDE_REST_PHASE)
 	var k := frames.scale_for(h)
 	var origin := Vector2(size.x * 0.5 - _seat_back * _facing, ground_y)
-	var xf := Transform2D(_lean * _facing, Vector2(k * _facing, k), 0.0, origin)
+	# Aşınmanın omuz çökmesi render edilmiş figürde de var (P16): kareler
+	# sabit olduğu için adım kısalması buraya gelmiyor, eğim ve renk
+	# geliyor - eğim, çöken boy ve renk. İki yol arasında fark kalmasın
+	# diye `wear_hunch` ve `wear_stoop` ikisinde de aynı sayıdan geliyor.
+	var xf := Transform2D(
+		(_lean + wear_hunch()) * _facing,
+		Vector2(k * _facing, k * wear_stoop()), 0.0, origin
+	)
 	# İniş/biniş klibi kalçadan asılı: gölge yerde, ayak yere yaklaştıkça
 	# koyulaşıyor.
 	var hip_rooted := clip == _action_clip and TRANSITION_CLIPS.has(clip)

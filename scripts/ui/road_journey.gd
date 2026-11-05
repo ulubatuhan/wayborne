@@ -3016,6 +3016,9 @@ func _refresh_ground_fx(biome: String, climate: String) -> void:
 	if _caravan != null:
 		_caravan.set_ground_cover(_ground_cover)
 		_caravan.set_soaking(float(_soaking.get("wet", 0.0)), float(_soaking.get("snow", 0.0)))
+		# Açlık ve yorgunluk bedende (P16): çöken omuz, kısalan adım,
+		# soluklaşan ten. Şafakta okunuyor, çünkü ikisi de günlük sayılar.
+		_caravan.set_wear(_session.body_hunger(), _session.body_fatigue())
 		# Nefes buharı donmaya yaklaşınca beliriyor, soğukta her nefeste.
 		_caravan.set_breath_share(clampf(
 			(BREATH_FROM_C - Temperature.daily_mean(day, biome, climate, _weather))
