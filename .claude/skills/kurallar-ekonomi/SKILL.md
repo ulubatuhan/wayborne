@@ -7,7 +7,7 @@ description: Wayborne kural kitabının "Ekonomi, şehir, erzak ve borç" bölü
 
 CLAUDE.md'nin bu bölümleri 2026-10-30'da kullanıcı kararıyla buraya taşındı; metin değişmedi, başlıklar aynı. Koddaki
 "bkz. CLAUDE.md <başlık>" başvuruları buraya bakar. Kural becerilerinin listesi CLAUDE.md'de ("Kural becerileri").
-Bölümler: Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
+Bölümler: Barter Rules, Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
 
 ### City Hub Rules
 
@@ -658,6 +658,33 @@ The resulting range on a 135 list price (base 100, greed 0.5, rep 0.3):
 accept pays 135, a won push pays 115-135 by skill, a lost push pays 149 plus
 1 reputation, walking out pays nothing and costs 1. A master talker (Charisma
 maxed, trusted) pays 85 against a list of 100 - it was 68 in the old design.
+
+### Barter Rules
+
+Barter (P6) is a **payment method for a purchase**, not a separate screen.
+`MarketScale.set_barter` puts your goods on the right pan where the coins
+would be, so the arm reads **equivalence** rather than price - the visual
+language was already there, and no new screen was needed.
+
+- `MarketPricing.barter_value(sell_price, quantity, scarcity)` is the whole
+  rule: what you hand over counts for more than the cash sale would pay
+  (`BARTER_BONUS_BASE` 10%) and the gap widens with scarcity
+  (`BARTER_BONUS_PER_SCARCITY` 45%). In a hungry region, turning grain into
+  coin and the coin into goods is clearly the worse move.
+- **Nothing was cut.** The purse stays, and taxes, tolls and the physician
+  still want gold. The statement is not "delete gold", it is **"gold is a
+  poor medium of exchange"** - scarcity's most concrete expression, said
+  without removing a system.
+- A barter still goes through `record_sale`, so the city's mood, the ledger
+  and the price pressure all see it - but it draws nothing from the city
+  treasury, because no gold changed hands.
+- `MODE_BARTER` keeps the basket: "Takas" and "Altınla Öde" toggle the
+  payment, they do not reset the purchase. The block list drops gold and
+  treasury entirely and keeps only equivalence and cargo room, where the
+  weight check is the **delta** (what comes in minus what goes out) - the
+  whole point of a barter is that it frees space.
+- Under `Scarcity.HUNGRY_CITY_FROM` the slip says so in a sentence. The
+  player has to feel the devaluation, not derive it from two numbers.
 
 ### Price Mark Rules
 

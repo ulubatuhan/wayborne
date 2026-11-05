@@ -85,3 +85,20 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
     derecesiyle kademeli olarak. Sıfırlanmıyor: yol büsbütün susmuyor, yalnız üç gün üst üste susabiliyor.
   - `chance_multiplier(context)` artık bağlamı okuyor; bağlamsız çağrı eski davranışı koruyor.
   - **Kabul:** `tests/test_trade_focus.gd` (8 test; P7, P14 ve P17 birlikte).
+
+- [x] **P06 Takas**
+  - Yeni ekran yok: `MarketScale`'in sağ kefesi takasta sikke yerine **senin verdiğin malı** taşıyor
+    (`set_barter`). Fiyat değil **denklik** okunuyor; görsel dil buna zaten hazırdı.
+  - `MODE_BARTER` alışın bir ödeme biçimi: sepet yerinde kalırken "Takas" / "Altınla Öde" arasında gidip
+    geliniyor. Kargodan bir mala tıklamak onu sağ kefeye koyar, tekrar tıklamak bir tane daha ekler.
+  - **Kuralın özü** `MarketPricing.barter_value`: verdiğin mal nakit sattığından çok eder
+    (`BARTER_BONUS_BASE` %10), ve fark kıtlıkla büyür (`BARTER_BONUS_PER_SCARCITY` %45). Yani aç bir bölgede
+    buğdayı sikkeye çevirip sikkeyle mal almak açık ara kötü bir hamle.
+  - **Hiçbir sistem kesilmedi** (derinleşme, asla sadeleştirme): kese duruyor, vergi, geçiş ücreti ve hekim
+    hâlâ altın istiyor. Söylenen şey "altını sil" değil, **"altın kötü bir takas aracı"**.
+  - Takas da bir satıştır: `record_sale` çağrılıyor (şehrin hâli, defter, baskı), ama hazineden altın
+    çekmiyor - altın el değiştirmiyor.
+  - Ekranda kıtlıkta ayrı bir cümle: *"Burada sikke az şey ediyor: mal mala değişince malın daha çok
+    sayılıyor."* Oyuncu farkı sayıdan değil cümleden anlamalı.
+  - **Kabul:** `tests/test_trade_focus.gd`'ye üç test, `tests/screenshot_barter.gd` iki kare
+    (altınla / takas).

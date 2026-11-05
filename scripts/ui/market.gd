@@ -49,6 +49,10 @@ void fragment() {
 const MODE_NONE: String = ""
 const MODE_BUY: String = "buy"
 const MODE_SELL: String = "sell"
+## Takas (P6): alınacak mal sol kefede, verilecek mal sağ kefede. Ayrı bir
+## kip, çünkü aynı anda hem kargodan seçiyorsun hem tezgâhtan - "al" da
+## "sat" da bu akışı anlatmıyor.
+const MODE_BARTER: String = "barter"
 
 var _session: GameSession
 var _current_location: Location
@@ -59,6 +63,8 @@ var _shop_rows: Array[Dictionary] = []
 var _basket: Array[Dictionary] = []
 var _active_id: String = ""
 var _mode: String = MODE_NONE
+## Takasta verilecek mallar: [{item: Item, quantity: int}].
+var _offer: Array[Dictionary] = []
 var _sell_item: Item
 var _sell_quantity: int = 0
 var _haggling_active: bool = false
@@ -77,6 +83,7 @@ var _reason_label: Label
 var _message_label: Label
 var _primary_button: Button
 var _haggle_button: Button
+var _barter_button: Button
 var _cancel_button: Button
 var _button_row: HBoxContainer
 var _haggle_holder: VBoxContainer
@@ -323,6 +330,7 @@ func _build_centre() -> Control:
 	_primary_button = _wide_button("UI_MARKET_BUY", _on_primary_pressed)
 	_primary_button.theme_type_variation = WaybookTheme.PRIMARY_BUTTON
 	_haggle_button = _wide_button("UI_MARKET_HAGGLE", _on_haggle_pressed)
+	_barter_button = _wide_button("UI_MARKET_BARTER", _on_barter_pressed)
 	_cancel_button = _wide_button("UI_MARKET_CANCEL", _on_cancel_pressed)
 	_haggle_holder = VBoxContainer.new()
 	_haggle_holder.add_theme_constant_override("separation", 6)
@@ -551,7 +559,9 @@ func _cargo_cell(item: Item, quantity: int) -> Control:
 		return cell
 	cell.tooltip_text = "%s ×%d" % [item.item_name, quantity]
 	cell.toggle_mode = true
-	cell.set_pressed_no_signal(_mode == MODE_SELL and _sell_item == item)
+	cell.set_pressed_no_signal(
+		(_mode == MODE_SELL and _sell_item == item) or _offer_has(item.item_id)
+	)
 	cell.disabled = _haggling_active
 	cell.pressed.connect(_on_cargo_pressed.bind(item))
 	var col := VBoxContainer.new()
@@ -583,6 +593,21 @@ func _refresh_selection() -> void:
 		if active != null:
 			_reason_label.text = _reason_for(active)
 		_primary_button.text = tr("UI_MARKET_BUY")
+	elif _mode == MODE_BARTER:
+		for entry in _basket:
+			_line_box.add_child(_line_row(entry.item, int(entry.quantity), false))
+		_line_box.add_child(_total_row(tr("UI_MARKET_BARTER_WANT") % _basket_total_price()))
+		for entry in _offer:
+			_line_box.add_child(_line_row(entry.item, int(entry.quantity), true))
+		_line_box.add_child(_total_row(tr("UI_MARKET_BARTER_GIVE") % _offer_value()))
+		# Kıtlıkta takasın payı büyüyor; oyuncu bunu sayıdan değil
+		# cümleden anlamalı, yoksa "neden 9 değil de 13?" sorusu kalır.
+		_reason_label.text = tr(
+			"UI_MARKET_BARTER_HINT_SCARCE"
+			if _session.scarcity_here() >= Scarcity.HUNGRY_CITY_FROM
+			else "UI_MARKET_BARTER_HINT"
+		)
+		_primary_button.text = tr("UI_MARKET_BARTER_DO")
 	elif _mode == MODE_SELL and _sell_item != null:
 		_line_box.add_child(_line_row(_sell_item, _sell_quantity, true))
 		_line_box.add_child(_total_row(tr("UI_MARKET_TOTAL_GET") % (_get_sell_price(_sell_item) * _sell_quantity)))
@@ -596,8 +621,12 @@ func _refresh_selection() -> void:
 	var has := _mode != MODE_NONE
 	_button_row.visible = not _haggling_active
 	_primary_button.disabled = not has or not _primary_block().is_empty()
-	_haggle_button.visible = _mode != MODE_SELL
+	_haggle_button.visible = _mode == MODE_NONE or _mode == MODE_BUY
 	_haggle_button.disabled = _mode != MODE_BUY or not _primary_block().is_empty()
+	# Takas yalnız alışın ödeme biçimi: satarken ya da pazarlık açıkken yok.
+	_barter_button.visible = _mode == MODE_BUY or _mode == MODE_BARTER
+	_barter_button.disabled = _basket.is_empty()
+	_barter_button.text = tr("UI_MARKET_BARTER_BACK" if _mode == MODE_BARTER else "UI_MARKET_BARTER")
 	_cancel_button.disabled = not has
 	var block := _primary_block()
 	if has and not block.is_empty():
@@ -680,6 +709,15 @@ func _refresh_scale() -> void:
 		entries.append({"texture": _item_texture(_sell_item), "quantity": _sell_quantity})
 		value = _best_known_sell_price(_sell_item) * _sell_quantity
 		gold = _get_sell_price(_sell_item) * _sell_quantity
+	elif _mode == MODE_BARTER:
+		# Takasta iki kefede de mal var: fiyat değil **denklik** okunuyor.
+		var offer_entries: Array[Dictionary] = []
+		for entry in _offer:
+			offer_entries.append({"texture": _item_texture(entry.item), "quantity": int(entry.quantity)})
+		for entry in _basket:
+			entries.append({"texture": _item_texture(entry.item), "quantity": int(entry.quantity)})
+		_scale.set_barter(entries, offer_entries, _basket_total_price(), _offer_value())
+		return
 	_scale.set_basket(entries, gold, value)
 
 func _item_texture(item: Item) -> Texture2D:
@@ -705,7 +743,29 @@ func _row_block_text(item: Item) -> String:
 
 func _on_cargo_pressed(item: Item) -> void:
 	_clear_message()
+	if _mode == MODE_BARTER:
+		_offer_more(item)
+		return
 	_select_sell(item)
+
+## Takasta kargoya tıklamak malı sağ kefeye koyar; aynı mala tekrar tıklamak
+## bir tane daha ekler, elindeki bitince başa döner (sıfırlar).
+func _offer_more(item: Item) -> void:
+	var held := _session.get_total_quantity(item.item_id)
+	if held <= 0:
+		return
+	for i in _offer.size():
+		if String(_offer[i].item.item_id) != item.item_id:
+			continue
+		var wanted := int(_offer[i].quantity) + 1
+		if wanted > held:
+			_offer.remove_at(i)
+		else:
+			_offer[i].quantity = wanted
+		_refresh_all()
+		return
+	_offer.append({"item": item, "quantity": 1})
+	_refresh_all()
 
 func _select_buy(item: Item) -> void:
 	if _mode != MODE_BUY:
@@ -761,6 +821,7 @@ func _change_quantity(delta: int) -> void:
 
 func _reset_selection() -> void:
 	_basket.clear()
+	_offer.clear()
 	_active_id = ""
 	_sell_item = null
 	_sell_quantity = 0
@@ -770,6 +831,12 @@ func _on_cancel_pressed() -> void:
 	_reset_selection()
 	_clear_message()
 	_refresh_all()
+
+func _offer_has(item_id: String) -> bool:
+	for entry in _offer:
+		if String(entry.item.item_id) == item_id:
+			return true
+	return false
 
 func _basket_has(item_id: String) -> bool:
 	for entry in _basket:
@@ -790,6 +857,26 @@ func _basket_total_price() -> int:
 		total += MarketPricing.bulk_total(_get_buy_price(entry.item), int(entry.quantity))
 	return total
 
+## Sağ kefedeki malın takastaki karşılığı (bkz. MarketPricing.barter_value):
+## nakit satıştan fazla eder ve fark kıtlıkla büyür.
+func _offer_value() -> int:
+	var total := 0
+	for entry in _offer:
+		total += MarketPricing.barter_value(
+			_get_sell_price(entry.item), int(entry.quantity), _session.scarcity_here()
+		)
+	return total
+
+## Takastan sonra kervanın yükü ne olur: verilen mal çıkar, alınan girer.
+func _barter_weight_delta() -> float:
+	var gained := _basket_weight()
+	var given := 0.0
+	for entry in _offer:
+		var item: Item = entry.item
+		if item.item_id != GameSession.PROVISIONS_ITEM_ID:
+			given += item.unit_weight * float(entry.quantity)
+	return gained - given
+
 func _basket_weight() -> float:
 	var total := 0.0
 	for entry in _basket:
@@ -809,6 +896,23 @@ func _primary_block() -> String:
 			return tr("UI_MARKET_NO_ROOM_WEIGHT") % [_basket_weight(), _session.get_cargo_space_remaining()]
 		if not _session.wallet.can_afford(_basket_total_price()):
 			return tr("UI_MARKET_NEED_GOLD") % _basket_total_price()
+	elif _mode == MODE_BARTER:
+		for entry in _basket:
+			if not _has_enough_stock(entry.item, int(entry.quantity)):
+				return tr("UI_MARKET_BASKET_STOCK_SHORT")
+		for entry in _offer:
+			var reason_offer := MarketPricing.sell_block_reason(entry.item, _current_location)
+			if not reason_offer.is_empty():
+				return tr(reason_offer)
+		if _offer.is_empty():
+			return tr("UI_MARKET_BARTER_NEED_OFFER")
+		# Takasta altın yok, hazine yok: yalnız denklik ve yer.
+		if _offer_value() < _basket_total_price():
+			return tr("UI_MARKET_BARTER_SHORT") % [_offer_value(), _basket_total_price()]
+		if _barter_weight_delta() > _session.get_cargo_space_remaining() + 0.001:
+			return tr("UI_MARKET_NO_ROOM_WEIGHT") % [
+				_barter_weight_delta(), _session.get_cargo_space_remaining()
+			]
 	elif _mode == MODE_SELL and _sell_item != null:
 		var reason := MarketPricing.sell_block_reason(_sell_item, _current_location)
 		if not reason.is_empty():
@@ -827,6 +931,8 @@ func _on_primary_pressed() -> void:
 		return
 	if _mode == MODE_BUY:
 		_buy_basket()
+	elif _mode == MODE_BARTER:
+		_do_barter()
 	elif _mode == MODE_SELL:
 		_sell_selected()
 
@@ -866,6 +972,52 @@ func _sell_selected() -> void:
 	_session.record_sale(item.item_id, quantity, total_price)
 	_reset_selection()
 	_show_message_soft(tr("UI_MARKET_SOLD") % [quantity, item.item_name, total_price])
+	_refresh_all()
+
+## Alıştan takasa geçer: kefedeki mal yerinde kalır, ödeme biçimi değişir.
+## Tekrar basmak alışa döner - sepeti kaybetmeden.
+func _on_barter_pressed() -> void:
+	if _haggling_active:
+		return
+	if _mode == MODE_BARTER:
+		_mode = MODE_BUY
+		_offer.clear()
+	elif _mode == MODE_BUY and not _basket.is_empty():
+		_mode = MODE_BARTER
+	_refresh_all()
+
+## Mal mala: verilen kargodan düşer, alınan kargoya girer, kese hiç
+## açılmaz. Üstte kalan değer tüccara bağış değil - oyuncu neyi vereceğini
+## kendisi seçtiği için fazlası da kendi kararı.
+func _do_barter() -> void:
+	# Önce ver, sonra al: yer açılsın (takasın bütün anlamı bu).
+	var given: Array[Dictionary] = []
+	for entry in _offer:
+		var item: Item = entry.item
+		var quantity := int(entry.quantity)
+		if _session.get_total_quantity(item.item_id) < quantity:
+			_show_message(tr("UI_MARKET_NOT_ENOUGH_ITEM") % item.item_name)
+			return
+		given.append({"item": item, "quantity": quantity})
+	for entry in given:
+		_session.remove_from_cargo_or_bags(String(entry.item.item_id), int(entry.quantity))
+		# Takas da bir satıştır: şehrin hâli, defteri ve baskısı bunu görür.
+		# Hazineden altın çekmiyor, çünkü altın el değiştirmiyor.
+		_session.record_sale(String(entry.item.item_id), int(entry.quantity), 0)
+	var taken := 0
+	for entry in _basket:
+		var item: Item = entry.item
+		var quantity := int(entry.quantity)
+		if not _session.add_to_cargo(item, quantity):
+			_show_message(tr("UI_MARKET_NO_ROOM"))
+			break
+		_session.consume_stock(item.item_id, quantity, 0)
+		taken += quantity
+	_reset_selection()
+	if taken > 0:
+		AudioManager.play_sfx(AudioManager.SFX_UI_COIN)
+		if _message_label.text.is_empty():
+			_show_message_soft(tr("UI_MARKET_BARTERED") % taken)
 	_refresh_all()
 
 ## Kefeyi tek bir toplam anlaşma olarak pazarlığa açar: kazanılan fiyat

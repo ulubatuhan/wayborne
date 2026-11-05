@@ -16,6 +16,9 @@ func run(t) -> void:
 	_test_profiteering_sale_is_remembered(t)
 	_test_quiet_days_are_allowed_under_scarcity(t)
 	_test_quiet_ramp_is_unchanged_when_fed(t)
+	_test_barter_beats_coin_under_scarcity(t)
+	_test_barter_scales_with_quantity(t)
+	_test_barter_tilt_reads_equivalence(t)
 
 # --- P7: fiyatın nedeni, sayısı değil ---
 
@@ -115,7 +118,7 @@ func _test_ordinary_sale_is_not_remembered(t) -> void:
 	var place := WorldMapData.get_locations()[0]
 	var session := _session_at(place.location_id, 1)
 	var before := _trade_lines(session)
-	session.record_sale("bolt_of_cloth", 10, 100)
+	session.record_sale("test_cloth", 10, 100)
 	t.eq(_trade_lines(session), before, "sıradan satış deftere girmez")
 
 func _test_mercy_sale_is_remembered(t) -> void:
@@ -153,10 +156,10 @@ func _test_profiteering_sale_is_remembered(t) -> void:
 	# fiyattan satmak". Dünyanın o gün kendiliğinden bir krizi olmasını
 	# beklemek testi sessizce atlanır hâle getirirdi.
 	session.plague._infect(place.location_id, 0.4)
-	session.market.add_shock(place.location_id, "medicine", 2.0, 30)
-	t.ok(session.is_profiteering_sale("medicine"), "kurulan kriz vurgun sayılır")
+	session.market.add_shock(place.location_id, MarketConditions.MEDICINE_ITEM, 2.0, 30)
+	t.ok(session.is_profiteering_sale(MarketConditions.MEDICINE_ITEM), "kurulan kriz vurgun sayılır")
 	var standing_before := session.standing.region(place.region)
-	session.record_sale("medicine", 5, 500)
+	session.record_sale(MarketConditions.MEDICINE_ITEM, 5, 500)
 	t.eq(_trade_lines(session), 1, "vurgun deftere girer")
 	t.ok(
 		session.standing.region(place.region) < standing_before,
@@ -213,3 +216,40 @@ func _test_quiet_ramp_is_unchanged_when_fed(t) -> void:
 		1.0 + RoadDirector.QUIET_RAMP * 2.0,
 		"bolluk rampası değişmedi"
 	)
+
+# --- P6: takas ---
+
+func _test_barter_beats_coin_under_scarcity(t) -> void:
+	# Asıl iddia: aç bir bölgede malı sikkeye çevirip sikkeyle mal almak
+	# kötü bir hamle. Altının değersizleşmesi kıtlığın en somut ifadesi -
+	# ve hiçbir sistem kesilmeden söyleniyor: kese duruyor, vergi ve geçiş
+	# ücreti hâlâ altın istiyor.
+	var cash := 100
+	var plenty := MarketPricing.barter_value(cash, 1, 0.0)
+	var hunger := MarketPricing.barter_value(cash, 1, 1.0)
+	t.ge(float(plenty), float(cash), "takas bollukta bile nakitten aşağı değil")
+	t.ok(hunger > plenty, "kıtlık takasın payını büyütür")
+	t.almost(
+		float(hunger),
+		float(cash) * (1.0 + MarketPricing.BARTER_BONUS_BASE + MarketPricing.BARTER_BONUS_PER_SCARCITY),
+		"en ağır kıtlıkta pay taban + kıtlık payı"
+	)
+
+func _test_barter_scales_with_quantity(t) -> void:
+	t.eq(
+		MarketPricing.barter_value(50, 4, 0.5),
+		MarketPricing.barter_value(200, 1, 0.5),
+		"takas değeri adetle doğrusal"
+	)
+	t.eq(MarketPricing.barter_value(0, 10, 0.5), 0, "değersiz malın takası da değersiz")
+	t.eq(MarketPricing.barter_value(50, 0, 0.5), 0, "hiç vermemek hiçbir şey etmez")
+	t.ge(float(MarketPricing.barter_value(-5, 3, 0.5)), 0.0, "eksi fiyat eksi karşılık vermez")
+
+func _test_barter_tilt_reads_equivalence(t) -> void:
+	# Terazi takasta fiyatı değil denkliği gösteriyor: iki kefe eşitse kol
+	# düz. (Görsel dil zaten buna hazırdı - yeni ekran gerekmedi.)
+	var scale := MarketScale.new()
+	t.almost(scale.tilt_for(100, 100), 0.0, "denk takasta kol düz")
+	t.ok(scale.tilt_for(200, 100) > 0.0, "aldığın ağırsa kol o yana iner")
+	t.ok(scale.tilt_for(100, 200) < 0.0, "verdiğin ağırsa öbür yana")
+	scale.free()

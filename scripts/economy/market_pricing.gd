@@ -24,6 +24,26 @@ const RARE_SELL_MULTIPLIER: float = 1.6
 const BULK_MIN_QUANTITY: int = 20
 const BULK_DISCOUNT: float = 0.06
 
+## Takas (P6, kullanıcı kararı 2026-11-05): mal mala değişince senin malın,
+## nakit sattığından **daha çok** eder - ve fark kıtlıkla büyür.
+##
+## Neden böyle kuruldu: altının değersizleşmesi kıtlığın en somut ifadesi.
+## Bunu "altını sil" diye değil, "altın kötü bir takas aracı" diye söylemek
+## hiçbir sistemi kesmiyor (derinleşme, asla sadeleştirme): kese duruyor,
+## vergi, geçiş ücreti ve hekim hâlâ altın istiyor, ama aç bir bölgede
+## buğdayı sikkeye çevirip sikkeyle mal almak açık ara kötü bir hamle.
+##
+## Ve oyuncuyu "en kârlısı hangisi" yerine **"neyden vazgeçebilirim"**
+## sorusuna taşıyor: teraziye koyduğun şey kervanın kendi yükü.
+const BARTER_BONUS_BASE: float = 0.10
+const BARTER_BONUS_PER_SCARCITY: float = 0.45
+
+## Verdiğin malın takastaki değeri. `sell_price` o malın bu şehirdeki nakit
+## satış fiyatı; dönen sayı tüccarın takasta saydığı karşılık.
+static func barter_value(sell_price: int, quantity: int, scarcity: float) -> int:
+	var bonus := BARTER_BONUS_BASE + BARTER_BONUS_PER_SCARCITY * clampf(scarcity, 0.0, 1.0)
+	return maxi(0, int(round(float(maxi(0, sell_price) * maxi(0, quantity)) * (1.0 + bonus))))
+
 static func bulk_total(unit_price: int, quantity: int) -> int:
 	var total := unit_price * quantity
 	if quantity >= BULK_MIN_QUANTITY:

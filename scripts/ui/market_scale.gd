@@ -29,6 +29,11 @@ const COIN: Color = Color(0.93, 0.74, 0.30)
 
 ## [{texture: Texture2D, quantity: int}] ve altın; set_basket doldurur.
 var _entries: Array[Dictionary] = []
+## Takasta (P6) sağ kefede altın değil **senin verdiğin mal** durur. Boşsa
+## kefe eskisi gibi sikke çizer; yani takas çizime yeni bir terazi değil,
+## var olan kefeye ikinci bir içerik ekliyor.
+var _offer: Array[Dictionary] = []
+var _offer_born: Array[float] = []
 var _gold: int = 0
 var _goods_value: int = 0
 var _tilt: float = 0.0
@@ -140,6 +145,33 @@ func set_basket(entries: Array[Dictionary], gold: int, goods_value: int) -> void
 	set_process(true)
 	queue_redraw()
 
+## Takas kefesi (P6): sol kefede aldığın mal, sağ kefede verdiğin mal.
+## Fiyat yok, **denklik** var - kolun eğimi zaten değeri gösteriyor.
+func set_barter(
+	entries: Array[Dictionary], offer: Array[Dictionary], want_value: int, offer_value: int
+) -> void:
+	_offer = offer
+	var offer_quantities: Array[int] = []
+	for entry in offer:
+		offer_quantities.append(int(entry.get("quantity", 0)))
+	var offer_shares := item_shares(offer_quantities)
+	var wanted_offer := 0
+	for s in offer_shares:
+		wanted_offer += s
+	if offer.is_empty():
+		wanted_offer = 0
+	_grow(_offer_born, wanted_offer)
+	set_basket(entries, 0, want_value)
+	# set_basket eğimi alış/altın farkına kurar; takasta fark iki malın
+	# arasında.
+	_gold = 0
+	_target_tilt = tilt_for(want_value, offer_value)
+	_grow(_coin_born, 0)
+	if _reduced():
+		_tilt = _target_tilt * MAX_TILT
+		_tilt_velocity = 0.0
+	queue_redraw()
+
 func _grow(born: Array[float], wanted: int) -> void:
 	while born.size() < wanted:
 		born.append(-1000.0 if _reduced() else _clock)
@@ -156,7 +188,7 @@ func _process(delta: float) -> void:
 	_tilt_velocity = step.y
 	var settled := absf(_tilt - _target_tilt * MAX_TILT) < 0.001 and absf(_tilt_velocity) < 0.002
 	var dropping := false
-	for born in _item_born + _coin_born:
+	for born in _item_born + _coin_born + _offer_born:
 		if _clock - born < DROP_SECONDS:
 			dropping = true
 			break
@@ -172,6 +204,8 @@ func settle_now() -> void:
 		_item_born[i] = -1000.0
 	for i in _coin_born.size():
 		_coin_born[i] = -1000.0
+	for i in _offer_born.size():
+		_offer_born[i] = -1000.0
 	queue_redraw()
 
 func get_tilt() -> float:
@@ -220,14 +254,19 @@ func _draw_sprite_pan(pan: Texture2D, hook: Vector2, k: float, goods: bool) -> v
 	var floor_at := origin + MarketScaleArt.PAN_FLOOR * k
 	var radius := MarketScaleArt.PAN_RADIUS * k
 	if goods:
-		_draw_goods_at(floor_at, radius, radius * 0.5)
+		_draw_goods_at(floor_at, radius, radius * 0.5, _entries, _item_born)
+	elif not _offer.is_empty():
+		_draw_goods_at(floor_at, radius, radius * 0.5, _offer, _offer_born)
 	else:
 		_draw_coins_at(floor_at, radius, k)
 	draw_texture_rect(pan, Rect2(origin, Vector2(pan.get_size()) * k), false)
 
-func _draw_goods_at(floor_at: Vector2, radius: float, item: float) -> void:
+func _draw_goods_at(
+	floor_at: Vector2, radius: float, item: float,
+	entries: Array[Dictionary], born_at: Array[float]
+) -> void:
 	var quantities: Array[int] = []
-	for entry in _entries:
+	for entry in entries:
 		quantities.append(int(entry.get("quantity", 0)))
 	var shares := item_shares(quantities)
 	var total_shown := 0
@@ -235,12 +274,12 @@ func _draw_goods_at(floor_at: Vector2, radius: float, item: float) -> void:
 		total_shown += s
 	var spots := pyramid(total_shown, item * 0.92)
 	var index := 0
-	for e in _entries.size():
-		var tex: Texture2D = _entries[e].get("texture")
+	for e in entries.size():
+		var tex: Texture2D = entries[e].get("texture")
 		for _k in shares[e]:
 			if index >= spots.size() or tex == null:
 				break
-			var age := _clock - (_item_born[index] if index < _item_born.size() else -1000.0)
+			var age := _clock - (born_at[index] if index < born_at.size() else -1000.0)
 			var at := floor_at + spots[index] + Vector2(0.0, -item * 0.42 + drop_offset(age) * item / ITEM_SIZE)
 			draw_texture_rect(tex, Rect2(at - Vector2(item, item) * 0.5, Vector2(item, item)), false)
 			index += 1
@@ -299,7 +338,9 @@ func _draw_pan(anchor: Vector2, hang: float, goods: bool) -> void:
 	draw_circle(anchor, 5.0, BRASS)
 	# Kefenin içi: parçalar kefenin ÖN kenarının arkasında kalsın diye önce parçalar, sonra ön kenar.
 	if goods:
-		_draw_goods(centre, radius)
+		_draw_goods(centre, radius, _entries, _item_born)
+	elif not _offer.is_empty():
+		_draw_goods(centre, radius, _offer, _offer_born)
 	else:
 		_draw_coins(centre, radius)
 	var bowl := PackedVector2Array()
@@ -310,9 +351,12 @@ func _draw_pan(anchor: Vector2, hang: float, goods: bool) -> void:
 	draw_polyline(bowl, INK, 2.5)
 	draw_line(centre + Vector2(-radius, 0), centre + Vector2(radius, 0), INK, 2.0)
 
-func _draw_goods(centre: Vector2, radius: float) -> void:
+func _draw_goods(
+	centre: Vector2, radius: float,
+	entries: Array[Dictionary], born_at: Array[float]
+) -> void:
 	var quantities: Array[int] = []
-	for entry in _entries:
+	for entry in entries:
 		quantities.append(int(entry.get("quantity", 0)))
 	var shares := item_shares(quantities)
 	var total_shown := 0
@@ -320,12 +364,12 @@ func _draw_goods(centre: Vector2, radius: float) -> void:
 		total_shown += s
 	var spots := pyramid(total_shown, ITEM_SIZE * 0.92)
 	var index := 0
-	for e in _entries.size():
-		var tex: Texture2D = _entries[e].get("texture")
+	for e in entries.size():
+		var tex: Texture2D = entries[e].get("texture")
 		for _k in shares[e]:
 			if index >= spots.size() or tex == null:
 				break
-			var age := _clock - (_item_born[index] if index < _item_born.size() else -1000.0)
+			var age := _clock - (born_at[index] if index < born_at.size() else -1000.0)
 			var at := centre + spots[index] + Vector2(0.0, -ITEM_SIZE * 0.45 + drop_offset(age))
 			draw_texture_rect(tex, Rect2(at - Vector2(ITEM_SIZE, ITEM_SIZE) * 0.5, Vector2(ITEM_SIZE, ITEM_SIZE)), false)
 			index += 1
