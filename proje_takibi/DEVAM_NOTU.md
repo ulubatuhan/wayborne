@@ -131,3 +131,24 @@ Kullanıcı N34'ü geri alırsa satın alma tek düğmeyle açılır.
 **Testler:** 31990 geçti. Yeni paket `tests/test_trade_focus.gd`; yeni araçlar
 `screenshot_haggling`, `screenshot_price_marks`, `screenshot_barter`,
 `screenshot_wear`, `screenshot_debt`, `screenshot_provisioning`.
+
+## Oyuncu profilleri turu (2026-11-05)
+
+Rapor `docs/design_notes/oyuncu_profilleri.md`, kayıt
+`proje_takibi/referans/gorevler/18_oyuncu_profilleri.md`, araç
+`tests/simulate_personas.gd` (`--iz <profil>`, `--ablasyon`).
+
+**Tek cümlelik bulgu:** oyunu şu an yalnız **optimize eden** oyuncu
+bitirebiliyor. Tüccar 24 seferin 24'ünü tamamlıyor; Hikâyeci ve Merhametli
+üçüncü seferde ölüyor.
+
+**Ablasyon:** tayfayı beslemek tek başına dayanıklılığı 3 → 11.2 sefer
+değiştiriyor. Planlayıcıyı okumak ve pazarlık etmek hiçbir şey
+değiştirmiyor.
+
+**Ekran:** planlayıcı açıkça uyarıyor; eksik olan bedelin **ölçeği**
+("moral düşer, stres birikir" ↔ kervan üç seferde biter).
+
+**Karar bekleyen:** yedi öneri (Ö1-Ö7), hiçbiri sistem kesmiyor. En
+yüksek öncelik Ö1 (uyarı ölümü adıyla ansın) ve Ö2 (sofra kipi
+planlayıcıda görünsün).
