@@ -446,25 +446,14 @@ func _on_offer_toggled(_toggled_on: bool, offer: MerchantOffer, checkbox: CheckB
 func _on_wallet_changed(_new_balance: int) -> void:
 	_refresh()
 
+## Şehirde ne varsa o kadar. Alım `GameSession.buy_provisions`'tan geçiyor:
+## stok, kese ve kargo sınırı orada tek yerde (bkz. P5/P9B - açlığın kapısı
+## artık para değil arz).
 func _on_buy_provisions_pressed() -> void:
 	var shortfall := _plan.get_provisions_shortfall(_session.get_provisions())
 	if shortfall <= 0:
 		return
-
-	var cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
-	if not _session.wallet.can_afford(cost):
-		return
-
-	# Erzağı önce ekle, parayı sonra düş - ters sırada `wallet.spend()`'in
-	# emit ettiği `balance_changed` senkron olarak `_on_wallet_changed` →
-	# `_refresh()`'i erzak henüz eklenmeden çağırıyordu, yani ekran hâlâ
-	# eksik gösterip orada donuyordu (buton "çalışmıyor" gibi okunuyordu,
-	# oysa arka planda para gitmiş erzak da gelmişti - yalnızca ekran
-	# yenilenmemişti). Kargo tam dolup erzak hiç eklenemezse (`add_to_cargo`
-	# hep-ya-da-hiç) para da hiç harcanmaz.
-	if _session.change_provisions(shortfall) != shortfall:
-		return
-	_session.wallet.spend(cost)
+	_session.buy_provisions(shortfall)
 	_refresh()
 
 func _on_borrow_pressed() -> void:
@@ -501,12 +490,21 @@ func _refresh() -> void:
 
 	var shortfall_cost := shortfall * GameSession.PROVISIONS_UNIT_PRICE
 	if shortfall > 0:
+		# Şehirde ne kadar var: planlayıcı **doğru sayıyı söylemeye devam
+		# ediyor**, ama o sayı burada bulunmayabilir. Sözün yeni hâli bu
+		# (P9/B): "stok bulabilirsen aç kalmazsın".
+		var stock := _session.get_provision_stock()
+		var buyable := shortfall if stock < 0 else mini(shortfall, stock)
 		_shortfall_label.text = tr("UI_PLANNER_PROVISIONS_SHORT") % [shortfall, shortfall_cost]
+		if stock >= 0 and stock < shortfall:
+			_shortfall_label.text += "\n" + (tr("UI_PLANNER_PROVISIONS_STOCK") % stock)
 		_shortfall_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		_buy_provisions_button.visible = true
-		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % shortfall_cost
-		var can_afford := _session.wallet.can_afford(shortfall_cost)
-		_buy_provisions_button.disabled = not can_afford
+		_buy_provisions_button.text = tr("UI_PLANNER_BUY_PROVISIONS") % (
+			buyable * GameSession.PROVISIONS_UNIT_PRICE
+		)
+		var can_afford := _session.wallet.can_afford(GameSession.PROVISIONS_UNIT_PRICE)
+		_buy_provisions_button.disabled = not can_afford or buyable <= 0
 		# Alacak param yoksa satın alma tuşu kilitli kalır ve tek başına
 		# çıkmaza götürür - oyuncu ya eksik erzakla yola çıkmayı kabul
 		# etmeli ya da loncadan borç almalı. İkinci seçenek burada, bir

@@ -48,3 +48,49 @@ static func buy_factor(item_id: String, degree_here: float) -> float:
 
 static func stock_left(stock: int, degree_here: float) -> int:
 	return int(floor(float(stock) * (1.0 - degree_here * STOCK_WITHHELD)))
+
+## --- Erzağın stoğu (P5 + P9/B, kullanıcı kararı 2026-11-05) ---
+##
+## **Kıtlık bir para sorunu değil, bir arz sorunudur.** Erzak bugüne kadar
+## planlayıcıda sınırsızdı: `PROVISIONS_UNIT_PRICE` ile kesen yettiği sürece
+## tam gereken sayı alınabiliyordu. Yani açlığın tek gerçek kapısı paraydı ve
+## para bulunabilir bir şey - "yoklukta kıvranmak" oradan sızıyordu.
+##
+## Artık her yerleşimin satabileceği bir erzak miktarı var ve o miktar
+## kıtlıkla düşüyor. Planlayıcı hâlâ **doğru sayıyı söylüyor** ("doğru
+## stoklayan asla aç kalmaz" sözü duruyor, bkz. Provision Rules); değişen
+## şey o sayıyı her zaman **satın alabilmek değil**. Oyuncuya haksızlık yok:
+## ne gerektiğini biliyor, bulamıyor.
+##
+## **Hesaplanır, saklanmaz** - `RouteWeather`, `Temperature`, `GroundCover`,
+## `Soaking` ile aynı kural. Girdi: yerleşim türü, bölge, gün. Aynı şehrin
+## aynı günü her zaman aynı rafı gösterir; kaydı yeniden yükleyip rafı
+## doldurmak yok, şehirden çıkıp girerek de yok.
+
+## Bir şehrin bir günde satabileceği erzak (ticaret payı 1.0 iken, bolluk).
+const PROVISION_BASE_STOCK: int = 150
+## Kıtlık bu payı yiyor: derece 1'de taban stoğun yalnızca %12'si kalır.
+const PROVISION_SCARCITY_BITE: float = 0.88
+## Yiyecek kıtlıkta en önce biter: bu pay, genel `STOCK_WITHHELD`'den sert.
+## Gerekçe (Y-C21): "kervanın ulaştırdığı yük şehrin hâlini düzeltir" -
+## şehirlerde yiyecek olsaydı kervanın taşıdığı şeyin anlamı kalmazdı.
+const PROVISION_MIN_STOCK: int = 0
+## Günden güne dalgalanma payı: aynı şehir her gün aynı sayıyı vermez.
+## Tohum şehir + gün, yani gün içinde sabit.
+const PROVISION_DAY_SWING: float = 0.35
+
+## Bir yerleşimin bugün satabileceği erzak. `location` null ise (test, F1
+## sentetik seferi) sınırsız demek için -1 döner - bilinmeyen bir yerde
+## oyuncuyu kilitlemek yanlış olurdu.
+static func provision_stock(location: Location, day: int) -> int:
+	if location == null:
+		return -1
+	var degree_here := degree(location.region, day)
+	var share := SettlementRules.trade_share(location.settlement_type)
+	var base := float(PROVISION_BASE_STOCK) * share
+	var left := base * (1.0 - degree_here * PROVISION_SCARCITY_BITE)
+	# Günlük dalga: tohumlu, yani aynı gün aynı sayı.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("provision|%s|%d" % [location.location_id, day])
+	left *= 1.0 + rng.randf_range(-PROVISION_DAY_SWING, PROVISION_DAY_SWING)
+	return maxi(PROVISION_MIN_STOCK, int(floor(left)))

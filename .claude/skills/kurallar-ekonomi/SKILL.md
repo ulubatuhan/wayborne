@@ -758,3 +758,38 @@ ever fell, and the career simulation had already measured the result
   wrapped wrist (`stump.gdshader`; the front-arm layer is cut, and the back-arm layer too in every frame where both hands fall on the same spot - in the standing pose the back hand showed exactly where the cut hand had been, T16-05, `WalkFigure.stump_layers`), no weapon is carried in hand, and
   `CombatUnit.TWO_HANDED_SKILLS` (shield, bow, maul) are locked with "cannot be done one-handed".
 
+
+### Provision Supply Rules
+
+Erzağın şehirdeki stoğu (P5) ve "doğru stoklayan asla aç kalmaz" sözünün
+yeni hâli (P9/B, kullanıcı kararı 2026-11-05).
+
+- **Kıtlık bir para sorunu değil, bir arz sorunudur.** Erzak planlayıcıda
+  sınırsızdı: `PROVISIONS_UNIT_PRICE` ile kese yettiği sürece tam gereken
+  sayı alınabiliyordu, yani açlığın tek gerçek kapısı paraydı - ve para
+  bulunabilir bir şey. "Yoklukta kıvranmak" oradan sızıyordu.
+- **Söz bozulmadı, anlamı değişti.** Planlayıcı hâlâ **doğru sayıyı**
+  söylüyor ve `test_route_terrain`/`test_temperature`'ın iddiası aynen
+  duruyor: *yeterli erzakla yola çıkan kervan hiç aç kalmaz*. Değişen,
+  o sayıyı her zaman **satın alabilmek**. Oyuncuya haksızlık yok - ne
+  gerektiğini biliyor, bulamıyor.
+- **Raf hesaplanır, saklanmaz** (`Scarcity.provision_stock`): yerleşim
+  türü, bölge, gün. Aynı şehrin aynı günü hep aynı raf - şehirden çıkıp
+  girerek tazelenmez.
+- **Ama oyuncunun o gün aldığı kayda yazılır**
+  (`provisions_bought_today/day/where`). Kayıt şehirde varışta alındığı
+  için yazılmasaydı kaydedip yükleyerek raf tazelenirdi. "Hesaplanan
+  saklanmaz" kuralı rafın kendisi için geçerli, oyuncunun yaptığı için
+  değil.
+- **Alımın tek kapısı `GameSession.buy_provisions`**: stok, kese ve kargo
+  sınırı orada. Kesenin yettiği kadarı alınır - düğmenin hiç çalışmaması
+  bir çıkmaz, eksik erzakla yola çıkmak ise bir karar (planlayıcı bunu
+  zaten iki basışlı bir onayla soruyor, hiç kilitlemiyor).
+- **Bilinmeyen yerde sınır yok** (`provision_stock(null, …) == -1`): test
+  ve F1 sentetik seferi olmayan bir rafın arkasında kilitlenmemeli.
+- Ölçüldü (2026-11-05): şehir ortalaması 88 (74-109), kasaba 44,
+  kervansaray 60; geç oyunda (300+ gün) şehir 60'a iniyor. Başlangıç
+  kervanının ihtiyacı 5 günde 15, 25 günde 75. Yani **şehir uzun bir
+  seferi ucu ucuna karşılıyor, kasaba karşılamıyor, kervan büyüdükçe
+  hiçbir yer karşılamıyor** - "büyüme yeni kriz doğurur" (Y-C24)
+  kuralının erzak tarafı.

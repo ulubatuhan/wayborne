@@ -4040,6 +4040,59 @@ func _original_candidate_index(venue: String, list_index: int) -> int:
 func get_provisions() -> int:
 	return get_total_quantity(PROVISIONS_ITEM_ID)
 
+## --- Erzağın şehirdeki stoğu (P5 + P9/B) ---
+##
+## Bulunulan şehrin bugün satabileceği erzak; -1 sınırsız (bilinmeyen yer).
+## **Hesaplanır, saklanmaz** (`Scarcity.provision_stock`), ama bu gün içinde
+## alınan düşülüyor: aynı şehirde ekranı kapatıp açarak rafı tazelemek yok.
+## Alınan miktar günle birlikte unutuluyor - yeni gün, yeni raf.
+var provisions_bought_today: int = 0
+var provisions_bought_day: int = -1
+var provisions_bought_where: String = ""
+
+func get_provision_stock() -> int:
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	var stock := Scarcity.provision_stock(location, total_days_elapsed + 1)
+	if stock < 0:
+		return -1
+	return maxi(0, stock - _provisions_taken_here())
+
+func _provisions_taken_here() -> int:
+	if provisions_bought_day != total_days_elapsed or provisions_bought_where != current_location_id:
+		return 0
+	return provisions_bought_today
+
+## Şehirden erzak alır; **gerçekten alınan** miktarı döner. Stok ne kadarsa
+## o kadar: para yetse bile şehirde yoksa yok. Açlığın kapısı artık para
+## değil arz (bkz. Scarcity.provision_stock).
+func buy_provisions(wanted: int) -> int:
+	if wanted <= 0:
+		return 0
+	var stock := get_provision_stock()
+	var taking := wanted if stock < 0 else mini(wanted, stock)
+	if taking <= 0:
+		return 0
+	var cost := taking * PROVISIONS_UNIT_PRICE
+	if not wallet.can_afford(cost):
+		# Kesenin yettiği kadarı: eksik erzakla yola çıkmak bir karar,
+		# düğmenin hiç çalışmaması bir çıkmaz.
+		taking = int(floor(float(wallet.balance) / float(PROVISIONS_UNIT_PRICE)))
+		taking = taking if stock < 0 else mini(taking, stock)
+		if taking <= 0:
+			return 0
+		cost = taking * PROVISIONS_UNIT_PRICE
+	# Erzağı önce ekle, parayı sonra düş (bkz. CaravanPlanner'daki gerekçe:
+	# ters sırada `balance_changed` ekranı erzak eklenmeden yeniliyordu).
+	if change_provisions(taking) != taking:
+		return 0
+	wallet.spend(cost)
+	if provisions_bought_day != total_days_elapsed or provisions_bought_where != current_location_id:
+		provisions_bought_today = 0
+		provisions_bought_day = total_days_elapsed
+		provisions_bought_where = current_location_id
+	provisions_bought_today += taking
+	return taking
+
 ## Negatif miktarlarda sıfırın altına inmez; her iki yönde de gerçekten
 ## değişen miktarı döner.
 ##
@@ -4981,6 +5034,13 @@ func to_save_dict() -> Dictionary:
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
 		"market_stock": market_stock.duplicate(),
+		# Erzak rafı hesaplanıyor ama **bugün alınan** kayda yazılıyor:
+		# kayıt şehirde varışta alındığı için, yazılmasa oyuncu kaydedip
+		# yükleyerek rafı tazeleyebilirdi (P5). Hesaplananın saklanmaması
+		# kuralı rafın kendisi için geçerli, oyuncunun yaptığı için değil.
+		"provisions_bought_today": provisions_bought_today,
+		"provisions_bought_day": provisions_bought_day,
+		"provisions_bought_where": provisions_bought_where,
 		"hired_recruit_indices": hired_recruit_indices.duplicate(true),
 		"banned_locations": banned_locations.duplicate(),
 		"next_character_serial": _next_character_serial,
@@ -5297,6 +5357,9 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	# Pazar stoğu en son: kayıtta varsa tazelenmiş tam stoğun üstüne yazılır,
 	# yoksa (eski kayıt) şehrin tam stoğu kalır. Yazılmasaydı şehirde
 	# alınan bir kayıt, boşaltılmış pazarı yeniden doldururdu.
+	provisions_bought_today = int(data.get("provisions_bought_today", 0))
+	provisions_bought_day = int(data.get("provisions_bought_day", -1))
+	provisions_bought_where = str(data.get("provisions_bought_where", ""))
 	if data.has("market_stock"):
 		market_stock.clear()
 		var stock_data: Dictionary = data["market_stock"]

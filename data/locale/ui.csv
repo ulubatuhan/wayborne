@@ -229,6 +229,7 @@
 "UI_PLANNER_PROVISIONS_NEEDED","Gerekli erzak: %d birim","Provisions required: %d units","","","","","","","","",""
 "UI_PLANNER_PROVISIONS_HELD","Envanterdeki erzak: %d birim","Provisions in the hold: %d units","","","","","","","","",""
 "UI_PLANNER_PROVISIONS_SHORT","Eksik erzak: %d birim (%d GG)","Provisions short: %d units (%d GP)","","","","","","","","",""
+"UI_PLANNER_PROVISIONS_STOCK","Bu şehirde yalnız %d erzak var.","This town has only %d provisions.","","","","","","","","",""
 "UI_PLANNER_BUY_PROVISIONS","Eksik erzağı satın al (%d GG)","Buy the missing provisions (%d GP)","","","","","","","","",""
 "UI_PLANNER_BORROW_FOR_PROVISIONS","Yetmiyor - Loncadan borç al","Not enough - borrow from the Guild","","","","","","","","",""
 "UI_PLANNER_DEPART_HUNGRY","Erzak eksik — yine de yola çık","Provisions short — set out anyway","","","","","","","","",""

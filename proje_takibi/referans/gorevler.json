@@ -4165,6 +4165,50 @@
    "sira": 219,
    "kim": "C",
    "not": "2026-11-05 kullanıcı isteği (\"yağmur ve suyun hayvanlar, insanlar ve vagon üzerinde de etkisi olsun; ıslansınlar, üstlerinde kar biriksin\"). `Soaking` (scripts/travel): kervanın üstündeki su ve kar, GroundCover'ın gövde karşılığı; RouteWeather + Temperature'dan hesaplanıyor, saklanmıyor, iki gün hafıza, ateş günün sonunda kurutuyor, eriyen kar suya dönüyor. Çizim: ArtDraw.snow_cap (düzensiz tek yığın), wet_sheen, wet_tint; WalkFigure baş/sırt/omuz, ArtDraw.wagon brandanın tepesi. Mekanik bağ: ıslak giysi ısısının %55'ini kaybediyor (Temperature.WET_WARMTH_LOSS), yani yağmurun bedeli gece stres/yorgunluk/humma olarak ödeniyor; planlayıcının erzak sözü etkilenmiyor. Yağmur dindiğinde brandanın kenarından canopy_drip damlıyor. Doğrulama: test_road_fx 311 test, screenshot_road_fx 09_islak_kervan ve 10_karli_kervan."
+  },
+  {
+   "id": "P03",
+   "baslik": "Ölü pazarlık sahnesi silindi",
+   "bolum": "17",
+   "alan": "Ticaret: odak",
+   "oncelik": "P2",
+   "durum": "bitti",
+   "bagimli": [],
+   "dosya": "gorevler/17_ticaret_odak.md",
+   "paket": "P20",
+   "sira": 301,
+   "kim": "C",
+   "not": "scripts/ui/haggling.gd (104 satır), scenes/game/haggling.tscn, Nav.HAGGLING, test seçici girdisi ve düğmesi. Oyunun akışında hiç yoktu."
+  },
+  {
+   "id": "P05",
+   "baslik": "Erzağın şehirdeki stoğu",
+   "bolum": "17",
+   "alan": "Ticaret: odak",
+   "oncelik": "P1",
+   "durum": "bitti",
+   "bagimli": [],
+   "dosya": "gorevler/17_ticaret_odak.md",
+   "paket": "P20",
+   "sira": 302,
+   "kim": "C",
+   "not": "Scarcity.provision_stock (hesaplanır, saklanmaz); GameSession.buy_provisions tek kapı; planlayıcı 'Bu şehirde yalnız N erzak var' satırı. Ölçüm: şehir 88, kasaba 44, geç oyun 60; ihtiyaç 25 günde 75."
+  },
+  {
+   "id": "P09",
+   "baslik": "Erzak sözü arza bağlandı (B yolu)",
+   "bolum": "17",
+   "alan": "Ticaret: odak",
+   "oncelik": "P1",
+   "durum": "bitti",
+   "bagimli": [
+    "P05"
+   ],
+   "dosya": "gorevler/17_ticaret_odak.md",
+   "paket": "P20",
+   "sira": 303,
+   "kim": "CO",
+   "not": "'Doğru stoklayan asla aç kalmaz' -> 'stok bulabilirsen aç kalmazsın'. Planlayıcı doğru sayıyı söylemeye devam ediyor; test_route_terrain/test_temperature iddiaları değişmedi (onlar zaten 'yeterli erzakla çıkan aç kalmaz' diyor)."
   }
  ],
  "guncelleme": "2026-11-02",
