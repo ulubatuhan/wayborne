@@ -1,0 +1,262 @@
+# Ucunda Yürüyen — oyun günlüğü
+
+Zorluğu arar. Erzağı sayar, hava raporunu okur, yolda yiyecek arar.
+
+## Keyif aldığım yerler (profilin kendi sözleri)
+- bitmek üzereyken yiyecek bulmak
+- kimseyi kaybetmeden zor bir yolu bitirmek
+- soğuk bir geceyi ateşle atlatmak
+- yaban hayvanını yenip et getirmek
+
+## 1. koşu (tohum 770000) — 20 sefer, 0 ölüm
+- **0. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **0. gün · kirsavel · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **5. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_customs_checkpoint
+- **5. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **7. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_storm
+- **7. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **9. gün · serai_orbeyan · keyif** — görülmemiş bir yere varıldı: serai_orbeyan
+- **9. gün · serai_orbeyan · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **9. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **16. gün · tolvarin · keyif** — görülmemiş bir yere varıldı: tolvarin
+- **16. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **16. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **19. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **19. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **22. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **22. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **23. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_traveling_tinker
+- **23. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **23. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **24. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_penitent_procession
+- **25. gün · serai_orbeyan · keyif** — vagonda bir şey üretildi
+- **30. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **30. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **30. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Kese yetmiyor
+- **31. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **31. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **32. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **33. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_military_convoy
+- **33. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Kervanda Muhafız görevlisi yok
+- **34. gün · tolvarin · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **34. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **34. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **36. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **36. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **38. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_hidden_guide
+- **40. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_merchant_caravan
+- **40. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Kesede 10 altın yok
+- **42. gün · serai_orbeyan · keyif** — vagonda bir şey üretildi
+- **42. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **44. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_forgotten_cache
+- **44. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Toprağı okuyacak otacın yok
+- **49. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **49. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **49. gün · tolvarin · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **49. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **49. gün · tolvarin · istedim** — mal almak — [sebep yazmıyor] vagonda yer kalmadı
+- **50. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_broken_axle
+- **50. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **51. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **51. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **54. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **54. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **56. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **56. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **56. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **58. gün · serai_orbeyan · keyif** — vagonda bir şey üretildi
+- **58. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **59. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_hunting_trip
+- **64. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_forage
+- **64. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **64. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **69. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_regional_war_news
+- **70. gün · serai_orbeyan · istedim** — Sabar Demirci'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **70. gün · serai_orbeyan · keyif** — vagonda bir şey üretildi
+- **70. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **73. gün · serai_orbeyan · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **73. gün · serai_orbeyan · anladım** — erzak eksik; yine de yola çıkılıyor
+- **76. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_party_theft
+- **78. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_party_investigation
+- **79. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **79. gün · serai_orbeyan · keyif** — dövüş kayıpsız kazanıldı
+- **83. gün · tolvarin · keyif** — Sabar Demirci hekime götürüldü
+- **83. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **83. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **85. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **85. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **89. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **91. gün · serai_orbeyan · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **91. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **92. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Toprağı okuyacak otacın yok
+- **97. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_spoiled_provisions
+- **97. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **97. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **97. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **97. gün · kirsavel · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **98. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_kin_encounter
+- **99. gün · tolvarin · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **99. gün · tolvarin · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **99. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **99. gün · tolvarin · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **100. gün · tolvarin · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **101. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **101. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **102. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **102. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **103. gün · tolvarin · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **104. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_mutiny
+- **104. gün · tolvarin · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **104. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **104. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **104. gün · akavan · keyif** — görülmemiş bir yere varıldı: akavan
+- **104. gün · akavan · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **104. gün · akavan · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **105. gün · akavan · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **106. gün · akavan · keyif** — dövüş kayıpsız kazanıldı
+- **112. gün · akavan · keyif** — dövüş kayıpsız kazanıldı
+- **114. gün · serai_duvenmor · keyif** — görülmemiş bir yere varıldı: serai_duvenmor
+
+## 2. koşu (tohum 771013) — 20 sefer, 0 ölüm
+- **0. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **0. gün · kirsavel · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **1. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_guard_patrol
+- **1. gün · kirsavel · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **2. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_spoiled_provisions
+- **2. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **2. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **3. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_customs_checkpoint
+- **3. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **4. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_road_wanderer
+- **4. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Vagonlarında yer yok
+- **5. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **5. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **5. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **6. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_plague_outbreak_news
+- **7. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **7. gün · kirsavel · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **8. gün · serai_orbeyan · keyif** — görülmemiş bir yere varıldı: serai_orbeyan
+- **8. gün · serai_orbeyan · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **8. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **14. gün · tolvarin · keyif** — görülmemiş bir yere varıldı: tolvarin
+- **14. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **14. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **18. gün · akavan · keyif** — görülmemiş bir yere varıldı: akavan
+- **18. gün · akavan · keyif** — vagonda bir şey üretildi
+- **23. gün · serai_duvenmor · keyif** — görülmemiş bir yere varıldı: serai_duvenmor
+- **23. gün · serai_duvenmor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **25. gün · merigaud · keyif** — görülmemiş bir yere varıldı: merigaud
+- **25. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **25. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **25. gün · merigaud · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **25. gün · merigaud · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **25. gün · merigaud · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **25. gün · merigaud · keyif** — panodan 1 ilan alındı
+- **25. gün · merigaud · istedim** — mal almak — [sebep yazmıyor] vagonda yer kalmadı
+- **28. gün · belvanor · keyif** — görülmemiş bir yere varıldı: belvanor
+- **28. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **28. gün · belvanor · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **28. gün · belvanor · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **28. gün · belvanor · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **28. gün · belvanor · istedim** — mal almak — [sebep yazmıyor] vagonda yer kalmadı
+- **29. gün · belvanor · keyif** — yeni bir kart görüldü: evt_road_warden
+- **29. gün · belvanor · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **31. gün · belvanor · keyif** — yeni bir kart görüldü: evt_kin_encounter
+- **31. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **31. gün · merigaud · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **31. gün · merigaud · keyif** — panodan 1 ilan alındı
+- **33. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **33. gün · belvanor · keyif** — panodan 2 ilan alındı
+- **35. gün · belvanor · keyif** — yeni bir kart görüldü: evt_stowaway
+- **35. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **35. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **35. gün · merigaud · keyif** — panodan 2 ilan alındı
+- **37. gün · merigaud · keyif** — yeni bir kart görüldü: evt_mine_collapse
+- **37. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **37. gün · belvanor · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **37. gün · belvanor · keyif** — panodan 1 ilan alındı
+- **40. gün · belvanor · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **41. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **41. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **45. gün · belvanor · keyif** — yeni bir kart görüldü: evt_hunting_trip
+- **48. gün · belvanor · keyif** — yeni bir kart görüldü: evt_landslide
+- **50. gün · belvanor · keyif** — yeni bir kart görüldü: evt_mutiny
+- **50. gün · belvanor · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **50. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **50. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **51. gün · belvanor · keyif** — yeni bir kart görüldü: evt_traveling_tinker
+- **51. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **51. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **51. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Kese yetmiyor
+- **52. gün · belvanor · keyif** — yeni bir kart görüldü: evt_stress_brawl
+- **53. gün · ilsande · keyif** — görülmemiş bir yere varıldı: ilsande
+- **53. gün · ilsande · istedim** — Kervanbaşı'i iyileştirmek — kese yetmiyor
+- **53. gün · ilsande · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **53. gün · ilsande · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **53. gün · ilsande · keyif** — aç bir şehre yiyecek bırakıldı
+- **53. gün · ilsande · keyif** — panodan 1 ilan alındı
+- **56. gün · caramine · keyif** — görülmemiş bir yere varıldı: caramine
+- **56. gün · caramine · istedim** — Kervanbaşı'i iyileştirmek — kese yetmiyor
+- **56. gün · caramine · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **58. gün · caramine · keyif** — yeni bir kart görüldü: evt_broken_axle
+- **58. gün · caramine · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **59. gün · ilsande · istedim** — Kervanbaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **59. gün · ilsande · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **59. gün · ilsande · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **59. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **59. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **59. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **59. gün · ilsande · keyif** — panodan 1 ilan alındı
+- **60. gün · ilsande · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **62. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **62. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **63. gün · ilsande · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **63. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **63. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **64. gün · ilsande · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **64. gün · ilsande · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **66. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **66. gün · belvanor · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **66. gün · belvanor · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **66. gün · belvanor · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **66. gün · belvanor · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **69. gün · belvanor · keyif** — yeni bir kart görüldü: evt_abandoned_wagon
+- **72. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **72. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **73. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **73. gün · belvanor · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **74. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **74. gün · belvanor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **75. gün · ilsande · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **75. gün · ilsande · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **75. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **75. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **75. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] itibar yetmiyor
+- **77. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **77. gün · ilsande · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **78. gün · ilsande · keyif** — yeni bir kart görüldü: evt_frontier_outpost
+- **79. gün · caramine · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **79. gün · caramine · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **79. gün · caramine · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **80. gün · caramine · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **81. gün · caramine · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **81. gün · caramine · anladım** — dövüş kaybedildi; yük ve moral gitti
+- **83. gün · ilsande · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **83. gün · ilsande · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **83. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **83. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **83. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] itibar yetmiyor
+- **86. gün · caramine · istedim** — Kervanbaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **86. gün · caramine · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **86. gün · caramine · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **86. gün · caramine · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **87. gün · caramine · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **90. gün · ilsande · istedim** — Kervanbaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **90. gün · ilsande · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **90. gün · ilsande · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **90. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **90. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] itibar yetmiyor
+- **90. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] yük yeri yok
+- **90. gün · ilsande · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] itibar yetmiyor
+- **92. gün · ilsande · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **92. gün · ilsande · anladım** — dövüş kaybedildi; yük ve moral gitti

@@ -1,0 +1,540 @@
+# Listeyi Kapatan — oyun günlüğü
+
+Her kontratı, her şehri, her kartı ister. Defterdeki sayaçlara bakar.
+
+## Keyif aldığım yerler (profilin kendi sözleri)
+- görülmemiş bir şehre ilk kez girmek
+- defterdeki sayacın bir artması
+- panodaki bütün ilanları almak
+- vagon alıp kervanı büyütmek
+
+## 1. koşu (tohum 770000) — 20 sefer, 0 ölüm
+- **1. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **1. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **1. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · keyif** — kiliseye verildi
+- **1. gün · kirsavel · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **1. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **1. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **1. gün · kirsavel · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **2. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **2. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **3. gün · tolvarin · keyif** — görülmemiş bir yere varıldı: tolvarin
+- **4. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **4. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **4. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · keyif** — kiliseye verildi
+- **4. gün · tolvarin · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **4. gün · tolvarin · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **4. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **4. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **4. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **5. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_landslide
+- **6. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_spoiled_provisions
+- **6. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **6. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **6. gün · tolvarin · keyif** — bitmek üzereyken 9 erzak bulundu
+- **7. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_forage
+- **11. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_mutiny
+- **11. gün · tolvarin · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **11. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **11. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **12. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **12. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **12. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **12. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **12. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **12. gün · kirsavel · keyif** — kiliseye verildi
+- **12. gün · kirsavel · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **12. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **12. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **12. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **16. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **16. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **16. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **16. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **16. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **16. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **16. gün · tolvarin · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **16. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **16. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **16. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **16. gün · tolvarin · keyif** — panodan 5 ilan alındı
+- **20. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **20. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **20. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **20. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **20. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **20. gün · kirsavel · keyif** — kiliseye verildi
+- **20. gün · kirsavel · keyif** — Hilda Demirci kervana katıldı
+- **20. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **20. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **20. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **23. gün · tolvarin · istedim** — tavernada kalmak — Kese yetmiyor
+- **23. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **23. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **23. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **23. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **23. gün · tolvarin · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **23. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **23. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **23. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **23. gün · tolvarin · keyif** — panodan 3 ilan alındı
+- **23. gün · tolvarin · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **24. gün · tolvarin · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **27. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **27. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **27. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **27. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **27. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **27. gün · kirsavel · keyif** — kiliseye verildi
+- **27. gün · kirsavel · keyif** — Turgay Uzun Adım kervana katıldı
+- **27. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **27. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **27. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **28. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **28. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **28. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **28. gün · kirsavel · keyif** — bitmek üzereyken 14 erzak bulundu
+- **30. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **30. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **31. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **31. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **31. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **31. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **31. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **31. gün · tolvarin · keyif** — kiliseye verildi
+- **31. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **31. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **31. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **31. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **31. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **32. gün · tolvarin · keyif** — bitmek üzereyken 14 erzak bulundu
+- **33. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **34. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_elder_burden
+- **36. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **36. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **36. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **36. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **36. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **36. gün · kirsavel · keyif** — Turgay Uzun Adım hekime götürüldü
+- **36. gün · kirsavel · keyif** — kiliseye verildi
+- **36. gün · kirsavel · istedim** — tayfaya biri katmak — Parti dolu
+- **36. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **36. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **36. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **38. gün · tolvarin · istedim** — tavernada kalmak — Kese yetmiyor
+- **38. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **38. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **38. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **38. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **38. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **38. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **38. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **38. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **38. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **39. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **39. gün · tolvarin · keyif** — bitmek üzereyken 14 erzak bulundu
+- **40. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_customs_checkpoint
+- **40. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **40. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **41. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_broken_axle
+- **41. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **43. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **43. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **43. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **43. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **43. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **43. gün · kirsavel · keyif** — kiliseye verildi
+- **43. gün · kirsavel · istedim** — tayfaya biri katmak — Parti dolu
+- **43. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **43. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **43. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **44. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_abandoned_wagon
+- **44. gün · kirsavel · keyif** — bitmek üzereyken 14 erzak bulundu
+- **48. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **48. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **48. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **48. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **48. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **48. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **48. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **48. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **48. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **48. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **48. gün · tolvarin · keyif** — panodan 1 ilan alındı
+- **49. gün · tolvarin · keyif** — bitmek üzereyken 14 erzak bulundu
+- **51. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **51. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **52. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **52. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **52. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **52. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **52. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **52. gün · kirsavel · keyif** — kiliseye verildi
+- **52. gün · kirsavel · istedim** — tayfaya biri katmak — Parti dolu
+- **52. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **52. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **52. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **55. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **55. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **55. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **55. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **55. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **55. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **55. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **55. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **55. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **55. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **55. gün · tolvarin · keyif** — panodan 4 ilan alındı
+- **56. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_refugee_column
+- **56. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Kesede 30 GG yok
+- **56. gün · tolvarin · keyif** — bitmek üzereyken 14 erzak bulundu
+- **59. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **59. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **59. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **59. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **59. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **59. gün · kirsavel · keyif** — kiliseye verildi
+- **59. gün · kirsavel · istedim** — tayfaya biri katmak — Parti dolu
+- **59. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **59. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **59. gün · kirsavel · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **60. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **60. gün · kirsavel · anladım** — dövüş kazanıldı ama 1 kişi yere düştü
+- **62. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_merchant_caravan
+- **63. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **63. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **63. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **63. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **63. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **63. gün · tolvarin · keyif** — kiliseye verildi
+- **63. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **63. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **63. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **63. gün · tolvarin · keyif** — panodan 2 ilan alındı
+- **64. gün · tolvarin · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **68. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **68. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **68. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **68. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **68. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **68. gün · kirsavel · keyif** — Sabar Demirci hekime götürüldü
+- **68. gün · kirsavel · keyif** — kiliseye verildi
+- **68. gün · kirsavel · istedim** — tayfaya biri katmak — Parti dolu
+- **68. gün · kirsavel · keyif** — vagonda bir şey üretildi
+- **68. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **68. gün · kirsavel · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **71. gün · tolvarin · istedim** — tavernada kalmak — Kese yetmiyor
+- **71. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **71. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **71. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **71. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **71. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **71. gün · tolvarin · keyif** — vagonda bir şey üretildi
+- **71. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **71. gün · tolvarin · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **74. gün · tolvarin · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **74. gün · tolvarin · anladım** — erzak eksik; yine de yola çıkılıyor
+- **75. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_road_patrol
+- **76. gün · tolvarin · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **76. gün · tolvarin · keyif** — dövüş kayıpsız kazanıldı
+- **83. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_bandit_tribute_zone_news
+- **85. gün · serai_orbeyan · keyif** — görülmemiş bir yere varıldı: serai_orbeyan
+- **86. gün · serai_orbeyan · istedim** — şölen kurmak — Kese yetmiyor
+- **86. gün · serai_orbeyan · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **86. gün · serai_orbeyan · istedim** — Kutalmış'in işini bitirmek — 4 tane eksik
+- **86. gün · serai_orbeyan · istedim** — Bayra'in işini bitirmek — 4 tane eksik
+- **86. gün · serai_orbeyan · istedim** — Yaruk'in işini bitirmek — 4 tane eksik
+- **86. gün · serai_orbeyan · istedim** — kiliseye vermek — Kese yetmiyor
+- **86. gün · serai_orbeyan · istedim** — tayfaya biri katmak — Parti dolu
+- **86. gün · serai_orbeyan · keyif** — vagonda bir şey üretildi
+- **86. gün · serai_orbeyan · keyif** — yeni bir vagon alındı
+- **86. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **87. gün · serai_orbeyan · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **88. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_storm
+- **89. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **89. gün · serai_orbeyan · keyif** — dövüş kayıpsız kazanıldı
+- **90. gün · serai_orbeyan · keyif** — dövüş kayıpsız kazanıldı
+- **91. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_village_provisions
+- **92. gün · serai_orbeyan · keyif** — dövüş kayıpsız kazanıldı
+- **93. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_grave_on_the_road
+- **96. gün · tolvarin · istedim** — şölen kurmak — Kese yetmiyor
+- **96. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **96. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **96. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **96. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **96. gün · tolvarin · keyif** — kiliseye verildi
+- **96. gün · tolvarin · istedim** — tayfaya biri katmak — Parti dolu
+- **96. gün · tolvarin · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **96. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **96. gün · tolvarin · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **96. gün · tolvarin · keyif** — panodan 4 ilan alındı
+- **97. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_wandering_players
+
+## 2. koşu (tohum 771013) — 20 sefer, 0 ölüm
+- **1. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **1. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **1. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · keyif** — kiliseye verildi
+- **1. gün · kirsavel · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **1. gün · kirsavel · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **1. gün · kirsavel · keyif** — yeni bir vagon alındı
+- **1. gün · kirsavel · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **4. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **4. gün · kirsavel · keyif** — dövüş kayıpsız kazanıldı
+- **7. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_broken_axle
+- **7. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **7. gün · serai_orbeyan · keyif** — görülmemiş bir yere varıldı: serai_orbeyan
+- **8. gün · serai_orbeyan · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **8. gün · serai_orbeyan · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **8. gün · serai_orbeyan · istedim** — Kutalmış'in işini bitirmek — 4 tane eksik
+- **8. gün · serai_orbeyan · istedim** — Bayra'in işini bitirmek — 4 tane eksik
+- **8. gün · serai_orbeyan · istedim** — Yaruk'in işini bitirmek — 4 tane eksik
+- **8. gün · serai_orbeyan · keyif** — kiliseye verildi
+- **8. gün · serai_orbeyan · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **8. gün · serai_orbeyan · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **8. gün · serai_orbeyan · keyif** — yeni bir vagon alındı
+- **8. gün · serai_orbeyan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **14. gün · tolvarin · keyif** — görülmemiş bir yere varıldı: tolvarin
+- **14. gün · tolvarin · istedim** — tavernada kalmak — Kese yetmiyor
+- **14. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **14. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **14. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **14. gün · tolvarin · istedim** — kiliseye vermek — Kese yetmiyor
+- **14. gün · tolvarin · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **14. gün · tolvarin · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **14. gün · tolvarin · keyif** — yeni bir vagon alındı
+- **14. gün · tolvarin · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **14. gün · tolvarin · keyif** — panodan 3 ilan alındı
+- **14. gün · tolvarin · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **15. gün · tolvarin · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **16. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_forage
+- **20. gün · akavan · keyif** — görülmemiş bir yere varıldı: akavan
+- **21. gün · akavan · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **21. gün · akavan · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **21. gün · akavan · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **21. gün · akavan · istedim** — Elsbeth'in işini bitirmek — 4 tane eksik
+- **21. gün · akavan · istedim** — Lorenz'in işini bitirmek — 4 tane eksik
+- **21. gün · akavan · keyif** — kiliseye verildi
+- **21. gün · akavan · keyif** — Külbilge Yolcu kervana katıldı
+- **21. gün · akavan · keyif** — vagonda bir şey üretildi
+- **21. gün · akavan · keyif** — yeni bir vagon alındı
+- **21. gün · akavan · istedim** — loncadan mal avansı almak — Kredi hattı dolu
+- **22. gün · akavan · keyif** — yeni bir kart görüldü: evt_wandering_players
+- **24. gün · akavan · keyif** — yeni bir kart görüldü: evt_road_patrol
+- **27. gün · akavan · keyif** — yeni bir kart görüldü: evt_party_theft
+- **27. gün · serai_duvenmor · keyif** — görülmemiş bir yere varıldı: serai_duvenmor
+- **28. gün · serai_duvenmor · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **28. gün · serai_duvenmor · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **28. gün · serai_duvenmor · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **28. gün · serai_duvenmor · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **28. gün · serai_duvenmor · keyif** — Friedrich'in istediği getirildi; adımız onda
+- **28. gün · serai_duvenmor · keyif** — kiliseye verildi
+- **28. gün · serai_duvenmor · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **28. gün · serai_duvenmor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **28. gün · serai_duvenmor · keyif** — yeni bir vagon alındı
+- **29. gün · serai_duvenmor · keyif** — dövüş kayıpsız kazanıldı
+- **31. gün · ondrelle · keyif** — görülmemiş bir yere varıldı: ondrelle
+- **32. gün · ondrelle · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **32. gün · ondrelle · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **32. gün · ondrelle · istedim** — Aldric'in işini bitirmek — 4 tane eksik
+- **32. gün · ondrelle · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **32. gün · ondrelle · istedim** — Lorenz'in işini bitirmek — 4 tane eksik
+- **32. gün · ondrelle · keyif** — kiliseye verildi
+- **32. gün · ondrelle · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **32. gün · ondrelle · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **32. gün · ondrelle · keyif** — yeni bir vagon alındı
+- **32. gün · ondrelle · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **33. gün · ondrelle · keyif** — yeni bir kart görüldü: evt_forgotten_cache
+- **33. gün · ondrelle · istedim** — kartta kapalı bir seçeneği seçmek — Toprağı okuyacak otacın yok
+- **34. gün · ondrelle · keyif** — yeni bir kart görüldü: evt_stowaway
+- **35. gün · serai_duvenmor · istedim** — tavernada kalmak — Kese yetmiyor
+- **35. gün · serai_duvenmor · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **35. gün · serai_duvenmor · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **35. gün · serai_duvenmor · istedim** — Friedrich'in işini bitirmek — 7 tane eksik
+- **35. gün · serai_duvenmor · istedim** — kiliseye vermek — Kese yetmiyor
+- **35. gün · serai_duvenmor · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **35. gün · serai_duvenmor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **35. gün · serai_duvenmor · keyif** — yeni bir vagon alındı
+- **35. gün · serai_duvenmor · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **36. gün · serai_duvenmor · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **38. gün · merigaud · keyif** — görülmemiş bir yere varıldı: merigaud
+- **38. gün · merigaud · istedim** — tavernada kalmak — Kese yetmiyor
+- **38. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **38. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 4 tane eksik
+- **38. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **38. gün · merigaud · istedim** — kiliseye vermek — Kese yetmiyor
+- **38. gün · merigaud · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **38. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **38. gün · merigaud · keyif** — yeni bir vagon alındı
+- **38. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **39. gün · merigaud · keyif** — bitmek üzereyken 11 erzak bulundu
+- **41. gün · serai_duvenmor · istedim** — tavernada kalmak — Kese yetmiyor
+- **41. gün · serai_duvenmor · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **41. gün · serai_duvenmor · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **41. gün · serai_duvenmor · istedim** — Friedrich'in işini bitirmek — 7 tane eksik
+- **41. gün · serai_duvenmor · istedim** — kiliseye vermek — Kese yetmiyor
+- **41. gün · serai_duvenmor · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **41. gün · serai_duvenmor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **41. gün · serai_duvenmor · keyif** — yeni bir vagon alındı
+- **43. gün · merigaud · istedim** — tavernada kalmak — Kese yetmiyor
+- **43. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **43. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 4 tane eksik
+- **43. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **43. gün · merigaud · istedim** — kiliseye vermek — Kese yetmiyor
+- **43. gün · merigaud · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **43. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **43. gün · merigaud · keyif** — yeni bir vagon alındı
+- **43. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **43. gün · merigaud · keyif** — panodan 1 ilan alındı
+- **43. gün · merigaud · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **44. gün · merigaud · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **46. gün · belvanor · keyif** — görülmemiş bir yere varıldı: belvanor
+- **46. gün · belvanor · istedim** — tavernada kalmak — Kese yetmiyor
+- **46. gün · belvanor · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **46. gün · belvanor · istedim** — Benedikt'in işini bitirmek — 4 tane eksik
+- **46. gün · belvanor · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **46. gün · belvanor · istedim** — Kervanbaşı'i iyileştirmek — kese yetmiyor
+- **46. gün · belvanor · istedim** — kiliseye vermek — Kese yetmiyor
+- **46. gün · belvanor · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **46. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **46. gün · belvanor · keyif** — yeni bir vagon alındı
+- **46. gün · belvanor · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **46. gün · belvanor · keyif** — panodan 1 ilan alındı
+- **47. gün · belvanor · keyif** — yeni bir kart görüldü: evt_hunting_trip
+- **47. gün · belvanor · keyif** — dövüş kayıpsız kazanıldı
+- **49. gün · merigaud · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **49. gün · merigaud · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **49. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **49. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 4 tane eksik
+- **49. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **49. gün · merigaud · keyif** — Kervanbaşı hekime götürüldü
+- **49. gün · merigaud · keyif** — kiliseye verildi
+- **49. gün · merigaud · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **49. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **49. gün · merigaud · keyif** — yeni bir vagon alındı
+- **49. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **49. gün · merigaud · keyif** — panodan 2 ilan alındı
+- **50. gün · merigaud · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **52. gün · merigaud · keyif** — yeni bir kart görüldü: evt_military_convoy
+- **52. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Kervanda Muhafız görevlisi yok
+- **53. gün · liraven · keyif** — görülmemiş bir yere varıldı: liraven
+- **54. gün · liraven · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **54. gün · liraven · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **54. gün · liraven · istedim** — Otto'in işini bitirmek — 4 tane eksik
+- **54. gün · liraven · istedim** — Gisela'in işini bitirmek — 4 tane eksik
+- **54. gün · liraven · keyif** — Benedikt'in istediği getirildi; adımız onda
+- **54. gün · liraven · keyif** — kiliseye verildi
+- **54. gün · liraven · keyif** — Kayra Kırık Mızrak kervana katıldı
+- **54. gün · liraven · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **54. gün · liraven · keyif** — yeni bir vagon alındı
+- **54. gün · liraven · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **54. gün · liraven · istedim** — elimdekinin tamamını satmak — [sebep yazmıyor] şehrin kesesi bu kadarını alamıyor
+- **54. gün · liraven · keyif** — aç bir şehre yiyecek bırakıldı
+- **59. gün · samuran · keyif** — görülmemiş bir yere varıldı: samuran
+- **59. gün · samuran · istedim** — tavernada kalmak — Kese yetmiyor
+- **59. gün · samuran · keyif** — Hilda'in istediği getirildi; adımız onda
+- **59. gün · samuran · keyif** — Sieglinde'in istediği getirildi; adımız onda
+- **59. gün · samuran · istedim** — Yelda'in işini bitirmek — 4 tane eksik
+- **59. gün · samuran · keyif** — kiliseye verildi
+- **59. gün · samuran · istedim** — tayfaya biri katmak — Parti dolu
+- **59. gün · samuran · keyif** — vagonda bir şey üretildi
+- **59. gün · samuran · keyif** — yeni bir vagon alındı
+- **59. gün · samuran · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **59. gün · samuran · istedim** — elimdekinin tamamını satmak — [sebep yazmıyor] şehrin kesesi bu kadarını alamıyor
+- **59. gün · samuran · keyif** — aç bir şehre yiyecek bırakıldı
+- **61. gün · samuran · keyif** — 2 gün çalışılıp erzak çıkarıldı
+- **68. gün · samuran · keyif** — yeni bir kart görüldü: evt_storm
+- **70. gün · liraven · istedim** — tavernada kalmak — Kese yetmiyor
+- **70. gün · liraven · istedim** — Otto'in işini bitirmek — 4 tane eksik
+- **70. gün · liraven · istedim** — Gisela'in işini bitirmek — 4 tane eksik
+- **70. gün · liraven · keyif** — Benedikt'in istediği getirildi; adımız onda
+- **70. gün · liraven · istedim** — Yalın Çakmaktaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **70. gün · liraven · keyif** — kiliseye verildi
+- **70. gün · liraven · istedim** — tayfaya biri katmak — Parti dolu
+- **70. gün · liraven · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **70. gün · liraven · keyif** — yeni bir vagon alındı
+- **70. gün · liraven · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **70. gün · liraven · keyif** — aç bir şehre yiyecek bırakıldı
+- **72. gün · liraven · keyif** — yeni bir kart görüldü: evt_trade_fair_news
+- **73. gün · merigaud · istedim** — tavernada kalmak — Kese yetmiyor
+- **73. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **73. gün · merigaud · keyif** — Elsbeth'in istediği getirildi; adımız onda
+- **73. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **73. gün · merigaud · keyif** — Kayra Kırık Mızrak hekime götürüldü
+- **73. gün · merigaud · keyif** — kiliseye verildi
+- **73. gün · merigaud · istedim** — tayfaya biri katmak — Parti dolu
+- **73. gün · merigaud · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **73. gün · merigaud · keyif** — yeni bir vagon alındı
+- **73. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **73. gün · merigaud · keyif** — panodan 4 ilan alındı
+- **74. gün · merigaud · keyif** — dövüş kayıpsız kazanıldı
+- **75. gün · merigaud · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **75. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **75. gün · merigaud · keyif** — dövüş kayıpsız kazanıldı
+- **76. gün · belvanor · keyif** — şölen kuruldu; yüzler güldü
+- **76. gün · belvanor · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **76. gün · belvanor · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **76. gün · belvanor · istedim** — Benedikt'in işini bitirmek — 4 tane eksik
+- **76. gün · belvanor · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **76. gün · belvanor · keyif** — Yalın Çakmaktaşı hekime götürüldü
+- **76. gün · belvanor · keyif** — Kayra Kırık Mızrak hekime götürüldü
+- **76. gün · belvanor · keyif** — kiliseye verildi
+- **76. gün · belvanor · istedim** — tayfaya biri katmak — Parti dolu
+- **76. gün · belvanor · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **76. gün · belvanor · keyif** — yeni bir vagon alındı
+- **76. gün · belvanor · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **76. gün · belvanor · keyif** — panodan 1 ilan alındı
+- **77. gün · belvanor · keyif** — bitmek üzereyken 14 erzak bulundu
+- **79. gün · merigaud · istedim** — tavernada kalmak — Kese yetmiyor
+- **79. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **79. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 7 tane eksik
+- **79. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **79. gün · merigaud · istedim** — Yalın Çakmaktaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **79. gün · merigaud · keyif** — kiliseye verildi
+- **79. gün · merigaud · istedim** — tayfaya biri katmak — Parti dolu
+- **79. gün · merigaud · keyif** — vagonda bir şey üretildi
+- **79. gün · merigaud · keyif** — yeni bir vagon alındı
+- **79. gün · merigaud · anladım** — loncadan yük avansı alındı: para değil mal, ve taşımak zorundayız
+- **79. gün · merigaud · keyif** — panodan 3 ilan alındı
+- **82. gün · merigaud · keyif** — yeni bir kart görüldü: evt_customs_checkpoint
+- **82. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **82. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **83. gün · merigaud · keyif** — yeni bir kart görüldü: evt_mutiny
+- **83. gün · merigaud · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **83. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **83. gün · merigaud · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **84. gün · liraven · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **84. gün · liraven · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **84. gün · liraven · istedim** — Otto'in işini bitirmek — 4 tane eksik
+- **84. gün · liraven · istedim** — Gisela'in işini bitirmek — 4 tane eksik
+- **84. gün · liraven · keyif** — Benedikt'in istediği getirildi; adımız onda
+- **84. gün · liraven · istedim** — Yalın Çakmaktaşı'i iyileştirmek — ilaç yok - bu şehre iksir getiren olmadı
+- **84. gün · liraven · keyif** — kiliseye verildi
+- **84. gün · liraven · istedim** — tayfaya biri katmak — Parti dolu
+- **84. gün · liraven · istedim** — vagonda bir şey üretmek — Yeterli malzeme yok
+- **84. gün · liraven · keyif** — yeni bir vagon alındı
+- **84. gün · liraven · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **86. gün · liraven · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **86. gün · liraven · keyif** — dövüş kayıpsız kazanıldı
+- **88. gün · merigaud · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **88. gün · merigaud · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **88. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **88. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 7 tane eksik
+- **88. gün · merigaud · keyif** — Gerhardt'in istediği getirildi; adımız onda
+- **88. gün · merigaud · keyif** — kiliseye verildi
+- **88. gün · merigaud · istedim** — tayfaya biri katmak — Parti dolu
+- **88. gün · merigaud · keyif** — vagonda bir şey üretildi
+- **88. gün · merigaud · keyif** — yeni bir vagon alındı
+- **88. gün · merigaud · istedim** — loncadan mal avansı almak — Lonca sana güvenmiyor
+- **88. gün · merigaud · istedim** — pazarda satmak — Alacaklın bu şehirde: sözünü tutana kadar tezgâh sana kapalı.
+- **88. gün · merigaud · istedim** — panodaki bir ilanı almak — [sebep yazmıyor] itibar yetmiyor
+- **88. gün · merigaud · keyif** — panodan 1 ilan alındı
+- **89. gün · merigaud · keyif** — bitmek üzereyken 14 erzak bulundu

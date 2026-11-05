@@ -990,11 +990,39 @@ func regard_here(role: String) -> int:
 
 ## Kişisel iş (T16-09): kişinin evinde, istenen mal kervanda yeterliyse teslim edilir.
 func can_deliver_chain(person_id: String) -> bool:
+	return get_chain_block_reason(person_id).is_empty()
+
+## Teslimat kapalıysa sebebi, açıksa "".
+##
+## Profil günlüklerinde (2026-11-05) en çok çarpılan ikinci kapı buydu:
+## kişinin istediği şey ekranda yazıyor ama "Teslim et" düğmesi sebep
+## söylemeden ölüyordu - oyuncu kaç tane eksik olduğunu göremiyordu.
+func get_chain_block_reason(person_id: String) -> String:
+	if is_journey_active():
+		return "UI_PEOPLE_CHAIN_ON_ROAD"
 	var p := people.person(person_id)
-	if p.is_empty() or not bool(p["alive"]) or String(p["home"]) != current_location_id or is_journey_active():
-		return false
+	if p.is_empty() or not bool(p["alive"]):
+		return "UI_PEOPLE_CHAIN_NOBODY"
+	if String(p["home"]) != current_location_id:
+		return "UI_PEOPLE_CHAIN_ELSEWHERE"
 	var chain: Dictionary = p.get("chain", {})
-	return not chain.is_empty() and get_total_quantity(String(chain["item"])) >= int(chain["qty"])
+	if chain.is_empty():
+		return "UI_PEOPLE_CHAIN_NOTHING"
+	var missing := int(chain["qty"]) - get_total_quantity(String(chain["item"]))
+	if missing > 0:
+		return "UI_PEOPLE_CHAIN_MISSING"
+	return ""
+
+## "3 tane eksik" gibi sayılı bir eksiklik yazısı; eksik yoksa "".
+func get_chain_missing_text(person_id: String) -> String:
+	var p := people.person(person_id)
+	var chain: Dictionary = p.get("chain", {}) if not p.is_empty() else {}
+	if chain.is_empty():
+		return ""
+	var missing := int(chain["qty"]) - get_total_quantity(String(chain["item"]))
+	if missing <= 0:
+		return ""
+	return TranslationServer.translate("UI_PEOPLE_CHAIN_MISSING_COUNT") % missing
 
 func deliver_chain(person_id: String) -> bool:
 	if not can_deliver_chain(person_id):
@@ -1012,6 +1040,22 @@ func deliver_chain(person_id: String) -> bool:
 
 func can_afford_lodging() -> bool:
 	return is_city_open_to_lodging() and wallet.can_afford(get_lodging_cost())
+
+## Konaklama kapalıysa sebebi, açıksa "".
+##
+## Profil günlükleri (2026-11-05) taverna düğmelerinin sebep söylemeden
+## öldüğünü buldu: oyuncu "kalmak istedim, olmadı" diyor ama *neden*
+## olmadığını okuyamıyor - şehre kapatıldığı için mi, kese yetmediği için
+## mi. Oyunun kendi kuralı (kapalı düğme sebebini söyler) burada
+## tutulmuyordu.
+func get_lodging_block_reason() -> String:
+	if is_journey_active():
+		return "UI_TAVERN_LODGE_ON_ROAD"
+	if is_shut_out():
+		return "UI_TAVERN_LODGE_SHUT_OUT"
+	if not wallet.can_afford(get_lodging_cost()):
+		return "UI_NOT_ENOUGH_GOLD"
+	return ""
 
 func is_city_open_to_lodging() -> bool:
 	return not is_journey_active() and not is_shut_out()
@@ -1055,9 +1099,18 @@ func get_feast_cost() -> int:
 	return FEAST_COST_PER_HEAD * maxi(1, party.size())
 
 func can_afford_feast() -> bool:
-	if party_stress <= 0 or has_feasted_today():
-		return false
-	return wallet.can_afford(get_feast_cost())
+	return get_feast_block_reason().is_empty()
+
+## Şölen kapalıysa sebebi, açıksa "". Üç ayrı sebep tek bir soluk düğmeye
+## çıkıyordu (bkz. get_lodging_block_reason'ın notu).
+func get_feast_block_reason() -> String:
+	if party_stress <= 0:
+		return "UI_TAVERN_FEAST_NO_STRESS"
+	if has_feasted_today():
+		return "UI_TAVERN_FEAST_ALREADY"
+	if not wallet.can_afford(get_feast_cost()):
+		return "UI_NOT_ENOUGH_GOLD"
+	return ""
 
 func throw_feast() -> bool:
 	if not can_afford_feast():
@@ -2077,6 +2130,76 @@ func meal_needs_decision() -> bool:
 ## satar (şehirden pahalı - evt_village_provisions). Toplayıcılık zaman yer
 ## (evt_forage'un "topla" seçeneği bir gün uzatır).
 const HUNT_PROVISIONS: int = 10
+
+## --- Yolda yiyecek aramak (kullanıcı kararı 2026-11-05, profil turu 2) ---
+##
+## **Bulunan kusur:** yolda erzak biterse oyuncunun yapabileceği hiçbir şey
+## yoktu. Yiyecek yalnız üç yerden geliyordu ve **üçü de kart çekişine
+## bağlıydı**: yaban hayvanını yenmek, köy durağı, `evt_forage`'ın "topla"
+## seçeneği. Yani açlıktan ölmek bir karar değil bir şanssızlıktı - oysa
+## kullanıcının istediği şey açık: *"çaba göstererek, mücadele ederek az
+## sayıda ölüm ile oyunu devam ettirebilmek de bir deneyim olmalı."*
+##
+## Artık kalıcı bir yol emri: kervan durur, yiyecek arar. Şehirdeki
+## gündelik işle (Ö3) aynı felsefe - **zaman öder, para değil.** Bir gün
+## yolculuğa eklenir, o günün erzağı yine yenir, karşılığında biyoma ve
+## partinin Sezgi'sine bağlı bir miktar gelir.
+##
+## Bedava değil: bozkırda ve çölde az bulunur, kış payı düşürür, ve
+## kaybedilen gün vadeleri yaklaştırır. Bolluk yolu değil, **ölmeme yolu**.
+const FORAGE_BASE: int = 6
+const FORAGE_PER_PERCEPTION: float = 0.7
+const FORAGE_BIOME_SHARE: Dictionary = {
+	"forest": 1.4, "meadow": 1.2, "marsh": 1.0, "hills": 0.9,
+	"steppe": 0.7, "mountain": 0.6, "desert": 0.4,
+}
+const FORAGE_WINTER_SHARE: float = 0.55
+const FORAGE_STRESS: int = 3
+## Arayan el sayısı. Profil günlükleri (2026-11-05) aramanın yalnızca
+## **zaten kurtulacak olanı** kurtardığını gösterdi: verim yalnızca en iyi
+## sezgiye bakıyordu, yani altı kişilik kervan bir kişilik kadar buluyordu.
+## Bir arama günü bir yol günü yiyor; getirisi o günün erzağını aşmazsa
+## aramak durumu kötüleştiriyordu. Fazladan her el payı büyütür - böylece
+## aramak büyük kervan için de gerçek bir tutunma hamlesi olur, ama hâlâ
+## çare değil bedelli bir erteleme.
+const FORAGE_PER_EXTRA_HAND: float = 0.35
+
+## Bu biyomda ve bu partiyle bir günlük arama kaç erzak getirir.
+func get_forage_yield(biome: String = "", day: int = -1) -> int:
+	var share := float(FORAGE_BIOME_SHARE.get(biome, 1.0))
+	var when := total_days_elapsed if day < 0 else day
+	# Kış payı: Scarcity'nin kış tepesine yakın günlerde toprak vermez.
+	var season_distance := absi(((when % Scarcity.YEAR_DAYS) - Scarcity.WINTER_PEAK_DAY))
+	season_distance = mini(season_distance, Scarcity.YEAR_DAYS - season_distance)
+	if season_distance < Scarcity.YEAR_DAYS / 8:
+		share *= FORAGE_WINTER_SHARE
+	var skill := get_best_effective_stat(CharacterStats.Kind.PERCEPTION)
+	var hands := maxi(1, get_party().size())
+	var per_hand := float(FORAGE_BASE) + skill * FORAGE_PER_PERCEPTION
+	var found := per_hand * share * (1.0 + float(hands - 1) * FORAGE_PER_EXTRA_HAND)
+	return maxi(1, int(round(found)))
+
+## Yolda yiyecek aramak kapalıysa sebebi, açıksa "".
+func get_forage_block_reason() -> String:
+	if not is_journey_active():
+		return "UI_FORAGE_NOT_ON_ROAD"
+	if get_party().is_empty():
+		return "UI_FORAGE_NO_HANDS"
+	return ""
+
+func can_forage() -> bool:
+	return get_forage_block_reason().is_empty()
+
+## Bir gün ara. Dönen: bulunan erzak. Yolculuk bir gün uzar.
+func forage_a_day(biome: String = "") -> int:
+	if not can_forage():
+		return 0
+	var found := get_forage_yield(biome)
+	change_provisions(found)
+	change_stress(FORAGE_STRESS)
+	# Gün yolculuğa ekleniyor: aramanın bedeli zaman.
+	extend_journey(1)
+	return found
 
 static func combat_victory_provisions(enemy_kind: String) -> int:
 	return HUNT_PROVISIONS if enemy_kind == "wildlife" else 0
@@ -3955,7 +4078,15 @@ const CHURCH_DONATION: int = 30
 const CHURCH_DONATION_STANDING: int = 2
 
 func can_donate_to_church() -> bool:
-	return not is_journey_active() and wallet.can_afford(CHURCH_DONATION)
+	return get_church_donation_block_reason().is_empty()
+
+## Bağış kapalıysa sebebi, açıksa "" (bkz. get_lodging_block_reason'ın notu).
+func get_church_donation_block_reason() -> String:
+	if is_journey_active():
+		return "UI_CHURCH_DONATE_ON_ROAD"
+	if not wallet.can_afford(CHURCH_DONATION):
+		return "UI_NOT_ENOUGH_GOLD"
+	return ""
 
 func donate_to_church() -> bool:
 	if not can_donate_to_church():
@@ -4522,6 +4653,19 @@ func journey_season() -> int:
 
 func get_days_travelled() -> int:
 	return maxi(0, journey_total_days - journey_days_remaining)
+
+## Yolu uzat ya da kısalt (gecikme kartı, kestirme, yiyecek arama).
+##
+## Kalan gün ile toplam gün **birlikte** değişir, yoksa `get_days_travelled()`
+## bozulur: kalan günü tek başına artırmak kat edilen yolu siler, tek başına
+## azaltmak da olmayan bir ilerleme uydurur. Kısaltmada toplam, yürünen
+## günün altına inmez - geçmiş geri alınmaz.
+func extend_journey(days: int) -> void:
+	if days == 0 or not is_journey_active():
+		return
+	var travelled := get_days_travelled()
+	journey_days_remaining = maxi(0, journey_days_remaining + days)
+	journey_total_days = maxi(travelled, travelled + journey_days_remaining)
 
 ## Geri dön: yürünen yol kadar geri yürünür. Her zaman mümkün - kervanın
 ## geldiği yolu bulamaması diye bir şey yok.

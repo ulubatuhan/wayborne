@@ -393,8 +393,18 @@ func _refresh_feast() -> void:
 	_feast_label.text = tr("UI_TAVERN_FEAST_HINT") % [
 		_session.party_stress, GameSession.MAX_STRESS, GameSession.FEAST_STRESS_RELIEF
 	]
-	_feast_button.text = tr("UI_TAVERN_FEAST") % _session.get_feast_cost()
-	_feast_button.disabled = not _session.can_afford_feast()
+	# Kapalı düğme sebebini söyler (profil günlükleri, 2026-11-05): üç ayrı
+	# sebep - kimse yorgun değil, bugün zaten verildi, kese yetmiyor - tek
+	# bir soluk düğmeye çıkıyor ve oyuncu hangisi olduğunu okuyamıyordu.
+	var feast_reason := _session.get_feast_block_reason()
+	if feast_reason.is_empty():
+		_feast_button.text = tr("UI_TAVERN_FEAST") % _session.get_feast_cost()
+		_feast_button.disabled = false
+	else:
+		_feast_button.text = "%s — %s" % [
+			tr("UI_TAVERN_FEAST") % _session.get_feast_cost(), tr(feast_reason)
+		]
+		_feast_button.disabled = true
 
 func _on_feast_pressed() -> void:
 	if _session.throw_feast():
@@ -405,8 +415,15 @@ func _refresh_lodging() -> void:
 	if _lodging_label == null:
 		return
 	_lodging_label.text = tr("UI_TAVERN_LODGING_HINT") % GameSession.LODGING_STRESS_RELIEF
-	_lodging_button.text = tr("UI_TAVERN_LODGE") % _session.get_lodging_cost()
-	_lodging_button.disabled = not _session.can_afford_lodging()
+	var lodging_reason := _session.get_lodging_block_reason()
+	if lodging_reason.is_empty():
+		_lodging_button.text = tr("UI_TAVERN_LODGE") % _session.get_lodging_cost()
+		_lodging_button.disabled = false
+	else:
+		_lodging_button.text = "%s — %s" % [
+			tr("UI_TAVERN_LODGE") % _session.get_lodging_cost(), tr(lodging_reason)
+		]
+		_lodging_button.disabled = true
 
 func _on_lodging_pressed() -> void:
 	var day_before := _session.total_days_elapsed

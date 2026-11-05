@@ -193,7 +193,15 @@ func _person_row(person: Dictionary) -> VBoxContainer:
 		row.add_child(wants)
 		var deliver := Button.new()
 		deliver.text = tr("UI_PEOPLE_DELIVER")
-		deliver.disabled = not _session.can_deliver_chain(id)
+		# Kapalı düğme sebebini söyler: kaç tane eksik olduğu yazılır
+		# (profil günlükleri, 2026-11-05).
+		var chain_reason := _session.get_chain_block_reason(id)
+		if not chain_reason.is_empty():
+			var missing_text := _session.get_chain_missing_text(id)
+			deliver.text = "%s — %s" % [
+				deliver.text, missing_text if not missing_text.is_empty() else tr(chain_reason)
+			]
+		deliver.disabled = not chain_reason.is_empty()
 		deliver.pressed.connect(func():
 			if _session.deliver_chain(id):
 				refresh())

@@ -58,3 +58,49 @@ Rapor `docs/design_notes/oyuncu_profilleri.md`. Araç `tests/simulate_personas.g
     · Ö5 ölümden sonra son üç karar gösterilsin (S) · Ö6 ilk seferde erzağın yettiği yollar işaretlensin (S)
     · Ö7 Tüccar'a ad ile ödül: bölgesel itibar eşiği deftere yazılsın (M).
   - Hiçbiri sistem kesmiyor; Ö3 pazarlığı geri büyütmeyi **önermiyor** (para basma noktası oydu).
+
+## İkinci tur: altı profil, oyun günlüğü (2026-11-05)
+
+Rapor: `docs/design_notes/oyuncu_gunlukleri.md` · Günlükler: `docs/design_notes/oyuncu_gunlukleri/*.md`
+Araç: `tests/simulate_player_diaries.gd` · Ekran: `tests/screenshot_diary_fixes.gd`
+Kilitler: `tests/test_persona_fixes.gd` (12 test, 32 055 geçti)
+
+- [x] **PR08 Altı profil + günlük aracı**
+  - Kâğıt Üstünde Tüccar · Defter Tutan · Ucunda Yürüyen · Listeyi Kapatan · Bedeli Soran ·
+    **Vagonu Kuran** (yeni). Her profil `keyif_yerleri` listesiyle geliyor ve şehrin tüm fiillerini
+    deniyor (taverna, şölen, pano, avans, pazar, takas, atölye, kilise, hekim, işe alma, kişi işleri,
+    dövüş, kamp, yolda arama).
+  - Günlük üç tür satır tutuyor: `istedim` (oyunun kendi sebep yazısıyla) · `keyif` · `anladım`.
+    Toplam 808 keyif, 1022 istedim, 103 anladım.
+
+- [x] **PR09 Ölçüm aracının üç yalanı yakalandı**
+  - Savaş simülatörde hiç çözülmüyordu (`TRIGGER_COMBAT` yalnız `road_journey.gd`'de): "sıfır ölüm"
+    sahteydi. `simulate_journeys.gd`'nin headless politikası taşındı.
+  - "148 kez sebep yazmıyor" benim uydurduğum cümleydi; kilitli seçenek sebebini zaten söylüyor.
+    Gerçek bulgu: **102 kez "Yeterli altının yok"** - yolda kapalı seçeneklerin birinci sebebi yoksulluk.
+  - "Sıfır aç gün" yalnız adı olan partiyi sayıyordu; `crew_hungry` ayrı ve 60-98 gün doğru.
+
+- [x] **PR10 Yedi kusur düzeltildi (hepsi testli, görünenler ekranda doğrulandı)**
+  - K1 `TRAVEL_DAYS` kat edilen yolu siliyordu (`get_days_travelled()` sıfıra kırpılıyordu) →
+    `GameSession.extend_journey()`.
+  - K2 arama yalnız en iyi sezgiye bakıyordu, el sayısına değil → `FORAGE_PER_EXTRA_HAND`.
+  - K3 konaklama, şölen ve bağış sebep söylemeden ölüyordu → üç yeni `*_block_reason`.
+  - K4 teslimat kaç tane eksik olduğunu söylemiyordu → `get_chain_missing_text`.
+  - K5 emirler paneli kadro listesinin üstüne biniyordu → `_default_orders_position` tavanı düzeltildi.
+  - K6 yolda yiyecek arama emri (önceki turdan) · K7 soy bilgiyi taşıyor (önceki turdan).
+
+- [ ] **PR11 Baş bulgu: oyunun ortası yok (kullanıcı kararı)**
+  - Dört profil 20/20 sefer **sıfır ölümle**; iki profil **iki koşunun ikisinde de** 5-6,5 seferde bitti.
+    Arada bant yok. Ayıran şey beceri değil, tek bir başlangıç kararı: sofra herkese mi açık.
+  - Sebebi aritmetik: **ticaret dışında günlük tüketimi aşan tek bir gelir yok.** Gündelik iş net
+    +0,4 gün, arama ≈0, dövüş küçük ve yarısı kaybediliyor. Sermayesi olmayan oyuncu için ayakta
+    kalmanın matematiksel yolu yok.
+  - Kullanıcının istediği bant ("çaba göstererek az ölümle devam etmek") bu yüzden yok.
+
+- [ ] **PR12 Öneriler (G1-G8), uygulanmadı**
+  - G1 ticaret dışı gelir: kervanı ücretle yük taşımaya vermek (M, **kullanıcı kararı**) · G2 isimsiz
+    ekibin açlığı deftere geçsin (M, **kullanıcı kararı**) · G3 atölye girdileri pazarda görünsün (S)
+    · G4 kişilerin istekleri pazara/deftere taşınsın (S) · G5 kaybedilen dövüşün bedeli olsun (M)
+    · G6 vagon büyümesinin görünür bedeli olsun (M) · G7 avans eşiğini yazsın (S) · G8 pano ilanının
+    neden alınamadığını yazsın (S).
+  - Hiçbiri sistem kesmiyor; G1 ticareti küçültmüyor, yoksulluğa taban koyuyor.

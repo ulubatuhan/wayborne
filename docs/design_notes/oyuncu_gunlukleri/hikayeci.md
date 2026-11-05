@@ -1,0 +1,192 @@
+# Defter Tutan — oyun günlüğü
+
+Sayıya değil ize bakar. Tavernada oturur, kişileri tanır, deftere ne yazıldığını merak eder.
+
+## Keyif aldığım yerler (profilin kendi sözleri)
+- tavernada bir gece kalıp odadakileri dinlemek
+- adı olan birinin kervanı hatırlaması
+- defterde yeni bir satır görmek
+- daha önce görmediği bir kart çekmek
+- yolda bir mezarın yanından geçmek
+
+## 1. koşu (tohum 770000) — 3 sefer, 2 ölüm
+- **1. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **1. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **1. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · keyif** — kiliseye verildi
+- **1. gün · kirsavel · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **2. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **3. gün · tolvarin · keyif** — görülmemiş bir yere varıldı: tolvarin
+- **4. gün · tolvarin · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **4. gün · tolvarin · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **4. gün · tolvarin · istedim** — Brunhild'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **4. gün · tolvarin · keyif** — kiliseye verildi
+- **4. gün · tolvarin · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **9. gün · tolvarin · keyif** — bitmek üzereyken 9 erzak bulundu
+- **10. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_wandering_players
+- **11. gün · tolvarin · keyif** — yeni bir kart görüldü: evt_party_theft
+- **11. gün · serai_orbeyan · keyif** — görülmemiş bir yere varıldı: serai_orbeyan
+- **12. gün · serai_orbeyan · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **12. gün · serai_orbeyan · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **12. gün · serai_orbeyan · istedim** — Kutalmış'in işini bitirmek — 4 tane eksik
+- **12. gün · serai_orbeyan · istedim** — Bayra'in işini bitirmek — 4 tane eksik
+- **12. gün · serai_orbeyan · istedim** — Yaruk'in işini bitirmek — 4 tane eksik
+- **12. gün · serai_orbeyan · istedim** — kiliseye vermek — Kese yetmiyor
+- **12. gün · serai_orbeyan · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **12. gün · serai_orbeyan · anladım** — herkesi besleyemiyoruz; sofra ekibe indirildi
+- **15. gün · serai_orbeyan · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **15. gün · serai_orbeyan · anladım** — erzak eksik; yine de yola çıkılıyor
+- **18. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_forage
+- **20. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_traveling_tinker
+- **20. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **20. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **20. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Kese yetmiyor
+- **25. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **25. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **26. gün · serai_orbeyan · keyif** — bitmek üzereyken 9 erzak bulundu
+- **29. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **29. gün · serai_orbeyan · keyif** — bitmek üzereyken 9 erzak bulundu
+- **32. gün · serai_orbeyan · keyif** — bitmek üzereyken 9 erzak bulundu
+- **35. gün · serai_orbeyan · keyif** — bitmek üzereyken 9 erzak bulundu
+- **40. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_refugee_column
+- **40. gün · serai_orbeyan · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **40. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Paylaşacak yeterli erzağın yok
+- **40. gün · serai_orbeyan · istedim** — kartta kapalı bir seçeneği seçmek — Kesede 30 GG yok
+- **46. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_broken_outburst
+- **55. gün · serai_orbeyan · anladım** — Kervanbaşı açlıktan öldü
+- **55. gün · serai_orbeyan · keyif** — yeni bir kart görüldü: evt_abandoned_wagon
+- **55. gün · selvicar · keyif** — görülmemiş bir yere varıldı: selvicar
+- **55. gün · selvicar · anladım** — kervan bitti; defter kapandı ve yeni bir soy başlayacak
+
+## 2. koşu (tohum 771013) — 7 sefer, 3 ölüm
+- **1. gün · kirsavel · istedim** — şölen kurmak — Kimsenin böyle bir geceye ihtiyacı yok
+- **1. gün · kirsavel · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **1. gün · kirsavel · istedim** — Kaya'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · istedim** — Mathis'in işini bitirmek — 4 tane eksik
+- **1. gün · kirsavel · keyif** — kiliseye verildi
+- **1. gün · kirsavel · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **4. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_wild_animal
+- **6. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_bandit_ambush
+- **6. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **7. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_road_patrol
+- **13. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_storm
+- **15. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_traveling_tinker
+- **15. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **15. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **15. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Kese yetmiyor
+- **16. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_hunting_trip
+- **18. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_road_wanderer
+- **18. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Vagonlarında yer yok
+- **18. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **19. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_spoiled_provisions
+- **19. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **19. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **19. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **20. gün · kirsavel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **21. gün · kirsavel · keyif** — bitmek üzereyken 9 erzak bulundu
+- **23. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_forage
+- **26. gün · kirsavel · keyif** — yeni bir kart görüldü: evt_regional_war_news
+- **27. gün · samuran · keyif** — görülmemiş bir yere varıldı: samuran
+- **27. gün · samuran · istedim** — tavernada kalmak — Kese yetmiyor
+- **27. gün · samuran · keyif** — Hilda'in istediği getirildi; adımız onda
+- **27. gün · samuran · keyif** — Sieglinde'in istediği getirildi; adımız onda
+- **27. gün · samuran · istedim** — Yelda'in işini bitirmek — 4 tane eksik
+- **27. gün · samuran · keyif** — kiliseye verildi
+- **27. gün · samuran · istedim** — tayfaya biri katmak — Vagonlarında yer yok
+- **27. gün · samuran · keyif** — aç bir şehre yiyecek bırakıldı
+- **27. gün · samuran · anladım** — herkesi besleyemiyoruz; sofra ekibe indirildi
+- **28. gün · samuran · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **29. gün · samuran · keyif** — yeni bir kart görüldü: evt_failing_bridge
+- **30. gün · samuran · keyif** — yeni bir kart görüldü: evt_carcass_on_road
+- **33. gün · samuran · keyif** — yeni bir kart görüldü: evt_wolves_follow
+- **34. gün · liraven · keyif** — görülmemiş bir yere varıldı: liraven
+- **34. gün · liraven · istedim** — tavernada kalmak — Kese yetmiyor
+- **34. gün · liraven · istedim** — Otto'in işini bitirmek — 4 tane eksik
+- **34. gün · liraven · istedim** — Gisela'in işini bitirmek — 4 tane eksik
+- **34. gün · liraven · istedim** — Benedikt'in işini bitirmek — 4 tane eksik
+- **34. gün · liraven · istedim** — kiliseye vermek — Kese yetmiyor
+- **34. gün · liraven · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **34. gün · liraven · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **35. gün · liraven · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **39. gün · liraven · istedim** — kartta kapalı bir seçeneği seçmek — Levazımcın yok
+- **39. gün · liraven · istedim** — kartta kapalı bir seçeneği seçmek — Otacın yok
+- **39. gün · merigaud · keyif** — görülmemiş bir yere varıldı: merigaud
+- **39. gün · merigaud · istedim** — tavernada kalmak — Kese yetmiyor
+- **39. gün · merigaud · istedim** — Sieglinde'in işini bitirmek — 4 tane eksik
+- **39. gün · merigaud · istedim** — Elsbeth'in işini bitirmek — 4 tane eksik
+- **39. gün · merigaud · istedim** — Gerhardt'in işini bitirmek — 4 tane eksik
+- **39. gün · merigaud · istedim** — kiliseye vermek — Kese yetmiyor
+- **39. gün · merigaud · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **39. gün · merigaud · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **40. gün · merigaud · keyif** — 1 gün çalışılıp erzak çıkarıldı
+- **42. gün · serai_duvenmor · keyif** — görülmemiş bir yere varıldı: serai_duvenmor
+- **42. gün · serai_duvenmor · istedim** — tavernada kalmak — Kese yetmiyor
+- **42. gün · serai_duvenmor · istedim** — Roswitha'in işini bitirmek — 4 tane eksik
+- **42. gün · serai_duvenmor · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **42. gün · serai_duvenmor · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **42. gün · serai_duvenmor · istedim** — kiliseye vermek — Kese yetmiyor
+- **42. gün · serai_duvenmor · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **42. gün · serai_duvenmor · istedim** — erzak almak — [sebep yazmıyor] şehrin erzak stoğu bitti
+- **44. gün · serai_duvenmor · keyif** — 2 gün çalışılıp erzak çıkarıldı
+- **46. gün · serai_duvenmor · keyif** — yeni bir kart görüldü: evt_guard_patrol
+- **46. gün · serai_duvenmor · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **46. gün · serai_duvenmor · keyif** — dövüş kayıpsız kazanıldı
+- **47. gün · ondrelle · keyif** — görülmemiş bir yere varıldı: ondrelle
+- **48. gün · ondrelle · istedim** — şölen kurmak — Kese yetmiyor
+- **48. gün · ondrelle · keyif** — tavernada bir gece kalındı; odadakiler dinlendi
+- **48. gün · ondrelle · istedim** — Aldric'in işini bitirmek — 4 tane eksik
+- **48. gün · ondrelle · istedim** — Friedrich'in işini bitirmek — 4 tane eksik
+- **48. gün · ondrelle · istedim** — Lorenz'in işini bitirmek — 4 tane eksik
+- **48. gün · ondrelle · istedim** — kiliseye vermek — Kese yetmiyor
+- **48. gün · ondrelle · istedim** — tayfaya biri katmak — Kese yetmiyor
+- **48. gün · ondrelle · keyif** — panodan 2 ilan alındı
+- **51. gün · ondrelle · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **51. gün · ondrelle · anladım** — erzak eksik; yine de yola çıkılıyor
+- **53. gün · ondrelle · keyif** — yeni bir kart görüldü: evt_customs_checkpoint
+- **53. gün · ondrelle · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **55. gün · ondrelle · keyif** — yeni bir kart görüldü: evt_kin_encounter
+- **56. gün · ondrelle · keyif** — bitmek üzereyken 9 erzak bulundu
+- **59. gün · ondrelle · keyif** — bitmek üzereyken 9 erzak bulundu
+- **60. gün · ondrelle · keyif** — bitmek üzereyken 9 erzak bulundu
+- **62. gün · ondrelle · keyif** — bitmek üzereyken 9 erzak bulundu
+- **67. gün · orvahel · keyif** — görülmemiş bir yere varıldı: orvahel
+- **67. gün · orvahel · istedim** — tavernada kalmak — Bu şehirde kapılar sana kapalı
+- **67. gün · orvahel · istedim** — Waldemar'in işini bitirmek — 4 tane eksik
+- **67. gün · orvahel · istedim** — Benedikt'in işini bitirmek — 4 tane eksik
+- **67. gün · orvahel · istedim** — Gisela'in işini bitirmek — 4 tane eksik
+- **67. gün · orvahel · keyif** — Yalın Çakmaktaşı hekime götürüldü
+- **67. gün · orvahel · keyif** — kiliseye verildi
+- **67. gün · orvahel · keyif** — Dorio Demirci kervana katıldı
+- **67. gün · orvahel · keyif** — panodan 1 ilan alındı
+- **70. gün · orvahel · keyif** — 3 gün çalışılıp erzak çıkarıldı
+- **70. gün · orvahel · anladım** — erzak eksik; yine de yola çıkılıyor
+- **71. gün · orvahel · keyif** — yeni bir kart görüldü: evt_party_theft
+- **72. gün · orvahel · keyif** — bitmek üzereyken 12 erzak bulundu
+- **73. gün · orvahel · keyif** — yeni bir kart görüldü: evt_merchant_caravan
+- **73. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Kesede 10 altın yok
+- **74. gün · orvahel · keyif** — bitmek üzereyken 12 erzak bulundu
+- **76. gün · orvahel · keyif** — yeni bir kart görüldü: evt_sick_merchant
+- **76. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **76. gün · orvahel · keyif** — bitmek üzereyken 12 erzak bulundu
+- **78. gün · orvahel · keyif** — bitmek üzereyken 12 erzak bulundu
+- **92. gün · orvahel · keyif** — yeni bir kart görüldü: evt_mutiny
+- **92. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **95. gün · orvahel · keyif** — yeni bir kart görüldü: evt_abandoned_wagon
+- **96. gün · orvahel · anladım** — Dorio Demirci açlıktan öldü
+- **97. gün · orvahel · anladım** — Yalın Çakmaktaşı açlıktan öldü
+- **97. gün · orvahel · istedim** — kartta tek seçenek vardı: seçmek diye bir şey yoktu
+- **97. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **97. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Bu kadroyu lafla yatıştıracak dilin yok
+- **99. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **99. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Onarılacak vagon ya da yeterli kese yok
+- **99. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Kese yetmiyor
+- **100. gün · orvahel · anladım** — Kervanbaşı açlıktan öldü
+- **102. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Saklanacak kaçak yok
+- **102. gün · orvahel · istedim** — kartta kapalı bir seçeneği seçmek — Yeterli altının yok
+- **102. gün · zelmarin · keyif** — görülmemiş bir yere varıldı: zelmarin
+- **102. gün · zelmarin · anladım** — kervan bitti; defter kapandı ve yeni bir soy başlayacak

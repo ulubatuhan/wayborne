@@ -171,3 +171,46 @@ yapıyor). Aynı simülatör, aynı tohumlar:
 ve keyfi düştü - daha uzun yaşayınca daha çok aç gün görüyor. Çözümü
 kıtlık kipine dokunuyor (affedici rota seçimi ya da sınırlı ilk sefer),
 o yüzden yapılmadı.
+
+## Oyun günlükleri turu — altı profil (2026-11-05)
+
+Rapor `docs/design_notes/oyuncu_gunlukleri.md`; altı günlüğün tamamı
+`docs/design_notes/oyuncu_gunlukleri/*.md`; kayıt
+`proje_takibi/referans/gorevler/18_oyuncu_profilleri.md` (PR08-PR12).
+Araç `tests/simulate_player_diaries.gd` (6 profil × 2 koşu × 20 sefer),
+ekran `tests/screenshot_diary_fixes.gd`, kilitler
+`tests/test_persona_fixes.gd` (12 test; süit 32 055 geçti).
+
+**Profiller:** Kâğıt Üstünde Tüccar · Defter Tutan · Ucunda Yürüyen ·
+Listeyi Kapatan · Bedeli Soran · Vagonu Kuran (yeni). Her biri keyif
+aldığı yerleri listeliyor ve şehrin bütün fiillerini deniyor; günlüğe
+`istedim` / `keyif` / `anladım` satırları düşüyor (808 / 1022 / 103).
+
+**Düzeltilen kusurlar (hepsi testli):**
+- K1 `TRAVEL_DAYS` kat edilen yolu siliyordu - `journey_total_days`
+  artmayınca `get_days_travelled()` sıfıra kırpılıyordu ve oyuncu
+  gecikme kartından sonra başa dönmüş görünüyordu →
+  `GameSession.extend_journey()`.
+- K2 yolda arama yalnız en iyi sezgiye bakıyordu, el sayısına değil →
+  `FORAGE_PER_EXTRA_HAND`.
+- K3 konaklama, şölen ve kilise bağışı sebep söylemeden ölüyordu → üç
+  yeni `*_block_reason` + ekranlar.
+- K4 teslimat kaç tane eksik olduğunu söylemiyordu →
+  `get_chain_missing_text`.
+- K5 emirler paneli kadro listesinin üstüne biniyordu.
+- K6 yolda "Yiyecek ara" emri · K7 soy bilgiyi taşıyor (fiyat defteri
+  kulaktan dolma olarak devrediliyor).
+
+**Ölçüm aracı üç kez yalan söyledi, üçü de yakalandı:** savaş
+simülatörde hiç çözülmüyordu ("sıfır ölüm" sahteydi); "sebep yazmıyor"
+sayısı benim uydurduğum cümleden geliyordu (gerçek bulgu: 102 kez
+"Yeterli altının yok"); "sıfır aç gün" yalnız adı olan partiyi
+sayıyordu (isimsiz ekip 60-98 gün aç).
+
+**Açık kalan karar (PR11/PR12):** oyunun ortası yok. Dört profil 20/20
+sefer sıfır ölümle, iki profil iki koşunun ikisinde de 5-6,5 seferde
+bitiyor; arada bant yok ve ayıran şey beceri değil, sofranın herkese
+açık olup olmaması. Sebebi aritmetik: **ticaret dışında günlük tüketimi
+aşan tek bir gelir yok** (gündelik iş net +0,4 gün, arama ≈0, dövüş
+küçük). Öneriler G1-G8 raporda; G1 (kervanı ücretle yük taşımaya vermek)
+ve G2 (isimsiz ekibin açlığı deftere geçsin) kullanıcı kararı bekliyor.

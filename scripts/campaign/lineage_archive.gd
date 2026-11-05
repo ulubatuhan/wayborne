@@ -33,6 +33,16 @@ static func build_record(session: GameSession) -> Dictionary:
 		"journeys": session.journeys_completed,
 		"graves": graves,
 		"ledger": lines,
+		# **Öğrenilen bilgi yeni soya geçer** (kullanıcı kararı 2026-11-05,
+		# profil turu 2): *"sonuçtan değil süreçten keyif ve haz vermeyi
+		# amaçlıyoruz"* ve *"baştan başlamak çok da koymamalı."*
+		#
+		# Taşınan şey güç değil **bilgi**: hangi kartları gördüğün ve
+		# gezdiğin yerlerin fiyat defteri. Yeni kervan daha güçlü
+		# başlamıyor, daha **bilgili** başlıyor - kıtlık aynı sertlikte,
+		# ama oyuncunun biriktirdiği okuma kaybolmuyor.
+		"seen_events": session.seen_event_ids.keys(),
+		"price_book": session.price_book.duplicate(true),
 	}
 
 ## Soyu yazar ve açtığı başlangıç kökenlerini (Y-D05) meta kayda ekler.
@@ -79,6 +89,19 @@ static func apply_to(session: GameSession, old: Dictionary) -> Dictionary:
 		grave["old_lineage"] = String(old.get("caravan_name", ""))
 		grave["id"] = "old_%s" % String(grave.get("id", ""))
 		session.road_memorials.append(grave)
+	# Gördüğün kart unutulmuyor: defterin sayacı (Ö4) soy boyunca birikir.
+	for event_id in old.get("seen_events", []):
+		session.note_event_seen(String(event_id))
+	# Eski soyun fiyat defteri **eskimiş olarak** devralınıyor: bilgi
+	# duruyor ama tazeliğini kaybetmiş. Yeni kervan nereye bakacağını
+	# bilir, ne bulacağını bilmez.
+	var inherited: Dictionary = old.get("price_book", {})
+	for location_id in inherited:
+		var entry: Dictionary = (inherited[location_id] as Dictionary).duplicate(true)
+		entry["source"] = GameSession.PRICE_SOURCE_RUMOR
+		entry["accurate"] = false
+		entry["day"] = -GameSession.PRICE_STALE_DAYS - 1
+		session.price_book[String(location_id)] = entry
 	# Yadigâr: eski soydan kalan eski mühür.
 	session.add_to_cargo_or_bag(ItemCatalog.get_item(ItemCatalog.RARE_RELIC), 1)
 	session.ledger.record(CaravanLedger.KIND_MEMORIAL, String(old.get("caravan_name", "")),
@@ -88,6 +111,8 @@ static func apply_to(session: GameSession, old: Dictionary) -> Dictionary:
 		"generations": int(old.get("generations", 1)),
 		"reputation": reputation,
 		"graves": (old.get("graves", []) as Array).size(),
+		"seen_events": (old.get("seen_events", []) as Array).size(),
+		"known_places": (old.get("price_book", {}) as Dictionary).keys().size(),
 		"ledger": old.get("ledger", []),
 	}
 	session.legacy = legacy

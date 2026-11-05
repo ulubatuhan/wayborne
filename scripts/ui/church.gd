@@ -103,8 +103,12 @@ func _build_donation() -> void:
 
 func _refresh_donation() -> void:
 	_donation_label.text = tr("UI_CHURCH_DONATION_HINT") % _session.standing.faction(Standing.CHURCH)
+	var donate_reason := _session.get_church_donation_block_reason()
 	_donation_button.text = tr("UI_CHURCH_DONATE") % GameSession.CHURCH_DONATION
-	_donation_button.disabled = not _session.can_donate_to_church()
+	if not donate_reason.is_empty():
+		# Kapalı düğme sebebini söyler (profil günlükleri, 2026-11-05).
+		_donation_button.text = "%s — %s" % [_donation_button.text, tr(donate_reason)]
+	_donation_button.disabled = not donate_reason.is_empty()
 
 func _build_doctor() -> void:
 	_doctor_box = VBoxContainer.new()

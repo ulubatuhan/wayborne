@@ -101,7 +101,14 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			session.apply_event_stress(effect.amount)
 			result.lines.append(Wording.change_line(Wording.STRESS, effect.amount))
 		EventEffect.Type.TRAVEL_DAYS:
-			session.journey_days_remaining = maxi(0, session.journey_days_remaining + effect.amount)
+			# Gecikme yolu uzatır, kat edileni silmez (profil günlükleri,
+			# 2026-11-05). Yalnızca kalan gün artırılıyordu; `journey_total_days`
+			# yerinde kalınca `get_days_travelled()` = total - remaining negatife
+			# düşüp sıfıra kırpılıyordu: oyuncu on gün yürüdükten sonra bir
+			# gecikme kartı çekince yol ekranında **başlangıç noktasına** geri
+			# dönmüş görünüyordu ve ne kadar yol aldığını bir daha göremiyordu.
+			# Doğrusu: yol uzadı, yürünen yürünmüş kaldı.
+			session.extend_journey(effect.amount)
 			result.lines.append(_t("EFF_TRAVEL_DAYS") % effect.amount)
 		EventEffect.Type.DANGER:
 			session.danger_level = clampf(session.danger_level + (effect.amount / 100.0), 0.0, 1.0)

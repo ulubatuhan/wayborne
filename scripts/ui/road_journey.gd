@@ -414,6 +414,7 @@ var _orders_dragging: bool = false
 var _orders_drag_offset: Vector2 = Vector2.ZERO
 var _pace_buttons: Array[Button] = []
 var _talk_merchant_button: Button
+var _forage_button: Button
 ## Yan kanal açıkken emirler kilitli; her karede tazelenen düğmeler bu
 ## kilidi ezmesin diye ayrı tutuluyor.
 var _orders_enabled: bool = true
@@ -1184,6 +1185,7 @@ const COMMANDS: Array[Dictionary] = [
 	{"key": "UI_ROAD_CMD_MARCH", "pace": PACE_STEADY, "pace_key": "UI_ROAD_PACE_STEADY", "short": "UI_ROAD_ORDER_STEADY"},
 	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST", "short": "UI_ROAD_ORDER_FAST"},
 	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": "", "short": "UI_ROAD_CMD_TALK_MERCHANT"},
+	{"key": "UI_ROAD_CMD_FORAGE", "pace": -4.0, "pace_key": "", "short": "UI_ROAD_ORDER_FORAGE"},
 ]
 const PACE_COMMAND_COUNT: int = 4
 ## Sofra emrinin düğmede ve kayıtta kısa adı.
@@ -1262,6 +1264,13 @@ func _build_orders_panel() -> void:
 	_talk_merchant_button.text = tr("UI_ROAD_ORDER_MERCHANT")
 	_talk_merchant_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT))
 	action_row.add_child(_talk_merchant_button)
+	# Yiyecek aramak (profil turu 2): yolda açken oyuncunun yapabileceği
+	# **tek eylem**. Önceden yiyecek yalnız kart çekişinden geliyordu;
+	# açlıktan ölmek bir karar değil bir şanssızlıktı.
+	_forage_button = Button.new()
+	_forage_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
+	_forage_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT + 1))
+	action_row.add_child(_forage_button)
 	# Yoldaki "Borç" emri P12'de kaldırıldı: yolda borçla uğraşmak muhasebe
 	# kipinin ta kendisiydi. Borç artık yalnız şehirde, Lonca'nın defter
 	# sekmesinde ödeniyor.
@@ -1329,12 +1338,18 @@ func _default_orders_position() -> Vector2:
 	var margin := ORDERS_PANEL_SAFE_MARGIN
 	if _orders_layer == null or _command_panel == null:
 		return Vector2(margin, margin)
-	var bottom_height := WaybookTheme.HUD_RULE_HEIGHT
-	if _hud != null and _hud.get_child_count() > 0:
+	# Tavan alttaki **bütün** HUD yığınının üstü, yalnız en alttaki ince
+	# şerit değil. Eskiden son çocuğun yüksekliği ölçülüyordu; o şerit
+	# kısa olduğu için panel kadro listesinin üstüne biniyor ve ilk
+	# yoldaşın satırını örtüyordu (ekran görüntüsü, 2026-11-05).
+	var ceiling := _orders_layer.size.y - WaybookTheme.HUD_RULE_HEIGHT
+	if _control_panel != null and _control_panel.is_inside_tree():
+		ceiling = _control_panel.global_position.y
+	elif _hud != null and _hud.get_child_count() > 0:
 		var bottom := _hud.get_child(_hud.get_child_count() - 1) as Control
 		if bottom != null:
-			bottom_height = bottom.size.y
-	var y := _orders_layer.size.y - bottom_height - WaybookTheme.HUD_RULE_HEIGHT - _command_panel.size.y - margin
+			ceiling = _orders_layer.size.y - bottom.size.y
+	var y := ceiling - _command_panel.size.y - margin
 	return Vector2(margin, maxf(margin, y))
 
 ## Emir paneli açılıp kapanır (bkz. `_orders_button`) - sürüklenmiş bir
@@ -1359,6 +1374,7 @@ func _on_orders_toggled(pressed: bool) -> void:
 func _refresh_command_panel() -> void:
 	if _pace_buttons.is_empty():
 		return
+	_refresh_forage_button()
 	# Panel yalnızca oyuncu düğmeyle açtıysa görünür - ve savaş yolun
 	# yerini alınca (band gizlenince) onun üstünde durmamalı.
 	_command_panel.visible = _orders_open and _band.visible
@@ -1489,6 +1505,9 @@ func _issue_command(index: int) -> void:
 	if is_equal_approx(pace, -2.0):
 		if not _talk_merchant_button.disabled:
 			_open_merchant_dialogue()
+		return
+	if is_equal_approx(pace, -4.0):
+		_forage_now()
 		return
 	if index < PACE_COMMAND_COUNT and _pace_buttons[index].disabled:
 		return
@@ -4314,6 +4333,31 @@ func _open_merchant_dialogue() -> void:
 	_merchant_dialogue_panel.closed.connect(_on_merchant_dialogue_closed)
 	add_child(_merchant_dialogue_panel)
 	_merchant_dialogue_panel.setup(_session)
+
+## Bir gün yiyecek ara. Zaman öder, para değil - şehirdeki gündelik işle
+## (Ö3) aynı felsefe. Yol bir gün uzar, o günün erzağı yine yenir.
+func _forage_now() -> void:
+	if _session.get_forage_block_reason() != "":
+		return
+	var biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())
+	var found := _session.forage_a_day(biome)
+	if found <= 0:
+		return
+	_add_log(tr("UI_ROAD_FORAGE_FOUND") % found, OUTCOME_COLOR)
+	_refresh_command_panel()
+
+func _refresh_forage_button() -> void:
+	if _forage_button == null:
+		return
+	# "Disabled with reason": kapalıysa sebebini kendi yazısında söyler.
+	var reason := _session.get_forage_block_reason()
+	if reason.is_empty():
+		_forage_button.disabled = not _orders_enabled
+		var biome := "" if _terrain == null else _terrain.biome_at(_terrain_day())
+		_forage_button.text = tr("UI_ROAD_ORDER_FORAGE") % _session.get_forage_yield(biome)
+	else:
+		_forage_button.disabled = true
+		_forage_button.text = tr(reason)
 
 func _on_merchant_dialogue_closed() -> void:
 	_merchant_dialogue_panel = null
