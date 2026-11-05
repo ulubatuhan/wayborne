@@ -151,3 +151,21 @@ Who you are travelling with, and who you meet, changes what an event does.
   chief shows the braces, so only that card uses them.
 - `EventEffect.Type.FACTION` (text_value = faction id) and `EventEffect.Type.CHIEF_MEMORY` ("paid") are how cards
   touch factions and the chief's memory; no card writes `People` or `Standing` directly.
+
+### Quiet Day Rules
+
+`RoadDirector`'s quiet ramp raised the daily chance after every silent day,
+so by the third day something was all but certain: the road could never
+actually fall silent. **A game that offers something every minute is not
+bleak, it is busy** - monotony is a resource, not a defect.
+
+Under scarcity the ramp and its ceiling are damped (`SCARCITY_QUIET_RAMP`
+0.16 against `QUIET_RAMP` 0.5; `SCARCITY_MAX_QUIET_BOOST` 1.3 against 2.0),
+interpolated by the scarcity degree from `SCARCITY_QUIET_FROM`. It is damped,
+never zeroed: the road does not go mute, it only becomes able to stay quiet
+three days running, so *"nothing happened today either, and one more sack is
+gone"* is a valid day.
+
+`chance_multiplier(context)` reads `scarcity_here` from the event context; a
+call without a context keeps the old behaviour, which is why the existing
+`test_event_engine` assertions did not have to change.

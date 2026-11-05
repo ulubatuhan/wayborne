@@ -391,7 +391,7 @@ func _refresh_shop_rows() -> void:
 				notes.append(tr("UI_MARKET_STOCK_PLENTY"))
 		# Görev Y-C11: fiyatın yedi katmanından sapanlar kısa adlarla; üstüne
 		# gelince her biri bir cümleyle açıklanır.
-		var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed)
+		var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed, _session.scarcity_here())
 		for reason in [buy_reason, sell_reason]:
 			if not reason.is_empty():
 				notes.append(tr(reason))
@@ -647,7 +647,7 @@ func _reason_for(item: Item) -> String:
 	if not String(best.city).is_empty() and String(best.city) != _session.current_location_id:
 		var city := WorldMapData.get_location_by_id(String(best.city))
 		parts.append(tr("UI_MARKET_BEST_ELSEWHERE") % [city.location_name if city != null else String(best.city), int(best.price), _get_sell_price(item)])
-	var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed)
+	var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed, _session.scarcity_here())
 	if not String(layer_text[0]).is_empty():
 		parts.append(String(layer_text[0]))
 	return " · ".join(parts)

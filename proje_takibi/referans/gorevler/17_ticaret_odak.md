@@ -58,3 +58,30 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
   - Ölü çeviri anahtarları silindi (15 adet: `UI_HAGGLE_RANGE`, `_ROUNDS`, `_YOUR_OFFER`, `_SUBMIT`, `_REJECT`,
     `_LOG`, `_OPENING`, `_RULES`, `_INSULTED`, `_CREDIBLE`, `_NOT_CREDIBLE`, `_COUNTER`, `_ULTIMATUM`,
     `_FINAL`, `_YOU_OFFERED`). Codex bölümü yeniden yazıldı.
+
+- [x] **P07 Görünür fiyat katmanı 7'den 3'e indi**
+  - Satır notunda artık çarpan yok ve en çok **üç neden** yazılıyor (`PriceLayerText.MAX_MARKS`), en güçlüsü
+    başta. Gizli on bir çarpan yerinde: kesilen tek şey, oyuncunun çözebileceği bir bilmece olduğu yanılsaması.
+  - Yeni söz: **Kıtlık**, yalnız yiyecekte ve yalnız `Scarcity.HUNGRY_CITY_FROM` (0.50) üstünde, ilk sırada.
+  - **Ekran görüntüsünde düşen iki deneme:** (1) çeviri CSV'si içe aktarılmadığı için ham anahtar
+    (`UI_PRICE_TAG_SCAR...`) görünüyordu; (2) eşik 0.35'ken bölgelerin tabanı 0.12-0.55 olduğu için "Kıtlık"
+    birinci günden itibaren her malın altında yazıyordu - **her yerde olan bir söz hiçbir şey söylemez.**
+  - **Kabul:** `tests/screenshot_price_marks.gd` iki kare (sakin şehir / kıtlık şehri, yan yana).
+
+- [x] **P14 Defter sattığını hatırlar**
+  - Ticaret bugüne kadar hiçbir ahlaki iz bırakmıyordu: para ve stok değişiyor, kimse bir şey hatırlamıyordu.
+  - İki yön, ikisi de `GameSession._remember_trade`'de: **iyilik** (vebalı şehre ilaç ya da aç şehre ≥3 yiyecek)
+    bölgesel itibarı +2 yapar, şehrin adı olan üç kişisinin gönlünü artırır, deftere `LEDGER_CAUSE_TRADE_MERCY`
+    yazar; **vurgun** (`is_profiteering_sale` - krizin şişirdiği fiyattan satmak) itibarı -3 yapar, kin biriktirir,
+    `LEDGER_CAUSE_TRADE_PROFITEER` yazar.
+  - Sıradan satış hiçbir şey yapmaz; yoksa defter alışveriş fişine dönerdi.
+  - Yeni: `People.remember_trade(location_id, kindly)`, `Scarcity.HUNGRY_CITY_FROM`.
+
+- [x] **P17 Sessiz güne izin**
+  - `RoadDirector`'un sessizlik rampası her sessiz günden sonra ihtimali büyütüyordu: üçüncü gün neredeyse kesin
+    bir şey oluyordu, yani oyun hiçbir zaman susamıyordu. **Her dakika bir şey sunan oyun kasvetli değil
+    meşguldür.**
+  - Kıtlıkta rampa ve tavan kısılıyor (`SCARCITY_QUIET_RAMP` 0.16, `SCARCITY_MAX_QUIET_BOOST` 1.3), kıtlık
+    derecesiyle kademeli olarak. Sıfırlanmıyor: yol büsbütün susmuyor, yalnız üç gün üst üste susabiliyor.
+  - `chance_multiplier(context)` artık bağlamı okuyor; bağlamsız çağrı eski davranışı koruyor.
+  - **Kabul:** `tests/test_trade_focus.gd` (8 test; P7, P14 ve P17 birlikte).

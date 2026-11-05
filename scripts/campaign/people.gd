@@ -151,6 +151,22 @@ func complete_chain(id: String) -> void:
 	p["chain_step"] = int(p.get("chain_step", 0)) + 1
 	p["favor"] = int(p["favor"]) + 1
 
+## Kriz anındaki bir ticaret o şehirde hatırlanır (P14). Kervanın
+## vebalı şehre ilaç getirmesi ya da aç şehre yiyecek satması bir iyilik,
+## krizin şişirdiği fiyattan satması bir kindir. Şehrin **yaşayan** üç
+## kişisi de hatırlar: lonca ustası, tefeci, taverna sahibi.
+##
+## Neden burada: ticaret bugüne kadar hiçbir ahlaki iz bırakmıyordu - para
+## ve stok değişiyor, kimse bir şey hatırlamıyordu.
+func remember_trade(location_id: String, kindly: bool) -> void:
+	for p in city_people(location_id):
+		if not bool(p.get("alive", false)):
+			continue
+		if kindly:
+			p["favor"] = int(p.get("favor", 0)) + 1
+		else:
+			p["grudge"] = int(p.get("grudge", 0)) + 1
+
 # --- yolun hafızası: reis ---
 
 ## Bir bölgenin yaşayan reisi (yoksa "").

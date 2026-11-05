@@ -31,7 +31,7 @@ func get_daily_chance(context: Dictionary) -> float:
 	var danger: float = float(context.get("danger", 0.0))
 	var chance := daily_event_chance * (0.5 + danger)
 	if director != null:
-		chance *= director.chance_multiplier()
+		chance *= director.chance_multiplier(context)
 	return clampf(chance, 0.0, MAX_DAILY_EVENT_CHANCE)
 
 ## Bir yolculuk günü ilerletir. Olay çıkmazsa null döner.

@@ -7,7 +7,7 @@ description: Wayborne kural kitabının "Ekonomi, şehir, erzak ve borç" bölü
 
 CLAUDE.md'nin bu bölümleri 2026-10-30'da kullanıcı kararıyla buraya taşındı; metin değişmedi, başlıklar aynı. Koddaki
 "bkz. CLAUDE.md <başlık>" başvuruları buraya bakar. Kural becerilerinin listesi CLAUDE.md'de ("Kural becerileri").
-Bölümler: City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
+Bölümler: Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
 
 ### City Hub Rules
 
@@ -658,6 +658,50 @@ The resulting range on a 135 list price (base 100, greed 0.5, rep 0.3):
 accept pays 135, a won push pays 115-135 by skill, a lost push pays 149 plus
 1 reputation, walking out pays nothing and costs 1. A master talker (Charisma
 maxed, trusted) pays 85 against a list of 100 - it was 68 in the old design.
+
+### Price Mark Rules
+
+What the player reads under a stall row is the **reason**, never the number
+(P7, user's decision 2026-11-05). The tooltip once printed each of the seven
+official layers with its multiplier (`×1.24`) while eleven more stayed
+hidden - so the surface was a spreadsheet, and an *incomplete* one: the
+player could not add the visible multipliers up to the real price, only
+believe they could.
+
+- **At most `PriceLayerText.MAX_MARKS` (three) reasons**, strongest first by
+  `|m - 1|`. A fourth is not read; the eye scans the row, not the sentence.
+- **No multipliers anywhere in the text.** The eleven hidden multipliers stay
+  where they are - they are the world's depth. What was cut is the illusion
+  of a solvable puzzle. The fourth pillar (*trade is a game of information*)
+  means "you do not know what is where", not "solve the multipliers".
+- **"Kıtlık" is a word, not a layer.** Scarcity cuts supply rather than
+  multiplying price, but it explains the number best, so it is pushed to the
+  front - *only* for food (`Scarcity.is_food`) and only past
+  `Scarcity.HUNGRY_CITY_FROM`. Two screenshots decided both limits: at a
+  0.35 threshold the word appeared under every good in every city from day
+  one, and **a word that is everywhere says nothing**. The threshold is
+  literally `Scarcity.HUNGRY_CITY_FROM` so that "a hungry city" means one
+  thing across the game.
+- Changing the locale CSV needs `godot --headless --import` before the
+  screenshot, or the raw key renders (also caught on screen).
+
+### Trade Memory Rules
+
+Trade left **no moral trace**: money and stock moved, nobody remembered
+anything. `GameSession._remember_trade` (P14) binds the two cases that
+should be remembered, and only those:
+
+- **Mercy** - medicine into a plague city, or `TRADE_MERCY_MIN_QUANTITY` (3)
+  or more food into a city past `Scarcity.HUNGRY_CITY_FROM`: regional
+  standing `+TRADE_MERCY_STANDING`, `People.remember_trade(..., true)` on the
+  city's three named people, and a `CaravanLedger.KIND_TRADE` line with
+  `LEDGER_CAUSE_TRADE_MERCY`.
+- **Profiteering** - `is_profiteering_sale`, i.e. selling at the price the
+  crisis set: standing `TRADE_PROFITEER_STANDING`, a grudge on the same
+  people, `LEDGER_CAUSE_TRADE_PROFITEER`.
+- **An ordinary sale records nothing.** Without that limit the ledger turns
+  into a receipt book and the lines stop meaning anything. The quantity floor
+  exists for the same reason: one sack of grain does not save a city.
 
 ### Reputation Rules
 

@@ -29,6 +29,9 @@ const FOOD_PRICE_RISE: float = 0.6
 const GOODS_PRICE_RISE: float = 0.2
 ## Pazarda satılmayan pay: satıcı satmak istemez.
 const STOCK_WITHHELD: float = 0.6
+## Bir şehrin "aç" sayıldığı kıtlık derecesi (P14): bunun üstünde yiyecek
+## satmak bir alışveriş değil bir iyiliktir ve hatırlanır.
+const HUNGRY_CITY_FROM: float = 0.5
 
 static func degree(region: String, day: int) -> float:
 	var base := float(REGION_BASE.get(region, 0.4))

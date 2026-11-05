@@ -20,6 +20,22 @@ const STRAIN_HEAVY_WEIGHT: float = 0.7
 const STRAIN_LIGHT_WEIGHT: float = 1.2
 const STRAIN_STRESS: float = 60.0
 
+## Sessiz güne izin (P17, kullanıcı kararı 2026-11-05). Sessizlik rampası
+## kıtlıkta gevşer: *"bugün de hiçbir şey olmadı ve bir çuval azaldı"*
+## geçerli bir gündür.
+##
+## Neden: rampa her sessiz günden sonra ihtimali büyüttüğü için üçüncü gün
+## neredeyse kesin bir şey oluyordu. Yani oyun hiçbir zaman sessiz kalamıyordu
+## - **her dakika bir şey sunan oyun kasvetli değil meşguldür.** Tekdüzelik
+## bir kusur değil, bir kaynak: kıtlıkta günlerin birbirine benzemesi
+## anlatının kendisi.
+##
+## Rampa sıfırlanmıyor, *kısılıyor*: kıtlık en ağır günde bile yol büsbütün
+## susmaz, yalnız üç gün üst üste susabilir hâle gelir.
+const SCARCITY_QUIET_FROM: float = 0.45
+const SCARCITY_QUIET_RAMP: float = 0.16
+const SCARCITY_MAX_QUIET_BOOST: float = 1.3
+
 ## Olay sertliği (Y-D01): ağır kartların ağırlık çarpanı (kolay < 1 < zor).
 var heavy_scale: float = 1.0
 var quiet_streak: int = 0
@@ -52,8 +68,15 @@ static func is_strained(context: Dictionary) -> bool:
 func begin_day(day: int) -> void:
 	_today = day
 
-func chance_multiplier() -> float:
-	var m := minf(MAX_QUIET_BOOST, 1.0 + QUIET_RAMP * float(maxi(0, quiet_streak - 1)))
+## `context` kıtlığı taşıyorsa (`scarcity_here`) sessizlik rampası kısılır
+## (P17). Varsayılanı boş: kıtlığı bilmeyen bir çağıran eski davranışı alır.
+func chance_multiplier(context: Dictionary = {}) -> float:
+	var scarcity := clampf(float(context.get("scarcity_here", 0.0)), 0.0, 1.0)
+	var quiet := inverse_lerp(SCARCITY_QUIET_FROM, 1.0, scarcity)
+	quiet = clampf(quiet, 0.0, 1.0)
+	var ramp := lerpf(QUIET_RAMP, SCARCITY_QUIET_RAMP, quiet)
+	var ceiling := lerpf(MAX_QUIET_BOOST, SCARCITY_MAX_QUIET_BOOST, quiet)
+	var m := minf(ceiling, 1.0 + ramp * float(maxi(0, quiet_streak - 1)))
 	if _today - last_heavy_day == 1:
 		m *= RELIEF_CHANCE
 	return m

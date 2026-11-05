@@ -2801,17 +2801,63 @@ func consume_stock(item_id: String, quantity: int, total_price: int = 0) -> void
 ## eksiye düşürmez).
 func record_sale(item_id: String, quantity: int, total_price: int = 0) -> void:
 	# Önce okunuyor: satış baskıyı değiştirmeden önceki şok hali sayılır.
-	if is_profiteering_sale(item_id):
+	var profiteering := is_profiteering_sale(item_id)
+	if profiteering:
 		profiteering_sales += 1
 	# Aç şehre yiyecek getirmek şehrin hâlini düzeltir (Y-C21).
 	if Scarcity.is_food(item_id):
 		change_city_morale(current_location_id, minf(MORALE_FOOD_CAP, float(quantity) * MORALE_PER_FOOD))
+	_remember_trade(item_id, quantity, profiteering)
 	market.record_sale(current_location_id, item_id, quantity)
 	# Şehre satılan ilaç hekimin stoğuna girer (Y-C05, kullanıcı notu).
 	if item_id == MarketConditions.MEDICINE_ITEM:
 		market.change_medicine(current_location_id, quantity)
 	if total_price > 0:
 		market.spend_city_gold(current_location_id, total_price)
+
+## Kriz anındaki ticaretin ahlaki izi (P14, kullanıcı kararı 2026-11-05).
+## Ticaret bugüne kadar hiçbir iz bırakmıyordu: para ve stok değişiyor,
+## kimse bir şey hatırlamıyordu. Oysa *"sattığımız şey onların tedavi
+## edebildiğini değiştirir"* - kullanıcının kendi notu.
+##
+## İki yön: vebalı şehre ilaç ya da aç şehre yiyecek getirmek bir iyilik,
+## krizin şişirdiği fiyattan satmak bir kin. İkisi de deftere yazılıyor,
+## bölgesel itibara ve o şehrin adı olan kişilerinin gönlüne dokunuyor.
+## Sıradan bir satış hiçbir şey yapmaz - yoksa defter alışveriş fişine döner.
+const TRADE_MERCY_STANDING: int = 2
+const TRADE_PROFITEER_STANDING: int = -3
+## Kaç adet "bir iyilik" sayılır: tek bir çuval buğdayla aç bir şehri
+## kurtardığını iddia etmek ucuz olurdu.
+const TRADE_MERCY_MIN_QUANTITY: int = 3
+
+func _remember_trade(item_id: String, quantity: int, profiteering: bool) -> void:
+	var where := current_location_id
+	var cause := ""
+	var kindly := false
+	if profiteering:
+		cause = "LEDGER_CAUSE_TRADE_PROFITEER"
+	elif quantity >= TRADE_MERCY_MIN_QUANTITY and _is_mercy_sale(item_id):
+		cause = "LEDGER_CAUSE_TRADE_MERCY"
+		kindly = true
+	if cause.is_empty():
+		return
+	change_reputation(TRADE_MERCY_STANDING if kindly else TRADE_PROFITEER_STANDING)
+	people.remember_trade(where, kindly)
+	ledger.record(
+		CaravanLedger.KIND_TRADE,
+		caravan_name,
+		total_days_elapsed,
+		1,
+		"",
+		cause,
+		where
+	)
+
+## İyilik sayılan satış: vebalı şehre ilaç, aç şehre yiyecek.
+func _is_mercy_sale(item_id: String) -> bool:
+	if item_id == MarketConditions.MEDICINE_ITEM and has_plague(current_location_id):
+		return true
+	return Scarcity.is_food(item_id) and scarcity_here() >= Scarcity.HUNGRY_CITY_FROM
 
 ## Krizden kâr etmenin sayacı. Veba vurmuş ya da yolunda savaş olan bir
 ## şehre, fiyatı o kriz yüzünden şişmiş bir malı satmak - dünya bunu
