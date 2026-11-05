@@ -28,7 +28,6 @@ const SETTINGS: String = "res://scenes/ui/settings.tscn"
 const SAVES: String = "res://scenes/ui/saves.tscn"
 
 const ECONOMY: String = "res://scenes/game/market.tscn"
-const HAGGLING: String = "res://scenes/game/haggling.tscn"
 const TRAVEL: String = "res://scenes/game/world_map.tscn"
 const CARAVAN_PLANNER: String = "res://scenes/game/caravan_planner.tscn"
 const JOURNEY: String = "res://scenes/game/road_journey.tscn"

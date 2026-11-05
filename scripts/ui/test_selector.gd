@@ -10,7 +10,6 @@ extends Control
 # ilgili sahnenin yolunu yazmak yeterli.
 @onready var _test_scenes: Dictionary = {
 	"economy": Nav.ECONOMY,
-	"haggling": Nav.HAGGLING,
 	"events": Nav.JOURNEY,
 	"combat": Nav.COMBAT,
 	"city": Nav.CITY_MAP,
@@ -19,7 +18,6 @@ extends Control
 
 @onready var _buttons: Dictionary = {
 	"economy": $VBoxContainer/EconomyButton,
-	"haggling": $VBoxContainer/HagglingButton,
 	"events": $VBoxContainer/EventsButton,
 	"combat": $VBoxContainer/CombatButton,
 	"city": $VBoxContainer/CityButton,

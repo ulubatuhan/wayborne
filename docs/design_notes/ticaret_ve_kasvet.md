@@ -308,9 +308,9 @@ gerektiğini bilir ve **bulamaz**. Kıtlığın en iyi tarifi budur.
   elektronik tablo olarak başlayıp oyun testinden sonra elden geçirildi ve geliştirici "denge sadece matematiksel
   bir denklem değil" dedi ([EGM](https://egmnow.com/a-russian-crucible-pathologic-2-and-the-problem-of-video-game-difficulty/)).
   **Alınacak:** yetişememenin normal olması. **Kaçınılacak:** açlığın idari yorgunluğa dönüşmesi.
-- **Darkest Dungeon:** bir eleştiri, kaybın yalnızca *zaman* maliyeti olduğunda dolgu malzemesine dönüştüğünü
-  söylüyor ([The Gemsbok](https://thegemsbok.com/art-reviews-and-articles/darkest-dungeon-red-hook-critique-mechanics-design/)).
-  **Alınacak:** her kaybın bir **adı** olsun; "bir sefer daha" bedeli yetmez.
+- **Stres ve sakatlık üstüne kurulu bir zindan oyunu** (adı depo kuralı gereği yazılmıyor, bkz.
+  `tests/test_naming_rule.gd`): eleştirmenler kaybın yalnızca *zaman* maliyeti olduğunda dolgu malzemesine
+  dönüştüğünü söylüyor. **Alınacak:** her kaybın bir **adı** olsun; "bir sefer daha" bedeli yetmez.
 - **The Long Dark:** bir oyuncu onu "kıtlığın değil bolluğun yönetimi" diye tanımlıyor
   ([RPGWatch](https://rpgwatch.com/forum/threads/the-long-dark-review-destructoid.37347/)).
   **Kaçınılacak:** depolanabilir bolluk. Wayborne'da vagon kapasitesi bunun kapısı.

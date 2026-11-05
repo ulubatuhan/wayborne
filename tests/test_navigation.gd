@@ -159,10 +159,13 @@ func _test_every_screen_is_reachable(t, nav, edges: Array) -> void:
 		reachable[String(edge.to)] = true
 
 	# Bunlara `open()` ile girilmez: yol ekranı planlayıcının onayından
-	# (`go_root`), savaş ekranı ile pazarlık ekranı yalnızca F1 geliştirici
-	# panelinden. Gerçek oyunda ikisi de gömülü panel olarak çalışır
-	# (`CombatPanel`, `HagglingPanel`), ayrı bir sahne olarak değil.
-	var entered_by_flow: Array[String] = [nav.JOURNEY, nav.COMBAT, nav.HAGGLING]
+	# (`go_root`), savaş ekranı yalnızca F1 geliştirici panelinden. Gerçek
+	# oyunda savaş gömülü panel olarak çalışır (`CombatPanel`), ayrı bir
+	# sahne olarak değil. Pazarlığın ayrı sahnesi (P3) silindi: o da zaten
+	# yalnız F1'den açılan, oyunun akışında hiç olmayan bir yüzeydi -
+	# oyuncunun gördüğü pazarlık `HagglingPanel`'in pazara ve yola gömülü
+	# hâli.
+	var entered_by_flow: Array[String] = [nav.JOURNEY, nav.COMBAT]
 
 	for scene_path in _scene_paths(nav):
 		if entered_by_flow.has(scene_path):

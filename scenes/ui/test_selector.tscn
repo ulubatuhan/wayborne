@@ -44,10 +44,6 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "Pazar"
 
-[node name="HagglingButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
-text = "Pazarlık"
-
 [node name="EventsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 text = "Kervan Seferi"

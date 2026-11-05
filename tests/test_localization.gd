@@ -395,7 +395,6 @@ func _test_no_hardcoded_prose_in_scenes(t) -> void:
 const SCENE_EXEMPT: Array[String] = [
 	"res://scenes/game/combat.tscn",
 	"res://scenes/ui/test_selector.tscn",
-	"res://scenes/game/haggling.tscn",
 ]
 
 func _scene_files() -> Array[String]:
