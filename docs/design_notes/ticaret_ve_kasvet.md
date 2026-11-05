@@ -154,7 +154,73 @@ Bu üçü birlikte, ticaret sistemini kesmeden kıtlığı ticaretin içine taş
 
 ---
 
-## 5. Kaldırmanın gerçek bedeli (bunu küçümsemeyelim)
+## 5. Kaldırmanın gerçek bedeli — **ölçüldü**
+
+Kod taraması (2026-11-05) sezgiyi **tersine çevirdi**: kullanıcının cümlesinde borç önce, pazarlık sonra geçiyor;
+bağımlılıkta sıra tam tersi.
+
+### Pazarlık bir **yaprak**
+
+| | |
+|---|---|
+| Kod | `haggling_session.gd` 215 + `haggling_panel.gd` 227 + `haggling.gd` 104 = **546 satır** |
+| Olay kartı | **1** (pusu, `event_catalog.gd:324`, `TRIGGER_HAGGLING`). "Pazarlık" diyen öbür iki kart (köy yemeği, kervansaray haydudu) düz Karizma kontrolü - `HagglingSession`'a hiç dokunmuyor, **kırılmaz** |
+| Çeviri anahtarı | **39** |
+| Test | **7 dosya** (`test_haggling.gd` 288 satır tamamen ölür, kalan 6'sı birer satır) |
+| Codex | 1 bölüm |
+| Başka okuyucu | **Yok.** `MarketPricing`, `MarketConditions`, borç, kontratlar, `Standing`, atölye - hiçbiri pazarlığı okumuyor |
+
+Üstelik `scripts/ui/haggling.gd` (104 satır) **oyunun akışında bile değil**: yalnız `test_selector.tscn`'den
+açılan bir geliştirici sahnesi. O, karar beklemeden silinebilir.
+
+**Ve kendi belgemiz suçu itiraf ediyor:** Codex'teki bölümün başlığı *"Pazarlık: oyunun **para basma noktası**"*
+(`docs/codex/codex_body2.py:118`). Teşhisin kanıtı bundan açık olamaz - kıtlık oyununda para basan bir nokta var.
+
+Bir de yol boyu fark edilen tuhaflık: pazarda `HagglingSession`'ın `player_speech` yuvasına **Zekâ** besleniyor
+(`market.gd:896`), Karizma ikinci parametre. Niyet buysa adı yanlış, değilse bu bir hata. Pazarlık sadeleşirken
+ikisinden biri seçilmeli.
+
+### Borç bir **omurga**
+
+| | |
+|---|---|
+| Kod | `debt.gd` 137 + `debt_ledger.gd` 156 + `debt_panel.gd` 327 = **620 satır**, ama borca **44 kod dosyası** değiyor |
+| Olay kartı | **3** + bir zincir (`evt_creditor_rider`, `evt_bailiffs_at_camp`, `evt_deserter_debt`) |
+| Olay motoru | `EventEffect.Type.DEBT_SETTLE`, `EFF_WENT_INTO_DEBT`, ve `RoadDirector`'un kart önceliğini `debt_overdue` ile belirleyen dalı |
+| Çeviri anahtarı | **51** |
+| Test | **14 dosya** |
+| Codex | **2 bölüm** + 5 ayrı yer |
+| Başka okuyucu | Kökenlerin yarısı (`start_origins`: lonca vesayeti ×2, kaçakçı vade 30, dul ×0.5, ikisi sıfırlar), yola çıkış morali −10, **lonca hizip itibarı** (`Standing.GUILD`), kredi limiti, şehir özeti ihtiyaç listesi, miras sahnesi, 15 ekran satırı |
+
+**Bu yüzden borç için "kaldır" değil "dönüştür" öneriyorum** (3b) - ve bu öneri o 44 bağlantının çoğunu
+**korur**: üç olay kartı `debt_overdue` ve `debt >= 150` koşullarıyla çalışıyor; adı olan bir alacaklıya olan
+vadesi geçmiş bir yükümlülük de "gecikmiş" ve "büyük" olabilir. Moral cezası, lonca itibarı kaybı, kökenlerin
+farkı, Defter satırı - hepsi durur. Düşen yalnızca **aritmetik**: faiz, yapılandırma düğmesi, kredi alma satırı,
+sayılardan oluşan panel.
+
+Açık hesap (kese eksiye düşünce doğan borç) ayrı bir şey ve **kalmalı**: o bir kredi değil, sıfırın altına
+inememenin adı.
+
+### Pazarın yüzeyi: 7 görünür + 11 gizli
+
+`market.gd` 1009 satır, sekmesiz üç sütun. Fiyatın **7 resmî katmanı** oyuncuya tooltip'te `×1.24` gibi
+gösteriliyor; bunun **dışında 11 çarpan daha** var (kıtlık, kültür perki, Tellal indirimi, erzak çarpanı, toplu
+indirim, tazelik, geri satış tavanı, ticaret lekesi, kapı komisyonu, aç şehir zammı, şehir hazinesi). Yani
+oyuncuya bir elektronik tablonun yarısı gösteriliyor, yarısı gizleniyor.
+
+**Bu, bilgi oyununun yanlış hâli.** Bilgi oyunu "çarpanları çöz" değil, "nerede ne var bilmiyorsun" olmalı. 7
+katmanlı tooltip, Bölüm 3c'deki *bulunabilirlik* dönüşümünün en güçlü gerekçesi: görünür katman sayısı düşsün,
+görünmeyen **stok** öne çıksın.
+
+### Sıralama önerisi (bu bulgudan sonra)
+
+1. **Önce pazarlık** - en ucuz kaldırma, en büyük kip kazancı, hiçbir sistem kırılmıyor.
+2. **Sonra pazarın stoğu** - küçük iş, en büyük his kazancı.
+3. **En son borç** - ve kaldırma değil dönüşüm; 44 bağlantı tek tek taşınacak bir göç işi.
+
+---
+
+## 5b. Çıkarmanın zamanlaması
 
 *Unpacking*'in yaratıcı yönetmeni Wren Brier GDC 2023'te şunu söylüyor: çıkarma **prototip aşamasında** ucuzdur;
 yapılmış içeriği kesmek pahalıdır
@@ -277,7 +343,13 @@ gerektiğini bilir ve **bulamaz**. Kıtlığın en iyi tarifi budur.
 
 ## Karar beklenenler
 
-1. **Pazarlık mini oyunu çıksın mı?** (önerim: evet, karar kalsın)
-2. **Borcun faizi ve defteri çıkıp yerine adlı alacaklı + teslimat gelsin mi?** (önerim: evet)
-3. **"Doğru stoklayan aç kalmaz" sözü için A, B, C?** (önerim: B)
-4. **Pazarda stok tükenmesi ve takas eklensin mi?** (önerim: evet, en ucuz his kazancı)
+1. **Pazarlık mini oyunu çıksın mı?** (önerim: evet, karar kalsın. En ucuzu: 546 satır, 1 olay kartı, 39 anahtar,
+   7 test; başka hiçbir sistem okumuyor. `haggling.gd` zaten oyunda değil, karar beklemeden silinebilir)
+2. **Pazarda stok tükenmesi ve takas eklensin mi?** (önerim: evet; en küçük iş, en büyük his kazancı)
+3. **"Doğru stoklayan aç kalmaz" sözü için A, B, C?** (önerim: B - sözü arza bağla)
+4. **Borcun faizi ve defteri çıkıp yerine adlı alacaklı + teslimat gelsin mi?** (önerim: evet ama **en son**;
+   44 kod dosyası, 3 olay kartı, 51 anahtar, 14 test, 2 Codex bölümü. Dönüşüm bunların çoğunu korur, kaldırma
+   korumaz)
+
+Ek karar: pazarda pazarlık **Zekâ** ile mi **Karizma** ile mi yapılıyor? Bugün `player_speech` yuvasına Zekâ
+besleniyor (`market.gd:896`) - niyet buysa adlandırma yanlış, değilse hata.
