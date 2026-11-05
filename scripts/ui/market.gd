@@ -888,6 +888,11 @@ func _basket_weight() -> float:
 ## Kefedeki işin önündeki engel (boşsa yapılabilir): stok, yer, kese, hazine.
 ## Kilitli düğme sebebiyle gösterilir, gizlenmez.
 func _primary_block() -> String:
+	# Vadesi geçmiş borcun yüzü bu şehirdeyse pazar kapalı (P11): bedel
+	# aritmetik değil sosyal.
+	var shut_out := _session.debt_shut_out_reason()
+	if not shut_out.is_empty():
+		return tr(shut_out)
 	if _mode == MODE_BUY:
 		for entry in _basket:
 			if not _has_enough_stock(entry.item, int(entry.quantity)):

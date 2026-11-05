@@ -11,6 +11,8 @@ const HINT_COLOR: Color = Color(0.7, 0.72, 0.78)
 
 var _session: GameSession
 var _debt_panel: DebtPanel
+var _advance_line: Label
+var _advance_rows: VBoxContainer
 var _rows: Array[Dictionary] = []
 
 # İki sekme: pano ve borç defteri. Her sekme kendi kaydırma kutusunda,
@@ -55,6 +57,7 @@ func _ready() -> void:
 	_debt_container.add_child(_debt_panel)
 	_debt_panel.setup(_session)
 	_debt_panel.ledger_changed.connect(_rebuild)
+	_build_advance_section()
 	_session.wallet.balance_changed.connect(_on_wallet_changed)
 
 	_rebuild()
@@ -62,6 +65,81 @@ func _ready() -> void:
 func _on_wallet_changed(_new_balance: int) -> void:
 	if _debt_panel != null:
 		_debt_panel.refresh()
+	_refresh_advance()
+
+## Mal avansı (P13): nakit kredinin yerini aldı. Para sıkışınca para almak
+## tam olarak bir kaçış kapağıydı - P5'in erzak stoğunu ve P9'un sözünü
+## anlamsız kılıyordu. Lonca artık **yük** veriyor: istediğin malı alırsın,
+## borcu deftere yazılır ve o malı taşımak zorundasın.
+const ADVANCE_QUANTITIES: Array[int] = [5, 10, 20]
+
+func _build_advance_section() -> void:
+	var title := Label.new()
+	title.text = tr("UI_GUILD_ADVANCE_TITLE")
+	title.modulate = ArtPalette.GOLD
+	_debt_container.add_child(title)
+	_advance_line = Label.new()
+	_advance_line.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_debt_container.add_child(_advance_line)
+	_advance_rows = VBoxContainer.new()
+	_advance_rows.add_theme_constant_override("separation", 4)
+	_debt_container.add_child(_advance_rows)
+	_refresh_advance()
+
+func _refresh_advance() -> void:
+	if _advance_rows == null:
+		return
+	NodeUtil.clear_children(_advance_rows)
+	_advance_line.text = tr("UI_GUILD_ADVANCE_LINE") % [
+		_session.get_available_credit(), _session.get_credit_limit(),
+		_session.get_loan_fee_percent(),
+	]
+	var reason := _session.get_advance_block_reason()
+	if not reason.is_empty():
+		var blocked := Label.new()
+		blocked.text = tr(reason)
+		blocked.modulate = HINT_COLOR
+		_advance_rows.add_child(blocked)
+		return
+	var location := WorldMapData.get_location_by_id(_session.current_location_id)
+	if location == null:
+		return
+	# Loncanın verebileceği mal: bu şehrin ürettikleri. Kıtlıkta burada da
+	# az seçenek kalır - avans dünyanın dışında bir kaynak değil.
+	for item_id in location.produces:
+		var item := ItemCatalog.get_item(item_id)
+		if item == null:
+			continue
+		_advance_rows.add_child(_advance_row(item))
+
+func _advance_row(item: Item) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	for quantity in ADVANCE_QUANTITIES:
+		var value := _session.get_advance_value(item, quantity)
+		var button := Button.new()
+		button.text = tr("UI_GUILD_ADVANCE_TAKE") % [
+			quantity, tr(item.item_name), value, Debt.DEFAULT_TERM_DAYS
+		]
+		# "Disabled with reason": kapalı düğme sebebini kendi yazısında
+		# söylemiyorsa oyuncu neden olmadığını bilemez.
+		if not _session.can_take_advance(item, quantity):
+			button.disabled = true
+			button.tooltip_text = tr(
+				"UI_GUILD_ADVANCE_NO_ROOM"
+				if _session.get_cargo_space_remaining() < item.unit_weight * float(quantity)
+				else "UI_GUILD_LOAN_LINE_FULL"
+			)
+		button.pressed.connect(_on_advance_pressed.bind(item, quantity))
+		row.add_child(button)
+	return row
+
+func _on_advance_pressed(item: Item, quantity: int) -> void:
+	if _session.take_goods_advance(item, quantity):
+		AudioManager.play_sfx(AudioManager.SFX_UI_COIN)
+		_debt_panel.refresh()
+		_rebuild()
+	_refresh_advance()
 
 ## Faz 17: lonca özel görevleri - kontrat panosunun sıradan MerchantOffer
 ## akışından ayrı, WorldEvents'e bağlı dört tek seferlik görev (bkz.

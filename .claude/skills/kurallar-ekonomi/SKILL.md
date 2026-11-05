@@ -7,7 +7,7 @@ description: Wayborne kural kitabının "Ekonomi, şehir, erzak ve borç" bölü
 
 CLAUDE.md'nin bu bölümleri 2026-10-30'da kullanıcı kararıyla buraya taşındı; metin değişmedi, başlıklar aynı. Koddaki
 "bkz. CLAUDE.md <başlık>" başvuruları buraya bakar. Kural becerilerinin listesi CLAUDE.md'de ("Kural becerileri").
-Bölümler: Profit Ceiling Rules, Barter Rules, Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
+Bölümler: Debt Rules, Profit Ceiling Rules, Barter Rules, Price Mark Rules, Trade Memory Rules, City Hub Rules, Caravan Ruin Rules, Provision Rules, Morale Rules, Economy Rules, Kervan Envanteri Rules, Haggling Rules, Reputation Rules, Playthrough Start Rules.
 
 ### City Hub Rules
 
@@ -759,6 +759,54 @@ should be remembered, and only those:
 - **An ordinary sale records nothing.** Without that limit the ledger turns
   into a receipt book and the lines stop meaning anything. The quantity floor
   exists for the same reason: one sack of grain does not save a city.
+
+### Debt Rules
+
+Debt is the money half of *"the caravan is never destroyed, it crawls"*. It
+was rebuilt in one pass (P10-P13, user's decision 2026-11-05) and the
+invariants matter more than the numbers.
+
+**No interest, no restructuring (P10).** The game's own measurement
+condemned interest: at the hard rate a debt reached the millions by the
+fortieth journey and locked the career; softened, it did **nothing**
+(`docs/design_notes/denge_baba_borcu.md`). A mechanic crushed under weight
+it could not carry. Restructuring went with it - with no interest there is
+nothing to pay to postpone. **Debt does not grow; you either pay or you do
+not.** What remains is principal, due day, creditor, overdue yes/no.
+
+**The price of being late is social, not arithmetic (P11).**
+- `OVERDUE_REPUTATION_PENALTY` per overdue period, claimed once per period
+  (`claim_overdue_periods`) - the daily loop calls it every day.
+- `GameSession.debt_shut_out_reason`: an overdue debt that **has a face**
+  closes that creditor's city to you. Only that city, only that debt -
+  institutional debt (the guild, the overdraft) shuts no door, because no
+  *promise* was broken. Nor does a debt that is merely owed: being in debt
+  is not the offence, breaking the word is.
+- A debt may be a **delivery** rather than money (`set_delivery`): paying
+  the principal does not settle it while the cargo is still owed.
+- The family debt's softness is now its reputation penalty, not an interest
+  rate: a relative does not rot your name in the street.
+
+**No cash loan (P13).** It was precisely the escape hatch: a player who can
+borrow coin when short of coin never squirms, and P5's provision stock and
+P9's promise lose their meaning. The guild now hands over **cargo**
+(`take_goods_advance`): goods the city produces, not a single coin into the
+purse, the debt written in the ledger, and the load is yours to carry - the
+advance has a **weight**. The advance binds to that city's moneylender
+(`_bind_debt_to_lender`), so the creditor has a name. **The overdraft
+stays**: going below zero is not credit, it is the name for not being able
+to go below zero.
+
+**Debt is a line, not a screen (P12).** `debt_panel.gd` shrank from 327 to
+145 lines (rows plus one Pay button); the road's "Borç" order is gone -
+dealing with debt mid-journey was the accounting register itself; and the
+Waybook's summary page carries the lines: who · how much · by when, the
+overdue one in red.
+
+Two bugs here were caught only by a screenshot, because both wrong values
+were valid integers: the summary printed the purse where the nearest due
+belonged ("En yakın vade: 850 gün"), and an overdue nearest due read as
+"-12 gün" instead of saying so in words.
 
 ### Reputation Rules
 

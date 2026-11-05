@@ -150,7 +150,7 @@ const LOAN_MIN_AMOUNT: int = 25
 ## bilerek: itibar, defterdeki tek gerçek teminat.
 const LOAN_MIN_REPUTATION: int = 0
 
-## Alacaklı adı bir çeviri anahtarı (bkz. DebtPanel'in creditor çözümü).
+## Alacaklı adı bir çeviri anahtarı.
 const LOAN_CREDITOR_KEY: String = "DEBT_CREDITOR_GUILD"
 
 func get_credit_limit() -> int:
@@ -161,16 +161,8 @@ func get_credit_limit() -> int:
 func get_available_credit() -> int:
 	return maxi(0, get_credit_limit() - get_total_debt())
 
-## Bu tutarda bir borç alınırsa hattan geriye ne kalacağı - `DebtPanel`'in
-## "iki gösterge" önizlemesinin sağ tarafı (bkz. DebtPanel'in kendi
-## yorumu). Nakit etki (`amount`) ile kalıcı etki (kredi hattının
-## daralması) aynı anda görünsün diye ayrı bir fonksiyon: ikisini tek bir
-## metinde birleştirmek oyuncuyu hesabı kendi kafasında yapmaya zorlardı.
-func get_available_credit_after_loan(amount: int) -> int:
-	return maxi(0, get_available_credit() - get_loan_principal(amount))
-
 ## Bu tutar ödenirse hattan ne kadar açılacağı - borcun azalması kredi
-## hattını genişletir, `get_available_credit_after_loan`'ın tersi yönü.
+## hattını genişletir.
 func get_available_credit_after_repay(amount: int) -> int:
 	return mini(get_credit_limit(), get_available_credit() + maxi(0, amount))
 
@@ -184,39 +176,87 @@ func get_loan_fee_percent() -> int:
 	# Tefeci hatırlar (T16-09): gönlü iyiyse ücreti indirir, küsse artırır.
 	return clampi(fee - regard_here(People.ROLE_LENDER), LOAN_ORIGINATION_PERCENT_TRUSTED - 2, LOAN_ORIGINATION_PERCENT_UNTRUSTED + 3)
 
-## Alınan paranın üstüne binen ve defterde anapara olarak duran tutar.
+## Avansın üstüne binen ve defterde anapara olarak duran tutar.
 ## Ücret yukarı yuvarlanır, ama tam sayı aritmetiğiyle.
 func get_loan_principal(amount: int) -> int:
 	var fee := (amount * get_loan_fee_percent() + 99) / 100
 	return amount + fee
 
-## Kredi kapalıysa sebebini anlatan çeviri anahtarı; boşsa açık.
-func get_loan_block_reason() -> String:
+## --- Mal avansı: nakit kredinin yerine (P13, kullanıcı kararı 2026-11-05) ---
+##
+## **Nakit kredi kaldırıldı.** O tam olarak bir kaçış kapağıydı: borç alıp
+## mal alabilen oyuncu kıvranmaz, ve P5'in erzak stoğuyla P9'un sözü
+## anlamını kaybederdi. Kıtlık oyununda "para sıkıştın mı para al" diye bir
+## cümle olamaz.
+##
+## Yerine lonca **yük** veriyor: istediğin malı avans olarak alırsın,
+## karşılığında onu taşımak ve bedelini ödemek zorundasın. Para değil mal -
+## ve o malı kervanın taşımak zorunda, yani avansın bir **ağırlığı** var.
+##
+## **Açık hesap kaldı.** Kese eksiye düşünce doğan borç bir kredi değil,
+## *sıfırın altına inememenin adı*; o iyi çalışıyor.
+const ADVANCE_MIN_VALUE: int = 25
+
+## Avans kapalıysa sebebini anlatan çeviri anahtarı; boşsa açık.
+func get_advance_block_reason() -> String:
 	if is_journey_active():
 		return "UI_GUILD_LOAN_ON_ROAD"
 	if credit_standing() < LOAN_MIN_REPUTATION:
 		return "UI_GUILD_LOAN_NO_TRUST"
-	if get_available_credit() < LOAN_MIN_AMOUNT:
+	if get_available_credit() < ADVANCE_MIN_VALUE:
 		return "UI_GUILD_LOAN_LINE_FULL"
 	return ""
 
-func can_borrow(amount: int) -> bool:
-	if not get_loan_block_reason().is_empty():
+## Bu kadar malın avansı alınabilir mi: hat, yer ve açık sebep.
+func can_take_advance(item: Item, quantity: int) -> bool:
+	if item == null or quantity <= 0:
 		return false
-	return amount >= LOAN_MIN_AMOUNT and amount <= get_available_credit()
+	if not get_advance_block_reason().is_empty():
+		return false
+	if get_advance_value(item, quantity) > get_available_credit():
+		return false
+	return get_cargo_space_remaining() + 0.001 >= item.unit_weight * float(quantity)
 
-## Parayı keseye yazar, anaparayı (ücretiyle) deftere. Başarısızsa hiçbir
-## şey değişmez.
-func borrow_from_guild(amount: int) -> bool:
-	if not can_borrow(amount):
+## Avansın defterdeki değeri: malın bu şehirdeki alış fiyatı + tahsis ücreti.
+func get_advance_value(item: Item, quantity: int) -> int:
+	if item == null or quantity <= 0:
+		return 0
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	var unit := MarketPricing.get_buy_price(item, location, market, total_days_elapsed)
+	return get_loan_principal(maxi(1, unit) * quantity)
+
+## Malı kargoya, borcu deftere yazar. Başarısızsa hiçbir şey değişmez.
+## Borç bir **teslimata** bağlı (P11): bedelini ödeyebilirsin, ama malı
+## kaybedersen borç kalır - avansın bütün anlamı bu.
+func take_goods_advance(item: Item, quantity: int) -> bool:
+	if not can_take_advance(item, quantity):
+		return false
+	var value := get_advance_value(item, quantity)
+	if not add_to_cargo(item, quantity):
 		return false
 	var debt := debts.borrow(
-		LOAN_CREDITOR_KEY, get_loan_principal(amount), total_days_elapsed
+		LOAN_CREDITOR_KEY, value, total_days_elapsed, Debt.SOURCE_ADVANCE
 	)
 	if debt == null:
 		return false
-	wallet.earn(amount)
+	debt.set_delivery(item.item_id, quantity, "")
+	_bind_debt_to_lender(debt)
 	return true
+
+## Borcu bu şehrin tefecisine bağlar (P11): alacaklı genel bir etiket değil,
+## adı olan bir kişi. Kişi yoksa borç kurumsal kalır.
+func _bind_debt_to_lender(debt: Debt) -> void:
+	if debt == null or current_location_id.is_empty():
+		return
+	people.ensure_city(current_location_id, total_days_elapsed)
+	for person in people.city_people(current_location_id):
+		if String(person.get("role", "")) != People.ROLE_LENDER:
+			continue
+		if not bool(person.get("alive", false)):
+			continue
+		debt.bind_to_person(String(person.get("id", "")), current_location_id)
+		debt.creditor_name = String(person.get("name", debt.creditor_name))
+		return
 
 ## Henüz kimseye takılmamış ekipman: equipment_id -> adet. Kervan
 ## Avlusu'nda satın alınan Silah/Zırh ve yolda EventEffect.Type.
@@ -1114,8 +1154,8 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 const FATHER_DEBT_ID: String = "father_debt"
 const FATHER_DEBT_PRINCIPAL: int = 180
 const FATHER_DEBT_TERM_DAYS: int = 120
-## Aile borcunun gecikme faizi ve itibar bedeli yumuşak (Debt.interest_rate).
-const FATHER_DEBT_INTEREST_RATE: float = 0.04
+## Aile borcunun gecikme bedeli yumuşak: alacaklı akraba, adını sokakta
+## çürütmez. (Faiz P10'da kaldırıldığı için yumuşaklığın tek ölçüsü bu.)
 const FATHER_DEBT_REPUTATION_PENALTY: int = 1
 const FATHER_CREDITOR_KEY: String = "DEBT_CREDITOR_FATHER"
 const FATHER_CAUSE_KEY: String = "LEDGER_CAUSE_FATHER"
@@ -1125,7 +1165,6 @@ func inherit_father_caravan() -> void:
 		return
 	var debt := debts.borrow(FATHER_CREDITOR_KEY, FATHER_DEBT_PRINCIPAL, total_days_elapsed, Debt.SOURCE_LOAN, FATHER_DEBT_ID)
 	debt.due_day = total_days_elapsed + FATHER_DEBT_TERM_DAYS
-	debt.interest_rate = FATHER_DEBT_INTEREST_RATE
 	debt.reputation_penalty = FATHER_DEBT_REPUTATION_PENALTY
 	for entry in ledger.entries:
 		if String(entry.get("kind", "")) == CaravanLedger.KIND_FOUNDER:
@@ -2261,6 +2300,21 @@ func unbelieving_companion() -> CharacterData:
 func _bound_for_avucici() -> bool:
 	var dest := WorldMapData.get_location_by_id(journey_destination_id)
 	return dest != null and dest.region == AVUCICI_REGION
+
+## Vadesi geçmiş ve **bir yüze bağlı** borcun şehri sana kapanır (P11).
+## Gecikmenin bedeli aritmetik değil sosyal: alacaklı seni o şehirde
+## alışveriş ederken görmek istemiyor.
+##
+## Yalnız o şehir, yalnız o borç: kurumsal borç (lonca, açık hesap) kimseye
+## kapı kapatmaz, çünkü ortada kırılan bir **söz** yok.
+func debt_shut_out_reason(location_id: String = "") -> String:
+	var where := current_location_id if location_id.is_empty() else location_id
+	if where.is_empty():
+		return ""
+	for debt in debts.get_overdue_debts(total_days_elapsed):
+		if debt.has_face() and debt.creditor_city_id == where:
+			return "UI_MARKET_DEBT_SHUT_OUT"
+	return ""
 
 func is_shut_out(location_id: String = "") -> bool:
 	var location := WorldMapData.get_location_by_id(current_location_id if location_id.is_empty() else location_id)

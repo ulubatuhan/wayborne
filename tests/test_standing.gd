@@ -79,9 +79,9 @@ func _test_factions_open_and_close_doors(t) -> void:
 	session.change_faction_standing(Standing.CHURCH, 20)
 	t.ok(session.doctor_fee("deep_cut") < fee or fee <= 1, "kiliseyle arası iyi olana hekim ucuz")
 	session.reputation = GameSession.LOAN_MIN_REPUTATION - 1
-	t.ne(session.get_loan_block_reason(), "", "itibarsız kervana kredi yok")
+	t.ne(session.get_advance_block_reason(), "", "itibarsız kervana avans yok")
 	session.change_faction_standing(Standing.GUILD, 10)
-	t.eq(session.get_loan_block_reason() == "UI_GUILD_LOAN_NO_TRUST", false, "loncanın defteri krediyi açar")
+	t.eq(session.get_advance_block_reason() == "UI_GUILD_LOAN_NO_TRUST", false, "loncanın defteri avansı açar")
 	var gold := session.wallet.balance
 	t.ok(session.donate_to_church(), "bağış yapılır")
 	t.eq(session.wallet.balance, gold - GameSession.CHURCH_DONATION, "bağış keseden")

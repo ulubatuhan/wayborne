@@ -2,8 +2,13 @@ extends RefCounted
 
 ## Borç, oyunun "kervan yok olmaz ama sürünür" kuralının parasal ayağı.
 ## En kritik iki şey: açık hesap ile kesenin eksi bakiyesi asla ayrışmamalı
-## (aynı para iki kez sayılırsa oyuncu olmayan bir borç görür) ve gecikme
-## faizi aynı dönem için iki kez işlememeli.
+## (aynı para iki kez sayılırsa oyuncu olmayan bir borç görür) ve gecikmenin
+## itibar bedeli aynı dönem için iki kez kesilmemeli.
+##
+## **Faiz ve yapılandırma kaldırıldı (P10).** Oyunun kendi ölçümü faizi
+## mahkûm etmişti: sert oranla borç kırkıncı seferde milyonlara çıkıp
+## kariyeri kilitliyor, yumuşatılınca hiçbir şey yapmıyordu. Bu paketin
+## faiz testleri yerlerini **borç büyümez** testine bıraktı.
 
 func suite_name() -> String:
 	return "Debt"
@@ -12,9 +17,9 @@ func run(t) -> void:
 	_test_overdraft_mirrors_wallet(t)
 	_test_optional_purchases_never_create_debt(t)
 	_test_borrowing_has_a_month_term(t)
-	_test_overdue_interest_applies_once_per_period(t)
+	_test_debt_never_grows(t)
 	_test_overdue_costs_reputation_through_advance_day(t)
-	_test_restructure_extends_and_costs_more_each_time(t)
+	_test_debt_can_wear_a_face_and_a_delivery(t)
 	_test_repay_only_spends_what_you_have(t)
 	_test_save_round_trip(t)
 	_test_debt_settle_effect(t)
@@ -74,28 +79,25 @@ func _test_borrowing_has_a_month_term(t) -> void:
 
 	t.eq(session.debts.borrow("Tefeci", 0, 0), null, "sıfır tutarlı borç açılmaz")
 
-func _test_overdue_interest_applies_once_per_period(t) -> void:
+func _test_debt_never_grows(t) -> void:
+	# P10'un tek cümlesi: **borç büyümez.** Ya ödersin ya ödemezsin.
 	var debt := Debt.create("d1", "Tefeci", 1000, 30)
-
-	t.eq(debt.apply_overdue_interest(30), 0, "vadesi gelmemiş borca faiz işlemez")
+	t.eq(debt.claim_overdue_periods(30), 0, "vadesi gelmemiş borcun dönemi yok")
 	t.eq(debt.principal, 1000, "anapara değişmedi")
 
-	# İlk gecikme dönemi
-	t.eq(debt.apply_overdue_interest(31), 1, "gecikmenin ilk dönemi işler")
-	t.eq(debt.principal, 1150, "anaparaya %15 faiz bindi")
+	t.eq(debt.claim_overdue_periods(31), 1, "gecikmenin ilk dönemi sayılır")
+	t.eq(debt.principal, 1000, "ama anapara büyümedi")
 
-	# Aynı dönemde tekrar çağırmak ikinci kez faiz bindirmemeli - günlük
-	# döngü her gün çağırıyor, burası kaçarsa borç günde bir katlanırdı.
-	t.eq(debt.apply_overdue_interest(35), 0, "aynı dönem ikinci kez işlemez")
-	t.eq(debt.principal, 1150, "anapara aynı kaldı")
+	# Aynı dönemde tekrar çağırmak ikinci kez saymamalı - günlük döngü her
+	# gün çağırıyor, burası kaçarsa itibar günde bir kez daha düşerdi.
+	t.eq(debt.claim_overdue_periods(35), 0, "aynı dönem ikinci kez sayılmaz")
+	t.eq(debt.claim_overdue_periods(41), 1, "sonraki dönem sayılır")
+	t.eq(debt.principal, 1000, "hiçbir dönemde anapara büyümedi")
 
-	# Bir sonraki dönem
-	t.eq(debt.apply_overdue_interest(41), 1, "sonraki dönem işler")
-	t.ok(debt.principal > 1150, "anapara yine büyüdü")
-
-	# Uzun süre bakılmazsa atlanan dönemlerin hepsi işlemeli.
+	# Uzun süre bakılmazsa atlanan dönemlerin hepsi sayılmalı.
 	var neglected := Debt.create("d2", "Tefeci", 1000, 30)
-	t.eq(neglected.apply_overdue_interest(61), 4, "atlanan dönemlerin hepsi işler")
+	t.eq(neglected.claim_overdue_periods(61), 4, "atlanan dönemlerin hepsi sayılır")
+	t.eq(neglected.principal, 1000, "yıllarca bakılmasa da borç aynı")
 
 func _test_overdue_costs_reputation_through_advance_day(t) -> void:
 	var session := _session(100)
@@ -119,26 +121,25 @@ func _test_overdue_costs_reputation_through_advance_day(t) -> void:
 		"aynı gecikme dönemi iki kez cezalandırılmaz"
 	)
 
-func _test_restructure_extends_and_costs_more_each_time(t) -> void:
-	var session := _session(0)
-	var debt := session.debts.borrow("Tefeci", 1000, 0)
+func _test_debt_can_wear_a_face_and_a_delivery(t) -> void:
+	# P11: alacaklı genel bir etiket değil bir kişi olabilir, ve borcun
+	# karşılığı para değil teslimat. Bir yüz, bir yüzdeden korkutucudur.
+	var debt := Debt.create("d3", "DEBT_CREDITOR_GUILD", 200, 30)
+	t.not_ok(debt.has_face(), "varsayılan alacaklı bir kurumdur")
+	t.not_ok(debt.is_delivery(), "varsayılan borç para borcudur")
+	debt.bind_to_person("orvahel|tefeci", "orvahel")
+	t.ok(debt.has_face(), "borç bir yüze bağlanabilir")
+	t.eq(debt.creditor_city_id, "orvahel", "ve o yüzün şehrine")
 
-	var first_fee := debt.get_restructure_fee()
-	t.ok(first_fee > 0, "yapılandırmanın bir bedeli var")
-	t.ok(session.debts.restructure(debt.debt_id, 40), "vadesi geçmiş borç yapılandırılabilir")
-	t.eq(debt.principal, 1000 + first_fee, "bedel anaparaya biner")
-	t.eq(debt.due_day, 40 + Debt.RESTRUCTURE_TERM_DAYS, "vade uzar")
-	t.not_ok(debt.is_overdue(41), "yapılandırılan borç artık gecikmiş değil")
-
-	# İkinci yapılandırma daha pahalı olmalı - sonsuza kadar ertelemek
-	# ucuz bir kaçış yolu olmamalı.
-	var second_fee := debt.get_restructure_fee()
-	t.ok(
-		float(second_fee) / float(debt.principal) > float(first_fee) / 1000.0,
-		"her yapılandırmada oran artar"
-	)
-
-	t.not_ok(session.debts.restructure("yok_boyle_borc", 10), "olmayan borç yapılandırılamaz")
+	debt.set_delivery("test_grain", 10, "drazvor")
+	t.ok(debt.is_delivery(), "borcun karşılığı mal olabilir")
+	t.not_ok(debt.is_settled(), "parası ödense de teslimat duruyorsa borç kapanmaz")
+	t.eq(debt.pay(500), 200, "borçtan fazlası alınmaz")
+	t.not_ok(debt.is_settled(), "yalnız para ödemek teslimatlı borcu kapatmaz")
+	t.eq(debt.deliver(4), 4, "kısmi teslimat sayılır")
+	t.eq(debt.delivery_quantity, 6, "kalan yük düşer")
+	t.eq(debt.deliver(99), 6, "istenenden fazlası sayılmaz")
+	t.ok(debt.is_settled(), "yük de bitince borç kapanır")
 
 func _test_repay_only_spends_what_you_have(t) -> void:
 	var session := _session(200)

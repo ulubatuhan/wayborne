@@ -109,22 +109,14 @@ func pay(debt_id: String, amount: int) -> int:
 	_prune_settled()
 	return paid
 
-## Vadeyi uzatır. Bedeli anaparaya biner (bkz. Debt.restructure) - para
-## gerektirmez, çünkü yapılandırmanın anlamı zaten "şimdi ödeyemiyorum".
-func restructure(debt_id: String, current_day: int) -> bool:
-	var debt := get_debt(debt_id)
-	if debt == null or debt.is_settled():
-		return false
-	debt.restructure(current_day)
-	return true
-
-## Günlük işleyiş: vadesi geçen her borca işlenmemiş gecikme faizini bindirir.
-## Toplam itibar cezasını döner (çağıran itibarı düşürür) - ceza burada
-## uygulanmıyor çünkü DebtLedger oturumun geri kalanını tanımıyor.
+## Günlük işleyiş: vadesi geçen her borcun kesilmemiş gecikme dönemlerini
+## toplar. **Borç büyümüyor** (P10: faiz kaldırıldı); gecikmenin bedeli
+## itibar. Toplam cezayı döner - ceza burada uygulanmıyor çünkü DebtLedger
+## oturumun geri kalanını tanımıyor.
 func advance_to_day(current_day: int) -> int:
 	var reputation_penalty := 0
 	for debt in debts:
-		var periods := debt.apply_overdue_interest(current_day)
+		var periods := debt.claim_overdue_periods(current_day)
 		reputation_penalty += periods * debt.reputation_penalty
 	return reputation_penalty
 

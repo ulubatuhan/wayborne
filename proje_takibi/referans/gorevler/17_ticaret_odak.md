@@ -146,3 +146,47 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
     Hazine artık günü de biliyor - yoksa geç oyunda uğranmamış her şehir hâlâ ilk günün parasıyla görünüyordu.
   - **Kabul:** `tests/test_trade_focus.gd`'ye üç regresyon testi (hazine kıtlıkla kurur, satış hazineyi
     aşamaz, aynı şehirde al-sat döngüsü para basamaz) ve `simulate_career`'a kalıcı "kâr tavanı" satırı.
+
+- [x] **P10 Faiz ve yapılandırma kalktı**
+  - Silinen: `OVERDUE_INTEREST_RATE`, `apply_overdue_interest`, `overdue_periods_applied`, bileşik birikim,
+    `restructure` ve bütün `RESTRUCTURE_*` sabitleri.
+  - Kalan: anapara, vade, alacaklı, gecikti mi. **Borç büyümez; ya ödersin ya ödemezsin.** Gecikmenin bedeli
+    aritmetik değil sosyal: dönem başına itibar (`OVERDUE_REPUTATION_PENALTY` 3) ve P11'in kapıları.
+  - Gerekçe oyunun kendi ölçümüydü: sert oranla borç kırkıncı seferde milyonlara çıkıp kariyeri kilitliyor,
+    yumuşatılınca hiçbir şey yapmıyordu (`denge_baba_borcu.md`). Taşıyamadığı ağırlığın altında ezilen bir
+    mekanik.
+  - Aile borcunun "yumuşaklığı" artık faiz oranı değil itibar bedeli (`FATHER_DEBT_REPUTATION_PENALTY` 1):
+    alacaklı akraba, adını sokakta çürütmez.
+
+- [x] **P11 Borcun bir adı ve bir teslimatı var**
+  - `Debt` yeni alanlar taşıyor: `creditor_person_id`, `creditor_city_id` (bir yüz, `People`'ın tanıdığı kişi)
+    ve `delivery_item_id/quantity/city_id` (karşılığı para değil yük).
+  - **Vade geçerse sosyal bedel:** `GameSession.debt_shut_out_reason` - yüzü olan gecikmiş borcun şehrinde
+    pazar sana kapanır. Yalnız o şehir, yalnız o borç: kurumsal borç (lonca, açık hesap) kimseye kapı kapatmaz,
+    çünkü ortada kırılan bir **söz** yok. Vadesi gelmemiş borç da kapatmaz: borçlu olmak değil, sözü bozmak.
+  - Teslimatlı borç parası ödense de kapanmıyor (`is_settled` yükü de sayıyor).
+
+- [x] **P12 Borç paneli küçüldü, defter satırı geldi**
+  - `debt_panel.gd` 327 → 145 satır: kredi hattı göstergesi, tutar kaydıracı, iki göstergeli önizleme, borç alma
+    ve yapılandırma düğmeleri gitti. Kalan: satırlar ve tek bir **Öde** düğmesi.
+  - **Yoldaki "Borç" emri kaldırıldı** (tempo -3.0, `_open_debt_panel`, `_debt_holder`, `_debt_button`): yolda
+    borçla uğraşmak muhasebe kipinin ta kendisiydi.
+  - Borç artık **Waybook'un özet sayfasında** da bir satır: kime · ne kadar · ne zamana kadar; vadesi geçen
+    satır kızıla düşüyor. Dördüncü sütun: *Defter unutmaz.*
+  - **Ekran görüntüsü iki hata yakaladı:** özet satırı ikinci argüman olarak kese bakiyesini basıyordu
+    ("En yakın vade: 850 gün" - iki sayı da geçerli birer tamsayı olduğu için hiçbir test göremezdi); ve
+    gecikme "-12 gün" diye okunuyordu, artık kendi cümlesini kuruyor.
+
+- [x] **P13 Nakit kredi kalktı, mal avansı geldi**
+  - `borrow_from_guild`, `can_borrow`, `get_loan_block_reason`, `get_available_credit_after_loan` silindi.
+    Yerine `take_goods_advance` / `can_take_advance` / `get_advance_value` / `get_advance_block_reason`.
+  - Nakit kredi **tam olarak bir kaçış kapağıydı**: para sıkışınca para alabilen oyuncu kıvranmaz ve P5'in
+    erzak stoğuyla P9'un sözü anlamını kaybederdi. Lonca artık **yük** veriyor: şehrin ürettiği maldan
+    istediğini alırsın, keseye tek kuruş girmez, borç deftere yazılır ve o malı taşımak zorundasın - yani
+    avansın bir **ağırlığı** var.
+  - Avans borcu `_bind_debt_to_lender` ile o şehrin tefecisine bağlanıyor: alacaklının adı var, etiketi değil.
+  - **Açık hesap kaldı** (kullanıcı kararı): kese eksiye düşünce doğan borç bir kredi değil, sıfırın altına
+    inememenin adı.
+  - **Kabul:** `tests/test_debt.gd` yeniden yazıldı (borç büyümez, yüz ve teslimat), `test_city_commerce.gd`'nin
+    dört kredi testi avansa çevrildi, `test_trade_focus.gd`'ye iki test, `tests/screenshot_debt.gd` iki kare
+    (Lonca defteri + Waybook borç satırları).

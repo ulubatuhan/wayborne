@@ -25,6 +25,8 @@ func run(t) -> void:
 	_test_city_treasury_dries_with_scarcity(t)
 	_test_sale_cannot_exceed_the_city_purse(t)
 	_test_buyback_cap_blocks_the_same_city_loop(t)
+	_test_overdue_debt_with_a_face_closes_that_market(t)
+	_test_advance_debt_wears_the_lenders_name(t)
 
 # --- P7: fiyatın nedeni, sayısı değil ---
 
@@ -373,3 +375,52 @@ func _test_buyback_cap_blocks_the_same_city_loop(t) -> void:
 		float(100 * GameSession.BUYBACK_SHARE) + 0.5,
 		"burada aldığın mal, buradaki alış fiyatının altında geri satılır"
 	)
+
+# --- P11: borcun bir yüzü var ---
+
+func _test_overdue_debt_with_a_face_closes_that_market(t) -> void:
+	# Gecikmenin bedeli aritmetik değil **sosyal** (P11): alacaklı seni o
+	# şehirde alışveriş ederken görmek istemiyor.
+	var place := WorldMapData.get_locations()[0]
+	var session := _session_at(place.location_id, 100)
+	t.eq(session.debt_shut_out_reason(), "", "borçsuz kervana pazar açık")
+
+	var debt := session.debts.borrow("Tefeci", 300, 0)
+	debt.due_day = 10
+	t.eq(
+		session.debt_shut_out_reason(), "",
+		"kurumsal borç kimseye kapı kapatmaz - ortada kırılan bir söz yok"
+	)
+
+	debt.bind_to_person("%s|tefeci" % place.location_id, place.location_id)
+	t.ne(session.debt_shut_out_reason(), "", "yüzü olan gecikmiş borç pazarı kapatır")
+
+	# Yalnız o şehir: başka bir şehre bu borcun hükmü geçmez.
+	var elsewhere := ""
+	for other in WorldMapData.get_locations():
+		if other.location_id != place.location_id:
+			elsewhere = other.location_id
+			break
+	t.eq(session.debt_shut_out_reason(elsewhere), "", "başka şehirde pazar açık")
+
+	# Ve vade geçmemişse kapı açık: borçlu olmak değil, sözü bozmak kapatıyor.
+	debt.due_day = session.total_days_elapsed + 30
+	t.eq(session.debt_shut_out_reason(), "", "vadesi gelmemiş borç kapı kapatmaz")
+
+func _test_advance_debt_wears_the_lenders_name(t) -> void:
+	var place: Location = null
+	for candidate in WorldMapData.get_locations():
+		if not candidate.produces.is_empty():
+			place = candidate
+			break
+	var session := _session_at(place.location_id, 10)
+	session.owned_wagon_count = 2
+	var item := ItemCatalog.get_item(String(place.produces[0]))
+	if not session.can_take_advance(item, 5):
+		t.ok(true, "bu şehirde avans kapalı - bağlama ölçülemedi")
+		return
+	t.ok(session.take_goods_advance(item, 5), "mal avansı alınır")
+	var debt: Debt = session.debts.get_debts()[0]
+	t.ok(debt.has_face(), "avans borcu bir yüze bağlanır (P11)")
+	t.eq(debt.creditor_city_id, place.location_id, "ve o yüzün şehrine")
+	t.ne(debt.creditor_name, "DEBT_CREDITOR_GUILD", "alacaklının adı var, etiketi değil")

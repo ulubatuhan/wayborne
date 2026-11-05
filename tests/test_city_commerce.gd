@@ -31,9 +31,9 @@ func run(t) -> void:
 	_test_damaged_wagon_goes_first(t)
 	_test_credit_line_scales_with_reputation(t)
 	_test_debt_consumes_the_credit_line(t)
-	_test_loan_preview_shows_both_effects(t)
-	_test_borrowing_to_clear_an_overdraft_is_not_free(t)
-	_test_loan_costs_more_than_it_pays(t)
+	_test_advance_gives_cargo_not_coin(t)
+	_test_advance_cannot_clear_an_overdraft(t)
+	_test_advance_costs_more_than_it_carries(t)
 	_test_loan_fee_scales_with_reputation(t)
 	_test_loan_closed_on_the_road_and_without_trust(t)
 	_test_brief_flags_what_the_caravan_lacks(t)
@@ -153,109 +153,88 @@ func _test_credit_line_scales_with_reputation(t) -> void:
 ## Hattı borcun kendisi tüketmezse, borç alıp borcu kapatmak sonsuz bir
 ## döngü olurdu.
 func _test_debt_consumes_the_credit_line(t) -> void:
-	var session := _session(100, 1)
+	var session := _advance_session()
 	var limit := session.get_credit_limit()
 	t.eq(session.get_available_credit(), limit, "borçsuzken hattın tamamı açık")
 
-	var taken := GameSession.LOAN_STEP * 2
-	t.ok(session.borrow_from_guild(taken), "krediden bir dilim alınır")
+	var item := _advance_item(session)
+	t.ne(item, null, "şehrin ürettiği bir mal var")
+	t.ok(session.take_goods_advance(item, 5), "hattan bir dilim mal avansı alınır")
 	t.eq(
 		session.get_available_credit(),
 		maxi(0, limit - session.get_total_debt()),
 		"kalan hat borcun tamamını düşer"
 	)
-	t.ok(
-		session.get_available_credit() < limit - taken + 1,
-		"tahsis ücreti de hattan yer"
-	)
 
-	# Hat dolana kadar al; sonrası kapalı olmalı.
+	# Hat ya da kargo dolana kadar al; sonrası kapalı olmalı.
 	var guard := 0
-	while session.can_borrow(GameSession.LOAN_MIN_AMOUNT) and guard < 200:
-		session.borrow_from_guild(GameSession.LOAN_MIN_AMOUNT)
+	while session.can_take_advance(item, 5) and guard < 200:
+		session.take_goods_advance(item, 5)
 		guard += 1
-	t.ok(guard < 200, "kredi hattı sonsuz değil")
-	t.not_ok(session.can_borrow(GameSession.LOAN_MIN_AMOUNT), "dolu hattan borç alınamaz")
+	t.ok(guard < 200, "avans sonsuz değil")
+	t.not_ok(session.can_take_advance(item, 5), "dolu hattan (ya da dolu kargodan) avans alınmaz")
 
-## A1 (bkz. akademik kaynak önerileri): DebtPanel'in "iki gösterge"si -
-## nakit etkisi ve kredi hattının kalıcı daralması/açılması - aynı anda
-## okunabilmeli. `get_available_credit_after_loan` borç alındıktan sonra
-## hattan ne kalacağını, `get_available_credit_after_repay` ödeme sonrası
-## ne kadar açılacağını söylüyor; ikisi de yalnızca zaten var olan
-## formülleri okuyor, yeni bir mekanik icat etmiyor.
-func _test_loan_preview_shows_both_effects(t) -> void:
-	var session := _session(0, 1)
-	session.reputation = 20
-	var before := session.get_available_credit()
-	var amount := GameSession.LOAN_STEP * 2
-	var principal := session.get_loan_principal(amount)
-	t.eq(
-		session.get_available_credit_after_loan(amount), before - principal,
-		"önizleme, alacağın kadar değil anaparanın (ücretiyle) tamamını düşer"
-	)
-	t.ok(session.borrow_from_guild(amount), "borç alınır")
-	t.eq(session.get_available_credit(), before - principal, "gerçek sonuç önizlemeyle aynı")
+## P13: **nakit kredi kaldırıldı**, çünkü tam olarak bir kaçış kapağıydı -
+## para sıkışınca para alabilen oyuncu kıvranmaz ve P5'in erzak stoğu ile
+## P9'un sözü anlamını kaybederdi. Yerine lonca **yük** veriyor.
+func _test_advance_gives_cargo_not_coin(t) -> void:
+	var session := _advance_session()
+	var item := _advance_item(session)
+	var purse := session.wallet.balance
+	var held := session.get_total_quantity(item.item_id)
+	var value := session.get_advance_value(item, 10)
 
-	var repay_amount := session.get_total_debt()
-	var after_repay := session.get_available_credit_after_repay(repay_amount)
-	t.ok(after_repay >= session.get_available_credit(), "ödeme önizlemesi hattı asla daraltmaz")
-	t.le(float(after_repay), float(session.get_credit_limit()), "önizleme de tavanı aşmaz")
-	t.eq(
-		session.get_available_credit_after_repay(1000000), session.get_credit_limit(),
-		"aşırı bir ödeme hattı yalnızca tavana kadar açar"
-	)
+	t.ok(session.take_goods_advance(item, 10), "avans alınır")
+	t.eq(session.wallet.balance, purse, "keseye tek kuruş girmez")
+	t.eq(session.get_total_quantity(item.item_id), held + 10, "mal kargoya girer")
+	t.eq(session.get_total_debt(), value, "borç ilan edilen değerle yazılır")
 
-## En keskin kaçamak: açık hesabın vadesi ilk eksiye düşüşte kurulur.
-## Borçla kapatmak onu bedava bir yapılandırmaya çevirirdi - oysa
-## yapılandırmanın ücreti var ve her seferinde artıyor.
-func _test_borrowing_to_clear_an_overdraft_is_not_free(t) -> void:
-	var session := _session(0, 1)
-	session.reputation = 20
-	session.spend_or_owe(100)
-	t.eq(session.get_total_debt(), 100, "açık hesap doğdu")
+	# Ve borç bir **teslimata** bağlı (P11): parasını ödesen de malı
+	# kaybedersen borç kapanmaz.
+	var debt: Debt = session.debts.get_debts()[0]
+	t.ok(debt.is_delivery(), "avans borcu bir yük borcudur")
+	t.eq(debt.delivery_item_id, item.item_id, "yük tam olarak alınan mal")
+	t.eq(debt.source, Debt.SOURCE_ADVANCE, "kaynağı avans olarak yazılır")
 
+## En keskin kaçamak kapandı: avans para vermediği için açık hesabı
+## kapatamıyor. Eskiden borç alıp açığı kapatmak bedava bir yapılandırmaya
+## dönüşebiliyordu; şimdi öyle bir kapı yok.
+func _test_advance_cannot_clear_an_overdraft(t) -> void:
+	var session := _advance_session()
+	session.spend_or_owe(session.wallet.balance + 100)
+	t.ok(session.wallet.balance < 0, "kese eksiye düştü")
 	var before := session.get_total_debt()
-	t.ok(session.borrow_from_guild(100), "açığı kapatacak kadar borç alınır")
-	t.eq(session.wallet.balance, 0, "kese sıfırlandı")
-	t.ok(
-		session.get_total_debt() > before,
-		"borç azalmadı, ücret kadar arttı (%d → %d)" % [before, session.get_total_debt()]
-	)
 
-	# Ve hat da bu kadar tükendi: aynı numara tekrar tekrar çekilemez.
-	t.le(
-		float(session.get_available_credit()),
-		float(session.get_credit_limit() - session.get_total_debt() + 1),
-		"kapanan açık hesabın yerini kredi aldı, hat boşalmadı"
-	)
+	var item := _advance_item(session)
+	if session.can_take_advance(item, 5):
+		session.take_goods_advance(item, 5)
+	t.ok(session.wallet.balance < 0, "avans keseyi kurtarmaz")
+	t.ok(session.get_total_debt() >= before, "borç azalmaz, olsa olsa artar")
 
-func _test_loan_costs_more_than_it_pays(t) -> void:
-	var session := _session(0, 1)
+## Avans bedava değil: tahsis ücreti defterdeki anaparaya biniyor, yani
+## malı alıp aynı gün satsan bile zarardasın.
+func _test_advance_costs_more_than_it_carries(t) -> void:
+	var session := _advance_session()
 	session.reputation = 20
-	var amount := GameSession.LOAN_STEP * 4
-	t.ok(session.borrow_from_guild(amount), "borç alınır")
-	t.eq(session.wallet.balance, amount, "keseye tam istenen tutar girer")
+	var item := _advance_item(session)
+	var location := WorldMapData.get_location_by_id(session.current_location_id)
+	var shelf := MarketPricing.get_buy_price(item, location, session.market, session.total_days_elapsed) * 10
+	t.ok(session.take_goods_advance(item, 10), "avans alınır")
 	t.ok(
-		session.get_total_debt() > amount,
-		"deftere ücretiyle birlikte yazılır (%d > %d)" % [session.get_total_debt(), amount]
+		session.get_total_debt() > shelf,
+		"deftere ücretiyle yazılır (%d > %d)" % [session.get_total_debt(), shelf]
 	)
 	t.eq(
-		session.get_total_debt(), session.get_loan_principal(amount),
+		session.get_total_debt(), session.get_loan_principal(shelf),
 		"anapara ilan edilen formülle aynı"
 	)
-
 	# Kayan nokta artığı kilitleniyor: `200 * 0.1` = 20.000000000000004 idi
-	# ve tavana yuvarlanınca 200'lük kredi 221 borç yazıyordu. Oyuncunun
+	# ve tavana yuvarlanınca 200'lük avans 221 borç yazıyordu. Oyuncunun
 	# gördüğü yüzde ile defterdeki tutar birebir tutmalı.
 	t.eq(session.get_loan_principal(200), 220, "yüzde 10'luk ücret tam çıkar")
 	t.eq(session.get_loan_principal(100), 110, "küçük tutarda da tam çıkar")
 	t.eq(session.get_loan_principal(0), 0, "sıfırın ücreti yok")
 
-## Ücret sabit bir yüzde değil - loncanın tanımadığı bir kervancı daha
-## kötü şartla borçlanır. Bant `LOAN_FEE_REPUTATION_CAP`'te düzleşiyor
-## (daha fazla itibar daha ucuz yapmıyor) ve reputation=20'de tam eski
-## sabit değere (%10) denk geliyor - bu yüzden yukarıdaki
-## `_test_loan_costs_more_than_it_pays` hâlâ o tutarı bekleyebiliyor.
 func _test_loan_fee_scales_with_reputation(t) -> void:
 	var untrusted := _session(0, 1)
 	untrusted.reputation = 0
@@ -283,11 +262,32 @@ func _test_loan_fee_scales_with_reputation(t) -> void:
 	t.eq(midpoint.get_loan_fee_percent(), 10, "20 itibar tam eski sabit orana denk geliyor")
 
 func _test_loan_closed_on_the_road_and_without_trust(t) -> void:
-	var session := _session(200, 1)
+	var session := _advance_session()
 	session.reputation = GameSession.LOAN_MIN_REPUTATION - 1
-	t.ne(session.get_loan_block_reason(), "", "itibarsız kervana kredi kapalı")
-	t.not_ok(session.borrow_from_guild(GameSession.LOAN_MIN_AMOUNT), "kapalı kredi para vermez")
-	t.eq(session.wallet.balance, 200, "kese değişmedi")
+	var purse := session.wallet.balance
+	t.ne(session.get_advance_block_reason(), "", "itibarsız kervana avans kapalı")
+	var item := _advance_item(session)
+	t.not_ok(session.take_goods_advance(item, 5), "kapalı avans mal vermez")
+	t.eq(session.wallet.balance, purse, "kese değişmedi")
+
+## Avans testlerinin ortak zemini: şehirde duran, kargosu boş bir kervan.
+func _advance_session() -> GameSession:
+	var session := _session(200, 2)
+	for place in WorldMapData.get_locations():
+		if not place.produces.is_empty():
+			session.current_location_id = place.location_id
+			break
+	return session
+
+func _advance_item(session: GameSession) -> Item:
+	var location := WorldMapData.get_location_by_id(session.current_location_id)
+	if location == null:
+		return null
+	for item_id in location.produces:
+		var item := ItemCatalog.get_item(item_id)
+		if item != null:
+			return item
+	return null
 
 # --- Şehrin karar paneli ---
 #

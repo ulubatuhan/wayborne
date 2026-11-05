@@ -414,7 +414,6 @@ var _orders_dragging: bool = false
 var _orders_drag_offset: Vector2 = Vector2.ZERO
 var _pace_buttons: Array[Button] = []
 var _talk_merchant_button: Button
-var _debt_button: Button
 ## Yan kanal açıkken emirler kilitli; her karede tazelenen düğmeler bu
 ## kilidi ezmesin diye ayrı tutuluyor.
 var _orders_enabled: bool = true
@@ -512,8 +511,6 @@ var _replan_button: Button
 ## Faz 17 PR-6: borç defteri artık yolda da açılabiliyor - eskiden yalnızca
 ## Tüccar Loncası'ndan erişilebiliyordu, oysa road HUD'u borcu zaten
 ## gösteriyordu ama üstünde hiçbir şey yapılamıyordu.
-var _debt_holder: VBoxContainer
-var _debt_panel: DebtPanel
 var _log_list: VBoxContainer
 var _reset_button: Button
 var _camp_button: Button
@@ -1060,9 +1057,6 @@ func _build_modal_layer() -> void:
 	_replan_holder.add_theme_constant_override("separation", 4)
 	column.add_child(_replan_holder)
 
-	_debt_holder = VBoxContainer.new()
-	_debt_holder.add_theme_constant_override("separation", 6)
-	column.add_child(_debt_holder)
 
 	_arrival_panel = VBoxContainer.new()
 	_arrival_panel.add_theme_constant_override("separation", 4)
@@ -1165,7 +1159,6 @@ func _refresh_modal() -> void:
 		or _haggle_holder.get_child_count() > 0
 		or _recruit_holder.get_child_count() > 0
 		or _replan_holder.get_child_count() > 0
-		or _debt_holder.get_child_count() > 0
 		or _arrival_panel.get_child_count() > 0
 	)
 	# Boş bir `VBoxContainer` bile ayırıcı boşluk üretiyor: beş boş
@@ -1175,7 +1168,6 @@ func _refresh_modal() -> void:
 	_haggle_holder.visible = _haggle_holder.get_child_count() > 0
 	_recruit_holder.visible = _recruit_holder.get_child_count() > 0
 	_replan_holder.visible = _replan_holder.get_child_count() > 0
-	_debt_holder.visible = _debt_holder.get_child_count() > 0
 	_arrival_panel.visible = _arrival_panel.get_child_count() > 0
 
 	if open == _modal_open:
@@ -1192,7 +1184,6 @@ const COMMANDS: Array[Dictionary] = [
 	{"key": "UI_ROAD_CMD_MARCH", "pace": PACE_STEADY, "pace_key": "UI_ROAD_PACE_STEADY", "short": "UI_ROAD_ORDER_STEADY"},
 	{"key": "UI_ROAD_CMD_FAST", "pace": PACE_FAST, "pace_key": "UI_ROAD_PACE_FAST", "short": "UI_ROAD_ORDER_FAST"},
 	{"key": "UI_ROAD_CMD_TALK_MERCHANT", "pace": -2.0, "pace_key": "", "short": "UI_ROAD_CMD_TALK_MERCHANT"},
-	{"key": "UI_ROAD_CMD_DEBT", "pace": -3.0, "pace_key": "", "short": "UI_ROAD_CMD_DEBT"},
 ]
 const PACE_COMMAND_COUNT: int = 4
 ## Sofra emrinin düğmede ve kayıtta kısa adı.
@@ -1271,12 +1262,9 @@ func _build_orders_panel() -> void:
 	_talk_merchant_button.text = tr("UI_ROAD_ORDER_MERCHANT")
 	_talk_merchant_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT))
 	action_row.add_child(_talk_merchant_button)
-	_debt_button = Button.new()
-	_debt_button.theme_type_variation = WaybookTheme.HUD_GHOST_BUTTON
-	_debt_button.text = tr("UI_ROAD_ORDER_DEBT")
-	_debt_button.tooltip_text = "%s (%d)" % [tr("UI_ROAD_CMD_DEBT"), PACE_COMMAND_COUNT + 2]
-	_debt_button.pressed.connect(_issue_command.bind(PACE_COMMAND_COUNT + 1))
-	action_row.add_child(_debt_button)
+	# Yoldaki "Borç" emri P12'de kaldırıldı: yolda borçla uğraşmak muhasebe
+	# kipinin ta kendisiydi. Borç artık yalnız şehirde, Lonca'nın defter
+	# sekmesinde ödeniyor.
 
 	# Kalıcı emirler: bir kez verilip hatırlanıyor (bkz. GameSession'daki
 	# "Kalıcı emirler" notu). Sofra düğmesi emri değiştiriyor, yemeği
@@ -1383,8 +1371,6 @@ func _refresh_command_panel() -> void:
 	for index in PACE_COMMAND_COUNT - 1:
 		_pace_buttons[index].disabled = not _orders_enabled
 	fast.disabled = not can_push or not _orders_enabled
-	if _debt_button != null:
-		_debt_button.disabled = not _orders_enabled
 	_meal_policy_button.disabled = not _orders_enabled
 	var command_key := [
 		can_push, "" if _session == null else _session.meal_policy_mode, TranslationServer.get_locale()
@@ -1503,9 +1489,6 @@ func _issue_command(index: int) -> void:
 	if is_equal_approx(pace, -2.0):
 		if not _talk_merchant_button.disabled:
 			_open_merchant_dialogue()
-		return
-	if is_equal_approx(pace, -3.0):
-		_open_debt_panel()
 		return
 	if index < PACE_COMMAND_COUNT and _pace_buttons[index].disabled:
 		return
@@ -4245,7 +4228,6 @@ func _has_open_panel() -> bool:
 		or _haggle_holder.get_child_count() > 0
 		or _recruit_holder.get_child_count() > 0
 		or _replan_holder.get_child_count() > 0
-		or _debt_holder.get_child_count() > 0
 		or _in_game_menu != null
 		or _succession_panel != null
 		or _meal_panel != null
@@ -4290,35 +4272,6 @@ func _open_merchant_dialogue() -> void:
 
 func _on_merchant_dialogue_closed() -> void:
 	_merchant_dialogue_panel = null
-
-## Faz 17 PR-6: borç defteri artık yolda da açılıyor - `DebtPanel` zaten
-## sahnesiz bir `PanelContainer` (`guild.tscn`'in Borçlar sekmesindeki
-## aynı bileşen), Road Screen Layout Rules'un "kararlar tek bir çerçeveli
-## kart içinde" kuralına uyduğu için doğrudan `_debt_holder`'a gömülüyor -
-## `MerchantDialoguePanel`'in aksine kendi arka planı/backdrop'u yok,
-## bu yüzden ayrı bir tam ekran katman değil, modal kartın bir parçası.
-func _open_debt_panel() -> void:
-	if _debt_panel != null:
-		return
-	NodeUtil.clear_children(_debt_holder)
-
-	var title := Label.new()
-	title.text = tr("UI_ROAD_DEBT_TITLE")
-	title.modulate = ArtPalette.GOLD
-	_debt_holder.add_child(title)
-
-	_debt_panel = DebtPanel.new()
-	_debt_holder.add_child(_debt_panel)
-	_debt_panel.setup(_session)
-
-	var close_button := Button.new()
-	close_button.text = tr("UI_CANCEL")
-	close_button.pressed.connect(_close_debt_panel)
-	_debt_holder.add_child(close_button)
-
-func _close_debt_panel() -> void:
-	NodeUtil.clear_children(_debt_holder)
-	_debt_panel = null
 
 ## Liderlik devrinin töreni (bkz. SuccessionPanel) - `_has_open_panel()`'e
 ## eklendiği için `_check_journey_end()` ve zaman akışı bu ekranda durur,

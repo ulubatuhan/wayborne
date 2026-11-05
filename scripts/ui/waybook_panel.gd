@@ -215,6 +215,36 @@ func _fill_overview(box: VBoxContainer) -> void:
 			box.add_child(_page_label(tr("UI_WAYBOOK_LEADER") % leader.character_name))
 		box.add_child(_page_label(tr("UI_WAYBOOK_DIED") % _session.ledger.count_of(CaravanLedger.KIND_DIED)))
 		box.add_child(_page_label(tr("UI_WAYBOOK_DEPARTED") % _session.ledger.count_of(CaravanLedger.KIND_DEPARTED)))
+		_fill_debts(box)
+
+## Borç artık bir ekran değil, defterinde bir satır (P12): **kime · ne
+## kadar · ne zamana kadar.** 327 satırlık borç paneli ve yoldaki "Borç"
+## emri kalktı; ödeme Lonca'da tek düğme. Dördüncü sütun: *Defter unutmaz.*
+func _fill_debts(box: VBoxContainer) -> void:
+	var owed := _session.debts.get_debts()
+	if owed.is_empty():
+		return
+	var heading := _page_label(tr("UI_WAYBOOK_DEBTS"))
+	heading.theme_type_variation = WaybookTheme.PAGE_HEADING
+	box.add_child(heading)
+	for debt in owed:
+		var creditor := String(TranslationServer.translate(debt.creditor_name))
+		var days := debt.get_days_remaining(_session.total_days_elapsed)
+		var line := ""
+		if debt.is_overdue(_session.total_days_elapsed):
+			line = tr("UI_WAYBOOK_DEBT_OVERDUE") % [creditor, debt.principal, -days]
+		elif debt.is_delivery():
+			var item := ItemCatalog.get_item(debt.delivery_item_id)
+			var goods := tr(item.item_name) if item != null else debt.delivery_item_id
+			line = tr("UI_WAYBOOK_DEBT_DELIVERY") % [creditor, debt.delivery_quantity, goods, days]
+		else:
+			line = tr("UI_WAYBOOK_DEBT_ROW") % [creditor, debt.principal, days]
+		var label := _page_label(line)
+		# Vadesi geçen satır kırmızıya değil **kızıla** düşüyor: sayfanın
+		# mürekkebi değişiyor, ekran bir uyarı vermiyor.
+		if debt.is_overdue(_session.total_days_elapsed):
+			label.add_theme_color_override("font_color", DebtPanel.OVERDUE_SEVERE_COLOR)
+		box.add_child(label)
 
 ## Defter ile Düşenler arasında: iki sayfa birlikte döner.
 func _toggle_fallen() -> void:
