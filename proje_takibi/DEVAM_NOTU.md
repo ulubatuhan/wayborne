@@ -93,3 +93,41 @@ KALSIN (dokunma): A4 kilise, A7 gün evreleri, A8 taverna, A9 sohbet, A10 terazi
 
 Kullanıcı kararları (2026-10-21): 2.3 CityView silinmiş kalsın (bitti); 6.1 LFS taşınmayacak (bitti); Y-H01 şimdilik öğretici/yardım paneli yok, kaldırıldı (bitti); Y-G08 motif ateş ve fener birlikte (güncellenecek); N31f ortam kayıtlarını kullanıcı getirecek. Karar bekleyen madde kalmadı; lore'a bağlılar yazılmaz.
 Lore'a bağlı olanlar (Y-E01/E02/E06, Y-A07) yazılmaz.
+
+## Ticaretin odağı turu — 17 önerinin hepsi oyunda (2026-11-05)
+
+Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, maddeler
+`docs/design_notes/ticaret_onerileri.md`, iş kaydı
+`proje_takibi/referans/gorevler/17_ticaret_odak.md`. Kullanıcı on yedisini de
+onayladı; hepsi uygulandı, her parça ayrı commit ve push edildi.
+
+**Ne değişti, tek cümleyle:** pazarlık tek bir karara indi (%45 → %15), erzak
+şehirde tükeniyor, altın kıtlıkta değersizleşiyor ve takas varsayılan hâle
+geliyor, fiyatın nedeni üç kelime, ticaret deftere ahlaki bir iz bırakıyor,
+açlık ve yorgunluk bedende görünüyor, yol üç gün üst üste susabiliyor ve borç
+büyümeyi bırakıp bir ad ile bir yük taşıyor.
+
+**Hiçbir sistem kesilmedi** (derinleşme, asla sadeleştirme): kese, lonca,
+itibar, kontrat, borç, pazarlık hepsi duruyor - kipleri değişti. Tek gerçek
+kaldırma nakit kredi (P13), yerine mal avansı geldi.
+
+**Ölçüm (P8):** `simulate_career`'a kalıcı "kâr tavanı" satırı eklendi. Asıl
+bulgu ölçüm aracının kendisiydi: satış şehir hazinesini ve geri satış tavanını
+hiç uğramıyordu, rapor 6948 GG'lik bir tepe gösteriyordu. Araç ekranın
+kapılarından geçirilince kese eğrisi düşüyor (oran 0.59-0.82), tepe 1617,
+ölüm oranı değişmedi.
+
+**Ekran görüntüsünün yakaladığı yedi kusur** (hiçbirini test göremezdi):
+pazarlıkta kazancı görünmeyen risk düğmesi; her malın altında yazan "Kıtlık";
+içe aktarılmamış çeviri anahtarı; aşınmanın dört hâlde de görünmemesi; borç
+özetinde kese bakiyesinin "en yakın vade" diye basılması; "-12 gün"; ve
+takasta kıtlığın neden iyi olduğunun söylenmemesi.
+
+**Yapılmayan tek şey:** P15'in "haber satın alınabilsin" kısmı, kullanıcının
+N34 kararıyla (*"tavernadan doğrudan dedikodu satın alınmasın"*) çeliştiği
+için uygulanmadı; haber anlatılıyor, kervansaray da aynı kurala bağlandı.
+Kullanıcı N34'ü geri alırsa satın alma tek düğmeyle açılır.
+
+**Testler:** 31990 geçti. Yeni paket `tests/test_trade_focus.gd`; yeni araçlar
+`screenshot_haggling`, `screenshot_price_marks`, `screenshot_barter`,
+`screenshot_wear`, `screenshot_debt`, `screenshot_provisioning`.
