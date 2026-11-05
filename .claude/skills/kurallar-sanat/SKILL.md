@@ -504,3 +504,60 @@ toz, çamur, yerde kalan iz, nefes buharı, kor ve duman. Kaynak
   on dört kare beklemek yarım saniyelik bir sıçramanın çoktan ölmesi
   demek. İlk iki denemede katalog sayfasının boş çıkması efektin
   zayıflığı değil, bu ölçüm hatasıydı.
+
+### Weather on the Body Rules
+
+Havanın bedene ve eşyaya bıraktığı iz (görev Y-G25): yağmurun ıslattığı
+kumaş, sırtta ve brandada biriken kar. Model `Soaking`, çizim
+`ArtDraw.snow_cap`/`wet_sheen`/`wet_tint`, dağıtım `RoadCaravan`.
+
+- **Zeminin ıslaklığıyla kervanın ıslaklığı iki ayrı birikimdir.**
+  `GroundCover` yere, `Soaking` sırta bakıyor; ikisi de aynı iki girdiyi
+  (`RouteWeather` + `Temperature`) ve aynı yağış tablosunu
+  (`GroundCover.WETTING`) okuyor ama ayrı şeyler biriktiriyor - yol çamur
+  olurken sırtta kuru kar durabilir, kar erirken tersi. Tek bir sayıya
+  indirilseydi ikisinden biri yalan söylerdi.
+- **Hesaplanır, saklanmaz** (`RouteWeather`, `Temperature`, `GroundCover`
+  ile aynı kural): girdi yalnızca tohumdan türeyenler ve kayıtta zaten
+  duran `last_fire_day`. Kaydı yeniden yükleyip üstünü kurutmak yok.
+- **Ateş günün sonunda yanar.** Kurutma o günün *sonuna* uygulanıyor,
+  başındaki taşımaya değil: ilk sürümde yağmurlu bir günde ateşin hiçbir
+  faydası görünmüyordu, çünkü gün boyu yağan yağmur kervanı yine tavana
+  çıkarıyordu. Yapısal test yakaladı ("ateş kurutur 1.00 < 1.00").
+- **Islaklık görünür bir süreçtir.** `RoadCaravan` hedefe doğru yumuşakça
+  gidiyor (`COAT_EASE_PER_SECOND`); anında atlasa yağmur başladığı saniyede
+  bütün kervan sırılsıklam olurdu. Sahneye girerken `immediate`: yola ıslak
+  çıkan kervanın ilk karesi yalan olmamalı.
+- **Kervan tek yerden ıslanır.** Pay figürlere ve vagona `RoadCaravan`'dan
+  dağıtılıyor; iki ayrı yerden okunsaydı kervanın yarısı ıslanıp yarısı
+  kuru kalırdı (`ArtDraw.wagon`'un var olma gerekçesinin aynısı).
+- **Islaklık `self_modulate`, `modulate` değil.** Kumaş koyulaşıyor ama
+  çocuk düğümler (durum efektleri, konuşma baloncuğu) ıslanmamalı.
+- **Kar ne tahta, ne sıra sıra kubbe, ne de şapka.** Üç deneme ve üçü de
+  ekran görüntüsünde elendi: (1) bütün genişliği örten tek kubbe öküzün
+  sırtına konmuş beyaz bir kalastı (ölçüldü, 18:1); (2) eşit dilimlere
+  bölünmüş kubbeler hizalı bir sıra şekerleme gibi okundu - eşit genişlik
+  ve eşit kabarıklık doğada yok; (3) kalın bir baş birikintisi figürlere
+  aşçı şapkası giydirdi. Şimdiki hâli **tek bir yığın**, sırtı birkaç
+  dalga boyunun toplamıyla düzensiz, uçları sıfıra inen, tabanı yüzeyin
+  içine gömülü (üstüne oturan yığın havada duruyor gibiydi) ve insanda bir
+  yığın değil **ince bir kabuk**. Mürekkebi yumuşak: `inked`'in tam siyah
+  hattı karı kesilmiş karton gibi gösteriyordu.
+- **Eklem adları iki kümeden gelir.** Render edilmiş kareler başın
+  tepesini `head_top` diye veriyor, prosedürel iskelet başın eklemini
+  `head` diye. İlk sürüm yalnız `head`'e baktı - ve oyundaki her gerçek
+  figür render edilmiş kare kullandığı için insanların hiçbirinde kar
+  çizilmedi. Yapısal test bunu göremezdi; ekran görüntüsü gördü.
+- **Ölçü eklemden, orandan değil.** İki ayaklının birimi kalça-baş
+  açıklığı (ölçüldü: kutunun 0.339'u), kutunun kendisi değil - atlı
+  binicinin kutusu yürüyen tayfanınkiyle aynı değil. İlk sürüm omuz-baş
+  açıklığını boyun 0.17'si sandı; gerçek değer 0.079.
+- **Atlının sırtında binici oturuyor:** kar oraya değil sağrıya biner,
+  yoksa birikinti binicinin kucağına düşüyor.
+- **Islanmanın mekanik karşılığı var, yoksa sadece boya olurdu.** Islak
+  giysi ısısının `Temperature.WET_WARMTH_LOSS` kadarını kaybediyor, yani
+  yağmurlu bir günün bedeli o gece stres, yorgunluk ve humma olarak
+  ödeniyor; kuruma yolu ateştir. Yeni bir ceza sistemi değil, var olan
+  soğuk kolunun çevrilmesi (bkz. kurallar-yol, "Weather invents no
+  system"). Planlayıcının erzak sözü etkilenmiyor: erzak payı yalnızca
+  sıcaklığa bakıyor, soğuk yüküne değil.

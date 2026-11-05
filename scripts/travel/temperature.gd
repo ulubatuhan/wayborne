@@ -139,9 +139,17 @@ static func ration_share(low_c: float) -> float:
 	return 0.0
 
 ## Gece soğuğunun bir bedene yükü: konfordan ne kadar aşağıda kaldığı.
-static func cold_load(low_c: float, warmth: float, by_fire: bool) -> float:
+## Islak giysi ısısının ne kadarını kaybeder. Yarıdan fazla: su yünün
+## havasını kovar. Bu, yağmuru soğuğa bağlayan tek sayı - yeni bir ceza
+## sistemi değil, var olan soğuk kolunun çevrilmesi (bkz. Soaking).
+const WET_WARMTH_LOSS: float = 0.55
+
+## `wet` 0..1 (bkz. `Soaking.at`). Varsayılanı sıfır: ıslaklığı bilmeyen
+## çağıran (planlayıcı, simülatör, şehir) eskisi gibi hesaplar.
+static func cold_load(low_c: float, warmth: float, by_fire: bool, wet: float = 0.0) -> float:
 	var felt := low_c + (CAMPFIRE_WARMTH if by_fire else 0.0)
-	return maxf(0.0, COMFORT_C - felt - warmth)
+	var kept := warmth * (1.0 - WET_WARMTH_LOSS * clampf(wet, 0.0, 1.0))
+	return maxf(0.0, COMFORT_C - felt - kept)
 
 static func band(load: float) -> int:
 	if load >= BAND_FROSTBITE:

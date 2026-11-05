@@ -33,6 +33,11 @@ func run(t) -> void:
 	_test_footfalls(t)
 	_test_layer_pool(t)
 	_test_layer_drifts_with_the_ground(t)
+	_test_soaking_is_deterministic(t)
+	_test_soaking_follows_the_sky(t)
+	_test_fire_dries_the_caravan(t)
+	_test_wet_clothes_keep_less_heat(t)
+	_test_weather_coat_on_the_figure(t)
 
 ## Zeminden türeyen her ad katalogda olmalı.
 func _test_catalog_matches_ground_names(t) -> void:
@@ -209,3 +214,95 @@ func _test_layer_drifts_with_the_ground(t) -> void:
 	# doğruladığı şey o: dünya 120 piksel ilerledi, iz 120 piksel geride.
 	t.almost(400.0 - (layer.world_x - 0.0) * FxLayer.GROUND_PARALLAX, 280.0, "iz dünya kadar geriye kayar", 0.01)
 	layer.free()
+
+## --- Kervanın üstündeki su ve kar (görev Y-G25) ---
+
+## `GroundCover` ile aynı kural: aynı yolun aynı günü her zaman aynı
+## ıslaklık. Olmasaydı kaydı yeniden yükleyip üstünü kurutmak mümkün olurdu.
+func _test_soaking_is_deterministic(t) -> void:
+	for day in [1, 9, 40]:
+		var first := Soaking.at("a|b", day, ArtPalette.BIOME_FOREST, "", -1)
+		var second := Soaking.at("a|b", day, ArtPalette.BIOME_FOREST, "", -1)
+		for key in ["wet", "snow"]:
+			t.almost(float(first[key]), float(second[key]),
+				"%d. günün %s payı aynı" % [day, key], 0.0001)
+			t.ok(float(first[key]) >= 0.0 and float(first[key]) <= 1.0,
+				"%s payı 0..1 arasında" % key)
+
+## Gökten ne düşüyorsa sırta o biner: sıcakta su, donda kar. İkisi aynı
+## anda tavana vurmaz - yağmur yağarken kar birikmiyor.
+func _test_soaking_follows_the_sky(t) -> void:
+	var rainy := -1
+	var snowy := -1
+	for day in range(1, 400):
+		var weather := RouteWeather.at("x|y", day, ArtPalette.BIOME_MEADOW)
+		if weather != RouteWeather.STORM and weather != RouteWeather.RAIN:
+			continue
+		if rainy < 0 and Temperature.daily_mean(day, ArtPalette.BIOME_MEADOW, "warm", weather) > 10.0:
+			rainy = day
+		if snowy < 0 and Temperature.daily_mean(day, ArtPalette.BIOME_MEADOW, "cold", weather) < -6.0:
+			snowy = day
+	if rainy > 0:
+		var wet := Soaking.at("x|y", rainy, ArtPalette.BIOME_MEADOW, "warm", -1)
+		t.ok(float(wet.wet) > 0.4, "ılık yağmurda kervan ıslanır (%.2f)" % float(wet.wet))
+		t.ok(float(wet.snow) < 0.05, "ılık yağmurda sırtta kar durmaz")
+	if snowy > 0:
+		var cold := Soaking.at("x|y", snowy, ArtPalette.BIOME_MEADOW, "cold", -1)
+		t.ok(float(cold.snow) > 0.1, "donda sırtta kar durur (%.2f)" % float(cold.snow))
+		t.ok(float(cold.wet) < float(cold.snow) + 0.5, "donda ıslaklık karı geçmez")
+	# Branda omuzdan çok tutar, ama tavanı aşmaz.
+	t.ok(Soaking.wagon_snow(0.4) > 0.4, "branda omuzdan çok kar tutar")
+	t.eq(Soaking.wagon_snow(1.0), 1.0, "branda payı tavanı aşmaz")
+
+## Ateş kurutur: kampın görünmeyen karşılığı. Olmasaydı kamp kurmak
+## yalnızca saat ve erzak harcamak olurdu.
+func _test_fire_dries_the_caravan(t) -> void:
+	var wettest := -1
+	for day in range(2, 300):
+		if RouteWeather.at("f|g", day, ArtPalette.BIOME_LAKE) == RouteWeather.STORM:
+			wettest = day
+			break
+	if wettest < 0:
+		t.ok(true, "fırtınalı gün bulunamadı, atlandı")
+		return
+	var no_fire := Soaking.at("f|g", wettest, ArtPalette.BIOME_LAKE, "warm", -1)
+	var by_fire := Soaking.at("f|g", wettest, ArtPalette.BIOME_LAKE, "warm", wettest)
+	t.ok(float(by_fire.wet) < float(no_fire.wet),
+		"ateş kurutur (%.2f < %.2f)" % [float(by_fire.wet), float(no_fire.wet)])
+
+## Islaklığın mekanik karşılığı: giysi ısısının yarısından çoğunu
+## kaybediyor. Yağmurun bedeli gece ödeniyor - yeni bir ceza sistemi değil,
+## var olan soğuk kolunun çevrilmesi.
+func _test_wet_clothes_keep_less_heat(t) -> void:
+	var dry := Temperature.cold_load(-6.0, 12.0, false, 0.0)
+	var damp := Temperature.cold_load(-6.0, 12.0, false, 0.5)
+	var soaked := Temperature.cold_load(-6.0, 12.0, false, 1.0)
+	t.ok(damp > dry, "nemli giysi daha az ısıtır")
+	t.ok(soaked > damp, "sırılsıklam en kötüsü")
+	t.almost(soaked - dry, 12.0 * Temperature.WET_WARMTH_LOSS,
+		"kayıp giysinin ısısının payı kadar", 0.001)
+	# Islaklığı bilmeyen çağıran (planlayıcı, simülatör, şehir) eskisi gibi
+	# hesaplıyor: varsayılan sıfır.
+	t.eq(Temperature.cold_load(-6.0, 12.0, false), dry, "varsayılan kuru")
+	# Giysisi olmayan ıslanmakla bir şey kaybetmiyor: kaybedilecek ısı yok.
+	t.eq(Temperature.cold_load(-6.0, 0.0, false, 1.0),
+		Temperature.cold_load(-6.0, 0.0, false, 0.0), "çıplakta ıslaklık bir şey değiştirmez")
+
+func _test_weather_coat_on_the_figure(t) -> void:
+	var figure := WalkFigure.new()
+	figure.size = Vector2(60.0, 120.0)
+	t.eq(figure.get_weather_coat(), Vector2.ZERO, "kuru başlar")
+	figure.set_weather_coat(0.8, 0.3)
+	t.almost(figure.get_weather_coat().x, 0.8, "ıslaklık yazıldı", 0.001)
+	t.almost(figure.get_weather_coat().y, 0.3, "kar yazıldı", 0.001)
+	# Islak kumaş koyulaşıyor; `self_modulate`, `modulate` değil - çocuk
+	# düğümler (durum efektleri, baloncuk) ıslanmamalı.
+	t.ok(figure.self_modulate.v < 1.0, "ıslak figür koyulaşır")
+	t.eq(figure.modulate, Color.WHITE, "çocuklar etkilenmez")
+	figure.set_weather_coat(2.0, -1.0)
+	t.eq(figure.get_weather_coat(), Vector2(1.0, 0.0), "paylar 0..1 arasına sıkışır")
+	figure.free()
+	# Tek formül: figür, vagon ve eşya aynı yağmurun altında.
+	t.ok(ArtDraw.wet_tint(Color.WHITE, 1.0).v < ArtDraw.wet_tint(Color.WHITE, 0.0).v,
+		"ıslak renk kurudan koyu")
+	t.eq(ArtDraw.wet_tint(Color.WHITE, 0.0), Color.WHITE, "kuruda renk değişmez")

@@ -1357,12 +1357,74 @@ const FX_BEAST_SCALE: float = 1.25
 ## (`OX_HEIGHT_RATIO`): hesap işi başlatır, ölçüm bitirir.
 const FX_READABILITY: float = 1.45
 
+## Kervanın üstündeki su ve kar (bkz. `Soaking`). İki sayı: hedef (yol
+## ekranı her şafakta veriyor) ve ekranda görünen (hedefe doğru yumuşakça
+## gidiyor). Anında atlasa yağmur başladığı saniyede bütün kervan
+## sırılsıklam olurdu; ıslanmak ve kurumak **görünen** bir süreç.
+const COAT_EASE_PER_SECOND: float = 0.055
+
+var _coat_wet: float = 0.0
+var _coat_snow: float = 0.0
+var _coat_wet_target: float = 0.0
+var _coat_snow_target: float = 0.0
+
 var _fx_ground: FxLayer = null
 var _fx_front: FxLayer = null
 var _cover: Dictionary = {}
 var _breath_share: float = 0.0
 var _wheel_fx_accum: float = 0.0
 var _breath_time: float = 0.0
+
+## Üstteki su ve kar payı. Yol ekranı `Soaking.at`'ten veriyor; kervan
+## bunu figürlere ve vagona dağıtıyor - kervanın yarısı ıslanıp yarısı
+## kuru kalmasın diye tek yerden.
+## `immediate` sahneye girerken: yola ıslak çıkan bir kervan ekranda
+## kuruyken başlayıp yavaşça ıslanmamalı, o ilk kare yalan olurdu.
+func set_soaking(wet: float, snow: float, immediate: bool = false) -> void:
+	_coat_wet_target = clampf(wet, 0.0, 1.0)
+	_coat_snow_target = clampf(snow, 0.0, 1.0)
+	if not immediate:
+		return
+	_coat_wet = _coat_wet_target
+	_coat_snow = _coat_snow_target
+	for child in get_children():
+		var figure := child as WalkFigure
+		if figure != null:
+			figure.set_weather_coat(_coat_wet, _coat_snow)
+	queue_redraw()
+
+func get_soaking() -> Vector2:
+	return Vector2(_coat_wet, _coat_snow)
+
+## Brandanın su damlatan kenarları: yağmur dindikten sonra kumaşta kalan su
+## bir süre daha akar. Noktalar vagonun kendi ölçüsünden (`ArtDraw.wagon`'un
+## kemer tabanı), tahminden değil.
+func canopy_drip_points() -> Array[Vector2]:
+	var points: Array[Vector2] = []
+	var height := size.y * _scale
+	if height <= 0.0 or _ground_y <= 0.0:
+		return points
+	var wagon_w := height * WAGON_WIDTH_RATIO
+	var wagon_h := height * WAGON_HEIGHT_RATIO
+	var hoop_top := _ground_y - wagon_h * ArtDraw.WAGON_WHEEL_RATIO * 1.35 - wagon_h * 0.16
+	for centre in _wagon_centres:
+		points.append(Vector2(float(centre) - wagon_w * 0.44, hoop_top))
+		points.append(Vector2(float(centre) + wagon_w * 0.44, hoop_top))
+	return points
+
+func _advance_coat(delta: float) -> void:
+	var step := delta * COAT_EASE_PER_SECOND
+	var next_wet := move_toward(_coat_wet, _coat_wet_target, step)
+	var next_snow := move_toward(_coat_snow, _coat_snow_target, step)
+	if is_equal_approx(next_wet, _coat_wet) and is_equal_approx(next_snow, _coat_snow):
+		return
+	_coat_wet = next_wet
+	_coat_snow = next_snow
+	for child in get_children():
+		var figure := child as WalkFigure
+		if figure != null:
+			figure.set_weather_coat(_coat_wet, _coat_snow)
+	queue_redraw()
 
 func set_fx_layers(ground: FxLayer, front: FxLayer) -> void:
 	_fx_ground = ground
@@ -1478,6 +1540,7 @@ func _process(delta: float) -> void:
 	# kamp sırasında kervanın zemin hızı zaten sıfır (bkz. orası).
 	_anim_time += delta
 	_breath_time += delta
+	_advance_coat(delta)
 	if _turning:
 		_advance_turn(delta)
 	# Efektlerin ölçeği her karede: ekran boyu ve yakınlaştırma değişince
@@ -2122,7 +2185,8 @@ func _draw() -> void:
 		ArtDraw.wagon(
 			self, Vector2(centre, _ground_y), wagon_w, wagon_h,
 			_wheel_angle, _light, index == 0, not driver_gone,
-			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion)
+			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion),
+			_coat_wet, Soaking.wagon_snow(_coat_snow)
 		)
 		_draw_mud(centre, wagon_w, wagon_h, index)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

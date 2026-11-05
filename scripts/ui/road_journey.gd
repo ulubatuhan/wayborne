@@ -3008,8 +3008,12 @@ func _refresh_ground_fx(biome: String, climate: String) -> void:
 	_snow_share = GroundCover.snow_share(
 		Temperature.daily_mean(day, biome, climate, _weather)
 	)
+	# Kervanın **üstü**: zeminden ayrı bir birikim (bkz. Soaking). Yol
+	# çamur olurken sırtta kuru kar durabilir; kar erirken tersi.
+	_soaking = Soaking.at(_route_key, day, biome, climate, _session.last_fire_day)
 	if _caravan != null:
 		_caravan.set_ground_cover(_ground_cover)
+		_caravan.set_soaking(float(_soaking.get("wet", 0.0)), float(_soaking.get("snow", 0.0)))
 		# Nefes buharı donmaya yaklaşınca beliriyor, soğukta her nefeste.
 		_caravan.set_breath_share(clampf(
 			(BREATH_FROM_C - Temperature.daily_mean(day, biome, climate, _weather))
@@ -3031,7 +3035,13 @@ const BREATH_FROM_C: float = 7.0
 const BREATH_FULL_C: float = -2.0
 ## Yağmurun yere çarpma izleri: en yoğun havada saniyede kaç tane.
 const RAIN_MARKS_PER_SECOND: float = 15.0
+## Yağmur dindikten sonra brandanın kenarından saniyede kaç damla.
+const CANOPY_DRIPS_PER_SECOND: float = 1.1
+## Brandanın damlamaya başladığı ıslaklık.
+const CANOPY_DRIP_FROM: float = 0.40
 var _snow_share: float = 0.0
+var _soaking: Dictionary = {}
+var _drip_accum: float = 0.0
 
 ## Her karede: efekt katmanlarının zeminle birlikte kayması ve yağmurun
 ## yere çarpma izleri.
@@ -3048,6 +3058,27 @@ func _sync_fx(delta: float) -> void:
 		if _caravan != null:
 			_curtain.set_px_per_metre(_caravan.fx_px_per_metre())
 	_spawn_rain_marks(delta)
+	_spawn_canopy_drips(delta)
+
+## Yağmur dindi ama branda hâlâ ıslak: kumaşta kalan su kenardan akıyor.
+## Yağarken çizilmiyor - perdenin içinde zaten damla var, bir de kenardan
+## damlatmak aynı şeyi iki kez söylemek olurdu.
+func _spawn_canopy_drips(delta: float) -> void:
+	if _fx_front == null or _caravan == null:
+		return
+	var wet := float(_soaking.get("wet", 0.0))
+	if wet < CANOPY_DRIP_FROM:
+		return
+	if float(RouteWeather.visuals(_weather).get("rain", 0.0)) > 0.01 or not _can_time_flow():
+		return
+	_drip_accum += delta * CANOPY_DRIPS_PER_SECOND * wet
+	if _drip_accum < 1.0:
+		return
+	_drip_accum -= 1.0
+	var edges := _caravan.canopy_drip_points()
+	if edges.is_empty():
+		return
+	_fx_front.emit("canopy_drip", edges[randi() % edges.size()])
 
 ## Damlanın yere değdiği yer. Kuru toprakta küçük bir toz, ıslak zeminde
 ## halka ve taç sıçrama, karda konan kar. **Yolun altındaki şeride**

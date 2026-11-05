@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **198** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **199** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -2767,6 +2767,27 @@ Toplam: **198** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Oyun tarafı:** `FxCatalog` (manifesto, doku, kare, dünya ölçüsü), `FxLayer` (havuzlu; efekt bırakıldığı **toprağa** çivili, kervanla birlikte kaymıyor), `WeatherCurtain` (iki derinlikte döşenen perde), `GroundCover` (ıslak/çamur/kar/toz; `RouteWeather` + `Temperature`'dan **hesaplanır, saklanmaz**, üç gün hafıza). `RoadCaravan` her ayak, toynak ve tekerlek temasında zemine göre efekt ve iz bırakıyor (`WalkFigure.take_footfalls`).
   - **Karar:** Perde varken `TravelBand`'in kendi prosedürel yağmuru susuyor (ekranda iki yağmur üst üste biniyordu); sanat eksikse geri geliyor - `PropArt`'ın "resmi yoksa çağıran kendi çizimine düşer" kuralı.
   - **Kabul:** `tests/test_road_fx.gd` (280 test: ad uyumu, manifesto bütünlüğü, zeminin yinelenebilirliği, adım sayacı, havuz tavanı), `tests/screenshot_road_fx.gd` sekiz kare (kuru, yağmur, fırtına, çamur, kar, tipi, sis, katalog) ve `docs/ui/efekt_tabakasi.png`.
+
+</details>
+
+### Y-G25 · Yağmur ve kar bedende: ıslanma ve kar birikmesi
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P12 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-G24
+- **Son not:** 2026-11-05 kullanıcı isteği ("yağmur ve suyun hayvanlar, insanlar ve vagon üzerinde de etkisi olsun; ıslansınlar, üstlerinde kar biriksin"). `Soaking` (scripts/travel): kervanın üstündeki su ve kar, GroundCover'ın gövde karşılığı; RouteWeather + Temperature'dan hesaplanıyor, saklanmıyor, iki gün hafıza, ateş günün sonunda kurutuyor, eriyen kar suya dönüyor. Çizim: ArtDraw.snow_cap (düzensiz tek yığın), wet_sheen, wet_tint; WalkFigure baş/sırt/omuz, ArtDraw.wagon brandanın tepesi. Mekanik bağ: ıslak giysi ısısının %55'ini kaybediyor (Temperature.WET_WARMTH_LOSS), yani yağmurun bedeli gece stres/yorgunluk/humma olarak ödeniyor; planlayıcının erzak sözü etkilenmiyor. Yağmur dindiğinde brandanın kenarından canopy_drip damlıyor. Doğrulama: test_road_fx 311 test, screenshot_road_fx 09_islak_kervan ve 10_karli_kervan.
+
+<details><summary>Görev metni</summary>
+
+- [x] **Y-G25 Yağmur ve kar bedende: ıslanma ve kar birikmesi**
+  - **Yapıldı (2026-11-05):** kullanıcı isteği - "yağmur ve suyun hayvanlar, insanlar ve vagon üzerinde de etkisi olsun. Islansınlar, üstlerinde kar biriksin vs."
+  - **Öncelik:** P2 · **Dalga:** 6 · **Bağımlı:** Y-G24 · **Kim:** C
+  - **Model:** `Soaking` (`scripts/travel/soaking.gd`) - kervanın **üstündeki** su ve kar, `GroundCover`'ın gövde karşılığı. İkisi aynı iki girdiyi (`RouteWeather` + `Temperature`) ve aynı yağış tablosunu okuyor ama ayrı şeyler biriktiriyor: yol çamur olurken sırtta kuru kar durabilir, kar erirken tersi. **Hesaplanır, saklanmaz**; iki gün hafıza; gövde zeminden hızlı ıslanır ve hızlı kurur; eriyen kar suya döner; **ateş günün sonunda kurutur** (kampın görünmeyen karşılığı).
+  - **Görünüş:** `ArtDraw.snow_cap` (düzensiz tek yığın, tabanı yüzeye gömülü, yumuşak mürekkep), `wet_sheen` (ıslak üst yüzeyde gökyüzünün soğuk parıltısı), `wet_tint` (tek formül: figür, vagon ve eşya aynı yağmurun altında). `WalkFigure` baş tepesi, sırtın üstü ve dört ayaklının sırtı; `ArtDraw.wagon` brandanın tepesi. Pay `RoadCaravan`'dan dağıtılıyor ve hedefe doğru yumuşakça gidiyor - ıslanmak görünen bir süreç.
+  - **Mekanik bağ (yeni ceza sistemi değil, var olan kolun çevrilmesi):** ıslak giysi ısısının `Temperature.WET_WARMTH_LOSS` (%55) kadarını kaybediyor, yani yağmurlu bir günün bedeli o gece stres, yorgunluk ve humma olarak ödeniyor; kuruma yolu ateştir. Planlayıcının erzak sözü etkilenmiyor (erzak payı yalnızca sıcaklığa bakıyor).
+  - **Ayrıca:** yağmur dindikten sonra brandanın kenarından `canopy_drip` damlıyor (katalogdaki efekt artık bağlı).
+  - **Ekran görüntüsünün yakaladığı dört hata** (hiçbirini yapısal test göremezdi): kar tümseği önce kalas, sonra sıra sıra şekerleme, sonra aşçı şapkası oldu; ve render edilmiş figürler `head` değil `head_top` verdiği için insanların hiçbirinde kar çizilmemişti.
+  - **Kabul:** `tests/test_road_fx.gd` 311 test (toplam 30923 geçti), `tests/screenshot_road_fx.gd` `09_islak_kervan` ve `10_karli_kervan`.
 
 </details>
 

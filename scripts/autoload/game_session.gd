@@ -3644,11 +3644,24 @@ func get_cold_ration_share() -> float:
 		return 0.0
 	return Temperature.ration_share(get_road_night_low())
 
+## Kervanın üstündeki su ve kar (`Soaking.at`): giysi ıslaksa daha az
+## ısıtıyor, yani yağmurlu bir günün bedeli gece ödeniyor. Hesaplanıyor,
+## saklanmıyor - `road_sky` zaten her şafakta yazılıyor.
+func get_road_soaking() -> Dictionary:
+	if not has_road_sky():
+		return {"wet": 0.0, "snow": 0.0}
+	return Soaking.at(String(road_sky["key"]), int(road_sky["day"]),
+		String(road_sky["biome"]), String(road_sky["climate"]), last_fire_day)
+
+func get_road_wetness() -> float:
+	return float(get_road_soaking().get("wet", 0.0))
+
 ## Bir kişinin bu gecenin soğuğundaki bandı (0-3).
 func get_cold_band(character: CharacterData, by_fire: bool = false) -> int:
 	if not has_road_sky():
 		return 0
-	return Temperature.band(Temperature.cold_load(get_road_night_low(), character.get_warmth(), by_fire))
+	return Temperature.band(Temperature.cold_load(
+		get_road_night_low(), character.get_warmth(), by_fire, get_road_wetness()))
 
 ## Şafakta geçen gecenin bedeli: kişi başına bant (giysisi ve bedeni, ateş
 ## yandıysa ılık), bant başına stres ve yorgunluk; ayazda humma şansı.
@@ -3662,9 +3675,13 @@ func _cold_night() -> void:
 	var low := get_road_night_low() + (BURN_WARMTH_C if burned_warmth_day == total_days_elapsed else 0.0)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("cold|%s|%d" % [caravan_name, total_days_elapsed])
+	# Islak giysi ısısının yarısından çoğunu kaybediyor: yağmurlu günün
+	# bedeli bu gece ödeniyor, ateş yanmışsa daha az (ateş hem ısıtıyor hem
+	# kurutuyor - iki ayrı yoldan, bkz. Soaking.FIRE_DRY).
+	var wet := get_road_wetness()
 	var shivering: Array[String] = []
 	for character in get_party():
-		var b := Temperature.band(Temperature.cold_load(low, character.get_warmth(), by_fire))
+		var b := Temperature.band(Temperature.cold_load(low, character.get_warmth(), by_fire, wet))
 		if b <= 0:
 			continue
 		change_character_stress(character, Temperature.BAND_STRESS[b])
@@ -3673,7 +3690,7 @@ func _cold_night() -> void:
 		shivering.append(character.character_name)
 		if b >= 3 and rng.randf() < Temperature.FROSTBITE_FEVER_BONUS and character.add_ailment("fever"):
 			cold_notes.append({"key": "UI_COLD_FEVER", "args": [character.character_name]})
-	var crew_band := Temperature.band(Temperature.cold_load(low, Temperature.CREW_WARMTH, by_fire))
+	var crew_band := Temperature.band(Temperature.cold_load(low, Temperature.CREW_WARMTH, by_fire, wet))
 	if owned_wagon_count > 0 and Temperature.CREW_BAND_MORALE[crew_band] != 0:
 		caravan.change_morale(Temperature.CREW_BAND_MORALE[crew_band])
 		cold_notes.append({"key": "UI_COLD_CREW", "args": []})

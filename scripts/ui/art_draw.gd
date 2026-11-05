@@ -509,13 +509,17 @@ static func wagon_driver_seat(base: Vector2, w: float, h: float) -> Vector2:
 ## yol / yarıçap kadar döndürüyor, ikisi aynı sayıyı okumalı.
 const WAGON_WHEEL_RATIO: float = 0.34
 
+## `wet` ve `snow` 0..1 (bkz. `Soaking`): ıslak branda koyulaşır, karlı
+## brandanın tepesinde kar durur. Vagon figürlerle **aynı** iki sayıyı
+## okuyor - kervanın yarısı ıslanıp yarısı kuru kalmasın.
 static func wagon(
 	canvas: CanvasItem, base: Vector2, w: float, h: float,
 	wheel_angle: float, tint: Color, with_load: bool = false, draw_driver: bool = true,
-	canopy_sway: float = 0.0
+	canopy_sway: float = 0.0, wet: float = 0.0, snow: float = 0.0
 ) -> void:
+	tint = wet_tint(tint, wet)
 	if PropArt.has(WAGON_PROP):
-		_wagon_sprite(canvas, base, h, wheel_angle, tint, with_load, draw_driver, canopy_sway)
+		_wagon_sprite(canvas, base, h, wheel_angle, tint, with_load, draw_driver, canopy_sway, snow, wet)
 		return
 	var body := _tint(ArtPalette.WAGON_BODY, tint)
 	var dark := _tint(ArtPalette.WAGON_BODY_DARK, tint)
@@ -583,6 +587,10 @@ static func wagon(
 			Vector2(base.x - w * 0.54, bed_y - h * 0.34), Vector2(w * 0.16, h * 0.20)
 		), _tint(ArtPalette.WAGON_LOAD, tint), true)
 
+	_wagon_weather(
+		canvas, Vector2(base.x + canopy_sway, hoop_top - h * 0.62), w * 0.56, h, snow, wet
+	)
+
 ## Render edilmiş brandalı vagon (`tools/figure_pipeline/props/wagon_builder.py`).
 ## Model `ArtDraw.wagon`'un kendi oranlarıyla kuruldu - h = WAGON_MODEL_H
 ## metre - yani aynı `base`/`h` aynı kutuya düşüyor ve kolon, ok, arabacı
@@ -592,7 +600,8 @@ const WAGON_MODEL_H: float = 1.6
 
 static func _wagon_sprite(
 	canvas: CanvasItem, base: Vector2, h: float, wheel_angle: float, tint: Color,
-	with_load: bool, draw_driver: bool, canopy_sway: float
+	with_load: bool, draw_driver: bool, canopy_sway: float,
+	snow: float = 0.0, wet: float = 0.0
 ) -> void:
 	var k := PropArt.scale_for_height(WAGON_PROP, h, WAGON_MODEL_H)
 	var w := h * 1.235
@@ -623,6 +632,29 @@ static func _wagon_sprite(
 	PropArt.draw_layer_rotated(
 		canvas, WAGON_PROP, "wheel_front", base, k, "wheel_front", wheel_angle * ratio, tint
 	)
+	# Brandanın tepesi resmin kendisinden, tahminden değil: katmanın
+	# dikdörtgeni nereye düşüyorsa kar oraya biner (`PropArt` kuralı).
+	var canopy := PropArt.layer_rect(WAGON_PROP, "canopy", base, k)
+	if canopy.size != Vector2.ZERO:
+		_wagon_weather(
+			canvas,
+			Vector2(canopy.position.x + canopy.size.x * 0.5 + canopy_sway, canopy.position.y),
+			canopy.size.x * 0.68, h, snow, wet
+		)
+
+## Brandanın tepesindeki kar ve ıslaklık. İki çizim yolunun (prosedürel ve
+## render edilmiş) ortak kapısı: aynı vagon iki ayrı yerde ıslanırsa iki
+## ayrı vagon olur - `ArtDraw.wagon`'un var olma gerekçesinin aynısı.
+##
+## Branda omuzdan çok kar tutuyor (`Soaking.wagon_snow`): yatay, geniş ve
+## kıpırdamayan bir yüzey.
+static func _wagon_weather(
+	canvas: CanvasItem, crest: Vector2, width: float, h: float, snow: float, wet: float
+) -> void:
+	if snow > 0.02:
+		snow_cap(canvas, crest, width, h * 0.075 * snow, int(crest.x), snow)
+	if wet > 0.05:
+		wet_sheen(canvas, crest, width * 0.9, wet * 0.38, int(crest.x) + 3)
 
 ## Koşum oku: öküzü vagona bağlayan kalas ve boyunduruk. Kısa ama
 ## vazgeçilmez - onsuz öküz vagonun önünde *duran* bir hayvan, çeken
@@ -685,6 +717,119 @@ static func _tint(color: Color, light: Color) -> Color:
 	return Color(color.r * light.r, color.g * light.g, color.b * light.b, color.a)
 
 ## Dolgu + koyu kontur. Yassı-resimsel stilin "mürekkep" hissi bundan.
+## --- Havanın bedene ve eşyaya bıraktığı iz (görev Y-G25) ---
+
+const SNOW_PILE: Color = Color(0.93, 0.95, 0.99)
+const SNOW_PILE_SHADE: Color = Color(0.74, 0.80, 0.90)
+## Islak kumaşın üstünde gökyüzünün soğuk parıltısı. Sıcak değil: tek sıcak
+## kaynak ateş (bkz. Art Rules).
+const WET_SHEEN: Color = Color(0.80, 0.86, 0.94)
+
+## Bir yüzeyin üstünde biriken kar. `at` yüzeyin üst orta noktası, `width`
+## yüzeyin eni, `depth` karın kalınlığı.
+##
+## **Kar siluetin üstünü kırar, içine yapıştırılmaz.** Öküzün hörgücünde
+## öğrenilen kural bu (bkz. Art Rules, "A body part is the silhouette, not
+## a decal on it"): omzun üstüne konan yumuşak beyaz bir elips, omza
+## yapıştırılmış bir disk gibi okunuyor. Birikinti kendi tümsek çokgeni
+## olarak **dış hattın dışına** taşıyor ve figürün geri kalanıyla aynı
+## mürekkeple çevriliyor, yani aynı çizim dilinden.
+##
+## Tümseğin pürüzü `seed_value`'dan: aynı omuzda her karede aynı kar durur,
+## kıpırdamaz. Zaman içinde eriyip büyümesi `depth`'ten gelir.
+static func snow_cap(
+	canvas: CanvasItem, at: Vector2, width: float, depth: float,
+	seed_value: int, alpha: float = 1.0
+) -> void:
+	if width <= 1.0 or alpha <= 0.01:
+		return
+	# **Kar ne tahta ne de sıra sıra kubbe.** İlk sürüm bütün genişliği tek
+	# bir kubbeyle örtüyordu: öküzün sırtına konmuş beyaz bir kalas
+	# (ölçüldü, 18:1). İkincisi genişliği eşit dilimlere bölüp her birine
+	# bir kubbe koydu: bu sefer hizalı bir sıra şekerleme gibi okundu -
+	# eşit genişlik ve eşit kabarıklık, doğada olmayan şey. Üçüncüsü ve
+	# bu: **tek bir yığın**, sırtı birkaç farklı dalga boyunun toplamıyla
+	# düzensiz, uçları sıfıra inen. Tekrar eden bir birim yok, o yüzden
+	# göz desen aramıyor.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("snowcap|%d" % seed_value)
+	# Üç dalga: biri yığının asıl kamburu, ikisi pürüz. Evreleri tohumdan,
+	# yani aynı omuzda her karede aynı kar duruyor - kıpırdamıyor.
+	var ph := [rng.randf() * TAU, rng.randf() * TAU, rng.randf() * TAU]
+	var half := width * 0.5
+	var rise := maxf(depth, width * 0.07)
+	var crest := PackedVector2Array()
+	var steps := 16
+	for step in steps + 1:
+		var u := float(step) / float(steps)
+		# Uçlarda sıfıra inen geniş bir plato: kar ortada birikir, kenardan
+		# dökülür. `pow(sin, 0.55)` kubbeyi yayvanlaştırıyor - düz sinüs
+		# tam ortada sivriliyordu.
+		var taper := pow(sin(u * PI), 0.55)
+		var rough := (
+			0.62
+			+ 0.26 * sin(u * 5.1 * PI + ph[0])
+			+ 0.14 * sin(u * 11.3 * PI + ph[1])
+			+ 0.08 * sin(u * 19.7 * PI + ph[2])
+		)
+		crest.append(at + Vector2(-half + width * u, -rise * taper * rough))
+	# Taban yüzeyin **içine** gömülüyor: tam üstüne oturan bir yığın
+	# ekranda havada duruyor gibi görünüyordu.
+	crest.append(at + Vector2(half, rise * 0.40))
+	crest.append(at + Vector2(0.0, rise * 0.52))
+	crest.append(at + Vector2(-half, rise * 0.40))
+	var fill := Color(SNOW_PILE.r, SNOW_PILE.g, SNOW_PILE.b, alpha * 0.92)
+	canvas.draw_colored_polygon(crest, fill)
+	# Mürekkep **yumuşak**: `inked`'in tam siyah hattı karı kesilmiş bir
+	# karton gibi gösteriyordu. Kar zaten koyu bir gövdenin üstünde parlak;
+	# dış hattın işi onu çizim diline bağlamak, kesmek değil.
+	var edge := crest.duplicate()
+	edge.append(crest[0])
+	canvas.draw_polyline(
+		edge, Color(ArtPalette.INK.r, ArtPalette.INK.g, ArtPalette.INK.b, alpha * 0.45),
+		maxf(0.8, rise * 0.09)
+	)
+	# Yığının altındaki soğuk gölge - karın yüzeye bastığı yer.
+	canvas.draw_line(
+		at + Vector2(-half * 0.88, rise * 0.14), at + Vector2(half * 0.88, rise * 0.14),
+		Color(SNOW_PILE_SHADE.r, SNOW_PILE_SHADE.g, SNOW_PILE_SHADE.b, alpha * 0.5),
+		maxf(0.8, rise * 0.16)
+	)
+
+## Islak yüzeyin üstündeki parıltı: gökyüzünün ışığı suda toplanıyor. İnce
+## ve kesintili - kalın sürekli bir çizgi ıslaklık değil, metal kenarı gibi
+## okunuyordu (aynı ders `ridge_snow`'un "kar bir bölge, dış hat değil"
+## kuralında da var).
+static func wet_sheen(
+	canvas: CanvasItem, at: Vector2, width: float, alpha: float, seed_value: int
+) -> void:
+	if width <= 2.0 or alpha <= 0.01:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("sheen|%d" % seed_value)
+	var half := width * 0.5
+	var thickness := maxf(1.0, width * 0.045)
+	var cursor := -half
+	while cursor < half:
+		var run := width * rng.randf_range(0.10, 0.26)
+		var gap := width * rng.randf_range(0.06, 0.18)
+		var end := minf(half, cursor + run)
+		var lift := width * 0.02 * rng.randf()
+		canvas.draw_line(
+			at + Vector2(cursor, -lift), at + Vector2(end, -lift),
+			Color(WET_SHEEN.r, WET_SHEEN.g, WET_SHEEN.b, alpha * rng.randf_range(0.55, 1.0)),
+			thickness
+		)
+		cursor = end + gap
+
+## Islanan kumaş koyulaşır ve soğur: su lifin arasındaki havayı kovuyor,
+## yüzey daha az ışık saçıyor. Tek yerde, çünkü figür, vagon ve eşya aynı
+## yağmurun altında - üçü ayrı formül kullanırsa üç ayrı hava olur.
+static func wet_tint(tint: Color, wet: float) -> Color:
+	var w := clampf(wet, 0.0, 1.0)
+	var soaked := tint.darkened(0.30 * w)
+	return soaked.lerp(Color(soaked.r * 0.90, soaked.g * 0.95, soaked.b * 1.06, soaked.a), 0.55 * w)
+
 static func inked(canvas: CanvasItem, points: PackedVector2Array, fill: Color, width: float = 1.6) -> void:
 	if points.size() < 3:
 		return

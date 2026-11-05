@@ -22,15 +22,21 @@ const VIEW_SIZE: Vector2i = Vector2i(1920, 1080)
 ## Efektlerin birikmesi için her kareden önce bekleme.
 const WARM_FRAMES: int = 150
 
-## Fotoğraflanacak hâller: ad, hava, zemin, kar payı, nefes payı.
+## Fotoğraflanacak hâller: ad, hava, zemin, kar payı, nefes payı, kervanın
+## **üstündeki** su ve kar (`Soaking`). Son ikisi zeminden ayrı: yol çamur
+## olurken sırt kuru, kar erirken tersi olabilir.
 const STATES: Array = [
-	["01_kuru_toz", RouteWeather.CLEAR, {"wet": 0.0, "mud": 0.0, "snow": 0.0, "dust": 1.0}, 0.0, 0.0],
-	["02_yagmur", RouteWeather.RAIN, {"wet": 0.78, "mud": 0.62, "snow": 0.0, "dust": 0.0}, 0.0, 0.0],
-	["03_firtina", RouteWeather.STORM, {"wet": 1.0, "mud": 0.80, "snow": 0.0, "dust": 0.0}, 0.0, 0.0],
-	["04_camur", RouteWeather.OVERCAST, {"wet": 0.30, "mud": 0.75, "snow": 0.0, "dust": 0.0}, 0.0, 0.35],
-	["05_kar", RouteWeather.RAIN, {"wet": 0.10, "mud": 0.0, "snow": 0.85, "dust": 0.0}, 1.0, 1.0],
-	["06_tipi", RouteWeather.STORM, {"wet": 0.05, "mud": 0.0, "snow": 1.0, "dust": 0.0}, 1.0, 1.0],
-	["07_sis", RouteWeather.FOG, {"wet": 0.45, "mud": 0.35, "snow": 0.0, "dust": 0.0}, 0.0, 0.55],
+	["01_kuru_toz", RouteWeather.CLEAR, {"wet": 0.0, "mud": 0.0, "snow": 0.0, "dust": 1.0}, 0.0, 0.0, 0.0, 0.0],
+	["02_yagmur", RouteWeather.RAIN, {"wet": 0.78, "mud": 0.62, "snow": 0.0, "dust": 0.0}, 0.0, 0.0, 0.85, 0.0],
+	["03_firtina", RouteWeather.STORM, {"wet": 1.0, "mud": 0.80, "snow": 0.0, "dust": 0.0}, 0.0, 0.0, 1.0, 0.0],
+	["04_camur", RouteWeather.OVERCAST, {"wet": 0.30, "mud": 0.75, "snow": 0.0, "dust": 0.0}, 0.0, 0.35, 0.55, 0.0],
+	["05_kar", RouteWeather.RAIN, {"wet": 0.10, "mud": 0.0, "snow": 0.85, "dust": 0.0}, 1.0, 1.0, 0.15, 0.75],
+	["06_tipi", RouteWeather.STORM, {"wet": 0.05, "mud": 0.0, "snow": 1.0, "dust": 0.0}, 1.0, 1.0, 0.10, 1.0],
+	["07_sis", RouteWeather.FOG, {"wet": 0.45, "mud": 0.35, "snow": 0.0, "dust": 0.0}, 0.0, 0.55, 0.45, 0.0],
+	# Yağmur dindi, kervan hâlâ sırılsıklam: brandanın kenarı damlıyor.
+	["09_islak_kervan", RouteWeather.OVERCAST, {"wet": 0.60, "mud": 0.55, "snow": 0.0, "dust": 0.0}, 0.0, 0.30, 1.0, 0.0],
+	# Kar dindi, sırtlarda ve brandada duruyor.
+	["10_karli_kervan", RouteWeather.OVERCAST, {"wet": 0.05, "mud": 0.0, "snow": 0.9, "dust": 0.0}, 1.0, 1.0, 0.10, 1.0],
 ]
 
 func _init() -> void:
@@ -48,13 +54,14 @@ func _init() -> void:
 	await _settle()
 
 	for state in STATES:
-		_apply(screen, String(state[1]), state[2], float(state[3]), float(state[4]))
+		_apply(screen, String(state[1]), state[2], float(state[3]), float(state[4]),
+			float(state[5]), float(state[6]))
 		for _frame in WARM_FRAMES:
 			await process_frame
 		_save("%s.png" % String(state[0]))
 
 	# Tek bir efektin kendi karesi: katalog sayfası oyunun içinde.
-	_apply(screen, RouteWeather.CLEAR, {"wet": 0.0, "mud": 0.0, "snow": 0.0, "dust": 0.0}, 0.0, 0.0)
+	_apply(screen, RouteWeather.CLEAR, {"wet": 0.0, "mud": 0.0, "snow": 0.0, "dust": 0.0}, 0.0, 0.0, 0.0, 0.0)
 	var front: FxLayer = screen.get("_fx_front")
 	var caravan: RoadCaravan = screen.get("_caravan")
 	var ground_y: float = caravan.get_ground_y()
@@ -81,7 +88,10 @@ func _init() -> void:
 
 ## Ekranın hava ve zemin durumunu doğrudan kurar. Normalde şafakta
 ## `_refresh_ground_fx` yazıyor; burada her hâli görmek için elle veriliyor.
-func _apply(screen: Control, weather: String, cover: Dictionary, snow: float, breath: float) -> void:
+func _apply(
+	screen: Control, weather: String, cover: Dictionary, snow: float, breath: float,
+	soak_wet: float = 0.0, soak_snow: float = 0.0
+) -> void:
 	var caravan: RoadCaravan = screen.get("_caravan")
 	var curtain: WeatherCurtain = screen.get("_curtain")
 	var band: TravelBand = screen.get("_band")
@@ -91,6 +101,8 @@ func _apply(screen: Control, weather: String, cover: Dictionary, snow: float, br
 	band.set_weather(weather)
 	caravan.set_ground_cover(cover)
 	caravan.set_breath_share(breath)
+	screen.set("_soaking", {"wet": soak_wet, "snow": soak_snow})
+	caravan.set_soaking(soak_wet, soak_snow, true)
 	var visuals := RouteWeather.visuals(weather)
 	var rain := float(visuals.get("rain", 0.0))
 	var layers := WeatherCurtain.layers_for(
