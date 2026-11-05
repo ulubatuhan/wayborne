@@ -115,10 +115,11 @@ def ch4():
         ),
 
         PageBreak(),
-        para("Pazarlık: oyunun para basma noktası", "h1"),
+        para("Pazarlık: tek karar, geri dönüşü yok", "h1"),
         para(
-            "Aynı tuzağa <b>iki kez</b> düşüldüğü için buranın değişmezleri sayılardan daha "
-            "önemli. İki bozuk tasarımın kaydı:"
+            "Bu bölümün başlığı uzun süre <i>“oyunun para basma noktası”</i>ydı. Tasarım "
+            "kendini itiraf ediyordu: kıtlık oyununda para basan bir nokta vardı. Buranın "
+            "değişmezleri sayılardan önemli, çünkü aynı tuzağa <b>üç kez</b> düşüldü:"
         ),
         sp(2),
         table(
@@ -133,44 +134,64 @@ def ch4():
                  "Sömürü kapandı ama hem eşik hem taban <b>yalnızca tur sayısının</b> "
                  "fonksiyonuydu - yani <i>nasıl</i> pazarlık ettiğin değil, <i>kaç kez</i> "
                  "reddedildiğin önemliydi"],
+                ["<b>Üçüncü</b>",
+                 "Üç tur, kaydıraçlı teklif, ciddiyet eşiği, ültimatom",
+                 "Sömürüsü yoktu ve iyi çalışıyordu - ama <b>yanlış kipteydi</b>. Üç turlu "
+                 "bir teklif döngüsünün ölçülebilir bir “doğru cevabı” vardır; oyuncu "
+                 "karşılaştırır, optimize eder. Kıtlığın doğru cevabı yoktur"],
             ],
             widths=[22 * mm, 60 * mm, 72 * mm],
         ),
         sp(4),
-        para("Mevcut tasarım: önemli olan yol", "h2"),
+        para("Mevcut tasarım: tek hamle, yazılı şans", "h2"),
         table(
             ["Kural", "Açıklama"],
             [
-                ["<b>Teklif sayılabilir bir kaynaktır</b>",
-                 "Üç tur, ekranda gösterilir. Deneme yanılmayla tersine çevrilecek gizli bir "
-                 "eğri yok."],
-                ["<b>Tüccar ancak ciddiye aldığı bir tekliften sonra taviz verir</b>",
-                 "Lowball bir turu yakar ama tüccarı <i>kıpırdatmaz</i>. Eşik "
-                 "<b>taviz sayısına</b> göre hesaplanır, tur sayısına göre değil - "
-                 "“aynı dip teklifi üç kez tekrarla” tam olarak bu yüzden işlemez."],
-                ["<b>Her red tabanı sertleştirir</b>",
-                 "Tur başına +%2.2. Teklifleriniz makul olsa bile işi uzatmak size yer kaybettirir."],
-                ["<b>Teklif bitince ültimatom gelir</b>",
-                 "Liste fiyatını öde ya da git. “Son teklif” perki ültimatomu tüccarın o anki "
-                 "tabanına yumuşatır - değerli, ama üç turu iyi kullanmaktan hâlâ kötü."],
+                ["<b>Üç düğme</b>",
+                 "<i>Kabul et · Diren · Çık git.</i> Kaydıraç yok, tur yok, sabır çubuğu yok, "
+                 "ültimatom yok. İstenen fiyatı ödemek her zaman geçerli bir hamle."],
+                ["<b>Direnmek bir kez atılır</b>",
+                 "İkinci hamle olmadığı için “tekrar deneyerek iyi fiyata varmak” tanım gereği "
+                 "imkânsız. Eski iki tasarımın sömürüsü tam olarak oradaydı."],
+                ["<b>Şans ekranda yazılı</b>",
+                 "Tek hakkı olan oyuncu kör zar atmamalı: %15-85 arası, Karizma ve itibarla "
+                 "hesaplanıp yüzde olarak gösterilir. Gizli bir eğriyi deneme yanılmayla "
+                 "bulmak yok, çünkü deneme hakkı yok."],
+                ["<b>Kaybedince fiyat artar</b>",
+                 "+%10 ve 1 puan itibar. Artış olmasaydı direnmek bedava bir kura olurdu. "
+                 "Ama pazarlık bitmez: artmış fiyatı kabul etmek ya da kalkmak hâlâ senin kararın."],
+                ["<b>Kazanç küçük</b>",
+                 "En iyi hâlde <b>%15</b> indirim - eskiden %45'e çıkıyordu. Pazarlık bir gelir "
+                 "kaynağı değil, küçük bir risk."],
+                ["<b>Tek stat: Karizma</b>",
+                 "Konuşma Karizma'dır. Zekâ'nın pazardaki işi fiyat defterini okumak; iki stattan "
+                 "“en iyisini” almak ikisini de aynı şeye indirgiyordu."],
                 ["<b>Masadan kalkmak biraz itibar yer</b>",
                  "Yalnızca 1 puan. Bilerek küçük: bedelsiz olsa “kızdır, sonra yeniden aç” "
                  "bedava bir tekrar döngüsü olurdu; ama bozulan bir pazarlık felaket değil, "
                  "bir bedeldir."],
-                ["<b>Beceri partiden okunur</b>",
-                 "Zeka ve Karizma'nın <i>en iyisi</i> tabanı genişletir. İki ekran da bir süre "
-                 "sıfır geçiyordu - bu, mini-oyunu tamamen karakter-kör yapmıştı."],
             ],
             widths=[54 * mm, 100 * mm],
         ),
         sp(4),
+        para("Kıtlıkta konu fiyat değil", "h2"),
+        para(
+            "Bölgenin kıtlığı 0.45'i geçtiğinde “Diren” düğmesi <b>“Üstele”</b> olur ve "
+            "ekrana tek bir cümle düşer: <i>“Karşındaki de aç.”</i> Üsteleyip kazanırsan malı "
+            "alırsın - ve o bölgedeki itibarın 2 puan düşer, deftere bir satır girer. "
+            "Kıtlık derslerinin kuralının ticaret tarafı: <b>bedel adı olan birine düşer.</b> "
+            "Burada o “biri” karşındaki satıcıdır."
+        ),
+        sp(3),
         callout(
-            "Ölçülen gradyan · 135 GG liste fiyatı (taban 100, açgözlülük 0.5, itibar 0.3)",
-            "<tt>Temkinli oyun  → ilk turda ~116 GG</tt><br/>"
-            "<tt>Nişan alan oyun → 116 → 99 → <b>83 GG</b></tt><br/>"
-            "<tt>Açgözlü oyun   → ültimatom: <b>135 GG</b> ya da git</tt><br/><br/>"
-            "Usta bir konuşmacı (Zeka ve Karizma maksimum, güvenilir itibar) 100 listelik bir "
-            "malı <b>68 GG</b>'ye alır. Yani mini-oyun hem beceriye hem karaktere duyarlı.",
+            "Ölçülen aralık · 135 GG liste fiyatı (taban 100, açgözlülük 0.5, itibar 0.3)",
+            "<tt>Kabul et            → <b>135 GG</b></tt><br/>"
+            "<tt>Diren, kazandın     → 115-135 GG (beceriye göre)</tt><br/>"
+            "<tt>Diren, kaybettin    → <b>149 GG</b> ve 1 itibar</tt><br/>"
+            "<tt>Çık git             → mal yok, 1 itibar</tt><br/><br/>"
+            "Usta bir konuşmacı (Karizma maksimum, tam itibar) 100 listelik bir malı en iyi "
+            "hâlde <b>85 GG</b>'ye alır - eski tasarımda 68 GG'ydi. Pazarlık artık kervanı "
+            "besleyen bir gelir değil, bir seferde bir kez alınan küçük bir karar.",
         ),
 
         PageBreak(),

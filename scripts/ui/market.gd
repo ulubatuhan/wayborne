@@ -887,16 +887,40 @@ func _on_haggle_pressed() -> void:
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
-	# Kervanın en iyi zekâsı ve karizması tüccarın tabanını aşağı çeker (bkz.
-	# HagglingSession.get_floor): dilini iyi kullanan biri burada para kazandırır.
+	panel.push_resolved.connect(_on_haggle_push)
+	# **Tek stat: Karizma** (P4). Eskiden `player_speech` yuvasına Zekâ
+	# besleniyordu ve ikinci parametre Karizma'ydı - ad ile içerik
+	# uyuşmuyordu. Konuşma Karizma'dır; Zekâ'nın pazardaki işi fiyat
+	# defterini okumak (bkz. PriceBookPanel).
 	panel.start_haggling(
 		float(base_price),
 		MARKET_HAGGLE_GREED,
 		MARKET_HAGGLE_REPUTATION,
-		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
 		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
-		false
+		_session.scarcity_here()
 	)
+	_refresh_all()
+
+## Direnmenin sonucu. Pazarlık burada bitmiyor: kaybedilen bir direniş
+## fiyatı yükseltiyor, kabul etmek ya da kalkmak hâlâ oyuncunun kararı.
+## Kıtlıkta üsteleyip kazanmanın bedeli **bölgede** ödeniyor (P2) ve
+## deftere bir satır düşüyor - ticaret ahlaki bir eylem.
+func _on_haggle_push(won: bool, reputation_cost: int, standing_cost: int) -> void:
+	if reputation_cost > 0:
+		_session.change_reputation(-reputation_cost)
+	if standing_cost > 0:
+		# `change_reputation` zaten **bulunulan bölgeye** yazıyor (T16-07);
+		# ayrı bir "burada" çağrısına gerek yok.
+		_session.change_reputation(-standing_cost)
+		_session.ledger.record(
+			CaravanLedger.KIND_TRADE,
+			_session.caravan_name,
+			_session.total_days_elapsed,
+			1,
+			"",
+			"LEDGER_CAUSE_HAGGLE_INSISTED",
+			_session.current_location_id
+		)
 	_refresh_all()
 
 func _on_haggle_deal(price: int) -> void:

@@ -31,6 +31,8 @@ const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
 
 ## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
 const HAGGLE_FAIL_MORALE: int = -8
+## Yolda direnip kaybetmenin morali (P1): tam haraçtan hafif.
+const HAGGLE_PUSH_MORALE: int = -3
 
 ## Savaş sonuçları. Zafer yolu bir süre güvenli kılar ve yağma getirir;
 ## yenilgi ağır ama kervanı bitirmez (bkz. EventEffectApplier clamp'leri).
@@ -4172,13 +4174,15 @@ func _open_haggling(max_price: int) -> void:
 	_haggle_holder.add_child(panel)
 	panel.deal_made.connect(_on_haggle_deal)
 	panel.haggling_failed.connect(_on_haggle_failed)
+	panel.push_resolved.connect(_on_haggle_push)
+	# Yolda kıtlık payı sıfır: karşındaki haydut aç olduğu için değil,
+	# silahlı olduğu için istiyor - vicdan dalı (P2) yalnızca pazarda.
 	panel.start_haggling(
 		float(max_price),
 		0.5,
 		0.3,
-		_session.get_best_effective_stat(CharacterStats.Kind.INTELLECT),
 		_session.get_best_effective_stat(CharacterStats.Kind.CHARISMA),
-		false
+		0.0
 	)
 
 ## Anlaşılan bedel kesende yoksa da ödenir: fark açık hesaba yazılır
@@ -4192,6 +4196,13 @@ func _on_haggle_deal(price: int) -> void:
 ## Yolda pazarlık koparsa itibar cezası yok: karşındaki haydut, kasabada
 ## kimseye şikâyet etmeyecek (bkz. HagglingPanel.haggling_failed). Bedel
 ## burada tam haracı ödemek - ve ödeyecek paran yoksa borçlanmak.
+## Yolda direnmenin bedeli moral: haydut kasabada şikâyet etmez ama
+## kervan korktuğunu bilir.
+func _on_haggle_push(won: bool, _reputation_cost: int, _standing_cost: int) -> void:
+	if not won:
+		_session.caravan.change_morale(HAGGLE_PUSH_MORALE)
+		_add_log(tr("UI_ROAD_HAGGLE_PUSH_LOST"))
+
 func _on_haggle_failed(_reputation_penalty: int) -> void:
 	var paid := _pending_haggle_max
 	_session.spend_or_owe(paid)

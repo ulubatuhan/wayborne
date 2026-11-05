@@ -1,214 +1,196 @@
 class_name HagglingSession
 extends RefCounted
 
-## Sıra tabanlı pazarlık. UI'dan bağımsız: sahne ağacı gerektirmez, doğrudan
+## Tek kararlık pazarlık. UI'dan bağımsız: sahne ağacı gerektirmez, doğrudan
 ## örneklenip test edilebilir.
 ##
-## TASARIMIN GEÇMİŞİ, çünkü iki kez aynı tuzağa düşüldü:
+## TASARIMIN GEÇMİŞİ, çünkü üç kez yeniden yazıldı:
 ##
 ## 1. İLK TASARIM: kabul eşiği sabırla birlikte tabana iniyordu ve sabrı en
 ##    hızlı yakan şey aşağılayıcı dip tekliflerdi. Tüccarı çileden çıkarmak
 ##    *ödüllendiriliyordu*.
-## 2. İKİNCİ TASARIM: eşik tabanın altına inmiyordu ve taban her reddedilen
-##    teklifte sertleşiyordu. Sömürü kapanmıştı ama gizli bir kusur kaldı:
-##    hem eşik hem taban yalnızca **kaç tur geçtiğinin** fonksiyonuydu. Yani
-##    nasıl pazarlık ettiğin değil, kaç kez reddedildiğin önemliydi; ikisi
-##    hep aynı noktada buluşuyordu ve oyuncunun tek işi o sayıyı bulmaktı.
+## 2. İKİNCİ TASARIM: eşik tabanın altına inmiyordu, taban her reddedilen
+##    teklifte sertleşiyordu. Sömürü kapanmıştı ama hem eşik hem taban
+##    yalnızca **kaç tur geçtiğinin** fonksiyonuydu: nasıl pazarlık ettiğin
+##    değil, kaç kez reddedildiğin önemliydi.
+## 3. ÜÇÜNCÜ TASARIM (üç tur, kaydıraçlı teklif, ciddiyet eşiği, ültimatom):
+##    sömürüsü yoktu ve iyi çalışıyordu - ama **yanlış kipteydi.** Üç turlu
+##    bir teklif döngüsünün ölçülebilir bir "doğru cevabı" vardır; oyuncu
+##    karşılaştırır, optimize eder, turları sürer. Kıtlığın doğru cevabı
+##    yoktur (bkz. `kitlik_tasarim_dersleri.md`). Üstelik Codex'teki bölümün
+##    başlığı tasarımı itiraf ediyordu: *"Pazarlık: oyunun para basma
+##    noktası."* Kıtlık oyununda para basan bir nokta vardı.
 ##
-## BU TASARIM: yolun kendisi önemli.
-##   - Elinde **MAX_ROUNDS** kadar teklif hakkı var, o kadar. Sayılabilir ve
-##     ekranda görünür; gizli bir eğriyi deneme yanılmayla bulmak yok.
-##   - Tüccar yalnızca **ciddiye aldığı** bir tekliften sonra bir adım geri
-##     çekilir (bkz. is_credible / concessions). Dip teklif hakkını yakar ama
-##     tüccarı yaklaştırmaz - "aynı dip teklifi üç kez ver, üçüncüde kabul
-##     ettir" işte bu yüzden çalışmıyor.
-##   - Her reddedilen teklif tabanı ayrıca sertleştirir: uzatmanın bedeli var.
-##   - Hakların bitince tüccar ültimatom verir: **ya listeden al ya çık.**
-##     Çıkmak itibar yiyor ama az - masadan kalkmak bir felaket değil, bir
-##     bedel.
+## BU TASARIM (P1, kullanıcı kararı 2026-11-05): **tek karar, geri dönüşü yok.**
+##   - Üç düğme: *kabul et · diren · çık git*.
+##   - "Diren" **bir kez** atılır. Şansı ekranda yazılı (`push_odds`) -
+##     gizli bir eğriyi deneme yanılmayla bulmak yok, çünkü deneme hakkı da
+##     yok. Kazanırsan indirim; kaybedersen tüccar sertleşir, fiyat **artar**
+##     ve itibarın düşer.
+##   - Kazanç küçük: en iyi hâlde `DISCOUNT_MAX` (%15), eskiden %45'ti.
+##     Pazarlık bir gelir kaynağı değil, küçük bir risk.
+##   - Masadan kalkmak itibar yiyor ama az: bir bedel, bir felaket değil.
 ##
-## Sonuç bir gradyan: temkinli oyuncu ilk turda küçük bir indirim alır,
-## nişan alan oyuncu üç turu doğru kullanıp tabana yaklaşır, açgözlü oyuncu
-## ültimatoma çarpar ve liste fiyatını öder.
+## VE KITLIKTA KONU FİYAT DEĞİL (P2): kıtlık `CONSCIENCE_FROM`'u geçince
+## "diren" artık **üstelemek** olur - karşındaki satıcı da aç. Kazansan bile
+## o bölgede itibarın düşer ve deftere bir satır girer. Kıtlık derslerinin
+## *"bedel adı olan birine düşer"* kuralının ticaret tarafı.
 
 enum State {
-	IN_PROGRESS,
-	FINAL_CHANCE,
+	OFFERED,
 	SUCCESS_DEAL,
 	ANGER_QUIT,
 }
 
-## Kaç teklif hakkın var. Üç, çünkü sayılabilir olması gerekiyor: oyuncu
-## "bir hakkım kaldı" diyebilmeli, "sabır çubuğu ne kadar indi" diye
-## tahmin etmemeli.
-const MAX_ROUNDS: int = 3
+## Kazanç aralığı. En iyi hâlde %15; eski tasarım %20-45 veriyordu - oyunun
+## para bastığı yer orasıydı.
+##
+## `DISCOUNT_BASE` neden var: bir süre sıfırdı ve becerisiz bir kervanda
+## direnip *kazanmak* bile fiyatı yuvarlamada hiç oynatmıyordu ("%39
+## ihtimalle 19 GG, yoksa 21 GG" - ekran görüntüsünde yakalandı). Kazancı
+## görünmeyen bir risk düğmesi karar değil, tuzaktır: taban kazanç
+## direnmenin her zaman bir şey kazandırmasını sağlar, beceri onu büyütür.
+const DISCOUNT_BASE: float = 0.04
+const DISCOUNT_PER_CHARISMA: float = 0.006
+const DISCOUNT_PER_REPUTATION: float = 0.05
+const DISCOUNT_MAX: float = 0.15
 
-## Sabır çubuğu artık kalan hakkın görüntüsü (bkz. current_patience).
-const DEFAULT_STARTING_PATIENCE: float = 100.0
+## Direnmenin şansı. Ekranda yazılı: oyuncu kör zar atmıyor, bilerek
+## atıyor - tek hakkı olduğu için bilmesi şart.
+const PUSH_ODDS_BASE: float = 0.30
+const PUSH_ODDS_PER_CHARISMA: float = 0.030
+const PUSH_ODDS_PER_REPUTATION: float = 0.20
+const PUSH_ODDS_MIN: float = 0.15
+const PUSH_ODDS_MAX: float = 0.85
 
-## Tüccarın gerçekten razı olabileceği en iyi fiyatın taban fiyata oranı.
-## Beceri bunu aşağı çeker ama asla bedavaya inmez.
-const FLOOR_BASE_RATIO: float = 0.80
-const FLOOR_PER_SPEECH: float = 0.010
-const FLOOR_PER_CHARISMA: float = 0.005
-const FLOOR_PER_REPUTATION: float = 0.05
-const FLOOR_MIN_RATIO: float = 0.55
+## Direnip kaybedince: tüccar sertleşir (fiyat artar) ve itibar düşer.
+## Artış olmasaydı direnmek bedava bir kura olurdu.
+const PUSH_FAIL_RAISE: float = 0.10
+const PUSH_REPUTATION_PENALTY: int = 1
 
-## Her reddedilen teklif tabanı bu kadar sertleştirir - uzatmanın bedeli.
-const FLOOR_HARDEN_PER_ROUND: float = 0.022
-
-## Tüccarın "ciddi" saydığı teklif: o anki eşiğin bu oranının üstü. Ciddi bir
-## teklif reddedilse bile tüccarı bir adım yaklaştırır; altındaki teklif
-## yalnızca hakkını yakar. Sömürüyü kapatan asıl mekanizma bu.
-const CREDIBLE_MARGIN: float = 0.85
-
-## Tabanın belirgin altındaki teklif hakaret sayılır: tek hamlede iki hak yakar.
-const INSULT_MARGIN: float = 0.85
-const INSULT_ROUND_COST: int = 2
-
-## Masadan kalkmanın itibar bedeli. Bilerek küçük: caydırıcı olmalı, cezalandırıcı
-## değil - pazarlık denemek riskli olsun ama korkutucu olmasın.
+## Masadan kalkmanın itibar bedeli. Bilerek küçük: caydırıcı olmalı,
+## cezalandırıcı değil.
 const WALKOUT_REPUTATION_PENALTY: int = 1
 
-signal patience_changed(new_patience: float)
-signal counter_offer_made(npc_offer: float)
-signal final_chance_offered(locked_offer: float)
+## Kıtlık bu derecenin üstündeyse pazarlığın konusu fiyat değil vicdandır
+## (P2): karşındaki de aç, ısrar etmenin bedeli bölgede ödenir.
+const CONSCIENCE_FROM: float = 0.45
+const CONSCIENCE_STANDING_COST: int = 2
+
 signal state_changed(new_state: State)
 
 var base_price: float
 var merchant_greed: float
 var reputation: float
-var player_speech: float
 var player_charisma: float
-## Doğru bilinen "son teklif" yeteneği: ültimatom liste fiyatından değil,
-## tüccarın o anki tabanından gelir. Hakları yakmayı ödüllendirmiyor -
-## üç turu doğru kullanmak hâlâ daha ucuz (bkz. tests/test_haggling.gd).
-var has_final_offer_perk: bool
+## Bölgenin kıtlık derecesi (`Scarcity.at`), 0-1. Yalnızca pazarda verilir;
+## yolda (haydut, haraç) kıtlığın vicdanla ilgisi yok.
+var scarcity: float = 0.0
 
-var state: State = State.IN_PROGRESS
-var p_start: float
-var p_min: float
+var state: State = State.OFFERED
+## Tüccarın istediği fiyat: itibarlı bir kervandan daha az sıyrılır.
+var list_price: float = 0.0
 var final_price: float = 0.0
-
-## Kaç teklif harcandı (hakaret ikisini birden yakar).
-var rounds_used: int = 0
-## Tüccarın kaç kez geri çekildiği - yalnızca ciddi tekliflerle artar.
-var concessions: int = 0
-
-## Kalan hakkın 0-100 arası görüntüsü; HagglingPanel'in çubuğu bunu okuyor.
-## Ayrı bir kaynak değil, rounds_used'ın türevi - ikisi ayrı tutulsaydı
-## kaçınılmaz olarak birbirinden kopardı.
-var current_patience: float = DEFAULT_STARTING_PATIENCE
-
-var _final_chance_used: bool = false
-var _locked_offer: float = 0.0
+var pushed: bool = false
+var push_won: bool = false
 
 func _init(
+	p_base_price: float = 0.0,
+	p_merchant_greed: float = 0.5,
+	p_reputation: float = 0.0,
+	p_player_charisma: float = 0.0,
+	p_scarcity: float = 0.0
+) -> void:
+	setup(p_base_price, p_merchant_greed, p_reputation, p_player_charisma, p_scarcity)
+
+func setup(
 	p_base_price: float,
 	p_merchant_greed: float,
 	p_reputation: float,
-	p_player_speech: float,
 	p_player_charisma: float,
-	p_has_final_offer_perk: bool = false
+	p_scarcity: float = 0.0
 ) -> void:
 	base_price = p_base_price
 	merchant_greed = clampf(p_merchant_greed, 0.0, 1.0)
 	reputation = clampf(p_reputation, 0.0, 1.0)
-	player_speech = p_player_speech
 	player_charisma = p_player_charisma
-	has_final_offer_perk = p_has_final_offer_perk
+	scarcity = clampf(p_scarcity, 0.0, 1.0)
+	list_price = base_price * (1.0 + (merchant_greed * (1.0 - reputation)))
+	state = State.OFFERED
+	pushed = false
+	push_won = false
+	final_price = 0.0
 
-	# İtibarlı bir kervandan daha az sıyırılır.
-	p_start = base_price * (1.0 + (merchant_greed * (1.0 - reputation)))
-	p_min = get_floor()
-	_sync_patience()
+## Direnç kazanılırsa ödenecek fiyat. İndirim **liste fiyatından**, taban
+## fiyattan değil: oyuncunun gördüğü sayıdan iniyor, gizli bir tabandan değil.
+func push_price() -> float:
+	return maxf(0.0, list_price * (1.0 - discount()))
 
-func get_rounds_left() -> int:
-	return maxi(0, MAX_ROUNDS - rounds_used)
+## Direnç kaybedilirse ödenecek fiyat.
+func raised_price() -> float:
+	return list_price * (1.0 + PUSH_FAIL_RAISE)
 
-## Tüccarın razı olabileceği taban: becerinle açılır, her reddedilen teklifle
-## kapanır. İtibar da tabanı biraz indirir - tanınan tüccar daha rahat verir.
-func get_floor() -> float:
-	var ratio := FLOOR_BASE_RATIO
-	ratio -= player_speech * FLOOR_PER_SPEECH
-	ratio -= player_charisma * FLOOR_PER_CHARISMA
-	ratio -= reputation * FLOOR_PER_REPUTATION
-	ratio += float(rounds_used) * FLOOR_HARDEN_PER_ROUND
-	ratio = clampf(ratio, FLOOR_MIN_RATIO, 1.0)
-	return clampf(base_price * ratio, 0.0, p_start)
+## Şu an ödenecek fiyat: direnilmediyse liste, kazanıldıysa indirimli,
+## kaybedildiyse artmış.
+func current_price() -> float:
+	if not pushed:
+		return list_price
+	return push_price() if push_won else raised_price()
 
-func get_slider_range() -> Vector2:
-	return Vector2(maxf(p_min * 0.6, 0.0), p_start * 1.2)
+func discount() -> float:
+	var d := DISCOUNT_BASE
+	d += player_charisma * DISCOUNT_PER_CHARISMA
+	d += reputation * DISCOUNT_PER_REPUTATION
+	return clampf(d, 0.0, DISCOUNT_MAX)
 
-## Tüccarın şu an kabul edeceği en düşük fiyat. Liste fiyatından tabana doğru
-## **taviz adımlarıyla** iner - geçen turlarla değil. Aradaki fark tasarımın
-## kendisi: geri çekilmeyi kazanman gerekiyor, beklemen değil.
-func get_acceptable_threshold() -> float:
-	var floor_now := get_floor()
-	var progress := clampf(float(concessions + 1) / float(MAX_ROUNDS), 0.0, 1.0)
-	return maxf(floor_now, lerpf(p_start, floor_now, progress))
+## Kazanmanın oyuncunun gördüğü sayıda bir karşılığı var mı. Çok ufak bir
+## alışverişte indirim yuvarlamada kayboluyor; o zaman direnmek saf zarar
+## olur ve düğme gösterilmez (bkz. `DISCOUNT_BASE`).
+func push_is_worth_it() -> bool:
+	return int(round(push_price())) < int(round(list_price))
 
-## Tüccarın ciddiye aldığı teklif. Reddedilse bile bir adım kazandırır.
-func is_credible(player_offer: float) -> bool:
-	return player_offer >= get_acceptable_threshold() * CREDIBLE_MARGIN
+func push_odds() -> float:
+	var odds := PUSH_ODDS_BASE
+	odds += player_charisma * PUSH_ODDS_PER_CHARISMA
+	odds += reputation * PUSH_ODDS_PER_REPUTATION
+	return clampf(odds, PUSH_ODDS_MIN, PUSH_ODDS_MAX)
 
-func is_insulting(player_offer: float) -> bool:
-	return player_offer < get_floor() * INSULT_MARGIN
+func can_push() -> bool:
+	return state == State.OFFERED and not pushed and push_is_worth_it()
+
+## Kıtlıkta "diren" üstelemeye dönüşüyor: karşındaki de aç (P2).
+func is_conscience() -> bool:
+	return scarcity >= CONSCIENCE_FROM
+
+## Üstelemenin bölgesel itibar bedeli; vicdan dalı kapalıysa sıfır.
+func conscience_standing_cost() -> int:
+	return CONSCIENCE_STANDING_COST if is_conscience() else 0
 
 func get_walkout_reputation_penalty() -> int:
 	return WALKOUT_REPUTATION_PENALTY
 
-func submit_offer(player_offer: float) -> void:
-	if state != State.IN_PROGRESS:
+func get_push_reputation_penalty() -> int:
+	return PUSH_REPUTATION_PENALTY
+
+## Tek hak. `rng` dışarıdan: tohum çağıranın (test ve simülatör aynı zarı
+## atabilsin diye). Döner: kazanıldı mı.
+func push(rng: RandomNumberGenerator) -> bool:
+	if not can_push():
+		return false
+	pushed = true
+	push_won = rng.randf() < push_odds()
+	return push_won
+
+func accept() -> void:
+	if state != State.OFFERED:
 		return
+	final_price = current_price()
+	_set_state(State.SUCCESS_DEAL)
 
-	if player_offer >= get_acceptable_threshold():
-		final_price = player_offer
-		_set_state(State.SUCCESS_DEAL)
+func walk_away() -> void:
+	if state != State.OFFERED:
 		return
-
-	var insulting := is_insulting(player_offer)
-	# Ciddiyet, teklifin *reddedilmeden önceki* eşiğe göre ölçülüyor - taban
-	# sertleşmeden önce, yoksa oyuncu kendi tekliflerinin arkasından koşardı.
-	var credible := not insulting and is_credible(player_offer)
-
-	rounds_used += INSULT_ROUND_COST if insulting else 1
-	if credible:
-		concessions += 1
-	p_min = get_floor()
-	_sync_patience()
-
-	if rounds_used >= MAX_ROUNDS:
-		_open_ultimatum()
-		return
-
-	counter_offer_made.emit((player_offer + get_acceptable_threshold()) / 2.0)
-
-## Haklar bitti: "ya listeden al ya çık." Yetenek yoksa fiyat liste fiyatıdır -
-## açgözlü oyuncunun bütün kazancı burada geri alınıyor.
-func _open_ultimatum() -> void:
-	rounds_used = MAX_ROUNDS
-	_sync_patience()
-	_locked_offer = minf(get_floor(), p_start) if has_final_offer_perk else p_start
-	_final_chance_used = true
-	_set_state(State.FINAL_CHANCE)
-	final_chance_offered.emit(_locked_offer)
-
-func respond_to_final_offer(accept: bool) -> void:
-	if state != State.FINAL_CHANCE:
-		return
-
-	if accept:
-		final_price = _locked_offer
-		_set_state(State.SUCCESS_DEAL)
-	else:
-		_set_state(State.ANGER_QUIT)
-
-func _sync_patience() -> void:
-	current_patience = DEFAULT_STARTING_PATIENCE * (
-		float(get_rounds_left()) / float(MAX_ROUNDS)
-	)
-	patience_changed.emit(current_patience)
+	_set_state(State.ANGER_QUIT)
 
 func _set_state(new_state: State) -> void:
 	state = new_state

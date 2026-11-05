@@ -590,9 +590,9 @@ turns materials into other materials, per the #22 backlog note above.
 
 ### Haggling Rules
 
-`HagglingSession` is the closest thing the game has to a money printer, and
-the same trap was walked into twice, so the invariants matter more than the
-numbers.
+`HagglingSession` was the closest thing the game had to a money printer, and
+the same trap was walked into **three times**, so the invariants matter more
+than the numbers.
 
 1. **First design:** the acceptance threshold slid toward the absolute
    minimum as patience fell, and the fastest way to burn patience was an
@@ -600,41 +600,64 @@ numbers.
 2. **Second design:** the threshold never went below the floor and the floor
    hardened per rejection. The exploit was closed, but both the threshold
    and the floor were functions of **`rounds_used` alone** - so how you
-   haggled did not matter, only how many times you were refused, and the two
-   curves always met at the same number.
+   haggled did not matter, only how many times you were refused.
+3. **Third design** (three rounds, a slider offer, a credibility threshold,
+   an ultimatum): it had no exploit and it worked - but it was in the
+   **wrong register**. A three-round offer loop has a measurable "right
+   answer"; the player compares, optimizes, spends the rounds. Scarcity has
+   no right answer (see `kitlik_tasarim_dersleri.md`). The codex chapter
+   title confessed the design: *"Pazarlık: oyunun para basma noktası."*
 
-**Current design - the path is what matters.**
+**Current design (P1, user's decision 2026-11-05) - one decision, no
+take-backs.**
 
-- **Offers are a countable resource** (`MAX_ROUNDS`, three), shown on screen.
-  No hidden curve to reverse-engineer by trial and error.
-- **The merchant concedes only after an offer he takes seriously**
-  (`is_credible`, `concessions`). A lowball burns a round without moving him,
-  which is precisely why "repeat the same bottom offer three times" cannot
-  work. `get_acceptable_threshold()` interpolates on `concessions`, never on
-  `rounds_used`.
-- **Every rejection still hardens the floor** (`FLOOR_HARDEN_PER_ROUND`), so
-  dragging it out costs you room even when your offers are credible.
-- **Out of offers, the merchant issues an ultimatum: pay list price or
-  leave.** `has_final_offer_perk` softens the ultimatum to his current floor
-  rather than list price - valuable, but still worse than spending the three
-  rounds well, which `tests/test_haggling.gd` asserts directly.
+- **Three buttons: accept · push · walk away.** No slider, no rounds, no
+  patience bar, no ultimatum. Paying the asking price is always a valid move,
+  and `tests/test_haggling.gd` asserts it.
+- **The push is thrown once.** Because there is no second move, "try again
+  until the price is good" - the exploit of both earlier designs - is
+  impossible by construction, not by tuning.
+- **The odds are printed on screen** (`push_odds`, 15-85%, from Charisma and
+  reputation). A player with exactly one right must not throw a blind die;
+  there is no hidden curve to reverse-engineer because there is no second
+  attempt to learn from.
+- **Losing the push raises the price** (`PUSH_FAIL_RAISE`, +10%) and costs 1
+  reputation. Without the raise, pushing would be a free coin flip. But it
+  does **not** end the haggle: accepting the raised price or walking out is
+  still the player's call, which is why the panel emits `push_resolved`
+  rather than `haggling_failed`.
+- **The win is small.** `DISCOUNT_MAX` is 15%; the old design gave 20-45%.
+  Haggling is a small risk, not an income stream. `DISCOUNT_BASE` (4%) exists
+  because with it at zero, an unskilled caravan saw *"39% chance of 19 GP,
+  otherwise 21 GP"* against an asking price of 19 - caught in a screenshot. A
+  risk button whose win is invisible is a trap, not a decision; where the win
+  still rounds away (`push_is_worth_it`), the button is not shown at all.
+- **One stat: Charisma.** Speech is Charisma. The old call fed Zeka into a
+  slot literally named `player_speech` and Karizma into the next parameter;
+  taking "the best of two" collapsed both into the same thing. Zeka's job in
+  the market is reading the price book (`PriceBookPanel`).
 - **Walking out costs a little reputation** (`WALKOUT_REPUTATION_PENALTY`,
-  1). Deliberately small: without any cost, "lowball until it breaks, then
-  reopen" is a free retry loop, but a broken negotiation should be a price,
-  not a disaster. The panel hands the penalty to whoever opened it
-  (`HagglingPanel.haggling_failed`) and each screen decides: a city
-  merchant's anger is heard around town (`market.gd`), a roadside bandit's is
-  not (`road_journey.gd`, which charges the full toll instead - through
-  `spend_or_owe`, so being broke is not an escape).
-- **Skill is read from the party, not hardcoded.** Callers pass
-  `get_best_effective_stat()` for Zeka and Karizma; those widen the floor.
-  Passing literal zeros (as both screens once did) made the whole mini-game
-  character-blind.
+  1). Deliberately small: without any cost, "break it, then reopen" is a free
+  retry loop, but a broken negotiation should be a price, not a disaster. The
+  panel hands the penalty to whoever opened it (`HagglingPanel.haggling_failed`)
+  and each screen decides: a city merchant's anger is heard around town
+  (`market.gd`), a roadside bandit's is not (`road_journey.gd`, which charges
+  the full toll instead - through `spend_or_owe`, so being broke is not an
+  escape).
 
-The resulting gradient on a 135 list price (base 100, greed 0.5, rep 0.3):
-cautious play takes ~116 in round one, aiming play walks 116 → 99 → 83, and
-greedy play hits the ultimatum and pays 135 or leaves. A master talker
-(Zeka/Karizma maxed, trusted) pays 68 against a list of 100.
+**Under scarcity the subject is not the price (P2).** Past
+`CONSCIENCE_FROM` (0.45) the push becomes **insistence**: the button reads
+"Üstele" and the panel says *"Karşındaki de aç."* Winning still gets you the
+goods, costs 2 **regional** standing and writes a `CaravanLedger.KIND_TRADE`
+line with cause `LEDGER_CAUSE_HAGGLE_INSISTED`. This is the trade-side of the
+scarcity lesson *"the price lands on someone with a name"*. The branch is
+market-only: on the road (bandits, tolls) scarcity is not passed in, because
+a toll has nothing to do with conscience.
+
+The resulting range on a 135 list price (base 100, greed 0.5, rep 0.3):
+accept pays 135, a won push pays 115-135 by skill, a lost push pays 149 plus
+1 reputation, walking out pays nothing and costs 1. A master talker (Charisma
+maxed, trusted) pays 85 against a list of 100 - it was 68 in the old design.
 
 ### Reputation Rules
 

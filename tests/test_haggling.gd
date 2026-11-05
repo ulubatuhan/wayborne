@@ -1,14 +1,16 @@
 extends RefCounted
 
-## Pazarlık, oyunun para basma noktasına en yakın yeri. İki kez aynı tuzağa
-## düşüldü (bkz. HagglingSession başlığı); bu paket ikisini birden kapalı
-## tutar.
+## Pazarlık, oyunun para basma noktasına en yakın yeriydi. Üç kez yeniden
+## yazıldı (gerekçeler `HagglingSession`'ın başlığında); bu paket dördüncü
+## tasarımın kapattığı şeyleri kapalı tutar.
 ##
-## Paketin merkezi tek bir cümle: **aynı dip teklifi tekrar tekrar vererek
-## iyi bir fiyata varılamaz.** Eski tasarımlarda varılabiliyordu - önce eşik
-## sabırla dibe indiği için, sonra eşik de taban da yalnızca geçen turun
-## fonksiyonu olduğu için. Şimdi tüccar ancak *ciddiye aldığı* bir teklifin
-## ardından geri çekiliyor, yani yol önemli.
+## Paketin merkezi iki cümle:
+##   1. **Pazarlık bir gelir kaynağı olamaz.** En iyi oyuncunun en iyi
+##      hamlesinde bile kazanç `DISCOUNT_MAX` ile sınırlı; eski tasarımda
+##      %45'e çıkıyordu.
+##   2. **Tek karar, tek hak.** Direnmek bir kez atılır; kaybedince fiyat
+##      *artar*. Tekrar deneyerek, bekleyerek ya da dip teklif vererek
+##      daha iyi bir sayıya varılamaz, çünkü ikinci bir hamle yok.
 
 const BASE_PRICE: float = 100.0
 const GREED: float = 0.5
@@ -19,270 +21,240 @@ func suite_name() -> String:
 
 func run(t) -> void:
 	_test_opening_state(t)
-	_test_paying_the_asking_price_always_works(t)
-	_test_first_round_already_offers_a_discount(t)
-	_test_threshold_never_drops_below_floor(t)
-	_test_only_credible_offers_move_the_merchant(t)
-	_test_lowball_spam_never_reaches_a_good_price(t)
-	_test_insult_burns_two_rounds(t)
-	_test_ultimatum_is_the_list_price(t)
-	_test_final_offer_perk_is_not_a_shortcut(t)
-	_test_skill_and_reputation_open_the_floor(t)
-	_test_walkout_costs_a_little_reputation(t)
-	_test_finished_session_is_inert(t)
+	_test_accepting_pays_the_list_price(t)
+	_test_discount_is_capped(t)
+	_test_discount_comes_off_the_visible_price(t)
+	_test_losing_the_push_raises_the_price(t)
+	_test_push_is_a_single_right(t)
+	_test_push_odds_are_bounded_and_shown(t)
+	_test_reputation_lowers_the_list_price(t)
+	_test_walkout_ends_the_session(t)
+	_test_conscience_branch_only_under_scarcity(t)
+	_test_no_sequence_beats_the_single_discount(t)
 
 func _new_session(
-	speech: float = 0.0, charisma: float = 0.0, perk: bool = false, reputation: float = REPUTATION
+	charisma: float = 0.0,
+	reputation: float = REPUTATION,
+	scarcity: float = 0.0
 ) -> HagglingSession:
-	return HagglingSession.new(BASE_PRICE, GREED, reputation, speech, charisma, perk)
+	return HagglingSession.new(BASE_PRICE, GREED, reputation, charisma, scarcity)
 
-## Aynı teklifi hakları bitene kadar tekrarlayan oyuncu. Dönen değer anlaşılan
-## fiyat; ültimatoma düşülürse -1 (ültimatomu kabul etmek ayrı bir karar).
-func _repeat_offer(offer: float, speech: float = 0.0, charisma: float = 0.0) -> float:
-	var session := _new_session(speech, charisma)
-	while session.state == HagglingSession.State.IN_PROGRESS:
-		session.submit_offer(offer)
-	if session.state == HagglingSession.State.SUCCESS_DEAL:
-		return session.final_price
-	return -1.0
+## Zarı sabitlemenin tek yolu: tohumu çağıran veriyor (bkz. `push`).
+func _rng_that_wins() -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	return _find_seed(rng, true)
 
-## Nişan alan oyuncu: elinde hak varken tüccarı yaklaştıracak en düşük ciddi
-## teklifi veriyor, son hakkında ise eldeki en iyi fiyatı alıp masadan
-## kalkıyor. "İyi oynanan pazarlık" derken kastedilen bu.
-func _best_skilled_price(speech: float = 0.0, charisma: float = 0.0) -> float:
-	var session := _new_session(speech, charisma)
-	while session.state == HagglingSession.State.IN_PROGRESS:
-		if session.get_rounds_left() <= 1:
-			session.submit_offer(session.get_acceptable_threshold())
-			continue
-		# Ciddiyet sınırının hemen üstü: tüccarı yaklaştıran en düşük teklif.
-		# Kıl payı üstü, çünkü sınırın tam üstünde kayan nokta yuvarlaması
-		# testi tesadüfe bağlardı.
-		session.submit_offer(
-			session.get_acceptable_threshold() * HagglingSession.CREDIBLE_MARGIN * 1.001
-		)
-	if session.state == HagglingSession.State.SUCCESS_DEAL:
-		return session.final_price
-	return -1.0
+func _rng_that_loses() -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	return _find_seed(rng, false)
+
+## İlk sayısı eşiğin altında/üstünde kalan bir tohum bul. Kör sabit tohum
+## yazmak yerine aranıyor: eşik değiştiğinde test kendiliğinden uyar.
+func _find_seed(rng: RandomNumberGenerator, want_low: bool) -> RandomNumberGenerator:
+	var threshold := 0.15
+	for candidate in range(1, 500):
+		rng.seed = candidate
+		var roll := rng.randf()
+		if want_low and roll < threshold:
+			rng.seed = candidate
+			return rng
+		if not want_low and roll > 0.9:
+			rng.seed = candidate
+			return rng
+	return rng
 
 func _test_opening_state(t) -> void:
-	var session := _new_session()
-	t.eq(session.state, HagglingSession.State.IN_PROGRESS, "pazarlık açık başlar")
-	t.eq(session.get_rounds_left(), HagglingSession.MAX_ROUNDS, "haklar dolu başlar")
-	t.eq(session.concessions, 0, "tüccar henüz geri çekilmedi")
+	var s := _new_session()
+	t.eq(s.state, HagglingSession.State.OFFERED, "pazarlık teklif durumunda başlar")
+	t.ok(s.can_push(), "açılışta direnme hakkı var")
+	t.not_ok(s.pushed, "açılışta henüz direnilmemiş")
+	t.ge(s.list_price, BASE_PRICE, "tüccar taban fiyatın altını istemez")
+	t.almost(s.current_price(), s.list_price, "direnilmeden ödenecek fiyat liste fiyatı")
+
+func _test_accepting_pays_the_list_price(t) -> void:
+	var s := _new_session()
+	var listed := s.list_price
+	s.accept()
+	t.eq(s.state, HagglingSession.State.SUCCESS_DEAL, "kabul etmek anlaşmayı bitirir")
+	t.almost(s.final_price, listed, "kabul edilen fiyat ekrandaki fiyattır")
+	t.not_ok(s.can_push(), "anlaşmadan sonra direnme hakkı kalmaz")
+	# Pazarlığa hiç girmeyen oyuncu cezalandırılmıyor: istenen fiyatı ödemek
+	# her zaman geçerli bir hamle.
+	s.accept()
+	t.eq(s.state, HagglingSession.State.SUCCESS_DEAL, "ikinci kabul durumu bozmaz")
+
+func _test_discount_is_capped(t) -> void:
+	# Sömürünün kapandığı yer: beceri ve itibar sonsuz olsa da indirim tavanlı.
+	var monster := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	t.le(
+		monster.discount(),
+		HagglingSession.DISCOUNT_MAX,
+		"indirim hiçbir beceriyle tavanı geçmez"
+	)
+	t.almost(
+		monster.discount(),
+		HagglingSession.DISCOUNT_MAX,
+		"beceri sonsuzken indirim tavana oturur"
+	)
+	# Taban kazanç: becerisiz bir kervanda bile direnip kazanmak fiyatı
+	# *görünür* biçimde indirmeli. Sıfırken "%39 ihtimalle 19 GG, yoksa
+	# 21 GG" yazıyordu - kazanmanın karşılığı olmayan bir risk düğmesi.
+	var novice := _new_session(0.0, 0.0)
+	t.almost(novice.discount(), HagglingSession.DISCOUNT_BASE, "taban indirim herkese açık")
+	t.ok(novice.push_price() < novice.list_price, "becerisiz kervan da direnince kazanır")
+	var pricey := HagglingSession.new(500.0, GREED, 0.0, 0.0, 0.0)
 	t.ok(
-		is_equal_approx(session.p_start, BASE_PRICE * (1.0 + GREED * (1.0 - REPUTATION))),
-		"açılış fiyatı açgözlülük ve itibardan türer"
+		int(round(pricey.push_price())) < int(round(pricey.list_price)),
+		"kazanç ekrandaki sayıda görünür, yuvarlamada kaybolmaz"
 	)
-	t.ok(session.get_floor() < session.p_start, "tabanın üstünde pazarlık payı var")
-	t.ok(session.get_floor() > 0.0, "taban asla bedavaya inmez")
+	t.ok(pricey.can_push(), "kazancı görünen bir masada direnme düğmesi açıktır")
+	# Ve kazancı yuvarlamada kaybolan ufak bir alışverişte düğme hiç çıkmaz:
+	# saf zarar olan bir karar sunulmaz.
+	var trivial := HagglingSession.new(1.0, 0.0, 0.0, 0.0, 0.0)
+	t.not_ok(trivial.push_is_worth_it(), "kazancı görünmeyen masada direnmeye değmez")
+	t.not_ok(trivial.can_push(), "değmeyen masada düğme kapalı")
+	t.le(
+		HagglingSession.DISCOUNT_MAX,
+		0.2,
+		"pazarlık bir gelir kaynağı olmayacak kadar küçük kalmalı"
+	)
 
-	var slider := session.get_slider_range()
-	t.ok(slider.x < slider.y, "teklif aralığı geçerli")
-	t.ok(slider.y > session.p_start, "istenenden fazlasını teklif etmek mümkün")
+func _test_discount_comes_off_the_visible_price(t) -> void:
+	var s := _new_session(50.0)
+	t.almost(
+		s.push_price(),
+		s.list_price * (1.0 - s.discount()),
+		"indirim ekranda yazan fiyattan iner, gizli bir tabandan değil"
+	)
+	t.le(s.push_price(), s.list_price, "direnip kazanmak fiyatı yükseltmez")
 
-## Pazarlık isteğe bağlı bir kazanç yolu: istediğini ödeyen oyuncu her zaman
-## anlaşabilmeli, yoksa mekanik zorunlu bir engele dönerdi.
-func _test_paying_the_asking_price_always_works(t) -> void:
-	var session := _new_session()
-	session.submit_offer(session.p_start)
-	t.eq(session.state, HagglingSession.State.SUCCESS_DEAL, "istenen fiyat anında kabul edilir")
-	t.ok(is_equal_approx(session.final_price, session.p_start), "ödenen fiyat teklif edilendir")
-	t.eq(session.get_rounds_left(), HagglingSession.MAX_ROUNDS, "kabul edilen teklif hak yakmaz")
+func _test_losing_the_push_raises_the_price(t) -> void:
+	var s := _new_session(50.0)
+	var listed := s.list_price
+	var won := s.push(_rng_that_loses())
+	t.not_ok(won, "kaybeden zar direnmeyi kaybettirir")
+	t.ok(s.pushed, "direnme kullanıldı olarak işaretlenir")
+	t.ge(s.current_price(), listed, "kaybedince fiyat liste fiyatının üstüne çıkar")
+	t.almost(
+		s.current_price(),
+		listed * (1.0 + HagglingSession.PUSH_FAIL_RAISE),
+		"artış sabitin kendisi kadar"
+	)
+	t.ge(
+		float(s.get_push_reputation_penalty()),
+		1.0,
+		"direnip kaybetmek itibara da dokunur: bedava kura değil"
+	)
+	# Kaybetmek pazarlığı bitirmiyor: artmış fiyatı kabul etmek ya da masadan
+	# kalkmak hâlâ oyuncunun kararı.
+	t.eq(s.state, HagglingSession.State.OFFERED, "kaybedince masa devam eder")
+	s.accept()
+	t.almost(s.final_price, listed * (1.0 + HagglingSession.PUSH_FAIL_RAISE),
+		"kabul edilen fiyat artmış fiyattır")
 
-## İlk tur da bir şey kazandırmalı: temkinli oyuncu hiç risk almadan küçük bir
-## indirim alabilmeli, yoksa pazarlık "ya hep ya hiç"e dönerdi.
-func _test_first_round_already_offers_a_discount(t) -> void:
-	var session := _new_session()
+func _test_push_is_a_single_right(t) -> void:
+	var s := _new_session(50.0)
+	s.push(_rng_that_loses())
+	t.not_ok(s.can_push(), "direnme hakkı bir kez")
+	var after := s.current_price()
+	var again := s.push(_rng_that_wins())
+	t.not_ok(again, "ikinci direnme hiç atılmaz")
+	t.almost(s.current_price(), after, "ikinci deneme fiyatı değiştirmez")
+	# Eski tasarımların sömürüsü buradaydı: tekrar deneyerek iyi fiyata
+	# varmak. İkinci hamle olmadığı için artık imkânsız.
+
+func _test_push_odds_are_bounded_and_shown(t) -> void:
+	var weak := HagglingSession.new(BASE_PRICE, GREED, 0.0, -99.0, 0.0)
+	var strong := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	t.ge(weak.push_odds(), HagglingSession.PUSH_ODDS_MIN, "şans tabanın altına inmez")
+	t.le(strong.push_odds(), HagglingSession.PUSH_ODDS_MAX, "şans tavanın üstüne çıkmaz")
 	t.ok(
-		session.get_acceptable_threshold() < session.p_start,
-		"ilk turda bile liste fiyatının altı kabul edilir"
+		strong.push_odds() > weak.push_odds(),
+		"karizma ve itibar direnme şansını artırır"
 	)
+	# Şans ekranda yazılı olmak zorunda: tek hak varsa kör zar atılmamalı.
 	t.ok(
-		session.get_acceptable_threshold() > session.get_floor(),
-		"ama ilk turda taban verilmez - indirim kazanılır"
+		HagglingSession.PUSH_ODDS_MAX < 1.0,
+		"direnmek hiçbir zaman garantiye dönüşmez"
 	)
 
-func _test_threshold_never_drops_below_floor(t) -> void:
-	var session := _new_session()
-	for _step in HagglingSession.MAX_ROUNDS + 2:
-		t.ok(
-			session.get_acceptable_threshold() >= session.get_floor() - 0.001,
-			"eşik tabanın altına inmez"
-		)
-		t.ok(
-			session.get_acceptable_threshold() <= session.p_start + 0.001,
-			"eşik açılış fiyatını aşmaz"
-		)
-		session.concessions += 1
-
-## Tasarımın kalbi: tüccarı yaklaştıran şey turun geçmesi değil, ciddi bir
-## teklif. Bu ayrım olmadan "aynı teklifi üç kez ver" yine kazanırdı.
-func _test_only_credible_offers_move_the_merchant(t) -> void:
-	var serious := _new_session()
-	var credible_offer := serious.get_acceptable_threshold() * HagglingSession.CREDIBLE_MARGIN
-	var threshold_before := serious.get_acceptable_threshold()
-	serious.submit_offer(credible_offer)
-	t.eq(serious.concessions, 1, "ciddi teklif tüccarı bir adım geri çeker")
+func _test_reputation_lowers_the_list_price(t) -> void:
+	var unknown := _new_session(0.0, 0.0)
+	var trusted := _new_session(0.0, 1.0)
 	t.ok(
-		serious.get_acceptable_threshold() < threshold_before,
-		"geri çekilme eşiğe yansır"
+		trusted.list_price < unknown.list_price,
+		"itibarlı kervandan daha az sıyrılır"
+	)
+	t.almost(trusted.list_price, BASE_PRICE, "tam itibarda liste fiyatı tabana oturur")
+
+func _test_walkout_ends_the_session(t) -> void:
+	var s := _new_session()
+	s.walk_away()
+	t.eq(s.state, HagglingSession.State.ANGER_QUIT, "masadan kalkmak pazarlığı bitirir")
+	t.eq(s.final_price, 0.0, "kalkınca hiçbir şey ödenmez")
+	t.not_ok(s.can_push(), "kalktıktan sonra direnilemez")
+	t.ge(
+		float(s.get_walkout_reputation_penalty()),
+		1.0,
+		"masadan kalkmanın bir bedeli var"
+	)
+	t.le(
+		float(s.get_walkout_reputation_penalty()),
+		2.0,
+		"bedel caydırıcı olmalı, felaket değil"
 	)
 
-	var lowballer := _new_session()
-	var lowball := lowballer.get_acceptable_threshold() * (HagglingSession.CREDIBLE_MARGIN - 0.1)
-	var lowball_threshold_before := lowballer.get_acceptable_threshold()
-	lowballer.submit_offer(lowball)
-	t.eq(lowballer.concessions, 0, "ciddiye alınmayan teklif tüccarı yaklaştırmaz")
-	t.eq(lowballer.get_rounds_left(), HagglingSession.MAX_ROUNDS - 1, "ama hakkı yakar")
+func _test_conscience_branch_only_under_scarcity(t) -> void:
+	var plenty := _new_session(0.0, REPUTATION, 0.0)
+	t.not_ok(plenty.is_conscience(), "bollukta pazarlığın konusu fiyattır")
+	t.eq(plenty.conscience_standing_cost(), 0, "vicdan dalı kapalıyken bölgesel bedel yok")
+	var hunger := _new_session(0.0, REPUTATION, 0.9)
+	t.ok(hunger.is_conscience(), "kıtlıkta diren üstelemeye dönüşür")
+	t.ge(
+		float(hunger.conscience_standing_cost()),
+		1.0,
+		"üstelemenin bölgesel bir bedeli var"
+	)
+	# Kıtlık derslerinin kuralı: bedel adı olan birine düşer. Burada o
+	# "biri" karşıdaki satıcı, bedeli de o bölgedeki itibar.
 	t.ok(
-		lowballer.get_acceptable_threshold() > lowball_threshold_before,
-		"üstüne taban sertleştiği için eşik yükselir - uzatmanın bedeli"
-	)
-
-## Paketin asıl iddiası, doğrudan senin sorduğun biçimde: sliderın solunu
-## zorlayarak buluşma noktasına varılamaz.
-func _test_lowball_spam_never_reaches_a_good_price(t) -> void:
-	var skilled := _best_skilled_price()
-	t.ok(skilled > 0.0, "nişan alan oyuncu anlaşabiliyor")
-	t.ok(skilled < _new_session().p_start, "iyi oynanan pazarlık gerçekten kazandırır")
-
-	# Nişan alan oyuncunun vardığı fiyatı doğrudan spam'lemeyi dene: her turda
-	# reddedilmeli ve ültimatoma çıkmalı.
-	var probe := _new_session()
-	var spam_result := _repeat_offer(skilled)
-	t.eq(
-		spam_result, -1.0,
-		"iyi fiyatı baştan spam'lemek anlaşma değil ültimatom getirir"
-	)
-
-	# Aralığın tamamını tara: hiçbir sabit teklif, nişan alarak varılan
-	# fiyattan daha iyisini getirmemeli.
-	var slider := probe.get_slider_range()
-	var steps := 200
-	var best_spam := -1.0
-	for index in steps + 1:
-		var offer: float = slider.x + (slider.y - slider.x) * (float(index) / float(steps))
-		var achieved := _repeat_offer(offer)
-		if achieved >= 0.0 and (best_spam < 0.0 or achieved < best_spam):
-			best_spam = achieved
-	t.ok(best_spam > 0.0, "bazı sabit teklifler tutuyor - mekanik ölü değil")
-	t.ok(
-		best_spam > skilled,
-		"tek bir fiyatı tekrarlamak, tura göre nişan almaktan daha iyi sonuç vermez"
-	)
-
-func _test_insult_burns_two_rounds(t) -> void:
-	var session := _new_session()
-	var floor_now := session.get_floor()
-	t.ok(session.is_insulting(floor_now * 0.5), "tabanın çok altı hakarettir")
-	t.ok(not session.is_insulting(floor_now), "tabanın kendisi hakaret değildir")
-	t.ok(not session.is_insulting(session.p_start), "istenen fiyat hakaret değildir")
-
-	session.submit_offer(floor_now * 0.5)
-	t.eq(
-		session.get_rounds_left(), HagglingSession.MAX_ROUNDS - HagglingSession.INSULT_ROUND_COST,
-		"hakaret tek hamlede iki hak yakar"
-	)
-	t.eq(session.concessions, 0, "hakaret tüccarı yaklaştırmaz")
-
-	# İki hakaret pazarlığı bitirir.
-	var quick := _new_session()
-	quick.submit_offer(quick.get_floor() * 0.5)
-	quick.submit_offer(quick.get_floor() * 0.5)
-	t.eq(quick.state, HagglingSession.State.FINAL_CHANCE, "iki hakaret ültimatoma çıkarır")
-
-## "Ya listeden al ya çık." Açgözlü oyuncunun bütün kazancı burada geri alınıyor.
-func _test_ultimatum_is_the_list_price(t) -> void:
-	var session := _new_session()
-	var lowball := session.get_floor()
-	for _round in HagglingSession.MAX_ROUNDS:
-		if session.state != HagglingSession.State.IN_PROGRESS:
-			break
-		session.submit_offer(lowball)
-
-	t.eq(session.state, HagglingSession.State.FINAL_CHANCE, "haklar bitince ültimatom gelir")
-	t.eq(session.get_rounds_left(), 0, "hak kalmadı")
-
-	session.respond_to_final_offer(true)
-	t.eq(session.state, HagglingSession.State.SUCCESS_DEAL, "ültimatom kabul edilebilir")
-	t.ok(
-		is_equal_approx(session.final_price, session.p_start),
-		"yetenek yoksa ültimatom liste fiyatıdır"
-	)
-
-	var walker := _new_session()
-	for _round in HagglingSession.MAX_ROUNDS:
-		if walker.state != HagglingSession.State.IN_PROGRESS:
-			break
-		walker.submit_offer(walker.get_floor())
-	walker.respond_to_final_offer(false)
-	t.eq(walker.state, HagglingSession.State.ANGER_QUIT, "ültimatom reddedilebilir")
-	t.ok(is_zero_approx(walker.final_price), "masadan kalkınca anlaşma yok")
-
-## Yetenek ültimatomu yumuşatıyor ama hakları yakmayı kârlı hale getirmemeli.
-func _test_final_offer_perk_is_not_a_shortcut(t) -> void:
-	var perked := _new_session(0.0, 0.0, true)
-	var lowball := perked.get_floor()
-	for _round in HagglingSession.MAX_ROUNDS:
-		if perked.state != HagglingSession.State.IN_PROGRESS:
-			break
-		perked.submit_offer(lowball)
-	perked.respond_to_final_offer(true)
-
-	t.eq(perked.state, HagglingSession.State.SUCCESS_DEAL, "yetenekli oyuncu anlaşır")
-	t.ok(
-		perked.final_price < _new_session().p_start,
-		"yetenek ültimatomu liste fiyatından ucuza çeker"
+		HagglingSession.CONSCIENCE_FROM > 0.0,
+		"vicdan dalı her pazarlıkta açık değil"
 	)
 	t.ok(
-		perked.final_price > _best_skilled_price(),
-		"ama hakları yakmak, üç turu doğru kullanmaktan hâlâ pahalı"
+		HagglingSession.CONSCIENCE_FROM < 1.0,
+		"vicdan dalı oyunun içinde gerçekten görülebilir"
 	)
 
-func _test_skill_and_reputation_open_the_floor(t) -> void:
-	var plain := _new_session()
-	var talker := _new_session(8.0, 8.0)
-	t.ok(talker.get_floor() < plain.get_floor(), "dili kuvvetli parti daha iyi taban açar")
+func _test_no_sequence_beats_the_single_discount(t) -> void:
+	# Paketin asıl sorusu: hangi hamle dizisi en iyi fiyatı verir? Cevap
+	# "indirimli fiyat"tan iyi olamaz, çünkü başka hamle yok. Üç yolu da
+	# ölç ve hiçbirinin tabanın altına inmediğini doğrula.
+	var best := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	var floor_price := best.list_price * (1.0 - HagglingSession.DISCOUNT_MAX)
 
-	# İtibar iki yerden birden çalışır: hem açılış fiyatını hem tabanı indirir.
-	var known := _new_session(0.0, 0.0, false, 1.0)
-	var stranger := _new_session(0.0, 0.0, false, 0.0)
-	t.ok(known.p_start < stranger.p_start, "tanınan kervana açılış fiyatı daha düşük çıkar")
-	t.ok(known.get_floor() < stranger.get_floor(), "tanınan kervan daha ucuza anlaşabilir")
+	var straight := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	straight.accept()
+	t.ge(straight.final_price, floor_price, "doğrudan kabul tabanın altına inmez")
 
-	# Beceri sınırsız indirim değil: taban oranının kendi dibi var.
-	var master := HagglingSession.new(BASE_PRICE, GREED, 1.0, 1000.0, 1000.0, false)
-	t.ok(
-		master.get_floor() >= BASE_PRICE * HagglingSession.FLOOR_MIN_RATIO - 0.001,
-		"beceri tabanı taban oranının altına indiremez"
-	)
+	var pushed_win := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	pushed_win.push(_rng_that_wins())
+	pushed_win.accept()
+	t.ge(pushed_win.final_price, floor_price, "direnip kazanmak bile tabanın altına inmez")
+	t.almost(pushed_win.final_price, floor_price, "en iyi sonuç tam olarak taban fiyattır")
 
-	t.ok(
-		_best_skilled_price(8.0, 8.0) < _best_skilled_price(),
-		"beceri somut para kazandırır"
-	)
+	var pushed_loss := HagglingSession.new(BASE_PRICE, GREED, 1.0, 999.0, 0.0)
+	pushed_loss.push(_rng_that_loses())
+	pushed_loss.accept()
+	t.ge(pushed_loss.final_price, straight.final_price,
+		"kaybedilen direniş hiç direnmemekten pahalıdır")
 
-## Caydırıcı olmalı, cezalandırıcı değil: pazarlık denemek riskli olsun ama
-## bir kopuş kervanı itibarsız bırakmasın.
-func _test_walkout_costs_a_little_reputation(t) -> void:
-	var session := _new_session()
-	var penalty := session.get_walkout_reputation_penalty()
-	t.ok(penalty > 0, "masadan kalkmak bedava değil")
-	t.le(penalty, 2, "ama ceza küçük kalır - kopuş bir felaket değil, bir bedel")
-
-func _test_finished_session_is_inert(t) -> void:
-	var session := _new_session()
-	session.submit_offer(session.p_start)
-	var settled := session.final_price
-
-	session.submit_offer(session.get_floor())
-	t.ok(is_equal_approx(session.final_price, settled), "kapanmış pazarlık yeni teklif almaz")
-	t.eq(session.state, HagglingSession.State.SUCCESS_DEAL, "kapanmış pazarlığın durumu değişmez")
-
-	var fresh := _new_session()
-	fresh.respond_to_final_offer(true)
-	t.eq(
-		fresh.state, HagglingSession.State.IN_PROGRESS,
-		"ültimatom gelmeden verilen cevap yok sayılır"
+	# Ve taban fiyat taban maliyetin çok altında olamaz: pazarlık para
+	# basmıyor.
+	t.ge(
+		floor_price,
+		BASE_PRICE * 0.8,
+		"en iyi pazarlık bile taban fiyatın %20'sinden fazlasını silemez"
 	)

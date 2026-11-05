@@ -41,6 +41,10 @@ const KIND_DIARY: String = "diary"
 const KIND_CODE: String = "code"
 const KIND_VERDICT: String = "verdict"
 const KIND_MEMORIAL: String = "memorial"
+## Ticaretin deftere düşen izi (P2, P14): kıtlıkta üstelenen bir pazarlık,
+## aç bir şehirde satılan son ilaç. Defterin dördüncü sütunu ticarete de
+## bakıyor - *Defter unutmaz.*
+const KIND_TRADE: String = "trade"
 
 ## Tür -> çeviri anahtarı. Tam yazılıyor, çalışma anında birleştirilmiyor
 ## (çeviri tarayıcısı ve çevirmen anahtarı arayınca bulabilsin diye).
@@ -55,6 +59,7 @@ const KIND_LABEL_KEYS: Dictionary = {
 	KIND_CODE: "LEDGER_CODE",
 	KIND_VERDICT: "LEDGER_VERDICT",
 	KIND_MEMORIAL: "LEDGER_MEMORIAL",
+	KIND_TRADE: "LEDGER_TRADE",
 }
 
 ## Üstü çizili sayılan türler: kervandan ayrılmış olmak.
