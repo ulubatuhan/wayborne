@@ -47,6 +47,10 @@ const BASE_SEED: int = 515000
 const STARTING_GOLD: int = 250
 const STARTING_PROVISIONS: int = 20
 const CASH_BUFFER: int = 180
+## Yola çıkmadan önce en çok kaç gün çalışılır. Sınırsız olsaydı gündelik
+## iş bir "bekle ve zengin ol" düğmesine dönerdi; kıtlıkta gün geçirmek
+## zaten pahalı ama oyuncu da sonsuza kadar beklemez.
+const LABOUR_DAY_CAP: int = 3
 
 # --- Profiller ---------------------------------------------------------
 #
@@ -223,7 +227,7 @@ func _run_persona(persona: Dictionary, seed_value: int, adaptive: bool) -> Dicti
 		"cards": 0, "unique": {}, "options_open": 0, "forced": 0,
 		"checks": 0, "checks_passed": 0,
 		"starved_days": 0, "neglect_days": 0, "deaths": 0, "lost_wagons": 0,
-		"morale_min": 100, "run_over_at": -1,
+		"morale_min": 100, "run_over_at": -1, "labour_days": 0,
 		"legs": 0, "legs_improved": 0, "blocked_departures": 0,
 		"purse_start": session.wallet.balance,
 		"shocks": 0,
@@ -345,7 +349,7 @@ func _run_leg(
 			session.get_provision_stock(), session.wallet.balance,
 		])
 	_buy(session, origin, persona, plan.get_contract_cargo_load())
-	_stock_provisions(session, persona, plan)
+	_stock_provisions(session, persona, plan, state)
 	if bool(persona["expand"]):
 		_spend_surplus(session)
 
@@ -444,7 +448,9 @@ func _build_plan(
 		taken += 1
 	return plan
 
-func _stock_provisions(session: GameSession, persona: Dictionary, plan: CaravanPlan) -> void:
+func _stock_provisions(
+	session: GameSession, persona: Dictionary, plan: CaravanPlan, state: Dictionary
+) -> void:
 	# Profil başına güvenlik payı: Hayatta Kalan fazla alır, Tüccar ucu ucuna.
 	var margin := 1.0
 	match String(persona["id"]):
@@ -464,6 +470,34 @@ func _stock_provisions(session: GameSession, persona: Dictionary, plan: CaravanP
 	# **Pazarın kapısından**: erzak artık şehirde tükeniyor (P5), kese
 	# yetse bile raf yetmeyebilir.
 	session.buy_provisions(wanted)
+
+	# --- Planlayıcının yeni sunduğu iki seçenek (Ö2, Ö3) ---
+	#
+	# Bunlar persona "zekâsı" değil, **ekranın sunduğu şey**: ikisi de
+	# yalnız erzak eksikken, tam o ekranda, gözün gittiği yerde duruyor.
+	# Etmen yalnız oradakini kullanıyor.
+	if plan.get_provisions_shortfall(session.get_provisions()) <= 0:
+		return
+
+	# Ö2: sofra kipinin günlük bedeli artık yan yana yazılı. Hâlâ açsa ve
+	# herkesi besliyorsa, oyuncu o satırı görüp kipi kısar.
+	if session.meal_policy_mode == GameSession.MEAL_MODE_ALL:
+		session.set_meal_policy(GameSession.MEAL_MODE_PARTY_ONLY)
+		var left := plan.get_provisions_shortfall(session.get_provisions())
+		if left > 0:
+			session.buy_provisions(left)
+
+	# Ö3: "Bir gün çalış" düğmesi. Zaman öder, para değil; gün geçtiği
+	# için bedava değil - en fazla birkaç gün, sonra yola çıkılır.
+	var worked := 0
+	while worked < LABOUR_DAY_CAP \
+			and plan.get_provisions_shortfall(session.get_provisions()) > 0 \
+			and session.can_work_a_day():
+		if session.work_a_day() <= 0:
+			break
+		worked += 1
+		state["labour_days"] = int(state["labour_days"]) + 1
+		session.buy_provisions(plan.get_provisions_shortfall(session.get_provisions()))
 
 func _spend_surplus(session: GameSession) -> void:
 	if session.wallet.balance > CASH_BUFFER and session.can_buy_wagon():
@@ -679,6 +713,7 @@ func _measure(session: GameSession, state: Dictionary) -> Dictionary:
 		# Hüsran göstergeleri.
 		"ac_gun": float(state["starved_days"]),
 		"ihmal": float(state["neglect_days"]),
+		"isgunu": float(state["labour_days"]),
 		"moral_dip": float(state["morale_min"]),
 		"olum": float(state["deaths"]),
 		"vagon_kaybi": float(state["lost_wagons"]),
@@ -697,6 +732,14 @@ func _measure(session: GameSession, state: Dictionary) -> Dictionary:
 
 func _average(persona: Dictionary, runs: Array[Dictionary], adaptive: bool) -> Dictionary:
 	var out := {"id": persona["id"], "name": persona["name"], "adaptive": adaptive}
+	# `bitti`nin ortalaması yanıltıcıydı: bitmeyen koşu -1 taşıyor ve
+	# ortalamada gerçek bir sefer numarasıymış gibi görünüyordu. Doğru
+	# soru "kaç koşu bitti".
+	var ended := 0
+	for run in runs:
+		if float(run["bitti"]) >= 0.0:
+			ended += 1
+	out["biten_kosu"] = float(ended)
 	var keys: Array = runs[0].keys()
 	for key in keys:
 		var total := 0.0
@@ -737,14 +780,14 @@ func _enjoyment(persona: Dictionary, row: Dictionary) -> float:
 func _report(rows: Array[Dictionary]) -> void:
 	print("")
 	print("── Profil tablosu (ortalama, %d koşu)" % RUNS_PER_PERSONA)
-	print("   profil            kip     keyif  sefer  bitti  özerk  yetkin  teslim  şehir  kart  açgün  ihmal  ölüm")
+	print("   profil            kip     keyif  sefer  ölen  özerk  yetkin  teslim  şehir  kart  açgün  işgün  ölüm")
 	for row in rows:
 		print("   %-16s  %-6s  %5.1f  %5.1f  %5s  %5.2f  %6.2f  %6.1f  %5.1f  %4.1f  %5.1f  %5.1f  %4.1f" % [
 			row["name"], "gelişen" if bool(row["adaptive"]) else "sabit",
 			row["keyif"], row["sefer"],
-			"-" if float(row["bitti"]) < 0.0 else "%.1f" % float(row["bitti"]),
+			"%d/%d" % [int(row["biten_kosu"]), RUNS_PER_PERSONA],
 			row["ozerklik"], row["yetkinlik"], row["teslimat"], row["sehir"],
-			row["farkli_kart"], row["ac_gun"], row["ihmal"], row["olum"],
+			row["farkli_kart"], row["ac_gun"], row["isgunu"], row["olum"],
 		])
 	print("")
 	print("── Sefer sonu durumu")

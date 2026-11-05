@@ -37,7 +37,22 @@ Rapor `docs/design_notes/oyuncu_profilleri.md`. Araç `tests/simulate_personas.g
   - Eksik olan uyarı değil **bedelin ölçeği**: "moral düşer, stres birikir" atlatılabilir okunuyor, oysa aynı
     karar kervanı üç seferde bitiriyor.
 
-- [ ] **PR06 Öneriler (kullanıcı kararı bekliyor)**
+- [x] **PR06 Öneriler uygulandı ve yeniden ölçüldü**
+  - Yedisi de yapıldı (Ö6 hariç: Ö1'in güçlenen uyarısı aynı işi planlayıcıda yapıyor, haritaya ikinci
+    gösterge ölçümle desteklenmedi).
+  - **Sonuç, aynı tohumlarla:** Hayatta Kalan 18.7 → **24.0 sefer** ve üç koşunun üçünde ölmekten
+    hiçbirinde ölmemeye geçti (keyif 0 → 29.9); Merhametli 3.0 → **9.7**; Tamamlayıcı (gelişen)
+    11.0 → **16.7**, keyif 38.8 → **53.7**. Tüccar neredeyse değişmedi (53.3 → 55.3) ve gündelik işi
+    koşu başına yalnız 1.3 gün kullandı - can simidi zordakine açık, güçlüye bedava kazanç değil.
+  - **Hikâyeci hâlâ ölüyor** (5.0 sefer, 3/3) ve keyfi düştü (18.5 → 8.8): daha uzun yaşayınca daha çok
+    aç gün görüyor. Dürüst sonuç: ertelendi, çözülmedi. Çözümü kıtlık kipine dokunuyor (affedici rota
+    ya da sınırlı ilk sefer), **kullanıcı kararı bekliyor**.
+  - Ekran doğrulaması üç kusur daha yakaladı: gündelik iş düğmesi tam gerektiği anda gizliydi
+    (engel bugünkü depoyu soruyordu, oysa ihtiyacı sefer belirler); düğme `_plan` kurulmadan
+    tazeleniyordu; ve eklenen satırlar "yola çık" düğmesini kaydırmanın altına itti.
+  - Kabul: `tests/test_persona_fixes.gd` (6 test), `tests/screenshot_persona_gate.gd`.
+
+- [ ] **PR07 Hikâyeci için karar (kullanıcı)**
   - Ö1 uyarının şiddeti ölümü adıyla ansın (S) · Ö2 sofra kipi planlayıcıda görünsün, günlük maliyetiyle (M)
     · Ö3 zordaki oyuncuya gündelik iş: zaman öder, para değil (M) · Ö4 Tamamlayıcı'ya sayaçlar (S)
     · Ö5 ölümden sonra son üç karar gösterilsin (S) · Ö6 ilk seferde erzağın yettiği yollar işaretlensin (S)

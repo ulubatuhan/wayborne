@@ -517,6 +517,33 @@ var standing: Standing = _new_standing()
 var people: People = People.new()
 ## Yolda görülen adlı yerler (T16-11): id -> ilk görüldüğü gün. Kayıtta.
 var seen_places: Dictionary = {}
+## Görülen olay kartları (Ö4). Defterdeki "gördüğün kart / toplam"
+## sayacının kaynağı; kayda yazılıyor çünkü soy boyunca birikiyor.
+var seen_event_ids: Dictionary = {}
+
+func note_event_seen(event_id: String) -> void:
+	if event_id.is_empty():
+		return
+	seen_event_ids[event_id] = true
+
+func get_seen_event_count() -> int:
+	return seen_event_ids.keys().size()
+
+## Son kararlar (Ö5, profil çalışması 2026-11-05). Hayatta Kalan ve
+## Merhametli profilleri ölüyordu ama **hangi kararın öldürdüğü**
+## görünmüyordu; oyuncunun hatayı öğrenmesi için gereken tek şey buydu.
+## Defter neyin olduğunu yazıyor, bu neyi seçtiğini.
+const RECENT_DECISION_COUNT: int = 3
+var recent_decisions: Array = []
+
+func note_decision(event_id: String, choice_key: String) -> void:
+	if event_id.is_empty():
+		return
+	recent_decisions.append({
+		"event": event_id, "choice": choice_key, "day": total_days_elapsed,
+	})
+	while recent_decisions.size() > RECENT_DECISION_COUNT:
+		recent_decisions.pop_front()
 
 ## Bir yer ilk kez görülünce deftere yazılır (Defter unutmaz).
 func note_road_place(place_id: String, place_name: String) -> void:
@@ -1987,6 +2014,33 @@ var standing_camp_at_dusk: bool = false
 ## Son savaşa sırasıyla girenler, `character_id` ile. Boşsa bütün parti.
 var combat_roster_ids: Array[String] = []
 
+## Bir sofra kipinin **günlük erzak maliyeti** (Ö2, profil çalışması
+## 2026-11-05). Ablasyon ölçümü sofra kipini oyunun en sert değişkeni
+## buldu: tayfayı beslemek tek başına dayanıklılığı üç seferden on bire
+## değiştiriyor. Bu ağırlıkta bir karar bir alt menüde, bedeli
+## görünmeden durmamalı.
+##
+## Aritmetiği `apply_meal_distribution` ile **aynı yerden** okuyor -
+## iki ayrı kural olsaydı ekrandaki sayı ile deftere düşen rakam
+## ayrışırdı (aynı gerekçe `get_meal_fed_party`'nin kendi yorumunda).
+func daily_provisions_for_mode(mode: String) -> int:
+	var party_mouths := get_party().size()
+	var other_mouths := owned_wagon_count * PEOPLE_PER_WAGON + caravan.get_contract_mouths()
+	var total_mouths := maxi(1, party_mouths + other_mouths)
+	var full_total := get_daily_provision_consumption()
+	var party_share := int(round(float(full_total) * float(party_mouths) / float(total_mouths)))
+	var other_share := full_total - party_share
+	match mode:
+		MEAL_MODE_PARTY_ONLY:
+			return party_share
+		MEAL_MODE_CREW_ONLY:
+			return other_share
+		MEAL_MODE_SELF_ONLY:
+			var per_head := 0.0 if party_mouths <= 0 else float(party_share) / float(party_mouths)
+			return int(round(per_head))
+		_:
+			return full_total
+
 func set_meal_policy(mode: String, selected: Array[CharacterData] = []) -> void:
 	meal_policy_mode = mode
 	meal_policy_ids.clear()
@@ -2392,8 +2446,35 @@ const MIN_REPUTATION: int = int(Standing.MIN_VALUE)
 ## içinde tutmasında da var).
 ## Bölgesel itibarla (T16-07) değişim bulunulan bölgede olur ve öbür bölgelere
 ## jeopolitik ağırlıkla yayılır (Standing.spill); dip ve tavan Standing'de.
+## Ad ile ödül (Ö7, profil çalışması 2026-11-05). Tüccar profili emeğinin
+## karşılığını göremiyordu: kese yatay (P8'in kasıtlı sonucu) ve zenginleşme
+## yok. Para ile değil **adla** ödüllendiriliyor: bir bölgede itibar eşiği
+## geçildiğinde deftere bir satır düşüyor ve bir daha düşmüyor.
+##
+## Kâr tavanı korunuyor - verilen şey para değil, tanınma.
+const STANDING_MILESTONES: Array[int] = [10, 25, 50]
+var standing_milestones_reached: Dictionary = {}
+
 func change_reputation(delta: int) -> int:
-	return standing.change_region(current_region(), float(delta))
+	var region := current_region()
+	var moved := standing.change_region(region, float(delta))
+	_note_standing_milestone(region)
+	return moved
+
+func _note_standing_milestone(region: String) -> void:
+	if region.is_empty():
+		return
+	var value := standing.region(region)
+	var reached: Array = standing_milestones_reached.get(region, [])
+	for milestone in STANDING_MILESTONES:
+		if value < milestone or reached.has(milestone):
+			continue
+		reached.append(milestone)
+		ledger.record(
+			CaravanLedger.KIND_TRADE, caravan_name, total_days_elapsed, 1, "",
+			"LEDGER_CAUSE_STANDING_MILESTONE", current_location_id, "", [str(milestone)]
+		)
+	standing_milestones_reached[region] = reached
 
 func accept_contract(offer: MerchantOffer) -> void:
 	accepted_contracts[offer.merchant_id] = total_days_elapsed
@@ -4185,6 +4266,54 @@ func _provisions_taken_here() -> int:
 ## Şehirden erzak alır; **gerçekten alınan** miktarı döner. Stok ne kadarsa
 ## o kadar: para yetse bile şehirde yoksa yok. Açlığın kapısı artık para
 ## değil arz (bkz. Scarcity.provision_stock).
+## --- Gündelik iş (Ö3, profil çalışması 2026-11-05) ---
+##
+## Zordaki oyuncunun elinde hiçbir kurtarma kolu kalmamıştı: pazarlığın
+## tavanı %15'e indi (P1, kasıtlı) ve ablasyon ölçümünde pazarlık etmek
+## dayanıklılığı hiç değiştirmiyordu. Ama **para basan bir kol da
+## istemiyoruz** - oyunun para musluğu tam olarak oradan kapanmıştı.
+##
+## Çözüm kıtlığa uygun: kervan şehirde bir gün çalışır, bir öğün kazanır.
+## **Zaman öder, para değil.** Gün geçer (kıtlık derinleşir, vadeler
+## yaklaşır, erzak tükenir), karşılığında yalnız o günün ekmeği gelir.
+## Zenginleşmeye yol yok: kazanılan erzak, bir günlük tüketimin biraz
+## üstü - ve yalnız gerçekten aç kervana açık.
+const DAY_LABOUR_PROVISION_FACTOR: float = 1.4
+const DAY_LABOUR_STRESS: int = 4
+const DAY_LABOUR_MIN_PROVISIONS: int = 1
+
+## Gündelik iş kapalıysa sebebi (çeviri anahtarı), açıksa "".
+func get_day_labour_block_reason() -> String:
+	if is_journey_active():
+		return "UI_LABOUR_ON_ROAD"
+	if get_party().is_empty():
+		return "UI_LABOUR_NO_HANDS"
+	return ""
+
+## "Bu kervanın çalışmaya ihtiyacı var mı" sorusunun cevabı **sefere**
+## bağlı, bugünkü depoya değil: ekran görüntüsünde 20 erzakla duran bir
+## kervan 111 erzaklık bir yola bakarken düğme gizleniyordu - tam
+## gerektiği anda. İhtiyacı planlayıcı bilir (eksik erzak), oturum yalnız
+## "çalışılabilir mi" sorusunu cevaplar.
+func should_offer_day_labour(shortfall: int) -> bool:
+	return shortfall > 0 and can_work_a_day()
+
+func can_work_a_day() -> bool:
+	return get_day_labour_block_reason().is_empty()
+
+## Bir gün çalış. Dönen: kazanılan erzak. Gün ilerler.
+func work_a_day() -> int:
+	if not can_work_a_day():
+		return 0
+	var earned := maxi(
+		DAY_LABOUR_MIN_PROVISIONS,
+		int(round(float(get_daily_provision_consumption()) * DAY_LABOUR_PROVISION_FACTOR))
+	)
+	advance_day()
+	change_provisions(earned)
+	change_stress(DAY_LABOUR_STRESS)
+	return earned
+
 func buy_provisions(wanted: int) -> int:
 	if wanted <= 0:
 		return 0
@@ -5135,6 +5264,9 @@ func to_save_dict() -> Dictionary:
 		"perishable_days": perishable_days.duplicate(),
 		"bought_here": bought_here.duplicate(),
 		"price_book": price_book.duplicate(true),
+		"seen_event_ids": seen_event_ids.duplicate(),
+		"recent_decisions": recent_decisions.duplicate(true),
+		"standing_milestones_reached": standing_milestones_reached.duplicate(true),
 		"journey_camps": journey_camps.duplicate(true),
 		"fulfilled_commission_starts": _fulfilled_commission_starts.duplicate(),
 		"delivered_wagon_quest_ids": _delivered_wagon_quest_ids.duplicate(),
@@ -5403,6 +5535,9 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	for item_id in (data.get("perishable_days", {}) as Dictionary):
 		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])
 	bought_here = _int_values(data.get("bought_here", {}))
+	seen_event_ids = (data.get("seen_event_ids", {}) as Dictionary).duplicate()
+	recent_decisions = (data.get("recent_decisions", []) as Array).duplicate(true)
+	standing_milestones_reached = (data.get("standing_milestones_reached", {}) as Dictionary).duplicate(true)
 	price_book = {}
 	var book: Dictionary = data.get("price_book", {})
 	for location_id in book:

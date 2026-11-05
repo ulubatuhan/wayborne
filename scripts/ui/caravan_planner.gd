@@ -31,6 +31,11 @@ var _shortfall_label: Label
 ## etiket, çünkü eksiklik satırı "ne kadar eksik / kaça alınır" diyor;
 ## bu satır "çıkarsan ne olur" diyor ve ikisi farklı sorular.
 var _risk_label: Label
+## Sofra kipi (Ö2): hangi kip, günde kaç erzak. Yolda verilen emir
+## **burada da** verilebiliyor, çünkü asıl bedeli yola çıkarken ödüyorsun.
+var _meal_label: Label
+var _meal_buttons: Array[Dictionary] = []
+var _labour_button: Button
 var _profit_label: Label
 var _morale_label: Label
 var _morale_reasons: VBoxContainer
@@ -321,6 +326,7 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_content.add_child(_current_provisions_label)
 	_content.add_child(_shortfall_label)
 	_content.add_child(_risk_label)
+	_build_meal_row()
 	_content.add_child(_profit_label)
 
 	# Çıkış morali görünmezse mekanik sessiz bir cezaya dönüşür: oyuncu
@@ -332,9 +338,26 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_morale_reasons = VBoxContainer.new()
 	_content.add_child(_morale_reasons)
 
+	# Erzağın iki yolu **yan yana**: parayla al, ya da bir gün çalış.
+	# Alt alta konduğunda ekran uzuyor ve "yola çık" düğmesi aşağı
+	# taşıyordu (ekran görüntüsünde yakalandı); iki seçenek zaten aynı
+	# sorunun iki cevabı, yan yana durmaları da doğru.
+	var provisions_row := HBoxContainer.new()
+	provisions_row.add_theme_constant_override("separation", 8)
+	_content.add_child(provisions_row)
+
 	_buy_provisions_button = Button.new()
+	_buy_provisions_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_buy_provisions_button.pressed.connect(_on_buy_provisions_pressed)
-	_content.add_child(_buy_provisions_button)
+	provisions_row.add_child(_buy_provisions_button)
+
+	# Gündelik iş (Ö3): zordaki oyuncunun tek kurtarma kolu. Zaman öder,
+	# para değil - kıtlık kipini bozmaz, para musluğu açmaz.
+	_labour_button = Button.new()
+	_labour_button.visible = false
+	_labour_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_labour_button.pressed.connect(_on_labour_pressed)
+	provisions_row.add_child(_labour_button)
 
 	_borrow_button = Button.new()
 	_borrow_button.text = tr("UI_PLANNER_BORROW_FOR_PROVISIONS")
@@ -456,11 +479,82 @@ func _on_buy_provisions_pressed() -> void:
 	_session.buy_provisions(shortfall)
 	_refresh()
 
+func _on_labour_pressed() -> void:
+	# Ekranda ayrı bir mesaj satırı yok: `_refresh` erzak, gün ve maliyet
+	# satırlarını zaten tazeliyor, sayılar kendi kendini anlatıyor.
+	_session.work_a_day()
+	_refresh()
+
+func _refresh_labour_button() -> void:
+	if _labour_button == null:
+		return
+	# Yalnız erzağı eksik olan kervana görünür: tok kervanın gün harcaması
+	# anlamsız, ve düğme her zaman duruyorsa bir çözüm değil bir alışkanlık
+	# olur.
+	var shortfall := _plan.get_provisions_shortfall(_session.get_provisions()) if _plan != null else 0
+	_labour_button.visible = _session.should_offer_day_labour(shortfall)
+	if _labour_button.visible:
+		_labour_button.text = tr("UI_PLANNER_LABOUR") % maxi(
+			GameSession.DAY_LABOUR_MIN_PROVISIONS,
+			int(round(float(_session.get_daily_provision_consumption())
+				* GameSession.DAY_LABOUR_PROVISION_FACTOR))
+		)
+
 func _on_borrow_pressed() -> void:
 	Nav.guild_initial_tab = 1
 	SceneInk.go(Nav.open(Nav.CARAVAN_PLANNER, Nav.GUILD))
 
+## Sofra kipleri yan yana, her birinin günlük erzak maliyetiyle.
+## Ablasyonun bulduğu şey: bu karar oyunun en sert değişkeni ve oyuncu
+## bedelini göremeden veriyor.
+const MEAL_ROW_MODES: Array[String] = [
+	GameSession.MEAL_MODE_ALL,
+	GameSession.MEAL_MODE_PARTY_ONLY,
+	GameSession.MEAL_MODE_SELF_ONLY,
+]
+
+func _build_meal_row() -> void:
+	# Başlık ve düğmeler **tek satırda**: ayrı satırda durduklarında ekran
+	# uzuyor ve kaydırma alanının altındaki "yola çık" düğmesi görünmez
+	# oluyordu (ekran görüntüsünde yakalandı - Y-K01'in tam konusu).
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	_content.add_child(row)
+	_meal_label = Label.new()
+	row.add_child(_meal_label)
+	for mode in MEAL_ROW_MODES:
+		var button := Button.new()
+		button.toggle_mode = true
+		button.pressed.connect(_on_meal_mode_pressed.bind(mode))
+		row.add_child(button)
+		_meal_buttons.append({"mode": mode, "button": button})
+
+func _on_meal_mode_pressed(mode: String) -> void:
+	_session.set_meal_policy(mode)
+	_refresh()
+
+func _refresh_meal_row() -> void:
+	if _meal_label == null:
+		return
+	_meal_label.text = tr("UI_PLANNER_MEAL_TITLE")
+	for entry in _meal_buttons:
+		var mode := String(entry["mode"])
+		var button: Button = entry["button"]
+		button.text = tr("UI_PLANNER_MEAL_OPTION") % [
+			tr(MEAL_POLICY_LABELS.get(mode, mode)),
+			_session.daily_provisions_for_mode(mode),
+		]
+		button.set_pressed_no_signal(_session.meal_policy_mode == mode)
+
+## Yol ekranıyla aynı adlar: aynı emir iki yerde iki ad taşımasın.
+const MEAL_POLICY_LABELS: Dictionary = {
+	GameSession.MEAL_MODE_ALL: "UI_MEAL_POLICY_ALL",
+	GameSession.MEAL_MODE_PARTY_ONLY: "UI_MEAL_POLICY_PARTY",
+	GameSession.MEAL_MODE_SELF_ONLY: "UI_MEAL_POLICY_SELF",
+}
+
 func _refresh() -> void:
+	_refresh_meal_row()
 	_refresh_departure_morale()
 	var cold := _plan.get_cold_provisions()
 	_cold_label.visible = cold > 0
@@ -522,7 +616,19 @@ func _refresh() -> void:
 		else:
 			_confirm_button.text = tr("UI_PLANNER_DEPART_HUNGRY")
 		_risk_label.visible = true
-		_risk_label.text = tr("UI_PLANNER_HUNGER_RISK") % _plan.get_hungry_days(current_provisions)
+		# **Bedelin ölçeği** (Ö1, profil çalışması 2026-11-05). Eski cümle
+		# yalnız "moral düşer, stres birikir" diyordu ve atlatılabilir bir
+		# rahatsızlık gibi okunuyordu; oysa ölçüm aynı kararın kervanı üç
+		# seferde bitirdiğini gösterdi. Açlık eşiğini geçen yolda uyarı
+		# ölümü **adıyla** anıyor. Yeni mekanik yok: söylenen şey zaten
+		# işleyen `STARVATION_HP_LOSS_START_DAY`.
+		var hungry_days := _plan.get_hungry_days(current_provisions)
+		if hungry_days >= GameSession.STARVATION_HP_LOSS_START_DAY:
+			_risk_label.text = tr("UI_PLANNER_HUNGER_DEADLY") % [
+				hungry_days, GameSession.STARVATION_HP_LOSS_START_DAY
+			]
+		else:
+			_risk_label.text = tr("UI_PLANNER_HUNGER_RISK") % hungry_days
 	else:
 		_shortfall_label.text = tr("UI_PLANNER_READY")
 		_shortfall_label.add_theme_color_override("font_color", SATISFIED_COLOR)
@@ -535,6 +641,10 @@ func _refresh() -> void:
 		_departure_armed = false
 
 	_profit_label.text = tr("UI_TOTAL_POTENTIAL") % _plan.get_total_profit()
+	# **Sonda**: eksik erzak sayısı bu noktada kesinleşiyor. Başta
+	# çağrıldığında `_plan` henüz kurulmamış oluyordu ve düğme tam
+	# gerektiği anda gizli kalıyordu - ekran görüntüsü yakaladı.
+	_refresh_labour_button()
 
 ## Eksik erzakla çıkmak iki basış ister: ilki riski söyler, ikincisi
 ## kabul eder. Tek basış, ekranı okumayan bir oyuncuyu kazara aç bir yola

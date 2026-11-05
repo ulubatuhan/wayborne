@@ -4166,6 +4166,24 @@ func _show_run_over() -> void:
 	body.modulate = LOCKED_COLOR
 	_arrival_panel.add_child(body)
 
+	# Son üç karar (Ö5): kervan bitti, ama **neden** bittiği okunabilsin.
+	# Ölçümde iki profil ölüyordu ve hangi kararın öldürdüğü hiçbir yerde
+	# görünmüyordu - öğrenilemeyen bir ölüm yalnız hüsrandır.
+	if not _session.recent_decisions.is_empty():
+		var heading := Label.new()
+		heading.text = tr("UI_ROAD_RUN_OVER_DECISIONS")
+		heading.modulate = ArtPalette.GOLD
+		_arrival_panel.add_child(heading)
+		for entry in _session.recent_decisions:
+			var line := Label.new()
+			line.autowrap_mode = TextServer.AUTOWRAP_WORD
+			line.text = tr("UI_ROAD_RUN_OVER_DECISION") % [
+				int((entry as Dictionary).get("day", 0)),
+				tr(String((entry as Dictionary).get("choice", ""))),
+			]
+			line.modulate = LOCKED_COLOR
+			_arrival_panel.add_child(line)
+
 	if _is_live_journey:
 		SaveManager.save_session(_session)
 		# Soy bitti: izi arşive yazılır, yeni kervan okur (Y-D03).

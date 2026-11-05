@@ -152,3 +152,22 @@ değiştirmiyor.
 **Karar bekleyen:** yedi öneri (Ö1-Ö7), hiçbiri sistem kesmiyor. En
 yüksek öncelik Ö1 (uyarı ölümü adıyla ansın) ve Ö2 (sofra kipi
 planlayıcıda görünsün).
+
+### Öneriler uygulandı ve yeniden ölçüldü (2026-11-05)
+
+Yedi önerinin hepsi oyunda (Ö6 hariç: Ö1'in güçlenen uyarısı aynı işi
+yapıyor). Aynı simülatör, aynı tohumlar:
+
+- **Hayatta Kalan artık oyunu bitiriyor:** 18.7 → 24.0 sefer, 3/3 ölümden
+  0/3'e, keyif 0 → 29.9.
+- **Merhametli üç kat yaşıyor:** 3.0 → 9.7 sefer.
+- **Tamamlayıcı (gelişen) ikinci bitiren oldu:** 11.0 → 16.7, keyif
+  38.8 → 53.7.
+- **Tüccar neredeyse değişmedi** (53.3 → 55.3) ve gündelik işi koşu başına
+  yalnız 1.3 gün kullandı - can simidi zordakine açık, güçlüye bedava
+  kazanç değil.
+
+**Açık kalan karar (PR07):** Hikâyeci profili hâlâ bitiremiyor (5.0 sefer)
+ve keyfi düştü - daha uzun yaşayınca daha çok aç gün görüyor. Çözümü
+kıtlık kipine dokunuyor (affedici rota seçimi ya da sınırlı ilk sefer),
+o yüzden yapılmadı.

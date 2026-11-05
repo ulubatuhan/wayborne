@@ -298,3 +298,94 @@ karşılığı görünür olur.
 - Profiller **yolu** oynuyor: taverna, lonca sohbeti, karakter ekranı ve
   şehrin kişileriyle bağ bu koşuda yok. Dalma ve ilişkililik ölçümleri bu
   yüzden olduğundan düşük.
+
+---
+
+## 8. Öneriler uygulandı — ve aynı araçla yeniden ölçüldü
+
+Kullanıcı *"devam et"* dedi; yedi önerinin hepsi uygulandı. Asıl soru şuydu:
+**işe yaradılar mı?** Aynı simülatör, aynı tohumlar, aynı yirmi dört sefer.
+
+### 8.1 Ne yapıldı
+
+| öneri | ne değişti | nerede |
+|---|---|---|
+| **Ö1** | Açlık eşiğini geçen yolda uyarı ölümü **adıyla** anıyor: *"...3. günden sonra açlık öldürmeye başlar."* | `caravan_planner.gd`, `UI_PLANNER_HUNGER_DEADLY` |
+| **Ö2** | Sofra kipi planlayıcıda, **günlük erzak bedeliyle**: `herkes · 3/gün · yalnızca ekip · 2/gün · yalnızca lider · 1/gün`. Aritmetik `apply_meal_distribution` ile aynı yerden (`daily_provisions_for_mode`) | `game_session.gd`, `caravan_planner.gd` |
+| **Ö3** | **Gündelik iş**: aç kervan şehirde bir gün çalışıp bir öğün kazanır. Zaman öder, para değil; kazanç bir günlük tüketimin biraz üstü | `work_a_day`, `should_offer_day_labour` |
+| **Ö4** | Defterde sayaçlar: görülen kart / toplam, gezilen yer / toplam, teslim edilen yük, tamamlanan sefer | `waybook_panel.gd`, `seen_event_ids` |
+| **Ö5** | Kervan bitince **son üç karar** gösteriliyor | `road_journey.gd`, `recent_decisions` |
+| **Ö6** | *(Ö1 ile birlikte karşılandı: uyarının şiddeti artık yolları birbirinden ayırıyor; haritada ayrı bir işaret eklenmedi - bkz. 8.4)* | — |
+| **Ö7** | Bölgesel itibar eşiği (10 · 25 · 50) geçilince deftere bir satır; **para değil tanınma**, her eşik bir kez | `change_reputation`, `STANDING_MILESTONES` |
+
+Hiçbiri yeni bir sistem kurmadı: hepsi zaten işleyen sayıları söylüyor ya da
+zaten var olan kararı görünür kılıyor. Gündelik iş tek yeni eylem ve kasıtlı
+olarak **para vermiyor**.
+
+### 8.2 Önce / sonra (aynı tohumlar, sabit kip)
+
+| profil | sefer önce | sefer sonra | ölen koşu önce | sonra | keyif önce | sonra |
+|---|---|---|---|---|---|---|
+| Tüccar | 24.0 | 24.0 | 0/3 | 0/3 | 53.3 | 55.3 |
+| Hikâyeci | 3.3 | **5.0** | 3/3 | 3/3 | 18.5 | 8.8 |
+| **Hayatta Kalan** | 18.7 | **24.0** | 3/3 | **0/3** | 0.0 | **29.9** |
+| Tamamlayıcı | 9.3 | **12.7** | 3/3 | 3/3 | 17.9 | 11.9 |
+| Merhametli | 3.0 | **9.7** | 3/3 | **2/3** | 12.5 | 13.0 |
+
+Gelişen kipte:
+
+| profil | sefer önce | sonra | keyif önce | sonra |
+|---|---|---|---|---|
+| **Tamamlayıcı** | 11.0 | **16.7** | 38.8 | **53.7** |
+| Hayatta Kalan | 18.7 | **24.0** | 4.1 | **23.3** |
+| Merhametli | 3.0 | 5.7 | 13.1 | 6.7 |
+| Hikâyeci | 3.3 | 3.3 | 18.5 | 21.1 |
+
+### 8.3 Okuması
+
+1. **Hayatta Kalan artık oyunu bitiriyor.** 18.7 → 24.0 sefer, üç koşunun
+   üçünde de ölüyordu, şimdi hiçbirinde ölmüyor; keyif 0 → 29.9. Bu profil
+   için gündelik iş tam da aradığı şeydi: zorluğu kaldırmıyor, **emek
+   karşılığı bir yol** veriyor (koşu başına 11 iş günü harcıyor).
+2. **Merhametli üç kat yaşıyor** (3.0 → 9.7). Herkesi beslemek hâlâ pahalı,
+   ama artık ölümcül değil: kervan tükendiğinde bir gün çalışıp devam
+   edebiliyor.
+3. **Tamamlayıcı (gelişen) oyunun ikinci bitireni oldu:** 16.7 sefer, üç
+   koşunun yalnız birinde ölüm, keyif 38.8 → 53.7. Ders alabilen oyuncu
+   artık gerçekten ödüllendiriliyor.
+4. **Hikâyeci hâlâ ölüyor** (5.0 sefer, 3/3). Düzeltmeler ona zaman
+   kazandırdı ama kurtarmadı - ve keyfi *düştü* (18.5 → 8.8), çünkü daha
+   uzun yaşayınca daha çok aç gün görüyor (36 → 53). **Dürüst sonuç: bu
+   profil için sorun çözülmedi**, yalnız ertelendi. Sebebi ablasyonda
+   görünüyordu: planlayıcıyı hiç okumayan oyuncuya yapılabilecek şey
+   sınırlı; ona yardım etmek için ya rota seçimi daha affedici olmalı ya
+   da ilk seferin uzunluğu sınırlanmalı. İkisi de kıtlık kipine dokunur,
+   o yüzden **kullanıcı kararı olmadan yapılmadı.**
+5. **Tüccar neredeyse değişmedi** (53.3 → 55.3) ve gündelik işi koşu başına
+   yalnız 1.3 gün kullandı. İstenen buydu: can simidi zordakine açık,
+   güçlüye bedava kazanç değil.
+
+### 8.4 Ekranda doğrulama (Y-K01) üç kusur daha yakaladı
+
+Üçü de yalnız ekran görüntüsüyle görülebilirdi:
+
+- **Gündelik iş düğmesi tam gerektiği anda gizliydi.** Engel "bugün aç
+  mısın" diye soruyordu; oysa 20 erzakla duran kervan 111 erzaklık yola
+  bakıyordu. İhtiyacı **sefer** belirler, bugünkü depo değil
+  (`should_offer_day_labour`).
+- **Düğme `_refresh`'in başında kuruluyordu, `_plan` daha yoktu** -
+  eksik erzak sayısı sıfır görünüyor ve düğme hiç açılmıyordu.
+- **Eklediklerim "yola çık" düğmesini kaydırma alanının altına itti.**
+  Sofra satırı tek satıra indirildi ve erzağın iki yolu (satın al ·
+  bir gün çalış) yan yana kondu - zaten aynı sorunun iki cevabı.
+
+### 8.5 Açık kalan
+
+- **Hikâyeci profili hâlâ oyunu bitiremiyor.** Çözümü kıtlık kipine
+  dokunuyor (daha affedici rota seçimi ya da sınırlı ilk sefer); kullanıcı
+  kararı bekliyor.
+- **Ö6 ayrı bir harita işareti olarak yapılmadı.** Ö1'in güçlenen uyarısı
+  aynı işi planlayıcıda yapıyor; haritaya ikinci bir gösterge eklemek
+  ölçümle desteklenmedi.
+- Kabul: `tests/test_persona_fixes.gd` (6 test, 23 iddia),
+  `tests/screenshot_persona_gate.gd` iki kare.

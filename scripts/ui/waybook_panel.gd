@@ -215,7 +215,25 @@ func _fill_overview(box: VBoxContainer) -> void:
 			box.add_child(_page_label(tr("UI_WAYBOOK_LEADER") % leader.character_name))
 		box.add_child(_page_label(tr("UI_WAYBOOK_DIED") % _session.ledger.count_of(CaravanLedger.KIND_DIED)))
 		box.add_child(_page_label(tr("UI_WAYBOOK_DEPARTED") % _session.ledger.count_of(CaravanLedger.KIND_DEPARTED)))
+		_fill_counters(box)
 		_fill_debts(box)
+
+## Sayılabilir olanlar (Ö4, profil çalışması 2026-11-05). Tamamlayıcı
+## profili oyunda **tamamlanacak bir şey göremiyordu**: kaç kart var, kaç
+## yer var, kaç kontrat taşındı - hiçbiri sayılı değildi. Veri zaten
+## vardı, yalnız gösterilmiyordu.
+func _fill_counters(box: VBoxContainer) -> void:
+	var heading := _page_label(tr("UI_WAYBOOK_COUNTS"))
+	heading.theme_type_variation = WaybookTheme.PAGE_HEADING
+	box.add_child(heading)
+	box.add_child(_page_label(tr("UI_WAYBOOK_COUNT_CARDS") % [
+		_session.get_seen_event_count(), EventCatalog.get_road_events().size()
+	]))
+	box.add_child(_page_label(tr("UI_WAYBOOK_COUNT_PLACES") % [
+		_session.visited_location_ids.size(), WorldMapData.get_locations().size()
+	]))
+	box.add_child(_page_label(tr("UI_WAYBOOK_COUNT_CONTRACTS") % _session.contracts_delivered))
+	box.add_child(_page_label(tr("UI_WAYBOOK_COUNT_JOURNEYS") % _session.journeys_completed))
 
 ## Borç artık bir ekran değil, defterinde bir satır (P12): **kime · ne
 ## kadar · ne zamana kadar.** 327 satırlık borç paneli ve yoldaki "Borç"

@@ -80,6 +80,12 @@ static func resolve_choice(
 	var resolution := Resolution.new()
 	# Y-H02: ilk anlamlı karar bir olay kartındaki seçimdir.
 	session.mark_first(GameSession.FIRST_DECISION)
+	# Ö4 (profil çalışması): Tamamlayıcı profilinin eksik bulduğu şey
+	# sayılabilirlikti - "kaç kart gördüm" sorusunun cevabı hiçbir yerde
+	# yoktu. Tek kayıt yeri burası: hem yol ekranı hem simülatör bu
+	# fonksiyondan geçiyor.
+	session.note_event_seen(event.event_id)
+	session.note_decision(event.event_id, choice.text_key)
 	if not choice.effects.is_empty():
 		resolution.choice_result = _apply(choice.effects, session, apply_effects)
 
