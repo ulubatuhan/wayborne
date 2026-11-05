@@ -2852,10 +2852,37 @@ func _use_roadside_stop(segment: Dictionary) -> void:
 				member.change_fatigue(-WELL_FATIGUE_RELIEF)
 			_session.change_stress(-GameSession.CAMP_STRESS_RELIEF)
 			_add_log(tr("UI_ROAD_SERAI_OPEN"))
+			_hear_serai_news()
 		RouteTerrain.SERAI_RUIN:
 			_add_log(tr("UI_ROAD_SERAI_RUIN"))
 		RouteTerrain.SERAI_BANDIT:
 			_add_log(tr("UI_ROAD_SERAI_BANDIT"))
+
+## Açık kervansarayda birinin anlattığı fiyat (P15). **Satın alınmıyor**:
+## kullanıcının N34 kararı "tavernadan doğrudan dedikodu satın alınmasın"
+## diyor ve kervansaray için de aynısı geçerli - biri anlatır, sen
+## dinlersin. Duyulan şey `hear_price_rumor`'un kendisi: eski gelir
+## (`PRICE_RUMOR_MIN_AGE`) ve dörtte bir ihtimalle yanlıştır.
+##
+## Hangi şehir: yolun gittiği şehir öncelikli, olmazsa defterde en eski
+## satır. Zar yok - kervansarayın kendisi zaten seyrek (yolların üçte biri)
+## ve hâli zar atılmış durumda.
+func _hear_serai_news() -> void:
+	var heard := _session.hear_price_rumor(_session.journey_destination_id)
+	if not heard:
+		var oldest := ""
+		var oldest_age := -1
+		for location_id in _session.price_book:
+			var age := _session.get_price_age(String(location_id))
+			if age > oldest_age:
+				oldest_age = age
+				oldest = String(location_id)
+		if oldest.is_empty():
+			return
+		heard = _session.hear_price_rumor(oldest)
+	if not heard:
+		return
+	_add_log(tr("UI_ROAD_SERAI_NEWS"))
 
 ## Sofradan sonra günün geri kalanı: olay çekimi, kayıt.
 func _after_meal() -> void:

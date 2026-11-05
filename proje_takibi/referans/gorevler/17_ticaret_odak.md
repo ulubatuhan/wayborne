@@ -190,3 +190,15 @@ Gerekçeler `docs/design_notes/ticaret_ve_kasvet.md`, madde madde öneriler
   - **Kabul:** `tests/test_debt.gd` yeniden yazıldı (borç büyümez, yüz ve teslimat), `test_city_commerce.gd`'nin
     dört kredi testi avansa çevrildi, `test_trade_focus.gd`'ye iki test, `tests/screenshot_debt.gd` iki kare
     (Lonca defteri + Waybook borç satırları).
+
+- [x] **P15 Haber eskir ve yanlış olabilir — büyük kısmı zaten vardı, bir kısmı kullanıcı kararıyla çelişiyordu**
+  - **Zaten vardı ve test altına alındı:** `price_book` tarihli (`get_price_age`, `PRICE_STALE_DAYS` 20),
+    söylenti taze gelmez (`PRICE_RUMOR_MIN_AGE` 2 - `MAX_AGE` 6) ve dörtte bir yanlıştır
+    (`PRICE_RUMOR_FALSE_CHANCE` 0.25); aynı şehri sorup sorup doğruya varmak kapalı; gördüğün fiyat
+    söylenti değil görgüdür.
+  - **Eklenen:** açık yol kenarı kervansarayında (Y-B14) biri bir pazardan söz ediyor
+    (`_hear_serai_news`) - hedef şehir öncelikli, yoksa defterdeki en eski satır tazeleniyor.
+  - **Yapılmayan ve nedeni:** önerinin *"tavernada ve kervansarayda haber **satın alınabilsin**"* kısmı
+    kullanıcının N34 kararıyla doğrudan çelişiyor: *"tavernadan doğrudan dedikodu satın alınmasın."*
+    Haber satılmıyor, **anlatılıyor** - kervansaray da aynı kurala tabi tutuldu. Kullanıcı N34'ü geri
+    almak isterse satın alma tek bir düğmeyle açılır.

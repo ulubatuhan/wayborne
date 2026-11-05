@@ -27,6 +27,8 @@ func run(t) -> void:
 	_test_buyback_cap_blocks_the_same_city_loop(t)
 	_test_overdue_debt_with_a_face_closes_that_market(t)
 	_test_advance_debt_wears_the_lenders_name(t)
+	_test_news_arrives_stale_and_can_be_wrong(t)
+	_test_prices_go_stale(t)
 
 # --- P7: fiyatın nedeni, sayısı değil ---
 
@@ -424,3 +426,46 @@ func _test_advance_debt_wears_the_lenders_name(t) -> void:
 	t.ok(debt.has_face(), "avans borcu bir yüze bağlanır (P11)")
 	t.eq(debt.creditor_city_id, place.location_id, "ve o yüzün şehrine")
 	t.ne(debt.creditor_name, "DEBT_CREDITOR_GUILD", "alacaklının adı var, etiketi değil")
+
+# --- P15: haber eskir ve yanlış olabilir ---
+
+func _test_news_arrives_stale_and_can_be_wrong(t) -> void:
+	# P15'in büyük kısmı zaten vardı: defter tarihli, söylenti eski gelir
+	# ve dörtte bir yanlıştır. Bu test onu kilitliyor - dördüncü sütun
+	# (*ticaret bilgi oyunudur*) bu üç sayıya dayanıyor.
+	var here := WorldMapData.get_locations()[0]
+	var there := ""
+	for other in WorldMapData.get_locations():
+		if other.location_id != here.location_id:
+			there = other.location_id
+			break
+	var session := _session_at(here.location_id, 200)
+	t.eq(session.get_price_age(there), -1, "duyulmamış şehrin yaşı yok")
+	t.ok(session.hear_price_rumor(there), "başka şehrin fiyatı duyulur")
+	var entry: Dictionary = session.price_book[there]
+	t.eq(String(entry.get("source", "")), GameSession.PRICE_SOURCE_RUMOR, "kaynağı söylenti")
+	t.ge(
+		float(session.get_price_age(there)),
+		float(GameSession.PRICE_RUMOR_MIN_AGE),
+		"söylenti taze gelmez: kulaktan kulağa geçene kadar eskir"
+	)
+	t.ok(GameSession.PRICE_RUMOR_FALSE_CHANCE > 0.0, "söylenti yanlış olabilir")
+	# Taze bilgi tekrar duyulmaz: aynı şehri sorup sorup doğruya varmak yok.
+	t.ne(session.get_price_rumor_block_reason(there), "", "taze söylenti tekrar duyulmaz")
+	# Ve kendi bulunduğun şehir söylenti değil, görgüdür.
+	t.ne(session.get_price_rumor_block_reason(here.location_id), "", "burayı kimse sana anlatmaz")
+	session.record_seen_prices(here.location_id)
+	t.eq(
+		String((session.price_book[here.location_id] as Dictionary).get("source", "")),
+		GameSession.PRICE_SOURCE_SEEN,
+		"gördüğün fiyat söylenti değil"
+	)
+	t.eq(session.get_price_age(here.location_id), 0, "gördüğün fiyat bugünün")
+
+func _test_prices_go_stale(t) -> void:
+	var here := WorldMapData.get_locations()[0]
+	var session := _session_at(here.location_id, 10)
+	session.record_seen_prices(here.location_id)
+	t.not_ok(session.is_price_stale(here.location_id), "bugün görülen fiyat taze")
+	session.total_days_elapsed += GameSession.PRICE_STALE_DAYS + 1
+	t.ok(session.is_price_stale(here.location_id), "yeterince beklenen her bilgi eskir")
