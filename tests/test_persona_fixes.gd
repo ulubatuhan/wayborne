@@ -26,6 +26,10 @@ func run(t) -> void:
 	_test_a_downed_fighter_never_gets_up_for_free(t)
 	_test_a_lost_fight_costs_cargo(t)
 	_test_a_longer_column_is_slower_and_louder(t)
+	_test_the_workshop_says_what_is_missing(t)
+	_test_an_open_request_is_visible_where_you_buy(t)
+	_test_the_advance_says_its_threshold(t)
+	_test_a_contract_that_will_not_fit_says_so(t)
 
 func _session_in_city(gold: int = 250) -> GameSession:
 	var session := GameSession.new(gold, 20, 1)
@@ -454,3 +458,78 @@ func _test_a_longer_column_is_slower_and_louder(t) -> void:
 		big.get_route_danger(route) > small.get_route_danger(route),
 		"ve aynı yol uzun kolon için daha tehlikeli"
 	)
+
+# --- G3, G4, G7, G8: bilgi kararın verildiği yerde ---
+
+func _test_the_workshop_says_what_is_missing(t) -> void:
+	# 108 kez "Yeterli malzeme yok" - doğru ama işe yaramaz bir cevap:
+	# neyin kaç tane eksik olduğunu söylemiyordu, oyuncu pazarda ne
+	# arayacağını bilmiyordu.
+	var session := _session_in_city()
+	var recipe: CraftingRecipe = null
+	for candidate in RecipeCatalog.get_recipes():
+		if not candidate.inputs.is_empty():
+			recipe = candidate
+			break
+	t.ok(recipe != null, "girdili bir tarif var")
+	t.ne(session.get_craft_block_reason_in_wagon(0, recipe), "", "malzeme yokken kapalı")
+	var missing := session.get_craft_missing_text(0, recipe)
+	t.ne(missing, "", "eksik malzeme sayıyla yazılır")
+	for item_id in recipe.inputs:
+		var item := ItemCatalog.get_item(String(item_id))
+		if item != null:
+			t.ok(missing.contains(item.item_name), "eksik malzemenin adı geçer")
+		# Ve o mal pazarda "bunun için gerekir" diye işaretlenir.
+		t.ok(session.recipe_needing(String(item_id)) != null, "pazar malı tarife bağlar")
+
+func _test_an_open_request_is_visible_where_you_buy(t) -> void:
+	# İstek kendi şehrinde yazıyordu, mal başka şehirde alınıyordu: bilgi
+	# vardı ama kararın verildiği yerde yoktu.
+	var session := _session_in_city()
+	session.people.ensure_city(session.current_location_id, 0)
+	var city := session.people.city_people(session.current_location_id)
+	var id := String((city[0] as Dictionary).get("id", ""))
+	var chain := session.people.offer_chain(id, 0)
+	t.ok(not chain.is_empty(), "bir iş teklif edildi")
+
+	var open := session.people.open_requests()
+	t.ok(not open.is_empty(), "açık istekler tek yerden okunur")
+	var wanted := session.people.who_wants(String(chain["item"]))
+	t.ok(not wanted.is_empty(), "o malı bekleyen biri bulunur")
+	t.eq(String(wanted["id"]), id, "bekleyen doğru kişi")
+	t.eq(int(wanted["qty"]), int(chain["qty"]), "kaç tane beklediği de")
+	t.ok(session.people.who_wants("yok_boyle_bir_mal").is_empty(), "istenmeyen mal boş döner")
+
+func _test_the_advance_says_its_threshold(t) -> void:
+	# 79 kez reddedildi ve hiçbirinde ne yapılması gerektiği yazmıyordu.
+	var session := _session_in_city()
+	session.reputation = GameSession.MIN_REPUTATION
+	if session.get_advance_block_reason() == "UI_GUILD_LOAN_NO_TRUST":
+		var detail := session.get_advance_block_detail()
+		t.ne(detail, "", "güven eşiği sayıyla yazılır")
+		t.ok(detail.contains(str(GameSession.LOAN_MIN_REPUTATION)), "gereken itibar geçer")
+
+	var place := WorldMapData.get_locations()[0]
+	session.start_journey(place.location_id, 4, 0.1, CaravanPlan.new(place, 4, 6, 1))
+	t.eq(session.get_advance_block_reason(), "UI_GUILD_LOAN_ON_ROAD", "yolda avans yok")
+	t.eq(session.get_advance_block_detail(), "", "yolda söylenecek eşik yok")
+
+func _test_a_contract_that_will_not_fit_says_so(t) -> void:
+	# Kullanıcının isteği: kutucuğu kapatma, alınmaya çalışınca uyarı ver.
+	var session := _session_in_city()
+	var place := WorldMapData.get_locations()[0]
+	var plan := CaravanPlan.new(place, 4, 6, 1)
+	plan.cargo_room = 0.0
+	var offer := MerchantOffer.new()
+	offer.merchant_id = "deneme"
+	offer.destination_location_id = place.location_id
+	offer.cargo_item_id = "test_cloth"
+	offer.cargo_weight = 10
+	offer.wagon_count = 1
+	t.ne(plan.get_offer_block_reason(offer), "", "sığmayan ilan sebebini söyler")
+	t.not_ok(plan.can_add_offer(offer), "ve gerçekten alınamaz")
+
+	plan.cargo_room = -1.0
+	t.eq(plan.get_offer_block_reason(offer), "", "yer varken sebep yok")
+	t.ok(plan.toggle_merchant(offer), "ve alınır")
+	t.eq(plan.get_offer_block_reason(offer), "", "seçili ilan engellenmiş sayılmaz")

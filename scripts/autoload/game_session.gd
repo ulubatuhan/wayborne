@@ -207,6 +207,23 @@ func get_advance_block_reason() -> String:
 		return "UI_GUILD_LOAN_LINE_FULL"
 	return ""
 
+## **G7 (kullanıcı onayı, 2026-11-06).** Avans profil günlüklerinde 79 kez
+## reddedildi ("Lonca sana güvenmiyor", "Kredi hattı dolu") ve hiçbirinde
+## oyuncunun *ne yapması gerektiği* yazmıyordu - kapı sebebini söylüyordu
+## ama eşiğini söylemiyordu. Sayılı hâli; eşik yoksa "".
+func get_advance_block_detail() -> String:
+	match get_advance_block_reason():
+		"UI_GUILD_LOAN_NO_TRUST":
+			return TranslationServer.translate("UI_GUILD_LOAN_NO_TRUST_DETAIL") % [
+				LOAN_MIN_REPUTATION, credit_standing()
+			]
+		"UI_GUILD_LOAN_LINE_FULL":
+			return TranslationServer.translate("UI_GUILD_LOAN_LINE_FULL_DETAIL") % [
+				get_available_credit(), ADVANCE_MIN_VALUE
+			]
+		_:
+			return ""
+
 ## Bu kadar malın avansı alınabilir mi: hat, yer ve açık sebep.
 func can_take_advance(item: Item, quantity: int) -> bool:
 	if item == null or quantity <= 0:
@@ -5498,6 +5515,36 @@ func get_craft_block_reason_in_wagon(wagon_index: int, recipe: CraftingRecipe) -
 
 func can_craft_in_wagon(wagon_index: int, recipe: CraftingRecipe) -> bool:
 	return get_craft_block_reason_in_wagon(wagon_index, recipe).is_empty()
+
+## **G3 (kullanıcı onayı, 2026-11-06).** Atölye profil günlüklerinin en çok
+## çarpılan kapısıydı: 108 kez "Yeterli malzeme yok", yirmi seferde beş
+## üretim. Cevap doğruydu ama işe yaramıyordu - *neyin* kaç tane eksik
+## olduğunu söylemiyordu, o yüzden oyuncu pazarda ne arayacağını bilmiyordu.
+## "2 bez, 1 ip" gibi bir liste döner; eksik yoksa "".
+func get_craft_missing_text(wagon_index: int, recipe: CraftingRecipe) -> String:
+	if recipe == null or wagon_index < 0 or wagon_index >= wagon_inventories.size():
+		return ""
+	var wagon_inventory := wagon_inventories[wagon_index]
+	var parts: Array[String] = []
+	for item_id in recipe.inputs:
+		var missing := int(recipe.inputs[item_id]) - wagon_inventory.get_quantity(String(item_id))
+		if missing <= 0:
+			continue
+		var item := ItemCatalog.get_item(String(item_id))
+		parts.append("%d %s" % [missing, item.item_name if item != null else String(item_id)])
+	if parts.is_empty():
+		return ""
+	return TranslationServer.translate("UI_CRAFT_MISSING_LIST") % ", ".join(parts)
+
+## Bir mal, bilinen bir tarifin girdisi mi - ve hangi tarifin.
+## Pazar bunu malın satırında söylüyor: bilgi, kararın verildiği yerde.
+func recipe_needing(item_id: String) -> CraftingRecipe:
+	if item_id.is_empty():
+		return null
+	for recipe in RecipeCatalog.get_recipes():
+		if recipe.inputs.has(item_id):
+			return recipe
+	return null
 
 ## Malzemeleri o vagondan tüketir ve tarifin sonucunu uygular - onarım
 ## kervanın genel hasar sayacını düşürür (vagon başına hasar takibi yok,

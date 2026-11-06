@@ -214,3 +214,34 @@ açık olup olmaması. Sebebi aritmetik: **ticaret dışında günlük tüketimi
 aşan tek bir gelir yok** (gündelik iş net +0,4 gün, arama ≈0, dövüş
 küçük). Öneriler G1-G8 raporda; G1 (kervanı ücretle yük taşımaya vermek)
 ve G2 (isimsiz ekibin açlığı deftere geçsin) kullanıcı kararı bekliyor.
+
+## Önerilerin uygulanması (2026-11-06)
+
+Rapor `docs/design_notes/oyuncu_gunlukleri.md` §9; kayıt
+`18_oyuncu_profilleri.md` PR13-PR18. Süit 32 129 geçti; ekran
+`tests/screenshot_g_fixes.gd` (5 kare).
+
+**G1 reddedildi** (kullanıcı): kervanı ücretle yük taşımaya vermek ticaret
+odağını artırıyor, tüccar konvoyundan farkı yok, hissi zayıflatıyor.
+
+**G2 dağılma** - kullanıcı öneriyi bir defter satırından bir mekaniğe
+çevirdi. `_sync_crew_names()` boşalan eli bedavaya dolduruyordu; artık
+`crew_missing` var. Üçüncü aç geceden itibaren bir el ayrılır, yedinciden
+itibaren ölür; tüketim ellerden, taşıma gücü `get_driveable_wagon_count()`
+üzerinden hesaplanıyor. Boşta vagonun yükü taşınır, sığmayan yolda kalır.
+Eksik el kervansarayda parayla kapanır (`hire_crew_hand`), fiyat
+`crew_lost_to_hunger` ile yükselir.
+**Ölçüm: Bedeli Soran 6,5 → 12,0 sefer, ölüm 3,5 → 1,0, biten koşu 2/2 →
+1/2.** Dört ölümsüz profil hâlâ ölmüyor ama teslimatları yarıya iniyor:
+aç bırakmak öldürmüyor, küçültüyor. Aradaki bant açıldı.
+
+**G5** yere düşen mutlaka yaralanır + kaybedilen dövüşte yük yağmalanır
+(erzak hariç). **G6** kolon uzadıkça yavaşlar ve göze batar; planlayıcı
+payı adıyla yazar. **G3/G4/G7/G8** görünürlük: eksik malzeme sayıyla,
+pazarda tarif ve bekleyen kişi notu, avans eşiği, pano ilanı tıklanınca
+sebebini söylüyor.
+
+**Açık kalan (PR18):** Defter Tutan profili hâlâ iki koşuda da bitiyor.
+Sorunu açlık değil gelirsizlik; G1 tam onu çözecekti ve reddedildi.
+Can simitleri işe yarıyor ama kullanılmaları gerekiyor (Bedeli Soran 29
+gün çalıştı + 26 gün aradı; Defter Tutan 7 ve 8). Tempo kararı kullanıcıda.

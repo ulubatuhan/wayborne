@@ -89,11 +89,20 @@ func get_contract_mouths() -> int:
 	return total
 
 func can_add_offer(offer: MerchantOffer) -> bool:
-	if is_selected(offer):
-		return false
+	return get_offer_block_reason(offer).is_empty()
+
+## **G8 (kullanıcı kararı, 2026-11-06).** İlan alınamadığında kutucuk
+## sessizce ölüydü - profil günlüklerinin tek kalan sessiz kapısı (25 kez).
+## Kullanıcının istediği: kapatma, alınmaya çalışıldığında sebebini söyle.
+## Sebep burada hesaplanıyor çünkü sınır da burada.
+func get_offer_block_reason(offer: MerchantOffer) -> String:
+	if offer == null or is_selected(offer):
+		return ""
 	if cargo_room >= 0.0 and get_contract_cargo_load() + offer.cargo_load() > cargo_room + 0.001:
-		return false
-	return get_used_wagon_count() + offer.wagon_count <= get_available_wagon_slots()
+		return "UI_CONTRACT_NO_CARGO_ROOM"
+	if get_used_wagon_count() + offer.wagon_count > get_available_wagon_slots():
+		return "UI_CONTRACT_NO_WAGON_SLOT"
+	return ""
 
 ## Seçiliyse çıkarır, değilse (yer varsa) ekler. İşlem uygulandıysa true döner.
 func toggle_merchant(offer: MerchantOffer) -> bool:

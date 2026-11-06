@@ -236,7 +236,13 @@ func _refresh_recipes() -> void:
 			craft_button.text = tr("UI_CRAFT_BUTTON") % recipe.recipe_name
 			craft_button.disabled = false
 		else:
-			craft_button.text = tr(reason)
+			# G3: "Yeterli malzeme yok" neyin eksik olduğunu söylemiyordu.
+			# Yalnızca sebep gerçekten malzemeyse ekleniyor: "onarılacak
+			# hasar yok" cevabının yanına malzeme listesi yazmak yanıltıcı.
+			var missing := ""
+			if reason == "UI_CRAFT_MISSING_MATERIAL":
+				missing = _session.get_craft_missing_text(_wagon_index, recipe)
+			craft_button.text = "%s — %s" % [tr(reason), missing] if not missing.is_empty() else tr(reason)
 			craft_button.disabled = true
 
 func _on_craft_pressed(recipe: CraftingRecipe) -> void:

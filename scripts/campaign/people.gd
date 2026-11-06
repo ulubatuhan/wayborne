@@ -74,6 +74,38 @@ func city_people(location_id: String) -> Array[Dictionary]:
 			out.append(persons[id])
 	return out
 
+## **G4 (kullanıcı onayı, 2026-11-06).** Bir kişinin ne istediği yalnızca
+## *kendi şehrinde* yazıyordu; malı ise başka şehirde alıyorsun. Bilgi
+## vardı ama kararın verildiği yerde yoktu - profil günlüklerinde 180'den
+## çok kez "istediği elimizde yok" cevabı alındı. Açık istekler artık tek
+## bir yerden okunuyor: [{id, name, city, item_id, qty, due, gold}].
+func open_requests() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for id in persons:
+		var p: Dictionary = persons[id]
+		if not bool(p.get("alive", false)):
+			continue
+		var chain: Dictionary = p.get("chain", {})
+		if chain.is_empty():
+			continue
+		out.append({
+			"id": String(id),
+			"name": String(p.get("name", "")),
+			"city": String(p.get("home", "")),
+			"item_id": String(chain.get("item", "")),
+			"qty": int(chain.get("qty", 0)),
+			"due": int(chain.get("due", 0)),
+			"gold": int(chain.get("gold", 0)),
+		})
+	return out
+
+## Bu malı bekleyen biri var mı (pazarda o malın satırında söylenir).
+func who_wants(item_id: String) -> Dictionary:
+	for request in open_requests():
+		if String(request["item_id"]) == item_id:
+			return request
+	return {}
+
 func person(id: String) -> Dictionary:
 	return persons.get(id, {})
 

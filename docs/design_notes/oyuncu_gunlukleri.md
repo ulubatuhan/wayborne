@@ -326,3 +326,130 @@ Kırk gün boyunca her gün bir şey denendi. Oyun kırk gün boyunca aynı ceva
   demek değil, "yirmi seferde ölmedi" demektir.
 - **İki koşu azdır.** Tohumlar sabit (770000, 771013); eğilimi gösterir, dağılımı değil.
 - Ekran doğrulaması dört karede yapıldı; G1–G8 önerilerinin hiçbiri henüz uygulanmadı.
+
+---
+
+## 9. Kullanıcının kararları ve uygulanan hâli (2026-11-06)
+
+Sekiz önerinin yedisi kabul edildi, biri reddedildi. Hepsi oyunda,
+testli (`tests/test_persona_fixes.gd`, süit 32 129 geçti) ve oyuncunun
+gördüğü her biri gerçek ekran görüntüsüyle doğrulandı
+(`tests/screenshot_g_fixes.gd`).
+
+### G1 — reddedildi
+> *"Oyunun ticaret odağını arttırıyor, istemiyorum ve tüccar konvoyu almaktan
+> tek farkı erzak ücreti vermiyorsun gibi herhalde. Hoşuma gitmedi, hissi
+> zayıflatıyor."*
+
+Gerekçe yerinde: önerilen "kervanı ücretle yük taşımaya vermek" mekanik
+olarak var olan tüccar konvoyunun bir kopyasıydı ve kıtlık hissini
+yumuşatıyordu. **Yapılmadı.** Yerine ortadaki bandı G2'nin dağılma kuralı
+açtı (aşağıda ölçüldü).
+
+### G2 — dağılma *(geliştirildi ve uygulandı)*
+> *"Bir ekip 60 gün aç kalıp bir arada kalamamalı. Dağılmalı. Deftere de
+> yazılmalı tabii."*
+
+Öneri bir defter satırıydı; kullanıcı onu bir **mekaniğe** çevirdi. Kodda
+bulunan delik şuydu: tayfa üçüncü aç geceden itibaren zaten ölüyordu, ama
+`_sync_crew_names()` boşalan eli **anında ve bedavaya** dolduruyordu, çünkü
+hedefi vagon sayısıydı. Tüketim ve kapasite de vagondan hesaplandığı için
+aç bırakmanın tek bedeli bir defter satırıydı.
+
+Yeni kural — *el sayısı gerçektir*:
+
+| | eski | yeni |
+|---|---|---|
+| aç gece 3+ | biri ölür, yeri bedava dolar | bir el **ayrılır**, yeri **boş kalır** |
+| aç gece 7+ | aynı | artık ölür (yürüyecek hâli kalmamıştır) |
+| tüketim | vagon sayısından | **el sayısından** (kervan küçülerek yaşar) |
+| taşıma gücü | vagon sayısından | **sürülebilen** vagondan |
+| yeri doldurmak | kendiliğinden | şehirde parayla; fiyat kaç eli aç bıraktığına bağlı |
+
+Sürülemeyen vagonun yükü sürülebilenlere taşınır, sığmayan yolda kalır
+("domino" dersi, Y-C23). Lider her zaman bir vagonu kendi sürebilir -
+yoksa son elini kaybeden kervan kilitlenirdi.
+
+**Ölçüm (aynı tohumlar, aynı altı profil):**
+
+| profil | sefer | ölen koşu | ölüm | ayrılan el | tutulan el | teslimat |
+|---|---|---|---|---|---|---|
+| Kâğıt Üstünde Tüccar | 20,0 (=) | 0/2 (=) | 0,0 (=) | 7,5 | 2,5 | 21,0 → **10,0** |
+| Defter Tutan | 5,0 (=) | 2/2 (=) | 2,5 (=) | 3,0 | 0,0 | 1,0 (=) |
+| Ucunda Yürüyen | 20,0 (=) | 0/2 (=) | 0,0 (=) | 10,0 | 6,5 | 15,0 → **11,0** |
+| Listeyi Kapatan | 20,0 (=) | 0/2 (=) | 0,0 (=) | 11,0 | 6,5 | 19,5 → **15,5** |
+| **Bedeli Soran** | 6,5 → **12,0** | 2/2 → **1/2** | 3,5 → **1,0** | 8,0 | 2,5 | 4,0 → 5,5 |
+| Vagonu Kuran | 20,0 (=) | 0/2 (=) | 0,0 (=) | 7,5 | 2,5 | 19,0 → **10,0** |
+
+İki şey birden oldu:
+
+1. **Aradaki bant açıldı.** Herkesi besleyen Bedeli Soran artık 6,5 değil
+   **12 sefer** yaşıyor, ölümü 3,5'ten **1,0'e** düşüyor ve iki koşunun
+   yalnız birinde bitiyor. Kullanıcının istediği hâl bu:
+   *çaba göstererek, az sayıda ölümle devam edebilmek.*
+2. **Bedava hayatta kalma bitti.** Dört "ölümsüz" profil hâlâ ölmüyor, ama
+   artık **yarı yarıya az taşıyor**: teslimatları 21→10, 19→10, 19,5→15,5.
+   Ekibi aç bırakmak kervanı öldürmüyor, **küçültüyor** - bugünün erzağını
+   yarının yüküyle ödüyorsun.
+
+En çok çarpılan kapı da değişti: artık **"eksik el tutmak — Kese yetmiyor"**
+(152 kez). Bedel ısırıyor.
+
+**Dürüst kalan:** Defter Tutan hâlâ iki koşuda da bitiyor (5 sefer). Onun
+sorunu açlık değil gelirsizlik; G1 tam olarak onu çözecekti ve reddedildi.
+Aradaki fark can alıcı: Bedeli Soran 29 gün şehirde çalıştı ve 26 gün yolda
+yiyecek aradı, Defter Tutan 7 ve 8. **Can simitleri işe yarıyor ama
+kullanılmaları gerekiyor**; tavernada oturup kart okuyarak geçinen bir
+oyuncu hâlâ ölüyor. Bunun kabul edilebilir olup olmadığı bir tasarım
+kararı - sistem değil, tempo meselesi.
+
+### G5 — yenilginin kalıcı bedeli *(uygulandı)*
+Yere düşen artık bedelsiz kalkmıyor: zar **hangi** yaranın geleceğine
+atılıyor, gelip gelmeyeceğine değil (eskiden %50). Ölümün Kıyısı kuralı
+duruyor - ölüm hâlâ kurada değil. Kaybedilen dövüşte haydut yükten de
+alıyor (`plunder_cargo`, payın dörtte biri, bir mal rastgele bağışlanır);
+erzağa dokunmuyor, çünkü açlık ayrı bir sistem ve yenilgi onu
+tetiklememeli.
+
+### G6 — kolonun boyu *(uygulandı)*
+İlk vagon bedava. Sonraki her vagon hızı %5 düşürüyor (taban ×0,70) ve
+tehlikeyi %4,5 artırıyor (tavan +%20). Planlayıcının tehlike dökümü payı
+**adıyla** yazıyor: *"4 vagonluk kolon göze batıyor +7"* - gizli bir ceza
+hatadan ayırt edilemez. Vagon hâlâ kapasite ve parti yeri açıyor: sistem
+kesilmedi, bedeli eklendi. G2 ile birlikte büyük kervan açlığa da kırılgan
+hâle geliyor ("büyüme kendi krizini doğursun", Y-C24).
+
+### G3 — atölyenin girdileri *(uygulandı)*
+Üretim düğmesi artık *"Yeterli malzeme yok — eksik: 2 Top Kumaş"* diyor; ve
+pazarda o mal *"Bandaj Sar için"* diye işaretleniyor. Bilgi artık alımın
+yapıldığı yerde. (Onarım tarifinde sebep hasar yokluğuysa malzeme listesi
+eklenmiyor - yanıltıcı olurdu.)
+
+### G4 — bekleyen kişiler *(uygulandı)*
+`People.open_requests()` / `who_wants()` ile açık istekler tek yerden
+okunuyor; pazarda o malın satırında *"Mathis ×4 bekliyor (Kirsavel, 12
+gün)"* yazıyor. Teslimat düğmesi de kaç tane eksik olduğunu söylüyor (K4).
+
+### G7 — avansın eşiği *(uygulandı)*
+`get_advance_block_detail()`: *"Lonca sana güvenmiyor: 12 itibar gerekiyor,
+sende 7"*, *"Kredi hattında 30 GG kaldı, en az 60 GG gerekiyor"*.
+
+### G8 — pano ilanı *(kullanıcının istediği gibi)*
+> *"Alınmaya çalıştığında bir uyarı verebilir."*
+
+Kutucuk artık **kapatılmıyor**; tıklanıyor ve olmuyorsa sebebini yazıyor
+(*"Bu yük vagonlara sığmıyor: önce yer aç."* / *"Bu ilan için boş vagon
+yok."*). Ölü bir kutucuk oyuncuya neyin eksik olduğunu öğretmiyordu.
+
+### Ekranda doğrulananlar
+`tests/screenshot_g_fixes.gd`, beş kare: kervansarayda *"Eksik el: 3. Boşta
+duran vagon yük alamaz…"* + *"El tut (65 GG)"*; yol durumunda *"3 el eksik ·
+2 vagon sürülemiyor"*; pazarda *"Bandaj Sar için"*; planlayıcıda *"4 vagonluk
+kolon göze batıyor +7"* ve *"Toplam vagon: 4 · 3 el eksik · 2 vagon
+sürülemiyor"*; atölyede *"eksik: 2 Top Kumaş"*.
+
+Ekran görüntüsü üç küçük kusur daha yakaladı ve üçü de düzeltildi:
+planlayıcı kolonun payını sayısız basıyordu (iki parçalı anahtar tek
+argümanla biçimlendiriliyordu); pazarın not satırı dar olduğu için eyleme
+dönüşen notlar kesiliyordu (artık başa alınıyor, tam metin ipucunda); ve
+onarım tarifinde "hasar yok" cevabının yanına malzeme listesi ekleniyordu.

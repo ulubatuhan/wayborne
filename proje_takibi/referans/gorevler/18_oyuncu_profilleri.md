@@ -104,3 +104,32 @@ Kilitler: `tests/test_persona_fixes.gd` (12 test, 32 055 geçti)
     · G6 vagon büyümesinin görünür bedeli olsun (M) · G7 avans eşiğini yazsın (S) · G8 pano ilanının
     neden alınamadığını yazsın (S).
   - Hiçbiri sistem kesmiyor; G1 ticareti küçültmüyor, yoksulluğa taban koyuyor.
+
+## Önerilerin kararı ve uygulanması (kullanıcı, 2026-11-06)
+
+Ayrıntı: `docs/design_notes/oyuncu_gunlukleri.md` §9. Süit 32 129 geçti.
+
+- [x] **PR13 G2 dağılma (geliştirildi ve uygulandı)**
+  - Kullanıcı: *"Bir ekip 60 gün aç kalıp bir arada kalamamalı. Dağılmalı. Deftere de yazılmalı."*
+  - El sayısı gerçek oldu (`crew_missing`): üçüncü aç geceden itibaren bir el ayrılır
+    (`LEDGER_CAUSE_DESERTED`), yedinciden itibaren ölür; yeri boş kalır. Tüketim ellerden,
+    taşıma gücü **sürülebilen** vagondan (`get_driveable_wagon_count`). Boşta vagonun yükü taşınır,
+    sığmayan yolda kalır. Eksik el kervansarayda parayla kapanır, fiyat `crew_lost_to_hunger` ile artar.
+  - **Ölçüm:** Bedeli Soran 6,5 → **12,0 sefer**, ölüm 3,5 → **1,0**, biten koşu 2/2 → **1/2**.
+    Dört "ölümsüz" profil hâlâ ölmüyor ama teslimatları yarıya iniyor (21→10, 19→10, 19,5→15,5):
+    aç bırakmak öldürmüyor, **küçültüyor**.
+- [x] **PR14 G5 yenilginin kalıcı bedeli** - yere düşen mutlaka yaralanır (zar hangi yara, gelip
+  gelmeyeceği değil); kaybedilen dövüşte yükün dörtte biri yağmalanır, erzağa dokunulmaz.
+- [x] **PR15 G6 kolonun boyu** - ilk vagon bedava, sonrası hızı düşürüp tehlikeyi artırıyor
+  (tabanı ve tavanı var); planlayıcı payı adıyla yazıyor.
+- [x] **PR16 G3/G4/G7/G8 görünürlük** - atölye eksik malzemeyi sayıyla söylüyor ve pazar malı tarife
+  bağlıyor; açık istekler `People.open_requests()` ile pazara taşındı; avans eşiğini yazıyor;
+  pano kutucuğu kapatılmıyor, tıklanınca sebebini söylüyor.
+- [x] **PR17 Ekran doğrulaması** - `tests/screenshot_g_fixes.gd` (5 kare). Üç kusur daha yakalandı ve
+  düzeltildi: kolon payı sayısız basılıyordu, pazarın not satırında eyleme dönüşen notlar kesiliyordu,
+  onarım tarifinde "hasar yok" cevabına malzeme listesi ekleniyordu.
+- [ ] **PR18 G1 reddedildi (kullanıcı)** - kervanı ücretle yük taşımaya vermek ticaret odağını
+  artırıyor ve tüccar konvoyundan ayırt edilemiyordu. Ortadaki bandı G2 açtı. **Açık kalan:** Defter
+  Tutan profili hâlâ iki koşuda da bitiyor; sorunu açlık değil gelirsizlik. Can simitleri (gündelik iş,
+  yolda arama) işe yarıyor ama kullanılmaları gerekiyor - tavernada oturup kart okuyarak geçinen oyuncu
+  hâlâ ölüyor. Tempo kararı kullanıcıda.

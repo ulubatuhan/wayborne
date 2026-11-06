@@ -388,6 +388,7 @@ func _refresh_shop_rows() -> void:
 		(row.buy as Label).text = "—" if not buy_reason.is_empty() else "%d" % _get_buy_price(item)
 		(row.sell as Label).text = "—" if not sell_reason.is_empty() else "%d" % _get_sell_price(item)
 		var notes: Array[String] = []
+		var actionable: Array[String] = []
 		var note_colour := ArtPalette.GRIM_PARCHMENT_DIM
 		if buy_reason.is_empty():
 			if remaining == 0:
@@ -397,6 +398,22 @@ func _refresh_shop_rows() -> void:
 				notes.append(tr("UI_MARKET_STOCK_LOW") % remaining)
 			elif remaining > 0:
 				notes.append(tr("UI_MARKET_STOCK_PLENTY"))
+		# G3: bu mal bilinen bir tarifin girdisiyse burada söylenir -
+		# atölye ekranı neyin gerektiğini biliyordu ama bilgi, alımın
+		# yapıldığı yerde yoktu (108 kez "Yeterli malzeme yok").
+		var recipe := _session.recipe_needing(item.item_id)
+		if recipe != null:
+			actionable.append(tr("UI_MARKET_RECIPE_INPUT") % recipe.recipe_name)
+		# G4: bu malı bekleyen biri varsa adıyla ve kaç gün kaldığıyla.
+		var wanted: Dictionary = _session.people.who_wants(item.item_id)
+		if not wanted.is_empty():
+			var place := WorldMapData.get_location_by_id(String(wanted["city"]))
+			actionable.append(tr("UI_MARKET_SOMEONE_WANTS") % [
+				String(wanted["name"]),
+				int(wanted["qty"]),
+				place.location_name if place != null else String(wanted["city"]),
+				maxi(0, int(wanted["due"]) - _session.total_days_elapsed),
+			])
 		# Görev Y-C11: fiyatın yedi katmanından sapanlar kısa adlarla; üstüne
 		# gelince her biri bir cümleyle açıklanır.
 		var layer_text := PriceLayerText.marks(item, _current_location, _session.market, _session.total_days_elapsed, _session.scarcity_here())
@@ -409,8 +426,16 @@ func _refresh_shop_rows() -> void:
 		var fresh := _session.get_freshness(item.item_id)
 		if fresh < 0.995 and _session.get_total_quantity(item.item_id) > 0:
 			notes.append(tr("UI_MARKET_STALE") % int(round(fresh * 100.0)))
+		# Not satırı dar ve sondaki not kesiliyor; kesilmemesi gereken tam
+		# da eyleme dönüşen ikisi (G3/G4), o yüzden onlar başa alınıyor.
+		# Tam metin yine de ipucunda duruyor (ekran görüntüsüyle bulundu,
+		# 2026-11-06). Tip korunsun diye `+` değil döngüyle birleştiriliyor
+		# (bkz. CLAUDE.md'nin `:=` / Variant tuzağı).
+		for text in notes:
+			actionable.append(text)
 		var note: Label = row.note
-		note.text = " · ".join(notes)
+		note.tooltip_text = " · ".join(actionable)
+		note.text = " · ".join(actionable)
 		note.add_theme_color_override("font_color", note_colour)
 		var tips: Array[String] = [tr("UI_MARKET_BULK_HINT") % [MarketPricing.BULK_MIN_QUANTITY, int(round(MarketPricing.BULK_DISCOUNT * 100.0))]]
 		if not String(layer_text[1]).is_empty():

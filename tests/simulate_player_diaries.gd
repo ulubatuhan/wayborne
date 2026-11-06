@@ -221,7 +221,7 @@ func _run(persona: Dictionary, seed_value: int) -> Dictionary:
 		"forage_days": 0, "labour_days": 0, "tavern_nights": 0,
 		"crafted": 0, "treated": 0, "recruited": 0, "chains": 0,
 		"run_over_at": -1, "seed": seed_value, "fights": 0, "fights_won": 0,
-		"crew_hungry_days": 0, "planned_days": 0, "actual_days": 0,
+		"crew_hungry_days": 0, "planned_days": 0, "actual_days": 0, "deserted": 0, "hired": 0,
 	}
 
 	for leg in LEGS:
@@ -287,6 +287,17 @@ func _spend_a_day_in_town(session: GameSession, state: Dictionary) -> void:
 	session.people.greet_city(session.current_location_id, session.total_days_elapsed)
 	session.record_seen_prices(session.current_location_id)
 
+	# Dağılan ekip toparlanır (G2): her profil bunu dener, çünkü boşta
+	# vagon taşıma gücü demek.
+	while session.crew_missing > 0:
+		var hire_reason := session.get_crew_hire_block_reason()
+		if not hire_reason.is_empty():
+			_blocked(state, session, "eksik el tutmak", hire_reason)
+			break
+		if not session.hire_crew_hand():
+			break
+		state["hired"] = int(state["hired"]) + 1
+		_note(state, session, "keyif", "eksik el tutuldu; vagon yine sürülüyor")
 	if bool(persona["tavern"]):
 		_try_tavern(session, state)
 	if bool(persona["chains"]):
@@ -701,6 +712,13 @@ func _eat(session: GameSession, state: Dictionary) -> void:
 	if not dead.is_empty():
 		state["deaths"] = int(state["deaths"]) + dead.size()
 		_note(state, session, "anladım", "%s açlıktan öldü" % String(dead[0]))
+	# Dağılma (G2): aç ekip bir arada kalmıyor.
+	for name_text in (result.get("crew_deserted_names", []) as Array):
+		state["deserted"] = int(state["deserted"]) + 1
+		_note(state, session, "anladım",
+			"%s gece yola düştü; bir el eksildi" % String(name_text))
+	if not (result.get("cargo_left_behind", []) as Array).is_empty():
+		_note(state, session, "anladım", "sürülemeyen vagonun yükü yolda kaldı")
 
 func _resolve(
 	session: GameSession, state: Dictionary, engine: EventEngine,
@@ -945,6 +963,7 @@ func _measure(session: GameSession, state: Dictionary) -> Dictionary:
 		"zincir": float(state["chains"]),
 		"dovus": float(state["fights"]), "kazanc": float(state["fights_won"]),
 		"ekip_ac": float(state["crew_hungry_days"]),
+		"ayrilan": float(state["deserted"]), "tutulan": float(state["hired"]),
 		"uzama": float(state["actual_days"]) / float(maxi(1, int(state["planned_days"]))),
 		"kese": float(session.wallet.balance), "itibar": float(session.reputation),
 		"diary": state["diary"], "blocked": state["blocked"], "seed": state["seed"],
@@ -999,12 +1018,12 @@ func _write_diary(persona: Dictionary, runs: Array[Dictionary]) -> void:
 func _report(rows: Array[Dictionary], blocked_all: Dictionary) -> void:
 	print("")
 	print("── Profil tablosu (ortalama, %d koşu)" % RUNS_PER_PERSONA)
-	print("   profil                  sefer  ölen  ölüm  açgün  ekipaç  arama  işgün  dövüş  kazan  uzama  teslim  şehir  kart  tavrn  üretm  hekim  katıl")
+	print("   profil                  sefer  ölen  ölüm  açgün  ekipaç  arama  işgün  dövüş  kazan  ayrıl  tuttu  uzama  teslim  şehir  kart  tavrn  üretm  hekim  katıl")
 	for row in rows:
-		print("   %-22s  %5.1f  %4s  %4.1f  %5.1f  %6.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.2f  %6.1f  %5.1f  %4.1f  %5.1f  %5.1f  %5.1f  %5.1f" % [
+		print("   %-22s  %5.1f  %4s  %4.1f  %5.1f  %6.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.2f  %6.1f  %5.1f  %4.1f  %5.1f  %5.1f  %5.1f  %5.1f" % [
 			row["name"], row["sefer"], "%d/%d" % [int(row["biten"]), RUNS_PER_PERSONA],
 			row["olum"], row["ac_gun"], row["ekip_ac"], row["arama"], row["isgunu"],
-			row["dovus"], row["kazanc"], row["uzama"],
+			row["dovus"], row["kazanc"], row["ayrilan"], row["tutulan"], row["uzama"],
 			row["teslimat"], row["sehir"], row["kart"], row["taverna"],
 			row["uretim"], row["hekim"], row["katilan"],
 		])
@@ -1019,5 +1038,6 @@ func _report(rows: Array[Dictionary], blocked_all: Dictionary) -> void:
 			"id": row["id"], "sefer": row["sefer"], "olum": row["olum"],
 			"biten": row["biten"], "ac_gun": row["ac_gun"], "ekip_ac": row["ekip_ac"],
 			"arama": row["arama"], "dovus": row["dovus"], "kazanc": row["kazanc"], "uzama": row["uzama"],
+			"ayrilan": row["ayrilan"], "tutulan": row["tutulan"],
 			"teslimat": row["teslimat"], "kart": row["kart"],
 		}))

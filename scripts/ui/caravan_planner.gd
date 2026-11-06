@@ -31,6 +31,7 @@ var _shortfall_label: Label
 ## etiket, çünkü eksiklik satırı "ne kadar eksik / kaça alınır" diyor;
 ## bu satır "çıkarsan ne olur" diyor ve ikisi farklı sorular.
 var _risk_label: Label
+var _offer_warning_label: Label
 ## Sofra kipi (Ö2): hangi kip, günde kaç erzak. Yolda verilen emir
 ## **burada da** verilebiliyor, çünkü asıl bedeli yola çıkarken ödüyorsun.
 var _meal_label: Label
@@ -222,7 +223,9 @@ func _add_danger_breakdown() -> void:
 	for part in parts:
 		var key := String(DANGER_PART_KEYS.get(String(part["part"]), ""))
 		var percent := int(round(float(part["delta"]) * 100.0))
-		if String(part["part"]) == "state":
+		# "state" ve "convoy" iki parçalı: biri yolun hâlini, öbürü kaç
+		# vagonluk kolon olduğunu adıyla söylüyor.
+		if String(part["part"]) in ["state", "convoy"]:
 			words.append(tr(key) % [String(part["arg"]), percent])
 		else:
 			words.append(tr(key) % percent)
@@ -307,6 +310,14 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 		_content.add_child(hint_label)
 	for offer in accepted_offers:
 		_content.add_child(_build_offer_row(offer))
+	# G8: alınmaya çalışılan ama sığmayan ilanın sebebi buraya yazılıyor.
+	# Ayrı bir etiket, çünkü `_risk_label`'ı her tazeleme erzak yazısıyla
+	# eziyor - uyarı bir tıklamanın cevabı, sürekli bir durum değil.
+	_offer_warning_label = Label.new()
+	_offer_warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_offer_warning_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
+	_offer_warning_label.visible = false
+	_content.add_child(_offer_warning_label)
 
 	_content.add_child(HSeparator.new())
 
@@ -465,9 +476,17 @@ func _build_offer_row(offer: MerchantOffer) -> HBoxContainer:
 	return row
 
 func _on_offer_toggled(_toggled_on: bool, offer: MerchantOffer, checkbox: CheckBox) -> void:
-	if not _plan.toggle_merchant(offer):
-		# Vagon limiti dolu: seçim geri alınır.
+	# G8: kutucuk kapalı değil - tıklanır, olmuyorsa **sebebini söyler.**
+	# Ölü bir kutucuk oyuncuya neyin eksik olduğunu öğretmiyordu.
+	var reason := _plan.get_offer_block_reason(offer)
+	if _plan.toggle_merchant(offer):
+		if _offer_warning_label != null:
+			_offer_warning_label.visible = false
+	else:
 		checkbox.set_pressed_no_signal(false)
+		if _offer_warning_label != null and not reason.is_empty():
+			_offer_warning_label.text = tr(reason)
+			_offer_warning_label.visible = true
 	_refresh()
 
 func _on_wallet_changed(_new_balance: int) -> void:
@@ -572,7 +591,8 @@ func _refresh() -> void:
 	for row in _offer_rows:
 		var offer: MerchantOffer = row.offer
 		var checkbox: CheckBox = row.checkbox
-		checkbox.disabled = not _plan.is_selected(offer) and not _plan.can_add_offer(offer)
+		# Kutucuk artık kapatılmıyor (G8): tıklanıp sebebi okunabilsin.
+		checkbox.disabled = false
 
 	var current_provisions := _session.get_provisions()
 	var required_provisions := _plan.get_required_provisions()
@@ -582,6 +602,11 @@ func _refresh() -> void:
 		_plan.get_party_size(),
 		_plan.get_total_wagon_count(),
 	]
+	# G2: dört vagonun ikisi sürülemiyorsa "Toplam vagon: 4" yanıltıcıdır.
+	if _session.get_idle_wagon_count() > 0:
+		_party_label.text += " · " + tr("UI_CREW_SHORT") % [
+			_session.crew_missing, _session.get_idle_wagon_count()
+		]
 	_documents_label.text = tr("UI_PLANNER_DOCUMENTS") % _plan.get_required_documents()
 	_required_provisions_label.text = tr("UI_PLANNER_PROVISIONS_NEEDED") % required_provisions
 	_current_provisions_label.text = tr("UI_PLANNER_PROVISIONS_HELD") % current_provisions
