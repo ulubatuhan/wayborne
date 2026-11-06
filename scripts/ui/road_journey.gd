@@ -2840,6 +2840,20 @@ func _serve_meal(mode: String, typed_selected: Array[CharacterData]) -> void:
 		_add_log(tr("UI_ROAD_MEAL_CREW_HUNGRY"), LOCKED_COLOR)
 	for name_text in (result.get("crew_starved_names", []) as Array):
 		_add_log(tr("UI_ROAD_MEAL_CREW_STARVED") % name_text, LOCKED_COLOR)
+	# Dağılma (G2): aç bir ekip bir arada kalmaz. Ayrılan adıyla yazılıyor,
+	# ve sürülemeyen vagonun yükü yolda kaldıysa ne kaldığı da.
+	for name_text in (result.get("crew_deserted_names", []) as Array):
+		_add_log(tr("UI_ROAD_CREW_DESERTED") % name_text, LOCKED_COLOR)
+	var left_behind: Array = result.get("cargo_left_behind", [])
+	if not left_behind.is_empty():
+		var parts: Array[String] = []
+		for entry in left_behind:
+			var lost_item := ItemCatalog.get_item(String((entry as Dictionary).get("item_id", "")))
+			parts.append("%s ×%d" % [
+				lost_item.item_name if lost_item != null else String((entry as Dictionary).get("item_id", "")),
+				int((entry as Dictionary).get("quantity", 0)),
+			])
+		_add_log(tr("UI_ROAD_CARGO_LEFT") % ", ".join(parts), LOCKED_COLOR)
 	var death_outcome: Dictionary = result.get("death_outcome", {})
 	if not (death_outcome.get("dead_names", []) as Array).is_empty():
 		_handle_death_outcome(death_outcome)
@@ -4058,6 +4072,20 @@ func _on_combat_finished(
 		if meat > 0:
 			effects.append(EventEffect.make(EventEffect.Type.PROVISIONS, meat))
 	else:
+		# G5: yenilgi artık yükü de götürüyor. Haydut altını alır ama asıl
+		# istediği maldır; altın ve moral kaybı kervanı yavaşlatmıyordu.
+		var plunder_rng := RandomNumberGenerator.new()
+		plunder_rng.seed = hash("plunder|%s|%d" % [_route_key, _session.total_days_elapsed])
+		var plundered := _session.plunder_cargo(GameSession.DEFEAT_PLUNDER_SHARE, plunder_rng)
+		if not plundered.is_empty():
+			var taken_parts: Array[String] = []
+			for entry in plundered:
+				var taken_item := ItemCatalog.get_item(String((entry as Dictionary).get("item_id", "")))
+				taken_parts.append("%s ×%d" % [
+					taken_item.item_name if taken_item != null else String((entry as Dictionary).get("item_id", "")),
+					int((entry as Dictionary).get("quantity", 0)),
+				])
+			_add_log(tr("UI_ROAD_COMBAT_PLUNDERED") % ", ".join(taken_parts), LOCKED_COLOR)
 		effects.append(EventEffect.make(EventEffect.Type.GOLD, COMBAT_DEFEAT_GOLD))
 		effects.append(EventEffect.make(EventEffect.Type.WAGON_DAMAGE, COMBAT_DEFEAT_WAGON_DAMAGE))
 		effects.append(EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, COMBAT_DEFEAT_MERCHANTS))

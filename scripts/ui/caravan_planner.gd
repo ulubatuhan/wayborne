@@ -105,6 +105,9 @@ func _setup(origin: Location, chosen: Array[MerchantOffer]) -> void:
 	_plan.provision_reduction = _session.get_duty_flat_reduction(DutyCatalog.LEVAZIMCI)
 	_plan.height_adjustment = CaravanPlan.height_adjustment_for(_session.get_party())
 	_plan.animal_mouths = _session.get_pack_animal_provision_mouths()
+	# Dağılan ekip ağız sayısını da düşürür (G2): plan gerçek eli sayar,
+	# vagon sayısını değil - yoksa yolda yenmeyecek bir sayı gösterir.
+	_plan.crew_hands = _session.get_crew_hands()
 	# Emanet yük (Y-C02) vagonlardaki boş yere sığmalı.
 	_plan.cargo_room = _session.get_cargo_space_remaining()
 	for offer in chosen:
@@ -168,6 +171,7 @@ const DANGER_PART_KEYS: Dictionary = {
 	"state": "UI_DANGER_PART_STATE",
 	"world": "UI_DANGER_PART_WORLD",
 	"growth": "UI_DANGER_PART_GROWTH",
+	"convoy": "UI_DANGER_PART_CONVOY",
 	"brotherhood": "UI_DANGER_PART_BROTHERHOOD",
 }
 

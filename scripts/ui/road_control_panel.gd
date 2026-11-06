@@ -250,10 +250,20 @@ func _caravan_summary(state: Dictionary) -> Control:
 	var daily := maxi(1, _session.get_daily_provision_consumption())
 	col.add_child(_fact_line(tr("UI_PANEL_PROVISIONS"), tr("UI_PANEL_PROVISIONS_VALUE") % [_session.get_provisions(), _session.get_provisions() / daily]))
 	var crew := Label.new()
-	crew.text = tr("UI_PANEL_CREW") % [_session.owned_wagon_count * GameSession.PEOPLE_PER_WAGON, _session.owned_wagon_count]
+	crew.text = tr("UI_PANEL_CREW") % [_session.get_crew_hands(), _session.owned_wagon_count]
 	crew.add_theme_font_size_override("font_size", 14)
 	crew.add_theme_color_override("font_color", ArtPalette.GRIM_PARCHMENT_DIM)
 	col.add_child(crew)
+	# Dağılma (G2): eksik el bir sayı değil, bir sonuç - kaç vagonun
+	# sürülemediğini de söylüyor, yoksa oyuncu kapasitesinin neden
+	# düştüğünü hiçbir yerde göremez.
+	var missing := _session.crew_missing
+	if missing > 0:
+		var short_line := Label.new()
+		short_line.text = tr("UI_CREW_SHORT") % [missing, _session.get_idle_wagon_count()]
+		short_line.add_theme_font_size_override("font_size", 14)
+		short_line.add_theme_color_override("font_color", ArtPalette.GRIM_RUST)
+		col.add_child(short_line)
 	return col
 
 func _fact_line(key_text: String, value_text: String) -> Control:

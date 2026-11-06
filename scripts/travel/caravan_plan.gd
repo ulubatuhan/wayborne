@@ -138,14 +138,22 @@ func get_required_documents() -> int:
 ## get_pack_animal_provision_mouths) - `height_adjustment`'ın aynı deseni:
 ## varsayılanı 0.0, eski çağıranlar ve sabit sayılarla çağıran testler hiç
 ## değişmeden geçer.
+## `crew_hands` -1 ise tayfa tam sayılır (`owned_wagons * PEOPLE_PER_WAGON`) -
+## eski, dağılma-kör davranış. Dağılan ekip ağız sayısını da düşürür: kervan
+## küçülerek yaşamayı sürdürebilir (bkz. GameSession'ın dağılma notu). Formül
+## yine tek yerde duruyor (Provision Rules).
 static func daily_consumption(
 	party_size: int, owned_wagons: int, merchant_count: int,
 	multiplier: float = 1.0, flat_reduction: int = 0, height_adjustment: float = 0.0,
-	animal_mouths: float = 0.0
+	animal_mouths: float = 0.0, crew_hands: int = -1
 ) -> int:
+	var crew_mouths := (
+		maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON if crew_hands < 0
+		else maxi(0, crew_hands)
+	)
 	var mouths := (
 		float(maxi(1, party_size))
-		+ float(maxi(0, owned_wagons) * GameSession.PEOPLE_PER_WAGON)
+		+ float(crew_mouths)
 		+ float(maxi(0, merchant_count))
 		+ height_adjustment
 		+ maxf(0.0, animal_mouths)
@@ -168,6 +176,9 @@ static func height_adjustment_for(party: Array[CharacterData]) -> float:
 		adjustment += character.get_provision_weight() - 1.0
 	return adjustment
 
+## Planlayıcı ekranı doldurmazsa -1: tayfa tam sayılır (dağılma-kör).
+var crew_hands: int = -1
+
 func get_daily_consumption() -> int:
 	return daily_consumption(
 		caravan_party_size,
@@ -176,7 +187,8 @@ func get_daily_consumption() -> int:
 		provision_multiplier,
 		provision_reduction,
 		height_adjustment,
-		animal_mouths
+		animal_mouths,
+		crew_hands
 	)
 
 ## Yolun *gerçekte* kaç gün süreceği: taban süre + hava/kondisyon payı.
@@ -197,7 +209,8 @@ func get_cold_provisions() -> int:
 			continue
 		extra += daily_consumption(
 			caravan_party_size, player_wagon_count, get_contract_mouths(),
-			provision_multiplier * (1.0 + share), provision_reduction, height_adjustment, animal_mouths
+			provision_multiplier * (1.0 + share), provision_reduction, height_adjustment,
+			animal_mouths, crew_hands
 		) - base
 	return maxi(0, extra)
 

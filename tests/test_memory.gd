@@ -385,8 +385,11 @@ func _test_starvation_can_kill(t) -> void:
 		t.eq(character.consecutive_hungry_days, 0, "doğru doyurulan hiç aç kalmaz")
 
 ## İsimsizler de sayılır: tayfayı art arda aç bırakmak moralini giderek
-## daha çok düşürür ve üçüncü geceden itibaren her gece birini adıyla
-## öldürür. Herkesi doyuran kervanda sayaç hiç artmaz.
+## daha çok düşürür ve üçüncü geceden itibaren her gece bir el eksilir -
+## yürüyebilen **ayrılır** (deftere adıyla), yürüyemeyen ölür. Yeri boş
+## kalır: eskiden `_sync_crew_names()` eli bedavaya doldurduğu için aç
+## bırakmanın hiçbir mekanik bedeli yoktu (bkz. dağılma notu).
+## Herkesi doyuran kervanda sayaç hiç artmaz.
 func _test_unfed_crew_can_starve(t) -> void:
 	var session := _session()
 	session.change_provisions(500)
@@ -404,26 +407,28 @@ func _test_unfed_crew_can_starve(t) -> void:
 		"düşüşün bir tavanı var"
 	)
 
-	var starved: Array[String] = []
-	for night in GameSession.STARVATION_HP_LOSS_START_DAY:
+	var hands_before := session.get_crew_hands()
+	var gone: Array[String] = []
+	for night in GameSession.CREW_DESERT_FROM:
 		var result := session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
 		t.eq(int(result["crew_hungry_nights"]), night + 1, "aç gece sayılıyor")
-		for name_text in (result["crew_starved_names"] as Array):
-			starved.append(String(name_text))
-	t.eq(starved.size(), 1, "üçüncü gece tayfadan biri öldü")
-	t.ok(crew_before.has(starved[0]), "ölen gerçek bir tayfa adı")
+		for name_text in (result["crew_deserted_names"] as Array):
+			gone.append(String(name_text))
+	t.eq(gone.size(), 1, "üçüncü gece bir el ayrıldı")
+	t.ok(crew_before.has(gone[0]), "ayrılan gerçek bir tayfa adı")
 	var entry: Dictionary = session.ledger.recent(1)[0]
-	t.eq(String(entry["kind"]), CaravanLedger.KIND_DIED, "deftere ölü yazıldı")
-	t.eq(String(entry["cause"]), "LEDGER_CAUSE_STARVED", "sebebi açlık")
-	t.eq(
-		session.crew_names.size(), session.owned_wagon_count * GameSession.PEOPLE_PER_WAGON,
-		"vagon yine sürülüyor"
-	)
-	t.not_ok(session.crew_names.has(starved[0]) and crew_before.count(starved[0]) == 1,
-		"ölen ad yerine yeniden gelmiyor")
+	t.eq(String(entry["kind"]), CaravanLedger.KIND_DEPARTED, "deftere ayrıldı diye yazıldı")
+	t.eq(String(entry["cause"]), "LEDGER_CAUSE_DESERTED", "sebebi açlıktan ayrılma")
+	# Asıl mesele: yeri **boş kaldı**.
+	t.eq(session.get_crew_hands(), hands_before - 1, "el eksildi")
+	t.eq(session.crew_missing, 1, "eksik el sayılıyor")
+	t.ok(session.get_crew_hands() < session.get_crew_need(), "vagonun eli tam değil")
+	t.not_ok(session.crew_names.has(gone[0]) and crew_before.count(gone[0]) == 1,
+		"ayrılan ad yerine yeniden gelmiyor")
 	var reloaded := _reload(session)
 	t.eq(reloaded.crew_hungry_nights, session.crew_hungry_nights, "aç gece kayda giriyor")
 	t.eq(reloaded.crew_names, session.crew_names, "tayfa yeniden atılmıyor")
+	t.eq(reloaded.crew_missing, session.crew_missing, "eksik el kayda giriyor")
 
 	session.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
 	t.eq(session.crew_hungry_nights, 0, "doyurulunca sayaç sıfırlanır")
@@ -433,6 +438,7 @@ func _test_unfed_crew_can_starve(t) -> void:
 	for _night in 10:
 		var fed_result := fed.apply_meal_distribution(GameSession.MEAL_MODE_ALL)
 		t.eq((fed_result["crew_starved_names"] as Array).size(), 0, "doyurulan tayfa ölmez")
+		t.eq((fed_result["crew_deserted_names"] as Array).size(), 0, "doyurulan tayfa ayrılmaz")
 	t.eq(fed.crew_hungry_nights, 0, "doğru doyuran kervanda sayaç hiç artmaz")
 
 ## Geride bırakma seçeneği kimi bırakacağını seçmeden önce söylüyor; kartın

@@ -24,6 +24,8 @@ var _sell_wagon_button: Button
 var _overview_wagon_button: Button
 var _dog_button: Button
 var _donkey_button: Button
+var _crew_hire_button: Button
+var _crew_hire_label: Label
 var _half_wagon_button: Button
 @onready var _equipment_container: VBoxContainer = $MarginContainer/VBoxContainer/EquipmentScroll/EquipmentContainer
 @onready var _back_button: Button = $MarginContainer/VBoxContainer/BackButton
@@ -45,6 +47,7 @@ func _ready() -> void:
 	_build_dog_button()
 	_build_donkey_button()
 	_build_half_wagon_button()
+	_build_crew_hire_button()
 	_back_button.text = Nav.back_label()
 	_back_button.pressed.connect(_on_back_pressed)
 	_build_equipment_shop()
@@ -128,6 +131,35 @@ func _build_half_wagon_button() -> void:
 	var container := _donkey_button.get_parent()
 	container.add_child(_half_wagon_button)
 	container.move_child(_half_wagon_button, _donkey_button.get_index() + 1)
+
+## Dağılan ekip burada toparlanır (G2). Fiyat kaç eli aç bıraktığına bağlı:
+## söz dolaşır.
+func _build_crew_hire_button() -> void:
+	_crew_hire_label = Label.new()
+	_crew_hire_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_crew_hire_button = Button.new()
+	_crew_hire_button.pressed.connect(_on_hire_crew_pressed)
+	var container := _half_wagon_button.get_parent()
+	container.add_child(_crew_hire_label)
+	container.add_child(_crew_hire_button)
+	container.move_child(_crew_hire_label, _half_wagon_button.get_index() + 1)
+	container.move_child(_crew_hire_button, _crew_hire_label.get_index() + 1)
+
+func _on_hire_crew_pressed() -> void:
+	if not _session.hire_crew_hand():
+		return
+	_clear_message()
+	_refresh()
+
+func _refresh_crew_hire() -> void:
+	_crew_hire_label.text = tr("UI_CREW_HIRE_HINT") % _session.crew_missing
+	_crew_hire_label.visible = _session.crew_missing > 0
+	var reason := _session.get_crew_hire_block_reason()
+	_crew_hire_button.text = tr("UI_CREW_HIRE") % _session.get_crew_hire_cost()
+	if not reason.is_empty():
+		# Kapalı düğme sebebini söyler.
+		_crew_hire_button.text = "%s — %s" % [_crew_hire_button.text, tr(reason)]
+	_crew_hire_button.disabled = not reason.is_empty()
 
 func _on_adopt_dog_pressed() -> void:
 	if not _session.adopt_dog():
@@ -248,6 +280,7 @@ func _refresh() -> void:
 	_refresh_dog_button()
 	_refresh_donkey_button()
 	_refresh_half_wagon_button()
+	_refresh_crew_hire()
 	_refresh_equipment_shop()
 
 ## Satış kapalıysa *sebebiyle birlikte* gösterilir - gizlemek, oyuncuya

@@ -494,9 +494,13 @@ func _test_wagon_speed_factor(t) -> void:
 	t.almost(
 		session.get_wagon_speed_factor(0), 1.0, "boş bir vagon tam hızda"
 	)
+	# Kolonun boyu (G6) vagon yükünün *üstüne* biniyor: iki vagonlu kervan
+	# boş olsa da tek vagonlu kadar hızlı değil.
 	t.almost(
-		session.get_caravan_theoretical_speed(), 1.0, "iki vagon da boşken kervan tam hızda"
+		session.get_caravan_theoretical_speed(), session.get_convoy_speed_factor(),
+		"iki vagon da boşken hız yalnızca kolonun boyu kadar düşer"
 	)
+	t.ok(session.get_convoy_speed_factor() < 1.0, "ikinci vagon kolonu uzatır")
 
 	# Vagon aşırı yüklenemez (bkz. Inventory.add_item'ın kendi kapasite
 	# kısıtı) - tavana yakın, sığan en fazla miktarı ekliyoruz.
@@ -510,8 +514,8 @@ func _test_wagon_speed_factor(t) -> void:
 		session.get_wagon_speed_factor(1), 1.0, "ikinci vagon hâlâ boş, hâlâ tam hızda"
 	)
 	t.almost(
-		session.get_caravan_theoretical_speed(), loaded_factor,
-		"kervanın teorik hızı en yavaş (en yüklü) vagona eşit"
+		session.get_caravan_theoretical_speed(), loaded_factor * session.get_convoy_speed_factor(),
+		"teorik hız = en yavaş vagon × kolonun boyu"
 	)
 
 ## Vagon boş olsa da kırılmış ya da yaralı bir yolcu kervanı yavaşlatır -

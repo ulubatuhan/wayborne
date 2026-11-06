@@ -605,6 +605,32 @@ func get_effective_danger(base_danger: float) -> float:
 	var growth := minf(1.0 + DANGER_GROWTH_PER_DAY * float(total_days_elapsed), DANGER_GROWTH_CAP)
 	return clampf(base_danger * growth, 0.0, 1.0)
 
+## --- Kolonun boyu (G6, kullanıcı onayı 2026-11-06) ---
+##
+## Profil günlüklerinde bir profil on iki koşuda **120 vagon** aldı ve 73 kez
+## "Parti dolu" cevabı duydu: sayaç artıyor, oyun değişmiyordu. Vagon almak
+## kapasite ve ağız getiriyordu ama hiçbir **görünür** bedel getirmiyordu.
+## Artık uzayan kolon yavaşlar ve dikkat çeker - büyümek bir karar, bir
+## düğme değil. (Y-C24, "büyüme kendi krizini doğursun".) Bedeller kesmiyor,
+## ekliyor: vagon hâlâ kapasite ve parti yeri açıyor.
+const CONVOY_SPEED_PENALTY_PER_WAGON: float = 0.05
+const CONVOY_MIN_SPEED_FACTOR: float = 0.70
+const CONVOY_DANGER_PER_WAGON: float = 0.045
+const CONVOY_DANGER_MAX: float = 0.20
+
+## Kolon ne kadar yavaşlıyor (1.0 = yavaşlama yok). İlk vagon bedava:
+## tek vagonlu kervan bu sistem yokmuş gibi yürür.
+func get_convoy_speed_factor() -> float:
+	var extra := maxi(0, owned_wagon_count - 1)
+	return maxf(
+		CONVOY_MIN_SPEED_FACTOR, 1.0 - CONVOY_SPEED_PENALTY_PER_WAGON * float(extra)
+	)
+
+## Uzun kolonun çektiği fazladan ilgi (0.0 = ek yok).
+func get_convoy_danger_share() -> float:
+	var extra := maxi(0, owned_wagon_count - 1)
+	return minf(CONVOY_DANGER_MAX, CONVOY_DANGER_PER_WAGON * float(extra))
+
 ## --- Rotanın o günkü hali ---
 ## Üç katman, üçü de ayrı: WorldMapData'nın sabit tablosu, yolun o günkü
 ## durumu (RouteConditions) ve kervanın deneyim eğrisi (get_effective_danger).
@@ -632,7 +658,9 @@ func get_route_danger(route: TravelRoute) -> float:
 	var route_key := RouteConditions.route_key(route.from_location_id, route.to_location_id)
 	var world_delta := world_events.get_route_danger_delta(route_key, total_days_elapsed)
 	var with_world_events := clampf(base + world_delta * (1.0 - base), 0.0, 1.0)
-	return clampf(get_effective_danger(with_world_events) * brotherhood_danger_factor(), 0.0, 1.0)
+	var grown := get_effective_danger(with_world_events)
+	var with_convoy := clampf(grown * (1.0 + get_convoy_danger_share()), 0.0, 1.0)
+	return clampf(with_convoy * brotherhood_danger_factor(), 0.0, 1.0)
 
 ## Tehlikenin dökümü (görev Y-F10): get_route_danger'ın adımları sırayla,
 ## her biri {"part", "value" (adımdan sonraki tehlike), "delta", "arg"}.
@@ -642,6 +670,7 @@ const DANGER_PART_BASE: String = "base"
 const DANGER_PART_STATE: String = "state"
 const DANGER_PART_WORLD: String = "world"
 const DANGER_PART_GROWTH: String = "growth"
+const DANGER_PART_CONVOY: String = "convoy"
 const DANGER_PART_BROTHERHOOD: String = "brotherhood"
 
 func get_route_danger_breakdown(route: TravelRoute) -> Array[Dictionary]:
@@ -662,9 +691,15 @@ func get_route_danger_breakdown(route: TravelRoute) -> Array[Dictionary]:
 	var grown := get_effective_danger(with_world)
 	if not is_equal_approx(grown, with_world):
 		parts.append({"part": DANGER_PART_GROWTH, "value": grown, "delta": grown - with_world, "arg": ""})
-	var final := clampf(grown * brotherhood_danger_factor(), 0.0, 1.0)
-	if not is_equal_approx(final, grown):
-		parts.append({"part": DANGER_PART_BROTHERHOOD, "value": final, "delta": final - grown, "arg": ""})
+	var with_convoy := clampf(grown * (1.0 + get_convoy_danger_share()), 0.0, 1.0)
+	if not is_equal_approx(with_convoy, grown):
+		parts.append({
+			"part": DANGER_PART_CONVOY, "value": with_convoy,
+			"delta": with_convoy - grown, "arg": str(owned_wagon_count),
+		})
+	var final := clampf(with_convoy * brotherhood_danger_factor(), 0.0, 1.0)
+	if not is_equal_approx(final, with_convoy):
+		parts.append({"part": DANGER_PART_BROTHERHOOD, "value": final, "delta": final - with_convoy, "arg": ""})
 	return parts
 
 ## Bir olayın o yol üstünde hâlâ süren müdahalesi var mı (bkz. ROUTE_CHANGE).
@@ -1214,6 +1249,8 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	crew_names.clear()
 	_crew_name_serial = 0
 	crew_hungry_nights = 0
+	crew_missing = 0
+	crew_lost_to_hunger = 0
 	_sync_crew_names()
 
 	current_location_id = roll_starting_location(rng, player_character.culture_id)
@@ -2017,7 +2054,8 @@ func get_daily_provision_consumption() -> int:
 		get_daily_provision_multiplier() * (1.0 + get_cold_ration_share()),
 		get_duty_flat_reduction(DutyCatalog.LEVAZIMCI),
 		CaravanPlan.height_adjustment_for(party),
-		get_pack_animal_provision_mouths()
+		get_pack_animal_provision_mouths(),
+		get_crew_hands()
 	)
 
 ## Akşam sofrası: erzak artık her gün sessizce, herkese eşit dağılmıyor -
@@ -2054,6 +2092,35 @@ const MEAL_HUNGER_MORALE_PENALTY: int = -8
 const CREW_HUNGER_MORALE_PER_NIGHT: int = 3
 const MAX_CREW_HUNGER_MORALE_PENALTY: int = -20
 var crew_hungry_nights: int = 0
+
+## --- Dağılma: aç bir ekip bir arada kalmaz (kullanıcı kararı, 2026-11-06) ---
+##
+## **Bulunan delik.** Yukarıdaki kural "üçüncü geceden itibaren tayfadan biri
+## açlıktan ölür" diyordu ve ölüyordu da - ama `_sync_crew_names()` boşalan
+## eli **anında ve bedavaya** dolduruyordu, çünkü hedefi vagon sayısıydı.
+## Tüketim de kapasite de vagondan hesaplandığı için ölen tayfanın hiçbir
+## mekanik bedeli yoktu: profil günlüklerinde dört kervan ekibini 60-98 gün
+## aç bıraktı, hepsi yirmi seferi sıfır kayıpla bitirdi (bkz.
+## `docs/design_notes/oyuncu_gunlukleri.md` §6).
+##
+## **Yeni kural: el sayısı gerçektir.** `crew_names` artık kendiliğinden
+## dolmuyor; `crew_missing` kaç elin eksik olduğunu tutuyor. Eller azalınca
+##   - **tüketim düşer** (daha az ağız) - kervan küçülerek yaşamayı sürdürebilir,
+##   - **sürülebilir vagon düşer** (`get_driveable_wagon_count`) - taşıma gücü gider.
+## Yani aç bırakmak artık bedava değil, bir takas: bugünün erzağını yarının
+## yüküyle ödüyorsun.
+##
+## Kademe: üçüncü aç geceden itibaren her gece bir el **ayrılır** (yürüyebilen
+## gider), yedinciden itibaren artık **ölür** (yürüyecek hâli kalmamıştır).
+## Önce seni bırakırlar, sonra seninle ölürler.
+const CREW_DESERT_FROM: int = STARVATION_HP_LOSS_START_DAY
+const CREW_STARVE_FROM: int = 7
+## Kaç elin eksik olduğu. Vagon alıp satmak ihtiyacı değiştirir, bunu değil:
+## borç kapanana kadar taşınır (bkz. `_sync_crew_names`).
+var crew_missing: int = 0
+## Açlıktan kaybedilen toplam el. Şehirdeki el tutma fiyatını yükseltiyor -
+## söz dolaşır, adamını aç bırakan kervana kimse ucuza binmez.
+var crew_lost_to_hunger: int = 0
 
 ## --- Kalıcı emirler ---
 ## Aynı kararı her gün yeniden sormak bir karar değil, bir angarya: sofra
@@ -2373,11 +2440,23 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 	var death_outcome := resolve_deaths(starving, "LEDGER_CAUSE_STARVED")
 
 	crew_hungry_nights = crew_hungry_nights + 1 if crew_hungry else 0
+	# Dağılma: üçüncü aç geceden itibaren her gece bir el gider. Yürüyebilen
+	# ayrılır, yürüyecek hâli kalmayan ölür (bkz. dağılma notu).
 	var crew_starved: Array[String] = []
-	if crew_hungry and crew_hungry_nights >= STARVATION_HP_LOSS_START_DAY:
-		var starved_name := _starve_one_crew_member()
-		if not starved_name.is_empty():
-			crew_starved.append(starved_name)
+	var crew_deserted: Array[String] = []
+	var cargo_left_behind: Array[Dictionary] = []
+	if crew_hungry and crew_hungry_nights >= CREW_DESERT_FROM:
+		var dies := crew_hungry_nights >= CREW_STARVE_FROM
+		var gone := _lose_one_crew_hand(
+			"LEDGER_CAUSE_STARVED" if dies else "LEDGER_CAUSE_DESERTED",
+			CaravanLedger.KIND_DIED if dies else CaravanLedger.KIND_DEPARTED
+		)
+		if not gone.is_empty():
+			if dies:
+				crew_starved.append(gone)
+			else:
+				crew_deserted.append(gone)
+			cargo_left_behind = settle_idle_wagons()
 
 	if crew_hungry:
 		caravan.change_morale(get_crew_hunger_morale_penalty(crew_hungry_nights))
@@ -2394,6 +2473,8 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		"crew_hungry": crew_hungry,
 		"crew_hungry_nights": crew_hungry_nights,
 		"crew_starved_names": crew_starved,
+		"crew_deserted_names": crew_deserted,
+		"cargo_left_behind": cargo_left_behind,
 		"death_outcome": death_outcome,
 	}
 
@@ -2408,16 +2489,23 @@ static func get_crew_hunger_morale_penalty(nights: int) -> int:
 ## elle doldurur (tüketim vagon sayısından hesaplanıyor, isim listesinden
 ## değil), ama yeni adla - ölen ad bir daha dönmez. Kayıt ölüm anında
 ## değiştiği için yeniden yüklemek de onu geri getirmez.
-func _starve_one_crew_member() -> String:
+## Bir el eksilir: deftere adıyla yazılır ve **yeri boş kalır.**
+##
+## Eskiden burası `_starve_one_crew_member()` idi ve son satırı
+## `_sync_crew_names()` çağırıyordu - yani boşalan eli aynı anda bedavaya
+## dolduruyordu. Ölen tayfanın tek bedeli bir defter satırıydı. Artık
+## `crew_missing` artıyor: el geri gelmek için şehirde parayla tutulur.
+func _lose_one_crew_hand(cause_key: String, kind: String) -> String:
 	if crew_names.is_empty():
 		return ""
 	var crew_name: String = crew_names.pop_back()
+	crew_missing = clampi(crew_missing + 1, 0, get_crew_need())
+	crew_lost_to_hunger += 1
 	ledger.record(
-		CaravanLedger.KIND_DIED, crew_name, total_days_elapsed, lineage_generation,
-		"", "LEDGER_CAUSE_STARVED", _ledger_location_id()
+		kind, crew_name, total_days_elapsed, lineage_generation,
+		"", cause_key, _ledger_location_id()
 	)
-	note_beat(BEAT_DEATH, [crew_name])
-	_sync_crew_names()
+	note_beat(BEAT_DEATH if kind == CaravanLedger.KIND_DIED else BEAT_HUNGER, [crew_name])
 	return crew_name
 
 func _character_names(characters: Array[CharacterData]) -> Array[String]:
@@ -4033,12 +4121,57 @@ const PLAGUE_MEDICINE_DRAIN: int = 2
 ## Son günün dert notları (yol günlüğü okur): [{"key", "args"}].
 var ailment_notes: Array = []
 
-## Savaşta Kıyı'ya düşüp kalkan biri sakatlanabilir (zar savaştan sonra).
+## Savaşta Kıyı'ya düşüp kalkan biri sakatlanır.
+##
+## **G5 (kullanıcı onayı, 2026-11-06).** Profil günlüklerinde zorluğu arayan
+## profil 8,5 dövüşün yarısını kaybetti ve **kimse ölmedi, kimse kalıcı bir
+## şey kaybetmedi**: Ölümün Kıyısı kuralı yenilgiyi bedelsiz kılıyordu, yani
+## oyunun en sert görünen sistemi sahteydi. Kural korunuyor (ölüm kurada
+## değil), ama yere düşen artık bedelsiz kalkmıyor: zar yalnızca **hangi**
+## yaranın geleceğine atılıyor, gelip gelmeyeceğine değil. Kaybedilen
+## dövüşte ayrıca yükün bir kısmı gider (bkz. `plunder_cargo`).
 func roll_injury(character: CharacterData, rng: RandomNumberGenerator) -> String:
-	if rng.randf() >= INJURY_CHANCE:
-		return ""
 	var id := CharacterData.INJURIES[rng.randi_range(0, CharacterData.INJURIES.size() - 1)]
-	return id if character.add_ailment(id) else ""
+	if character.add_ailment(id):
+		return id
+	# Zaten o yarayı taşıyorsa başka bir tanesi denenir - "zaten yaralı"
+	# bedelsizliğe dönmesin.
+	for candidate in CharacterData.INJURIES:
+		if character.add_ailment(candidate):
+			return candidate
+	return ""
+
+## Kaybedilen dövüşte yükün bir payı gider: haydut altını alır ama asıl
+## istediği maldır. Kaybedilenlerin listesi döner ([{item_id, quantity}]).
+const DEFEAT_PLUNDER_SHARE: float = 0.25
+
+func plunder_cargo(share: float, rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var taken: Array[Dictionary] = []
+	if share <= 0.0:
+		return taken
+	var entries := get_total_inventory_entries()
+	if entries.is_empty():
+		return taken
+	for entry in entries.duplicate():
+		var item: Item = (entry as Dictionary).item
+		if item == null or item.item_id == PROVISIONS_ITEM_ID:
+			continue
+		var quantity := int((entry as Dictionary).quantity)
+		if quantity <= 0:
+			continue
+		# En az bir tane: payı yuvarlanıp sıfıra inen bir yağma yağma değildir.
+		var grab := maxi(1, int(round(float(quantity) * clampf(share, 0.0, 1.0))))
+		grab = mini(grab, quantity)
+		if remove_from_cargo_or_bags(item.item_id, grab):
+			taken.append({"item_id": item.item_id, "quantity": grab})
+	# Her seferinde her maldan almak fazla sert; biri rastgele bırakılıyor.
+	if taken.size() > 1:
+		var spared: Dictionary = taken[rng.randi_range(0, taken.size() - 1)]
+		var spared_item := ItemCatalog.get_item(String(spared["item_id"]))
+		if spared_item != null:
+			add_to_cargo_or_bag(spared_item, int(spared["quantity"]))
+			taken.erase(spared)
+	return taken
 
 func _ailment_day() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -5024,8 +5157,109 @@ var crew_names: Array[String] = []
 ## aynı (sayaç o ana kadar indeksle eşit).
 var _crew_name_serial: int = 0
 
+## Yüklenebilen vagonların ambarları. Boşta duran vagona yeni yük konmaz -
+## onu çekecek el yok.
+func driveable_wagon_inventories() -> Array[Inventory]:
+	var open: Array[Inventory] = []
+	var count := mini(get_driveable_wagon_count(), wagon_inventories.size())
+	for index in count:
+		open.append(wagon_inventories[index])
+	return open
+
+## El eksikliği yüzünden boşta kalan vagonlardaki yük, sürülebilen
+## vagonlara taşınır; sığmayan yolda kalır. Kaybedilenlerin listesi döner
+## ([{item_id, quantity}]).
+##
+## "Yenilmez çevre ve domino" dersi (Y-C23): bir bedel öbürünü tetikler -
+## ekibi aç bıraktın, eller gitti, vagonu süremiyorsun, yük yolda kaldı.
+func settle_idle_wagons() -> Array[Dictionary]:
+	var lost: Array[Dictionary] = []
+	var driveable := mini(get_driveable_wagon_count(), wagon_inventories.size())
+	if driveable >= wagon_inventories.size():
+		return lost
+	var open := driveable_wagon_inventories()
+	if pack_inventory.weight_limit > 0.0:
+		open.append(pack_inventory)
+	for index in range(driveable, wagon_inventories.size()):
+		var idle := wagon_inventories[index]
+		for entry in idle.get_all_entries().duplicate():
+			var item: Item = (entry as Dictionary).item
+			var quantity := int((entry as Dictionary).quantity)
+			if item == null or quantity <= 0:
+				continue
+			idle.remove_item(item.item_id, quantity)
+			var left := quantity
+			for target_inventory in open:
+				if left <= 0:
+					break
+				var take := mini(left, target_inventory.get_max_addable(item))
+				if take <= 0:
+					continue
+				target_inventory.add_item(item, take)
+				left -= take
+			if left > 0:
+				lost.append({"item_id": item.item_id, "quantity": left})
+	return lost
+
+## --- Şehirde el tutmak ---
+##
+## Eksik el parayla kapanır, ama fiyat sabit değil: adamını aç bırakan
+## kervanın sözü dolaşır (`crew_lost_to_hunger`). Yolda tasarruf ettiğin
+## erzağı şehirde altınla ödüyorsun - kaçış kapısı var ama bedava değil.
+const CREW_HIRE_BASE: int = 35
+const CREW_HIRE_PER_LOST: int = 6
+const CREW_HIRE_MAX: int = 120
+
+func get_crew_hire_cost() -> int:
+	return mini(CREW_HIRE_MAX, CREW_HIRE_BASE + CREW_HIRE_PER_LOST * maxi(0, crew_lost_to_hunger))
+
+## El tutmak kapalıysa sebebi, açıksa "".
+func get_crew_hire_block_reason() -> String:
+	if is_journey_active():
+		return "UI_CREW_HIRE_ON_ROAD"
+	if crew_missing <= 0:
+		return "UI_CREW_HIRE_FULL"
+	if not wallet.can_afford(get_crew_hire_cost()):
+		return "UI_NOT_ENOUGH_GOLD"
+	return ""
+
+func can_hire_crew_hand() -> bool:
+	return get_crew_hire_block_reason().is_empty()
+
+func hire_crew_hand() -> bool:
+	if not can_hire_crew_hand():
+		return false
+	wallet.spend(get_crew_hire_cost())
+	crew_missing = maxi(0, crew_missing - 1)
+	_sync_crew_names()
+	return true
+
+## Kaç el gerekiyor: her vagonda `PEOPLE_PER_WAGON` kişi.
+func get_crew_need() -> int:
+	return owned_wagon_count * PEOPLE_PER_WAGON
+
+## Kaç el var.
+func get_crew_hands() -> int:
+	return crew_names.size()
+
+## Kaç vagon gerçekten sürülebiliyor.
+##
+## Lider her zaman bir vagonu kendi sürebilir - yoksa son elini kaybeden
+## kervan taşıma gücü sıfıra inip kilitlenirdi. Bunun üstü ele bağlı.
+func get_driveable_wagon_count() -> int:
+	if owned_wagon_count <= 0:
+		return 0
+	var by_hands := get_crew_hands() / PEOPLE_PER_WAGON
+	var floor_count := 1 if not get_party().is_empty() else 0
+	return clampi(by_hands, floor_count, owned_wagon_count)
+
+## El eksikliğinden boşta duran vagon sayısı.
+func get_idle_wagon_count() -> int:
+	return maxi(0, owned_wagon_count - get_driveable_wagon_count())
+
 func _sync_crew_names() -> void:
-	var target := owned_wagon_count * PEOPLE_PER_WAGON
+	crew_missing = clampi(crew_missing, 0, get_crew_need())
+	var target := maxi(0, get_crew_need() - crew_missing)
 	while crew_names.size() < target:
 		crew_names.append(_roll_crew_name(_crew_name_serial))
 		_crew_name_serial += 1
@@ -5077,8 +5311,10 @@ func _sync_wagon_inventories() -> void:
 		for entry in removed.get_all_entries():
 			add_to_cargo(entry.item, entry.quantity)
 
+## Taşıyabildiğin yük: **sürülebilen** vagonlar kadar. Elin yoksa vagonun
+## boş durur (bkz. `get_driveable_wagon_count`).
 func get_cargo_capacity() -> float:
-	return owned_wagon_count * CARGO_PER_WAGON + get_extra_cargo_capacity()
+	return get_driveable_wagon_count() * CARGO_PER_WAGON + get_extra_cargo_capacity()
 
 ## Bir vagonun ne kadar dolu olduğu - bkz. `get_caravan_theoretical_speed()`,
 ## artık yalnızca bilgilendirici değil, yolun gerçek yürüyüş hızını da
@@ -5119,7 +5355,9 @@ func get_caravan_theoretical_speed() -> float:
 	var slowest := get_party_condition_speed_factor()
 	for index in wagon_inventories.size():
 		slowest = minf(slowest, get_wagon_speed_factor(index))
-	return slowest
+	# Kolonun boyu (G6) en yavaş vagonun *üstüne* biniyor, onunla
+	# yarışmıyor: altı vagonlu bir kervan hafif yüklü olsa da uzundur.
+	return slowest * get_convoy_speed_factor()
 
 func get_cargo_weight() -> float:
 	var total := pack_inventory.get_total_weight()
@@ -5144,7 +5382,7 @@ func add_to_cargo(item: Item, quantity: int) -> bool:
 	# hemen ardından, aynı havuzda deneniyor - kişisel çantaların aksine bu
 	# normal kullanılabilir kapasitenin bir parçası, yalnızca taştığında
 	# başvurulan bir son çare değil (bkz. get_cargo_capacity).
-	var sources: Array[Inventory] = wagon_inventories.duplicate()
+	var sources: Array[Inventory] = driveable_wagon_inventories()
 	# `Inventory.weight_limit == 0.0` "sınırsız" demek (bkz. Inventory'nin
 	# kendi tanımı) - eşek/yarım vagon yoksa pack_inventory'nin gerçek
 	# kapasitesi sıfır, sınırsız değil. Yalnızca gerçek bir ek kapasite
@@ -5444,6 +5682,8 @@ func to_save_dict() -> Dictionary:
 		"crew_names": crew_names.duplicate(),
 		"crew_name_serial": _crew_name_serial,
 		"crew_hungry_nights": crew_hungry_nights,
+		"crew_missing": crew_missing,
+		"crew_lost_to_hunger": crew_lost_to_hunger,
 		"meal_policy_mode": meal_policy_mode,
 		"meal_policy_ids": meal_policy_ids.duplicate(),
 		"standing_camp_at_dusk": standing_camp_at_dusk,
@@ -5742,6 +5982,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	# bir kez eski bir adı tekrar edebilir, hiçbir zaman mevcut birini ezmez.
 	_crew_name_serial = maxi(int(data.get("crew_name_serial", 0)), crew_names.size())
 	crew_hungry_nights = maxi(0, int(data.get("crew_hungry_nights", 0)))
+	crew_missing = maxi(0, int(data.get("crew_missing", 0)))
+	crew_lost_to_hunger = maxi(0, int(data.get("crew_lost_to_hunger", 0)))
 	meal_policy_mode = String(data.get("meal_policy_mode", MEAL_MODE_ALL))
 	meal_policy_ids.clear()
 	for id in data.get("meal_policy_ids", []):

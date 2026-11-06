@@ -20,6 +20,12 @@ func run(t) -> void:
 	_test_more_hands_find_more_food(t)
 	_test_closed_doors_say_why(t)
 	_test_delivery_says_how_many_are_missing(t)
+	_test_a_hungry_crew_breaks_up(t)
+	_test_an_idle_wagon_cannot_be_loaded(t)
+	_test_hands_are_hired_back_in_the_city_for_gold(t)
+	_test_a_downed_fighter_never_gets_up_for_free(t)
+	_test_a_lost_fight_costs_cargo(t)
+	_test_a_longer_column_is_slower_and_louder(t)
 
 func _session_in_city(gold: int = 250) -> GameSession:
 	var session := GameSession.new(gold, 20, 1)
@@ -286,3 +292,165 @@ func _test_delivery_says_how_many_are_missing(t) -> void:
 	t.eq(session.get_chain_block_reason(id), "", "mal gelince açılır")
 	t.eq(session.get_chain_missing_text(id), "", "eksik kalmaz")
 	t.ok(session.deliver_chain(id), "ve teslim edilir")
+
+# --- G2: aç ekip dağılır (kullanıcı kararı 2026-11-06) ---
+
+func _test_a_hungry_crew_breaks_up(t) -> void:
+	# **Bulunan delik:** tayfa açlıktan ölüyordu ama `_sync_crew_names()`
+	# yerini anında ve bedavaya dolduruyordu; tüketim ve kapasite vagondan
+	# hesaplandığı için aç bırakmanın hiçbir mekanik bedeli yoktu. Günlükler
+	# dört kervanın ekibini 60-98 gün aç bırakıp sıfır kayıpla yirmi seferi
+	# bitirdiğini ölçtü.
+	var session := _session_in_city()
+	session.owned_wagon_count = 3
+	session._sync_wagon_inventories()
+	session.change_provisions(500)
+	t.eq(session.get_crew_hands(), session.get_crew_need(), "başlangıçta eller tam")
+	t.eq(session.get_driveable_wagon_count(), 3, "üç vagon da sürülüyor")
+	var mouths_before := session.get_daily_provision_consumption()
+	var capacity_before := session.get_cargo_capacity()
+
+	# Üç aç gece: bir el ayrılır.
+	for _night in GameSession.CREW_DESERT_FROM:
+		session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
+	t.eq(session.crew_missing, 1, "bir el eksildi")
+	t.ok(
+		session.get_daily_provision_consumption() < mouths_before,
+		"ağız azaldı: kervan küçülerek yaşamayı sürdürebilir"
+	)
+
+	# İkinci el gidince bir vagon sürülemez olur.
+	session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
+	t.eq(session.crew_missing, 2, "iki el eksik")
+	t.eq(session.get_driveable_wagon_count(), 2, "bir vagon boşta kaldı")
+	t.eq(session.get_idle_wagon_count(), 1, "boşta vagon sayılıyor")
+	t.ok(session.get_cargo_capacity() < capacity_before, "taşıma gücü düştü")
+
+	# Yedinci geceden sonra artık ayrılmıyorlar, ölüyorlar.
+	var died := 0
+	while session.crew_hungry_nights < GameSession.CREW_STARVE_FROM:
+		var result := session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
+		died += (result["crew_starved_names"] as Array).size()
+	t.ok(died > 0, "yürüyecek hâli kalmayan ölür")
+
+func _test_an_idle_wagon_cannot_be_loaded(t) -> void:
+	var session := _session_in_city()
+	session.owned_wagon_count = 2
+	session._sync_wagon_inventories()
+	var item := ItemCatalog.get_item("test_cloth")
+	t.ok(item != null, "deneme malı var")
+	var full := int(floor(session.get_cargo_capacity() / maxf(0.1, item.unit_weight)))
+	t.ok(session.add_to_cargo(item, full), "iki vagon doldu")
+
+	# Bir el gidince ikinci vagon sürülemez: yükü taşınır, sığmayan kalır.
+	session.crew_missing = 2
+	session._sync_crew_names()
+	t.eq(session.get_driveable_wagon_count(), 1, "tek vagon sürülüyor")
+	var left := session.settle_idle_wagons()
+	t.ok(not left.is_empty(), "sığmayan yük yolda kaldı")
+	t.ok(
+		session.get_total_quantity(item.item_id) < full,
+		"kalan yük gerçekten eksildi"
+	)
+	t.not_ok(session.add_to_cargo(item, full), "boşta vagona yeni yük konmaz")
+
+func _test_hands_are_hired_back_in_the_city_for_gold(t) -> void:
+	var session := _session_in_city(400)
+	session.owned_wagon_count = 2
+	session._sync_wagon_inventories()
+	session.crew_missing = 2
+	session.crew_lost_to_hunger = 2
+	session._sync_crew_names()
+	var cheap := _session_in_city(400)
+	t.ok(
+		session.get_crew_hire_cost() > cheap.get_crew_hire_cost(),
+		"aç bıraktığın her el fiyatı yükseltir: söz dolaşır"
+	)
+
+	var purse := session.wallet.balance
+	t.eq(session.get_crew_hire_block_reason(), "", "şehirde el tutulur")
+	t.ok(session.hire_crew_hand(), "bir el tutuldu")
+	t.eq(session.crew_missing, 1, "eksik bir azaldı")
+	t.ok(session.wallet.balance < purse, "parayla")
+	t.ok(session.hire_crew_hand(), "ikinci el de tutuldu")
+	t.eq(session.get_crew_hire_block_reason(), "UI_CREW_HIRE_FULL", "eksik kalmayınca kapalı")
+
+	var place := WorldMapData.get_locations()[0]
+	session.start_journey(place.location_id, 4, 0.1, CaravanPlan.new(place, 4, 6, 1))
+	t.eq(session.get_crew_hire_block_reason(), "UI_CREW_HIRE_ON_ROAD", "yolda el tutulmaz")
+
+# --- G5: kaybedilen dövüşün kalıcı bedeli ---
+
+func _test_a_downed_fighter_never_gets_up_for_free(t) -> void:
+	# Zorluğu arayan profil 8,5 dövüşün yarısını kaybetti ve kimse ölmedi,
+	# kimse kalıcı bir şey kaybetmedi. Ölümün Kıyısı kuralı duruyor (ölüm
+	# kurada değil), ama yere düşen artık mutlaka bir yara taşıyor.
+	var session := _session_in_city()
+	var fighter := session.get_party()[0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4242
+	t.eq(fighter.ailments.size(), 0, "sağlam başlıyor")
+	var injury := session.roll_injury(fighter, rng)
+	t.ne(injury, "", "yere düşen mutlaka bir yara alır")
+	t.ok(fighter.ailments.has(injury), "yara üstünde kalır")
+
+	# Üç yaranın üçünü de taşıyan biri dördüncüyü almaz - ama bu
+	# "zaten yaralı olan bedava kurtulur" demek değil, taşıyacak yer yok.
+	for id in CharacterData.INJURIES:
+		fighter.add_ailment(id)
+	t.eq(session.roll_injury(fighter, rng), "", "taşıyacak yara kalmayınca boş döner")
+
+func _test_a_lost_fight_costs_cargo(t) -> void:
+	var session := _session_in_city()
+	var item := ItemCatalog.get_item("test_cloth")
+	session.add_to_cargo(item, 12)
+	var before := session.get_total_quantity(item.item_id)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var taken := session.plunder_cargo(GameSession.DEFEAT_PLUNDER_SHARE, rng)
+	t.ok(not taken.is_empty(), "haydut yükten alır")
+	t.ok(session.get_total_quantity(item.item_id) < before, "yük gerçekten eksilir")
+
+	# Erzağa dokunmuyor: açlık ayrı bir sistem, yenilgi onu tetiklemesin.
+	var provisions := session.get_provisions()
+	session.plunder_cargo(GameSession.DEFEAT_PLUNDER_SHARE, rng)
+	t.eq(session.get_provisions(), provisions, "erzak yağmalanmaz")
+
+# --- G6: büyümenin görünür bedeli ---
+
+func _test_a_longer_column_is_slower_and_louder(t) -> void:
+	# Bir profil on iki koşuda 120 vagon aldı ve 73 kez "Parti dolu" duydu:
+	# sayaç artıyor, oyun değişmiyordu. Vagon hâlâ kapasite ve parti yeri
+	# açıyor (sistem kesilmedi), ama artık bedeli de var.
+	var small := _session_in_city()
+	small.owned_wagon_count = 1
+	small._sync_wagon_inventories()
+	var big := _session_in_city()
+	big.owned_wagon_count = 5
+	big._sync_wagon_inventories()
+
+	t.almost(small.get_convoy_speed_factor(), 1.0, "tek vagonlu kervan bu sistemi hissetmez")
+	t.almost(small.get_convoy_danger_share(), 0.0, "ve dikkat de çekmez")
+	t.ok(big.get_convoy_speed_factor() < small.get_convoy_speed_factor(), "uzun kolon yavaştır")
+	t.ok(big.get_convoy_danger_share() > 0.0, "ve göze batar")
+	t.ge(
+		big.get_convoy_speed_factor(), GameSession.CONVOY_MIN_SPEED_FACTOR,
+		"yavaşlamanın bir tabanı var: kervan durmaz"
+	)
+	t.le(
+		big.get_convoy_danger_share(), GameSession.CONVOY_DANGER_MAX,
+		"dikkatin de bir tavanı var"
+	)
+
+	# Tehlikenin dökümü bunu **yazıyor**: gizli bir ceza hatadan ayırt edilemez.
+	var route := WorldMapData.get_routes_from(big.current_location_id)[0]
+	var parts := big.get_route_danger_breakdown(route)
+	var named := false
+	for part in parts:
+		if String((part as Dictionary).get("part", "")) == GameSession.DANGER_PART_CONVOY:
+			named = true
+	t.ok(named, "planlayıcı kolonun payını adıyla söyler")
+	t.ok(
+		big.get_route_danger(route) > small.get_route_danger(route),
+		"ve aynı yol uzun kolon için daha tehlikeli"
+	)
