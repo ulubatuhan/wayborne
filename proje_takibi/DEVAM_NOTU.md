@@ -264,3 +264,30 @@ Süit 32 163 geçti; ekran `tests/screenshot_g_fixes.gd` (7 kare).
   "sefer 12,0" durdu (11,4). Defter Tutan 5,8 → 7,4 sefer, 5/5 → 4/5.
   Varsayılan liderin dolandırma oranı %12: profiller hiç denemedi, ki
   kullanıcının şartı buydu.
+
+## Üç uzman profili (2026-11-06)
+
+Rapor `docs/design_notes/uzman_degerlendirme.md`; kayıt PR23-PR24.
+Araç `tests/simulate_expert_review.gd` (6 koşu × 40 sefer).
+
+Tutundurma Analisti · Sistem Tasarımcısı · Zanaat Denetçisi. Araç baştan
+söylüyor: gerçek D1/D7/iade/inceleme insan ister; buradakiler vekil
+gösterge. Üç ölçüm kusuru koşu sırasında yakalandı (20 sefer sınırı beceri
+farkını gizliyordu, negatif keseyle oran anlamsızdı, kişi işleri hiç
+teklif edilmediği için "açıkta kalan iş" sahte sıfırdı).
+
+**Baş bulgu:** içerik pisti 4,2 sefer, çekilişlerin %73'ü tekrar, ama 40
+seferde katalogun yalnız %56'sı görülüyor. Oyun yeni görünmeyi içerik
+bittiği için değil, aynı kartları yeniden çektiği için bırakıyor →
+U1 (çekiliş görülmemiş kartı kayırsın) içerik üretmeden kapatır.
+
+**İkinci:** 40 seferde 0/6 koşu bitiyor; soy/defter omurgası yetkin
+oyuncuda hiç ateşlenmiyor. Ustalık kesede (554 GG) ve açlıkta (%26→%9)
+görünüyor, hayatta kalmada görünmüyor.
+
+**Zanaat denetimi:** %100 benzersiz metin, TTR 0,66, %3 tek seçenekli,
+%4 sahte seçim, %64 beceri kontrolü, sıfır etkisiz sonuç, sıfır YZ yazım
+izi - ölçülebilen her eksende el emeği. Tek büyük açık: 199 sonucun
+sıfırı bir kişinin ya da yerin adını geçiriyor (U2).
+
+Öneriler U1-U7 raporda; U3 (yetkin oyuncuya da bir son) kullanıcı kararı.

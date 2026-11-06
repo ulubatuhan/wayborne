@@ -150,3 +150,28 @@ Ayrıntı: `docs/design_notes/oyuncu_gunlukleri.md` §10. Süit 32 163 geçti.
 - [x] **PR22 Ölçüm beş koşuya çıkarıldı** - iki koşu azmış. §9'un "ölüm 3,5 → 1,0" iddiası beş koşuda
   **durmadı** (2,4); "sefer 6,5 → 12,0" iddiası durdu (11,4). Rapor düzeltildi.
   Defter Tutan dilencilikle 5,8 → 7,4 sefer, ölüm 2,4 → 1,8, biten koşu 5/5 → 4/5.
+
+## Üçüncü tur: üç uzman profili (kullanıcı isteği, 2026-11-06)
+
+Rapor: `docs/design_notes/uzman_degerlendirme.md` · Araç: `tests/simulate_expert_review.gd`
+(6 koşu × 40 sefer; Tutundurma Analisti, Sistem Tasarımcısı, Zanaat Denetçisi).
+
+- [x] **PR23 Üç uzman profili ve ölçüm** - ürün hunisi, ustalık eğrisi ve "YZ dolgusu" denetimi.
+  Araç baştan söylüyor: gerçek D1/D7/iade insan ister, buradakiler vekil gösterge.
+  Üç ölçüm kusuru koşu sırasında yakalandı: 20 sefer sınırı beceri farkını gizliyordu (40'a çıktı),
+  negatif keseyle oran anlamsızdı (mutlak farka çevrildi), kişi işleri hiç teklif edilmediği için
+  "açıkta kalan iş" sahte sıfır veriyordu.
+
+- [ ] **PR24 Uzman önerileri (U1-U7), uygulanmadı**
+  - U1 çekiliş görülmemiş kartı kayırsın (S, **en yüksek getiri**) · U2 sonuçlar bir adı ansın (M)
+    · U3 yetkin oyuncuya da bir son (M, **kullanıcı kararı**) · U4 boş turu kapat (S)
+    · U5 ilk oturum oyunun imzasını göstersin (S) · U6 ustalığı ekranda söyle (S)
+    · U7 sayı-only sonuçları azalt (sürekli).
+  - **Baş bulgu:** içerik pisti 4,2 sefer ve çekilişlerin %73'ü tekrar, ama 40 seferde katalogun
+    yalnız %56'sı görülüyor - yani oyun yeni görünmeyi içerik bittiği için değil, aynı kartları
+    yeniden çektiği için bırakıyor. U1 bunu içerik üretmeden kapatır.
+  - **İkinci bulgu:** 40 seferde 0/6 koşu bitiyor; soy/defter omurgası yetkin oyuncuda hiç
+    ateşlenmiyor. Ustalık kesede (554 GG) ve açlıkta (%26→%9) görünüyor, hayatta kalmada görünmüyor.
+  - **Zanaat:** %100 benzersiz metin, 0,66 sözcük çeşitliliği, %3 tek seçenekli, %4 sahte seçim,
+    %64 beceri kontrolü, sıfır etkisiz sonuç, sıfır YZ yazım izi. Ölçülebilen her eksende el emeği.
+    Tek büyük açık: **199 sonucun sıfırı bir kişinin ya da yerin adını geçiriyor.**
