@@ -245,3 +245,22 @@ sebebini söylüyor.
 Sorunu açlık değil gelirsizlik; G1 tam onu çözecekti ve reddedildi.
 Can simitleri işe yarıyor ama kullanılmaları gerekiyor (Bedeli Soran 29
 gün çalıştı + 26 gün aradı; Defter Tutan 7 ve 8). Tempo kararı kullanıcıda.
+
+## İkinci tur düzeltmeler (2026-11-06)
+
+Rapor `docs/design_notes/oyuncu_gunlukleri.md` §10; kayıt PR19-PR22.
+Süit 32 163 geçti; ekran `tests/screenshot_g_fixes.gd` (7 kare).
+
+- **Dağılmada ölüm ve terk ediş birlikte** (kullanıcı): kademeli kural geç
+  gecelerde yine yalnız ölüm bırakıyordu. `get_crew_death_share()` %15'ten
+  %65'e, tavan %85 - 1,0'e varmıyor.
+- **Tavernada dilencilik:** yalnız meyhaneciyle, aç karna, günde bir,
+  kayıtta; itibar doğrudan düşer. İki düzeltme: "aç" ölçütü ambarın dibi
+  (önceki okumayla hiç tetiklenmiyordu), getiri 2 GG'den 5-18 GG'ye.
+- **Tavernada dolandırıcılık:** kargodaki en ucuz malı nadir diye satmak,
+  Zeka+Karizma kontrolü (oran ekranda), karşıdakinin kesesi tohumlu ve
+  bilinmiyor, yakalanınca itibar -3 ve o gün taverna kapalı.
+- **Ölçüm beş koşuya çıkarıldı.** §9'un "ölüm 1,0" iddiası durmadı (2,4);
+  "sefer 12,0" durdu (11,4). Defter Tutan 5,8 → 7,4 sefer, 5/5 → 4/5.
+  Varsayılan liderin dolandırma oranı %12: profiller hiç denemedi, ki
+  kullanıcının şartı buydu.

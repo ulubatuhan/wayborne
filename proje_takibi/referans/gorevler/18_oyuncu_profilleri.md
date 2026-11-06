@@ -133,3 +133,20 @@ Ayrıntı: `docs/design_notes/oyuncu_gunlukleri.md` §9. Süit 32 129 geçti.
   Tutan profili hâlâ iki koşuda da bitiyor; sorunu açlık değil gelirsizlik. Can simitleri (gündelik iş,
   yolda arama) işe yarıyor ama kullanılmaları gerekiyor - tavernada oturup kart okuyarak geçinen oyuncu
   hâlâ ölüyor. Tempo kararı kullanıcıda.
+
+## İkinci tur düzeltmeler (kullanıcı, 2026-11-06)
+
+Ayrıntı: `docs/design_notes/oyuncu_gunlukleri.md` §10. Süit 32 163 geçti.
+
+- [x] **PR19 Dağılmada ölüm ve terk ediş birlikte** - kademeli kural (3-6 ayrılma, 7+ ölüm) geç gecelerde
+  yine yalnız ölüm bırakıyordu. `get_crew_death_share()` %15'ten %65'e çıkıp %85 tavanına yürüyor,
+  1,0'e varmıyor: kervanı bırakıp gitmek her gece mümkün. Zar kervan adı + günden tohumlu.
+- [x] **PR20 Tavernada dilencilik** - yalnız meyhaneciyle ve aç karna; günde bir, kayıtta; itibar
+  doğrudan düşer, deftere yalnız ilk kez yazılır. İki kez düzeltildi: "aç" ölçütü ambarın dibi oldu
+  (önceki okuma hiç tetiklenmiyordu), getiri 2 GG'den 5-18 GG'ye çıktı (2 GG bir seçenek değil tuzaktı).
+- [x] **PR21 Tavernada dolandırıcılık** - kargodaki en ucuz malı nadir diye satmak; Zeka+Karizma
+  kontrolü (ağırlık zekâda), oran ekranda; karşıdakinin kesesi tohumlu ve bilinmiyor; yakalanınca
+  itibar -3 ve o gün taverna kapalı; meyhaneciye denenmez.
+- [x] **PR22 Ölçüm beş koşuya çıkarıldı** - iki koşu azmış. §9'un "ölüm 3,5 → 1,0" iddiası beş koşuda
+  **durmadı** (2,4); "sefer 6,5 → 12,0" iddiası durdu (11,4). Rapor düzeltildi.
+  Defter Tutan dilencilikle 5,8 → 7,4 sefer, ölüm 2,4 → 1,8, biten koşu 5/5 → 4/5.

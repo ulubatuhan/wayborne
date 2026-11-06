@@ -42,7 +42,7 @@ extends SceneTree
 ## Test değil - tablo basar, günlükleri `user://oyuncu_gunlukleri/` altına yazar.
 
 const LEGS: int = 20
-const RUNS_PER_PERSONA: int = 2
+const RUNS_PER_PERSONA: int = 5
 const BASE_SEED: int = 770000
 const STARTING_GOLD: int = 250
 const STARTING_PROVISIONS: int = 20
@@ -50,6 +50,8 @@ const DIARY_DIR: String = "user://oyuncu_gunlukleri"
 ## Yola çıkmadan önce en çok kaç gün çalışılır; yolda en çok kaç gün aranır.
 const LABOUR_DAY_CAP: int = 3
 const FORAGE_DAY_CAP: int = 4
+## Profil bu orandan düşük bir yalanı denemez (oran ekranda yazıyor).
+const SWINDLE_WORTH_TRYING: float = 0.35
 ## Savaş sonrası stres - `simulate_journeys.gd`'nin aynı sayıları.
 const COMBAT_STRESS_BASE: int = 8
 const COMBAT_STRESS_PER_DOWN: int = 6
@@ -221,7 +223,7 @@ func _run(persona: Dictionary, seed_value: int) -> Dictionary:
 		"forage_days": 0, "labour_days": 0, "tavern_nights": 0,
 		"crafted": 0, "treated": 0, "recruited": 0, "chains": 0,
 		"run_over_at": -1, "seed": seed_value, "fights": 0, "fights_won": 0,
-		"crew_hungry_days": 0, "planned_days": 0, "actual_days": 0, "deserted": 0, "hired": 0,
+		"crew_hungry_days": 0, "planned_days": 0, "actual_days": 0, "deserted": 0, "hired": 0, "begged": 0, "conned": 0, "caught": 0,
 	}
 
 	for leg in LEGS:
@@ -321,6 +323,29 @@ func _try_tavern(session: GameSession, state: Dictionary) -> void:
 		_blocked(state, session, "tavernada kalmak", reason)
 		return
 	session.lodge_night()
+	# Tavernanın iki alçak yolu (2026-11-06): aç karna el açmak, ve bir malı
+	# yutturmaya çalışmak. İkisi de itibar yiyor; profil bunu bilerek yapıyor.
+	var beg_reason := session.get_beg_block_reason("bartender")
+	if beg_reason.is_empty():
+		var alms := session.beg_in_tavern("bartender")
+		state["begged"] = int(state["begged"]) + 1
+		_note(state, session, "anladım", "meyhaneciye el açıldı: %d GG, ad eksildi" % alms)
+	elif beg_reason != "UI_BEG_NOT_HUNGRY":
+		_blocked(state, session, "el açmak", beg_reason)
+	var swindle_reason := session.get_swindle_block_reason("patron")
+	# Oran ekranda yazıyor; kör atmak oyuncunun yapacağı şey değil.
+	if swindle_reason.is_empty() and session.get_swindle_odds() < SWINDLE_WORTH_TRYING:
+		_note(state, session, "anladım", "yalanın tutma ihtimali düşük; denenmedi")
+	elif swindle_reason.is_empty():
+		var con := session.swindle_in_tavern("patron", "konuk_%d" % session.total_days_elapsed)
+		if bool(con.get("caught", false)):
+			state["caught"] = int(state["caught"]) + 1
+			_note(state, session, "anladım", "dolandırırken yakalandık; bugün taverna kapalı")
+		elif int(con.get("gold", 0)) > 0:
+			state["conned"] = int(state["conned"]) + 1
+			_note(state, session, "keyif", "ucuz bir mal %d GG'ye yutturuldu" % int(con["gold"]))
+	else:
+		_blocked(state, session, "bir malı yutturmak", swindle_reason)
 	var feast_reason := session.get_feast_block_reason()
 	if feast_reason.is_empty():
 		session.throw_feast()
@@ -964,6 +989,8 @@ func _measure(session: GameSession, state: Dictionary) -> Dictionary:
 		"dovus": float(state["fights"]), "kazanc": float(state["fights_won"]),
 		"ekip_ac": float(state["crew_hungry_days"]),
 		"ayrilan": float(state["deserted"]), "tutulan": float(state["hired"]),
+		"dilendi": float(state["begged"]), "yutturdu": float(state["conned"]),
+		"yakalandi": float(state["caught"]),
 		"uzama": float(state["actual_days"]) / float(maxi(1, int(state["planned_days"]))),
 		"kese": float(session.wallet.balance), "itibar": float(session.reputation),
 		"diary": state["diary"], "blocked": state["blocked"], "seed": state["seed"],
@@ -1018,12 +1045,13 @@ func _write_diary(persona: Dictionary, runs: Array[Dictionary]) -> void:
 func _report(rows: Array[Dictionary], blocked_all: Dictionary) -> void:
 	print("")
 	print("── Profil tablosu (ortalama, %d koşu)" % RUNS_PER_PERSONA)
-	print("   profil                  sefer  ölen  ölüm  açgün  ekipaç  arama  işgün  dövüş  kazan  ayrıl  tuttu  uzama  teslim  şehir  kart  tavrn  üretm  hekim  katıl")
+	print("   profil                  sefer  ölen  ölüm  açgün  ekipaç  arama  işgün  dövüş  kazan  ayrıl  tuttu  dilen  yuttu  yakal  uzama  teslim  şehir  kart  tavrn  üretm  hekim  katıl")
 	for row in rows:
-		print("   %-22s  %5.1f  %4s  %4.1f  %5.1f  %6.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.2f  %6.1f  %5.1f  %4.1f  %5.1f  %5.1f  %5.1f  %5.1f" % [
+		print("   %-22s  %5.1f  %4s  %4.1f  %5.1f  %6.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.1f  %5.2f  %6.1f  %5.1f  %4.1f  %5.1f  %5.1f  %5.1f  %5.1f" % [
 			row["name"], row["sefer"], "%d/%d" % [int(row["biten"]), RUNS_PER_PERSONA],
 			row["olum"], row["ac_gun"], row["ekip_ac"], row["arama"], row["isgunu"],
-			row["dovus"], row["kazanc"], row["ayrilan"], row["tutulan"], row["uzama"],
+			row["dovus"], row["kazanc"], row["ayrilan"], row["tutulan"],
+			row["dilendi"], row["yutturdu"], row["yakalandi"], row["uzama"],
 			row["teslimat"], row["sehir"], row["kart"], row["taverna"],
 			row["uretim"], row["hekim"], row["katilan"],
 		])

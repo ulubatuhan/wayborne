@@ -191,6 +191,12 @@ func complete_chain(id: String) -> void:
 ## Neden burada: ticaret bugüne kadar hiçbir ahlaki iz bırakmıyordu - para
 ## ve stok değişiyor, kimse bir şey hatırlamıyordu.
 func remember_trade(location_id: String, kindly: bool) -> void:
+	remember_deed(location_id, kindly)
+
+## Şehrin adı olan kişileri bir **işi** hatırlar - ticaret, dilencilik,
+## yakalanan bir dolandırıcılık. `remember_trade` bunun ticaret adıyla
+## anılan hâli; eski çağıranlar değişmedi.
+func remember_deed(location_id: String, kindly: bool) -> void:
 	for p in city_people(location_id):
 		if not bool(p.get("alive", false)):
 			continue

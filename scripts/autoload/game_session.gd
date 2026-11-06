@@ -1103,6 +1103,8 @@ func can_afford_lodging() -> bool:
 func get_lodging_block_reason() -> String:
 	if is_journey_active():
 		return "UI_TAVERN_LODGE_ON_ROAD"
+	if is_tavern_banned():
+		return "UI_TAVERN_BANNED"
 	if is_shut_out():
 		return "UI_TAVERN_LODGE_SHUT_OUT"
 	if not wallet.can_afford(get_lodging_cost()):
@@ -1153,9 +1155,214 @@ func get_feast_cost() -> int:
 func can_afford_feast() -> bool:
 	return get_feast_block_reason().is_empty()
 
+## --- Tavernada iki alçak yol (kullanıcı kararı, 2026-11-06) ---
+##
+## Profil günlükleri bir boşluk ölçtü: ticaret dışında günlük tüketimi aşan
+## hiçbir gelir yok, bu yüzden tavernada oturup kişileri tanıyarak oynayan
+## oyuncu matematiksel olarak ölüyordu. Kullanıcı bunun lojistik bir ücretle
+## (reddedilen G1) kapatılmasını istemedi; **"para kazanmaya da çalışması
+## lazım değil mi? Dilencilik ya da tavernada dolandırıcılık yapmalı"** dedi.
+##
+## İkisi de bir gelir kapısı değil, bir **itibar takası**: parayı alırsın,
+## adın eksilir. İtibar kontratı, krediyi ve işe almayı açtığı için kariyerini
+## dilencilikle sürdüren kervan ticaret oyununu kaybeder - bedeli olan ama
+## kapanmayan bir çıkış yolu.
+##
+## Günde bir kez (kayıtta): gün yalnızca yolda ilerlediği için bu, şehir
+## ziyareti başına bir kez demek - şölenin rasyonlanmasıyla aynı gerekçe.
+## Zar kervan adı + gün + şehirden tohumlu: kaydı yükleyip yeniden atmak yok.
+
+## **Dilencilik.** Yalnızca meyhanecinin karşısında ve **aç karna**: tok bir
+## kervanbaşı el açmaz. Kullanıcının iki şartı da burada.
+const BEG_BASE: int = 14
+const BEG_PER_CHARISMA: float = 1.1
+const BEG_STRESS: int = 5
+const BEG_REPUTATION: int = -1
+## Aç bir şehir veremez; kıtlığın en somut cümlesi bu.
+const BEG_CITY_FLOOR: float = 0.15
+var last_beg_day: int = -1
+
+func has_begged_today() -> bool:
+	return last_beg_day == total_days_elapsed
+
+## Kervanın karnı aç mı.
+##
+## "Dün gece biri aç yattı" diye okumak yetmiyordu: şehre varan kervanın
+## sayacı sıfırlanır (bkz. finish_journey), yani oyuncu tam da paraya ihtiyaç
+## duyduğu anda - yola çıkmadan önce - hiç el açamıyordu, ölçümde dilencilik
+## bir kez bile tetiklenmedi. Doğrusu **ambarın dibi**: erzak önümüzdeki
+## birkaç günü çıkarmıyorsa bu kervan açtır. Tok karna el açılmaz, ama
+## "tok" demek dolu bir ambar demek.
+const HUNGRY_LARDER_DAYS: int = 2
+
+func is_caravan_hungry() -> bool:
+	if crew_hungry_nights > 0:
+		return true
+	if get_provisions() < get_daily_provision_consumption() * HUNGRY_LARDER_DAYS:
+		return true
+	for character in get_party():
+		if character.consecutive_hungry_days > 0:
+			return true
+	return false
+
+## Dilencilik kapalıysa sebebi, açıksa "".
+func get_beg_block_reason(role: String) -> String:
+	if is_journey_active():
+		return "UI_BEG_ON_ROAD"
+	if role != "bartender":
+		return "UI_BEG_WRONG_EAR"
+	if not is_caravan_hungry():
+		return "UI_BEG_NOT_HUNGRY"
+	if has_begged_today():
+		return "UI_BEG_ALREADY"
+	return ""
+
+## Bir günlük dilenmenin getirisi: karizma kadar, ama şehrin hâli kadar.
+##
+## İlk sayılar ölçülünce iki payın **çarpımı** tipik bir şehirde 2 GG
+## veriyordu - yarım birim erzak. Bir itibar puanına 2 GG, hiçbir oyuncunun
+## seçmeyeceği bir takas: yani bir seçenek değil, bir tuzak. Paylar artık
+## daha yumuşak biniyor; aralık 5-18 GG, yani küçük bir kervan için bir
+## iki günlük yemek. Can simidi, maaş değil.
+func get_beg_yield() -> int:
+	var skill := get_best_effective_stat(CharacterStats.Kind.CHARISMA)
+	# Aç şehir az verir (kıtlığın en somut cümlesi), ama hiç vermemez.
+	var lean := maxf(BEG_CITY_FLOOR, 1.0 - scarcity_here() * 0.5)
+	var mood := 0.5 + morale_of(current_location_id) / 200.0
+	return maxi(1, int(round((float(BEG_BASE) + skill * BEG_PER_CHARISMA) * lean * mood)))
+
+## El açar. Kaç kuruş düştüğünü döner; kapalıysa 0.
+func beg_in_tavern(role: String) -> int:
+	if not get_beg_block_reason(role).is_empty():
+		return 0
+	var coins := get_beg_yield()
+	wallet.earn(coins)
+	last_beg_day = total_days_elapsed
+	change_stress(BEG_STRESS)
+	change_reputation(BEG_REPUTATION)
+	people.remember_deed(current_location_id, false)
+	# Defter yalnız ilk kez yazıyor: her sadaka bir satır olsaydı defter bir
+	# makbuz koçanına dönerdi (bkz. Trade Memory Rules). Yazılan şey para
+	# değil, eşiğin geçildiği gün.
+	if mark_first(FIRST_BEGGED):
+		ledger.record(
+			CaravanLedger.KIND_TRADE, caravan_name, total_days_elapsed, lineage_generation,
+			"", "LEDGER_CAUSE_BEGGED", _ledger_location_id()
+		)
+	return coins
+
+## **Dolandırıcılık.** Elindeki en ucuz malı çok değerli bir şeymiş gibi
+## satmaya çalışmak. Kullanıcının tarifi: *"elindeki çok basit bir malı çok
+## iyi bir şey gibi satmaya çalışmalı... karşı tarafın da parası varsa ve
+## kandırılırsa başarılı olur ama bunu yapmaya çalışan oyuncunun zekası ve
+## manipülasyonu gerçekten iyi olmalı ve bir skill check şart."*
+##
+## Kontrol iki ayağı birden okuyor - kurgu Zeka, anlatım Karizma. Bu,
+## Haggling Rules'un "ikisinin iyisini al" tuzağı değil: iki ayrı katkı
+## toplanıyor, ve ağırlık Zeka'da.
+const SWINDLE_BASE_ODDS: float = 0.12
+const SWINDLE_PER_WITS: float = 0.055
+const SWINDLE_PER_CHARISMA: float = 0.03
+const SWINDLE_MIN_ODDS: float = 0.10
+const SWINDLE_MAX_ODDS: float = 0.80
+## Malın "aslında ne ettiği" ile satıldığı fiyat arasındaki uçurum.
+const SWINDLE_PRICE_FACTOR: int = 9
+const SWINDLE_CAUGHT_REPUTATION: int = -3
+const SWINDLE_CAUGHT_STRESS: int = 8
+## Yakalanan o gün tavernadan atılır.
+var tavern_banned_day: int = -1
+var last_swindle_day: int = -1
+
+func is_tavern_banned() -> bool:
+	return tavern_banned_day == total_days_elapsed
+
+func has_swindled_today() -> bool:
+	return last_swindle_day == total_days_elapsed
+
+## Satmaya kalkışılacak mal: kargodaki en ucuz, erzak olmayan şey.
+func get_swindle_item() -> Item:
+	var cheapest: Item = null
+	for entry in get_total_inventory_entries():
+		var item: Item = (entry as Dictionary).item
+		if item == null or item.item_id == PROVISIONS_ITEM_ID:
+			continue
+		if int((entry as Dictionary).quantity) <= 0:
+			continue
+		if cheapest == null or item.base_price < cheapest.base_price:
+			cheapest = item
+	return cheapest
+
+## Karşıdakinin kesesi: kişiden ve günden tohumlu, bakmakla değişmez.
+## Oyuncu bunu **önceden bilmez** - dolandırıcılık bir bilgi kumarıdır.
+func get_mark_purse(person_id: String) -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("mark_purse|%s|%s|%d" % [person_id, current_location_id, total_days_elapsed])
+	# Çoğu meyhane konuğunun üstünde doğru dürüst para yoktur.
+	if rng.randf() < 0.45:
+		return rng.randi_range(0, 8)
+	return rng.randi_range(12, 70)
+
+## Kandırmanın tutma olasılığı. Ekranda yazılır: tek atışlık bir zar kör
+## atılmaz (Haggling Rules).
+func get_swindle_odds() -> float:
+	var wits := get_best_effective_stat(CharacterStats.Kind.INTELLECT)
+	var tongue := get_best_effective_stat(CharacterStats.Kind.CHARISMA)
+	return clampf(
+		SWINDLE_BASE_ODDS + wits * SWINDLE_PER_WITS + tongue * SWINDLE_PER_CHARISMA,
+		SWINDLE_MIN_ODDS, SWINDLE_MAX_ODDS
+	)
+
+## Dolandırıcılık kapalıysa sebebi, açıksa "".
+func get_swindle_block_reason(role: String) -> String:
+	if is_journey_active():
+		return "UI_SWINDLE_ON_ROAD"
+	if role == "bartender":
+		# Meyhaneciyi dolandırmak: kalacak yerini de kaybedersin.
+		return "UI_SWINDLE_NOT_THE_KEEPER"
+	if has_swindled_today():
+		return "UI_SWINDLE_ALREADY"
+	if get_swindle_item() == null:
+		return "UI_SWINDLE_NO_GOODS"
+	return ""
+
+## Malı yutturmaya çalışır. Döner: {"ok", "won", "gold", "item_id", "caught"}.
+func swindle_in_tavern(role: String, person_id: String) -> Dictionary:
+	if not get_swindle_block_reason(role).is_empty():
+		return {"ok": false}
+	var item := get_swindle_item()
+	last_swindle_day = total_days_elapsed
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("swindle|%s|%s|%d" % [caravan_name, person_id, total_days_elapsed])
+	var believed := rng.randf() < get_swindle_odds()
+	if not believed:
+		# Yakalandı: itibar doğrudan düşer ve o gün taverna kapanır.
+		change_reputation(SWINDLE_CAUGHT_REPUTATION)
+		change_stress(SWINDLE_CAUGHT_STRESS)
+		people.remember_deed(current_location_id, false)
+		tavern_banned_day = total_days_elapsed
+		ledger.record(
+			CaravanLedger.KIND_TRADE, caravan_name, total_days_elapsed, lineage_generation,
+			"", "LEDGER_CAUSE_SWINDLE_CAUGHT", _ledger_location_id()
+		)
+		return {"ok": true, "won": false, "gold": 0, "item_id": item.item_id, "caught": true}
+	# Kandı - ama kesesinde ne varsa o kadar öder. Para yoksa kazanç da yok:
+	# iyi bir yalan boş bir cebi doldurmaz.
+	var asking := maxi(1, item.base_price * SWINDLE_PRICE_FACTOR)
+	var paid := mini(asking, get_mark_purse(person_id))
+	if paid > 0:
+		remove_from_cargo_or_bags(item.item_id, 1)
+		wallet.earn(paid)
+		ledger.record(
+			CaravanLedger.KIND_TRADE, caravan_name, total_days_elapsed, lineage_generation,
+			"", "LEDGER_CAUSE_SWINDLED", _ledger_location_id()
+		)
+	return {"ok": true, "won": true, "gold": paid, "item_id": item.item_id, "caught": false}
+
 ## Şölen kapalıysa sebebi, açıksa "". Üç ayrı sebep tek bir soluk düğmeye
 ## çıkıyordu (bkz. get_lodging_block_reason'ın notu).
 func get_feast_block_reason() -> String:
+	if is_tavern_banned():
+		return "UI_TAVERN_BANNED"
 	if party_stress <= 0:
 		return "UI_TAVERN_FEAST_NO_STRESS"
 	if has_feasted_today():
@@ -1268,6 +1475,9 @@ func start_playthrough(player_character: CharacterData, rng: RandomNumberGenerat
 	crew_hungry_nights = 0
 	crew_missing = 0
 	crew_lost_to_hunger = 0
+	last_beg_day = -1
+	last_swindle_day = -1
+	tavern_banned_day = -1
 	_sync_crew_names()
 
 	current_location_id = roll_starting_location(rng, player_character.culture_id)
@@ -2132,6 +2342,16 @@ var crew_hungry_nights: int = 0
 ## Önce seni bırakırlar, sonra seninle ölürler.
 const CREW_DESERT_FROM: int = STARVATION_HP_LOSS_START_DAY
 const CREW_STARVE_FROM: int = 7
+## Kaybedilen el ayrıldı mı, öldü mü.
+##
+## İlk hâli kademeliydi: 3-6. geceler ayrılma, 7+ ölüm. Kullanıcı düzeltti
+## (2026-11-06): *"Sadece öldürmek değil de kervanı terk eden de olmalı."*
+## Geç gecelerde yalnız ölüm olması da aynı kusurun öbür yüzü - aç bir
+## ekipte her gece hem bırakan hem düşen vardır; değişen oran. Pay hiçbir
+## zaman 1,0'e varmaz: kervanı bırakıp gitmek her gece mümkün kalır.
+const CREW_DEATH_SHARE_EARLY: float = 0.15
+const CREW_DEATH_SHARE_LATE: float = 0.65
+const CREW_DEATH_SHARE_MAX: float = 0.85
 ## Kaç elin eksik olduğu. Vagon alıp satmak ihtiyacı değiştirir, bunu değil:
 ## borç kapanana kadar taşınır (bkz. `_sync_crew_names`).
 var crew_missing: int = 0
@@ -2463,7 +2683,12 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 	var crew_deserted: Array[String] = []
 	var cargo_left_behind: Array[Dictionary] = []
 	if crew_hungry and crew_hungry_nights >= CREW_DESERT_FROM:
-		var dies := crew_hungry_nights >= CREW_STARVE_FROM
+		# Zar kervanın adı ve günden tohumlu: kaydı yükleyip ölümü
+		# ayrılmaya çevirmek yok (bkz. Stress Rules'un "yükleyerek yeniden
+		# atılabilen bir zar, zar değildir" kuralı).
+		var loss_rng := RandomNumberGenerator.new()
+		loss_rng.seed = hash("crew_loss|%s|%d" % [caravan_name, total_days_elapsed])
+		var dies := loss_rng.randf() < get_crew_death_share(crew_hungry_nights)
 		var gone := _lose_one_crew_hand(
 			"LEDGER_CAUSE_STARVED" if dies else "LEDGER_CAUSE_DESERTED",
 			CaravanLedger.KIND_DIED if dies else CaravanLedger.KIND_DEPARTED
@@ -2494,6 +2719,19 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 		"cargo_left_behind": cargo_left_behind,
 		"death_outcome": death_outcome,
 	}
+
+## Bu kaçıncı aç gecede kaybedilen el ölür (geri kalanında ayrılır).
+## Erken gecelerde çoğu bırakıp gider, geç gecelerde çoğu düşer - ama
+## ikisi de her gece mümkün (bkz. CREW_DEATH_SHARE_EARLY'nin notu).
+static func get_crew_death_share(nights: int) -> float:
+	if nights < CREW_DESERT_FROM:
+		return 0.0
+	var span := float(maxi(1, CREW_STARVE_FROM - CREW_DESERT_FROM))
+	var walked := float(nights - CREW_DESERT_FROM) / span
+	if walked <= 1.0:
+		return lerpf(CREW_DEATH_SHARE_EARLY, CREW_DEATH_SHARE_LATE, clampf(walked, 0.0, 1.0))
+	# Yedinci geceden sonra ölüm payı yavaşça tavana yürür ama tavanı aşmaz.
+	return minf(CREW_DEATH_SHARE_MAX, CREW_DEATH_SHARE_LATE + (walked - 1.0) * 0.1)
 
 ## İlk aç gece tek seferlik düşüş; sonraki her art arda gece biraz daha.
 static func get_crew_hunger_morale_penalty(nights: int) -> int:
@@ -3945,6 +4183,8 @@ const FIRST_DECISION: String = "first_decision"
 const FIRST_THREAT: String = "first_threat"
 const FIRST_LOSS_RISK: String = "first_loss_risk"
 const FIRST_PROFIT: String = "first_profit"
+## Kervanbaşının ilk kez el açtığı gün (bkz. beg_in_tavern).
+const FIRST_BEGGED: String = "first_begged"
 ## Çizelgenin hedefi (saniye): ilk karar 3 dk, ilk tehdit 10 dk, ilk kayıp tehlikesi ve ilk kârlı varış 30 dk.
 const FIRST_TARGETS: Dictionary = {
 	FIRST_DECISION: 180.0, FIRST_THREAT: 600.0, FIRST_LOSS_RISK: 1800.0, FIRST_PROFIT: 1800.0,
@@ -5731,6 +5971,9 @@ func to_save_dict() -> Dictionary:
 		"crew_hungry_nights": crew_hungry_nights,
 		"crew_missing": crew_missing,
 		"crew_lost_to_hunger": crew_lost_to_hunger,
+		"last_beg_day": last_beg_day,
+		"last_swindle_day": last_swindle_day,
+		"tavern_banned_day": tavern_banned_day,
 		"meal_policy_mode": meal_policy_mode,
 		"meal_policy_ids": meal_policy_ids.duplicate(),
 		"standing_camp_at_dusk": standing_camp_at_dusk,
@@ -6031,6 +6274,9 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	crew_hungry_nights = maxi(0, int(data.get("crew_hungry_nights", 0)))
 	crew_missing = maxi(0, int(data.get("crew_missing", 0)))
 	crew_lost_to_hunger = maxi(0, int(data.get("crew_lost_to_hunger", 0)))
+	last_beg_day = int(data.get("last_beg_day", -1))
+	last_swindle_day = int(data.get("last_swindle_day", -1))
+	tavern_banned_day = int(data.get("tavern_banned_day", -1))
 	meal_policy_mode = String(data.get("meal_policy_mode", MEAL_MODE_ALL))
 	meal_policy_ids.clear()
 	for id in data.get("meal_policy_ids", []):

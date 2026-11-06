@@ -31,6 +31,8 @@ func _init() -> void:
 	await _shoot_city("03_pazar_notlari", "res://scenes/game/market.tscn")
 	await _shoot_planner("04_planlayici_kolon")
 	await _shoot_wagon("05_vagon_atolyesi")
+	await _shoot_talk("06_meyhaneci_dilencilik", "bartender", true)
+	await _shoot_talk("07_konuk_dolandiricilik", "patron", false)
 	print("bitti")
 	quit()
 
@@ -122,6 +124,30 @@ func _shoot_planner(file_name: String) -> void:
 			break
 	var screen: Node = load("res://scenes/game/caravan_planner.tscn").instantiate()
 	get_root().add_child(screen)
+	await _settle()
+	await _settle()
+	_save("%s.png" % file_name)
+	screen.queue_free()
+	await _settle()
+
+## Tavernanın iki alçak yolu (kullanıcı kararı 2026-11-06): el açmak yalnız
+## meyhanecide ve aç karna; bir malı yutturmak yalnız konukta.
+func _shoot_talk(file_name: String, role: String, hungry: bool) -> void:
+	var session := _battered_session()
+	if hungry:
+		session.change_provisions(-session.get_provisions())
+	else:
+		session.change_provisions(200)
+		session.add_to_cargo(ItemCatalog.get_item("test_cloth"), 3)
+	print("  %s: aç mı %s · el açma %s · yutturma %s" % [
+		file_name, session.is_caravan_hungry(),
+		session.get_beg_block_reason(role), session.get_swindle_block_reason(role),
+	])
+	var screen: Node = load("res://scenes/game/tavern.tscn").instantiate()
+	get_root().add_child(screen)
+	await _settle()
+	var who := CharacterData.create("Yolcu", CultureCatalog.NOMAD, CharacterStats.new())
+	screen.call("_on_person_chosen", who, role)
 	await _settle()
 	await _settle()
 	_save("%s.png" % file_name)

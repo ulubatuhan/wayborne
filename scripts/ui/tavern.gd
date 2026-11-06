@@ -281,8 +281,42 @@ func _talk_choices(character: CharacterData) -> Array:
 		choices.append({"id": "prices", "text": tr("UI_TALK_PRICES")})
 	if _session.is_at_caravanserai() and not _ledger_read and _talk_role == "bartender":
 		choices.append({"id": "ledger", "text": tr("UI_TALK_LEDGER")})
+	_add_low_roads(choices)
 	choices.append({"id": "bye", "text": tr("UI_TALK_BYE")})
 	return choices
+
+## Tavernanın iki alçak yolu (kullanıcı kararı, 2026-11-06): el açmak ve
+## bir malı yutturmak. İkisi de yalnız **ait oldukları kulakta** listeleniyor
+## - dilencilik meyhanecide, dolandırıcılık konukta - yoksa her sohbette iki
+## fazladan satır, oyunun ağzını bozardı. Listelendiklerinde kapalı olsalar
+## bile sebeplerini söylüyorlar (kapalı düğme sebebini söyler).
+func _add_low_roads(choices: Array) -> void:
+	if _talk_role == "bartender":
+		var beg_reason := _session.get_beg_block_reason(_talk_role)
+		# "Henüz o kadar aç değiliz" cevabını her sohbette göstermek gürültü;
+		# el açma seçeneği ancak karın gerçekten açken görünüyor.
+		if beg_reason.is_empty() or beg_reason != "UI_BEG_NOT_HUNGRY":
+			var beg := {
+				"id": "beg", "text": tr("UI_TALK_BEG"), "cost": tr("UI_TALK_BEG_COST"),
+			}
+			if not beg_reason.is_empty():
+				beg["locked"] = tr(beg_reason)
+			choices.append(beg)
+		return
+	var swindle_reason := _session.get_swindle_block_reason(_talk_role)
+	var goods := _session.get_swindle_item()
+	if goods == null and swindle_reason == "UI_SWINDLE_NO_GOODS":
+		return
+	var swindle := {
+		"id": "swindle",
+		"text": tr("UI_TALK_SWINDLE") % [
+			goods.item_name if goods != null else "",
+			int(round(_session.get_swindle_odds() * 100.0)),
+		],
+	}
+	if not swindle_reason.is_empty():
+		swindle["locked"] = tr(swindle_reason)
+	choices.append(swindle)
 
 func _on_talk_choice(id: String, character: CharacterData, role: String) -> void:
 	match id:
@@ -299,6 +333,24 @@ func _on_talk_choice(id: String, character: CharacterData, role: String) -> void
 			_asked_prices[character.character_id] = true
 			_talk.say(_price_news(character, role), _talk_choices(character))
 			_refresh_price_rumors()
+		"beg":
+			var coins := _session.beg_in_tavern(role)
+			_talk.say(
+				tr("UI_TALK_BEG_GIVEN") % coins if coins > 0 else tr("UI_TALK_BEG_NOTHING"),
+				_talk_choices(character)
+			)
+			_refresh_feast()
+			_refresh_lodging()
+		"swindle":
+			var result := _session.swindle_in_tavern(role, character.character_id)
+			var line := tr("UI_TALK_SWINDLE_CAUGHT")
+			if bool(result.get("won", false)):
+				var gold := int(result.get("gold", 0))
+				line = tr("UI_TALK_SWINDLE_SOLD") % gold if gold > 0 else tr("UI_TALK_SWINDLE_BROKE")
+			_talk.say(line, _talk_choices(character))
+			# Yakalanan o gün dışarı: konuşma biter, taverna kapanır.
+			if bool(result.get("caught", false)):
+				_thrown_out()
 		"ledger":
 			_ledger_read = true
 			_talk.say(_traveller_ledger(), _talk_choices(character))
@@ -529,4 +581,13 @@ func _on_map_pressed() -> void:
 	SceneInk.go(Nav.open(Nav.TAVERN, Nav.TRAVEL))
 
 func _on_back_pressed() -> void:
+	SceneInk.go(Nav.back())
+
+## Dolandırırken yakalanan o gün kapı dışarı (kullanıcı kararı,
+## 2026-11-06). Konuşma kapanır, ekran şehre döner; o gün oda, şölen ve
+## sohbet kapalı - `GameSession.is_tavern_banned()` okuyan her kapı
+## sebebini söylüyor.
+func _thrown_out() -> void:
+	if _talk != null:
+		_talk.close()
 	SceneInk.go(Nav.back())

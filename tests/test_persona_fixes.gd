@@ -30,6 +30,10 @@ func run(t) -> void:
 	_test_an_open_request_is_visible_where_you_buy(t)
 	_test_the_advance_says_its_threshold(t)
 	_test_a_contract_that_will_not_fit_says_so(t)
+	_test_begging_needs_an_empty_belly_and_the_keepers_ear(t)
+	_test_a_swindle_is_a_skill_check_on_wits_and_tongue(t)
+	_test_being_caught_costs_the_name_and_the_tavern(t)
+	_test_a_good_lie_does_not_fill_an_empty_pocket(t)
 
 func _session_in_city(gold: int = 250) -> GameSession:
 	var session := GameSession.new(gold, 20, 1)
@@ -330,12 +334,19 @@ func _test_a_hungry_crew_breaks_up(t) -> void:
 	t.eq(session.get_idle_wagon_count(), 1, "boşta vagon sayılıyor")
 	t.ok(session.get_cargo_capacity() < capacity_before, "taşıma gücü düştü")
 
-	# Yedinci geceden sonra artık ayrılmıyorlar, ölüyorlar.
-	var died := 0
-	while session.crew_hungry_nights < GameSession.CREW_STARVE_FROM:
-		var result := session.apply_meal_distribution(GameSession.MEAL_MODE_PARTY_ONLY)
-		died += (result["crew_starved_names"] as Array).size()
-	t.ok(died > 0, "yürüyecek hâli kalmayan ölür")
+	# Her gece hem bırakan hem düşen olabilir; değişen oran (kullanıcı
+	# düzeltmesi 2026-11-06). Pay geceyle ağırlaşır ama 1,0'e varmaz.
+	t.eq(GameSession.get_crew_death_share(GameSession.CREW_DESERT_FROM - 1), 0.0,
+		"üçüncü geceden önce kimse kaybedilmez")
+	t.ok(
+		GameSession.get_crew_death_share(GameSession.CREW_STARVE_FROM)
+		> GameSession.get_crew_death_share(GameSession.CREW_DESERT_FROM),
+		"geceler geçtikçe ölüm payı ağırlaşır"
+	)
+	t.le(
+		GameSession.get_crew_death_share(99), GameSession.CREW_DEATH_SHARE_MAX,
+		"ama kervanı bırakıp gitmek her gece mümkün kalır"
+	)
 
 func _test_an_idle_wagon_cannot_be_loaded(t) -> void:
 	var session := _session_in_city()
@@ -533,3 +544,119 @@ func _test_a_contract_that_will_not_fit_says_so(t) -> void:
 	t.eq(plan.get_offer_block_reason(offer), "", "yer varken sebep yok")
 	t.ok(plan.toggle_merchant(offer), "ve alınır")
 	t.eq(plan.get_offer_block_reason(offer), "", "seçili ilan engellenmiş sayılmaz")
+
+# --- Tavernanın iki alçak yolu (kullanıcı kararı 2026-11-06) ---
+
+func _test_begging_needs_an_empty_belly_and_the_keepers_ear(t) -> void:
+	# Kullanıcının iki şartı: yalnız meyhaneciyle, ve **aç karna**.
+	# *"Tok karna dilencilik yapamayalım."*
+	var fed := _session_in_city()
+	fed.change_provisions(500)
+	t.not_ok(fed.is_caravan_hungry(), "karnı tok kervan")
+	t.eq(fed.get_beg_block_reason("bartender"), "UI_BEG_NOT_HUNGRY", "tok karna el açılmaz")
+
+	var hungry := _session_in_city()
+	hungry.change_provisions(-hungry.get_provisions())
+	t.ok(hungry.is_caravan_hungry(), "erzak bir günü çıkarmıyor")
+	t.eq(hungry.get_beg_block_reason("patron"), "UI_BEG_WRONG_EAR", "bunu konuğa söylemezsin")
+	t.eq(hungry.get_beg_block_reason("bartender"), "", "meyhaneciye söylenir")
+
+	var purse := hungry.wallet.balance
+	var standing := hungry.reputation
+	var coins := hungry.beg_in_tavern("bartender")
+	t.ok(coins > 0, "bir şeyler düşer")
+	t.eq(hungry.wallet.balance, purse + coins, "kese kadarınca dolar")
+	t.ok(hungry.reputation < standing, "ve ad doğrudan eksilir")
+	t.eq(hungry.get_beg_block_reason("bartender"), "UI_BEG_ALREADY", "günde bir kez")
+	# Günde bir kuralı kayıtta: yükleyerek yeniden el açmak yok.
+	var reloaded := GameSession.new(1, 1, 1)
+	reloaded.load_from_dict(hungry.to_save_dict())
+	t.eq(reloaded.get_beg_block_reason("bartender"), "UI_BEG_ALREADY", "kayıt bunu hatırlar")
+
+	# Aç bir şehir veremez: kıtlığın en somut cümlesi.
+	var rich_city := _session_in_city()
+	rich_city.change_provisions(-rich_city.get_provisions())
+	rich_city.change_city_morale(rich_city.current_location_id, 100.0)
+	var poor_city := _session_in_city()
+	poor_city.change_provisions(-poor_city.get_provisions())
+	poor_city.change_city_morale(poor_city.current_location_id, -100.0)
+	t.ok(rich_city.get_beg_yield() > poor_city.get_beg_yield(), "aç şehir az verir")
+
+func _test_a_swindle_is_a_skill_check_on_wits_and_tongue(t) -> void:
+	# *"Elindeki çok basit bir malı çok iyi bir şey gibi satmaya çalışmalı...
+	# zekası ve manipülasyonu gerçekten iyi olmalı ve bir skill check şart."*
+	var session := _session_in_city()
+	t.eq(session.get_swindle_block_reason("patron"), "UI_SWINDLE_NO_GOODS",
+		"yutturacak mal yokken kapalı")
+	t.eq(session.get_swindle_item(), null, "ve mal da yok")
+
+	var cheap := ItemCatalog.get_item("test_cloth")
+	var dear := ItemCatalog.get_item("jewelry")
+	session.add_to_cargo(dear, 1)
+	session.add_to_cargo(cheap, 2)
+	t.eq(session.get_swindle_item().item_id, cheap.item_id, "satılacak olan en ucuz mal")
+	t.eq(session.get_swindle_block_reason("patron"), "", "konuğa denenebilir")
+	t.eq(session.get_swindle_block_reason("bartender"), "UI_SWINDLE_NOT_THE_KEEPER",
+		"meyhaneciye denenmez: yatacak yerini kaybedersin")
+
+	# Kontrol iki ayağı birden okuyor, ağırlık zekâda.
+	var clever := _session_in_city()
+	clever.get_party()[0].stats.set_value(CharacterStats.Kind.INTELLECT, 12)
+	var dull := _session_in_city()
+	t.ok(clever.get_swindle_odds() > dull.get_swindle_odds(), "zekâ oranı yükseltir")
+	var smooth := _session_in_city()
+	smooth.get_party()[0].stats.set_value(CharacterStats.Kind.CHARISMA, 12)
+	t.ok(smooth.get_swindle_odds() > dull.get_swindle_odds(), "karizma da yükseltir")
+	t.le(clever.get_swindle_odds(), GameSession.SWINDLE_MAX_ODDS, "oranın tavanı var")
+
+func _test_being_caught_costs_the_name_and_the_tavern(t) -> void:
+	# *"Başarısız dolandırıcılık da direkt itibar düşürsün ve tavernadan
+	# kovulalım o gün."*
+	var session := _session_in_city()
+	session.add_to_cargo(ItemCatalog.get_item("test_cloth"), 2)
+	# Beceriyi dibe çek: zar tohumlu, yakalanması kesine yakın.
+	session.get_party()[0].stats.set_value(CharacterStats.Kind.INTELLECT, 1)
+	session.get_party()[0].stats.set_value(CharacterStats.Kind.CHARISMA, 1)
+	var standing := session.reputation
+	var caught := false
+	for attempt in 6:
+		var fresh := _session_in_city()
+		fresh.add_to_cargo(ItemCatalog.get_item("test_cloth"), 2)
+		fresh.get_party()[0].stats.set_value(CharacterStats.Kind.INTELLECT, 1)
+		fresh.get_party()[0].stats.set_value(CharacterStats.Kind.CHARISMA, 1)
+		var result := fresh.swindle_in_tavern("patron", "mark_%d" % attempt)
+		if bool(result.get("caught", false)):
+			caught = true
+			t.ok(fresh.reputation < standing, "yakalanınca ad doğrudan eksilir")
+			t.ok(fresh.is_tavern_banned(), "ve o gün tavernaya giremezsin")
+			t.eq(fresh.get_lodging_block_reason(), "UI_TAVERN_BANNED", "oda kapanır")
+			t.eq(fresh.get_feast_block_reason(), "UI_TAVERN_BANNED", "şölen de")
+			break
+	t.ok(caught, "beceriksiz bir yalan yakalanır")
+
+	# Günde bir deneme, ve kayıt bunu hatırlar.
+	var once := _session_in_city()
+	once.add_to_cargo(ItemCatalog.get_item("test_cloth"), 2)
+	once.swindle_in_tavern("patron", "mark")
+	t.eq(once.get_swindle_block_reason("patron"), "UI_SWINDLE_ALREADY", "günde bir kez")
+	var reloaded := GameSession.new(1, 1, 1)
+	reloaded.load_from_dict(once.to_save_dict())
+	t.eq(reloaded.get_swindle_block_reason("patron"), "UI_SWINDLE_ALREADY", "kayıt hatırlar")
+
+func _test_a_good_lie_does_not_fill_an_empty_pocket(t) -> void:
+	# *"Karşı tarafın da parası varsa."* Kandırmak yetmez; adamın kesesi
+	# boşsa kazanç da yok.
+	var broke_mark := ""
+	var rich_mark := ""
+	var session := _session_in_city()
+	for index in 40:
+		var who := "mark_%d" % index
+		var purse := session.get_mark_purse(who)
+		if purse <= 0 and broke_mark.is_empty():
+			broke_mark = who
+		if purse > 20 and rich_mark.is_empty():
+			rich_mark = who
+	t.ne(broke_mark, "", "kesesi boş biri bulunur")
+	t.ne(rich_mark, "", "kesesi dolu biri de")
+	# Aynı kişi aynı gün hep aynı keseyi taşır: bakmakla değişmez.
+	t.eq(session.get_mark_purse(rich_mark), session.get_mark_purse(rich_mark), "kese tohumlu")

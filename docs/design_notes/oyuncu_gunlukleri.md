@@ -453,3 +453,89 @@ planlayıcı kolonun payını sayısız basıyordu (iki parçalı anahtar tek
 argümanla biçimlendiriliyordu); pazarın not satırı dar olduğu için eyleme
 dönüşen notlar kesiliyordu (artık başa alınıyor, tam metin ipucunda); ve
 onarım tarifinde "hasar yok" cevabının yanına malzeme listesi ekleniyordu.
+
+---
+
+## 10. İkinci tur düzeltmeler (kullanıcı, 2026-11-06)
+
+### Ölçüm düzeltmesi: iki koşu azmış
+
+§9'un tablosu **iki** koşunun ortalamasıydı ve bir sayısı dayanmadı. Araç
+beş koşuya çıkarıldı (`RUNS_PER_PERSONA = 5`) ve aynı ölçüm yeniden alındı:
+
+| iddia (2 koşu) | beş koşuda | durum |
+|---|---|---|
+| Bedeli Soran 6,5 → 12,0 sefer | **11,4 sefer** | **duruyor** |
+| ölüm 3,5 → 1,0 | **2,4** | **durmadı** - düzeltildi |
+| biten koşu 2/2 → 1/2 | 5/5 | durmadı |
+
+Yani dağılma kuralı cömert oyuncunun **ömrünü neredeyse iki katına
+çıkarıyor** ama ölümlerini azaltmıyor; daha uzun yaşıyor, daha çok ölüm
+görüyor. Bu, birinci turda Hikâyeci için ölçülen şeyin aynısı ve aynı
+şekilde dürüstçe yazılması gerekiyor. §9'un o satırı bu tabloyla okunmalı.
+
+### Dağılma: ölüm ile terk ediş birlikte
+> *"Sadece öldürmek değil de kervanı terk eden de olmalı."*
+
+İlk hâli kademeliydi (3-6. geceler ayrılma, 7+ ölüm), yani geç gecelerde
+yine yalnız ölüm vardı - aynı kusurun öbür yüzü. Artık her gece ikisi de
+mümkün, değişen oran: `get_crew_death_share()` üçüncü gecede %15'ten
+yedincide %65'e çıkıyor, sonra %85 tavanına yürüyor ama **1,0'e varmıyor** -
+kervanı bırakıp gitmek her gece açık kalıyor. Zar kervan adı ve günden
+tohumlu: kaydı yükleyip ölümü ayrılmaya çevirmek yok.
+
+### Tavernanın iki alçak yolu
+> *"Bu kişi eğer sadece tavernada takılıyorsa aç kalmalı zaten, para
+> kazanmaya da çalışması lazım değil mi? Dilencilik ya da tavernada
+> dolandırıcılık yapmalı."*
+
+G1'in reddedilme gerekçesi buraya da uyuyor: bu bir **ücret** değil, bir
+**itibar takası**. Parayı alırsın, adın eksilir; itibar kontratı, krediyi ve
+işe almayı açtığı için kariyerini bu iki yolla sürdüren kervan ticaret
+oyununu kaybeder. Bedeli olan ama kapanmayan bir çıkış.
+
+**Dilencilik** - yalnızca meyhanecinin karşısında ve **aç karna**
+(kullanıcının iki şartı). Günde bir, kayıtta. İtibarı **doğrudan** düşürür,
+5 stres bırakır, şehrin adı olan kişilerine bir kırgınlık yazar; deftere
+yalnız **ilk kez** yazılır (her sadaka bir satır olsaydı defter makbuz
+koçanına dönerdi - Trade Memory Rules).
+
+*"Aç karna" şartının ilk okunuşu yanlıştı:* "dün gece biri aç yattı" diye
+yazılınca ölçümde dilencilik **bir kez bile tetiklenmedi** - şehre varan
+kervanın açlık sayacı sıfırlanıyor, yani oyuncu tam da paraya ihtiyaç
+duyduğu anda el açamıyordu. Doğrusu ambarın dibi: erzak önümüzdeki iki
+günü çıkarmıyorsa bu kervan açtır.
+
+*Getirisi de bir kez düzeltildi:* ilk sayılar tipik bir şehirde **2 GG**
+veriyordu. Bir itibar puanına 2 GG hiçbir oyuncunun seçmeyeceği bir
+takastır - yani bir seçenek değil bir tuzak. Aralık şimdi 5-18 GG: küçük bir
+kervan için bir iki günlük yemek. Aç şehir az verir, hiç vermemez.
+
+**Dolandırıcılık** - *"elindeki çok basit bir malı çok iyi bir şey gibi
+satmaya çalışmalı... karşı tarafın da parası varsa ve kandırılırsa başarılı
+olur ama... zekası ve manipülasyonu gerçekten iyi olmalı ve bir skill check
+şart."* Dördü de mekanikte:
+- Satılan şey **kargodaki en ucuz mal**, gerçekten elden çıkıyor.
+- Kontrol iki ayağı birden okuyor - kurgu **Zeka**, anlatım **Karizma**,
+  ağırlık zekâda. Oran ekranda yazıyor (tek atışlık zar kör atılmaz).
+- Karşıdakinin kesesi kişiden ve günden tohumlu, **önceden bilinmiyor**:
+  kandırmak yetmez, adamın parası da olmalı. *İyi bir yalan boş bir cebi
+  doldurmaz.*
+- Yakalanınca itibar **doğrudan** düşer (-3) ve **o gün taverna kapanır**:
+  oda, şölen ve sohbet "Bugün bu tavernaya giremezsin" diyor.
+- Meyhaneciye denenmez: yatacak yerini kaybedersin.
+
+**Ölçüm (5 koşu):** varsayılan bir liderin tutturma oranı **%12** - yani
+`SWINDLE_WORTH_TRYING` eşiğinin (%35) altında ve profiller hiç denemedi.
+Bu bir eksiklik değil, kullanıcının şartının ta kendisi: dolandırıcılık
+gerçekten zeki ve dili düzgün bir kervanbaşının işi, bir düğme değil.
+
+**Defter Tutan'a etkisi:** 5,8 → **7,4 sefer**, ölüm 2,4 → **1,8**, biten
+koşu 5/5 → **4/5**. Yani tavernada oturan oyuncu artık yarı yarıya daha uzun
+yaşıyor ve beş koşunun birinde yirmi seferi tamamlıyor - ama hâlâ çoğunlukla
+ölüyor. Bu kullanıcının kendi çerçevesiyle tutarlı: *"sadece tavernada
+takılıyorsa aç kalmalı zaten."* El açmak bir maaş değil, bir gün daha.
+
+**Ekranda doğrulandı:** meyhaneci sohbetinde *"Eli açmak: bir lokma iste
+(adın eksilir)"* - ve yalnızca kervan açken; konuk sohbetinde *"Top Kumaş'ı
+nadir bir mal diye sat (%12 tutar)"*.
