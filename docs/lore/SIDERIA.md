@@ -77,7 +77,8 @@ aşınır, defter unutmaz, ticaret bilgi oyunudur — oyunun sütunlarıdır; bu
    el. Karşısında tek bir şey var: **yol**, hiçbir ad yazmaz (yol kenarı mezarları işaretsizdir) ve Baikhan,
    hiç defter tutmaz. Oyunun defteri (Waybook) bu kavganın oyuncu tarafındaki yüzüdür.
 3. **Kendinin olmayan yaşamı almak.** [Karar] Kadimler kendi yaşam enerjilerinden fazlasını kullanmayı denedi ve
-   bittiler. Deli kral kendisine ait olmayan bir ömür istedi ve imparatorluk onunla bitti. Fazlasını zorlayan
+   bittiler. Deli kral kendisine ait olmayan bir ömür istedi, veremeyenleri yaktı ve sonunda kendini yaktı;
+   imparatorluk onunla bitti. Fazlasını zorlayan
    büyücü adayı ölür. İllet bir kıtanın işgücünü, yani yaşamını aldı. Bu, dünyanın tekrar eden tek günahıdır ve
    **oyun bunu asla açıkça söylemez**; yalnızca dört ayrı yerde aynı gölge düşer.
 4. **Taşınmış taş.** [Yazar, defter IV] Kadim tapınaklar yalnız doğudadır; batıda bulunan her kadim taş oradan
@@ -154,7 +155,7 @@ Yıllar çöküşten sayılır; bugün 60. yıldır.
 
 | yıl | olan |
 |---|---|
-| 0 | **İmparatorluk çöker.** Başkent Merigard yakılır, halkı sürülür. |
+| 0 | **İmparatorluk çöker.** Savaşın son yılında imparator kendini bir ayinle yakar; başkent Merigard yakılır, halkı sürülür. |
 | 0–35 | **Otuz beş yıl barış.** Beylikler ve krallıklar kendi düzenlerini kurar; yollar işler, ticaret sürer. Vaelghard toplanır, Vadi'nin şehirleri bağımsızlığını ilan eder, Kanlı Baron hükmünü alır, lonca güneye taşınır, Orvahel kurulur, Yumruk doğar, Tolvarin ile Kirsavel ayrışır, Ayazkaya yol kavgasına girer. |
 | 35 | **İllet çıkar.** Hiç kimse birlik hâlinde onunla mücadele etmeye çalışmaz. |
 | 35 | **Gokyurt sınırını kapatır:** göçebe halkı sınırlarını daha iyi kontrol eder, kimseyi yanaştırmaz, izolasyonunu korur. Bugün kıtanın en sağlıklı yeri olmasının sebebi budur. |
@@ -295,9 +296,10 @@ uyandıran.
 - **[Yazar]** İmparatorluğun baron ve düklerinden **Dük Valdric** bugünkü Ezmerak ve Golcavar topraklarını
   yönetir; piç oğlu **Aldemar** hanedanda yetişmeye uygun görülmez, orduya verilir (§10.3).
 
-[Karar] **Asimilasyonun sırası:** önce Vadi'nin köy inançları, sonra kıyıların deniz inanışı, en son dağın
-nefesi. Direnenler: Tolvarin, Kirsavel, Taşkök ve Gokyurt. Ayazkaya'nın inanışını kilise yuttu ama dağlı
-bırakmadı — bugün Dağın Nefesi'nin en yüksek sesle yaşadığı yer orası (§8.4).
+[Karar] **Asimilasyonun sırası:** önce Vadi'nin köy inançları, sonra kıyıların deniz inanışı, sonra dağın
+nefesi, **en son bozkır**. Direnenler: Tolvarin, Kirsavel, Taşkök ve Gokyurt. Ayazkaya'nın inanışını kilise
+yuttu ama dağlı bırakmadı — bugün Dağın Nefesi'nin en yüksek sesle yaşadığı yer orası (§8.4). **Son sıra
+imparatorluğu bitirdi:** bozkıra uzanan el dokuz boyu birleştirdi (§4.3).
 
 ### 4.2 Deli kral [Yazar, defter IV + Karar]
 
@@ -311,14 +313,25 @@ istedi: **ömür.** Büyü yaşam enerjisidir; bir büyücü kendi enerjisini ha
 kadimlerin bile yapamadığı şey budur. Büyücüler bunu söylediler. İmparator sözlerini ihanet, denemelerini ise
 "yapabiliyorlar ama yapmıyorlar"ın kanıtı saydı. Hepsini yazlık sarayının avlusunda yaktırdı.
 
-[Karar] Bir yıl kadar sonra yine öldü ve arkasında emir verecek kimse kalmadı; göçebe birliği tam o boşluğa
-yürüdü. Dolayısıyla **imparatorluk onunla bitti** ve tarihe "deli" diye geçen adam dünyanın tek doğru sözünü
-duyan adamdır. Hiçbir kaynak bunu böyle anlatmaz:
+[Karar] Katliam, boylarla savaş başlamadan önceydi. Böylece imparator, ona o ayinin işlemeyeceğini
+söyleyebilecek herkesi kendi eliyle yakmış oldu.
+
+**[Yazar, 2026-11-07] Sonu:** **savaşın sonlarında kendini bir ayinle yakarak ölümsüz kılmaya çalıştı ve
+öldü.** [Karar] Aynı avluda, büyücüleri yaktırdığı yerde. Ayini kimse yürütmedi, çünkü yürütecek kimse
+kalmamıştı; nasıl yapılacağını büyücülerin ağzından duyduğu kadarını saraydaki kâtiplere yazdırmıştı. Ondan
+sonra emir verecek kimse kalmadı: başkent bir yıl içinde düştü (§4.3). Yani **imparatorluk onunla bitti** —
+hastalığından değil, ölümsüzlük denemesinden. Tarihe "deli" diye geçen adam dünyanın tek doğru sözünü duyan
+ve ona inanmayan adamdır.
+
+[Karar] Bu, dünyanın tekrar eden günahının en açık hâlidir (§1.2/3): kendine ait olmayan yaşamı almak. Kadimler
+denedi ve bittiler; imparator denedi ve imparatorluk bitti. **Oyun bu bağı hiçbir yerde kurmaz.**
+
+Hiçbir kaynak bunu böyle anlatmaz:
 
 | kim | nasıl anlatır |
 |---|---|
-| Vaelghard kanun kitabı | Hastalık aklını aldı, taht sahipsiz kaldı, düzeni kuzey devraldı. (Krallığın mirasçılık iddiasının temeli bu paragraftır.) |
-| Göçebe destanı | Kendisine ait olmayan bir ömür istedi; gök aklını aldı. Destan büyücüleri hiç anmaz. |
+| Vaelghard kanun kitabı | Hastalık aklını aldı, taht sahipsiz kaldı, düzeni kuzey devraldı. Yangın bir kaza olarak yazılır. (Krallığın mirasçılık iddiasının temeli bu paragraftır.) |
+| Göçebe destanı | Kendisine ait olmayan bir ömür istedi; gök aklını aldı, sonunda kendi ateşini kendi yaktı. Destan büyücüleri hiç anmaz. |
 | Orsian muhasebe defteri | Büyücülerin malları saraya geçti ve hiçbir borç kapanmadı. Orsian'a sorarsan deliliğin bir satırı vardır ve o satır ödenmemiştir. |
 | Avuçiçi | Söz konusu bile edilmez. Kâtip "o yıllar Kitap'a yazılmadı" der. |
 | Raviellon | Hiçbir şey. Kimse cevap vermiyor; büyücülerin bugün bile Sideria'dan uzak durmasının sebebi budur. |
@@ -328,12 +341,21 @@ duyan adamdır. Hiçbir kaynak bunu böyle anlatmaz:
 
 ### 4.3 Çöküş ve büyük savaş [Yazar]
 
-- **Göçebe boyları tarihte bir kez birlikte davranır:** Han birliği toplar, ordular birleşir ve imparatorluğa
-  karşı savaşır. İmparatorluk dize gelir ve parçalanır. Savaş bitince her boy obasına döner.
-  [Karar] Sebebi: imparatorluğun bozkır karakolları (Sargalak) otlak geçişlerine bedel koymaya başladı ve kurak
-  bir yıl bunu taşınmaz hâle getirdi. Birliği Sogurtay konseyinde bir han kurdu.
+- **[Yazar, 2026-11-07] Savaşın sebebi asimilasyondur:** imparatorluk göçebe boylarını **tek tek** asimile
+  etmeye çalıştı; **boylar direndi ve sonunda dokuz boy birleşip imparatorlukla savaştı.**
+- **[Yazar] Göçebe boyları tarihte bir kez birlikte davranır:** Han birliği toplar, ordular birleşir ve
+  imparatorluğa karşı savaşır. İmparatorluk dize gelir ve parçalanır. Savaş bitince her boy obasına döner.
+  [Karar] Birlik **Sogurtay konseyinde** kuruldu: tek tek konuşulan boyların hepsinin bir arada bulunduğu tek
+  yer orası (§8.3).
+  [Karar] **Asimilasyon nasıl yürüdü:** imparatorluğun yöntemi her yerde aynıydı — bir inancı Kitap'a bir sayfa
+  olarak katmak (§4.1, §8.1). Bozkırda bu, oba oba yapıldı: bir beye "imparatorluğun beyi" denildi, obaya bir
+  kâtip gönderildi, Sogurtay suyundan okumak "Kitap'ın bir satırı" ilan edildi, otlak deftere yazıldı. Her oba
+  yalnız direndi ve yalnız kaybetti; sıra yeterince obaya gelince han dokuzu birleştirdi. **Baikhan'ın hiç
+  asimile edilememesinin sebebi bu savaştır**, inancın gücü değil.
   [Karar] **Ordular şehirlere değil ambarlara saldırdı.** İmparatorluk ordusu yerinden kalkamadı, çünkü kendini
   besleyemiyordu. Bugünün Vadi savaşları aynı şeyi tekrar ediyor (§1.2/1).
+  [Karar] **Sargalak Yıkıntısı** (§11.1) bozkırdaki imparatorluk karakolu: kâtiplerin ve defterlerin durduğu
+  yer, obaların ilk akında yaktığı yer.
 - **Büyük savaşın sonunda** Merigard'ın halkı sürülür, şehir yakılır.
   [Karar] **Kim yaktı:** herkes başkasını suçlar ve oyun hiçbirini doğrulamaz. Vaelghard göçebeleri suçlar;
   göçebeler açlıktan ayaklanan kendi halkını; Vadi, Vaelghard'ın ordusunu (başkenti yakıp Orvahel'i kurmak
@@ -341,7 +363,7 @@ duyan adamdır. Hiçbir kaynak bunu böyle anlatmaz:
 - **[Yazar, T7]** Dört kuleli tapınak yangından kalan tek yapıdır: **şehir genç, tapınak eski.**
 - **[Yazar, onaylandı T8]** Son meydan muharebesi **Mühür Savaşı Ovası**'nda olur; düşen imparatorluk mühürleri
   bugün nadir "eski mühür" olarak elden ele geçer.
-- **[Yazar]** Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemedi.
+- **[Yazar]** Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemedi: asimilasyon savaşla kesildi.
 - **[Yazar, defter IV]** Çöküş bugünden **altmış yıl** öncedir; bütün yakın tarih bu güne göre sayılır.
 
 ### 4.4 Parçalanmanın ilk yılları [Yazar]
@@ -1330,10 +1352,10 @@ NPC'nin ağzında bir cümle olarak kullanılabilir. **[Yazar]** Haritada adı o
 
 | yer | ne |
 |---|---|
-| **Deli Kral Sarayı Yıkıntısı** (Vastrevar'ın doğusu) | Son imparatorun yazlık sarayı; büyücüler avlusunda yakıldı (§4.2). Halk yaklaşmaz: geceleri avluda kül kalktığı anlatılır. Vaelghard sarayı ne onarır ne yıkar. |
+| **Deli Kral Sarayı Yıkıntısı** (Vastrevar'ın doğusu) | Son imparatorun yazlık sarayı. Avlusunda iki kez ateş yakıldı: önce büyücüler, sonra savaşın sonunda kendini ölümsüz kılmaya çalışan imparatorun kendisi (§4.2). Halk yaklaşmaz: geceleri avluda kül kalktığı anlatılır. Vaelghard sarayı ne onarır ne yıkar. |
 | **Velkrun Yıkıntısı** (Taşkök) | İmparatorluğun kereste ambarı; parçalanmada yakıldı. "Odun satılır, orman satılmaz" kuralının doğduğu yer (§10.6). |
 | **Eski Darphane Yıkıntısı** (güney) | İmparatorluğun darphanesi; GG burada basıldı. Çöküşte kalıplar Orsolune'ye kaçırıldı. |
-| **Sargalak Yıkıntısı** (bozkırın ortası) | İmparatorluk karakolu; obalar ilk akında yaktı. Taşları yurt ocağı olarak taşındı. Göçebe savaşının başladığı yer (§4.3). |
+| **Sargalak Yıkıntısı** (bozkırın ortası) | İmparatorluk karakolu: bozkıra gönderilen kâtiplerin ve otlağı yazdıkları defterlerin durduğu yer. Obalar ilk akında yaktı; taşları yurt ocağı olarak taşındı. Göçebe savaşının başladığı yer (§4.3). |
 | **Tozkapı Yıkıntısı** | Kadimlerden bir kapı: bir duvarın ortasında, iki tarafı da açık. İçinden geçen tozlanır; toz yıkanınca çıkmaz derler. Taşları doğudan taşınmıştır ve kimse nasıl olduğunu bilmez (§1.2/4). |
 | **Solgun Bahçe Yıkıntısı** (Vadi) | Bir prensin bahçesi; kıtlığın ilk yılında ilk solan yer. Sebebi büyü değil: bahçıvanları İllet'ten öldü ve kimse sulamadı. Vadi bunu bir işaret sayar. |
 | **Hallecort Yıkıntısı** (kuzey kıyısı) | İmparatorluk balıkçı durağı; buzul yaklaşınca terk edildi. |
@@ -1617,6 +1639,10 @@ her metinde geçerlidir. Örnek — "Vaelghard Vadi'ye indi":
   altmış yılın çizgisi, deli kral, takvim, coğrafyanın adları, yolun töresi.
 - **2026-11-07:** kullanıcı T49'u onayladı ve kalan bütün önerilerin kararını bana bıraktı
   (*"diğerleri için de sen kendi cevaplarını üret ve lore'a ekle"*). Dört belge bu belgede birleştirildi.
+- **2026-11-07, aynı gün iki düzeltme [Yazar]:** (1) göçebe savaşının sebebi **asimilasyondur** — imparatorluk
+  boyları tek tek asimile etmeye çalıştı, boylar direndi, sonunda dokuz boy birleşip savaştı (benim "otlak
+  bedeli ve kurak yıl" gerekçem düştü); (2) **deli imparator savaşın sonlarında kendini bir ayinle yakarak
+  ölümsüz kılmaya çalıştı ve öldü** (benim "hastalığından bir yıl sonra öldü" satırım düştü).
 
 **Kullanıcı tarafından geçersiz kılınan ve bu belgeden silinen satırlar** (bir daha kullanılmaz):
 kıtlığın sebebi olarak "uzayan kış" ve "solgunluk"; "kıtlık imparatorluğun son yıllarında başladı";
@@ -1624,7 +1650,8 @@ kıtlığın sebebi olarak "uzayan kış" ve "solgunluk"; "kıtlık imparatorlu�
 Gokana toprak"; "Gelgit Kıyısı balıkçıların yurdudur"; "kaçak ihbarı itibar kazandırır/kaybettirir";
 "doğuda da göçebeler var"; beş bölümlü senaryo/kampanya sistemi; batı denizlerinin "Uzun Deniz / Sabah Denizi"
 adları (kanon: Ağıt Denizi, Gelgit Denizi); Vadi nehrinin "Vael Suyu" adı (kanon: Kemersu);
-yol sunaklarının dörde indirilmesi (kanon: oyundaki on sunak kalır).
+yol sunaklarının dörde indirilmesi (kanon: oyundaki on sunak kalır); göçebe savaşının sebebi olarak otlak
+bedeli ve kurak yıl (kanon: asimilasyon); deli imparatorun hastalığından ölmesi (kanon: ölümsüzlük ayini).
 
 ### 16.2 Oyuna bağlanış (kod işi; her biri ayrı karar)
 

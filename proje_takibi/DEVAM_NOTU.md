@@ -515,8 +515,20 @@ kullanılır, bir [Yazar] satırıyla çakışırsa yanlıştır ve silinir. Sı
 **Karara bağlanan açık sorular (benim cevaplarım):**
 - **Deli kral neden katletti:** hastalandı, Raviellon'da eğitilmiş büyücülerden **ömür** istedi; büyü kendi
   yaşam enerjisidir, kimse başkasının ömrünü uzatamaz. Reddi ihanet, denemeleri "yapabiliyorlar ama
-  yapmıyorlar"ın kanıtı saydı ve hepsini yazlık sarayının avlusunda yaktırdı. Bir yıl sonra yine öldü; göçebe
-  birliği o boşluğa yürüdü. Altı kaynak altı ayrı şey anlatıyor (§4.2), hiçbiri doğrulanmıyor.
+  yapmıyorlar"ın kanıtı saydı ve hepsini yazlık sarayının avlusunda yaktırdı. Altı kaynak altı ayrı şey
+  anlatıyor (§4.2), hiçbiri doğrulanmıyor.
+- **Kullanıcının aynı gün verdiği iki düzeltme [Yazar] (işlendi):**
+  - **Göçebe savaşının sebebi asimilasyon:** imparatorluk boyları **tek tek** asimile etmeye çalıştı, boylar
+    direndi, sonunda **dokuz boy birleşip** savaştı. Benim "bozkır karakolları otlak bedeli koydu, kurak yıl
+    taşınmaz hâle getirdi" gerekçem düştü. Yeni [Karar] dokusu: asimilasyon oba oba yürüdü (beye
+    "imparatorluğun beyi" denmesi, obaya kâtip, Sogurtay suyundan okumanın "Kitap'ın bir satırı" ilan
+    edilmesi, otlağın deftere yazılması); birlik Sogurtay konseyinde kuruldu; **Baikhan'ın hiç asimile
+    edilememesinin sebebi bu savaştır**, inancın gücü değil.
+  - **Deli imparatorun sonu:** savaşın sonlarında **kendini bir ayinle yakarak ölümsüz kılmaya çalıştı ve
+    öldü** — büyücüleri yaktırdığı aynı avluda, çünkü ayinin işlemeyeceğini söyleyecek herkesi kendi eliyle
+    yakmıştı. Benim "hastalığından bir yıl sonra öldü, göçebeler o boşluğa yürüdü" satırım düştü. Böylece
+    üçüncü omurga (§1.2/3, kendine ait olmayan yaşamı almak) kadimlerden imparatora doğrudan bağlandı; oyun
+    bu bağı hiçbir yerde kurmaz.
 - **İmparatorluğun takvime verdiği ad:** aynı gün, üç ad — göçebe **İlk Ot**, imparatorluk/Vaelghard **Yol
   Günü** (Septimar'ın fermanı anlatıyı tersine çevirdi: ot yolu değil yol otu getirir; büro yine otlağa atlı
   yollar ve bunu herkes bilir), kilise **Sayfa Günü**. Üç yıl sayma biçimi: Ferman yılı / çöküşten beri /
