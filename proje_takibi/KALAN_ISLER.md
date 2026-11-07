@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -114,6 +114,25 @@ Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
   - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
   - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
+
+</details>
+
+### Y-E13 · Dağılan tayfa yolda karşına çıkar
+
+- **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-11-07 kullanıcı (soru defteri IV, dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider, çoğu varamaz; bazıları kaçakların yanına katılır. Kart: yolda karşına çıkan silahlı grubun içinde adı deftere yazılmış eski arabacın durur.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E13 Dağılan tayfa yolda karşına çıkar**
+  - Kullanıcı, soru defteri IV (dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider ve çoğu oraya
+    varamaz; bazıları kaçakların yanına katılır.
+  - Kart: yolu kesen silahlı grubun içinde **adı deftere yazılmış** eski arabacın duruyor. Defter onu
+    "açlıktan ayrıldı" diye yazmıştı; şimdi karşında.
+  - Seçenekler kurgulanacak: tanıdığını söyle (karizma), hiç tanımamış gibi yap, dövüş. Tanıdığını söylemek
+    yükü kurtarabilir ama kervanın geri kalanının gözünde kervanbaşını küçültür.
+  - Bağlar: `crew_lost_to_hunger` sayacı, `CaravanLedger` satırı, `People` hafızası.
 
 </details>
 

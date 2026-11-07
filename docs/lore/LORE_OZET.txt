@@ -1,6 +1,6 @@
-WAYBORNE - ELDEKİ LORE VE TARİHÇE (2026-10-30)
+WAYBORNE - ELDEKİ LORE VE TARİHÇE (2026-11-07)
 
-Yalnızca geçerli bilgi. Yer tutucu, reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) senin cevapların ve onayların, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve onun yer atlası. Defter II'nin onay ve düzeltmeleri işlendi. Onay bekleyen önerilerim ve çelişkiler en sonda ayrı; tam liste docs/lore/SORULAR.md ve ONERILER_III.md.
+Yalnızca geçerli bilgi. Yer tutucu, reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) senin cevapların ve onayların, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve onun yer atlası. Defter II ve defter IV'ün onay ve düzeltmeleri işlendi. Onay bekleyen önerilerim ve çelişkiler en sonda ayrı; tam liste docs/lore/SORULAR.md ve ONERILER_III.md.
 
 ÇERÇEVE
 - (Yazar) Tek bir kıta: Sideria. Ortaçağ'ın farklı yerlerinden ve dönemlerinden sekansların karışımı; hiçbir tarihî figür, ad, imge ya da olay olduğu gibi alınmaz, taklit edilmez, referans verilmez.
@@ -16,8 +16,11 @@ TEZ
 - (Yazar) "Wayborne" bir yer adı değil: ana karakter yolda doğmuştur, kendini ait hissedebildiği tek yer yoldur.
 - (Yazar) Defter El inancını, yol Baikhan inancını temsil eder. Bu bir bakış açısıdır, tek doğru okuma değil: yalnızca El'in ya da Baikhan'ın gözünden, ya da dini hiç katmadan bakan da olur.
 
-KITLIK
-- (Yazar) Kıtayı bütünüyle etkileyen bir olay bir kıtlık başlattı: büyülü ve devasa bir olay ya da mevsimlerin değişmesi (hangisi olduğu henüz açık). Bütün savaşlar temelde bu kıtlıktan doğar.
+KITLIK VE İLLET
+- (Yazar, defter IV) Kıtlığı başlatan şey büyü ya da mevsim değil, İLLET (veba) yüzünden işgücünün çökmesi. Çalışacak insan azaldı, üretim ve ticaret düştü, ambarlar bir daha dolmadı. Bütün savaşlar temelde bu kıtlıktan doğar.
+- (Yazar, defter IV) Çizgi: imparatorluk 60 yıl önce çöktü; 35 yıl barış; 35. yılda İllet çıktı, kimse birlik olmadı; Gokyurt sınırını kapattı; 5 yılda krallıklar teker teker yenildi; 40. yılın sonunda kıtlık başladı; son 20 yıl hastalık ve savaş. Bugün bazı devletler göçebe topraklarına göz dikiyor ama harekete geçmedi.
+- (Yazar, defter IV) Bugün kıtlık olabileceği en kötü hâlinde; devletler ve şehirler yine de idare ediyor. Çocuklar açlıktan ölüyor; bazı yerlerde İlletli hastalar bile zorla çalıştırılıyor.
+- (Yazar, defter IV) Hastalığın genel adı İLLET; yerel adı Kara Nefes. Avuçiçi inançsızların cezası der, Vadi kirli su der (haklıdır), göçebe şehirlerin hastalığı der ve şehre girmez.
 - (Yazar) Oyunda kıtlık ve yokluk her mekanikte ve ortamda hissedilir: ticaret kıt, asıl iş kervanı bir yerden öbürüne ulaştırmak; şehirlerin morali var ve kervanın getirdiği yük onu değiştirir.
 - (Yazar) Vadi kıtada en çok kıtlık ve mali zarar yaşayan bölge.
 
@@ -34,6 +37,7 @@ KITLIK
 KADİM UYGARLIK
 - (Yazar) Bugünkü insanlıktan önce basit gündelik hayatlı, teknolojisiz bir uygarlık; yaşam enerjisini radikal kullandı, kontrol edemediği güç sonunu getirdi. Kalan bilgi tapınak duvarı tasvirleri ve tılsımlı basit nesneler.
 - (Yazar) Hayatta kalanlar kültürlerini yitirdi; zamanla bugünkü insanlığı kurdular.
+- (Yazar, defter IV) Yurtları KARAOCAK SIRTI'NIN DOĞU ETEKLERİ: madenciler bugün onların galerilerinde çalışıyor, Vorgat ve Zurek'in zenginliği kadim bir şehrin üstünde olmalarından. Sunaklar her yerde, tapınak yalnız doğuda; batıdaki her kadim taş oradan taşınmış.
 
 İNANÇLAR
 - (Yazar) İki büyük inanç: El (The Hand) ve Baikhan. Diğerleri küçük, yerel, yasaklı ya da bu ikisinin içinde erimiş.
@@ -45,6 +49,7 @@ KADİM UYGARLIK
 - (Yazar) El kilisesi imparatorluğun dini olarak onunla yayıldı.
 - (Yazar) Vadi'de din bir topluluk, güç alanı ve politik araç; kiliseler ağ kurmak ve entrika için kullanılır.
 - (Yazar) Baikhan: göçebelerin inancı, kilisenin asimilasyonundan kaçan tek büyük inanç; özgürlük, doğaya, göğe ve toprağa saygı. Gokyurt'ta başka inanç yok. Sogurtay Obası şamanlarındır; şamanlar Baikhan'ın tek kurumu, kitapsız, sözle ve sudan okurlar. Dokuz boyun her biri yılda bir ay Sogurtay'a gelir (dokuz ay); kalan üç ay şamanlarındır: sessizce ibadet eder, doğayı tımar eder, şükrederler; doğa onları tanır, hiçbir unsuru onlara zarar vermez. Beyler Sogurtay'a yalnızca konsey için birlikte gelir.
+- (Yazar, defter IV) Baikhan ve Gokana BİR VARLIK DEĞİL: bir inanışın, göçebe felsefesinin unsurları. Baikhan yeri ve göğü, Gokana suyu ve yağmuru temsil eder; birbirini tamamlar, birbirine ihtiyaç duyarlar. Göçebe "Baikhan'a" diye dua etmez, "Baikhan'ın altında" der.
 - (Yazar) Dağın Nefesi en yüksek sesle Ayazkaya'da yaşar; güçlü olmak her şey. Kutsal doruk Kartalın Nefesi Zirvesi, Ulmarec ile Droskal arasındaki en yüksek zirve. Kabile beyinin hükmü dağa tırmanıp dönmesiyle tanınır; hüküm sınanacaksa meydan okuyan dağa tırmanır, sonra beyin yerleşkesinde düello edilir, kazananın hükmü sürer.
 - (Yazar) Septisizm'in yasakladığı inançlar: Kirsavel'de göçebe inancına benzeyen eski bir inanç (hayvanlar kutsal), Tolvarin'de tarım ve işçilik inancı (toprak kutsal), Taşkök'te madencilik ve odunculuk inançları. Vadi'de azınlıktaki eski inançlar imparatorluk zamanında kilisenin içine soğuruldu.
 - (Yazar) Huy arınması kültüre göre kilisede ya da doğada ibadetle, ya da şifahane gibi bir yerde tedaviyle olur; aynı yerde hastalıklar da iyileşir.
@@ -65,6 +70,9 @@ COĞRAFYA VE İKLİM
 - (Yazar) Kıtanın en kuzeyi daima karlı. Kış Sideria'ya kuzeydoğudan gelir.
 - (Yazar) Vaelghard çok dağlı ve göllü, manzarası güzel. Orvahel yöresi dağlık, çam ormanlı, havası basık ve puslu. Güney kıyısında Ors sıradağları.
 - (Yazar) Gokyurt'un güneybatısı obaların kışlağı: hayvancılık ve balıkçılık.
+- (Yazar, defter IV) Sular: batı denizi AĞIT DENİZİ (Ors ve Mirsana ona bakar), güneydoğu suyu GELGİT DENİZİ (Zelmarin adını oradan alır). Ana nehir KEMERSU: Taşkök'ten doğar, Vadi'yi besler, Ors kıyısında denize dökülür; Vadi'nin bütün değirmenleri onun üstünde ve Vaelghard'ın güneye inme sebebi o değirmenler.
+- (Yazar, defter IV) Doğu sıradağı KARAOCAK SIRTI, kuzeybatı dağları TAŞKÖK. Büyük orman KEMERSAL ORMANI, kuzeydeki iğne ormanı AYAZKAYA ÇAMLIĞI.
+- (Yazar, defter IV) Takvim SÜRÜ YILI: yıl ilk otun çıktığı gün başlar; göçebe takvimi, imparatorluk da aldı ama adını ve hikâyesini değiştirdi. Çağlar: Kadimler, Dağınık Beylikler, İmparatorluk, Kıtlık.
 - (Oyun) Yolların arazisi bozkır, dağ, orman, göl kıyısı, çayır, bataklık; mevsimler yolu değiştirir.
 
 SİYASİ HARİTA BUGÜN

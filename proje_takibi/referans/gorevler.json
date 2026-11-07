@@ -4209,9 +4209,24 @@
    "sira": 303,
    "kim": "CO",
    "not": "'Doğru stoklayan asla aç kalmaz' -> 'stok bulabilirsen aç kalmazsın'. Planlayıcı doğru sayıyı söylemeye devam ediyor; test_route_terrain/test_temperature iddiaları değişmedi (onlar zaten 'yeterli erzakla çıkan aç kalmaz' diyor)."
+  },
+  {
+   "id": "Y-E13",
+   "baslik": "Dağılan tayfa yolda karşına çıkar",
+   "bolum": "15",
+   "alan": "Yönetmen: İçerik ve anlatı",
+   "oncelik": "P2",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/15_film_kervan_fikirleri.md",
+   "dalga": 5,
+   "paket": "P11",
+   "sira": 310,
+   "kim": "C",
+   "not": "2026-11-07 kullanıcı (soru defteri IV, dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider, çoğu varamaz; bazıları kaçakların yanına katılır. Kart: yolda karşına çıkan silahlı grubun içinde adı deftere yazılmış eski arabacın durur."
   }
  ],
- "guncelleme": "2026-11-02",
+ "guncelleme": "2026-11-07",
  "kim_anlami": {
   "C": "Claude tek başına (kod, test, belge)",
   "CO": "Claude yapar; senin görsel ya da tasarım onayın gerekir",
@@ -4459,7 +4474,8 @@
     "Y-E10",
     "Y-E11",
     "Y-E12",
-    "Y-A08"
+    "Y-A08",
+    "Y-E13"
    ]
   },
   {

@@ -4,12 +4,36 @@
 önerilerim (Tn), iki kaynağın tutmadığı yerler (Çn) ve hâlâ açık sorular. Hepsi soru defterinde de var; cevaplar
 oradan gelir, buraya işlenir.
 
-**Son güncelleme:** 2026-10-30.
+**Son güncelleme:** 2026-11-07 (defter IV işlendi).
 
 - **Soru defteri I** (302 soru): https://claude.ai/artifact/GL3TcJUe1Agerti9VP6JbH. Bölge soruları cevaplandı.
 - **Soru defteri II**: https://claude.ai/artifact/MfVQJSzrrLb68TwZJSPQdh. 30 onay cevaplandı ve işlendi.
 - **Soru defteri III**: bağlantısı `proje_takibi/DEVAM_NOTU.md` L3 satırında. İçeriği tek kaynaktan
   (`tools/lore_defter3_banka.py`) üretilir ve repo içindeki kopyası [ONERILER_III.md](ONERILER_III.md).
+- **Soru defteri IV**: https://claude.ai/artifact/DsC1PMXP2y4WnwH9mXgFHR. 24 soru, hepsi cevaplandı ve
+  2026-11-07'de işlendi (aşağıda).
+
+## Dördüncü turda işlenenler (defter IV'ün cevapları, 2026-11-07)
+
+**Kanona geçen (onaylandı):** coğrafyanın adları (Ağıt Denizi, Gelgit Denizi, Kemersu, Karaocak Sırtı, Taşkök,
+Kemersal Ormanı, Ayazkaya Çamlığı); kadim yurdun yeri (Karaocak'ın doğu etekleri, tapınak yalnız doğuda);
+Sürü Yılı takvimi ve dört çağ; Mirsana'yı yedi tüccar evi sırayla yönetir; Gelgit Kıyısı imparatorluk dilini
+deniz ağzıyla konuşur; Vadi savaşlarının tarafları; asker kaçaklarının kimden, nerede ve nasıl; haydutun neden
+mal istediği; "ya paran ya canın"ın bir çizgi olduğu; kervanın neden muhafız tutmadığı; dağılma, dilencilik,
+dolandırıcılık, el tutma ve kervan adının töresi.
+
+**Düzeltilerek geçen:**
+- **Kıtlığın sebebi ve zamanı.** Sebep büyü ya da mevsim değil **İllet'in işgücünü yok etmesi**; kıtlık
+  imparatorluğun son yıllarında değil **çöküşten kırk yıl sonra** başladı. T31, T32 ve T33 bu kararla silindi.
+  Altmış yılın çizgisi TARIHCE §VIa'da.
+- **Deli kral** imparatorluğun **son yöneticisiydi** ve katliam **kıtlıktan önce** oldu; "aç halk suçlu aradı"
+  gerekçesi düştü (yeni açık soru aşağıda).
+- **Baikhan ve Gokana bir varlık değil:** bir inanışın unsurları - Baikhan yer ve gök, Gokana su ve yağmur.
+- **Kaçak ihbarının itibarla ilgili sonucu yok** (kaçağın iyisi de var kötüsü de). Oyunda
+  `evt_deserter_search`in +1 itibarı kaldırıldı.
+- **Kaçma sebebi yalnız açlık değil:** ordunun yaptırdıkları; ve kaçanların hepsi iyi yürekli değil.
+- **Vebanın genel adı İllet** (yerel adlar da var: Kara Nefes). Oyun metinleri İllet'e çevrildi.
+- **İmparatorluk takvimi orijinaliyle almadı**, adını ve hikâyesini değiştirdi (adı açık soru).
 
 ## Üçüncü turda işlenenler (defter II'nin cevapları, 2026-10-30)
 
@@ -37,7 +61,8 @@ oradan gelir, buraya işlenir.
 | no | öneri | nerede |
 |---|---|---|
 | T4 | Septisizm'in dereceleri; Yumruk'ta derece yok, Okuyan var. | LORE §4.1 |
-| T31–T34 | Kıtlığın sebebi, zamanı, deli kral, kim ne ister. | §6b, TARIHCE VI |
+| ~~T31–T33~~ | **Düştü:** kıtlığın sebebi ve zamanı defter IV'te kanona bağlandı (İllet, çöküşten 40 yıl sonra). |  |
+| T34 | Kıtlıkta kim ne ister. | §6b |
 | T35 | Septimar'ın eklemeleri asimile edilen inançların kendisi; Yumruk onları söküp atmak ister. | §4.1, TARIHCE V.4b |
 | T36 | Sogurtay'da iki boy hiç karşılaşmaz; şamanların üç ayı kışın en sert ayları. | §4.3 |
 | T37 | Doğu sıradağının adı **Karaocak** (Vorgat). | §7, §8.6b |
@@ -47,7 +72,10 @@ oradan gelir, buraya işlenir.
 | T41 | Taşkök ve Karaocak dağlıların dilinin yumuşamış bir kolu; Orsian hesap sözcükleri deniz ötesinden. | §11 |
 | T48 | Yolun düşmanları: her bölgenin kendi haydut kimlikleri (Prens Kaçağı, Garnizon Kaçağı, Elsiz Sürgün...). | §14 |
 | T42 | Gelgit Taşları Denizin İlk Gözyaşı'nın yeri ("balıkçıların yurdu" kısmı Ç12 ile düştü). | §8.10 |
-| T43 | Velkrun Yıkıntısı imparatorluğun kereste hanı; "odun satılır, orman satılmaz". | §8.6 |
+| T43 | Velkrun Yıkıntısı imparatorluğun kereste ambarı; "odun satılır, orman satılmaz". | §8.6 |
+| T49 | Göçebenin tapınağı yok: bir varlığa değil bir düzene inanılır, yer ve gök kapatılamaz. | §4.3 |
+| T50 | "En kötü hâlinde" olan acı, kırılmamış olan düzen; oyunun kıtlık eğrisi idarenin tükenmesini anlatır. | §6b |
+| T51 | Üç kuşak üç dünya: dede barışı, baba İlleti, oğul yalnız kıtlığı gördü. | TARIHCE VIa |
 | T44 | Karaocak'ın komşuları, Kör Kazmalar Mezarlığı. | §8.6b |
 | T45 | İlk Sayfa Manastırı'nın adı iki mezhebin kavgası. | §8.8 |
 | T46 | Yumruk'un sembolü: ilk sayfayı sıkıca tutan el. | defter III |
@@ -77,6 +105,16 @@ oradan gelir, buraya işlenir.
 | Ç14 | Avuçiçi'nde inançsız: "kapıda malını satar ve gider" ile "görüldüğü yerde eli kesilir" yan yana. | **Çözüldü:** suçlu inançsız asılır; inançsız şehre giremez, kapıda lonca aracısıyla komisyonla satar; şehirde görülen ya da inançlı rolü yapanın eli kesilir; sakatlık oyunda yaşanır. |
 
 ## Açık sorular
+
+**Defter IV'ten doğanlar (2026-11-07):**
+
+1. **Deli kral büyücüleri neden katletti?** Kıtlık henüz başlamamıştı, yani suçlanacak bir felaket yoktu.
+   (TARIHCE V.11)
+2. **İmparatorluk Sürü Yılı'na hangi adı verdi ve yılın başı için hangi hikâyeyi anlattı?** (LORE §6d)
+3. **Dağılan tayfanın karşına çıkması** bir kart olmalı: adı deftere yazılmış birinin yolda silahlı grubun
+   içinde durması (kullanıcının kendi önerisi, defter IV). Oyun işi; `proje_takibi/`ye yazıldı.
+
+
 
 Defter II'nin cevapsız kalan bütün soruları (kıtlık, takip, adı konmuş yerler, coğrafya, bugün, geçmiş) defter
 III'e önerili cevaplarıyla taşındı. Önerisiz kalan tek soru kadim uygarlığın sonu: oyunda hiç söylenmeyecek ama her şey

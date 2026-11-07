@@ -44,7 +44,8 @@ Yakın geçmiş ise yaşayanların hafızasında: imparatorluğun çöküşünü
 | II.4 | Tapınaklarının duvarlarına gündelik hayatlarını resmettiler; kalan bilginin neredeyse tamamı bu tasvirler. | [Yazar] |
 | II.5 | **Son.** Kontrol edemedikleri güç uygarlıklarının sonunu getirdi. Nasıl olduğu bilinmiyor. | [Yazar] / [Boş — nasıl] |
 | II.6 | Kuzeybatı ve kuzeydoğu dağlarının buzullarında, maden derinliklerinde ve ışıksız vadilerde eski ve çok tehlikeli yaratıklar kalır. | [Yazar] |
-| II.7 | Uygarlığın yurdu haritanın neresiydi, kalıntıları nerede yoğun? | [Boş] |
+| II.7 | **[Yazar, defter IV]** Yurdu **Karaocak Sırtı'nın doğu etekleri**. Madenciler bugün onların açtığı galerilerin içinde çalışıyor; Vorgat ve Zurek'in zenginliği aslında kadim bir şehrin üstüne kurulmuş olmasından. | [Yazar, defter IV] |
+| II.8 | **[Yazar, defter IV]** Sunaklar yol boyunca her yerde (zaten kanon: sunaklar imparatorluk yollarından eskidir), ama **tapınak yalnız doğuda**. Batıda bulunan her kadim taş oradan taşınmıştır. | [Yazar, defter IV] |
 
 ## III. Kayıp çağ
 
@@ -80,28 +81,49 @@ Yakın geçmiş ise yaşayanların hafızasında: imparatorluğun çöküşünü
 | V.7 | Vastrevar imparatorluğun en büyük kentlerinden biri. | [Yazar] |
 | V.8 | İmparatorluğun baron ve düklerinden **Dük Valdric**, bugünkü Ezmerak ve Golcavar topraklarını yönetir. Piç oğlu **Aldemar** hanedanda yetişmeye uygun görülmez, orduya verilir. | [Yazar] / [Çelişki Ç4 — adlar] |
 | V.9 | **Deli kral** büyücüleri katleder. Katliam büyücülerin bugün bile Sideria'dan uzak durmasının sebebi. Sarayının yıkıntısı Vastrevar'ın doğusunda. | [Yazar] / [Harita] |
-| V.10 | Deli kral imparator muydu, bir krallığın kralı mı; katliam çöküşten ne kadar önce? | [Boş] |
+| V.10 | **[Yazar, defter IV]** Deli kral **imparatorluğun son yöneticisiydi**. "Kral" denmesi hakarettir; halk ona imparator demeyi bıraktı. **Katliam kıtlıktan önce olur** - kıtlık imparatorluk çöktükten sonra başlar, yani katliamın sebebi açlık değildir. | [Yazar, defter IV] |
+| V.11 | [Boş] Öyleyse büyücüleri neden katletti? Kıtlık yoksa suçlanacak bir felaket de yok. | [Boş] |
 
-## VI. Kıtlık ve büyük savaş
+## VI. Çöküş ve büyük savaş
 
 Kullanıcının 2026-10-29 notu: kıtayı etkileyen bir olay bir kıtlık başlatır ve bütün savaşlar temelde bu kıtlıktan
-çıkar. Sebebi ve başlangıcı henüz karar verilmedi; aşağıdaki iki satır öneridir.
+çıkar. **Defter IV o olayı belirledi: İllet (veba).** Kıtlık imparatorluğun son yıllarında değil, **çöküşten kırk yıl
+sonra** başlar; önceki "uzayan kış / solgunluk" önerileri (T31) ve "kıtlık imparatorluğun son yıllarında başladı"
+türetmesi (T32, T33) bu kararla silindi.
 
 | | olay | işaret |
 |---|---|---|
-| VI.1 | Kıtayı bütünüyle etkileyen bir olay **kıtlığı** başlatır: büyülü ve devasa bir olay ya da mevsimlerin değişmesi. | [Yazar] / [Boş — sebep, başlangıç] |
-| VI.2 | **[Türetme T32]** Kıtlık imparatorluğun son yıllarında başlar ve bugün hâlâ sürer. Büyük savaş ilk kıtlık savaşıdır: otlakları kuruyan, kışları uzayan obalar güneye bakar; imparatorluk aç kalan şehirlerini besleyemez. | [Türetme T32] |
-| VI.3 | **[Türetme T33]** Deli kral kıtlığı büyücülere yükler ve onları katleder; katliam bir delinin işi değil, aç bir halkın aradığı suçlunun bulunmasıdır. Kıtlık büyüyle geldiyse onu anlayabilecek tek insanlar böylece gider. | [Türetme T33] |
-| VI.4 | Göçebe boyları tarihte bir kez birlikte davranır: Han birliği toplar, ordular birleşir ve **imparatorluğa karşı savaşır**. İmparatorluk dize gelir ve parçalanır. Savaş bitince her boy obasına döner. | [Yazar] |
-| VI.5 | **Büyük savaşın sonunda** Merigard'ın halkı sürülür, şehir yakılır. | [Yazar] / [Boş — kim yaktı] |
-| VI.6 | **[Yazar, T7]** Dört kuleli tapınak yangından kalan tek yapıdır: şehir genç, tapınak eski. | [Yazar, T7] |
-| VI.7 | **[Yazar, onaylandı T8]** Son meydan muharebesi Mühür Savaşı Ovası'nda olur; düşen imparatorluk mühürleri bugün nadir "eski mühür" olarak elden ele geçer. | [Yazar, onaylandı T8] |
-| VI.8 | Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemez. | [Yazar] |
+| VI.1 | Göçebe boyları tarihte bir kez birlikte davranır: Han birliği toplar, ordular birleşir ve **imparatorluğa karşı savaşır**. İmparatorluk dize gelir ve parçalanır. Savaş bitince her boy obasına döner. | [Yazar] |
+| VI.2 | **Büyük savaşın sonunda** Merigard'ın halkı sürülür, şehir yakılır. | [Yazar] / [Boş — kim yaktı] |
+| VI.3 | **[Yazar, T7]** Dört kuleli tapınak yangından kalan tek yapıdır: şehir genç, tapınak eski. | [Yazar, T7] |
+| VI.4 | **[Yazar, onaylandı T8]** Son meydan muharebesi Mühür Savaşı Ovası'nda olur; düşen imparatorluk mühürleri bugün nadir "eski mühür" olarak elden ele geçer. | [Yazar, onaylandı T8] |
+| VI.5 | Baikhan yolu bu güç sayesinde hiçbir zaman asimile edilemez. | [Yazar] |
+| VI.6 | **Çöküş bugünden altmış yıl öncedir.** Bütün yakın tarih bu güne göre sayılır. | [Yazar, defter IV] |
+
+## VIa. Altmış yılın çizgisi [Yazar, defter IV]
+
+Kullanıcının kendi sıralaması. Yıllar çöküşten itibaren sayılır; bugün 60. yıldır.
+
+| yıl | olan | işaret |
+|---|---|---|
+| 0 | İmparatorluk çöker. | [Yazar, defter IV] |
+| 0–35 | **Otuz beş yıl barış.** Beylikler ve krallıklar kendi düzenlerini kurar; yollar işler, ticaret sürer. | [Yazar, defter IV] |
+| 35 | **İllet çıkar.** Hiç kimse birlik hâlinde onunla mücadele etmeye çalışmaz. | [Yazar, defter IV] |
+| 35 | **Gokyurt sınırını kapatır:** göçebe halkı sınırlarını daha iyi kontrol eder, kimseyi yanaştırmaz, izolasyonunu korur. Bugün kıtanın en sağlıklı yeri olmasının sebebi budur. | [Yazar, defter IV] |
+| 35–40 | Öbür krallıklar **teker teker hastalığa yenilir.** İşgücü azalır; ticaret ve üretim çok düşer. | [Yazar, defter IV] |
+| 40 | **Kıtlık başlar.** Sebebi büyü ya da mevsim değil, çalışacak insanın kalmamasıdır. | [Yazar, defter IV] |
+| 40–60 | Krallıklar birbirinin **malına ve toprağına göz diker**; teker teker savaşlar başlar. Son yirmi yıl hastalık ve savaşla geçer. | [Yazar, defter IV] |
+| 60 (bugün) | Halklar ve ordular perişan. **Bazı devletler gözlerini göçebe topraklarına çevirmeye cüret eder oldu, ama henüz harekete geçmediler.** | [Yazar, defter IV] |
+
+**[Türetme, defter IV]** Bu çizgi oyunun soy sistemini de ölçeklendirir: çöküşü çocukken gören bir adam bugün
+yetmişindedir, yani hatırlayan sağ. Kervanbaşının dedesi barış yıllarında yürüdü, babası İlleti gördü, kendisi
+kıtlıktan başkasını bilmiyor. Üç kuşak, üç ayrı dünya.
 
 ## VII. Parçalanma
 
 Yaşayanların hafızasındaki çağ. **[Yazar, onaylandı T26]** Aldemar imparatorluk ordusunda hizmet etti, döndü, hüküm sürdü, genç
-öldü; oğlu bugün hüküm sürüyor. Çöküş bu yüzden bundan **30–50 yıl önce** olmalı.
+öldü; oğlu bugün hüküm sürüyor. **[Yazar, defter IV]** Çöküş bugünden tam **altmış yıl önce**; bu bölümün olayları
+ilk yıllara, VIa'nın "otuz beş yıl barış" aralığına düşer.
 
 | | olay | işaret |
 |---|---|---|
@@ -123,6 +145,7 @@ Oyunun başladığı an. Her oyunda yaşanmış sayılır.
 | | olay | işaret |
 |---|---|---|
 | VIII.1 | **Vaelghard**'da Kral Raegmund. Dağlılarla savaşta; göçebe yağmalarına karşılık veremiyor; güneye borçlu. | [Yazar] |
+| VIII.1b | **[Yazar, defter IV]** Perişan ordular arasında bazı devletler **göçebe topraklarına göz dikmeye cüret eder oldu** - Gokyurt kıtanın hâlâ beslenen tek yeri. Henüz kimse harekete geçmedi; oyunun bugünü bu eşiğin üstünde duruyor. | [Yazar, defter IV] |
 | VIII.2 | **Ezmerak**'ta Baron Daveric, Kanlı Baron'un oğlu: ticarete odaklı, faydacı, halkından uzak. | [Yazar] |
 | VIII.3 | **Orvahel**'de Birinci Okuyucu V. Leon "Lekesiz". | [Yazar] / [Yazar, onaylandı T3] |
 | VIII.4 | **Gokyurt**'ta Büyük Han Arsalkan Obası'ndan. | [Yazar] / [Boş — Han'ın adı] |

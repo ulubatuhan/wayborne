@@ -115,7 +115,11 @@ yalnızca tapınak duvarlarındaki gündelik hayat tasvirleri ve eski büyüyle 
 geleceği gösteren, güç ya da zaaf veren, bela getiren, eski yaratıkları uyandıran). Eski yaratıklar: eskinin vahşi
 hayvanlarının ilkel ve mutasyona uğramış halleri.
 
-- [Boş] Kadim uygarlığın yurdu haritanın neresi, tapınakları nerede yoğun.
+- **[Yazar, defter IV]** Yurdu **Karaocak Sırtı'nın doğu etekleri**. Madenciler bugün onların açtığı galerilerin
+  içinde çalışıyor; **Vorgat ve Zurek'in zenginliği aslında kadim bir şehrin üstüne kurulmuş olmasından.**
+- **[Yazar, defter IV]** Sunaklar yol boyunca her yerde (zaten kanon: sunaklar imparatorluk yollarından eskidir),
+  ama **tapınak yalnız doğuda**. Batıda bulunan her kadim taş oradan taşınmıştır - bir Vadi kilisesinin temelinde
+  Karaocak'tan gelmiş bir blok olabilir ve bunu kimse bilmez.
 
 ## 4. İnançlar
 
@@ -195,7 +199,12 @@ bakımda ve toplulukta yarar.
   - [Türetme T36] Bir boyun ayı ötekinin ayıyla çakışmaz; Sogurtay'da iki boy aynı anda bulunmaz. Kan davası olan iki
     boy bu yüzden Sogurtay'da hiç karşılaşmaz; barış ancak konsey toplanınca, beylerin ağzından konuşulur. Şamanların
     üç ayı kışın en sert ayları: oba kışlağa çekilmişken Sogurtay'da yalnızca şamanlar kalır.
-- [Boş] Baikhan ve Gokana: varlık mı, yer mi, gök ve toprak mı.
+- **[Yazar, defter IV]** **Baikhan ve Gokana bir varlık değil.** İkisi bir inanışın, göçebe felsefesinin
+  unsurları: **Baikhan yeri ve göğü**, **Gokana suyu ve yağmuru** temsil eder. Birbirini tamamlar, birbirine
+  ihtiyaç duyarlar. Bu yüzden göçebe "Baikhan'a" diye dua etmez, "Baikhan'ın altında" der; kuyuya inen suya
+  Gokana'nın payı denir.
+- **[Türetme, defter IV]** Bir varlığa değil bir düzene inanıldığı için göçebenin **tapınağı yoktur**: tapınak
+  kapalı bir yerdir, yer ve gök kapatılamaz. Şamanın işi aracılık değil okumaktır (§4.3, T22).
 
 ### 4.4 Eski efsaneler ve küçük inanışlar
 
@@ -259,44 +268,67 @@ o dine göre yerleştirilmiş mezarlar (katakomb), çok azında eski tılsımlı
 - **[Yazar]** **Kartalın Nefesi Zirvesi**: Ulmarec ile Droskal arasındaki en yüksek zirve (kuzeydoğu dağları).
 - **[Yazar]** Gokyurt'un güneybatısı obaların kışlağıdır: hava soğuyunca oraya göçülür, hayvancılık ve balıkçılık
   yapılır.
-- [Boş] Denizlerin, iç suların, ana nehirlerin, büyük sıradağın ve ormanların adları (SORULAR.md, coğrafya).
+- **[Yazar, defter IV]** **Sular.** Batı denizi **Ağıt Denizi** (Ors ve Mirsana ona bakar), güneydoğu suyu
+  **Gelgit Denizi** (Zelmarin adını oradan alır). Ana nehir **Kemersu**: Taşkök dağlarından doğar, Vadi'yi besler,
+  Ors kıyısında Ağıt Denizi'ne dökülür. **Vadi'nin bütün değirmenleri onun üstünde** - Vaelghard'ın güneye
+  inmesinin asıl sebebi de bu değirmenlerdir (§8.7, defter IV).
+- **[Yazar, defter IV]** **Yükseltiler ve ormanlar.** Doğu sıradağı **Karaocak Sırtı** (bölge adıyla aynı kök),
+  kuzeybatı dağları **Taşkök**. Büyük orman **Kemersal Ormanı**, kuzeydeki iğne ormanı **Ayazkaya Çamlığı**.
 
 ## 6b. Kıtlık
 
-- **[Yazar, 2026-10-29]** Kıtayı bütünüyle etkileyen bir olay bir **kıtlık** başlattı: büyülü ve devasa bir olay ya
-  da mevsimlerin değişmesi. **Bütün savaşlar temelde bu kıtlıktan doğar.** Oyunda kıtlık ve yokluk her mekanikte ve
-  ortamda hissedilir; ticaret kıttır, asıl iş kervanı bir yerden öbürüne ulaştırmaktır (görev Y-C21).
-- **[Yazar]** Vadi kıtada en çok kıtlık ve mali zarar yaşayan bölge.
-- [Boş] Sebebi, ne zaman başladığı, sürüp sürmediği, kötüleşip kötüleşmediği.
-- **[Türetme T31] Sebep için iki öneri** (kullanıcı ikisini de anmıştı; biri seçilir ya da ikisi birleşir):
-  - **a. Uzayan kış.** Kış Sideria'ya kuzeydoğudan gelir [Yazar]; bir zamandır her yıl biraz daha erken gelip biraz
-    daha geç gidiyor. Kuzeydoğu dağlarının buzulları ilerliyor; buzun içindeki eski yaratıklar ışığa yaklaşıyor.
-    Yazlar kısalınca hasat yetişmiyor, otlak erken kuruyor. Bağları:
-    - Gokyurt obaları güneybatıya her yıl daha erken göçüyor; otlak kavgası Tolvarin ile Kirsavel'in kanını ısıtıyor;
-      Vaelghard'ın kuzey kasaba yolları her yıl daha uzun kapalı kalıyor.
-    - Herkes bunu başka okur: kilise El'in sayfayı kapattığını söyler, şamanlar doğaya yapılan saygısızlığı, Orsianlar
-      fiyat eğrisini, dağlılar dağın nefesini tuttuğunu.
-  - **b. Solgunluk.** Büyülü bir olay toprağın yaşam enerjisini çekiyor. Ekin büyüyor ama başakta tane yok, hayvan
-    doğuruyor ama yavru zayıf. Kadim uygarlığın sonunu getiren güçle aynı aileden bir şey: ya biri onu yeniden
-    uyandırdı ya da hiç bitmedi. Bağları:
-    - Öbürküler yaşamdan beslenir [Yazar]; solgunluk onların yoğunlaştığı yerlerde ağır olabilir.
-    - Tılsımlı nesneler ve büyücüler şüphe altına girer.
-    - Deli kralın büyücü katliamı bir sebep bulur (T33).
-  - İkisi birleşebilir: mevsimleri büyü değiştirdi.
-- **[Türetme T32] Zaman:** kıtlık imparatorluğun son yıllarında başladı ve bugün de sürüyor. Büyük savaş ilk kıtlık
-  savaşıydı: otlağı kuruyan obalar Han'ın çağrısına bu yüzden uydu; imparatorluk aç şehirlerini besleyemediği için
-  dağıldı. Bugünkü Vadi savaşları, dağlıların yağması ve göçebe akınları aynı açlığın devamı.
-- **[Türetme T33]** Deli kral kıtlığı büyücülere yükleyip onları katletti. Tarih kitapları ona "deli" der; o gün aç
-  halk ona alkış tuttu.
-- **[Türetme T34] Kıtlıkta kim ne ister:** Orvahel gıda, kâğıt ve tekstil ister [Yazar]; Vadi buğday üretir ama savaş
-  yüzünden yine aç kalır (T23); Vaelghard güneye borçlanarak beslenir [Yazar: borçlu]; Orsolune kıtlıkta borç verir ve
-  zenginleşir. Orsian ahlakı "dolandırma, ama kitaptaki açığı kullan" kıtlıkta en çok burada sınanır.
+**[Yazar, defter IV] Kıtlığın sebebi artık belli: İllet.** Kıtlığı başlatan şey büyülü bir olay ya da değişen
+mevsimler değil, **işgücünün çökmesi**. Veba kıtaya yayıldı, çalışacak insan azaldı, üretim ve ticaret düştü;
+ambarlar bir daha dolmadı. "En büyük kaynak işgücüdür" (defter IV, Vadi savaşları sorusu) - kıtlık bu kaynağın
+kaybından doğdu.
 
+Bu karar, daha önce yazılmış iki öneriyi (uzayan kış ve solgunluk) ve "kıtlık imparatorluğun son yıllarında
+başladı" türetmesini **geçersiz kılar**; o satırlar silindi.
+
+**[Yazar, defter IV] Zaman çizgisi** (ayrıntı TARIHCE §VI-VIII): imparatorluk altmış yıl önce çöktü, ilk otuz
+beş yıl barış içinde geçti, sonra İllet çıktı; kimse birlik olup karşı koymadı. Beş yıl içinde krallıklar teker
+teker hastalığa yenildi, üretim düştü ve **kırkıncı yılın sonunda kıtlık başladı**. Yani kıtlık bugün **yirmi
+yaşında** - bir kuşak, iki değil.
+
+- **[Yazar, defter IV]** **Bugün kıtlık olabileceği en kötü hâlinde**, ama devletler ve şehirler bir şekilde
+  ayakta kalıyor, idare ediyorlar. Kimse daha fazlasını yapamıyor. Durum haylice kötü: çocuklar açlıktan ölüyor,
+  bazı yerlerde İlletli hastalar bile zorla çalıştırılıyor.
+- **[Türetme, defter IV - oyuna bağlanışı]** "En kötü hâlinde" olan **acı**; kırılmamış olan **düzen**. Oyunun
+  kıtlık eğrisinin yıllar içinde derinleşmesi (bkz. `Scarcity.DRIFT_PER_DAY` 0,00055, tavan 0,45) açlığın
+  artmasını değil, idare edebilmenin tükenmesini anlatır. Bu yorum onay bekler.
+- **[Yazar]** Vadi kıtada en çok kıtlık ve mali zarar yaşayan bölge.
+- **[Yazar, 2026-10-29]** **Bütün savaşlar temelde bu kıtlıktan doğar.** Oyunda kıtlık ve yokluk her mekanikte
+  ve ortamda hissedilir; ticaret kıttır, asıl iş kervanı bir yerden öbürüne ulaştırmaktır (görev Y-C21).
 - **[Yazar, 2026-10-31]** Gokyurt kıtlıktan öbür yerlere göre daha az etkilendi; kıtanın hâlâ en sağlıklı yeri.
-- **[Yazar, 2026-10-31]** **Veba** genel bir durum; etkisi her yerde görülür, bölgeden bölgeye farklıdır. Vebanın hiç
-  bulaşmadığı köyler var; nedeni bilinmez.
-- **[Yazar, 2026-10-31]** Kervansaraylar: çoğu eskimiş, ücra ama açık; çok azı kapanmış harabe; bazıları haydutların
-  elinde. Oyun metninde "han" denmez, kervansaray denir.
+  Sebebi İllet çıkınca sınırını kapatıp izolasyonunu koruması (defter IV).
+- **[Türetme T34] Kıtlıkta kim ne ister:** Orvahel gıda, kâğıt ve tekstil ister [Yazar]; Vadi buğday üretir ama
+  savaş yüzünden yine aç kalır (T23); Vaelghard güneye borçlanarak beslenir [Yazar: borçlu]; Orsolune kıtlıkta
+  borç verir ve zenginleşir. Orsian ahlakı "dolandırma, ama kitaptaki açığı kullan" kıtlıkta en çok burada
+  sınanır.
+- **[Yazar, 2026-10-31]** Kervansaraylar: çoğu eskimiş, ücra ama açık; çok azı kapanmış harabe; bazıları
+  haydutların elinde. Oyun metninde "han" denmez, kervansaray denir.
+
+### 6c. İllet (veba)
+
+- **[Yazar, defter IV]** Hastalığın **genel adı İllet**; kıtada herkes bu adla anlar. Yerel adları da var;
+  en yaygını **Kara Nefes** (dağlıların "Orman'ın Nefesi"yle kasıtlı olarak çakışır - dağlı onu ormanın öcü
+  sayar, şehirli hastalık).
+- **[Yazar, defter IV]** Halkın açıklaması bölgeye göre değişir: Avuçiçi **inançsızların cezası** der, Vadi
+  **kirli su** der (ve haklıdır), göçebe **şehirlerin hastalığı** der ve şehre girmez. Kervan üçünü de duyar,
+  hiçbirini doğrulayamaz - bilgi oyununun parçası.
+- **[Yazar, 2026-10-31]** Veba genel bir durum; etkisi her yerde görülür, bölgeden bölgeye farklıdır. Vebanın
+  hiç bulaşmadığı köyler var; nedeni bilinmez.
+
+### 6d. Takvim
+
+- **[Yazar, defter IV]** Takvim **Sürü Yılı**: yıl **ilk otun çıktığı gün** başlar. Göçebe takvimidir;
+  imparatorluğa da geçmiştir çünkü ordu da otla yürür. Dört mevsim, oyunun kullandığı 360 gün.
+- **[Yazar, defter IV]** İmparatorluk bu takvimi **orijinaliyle almadı**: adını ve hikâyesini kendine göre
+  değiştirdi. Bugün kuzeyde ve şehirlerde yılın başı aynı gündür ama ona başka bir ad verilir ve başka bir
+  başlangıç anlatılır.
+- [Boş] İmparatorluğun takvime verdiği ad ve anlattığı hikâye.
+- **[Yazar, defter IV]** Çağlar: **Kadimler** → **Dağınık Beylikler** → **İmparatorluk** → **Kıtlık**. Bugün
+  Kıtlık Çağı'nın içindeyiz ve kimse ona daha iyi bir ad vermedi.
 
 ## 7. Siyasi harita bugün
 
@@ -319,8 +351,8 @@ eşlenmişti (iki "dağ", iki "sınır", iki "güney"); bu eşleşme kaldırıld
 | doğu, çember | **Avuçiçi** [Yazar, onaylandı T2] | Teokrasi | Birinci Okuyucu **V. Leon** | **Orvahel** | yalnızca Septisizm | imparatorluk dili |
 | doğu sıradağı | **Karaocak** [Türetme T37] | Beylik [Türetme] | Vorgat beyi | **Vorgat** | madenci eski inançları | [T41] |
 | güneybatı kıyısı | **Ors** (halkı: **Orsianlar**) | Orsolune Konseyi (ticaret oligarşisi) | konsey | **Orsolune** | Yumruk | imparatorluk dili, hesap sözcükleri deniz ötesinden |
-| (Ors içinde) | **Mirsana** | Bağımsız ticaret şehir devleti | [Boş] | Mirsana | Yumruk, Septisizm ve eski inanç karışık | imparatorluk dili |
-| güneydoğu kıyısı | **Gelgit Kıyısı** [Türetme T39] | Zelmarin Konseyi | konsey | **Zelmarin** | Septisizm ağır, karışık | [Boş] |
+| (Ors içinde) | **Mirsana** | Bağımsız ticaret şehir devleti | **yedi tüccar evi, sırayla** [Yazar, defter IV] | Mirsana | Yumruk, Septisizm ve eski inanç karışık | imparatorluk dili |
+| güneydoğu kıyısı | **Gelgit Kıyısı** [Türetme T39] | Zelmarin Konseyi | konsey | **Zelmarin** | Septisizm ağır, karışık | imparatorluk dili, deniz ağzı [Yazar, defter IV] |
 
 Haritanın dışında kalan yerleşimler en yakın parçaya düşer: Golcavar Ezmerak Baronluğu'na, Liraven Vadi'ye,
 Zelmarin Gelgit Kıyısı'na. **[Yazar, Ç11]** Akavan ve Samuran kanona göre Vadi'dir (Ondrelle'e ve Liraven'e bağlı).
@@ -519,7 +551,7 @@ Zelmarin Gelgit Kıyısı'na. **[Yazar, Ç11]** Akavan ve Samuran kanona göre V
 - **[Yazar]** Çok sabırlıdır; onu yalnızca ihanet ya da katliam gibi büyük kötülükler öfkelendirir.
 - **[Yazar]** Kullanıcının tarifiyle "kuzeybatıdaki barışçıl dağ ve orman beylikleri".
 - [Türetme T43] **Velkrun Yıkıntısı** Taşkök'ün imparatorluğa bağlandığı tek yerdi: imparatorluk orada bir kereste
-  hanı kurdu, Taşkök'ün ünlü odunu başkentin çatılarına oradan gitti. Parçalanmada han yakıldı; Taşkök bir daha kimseye
+  ambarı kurdu, Taşkök'ün ünlü odunu başkentin çatılarına oradan gitti. Parçalanmada ambar yakıldı; Taşkök bir daha kimseye
   bağlanmadı. Harvek'in konseyi o günden beri bir kuralla toplanır: odun satılır, orman satılmaz.
 
 ### 8.6b Karaocak (doğu sıradağı)
@@ -562,6 +594,13 @@ Zelmarin Gelgit Kıyısı'na. **[Yazar, Ç11]** Akavan ve Samuran kanona göre V
 - **[Yazar, onaylandı T23]** Harita Vadi'yi "bereketli" diye işaretliyor, kanon onu en aç bölge diyor. İkisi birlikte doğru: toprak
   kıtanın en verimlisi, ama bitmeyen prens savaşları hasadı yakıyor, yolları kesiyor ve köylüyü kaçırıyor. Vadi buğday
   üretir ve aç kalır.
+- **[Yazar, defter IV] Bugünkü Vadi savaşları kimler arasında:** **lonca şehirleri kendi aralarında.** Devlet yok,
+  ordu yok; her şehir **paralı bölük** tutuyor ve bölükler ambarlar için birbirine giriyor. Cephe diye bir şey yok,
+  bir vadi boyunca süren kavga var. **Vaelghard** kuzeyden zaman zaman "düzen için" iniyor - asıl derdi
+  **Kemersu'nun değirmenleri**; Vadi bunu işgal sayıyor, Vaelghard koruma.
+- **[Yazar, defter IV]** Bu kıtlığın savaşıdır: kimse toprak istemiyor, herkes **ambar** istiyor - ve ambardan da
+  çok **işgücü**. İlletin asıl yıkımı budur: çalışacak adam kalmadı, kıtlık oradan doğdu. Dağılan paralı bölükler
+  yolun asker kaçaklarının ana kaynağı (§14b).
 
 ### 8.8 Avuçiçi (Orvahel)
 
@@ -781,6 +820,70 @@ aç insanlarıdır; kimin olduğu oranın tarihinden (§8, §12). Oyunda `EnemyC
 | Ors ve Gelgit Kıyısı | Kıyı Korsanı | Tuz Kaçakçısı | kıyı, mühürsüz tuz |
 | Avuçiçi | Elsiz Sürgün | Garnizon Kaçağı | eli kesilip sürülenler (Ç14); garantör Vaelghard'ın kaçakları |
 | Gokyurt | Oba Yağmacısı | Bozkır Akıncısı | otlağı kuruyan obalar, atlı okçular |
+
+### 14b. Yolun töresi, asker kaçakları ve yol kesenler [Yazar, defter IV]
+
+**Yolun töresi:** *payını al, yolcuyu bırak.* Her şeyi almak kervanı öldürmek demektir, çünkü yüksüz kervan
+zaten ölür. Bu yüzden "ya paran ya canın - her şeyi bırak git" bir çizgiyi aşmaktır ve **herkes bunu bilir**.
+Nadir olmalı (yol kartlarının yüzde beşinden azı) ve **kim yaptıysa adı kalmalı**: böyle bir soygundan sonra o
+reisin adı deftere geçer, bir daha karşına çıkınca tanınır.
+
+**Haydut neden mal istiyor:** çünkü parayla yiyecek alınamıyor. Kıtlıkta altın bir söz, un bir gerçektir. İki
+ayrı aile var ve ikisi de yolda: **eski haydut** hâlâ para ister (alışkanlık, ve şehirde harcayacağını sanır),
+**aç haydut** mal ister.
+
+**Kervan neden muhafız tutmuyor:** tutuyor - kervanın kendisi odur. Büyük bir muhafız bölüğü tutmak bir bölük
+beslemek demek ve kıtlıkta kimse bir bölüğü besleyemez. Zaten kaçakların çoğu öyle dağılmış bölüklerden.
+Kervan az kişiyle, hızlı ve göze batmadan gitmeye çalışır.
+
+#### Asker kaçakları
+
+- **Kimden kaçıyorlar:** çoğu **Vadi'nin paralı bölüklerinden** (ödenmeyen maaş, dağılan bölük, kaçan komutan),
+  bir kısmı **Vaelghard'ın inen birliklerinden** geri dönmemiş olanlar. Ortak yanları: silahları var, ekmekleri
+  yok, geri dönecek yerleri yok.
+- **Neden kaçıyorlar:** yalnız açlık değil. Ordu sana kötü şeyler yaptırır - hastaları öldürtür, karşı devletin
+  malını yaktırır, masum insanları öldürtür - boş zamanında tarlada ve değirmende çalıştırır, ve ilk fırsatta
+  ülken için ölmeni bekler. Herkes bunu kaldıramaz. **Ama kaçanların hepsi iyi yürekli de değil:** düzeni
+  benimseyemeyen, başka problemleri olan, kendi birliğini ve çetesini kurmak isteyen yetenekli ama kötü
+  insanlar da aralarında. Dışarıda yemek bulmak da daha zor; kaçak olmak bir karar değil, bir sonuç.
+- **Nerede yoklar:** **Gokyurt'ta** bozkırda saklanacak yer yok ve otlak obalara ait - silahlı yabancı grup
+  görülür görülmez atlılar üstüne gider; kaçak bozkıra girmez çünkü bozkırda kaçak yaşayamaz. **Vaelghard
+  şehirleri civarında** krallık hâlâ işliyor ve kaçağı kendi kapısında asıyor; kaçaklar kuzeyden uzaklaşır,
+  sınırın güneyinde yoğunlaşır. [Oyun] Bu iki yerde kaçak kartı çekilmez, haydut kartı normal ağırlıkta.
+- **Yakalanırsa:** Vaelghard'da asılır. Vadi'de kimse uğraşmaz; bölük onu bulursa döver ve geri alır, çünkü
+  adam lazım.
+- **İhbar:** kervan ihbar edebilir, ama **ihbarın itibarla ilgili bir sonucu yoktur** - ne kazandırır ne
+  kaybettirir. Sebebi: kaçağın iyisi de var kötüsü de, ve kimse hangisini ele verdiğini bilemez. (Bu kanon,
+  daha önce önerilen "Vaelghard'da ihbar bölgesel itibar kazandırır, Kardeşlik'te kaybettirir" kuralını
+  geçersiz kılar.)
+- **Nasıl görünürler:** **yarım üniforma.** Bölüğün rengi solmuş bir kuşak, sökülmüş bir nişan, hâlâ iyi
+  bakılmış bir kılıç ve paramparça bir ayakkabı. Asker gibi dururlar, dilenci gibi kokarlar. Onları
+  haydutlardan ayıran şey **düzen alışkanlığı**: sıraya girerler, biri konuşur, ötekiler susar.
+
+#### Yolun ahlakı: el açmak, dolandırmak, el tutmak
+
+- **El açmak** kervanbaşılığın bittiğinin ilanıdır. Kervanbaşı pazarlık eder, borç alır, mal satar - el açmaz.
+  Açtıysa kervanı yoktur, yalnızca arabaları vardır. [Oyun] İtibarı doğrudan düşürür ve deftere yalnız ilk kez
+  yazılır: ikinci kez kimsenin umurunda değildir. Meyhaneci verir, çünkü meyhaneci herkese verir - ama bir
+  daha sana oda fiyatını farklı söyler.
+- **Dolandırmak** hırsızlıktan hafif, yalandan ağırdır. Yolda yalan söylemek olağan (herkes malını över), ama
+  **bir yolcuyu** dolandırmak yolun töresini kırar: yolcu yolcuya güvenmek zorundadır. Yakalananın cezası
+  dövülmek değil **dışarı atılmak**: meyhane kapısı o gün kapanır, ve anlatılır. Tüccar dolandırmak ayrı iş -
+  orada herkes birbirini dolandırmaya çalışıyor sayılır.
+- **Eksik el** pazar meydanının kenarından tutulur; iş bekleyenler orada durur. Lonca değil - lonca kalifiye
+  adam verir ve pahalıdır, arabacı meydanda bulunur. Kıtlıkta meydan kalabalık ama **sağlam adam az**:
+  fiyatın düşük olmamasının sebebi bu, aç bir adamı işe almak da bir risk.
+- **Dağılma:** aç kalan tayfanın kervanı bırakıp gitmesini töre haklı bulur, **ama kervanbaşının adını
+  lekeler.** "Adamını aç bıraktı" yolun en ağır sözlerinden; el tutma fiyatının her kayıpla yükselmesi bundan.
+  Gidenler en yakın şehre gider ve çoğu oraya varamaz; bazıları **kaçakların yanına** katılır - yolda karşına
+  çıkan silahlı grubun içinde bir zamanlar senin arabacın olabilir.
+
+#### Kervanın adı
+
+**Ad bir sicildir.** Loncalar kervan adlarını tutar; teslim edilen yük ve ödenen borç o ada yazılır.
+Kervanbaşı ölünce ad kalır, sicil kalır - oyunun soy sistemi budur. Tanınma mesafelidir: kendi bölgende adın
+bilinir, komşu bölgede duyulmuştur, uzakta hiçbir şey ifade etmez. Bir ad **düşebilir**: borç ödenmez, yük
+teslim edilmez, adam aç bırakılırsa lonca sicili kapatır ve yeni bir adla başlamak gerekir.
 
 ## 15. Oyuna bağlanış (kod işi; her biri ayrı karar)
 

@@ -3239,8 +3239,11 @@ static func _deserter_search() -> GameEvent:
 	)
 	event.choices = _choices([
 		lie,
+		# İhbarın itibarla ilgili bir sonucu yok (kullanıcı kararı 2026-11-07,
+		# defter IV): kaçağın iyisi de var kötüsü de, ve kimse hangisini ele
+		# verdiğini bilmez. Kalan bedel vicdanın: stres. Eskiden +1 itibar
+		# veriyordu, o satır kanonla çelişti ve kaldırıldı.
 		_choice("EVT_DESERTER_SEARCH_OPT_HANDOVER", _effects([
-			EventEffect.make(EventEffect.Type.REPUTATION, 1),
 			EventEffect.make(EventEffect.Type.STRESS, 8),
 			EventEffect.make(EventEffect.Type.CLEAR_FLAG, 0, "deserters_hidden"),
 		])),

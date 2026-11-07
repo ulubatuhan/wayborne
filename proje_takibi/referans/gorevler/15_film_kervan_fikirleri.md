@@ -178,6 +178,15 @@ Kaynak: kullanıcının film listesi (The Road, The Way Back, The Seventh Seal, 
   - **Kullanıcı notu:** "Gizli güdülü kılavuz: Onay. (Yerel rehber kiralamak: Red, buna para verecek imkânımız olmamalı hiç.)"
   - **Kabul:** Kart onaya partide.
 
+- [ ] **Y-E13 Dağılan tayfa yolda karşına çıkar**
+  - Kullanıcı, soru defteri IV (dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider ve çoğu oraya
+    varamaz; bazıları kaçakların yanına katılır.
+  - Kart: yolu kesen silahlı grubun içinde **adı deftere yazılmış** eski arabacın duruyor. Defter onu
+    "açlıktan ayrıldı" diye yazmıştı; şimdi karşında.
+  - Seçenekler kurgulanacak: tanıdığını söyle (karizma), hiç tanımamış gibi yap, dövüş. Tanıdığını söylemek
+    yükü kurtarabilir ama kervanın geri kalanının gözünde kervanbaşını küçültür.
+  - Bağlar: `crew_lost_to_hunger` sayacı, `CaravanLedger` satırı, `People` hafızası.
+
 - [ ] **Y-C33 Ant bağı**
   - **Onay turu (2026-10-31):** açık. Kullanıcı kararı: ant bağını yalnızca Gokyurtlular ve dağ kabileleri içer.
   - **Öncelik:** P2 · **Dalga:** 4 · **Bağımlı:** Y-C17 · **Kim:** C

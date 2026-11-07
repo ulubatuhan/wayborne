@@ -457,3 +457,35 @@ Kıtlık derinleştikçe ağırlığı 2,4 kat artıyor. Ekranda doğrulandı:
 "Daha azına ikna etmeye çalış — Veysel · Karizma · %50".
 
 Dövüş garantisi ölçümü yeniden koşuldu: üç muaf olmayan yolda hâlâ %100.
+
+## Soru defteri IV işlendi (2026-11-07)
+
+Defterin kendisi: https://claude.ai/artifact/DsC1PMXP2y4WnwH9mXgFHR (24 cevap, veritabanından okundu).
+
+**Kanona geçen (16 onay):** coğrafyanın adları (Ağıt Denizi, Gelgit Denizi, Kemersu, Karaocak Sırtı, Taşkök,
+Kemersal Ormanı, Ayazkaya Çamlığı), kadim yurdun yeri, Sürü Yılı takvimi ve dört çağ, Mirsana'nın yedi tüccar
+evi, Gelgit Kıyısı'nın deniz ağzı, Vadi savaşlarının tarafları, asker kaçaklarının kimden/nerede/nasılı,
+haydutun mal istemesi, "ya paran ya canın"ın bir çizgi olması, kervanın muhafız tutmaması, dağılma,
+dilencilik, dolandırıcılık, el tutma ve kervan adının töresi.
+
+**Düzeltmeler (5) ve sildikleri:**
+- **Kıtlığın sebebi İllet.** Büyü ya da mevsim değil: veba işgücünü yok etti, üretim düştü, ambarlar bir daha
+  dolmadı. T31 (uzayan kış / solgunluk), T32 (kıtlık imparatorluğun son yıllarında başladı) ve T33 (deli kral
+  kıtlığı büyücülere yükledi) **silindi**.
+- **Altmış yılın çizgisi** (TARIHCE §VIa, yeni): çöküş 60 yıl önce → 35 yıl barış → İllet → Gokyurt sınırını
+  kapatır → 5 yılda krallıklar yenilir → 40. yılın sonunda kıtlık → son 20 yıl hastalık ve savaş → bugün bazı
+  devletler göçebe topraklarına göz dikiyor ama harekete geçmedi. Kıtlık yirmi yaşında, kırk değil.
+- **Deli kral** imparatorluğun son yöneticisiydi, katliam kıtlıktan önce. Yeni açık soru: kıtlık yokken
+  büyücüleri neden katletti?
+- **Baikhan ve Gokana bir varlık değil:** Baikhan yer ve gök, Gokana su ve yağmur; birbirini tamamlarlar.
+- **Kaçak ihbarının itibarla sonucu yok** (iyisi de var kötüsü de). `evt_deserter_search`in +1 itibarı
+  kaldırıldı; kalan bedel yalnız stres.
+
+**Oyuna dokunanlar:**
+- Vebanın adı **İllet** oldu: ui/events/game CSV'lerinde 14 metin (İngilizcede "the Affliction").
+- `EVT_LEVY_TEXT` yeniden yazıldı: kaçak para değil yiyecek istiyor, bölük dağıldı, dönecek yer yok.
+- Yeni görev **Y-E13**: dağılan tayfanın yolda karşına çıkması kartı (kullanıcının kendi önerisi).
+
+**Yeni açık sorular:** deli kralın gerekçesi; imparatorluğun Sürü Yılı'na verdiği ad ve hikâye.
+**Onay bekleyen üç türetme:** T49 (göçebenin tapınağı yok), T50 (kıtlık eğrisi idarenin tükenmesini anlatır),
+T51 (üç kuşak üç dünya).
