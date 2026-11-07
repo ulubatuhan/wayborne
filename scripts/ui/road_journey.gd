@@ -4671,6 +4671,13 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		break_label.modulate = LOCKED_COLOR if break_data.affliction else OUTCOME_COLOR
 		_arrival_panel.add_child(break_label)
 
+	# Büyümenin bedeli (U3): vagon bakımı. Sıfırsa satır da yok.
+	var upkeep: int = payout.get("upkeep", 0)
+	if upkeep > 0:
+		var upkeep_label := _make_summary_label(tr("UI_ROAD_UPKEEP") % upkeep)
+		upkeep_label.modulate = LOCKED_COLOR
+		_arrival_panel.add_child(upkeep_label)
+
 	# Ustalık satırı (U6): planın sonucu, zarın değil. İki sayı, övgü yok -
 	# aç geçen gün ve varışta kalan erzağın kaç gün yeteceği.
 	var hungry_days: int = payout.get("hungry_days", 0)

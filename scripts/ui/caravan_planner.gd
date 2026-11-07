@@ -38,6 +38,7 @@ var _meal_label: Label
 var _meal_buttons: Array[Dictionary] = []
 var _labour_button: Button
 var _profit_label: Label
+var _upkeep_label: Label
 var _morale_label: Label
 var _morale_reasons: VBoxContainer
 var _buy_provisions_button: Button
@@ -335,11 +336,14 @@ func _build_ui(origin: Location, destination: Location, travel_days: int) -> voi
 	_risk_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 	_risk_label.visible = false
 	_profit_label = Label.new()
+	# Büyümenin bedeli (U3): bakım faturası yola çıkmadan okunsun.
+	_upkeep_label = Label.new()
 	_content.add_child(_party_label)
 	_content.add_child(_documents_label)
 	_content.add_child(_required_provisions_label)
 	_content.add_child(_current_provisions_label)
 	_content.add_child(_shortfall_label)
+	_content.add_child(_upkeep_label)
 	_content.add_child(_risk_label)
 	_build_meal_row()
 	_content.add_child(_profit_label)
@@ -669,6 +673,11 @@ func _refresh() -> void:
 		_risk_label.visible = false
 		_departure_armed = false
 
+	var upkeep := _session.get_wagon_upkeep(_plan.travel_days)
+	_upkeep_label.visible = upkeep > 0
+	if upkeep > 0:
+		_upkeep_label.text = tr("UI_PLAN_UPKEEP") % upkeep
+		_upkeep_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 	_profit_label.text = tr("UI_TOTAL_POTENTIAL") % _plan.get_total_profit()
 	# **Sonda**: eksik erzak sayısı bu noktada kesinleşiyor. Başta
 	# çağrıldığında `_plan` henüz kurulmamış oluyordu ve düğme tam

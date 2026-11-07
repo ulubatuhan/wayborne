@@ -231,6 +231,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_deserter_levy())
 	_road_events.append(_cargo_toll())
 	_road_events.append(_road_ultimatum())
+	_road_events.append(_provision_raid())
 	_apply_career_threats()
 	_apply_promised_effects()
 	return _road_events
@@ -330,6 +331,71 @@ static func _wanderer_revenge() -> GameEvent:
 	])
 	return event
 
+
+## Aç yağmacılar: altın da mal da istemiyorlar, **un** istiyorlar
+## (kullanıcı kararı 2026-11-07: "sadece erzak isteyenler de çıkabilir ki
+## o zaman dolandırma seçeneği çıkmaz, belki daha az erzağa ikna etmeye
+## çalışabilir").
+##
+## Blöf yok ve olamaz: bir çuval unu paha biçilmez diye yutturamazsın,
+## karşındaki onu yiyecek. Yerine Karizma var - tutarsa yarısına
+## razı olurlar, tutmazsa istediklerini alırlar ve bir de kırılırsın.
+const PROVISION_RAID_HALF: int = GameSession.RANSOM_FLOOR_PROVISIONS / 2
+
+static func _provision_raid() -> GameEvent:
+	var event := _event("evt_provision_raid", "EVT_FOODRAID_TITLE", "EVT_FOODRAID_TEXT", 1.7)
+	event.cooldown_days = 3
+	event.conditions = _conditions([
+		EventCondition.make(
+			"provisions", EventCondition.Op.GREATER_EQUAL,
+			float(GameSession.RANSOM_FLOOR_PROVISIONS)
+		),
+	])
+	event.weight_modifiers = _modifiers([
+		# Kıtlık derinleştikçe yolu kesen altın değil ekmek ister.
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.5),
+		]), 2.4),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.4),
+		]), 1.4),
+	])
+	event.choices = _choices([
+		_pay_off_choice("EVT_FOODRAID_OPT_GIVE", "EVT_RAID_NO_DEAL", _effects([
+			EventEffect.make(
+				EventEffect.Type.PROVISIONS, -GameSession.RANSOM_FLOOR_PROVISIONS
+			),
+			EventEffect.make(EventEffect.Type.MORALE, -8),
+		])),
+		_checked_choice(
+			"EVT_FOODRAID_OPT_TALK",
+			SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST, 1.0),
+			"EVT_FOODRAID_TALK_OK", _effects([
+				EventEffect.make(EventEffect.Type.PROVISIONS, -PROVISION_RAID_HALF),
+				EventEffect.make(EventEffect.Type.STRESS, 4),
+			]),
+			"EVT_FOODRAID_TALK_BAD", _effects([
+				EventEffect.make(
+					EventEffect.Type.PROVISIONS, -GameSession.RANSOM_FLOOR_PROVISIONS
+				),
+				EventEffect.make(EventEffect.Type.MORALE, -12),
+				EventEffect.make(EventEffect.Type.STRESS, 8),
+			])
+		),
+		_choice("EVT_FOODRAID_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
+		])),
+	])
+	return event
+
+## Fidyenin üç bandı (kullanıcı kararı 2026-11-07: "fidyeler en az 5
+## kişilik bir ekibin bir haftalık erzağı kadar olmalı"). Taban
+## GameSession.RANSOM_FLOOR_GOLD = 140 GG; tehlikeli yolda örgütlü çete
+## daha fazlasını ister. Eski bantlar 80/130/190'dı - küçük çete bir
+## kervanı bir hafta yaşatacak parayı değil, harçlık istiyordu.
+const AMBUSH_RANSOM_MID: int = 210
+const AMBUSH_RANSOM_HIGH: int = 290
+
 static func _bandit_ambush() -> GameEvent:
 	var event := _event("evt_bandit_ambush", "EVT_AMBUSH_TITLE", "EVT_AMBUSH_TEXT", 3.2)
 	event.cooldown_days = 1
@@ -372,7 +438,7 @@ static func _bandit_ambush() -> GameEvent:
 	var pay_choice := _gated_choice(
 		"EVT_AMBUSH_OPT_PAY", "EVT_AMBUSH_OPT_PAY_LOCKED",
 		_conditions([
-			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80),
+			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, GameSession.RANSOM_FLOOR_GOLD),
 			# Üst üste ödeyenle pazarlık biter (U5, bkz. _pay_off_choice).
 			EventCondition.make("raids_bought_off", EventCondition.Op.LESS_THAN, float(GameSession.RAID_PATIENCE)),
 		]),
@@ -384,14 +450,14 @@ static func _bandit_ambush() -> GameEvent:
 	pay_choice.outcomes = _outcomes([
 		_outcome_if("EVT_AMBUSH_PAY_LOW", _conditions([
 			EventCondition.make("danger", EventCondition.Op.LESS_THAN, 0.35),
-		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -80)]), 1.0),
+		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -GameSession.RANSOM_FLOOR_GOLD)]), 1.0),
 		_outcome_if("EVT_AMBUSH_PAY_MID", _conditions([
 			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
 			EventCondition.make("danger", EventCondition.Op.LESS_THAN, 0.6),
-		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -130)]), 1.0),
+		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -AMBUSH_RANSOM_MID)]), 1.0),
 		_outcome_if("EVT_AMBUSH_PAY_HIGH", _conditions([
 			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.6),
-		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -190)]), 1.0),
+		]), _effects([EventEffect.make(EventEffect.Type.GOLD, -AMBUSH_RANSOM_HIGH)]), 1.0),
 	])
 	event.choices = _choices([
 		pay_choice,
@@ -2340,9 +2406,10 @@ static func _bandit_tribute_zone_news() -> GameEvent:
 ## savaşı açıyor (TRIGGER_COMBAT), pazarlık haydut pususunun kendi
 ## OPT_HAGGLE'ıyla aynı vokabüleri kullanmıyor çünkü burada pazarlık
 ## payı yok - bir haraç, teklif değil.
-## Haracın erzakla ödenen karşılığı (Y-C32): dört ağızlı bir kervanın iki
-## günlük payı.
-const TOLL_PROVISIONS: int = 8
+## Haracın erzakla ödenen karşılığı (Y-C32). Kullanıcı kararı 2026-11-07
+## ile fidye tabanına bağlandı: beş ağzın bir haftalık payı. Eskiden 8'di
+## (iki günlük pay) - yol kesen için bu bir haraç değil, bahşişti.
+const TOLL_PROVISIONS: int = GameSession.RANSOM_FLOOR_PROVISIONS
 
 static func _bandit_tribute_toll() -> GameEvent:
 	var event := _event("evt_bandit_tribute_toll", "EVT_TRIBUTE_TOLL_TITLE", "EVT_TRIBUTE_TOLL_TEXT", 1.6)
@@ -2353,9 +2420,11 @@ static func _bandit_tribute_toll() -> GameEvent:
 	event.choices = _choices([
 		_gated_choice(
 			"EVT_TRIBUTE_TOLL_OPT_PAY", "EVT_TRIBUTE_TOLL_OPT_PAY_LOCKED",
-			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 70)]),
+			_conditions([EventCondition.make(
+				"gold", EventCondition.Op.GREATER_EQUAL, GameSession.RANSOM_FLOOR_GOLD
+			)]),
 			_effects([
-				EventEffect.make(EventEffect.Type.GOLD, -70),
+				EventEffect.make(EventEffect.Type.GOLD, -GameSession.RANSOM_FLOOR_GOLD),
 				# Haraç veren kervanın adı kardeşlikte duyulur (T16-07).
 				EventEffect.make(EventEffect.Type.FACTION, 2, Standing.BROTHERHOOD),
 			])
@@ -2778,21 +2847,26 @@ static func _serai_ruin() -> GameEvent:
 	])
 	return event
 
+## Haydut elindeki kervansarayın kapı bedeli. Pazarlık tabana (140 GG)
+## kadar indirebilir, altına değil.
+const SERAI_TOLL_GOLD: int = 240
+const SERAI_TOLL_HAGGLED: int = 180
+
 static func _serai_bandit() -> GameEvent:
 	var event := _event("evt_serai_bandit", "EVT_SERAI_BANDIT_TITLE", "EVT_SERAI_BANDIT_TEXT", 2.0)
 	event.cooldown_days = 3
 	event.conditions = _conditions([_c("serai_bandit", EventCondition.Op.GREATER_EQUAL, 1)])
 	event.choices = _choices([
 		_gated_choice("EVT_SERAI_BANDIT_OPT_PAY", "EVT_SERAI_BANDIT_OPT_PAY_LOCKED",
-			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 50)]),
-			_effects([_fx(EventEffect.Type.GOLD, -50)])),
+			_conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, SERAI_TOLL_GOLD)]),
+			_effects([_fx(EventEffect.Type.GOLD, -SERAI_TOLL_GOLD)])),
 		_gated_choice("EVT_SERAI_BANDIT_OPT_GRAIN", "EVT_SERAI_BANDIT_OPT_GRAIN_LOCKED",
 			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, TOLL_PROVISIONS)]),
 			_effects([_fx(EventEffect.Type.PROVISIONS, -TOLL_PROVISIONS)])),
 		_choice("EVT_SERAI_BANDIT_OPT_AROUND", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1)])),
 		_check_choice("EVT_SERAI_BANDIT_OPT_HAGGLE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
-			"EVT_SERAI_BANDIT_HAGGLE_OK", _effects([_fx(EventEffect.Type.GOLD, -25)]),
-			"EVT_SERAI_BANDIT_HAGGLE_MID", _effects([_fx(EventEffect.Type.GOLD, -40)]),
+			"EVT_SERAI_BANDIT_HAGGLE_OK", _effects([_fx(EventEffect.Type.GOLD, -GameSession.RANSOM_FLOOR_GOLD)]),
+			"EVT_SERAI_BANDIT_HAGGLE_MID", _effects([_fx(EventEffect.Type.GOLD, -SERAI_TOLL_HAGGLED)]),
 			"EVT_SERAI_BANDIT_HAGGLE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit")])),
 		_choice("EVT_SERAI_BANDIT_OPT_ATTACK", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"), _fx(EventEffect.Type.DANGER, -10)])),
 	])
@@ -3377,6 +3451,11 @@ static func _bailiffs_at_camp() -> GameEvent:
 ## (bkz. CombatEncounter.ambushed). Blöfün bedava bir çıkış olmamasının
 ## sebebi bu: başarısızlığı dövüşten beter.
 const BLUFF_DIFFICULTY: float = 2.5
+## Blöfün tavanı (kullanıcı kararı 2026-11-07): "çok zeki bir kervanbaşı
+## 10 haydut liderinden 7'sini dolandırabilsin sadece." Zekâ ne kadar
+## yükselirse yükselsin şans %70'i geçmez - yol kesenin reisi de bir
+## ömür boyu yalan dinlemiş biridir.
+const BLUFF_CEILING: int = 70
 
 ## Ödeyerek sıyrılma seçeneği. Üst üste `RAID_PATIENCE` kez ödeyen kervanın
 ## adı yolda yayılır ve dördüncü çete pazarlık etmez (U5, 2026-11-07):
@@ -3395,7 +3474,10 @@ static func _bluff_choice(
 ) -> EventChoice:
 	var choice := _checked_choice(
 		text_key,
-		SkillCheck.make(CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST, BLUFF_DIFFICULTY),
+		SkillCheck.make(
+			CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST,
+			BLUFF_DIFFICULTY, BLUFF_CEILING
+		),
 		ok_key, _effects([
 			EventEffect.make(EventEffect.Type.CARGO_DECOY),
 			EventEffect.make(EventEffect.Type.STRESS, 6),
@@ -3404,10 +3486,12 @@ static func _bluff_choice(
 			EventEffect.make(EventEffect.Type.TRIGGER_AMBUSH, 0, enemy_kind),
 		])
 	)
-	# Verecek bir şey yoksa blöf de yok: boş bir vagonun paha biçilmez
-	# sandığı olmaz.
+	# Verecek bir şey olması kartın kendi koşulu (üç kart da yüklü kervan
+	# ister), o yüzden buradaki tek kapı çetenin kulağı: bazıları konuşmaz
+	# (bkz. GameSession.is_raid_deaf - kullanıcı kararı 2026-11-07,
+	# "10 kervandan 2'si dolandırma girişimini direkt reddedebilir").
 	return _requires(choice, locked_key, _conditions([
-		EventCondition.make("cargo_items", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("raid_deaf", EventCondition.Op.LESS_THAN, 1.0),
 	]))
 
 ## Maaşını alamamış, bölüğünden kopmuş askerler. Yükün hepsini isterler.
@@ -3437,7 +3521,7 @@ static func _deserter_levy() -> GameEvent:
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
 		])),
 		_bluff_choice(
-			"EVT_LEVY_OPT_BLUFF", "EVT_LEVY_OPT_BLUFF_LOCKED",
+			"EVT_LEVY_OPT_BLUFF", "EVT_RAID_NO_BLUFF",
 			"EVT_LEVY_BLUFF_OK", "EVT_LEVY_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
 		),
 	])
@@ -3471,7 +3555,7 @@ static func _cargo_toll() -> GameEvent:
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
 		])),
 		_bluff_choice(
-			"EVT_CARGOTOLL_OPT_BLUFF", "EVT_CARGOTOLL_OPT_BLUFF_LOCKED",
+			"EVT_CARGOTOLL_OPT_BLUFF", "EVT_RAID_NO_BLUFF",
 			"EVT_CARGOTOLL_BLUFF_OK", "EVT_CARGOTOLL_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
 		),
 	])
@@ -3485,6 +3569,8 @@ static func _road_ultimatum() -> GameEvent:
 	event.cooldown_days = 6
 	event.conditions = _conditions([
 		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
+		# Boş bir kervana "her şeyi bırak" denmez; bırakacak bir şey olmalı.
+		EventCondition.make("cargo_items", EventCondition.Op.GREATER_EQUAL, 1),
 	])
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([
@@ -3505,7 +3591,7 @@ static func _road_ultimatum() -> GameEvent:
 			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
 		])),
 		_bluff_choice(
-			"EVT_ULTIMATUM_OPT_BLUFF", "EVT_ULTIMATUM_OPT_BLUFF_LOCKED",
+			"EVT_ULTIMATUM_OPT_BLUFF", "EVT_RAID_NO_BLUFF",
 			"EVT_ULTIMATUM_BLUFF_OK", "EVT_ULTIMATUM_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
 		),
 	])

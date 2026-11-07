@@ -21,6 +21,7 @@ func _init() -> void:
 	await _shoot_arrival(0, "varis_temiz")
 	await _shoot_arrival(3, "varis_ac")
 	await _shoot_city()
+	await _shoot_planner()
 	quit()
 
 func _session() -> GameSession:
@@ -71,6 +72,29 @@ func _shoot_city() -> void:
 	await _settle()
 	_save("sehir_bos_tur.png")
 	panel.queue_free()
+	await _settle()
+
+## Büyümenin bedeli (U3): kalabalık kervanın planlayıcıda okunan faturası -
+## vagon bakımı ve kalabalık kolonun moral eksisi.
+func _shoot_planner() -> void:
+	var session := _session()
+	session.owned_wagon_count = 5
+	session._sync_wagon_inventories()
+	session._sync_crew_names()
+	for i in 3:
+		session.add_to_party(CharacterData.create(
+			"Yoldaş %d" % (i + 1), CultureCatalog.HIGHLAND, CharacterStats.new()
+		))
+	for candidate in WorldMapData.get_routes_from(session.current_location_id):
+		if session.is_route_open(candidate):
+			TravelContext.selected_destination_id = candidate.to_location_id
+			break
+	var screen: Node = load("res://scenes/game/caravan_planner.tscn").instantiate()
+	get_root().add_child(screen)
+	await _settle()
+	await _settle()
+	_save("buyume_bedeli.png")
+	screen.queue_free()
 	await _settle()
 
 func _settle() -> void:

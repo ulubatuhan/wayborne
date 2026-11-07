@@ -285,9 +285,11 @@ func _test_bandit_ambush_toll_scales_with_danger(t) -> void:
 	t.ne(low, null, "düşük tehlikede bir sonuç var")
 	t.ne(mid, null, "orta tehlikede bir sonuç var")
 	t.ne(high, null, "yüksek tehlikede bir sonuç var")
-	t.eq(int(low.effects[0].amount), -80, "düşük tehlikede fidye en ucuz")
-	t.eq(int(mid.effects[0].amount), -130, "orta tehlikede fidye orta")
-	t.eq(int(high.effects[0].amount), -190, "yüksek tehlikede fidye en pahalı")
+	# Fidyenin tabanı: beş ağzın bir haftalık erzağı (kullanıcı kararı
+	# 2026-11-07) - bkz. GameSession.RANSOM_FLOOR_GOLD.
+	t.eq(int(low.effects[0].amount), -GameSession.RANSOM_FLOOR_GOLD, "düşük tehlikede fidye tabanda")
+	t.eq(int(mid.effects[0].amount), -EventCatalog.AMBUSH_RANSOM_MID, "orta tehlikede fidye orta")
+	t.eq(int(high.effects[0].amount), -EventCatalog.AMBUSH_RANSOM_HIGH, "yüksek tehlikede fidye en pahalı")
 	t.ok(
 		absf(high.effects[0].amount) > absf(low.effects[0].amount),
 		"tehlikeli bir yolda haydutlar daha çok fidye ister"

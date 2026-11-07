@@ -1541,3 +1541,6 @@
 "UI_BRIEF_IDLE_LABOUR","Bir gün çalışılabilir: bir gün gider, %d erzak gelir.","You could work a day: it costs a day and brings %d provisions.","","","","","","","","",""
 "UI_BRIEF_IDLE_TAVERN","Acele bir iş yok. Masada bir kulak, bir yatak ve bir oyun var.","Nothing is pressing. The tavern has an ear, a bed and a game.","","","","","","","","",""
 "UI_BRIEF_GO_PLANNER","Planlayıcıya git","Open the planner","","","","","","","","",""
+"UI_MORALE_CROWD","Kalabalık kolon","A crowded column","","","","","","","","",""
+"UI_ROAD_UPKEEP","Vagon bakımı: %d GG","Wagon upkeep: %d GP","","","","","","","","",""
+"UI_PLAN_UPKEEP","Vagon bakımı (varışta): %d GG","Wagon upkeep (on arrival): %d GP","","","","","","","","",""

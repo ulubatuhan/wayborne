@@ -5081,6 +5081,86 @@ func get_departure_temperament_bonus() -> int:
 				total += trait_resource.morale_bonus
 	return clampi(total, -DEPARTURE_TEMPERAMENT_BONUS_CAP, DEPARTURE_TEMPERAMENT_BONUS_CAP)
 
+## --- Fidyenin tabanı (kullanıcı kararı 2026-11-07) ---
+##
+## "Fidyeler en az 5 kişilik bir ekibin bir haftalık erzağı kadar olmalı."
+## Beş ağız × yedi gün × günde bir erzak = 35 erzak; erzağın birim fiyatı
+## 4 GG olduğuna göre 140 GG. Yol kesenin istediği şey bir harçlık değil,
+## bir kervanı bir hafta yaşatacak kadar yüktür - altınla ya da unla.
+##
+## Taban, pazarlıkla inilebilecek en düşük noktadır: bir kervancı iyi
+## konuşarak fidyeyi buraya indirebilir, altına indiremez.
+const RANSOM_FLOOR_PROVISIONS: int = 35
+const RANSOM_FLOOR_GOLD: int = RANSOM_FLOOR_PROVISIONS * PROVISIONS_UNIT_PRICE
+
+## --- Lafa bakmayan çete (kullanıcı kararı 2026-11-07) ---
+##
+## "10 kervandan 2'si de dolandırma girişimini direkt reddedebilir."
+## Bazı çeteler konuşmaz: reis sözü kesip malı gösterir. Blöf seçeneği o
+## gün hiç açılmaz, sebebiyle birlikte kapalı durur.
+##
+## Tohum kervanın adı ve gün: aynı gün her bakışta aynı cevabı verir,
+## kaydı yükleyip "bu sefer konuşur mu" diye yeniden zar atmak yok.
+const RAID_DEAF_SHARE: float = 0.2
+
+func is_raid_deaf() -> bool:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("raid_deaf|%s|%d" % [caravan_name, total_days_elapsed])
+	return rng.randf() < RAID_DEAF_SHARE
+
+## --- Büyümenin bedeli (U3, kullanıcı kararı 2026-11-07) ---
+##
+## Ölçüm: 90 seferde plan okuyan oyuncu hiç bitmiyordu - yetkin oyuncunun
+## üstünde hiçbir baskı yoktu. Kullanıcının kararı: **"büyüyen kervanın
+## ekonomisi zorlaşmalı; açlık, moral."** Yani son, dışarıdan gelen bir
+## duvar değil, kervanın kendi büyümesinden doğuyor (Y-C24: "büyüme ve
+## servet kendiliğinden yeni kriz doğurur").
+##
+## Üç kol, ikisi burada yeni, biri zaten vardı:
+##
+## 1. **Bakım** (yeni): her vagon her yol günü para yer - dingil yağı,
+##    koşum, hayvan nalı, tekerlek. Vagon almak bugüne kadar tek seferlik
+##    bir masraftı ve sonrası saf kapasiteydi; büyümenin tavanı yoktu.
+##    İlk vagon bedava sayılıyor (kervan kervandır), bedel ikinciden
+##    itibaren ve yolun uzunluğuyla birlikte artıyor.
+## 2. **Kalabalık** (yeni): çıkış morali ağız sayısıyla düşüyor. Uzun bir
+##    kolonda kervanbaşı kimseyi tanımaz, sıra beklenir, kavga çıkar.
+## 3. **Açlık** (zaten vardı, burada anılıyor ki üçü birlikte okunsun):
+##    büyüyen kervan hem daha çok el ister (bkz. get_crew_need - eller
+##    yer), hem daha yavaş yürür (bkz. get_convoy_speed_factor, G6), yani
+##    aynı yol daha çok gün ve daha çok erzak demek. Büyümenin açlık kolu
+##    bu ikisinden geliyor; yeni bir "israf" uydurmaya gerek yok.
+##
+## Hiçbiri gizli değil: bakım planlayıcıda ve varış özetinde, kalabalık
+## çıkış morali dökümünde yazılı. Okunamayan bir bedel ceza değil, tuzaktır.
+## Sayılar ölçümle oturdu. İlk deneme (2 bedava vagon yerine 1, günlük
+## 1,6 GG, kalabalık -18'e kadar) **çok sertti**: 90 seferde plan okuyan
+## oyuncunun kesesi +86'dan -4770 GG'ye düştü, aç sefer %6'dan %41'e,
+## boş tur %28'den %81'e çıktı. Bu bir son değil sefalettir - oyun
+## bitmiyor, yalnız iflas etmiş hâlde sürüyordu. Baskı dörtte bire indi.
+const UPKEEP_FREE_WAGONS: int = 2
+const UPKEEP_GOLD_PER_WAGON_DAY: float = 0.5
+## Ağız sayısı bunu aşınca moral düşmeye başlar.
+const CROWD_MORALE_FROM: int = 8
+const CROWD_MORALE_EACH: int = 2
+const CROWD_MORALE_CAP: int = 12
+
+## Bir seferin vagon bakım faturası. `days` yolun gün sayısı.
+func get_wagon_upkeep(days: int) -> int:
+	var paying := maxi(0, owned_wagon_count - UPKEEP_FREE_WAGONS)
+	if paying <= 0 or days <= 0:
+		return 0
+	return int(round(float(paying) * float(days) * UPKEEP_GOLD_PER_WAGON_DAY))
+
+## Kervanın beslediği ağız sayısı: parti, tayfa elleri ve katılan tüccarlar.
+func get_caravan_mouths() -> int:
+	return get_party().size() + get_crew_hands() + caravan.get_contract_mouths()
+
+## Kalabalığın çıkış moraline bindirdiği eksi (0 ya da negatif).
+func get_crowd_morale_penalty() -> int:
+	var extra := maxi(0, get_caravan_mouths() - CROWD_MORALE_FROM)
+	return -mini(CROWD_MORALE_CAP, extra * CROWD_MORALE_EACH)
+
 func get_departure_morale() -> int:
 	var morale := float(CaravanState.MAX_MORALE)
 	morale -= market.get_hardship(current_location_id, total_days_elapsed) * float(DEPARTURE_HARDSHIP_WEIGHT)
@@ -5091,6 +5171,7 @@ func get_departure_morale() -> int:
 		float(reputation) * DEPARTURE_REPUTATION_PER_POINT,
 		0.0, float(DEPARTURE_REPUTATION_BONUS_CAP)
 	)
+	morale += float(get_crowd_morale_penalty())
 	morale += float(get_departure_temperament_bonus())
 	morale += float(get_dog_morale_bonus())
 	return clampi(int(round(morale)), DEPARTURE_MORALE_FLOOR, CaravanState.MAX_MORALE)
@@ -5119,6 +5200,9 @@ func get_departure_morale_breakdown() -> Array[Dictionary]:
 	))
 	if pride > 0:
 		lines.append({"key": "UI_MORALE_REPUTATION", "amount": pride})
+	var crowd := get_crowd_morale_penalty()
+	if crowd != 0:
+		lines.append({"key": "UI_MORALE_CROWD", "amount": crowd})
 	var temperament := get_departure_temperament_bonus()
 	if temperament != 0:
 		lines.append({"key": "UI_MORALE_TEMPERAMENT", "amount": temperament})
@@ -5263,6 +5347,13 @@ func finish_journey() -> Dictionary:
 	# ustalık, söylenmeyen ustalıktır. İki sayı: kaç gün aç kalındı ve
 	# varışta kaç günlük erzak arttı. İkisi de **planın** sonucu, zarın
 	# değil; o yüzden övgü değil bilanço.
+	# Büyümenin bedeli (U3): vagon bakımı varışta kesilir. `spend_or_owe`
+	# üstünden geçiyor - büyüyen kervan borca da düşebilmeli, "kese boşsa
+	# bakım bedava" diye bir kapı olmamalı.
+	var upkeep := get_wagon_upkeep(maxi(1, journey_total_days))
+	if upkeep > 0:
+		spend_or_owe(upkeep)
+	payout["upkeep"] = upkeep
 	payout["hungry_days"] = journey_hungry_days
 	payout["journey_days"] = maxi(1, journey_total_days)
 	var daily := maxf(0.1, get_daily_provision_consumption())
@@ -6491,6 +6582,8 @@ func build_event_context() -> Dictionary:
 		"deserters_here": 1.0 if deserters_on_this_road() else 0.0,
 		# Kaç kez üst üste ödeyip sıyrıldın: eşiğe gelince pazarlık kapanır.
 		"raids_bought_off": float(raids_bought_off),
+		# Bugünkü çete lafa bakıyor mu (blöf seçeneği açılır mı).
+		"raid_deaf": 1.0 if is_raid_deaf() else 0.0,
 		# Korunan yol: garantinin kalktığı yer aynı zamanda daha sakin
 		# olmalı - Avuçiçi'nin muhafızı, obanın töresi, krallığın devriyesi
 		# yolu yalnız "garantisiz" değil, gerçekten tenha yapar.

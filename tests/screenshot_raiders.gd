@@ -12,7 +12,7 @@ extends SceneTree
 
 const SHOT_DIR: String = "user://raider_shots"
 const VIEW_SIZE: Vector2i = Vector2i(1600, 900)
-const CARDS: Array = ["evt_deserter_levy", "evt_cargo_toll", "evt_road_ultimatum"]
+const CARDS: Array = ["evt_deserter_levy", "evt_cargo_toll", "evt_road_ultimatum", "evt_provision_raid"]
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(SHOT_DIR)
@@ -23,8 +23,8 @@ func _init() -> void:
 		settings.call("set_locale", "tr")
 	for card_id in CARDS:
 		await _shoot(String(card_id), true)
-	# Yükü olmayan kervan: blöf kilitli, sebebi yazıyor.
-	await _shoot("evt_road_ultimatum", false, "_boş")
+	# Lafa bakmayan çete: blöf sebebiyle kapalı (kullanıcı kararı 2026-11-07).
+	await _shoot("evt_cargo_toll", true, "_sagir", true)
 	quit()
 
 ## Yol ekranı GameState'in oturumunu okur - buradan kurulan ayrı bir
@@ -49,7 +49,7 @@ func _load_cargo(session: GameSession) -> void:
 		if item != null:
 			session.add_to_cargo_or_bag(item, 5)
 
-func _shoot(card_id: String, with_cargo: bool, suffix: String = "") -> void:
+func _shoot(card_id: String, with_cargo: bool, suffix: String = "", deaf: bool = false) -> void:
 	var session := _session(with_cargo)
 	var origin := WorldMapData.get_location_by_id(session.current_location_id)
 	var route: TravelRoute = null
@@ -66,6 +66,12 @@ func _shoot(card_id: String, with_cargo: bool, suffix: String = "") -> void:
 	session.start_journey(destination.location_id, days, 0.6, plan)
 	if with_cargo:
 		_load_cargo(session)
+	if deaf:
+		# Konuşmayan bir çetenin denk geldiği ilk günü bul.
+		for day in 400:
+			session.total_days_elapsed = day
+			if session.is_raid_deaf():
+				break
 	else:
 		# Boş kervan: blöfün verecek bir şeyi yok, kilit sebebiyle görünmeli.
 		var strip := RandomNumberGenerator.new()

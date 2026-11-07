@@ -414,3 +414,46 @@ baskısı, büyüyen kervanın krizleri - Y-C24) açık; bu senin kararın.
 
 Test `tests/test_retention.gd` (48 doğrulama). Ekran
 `tests/screenshot_retention.gd`.
+
+## U3'ün kolu seçildi + yol keseni dengeleme (2026-11-07, kullanıcı kararı)
+
+**U3: "büyüyen kervanın ekonomisi zorlaşmalı; açlık, moral."** Üç kol:
+- **Bakım** (yeni): her vagon her yol günü para yer. İlk iki vagon bedava,
+  sonrası gün başına 0,5 GG. Planlayıcıda ("Vagon bakımı (varışta): 15 GG")
+  ve varış özetinde yazılı. Vagon almak artık tek seferlik masraf değil.
+- **Kalabalık** (yeni): çıkış morali ağız sayısıyla düşer (8 ağızdan sonra
+  her ağız -2, en çok -12). Moral dökümünde "Kalabalık kolon" satırı.
+- **Açlık** (zaten vardı): büyüyen kervan daha çok el ister (eller yer) ve
+  daha yavaş yürür (G6), yani aynı yol daha çok gün ve erzak demek.
+
+İlk deneme çok sertti ve ölçüm yakaladı: 1 bedava vagon + 1,6 GG/gün +
+kalabalık -18 ile plan okuyan oyuncunun kesesi +86'dan **-4770 GG**'ye,
+aç sefer %6'dan %41'e, boş tur %28'den %81'e çıktı. Bu bir son değil
+sefalettir - oyun bitmiyor, iflas etmiş hâlde sürüyordu. Baskı dörtte
+bire indirildi. Şimdi (90 sefer): acemi 69,7'de, açgözlü 75,5'te bitiyor;
+plan okuyan 90'ı tamamlıyor ama kesesi **-271 GG** (eskiden +86), aç
+sefer %14 (eskiden %6). Yani yetkin oyuncu artık bıçak sırtında.
+
+**Fidyenin tabanı.** "Fidyeler en az 5 kişilik bir ekibin bir haftalık
+erzağı kadar olmalı" → `RANSOM_FLOOR_PROVISIONS` 35, `RANSOM_FLOOR_GOLD`
+140. Haydut pususu 80/130/190 → **140/210/290**; haydut kervansarayı 50 →
+240 (pazarlıkla 140'a iner); haraç 70 → 140, erzakla 8 → 35. Gümrük
+rüşveti (80 GG) dokunulmadı - rüşvet fidye değil.
+
+**Blöfün tavanı.** `SkillCheck`e `ceiling` alanı eklendi; blöfünki 70.
+"Çok zeki bir kervanbaşı 10 haydut liderinden 7'sini dolandırabilsin
+sadece" - zekâ ne kadar yükselirse yükselsin şans %70'i geçmiyor. Zorluğu
+yükseltmek bunu çözmezdi: yeterince yüksek bir stat yine %95'e çıkıyordu.
+
+**Lafa bakmayan çete.** `is_raid_deaf()` - kervanın adı ve günden tohumlu,
+%20. O gün blöf seçeneği sebebiyle kapalı: "Reis lafı kesiyor: bu çete
+konuşmaya gelmemiş." Ekranda doğrulandı.
+
+**Erzak isteyen yağmacı** (`evt_provision_raid`, "Un İsteyenler"). Altın
+da mal da istemiyorlar. Blöf yok ve olamaz - bir çuval unu paha biçilmez
+diye yutturamazsın, karşındaki onu yiyecek. Yerine Karizma: tutarsa
+yarısına (17 erzak) razı olurlar, tutmazsa 35'i alıp bir de kırılırsın.
+Kıtlık derinleştikçe ağırlığı 2,4 kat artıyor. Ekranda doğrulandı:
+"Daha azına ikna etmeye çalış — Veysel · Karizma · %50".
+
+Dövüş garantisi ölçümü yeniden koşuldu: üç muaf olmayan yolda hâlâ %100.

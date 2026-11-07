@@ -27,6 +27,17 @@ enum Source {
 ## karşı bir eşik. 0 = ortalama bir karakter (statı 5) tam %50 civarında
 ## geçer; pozitif değer zorlaştırır, negatif kolaylaştırır.
 @export var difficulty: float = 0.0
+## Bu zarın kendi tavanı (kullanıcı kararı 2026-11-07): "çok zeki bir
+## kervanbaşı 10 haydut liderinden 7'sini dolandırabilsin sadece."
+##
+## Zorluk tek başına yetmiyordu: zorluğu yükseltmek *orta* bir karakteri
+## imkânsıza itiyor ama yeterince yüksek bir stat yine %95'e çıkıyordu -
+## yani bir stat yeterince büyüyünce iş garantiye biniyordu. Tavan bunu
+## kesiyor: bazı işler ne kadar iyi olursan ol kumar kalır.
+##
+## Varsayılan MAX_CHANCE, yani eski davranış; yalnız tavanı olan zarlar
+## bunu düşürür.
+@export var ceiling: int = MAX_CHANCE
 
 ## Her etkin puan şansı bu kadar değiştirir. 6 seçildi: statı 10'a
 ## (effective +5) çıkarmış biri tabana göre %30 daha güçlü şansla girer -
@@ -41,14 +52,16 @@ const CRITICAL_BAND: int = 15
 
 ## Başarı ihtimali (yüzde) - hem zar hem de butonun üstündeki "Zeka 12 · %72"
 ## önizlemesi **aynı** bu formülü okur, iki yerde iki formül olmasın diye.
-static func compute_chance(effective_stat: float, difficulty: float) -> int:
+static func compute_chance(
+	effective_stat: float, difficulty: float, chance_ceiling: int = MAX_CHANCE
+) -> int:
 	return clampi(
 		int(round(50.0 + CHANCE_PER_EFFECTIVE_POINT * (effective_stat - difficulty))),
-		MIN_CHANCE, MAX_CHANCE
+		MIN_CHANCE, mini(MAX_CHANCE, chance_ceiling)
 	)
 
 func get_chance(effective_stat: float) -> int:
-	return compute_chance(effective_stat, difficulty)
+	return compute_chance(effective_stat, difficulty, ceiling)
 
 ## 0 = başarısızlık, 1 = kıl payı (normal başarı), 2 = tam başarı.
 func roll(effective_stat: float, rng: RandomNumberGenerator) -> int:
@@ -69,10 +82,12 @@ func get_context_key() -> String:
 	return "%s_%s" % [prefix, stat_name]
 
 static func make(
-	stat_kind: CharacterStats.Kind, source_kind: Source = Source.PARTY_BEST, difficulty_value: float = 0.0
+	stat_kind: CharacterStats.Kind, source_kind: Source = Source.PARTY_BEST,
+	difficulty_value: float = 0.0, chance_ceiling: int = MAX_CHANCE
 ) -> SkillCheck:
 	var check := SkillCheck.new()
 	check.stat = stat_kind
 	check.source = source_kind
 	check.difficulty = difficulty_value
+	check.ceiling = chance_ceiling
 	return check

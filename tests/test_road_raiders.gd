@@ -14,6 +14,10 @@ func run(t) -> void:
 	_test_plunder_takes_all_but_spares_provisions(t)
 	_test_decoy_hands_over_the_cheapest(t)
 	_test_ambush_puts_enemies_first(t)
+	_test_bluff_is_never_a_sure_thing(t)
+	_test_some_bands_refuse_to_talk(t)
+	_test_ransom_never_below_a_week_of_bread(t)
+	_test_food_raiders_offer_talking_not_bluffing(t)
 
 func _session(origin: String = "liraven") -> GameSession:
 	var session := GameSession.new(500, 40, 2)
@@ -187,3 +191,101 @@ func _test_ambush_puts_enemies_first(t) -> void:
 	var fair_order := fair.turn_order()
 	t.ok(not fair_order.is_empty() and fair_order[0].is_player_side,
 		"pusu yoksa hızlı olan önce oynar")
+
+
+## Kullanıcı kararı 2026-11-07: "çok zeki bir kervanbaşı 10 haydut
+## liderinden 7'sini dolandırabilsin sadece."
+func _test_bluff_is_never_a_sure_thing(t) -> void:
+	var event := EventCatalog.get_event("evt_cargo_toll")
+	t.ok(event != null, "kart var")
+	if event == null:
+		return
+	var check: SkillCheck = event.choices[2].check
+	t.ok(check != null, "blöf bir zar ister")
+	if check == null:
+		return
+	t.eq(check.ceiling, EventCatalog.BLUFF_CEILING, "blöfün kendi tavanı var")
+	# Dünyadaki en zeki kervanbaşı bile tavanı geçemez.
+	t.le(check.get_chance(99.0), EventCatalog.BLUFF_CEILING, "tavan aşılamaz")
+	t.eq(check.get_chance(99.0), EventCatalog.BLUFF_CEILING, "zekâ tavana kadar işe yarar")
+	# Tavansız bir zar eski davranışta kalıyor.
+	var plain := SkillCheck.make(CharacterStats.Kind.CHARISMA)
+	t.eq(plain.get_chance(99.0), SkillCheck.MAX_CHANCE, "tavansız zar eskisi gibi")
+
+## "10 kervandan 2'si dolandırma girişimini direkt reddedebilir."
+func _test_some_bands_refuse_to_talk(t) -> void:
+	var session := _session()
+	var deaf := 0
+	for day in 400:
+		session.total_days_elapsed = day
+		if session.is_raid_deaf():
+			deaf += 1
+	var share := float(deaf) / 400.0
+	t.ok(absf(share - GameSession.RAID_DEAF_SHARE) < 0.06,
+		"çetelerin yaklaşık beşte biri konuşmaz: %%%.0f" % (share * 100.0))
+	# Aynı gün her bakışta aynı cevap: kaydı yükleyip yeniden zar yok.
+	session.total_days_elapsed = 7
+	t.eq(session.is_raid_deaf(), session.is_raid_deaf(), "aynı gün aynı cevap")
+	# Lafa bakmayan bir günde blöf seçeneği sebebiyle kapalı.
+	var event := EventCatalog.get_event("evt_cargo_toll")
+	var bluff: EventChoice = event.choices[2]
+	for day in 400:
+		session.total_days_elapsed = day
+		if not session.is_raid_deaf():
+			continue
+		t.not_ok(bluff.is_available(session.build_event_context()), "sağır çetede blöf kapalı")
+		t.ne(bluff.unavailable_text_key, "", "kapalı blöf sebebini yazar")
+		break
+
+## "Fidyeler en az 5 kişilik bir ekibin bir haftalık erzağı kadar olmalı."
+func _test_ransom_never_below_a_week_of_bread(t) -> void:
+	t.eq(GameSession.RANSOM_FLOOR_PROVISIONS, 35, "beş ağız × yedi gün")
+	t.eq(GameSession.RANSOM_FLOOR_GOLD, 140, "erzağın parayla karşılığı")
+	var lowest := 99999
+	for event_id in ["evt_bandit_ambush", "evt_serai_bandit", "evt_bandit_tribute_toll"]:
+		var event := EventCatalog.get_event(String(event_id))
+		if event == null:
+			continue
+		for choice in event.choices:
+			for effect in _all_effects(choice):
+				if effect.type == EventEffect.Type.GOLD and effect.amount < 0:
+					lowest = mini(lowest, -effect.amount)
+	t.ge(float(lowest), float(GameSession.RANSOM_FLOOR_GOLD),
+		"hiçbir fidye tabanın altında değil: %d GG" % lowest)
+
+static func _all_effects(choice: EventChoice) -> Array[EventEffect]:
+	var out: Array[EventEffect] = []
+	out.append_array(choice.effects)
+	for outcome in choice.outcomes:
+		out.append_array(outcome.effects)
+	return out
+
+## "Sadece erzak isteyenler de çıkabilir ki o zaman dolandırma seçeneği
+## çıkmaz, belki daha az erzağa ikna etmeye çalışabilir."
+func _test_food_raiders_offer_talking_not_bluffing(t) -> void:
+	var event := EventCatalog.get_event("evt_provision_raid")
+	t.ok(event != null, "erzak yağmacısı katalogda")
+	if event == null:
+		return
+	t.eq(event.choices.size(), 3, "ver · ikna et · dövüş")
+	for choice in event.choices:
+		for effect in _all_effects(choice):
+			t.ne(effect.type, EventEffect.Type.CARGO_DECOY, "erzak isteyene blöf yok")
+	var talk: EventChoice = event.choices[1]
+	t.ok(talk.check != null, "ikna bir zar ister")
+	if talk.check != null:
+		t.eq(talk.check.stat, CharacterStats.Kind.CHARISMA, "ikna karizmaya bakar")
+	var taken: Array[int] = []
+	for outcome in talk.outcomes:
+		for effect in outcome.effects:
+			if effect.type == EventEffect.Type.PROVISIONS:
+				taken.append(effect.amount)
+	t.eq(taken.size(), 2, "iki dal: tutan ve tutmayan")
+	if taken.size() < 2:
+		return
+	taken.sort()
+	var worst: int = taken[0]
+	var best: int = taken[1]
+	t.ok(best < 0 and worst < best, "tutan ikna daha az erzak verdirir: %d > %d" % [best, worst])
+	t.eq(-worst, GameSession.RANSOM_FLOOR_PROVISIONS, "tutmazsa istedikleri kadarını alırlar")
+	t.ok(RoadDirector.can_fight(event), "direnmek savaşa açılır")
