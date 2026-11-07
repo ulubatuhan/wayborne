@@ -560,3 +560,6 @@
 "ENEMY_HANDLESS_EXILE_NAME","Elsiz Sürgün","Handless Exile","","","","","","","","",""
 "ENEMY_OBA_RAIDER_NAME","Oba Yağmacısı","Oba Raider","","","","","","","","",""
 "ENEMY_STEPPE_RIDER_NAME","Bozkır Akıncısı","Steppe Rider","","","","","","","","",""
+"EFF_AMBUSH_OPENING","Geç kaldın - onlar çoktan davrandı.","Too late - they have already moved.","","","","","","","","",""
+"EFF_CARGO_PLUNDER","Yükten alındı: %s","Taken from the load: %s","","","","","","","","",""
+"EFF_CARGO_DECOY","Paha biçilmez diye verildi: %s","Handed over as priceless: %s","","","","","","","","",""

@@ -289,8 +289,11 @@ func _test_every_effect_type_is_handled(t) -> void:
 		return
 	var source := file.get_as_text()
 	for type_name in EventEffect.Type.keys():
+		# İki tip tek kolu paylaşabiliyor ("TRIGGER_COMBAT, TRIGGER_AMBUSH:"),
+		# o yüzden iki kolun da başı kabul ediliyor.
+		var arm: String = "EventEffect.Type.%s" % type_name
 		t.ok(
-			source.contains("EventEffect.Type.%s:" % type_name),
+			source.contains(arm + ":") or source.contains(arm + ","),
 			"EventEffect.Type.%s uygulayıcıda karşılanıyor" % type_name
 		)
 

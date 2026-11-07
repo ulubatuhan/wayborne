@@ -94,6 +94,23 @@ enum Type {
 	# Yolun reisi (N32, T16-09): text_value "paid" - kartta olan reise boyun
 	# eğildi, çetesi büyür (People.chief_paid).
 	CHIEF_MEMORY,
+	# Pusu savaşı (kullanıcı kararı 2026-11-07): TRIGGER_COMBAT'ın aynısı, tek
+	# farkı savaşın "pusuya düşülmüş" başlaması - ilk round'da düşman önce
+	# oynar (bkz. CombatEncounter.ambushed). Blöfü tutmayan kervanın bedeli.
+	# Ayrı bir tür, çünkü `text_value` kadro türünü taşıyor ve oraya ikinci
+	# bir anlam sıkıştırmak ("bandit|ambush") kataloğu okunmaz yapardı.
+	TRIGGER_AMBUSH,
+	# Yük yağması (kullanıcı kararı 2026-11-07): yol kesenin para değil
+	# **mal** istemesi. amount = yüzde pay (100 = hepsi), text_value "all"
+	# ise bırakılan tek mal da bırakılmaz (bkz. GameSession.plunder_cargo).
+	# Erzağa dokunmaz - kervanı yolda öldürmek yağmacının da işine gelmez.
+	CARGO_PLUNDER,
+	# Blöfün bedeli (kullanıcı kararı 2026-11-07): "elindeki bir malı bu çok
+	# değerli diye onları kandırıp sadece o malı vererek diğer eşyalarını ve
+	# canını kurtarabilir". Yükün **en ucuz** kalemini bir adet verir -
+	# oyuncu neyi vereceğini seçmez, blöfün tuttuğu şey zaten en ucuzunun
+	# değerli görünmesidir.
+	CARGO_DECOY,
 }
 
 @export var type: Type = Type.GOLD

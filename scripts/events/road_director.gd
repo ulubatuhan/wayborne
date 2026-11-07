@@ -92,7 +92,56 @@ func weight_multiplier(event: GameEvent, context: Dictionary) -> float:
 	for link in (context.get("domino_open", []) as Array):
 		if (DOMINO_NEXT.get(String(link), []) as Array).has(event.event_id):
 			m *= DOMINO_WEIGHT
-	return m * novelty_multiplier(event.event_id, context)
+	return m * novelty_multiplier(event.event_id, context) * combat_debt_multiplier(event, context)
+
+## Dövüş borcu (kullanıcı kararı 2026-11-07): "her yolculukta en az 1 adet
+## kombat olacak şekilde kurgula sistemi yani 3 günlük yolculukta bile 1
+## olay olmalı ve kombata evrilmeli sonucu".
+##
+## Garanti bir anahtar değil bir **rampa**: son üç güne girilip hâlâ
+## dövüşülmediyse dövüşe açılan kartlar ağırlaşır, ötekiler zayıflar; son
+## günde `EventEngine` zaten kartı zorunlu kılıyor. Böylece dövüş çoğu
+## seferde kendiliğinden ve erken geliyor, "son gün mutlaka haydut" diye
+## okunabilen bir desen oluşmuyor.
+##
+## Ötekiler sıfırlanmıyor, kısılıyor: koşulu sağlayan tek kart dövüşsüz
+## olabilir ve o zaman yolun susması, kartın gelmemesinden iyidir.
+const COMBAT_DUE_FROM_DAYS: float = 3.0
+const COMBAT_DUE_WEIGHT: float = 3.5
+const COMBAT_DUE_OTHER_WEIGHT: float = 0.2
+
+## Korunan yolda (Avuçiçi, Gokyurt, krallığın kendi şehirleri arası) yolu
+## kesen kart seyrekleşir. Ölçüm bunu gerektirdi: garantiyi kaldırmak tek
+## başına o yolları %77 oranında yine haydutlu bırakıyordu, yani "aşırı
+## korunan yer" ekranda hissedilmiyordu. Sıfır değil: muhafız da her yeri
+## tutamaz, kutsal yolda bir soygun hikâye olur.
+const GUARDED_ROAD_WEIGHT: float = 0.3
+
+func combat_debt_multiplier(event: GameEvent, context: Dictionary) -> float:
+	if float(context.get("guarded_road", 0.0)) > 0.0:
+		return GUARDED_ROAD_WEIGHT if can_fight(event) else 1.0
+	if float(context.get("combat_due", 0.0)) <= 0.0:
+		return 1.0
+	if float(context.get("days_left", 99.0)) > COMBAT_DUE_FROM_DAYS:
+		return 1.0
+	return COMBAT_DUE_WEIGHT if can_fight(event) else COMBAT_DUE_OTHER_WEIGHT
+
+## Kart bir savaşa açılabiliyor mu: seçeneğinin ya da sonucunun etkilerinde
+## TRIGGER_COMBAT / TRIGGER_AMBUSH var mı.
+static func can_fight(event: GameEvent) -> bool:
+	for choice in event.choices:
+		if _fight_effects(choice.effects):
+			return true
+		for outcome in choice.outcomes:
+			if _fight_effects(outcome.effects):
+				return true
+	return false
+
+static func _fight_effects(effects: Array[EventEffect]) -> bool:
+	for effect in effects:
+		if effect.type == EventEffect.Type.TRIGGER_COMBAT or effect.type == EventEffect.Type.TRIGGER_AMBUSH:
+			return true
+	return false
 
 ## Yenilik çarpanı (U1, uzman ölçümü 2026-11-07).
 ##

@@ -26,8 +26,19 @@ func _init(events: Array[GameEvent], seed_value: int = 0) -> void:
 	else:
 		_rng.randomize()
 
+## Dövüş borcunun son günü (kullanıcı kararı 2026-11-07): sefer bitmek
+## üzereyken hâlâ dövüşülmediyse o günün kartı **kesin** çıkar ve dövüşe
+## açılan kartlar arasından çekilir. Rampa (RoadDirector.combat_debt_
+## multiplier) çoğu seferde işi daha erken bitirdiği için bu kapı
+## nadiren açılır; açıldığında garantiyi tutan odur.
+static func combat_forced(context: Dictionary) -> bool:
+	return float(context.get("combat_due", 0.0)) > 0.0 \
+		and float(context.get("days_left", 99.0)) <= 1.0
+
 ## Tehlike arttıkça günlük olay ihtimali yükselir.
 func get_daily_chance(context: Dictionary) -> float:
+	if combat_forced(context):
+		return 1.0
 	var danger: float = float(context.get("danger", 0.0))
 	var chance := daily_event_chance * (0.5 + danger)
 	if director != null:
@@ -56,6 +67,17 @@ func _weight(event: GameEvent, context: Dictionary) -> float:
 ## Havuzdan koşulu sağlayan bir olayı ağırlıklı olarak çeker.
 func draw_event(current_day: int, context: Dictionary) -> GameEvent:
 	var eligible := get_eligible_events(current_day, context)
+	# Dövüş borcunun son günü: havuz dövüşe açılan kartlara iniyor. Hiç
+	# yoksa (kuramsal: o yolda uygun tek bir dövüş kartı bile yok) eski
+	# havuz kalıyor - garanti bir kartı yoktan var edemez, sessiz bir gün
+	# yanlış karttan iyidir.
+	if combat_forced(context):
+		var fighters: Array[GameEvent] = []
+		for event in eligible:
+			if RoadDirector.can_fight(event):
+				fighters.append(event)
+		if not fighters.is_empty():
+			eligible = fighters
 	if eligible.is_empty():
 		return null
 

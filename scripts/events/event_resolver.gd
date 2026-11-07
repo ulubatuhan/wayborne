@@ -85,6 +85,8 @@ static func resolve_choice(
 	# yoktu. Tek kayıt yeri burası: hem yol ekranı hem simülatör bu
 	# fonksiyondan geçiyor.
 	session.note_event_seen(event.event_id)
+	# Dövüş garantisi (2026-11-07): yolu kesen bir kartla yüzleşildi.
+	session.note_raid_faced(event)
 	session.note_decision(event.event_id, choice.text_key)
 	if not choice.effects.is_empty():
 		resolution.choice_result = _apply(choice.effects, session, apply_effects)

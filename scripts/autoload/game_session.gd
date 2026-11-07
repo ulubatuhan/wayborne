@@ -525,6 +525,84 @@ var journey_start_day: int = -1
 var journey_shortcut: bool = false
 var journey_days_remaining: int = 0
 
+## Bu seferde kaç kez savaşa girildi (kullanıcı kararı 2026-11-07: "her
+## yolculukta en az 1 adet kombat olacak şekilde kurgula sistemi yani 3
+## günlük yolculukta bile 1 olay olmalı ve kombata evrilmeli sonucu").
+## Sefer kaydıyla birlikte yazılıyor: kaydı yükleyip garantiyi sıfırlamak
+## bir sömürü kapısı olmasın.
+var journey_combat_count: int = 0
+
+## Dövüşün garanti olmadığı bölgeler. Gerekçe oyunun kendi lore'u, kolaylık
+## değil: Avuçiçi (`ahit`) Ahit'in muhafızlarıyla kıtanın en sıkı korunan
+## yolu (kullanıcı, 2026-11-07: "aşırı korunan bir yer orası, lore'da
+## açıklamıştım"), Gokyurt (`gocebe`) obaların kendi törelerinin yürüdüğü
+## bozkır - yolu kesen, obanın kanına girer.
+const COMBAT_SAFE_REGIONS: Array[String] = ["ahit", "gocebe"]
+## Kuzey Krallığı (Vaelghard). Krallığın *şehirleri arasındaki* yol devriyeli;
+## garanti yalnız iki ucu da krallık şehri olan yollarda kalkar - krallıktan
+## sınıra çıkan yol hâlâ yoldur (kullanıcı: "kuzey krallığı şehirleri civarı").
+const GUARDED_REGION: String = "imparatorluk"
+
+## Bu yolda "en az bir dövüş" kuralı işliyor mu.
+func combat_guarantee_applies() -> bool:
+	if not is_journey_active():
+		return false
+	var destination := journey_region()
+	if COMBAT_SAFE_REGIONS.has(destination):
+		return false
+	if COMBAT_SAFE_REGIONS.has(current_region()):
+		return false
+	return not (destination == GUARDED_REGION and current_region() == GUARDED_REGION)
+
+## Bu seferde hâlâ bir dövüş borcu var mı.
+func journey_needs_combat() -> bool:
+	return journey_combat_count <= 0 and combat_guarantee_applies()
+
+## Asker kaçakları bu yolda çıkabilir mi (kullanıcı kararı 2026-11-07:
+## "Göçebe bölgesi ve kuzey krallığı şehirleri civarı haricinde her yerde
+## deserter asker olabilir").
+##
+## Gerekçe: Gokyurt'un bozkırında ordu yok, oba var - kaçacak garnizon da
+## yok. Kuzey Krallığı'nın *şehirleri arasındaki* yollar hâlâ devriyeli,
+## kaçak oraya sokulmaz; aynı krallıktan sınıra çıkan yol ise kaçakların
+## tam yatağı, orada kural işler.
+func deserters_on_this_road() -> bool:
+	var there := journey_region()
+	var here := current_region()
+	if there == "gocebe" or here == "gocebe":
+		return false
+	return not (there == GUARDED_REGION and here == GUARDED_REGION)
+
+## Erzak dışı, elde duran kalem sayısı: yol kesenin "mal ver" diyebilmesi ve
+## blöfün verilecek bir şeyi olması için.
+func get_cargo_item_count() -> int:
+	var count := 0
+	for entry in get_total_inventory_entries():
+		var item: Item = (entry as Dictionary).item
+		if item == null or item.item_id == PROVISIONS_ITEM_ID:
+			continue
+		if int((entry as Dictionary).quantity) > 0:
+			count += 1
+	return count
+
+## Savaşı açan tek kapı EventEffectApplier (TRIGGER_COMBAT / TRIGGER_AMBUSH),
+## yani hem yol ekranı hem simülatörler buradan geçiyor.
+func note_combat_triggered() -> void:
+	journey_combat_count += 1
+
+## Dövüşe açılan bir kartla yüzleşmek de borcu kapatır - fidyeyi ödeyip
+## yoluna gitmek bir **karar**, kaçamak değil; bedeli zaten kesede ve
+## yükte. Garantinin "dövüşmeyi seçene kadar her gün haydut" hâline
+## dönüşmemesi için bu kapı gerekli: oyun kervanın yolunu kesmeyi garanti
+## eder, nasıl kurtulacağını oyuncuya bırakır.
+##
+## Sıkılaştırmak isteyen (yalnız gerçek savaş sayılsın) bu çağrıyı
+## EventResolver'dan kaldırır; garanti o zaman "her seferde bir dövüş"e
+## döner.
+func note_raid_faced(event: GameEvent) -> void:
+	if event != null and RoadDirector.can_fight(event):
+		journey_combat_count += 1
+
 var danger_level: float = 0.0
 ## Bölgesel itibar ve hizipler (Y-C12, T16-07; bkz. Standing). `reputation`
 ## artık bulunulan bölgenin gözündeki ad: bütün eski kapılar (işe alma, kontrat,
@@ -4418,7 +4496,10 @@ func roll_injury(character: CharacterData, rng: RandomNumberGenerator) -> String
 ## istediği maldır. Kaybedilenlerin listesi döner ([{item_id, quantity}]).
 const DEFEAT_PLUNDER_SHARE: float = 0.25
 
-func plunder_cargo(share: float, rng: RandomNumberGenerator) -> Array[Dictionary]:
+## `spare_one`: yağmacı her maldan alıp birini bırakır (kaybedilen dövüşün
+## bedeli - bkz. G5). Yol kesen "hepsini ver" dediğinde false geçiliyor:
+## orada bırakılan bir şey yok, pazarlık da yok (kullanıcı kararı 2026-11-07).
+func plunder_cargo(share: float, rng: RandomNumberGenerator, spare_one: bool = true) -> Array[Dictionary]:
 	var taken: Array[Dictionary] = []
 	if share <= 0.0:
 		return taken
@@ -4438,7 +4519,7 @@ func plunder_cargo(share: float, rng: RandomNumberGenerator) -> Array[Dictionary
 		if remove_from_cargo_or_bags(item.item_id, grab):
 			taken.append({"item_id": item.item_id, "quantity": grab})
 	# Her seferinde her maldan almak fazla sert; biri rastgele bırakılıyor.
-	if taken.size() > 1:
+	if spare_one and taken.size() > 1:
 		var spared: Dictionary = taken[rng.randi_range(0, taken.size() - 1)]
 		var spared_item := ItemCatalog.get_item(String(spared["item_id"]))
 		if spared_item != null:
@@ -5020,6 +5101,7 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 		return
 	journey_start_day = total_days_elapsed
 	journey_shortcut = shortcut
+	journey_combat_count = 0
 	journey_origin_id = current_location_id
 	journey_destination_id = destination_id
 	journey_total_days = maxi(1, days)
@@ -6011,6 +6093,7 @@ func _journey_save_block() -> Dictionary:
 		"danger_level": danger_level,
 		"start_day": journey_start_day,
 		"shortcut": journey_shortcut,
+		"combat_count": journey_combat_count,
 		"caravan": caravan.to_dict(),
 		"controller": journey_snapshot.duplicate(true),
 	}
@@ -6025,6 +6108,7 @@ func _load_journey_block(block: Dictionary) -> void:
 	danger_level = clampf(float(block.get("danger_level", 0.0)), 0.0, 1.0)
 	journey_start_day = int(block.get("start_day", -1))
 	journey_shortcut = bool(block.get("shortcut", false))
+	journey_combat_count = maxi(0, int(block.get("combat_count", 0)))
 	caravan = CaravanState.from_dict(block.get("caravan", {}) as Dictionary)
 	journey_snapshot = (block.get("controller", {}) as Dictionary).duplicate(true)
 
@@ -6349,6 +6433,20 @@ func build_event_context() -> Dictionary:
 		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
 		"domino_open": domino_open(),
+		# Dövüş garantisi (kullanıcı kararı 2026-11-07): bu seferde hâlâ bir
+		# dövüş borcu var mı, ve kaç gün kaldı. Yönetmen bu ikisiyle son
+		# günlere doğru dövüşe açılan kartları öne çekiyor; son günde
+		# zorunlu hâle geliyor (bkz. RoadDirector / EventEngine).
+		"combat_due": 1.0 if journey_needs_combat() else 0.0,
+		"days_left": float(journey_days_remaining),
+		# Yol kesenler (kullanıcı kararı 2026-11-07): asker kaçağı bu yolda
+		# çıkabilir mi, ve "mal ver" diyebilecekleri bir yük var mı.
+		"deserters_here": 1.0 if deserters_on_this_road() else 0.0,
+		# Korunan yol: garantinin kalktığı yer aynı zamanda daha sakin
+		# olmalı - Avuçiçi'nin muhafızı, obanın töresi, krallığın devriyesi
+		# yolu yalnız "garantisiz" değil, gerçekten tenha yapar.
+		"guarded_road": 0.0 if combat_guarantee_applies() else 1.0,
+		"cargo_items": float(get_cargo_item_count()),
 		# Çekilişin hafızası (U1): yönetmen görülmüşü sönümler, görülmemişi
 		# kayırır. Sözlükle taşınıyor çünkü yönetmen oturumu tanımıyor.
 		"seen_cards": seen_event_ids,

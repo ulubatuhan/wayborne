@@ -102,6 +102,17 @@ var enemy_units: Array[CombatUnit] = []
 ## vahşi hayvan ya da muhafız kadrosu da kendi adıyla anılır.
 var enemy_label: String = "Haydutlar"
 
+## Pusuya düşülerek girilen savaş (kullanıcı kararı 2026-11-07): yoldaki
+## blöf tutmazsa "kombata dezavantajlı başlar yani ilk hamleyi karşı taraf
+## yapar". İlk round'da bütün düşmanlar bütün oyunculardan önce oynar; her
+## iki tarafın kendi iç sırası yine hız zarıyla belirlenir.
+##
+## Niye bir tur bonusu ya da hasar cezası değil: ilk hamle oyuncunun
+## *planını* bozar (yaralıyı çekemez, muhafızı öne alamaz), sayıyı değil.
+## İkinci round'dan itibaren sıra normale döner - pusu bir an, bir durum
+## değil; savaşı baştan kaybettiren bir ceza değil.
+var ambushed: bool = false
+
 var _order: Array[CombatUnit] = []
 var _order_index: int = 0
 var _rng: RandomNumberGenerator
@@ -138,8 +149,20 @@ func step() -> void:
 	_run_until_player_turn()
 
 func start() -> void:
+	# `ambushed` kurulduktan SONRA, start'tan önce atanıyor (çağıran onu
+	# `new()`a geçiremez), o yüzden pusu varsa sıra burada yeniden
+	# kuruluyor. Pusu yoksa dokunulmuyor: sıra yeniden atılsaydı aynı
+	# tohumla kurulan eski savaşlar başka sıralanırdı.
+	if ambushed:
+		_build_order()
 	_emit_log(tr("CBT_LOG_OPENING") % [enemy_label, player_units.size()])
 	_run_until_player_turn()
+
+## Bu round'un sırası. Pusunun ilk round'da düşmanı öne aldığını dışarıdan
+## okuyabilmek için (test; ileride bir "sıra şeridi" arayüzü de buradan
+## okur). Kopya dönüyor - sıraya dışarıdan dokunulmasın.
+func turn_order() -> Array[CombatUnit]:
+	return _order.duplicate()
 
 func get_active_unit() -> CombatUnit:
 	if _order.is_empty():
@@ -751,8 +774,14 @@ func _build_order() -> void:
 	_order.append_array(enemy_units)
 	for unit in _order:
 		unit.turn_speed = unit.initiative + _rng.randi_range(1, SPEED_DIE)
-	_order.sort_custom(_compare_turn_speed)
+	_order.sort_custom(_compare_ambush_turn_speed if ambushed and round_number <= 1 else _compare_turn_speed)
 	_order_index = 0
+
+## Pusunun ilk round'u: taraf hızın önüne geçer, düşman önce oynar.
+func _compare_ambush_turn_speed(a: CombatUnit, b: CombatUnit) -> bool:
+	if a.is_player_side != b.is_player_side:
+		return b.is_player_side
+	return _compare_turn_speed(a, b)
 
 func _compare_turn_speed(a: CombatUnit, b: CombatUnit) -> bool:
 	if a.turn_speed != b.turn_speed:

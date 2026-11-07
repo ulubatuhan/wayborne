@@ -320,6 +320,9 @@ var _pending_event_day_position: float:
 var _encounter: RoadEncounter = null
 var _current_combat_kind: String = "bandit"
 var _pending_combat_danger: float = 0.0
+## Açılacak savaş pusuyla mı başlıyor (blöf tutmadı): ilk round'da düşman
+## önce oynar - bkz. CombatEncounter.ambushed.
+var _pending_combat_ambush: bool = false
 var _pre_combat_panel: PreCombatPanel = null
 ## Bu savaşa gerçekten katılanlar (bkz. PreCombatPanel) - dışarıda
 ## kalanlar risk almadığı için ne XP alır ne düşme izi taşır.
@@ -3782,7 +3785,8 @@ func _apply_side_channels(result: EventEffectApplier.Result) -> void:
 		var enemy_kind := "bandit"
 		if not result.combat_kinds.is_empty():
 			enemy_kind = result.combat_kinds[0]
-		_open_combat(int(result.combat_requests[0]), enemy_kind)
+		var ambushed := not result.combat_ambushes.is_empty() and bool(result.combat_ambushes[0])
+		_open_combat(int(result.combat_requests[0]), enemy_kind, ambushed)
 		return
 
 	if not result.recruit_requests.is_empty():
@@ -3865,9 +3869,10 @@ func _close_recruit_offer() -> void:
 ## TRIGGER_COMBAT'in text_value'su); bölge (bkz. EnemyCatalog.build_bandit_squad'ın
 ## region_id'si) sefer hedefinden okunuyor - haydut kadrosu gidilen yöreye
 ## göre reskin oluyor.
-func _open_combat(danger_percent: int, enemy_kind: String = "bandit") -> void:
+func _open_combat(danger_percent: int, enemy_kind: String = "bandit", ambushed: bool = false) -> void:
 	_pending_combat_danger = _weathered_danger() if danger_percent <= 0 else danger_percent / 100.0
 	_current_combat_kind = enemy_kind
+	_pending_combat_ambush = ambushed
 	# Reisle yüzleşme (T16-09): kadroda reis olsun diye tehlike reis eşiğinde.
 	_chief_fight = ""
 	if _current_event != null and _current_event.event_id == CHIEF_EVENT_ID and not _session.people.active_chief.is_empty():
@@ -3911,6 +3916,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 
 	var panel := CombatPanel.new()
 	_combat_holder.add_child(panel)
+	panel.ambushed = _pending_combat_ambush
 	panel.combat_finished.connect(_on_combat_finished)
 	CombatUnit.deathblow_offset = _session.get_deathblow_offset()
 	_combat_retreat_kind = ""

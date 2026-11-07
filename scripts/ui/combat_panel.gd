@@ -134,6 +134,10 @@ func _ready() -> void:
 ## GameSession'dan geçirilir - kırılma noktasını aşmış (bkz.
 ## CharacterData.is_stressed) her karakter emirlere kulak asmayabilir -
 ## ve bu artık kadronun ortalamasına değil kişinin kendi stresine bakıyor.
+## Pusuya düşülerek girilen savaş: `start_combat`tan ÖNCE kurulur, çünkü
+## sıra ilk round'da zaten atılmış oluyor (bkz. CombatEncounter.ambushed).
+var ambushed: bool = false
+
 func start_combat(
 	party: Array[CharacterData], danger_level: float,
 	rng: RandomNumberGenerator = null,
@@ -167,6 +171,7 @@ func start_combat(
 	_apply_muhafiz_opening_bonus(party, units)
 
 	_encounter = CombatEncounter.new(units, enemies, combat_rng, enemy_label)
+	_encounter.ambushed = ambushed
 	_encounter.log_added.connect(_on_log_added)
 	_encounter.state_changed.connect(_on_state_changed)
 	_encounter.unit_barked.connect(_on_unit_barked)

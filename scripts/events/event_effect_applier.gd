@@ -23,6 +23,9 @@ class Result extends RefCounted:
 	## sayılır - evt_bandit_ambush gibi eski tanımlar hiçbir şey değiştirmeden
 	## çalışmaya devam eder.
 	var combat_kinds: Array[String] = []
+	## combat_requests ile aynı sırada: savaş pusuyla mı başlıyor
+	## (bkz. CombatEncounter.ambushed - ilk round'da düşman önce oynar).
+	var combat_ambushes: Array[bool] = []
 	## Yolda partiye katılma teklifi; değer istenen ücrettir.
 	var recruit_requests: Array[int] = []
 
@@ -64,6 +67,26 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			if removed:
 				var item := ItemCatalog.get_item(effect.text_value)
 				result.lines.append(_t("EFF_ITEM_REMOVE") % [item.item_name if item != null else effect.text_value, quantity])
+		EventEffect.Type.CARGO_PLUNDER:
+			var share := clampf(float(effect.amount) / 100.0, 0.0, 1.0)
+			# Tohum günden: aynı günü yeniden yükleyip başka bir yağma
+			# çekmek mümkün olmasın.
+			var plunder_rng := RandomNumberGenerator.new()
+			plunder_rng.seed = hash("plunder|%s|%d" % [session.caravan_name, session.total_days_elapsed])
+			var taken := session.plunder_cargo(share, plunder_rng, effect.text_value != "all")
+			var names: Array[String] = []
+			for entry in taken:
+				var plundered := ItemCatalog.get_item(String((entry as Dictionary)["item_id"]))
+				names.append("%s x%d" % [
+					plundered.item_name if plundered != null else String((entry as Dictionary)["item_id"]),
+					int((entry as Dictionary)["quantity"]),
+				])
+			if not names.is_empty():
+				result.lines.append(_t("EFF_CARGO_PLUNDER") % ", ".join(names))
+		EventEffect.Type.CARGO_DECOY:
+			var decoy := session.get_swindle_item()
+			if decoy != null and session.remove_from_cargo_or_bags(decoy.item_id, 1):
+				result.lines.append(_t("EFF_CARGO_DECOY") % decoy.item_name)
 		EventEffect.Type.WAGON_DAMAGE:
 			# Arabacı elinden geldiğince hasarı azaltır ama tamamen sıfırlamaz.
 			var reduced := maxi(0, effect.amount - session.get_duty_flat_reduction(DutyCatalog.ARABACI))
@@ -129,11 +152,16 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 		EventEffect.Type.TRIGGER_HAGGLING:
 			result.haggling_requests.append(effect.amount)
 			result.lines.append(_t("EFF_HAGGLE_OPENING"))
-		EventEffect.Type.TRIGGER_COMBAT:
+		EventEffect.Type.TRIGGER_COMBAT, EventEffect.Type.TRIGGER_AMBUSH:
+			var ambush := effect.type == EventEffect.Type.TRIGGER_AMBUSH
 			session.mark_first(GameSession.FIRST_THREAT)
+			# Dövüş garantisinin tek sayacı: savaşa açılan her yol buradan
+			# geçiyor (yol ekranı da, simülatörler de).
+			session.note_combat_triggered()
 			result.combat_requests.append(effect.amount)
 			result.combat_kinds.append(effect.text_value if not effect.text_value.is_empty() else "bandit")
-			result.lines.append(_t("EFF_COMBAT_OPENING"))
+			result.combat_ambushes.append(ambush)
+			result.lines.append(_t("EFF_AMBUSH_OPENING" if ambush else "EFF_COMBAT_OPENING"))
 		EventEffect.Type.TRIGGER_RECRUIT:
 			result.recruit_requests.append(effect.amount)
 		EventEffect.Type.GRANT_TRAIT:

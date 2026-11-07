@@ -156,6 +156,11 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_creditor_rider())
 	_road_events.append(_bailiffs_at_camp())
 	_road_events.append(_hunting_trip())
+	# Yol kesenler (kullanıcı kararı 2026-11-07): asker kaçağı bölüğü, mal
+	# isteyen haydut, "ya paran ya canın" ültimatomu.
+	_road_events.append(_deserter_levy())
+	_road_events.append(_cargo_toll())
+	_road_events.append(_road_ultimatum())
 	_apply_career_threats()
 	return _road_events
 
@@ -3284,6 +3289,147 @@ static func _bailiffs_at_camp() -> GameEvent:
 
 ## Anahtarlar tam yazılır, çalışma anında birleştirilmez (Localization Rules:
 ## tanımsız anahtar taraması ve çevirmen araması ancak böyle bulur; görev 4.4).
+
+## Yol kesenlerin üç kartı (kullanıcı kararı 2026-11-07). Ortak omurgaları
+## var, ayrı kartlar olmalarının sebebi istedikleri şeyin farklı olması:
+## asker kaçağı **hepsini** ister (ordudan kaçanın geri dönüşü yok, bir
+## seferde yetecek kadar toplamak zorunda), haydut bir **pay** ister (yolu
+## yarın da kullanacak), ültimatom **her şeyi ve gitmenizi** ister.
+##
+## Her üçünde de aynı üçüncü yol var: zeki bir kervancı elindeki en ucuz
+## kalemi paha biçilmez diye yutturup gerisini ve canını kurtarabilir.
+## Tutmazsa savaş **pusuyla** başlar - ilk hamleyi karşı taraf yapar
+## (bkz. CombatEncounter.ambushed). Blöfün bedava bir çıkış olmamasının
+## sebebi bu: başarısızlığı dövüşten beter.
+const BLUFF_DIFFICULTY: float = 2.5
+
+## Blöf seçeneği: üç kartın da üçüncü yolu. `prize` blöfün kurtardığı şey
+## değişmediği için ortak, metin anahtarları karttan karta değişiyor.
+static func _bluff_choice(
+	text_key: String, locked_key: String, ok_key: String, bad_key: String, enemy_kind: String
+) -> EventChoice:
+	var choice := _checked_choice(
+		text_key,
+		SkillCheck.make(CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST, BLUFF_DIFFICULTY),
+		ok_key, _effects([
+			EventEffect.make(EventEffect.Type.CARGO_DECOY),
+			EventEffect.make(EventEffect.Type.STRESS, 6),
+		]),
+		bad_key, _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_AMBUSH, 0, enemy_kind),
+		])
+	)
+	# Verecek bir şey yoksa blöf de yok: boş bir vagonun paha biçilmez
+	# sandığı olmaz.
+	return _requires(choice, locked_key, _conditions([
+		EventCondition.make("cargo_items", EventCondition.Op.GREATER_EQUAL, 1),
+	]))
+
+## Maaşını alamamış, bölüğünden kopmuş askerler. Yükün hepsini isterler.
+static func _deserter_levy() -> GameEvent:
+	var event := _event("evt_deserter_levy", "EVT_LEVY_TITLE", "EVT_LEVY_TEXT", 1.9)
+	event.cooldown_days = 2
+	event.conditions = _conditions([
+		EventCondition.make("deserters_here", EventCondition.Op.GREATER_EQUAL, 1),
+		EventCondition.make("cargo_items", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.weight_modifiers = _modifiers([
+		# Kıtlıkta kaçak çoğalır: beslenemeyen ordu dağılır.
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.5),
+		]), 1.7),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.5),
+		]), 1.5),
+	])
+	event.choices = _choices([
+		_choice("EVT_LEVY_OPT_GIVE", _effects([
+			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
+			EventEffect.make(EventEffect.Type.MORALE, -14),
+			EventEffect.make(EventEffect.Type.STRESS, 10),
+		])),
+		_choice("EVT_LEVY_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
+		])),
+		_bluff_choice(
+			"EVT_LEVY_OPT_BLUFF", "EVT_LEVY_OPT_BLUFF_LOCKED",
+			"EVT_LEVY_BLUFF_OK", "EVT_LEVY_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
+		),
+	])
+	return event
+
+## Para değil mal isteyen haydutlar: yolu yarın da kullanacakları için
+## kervanı bitirmezler, bir pay alıp bırakırlar.
+static func _cargo_toll() -> GameEvent:
+	var event := _event("evt_cargo_toll", "EVT_CARGOTOLL_TITLE", "EVT_CARGOTOLL_TEXT", 1.8)
+	event.cooldown_days = 2
+	event.conditions = _conditions([
+		EventCondition.make("cargo_items", EventCondition.Op.GREATER_EQUAL, 2),
+	])
+	event.weight_modifiers = _modifiers([
+		# Kıtlıkta altının değil malın kıymeti var.
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.45),
+		]), 2.0),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.4),
+		]), 1.6),
+	])
+	event.choices = _choices([
+		_choice("EVT_CARGOTOLL_OPT_PAY", _effects([
+			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 50),
+			EventEffect.make(EventEffect.Type.MORALE, -6),
+			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
+		])),
+		_choice("EVT_CARGOTOLL_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.FACTION, -2, Standing.BROTHERHOOD),
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
+		])),
+		_bluff_choice(
+			"EVT_CARGOTOLL_OPT_BLUFF", "EVT_CARGOTOLL_OPT_BLUFF_LOCKED",
+			"EVT_CARGOTOLL_BLUFF_OK", "EVT_CARGOTOLL_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
+		),
+	])
+	return event
+
+## "Ya paran ya canın": pazarlık yok, her şeyi bırakıp gideceksiniz.
+## Kartın ağırlığı düşük ve beklemesi uzun - kıtlığın en sert yüzü her
+## gün görünmemeli, görününce de unutulmamalı.
+static func _road_ultimatum() -> GameEvent:
+	var event := _event("evt_road_ultimatum", "EVT_ULTIMATUM_TITLE", "EVT_ULTIMATUM_TEXT", 0.9)
+	event.cooldown_days = 6
+	event.conditions = _conditions([
+		EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.35),
+	])
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.6),
+		]), 2.2),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("danger", EventCondition.Op.GREATER_EQUAL, 0.65),
+		]), 1.8),
+	])
+	event.choices = _choices([
+		_choice("EVT_ULTIMATUM_OPT_LEAVE", _effects([
+			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
+			EventEffect.make(EventEffect.Type.GOLD, -ULTIMATUM_GOLD),
+			EventEffect.make(EventEffect.Type.MORALE, -18),
+			EventEffect.make(EventEffect.Type.STRESS, 14),
+		])),
+		_choice("EVT_ULTIMATUM_OPT_FIGHT", _effects([
+			EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0),
+		])),
+		_bluff_choice(
+			"EVT_ULTIMATUM_OPT_BLUFF", "EVT_ULTIMATUM_OPT_BLUFF_LOCKED",
+			"EVT_ULTIMATUM_BLUFF_OK", "EVT_ULTIMATUM_BLUFF_BAD", EnemyCatalog.KIND_BANDIT
+		),
+	])
+	return event
+
+## Ültimatomun aldığı altın. Keseyi sıfırlamıyor: borca düşürüp oyunu
+## kilitlemek bir son değil, bir duvar olurdu (bkz. spend_or_owe).
+const ULTIMATUM_GOLD: int = 140
+
 static func _event(event_id: String, title_key: String, text_key: String, base_weight: float) -> GameEvent:
 	var event := GameEvent.new()
 	event.event_id = event_id

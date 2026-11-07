@@ -325,3 +325,55 @@ gerçek kart: *"Fidyeyi kabul ettiler; kervan Vastrevar yoluna devam ediyor."*
 ve *"Torgan yalnızca çürümüş erzak buldu; vakit boşa gitti."*
 
 Sırada: U3-U7 ve her seferde en az bir dövüş + asker kaçakları.
+
+## Yol kesenler ve dövüş garantisi (2026-11-07)
+
+**Garanti.** `GameSession.journey_combat_count` sefer başına sıfırlanıyor ve
+sefer kaydına yazılıyor (yükleyip garantiyi sıfırlamak yok). Borç iki kapıdan
+kapanıyor: savaşın gerçekten açılması (`EventEffectApplier`, TRIGGER_COMBAT /
+TRIGGER_AMBUSH) ya da dövüşe açılan bir kartla yüzleşilmesi
+(`EventResolver.note_raid_faced`). İkincisi bilerek: "fidyeyi öde" bir karar,
+kaçamak değil - yoksa garanti "oyuncu dövüşene kadar her gün haydut"a
+dönüşürdü. **Sıkılaştırmak istenirse** `note_raid_faced` çağrısı kaldırılır,
+garanti saf "her seferde bir dövüş" olur (karar senin).
+
+Rampa + kapı: son üç günde dövüş kartları ×3,5, ötekiler ×0,2
+(`RoadDirector.combat_debt_multiplier`); son günde `EventEngine` günü %100
+kart yapıp havuzu dövüş kartlarına indiriyor. Ölçüm (`tests/measure_combat_
+quota.gd`, 120 koşu/yol): 3 günlük yolda bile %100, ilk kesilme ortalama 2.
+gün - yani "son gün mutlaka haydut" deseni oluşmuyor.
+
+**Muafiyet.** Avuçiçi (`ahit`), Gokyurt (`gocebe`) ve Kuzey Krallığı'nın
+*kendi şehirleri arası* yollar. Krallıktan sınıra çıkan yolda garanti işliyor
+(ölçümde %100). Garantiyi kaldırmak yetmedi: ölçüm o yolların yine %77
+oranında kesildiğini gösterdi, yani "aşırı korunan yer" ekranda
+hissedilmiyordu - korunan yolda dövüş kartları ×0,3 (`GUARDED_ROAD_WEIGHT`),
+şimdi %38-48.
+
+**Üç yeni kart** (hepsinde aynı üç yol: ver · dövüş · blöf):
+- `evt_deserter_levy` "Maaşsız Bölük" - asker kaçakları yükün **hepsini**
+  ister. Gokyurt'ta ve krallığın şehirleri arasında çıkmaz
+  (`deserters_on_this_road`); kıtlıkta ve tehlikede sıklaşır.
+- `evt_cargo_toll` "Para Değil, Mal" - haydut yarısını ister (yolu yarın da
+  kullanacak). Kıtlıkta ×2.
+- `evt_road_ultimatum` "Ya Paran Ya Canın" - her şeyi bırakıp yaya devam.
+  Düşük ağırlık, 6 gün bekleme: kıtlığın en sert yüzü her gün görünmemeli.
+
+**Blöf (Zeka).** `CARGO_DECOY` yükün en ucuz kalemini "paha biçilmez" diye
+verir; tutarsa gerisi ve can kurtulur. Tutmazsa `TRIGGER_AMBUSH`: savaş
+pusuyla başlar, ilk round'da **düşman önce oynar**
+(`CombatEncounter.ambushed`, ikinci round'dan sonra sıra normale döner).
+Verecek yük yoksa seçenek sebebiyle kilitli.
+
+Yeni etkiler: `CARGO_PLUNDER` (amount = yüzde, "all" = bırakılan tek mal da
+yok; erzağa dokunmaz), `CARGO_DECOY`, `TRIGGER_AMBUSH`.
+
+Test `tests/test_road_raiders.gd` (65 doğrulama). Ekran
+`tests/screenshot_raiders.gd`: üç kart da üç yolu okunur gösteriyor, blöf
+oranıyla ("Veysel · Zeka · %47"), yüksüz kervanda sebebiyle kilitli
+("Verecek yükün yok"). İki ölçüm kusuru koşu sırasında yakalandı: yük
+`start_journey`den önce konunca kervan yeniden kurulurken siliniyordu, ve
+ekran aracı kendi kurduğu oturumu kullanıyordu (yol ekranı GameState'inkini
+okur).
+
+Sırada: U3-U7.
