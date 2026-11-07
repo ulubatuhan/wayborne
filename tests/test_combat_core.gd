@@ -928,7 +928,7 @@ func _test_burn_and_chill(t) -> void:
 	t.eq(hero.get_chill_resist(), hero.get_blight_resist(), "üşüme direnci iç direnç")
 
 ## Büyücü şablonu ve yedi büyü hazır, ama hiçbir kadro onu kendiliğinden
-## kurmuyor: hangi olayın açacağı lore'un kararı (bkz. LORE.md §3.3).
+## kurmuyor: hangi olayın açacağı lore'un kararı (bkz. SIDERIA.md §3.6).
 func _test_rogue_mage_is_ready_but_never_spawned(t) -> void:
 	var mage := EnemyCatalog.get_enemy(EnemyCatalog.ROGUE_MAGE)
 	t.ok(mage != null, "büyücü şablonu var")

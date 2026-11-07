@@ -403,10 +403,11 @@ Kullanıcı kararı: sıra teknik önceliğe göre. Bir dalga içinde bağımlı
   - **Kabul:** Sır belgesi (yalnızca geliştirici için) ve oyuna dağıtılmış en az 15 ipucu.
   - **Literatür:** R37, R38, R9
 - [ ] **Y-E06 Lore'u kapat, sonra içerik yaz**
+  - **Lore kapandı, hikâye kullanıcıda** (2026-11-07): evrenin tek belgesi `docs/lore/SIDERIA.md`. Dört parça (LORE, TARIHCE, SORULAR, ONERILER_III) orada birleştirildi ve silindi; Ç1-Ç14 çözüldü, onay bekleyen öneriler kullanıcının yetkisiyle karara bağlandı.
   - **Öncelik:** P1 · **Dalga:** 1
-  - **Ne:** Önce lore: `SORULAR.md` coğrafya soruları, “Yolda doğan kim?” çelişkisi, şehir ve yer adlarının kesinleşmesi, tarihçe. Olay, düşman, zindan ve bölüm yazımı bundan sonra.
+  - **Ne:** Önce lore: coğrafya, tarih, inançlar, bölgeler ve yerleşimler tek belgede; sonra içerik. Olay, düşman ve diyalog yazımı o belgeden üretilir.
   - **Kullanıcı notu:** “kesinlikle öyle, lore'a odaklanacağız önce o yüzden.”
-  - **Kabul:** SORULAR.md'de açık soru kalmadı; lore belgesi kullanıcı onaylı.
+  - **Kabul:** SIDERIA.md'de açık lore sorusu kalmadı (kalan iki madde kullanıcıda: kadim uygarlığın sonu, hikâye ve kampanya).
 - [ ] **Y-E07 Paylaşılabilir defter sayfası ve güncel Codex**
   - **Yapıldı, test bekliyor** (`yerel/yapilacaklar-p05-p06`, commit `35a0db9`): Codex 29 elle + 42 otomatik sayfa; PDF dışa aktarım sonrası yeniden üretilecek.
   - **Öncelik:** P2 · **Dalga:** 5

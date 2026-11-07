@@ -2,8 +2,8 @@
 
 Kullanıcı istedi: yerleşim sorularını eldeki bilgiye dayanarak kendin cevapla, kalan lore sorularını olabildiğince
 kendin cevapla, kalanları, onay isteklerini ve tezatları üçüncü defterle sun. Buradaki her taslak bir öneridir;
-onaylanınca LORE.md'ye [Yazar, onaylandı] olarak geçer. Tek kaynak bu dosya: hem defter sayfası
-(`lore_soru_sayfasi.py`) hem `docs/lore/ONERILER_III.md` buradan üretilir.
+karara bağlandı ve 2026-11-07'de evrenin tek belgesi `docs/lore/SIDERIA.md`'ye işlendi. Bu dosya defter III'ün
+içeriğinin tarihsel kaynağıdır; **kanon SIDERIA.md'dir**, buradaki satırlar oradaki kararlarla çelişirse yanlıştır.
 """
 
 # Harita parçası -> bölge (kullanıcı kararı 2026-10-30: her parça kendi bölgesi, kültür eşleşmesi kaldırıldı).

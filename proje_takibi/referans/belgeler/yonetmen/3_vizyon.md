@@ -45,7 +45,7 @@ kentlerinden esinlenir ama hiçbir gerçek adı/imgeyi taklit etmez.
 - 15.10: "Unutma, aynı kasvetli, grim tarz devam etmeli."
 - 14.10 (aktarılan UI prompt'u): "A warm bowl of soup, a safe fire, and a trusted companion are luxury items" — kıtlık, paranoya, çöküş.
 - Anlatıcı yok (13.10, C6): "oyunda hiçbir noktada yazarın ağzından bir metin yer almayacak, tüm metinler ... npclerin ağzından yazılmış gibi."
-- Lore tezi (LORE.md, oyunda yazılı): "Konu kervan değil, kervanı çeken insanlar ve onların aşınması." Defter (Waybook) hiçbir satırı silmez, ölenin adının üstü çizilir.
+- Lore tezi (`docs/lore/SIDERIA.md` §1.3, oyunda yazılı): "Konu kervan değil, kervanı çeken insanlar ve onların aşınması." Defter (Waybook) hiçbir satırı silmez, ölenin adının üstü çizilir.
 - "Wayborne" adı (13.10, C12): "Ana karakterimizin hikayesinin temeli yolda doğmuş olması ve kendini ait hissedebildiği tek yerin yol olması."
 
 ### 1.3 Dünya (Sideria)
@@ -263,7 +263,7 @@ kentlerinden esinlenir ama hiçbir gerçek adı/imgeyi taklit etmez.
 - Gerçek seslendirme + savaş nidaları (eski not #7 "Sesli anlatımlı bir tutorial, yaşlı story teller sesi/genç indie dev sesi?", #11 karakterler "korkar ve ağlar").
 - Karanlık arayüzün ekranlara bağlanması yarım (16.10: "Ana menu degismemis?").
 - Kıyafetlerin ganimete/loot'a bağlanması (09.10 isteği).
-- Lore ve tarihçenin tamamlanması — `SORULAR.md`'de coğrafya fazı soruları bekliyor; "Yolda doğan kim?" çelişkisi açık.
+- Lore ve tarihçe tamamlandı (2026-11-07, `docs/lore/SIDERIA.md`); kalan iki madde kullanıcıda: kadim uygarlığın sonu ve oyunun hikâyesi.
 - Eşya bozulması; hastalık/doktor/şehrin ilaç stoğu (15.10); yoldaş bulmanın zorlaşması (15.10: "sadece buna mecbur olanlar katılmalı"); Celsius sıcaklık (14.10).
 - Codex'in olay bölümü güncel değil (24.09: güncellenmesi istenmedi).
 - Beş ikon ve görsel denetim tablosundaki küçük eksikler.

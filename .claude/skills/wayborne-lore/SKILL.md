@@ -13,9 +13,12 @@ bekleyen bir öneridir.
 
 Lore'a dokunmadan önce bunların güncel hâlini oku; ezberden yazma:
 
-- `docs/lore/LORE.md` (dünya ne) ve `docs/lore/TARIHCE.md` (ne zaman ne oldu): **tek çalışmanın iki yarısı**.
-  Biri değişirse öbürü de güncellenir; çelişirlerse ikisi de yanlıştır.
-- `docs/lore/SORULAR.md` ve `docs/lore/LORE_OZET.txt`: açık sorular ve soru defterine gömülen özet.
+- **`docs/lore/SIDERIA.md`: evrenin tek belgesi.** Dünya, zaman, derin geçmiş, imparatorluk, kıtlık,
+  coğrafya, halklar, inançlar, güçler, 11 bölge ve 27 yerleşim, yolun töresi, gündelik hayat, söyleyiş,
+  metin üretim kılavuzu, karar günlüğü. 2026-11-07'de eski dört parça (`LORE.md`, `TARIHCE.md`,
+  `SORULAR.md`, `ONERILER_III.md`) orada birleştirildi ve silindi; yeni bir lore belgesi açılmaz,
+  her şey buraya yazılır.
+- `docs/lore/LORE_OZET.txt`: soru defterine gömülen düz özet; yalnızca geçerli bilgiyi taşır.
 - Harita ve oyun verisi: `data/config/settlements.json` (27 yerleşim, bölge, tür, sur, mal, komşular),
   `tools/worldmap/atlas/places_v3.json` (adı konmuş bütün yerler, bölgeleri), `docs/lore/sideria_harita.jpg`.
 - Oyunda zaten yazılı olanlar: `data/locale/*.csv` (olay kartları, kültür metinleri, kilise ekranı, haberler),
@@ -33,6 +36,7 @@ Kullanıcının cevabı haritayla ya da oyun verisiyle çelişiyorsa sessizce bi
 | **[Oyun]** | Bugün oyunda yazılı (kart, metin, kural, veri). Değiştirmek kod ya da çeviri işi. |
 | **[Harita]** | Onaylı harita v3 ve atlas. |
 | **[Türetme]** | Senin bağlantın ya da çıkarımın. **Onay bekler**; reddedilirse silinir. |
+| **[Karar]** | Kullanıcının yetki verdiği yerde senin verdiğin karar (2026-11-07: "kalanlar için sen kendi cevaplarını üret"). Kanon gibi kullanılır; kullanıcı aksini söyleyene kadar geçerli. Bir [Yazar] satırıyla çakışırsa [Karar] yanlıştır ve silinir. |
 | **[Çelişki]** | İki kaynak tutmuyor; karar kullanıcının. |
 | **[Boş]** | Henüz kimse bir şey söylemedi. |
 
@@ -114,9 +118,10 @@ parçalara bağlanmalı.
 
 - Düzyazının sesi ve yapay zekâ izlerinin temizliği için `wayborne-metin` becerisi.
 
-- `LORE.md` ve `TARIHCE.md` birlikte güncellenir; `LORE_OZET.txt` yalnızca geçerli bilgiyi taşır (soru
-  defterine gömülür).
-- `SORULAR.md`: cevaplananlar düşer, açık kalanlar ve yeni sorular girer.
+- `SIDERIA.md` tek yerde güncellenir: bilgi ait olduğu bölüme yazılır, geçersiz kalan satır **silinir**
+  (işaretlenmez). Kullanıcının geçersiz kıldığı satırlar §16.1'in "silinenler" listesine bir satırla geçer,
+  ki bir daha kullanılmasın. Açık uçlar §16.3 (asla söylenmeyecekler) ve §16.4 (kullanıcıya ait kararlar).
+- `LORE_OZET.txt` yalnızca geçerli bilgiyi taşır (soru defterine gömülür).
 - Sorular kullanıcıya **soru defteri** sayfası olarak gider (`tools/lore_soru_sayfasi.py`, cevaplar sayfanın
   `answers/<soru kimliği>` deposuna). Her soru:
   - kısa ve tek bir şey sorar;

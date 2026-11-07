@@ -2117,8 +2117,9 @@ eklendi, deri tonları koyulaştırıldı, kombinlerin iç içe geçmemesi isten
   miğferler), üç zırh kademesinin görünüşü, `hides`/`genders` kuralları,
   kalınlık kabuğu. Önlük kesildi, rijit zırh yerine kumaş zırh - ikisi de
   kombin QA'sında görüldü (Wardrobe & Rig Rules).
-- **Lore**: `docs/lore/LORE.md` ve `docs/lore/TARIHCE.md` - oyunun bugün
-  bildiği evren ve tarih, boş satırlarıyla.
+- **Lore**: o günün iki belgesi `LORE.md` ve `TARIHCE.md` - oyunun bugün
+  bildiği evren ve tarih, boş satırlarıyla. (2026-11-07'de ikisi de
+  `docs/lore/SIDERIA.md`'de birleştirildi.)
 
 Faz 26 ("Büyü ve yara") - silahların ele göre önde/arkada çizilmesi
 (kılıç sağ elde, kalkan sol kolda), büyücü cüppesi ve külahı (MakeHuman,
@@ -2127,7 +2128,8 @@ yedi yeni klip (ok/kesik darbesi, kaçınma, yanma/donma/zehir tepkisi, büyü
 yapma; 6 beden × 50 giysi yeniden render), savaş boyunca saplı kalan ok ve
 bıçak, Kenney Particle Pack (CC0) üzerinden mermi/çarpma katmanı ve bedenin
 kendisinde süren durum izi (bkz. Combat Rules, Motion Rules). Lore: iki
-büyük inanç Baikhan ve The Hand; coğrafya soruları `docs/lore/SORULAR.md`.
+büyük inanç Baikhan ve The Hand; coğrafya soruları o günün `SORULAR.md`'si
+(bugün `docs/lore/SIDERIA.md` §6).
 
 **Faz 27 ("Karanlık arayüz ve render edilmiş yol") birleştirildi.**
 `ui-hud-redesign` dalındaki taslak üç turda onaylandı: şehre özgü önden

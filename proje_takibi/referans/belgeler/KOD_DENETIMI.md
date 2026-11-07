@@ -167,8 +167,8 @@ CLAUDE.md, dinleyicisi olmayan `EventBus`'ı aynı gerekçeyle silmişti ("Don't
 | `SurvivalGauge` Celsius kipi (`survival_gauge.gd:79-87`) | Gerçek veri yok | CLAUDE.md Ana Hedefler "Sıcaklık, Celsius derecesiyle". REDESIGN.md §7.6 |
 | `scripts/character/body_frames.gd:21` `KIND_HAIR` | Kullanılmıyor | CLAUDE.md Wardrobe & Rig Rules: "`BodyFrames.KIND_HAIR` is the slot; `render_frames.py --hair`" |
 | `EnemyCatalog.ROGUE_MAGE` | Hiç doğmuyor (testle kilitli) | CLAUDE.md Combat Rules "ready and never spawned ... lore decision" |
-| `data/config/world_places.json` (46 KB, kodda hiçbir okuyucusu yok) | Henüz bağlı değil | CLAUDE.md Ana Hedefler "Evrenin lore'u ve tarihi". `docs/lore/SORULAR.md` "Faz G — Coğrafya" |
-| `docs/lore/*` (LORE, TARIHCE, SORULAR, iki harita jpg ~0.9 MB) | Doküman | CLAUDE.md Ana Hedefler (lore) |
+| `data/config/world_places.json` (46 KB, kodda hiçbir okuyucusu yok) | Henüz bağlı değil | CLAUDE.md Ana Hedefler "Evrenin tek belgesi". `docs/lore/SIDERIA.md` §6 (Coğrafya) |
+| `docs/lore/*` (SIDERIA.md, LORE_OZET.txt, iki harita jpg ~0.9 MB) | Doküman | CLAUDE.md Ana Hedefler (lore) |
 | `docs/ui/mockups/` (24 jpg, 5.75 MB) | Onaylı tasarım referansı | REDESIGN.md §7 (kalan ekranlar bağlanana kadar). Bağlandıktan sonra depo dışına alınabilir. |
 | `docs/gemini-prompts.md`, `docs/wayborne_gorsel_denetim.xlsx` | Açık iş listesi | CLAUDE.md Ana Hedefler "Waybook'un kalan sanat borcu" (5 ikon) |
 | `art_source/waybook/A0_style_anchor.jpg` | Hiçbir araç okumuyor | Aynı madde (yeni ikon üretiminde üslup çapası). Bkz. §7. |

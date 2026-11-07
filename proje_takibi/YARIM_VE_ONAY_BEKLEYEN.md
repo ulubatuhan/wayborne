@@ -54,7 +54,26 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **26** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+
+## Paket P00
+
+### Y-E06 · Lore'u kapat, sonra içerik yaz
+
+- **Durum:** lore kapandı, hikâye kullanıcıda · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:** 2026-11-07: dünya kitabı tek belgede toplandı (docs/lore/SIDERIA.md). Dört parça (LORE, TARIHCE, SORULAR, ONERILER_III) birleştirildi ve silindi; bütün çelişkiler (Ç1-Ç14) çözüldü, onay bekleyen öneriler kullanıcının yetkisiyle karara bağlandı ([Karar]). Kalan: kadim uygarlığın sonu (kullanıcıda, oyunda hiç söylenmeyecek) ve oyunun hikâyesi, kampanyası ve diyalogları (kullanıcı kendisi yazacak). Olay, düşman ve metin yazımı artık SIDERIA.md'den üretilir.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E06 Lore'u kapat, sonra içerik yaz**
+  - **Lore kapandı, hikâye kullanıcıda** (2026-11-07): evrenin tek belgesi `docs/lore/SIDERIA.md`. Dört parça (LORE, TARIHCE, SORULAR, ONERILER_III) orada birleştirildi ve silindi; Ç1-Ç14 çözüldü, onay bekleyen öneriler kullanıcının yetkisiyle karara bağlandı.
+  - **Öncelik:** P1 · **Dalga:** 1
+  - **Ne:** Önce lore: coğrafya, tarih, inançlar, bölgeler ve yerleşimler tek belgede; sonra içerik. Olay, düşman ve diyalog yazımı o belgeden üretilir.
+  - **Kullanıcı notu:** “kesinlikle öyle, lore'a odaklanacağız önce o yüzden.”
+  - **Kabul:** SIDERIA.md'de açık lore sorusu kalmadı (kalan iki madde kullanıcıda: kadim uygarlığın sonu, hikâye ve kampanya).
+
+</details>
 
 ## Paket P01
 

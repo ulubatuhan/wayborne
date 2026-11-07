@@ -12,7 +12,7 @@ kullanılır.
 
 - Oyunda anlatıcı yok. Her metnin bir söyleyeni var: bir NPC, bir yoldaş, bir kitabın yazarı, bir yazıtı kazıyan
   el, kervanın defteri. Yazmadan önce söyleyeni seç ve onun bilmediğini yazma.
-- Ses kültüre göre (`docs/lore/LORE.md` §7–§11):
+- Ses kültüre göre (`docs/lore/SIDERIA.md` §7, §10, §14):
   - Vaelghard resmî, kanun ve kayıt diliyle konuşur.
   - Vadi gündelik ve alaycıdır, eleştiriye alınır.
   - Gokyurt doğadan ve törelerden imgeyle konuşur.

@@ -48,8 +48,8 @@ adını taşıyacak kimsenin kalmamasıdır.
   - Güney liman kentleri: ticaret.
   - Göçebe boylar.
   - Ahit: tapınak kenti.
-- Lore ve tarihçe: `docs/lore/LORE.md`, `docs/lore/TARIHCE.md`. Olay, düşman, zindan ve bölüm yazımı lore kapandıktan
-  sonra yapılır.
+- Lore ve tarihçe: `docs/lore/SIDERIA.md` (tek belge; 2026-11-07'de LORE, TARIHCE, SORULAR ve ONERILER_III
+  orada birleştirildi). Olay, düşman ve diyalog yazımı o belgeden üretilir.
 
 ## Ton
 

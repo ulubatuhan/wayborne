@@ -2149,7 +2149,7 @@ Toplam: **202** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Onay turu (2026-10-31):** onaylandı, uygulanacak. Kart onaylandı; kullanıcı notu: zorla girince ticarette ciddi dezavantaj ve itibar doğrudan zedelenmeli.
   - **Durum (2026-10-31):** öneri. Kart taslağı kart partisi 1'de (docs/design_notes/kart_partisi_01.md), onay bekliyor.
   - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-C25 · **Kim:** C
-  - **Ne:** Bazı köylere veba hiç bulaşmamış (kurtulan değil). Oyun nedenini açıklamaz. Durak ya da olay zinciri; lore kaydı LORE.md §6b.
+  - **Ne:** Bazı köylere veba hiç bulaşmamış (kurtulan değil). Oyun nedenini açıklamaz. Durak ya da olay zinciri; lore kaydı SIDERIA.md §5.1.
   - **Kullanıcı notu:** "Vebanın hiç bulaşmadığı köyler olabilir, kurtulan köy olmasın."
   - **Kabul:** Kartlar onaya 10'luk partiyle gider.
 
@@ -3470,7 +3470,7 @@ Toplam: **202** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 
 - **Durum:** bitti · **Öncelik:** P1 · **Paket:** P19 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/16_oyun_testi_isleri.md](referans/gorevler/16_oyun_testi_isleri.md)
-- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ç12. | Bitti: settlements.json `peoples` (bölge kültürü + balıkçı kasabalarında balıkçı), Location.peoples, işe alınanların %75'i yerleşimin halklarından (RecruitCatalog.LOCAL_SHARE); lore Ç12 çözüldü (LORE §8.10, §13; SORULAR; LORE_OZET). Test: test_settlements _test_fisher_towns_are_mixed.
+- **Son not:** 2026-11-02 kullanıcı listesi. Eski: Ç12. | Bitti: settlements.json `peoples` (bölge kültürü + balıkçı kasabalarında balıkçı), Location.peoples, işe alınanların %75'i yerleşimin halklarından (RecruitCatalog.LOCAL_SHARE); lore Ç12 çözüldü (bugün SIDERIA.md §7.1, §10.11). Test: test_settlements _test_fisher_towns_are_mixed.
 
 <details><summary>Görev metni</summary>
 
@@ -3559,7 +3559,7 @@ Toplam: **202** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 <details><summary>Görev metni</summary>
 
 - [ ] **T16-11 Haritada adı olan her yer oynanabilir**
-  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: LORE.md §15 ve places_v3.json.
+  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: SIDERIA.md §16.2 ve places_v3.json.
   - **Kim:** C · **Eski:** Ana hedef
 
 </details>

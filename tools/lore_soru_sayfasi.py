@@ -3,10 +3,12 @@
 
 Defter I bölge sorularıyla, defter II onaylarla cevaplandı. Defter III'te soruların çoğunu Claude cevapladı
 (kullanıcı isteği, 2026-10-30): yeni bağlar, 27 yerleşimin taslağı, kalan sorulara öneriler ve çelişkiler.
-İçerik `lore_defter3_banka.py`'de; `--md` aynı içeriği `docs/lore/ONERILER_III.md`'ye de yazar.
+İçerik `lore_defter3_banka.py`'de. **Defter III 2026-11-07'de kapandı:** bütün önerileri karara bağlandı ve
+evrenin tek belgesi `docs/lore/SIDERIA.md`'ye işlendi; `--md` ile üretilen dosya artık tarihsel bir kopyadır,
+kanon değildir.
 
 Kullanıcının kalan lore ve tarihçeyi yazması için soruları haritadaki gerçek bölgelere,
-27 yerleşime ve atlasın adı konmuş yerlerine bağlar. Harita karoları (zoom 1), şehir önü
+27 yerleşime ve atlasın adı konmuş yerlerine bağladı. Harita karoları (zoom 1), şehir önü
 resimleri (gündüz) ve `settlements.json` ile `places_v3.json` sayfaya gömülür; cevaplar
 sayfanın `db` deposuna (`answers/<soru kimliği>`) yazılır, Claude oradan okur.
 
@@ -180,7 +182,7 @@ def build_questions(settlements, places):
         items.append({"kind": "settlement", "key": sid, "title": s["proper_name"],
                       "qs": [q(f"yer3.{sid}", "Bu yerleşim için yazdığım lore", choices=ONAY, draft=draft,
                                draft_label="Önerim (eldeki bilgiden)")]})
-    secs.append({"id": "yerlesimler", "title": "Yerleşimler", "lead": "27 yerleşimin her biri için senin bölge cevaplarına, onaylı bağlara ve oyundaki verisine (tür, sur, ürettiği ve istediği mal) dayanarak yazdığım taslak. Onaylarsan LORE.md'ye geçer.", "items": items})
+    secs.append({"id": "yerlesimler", "title": "Yerleşimler", "lead": "27 yerleşimin her biri için senin bölge cevaplarına, onaylı bağlara ve oyundaki verisine (tür, sur, ürettiği ve istediği mal) dayanarak yazdığım taslak. Onaylananlar SIDERIA.md'ye geçti.", "items": items})
 
     for key, (title, rows) in B.ANSWERS.items():
         qs = []
@@ -203,10 +205,11 @@ LEDE = ("İkinci defterdeki onay ve düzeltmelerin işlendi; mezhepler senin anl
 
 
 def write_markdown(settlements, out_md):
-    """ONERILER_III.md: defterdeki bütün önerilerin repo içindeki kopyası (onaylananlar LORE.md'ye taşınır)."""
+    """Defterdeki bütün önerilerin tarihsel kopyası. Kanon docs/lore/SIDERIA.md'dir (defter III kapandı)."""
     L = ["# Defter III önerileri", "",
          "`tools/lore_defter3_banka.py`'den üretilir (`python3 -I tools/lore_soru_sayfasi.py <html> --md`); elle düzenleme.",
-         "Hepsi **[Türetme]**, kullanıcı onayı bekliyor. Onaylanan LORE.md'ye [Yazar, onaylandı] olarak geçer.", ""]
+         "**Tarihsel kopya:** defter III 2026-11-07'de kapandı, bütün öneriler karara bağlanıp",
+         "`docs/lore/SIDERIA.md`'ye işlendi. Kanon oradadır; buradaki satırlar yalnızca o günün önerileridir.", ""]
     L += ["## Yeni bağlar", ""]
     for _, title, rows in B.NEW_LINKS:
         L += [f"### {title}", ""]

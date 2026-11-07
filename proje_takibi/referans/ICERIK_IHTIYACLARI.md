@@ -16,7 +16,7 @@ Bu dosya iki şey söylüyor:
 
 | # | İçerik | Bekleyen görevler | Ne lazım | Ben ne yapabilirim |
 |---|---|---|---|---|
-| A1 | **Lore ve tarihçe** | Y-E06 → Y-C01, Y-C09, Y-C12, Y-E01, Y-E02, Y-E04, Y-E08, Y-C18, Y-A07, Y-I02 | `SORULAR.md` coğrafya soruları, “Yolda doğan kim?” çelişkisinin çözümü, bölgeler arası siyasi ilişkiler (dostluk, düşmanlık, ticaret), inançlar ve dünya sırrı, büyünün dünyadaki yeri | Soruları tek tek önüne koyarım, cevaplarını lore belgesine işlerim, çelişkileri gösteririm. Karar senin. |
+| A1 | **Lore ve tarihçe** | Y-E06 → Y-C01, Y-C09, Y-C12, Y-E01, Y-E02, Y-E04, Y-E08, Y-C18, Y-A07, Y-I02 | **Kapandı (2026-11-07):** coğrafya, bölgeler arası siyasi ilişkiler, inançlar, büyünün yeri ve dünya sırrı `docs/lore/SIDERIA.md`'de. Kalan: kadim uygarlığın sonu (kullanıcıda) ve hikâye/kampanya (kullanıcı yazacak). | İçerik artık SIDERIA.md'den üretilir. |
 | A2 | **Adlar** | 1.1 (mezra yerine), 8.7 (boğaz), Y-C13 (şehir kişileri), Y-C09 (bölgesel düşman adları), yeni eşyalar (Y-C06) | Onay | Kurala uygun ad listeleri öneririm (başka eserlerden ve gerçek tarihten değil, birbirine benzemeyen). |
 | A3 | **Kampanya bölümleri** | Y-C18 | Bölümlerin hikâyesi | Taslak yazabilirim; ama senin notun gereği bölümleri sen yazıyor ya da onaylıyorsun. |
 | A4 | **Babadan devir açılışı** | Y-C14, Y-D04, Y-H01 | Babanın adı, hastalığı, borcun kime olduğu, açılış sahnesinin tonu | Sahne metni ve sahne tahtası taslağı. |

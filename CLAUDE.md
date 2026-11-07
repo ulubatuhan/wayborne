@@ -377,11 +377,13 @@ verir.
 - **Codex'in olay bölümünde tasarım notları eksik.** Karar ağaçları kataloğun 71 olayının hepsini kapsıyor (Y-E07,
   2026-10-22'de yeniden üretildi); elle yazılmış tasarım notu yalnızca 29 kartta. Kalan kartların notu lore kapanınca
   yazılır.
-- **Evrenin lore'u ve tarihi tamamlanıyor.** `docs/lore/LORE.md` (evren) ve
-  `docs/lore/TARIHCE.md` (zaman çizelgesi) oyunda bugün var olan her bilgiyi
-  [Kanon]/[İma]/[Boş] diye işaretliyor; harita ve mekanikler bu iki belgenin
-  [Boş] satırları dolunca somut zemine oturacak (dünyanın adı, beylikler,
-  kültürlerin yurtları, deniz/liman, lonca ve kilisenin kökeni).
+- **Evrenin tek belgesi `docs/lore/SIDERIA.md` (2026-11-07).** Dünya, tarih, coğrafya, inançlar, güçler,
+  11 bölge, 27 yerleşim, yolun töresi, gündelik hayat, söyleyiş ve metin üretim kılavuzu tek yerde. Eski
+  dört parça (`LORE.md`, `TARIHCE.md`, `SORULAR.md`, `ONERILER_III.md`) orada birleştirildi ve silindi;
+  çelişkiler çözüldü, boşluklar [Karar] olarak dolduruldu. **Kalan iki iş kullanıcıda:** kadim uygarlığın
+  sonu (oyunda hiç söylenmeyecek) ve oyunun hikâyesi/kampanyası ile ona ait diyaloglar. Oyun içi her metin
+  (diyalog, kitap, yazıt, haber, kart) bu belgeye bakarak üretilir; işaretler: [Yazar] kullanıcının sözü,
+  [Oyun], [Harita], [Karar] benim kararım, [Boş] kasıtlı sessizlik.
 - **Bütün görseller el çizimi (kullanıcı hedefi, 2026-10-22; program 2026-10-27).** Kullanıcı oyunun bütün görsellerini
   tablette (ibis Paint X) kendisi çiziyor; amaç AI beyanından olabildiğince kurtulmak. Tek liste
   `tools/el_cizimi/envanter.py` (676 satır, eski ve kullanılmayan dosyalar hariç); şablonlar `sablon_uret.py` (hizalı

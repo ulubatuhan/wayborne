@@ -132,7 +132,7 @@ Bölümler: scripts/combat/, Combat Rules, Ruin Rules.
   would have shifted the eight-stat budget. `EnemyCatalog.ROGUE_MAGE` is
   ready and spawned by no ordinary squad builder - only by the rare, once-only `evt_rogue_mage`
   (`EnemyCatalog.KIND_MAGE`, task Y-F07T, the user's note: rare, never removed) (`test_combat_core`
-  asserts it): which event opens a wizard is a lore decision (LORE.md
+  asserts it): which event opens a wizard is a lore decision (SIDERIA.md
   §3.3: wizards are rare and unwelcome).
 - **A skill says how it looks, not only what it does.** `CombatSkill.element`
   ("" or fire/frost/poison/arcane/sleep) and `delivery` (arrow, thrown,

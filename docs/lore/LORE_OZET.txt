@@ -1,6 +1,6 @@
-WAYBORNE - ELDEKİ LORE VE TARİHÇE (2026-11-07)
+WAYBORNE - ELDEKİ LORE VE TARİHÇE ÖZETİ (2026-11-07)
 
-Yalnızca geçerli bilgi. Yer tutucu, reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) senin cevapların ve onayların, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve onun yer atlası. Defter II ve defter IV'ün onay ve düzeltmeleri işlendi. Onay bekleyen önerilerim ve çelişkiler en sonda ayrı; tam liste docs/lore/SORULAR.md ve ONERILER_III.md.
+Bu dosya düz bir özettir; soru defteri sayfalarına gömülmek için var. **Evrenin tek belgesi ve tek kanonu docs/lore/SIDERIA.md'dir** (dünya, zaman, derin geçmiş, imparatorluk, kıtlık, coğrafya, halklar, inançlar, güçler, 11 bölge ve 27 yerleşim, yolun töresi, gündelik hayat, söyleyiş, metin üretim kılavuzu). Burada yalnızca geçerli bilgi var; yer tutucu, reddedilmiş ve terk edilmiş her şey dışarıda. Kaynak işaretleri: (Yazar) kullanıcının cevapları ve onayları, (Oyun) bugün oyunda yazılı, (Harita) onaylı harita v3 ve yer atlası, (Karar) kullanıcının 2026-11-07'de verdiği yetkiyle Claude'un kararı.
 
 ÇERÇEVE
 - (Yazar) Tek bir kıta: Sideria. Ortaçağ'ın farklı yerlerinden ve dönemlerinden sekansların karışımı; hiçbir tarihî figür, ad, imge ya da olay olduğu gibi alınmaz, taklit edilmez, referans verilmez.
@@ -123,15 +123,18 @@ KERVAN HAYATI
 - (Oyun) Mallar: buğday, kumaş, demir, iksir, kürk, baharat, bal, ipek, mücevher, balık, şarap; kaçak mühürsüz tuz; nadir eski mühür. Para birimi GG.
 - (Oyun) Yol hafızası: mezar, taş yığını, enkaz, kül yolda kalır.
 
-ONAY BEKLEYEN ÖNERİLERİM (DEFTER III)
-- Kıtlığın sebebi (uzayan kış, toprağı solduran büyü ya da ikisi), zamanı, deli kral, kıtlıkta kim ne ister.
-- Doğu sıradağının adı Karaocak, güneydoğu kıyısının adı Gelgit Kıyısı.
-- Septimar'ın eklemeleri asimile edilen inançlar; Yumruk Belvanor'da doğdu; Septisizm'in dereceleri, Yumruk'un Okuyanları.
-- 27 yerleşimin her biri için kimlik, kalp, gelenek ve kıtlık taslağı.
-- Takip, yer, coğrafya, bugünün dünyası ve geçmiş sorularına önerilerim.
-
-ÇELİŞKİLER
-- Balıkçıların yurdu (Ç12) çözüldü: tek yurt yok; balıkçı kasabaları balıkçı ve bölge kültürünü karışık taşır.
+KARARA BAĞLANANLAR (2026-11-07)
+- Kullanıcı T49'u onayladı ve kalan bütün önerilerin kararını Claude'a bıraktı: defter III ve IV'ün açık
+  maddeleri (T4, T34-T48, T50, T51, 27 yerleşim taslağı, takip/yer/coğrafya/geçmiş soruları) karara
+  bağlandı ve SIDERIA.md'ye (Karar) olarak işlendi.
+- Yeni kararlar: deli kralın katliamının sebebi (kendisine ait olmayan ömür istedi, büyücüler yapamayacağını
+  söyledi, ihanet saydı ve yaktırdı); takvimin üç adı (İlk Ot / Yol Günü / Sayfa Günü) ve üç yıl sayma
+  biçimi; imparatorluğun adı Vael ve dört yüz yılı; Merigard'ı kimin yaktığının bilinmemesi; kadim taşların
+  batıya kim tarafından taşındığının bilinmemesi.
+- Çelişkiler: Ç1-Ç14'ün hepsi çözüldü. Kullanıcının geçersiz kıldığı satırların listesi SIDERIA.md §16.1'de;
+  bir daha kullanılmazlar.
+- Açık kalan: kadim uygarlığın sonu (oyunda hiç söylenmeyecek, cevabı kullanıcının) ve oyunun hikâyesi,
+  kampanyası ve ona ait diyaloglar (kullanıcı kendisi yazacak).
 
 DEFTER III KARARLARI (2026-11-01)
 - (Yazar) Eski başkent Merigard; Vadi'deki Merigaud adını ondan alır, para birimi GG (Gümüş Gard) da.

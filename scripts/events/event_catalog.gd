@@ -2010,7 +2010,7 @@ static func _merchant_caravan() -> GameEvent:
 	return event
 
 ## Haydut büyücü (görev Y-F07T): nadir, bir seferlik. Büyücüler bu dünyada
-## nadir ve istenmeyen (LORE.md §3.3); biri yolu kesince ya parası verilir,
+## nadir ve istenmeyen (SIDERIA.md §3.6); biri yolu kesince ya parası verilir,
 ## ya kaçılır, ya da savaşılır - büyüleri savaşta gerçekten çalışır.
 static func _rogue_mage() -> GameEvent:
 	var event := _event("evt_rogue_mage", "EVT_ROGUE_MAGE_TITLE", "EVT_ROGUE_MAGE_TEXT", 0.08)

@@ -489,3 +489,56 @@ dilencilik, dolandırıcılık, el tutma ve kervan adının töresi.
 **Yeni açık sorular:** deli kralın gerekçesi; imparatorluğun Sürü Yılı'na verdiği ad ve hikâye.
 **Onay bekleyen üç türetme:** T49 (göçebenin tapınağı yok), T50 (kıtlık eğrisi idarenin tükenmesini anlatır),
 T51 (üç kuşak üç dünya).
+
+## Dünya kitabı: tek belge (2026-11-07)
+
+**Kullanıcının isteği:** "T49 ONAYLI, diğerleri için de sen kendi cevaplarını üret ve lore'a ekle... tüm lore
+ve tarihçeyi tara, coğrafyayı, tarihi, lore'u, inanışları. Elimizdeki tüm bağlamı kategorize et ve birbirine
+bağla, çelişkileri düzelt, boşlukları doldur benim yazdıklarımı çiğnemeden. Tek bir doküman oluştur ve ileride
+bu dokümana bakarak oyun içi diyalogları ve metin kaynaklarını üretebileceğin bir yapıda olsun."
+
+**Sonuç: `docs/lore/SIDERIA.md`** (1689 satır, 16 bölüm). Dört belge orada birleştirildi ve **silindi**:
+`LORE.md`, `TARIHCE.md`, `SORULAR.md`, `ONERILER_III.md` (git geçmişinde dururlar). Bundan sonra lore, tarih,
+coğrafya, inanç ve oyun içi metin yalnızca bu belgeden üretilir; yeni lore belgesi açılmaz.
+
+**Bölümler:** 0 nasıl kullanılır (işaretler, iki değişmez kural, metin üretirken izlenecek yol) · 1 dünya bir
+bakışta + **beş omurga** · 2 zaman (dört çağ, takvim, altmış yılın çizgisi, üç kuşak) · 3 görünmeyen dünya ve
+derin geçmiş · 4 imparatorluk · 5 İllet ve kıtlık · 6 coğrafya · 7 halklar ve diller · 8 inançlar · 9 güçler
+ve ilişkiler ağı · 10 **11 bölge ve 27 yerleşim** (her yerleşimde kalp / gelenek / kıtlık) · 11 adı konmuş
+yerler · 12 yolun töresi, kaçaklar, kervanın adı, bölgesel düşmanlar · 13 gündelik hayat · 14 **söyleyiş**
+(kim neye yemin eder, neye küfreder; aynı haberin altı okunuşu) · 15 **metin üretim kılavuzu** (14 kaynak türü
+için uzunluk, ses, yasak) · 16 karar günlüğü, asla söylenmeyecekler, kullanıcıya ait kararlar.
+
+**Yeni işaret:** **[Karar]** = kullanıcının 2026-11-07'de verdiği yetkiyle benim verdiğim karar; kanon gibi
+kullanılır, bir [Yazar] satırıyla çakışırsa yanlıştır ve silinir. Sıra: [Yazar] > [Oyun] > [Harita] > [Karar].
+
+**Karara bağlanan açık sorular (benim cevaplarım):**
+- **Deli kral neden katletti:** hastalandı, Raviellon'da eğitilmiş büyücülerden **ömür** istedi; büyü kendi
+  yaşam enerjisidir, kimse başkasının ömrünü uzatamaz. Reddi ihanet, denemeleri "yapabiliyorlar ama
+  yapmıyorlar"ın kanıtı saydı ve hepsini yazlık sarayının avlusunda yaktırdı. Bir yıl sonra yine öldü; göçebe
+  birliği o boşluğa yürüdü. Altı kaynak altı ayrı şey anlatıyor (§4.2), hiçbiri doğrulanmıyor.
+- **İmparatorluğun takvime verdiği ad:** aynı gün, üç ad — göçebe **İlk Ot**, imparatorluk/Vaelghard **Yol
+  Günü** (Septimar'ın fermanı anlatıyı tersine çevirdi: ot yolu değil yol otu getirir; büro yine otlağa atlı
+  yollar ve bunu herkes bilir), kilise **Sayfa Günü**. Üç yıl sayma biçimi: Ferman yılı / çöküşten beri /
+  Sogurtay suyunun tadı.
+- **T49 onaylandı** (göçebenin tapınağı yok), **T50** ve **T51** karara bağlandı; defter III'ün bütün
+  önerileri (T4, T34-T48, 27 yerleşim taslağı, takip/yer/coğrafya/geçmiş soruları) [Karar] olarak işlendi.
+- Ayrıca kararlaştı: imparatorluğun adı **Vael** ve dört yüz yılı; Merigard'ı kimin yaktığının bilinmemesi;
+  kadim taşları batıya kimin taşıdığının bilinmemesi; Bekçi Kadın'ın iki adı (Yolcu Ana, Yolkiz); Büyük Han
+  **Kaytaş**; Orbeyan'ı **Kutlay Ana** işletir; yasaklı iki inancın kendi adları (Saban Yolu, Sürü Sözü) ve
+  kilisenin inançları yer adıyla anma yöntemi; GG'yi Orsolune basıyor, Orvahel kapıda yeniden damgalıyor.
+
+**Çelişkiler:** Ç1-Ç14 kapandı. Kullanıcının geçersiz kıldığı ve bir daha kullanılmayacak satırların listesi
+§16.1'de (uzayan kış/solgunluk, kıtlığın imparatorluk sonunda başlaması, deli kralın eski gerekçesi,
+"Baikhan gök Gokana toprak", Gelgit Kıyısı'nın balıkçı yurdu olması, ihbarın itibar etkisi, Uzun/Sabah Denizi
+adları, Vadi nehrinin "Vael Suyu" adı, sunakların dörde inmesi, senaryo sistemi).
+
+**Hâlâ kullanıcıda:** (1) kadim uygarlığın sonu — oyunda hiç söylenmeyecek, benim duran önerim §16.3'te;
+(2) oyunun hikâyesi, kampanyası ve ona ait diyaloglar (kullanıcı kendisi yazacak).
+
+**Dokunulan dosyalar:** `docs/lore/SIDERIA.md` (yeni), `LORE_OZET.txt` (başlık ve karar bölümü yenilendi),
+`CLAUDE.md` Ana Hedefler, `CLAUDE_BASLANGIC.md`, `docs/design/TASARIM.md`, `docs/history/FAZ_ANLATILARI.md`,
+`.claude/skills/wayborne-lore` ([Karar] işareti ve tek belge kuralı), `wayborne-metin`, `kurallar-savas`,
+`tools/lore_soru_sayfasi.py` ve `lore_defter3_banka.py` (defter III kapandı, çıktısı tarihsel kopya),
+kod yorumlarındaki LORE.md başvuruları (`enemy_catalog`, `event_catalog`, `outfit_catalog`,
+`test_combat_core`), görev Y-E06 (durum: "lore kapandı, hikâye kullanıcıda").

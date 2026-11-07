@@ -117,8 +117,8 @@ klasördür**; belgelerdeki `xx/TODO/...` yolları buraya karşılık gelir.
     olmamalı.
   - **Onaylı ama uygulanmamış taslaklar:** 9.1 UI kiti örnekleri (köşebentsiz), 9.2/Y-G16 menü kampı, Y-G05 savaş
     ekranı, Y-G13 beş ana görsel, Y-G11T, 12.2 ve 9.10 yol revizyonu.
-- **Lore'a bağlı işler:** `docs/lore/LORE.md` ve `TARIHCE.md`'deki [Boş] satırlar kullanıcıdan bekleniyor
-  (`proje_takibi/referans/ICERIK_IHTIYACLARI.md`).
+- **Lore'a bağlı işler:** evrenin tek belgesi `docs/lore/SIDERIA.md`. Açık kalan tek lore satırı kadim
+  uygarlığın sonu (§16.3); hikâye ve kampanya kullanıcıda (§16.4).
 
 ## 6. Depoda olmayanlar
 

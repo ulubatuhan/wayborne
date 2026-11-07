@@ -37,5 +37,5 @@
   - **Ne:** Kod düzeni (eski 4.3): testler, ekran görüntüleri ve ölçüm iş akışları tek dosyada toplanır.
   - **Kim:** C · **Eski:** 4.3
 - [ ] **T16-11 Haritada adı olan her yer oynanabilir**
-  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: LORE.md §15 ve places_v3.json.
+  - **Ne:** Haritada adı olan her yer (obalar, kabile yurtları, mezralar, manastırlar, kuleler, harabeler) bir durak, olay ya da ziyaret edilebilir yer olarak oyuna girer. Girdi: SIDERIA.md §16.2 ve places_v3.json.
   - **Kim:** C · **Eski:** Ana hedef

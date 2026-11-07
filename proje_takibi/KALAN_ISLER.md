@@ -2,24 +2,9 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
-
-### Y-E06 · Lore'u kapat, sonra içerik yaz
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E06 Lore'u kapat, sonra içerik yaz**
-  - **Öncelik:** P1 · **Dalga:** 1
-  - **Ne:** Önce lore: `SORULAR.md` coğrafya soruları, “Yolda doğan kim?” çelişkisi, şehir ve yer adlarının kesinleşmesi, tarihçe. Olay, düşman, zindan ve bölüm yazımı bundan sonra.
-  - **Kullanıcı notu:** “kesinlikle öyle, lore'a odaklanacağız önce o yüzden.”
-  - **Kabul:** SORULAR.md'de açık soru kalmadı; lore belgesi kullanıcı onaylı.
-
-</details>
 
 ### Y-A06 · Haftalık playtest günlüğü ve beş dış oyuncu
 

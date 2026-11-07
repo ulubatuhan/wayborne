@@ -425,7 +425,7 @@ static func _ensure_built() -> void:
 		34, {"accuracy_bonus": 2, "crit_bonus": 1, "dodge_bonus": -1}, art, false, "", false,
 		{"hides": [SLOT_SHIRT, SLOT_PANTS]})
 	# Büyücü cüppesi: terzide satılmaz - büyücüler nadir ve hoş
-	# karşılanmıyor (docs/lore/LORE.md §3.3), cüppe ancak bir büyücüden kalır.
+	# karşılanmıyor (docs/lore/SIDERIA.md §3.6), cüppe ancak bir büyücüden kalır.
 	_add(SLOT_JACKET, "mage_robe", "OUTFIT_MAGE_ROBE", Color(0.30, 0.17, 0.40), 44,
 		40, {"accuracy_bonus": 2, "crit_bonus": 2, "dodge_bonus": -1}, art, false, "", false,
 		{"hides": [SLOT_SHIRT, SLOT_PANTS], "sold": false})

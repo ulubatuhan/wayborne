@@ -62,7 +62,7 @@ const STAG: String = "stag"
 const DEER: String = "deer"
 
 ## Kaçak büyücü: büyücüler nadir ve Kilise'nin/göçebelerin gözünde
-## istenmeyen (bkz. docs/lore/LORE.md §3.3), o yüzden hiçbir kadro onu
+## istenmeyen (bkz. docs/lore/SIDERIA.md §3.6), o yüzden hiçbir kadro onu
 ## kendiliğinden kurmuyor - şablon hazır, hangi olayın açacağı lore'un
 ## kararı. Arka mevkiden büyü yapar, canı az; kalkan büyüsüyle kendini korur.
 const ROGUE_MAGE: String = "rogue_mage"
@@ -156,7 +156,7 @@ const GARRISON_REGION_ID: String = "dravoss"
 ## Bölge başına haydut kadrosu (Y-C09, T16-08): ön saf (`melee`), ikinci ön saf
 ## (`second`, yoksa melee), arka saf (`ranged`), reis (`leader`) ve tehlike
 ## yükselince katılan (`extra`). Eksik anahtar varsayılan haydutla dolar. Kim
-## olduklarının gerekçesi LORE.md §8 ve docs/lore/LORE.md "Yolun düşmanları".
+## olduklarının gerekçesi docs/lore/SIDERIA.md §10 ve §12.5 "Yolun düşmanları".
 const REGIONAL_BANDITS: Dictionary = {
 	# Bitmeyen prens savaşlarının kaçakları ve hasadı yanan köylüler.
 	"vadi": {"melee": VALLEY_DESERTER, "ranged": VALLEY_FORAGER},
