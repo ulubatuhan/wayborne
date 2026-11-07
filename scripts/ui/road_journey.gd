@@ -3520,7 +3520,7 @@ func _present_event(event: GameEvent) -> void:
 	if not EventCatalog.PLACE_EVENTS.values().has(event.event_id):
 		_session.people.active_place_name = ""
 
-	_add_log("—— %s" % _session.people.fill_names(tr(event.title_key)))
+	_add_log("—— %s" % EventText.fill(tr(event.title_key), _session, null, event.event_id))
 
 	if not event.immediate_effects.is_empty():
 		var immediate := _apply_effects(event.immediate_effects)
@@ -3535,7 +3535,7 @@ func _render_card(event: GameEvent) -> void:
 	NodeUtil.clear_children(_card_panel)
 
 	var title := Label.new()
-	title.text = _session.people.fill_names(tr(event.title_key))
+	title.text = EventText.fill(tr(event.title_key), _session, null, event.event_id)
 	title.add_theme_font_size_override("font_size", 20)
 	title.modulate = ArtPalette.GOLD
 	_card_panel.add_child(title)
@@ -3553,7 +3553,7 @@ func _render_card(event: GameEvent) -> void:
 	_card_panel.add_child(body_scroll)
 
 	var body := Label.new()
-	body.text = _session.people.fill_names(tr(_framed_text_key(event)))
+	body.text = EventText.fill(tr(_framed_text_key(event)), _session, null, event.event_id)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, 0.0)
@@ -3653,7 +3653,7 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 	# seçenek bir satır değil bir tuş, ve kilitli olan üstü çizili sekme.
 	var button := Button.new()
 	var available := choice.is_available(context)
-	var label := _session.people.fill_names(tr(choice.text_key))
+	var label := EventText.fill(tr(choice.text_key), _session, choice.check, choice.text_key)
 	var hint_key := choice.get_hint_text(_session.get_best_effective_stat(choice.hint_stat))
 	if not hint_key.is_empty():
 		label = "%s (%s)" % [label, tr(hint_key)]
@@ -3735,11 +3735,11 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	var resolved_event := _current_event
 	_current_event = null
 	if resolved_event != null:
-		_session.note_beat(GameSession.BEAT_EVENT, [_session.people.fill_names(tr(resolved_event.title_key))])
+		_session.note_beat(GameSession.BEAT_EVENT, [EventText.fill(tr(resolved_event.title_key), _session, null, resolved_event.event_id)])
 		_session.log_beat(GameSession.BEAT_LOG_DECISION, "card:" + resolved_event.event_id)
 	NodeUtil.clear_children(_card_panel)
 
-	_add_log("   » %s" % tr(choice.text_key))
+	_add_log("   » %s" % EventText.fill(tr(choice.text_key), _session, choice.check, choice.text_key))
 
 	# Çözümün sırası (etkiler → zar → sonuç → XP) tek yerde: EventResolver.
 	# Ekran yalnızca sonucu anlatıyor ve yan kanalları açıyor.
@@ -3751,7 +3751,9 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 		for line in resolution.choice_result.lines:
 			_add_log("      %s" % line)
 	if resolution.outcome != null:
-		_add_log("   %s" % tr(resolution.outcome.text_key), OUTCOME_COLOR)
+		_add_log("   %s" % EventText.fill(
+			tr(resolution.outcome.text_key), _session, choice.check, resolution.outcome.text_key
+		), OUTCOME_COLOR)
 		if resolution.outcome_result != null:
 			_apply_side_channels(resolution.outcome_result)
 			for line in resolution.outcome_result.lines:

@@ -538,10 +538,26 @@ var seen_places: Dictionary = {}
 ## sayacının kaynağı; kayda yazılıyor çünkü soy boyunca birikiyor.
 var seen_event_ids: Dictionary = {}
 
+## Son çekilen kartların halkası (U1, uzman ölçümü 2026-11-07). Ölçüm şunu
+## gösterdi: kataloğun 97 kartından yalnızca %56'sı hiç görünüyor, buna
+## karşılık çekilişlerin %73'ü tekrar. Yani sorun içerik eksiği değil,
+## **çekilişin körlüğü**: ağırlık, kartın daha önce gelip gelmediğini
+## bilmiyordu. Görülmüşler sönümlenmezse içerik ömrü 4,2 sefere sıkışıyor.
+##
+## Niye iki ayrı kayıt: `seen_event_ids` soy boyunca birikir ("bu kartı hiç
+## gördün mü"), bu halka yakın geçmişi tutar ("bunu yeni gördün"). İkisi
+## ayrı sönüm katsayısı alıyor; biri unutmaz, öbürü unutur.
+const RECENT_CARD_MEMORY: int = 12
+var recent_card_ids: Array = []
+
 func note_event_seen(event_id: String) -> void:
 	if event_id.is_empty():
 		return
 	seen_event_ids[event_id] = true
+	recent_card_ids.erase(event_id)
+	recent_card_ids.append(event_id)
+	while recent_card_ids.size() > RECENT_CARD_MEMORY:
+		recent_card_ids.pop_front()
 
 func get_seen_event_count() -> int:
 	return seen_event_ids.keys().size()
@@ -5934,6 +5950,7 @@ func to_save_dict() -> Dictionary:
 		"bought_here": bought_here.duplicate(),
 		"price_book": price_book.duplicate(true),
 		"seen_event_ids": seen_event_ids.duplicate(),
+		"recent_card_ids": recent_card_ids.duplicate(),
 		"recent_decisions": recent_decisions.duplicate(true),
 		"standing_milestones_reached": standing_milestones_reached.duplicate(true),
 		"journey_camps": journey_camps.duplicate(true),
@@ -6210,6 +6227,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])
 	bought_here = _int_values(data.get("bought_here", {}))
 	seen_event_ids = (data.get("seen_event_ids", {}) as Dictionary).duplicate()
+	recent_card_ids = (data.get("recent_card_ids", []) as Array).duplicate()
 	recent_decisions = (data.get("recent_decisions", []) as Array).duplicate(true)
 	standing_milestones_reached = (data.get("standing_milestones_reached", {}) as Dictionary).duplicate(true)
 	price_book = {}
@@ -6331,6 +6349,10 @@ func build_event_context() -> Dictionary:
 		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
 		"domino_open": domino_open(),
+		# Çekilişin hafızası (U1): yönetmen görülmüşü sönümler, görülmemişi
+		# kayırır. Sözlükle taşınıyor çünkü yönetmen oturumu tanımıyor.
+		"seen_cards": seen_event_ids,
+		"recent_cards": recent_card_ids,
 		# Kıtlık (Y-C21): yolun gittiği yerin derecesi ve oranın hâli.
 		"scarcity_here": scarcity_here(journey_destination_id if is_journey_active() else ""),
 		"city_morale": morale_of(journey_destination_id if is_journey_active() else current_location_id),

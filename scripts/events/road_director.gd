@@ -92,7 +92,38 @@ func weight_multiplier(event: GameEvent, context: Dictionary) -> float:
 	for link in (context.get("domino_open", []) as Array):
 		if (DOMINO_NEXT.get(String(link), []) as Array).has(event.event_id):
 			m *= DOMINO_WEIGHT
-	return m
+	return m * novelty_multiplier(event.event_id, context)
+
+## Yenilik çarpanı (U1, uzman ölçümü 2026-11-07).
+##
+## Ölçüm: kataloğun 97 kartından yalnızca %56'sı bir kariyerde hiç görünüyor,
+## buna karşılık çekilişlerin %73'ü tekrar; içerik ömrü 4,2 sefer. Sebebi
+## içerik eksiği değil, ağırlığın kartın geçmişini hiç bilmemesiydi - aynı
+## yüksek ağırlıklı kart her uygun günde yeniden favori oluyordu.
+##
+## Üç kademe: hiç görülmemiş kart kayırılır, yakında görülen bastırılır,
+## eskiden görülmüş olan hafifçe sönümlenir. Hiçbiri sıfır değil: kart
+## havuzdan **çıkmaz**, yalnız sıraya girer. Bir kartı tümden kilitlemek
+## koşulu sağlayan tek kart kaldığında yolu susturur; sönüm susturmaz.
+##
+## Domino bunun üstünde kalır (DOMINO_WEIGHT 2,5 > RECENT_CARD_WEIGHT'in
+## bastırması): bir zincirin ikinci halkası yeni görülmüş olsa bile gelir,
+## çünkü zincirin kopması tekrardan daha kötüdür.
+const UNSEEN_CARD_WEIGHT: float = 2.4
+const RECENT_CARD_WEIGHT: float = 0.35
+const SEEN_CARD_WEIGHT: float = 0.8
+
+func novelty_multiplier(event_id: String, context: Dictionary) -> float:
+	if event_id.is_empty():
+		return 1.0
+	var recent := context.get("recent_cards", []) as Array
+	if recent.has(event_id):
+		return RECENT_CARD_WEIGHT
+	var seen := context.get("seen_cards", {}) as Dictionary
+	if seen.is_empty():
+		# Bağlam hafızayı taşımıyor (eski çağıran, test): eski davranış.
+		return 1.0
+	return SEEN_CARD_WEIGHT if seen.has(event_id) else UNSEEN_CARD_WEIGHT
 
 ## Zincirin halkası -> sonraki halkayı getiren kartlar.
 const DOMINO_WEIGHT: float = 2.5

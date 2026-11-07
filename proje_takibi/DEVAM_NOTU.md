@@ -291,3 +291,37 @@ izi - ölçülebilen her eksende el emeği. Tek büyük açık: 199 sonucun
 sıfırı bir kişinin ya da yerin adını geçiriyor (U2).
 
 Öneriler U1-U7 raporda; U3 (yetkin oyuncuya da bir son) kullanıcı kararı.
+
+## U1 + U2 oyuna alındı (2026-11-07)
+
+**U1 - çekiliş artık görülmemişi kayırıyor.** `GameSession` son 12 kartın
+halkasını tutuyor (`recent_card_ids`, kayda yazılıyor), `build_event_context`
+hem onu hem `seen_event_ids`'i yönetmene taşıyor,
+`RoadDirector.novelty_multiplier` üç kademe uyguluyor: hiç görülmemiş ×2,4,
+eskiden görülmüş ×0,8, yeni görülmüş ×0,35. Hiçbiri sıfır değil - kart
+havuzdan çıkmıyor, sıraya giriyor; domino çarpanı (×2,5) üstte kalıyor, yani
+bir zincirin ikinci halkası yeni görülmüş olsa bile geliyor.
+
+**U2 - sonuçlar ad anıyor.** Tek kapı `EventText.fill()`: önce eski
+`People.fill_names` işaretleri ({place}, {nemesis}...), sonra `{who}` (check'i
+gerçekten atan kişi; check yoksa tohumdan sabit biri) ve `{town}` (seferde
+gidilen, şehirdeyken bulunulan yerleşim), en sonda temizlik - çözülemeyen
+işaret ekrana çıkmıyor (eski `fill_names` "{nemesis}"i olduğu gibi
+geçiriyordu). Türkçe çekim tuzağı ad bir ortak ada yapıştırılarak aşıldı
+("{town} yolunda"), yani kesme işareti/ünlü uyumu sorunu hiç doğmuyor.
+
+193 sonuç metni yeniden yazıldı (tr + en): 191'i bir kişi ya da yer anıyor
+(144 `{who}`, 47 `{town}`). İkisi bilerek adsız: `EVT_TROUBLED_NIGHT_SLEEP_GOOD`
+(bütün kervanın gecesi) ve `EVT_PORT_GOSSIP_INTRIGUE` (zaten İpekevi'ni anıyor).
+
+Bu arada kullanıcının "han deme, kervansaray de" kuralını çiğneyen dört metin
+çıktı ve düzeldi: `EVT_SICK_OWN_CARE_BAD`, `EVT_SICK_OPT_LEAVE`,
+`EVT_PORT_GOSSIP_TEXT`, `EVT_RIVAL_SLANDER_TEXT` (+ `STORY_WIDOW_2` ui.csv'de).
+
+Test `tests/test_event_text.gd` (22 doğrulama): katalogdaki her sonuç boş bir
+oturumla dolduruluyor, hiçbirinde küme parantezi kalmıyor, ad oranı ≥%95.
+Ekran doğrulaması `tests/screenshot_named_cards.gd` - gerçek yol ekranında
+gerçek kart: *"Fidyeyi kabul ettiler; kervan Vastrevar yoluna devam ediyor."*
+ve *"Torgan yalnızca çürümüş erzak buldu; vakit boşa gitti."*
+
+Sırada: U3-U7 ve her seferde en az bir dövüş + asker kaçakları.
