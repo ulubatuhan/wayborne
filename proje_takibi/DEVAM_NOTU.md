@@ -377,3 +377,40 @@ ekran aracı kendi kurduğu oturumu kullanıyordu (yol ekranı GameState'inkini
 okur).
 
 Sırada: U3-U7.
+
+## U3-U7 oyuna alındı (2026-11-07)
+
+Ölçüm karşılaştırması `docs/design_notes/uzman_degerlendirme.md` §7.
+
+**U7 - metnin sözü tutuluyor.** `EventCatalog.PROMISED_EFFECTS`: 29 sonuç
+cümlesi somut bir şey söylüyordu ama oyun uygulamıyordu (bulunan takı
+gelmiyordu, kavgada kırılan vagon kırılmıyordu, "deftere yazılır" denen ad
+yazılmıyordu). Tablo tek yerde duruyor, `_apply_career_threats` deseniyle
+kataloğa işleniyor. Yalnız sayı oynatan sonuç %36 → %22.
+
+**U6 - varışta ustalık.** `journey_hungry_days` sefer başına sayılıyor ve
+kayda giriyor; varış özeti iki satır yazıyor: "3 gün aç kalkıldı (10 günlük
+yolda)" ve "Kilerde 5 günlük erzak kaldı". Ekranda doğrulandı.
+
+**U4 - boş tur.** `CityBriefModel` artık boş liste döndürmüyor: hiçbir
+ihtiyaç yoksa bedelli bir öneri geliyor (birinin isteği → taverna, gündelik
+iş → planlayıcı, yoksa taverna). Ekranda doğrulandı: "Bir gün çalışılabilir:
+bir gün gider, 6 erzak gelir." İki eski test bu kuralla çelişiyordu
+("hazır kervanda uyarı listesi boş"), kurala göre güncellendi: acil uyarı
+yok, ama öneri var.
+
+**U5 - ilk oturumun imzası.** Dövüş garantisi zaten 1/6'yı 4/6 yaptı. Üstüne
+"üst üste ödeyenle pazarlık biter" eklendi (`raids_bought_off`,
+`RAID_PATIENCE` 3): eşiğe gelen kervana fidye seçeneği sebebiyle kapanıyor,
+gerçek bir dövüş sayacı sıfırlıyor. Eşiği 2'ye indirmek ölçümü
+değiştirmedi - kalan iki koşu ödemiyor, **blöf yapıyor ve tutuyor**; yani
+kullanıcının kendi mekaniği çalışıyor, eşik gevşekte bırakıldı.
+
+**U3 - son.** Seçilen kol kıtlığın derinleşmesi: `Scarcity.DRIFT_PER_DAY`
+0,0004 → 0,00055, `DRIFT_CAP` 0,2 → 0,45. Birinci yıl neredeyse aynı, geç
+oyun ısırıyor. 90 sefer ölçümünde acemi 68,3'te, açgözlü 75,5'te bitiyor;
+**plan okuyan hâlâ bitmiyor**. Raporun öbür iki kolu (yaşlanma/kuşak
+baskısı, büyüyen kervanın krizleri - Y-C24) açık; bu senin kararın.
+
+Test `tests/test_retention.gd` (48 doğrulama). Ekran
+`tests/screenshot_retention.gd`.

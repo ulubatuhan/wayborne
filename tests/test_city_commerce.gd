@@ -324,10 +324,13 @@ func _test_brief_flags_what_the_caravan_lacks(t) -> void:
 	var offers := WorldMapData.get_offers_from_origin(stocked.current_location_id)
 	if not offers.is_empty():
 		stocked.accept_contract(offers[0])
-	t.ok(
-		_brief_needs(stocked).is_empty(),
-		"hazır kervanda uyarı listesi boş - boş bir uyarı listesi gürültüdür"
-	)
+	# U4 (2026-11-07): hazır kervanda liste artık boş değil - acil satır yok
+	# ama şehir **bedelli** bir şey öneriyor (boş turu kapatmak için). Kural
+	# değişen yer burası: "uyarı yok" demek "yapacak iş yok" demek değil.
+	var ready_needs := _brief_needs(stocked)
+	t.ok(not ready_needs.is_empty(), "hazır kervana da bir şey önerilir (U4)")
+	for need in ready_needs:
+		t.not_ok(bool(need.urgent), "hazır kervanda acil uyarı yok: %s" % String(need.text))
 
 	var lacking := _brief_session(40, 2)
 	lacking.owned_wagon_damaged = 1
@@ -368,7 +371,8 @@ func _test_brief_shows_debt_even_when_the_term_is_far_off(t) -> void:
 	var offers := WorldMapData.get_offers_from_origin(session.current_location_id)
 	if not offers.is_empty():
 		session.accept_contract(offers[0])
-	t.ok(_brief_needs(session).is_empty(), "borçsuz hazır kervanda uyarı yok")
+	for need in _brief_needs(session):
+		t.not_ok(bool(need.urgent), "borçsuz hazır kervanda acil uyarı yok")
 
 	session.spend_or_owe(session.wallet.balance + 350)
 	t.ge(float(session.get_total_debt()), 350.0, "açık hesap doğdu")

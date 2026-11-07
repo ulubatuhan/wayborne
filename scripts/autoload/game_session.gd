@@ -532,6 +532,29 @@ var journey_days_remaining: int = 0
 ## bir sömürü kapısı olmasın.
 var journey_combat_count: int = 0
 
+## Üst üste kaç kez yol kesildi ve dövüşmeden sıyrılındı (U5 ölçümü
+## 2026-11-07: ilk üç seferde dövüş hâlâ 4/6 koşuda görünüyordu, çünkü
+## fidyeyi hep ödeyen hiç dövüşmüyor).
+##
+## Eşik neden 3: 2 de denendi ve ölçüm **değişmedi** (ilk üç seferde dövüş
+## yine 4/6). Sebebi şu: kalan iki koşuda kervan ödemiyor, *blöf yapıyor*
+## ve blöf tutuyor - yani oyunun kendi mekaniği (zeki kervancı malı
+## yutturup canını kurtarır) çalışıyor. Sıkmanın faydası yok, zararı var;
+## eşik gevşek olanda bırakıldı.
+##
+## Bunun cevabı dövüşü zorlamak değil - seçim kalmalı - **pazarlığın
+## tükenmesi**: üst üste ödeyen kervanın adı yolda yayılır ("bunlar
+## para veriyor"), ve dördüncü çete pazarlık etmez. Sayaç gerçek bir
+## dövüşle sıfırlanır. Kuşak boyunca taşınır, sefere bağlı değil: yolun
+## hafızası şehirde silinmez.
+const RAID_PATIENCE: int = 3
+var raids_bought_off: int = 0
+
+## Bu seferde kaç gün birileri aç kalktı (U6: varışta ustalığı ekranda
+## söylemek için). Sefer başına sıfırlanır, sefer kaydıyla birlikte yazılır.
+## Gün sayısı, kişi sayısı değil: "bugün birileri aç kaldı" bir gündür.
+var journey_hungry_days: int = 0
+
 ## Dövüşün garanti olmadığı bölgeler. Gerekçe oyunun kendi lore'u, kolaylık
 ## değil: Avuçiçi (`ahit`) Ahit'in muhafızlarıyla kıtanın en sıkı korunan
 ## yolu (kullanıcı, 2026-11-07: "aşırı korunan bir yer orası, lore'da
@@ -589,6 +612,7 @@ func get_cargo_item_count() -> int:
 ## yani hem yol ekranı hem simülatörler buradan geçiyor.
 func note_combat_triggered() -> void:
 	journey_combat_count += 1
+	raids_bought_off = 0
 
 ## Dövüşe açılan bir kartla yüzleşmek de borcu kapatır - fidyeyi ödeyip
 ## yoluna gitmek bir **karar**, kaçamak değil; bedeli zaten kesede ve
@@ -600,8 +624,15 @@ func note_combat_triggered() -> void:
 ## EventResolver'dan kaldırır; garanti o zaman "her seferde bir dövüş"e
 ## döner.
 func note_raid_faced(event: GameEvent) -> void:
-	if event != null and RoadDirector.can_fight(event):
-		journey_combat_count += 1
+	if event == null or not RoadDirector.can_fight(event):
+		return
+	journey_combat_count += 1
+	# Dövüş olduysa `note_combat_triggered` sayacı zaten sıfırladı; burada
+	# yalnızca "yine ödedi" durumu artıyor. İkisi aynı çözümde art arda
+	# çağrıldığı için sıra önemli: bu çağrı önce (EventResolver), savaşın
+	# tetiklenmesi sonra (etkiler uygulanınca) - yani dövüşen kervanda
+	# sayaç net sıfır kalıyor.
+	raids_bought_off += 1
 
 var danger_level: float = 0.0
 ## Bölgesel itibar ve hizipler (Y-C12, T16-07; bkz. Standing). `reputation`
@@ -2770,6 +2801,8 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 	# "bu gece kim yiyecek" ahlaki bir seçim değil bir ayar olurdu.
 	var death_outcome := resolve_deaths(starving, "LEDGER_CAUSE_STARVED")
 
+	if crew_hungry or not hungry_party.is_empty():
+		journey_hungry_days += 1
 	crew_hungry_nights = crew_hungry_nights + 1 if crew_hungry else 0
 	# Dağılma: üçüncü aç geceden itibaren her gece bir el gider. Yürüyebilen
 	# ayrılır, yürüyecek hâli kalmayan ölür (bkz. dağılma notu).
@@ -5102,6 +5135,7 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 	journey_start_day = total_days_elapsed
 	journey_shortcut = shortcut
 	journey_combat_count = 0
+	journey_hungry_days = 0
 	journey_origin_id = current_location_id
 	journey_destination_id = destination_id
 	journey_total_days = maxi(1, days)
@@ -5224,6 +5258,15 @@ func finish_journey() -> Dictionary:
 	# Görünmeyen bir teslimat, olmayan bir teslimattan ayırt edilemez -
 	# aynı kural görünmeyen ceza için de yazılıydı (bkz. DebtPanel).
 	payout["delivered_contracts"] = delivered
+	# Ustalık (U6, uzman ölçümü): beceri kesede 554 GG ve açlıkta %26→%9
+	# fark yaratıyordu ama oyuncu bunu hiçbir yerde okumuyordu - ölçülen
+	# ustalık, söylenmeyen ustalıktır. İki sayı: kaç gün aç kalındı ve
+	# varışta kaç günlük erzak arttı. İkisi de **planın** sonucu, zarın
+	# değil; o yüzden övgü değil bilanço.
+	payout["hungry_days"] = journey_hungry_days
+	payout["journey_days"] = maxi(1, journey_total_days)
+	var daily := maxf(0.1, get_daily_provision_consumption())
+	payout["spare_days"] = int(floor(float(get_provisions()) / daily))
 	if int(payout.net) > 0:
 		mark_first(FIRST_PROFIT)
 
@@ -6032,6 +6075,7 @@ func to_save_dict() -> Dictionary:
 		"bought_here": bought_here.duplicate(),
 		"price_book": price_book.duplicate(true),
 		"seen_event_ids": seen_event_ids.duplicate(),
+		"raids_bought_off": raids_bought_off,
 		"recent_card_ids": recent_card_ids.duplicate(),
 		"recent_decisions": recent_decisions.duplicate(true),
 		"standing_milestones_reached": standing_milestones_reached.duplicate(true),
@@ -6094,6 +6138,7 @@ func _journey_save_block() -> Dictionary:
 		"start_day": journey_start_day,
 		"shortcut": journey_shortcut,
 		"combat_count": journey_combat_count,
+		"hungry_days": journey_hungry_days,
 		"caravan": caravan.to_dict(),
 		"controller": journey_snapshot.duplicate(true),
 	}
@@ -6109,6 +6154,7 @@ func _load_journey_block(block: Dictionary) -> void:
 	journey_start_day = int(block.get("start_day", -1))
 	journey_shortcut = bool(block.get("shortcut", false))
 	journey_combat_count = maxi(0, int(block.get("combat_count", 0)))
+	journey_hungry_days = maxi(0, int(block.get("hungry_days", 0)))
 	caravan = CaravanState.from_dict(block.get("caravan", {}) as Dictionary)
 	journey_snapshot = (block.get("controller", {}) as Dictionary).duplicate(true)
 
@@ -6311,6 +6357,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 		perishable_days[String(item_id)] = float(data["perishable_days"][item_id])
 	bought_here = _int_values(data.get("bought_here", {}))
 	seen_event_ids = (data.get("seen_event_ids", {}) as Dictionary).duplicate()
+	raids_bought_off = maxi(0, int(data.get("raids_bought_off", 0)))
 	recent_card_ids = (data.get("recent_card_ids", []) as Array).duplicate()
 	recent_decisions = (data.get("recent_decisions", []) as Array).duplicate(true)
 	standing_milestones_reached = (data.get("standing_milestones_reached", {}) as Dictionary).duplicate(true)
@@ -6442,6 +6489,8 @@ func build_event_context() -> Dictionary:
 		# Yol kesenler (kullanıcı kararı 2026-11-07): asker kaçağı bu yolda
 		# çıkabilir mi, ve "mal ver" diyebilecekleri bir yük var mı.
 		"deserters_here": 1.0 if deserters_on_this_road() else 0.0,
+		# Kaç kez üst üste ödeyip sıyrıldın: eşiğe gelince pazarlık kapanır.
+		"raids_bought_off": float(raids_bought_off),
 		# Korunan yol: garantinin kalktığı yer aynı zamanda daha sakin
 		# olmalı - Avuçiçi'nin muhafızı, obanın töresi, krallığın devriyesi
 		# yolu yalnız "garantisiz" değil, gerçekten tenha yapar.

@@ -79,6 +79,14 @@ static func build_needs(session: GameSession) -> Array[Dictionary]:
 			_t("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
 		))
 
+	# Boş tur (U4, uzman ölçümü: şehir ziyaretlerinin %19'unda yapacak bir
+	# şey yoktu). Hiçbir ihtiyaç yoksa şehir "tamam, git" demiyor; **bedelli**
+	# bir şey öneriyor. Yeni mekanik icat edilmiyor - üçü de zaten var,
+	# yalnız görünmüyorlardı. Sıra niyete göre: önce birinin seni
+	# beklemesi, sonra bir günlük emek, en sonda masadaki kulak.
+	if needs.is_empty():
+		needs.append_array(_idle_offers(session))
+
 	# Bu yerde olmayan mekâna (kasabada lonca ya da avlu) giden düğme yok:
 	# ihtiyaç yine yazılır, ama burada çözülemeyeceği söylenir.
 	var here := WorldMapData.get_location_by_id(session.current_location_id)
@@ -89,6 +97,32 @@ static func build_needs(session: GameSession) -> Array[Dictionary]:
 				need["scene"] = ""
 				need["action"] = _t("UI_BRIEF_NOT_HERE")
 	return needs
+
+## Yapacak bir şey kalmadığında şehrin önerdikleri. Hiçbiri bedava değil:
+## birinin isteği yükten ya da yoldan, gündelik iş bir günden, taverna
+## keseden gider.
+static func _idle_offers(session: GameSession) -> Array[Dictionary]:
+	var offers: Array[Dictionary] = []
+	for request in session.people.open_requests():
+		if String((request as Dictionary).get("city", "")) != session.current_location_id:
+			continue
+		offers.append(_need(
+			_t("UI_BRIEF_IDLE_REQUEST") % String((request as Dictionary).get("name", "")),
+			_t("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
+		))
+		break
+	if session.can_work_a_day():
+		offers.append(_need(
+			_t("UI_BRIEF_IDLE_LABOUR") % int(round(
+				float(session.get_daily_provision_consumption()) * GameSession.DAY_LABOUR_PROVISION_FACTOR
+			)),
+			_t("UI_BRIEF_GO_PLANNER"), Nav.CARAVAN_PLANNER, false
+		))
+	if offers.is_empty():
+		offers.append(_need(
+			_t("UI_BRIEF_IDLE_TAVERN"), _t("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
+		))
+	return offers
 
 static func _facility_for_scene(scene_path: String) -> String:
 	for v in CityFront.VENUES:

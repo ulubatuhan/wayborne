@@ -43,6 +43,76 @@ const CAREER_THREATS: Dictionary = {
 	"evt_customs_checkpoint": [1.2, 1.4],
 }
 
+
+## Metnin söz verdiği ama etkinin vermediği sonuçlar (U7, uzman ölçümü
+## 2026-11-07: sonuçların %36'sı yalnız altın/moral/stres/itibar
+## oynatıyordu). Bu bir "dolgu ekleme" listesi değil, bir **kusur**
+## listesi: aşağıdaki satırların her birinde cümle zaten somut bir şey
+## söylüyordu - bir mal bulundu, biri yaralandı, bir ad deftere yazıldı -
+## ama oyun bunu hiç uygulamıyordu. Yazı ile mekanik arasındaki açık.
+##
+## Niye kartın içine değil de buraya: hepsi aynı kusurun örneği, bir
+## arada okunduğunda denetlenebiliyor; kartların içine dağılsalardı
+## "hangi sonuç hâlâ sözünü tutmuyor" sorusu bir daha cevaplanamazdı.
+## Çekiliş, ağırlık ve metin kartın; bu tablo yalnız eksik eli tamamlıyor.
+## (Aynı desen: `_apply_career_threats`.)
+const PROMISED_EFFECTS: Dictionary = {
+	# Bulunan şey gerçekten bulunsun.
+	"EVT_SERAI_RUIN_SEARCH_OK": [[EventEffect.Type.ITEM_ADD, 1, "jewelry"]],
+	"EVT_PORT_GOSSIP_TREASURE": [[EventEffect.Type.ITEM_ADD, 2, "silk"]],
+	"EVT_STARVING_HUNT_OK": [[EventEffect.Type.PROVISIONS, 6, ""]],
+	"EVT_KIN_GREET_PLAIN": [[EventEffect.Type.PROVISIONS, 1, ""]],
+	# Harcanan şey gerçekten harcansın.
+	"EVT_SICK_OWN_CARE_OK": [[EventEffect.Type.ITEM_REMOVE, 1, "test_bandage"]],
+	"EVT_FACTION_MEND_OK": [[EventEffect.Type.PROVISIONS, -2, ""]],
+	# Kırılan şey gerçekten kırılsın.
+	"EVT_BRAWL_IGNORE_ESCALATE": [[EventEffect.Type.WAGON_DAMAGE, 1, ""]],
+	# Canı yanan gerçekten yansın (boş text_value = lider, bkz. PARTY_HP).
+	"EVT_BRAWL_INTERVENE_HURT": [[EventEffect.Type.PARTY_HP, -6, ""]],
+	"EVT_STORM_PRESS_OK": [[EventEffect.Type.PARTY_HP, -3, "weakest"]],
+	"EVT_FORD_SWIM_OK": [[EventEffect.Type.PARTY_HP, -2, "weakest"]],
+	"EVT_FORD_CROSS_OK": [[EventEffect.Type.PARTY_HP, -1, "weakest"]],
+	"EVT_BRIDGE_FORD_GOOD": [[EventEffect.Type.PARTY_HP, -2, "weakest"]],
+	"EVT_MINE_DESCEND_GOOD": [[EventEffect.Type.PARTY_HP, -5, "strength"]],
+	"EVT_DUVENMOR_DAWN_OK": [[EventEffect.Type.PARTY_HP, -4, ""]],
+	"EVT_HIGHLAND_CHALLENGE_LOSE": [[EventEffect.Type.PARTY_HP, -2, "strength"]],
+	"EVT_BROKEN_CALM_BAD": [[EventEffect.Type.PARTY_HP, -3, "weakest"]],
+	"EVT_QUARANTINE_TOGETHER_LUCK": [[EventEffect.Type.PARTY_HP, -2, "weakest"]],
+	"EVT_HUNTING_TRIP_HUNT_BAD": [[EventEffect.Type.PARTY_HP, -2, "perception"]],
+	# Dinlenen gerçekten dinlensin.
+	"EVT_TROUBLED_NIGHT_SLEEP_GOOD": [[EventEffect.Type.PARTY_HP, 3, "weakest"]],
+	# Deftere yazılan ad gerçekten yazılsın (bkz. GameSession.stain_trade).
+	"EVT_SEIZED_REFUSE_OK": [[EventEffect.Type.TRADE_STAIN, 6, ""]],
+	"EVT_CONVOY_SEARCH_CAUGHT": [[EventEffect.Type.TRADE_STAIN, 10, ""]],
+	"EVT_CONVOY_SEARCH_FINED": [[EventEffect.Type.TRADE_STAIN, 5, ""]],
+	"EVT_WARDEN_EXEMPT_BAD": [[EventEffect.Type.TRADE_STAIN, 5, ""]],
+	"EVT_RIVAL_SLANDER_LOST": [[EventEffect.Type.TRADE_STAIN, 8, ""]],
+	"EVT_TRIBUNAL_DEFEND_MID": [[EventEffect.Type.TRADE_STAIN, 6, ""]],
+	"EVT_MILITARY_CONVOY_CRATE_MID": [[EventEffect.Type.TRADE_STAIN, 7, ""]],
+	"EVT_REFUGEE_BUY_BAD": [[EventEffect.Type.TRADE_STAIN, 6, ""]],
+	"EVT_SHRINE_TAKE_BAD": [[EventEffect.Type.TRADE_STAIN, 5, ""]],
+	"EVT_VILLAGE_FOOD_HAGGLE_BAD": [[EventEffect.Type.TRADE_STAIN, 4, ""]],
+}
+
+## Tabloyu kataloğa işler. Aynı etki iki kez eklenmesin diye tür+hedef
+## çifti kontrol ediliyor: `get_road_events()` önbelleklense de, bir
+## testin kataloğu yeniden kurması bu adımı iki kez çalıştırabilir.
+static func _apply_promised_effects() -> void:
+	for event in _road_events:
+		for choice in event.choices:
+			for outcome in choice.outcomes:
+				var rows: Array = PROMISED_EFFECTS.get(outcome.text_key, [])
+				for row in rows:
+					var spec: Array = row
+					var already := false
+					for effect in outcome.effects:
+						if effect.type == spec[0] and effect.text_value == String(spec[2]):
+							already = true
+					if not already:
+						outcome.effects.append(
+							EventEffect.make(spec[0], int(spec[1]), String(spec[2]))
+						)
+
 static func _apply_career_threats() -> void:
 	for event in _road_events:
 		if not CAREER_THREATS.has(event.event_id):
@@ -162,6 +232,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_cargo_toll())
 	_road_events.append(_road_ultimatum())
 	_apply_career_threats()
+	_apply_promised_effects()
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -300,7 +371,11 @@ static func _bandit_ambush() -> GameEvent:
 	# fazla çıkabilir" hali - EFF_GOLD_LOSS zaten gerçek sayıyı basıyor).
 	var pay_choice := _gated_choice(
 		"EVT_AMBUSH_OPT_PAY", "EVT_AMBUSH_OPT_PAY_LOCKED",
-		_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80)]),
+		_conditions([
+			EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80),
+			# Üst üste ödeyenle pazarlık biter (U5, bkz. _pay_off_choice).
+			EventCondition.make("raids_bought_off", EventCondition.Op.LESS_THAN, float(GameSession.RAID_PATIENCE)),
+		]),
 		_effects([
 			EventEffect.make(EventEffect.Type.MORALE, -5),
 			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
@@ -3303,6 +3378,16 @@ static func _bailiffs_at_camp() -> GameEvent:
 ## sebebi bu: başarısızlığı dövüşten beter.
 const BLUFF_DIFFICULTY: float = 2.5
 
+## Ödeyerek sıyrılma seçeneği. Üst üste `RAID_PATIENCE` kez ödeyen kervanın
+## adı yolda yayılır ve dördüncü çete pazarlık etmez (U5, 2026-11-07):
+## seçim kaldırılmıyor, **tükeniyor**. Sayaç gerçek bir dövüşle sıfırlanır.
+static func _pay_off_choice(
+	text_key: String, locked_key: String, effects: Array[EventEffect]
+) -> EventChoice:
+	return _gated_choice(text_key, locked_key, _conditions([
+		EventCondition.make("raids_bought_off", EventCondition.Op.LESS_THAN, float(GameSession.RAID_PATIENCE)),
+	]), effects)
+
 ## Blöf seçeneği: üç kartın da üçüncü yolu. `prize` blöfün kurtardığı şey
 ## değişmediği için ortak, metin anahtarları karttan karta değişiyor.
 static func _bluff_choice(
@@ -3343,7 +3428,7 @@ static func _deserter_levy() -> GameEvent:
 		]), 1.5),
 	])
 	event.choices = _choices([
-		_choice("EVT_LEVY_OPT_GIVE", _effects([
+		_pay_off_choice("EVT_LEVY_OPT_GIVE", "EVT_RAID_NO_DEAL", _effects([
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
 			EventEffect.make(EventEffect.Type.MORALE, -14),
 			EventEffect.make(EventEffect.Type.STRESS, 10),
@@ -3376,7 +3461,7 @@ static func _cargo_toll() -> GameEvent:
 		]), 1.6),
 	])
 	event.choices = _choices([
-		_choice("EVT_CARGOTOLL_OPT_PAY", _effects([
+		_pay_off_choice("EVT_CARGOTOLL_OPT_PAY", "EVT_RAID_NO_DEAL", _effects([
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 50),
 			EventEffect.make(EventEffect.Type.MORALE, -6),
 			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
@@ -3410,7 +3495,7 @@ static func _road_ultimatum() -> GameEvent:
 		]), 1.8),
 	])
 	event.choices = _choices([
-		_choice("EVT_ULTIMATUM_OPT_LEAVE", _effects([
+		_pay_off_choice("EVT_ULTIMATUM_OPT_LEAVE", "EVT_RAID_NO_DEAL", _effects([
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
 			EventEffect.make(EventEffect.Type.GOLD, -ULTIMATUM_GOLD),
 			EventEffect.make(EventEffect.Type.MORALE, -18),

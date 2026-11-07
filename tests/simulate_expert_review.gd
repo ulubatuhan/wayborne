@@ -398,6 +398,9 @@ func _play(seed_value: int, policy: Dictionary) -> Dictionary:
 	}
 
 ## Şehirde bir tur. Bir şey yapılabildiyse true - yapılamadıysa "boş tur".
+## Kiler bu kadar günün altına inince boş turda gündelik işe gidilir.
+const IDLE_LABOUR_DAYS: int = 3
+
 func _city_turn(session: GameSession, state: Dictionary) -> bool:
 	session.people.ensure_city(session.current_location_id, session.total_days_elapsed)
 	# Kişilerin işi teklif edilmezse "açıkta kalan iş" hep sıfır çıkar ve
@@ -439,6 +442,14 @@ func _city_turn(session: GameSession, state: Dictionary) -> bool:
 		if quantity > 0 and session.add_to_cargo(item, quantity):
 			session.consume_stock(item_id, quantity, unit * quantity)
 			session.wallet.spend(unit * quantity)
+			acted = true
+	# U4 (2026-11-07): ticaret yapılamadıysa şehrin önerdiği bedelli işe
+	# bakılır. Politika gerçekçi tutuluyor - bir oyuncu her boş turda
+	# çalışmaz, **kiler daraldığında** çalışır; yoksa ölçü anlamını yitirir.
+	if not acted and session.can_work_a_day():
+		var daily := maxi(1, session.get_daily_provision_consumption())
+		if session.get_provisions() < daily * IDLE_LABOUR_DAYS:
+			session.work_a_day()
 			acted = true
 	return acted
 

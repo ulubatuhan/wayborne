@@ -4671,6 +4671,21 @@ func _render_arrival_summary(payout: Dictionary) -> void:
 		break_label.modulate = LOCKED_COLOR if break_data.affliction else OUTCOME_COLOR
 		_arrival_panel.add_child(break_label)
 
+	# Ustalık satırı (U6): planın sonucu, zarın değil. İki sayı, övgü yok -
+	# aç geçen gün ve varışta kalan erzağın kaç gün yeteceği.
+	var hungry_days: int = payout.get("hungry_days", 0)
+	var journey_days: int = payout.get("journey_days", 1)
+	var mastery := _make_summary_label(
+		tr("UI_ROAD_MASTERY_CLEAN") % journey_days if hungry_days <= 0
+		else tr("UI_ROAD_MASTERY_HUNGRY") % [hungry_days, journey_days]
+	)
+	mastery.modulate = OUTCOME_COLOR if hungry_days <= 0 else LOCKED_COLOR
+	_arrival_panel.add_child(mastery)
+	var spare_days: int = payout.get("spare_days", 0)
+	var larder := _make_summary_label(tr("UI_ROAD_MASTERY_LARDER") % spare_days)
+	larder.modulate = OUTCOME_COLOR if spare_days >= 2 else LOCKED_COLOR
+	_arrival_panel.add_child(larder)
+
 	_add_log(tr("UI_ROAD_ARRIVED") % payout.net, OUTCOME_COLOR)
 
 ## Kırılan bir yoldaşın varış özetindeki tek satırlık dökümü - huy

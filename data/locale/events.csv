@@ -773,3 +773,4 @@
 "EVT_ULTIMATUM_OPT_BLUFF_LOCKED","Verecek yükün yok","You have no cargo to offer","","","","","","","","",""
 "EVT_ULTIMATUM_BLUFF_OK","{who} o kalemi avucunda çevirdi ve adamın gözünün içine baktı: bundan iyisini bu yolda bulamazsın. Adam aldı, kenara çekildi.","{who} turns the thing over in a palm and looks the man in the eye: you will not find better on this road. He takes it and steps aside.","","","","","","","","",""
 "EVT_ULTIMATUM_BLUFF_BAD","Adam malı aldı, baktı, yere bıraktı ve üstüne bastı. '{who}, son sözünü söyledin.' Önce onlar davrandı.","He takes it, looks, sets it down and steps on it. '{who}, that was your last word.' They move first.","","","","","","","","",""
+"EVT_RAID_NO_DEAL","Adın yolda yayılmış: bu sefer pazarlık yok","Your name has gone round the road: no deal this time","","","","","","","","",""

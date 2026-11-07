@@ -21,8 +21,22 @@ const SEASON_SWING: float = 0.12
 const YEAR_DAYS: int = 360
 ## Kış ortası (en ağır gün) yılın bu günü.
 const WINTER_PEAK_DAY: int = 300
-const DRIFT_PER_DAY: float = 0.0004
-const DRIFT_CAP: float = 0.2
+## Kıtlığın yıllar içindeki kayması (U3, uzman ölçümü 2026-11-07: 40
+## seferde 6 koşunun 6'sı da bitmiyordu - yetkin oyuncu için hiçbir
+## başarısızlık baskısı yoktu).
+##
+## Seçilen kol **kıtlığın derinleşmesi**; raporun saydığı öbür iki yol
+## (yaşlanma/kuşak baskısı, büyüyen kervanın kendi krizleri) açık duruyor.
+## Gerekçe: kıtlık zaten oyunun ağırlık merkezi (Y-C21) ve "yenilmez
+## çevre" tasarım dersi (Y-C23) tam olarak bunu söylüyor - kıtlık
+## çözülmez, dayanılır ve dayanmak her yıl pahalanır.
+##
+## Kayma hızı 0,0004 → 0,00055/gün, tavan 0,2 → 0,45. İki yıl (720 gün)
+## sonunda tavana yaklaşılıyor; Vadi gibi tabanı yüksek bir bölge o
+## noktada neredeyse yokluğa iniyor. Birinci yılda fark küçük (gün 360'ta
+## 0,14 yerine 0,20): erken oyun aynı kalıyor, geç oyun ısırıyor.
+const DRIFT_PER_DAY: float = 0.00055
+const DRIFT_CAP: float = 0.45
 const FOOD_ITEMS: Array[String] = ["provisions", "test_grain", "fish", "honey"]
 ## Fiyat: yiyecek kıtlıkla en çok pahalanır, öbür mallar az.
 const FOOD_PRICE_RISE: float = 0.6

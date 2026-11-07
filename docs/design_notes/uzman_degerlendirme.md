@@ -221,3 +221,41 @@ kişiye ya da yere** bağlansın (bir mal gitsin, biri kırılsın, bir yol kapa
 - **Zanaat denetimi metni okur, anlamaz.** "Yalnız sayı oynatan sonuç" bir kalite yargısı değil bir
   biçim sayımıdır; iyi yazılmış bir sayı sonucu da olabilir.
 - **Dövüş politikası tek.** Dövüş sayıları yön gösterir, kesin değildir.
+
+---
+
+## 7. İkinci tur: U1-U7 uygulandıktan sonraki ölçüm (2026-11-07)
+
+Aynı araç, aynı tohumlar (6 koşu × 40 sefer). Katalog 97 → 100 kart (üç yol
+kesen kart eklendi), sonuç sayısı 193 → 205.
+
+| ölçü | önce | sonra | not |
+|---|---|---|---|
+| içerik pisti | 4,2 sefer | 6,3 sefer | U1 çalıştı; yeni kartların sık çekilmesi bir kısmını geri aldı |
+| katalogun görüldüğü pay | %56 | %58 | |
+| tekrar oranı | %73 | %75 | yol kesme garantisi her seferde bir kart harcıyor |
+| adı/yeri anan sonuç | %0 | **%96** | U2 |
+| yalnız sayı oynatan sonuç | %37 | **%22** | U7 |
+| sahte seçim | %4 | %2 | U7'nin yan etkisi |
+| ilk üç seferde dövüş | 1/6 | **4/6** | U5 |
+| boş tur | %19 | %28 | aşağıya bak |
+| 40 seferde biten koşu | 0/6 | 0/6 | U3 kısmen |
+
+**Boş tur neden arttı?** İki sebep, ikisi de gerçek. Yol kesenler kervanı
+fakirleştiriyor (alacak parası kalmıyor), ve ölçüm aracı U4'ün önerisini
+baştan görmüyordu - araç düzeltildi (kiler üç günün altına inince gündelik
+işe gidiliyor) ve sayı %34'ten %28'e indi. Kalanı ekonominin kendisi.
+
+**U3'ün dürüst durumu.** Seçilen kol kıtlığın derinleşmesi oldu (kayma
+0,0004 → 0,00055/gün, tavan 0,2 → 0,45). 40 seferde kimse bitmiyor ama
+**90 sefer ölçüldüğünde**: acemi 68,3 seferde, açgözlü 75,5 seferde bitiyor;
+plan okuyan 90'ı da tamamlıyor (kese +86 GG, aç sefer %6). Yani kıtlık
+dikkatsizi ve açgözlüyü artık öldürüyor, **yetkin oyuncuyu öldürmüyor**.
+Raporun saydığı öbür iki kol (yaşlanma/kuşak baskısı, büyüyen kervanın kendi
+krizleri - Y-C24) hâlâ açık ve bu kullanıcı kararı.
+
+**İlk dövüş neden 4/6'da kaldı?** "Üst üste ödeyenle pazarlık biter" eşiği
+3'ten 2'ye indirildi ve ölçüm **değişmedi**. Sebebi kusur değil, mekaniğin
+kendisi: kalan iki koşuda kervan ödemiyor, *blöf yapıyor* ve blöf tutuyor
+(zeki kervancı malı yutturup canını kurtarır - kullanıcı kararı 2026-11-07).
+Eşik gevşek olanda (3) bırakıldı.
