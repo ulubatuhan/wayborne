@@ -1,0 +1,632 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>El Çizimi Atölyesi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Düzen: tablette çalışan bir tezgâh - üstte ölçüm ve süzgeçler, altında tek kolon iş listesi.
+   Palet oyunun kendi paleti (docs/ui/STIL_REHBERI.md): mürekkep, kömür, parşömen, tek sıcak kaynak kehribar. */
+:root {
+  color-scheme: dark;
+  --murekkep: #0E0D0F;
+  --komur: #121010;
+  --komur-yumusak: #201C1A;
+  --komur-kart: #191615;
+  --parsomen: #C4B08F;
+  --parsomen-soluk: #8C785C;
+  --kemik: #E0D9C7;
+  --kehribar: #EDA852;
+  --altin-soluk: #856B38;
+  --kan: #A8302B;
+  --demir: #454242;
+  --arduvaz: #788A94;
+  --safra: #8C9440;
+  --baslik: "Alegreya", "Iowan Old Style", Georgia, serif;
+  --govde: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --veri: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--murekkep);
+  color: var(--parsomen);
+  font-family: var(--govde);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+.sayfa {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+h1, h2, h3 { font-family: var(--baslik); color: var(--kemik); text-wrap: balance; margin: 0; }
+h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 1.22rem; margin-block: 2.2rem .6rem; }
+h3 { font-size: 1rem; margin-block: 1.1rem .35rem; }
+p { margin: .5rem 0; }
+a { color: var(--kehribar); }
+code, .kimlik, .veri { font-family: var(--veri); font-size: .86em; }
+.etiket {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .13em;
+  color: var(--parsomen-soluk); font-weight: 700;
+}
+.sessiz { color: var(--parsomen-soluk); }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* üst bant */
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--komur);
+}
+.tepe {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  background: var(--komur); border-bottom: 1px solid var(--komur-yumusak);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+}
+.tepe-sira { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.tepe-sira .olcum { font-size: .78rem; color: var(--parsomen-soluk); font-family: var(--veri); }
+
+/* özet */
+.kutular { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 10px; margin-top: 14px; }
+.kutu { background: var(--komur-kart); border: 1px solid var(--komur-yumusak); border-radius: 2px; padding: 12px 14px; min-width: 0; }
+.kutu .sayi { font-family: var(--baslik); font-size: 1.9rem; color: var(--kemik); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.kutu.vurgu { border-left: 3px solid var(--kehribar); }
+.kutu.vurgu .sayi { color: var(--kehribar); }
+.kutu.uyari { border-left: 3px solid var(--kan); }
+
+.cubuk { height: 7px; background: var(--komur-yumusak); border-radius: 1px; overflow: hidden; display: flex; }
+.cubuk i { display: block; height: 100%; }
+.cubuk .oyunda { background: var(--kehribar); }
+.cubuk .yuklendi { background: var(--altin-soluk); }
+.cubuk .isaretli { background: var(--arduvaz); }
+
+table.ilerleme { width: 100%; border-collapse: collapse; margin-top: 8px; }
+table.ilerleme td { padding: 6px 8px 6px 0; vertical-align: middle; border-bottom: 1px solid var(--komur-yumusak); }
+table.ilerleme td.ad { white-space: nowrap; color: var(--kemik); }
+table.ilerleme td.bar { width: 55%; min-width: 90px; }
+table.ilerleme td.say { text-align: right; white-space: nowrap; font-family: var(--veri); font-size: .8rem; }
+
+/* süzgeçler */
+.suzgec { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+button.cip, .cip {
+  font: inherit; font-size: .82rem; color: var(--parsomen);
+  background: var(--komur-kart); border: 1px solid var(--komur-yumusak);
+  border-radius: 999px; padding: 4px 11px; cursor: pointer;
+}
+button.cip[aria-pressed="true"] { background: var(--altin-soluk); border-color: var(--kehribar); color: var(--murekkep); font-weight: 700; }
+button.cip:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--kehribar); outline-offset: 2px; }
+input[type="search"] {
+  font: inherit; color: var(--kemik); background: var(--komur-kart);
+  border: 1px solid var(--komur-yumusak); border-radius: 2px; padding: 7px 10px; width: 100%;
+}
+
+/* iş listesi */
+.liste { margin-top: 10px; border-top: 1px solid var(--komur-yumusak); }
+details.is { border-bottom: 1px solid var(--komur-yumusak); }
+details.is > summary {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline;
+  padding: 9px 0; cursor: pointer; list-style: none;
+}
+details.is > summary::-webkit-details-marker { display: none; }
+details.is[open] > summary { background: linear-gradient(to right, var(--komur-kart), transparent); }
+.oncelik-im {
+  font-family: var(--veri); font-size: .72rem; width: 2.2em; text-align: center;
+  border: 1px solid var(--demir); border-radius: 2px; color: var(--parsomen-soluk);
+}
+.oncelik-im.o1 { border-color: var(--kan); color: var(--kan); }
+.oncelik-im.o2 { border-color: var(--altin-soluk); color: var(--kehribar); }
+.is-ad { color: var(--kemik); min-width: 0; }
+.is-ad .kimlik { display: block; color: var(--parsomen-soluk); }
+.durum-im { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
+.durum-oyunda { color: var(--kehribar); }
+.durum-yuklendi { color: var(--altin-soluk); }
+.durum-bekliyor { color: var(--demir); }
+.durum-isaret { color: var(--arduvaz); }
+
+.kart { padding: 2px 0 16px; display: grid; gap: 10px; }
+.satirlar { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: .9rem; }
+.satirlar dt { color: var(--parsomen-soluk); font-size: .76rem; text-transform: uppercase; letter-spacing: .1em; padding-top: 3px; }
+.satirlar dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.katman-sira { display: flex; flex-wrap: wrap; gap: 4px; }
+.katman-sira span { font-family: var(--veri); font-size: .78rem; background: var(--komur-yumusak); padding: 2px 7px; border-radius: 2px; }
+.katman-sira span.etek { border: 1px solid var(--altin-soluk); }
+.ogut { background: var(--komur-kart); border-left: 2px solid var(--altin-soluk); padding: 9px 12px; font-size: .9rem; }
+.ogut ul { margin: .3rem 0; padding-left: 1.1rem; }
+.ogut li { margin: .2rem 0; }
+.isaret-sira { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+details.rehber { border: 1px solid var(--komur-yumusak); border-radius: 2px; margin-top: 8px; background: var(--komur-kart); }
+details.rehber > summary { padding: 11px 14px; cursor: pointer; color: var(--kemik); font-family: var(--baslik); font-size: 1rem; }
+details.rehber > div { padding: 0 14px 14px; }
+ol.adim { padding-left: 1.3rem; }
+ol.adim li { margin: .4rem 0; }
+dl.isaretler { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: .9rem; }
+dl.isaretler dt { color: var(--kemik); }
+dl.isaretler dd { margin: 0; }
+
+.yol { font-family: var(--veri); font-size: .84rem; color: var(--kehribar); overflow-wrap: anywhere; }
+.bos { padding: 28px 0; color: var(--parsomen-soluk); }
+.dipnot { margin-top: 2.4rem; border-top: 1px solid var(--komur-yumusak); padding-top: 1rem; font-size: .85rem; color: var(--parsomen-soluk); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 520px) {
+  .satirlar { grid-template-columns: 1fr; gap: 2px; }
+  .satirlar dt { padding-top: 8px; }
+  details.is > summary { grid-template-columns: auto 1fr; }
+  .durum-im { grid-column: 2; }
+}
+</style>
+
+<div class="sayfa">
+
+  <header class="tepe">
+    <div class="tepe-sira">
+      <h1>El Çizimi Atölyesi</h1>
+      <span class="olcum" id="olcum-satiri">ölçüm bekleniyor</span>
+    </div>
+  </header>
+
+  <p class="sessiz" style="margin-top:14px">
+    Wayborne'un bütün görselleri elle yeniden çizilecek. Bu sayfa üç soruya cevap verir:
+    <strong style="color:var(--kemik)">ne çizilecek</strong>, <strong style="color:var(--kemik)">nasıl çizilecek</strong>,
+    <strong style="color:var(--kemik)">nereye yüklenecek</strong> — ve depodaki gerçek duruma bakarak ne kadarının
+    bittiğini sayar.
+  </p>
+
+  <div class="kutular" id="kutular"></div>
+
+  <h2>Öncelik</h2>
+  <p class="sessiz" style="margin-top:0">
+    <strong style="color:var(--kan)">1</strong> bugün yapay zekâ üretimi olanlar: bunlar bitince oyunun AI beyanı
+    kalkar. <strong style="color:var(--kehribar)">2</strong> oyunda en çok görünenler.
+    <strong>3</strong> kalanlar; çizilmezse bugünkü görsel kalır.
+  </p>
+  <table class="ilerleme" id="oncelik-tablo"></table>
+
+  <h2>Kategoriler</h2>
+  <table class="ilerleme" id="kategori-tablo"></table>
+
+  <h2>Sırada ne var</h2>
+  <p class="sessiz" style="margin-top:0">Öncelik 1'den, önce bitmesi gereken işi olmayan ilk altı kalem.</p>
+  <div id="sirada"></div>
+
+  <h2>İş listesi</h2>
+  <input type="search" id="ara" placeholder="Kimlik, ad ya da oyundaki dosya ara (örn. ikon, Brazdun, KYF-)" autocomplete="off">
+  <div class="suzgec" id="suzgec-oncelik"></div>
+  <div class="suzgec" id="suzgec-durum"></div>
+  <div class="suzgec" id="suzgec-kategori"></div>
+  <p class="etiket" id="sonuc-sayisi" style="margin-top:10px"></p>
+  <div class="liste" id="liste"></div>
+  <p id="daha-kutu" hidden><button class="cip" id="daha">Daha fazla göster</button></p>
+
+  <h2>Nasıl çizilir</h2>
+
+  <details class="rehber">
+    <summary>1 · Hazırlık (bir kez)</summary>
+    <div>
+      <ul>
+        <li><strong>Uygulama:</strong> ibis Paint X. Ayarlar → Kalem → basınç duyarlılığı açık, "parmakla çizme"
+          kapalı, avuç içi reddi açık.</li>
+        <li><strong>Çizgi fırçası:</strong> G Pen ya da Dip Pen (Hard), boyut tuvalin uzun kenarının ~%0,25'i
+          (2048 tuvalde 5-6 px), stabilizatör 3-5.</li>
+        <li><strong>Düz renk:</strong> doldurma aracı (referans "Kanvas", boşluk kapatma 2) ya da sert pen.</li>
+        <li><strong>Gölge:</strong> aynı renk ailesinin bir koyusu, sert kenar. Oyunun dili mürekkep + az ton:
+          bir parçada en fazla iki gölge tonu, <strong>gradyan yok</strong> — ışığı ve sisi oyun veriyor.</li>
+        <li><strong>Palet:</strong> kasvetli ve az doygun. İlk birkaç çizimden sonra paleti birlikte sabitleyip
+          ibis'e kaydediyoruz. Tek sıcak kaynak kuralı: dünyada yalnızca <em>ateş</em> sıcak renkli.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="rehber">
+    <summary>2 · Tuval ve referans</summary>
+    <div>
+      <ol class="adim">
+        <li>Tuval boyutu listede her kalemin <strong>Tuval</strong> satırında. Çok katmanlı işlerde şablon
+          paketindeki <code>&lt;KİMLİK&gt;.psd</code>: Galerim → + → PSD içe aktar. Katmanlar adlı ve sıralı gelir.</li>
+        <li>Tek katmanlı işlerde: Yeni tuval → Özel boyut.</li>
+        <li>Uygulama o boyutu açmazsa <strong>aynı oranda</strong> daha küçüğü de olur (en az yarısı); araç
+          ölçekler. Oran şaşarsa dosya geri çevrilir.</li>
+        <li>Referansı koy: Katman → Fotoğraf ekle → <code>&lt;KİMLİK&gt;_ref.jpg</code>, "tuvale sığdır".
+          En alta al, opaklık <strong>%35</strong>, adını <code>referans</code> yap, kilitle (araç bu adı yok sayar).</li>
+      </ol>
+      <h3>Referanstaki işaretler kılavuz değil kuraldır</h3>
+      <dl class="isaretler">
+        <dt>Mavi yatay çizgi</dt><dd>Yer. Ayak, tekerlek, kapı tabanı bunun üstünde.</dd>
+        <dt>Mavi halkalar</dt><dd>Eklemler (omuz, dirsek, el, kalça, diz, bilek, boyun). Oyun kolu ve bacağı
+          buralardan büker; eklem kayarsa diz yanlış yerden kırılır.</dd>
+        <dt>Kırmızı artılar</dt><dd>Dönme ve oturma noktaları: teker göbeği, arabacı koltuğu, branda tabanı.</dd>
+        <dt>Renkli çerçeveler</dt><dd>Her parçanın sınırı. Çerçeveden taşan kısım kesilir.</dd>
+        <dt>Mavi hatlar (kasaba)</dt><dd>Tıklama alanları (pazar, kervansaray, lonca). Binaların dış hatları bu
+          çizgilerde kalsın.</dd>
+        <dt>Kırmızı dikey kenarlar (yol)</dt><dd>Sol kenar sağ kenara bağlanır; yol ekranda döşenerek sonsuz akar.</dd>
+        <dt>Paftanın kenarları (harita)</dt><dd>Komşu paftayla birleşir; kıyı, nehir ve yol kenarda kesilmeden geçsin.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="rehber">
+    <summary>3 · Çizim kuralları</summary>
+    <div>
+      <ul>
+        <li><strong>Her parça kendi katmanında</strong>, katman adı şablondakiyle aynı. Çizgiyi ve rengi ayırmak
+          istersen o adla bir <em>klasör</em> aç: araç klasörü tek katman sayar.</li>
+        <li><strong>Sıra:</strong> çizgi → düz renk (çizginin altına) → az gölge.</li>
+        <li><strong>Saydamlık:</strong> PNG ile teslim edilen ikon, eşya ve sahne parçalarının çevresi saydam
+          kalır — arka planı boyamayın. Tam ekran resimler (kasaba, olay, ekran arka planı, harita) baştan sona boyanır.</li>
+        <li><strong>Gri ile çizilecekler:</strong> beden, saç, temel takım (atlet, büstiyer, şort) ve bulutlar gri
+          tonlarla. Oyun ten ve saç rengini kendisi çarpar; renkli çizilirse her ten o rengin üstüne biner.
+          Her kalemin <strong>Renklendirme</strong> satırı bunu söyler.</li>
+        <li><strong>Lore'un iki sınırı:</strong> dinî simge yok (mezar, sunak, kilise: taş, bez, adak; haç ve hilal
+          yok), uzak şehirde kubbe ve minare yok — sur, kapı, ambar.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="rehber">
+    <summary>4 · Figürler: tek çizim, oyun büker</summary>
+    <div>
+      <p>Bir kişi oyunda 159 karede, altı bedende ve 63 giysiyle görünüyor. Kare kare çizmek imkânsız; onun yerine
+        <strong>yalnızca orta kilolu erkek ve kadın beden, yalnızca rölanti pozunda</strong>, beş derinlik
+        katmanında çizilir ve oyun kemiklerle büker. İnce ve iri beden bundan türetilir.</p>
+      <ul>
+        <li><strong>Eklemler yerinde:</strong> omuz, dirsek, kalça, diz şablonun halkalarında. Kol ve bacak
+          referanstaki gibi düz; dirseği bükük çizilmiş bir kol açılırken yamulur.</li>
+        <li><strong>Gizlenen yeri de çiz:</strong> uzak kol ve bacak gövdenin arkasında kalsa bile tam çizilir
+          (yürürken görünür). Koltuk altı ve kalçanın arkası boş bırakılmaz.</li>
+        <li><strong>Eklemde bindirme:</strong> üst kolun ucu dirseğin biraz altına, önkolun başı biraz üstüne
+          uzansın; bükülünce arada boşluk açılmasın. Aynısı diz ve omuz için.</li>
+        <li><strong>Etek, elbise, cüppe tek parça:</strong> bu yedi giysinin altıncı bir <code>etek</code> katmanı
+          var, iki bacağın da önünde. Bacakları örten bütün kısım oraya; bacak katmanlarına bölünen etek adım
+          açılınca ortadan yarılıyor (pilotta görüldü).</li>
+        <li><strong>Kumaş dökümü sade:</strong> büyük kıvrımları oyun bükerken sürükler; düz renk ve az çizgi en
+          iyi bükülür.</li>
+        <li>Giysi <strong>bedenin üstüne oturarak</strong> çizilir; şablonda beden soluk durur, giysi katmanına
+          beden çizilmez.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="rehber">
+    <summary>5 · Teslim ve dosya adı</summary>
+    <div>
+      <ul>
+        <li>Bitince <code>referans</code> ve <code>katman_haritasi</code> katmanlarını gizle (silmek de olur).</li>
+        <li><strong>Çok katmanlı:</strong> Paylaş → PSD. <strong>Tek katmanlı:</strong> Paylaş → PNG (saydam).</li>
+        <li><strong>Dosya adı = kimlik</strong>, birebir; büyük-küçük harf ve tire aynı:
+          <code>KYF-peasant_shirt-E.psd</code>, <code>ARY-item_silk.png</code>.
+          Her kalemin kartında dosya adı kopyalanabilir.</li>
+        <li>PSD dışa aktaramıyorsan ya da 25 MB'ı geçiyorsa her katmanı ayrı PNG olarak ver:
+          <code>&lt;KİMLİK&gt;__&lt;katman&gt;.png</code> — hepsi aynı tuval boyutunda.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="rehber">
+    <summary>6 · Sık karşılaşılanlar</summary>
+    <div>
+      <dl class="isaretler">
+        <dt>"tuval oranı şablonla aynı değil"</dt><dd>Tuvali listedeki boyutla yeniden aç; çizimi
+          <em>Tuval → Yeniden boyutlandır</em> ile değil <em>Taşı/Ölçekle</em> ile oturt.</dd>
+        <dt>"eksik katman"</dt><dd>Katman adını kontrol et; Türkçe karakter yok: <code>govde</code>, <code>on_kol</code>.</dd>
+        <dt>"saydam olması gereken resim tamamen opak"</dt><dd>Kâğıt/arka plan katmanını gizle ya da sil.</dd>
+        <dt>"katmanın bir kısmı çerçevesinin dışında kaldı"</dt><dd>O parçayı şablondaki renkli çerçevenin içine çek.</dd>
+        <dt>PSD 25 MB'tan büyük</dt><dd>Katmanları <code>&lt;KİMLİK&gt;__&lt;katman&gt;.png</code> olarak ayrı yükle.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <h2>Nereye yüklenecek</h2>
+  <p>Tek bir klasör var. GitHub'ın Android uygulaması dosya yükleyemiyor; tablet tarayıcısını (Chrome) kullan.</p>
+  <p class="yol" id="gelen-yolu">ulubatuhan/wayborne · dal <strong>Wayborne</strong> · art_source/el_cizimi/gelen/</p>
+  <p><button class="cip" data-kopya="art_source/el_cizimi/gelen/">Klasör yolunu kopyala</button>
+     <a class="cip" id="gelen-bag" href="https://github.com/ulubatuhan/wayborne/tree/Wayborne/art_source/el_cizimi/gelen" target="_blank" rel="noopener">GitHub'da aç</a></p>
+  <ol class="adim">
+    <li>Sağ üstten <strong>masaüstü sitesi</strong>ni işaretle, dal seçicisinden <strong>Wayborne</strong>'u seç.</li>
+    <li><code>art_source/el_cizimi/gelen/</code> klasörüne gir.</li>
+    <li><strong>Add file → Upload files</strong>, dosyaları seç (birden çok olabilir). Dosya başına en fazla 25 MB.</li>
+    <li>Commit mesajı: <code>El çizimi: &lt;KİMLİK&gt;</code> (birden çoksa <code>El çizimi: 5 ikon</code>),
+      <strong>Commit directly to the Wayborne branch</strong>.</li>
+    <li>Bana "gelen'e yükledim" yaz. Doğrulayıp oyuna işlerim, ekran görüntüsünü gösteririm; görüntüde doğru
+      görünmeyen iş "oyunda" sayılmaz.</li>
+  </ol>
+
+  <h3>Yükledikten sonra dosya nereye gidiyor</h3>
+  <dl class="isaretler">
+    <dt class="yol">gelen/</dt><dd>Senin yüklediğin aslı. Bu sayfada <span class="durum-yuklendi">YÜKLENDİ</span> diye sayılır.</dd>
+    <dt class="yol">islenmis/&lt;KİMLİK&gt;/</dt><dd>Doğrulanıp şablonun tuvaline oturtulmuş katmanlar: el çiziminin
+      kalıcı kaynağı. Oyun dosyaları istenirse hep buradan yeniden üretilir. Bu sayfada
+      <span class="durum-oyunda">OYUNDA</span>.</dd>
+    <dt class="yol">arsiv/</dt><dd>İşlendikten sonra aslın taşındığı yer.</dd>
+    <dt class="yol">data/assets/…</dt><dd>Oyunun kendi dosyası: her kalemin kartındaki <strong>Oyundaki dosya</strong>
+      satırı. Çizim oraya küçültülerek yazılır, kod değişmez.</dd>
+  </dl>
+
+  <h2>Bu sayfayı güncellemek</h2>
+  <p>Ölçüm depodan okunur: <code>gelen/</code> ve <code>islenmis/</code> klasörleri sayılır
+    (<code>tools/el_cizimi/ilerleme.py</code>). Yayınlanmış bir sayfa kendi başına özel bir depoya bağlanamaz,
+    o yüzden ölçümü ben yapıyorum: <strong>bana "güncelle" yaz</strong>, depoyu ölçer ve bu sayfayı aynı
+    adresten yenilerim — sayfa açıksa kendisi tazelenir.</p>
+  <p><button class="cip" data-kopya="güncelle">"güncelle" sözünü kopyala</button></p>
+  <p class="sessiz">Aşağıdaki işaretler ("çiziyorum", "bitti, yüklenecek") senin kendi notların; sayfada kalıcı
+    durur ve ben de okuyabilirim. Depodaki durum onları ezmez, yanlarında görünür.</p>
+
+  <div class="dipnot">
+    <p>Tek liste <code>tools/el_cizimi/envanter.py</code>'de; Excel (<code>docs/el_cizimi/el_cizimi_takip.xlsx</code>),
+      şablon paketleri ve bu sayfa oradan üretilir. Süreç yazısı: <code>docs/el_cizimi/SUREC.md</code>.
+      Şablon paketleri depoda durmaz, ayrıca gönderilir (<code>tools/el_cizimi/sablon_uret.py</code> yeniden üretir).</p>
+    <p id="dip-olcum"></p>
+  </div>
+</div>
+
+<script>
+const VERI = __VERI__;
+
+const DURUM_AD = { oyunda: "OYUNDA", yuklendi: "YÜKLENDİ", bekliyor: "BEKLİYOR" };
+const ISARETLER = [
+  { k: "ciziyorum", ad: "Çiziyorum" },
+  { k: "bitti", ad: "Bitti, yüklenecek" },
+  { k: "takildi", ad: "Takıldım" },
+];
+const TIP_OGUT = {
+  figure: ["Beş derinlik katmanı, rölanti pozu; eklemler şablonun halkalarında.",
+           "Uzak kol ve bacak gövdenin arkasında kalsa da tam çizilir.",
+           "Eklemde bindirme bırak; bükülünce boşluk açılmasın."],
+  rider:  ["Binici figürü: eyer ve üzengi hattı referanstaki artılarda.",
+           "Bacak binek hattına göre açılır; eklemler halkalarda kalsın."],
+  beast:  ["Üç katman: uzak bacaklar, kuyruk, gövde. Oyun aynı ızgarayla büker.",
+           "Uzak bacaklar gövdeden tam ayrı; gövdeye çizilmez."],
+  prop:   ["Her parça kendi renkli çerçevesinin içinde; taşan kısım kesilir.",
+           "Kırmızı artılar dönme noktası: teker göbeği, koltuk, branda tabanı — kaydırma."],
+  strip:  ["Sol kenar sağ kenara bağlanır: döşenince dikiş görünmesin.",
+           "Kenara yakın belirgin bir leke koyma; tekrarı gözükür."],
+  map:    ["2x2 karo olarak kesilir; pafta kenarında kıyı, nehir ve yol kesilmeden geçsin.",
+           "Komşu paftayla birleşeceği için kenar renkleri aynı tonda kalsın."],
+  image:  ["Tam ekran resim: baştan sona boyanır, saydam alan bırakılmaz."],
+  blank:  ["Yeni parça: oyunda bugün karşılığı yok, referans da yok. Açıklamadan çiz; ölçü serbest ama tuval boyutu sabit."],
+  blank_square: ["Yeni parça, kare tuval: ikon ailesinin diliyle çiz (mürekkep kontur, iki ton, saydam çevre)."],
+};
+
+let DURUMLAR = {};      // kimlik -> {d: işaret}
+let db = null;
+const durumState = { arama: "", oncelik: new Set(), durum: new Set(), kategori: new Set(), limit: 60 };
+
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function barHtml(p, isaretli) {
+  const t = Math.max(1, p.toplam);
+  const yuz = (n) => (100 * n / t).toFixed(2) + "%";
+  return `<div class="cubuk" role="img" aria-label="${p.oyunda} oyunda, ${p.yuklendi} yüklendi, ${p.toplam} toplam">
+    <i class="oyunda" style="width:${yuz(p.oyunda)}"></i>
+    <i class="yuklendi" style="width:${yuz(p.yuklendi)}"></i>
+    <i class="isaretli" style="width:${yuz(isaretli || 0)}"></i>
+  </div>`;
+}
+
+function isaretSayisi(secici) {
+  let n = 0;
+  for (const k of VERI.kalemler) {
+    if (k.durum === "bekliyor" && DURUMLAR[k.id] && (!secici || secici(k))) n++;
+  }
+  return n;
+}
+
+function kutulariCiz() {
+  const o = VERI.ozet;
+  const isaretli = isaretSayisi(null);
+  el("kutular").innerHTML = [
+    ["vurgu", o.oyunda, "oyunda", `${o.toplam} kalemin ${(100 * o.oyunda / o.toplam).toFixed(0)}%'i`],
+    ["", o.yuklendi, "yüklendi, işlenmeyi bekliyor", "art_source/el_cizimi/gelen/"],
+    ["", isaretli, "işaretim var", "çiziyorum / bitti / takıldım"],
+    ["", o.bekliyor, "bekliyor", `tahmin ${o.kalan_saat.toLocaleString("tr-TR")} saat`],
+    [o.ai_kalan ? "uyari" : "", o.ai_kalan, "AI kaynaklı kalan", o.ai_kalan ? "bunlar bitince beyan kalkar" : "beyan kalkabilir"],
+  ].map(([sinif, sayi, ad, alt]) => `<div class="kutu ${sinif}">
+      <div class="sayi tabular">${sayi.toLocaleString("tr-TR")}</div>
+      <div class="etiket">${esc(ad)}</div>
+      <div class="sessiz" style="font-size:.8rem">${esc(alt)}</div>
+    </div>`).join("");
+}
+
+function tablolariCiz() {
+  const sira = [["1", "1 · AI yerine geçecekler"], ["2", "2 · en çok görünenler"], ["3", "3 · kalanlar"]];
+  el("oncelik-tablo").innerHTML = sira.map(([no, ad]) => {
+    const p = VERI.oncelikler[no];
+    const im = isaretSayisi((k) => String(k.oncelik) === no);
+    return `<tr><td class="ad">${esc(ad)}</td><td class="bar">${barHtml(p, im)}</td>
+      <td class="say">${p.oyunda}/${p.toplam} · ${Math.round(p.kalan_saat)} sa</td></tr>`;
+  }).join("");
+  el("kategori-tablo").innerHTML = Object.entries(VERI.kategoriler).map(([ad, p]) => {
+    const im = isaretSayisi((k) => k.kategori === ad);
+    return `<tr><td class="ad">${esc(ad)}</td><td class="bar">${barHtml(p, im)}</td>
+      <td class="say">${p.oyunda}/${p.toplam} · ${Math.round(p.kalan_saat)} sa</td></tr>`;
+  }).join("");
+}
+
+function siradaCiz() {
+  const bitmis = new Set(VERI.kalemler.filter((k) => k.durum === "oyunda").map((k) => k.id));
+  const adaylar = VERI.kalemler.filter((k) => k.durum === "bekliyor" && !DURUMLAR[k.id]
+    && k.oncelik === 1 && (!k.once || bitmis.has(k.once)))
+    .sort((a, b) => a.saat - b.saat || a.id.localeCompare(b.id, "tr")).slice(0, 6);
+  el("sirada").innerHTML = adaylar.length
+    ? `<div class="liste">${adaylar.map(isHtml).join("")}</div>`
+    : `<p class="bos">Öncelik 1'de işaretsiz kalem yok.</p>`;
+  baglaKartlar(el("sirada"));
+}
+
+function ogutHtml(k) {
+  const satirlar = (TIP_OGUT[k.tip] || []).slice();
+  if (k.renk && k.renk.startsWith("Gri")) satirlar.push("Gri tonlarla çiz: oyun rengi kendisi çarpar.");
+  if (k.teslim.startsWith("PNG")) satirlar.push("Çevresi saydam kalsın; arka planı boyama.");
+  if (k.kod) satirlar.push("Bu parçanın oyuna bağlanması ayrıca kod işi — çizim bende bekler, ben bağlarım.");
+  if (!satirlar.length) return "";
+  return `<div class="ogut"><ul>${satirlar.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>`;
+}
+
+function isHtml(k) {
+  const im = DURUMLAR[k.id];
+  const imAd = im ? (ISARETLER.find((x) => x.k === im) || {}).ad : null;
+  const durumSinif = k.durum === "bekliyor" && im ? "durum-isaret" : "durum-" + k.durum;
+  const durumYazi = k.durum === "bekliyor" && imAd ? imAd.toUpperCase() : DURUM_AD[k.durum];
+  const uzanti = k.teslim.startsWith("PSD") ? ".psd" : ".png";
+  return `<details class="is" data-id="${esc(k.id)}">
+    <summary>
+      <span class="oncelik-im o${k.oncelik}">${k.oncelik}</span>
+      <span class="is-ad">${esc(k.ad)}<span class="kimlik">${esc(k.id)} · ${esc(k.grup)} · ${k.saat} sa</span></span>
+      <span class="durum-im ${durumSinif}">${esc(durumYazi)}</span>
+    </summary>
+    <div class="kart">
+      <dl class="satirlar">
+        <dt>Ne çizilecek</dt><dd>${esc(k.ne)}</dd>
+        <dt>Tuval</dt><dd class="veri">${esc(k.tuval)}</dd>
+        <dt>Katmanlar</dt><dd><div class="katman-sira">${k.katmanlar.map((a) =>
+          `<span class="${a === "etek" ? "etek" : ""}">${esc(a)}</span>`).join("")}</div>
+          <span class="sessiz" style="font-size:.8rem">alttan üste</span></dd>
+        <dt>Teslim</dt><dd>${esc(k.teslim)} · dosya adı <code>${esc(k.id + uzanti)}</code>
+          <button class="cip" data-kopya="${esc(k.id + uzanti)}">kopyala</button></dd>
+        <dt>Renklendirme</dt><dd>${esc(k.renk)}</dd>
+        <dt>Oyundaki dosya</dt><dd class="yol">${esc(k.hedef)}</dd>
+        <dt>Bugünkü kaynak</dt><dd>${esc(k.kaynak)}</dd>
+        <dt>Tahmin</dt><dd>${k.saat} saat · ${esc(k.kategori)} / ${esc(k.grup)}</dd>
+        ${k.once ? `<dt>Önce bitmeli</dt><dd class="veri">${esc(k.once)}</dd>` : ""}
+        ${k.not ? `<dt>Not</dt><dd>${esc(k.not)}</dd>` : ""}
+        ${k.dosyalar ? `<dt>Yüklenen</dt><dd class="veri">${k.dosyalar.map(esc).join(", ")}</dd>` : ""}
+        ${k.excel ? `<dt>Excel'de</dt><dd>${esc(k.excel)}</dd>` : ""}
+      </dl>
+      ${ogutHtml(k)}
+      <div class="isaret-sira" data-isaret="${esc(k.id)}">
+        <span class="etiket">İşaretim:</span>
+        ${ISARETLER.map((x) => `<button class="cip" data-isaret-kod="${x.k}" aria-pressed="${im === x.k}">${x.ad}</button>`).join("")}
+        <button class="cip" data-isaret-kod="">temizle</button>
+      </div>
+    </div>
+  </details>`;
+}
+
+function listeyiCiz() {
+  const a = durumState.arama.toLocaleLowerCase("tr");
+  const secili = VERI.kalemler.filter((k) => {
+    if (durumState.oncelik.size && !durumState.oncelik.has(String(k.oncelik))) return false;
+    if (durumState.kategori.size && !durumState.kategori.has(k.kategori)) return false;
+    if (durumState.durum.size) {
+      const d = durumState.durum.has("isaretli") && DURUMLAR[k.id] ? "isaretli" : k.durum;
+      if (!durumState.durum.has(d)) return false;
+    }
+    if (a && !(k.id + " " + k.ad + " " + k.hedef + " " + k.grup + " " + k.ne).toLocaleLowerCase("tr").includes(a)) return false;
+    return true;
+  });
+  const gosterilen = secili.slice(0, durumState.limit);
+  el("sonuc-sayisi").textContent = `${secili.length} kalem` + (secili.length > gosterilen.length ? ` · ${gosterilen.length} gösteriliyor` : "");
+  el("liste").innerHTML = gosterilen.length ? gosterilen.map(isHtml).join("") : `<p class="bos">Bu süzgeçle kalem yok.</p>`;
+  el("daha-kutu").hidden = secili.length <= gosterilen.length;
+  baglaKartlar(el("liste"));
+}
+
+function suzgecleriKur() {
+  const yap = (kap, secenekler, kume) => {
+    kap.innerHTML = secenekler.map(([deger, ad]) =>
+      `<button class="cip" data-deger="${esc(deger)}" aria-pressed="false">${esc(ad)}</button>`).join("");
+    kap.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-deger]");
+      if (!b) return;
+      const d = b.dataset.deger;
+      if (kume.has(d)) { kume.delete(d); b.setAttribute("aria-pressed", "false"); }
+      else { kume.add(d); b.setAttribute("aria-pressed", "true"); }
+      durumState.limit = 60;
+      listeyiCiz();
+    });
+  };
+  yap(el("suzgec-oncelik"), [["1", "öncelik 1"], ["2", "öncelik 2"], ["3", "öncelik 3"]], durumState.oncelik);
+  yap(el("suzgec-durum"), [["bekliyor", "bekliyor"], ["isaretli", "işaretim var"], ["yuklendi", "yüklendi"], ["oyunda", "oyunda"]], durumState.durum);
+  yap(el("suzgec-kategori"), Object.keys(VERI.kategoriler).map((a) => [a, a]), durumState.kategori);
+  el("ara").addEventListener("input", (e) => { durumState.arama = e.target.value.trim(); durumState.limit = 60; listeyiCiz(); });
+  el("daha").addEventListener("click", () => { durumState.limit += 120; listeyiCiz(); });
+}
+
+function baglaKartlar(kap) {
+  kap.querySelectorAll("[data-isaret]").forEach((sira) => {
+    sira.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-isaret-kod]");
+      if (!b) return;
+      isaretle(sira.dataset.isaret, b.dataset.isaretKod);
+    });
+  });
+}
+
+async function isaretle(kimlik, kod) {
+  if (kod) DURUMLAR[kimlik] = kod; else delete DURUMLAR[kimlik];
+  yenile();
+  if (!db) return;
+  try {
+    if (kod) await db.doc("durum/" + kimlik).set({ d: kod, t: Date.now() });
+    else await db.doc("durum/" + kimlik).delete();
+  } catch (hata) {
+    console.warn("işaret kaydedilemedi", hata);
+  }
+}
+
+function yenile() {
+  kutulariCiz();
+  tablolariCiz();
+  siradaCiz();
+  listeyiCiz();
+}
+
+function kopyalamayiKur() {
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-kopya]");
+    if (!b) return;
+    const metin = b.dataset.kopya;
+    try {
+      await navigator.clipboard.writeText(metin);
+      const eski = b.textContent;
+      b.textContent = "kopyalandı";
+      setTimeout(() => { b.textContent = eski; }, 1200);
+    } catch (hata) {
+      const s = document.createElement("span");
+      s.className = "veri";
+      s.textContent = " " + metin;
+      b.after(s);
+      const r = document.createRange();
+      r.selectNodeContents(s);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(r);
+    }
+  });
+}
+
+function olcumuYaz() {
+  const o = VERI.olcum;
+  el("olcum-satiri").textContent = `ölçüm ${o.tarih} · ${o.dal || "Wayborne"} @ ${o.commit || "?"}`;
+  el("dip-olcum").textContent = `Ölçüm: ${o.tarih}, dal ${o.dal || "Wayborne"}, commit ${o.commit || "?"} · ${o.nasil}`
+    + (o.bilinmeyen_dosyalar && o.bilinmeyen_dosyalar.length
+      ? ` · gelen/ içinde envanterde olmayan dosya: ${o.bilinmeyen_dosyalar.join(", ")}` : "");
+}
+
+olcumuYaz();
+suzgecleriKur();
+kopyalamayiKur();
+yenile();
+
+(async () => {
+  const d = await window.claude?.use?.("db");
+  if (!d) return;
+  db = d;
+  try {
+    db.collection("durum").onSnapshot((anlik) => {
+      const yeni = {};
+      (anlik.docs || []).forEach((belge) => {
+        const v = belge.data ? belge.data() : belge;
+        if (v && v.d) yeni[belge.id] = v.d;
+      });
+      DURUMLAR = yeni;
+      yenile();
+    });
+  } catch (hata) {
+    console.warn("işaretler okunamadı", hata);
+  }
+})();
+</script>

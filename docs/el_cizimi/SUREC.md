@@ -11,6 +11,7 @@ kurtulması ve "içimize sinen" tek bir el.
 | Takip dosyası | `docs/el_cizimi/el_cizimi_takip.xlsx` | 676 görselin listesi, öncelik, tahmini süre, durum |
 | Şablon paketleri | `01_figur.zip` ... `10_efekt.zip` (depoda değil, sana ayrıca gönderilir) | her görselin hizalı referansı, katman haritası, adlı katmanlı PSD |
 | Alım aracı | `tools/el_cizimi/al.py` | yüklediğin dosyayı doğrular ve oyuna işler |
+| Takip sayfası | https://claude.ai/artifact/2n5snQZu3vRhhQSv6K2cPk | tablette açılan atölye sayfası: liste, nasıl çizilir, nereye yüklenir, depodan ölçülen ilerleme |
 
 Liste tek bir kaynaktan üretilir (`tools/el_cizimi/envanter.py`); oyuna yeni bir görsel girerse oradan Excel'e ve
 şablonlara geçer. Eski çalışmalar, kullanılmayan dosyalar ve ham kaynak paketleri listede yok.
@@ -59,7 +60,7 @@ Tuval boyutu Excel'deki **Tuval** sütununda ve şablonun sol üstünde yazar.
      noktalardan büker; eklem kayarsa diz yanlış yerden kırılır.
    - **Kırmızı artılar (eşya):** dönme ve oturma noktaları (teker göbeği, arabacı koltuğu, branda tabanı).
    - **Renkli çerçeveler (eşya):** her parçanın sınırı. Parça çerçevesinden taşarsa taşan kısım kesilir.
-   - **Mavi hatlar (kasaba):** tıklama alanları (pazar, han, lonca...). Binaların dış hatları bu çizgilerde kalsın.
+   - **Mavi hatlar (kasaba):** tıklama alanları (pazar, kervansaray, lonca...). Binaların dış hatları bu çizgilerde kalsın.
    - **Kırmızı dikey kenarlar (yol):** sol kenar sağ kenara bağlanır; yol ekranda döşenerek sonsuz akar.
    - **Paftanın kenarları (harita):** komşu paftayla birleşir; kıyı, nehir ve yol kenarda kesilmeden geçsin.
 
@@ -161,6 +162,14 @@ Pilot sonucu ve bunun neden işe yaradığı: `docs/el_cizimi/pilot/` (bkz. `PIL
 - Takip dosyası ve şablonlar yeniden üretilebilir:
   `python3 -I tools/el_cizimi/sablon_uret.py <klasör>`, `python3 -I tools/el_cizimi/takip_excel.py`
   (senin girdilerin korunur).
+- **Takip sayfası** (https://claude.ai/artifact/2n5snQZu3vRhhQSv6K2cPk) ölçümü depodan okur:
+  `gelen/` ve `islenmis/` klasörleri sayılır. "Güncelle" dendiğinde iki komut yeter ve sayfa aynı adrese
+  yeniden yayınlanır:
+
+      python3 -I tools/el_cizimi/ilerleme.py --yaz --sayfa <çıktı.html>
+
+  Sayfadaki "çiziyorum / bitti / takıldım" işaretleri sayfanın kendi veritabanında (`durum` koleksiyonu)
+  durur; depodaki durumu ezmez, yanında görünür.
 
 ## 7. Sık karşılaşılanlar
 

@@ -554,3 +554,31 @@ adları, Vadi nehrinin "Vael Suyu" adı, sunakların dörde inmesi, senaryo sist
 `tools/lore_soru_sayfasi.py` ve `lore_defter3_banka.py` (defter III kapandı, çıktısı tarihsel kopya),
 kod yorumlarındaki LORE.md başvuruları (`enemy_catalog`, `event_catalog`, `outfit_catalog`,
 `test_combat_core`), görev Y-E06 (durum: "lore kapandı, hikâye kullanıcıda").
+
+## El çizimi takip sayfası (2026-11-08)
+
+Kullanıcı: "elde çizmem gereken tüm kaynakların yerini belirt, nasıl çizmem gerektiğini açıkla, GitHub'a nereye
+yükleyeceğimi anlatan ve ne kadar kaldığını takip eden bir artifact hazırla (güncelle dediğimde GitHub'a bağlanıp
+ölçüm yapsın)."
+
+**Sayfa:** https://claude.ai/artifact/2n5snQZu3vRhhQSv6K2cPk (özel; `db` + `user` yetenekleri, ikon brush).
+İçinde: 714 kalemin tamamı (süzgeç + arama), her kalemin kartı (ne çizilecek, tuval, katmanlar alttan üste,
+teslim biçimi ve kopyalanabilir dosya adı, renklendirme kuralı, oyundaki hedef dosya, bugünkü kaynak, tahmin,
+bağımlılık, tipine göre öğütler), altı başlıkta nasıl çizilir rehberi, yükleme adımları ve klasör haritası,
+öncelik/kategori ilerleme çubukları, "sırada ne var" (öncelik 1'den en kısa altı iş).
+
+**Ölçüm depodan:** `art_source/el_cizimi/islenmis/<KİMLİK>/` → oyunda, `gelen/<KİMLİK>.*` → yüklendi, yoksa
+bekliyor. Araç: `tools/el_cizimi/ilerleme.py` (`--yaz` → `docs/el_cizimi/ilerleme.json`, `--sayfa <yol>` →
+şablondan sayfayı üretir). Şablon: `docs/el_cizimi/takip_sayfasi_sablon.html` (`__VERI__` yer tutucusu).
+
+**"Güncelle" iş akışı (kullanıcı bu sözü yazınca):**
+
+    git pull && python3 -I tools/el_cizimi/ilerleme.py --yaz --sayfa <scratchpad>/el_cizimi_atolyesi.html
+    Artifact publish → aynı file_path (URL korunur; açık sayfa kendi tazelenir)
+
+Yayınlanmış sayfa özel depoya kendisi bağlanamaz (artifact CSP'si dış fetch'i kesiyor); ölçümü bu oturum yapar.
+Sayfadaki "çiziyorum / bitti / takıldım" işaretleri `durum` koleksiyonunda; ArtifactData ile okunabilir
+(deneme belgesi yazılıp silindi, yazma ve okuma çalışıyor).
+
+**Bugünkü ölçüm:** 714 kalem, 2053 saat tahmin, 0 oyunda, 0 yüklendi; AI kaynaklı 183 (öncelik 1).
+Excel 714 satıra yeniden üretildi (691'di). SUREC.md'ye sayfa ve güncelleme komutu yazıldı.
