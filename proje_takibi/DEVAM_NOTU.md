@@ -582,3 +582,23 @@ Sayfadaki "çiziyorum / bitti / takıldım" işaretleri `durum` koleksiyonunda; 
 
 **Bugünkü ölçüm:** 714 kalem, 2053 saat tahmin, 0 oyunda, 0 yüklendi; AI kaynaklı 183 (öncelik 1).
 Excel 714 satıra yeniden üretildi (691'di). SUREC.md'ye sayfa ve güncelleme komutu yazıldı.
+
+## Ahlak · Ruh · İz mimarisi (2026-11-10)
+
+Fable promptu (`docs/fable_sistem_promptu.md`, üretici `tools/fable_paket.py`) koşturuldu; cevabı
+**`docs/design_notes/ahlak_ruh_iz_mimarisi.md`** (§A–§I, kod yok, mimari). Henüz hiçbir şey uygulanmadı;
+kullanıcı onayı bekliyor. Uygulama sırası belgenin §H'sinde (12 adım, ilk adım `BEDEL` etkisi ve bedel
+taşıyıcısı seçici).
+
+Teşhisin en ağır dört satırı (ölçüm: `simulate_career`, `simulate_expert_review`): kadro 10. seferde 1'e iniyor
+ve kalıyor; ahlaki kartların çoğu `party_size ≥ 2/3` koşulunun arkasında kilitli; ustalık eğrisi ters (acemi
+40 sefer, açgözlü 33,8); "iyi bir şey arası 40,4 gün", boş tur %43. Depoda doğrulanan okunmayan durum:
+`recent_decisions` (tek okuyucu ölüm ekranı), `bonds`/`grievance`/`rapport`/`backstory` (olay motorunda 0
+dosya), `route_memory` ve `road_memorials` (yalnız görsel), `crew_lost_to_hunger` (yalnız el tutma fiyatı).
+Not: `simulate_journeys`'in "hiç ateşlenmedi" listesi o aracın körlüğü (dünya durumu yok), kartların ölü
+olduğunun kanıtı değil; ayrıca aynı araçta "Sükûnet" satırı Karizma 5/10/15 için hep %53: bağlı değil.
+
+Tasarımın özü: `BEDEL` (bedeli adı olan birine yükler, kart açılmadan adı gösterir), iki yavaş eksen
+Kabuk/Çatlak ve hâl makinesi (Katı yararlı ama yalnızlaştırır; Çatlak yalnız dönen bir iyilikle iyileşir),
+iz defteri (taşıyıcı, şiddet, sönme, yol boyunca yayılma, on dönüş biçimi, kuşak izleri ve lakap), yankı
+varyantı (tekrar eden kart ilk cevabı bilir), söz (vadeli iz). 50 satırlık kelebek matrisi §E'de.
