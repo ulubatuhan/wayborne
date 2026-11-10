@@ -222,7 +222,7 @@ func is_shocked(location_id: String, item_id: String, day: int) -> bool:
 ## şoku (etiketi WorldEvents'in) ve geri kalan olay şokları.
 func get_shock_parts(location_id: String, item_id: String, day: int) -> Dictionary:
 	var world_labels: Array = WorldEvents.KIND_LABEL_KEYS.values()
-	var parts := {"event": 1.0, "world": 1.0, "world_label": ""}
+	var parts := {"event": 1.0, "world": 1.0, "world_label": "", "event_label": ""}
 	for shock in _shocks:
 		if not _shock_matches(shock, location_id, item_id, day):
 			continue
@@ -232,6 +232,10 @@ func get_shock_parts(location_id: String, item_id: String, day: int) -> Dictiona
 			parts["world_label"] = label
 		else:
 			parts["event"] = float(parts["event"]) * float(shock["multiplier"])
+			# Şokun sebebi varsa taşınır: iz dönüşü tezgâhta adıyla okunur
+			# (bkz. PriceLayerText, dünya olayının `world_label`'ı gibi).
+			if not label.is_empty():
+				parts["event_label"] = label
 	return parts
 
 ## Günlük işleyiş: baskı tabana doğru çekilir, süresi dolan şoklar düşer.

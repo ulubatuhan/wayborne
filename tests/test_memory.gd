@@ -175,6 +175,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"cold_notes": "yalnızca son gecenin soğuk notları; günlük yazıldıktan sonra anlamı yok",
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
 	"last_bearer_name": "yalnızca o kartın {bedel} işaretini doldurur; kalıcı olan kişinin kendi last_price_day'i",
+	"_trace_source": "doğan izin kaynağını kartın kendisinden alan geçici kanca; kalıcı olan izin kendi `kaynak` alanı",
 }
 
 ## Kayıtta farklı bir anahtarla duran alanlar: alan -> anahtar.
@@ -198,6 +199,8 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"journey_shortcut": "journey",
 	"journey_combat_count": "journey",
 	"journey_hungry_days": "journey",
+	"traces": "izler",
+	"waiting_face": "bekleyen_yuz",
 }
 
 func _test_every_persistent_field_is_saved(t) -> void:

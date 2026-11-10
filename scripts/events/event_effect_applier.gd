@@ -220,6 +220,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			result.lines.append(_t("EFF_TRADE_STAIN"))
 		EventEffect.Type.BEDEL:
 			_apply_bedel(effect, session, result)
+		EventEffect.Type.IZ_BIRAK:
+			_apply_trace(effect, session, result)
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:
@@ -261,6 +263,52 @@ static func _apply_bedel(effect: EventEffect, session: GameSession, result: Resu
 					% [bearer.character_name, absi(moved)])
 		_:
 			push_warning("BEDEL: bilinmeyen alt etki %s" % alt)
+
+## Bir karar dünyada iz bırakır (İz alt sistemi, §D-İ1).
+##
+## Taşıyıcının kimliği etkide yazmaz, yerinden okunur: kart "burada bir kin
+## bıraktın" der, hangi şehir olduğunu kervanın nerede olduğu söyler. Böylece
+## aynı kart her yerde çalışır ve katalogda yer kimliği gömülü kalmaz.
+static func _apply_trace(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var parts := effect.text_value.split("|")
+	if parts.size() < 4:
+		push_warning("IZ_BIRAK: text_value eksik (%s)" % effect.text_value)
+		return
+	var tur := parts[0].strip_edges()
+	var tasiyici_tip := parts[1].strip_edges()
+	var gecikme := parts[2].strip_edges()
+	var donus := parts[3].strip_edges()
+	var donus_karti := parts[4].strip_edges() if parts.size() > 4 else ""
+	if not Trace.TYPES.has(tur):
+		push_warning("IZ_BIRAK: bilinmeyen tur (%s)" % tur)
+		return
+	var siddet := absf(float(effect.amount)) / 100.0
+	var yon := -1 if effect.amount < 0 else 1
+	var trace: Trace = session.leave_trace(
+		tur, tasiyici_tip, _trace_bearer_id(tasiyici_tip, session), yon,
+		gecikme, donus, siddet if siddet > 0.0 else -1.0, donus_karti
+	)
+	if trace == null:
+		return
+	# Açık hesabın kendisi oyuncuya sayı olarak gösterilmez (§F): yalnız
+	# "bu bir yere yazıldı" denir; karşılığı geldiğinde adıyla anılır.
+	result.lines.append(_t("EFF_TRACE_LEFT" if yon > 0 else "EFF_TRACE_LEFT_BAD"))
+
+static func _trace_bearer_id(tasiyici_tip: String, session: GameSession) -> String:
+	match tasiyici_tip:
+		Trace.BEARER_ROAD:
+			return session.current_route_id()
+		Trace.BEARER_REGION:
+			var location := WorldMapData.get_location_by_id(session.journey_destination_id
+				if session.is_journey_active() else session.current_location_id)
+			return location.region if location != null else ""
+		Trace.BEARER_COMPANION:
+			return session.last_bearer_name
+		Trace.BEARER_LINE:
+			return session.caravan_name
+		_:
+			return session.journey_destination_id if session.is_journey_active() \
+				else session.current_location_id
 
 ## İkinci kademe: bedel bir tayfa elinin sırtına biner.
 ##

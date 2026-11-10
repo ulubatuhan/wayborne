@@ -683,14 +683,80 @@ var recent_decisions: Array = []
 ## kalıcı olan şey kişinin kendi `last_price_day`'i ve izidir.
 var last_bearer_name: String = ""
 
+## İzlerin defteri (İz alt sistemi, tasarım notu §C.1/§D.3): bir kararın
+## dünyada bıraktığı, vadesi ve sönmesi olan kayıt. `recent_decisions` ne
+## seçildiğini üç karta kadar tutuyordu ve tek okuyucusu ölüm ekranıydı
+## (teşhis A7); iz defteri aynı kancadan beslenir ama unutmaz.
+var traces: TraceLedger = TraceLedger.new()
+
+## İz doğarken yazılacak kaynak: "event_id|choice_key". `note_decision`
+## dolduruyor, `IZ_BIRAK` etkisi okuyor - böylece etkinin hangi karttan
+## geldiğini applier'a ayrıca taşımak gerekmiyor (EventResolver kararı
+## etkilerden *önce* not ediyor).
+var _trace_source: String = ""
+
 func note_decision(event_id: String, choice_key: String) -> void:
 	if event_id.is_empty():
 		return
+	_trace_source = "%s|%s" % [event_id, choice_key]
 	recent_decisions.append({
 		"event": event_id, "choice": choice_key, "day": total_days_elapsed,
 	})
 	while recent_decisions.size() > RECENT_DECISION_COUNT:
 		recent_decisions.pop_front()
+
+## Kart dışında kalan eylemlerin izi (dilencilik, dolandırıcılık, sofra,
+## kovma, vurgun, varis): "eylem:<ad>".
+func note_trace_action(action: String) -> void:
+	_trace_source = "eylem:%s" % action
+
+func current_trace_source() -> String:
+	return _trace_source if not _trace_source.is_empty() else "eylem:bilinmeyen"
+
+## İzin doğduğu yer: şehirdeysek şehir, yoldaysak "yol:<from>|<to>".
+func trace_birth_place() -> String:
+	if is_journey_active():
+		return "yol:%s|%s" % [journey_origin_id, journey_destination_id]
+	return current_location_id
+
+## Bugün bulunulan yolun kimliği (yol taşıyıcılı izler için); şehirdeysek boş.
+func current_route_id() -> String:
+	if not is_journey_active():
+		return ""
+	return "%s|%s" % [journey_origin_id, journey_destination_id]
+
+## Tek giriş noktası (§D-İ1): iz başka hiçbir yerde doğmaz.
+## `also_ledger` false: o an deftere zaten kendi satırını yazıyor (ayrılık,
+## ticaret, dolandırıcılık). Aynı anı iki kez yazmak defteri fişe çevirir -
+## açık hesaplar sayfası zaten iz defterinin kendisini okuyor.
+func leave_trace(
+	tur: String, tasiyici_tip: String, tasiyici_id: String, yon: int,
+	gecikme: String, donus: String, siddet: float = -1.0, donus_karti: String = "",
+	also_ledger: bool = true
+) -> Trace:
+	var kaynak := current_trace_source()
+	var trace: Trace = traces.leave(
+		tur, tasiyici_tip, tasiyici_id, yon, kaynak, total_days_elapsed,
+		trace_birth_place(), gecikme, donus,
+		"%s|%d|%s" % [caravan_name, total_days_elapsed, kaynak],
+		siddet, donus_karti, last_bearer_name
+	)
+	if also_ledger and trace != null and traces.ledger_worthy().has(trace):
+		ledger.record(
+			CaravanLedger.KIND_TRACE, _trace_ledger_name(trace), total_days_elapsed,
+			lineage_generation, "", _trace_cause_key(trace), _ledger_location_id()
+		)
+	return trace
+
+func _trace_ledger_name(trace: Trace) -> String:
+	if trace.tasiyici_tip == Trace.BEARER_CITY or trace.tasiyici_tip == Trace.BEARER_PERSON:
+		var location := WorldMapData.get_location_by_id(trace.tasiyici_id)
+		if location != null:
+			return location.location_name
+	return trace.tasiyici_id
+
+func _trace_cause_key(trace: Trace) -> String:
+	return String(Trace.LEDGER_CAUSE_KEYS.get(trace.tur, "LEDGER_TRACE_RUMOR"))
 
 ## Bir yer ilk kez görülünce deftere yazılır (Defter unutmaz).
 func note_road_place(place_id: String, place_name: String) -> void:
@@ -1474,6 +1540,13 @@ func swindle_in_tavern(role: String, person_id: String) -> Dictionary:
 			CaravanLedger.KIND_TRADE, caravan_name, total_days_elapsed, lineage_generation,
 			"", "LEDGER_CAUSE_SWINDLE_CAUGHT", _ledger_location_id()
 		)
+		# Yakalanan dolandırıcılığın yüzü vardır (§E satır 23): dolandırılan
+		# kişi bir sonraki gelişinde kapıda bekler.
+		note_trace_action("dolandiricilik")
+		leave_trace(
+			Trace.TYPE_GRUDGE, Trace.BEARER_PERSON, current_location_id, -1,
+			Trace.DELAY_SHORT, Trace.RETURN_FACE, -1.0, "", false
+		)
 		return {"ok": true, "won": false, "gold": 0, "item_id": item.item_id, "caught": true}
 	# Kandı - ama kesesinde ne varsa o kadar öder. Para yoksa kazanç da yok:
 	# iyi bir yalan boş bir cebi doldurmaz.
@@ -1722,6 +1795,16 @@ func dismiss(character: CharacterData, cause_key: String = DISMISSED_CAUSE_KEY) 
 		total_days_elapsed, lineage_generation, character.character_id,
 		cause_key, _ledger_location_id()
 	)
+	# Kovulan adam bu dünyada kaybolmaz (§E satır 41): bir sonraki şehirde
+	# başka bir kervanın yanında karşına çıkar. Yalnız **kovma** iz bırakır;
+	# geride bırakılmanın ve ölümün kendi yolları var.
+	if cause_key == DISMISSED_CAUSE_KEY:
+		note_trace_action("kovma")
+		last_bearer_name = character.character_name
+		leave_trace(
+			Trace.TYPE_GRUDGE, Trace.BEARER_PERSON, _trace_here_id(), -1,
+			Trace.DELAY_SHORT, Trace.RETURN_FACE, -1.0, "", false
+		)
 	return true
 
 ## Defter satırının yeri: yoldaysak gidilen şehrin yolu, değilsek bulunulan
@@ -3184,6 +3267,8 @@ func advance_day() -> Array[String]:
 	change_faction_standing(Standing.GUILD, -overdue_hit)
 	# Arz-talep baskısı tabana çekilir, süresi dolan fiyat şokları düşer.
 	market.advance_day(total_days_elapsed)
+	# İzler erir: kimsenin hatırlamaması da bir sonuçtur (§D-İ3).
+	traces.advance_day(total_days_elapsed)
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
 	route_conditions.advance_day(total_days_elapsed)
@@ -3597,6 +3682,15 @@ func _remember_trade(item_id: String, quantity: int, profiteering: bool) -> void
 		return
 	change_reputation(TRADE_MERCY_STANDING if kindly else TRADE_PROFITEER_STANDING)
 	people.remember_trade(where, kindly)
+	# Pazarın hafızası (§E satır 2 ve 47): kriz fiyatından satan kervanı
+	# tezgâh bir daha ucuza tanımaz, taban fiyattan satanı tanır. Vurgunun
+	# tek sonucu tek bir karttı (teşhis A11); artık vadesi olan bir hesap.
+	note_trace_action("vurgun" if not kindly else "merhamet")
+	leave_trace(
+		Trace.TYPE_GRATITUDE if kindly else Trace.TYPE_GRUDGE,
+		Trace.BEARER_CITY, where, 1 if kindly else -1,
+		Trace.DELAY_SHORT, Trace.RETURN_PRICE, -1.0, "", false
+	)
 	ledger.record(
 		CaravanLedger.KIND_TRADE,
 		caravan_name,
@@ -5451,8 +5545,108 @@ func finish_journey() -> Dictionary:
 	payout["wagons_earned"] = grant_earned_wagons()
 
 	payout["hospitality"] = _apply_hospitality()
+	payout["trace_return"] = resolve_trace_return()
 
 	return payout
+
+## --- İzin geri dönüşü (§D-İ3) ---
+##
+## Şehir, yolun bedelinin tahsil edildiği yer olmalı; bugün yalnızca dükkân
+## (teşhis A5: ziyaretlerin %43'ünde yapacak iş yok). Varışta olgunlaşmış
+## bir iz varsa karşılığını burada verir.
+##
+## **Günde en çok bir dönüş** (§D.4 boğulma önleyici): iz sistemi sahneyi
+## doldurmak için değil, bir kararın geri gelmesi için var. Henüz yazılmamış
+## dönüş biçimleri (kart, kapı, teklif, aday, düşman - §H adım 8-9) olgun
+## kalsa da işlenmez: iz açık kalır, sırası gelince döner. Dönüşü olmayan
+## bir izi "dönmüş" saymak hesabı sessizce silmek olurdu.
+const TRACE_RETURN_FORMS: Array[String] = [Trace.RETURN_PRICE, Trace.RETURN_FACE]
+## Fiyat dönüşünün gücü: taban + şiddet payı, 20 gün (§D-İ3).
+const TRACE_PRICE_BASE: float = 0.04
+const TRACE_PRICE_PER_SEVERITY: float = 0.08
+const TRACE_PRICE_DAYS: int = 20
+
+func resolve_trace_return() -> Dictionary:
+	var region := ""
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	if location != null:
+		region = location.region
+	for trace in traces.ripe_here(total_days_elapsed, current_location_id, region, current_route_id()):
+		if not TRACE_RETURN_FORMS.has(trace.donus):
+			continue
+		var note := _apply_trace_return(trace)
+		if note.is_empty():
+			continue
+		traces.mark_returned(trace, total_days_elapsed)
+		return note
+	return {}
+
+func _apply_trace_return(trace: Trace) -> Dictionary:
+	match trace.donus:
+		Trace.RETURN_PRICE:
+			return _trace_return_price(trace)
+		Trace.RETURN_FACE:
+			return _trace_return_face(trace)
+	return {}
+
+## Fiyat dönüşü: şehrin tezgâhı kervanı tanır. İyi iz ucuzlatır, kin
+## pahalılaştırır - bütün mallarda, yirmi gün (MarketPricing LAYER_EVENT).
+func _trace_return_price(trace: Trace) -> Dictionary:
+	if trace.tasiyici_id != current_location_id and not trace.knows(current_location_id):
+		return {}
+	var share: float = TRACE_PRICE_BASE + TRACE_PRICE_PER_SEVERITY * trace.siddet
+	var multiplier: float = 1.0 - share if trace.yon > 0 else 1.0 + share
+	market.add_shock(
+		current_location_id, "", multiplier, total_days_elapsed + TRACE_PRICE_DAYS,
+		String(Trace.LEDGER_CAUSE_KEYS.get(trace.tur, "LEDGER_TRACE_RUMOR"))
+	)
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	var place_name := location.location_name if location != null else current_location_id
+	write_journal(TranslationServer.translate(
+		"UI_JOURNAL_TRACE_PRICE" if trace.yon > 0 else "UI_JOURNAL_TRACE_PRICE_BAD") % place_name)
+	return {"iz": trace.id, "bicim": Trace.RETURN_PRICE, "ad": place_name}
+
+## Yüz dönüşü: şehrin adı olan kişilerinden biri hesabı hatırlar. Gönül
+## (favor/grudge) tavernanın fiyatını ve tefecinin ücretini zaten oynatıyor;
+## iz oraya yazılır, yeni bir sayaç açılmaz.
+func _trace_return_face(trace: Trace) -> Dictionary:
+	people.ensure_city(current_location_id, total_days_elapsed)
+	var candidates := people.city_people(current_location_id)
+	var alive: Array[Dictionary] = []
+	for person in candidates:
+		if bool(person.get("alive", false)):
+			alive.append(person)
+	if alive.is_empty():
+		return {}
+	# Kim beklediği zara bırakılmaz: iz hep aynı kapıyı çalar.
+	var who: Dictionary = alive[absi(hash(trace.id)) % alive.size()]
+	people.remember_deed(current_location_id, trace.yon > 0)
+	waiting_face = {
+		"kisi": String(who.get("id", "")), "iz": trace.id, "gun": total_days_elapsed,
+	}
+	write_journal(TranslationServer.translate(
+		"UI_JOURNAL_TRACE_FACE" if trace.yon > 0 else "UI_JOURNAL_TRACE_FACE_BAD")
+		% String(who.get("name", "")))
+	return {"iz": trace.id, "bicim": Trace.RETURN_FACE, "ad": String(who.get("name", ""))}
+
+## Kapıda bekleyen yüz (son dönen `yuz` izi). Şehir özeti ve defter sayfası
+## bunu okuyor (§H adım 4); boşsa kimse beklemiyor.
+var waiting_face: Dictionary = {}
+
+## İzlerin "burası"sı: şehirdeysek şehir, yoldaysak gidilen şehir - yolda
+## açılan hesap varılacak kapıda okunur.
+func _trace_here_id() -> String:
+	return journey_destination_id if is_journey_active() else current_location_id
+
+## Bu yolda defterde kaç ölü var (§C.4 `iz_yolda_olu`). Yolun hafızası
+## bugüne kadar yalnız çizime gidiyordu (teşhis A9): aynı yolda üç kişi
+## gömmüş kervan o yola dördüncü kez girerken hiçbir şey olmuyordu.
+func _road_deaths_here() -> int:
+	if not is_journey_active():
+		return 0
+	var route := RouteConditions.route_key(journey_origin_id, journey_destination_id)
+	var memory: Dictionary = route_memory.get(route, {})
+	return int(memory.get("deaths", 0))
 
 ## Yolda kervandan ayrılan (teslim edilemeyen) her kontrat için itibar
 ## cezası uygular. Kaç kontratın kaybedildiğini döner.
@@ -6132,7 +6326,7 @@ func move_cargo_between_wagons(from_index: int, item_id: String, to_index: int, 
 ## hâlâ okunuyor (bkz. load_from_dict) - `_migrate_save`de değil, orada
 ## çünkü dönüşüm vagonların senkron edilmiş olmasını gerektiriyor ve o
 ## sıra load_from_dict'in kendi akışında.
-const SAVE_VERSION: int = 4
+const SAVE_VERSION: int = 5
 
 func to_save_dict() -> Dictionary:
 	var wagon_inventory_data: Array = []
@@ -6151,6 +6345,8 @@ func to_save_dict() -> Dictionary:
 		"reputation": reputation,
 		"seen_places": seen_places.duplicate(),
 		"people": people.to_dict(),
+		"izler": traces.to_dict(),
+		"bekleyen_yuz": waiting_face.duplicate(),
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
@@ -6312,6 +6508,11 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 	# sefer, yeni dünyada o iki yer komşu değilse çıkış yerinde biter.
 	if version < 4:
 		data = _migrate_legacy_world(data)
+	# v4 -> v5: iz defteri (İz alt sistemi) eklendi. Eski kayıtta `izler`
+	# yoksa boş defterle açılır - geriye dönük iz uydurulmaz, çünkü bir izin
+	# doğum kaydı olmadan dönüşü rastgelelikten ayırt edilemez. Var olan
+	# bayrak zincirleri (stowaway_helped, wanderer_scorned...) dokunulmadan
+	# çalışmaya devam eder.
 	return data
 
 static func _migrate_legacy_world(data: Dictionary) -> Dictionary:
@@ -6402,6 +6603,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	current_location_id = String(data.get("current_location_id", WorldMapData.START_LOCATION_ID))
 	# Bölgesel itibar (T16-07); eski kayıtta tek sayı vardı: her bölge onunla açılır.
 	people.from_dict(data.get("people", {}) as Dictionary)
+	traces.from_dict(data.get("izler", {}) as Dictionary)
+	waiting_face = (data.get("bekleyen_yuz", {}) as Dictionary).duplicate()
 	seen_places = (data.get("seen_places", {}) as Dictionary).duplicate()
 	if data.has("standing"):
 		standing.from_dict(data["standing"] as Dictionary)
@@ -6667,6 +6870,13 @@ func build_event_context() -> Dictionary:
 		# (evt_faction_split `>= 6` istiyordu: hiç sağlanamayan bir koşul).
 		"caravan_people": party_size + get_crew_hands(),
 		"worn_shoulder_ratio": _worn_shoulder_ratio(),
+		# Açık hesaplar (İz alt sistemi, §C.4): bulunulan yerde bilinen en
+		# güçlü minnetin/kinin şiddeti ve kaç hesabın açık olduğu. Kart bunu
+		# okuyabilir: tanındığın şehirde kapı başka açılır.
+		"iz_minnet_burada": traces.strength_here(Trace.TYPE_GRATITUDE, _trace_here_id()),
+		"iz_kin_burada": traces.strength_here(Trace.TYPE_GRUDGE, _trace_here_id()),
+		"iz_acik": traces.open_count(),
+		"iz_yolda_olu": _road_deaths_here(),
 		"flags": _flags,
 		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü

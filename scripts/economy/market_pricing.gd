@@ -140,7 +140,7 @@ static func price_layers(
 	var inflation := 1.0
 	var season := 1.0
 	var pressure := 1.0
-	var shocks := {"event": 1.0, "world": 1.0, "world_label": ""}
+	var shocks := {"event": 1.0, "world": 1.0, "world_label": "", "event_label": ""}
 	if conditions != null and location != null:
 		inflation = MarketConditions.get_inflation_multiplier(day)
 		season = MarketConditions.get_season_multiplier(item.item_id, day)
@@ -152,7 +152,7 @@ static func price_layers(
 		{"layer": LAYER_INFLATION, "multiplier": inflation, "arg": ""},
 		{"layer": LAYER_SEASON, "multiplier": season, "arg": ""},
 		{"layer": LAYER_PRESSURE, "multiplier": pressure, "arg": ""},
-		{"layer": LAYER_EVENT, "multiplier": float(shocks["event"]), "arg": ""},
+		{"layer": LAYER_EVENT, "multiplier": float(shocks["event"]), "arg": String(shocks.get("event_label", ""))},
 		{"layer": LAYER_WORLD, "multiplier": float(shocks["world"]), "arg": String(shocks["world_label"])},
 	]
 

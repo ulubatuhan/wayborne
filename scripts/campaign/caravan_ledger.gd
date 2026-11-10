@@ -45,6 +45,9 @@ const KIND_MEMORIAL: String = "memorial"
 ## aç bir şehirde satılan son ilaç. Defterin dördüncü sütunu ticarete de
 ## bakıyor - *Defter unutmaz.*
 const KIND_TRADE: String = "trade"
+## Açık hesap (İz alt sistemi): bir kararın dünyada bıraktığı, vadesi olan
+## kayıt. Üstü çizilmez - karşılığı geldiğinde yanına yazılır.
+const KIND_TRACE: String = "iz"
 
 ## Tür -> çeviri anahtarı. Tam yazılıyor, çalışma anında birleştirilmiyor
 ## (çeviri tarayıcısı ve çevirmen anahtarı arayınca bulabilsin diye).
@@ -60,6 +63,7 @@ const KIND_LABEL_KEYS: Dictionary = {
 	KIND_VERDICT: "LEDGER_VERDICT",
 	KIND_MEMORIAL: "LEDGER_MEMORIAL",
 	KIND_TRADE: "LEDGER_TRADE",
+	KIND_TRACE: "LEDGER_TRACE_KIND",
 }
 
 ## Üstü çizili sayılan türler: kervandan ayrılmış olmak.

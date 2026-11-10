@@ -121,6 +121,16 @@ enum Type {
 	# "weakest", bir stat adı ya da lider seçebiliyor; bağ, kırgınlık, yemin
 	# ve geçmiş okunamıyordu - oysa hepsi kayıtta duruyor.
 	BEDEL,
+	# Dünyada vadeli bir iz bırakır (İz alt sistemi, tasarım notu §C.3/§D-İ1).
+	# amount = şiddet × 100 (0 ise türün kendi başlangıcı), text_value =
+	# "<tur>|<tasiyici_tip>|<gecikme>|<donus>[|<donus_karti>]" - ör.
+	# "minnet|sehir|kisa|yuz", "kin|sehir|uzun|fiyat". Taşıyıcının kimliği
+	# verilmez, yerinden okunur: şehir/kişi izinin kimliği bulunulan (ya da
+	# gidilen) şehir, yol izininki o yol, bölge izininki o bölge.
+	# Yön `amount`ın işaretidir: eksi şiddet kervanın aleyhine bir izdir.
+	# Niye SET_FLAG + UNLOCK_EVENT yetmedi: bayrak taşıyıcı, şiddet, vade,
+	# sönme ve yayılma taşımaz - yani bir hesap değil, bir anahtardır.
+	IZ_BIRAK,
 }
 
 @export var type: Type = Type.GOLD

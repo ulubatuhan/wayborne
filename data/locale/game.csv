@@ -569,3 +569,5 @@
 "EFF_BEDEL_ALONE","Verecek kimse yok: bedeli sen ödedin.","There was no one else: you paid it.","","","","","","","","",""
 "EFF_BEDEL_HAND_LEFT","%s geride kaldı; vagonunda yeri boş.","%s stayed behind; the seat on the wagon is empty.","","","","","","","","",""
 "EFF_BEDEL_HAND_WORN","Payı %s'in sırtına bindi; vagonlar ekşidi.","The share fell on %s; the wagons soured.","","","","","","","","",""
+"EFF_TRACE_LEFT","Bu bir yere yazıldı.","This went down somewhere.","","","","","","","","",""
+"EFF_TRACE_LEFT_BAD","Bu da bir yere yazıldı.","This, too, went down somewhere.","","","","","","","","",""

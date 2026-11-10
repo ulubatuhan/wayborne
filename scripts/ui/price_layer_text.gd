@@ -71,10 +71,18 @@ static func marks(
 			seen[name] = true
 			var key := String((LAYER_UP_KEYS if m > 1.0 else LAYER_DOWN_KEYS)[name])
 			var line := String(TranslationServer.translate(key))
+			var tag_key := String(LAYER_TAG_KEYS[name])
 			if name == MarketPricing.LAYER_WORLD:
 				line = line % String(TranslationServer.translate(String(layer["arg"])))
+			# Sebebi olan olay şoku: iz dönüşü (§D-İ3 `fiyat`). "Olay" demek
+			# oyuncuya bir şey söylemez; hesabın adı söyler.
+			elif name == MarketPricing.LAYER_EVENT and not String(layer["arg"]).is_empty():
+				tag_key = "UI_PRICE_TAG_TRACE"
+				line = String(TranslationServer.translate(
+					"UI_PRICE_WHY_TRACE_UP" if m > 1.0 else "UI_PRICE_WHY_TRACE_DOWN")
+					) % String(TranslationServer.translate(String(layer["arg"])))
 			found.append({
-				"tag": String(TranslationServer.translate(String(LAYER_TAG_KEYS[name]))),
+				"tag": String(TranslationServer.translate(tag_key)),
 				"why": line,
 				"weight": absf(m - 1.0),
 			})
