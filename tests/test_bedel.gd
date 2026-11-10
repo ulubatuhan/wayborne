@@ -17,6 +17,9 @@ func run(t) -> void:
 	_test_grieved_rule_picks_the_grieved(t)
 	_test_lone_leader_pays_it_himself(t)
 	_test_bedel_never_kills(t)
+	_test_hand_carries_it_when_no_companion(t)
+	_test_hand_leave_behind_empties_a_seat(t)
+	_test_six_moral_cards_fire_at_crew_one(t)
 
 func _session(extra: int = 2) -> GameSession:
 	var session := GameSession.new()
@@ -31,6 +34,17 @@ func _session(extra: int = 2) -> GameSession:
 
 func _fx(amount: int, text: String) -> EventEffect:
 	return EventEffect.make(EventEffect.Type.BEDEL, amount, text)
+
+## Yalnız kervanbaşı: start_playthrough kadroyu iki kişiyle açıyor.
+func _lone_session() -> GameSession:
+	var session := _session(0)
+	var others: Array[CharacterData] = []
+	for member in session.get_party():
+		if not member.is_player:
+			others.append(member)
+	for member in others:
+		session.dismiss(member)
+	return session
 
 func _test_same_state_same_bearer(t) -> void:
 	var session := _session()
@@ -83,15 +97,8 @@ func _test_grieved_rule_picks_the_grieved(t) -> void:
 	t.eq(picked.character_id, party[2].character_id, "en kırgın olan öne çıkıyor")
 
 func _test_lone_leader_pays_it_himself(t) -> void:
-	var session := _session(0)
-	# start_playthrough kadroyu iki kişiyle açıyor; yalnız lideri sınamak için
-	# yoldaşları çıkarıyoruz (kopyayı gez: dismiss parti dizisini kısaltıyor).
-	var others: Array[CharacterData] = []
-	for member in session.get_party():
-		if not member.is_player:
-			others.append(member)
-	for member in others:
-		session.dismiss(member)
+	var session := _lone_session()
+	session.crew_names.clear()
 	t.ok(BedelSecici.pick(BedelSecici.RULE_WEAKEST, session) == null,
 		"yalnız liderin havuzu boş")
 	var leader := session.get_player_character()
@@ -106,3 +113,54 @@ func _test_bedel_never_kills(t) -> void:
 	EventEffectApplier.apply([_fx(-999, "PARTY_HP|en_zayif")], session)
 	t.eq(victim.current_hp, 1, "olaylar öldürmez: can 1'de kenetlenir")
 	t.ok(session.get_party().has(victim), "kenetlenen kişi kervanda kalıyor")
+
+# --- §H adım 2: bedel kadro dışına da düşer, kartlar kadro 1'de de gelir ---
+
+func _test_hand_carries_it_when_no_companion(t) -> void:
+	var session := _lone_session()
+	session.crew_names = ["Tayfa Eli"]
+	var bearer := BedelSecici.pick_bearer(BedelSecici.RULE_WEAKEST, session)
+	t.eq(String(bearer.get("tur", "")), BedelSecici.KIND_HAND, "yoldaş yoksa taşıyıcı tayfa eli")
+	t.eq(String(bearer.get("ad", "")), "Tayfa Eli", "elin adı taşıyıcı olarak yazılıyor")
+	var choice := EventChoice.new()
+	choice.effects = [_fx(6, "STRESS|gecmisi_uyan")]
+	t.eq(EventEffectApplier.get_choice_target_name(choice, session), "Tayfa Eli",
+		"düğmede elin adı yazıyor")
+	var before: int = session.caravan.morale
+	var leader := session.get_player_character()
+	var leader_stress: int = leader.stress
+	EventEffectApplier.apply(choice.effects, session)
+	t.ok(session.caravan.morale < before, "elin payı moralden alınıyor")
+	t.eq(leader.stress, leader_stress, "el öderken lider ödemiyor")
+	t.eq(session.last_bearer_name, "Tayfa Eli", "{bedel} elin adını dolduruyor")
+
+func _test_hand_leave_behind_empties_a_seat(t) -> void:
+	var session := _lone_session()
+	session.crew_names = ["Birinci El", "İkinci El"]
+	var missing_before: int = session.crew_missing
+	EventEffectApplier.apply([_fx(0, "LEAVE_BEHIND|yemini_yok")], session)
+	t.not_ok(session.crew_names.has("İkinci El"), "en son tutulan el geride kaldı")
+	t.ok(session.crew_names.has("Birinci El"), "öteki el kervanda")
+	t.eq(session.crew_missing, missing_before + 1, "yeri boş kaldı: el parayla tutulur")
+	t.ok(session.ledger.count_of(CaravanLedger.KIND_DEPARTED) > 0, "defter adsız olanı da yazdı")
+
+## Teşhis A2: oyunun en iyi ikilemleri `party_size` koşulunun arkasında,
+## oyunun gerçekte hiç ulaşmadığı bir durumu bekliyordu (kadro 10. seferde
+## 1'e iniyor). Bedel kadro dışına da düşebildiği için koşullar kaldırıldı:
+## altı kart kadro 1'de de uygun olmalı.
+func _test_six_moral_cards_fire_at_crew_one(t) -> void:
+	var session := _lone_session()
+	session.total_days_elapsed = 40
+	session.danger_level = 0.6
+	session.journey_days_remaining = 2
+	session.caravan.morale = 20
+	session.crew_hungry_nights = 3
+	var context := session.build_event_context()
+	context["scarcity_here"] = 0.8
+	context["plague_here"] = 1.0
+	context["city_morale"] = 10.0
+	t.eq(int(context["party_size"]), 1, "kadro gerçekten 1")
+	for event_id in ["evt_taken_captive", "evt_faith_tribunal", "evt_elder_burden",
+			"evt_fever_quarantine", "evt_faction_split", "evt_leave_the_wounded"]:
+		var event := EventCatalog.get_event(event_id)
+		t.ok(event != null and event.is_eligible(context), "kadro 1'de uygun: %s" % event_id)

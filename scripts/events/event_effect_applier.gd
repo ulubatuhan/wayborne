@@ -37,6 +37,10 @@ class Result extends RefCounted:
 	## (bkz. tests/test_event_effects.gd).
 	var unlocked_event_ids: Array[String] = []
 
+## Bedel bir tayfa elinin sırtına bindiğinde stres/yara miktarının moral
+## karşılığı (bkz. `_apply_bedel_to_hand`).
+const HAND_MORALE_SHARE: float = 0.5
+
 ## tr() bir Object örnek metodu, buradaki her şey static (bkz. CLAUDE.md
 ## Localization Rules) - o yüzden çeviriler TranslationServer'dan geçiyor.
 static func _t(key: String) -> String:
@@ -230,8 +234,13 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 static func _apply_bedel(effect: EventEffect, session: GameSession, result: Result) -> void:
 	var rule := _bedel_rule(effect)
 	var alt := _bedel_effect_name(effect)
-	var bearer: CharacterData = BedelSecici.pick(rule, session)
-	if bearer == null:
+	var chosen := BedelSecici.pick_bearer(rule, session)
+	var kind := String(chosen.get("tur", ""))
+	if kind == BedelSecici.KIND_HAND:
+		_apply_bedel_to_hand(alt, String(chosen.get("ad", "")), effect, session, result)
+		return
+	var bearer: CharacterData = chosen.get("kisi", null)
+	if bearer == null or kind == BedelSecici.KIND_FUTURE:
 		_apply_bedel_to_caravan(alt, effect, session, result)
 		return
 	session.last_bearer_name = bearer.character_name
@@ -252,6 +261,31 @@ static func _apply_bedel(effect: EventEffect, session: GameSession, result: Resu
 					% [bearer.character_name, absi(moved)])
 		_:
 			push_warning("BEDEL: bilinmeyen alt etki %s" % alt)
+
+## İkinci kademe: bedel bir tayfa elinin sırtına biner.
+##
+## Ellerin stresi ve canı modellenmiyor (savaşmıyorlar, statları yok), ama
+## bir kanalları var ve zaten kuruludur: moral - aç bırakılan tayfanın
+## bedeli de oradan alınıyor (`get_crew_hunger_morale_penalty`). O yüzden
+## elin ödediği bedel ya **yeri boş kalmasıdır** (geride bırakılma) ya da
+## vagonların ekşimesidir. Bu bir sadeleştirme değil: elin kendi sayısını
+## uydurmak yerine var olan kanalı kullanıyoruz.
+static func _apply_bedel_to_hand(alt: String, hand_name: String, effect: EventEffect,
+		session: GameSession, result: Result) -> void:
+	if hand_name.is_empty():
+		_apply_bedel_to_caravan(alt, effect, session, result)
+		return
+	session.last_bearer_name = hand_name
+	match alt:
+		"LEAVE_BEHIND":
+			if session.strike_crew_hand(hand_name, "LEDGER_CAUSE_LEFT_BEHIND"):
+				session.caravan.change_morale(-4)
+				result.lines.append(_t("EFF_BEDEL_HAND_LEFT") % hand_name)
+		_:
+			# Stres de yara da aynı kanala düşer: elin payını vagonlar çeker.
+			var cost := maxi(1, roundi(absf(float(effect.amount)) * HAND_MORALE_SHARE))
+			session.caravan.change_morale(-cost)
+			result.lines.append(_t("EFF_BEDEL_HAND_WORN") % hand_name)
 
 ## Taşıyacak kimse yoksa bedel kervanbaşının sırtına biner.
 static func _apply_bedel_to_caravan(alt: String, effect: EventEffect, session: GameSession,
@@ -348,6 +382,28 @@ static func get_choice_target(choice: EventChoice, session: GameSession) -> Char
 		found = _target_in(outcome.effects, session)
 		if found != null:
 			return found
+	return null
+
+## Düğmede yazacak ad. `get_choice_target` yalnız `CharacterData` dönebildiği
+## için tayfa elini gösteremiyordu; bedelin ikinci kademesi (el) ve üçüncüsü
+## (gelecekteki sen) de adıyla yazılmalı - yoksa kadro 1'de açılan kart
+## kimin ödeyeceğini gizlemiş olur, yani tuzak olur.
+static func get_choice_target_name(choice: EventChoice, session: GameSession) -> String:
+	var bedel := _bedel_in(choice.effects)
+	if bedel == null:
+		for outcome in choice.outcomes:
+			bedel = _bedel_in(outcome.effects)
+			if bedel != null:
+				break
+	if bedel != null:
+		return BedelSecici.bearer_name(_bedel_rule(bedel), session)
+	var target := get_choice_target(choice, session)
+	return target.character_name if target != null else ""
+
+static func _bedel_in(effects: Array[EventEffect]) -> EventEffect:
+	for effect in effects:
+		if effect.type == EventEffect.Type.BEDEL:
+			return effect
 	return null
 
 static func _target_in(effects: Array[EventEffect], session: GameSession) -> CharacterData:

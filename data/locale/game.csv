@@ -567,3 +567,5 @@
 "EFF_BEDEL_HEAL","%s biraz toparlandı (+%d).","%s mends a little (+%d).","","","","","","","","",""
 "EFF_BEDEL_STRESS","Yük %s'in sırtına bindi.","The weight settled on %s.","","","","","","","","",""
 "EFF_BEDEL_ALONE","Verecek kimse yok: bedeli sen ödedin.","There was no one else: you paid it.","","","","","","","","",""
+"EFF_BEDEL_HAND_LEFT","%s geride kaldı; vagonunda yeri boş.","%s stayed behind; the seat on the wagon is empty.","","","","","","","","",""
+"EFF_BEDEL_HAND_WORN","Payı %s'in sırtına bindi; vagonlar ekşidi.","The share fell on %s; the wagons soured.","","","","","","","","",""

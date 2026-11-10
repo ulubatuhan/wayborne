@@ -2488,8 +2488,9 @@ static func _road_warden() -> GameEvent:
 static func _taken_captive() -> GameEvent:
 	var event := _event("evt_taken_captive", "EVT_CAPTIVE_TITLE", "EVT_CAPTIVE_TEXT", 0.18)
 	event.cooldown_days = 30
+	# Kadro koşulu kaldırıldı (§H adım 2): kaçırılan kişi yoldaş yoksa
+	# vagonun kenarındaki el olur - BEDEL seçicisinin ikinci kademesi.
 	event.conditions = _conditions([
-		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
 		_c("danger", EventCondition.Op.GREATER_EQUAL, 0.3),
 	])
 	event.choices = _choices([
@@ -2657,7 +2658,9 @@ static func _pilgrim_caravan() -> GameEvent:
 static func _faith_tribunal() -> GameEvent:
 	var event := _event("evt_faith_tribunal", "EVT_TRIBUNAL_TITLE", "EVT_TRIBUNAL_TEXT", 0.18)
 	event.cooldown_days = 25
-	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 2)])
+	# Kadro koşulu kaldırıldı: suçlanan yoldaş yoksa bir el olur, o da yoksa
+	# kervanbaşının kendisi suçlanır (bedelin üçüncü kademesi).
+	event.conditions = _conditions([])
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([_c("near_shrine", EventCondition.Op.GREATER_EQUAL, 1)]), 4.0),
 		EventWeightModifier.make(_conditions([_c("near_mezra", EventCondition.Op.GREATER_EQUAL, 1)]), 2.0),
@@ -2684,9 +2687,8 @@ static func _elder_burden() -> GameEvent:
 	var event := _event("evt_elder_burden", "EVT_ELDER_TITLE", "EVT_ELDER_TEXT", 0.3)
 	event.cooldown_days = 20
 	event.conditions = _conditions([
-		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
 		_c("scarcity_here", EventCondition.Op.GREATER_EQUAL, 0.4),
-		_c("weakest_companion_hp_ratio", EventCondition.Op.LESS_EQUAL, 0.6),
+		_c("worn_shoulder_ratio", EventCondition.Op.LESS_EQUAL, 0.6),
 	])
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([_c("near_mezra", EventCondition.Op.GREATER_EQUAL, 1)]), 5.0),
@@ -2707,7 +2709,6 @@ static func _fever_quarantine() -> GameEvent:
 	var event := _event("evt_fever_quarantine", "EVT_QUARANTINE_TITLE", "EVT_QUARANTINE_TEXT", 0.3)
 	event.cooldown_days = 18
 	event.conditions = _conditions([
-		_c("party_size", EventCondition.Op.GREATER_EQUAL, 3),
 		_c("plague_here", EventCondition.Op.GREATER_EQUAL, 1),
 	])
 	event.choices = _choices([
@@ -2802,7 +2803,9 @@ static func _cargo_seized() -> GameEvent:
 static func _faction_split() -> GameEvent:
 	var event := _event("evt_faction_split", "EVT_FACTION_TITLE", "EVT_FACTION_TEXT", 0.6)
 	event.cooldown_days = 14
-	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 6)])
+	# `party_size >= 6` hiç sağlanamıyordu (savaş kadrosu en çok 4): kart ölü
+	# içerikti. Kervanı ikiye bölen kalabalık adsız elleri de sayar.
+	event.conditions = _conditions([_c("caravan_people", EventCondition.Op.GREATER_EQUAL, 3)])
 	event.choices = _choices([
 		_choice("EVT_FACTION_OPT_OLD", _effects([_fx(EventEffect.Type.MORALE, -5), _fx(EventEffect.Type.STRESS, 4)])),
 		_choice("EVT_FACTION_OPT_NEW", _effects([_fx(EventEffect.Type.MORALE, -3), _fx(EventEffect.Type.STRESS, 6)])),
@@ -2900,8 +2903,7 @@ static func _leave_the_wounded() -> GameEvent:
 	var event := _event("evt_leave_the_wounded", "EVT_LEAVE_WOUNDED_TITLE", "EVT_LEAVE_WOUNDED_TEXT", 0.3)
 	event.cooldown_days = 10
 	event.conditions = _conditions([
-		EventCondition.make("weakest_companion_hp_ratio", EventCondition.Op.LESS_EQUAL, 0.35),
-		EventCondition.make("party_size", EventCondition.Op.GREATER_EQUAL, 2),
+		EventCondition.make("worn_shoulder_ratio", EventCondition.Op.LESS_EQUAL, 0.35),
 	])
 	event.weight_modifiers = _modifiers([
 		EventWeightModifier.make(_conditions([

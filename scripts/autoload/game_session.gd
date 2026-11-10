@@ -2488,6 +2488,10 @@ var crew_missing: int = 0
 ## Açlıktan kaybedilen toplam el. Şehirdeki el tutma fiyatını yükseltiyor -
 ## söz dolaşır, adamını aç bırakan kervana kimse ucuza binmez.
 var crew_lost_to_hunger: int = 0
+## Aç geçen bir gecenin ellerin yorgunluğuna katkısı (bkz.
+## `_worn_shoulder_ratio`): üç aç gece moralden bağımsız olarak omzu
+## "bırakılacak kadar" yorgun gösterir.
+const HAND_WEAR_PER_HUNGRY_NIGHT: float = 0.1
 
 ## --- Kalıcı emirler ---
 ## Aynı kararı her gün yeniden sormak bir karar değil, bir angarya: sofra
@@ -2894,6 +2898,23 @@ func _lose_one_crew_hand(cause_key: String, kind: String) -> String:
 	)
 	note_beat(BEAT_DEATH if kind == CaravanLedger.KIND_DIED else BEAT_HUNGER, [crew_name])
 	return crew_name
+
+## Adı belli bir tayfa eli kervandan çıkarılır - ölüm değil, geride
+## bırakılma (BEDEL etkisinin ikinci kademesi). Yeri boş kalır: `crew_missing`
+## artar, el şehirde parayla tutulur. Deftere adıyla yazılır, çünkü defter
+## adsız olanı da unutmaz.
+func strike_crew_hand(crew_name: String, cause_key: String) -> bool:
+	var index := crew_names.find(crew_name)
+	if index < 0:
+		return false
+	crew_names.remove_at(index)
+	crew_missing = clampi(crew_missing + 1, 0, get_crew_need())
+	ledger.record(
+		CaravanLedger.KIND_DEPARTED, crew_name, total_days_elapsed, lineage_generation,
+		"", cause_key, _ledger_location_id()
+	)
+	note_beat(BEAT_SACRIFICE, [crew_name])
+	return true
 
 func _character_names(characters: Array[CharacterData]) -> Array[String]:
 	var names: Array[String] = []
@@ -6640,6 +6661,12 @@ func build_event_context() -> Dictionary:
 		"days_as_leader": get_days_as_leader(),
 		"profiteering_sales": profiteering_sales,
 		"weakest_companion_hp_ratio": _weakest_companion_hp_ratio(),
+		# Kervanda kaç insan var: adı olan yoldaşlar + adı yazılı tayfa
+		# elleri. `party_size` savaş kadrosunu (en çok 4) sayıyor, o yüzden
+		# "kervan iki kümeye ayrıldı" türü bir kart party_size ile ölçülemez
+		# (evt_faction_split `>= 6` istiyordu: hiç sağlanamayan bir koşul).
+		"caravan_people": party_size + get_crew_hands(),
+		"worn_shoulder_ratio": _worn_shoulder_ratio(),
 		"flags": _flags,
 		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.
 		# party_slots_free üstteki not) İzci varlığı ve oyuncunun kültürü
@@ -6710,6 +6737,25 @@ func _weakest_companion_hp_ratio() -> float:
 			continue
 		weakest = minf(weakest, float(character.current_hp) / float(maxi(1, character.get_max_hp())))
 	return weakest
+
+## Kervanda en yorgun omuzun hâli, 0 (bitmiş) ile 1 (sağlam) arasında.
+##
+## Niye `weakest_companion_hp_ratio` yetmedi: o alan yoldaş yokken 1.0
+## döner, yani "geride bırakılacak kadar yorgun kimse yok" der - ama kadro
+## onuncu seferde 1'e iniyor (teşhis A1) ve kervanı asıl o zaman adsız eller
+## taşıyor. Ellerin canı modellenmiyor (savaşmıyorlar); sahip oldukları tek
+## kanal moral ve aç geçen geceler - `_apply_bedel_to_hand` da aynı kanalı
+## kullanıyor. O yüzden yoldaş varsa onun canı, yoksa ellerin yorgunluğu
+## okunur. Böylece "yaralıyı bırak" türü kartlar kadro 1'de de gelir, yalnız
+## bedeli başka bir sırta biner.
+func _worn_shoulder_ratio() -> float:
+	var companion_ratio := _weakest_companion_hp_ratio()
+	if companion_ratio < 1.0:
+		return companion_ratio
+	if get_crew_hands() <= 0:
+		return 1.0
+	var wear := float(caravan.morale) / 100.0 - HAND_WEAR_PER_HUNGRY_NIGHT * float(crew_hungry_nights)
+	return clampf(wear, 0.0, 1.0)
 
 func has_active_world_event(kind: WorldEvents.Kind) -> bool:
 	return not world_events.get_active_by_kind(kind, total_days_elapsed).is_empty()

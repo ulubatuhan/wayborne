@@ -17,9 +17,14 @@ extends RefCounted
 ## `road_journey.gd` UI_ROAD_CHOICE_TARGET). Bilmeden ödetmek ikilem değil
 ## tuzaktır.
 ##
-## Havuz: adı olan yoldaşlar (lider hariç). Havuz boşsa `null` döner ve
-## bedel "gelecekteki sen"e yazılır - çağıran taraf (olay etkisi) o zaman
-## kervanın kendisinden alır.
+## Havuz üç kademelidir (§H adım 2, teşhis A1-A2): adı olan yoldaşlar
+## (lider hariç) · adı yazılı tayfa elleri (`crew_names`) · gelecekteki sen.
+## Kadro onuncu seferde 1'e iniyordu ve oyunun en iyi ikilemleri
+## `party_size ≥ 2/3/6` koşulunun arkasında, oyunun hiç ulaşmadığı bir
+## durumu bekliyordu. Bedel kadro dışına da düşebildiği için o koşullar
+## kaldırıldı: kart kadro 1'de de gelir, yalnız bedeli başka bir sırta biner.
+## `pick()` yalnız birinci kademeyi (yoldaş) verir - `CharacterData` döner;
+## tayfa elinin `CharacterData`'sı yoktur, onu `pick_bearer()` adıyla döner.
 
 ## Kural kimlikleri - kartın `text_value`'sunda yazan ad.
 const RULE_WEAKEST: String = "en_zayif"
@@ -70,10 +75,43 @@ static func pick(rule: String, session: GameSession) -> CharacterData:
 		return null
 	return best
 
+## Taşıyıcı kademeleri.
+const KIND_COMPANION: String = "yoldas"
+const KIND_HAND: String = "el"
+const KIND_FUTURE: String = "sen"
+
+## Bedeli ödeyecek sırt, türüyle: `{"tur": …, "ad": String, "kisi": CharacterData}`.
+## `kisi` yalnız `KIND_COMPANION` ve `KIND_FUTURE`'da doludur (ikincisinde
+## kervanbaşının kendisi). Hiç kimse yoksa `tur` boş döner.
+static func pick_bearer(rule: String, session: GameSession) -> Dictionary:
+	if session == null:
+		return {"tur": "", "ad": "", "kisi": null}
+	var companion: CharacterData = pick(rule, session)
+	if companion != null:
+		return {"tur": KIND_COMPANION, "ad": companion.character_name, "kisi": companion}
+	var hand := _pick_hand(session)
+	if not hand.is_empty():
+		return {"tur": KIND_HAND, "ad": hand, "kisi": null}
+	var leader := session.get_player_character()
+	if leader == null:
+		return {"tur": "", "ad": "", "kisi": null}
+	return {"tur": KIND_FUTURE, "ad": leader.character_name, "kisi": leader}
+
+## İkinci kademe: adı yazılı tayfa eli. Ellerin kırgınlığı, bağı, geçmişi
+## yok - puanlanacak bir şey taşımıyorlar - o yüzden kural değil sıra karar
+## verir: **en son tutulan el**, yani kervanda en kısa süre kalmış olan
+## (seçicinin eşitlik kuralının aynısı). Deterministiktir: aynı durum aynı adı
+## verir.
+static func _pick_hand(session: GameSession) -> String:
+	for index in range(session.crew_names.size() - 1, -1, -1):
+		var crew_name: String = session.crew_names[index]
+		if not crew_name.is_empty():
+			return crew_name
+	return ""
+
 ## Bir seçeneğin metninde yazacak ad; kimse yoksa boş.
 static func bearer_name(rule: String, session: GameSession) -> String:
-	var who: CharacterData = pick(rule, session)
-	return who.character_name if who != null else ""
+	return String(pick_bearer(rule, session).get("ad", ""))
 
 static func _score(rule: String, aday: CharacterData, session: GameSession, tek_kisi: bool) -> float:
 	var score := 0.0
