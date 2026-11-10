@@ -602,3 +602,32 @@ Tasarımın özü: `BEDEL` (bedeli adı olan birine yükler, kart açılmadan ad
 Kabuk/Çatlak ve hâl makinesi (Katı yararlı ama yalnızlaştırır; Çatlak yalnız dönen bir iyilikle iyileşir),
 iz defteri (taşıyıcı, şiddet, sönme, yol boyunca yayılma, on dönüş biçimi, kuşak izleri ve lakap), yankı
 varyantı (tekrar eden kart ilk cevabı bilir), söz (vadeli iz). 50 satırlık kelebek matrisi §E'de.
+
+### Uygulama başladı: H1–H3 bitti (2026-11-10)
+
+Kullanıcı "Fable'in önerilerini sırasıyla tam olarak uygula, reddediklerini düzelt/kaldır/not al" dedi.
+§H'nin on iki adımı sırayla işleniyor; her adım kendi commit'i, kendi testi, oyuncu gören bir değişiklik
+varsa kendi ekran görüntüsü.
+
+- **H1 · `BEDEL` etkisi ve bedel taşıyıcısı seçici** (commit `b37060c`). `scripts/events/bedel_secici.gd`:
+  beş kural (`en_zayif`, `en_kirgin`, `bagi_olan`, `yemini_yok`, `gecmisi_uyan`), yakınlık korur, bozuk hâl
+  öne çıkar, son on günde ödeyen geri çekilir, yeminli teslim edilmez, tek kalan yoldaş korunur. Seçim
+  rastgele değil: aynı durum aynı kişiyi verir ve ad seçenek seçilmeden düğmede yazar.
+  `CharacterData.last_price_day`, `GameSession.last_bearer_name`, `EventText.BEARER` (`{bedel}`).
+  On kart bağlandı. Testler: `tests/test_bedel.gd`.
+- **H2 · kadro kilidi açıldı** (commit `5a07cb5`). Bedel kadro dışına da düşer: ikinci kademe adı yazılı
+  **tayfa eli** (`GameSession.strike_crew_hand`, yeri boş kalır, deftere yazılır; stres/yara moral üstünden),
+  üçüncü kademe gelecekteki sen. Altı kartın `party_size` koşulu kalktı (`evt_faction_split`'inki `>= 6` ile
+  zaten hiç sağlanamıyordu). Yeni bağlam anahtarları: `caravan_people`, `worn_shoulder_ratio`.
+  `EventEffectApplier.get_choice_target_name` düğmede her kademenin adını yazıyor.
+  Ekran: `tests/screenshot_bedel.gd` (yoldaşlı ve yalnız hâl).
+- **H3 · iz defteri çekirdeği** (commit `a1029b9`). `scripts/campaign/trace.gd` + `trace_ledger.gd`: sekiz tür,
+  taşıyıcı, şiddet, vade, sönme, tavan; tek doğum noktası `GameSession.leave_trace`, kaynağı `note_decision`
+  veriyor. Kayıt sürümü **4 → 5** (`izler`, `bekleyen_yuz`; eski kayıt boş defterle açılır). İki dönüş biçimi
+  yazıldı: **fiyat** (20 gün, tezgâhta "Hesap" işareti olarak okunuyor) ve **yüz** (şehrin adı olan kişisi,
+  gönlüne yazılır, günlüğe adıyla düşer). Varışta günde bir dönüş. Kaynaklar: vurgun, merhamet satışı, kovma,
+  yakalanan dolandırıcılık. `EventEffect.Type.IZ_BIRAK` ile kartlar da iz bırakabiliyor.
+  Testler: `tests/test_trace.gd`; ekran: `tests/screenshot_trace.gd`.
+
+Sırada: H4 (Açık Hesaplar sayfası + şehir özetinde "seni bekleyen var"), sonra H5…H12. §I'nin on üç
+reddedilen fikri adım adım görev kaydına not edilecek (yeniden önerilmesin diye).
