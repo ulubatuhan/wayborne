@@ -63,6 +63,8 @@ var _fallen_toggle: Button
 var _showing_fallen: bool = false
 var _journal_toggle: Button
 var _showing_journal: bool = false
+var _accounts_toggle: Button
+var _showing_accounts: bool = false
 
 func setup(session: GameSession) -> WaybookPanel:
 	_session = session
@@ -185,6 +187,13 @@ func _fill_summary(box: VBoxContainer) -> void:
 	box.add_child(_journal_toggle)
 	_journal_toggle.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_journal_toggle.custom_minimum_size = Vector2(BUTTON_WIDTH, 0)
+	_accounts_toggle = Button.new()
+	_accounts_toggle.text = tr("UI_WAYBOOK_ACCOUNTS_OPEN")
+	_accounts_toggle.disabled = _session == null
+	_accounts_toggle.pressed.connect(func(): set_accounts_page(not _showing_accounts))
+	box.add_child(_accounts_toggle)
+	_accounts_toggle.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_accounts_toggle.custom_minimum_size = Vector2(BUTTON_WIDTH, 0)
 	_share = Button.new()
 	_share.text = tr("UI_WAYBOOK_SHARE")
 	_share.disabled = _session == null
@@ -273,7 +282,9 @@ func set_fallen_page(fallen: bool) -> void:
 		_play_sfx("ui_page")
 	_showing_fallen = fallen
 	_showing_journal = false
+	_showing_accounts = false
 	_journal_toggle.text = tr("UI_WAYBOOK_JOURNAL_OPEN")
+	_accounts_toggle.text = tr("UI_WAYBOOK_ACCOUNTS_OPEN")
 	for box in [_entries, _summary]:
 		for child in (box as Node).get_children():
 			child.queue_free()
@@ -309,6 +320,36 @@ func set_journal_page(on: bool) -> void:
 	_journal_toggle.text = tr("UI_WAYBOOK_FALLEN_CLOSE")
 	_share.visible = false
 	(func(): _left.scroll_vertical = int(_left.get_v_scroll_bar().max_value)).call_deferred()
+
+## Açık Hesaplar (İz alt sistemi, §H adım 4): dünyada kervanın adına
+## yazılmış, karşılığı henüz gelmemiş ne varsa. Sayı yok, üstü çizili satır
+## yok: karşılığı gelen satırın **yanına** yazılır, sönen "kimse
+## hatırlamadı" olur - defter unutmaz, dünya unutabilir.
+func set_accounts_page(on: bool) -> void:
+	set_fallen_page(false)
+	if not on:
+		return
+	_showing_accounts = true
+	for child in _entries.get_children():
+		child.queue_free()
+	_entries.add_child(_fallen_heading(tr("UI_WAYBOOK_ACCOUNTS_TITLE")))
+	var rows := LedgerPage.account_rows(_session)
+	if rows.is_empty():
+		_entries.add_child(_page_label(tr("UI_WAYBOOK_ACCOUNTS_EMPTY")))
+	for row in rows:
+		var heading := _page_label(String(row.get("text", "")))
+		heading.theme_type_variation = WaybookTheme.PAGE_HEADING
+		# Sayfa başlıklarının kendi rengi kızıl; aleyhteki hesabı ondan
+		# ayıran şey renk değil **mürekkep**: lehte olan satır sayfanın
+		# sıradan mürekkebiyle yazılır, aleyhte olan kızıl kalır.
+		if bool(row.get("bad", false)):
+			heading.add_theme_color_override("font_color", DebtPanel.OVERDUE_SEVERE_COLOR)
+		else:
+			heading.add_theme_color_override("font_color", ArtPalette.UI_TEXT_ON_PAGE)
+		_entries.add_child(heading)
+		_entries.add_child(_page_label(String(row.get("note", ""))))
+	_accounts_toggle.text = tr("UI_WAYBOOK_FALLEN_CLOSE")
+	_share.visible = false
 
 func _fill_fallen(box: VBoxContainer) -> void:
 	box.add_child(_fallen_heading(tr("UI_WAYBOOK_FALLEN_TITLE")))

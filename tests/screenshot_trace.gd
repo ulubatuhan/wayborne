@@ -25,6 +25,8 @@ func _init() -> void:
 	var session := _session()
 	await _market(session)
 	await _waybook(session)
+	await _accounts(session)
+	await _brief(session)
 	quit()
 
 func _session() -> GameSession:
@@ -44,6 +46,12 @@ func _session() -> GameSession:
 	trace.olgunluk_gunu = session.total_days_elapsed
 	var note := session.resolve_trace_return()
 	print("  dönüş: %s" % note)
+	# İkinci bir hesap daha: vadesi dolmamış bir minnet, sayfada üç durum
+	# birden görünsün diye (dönen, bekleyen).
+	session.note_trace_action("merhamet")
+	session.leave_trace(
+		Trace.TYPE_GRATITUDE, Trace.BEARER_CITY, session.current_location_id, 1,
+		Trace.DELAY_LONG, Trace.RETURN_FACE, 0.6)
 	return session
 
 func _market(_session: GameSession) -> void:
@@ -61,6 +69,33 @@ func _waybook(session: GameSession) -> void:
 	panel.call("set_journal_page", true)
 	await _settle()
 	_save("02_defter_gunluk.png")
+	panel.queue_free()
+	await _settle()
+
+func _accounts(session: GameSession) -> void:
+	var panel := WaybookPanel.new().setup(session)
+	get_root().add_child(panel)
+	await _settle()
+	panel.call("set_accounts_page", true)
+	await _settle()
+	_save("03_acik_hesaplar.png")
+	panel.queue_free()
+	await _settle()
+
+## Şehir özeti: dönen bir `yuz` izi kapıda bekleyeni adıyla söylüyor.
+func _brief(session: GameSession) -> void:
+	session.note_trace_action("kovma")
+	var face: Trace = session.leave_trace(
+		Trace.TYPE_GRUDGE, Trace.BEARER_CITY, session.current_location_id, -1,
+		Trace.DELAY_SHORT, Trace.RETURN_FACE, 0.7)
+	face.olgunluk_gunu = session.total_days_elapsed
+	print("  yüz dönüşü: %s" % session.resolve_trace_return())
+	var panel := CityBriefPanel.new()
+	get_root().add_child(panel)
+	panel.setup(session)
+	await _settle()
+	await _settle()
+	_save("04_sehir_ozeti.png")
 	panel.queue_free()
 	await _settle()
 

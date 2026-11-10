@@ -40,6 +40,7 @@ func run(t) -> void:
 	_test_brief_needs_point_at_real_screens(t)
 	_test_brief_shows_debt_even_when_the_term_is_far_off(t)
 	_test_brief_offers_every_open_route(t)
+	_test_brief_says_someone_is_waiting(t)
 	_test_price_book(t)
 	_test_goods_variety(t)
 	_test_buy_then_sell_back_never_profits(t)
@@ -709,3 +710,28 @@ func _test_ban_survives_save(t) -> void:
 	copy.load_from_dict(session.to_save_dict())
 	t.ok(copy.is_banned("serai_duvenmor"), "yasak kayıttan döner")
 	t.ok(not copy.is_banned("serai_seyvan"), "yasak yalnızca o yere")
+
+## §H adım 4: bir iz `yuz` olarak döndüğünde şehir brifingi bunu söyler.
+## Şehir, yolun bedelinin tahsil edildiği yer olmalı; "yapacak iş yok" turu
+## (teşhis A5) geçmişin kendisiyle kapanıyor.
+func _test_brief_says_someone_is_waiting(t) -> void:
+	var session := _brief_session(900, 90)
+	session.note_trace_action("sinama")
+	var trace: Trace = session.leave_trace(
+		Trace.TYPE_GRUDGE, Trace.BEARER_CITY, session.current_location_id, -1,
+		Trace.DELAY_SHORT, Trace.RETURN_FACE)
+	trace.olgunluk_gunu = session.total_days_elapsed
+	t.ok(not session.resolve_trace_return().is_empty(), "yüz dönüşü işlendi")
+	var person := session.people.person(String(session.waiting_face["kisi"]))
+	var found := false
+	for need in _brief_needs(session):
+		if String(need.get("text", "")).contains(String(person.get("name", ""))):
+			found = true
+	t.ok(found, "şehir özeti bekleyeni adıyla söylüyor")
+
+	# Açık hesaplar sayfası aynı hesabı yazıyor ve karşılığının geldiğini
+	# yanına ekliyor - üstünü çizmeden.
+	var rows := LedgerPage.account_rows(session)
+	t.eq(rows.size(), 1, "açık hesaplar sayfasında bir satır var")
+	t.ok(String(rows[0].get("note", "")).length() > 0, "satırın karşılığı yazılı")
+	t.ok(bool(rows[0].get("bad", false)), "kin satırı kızıl okunur")

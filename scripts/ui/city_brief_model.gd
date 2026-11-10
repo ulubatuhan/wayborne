@@ -66,6 +66,20 @@ static func build_needs(session: GameSession) -> Array[Dictionary]:
 			_t("UI_BRIEF_NEED_CONTRACT"), _t("UI_BRIEF_GO_GUILD"), Nav.GUILD, false
 		))
 
+	# Seni bekleyen var (İz alt sistemi, §H adım 4). Bir iz `yuz` olarak
+	# döndüğünde şehrin adı olan kişilerinden biri kapıda bekler; şehir
+	# ziyaretlerinin %43'ünde yapacak iş olmamasının (teşhis A5) cevabı
+	# yeni bir mekanik değil, **geçmişin kendisi**.
+	var waiting := _waiting_face(session)
+	if not waiting.is_empty():
+		var role := String(waiting.get("role", ""))
+		var to_tavern := role == People.ROLE_INNKEEPER
+		needs.append(_need(
+			_t("UI_BRIEF_NEED_WAITING") % String(waiting.get("name", "")),
+			_t("UI_BRIEF_GO_TAVERN" if to_tavern else "UI_BRIEF_GO_GUILD"),
+			Nav.TAVERN if to_tavern else Nav.GUILD, false
+		))
+
 	if session.party_stress >= STRESS_WARNING:
 		needs.append(_need(
 			_t("UI_BRIEF_NEED_STRESS") % [session.party_stress, GameSession.MAX_STRESS],
@@ -123,6 +137,20 @@ static func _idle_offers(session: GameSession) -> Array[Dictionary]:
 			_t("UI_BRIEF_IDLE_TAVERN"), _t("UI_BRIEF_GO_TAVERN"), Nav.TAVERN, false
 		))
 	return offers
+
+## Bu şehirde kapıda bekleyen kişi (son dönen `yuz` izi); yoksa boş.
+## Oturumun `waiting_face`'i şehirden şehre taşınmaz: beklenen yüz kendi
+## şehrindedir, başka kapıda beklemez.
+static func _waiting_face(session: GameSession) -> Dictionary:
+	var id := String(session.waiting_face.get("kisi", ""))
+	if id.is_empty():
+		return {}
+	var person := session.people.person(id)
+	if person.is_empty() or not bool(person.get("alive", false)):
+		return {}
+	if String(person.get("home", "")) != session.current_location_id:
+		return {}
+	return person
 
 static func _facility_for_scene(scene_path: String) -> String:
 	for v in CityFront.VENUES:

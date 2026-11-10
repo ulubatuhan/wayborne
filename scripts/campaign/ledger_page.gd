@@ -34,6 +34,50 @@ static func lines(session: GameSession) -> Array[String]:
 		out.append(TranslationServer.translate("UI_LEDGER_PAGE_GRAVES") % graves)
 	return out
 
+## --- Açık Hesaplar (İz alt sistemi, tasarım notu §H adım 4) ---
+##
+## Defterin bu sayfası bir bilanço değil, bir hatırlatma: dünyada kervanın
+## adına yazılmış, karşılığı henüz gelmemiş ne varsa burada durur. Şiddet
+## sayısı **yazılmaz** (§F: sayı göstermeden durum göstermek); satır yalnız
+## nerede, ne ve sırasının gelip gelmediğini söyler. Üstü çizilmez: karşılığı
+## geldiğinde yanına yazılır, sönerse "kimse hatırlamadı" denir.
+##
+## Her satır: {"text", "note", "bad"}.
+static func account_rows(session: GameSession) -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	if session == null:
+		return rows
+	for trace in session.traces.traces:
+		if trace.gecikme == Trace.DELAY_NOW or trace.gecikme == Trace.DELAY_JOURNEY:
+			continue
+		var cause := String(Trace.LEDGER_CAUSE_KEYS.get(trace.tur, "LEDGER_TRACE_RUMOR"))
+		rows.append({
+			"text": TranslationServer.translate("UI_WAYBOOK_ACCOUNT_ROW") % [
+				_account_where(trace), TranslationServer.translate(cause)],
+			"note": _account_note(trace, session.total_days_elapsed),
+			"bad": trace.yon < 0,
+		})
+	return rows
+
+static func _account_where(trace: Trace) -> String:
+	var location := WorldMapData.get_location_by_id(trace.tasiyici_id)
+	if location != null:
+		return location.location_name
+	if trace.tasiyici_id.is_empty():
+		return TranslationServer.translate("UI_WAYBOOK_ACCOUNT_SOMEWHERE")
+	return trace.tasiyici_id
+
+static func _account_note(trace: Trace, day: int) -> String:
+	match trace.durum:
+		Trace.STATE_RETURNED:
+			return TranslationServer.translate("UI_WAYBOOK_ACCOUNT_ANSWERED") % (trace.donus_gunu + 1)
+		Trace.STATE_FADED:
+			return TranslationServer.translate("UI_WAYBOOK_ACCOUNT_FADED")
+		_:
+			if day >= trace.olgunluk_gunu:
+				return TranslationServer.translate("UI_WAYBOOK_ACCOUNT_RIPE")
+			return TranslationServer.translate("UI_WAYBOOK_ACCOUNT_WAITING")
+
 ## Dosya adı: kervanın adı ve günü; dosya sistemine uymayan harfler atılır.
 static func file_path(session: GameSession) -> String:
 	var name := session.caravan_name.to_lower().validate_filename().replace(" ", "_")
