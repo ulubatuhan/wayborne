@@ -569,6 +569,10 @@ func get_check_modifier(kind: CharacterStats.Kind) -> float:
 		var trait_resource := TraitCatalog.get_trait(trait_id)
 		if trait_resource != null and trait_resource.affinity_stat == kind:
 			total += trait_resource.check_bonus
+	# Katı insanın soğuk yüzü (§D-R3): kimse ondan bir şey ummaz, sözü de
+	# o kadar geçer. Yalnız Karizma'ya biner - kabuk zekâyı köreltmez.
+	if is_hard() and kind == CharacterStats.Kind.CHARISMA:
+		total -= HARD_CHARISMA_PENALTY
 	return total
 
 ## Faz 17: "irrasyonel davranış" katmanı - yalnızca zaten kırılmış
@@ -695,7 +699,11 @@ static func backstory_for_id(id: String) -> String:
 	return BACKSTORY_KEYS[absi(hash("backstory|" + id)) % BACKSTORY_KEYS.size()]
 
 func change_rapport(delta: int) -> void:
-	rapport = clampi(rapport + delta, 0, MAX_RAPPORT)
+	# Katı insan yakınlığı yarım alır: kabuk işe yarar ama yalnızlaştırır.
+	var applied := delta
+	if delta > 0 and is_hard():
+		applied = int(round(float(delta) * HARD_RAPPORT_MULT))
+	rapport = clampi(rapport + applied, 0, MAX_RAPPORT)
 
 const GRIEVANCE_UNFED: String = "unfed"
 const GRIEVANCE_BENCHED: String = "benched"
@@ -847,12 +855,101 @@ func change_soul(axis: String, delta: float, day: int) -> float:
 const SOUL_SHELL: String = "kabuk"
 const SOUL_CRACK: String = "catlak"
 
+## --- Hâl: eksenlerin ve stresin görünen yüzü (§D-R3) ---
+##
+## Hâl yeni bir sayaç değil, var olanların okunuşu: stres Yorgun'u, Kabuk
+## Katı'yı, Çatlak Sönük'ü getirir. Her birinin etkisi **var olan** bir
+## çarpana biner; yeni bir sistem açılmaz. Histerezis (girmek 4, çıkmak 3)
+## bir eşiğin üstünde titreyen kişinin her gün hâl değiştirmesini engeller:
+## bir insan günde bir Katı olup bir Diri'ye dönmez.
+const STATE_ALIVE: String = "diri"
+const STATE_WEARY: String = "yorgun"
+const STATE_HARD: String = "kati"
+const STATE_DIM: String = "sonuk"
+const STATES: Array[String] = [STATE_ALIVE, STATE_WEARY, STATE_HARD, STATE_DIM]
+
+const STATE_ENTER_AXIS: float = 4.0
+const STATE_LEAVE_AXIS: float = 3.0
+const STATE_WEARY_STRESS_IN: int = 60
+const STATE_WEARY_STRESS_OUT: int = 40
+const STATE_WEARY_DAYS_IN: int = 5
+const STATE_WEARY_DAYS_OUT: int = 3
+
+## Yorgun: günün yıpranması %15 ağır, kamp eyleminin verimi %20 düşük.
+const WEARY_STRESS_MULT: float = 1.15
+const WEARY_CAMP_MULT: float = 0.8
+## Katı: olaydan gelen stresin yarısı, yakınlık kazanımının yarısı.
+const HARD_EVENT_STRESS_MULT: float = 0.5
+const HARD_RAPPORT_MULT: float = 0.5
+## Katı insanın soğuk yüzü Karizma kontrolünde bir puan eksi: kimse ona
+## inanmıyor değil, kimse ondan bir şey ummuyor.
+const HARD_CHARISMA_PENALTY: float = 1.0
+## Sönük: yorgunluk %25 hızlı birikir, görev verimi %15 düşer, savaşta
+## kırılma eşiği 10 puan iner.
+const DIM_FATIGUE_MULT: float = 1.25
+const DIM_DUTY_MULT: float = 0.85
+const DIM_BREAK_PENALTY: int = 10
+
+var hal: String = STATE_ALIVE
+## Hâle girilen gün (histerezis sayacı) ve eşiğin kaç gündür aşıldığı.
+var hal_gunu: int = -1
+var _weary_streak: int = 0
+var _calm_streak: int = 0
+
+## Günlük hâl değerlendirmesi. `on_road` yalnız Yorgun'un giriş sayacını
+## etkiler (yolun yıpranması); şehir geceleri çıkış sayacına **sayılır**.
+## Hâl değiştiyse yeni hâli, değişmediyse boş dönüyor - çağıran bunu
+## günlüğe ve kişilik sürüklenmesine veriyor.
+func update_state(day: int, on_road: bool) -> String:
+	if stress > STATE_WEARY_STRESS_IN and on_road:
+		_weary_streak += 1
+	elif stress <= STATE_WEARY_STRESS_IN:
+		_weary_streak = 0
+	if stress < STATE_WEARY_STRESS_OUT:
+		_calm_streak += 1
+	else:
+		_calm_streak = 0
+	var next := _next_state()
+	if next == hal:
+		return ""
+	hal = next
+	hal_gunu = day
+	return hal
+
+func _next_state() -> String:
+	# Eksenler stresin önünde: kabuk ve çatlak kalıcı, stres uçucu.
+	var hard: bool = kabuk >= STATE_ENTER_AXIS or (hal == STATE_HARD and kabuk >= STATE_LEAVE_AXIS)
+	var dim: bool = catlak >= STATE_ENTER_AXIS or (hal == STATE_DIM and catlak >= STATE_LEAVE_AXIS)
+	if hard and dim:
+		return STATE_HARD if kabuk >= catlak else STATE_DIM
+	if hard:
+		return STATE_HARD
+	if dim:
+		return STATE_DIM
+	if hal == STATE_WEARY:
+		return STATE_ALIVE if _calm_streak >= STATE_WEARY_DAYS_OUT else STATE_WEARY
+	if _weary_streak >= STATE_WEARY_DAYS_IN:
+		return STATE_WEARY
+	return STATE_ALIVE
+
+func is_hard() -> bool:
+	return hal == STATE_HARD
+
+func is_dim() -> bool:
+	return hal == STATE_DIM
+
+func is_weary() -> bool:
+	return hal == STATE_WEARY
+
 ## Direnç ne kadar yüksekse bu karakter o kadar geç kırılır -
 ## dayanıklılığa bağlı (bkz. GameSession.resolve_stress_breaks). Herkes
 ## er ya da geç kırılabilir, yalnızca eşiği farklı.
 func get_stress_resistance() -> int:
+	# Sönük insanın kırılma eşiği düşer; liderin sükûneti (Karizma) herkesin
+	# eşiğini taşır (§D-R4, teşhis A12: o bağ hiç kurulmamıştı).
 	return 50 + int(round(3.0 * stats.get_effective_value(CharacterStats.Kind.ENDURANCE))) \
-		+ _trait_bonus_sum("stress_resistance_bonus")
+		+ _trait_bonus_sum("stress_resistance_bonus") \
+		- (DIM_BREAK_PENALTY if is_dim() else 0) + leader_composure_bonus
 
 ## PR-3'ün ilk kancası: "ne kadar dayanıklıysan o kadar geç kırılırsın"
 ## (yukarısı) yalnızca *eşiği* belirliyordu, günün kendisinin bıraktığı
@@ -875,7 +972,17 @@ const DAILY_STRESS_GAIN_PER_RESIST_POINT: float = -0.06
 const MIN_DAILY_STRESS_GAIN_MULT: float = 0.7
 const MAX_DAILY_STRESS_GAIN_MULT: float = 1.3
 
+## Liderin sözünün taşıdığı pay (§D-R4). Türetilmiş bir önbellek:
+## `GameSession` her gün ve kadro değişince yeniden yazıyor, kayda girmiyor.
+var leader_composure_bonus: int = 0
+
 func get_daily_stress_gain_multiplier() -> float:
+	if is_weary():
+		return clampf(WEARY_STRESS_MULT * _trait_stress_mult(), MIN_DAILY_STRESS_GAIN_MULT,
+			MAX_DAILY_STRESS_GAIN_MULT * WEARY_STRESS_MULT)
+	return _trait_stress_mult()
+
+func _trait_stress_mult() -> float:
 	return clampf(
 		1.0 + DAILY_STRESS_GAIN_PER_RESIST_POINT * float(_trait_bonus_sum("stress_resistance_bonus")),
 		MIN_DAILY_STRESS_GAIN_MULT, MAX_DAILY_STRESS_GAIN_MULT
@@ -911,6 +1018,9 @@ func change_fatigue(delta: int) -> void:
 	var applied := delta
 	if delta > 0 and body_weight == BODY_WEIGHT_HEAVY:
 		applied = int(round(float(delta) * FATIGUE_HEAVY_GAIN_MULT))
+	# Sönük insanın bedeni de ağırlaşır: aynı yol onu daha çok yorar.
+	if delta > 0 and is_dim():
+		applied = int(round(float(applied) * DIM_FATIGUE_MULT))
 	fatigue = clampi(fatigue + applied, 0, MAX_FATIGUE)
 
 ## İsabet ve kaçınmadan düşülen pay (pozitif sayı; eşiğin altında 0).
@@ -1147,6 +1257,9 @@ func to_dict() -> Dictionary:
 		"last_price_day": last_price_day,
 		"kabuk": kabuk,
 		"catlak": catlak,
+		"hal": hal,
+		"hal_gunu": hal_gunu,
+		"hal_sayac": [_weary_streak, _calm_streak],
 		"soul_day": _soul_day,
 		"soul_moved": [_soul_moved_kabuk, _soul_moved_catlak],
 		"missing_hand": missing_hand,
@@ -1199,6 +1312,12 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.last_price_day = int(data.get("last_price_day", -999))
 	character.kabuk = clampf(float(data.get("kabuk", 0.0)), 0.0, SOUL_MAX)
 	character.catlak = clampf(float(data.get("catlak", 0.0)), 0.0, SOUL_MAX)
+	character.hal = str(data.get("hal", STATE_ALIVE))
+	character.hal_gunu = int(data.get("hal_gunu", -1))
+	var streaks: Array = data.get("hal_sayac", [0, 0])
+	if streaks.size() >= 2:
+		character._weary_streak = int(streaks[0])
+		character._calm_streak = int(streaks[1])
 	character._soul_day = int(data.get("soul_day", -1))
 	var soul_moved: Array = data.get("soul_moved", [0.0, 0.0])
 	if soul_moved.size() >= 2:

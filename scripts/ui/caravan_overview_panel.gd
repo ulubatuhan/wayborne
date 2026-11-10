@@ -312,7 +312,25 @@ const GRIEVANCE_THOUGHT_KEYS: Dictionary = {
 func _thought_for(character: CharacterData) -> String:
 	return thought_for(character)
 
+## Hâlin adı: sıfat **başkasının ağzından** okunur, sayı olarak değil
+## (§F). Kabuk ve Çatlak ekranda hiçbir yerde sayı olarak görünmüyor;
+## görünen tek şey bu üç kelime ve ona eşlik eden cümle.
+const STATE_THOUGHT_KEYS: Dictionary = {
+	CharacterData.STATE_WEARY: "UI_STATE_WEARY",
+	CharacterData.STATE_HARD: "UI_STATE_HARD",
+	CharacterData.STATE_DIM: "UI_STATE_DIM",
+}
+
+static func state_label(character: CharacterData) -> String:
+	var key := String(STATE_THOUGHT_KEYS.get(character.hal, ""))
+	return "" if key.is_empty() else String(TranslationServer.translate(key))
+
 static func thought_for(character: CharacterData) -> String:
+	# Hâl kırgınlığın da önünde: Katı bir adamın aklındaki eski bir hesap
+	# değil, artık kim olduğudur.
+	var state := String(STATE_THOUGHT_KEYS.get(character.hal, ""))
+	if not state.is_empty():
+		return String(TranslationServer.translate(state)) % character.character_name
 	var top := character.get_top_grievance()
 	if not top.is_empty() and (
 		character.get_grievance(top) >= GRIEVANCE_THOUGHT_THRESHOLD

@@ -1026,7 +1026,13 @@ func get_max_stress_character() -> CharacterData:
 func change_character_stress(character: CharacterData, delta: int) -> void:
 	if character == null:
 		return
-	character.change_stress(delta)
+	# Katı insanın kabuğu olaydan gelen stresi yarıya indirir (§D-R3).
+	# Yolun kendi yıpranması (`_apply_road_stress_day`) bundan muaf: kabuk
+	# günün ağırlığını değil, **yaşananın** ağırlığını hafifletir.
+	var applied := delta
+	if delta > 0 and character.is_hard():
+		applied = int(round(float(delta) * CharacterData.HARD_EVENT_STRESS_MULT))
+	character.change_stress(applied)
 
 ## --- Yorgunluk ve kervanın takati (görev Y-F01) ---
 ## Kişinin yorgunluğu (`CharacterData.fatigue`) bedenin hâli; kervanın takati
@@ -3285,6 +3291,8 @@ func advance_day() -> Array[String]:
 	market.advance_day(total_days_elapsed)
 	# İzler erir: kimsenin hatırlamaması da bir sonuçtur (§D-İ3).
 	traces.advance_day(total_days_elapsed)
+	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
+	update_party_states()
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
 	route_conditions.advance_day(total_days_elapsed)
@@ -5772,6 +5780,62 @@ func charge_leader_tone(mercy: bool) -> void:
 	var cost := roundi(leader.catlak if not mercy else leader.kabuk)
 	if cost > 0:
 		change_character_stress(leader, cost)
+
+## --- Hâl makinesi (§D-R3) ve liderin sükûneti (§D-R4) ---
+##
+## Liderin Karizması bugüne kadar savaşta ölçülebilir bir fark yaratmıyordu
+## (teşhis A12: `simulate_journeys`'in Sükûnet satırı Karizma 5/10/15 için
+## hep %53). Sebebi şuydu: Karizma yalnız **kendi** sahibinin emir reddini
+## azaltıyordu, oysa liderlik başkalarına yapılır. Artık liderin sözü her
+## yoldaşın kırılma eşiğini taşıyor.
+const COMPOSURE_PER_POINT: int = 2
+const COMPOSURE_CAP: int = 10
+
+func update_party_states() -> void:
+	if party.is_empty():
+		return
+	_refresh_leader_composure()
+	var on_road := is_journey_active()
+	for member in party:
+		var changed := member.update_state(total_days_elapsed, on_road)
+		if changed.is_empty():
+			continue
+		_drift_personality(member, changed)
+		note_beat(BEAT_STORY, [member.character_name])
+
+## Liderin sükûnet payı kişilerde önbelleklenir (`leader_composure_bonus`):
+## `is_stressed()` oyunun her yerinden çağrılıyor ve oraya oturumu taşımak
+## sekiz ekranı değiştirmek demekti.
+func _refresh_leader_composure() -> void:
+	var leader := get_player_character()
+	if leader == null:
+		return
+	var bonus := clampi(
+		COMPOSURE_PER_POINT * int(round(
+			leader.stats.get_effective_value(CharacterStats.Kind.CHARISMA))),
+		-COMPOSURE_CAP, COMPOSURE_CAP
+	)
+	for member in party:
+		# Liderin kendi eşiği kendi sözüyle taşınmaz.
+		member.leader_composure_bonus = 0 if member == leader else bonus
+
+## Kişilik sürüklenmesi (§D-R3): bir hâle **ilk** girişte, yeri varsa, o
+## hâlin huyu yazılır. Zar kişinin kimliğinden tohumlu - aynı kişi aynı
+## hâle hep aynı huyla girer, kaydı yeniden yüklemek değiştirmez.
+func _drift_personality(member: CharacterData, state: String) -> void:
+	var options: Array[String] = []
+	if state == CharacterData.STATE_HARD:
+		options = [TraitCatalog.PRUDENT, TraitCatalog.OFF_PUTTING]
+	elif state == CharacterData.STATE_DIM:
+		options = [TraitCatalog.WAVERING_FAITH, TraitCatalog.REASSURING]
+	if options.is_empty():
+		return
+	for option in options:
+		if member.has_trait(option):
+			return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s|hal|%s" % [member.character_id, state])
+	member.grant_trait(options[rng.randi_range(0, options.size() - 1)], total_days_elapsed)
 
 func _leader_soul(axis: String) -> float:
 	if party.is_empty():

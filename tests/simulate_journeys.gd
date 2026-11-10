@@ -369,6 +369,12 @@ func _simulate_combat(
 	for character in party:
 		if position > CombatEncounter.MAX_SIDE_SIZE:
 			break
+		# `party_stress` buraya kadar geliyordu ve **hiç uygulanmıyordu**:
+		# "kırılmış parti" satırı aslında sakin bir partiyi ölçüyordu, yani
+		# emir reddi hiç tetiklenmiyor ve Karizma'nın karşılığı ölçülemiyordu
+		# (teşhis A12'nin asıl sebebi aracın kendisiydi).
+		if party_stress > 0:
+			character.stress = party_stress
 		units.append(CombatUnit.from_character(character, position, character.is_stressed()))
 		position += 1
 
@@ -740,25 +746,41 @@ func _report_progression_ladder() -> void:
 ## Karizma'nın savaştaki tek karşılığı: kırılmış bir savaşçının emri
 ## reddetme ihtimalini düşürmesi. Stres yokken hiçbir fark yaratmamalı -
 ## bu da ölçülüyor, yoksa "her yerde işe yarayan" gizli bir bonus olurdu.
+const COMPOSURE_EDGE_STRESS: int = 55
+
 func _report_composure_impact() -> void:
 	for stressed in [false, true]:
-		var line: String = "    %s parti: " % ("kırılmış" if stressed else "sakin")
+		var line: String = "    %s parti: " % ("eşiğin ucunda" if stressed else "sakin")
 		for charisma in [5, 10, 15]:
 			var wins := 0
 			var battles := 60
 			for index in battles:
 				var rng := RandomNumberGenerator.new()
 				rng.seed = 1500 + index
+				# Sükûnet liderlikten gelir (§D-R4): kervanbaşının Karizması
+				# **yoldaşın** kırılma eşiğini taşır. Eski ölçüm partinin
+				# hepsine aynı Karizma'yı verip tek başına kendi emir reddini
+				# ölçüyordu ve bu yüzden Karizma 5/10/15 için hep aynı sayıyı
+				# basıyordu (teşhis A12) - aracın körlüğüydü.
+				var leader_stats := CharacterStats.new()
+				leader_stats.set_value(CharacterStats.Kind.CHARISMA, charisma)
+				var session := GameSession.new(0, 0, 1)
+				var leader := CharacterData.create(
+					"Kervanbaşı", CultureCatalog.VALLEY, leader_stats)
+				session.set_player_character(leader)
+				session.add_to_party(CharacterData.create(
+					"Yoldaş", CultureCatalog.VALLEY, CharacterStats.new()))
+				session.update_party_states()
 				var party: Array[CharacterData] = []
-				for slot in 2:
-					var stats := CharacterStats.new()
-					stats.set_value(CharacterStats.Kind.CHARISMA, charisma)
-					var character := CharacterData.create(
-						"Yoldaş %d" % (slot + 1), CultureCatalog.VALLEY, stats
-					)
+				for character in session.get_party():
 					character.heal_full()
 					party.append(character)
-				var stress: int = GameSession.MAX_STRESS if stressed else 0
+				# Eşiğin **ucunda** ölçülüyor: tavan stresle (100) kimse
+				# kurtulamaz, liderin sözü de dahil hiçbir şey ölçülemez.
+				# Kırılma eşiği tabanda 50; 55 tam o sınırın bir adım
+				# üstü, yani "liderin sözü yetti mi" sorusunun sorulabildiği
+				# tek yer.
+				var stress: int = COMPOSURE_EDGE_STRESS if stressed else 0
 				if bool(_simulate_combat(party, 0.5, rng, 1, stress).victory):
 					wins += 1
 			line += "Karizma %2d → %%%d   " % [

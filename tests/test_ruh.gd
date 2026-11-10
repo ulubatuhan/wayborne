@@ -19,6 +19,10 @@ func run(t) -> void:
 	_test_leader_pays_for_its_own_face(t)
 	_test_no_choice_is_ever_closed(t)
 	_test_soul_survives_the_save(t)
+	_test_state_machine_has_hysteresis(t)
+	_test_states_bend_existing_counters(t)
+	_test_leader_word_carries_the_break_threshold(t)
+	_test_state_is_read_as_a_sentence_not_a_number(t)
 
 func _session(extra: int = 2) -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -129,3 +133,77 @@ func _test_soul_survives_the_save(t) -> void:
 	var copy := CharacterData.from_dict(who.to_dict())
 	t.eq(copy.kabuk, 2.25, "kabuk kayıttan döndü")
 	t.eq(copy.catlak, 1.75, "çatlak kayıttan döndü")
+
+# --- §D-R3: hâl makinesi ---
+
+## Histerezis: girmek 4, çıkmak 3. Bir insan günde bir Katı olup bir
+## Diri'ye dönmez - eşiğin üstünde titreyen kişi hâlinde kalır.
+func _test_state_machine_has_hysteresis(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	who.kabuk = CharacterData.STATE_ENTER_AXIS
+	t.eq(who.update_state(10, true), CharacterData.STATE_HARD, "kabuk 4'te Katı")
+	who.kabuk = 3.5
+	t.eq(who.update_state(11, true), "", "3,5'te hâlâ Katı: çıkış eşiği ayrı")
+	t.ok(who.is_hard(), "hâl korunuyor")
+	who.kabuk = 2.75
+	t.eq(who.update_state(12, true), CharacterData.STATE_ALIVE, "3'ün altında Diri'ye döner")
+
+	# Yorgun yolun beş gününü ister, şehrin üç gecesinde geçer.
+	var tired := _companion(session)
+	tired.stress = CharacterData.STATE_WEARY_STRESS_IN + 5
+	for day in CharacterData.STATE_WEARY_DAYS_IN - 1:
+		t.eq(tired.update_state(20 + day, true), "", "beşinci günden önce Yorgun değil")
+	t.eq(tired.update_state(30, true), CharacterData.STATE_WEARY, "beşinci yol günü Yorgun")
+	tired.stress = CharacterData.STATE_WEARY_STRESS_OUT - 5
+	for day in CharacterData.STATE_WEARY_DAYS_OUT - 1:
+		tired.update_state(40 + day, false)
+	t.eq(tired.update_state(50, false), CharacterData.STATE_ALIVE, "üç sakin gece Yorgun'u alır")
+
+## Hiçbir hâl yeni bir sayaç açmıyor: hepsi var olan çarpanlara biniyor.
+func _test_states_bend_existing_counters(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	who.kabuk = 5.0
+	who.update_state(10, true)
+	var before: int = who.stress
+	session.change_character_stress(who, 10)
+	t.eq(who.stress, before + 5, "Katı olaydan gelen stresi yarıya indiriyor")
+	var rapport_before: int = who.rapport
+	who.change_rapport(2)
+	t.eq(who.rapport, rapport_before + 1, "Katı yakınlığı yarım alıyor")
+	t.eq(who.get_check_modifier(CharacterStats.Kind.CHARISMA),
+		-CharacterData.HARD_CHARISMA_PENALTY, "soğuk yüzün Karizma payı eksi")
+
+	var dim := _session(1).get_party()[1]
+	dim.catlak = 5.0
+	dim.update_state(10, true)
+	var fatigue_before: int = dim.fatigue
+	dim.change_fatigue(8)
+	t.ok(dim.fatigue > fatigue_before + 8, "Sönük daha çabuk yoruluyor")
+	var dim_threshold: int = dim.get_stress_resistance()
+	dim.catlak = 0.0
+	dim.update_state(11, true)
+	t.eq(dim_threshold, dim.get_stress_resistance() - CharacterData.DIM_BREAK_PENALTY,
+		"Sönük savaşta on puan erken kırılıyor")
+
+## Teşhis A12: liderin Karizması savaşta ölçülebilir hiçbir şey yapmıyordu
+## çünkü yalnız kendi emir reddini azaltıyordu. Liderlik başkalarına yapılır.
+func _test_leader_word_carries_the_break_threshold(t) -> void:
+	var session := _session()
+	var leader := session.get_player_character()
+	var who := _companion(session)
+	var base: int = who.get_stress_resistance()
+	leader.stats.set_value(CharacterStats.Kind.CHARISMA, 10)
+	session.update_party_states()
+	t.ok(who.get_stress_resistance() > base, "liderin sözü yoldaşın eşiğini taşıyor")
+	t.eq(leader.leader_composure_bonus, 0, "lider kendi sözüyle taşınmıyor")
+
+func _test_state_is_read_as_a_sentence_not_a_number(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	who.kabuk = 5.0
+	who.update_state(10, true)
+	var line := CaravanOverviewPanel.thought_for(who)
+	t.ok(line.contains(who.character_name), "hâl kişinin adıyla anlatılıyor")
+	t.not_ok(line.contains("4") or line.contains("5"), "ekranda eksenin sayısı yok")
