@@ -39,3 +39,6 @@ Thumbs.db
 *.log
 *.orig
 build/ui_scenes/
+
+# Fable paketinin ölçüm günlükleri (yeniden üretilebilir)
+build/fable_olcum/
