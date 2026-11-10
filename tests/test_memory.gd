@@ -174,6 +174,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"road_sky": "yolun bugünkü göğü; yol ekranı her sabah ve yüklemede tohumdan yeniden yazar",
 	"cold_notes": "yalnızca son gecenin soğuk notları; günlük yazıldıktan sonra anlamı yok",
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
+	"last_bearer_name": "yalnızca o kartın {bedel} işaretini doldurur; kalıcı olan kişinin kendi last_price_day'i",
 }
 
 ## Kayıtta farklı bir anahtarla duran alanlar: alan -> anahtar.

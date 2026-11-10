@@ -111,6 +111,16 @@ enum Type {
 	# oyuncu neyi vereceğini seçmez, blöfün tuttuğu şey zaten en ucuzunun
 	# değerli görünmesidir.
 	CARGO_DECOY,
+	# Bedeli adı olan birine yükler (Ahlak alt sistemi, tasarım notu
+	# docs/design_notes/ahlak_ruh_iz_mimarisi.md §D-A2). amount = asıl etkinin
+	# büyüklüğü, text_value = "<ALT_ETKI>|<kural>" (ör. "PARTY_HP|en_kirgin",
+	# "STRESS|bagi_olan", "LEAVE_BEHIND|yemini_yok"). Kural adları
+	# BedelSecici.RULES'ta; taşıyıcının adı kart açılmadan seçeneğin üstünde
+	# yazar ve sonuç metninde {bedel} olarak geçer.
+	# Niye PARTY_HP'nin seçicisini genişletmek yetmedi: o seçici yalnız
+	# "weakest", bir stat adı ya da lider seçebiliyor; bağ, kırgınlık, yemin
+	# ve geçmiş okunamıyordu - oysa hepsi kayıtta duruyor.
+	BEDEL,
 }
 
 @export var type: Type = Type.GOLD

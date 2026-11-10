@@ -678,6 +678,11 @@ func get_seen_event_count() -> int:
 const RECENT_DECISION_COUNT: int = 3
 var recent_decisions: Array = []
 
+## Son bedeli ödeyen kişinin adı (Ahlak, BEDEL etkisi). Kayda yazılmaz:
+## yalnız o kartın sonuç metnindeki {bedel} işaretini doldurmak için var -
+## kalıcı olan şey kişinin kendi `last_price_day`'i ve izidir.
+var last_bearer_name: String = ""
+
 func note_decision(event_id: String, choice_key: String) -> void:
 	if event_id.is_empty():
 		return

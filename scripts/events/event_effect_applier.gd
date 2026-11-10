@@ -214,16 +214,92 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 		EventEffect.Type.TRADE_STAIN:
 			session.stain_trade(effect.amount)
 			result.lines.append(_t("EFF_TRADE_STAIN"))
+		EventEffect.Type.BEDEL:
+			_apply_bedel(effect, session, result)
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:
 				session.advance_chain(parts[0], int(parts[1]), parts[2] if parts.size() > 2 else "", effect.amount)
 
+## Bedel adı olan birine düşer (Ahlak, §D-A2). Seçici önizlemeyle aynı:
+## kart açılırken yazan ad ile bedeli ödeyen kişi aynı olmak zorunda.
+##
+## Havuz boşsa (tek başına yürüyen lider) bedel kervanın kendisine yazılır:
+## can yerine stres, bırakma yerine moral. "Gelecekteki sen" de bir
+## taşıyıcıdır - bedelsiz bir seçenek üretmektense lideri yıpratırız.
+static func _apply_bedel(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var rule := _bedel_rule(effect)
+	var alt := _bedel_effect_name(effect)
+	var bearer: CharacterData = BedelSecici.pick(rule, session)
+	if bearer == null:
+		_apply_bedel_to_caravan(alt, effect, session, result)
+		return
+	session.last_bearer_name = bearer.character_name
+	bearer.last_price_day = session.total_days_elapsed
+	match alt:
+		"LEAVE_BEHIND":
+			_leave_behind_character(bearer, session, result)
+		"STRESS":
+			session.change_character_stress(bearer, effect.amount)
+			result.lines.append(_t("EFF_BEDEL_STRESS") % bearer.character_name)
+		"PARTY_HP", "":
+			# Olaylar öldürmez: can 1'de kenetlenir (bkz. _apply_party_hp).
+			var before: int = bearer.current_hp
+			bearer.current_hp = clampi(bearer.current_hp + effect.amount, 1, bearer.get_max_hp())
+			var moved: int = bearer.current_hp - before
+			if moved != 0:
+				result.lines.append(_t("EFF_BEDEL_HP" if moved < 0 else "EFF_BEDEL_HEAL")
+					% [bearer.character_name, absi(moved)])
+		_:
+			push_warning("BEDEL: bilinmeyen alt etki %s" % alt)
+
+## Taşıyacak kimse yoksa bedel kervanbaşının sırtına biner.
+static func _apply_bedel_to_caravan(alt: String, effect: EventEffect, session: GameSession,
+		result: Result) -> void:
+	var leader := session.get_player_character()
+	if leader == null:
+		return
+	session.last_bearer_name = leader.character_name
+	leader.last_price_day = session.total_days_elapsed
+	match alt:
+		"LEAVE_BEHIND":
+			# Lider bırakılmaz; yük bırakmak gibi okunur: moral ve stres.
+			session.caravan.change_morale(-6)
+			session.change_character_stress(leader, 8)
+			result.lines.append(_t("EFF_BEDEL_ALONE"))
+		"STRESS":
+			session.change_character_stress(leader, effect.amount)
+			result.lines.append(_t("EFF_BEDEL_STRESS") % leader.character_name)
+		_:
+			var before: int = leader.current_hp
+			leader.current_hp = clampi(leader.current_hp + effect.amount, 1, leader.get_max_hp())
+			var moved: int = leader.current_hp - before
+			if moved != 0:
+				result.lines.append(_t("EFF_BEDEL_HP" if moved < 0 else "EFF_BEDEL_HEAL")
+					% [leader.character_name, absi(moved)])
+
+static func _bedel_effect_name(effect: EventEffect) -> String:
+	var parts := effect.text_value.split("|")
+	return parts[0].strip_edges().to_upper() if parts.size() > 0 else ""
+
+static func _bedel_rule(effect: EventEffect) -> String:
+	var parts := effect.text_value.split("|")
+	if parts.size() < 2:
+		return BedelSecici.RULE_WEAKEST
+	var rule := parts[1].strip_edges()
+	return rule if BedelSecici.RULES.has(rule) else BedelSecici.RULE_WEAKEST
+
 ## En yaralı yoldaş kervandan ayrılır - ölüm değil, geride bırakılma.
 ## Lider asla bırakılmaz, tek kişilik bir parti hiç kimseyi bırakamaz.
 static func _apply_leave_behind(session: GameSession, result: Result) -> void:
-	var target := _weakest_companion(session)
-	if target == null:
+	_leave_behind_character(_weakest_companion(session), session, result)
+
+## Belirli bir kişiyi geride bırakır. Seçici dışarıda kaldığı için BEDEL de
+## (adı olan taşıyıcı) aynı yolu kullanıyor - iki ayrı bırakma akışı iki
+## ayrı kural demekti (ant kardeşi, defter satırı, feda izi).
+static func _leave_behind_character(target: CharacterData, session: GameSession,
+		result: Result) -> void:
+	if target == null or target.is_player:
 		return
 	# Ant içmiş birini geride bırakmak sözü bozmaktır (Y-C33): aynı töreden
 	# olanlar bunu unutmaz.
@@ -283,6 +359,8 @@ static func _target_in(effects: Array[EventEffect], session: GameSession) -> Cha
 				return _pick_party_target(effect.text_value, session)
 			EventEffect.Type.CUT_HAND:
 				return session.unbelieving_companion()
+			EventEffect.Type.BEDEL:
+				return BedelSecici.pick(_bedel_rule(effect), session)
 	return null
 
 static func _pick_party_target(selector: String, session: GameSession) -> CharacterData:

@@ -563,3 +563,7 @@
 "EFF_AMBUSH_OPENING","Geç kaldın - onlar çoktan davrandı.","Too late - they have already moved.","","","","","","","","",""
 "EFF_CARGO_PLUNDER","Yükten alındı: %s","Taken from the load: %s","","","","","","","","",""
 "EFF_CARGO_DECOY","Paha biçilmez diye verildi: %s","Handed over as priceless: %s","","","","","","","","",""
+"EFF_BEDEL_HP","%s bedelini canıyla ödedi (-%d).","%s paid with blood (-%d).","","","","","","","","",""
+"EFF_BEDEL_HEAL","%s biraz toparlandı (+%d).","%s mends a little (+%d).","","","","","","","","",""
+"EFF_BEDEL_STRESS","Yük %s'in sırtına bindi.","The weight settled on %s.","","","","","","","","",""
+"EFF_BEDEL_ALONE","Verecek kimse yok: bedeli sen ödedin.","There was no one else: you paid it.","","","","","","","","",""

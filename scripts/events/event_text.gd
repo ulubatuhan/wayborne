@@ -34,10 +34,14 @@ extends RefCounted
 const WHO: String = "{who}"
 ## Yolun gittiği adı bilinen yerleşim.
 const TOWN: String = "{town}"
+## Bu seçimin bedelini ödeyen kişi (Ahlak, BEDEL etkisi). Kart açılırken
+## seçeneğin üstünde zaten yazıyor; sonuç metni aynı adı anar ki bedelin
+## kime düştüğü iki kez görünsün.
+const BEARER: String = "{bedel}"
 
 ## Bütün işaretler (eski zincir işaretleri dahil) - `_strip` ve test bu
 ## listeyi tarıyor.
-const TOKENS: Array = [WHO, TOWN, "{place}", "{off}", "{nemesis}", "{scar}"]
+const TOKENS: Array = [WHO, TOWN, BEARER, "{place}", "{off}", "{nemesis}", "{scar}"]
 
 ## Bir olay metnini (kart başlığı, gövde, seçenek, sonuç) adlarla doldurur.
 ##
@@ -56,6 +60,8 @@ static func fill(text: String, session: GameSession, check: SkillCheck = null, s
 		filled = filled.replace(WHO, person_name(session, check, seed_key))
 	if filled.contains(TOWN):
 		filled = filled.replace(TOWN, place_name(session))
+	if filled.contains(BEARER) and not session.last_bearer_name.is_empty():
+		filled = filled.replace(BEARER, session.last_bearer_name)
 	return _strip(filled)
 
 ## Çözülemeyen işaretleri temizler: işaretin kendisi ve peşindeki tek
