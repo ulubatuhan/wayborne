@@ -169,11 +169,48 @@ func load_from_dict(data: Dictionary) -> void:
 ## Zar bu motorun kendi `_rng`'siyle atılıyor - EventEngine seed'lenerek
 ## kurulduğu için (bkz. Event Engine Rules) bir sefer tamamen tekrarlanabilir
 ## kalıyor, check de dahil.
+## Liderin yüzünün zara kattığı (§D-R4). Kabuk bağlamış lider sert bir
+## seçeneği daha inandırıcı savunur, çatlamış lider merhametli olanı -
+## çünkü ikisini de yaşamıştır. Hiçbir seçenek kapanmaz, yalnız zar kayar.
+##
+## Önizleme ve zar **aynı** fonksiyonu okuyor: düğmede yazan yüzde ile
+## atılan zar ayrı hesaplanırsa oyuncuya yalan söylenmiş olur (aynı kural
+## bedel taşıyıcısının adında da yazılı).
+const LEADER_SOUL_GATE: float = 4.0
+const LEADER_SOUL_BONUS: float = 1.0
+
+static func leader_tone_bonus(choice: EventChoice, context: Dictionary) -> float:
+	var tone := choice_tone(choice)
+	if tone == TONE_HARSH and float(context.get("lider_kabuk", 0.0)) >= LEADER_SOUL_GATE:
+		return LEADER_SOUL_BONUS
+	if tone == TONE_MERCY and float(context.get("lider_catlak", 0.0)) >= LEADER_SOUL_GATE:
+		return LEADER_SOUL_BONUS
+	return 0.0
+
+const TONE_HARSH: String = "sert"
+const TONE_MERCY: String = "merhamet"
+
+## Seçeneğin tonu, kendi etkilerinden okunur: bedeli başkasına yükleyen ya
+## da kin bırakan sert, minnet bırakan merhametlidir. Katalogda ayrı bir
+## etiket tutulmuyor - etiket unutulur, etki unutulmaz.
+static func choice_tone(choice: EventChoice) -> String:
+	for effect in choice.effects:
+		if effect.type == EventEffect.Type.BEDEL:
+			return TONE_HARSH
+		if effect.type == EventEffect.Type.IZ_BIRAK:
+			var tur := effect.text_value.split("|")[0].strip_edges()
+			if tur == Trace.TYPE_GRUDGE:
+				return TONE_HARSH
+			if tur == Trace.TYPE_GRATITUDE:
+				return TONE_MERCY
+	return ""
+
 func resolve_check(choice: EventChoice, context: Dictionary) -> Dictionary:
 	var checked := context.duplicate()
 	if choice.check == null:
 		return checked
-	var effective_stat: float = float(context.get(choice.check.get_context_key(), 0.0))
+	var effective_stat: float = float(context.get(choice.check.get_context_key(), 0.0)) \
+		+ leader_tone_bonus(choice, context)
 	checked["check_tier"] = choice.check.roll(effective_stat, _rng)
 	return checked
 

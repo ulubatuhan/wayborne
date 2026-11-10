@@ -571,3 +571,5 @@
 "EFF_BEDEL_HAND_WORN","Payı %s'in sırtına bindi; vagonlar ekşidi.","The share fell on %s; the wagons soured.","","","","","","","","",""
 "EFF_TRACE_LEFT","Bu bir yere yazıldı.","This went down somewhere.","","","","","","","","",""
 "EFF_TRACE_LEFT_BAD","Bu da bir yere yazıldı.","This, too, went down somewhere.","","","","","","","","",""
+"EFF_SOUL_SHELL","Kimse bir şey söylemedi.","No one said anything.","","","","","","","","",""
+"EFF_SOUL_CRACK","Bir şey yerine oturmadı.","Something did not settle.","","","","","","","","",""

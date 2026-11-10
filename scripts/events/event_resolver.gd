@@ -100,6 +100,10 @@ static func resolve_choice(
 	if resolution.outcome != null and not resolution.outcome.effects.is_empty():
 		resolution.outcome_result = _apply(resolution.outcome.effects, session, apply_effects)
 
+	# Ruh (§D-R2): bedeli ödeyen belliydi, işe yarayıp yaramadığı ancak
+	# burada belli olur - zarın sonucu tanıklığın türünü değiştiriyor.
+	session.settle_price(resolution.check_tier)
+
 	for result in resolution.get_results():
 		for event_id in result.unlocked_event_ids:
 			engine.unlock_event(event_id)

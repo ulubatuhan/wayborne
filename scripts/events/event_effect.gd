@@ -131,6 +131,12 @@ enum Type {
 	# Niye SET_FLAG + UNLOCK_EVENT yetmedi: bayrak taşıyıcı, şiddet, vade,
 	# sönme ve yayılma taşımaz - yani bir hesap değil, bir anahtardır.
 	IZ_BIRAK,
+	# Kişinin Ruh eksenini oynatır (Ruh alt sistemi, §C.3/§D-R2).
+	# amount = adım × 4 (1 = 0,25; eksi değer iyileştirir),
+	# text_value = "<eksen>|<kim>": eksen `kabuk`/`catlak`, kim `bedel`,
+	# `lider`, `tanik`, `hepsi`. Stres uçucudur (handa bir gece siler),
+	# huy ani ve ikilidir; eksen yavaştır ve yalnız doğru şeyle geri döner.
+	RUH,
 }
 
 @export var type: Type = Type.GOLD

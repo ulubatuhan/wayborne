@@ -741,6 +741,14 @@ func leave_trace(
 		"%s|%d|%s" % [caravan_name, total_days_elapsed, kaynak],
 		siddet, donus_karti, last_bearer_name
 	)
+	# Ruh (§D-R2, §D-R4): minnet izi bir merhametin, kin izi bir sertliğin
+	# kaydıdır - ikisi de kervanda biri tarafından görülüyor ve liderin
+	# kendi eksenine göre bir bedeli var.
+	if trace != null and tur == Trace.TYPE_GRATITUDE:
+		note_witness(WITNESS_MERCY)
+		charge_leader_tone(true)
+	elif trace != null and tur == Trace.TYPE_GRUDGE:
+		charge_leader_tone(false)
 	if also_ledger and trace != null and traces.ledger_worthy().has(trace):
 		ledger.record(
 			CaravanLedger.KIND_TRACE, _trace_ledger_name(trace), total_days_elapsed,
@@ -1795,6 +1803,9 @@ func dismiss(character: CharacterData, cause_key: String = DISMISSED_CAUSE_KEY) 
 		total_days_elapsed, lineage_generation, character.character_id,
 		cause_key, _ledger_location_id()
 	)
+	# Ruh tanıklığı: biri gitti, yeri boş kaldı. Lider için bu bir karar
+	# (kabuk), kalanlar için bir kayıp (çatlak).
+	note_witness(WITNESS_LEFT, character)
 	# Kovulan adam bu dünyada kaybolmaz (§E satır 41): bir sonraki şehirde
 	# başka bir kervanın yanında karşına çıkar. Yalnız **kovma** iz bırakır;
 	# geride bırakılmanın ve ölümün kendi yolları var.
@@ -1940,6 +1951,10 @@ func resolve_deaths(
 	for survivor in party:
 		survivor.add_grievance(CharacterData.GRIEVANCE_WITNESSED_DEATH, died_count)
 		_apply_shared_grief(survivor, dead)
+	# Ruh tanıklığı (§D-R2): ölen her yoldaş için ayrı ayrı - dostunu
+	# kaybetmek ile tanımadığını kaybetmek aynı şey değil.
+	for character in dead:
+		note_witness(WITNESS_DEATH, character)
 
 	if not leader_died:
 		return result
@@ -2980,6 +2995,7 @@ func _lose_one_crew_hand(cause_key: String, kind: String) -> String:
 		"", cause_key, _ledger_location_id()
 	)
 	note_beat(BEAT_DEATH if kind == CaravanLedger.KIND_DIED else BEAT_HUNGER, [crew_name])
+	note_witness(WITNESS_HAND_LOST)
 	return crew_name
 
 ## Adı belli bir tayfa eli kervandan çıkarılır - ölüm değil, geride
@@ -5578,6 +5594,8 @@ func resolve_trace_return() -> Dictionary:
 		if note.is_empty():
 			continue
 		traces.mark_returned(trace, total_days_elapsed)
+		note_witness(
+			WITNESS_TRACE_GOOD if trace.yon > 0 else WITNESS_TRACE_BAD, null, trace.dogum_gunu)
 		return note
 	return {}
 
@@ -5632,6 +5650,136 @@ func _trace_return_face(trace: Trace) -> Dictionary:
 ## Kapıda bekleyen yüz (son dönen `yuz` izi). Şehir özeti ve defter sayfası
 ## bunu okuyor (§H adım 4); boşsa kimse beklemiyor.
 var waiting_face: Dictionary = {}
+
+## --- Tanıklık: Ruh eksenlerini oynatan tek kapı (§D-R2) ---
+##
+## Bir şeyi **görmek** de bir şey yapar. Kervanda kim neye tanık oldu sorusu
+## bugüne kadar yalnız stresle ölçülüyordu ve stres handa bir gecede
+## siliniyordu; Kabuk ve Çatlak silinmez.
+##
+## Tanıklık **anında** işlenir, gün sonunda değil: tanık "aynı kamptakiler"
+## demek ve kadro gün içinde değişebiliyor (biri ölür, biri bırakılır) -
+## akşama kalan bir liste yanlış kişileri tanık sayardı. Günlük tavan
+## (`CharacterData.SOUL_DAILY_CAP`) boğulmayı zaten engelliyor.
+const WITNESS_PRICE_WORTH: String = "bedel_ise_yaradi"
+const WITNESS_PRICE_WASTED: String = "bedel_bosa_gitti"
+const WITNESS_MERCY: String = "merhamet"
+const WITNESS_DEATH: String = "olum"
+const WITNESS_LEFT: String = "birakildi"
+const WITNESS_HAND_LOST: String = "el_gitti"
+const WITNESS_TRACE_GOOD: String = "iz_iyi_dondu"
+const WITNESS_TRACE_BAD: String = "iz_kotu_dondu"
+
+## Dostluk eşiği: bu bağdan yukarısı "dostu" sayılır (tabloda +1/+0,75).
+const WITNESS_FRIEND_BOND: float = 2.0
+## Kaçıncı el kaybından sonra lider alışmayı bırakıp çatlamaya başlar.
+const WITNESS_HANDS_BEFORE_CRACK: int = 2
+
+## `subject` olayın başına gelen kişi (bedeli ödeyen, ölen, bırakılan);
+## tanık sayılmaz. `born_day` yalnız iz dönüşlerinde: izin doğduğu gün.
+func note_witness(kind: String, subject: CharacterData = null, born_day: int = -1) -> void:
+	# `party` doğrudan okunuyor: `get_party()` boş partiyi **yeniden kurar**
+	# (bkz. `_ensure_party`), yani son yoldaş öldükten sonra tanıklık işlemek
+	# kervanı diriltirdi. Kimse kalmadıysa tanık da yoktur.
+	if party.is_empty():
+		return
+	var leader := get_player_character()
+	for member in party:
+		if member == subject:
+			continue
+		var witness := member != leader
+		var friend := subject != null and get_bond(member, subject) >= WITNESS_FRIEND_BOND
+		var saw_it_born := born_day < 0 or get_join_day(member) <= born_day
+		_apply_witness(kind, member, witness, friend, saw_it_born)
+	if subject != null:
+		_apply_subject_witness(kind, subject)
+
+func _apply_witness(kind: String, who: CharacterData, witness: bool, friend: bool,
+		saw_it_born: bool) -> void:
+	var day := total_days_elapsed
+	match kind:
+		WITNESS_PRICE_WORTH:
+			who.change_soul(CharacterData.SOUL_SHELL, 0.25 if witness else 0.5, day)
+		WITNESS_PRICE_WASTED:
+			who.change_soul(CharacterData.SOUL_CRACK, 0.5, day)
+		WITNESS_MERCY:
+			who.change_soul(CharacterData.SOUL_SHELL, -0.25 if witness else -0.5, day)
+		WITNESS_DEATH:
+			who.change_soul(CharacterData.SOUL_CRACK, 1.0 if friend else 0.5, day)
+		WITNESS_LEFT:
+			if witness:
+				who.change_soul(CharacterData.SOUL_CRACK, 0.75 if friend else 0.25, day)
+			else:
+				# Lideri yıpratan şey kaybın kendisi değil, kararı vermiş
+				# olmak: bırakmak kabuk bağlar.
+				who.change_soul(CharacterData.SOUL_SHELL, 0.75, day)
+		WITNESS_HAND_LOST:
+			if witness:
+				who.change_soul(CharacterData.SOUL_CRACK, 0.25, day)
+			elif crew_lost_to_hunger <= WITNESS_HANDS_BEFORE_CRACK:
+				who.change_soul(CharacterData.SOUL_SHELL, 0.25, day)
+			else:
+				who.change_soul(CharacterData.SOUL_CRACK, 0.5, day)
+		WITNESS_TRACE_GOOD:
+			# Çatlağın tek ilacı: yaptığın bir iyiliğin geri dönmesi. O izin
+			# doğduğu gün kervanda olmayan için bu bir hikâye, bir tanıklık
+			# değil - payı dörtte bir.
+			if witness:
+				who.change_soul(CharacterData.SOUL_CRACK, -1.0 if saw_it_born else -0.25, day)
+			else:
+				who.change_soul(CharacterData.SOUL_CRACK, -0.5, day)
+		WITNESS_TRACE_BAD:
+			if witness:
+				who.change_soul(CharacterData.SOUL_CRACK, 0.25, day)
+			else:
+				who.change_soul(CharacterData.SOUL_SHELL, 0.25, day)
+
+func _apply_subject_witness(kind: String, subject: CharacterData) -> void:
+	match kind:
+		WITNESS_PRICE_WORTH:
+			subject.change_soul(CharacterData.SOUL_CRACK, 0.5, total_days_elapsed)
+		WITNESS_PRICE_WASTED:
+			subject.change_soul(CharacterData.SOUL_CRACK, 1.0, total_days_elapsed)
+
+## Bugün bedeli ödeyen kişi (BEDEL etkisi). Kartın sonucu belli olunca
+## (`settle_price`) tanıklığa dönüşür: bedel işe yaradıysa ödeyen çatlar ve
+## kalanlar kabuk bağlar, boşa gittiyse herkes çatlar. Kayda yazılmaz:
+## tek bir kartın çözümü kadar yaşar.
+var _price_payer: CharacterData = null
+
+func note_price_paid(who: CharacterData) -> void:
+	_price_payer = who
+
+## `check_tier`: 0 başarısız, 1-2 başarılı, -1 zar atılmadı. Zar yoksa bedel
+## bir şey satın almıştır (kart öyle yazılmıştır); sıfır tur, bedelin boşa
+## gitmesidir - **bedeli ödetip yine de kaybetmek** bu oyunun en ağır anı.
+func settle_price(check_tier: int) -> void:
+	if _price_payer == null or party.is_empty():
+		return
+	var payer := _price_payer
+	_price_payer = null
+	note_witness(WITNESS_PRICE_WASTED if check_tier == 0 else WITNESS_PRICE_WORTH, payer)
+
+## Liderin ödediği (§D-R4): hiçbir seçenek kapanmaz, yalnız bedeli değişir.
+## Kabuk bağlamış liderin eli merhamete gitmez, çatlamış liderin içi
+## sertliğe götürmez - ikisi de stres olarak yazılır.
+func charge_leader_tone(mercy: bool) -> void:
+	if party.is_empty():
+		return
+	var leader := get_player_character()
+	if leader == null:
+		return
+	var cost := roundi(leader.catlak if not mercy else leader.kabuk)
+	if cost > 0:
+		change_character_stress(leader, cost)
+
+func _leader_soul(axis: String) -> float:
+	if party.is_empty():
+		return 0.0
+	var leader := get_player_character()
+	if leader == null:
+		return 0.0
+	return leader.kabuk if axis == CharacterData.SOUL_SHELL else leader.catlak
 
 ## İzlerin "burası"sı: şehirdeysek şehir, yoldaysak gidilen şehir - yolda
 ## açılan hesap varılacak kapıda okunur.
@@ -6876,6 +7024,10 @@ func build_event_context() -> Dictionary:
 		"iz_minnet_burada": traces.strength_here(Trace.TYPE_GRATITUDE, _trace_here_id()),
 		"iz_kin_burada": traces.strength_here(Trace.TYPE_GRUDGE, _trace_here_id()),
 		"iz_acik": traces.open_count(),
+		# Liderin iki ekseni (§C.4): soğuk yüz blöfü kolaylaştırır, çatlamış
+		# yüz teselliyi. Kart bunu okuyabilir; hiçbir seçeneği kapatmaz.
+		"lider_kabuk": _leader_soul(CharacterData.SOUL_SHELL),
+		"lider_catlak": _leader_soul(CharacterData.SOUL_CRACK),
 		"iz_yolda_olu": _road_deaths_here(),
 		"flags": _flags,
 		# EventCondition yalnızca sabitle karşılaştırabildiği için (bkz.

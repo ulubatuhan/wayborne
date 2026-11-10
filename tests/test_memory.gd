@@ -176,6 +176,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"_board_cache": "kontrat panosu tohumdan yeniden kurulur (bkz. ContractBoard), önbellek yalnızca kimlik birliği için",
 	"last_bearer_name": "yalnızca o kartın {bedel} işaretini doldurur; kalıcı olan kişinin kendi last_price_day'i",
 	"_trace_source": "doğan izin kaynağını kartın kendisinden alan geçici kanca; kalıcı olan izin kendi `kaynak` alanı",
+	"_price_payer": "tek bir kartın çözümü kadar yaşar; kalıcı olan kişinin kendi kabuk/çatlağı",
 }
 
 ## Kayıtta farklı bir anahtarla duran alanlar: alan -> anahtar.

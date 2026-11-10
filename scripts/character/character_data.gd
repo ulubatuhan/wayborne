@@ -789,6 +789,64 @@ func get_top_grievance() -> String:
 func change_stress(delta: int) -> void:
 	stress = clampi(stress + delta, 0, MAX_STRESS)
 
+## --- Ruh: iki yavaş eksen (Ruh alt sistemi, tasarım notu §D-R1) ---
+##
+## Stres uçucudur: handa bir gece siler. İnsanın aşınması uçucu değildir -
+## "insanlar aşınır" sütununun ölçüsü bugüne kadar yalnız stresti ve o ölçü
+## her şehirde sıfırlanıyordu.
+##
+## **Kabuk**: görüp de bir şey yapmamanın, yaptırmanın, işe yarayan
+## zalimliğin tortusu. *Yararlıdır* - olaydan gelen stresi yarıya indirir,
+## soğuk yüz blöfü kolaylaştırır; bedeli yakınlıktır.
+## **Çatlak**: çaresizliğin, kaybın, boşa giden iyiliğin tortusu.
+## *Yararsızdır ama insandır* - ve yalnız **dönen bir iyilikle** iyileşir.
+##
+## İkisi de 0-6 arası, 0,25 adımlı. Ekranda sayı olarak **gösterilmez**
+## (§F): duruş, oturuş ve replikle okunur.
+const SOUL_MAX: float = 6.0
+const SOUL_STEP: float = 0.25
+## Bir günde bir eksen bu kadardan fazla oynamaz (boğulma önleyici, §D-R2):
+## tek bir kara gün kimseyi Taş yapmaz.
+const SOUL_DAILY_CAP: float = 1.5
+## Dul ve açlıktan yola düşmüş kişi çatlağıyla gelir: kervan onu kırmadı.
+const SOUL_BACKSTORY_CRACK: Array[String] = [BACKSTORY_WIDOW, BACKSTORY_HUNGRY]
+
+var kabuk: float = 0.0
+var catlak: float = 0.0
+## Günlük tavanın sayacı: hangi gün ve o gün eksen başına ne kadar oynadı.
+var _soul_day: int = -1
+var _soul_moved_kabuk: float = 0.0
+var _soul_moved_catlak: float = 0.0
+
+## Eksenleri oynatan tek kapı. `day` günlük tavanı yönetir; dönen değer
+## gerçekten uygulanan miktardır (tavan yüzünden kısılmış olabilir).
+func change_soul(axis: String, delta: float, day: int) -> float:
+	if is_zero_approx(delta):
+		return 0.0
+	if day != _soul_day:
+		_soul_day = day
+		_soul_moved_kabuk = 0.0
+		_soul_moved_catlak = 0.0
+	var moved: float = _soul_moved_kabuk if axis == SOUL_SHELL else _soul_moved_catlak
+	var room: float = maxf(0.0, SOUL_DAILY_CAP - absf(moved))
+	var applied: float = clampf(delta, -room, room)
+	if is_zero_approx(applied):
+		return 0.0
+	if axis == SOUL_SHELL:
+		var before: float = kabuk
+		kabuk = snappedf(clampf(kabuk + applied, 0.0, SOUL_MAX), SOUL_STEP)
+		applied = kabuk - before
+		_soul_moved_kabuk += absf(applied)
+	else:
+		var before_crack: float = catlak
+		catlak = snappedf(clampf(catlak + applied, 0.0, SOUL_MAX), SOUL_STEP)
+		applied = catlak - before_crack
+		_soul_moved_catlak += absf(applied)
+	return applied
+
+const SOUL_SHELL: String = "kabuk"
+const SOUL_CRACK: String = "catlak"
+
 ## Direnç ne kadar yüksekse bu karakter o kadar geç kırılır -
 ## dayanıklılığa bağlı (bkz. GameSession.resolve_stress_breaks). Herkes
 ## er ya da geç kırılabilir, yalnızca eşiği farklı.
@@ -1087,6 +1145,10 @@ func to_dict() -> Dictionary:
 		"rapport": rapport,
 		"sworn": sworn,
 		"last_price_day": last_price_day,
+		"kabuk": kabuk,
+		"catlak": catlak,
+		"soul_day": _soul_day,
+		"soul_moved": [_soul_moved_kabuk, _soul_moved_catlak],
 		"missing_hand": missing_hand,
 		"oath_partner": oath_partner,
 		"creed": creed,
@@ -1135,6 +1197,13 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.rapport = clampi(int(data.get("rapport", 0)), 0, MAX_RAPPORT)
 	character.sworn = bool(data.get("sworn", false))
 	character.last_price_day = int(data.get("last_price_day", -999))
+	character.kabuk = clampf(float(data.get("kabuk", 0.0)), 0.0, SOUL_MAX)
+	character.catlak = clampf(float(data.get("catlak", 0.0)), 0.0, SOUL_MAX)
+	character._soul_day = int(data.get("soul_day", -1))
+	var soul_moved: Array = data.get("soul_moved", [0.0, 0.0])
+	if soul_moved.size() >= 2:
+		character._soul_moved_kabuk = float(soul_moved[0])
+		character._soul_moved_catlak = float(soul_moved[1])
 	character.missing_hand = bool(data.get("missing_hand", false))
 	character.oath_partner = str(data.get("oath_partner", ""))
 	character.creed = str(data.get("creed", ""))

@@ -222,6 +222,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_bedel(effect, session, result)
 		EventEffect.Type.IZ_BIRAK:
 			_apply_trace(effect, session, result)
+		EventEffect.Type.RUH:
+			_apply_soul(effect, session, result)
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:
@@ -247,6 +249,10 @@ static func _apply_bedel(effect: EventEffect, session: GameSession, result: Resu
 		return
 	session.last_bearer_name = bearer.character_name
 	bearer.last_price_day = session.total_days_elapsed
+	# Ruh (§D-R2): bedeli kim ödedi; işe yarayıp yaramadığı kartın sonucu
+	# belli olunca (EventResolver -> settle_price) tanıklığa dönüşür.
+	session.note_price_paid(bearer)
+	session.charge_leader_tone(false)
 	match alt:
 		"LEAVE_BEHIND":
 			_leave_behind_character(bearer, session, result)
@@ -263,6 +269,55 @@ static func _apply_bedel(effect: EventEffect, session: GameSession, result: Resu
 					% [bearer.character_name, absi(moved)])
 		_:
 			push_warning("BEDEL: bilinmeyen alt etki %s" % alt)
+
+## Kartın doğrudan Ruh eksenine dokunması (§C.3): `amount` adım × 4
+## (1 = 0,25), `text_value` "<eksen>|<kim>" - eksen `kabuk`/`catlak`, kim
+## `bedel` (o kartın bedelini ödeyen), `lider`, `tanik` (lider dışındakiler)
+## ya da `hepsi`.
+##
+## Niye `STRESS` yetmedi: stres uçucudur, handa bir gece siler; `GRANT_TRAIT`
+## ise ani ve ikilidir. Eksen yavaş ve geri dönülebilir - ama yalnız doğru
+## şeyle (§D-R2: çatlağın ilacı dönen bir iyiliktir).
+static func _apply_soul(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var parts := effect.text_value.split("|")
+	if parts.is_empty():
+		return
+	var axis := parts[0].strip_edges()
+	if axis != CharacterData.SOUL_SHELL and axis != CharacterData.SOUL_CRACK:
+		push_warning("RUH: bilinmeyen eksen (%s)" % axis)
+		return
+	var who := parts[1].strip_edges() if parts.size() > 1 else "lider"
+	var delta := float(effect.amount) * CharacterData.SOUL_STEP
+	var leader := session.get_player_character()
+	var targets: Array[CharacterData] = []
+	match who:
+		"bedel":
+			var bearer: CharacterData = _bedel_target_by_name(session)
+			if bearer != null:
+				targets.append(bearer)
+		"lider":
+			if leader != null:
+				targets.append(leader)
+		"tanik":
+			for member in session.get_party():
+				if member != leader:
+					targets.append(member)
+		_:
+			targets.append_array(session.get_party())
+	var moved := false
+	for target in targets:
+		if not is_zero_approx(target.change_soul(axis, delta, session.total_days_elapsed)):
+			moved = true
+	if moved:
+		result.lines.append(_t("EFF_SOUL_SHELL" if axis == CharacterData.SOUL_SHELL else "EFF_SOUL_CRACK"))
+
+static func _bedel_target_by_name(session: GameSession) -> CharacterData:
+	if session.last_bearer_name.is_empty():
+		return null
+	for member in session.get_party():
+		if member.character_name == session.last_bearer_name:
+			return member
+	return null
 
 ## Bir karar dünyada iz bırakır (İz alt sistemi, §D-İ1).
 ##

@@ -149,6 +149,10 @@ static func _make_candidate(profile: Array[int], rng: RandomNumberGenerator, lev
 	_grant_levels(candidate, level)
 	# Neden geldiği (Y-C16): kervana mecbur olanlar katılır.
 	candidate.backstory_id = CharacterData.BACKSTORY_KEYS[rng.randi_range(0, CharacterData.BACKSTORY_KEYS.size() - 1)]
+	# Çatlağıyla gelen (§D-R1): dul ve açlıktan yola düşmüş kişiyi kervan
+	# kırmadı, yolda bulduğun adam zaten kırıktı.
+	if CharacterData.SOUL_BACKSTORY_CRACK.has(candidate.backstory_id):
+		candidate.catlak = 1.0
 	candidate.grant_trait(TraitCatalog.roll_seed_trait(candidate.stats, rng), 0)
 	_dress(candidate)
 	candidate.heal_full()
