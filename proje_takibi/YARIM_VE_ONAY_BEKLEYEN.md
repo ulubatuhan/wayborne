@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **30** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -74,6 +74,24 @@ Toplam: **27** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** SIDERIA.md'de açık lore sorusu kalmadı (kalan iki madde kullanıcıda: kadim uygarlığın sonu, hikâye ve kampanya).
 
 </details>
+
+### Y-R01 · Ahlak/Ruh/İz: §E'nin 50 satırını kartlara işle
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
+- **Son not:** H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak.
+
+### Y-R02 · Yankı varyantlarını seçeneğe göre yaz
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
+- **Son not:** H9'da 22 kartın her birine bir yankı cümlesi yazıldı (gövdenin sonuna). §D-A4 ayrıca cevaba göre varyant istiyor (<id>_YANKI_<secim>); bedel kayması zaten cevaba bakıyor, metin henüz bakmıyor.
+
+### Y-R03 · Reddedilen fikirler: yeniden önerilmesin
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
+- **Son not:** §I'nin on üç maddesi (görünür ahlak çubuğu/karma puanı; akıl sağlığı sayacı ve yalan söyleyen arayüz; liderin kendi başına karar vermesi; olay kartıyla ölüm; bir sistemi kaldırarak dengelemek; her NPC ile tam ilişki grafiği; yoldaşlar arası aşk/evlilik/çocuk; rastgele kelebek etkileri; bölümlü ahlaki hikâye ve iyi/kötü son; şehir yönetimi katmanı; yamyamlık ve benzeri şok seçenekleri; yeni harcanabilir kaynak (vicdan/umut); hâl için yeni ikon seti ve renk kodu) **uygulanmadı ve uygulanmayacak**. Gerekçeleri tasarım notunun §I'sinde; dördü doğrudan anayasa ihlali (A1, A2, A4, A5). Yeniden öneri gelirse önce oraya bakılır.
 
 ## Paket P01
 

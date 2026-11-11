@@ -631,3 +631,34 @@ varsa kendi ekran görüntüsü.
 
 Sırada: H4 (Açık Hesaplar sayfası + şehir özetinde "seni bekleyen var"), sonra H5…H12. §I'nin on üç
 reddedilen fikri adım adım görev kaydına not edilecek (yeniden önerilmesin diye).
+
+### §H'nin on iki adımı bitti (2026-11-10/11)
+
+Fable'ın mimarisi baştan sona uygulandı; her adım kendi commit'i, kendi testi, oyuncu gören bir değişiklik
+varsa kendi ekran görüntüsüyle. Adım listesi, commit'leri ve açık kalanlar:
+`proje_takibi/referans/gorevler/19_ahlak_ruh_iz.md` (bölüm 19, Y-R01…Y-R03).
+
+- **H1-H2 · Ahlak**: `BEDEL` etkisi ve beş kurallı taşıyıcı seçici (ad kart açılmadan düğmede yazar);
+  bedel kadro dışına da düşer (tayfa eli, gelecekteki sen), böylece altı ahlaki kartın `party_size` kilidi
+  kalktı - `evt_faction_split`'inki (`>= 6`) zaten hiç sağlanamıyordu.
+- **H3-H4 · İz**: iz defteri (sekiz tür, taşıyıcı, şiddet, vade, sönme, tavan), kayıt sürümü 4 → 5,
+  fiyat ve yüz dönüşü, Açık Hesaplar sayfası ve şehir özetinde "seni bekleyen var".
+- **H5-H7 · Ruh**: Kabuk ve Çatlak (stres uçucu, bunlar değil), sekiz satırlık tanıklık tablosu, hâl makinesi
+  (Yorgun/Katı/Sönük, histerezis), liderin maliyet çarpanları, Ateş Başı'nın öncelik sıralı sessiz anı ve
+  Boş Yer (ateşin başında koltuk boş kalıyor).
+- **H8-H10**: izin yayılması (12 gün/atlama, ahit kapalı, göçebe yalnız Orbeyan üzerinden), kalan beş dönüş
+  biçimi, Y-E13'ün kartı (`evt_deserter_face`), yankı çözücü + 22 yankı cümlesi, Söz (vadeli iz) ve sertlik
+  kapısı.
+- **H11-H12**: şehrin ruhu kervana dokunuyor, kervanın huyu (sıfat, sayı değil) ve bant değişiminde doğan
+  söylenti, Taş ve Gidici, lakap ve kuşak izleri, §G.4'ün ölçüm dökümleri + üç ahlak politikası.
+
+**Ölçümün söylediği (dürüst hâli).** `simulate_journeys`: Sükûnet satırı artık düz değil (eşiğin ucunda
+%32 → %65 → %57; sakin partide hep %53, çünkü sakin parti emir reddetmez) - ayrıca aracın iki körlüğü
+düzeltildi (verilen `party_stress` hiç uygulanmıyordu; Sükûnet partinin hepsine aynı Karizma'yı verip
+kişinin yalnız kendi emir reddini ölçüyordu). `simulate_career` (40 sefer, sert politika): doğan iz 6,1 ·
+dönen 2,5 · sönen 2,6 · açık 1,0 · dönüşe 34 gün. §G.2'nin hedefi 12-22 dönüş: **aradaki fark mekanizma
+değil hacim** - 101 kartın yalnız on ikisi iz bırakıyor (Y-R01).
+
+**§I'nin on üç reddedilen fikri** bölüm 19'a gerekçeleriyle yazıldı (Y-R03, kapandı): yeniden öneri gelirse
+önce oraya bakılır. Dördü doğrudan anayasa ihlali (görünür karma çubuğu değil; otomatik karar A5, kartla
+ölüm A2, sistem kaldırarak denge A1, iyi son/kötü son A4).
