@@ -955,6 +955,10 @@ func leave_trace(
 		"%s|%d|%s" % [caravan_name, total_days_elapsed, kaynak],
 		siddet, donus_karti, last_bearer_name
 	)
+	# Yolda doğan izin ilk duyanı gidilen şehirdir: yol kimliği ("yol:a|b")
+	# bir yerleşim değil, oradan kimseye yayılamaz.
+	if trace != null and is_journey_active():
+		trace.add_knower(journey_destination_id)
 	# Ruh (§D-R2, §D-R4): minnet izi bir merhametin, kin izi bir sertliğin
 	# kaydıdır - ikisi de kervanda biri tarafından görülüyor ve liderin
 	# kendi eksenine göre bir bedeli var.
@@ -2220,6 +2224,14 @@ func appoint_heir(heir: CharacterData) -> int:
 		change_character_stress(senior, PASSED_OVER_STRESS)
 		# Ad kavgası ikisinin arasını açar (R1 #2).
 		CompanionLife.change_bond(bonds, senior, heir, CompanionLife.PASSED_OVER_SPLIT)
+	# Kuşak devri (§D-İ4, §H adım 12): giden lider bir lakapla anılır, açık
+	# hesapların ağırları soya geçer ve adın kiri yarıya iner.
+	var epithet := _name_the_epithet()
+	var outgoing := _seal_epithet(epithet)
+	_pass_traces_to_the_line()
+	# Ad temizlenmez, yarıya iner: babasının oğlu (§D-İ4).
+	huy_puani *= 0.5
+	_temper_band = temper_band()
 	# Dönem sayacı sıfırlanıyor ki kampanya "bu liderin dönemi" diye sorabilsin.
 	lineage_generation += 1
 	leader_since_day = total_days_elapsed
@@ -2227,7 +2239,90 @@ func appoint_heir(heir: CharacterData) -> int:
 		CaravanLedger.KIND_LED, heir.character_name,
 		total_days_elapsed, lineage_generation, heir.character_id
 	)
+	if not outgoing.is_empty():
+		write_journal(TranslationServer.translate("UI_JOURNAL_EPITHET") % outgoing)
 	return lineage_generation
+
+## --- Lakap ve kuşak izleri (§D-İ4) ---
+##
+## Lakabı anlatıcı koymaz, lonca kâtibi yazar: huy puanı, liderin eksenleri,
+## tutulan ve bozulan sözler, gömülenlerle bırakılanlar. Lakap bir son
+## değil, bir satırdır - "iyi son / kötü son" yoktur (§I).
+const EPITHET_KEYS: Dictionary = {
+	"kanli": "EPITHET_BLOODY",
+	"demir": "EPITHET_IRON",
+	"sessiz": "EPITHET_SILENT",
+	"sozu": "EPITHET_TRUE_WORD",
+	"kapisi": "EPITHET_OPEN_GATE",
+	"yuku": "EPITHET_BURDENED",
+	"adsiz": "EPITHET_NAMELESS",
+}
+## Kuşağa geçen izin en az şiddeti ve kuşak izi tavanı.
+const LEGACY_TRACE_FROM: float = 0.5
+const LEGACY_TRACE_MAX: int = 6
+
+func _name_the_epithet() -> String:
+	var leader := get_player_character()
+	if leader == null:
+		return ""
+	var buried := ledger.count_of(CaravanLedger.KIND_DIED)
+	var broken := 0
+	var kept := 0
+	for trace in traces.traces:
+		if trace.kaynak.contains("soz"):
+			if trace.tur == Trace.TYPE_GRUDGE:
+				broken += 1
+			elif trace.tur == Trace.TYPE_GRATITUDE:
+				kept += 1
+	if huy_puani <= TEMPER_BANDS[0]:
+		return "kanli"
+	if leader.kabuk >= CharacterData.STATE_ENTER_AXIS:
+		return "demir"
+	if leader.catlak >= CharacterData.STATE_ENTER_AXIS:
+		return "sessiz"
+	if kept >= 2 and broken == 0:
+		return "sozu"
+	if huy_puani >= TEMPER_BANDS[3]:
+		return "kapisi"
+	if buried >= 3:
+		return "yuku"
+	return "adsiz"
+
+## Lakabı kişiye ve deftere yazar; okunan adı döner.
+func _seal_epithet(epithet: String) -> String:
+	var leader := get_player_character()
+	if leader == null or epithet.is_empty():
+		return ""
+	leader.lakap = String(EPITHET_KEYS.get(epithet, "EPITHET_NAMELESS"))
+	var label := "%s, %s" % [
+		leader.character_name, TranslationServer.translate(leader.lakap)]
+	lakaplar.append({
+		"kusak": lineage_generation, "ad": leader.character_name, "lakap": leader.lakap,
+	})
+	ledger.record(
+		CaravanLedger.KIND_EPITHET, label, total_days_elapsed, lineage_generation,
+		leader.character_id, leader.lakap, _ledger_location_id()
+	)
+	return label
+
+## Açık hesapların ağırları soya geçer: kuşak izi bir kez döner ve söner.
+func _pass_traces_to_the_line() -> void:
+	var passed := 0
+	for trace in traces.open_traces():
+		if passed >= LEGACY_TRACE_MAX:
+			break
+		if trace.siddet < LEGACY_TRACE_FROM or trace.gecikme == Trace.DELAY_GENERATION:
+			continue
+		trace.gecikme = Trace.DELAY_GENERATION
+		trace.tasiyici_tip = Trace.BEARER_LINE
+		trace.tasiyici_id = caravan_name
+		trace.sonme = 0.0
+		trace.durum = Trace.STATE_LEGACY
+		trace.olgunluk_gunu = total_days_elapsed
+		passed += 1
+
+## Kuşakların lakapları: [{"kusak", "ad", "lakap"}], kayıtta.
+var lakaplar: Array = []
 
 func is_run_over() -> bool:
 	return get_phase() == Phase.RUN_OVER
@@ -6128,7 +6223,12 @@ func is_service_refused(service: String) -> bool:
 ## Fiyat dönüşü: şehrin tezgâhı kervanı tanır. İyi iz ucuzlatır, kin
 ## pahalılaştırır - bütün mallarda, yirmi gün (MarketPricing LAYER_EVENT).
 func _trace_return_price(trace: Trace) -> Dictionary:
-	if trace.tasiyici_id != current_location_id and not trace.knows(current_location_id):
+	# Bölge taşıyıcılı iz bölgenin **her** pazarında okunur: "burada senin
+	# gibisini tanırlar" demek bir şehir değil bir bölge sözüdür.
+	var here_region := _trace_region_of(current_location_id)
+	var regional := trace.tasiyici_tip == Trace.BEARER_REGION and trace.tasiyici_id == here_region
+	if not regional and trace.tasiyici_id != current_location_id \
+			and not trace.knows(current_location_id):
 		return {}
 	var share: float = TRACE_PRICE_BASE + TRACE_PRICE_PER_SEVERITY * trace.siddet
 	var multiplier: float = 1.0 - share if trace.yon > 0 else 1.0 + share
@@ -7126,6 +7226,7 @@ func to_save_dict() -> Dictionary:
 		"yankilar": yankilar.duplicate(true),
 		"huy_puani": huy_puani,
 		"huy_bandi": _temper_band,
+		"lakaplar": lakaplar.duplicate(true),
 		"kamp_sayaci": [_camp_count, _empty_seat_shown_camp],
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
@@ -7395,6 +7496,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	yankilar = (data.get("yankilar", {}) as Dictionary).duplicate(true)
 	huy_puani = float(data.get("huy_puani", 0.0))
 	_temper_band = int(data.get("huy_bandi", 2))
+	lakaplar = (data.get("lakaplar", []) as Array).duplicate(true)
 	var camp_counts: Array = data.get("kamp_sayaci", [0, -99])
 	if camp_counts.size() >= 2:
 		_camp_count = int(camp_counts[0])

@@ -102,8 +102,38 @@ func _initialize() -> void:
 			draws, unique, float(draws) / float(maxi(1, unique)),
 		])
 		_career_draws = {}
+		_report_traces(arcs, policy)
 		_print_measure(policy, arcs)
+
+	# Üç ahlak politikası (§G.2): aynı yatırım politikasıyla, farklı
+	# kararlarla. Ölçülen şey kese değil, kervanın kimle vardığı.
+	for moral in [MORAL_MERCIFUL, MORAL_HARSH, MORAL_CALCULATING]:
+		moral_policy = moral
+		var moral_arcs: Array[Dictionary] = []
+		for arc_index in ARC_COUNT:
+			moral_arcs.append(_run_arc(BASE_SEED + arc_index * 977, POLICY_PHASED))
+		_report_moral(moral_arcs, moral)
+		_report_traces(moral_arcs, moral)
+		_career_draws = {}
+		_threats_by_stage = {}
+	moral_policy = ""
 	quit()
+
+## Merhametli daha kalabalık ve daha aç, sert daha tok ve daha yalnız
+## olmalı; kese farkı 250 GG'yi aşmamalı (§G.2).
+func _report_moral(arcs: Array[Dictionary], moral: String) -> void:
+	var party := 0.0
+	var gold := 0.0
+	var deaths := 0.0
+	for arc in arcs:
+		var final: Dictionary = (arc.get("samples", {}) as Dictionary).get("final", {})
+		party += float(final.get("party", 0))
+		gold += float(final.get("gold", 0))
+		deaths += float(arc.get("deaths", 0))
+	var count := maxf(1.0, float(arcs.size()))
+	print("   ahlak politikası %-11s: son kadro %.1f · kese %d · ölü %.1f" % [
+		moral, party / count, int(gold / count), deaths / count,
+	])
 
 ## Y-K03: makine okunur ölçüm satırı (tools/measure_report.py okur, CI'da
 ## rapor olur). Sefer süresi gün ve 1x gerçek dakika, sefer başına kart,
@@ -197,7 +227,80 @@ func _run_arc(seed_value: int, policy: String) -> Dictionary:
 		"purse_second": int(purse_second_half / maxi(1, second_half_legs)),
 		"legs": session.journeys_completed, "days": session.total_days_elapsed,
 		"cards": _cards_drawn, "deaths": session.ledger.count_of(CaravanLedger.KIND_DIED),
+		"traces": _trace_report(session),
+		"states": _state_report(session),
 	}
+
+## --- §G.4: iz dökümü ve hâl histogramı (görev H12) ---
+##
+## "Dönen iz 12-22, sönerek kapanan %25-40, geri dönülemez hâl geçişi 2-5"
+## hedefleri ancak ölçülebilirse savunulabilir. İki döküm de kariyer
+## sonundaki defterden okunuyor: simülatör ayrı bir sayaç tutmuyor.
+func _trace_report(session: GameSession) -> Dictionary:
+	var born := session.traces.serial
+	var returned := 0
+	var faded := 0
+	var open_now := 0
+	var good_returns := 0
+	var days_to_return := 0
+	for trace in session.traces.traces:
+		match trace.durum:
+			Trace.STATE_RETURNED:
+				returned += 1
+				days_to_return += maxi(0, trace.donus_gunu - trace.dogum_gunu)
+				if trace.yon > 0:
+					good_returns += 1
+			Trace.STATE_FADED:
+				faded += 1
+			_:
+				open_now += 1
+	return {
+		"born": born, "returned": returned, "faded": faded, "open": open_now,
+		"good": good_returns,
+		"days": int(float(days_to_return) / float(maxi(1, returned))),
+	}
+
+func _state_report(session: GameSession) -> Dictionary:
+	var counts := {
+		CharacterData.STATE_ALIVE: 0, CharacterData.STATE_WEARY: 0,
+		CharacterData.STATE_HARD: 0, CharacterData.STATE_DIM: 0,
+		CharacterData.STATE_STONE: 0, CharacterData.STATE_LEAVING: 0,
+	}
+	for member in session.get_party():
+		counts[member.hal] = int(counts.get(member.hal, 0)) + 1
+	return counts
+
+## İz dökümü ve hâl histogramı (§G.4): doğan/dönen/sönen, dönüşün iyi payı,
+## doğumdan dönüşe ortalama gün, kariyer sonundaki hâller.
+func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
+	var born := 0
+	var returned := 0
+	var faded := 0
+	var open_now := 0
+	var good := 0
+	var days := 0
+	var states := {}
+	for arc in arcs:
+		var report: Dictionary = arc.get("traces", {})
+		born += int(report.get("born", 0))
+		returned += int(report.get("returned", 0))
+		faded += int(report.get("faded", 0))
+		open_now += int(report.get("open", 0))
+		good += int(report.get("good", 0))
+		days += int(report.get("days", 0))
+		for state in (arc.get("states", {}) as Dictionary):
+			states[state] = int(states.get(state, 0)) + int(arc["states"][state])
+	var count := maxi(1, arcs.size())
+	print("   iz dökümü (%s): doğan %.1f · dönen %.1f (iyi %%%d) · sönen %.1f · açık %.1f · dönüş %d gün" % [
+		policy, float(born) / count, float(returned) / count,
+		int(round(100.0 * float(good) / float(maxi(1, returned)))),
+		float(faded) / count, float(open_now) / count, int(float(days) / count),
+	])
+	var line := "   hâl histogramı (%s):" % policy
+	for state in [CharacterData.STATE_ALIVE, CharacterData.STATE_WEARY, CharacterData.STATE_HARD,
+			CharacterData.STATE_DIM, CharacterData.STATE_STONE, CharacterData.STATE_LEAVING]:
+		line += " %s %.1f ·" % [state, float(int(states.get(state, 0))) / count]
+	print(line.trim_suffix(" ·"))
 
 func _snapshot(session: GameSession) -> Dictionary:
 	return {
@@ -415,13 +518,23 @@ func _consume_daily(session: GameSession) -> void:
 		session.caravan.change_morale(-10)
 		session.change_stress(6)
 
+## Üç ahlak politikası (§G.2, görev H12). Eski ölçüm hep **ilk açık
+## seçeneği** alıyordu; bu bir politika değil bir yanlılıktı ve ahlaki
+## sistemin ürettiği hiçbir şeyi ölçmüyordu (iz doğmuyor, bedel ödenmiyor).
+## Üçü de var olan seçenek listesinden seçiyor, yeni bir kart gerekmiyor.
+const MORAL_MERCIFUL: String = "merhametli"
+const MORAL_HARSH: String = "sert"
+const MORAL_CALCULATING: String = "hesapci"
+var moral_policy: String = ""
+
 func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent) -> void:
 	var context := session.build_event_context()
-	var chosen: EventChoice = null
-	for choice in event.choices:
-		if choice.is_available(context):
-			chosen = choice
-			break
+	var chosen: EventChoice = _pick_by_moral(event, context)
+	if chosen == null:
+		for choice in event.choices:
+			if choice.is_available(context):
+				chosen = choice
+				break
 	if chosen == null:
 		return
 
@@ -432,6 +545,38 @@ func _resolve_event(session: GameSession, engine: EventEngine, event: GameEvent)
 	if EventCatalog.CAREER_THREATS.has(event.event_id):
 		var stage := session.get_career_stage()
 		_threats_by_stage[stage] = int(_threats_by_stage.get(stage, 0)) + 1
+
+## Merhametli: bedeli **kervanın kendi** üstüne alan seçenek (kaynak verir,
+## kimseyi bırakmaz). Sert: kaynağı koruyan, bedeli başkasına yükleyen.
+## Hesapçı: açık hesap bırakan seçenek (iz doğuran) - geri dönüşü okuyan
+## oyuncunun taklidi.
+func _pick_by_moral(event: GameEvent, context: Dictionary) -> EventChoice:
+	if moral_policy.is_empty():
+		return null
+	var best: EventChoice = null
+	var best_score := -INF
+	for choice in event.choices:
+		if not choice.is_available(context):
+			continue
+		var score := 0.0
+		for effect in choice.effects:
+			match effect.type:
+				EventEffect.Type.BEDEL:
+					score += -3.0 if moral_policy == MORAL_MERCIFUL else 3.0
+				EventEffect.Type.LEAVE_BEHIND:
+					score += -4.0 if moral_policy == MORAL_MERCIFUL else 2.0
+				EventEffect.Type.GOLD, EventEffect.Type.PROVISIONS:
+					# Kaynak vermek merhametin, korumak sertliğin işareti.
+					if effect.amount < 0:
+						score += 1.5 if moral_policy == MORAL_MERCIFUL else -1.5
+				EventEffect.Type.IZ_BIRAK:
+					score += 3.0 if moral_policy == MORAL_CALCULATING else 0.5
+				_:
+					pass
+		if score > best_score:
+			best_score = score
+			best = choice
+	return best
 
 var _threats_by_stage: Dictionary = {}
 ## Y-K03: bir kervanın ömrü boyunca çekilen kart.

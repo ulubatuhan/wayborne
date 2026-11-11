@@ -904,6 +904,9 @@ const DIM_FATIGUE_MULT: float = 1.25
 const DIM_DUTY_MULT: float = 0.85
 const DIM_BREAK_PENALTY: int = 10
 
+## Lakap (yalnız lider ve eski liderler; çeviri anahtarı). Lonca kâtibi
+## yazar, anlatıcı değil (§D-İ4).
+var lakap: String = ""
 var hal: String = STATE_ALIVE
 ## Hâle girilen gün (histerezis sayacı) ve eşiğin kaç gündür aşıldığı.
 var hal_gunu: int = -1
@@ -1291,6 +1294,7 @@ func to_dict() -> Dictionary:
 		"last_price_day": last_price_day,
 		"kabuk": kabuk,
 		"catlak": catlak,
+		"lakap": lakap,
 		"hal": hal,
 		"hal_gunu": hal_gunu,
 		"hal_sayac": [_weary_streak, _calm_streak],
@@ -1346,6 +1350,7 @@ static func from_dict(data: Dictionary) -> CharacterData:
 	character.last_price_day = int(data.get("last_price_day", -999))
 	character.kabuk = clampf(float(data.get("kabuk", 0.0)), 0.0, SOUL_MAX)
 	character.catlak = clampf(float(data.get("catlak", 0.0)), 0.0, SOUL_MAX)
+	character.lakap = str(data.get("lakap", ""))
 	character.hal = str(data.get("hal", STATE_ALIVE))
 	character.hal_gunu = int(data.get("hal_gunu", -1))
 	var streaks: Array = data.get("hal_sayac", [0, 0])

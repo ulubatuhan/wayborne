@@ -48,6 +48,8 @@ const KIND_TRADE: String = "trade"
 ## Açık hesap (İz alt sistemi): bir kararın dünyada bıraktığı, vadesi olan
 ## kayıt. Üstü çizilmez - karşılığı geldiğinde yanına yazılır.
 const KIND_TRACE: String = "iz"
+## Lakap: bir kuşağın adının yanına yazılan tek satır (§D-İ4).
+const KIND_EPITHET: String = "lakap"
 
 ## Tür -> çeviri anahtarı. Tam yazılıyor, çalışma anında birleştirilmiyor
 ## (çeviri tarayıcısı ve çevirmen anahtarı arayınca bulabilsin diye).
@@ -64,6 +66,7 @@ const KIND_LABEL_KEYS: Dictionary = {
 	KIND_MEMORIAL: "LEDGER_MEMORIAL",
 	KIND_TRADE: "LEDGER_TRADE",
 	KIND_TRACE: "LEDGER_TRACE_KIND",
+	KIND_EPITHET: "LEDGER_EPITHET",
 }
 
 ## Üstü çizili sayılan türler: kervandan ayrılmış olmak.
