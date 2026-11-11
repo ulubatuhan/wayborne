@@ -1812,6 +1812,9 @@ func dismiss(character: CharacterData, cause_key: String = DISMISSED_CAUSE_KEY) 
 	# Ruh tanıklığı: biri gitti, yeri boş kaldı. Lider için bu bir karar
 	# (kabuk), kalanlar için bir kayıp (çatlak).
 	note_witness(WITNESS_LEFT, character)
+	note_empty_seat(
+		character,
+		EMPTY_SEAT_DISMISSED if cause_key == DISMISSED_CAUSE_KEY else EMPTY_SEAT_BEHIND)
 	# Kovulan adam bu dünyada kaybolmaz (§E satır 41): bir sonraki şehirde
 	# başka bir kervanın yanında karşına çıkar. Yalnız **kovma** iz bırakır;
 	# geride bırakılmanın ve ölümün kendi yolları var.
@@ -1961,6 +1964,7 @@ func resolve_deaths(
 	# kaybetmek ile tanımadığını kaybetmek aynı şey değil.
 	for character in dead:
 		note_witness(WITNESS_DEATH, character)
+		note_empty_seat(character, EMPTY_SEAT_DIED)
 
 	if not leader_died:
 		return result
@@ -2119,6 +2123,17 @@ func apply_camp_actions(actions: Array) -> Array[String]:
 				change_provisions(CAMP_HUNT_PROVISIONS)
 			"tales":
 				change_stress(CAMP_TALES_STRESS)
+				# Hikâye anlatılan akşam, anlatılan kişi olur (§D-R7): boş
+				# yerin yası on gün kısalır ve deftere bir satır düşer.
+				# Katı insana işlemez: kabuk hikâyeyi de geçirmez.
+				var told := tell_empty_seat_tale()
+				if not told.is_empty():
+					companion_notes.append({
+						"key": "UI_CAMP_MOMENT_TALE", "args": [told], "who": "",
+					})
+				for member in party:
+					if member.is_hard():
+						member.change_stress(-CAMP_TALES_STRESS)
 			CAMP_ACTION_BURN_CANVAS, CAMP_ACTION_BURN_PLANKS:
 				if not can_camp_action(String(action)):
 					continue
@@ -2469,6 +2484,7 @@ func _apply_road_stress_day() -> void:
 func make_camp() -> Dictionary:
 	var paid := mini(CAMP_PROVISIONS_COST, get_provisions())
 	change_provisions(-paid)
+	var moment := roll_camp_moment()
 	var relief := CAMP_STRESS_RELIEF + get_duty_flat_reduction(DutyCatalog.OTACI) * 2
 	change_stress(-relief)
 	# Kamp takati de tazeliyor: zorlamanın bedeli var ama çıkışı da var,
@@ -2477,7 +2493,102 @@ func make_camp() -> Dictionary:
 	caravan.rest_at_camp()
 	# Ateş başındakiler bedenen de dinlenir (Y-F01).
 	change_party_fatigue(-FATIGUE_CAMP_RELIEF)
-	return {"provisions_spent": paid, "stress_relief": relief, "fatigue_relief": FATIGUE_CAMP_RELIEF}
+	return {
+		"provisions_spent": paid, "stress_relief": relief,
+		"fatigue_relief": FATIGUE_CAMP_RELIEF, "moment": moment,
+	}
+
+## --- Boş Yer ve ateş başı (Ruh alt sistemi, §D-R7) ---
+##
+## Adı olan biri öldüğünde, bırakıldığında ya da kovulduğunda yeri bir süre
+## **boş tutulur**: ateşin başında bir koltuk dolmaz, dostları her gün bir
+## parça daha yıpranır, akşamın cümlesi onu anar. Kadro bire indiğinde bile
+## Ruh'un sahnesi boş kalmıyor - liderin yanındaki boşluklar konuşuyor.
+const EMPTY_SEAT_DAYS: int = SHARED_GRIEF_DAYS
+## Hikâyesi anlatılan kişinin yeri on gün erken kapanır: yas anlatılınca
+## kısalır (var olan `CAMP_ACTION_TALES` buna bağlanıyor).
+const EMPTY_SEAT_TALE_RELIEF: int = 10
+const MAX_EMPTY_SEATS: int = 4
+const EMPTY_SEAT_DIED: String = "oldu"
+const EMPTY_SEAT_LEFT: String = "gitti"
+const EMPTY_SEAT_BEHIND: String = "birakildi"
+const EMPTY_SEAT_DISMISSED: String = "kovuldu"
+
+## [{"ad", "gun", "nasil", "bagli"}] - en çok MAX_EMPTY_SEATS, kayıtta.
+var bos_yerler: Array = []
+## Boş yerin anı en son kaçıncı kampta gösterildi (kampların sayacı).
+var _camp_count: int = 0
+var _empty_seat_shown_camp: int = -99
+
+func note_empty_seat(who: CharacterData, how: String) -> void:
+	if who == null or who.character_name.is_empty():
+		return
+	var bound: Array[String] = []
+	for member in party:
+		if member != who and get_bond(member, who) >= CompanionLife.FRIENDS_AT:
+			bound.append(member.character_id)
+	bos_yerler.append({
+		"ad": who.character_name, "gun": total_days_elapsed, "nasil": how,
+		"bagli": bound,
+	})
+	while bos_yerler.size() > MAX_EMPTY_SEATS:
+		bos_yerler.pop_front()
+
+## Hâlâ açık olan boş yerler (süresi dolan düşer).
+func open_empty_seats() -> Array:
+	var open: Array = []
+	for seat in bos_yerler:
+		if total_days_elapsed - int(seat.get("gun", 0)) < EMPTY_SEAT_DAYS:
+			open.append(seat)
+	return open
+
+## Ateşin başında boş bırakılacak yer var mı (yol ekranı okuyor).
+func has_empty_seat() -> bool:
+	return not open_empty_seats().is_empty()
+
+## Hikâyesi anlatılınca yas kısalır: en eski açık yer on gün geri alınır.
+func tell_empty_seat_tale() -> String:
+	var open := open_empty_seats()
+	if open.is_empty():
+		return ""
+	var seat: Dictionary = open[0]
+	seat["gun"] = int(seat.get("gun", 0)) - EMPTY_SEAT_TALE_RELIEF
+	var who := String(seat.get("ad", ""))
+	ledger.record(
+		CaravanLedger.KIND_STORY, who, total_days_elapsed, lineage_generation,
+		"", "LEDGER_CAUSE_TALE_TOLD", _ledger_location_id()
+	)
+	return who
+
+## Kampın sessiz anı (§D-R7): zar değil, öncelik sırası. Dönen sözlük
+## {"kind", "ad"} ya da boş; yol ekranı bunu bir cümle olarak yazıyor.
+func roll_camp_moment() -> Dictionary:
+	_camp_count += 1
+	var open := open_empty_seats()
+	var seat_name := String(open[0].get("ad", "")) if not open.is_empty() else ""
+	var changed := ""
+	for member in party:
+		if member.hal_gunu == total_days_elapsed and member.hal != CharacterData.STATE_ALIVE:
+			changed = member.character_name
+			break
+	var payer := ""
+	for member in party:
+		if member.last_price_day == total_days_elapsed:
+			payer = member.character_name
+			break
+	var moment := CompanionLife.quiet_moment(
+		party, bonds, seat_name, _camp_count - _empty_seat_shown_camp,
+		payer, changed, _good_return_today, total_days_elapsed
+	)
+	if String(moment.get("kind", "")) == CompanionLife.MOMENT_EMPTY_SEAT:
+		_empty_seat_shown_camp = _camp_count
+	if not moment.is_empty():
+		var key := String(CompanionLife.MOMENT_LINE_KEYS[String(moment["kind"])])
+		companion_notes.append({"key": key, "args": [String(moment.get("ad", ""))], "who": ""})
+	return moment
+
+## Bugün iyi bir iz döndü mü (ateş başının dördüncü sırası).
+var _good_return_today: bool = false
 
 func heal_party() -> void:
 	for character in party:
@@ -3293,6 +3404,7 @@ func advance_day() -> Array[String]:
 	traces.advance_day(total_days_elapsed)
 	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
 	update_party_states()
+	_good_return_today = false
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
 	route_conditions.advance_day(total_days_elapsed)
@@ -5602,6 +5714,7 @@ func resolve_trace_return() -> Dictionary:
 		if note.is_empty():
 			continue
 		traces.mark_returned(trace, total_days_elapsed)
+		_good_return_today = trace.yon > 0
 		note_witness(
 			WITNESS_TRACE_GOOD if trace.yon > 0 else WITNESS_TRACE_BAD, null, trace.dogum_gunu)
 		return note
@@ -6559,6 +6672,8 @@ func to_save_dict() -> Dictionary:
 		"people": people.to_dict(),
 		"izler": traces.to_dict(),
 		"bekleyen_yuz": waiting_face.duplicate(),
+		"bos_yerler": bos_yerler.duplicate(true),
+		"kamp_sayaci": [_camp_count, _empty_seat_shown_camp],
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
 		"owned_wagon_count": owned_wagon_count,
@@ -6817,6 +6932,11 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	people.from_dict(data.get("people", {}) as Dictionary)
 	traces.from_dict(data.get("izler", {}) as Dictionary)
 	waiting_face = (data.get("bekleyen_yuz", {}) as Dictionary).duplicate()
+	bos_yerler = (data.get("bos_yerler", []) as Array).duplicate(true)
+	var camp_counts: Array = data.get("kamp_sayaci", [0, -99])
+	if camp_counts.size() >= 2:
+		_camp_count = int(camp_counts[0])
+		_empty_seat_shown_camp = int(camp_counts[1])
 	seen_places = (data.get("seen_places", {}) as Dictionary).duplicate()
 	if data.has("standing"):
 		standing.from_dict(data["standing"] as Dictionary)

@@ -36,6 +36,52 @@ const ACTION_LINE_KEYS: Dictionary = {
 	"sings": "UI_ROAD_ACT_SINGS", "sulks": "UI_ROAD_ACT_SULKS",
 }
 
+## --- Ateş başı: kampın sessiz anı (Ruh alt sistemi, tasarım notu §D-R7) ---
+##
+## Her kampta **en çok bir** sessiz an. Zar yok, öncelik sırası var: ilk
+## uyan gösterilir. Zar olsaydı o an bir süs olurdu; sıra olunca o gün
+## yaşananın görünen yüzü oluyor.
+##
+## Sıra: boş yer · bugün bedel ödeyen · bugün hâli değişen · bugün iyi dönen
+## iz · aynı ateşte hasım çift · hiçbiri (var olan %6 zar).
+const MOMENT_EMPTY_SEAT: String = "bos_yer"
+const MOMENT_PRICE: String = "bedel"
+const MOMENT_STATE: String = "hal"
+const MOMENT_RETURN: String = "donus"
+const MOMENT_RIVALS: String = "hasim"
+## Boş yerin anı en çok bu kadar kampta bir tekrarlanır: her akşam aynı
+## boşluğu göstermek yası bir duvar kâğıdına çevirir.
+const EMPTY_SEAT_EVERY_CAMPS: int = 3
+const MOMENT_LINE_KEYS: Dictionary = {
+	MOMENT_EMPTY_SEAT: "UI_CAMP_MOMENT_EMPTY_SEAT",
+	MOMENT_PRICE: "UI_CAMP_MOMENT_PRICE",
+	MOMENT_STATE: "UI_CAMP_MOMENT_STATE",
+	MOMENT_RETURN: "UI_CAMP_MOMENT_RETURN",
+	MOMENT_RIVALS: "UI_CAMP_MOMENT_RIVALS",
+}
+
+## Bugünün sessiz anı: {"kind", "ad"} ya da boş. Girdilerin hepsi çağırandan
+## gelir (oturum bilinmiyor, sahne ağacı yok) - böylece sıralama tek başına
+## sınanabiliyor.
+static func quiet_moment(
+	party: Array[CharacterData], bonds: Dictionary, empty_seat_name: String,
+	seat_shown_ago: int, price_payer: String, changed_state: String,
+	good_return: bool, day: int
+) -> Dictionary:
+	if not empty_seat_name.is_empty() and seat_shown_ago >= EMPTY_SEAT_EVERY_CAMPS:
+		return {"kind": MOMENT_EMPTY_SEAT, "ad": empty_seat_name, "gun": day}
+	if not price_payer.is_empty():
+		return {"kind": MOMENT_PRICE, "ad": price_payer, "gun": day}
+	if not changed_state.is_empty():
+		return {"kind": MOMENT_STATE, "ad": changed_state, "gun": day}
+	if good_return:
+		return {"kind": MOMENT_RETURN, "ad": "", "gun": day}
+	for i in party.size():
+		for j in range(i + 1, party.size()):
+			if get_bond(bonds, party[i], party[j]) <= RIVALS_AT:
+				return {"kind": MOMENT_RIVALS, "ad": party[i].character_name, "gun": day}
+	return {}
+
 static func bond_key(a: CharacterData, b: CharacterData) -> String:
 	var ids := [a.character_id, b.character_id]
 	ids.sort()

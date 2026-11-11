@@ -177,6 +177,7 @@ const TRANSIENT_FIELDS: Dictionary = {
 	"last_bearer_name": "yalnızca o kartın {bedel} işaretini doldurur; kalıcı olan kişinin kendi last_price_day'i",
 	"_trace_source": "doğan izin kaynağını kartın kendisinden alan geçici kanca; kalıcı olan izin kendi `kaynak` alanı",
 	"_price_payer": "tek bir kartın çözümü kadar yaşar; kalıcı olan kişinin kendi kabuk/çatlağı",
+	"_good_return_today": "yalnız o akşamın ateş başı sırasını belirler; kalıcı olan izin kendi durumu",
 }
 
 ## Kayıtta farklı bir anahtarla duran alanlar: alan -> anahtar.
@@ -201,6 +202,8 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"journey_combat_count": "journey",
 	"journey_hungry_days": "journey",
 	"traces": "izler",
+	"_camp_count": "kamp_sayaci",
+	"_empty_seat_shown_camp": "kamp_sayaci",
 	"waiting_face": "bekleyen_yuz",
 }
 

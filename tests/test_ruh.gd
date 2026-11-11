@@ -23,6 +23,8 @@ func run(t) -> void:
 	_test_states_bend_existing_counters(t)
 	_test_leader_word_carries_the_break_threshold(t)
 	_test_state_is_read_as_a_sentence_not_a_number(t)
+	_test_quiet_moment_follows_priority(t)
+	_test_empty_seat_is_kept_and_closed_by_a_tale(t)
 
 func _session(extra: int = 2) -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -207,3 +209,43 @@ func _test_state_is_read_as_a_sentence_not_a_number(t) -> void:
 	var line := CaravanOverviewPanel.thought_for(who)
 	t.ok(line.contains(who.character_name), "hâl kişinin adıyla anlatılıyor")
 	t.not_ok(line.contains("4") or line.contains("5"), "ekranda eksenin sayısı yok")
+
+# --- §D-R7: ateş başı ve Boş Yer ---
+
+## Sıra zarın yerine geçiyor: ilk uyan gösteriliyor. Zar olsaydı o an bir
+## süs olurdu; sıra olunca o gün yaşananın görünen yüzü oluyor.
+func _test_quiet_moment_follows_priority(t) -> void:
+	var session := _session()
+	var party := session.get_party()
+	var bonds := session.bonds
+	var seat := CompanionLife.quiet_moment(
+		party, bonds, "Ölen", CompanionLife.EMPTY_SEAT_EVERY_CAMPS, "Ödeyen", "Değişen", true, 10)
+	t.eq(String(seat["kind"]), CompanionLife.MOMENT_EMPTY_SEAT, "boş yer her şeyin önünde")
+	var price := CompanionLife.quiet_moment(
+		party, bonds, "", 0, "Ödeyen", "Değişen", true, 10)
+	t.eq(String(price["kind"]), CompanionLife.MOMENT_PRICE, "bedel ödeyen hâlin önünde")
+	var state := CompanionLife.quiet_moment(party, bonds, "", 0, "", "Değişen", true, 10)
+	t.eq(String(state["kind"]), CompanionLife.MOMENT_STATE, "hâl değişimi dönüşün önünde")
+	var good := CompanionLife.quiet_moment(party, bonds, "", 0, "", "", true, 10)
+	t.eq(String(good["kind"]), CompanionLife.MOMENT_RETURN, "iyi dönüş dördüncü sırada")
+	t.ok(CompanionLife.quiet_moment(party, bonds, "", 0, "", "", false, 10).is_empty(),
+		"hiçbiri yoksa an yok: sessizlik de bir cevaptır")
+	# Boş yerin anı her akşam tekrarlanmaz.
+	t.ok(CompanionLife.quiet_moment(party, bonds, "Ölen", 1, "", "", false, 10).is_empty(),
+		"aynı boşluk her kampta gösterilmiyor")
+
+## Boş Yer: giden kişinin yeri bir süre tutuluyor, hikâyesi anlatılınca yas
+## kısalıyor ve deftere düşüyor.
+func _test_empty_seat_is_kept_and_closed_by_a_tale(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	session.total_days_elapsed = 100
+	session.dismiss(who)
+	t.ok(session.has_empty_seat(), "giden kişinin yeri boş tutuluyor")
+	var told := session.tell_empty_seat_tale()
+	t.eq(told, who.character_name, "anlatılan hikâye gidenin hikâyesi")
+	t.ok(session.ledger.count_of(CaravanLedger.KIND_STORY) > 0, "hikâye deftere düştü")
+	var open: Array = session.open_empty_seats()
+	t.eq(int(open[0]["gun"]), 100 - GameSession.EMPTY_SEAT_TALE_RELIEF, "yas on gün kısaldı")
+	session.total_days_elapsed = 100 + GameSession.EMPTY_SEAT_DAYS
+	t.not_ok(session.has_empty_seat(), "süresi dolan yer kapanıyor")

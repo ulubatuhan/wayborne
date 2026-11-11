@@ -2814,7 +2814,8 @@ func _open_meal_panel() -> void:
 	# ödünç alınıyor. Zaten kamp kuruluysa üstüne binmiyoruz.
 	if not _camping:
 		_band.set_camping(true)
-		_caravan.set_camping(true)
+		_caravan.set_empty_seat(_session.has_empty_seat())
+	_caravan.set_camping(true)
 	_meal_panel.setup(_session)
 
 func _on_meal_confirmed(mode: String, selected: Array) -> void:
@@ -3355,6 +3356,7 @@ func _on_camp_pressed() -> void:
 	# değiştirir - bu yalnızca varsayılan, kilit değil.
 	_clock.set_speed_index(_clock.camp_speed_index())
 	_band.set_camping(true)
+	_caravan.set_empty_seat(_session.has_empty_seat())
 	_caravan.set_camping(true)
 	_add_log(tr("UI_ROAD_CAMP_LIT"), OUTCOME_COLOR)
 	_refresh_state()

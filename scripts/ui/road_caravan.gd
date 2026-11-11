@@ -924,6 +924,19 @@ func set_gather_time_scale(scale: float) -> void:
 ## çiziliyor (bkz. `_draw_campfires`); bu yalnızca kimin nereye
 ## yürüyeceğini belirliyor. Yön ayrı bir bayrak değil - sayaçlar
 ## `_camping`'e doğru akıyor, `_advance_gather` kararı orada veriyor.
+## Ateşin başında boş bırakılacak bir yer var mı (Ruh alt sistemi, §D-R7:
+## Boş Yer). Kimse oraya oturmaz; oturacak kişi bir sonraki yere geçer, yani
+## ateşin başı gözle görülür biçimde eksilir. Kayıt değil görüntü: yol ekranı
+## her kamp kurulurken oturumdan okuyup veriyor.
+var _empty_seat: bool = false
+
+func set_empty_seat(on: bool) -> void:
+	if _empty_seat == on:
+		return
+	_empty_seat = on
+	if _camping:
+		_begin_gathering()
+
 func set_camping(camping: bool) -> void:
 	if _camping == camping:
 		return
@@ -956,6 +969,15 @@ func _begin_gathering() -> void:
 	# Ateş başına kaç koltuk dolduğu - üst üste binmesinler diye (bkz.
 	# CAMPFIRE_SEATS'in notu).
 	var seats_taken: Dictionary = {}
+
+	# Boş Yer: öncü ateşinin ilk koltuğu baştan tutulu sayılıyor, oraya
+	# kimse oturmuyor. Gidenin yeri bir süre doldurulmuyor - kervan onu
+	# hemen unutmuş gibi oturamaz.
+	if _empty_seat:
+		var reserved: Dictionary = seats_taken.get("used_%d" % _vanguard_index(), {})
+		reserved[0] = true
+		seats_taken["used_%d" % _vanguard_index()] = reserved
+		seats_taken[_vanguard_index()] = int(seats_taken.get(_vanguard_index(), 0)) + 1
 
 	# Lider kervanın başında; ateşi öncü ateşi.
 	var vanguard := _vanguard_index()
