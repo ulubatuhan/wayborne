@@ -187,6 +187,16 @@ static func leader_tone_bonus(choice: EventChoice, context: Dictionary) -> float
 		return LEADER_SOUL_BONUS
 	return 0.0
 
+## Sertlik kapısının en üst bandında kontrol zorlaşır: kandıracak kadar tok
+## adam kalmadı (§D-A3). Bir puan, tavanı değil zarı kaydırıyor - tavanı
+## indirmek bazı seçenekleri fiilen kapatırdı.
+const HARDSHIP_HARDEST_BAND: int = 3
+const HARDSHIP_CHECK_PENALTY: float = -1.0
+
+static func hardship_check_penalty(context: Dictionary) -> float:
+	var scarcity := float(context.get("scarcity_here", 0.0))
+	return HARDSHIP_CHECK_PENALTY if EventResolver.hardship_band(scarcity) >= HARDSHIP_HARDEST_BAND else 0.0
+
 const TONE_HARSH: String = "sert"
 const TONE_MERCY: String = "merhamet"
 
@@ -210,7 +220,8 @@ func resolve_check(choice: EventChoice, context: Dictionary) -> Dictionary:
 	if choice.check == null:
 		return checked
 	var effective_stat: float = float(context.get(choice.check.get_context_key(), 0.0)) \
-		+ leader_tone_bonus(choice, context)
+		+ leader_tone_bonus(choice, context) \
+		+ hardship_check_penalty(context)
 	checked["check_tier"] = choice.check.roll(effective_stat, _rng)
 	return checked
 

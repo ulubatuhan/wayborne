@@ -91,7 +91,7 @@ static func resolve_choice(
 	# bedeli ağırlaşır, ötekilerinki hafifler - dünya öteki cevabı bekliyor.
 	# Oran kararın kendisine değil bedeline biniyor: hiçbir seçenek
 	# kapanmıyor (A5).
-	var echo_scale := _echo_scale(session, event, choice)
+	var echo_scale := _echo_scale(session, event, choice) * _hardship_scale(session)
 	session.note_decision(event.event_id, choice.text_key)
 	if not choice.effects.is_empty():
 		resolution.choice_result = _apply(
@@ -118,6 +118,26 @@ static func resolve_choice(
 	if event != null and event.xp_value > 0:
 		resolution.levels_gained = session.grant_party_xp(event.xp_value)
 	return resolution
+
+## --- Sertlik kapısı (§D-A3): kıtlık seçeneği kaldırmaz, pahalılaştırır ---
+##
+## Kıtlık bandı yükseldikçe seçeneklerin kaynak bedeli artar ve beceri
+## kontrolünün tavanı iner ("kandıracak kadar tok adam kalmadı"). Hiçbir
+## bantta hiçbir seçenek **silinmez** (A1, A5): kıtlık oyunu daraltmaz,
+## ağırlaştırır.
+const HARDSHIP_BANDS: Array[float] = [0.30, 0.50, 0.70]
+const HARDSHIP_COST: Array[float] = [1.0, 1.25, 1.25, 1.3]
+
+static func hardship_band(scarcity: float) -> int:
+	var band := 0
+	for threshold in HARDSHIP_BANDS:
+		if scarcity >= threshold:
+			band += 1
+	return band
+
+static func _hardship_scale(session: GameSession) -> float:
+	var band := hardship_band(session.scarcity_here())
+	return HARDSHIP_COST[clampi(band, 0, HARDSHIP_COST.size() - 1)]
 
 ## Bedeli ölçeklenen etki türleri: kaynak ve insan. Bayrak, zincir, kart
 ## açma ve savaş ölçeklenmez - onlar bir miktar değil bir olay.

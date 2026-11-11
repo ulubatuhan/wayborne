@@ -28,6 +28,9 @@ func run(t) -> void:
 	_test_volunteer_costs_nothing_and_comes_cracked(t)
 	_test_refusal_closes_one_service_with_a_reason(t)
 	_test_deserted_hand_waits_on_the_road(t)
+	_test_promise_has_a_term_a_witness_and_a_price(t)
+	_test_three_promises_is_the_ceiling(t)
+	_test_hardship_costs_more_but_closes_nothing(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -280,3 +283,49 @@ func _test_deserted_hand_waits_on_the_road(t) -> void:
 	t.eq(session.pending_trace_card, GameSession.DESERTER_FACE_EVENT, "kart açılmayı bekliyor")
 	var filled := EventText.fill(tr("EVT_DESERTER_FACE_TEXT"), session)
 	t.ok(filled.contains("Dağılan El"), "kart onun adını okuyor")
+
+# --- §D-A5: söz, ve §D-A3: sertlik kapısı ---
+
+func _test_promise_has_a_term_a_witness_and_a_price(t) -> void:
+	var session := _session()
+	session.note_trace_action("soz")
+	var promise := session.give_promise(session.current_location_id, "erzak", 6, 20)
+	t.ok(promise != null, "söz verildi")
+	t.eq(promise.tur, Trace.TYPE_PROMISE, "söz bir izdir, bayrak değil")
+	t.eq(promise.olgunluk_gunu, session.total_days_elapsed + 20, "vadesi var")
+	t.ok(session.ledger.count_of(CaravanLedger.KIND_TRACE) > 0, "deftere yazıldı")
+
+	# Tutulan söz minnete döner.
+	session.keep_promise(promise)
+	t.eq(promise.tur, Trace.TYPE_GRATITUDE, "tutulan söz minnet")
+	t.eq(promise.yayilma, 1, "minnet yakına gider")
+
+	# Bozulan söz yayılan kin olur.
+	session.note_trace_action("soz2")
+	var second := session.give_promise("ilsande", "altin", 40, 5)
+	session.total_days_elapsed += 6
+	session._check_promises()
+	t.eq(second.tur, Trace.TYPE_GRUDGE, "vadesi dolan söz bozulur")
+	t.eq(second.yayilma, 2, "bozulan söz uzağa gider")
+
+func _test_three_promises_is_the_ceiling(t) -> void:
+	var session := _session()
+	for index in GameSession.MAX_OPEN_PROMISES:
+		session.note_trace_action("soz%d" % index)
+		t.ok(session.give_promise("ilsande", "donus", 0, 30) != null, "söz %d verildi" % index)
+	session.note_trace_action("soz_fazla")
+	t.not_ok(session.can_promise(), "üç sözden fazlası bir ağza sığmıyor")
+	t.eq(session.give_promise("ilsande", "donus", 0, 30), null, "dördüncü söz açılmıyor")
+
+## Kıtlık seçeneği kaldırmaz, pahalılaştırır (A1, A5).
+func _test_hardship_costs_more_but_closes_nothing(t) -> void:
+	t.eq(EventResolver.hardship_band(0.1), 0, "sakin bölgede bant 0")
+	t.eq(EventResolver.hardship_band(0.75), 3, "kıtlıkta en sert bant")
+	t.ok(EventResolver.HARDSHIP_COST[3] > EventResolver.HARDSHIP_COST[0], "bedel ağırlaşıyor")
+	var hungry := {"scarcity_here": 0.8}
+	t.eq(EventEngine.hardship_check_penalty(hungry), EventEngine.HARDSHIP_CHECK_PENALTY,
+		"en sert bantta zar zorlaşıyor")
+	t.eq(EventEngine.hardship_check_penalty({"scarcity_here": 0.2}), 0.0, "sakin bölgede pay yok")
+	var choice := EventChoice.new()
+	choice.effects = [EventEffect.make(EventEffect.Type.GOLD, -10)]
+	t.ok(choice.is_available(hungry), "en sert bantta bile seçenek açık")

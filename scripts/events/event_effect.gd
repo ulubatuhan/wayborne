@@ -137,6 +137,11 @@ enum Type {
 	# `lider`, `tanik`, `hepsi`. Stres uçucudur (handa bir gece siler),
 	# huy ani ve ikilidir; eksen yavaştır ve yalnız doğru şeyle geri döner.
 	RUH,
+	# Vadeli bir söz açar (§C.3/§D-A5). amount = vade (gün), text_value =
+	# "<kime tip>:<id>|<ne>|<miktar>" - ne: erzak, altin, teslim, donus.
+	# Bugünkü sözler bayrak: vadesi, tanığı ve bozulunca yayılması yok
+	# (teşhis A15). Söz bu dünyada bir sicildir (lore §12.4).
+	SOZ,
 }
 
 @export var type: Type = Type.GOLD

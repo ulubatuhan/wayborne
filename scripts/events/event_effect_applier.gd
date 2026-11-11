@@ -224,6 +224,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_trace(effect, session, result)
 		EventEffect.Type.RUH:
 			_apply_soul(effect, session, result)
+		EventEffect.Type.SOZ:
+			_apply_promise(effect, session, result)
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:
@@ -269,6 +271,24 @@ static func _apply_bedel(effect: EventEffect, session: GameSession, result: Resu
 					% [bearer.character_name, absi(moved)])
 		_:
 			push_warning("BEDEL: bilinmeyen alt etki %s" % alt)
+
+## Söz verilir (§D-A5): vadeli bir iz açılır. Üç açık sözü olan dördüncüyü
+## veremez - seçenek **sebebiyle** kilitlidir, sessizce kaybolmaz.
+static func _apply_promise(effect: EventEffect, session: GameSession, result: Result) -> void:
+	var parts := effect.text_value.split("|")
+	if parts.is_empty():
+		return
+	var who := parts[0].strip_edges()
+	var what := parts[1].strip_edges() if parts.size() > 1 else "donus"
+	var amount := int(parts[2].strip_edges()) if parts.size() > 2 else 0
+	var to_id := who.get_slice(":", 1) if who.contains(":") else session.current_location_id
+	if to_id.is_empty():
+		to_id = session.current_location_id
+	var promise: Trace = session.give_promise(to_id, what, amount, maxi(1, effect.amount))
+	if promise == null:
+		result.lines.append(_t("EFF_PROMISE_FULL"))
+		return
+	result.lines.append(_t("EFF_PROMISE_GIVEN") % maxi(1, effect.amount))
 
 ## Kartın doğrudan Ruh eksenine dokunması (§C.3): `amount` adım × 4
 ## (1 = 0,25), `text_value` "<eksen>|<kim>" - eksen `kabuk`/`catlak`, kim

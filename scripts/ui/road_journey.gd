@@ -3673,7 +3673,8 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		label = "%s (%s)" % [label, tr(hint_key)]
 	if choice.check != null:
 		var stat_value: float = float(context.get(choice.check.get_context_key(), 0.0)) \
-			+ EventEngine.leader_tone_bonus(choice, context)
+			+ EventEngine.leader_tone_bonus(choice, context) \
+			+ EventEngine.hardship_check_penalty(context)
 		var roller := _session.get_check_roller(choice.check)
 		var roller_name := roller.character_name if roller != null else ""
 		label = "%s — %s" % [label, choice.get_check_preview(stat_value, roller_name)]

@@ -993,6 +993,8 @@
 "LEDGER_TRACE_GRATITUDE","bir iyilik hatırlanıyor","a kindness is remembered","","","","","","","","",""
 "LEDGER_TRACE_GRUDGE","bir kin tutuldu","a grudge was taken","","","","","","","","",""
 "LEDGER_TRACE_PROMISE","bir söz verildi","a word was given","","","","","","","","",""
+"UI_JOURNAL_PROMISE_KEPT","%s'e verilen söz tutuldu.","The word given to %s was kept.","","","","","","","","",""
+"UI_JOURNAL_PROMISE_BROKEN","%s'e verilen sözün vadesi doldu; kimse hatırlatmadı.","The word given to %s came due; no one reminded us.","","","","","","","","",""
 "LEDGER_TRACE_RUMOR","bir söz dolaşıyor","word is going around","","","","","","","","",""
 "LEDGER_TRACE_SACRED","bir ahit bozuldu ya da tutuldu","a vow was kept or broken","","","","","","","","",""
 "LEDGER_TRACE_SICKNESS","hastalık taşındı","sickness was carried","","","","","","","","",""

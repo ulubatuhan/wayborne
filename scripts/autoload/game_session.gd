@@ -695,6 +695,92 @@ var traces: TraceLedger = TraceLedger.new()
 ## etkilerden *önce* not ediyor).
 var _trace_source: String = ""
 
+## --- Söz (§D-A5) ---
+##
+## "Söz ver, oyala" bugüne kadar bir bayraktı: vadesi yoktu, tanığı yoktu,
+## bozulunca kimse duymuyordu (teşhis A15). Oysa söz bu dünyada bir sicil.
+## Söz bir izdir: tutulursa minnet, bozulursa yayılan kin.
+##
+## Aynı anda en çok üç açık söz: dördüncüsü **sebebiyle** kilitli -
+## "Bu kadar söz bir ağza sığmaz."
+const MAX_OPEN_PROMISES: int = 3
+const PROMISE_KEPT_SEVERITY: float = 0.7
+const PROMISE_BROKEN_SEVERITY: float = 0.8
+## Vade bir kez ertelenebilir: on gün, şiddetten bir pay.
+const PROMISE_DELAY_DAYS: int = 10
+const PROMISE_DELAY_COST: float = 0.1
+
+## Açık sözler: iz defterindeki `soz` türünde, dönmemiş izler.
+func open_promises() -> Array[Trace]:
+	var out: Array[Trace] = []
+	for trace in traces.traces:
+		if trace.durum == Trace.STATE_OPEN and trace.tur == Trace.TYPE_PROMISE:
+			out.append(trace)
+	return out
+
+func can_promise() -> bool:
+	return open_promises().size() < MAX_OPEN_PROMISES
+
+## Söz verilir: vadeli bir iz açılır ve deftere yazılır.
+func give_promise(to_id: String, what: String, amount: int, days: int) -> Trace:
+	if not can_promise():
+		return null
+	var trace: Trace = traces.leave(
+		Trace.TYPE_PROMISE, Trace.BEARER_PERSON, to_id, 1,
+		"%s|%s" % [current_trace_source(), what], total_days_elapsed,
+		trace_birth_place(), Trace.DELAY_SHORT, Trace.RETURN_FACE,
+		"%s|soz|%d" % [caravan_name, total_days_elapsed], -1.0, "", last_bearer_name
+	)
+	if trace == null:
+		return null
+	# Vadeyi kart söyler, zar değil: söz verirken ne zamana söz verdiğini
+	# bilmemek söz değil, oyalamadır.
+	trace.olgunluk_gunu = total_days_elapsed + maxi(1, days)
+	trace.siddet = PROMISE_KEPT_SEVERITY
+	ledger.record(
+		CaravanLedger.KIND_TRACE, _trace_ledger_name(trace), total_days_elapsed,
+		lineage_generation, "", "LEDGER_TRACE_PROMISE", _ledger_location_id()
+	)
+	return trace
+
+## Söz tutuldu: minnete döner, tanıkların çatlağı iyileşir, liderinki de.
+func keep_promise(trace: Trace) -> void:
+	if trace == null or trace.tur != Trace.TYPE_PROMISE:
+		return
+	trace.tur = Trace.TYPE_GRATITUDE
+	trace.yon = 1
+	trace.siddet = PROMISE_KEPT_SEVERITY
+	trace.yayilma = 1
+	trace.olgunluk_gunu = total_days_elapsed
+	note_witness(WITNESS_MERCY)
+	for member in party:
+		member.change_rapport(1)
+	write_journal(TranslationServer.translate("UI_JOURNAL_PROMISE_KEPT")
+		% _trace_ledger_name(trace))
+
+## Söz bozuldu: yayılan kin. Yeminli yoldaş bunu unutmaz (var olan kural).
+func break_promise(trace: Trace) -> void:
+	if trace == null or trace.tur != Trace.TYPE_PROMISE:
+		return
+	trace.tur = Trace.TYPE_GRUDGE
+	trace.yon = -1
+	trace.siddet = PROMISE_BROKEN_SEVERITY
+	trace.yayilma = 2
+	trace.sonme = float(Trace.TYPE_TABLE[Trace.TYPE_GRUDGE]["sonme"])
+	trace.olgunluk_gunu = total_days_elapsed
+	charge_leader_tone(false)
+	for member in party:
+		if CharacterData.OATH_CULTURES.has(member.culture_id):
+			member.add_grievance(CharacterData.GRIEVANCE_OATH_BROKEN, 1)
+	write_journal(TranslationServer.translate("UI_JOURNAL_PROMISE_BROKEN")
+		% _trace_ledger_name(trace))
+
+## Her gün: vadesi dolan söz bozulmuş sayılır.
+func _check_promises() -> void:
+	for trace in open_promises():
+		if total_days_elapsed > trace.olgunluk_gunu:
+			break_promise(trace)
+
 ## Yankı defteri (§D-A4): hangi kart kaç kez cevaplandı, en son hangi
 ## cevapla. Soy boyunca taşınır - tekrar eden kart ilk cevabı **bilerek**
 ## geliyor. Teşhis A6: kırk seferde 1792 çekilişin yalnız 66 farklı kart
@@ -3451,6 +3537,8 @@ func advance_day() -> Array[String]:
 	market.advance_day(total_days_elapsed)
 	# İzler erir: kimsenin hatırlamaması da bir sonuçtur (§D-İ3).
 	traces.advance_day(total_days_elapsed)
+	# Vadesi dolan söz bozulur (§D-A5): kimse hatırlatmaz, defter yazar.
+	_check_promises()
 	# Söz yol alır (§D-İ2): on iki günde bir komşu yerleşim daha duyar.
 	traces.spread_day(total_days_elapsed, _trace_neighbours, _trace_region_of)
 	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
