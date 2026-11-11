@@ -695,6 +695,106 @@ var traces: TraceLedger = TraceLedger.new()
 ## etkilerden *önce* not ediyor).
 var _trace_source: String = ""
 
+## --- Şehrin ruhu kervanın ruhuna dokunur (§D-R6) ---
+##
+## `city_morale` bugüne kadar yalnız fiyata ve kapıya bakıyordu; kervanın
+## insanına hiç dokunmuyordu (teşhis A14). Aç bir şehre girmek bir sayıyı
+## değil, kadronun o geceki hâlini değiştirmeli.
+const CITY_MOOD_FULL: float = 60.0
+const CITY_MOOD_HOLDING: float = 30.0
+const CITY_MOOD_HUNGRY: float = 15.0
+## Aç şehirde her yoldaş +2 stres, kırılmış şehirde +4; Katı yarısını,
+## Taş hiçbirini almıyor. Tok şehir bir kez -2.
+const CITY_STRESS_HUNGRY: int = 2
+const CITY_STRESS_BROKEN: int = 4
+const CITY_STRESS_FULL: int = -2
+
+## Şehrin ruh bandı: 0 tok, 1 dayanıyor, 2 aç, 3 kırılmış (türetilir).
+func city_mood_band(location_id: String = "") -> int:
+	var where := current_location_id if location_id.is_empty() else location_id
+	var morale := morale_of(where)
+	if morale >= CITY_MOOD_FULL:
+		return 0
+	if morale >= CITY_MOOD_HOLDING:
+		return 1
+	if morale >= CITY_MOOD_HUNGRY:
+		return 2
+	return 3
+
+## Varışta şehrin hâlini kadroya yazar; uygulanan stresi döner.
+func apply_city_mood() -> int:
+	var band := city_mood_band()
+	var delta := 0
+	match band:
+		0:
+			delta = CITY_STRESS_FULL
+		2:
+			delta = CITY_STRESS_HUNGRY
+		3:
+			delta = CITY_STRESS_BROKEN
+	if delta == 0:
+		return 0
+	for member in party:
+		if delta > 0 and member.is_stone():
+			continue
+		change_character_stress(member, delta)
+		# Geçmişi uyan daha derin yaralanıyor: açlığı bilen aç şehri tanır.
+		if delta > 0 and band >= 3 and CharacterData.SOUL_BACKSTORY_CRACK.has(member.backstory_id):
+			member.change_soul(CharacterData.SOUL_CRACK, 0.5, total_days_elapsed)
+	if band >= 3:
+		var leader := get_player_character()
+		if leader != null:
+			leader.change_soul(CharacterData.SOUL_SHELL, 0.25, total_days_elapsed)
+	return delta
+
+## --- Kervanın huyu (§D-R5): Ruh'tan İz'e köprü ---
+##
+## Her bedelli karar huy puanını oynatır; puan günde biraz sıfıra doğru
+## söner. Bandı değiştiğinde bölge taşıyıcılı bir **söylenti** doğar:
+## kervanın adı ondan önce varır. Ekranda sayı olarak **görünmez** (§F);
+## yalnız başkalarının ağzından bir sıfat olarak çıkar.
+const TEMPER_MERCY: float = 1.0
+const TEMPER_HARSH: float = -1.0
+const TEMPER_PROFITEER: float = -1.5
+const TEMPER_PROMISE_KEPT: float = 1.5
+const TEMPER_PROMISE_BROKEN: float = -2.0
+const TEMPER_DECAY: float = 0.02
+const TEMPER_BANDS: Array[float] = [-6.0, -2.5, 2.5, 6.0]
+const TEMPER_LABEL_KEYS: Array[String] = [
+	"UI_TEMPER_BLOODY", "UI_TEMPER_TIGHT", "UI_TEMPER_PLAIN",
+	"UI_TEMPER_OPEN", "UI_TEMPER_GATE_OPEN",
+]
+
+var huy_puani: float = 0.0
+## En son hangi bantta olduğumuz - bant değişince söylenti doğuyor.
+var _temper_band: int = 2
+
+func change_temper(delta: float) -> void:
+	huy_puani = clampf(huy_puani + delta, -10.0, 10.0)
+	var band := temper_band()
+	if band == _temper_band:
+		return
+	_temper_band = band
+	# Bandın değişmesi bir haberdir: bölgede dolaşır.
+	note_trace_action("huy")
+	leave_trace(
+		Trace.TYPE_RUMOR, Trace.BEARER_REGION, _trace_region_of(_trace_here_id()),
+		1 if band > 2 else -1, Trace.DELAY_SHORT, Trace.RETURN_PRICE, 0.5, "", false)
+
+func temper_band() -> int:
+	var band := 0
+	for threshold in TEMPER_BANDS:
+		if huy_puani >= threshold:
+			band += 1
+	return band
+
+## Kervanın huyunun adı - başkalarının ağzındaki sıfat.
+func temper_label() -> String:
+	return TranslationServer.translate(TEMPER_LABEL_KEYS[clampi(temper_band(), 0, 4)])
+
+func _decay_temper() -> void:
+	huy_puani = move_toward(huy_puani, 0.0, TEMPER_DECAY)
+
 ## --- Söz (§D-A5) ---
 ##
 ## "Söz ver, oyala" bugüne kadar bir bayraktı: vadesi yoktu, tanığı yoktu,
@@ -753,6 +853,7 @@ func keep_promise(trace: Trace) -> void:
 	trace.yayilma = 1
 	trace.olgunluk_gunu = total_days_elapsed
 	note_witness(WITNESS_MERCY)
+	change_temper(TEMPER_PROMISE_KEPT)
 	for member in party:
 		member.change_rapport(1)
 	write_journal(TranslationServer.translate("UI_JOURNAL_PROMISE_KEPT")
@@ -769,6 +870,7 @@ func break_promise(trace: Trace) -> void:
 	trace.sonme = float(Trace.TYPE_TABLE[Trace.TYPE_GRUDGE]["sonme"])
 	trace.olgunluk_gunu = total_days_elapsed
 	charge_leader_tone(false)
+	change_temper(TEMPER_PROMISE_BROKEN)
 	for member in party:
 		if CharacterData.OATH_CULTURES.has(member.culture_id):
 			member.add_grievance(CharacterData.GRIEVANCE_OATH_BROKEN, 1)
@@ -859,8 +961,10 @@ func leave_trace(
 	if trace != null and tur == Trace.TYPE_GRATITUDE:
 		note_witness(WITNESS_MERCY)
 		charge_leader_tone(true)
+		change_temper(TEMPER_MERCY)
 	elif trace != null and tur == Trace.TYPE_GRUDGE:
 		charge_leader_tone(false)
+		change_temper(TEMPER_HARSH)
 	if also_ledger and trace != null and traces.ledger_worthy().has(trace):
 		ledger.record(
 			CaravanLedger.KIND_TRACE, _trace_ledger_name(trace), total_days_elapsed,
@@ -3539,6 +3643,7 @@ func advance_day() -> Array[String]:
 	traces.advance_day(total_days_elapsed)
 	# Vadesi dolan söz bozulur (§D-A5): kimse hatırlatmaz, defter yazar.
 	_check_promises()
+	_decay_temper()
 	# Söz yol alır (§D-İ2): on iki günde bir komşu yerleşim daha duyar.
 	traces.spread_day(total_days_elapsed, _trace_neighbours, _trace_region_of)
 	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
@@ -3965,6 +4070,8 @@ func _remember_trade(item_id: String, quantity: int, profiteering: bool) -> void
 	# tezgâh bir daha ucuza tanımaz, taban fiyattan satanı tanır. Vurgunun
 	# tek sonucu tek bir karttı (teşhis A11); artık vadesi olan bir hesap.
 	note_trace_action("vurgun" if not kindly else "merhamet")
+	if not kindly:
+		change_temper(TEMPER_PROFITEER)
 	leave_trace(
 		Trace.TYPE_GRATITUDE if kindly else Trace.TYPE_GRUDGE,
 		Trace.BEARER_CITY, where, 1 if kindly else -1,
@@ -5252,6 +5359,15 @@ func _restock_recruits() -> void:
 		for index in sorted_hired:
 			if int(index) >= 0 and int(index) < candidates.size():
 				candidates.remove_at(int(index))
+		# Aç şehrin adamı ucuzdur ve yarı kırıktır (§D-R6): şehrin hâli
+		# adayın doğuşuna yazılıyor - kervan onu öyle buluyor.
+		var band := city_mood_band()
+		for candidate in candidates:
+			if band >= 2:
+				candidate.catlak = minf(
+					CharacterData.SOUL_MAX, candidate.catlak + float(band - 1))
+			if band >= 3:
+				candidate.hire_cost = int(round(float(candidate.hire_cost) * 0.5))
 		recruit_candidates[venue] = candidates
 
 func get_recruit_candidates(venue: String) -> Array[CharacterData]:
@@ -5830,6 +5946,10 @@ func finish_journey() -> Dictionary:
 
 	payout["hospitality"] = _apply_hospitality()
 	payout["trace_return"] = resolve_trace_return()
+	# Şehrin hâli insana dokunuyor (teşhis A14: aç bir şehre girmek yalnızca
+	# fiyatı değiştiriyordu).
+	payout["city_toll"] = apply_city_mood()
+	payout["left_quietly"] = _release_leavers()
 
 	return payout
 
@@ -6187,11 +6307,44 @@ func update_party_states() -> void:
 	_refresh_leader_composure()
 	var on_road := is_journey_active()
 	for member in party:
+		# Gidici'nin koşulu kişinin kendi bilemeyeceği bir şey: dostu var mı
+		# ve yemini var mı (§D-R3).
+		member.can_leave_the_caravan = not member.sworn and not _has_friend(member)
 		var changed := member.update_state(total_days_elapsed, on_road)
 		if changed.is_empty():
 			continue
+		if changed == CharacterData.STATE_STONE:
+			_turn_to_stone(member)
 		_drift_personality(member, changed)
 		note_beat(BEAT_STORY, [member.character_name])
+
+func _has_friend(member: CharacterData) -> bool:
+	for other in party:
+		if other != member and get_bond(member, other) >= CompanionLife.FRIENDS_AT:
+			return true
+	return false
+
+## Taş: bağları sıfırlanır (dostu da hasmı da kalmaz) ve huyu kesinleşir.
+func _turn_to_stone(member: CharacterData) -> void:
+	for other in party:
+		if other == member:
+			continue
+		var key := CompanionLife.bond_key(member, other)
+		if bonds.has(key):
+			bonds[key] = 0.0
+	member.grant_trait(TraitCatalog.OFF_PUTTING, total_days_elapsed)
+
+## Gidici şehirde ayrılır (yolda değil, A2): varışta uğurlanır.
+func _release_leavers() -> Array[String]:
+	var gone: Array[String] = []
+	var leaving: Array[CharacterData] = []
+	for member in party:
+		if member.is_leaving() and not member.is_player:
+			leaving.append(member)
+	for member in leaving:
+		if dismiss(member, "LEDGER_CAUSE_WENT_QUIET"):
+			gone.append(member.character_name)
+	return gone
 
 ## Liderin sükûnet payı kişilerde önbelleklenir (`leader_composure_bonus`):
 ## `is_stressed()` oyunun her yerinden çağrılıyor ve oraya oturumu taşımak
@@ -6971,6 +7124,8 @@ func to_save_dict() -> Dictionary:
 		"bekleyen_dusman": waiting_enemy,
 		"bekleyen_iz_karti": pending_trace_card,
 		"yankilar": yankilar.duplicate(true),
+		"huy_puani": huy_puani,
+		"huy_bandi": _temper_band,
 		"kamp_sayaci": [_camp_count, _empty_seat_shown_camp],
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
@@ -7238,6 +7393,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	waiting_enemy = String(data.get("bekleyen_dusman", ""))
 	pending_trace_card = String(data.get("bekleyen_iz_karti", ""))
 	yankilar = (data.get("yankilar", {}) as Dictionary).duplicate(true)
+	huy_puani = float(data.get("huy_puani", 0.0))
+	_temper_band = int(data.get("huy_bandi", 2))
 	var camp_counts: Array = data.get("kamp_sayaci", [0, -99])
 	if camp_counts.size() >= 2:
 		_camp_count = int(camp_counts[0])

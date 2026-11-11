@@ -795,7 +795,9 @@ func get_top_grievance() -> String:
 	return best
 
 func change_stress(delta: int) -> void:
-	stress = clampi(stress + delta, 0, MAX_STRESS)
+	# Taş'ı hiçbir şey artık sarsmıyor: stresi bir çizgiyi aşmıyor.
+	var ceiling: int = STONE_STRESS_CAP if is_stone() else MAX_STRESS
+	stress = clampi(stress + delta, 0, ceiling)
 
 ## --- Ruh: iki yavaş eksen (Ruh alt sistemi, tasarım notu §D-R1) ---
 ##
@@ -866,7 +868,19 @@ const STATE_ALIVE: String = "diri"
 const STATE_WEARY: String = "yorgun"
 const STATE_HARD: String = "kati"
 const STATE_DIM: String = "sonuk"
-const STATES: Array[String] = [STATE_ALIVE, STATE_WEARY, STATE_HARD, STATE_DIM]
+## Dönüşü olmayan iki hâl (§D-R3, §H adım 11). Taş: kabuk tavana vurdu,
+## kimse kalmadı içeride - bedeli **kendi** üstüne alır, bağları sıfırlanır.
+## Gidici: çatlak tavana vurdu ve tutunacak kimsesi yok; bir sonraki şehirde
+## ayrılır. Yolda ayrılmaz - yolda bırakıp gitmek ölüm kapısı açardı (A2).
+const STATE_STONE: String = "tas"
+const STATE_LEAVING: String = "gidici"
+const STATES: Array[String] = [
+	STATE_ALIVE, STATE_WEARY, STATE_HARD, STATE_DIM, STATE_STONE, STATE_LEAVING,
+]
+## Dönüşsüz hâllerin eşiği: eksen tavanı.
+const STATE_FINAL_AXIS: float = SOUL_MAX
+## Taş'ın stresi bu çizgiyi hiç aşmaz: hiçbir şey onu artık sarsmıyor.
+const STONE_STRESS_CAP: int = 40
 
 const STATE_ENTER_AXIS: float = 4.0
 const STATE_LEAVE_AXIS: float = 3.0
@@ -917,6 +931,16 @@ func update_state(day: int, on_road: bool) -> String:
 	return hal
 
 func _next_state() -> String:
+	# Dönüşsüz hâller her şeyin önünde ve hiçbir yere gitmez.
+	if hal == STATE_STONE or hal == STATE_LEAVING:
+		return hal
+	if kabuk >= STATE_FINAL_AXIS:
+		return STATE_STONE
+	# Gidici'nin iki koşulu daha var (dostu yok, yeminli değil); onları
+	# kervanı gören taraf (GameSession) söyler - kişi kendi başına
+	# "kimsem yok" diyemez.
+	if catlak >= STATE_FINAL_AXIS and can_leave_the_caravan:
+		return STATE_LEAVING
 	# Eksenler stresin önünde: kabuk ve çatlak kalıcı, stres uçucu.
 	var hard: bool = kabuk >= STATE_ENTER_AXIS or (hal == STATE_HARD and kabuk >= STATE_LEAVE_AXIS)
 	var dim: bool = catlak >= STATE_ENTER_AXIS or (hal == STATE_DIM and catlak >= STATE_LEAVE_AXIS)
@@ -932,11 +956,21 @@ func _next_state() -> String:
 		return STATE_WEARY
 	return STATE_ALIVE
 
+## Kervanı bırakabilir mi: dostu olmayan ve yemini olmayan. GameSession
+## her gün yazıyor (bkz. update_party_states) - kişi bunu kendi bilemez.
+var can_leave_the_caravan: bool = false
+
+func is_stone() -> bool:
+	return hal == STATE_STONE
+
+func is_leaving() -> bool:
+	return hal == STATE_LEAVING
+
 func is_hard() -> bool:
-	return hal == STATE_HARD
+	return hal == STATE_HARD or hal == STATE_STONE
 
 func is_dim() -> bool:
-	return hal == STATE_DIM
+	return hal == STATE_DIM or hal == STATE_LEAVING
 
 func is_weary() -> bool:
 	return hal == STATE_WEARY

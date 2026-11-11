@@ -25,6 +25,10 @@ func run(t) -> void:
 	_test_state_is_read_as_a_sentence_not_a_number(t)
 	_test_quiet_moment_follows_priority(t)
 	_test_empty_seat_is_kept_and_closed_by_a_tale(t)
+	_test_stone_has_no_way_back(t)
+	_test_leaver_waits_for_the_city(t)
+	_test_city_mood_touches_people(t)
+	_test_temper_is_an_adjective_not_a_number(t)
 
 func _session(extra: int = 2) -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -249,3 +253,65 @@ func _test_empty_seat_is_kept_and_closed_by_a_tale(t) -> void:
 	t.eq(int(open[0]["gun"]), 100 - GameSession.EMPTY_SEAT_TALE_RELIEF, "yas on gün kısaldı")
 	session.total_days_elapsed = 100 + GameSession.EMPTY_SEAT_DAYS
 	t.not_ok(session.has_empty_seat(), "süresi dolan yer kapanıyor")
+
+# --- §H adım 11: Taş, Gidici, şehrin ruhu ve kervanın huyu ---
+
+## Taş: kabuk tavana vurdu. Katı'nın etkileri kalıcı, stres bir çizgiyi
+## aşmıyor, bağları sıfırlanıyor - dostu da hasmı da kalmıyor.
+func _test_stone_has_no_way_back(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	var other := session.get_party()[2]
+	session.bonds[CompanionLife.bond_key(who, other)] = 3.0
+	who.kabuk = CharacterData.SOUL_MAX
+	session.update_party_states()
+	t.ok(who.is_stone(), "kabuk tavanda: Taş")
+	t.eq(session.get_bond(who, other), 0.0, "bağları sıfırlandı")
+	t.ok(who.has_trait(TraitCatalog.OFF_PUTTING), "huyu kesinleşti")
+	who.change_stress(100)
+	t.eq(who.stress, CharacterData.STONE_STRESS_CAP, "hiçbir şey onu artık sarsmıyor")
+	who.kabuk = 0.0
+	session.update_party_states()
+	t.ok(who.is_stone(), "Taş'tan dönüş yok")
+
+## Gidici: çatlak tavanda ve tutunacak kimsesi yok. Yolda ayrılmıyor -
+## yolda bırakıp gitmek ölüm kapısı açardı (A2).
+func _test_leaver_waits_for_the_city(t) -> void:
+	var session := _session()
+	var who := _companion(session)
+	who.catlak = CharacterData.SOUL_MAX
+	who.sworn = true
+	session.update_party_states()
+	t.not_ok(who.is_leaving(), "yeminli gitmiyor")
+	who.sworn = false
+	session.update_party_states()
+	t.ok(who.is_leaving(), "dostu ve yemini olmayan Gidici")
+	var before: int = session.get_party().size()
+	var gone := session._release_leavers()
+	t.eq(gone.size(), 1, "şehirde uğurlanıyor")
+	t.eq(session.get_party().size(), before - 1, "kadro eksildi")
+
+## Teşhis A14: aç şehre girmek yalnızca fiyatı değiştiriyordu.
+func _test_city_mood_touches_people(t) -> void:
+	var session := _session()
+	session.city_morale[session.current_location_id] = 10.0
+	t.eq(session.city_mood_band(), 3, "kırılmış şehir")
+	var who := _companion(session)
+	var before: int = who.stress
+	var leader := session.get_player_character()
+	var shell_before: float = leader.kabuk
+	t.eq(session.apply_city_mood(), GameSession.CITY_STRESS_BROKEN, "şehrin bedeli yazıldı")
+	t.eq(who.stress, before + GameSession.CITY_STRESS_BROKEN, "kırılmış şehir kadroyu yıpratıyor")
+	t.ok(leader.kabuk > shell_before, "lider alışıyor: kabuk")
+
+## Huy ekranda sayı değil sıfat; bandı değişince söylenti doğuyor.
+func _test_temper_is_an_adjective_not_a_number(t) -> void:
+	var session := _session()
+	t.eq(session.temper_band(), 2, "başlangıçta adı yok")
+	var traces_before: int = session.traces.open_count()
+	for _step in 6:
+		session.change_temper(GameSession.TEMPER_MERCY)
+	t.ok(session.temper_band() > 2, "merhamet huyu açıyor")
+	t.ok(session.traces.open_count() > traces_before, "bant değişince söylenti doğdu")
+	t.ne(session.temper_label(), "", "huyun bir adı var")
+	t.not_ok(session.temper_label().contains("6"), "ekranda sayı yok")

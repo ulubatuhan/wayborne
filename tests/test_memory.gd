@@ -208,6 +208,7 @@ const SAVE_KEY_ALIASES: Dictionary = {
 	"volunteer_name": "gonullu",
 	"waiting_enemy": "bekleyen_dusman",
 	"pending_trace_card": "bekleyen_iz_karti",
+	"_temper_band": "huy_bandi",
 	"_camp_count": "kamp_sayaci",
 	"_empty_seat_shown_camp": "kamp_sayaci",
 	"waiting_face": "bekleyen_yuz",

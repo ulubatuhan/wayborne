@@ -319,6 +319,8 @@ const STATE_THOUGHT_KEYS: Dictionary = {
 	CharacterData.STATE_WEARY: "UI_STATE_WEARY",
 	CharacterData.STATE_HARD: "UI_STATE_HARD",
 	CharacterData.STATE_DIM: "UI_STATE_DIM",
+	CharacterData.STATE_STONE: "UI_STATE_STONE",
+	CharacterData.STATE_LEAVING: "UI_STATE_LEAVING",
 }
 
 static func state_label(character: CharacterData) -> String:
