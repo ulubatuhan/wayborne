@@ -70,7 +70,11 @@ func _test_catalog_outcomes_name_someone(t) -> void:
 			for outcome in choice.outcomes:
 				total += 1
 				var raw := tr(outcome.text_key)
-				if raw.contains(EventText.WHO) or raw.contains(EventText.TOWN):
+				# {tanidik} da bir kişiyi anar (Y-E13: dağılan elin adı), bu
+				# yüzden ad sayılır - ölçülen şey işaretin kendisi değil,
+				# sonucun birini ya da bir yeri anıp anmadığı.
+				if raw.contains(EventText.WHO) or raw.contains(EventText.TOWN) \
+						or raw.contains(EventText.DESERTER):
 					named += 1
 				var shown := EventText.fill(raw, session, choice.check, outcome.text_key)
 				if shown.contains("{") and leaked.size() < 5:

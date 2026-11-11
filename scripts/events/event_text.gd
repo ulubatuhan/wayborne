@@ -41,7 +41,8 @@ const BEARER: String = "{bedel}"
 
 ## Bütün işaretler (eski zincir işaretleri dahil) - `_strip` ve test bu
 ## listeyi tarıyor.
-const TOKENS: Array = [WHO, TOWN, BEARER, "{place}", "{off}", "{nemesis}", "{scar}"]
+const DESERTER: String = "{tanidik}"
+const TOKENS: Array = [WHO, TOWN, BEARER, DESERTER, "{place}", "{off}", "{nemesis}", "{scar}"]
 
 ## Bir olay metnini (kart başlığı, gövde, seçenek, sonuç) adlarla doldurur.
 ##
@@ -62,6 +63,10 @@ static func fill(text: String, session: GameSession, check: SkillCheck = null, s
 		filled = filled.replace(TOWN, place_name(session))
 	if filled.contains(BEARER) and not session.last_bearer_name.is_empty():
 		filled = filled.replace(BEARER, session.last_bearer_name)
+	# Y-E13: yolu kesen grubun içindeki tanıdık yüz - aç bırakıp
+	# kaybettiğin el. Adı defterde yazılı, şimdi karşında.
+	if filled.contains(DESERTER) and not session.waiting_enemy.is_empty():
+		filled = filled.replace(DESERTER, session.waiting_enemy)
 	return _strip(filled)
 
 ## Çözülemeyen işaretleri temizler: işaretin kendisi ve peşindeki tek

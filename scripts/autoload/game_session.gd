@@ -1239,6 +1239,9 @@ const LODGING_STRESS_RELIEF: int = 6
 const LODGING_HEAL_SHARE: float = 0.25
 
 func get_lodging_cost() -> int:
+	# Açılan kapı (§D-İ3 `kapi`): dönen bir minnet bir geceyi bedava kılar.
+	if free_lodging_day == total_days_elapsed:
+		return 0
 	# Taverna sahibi hatırlar (T16-09): gönlüne göre %10'ar, en çok yarısı.
 	var kindness := clampf(1.0 - 0.1 * float(regard_here(People.ROLE_INNKEEPER)), 0.5, 1.3)
 	return int(ceil(LODGING_COST_PER_HEAD * maxi(1, party.size()) * (1.0 + scarcity_here()) * kindness))
@@ -3049,6 +3052,17 @@ func apply_meal_distribution(mode: String, selected: Array[CharacterData] = []) 
 				crew_starved.append(gone)
 			else:
 				crew_deserted.append(gone)
+				# Y-E13: aç kalıp kervanı bırakan el en yakın şehre gider,
+				# çoğu oraya varamaz; bazıları kaçakların yanına katılır.
+				# Bu bir iz: adı deftere yazılan adam yolu kesen grubun
+				# içinde karşına çıkar.
+				note_trace_action("ac_birakma")
+				last_bearer_name = gone
+				var deserter_trace: Trace = leave_trace(
+					Trace.TYPE_GRUDGE, Trace.BEARER_ROAD, current_route_id(), -1,
+					Trace.DELAY_SHORT, Trace.RETURN_ENEMY, -1.0, "", false)
+				if deserter_trace != null:
+					deserter_trace.bedel_odeyen = gone
 			cargo_left_behind = settle_idle_wagons()
 
 	if crew_hungry:
@@ -3336,6 +3350,15 @@ func _board_for(origin: String, day: int) -> Array[MerchantOffer]:
 		_board_cache[key] = ContractBoard.roll(origin, day)
 	var board: Array[MerchantOffer] = []
 	board.append_array(_board_cache[key])
+	# Dönen minnetin teklifi (§D-İ3 `teklif`): panodaki en iyi iş artık
+	# adı olan birinden geliyor ve ücreti bir pay fazla. Yeni bir kontrat
+	# türü değil - var olan ilanın sahibi ve ücreti değişiyor.
+	if origin == current_location_id and not favoured_offer_name.is_empty() and not board.is_empty():
+		var favoured: MerchantOffer = board[0]
+		favoured.merchant_name = favoured_offer_name
+		favoured.rush = false
+		favoured.potential_profit = int(round(
+			float(favoured.potential_profit) * FAVOURED_OFFER_BONUS))
 	return board
 
 ## Kontratı kimliğinden bulur: statik (lonca görevi, eski kayıt) ya da
@@ -3406,6 +3429,10 @@ func advance_day() -> Array[String]:
 	traces.spread_day(total_days_elapsed, _trace_neighbours, _trace_region_of)
 	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
 	update_party_states()
+	# Yol taşıyıcılı izler yolda döner (şehirde değil): dağılan el seni
+	# şehirde değil, kendi kaybolduğu yolda bekler.
+	if is_journey_active():
+		resolve_trace_return()
 	_good_return_today = false
 	# Süresi dolan yol kapanmaları/temizlenmeleri defterden düşer; doğal
 	# hava ve eşkıya durumları hesaplandığı için bakım gerektirmez.
@@ -5668,6 +5695,11 @@ func finish_journey() -> Dictionary:
 	hired_recruit_indices = {}
 	tailor_sold = {}
 	bought_here = {}
+	# Geçen ziyaretin dönüşleri bu şehre taşınmaz: açılan kapı da kapanan
+	# hizmet de bir ziyaret sürer.
+	refused_service = ""
+	favoured_offer_name = ""
+	volunteer_name = ""
 	_restock_current_location()
 	record_seen_prices(current_location_id)
 	learn_plague(current_location_id)
@@ -5698,7 +5730,11 @@ func finish_journey() -> Dictionary:
 ## dönüş biçimleri (kart, kapı, teklif, aday, düşman - §H adım 8-9) olgun
 ## kalsa da işlenmez: iz açık kalır, sırası gelince döner. Dönüşü olmayan
 ## bir izi "dönmüş" saymak hesabı sessizce silmek olurdu.
-const TRACE_RETURN_FORMS: Array[String] = [Trace.RETURN_PRICE, Trace.RETURN_FACE]
+const TRACE_RETURN_FORMS: Array[String] = [
+	Trace.RETURN_PRICE, Trace.RETURN_FACE, Trace.RETURN_GATE,
+	Trace.RETURN_CANDIDATE, Trace.RETURN_OFFER, Trace.RETURN_REFUSAL,
+	Trace.RETURN_ENEMY,
+]
 ## Fiyat dönüşünün gücü: taban + şiddet payı, 20 gün (§D-İ3).
 const TRACE_PRICE_BASE: float = 0.04
 const TRACE_PRICE_PER_SEVERITY: float = 0.08
@@ -5728,7 +5764,132 @@ func _apply_trace_return(trace: Trace) -> Dictionary:
 			return _trace_return_price(trace)
 		Trace.RETURN_FACE:
 			return _trace_return_face(trace)
+		Trace.RETURN_GATE:
+			return _trace_return_gate(trace)
+		Trace.RETURN_CANDIDATE:
+			return _trace_return_candidate(trace)
+		Trace.RETURN_OFFER:
+			return _trace_return_offer(trace)
+		Trace.RETURN_REFUSAL:
+			return _trace_return_refusal(trace)
+		Trace.RETURN_ENEMY:
+			return _trace_return_enemy(trace)
 	return {}
+
+## --- Kalan dönüş biçimleri (§D-İ3, §H adım 8) ---
+##
+## Hepsi var olan bir sisteme biniyor: kapı konaklamaya ve bir güne, aday
+## işe alma panosuna, teklif kontrat panosuna, ret bir hizmetin kapanmasına.
+## Yeni bir ekran, yeni bir kaynak, yeni bir sayaç yok - geri dönüş zaten
+## oynadığın oyunun içinden gelmeli, yanına eklenen bir kutudan değil.
+
+## Bir gece bedava konaklama (lehte) ya da kapıda bir günlük bekleme
+## (aleyhte). İkisi de kervanın zaten bildiği birer bedel.
+var free_lodging_day: int = -1
+## Bu ziyaret boyunca kapalı hizmet ("" ise yok): işe alma, kredi, hekim.
+var refused_service: String = ""
+## Panoya eklenen özel teklifin sahibi (bir ziyaret sürer).
+var favoured_offer_name: String = ""
+## Kapıda bekleyen gönüllü: ücretsiz aday (bir ziyaret sürer).
+var volunteer_name: String = ""
+
+const REFUSED_HIRE: String = "tayfa"
+const REFUSED_CREDIT: String = "kredi"
+const REFUSED_HEALER: String = "hekim"
+const REFUSED_SERVICES: Array[String] = [REFUSED_HIRE, REFUSED_CREDIT, REFUSED_HEALER]
+## Özel teklifin ücret payı (§E satır 8: ücret × 1,2).
+const FAVOURED_OFFER_BONUS: float = 1.2
+
+func _trace_return_gate(trace: Trace) -> Dictionary:
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	var place_name := location.location_name if location != null else current_location_id
+	if trace.yon > 0:
+		free_lodging_day = total_days_elapsed
+		write_journal(TranslationServer.translate("UI_JOURNAL_TRACE_GATE") % place_name)
+	else:
+		# Kapıda bir gün: kervan bekletiliyor. Gün kervanın en pahalı
+		# kaynağı - ceza para değil, zaman.
+		advance_day()
+		write_journal(TranslationServer.translate("UI_JOURNAL_TRACE_GATE_BAD") % place_name)
+	return {"iz": trace.id, "bicim": Trace.RETURN_GATE, "ad": place_name}
+
+## Minnetin insan getirmesi (teşhis A1: kadro onuncu seferde 1'e iniyor ve
+## işe almanın tek yolu altın, altın da hep eksi). Gönüllü ücretsiz gelir ama
+## çatlağıyla gelir: onu yola düşüren şey hâlâ orada.
+const VOLUNTEER_CRACK: float = 3.0
+
+func _trace_return_candidate(trace: Trace) -> Dictionary:
+	if recruit_candidates.is_empty():
+		_restock_recruits()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("gonullu|%s|%s" % [caravan_name, trace.id])
+	var here := WorldMapData.get_location_by_id(current_location_id)
+	var board: Array[CharacterData] = RecruitCatalog.build_candidates(
+		RecruitCatalog.VENUE_TAVERN, rng, get_player_character().level, 0, 0,
+		here.peoples if here != null else ([] as Array[String])
+	)
+	if board.is_empty():
+		return {}
+	var volunteer: CharacterData = board[0]
+	volunteer.hire_cost = 0
+	volunteer.catlak = VOLUNTEER_CRACK
+	var pool: Array = recruit_candidates.get(RecruitCatalog.VENUE_TAVERN, [])
+	pool.append(volunteer)
+	recruit_candidates[RecruitCatalog.VENUE_TAVERN] = pool
+	volunteer_name = volunteer.character_name
+	write_journal(TranslationServer.translate("UI_JOURNAL_TRACE_VOLUNTEER") % volunteer_name)
+	return {"iz": trace.id, "bicim": Trace.RETURN_CANDIDATE, "ad": volunteer_name}
+
+func _trace_return_offer(trace: Trace) -> Dictionary:
+	people.ensure_city(current_location_id, total_days_elapsed)
+	var who := ""
+	for person in people.city_people(current_location_id):
+		if bool(person.get("alive", false)):
+			who = String(person.get("name", ""))
+			break
+	if who.is_empty():
+		return {}
+	favoured_offer_name = who
+	_board_cache.clear()
+	write_journal(TranslationServer.translate("UI_JOURNAL_TRACE_OFFER") % who)
+	return {"iz": trace.id, "bicim": Trace.RETURN_OFFER, "ad": who}
+
+func _trace_return_refusal(trace: Trace) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("ret|%s|%s" % [caravan_name, trace.id])
+	refused_service = REFUSED_SERVICES[rng.randi_range(0, REFUSED_SERVICES.size() - 1)]
+	var location := WorldMapData.get_location_by_id(current_location_id)
+	var place_name := location.location_name if location != null else current_location_id
+	write_journal(TranslationServer.translate(
+		"UI_JOURNAL_TRACE_REFUSAL_" + refused_service.to_upper()) % place_name)
+	return {"iz": trace.id, "bicim": Trace.RETURN_REFUSAL, "ad": place_name}
+
+## Tanıdık yüz (Y-E13, §D-İ3 `dusman`): aç bırakıp kaybettiğin el yolu
+## kesen grubun içinde. Kart (`evt_deserter_face`) onun adını okuyor; burada
+## yalnız kimin beklediği yazılıyor. Yolda çözülür, şehirde değil.
+var waiting_enemy: String = ""
+
+func _trace_return_enemy(trace: Trace) -> Dictionary:
+	if not is_journey_active():
+		return {}
+	var who := trace.bedel_odeyen
+	if who.is_empty():
+		return {}
+	waiting_enemy = who
+	# Kart yol ekranının motorunda açılıyor: oturum motoru tutmuyor, o
+	# yüzden "açılacak kart" burada bekliyor (bkz. road_journey'nin günlük
+	# döngüsü) - aynı desen UNLOCK_EVENT'te de var.
+	pending_trace_card = DESERTER_FACE_EVENT
+	return {"iz": trace.id, "bicim": Trace.RETURN_ENEMY, "ad": who}
+
+const DESERTER_FACE_EVENT: String = "evt_deserter_face"
+## Bir iz dönüşünün açtığı kart; yol ekranı okuyup motoruna veriyor ve
+## siliyor. Kayıtta: sefer ortası kaydı iki günün arasına düşebilir.
+var pending_trace_card: String = ""
+
+## Bu ziyaretin kapalı hizmeti mi (kapanma sebebi ekranlarda yazılıyor).
+func is_service_refused(service: String) -> bool:
+	return refused_service == service
 
 ## Fiyat dönüşü: şehrin tezgâhı kervanı tanır. İyi iz ucuzlatır, kin
 ## pahalılaştırır - bütün mallarda, yirmi gün (MarketPricing LAYER_EVENT).
@@ -6264,6 +6425,9 @@ func get_crew_hire_cost() -> int:
 func get_crew_hire_block_reason() -> String:
 	if is_journey_active():
 		return "UI_CREW_HIRE_ON_ROAD"
+	# Kapanan kapı (§D-İ3 `ret`): bu şehirde bu sefer kimse ele gelmiyor.
+	if is_service_refused(REFUSED_HIRE):
+		return "UI_SERVICE_REFUSED_HIRE"
 	if crew_missing <= 0:
 		return "UI_CREW_HIRE_FULL"
 	if not wallet.can_afford(get_crew_hire_cost()):
@@ -6686,6 +6850,12 @@ func to_save_dict() -> Dictionary:
 		"izler": traces.to_dict(),
 		"bekleyen_yuz": waiting_face.duplicate(),
 		"bos_yerler": bos_yerler.duplicate(true),
+		"bedava_konaklama_gunu": free_lodging_day,
+		"kapali_hizmet": refused_service,
+		"ozel_teklif": favoured_offer_name,
+		"gonullu": volunteer_name,
+		"bekleyen_dusman": waiting_enemy,
+		"bekleyen_iz_karti": pending_trace_card,
 		"kamp_sayaci": [_camp_count, _empty_seat_shown_camp],
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
@@ -6946,6 +7116,12 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	traces.from_dict(data.get("izler", {}) as Dictionary)
 	waiting_face = (data.get("bekleyen_yuz", {}) as Dictionary).duplicate()
 	bos_yerler = (data.get("bos_yerler", []) as Array).duplicate(true)
+	free_lodging_day = int(data.get("bedava_konaklama_gunu", -1))
+	refused_service = String(data.get("kapali_hizmet", ""))
+	favoured_offer_name = String(data.get("ozel_teklif", ""))
+	volunteer_name = String(data.get("gonullu", ""))
+	waiting_enemy = String(data.get("bekleyen_dusman", ""))
+	pending_trace_card = String(data.get("bekleyen_iz_karti", ""))
 	var camp_counts: Array = data.get("kamp_sayaci", [0, -99])
 	if camp_counts.size() >= 2:
 		_camp_count = int(camp_counts[0])

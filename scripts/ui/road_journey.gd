@@ -2749,6 +2749,10 @@ func _run_day() -> void:
 	_apply_daily_pace_and_weather()
 
 	var expired_contracts := _session.advance_day()
+	# Dönen bir iz kart açtıysa (Y-E13: tanıdık yüz) motor onu bugün çeksin.
+	if not _session.pending_trace_card.is_empty():
+		_engine.unlock_event(_session.pending_trace_card)
+		_session.pending_trace_card = ""
 	for _merchant_id in expired_contracts:
 		_add_log(tr("UI_ROAD_CONTRACT_EXPIRED"))
 	for note in _session.companion_notes:

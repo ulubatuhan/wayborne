@@ -195,6 +195,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
 	_road_events.append(_untouched_village())
+	_road_events.append(_deserter_face())
 	_road_events.append(_serai_open())
 	_road_events.append(_serai_ruin())
 	_road_events.append(_serai_bandit())
@@ -2813,6 +2814,39 @@ static func _faction_split() -> GameEvent:
 			"EVT_FACTION_MEND_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
 			"EVT_FACTION_MEND_MID", _effects([_fx(EventEffect.Type.STRESS, 3)]),
 			"EVT_FACTION_MEND_BAD", _effects([_fx(EventEffect.Type.BEDEL, 0, "LEAVE_BEHIND|en_kirgin"), _fx(EventEffect.Type.MORALE, -6)])),
+	])
+	return event
+
+## Y-E13 (kullanıcı, soru defteri IV): aç kalıp kervanı bırakan el en yakın
+## şehre gider, çoğu oraya varamaz; bazıları kaçakların yanına katılır.
+## Yolu kesen grubun içinde **adı deftere yazılmış** eski elin duruyor.
+## Tanıdığını söylemek yükü kurtarabilir ama kervanbaşını kendi
+## adamlarının gözünde küçültür; tanımamak kabuk bağlatır.
+static func _deserter_face() -> GameEvent:
+	var event := _event("evt_deserter_face", "EVT_DESERTER_FACE_TITLE", "EVT_DESERTER_FACE_TEXT", 0.0)
+	event.triggered_only = true
+	event.cooldown_days = 20
+	event.choices = _choices([
+		_check_choice("EVT_DESERTER_FACE_OPT_KNOW", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_DESERTER_FACE_KNOW_OK", _effects([
+				_fx(EventEffect.Type.MORALE, -4), _fx(EventEffect.Type.REPUTATION, -1),
+				_fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|yol|kisa|kapi"),
+			]),
+			"EVT_DESERTER_FACE_KNOW_MID", _effects([
+				_fx(EventEffect.Type.CARGO_PLUNDER, 30), _fx(EventEffect.Type.MORALE, -6),
+			]),
+			"EVT_DESERTER_FACE_KNOW_BAD", _effects([
+				_fx(EventEffect.Type.CARGO_PLUNDER, 50), _fx(EventEffect.Type.MORALE, -8),
+				_fx(EventEffect.Type.RUH, 2, "kabuk|lider"),
+			])),
+		_choice("EVT_DESERTER_FACE_OPT_STRANGER", _effects([
+			_fx(EventEffect.Type.RUH, 2, "kabuk|lider"), _fx(EventEffect.Type.RUH, 1, "catlak|tanik"),
+			_fx(EventEffect.Type.CARGO_PLUNDER, 40),
+		])),
+		_choice("EVT_DESERTER_FACE_OPT_FIGHT", _effects([
+			_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit"),
+			_fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|uzun|dusman"),
+		])),
 	])
 	return event
 

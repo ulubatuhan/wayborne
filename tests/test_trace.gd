@@ -24,6 +24,10 @@ func run(t) -> void:
 	_test_context_reads_open_accounts(t)
 	_test_rumor_takes_twelve_days_per_hop(t)
 	_test_closed_and_gated_regions(t)
+	_test_open_gate_and_closed_gate(t)
+	_test_volunteer_costs_nothing_and_comes_cracked(t)
+	_test_refusal_closes_one_service_with_a_reason(t)
+	_test_deserted_hand_waits_on_the_road(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -211,3 +215,68 @@ func _test_closed_and_gated_regions(t) -> void:
 	t.not_ok(trace.knows("orvahel"), "ahit toprağına dışarıdan söylenti girmiyor")
 	# Göçebe toprağına yalnız Orbeyan üzerinden.
 	t.ok(TraceLedger.GATE_PLACE == "serai_orbeyan", "göçebe kapısı Orbeyan")
+
+# --- §D-İ3: kalan dönüş biçimleri ---
+
+func _ripe(session: GameSession, donus: String, yon: int = 1) -> Trace:
+	var trace := _leave(session, Trace.TYPE_GRATITUDE if yon > 0 else Trace.TYPE_GRUDGE, donus, yon)
+	trace.olgunluk_gunu = session.total_days_elapsed
+	return trace
+
+func _test_open_gate_and_closed_gate(t) -> void:
+	var session := _session()
+	var cost_before: int = session.get_lodging_cost()
+	t.ok(cost_before > 0, "konaklamanın bir bedeli var")
+	_ripe(session, Trace.RETURN_GATE, 1)
+	t.eq(String(session.resolve_trace_return().get("bicim", "")), Trace.RETURN_GATE, "kapı döndü")
+	t.eq(session.get_lodging_cost(), 0, "açılan kapı bir geceyi bedava kılıyor")
+
+	var hard := _session()
+	hard.total_days_elapsed = 30
+	_ripe(hard, Trace.RETURN_GATE, -1)
+	var day_before: int = hard.total_days_elapsed
+	hard.resolve_trace_return()
+	t.eq(hard.total_days_elapsed, day_before + 1, "kapanan kapı bir gün yiyor")
+
+func _test_volunteer_costs_nothing_and_comes_cracked(t) -> void:
+	var session := _session()
+	_ripe(session, Trace.RETURN_CANDIDATE, 1)
+	var note := session.resolve_trace_return()
+	t.eq(String(note.get("bicim", "")), Trace.RETURN_CANDIDATE, "aday döndü")
+	var found: CharacterData = null
+	for candidate in session.get_recruit_candidates(RecruitCatalog.VENUE_TAVERN):
+		if candidate.character_name == session.volunteer_name:
+			found = candidate
+	t.ok(found != null, "gönüllü panoda")
+	t.eq(found.hire_cost, 0, "gönüllü ücret istemiyor")
+	t.ok(found.catlak > 0.0, "gönüllü çatlağıyla geliyor")
+
+func _test_refusal_closes_one_service_with_a_reason(t) -> void:
+	var session := _session()
+	_ripe(session, Trace.RETURN_REFUSAL, -1)
+	session.resolve_trace_return()
+	t.ok(GameSession.REFUSED_SERVICES.has(session.refused_service), "bir hizmet kapandı")
+	if session.refused_service == GameSession.REFUSED_HIRE:
+		session.crew_missing = 1
+		t.eq(session.get_crew_hire_block_reason(), "UI_SERVICE_REFUSED_HIRE",
+			"kapanma sebebiyle yazılıyor, sessizce değil")
+
+func _test_deserted_hand_waits_on_the_road(t) -> void:
+	var session := _session()
+	var routes := WorldMapData.get_routes_from(session.current_location_id)
+	if routes.is_empty():
+		return
+	var destination := WorldMapData.get_location_by_id(routes[0].to_location_id)
+	session.start_journey(routes[0].to_location_id, 5, 0.3, CaravanPlan.new(destination, 5))
+	session.note_trace_action("ac_birakma")
+	var trace: Trace = session.leave_trace(
+		Trace.TYPE_GRUDGE, Trace.BEARER_ROAD, session.current_route_id(), -1,
+		Trace.DELAY_SHORT, Trace.RETURN_ENEMY, -1.0, "", false)
+	trace.bedel_odeyen = "Dağılan El"
+	trace.olgunluk_gunu = session.total_days_elapsed
+	var note := session.resolve_trace_return()
+	t.eq(String(note.get("bicim", "")), Trace.RETURN_ENEMY, "düşman dönüşü yolda işlendi")
+	t.eq(session.waiting_enemy, "Dağılan El", "yolu kesen grupta tanıdık yüz var")
+	t.eq(session.pending_trace_card, GameSession.DESERTER_FACE_EVENT, "kart açılmayı bekliyor")
+	var filled := EventText.fill(tr("EVT_DESERTER_FACE_TEXT"), session)
+	t.ok(filled.contains("Dağılan El"), "kart onun adını okuyor")
