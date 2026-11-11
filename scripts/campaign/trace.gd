@@ -128,6 +128,8 @@ var donus_karti: String = ""
 var durum: String = STATE_OPEN
 ## Geri döndüğü gün (-1: dönmedi). Defter "karşılığı"nı buna bakarak yazar.
 var donus_gunu: int = -1
+## Son yayılma günü: söz bir komşuya varmak için gün ister (§D-İ2).
+var son_yayilma_gunu: int = -1
 
 const MAX_KNOWERS: int = 8
 
@@ -154,6 +156,7 @@ func to_dict() -> Dictionary:
 		"olgunluk_gunu": olgunluk_gunu, "sonme": sonme, "yayilma": yayilma,
 		"bilenler": bilenler.duplicate(), "donus": donus, "donus_karti": donus_karti,
 		"durum": durum, "donus_gunu": donus_gunu,
+		"son_yayilma_gunu": son_yayilma_gunu,
 	}
 
 static func from_dict(data: Dictionary) -> Trace:
@@ -179,4 +182,5 @@ static func from_dict(data: Dictionary) -> Trace:
 	trace.donus_karti = String(data.get("donus_karti", ""))
 	trace.durum = String(data.get("durum", STATE_OPEN))
 	trace.donus_gunu = int(data.get("donus_gunu", -1))
+	trace.son_yayilma_gunu = int(data.get("son_yayilma_gunu", -1))
 	return trace

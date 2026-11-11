@@ -111,6 +111,83 @@ func advance_day(_day: int) -> void:
 			trace.durum = Trace.STATE_FADED
 	_trim_closed()
 
+## --- Yayılma: söz yol alır (§D-İ2) ---
+##
+## Bir söylenti komşu yerleşime on iki günde varır ve her atlamada zayıflar;
+## bölge sınırını geçerken bir kez daha. **Tanınma mesafelidir**: kendi
+## bölgende bilinirsin, komşuda duyulmuşsundur, uzakta hiçbir şey ifade
+## etmezsin. Yayılma yönü önce kervansaraylara gider - oraya her yerden
+## yolcu uğrar, haber orada birikir (var olan NEWS_CARAVANSERAI mantığı).
+const SPREAD_DAYS: int = 12
+const SPREAD_LOSS: float = 0.75
+## Ahit toprağı (Avuçiçi) dışarıdan söylenti almaz: oraya giren söz kapıda
+## kalır. Göçebe toprağına (Gokyurt) yalnız Orbeyan Kervansarayı üzerinden
+## haber ulaşır - bozkırda haber ateşten ateşe gider, yoldan değil.
+const CLOSED_REGION: String = "ahit"
+const GATED_REGION: String = "gocebe"
+const GATE_PLACE: String = "serai_orbeyan"
+
+## Günlük yayılma. `neighbours` bir yer kimliğinden komşularını, `region_of`
+## bir yerin bölgesini veren çağrılabilirler - harita bilgisi dışarıdan
+## geliyor ki defter haritasız da sınanabilsin.
+func spread_day(day: int, neighbours: Callable, region_of: Callable) -> int:
+	var spread_count := 0
+	for trace in traces:
+		if trace.durum != Trace.STATE_OPEN or trace.yayilma <= 0:
+			continue
+		if trace.bilenler.size() >= Trace.MAX_KNOWERS:
+			continue
+		if trace.son_yayilma_gunu < 0:
+			trace.son_yayilma_gunu = trace.dogum_gunu
+		if day - trace.son_yayilma_gunu < SPREAD_DAYS:
+			continue
+		trace.son_yayilma_gunu = day
+		if _hop(trace, neighbours, region_of):
+			spread_count += 1
+	return spread_count
+
+func _hop(trace: Trace, neighbours: Callable, region_of: Callable) -> bool:
+	var reached := false
+	var sources: Array[String] = trace.bilenler.duplicate()
+	for source in sources:
+		for target in _ordered_targets(source, neighbours):
+			if trace.knows(target):
+				continue
+			if not _can_reach(source, target, region_of):
+				continue
+			trace.add_knower(target)
+			trace.siddet *= SPREAD_LOSS
+			if String(region_of.call(source)) != String(region_of.call(target)):
+				trace.siddet *= SPREAD_LOSS
+			trace.yayilma -= 1
+			reached = true
+			break
+		if reached:
+			break
+	return reached
+
+## Önce kervansaraylar: haber orada birikir.
+func _ordered_targets(source: String, neighbours: Callable) -> Array[String]:
+	var all: Array[String] = neighbours.call(source)
+	var serais: Array[String] = []
+	var rest: Array[String] = []
+	for place in all:
+		if place.begins_with("serai_"):
+			serais.append(place)
+		else:
+			rest.append(place)
+	serais.append_array(rest)
+	return serais
+
+func _can_reach(source: String, target: String, region_of: Callable) -> bool:
+	var to_region := String(region_of.call(target))
+	var from_region := String(region_of.call(source))
+	if to_region == CLOSED_REGION and from_region != CLOSED_REGION:
+		return false
+	if to_region == GATED_REGION and from_region != GATED_REGION and source != GATE_PLACE:
+		return false
+	return true
+
 ## Burada (bu yerde / bu yolda / bu bölgede) bugün dönebilecek izler, en
 ## ağırdan hafife.
 func ripe_here(day: int, place_id: String, region: String, route_id: String) -> Array[Trace]:

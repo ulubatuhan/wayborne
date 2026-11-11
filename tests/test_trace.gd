@@ -22,6 +22,8 @@ func run(t) -> void:
 	_test_old_save_opens_with_empty_ledger(t)
 	_test_profiteering_leaves_a_trace(t)
 	_test_context_reads_open_accounts(t)
+	_test_rumor_takes_twelve_days_per_hop(t)
+	_test_closed_and_gated_regions(t)
 
 func _session() -> GameSession:
 	var session := GameSession.new(400, 40, 2)
@@ -166,3 +168,46 @@ func _test_context_reads_open_accounts(t) -> void:
 	t.ok(context.has("iz_kin_burada"), "bağlamda kin izi var")
 	t.eq(float(context["iz_kin_burada"]), trace.siddet, "burada bilinen kinin şiddeti okunuyor")
 	t.eq(int(context["iz_acik"]), session.traces.open_count(), "açık hesap sayısı bağlamda")
+
+# --- §D-İ2: söz yol alır ---
+
+func _neighbours(place_id: String) -> Array[String]:
+	var out: Array[String] = []
+	for route in WorldMapData.get_routes_from(place_id):
+		out.append(route.to_location_id)
+	return out
+
+func _region_of(place_id: String) -> String:
+	var location := WorldMapData.get_location_by_id(place_id)
+	return location.region if location != null else ""
+
+func _test_rumor_takes_twelve_days_per_hop(t) -> void:
+	var session := _session()
+	var trace := _leave(session, Trace.TYPE_RUMOR, Trace.RETURN_PRICE, -1)
+	var known_before: int = trace.bilenler.size()
+	session.traces.spread_day(session.total_days_elapsed + 1, _neighbours, _region_of)
+	t.eq(trace.bilenler.size(), known_before, "söz ertesi gün komşu şehre varmıyor")
+	var strength_before: float = trace.siddet
+	session.traces.spread_day(
+		trace.dogum_gunu + TraceLedger.SPREAD_DAYS, _neighbours, _region_of)
+	t.eq(trace.bilenler.size(), known_before + 1, "on iki günde bir komşu duydu")
+	t.ok(trace.siddet < strength_before, "her atlamada söz zayıflıyor")
+
+## Tanınma mesafelidir: ahit toprağı dışarıdan söylenti almaz, göçebe
+## toprağına yalnız Orbeyan üzerinden haber ulaşır.
+func _test_closed_and_gated_regions(t) -> void:
+	var session := _session()
+	var trace := _leave(session, Trace.TYPE_RUMOR, Trace.RETURN_PRICE, -1)
+	trace.bilenler.clear()
+	# Ahit'in komşusundan Ahit'e: kapı kapalı.
+	var outside := ""
+	for route in WorldMapData.get_routes_from("orvahel"):
+		outside = route.to_location_id
+		break
+	t.ok(not outside.is_empty(), "Orvahel'in komşusu var")
+	trace.add_knower(outside)
+	trace.son_yayilma_gunu = 0
+	session.traces.spread_day(TraceLedger.SPREAD_DAYS, _neighbours, _region_of)
+	t.not_ok(trace.knows("orvahel"), "ahit toprağına dışarıdan söylenti girmiyor")
+	# Göçebe toprağına yalnız Orbeyan üzerinden.
+	t.ok(TraceLedger.GATE_PLACE == "serai_orbeyan", "göçebe kapısı Orbeyan")

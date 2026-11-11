@@ -3402,6 +3402,8 @@ func advance_day() -> Array[String]:
 	market.advance_day(total_days_elapsed)
 	# İzler erir: kimsenin hatırlamaması da bir sonuçtur (§D-İ3).
 	traces.advance_day(total_days_elapsed)
+	# Söz yol alır (§D-İ2): on iki günde bir komşu yerleşim daha duyar.
+	traces.spread_day(total_days_elapsed, _trace_neighbours, _trace_region_of)
 	# Hâller değerlendirilir: eksenler ve stres bugün kimi neye çevirdi.
 	update_party_states()
 	_good_return_today = false
@@ -5949,6 +5951,17 @@ func _drift_personality(member: CharacterData, state: String) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("%s|hal|%s" % [member.character_id, state])
 	member.grant_trait(options[rng.randi_range(0, options.size() - 1)], total_days_elapsed)
+
+## İzin yayılması için harita okumaları (bkz. TraceLedger.spread_day).
+func _trace_neighbours(place_id: String) -> Array[String]:
+	var out: Array[String] = []
+	for route in WorldMapData.get_routes_from(place_id):
+		out.append(route.to_location_id)
+	return out
+
+func _trace_region_of(place_id: String) -> String:
+	var location := WorldMapData.get_location_by_id(place_id)
+	return location.region if location != null else ""
 
 func _leader_soul(axis: String) -> float:
 	if party.is_empty():
