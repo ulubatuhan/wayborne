@@ -27,6 +27,7 @@ func _init() -> void:
 		settings.call("set_locale", "tr")
 	await _shoot("yoldasli", true)
 	await _shoot("yalniz", false)
+	await _shoot_deserter()
 	quit()
 
 func _session(with_companion: bool) -> GameSession:
@@ -83,6 +84,34 @@ func _shoot(label: String, with_companion: bool) -> void:
 	await _settle()
 	print("  taşıyıcı: %s" % BedelSecici.bearer_name(BedelSecici.RULE_UNSWORN, session))
 	_save("%s_%s.png" % [CARD, label])
+	screen.queue_free()
+	await _settle()
+
+## Y-E13: yolu kesen grubun içindeki tanıdık yüz - kart onun adını okuyor.
+func _shoot_deserter() -> void:
+	var session := _session(true)
+	var origin := WorldMapData.get_location_by_id(session.current_location_id)
+	var route: TravelRoute = null
+	for candidate in WorldMapData.get_routes_from(origin.location_id):
+		if session.is_route_open(candidate):
+			route = candidate
+			break
+	if route == null:
+		return
+	var days := session.get_route_travel_days(route)
+	var destination := WorldMapData.get_location_by_id(route.to_location_id)
+	var plan := CaravanPlan.new(destination, days, session.get_wagon_capacity(), 1)
+	session.start_journey(destination.location_id, days, session.get_route_danger(route), plan)
+	session.waiting_enemy = "Tepeli Mert"
+	var state := get_root().get_node_or_null("GameState")
+	if state != null:
+		state.call("set_session", session)
+	var screen: Node = load("res://scenes/game/road_journey.tscn").instantiate()
+	get_root().add_child(screen)
+	await _settle()
+	screen.call("_present_event", EventCatalog.get_event("evt_deserter_face"))
+	await _settle()
+	_save("evt_deserter_face.png")
 	screen.queue_free()
 	await _settle()
 
