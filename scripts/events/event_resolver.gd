@@ -87,9 +87,15 @@ static func resolve_choice(
 	session.note_event_seen(event.event_id)
 	# Dövüş garantisi (2026-11-07): yolu kesen bir kartla yüzleşildi.
 	session.note_raid_faced(event)
+	# Yankı (§D-A4): aynı kartı ikinci kez cevaplarken **aynı** cevabın
+	# bedeli ağırlaşır, ötekilerinki hafifler - dünya öteki cevabı bekliyor.
+	# Oran kararın kendisine değil bedeline biniyor: hiçbir seçenek
+	# kapanmıyor (A5).
+	var echo_scale := _echo_scale(session, event, choice)
 	session.note_decision(event.event_id, choice.text_key)
 	if not choice.effects.is_empty():
-		resolution.choice_result = _apply(choice.effects, session, apply_effects)
+		resolution.choice_result = _apply(
+			_scaled(choice.effects, echo_scale), session, apply_effects)
 
 	# Check varsa zar burada atılıyor - koşulların gördüğü bağlam kopyası
 	# "check_tier" taşıyor (bkz. EventEngine.resolve_check).
@@ -98,7 +104,8 @@ static func resolve_choice(
 		resolution.check_tier = int(checked_context["check_tier"])
 	resolution.outcome = engine.resolve_outcome(choice, checked_context)
 	if resolution.outcome != null and not resolution.outcome.effects.is_empty():
-		resolution.outcome_result = _apply(resolution.outcome.effects, session, apply_effects)
+		resolution.outcome_result = _apply(
+			_scaled(resolution.outcome.effects, echo_scale), session, apply_effects)
 
 	# Ruh (§D-R2): bedeli ödeyen belliydi, işe yarayıp yaramadığı ancak
 	# burada belli olur - zarın sonucu tanıklığın türünü değiştiriyor.
@@ -111,6 +118,36 @@ static func resolve_choice(
 	if event != null and event.xp_value > 0:
 		resolution.levels_gained = session.grant_party_xp(event.xp_value)
 	return resolution
+
+## Bedeli ölçeklenen etki türleri: kaynak ve insan. Bayrak, zincir, kart
+## açma ve savaş ölçeklenmez - onlar bir miktar değil bir olay.
+const SCALABLE_EFFECTS: Array = [
+	EventEffect.Type.GOLD, EventEffect.Type.PROVISIONS, EventEffect.Type.STRESS,
+	EventEffect.Type.PARTY_HP, EventEffect.Type.MORALE, EventEffect.Type.BEDEL,
+	EventEffect.Type.REPUTATION,
+]
+
+static func _echo_scale(session: GameSession, event: GameEvent, choice: EventChoice) -> float:
+	if event == null or session.echo_count(event.event_id) < 1:
+		return 1.0
+	if session.echo_choice(event.event_id) == choice.text_key:
+		return GameSession.ECHO_REPEAT_COST
+	return GameSession.ECHO_OTHER_COST
+
+static func _scaled(effects: Array[EventEffect], scale: float) -> Array[EventEffect]:
+	if is_equal_approx(scale, 1.0):
+		return effects
+	var out: Array[EventEffect] = []
+	for effect in effects:
+		if not SCALABLE_EFFECTS.has(effect.type) or effect.amount == 0:
+			out.append(effect)
+			continue
+		var amount := int(round(float(effect.amount) * scale))
+		# Yuvarlama bir bedeli sıfıra indirmesin: bedel küçülür, kaybolmaz.
+		if amount == 0:
+			amount = 1 if effect.amount > 0 else -1
+		out.append(EventEffect.make(effect.type, amount, effect.text_value))
+	return out
 
 static func _apply(
 	effects: Array[EventEffect], session: GameSession, apply_effects: Callable

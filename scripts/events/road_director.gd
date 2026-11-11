@@ -161,6 +161,10 @@ static func _fight_effects(effects: Array[EventEffect]) -> bool:
 const UNSEEN_CARD_WEIGHT: float = 2.4
 const RECENT_CARD_WEIGHT: float = 0.35
 const SEEN_CARD_WEIGHT: float = 0.8
+## Yankı payları - sayıların gerekçesi GameSession'daki yankı defterinde.
+const ECHO_WEIGHT: float = 1.4
+const ECHO_FADE_FROM: int = 3
+const ECHO_FADE_WEIGHT: float = 0.25
 
 func novelty_multiplier(event_id: String, context: Dictionary) -> float:
 	if event_id.is_empty():
@@ -168,6 +172,15 @@ func novelty_multiplier(event_id: String, context: Dictionary) -> float:
 	var recent := context.get("recent_cards", []) as Array
 	if recent.has(event_id):
 		return RECENT_CARD_WEIGHT
+	# Yankı (§D-A4): görülmüş ama **değişmiş** kart yeni sayılır - ikinci
+	# gelişinde gövdesi ilk cevabı biliyor ve bedelleri kaymış oluyor.
+	# Üçüncü gelişten sonra seyreliyor: dünya da yorulur.
+	var echoes := context.get("yankilar", {}) as Dictionary
+	var echo_count := int((echoes.get(event_id, {}) as Dictionary).get("n", 0))
+	if echo_count >= ECHO_FADE_FROM:
+		return ECHO_FADE_WEIGHT
+	if echo_count >= 1:
+		return ECHO_WEIGHT
 	var seen := context.get("seen_cards", {}) as Dictionary
 	if seen.is_empty():
 		# Bağlam hafızayı taşımıyor (eski çağıran, test): eski davranış.

@@ -21,6 +21,9 @@ func run(t) -> void:
 	_test_hunting_trip_weight_follows_terrain(t)
 	_test_hunting_trip_hunt_option_opens_hunt_combat(t)
 	_test_bandit_ambush_toll_scales_with_danger(t)
+	_test_echo_changes_the_card_on_its_second_coming(t)
+	_test_echo_weight(t)
+	_test_echo_never_erases_a_cost(t)
 	_test_news_events_frame_by_culture(t)
 	_test_road_director(t)
 	_test_career_threats(t)
@@ -392,3 +395,58 @@ func _test_career_threats(t) -> void:
 	t.eq(session.get_career_stage(), 0, "taze kervan erken evrede")
 	session.journeys_completed = GameSession.CAREER_LATE_JOURNEYS
 	t.eq(session.get_career_stage(), 2, "uzun kariyer geç evrede")
+
+# --- §D-A4: yankı çözücü (görev H9) ---
+
+func _echo_session() -> GameSession:
+	var session := GameSession.new(500, 40, 2)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 19
+	session.start_playthrough(
+		CharacterData.create("Lider", CultureCatalog.VALLEY, CharacterStats.new()), rng)
+	return session
+
+## Teşhis A6: tekrar eden kart ilk cevabı bilmiyordu - aynı metin, aynı
+## seçenekler. İkinci gelişte gövde değişmeli ve en az bir bedel kaymalı.
+func _test_echo_changes_the_card_on_its_second_coming(t) -> void:
+	var session := _echo_session()
+	var event := EventCatalog.get_event("evt_bandit_ambush")
+	t.ok(event != null, "kart katalogda")
+	t.eq(session.echo_count(event.event_id), 0, "ilk gelişte yankı yok")
+	var echo_key := EventCatalog.get_echo_line_key(event.event_id)
+	t.ok(not echo_key.is_empty(), "kartın yankı cümlesi var")
+	t.ne(tr(echo_key), echo_key, "yankı cümlesi çevrilmiş")
+
+	var choice: EventChoice = event.choices[0]
+	session.note_decision(event.event_id, choice.text_key)
+	t.eq(session.echo_count(event.event_id), 1, "cevap yankı defterine yazıldı")
+	t.eq(session.echo_choice(event.event_id), choice.text_key, "hangi cevap olduğu da")
+
+	# Aynı cevap pahalı, öteki ucuz - ama ikisi de açık.
+	t.eq(EventResolver._echo_scale(session, event, choice), GameSession.ECHO_REPEAT_COST,
+		"aynı cevabın bedeli ağırlaşıyor")
+	if event.choices.size() > 1:
+		t.eq(EventResolver._echo_scale(session, event, event.choices[1]), GameSession.ECHO_OTHER_COST,
+			"öteki cevabın bedeli hafifliyor")
+
+## Görülmüş ama değişmiş kart yeni sayılır; üçüncü gelişten sonra seyreler.
+func _test_echo_weight(t) -> void:
+	var director := RoadDirector.new()
+	var context := {"seen_cards": {"evt_bandit_ambush": true}, "recent_cards": [], "yankilar": {}}
+	var plain: float = director.novelty_multiplier("evt_bandit_ambush", context)
+	context["yankilar"] = {"evt_bandit_ambush": {"n": 1}}
+	var echoed: float = director.novelty_multiplier("evt_bandit_ambush", context)
+	t.ok(echoed > plain, "yankılı kart görülmüş karttan ağır")
+	context["yankilar"] = {"evt_bandit_ambush": {"n": RoadDirector.ECHO_FADE_FROM}}
+	t.eq(director.novelty_multiplier("evt_bandit_ambush", context), RoadDirector.ECHO_FADE_WEIGHT,
+		"üçüncü gelişten sonra seyreliyor")
+
+## Bedel ölçeklenirken sıfıra yuvarlanmıyor ve bayraklar ölçeklenmiyor.
+func _test_echo_never_erases_a_cost(t) -> void:
+	var cheap: Array[EventEffect] = [
+		EventEffect.make(EventEffect.Type.GOLD, -1),
+		EventEffect.make(EventEffect.Type.SET_FLAG, 0, "bayrak"),
+	]
+	var scaled := EventResolver._scaled(cheap, GameSession.ECHO_OTHER_COST)
+	t.eq(scaled[0].amount, -1, "küçülen bedel kaybolmuyor")
+	t.eq(scaled[1].type, EventEffect.Type.SET_FLAG, "bayrak ölçeklenmiyor")

@@ -695,9 +695,35 @@ var traces: TraceLedger = TraceLedger.new()
 ## etkilerden *önce* not ediyor).
 var _trace_source: String = ""
 
+## Yankı defteri (§D-A4): hangi kart kaç kez cevaplandı, en son hangi
+## cevapla. Soy boyunca taşınır - tekrar eden kart ilk cevabı **bilerek**
+## geliyor. Teşhis A6: kırk seferde 1792 çekilişin yalnız 66 farklı kart
+## ettiği bir oyunda tekrarın kendisi sorun değil; aynı metnin aynı
+## seçeneklerle gelmesi sorun. Oyuncu öğrendi, dünya öğrenmedi.
+## {event_id: {"n": int, "secim": String, "gun": int}}
+var yankilar: Dictionary = {}
+
+## Yankı varyantının ağırlık payı: görülmüş ama **değişmiş** kart yeni sayılır.
+const ECHO_WEIGHT: float = 1.4
+## Üçüncü gelişten sonra kart iyice seyreliyor.
+const ECHO_FADE_FROM: int = 3
+const ECHO_FADE_WEIGHT: float = 0.25
+## Aynı cevabı tekrar vermek pahalı, öteki cevap ucuz: dünya ötekini bekliyor.
+const ECHO_REPEAT_COST: float = 1.3
+const ECHO_OTHER_COST: float = 0.8
+
+func echo_count(event_id: String) -> int:
+	return int((yankilar.get(event_id, {}) as Dictionary).get("n", 0))
+
+func echo_choice(event_id: String) -> String:
+	return String((yankilar.get(event_id, {}) as Dictionary).get("secim", ""))
+
 func note_decision(event_id: String, choice_key: String) -> void:
 	if event_id.is_empty():
 		return
+	yankilar[event_id] = {
+		"n": echo_count(event_id) + 1, "secim": choice_key, "gun": total_days_elapsed,
+	}
 	_trace_source = "%s|%s" % [event_id, choice_key]
 	recent_decisions.append({
 		"event": event_id, "choice": choice_key, "day": total_days_elapsed,
@@ -6856,6 +6882,7 @@ func to_save_dict() -> Dictionary:
 		"gonullu": volunteer_name,
 		"bekleyen_dusman": waiting_enemy,
 		"bekleyen_iz_karti": pending_trace_card,
+		"yankilar": yankilar.duplicate(true),
 		"kamp_sayaci": [_camp_count, _empty_seat_shown_camp],
 		"standing": standing.to_dict(),
 		"flags": _flags.duplicate(),
@@ -7122,6 +7149,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	volunteer_name = String(data.get("gonullu", ""))
 	waiting_enemy = String(data.get("bekleyen_dusman", ""))
 	pending_trace_card = String(data.get("bekleyen_iz_karti", ""))
+	yankilar = (data.get("yankilar", {}) as Dictionary).duplicate(true)
 	var camp_counts: Array = data.get("kamp_sayaci", [0, -99])
 	if camp_counts.size() >= 2:
 		_camp_count = int(camp_counts[0])
@@ -7397,6 +7425,11 @@ func build_event_context() -> Dictionary:
 		"iz_minnet_burada": traces.strength_here(Trace.TYPE_GRATITUDE, _trace_here_id()),
 		"iz_kin_burada": traces.strength_here(Trace.TYPE_GRUDGE, _trace_here_id()),
 		"iz_acik": traces.open_count(),
+		# Yankı defteri (§C.4/§D-A4). Tek bir sayı olarak verilemez: bağlam
+		# günde bir kez kuruluyor, yankı ise **karta özel**. Yönetmen
+		# ağırlığı buradan okuyor (RoadDirector.novelty_multiplier), kart
+		# ekranı doğrudan oturumdan.
+		"yankilar": yankilar,
 		# Liderin iki ekseni (§C.4): soğuk yüz blöfü kolaylaştırır, çatlamış
 		# yüz teselliyi. Kart bunu okuyabilir; hiçbir seçeneği kapatmaz.
 		"lider_kabuk": _leader_soul(CharacterData.SOUL_SHELL),

@@ -125,6 +125,44 @@ static func _apply_career_threats() -> void:
 			EventCondition.make("career_stage", EventCondition.Op.GREATER_EQUAL, 2),
 		]), float(mults[1]) / float(mults[0])))
 
+## --- Yankı cümleleri (§D-A4, görev H9) ---
+##
+## Tekrar eden kart ilk cevabı **bilerek** gelir: gövdenin sonuna o kartın
+## kendi yankı cümlesi eklenir. Teşhis A6: kırk seferde çekilen kartların
+## %74'ü tekrardı ve tekrar eden kart ilk seferki cevabı bilmiyordu - aynı
+## metin, aynı seçenekler. Oyuncu öğrenmişti, dünya öğrenmemişti.
+##
+## Anahtarlar tam yazılı (çalışma anında birleştirilmez, bkz. Localization
+## Rules). Listede olmayan kart yankısız gelir: sessizlik uydurmadan iyidir.
+const ECHO_LINE_KEYS: Dictionary = {
+	"evt_refugee_column": "ECHO_REFUGEE_COLUMN",
+	"evt_road_wanderer": "ECHO_ROAD_WANDERER",
+	"evt_stowaway": "ECHO_STOWAWAY",
+	"evt_sick_merchant": "ECHO_SICK_MERCHANT",
+	"evt_abandoned_wagon": "ECHO_ABANDONED_WAGON",
+	"evt_mutiny": "ECHO_MUTINY",
+	"evt_customs_checkpoint": "ECHO_CUSTOMS_CHECKPOINT",
+	"evt_guard_patrol": "ECHO_GUARD_PATROL",
+	"evt_military_convoy": "ECHO_MILITARY_CONVOY",
+	"evt_pilgrim_encounter": "ECHO_PILGRIM_ENCOUNTER",
+	"evt_penitent_procession": "ECHO_PENITENT_PROCESSION",
+	"evt_starving_roadside": "ECHO_STARVING_ROADSIDE",
+	"evt_untouched_village": "ECHO_UNTOUCHED_VILLAGE",
+	"evt_village_provisions": "ECHO_VILLAGE_PROVISIONS",
+	"evt_provision_raid": "ECHO_PROVISION_RAID",
+	"evt_cargo_toll": "ECHO_CARGO_TOLL",
+	"evt_deserter_levy": "ECHO_DESERTER_LEVY",
+	"evt_bandit_ambush": "ECHO_BANDIT_AMBUSH",
+	"evt_grave_on_the_road": "ECHO_GRAVE_ON_THE_ROAD",
+	"evt_party_theft": "ECHO_PARTY_THEFT",
+	"evt_troubled_night": "ECHO_TROUBLED_NIGHT",
+	"evt_spoiled_provisions": "ECHO_SPOILED_PROVISIONS",
+}
+
+## Kartın yankı cümlesi (yoksa boş).
+static func get_echo_line_key(event_id: String) -> String:
+	return String(ECHO_LINE_KEYS.get(event_id, ""))
+
 static func get_road_events() -> Array[GameEvent]:
 	if not _road_events.is_empty():
 		return _road_events

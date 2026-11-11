@@ -3563,6 +3563,11 @@ func _render_card(event: GameEvent) -> void:
 
 	var body := Label.new()
 	body.text = EventText.fill(tr(_framed_text_key(event)), _session, null, event.event_id)
+	# Yankı (§D-A4): kartı ikinci kez görüyorsan gövdenin sonunda dünyanın
+	# ilk cevabını hatırladığı bir cümle var.
+	var echo_key := EventCatalog.get_echo_line_key(event.event_id)
+	if _session.echo_count(event.event_id) >= 1 and not echo_key.is_empty():
+		body.text += "\n\n" + EventText.fill(tr(echo_key), _session, null, echo_key)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, 0.0)
