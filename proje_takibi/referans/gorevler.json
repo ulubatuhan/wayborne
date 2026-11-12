@@ -4277,14 +4277,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 311,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-001' -A60)."
+   "not": "2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü."
   },
   {
    "id": "IP-002",
@@ -4292,14 +4292,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 312,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-002' -A60)."
+   "not": "2026-11-12 kapandı: meşale 2 GG'ye 27 yerleşimin hepsinde satılıyor (olc_mesale.gd). Oyunda sorun yok, sürücü almıyordu; düzeltildi. Yeni bulgu H-15 (tarif ekonomik değil)."
   },
   {
    "id": "IP-005",
@@ -4307,14 +4307,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 313,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-005' -A60)."
+   "not": "2026-11-12 kapandı: GameEvent.max_per_journey; isyan seferde en çok iki kez. Sayaç kayıtla taşınıyor."
   },
   {
    "id": "IP-004",
@@ -4322,7 +4322,7 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [
     "IP-005"
    ],
@@ -4331,7 +4331,7 @@
    "paket": "P20",
    "sira": 314,
    "kim": "CO",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-004' -A60)."
+   "not": "2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi."
   },
   {
    "id": "IP-007",
@@ -4339,14 +4339,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 315,
    "kim": "CO",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-007' -A60)."
+   "not": "2026-11-12 kapandı: evt_gate_count, ilk seferin ilk gününde bir kez."
   },
   {
    "id": "IP-010",
@@ -4354,7 +4354,7 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [
     "Y-R01"
    ],
@@ -4363,7 +4363,7 @@
    "paket": "P20",
    "sira": 316,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-010' -A60)."
+   "not": "2026-11-12 kapandı: yedi seçeneğe iz."
   },
   {
    "id": "IP-011",
@@ -4371,7 +4371,7 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [
     "IP-010"
    ],
@@ -4380,7 +4380,7 @@
    "paket": "P20",
    "sira": 317,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-011' -A60)."
+   "not": "2026-11-12 kapandı: yedi seçeneğe iz; toplam on dört."
   },
   {
    "id": "IP-009",
@@ -4388,14 +4388,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 318,
    "kim": "CO",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-009' -A60)."
+   "not": "2026-11-12 kapandı: People.chain_hint yön söylüyor, şehir özetinde görünüyor. Ekranda görüldü."
   },
   {
    "id": "IP-012",
@@ -4403,14 +4403,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 319,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-012' -A60)."
+   "not": "2026-11-12 kapandı: kervanın en iyi bulgusunu geçen nadir arama deftere bulanın adıyla giriyor."
   },
   {
    "id": "IP-008",
@@ -4418,14 +4418,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 320,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-008' -A60)."
+   "not": "2026-11-12 kapandı: playtest_ilk_saat.gd beş ekranı gerçek sahnesiyle çekiyor. Geri dönüş sayısı sürücü sınırı değilmiş (kısa seferde dönmek varmaktan uzun); sebep artık engel olarak kayda giriyor."
   },
   {
    "id": "IP-003",
@@ -4433,14 +4433,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "yapılacak",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 321,
    "kim": "CK",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-003' -A60)."
+   "not": "2026-11-12 kapandı (K-04 cevabı gelmeden, önerilen 'evet' ile): yakında görülmüş dövüş kartı garantiden az pay alıyor. Dövüş sıklığı değişmedi."
   },
   {
    "id": "IP-006",
@@ -4448,14 +4448,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "yapılacak",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 322,
    "kim": "CK",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-006' -A60)."
+   "not": "2026-11-12 kapandı (K-03 cevabı gelmeden): avluda sıradaki adım satırı + ilk kâr deftere. Fiyat değişmedi. Ekranda görüldü."
   },
   {
    "id": "IP-013",
@@ -4463,14 +4463,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "yapılacak",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 323,
    "kim": "CK",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-013' -A60)."
+   "not": "2026-11-12 kapandı (K-05 cevabı gelmeden, önerilen 'yalnız kart' ile): alacaklı ağırlığı 300/600 borçta artıyor, tefeci şehir özetinde söz bırakıyor. Faiz ve vade değişmedi. Ekranda görüldü."
   },
   {
    "id": "IP-014",
@@ -4512,14 +4512,14 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P0",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [],
    "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
    "dalga": 1,
    "paket": "P20",
    "sira": 326,
    "kim": "C",
-   "not": "Opus 5 denetimi 2026-11-12: üç sürücü siyaseti ölçümü bozuyor (H-11 vagon değirmeni, H-12 en pahalı aday, H-13 mal payı). Düzeltilip yeniden ölçülmeden 1. ve 8. bulgu ile IP-006 geçerli sayılmaz. İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md"
+   "not": "2026-11-12 kapandı: vagon satışı yalnız icra/sürülemeyen vagon, aday seçimi profilden, mal payı büyümeye pay ayırıyor. Yeniden ölçüm: kese dibi -956'dan -35'e, 15 koşunun 13'ü vagon 2'yi gördü."
   }
  ],
  "guncelleme": "2026-11-12",

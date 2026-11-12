@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **34** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -582,26 +582,95 @@ Toplam: **34** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ## Paket P20
 
+### IP-001 · Planlayıcı eksik erzağı günle söyler
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü.
+
+### IP-002 · Meşale erişimi ölçümü
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: meşale 2 GG'ye 27 yerleşimin hepsinde satılıyor (olc_mesale.gd). Oyunda sorun yok, sürücü almıyordu; düzeltildi. Yeni bulgu H-15 (tarif ekonomik değil).
+
+### IP-005 · İsyan kartı sefer başına en çok iki kez
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: GameEvent.max_per_journey; isyan seferde en çok iki kez. Sayaç kayıtla taşınıyor.
+
+### IP-004 · Üç açlık kartı
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Bağımlı:** IP-005
+- **Son not:** 2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi.
+
+### IP-007 · Kapıdaki sayım kartı
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: evt_gate_count, ilk seferin ilk gününde bir kez.
+
+### IP-010 · En çok görülen kartlara iz, 1. parti
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Bağımlı:** Y-R01
+- **Son not:** 2026-11-12 kapandı: yedi seçeneğe iz.
+
+### IP-011 · En çok görülen kartlara iz, 2. parti
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Bağımlı:** IP-010
+- **Son not:** 2026-11-12 kapandı: yedi seçeneğe iz; toplam on dört.
+
+### IP-009 · Kişi isteğinde yön satırı
+
+- **Durum:** kapandı · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: People.chain_hint yön söylüyor, şehir özetinde görünüyor. Ekranda görüldü.
+
+### IP-012 · Aramada nadir bulgu deftere adla yazılır
+
+- **Durum:** kapandı · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: kervanın en iyi bulgusunu geçen nadir arama deftere bulanın adıyla giriyor.
+
+### IP-008 · İlk saat sahne turu aracı, sürücüde geri dönüş
+
+- **Durum:** kapandı · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: playtest_ilk_saat.gd beş ekranı gerçek sahnesiyle çekiyor. Geri dönüş sayısı sürücü sınırı değilmiş (kısa seferde dönmek varmaktan uzun); sebep artık engel olarak kayda giriyor.
+
 ### IP-003 · Garantili karşılaşmada tür dönüşümü (karar K-04)
 
-- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-003' -A60).
+- **Son not:** 2026-11-12 kapandı (K-04 cevabı gelmeden, önerilen 'evet' ile): yakında görülmüş dövüş kartı garantiden az pay alıyor. Dövüş sıklığı değişmedi.
 
 ### IP-006 · Kervan avlusunda sıradaki adım (karar K-03)
 
-- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-006' -A60).
+- **Son not:** 2026-11-12 kapandı (K-03 cevabı gelmeden): avluda sıradaki adım satırı + ilk kâr deftere. Fiyat değişmedi. Ekranda görüldü.
 
 ### IP-013 · Borcun yüzü (karar K-05)
 
-- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-013' -A60).
+- **Son not:** 2026-11-12 kapandı (K-05 cevabı gelmeden, önerilen 'yalnız kart' ile): alacaklı ağırlığı 300/600 borçta artıyor, tefeci şehir özetinde söz bırakıyor. Faiz ve vade değişmedi. Ekranda görüldü.
 
 ### K-PLAN · Satış planı kararları K-01…K-10
 
 - **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcının işi
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
 - **Son not:** Karar listesi: docs/playtest/2026-11-12/06_is_plani.md §5. K-03, K-04, K-05 Dalga 1'in üç kartını bekletiyor.
+
+### IP-015 · Sürücünün şehir siyaseti ve yeniden ölçüm
+
+- **Durum:** kapandı · **Öncelik:** P0 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** 2026-11-12 kapandı: vagon satışı yalnız icra/sürülemeyen vagon, aday seçimi profilden, mal payı büyümeye pay ayırıyor. Yeniden ölçüm: kese dibi -956'dan -35'e, 15 koşunun 13'ü vagon 2'yi gördü.

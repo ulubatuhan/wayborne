@@ -835,7 +835,11 @@ static func _gate_count() -> GameEvent:
 	event.fire_only_once = true
 	event.conditions = _conditions([
 		_c("journeys_completed", EventCondition.Op.LESS_EQUAL, 0),
-		_c("journey_day", EventCondition.Op.LESS_EQUAL, 1),
+		# Pencere üç gün: kart çekimi günlük bir şansa bağlı ve sessiz gün
+		# rampası ilk günlerde çekimi seyrekleştiriyor - tek güne bağlanınca
+		# kart ölçümde onbeş koşunun ancak onunda çıktı ve ilk kararı hiç
+		# öne çekmedi.
+		_c("journey_day", EventCondition.Op.LESS_EQUAL, 3),
 	])
 	event.choices = _choices([
 		# Doğru saymak kapıda bir yüz kazandırır.

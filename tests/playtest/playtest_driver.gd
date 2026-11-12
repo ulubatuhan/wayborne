@@ -1449,9 +1449,15 @@ func _aclikta_don() -> void:
 		return
 	if not _hungry or _s.get_provisions() > 0:
 		return
+	# IP-008: geri dönüş 60 saatte bir kez kullanıldı ve bu bir sürücü sınırı
+	# değil - kısa seferde dönmek varmaktan uzundur. Sebep artık kayda
+	# giriyor, bir dahaki ölçümde "hiç kullanılmadı" diye okunmasın.
 	if _s.get_days_travelled() >= _s.journey_days_remaining:
+		_engel("geri dönmek", "varış dönüşten yakın (%d gün gidildi, %d gün kaldı)"
+			% [_s.get_days_travelled(), _s.journey_days_remaining])
 		return
 	if not _s.turn_back():
+		_engel("geri dönmek", "yol geri dönüşe kapalı")
 		return
 	_replanned = true
 	_j.start_return_leg(_s.journey_total_days)

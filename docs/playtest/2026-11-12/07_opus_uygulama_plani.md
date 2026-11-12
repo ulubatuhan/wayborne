@@ -1,8 +1,8 @@
 # Uygulama planı (uygulayıcı: Opus 5 medium)
 
-**SIRADAKİ: IP-015**
+**Dalga 1 bitti (2026-11-12).** On dört işin hepsi uygulandı ve ölçüldü; sonuç `08_dalga1_sonucu.md`.
 
-Başlatma satırı: `IP-015'i yap.`
+**SIRADAKİ: Dalga 2** — `06_is_plani.md` WP-02'den başlar. Kartları Fable yazar; bu dosya Dalga 1'in kaydıdır.
 
 ## Uygulayıcı talimatı
 
@@ -22,21 +22,21 @@ Başlatma satırı: `IP-015'i yap.`
 
 ## Sıra
 
-- [ ] IP-015 Sürücünün şehir siyaseti ve yeniden ölçüm · M · **ölçüm aracı, oyun kodu değişmez**
-- [ ] IP-001 Planlayıcı eksik erzağı günle söyler · S
-- [ ] IP-002 Meşale erişimi ölçümü · S
-- [ ] IP-005 İsyan kartı sefer başına en çok iki kez · S
-- [ ] IP-004 Üç açlık kartı · M
-- [ ] IP-007 Kapıdaki sayım kartı · M
-- [ ] IP-010 En çok görülen kartlara iz, 1. parti · M
-- [ ] IP-011 En çok görülen kartlara iz, 2. parti · M
-- [ ] IP-009 Kişi isteğinde yön satırı · M
-- [ ] IP-012 Aramada nadir bulgu deftere adla yazılır · S
-- [ ] IP-008 İlk saat sahne turu aracı · M
-- [ ] IP-003 Karşılaşma türü dönüşümü · S · **KARAR-BEKLİYOR K-04**
-- [ ] IP-006 Kervan avlusunda sıradaki adım · M · **KARAR-BEKLİYOR K-03**
-- [ ] IP-013 Borcun yüzü · S · **KARAR-BEKLİYOR K-05**
-- [ ] IP-014 Dalga 1 sonrası yeniden ölçüm ve rapor · S
+- [x] IP-015 Sürücünün şehir siyaseti ve yeniden ölçüm · M · **ölçüm aracı, oyun kodu değişmez**
+- [x] IP-001 Planlayıcı eksik erzağı günle söyler · S
+- [x] IP-002 Meşale erişimi ölçümü · S
+- [x] IP-005 İsyan kartı sefer başına en çok iki kez · S
+- [x] IP-004 Üç açlık kartı · M
+- [x] IP-007 Kapıdaki sayım kartı · M
+- [x] IP-010 En çok görülen kartlara iz, 1. parti · M
+- [x] IP-011 En çok görülen kartlara iz, 2. parti · M
+- [x] IP-009 Kişi isteğinde yön satırı · M
+- [x] IP-012 Aramada nadir bulgu deftere adla yazılır · S
+- [x] IP-008 İlk saat sahne turu aracı · M
+- [x] IP-003 Karşılaşma türü dönüşümü · S · **KARAR-BEKLİYOR K-04**
+- [x] IP-006 Kervan avlusunda sıradaki adım · M · **KARAR-BEKLİYOR K-03**
+- [x] IP-013 Borcun yüzü · S · **KARAR-BEKLİYOR K-05**
+- [x] IP-014 Dalga 1 sonrası yeniden ölçüm ve rapor · S
 
 Sonraki dalgalar (`06_is_plani.md` WP-02…WP-18) bu turda karta dökülmedi: kart metinleri ve yankı satırları önce
 yazılmalı. Dalga 1 bitince Fable'a "Dalga 2 kartlarını yaz" denir.

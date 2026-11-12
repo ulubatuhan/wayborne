@@ -26,8 +26,12 @@ açılmadı, süre sayaçtır (`ALTYAPI.md`). Oyun kodu değişmedi.
     2029, 2028 ortası, 2027 sonu. AI beyanını kaldıran öncelik 1 ise yalnız 292 saat: haftada 30 saatle Ocak 2027 sonu.
     Kod tarafı Dalga 1 olarak 14 iş kartına döküldü; üçü senin kararını bekliyor (K-03, K-04, K-05).
 
+**Dalga 1 uygulandı (2026-11-12).** On dört iş bitti, yeniden ölçüldü: en çok görülen kartın payı %20'den
+%9,1'e indi, doğan iz acemide 7'den 12'ye çıktı, açlıkta üç karar noktası oluştu, meşale ve büyüme bulguları
+sürücü hatası çıktı. Tutmayan iki ölçüt ve nedenleri `08_dalga1_sonucu.md`'de.
+
 Belgeler: `01` profiller ve günlükler · `02` retention · `03` umutsuzluk ölçümü · `04` referans açıkları ·
-`05` hata listesi · `06` iş planı · `07` uygulama kartları.
+`05` hata listesi · `06` iş planı · `07` uygulama kartları · `08` Dalga 1 sonucu.
 
 **Sınır.** Profiller sentetik; "bırakırdım" satırları ölçüm değil beyandır. Sekiz profil dörde indi, koşular
 sırayla yapıldı. Ses, kumanda, yürüyüş ve dikkat işaretleri ölçülmedi; ekran olarak yalnız menü, yol, kart ve

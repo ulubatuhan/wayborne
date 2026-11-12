@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -297,78 +297,9 @@ Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ## Paket P20
 
-### IP-001 · Planlayıcı eksik erzağı günle söyler
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-001' -A60).
-
-### IP-002 · Meşale erişimi ölçümü
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-002' -A60).
-
-### IP-005 · İsyan kartı sefer başına en çok iki kez
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-005' -A60).
-
-### IP-004 · Üç açlık kartı
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Bağımlı:** IP-005
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-004' -A60).
-
-### IP-007 · Kapıdaki sayım kartı
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-007' -A60).
-
-### IP-010 · En çok görülen kartlara iz, 1. parti
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Bağımlı:** Y-R01
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-010' -A60).
-
-### IP-011 · En çok görülen kartlara iz, 2. parti
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Bağımlı:** IP-010
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-011' -A60).
-
-### IP-009 · Kişi isteğinde yön satırı
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-009' -A60).
-
-### IP-012 · Aramada nadir bulgu deftere adla yazılır
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-012' -A60).
-
-### IP-008 · İlk saat sahne turu aracı, sürücüde geri dönüş
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-008' -A60).
-
 ### IP-014 · Dalga 1 sonrası yeniden ölçüm
 
 - **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
 - **Bağımlı:** IP-001, IP-004, IP-010
 - **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-014' -A60).
-
-### IP-015 · Sürücünün şehir siyaseti ve yeniden ölçüm
-
-- **Durum:** açık · **Öncelik:** P0 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** Opus 5 denetimi 2026-11-12: üç sürücü siyaseti ölçümü bozuyor (H-11 vagon değirmeni, H-12 en pahalı aday, H-13 mal payı). Düzeltilip yeniden ölçülmeden 1. ve 8. bulgu ile IP-006 geçerli sayılmaz. İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md

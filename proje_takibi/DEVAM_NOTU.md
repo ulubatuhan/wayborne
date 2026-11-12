@@ -684,3 +684,21 @@ Raporun iki yeri düzeltildi:
   IP-015 sıranın başına alındı (oyun kodu değişmez).
 - **Çizim saatleri ölçüldü:** `envanter.py` 715 kalem / 2058 saat; öncelik 1 = 183 kalem / **292 saat** (önceki 520
   orantı tahmini yanlıştı). Haftada 30 saatle AI beyanı Ocak 2027 sonunda kalkar, Şubat 2027 fuarı yetişir.
+
+### Dalga 1 uygulandı (2026-11-12, Opus)
+
+On dört iş kartının hepsi bitti ve yeniden ölçüldü (`docs/playtest/2026-11-12/08_dalga1_sonucu.md`).
+
+- **Ölçüm aracı (IP-015, IP-002):** sürücünün vagon değirmeni, en pahalı aday seçimi ve mal payı düzeltildi;
+  ışık malzemesi alımı eklendi. İki "bulgu" sürücü hatası çıktı: meşale 2 GG'ye her yerde satılıyor, büyüme
+  oluyor ama tutmuyor. Yerine iki gerçek bulgu: işe alım hiç karşılanamıyor (H-16), meşale tarifi ekonomik değil (H-15).
+- **Oyun (IP-001, IP-003…IP-013):** planlayıcı eksik erzağı gün olarak yazıyor · `GameEvent.max_per_journey` ·
+  üç açlık kartı · kapıdaki sayım kartı · on dört seçeneğe iz · tanıdıklar yön söylüyor · aramanın nadir bulgusu
+  deftere · garantili dövüşte kart dönüşümü · avluda sıradaki adım + ilk kâr deftere · alacaklı borçla sıklaşıyor,
+  tefeci kapıda söz bırakıyor.
+- **Araç (IP-008):** `tests/playtest/playtest_ilk_saat.gd` ilk saatin beş ekranını gerçek sahnesiyle çekiyor.
+- **Sonuç:** en çok görülen kartın payı %20 → %9,1; doğan iz acemide 7 → 12; aç gece merhametlide 10 → 1.
+  Tutmayan iki ölçüt: ilk karar (darboğaz yolda değil, şehirde - kullanıcı kararı gerek) ve iyi şey arası.
+- **Sıradaki:** Dalga 2 = `06_is_plani.md` WP-02 (iz hacmi, Y-R01'in kalan satırları). Kartlarını Fable yazacak.
+- **Not:** IP-003, IP-006, IP-013 K-04/K-03/K-05 cevabı gelmeden, önerilen muhafazakâr seçenekle uygulandı
+  (kullanıcı "tek tek hepsini yap" dedi). Fiyat, faiz, vade, dövüş sıklığı değişmedi.
