@@ -25,6 +25,11 @@ enum Category {
 @export var fire_only_once: bool = false
 ## Tekrar çıkabilmesi için geçmesi gereken gün sayısı (0 = beklemesiz).
 @export var cooldown_days: int = 0
+## Bir seferde en çok kaç kez çıkabilir (0 = sınırsız). Bekleme süresi
+## "iki gün sonra yine" der, bu "bu yolculukta yeter" der: aç bir yürüyüşte
+## isyan kartı on iki saatte yirmi bir kez çıkmıştı (IP-005). Motorun durumu
+## seferle birlikte doğup ölüyor, o yüzden sayaç da seferlik.
+@export var max_per_journey: int = 0
 ## true ise havuzdan rastgele çekilmez, yalnızca UNLOCK_EVENT ile açılır.
 @export var triggered_only: bool = false
 

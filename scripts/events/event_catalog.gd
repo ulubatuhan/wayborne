@@ -167,6 +167,10 @@ static func get_road_events() -> Array[GameEvent]:
 	if not _road_events.is_empty():
 		return _road_events
 
+	_road_events.append(_gate_count())
+	_road_events.append(_hunger_draft_animal())
+	_road_events.append(_hunger_eat_cargo())
+	_road_events.append(_hunger_send_ahead())
 	_road_events.append(_bandit_ambush())
 	_road_events.append(_customs_checkpoint())
 	_road_events.append(_broken_axle())
@@ -805,6 +809,156 @@ static func _sick_merchant() -> GameEvent:
 	])
 	return event
 
+## --- Açlığın kendi kartları (IP-004) ---
+##
+## Erzak bittikten sonra oyunun tek kararı her akşam aynı boş sofraydı: acemi
+## profili 83 aç gece boyunca hiçbir şey seçemedi, yalnız öldü. Üç kart aç
+## gecenin ikincisinde, dördüncüsünde ve altıncısında çıkar; hiçbiri açlığı
+## çözmez, her biri bir şeyi feda eder. Hepsi sefer başına bir kez
+## (`max_per_journey`), çünkü bunlar bir döngü değil bir inişin basamakları.
+
+## Kapıdaki sayım (IP-007): ilk seferin ilk gününde, bir kez. İlk karar
+## ölçümü 404-677 saniyede çıkıyordu; oyunun kendi hedefi 180. Yeni sistem
+## yok - bir soru, bir iz, varışta kapıda dönen bir hesap.
+static func _gate_count() -> GameEvent:
+	var event := _event("evt_gate_count", "EVT_GATE_COUNT_TITLE", "EVT_GATE_COUNT_TEXT", 60.0)
+	event.fire_only_once = true
+	event.conditions = _conditions([
+		_c("journeys_completed", EventCondition.Op.LESS_EQUAL, 0),
+		_c("journey_day", EventCondition.Op.LESS_EQUAL, 1),
+	])
+	event.choices = _choices([
+		# Doğru saymak kapıda bir yüz kazandırır.
+		_choice("EVT_GATE_COUNT_OPT_TELL", _effects([
+			_fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|sehir|kisa|kapi"),
+		])),
+		# Eksik söylemek para kazandırır ya da sicile geçer: cazip ve riskli.
+		_checked_choice(
+			"EVT_GATE_COUNT_OPT_SHORT",
+			SkillCheck.make(CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER, 0.0),
+			"EVT_GATE_COUNT_OUT_PASSED", _effects([
+				_fx(EventEffect.Type.GOLD, 8),
+			]),
+			"EVT_GATE_COUNT_OUT_NOTED", _effects([
+				_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|sehir|kisa|kapi"),
+				_fx(EventEffect.Type.STRESS, 3),
+			])
+		),
+		_choice("EVT_GATE_COUNT_OPT_SILENT", _effects([
+			_fx(EventEffect.Type.STRESS, 2),
+		])),
+	])
+	return event
+
+static func _hunger_draft_animal() -> GameEvent:
+	var event := _event("evt_hunger_draft_animal", "EVT_HUNGER_DRAFT_TITLE", "EVT_HUNGER_DRAFT_TEXT", 6.0)
+	event.max_per_journey = 1
+	event.conditions = _conditions([
+		_c("hungry_nights", EventCondition.Op.GREATER_EQUAL, 2),
+		_c("provisions", EventCondition.Op.LESS_EQUAL, 0),
+	])
+	event.choices = _choices([
+		# Hayvanı kesmek bugünü kurtarır, yolu uzatır: kervan sırayla çeker.
+		# Bölgede konuşulur - koşumunu yiyen kervanın adı önden gider.
+		# Kesmeyi bilen biri hayvanın hepsini çıkarır; bilmeyen eti ziyan eder
+		# ve geriye bir gece yetecek kadarı kalır. Cazip ama riskli olan bu:
+		# kazanç büyük, beceriksizlik bedava değil.
+		_checked_choice(
+			"EVT_HUNGER_DRAFT_OPT_KILL",
+			SkillCheck.make(CharacterStats.Kind.WISDOM, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_HUNGER_DRAFT_OUT_CLEAN", _effects([
+				_fx(EventEffect.Type.PROVISIONS, 14),
+				_fx(EventEffect.Type.TRAVEL_DAYS, 2),
+				_fx(EventEffect.Type.STRESS, 4),
+				_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|bolge|kisa|fiyat"),
+			]),
+			"EVT_HUNGER_DRAFT_OUT_WASTED", _effects([
+				_fx(EventEffect.Type.PROVISIONS, 5),
+				_fx(EventEffect.Type.TRAVEL_DAYS, 2),
+				_fx(EventEffect.Type.STRESS, 9),
+				_fx(EventEffect.Type.MORALE, -6),
+				_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|bolge|kisa|fiyat"),
+			])
+		),
+		_choice("EVT_HUNGER_DRAFT_OPT_KEEP", _effects([
+			_fx(EventEffect.Type.MORALE, -8),
+			_fx(EventEffect.Type.STRESS, 6),
+		])),
+	])
+	return event
+
+static func _hunger_eat_cargo() -> GameEvent:
+	var event := _event("evt_hunger_eat_cargo", "EVT_HUNGER_CARGO_TITLE", "EVT_HUNGER_CARGO_TEXT", 6.0)
+	event.max_per_journey = 1
+	event.conditions = _conditions([
+		_c("hungry_nights", EventCondition.Op.GREATER_EQUAL, 4),
+		_c("provisions", EventCondition.Op.LESS_EQUAL, 0),
+		_c("cargo_items", EventCondition.Op.GREATER_EQUAL, 1),
+	])
+	event.choices = _choices([
+		# Mühürlü yükü açmak: karın doyar, hesabı şehirde sorulur.
+		# Mührü açıp yerine koymak bir el işi: tutarsa şehirde kimse fark
+		# etmez, tutmazsa yükün sahibi seni bekliyor olur.
+		_checked_choice(
+			"EVT_HUNGER_CARGO_OPT_EAT",
+			SkillCheck.make(CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_HUNGER_CARGO_OUT_UNSEEN", _effects([
+				_fx(EventEffect.Type.CARGO_DECOY),
+				_fx(EventEffect.Type.PROVISIONS, 8),
+				_fx(EventEffect.Type.BEDEL, 4, "STRESS|gecmisi_uyan"),
+			]),
+			"EVT_HUNGER_CARGO_OUT_SEEN", _effects([
+				_fx(EventEffect.Type.CARGO_DECOY),
+				_fx(EventEffect.Type.PROVISIONS, 8),
+				_fx(EventEffect.Type.BEDEL, 4, "STRESS|gecmisi_uyan"),
+				_fx(EventEffect.Type.IZ_BIRAK, -50, "kin|sehir|uzun|fiyat"),
+			])
+		),
+		# Yenmeyeni yakmak: bu gece ısınılır, yarın bir kalem eksiktir.
+		_choice("EVT_HUNGER_CARGO_OPT_BURN", _effects([
+			_fx(EventEffect.Type.CARGO_DECOY),
+			_fx(EventEffect.Type.STRESS, -6),
+			_fx(EventEffect.Type.MORALE, -4),
+		])),
+		# Mühre dokunmamak sözü tutar, bedeli adı olan birine düşer.
+		_choice("EVT_HUNGER_CARGO_OPT_REFUSE", _effects([
+			_fx(EventEffect.Type.BEDEL, 0, "PARTY_HP|en_zayif"),
+			_fx(EventEffect.Type.MORALE, -6),
+			_fx(EventEffect.Type.REPUTATION, 1),
+		])),
+	])
+	return event
+
+static func _hunger_send_ahead() -> GameEvent:
+	var event := _event("evt_hunger_send_ahead", "EVT_HUNGER_AHEAD_TITLE", "EVT_HUNGER_AHEAD_TEXT", 6.0)
+	event.max_per_journey = 1
+	event.conditions = _conditions([
+		_c("hungry_nights", EventCondition.Op.GREATER_EQUAL, 6),
+		_c("provisions", EventCondition.Op.LESS_EQUAL, 0),
+		_c("party_size", EventCondition.Op.GREATER_EQUAL, 2),
+	])
+	event.choices = _choices([
+		# Yüksüz biri iki günde varır. Dönerse bir çuvalla döner; dönmezse
+		# kervan onu geride bırakmış olur - ölmez, ayrılır (olaylar öldürmez).
+		_checked_choice(
+			"EVT_HUNGER_AHEAD_OPT_SEND",
+			SkillCheck.make(CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST, 0.0),
+			"EVT_HUNGER_AHEAD_OUT_BACK", _effects([
+				_fx(EventEffect.Type.PROVISIONS, 10),
+				_fx(EventEffect.Type.MORALE, 6),
+			]),
+			"EVT_HUNGER_AHEAD_OUT_GONE", _effects([
+				_fx(EventEffect.Type.LEAVE_BEHIND),
+				_fx(EventEffect.Type.MORALE, -10),
+				_fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|yuz"),
+			])
+		),
+		_choice("EVT_HUNGER_AHEAD_OPT_STAY", _effects([
+			_fx(EventEffect.Type.STRESS, 8),
+		])),
+	])
+	return event
+
 static func _mutiny() -> GameEvent:
 	var event := _event("evt_mutiny", "EVT_MUTINY_TITLE", "EVT_MUTINY_TEXT", 2.0)
 	event.conditions = _conditions([
@@ -822,6 +976,10 @@ static func _mutiny() -> GameEvent:
 		]), 24.0),
 	])
 	event.cooldown_days = 4
+	# Aç bir yürüyüşte moral dipte kalıyor ve bu kart -24 kat ağırlıkla- on iki
+	# saatte yirmi bir kez çıkmıştı (IP-005). Kriz baskın olmalı ama bir seferde
+	# iki isyan yeter; üçüncüsü kriz değil, döngüdür.
+	event.max_per_journey = 2
 	event.choices = _choices([
 		_gated_choice(
 			"EVT_MUTINY_OPT_PAY", "EVT_MUTINY_OPT_PAY_LOCKED",

@@ -4760,6 +4760,14 @@ func body_fatigue() -> float:
 		return 0.0
 	return clampf(float(worst.fatigue) / float(CharacterData.MAX_FATIGUE), 0.0, 1.0)
 
+## Adı olan kişilerin en uzun aç serisi (IP-004). `_anyone_hungry` "var mı?"
+## diye sorar, bu "kaçıncı gece?" diye - açlık kartlarının eşiği bu.
+func _leader_hungry_days() -> int:
+	var worst := 0
+	for character in get_party():
+		worst = maxi(worst, character.consecutive_hungry_days)
+	return worst
+
 func _anyone_hungry() -> bool:
 	if crew_hungry_nights > 0:
 		return true
@@ -7692,6 +7700,11 @@ func build_event_context() -> Dictionary:
 		"broken_count": _broken_count(),
 		# Yol yönetmeni (Y-B02) açlığı zorluk sayar.
 		"hungry": 1.0 if _anyone_hungry() else 0.0,
+		# Kaçıncı aç gece (IP-004): "aç mı" yetmiyordu - erzak bittikten sonra
+		# yirmi gün boyunca tek karar boş sofraydı. Açlığın kendi kartları bu
+		# sayıya bakıyor. Tayfanın ve liderin saydığının büyüğü: ikisi de aç
+		# kalmanın aynı gecesini sayar, biri daha erken başlamış olabilir.
+		"hungry_nights": maxi(crew_hungry_nights, _leader_hungry_days()),
 		"provisions": get_provisions(),
 		# Veba bu yolun iki ucundan birinde mi (Y-C26 kartı ve vebalı kartlar).
 		"plague_here": 1.0 if _plague_on_route() else 0.0,
@@ -7758,6 +7771,11 @@ func build_event_context() -> Dictionary:
 		"companions_lost": get_companions_lost(),
 		"lineage_generation": lineage_generation,
 		"days_as_leader": get_days_as_leader(),
+		# Kaçıncı sefer ve bu seferin kaçıncı günü (IP-007): ilk çıkışın ilk
+		# gününe konan kart bu ikisine bakıyor. İlk karar ölçümü 7-11. dakikada
+		# geliyordu; oyunun kendi hedefi 3. dakika.
+		"journeys_completed": journeys_completed,
+		"journey_day": maxi(0, journey_total_days - journey_days_remaining),
 		"profiteering_sales": profiteering_sales,
 		"weakest_companion_hp_ratio": _weakest_companion_hp_ratio(),
 		# Kervanda kaç insan var: adı olan yoldaşlar + adı yazılı tayfa

@@ -10,6 +10,7 @@ func suite_name() -> String:
 func run(t) -> void:
 	_test_fire_only_once(t)
 	_test_cooldown(t)
+	_test_max_per_journey(t)
 	_test_triggered_only(t)
 	_test_conditions_filter(t)
 	_test_seed_is_reproducible(t)
@@ -62,6 +63,23 @@ func _test_cooldown(t) -> void:
 	t.eq(engine.get_eligible_events(2, {}).size(), 0, "bekleme sırasında uygun değil")
 	t.eq(engine.get_eligible_events(3, {}).size(), 0, "son bekleme gününde de değil")
 	t.eq(engine.get_eligible_events(4, {}).size(), 1, "bekleme dolunca tekrar uygun")
+
+## IP-005: bekleme "iki gün sonra yine" der, tavan "bu yolculukta yeter" der.
+func _test_max_per_journey(t) -> void:
+	var event := _make_event("tavanli")
+	event.max_per_journey = 2
+
+	var engine := EventEngine.new(_pool([event]), 99)
+	engine.mark_fired(event, 1)
+	t.eq(engine.get_eligible_events(2, {}).size(), 1, "birinciden sonra hâlâ uygun")
+	engine.mark_fired(event, 2)
+	t.eq(engine.get_eligible_events(3, {}).size(), 0, "tavana varınca bu seferde bir daha çıkmaz")
+
+	# Sayaç seferin kaydıyla birlikte taşınır: yarıda kaydedilip yüklenen bir
+	# sefer tavanı sıfırlayıp sömürü kapısı açmasın.
+	var ikinci := EventEngine.new(_pool([event]), 99)
+	ikinci.load_from_dict(engine.to_dict())
+	t.eq(ikinci.get_eligible_events(4, {}).size(), 0, "kayıttan dönünce tavan korunur")
 
 func _test_triggered_only(t) -> void:
 	var event := _make_event("zincir")

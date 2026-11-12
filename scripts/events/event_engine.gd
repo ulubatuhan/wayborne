@@ -13,6 +13,8 @@ var daily_event_chance: float = DEFAULT_DAILY_EVENT_CHANCE
 var _events: Array[GameEvent] = []
 var _rng := RandomNumberGenerator.new()
 var _fired_once: Dictionary = {}
+## event_id -> bu seferde kaç kez çıktı (GameEvent.max_per_journey'nin sayacı).
+var _fired_count: Dictionary = {}
 var _available_after_day: Dictionary = {}
 var _unlocked: Dictionary = {}
 ## Yol yönetmeni (görev Y-B02): verilirse günlük ihtimali ve ağırlıkları eğer;
@@ -111,6 +113,8 @@ func _is_eligible(event: GameEvent, current_day: int, context: Dictionary) -> bo
 		return false
 	if _available_after_day.has(event.event_id) and current_day < int(_available_after_day[event.event_id]):
 		return false
+	if event.max_per_journey > 0 and int(_fired_count.get(event.event_id, 0)) >= event.max_per_journey:
+		return false
 	return event.is_eligible(context)
 
 ## Olay gösterildikten sonra çağrılır: bir-kez ve bekleme kayıtlarını işler.
@@ -119,6 +123,7 @@ func mark_fired(event: GameEvent, current_day: int) -> void:
 		director.note_card(event, current_day)
 	if event.fire_only_once:
 		_fired_once[event.event_id] = true
+	_fired_count[event.event_id] = int(_fired_count.get(event.event_id, 0)) + 1
 	if event.cooldown_days > 0:
 		_available_after_day[event.event_id] = current_day + event.cooldown_days
 	_unlocked.erase(event.event_id)
@@ -133,6 +138,7 @@ func unlock_event(event_id: String) -> void:
 func to_dict() -> Dictionary:
 	return {
 		"fired_once": _fired_once.keys(),
+		"fired_count": _fired_count.duplicate(),
 		"available_after_day": _available_after_day.duplicate(),
 		"unlocked": _unlocked.keys(),
 		"rng_seed": str(_rng.seed),
@@ -144,6 +150,10 @@ func load_from_dict(data: Dictionary) -> void:
 	_fired_once = {}
 	for event_id in (data.get("fired_once", []) as Array):
 		_fired_once[String(event_id)] = true
+	_fired_count = {}
+	var counts: Dictionary = data.get("fired_count", {})
+	for event_id in counts:
+		_fired_count[String(event_id)] = int(counts[event_id])
 	_available_after_day = {}
 	var after: Dictionary = data.get("available_after_day", {})
 	for event_id in after:
