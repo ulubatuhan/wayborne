@@ -1,8 +1,8 @@
 # Uygulama planı (uygulayıcı: Opus 5 medium)
 
-**SIRADAKİ: IP-001**
+**SIRADAKİ: IP-015**
 
-Başlatma satırı: `IP-001'i yap.`
+Başlatma satırı: `IP-015'i yap.`
 
 ## Uygulayıcı talimatı
 
@@ -22,6 +22,7 @@ Başlatma satırı: `IP-001'i yap.`
 
 ## Sıra
 
+- [ ] IP-015 Sürücünün şehir siyaseti ve yeniden ölçüm · M · **ölçüm aracı, oyun kodu değişmez**
 - [ ] IP-001 Planlayıcı eksik erzağı günle söyler · S
 - [ ] IP-002 Meşale erişimi ölçümü · S
 - [ ] IP-005 İsyan kartı sefer başına en çok iki kez · S
@@ -35,12 +36,41 @@ Başlatma satırı: `IP-001'i yap.`
 - [ ] IP-003 Karşılaşma türü dönüşümü · S · **KARAR-BEKLİYOR K-04**
 - [ ] IP-006 Kervan avlusunda sıradaki adım · M · **KARAR-BEKLİYOR K-03**
 - [ ] IP-013 Borcun yüzü · S · **KARAR-BEKLİYOR K-05**
-- [ ] IP-014 Yeniden ölçüm ve rapor · S
+- [ ] IP-014 Dalga 1 sonrası yeniden ölçüm ve rapor · S
 
 Sonraki dalgalar (`06_is_plani.md` WP-02…WP-18) bu turda karta dökülmedi: kart metinleri ve yankı satırları önce
 yazılmalı. Dalga 1 bitince Fable'a "Dalga 2 kartlarını yaz" denir.
 
 ---
+
+## IP-015 Sürücünün şehir siyaseti ve yeniden ölçüm
+
+- **Kimlik:** IP-015 · boyut M · sütun: — (ölçüm aracı) · bağımlılık: yok
+- **Amaç:** Üç sürücü siyaseti ölçümü bozuyor (bkz. `05_hata_listesi.md` H-11, H-12, H-13). Düzelt, yeniden koş,
+  1. ve 8. bulguyu yeni sayılarla yaz. **Oyun kodu değişmez.**
+- **Oku:** `tests/playtest/playtest_driver.gd` satır 855-885 (`_v_vagon_al`, `_v_vagon_sat`), 814-841 (`_v_ise_alma`),
+  1014-1045 (`_mal_al`) · `tests/playtest/profiller/*.json`
+- **Adımlar:**
+  1. **Vagon değirmeni (H-11):** `_v_vagon_sat` yalnız iki koşulda satsın: (a) vadesi geçmiş borç var ve kese borcu
+     kapatmaya yetmiyor, (b) kadro o vagonu süremiyor (`get_idle_wagon_count() > 0`). Kese dibi tek başına yetmesin.
+  2. **İşe alım (H-12):** aday seçimi profilden gelsin: `sehir.aday_secimi` = `"ucuz"` (en düşük `hire_cost`) ya da
+     `"kidemli"` (bugünkü hâl). Varsayılan `"ucuz"`; `p4_somurucu` ve `p2_hayatta_kalan`'a `"ucuz"`, ötekilere de
+     `"ucuz"` yaz (kimse 4 saatte kıdemliye para yetiştiremiyor). `ise_alma_sonrasi_kese` 60'tan 20'ye insin.
+  3. **Mal payı (H-13):** `_mal_al` bütçesini hesaplarken büyüme hedefi varsa onu da ayır: profile
+     `sehir.buyume_hedefi` (bool, varsayılan `true`) ekle; doğruysa `_s.get_next_donkey_cost()` kadarını bütçeden düş.
+  4. **first_decision tanımı (H-14):** planlayıcıdaki "eksik erzakla yola çık" ve rota seçimi de `_ilk("first_decision")`
+     saysın; eski dar ölçüm `first_card` adıyla ayrıca kalsın.
+  5. 15 koşuyu yeniden koştur (`ALTYAPI.md`'deki komut), `python3 tools/playtest_toplam.py > build/playtest/toplam.txt`.
+  6. Yeni sayılarla **yalnız şunları** güncelle: `00_yonetici_ozeti.md` 1., 4. ve 8. madde · `01`'deki özet tablo ·
+     `02`'deki huni, ilkler ve R-1 maddesi · `03`'ün 1. ve 2. katman tabloları · `05`'te H-07, H-11, H-12, H-13.
+  7. R-1 (büyüme) yeni sayılarla hâlâ tutmuyorsa IP-006 sırada kalır; tutuyorsa IP-006'yı listeden **çıkar** ve
+     gerekçesini `06_is_plani.md` §5 K-03 satırına yaz.
+- **Yapma:** `scripts/` altına dokunma. Profillerin ahlakını, ağırlıklarını, rotasını, tempo ve sofra kipini
+  değiştirme. Tohumları değiştirme (101, 202, 303).
+- **Doğrula:** `tools/test_ozet.sh` → `0 başarısız`; yeni `toplam.txt`'te 15 satır; `grep -c "vagon satıldı"`
+  bütün günlüklerde toplam 31'den küçük; en az bir profilde 4:00 kontrol noktasında vagon ≥ 2.
+- **Commit:** `Oyun testi: sürücünün şehir siyaseti düzeltildi, yeniden ölçüldü (IP-015)`
+- **Bitiş ölçütü:** Yeni sayılar raporda; 1. ve 8. bulgu ya doğrulanmış ya düzeltilmiş.
 
 ## IP-001 Planlayıcı eksik erzağı günle söyler
 

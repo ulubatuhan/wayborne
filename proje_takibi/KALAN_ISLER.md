@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **29** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -366,3 +366,9 @@ Toplam: **28** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
 - **Bağımlı:** IP-001, IP-004, IP-010
 - **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-014' -A60).
+
+### IP-015 · Sürücünün şehir siyaseti ve yeniden ölçüm
+
+- **Durum:** açık · **Öncelik:** P0 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** Opus 5 denetimi 2026-11-12: üç sürücü siyaseti ölçümü bozuyor (H-11 vagon değirmeni, H-12 en pahalı aday, H-13 mal payı). Düzeltilip yeniden ölçülmeden 1. ve 8. bulgu ile IP-006 geçerli sayılmaz. İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md

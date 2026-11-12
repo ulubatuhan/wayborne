@@ -15,5 +15,9 @@ Bu turda oyun kodu değişmedi. Oynamayı durduran bir hata çıkmadı: 15 koşu
 | H-08 | Sürücü geri dönüşü neredeyse hiç kullanmıyor. | 60 saatte 1. Sürücü sınırı olabilir. **[Tahmin]** | ölçüm aracı | IP-008 |
 | H-09 | Sürücü yol sahnesini açmıyor; dikkat işaretleri ve yürüyüş ölçülmedi. | `ALTYAPI.md` | ölçüm aracı | IP-008 |
 | H-10 | `playtest_driver.gd` 2270 satır, tek dosya. | — | bakım | şimdilik dokunma |
+| H-11 | **Sürücü vagon değirmeni:** kese 30'un altına inince vagonu satıyor (150 GG alış, 83 GG satış). 60 saatte 26 alış, 31 satış. "Hiçbir profil büyümedi" bulgusu bundan şişti. | `olaylar.jsonl` **[Ölçüm]** | ölçüm aracı | IP-015 |
+| H-12 | **Sürücü hep en pahalı adayı seçiyor** (`_v_ise_alma`, en yüksek seviye) ve üstüne 60 GG yedek tutuyor; 60 saatte 0 işe alım. "Kadro 2'yi geçmedi" bundan. | `playtest_driver.gd:825-833` **[Ölçüm]** | ölçüm aracı | IP-015 |
+| H-13 | **Sürücü her şehirde kesenin %35-60'ını mala yatırıyor**, üstüne vagon için 150 GG yedek şartı var: vagona biriktirmek yapısal olarak imkânsız. | `_mal_al`, `_v_vagon_al` **[Ölçüm]** | ölçüm aracı | IP-015 |
+| H-14 | `ilkler_oturum.first_decision` yalnız olay kartını sayıyor; planlayıcıdaki "eksik erzakla çık" kararı sayılmıyor. "İlk karar 7-11. dakika" bu tanımla okunmalı. | `ALTYAPI.md` **[Gözlem]** | tanım | IP-015 |
 
 Ölçülmedi: ses, kumanda, 1280x800, uzun oturum bellek kullanımı, kayıt/yükleme döngüsü (sürücü kaydetmiyor).

@@ -4505,6 +4505,21 @@
    "sira": 325,
    "kim": "S",
    "not": "Karar listesi: docs/playtest/2026-11-12/06_is_plani.md §5. K-03, K-04, K-05 Dalga 1'in üç kartını bekletiyor."
+  },
+  {
+   "id": "IP-015",
+   "baslik": "Sürücünün şehir siyaseti ve yeniden ölçüm",
+   "bolum": "20",
+   "alan": "Oyun testi 2026-11-12 ve satış planı",
+   "oncelik": "P0",
+   "durum": "açık",
+   "bagimli": [],
+   "dosya": "gorevler/20_oyun_testi_ve_satis_plani.md",
+   "dalga": 1,
+   "paket": "P20",
+   "sira": 326,
+   "kim": "C",
+   "not": "Opus 5 denetimi 2026-11-12: üç sürücü siyaseti ölçümü bozuyor (H-11 vagon değirmeni, H-12 en pahalı aday, H-13 mal payı). Düzeltilip yeniden ölçülmeden 1. ve 8. bulgu ile IP-006 geçerli sayılmaz. İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md"
   }
  ],
  "guncelleme": "2026-11-12",
@@ -4918,6 +4933,7 @@
    "alan": "ilk saat, açlık, iz hacmi, ölçüm",
    "gerekce": "Dört profilli oyun testinin bulguları; sırayla, kart kart uygulanır.",
    "gorevler": [
+    "IP-015",
     "IP-001",
     "IP-002",
     "IP-005",

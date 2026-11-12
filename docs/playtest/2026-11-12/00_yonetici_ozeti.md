@@ -3,8 +3,9 @@
 Dört sentetik profil, 15 koşu, her biri 4 saat eşdeğeri (60 saat). Oyunun kendi kuralları koştu; yol sahnesi
 açılmadı, süre sayaçtır (`ALTYAPI.md`). Oyun kodu değişmedi.
 
-1. **Dört saatte hiçbir profil büyümedi.** Vagon 1, kadro 2 (çoğu zaman 1'e düştü), kese hiçbir kontrol noktasında
-   112'yi geçmedi. Büyümenin ilk basamağı (150 GG) görünmüyor ve ulaşılmıyor. Retention'ın bir numaralı sorunu bu.
+1. **Büyüme tutmuyor: alınan geri satılıyor.** 60 saatte 26 büyüme adımı atıldı (20 eşek, 5 vagon, 1 yarım vagon) ama
+   31 vagon satışı oldu; dört saatin sonunda vagon yine 1. **Uyarı:** sürücünün şehir siyaseti bu sonucu büyütüyor
+   (kese 30'un altına inince 150 GG'lik vagonu 83 GG'ye satıyor), bu yüzden madde yeniden ölçülecek — bkz. `05` H-11.
 2. **Acemi ilk yarım saatte açlıktan ölüyor ve nedenini gün olarak görmüyor.** 27 ölümün 23'ü açlık; 15 seferin 11'i
    33 günden uzun yola eksik erzakla çıkıldı. Planlayıcı eksiği birimle söylüyor.
 3. **Erzak bitince karar da bitiyor.** 83 aç gece boyunca tek karar boş sofra; aynı isyan kartı 21 kez.
@@ -19,7 +20,8 @@ açılmadı, süre sayaçtır (`ALTYAPI.md`). Oyun kodu değişmedi.
    kazanıldı. Zorluk yerinde; eksik olan zorluğun karşısında kazanılan bir şeyin görünmesi.
 9. **Referanslarla açık yeni sistem değil, erişim.** Beş referansın his sütunlarının çoğu oyunda var; açıkların
    beşi "sistem var, ilk dört saatte görünmüyor" başlığında toplanıyor. Filmden tek yeni öneri çıktı.
-10. **Kritik yol çizim.** 2053 saat; haftada 15 / 30 / 45 saatle 1.0 sırasıyla 2029, 2028 ortası, 2027 sonu.
+10. **Kritik yol çizim.** 2058 saat (715 kalem, `envanter.py`'den sayıldı); haftada 15 / 30 / 45 saatle 1.0 sırasıyla
+    2029, 2028 ortası, 2027 sonu. AI beyanını kaldıran öncelik 1 ise yalnız 292 saat: haftada 30 saatle Ocak 2027 sonu.
     Kod tarafı Dalga 1 olarak 14 iş kartına döküldü; üçü senin kararını bekliyor (K-03, K-04, K-05).
 
 Belgeler: `01` profiller ve günlükler · `02` retention · `03` umutsuzluk ölçümü · `04` referans açıkları ·

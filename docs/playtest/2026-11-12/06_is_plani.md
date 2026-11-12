@@ -50,8 +50,8 @@ Her satır ölçülür; hepsi tutmadan 1.0 çıkmaz.
 | WP-07 | Ölçüm: sürücü CI'da, sahne turu (IP-008) | — | 20 | C | — | S-12 | Düşük |
 | WP-08 | Kumanda ve 1280x800 (Y-J*) | — | 50 | C | — | S-10 | Orta |
 | WP-09 | Ses: müzik, ortam, efekt, nidalar | Yol yaşar | 120 | K + İ | K-07 | S-09 | **Yüksek: kaynak** |
-| WP-10 | El çizimi öncelik 1 (181 görsel) | — | ~520 | K | — | S-08 (kısmi) | **Kritik yol** |
-| WP-11 | El çizimi kalan (533 kalem) | — | ~1533 | K | WP-10 | S-08 | **Kritik yol** |
+| WP-10 | El çizimi öncelik 1 (183 görsel) | — | 292 | K | — | S-08 (kısmi) | **Kritik yol** |
+| WP-11 | El çizimi kalan (532 kalem) | — | 1766 | K | WP-10 | S-08 | **Kritik yol** |
 | WP-12 | Çizimi oyuna alma, `HumanSkin`, ekran doğrulama | — | 90 | C | WP-10 | her teslim ekranda | Orta |
 | WP-13 | Çeviri: EN baştan okuma, yazım, glif | — | 40 | İ | WP-04 | S-11 | Düşük |
 | WP-14 | Demo kesiti (Y-I*, `demo_next_fest.md`) | — | 40 | C | WP-01 | S-14 | Orta |
@@ -61,7 +61,7 @@ Her satır ölçülür; hepsi tutmadan 1.0 çıkmaz.
 | WP-18 | Codex ve tasarım notları (72 kart notu) | — | 30 | C | lore | codex tam | Düşük |
 | WP-19 | Hikâye ve kampanya diyalogları | Defter unutmaz | ? | K | lore | kullanıcı | **Belirsiz** |
 
-Toplam: kullanıcı ~2053 saat çizim + ses ve mağaza için ~100 saat; Claude ~570 saat eşdeğeri iş (takvimi belirlemez,
+Toplam: kullanıcı 2058 saat çizim + ses ve mağaza için ~100 saat; Claude ~570 saat eşdeğeri iş (takvimi belirlemez,
 çizimle koşut yürür). WP-19'un saati kullanıcı kapsamı söyleyince yazılır.
 
 ## 4. Kritik yol
@@ -69,11 +69,11 @@ Toplam: kullanıcı ~2053 saat çizim + ses ve mağaza için ~100 saat; Claude ~
 Çizim (WP-10, WP-11) → oyuna alma (WP-12) → AI beyanı (S-08) → aday. Kod işlerinin hepsi bunun gölgesinde biter.
 Çizimi kısaltan tek kaldıraç haftalık saattir; kapsam kesilmez.
 
-| senaryo | haftalık çizim | öncelik 1 (520 s) | tamamı (2053 s) | demo | 1.0 |
+| senaryo | haftalık çizim | öncelik 1 (292 s) | tamamı (2058 s) | demo | 1.0 |
 |---|---|---|---|---|---|
-| A | 15 saat | 35 hafta → Tem 2027 | 137 hafta → Haz 2029 | Eki 2027 fuarı | 2029 3. çeyrek |
-| B | 30 saat | 17 hafta → Mar 2027 | 68 hafta → Mar 2028 | Haz 2027 fuarı | 2028 2. çeyrek |
-| C | 45 saat | 12 hafta → Şub 2027 başı | 46 hafta → Eki 2027 | Şub 2027 fuarı (pay yok) | 2027 4. çeyrek |
+| A | 15 saat | 20 hafta → Nis 2027 | 137 hafta → Haz 2029 | Eki 2027 fuarı | 2029 3. çeyrek |
+| B | 30 saat | 10 hafta → Oca 2027 sonu | 69 hafta → Mar 2028 | **Şub 2027 fuarı yetişir** | 2028 2. çeyrek |
+| C | 45 saat | 7 hafta → Ara 2026 sonu | 46 hafta → Eki 2027 | Şub 2027 fuarı (payla) | 2027 4. çeyrek |
 
 Öncelik 1'in 520 saati orantıyla çıkarıldı (181 / 714 × 2053) **[Tahmin]**; `el_cizimi_takip.xlsx` Özet sayfasındaki
 gerçek saatle değiştirilmeli. Tarihler 2026-11-12'den sayıldı ve boş hafta içermez.
@@ -84,7 +84,7 @@ Dalga 1 başlamadan cevaplanması gerekenler **K-03, K-04, K-05**; öbürleri ta
 
 | no | karar | seçenekler | önerim |
 |---|---|---|---|
-| K-01 | Haftalık çizim saati | A 15 · B 30 · C 45 | B: Şubat fuarı kaçar, Haziran rahat tutar |
+| K-01 | Haftalık çizim saati | A 15 · B 30 · C 45 | B: öncelik 1 Ocak sonunda biter, Şubat 2027 fuarı yetişir |
 | K-02 | Sıra | (a) demo → erken erişim → 1.0 · (b) demo → 1.0 · (c) erken erişim yok, kapalı beta | (a), ama erken erişim öncelik 1 görseller bittikten sonra |
 | K-03 | Büyüme basamağı: yalnız görünür kılınsın mı, eşek/yarım vagon fiyatı da ölçülsün mü | yalnız görünürlük · görünürlük + fiyat ölçümü | Önce görünürlük, sonra yeniden ölç |
 | K-04 | Garantili karşılaşmada tür dönüşümü (sıklık aynı) | evet · hayır | Evet |

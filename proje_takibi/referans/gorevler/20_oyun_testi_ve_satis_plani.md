@@ -8,6 +8,7 @@ burada yalnız liste ve gerekçe var.
 
 | no | iş | bulgu | sütun |
 |---|---|---|---|
+| IP-015 | Sürücünün şehir siyaseti ve yeniden ölçüm | H-11, H-12, H-13, H-14 (Opus denetimi) | — |
 | IP-001 | Planlayıcı eksik erzağı günle söyler | R-2, H-03 | İnsanlar aşınır |
 | IP-002 | Meşale erişimi ölçümü | R-6, H-01 | Yol yaşar |
 | IP-005 | İsyan kartı sefer başına en çok iki kez | H-04 | Yol yaşar |
@@ -22,6 +23,12 @@ burada yalnız liste ve gerekçe var.
 | IP-006 | Kervan avlusunda sıradaki adım | R-1, H-07 · **karar K-03** | Defter unutmaz |
 | IP-013 | Borcun yüzü | U-2, H-06 · **karar K-05** | İnsanlar aşınır |
 | IP-014 | Dalga 1 sonrası yeniden ölçüm | — | — |
+
+## Uyarı (Opus 5 denetimi, 2026-11-12)
+
+Sürücünün üç şehir siyaseti ölçümü bozuyor: vagonu kese dibinde geri satıyor (150 GG alış / 83 GG satış,
+60 saatte 26 alış, 31 satış), hep en pahalı adayı seçiyor (0 işe alım), kesenin %35-60'ını her şehirde mala
+yatırıyor. Raporun 1. ve 8. maddesi ile IP-006 bu yüzden **IP-015'ten sonra** okunur.
 
 ## Kararlar (K-PLAN)
 

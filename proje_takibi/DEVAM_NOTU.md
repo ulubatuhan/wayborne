@@ -674,3 +674,13 @@ değil hacim** - 101 kartın yalnız on ikisi iz bırakıyor (Y-R01).
   K-PLAN). IP-003, IP-006, IP-013 kullanıcının K-04, K-03, K-05 kararını bekliyor.
 - **Açık:** sürücü yol sahnesini açmıyor (IP-008); sekiz profil dörde indi; ses ve kumanda ölçülmedi; Dalga 2+
   kartları yazılmadı (kart metinleri önce gerekir).
+
+### Opus 5 denetimi (2026-11-12, aynı gün)
+
+Raporun iki yeri düzeltildi:
+- **Sürücü siyaseti ölçümü bozuyor** (yeni H-11..H-14): vagonu kese dibinde 150 GG alıp 83 GG'ye satıyor (60 saatte
+  26 büyüme adımı, 31 satış), hep en pahalı adayı seçiyor (0 işe alım), kesenin %35-60'ını her şehirde mala
+  yatırıyor. "Hiçbir profil büyümedi" ve "sömürü bulunamadı" maddeleri bu yüzden **IP-015**'ten sonra okunur.
+  IP-015 sıranın başına alındı (oyun kodu değişmez).
+- **Çizim saatleri ölçüldü:** `envanter.py` 715 kalem / 2058 saat; öncelik 1 = 183 kalem / **292 saat** (önceki 520
+  orantı tahmini yanlıştı). Haftada 30 saatle AI beyanı Ocak 2027 sonunda kalkar, Şubat 2027 fuarı yetişir.
