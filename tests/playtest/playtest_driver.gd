@@ -101,12 +101,12 @@ const CHIEF_KINDS: Array[String] = ["bandit_leader", "toll_man"]
 
 const VARSAYILAN_SIRA: Array[String] = [
 	"eksik_el", "sat", "borc_ode", "hekim", "tamir", "taverna", "dilencilik", "dolandiricilik",
-	"solen", "zincir", "kilise", "ise_alma", "zanaat", "vagon_al", "vagon_sat", "kopek",
+	"solen", "zincir", "kilise", "ise_alma", "isik", "zanaat", "vagon_al", "vagon_sat", "kopek",
 	"avans", "kontrat", "al", "gundelik_is",
 ]
 const EKRAN: Dictionary = {
 	"eksik_el": "avlu", "tamir": "avlu", "vagon_al": "avlu", "vagon_sat": "avlu", "kopek": "avlu",
-	"sat": "pazar", "al": "pazar", "borc_ode": "borc", "hekim": "kilise", "kilise": "kilise",
+	"sat": "pazar", "al": "pazar", "isik": "pazar", "borc_ode": "borc", "hekim": "kilise", "kilise": "kilise",
 	"taverna": "taverna", "dilencilik": "taverna", "dolandiricilik": "taverna", "solen": "taverna",
 	"zincir": "taverna", "ise_alma": "ise_alma", "zanaat": "vagon", "avans": "lonca", "kontrat": "lonca",
 	"gundelik_is": "planlayici",
@@ -576,6 +576,8 @@ func _sehir() -> void:
 				_v_kilise()
 			"ise_alma":
 				_v_ise_alma()
+			"isik":
+				_v_isik()
 			"zanaat":
 				_v_zanaat()
 			"vagon_al":
@@ -822,11 +824,18 @@ func _v_ise_alma() -> void:
 	if candidates.is_empty():
 		_engel("tayfaya biri katmak", "bu yerde aday yok (%s)" % venue)
 		return
+	# IP-015: eski hâl hep en kıdemliyi (= en pahalıyı) seçiyordu ve 60 saatte sıfır
+	# işe alım çıktı. Kesesi dar bir oyuncu ucuz olanı alır; seçim artık profilin.
+	var kidemli := _ps("sehir", "aday_secimi", "ucuz") == "kidemli"
 	var pick: CharacterData = null
 	for candidate in candidates:
-		if _s.wallet.balance - candidate.hire_cost < int(_pf("sehir", "ise_alma_sonrasi_kese", 60.0)):
+		if _s.wallet.balance - candidate.hire_cost < int(_pf("sehir", "ise_alma_sonrasi_kese", 20.0)):
 			continue
-		if pick == null or candidate.level > pick.level:
+		if pick == null:
+			pick = candidate
+		elif kidemli and candidate.level > pick.level:
+			pick = candidate
+		elif not kidemli and candidate.hire_cost < pick.hire_cost:
 			pick = candidate
 	if pick == null:
 		_engel("tayfaya biri katmak", "UI_NOT_ENOUGH_GOLD")
@@ -838,6 +847,37 @@ func _v_ise_alma() -> void:
 		_iyi("işe alım: %s" % pick.character_name)
 	else:
 		_engel("tayfaya biri katmak", "aday alınamadı (itibar ya da yer)")
+
+## IP-002: meşale her yerleşimin tezgâhında (Location.sells, LIGHT_SUPPLIES) ama
+## `_mal_al` yalnız "buranın ürettiği" malı alıyordu, o yüzden 60 saatte bir gece
+## bile ışık yakılamadı. Işık isteyen profil artık birkaç gecelik meşale alır.
+func _v_isik() -> void:
+	if not _pb("yol", "isik", false):
+		return
+	var gece := int(_pf("sehir", "isik_gece", 4.0))
+	var gerek := gece * GameSession.TORCHES_PER_NIGHT
+	var elde := _s.get_total_quantity(ItemCatalog.TORCH)
+	if elde >= gerek:
+		return
+	var here := WorldMapData.get_location_by_id(_s.current_location_id)
+	var torch: Item = ItemCatalog.get_item(ItemCatalog.TORCH)
+	if here == null or torch == null or not here.sells(torch.item_id):
+		_engel("meşale almak", "tezgâhta meşale yok")
+		return
+	_ekran("pazar")
+	var unit := _alis_fiyati(torch, here)
+	var yedek := int(_pf("sehir", "isik_sonrasi_kese", 40.0))
+	var alinabilir := int(floor(float(maxi(0, _s.wallet.balance - yedek)) / float(maxi(1, unit))))
+	var adet := mini(gerek - elde, alinabilir)
+	if adet <= 0:
+		_engel("meşale almak", "kese yetmiyor (%d GG)" % unit)
+		return
+	var total := MarketPricing.bulk_total(unit, adet)
+	if not _s.add_to_cargo(torch, adet):
+		_engel("meşale almak", "vagonda yer yok")
+		return
+	_s.wallet.spend(total)
+	_islem("%d meşale alındı (%d GG)" % [adet, total], "gece ışığı için")
 
 func _v_zanaat() -> void:
 	var last := "üretilecek bir tarif yok"
@@ -869,8 +909,14 @@ func _v_vagon_al() -> void:
 			return
 	_engel("kervanı büyütmek", "vagon, eşek ya da yarım vagon için kese yetmiyor (sıradaki vagon %d GG)" % _s.get_next_wagon_cost())
 
+## Vagon satmak son çaredir, kese dibi değil (IP-015). Eski hâl 150 GG'lik vagonu
+## 83 GG'ye geri satıp büyümeyi değirmene çeviriyordu: 60 saatte 26 alış, 31 satış.
+## Gerçek oyuncu vagonu ya icra kapıdayken ya da süremediği için satar.
 func _v_vagon_sat() -> void:
-	if _s.wallet.balance >= int(_pf("sehir", "kese_dibi", 30.0)):
+	var overdue := not _s.debts.get_overdue_debts(_s.total_days_elapsed).is_empty()
+	var icra_baskisi := overdue and _s.wallet.balance < _s.get_total_debt()
+	var surulemeyen := _s.get_idle_wagon_count() > 0
+	if not icra_baskisi and not surulemeyen:
 		return
 	_ekran("avlu")
 	var reason := _s.get_wagon_sale_block_reason()
@@ -937,6 +983,7 @@ func _rota_sec(routes: Array[TravelRoute]) -> TravelRoute:
 	if _rng_karar.randf() >= _okuma():
 		_sayac["okumadan"] = int(_sayac["okumadan"]) + 1
 		var blind: TravelRoute = routes[_rng_karar.randi_range(0, routes.size() - 1)]
+		_ilk("ilk_karar_genis")
 		_olay("rota", "%s yolu seçildi" % blind.to_location_id, "haritayı okumadan", routes.size(), routes.size())
 		return blind
 	var board := _s.get_contract_board()
@@ -986,6 +1033,7 @@ func _rota_sec(routes: Array[TravelRoute]) -> TravelRoute:
 			best_score = score
 			best = candidate
 			best_why = "%s (%+.1f)" % [top, top_value]
+	_ilk("ilk_karar_genis")
 	_olay("rota", "%s yolu seçildi (%d gün, tehlike %d%%)" % [
 		best.to_location_id, _s.get_route_travel_days(best), int(round(_s.get_route_danger(best) * 100.0))],
 		best_why, routes.size(), routes.size())
@@ -1013,7 +1061,12 @@ func _kontrat_al(plan: CaravanPlan, destination: Location) -> void:
 
 func _mal_al(origin: Location, destination: Location, reserved: float, erzak_parasi: int) -> void:
 	var share := _pf("sehir", "mal_payi", 0.35)
-	var budget := int(floor(float(maxi(0, _s.wallet.balance - erzak_parasi)) * share))
+	# IP-015: mal payı kesenin tamamını yiyince büyümeye hiç para kalmıyordu.
+	# Büyüme hedefi olan profil bir sonraki basamağın (eşek) parasını ayırır.
+	var buyume_payi := 0
+	if _pb("sehir", "buyume_hedefi", true) and _s.can_buy_donkey():
+		buyume_payi = _s.get_next_donkey_cost()
+	var budget := int(floor(float(maxi(0, _s.wallet.balance - erzak_parasi - buyume_payi)) * share))
 	if budget <= 0:
 		return
 	var okur := _rng_karar.randf() < _okuma()

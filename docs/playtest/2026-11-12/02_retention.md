@@ -45,16 +45,16 @@ ardından gelen şeyin her seferinde aynı pusu olmasıdır.
 
 Her öneri bir şey ekler ya da görünür kılar; hiçbiri baskıyı azaltmaz, hiçbiri bir sistemi kesmez.
 
-### R-1 Dört saatte hiçbir profil büyümüyor
-- **Kanıt [Ölçüm]:** Vagon 1, kadro 2 → 1. "Kervanı büyütmek: kese yetmiyor (150 GG)" 22-53 kez. Kese ortancası hiçbir
-  kontrol noktasında 112'yi geçmedi. İlk kâr iki profilde hiç yok.
-- **Öneri:** Büyümeyi ucuzlatmak değil, büyümenin ara basamağını görünür kılmak: var olan eşek ve yarım vagon
-  seçenekleri kervan avlusunda "sıradaki adım" olarak fiyatıyla ve kaç sefer uzakta olduğuyla yazsın; ilk kârlı
-  varışta defter bunu bir satırla ansın.
+### R-1 Büyüme tutmuyor, kadro hiç büyümüyor
+- **Kanıt [Ölçüm]** (IP-015 sonrası): 15 koşunun 13'ünde vagon 2'ye, üçünde 3'e çıkıyor; dört saatin sonunda
+  yalnız dördünde 2'de kalıyor. Kadro hiç artmıyor: **0 işe alım**, "kese yetmiyor" 102, "vagonlarında yer yok" 99.
+  "Kervanı büyütmek: kese yetmiyor (150 GG)" 121 kez.
+- **Öneri:** İki parça. (a) Büyümenin ara basamağı kervan avlusunda "sıradaki adım" olarak fiyatıyla görünsün
+  (IP-006). (b) İşe alımın karşılanabilirliği ölçülsün: aday fiyatı mı yüksek, kadro kapasitesi mi dar — ikisi de
+  kullanıcı kararı (K-03).
 - **Sütun:** Defter unutmaz · Ticaret bilgi oyunudur.
-- **Beklenen etki:** 2:00'deki bırakma (P2, P4) 3:00 sonrasına kayar. **Doğrulama:** aynı 15 koşuda "vagon > 1 olan
-  kontrol noktası" 0'dan en az 4'e; `first_profit` eksik koşu 6'dan en çok 2'ye. **Maliyet:** M (IP-006). Fiyat
-  değişirse kullanıcı kararı (K-03).
+- **Beklenen etki:** 4:00'te vagon ≥ 2 olan koşu 4'ten 8'e; en az bir profilde ilk işe alım.
+- **Doğrulama:** huni'de son vagon sayısı; `sayaclar.ise_alim` ≥ 1. **Maliyet:** M (IP-006) + ölçüm.
 
 ### R-2 Acemi ilk yolculukta 33-36 günlük yola çıkabiliyor ve ne olacağını gün olarak görmüyor
 - **Kanıt [Ölçüm]:** P1'in 15 seferinden 11'i 33+ gün; 68 erzakla çıkıldı, erzak 9. yol gününde bitti. Planlayıcı
@@ -93,12 +93,10 @@ Her öneri bir şey ekler ya da görünür kılar; hiçbiri baskıyı azaltmaz, 
 - **Sütun:** Yol yaşar. **Beklenen etki:** en çok görülen kartın payı %20'den %10'un altına. **Doğrulama:**
   `kart_gorulme`. **Maliyet:** S (IP-003). Dövüş oranına dokunan her şey kullanıcı kararı (K-04).
 
-### R-6 Meşale kapısı her gece çarpıyor
-- **Kanıt [Ölçüm]:** "İki meşale yok" koşu başına 85-105 kez; hiçbir profil bir gece bile ışık yakamadı.
-  Meşale pazarda satılmıyor, tarifle üretiliyor (1 bez); "üretmek: yeterli malzeme yok" kapısı da 20-61 kez
-  çarptı. **[Ölçüm]** Bezin başlangıç şehirlerinde bulunup bulunmadığı ayrılmadı. **[Tahmin]**
-- **Öneri:** Önce ölç (IP-002): bez nerede satılıyor, sürücü neden alamadı. Oyunda erişilemiyorsa bu bir hata.
-- **Maliyet:** S.
+### R-6 Meşale kapısı — kapandı (IP-002)
+Meşale 2 GG'ye 27 yerleşimin hepsinde tezgâhta; sürücü ışık malzemesi almıyordu. Düzeltildikten sonra 60 saatte
+86 meşale alındı. **Oyunda sorun yok.** Kalan not: tarif (12 GG bez → 4 GG değerinde iki meşale) ekonomik olarak
+anlamsız, yolda üretmek dışında (H-15, sayı kararı kullanıcıda).
 
 ### R-7 Kişilerin istekleri hiç tamamlanmıyor
 - **Kanıt [Ölçüm]:** "X'in işini bitirmek: 4 tane eksik" 41-184 kez; tamamlanan zincir sıfır.
