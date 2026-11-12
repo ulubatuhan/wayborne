@@ -24,6 +24,7 @@ func run(t) -> void:
 	_test_consumption_never_free(t)
 	_test_hungry_days_predicts_the_road(t)
 	_test_pack_animals_reach_the_planner(t)
+	_test_forage_find_is_written_once(t)
 
 ## Planın istediği = yolun yediği. İkisi ayrı formüllerken planlayıcı
 ## yalnızca tüccarları sayıyor, yol levazımcıyı da düşüyordu.
@@ -226,3 +227,20 @@ func _test_hungry_days_predicts_the_road(t) -> void:
 		empty_plan.get_hungry_days(0), empty_plan.get_provisioned_days(),
 		"bomboş depoyla yolun her günü aç geçer"
 	)
+
+## IP-012: her gece basılan arama düğmesi alışkanlık; nadir bir bulgu an olur
+## ve deftere **bulanın adıyla** yazılır. İkinci, daha küçük bulgu yazmaz.
+func _test_forage_find_is_written_once(t) -> void:
+	var session := _session(2, 1, 0)
+	var before := session.ledger.entries.size()
+	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN - 1)
+	t.eq(session.ledger.entries.size(), before, "küçük bulgu satır yazmaz")
+	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN + 2)
+	t.eq(session.ledger.entries.size(), before + 1, "nadir bulgu deftere girer")
+	var line: Dictionary = session.ledger.entries[-1]
+	t.eq(String(line["cause"]), "LEDGER_CAUSE_FORAGE_FIND", "sebebi aramadır")
+	t.ok(String(line["name"]).length() > 0, "bulanın adı yazılı")
+	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN)
+	t.eq(session.ledger.entries.size(), before + 1, "daha küçük ikinci bulgu yazmaz")
+	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN + 5)
+	t.eq(session.ledger.entries.size(), before + 2, "daha büyük bulgu yeniden yazar")

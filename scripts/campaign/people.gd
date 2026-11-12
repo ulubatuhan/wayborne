@@ -174,6 +174,37 @@ func offer_chain(id: String, day: int) -> Dictionary:
 	}
 	return p["chain"]
 
+## İstenen mal nerede bulunur (IP-009): kesin yer değil, **yön**. Ticaret bilgi
+## oyunudur - ama ölçümde "4 tane eksik" kapısı koşu başına 41-184 kez çarptı ve
+## hiçbir zincir tamamlanmadı, çünkü oyuncunun malı nerede arayacağına dair tek
+## bir ipucu yoktu. Şehir adı verilmiyor: verilse oyun bir görev işaretçisine
+## dönerdi; yön verilince arama oyuncunun işi kalıyor.
+func chain_hint(id: String) -> String:
+	var p: Dictionary = persons.get(id, {})
+	var chain: Dictionary = p.get("chain", {})
+	if p.is_empty() or chain.is_empty():
+		return ""
+	var home := WorldMapData.get_location_by_id(String(p["home"]))
+	if home == null:
+		return ""
+	var item_id := String(chain["item"])
+	var best: Location = null
+	var best_distance := 0.0
+	for location in WorldMapData.get_locations():
+		if location.location_id == home.location_id or not location.produces.has(item_id):
+			continue
+		var distance := home.map_position.distance_to(location.map_position)
+		if best == null or distance < best_distance:
+			best = location
+			best_distance = distance
+	if best == null:
+		return ""
+	var delta := best.map_position - home.map_position
+	if absf(delta.x) >= absf(delta.y):
+		return "UI_DIR_EAST" if delta.x > 0.0 else "UI_DIR_WEST"
+	# Haritada y aşağı doğru büyür: artı y güneydir.
+	return "UI_DIR_SOUTH" if delta.y > 0.0 else "UI_DIR_NORTH"
+
 ## İş teslim edilir: çağıran malı düşer, ödülü verir; burada kişinin hafızası.
 func complete_chain(id: String) -> void:
 	var p: Dictionary = persons.get(id, {})

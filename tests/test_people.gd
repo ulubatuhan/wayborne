@@ -41,6 +41,11 @@ func _test_chain(t) -> void:
 	var chain := session.people.offer_chain(id, session.total_days_elapsed)
 	t.ok(not chain.is_empty(), "iş verilir")
 	t.ok(WorldMapData.get_location_by_id("liraven").demands.has(String(chain["item"])), "şehrin istediği mal")
+	# IP-009: istek bir yön söyler (şehir adı değil), yoksa oyuncu nerede
+	# arayacağını bilemiyordu - ölçümde hiçbir zincir tamamlanmamıştı.
+	var hint := session.people.chain_hint(id)
+	t.ok(hint in ["UI_DIR_NORTH", "UI_DIR_SOUTH", "UI_DIR_EAST", "UI_DIR_WEST", ""], "ipucu bir yön ya da boş")
+	t.eq(session.people.chain_hint("yok_boyle_biri"), "", "olmayan kişi ipucu vermez")
 	t.not_ok(session.can_deliver_chain(id), "mal yokken teslim edilemez")
 	session.add_to_cargo(ItemCatalog.get_item(String(chain["item"])), int(chain["qty"]))
 	var gold := session.wallet.balance

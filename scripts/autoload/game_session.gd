@@ -3157,6 +3157,14 @@ func get_forage_block_reason() -> String:
 func can_forage() -> bool:
 	return get_forage_block_reason().is_empty()
 
+## Bu seferde aramanın en iyi bulgusu: ikinci, daha küçük bir bulgu satır
+## yazmaz (IP-012). Sefer bitince sıfırlanmıyor, çünkü ölçü "bu kervanın
+## gördüğü en iyi gün" - ikinci bir çeyrek lokma an olmaz.
+var best_forage_find: int = 0
+## Deftere satır yazdıran en az bulgu. Her gece basılan düğmenin sonucu
+## alışkanlıktır; an olması için nadir olması gerekir.
+const FORAGE_LEDGER_MIN: int = 6
+
 ## Bir gün ara. Dönen: bulunan erzak. Yolculuk bir gün uzar.
 func forage_a_day(biome: String = "") -> int:
 	if not can_forage():
@@ -3166,7 +3174,26 @@ func forage_a_day(biome: String = "") -> int:
 	change_stress(FORAGE_STRESS)
 	# Gün yolculuğa ekleniyor: aramanın bedeli zaman.
 	extend_journey(1)
+	_note_forage_find(found)
 	return found
+
+## Nadir bir bulgu deftere **bulanın adıyla** yazılır. Ölçümde arama her gece
+## basılan bir düğmeydi (koşu başına 37-69 kez) ve hiçbir izi kalmıyordu;
+## R5 karşılaştırmasının tek yeni önerisi buydu (Y-B16 ile aynı aile).
+func _note_forage_find(found: int) -> void:
+	if found < FORAGE_LEDGER_MIN or found <= best_forage_find:
+		return
+	best_forage_find = found
+	var finder := get_duty_holder(DutyCatalog.IZCI)
+	if finder == null:
+		finder = get_player_character()
+	if finder == null:
+		return
+	ledger.record(
+		CaravanLedger.KIND_STORY, finder.character_name, total_days_elapsed,
+		lineage_generation, finder.character_id, "LEDGER_CAUSE_FORAGE_FIND",
+		_ledger_location_id(), "", [str(found)]
+	)
 
 static func combat_victory_provisions(enemy_kind: String) -> int:
 	return HUNT_PROVISIONS if enemy_kind == "wildlife" else 0
@@ -7297,6 +7324,7 @@ func to_save_dict() -> Dictionary:
 		"journal": journal.duplicate(true),
 		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
+		"best_forage_find": best_forage_find,
 		"contracts_delivered": contracts_delivered,
 		"visited_location_ids": visited_location_ids.duplicate(),
 		"market_stock": market_stock.duplicate(),
@@ -7528,6 +7556,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	# Eski kayıtların "campaign_chapter_index" alanı okunmaz: senaryo sistemi
 	# kaldırıldı (kullanıcı kararı 2026-10-31).
 	journeys_completed = maxi(0, int(data.get("journeys_completed", 0)))
+	best_forage_find = maxi(0, int(data.get("best_forage_find", 0)))
 	contracts_delivered = maxi(0, int(data.get("contracts_delivered", 0)))
 	visited_location_ids = (data.get("visited_location_ids", {}) as Dictionary).duplicate()
 	# Bulunduğun şehri görmemiş sayılmak olmaz; eski kayıtlar için de doğru.

@@ -189,6 +189,10 @@ func _person_row(person: Dictionary) -> VBoxContainer:
 	else:
 		var item := ItemCatalog.get_item(String(chain["item"]))
 		var wants := _note(tr("UI_PEOPLE_CHAIN") % [int(chain["qty"]), item.item_name if item != null else String(chain["item"]), int(chain["due"]) + 1, int(chain["gold"])])
+		# IP-009: malın hangi yönden geldiği bir haber, kesin yer değil.
+		var hint := _session.people.chain_hint(id)
+		if not hint.is_empty():
+			wants.text += " " + (tr("UI_PEOPLE_HINT") % tr(hint))
 		wants.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(wants)
 		var deliver := Button.new()
