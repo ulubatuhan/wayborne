@@ -3679,7 +3679,10 @@ func _build_choice_button(choice: EventChoice, context: Dictionary) -> Button:
 		var roller_name := roller.character_name if roller != null else ""
 		label = "%s — %s" % [label, choice.get_check_preview(stat_value, roller_name)]
 	var target_name := EventEffectApplier.get_choice_target_name(choice, _session)
-	if not target_name.is_empty():
+	# Zarı atan ile bedeli ödeyen aynı kişiyse ad bir kez yazılır: önizleme
+	# zaten anıyor ("Sarp · Dayanıklılık %59"), ikinci kez yazmak düğmeyi
+	# kalabalıklaştırıyordu (açlık kartı, 2026-11-12).
+	if not target_name.is_empty() and not label.contains(target_name):
 		label = tr("UI_ROAD_CHOICE_TARGET") % [label, target_name]
 	if _choice_triggers_combat(choice):
 		# %12 kazanma oranı bir dengesizlik değil bir okunabilirlik sorunu:

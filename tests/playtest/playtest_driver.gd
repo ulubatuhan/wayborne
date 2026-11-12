@@ -876,6 +876,7 @@ func _v_isik() -> void:
 	if not _s.add_to_cargo(torch, adet):
 		_engel("meşale almak", "vagonda yer yok")
 		return
+	_s.consume_stock(torch.item_id, adet, total)
 	_s.wallet.spend(total)
 	_islem("%d meşale alındı (%d GG)" % [adet, total], "gece ışığı için")
 

@@ -9,7 +9,7 @@ Bu turda oyun kodu değişmedi. Oynamayı durduran bir hata çıkmadı: 15 koşu
 | H-15 | Meşale tarifi ekonomik olarak anlamsız: 12 GG'lik bir bez 4 GG'lik iki meşale veriyor. Yolda üretmek dışında bir sebebi yok. | `olc_mesale.gd` **[Ölçüm]** | sayı (kullanıcı kararı) | — |
 | H-16 | **İşe alım karşılanamıyor:** 60 saatte 0 alım; 102 kez "kese yetmiyor", 99 kez "vagonlarında yer yok". Kadro hiç 2'yi geçmedi. (Sürücü düzeltildikten sonra da sürüyor.) | `engeller_ilk10` **[Ölçüm]** | denge | K-03 ile birlikte |
 | H-02 | Hatırlayan kişilerin işi hiç tamamlanmadı. | "4 tane eksik" 41-184 / profil; tamamlanan 0. **[Ölçüm]** | erişim | IP-009 |
-| H-03 | Planlayıcı eksik erzağı birimle söylüyor, günle değil. | `UI_PLANNER_PROVISIONS_SHORT`; P1'in 23 açlık ölümü. **[Ölçüm + Gözlem]** | okunabilirlik | IP-001 |
+| ~~H-03~~ | **Yanlış bulgu (denetim 2026-11-12).** Planlayıcı aç gün sayısını ve ölümcül eşiği zaten söylüyordu (`UI_PLANNER_HUNGER_DEADLY`, Ö1); rapor yalnız eksik satırına bakmıştı. Acemi profilinin ölümleri uyarıyı okumamasından (okuma 0,15) geliyor, uyarının yokluğundan değil. IP-001 yalnız onay düğmesine gün sayısını ekledi; tekrar eden satır kaldırıldı. | `UI_PLANNER_PROVISIONS_SHORT`; P1'in 23 açlık ölümü. **[Ölçüm + Gözlem]** | okunabilirlik | IP-001 |
 | H-04 | İsyan kartı aynı aç yürüyüşte üst üste çıkıyor. | P1'de 21 kez / 12 saat. **[Ölçüm]** | tekrar | IP-005 |
 | H-05 | Kısa seferde garantili dövüş hep pusu. | P2: 19 pusu / 20 sefer. **[Ölçüm]** | tekrar | IP-003 |
 | H-06 | 1006 borçla moral 100, stres 2. | P3b, 4:00 kontrol noktası. **[Ölçüm]** | hissizlik | IP-013 (karar K-05) |

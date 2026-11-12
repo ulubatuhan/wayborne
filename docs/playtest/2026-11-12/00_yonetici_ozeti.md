@@ -7,8 +7,8 @@ açılmadı, süre sayaçtır (`ALTYAPI.md`). Oyun kodu değişmedi.
    üçünde 3'e çıkıyor; dört saatin sonunda yalnız dördünde 2'de kalıyor, kalanı 1'e düşüyor. Kadro ise hiç
    artmadı: 60 saatte **0 işe alım**, 102 kez "kese yetmiyor", 99 kez "vagonlarında yer yok". Vagon bir yere
    kadar alınabiliyor, insan alınamıyor.
-2. **Acemi ilk yarım saatte açlıktan ölüyor ve nedenini gün olarak görmüyor.** 27 ölümün 23'ü açlık; 15 seferin 11'i
-   33 günden uzun yola eksik erzakla çıkıldı. Planlayıcı eksiği birimle söylüyor.
+2. **Acemi ilk yarım saatte açlıktan ölüyor.** 27 ölümün 23'ü açlık; 15 seferin 11'i 33 günden uzun yola eksik
+   erzakla çıkıldı. (Düzeltme: planlayıcı aç gün sayısını zaten söylüyordu; sebep profilin uyarıyı okumaması.)
 3. **Erzak bitince karar da bitiyor.** 83 aç gece boyunca tek karar boş sofra; aynı isyan kartı 21 kez.
 4. **İlk karar 7-11. dakikada** (hedef 3. dakika); ilk kâr iki profilde dört saatte hiç gelmedi.
 5. **Ruh ve iz mimarisi kurulu ama oyuncuya ulaşmıyor.** 60 saatte 53 iz doğdu, 9'u döndü; 6 bedel ödendi; 24 kişinin

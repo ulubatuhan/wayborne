@@ -623,16 +623,9 @@ func _refresh() -> void:
 		var stock := _session.get_provision_stock()
 		var buyable := shortfall if stock < 0 else mini(shortfall, stock)
 		_shortfall_label.text = tr("UI_PLANNER_PROVISIONS_SHORT") % [shortfall, shortfall_cost]
-		# IP-001: eksik "birim" soyut bir sayı. Acemi profilinin 23 açlık ölümü,
-		# 36 günlük yola 13 günlük erzakla çıkmaktan geliyordu ve ekran bunu
-		# gün olarak hiç söylemiyordu. Kilit yok, yalnız sayı.
-		var daily: int = maxi(1, _plan.get_daily_consumption())
-		var fed_days: int = maxi(0, current_provisions) / daily
-		var route_days: int = _plan.get_provisioned_days()
+		# Aç gün sayısı aşağıdaki risk satırında zaten yazıyor (Ö1); onay düğmesi
+		# de aynı sayıyı kullanıyor (IP-001). Burada tekrar edilmez.
 		var hungry_days: int = _plan.get_hungry_days(current_provisions)
-		_shortfall_label.text += "\n" + (
-			tr("UI_PLANNER_HUNGRY_DAYS") % [fed_days, route_days, hungry_days]
-		)
 		if stock >= 0 and stock < shortfall:
 			_shortfall_label.text += "\n" + (tr("UI_PLANNER_PROVISIONS_STOCK") % stock)
 		_shortfall_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)

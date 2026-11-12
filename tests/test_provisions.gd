@@ -240,6 +240,10 @@ func _test_forage_find_is_written_once(t) -> void:
 	var line: Dictionary = session.ledger.entries[-1]
 	t.eq(String(line["cause"]), "LEDGER_CAUSE_FORAGE_FIND", "sebebi aramadır")
 	t.ok(String(line["name"]).length() > 0, "bulanın adı yazılı")
+	# Defterde okunan cümle: argüman yerine oturur, işaret sızmaz.
+	var shown := CaravanLedger.describe(line)
+	t.not_ok(shown.contains("%s"), "defter satırına işaret sızmaz: %s" % shown)
+	t.ok(shown.contains(str(GameSession.FORAGE_LEDGER_MIN + 2)), "bulunan öğün sayısı yazılı")
 	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN)
 	t.eq(session.ledger.entries.size(), before + 1, "daha küçük ikinci bulgu yazmaz")
 	session._note_forage_find(GameSession.FORAGE_LEDGER_MIN + 5)

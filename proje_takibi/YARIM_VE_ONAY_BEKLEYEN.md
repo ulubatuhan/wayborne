@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **46** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -586,7 +586,7 @@ Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 - **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Son not:** 2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü.
+- **Son not:** 2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü. Denetim: planlayıcı aç günü zaten söylüyordu (Ö1); tekrar eden satır kaldırıldı, yalnız onay düğmesi kaldı.
 
 ### IP-002 · Meşale erişimi ölçümü
 
@@ -605,7 +605,7 @@ Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
 - **Bağımlı:** IP-005
-- **Son not:** 2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi.
+- **Son not:** 2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi. Denetim: 'mühür durur' bedelsizdi (-8 can eklendi); 'önden giden' metni ile mekaniği farklı kişiyi anıyordu (en_diri kuralı). Metinler kullanıcı onayı bekliyor (kurallar-olay: kartlar onaylı partilerle girer).
 
 ### IP-007 · Kapıdaki sayım kartı
 
@@ -662,6 +662,13 @@ Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
 - **Son not:** 2026-11-12 kapandı (K-05 cevabı gelmeden, önerilen 'yalnız kart' ile): alacaklı ağırlığı 300/600 borçta artıyor, tefeci şehir özetinde söz bırakıyor. Faiz ve vade değişmedi. Ekranda görüldü.
+
+### IP-014 · Dalga 1 sonrası yeniden ölçüm
+
+- **Durum:** kapandı · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Bağımlı:** IP-001, IP-004, IP-010
+- **Son not:** 2026-11-12 kapandı: sonuç docs/playtest/2026-11-12/08_dalga1_sonucu.md.
 
 ### K-PLAN · Satış planı kararları K-01…K-10
 

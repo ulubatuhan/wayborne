@@ -31,6 +31,26 @@ toplu tablo `build/playtest/toplam.txt`.
 | Meşale alımı | 0 | 86 |
 | Vagon satışı / büyüme adımı | 31 / 26 | 33 / 27, hepsi gerçek baskı |
 
+## Denetim (2026-11-12, aynı gün)
+
+Dalga 1'in kodu ve Fable'ın raporu oyunun kurallarına karşı yeniden okundu. Bulunan ve düzeltilenler:
+
+- **Yanlış bulgu, tekrarlanan bilgi (IP-001).** Planlayıcı aç gün sayısını zaten söylüyordu; IP-001'in
+  eklediği satır aynı sayıyı ikinci kez yazıyordu. Satır kaldırıldı, onay düğmesindeki gün sayısı kaldı.
+- **Defterde `%s` sızıntısı (IP-006, IP-012).** Argümanlı sebep satırları (`bulunan öğün`, `ilk kâr`) defterde
+  işaretle görünüyordu, çünkü `CaravanLedger.describe` argümanları yalnız günlük satırlarına uyguluyordu.
+  Düzeltildi, sınaması eklendi.
+- **Bedelsiz seçenek (IP-004).** "Mühür durur" 0 tutarlı bir bedel taşıyordu ve itibar veriyordu, yani "doğru
+  seçenek yok" kuralını bozuyordu. En zayıfın bedeninden 8 can ödetiyor (olaylar öldürmez, 1'de kenetlenir).
+- **Metin bir kişiyi, mekanik başkasını anıyordu (IP-004).** "Önden giden" kartında zarı en dayanıklı atıyor,
+  `LEAVE_BEHIND` en zayıfı götürüyordu. Bedel seçicisine `en_diri` kuralı eklendi; düğme gidecek kişinin
+  adını söylüyor, dönen ya da dönmeyen o kişi.
+- **"Hesabını ben veririm" ama bedel başkasına.** Seçenek metni düzeltildi.
+- **§E ile çelişki (IP-011).** Mülteci koluna paylaşılan erzak §E satır 1'de *kısa* vadeli; *uzun* yazılmıştı.
+- **Yer adına ek bitiştirilmiş metin.** `{town}'daki` ünlü uyumunu bozuyordu; yeniden yazıldı.
+- **Atlanan adım: Codex.** Kartlar değişince olay dökümü ve PDF yeniden üretilmeliydi; üretildi (106 olay).
+- **Düğmede ad iki kez.** Zarı atan ile bedeli ödeyen aynıysa ad artık bir kez yazılıyor.
+
 ## Tutmayan iki ölçüt, dürüst hâliyle
 
 **S-01 ilk karar.** Kapıdaki sayım kartı 15 koşunun 13'ünde çıkıyor ama ilk kararı öne çekmedi, çünkü

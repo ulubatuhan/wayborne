@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **17** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -294,12 +294,3 @@ Toplam: **18** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Literatür:** R70, R71, R69
 
 </details>
-
-## Paket P20
-
-### IP-014 · Dalga 1 sonrası yeniden ölçüm
-
-- **Durum:** açık · **Öncelik:** P1 · **Paket:** P20 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
-- **Bağımlı:** IP-001, IP-004, IP-010
-- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-014' -A60).

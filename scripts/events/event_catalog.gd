@@ -936,7 +936,10 @@ static func _hunger_eat_cargo() -> GameEvent:
 		])),
 		# Mühre dokunmamak sözü tutar, bedeli adı olan birine düşer.
 		_choice("EVT_HUNGER_CARGO_OPT_REFUSE", _effects([
-			_fx(EventEffect.Type.BEDEL, 0, "PARTY_HP|en_zayif"),
+			# Tutulan mühür bedavaya gelmez: açlık en zayıfın bedeninden ödenir.
+			# (İlk hâli 0 tutarlıydı ve hiçbir şey ödetmiyordu - üstelik itibar
+			# veriyordu, yani "doğru seçenek yok" kuralını bozuyordu.)
+			_fx(EventEffect.Type.BEDEL, -8, "PARTY_HP|en_zayif"),
 			_fx(EventEffect.Type.MORALE, -6),
 			_fx(EventEffect.Type.REPUTATION, 1),
 		])),
@@ -957,12 +960,16 @@ static func _hunger_send_ahead() -> GameEvent:
 		_checked_choice(
 			"EVT_HUNGER_AHEAD_OPT_SEND",
 			SkillCheck.make(CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST, 0.0),
+			# Giden ve dönen (ya da dönmeyen) aynı kişi: düğmede adı yazan en diri
+			# yoldaş. İlk hâlde zarı en dayanıklı atıyor ama LEAVE_BEHIND en
+			# zayıfı götürüyordu - metin birini, mekanik başkasını anıyordu.
 			"EVT_HUNGER_AHEAD_OUT_BACK", _effects([
+				_fx(EventEffect.Type.BEDEL, 6, "STRESS|en_diri"),
 				_fx(EventEffect.Type.PROVISIONS, 10),
 				_fx(EventEffect.Type.MORALE, 6),
 			]),
 			"EVT_HUNGER_AHEAD_OUT_GONE", _effects([
-				_fx(EventEffect.Type.LEAVE_BEHIND),
+				_fx(EventEffect.Type.BEDEL, 0, "LEAVE_BEHIND|en_diri"),
 				_fx(EventEffect.Type.MORALE, -10),
 				_fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|yuz"),
 			])
@@ -2160,8 +2167,8 @@ static func _refugee_column() -> GameEvent:
 			"EVT_REFUGEE_COLUMN_OPT_SHARE", "EVT_REFUGEE_COLUMN_OPT_SHARE_LOCKED",
 			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
 			_effects([
-				# İz (IP-010/011): ekmek verilen kol dağılır ve anlatır
-				_fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|uzun|aday"),
+				# İz (IP-010/011, §E satır 1): ekmek verilen kol dağılır ve anlatır
+				_fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|kisa|aday"),
 				EventEffect.make(EventEffect.Type.PROVISIONS, -6),
 				EventEffect.make(EventEffect.Type.MORALE, 6),
 				EventEffect.make(EventEffect.Type.REPUTATION, 2),

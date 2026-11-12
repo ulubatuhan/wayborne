@@ -168,7 +168,7 @@ static func describe(entry: Dictionary) -> String:
 	var day := int(entry.get("day", 0))
 	if cause.is_empty():
 		return "%s — %s" % [name, get_kind_label(String(entry.get("kind", "")))]
-	var cause_text := String(TranslationServer.translate(cause))
+	var cause_text := _cause_text(entry)
 	var location_id := String(entry.get("location", ""))
 	var location := WorldMapData.get_location_by_id(location_id) if not location_id.is_empty() else null
 	if location != null:
@@ -176,6 +176,16 @@ static func describe(entry: Dictionary) -> String:
 			name, cause_text, location.location_name, day
 		]
 	return String(TranslationServer.translate("LEDGER_LINE")) % [name, cause_text, day]
+
+## Sebep cümlesi, varsa içine argümanlar (bulunan öğün, kâr). Argümanlı
+## sebepler ilk kez 2026-11-12'de geldi; argümanı olmayan eski satırlar
+## olduğu gibi kalır.
+static func _cause_text(entry: Dictionary) -> String:
+	var text := String(TranslationServer.translate(String(entry.get("cause", ""))))
+	var args: Array = entry.get("args", [])
+	if args.is_empty() or text.count("%s") != args.size():
+		return text
+	return text % args
 
 ## Günün satırı (Y-B08): anahtarın cümlesi, içine adlar.
 static func diary_text(entry: Dictionary) -> String:
@@ -191,7 +201,7 @@ static func describe_cause(entry: Dictionary) -> String:
 	var cause := String(entry.get("cause", ""))
 	if cause.is_empty():
 		return ""
-	var cause_text := String(TranslationServer.translate(cause))
+	var cause_text := _cause_text(entry)
 	var day := int(entry.get("day", 0))
 	var location_id := String(entry.get("location", ""))
 	var location := WorldMapData.get_location_by_id(location_id) if not location_id.is_empty() else null

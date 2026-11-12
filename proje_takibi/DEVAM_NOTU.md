@@ -702,3 +702,15 @@ On dört iş kartının hepsi bitti ve yeniden ölçüldü (`docs/playtest/2026-
 - **Sıradaki:** Dalga 2 = `06_is_plani.md` WP-02 (iz hacmi, Y-R01'in kalan satırları). Kartlarını Fable yazacak.
 - **Not:** IP-003, IP-006, IP-013 K-04/K-03/K-05 cevabı gelmeden, önerilen muhafazakâr seçenekle uygulandı
   (kullanıcı "tek tek hepsini yap" dedi). Fiyat, faiz, vade, dövüş sıklığı değişmedi.
+
+### Denetim: Fable raporu + Dalga 1 oyunun kurallarına karşı (2026-11-12)
+
+Düzeltilenler (ayrıntı `docs/playtest/2026-11-12/08_dalga1_sonucu.md` "Denetim"):
+- IP-001 yanlış bulguya dayanıyordu: planlayıcı aç günü zaten söylüyordu (Ö1). Tekrar eden satır kaldırıldı.
+- Defterde `%s` sızıntısı (ilk kâr, arama bulgusu): `CaravanLedger._cause_text` argümanları uyguluyor.
+- "Mühür durur" bedelsizdi → en zayıfa -8 can. "Önden giden": zar ile LEAVE_BEHIND farklı kişiydi → `en_diri` kuralı.
+- "Hesabını ben veririm" metni bedelle çelişiyordu; §E satır 1 (mülteci, kısa vade); `{town}'daki` ek hatası.
+- Atlanan adım: Codex dökümü ve PDF yeniden üretildi. Düğmede aynı ad iki kez yazılmıyor.
+
+Kullanıcı kararı bekleyenler: dört yeni kartın metni (kurallar-olay: kartlar onaylı partilerle girer);
+tanıdıkların yön ipucunun şehir özetinde bedava olması "Ticaret bilgi oyunudur" sütunuyla gerilimde (tavernaya mı?).

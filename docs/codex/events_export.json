@@ -5,9 +5,509 @@
         {
           "effects": [
             {
+              "amount": 40,
+              "text": "minnet|sehir|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Hepsini say.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Yarısını söyle.",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} rakamı öyle doğal söyledi ki adam tahtasına bakmadan çentiği attı. {town} yolunda birkaç sikke fazla.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "soylenti|sehir|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Adam {who} tarafına uzun uzun baktı, sonra tahtasının kenarına ayrı bir çentik attı. O çentik {town} kapısında duruyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Yürümeye devam et.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "journeys_completed",
+          "op": "LESS_EQUAL",
+          "value": 0
+        },
+        {
+          "key": "journey_day",
+          "op": "LESS_EQUAL",
+          "value": 3
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_gate_count",
+      "immediate": [],
+      "modifiers": 0,
+      "once": true,
+      "text": "Kapıdan çıkarken tebeşirli bir adam vagonun yanında yürüyor. Tahtasına çentik atıyor ve başını kaldırmadan ne götürdüğünü soruyor.",
+      "title": "Kapıdaki Sayım",
+      "triggered_only": false,
+      "weight": 60
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Kes. Vagonu sırayla çekeriz.",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 14,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -40,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} bıçağı aldı. Sabaha kadar tuzlandı, hiçbir şey ziyan olmadı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 9,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -40,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} elinden geleni yaptı ama kimse bu işi bilmiyordu. Etin çoğu sabaha kadar bozuldu; geriye bir gecelik kaldı.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -8,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Hayvan kalır.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "hungry_nights",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        },
+        {
+          "key": "provisions",
+          "op": "LESS_EQUAL",
+          "value": 0
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_hunger_draft_animal",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "İki gecedir kazan boş. Arabacı dizgini bırakmış, öküzün sağrısına bakıyor. Kimse bir şey demiyor.",
+      "title": "Koşumdaki Hayvan",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Çuvalı aç. Hesabı sonra verilir.",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "CARGO_DECOY"
+                },
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 4,
+                  "text": "STRESS|gecmisi_uyan",
+                  "type": "BEDEL"
+                }
+              ],
+              "label": "{who} mührü özenle kaldırdı, çuvalı yeniden dikti. {town} kapısında kimse bir şey sormadı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "CARGO_DECOY"
+                },
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 4,
+                  "text": "STRESS|gecmisi_uyan",
+                  "type": "BEDEL"
+                },
+                {
+                  "amount": -50,
+                  "text": "kin|sehir|uzun|fiyat",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} ipi yanlış düğümledi. Yükün sahibi {town} kapısında çuvalı açar açmaz anladı.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "CARGO_DECOY"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Yenmeyeni yak, bu gece ısınalım.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -8,
+              "text": "PARTY_HP|en_zayif",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Mühür durur.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "hungry_nights",
+          "op": "GREATER_EQUAL",
+          "value": 4
+        },
+        {
+          "key": "provisions",
+          "op": "LESS_EQUAL",
+          "value": 0
+        },
+        {
+          "key": "cargo_items",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_hunger_eat_cargo",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yük başkasının: sayılmış, mühürlenmiş, bekleniyor. Dört gündür kimse yemedi. Bir el çuvalın ipine gitti, durdu, sana baktı.",
+      "title": "Çuvalların Ağzı",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "En diri olan gitsin.",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "STRESS|en_diri",
+                  "type": "BEDEL"
+                },
+                {
+                  "amount": 10,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{bedel} üçüncü sabah {town} yolundan döndü. Sırtında bir çuval, ağzında tek kelime yok.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "LEAVE_BEHIND|en_diri",
+                  "type": "BEDEL"
+                },
+                {
+                  "amount": -10,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -30,
+                  "text": "soylenti|bolge|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{bedel} dönmedi. {town} yolunda izi de yok.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 8,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Ayrılmıyoruz.",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "hungry_nights",
+          "op": "GREATER_EQUAL",
+          "value": 6
+        },
+        {
+          "key": "provisions",
+          "op": "LESS_EQUAL",
+          "value": 0
+        },
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_hunger_send_ahead",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Altı gece. Kervan bu hızla varmaz. Yükü olmayan tek kişi iki günde varır, belki bir çuvalla döner. Belki dönmez.",
+      "title": "Önden Giden",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -40,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
               "amount": -5,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 1,
+              "text": "kardeslik",
+              "type": "FACTION"
             }
           ],
           "label": "Fidyeyi öde",
@@ -23,12 +523,12 @@
               ],
               "effects": [
                 {
-                  "amount": -80,
+                  "amount": -140,
                   "text": "",
                   "type": "GOLD"
                 }
               ],
-              "label": "Küçük bir çeteydiler - azıcık altına razı oldular.",
+              "label": "Küçük bir çeteydiler; {who} keseden azıcık altın saydı, razı oldular.",
               "weight": 1
             },
             {
@@ -46,12 +546,12 @@
               ],
               "effects": [
                 {
-                  "amount": -130,
+                  "amount": -210,
                   "text": "",
                   "type": "GOLD"
                 }
               ],
-              "label": "Fidyeyi kabul ettiler; kervan yoluna devam ediyor.",
+              "label": "Fidyeyi kabul ettiler; kervan {town} yoluna devam ediyor.",
               "weight": 1
             },
             {
@@ -64,12 +564,12 @@
               ],
               "effects": [
                 {
-                  "amount": -190,
+                  "amount": -290,
                   "text": "",
                   "type": "GOLD"
                 }
               ],
-              "label": "İyi örgütlenmiş bir çeteydiler - ağır bir bedel istediler, ama yol açıldı.",
+              "label": "İyi örgütlenmiş bir çeteydiler - ağır bir bedel istediler, ama {town} yolu açıldı.",
               "weight": 1
             }
           ],
@@ -77,12 +577,22 @@
             {
               "key": "gold",
               "op": "GREATER_EQUAL",
-              "value": 80
+              "value": 140
+            },
+            {
+              "key": "raids_bought_off",
+              "op": "LESS_THAN",
+              "value": 3
             }
           ]
         },
         {
           "effects": [
+            {
+              "amount": -2,
+              "text": "kardeslik",
+              "type": "FACTION"
+            },
             {
               "amount": 0,
               "text": "",
@@ -123,6 +633,11 @@
       "choices": [
         {
           "effects": [
+            {
+              "amount": 30,
+              "text": "minnet|sehir|kisa|kapi",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": 3,
               "text": "",
@@ -174,7 +689,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Gümrükçü balyaları sayar, altına bakmaz. Bir gün kaybedersiniz, tuz sizinle kalır.",
+              "label": "{who} balyaları öyle dizmiş ki gümrükçü sayar, altına bakmaz. Bir gün kaybedersiniz, tuz sizinle kalır.",
               "weight": 1
             },
             {
@@ -197,7 +712,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Bir çuval yırtılır, tuz yere akar. Gümrükçü hepsine el koyar, sessiz kalması için de bir kese ister.",
+              "label": "{town} kapısında bir çuval yırtılır, tuz yere akar. Gümrükçü hepsine el koyar, sessiz kalması için de bir kese ister.",
               "weight": 1
             },
             {
@@ -225,7 +740,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Köpek tuzun kokusunu alır. El konur, ceza kesilir, adınız deftere kaçakçı diye yazılır.",
+              "label": "Köpek tuzun kokusunu alır. El konur, ceza kesilir, adınız {town} defterine kaçakçı diye yazılır.",
               "weight": 1
             }
           ],
@@ -239,6 +754,11 @@
         },
         {
           "effects": [
+            {
+              "amount": -40,
+              "text": "soylenti|sehir|kisa|kapi",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": -80,
               "text": "",
@@ -290,7 +810,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Kervan bariyeri devirip uzaklaştı. Arkanızda bağrışmalar kaldı, ama peşinize düşen olmadı.",
+              "label": "{who} kırbacı indirdi; kervan bariyeri devirip uzaklaştı. Arkanızda bağrışmalar kaldı, ama peşinize düşen olmadı.",
               "weight": 1
             },
             {
@@ -323,7 +843,7 @@
                   "type": "ITEM_REMOVE"
                 }
               ],
-              "label": "Bir sonraki köyde yakalandınız. Evraklara el konuldu ve ağır bir ceza kesildi.",
+              "label": "{town} yolundaki ilk köyde yakalandınız. Evraklara el konuldu ve ağır bir ceza kesildi.",
               "weight": 1
             }
           ],
@@ -463,9 +983,14 @@
                   "amount": -5,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -3,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Islanıp üşüdünüz ama kervan bir bütün halinde fırtınayı geçti.",
+              "label": "{who} öküzlerin başını tuttu; ıslanıp üşüdünüz ama kervan bir bütün halinde fırtınayı geçti.",
               "weight": 1
             },
             {
@@ -493,7 +1018,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Bir vagon çamura saplanıp devrildi; erzağın bir kısmı suya gitti.",
+              "label": "{who} halata yetişemedi; bir vagon çamura saplanıp devrildi, erzağın bir kısmı suya gitti.",
               "weight": 1
             },
             {
@@ -526,7 +1051,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Sel suyu bir vagonu yatağından söküp götürdü; sabah geriye yalnızca izi kalmıştı.",
+              "label": "Sel suyu bir vagonu yatağından söküp götürdü; sabah {town} yolunda geriye yalnızca izi kalmıştı.",
               "weight": 1
             }
           ],
@@ -557,6 +1082,11 @@
               "amount": 2,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Levazımcı çuvalları erkenden yokladı",
@@ -581,6 +1111,11 @@
               "amount": -4,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Otacı bozulanı yahniye çevirsin",
@@ -690,7 +1225,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Sıcak bir köşe ve bir tas çorba verdiniz. Sabaha kese hafiflemişti.",
+              "label": "{who} sıcak bir köşe ve bir tas çorba verdi. Sabaha kese hafiflemişti.",
               "weight": 4
             },
             {
@@ -717,7 +1252,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Kimseye bir şey demeden vagona aldınız. Gözlerindeki bakış borcunu unutmayacağını söylüyor.",
+              "label": "{who} kimseye bir şey demeden onu vagona aldı. Gözlerindeki bakış borcunu unutmayacağını söylüyor.",
               "weight": 1
             }
           ],
@@ -763,7 +1298,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Devriyeye teslim ettiniz. Götürülürken size döndü ve hiçbir şey söylemedi - söylemesine gerek yoktu.",
+              "label": "Devriyeye teslim ettiniz. Götürülürken döndü, baktı; {who} o bakışı bir daha unutmayacak.",
               "weight": 4
             },
             {
@@ -785,7 +1320,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Devriyeye teslim ettiniz. Kese doldu ama kadro bir süre yüzünüze bakmadı.",
+              "label": "{town} devriyesine teslim ettiniz. Kese doldu ama kadro bir süre yüzünüze bakmadı.",
               "weight": 1
             }
           ],
@@ -870,6 +1405,11 @@
         {
           "effects": [
             {
+              "amount": 40,
+              "text": "minnet|kisi|uzun|teklif",
+              "type": "IZ_BIRAK"
+            },
+            {
               "amount": -90,
               "text": "",
               "type": "GOLD"
@@ -904,6 +1444,11 @@
         {
           "effects": [
             {
+              "amount": -60,
+              "text": "kin|kisi|uzun|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
               "amount": 1,
               "text": "",
               "type": "MERCHANT_LEAVE"
@@ -919,7 +1464,7 @@
               "type": "REPUTATION"
             }
           ],
-          "label": "Bir handa bırak",
+          "label": "Bir kervansarayda bırak",
           "locked": "",
           "outcomes": [],
           "requirements": []
@@ -951,9 +1496,14 @@
                   "amount": 4,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 1,
+                  "text": "test_bandage",
+                  "type": "ITEM_REMOVE"
                 }
               ],
-              "label": "Ot kaynatıldı, sargılar değişti. Sabaha ateş düştü; tüccar bunu yol boyunca anlatacak.",
+              "label": "{who} ot kaynattı, sargıları değiştirdi. Sabaha ateş düştü; tüccar bunu yol boyunca anlatacak.",
               "weight": 1
             },
             {
@@ -976,7 +1526,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Ateş inip çıktı. Bir gün beklediniz, sonunda adam ayağa kalktı.",
+              "label": "Ateş inip çıktı. {who} bir gün başında bekledi, sonunda adam ayağa kalktı.",
               "weight": 1
             },
             {
@@ -1004,7 +1554,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Ateş düşmedi. Tüccar ilk handa kervandan ayrıldı; arkasından herkes kendi alnına dokunup duruyor.",
+              "label": "Ateş düşmedi. Tüccar {town} yolundaki ilk kervansarayda ayrıldı; arkasından herkes kendi alnına dokunup duruyor.",
               "weight": 1
             }
           ],
@@ -1107,7 +1657,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Sesini yükselttin ve homurdanma kesildi. Şimdilik.",
+              "label": "Sesini yükselttin; ilk susan {who} oldu, sonra ötekiler. Şimdilik.",
               "weight": 1
             },
             {
@@ -1135,7 +1685,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Sertliğin ters tepti. Sabaha iki tüccar ve yükleri ortadan kaybolmuştu.",
+              "label": "Sertliğin ters tepti. Sabaha {town} yolunda iki tüccar ve yükleri ortadan kaybolmuştu.",
               "weight": 1
             }
           ],
@@ -1205,7 +1755,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "İşe yarar ne varsa aldınız. Kimse bir şey demedi ama kimse de sevinmedi.",
+              "label": "İşe yarar ne varsa aldınız. {who} bir şey demedi ama sevinmedi de.",
               "weight": 1
             },
             {
@@ -1233,7 +1783,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Biri sesini yükseltti: bu mal birinin malı, sahibi ölmüş olsa bile. Yükü aldınız ama tartışma yolda uzun sürdü.",
+              "label": "{who} sesini yükseltti: bu mal birinin malı, sahibi ölmüş olsa bile. Yükü aldınız ama tartışma yolda uzun sürdü.",
               "weight": 1
             },
             {
@@ -1266,7 +1816,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Yükü indirirken kadrodan biri söylendi: terk edilmiş vagonun malı uğur getirmez. O gece kimse rahat uyumadı.",
+              "label": "Yükü indirirken {who} söylendi: terk edilmiş vagonun malı uğur getirmez. O gece kimse rahat uyumadı.",
               "weight": 1
             }
           ],
@@ -1371,7 +1921,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Yemeği paylaşınca ağzından kendi boyunun türküsü döküldü. Kervan uzun süre sonra ilk kez güldü.",
+              "label": "{who} yemeği paylaşınca ağzından kendi boyunun türküsü döküldü. Kervan uzun süre sonra ilk kez güldü.",
               "weight": 4
             },
             {
@@ -1394,7 +1944,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Kabını doldurdu, teşekkür etti, gitti. Ertesi sabah erzak çuvalının ağzı gevşek bulundu.",
+              "label": "Kabını doldurdu, teşekkür etti, gitti. Ertesi sabah {who} erzak çuvalının ağzını gevşek buldu.",
               "weight": 4
             },
             {
@@ -1411,7 +1961,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Karnını doyurdu, yoluna gitti. Kadro iyi bir şey yaptığını hissetti.",
+              "label": "Karnını doyurdu, yoluna gitti. {who} iyi bir şey yaptığınızı söyledi.",
               "weight": 1
             }
           ],
@@ -1447,7 +1997,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Arkanızdan bakarken yüzündeki ifade değişti. Bu yüzü bir daha göreceksiniz.",
+              "label": "Arkanızdan bakarken yüzündeki ifade değişti. Bu yüzü {town} yolunda bir daha göreceksiniz.",
               "weight": 4
             },
             {
@@ -1459,7 +2009,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Omuz silkip yoluna döndü. Kadro sessizce yola devam etti.",
+              "label": "Omuz silkip yoluna döndü. Kervan sessizce {town} yoluna devam etti.",
               "weight": 1
             }
           ],
@@ -1596,6 +2146,11 @@
                   "amount": -8,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": 3,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
               "label": "Kâbussuz, dinlendirici bir uyku. Sabah kervan tazelenmiş uyanıyor.",
@@ -1626,7 +2181,7 @@
                   "type": "GRANT_TRAIT"
                 }
               ],
-              "label": "Kâbuslar sabaha kadar sürdü. Biri terler içinde uyanıp bir daha gölgelere güvenmiyor.",
+              "label": "Kâbuslar sabaha kadar sürdü. {who} terler içinde uyandı ve bir daha gölgelere güvenmedi.",
               "weight": 1
             }
           ],
@@ -1675,7 +2230,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "İkisini de geriye ittirip ayırdın. Kavga bitti, gerginlik biraz düştü.",
+              "label": "{who} ile ötekini geriye ittirip ayırdın. Kavga bitti, gerginlik biraz düştü.",
               "weight": 1
             },
             {
@@ -1701,9 +2256,14 @@
                   "amount": 6,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Aranıza girerken bir yumruk sana isabet etti. Kavgayı bitirdin ama canın yandı, ortalık daha da gerildi.",
+              "label": "{who} ile ötekinin arasına girerken bir yumruk sana isabet etti. Kavgayı bitirdin ama canın yandı, ortalık daha da gerildi.",
               "weight": 1
             }
           ],
@@ -1723,7 +2283,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Birkaç yumruktan sonra ikisi de yoruldu, gerginlik biraz dağıldı.",
+              "label": "{who} birkaç yumruktan sonra yoruldu, öteki de; gerginlik biraz dağıldı.",
               "weight": 1
             },
             {
@@ -1743,9 +2303,14 @@
                   "amount": -30,
                   "text": "",
                   "type": "GOLD"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "WAGON_DAMAGE"
                 }
               ],
-              "label": "Kavga büyüdü, bir vagonun malı dökülüp kırıldı, herkes tedirgin.",
+              "label": "Kavga büyüdü; {who} bir vagona çarptı, mal dökülüp kırıldı, herkes tedirgin.",
               "weight": 1.3
             }
           ],
@@ -1795,7 +2360,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Toprağın altında işlenmiş bir yüzük çıkıyor.",
+              "label": "{who} küreği çevirdi: toprağın altında işlenmiş bir yüzük.",
               "weight": 1
             },
             {
@@ -1813,7 +2378,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Bir bez parçasına sarılı, eski bir muska çıkıyor.",
+              "label": "{who} bir bez parçasına sarılı, eski bir muska çıkarıyor.",
               "weight": 1
             },
             {
@@ -1836,7 +2401,7 @@
                   "type": "GRANT_OUTFIT"
                 }
               ],
-              "label": "Yağlı bir muşambaya sarılı bir bohça çıkıyor: içinde kalın örgü bir kazak ve bir yün başlık. Biri kışa hazırlanmış, ama kış ona gelmemiş.",
+              "label": "{who} yağlı bir muşambaya sarılı bir bohça çıkarıyor: içinde kalın örgü bir kazak ve bir yün başlık. Biri kışa hazırlanmış, ama kış ona gelmemiş.",
               "weight": 1
             },
             {
@@ -1859,7 +2424,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Yalnızca çürümüş erzak ve boşa geçen vakit.",
+              "label": "{who} yalnızca çürümüş erzak buldu; vakit boşa gitti.",
               "weight": 1
             },
             {
@@ -1887,7 +2452,7 @@
                   "type": "GRANT_TRAIT"
                 }
               ],
-              "label": "Kürek tahtaya değil kemiğe çarptı. Burası zula değil, mezar. Kadro toprağı aceleyle geri örttü.",
+              "label": "Kürek tahtaya değil kemiğe çarptı. Burası zula değil, mezar; {who} toprağı aceleyle geri örttü.",
               "weight": 1
             }
           ],
@@ -2060,7 +2625,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Çelik iyi, dengesi yerinde. Damgası yok çünkü yapanı kimseye hesap vermiyormuş.",
+              "label": "{who} eline aldı: çelik iyi, dengesi yerinde. Damgası yok çünkü yapanı kimseye hesap vermiyormuş.",
               "weight": 1
             },
             {
@@ -2083,7 +2648,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Sıradan bir kılıç; söylediği kadar değil, ama çürük de değil.",
+              "label": "{who} omuz silkti: sıradan bir kılıç; söylediği kadar değil, ama çürük de değil.",
               "weight": 1
             },
             {
@@ -2106,7 +2671,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "İlk denemede ağzı kıvrıldı. Demirci çoktan yolun dönemecindeydi.",
+              "label": "İlk denemede ağzı kıvrıldı; {who} elinde eğri bir demirle kaldı. Demirci çoktan yolun dönemecindeydi.",
               "weight": 1
             }
           ],
@@ -2192,7 +2757,7 @@
                   "type": "DANGER"
                 }
               ],
-              "label": "Patika gerçekten kısaymış. İki gün kazandınız; yalnız buralar ıssız.",
+              "label": "Patika gerçekten kısaymış. İki gün kazandınız; yalnız {town} yolunun bu yanı ıssız.",
               "weight": 1
             },
             {
@@ -2215,7 +2780,7 @@
                   "type": "WAGON_DAMAGE"
                 }
               ],
-              "label": "Bir gün kazandınız ama dar bir dönemeçte vagonun dingili taşa çarptı.",
+              "label": "{who} öne geçti; bir gün kazandınız ama dar bir dönemeçte vagonun dingili taşa çarptı.",
               "weight": 1
             },
             {
@@ -2243,7 +2808,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Patika bir kuru dere yatağında kayboldu. Geri dönüp ana yolu bulana kadar bir gün gitti.",
+              "label": "Patika bir kuru dere yatağında kayboldu. {town} yolunu geri bulana kadar bir gün gitti.",
               "weight": 1
             }
           ],
@@ -2321,7 +2886,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Tekerlekler uçurumun kıyısını sıyırdı; kervan dar geçidi kaybetmeden aştı.",
+              "label": "{who} öküzü dizginden çekti; tekerlekler uçurumun kıyısını sıyırdı, kervan dar geçidi kaybetmeden aştı.",
               "weight": 1
             },
             {
@@ -2359,7 +2924,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Kayan toprak bir vagonun altını boşalttı. Halatlar koptu, vagon yamaçtan aşağı gitti.",
+              "label": "Kayan toprak bir vagonun altını boşalttı. {who} halata yapıştı ama halatlar koptu; vagon yamaçtan aşağı gitti.",
               "weight": 1
             }
           ],
@@ -2511,7 +3076,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Ağzını açar açmaz kendi lehçeni duydu. Ölçüyü bol tuttu, üstüne bir de yol azığı kattı.",
+              "label": "{who} ağzını açar açmaz tüccar kendi lehçesini duydu. Ölçüyü bol tuttu, üstüne bir de yol azığı kattı.",
               "weight": 4
             },
             {
@@ -2528,7 +3093,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Fiyatta anlaştınız. Ne fazla cömert ne de cimri - dürüst bir alışveriş.",
+              "label": "Fiyatta anlaştınız. Ne fazla cömert ne de cimri - {who} dürüst bir alışveriş olduğunu söyledi.",
               "weight": 1
             }
           ],
@@ -2569,7 +3134,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Aynı boydan olduğunuz anlaşılınca ateş büyütüldü. Sabaha kadar türkü söylendi, kadro yıllardır bu kadar dinlenmemişti.",
+              "label": "Aynı boydan olduğunuz anlaşılınca ateş büyütüldü. Sabaha kadar türkü söylendi; {who} yıllardır bu kadar dinlenmemişti.",
               "weight": 4
             },
             {
@@ -2584,9 +3149,14 @@
                   "amount": 1,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "PROVISIONS"
                 }
               ],
-              "label": "Selamınız alındı, bir tas çorba içirildi. Yol arkadaşlığı bu kadarıyla kaldı.",
+              "label": "Selamınız alındı, bir tas çorba içirildi. Yol arkadaşlığı bu kadarıyla kaldı; sabah {town} yoluna ayrı çıktınız.",
               "weight": 1
             }
           ],
@@ -2641,7 +3211,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Rakamları tek tek karşılaştırıp haklı tarafı buldun. İkisi de kararına saygı duydu.",
+              "label": "{who} rakamları tek tek karşılaştırıp haklı tarafı buldu. İkisi de kararına saygı duydu.",
               "weight": 1
             },
             {
@@ -2664,7 +3234,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Defterler karmaşık çıktı, yanlış tarafa hak verdin. Kervanda bunun lafı çıkıyor.",
+              "label": "Defterler karmaşık çıktı, yanlış tarafa hak verdin. {who} bunun lafını günlerce etti.",
               "weight": 1
             }
           ],
@@ -2737,7 +3307,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Bilek yere değmedi. Kervanın seni alkışlıyor.",
+              "label": "Bilek yere değmedi. En yüksek sesle bağıran {who} oldu.",
               "weight": 1
             },
             {
@@ -2758,9 +3328,14 @@
                   "amount": -3,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -2,
+                  "text": "strength",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Bu sefer sen yenildin ama iyi dövüştün, karşı taraf bunu takdir ediyor.",
+              "label": "Bu sefer sen yenildin ama iyi dövüştün, karşı taraf bunu takdir ediyor. {who} yine de bozuldu.",
               "weight": 1
             }
           ],
@@ -2826,9 +3401,14 @@
                   "amount": 6,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "silk",
+                  "type": "ITEM_ADD"
                 }
               ],
-              "label": "Sarhoş bir kâtip, batan bir geminin yükünün nereye vurduğunu anlattı. Sabah oraya uğradınız.",
+              "label": "Sarhoş bir kâtip, batan bir geminin yükünün nereye vurduğunu anlattı. Sabah {who} ile oraya uğradınız.",
               "weight": 0.8
             },
             {
@@ -2851,7 +3431,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Kimsenin adını anmadığı bir şeyden söz ettiler. Ertesi sabah çadırınızın önünde bir muska buldunuz. Kim bıraktı, bilen yok.",
+              "label": "Kimsenin adını anmadığı bir şeyden söz ettiler. Ertesi sabah çadırın önünde bir muska buldunuz; {who} ona dokunmadı.",
               "weight": 0.7
             },
             {
@@ -2897,7 +3477,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Bir saat dinlediniz, işinize yarar tek bir şey duymadınız. Hesabı da siz ödediniz - ama liman ağzı böyle açılır.",
+              "label": "Bir saat dinlediniz, işinize yarar tek bir şey duymadınız. Hesabı {who} ödedi - ama liman ağzı böyle açılır.",
               "weight": 1
             }
           ],
@@ -2929,7 +3509,7 @@
       "immediate": [],
       "modifiers": 0,
       "once": false,
-      "text": "Yol üstündeki handa, limanlardan haber taşıyan bir tüccar kervanı senin gibi biriyle konuşmak istiyor.",
+      "text": "Yol kenarı kervansarayında, limanlardan haber taşıyan bir tüccar kervanı senin gibi biriyle konuşmak istiyor.",
       "title": "Rıhtım Dedikodusu",
       "triggered_only": false,
       "weight": 0.8
@@ -2947,6 +3527,11 @@
               "amount": 2,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Ağı at, avlanmaya vakit ayır",
@@ -2988,7 +3573,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Ağ ağırlaştı, iki kişi zor çekti. Bu akşam herkesin tasında balık var.",
+              "label": "Ağ ağırlaştı; {who} ile bir kişi daha zor çekti. Bu akşam herkesin tasında balık var.",
               "weight": 1
             },
             {
@@ -3011,7 +3596,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Akıntı ağı iki kez kaçırdı. Az balık, uzun bir öğleden sonra.",
+              "label": "Akıntı ağı iki kez {who} elinden kaçırdı. Az balık, uzun bir öğleden sonra.",
               "weight": 1
             },
             {
@@ -3034,7 +3619,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Akıntı ayağını kaydırdı; kayalara çarparak çıktı. Ağ boş.",
+              "label": "Akıntı ayağını kaydırdı; {who} kayalara çarparak çıktı. Ağ boş.",
               "weight": 1
             }
           ],
@@ -3120,7 +3705,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Adaklar arasında birkaç sikke buluyorsun.",
+              "label": "Adaklar arasında birkaç sikke buluyorsun. {who} başka tarafa baktı.",
               "weight": 1
             },
             {
@@ -3141,9 +3726,14 @@
                   "amount": -4,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Kervandan biri seni görüyor - bunun uğursuzluk getireceğine yemin ediyor, haber çabuk yayılıyor.",
+              "label": "{who} seni görüyor - bunun uğursuzluk getireceğine yemin ediyor, haber çabuk yayılıyor.",
               "weight": 1
             }
           ],
@@ -3220,7 +3810,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Tarifin doğru çıkıyor - hacı, doğru yöne, memnun ayrılıyor.",
+              "label": "{who} tarifi doğru verdi - hacı, doğru yöne, memnun ayrılıyor.",
               "weight": 1
             },
             {
@@ -3238,7 +3828,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Tarifin şüpheli çıkıyor - hacı gülümsüyor ama gözlerinde kuşku var, sessizce ayrılıyor.",
+              "label": "{who} tarifi şüpheli verdi - hacı gülümsüyor ama gözlerinde kuşku var, sessizce ayrılıyor.",
               "weight": 1
             }
           ],
@@ -3374,7 +3964,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Sessizce ve çabucak sıyrıldınız, hayvan farkına bile varmadı.",
+              "label": "Sessizce ve çabucak sıyrıldınız; {who} nefesini bile tuttu, hayvan farkına varmadı.",
               "weight": 1
             },
             {
@@ -3402,7 +3992,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Ayak sesleriniz hayvanı ürküttü, kısa bir süre peşinizden geldi.",
+              "label": "{who} bir dala bastı; hayvan ürktü ve kısa bir süre peşinizden geldi.",
               "weight": 1
             }
           ],
@@ -3424,6 +4014,11 @@
       "choices": [
         {
           "effects": [
+            {
+              "amount": -40,
+              "text": "soylenti|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": -100,
               "text": "",
@@ -3470,7 +4065,7 @@
                   "type": "DANGER"
                 }
               ],
-              "label": "Şaşkınlıklarından yararlanıp sıyırıyorsun.",
+              "label": "Şaşkınlıklarından yararlanıp {town} kapısından sıyırıyorsun.",
               "weight": 1
             },
             {
@@ -3498,7 +4093,7 @@
                   "type": "DOCUMENT_LOSE"
                 }
               ],
-              "label": "Yakalanıyorsun - evrakların el konuluyor, adın şehirlerde daha da kötüye çıkıyor.",
+              "label": "Yakalanıyorsun - evrakların el konuluyor, adın {town} ve çevresinde daha da kötüye çıkıyor.",
               "weight": 1
             }
           ],
@@ -3635,7 +4230,7 @@
                   "type": "GRANT_EQUIPMENT"
                 }
               ],
-              "label": "Derinde dokunulmamış bir yemişlik ve mantar yatağı. Çuvallar doldu.",
+              "label": "{who} derinde dokunulmamış bir yemişlik ve mantar yatağı buldu. Çuvallar doldu.",
               "weight": 1
             },
             {
@@ -3658,7 +4253,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "İyi topladınız ama dönüş yolunu bulmak bir günü yedi.",
+              "label": "İyi topladınız ama {who} dönüş yolunu bulana kadar bir gün gitti.",
               "weight": 1
             },
             {
@@ -3686,7 +4281,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Tanımadığınız kırmızı meyveler. Gece boyunca kusanların başında beklediniz.",
+              "label": "Tanımadığınız kırmızı meyveler. Gece boyunca {who} kusanların başında bekledi.",
               "weight": 1
             }
           ],
@@ -3746,6 +4341,11 @@
         {
           "effects": [
             {
+              "amount": 40,
+              "text": "minnet|sehir|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            },
+            {
               "amount": -70,
               "text": "",
               "type": "GOLD"
@@ -3786,6 +4386,11 @@
               ],
               "effects": [
                 {
+                  "amount": -50,
+                  "text": "kin|sehir|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                },
+                {
                   "amount": -64,
                   "text": "",
                   "type": "GOLD"
@@ -3796,7 +4401,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Yaşlı güler, elini sıkar. Bolca erzak, biraz daha ucuza.",
+              "label": "Yaşlı güler, {who} elini sıkar. Bolca erzak, biraz daha ucuza.",
               "weight": 1
             },
             {
@@ -3819,7 +4424,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Fiyatta inat eder; ancak az bir şey satar.",
+              "label": "Fiyatta inat eder; {who} ne dediyse dinlemez, ancak az bir şey satar.",
               "weight": 1
             },
             {
@@ -3840,9 +4445,14 @@
                   "amount": -1,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Kapıyı kapatır. Köy arkanızdan söylenir, kervan aç gözlerle yola devam eder.",
+              "label": "Kapıyı kapatır. Köy arkanızdan söylenir, kervan {town} yoluna aç gözlerle devam eder.",
               "weight": 1
             }
           ],
@@ -3905,7 +4515,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Dere kenarında yakalarsınız. Çuvallar geri gelir, tüccar boynu bükük kervana döner.",
+              "label": "{who} onu dere kenarında yakalar. Çuvallar geri gelir, tüccar boynu bükük kervana döner.",
               "weight": 1
             },
             {
@@ -3928,7 +4538,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Tüccar karanlıkta kaybolur; çuvalların birkaçı yolda düşmüş.",
+              "label": "Tüccar karanlıkta kaybolur; çuvalların birkaçı {town} yolunda düşmüş.",
               "weight": 1
             },
             {
@@ -3956,7 +4566,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Kaybolur. Sabah kesenin de hafiflediği anlaşılır.",
+              "label": "Kaybolur. Sabah {who} kesenin de hafiflediğini görür.",
               "weight": 1
             }
           ],
@@ -4024,7 +4634,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Sesiniz onu tutar. Kalır, hatta biraz da güler.",
+              "label": "Sesiniz onu tutar. Kalır, hatta {who} ile biraz da güler.",
               "weight": 1
             },
             {
@@ -4042,7 +4652,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Kalır, ama bütün gün suratı asık; kervan bunu hisseder.",
+              "label": "Kalır, ama bütün gün suratı asık; {who} bunu akşam ateşinde dile getirir.",
               "weight": 1
             },
             {
@@ -4060,7 +4670,7 @@
                   "type": "MERCHANT_LEAVE"
                 }
               ],
-              "label": "Dinlemez. Arabasını çevirip gider.",
+              "label": "Dinlemez. Arabasını çevirip {town} yolundan geri gider.",
               "weight": 1
             }
           ],
@@ -4178,7 +4788,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Hükmünüzü ikisi de kabul eder. Akşam aynı ateşte otururlar.",
+              "label": "Hükmünüzü ikisi de kabul eder. Akşam {who} ile aynı ateşte otururlar.",
               "weight": 1
             },
             {
@@ -4196,7 +4806,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Kavga biter ama hesap kapanmaz; bakışlar kervanı geriyor.",
+              "label": "Kavga biter ama hesap kapanmaz; {who} o bakışların arasında kalır.",
               "weight": 1
             },
             {
@@ -4219,7 +4829,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Tüccar hükmü hakaret sayar, arabasını çevirir ve gittiği her yerde adınızı kötüler.",
+              "label": "Tüccar hükmü hakaret sayar, arabasını çevirir ve {town} yolunda adınızı kötüler.",
               "weight": 1
             }
           ],
@@ -4328,9 +4938,14 @@
                   "amount": 2,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -1,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Tekerlekler taşları bulur, kervan ıslak ayaklarla karşıda.",
+              "label": "{who} taşları önden yokladı; tekerlekler onları buldu, kervan ıslak ayaklarla karşıda.",
               "weight": 1
             },
             {
@@ -4348,7 +4963,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Bir çuval akıntıya kapılır.",
+              "label": "{who} elinden bir çuval akıntıya kapılır.",
               "weight": 1
             },
             {
@@ -4371,7 +4986,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Bir vagon taşa oturur; çekip çıkarırken dingil inler, erzak ıslanır.",
+              "label": "Bir vagon taşa oturur; {who} çekip çıkarırken dingil inler, erzak ıslanır.",
               "weight": 1
             }
           ],
@@ -4405,9 +5020,14 @@
                   "amount": 4,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": -2,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Öküzler yüzer gibi geçer; herkes titriyor ama tam.",
+              "label": "Öküzler yüzer gibi geçer; {who} dahil herkes titriyor ama tam.",
               "weight": 1
             },
             {
@@ -4430,7 +5050,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Bir vagon yan yatar, düzeltilir; kalpler ağızda.",
+              "label": "Bir vagon yan yatar, {who} ile düzeltilir; kalpler ağızda.",
               "weight": 1
             },
             {
@@ -4458,7 +5078,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Akıntı vagonları sürükler; çekip kurtarırsınız ama bedeli ağır.",
+              "label": "Akıntı vagonları sürükler; {who} ile çekip kurtarırsınız ama bedeli ağır.",
               "weight": 1
             }
           ],
@@ -4545,7 +5165,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Sesiniz onu bulur. Bırakır, oturur, ağlar. Kervan rahatlar.",
+              "label": "Sesiniz ona ulaşır; {who} bırakır, oturur, ağlar. Kervan rahatlar.",
               "weight": 1
             },
             {
@@ -4563,7 +5183,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Bırakır ama gözleri hâlâ yanıyor.",
+              "label": "{who} bırakır ama gözleri hâlâ yanıyor.",
               "weight": 1
             },
             {
@@ -4584,9 +5204,14 @@
                   "amount": 3,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": -3,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Sözünüz yağ olur ateşe; kavga büyür, sabaha kadar kimse uyumaz.",
+              "label": "Sözünüz yağ olur ateşe; kavga büyür, {who} sabaha kadar uyumaz.",
               "weight": 1
             }
           ],
@@ -4709,7 +5334,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Işık arkanızda söner; bir gün kaybedip uzaklaşırsınız.",
+              "label": "Işık arkanızda söner; bir gün kaybedip {town} yoluna geri dönersiniz.",
               "weight": 1
             },
             {
@@ -4732,7 +5357,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Bir alev vagonun brandasını yalar; yine de kurtulursunuz.",
+              "label": "Bir alev vagonun brandasını yalar; {who} kumla bastırır, yine de kurtulursunuz.",
               "weight": 1
             },
             {
@@ -4750,7 +5375,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Ayağınız takılır; büyücü yolu kapatır. Savaşmaktan başka yol yok.",
+              "label": "{who} tökezler; büyücü yolu kapatır. Savaşmaktan başka yol yok.",
               "weight": 1
             }
           ],
@@ -4832,7 +5457,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Muhafızlar eli boş döner. Kervan derin bir nefes alır.",
+              "label": "Muhafızlar eli boş döner. {who} derin bir nefes alır.",
               "weight": 1
             },
             {
@@ -4853,9 +5478,14 @@
                   "amount": -2,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Bir kapak açılır; sandık bulunmaz ama şüphe yeter. Ceza kesilir.",
+              "label": "Bir kapak açılır; sandık bulunmaz ama şüphe yeter. {town} kapısında ceza kesilir.",
               "weight": 1
             },
             {
@@ -4876,9 +5506,14 @@
                   "amount": -6,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 10,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Sandık bulunur. Ağır ceza, ve adınız onların defterine kara yazılır.",
+              "label": "Sandık bulunur. Ağır ceza, ve adınız {town} defterine kara yazılır.",
               "weight": 1
             }
           ],
@@ -5009,7 +5644,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Sözünüz hanı güldürür; rakibin adı küçülür.",
+              "label": "Sözünüz tavernayı güldürür; rakibin adı {town} pazarında küçülür.",
               "weight": 1
             },
             {
@@ -5027,7 +5662,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Kimse kimseye inanmaz; laf ortada kalır.",
+              "label": "{who} bile taraf tutmaz; laf ortada kalır.",
               "weight": 1
             },
             {
@@ -5043,9 +5678,14 @@
                   "amount": -4,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Sesiniz titrer; han rakibe inanır.",
+              "label": "Sesiniz titrer; taverna rakibe inanır, {who} gözlerini kaçırır.",
               "weight": 1
             }
           ],
@@ -5071,7 +5711,7 @@
       "immediate": [],
       "modifiers": 0,
       "once": true,
-      "text": "Yolda alt ettiğiniz tüccar sizden önce hanlara varmış: adınızı hilekâr diye yaymış. Bir handa yüzünüze söylüyorlar.",
+      "text": "Yolda alt ettiğiniz tüccar sizden önce kervansaraylara varmış: adınızı hilekâr diye yaymış. Bir tavernada yüzünüze söylüyorlar.",
       "title": "Rakibin dili",
       "triggered_only": true,
       "weight": 3
@@ -5157,7 +5797,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Doğru kişiyi buldun. Eşya geri verildi, kervanın adı bu kadar çabuk çözüldüğü için büyüdü.",
+              "label": "{who} doğru kişiyi buldu. Eşya geri verildi, kervanın adı bu kadar çabuk çözüldüğü için büyüdü.",
               "weight": 1
             },
             {
@@ -5185,7 +5825,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Yanlış kişiyi suçladın. Kervan bölündü, gerçek hırsız hâlâ aranızda gizleniyor.",
+              "label": "{who} yanlış kişiyi suçladı. Kervan bölündü, gerçek hırsız hâlâ aranızda gizleniyor.",
               "weight": 1
             }
           ],
@@ -5231,6 +5871,11 @@
       "choices": [
         {
           "effects": [
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|yuz",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": -1,
               "text": "",
@@ -5300,7 +5945,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Sandık sessizce vagona girdi. İçinde maaş akçesi var.",
+              "label": "Sandık {who} elinde sessizce vagona girdi. İçinde maaş akçesi var.",
               "weight": 1
             },
             {
@@ -5321,9 +5966,14 @@
                   "amount": -4,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 7,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Sandığın yarısını boşalttınız ki bir çavuş dönüp baktı. Kimse bir şey demedi, ama gördü.",
+              "label": "Sandığın yarısını boşalttınız ki bir çavuş dönüp baktı - tam {who} eğilmişken. Kimse bir şey demedi, ama gördü.",
               "weight": 1
             },
             {
@@ -5346,7 +5996,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Bir asker bağırdı. Konvoy durdu, mızraklar size döndü.",
+              "label": "Bir asker bağırdı. Konvoy durdu, mızraklar size döndü; {who} elini kabzaya attı.",
               "weight": 1
             }
           ],
@@ -5368,6 +6018,11 @@
       "choices": [
         {
           "effects": [
+            {
+              "amount": 50,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": -6,
               "text": "",
@@ -5434,7 +6089,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Bir kadının boynundaki zincir gerçek gümüş. Size teşekkür ediyor; arkanızdan bakanlar etmiyor.",
+              "label": "Bir kadının boynundaki zincir gerçek gümüş. Size teşekkür ediyor; {who} arkaya bakamıyor.",
               "weight": 1
             },
             {
@@ -5462,7 +6117,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Yarısı sahte, yarısı gerçek. Darda olanla pazarlık etmenin tadı ağızda kaldı.",
+              "label": "Yarısı sahte, yarısı gerçek. {who} bir daha darda olanla pazarlık etmek istemiyor.",
               "weight": 1
             },
             {
@@ -5488,9 +6143,14 @@
                   "amount": -4,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Hepsi boyalı tunç. Kandırılan sizsiniz, ama yolda anlatılan hikâye kervanın açları soyduğu.",
+              "label": "Hepsi boyalı tunç. Kandırılan sizsiniz, ama {town} yolunda anlatılan hikâye kervanın açları soyduğu.",
               "weight": 1
             }
           ],
@@ -5504,6 +6164,11 @@
         },
         {
           "effects": [
+            {
+              "amount": -50,
+              "text": "kin|bolge|uzun|ret",
+              "type": "IZ_BIRAK"
+            },
             {
               "amount": -2,
               "text": "",
@@ -5558,7 +6223,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "İyi bir pazarlık oldu, kârla ayrıldın (+30 GG).",
+              "label": "İyi bir pazarlık oldu; {who} kârla ayrıldı (+30 GG).",
               "weight": 1
             },
             {
@@ -5576,7 +6241,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Teklif göründüğünden kötüymüş, biraz zararla ayrıldın (-10 GG).",
+              "label": "Teklif göründüğünden kötüymüş; {who} biraz zararla ayrıldı (-10 GG).",
               "weight": 1
             }
           ],
@@ -5641,7 +6306,7 @@
               "type": "MORALE"
             },
             {
-              "amount": 3,
+              "amount": -2,
               "text": "",
               "type": "STRESS"
             }
@@ -5657,6 +6322,11 @@
               "amount": -1,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Haberi ciddiye alma",
@@ -5736,7 +6406,7 @@
       "modifiers": 2,
       "once": false,
       "text": "Önünüzdeki şehirde bir hastalık yayıldığı söyleniyor. Şehre girdiğinizde mallar pahalı ve tedirgin bulacaksınız.",
-      "title": "Veba Haberi",
+      "title": "İllet Haberi",
       "triggered_only": false,
       "weight": 0.3
     },
@@ -5748,6 +6418,11 @@
               "amount": 3,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
             }
           ],
           "label": "Kadroya müjdele, adımlar hızlansın",
@@ -5800,6 +6475,11 @@
               "amount": -3,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Kadroyu uyar, tetikte olun",
@@ -5813,6 +6493,11 @@
               "amount": -1,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
             }
           ],
           "label": "Haberi ciddiye alma",
@@ -5847,28 +6532,562 @@
     {
       "choices": [
         {
-          "effects": [
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Ona Kitap'ı as, duayı fısılda; inançlı gibi geçsin",
+          "locked": "",
+          "outcomes": [
             {
-              "amount": -70,
-              "text": "",
-              "type": "GOLD"
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Asker duayı dinliyor, başını sallıyor. Geçiyorsunuz; kimse arkasına bakmıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -25,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bir kelime yanlış çıkıyor. Asker susuyor; kesedeki gümüş onu ikna ediyor, bu kez.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "CUT_HAND"
+                },
+                {
+                  "amount": -12,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Dua yarıda kalıyor. 'El'e inanmayan El'i taşıyamaz.' Kafilenin önünde, yolun kenarında.",
+              "weight": 1
             }
           ],
-          "label": "Haracı öde (70 GG)",
-          "locked": "Haracı ödeyecek kadar altının yok",
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Onu kapı dışında bırak, dönüşte alırsın",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -3,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Geri dön; bu kapıdan girmeyeceğiz",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "avucici_unbeliever",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 30,
+      "id": "evt_avucici_hand",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orvahel'e yarım gün kala bir asker kafileyi durduruyor; Kitap göğsüne bağlı. Tek tek yüzlere bakıyor. Kafilede El'e inanmayan biri var ve asker bunu sezmiş gibi.",
+      "title": "El'in Kapısı",
+      "triggered_only": false,
+      "weight": 1.2
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "kardeslik",
+              "type": "FACTION"
+            },
+            {
+              "amount": 0,
+              "text": "bandit",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Yüzleş",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -90,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "kardeslik",
+              "type": "FACTION"
+            },
+            {
+              "amount": 0,
+              "text": "paid",
+              "type": "CHIEF_MEMORY"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Haracını ver (90 GG)",
+          "locked": "Haracını ver (90 GG yok)",
           "outcomes": [],
           "requirements": [
             {
               "key": "gold",
               "op": "GREATER_EQUAL",
-              "value": 70
+              "value": 90
             }
           ]
         },
         {
           "effects": [
             {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Geri çekil, yolu dolaş (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chief_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 6,
+      "id": "evt_chief_returns",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun ortasında adamları dizilmiş, önlerinde {nemesis}. Yüzünde {scar}: geçen sefer bizden aldığı iz. Bu kez çetesi daha kalabalık. \"Sizi tanıyorum,\" diyor. \"Ben de unutmadım.\"",
+      "title": "{nemesis} yolu tutmuş",
+      "triggered_only": false,
+      "weight": 2.4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -20,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Erzak al (20 GG, 6 erzak)",
+          "locked": "Erzak al (20 GG yok)",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 20
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Oturup yolu sor",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Durma, geç git",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "place_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_place_village",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun kenarında {place}. Birkaç ev, bir kuyu, kapı önünden bizi süzen çocuklar. Kıtlık burada da var: ambarlar yarı boş, ama satacak bir şeyleri kalmış.",
+      "title": "{place}",
+      "triggered_only": false,
+      "weight": 0
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -8,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Dinlen, sessizce otur",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -10,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "kilise",
+              "type": "FACTION"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Adak bırak (10 GG)",
+          "locked": "Adak bırak (10 GG yok)",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Durma, geç git",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "place_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_place_shrine",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{place}. Taşları kararmış, eşiği aşınmış. Burada dinlenen yolcuların izi hâlâ toprakta.",
+      "title": "{place}",
+      "triggered_only": false,
+      "weight": 0
+    },
+    {
+      "choices": [
+        {
+          "effects": [],
+          "label": "Yıkıntıyı kurcala",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [],
+              "effects": [
+                {
+                  "amount": 25,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "Bir taşın altında unutulmuş bir kese.",
+              "weight": 4
+            },
+            {
+              "conditions": [],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "Bir duvar çöktü; biri altında kaldı.",
+              "weight": 3
+            },
+            {
+              "conditions": [],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Hiçbir şey yok. Yalnızca soğuk ve rüzgâr.",
+              "weight": 3
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -5,
+              "text": "",
+              "type": "DANGER"
+            }
+          ],
+          "label": "Yükseğe çık, yolu gözle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Durma, geç git",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "place_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_place_ruin",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{place}. Yıkık duvarlar, kararmış bir ocak. Burada kim yaşadıysa çoktan gitmiş; bir şey bırakmış olabilir.",
+      "title": "{place}",
+      "triggered_only": false,
+      "weight": 0
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 3,
+              "text": "test_weapon",
+              "type": "ITEM_ADD"
+            }
+          ],
+          "label": "Demir al (30 GG, 3 demir)",
+          "locked": "Demir al (30 GG yok)",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Durma, geç git",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "place_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 0,
+      "id": "evt_place_mine",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{place}. Toz, kazma sesi, solgun yüzler. Madenciler ekmek parası için demir verir.",
+      "title": "{place}",
+      "triggered_only": false,
+      "weight": 0
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -140,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "kardeslik",
+              "type": "FACTION"
+            }
+          ],
+          "label": "Haracı öde (140 GG)",
+          "locked": "Haracı öde: 140 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 140
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -35,
               "text": "",
               "type": "PROVISIONS"
             },
@@ -5876,21 +7095,31 @@
               "amount": -4,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 2,
+              "text": "kardeslik",
+              "type": "FACTION"
             }
           ],
-          "label": "Haracı erzakla öde (8 erzak)",
+          "label": "Haracı erzakla öde (35 erzak)",
           "locked": "Verecek kadar erzak yok",
           "outcomes": [],
           "requirements": [
             {
               "key": "provisions",
               "op": "GREATER_EQUAL",
-              "value": 8
+              "value": 35
             }
           ]
         },
         {
           "effects": [
+            {
+              "amount": -3,
+              "text": "kardeslik",
+              "type": "FACTION"
+            },
             {
               "amount": 0,
               "text": "bandit",
@@ -5989,7 +7218,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Bekçi kâğıda bakmadan el sallıyor. Geçiyorsunuz.",
+              "label": "Bekçi kâğıda bakmadan el sallıyor. {town} yoluna geçiyorsunuz.",
               "weight": 1
             },
             {
@@ -6007,7 +7236,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Yarısına razı oluyor. 20 GG.",
+              "label": "{who} yarısına razı ediyor. 20 GG.",
               "weight": 1
             },
             {
@@ -6028,9 +7257,14 @@
                   "amount": -1,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Yalanı yüzünden okuyor ve iki katını istiyor. Söz karakolda dolaşır.",
+              "label": "Yalanı {who} yüzünden okuyor ve iki katını istiyor. Söz karakolda dolaşır.",
               "weight": 1
             }
           ],
@@ -6065,7 +7299,7 @@
                   "type": "SET_FLAG"
                 }
               ],
-              "label": "Bekçi yüzünü buruşturup çekiliyor. Seni unutmayacak.",
+              "label": "Bekçi yüzünü buruşturup çekiliyor. Seni unutmayacak; {who} bunu yüzünden okuyor.",
               "weight": 1
             },
             {
@@ -6088,7 +7322,7 @@
                   "type": "SET_FLAG"
                 }
               ],
-              "label": "20 GG'ye iniyor ama adını defterine yazıyor.",
+              "label": "20 GG'ye iniyor ama adını {town} defterine yazıyor.",
               "weight": 1
             },
             {
@@ -6106,7 +7340,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Bekçi yanındakileri çağırıyor. Karakol silahlanıyor.",
+              "label": "Bekçi yanındakileri çağırıyor. Karakol silahlanıyor; {who} öne çıkıyor.",
               "weight": 1
             }
           ],
@@ -6166,7 +7400,7 @@
                   "type": "CHAIN_ADVANCE"
                 }
               ],
-              "label": "İzi yarım gün sürdünüz. Haydutlar uyurken bağı kesip getirdiniz; kolunda ip yarası var.",
+              "label": "{who} izi yarım gün sürdü. Haydutlar uyurken bağı kesip getirdi; kolunda ip yarası var.",
               "weight": 1
             },
             {
@@ -6199,7 +7433,7 @@
                   "type": "CHAIN_ADVANCE"
                 }
               ],
-              "label": "Geç buldunuz ama buldunuz. Dövülmüş, susuyor.",
+              "label": "{who} geç buldu ama buldu. Dövülmüş, susuyor.",
               "weight": 1
             },
             {
@@ -6227,7 +7461,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "İz yağmurda kayboldu. İki gün sonra kendi başına, yarı ölü döndü.",
+              "label": "İz yağmurda kayboldu. İki gün sonra {town} yolunda kendi başına, yarı ölü döndü.",
               "weight": 1
             }
           ],
@@ -6261,8 +7495,13 @@
           "effects": [
             {
               "amount": 0,
-              "text": "",
-              "type": "LEAVE_BEHIND"
+              "text": "LEAVE_BEHIND|en_zayif",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -10,
@@ -6282,11 +7521,6 @@
         }
       ],
       "conditions": [
-        {
-          "key": "party_size",
-          "op": "GREATER_EQUAL",
-          "value": 3
-        },
         {
           "key": "danger",
           "op": "GREATER_EQUAL",
@@ -6358,7 +7592,7 @@
                   "type": "CHAIN_ADVANCE"
                 }
               ],
-              "label": "Hikâyeleri birbirini tutuyor. Doğru olanı seçtiğine inanıyorsun.",
+              "label": "Hikâyeleri birbirini tutuyor. {who} doğru olanı seçtiğine inanıyor.",
               "weight": 1
             },
             {
@@ -6381,7 +7615,7 @@
                   "type": "CHAIN_ADVANCE"
                 }
               ],
-              "label": "Sorular sertleşti; ikisi de gece çekip gitti.",
+              "label": "{who} soruları sertleştirdi; ikisi de gece çekip gitti.",
               "weight": 1
             }
           ],
@@ -6524,7 +7758,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Komşu yoldaki haydut tuzağını anlatıyorlar. Oradan geçmeyeceksiniz.",
+              "label": "Komşu yoldaki haydut tuzağını anlatıyorlar. {who} not aldı; oradan geçmeyeceksiniz.",
               "weight": 1
             },
             {
@@ -6542,7 +7776,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Masal anlatıp duruyorlar; hangisi gerçek, bilinmiyor.",
+              "label": "Masal anlatıp duruyorlar; {who} hangisinin gerçek olduğunu çıkaramıyor.",
               "weight": 1
             }
           ],
@@ -6631,8 +7865,13 @@
           "effects": [
             {
               "amount": 4,
-              "text": "",
-              "type": "STRESS"
+              "text": "STRESS|gecmisi_uyan",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Reddet",
@@ -6698,7 +7937,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Bir süre onlarla yürüdünüz. Kimse konuşmadı; omuzlar hafifledi.",
+              "label": "Bir süre onlarla yürüdünüz. Kimse konuşmadı; {who} dahil herkesin omzu hafifledi.",
               "weight": 1
             },
             {
@@ -6716,7 +7955,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Dua uzadı, gün kısaldı. Yolun yarısı kaldı.",
+              "label": "Dua uzadı, gün kısaldı. {town} yolunun yarısı kaldı.",
               "weight": 1
             }
           ],
@@ -6761,7 +8000,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Sözünü tuttu. Patika dardı ama bir gün kazandınız.",
+              "label": "Sözünü tuttu. Patika dardı ama {town} yoluna bir gün önce çıktınız.",
               "weight": 1
             },
             {
@@ -6779,7 +8018,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Gece erzak çuvalıyla kayboldu. Aç birinin işi.",
+              "label": "Gece erzak çuvalıyla kayboldu. {who} nöbetteydi.",
               "weight": 1
             },
             {
@@ -6802,7 +8041,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Yol kısaydı ama sabah kesenin ağzı açıktı.",
+              "label": "Yol kısaydı ama sabah {who} keseyi ağzı açık buldu.",
               "weight": 1
             },
             {
@@ -6825,7 +8064,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Patika bir vadide bitti. Kayaların arkasından silahlılar çıktı.",
+              "label": "Patika bir vadide bitti. Kayaların arkasından silahlılar çıktı; {who} geç anladı.",
               "weight": 1
             }
           ],
@@ -6871,7 +8110,7 @@
                   "type": "TRAVEL_DAYS"
                 }
               ],
-              "label": "Sorulara düz cevap veriyor, yolu gösterdiği yerden anlatıyor. Peşine takılıyorsunuz; bir gün kazandınız.",
+              "label": "Sorulara düz cevap veriyor, yolu gösterdiği yerden anlatıyor. {who} ikna oldu; peşine takılıyorsunuz, bir gün kazandınız.",
               "weight": 1
             },
             {
@@ -6894,7 +8133,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Anlattığı yol kendi içinde tutmuyor. Teşekkür edip yolluyorsunuz.",
+              "label": "Anlattığı yol kendi içinde tutmuyor. {who} teşekkür edip yolluyor.",
               "weight": 1
             },
             {
@@ -6912,7 +8151,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Sorulardan kuşkulanıp gidiyor. Ne olduğunu hiç bilmeyeceksiniz.",
+              "label": "{who} soruları üst üste sıraladı; adam kuşkulanıp gitti. Ne olduğunu hiç bilmeyeceksiniz.",
               "weight": 1
             }
           ],
@@ -7005,7 +8244,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Kapı bir kişilik açılıyor. Bir gece sonra yoldaşının ateşi düşmüş.",
+              "label": "Kapı bir kişilik açılıyor; {who} yoldaşını içeri taşıyor. Bir gece sonra ateşi düşmüş.",
               "weight": 1
             },
             {
@@ -7028,7 +8267,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Kapının üstünden meşale atıyorlar. Bir çuval erzak yanıyor.",
+              "label": "Kapının üstünden meşale atıyorlar. Bir çuval erzak yanıyor; {who} alevi ayağıyla bastırıyor.",
               "weight": 1
             }
           ],
@@ -7068,7 +8307,7 @@
                   "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Kapı kırıldı, ambar boşaltıldı. Bunu çevredeki herkes duyacak; pazarlar seni bir süre hatırlar.",
+              "label": "Kapı kırıldı, ambar boşaltıldı. Bunu {town} ve çevresi duyacak; pazarlar seni bir süre hatırlar.",
               "weight": 1
             },
             {
@@ -7096,7 +8335,7 @@
                   "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Köyün erkekleri sopayla kapıda. Kavga başlıyor ve adın şimdiden kötüye çıktı.",
+              "label": "Köyün erkekleri sopayla kapıda. Kavga başlıyor ve adın {town} yolunda şimdiden kötüye çıktı.",
               "weight": 1
             }
           ],
@@ -7106,8 +8345,13 @@
           "effects": [
             {
               "amount": 2,
-              "text": "",
-              "type": "STRESS"
+              "text": "STRESS|gecmisi_uyan",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Uzaktan geç",
@@ -7129,9 +8373,155 @@
       "modifiers": 1,
       "once": false,
       "text": "Çevrede herkes hasta, bu mezranın kapısı ise sıkı kapalı. İçeriden sağlıklı sesler geliyor. Neden kimsenin hastalanmadığını onlar da bilmiyor; bilseler de söylemezler.",
-      "title": "Vebanın Uğramadığı Köy",
+      "title": "İlletin Uğramadığı Köy",
       "triggered_only": false,
       "weight": 0.3
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Adını söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -1,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 40,
+                  "text": "minnet|yol|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{tanidik} adını duyunca duruyor. Bir şey söylemeden yolu açıyorlar; o sırada kervandan kimse sana bakmıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 30,
+                  "text": "",
+                  "type": "CARGO_PLUNDER"
+                },
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{tanidik} duyuyor ama ötekiler duymuyor. Yükün bir kısmını alıp bırakıyorlar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 50,
+                  "text": "",
+                  "type": "CARGO_PLUNDER"
+                },
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "kabuk|lider",
+                  "type": "RUH"
+                }
+              ],
+              "label": "{tanidik}: ''O adı burada kullanma.'' Yükün yarısı gidiyor, sen de bir şey kaybediyorsun.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "kabuk|lider",
+              "type": "RUH"
+            },
+            {
+              "amount": 1,
+              "text": "catlak|tanik",
+              "type": "RUH"
+            },
+            {
+              "amount": 40,
+              "text": "",
+              "type": "CARGO_PLUNDER"
+            }
+          ],
+          "label": "Hiç tanımamış gibi dur",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "bandit",
+              "type": "TRIGGER_COMBAT"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|uzun|dusman",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Yolu açtır",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 20,
+      "id": "evt_deserter_face",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolu kesen beş kişiden biri öne çıkmıyor, arkada duruyor. Yüzünü biliyorsun: {tanidik}. Defterde onun adı var, yanında ''aç kaldı, ayrıldı'' yazıyor. Şimdi elinde bir mızrak var ve sana bakmıyor.",
+      "title": "Tanıdık Bir Yüz",
+      "triggered_only": true,
+      "weight": 0
     },
     {
       "choices": [
@@ -7201,7 +8591,7 @@
                   "type": "DANGER"
                 }
               ],
-              "label": "Bir tuzçu ileride haydutların nerede beklediğini anlatıyor.",
+              "label": "Bir tuzçu, {town} yolunda haydutların nerede beklediğini anlatıyor.",
               "weight": 1
             },
             {
@@ -7219,7 +8609,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Kimse konuşmak istemiyor.",
+              "label": "{who} birkaç masa dolaştı; kimse konuşmak istemiyor.",
               "weight": 1
             }
           ],
@@ -7239,7 +8629,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Kimse görmedi.",
+              "label": "{who} samanı aldı, kimse görmedi.",
               "weight": 2
             },
             {
@@ -7256,7 +8646,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Sahibi gördü, bir şey demedi. Diğer kervansaraylar duyacak.",
+              "label": "Sahibi gördü, bir şey demedi. {town} yolundaki kervansaraylar duyacak.",
               "weight": 1
             }
           ],
@@ -7322,9 +8712,14 @@
                   "amount": 25,
                   "text": "",
                   "type": "GOLD"
+                },
+                {
+                  "amount": 1,
+                  "text": "jewelry",
+                  "type": "ITEM_ADD"
                 }
               ],
-              "label": "Taşların altında eski bir mühür ve bir takı. Satılır.",
+              "label": "{who} taşların altında eski bir mühür ve bir takı buldu. Satılır.",
               "weight": 1
             },
             {
@@ -7342,7 +8737,7 @@
                   "type": "GOLD"
                 }
               ],
-              "label": "Birkaç eski sikke, başka bir şey yok.",
+              "label": "{who} birkaç eski sikke buldu, başka bir şey yok.",
               "weight": 1
             },
             {
@@ -7360,7 +8755,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Bir duvar parçası çöküyor; arayan altında kalıyor.",
+              "label": "Bir duvar parçası çöküyor; {who} altında kalıyor.",
               "weight": 1
             }
           ],
@@ -7402,38 +8797,38 @@
         {
           "effects": [
             {
-              "amount": -50,
+              "amount": -240,
               "text": "",
               "type": "GOLD"
             }
           ],
-          "label": "Öde (50 GG)",
-          "locked": "Öde: 50 GG yok",
+          "label": "Öde (240 GG)",
+          "locked": "Öde: 240 GG yok",
           "outcomes": [],
           "requirements": [
             {
               "key": "gold",
               "op": "GREATER_EQUAL",
-              "value": 50
+              "value": 240
             }
           ]
         },
         {
           "effects": [
             {
-              "amount": -8,
+              "amount": -35,
               "text": "",
               "type": "PROVISIONS"
             }
           ],
-          "label": "Erzakla öde (8 erzak)",
-          "locked": "Erzakla öde: 8 erzak yok",
+          "label": "Erzakla öde (35 erzak)",
+          "locked": "Erzakla öde: 35 erzak yok",
           "outcomes": [],
           "requirements": [
             {
               "key": "provisions",
               "op": "GREATER_EQUAL",
-              "value": 8
+              "value": 35
             }
           ]
         },
@@ -7469,12 +8864,12 @@
               ],
               "effects": [
                 {
-                  "amount": -25,
+                  "amount": -140,
                   "text": "",
                   "type": "GOLD"
                 }
               ],
-              "label": "Yarısına razı oluyorlar. 25 GG.",
+              "label": "{who} tabana kadar indirdi: 140 GG, bir kervanın bir haftalık ekmeği kadar.",
               "weight": 1
             },
             {
@@ -7487,12 +8882,12 @@
               ],
               "effects": [
                 {
-                  "amount": -40,
+                  "amount": -180,
                   "text": "",
                   "type": "GOLD"
                 }
               ],
-              "label": "40 GG'de anlaşıyorsunuz.",
+              "label": "{who} 180 GG'de anlaşıyor.",
               "weight": 1
             },
             {
@@ -7510,7 +8905,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Pazarlık uzadı, sabırları tükendi. Kılıçlar çekiliyor.",
+              "label": "Pazarlık uzadı, sabırları tükendi. Kılıçlar çekiliyor; {who} öne geçiyor.",
               "weight": 1
             }
           ],
@@ -7594,9 +8989,14 @@
                   "amount": 4,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Şafakta o yere düştü, sen ayaktaydın. Herkes gördü.",
+              "label": "Şafakta o yere düştü, sen ayaktaydın. {who} dahil herkes gördü.",
               "weight": 1
             },
             {
@@ -7619,7 +9019,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Şafakta yere düşen sendin.",
+              "label": "Şafakta yere düşen sendin. {who} seni kaldırdı.",
               "weight": 1
             }
           ],
@@ -7741,7 +9141,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Duaları doğru yerde kesip doğru yerde başlattın. Kimse bir şey sormadı.",
+              "label": "Duaları doğru yerde kesip doğru yerde başlattın. Kimse bir şey sormadı; kafile {town} yoluna sizi de alarak sürdü.",
               "weight": 1
             },
             {
@@ -7774,7 +9174,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Katıldınız, ama her duada birinin size baktığını hissettiniz.",
+              "label": "Katıldınız, ama her duada birinin size baktığını hissettiniz; {who} başını hiç kaldırmadı.",
               "weight": 1
             },
             {
@@ -7802,7 +9202,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Yanlış satırı okudun. Muhafızlar El'i taşıyan inançsızın cezasını kesip kafileden attı.",
+              "label": "Yanlış satırı okudun. Muhafızlar El'i taşıyan inançsızın cezasını kesip kafileden attı; {town} yolunun kalanını yalnız yürüdünüz.",
               "weight": 1
             }
           ],
@@ -7876,7 +9276,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Sözlerin tuttu. Görevliler başlarını sallayıp yollarına gidiyor.",
+              "label": "Sözlerin tuttu. Görevliler başlarını sallayıp yollarına gidiyor; {who} nefes alıyor.",
               "weight": 1
             },
             {
@@ -7897,9 +9297,14 @@
                   "amount": -1,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Bıraktılar ama adını defterlerine yazdılar.",
+              "label": "Bıraktılar ama {who} adını defterlerine yazdılar.",
               "weight": 1
             },
             {
@@ -7922,7 +9327,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Savunman cezayı ağırlaştırdı. Yolun ortasında kırbaçladılar.",
+              "label": "Savunman cezayı ağırlaştırdı. {who} yolun ortasında kırbaçlandı.",
               "weight": 1
             }
           ],
@@ -7956,8 +9361,13 @@
           "effects": [
             {
               "amount": 0,
-              "text": "",
-              "type": "LEAVE_BEHIND"
+              "text": "LEAVE_BEHIND|yemini_yok",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -6,
@@ -7976,19 +9386,13 @@
           "requirements": []
         }
       ],
-      "conditions": [
-        {
-          "key": "party_size",
-          "op": "GREATER_EQUAL",
-          "value": 2
-        }
-      ],
+      "conditions": [],
       "cooldown": 25,
       "id": "evt_faith_tribunal",
       "immediate": [],
       "modifiers": 2,
       "once": false,
-      "text": "Yolun kenarında üç din görevlisi kervanı durduruyor. Yoldaşlarından birini parmakla gösteriyorlar: yanlış duayı okuduğunu, El'in sayfasını kirlettiğini söylüyorlar. Mahkemeleri burada, yolun ortasında.",
+      "text": "Yolun kenarında üç din görevlisi kervanı durduruyor. Kervanından birini parmakla gösteriyorlar: yanlış duayı okuduğunu, El'in sayfasını kirlettiğini söylüyorlar. Mahkemeleri burada, yolun ortasında.",
       "title": "Sapkınlık Suçlaması",
       "triggered_only": false,
       "weight": 0.18
@@ -7999,8 +9403,13 @@
           "effects": [
             {
               "amount": 0,
-              "text": "",
-              "type": "LEAVE_BEHIND"
+              "text": "LEAVE_BEHIND|en_zayif",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -6,
@@ -8024,6 +9433,11 @@
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Taşı (bir gün, 4 erzak)",
@@ -8079,7 +9493,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Sargı ve sıcak su: ertesi sabah kendi ayağıyla yürüyordu.",
+              "label": "Sargı ve sıcak su: ertesi sabah kendi ayağıyla yürüyordu. {who} başında beklemişti.",
               "weight": 1
             },
             {
@@ -8102,7 +9516,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Bakım yetmedi. Bir gün daha kaybettiniz.",
+              "label": "Bakım yetmedi. {town} yoluna bir gün daha geç çıktınız.",
               "weight": 1
             }
           ],
@@ -8111,17 +9525,12 @@
       ],
       "conditions": [
         {
-          "key": "party_size",
-          "op": "GREATER_EQUAL",
-          "value": 3
-        },
-        {
           "key": "scarcity_here",
           "op": "GREATER_EQUAL",
           "value": 0.4
         },
         {
-          "key": "weakest_companion_hp_ratio",
+          "key": "worn_shoulder_ratio",
           "op": "LESS_EQUAL",
           "value": 0.6
         }
@@ -8178,9 +9587,14 @@
                   "amount": 3,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": -2,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Ateş düştü, kimse hastalanmadı. Bu sefer.",
+              "label": "Ateş düştü, kimse hastalanmadı. Bu sefer. {who} üç gece uyumadı.",
               "weight": 1
             },
             {
@@ -8203,7 +9617,7 @@
                   "type": "PARTY_HP"
                 }
               ],
-              "label": "Üç gün sonra iki kişi daha öksürüyordu.",
+              "label": "Üç gün sonra {who} da öksürüyordu, bir kişi daha.",
               "weight": 1
             }
           ],
@@ -8213,8 +9627,13 @@
           "effects": [
             {
               "amount": 0,
-              "text": "",
-              "type": "LEAVE_BEHIND"
+              "text": "LEAVE_BEHIND|en_zayif",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -20,
@@ -8236,11 +9655,6 @@
       ],
       "conditions": [
         {
-          "key": "party_size",
-          "op": "GREATER_EQUAL",
-          "value": 3
-        },
-        {
           "key": "plague_here",
           "op": "GREATER_EQUAL",
           "value": 1
@@ -8251,7 +9665,7 @@
       "immediate": [],
       "modifiers": 0,
       "once": false,
-      "text": "Vebalı topraklardayız ve kervandan biri sabaha ateşle uyandı. Yanında yatanlar yerlerini değiştirmek istiyor.",
+      "text": "İlletli topraklardayız ve kervandan biri sabaha ateşle uyandı. Yanında yatanlar yerlerini değiştirmek istiyor.",
       "title": "Ateşli",
       "triggered_only": false,
       "weight": 0.3
@@ -8274,6 +9688,11 @@
               "amount": 20,
               "text": "",
               "type": "CITY_MORALE"
+            },
+            {
+              "amount": 70,
+              "text": "minnet|sehir|kisa|teklif",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Bir vagonu ver",
@@ -8313,8 +9732,13 @@
           "effects": [
             {
               "amount": 6,
-              "text": "",
-              "type": "STRESS"
+              "text": "STRESS|gecmisi_uyan",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -8,
@@ -8361,7 +9785,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Yarım yüke razı oldular. Kapıda sizi bekleyecekler.",
+              "label": "Yarım yüke razı oldular. {town} kapısında sizi bekleyecekler.",
               "weight": 1
             },
             {
@@ -8384,7 +9808,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Pazarlık uzadı; gece vagonun birini kendileri sürüp götürdüler.",
+              "label": "Pazarlık uzadı; gece vagonun birini kendileri sürüp götürdüler. {who} nöbetteydi.",
               "weight": 1
             }
           ],
@@ -8448,8 +9872,13 @@
           "effects": [
             {
               "amount": 6,
-              "text": "",
-              "type": "STRESS"
+              "text": "STRESS|gecmisi_uyan",
+              "type": "BEDEL"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             },
             {
               "amount": -2,
@@ -8489,9 +9918,14 @@
                   "amount": -2,
                   "text": "",
                   "type": "STRESS"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "PROVISIONS"
                 }
               ],
-              "label": "Bir yaban keçisi düştü. Aile yedi, sizinkiler de.",
+              "label": "{who} bir yaban keçisi düşürdü. Aile yedi, sizinkiler de.",
               "weight": 1
             },
             {
@@ -8514,7 +9948,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Bütün gün iz sürdünüz; av yoktu.",
+              "label": "{who} bütün gün iz sürdü; av yoktu.",
               "weight": 1
             }
           ],
@@ -8663,7 +10097,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Yüklerin şehre gideceğini anlattın; kalabalık yol açtı.",
+              "label": "Yüklerin {town} için olduğunu anlattın; kalabalık yol açtı.",
               "weight": 1
             },
             {
@@ -8686,7 +10120,7 @@
                   "type": "CITY_MORALE"
                 }
               ],
-              "label": "Biri taş attı, sonra herkes. Muhafızlar araya girdi.",
+              "label": "Biri taş attı, sonra herkes. Muhafızlar araya girdi; {who} alnından kanıyor.",
               "weight": 1
             }
           ],
@@ -8787,9 +10221,14 @@
                   "amount": -1,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "TRADE_STAIN"
                 }
               ],
-              "label": "Kethüda geri adım attı; ama bunu unutmayacak.",
+              "label": "Kethüda geri adım attı; ama bunu unutmayacak, {town} defterine de yazdırır.",
               "weight": 1
             },
             {
@@ -8812,7 +10251,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Yarısıyla yetindi.",
+              "label": "{who} yarısına razı etti.",
               "weight": 1
             },
             {
@@ -8840,7 +10279,7 @@
                   "type": "CITY_MORALE"
                 }
               ],
-              "label": "Muhafızlar silahlarını çekiyor.",
+              "label": "Muhafızlar silahlarını çekiyor; {who} öne çıkıyor.",
               "weight": 1
             }
           ],
@@ -8934,9 +10373,14 @@
                   "amount": 3,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "PROVISIONS"
                 }
               ],
-              "label": "Gece yarısı herkes aynı ateşin başındaydı.",
+              "label": "Gece yarısı herkes aynı ateşin başındaydı; {who} çayı taşıdı.",
               "weight": 1
             },
             {
@@ -8954,7 +10398,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Ateşler birleşti ama kimse konuşmadı.",
+              "label": "Ateşler birleşti ama kimse konuşmadı; {who} dahil.",
               "weight": 1
             },
             {
@@ -8968,8 +10412,13 @@
               "effects": [
                 {
                   "amount": 0,
-                  "text": "",
-                  "type": "LEAVE_BEHIND"
+                  "text": "LEAVE_BEHIND|en_kirgin",
+                  "type": "BEDEL"
+                },
+                {
+                  "amount": -50,
+                  "text": "kin|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
                 },
                 {
                   "amount": -6,
@@ -8977,7 +10426,7 @@
                   "type": "MORALE"
                 }
               ],
-              "label": "Tartışma büyüdü; sabah biri eşyasını toplayıp gitmişti.",
+              "label": "Tartışma büyüdü; sabah biri eşyasını toplayıp {town} yolundan geri dönmüştü.",
               "weight": 1
             }
           ],
@@ -8986,9 +10435,9 @@
       ],
       "conditions": [
         {
-          "key": "party_size",
+          "key": "caravan_people",
           "op": "GREATER_EQUAL",
-          "value": 6
+          "value": 3
         }
       ],
       "cooldown": 14,
@@ -9007,8 +10456,8 @@
           "effects": [
             {
               "amount": 0,
-              "text": "",
-              "type": "LEAVE_BEHIND"
+              "text": "LEAVE_BEHIND|yemini_yok",
+              "type": "BEDEL"
             },
             {
               "amount": 6,
@@ -9047,6 +10496,11 @@
               "amount": -6,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Taşıyın, kimseyi bırakmıyoruz",
@@ -9081,14 +10535,9 @@
       ],
       "conditions": [
         {
-          "key": "weakest_companion_hp_ratio",
+          "key": "worn_shoulder_ratio",
           "op": "LESS_EQUAL",
           "value": 0.35
-        },
-        {
-          "key": "party_size",
-          "op": "GREATER_EQUAL",
-          "value": 2
         }
       ],
       "cooldown": 10,
@@ -9096,7 +10545,7 @@
       "immediate": [],
       "modifiers": 1,
       "once": false,
-      "text": "Yaralı yoldaşınız artık yürüyemiyor. Köyün yaşlıları onu yanlarında tutabileceklerini söylüyor - karşılığında kervanın bir kısım erzağını paylaşmaya da razılar. Taşımak kervanı yavaşlatır; bırakmak onu bir daha görememek demek olabilir.",
+      "text": "Kervanın yaralısı artık yürüyemiyor. Köyün yaşlıları onu yanlarında tutabileceklerini söylüyor - karşılığında kervanın bir kısım erzağını paylaşmaya da razılar. Taşımak kervanı yavaşlatır; bırakmak onu bir daha görememek demek olabilir.",
       "title": "Köyün Kapısında",
       "triggered_only": false,
       "weight": 0.3
@@ -9127,7 +10576,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Ayağa kalkmış. Köyde kalmaya karar vermiş, ama size bir çıkın azık ve selam göndermiş.",
+              "label": "Ayağa kalkmış. Köyde kalmaya karar vermiş, ama {who} eline bir çıkın azık ve selam göndermiş.",
               "weight": 1
             },
             {
@@ -9149,7 +10598,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Üçüncü gece ateşi düşmemiş. Köylüler onu tepedeki ağacın altına gömmüş.",
+              "label": "Üçüncü gece ateşi düşmemiş. Köylüler onu tepedeki ağacın altına gömmüş; {town} yolundan görünüyor.",
               "weight": 1
             }
           ],
@@ -9275,7 +10724,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Komutan maddeyi okuyunca geri adım atıyor; kervanınızı saygıyla uğurluyor.",
+              "label": "Komutan maddeyi okuyunca geri adım atıyor; kervanınızı saygıyla {town} yoluna uğurluyor.",
               "weight": 1
             },
             {
@@ -9298,7 +10747,7 @@
                   "type": "REPUTATION"
                 }
               ],
-              "label": "Tartışma uzadıkça ceza büyüyor.",
+              "label": "Tartışma uzadıkça ceza büyüyor; {who} susmasını bilmiyor.",
               "weight": 1
             }
           ],
@@ -9381,9 +10830,14 @@
                   "amount": 2,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": -5,
+                  "text": "strength",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "İki madenciyi sırtında çıkarıyor. Maden sahibi borcunu altınla ödüyor.",
+              "label": "{who} iki madenciyi sırtında çıkarıyor. Maden sahibi borcunu altınla ödüyor.",
               "weight": 1
             },
             {
@@ -9406,7 +10860,7 @@
                   "type": "STRESS"
                 }
               ],
-              "label": "Tavan bir kez daha oturuyor. Çıkarıyorlar, ama kanlar içinde.",
+              "label": "Tavan bir kez daha oturuyor. {who} çıkarılıyor, ama kanlar içinde.",
               "weight": 1
             }
           ],
@@ -9489,9 +10943,14 @@
                   "amount": 2,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -2,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Suyun rengi sığlığı ele veriyor; kervan dizine kadar ıslanarak geçiyor.",
+              "label": "Suyun rengi sığlığı ele veriyor; {who} önden geçiyor, kervan dizine kadar ıslanıyor.",
               "weight": 1
             },
             {
@@ -9514,7 +10973,7 @@
                   "type": "PROVISIONS"
                 }
               ],
-              "label": "Geçit sanılan yer bir çukur çıkıyor; bir vagon su alıyor.",
+              "label": "Geçit sanılan yer bir çukur çıkıyor; bir vagon su alıyor, {who} boğazına kadar giriyor.",
               "weight": 1
             }
           ],
@@ -9598,7 +11057,7 @@
               "type": "UNLOCK_EVENT"
             }
           ],
-          "label": "Dur, taşları topla, bir işaret koy",
+          "label": "Dur, dağılan taşları yeniden yığ",
           "locked": "",
           "outcomes": [],
           "requirements": []
@@ -9685,7 +11144,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Dinliyorsun, o da seni hatırlıyor: taşları toplayan sendin. 'Bir dahaki durakta beni bekle,' diyor.",
+              "label": "Dinliyorsun, o da seni hatırlıyor: taşları toplayan sendin. '{town} yolundaki bir dahaki durakta beni bekle,' diyor.",
               "weight": 1
             },
             {
@@ -9713,7 +11172,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Sözlerini iyi dinliyorsun, ama geçip gittiğini biliyor. Yine de adını yolda iyi anacak.",
+              "label": "Sözlerini iyi dinliyorsun, ama geçip gittiğini biliyor. Yine de adını {town} yolunda iyi anacak.",
               "weight": 1
             },
             {
@@ -9741,7 +11200,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Ne dediğini tam anlayamıyorsun; o da senden bir şey anlamıyor. Soğuk bir sessizlikle ayrılıyor.",
+              "label": "Ne dediğini tam anlayamıyorsun; o da senden bir şey anlamıyor. Soğuk bir sessizlikle, {town} yoluna doğru ayrılıyor.",
               "weight": 1
             }
           ],
@@ -9995,7 +11454,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Çavuş bir süre bakıyor, sonra el sallıyor. Vagonun içinde iki kişi nefesini bırakıyor.",
+              "label": "Çavuş bir süre {who} yüzüne bakıyor, sonra el sallıyor. Vagonun içinde iki kişi nefesini bırakıyor.",
               "weight": 1
             },
             {
@@ -10018,7 +11477,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Sesin titriyor. Çavuş kılıcını çekiyor: 'Aç o vagonu.'",
+              "label": "Sesin titriyor. Çavuş kılıcını çekiyor: 'Aç o vagonu.' {who} elini kabzaya atıyor.",
               "weight": 1
             }
           ],
@@ -10026,11 +11485,6 @@
         },
         {
           "effects": [
-            {
-              "amount": 1,
-              "text": "",
-              "type": "REPUTATION"
-            },
             {
               "amount": 8,
               "text": "",
@@ -10268,7 +11722,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Gece boyu sayıyorsun: altı, belki yedi. En azından ne geleceğini biliyorsun.",
+              "label": "{who} gece boyu sayıyor: altı, belki yedi. En azından ne geleceğini biliyorsunuz.",
               "weight": 1
             },
             {
@@ -10296,7 +11750,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Sayarken biri arkadan dalıyor, bir koşum hayvanını yaralayıp karanlığa kaçıyor.",
+              "label": "Sayarken biri arkadan dalıyor, bir koşum hayvanını yaralayıp karanlığa kaçıyor; {who} geç dönüyor.",
               "weight": 1
             }
           ],
@@ -10466,7 +11920,7 @@
       "cooldown": 15,
       "id": "evt_creditor_rider",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 2,
       "once": false,
       "text": "Tozlu bir atlı kervanın yanına sürüyor. Defterinden bir sayfa okuyor: borcun vadesi geçmiş. 'Bir dahaki sefere yalnız gelmeyeceğim,' diyor.",
       "title": "Alacaklının Atlısı",
@@ -10528,7 +11982,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Sözlerin memurları ikna ediyor; kâğıdı katlayıp gidiyorlar.",
+              "label": "Sözlerin memurları ikna ediyor; kâğıdı katlayıp gidiyorlar. {who} kapıyı arkalarından kapatıyor.",
               "weight": 1
             },
             {
@@ -10551,7 +12005,7 @@
                   "type": "CLEAR_FLAG"
                 }
               ],
-              "label": "Gidiyorlar, ama kervanın adı alacaklıların arasında dolaşacak.",
+              "label": "Gidiyorlar, ama kervanın adı {town} alacaklıları arasında dolaşacak.",
               "weight": 1
             },
             {
@@ -10579,7 +12033,7 @@
                   "type": "UNLOCK_EVENT"
                 }
               ],
-              "label": "Yalvarman kimseyi etkilemiyor. Herkesin önünde azarlanıyorsun; memurlar yine gelecek.",
+              "label": "Yalvarman kimseyi etkilemiyor. {who} dahil herkesin önünde azarlanıyorsun; memurlar yine gelecek.",
               "weight": 1
             }
           ],
@@ -10652,7 +12106,7 @@
                   "type": "TRIGGER_COMBAT"
                 }
               ],
-              "label": "Rüzgârı arkana alıp sessizce yaklaştın - hayvanlar seni fark ettiğinde artık çok geç.",
+              "label": "{who} rüzgârı arkasına alıp sessizce yaklaştı - hayvanlar fark ettiğinde artık çok geçti.",
               "weight": 1
             },
             {
@@ -10668,9 +12122,14 @@
                   "amount": -1,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -2,
+                  "text": "perception",
+                  "type": "PARTY_HP"
                 }
               ],
-              "label": "Bir dal çatırdadı, erkek geyik başını kaldırdı - sürü bir anda ormanın içinde kayboldu.",
+              "label": "Bir dal çatırdadı, erkek geyik başını kaldırdı - {who} daha yayı germemişti, sürü ormanın içinde kayboldu.",
               "weight": 1
             }
           ],
@@ -10700,6 +12159,524 @@
       "title": "Av Fırsatı",
       "triggered_only": false,
       "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "kin|kisi|uzun|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 100,
+              "text": "all",
+              "type": "CARGO_PLUNDER"
+            },
+            {
+              "amount": -14,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 10,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Hepsini indir",
+          "locked": "Adın yolda yayılmış: bu sefer pazarlık yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "raids_bought_off",
+              "op": "LESS_THAN",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Diren",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 2.5,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Bir sandığı paha biçilmez diye yuttur",
+          "locked": "Reis lafı kesiyor: bu çete konuşmaya gelmemiş",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "CARGO_DECOY"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} sandığın kapağını ağır ağır araladı ve mührü gösterdi. Çavuş yutkundu, yalnız onu aldı; gerisine bakmadılar bile.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "bandit",
+                  "type": "TRIGGER_AMBUSH"
+                }
+              ],
+              "label": "Çavuş mühre bir, {who} yüzüne bir baktı. 'Benim de bir zamanlar mührüm vardı.' Mızrak önce kalktı.",
+              "weight": 1
+            }
+          ],
+          "requirements": [
+            {
+              "key": "raid_deaf",
+              "op": "LESS_THAN",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "deserters_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        },
+        {
+          "key": "cargo_items",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 2,
+      "id": "evt_deserter_levy",
+      "immediate": [],
+      "modifiers": 2,
+      "once": false,
+      "text": "Yolu kesen beş kişi üniformalarının söküklerini sökmemiş. Çavuş olduğu belli olan adam mızrağını yere dayıyor: 'Bize para lazım değil, yiyecek lazım. Bölük dağıldı, dönecek yerimiz yok. Yükün hepsini indireceksiniz.'",
+      "title": "Maaşsız Bölük",
+      "triggered_only": false,
+      "weight": 1.9
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -40,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 50,
+              "text": "",
+              "type": "CARGO_PLUNDER"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 1,
+              "text": "kardeslik",
+              "type": "FACTION"
+            }
+          ],
+          "label": "Yarısını bırak",
+          "locked": "Adın yolda yayılmış: bu sefer pazarlık yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "raids_bought_off",
+              "op": "LESS_THAN",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "kardeslik",
+              "type": "FACTION"
+            },
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Yükü koru",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 2.5,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Bir kalemi paha biçilmez diye yuttur",
+          "locked": "Reis lafı kesiyor: bu çete konuşmaya gelmemiş",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "CARGO_DECOY"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} o kalemi öyle bir anlattı ki adamlar yarısını unuttu. Tek bir denk aldılar, yola da el salladılar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "bandit",
+                  "type": "TRIGGER_AMBUSH"
+                }
+              ],
+              "label": "Adamlardan biri gülüp malı eline aldı, tartıp geri attı. '{who}, bizi pazarda mı sandın?' İlk taş o anda atıldı.",
+              "weight": 1
+            }
+          ],
+          "requirements": [
+            {
+              "key": "raid_deaf",
+              "op": "LESS_THAN",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "cargo_items",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 2,
+      "id": "evt_cargo_toll",
+      "immediate": [],
+      "modifiers": 2,
+      "once": false,
+      "text": "Kayaların ardından çıkanlar keseye bakmıyor bile; gözleri brandada. 'Altını ne yapalım, {town} pazarında ekmek yok. Yükün yarısı bizim.'",
+      "title": "Para Değil, Mal",
+      "triggered_only": false,
+      "weight": 1.8
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 100,
+              "text": "all",
+              "type": "CARGO_PLUNDER"
+            },
+            {
+              "amount": -140,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -18,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 14,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Her şeyi bırak, yürü",
+          "locked": "Adın yolda yayılmış: bu sefer pazarlık yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "raids_bought_off",
+              "op": "LESS_THAN",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Hiçbir şey bırakma",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 2.5,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Tek bir malı canının bedeli diye sun",
+          "locked": "Reis lafı kesiyor: bu çete konuşmaya gelmemiş",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "CARGO_DECOY"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} o kalemi avucunda çevirdi ve adamın gözünün içine baktı: bundan iyisini bu yolda bulamazsın. Adam aldı, kenara çekildi.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "bandit",
+                  "type": "TRIGGER_AMBUSH"
+                }
+              ],
+              "label": "Adam malı aldı, baktı, yere bıraktı ve üstüne bastı. '{who}, son sözünü söyledin.' Önce onlar davrandı.",
+              "weight": 1
+            }
+          ],
+          "requirements": [
+            {
+              "key": "raid_deaf",
+              "op": "LESS_THAN",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "danger",
+          "op": "GREATER_EQUAL",
+          "value": 0.35
+        },
+        {
+          "key": "cargo_items",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 6,
+      "id": "evt_road_ultimatum",
+      "immediate": [],
+      "modifiers": 2,
+      "once": false,
+      "text": "Önde duran adam konuşmadan önce arkasındakileri saydırdı. 'Pazarlık yok. Vagonları, keseyi, yükü bırakıp {town} yoluna yaya çıkacaksınız. Bir de şunu bilin: bugün kimseyi öldürmek istemiyorum.'",
+      "title": "Ya Paran Ya Canın",
+      "triggered_only": false,
+      "weight": 0.9
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -35,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -8,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "İstedikleri unu ver",
+          "locked": "Adın yolda yayılmış: bu sefer pazarlık yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "raids_bought_off",
+              "op": "LESS_THAN",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 1,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Daha azına ikna etmeye çalış",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -17,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} önce kendi kervanının kaç gün yolu kaldığını saydı, sonra onlarınkini. Adam dinledi ve yarısına razı oldu.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -35,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -12,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} konuştukça adamın çenesi kasıldı. 'Benim çocuğum da sayıyor.' Çuvalların hepsini aldılar.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Kileri koru",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "provisions",
+          "op": "GREATER_EQUAL",
+          "value": 35
+        }
+      ],
+      "cooldown": 3,
+      "id": "evt_provision_raid",
+      "immediate": [],
+      "modifiers": 2,
+      "once": false,
+      "text": "Yolu kesenlerin altına bakan yok. Öndeki adam çuvalları gösteriyor: 'Keseni al, yanında götür. Bize un lazım. {town} yoluna kadar yeter de artar sende.'",
+      "title": "Un İsteyenler",
+      "triggered_only": false,
+      "weight": 1.7
     }
   ]
 }

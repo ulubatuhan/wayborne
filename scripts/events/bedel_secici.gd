@@ -32,8 +32,11 @@ const RULE_GRIEVED: String = "en_kirgin"
 const RULE_BONDED: String = "bagi_olan"
 const RULE_UNSWORN: String = "yemini_yok"
 const RULE_BACKSTORY: String = "gecmisi_uyan"
+## En diri olan: önden gönderilen, yükü taşıyan. Bedeli bu kez gücü ödetir -
+## açlık kartında "en diri olan gitsin" diyen seçenek o kişiyi adıyla anar.
+const RULE_STRONGEST: String = "en_diri"
 const RULES: Array[String] = [
-	RULE_WEAKEST, RULE_GRIEVED, RULE_BONDED, RULE_UNSWORN, RULE_BACKSTORY,
+	RULE_WEAKEST, RULE_GRIEVED, RULE_BONDED, RULE_UNSWORN, RULE_BACKSTORY, RULE_STRONGEST,
 ]
 
 ## Aynı kişi art arda ödemesin: son ödemeden bu kadar gün geçmediyse puanı
@@ -119,6 +122,9 @@ static func _score(rule: String, aday: CharacterData, session: GameSession, tek_
 		RULE_WEAKEST:
 			var ratio: float = float(aday.current_hp) / float(maxi(1, aday.get_max_hp()))
 			score += 3.0 * (1.0 - ratio)
+		RULE_STRONGEST:
+			var hp_ratio: float = float(aday.current_hp) / float(maxi(1, aday.get_max_hp()))
+			score += 3.0 * hp_ratio + 0.4 * aday.stats.get_effective_value(CharacterStats.Kind.ENDURANCE)
 		RULE_GRIEVED:
 			score += 2.0 * _grievance_weight(aday)
 		RULE_BONDED:

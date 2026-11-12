@@ -11,6 +11,7 @@ func suite_name() -> String:
 
 func run(t) -> void:
 	_test_same_state_same_bearer(t)
+	_test_hunger_cards_cost_the_named_person(t)
 	_test_preview_matches_apply(t)
 	_test_sworn_is_not_handed_over(t)
 	_test_recent_payer_steps_back(t)
@@ -164,3 +165,35 @@ func _test_six_moral_cards_fire_at_crew_one(t) -> void:
 			"evt_fever_quarantine", "evt_faction_split", "evt_leave_the_wounded"]:
 		var event := EventCatalog.get_event(event_id)
 		t.ok(event != null and event.is_eligible(context), "kadro 1'de uygun: %s" % event_id)
+
+## 2026-11-12 denetimi: açlık kartlarında bedel adı yazan kişiye düşmeli.
+## "Önden giden" kartında zarı en dayanıklı atıp en zayıfı götüren ilk hâl,
+## ve 0 tutarlı (hiçbir şey ödetmeyen) "mühür durur" seçeneği burada yakalanır.
+func _test_hunger_cards_cost_the_named_person(t) -> void:
+	var session := _session(2)
+	var party := session.get_party()
+	var strong: CharacterData = null
+	for member in party:
+		if not member.is_player:
+			strong = member
+			break
+	strong.stats.endurance = 9
+	var weak: CharacterData = null
+	for member in party:
+		if not member.is_player and member != strong:
+			weak = member
+	weak.current_hp = maxi(2, weak.get_max_hp() / 3)
+	t.eq(BedelSecici.pick(BedelSecici.RULE_STRONGEST, session), strong, "en diri kural en dayanıklıyı seçer")
+	t.ok(BedelSecici.pick(BedelSecici.RULE_WEAKEST, session) != strong, "en zayıf kural başkasını seçer")
+
+	var ahead := EventCatalog.get_event("evt_hunger_send_ahead")
+	var send: EventChoice = ahead.choices[0]
+	t.eq(EventEffectApplier.get_choice_target_name(send, session), strong.character_name,
+		"önden gidecek kişinin adı düğmede: en diri olan")
+
+	var cargo := EventCatalog.get_event("evt_hunger_eat_cargo")
+	var refuse: EventChoice = cargo.choices[2]
+	var before := weak.current_hp
+	EventEffectApplier.apply(refuse.effects, session)
+	t.ok(weak.current_hp < before, "mührü tutmak birinin bedeninden ödenir")
+	t.ok(weak.current_hp >= 1, "olaylar öldürmez")

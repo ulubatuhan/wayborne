@@ -4284,7 +4284,7 @@
    "paket": "P20",
    "sira": 311,
    "kim": "C",
-   "not": "2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü."
+   "not": "2026-11-12 kapandı: planlayıcı eksik erzağı gün olarak da yazıyor; onay düğmesi kaç gün aç yürüneceğini söylüyor. Ekranda görüldü. Denetim: planlayıcı aç günü zaten söylüyordu (Ö1); tekrar eden satır kaldırıldı, yalnız onay düğmesi kaldı."
   },
   {
    "id": "IP-002",
@@ -4331,7 +4331,7 @@
    "paket": "P20",
    "sira": 314,
    "kim": "CO",
-   "not": "2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi."
+   "not": "2026-11-12 kapandı: üç açlık kartı (aç gece 2/4/6), beceri kontrollü ve izli, kalite listesinden geçti. Bağlama hungry_nights eklendi. Denetim: 'mühür durur' bedelsizdi (-8 can eklendi); 'önden giden' metni ile mekaniği farklı kişiyi anıyordu (en_diri kuralı). Metinler kullanıcı onayı bekliyor (kurallar-olay: kartlar onaylı partilerle girer)."
   },
   {
    "id": "IP-007",
@@ -4478,7 +4478,7 @@
    "bolum": "20",
    "alan": "Oyun testi 2026-11-12 ve satış planı",
    "oncelik": "P1",
-   "durum": "açık",
+   "durum": "kapandı",
    "bagimli": [
     "IP-001",
     "IP-004",
@@ -4489,7 +4489,7 @@
    "paket": "P20",
    "sira": 324,
    "kim": "C",
-   "not": "İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-014' -A60)."
+   "not": "2026-11-12 kapandı: sonuç docs/playtest/2026-11-12/08_dalga1_sonucu.md."
   },
   {
    "id": "K-PLAN",
