@@ -486,6 +486,8 @@ static func _bandit_ambush() -> GameEvent:
 			EventCondition.make("raids_bought_off", EventCondition.Op.LESS_THAN, float(GameSession.RAID_PATIENCE)),
 		]),
 		_effects([
+			# İz (IP-010/011): fidye verilen yolun haberi yayılır
+			_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|bolge|kisa|dusman"),
 			EventEffect.make(EventEffect.Type.MORALE, -5),
 			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
 		])
@@ -529,6 +531,8 @@ static func _customs_checkpoint() -> GameEvent:
 			"EVT_CUSTOMS_OPT_PAPERS", "EVT_CUSTOMS_OPT_PAPERS_LOCKED",
 			_conditions([EventCondition.make("documents", EventCondition.Op.GREATER_EQUAL, 1)]),
 			_effects([
+				# İz (IP-010/011): dürüst beyan kapıda hatırlanır
+				_fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|sehir|kisa|kapi"),
 				EventEffect.make(EventEffect.Type.REPUTATION, 3),
 				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
 				# Kâğıdı gösteren yükünü de açar: kaçağa el konur.
@@ -555,6 +559,8 @@ static func _customs_checkpoint() -> GameEvent:
 			"EVT_CUSTOMS_OPT_BRIBE", "EVT_CUSTOMS_OPT_BRIBE_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 80)]),
 			_effects([
+				# İz (IP-010/011): rüşvet veren kervanın adı memurlar arasında dolaşır
+				_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|sehir|kisa|kapi"),
 				EventEffect.make(EventEffect.Type.GOLD, -80),
 				EventEffect.make(EventEffect.Type.REPUTATION, -2),
 			])
@@ -777,6 +783,8 @@ static func _sick_merchant() -> GameEvent:
 			"EVT_SICK_OPT_TREAT", "EVT_SICK_OPT_TREAT_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 90)]),
 			_effects([
+				# İz (IP-010/011): başında kalınan tüccar borcunu bilir
+				_fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|kisi|uzun|teklif"),
 				EventEffect.make(EventEffect.Type.GOLD, -90),
 				EventEffect.make(EventEffect.Type.TRAVEL_DAYS, 1),
 				EventEffect.make(EventEffect.Type.MORALE, 10),
@@ -784,6 +792,8 @@ static func _sick_merchant() -> GameEvent:
 			])
 		),
 		_choice("EVT_SICK_OPT_LEAVE", _effects([
+			# İz (IP-010/011): malı alınıp bırakılan unutmaz
+			_fx(EventEffect.Type.IZ_BIRAK, -60, "kin|kisi|uzun|dusman"),
 			EventEffect.make(EventEffect.Type.MERCHANT_LEAVE, 1),
 			EventEffect.make(EventEffect.Type.MORALE, -18),
 			EventEffect.make(EventEffect.Type.REPUTATION, -6),
@@ -1783,6 +1793,8 @@ static func _guard_patrol() -> GameEvent:
 			"EVT_GUARD_PATROL_OPT_BRIBE", "EVT_GUARD_PATROL_OPT_BRIBE_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 100)]),
 			_effects([
+				# İz (IP-010/011): devriyeye verilen para konuşulur
+				_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|bolge|kisa|kapi"),
 				EventEffect.make(EventEffect.Type.GOLD, -100),
 				EventEffect.make(EventEffect.Type.REPUTATION, -2),
 			])
@@ -2006,6 +2018,8 @@ static func _village_provisions() -> GameEvent:
 			"EVT_VILLAGE_FOOD_OPT_LARGE", "EVT_VILLAGE_FOOD_OPT_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, VILLAGE_LARGE_COST)]),
 			_effects([
+				# İz (IP-010/011): aç köyden bolca alan iyi fiyat görür
+				_fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|sehir|kisa|fiyat"),
 				EventEffect.make(EventEffect.Type.GOLD, -VILLAGE_LARGE_COST),
 				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_LARGE_PROVISIONS),
 			])
@@ -2013,6 +2027,8 @@ static func _village_provisions() -> GameEvent:
 		_requires(_check_choice(
 			"EVT_VILLAGE_FOOD_OPT_HAGGLE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
 			"EVT_VILLAGE_FOOD_HAGGLE_OK", _effects([
+				# İz (IP-010/011): kıtlıkta pazarlığı ezmek kin bırakır
+				_fx(EventEffect.Type.IZ_BIRAK, -50, "kin|sehir|kisa|fiyat"),
 				EventEffect.make(EventEffect.Type.GOLD, -64),
 				EventEffect.make(EventEffect.Type.PROVISIONS, VILLAGE_LARGE_PROVISIONS),
 			]),
@@ -2097,6 +2113,8 @@ static func _military_convoy() -> GameEvent:
 	event.cooldown_days = 8
 	event.choices = _choices([
 		_choice("EVT_MILITARY_CONVOY_OPT_YIELD", _effects([
+			# İz (IP-010/011): orduya açılan yol hatırlanır
+			_fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|yuz"),
 			EventEffect.make(EventEffect.Type.MORALE, -1),
 		])),
 		_gated_choice(
@@ -2138,6 +2156,8 @@ static func _refugee_column() -> GameEvent:
 			"EVT_REFUGEE_COLUMN_OPT_SHARE", "EVT_REFUGEE_COLUMN_OPT_SHARE_LOCKED",
 			_conditions([EventCondition.make("provisions", EventCondition.Op.GREATER_EQUAL, 6)]),
 			_effects([
+				# İz (IP-010/011): ekmek verilen kol dağılır ve anlatır
+				_fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|uzun|aday"),
 				EventEffect.make(EventEffect.Type.PROVISIONS, -6),
 				EventEffect.make(EventEffect.Type.MORALE, 6),
 				EventEffect.make(EventEffect.Type.REPUTATION, 2),
@@ -2167,6 +2187,8 @@ static func _refugee_column() -> GameEvent:
 		), "EVT_REFUGEE_COLUMN_OPT_BUY_LOCKED",
 			_conditions([EventCondition.make("gold", EventCondition.Op.GREATER_EQUAL, 30)])),
 		_choice("EVT_REFUGEE_COLUMN_OPT_PASS", _effects([
+			# İz (IP-010/011): yoldan sürülenler kapıyı kapatır
+			_fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|uzun|ret"),
 			EventEffect.make(EventEffect.Type.MORALE, -2),
 		])),
 	])
@@ -3751,6 +3773,8 @@ static func _deserter_levy() -> GameEvent:
 	])
 	event.choices = _choices([
 		_pay_off_choice("EVT_LEVY_OPT_GIVE", "EVT_RAID_NO_DEAL", _effects([
+			# İz (IP-010/011): ele verilen kaçak unutmaz
+			_fx(EventEffect.Type.IZ_BIRAK, -60, "kin|kisi|uzun|dusman"),
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
 			EventEffect.make(EventEffect.Type.MORALE, -14),
 			EventEffect.make(EventEffect.Type.STRESS, 10),
@@ -3784,6 +3808,8 @@ static func _cargo_toll() -> GameEvent:
 	])
 	event.choices = _choices([
 		_pay_off_choice("EVT_CARGOTOLL_OPT_PAY", "EVT_RAID_NO_DEAL", _effects([
+			# İz (IP-010/011): ödeyen kervan bir daha aranır
+			_fx(EventEffect.Type.IZ_BIRAK, -40, "soylenti|bolge|kisa|dusman"),
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 50),
 			EventEffect.make(EventEffect.Type.MORALE, -6),
 			EventEffect.make(EventEffect.Type.FACTION, 1, Standing.BROTHERHOOD),
@@ -3820,6 +3846,8 @@ static func _road_ultimatum() -> GameEvent:
 	])
 	event.choices = _choices([
 		_pay_off_choice("EVT_ULTIMATUM_OPT_LEAVE", "EVT_RAID_NO_DEAL", _effects([
+			# İz (IP-010/011): boyun eğen kervanın yolu işaretlenir
+			_fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|dusman"),
 			EventEffect.make(EventEffect.Type.CARGO_PLUNDER, 100, "all"),
 			EventEffect.make(EventEffect.Type.GOLD, -ULTIMATUM_GOLD),
 			EventEffect.make(EventEffect.Type.MORALE, -18),
