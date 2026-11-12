@@ -1,0 +1,118 @@
+{
+ "id": "p1_acemi",
+ "ad": "P1 İlk kez oynayan",
+ "aciklama": "Hiçbir şeyi okumaz, ipucu görmez; düğmeye basar. Retention'ın ana deneği.",
+ "karakter": {
+  "ad": "Kervanbaşı",
+  "kultur": "port",
+  "sinif": "guard",
+  "koken": "father",
+  "kader": false,
+  "statlar": {
+   "strength": 3,
+   "endurance": 3,
+   "agility": 2
+  }
+ },
+ "okuma": 0.15,
+ "ahlak": "",
+ "agirliklar": {
+  "altin": 0.6,
+  "erzak": 0.2,
+  "moral": 0.2,
+  "stres": -0.1,
+  "itibar": 0.1,
+  "savas": 0.3,
+  "risk": 0.3,
+  "insan": 0.3,
+  "zaman": -0.2,
+  "vagon": 0.5,
+  "mal": 0.3,
+  "bedel": 0.0,
+  "iz": 0.0,
+  "merhamet": 0.2,
+  "sert": 0.0
+ },
+ "gelisim": {
+  "vagon_kaybi": {
+   "risk": -0.2,
+   "savas": -0.1,
+   "vagon": 0.2
+  },
+  "olum": {
+   "insan": 0.2,
+   "risk": -0.15,
+   "savas": -0.1
+  },
+  "kese_dibi": {
+   "altin": 0.2,
+   "merhamet": -0.1
+  },
+  "aclik": {
+   "erzak": 0.25,
+   "zaman": -0.1
+  }
+ },
+ "rota": {
+  "kontrat": 0.5,
+  "yeni_yer": 1.2,
+  "gun": -0.1,
+  "tehlike": -0.2,
+  "talep": 0.2,
+  "erzak_kontrol": false
+ },
+ "sehir": {
+  "sira": [
+   "eksik_el",
+   "sat",
+   "borc_ode",
+   "hekim",
+   "tamir",
+   "taverna",
+   "dilencilik",
+   "zincir",
+   "ise_alma",
+   "zanaat",
+   "vagon_al",
+   "vagon_sat",
+   "avans",
+   "kontrat",
+   "al",
+   "gundelik_is"
+  ],
+  "mal_payi": 0.5,
+  "kontrat_sinir": 1,
+  "erzak_payi": 0.9,
+  "gundelik_is_gun": 3,
+  "ise_alma_yer": "market",
+  "ise_alma_sonrasi_kese": 80,
+  "vagon_sonrasi_kese": 150,
+  "borc_sonrasi_kese": 120,
+  "kese_dibi": 30,
+  "konaklama_stres": 25,
+  "konaklama_sonrasi_kese": 40,
+  "her_sehirde_konakla": false,
+  "solen_moral": 55,
+  "bagis_kese": 150,
+  "dolandiricilik_esik": 0.35,
+  "avans_kese": 80,
+  "avans_adet": 5
+ },
+ "yol": {
+  "tempo": "sabit",
+  "kamp": "her_gece",
+  "kamp_isleri": [
+   "watch",
+   "wounds",
+   "repair"
+  ],
+  "sofra": "herkes",
+  "kisayol": false,
+  "sapma": "asla",
+  "risk_istahi": 0.6,
+  "yiyecek_ara": false,
+  "isik": false,
+  "hiz_geri_al": true,
+  "geri_cekil_can": 0.1
+ }
+}

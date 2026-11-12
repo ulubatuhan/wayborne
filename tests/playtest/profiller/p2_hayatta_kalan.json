@@ -1,0 +1,118 @@
+{
+ "id": "p2_hayatta_kalan",
+ "ad": "P2 Hayatta kalma veterani",
+ "aciklama": "Erzağı sayar, havayı okur, yolda arar; zorluğu ister. Kıtlık ölçümünün ana deneği.",
+ "karakter": {
+  "ad": "Kervanbaşı",
+  "kultur": "highland",
+  "sinif": "hunter",
+  "koken": "father",
+  "kader": false,
+  "statlar": {
+   "endurance": 4,
+   "perception": 2,
+   "wisdom": 2
+  }
+ },
+ "okuma": 0.95,
+ "ahlak": "",
+ "agirliklar": {
+  "altin": 0.3,
+  "erzak": 1.0,
+  "moral": 0.3,
+  "stres": -0.2,
+  "itibar": 0.1,
+  "savas": 0.4,
+  "risk": 0.5,
+  "insan": 0.5,
+  "zaman": -0.3,
+  "vagon": 0.6,
+  "mal": 0.3,
+  "bedel": -0.6,
+  "iz": 0.2,
+  "merhamet": 0.2,
+  "sert": 0.1
+ },
+ "gelisim": {
+  "vagon_kaybi": {
+   "risk": -0.2,
+   "savas": -0.1,
+   "vagon": 0.2
+  },
+  "olum": {
+   "insan": 0.2,
+   "risk": -0.15,
+   "savas": -0.1
+  },
+  "kese_dibi": {
+   "altin": 0.2,
+   "merhamet": -0.1
+  },
+  "aclik": {
+   "erzak": 0.25,
+   "zaman": -0.1
+  }
+ },
+ "rota": {
+  "kontrat": 1.0,
+  "yeni_yer": 0.6,
+  "gun": -0.2,
+  "tehlike": -0.4,
+  "talep": 0.6,
+  "erzak_kontrol": true
+ },
+ "sehir": {
+  "sira": [
+   "eksik_el",
+   "sat",
+   "borc_ode",
+   "hekim",
+   "tamir",
+   "taverna",
+   "dilencilik",
+   "zincir",
+   "ise_alma",
+   "zanaat",
+   "vagon_al",
+   "vagon_sat",
+   "avans",
+   "kontrat",
+   "al",
+   "gundelik_is"
+  ],
+  "mal_payi": 0.25,
+  "kontrat_sinir": 2,
+  "erzak_payi": 1.4,
+  "gundelik_is_gun": 3,
+  "ise_alma_yer": "market",
+  "ise_alma_sonrasi_kese": 80,
+  "vagon_sonrasi_kese": 150,
+  "borc_sonrasi_kese": 120,
+  "kese_dibi": 30,
+  "konaklama_stres": 25,
+  "konaklama_sonrasi_kese": 40,
+  "her_sehirde_konakla": false,
+  "solen_moral": 55,
+  "bagis_kese": 150,
+  "dolandiricilik_esik": 0.35,
+  "avans_kese": 80,
+  "avans_adet": 5
+ },
+ "yol": {
+  "tempo": "duruma_gore",
+  "kamp": "her_gece",
+  "kamp_isleri": [
+   "watch",
+   "wounds",
+   "repair"
+  ],
+  "sofra": "duruma_gore",
+  "kisayol": false,
+  "sapma": "aclikta",
+  "risk_istahi": 0.6,
+  "yiyecek_ara": true,
+  "isik": true,
+  "hiz_geri_al": true,
+  "geri_cekil_can": 0.25
+ }
+}

@@ -1,0 +1,118 @@
+{
+ "id": "p3b_sert",
+ "ad": "P3b Ahlak ikilemi: sert",
+ "aciklama": "Aynı tohumlarla iki yol; kartı okur, deftere bakar. Sonuçların ayrışması ve iz dönüşleri.",
+ "karakter": {
+  "ad": "Kervanbaşı",
+  "kultur": "nomad",
+  "sinif": "clerk",
+  "koken": "father",
+  "kader": false,
+  "statlar": {
+   "charisma": 4,
+   "wisdom": 2,
+   "faith": 2
+  }
+ },
+ "okuma": 1.0,
+ "ahlak": "sert",
+ "agirliklar": {
+  "altin": 0.9,
+  "erzak": 0.9,
+  "moral": 0.3,
+  "stres": -0.3,
+  "itibar": 0.6,
+  "savas": -0.7,
+  "risk": -0.4,
+  "insan": 0.0,
+  "zaman": -0.4,
+  "vagon": 1.0,
+  "mal": 0.6,
+  "bedel": 1.0,
+  "iz": 0.2,
+  "merhamet": -1.0,
+  "sert": 1.5
+ },
+ "gelisim": {
+  "vagon_kaybi": {
+   "risk": -0.2,
+   "savas": -0.1,
+   "vagon": 0.2
+  },
+  "olum": {
+   "insan": 0.2,
+   "risk": -0.15,
+   "savas": -0.1
+  },
+  "kese_dibi": {
+   "altin": 0.2,
+   "merhamet": -0.1
+  },
+  "aclik": {
+   "erzak": 0.25,
+   "zaman": -0.1
+  }
+ },
+ "rota": {
+  "kontrat": 1.5,
+  "yeni_yer": 0.5,
+  "gun": -0.3,
+  "tehlike": -1.5,
+  "talep": 1.0,
+  "erzak_kontrol": true
+ },
+ "sehir": {
+  "sira": [
+   "eksik_el",
+   "sat",
+   "borc_ode",
+   "hekim",
+   "tamir",
+   "taverna",
+   "dilencilik",
+   "zincir",
+   "ise_alma",
+   "zanaat",
+   "vagon_al",
+   "vagon_sat",
+   "avans",
+   "kontrat",
+   "al",
+   "gundelik_is"
+  ],
+  "mal_payi": 0.35,
+  "kontrat_sinir": 2,
+  "erzak_payi": 1.25,
+  "gundelik_is_gun": 3,
+  "ise_alma_yer": "market",
+  "ise_alma_sonrasi_kese": 80,
+  "vagon_sonrasi_kese": 150,
+  "borc_sonrasi_kese": 120,
+  "kese_dibi": 30,
+  "konaklama_stres": 25,
+  "konaklama_sonrasi_kese": 40,
+  "her_sehirde_konakla": false,
+  "solen_moral": 55,
+  "bagis_kese": 150,
+  "dolandiricilik_esik": 0.35,
+  "avans_kese": 80,
+  "avans_adet": 5
+ },
+ "yol": {
+  "tempo": "duruma_gore",
+  "kamp": "her_gece",
+  "kamp_isleri": [
+   "watch",
+   "wounds",
+   "repair"
+  ],
+  "sofra": "duruma_gore",
+  "kisayol": false,
+  "sapma": "aclikta",
+  "risk_istahi": 0.4,
+  "yiyecek_ara": true,
+  "isik": true,
+  "hiz_geri_al": true,
+  "geri_cekil_can": 0.25
+ }
+}

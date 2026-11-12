@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **30** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **34** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -579,3 +579,29 @@ Toplam: **30** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Bağlı:** Y-C10, Y-C13, Y-C17, Y-B01, N32, N33, Y-E06 (içerik).
 
 </details>
+
+## Paket P20
+
+### IP-003 · Garantili karşılaşmada tür dönüşümü (karar K-04)
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-003' -A60).
+
+### IP-006 · Kervan avlusunda sıradaki adım (karar K-03)
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-006' -A60).
+
+### IP-013 · Borcun yüzü (karar K-05)
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcı kararı gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** İş kartı: docs/playtest/2026-11-12/07_opus_uygulama_plani.md (grep -n '^## IP-013' -A60).
+
+### K-PLAN · Satış planı kararları K-01…K-10
+
+- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P20 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/20_oyun_testi_ve_satis_plani.md](referans/gorevler/20_oyun_testi_ve_satis_plani.md)
+- **Son not:** Karar listesi: docs/playtest/2026-11-12/06_is_plani.md §5. K-03, K-04, K-05 Dalga 1'in üç kartını bekletiyor.

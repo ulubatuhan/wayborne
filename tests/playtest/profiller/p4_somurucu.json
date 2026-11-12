@@ -1,0 +1,118 @@
+{
+ "id": "p4_somurucu",
+ "ad": "P4 Sömürücü tüccar",
+ "aciklama": "Baskın stratejiyi arar: avans, dolandırıcılık, dilencilik, al-sat, vagon; bedelsiz kaçış kovalar.",
+ "karakter": {
+  "ad": "Kervanbaşı",
+  "kultur": "valley",
+  "sinif": "clerk",
+  "koken": "father",
+  "kader": false,
+  "statlar": {
+   "charisma": 4,
+   "intellect": 4
+  }
+ },
+ "okuma": 1.0,
+ "ahlak": "hesapci",
+ "agirliklar": {
+  "altin": 1.5,
+  "erzak": 0.6,
+  "moral": 0.0,
+  "stres": 0.0,
+  "itibar": 0.2,
+  "savas": -1.0,
+  "risk": -0.5,
+  "insan": -0.2,
+  "zaman": -0.6,
+  "vagon": 1.2,
+  "mal": 1.0,
+  "bedel": 0.8,
+  "iz": 0.0,
+  "merhamet": -0.5,
+  "sert": 0.8
+ },
+ "gelisim": {
+  "vagon_kaybi": {
+   "risk": -0.2,
+   "savas": -0.1,
+   "vagon": 0.2
+  },
+  "olum": {
+   "insan": 0.2,
+   "risk": -0.15,
+   "savas": -0.1
+  },
+  "kese_dibi": {
+   "altin": 0.2,
+   "merhamet": -0.1
+  },
+  "aclik": {
+   "erzak": 0.25,
+   "zaman": -0.1
+  }
+ },
+ "rota": {
+  "kontrat": 2.0,
+  "yeni_yer": 0.2,
+  "gun": -0.5,
+  "tehlike": -1.5,
+  "talep": 1.5,
+  "erzak_kontrol": true
+ },
+ "sehir": {
+  "sira": [
+   "eksik_el",
+   "sat",
+   "dolandiricilik",
+   "dilencilik",
+   "avans",
+   "kontrat",
+   "al",
+   "vagon_al",
+   "borc_ode",
+   "zanaat",
+   "tamir",
+   "hekim",
+   "gundelik_is",
+   "ise_alma",
+   "zincir",
+   "vagon_sat",
+   "taverna"
+  ],
+  "mal_payi": 0.6,
+  "kontrat_sinir": 3,
+  "erzak_payi": 1.25,
+  "gundelik_is_gun": 3,
+  "ise_alma_yer": "market",
+  "ise_alma_sonrasi_kese": 80,
+  "vagon_sonrasi_kese": 60,
+  "borc_sonrasi_kese": 120,
+  "kese_dibi": 30,
+  "konaklama_stres": 25,
+  "konaklama_sonrasi_kese": 40,
+  "her_sehirde_konakla": false,
+  "solen_moral": 55,
+  "bagis_kese": 150,
+  "dolandiricilik_esik": 0.2,
+  "avans_kese": 200,
+  "avans_adet": 5
+ },
+ "yol": {
+  "tempo": "hizli",
+  "kamp": "her_gece",
+  "kamp_isleri": [
+   "watch",
+   "wounds",
+   "repair"
+  ],
+  "sofra": "parti",
+  "kisayol": true,
+  "sapma": "aclikta",
+  "risk_istahi": 0.3,
+  "yiyecek_ara": true,
+  "isik": true,
+  "hiz_geri_al": true,
+  "geri_cekil_can": 0.25
+ }
+}

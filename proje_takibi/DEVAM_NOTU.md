@@ -662,3 +662,15 @@ değil hacim** - 101 kartın yalnız on ikisi iz bırakıyor (Y-R01).
 **§I'nin on üç reddedilen fikri** bölüm 19'a gerekçeleriyle yazıldı (Y-R03, kapandı): yeniden öneri gelirse
 önce oraya bakılır. Dördü doğrudan anayasa ihlali (görünür karma çubuğu değil; otomatik karar A5, kartla
 ölüm A2, sistem kaldırarak denge A1, iyi son/kötü son A4).
+
+## Oyun testi 2026-11-12 (dört profil) ve satış planı
+
+- **Ne yapıldı:** `tests/playtest/playtest_driver.gd` ile beş profil dosyası (acemi, hayatta kalan, merhametli/sert
+  ikizi, sömürücü) × üç tohum × 4 saat = 15 koşu. Oyun kodu değişmedi. Rapor `docs/playtest/2026-11-12/` (00-07,
+  `ALTYAPI.md`); toplayıcı `tools/playtest_toplam.py`; ham çıktı `build/playtest/` (depoda değil).
+- **Bulgu özeti:** dört saatte büyüme yok (vagon 1, kadro 2); acemi ilk yarım saatte açlıktan ölüyor; ilk karar
+  7-11. dakika; iz/bedel/hâl oyuncuya ulaşmıyor (60 saatte 53 iz, 9 dönüş, 6 bedel); borç hissedilmiyor.
+- **Sıradaki:** `docs/playtest/2026-11-12/07_opus_uygulama_plani.md` → **IP-001**. Görev kaydı bölüm 20 (IP-001…IP-014,
+  K-PLAN). IP-003, IP-006, IP-013 kullanıcının K-04, K-03, K-05 kararını bekliyor.
+- **Açık:** sürücü yol sahnesini açmıyor (IP-008); sekiz profil dörde indi; ses ve kumanda ölçülmedi; Dalga 2+
+  kartları yazılmadı (kart metinleri önce gerekir).
