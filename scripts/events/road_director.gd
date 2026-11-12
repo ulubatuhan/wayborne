@@ -109,6 +109,9 @@ func weight_multiplier(event: GameEvent, context: Dictionary) -> float:
 const COMBAT_DUE_FROM_DAYS: float = 3.0
 const COMBAT_DUE_WEIGHT: float = 3.5
 const COMBAT_DUE_OTHER_WEIGHT: float = 0.2
+## Yakında görülmüş bir dövüş kartının garanti payı (IP-003). Sıfır değil:
+## havuzda başka dövüş kartı yoksa yol yine de kesilmeli.
+const COMBAT_DUE_REPEAT_WEIGHT: float = 0.9
 
 ## Korunan yolda (Avuçiçi, Gokyurt, krallığın kendi şehirleri arası) yolu
 ## kesen kart seyrekleşir. Ölçüm bunu gerektirdi: garantiyi kaldırmak tek
@@ -124,7 +127,17 @@ func combat_debt_multiplier(event: GameEvent, context: Dictionary) -> float:
 		return 1.0
 	if float(context.get("days_left", 99.0)) > COMBAT_DUE_FROM_DAYS:
 		return 1.0
-	return COMBAT_DUE_WEIGHT if can_fight(event) else COMBAT_DUE_OTHER_WEIGHT
+	if not can_fight(event):
+		return COMBAT_DUE_OTHER_WEIGHT
+	# IP-003: garanti **dövüşün** garantisi, pusunun değil. 3,5 katlık çarpan
+	# yenilik sönümlemesini eziyordu: kısa seferlerde yirmi seferin on
+	# dokuzunda aynı pusu geldi. Yakında görülmüş bir dövüş kartı garantiyi
+	# çok daha zayıf alır, böylece sıra görülmemiş olana geçer. Dövüş
+	# sıklığı değişmiyor - hangi dövüş olduğu değişiyor.
+	var recent: Array = context.get("recent_cards", [])
+	if recent.has(event.event_id):
+		return COMBAT_DUE_REPEAT_WEIGHT
+	return COMBAT_DUE_WEIGHT
 
 ## Kart bir savaşa açılabiliyor mu: seçeneğinin ya da sonucunun etkilerinde
 ## TRIGGER_COMBAT / TRIGGER_AMBUSH var mı.

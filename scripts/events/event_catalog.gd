@@ -3626,6 +3626,18 @@ static func _wolf_pack() -> GameEvent:
 static func _creditor_rider() -> GameEvent:
 	var event := _event("evt_creditor_rider", "EVT_CREDITOR_TITLE", "EVT_CREDITOR_TEXT", 1.5)
 	event.cooldown_days = 15
+	# IP-013 (karar K-05, "yalnız kart"): ölçümde sert profil 1006 borçla moral
+	# 100 ve stres 2'de yürüyordu - sayı büyüyor, his büyümüyordu. Faize,
+	# vadeye, cezaya dokunulmadı; yalnız alacaklının kapıda görünme sıklığı
+	# borçla artıyor, çünkü büyük borcun peşine daha çok adam düşer.
+	event.weight_modifiers = _modifiers([
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("debt", EventCondition.Op.GREATER_EQUAL, 300),
+		]), 2.0),
+		EventWeightModifier.make(_conditions([
+			EventCondition.make("debt", EventCondition.Op.GREATER_EQUAL, 600),
+		]), 1.5),
+	])
 	event.conditions = _conditions([
 		EventCondition.make("debt_overdue", EventCondition.Op.GREATER_EQUAL, 1.0),
 		EventCondition.make("debt", EventCondition.Op.GREATER_EQUAL, 150),

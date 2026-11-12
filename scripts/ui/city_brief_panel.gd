@@ -172,6 +172,13 @@ func _person_row(person: Dictionary) -> VBoxContainer:
 	elif regard < 0:
 		memory += " " + tr("UI_PEOPLE_REGARD_BAD")
 	box.add_child(_note(memory))
+	# IP-013: vadesi geçmiş borç varken tefeci kapıda bir söz bırakır. Sayıyı
+	# ekranda zaten borç defteri söylüyor; burada eksik olan bir yüzdü.
+	if String(person["role"]) == People.ROLE_LENDER \
+			and not _session.debts.get_overdue_debts(_session.total_days_elapsed).is_empty():
+		var waits := _note(tr("UI_BRIEF_LENDER_WAITS") % String(person["name"]))
+		waits.modulate = URGENT_COLOR
+		box.add_child(waits)
 	var chain: Dictionary = person.get("chain", {})
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)

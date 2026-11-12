@@ -27,6 +27,7 @@ func run(t) -> void:
 	_test_echo_never_erases_a_cost(t)
 	_test_news_events_frame_by_culture(t)
 	_test_road_director(t)
+	_test_combat_guarantee_rotates_the_card(t)
 	_test_career_threats(t)
 
 func _make_event(event_id: String, weight: float = 1.0) -> GameEvent:
@@ -468,3 +469,34 @@ func _test_echo_never_erases_a_cost(t) -> void:
 	var scaled := EventResolver._scaled(cheap, GameSession.ECHO_OTHER_COST)
 	t.eq(scaled[0].amount, -1, "küçülen bedel kaybolmuyor")
 	t.eq(scaled[1].type, EventEffect.Type.SET_FLAG, "bayrak ölçeklenmiyor")
+
+## IP-003: dövüş garantisi dövüşü garanti eder, aynı pusuyu değil.
+func _test_combat_guarantee_rotates_the_card(t) -> void:
+	var director := RoadDirector.new()
+	var fighter := _make_event("evt_dovusen")
+	fighter.choices = _choices([
+		EventChoice.make("OPT", _fx_list([EventEffect.make(EventEffect.Type.TRIGGER_COMBAT, 0)])),
+	])
+	var quiet := _make_event("evt_sessiz")
+	var context := {"combat_due": 1.0, "days_left": 1.0, "recent_cards": []}
+	var fresh := director.combat_debt_multiplier(fighter, context)
+	t.almost(fresh, RoadDirector.COMBAT_DUE_WEIGHT, "görülmemiş dövüş kartı garantiyi tam alır")
+	context["recent_cards"] = ["evt_dovusen"]
+	var repeat := director.combat_debt_multiplier(fighter, context)
+	t.almost(repeat, RoadDirector.COMBAT_DUE_REPEAT_WEIGHT, "yakında görülen dövüş kartı kısılır")
+	t.ok(repeat < fresh, "sıra görülmemiş olana geçer")
+	t.ok(repeat > 0.0, "havuzda tek dövüş kartı kalsa bile yol kesilebilir")
+	t.almost(director.combat_debt_multiplier(quiet, context), RoadDirector.COMBAT_DUE_OTHER_WEIGHT,
+		"dövüşsüz kart garantiden pay almaz")
+
+func _fx_list(items: Array) -> Array[EventEffect]:
+	var typed: Array[EventEffect] = []
+	for item in items:
+		typed.append(item)
+	return typed
+
+func _choices(items: Array) -> Array[EventChoice]:
+	var typed: Array[EventChoice] = []
+	for item in items:
+		typed.append(item)
+	return typed

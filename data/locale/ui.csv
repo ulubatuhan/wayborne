@@ -1615,3 +1615,4 @@
 "UI_DIR_SOUTH","güney","south","","","","","","","","",""
 "UI_DIR_EAST","doğu","east","","","","","","","","",""
 "UI_DIR_WEST","batı","west","","","","","","","","",""
+"UI_BRIEF_LENDER_WAITS","%s kapıda haber bırakmış: defter açık duruyor.","%s left word at the gate: the ledger stays open.","","","","","","","","",""
