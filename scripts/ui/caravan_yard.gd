@@ -249,6 +249,24 @@ func _refresh_equipment_shop() -> void:
 		buy_button.text = tr("UI_YARD_BUY") % equipment_resource.price
 		buy_button.disabled = not _session.wallet.can_afford(equipment_resource.price)
 
+## Alınamayan en ucuz büyüme basamağı: adı, fiyatı ve kesenin yüzdesi.
+## Hepsi alınabiliyorsa satır büyümenin açık olduğunu söyler.
+func _next_step_line() -> String:
+	var steps: Array = []
+	if _session.can_buy_donkey():
+		steps.append([tr("UI_YARD_STEP_DONKEY"), _session.get_next_donkey_cost()])
+	if _session.can_buy_half_wagon():
+		steps.append([tr("UI_YARD_STEP_HALF_WAGON"), _session.get_next_half_wagon_cost()])
+	if _session.can_buy_wagon():
+		steps.append([tr("UI_YARD_STEP_WAGON"), _session.get_next_wagon_cost()])
+	var best: Array = []
+	for step in steps:
+		if int(step[1]) > _session.wallet.balance and (best.is_empty() or int(step[1]) < int(best[1])):
+			best = step
+	if best.is_empty():
+		return tr("UI_YARD_STEP_READY")
+	return tr("UI_YARD_NEXT_STEP") % [String(best[0]), int(best[1]), _session.wallet.balance]
+
 func _refresh() -> void:
 	# Vagon almak yalnızca kargo değil, parti kapasitesi de açıyor
 	# (bkz. GameSession.get_party_capacity) - oyuncu bunu burada görsün.
@@ -259,6 +277,10 @@ func _refresh() -> void:
 		_session.get_party().size(),
 		_session.get_party_capacity(),
 	]
+	# IP-006: büyümenin bir sonraki basamağı ve kesenin onun neresinde olduğu.
+	# Ölçümde "kese yetmiyor (150 GG)" koşu başına 22-121 kez çarpıyordu ama
+	# oyuncu ne kadarının biriktiğini hiçbir yerde görmüyordu. Fiyat değişmedi.
+	_status_label.text += "\n" + _next_step_line()
 
 	if _session.owned_wagon_damaged > 0:
 		var repair_cost := _session.get_repair_cost()

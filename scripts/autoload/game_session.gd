@@ -6004,7 +6004,17 @@ func finish_journey() -> Dictionary:
 	var daily := maxf(0.1, get_daily_provision_consumption())
 	payout["spare_days"] = int(floor(float(get_provisions()) / daily))
 	if int(payout.net) > 0:
-		mark_first(FIRST_PROFIT)
+		# İlk kârlı varış deftere bir kez girer (IP-006): ölçümde iki profil
+		# dört saatte hiç kâr görmedi ve gördüğünde de bunu anan bir şey
+		# yoktu. Kervanın ilk doğru seferi yolda bir satır bırakmalı.
+		if mark_first(FIRST_PROFIT):
+			var leader := get_player_character()
+			if leader != null:
+				ledger.record(
+					CaravanLedger.KIND_STORY, leader.character_name, total_days_elapsed,
+					lineage_generation, leader.character_id, "LEDGER_CAUSE_FIRST_PROFIT",
+					_ledger_location_id(), "", [str(int(payout.net))]
+				)
 
 	# Teslim edilen her kontrat itibar kazandırır. Bu, kaybettiren kolun
 	# (bkz. REPUTATION_PENALTY_PER_LOST_CONTRACT) eksik olan karşılığı:
