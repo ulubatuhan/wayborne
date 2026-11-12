@@ -623,6 +623,16 @@ func _refresh() -> void:
 		var stock := _session.get_provision_stock()
 		var buyable := shortfall if stock < 0 else mini(shortfall, stock)
 		_shortfall_label.text = tr("UI_PLANNER_PROVISIONS_SHORT") % [shortfall, shortfall_cost]
+		# IP-001: eksik "birim" soyut bir sayı. Acemi profilinin 23 açlık ölümü,
+		# 36 günlük yola 13 günlük erzakla çıkmaktan geliyordu ve ekran bunu
+		# gün olarak hiç söylemiyordu. Kilit yok, yalnız sayı.
+		var daily: int = maxi(1, _plan.get_daily_consumption())
+		var fed_days: int = maxi(0, current_provisions) / daily
+		var route_days: int = _plan.get_provisioned_days()
+		var hungry_days: int = _plan.get_hungry_days(current_provisions)
+		_shortfall_label.text += "\n" + (
+			tr("UI_PLANNER_HUNGRY_DAYS") % [fed_days, route_days, hungry_days]
+		)
 		if stock >= 0 and stock < shortfall:
 			_shortfall_label.text += "\n" + (tr("UI_PLANNER_PROVISIONS_STOCK") % stock)
 		_shortfall_label.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
@@ -645,7 +655,9 @@ func _refresh() -> void:
 		_confirm_button.disabled = false
 		_confirm_button.add_theme_color_override("font_color", ArtPalette.UI_WARNING)
 		if _departure_armed:
-			_confirm_button.text = tr("UI_PLANNER_DEPART_CONFIRM")
+			# İkinci basışta soyut bir "emin misin?" değil, kaç gün aç
+			# yürüneceği yazar (IP-001).
+			_confirm_button.text = tr("UI_PLANNER_DEPART_CONFIRM_DAYS") % hungry_days
 		else:
 			_confirm_button.text = tr("UI_PLANNER_DEPART_HUNGRY")
 		_risk_label.visible = true
@@ -655,7 +667,6 @@ func _refresh() -> void:
 		# seferde bitirdiğini gösterdi. Açlık eşiğini geçen yolda uyarı
 		# ölümü **adıyla** anıyor. Yeni mekanik yok: söylenen şey zaten
 		# işleyen `STARVATION_HP_LOSS_START_DAY`.
-		var hungry_days := _plan.get_hungry_days(current_provisions)
 		if hungry_days >= GameSession.STARVATION_HP_LOSS_START_DAY:
 			_risk_label.text = tr("UI_PLANNER_HUNGER_DEADLY") % [
 				hungry_days, GameSession.STARVATION_HP_LOSS_START_DAY

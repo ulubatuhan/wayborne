@@ -251,6 +251,8 @@
 "UI_PLANNER_BORROW_FOR_PROVISIONS","Yetmiyor - Loncadan borç al","Not enough - borrow from the Guild","","","","","","","","",""
 "UI_PLANNER_DEPART_HUNGRY","Erzak eksik — yine de yola çık","Provisions short — set out anyway","","","","","","","","",""
 "UI_PLANNER_DEPART_CONFIRM","Emin misin? Tekrar bas ve yola çık","Are you sure? Press again to set out","","","","","","","","",""
+"UI_PLANNER_HUNGRY_DAYS","Erzak %d gün yeter, yol %d gün: %d gün aç yürürsün.","Provisions last %d days, the road is %d: %d days walked hungry.","","","","","","","","",""
+"UI_PLANNER_DEPART_CONFIRM_DAYS","%d gün aç yürüyeceksin. Tekrar bas ve yola çık","%d days hungry. Press again to set out","","","","","","","","",""
 "UI_PLANNER_MEAL_OPTION","%s · %d/gün","%s · %d/day","","","","","","","","",""
 "UI_LABOUR_ON_ROAD","Yolda gündelik iş yok","No day work on the road","","","","","","","","",""
 "UI_LABOUR_NO_HANDS","Çalışacak kimse yok","No one left to work","","","","","","","","",""
