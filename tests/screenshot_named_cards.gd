@@ -26,7 +26,12 @@ func _init() -> void:
 	var settings := get_root().get_node_or_null("UserSettings")
 	if settings != null:
 		settings.call("set_locale", "tr")
-	for card_id in CARDS:
+	# Yankı (Y-R02): ECHO_CARD ve ECHO_CHOICE verilirse yalnız o kart, ikinci
+	# gelişi olarak çekilir; geçen seferki cevap ECHO_CHOICE.
+	var cards: Array = CARDS
+	if not OS.get_environment("ECHO_CARD").is_empty():
+		cards = [OS.get_environment("ECHO_CARD")]
+	for card_id in cards:
 		await _shoot(String(card_id))
 	quit()
 
@@ -68,9 +73,17 @@ func _shoot(card_id: String) -> void:
 		push_warning("kart yok: %s" % card_id)
 		screen.queue_free()
 		return
+	var echo_choice := OS.get_environment("ECHO_CHOICE")
+	if not echo_choice.is_empty():
+		var live: GameSession = screen.get("_session")
+		live.note_decision(card_id, echo_choice)
 	screen.call("_present_event", event)
 	await _settle()
 	_save("%s_kart.png" % card_id)
+	if not echo_choice.is_empty():
+		screen.queue_free()
+		await _settle()
+		return
 
 	# Sonucu OLAN ilk açık seçeneğe bas: yalnız garantili etkisi olan bir
 	# seçenek günlüğe sonuç satırı düşürmez, yani doğrulanacak cümle çıkmaz.

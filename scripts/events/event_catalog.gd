@@ -213,8 +213,70 @@ const ECHO_LINE_KEYS: Dictionary = {
 	"evt_spoiled_provisions": "ECHO_SPOILED_PROVISIONS",
 }
 
-## Kartın yankı cümlesi (yoksa boş).
-static func get_echo_line_key(event_id: String) -> String:
+## Cevaba göre yankı (§D-A4, görev Y-R02): kart ikinci kez geldiğinde gövdenin
+## sonundaki cümle geçen seferki *cevabı* bilir. Tabloda olmayan cevap genel
+## cümleye (`ECHO_LINE_KEYS`) düşer. Anahtarlar tam yazılı (Localization Rules).
+const ECHO_CHOICE_LINE_KEYS: Dictionary = {
+	"evt_refugee_column": {
+		"EVT_REFUGEE_COLUMN_OPT_SHARE": "ECHO_REFUGEE_COLUMN_SHARE",
+		"EVT_REFUGEE_COLUMN_OPT_BUY": "ECHO_REFUGEE_COLUMN_BUY",
+		"EVT_REFUGEE_COLUMN_OPT_PASS": "ECHO_REFUGEE_COLUMN_PASS",
+	},
+	"evt_road_wanderer": {
+		"EVT_WANDERER_OPT_HIRE": "ECHO_ROAD_WANDERER_HIRE",
+		"EVT_WANDERER_OPT_FEED": "ECHO_ROAD_WANDERER_FEED",
+		"EVT_WANDERER_OPT_IGNORE": "ECHO_ROAD_WANDERER_IGNORE",
+	},
+	"evt_stowaway": {
+		"EVT_STOWAWAY_OPT_SHELTER": "ECHO_STOWAWAY_SHELTER",
+		"EVT_STOWAWAY_OPT_TURN_IN": "ECHO_STOWAWAY_TURN_IN",
+	},
+	"evt_penitent_procession": {
+		"EVT_PENITENT_OPT_BREAD": "ECHO_PENITENT_PROCESSION_BREAD",
+		"EVT_PENITENT_OPT_REFUSE": "ECHO_PENITENT_PROCESSION_REFUSE",
+		"EVT_PENITENT_OPT_SELL": "ECHO_PENITENT_PROCESSION_SELL",
+		"EVT_PENITENT_OPT_PRAY": "ECHO_PENITENT_PROCESSION_PRAY",
+	},
+	"evt_starving_roadside": {
+		"EVT_STARVING_OPT_SHARE": "ECHO_STARVING_ROADSIDE_SHARE",
+		"EVT_STARVING_OPT_DRIVE": "ECHO_STARVING_ROADSIDE_DRIVE",
+		"EVT_STARVING_OPT_HUNT": "ECHO_STARVING_ROADSIDE_HUNT",
+		"EVT_STARVING_OPT_TAKE": "ECHO_STARVING_ROADSIDE_TAKE",
+	},
+	"evt_untouched_village": {
+		"EVT_UNTOUCHED_OPT_GATE": "ECHO_UNTOUCHED_VILLAGE_GATE",
+		"EVT_UNTOUCHED_OPT_SICK": "ECHO_UNTOUCHED_VILLAGE_SICK",
+		"EVT_UNTOUCHED_OPT_FORCE": "ECHO_UNTOUCHED_VILLAGE_FORCE",
+		"EVT_UNTOUCHED_OPT_PASS": "ECHO_UNTOUCHED_VILLAGE_PASS",
+	},
+	"evt_provision_raid": {
+		"EVT_FOODRAID_OPT_GIVE": "ECHO_PROVISION_RAID_GIVE",
+		"EVT_FOODRAID_OPT_TALK": "ECHO_PROVISION_RAID_TALK",
+		"EVT_FOODRAID_OPT_FIGHT": "ECHO_PROVISION_RAID_FIGHT",
+	},
+	"evt_bandit_ambush": {
+		"EVT_AMBUSH_OPT_PAY": "ECHO_BANDIT_AMBUSH_PAY",
+		"EVT_AMBUSH_OPT_FIGHT": "ECHO_BANDIT_AMBUSH_FIGHT",
+		"EVT_AMBUSH_OPT_HAGGLE": "ECHO_BANDIT_AMBUSH_HAGGLE",
+	},
+	"evt_mutiny": {
+		"EVT_MUTINY_OPT_PAY": "ECHO_MUTINY_PAY",
+		"EVT_MUTINY_OPT_MANIPULATE": "ECHO_MUTINY_MANIPULATE",
+		"EVT_MUTINY_OPT_HARSH": "ECHO_MUTINY_HARSH",
+	},
+	"evt_sick_merchant": {
+		"EVT_SICK_OPT_TREAT": "ECHO_SICK_MERCHANT_TREAT",
+		"EVT_SICK_OPT_LEAVE": "ECHO_SICK_MERCHANT_LEAVE",
+		"EVT_SICK_OPT_OWN_CARE": "ECHO_SICK_MERCHANT_OWN_CARE",
+	},
+}
+
+## Kartın yankı cümlesi (yoksa boş). Geçen seferki cevap verilirse ona özgü
+## cümle, yoksa kartın genel cümlesi.
+static func get_echo_line_key(event_id: String, last_choice: String = "") -> String:
+	var by_choice: Dictionary = ECHO_CHOICE_LINE_KEYS.get(event_id, {})
+	if by_choice.has(last_choice):
+		return String(by_choice[last_choice])
 	return String(ECHO_LINE_KEYS.get(event_id, ""))
 
 static func get_road_events() -> Array[GameEvent]:

@@ -440,6 +440,23 @@ func _test_echo_changes_the_card_on_its_second_coming(t) -> void:
 	session.note_decision(event.event_id, choice.text_key)
 	t.eq(session.echo_count(event.event_id), 1, "cevap yankı defterine yazıldı")
 	t.eq(session.echo_choice(event.event_id), choice.text_key, "hangi cevap olduğu da")
+	# Y-R02: yankı cümlesi cevaba göre değişir; tablodaki her cevap kartın
+	# gerçek bir seçeneği ve her anahtar çevrilmiş.
+	var by_choice := EventCatalog.get_echo_line_key(event.event_id, choice.text_key)
+	t.ne(by_choice, echo_key, "cevaba özgü yankı genel cümleden ayrı")
+	t.eq(EventCatalog.get_echo_line_key(event.event_id, "YOK"), echo_key, "bilinmeyen cevap genele düşer")
+	for event_id in EventCatalog.ECHO_CHOICE_LINE_KEYS:
+		var card := EventCatalog.get_event(event_id)
+		t.ok(card != null, "yankı tablosundaki kart katalogda: %s" % event_id)
+		if card == null:
+			continue
+		var keys := {}
+		for c in card.choices:
+			keys[c.text_key] = true
+		for choice_key in EventCatalog.ECHO_CHOICE_LINE_KEYS[event_id]:
+			t.ok(keys.has(choice_key), "yankı cevabı kartın seçeneği: %s" % choice_key)
+			var line: String = EventCatalog.ECHO_CHOICE_LINE_KEYS[event_id][choice_key]
+			t.ne(tr(line), line, "yankı çevrilmiş: %s" % line)
 
 	# Aynı cevap pahalı, öteki ucuz - ama ikisi de açık.
 	t.eq(EventResolver._echo_scale(session, event, choice), GameSession.ECHO_REPEAT_COST,
