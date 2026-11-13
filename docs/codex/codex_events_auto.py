@@ -10,6 +10,7 @@ kalır.
 """
 
 import json
+from codex_event_notes import NOTES
 import os
 from xml.sax.saxutils import escape
 
@@ -104,8 +105,9 @@ def auto_events(known_ids):
             "flavor": escape(ev["text"]).replace(chr(10), "<br/>"),
             "trigger": _trigger(ev),
             "options": [_option(ch) for ch in ev["choices"]],
-            "note": "Bu sayfa katalogdan otomatik üretildi (tests/export_codex_events.gd). "
-                    "Tasarım notu elle yazıldığında codex_events_data.py'ye taşınır.",
+            "note": escape(NOTES[ev["id"]]) if ev["id"] in NOTES else
+                    "Bu sayfa katalogdan otomatik üretildi (tests/export_codex_events.gd). "
+                    "Tasarım notu elle yazıldığında codex_event_notes.py'ye eklenir.",
         }
         if ev["immediate"]:
             page["immediate"] = _effects(ev["immediate"])

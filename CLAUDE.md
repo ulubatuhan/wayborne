@@ -374,9 +374,6 @@ verir.
   bugünkü sentezlenmiş placeholder'larının yerini gerçek kayıt alacak;
   Faz 13 PR-D'nin kısa metin yorumları (`unit_barked`) bunun metin
   karşılığı olarak zaten kurulu.
-- **Codex'in olay bölümünde tasarım notları eksik.** Karar ağaçları kataloğun 71 olayının hepsini kapsıyor (Y-E07,
-  2026-10-22'de yeniden üretildi); elle yazılmış tasarım notu yalnızca 29 kartta. Kalan kartların notu lore kapanınca
-  yazılır.
 - **Evrenin tek belgesi `docs/lore/SIDERIA.md` (2026-11-07).** Dünya, tarih, coğrafya, inançlar, güçler,
   11 bölge, 27 yerleşim, yolun töresi, gündelik hayat, söyleyiş ve metin üretim kılavuzu tek yerde. Eski
   dört parça (`LORE.md`, `TARIHCE.md`, `SORULAR.md`, `ONERILER_III.md`) orada birleştirildi ve silindi;
@@ -442,8 +439,8 @@ verir.
 ## Codex
 
 `docs/Wayborne-Codex.pdf` is the game's design document — covering
-every mechanic in prose, plus a one-page decision tree for each road event it documents (29 written by hand, the rest generated from the
-catalog export since task Y-E07; rebuild the PDF after the export) (trigger, options, weighted outcomes, effects). It is
+every mechanic in prose, plus a one-page decision tree for each road event it documents (29 pages written by hand, the rest generated from the
+catalog export since task Y-E07, each with a hand-written design note in `docs/codex/codex_event_notes.py`; rebuild the PDF after the export) (trigger, options, weighted outcomes, effects). It is
 **generated**, not written: `docs/codex/` holds the reportlab source and
 `python3 docs/codex/codex_main.py` rebuilds the PDF in place. This file
 (CLAUDE.md) stays the rule book — what must never be broken and why; the
