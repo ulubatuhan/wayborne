@@ -7876,6 +7876,10 @@ func build_event_context() -> Dictionary:
 	var region := journey_region()
 	if not region.is_empty():
 		context["region_" + region] = 1.0
+	# Takvim (Y-E08): yılın dönemi `takvim_<id>` olarak bağlamda.
+	var period := SideriaCalendar.period(total_days_elapsed)
+	if not period.is_empty():
+		context["takvim_" + period] = 1.0
 	return context
 
 ## --- Lonca özel görevleri (bkz. Faz 17 PR-4) ---

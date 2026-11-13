@@ -73,6 +73,11 @@ func _shoot(card_id: String) -> void:
 		push_warning("kart yok: %s" % card_id)
 		screen.queue_free()
 		return
+	# Takvim (Y-E08): CAL_DAY ile oturumun günü o güne çekilir.
+	if not OS.get_environment("CAL_DAY").is_empty():
+		var cal_session: GameSession = screen.get("_session")
+		cal_session.total_days_elapsed = int(OS.get_environment("CAL_DAY"))
+		screen.set("_last_clock_text", "")
 	var echo_choice := OS.get_environment("ECHO_CHOICE")
 	if not echo_choice.is_empty():
 		var live: GameSession = screen.get("_session")

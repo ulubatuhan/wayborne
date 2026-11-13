@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -84,21 +84,6 @@ Toplam: **16** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Kesinlikle.”
   - **Kabul:** Sır belgesi (yalnızca geliştirici için) ve oyuna dağıtılmış en az 15 ipucu.
   - **Literatür:** R37, R38, R9
-
-</details>
-
-### Y-E08 · Takvim: bayramlar, fuarlar, hac dönemi
-
-- **Durum:** açık · **Öncelik:** P3 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E08 Takvim: bayramlar, fuarlar, hac dönemi**
-  - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
-  - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
-  - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
 
 </details>
 

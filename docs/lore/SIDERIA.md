@@ -149,6 +149,23 @@ imparatorluğa da geçmiştir, çünkü ordu da otla yürür. Dört mevsim, oyun
 - **Gokyurt:** yıl saymaz. Sogurtay suyunun tadını sayar: "üç acı sudan beri" (§8.3).
 - **Ayazkaya:** hükümle sayar: "Demirbalta'nın üçüncü kışı".
 
+### 2.3a Yılın dönemleri [Karar, Y-E08]
+
+Sürü Yılı'nın 360 gününde yolun yüzünü değiştiren beş dönem. Hiçbiri bir ferman değil: yol onları kendiliğinden
+yaşar, herkes bilir. Oyunda gün sayısından hesaplanır (`SideriaCalendar`); yolun saat satırında adıyla görünür.
+
+| gün | dönem | kim yaşar | yolda ne olur |
+|---|---|---|---|
+| 0-4 | **İlk Ot** | göçebe, sonra herkes | Sürüler yer değiştirir, yolları keser. Kayıt Bürosu'nun atlıları fermanı okumaya çıkar. |
+| 60-71 | **Hac Yürüyüşü** | Septisistler | Orvahel'e yürüyen kafileler yolu doldurur. Kafilenin önünü geçen "yürüyüş payı" öder: bir somun ya da bir günlük yürüyüş. |
+| 150-159 | **Orsolune Panayırı** | Ors ve kıyı, bütün tüccarlar | Yıllık panayır. Aracılar yükü panayıra varmadan almaya çalışır; yol fiyat bağıran arabalarla dolar. |
+| 235-244 | **Ondalık Günleri** | Vaelghard, Vadi prenslikleri | Hasattan sonra vergi ve geçiş toplanır; kâtip, bekçi ve gümrük her zamankinden çoktur. |
+| 300-302 | **Taş Gecesi** | herkes, iki inanç da | Yol bir gece durur. Her kervan konakladığı yerde yolda ölenleri için taş yığar; ad söylenmez, yalnız taş sayılır (§8.5). |
+
+Göçebe bu dönemleri günle değil olayla bilir: "sürü geçtiyse İlk Ot'tur". Vaelghard kâtibi hepsini fermanla
+ilan eder, bir gün geç. Kilise yalnız Hac Yürüyüşü'nü ve Taş Gecesi'ni tanır; Taş Gecesi'ne kendi adını
+vermez, "Sayılı Gece" der.
+
 ### 2.4 Altmış yılın çizgisi [Yazar, defter IV]
 
 Yıllar çöküşten sayılır; bugün 60. yıldır.

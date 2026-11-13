@@ -638,7 +638,7 @@ func _panel_state() -> Dictionary:
 	if parts.size() == 2:
 		path = WorldMapData.get_route_path(origin, String(parts[1] if String(parts[0]) == origin else parts[0]))
 	return {
-		"clock": tr("UI_ROAD_CLOCK") % [_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(_clock.get_phase()))],
+		"clock": tr("UI_ROAD_CLOCK") % [_current_day + 1, _clock.get_clock_text(), tr(JourneyClock.get_phase_key(_clock.get_phase()))] + _calendar_suffix(),
 		"destination": destination.location_name if destination != null else "",
 		"days_left": _session.journey_days_remaining,
 		"weather": tr(RouteWeather.name_key(_weather)),
@@ -3308,7 +3308,7 @@ func _refresh_time_ui() -> void:
 		_last_phase = phase
 		_clock_label.text = tr("UI_ROAD_CLOCK") % [
 			_current_day + 1, clock_text, tr(JourneyClock.get_phase_key(phase))
-		]
+		] + _calendar_suffix()
 
 	var speed := _clock.get_speed()
 	if not is_equal_approx(speed, _last_speed):
@@ -4928,3 +4928,10 @@ func _on_back_pressed() -> void:
 		_open_in_game_menu()
 	else:
 		SceneInk.go(Nav.back())
+
+## Yılın dönemi saat satırının sonunda (Y-E08): "· Hac Yürüyüşü". Dönem dışında boş.
+func _calendar_suffix() -> String:
+	var period := SideriaCalendar.period(_session.total_days_elapsed)
+	if period.is_empty():
+		return ""
+	return " · " + tr(SideriaCalendar.name_key(period))

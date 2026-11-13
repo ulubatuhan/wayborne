@@ -859,7 +859,7 @@
       "cooldown": 0,
       "id": "evt_customs_checkpoint",
       "immediate": [],
-      "modifiers": 3,
+      "modifiers": 4,
       "once": false,
       "text": "Yol üzerindeki bariyerde üniformalı memurlar kervanı durdurdu. Evrakları görmek istiyorlar.",
       "title": "Gümrük Kontrolü",
@@ -2745,7 +2745,7 @@
       "cooldown": 6,
       "id": "evt_traveling_tinker",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Sırtında takırdayan bir alet çantasıyla yalnız yürüyen bir demirci, kervanla birlikte yürümeyi ve mal satmayı teklif ediyor.",
       "title": "Gezgin Demirci",
@@ -3794,7 +3794,7 @@
       "cooldown": 6,
       "id": "evt_roadside_shrine",
       "immediate": [],
-      "modifiers": 1,
+      "modifiers": 2,
       "once": false,
       "text": "Yosun tutmuş taşlardan bir türbe, üzerinde geçmiş yolcuların bıraktığı küçük adaklar.",
       "title": "Yol Kenarı Türbesi",
@@ -3907,7 +3907,7 @@
       "cooldown": 8,
       "id": "evt_pilgrim_encounter",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Elinde bir asa, sırtında hafif bir denkle yürüyen biri var - doruğa mı, kıyıya mı gittiğini söylemiyor, yalnızca birkaç günlük eşlik istiyor.",
       "title": "Yolun Hacısı",
@@ -6359,7 +6359,7 @@
       "cooldown": 8,
       "id": "evt_merchant_caravan",
       "immediate": [],
-      "modifiers": 2,
+      "modifiers": 3,
       "once": false,
       "text": "Ters istikametten başka bir tüccar kervanı geliyor. Yolun ortasında kısa bir alışveriş önerir - kazançlı da çıkabilirsin, kaybettirebilir de.",
       "title": "Karşıdan Gelen Kervan",
@@ -7442,7 +7442,7 @@
       "cooldown": 8,
       "id": "evt_road_warden",
       "immediate": [],
-      "modifiers": 2,
+      "modifiers": 3,
       "once": false,
       "text": "Karakolun önünde bir bekçi kolunu uzatıp yolu kesiyor. Mührü gerçek, istediği \"yol bedeli\" ise hiçbir kâğıtta yazmıyor.",
       "title": "Mühürlü Bekçi",
@@ -9530,7 +9530,7 @@
       "cooldown": 20,
       "id": "evt_reg_registry_rider",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 2,
       "once": false,
       "text": "Vastrevar Kayıt Bürosu'nun bir atlısı yolu kesmiş; elinde kervanın adını, kişi sayısını ve yükünü soran basılı bir kâğıt. \"Krallıkta adı olmayan yük yoktur,\" diyor. Kâğıdın altında mühür için yer bırakılmış.",
       "title": "Kayıt Bürosunun Atlısı",
@@ -9959,7 +9959,7 @@
       "cooldown": 20,
       "id": "evt_reg_two_clerks",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "İki prensliğin arasındaki köprüde iki ayrı kulübe, iki ayrı kâtip. İkisi de köprünün kendi prensine ait olduğunu söylüyor ve ikisi de geçiş parası istiyor. Biri öbürünü duymazdan geliyor, öbürü gülüyor.",
       "title": "İki Kâtipli Köprü",
@@ -10081,7 +10081,7 @@
       "cooldown": 20,
       "id": "evt_reg_council_contract",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Orsolune Konseyi'nin bir aracısı yolun kenarına bir masa kurmuş. Önündeki sözleşme kervanın yükünü bir sonraki şehirde ondan alacağını yazıyor. Fiyat iyi, sözleşmenin dili kalın, dipnotları ince.",
       "title": "Konseyin Sözleşmesi",
@@ -10758,7 +10758,7 @@
       "cooldown": 20,
       "id": "evt_reg_sogurtay_water",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Bir oba yolun kenarına kurulmuş. Yaşlı bir kadın bir kâse Sogurtay suyu uzatıyor: misafir önce suyu tadar ve tadını söyler. Acı derse oba ona yolun kötü olduğunu anlatır, tatlı derse iyi. Kâse senin elinde.",
       "title": "Suyun Tadı",
@@ -10895,7 +10895,7 @@
       "cooldown": 20,
       "id": "evt_reg_page_collector",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Orvahel yolunda bir kilise kâtibi, sırtında bir sandık dolusu boş sayfa. Her kervandan bir satır istiyor: yolda ölenlerinizin adı. \"Kitap onları da yazar,\" diyor. Yolun töresi ise yolda ölenin adının yazılmayacağını söyler.",
       "title": "Sayfa Toplayıcı",
@@ -11032,7 +11032,7 @@
       "cooldown": 20,
       "id": "evt_reg_gallows_boots",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Yol ayrımında bir darağacı. Asılı adamın boynunda bir tahta: \"Kervan soyguncusu.\" Ayağında yeni, sağlam çizmeler var; kervanda kışı yalınayak geçirecek iki kişi var. Krallığın kanunu asılanı indirmeyi yasaklar.",
       "title": "Darağacındaki Çizmeler",
@@ -11302,7 +11302,7 @@
       "cooldown": 20,
       "id": "evt_reg_far_ship",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Kıyı yolunda yeni inmiş bir gemici, sırtında bir balya ipek. Uzak kıtadan gelmiş; orada kıtlık yok, diyor, ama kimse ona inanmıyor. İpeği ucuza satmak istiyor, çünkü karada aç kalmaktan korkuyor.",
       "title": "Raviellon Gemisinden İnen",
@@ -12046,7 +12046,7 @@
       "cooldown": 20,
       "id": "evt_reg_herd_crossing",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Bir obanın sürüsü yolu kesiyor: yüzlerce koyun, arkalarında atlı çobanlar. Ot ileride; sürü yolun öbür yanına geçmeden kimse geçmeyecek. Çobanlardan biri sana bakıp gülüyor: \"Ot beklemez. Sen beklersin.\"",
       "title": "Sürünün Geçişi",
@@ -12178,7 +12178,7 @@
       "cooldown": 20,
       "id": "evt_reg_silent_hour",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Orvahel çanları çalıyor: okuma saati. Bu topraklarda o saatte yol susar; arabalar durur, kimse konuşmaz. Yolun kenarındaki bir okuyucu kervanına bakıyor. Arabacıların şarkısı yarıda kesilmiş.",
       "title": "Okuma Saati",
@@ -12469,6 +12469,413 @@
         {
           "effects": [
             {
+              "amount": -3,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Payı ekmekle ver (3 erzak)",
+          "locked": "Verecek erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "Birini bir gün kafileyle yürüt",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} bir gün kafileyle yürüyor ve akşam kervana bir dua ve bir kestirme yol ile dönüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} kafileyle yürüyor ve yorgun dönüyor; kafile sözünü tutuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} yolda düşüp kalıyor; kafile onu taşıyarak geri getiriyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kafilenin arkasında yürü (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "takvim_hac",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 6,
+      "id": "evt_cal_pilgrim_road",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yılın bu günlerinde yol Orvahel'e yürüyenlerle dolar. Önünüzdeki kafile yolun bütün genişliğini tutuyor; yavaş, sabırlı, şarkısız. Kafilenin başındaki okuyucu kervanı geçirmek için bir \"yürüyüş payı\" istiyor: bir somun, ya da bir kişinin bir günlük yürüyüşü.",
+      "title": "Hac Yürüyüşü",
+      "triggered_only": false,
+      "weight": 2
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 50,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 20,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Yükün bir kısmını aracıya sat",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Arabalar arasında dolaşıp fiyatları dinle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 80,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} üç ayrı arabadan aynı fiyatı duyuyor ve onu aracıya söylüyor; aracı fiyatı yükseltiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} her arabadan başka bir fiyat duyuyor; hiçbirine güvenmiyorsunuz.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} dinlerken bir yankesici kesenin ipini kesiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Yükü panayıra götür",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "takvim_panayir",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 6,
+      "id": "evt_cal_fair_news",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orsolune panayırının günleri. Yol tüccar arabalarıyla dolu ve her arabada biri ötekine fiyat bağırıyor. Bir aracı kervanının yükünü daha panayıra varmadan almak istiyor; panayırda fiyatın yükseleceğini de, düşeceğini de söyleyenler var.",
+      "title": "Panayır Yolu",
+      "triggered_only": false,
+      "weight": 2
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -10,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Dur, taşları yığ (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Taşları birlikte say, kimseyi atlamadan",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 30,
+                  "text": "kutsal|yol|uzun|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} sayıyı kimsenin adını anmadan tutturuyor; ateşin başı ilk kez aynı sayıda birleşiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} sayıyor ama bir taş eksik kalıyor; kimse kimin olduğunu söylemiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -30,
+                  "text": "kutsal|yol|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} saydıkça biri bir ad söylüyor; töre bozuluyor ve gece uzuyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 8,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Gecenin içinden yürü",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "takvim_tas_gecesi",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 3,
+      "id": "evt_cal_stone_night",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bu gece yol durur. Her kervan yolda ölenleri için konakladığı yere bir taş yığar; ad söylenmez, yalnızca taş sayılır. Ateşin başında kervanın yolda bıraktıklarını sayıyorlar ve sayı herkesin ağzında başka.",
+      "title": "Taş Gecesi",
+      "triggered_only": false,
+      "weight": 3
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"
@@ -12604,7 +13011,7 @@
       "cooldown": 12,
       "id": "evt_wandering_players",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Akşam üç gezgin oyuncu ateşe yaklaşıyor. Boyaları akmış, sırtlarında katlanmış bir perde. Bir gece ateşi paylaşmak istiyorlar.",
       "title": "Gezgin Oyuncular",
@@ -12752,7 +13159,7 @@
       "cooldown": 14,
       "id": "evt_penitent_procession",
       "immediate": [],
-      "modifiers": 1,
+      "modifiers": 2,
       "once": false,
       "text": "Yol boyunca yalınayak yürüyen bir alay. Ayakları kanamış, ellerinde boş tas. Ekmek istiyorlar. Kervandaki Septisist bunu dua sayıyor, Yumruk'tan olan gösteriş.",
       "title": "Yalınayak Alay",
@@ -14039,7 +14446,7 @@
       "cooldown": 20,
       "id": "evt_pilgrim_caravan",
       "immediate": [],
-      "modifiers": 0,
+      "modifiers": 1,
       "once": false,
       "text": "Orvahel yolunda, açık el işareti taşıyan bir hacı kafilesi. Yavaş yürüyorlar, saatleri duayla bölünüyor; ama yanlarında silahlı muhafız var ve haydut onlara yaklaşmıyor. Kafilenin başı kim olduğunuzu soruyor.",
       "title": "Avuçiçi Kafilesi",
@@ -15937,7 +16344,7 @@
       "cooldown": 20,
       "id": "evt_grave_on_the_road",
       "immediate": [],
-      "modifiers": 1,
+      "modifiers": 2,
       "once": false,
       "text": "Yol kenarında, taşları dağılmış alçak bir tümsek. Üstünde ne ad var ne işaret. Kervandakiler bakışlarını kaçırıyor - hepsi birini bu yola gömdüklerini hatırlıyor.",
       "title": "İşaretsiz Mezar",
@@ -17271,7 +17678,7 @@
       "cooldown": 2,
       "id": "evt_cargo_toll",
       "immediate": [],
-      "modifiers": 2,
+      "modifiers": 3,
       "once": false,
       "text": "Kayaların ardından çıkanlar keseye bakmıyor bile; gözleri brandada. 'Altını ne yapalım, {town} pazarında ekmek yok. Yükün yarısı bizim.'",
       "title": "Para Değil, Mal",

@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **205** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **206** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -2143,6 +2143,22 @@ Toplam: **205** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
   - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
   - **Literatür:** R15, R48
+
+</details>
+
+### Y-E08 · Takvim: bayramlar, fuarlar, hac dönemi
+
+- **Durum:** bitti · **Öncelik:** P3 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:**  | 2026-11-13: SIDERIA §2.3a [Karar]: beş dönem (İlk Ot, Hac Yürüyüşü, Orsolune Panayırı, Ondalık Günleri, Taş Gecesi). SideriaCalendar (hesaplanır, saklanmaz), bağlamda takvim_<id>, CALENDAR_WEIGHTS ilgili kartları çoğaltır, yol ekranının saat satırında dönem adı, üç dönem kartı (hac, panayır, Taş Gecesi). Test: test_calendar.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E08 Takvim: bayramlar, fuarlar, hac dönemi**
+  - **Öncelik:** P3 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** Şehirlere özgü bayram ve fuarlar, mevsimin bölgesel etkisi.
+  - **Kabul:** Takvim verisi ve en az 5 takvim olayı.
 
 </details>
 

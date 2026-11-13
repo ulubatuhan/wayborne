@@ -201,6 +201,37 @@ static func _apply_promised_effects() -> void:
 							EventEffect.make(spec[0], int(spec[1]), String(spec[2]))
 						)
 
+## --- Yılın dönemleri (görev Y-E08) ---
+##
+## Dönem bir kartı açmaz, çoğaltır: hac döneminde yol hacılarla, panayırda
+## tüccarla, ondalıkta kâtiple dolar. Değer: kart -> çarpan.
+const CALENDAR_WEIGHTS: Dictionary = {
+	"ilk_ot": {"evt_reg_herd_crossing": 4.0, "evt_reg_registry_rider": 2.0, "evt_reg_sogurtay_water": 2.0},
+	"hac": {
+		"evt_penitent_procession": 3.0, "evt_pilgrim_encounter": 3.0, "evt_pilgrim_caravan": 3.0,
+		"evt_reg_page_collector": 3.0, "evt_reg_silent_hour": 2.0, "evt_roadside_shrine": 2.0,
+	},
+	"panayir": {
+		"evt_merchant_caravan": 3.0, "evt_reg_council_contract": 3.0, "evt_reg_far_ship": 3.0,
+		"evt_wandering_players": 2.0, "evt_traveling_tinker": 2.0,
+	},
+	"ondalik": {
+		"evt_reg_registry_rider": 3.0, "evt_road_warden": 2.0, "evt_customs_checkpoint": 2.0,
+		"evt_reg_two_clerks": 2.0, "evt_cargo_toll": 1.5,
+	},
+	"tas_gecesi": {"evt_grave_on_the_road": 4.0, "evt_reg_gallows_boots": 2.0},
+}
+
+static func _apply_calendar_weights() -> void:
+	for event in _road_events:
+		for period in CALENDAR_WEIGHTS:
+			var table: Dictionary = CALENDAR_WEIGHTS[period]
+			if not table.has(event.event_id):
+				continue
+			event.weight_modifiers.append(EventWeightModifier.make(_conditions([
+				EventCondition.make("takvim_" + String(period), EventCondition.Op.GREATER_EQUAL, 1),
+			]), float(table[event.event_id])))
+
 static func _apply_career_threats() -> void:
 	for event in _road_events:
 		if not CAREER_THREATS.has(event.event_id):
@@ -474,6 +505,9 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_reg_silent_hour())
 	_road_events.append(_comp_letter_home())
 	_road_events.append(_comp_night_confession())
+	_road_events.append(_cal_pilgrim_road())
+	_road_events.append(_cal_fair_news())
+	_road_events.append(_cal_stone_night())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -520,6 +554,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_apply_promised_effects()
 	_apply_choice_traces()
 	_apply_chain_openers()
+	_apply_calendar_weights()
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -3479,6 +3514,51 @@ static func _comp_night_confession() -> GameEvent:
 			"EVT_COMP_CONFESS_ASK_MID", _effects([_fx(EventEffect.Type.STRESS, 1)]),
 			"EVT_COMP_CONFESS_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.IZ_BIRAK, -30, "kin|yoldas|kisa|yuz")])),
 		_choice("EVT_COMP_CONFESS_OPT_TELL", _effects([_fx(EventEffect.Type.MORALE, -4), _fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.REPUTATION, 1)])),
+	])
+	return event
+
+## Y-E08 takvim · Takvim: hac yürüyüşü.
+static func _cal_pilgrim_road() -> GameEvent:
+	var event := _event("evt_cal_pilgrim_road", "EVT_CAL_HAC_TITLE", "EVT_CAL_HAC_TEXT", 2.0)
+	event.cooldown_days = 6
+	event.conditions = _conditions([_c("takvim_hac", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_CAL_HAC_OPT_BREAD", "EVT_CAL_HAC_OPT_BREAD_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 3)]), _effects([_fx(EventEffect.Type.PROVISIONS, -3), _fx(EventEffect.Type.REPUTATION, 1), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|kapi")])),
+		_check_choice("EVT_CAL_HAC_OPT_WALK", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_CAL_HAC_WALK_OK", _effects([_fx(EventEffect.Type.DANGER, -6), _fx(EventEffect.Type.STRESS, -4)]),
+			"EVT_CAL_HAC_WALK_MID", _effects([_fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_CAL_HAC_WALK_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -5, "weakest"), _fx(EventEffect.Type.STRESS, 4)])),
+		_choice("EVT_CAL_HAC_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 2)])),
+	])
+	return event
+
+## Y-E08 takvim · Takvim: Orsolune panayırı.
+static func _cal_fair_news() -> GameEvent:
+	var event := _event("evt_cal_fair_news", "EVT_CAL_FAIR_TITLE", "EVT_CAL_FAIR_TEXT", 2.0)
+	event.cooldown_days = 6
+	event.conditions = _conditions([_c("takvim_panayir", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CAL_FAIR_OPT_SELL", _effects([_fx(EventEffect.Type.GOLD, 50), _fx(EventEffect.Type.IZ_BIRAK, 20, "minnet|kisi|kisa|teklif")])),
+		_check_choice("EVT_CAL_FAIR_OPT_LISTEN", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_CAL_FAIR_LISTEN_OK", _effects([_fx(EventEffect.Type.GOLD, 80)]),
+			"EVT_CAL_FAIR_LISTEN_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_CAL_FAIR_LISTEN_BAD", _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.STRESS, 3)])),
+		_choice("EVT_CAL_FAIR_OPT_KEEP", _effects([_fx(EventEffect.Type.MORALE, 2)])),
+	])
+	return event
+
+## Y-E08 takvim · Takvim: Taş Gecesi; yolda ölenler için taş yığılır, ad söylenmez.
+static func _cal_stone_night() -> GameEvent:
+	var event := _event("evt_cal_stone_night", "EVT_CAL_STONES_TITLE", "EVT_CAL_STONES_TEXT", 3.0)
+	event.cooldown_days = 3
+	event.conditions = _conditions([_c("takvim_tas_gecesi", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CAL_STONES_OPT_PILE", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, -10), _fx(EventEffect.Type.MORALE, 4)])),
+		_check_choice("EVT_CAL_STONES_OPT_COUNT", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_CAL_STONES_COUNT_OK", _effects([_fx(EventEffect.Type.STRESS, -8), _fx(EventEffect.Type.MORALE, 5), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|yol|uzun|yuz")]),
+			"EVT_CAL_STONES_COUNT_MID", _effects([_fx(EventEffect.Type.STRESS, -2)]),
+			"EVT_CAL_STONES_COUNT_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -30, "kutsal|yol|kisa|fiyat")])),
+		_choice("EVT_CAL_STONES_OPT_GO", _effects([_fx(EventEffect.Type.STRESS, 8), _fx(EventEffect.Type.MORALE, -4)])),
 	])
 	return event
 

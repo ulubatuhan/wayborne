@@ -1942,7 +1942,7 @@
    "bolum": "13",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P3",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [
     "Y-E06"
    ],
@@ -1950,7 +1950,8 @@
    "dalga": 5,
    "paket": "P11",
    "sira": 121,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-13: SIDERIA §2.3a [Karar]: beş dönem (İlk Ot, Hac Yürüyüşü, Orsolune Panayırı, Ondalık Günleri, Taş Gecesi). SideriaCalendar (hesaplanır, saklanmaz), bağlamda takvim_<id>, CALENDAR_WEIGHTS ilgili kartları çoğaltır, yol ekranının saat satırında dönem adı, üç dönem kartı (hac, panayır, Taş Gecesi). Test: test_calendar."
   },
   {
    "id": "Y-C18",
