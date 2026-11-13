@@ -1437,6 +1437,34 @@ eklenebilir. Mülteciler en çok Vadi'nin prens savaşlarından ve obaların ak�
 
 ---
 
+### 11.7 Galeri ağızları: kadim şehrin yüzeye yakın kapıları [Karar, Y-A07]
+
+Karaocak madencileri kadim bir şehrin galerilerinde çalışır (§3.2) ama bunu bilmez; bildikleri yalnızca bazı
+tünellerin "kazmayla açılmamış" olduğudur. O tünellerin yüzeye yakın uçları ocakların kenarında açılır ve
+madenciler onlara **ağız** der. Bir ağız terk edilmiş bir kuyu, bir yarık ya da bir mezarın merdivenidir. Hiçbiri
+derin değildir: birkaç yüz adım sonra göçükle, suyla ya da "kör hava"yla kapanır. Derinin ne olduğu bilinmez
+(§16.3); oyun yalnız ağızları açar.
+
+| ağız | nerede | ne | derinlik |
+|---|---|---|---|
+| **Eski Ağız** | Vorgat'ın kuzey sırtı | Vorgat'ın ilk kuyusu. Madenciler duvarı düz kesilmiş bir tünele çıkınca kazmayı bırakıp kuyuyu taşla örttüler; örtü bugün kırık. | yüzeye en yakın, dört aşama |
+| **Kemrug Yarığı** | Kemrug ocağının altı | Ocağın tabanında açılan çatlak; içinden ılık hava ve su sesi gelir. Kemruglular yarığa ekmek bırakır, ne için olduğunu söylemez. | beş aşama |
+| **Kör Kazmalar'ın Alt Katı** | Kör Kazmalar Mezarlığı | Mezarlığın en eski taşlarının altında inen bir merdiven. Gözünü ocakta kaybedenler oraya, merdivenin başına gömülür. Merdivenin dibinde resimli duvarlar. | beş aşama |
+
+- **Kör hava:** derinde nefes ağırlaşır, fener söner. Madenciler kör havayı sesten bilir: kuşu susan galeriye girilmez.
+  Işıksız inen kervan hem daha çok yorulur hem tuzağı geç görür.
+- **Kör dişler:** madencilerin galerideki hayvanlara verdiği ad. Kadim değişimin torunları (§3.2): gözsüz porsuklar
+  (**galeri porsuğu**), solgun, taşa benzeyen kurtlar (**taş kurdu**) ve en derinde, yüzü olmayan bir ayı
+  (**mağara ayısı**). Yüzeye çıkmazlar; ışıktan değil sesten kaçarlar.
+- **Galeri yağmacıları:** kıtlıkta ağızlara insan da iner. Ocaktan kovulmuş madenciler, kaçaklar, tılsım avcıları.
+  Kör dişlerden çok onlardan korkulur.
+- **Ne bulunur:** madencilerin bıraktığı alet ve cevher, elde ısınan taşlar (§3.7, tılsımlı nesneler), kadim
+  kemikler, gündelik hayat resimleri. Altın yok: kadimler altını değerli saymamış görünür.
+- **Töre:** ağza inen, çıktığında madencilere bir parça cevher bırakır; bırakmayanı ocak bir daha içeri almaz. Ağızda
+  ölen yola değil ağza aittir; mezarı girişe yığılan taştır ve ad yazılmaz, yolun töresi burada da geçer.
+- **Madenciler neden inmez:** inen madencinin kazması ilk tünelde körleşir derler; asıl sebep kör havadır. Ocak
+  beyleri ağızları kapalı tutmak ister ve kervanın inmesine göz yumar, çünkü kervan kaybolursa ocağın adamı kaybolmaz.
+
 ## 12. Yol: töre, tehlike, ad
 
 ### 12.1 Yolun töresi [Yazar, defter IV]

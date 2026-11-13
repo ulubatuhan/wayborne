@@ -1,7 +1,14 @@
 # Zindanlar: tam sürüm (Y-A07)
 
-Durum: tasarım notu, kullanıcı onayı bekliyor. Kod henüz değişmedi. Adlar, yerler ve yaratıklar lore'a (Y-E06) bağlı;
-aşağıda yer tutucu olarak geçiyor.
+Durum (2026-11-13): **oyunda.** Kullanıcı kararları: (1) aşama dizisi, ama "maksimum oyuncu keyfi"; (2) kervan
+beklerken olay gelir; (3) ilk ağızlar Karaocak galerilerinin yüzeye yakın uçları, maden civarında, lore'a eklenerek.
+Lore: SIDERIA §11.7 (Eski Ağız, Kemrug Yarığı, Kör Kazmalar'ın Alt Katı; kör hava, kör dişler, galeri yağmacıları,
+ağız töresi). Kod: `DungeonCatalog`, `GameSession.dungeons`/`dungeon_run`, `DUNGEON_*` etkileri, 18 kart
+(giriş, dönüş, 15 aşama, kervan baskını), kapı kartı her aşamadan sonra (derine in / töreyle çık / paysız çık),
+`EnemyCatalog.KIND_DEEP` (galeri porsuğu, taş kurdu, mağara ayısı; var olan figürler solgun renkle). Işık: meşale her
+aşamada yanar, ışıksız iniş ağır stres. Sırt yükü kişi başına 2. Her iki aşama bir gün, kervan bekler ve erzak
+yer. Ağızda kaybedilen savaş inişi bitirir, yük yağmalanmaz. Test: test_dungeon; ekran: screenshot_dungeon.
+Açık: zindan savaşının arka planı hâlâ yol sahnesi (karanlık galeri arka planı çizim işi); oda haritası istenmedi.
 
 ## Kullanıcı notu
 

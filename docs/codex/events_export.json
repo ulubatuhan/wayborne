@@ -13509,6 +13509,2201 @@
         {
           "effects": [
             {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_ENTER"
+            }
+          ],
+          "label": "İn (kadro iner, kervan bekler)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Madenciye ağzı sor, yerini not et",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "DUNGEON_ENTER"
+                },
+                {
+                  "amount": 0,
+                  "text": "CLUE_GALLERIES",
+                  "type": "CLUE_HEAR"
+                }
+              ],
+              "label": "{who} madenciyi dinliyor: duvarları düz kesilmiş tüneller, kazmanın açmadığı. Yer deftere yazılıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "DUNGEON_ENTER"
+                }
+              ],
+              "label": "{who} yerini öğreniyor; madenci fazlasını söylemiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "DUNGEON_ENTER"
+                }
+              ],
+              "label": "{who} soru sordukça madenci kızıyor: \"Sorma, inme.\"",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Uzak dur, yoluna devam et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "dungeon_mouth_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_dng_mouth",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vorgat ocaklarının kenarında yaşlı bir madenci kervanı durduruyor ve sırttaki bir yarığı gösteriyor: \"Ağız. Bizim kazmamız orada körleşir. Siz kazmayla değil ışıkla inersiniz belki.\" İçeriden ılık bir hava çıkıyor. Kadro inerse kervan ağızda bekler.",
+      "title": "Galerinin Ağzı",
+      "triggered_only": false,
+      "weight": 2.5
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_ENTER"
+            }
+          ],
+          "label": "Yeniden in",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Ağzın önünde dinle, içeride kim var",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "DUNGEON_ENTER"
+                }
+              ],
+              "label": "{who} içeriden gelen sesi tanıyor: yalnız su. Kadro rahatlıkla iniyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} bir şey duyuyor, ne olduğunu çıkaramıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 55,
+                  "text": "bandit",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} içeride insan sesi duyuyor; yağmacılar ağzı tutmuş.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Bu sefer geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "dungeon_return_here",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 12,
+      "id": "evt_dng_return",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yol yine Vorgat ocaklarının yanından geçiyor. Defterde yeri yazılı ağız sırtta duruyor; girişte geçen seferden kalan taşlar hâlâ yığılı.",
+      "title": "Bilinen Ağız",
+      "triggered_only": false,
+      "weight": 1.5
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Kirişten geç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} kirişi önden geçip ipi bağlıyor; kadro arkasından geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} geçiyor ama kiriş inliyor; herkes nefesini tutarak geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "agility",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Kiriş {who} ağırlığı altında kırılıyor; düşüş kısa ama sert.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 5,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -2,
+              "text": "weakest",
+              "type": "PARTY_HP"
+            }
+          ],
+          "label": "Kuyunun dibinden dolaş",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri dön, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_collapsed_shaft",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yol yarı yarıya göçmüş bir kuyunun ağzında bitiyor. Karşı yakada tünel devam ediyor; arada çürümüş bir merdiven ve sağlam görünen bir kiriş.",
+      "title": "Göçük Kuyu",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "Nefesi tutup hızla geç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} önden sayarak yürüyor; herkes onun sayısına göre nefes alıyor ve geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} geçiyor; arkadakilerden biri dizlerinin üstüne çöküyor ve sürükleniyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "endurance",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "",
+                  "type": "DUNGEON_EXIT"
+                }
+              ],
+              "label": "{who} yarı yolda bayılıyor; kadro onu taşıyarak geri çıkıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -1,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Havanın dönmesini bekle (yarım gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri dön, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_bad_air",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Galeri daralıyor ve hava ağırlaşıyor. Alev küçülüyor, nefes kısalıyor. Madencilerin sözü: kuşu susan galeriye girilmez. Kuşunuz yok.",
+      "title": "Kör Hava",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 35,
+              "text": "deep",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Karşı koy",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Sessizce yanlarından geç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} kadroyu taşa basmadan geçiriyor; porsuklar başka bir sese dönüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} geçiriyor ama biri tökezliyor; porsuklar peşe düşmüyor, yalnız bağırıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 35,
+                  "text": "deep",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} bir taşa basıyor; ses galeride çınlıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri çekil, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_blind_badgers",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Karanlıkta tırnak sesi. Işığın ucunda gözsüz, solgun porsuklar beliriyor; ışığa değil sese dönüyorlar. Madencilerin kör diş dediği bunlar.",
+      "title": "Kör Dişler",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 35,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_LOOT"
+            }
+          ],
+          "label": "Cevheri al",
+          "locked": "Sırtta yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "dungeon_bag_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Testiyi aç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} mumu dikkatle kesiyor: testide kurutulmuş et ve bir kuş tüyü. Madencilerin ağız erzakı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} açıyor; içi boş, yalnız bir koku.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -3,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "{who} testiyi açınca içinden ağır, tatlı bir koku yayılıyor; kadro başını tutuyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Dokunma, devam et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_miners_cache",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir duvar oyuğunda madencilerin bıraktıkları: paslı kazmalar, bir torba cevher, bir de ağzı mumla mühürlenmiş bir testi. Testinin üstüne kömürle bir işaret çizilmiş: dokunma.",
+      "title": "Madencilerin Bıraktığı",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Çizgileri elinle oku",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "CLUE_GALLERIES",
+                  "type": "CLUE_HEAR"
+                },
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} çizgileri parmaklarıyla izliyor: bir yolun, bir suyun, bir kapının şekli. Kimse yazı demiyor, ama yazı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} çizgileri buluyor ama bir anlam çıkaramıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} duvara dokundukça soğuk bir şey ensesine yerleşiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Devam et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri dön, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_flat_wall",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Kazma izleri birden bitiyor. Bundan sonrası düz, cilalı gibi kesilmiş bir duvar; köşeleri yuvarlak. Duvarda elin ancak bulabileceği kadar ince çizgiler var.",
+      "title": "Düz Duvar",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Doğru tüneli seç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} yankının dördüncü kez dönmediği tüneli seçiyor; hava orada taze.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -1,
+                  "text": "",
+                  "type": "PROVISIONS"
+                }
+              ],
+              "label": "{who} bir tünel seçiyor; yarım gün dolaştıktan sonra doğru yola çıkıyorsunuz.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} seçtiği tünel kendi üstüne dönüyor; kadro salona üçüncü kez çıktığında biri ağlıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Her tünele işaret koyarak dene (yarım gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri dön, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_echo_hall",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Galeri büyük bir salona açılıyor; ışık tavana yetişmiyor. Her ses üç kez dönüyor ve hangi yönden geldiği belli olmuyor. Salondan dört tünel çıkıyor.",
+      "title": "Yankı Salonu",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 55,
+              "text": "deep",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Karşı koy",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Başka yöne gürültü yap, sürüyü çek",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} bir taşı uzak bir tünele fırlatıyor; sürü sese koşuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 45,
+                  "text": "deep",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} taşı atıyor; sürünün yarısı gidiyor, yarısı bekliyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 65,
+                  "text": "deep",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} attığı taş yakına düşüyor; sürü tam üstünüze geliyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri çekil, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_stone_wolves",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Taşa benzeyen şekiller kıpırdıyor. Solgun, toz renginde kurtlar; ışıkta gözleri yok, yalnız kulakları dikiliyor. Sürü sizi duydu.",
+      "title": "Taş Kurtları",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "amulet_ancient_eye",
+              "type": "GRANT_EQUIPMENT"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_LOOT"
+            }
+          ],
+          "label": "Isınanı al",
+          "locked": "Sırtta yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "dungeon_bag_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Hepsini topla",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "jewelry",
+                  "type": "ITEM_ADD"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "DUNGEON_LOOT"
+                }
+              ],
+              "label": "{who} taşları tek tek tartıyor ve yalnız sessiz olanları alıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "jewelry",
+                  "type": "ITEM_ADD"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "DUNGEON_LOOT"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} topluyor; biri elde o kadar ısınıyor ki bırakmak zorunda kalıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} taşları torbaya doldurunca torba ısınıp tutuşuyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Dokunma",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_warm_stones",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir oyukta yumruk büyüklüğünde, oyulmuş taşlar. Biri eline alındığında ısınıyor. Zurekli kuyumcular bunlara tılsım der; madenciler dokunmaz.",
+      "title": "Isınan Taşlar",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 30,
+              "text": "kutsal|bolge|uzun|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Her başın yanına bir taş daha koy",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "FAITH"
+          },
+          "effects": [],
+          "label": "Kemiklerin arasına bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "jewelry",
+                  "type": "ITEM_ADD"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "DUNGEON_LOOT"
+                }
+              ],
+              "label": "{who} kemiklere dokunmadan bakıyor; en uçtaki başın altında küçük, tunç bir kutu.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} bakıyor, bir şey bulamıyor; ama gözü kemiklerden ayrılmıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} bir kemiği yerinden oynatıyor; sıra bozuluyor ve kimse düzeltmeye cesaret edemiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Geri dön, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_old_bones",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir duvar boyunca yan yana yatırılmış kemikler, düzgün bir sırayla. Her başın yanında bir taş. İnsan kemiği gibi, ama kollar biraz fazla uzun.",
+      "title": "Eski Kemikler",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -10,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 4,
+              "text": "weakest",
+              "type": "PARTY_HP"
+            },
+            {
+              "amount": -1,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Dinlen (yarım gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Öncekilerin bıraktığına bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} ocak taşının altında bir harita parçası buluyor: ağzın aşağısı, kömürle.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [],
+              "label": "{who} yalnız is ve eski bir çaput buluyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} duvardaki isin arasında bir ad buluyor, kazınmış. Altına bir çizgi çekilmiş.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Dinlenmeden devam et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_resting_niche",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Kuru, temiz bir oyuk; tavanından ince bir su sızıyor. Birileri burada daha önce dinlenmiş: duvarda is, yerde bir ocak taşı.",
+      "title": "Kuru Oyuk",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -20,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Pay ver (30 GG)",
+          "locked": "Kesede 30 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Onlarla ortaklık konuş",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} ganimeti paylaşmayı öneriyor; yağmacılar bir kısa yol gösteriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -15,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} uzlaşıyor ama yağmacılar bir torbanızı alıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 55,
+                  "text": "bandit",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} ortaklık deyince yağmacılar gülüp kazmalarını kaldırıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 55,
+              "text": "bandit",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Galeriyi geri al",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_looters",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Önünüzde ışık var, sizinki değil. Ocaktan kovulmuş madenciler ve iki kaçak; sırtlarında çuvallar. \"Burası bizim,\" diyor biri. \"Ama payını verirsen yolu açarız.\"",
+      "title": "Galeri Yağmacıları",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 75,
+              "text": "deep",
+              "type": "TRIGGER_COMBAT"
+            }
+          ],
+          "label": "Karşı koy",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "Kıpırdama, sesini kes",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} kadroya işaretle donmasını söylüyor; yaratık burnunu dolaştırıp başka bir tünele çekiliyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 10,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} donup kalıyor; yaratık yanınızdan geçiyor, birine sürtünerek.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 85,
+                  "text": "deep",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "Birinin nefesi kesiliyor ve {who} sesi bastıramıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "",
+              "type": "DUNGEON_EXIT"
+            }
+          ],
+          "label": "Sessizce geri çekil, çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_cave_bear",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Galerinin dibinde büyük, solgun bir şey nefes alıyor. Bir ayının gövdesi, ama ışık yüzüne düştüğünde yüz yok: düz, kemik bir alın. Sesinizi duydu.",
+      "title": "Yüzü Olmayan",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Delikten bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "jewelry",
+                  "type": "ITEM_ADD"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "DUNGEON_LOOT"
+                },
+                {
+                  "amount": 0,
+                  "text": "CLUE_ROAD_OLDER",
+                  "type": "CLUE_HEAR"
+                }
+              ],
+              "label": "{who} deliğin ardında düz kesilmiş basamaklar görüyor, göçükle kapanmış. Basamakların kenarında bir kemik tarak.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} yalnız karanlık görüyor ve ılık bir nefes hissediyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} deliğe yaklaşınca içeriden bir taş düşüyor; göçük ilerliyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 40,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_LOOT"
+            }
+          ],
+          "label": "Madencilerin harcından cevher kazı",
+          "locked": "Sırtta yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "dungeon_bag_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Örtüye dokunma",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_sealed_tunnel",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Galeri bir taş örtüyle bitiyor. Madenciler onu harçla, aceleyle örmüşler; örtünün ortasında bir delik açılmış, içeriden değil dışarıdan. Delikten ılık bir hava geliyor ve daha derinde bir şey göçmüş.",
+      "title": "Taşla Örtülen",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -12,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 6,
+              "text": "weakest",
+              "type": "PARTY_HP"
+            }
+          ],
+          "label": "Suya gir, dinlen",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "ENDURANCE"
+          },
+          "effects": [],
+          "label": "Suyun dibine bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "amulet_ancient_eye",
+                  "type": "GRANT_EQUIPMENT"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "DUNGEON_LOOT"
+                }
+              ],
+              "label": "{who} dipte, taşa gömülü ısınan bir taş buluyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} dibe ulaşamıyor; su sandığından derin.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "endurance",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} suyun altında yönünü kaybediyor; çekip çıkarıyorsunuz.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -1,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Kemruglıların ekmeğinin yanına sen de bırak (1 erzak)",
+          "locked": "Bırakacak erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_warm_spring",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yarığın dibinde ılık bir su birikmiş; buharı ışığı bulanıklaştırıyor. Suyun kenarında Kemruglıların bıraktığı ekmekler, kurumuş. Suyun öbür yanında göçük; ötesinden su sesi geliyor.",
+      "title": "Ilık Su",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Resimlere uzun uzun bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "CLUE_PAINTINGS",
+                  "type": "CLUE_HEAR"
+                },
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} resimlerde bugünün töresini tanıyor: yola taş dizen eller. Kimse bir şey söylemiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} resimlere bakıyor; güzel, ama yabancı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} resimlerdeki yüzlerin hepsinin aynı yüz olduğunu fark ediyor ve bir daha bakmıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "jewelry",
+              "type": "ITEM_ADD"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "DUNGEON_LOOT"
+            },
+            {
+              "amount": -40,
+              "text": "kutsal|bolge|uzun|ret",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Boyalı taştan bir parça kopar",
+          "locked": "Sırtta yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "dungeon_bag_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 30,
+              "text": "kutsal|bolge|uzun|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Hiçbir şeye dokunmadan çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_s_painted_room",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Merdivenin dibinde bir oda. Duvarları resimli: insanlar ekmek pişiriyor, çocuk yıkıyor, bir yola taş diziyor. Hiçbirinde savaş yok. Odanın öbür kapısı göçükle kapalı.",
+      "title": "Resimli Oda",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Kaçanı yakala",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} adamı yakalıyor; çuval geri geliyor ve adam ocaktan kovulmuş bir madenci çıkıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "PROVISIONS"
+                }
+              ],
+              "label": "{who} çuvalı kurtarıyor, adam kaçıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -2,
+                  "text": "agility",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "{who} karanlıkta düşüyor; adam da çuval da gidiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Bırak gitsin; aç adam",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Yükü say, tayfayı azarla",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [],
+      "cooldown": 0,
+      "id": "evt_dng_camp_raid",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Ağızdan çıktığınızda kervan dağınık. Tayfa anlatıyor: gece birileri yanaşmış, çuvallara dokunmuş. Biri hâlâ kampın kenarında, elinde bir çuvalla, kaçıp kaçmamak arasında duruyor.",
+      "title": "Ağızda Bekleyenler",
+      "triggered_only": true,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"

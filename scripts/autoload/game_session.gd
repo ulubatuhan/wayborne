@@ -4262,6 +4262,111 @@ func note_city_arrival(lines: Array[String]) -> bool:
 	write_journal(" ".join(lines))
 	return true
 
+## --- Galeri ağızları (Y-A07, SIDERIA §11.7) ---
+## Ağız -> {"found", "deepest", "visits"}. Kayıtta.
+var dungeons: Dictionary = {}
+## Süren iniş: {"id", "depth", "phase" (stage/gate/raid), "used", "bag", "visit"}.
+## Kayıtta, çünkü sefer ortası otomatik kayıt bir inişin ortasına düşebilir.
+var dungeon_run: Dictionary = {}
+## Çıkışta kervanın beklerken başına bir şey gelme şansı.
+const DUNGEON_RAID_CHANCE: float = 0.3
+
+func dungeon_found(dungeon_id: String) -> bool:
+	return bool((dungeons.get(dungeon_id, {}) as Dictionary).get("found", false))
+
+## Bu yolda henüz bulunmamış ilk ağız (yoksa boş).
+func dungeon_unfound_here() -> String:
+	if not is_journey_active() or not DungeonCatalog.is_near(journey_origin_id, journey_destination_id):
+		return ""
+	for id in DungeonCatalog.ORDER:
+		if not dungeon_found(id):
+			return id
+	return ""
+
+## Bu yolda bulunmuş ilk ağız (yoksa boş).
+func dungeon_known_here() -> String:
+	if not is_journey_active() or not DungeonCatalog.is_near(journey_origin_id, journey_destination_id):
+		return ""
+	for id in DungeonCatalog.ORDER:
+		if dungeon_found(id):
+			return id
+	return ""
+
+func dungeon_has_light() -> bool:
+	return get_total_quantity(ItemCatalog.TORCH) > 0 or get_total_quantity(ItemCatalog.LANTERN) > 0
+
+## Ağzı bulur; `enter` ise kadro iner. Kimlik boşsa bu yolun ağzı.
+func dungeon_enter(dungeon_id: String, enter: bool) -> void:
+	var id := dungeon_id
+	if id.is_empty():
+		id = dungeon_unfound_here() if not dungeon_unfound_here().is_empty() else dungeon_known_here()
+	if not DungeonCatalog.DUNGEONS.has(id):
+		return
+	var record: Dictionary = dungeons.get(id, {"found": false, "deepest": 0, "visits": 0})
+	if not bool(record["found"]):
+		record["found"] = true
+		write_journal(TranslationServer.translate("UI_DUNGEON_FOUND") % TranslationServer.translate(DungeonCatalog.name_key(id)))
+	dungeons[id] = record
+	if enter:
+		dungeon_run = {"id": id, "depth": 1, "phase": "stage", "used": [], "bag": 0, "visit": int(record["visits"])}
+
+func dungeon_bag_free() -> int:
+	if dungeon_run.is_empty():
+		return 0
+	return maxi(0, get_party().size() * DungeonCatalog.BAG_PER_PERSON - int(dungeon_run["bag"]))
+
+func dungeon_after_stage(event_id: String) -> void:
+	if dungeon_run.is_empty() or String(dungeon_run["phase"]) != "stage":
+		return
+	(dungeon_run["used"] as Array).append(event_id)
+	dungeon_run["phase"] = "gate"
+
+## Bir aşama daha derine: meşale yanar (fener yanmaz, yağıyla gider).
+func dungeon_deeper() -> void:
+	if dungeon_run.is_empty():
+		return
+	dungeon_run["depth"] = int(dungeon_run["depth"]) + 1
+	dungeon_run["phase"] = "stage"
+	if get_total_quantity(ItemCatalog.TORCH) > 0:
+		remove_from_cargo_or_bags(ItemCatalog.TORCH, 1)
+
+## Çıkış: en derin aşama deftere yazılır; kervan beklerken başına bir şey
+## gelmiş olabilir (kapı kartından sonra o kart gelir).
+func dungeon_exit(forced: bool = false) -> void:
+	if dungeon_run.is_empty():
+		return
+	var id := String(dungeon_run["id"])
+	var record: Dictionary = dungeons.get(id, {"found": true, "deepest": 0, "visits": 0})
+	var reached := int(dungeon_run["depth"])
+	record["deepest"] = maxi(int(record["deepest"]), reached)
+	record["visits"] = int(record["visits"]) + 1
+	dungeons[id] = record
+	write_journal(TranslationServer.translate("UI_DUNGEON_LEFT_FORCED" if forced else "UI_DUNGEON_LEFT") % [
+		TranslationServer.translate(DungeonCatalog.name_key(id)), reached])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("dng_raid|%s|%d|%d" % [id, int(record["visits"]), total_days_elapsed])
+	if rng.randf() < DUNGEON_RAID_CHANCE:
+		dungeon_run = {"phase": "raid"}
+	else:
+		dungeon_run = {}
+
+## Ekranın sıradaki kartı: aşama, kapı ya da kervanın başına gelen.
+func dungeon_next_event() -> GameEvent:
+	if dungeon_run.is_empty():
+		return null
+	match String(dungeon_run["phase"]):
+		"stage":
+			var id := String(dungeon_run["id"])
+			return EventCatalog.get_event(DungeonCatalog.stage_for(
+				id, int(dungeon_run["depth"]), int(dungeon_run["visit"]), dungeon_run["used"] as Array))
+		"gate":
+			var depth := int(dungeon_run["depth"])
+			return DungeonCatalog.gate_event(depth, depth >= DungeonCatalog.max_depth(String(dungeon_run["id"])), dungeon_has_light())
+		"raid":
+			dungeon_run = {}
+			return EventCatalog.get_event("evt_dng_camp_raid")
+	return null
+
 ## Geçiş belgeleri (Y-C31): belge -> son geçerli gün. Kayıtta.
 var passes: Dictionary = {}
 
@@ -4287,6 +4392,14 @@ func grant_pass(pass_id: String, days: int) -> void:
 var secret_clues: Array = []
 ## Bu yol gününde duyulan ipucu, ekranın günlüğe dökmesi için (kayda girmez).
 var clue_queue: Array[String] = []
+
+## Belirli bir ipucu (bir aşamanın resmi, bir kişinin sözü): duyulmamışsa yazılır.
+func hear_clue(key: String) -> void:
+	if key.is_empty() or secret_clues.has(key):
+		return
+	secret_clues.append(key)
+	clue_queue.append(key)
+	write_journal(TranslationServer.translate("UI_CLUE_HEARD") % TranslationServer.translate(key))
 
 ## Yol gününde belki bir ipucu: bölgeye uyan ve henüz duyulmamış ilki.
 func _hear_secret_clue() -> void:
@@ -6017,6 +6130,10 @@ func divert_journey(destination_id: String) -> bool:
 func finish_journey() -> Dictionary:
 	# Şehirde herkes yer - tayfanın aç gece sayacı burada kapanır.
 	crew_hungry_nights = 0
+	# Yarım kalmış iniş varışta kapanır: kervan şehre girdiyse kadro ağızdan çıkmıştır.
+	if dungeon_run.has("depth"):
+		dungeon_exit(false)
+	dungeon_run = {}
 	# Yolun günlüğü yolda kalır: şehirde yeni bir sayfa.
 	day_beats.clear()
 	var settled := _settle_contract_cargo()
@@ -7391,6 +7508,8 @@ func to_save_dict() -> Dictionary:
 		"journal": journal.duplicate(true),
 		"secret_clues": secret_clues.duplicate(),
 		"passes": passes.duplicate(),
+		"dungeons": dungeons.duplicate(true),
+		"dungeon_run": dungeon_run.duplicate(true),
 		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
 		"best_forage_find": best_forage_find,
@@ -7554,6 +7673,8 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	journal = (data.get("journal", []) as Array).duplicate(true)
 	secret_clues = (data.get("secret_clues", []) as Array).duplicate()
 	passes = (data.get("passes", {}) as Dictionary).duplicate()
+	dungeons = (data.get("dungeons", {}) as Dictionary).duplicate(true)
+	dungeon_run = (data.get("dungeon_run", {}) as Dictionary).duplicate(true)
 	city_morale = (data.get("city_morale", {}) as Dictionary).duplicate()
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
@@ -7941,6 +8062,14 @@ func build_event_context() -> Dictionary:
 	var period := SideriaCalendar.period(total_days_elapsed)
 	if not period.is_empty():
 		context["takvim_" + period] = 1.0
+	if not dungeon_unfound_here().is_empty():
+		context["dungeon_mouth_here"] = 1.0
+	if not dungeon_known_here().is_empty() and dungeon_run.is_empty():
+		context["dungeon_return_here"] = 1.0
+	if not dungeon_run.is_empty() and dungeon_run.has("depth"):
+		context["dungeon_depth"] = float(dungeon_run["depth"])
+		context["dungeon_bag_free"] = float(dungeon_bag_free())
+	context["dungeon_light"] = 1.0 if dungeon_has_light() else 0.0
 	for pass_id in PassCatalog.PASSES:
 		if pass_needed(pass_id):
 			context["pass_needed_" + String(pass_id)] = 1.0

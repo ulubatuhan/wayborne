@@ -152,6 +152,25 @@ const ARCHETYPES: Dictionary = {
 		"metal": Color(0.55, 0.54, 0.56),
 		"sprite_kind": "wolf", "sprite_tint": Color(0.28, 0.27, 0.30),
 	},
+	# Kör dişler (Y-A07): galeride güneş görmemiş, solgun ve toz renginde.
+	"gallery_badger": {
+		"body": BEAST, "bulk": 1.5, "head": "snout", "weapon": "none",
+		"cloth": Color(0.52, 0.50, 0.47), "trim": Color(0.36, 0.35, 0.33),
+		"metal": Color(0.80, 0.80, 0.78),
+		"sprite_kind": "boar", "sprite_tint": Color(1.25, 1.22, 1.15),
+	},
+	"stone_wolf": {
+		"body": BEAST, "bulk": 1.5, "head": "snout", "weapon": "none",
+		"cloth": Color(0.60, 0.60, 0.58), "trim": Color(0.42, 0.42, 0.41),
+		"metal": Color(0.80, 0.80, 0.78),
+		"sprite_kind": "wolf", "sprite_tint": Color(1.45, 1.45, 1.42),
+	},
+	"cave_bear": {
+		"body": BEAST, "bulk": 2.9, "head": "snout", "weapon": "none",
+		"cloth": Color(0.55, 0.53, 0.50), "trim": Color(0.38, 0.37, 0.35),
+		"metal": Color(0.80, 0.80, 0.78),
+		"sprite_kind": "bear", "sprite_tint": Color(1.55, 1.50, 1.42),
+	},
 }
 
 const FALLBACK_KIND: String = "bandit"

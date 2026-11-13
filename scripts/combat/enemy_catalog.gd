@@ -233,6 +233,13 @@ const KIND_HUNT: String = "hunt"
 ## Haydut büyücü (görev Y-F07T, kullanıcı notu: nadir bir olay, kaldırmak yok):
 ## yalnız evt_rogue_mage açar; büyücü ve iki koruyucu kesici.
 const KIND_MAGE: String = "mage"
+## Kör dişler (Y-A07, SIDERIA §11.7): galeri ağızlarındaki kadim değişimin
+## torunları. Yalnız zindan aşamaları açar; yeni çizim yok, var olan hayvan
+## figürlerini solgun bir renkle ödünç alırlar (combat_figure).
+const KIND_DEEP: String = "deep"
+const GALLERY_BADGER: String = "gallery_badger"
+const STONE_WOLF: String = "stone_wolf"
+const CAVE_BEAR: String = "cave_bear"
 
 ## Kadronun oyuncuya görünen adı. Savaş kayıtları ve panel başlığı bunu
 ## okur - kadro türü Faz 8 PR-B'de çeşitlenince metinler sabit "Haydutlar"
@@ -245,6 +252,7 @@ const _KIND_LABELS: Dictionary = {
 	KIND_WILDLIFE: "ENEMY_KIND_WILDLIFE",
 	KIND_GUARD: "ENEMY_KIND_GUARD",
 	KIND_HUNT: "ENEMY_KIND_HUNT",
+	KIND_DEEP: "ENEMY_KIND_DEEP",
 }
 
 static var _enemies: Array[EnemyTemplate] = []
@@ -277,6 +285,8 @@ static func build_squad(
 			return build_wildlife_squad(danger_level, party_size, rng, average_level, biome)
 		KIND_GUARD:
 			return build_guard_squad(danger_level, party_size, rng, average_level)
+		KIND_DEEP:
+			return build_deep_squad(danger_level, party_size, rng, average_level)
 		KIND_HUNT:
 			return build_hunt_squad(danger_level, party_size, rng, average_level)
 		KIND_MAGE:
@@ -403,6 +413,27 @@ static func build_guard_squad(
 
 	return _build_units(ids, party_size, average_level, danger_level)
 
+## Galeri ağzının derinliğine göre kör dişler: sığda porsuklar, ortada taş
+## kurtları, en derinde mağara ayısı. Tehlike = aşamanın derinliği.
+static func build_deep_squad(
+	danger_level: float, party_size: int, rng: RandomNumberGenerator, average_level: int = 1
+) -> Array[CombatUnit]:
+	_ensure_built()
+	var ids: Array[String] = []
+	if danger_level >= 0.7:
+		ids = [CAVE_BEAR]
+		if party_size >= 3:
+			ids.append(STONE_WOLF)
+	elif danger_level >= 0.45:
+		ids = [STONE_WOLF, STONE_WOLF]
+		if party_size >= 3 and rng.randf() < 0.5:
+			ids.append(STONE_WOLF)
+	else:
+		ids = [GALLERY_BADGER, GALLERY_BADGER]
+		if party_size >= 3:
+			ids.append(GALLERY_BADGER)
+	return _build_units(ids, party_size, average_level, danger_level)
+
 static func build_mage_squad(danger_level: float, party_size: int, average_level: int = 1) -> Array[CombatUnit]:
 	_ensure_built()
 	var ids: Array[String] = [CUTTER, ROGUE_MAGE]
@@ -506,6 +537,10 @@ static func _ensure_built() -> void:
 	_enemies.append(_make(WOLF, "ENEMY_WOLF_NAME", 19, 80, 13, 6, 3, 14, [SkillCatalog.WOLF_BITE], 1, 8))
 	_enemies.append(_make(BEAR, "ENEMY_BEAR_NAME", 62, 72, 3, 3, 9, 5, [SkillCatalog.BEAR_CLAW], 1, 30))
 	_enemies.append(_make(BOAR, "ENEMY_BOAR_NAME", 33, 76, 6, 4, 6, 10, [SkillCatalog.BOAR_CHARGE], 1, 14))
+	# Kör dişler (Y-A07): gözsüz, sesle avlanır; isabetleri düşük, dirençleri yüksek.
+	_enemies.append(_make(GALLERY_BADGER, "ENEMY_GALLERY_BADGER_NAME", 26, 72, 8, 4, 5, 11, [SkillCatalog.BOAR_CHARGE], 1, 12))
+	_enemies.append(_make(STONE_WOLF, "ENEMY_STONE_WOLF_NAME", 28, 78, 10, 6, 6, 13, [SkillCatalog.WOLF_BITE], 1, 16))
+	_enemies.append(_make(CAVE_BEAR, "ENEMY_CAVE_BEAR_NAME", 80, 70, 2, 4, 11, 4, [SkillCatalog.BEAR_CLAW], 1, 40))
 
 	# Sürü reisi - "Kırağı Kurdu" (beyaz) / "Zifir Kurdu" (kara), kullanıcının
 	# kendi isteği ("statları buna göre daha yüksek olmalı", ve ikisinin de

@@ -92,7 +92,7 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P03
 
@@ -166,6 +166,27 @@ Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** En az 10 çok seferli zincir; sonucu başka bir şehirde ya da varisin döneminde gelir.
   - **Kabul:** 10 zincir; kayıtta zincir durumu; testler.
   - **Literatür:** R24, R48
+
+</details>
+
+### Y-A07 · Zindanlar: tam sürüm
+
+- **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06, Y-C01
+- **Son not:** docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek. | 2026-11-13: tam sürüm oyunda (bkz. docs/design_notes/zindanlar.md Durum). Üç ağız Vorgat yolunda; 18 kart; kör dişler; ışık, sırt yükü, kervanın beklemesi, töre. Açık: zindan savaşının karanlık arka planı (çizim).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-A07 Zindanlar: tam sürüm**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `b76bb93`): docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası.
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Rota dışı zindan, hazine ve mistik yaratık (Temmuz pitch'inin çekirdeği) tam sürüm olarak tasarlanır ve uygulanır; küçük ara sürüm yok. Önce tasarım notu: giriş (haritada yer, söylenti, olay), yapı (oda ya da aşama dizisi), savaş, ganimet, kayıp ve stres kuralları, kervanın zindan dışında beklemesi. Tasarım notu kullanıcı onayından sonra uygulanır.
+  - **Neden:** Zindanlar konuşmalarda hiç ele alınmadı; keşif ve ganimet açığını kapatır.
+  - **Kullanıcı notu:** “Sıra zindanlara gelecek fakat bende küçük sürüm diye bir şey yok, tam gaz devam. Solo indie olduğum için istediğim gibi ilerleyebiliyorum ve claude, gemini, google ai sayesinde fazlasıyla da hızlı ilerliyor çalışmalar.”
+  - **Kabul:** Onaylı tasarım notu; haritadaki en az bir bölgede oynanabilir zindan; kayıt ve yükleme testi.
+  - **Kaynaklar ve teknik (CC0 araştırması):** Yapılar: Quaternius Ultimate Modular Ruins ve Modular Dungeon (yeni indirme QAL), Kenney Castle Kit (CC0). Ses: OpenGameArt “Loopable Dungeon Ambience”, “Dripping water loop” (indirmeden önce lisans sayfası kontrol edilir).
+  - **Literatür:** R9
 
 </details>
 

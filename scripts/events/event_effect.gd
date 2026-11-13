@@ -145,6 +145,15 @@ enum Type {
 	# Geçiş belgesi verir (Y-C31). text_value = belge (PassCatalog), amount =
 	# geçerli gün; 0 yalnız bu yolculuk. Belge deftere yazılır.
 	PASS_GRANT,
+	# Galeri ağızları (Y-A07). DUNGEON_ENTER: text_value = ağız (boş: bu yolunki),
+	# amount 1 iner, 0 yalnız yerini bulur. DUNGEON_DEEPER bir aşama iner,
+	# DUNGEON_EXIT çıkar. DUNGEON_LOOT: amount kadar ganimet sırta biner.
+	DUNGEON_ENTER,
+	DUNGEON_DEEPER,
+	DUNGEON_EXIT,
+	DUNGEON_LOOT,
+	# Dünya sırrından belirli bir ipucu (Y-E04): text_value = ipucu anahtarı.
+	CLUE_HEAR,
 }
 
 @export var type: Type = Type.GOLD

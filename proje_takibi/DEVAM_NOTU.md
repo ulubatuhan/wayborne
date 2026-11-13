@@ -748,3 +748,9 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
   - Y-R01 2. parti (0dd79f2): iz bırakan 87/141, dönüş 19-26 (hedef 12-22), FADE_SCALE 0,85.
 - Açık kalan (kullanıcıda): ana hikâye, Y-C31 belge adları, Y-A07 zindan onayı, kâtip kayıtları (AI ses), satış
   kararları K-01..K-10, 2. bölümdeki ekranda deneme listesi. Yapısal açık: iz sönen payı ~%65 (hedef %25-40).
+
+## Y-C31 ve Y-A07 (2026-11-13)
+
+- Y-C31 bitti (e6defa6): `PassCatalog`, dört belge, `PASS_GRANT`, belgesiz kart, test_passes.
+- Y-A07 zindanlar oyunda: SIDERIA §11.7 galeri ağızları, `DungeonCatalog`, `dungeon_run`, 18 kart, `KIND_DEEP`.
+  Ekran: tests/screenshot_dungeon.gd. Açık: zindan savaşının karanlık arka planı (çizim).

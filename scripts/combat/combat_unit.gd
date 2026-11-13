@@ -213,12 +213,12 @@ static func behavior_for(enemy_id: String) -> String:
 	match enemy_id:
 		"bandit_leader", "mountain_bandit", "toll_man":
 			return "leader_hunter"
-		"wolf", "wolf_alpha_white", "wolf_alpha_black":
+		"wolf", "wolf_alpha_white", "wolf_alpha_black", "stone_wolf":
 			return "pack"
 		# Kaçak askerler talimi unutmamış (T16-08).
 		"city_guard", "guard_sergeant", "garrison_deserter", "valley_deserter":
 			return "guard"
-		"bear", "boar":
+		"bear", "boar", "gallery_badger", "cave_bear":
 			return "beast"
 	return ""
 

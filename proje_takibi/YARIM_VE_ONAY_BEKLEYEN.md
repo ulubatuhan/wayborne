@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **42** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **41** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -234,27 +234,6 @@ Toplam: **42** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Kullanıcı notu: bölümler henüz yazılmadı; bölüm sayısı ve sahneleme önerisi şimdilik onaylanmadı. Görev yalnızca bölümlerin yazılması. Sahneleme, final mekânı ve finalden sonrası, bölümler yazıldıktan sonra kullanıcıyla yeniden konuşulur.
   - **Kullanıcı notu:** “Evet bölümler yazılmadı o yüzden bana 8 bölüm var demen bile aslında uydurma bir veriye dayanıyor. Bu bölümler yazıldıktan sonra düşünülecek bir konu bu, onaylamıyorum bu konuyu o yüzden şu an. ama bölüm yazılacak gibi bir not alabilirsin.”
   - **Kabul:** Bölüm metinleri yazıldı ve kullanıcı onayladı.
-
-</details>
-
-### Y-A07 · Zindanlar: tam sürüm
-
-- **Durum:** lore bekliyor · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06, Y-C01
-- **Son not:** docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-A07 Zindanlar: tam sürüm**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `b76bb93`): docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası.
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
-  - **Ne:** Rota dışı zindan, hazine ve mistik yaratık (Temmuz pitch'inin çekirdeği) tam sürüm olarak tasarlanır ve uygulanır; küçük ara sürüm yok. Önce tasarım notu: giriş (haritada yer, söylenti, olay), yapı (oda ya da aşama dizisi), savaş, ganimet, kayıp ve stres kuralları, kervanın zindan dışında beklemesi. Tasarım notu kullanıcı onayından sonra uygulanır.
-  - **Neden:** Zindanlar konuşmalarda hiç ele alınmadı; keşif ve ganimet açığını kapatır.
-  - **Kullanıcı notu:** “Sıra zindanlara gelecek fakat bende küçük sürüm diye bir şey yok, tam gaz devam. Solo indie olduğum için istediğim gibi ilerleyebiliyorum ve claude, gemini, google ai sayesinde fazlasıyla da hızlı ilerliyor çalışmalar.”
-  - **Kabul:** Onaylı tasarım notu; haritadaki en az bir bölgede oynanabilir zindan; kayıt ve yükleme testi.
-  - **Kaynaklar ve teknik (CC0 araştırması):** Yapılar: Quaternius Ultimate Modular Ruins ve Modular Dungeon (yeni indirme QAL), Kenney Castle Kit (CC0). Ses: OpenGameArt “Loopable Dungeon Ambience”, “Dripping water loop” (indirmeden önce lisans sayfası kontrol edilir).
-  - **Literatür:** R9
 
 </details>
 

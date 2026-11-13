@@ -1977,7 +1977,7 @@
    "bolum": "13",
    "alan": "Yönetmen: Yön ve kapsam",
    "oncelik": "P2",
-   "durum": "lore bekliyor",
+   "durum": "test bekliyor",
    "bagimli": [
     "Y-E06",
     "Y-C01"
@@ -1988,7 +1988,7 @@
    "sira": 123,
    "kim": "CO",
    "commit": "b76bb93",
-   "not": "docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek."
+   "not": "docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek. | 2026-11-13: tam sürüm oyunda (bkz. docs/design_notes/zindanlar.md Durum). Üç ağız Vorgat yolunda; 18 kart; kör dişler; ışık, sırt yükü, kervanın beklemesi, töre. Açık: zindan savaşının karanlık arka planı (çizim)."
   },
   {
    "id": "Y-E07",

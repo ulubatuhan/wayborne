@@ -3855,9 +3855,12 @@ func _on_choice_pressed(choice: EventChoice) -> void:
 	if _choice_leaves_someone(choice):
 		AudioManager.hush(false)
 
+	if resolved_event != null and DungeonCatalog.is_stage(resolved_event.event_id):
+		_session.dungeon_after_stage(resolved_event.event_id)
 	_refresh_state()
 	_check_journey_end()
 	_autosave_journey()
+	_continue_dungeon()
 
 func _choice_leaves_someone(choice: EventChoice) -> bool:
 	for effect in choice.effects:
@@ -4168,6 +4171,10 @@ func _on_combat_finished(
 		var meat := GameSession.combat_victory_provisions(_current_combat_kind)
 		if meat > 0:
 			effects.append(EventEffect.make(EventEffect.Type.PROVISIONS, meat))
+	elif _session.dungeon_run.has("depth"):
+		# Galeri ağzında kaybedilen savaş (Y-A07): kervan dışarıda, yük yağmalanmaz;
+		# bedel kadronun sırtında, moral ve iniş biter (bkz. _continue_dungeon).
+		effects.append(EventEffect.make(EventEffect.Type.MORALE, COMBAT_DEFEAT_MORALE))
 	else:
 		# G5: yenilgi artık yükü de götürüyor. Haydut altını alır ama asıl
 		# istediği maldır; altın ve moral kaybı kervanı yavaşlatmıyordu.
@@ -4199,6 +4206,10 @@ func _on_combat_finished(
 	_set_journey_controls_enabled(true)
 	_refresh_state()
 	_check_journey_end()
+	# Ağızda kaybedilen savaş inişi bitirir: kadro yaralılarını sırtlayıp çıkar.
+	if not victory and _session.dungeon_run.has("depth"):
+		_session.dungeon_exit(true)
+	_continue_dungeon()
 
 ## Yere düşenler kendi stresini alıyor. Kimin düştüğü savaş panelinden
 ## sayı olarak geliyor (isim değil), o yüzden en yorgun olanlardan
@@ -4951,3 +4962,12 @@ func _flush_scribe() -> void:
 		_add_log(tr("UI_SCRIBE_LINE") % tr(key), SCRIBE_COLOR)
 		AudioManager.play_voice(ScribeLines.voice_path(key))
 	_session.scribe_queue.clear()
+
+## Galeri ağzının sıradaki kartı (Y-A07): aşama, kapı ya da kervanın başına
+## gelen. Bir panel (savaş) açıksa o kapanınca yeniden çağrılır.
+func _continue_dungeon() -> void:
+	if _session.dungeon_run.is_empty() or _has_open_panel():
+		return
+	var next := _session.dungeon_next_event()
+	if next != null:
+		call_deferred("_present_event", next)

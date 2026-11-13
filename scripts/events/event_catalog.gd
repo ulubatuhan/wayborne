@@ -531,6 +531,24 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_pass_horn_tally())
 	_road_events.append(_pass_toll_stone())
 	_road_events.append(_pass_bell())
+	_road_events.append(_dng_mouth())
+	_road_events.append(_dng_return())
+	_road_events.append(_dng_s_collapsed_shaft())
+	_road_events.append(_dng_s_bad_air())
+	_road_events.append(_dng_s_blind_badgers())
+	_road_events.append(_dng_s_miners_cache())
+	_road_events.append(_dng_s_flat_wall())
+	_road_events.append(_dng_s_echo_hall())
+	_road_events.append(_dng_s_stone_wolves())
+	_road_events.append(_dng_s_warm_stones())
+	_road_events.append(_dng_s_old_bones())
+	_road_events.append(_dng_s_resting_niche())
+	_road_events.append(_dng_s_looters())
+	_road_events.append(_dng_s_cave_bear())
+	_road_events.append(_dng_s_sealed_tunnel())
+	_road_events.append(_dng_s_warm_spring())
+	_road_events.append(_dng_s_painted_room())
+	_road_events.append(_dng_camp_raid())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -3646,6 +3664,276 @@ static func _pass_bell() -> GameEvent:
 			"EVT_PASS_BELL_QUIET_MID", _effects([_fx(EventEffect.Type.TRADE_STAIN, 4), _fx(EventEffect.Type.REPUTATION, -2)]),
 			"EVT_PASS_BELL_QUIET_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard")])),
 		_choice("EVT_PASS_BELL_OPT_ROUND", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2)])),
+	])
+	return event
+
+## Y-A07 zindan · Y-A07: galeri ağzının bulunması.
+static func _dng_mouth() -> GameEvent:
+	var event := _event("evt_dng_mouth", "EVT_DNG_MOUTH_TITLE", "EVT_DNG_MOUTH_TEXT", 2.5)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("dungeon_mouth_here", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_DNG_MOUTH_OPT_ENTER", _effects([_fx(EventEffect.Type.DUNGEON_ENTER, 1)])),
+		_check_choice("EVT_DNG_MOUTH_OPT_ASK", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_DNG_MOUTH_ASK_OK", _effects([_fx(EventEffect.Type.DUNGEON_ENTER, 0), _fx(EventEffect.Type.CLUE_HEAR, 0, "CLUE_GALLERIES")]),
+			"EVT_DNG_MOUTH_ASK_MID", _effects([_fx(EventEffect.Type.DUNGEON_ENTER, 0)]),
+			"EVT_DNG_MOUTH_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.DUNGEON_ENTER, 0)])),
+		_choice("EVT_DNG_MOUTH_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, -2)])),
+	])
+	return event
+
+## Y-A07 zindan · Y-A07: bilinen ağza dönüş.
+static func _dng_return() -> GameEvent:
+	var event := _event("evt_dng_return", "EVT_DNG_RETURN_TITLE", "EVT_DNG_RETURN_TEXT", 1.5)
+	event.cooldown_days = 12
+	event.conditions = _conditions([_c("dungeon_return_here", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_DNG_RETURN_OPT_ENTER", _effects([_fx(EventEffect.Type.DUNGEON_ENTER, 1)])),
+		_check_choice("EVT_DNG_RETURN_OPT_LISTEN", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_RETURN_LISTEN_OK", _effects([_fx(EventEffect.Type.STRESS, -3), _fx(EventEffect.Type.DUNGEON_ENTER, 1)]),
+			"EVT_DNG_RETURN_LISTEN_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_DNG_RETURN_LISTEN_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 55, "bandit")])),
+		_choice("EVT_DNG_RETURN_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, -1)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (sığ): göçük kuyu, geçit.
+static func _dng_s_collapsed_shaft() -> GameEvent:
+	var event := _event("evt_dng_s_collapsed_shaft", "EVT_DNG_SHAFT_TITLE", "EVT_DNG_SHAFT_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_SHAFT_OPT_BEAM", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_SHAFT_BEAM_OK", _effects([_fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_DNG_SHAFT_BEAM_MID", _effects([_fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_DNG_SHAFT_BEAM_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -6, "agility"), _fx(EventEffect.Type.STRESS, 4)])),
+		_choice("EVT_DNG_SHAFT_OPT_CLIMB", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.PARTY_HP, -2, "weakest")])),
+		_choice("EVT_DNG_SHAFT_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (sığ): kör hava, tuzak.
+static func _dng_s_bad_air() -> GameEvent:
+	var event := _event("evt_dng_s_bad_air", "EVT_DNG_AIR_TITLE", "EVT_DNG_AIR_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_AIR_OPT_HOLD", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_AIR_HOLD_OK", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_DNG_AIR_HOLD_MID", _effects([_fx(EventEffect.Type.PARTY_HP, -4, "weakest"), _fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_DNG_AIR_HOLD_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -6, "endurance"), _fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+		_choice("EVT_DNG_AIR_OPT_WAIT", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.PROVISIONS, -1)])),
+		_choice("EVT_DNG_AIR_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (sığ): galeri porsukları, savaş.
+static func _dng_s_blind_badgers() -> GameEvent:
+	var event := _event("evt_dng_s_blind_badgers", "EVT_DNG_BADGERS_TITLE", "EVT_DNG_BADGERS_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_BADGERS_OPT_FIGHT", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 35, "deep")])),
+		_check_choice("EVT_DNG_BADGERS_OPT_SILENT", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_BADGERS_SILENT_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_DNG_BADGERS_SILENT_MID", _effects([_fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_DNG_BADGERS_SILENT_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 35, "deep")])),
+		_choice("EVT_DNG_BADGERS_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (sığ): madencilerin bıraktığı, hazine.
+static func _dng_s_miners_cache() -> GameEvent:
+	var event := _event("evt_dng_s_miners_cache", "EVT_DNG_CACHE_TITLE", "EVT_DNG_CACHE_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_gated_choice("EVT_DNG_CACHE_OPT_ORE", "EVT_DNG_CACHE_OPT_ORE_LOCKED", _conditions([_c("dungeon_bag_free", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.GOLD, 35), _fx(EventEffect.Type.DUNGEON_LOOT, 1)])),
+		_check_choice("EVT_DNG_CACHE_OPT_JAR", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_CACHE_JAR_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 4), _fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_DNG_CACHE_JAR_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_DNG_CACHE_JAR_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.PARTY_HP, -3, "weakest")])),
+		_choice("EVT_DNG_CACHE_OPT_LEAVE", _effects([_fx(EventEffect.Type.STRESS, -2)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (sığ): düz duvar, ipucu.
+static func _dng_s_flat_wall() -> GameEvent:
+	var event := _event("evt_dng_s_flat_wall", "EVT_DNG_WALL_TITLE", "EVT_DNG_WALL_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_WALL_OPT_READ", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_DNG_WALL_READ_OK", _effects([_fx(EventEffect.Type.CLUE_HEAR, 0, "CLUE_GALLERIES"), _fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.DANGER, -5)]),
+			"EVT_DNG_WALL_READ_MID", _effects([_fx(EventEffect.Type.STRESS, 1)]),
+			"EVT_DNG_WALL_READ_BAD", _effects([_fx(EventEffect.Type.STRESS, 6)])),
+		_choice("EVT_DNG_WALL_OPT_ON", _effects([_fx(EventEffect.Type.STRESS, 1)])),
+		_choice("EVT_DNG_WALL_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (orta): yankı salonu, geçit.
+static func _dng_s_echo_hall() -> GameEvent:
+	var event := _event("evt_dng_s_echo_hall", "EVT_DNG_ECHO_TITLE", "EVT_DNG_ECHO_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_ECHO_OPT_WAY", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_ECHO_WAY_OK", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.DANGER, -4)]),
+			"EVT_DNG_ECHO_WAY_MID", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.PROVISIONS, -1)]),
+			"EVT_DNG_ECHO_WAY_BAD", _effects([_fx(EventEffect.Type.STRESS, 8)])),
+		_choice("EVT_DNG_ECHO_OPT_MARK", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.PROVISIONS, -2)])),
+		_choice("EVT_DNG_ECHO_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (orta): taş kurtları, savaş.
+static func _dng_s_stone_wolves() -> GameEvent:
+	var event := _event("evt_dng_s_stone_wolves", "EVT_DNG_WOLVES_TITLE", "EVT_DNG_WOLVES_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_WOLVES_OPT_FIGHT", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 55, "deep")])),
+		_check_choice("EVT_DNG_WOLVES_OPT_NOISE", CharacterStats.Kind.INTELLECT, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_WOLVES_NOISE_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_DNG_WOLVES_NOISE_MID", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 45, "deep")]),
+			"EVT_DNG_WOLVES_NOISE_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 65, "deep")])),
+		_choice("EVT_DNG_WOLVES_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (orta): elde ısınan taşlar, hazine (§3.7).
+static func _dng_s_warm_stones() -> GameEvent:
+	var event := _event("evt_dng_s_warm_stones", "EVT_DNG_WARMSTONES_TITLE", "EVT_DNG_WARMSTONES_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_gated_choice("EVT_DNG_WARMSTONES_OPT_TAKE", "EVT_DNG_WARMSTONES_OPT_TAKE_LOCKED", _conditions([_c("dungeon_bag_free", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.GRANT_EQUIPMENT, 0, "amulet_ancient_eye"), _fx(EventEffect.Type.DUNGEON_LOOT, 1)])),
+		_check_choice("EVT_DNG_WARMSTONES_OPT_ALL", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_DNG_WARMSTONES_ALL_OK", _effects([_fx(EventEffect.Type.ITEM_ADD, 2, "jewelry"), _fx(EventEffect.Type.DUNGEON_LOOT, 2)]),
+			"EVT_DNG_WARMSTONES_ALL_MID", _effects([_fx(EventEffect.Type.ITEM_ADD, 1, "jewelry"), _fx(EventEffect.Type.DUNGEON_LOOT, 1), _fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_DNG_WARMSTONES_ALL_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -4), _fx(EventEffect.Type.STRESS, 5)])),
+		_choice("EVT_DNG_WARMSTONES_OPT_LEAVE", _effects([_fx(EventEffect.Type.STRESS, -3)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama: kadim kemikler; töre ve inanç.
+static func _dng_s_old_bones() -> GameEvent:
+	var event := _event("evt_dng_s_old_bones", "EVT_DNG_BONES_TITLE", "EVT_DNG_BONES_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_BONES_OPT_STONE", _effects([_fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|bolge|uzun|yuz")])),
+		_check_choice("EVT_DNG_BONES_OPT_LOOK", CharacterStats.Kind.FAITH, SkillCheck.Source.LEADER,
+			"EVT_DNG_BONES_LOOK_OK", _effects([_fx(EventEffect.Type.ITEM_ADD, 1, "jewelry"), _fx(EventEffect.Type.DUNGEON_LOOT, 1)]),
+			"EVT_DNG_BONES_LOOK_MID", _effects([_fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_DNG_BONES_LOOK_BAD", _effects([_fx(EventEffect.Type.STRESS, 8), _fx(EventEffect.Type.MORALE, -4)])),
+		_choice("EVT_DNG_BONES_OPT_BACK", _effects([_fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (orta): dinlenme yeri.
+static func _dng_s_resting_niche() -> GameEvent:
+	var event := _event("evt_dng_s_resting_niche", "EVT_DNG_REST_TITLE", "EVT_DNG_REST_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_REST_OPT_REST", _effects([_fx(EventEffect.Type.STRESS, -10), _fx(EventEffect.Type.PARTY_HP, 4, "weakest"), _fx(EventEffect.Type.PROVISIONS, -1)])),
+		_check_choice("EVT_DNG_REST_OPT_SEARCH", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_REST_SEARCH_OK", _effects([_fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.STRESS, -3)]),
+			"EVT_DNG_REST_SEARCH_MID", _effects([]),
+			"EVT_DNG_REST_SEARCH_BAD", _effects([_fx(EventEffect.Type.STRESS, 5)])),
+		_choice("EVT_DNG_REST_OPT_ON", _effects([_fx(EventEffect.Type.STRESS, 2)])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama: galeri yağmacıları (§11.7), savaş ya da pazarlık.
+static func _dng_s_looters() -> GameEvent:
+	var event := _event("evt_dng_s_looters", "EVT_DNG_LOOTERS_TITLE", "EVT_DNG_LOOTERS_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_gated_choice("EVT_DNG_LOOTERS_OPT_PAY", "EVT_DNG_LOOTERS_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 30)]), _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.IZ_BIRAK, -20, "soylenti|bolge|kisa|dusman")])),
+		_check_choice("EVT_DNG_LOOTERS_OPT_TALK", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_DNG_LOOTERS_TALK_OK", _effects([_fx(EventEffect.Type.DANGER, -6), _fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_DNG_LOOTERS_TALK_MID", _effects([_fx(EventEffect.Type.GOLD, -15)]),
+			"EVT_DNG_LOOTERS_TALK_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 55, "bandit")])),
+		_choice("EVT_DNG_LOOTERS_OPT_FIGHT", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 55, "bandit")])),
+	])
+	return event
+
+## Y-A07 zindan · Aşama (derin): mağara ayısı, savaş.
+static func _dng_s_cave_bear() -> GameEvent:
+	var event := _event("evt_dng_s_cave_bear", "EVT_DNG_BEAR_TITLE", "EVT_DNG_BEAR_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_BEAR_OPT_FIGHT", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 75, "deep")])),
+		_check_choice("EVT_DNG_BEAR_OPT_STILL", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_BEAR_STILL_OK", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.MORALE, 4)]),
+			"EVT_DNG_BEAR_STILL_MID", _effects([_fx(EventEffect.Type.STRESS, 10)]),
+			"EVT_DNG_BEAR_STILL_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 85, "deep")])),
+		_choice("EVT_DNG_BEAR_OPT_BACK", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.DUNGEON_EXIT, 0)])),
+	])
+	return event
+
+## Y-A07 zindan · Eski Ağız son aşama: madencilerin taş örtüsü.
+static func _dng_s_sealed_tunnel() -> GameEvent:
+	var event := _event("evt_dng_s_sealed_tunnel", "EVT_DNG_SEALED_TITLE", "EVT_DNG_SEALED_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_SEALED_OPT_LOOK", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.LEADER,
+			"EVT_DNG_SEALED_LOOK_OK", _effects([_fx(EventEffect.Type.ITEM_ADD, 1, "jewelry"), _fx(EventEffect.Type.DUNGEON_LOOT, 1), _fx(EventEffect.Type.CLUE_HEAR, 0, "CLUE_ROAD_OLDER")]),
+			"EVT_DNG_SEALED_LOOK_MID", _effects([_fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_DNG_SEALED_LOOK_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -4, "weakest"), _fx(EventEffect.Type.STRESS, 5)])),
+		_gated_choice("EVT_DNG_SEALED_OPT_MINERS", "EVT_DNG_SEALED_OPT_MINERS_LOCKED", _conditions([_c("dungeon_bag_free", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.GOLD, 40), _fx(EventEffect.Type.DUNGEON_LOOT, 1)])),
+		_choice("EVT_DNG_SEALED_OPT_LEAVE", _effects([_fx(EventEffect.Type.STRESS, -4)])),
+	])
+	return event
+
+## Y-A07 zindan · Kemrug Yarığı son aşama: ılık su.
+static func _dng_s_warm_spring() -> GameEvent:
+	var event := _event("evt_dng_s_warm_spring", "EVT_DNG_SPRING_TITLE", "EVT_DNG_SPRING_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_choice("EVT_DNG_SPRING_OPT_BATHE", _effects([_fx(EventEffect.Type.STRESS, -12), _fx(EventEffect.Type.PARTY_HP, 6, "weakest")])),
+		_check_choice("EVT_DNG_SPRING_OPT_DIVE", CharacterStats.Kind.ENDURANCE, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_SPRING_DIVE_OK", _effects([_fx(EventEffect.Type.GRANT_EQUIPMENT, 0, "amulet_ancient_eye"), _fx(EventEffect.Type.DUNGEON_LOOT, 1)]),
+			"EVT_DNG_SPRING_DIVE_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_DNG_SPRING_DIVE_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -5, "endurance"), _fx(EventEffect.Type.STRESS, 5)])),
+		_gated_choice("EVT_DNG_SPRING_OPT_BREAD", "EVT_DNG_SPRING_OPT_BREAD_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.PROVISIONS, -1), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|uzun|kapi"), _fx(EventEffect.Type.STRESS, -4)])),
+	])
+	return event
+
+## Y-A07 zindan · Kör Kazmalar son aşama: resimli oda (§3.2 tasvirleri).
+static func _dng_s_painted_room() -> GameEvent:
+	var event := _event("evt_dng_s_painted_room", "EVT_DNG_PAINTED_TITLE", "EVT_DNG_PAINTED_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_PAINTED_OPT_STUDY", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_DNG_PAINTED_STUDY_OK", _effects([_fx(EventEffect.Type.CLUE_HEAR, 0, "CLUE_PAINTINGS"), _fx(EventEffect.Type.STRESS, -8), _fx(EventEffect.Type.MORALE, 4)]),
+			"EVT_DNG_PAINTED_STUDY_MID", _effects([_fx(EventEffect.Type.STRESS, -2)]),
+			"EVT_DNG_PAINTED_STUDY_BAD", _effects([_fx(EventEffect.Type.STRESS, 8)])),
+		_gated_choice("EVT_DNG_PAINTED_OPT_SCRAPE", "EVT_DNG_PAINTED_OPT_SCRAPE_LOCKED", _conditions([_c("dungeon_bag_free", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.ITEM_ADD, 2, "jewelry"), _fx(EventEffect.Type.DUNGEON_LOOT, 1), _fx(EventEffect.Type.IZ_BIRAK, -40, "kutsal|bolge|uzun|ret")])),
+		_choice("EVT_DNG_PAINTED_OPT_LEAVE", _effects([_fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|bolge|uzun|yuz")])),
+	])
+	return event
+
+## Y-A07 zindan · Y-A07: kadro ağızdayken kervanın başına gelen.
+static func _dng_camp_raid() -> GameEvent:
+	var event := _event("evt_dng_camp_raid", "EVT_DNG_CAMPRAID_TITLE", "EVT_DNG_CAMPRAID_TEXT", 1.0)
+	event.cooldown_days = 0
+	event.triggered_only = true
+	event.choices = _choices([
+		_check_choice("EVT_DNG_CAMPRAID_OPT_CATCH", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_DNG_CAMPRAID_CATCH_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_DNG_CAMPRAID_CATCH_MID", _effects([_fx(EventEffect.Type.PROVISIONS, -2)]),
+			"EVT_DNG_CAMPRAID_CATCH_BAD", _effects([_fx(EventEffect.Type.PROVISIONS, -5), _fx(EventEffect.Type.PARTY_HP, -2, "agility")])),
+		_choice("EVT_DNG_CAMPRAID_OPT_LET", _effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|aday")])),
+		_choice("EVT_DNG_CAMPRAID_OPT_COUNT", _effects([_fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.MORALE, -3)])),
 	])
 	return event
 

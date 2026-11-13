@@ -226,6 +226,17 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_soul(effect, session, result)
 		EventEffect.Type.SOZ:
 			_apply_promise(effect, session, result)
+		EventEffect.Type.DUNGEON_ENTER:
+			session.dungeon_enter(effect.text_value, effect.amount > 0)
+		EventEffect.Type.DUNGEON_DEEPER:
+			session.dungeon_deeper()
+		EventEffect.Type.DUNGEON_EXIT:
+			session.dungeon_exit(false)
+		EventEffect.Type.DUNGEON_LOOT:
+			if not session.dungeon_run.is_empty() and session.dungeon_run.has("bag"):
+				session.dungeon_run["bag"] = int(session.dungeon_run["bag"]) + maxi(0, effect.amount)
+		EventEffect.Type.CLUE_HEAR:
+			session.hear_clue(effect.text_value)
 		EventEffect.Type.PASS_GRANT:
 			session.grant_pass(effect.text_value, effect.amount)
 			result.lines.append(_t("EFF_PASS_GRANTED") % _t(PassCatalog.name_key(effect.text_value)))
