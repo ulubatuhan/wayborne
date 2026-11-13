@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -74,12 +74,6 @@ Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** SIDERIA.md'de açık lore sorusu kalmadı (kalan iki madde kullanıcıda: kadim uygarlığın sonu, hikâye ve kampanya).
 
 </details>
-
-### Y-R01 · Ahlak/Ruh/İz: §E'nin 50 satırını kartlara işle
-
-- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
-- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
-- **Son not:** H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak. | 2026-11-13: 1. parti. Ölçüm aracı hatası düzeltildi: defter kapanmış izlerin son 12'sini tuttuğu için dönen/sönen eksik sayılıyordu (TraceLedger.archived, evicted). 14 karta matris satırına göre iz (EventCatalog.CHOICE_TRACES, 26 seçenek/sonuç; iz bırakan kart 25 -> 39/106). Sönme ortak çarpanı 0,7 (§G.1 ±%30 sınırı). simulate_career 40 sefer: dönen 5,5 -> 8-11 (sert 14,5, hedef 12-22); sönen payı %75 -> %65 (hedef %25-40, düğme sınırında, kalan iş yapısal: dönüş fırsatı). Kalan: izsiz 67 kart (rapor: tests/report_trace_coverage.gd).
 
 ### Y-R03 · Reddedilen fikirler: yeniden önerilmesin
 

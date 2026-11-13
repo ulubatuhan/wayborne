@@ -130,6 +130,25 @@ const CHOICE_TRACES: Dictionary = {
 	"EVT_MERCHANT_BREAD_OPT_ACCEPT": [40, "minnet|kisi|kisa|teklif"],
 	"EVT_PROFITEER_OPT_RESTITUTION": [60, "minnet|bolge|uzun|fiyat"],
 	"EVT_PROFITEER_OPT_IGNORE": [-60, "kin|bolge|uzun|fiyat"],
+	# 2. parti (2026-11-13)
+	"EVT_MUTINY_OPT_HARSH": [-40, "kin|yoldas|kisa|yuz"], # 42
+	"EVT_MUTINY_OPT_MANIPULATE": [-30, "kin|yoldas|kisa|yuz"], # türetme
+	"EVT_ABANDONED_OPT_SEARCH": [40, "minnet|kisi|kisa|teklif"], # türetme
+	"EVT_KIN_OPT_GREET": [30, "minnet|bolge|kisa|kapi"], # türetme
+	"EVT_SHRINE_OPT_TAKE": [-50, "kutsal|bolge|kisa|ret"], # 44 gibi
+	"EVT_SHRINE_OPT_PRAY": [30, "kutsal|yol|kisa|yuz"],  # 43 gibi
+	"EVT_MERCHANT_FEET_OPT_PAY": [30, "minnet|kisi|kisa|teklif"], # türetme
+	"EVT_PARTY_THEFT_OPT_INVESTIGATE": [-30, "kin|yoldas|kisa|yuz"], # türetme
+	"EVT_MERCHANT_CARAVAN_OPT_TRADE": [30, "minnet|kisi|kisa|teklif"], # türetme
+	"EVT_TRIBUTE_TOLL_OPT_PAY": [-30, "soylenti|bolge|kisa|dusman"], # 34
+	"EVT_SERAI_BANDIT_OPT_PAY": [-30, "soylenti|bolge|kisa|dusman"], # 34
+	"EVT_SERAI_BANDIT_OPT_ATTACK": [40, "minnet|bolge|uzun|teklif"], # 36 gibi
+	"EVT_DUVENMOR_OPT_DRAW": [-60, "kin|sehir|uzun|ret"], # türetme
+	"EVT_SEIZED_OPT_YIELD": [40, "minnet|sehir|kisa|kapi"], # 9 gibi
+	"EVT_SEIZED_OPT_BRIBE": [-30, "soylenti|sehir|kisa|fiyat"], # türetme
+	"EVT_OUTPOST_OPT_WATCH": [30, "minnet|bolge|kisa|kapi"], # türetme
+	"EVT_FOODRAID_OPT_GIVE": [-30, "soylenti|bolge|kisa|dusman"], # 34
+	"EVT_VALLEY_DISPUTE_OPT_MEDIATE": [30, "minnet|bolge|kisa|teklif"], # türetme
 }
 
 ## `CHOICE_TRACES`'i kataloğa işler; aynı iz iki kez eklenmez.

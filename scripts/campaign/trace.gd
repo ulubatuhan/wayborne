@@ -38,8 +38,10 @@ const TYPES: Array[String] = [
 ## Bütün türlerin sönme hızına ortak çarpan (§G.1'in ±%30 düğmesi). 1,0'da
 ## kırk seferde doğan izlerin %75'i karşılığını bulmadan sönüyordu: kervan
 ## aynı şehre seyrek uğruyor, iz onu beklerken unutuluyordu (Y-R01 ölçümü,
-## 2026-11-13). Oranlar değişmedi: kin yine minnetten yavaş söner.
-const FADE_SCALE: float = 0.7
+## 2026-11-13). 0,7 ile kart başına iz eklenince dönüş hedefi aştı (22-28); 0,85'te
+## yatırım politikalarında 19-22, ahlak politikalarında 22-26 (simulate_career).
+## Oranlar değişmedi: kin yine minnetten yavaş söner.
+const FADE_SCALE: float = 0.85
 const TYPE_TABLE: Dictionary = {
 	TYPE_GRATITUDE: {"siddet": 0.5, "sonme": 0.006, "yayilma": 1},
 	TYPE_GRUDGE: {"siddet": 0.6, "sonme": 0.004, "yayilma": 2},
