@@ -18,6 +18,10 @@ const INK: Color = Color(0.055, 0.050, 0.058)
 const INK_SOFT: Color = Color(0.115, 0.105, 0.115)
 const BONE: Color = Color(0.88, 0.85, 0.78)
 const BONE_DIM: Color = Color(0.62, 0.59, 0.54)
+## Uzaktaki yağışın perdesi (WeatherCurtain'in uzak düzlemi): yağmur ufukta
+## kurşuni, kar soluk ve soğuk. İkisi de soğuk - tek sıcak kaynak kuralı.
+const PRECIP_VEIL_RAIN: Color = Color(0.56, 0.61, 0.66)
+const PRECIP_VEIL_SNOW: Color = Color(0.82, 0.85, 0.90)
 
 # --- Vurgular ---
 const GOLD: Color = Color(0.86, 0.70, 0.34)

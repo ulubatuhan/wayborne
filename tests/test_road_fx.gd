@@ -30,6 +30,7 @@ func run(t) -> void:
 	_test_pick_order(t)
 	_test_curtain_layers(t)
 	_test_curtain_falls_back_without_art(t)
+	_test_curtain_depths(t)
 	_test_footfalls(t)
 	_test_layer_pool(t)
 	_test_layer_drifts_with_the_ground(t)
@@ -161,6 +162,41 @@ func _test_curtain_layers(t) -> void:
 
 ## Resmi olmayan perde listeye girmemeli: çağıran onu "perde var" sanıp
 ## şeridin kendi yağmurunu susturursa ekranda hiç yağmur kalmaz.
+## Kullanıcı, 2026-11-13: yağış tüm ekrana geçirilmiş bir filtre gibi değil,
+## arka plan, yol ve ön plan arasında ayrı ayrı görünmeli. Düzlemlerin payı
+## ve uzak düzlemin yolun önüne düşmemesi burada sabitleniyor.
+func _test_curtain_depths(t) -> void:
+	var all := WeatherCurtain.layers_for(0.62, 0.25, 0.0)
+	var far := WeatherCurtain.plane_layers(all, WeatherCurtain.Depth.FAR)
+	var mid := WeatherCurtain.plane_layers(all, WeatherCurtain.Depth.MID)
+	var near := WeatherCurtain.plane_layers(all, WeatherCurtain.Depth.NEAR)
+	t.ok(not far.is_empty() and not mid.is_empty() and not near.is_empty(), "üç düzlem de yağış çizer")
+	t.eq(String(near[0].id), String(all[0].id), "yakın düzlem asıl yağışı çizer")
+	t.ok(float(near[0].scale) > float(mid[0].scale), "yakındaki damla yoldakinden iri")
+	t.ok(float(mid[0].scale) > float(far[0].scale), "yoldaki damla uzaktakinden iri")
+	t.ok(float(near[0].parallax) > float(mid[0].parallax), "yakın düzlem daha hızlı kayar")
+	t.ok(float(near[0].alpha) < float(mid[0].alpha), "yakın düzlem seyrek ve soluk: asıl yağış yolda")
+	for layer in near:
+		t.ok(String(layer.id) != "fog_drift", "sis kameranın önünde değil")
+
+	# Uzak düzlem şeridin çocuğu olarak yolun uzak kenarında biter.
+	var band := TravelBand.new()
+	band.size = Vector2(1600.0, 900.0)
+	var curtain := WeatherCurtain.new(WeatherCurtain.Depth.FAR)
+	band.add_child(curtain)
+	var window: Vector3 = curtain.call("_window", Rect2(Vector2.ZERO, band.size))
+	t.ok(window.y < band.road_line_y(), "uzak yağış yolun önüne düşmez")
+	t.ok(window.z < window.y, "kenarı yumuşak")
+	var road_curtain := WeatherCurtain.new(WeatherCurtain.Depth.MID)
+	band.add_child(road_curtain)
+	var road_window: Vector3 = road_curtain.call("_window", Rect2(Vector2.ZERO, band.size))
+	t.ok(road_window.y > band.road_line_y() and road_window.y < band.size.y, "yol düzlemi yolda biter")
+	var near_curtain := WeatherCurtain.new(WeatherCurtain.Depth.NEAR)
+	var near_window: Vector3 = near_curtain.call("_window", Rect2(Vector2.ZERO, band.size))
+	t.almost(near_window.y, band.size.y, "yakın düzlem ekranın tamamında")
+	band.free()
+	near_curtain.free()
+
 func _test_curtain_falls_back_without_art(t) -> void:
 	for layer in WeatherCurtain.layers_for(1.0, 1.0, 0.5):
 		t.ok(FxCatalog.has(String(layer.id)), "%s perdesinin resmi var" % String(layer.id))

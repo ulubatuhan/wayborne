@@ -93,7 +93,6 @@ func _apply(
 	soak_wet: float = 0.0, soak_snow: float = 0.0
 ) -> void:
 	var caravan: RoadCaravan = screen.get("_caravan")
-	var curtain: WeatherCurtain = screen.get("_curtain")
 	var band: TravelBand = screen.get("_band")
 	screen.set("_weather", weather)
 	screen.set("_snow_share", snow)
@@ -108,7 +107,9 @@ func _apply(
 	var layers := WeatherCurtain.layers_for(
 		rain, float(visuals.get("fog", 0.0)), snow
 	)
-	curtain.set_layers(layers)
+	var curtains: Array[WeatherCurtain] = screen.get("_curtains")
+	for curtain in curtains:
+		curtain.set_layers(layers, rain, snow >= WeatherCurtain.SNOW_FULL)
 	band.set_curtain_rain(rain > 0.01 and not layers.is_empty())
 	var ground: FxLayer = screen.get("_fx_ground")
 	var front: FxLayer = screen.get("_fx_front")

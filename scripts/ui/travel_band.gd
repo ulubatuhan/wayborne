@@ -1017,6 +1017,11 @@ func _draw_road(area: Rect2, cover: Rect2) -> void:
 				continue
 			draw_circle(Vector2(x, _ground_y_at_screen(x) + band * y_jitter), radius, road.darkened(shade))
 
+## Yolun ortasının y'si, şeridin kendi uzayında (WeatherCurtain'in uzak ve
+## yol düzlemleri burada biter: uzaktaki yağış yolun önüne düşmez).
+func road_line_y() -> float:
+	return _ground_y_at_screen(size.x * 0.5)
+
 ## Yolun ekrandaki y'si. Eğim yolu döndürüyor; kervan da bu çizgiye
 ## basıyor (bkz. ground_line_changed).
 func _ground_y_at_screen(x: float) -> float:

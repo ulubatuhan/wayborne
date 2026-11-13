@@ -355,6 +355,8 @@ var _caravan: RoadCaravan
 var _fx_ground: FxLayer
 var _fx_front: FxLayer
 var _curtain: WeatherCurtain
+## Üç derinlik düzlemi: uzak, yol, yakın (bkz. WeatherCurtain.Depth).
+var _curtains: Array[WeatherCurtain] = []
 ## Zeminin o günkü hâli (`GroundCover.at`); her şafakta yenileniyor.
 var _ground_cover: Dictionary = {}
 var _ripple_accum: float = 0.0
@@ -668,6 +670,13 @@ func _build_world_layer() -> void:
 	# hesaplanırdı ve eğimli yolda kervan havada yürürdü.
 	# Yerde kalan izler kervanın **altında**: ayak izi ve tekerlek yivi
 	# toprağa basılı, figürün üstüne değil (bkz. FxLayer'ın iki katmanı).
+	# Uzak yağış (WeatherCurtain.Depth.FAR) kervandan da yerdeki izlerden de
+	# önce: manzaranın önünden, kervanın arkasından geçer ve yolun uzak
+	# kenarında biter.
+	var far_curtain := WeatherCurtain.new(WeatherCurtain.Depth.FAR)
+	_band.add_actor_layer(far_curtain)
+	_curtains.append(far_curtain)
+
 	_fx_ground = FxLayer.new()
 	_band.add_actor_layer(_fx_ground)
 
@@ -695,11 +704,17 @@ func _build_world_layer() -> void:
 	_band.add_actor_layer(_fx_front)
 	_caravan.set_fx_layers(_fx_ground, _fx_front)
 
-	# Gökten düşen perde dünyanın **en üstünde**: yağmur kervanın da
-	# manzaranın da önünden geçer. HUD'un altında kalıyor, çünkü `_world`
-	# ayrı bir katman (bkz. Road Screen Layout Rules).
-	_curtain = WeatherCurtain.new()
-	_world.add_child(_curtain)
+	# Yol düzleminin yağışı kervanın önünden geçer, ön plan otunun arkasında
+	# kalır (add_actor_layer ön planı en üstte tutuyor) ve yolda biter.
+	_curtain = WeatherCurtain.new(WeatherCurtain.Depth.MID)
+	_band.add_actor_layer(_curtain)
+	_curtains.append(_curtain)
+	# Kameraya en yakın damlalar dünyanın **en üstünde**, ön plan otunun da
+	# önünde. HUD'un altında kalıyor, çünkü `_world` ayrı bir katman (bkz.
+	# Road Screen Layout Rules). Üç düzlemin gerekçesi WeatherCurtain'de.
+	var near_curtain := WeatherCurtain.new(WeatherCurtain.Depth.NEAR)
+	_world.add_child(near_curtain)
+	_curtains.append(near_curtain)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -3081,7 +3096,8 @@ func _refresh_ground_fx(biome: String, climate: String) -> void:
 		var layers := WeatherCurtain.layers_for(
 			rain, float(visuals.get("fog", 0.0)), _snow_share
 		)
-		_curtain.set_layers(layers)
+		for curtain in _curtains:
+			curtain.set_layers(layers, rain, _snow_share >= WeatherCurtain.SNOW_FULL)
 		# Perde yağışı üstlendiyse şeridin kendi yağmuru sussun; yoksa
 		# ekranda iki yağmur üst üste biner (bkz. TravelBand._curtain_rain).
 		_band.set_curtain_rain(rain > 0.01 and not layers.is_empty())
@@ -3109,10 +3125,10 @@ func _sync_fx(delta: float) -> void:
 		_fx_ground.set_world_x(scroll)
 	if _fx_front != null:
 		_fx_front.set_world_x(scroll)
-	if _curtain != null:
-		_curtain.set_world_x(scroll)
+	for curtain in _curtains:
+		curtain.set_world_x(scroll)
 		if _caravan != null:
-			_curtain.set_px_per_metre(_caravan.fx_px_per_metre())
+			curtain.set_px_per_metre(_caravan.fx_px_per_metre())
 	_spawn_rain_marks(delta)
 	_spawn_canopy_drips(delta)
 

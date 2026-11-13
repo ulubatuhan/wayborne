@@ -474,6 +474,15 @@ toz, çamur, yerde kalan iz, nefes buharı, kor ve duman. Kaynak
   kaldı - `WeatherCurtain.layers_for` resmi olmayan perdeyi listeye
   almıyor, yani sanat eksikse yağmur yine yağıyor (`PropArt`'ın "resmi
   yoksa çağıran kendi çizimine düşer" kuralı).
+- **Yağış üç derinlik düzleminde, sahnenin kendi katmanları arasında (kullanıcı, 2026-11-13).** Perde tek bir tam
+  ekran katmanken uzak yağmur bile ön plan otlarının önünden geçiyordu ve ekran "üstüne yağmur filtresi geçirilmiş
+  gibi" duruyordu - derinlik yalnız ölçek farkıydı, göz onu camın üstünde okuyordu. `WeatherCurtain.Depth`:
+  `FAR` şeridin çocuğu, kervandan ve yerdeki izlerden önce, yolun uzak kenarında yumuşakça biter ve ufku soğuk bir
+  perdeyle (`ArtPalette.PRECIP_VEIL_*`) bulandırır; `MID` kervandan sonra, ön plandan önce (`add_actor_layer`),
+  yol yüzeyinde biter; `NEAR` dünyanın en üstünde, iri, seyrek, hızlı. Aynı resim, aynı kare; değişen ölçek,
+  saydamlık, kayma ve dikey pencere. Küçültülen döşeme birim alana düşen taneyi artırır, bu yüzden uzak düzlemin
+  saydamlığı ayrıca kısılır (tipide ilk deneme arka planı düz bir duvarla örttü). `test_road_fx` düzlemlerin
+  payını ve pencerelerini sabitliyor. Godot'un yerleşik `Plane` tipi yüzünden enum'un adı `Depth`.
 - **Ölçek figürün boyundan, tek zemin tek ölçek.** Efektler kervanın
   insan boyundan çıkan tek bir piksel/metre ile ölçekleniyor (`×0.86`,
   çünkü bir figür kutusunun yalnızca o kadarını dolduruyor); ölçeği her
